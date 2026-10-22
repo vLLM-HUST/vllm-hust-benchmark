@@ -1,0 +1,58 @@
+############ Natural (pre-EOS) vs post-EOS divergence locus ############
+### LANE G B=64 [MAIN] ###
+[G B64 on vs off] arms=64 diverged=6 natural_region=6 post_EOS_forced=0
+  arm  first_diff  first_EOS_in_OFF  locus
+   22         121             None  NATURAL
+   32          98             None  NATURAL
+   42           6             None  NATURAL
+   47           3             None  NATURAL
+   58          98             None  NATURAL
+   60           4             None  NATURAL
+  natural-prefix exact match: 58/64
+### LANE G B=32 ###
+[G B32 on vs off] arms=32 diverged=1 natural_region=1 post_EOS_forced=0
+  arm  first_diff  first_EOS_in_OFF  locus
+   22          36             None  NATURAL
+  natural-prefix exact match: 31/32
+### LANE E B=64 ###
+[E B64 on vs off] arms=64 diverged=8 natural_region=8 post_EOS_forced=0
+  arm  first_diff  first_EOS_in_OFF  locus
+   22          82             None  NATURAL
+   32         127             None  NATURAL
+   39          69             None  NATURAL
+   47           3             None  NATURAL
+   52          11               64  NATURAL
+   54           8               34  NATURAL
+   57          14             None  NATURAL
+   60           4             None  NATURAL
+  natural-prefix exact match: 56/64
+### NOISE FLOOR off vs off2 (eager) ###
+[E B64 off vs off2] arms=64 diverged=0 natural_region=0 post_EOS_forced=0
+  arm  first_diff  first_EOS_in_OFF  locus
+  natural-prefix exact match: 64/64
+############ HISTORICAL real-model natural-prefix cross-check (source machine) ############
+[HIST G B64 on vs off] arms=64 diverged=6 natural_region=5 post_EOS_forced=1
+  arm  first_diff  first_EOS_in_OFF  locus
+   22          82             None  NATURAL
+   42           8               51  NATURAL
+   45           3             None  NATURAL
+   52          11               64  NATURAL
+   53           8                8  post-EOS
+   57          14             None  NATURAL
+  natural-prefix exact match: 58/64
+[HIST G B32 on vs off] arms=32 diverged=1 natural_region=1 post_EOS_forced=0
+  arm  first_diff  first_EOS_in_OFF  locus
+   22          36             None  NATURAL
+  natural-prefix exact match: 31/32
+############ NEW off vs HIST off (cross-baseline drift, natural-prefix) ############
+[NEW off vs HIST off] arms=64 diverged=8 natural_region=8 post_EOS_forced=0
+  arm  first_diff  first_EOS_in_OFF  locus
+   22          82             None  NATURAL
+   32          98             None  NATURAL
+   42           9               51  NATURAL
+   47           3             None  NATURAL
+   52          11               64  NATURAL
+   54           8               34  NATURAL
+   57          14             None  NATURAL
+   59          10             None  NATURAL
+  natural-prefix exact match: 56/64

@@ -1,0 +1,31 @@
+{
+ "schema": "opt-ops-window-cohort.v1",
+ "id": "028-qwen35-35b-a3b-tp2-fullgraph",
+ "model": "Qwen3.5-35B-A3B",
+ "host": {
+  "vllm_core": "0.28.1.post1.dev143+gf18cf803c",
+  "vllm_ascend": "0.25.1rc2.dev125+hust.20260903.4.g74f0c0a27.d20260909"
+ },
+ "serve": {
+  "entry": "vllm serve (console script)",
+  "tp": 2,
+  "max_model_len": 8192,
+  "prefix_caching": "off",
+  "extra_args": "--compilation-config {\"mode\":\"VLLM_COMPILE\",\"cudagraph_mode\":\"FULL\",\"cudagraph_capture_sizes\":[1,2,4,8,16,32]}"
+ },
+ "graph": {
+  "mode": "VLLM_COMPILE",
+  "cudagraph_mode": "FULL",
+  "cudagraph_capture_sizes": "1,2,4,8,16,32"
+ },
+ "precision": "bf16",
+ "carriers": {
+  "VLLM_HUST_GATE_FP32": "1",
+  "VLLM_HUST_GDN_MERGE_INPROJ": "1",
+  "husk_package": "vllm_ascend_split_batch"
+ },
+ "carriers_note": "VLLM_HUST_* 是 husk 插件开关; husk_package 为空 = 载体未安装（env 静默 fail-open）。记录轴: 不作门禁、不要求重跑（单变量替换结论具普遍价值）; 只有跨窗口绝对数值比较需要同载体状态; 两臂载体状态不一致才是第二个变量。容器重启后 /root/start-sshd.sh 恢复安装与补丁链。",
+ "recorded_at": "2026-10-19T02:29:08Z",
+ "recorded_by": "bench-ladder.sh cohort_write",
+ "note": "本窗口数字只在本 cohort(模型/宿主/设备/服务配置/图档) 内成立；换坐标不得外推（见 /root/opt-ops/state/cohort.json）"
+}

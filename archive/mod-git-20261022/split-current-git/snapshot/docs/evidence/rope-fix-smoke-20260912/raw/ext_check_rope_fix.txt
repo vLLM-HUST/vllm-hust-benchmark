@@ -1,0 +1,20 @@
+$ vllm-hust-ext extension check org.vllm-hust.rope-fix
+INFO 09-12 04:21:53 [__init__.py:52] Available plugins for group vllm.platform_plugins:
+INFO 09-12 04:21:53 [__init__.py:54] - ascend -> vllm_ascend:register
+INFO 09-12 04:21:53 [__init__.py:57] All plugins in this group will be loaded. Set `VLLM_PLUGINS` to control which plugins to load.
+INFO 09-12 04:21:53 [__init__.py:272] Platform plugin ascend is activated
+INFO 09-12 04:21:53 [platform.py:70] Breakable CUDAGraph on Ascend is opt-in; using VLLM_USE_BREAKABLE_CUDAGRAPH=0.
+{
+  "extension_id": "org.vllm-hust.rope-fix",
+  "provider": "vllm",
+  "states": [
+    "installed",
+    "discovered",
+    "compatible",
+    "degraded"
+  ],
+  "evidence": [
+    "host version 0.25.1rc2.dev125+hust.20260903.4.g74f0c0a27 satisfies the declared range",
+    "extension is descriptor-only and cannot be enabled (implementation status: import_only)"
+  ]
+}

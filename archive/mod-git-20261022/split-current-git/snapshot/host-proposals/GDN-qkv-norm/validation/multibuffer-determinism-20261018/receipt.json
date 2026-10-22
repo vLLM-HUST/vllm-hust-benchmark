@@ -1,0 +1,150 @@
+{
+  "schema": "gdn-multibuffer-determinism.v1",
+  "candidate": "gdn-unpack-qk-l2norm-fusion",
+  "base_head": "5cccd3071628accd06637a09096cc93290cbeb89",
+  "change": "unpack_norm_kernel launched with multibuffer=True; single line in src/vllm_ascend_split_batch/gdn_qkv_norm.py launch_into; no arithmetic, layout or guard change; diagnostic separate-outputs path reverted and not carried",
+  "shape": {
+    "T": 16,
+    "row_stride": 4096,
+    "q": 1024,
+    "k": 1024,
+    "v": 2048,
+    "head_dim": 128,
+    "phase": "pure non-spec decode"
+  },
+  "weights": {
+    "model": "Qwen3.5-35B-A3B",
+    "precision": "bf16",
+    "format": "ND",
+    "tp": 2,
+    "graph": "FULL"
+  },
+  "l0": {
+    "exact_cases": "5/5 PASS (random/zero/small/special/offset)",
+    "graph_replay": "8/8 PASS with stable addresses",
+    "candidate_event_chain_us": 246.3,
+    "baseline_event_chain_us": 794.9,
+    "source": "/root/包体恢复/records/probes/20261018T164700Z_gdn_separate/multibuffer-l0.json"
+  },
+  "determinism_protocol": {
+    "env": {
+      "VLLM_BATCH_INVARIANT": "1",
+      "HCCL_DETERMINISTIC": "strict",
+      "LCCL_DETERMINISTIC": "1",
+      "ATB_MATMUL_SHUFFLE_K_ENABLE": "0",
+      "ATB_LLM_LCOC_ENABLE": "0",
+      "cudagraph_mode": "PIECEWISE"
+    },
+    "batch_invariant_ops": "absent; vllm_ascend Triton fallback active (2 ranks logged Enabling batch-invariant)",
+    "results": {
+      "baseline_r1_vs_r2": "16/16",
+      "fusion_mb_r1_vs_r2": "16/16",
+      "fusion_mb_vs_baseline": "16/16",
+      "new_protocol_vs_oldA": "1/16",
+      "new_protocol_vs_oldB": "3/16"
+    }
+  },
+  "production_cohort_full": {
+    "env": {
+      "VLLM_BATCH_INVARIANT": "unset",
+      "cudagraph_mode": "FULL"
+    },
+    "fusion_mb_vs_baseline_fixed_batch": "16/16 identical PASS",
+    "standard_l3": "8/8 identical PASS",
+    "old_pre_multibuffer_fusion_vs_baseline": "2/16 identical (20261018T145000Z_gdn_profile_AB_compare.log)"
+  },
+  "attribution": "multibuffer=True alone removes the reproducible fixed-batch divergence in the production cohort; deterministic mode additionally equalizes arms under PIECEWISE but changes global numerics versus the old FULL windows",
+  "limits": [
+    "L4 for the multibuffer variant not yet collected; acceptance still blocked on light L4 and coverage",
+    "Exact-match evidence is this fixed 16-request batch plus 8-prompt standard L3; no cross-batch invariance claimed",
+    "batch_invariant_ops wheel absent; deterministic arm used Triton fallback, not AscendC batch-invariant kernels",
+    "Triton optional-pointer-parameter kernel signature segfaults triton-ascend ttir_to_linalg (two probes recorded in L2 20261018T164700Z_gdn_separate); avoid that form"
+  ],
+  "next_action": "Collect light L4 both ranks for the multibuffer variant in the production cohort, then opt coverage; keep default-off until acceptance gates pass",
+  "evidence": [
+    {
+      "path": "/root/包体恢复/records/probes/20261018T173500Z_gdn_determinism_plan.json",
+      "sha256": "b2efae141dfc20b3943b5bc9a76fb8beb5df8771990033cfb2e2351be4806958"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261018T164700Z_gdn_separate/multibuffer-l0.json",
+      "sha256": "4b3851b0ebb49249765c9ad1d94b23fec3858f51681beb47ff71b70f393a67ab"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261018T164700Z_gdn_separate/multibuffer-graph.json",
+      "sha256": "7df2815f654ed2251acb538c68c5f70d676c41d88220a2979bc5d2ca3279e400"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261018T173500Z_gdn_determinism/baseline-repeat-compare.log",
+      "sha256": "06d6ad679db0a961b38f0e86850203945ac647dbad73d26efff73a3c6f4fac9a"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261018T173500Z_gdn_determinism/fusion-mb-repeat-compare.log",
+      "sha256": "06d6ad679db0a961b38f0e86850203945ac647dbad73d26efff73a3c6f4fac9a"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261018T173500Z_gdn_determinism/fusion-mb-vs-baseline.log",
+      "sha256": "06d6ad679db0a961b38f0e86850203945ac647dbad73d26efff73a3c6f4fac9a"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261018T173500Z_gdn_determinism/det-baseline-vs-oldA.log",
+      "sha256": "7580934f398e92760fadc6da73f753c516cd059430e306522e4b4fdc2172d074"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261018T173500Z_gdn_determinism/fusionmb-vs-oldA.log",
+      "sha256": "7580934f398e92760fadc6da73f753c516cd059430e306522e4b4fdc2172d074"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261018T173500Z_gdn_determinism/fusionmb-vs-oldB.log",
+      "sha256": "b4a0692f404735dc1b2e28941dc2308daebe51f289aa1440d00d61ed15ca7c3a"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261018T173500Z_gdn_determinism/fusion-full-mb.json",
+      "sha256": "312b5644dbdd52df5bde61e757563c31a63a939a8c1771c3bdda8341b0a0a1c3"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261018T173500Z_gdn_determinism/fusion-full-mb.log",
+      "sha256": "e9f339555b3a23308880592567a45b7ac62d55b601d662c2f4fd8d78b425eb3b"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261018T173500Z_gdn_determinism/baseline-full.json",
+      "sha256": "312b5644dbdd52df5bde61e757563c31a63a939a8c1771c3bdda8341b0a0a1c3"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261018T173500Z_gdn_determinism/baseline-full.log",
+      "sha256": "15752e8e8d8fe56ad4937ee78ca26bc43fcd7501acb33e23e80f1bedec2aad0d"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261018T173500Z_gdn_determinism/fusion-full-mb-vs-baseline-full.log",
+      "sha256": "06d6ad679db0a961b38f0e86850203945ac647dbad73d26efff73a3c6f4fac9a"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261018T173500Z_gdn_determinism/fusion-full-mb-standard-l3.json",
+      "sha256": "cedec6f60037f57447c7ffa4067489a27376c21971d9452ea61ce6022e0f9700"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261018T173500Z_gdn_determinism/baseline-full-standard-l3.json",
+      "sha256": "cedec6f60037f57447c7ffa4067489a27376c21971d9452ea61ce6022e0f9700"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261018T173500Z_gdn_determinism/standard-l3-compare.log",
+      "sha256": "a077f1b23b093a4ed12e90d74d6306f82ffce795dbdee8a969cef3a016691dc2"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261018T173500Z_gdn_determinism/fusion-mb-serve-command.log",
+      "sha256": "fd3bed38551f3cbb3bff35da98b1c89ab19a910d9d848972f89aeae0eabc3c01"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261018T173500Z_gdn_determinism/baseline-serve-command.log",
+      "sha256": "23b0d22e2d300a427cb2b537590d7a790dcc1e88456bc4e0bcb1139d587035ae"
+    },
+    {
+      "path": "/root/包体恢复/logs/ladder-serve-1018-173500.env.json",
+      "sha256": "0e45613fd54255e3d45801a518310e99ccfcdd02a3df055eed3a237de44d1307"
+    },
+    {
+      "path": "/root/包体恢复/logs/ladder-serve-1018-175655.env.json",
+      "sha256": "a4fdcaaeb1aef62c6ac754fecfc300a5ae337bf18933aafd8fa43b0962bf4e23"
+    }
+  ]
+}

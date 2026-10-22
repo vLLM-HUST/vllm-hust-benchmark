@@ -1,0 +1,27 @@
+Evidence #2 re-run — measured shape / env facts (all values produced by commands run
+in this session; no memory values).
+
+Prompt shape (harness ev2_run.py, EV2_SENT=420, EV2_BATCH=64):
+  tokenizer: /data/shared_models/Qwen--Qwen2.5-Coder-14B-Instruct (Qwen2.5-Coder-14B)
+  base  = "You are a helpful assistant. " + "The quick brown fox jumps over the lazy dog. " * 420
+  prompt= base + "\n\nQuestion i: What is i+i? Answer with the number only."
+  measured prompt_tokens = 4224  (base_tokens = 4207)
+  plugin split point (block-aligned): shared_len=4096, shared_blocks=32  (48 layers)
+      -> grep -o 'shared_len=[0-9]*' gB64_ie_on.log | sort | uniq -c  =>  96 shared_len=4096
+  NOTE: the prior report / ev2_run.py docstring labels this shape "~4356 tok";
+        the measured value on this box is 4224 prompt tokens (split at 4096).
+
+Graph lane (EV2_EAGER=0, EV2_CAPTURE=32,64):  enforce_eager=False, cudagraph_capture_sizes=[32,64],
+  "Capturing CUDA graphs (decode, FULL)" x2, "Graph capturing finished in 3 secs"
+      -> gB64_ie_off.log / gB64_ie_on.log
+Eager lane (EV2_EAGER=1): enforce_eager=True, 0 capture events
+      -> eB64_ie_off.log
+
+Baseline-quirk env applied symmetrically to EVERY leg (see report §1):
+  VLLM_DISABLE_COMPILE_CACHE=1        (known env var; no "Unknown environment variable" warning)
+  VLLM_CACHE_ROOT=/tmp/ev2rerun_cache_<tag>   (fresh dir per leg)
+  ASCEND_RT_VISIBLE_DEVICES=6, HF_HUB_OFFLINE=1, CWD=/tmp
+
+Card 6 HBM Usage Rate: 5% before batch 1 (card6_before.txt), 5% after batch 2
+  (card6_after.txt); per-leg samples in card6_perleg.txt.
+No stray python/vllm processes on card 6 after the matrix (checked 19:41 UTC).

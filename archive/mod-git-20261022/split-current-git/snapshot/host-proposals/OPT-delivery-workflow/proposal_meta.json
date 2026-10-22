@@ -1,0 +1,43 @@
+{
+  "schema": "opt-delivery-workflow.v1",
+  "purpose": "Keep operator work focused on versioned repository delivery, independently from optimization acceptance.",
+  "target_repo": "vllm-ascend-split-batch-hust",
+  "entrypoint": "opt status; opt delivery",
+  "implementation": "tools/operator_delivery.py",
+  "deployment_root": "/root",
+  "deployment": "Explicit patch only; no import-time deployment or automatic Git writes.",
+  "apply": "patch --dry-run -p1 -d /root < patch.diff; then patch -p1 -d /root < patch.diff",
+  "rollback": "patch --dry-run -R -p1 -d /root < patch.diff; then patch -R -p1 -d /root < patch.diff",
+  "files": [
+    {
+      "target": "AGENTS.md",
+      "before_sha256": "442fc8d06e1724f99cd96efe4ed36a79cea109fb2327653cafda5399bbff6c47",
+      "after_sha256": "6b179eb6ec7f2c392507c0be1701e7901adf89427b1967853a7b191e03e2adf6"
+    },
+    {
+      "target": "opt-ops/AGENTS.md",
+      "before_sha256": "77ee55b02ee0e2bb863b9e8f87bc283859b4c1825281eccd1a1474a939bfb965",
+      "after_sha256": "b04e5c28b1e05f6ba2fbaead459eaa6b14c8216d488e6be17314e5beaedf5a83"
+    },
+    {
+      "target": "opt-ops/README.md",
+      "before_sha256": "67f528d7a41153f60613e2324bb6f1f4c1d5556678c4e2a3922c19d6376c3ddc",
+      "after_sha256": "a8562cee61969acb7bfeb1605e5e63c3c39f9014b922fe0d201de7c3f29265b6"
+    },
+    {
+      "target": "opt-ops/scripts/opt.py",
+      "before_sha256": "12b44825d1fdcfcda3903e1a5b508b7a0ee0213507af3dca73c861bd38183bb9",
+      "after_sha256": "44d3d10060216aa11e0c12751ecb263fbdcbd3230d3f7383749aa94edc5814a8"
+    }
+  ],
+  "boundaries": [
+    "No change to PURPOSE, numerical gates, NPU authorization or rejected operator methods.",
+    "COMMITTED_LOCAL verifies only declared paths against the declared base; does not certify task scope, tests, acceptance or remote push.",
+    "No remote calls, staging, commits, process termination or serving from the helper."
+  ],
+  "tests": [
+    "tests/test_operator_delivery.py",
+    "tests/test_opt_delivery_integration.py"
+  ],
+  "motivation_evidence": "/root/包体恢复/records/probes/20261018T145800Z_gdn_model_receipt.json"
+}

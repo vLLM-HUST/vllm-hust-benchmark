@@ -1,0 +1,130 @@
+{
+  "schema": "gdn-model-validation.v1",
+  "recorded_at": "2026-10-18T14:57:05.298830+00:00",
+  "candidate": "gdn-unpack-qk-l2norm-fusion",
+  "stage": "blocked",
+  "verdict": "L4 collection and device-chain attribution completed; full-model acceptance blocked by reproducible fixed-batch A/B numerical mismatch. No production activation.",
+  "shape": "T16 pure decode, post-CausalConv1d to RecurrentGatedDeltaRule; Q/K8x128 V16x128; packed row4096",
+  "weights": {
+    "model": "Qwen3.5-35B-A3B",
+    "precision": "bf16",
+    "format": "ND",
+    "tp": 2,
+    "graph": "FULL"
+  },
+  "l4": {
+    "A": [
+      {
+        "source": "/root/prof/ladder-1018-143340/dp0_pp0_tp0_dcp0_ep0_rank0_918830_20261018144013805_ascend_pt/ASCEND_PROFILER_OUTPUT/kernel_details.csv",
+        "sha256": "1d98334b505eaa262df2eac8ed6ca5a7cba2b391e4319e640eb3cd2fa6d5b52a",
+        "all_kernel_count": 62122,
+        "all_kernel_us": 5895167.879999829,
+        "target_calls": 540,
+        "target_kernel_count": 3240,
+        "target_active_us": 16364.52,
+        "target_fraction_all_kernel": 0.0027759209462921135,
+        "active_us_per_call_mean": 30.304666666666666,
+        "active_us_per_call_median": 30.340000000000003,
+        "all_fused_kernel_count": 0
+      },
+      {
+        "source": "/root/prof/ladder-1018-143340/dp0_pp0_tp1_dcp0_ep1_rank1_918831_20261018144013805_ascend_pt/ASCEND_PROFILER_OUTPUT/kernel_details.csv",
+        "sha256": "7cf27bea061f5f7a8264ba89b1008c4b20bc38f0e3f7fa14a664a3ab3ec34b24",
+        "all_kernel_count": 62122,
+        "all_kernel_us": 2161165.7400000687,
+        "target_calls": 540,
+        "target_kernel_count": 3240,
+        "target_active_us": 15893.879999999997,
+        "target_fraction_all_kernel": 0.007354308698230378,
+        "active_us_per_call_mean": 29.43311111111111,
+        "active_us_per_call_median": 29.559999999999995,
+        "all_fused_kernel_count": 0
+      }
+    ],
+    "B": [
+      {
+        "source": "/root/prof/ladder-1018-144357/dp0_pp0_tp0_dcp0_ep0_rank0_927245_20261018144956563_ascend_pt/ASCEND_PROFILER_OUTPUT/kernel_details.csv",
+        "sha256": "0c1fd8cb84153f96aedcfcd948d79ae2b7c7c780af38936a822c7b909eecfa06",
+        "all_kernel_count": 59422,
+        "all_kernel_us": 4172622.3599998993,
+        "target_calls": 540,
+        "target_kernel_count": 540,
+        "target_active_us": 5680.779999999996,
+        "target_fraction_all_kernel": 0.0013614412016907595,
+        "active_us_per_call_mean": 10.519962962962962,
+        "active_us_per_call_median": 10.24,
+        "all_fused_kernel_count": 540
+      },
+      {
+        "source": "/root/prof/ladder-1018-144357/dp0_pp0_tp1_dcp0_ep1_rank1_927246_20261018144956562_ascend_pt/ASCEND_PROFILER_OUTPUT/kernel_details.csv",
+        "sha256": "8fe283937a7989e735adb48dfb32198026eabe0a648782a045885627f461c182",
+        "all_kernel_count": 59422,
+        "all_kernel_us": 3584566.2200001646,
+        "target_calls": 540,
+        "target_kernel_count": 540,
+        "target_active_us": 5209.619999999997,
+        "target_fraction_all_kernel": 0.0014533474011256397,
+        "active_us_per_call_mean": 9.647444444444444,
+        "active_us_per_call_median": 9.22,
+        "all_fused_kernel_count": 540
+      }
+    ]
+  },
+  "l3": {
+    "standard": "8/8 PASS",
+    "mmlu_same_prompt_hash": "16/16 PASS",
+    "fixed_raw_batch_AB": "2/16 FAIL in both plain/profile comparison and matched profile comparison",
+    "fixed_batch_AA": "16/16 PASS",
+    "fixed_batch_BB": "16/16 PASS within service and across independent plain/profile services",
+    "concurrent_chat_AB": "3/16 FAIL; B/B also 3/16 FAIL; not used as a passing gate"
+  },
+  "graph": "8 changing-input isolated replays PASS; does not replace model graph correctness",
+  "cpu": "782 passed,11 skipped; Ruff and bash -n PASS",
+  "deployment": "Same reversible patched runtime both arms; env flag only arm variable; both services stopped; default remains zero",
+  "host_kernel_distinction": "L0 eager host enqueue and event spans overlap; independently traced kernel active time is separate. Model L4 target active time is not host enqueue or end-to-end latency. Old rejected copy self-time remains unknown and was not rerun.",
+  "limits": [
+    "One light window per arm, both ranks; do not promote timing as accepted gain while L3 FAIL.",
+    "Large all-kernel denominator differences include communication and other phases; not attributed to this fusion.",
+    "Root cause of fixed-batch divergence not established; scheduling order alone and profiler configuration do not explain current control results.",
+    "Standard and MMLU passes do not supersede failed supplementary fixed-batch coverage."
+  ],
+  "next_action": "Keep default-off; first-divergence real-input Q/K/V and recurrent-state differential capture before further optimization.",
+  "evidence": [
+    {
+      "path": "/root/包体恢复/records/probes/20261018T145600Z_gdn_A_l4.json",
+      "sha256": "5518a6ac22cd93094dfd3c3db957372c6f5acafe26a020779e15afed12942453"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261018T145600Z_gdn_B_l4.json",
+      "sha256": "16716513dba59efaf7b043f48699a85c4f3a6a1d7e6e83ec4c83d8f9659d8d14"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261018T144800Z_gdn_l4_analyze.py",
+      "sha256": "8e15647107889af02682a967d701352f4fe0b587396e69674e73638dcb3026ef"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261018T145000Z_gdn_profile_AB_compare.log",
+      "sha256": "0849d9b90da319f108f961705d504412b533d255fcbe2d7ab71008e966f2a002"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261018T145000Z_gdn_cross_service_BB_compare.log",
+      "sha256": "06d6ad679db0a961b38f0e86850203945ac647dbad73d26efff73a3c6f4fac9a"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261018T144000Z_gdn_AA_batch_compare.log",
+      "sha256": "06d6ad679db0a961b38f0e86850203945ac647dbad73d26efff73a3c6f4fac9a"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261018T145500Z_gdn_mmlu_AB_compare.log",
+      "sha256": "06d6ad679db0a961b38f0e86850203945ac647dbad73d26efff73a3c6f4fac9a"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261018T144700Z_gdn_tools_pytest.log",
+      "sha256": "fdf572a0131fb646045aae1a31f7d3183efc2c2c8d74ebb6ed4fbbad1d8c4c4f"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261018T145600Z_gdn_coverage.log",
+      "sha256": "b46fe3e87e01e7caba7ad0e5044195d37f6a0bbb158691d5f6c597101ba77756"
+    }
+  ]
+}

@@ -1,0 +1,177 @@
+{
+  "decision": "Implement the scoped fused consumer-chain; ready for integration validation, not accepted or deployed",
+  "candidate": "gdn-unpack-qk-l2norm-fusion",
+  "route": "028/D3-gdn-high-concurrency-longctx",
+  "authorization": "User annotation requests a complete analysis/validation/implementation round and autonomous intermediate decision",
+  "shape": {
+    "T": 16,
+    "row_stride": 4096,
+    "q": 1024,
+    "k": 1024,
+    "v": 2048,
+    "head_dim": 128,
+    "phase": "pure decode"
+  },
+  "weights": {
+    "model": "Qwen3.5-35B-A3B",
+    "precision": "bf16",
+    "format": "ND",
+    "tp": 2,
+    "input": "seeded synthetic"
+  },
+  "l0_correctness": [
+    {
+      "case": "random",
+      "status": "PASS"
+    },
+    {
+      "case": "zero",
+      "status": "PASS"
+    },
+    {
+      "case": "small",
+      "status": "PASS"
+    },
+    {
+      "case": "special",
+      "status": "PASS"
+    },
+    {
+      "case": "offset",
+      "status": "PASS"
+    }
+  ],
+  "l0_eager_medians": {
+    "baseline": {
+      "host_enqueue_us": 844.2428894340992,
+      "event_eager_chain_us": 842.9089546203613,
+      "host_total_us": 846.1836725473404
+    },
+    "candidate": {
+      "host_enqueue_us": 263.6938588693738,
+      "event_eager_chain_us": 262.01748847961426,
+      "host_total_us": 265.91962669044733
+    },
+    "candidate_launch_only": {
+      "host_enqueue_us": 121.16318102926016,
+      "event_eager_chain_us": 119.94849443435669,
+      "host_total_us": 123.24894778430462
+    }
+  },
+  "device_trace": {
+    "baseline": {
+      "all_kernel_count": 30,
+      "all_kernel_total_us": 64.66000000000001,
+      "active_us_per_call_mean": 12.932,
+      "active_us_per_call_median": 12.82
+    },
+    "candidate": {
+      "all_kernel_count": 5,
+      "all_kernel_total_us": 13.96,
+      "active_us_per_call_mean": 2.792,
+      "active_us_per_call_median": 2.86
+    }
+  },
+  "performance_scope": "new fused consumer-chain vs native unpack + two actual installed l2norm consumers, paired T16/bf16/ND; eager/trace separate; old rejected copy was not rerun",
+  "implementation": [
+    "src/vllm_ascend_split_batch/gdn_qkv_norm.py",
+    "src/vllm_ascend_split_batch/gdn_qkv_norm_kernel.py",
+    "host-proposals/GDN-qkv-norm/gen_patch.py",
+    "host-proposals/GDN-qkv-norm/patch.diff",
+    "host-proposals/GDN-qkv-norm/proposal_meta.json",
+    "tools/bench_gdn_qkv_norm.py",
+    "tools/bench-ladder.sh: GdnQkvNorm branch"
+  ],
+  "tests": {
+    "offline_compile_and_cpu": "38 passed",
+    "final_full_cpu": "776 passed, 11 skipped",
+    "focused_with_patch_and_bench": "68 passed, 1 skipped",
+    "patch_roundtrip": "25 patch tests passed, forward apply and reverse restore on temporary source copy",
+    "ruff": "PASS full repository",
+    "shell_syntax": "PASS",
+    "evidence_semantics": "13/13 PASS"
+  },
+  "initial_compiler_issue": "Different tensor ranks shared the same branch-local offset name; fixed by distinct v_offset before any device launch. No hardware retry.",
+  "secondary_design": "Mixed-prefix reuse CPU value/stride/alias proof passes for prefix1/16 and T17/825/1489/1587/2048 across three dtypes. Not implemented into runtime because mixed-callsite occurrence and benefit remain unattributed; avoid combining two levers.",
+  "host_contract_audit": {
+    "schema": "torch_binding.cpp:2794 only state carries Tensor(a!); query/key/value read-only",
+    "adapter": "recurrent_gated_delta_rule_torch_adpt.h query/key/value const references, fresh output, state mutable",
+    "limit": "Static contract review is not actual recurrent-state or graph replay validation"
+  },
+  "deployment": {
+    "default_off": true,
+    "env": "VLLM_HUST_GDN_QKV_NORM=1 explicitly required",
+    "guard": "pure decode T16/bf16/stride4096/head128, QK1024/V2048, num_spec0, PCP1, no grad, default l2norm mode",
+    "live_runtime_modified": false,
+    "host_sha256": "1081d19738da1130cf85beb7c1bcb4d061a0ca83f0edd4f3a7f2b30bd185e35d",
+    "commit_push": false
+  },
+  "missing_gates": [
+    "full-model L3 and opt bench compare NOT RUN (serve cap 0)",
+    "matched full-model L4 all-kernel attribution NOT RUN",
+    "FULL graph capture/replay correctness NOT RUN"
+  ],
+  "budget": {
+    "cap_s": 1200,
+    "charged_before_s": 659.7282223905623,
+    "charged_this_window_s": 24.066573025658727,
+    "charged_total_s": 683.7947954162211,
+    "remaining_s": 516.2052045837789,
+    "window_cap_s": 360,
+    "serve_starts": 0,
+    "retries": 0,
+    "forced_cancellation": false
+  },
+  "coverage": {
+    "exit_code": 0,
+    "FAIL": 0,
+    "WARN": 57,
+    "startup_drift": "Two unrelated W1R historical evidence files remain drifted; no pin reset, no acceptance claim"
+  },
+  "sources": [
+    {
+      "path": "/root/包体恢复/records/ladder/1018-125822-l0-gdn-qkv-norm.json",
+      "sha256": "5117c8b4192a9ce65f6c13bcf9e299f77762021832f02cc514536de42bf49488"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261018T130700Z_gdn_norm_trace_analysis.json",
+      "sha256": "69f55e20f98b315fa4e3bc01fa0693832a369cd81e7961120820a72e0a9fa699"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261018T130700Z_gdn_norm_trace_analysis.py",
+      "sha256": "9ca09d23e95c684cfc3e1299467f71c8533b30532dec908386b708e6ad58c73a"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261018T125800Z_gdn_norm_cpu_compile.log",
+      "sha256": "d77bb303c79098b0013095a57d5e39132a8a05646bb34d54cd47dde622396065"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261018T130600Z_gdn_norm_patch_tests.log",
+      "sha256": "50886ddae3b374c3062fbe873c12bb786017c5a8ded064cfcd76ee5e5e79b05e"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261018T131000Z_gdn_norm_final_pytest.log",
+      "sha256": "7aa0da25aa362658c0aefad6215ec26b8d0da4bfe51b966516084b45430935f7"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261018T131200Z_gdn_norm_ruff.log",
+      "sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261018T131100Z_gdn_norm_coverage.log",
+      "sha256": "b46fe3e87e01e7caba7ad0e5044195d37f6a0bbb158691d5f6c597101ba77756"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261018T130000Z_gdn_norm_exit.json",
+      "sha256": "d10f956c7f45246c66e7b54f6b56bf04864fd9657caacbd330423de4ee601b95"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261018T130000Z_gdn_norm_npu.log",
+      "sha256": "bb953643fc240e774a107e58b7c66dbc29fdadf8925f5bcaaa0d9f85eb9f6378"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261018T131200Z_gdn_norm_final_sources/manifest.json",
+      "sha256": "989ed6999f1ba936bb5f6ae08086654be309ce7f25d1c20ba88a46d5539e768c"
+    }
+  ]
+}

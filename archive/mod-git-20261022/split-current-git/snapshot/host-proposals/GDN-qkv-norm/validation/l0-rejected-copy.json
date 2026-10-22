@@ -1,0 +1,1815 @@
+{
+ "schema": "opt-ops-l0-gdn-qkv-unpack.v1",
+ "ts": "2026-10-18T12:38:07Z",
+ "status": "ok",
+ "command": {
+  "argv": [
+   "/root/vllm-workspace/vllm-ascend-split-batch-hust/tools/bench_gdn_qkv_unpack.py",
+   "--device",
+   "npu",
+   "--tokens",
+   "16",
+   "--row-strides",
+   "4096",
+   "--iters",
+   "20",
+   "--warmup",
+   "2",
+   "--repeats",
+   "3",
+   "--wall-budget-min",
+   "5.5",
+   "--out",
+   "/root/包体恢复/records/ladder/1018-123757-l0-gdn-qkv-unpack.json"
+  ],
+  "cwd": "/root/vllm-workspace/vllm-ascend-split-batch-hust",
+  "python": "/usr/local/python3.12.13/bin/python"
+ },
+ "goal": {
+  "op": "rearrange_mixed_qkv (GDN mixed QKV unpack)",
+  "baseline": "split + reshape x3 + cat = 4 launch（逐字上游实现）",
+  "candidate": "单次 copy（同契约）",
+  "callsite": {
+   "canonical": "vllm-hust/vllm/model_executor/layers/mamba/gdn/qwen_gdn_linear_attn.py:890-924",
+   "callers": [
+    "/vllm-workspace/vllm-ascend/vllm_ascend/ops/gdn.py:479 rearrange_mixed_qkv(mixed_qkv_spec)",
+    "/vllm-workspace/vllm-ascend/vllm_ascend/ops/gdn.py:480 rearrange_mixed_qkv(mixed_qkv_non_spec)",
+    "/vllm-workspace/vllm-ascend/vllm_ascend/ops/gdn.py:535 rearrange_mixed_qkv(mixed_qkv_non_spec[:num_decode_tokens])"
+   ],
+   "source": "安装树直读（非窗口产物）",
+   "tree": "/vllm-workspace/vllm-ascend/vllm_ascend/ops/gdn.py",
+   "note": "仓内 clone vllm-ascend-hust 的同文件 split 两条为 532/533、无 decode 第 3 条；行号只对安装树成立"
+  }
+ },
+ "fidelity": {
+  "model": "Qwen3.5-35B-A3B",
+  "precision": {
+   "perf": "bfloat16",
+   "supplement_correctness": [
+    "float16",
+    "float32"
+   ]
+  },
+  "weight_format": {
+   "declared": "unspecified",
+   "note": "本算子只搬数据不读权重；权重格式不适用",
+   "do_not_infer": "NZ/ND"
+  }
+ },
+ "layer_dims": {
+  "q_dim": 1024,
+  "k_dim": 1024,
+  "v_dim": 2048,
+  "head_k_dim": 128,
+  "head_v_dim": 128,
+  "packed_width": 4096
+ },
+ "cells": [
+  {
+   "id": "T16-rs4096",
+   "T": 16,
+   "row_stride": 4096,
+   "input_layout": "contiguous",
+   "phase": "decode",
+   "phase_source": "declared",
+   "shape_role": "measured-shape",
+   "claim_scope": "same-shape independent eager-chain local latency per call (baseline 4 launches vs candidate 1)",
+   "in_shape": [
+    16,
+    4096
+   ],
+   "in_stride": [
+    4096,
+    1
+   ],
+   "out_shapes": [
+    [
+     1,
+     16,
+     8,
+     128
+    ],
+    [
+     1,
+     16,
+     8,
+     128
+    ],
+    [
+     1,
+     16,
+     16,
+     128
+    ]
+   ],
+   "numeric": {
+    "bfloat16": {
+     "baseline_vs_truth": {
+      "parts": [
+       {
+        "dtype_ok": true,
+        "shape_ok": true,
+        "stride_ok": null,
+        "stride_checked": false,
+        "ref_shape": [
+         1,
+         16,
+         8,
+         128
+        ],
+        "cand_shape": [
+         1,
+         16,
+         8,
+         128
+        ],
+        "ref_stride": [
+         65536,
+         4096,
+         128,
+         1
+        ],
+        "cand_stride": [
+         16384,
+         1024,
+         128,
+         1
+        ],
+        "bitwise_ok": true,
+        "ref_bits": {
+         "dtype": "bfloat16",
+         "numel": 16384,
+         "nan_count": 2,
+         "neg_zero_count": 1
+        },
+        "cand_bits": {
+         "dtype": "bfloat16",
+         "numel": 16384,
+         "nan_count": 2,
+         "neg_zero_count": 1
+        }
+       },
+       {
+        "dtype_ok": true,
+        "shape_ok": true,
+        "stride_ok": null,
+        "stride_checked": false,
+        "ref_shape": [
+         1,
+         16,
+         8,
+         128
+        ],
+        "cand_shape": [
+         1,
+         16,
+         8,
+         128
+        ],
+        "ref_stride": [
+         65536,
+         4096,
+         128,
+         1
+        ],
+        "cand_stride": [
+         16384,
+         1024,
+         128,
+         1
+        ],
+        "bitwise_ok": true,
+        "ref_bits": {
+         "dtype": "bfloat16",
+         "numel": 16384,
+         "nan_count": 0,
+         "neg_zero_count": 0
+        },
+        "cand_bits": {
+         "dtype": "bfloat16",
+         "numel": 16384,
+         "nan_count": 0,
+         "neg_zero_count": 0
+        }
+       },
+       {
+        "dtype_ok": true,
+        "shape_ok": true,
+        "stride_ok": null,
+        "stride_checked": false,
+        "ref_shape": [
+         1,
+         16,
+         16,
+         128
+        ],
+        "cand_shape": [
+         1,
+         16,
+         16,
+         128
+        ],
+        "ref_stride": [
+         65536,
+         4096,
+         128,
+         1
+        ],
+        "cand_stride": [
+         32768,
+         2048,
+         128,
+         1
+        ],
+        "bitwise_ok": true,
+        "ref_bits": {
+         "dtype": "bfloat16",
+         "numel": 32768,
+         "nan_count": 0,
+         "neg_zero_count": 0
+        },
+        "cand_bits": {
+         "dtype": "bfloat16",
+         "numel": 32768,
+         "nan_count": 0,
+         "neg_zero_count": 0
+        }
+       }
+      ],
+      "ok": true
+     },
+     "contract": {
+      "baseline": {
+       "n_tensors": 3,
+       "shape_ok": true,
+       "expected_shapes": [
+        [
+         1,
+         16,
+         8,
+         128
+        ],
+        [
+         1,
+         16,
+         8,
+         128
+        ],
+        [
+         1,
+         16,
+         16,
+         128
+        ]
+       ],
+       "actual_shapes": [
+        [
+         1,
+         16,
+         8,
+         128
+        ],
+        [
+         1,
+         16,
+         8,
+         128
+        ],
+        [
+         1,
+         16,
+         16,
+         128
+        ]
+       ],
+       "same_backing": true,
+       "segments_disjoint": true,
+       "ok": true
+      },
+      "candidate": {
+       "n_tensors": 3,
+       "shape_ok": true,
+       "expected_shapes": [
+        [
+         1,
+         16,
+         8,
+         128
+        ],
+        [
+         1,
+         16,
+         8,
+         128
+        ],
+        [
+         1,
+         16,
+         16,
+         128
+        ]
+       ],
+       "actual_shapes": [
+        [
+         1,
+         16,
+         8,
+         128
+        ],
+        [
+         1,
+         16,
+         8,
+         128
+        ],
+        [
+         1,
+         16,
+         16,
+         128
+        ]
+       ],
+       "same_backing": true,
+       "segments_disjoint": true,
+       "ok": true
+      }
+     },
+     "candidate_vs_baseline": {
+      "parts": [
+       {
+        "dtype_ok": true,
+        "shape_ok": true,
+        "stride_ok": true,
+        "stride_checked": true,
+        "ref_shape": [
+         1,
+         16,
+         8,
+         128
+        ],
+        "cand_shape": [
+         1,
+         16,
+         8,
+         128
+        ],
+        "ref_stride": [
+         16384,
+         1024,
+         128,
+         1
+        ],
+        "cand_stride": [
+         16384,
+         1024,
+         128,
+         1
+        ],
+        "bitwise_ok": true,
+        "ref_bits": {
+         "dtype": "bfloat16",
+         "numel": 16384,
+         "nan_count": 2,
+         "neg_zero_count": 1
+        },
+        "cand_bits": {
+         "dtype": "bfloat16",
+         "numel": 16384,
+         "nan_count": 2,
+         "neg_zero_count": 1
+        }
+       },
+       {
+        "dtype_ok": true,
+        "shape_ok": true,
+        "stride_ok": true,
+        "stride_checked": true,
+        "ref_shape": [
+         1,
+         16,
+         8,
+         128
+        ],
+        "cand_shape": [
+         1,
+         16,
+         8,
+         128
+        ],
+        "ref_stride": [
+         16384,
+         1024,
+         128,
+         1
+        ],
+        "cand_stride": [
+         16384,
+         1024,
+         128,
+         1
+        ],
+        "bitwise_ok": true,
+        "ref_bits": {
+         "dtype": "bfloat16",
+         "numel": 16384,
+         "nan_count": 0,
+         "neg_zero_count": 0
+        },
+        "cand_bits": {
+         "dtype": "bfloat16",
+         "numel": 16384,
+         "nan_count": 0,
+         "neg_zero_count": 0
+        }
+       },
+       {
+        "dtype_ok": true,
+        "shape_ok": true,
+        "stride_ok": true,
+        "stride_checked": true,
+        "ref_shape": [
+         1,
+         16,
+         16,
+         128
+        ],
+        "cand_shape": [
+         1,
+         16,
+         16,
+         128
+        ],
+        "ref_stride": [
+         32768,
+         2048,
+         128,
+         1
+        ],
+        "cand_stride": [
+         32768,
+         2048,
+         128,
+         1
+        ],
+        "bitwise_ok": true,
+        "ref_bits": {
+         "dtype": "bfloat16",
+         "numel": 32768,
+         "nan_count": 0,
+         "neg_zero_count": 0
+        },
+        "cand_bits": {
+         "dtype": "bfloat16",
+         "numel": 32768,
+         "nan_count": 0,
+         "neg_zero_count": 0
+        }
+       }
+      ],
+      "ok": true
+     },
+     "candidate_vs_truth": {
+      "parts": [
+       {
+        "dtype_ok": true,
+        "shape_ok": true,
+        "stride_ok": null,
+        "stride_checked": false,
+        "ref_shape": [
+         1,
+         16,
+         8,
+         128
+        ],
+        "cand_shape": [
+         1,
+         16,
+         8,
+         128
+        ],
+        "ref_stride": [
+         65536,
+         4096,
+         128,
+         1
+        ],
+        "cand_stride": [
+         16384,
+         1024,
+         128,
+         1
+        ],
+        "bitwise_ok": true,
+        "ref_bits": {
+         "dtype": "bfloat16",
+         "numel": 16384,
+         "nan_count": 2,
+         "neg_zero_count": 1
+        },
+        "cand_bits": {
+         "dtype": "bfloat16",
+         "numel": 16384,
+         "nan_count": 2,
+         "neg_zero_count": 1
+        }
+       },
+       {
+        "dtype_ok": true,
+        "shape_ok": true,
+        "stride_ok": null,
+        "stride_checked": false,
+        "ref_shape": [
+         1,
+         16,
+         8,
+         128
+        ],
+        "cand_shape": [
+         1,
+         16,
+         8,
+         128
+        ],
+        "ref_stride": [
+         65536,
+         4096,
+         128,
+         1
+        ],
+        "cand_stride": [
+         16384,
+         1024,
+         128,
+         1
+        ],
+        "bitwise_ok": true,
+        "ref_bits": {
+         "dtype": "bfloat16",
+         "numel": 16384,
+         "nan_count": 0,
+         "neg_zero_count": 0
+        },
+        "cand_bits": {
+         "dtype": "bfloat16",
+         "numel": 16384,
+         "nan_count": 0,
+         "neg_zero_count": 0
+        }
+       },
+       {
+        "dtype_ok": true,
+        "shape_ok": true,
+        "stride_ok": null,
+        "stride_checked": false,
+        "ref_shape": [
+         1,
+         16,
+         16,
+         128
+        ],
+        "cand_shape": [
+         1,
+         16,
+         16,
+         128
+        ],
+        "ref_stride": [
+         65536,
+         4096,
+         128,
+         1
+        ],
+        "cand_stride": [
+         32768,
+         2048,
+         128,
+         1
+        ],
+        "bitwise_ok": true,
+        "ref_bits": {
+         "dtype": "bfloat16",
+         "numel": 32768,
+         "nan_count": 0,
+         "neg_zero_count": 0
+        },
+        "cand_bits": {
+         "dtype": "bfloat16",
+         "numel": 32768,
+         "nan_count": 0,
+         "neg_zero_count": 0
+        }
+       }
+      ],
+      "ok": true
+     },
+     "input_unmodified": true,
+     "ok": true
+    },
+    "float16": {
+     "baseline_vs_truth": {
+      "parts": [
+       {
+        "dtype_ok": true,
+        "shape_ok": true,
+        "stride_ok": null,
+        "stride_checked": false,
+        "ref_shape": [
+         1,
+         16,
+         8,
+         128
+        ],
+        "cand_shape": [
+         1,
+         16,
+         8,
+         128
+        ],
+        "ref_stride": [
+         65536,
+         4096,
+         128,
+         1
+        ],
+        "cand_stride": [
+         16384,
+         1024,
+         128,
+         1
+        ],
+        "bitwise_ok": true,
+        "ref_bits": {
+         "dtype": "float16",
+         "numel": 16384,
+         "nan_count": 2,
+         "neg_zero_count": 1
+        },
+        "cand_bits": {
+         "dtype": "float16",
+         "numel": 16384,
+         "nan_count": 2,
+         "neg_zero_count": 1
+        }
+       },
+       {
+        "dtype_ok": true,
+        "shape_ok": true,
+        "stride_ok": null,
+        "stride_checked": false,
+        "ref_shape": [
+         1,
+         16,
+         8,
+         128
+        ],
+        "cand_shape": [
+         1,
+         16,
+         8,
+         128
+        ],
+        "ref_stride": [
+         65536,
+         4096,
+         128,
+         1
+        ],
+        "cand_stride": [
+         16384,
+         1024,
+         128,
+         1
+        ],
+        "bitwise_ok": true,
+        "ref_bits": {
+         "dtype": "float16",
+         "numel": 16384,
+         "nan_count": 0,
+         "neg_zero_count": 0
+        },
+        "cand_bits": {
+         "dtype": "float16",
+         "numel": 16384,
+         "nan_count": 0,
+         "neg_zero_count": 0
+        }
+       },
+       {
+        "dtype_ok": true,
+        "shape_ok": true,
+        "stride_ok": null,
+        "stride_checked": false,
+        "ref_shape": [
+         1,
+         16,
+         16,
+         128
+        ],
+        "cand_shape": [
+         1,
+         16,
+         16,
+         128
+        ],
+        "ref_stride": [
+         65536,
+         4096,
+         128,
+         1
+        ],
+        "cand_stride": [
+         32768,
+         2048,
+         128,
+         1
+        ],
+        "bitwise_ok": true,
+        "ref_bits": {
+         "dtype": "float16",
+         "numel": 32768,
+         "nan_count": 0,
+         "neg_zero_count": 0
+        },
+        "cand_bits": {
+         "dtype": "float16",
+         "numel": 32768,
+         "nan_count": 0,
+         "neg_zero_count": 0
+        }
+       }
+      ],
+      "ok": true
+     },
+     "contract": {
+      "baseline": {
+       "n_tensors": 3,
+       "shape_ok": true,
+       "expected_shapes": [
+        [
+         1,
+         16,
+         8,
+         128
+        ],
+        [
+         1,
+         16,
+         8,
+         128
+        ],
+        [
+         1,
+         16,
+         16,
+         128
+        ]
+       ],
+       "actual_shapes": [
+        [
+         1,
+         16,
+         8,
+         128
+        ],
+        [
+         1,
+         16,
+         8,
+         128
+        ],
+        [
+         1,
+         16,
+         16,
+         128
+        ]
+       ],
+       "same_backing": true,
+       "segments_disjoint": true,
+       "ok": true
+      },
+      "candidate": {
+       "n_tensors": 3,
+       "shape_ok": true,
+       "expected_shapes": [
+        [
+         1,
+         16,
+         8,
+         128
+        ],
+        [
+         1,
+         16,
+         8,
+         128
+        ],
+        [
+         1,
+         16,
+         16,
+         128
+        ]
+       ],
+       "actual_shapes": [
+        [
+         1,
+         16,
+         8,
+         128
+        ],
+        [
+         1,
+         16,
+         8,
+         128
+        ],
+        [
+         1,
+         16,
+         16,
+         128
+        ]
+       ],
+       "same_backing": true,
+       "segments_disjoint": true,
+       "ok": true
+      }
+     },
+     "candidate_vs_baseline": {
+      "parts": [
+       {
+        "dtype_ok": true,
+        "shape_ok": true,
+        "stride_ok": true,
+        "stride_checked": true,
+        "ref_shape": [
+         1,
+         16,
+         8,
+         128
+        ],
+        "cand_shape": [
+         1,
+         16,
+         8,
+         128
+        ],
+        "ref_stride": [
+         16384,
+         1024,
+         128,
+         1
+        ],
+        "cand_stride": [
+         16384,
+         1024,
+         128,
+         1
+        ],
+        "bitwise_ok": true,
+        "ref_bits": {
+         "dtype": "float16",
+         "numel": 16384,
+         "nan_count": 2,
+         "neg_zero_count": 1
+        },
+        "cand_bits": {
+         "dtype": "float16",
+         "numel": 16384,
+         "nan_count": 2,
+         "neg_zero_count": 1
+        }
+       },
+       {
+        "dtype_ok": true,
+        "shape_ok": true,
+        "stride_ok": true,
+        "stride_checked": true,
+        "ref_shape": [
+         1,
+         16,
+         8,
+         128
+        ],
+        "cand_shape": [
+         1,
+         16,
+         8,
+         128
+        ],
+        "ref_stride": [
+         16384,
+         1024,
+         128,
+         1
+        ],
+        "cand_stride": [
+         16384,
+         1024,
+         128,
+         1
+        ],
+        "bitwise_ok": true,
+        "ref_bits": {
+         "dtype": "float16",
+         "numel": 16384,
+         "nan_count": 0,
+         "neg_zero_count": 0
+        },
+        "cand_bits": {
+         "dtype": "float16",
+         "numel": 16384,
+         "nan_count": 0,
+         "neg_zero_count": 0
+        }
+       },
+       {
+        "dtype_ok": true,
+        "shape_ok": true,
+        "stride_ok": true,
+        "stride_checked": true,
+        "ref_shape": [
+         1,
+         16,
+         16,
+         128
+        ],
+        "cand_shape": [
+         1,
+         16,
+         16,
+         128
+        ],
+        "ref_stride": [
+         32768,
+         2048,
+         128,
+         1
+        ],
+        "cand_stride": [
+         32768,
+         2048,
+         128,
+         1
+        ],
+        "bitwise_ok": true,
+        "ref_bits": {
+         "dtype": "float16",
+         "numel": 32768,
+         "nan_count": 0,
+         "neg_zero_count": 0
+        },
+        "cand_bits": {
+         "dtype": "float16",
+         "numel": 32768,
+         "nan_count": 0,
+         "neg_zero_count": 0
+        }
+       }
+      ],
+      "ok": true
+     },
+     "candidate_vs_truth": {
+      "parts": [
+       {
+        "dtype_ok": true,
+        "shape_ok": true,
+        "stride_ok": null,
+        "stride_checked": false,
+        "ref_shape": [
+         1,
+         16,
+         8,
+         128
+        ],
+        "cand_shape": [
+         1,
+         16,
+         8,
+         128
+        ],
+        "ref_stride": [
+         65536,
+         4096,
+         128,
+         1
+        ],
+        "cand_stride": [
+         16384,
+         1024,
+         128,
+         1
+        ],
+        "bitwise_ok": true,
+        "ref_bits": {
+         "dtype": "float16",
+         "numel": 16384,
+         "nan_count": 2,
+         "neg_zero_count": 1
+        },
+        "cand_bits": {
+         "dtype": "float16",
+         "numel": 16384,
+         "nan_count": 2,
+         "neg_zero_count": 1
+        }
+       },
+       {
+        "dtype_ok": true,
+        "shape_ok": true,
+        "stride_ok": null,
+        "stride_checked": false,
+        "ref_shape": [
+         1,
+         16,
+         8,
+         128
+        ],
+        "cand_shape": [
+         1,
+         16,
+         8,
+         128
+        ],
+        "ref_stride": [
+         65536,
+         4096,
+         128,
+         1
+        ],
+        "cand_stride": [
+         16384,
+         1024,
+         128,
+         1
+        ],
+        "bitwise_ok": true,
+        "ref_bits": {
+         "dtype": "float16",
+         "numel": 16384,
+         "nan_count": 0,
+         "neg_zero_count": 0
+        },
+        "cand_bits": {
+         "dtype": "float16",
+         "numel": 16384,
+         "nan_count": 0,
+         "neg_zero_count": 0
+        }
+       },
+       {
+        "dtype_ok": true,
+        "shape_ok": true,
+        "stride_ok": null,
+        "stride_checked": false,
+        "ref_shape": [
+         1,
+         16,
+         16,
+         128
+        ],
+        "cand_shape": [
+         1,
+         16,
+         16,
+         128
+        ],
+        "ref_stride": [
+         65536,
+         4096,
+         128,
+         1
+        ],
+        "cand_stride": [
+         32768,
+         2048,
+         128,
+         1
+        ],
+        "bitwise_ok": true,
+        "ref_bits": {
+         "dtype": "float16",
+         "numel": 32768,
+         "nan_count": 0,
+         "neg_zero_count": 0
+        },
+        "cand_bits": {
+         "dtype": "float16",
+         "numel": 32768,
+         "nan_count": 0,
+         "neg_zero_count": 0
+        }
+       }
+      ],
+      "ok": true
+     },
+     "input_unmodified": true,
+     "ok": true
+    },
+    "float32": {
+     "baseline_vs_truth": {
+      "parts": [
+       {
+        "dtype_ok": true,
+        "shape_ok": true,
+        "stride_ok": null,
+        "stride_checked": false,
+        "ref_shape": [
+         1,
+         16,
+         8,
+         128
+        ],
+        "cand_shape": [
+         1,
+         16,
+         8,
+         128
+        ],
+        "ref_stride": [
+         65536,
+         4096,
+         128,
+         1
+        ],
+        "cand_stride": [
+         16384,
+         1024,
+         128,
+         1
+        ],
+        "bitwise_ok": true,
+        "ref_bits": {
+         "dtype": "float32",
+         "numel": 16384,
+         "nan_count": 2,
+         "neg_zero_count": 1
+        },
+        "cand_bits": {
+         "dtype": "float32",
+         "numel": 16384,
+         "nan_count": 2,
+         "neg_zero_count": 1
+        }
+       },
+       {
+        "dtype_ok": true,
+        "shape_ok": true,
+        "stride_ok": null,
+        "stride_checked": false,
+        "ref_shape": [
+         1,
+         16,
+         8,
+         128
+        ],
+        "cand_shape": [
+         1,
+         16,
+         8,
+         128
+        ],
+        "ref_stride": [
+         65536,
+         4096,
+         128,
+         1
+        ],
+        "cand_stride": [
+         16384,
+         1024,
+         128,
+         1
+        ],
+        "bitwise_ok": true,
+        "ref_bits": {
+         "dtype": "float32",
+         "numel": 16384,
+         "nan_count": 0,
+         "neg_zero_count": 0
+        },
+        "cand_bits": {
+         "dtype": "float32",
+         "numel": 16384,
+         "nan_count": 0,
+         "neg_zero_count": 0
+        }
+       },
+       {
+        "dtype_ok": true,
+        "shape_ok": true,
+        "stride_ok": null,
+        "stride_checked": false,
+        "ref_shape": [
+         1,
+         16,
+         16,
+         128
+        ],
+        "cand_shape": [
+         1,
+         16,
+         16,
+         128
+        ],
+        "ref_stride": [
+         65536,
+         4096,
+         128,
+         1
+        ],
+        "cand_stride": [
+         32768,
+         2048,
+         128,
+         1
+        ],
+        "bitwise_ok": true,
+        "ref_bits": {
+         "dtype": "float32",
+         "numel": 32768,
+         "nan_count": 0,
+         "neg_zero_count": 0
+        },
+        "cand_bits": {
+         "dtype": "float32",
+         "numel": 32768,
+         "nan_count": 0,
+         "neg_zero_count": 0
+        }
+       }
+      ],
+      "ok": true
+     },
+     "contract": {
+      "baseline": {
+       "n_tensors": 3,
+       "shape_ok": true,
+       "expected_shapes": [
+        [
+         1,
+         16,
+         8,
+         128
+        ],
+        [
+         1,
+         16,
+         8,
+         128
+        ],
+        [
+         1,
+         16,
+         16,
+         128
+        ]
+       ],
+       "actual_shapes": [
+        [
+         1,
+         16,
+         8,
+         128
+        ],
+        [
+         1,
+         16,
+         8,
+         128
+        ],
+        [
+         1,
+         16,
+         16,
+         128
+        ]
+       ],
+       "same_backing": true,
+       "segments_disjoint": true,
+       "ok": true
+      },
+      "candidate": {
+       "n_tensors": 3,
+       "shape_ok": true,
+       "expected_shapes": [
+        [
+         1,
+         16,
+         8,
+         128
+        ],
+        [
+         1,
+         16,
+         8,
+         128
+        ],
+        [
+         1,
+         16,
+         16,
+         128
+        ]
+       ],
+       "actual_shapes": [
+        [
+         1,
+         16,
+         8,
+         128
+        ],
+        [
+         1,
+         16,
+         8,
+         128
+        ],
+        [
+         1,
+         16,
+         16,
+         128
+        ]
+       ],
+       "same_backing": true,
+       "segments_disjoint": true,
+       "ok": true
+      }
+     },
+     "candidate_vs_baseline": {
+      "parts": [
+       {
+        "dtype_ok": true,
+        "shape_ok": true,
+        "stride_ok": true,
+        "stride_checked": true,
+        "ref_shape": [
+         1,
+         16,
+         8,
+         128
+        ],
+        "cand_shape": [
+         1,
+         16,
+         8,
+         128
+        ],
+        "ref_stride": [
+         16384,
+         1024,
+         128,
+         1
+        ],
+        "cand_stride": [
+         16384,
+         1024,
+         128,
+         1
+        ],
+        "bitwise_ok": true,
+        "ref_bits": {
+         "dtype": "float32",
+         "numel": 16384,
+         "nan_count": 2,
+         "neg_zero_count": 1
+        },
+        "cand_bits": {
+         "dtype": "float32",
+         "numel": 16384,
+         "nan_count": 2,
+         "neg_zero_count": 1
+        }
+       },
+       {
+        "dtype_ok": true,
+        "shape_ok": true,
+        "stride_ok": true,
+        "stride_checked": true,
+        "ref_shape": [
+         1,
+         16,
+         8,
+         128
+        ],
+        "cand_shape": [
+         1,
+         16,
+         8,
+         128
+        ],
+        "ref_stride": [
+         16384,
+         1024,
+         128,
+         1
+        ],
+        "cand_stride": [
+         16384,
+         1024,
+         128,
+         1
+        ],
+        "bitwise_ok": true,
+        "ref_bits": {
+         "dtype": "float32",
+         "numel": 16384,
+         "nan_count": 0,
+         "neg_zero_count": 0
+        },
+        "cand_bits": {
+         "dtype": "float32",
+         "numel": 16384,
+         "nan_count": 0,
+         "neg_zero_count": 0
+        }
+       },
+       {
+        "dtype_ok": true,
+        "shape_ok": true,
+        "stride_ok": true,
+        "stride_checked": true,
+        "ref_shape": [
+         1,
+         16,
+         16,
+         128
+        ],
+        "cand_shape": [
+         1,
+         16,
+         16,
+         128
+        ],
+        "ref_stride": [
+         32768,
+         2048,
+         128,
+         1
+        ],
+        "cand_stride": [
+         32768,
+         2048,
+         128,
+         1
+        ],
+        "bitwise_ok": true,
+        "ref_bits": {
+         "dtype": "float32",
+         "numel": 32768,
+         "nan_count": 0,
+         "neg_zero_count": 0
+        },
+        "cand_bits": {
+         "dtype": "float32",
+         "numel": 32768,
+         "nan_count": 0,
+         "neg_zero_count": 0
+        }
+       }
+      ],
+      "ok": true
+     },
+     "candidate_vs_truth": {
+      "parts": [
+       {
+        "dtype_ok": true,
+        "shape_ok": true,
+        "stride_ok": null,
+        "stride_checked": false,
+        "ref_shape": [
+         1,
+         16,
+         8,
+         128
+        ],
+        "cand_shape": [
+         1,
+         16,
+         8,
+         128
+        ],
+        "ref_stride": [
+         65536,
+         4096,
+         128,
+         1
+        ],
+        "cand_stride": [
+         16384,
+         1024,
+         128,
+         1
+        ],
+        "bitwise_ok": true,
+        "ref_bits": {
+         "dtype": "float32",
+         "numel": 16384,
+         "nan_count": 2,
+         "neg_zero_count": 1
+        },
+        "cand_bits": {
+         "dtype": "float32",
+         "numel": 16384,
+         "nan_count": 2,
+         "neg_zero_count": 1
+        }
+       },
+       {
+        "dtype_ok": true,
+        "shape_ok": true,
+        "stride_ok": null,
+        "stride_checked": false,
+        "ref_shape": [
+         1,
+         16,
+         8,
+         128
+        ],
+        "cand_shape": [
+         1,
+         16,
+         8,
+         128
+        ],
+        "ref_stride": [
+         65536,
+         4096,
+         128,
+         1
+        ],
+        "cand_stride": [
+         16384,
+         1024,
+         128,
+         1
+        ],
+        "bitwise_ok": true,
+        "ref_bits": {
+         "dtype": "float32",
+         "numel": 16384,
+         "nan_count": 0,
+         "neg_zero_count": 0
+        },
+        "cand_bits": {
+         "dtype": "float32",
+         "numel": 16384,
+         "nan_count": 0,
+         "neg_zero_count": 0
+        }
+       },
+       {
+        "dtype_ok": true,
+        "shape_ok": true,
+        "stride_ok": null,
+        "stride_checked": false,
+        "ref_shape": [
+         1,
+         16,
+         16,
+         128
+        ],
+        "cand_shape": [
+         1,
+         16,
+         16,
+         128
+        ],
+        "ref_stride": [
+         65536,
+         4096,
+         128,
+         1
+        ],
+        "cand_stride": [
+         32768,
+         2048,
+         128,
+         1
+        ],
+        "bitwise_ok": true,
+        "ref_bits": {
+         "dtype": "float32",
+         "numel": 32768,
+         "nan_count": 0,
+         "neg_zero_count": 0
+        },
+        "cand_bits": {
+         "dtype": "float32",
+         "numel": 32768,
+         "nan_count": 0,
+         "neg_zero_count": 0
+        }
+       }
+      ],
+      "ok": true
+     },
+     "input_unmodified": true,
+     "ok": true
+    }
+   },
+   "contract": {},
+   "perf": {
+    "dtype": "bfloat16",
+    "iters": 20,
+    "repeats": 3,
+    "warmup": 2,
+    "schedule": [
+     [
+      "baseline",
+      "candidate"
+     ],
+     [
+      "candidate",
+      "baseline"
+     ],
+     [
+      "baseline",
+      "candidate"
+     ]
+    ],
+    "timer_scope": "npu_event_elapsed_eager_chain_including_host_submission_gaps",
+    "shape_role": "measured-shape",
+    "claim_scope": "same-shape independent eager-chain local latency per call (baseline 4 launches vs candidate 1)",
+    "arms": {
+     "baseline": {
+      "us_median": 284.635,
+      "metric": "us_per_iter_event_elapsed",
+      "runs": [
+       {
+        "timer_scope": "npu_event_elapsed_eager_chain_including_host_submission_gaps",
+        "iters": 20,
+        "event_elapsed_us_total": 5670.18,
+        "us_per_iter_event_elapsed": 283.509,
+        "us_host_enqueue": 323.269,
+        "us_host_total": 326.765
+       },
+       {
+        "timer_scope": "npu_event_elapsed_eager_chain_including_host_submission_gaps",
+        "iters": 20,
+        "event_elapsed_us_total": 5702.2,
+        "us_per_iter_event_elapsed": 285.11,
+        "us_host_enqueue": 288.817,
+        "us_host_total": 292.252
+       },
+       {
+        "timer_scope": "npu_event_elapsed_eager_chain_including_host_submission_gaps",
+        "iters": 20,
+        "event_elapsed_us_total": 5692.7,
+        "us_per_iter_event_elapsed": 284.635,
+        "us_host_enqueue": 287.942,
+        "us_host_total": 291.566
+       }
+      ]
+     },
+     "candidate": {
+      "us_median": 308.525,
+      "metric": "us_per_iter_event_elapsed",
+      "runs": [
+       {
+        "timer_scope": "npu_event_elapsed_eager_chain_including_host_submission_gaps",
+        "iters": 20,
+        "event_elapsed_us_total": 6201.98,
+        "us_per_iter_event_elapsed": 310.099,
+        "us_host_enqueue": 312.883,
+        "us_host_total": 316.965
+       },
+       {
+        "timer_scope": "npu_event_elapsed_eager_chain_including_host_submission_gaps",
+        "iters": 20,
+        "event_elapsed_us_total": 6080.64,
+        "us_per_iter_event_elapsed": 304.032,
+        "us_host_enqueue": 307.194,
+        "us_host_total": 310.349
+       },
+       {
+        "timer_scope": "npu_event_elapsed_eager_chain_including_host_submission_gaps",
+        "iters": 20,
+        "event_elapsed_us_total": 6170.5,
+        "us_per_iter_event_elapsed": 308.525,
+        "us_host_enqueue": 311.337,
+        "us_host_total": 315.015
+       }
+      ]
+     }
+    },
+    "post_measure_input_unmodified": true,
+    "paired_delta_pct": [
+     -8.575,
+     -6.224,
+     -7.743
+    ],
+    "paired_delta_pct_median": -7.743,
+    "delta_pct": 8.393
+   },
+   "ok": true
+  }
+ ],
+ "budget": {
+  "wall_budget_min": 5.5,
+  "exhausted": false,
+  "stop_reason": "",
+  "enforcement": "soft: cell 边界；硬上限由外层 timeout 保护，单进程不重试",
+  "elapsed_s": 15.19
+ },
+ "not_claimed": [
+  "不宣称任何 e2e/吞吐/图指标收益；L0 数字不换算成端到端",
+  "计时是 eager 链流程局部延迟（含链内 host 供给空洞），不是 FULL/图模式时长，也不是 L4/all-kernel 占比",
+  "T=1/2/17 与行跨距 6176 为合成覆盖，不作生产范围、不称实测 shape 收益"
+ ],
+ "hardware": {
+  "device": "npu",
+  "device_name": "Ascend910B2",
+  "device_count": 2,
+  "host": "coder-user-tianyuw-new-profile-59445888f-qs6v5",
+  "machine": "aarch64",
+  "torch": "2.13.0+cpu",
+  "torch_npu": "2.13.0.rc1"
+ },
+ "caliber": {
+  "timing": {
+   "per_iter": "us",
+   "iters_per_round": 20,
+   "repeats": 3,
+   "warmup": 2,
+   "timer_scope": {
+    "npu": "npu_event_elapsed_eager_chain_including_host_submission_gaps",
+    "cpu": "host_wall_perf_counter_elapsed_including_host_submission"
+   },
+   "npu": "torch.npu.Event 包夹 iters 次 eager 调用 → /iters/（event_elapsed_us_total、us_per_iter_event_elapsed）",
+   "host_enqueue": "perf_counter 同步前包夹 → /iters",
+   "host_total": "perf_counter 含末次 synchronize → /iters",
+   "measures": "同一 shape 下独立 eager 调用链的流程局部延迟（per call）；Event 只包住 iters 次调用，链内的 host 供给空洞计入",
+   "does_not_measure": [
+    "FULL/图模式时长",
+    "L4 all-kernel 占比",
+    "e2e/吞吐"
+   ],
+   "pairing": "偶数轮正序、奇数轮反序；两臂同轮相邻测量",
+   "device_available": true
+  },
+  "format": {
+   "declared": "ND",
+   "source": "窗口 1017-093650 kernel_details.csv Input/Output Formats（rearrange 的 4 个 launch 均为 ND）",
+   "note": "L0 自造输入同为 ND（连续或 strided view）"
+  },
+  "input_layouts": [
+   {
+    "row_stride": 4096,
+    "label": "measured-layout",
+    "source": "窗口 1017-093650: aclnnInplaceCopy_Slice in='T,4096' → out='T,1024'（q/k）与 out='T,2048'（v）"
+   },
+   {
+    "row_stride": 6176,
+    "label": "synthetic-supplementary",
+    "source": "窗口同族里存在 6176 宽缓冲视图（in='T,6176' → 'T,6144'），本档只复用行跨距不等于宽度的布局不变量，不是对生产的复现"
+   }
+  ]
+ },
+ "arms": {
+  "requested": [
+   "baseline",
+   "candidate"
+  ],
+  "candidate_spec": "vllm_ascend_split_batch.gdn_qkv_unpack:rearrange_mixed_qkv",
+  "candidate_arg_style": "dims"
+ },
+ "code": {
+  "repo": "/root/vllm-workspace/vllm-ascend-split-batch-hust",
+  "repo_head": "bbab3197c793ba4f890b0609024d317ae3547e69",
+  "repo_dirty_paths": 11,
+  "tool_sha256": "03c0d84c4100bb2770de6cedc59d4c9268a1c710cb84c4beeec55cad89850211",
+  "candidate": {
+   "spec": "vllm_ascend_split_batch.gdn_qkv_unpack:rearrange_mixed_qkv",
+   "module": "vllm_ascend_split_batch.gdn_qkv_unpack",
+   "attr": "rearrange_mixed_qkv",
+   "module_file": "/root/vllm-workspace/vllm-ascend-split-batch-hust/src/vllm_ascend_split_batch/gdn_qkv_unpack/__init__.py",
+   "module_sha256": "f991896560401c84f166abe8de035b91b526db2232c1ead39c227a9a018d49f4",
+   "callable_module_file": "/root/vllm-workspace/vllm-ascend-split-batch-hust/src/vllm_ascend_split_batch/gdn_qkv_unpack/api.py",
+   "callable_module_sha256": "b4cf8533e2a435777d65fc7665c61441fedaf4368f1b62f02740cdd5d71e4282",
+   "inside_repo": true,
+   "callable_inside_repo": true,
+   "package": {
+    "dir": "/root/vllm-workspace/vllm-ascend-split-batch-hust/src/vllm_ascend_split_batch/gdn_qkv_unpack",
+    "inside_repo": true,
+    "files": {
+     "src/vllm_ascend_split_batch/gdn_qkv_unpack/__init__.py": "f991896560401c84f166abe8de035b91b526db2232c1ead39c227a9a018d49f4",
+     "src/vllm_ascend_split_batch/gdn_qkv_unpack/api.py": "b4cf8533e2a435777d65fc7665c61441fedaf4368f1b62f02740cdd5d71e4282",
+     "src/vllm_ascend_split_batch/gdn_qkv_unpack/kernels.py": "e8bef290b753ee691595d07ac6fc445be363572f9c4b9a9e4c8f36f3d952f5ee",
+     "src/vllm_ascend_split_batch/gdn_qkv_unpack/reference.py": "e4394a97fb96615d9a83e510e4f95c18f15c9448d995bc41f6ca2a0690f77047"
+    }
+   }
+  }
+ },
+ "shape_scope": {
+  "rule": "只有『已声明相位 且 行跨距=4096』算实测形状；其余只作合成覆盖",
+  "measured": [
+   "T16-rs4096"
+  ],
+  "synthetic": [],
+  "claim": "same-shape independent eager-chain local latency per call (baseline 4 launches vs candidate 1)",
+  "synthetic_claim": "synthetic coverage only; not a production-shape gain"
+ }
+}

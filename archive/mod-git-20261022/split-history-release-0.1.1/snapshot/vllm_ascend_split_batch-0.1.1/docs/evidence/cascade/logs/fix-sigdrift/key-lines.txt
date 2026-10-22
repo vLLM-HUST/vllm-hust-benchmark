@@ -1,0 +1,29 @@
+== serve ON (unshimmed, card 6) key lines: /vllm-workspace/flashinfer-migration/cascade-evidence/logs/fix-sigdrift/serve-on-card6.log
+9:INFO 09-09 18:02:45 [cascade_plugin.py:147] cascade plugin loaded (gate=1, graph_gate=1, kernel_wheel=ok)
+42:(EngineCore pid=3210520) INFO 09-09 18:03:42 [cascade_plugin.py:147] cascade plugin loaded (gate=1, graph_gate=1, kernel_wheel=ok)
+977:(APIServer pid=3209315) INFO:     Application startup complete.
+capture_body_success=96  cascade_key_hit=63  replay_swap_true=113  stage1_skip=62  TypeError_or_Traceback=1
+     48 capture body SUCCESS: num_tokens=16
+     48 capture body SUCCESS: num_tokens=8
+
+== serve OFF (default-off, card 6) key lines: /vllm-workspace/flashinfer-migration/cascade-evidence/logs/fix-sigdrift/serve-off-card6.log
+9:INFO 09-09 18:07:09 [cascade_plugin.py:147] cascade plugin loaded (gate=0, graph_gate=0, kernel_wheel=ok)
+37:(EngineCore pid=3215870) INFO 09-09 18:08:02 [cascade_plugin.py:147] cascade plugin loaded (gate=0, graph_gate=0, kernel_wheel=ok)
+130:(APIServer pid=3215253) INFO:     Application startup complete.
+gate0_marker=2  cascade_active=0  capture_body=0  replay=0  wheel_unavailable=0  errors=8
+
+== onoff runner (offline graph lane, TRACE on for ON leg): /vllm-workspace/flashinfer-migration/cascade-evidence/logs/fix-sigdrift/onoff-on-trace.log
+/vllm-workspace/flashinfer-migration/cascade-evidence/logs/fix-sigdrift/onoff-runner.log:83:EV2 mode=off tag=sigdrift_off batch=8 sent=240 gen=64 eager=0 wall=2.71s out_tokens=512 -> /tmp/ev2_off_sigdrift_off.json DONE
+/vllm-workspace/flashinfer-migration/cascade-evidence/logs/fix-sigdrift/onoff-runner.log:183:EV2 mode=on tag=sigdrift_on batch=8 sent=240 gen=64 eager=0 wall=3.73s out_tokens=512 -> /tmp/ev2_on_sigdrift_on.json DONE
+/vllm-workspace/flashinfer-migration/cascade-evidence/logs/fix-sigdrift/onoff-on-trace.log:1269:EV2 mode=on tag=sigdrift_on2 batch=8 sent=240 gen=64 eager=0 wall=3.73s out_tokens=512 -> /tmp/ev2_on_sigdrift_on2.json DONE
+on_trace capture_body_success=96 cascade_key_hit=63 twin_miss=1 errors=0
+== serve-on-card6: serving window = lines 1..1432 (first [shutdown] marker) ==
+  TypeError in window: 0
+  Traceback in window: 0
+  ERROR in window: 0
+  total Traceback in whole log: 1 (all at teardown: 1)
+== serve-off-card6: serving window = lines 1..143 (first [shutdown] marker) ==
+  TypeError in window: 0
+  Traceback in window: 0
+  ERROR in window: 0
+  total Traceback in whole log: 1 (all at teardown: 1)

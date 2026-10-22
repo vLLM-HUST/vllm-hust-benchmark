@@ -1,0 +1,159 @@
+--- a/AGENTS.md
++++ b/AGENTS.md
+@@ -2,8 +2,8 @@
+ 
+ <div align="left">
+ 
+-- **主会话**：负责计划、任务分派、证据审查与最终验收。
+-- **快速子代理（快速模型）**：负责代码写入、测试和实验验证。
++- **主会话**：负责分析、设计、实现、验证、证据审查及目标仓交付，不把提交责任转交给子代理。
++- **子代理**：仅在工具可用且任务可独立验证时辅助；没有子代理不阻塞主会话执行。
+ 
+ </div>
+ 
+@@ -16,6 +16,17 @@
+ 3. **算子方向只认算子级证据**：L4 目标算子次数／时长（all-kernel 分母）+ L0 微基准 + L3 数值校验；吞吐／图指标不得给算子方向下结论。
+ 
+ 主线外（勿混入算子循环）：5 数据集执行合同、W8A8 量化（已裁决不做）、全量长跑吞吐塌陷（单独立项）。
++
++## 算子任务执行合同
++
++- **交付归宿**：`/root/vllm-workspace/vllm-ascend-split-batch-hust`。实现、测试、接入/回滚材料、结果与边界须进入该仓；运行树和 L2 不是替代归宿。工作台流程修改也须在该仓保留可回滚补丁和测试。
++- **开工只写一条任务句**：`目标形状/权重 → 本次唯一改动 → 验证门 → 目标仓路径`；从 `opt status` 记录起点 HEAD 和已有 dirty 文件。续接任务先查现有提交与证据，不重做热点分析，不重跑已拒绝方法。
++- **动作前检查**：它解决哪个尚未回答的问题？结果写到哪个新证据路径？结果会改变哪一个下一步？三者说不清，不起新实验、不扩范围、不增加台账。
++- **四个状态分别报告**：实验完成 / 优化验收 / 代码提交 / 远端发布。L4 结束不等于验收，coverage 通过不等于数值通过，本地 commit 不等于 push。
++- **负结果也交付**：L3 失败即保留失败证据和 default-off，先定位首个分歧；不得以其他通过项抵消失败，不得为等到成功而延迟提交已有可复现实现、测试和明确边界。
++- **提交检查点**：最小实现及测试就绪一次；完整验证或明确阻塞一次。只暂存本轮路径，审查 staged diff 后提交。禁止 `git add .`、夹带无关变更或用历史 commit 代替本轮提交。
++- **收尾顺序**：`opt coverage` → 记录候选裁决 → 审查本轮 diff/测试/证据 → commit → `opt delivery --base <起点HEAD> --path <本轮路径> ... --check` → 获授权才 push 并核对远端 hash。尚无 commit 时只能说“未提交”；交付核验只检查 Git 事实，不替代验收门。
++- **上下文交接只保留执行必需项**：任务句、目标仓/分支/起点 HEAD、本轮路径、当前唯一问题、运行中的 session/PID/日志、最近命令退出码、下一动作与停止条件。先恢复运行中任务；禁止改动正在执行的脚本。
+ 
+ ## §0.1 算子设计责任
+ 
+--- a/opt-ops/AGENTS.md
++++ b/opt-ops/AGENTS.md
+@@ -16,6 +16,14 @@
+ 底层实现（`bench-ladder.sh`/`kbctl.py`/`kbq.py`/`askb`/`pyopt`/`expledger.py`/`opttruth.py`）保持权威，日常只经 `opt`。
+ 
+ 单一实现：开工只 `opt status`（`opt focus|next` 是它的分节视图，同一 `startup_view()` 与排序函数）；收尾只 `opt coverage`（`opt metric|layer|caliber lint` 与 `kbctl *-lint` 是它的门禁视图）；证据哈希每进程每路径一次；完整证据面只 `opt candidate show`。
++
++## 仓库交付
++
++- 执行合同以 `/root/AGENTS.md`「算子任务执行合同」为准；`opt status` 首屏与 JSON 同时给出目标仓、分支、HEAD 和交付约束。
++- `opt delivery --base <开工HEAD> --path <本轮路径> ... --check` 是只读 Git 核验：每个声明路径相对起点有已提交变更且无未提交修改才返回 0；缺范围或不完整返回 3，读取错误返回 4。
++- `COMMITTED_LOCAL` 只表示声明路径的 Git 事实，不代表范围完整、测试成功、数值验收或已 push。未声明路径不归属于本轮；不得据此自动 stage/commit/push。
++- `blocked/rejected/inconclusive` 不免除交付责任；提交 default-off 实现、复现测试和失败证据，不设置 accepted，不绕过失败数值门。
++- 工作台脚本不是独立 Git 仓：修改需同步到目标插件仓的可校验补丁，禁止只改 `/root/opt-ops` 后称“已落仓”。
+ 
+ ## 候选闭环
+ 
+--- a/opt-ops/README.md
++++ b/opt-ops/README.md
+@@ -57,6 +57,20 @@
+ - **`records/CURRENT.json` 只导航基线与证据**（`版本/方向` 列 current + supersedes），**不复述进度**；registry / README / AGENTS 也不写进度。报告是历史，按需查，不作当前指令。
+ - **门禁按动作/结论分阶段**：硬门只挡「下结论 / 推进到 `accepted` / 引用占比排名」这类动作，**不挡**分析/探针/L0/只读排查；WARN 不阻塞分析/探针；`accepted` 须结构化 checks `l0`/`l4`/`l3`=`PASS` 且证据存在（不得伪造）——**这只是结构证据检查（结构齐备 ≠ 已验收），仍须有实际 L0/L4/L3 实测结果**；算子方向 L3 独立跑（不与该 L4 窗串同窗）、先补 L0 设备级证据，只有 L4+L3 不足以宣称 accepted；负结果只关具体 `op`/`method`，不否定整个算子。
+ - **实验阶梯与 L4 采集门**：静态筛选后先在 plain serve 跑 `opt bench screen <唯一tag>`（L1×3 + L2×3 + L3×1）；候选晋级 `ready|validating` 后，才能执行 `opt bench profile --candidate <ID> --trace-tier light --screen-report <screen.json> --collection-reason candidate-ab --gap "<缺口>"`。`deep` 只接受 `mechanism-gap`。缺参即拒绝启动（`opt raw bench profile` 同门）；重采同一窗补 `--repeat-reason`。此门只是**意图／复用预检**：**不自动登记「采集完成」、不扣预算、也不保证无重复**（真正记账在候选台账与 L2 产物）。
++
++### 2.5 仓库交付与优化验收分离
++
++`opt status` 的 `delivery` 段只读目标插件仓的根目录、分支、HEAD，并显示交付合同；缺工具或 Git 读取失败显式标为 `ERROR`。不根据候选 accepted、历史提交或整个工作树是否干净推断本轮已交付。
++
++```bash
++opt delivery --base <开工时记录的HEAD> --path <本轮实现路径> --path <本轮测试路径> --check
++```
++
++- 范围必须是仓内明确路径，禁止整个仓、上级目录和 glob。起点须为 HEAD 的祖先。
++- 声明路径均有相对起点的已提交变更且无 dirty 时为 `COMMITTED_LOCAL`；无范围为 `UNSCOPED`；未提交或未变更为 `INCOMPLETE`。未声明的 dirty 文件不阻断本轮交付，也不得夹带提交。
++- `--check` 仅 `COMMITTED_LOCAL` 返回 0；其余非错误状态返回 3；工具错误返回 4。无 `--check` 是信息视图，不是门禁。
++- 工具不修改 Git，不访问远端，不判定测试/数值正确，不自称 push 成功；远端始终 `NOT_VERIFIED`。push 仍须用户授权及实际远端 hash 核验。
++- 算子失败可以提交其 default-off 载体、测试和负结果；只有验收门通过才能宣称优化有效。`opt coverage` 仍是证据收尾门，`delivery` 不替代或复制其判据。
+ 
+ ## 3. 版本 × 方向矩阵（权威来源 = `registry.json`，**本文档不抄表**）
+ 
+--- a/opt-ops/scripts/opt.py
++++ b/opt-ops/scripts/opt.py
+@@ -54,6 +54,7 @@
+ # ---------------------------------------------------------------- 动词表
+ # 每条: 动词 → (底层命令构造, 一句话说明, 归属阶段)
+ VERBS = {
++    "delivery": ("插件仓 tools/operator_delivery.py", "只读交付核验：--base <起点HEAD> --path <本轮路径>（可重复）--check；不替代数值/测试门，不自动提交或 push", "固化"),
+     "status":   ("<内置> 开工视图（唯一聚合点）",
+                  "一屏: 分类(route+layer)/active 统计范围/cohort+carriers/焦点候选(唯一下一步·停止条件·"
+                  "预算·证据计数)/确定性下一步/truth gaps/结构化问题(稳定ID·严重级·修复入口·是否阻断)/"
+@@ -919,8 +920,24 @@
+ 
+     # 下一步（与 opt next 共用同一排序函数）
+     st["next"] = _next_items(st) if ("candidates" in sec) else []
++    st["delivery"] = delivery_view()
+     st["trace"] = ws.trace()
+     return st
++
++
++def delivery_view() -> dict:
++    tool = os.path.join(os.path.dirname(TOOLS["bench"]), "operator_delivery.py")
++    try:
++        result = subprocess.run([PY_SYS, tool, "--json"], capture_output=True,
++                                text=True, timeout=30)
++        if result.returncode:
++            return {"state": "ERROR", "error": result.stdout or result.stderr}
++        report = json.loads(result.stdout)
++        if not isinstance(report, dict) or report.get("schema") != "operator-delivery.v1":
++            raise ValueError("invalid delivery response")
++        return report
++    except (OSError, ValueError, subprocess.TimeoutExpired) as exc:
++        return {"state": "ERROR", "error": str(exc)}
+ 
+ 
+ def collect_status() -> dict:
+@@ -932,7 +949,17 @@
+     """人读视图 —— 与 `opt status --json` 是**同一个对象**（startup_view）的两种渲染。"""
+     print(f"== opt status ({st['ts']}) ==")
+     print(f"资源: NPU {st['npu'] or '-'} | serve {st['serve'] or '-'} | 待审 {st['pending_approvals']}")
+-    print("角色: 主会话负责分析、设计、实现、实验、门禁与记录")
++    print("角色: 主会话负责分析、设计、实现、实验、门禁与目标仓提交")
++    delivery = st.get("delivery", {})
++    print(f"交付目标: {delivery.get('repo', '?')} | 分支 {delivery.get('branch', '?')} | "
++          f"HEAD {delivery.get('head', '?')} | {delivery.get('state', 'ERROR')}")
++    if delivery.get("error"):
++        print(f"  交付读取失败: {delivery['error']}")
++    else:
++        print(f"  {delivery['contract']['objective']}")
++        print(f"  {delivery['contract']['failure_action']}")
++        print(f"  {delivery['contract']['stop_rule']}")
++        print(f"  下一步: {delivery['next_action']}；远端 {delivery['remote']}")
+     print(f"知识: L1 卡 {st['notes']['total']} 张 {st['notes']['by_lifecycle'] or ''} | "
+           f"pin {'已钉 ' + str(st['pin']['l0_commit']) if st['pin']['pinned'] else '未钉'} | "
+           f"漂移 {st.get('drift', '未检查')}")
+@@ -1601,6 +1628,11 @@
+     p = sub.add_parser("status")
+     p.add_argument("--json", action="store_true", default=argparse.SUPPRESS,
+                    help="机器可读（与 opt --json status 等价）")
++    p = sub.add_parser("delivery")
++    p.add_argument("--base")
++    p.add_argument("--path", action="append", default=[])
++    p.add_argument("--check", action="store_true")
++    p.add_argument("--json", action="store_true", default=argparse.SUPPRESS)
+     p = sub.add_parser("doctor")
+     p.add_argument("--init", action="store_true", help="顺带创建缺失的状态库（pyopt.db）")
+     p.add_argument("--json", action="store_true", default=argparse.SUPPRESS)
+@@ -1771,6 +1803,21 @@
+          else print_status(st))
+         # 状态视图本身成功（信息性）；阻断判断交给各门（coverage/metric/layer/drift）
+         return 0
++    if cmd == "delivery":
++        tool = os.path.join(os.path.dirname(TOOLS["bench"]), "operator_delivery.py")
++        if not os.path.isfile(tool):
++            print(f"delivery helper missing: {tool}", file=sys.stderr)
++            return 4
++        argv = [PY_SYS, tool]
++        if args.base:
++            argv += ["--base", args.base]
++        for path in args.path:
++            argv += ["--path", path]
++        if args.check:
++            argv.append("--check")
++        if args.json:
++            argv.append("--json")
++        return run(argv, dry=args.dry_run).returncode
+     if cmd == "doctor":
+         return cmd_doctor(args)
+     if cmd == "help":

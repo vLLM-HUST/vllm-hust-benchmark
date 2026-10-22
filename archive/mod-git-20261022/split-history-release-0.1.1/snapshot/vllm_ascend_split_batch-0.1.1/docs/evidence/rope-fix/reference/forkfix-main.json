@@ -1,0 +1,1368 @@
+{
+ "meta": {
+  "device": "npu:0",
+  "visible": "7",
+  "shapes": {
+   "Q": 40,
+   "KV": 8,
+   "head_dim": 128,
+   "rot": 128,
+   "base": 1000000.0
+  },
+  "oot_rope_keys": [
+   "ApplyRotaryEmb",
+   "DeepseekScalingRotaryEmbedding",
+   "Llama3RotaryEmbedding",
+   "MRotaryEmbedding",
+   "RotaryEmbedding",
+   "YaRNScalingRotaryEmbedding"
+  ],
+  "variants": {
+   "interleaved": {
+    "cls": "AscendRotaryEmbedding",
+    "fwd": "AscendRotaryEmbedding.forward_oot"
+   },
+   "llama3": {
+    "cls": "AscendLlama3RotaryEmbedding",
+    "fwd": "AscendLlama3RotaryEmbedding.forward_oot"
+   },
+   "yarn": {
+    "cls": "AscendYaRNRotaryEmbedding",
+    "fwd": "AscendYaRNRotaryEmbedding.forward_oot"
+   },
+   "mrope": {
+    "cls": "AscendMRotaryEmbedding",
+    "fwd": "AscendMRotaryEmbedding.forward_oot"
+   }
+  }
+ },
+ "breakpoints": [
+  {
+   "variant": "mrope",
+   "kind": "runtime-error（生产类到 kernel 端参数不接）",
+   "where": "vllm-ascend-hust/vllm_ascend/ops/rotary_embedding.py:541 forward_triton 调 triton_mrope 只给 8 个位置参数；host 签名 mrope.py:159-169 需 9 个（第 9 个 is_neox_style 无缺省）",
+   "trigger": "positions.ndim==2 且 mrope_interleaved=True（Qwen2.5-VL 形状），rotary_embedding.py:560 走 forward_triton",
+   "evidence": "AscendMRotaryEmbedding.forward(pos(3,T),q,k) → TypeError: triton_mrope() missing 1 required positional argument: 'is_neox_style'（两个 combo 均复现）",
+   "fix_hint": "forward_triton 补 self.is_neox_style（host MRotaryEmbedding.forward_cuda 的调用式）"
+  },
+  {
+   "variant": "llama3",
+   "kind": "coverage-gap（生成端存在但未接线到 Ascend kernel 端）",
+   "where": "vllm_ascend/utils.py:735-765 REGISTERED_ASCEND_OPS 无 Llama3RotaryEmbedding → CustomOp.__new__ 不替换，落到 host Llama3RotaryEmbedding，forward_oot 默认实现 = forward_native（torch 逐元素 bf16 数学）",
+   "evidence": "type(rope)=Llama3RotaryEmbedding, fwd=CustomOp.forward_oot；生产 forward 输出 O==G3(bf16 数学 golden) 逐位，但 O 与直接 triton kernel 输出 bitwise=False（两者数学精度不同）→ triton rope 对该变体不可达",
+   "fix_hint": "与 AscendRotaryEmbedding 同法加一个 AscendLlama3RotaryEmbedding 并登记 'Llama3RotaryEmbedding'"
+  },
+  {
+   "variant": "yarn",
+   "kind": "formula-divergence（生成端公式与 host/GPU 不一致）",
+   "where": "AscendYaRNRotaryEmbedding.__init__ 的 truncate 缺省 False（host YaRNScalingRotaryEmbedding 缺省 True）；HF/vllm 参考实现为 truncate=True（修正区间取整）",
+   "evidence": "truncate 矩阵：同 truncate 时 cache 差 0；异 truncate 时 cache max_abs=0.0; inv_freq 0/64 项不同（rel 最大 0.0000）；同输入同 kernel 下输出 max_abs=0.0、0/20971520 元素不同",
+   "fix_hint": "AscendYaRN truncate 缺省改回 True（或显式从 rope_parameters 透传）"
+  }
+ ],
+ "cases": [
+  {
+   "variant": "interleaved",
+   "combo": "seq",
+   "T": 4096,
+   "pos_ndim": 1,
+   "pos_span": 32768,
+   "pos_min": 0,
+   "pos_max": 4095,
+   "gen": {
+    "cls": "AscendRotaryEmbedding",
+    "fwd_method": "AscendRotaryEmbedding.forward_oot",
+    "cache_shape": [
+     32768,
+     128
+    ],
+    "cache_dtype": "bfloat16",
+    "recompute_max_abs": 0.0,
+    "quant_max_abs": 0.001953125,
+    "ref_cls": "AscendRotaryEmbedding",
+    "ref_vs_fork_cache_max_abs": 0.0
+   },
+   "floor_theory": 0.042724609375,
+   "g2_vs_g1f_cache_noise": {
+    "max_abs": 0.03125,
+    "max_rel": 2320.058837890625,
+    "n_exact": 16354951,
+    "n_elem": 20971520,
+    "n_bad_pre": 17160,
+    "bitwise": false,
+    "pass_pre_bf16": false
+   },
+   "g1f_vs_g1_formula_divergence": {
+    "max_abs": 0.0,
+    "max_rel": 0.0,
+    "n_exact": 20971520,
+    "n_elem": 20971520,
+    "n_bad_pre": 0,
+    "bitwise": true,
+    "pass_pre_bf16": true
+   },
+   "g2_vs_g1_gen_total": {
+    "max_abs": 0.03125,
+    "max_rel": 2320.058837890625,
+    "n_exact": 16354951,
+    "n_elem": 20971520,
+    "n_bad_pre": 17160,
+    "bitwise": false,
+    "pass_pre_bf16": false
+   },
+   "g3_vs_g1_bf16math": {
+    "max_abs": 0.03125,
+    "max_rel": 3906.607666015625,
+    "n_exact": 14605033,
+    "n_elem": 20971520,
+    "n_bad_pre": 52587,
+    "bitwise": false,
+    "pass_pre_bf16": false
+   },
+   "g3_vs_g2_bf16math_vs_fp32math": {
+    "max_abs": 0.03125,
+    "max_rel": 127.0,
+    "n_exact": 15808792,
+    "n_elem": 20971520,
+    "n_bad_pre": 19794,
+    "bitwise": false,
+    "pass_pre_bf16": false
+   },
+   "kernel_wrapper": {
+    "ok": true,
+    "note": "class=AscendRotaryEmbedding fwd=AscendRotaryEmbedding.forward_oot",
+    "breakage": null
+   },
+   "kernel": {
+    "tag": "rope_forward_triton(直读bf16 cache)",
+    "q_vs_g2": {
+     "max_abs": 0.0,
+     "max_rel": 0.0,
+     "n_exact": 20971520,
+     "n_elem": 20971520,
+     "n_bad_pre": 0,
+     "bitwise": true,
+     "pass_pre_bf16": true
+    },
+    "k_vs_g2": {
+     "max_abs": 0.0,
+     "max_rel": 0.0,
+     "n_exact": 4194304,
+     "n_elem": 4194304,
+     "n_bad_pre": 0,
+     "bitwise": true,
+     "pass_pre_bf16": true
+    },
+    "q_vs_g1f": {
+     "max_abs": 0.03125,
+     "max_rel": 2320.058837890625,
+     "n_exact": 16354951,
+     "n_elem": 20971520,
+     "n_bad_pre": 17160,
+     "bitwise": false,
+     "pass_pre_bf16": false
+    },
+    "q_vs_g1": {
+     "max_abs": 0.03125,
+     "max_rel": 2320.058837890625,
+     "n_exact": 16354951,
+     "n_elem": 20971520,
+     "n_bad_pre": 17160,
+     "bitwise": false,
+     "pass_pre_bf16": false
+    }
+   },
+   "e2e": {
+    "max_abs": 0.03125,
+    "max_rel": 2320.058837890625,
+    "pass_pre_bf16_elementwise": false,
+    "n_bad_pre": 17160,
+    "chain_selfconsistent": true,
+    "noise_within_bf16_bound": true,
+    "note": "链自洽判据 = O 与 bf16-cache golden(G2) 逐位一致；端到端偏差上限 = 2·2^-8·max|x|"
+   },
+   "prod_forward": {
+    "path": "AscendRotaryEmbedding.forward_oot",
+    "o_vs_g1": {
+     "max_abs": 0.03125,
+     "max_rel": 2320.058837890625,
+     "n_exact": 16354951,
+     "n_elem": 20971520,
+     "n_bad_pre": 17160,
+     "bitwise": false,
+     "pass_pre_bf16": false
+    },
+    "o_vs_g2": {
+     "max_abs": 0.0,
+     "max_rel": 0.0,
+     "n_exact": 20971520,
+     "n_elem": 20971520,
+     "n_bad_pre": 0,
+     "bitwise": true,
+     "pass_pre_bf16": true
+    },
+    "o_vs_g3_bf16math": {
+     "max_abs": 0.03125,
+     "max_rel": 7476.806640625,
+     "n_exact": 15808792,
+     "n_elem": 20971520,
+     "n_bad_pre": 19728,
+     "bitwise": false,
+     "pass_pre_bf16": false
+    },
+    "o_vs_direct_kernel": {
+     "max_abs": 0.0,
+     "max_rel": 0.0,
+     "n_exact": 20971520,
+     "n_elem": 20971520,
+     "n_bad_pre": 0,
+     "bitwise": true,
+     "pass_pre_bf16": true
+    },
+    "note": "生产入口输出（cos_sin_cache 已随 nn.Module.to(device) 上卡，模拟模型加载）；与直接 kernel 调用对比可判定 forward_oot → triton 的实际接线"
+   }
+  },
+  {
+   "variant": "interleaved",
+   "combo": "scatter",
+   "T": 2048,
+   "pos_ndim": 1,
+   "pos_span": 32768,
+   "pos_min": 16,
+   "pos_max": 32762,
+   "gen": {
+    "cls": "AscendRotaryEmbedding",
+    "fwd_method": "AscendRotaryEmbedding.forward_oot",
+    "cache_shape": [
+     32768,
+     128
+    ],
+    "cache_dtype": "bfloat16",
+    "recompute_max_abs": 0.0,
+    "quant_max_abs": 0.001953125,
+    "ref_cls": "AscendRotaryEmbedding",
+    "ref_vs_fork_cache_max_abs": 0.0
+   },
+   "floor_theory": 0.04248046875,
+   "g2_vs_g1f_cache_noise": {
+    "max_abs": 0.03125,
+    "max_rel": 1877.0694580078125,
+    "n_exact": 7748785,
+    "n_elem": 10485760,
+    "n_bad_pre": 10690,
+    "bitwise": false,
+    "pass_pre_bf16": false
+   },
+   "g1f_vs_g1_formula_divergence": {
+    "max_abs": 0.0,
+    "max_rel": 0.0,
+    "n_exact": 10485760,
+    "n_elem": 10485760,
+    "n_bad_pre": 0,
+    "bitwise": true,
+    "pass_pre_bf16": true
+   },
+   "g2_vs_g1_gen_total": {
+    "max_abs": 0.03125,
+    "max_rel": 1877.0694580078125,
+    "n_exact": 7748785,
+    "n_elem": 10485760,
+    "n_bad_pre": 10690,
+    "bitwise": false,
+    "pass_pre_bf16": false
+   },
+   "g3_vs_g1_bf16math": {
+    "max_abs": 0.03125,
+    "max_rel": 3906.488525390625,
+    "n_exact": 6716413,
+    "n_elem": 10485760,
+    "n_bad_pre": 32307,
+    "bitwise": false,
+    "pass_pre_bf16": false
+   },
+   "g3_vs_g2_bf16math_vs_fp32math": {
+    "max_abs": 0.03125,
+    "max_rel": 50.20000076293945,
+    "n_exact": 7408968,
+    "n_elem": 10485760,
+    "n_bad_pre": 12013,
+    "bitwise": false,
+    "pass_pre_bf16": false
+   },
+   "kernel_wrapper": {
+    "ok": true,
+    "note": "class=AscendRotaryEmbedding fwd=AscendRotaryEmbedding.forward_oot",
+    "breakage": null
+   },
+   "kernel": {
+    "tag": "rope_forward_triton(直读bf16 cache)",
+    "q_vs_g2": {
+     "max_abs": 0.0,
+     "max_rel": 0.0,
+     "n_exact": 10485760,
+     "n_elem": 10485760,
+     "n_bad_pre": 0,
+     "bitwise": true,
+     "pass_pre_bf16": true
+    },
+    "k_vs_g2": {
+     "max_abs": 0.0,
+     "max_rel": 0.0,
+     "n_exact": 2097152,
+     "n_elem": 2097152,
+     "n_bad_pre": 0,
+     "bitwise": true,
+     "pass_pre_bf16": true
+    },
+    "q_vs_g1f": {
+     "max_abs": 0.03125,
+     "max_rel": 1877.0694580078125,
+     "n_exact": 7748785,
+     "n_elem": 10485760,
+     "n_bad_pre": 10690,
+     "bitwise": false,
+     "pass_pre_bf16": false
+    },
+    "q_vs_g1": {
+     "max_abs": 0.03125,
+     "max_rel": 1877.0694580078125,
+     "n_exact": 7748785,
+     "n_elem": 10485760,
+     "n_bad_pre": 10690,
+     "bitwise": false,
+     "pass_pre_bf16": false
+    }
+   },
+   "e2e": {
+    "max_abs": 0.03125,
+    "max_rel": 1877.0694580078125,
+    "pass_pre_bf16_elementwise": false,
+    "n_bad_pre": 10690,
+    "chain_selfconsistent": true,
+    "noise_within_bf16_bound": true,
+    "note": "链自洽判据 = O 与 bf16-cache golden(G2) 逐位一致；端到端偏差上限 = 2·2^-8·max|x|"
+   },
+   "prod_forward": {
+    "path": "AscendRotaryEmbedding.forward_oot",
+    "o_vs_g1": {
+     "max_abs": 0.03125,
+     "max_rel": 1877.0694580078125,
+     "n_exact": 7748785,
+     "n_elem": 10485760,
+     "n_bad_pre": 10690,
+     "bitwise": false,
+     "pass_pre_bf16": false
+    },
+    "o_vs_g2": {
+     "max_abs": 0.0,
+     "max_rel": 0.0,
+     "n_exact": 10485760,
+     "n_elem": 10485760,
+     "n_bad_pre": 0,
+     "bitwise": true,
+     "pass_pre_bf16": true
+    },
+    "o_vs_g3_bf16math": {
+     "max_abs": 0.03125,
+     "max_rel": 7690.4296875,
+     "n_exact": 7408968,
+     "n_elem": 10485760,
+     "n_bad_pre": 11951,
+     "bitwise": false,
+     "pass_pre_bf16": false
+    },
+    "o_vs_direct_kernel": {
+     "max_abs": 0.0,
+     "max_rel": 0.0,
+     "n_exact": 10485760,
+     "n_elem": 10485760,
+     "n_bad_pre": 0,
+     "bitwise": true,
+     "pass_pre_bf16": true
+    },
+    "note": "生产入口输出（cos_sin_cache 已随 nn.Module.to(device) 上卡，模拟模型加载）；与直接 kernel 调用对比可判定 forward_oot → triton 的实际接线"
+   }
+  },
+  {
+   "variant": "llama3",
+   "combo": "seq",
+   "T": 4096,
+   "pos_ndim": 1,
+   "pos_span": 8192,
+   "pos_min": 0,
+   "pos_max": 4095,
+   "gen": {
+    "cls": "AscendLlama3RotaryEmbedding",
+    "fwd_method": "AscendLlama3RotaryEmbedding.forward_oot",
+    "cache_shape": [
+     131072,
+     128
+    ],
+    "cache_dtype": "bfloat16",
+    "recompute_max_abs": 0.0,
+    "quant_max_abs": 0.001953125,
+    "ref_cls": "AscendLlama3RotaryEmbedding",
+    "ref_vs_fork_cache_max_abs": 0.0
+   },
+   "floor_theory": 0.042724609375,
+   "g2_vs_g1f_cache_noise": {
+    "max_abs": 0.03125,
+    "max_rel": 1364.3333740234375,
+    "n_exact": 17216597,
+    "n_elem": 20971520,
+    "n_bad_pre": 13968,
+    "bitwise": false,
+    "pass_pre_bf16": false
+   },
+   "g1f_vs_g1_formula_divergence": {
+    "max_abs": 0.0,
+    "max_rel": 0.0,
+    "n_exact": 20971520,
+    "n_elem": 20971520,
+    "n_bad_pre": 0,
+    "bitwise": true,
+    "pass_pre_bf16": true
+   },
+   "g2_vs_g1_gen_total": {
+    "max_abs": 0.03125,
+    "max_rel": 1364.3333740234375,
+    "n_exact": 17216597,
+    "n_elem": 20971520,
+    "n_bad_pre": 13968,
+    "bitwise": false,
+    "pass_pre_bf16": false
+   },
+   "g3_vs_g1_bf16math": {
+    "max_abs": 0.03125,
+    "max_rel": 1954.0787353515625,
+    "n_exact": 15799339,
+    "n_elem": 20971520,
+    "n_bad_pre": 42144,
+    "bitwise": false,
+    "pass_pre_bf16": false
+   },
+   "g3_vs_g2_bf16math_vs_fp32math": {
+    "max_abs": 0.03125,
+    "max_rel": 127.0,
+    "n_exact": 16805631,
+    "n_elem": 20971520,
+    "n_bad_pre": 15697,
+    "bitwise": false,
+    "pass_pre_bf16": false
+   },
+   "kernel_wrapper": {
+    "ok": true,
+    "note": "class=AscendLlama3RotaryEmbedding fwd=AscendLlama3RotaryEmbedding.forward_oot",
+    "breakage": null
+   },
+   "kernel": {
+    "tag": "rope_forward_triton(直读bf16 cache)",
+    "q_vs_g2": {
+     "max_abs": 0.0,
+     "max_rel": 0.0,
+     "n_exact": 20971520,
+     "n_elem": 20971520,
+     "n_bad_pre": 0,
+     "bitwise": true,
+     "pass_pre_bf16": true
+    },
+    "k_vs_g2": {
+     "max_abs": 0.0,
+     "max_rel": 0.0,
+     "n_exact": 4194304,
+     "n_elem": 4194304,
+     "n_bad_pre": 0,
+     "bitwise": true,
+     "pass_pre_bf16": true
+    },
+    "q_vs_g1f": {
+     "max_abs": 0.03125,
+     "max_rel": 1364.3333740234375,
+     "n_exact": 17216597,
+     "n_elem": 20971520,
+     "n_bad_pre": 13968,
+     "bitwise": false,
+     "pass_pre_bf16": false
+    },
+    "q_vs_g1": {
+     "max_abs": 0.03125,
+     "max_rel": 1364.3333740234375,
+     "n_exact": 17216597,
+     "n_elem": 20971520,
+     "n_bad_pre": 13968,
+     "bitwise": false,
+     "pass_pre_bf16": false
+    }
+   },
+   "e2e": {
+    "max_abs": 0.03125,
+    "max_rel": 1364.3333740234375,
+    "pass_pre_bf16_elementwise": false,
+    "n_bad_pre": 13968,
+    "chain_selfconsistent": true,
+    "noise_within_bf16_bound": true,
+    "note": "链自洽判据 = O 与 bf16-cache golden(G2) 逐位一致；端到端偏差上限 = 2·2^-8·max|x|"
+   },
+   "prod_forward": {
+    "path": "AscendLlama3RotaryEmbedding.forward_oot",
+    "o_vs_g1": {
+     "max_abs": 0.03125,
+     "max_rel": 1364.3333740234375,
+     "n_exact": 17216597,
+     "n_elem": 20971520,
+     "n_bad_pre": 13968,
+     "bitwise": false,
+     "pass_pre_bf16": false
+    },
+    "o_vs_g2": {
+     "max_abs": 0.0,
+     "max_rel": 0.0,
+     "n_exact": 20971520,
+     "n_elem": 20971520,
+     "n_bad_pre": 0,
+     "bitwise": true,
+     "pass_pre_bf16": true
+    },
+    "o_vs_g3_bf16math": {
+     "max_abs": 0.03125,
+     "max_rel": 10742.1875,
+     "n_exact": 16805631,
+     "n_elem": 20971520,
+     "n_bad_pre": 15604,
+     "bitwise": false,
+     "pass_pre_bf16": false
+    },
+    "o_vs_direct_kernel": {
+     "max_abs": 0.0,
+     "max_rel": 0.0,
+     "n_exact": 20971520,
+     "n_elem": 20971520,
+     "n_bad_pre": 0,
+     "bitwise": true,
+     "pass_pre_bf16": true
+    },
+    "note": "生产入口输出（cos_sin_cache 已随 nn.Module.to(device) 上卡，模拟模型加载）；与直接 kernel 调用对比可判定 forward_oot → triton 的实际接线"
+   }
+  },
+  {
+   "variant": "llama3",
+   "combo": "scatter",
+   "T": 2048,
+   "pos_ndim": 1,
+   "pos_span": 8192,
+   "pos_min": 4,
+   "pos_max": 8190,
+   "gen": {
+    "cls": "AscendLlama3RotaryEmbedding",
+    "fwd_method": "AscendLlama3RotaryEmbedding.forward_oot",
+    "cache_shape": [
+     131072,
+     128
+    ],
+    "cache_dtype": "bfloat16",
+    "recompute_max_abs": 0.0,
+    "quant_max_abs": 0.001953125,
+    "ref_cls": "AscendLlama3RotaryEmbedding",
+    "ref_vs_fork_cache_max_abs": 0.0
+   },
+   "floor_theory": 0.04248046875,
+   "g2_vs_g1f_cache_noise": {
+    "max_abs": 0.03125,
+    "max_rel": 756.760009765625,
+    "n_exact": 8465130,
+    "n_elem": 10485760,
+    "n_bad_pre": 7258,
+    "bitwise": false,
+    "pass_pre_bf16": false
+   },
+   "g1f_vs_g1_formula_divergence": {
+    "max_abs": 0.0,
+    "max_rel": 0.0,
+    "n_exact": 10485760,
+    "n_elem": 10485760,
+    "n_bad_pre": 0,
+    "bitwise": true,
+    "pass_pre_bf16": true
+   },
+   "g2_vs_g1_gen_total": {
+    "max_abs": 0.03125,
+    "max_rel": 756.760009765625,
+    "n_exact": 8465130,
+    "n_elem": 10485760,
+    "n_bad_pre": 7258,
+    "bitwise": false,
+    "pass_pre_bf16": false
+   },
+   "g3_vs_g1_bf16math": {
+    "max_abs": 0.03125,
+    "max_rel": 2258.862060546875,
+    "n_exact": 7699927,
+    "n_elem": 10485760,
+    "n_bad_pre": 22147,
+    "bitwise": false,
+    "pass_pre_bf16": false
+   },
+   "g3_vs_g2_bf16math_vs_fp32math": {
+    "max_abs": 0.03125,
+    "max_rel": 127.0,
+    "n_exact": 8236679,
+    "n_elem": 10485760,
+    "n_bad_pre": 8309,
+    "bitwise": false,
+    "pass_pre_bf16": false
+   },
+   "kernel_wrapper": {
+    "ok": true,
+    "note": "class=AscendLlama3RotaryEmbedding fwd=AscendLlama3RotaryEmbedding.forward_oot",
+    "breakage": null
+   },
+   "kernel": {
+    "tag": "rope_forward_triton(直读bf16 cache)",
+    "q_vs_g2": {
+     "max_abs": 0.0,
+     "max_rel": 0.0,
+     "n_exact": 10485760,
+     "n_elem": 10485760,
+     "n_bad_pre": 0,
+     "bitwise": true,
+     "pass_pre_bf16": true
+    },
+    "k_vs_g2": {
+     "max_abs": 0.0,
+     "max_rel": 0.0,
+     "n_exact": 2097152,
+     "n_elem": 2097152,
+     "n_bad_pre": 0,
+     "bitwise": true,
+     "pass_pre_bf16": true
+    },
+    "q_vs_g1f": {
+     "max_abs": 0.03125,
+     "max_rel": 756.760009765625,
+     "n_exact": 8465130,
+     "n_elem": 10485760,
+     "n_bad_pre": 7258,
+     "bitwise": false,
+     "pass_pre_bf16": false
+    },
+    "q_vs_g1": {
+     "max_abs": 0.03125,
+     "max_rel": 756.760009765625,
+     "n_exact": 8465130,
+     "n_elem": 10485760,
+     "n_bad_pre": 7258,
+     "bitwise": false,
+     "pass_pre_bf16": false
+    }
+   },
+   "e2e": {
+    "max_abs": 0.03125,
+    "max_rel": 756.760009765625,
+    "pass_pre_bf16_elementwise": false,
+    "n_bad_pre": 7258,
+    "chain_selfconsistent": true,
+    "noise_within_bf16_bound": true,
+    "note": "链自洽判据 = O 与 bf16-cache golden(G2) 逐位一致；端到端偏差上限 = 2·2^-8·max|x|"
+   },
+   "prod_forward": {
+    "path": "AscendLlama3RotaryEmbedding.forward_oot",
+    "o_vs_g1": {
+     "max_abs": 0.03125,
+     "max_rel": 756.760009765625,
+     "n_exact": 8465130,
+     "n_elem": 10485760,
+     "n_bad_pre": 7258,
+     "bitwise": false,
+     "pass_pre_bf16": false
+    },
+    "o_vs_g2": {
+     "max_abs": 0.0,
+     "max_rel": 0.0,
+     "n_exact": 10485760,
+     "n_elem": 10485760,
+     "n_bad_pre": 0,
+     "bitwise": true,
+     "pass_pre_bf16": true
+    },
+    "o_vs_g3_bf16math": {
+     "max_abs": 0.03125,
+     "max_rel": 7476.806640625,
+     "n_exact": 8236679,
+     "n_elem": 10485760,
+     "n_bad_pre": 8262,
+     "bitwise": false,
+     "pass_pre_bf16": false
+    },
+    "o_vs_direct_kernel": {
+     "max_abs": 0.0,
+     "max_rel": 0.0,
+     "n_exact": 10485760,
+     "n_elem": 10485760,
+     "n_bad_pre": 0,
+     "bitwise": true,
+     "pass_pre_bf16": true
+    },
+    "note": "生产入口输出（cos_sin_cache 已随 nn.Module.to(device) 上卡，模拟模型加载）；与直接 kernel 调用对比可判定 forward_oot → triton 的实际接线"
+   }
+  },
+  {
+   "variant": "yarn",
+   "combo": "seq",
+   "T": 4096,
+   "pos_ndim": 1,
+   "pos_span": 8192,
+   "pos_min": 0,
+   "pos_max": 4095,
+   "gen": {
+    "cls": "AscendYaRNRotaryEmbedding",
+    "fwd_method": "AscendYaRNRotaryEmbedding.forward_oot",
+    "cache_shape": [
+     131072,
+     128
+    ],
+    "cache_dtype": "bfloat16",
+    "recompute_max_abs": 0.0,
+    "quant_max_abs": 0.00390625,
+    "ref_cls": "YaRNScalingRotaryEmbedding",
+    "ref_vs_fork_cache_max_abs": 0.0
+   },
+   "floor_theory": 0.042724609375,
+   "g2_vs_g1f_cache_noise": {
+    "max_abs": 0.03125,
+    "max_rel": 1982.9869384765625,
+    "n_exact": 13418431,
+    "n_elem": 20971520,
+    "n_bad_pre": 22594,
+    "bitwise": false,
+    "pass_pre_bf16": false
+   },
+   "g1f_vs_g1_formula_divergence": {
+    "max_abs": 0.0,
+    "max_rel": 0.0,
+    "n_exact": 20971520,
+    "n_elem": 20971520,
+    "n_bad_pre": 0,
+    "bitwise": true,
+    "pass_pre_bf16": true
+   },
+   "g2_vs_g1_gen_total": {
+    "max_abs": 0.03125,
+    "max_rel": 1982.9869384765625,
+    "n_exact": 13418431,
+    "n_elem": 20971520,
+    "n_bad_pre": 22594,
+    "bitwise": false,
+    "pass_pre_bf16": false
+   },
+   "g3_vs_g1_bf16math": {
+    "max_abs": 0.03125,
+    "max_rel": 1561.3809814453125,
+    "n_exact": 12256131,
+    "n_elem": 20971520,
+    "n_bad_pre": 61272,
+    "bitwise": false,
+    "pass_pre_bf16": false
+   },
+   "g3_vs_g2_bf16math_vs_fp32math": {
+    "max_abs": 0.03125,
+    "max_rel": 63.0,
+    "n_exact": 14775300,
+    "n_elem": 20971520,
+    "n_bad_pre": 22969,
+    "bitwise": false,
+    "pass_pre_bf16": false
+   },
+   "kernel_wrapper": {
+    "ok": true,
+    "note": "class=AscendYaRNRotaryEmbedding fwd=AscendYaRNRotaryEmbedding.forward_oot",
+    "breakage": null
+   },
+   "kernel": {
+    "tag": "rope_forward_triton(直读bf16 cache)",
+    "q_vs_g2": {
+     "max_abs": 0.0,
+     "max_rel": 0.0,
+     "n_exact": 20971520,
+     "n_elem": 20971520,
+     "n_bad_pre": 0,
+     "bitwise": true,
+     "pass_pre_bf16": true
+    },
+    "k_vs_g2": {
+     "max_abs": 0.0,
+     "max_rel": 0.0,
+     "n_exact": 4194304,
+     "n_elem": 4194304,
+     "n_bad_pre": 0,
+     "bitwise": true,
+     "pass_pre_bf16": true
+    },
+    "q_vs_g1f": {
+     "max_abs": 0.03125,
+     "max_rel": 1982.9869384765625,
+     "n_exact": 13418431,
+     "n_elem": 20971520,
+     "n_bad_pre": 22594,
+     "bitwise": false,
+     "pass_pre_bf16": false
+    },
+    "q_vs_g1": {
+     "max_abs": 0.03125,
+     "max_rel": 1982.9869384765625,
+     "n_exact": 13418431,
+     "n_elem": 20971520,
+     "n_bad_pre": 22594,
+     "bitwise": false,
+     "pass_pre_bf16": false
+    }
+   },
+   "e2e": {
+    "max_abs": 0.03125,
+    "max_rel": 1982.9869384765625,
+    "pass_pre_bf16_elementwise": false,
+    "n_bad_pre": 22594,
+    "chain_selfconsistent": true,
+    "noise_within_bf16_bound": true,
+    "note": "链自洽判据 = O 与 bf16-cache golden(G2) 逐位一致；端到端偏差上限 = 2·2^-8·max|x|"
+   },
+   "prod_forward": {
+    "path": "AscendYaRNRotaryEmbedding.forward_oot",
+    "o_vs_g1": {
+     "max_abs": 0.03125,
+     "max_rel": 1982.9869384765625,
+     "n_exact": 13418431,
+     "n_elem": 20971520,
+     "n_bad_pre": 22594,
+     "bitwise": false,
+     "pass_pre_bf16": false
+    },
+    "o_vs_g2": {
+     "max_abs": 0.0,
+     "max_rel": 0.0,
+     "n_exact": 20971520,
+     "n_elem": 20971520,
+     "n_bad_pre": 0,
+     "bitwise": true,
+     "pass_pre_bf16": true
+    },
+    "o_vs_g3_bf16math": {
+     "max_abs": 0.03125,
+     "max_rel": 14099.12109375,
+     "n_exact": 14775300,
+     "n_elem": 20971520,
+     "n_bad_pre": 22905,
+     "bitwise": false,
+     "pass_pre_bf16": false
+    },
+    "o_vs_direct_kernel": {
+     "max_abs": 0.0,
+     "max_rel": 0.0,
+     "n_exact": 20971520,
+     "n_elem": 20971520,
+     "n_bad_pre": 0,
+     "bitwise": true,
+     "pass_pre_bf16": true
+    },
+    "note": "生产入口输出（cos_sin_cache 已随 nn.Module.to(device) 上卡，模拟模型加载）；与直接 kernel 调用对比可判定 forward_oot → triton 的实际接线"
+   }
+  },
+  {
+   "variant": "yarn",
+   "combo": "scatter",
+   "T": 2048,
+   "pos_ndim": 1,
+   "pos_span": 8192,
+   "pos_min": 4,
+   "pos_max": 8190,
+   "gen": {
+    "cls": "AscendYaRNRotaryEmbedding",
+    "fwd_method": "AscendYaRNRotaryEmbedding.forward_oot",
+    "cache_shape": [
+     131072,
+     128
+    ],
+    "cache_dtype": "bfloat16",
+    "recompute_max_abs": 0.0,
+    "quant_max_abs": 0.00390625,
+    "ref_cls": "YaRNScalingRotaryEmbedding",
+    "ref_vs_fork_cache_max_abs": 0.0
+   },
+   "floor_theory": 0.04248046875,
+   "g2_vs_g1f_cache_noise": {
+    "max_abs": 0.03125,
+    "max_rel": 3387.5703125,
+    "n_exact": 6686672,
+    "n_elem": 10485760,
+    "n_bad_pre": 11787,
+    "bitwise": false,
+    "pass_pre_bf16": false
+   },
+   "g1f_vs_g1_formula_divergence": {
+    "max_abs": 0.0,
+    "max_rel": 0.0,
+    "n_exact": 10485760,
+    "n_elem": 10485760,
+    "n_bad_pre": 0,
+    "bitwise": true,
+    "pass_pre_bf16": true
+   },
+   "g2_vs_g1_gen_total": {
+    "max_abs": 0.03125,
+    "max_rel": 3387.5703125,
+    "n_exact": 6686672,
+    "n_elem": 10485760,
+    "n_bad_pre": 11787,
+    "bitwise": false,
+    "pass_pre_bf16": false
+   },
+   "g3_vs_g1_bf16math": {
+    "max_abs": 0.03125,
+    "max_rel": 1986.9393310546875,
+    "n_exact": 6070546,
+    "n_elem": 10485760,
+    "n_bad_pre": 32037,
+    "bitwise": false,
+    "pass_pre_bf16": false
+   },
+   "g3_vs_g2_bf16math_vs_fp32math": {
+    "max_abs": 0.03125,
+    "max_rel": 63.0,
+    "n_exact": 7294938,
+    "n_elem": 10485760,
+    "n_bad_pre": 11977,
+    "bitwise": false,
+    "pass_pre_bf16": false
+   },
+   "kernel_wrapper": {
+    "ok": true,
+    "note": "class=AscendYaRNRotaryEmbedding fwd=AscendYaRNRotaryEmbedding.forward_oot",
+    "breakage": null
+   },
+   "kernel": {
+    "tag": "rope_forward_triton(直读bf16 cache)",
+    "q_vs_g2": {
+     "max_abs": 0.0,
+     "max_rel": 0.0,
+     "n_exact": 10485760,
+     "n_elem": 10485760,
+     "n_bad_pre": 0,
+     "bitwise": true,
+     "pass_pre_bf16": true
+    },
+    "k_vs_g2": {
+     "max_abs": 0.0,
+     "max_rel": 0.0,
+     "n_exact": 2097152,
+     "n_elem": 2097152,
+     "n_bad_pre": 0,
+     "bitwise": true,
+     "pass_pre_bf16": true
+    },
+    "q_vs_g1f": {
+     "max_abs": 0.03125,
+     "max_rel": 3387.5703125,
+     "n_exact": 6686672,
+     "n_elem": 10485760,
+     "n_bad_pre": 11787,
+     "bitwise": false,
+     "pass_pre_bf16": false
+    },
+    "q_vs_g1": {
+     "max_abs": 0.03125,
+     "max_rel": 3387.5703125,
+     "n_exact": 6686672,
+     "n_elem": 10485760,
+     "n_bad_pre": 11787,
+     "bitwise": false,
+     "pass_pre_bf16": false
+    }
+   },
+   "e2e": {
+    "max_abs": 0.03125,
+    "max_rel": 3387.5703125,
+    "pass_pre_bf16_elementwise": false,
+    "n_bad_pre": 11787,
+    "chain_selfconsistent": true,
+    "noise_within_bf16_bound": true,
+    "note": "链自洽判据 = O 与 bf16-cache golden(G2) 逐位一致；端到端偏差上限 = 2·2^-8·max|x|"
+   },
+   "prod_forward": {
+    "path": "AscendYaRNRotaryEmbedding.forward_oot",
+    "o_vs_g1": {
+     "max_abs": 0.03125,
+     "max_rel": 3387.5703125,
+     "n_exact": 6686672,
+     "n_elem": 10485760,
+     "n_bad_pre": 11787,
+     "bitwise": false,
+     "pass_pre_bf16": false
+    },
+    "o_vs_g2": {
+     "max_abs": 0.0,
+     "max_rel": 0.0,
+     "n_exact": 10485760,
+     "n_elem": 10485760,
+     "n_bad_pre": 0,
+     "bitwise": true,
+     "pass_pre_bf16": true
+    },
+    "o_vs_g3_bf16math": {
+     "max_abs": 0.03125,
+     "max_rel": 7873.53515625,
+     "n_exact": 7294938,
+     "n_elem": 10485760,
+     "n_bad_pre": 11934,
+     "bitwise": false,
+     "pass_pre_bf16": false
+    },
+    "o_vs_direct_kernel": {
+     "max_abs": 0.0,
+     "max_rel": 0.0,
+     "n_exact": 10485760,
+     "n_elem": 10485760,
+     "n_bad_pre": 0,
+     "bitwise": true,
+     "pass_pre_bf16": true
+    },
+    "note": "生产入口输出（cos_sin_cache 已随 nn.Module.to(device) 上卡，模拟模型加载）；与直接 kernel 调用对比可判定 forward_oot → triton 的实际接线"
+   }
+  },
+  {
+   "variant": "mrope",
+   "combo": "seq",
+   "T": 4096,
+   "pos_ndim": 2,
+   "pos_span": 32768,
+   "pos_min": 0,
+   "pos_max": 4095,
+   "gen": {
+    "cls": "AscendMRotaryEmbedding",
+    "fwd_method": "AscendMRotaryEmbedding.forward_oot",
+    "cache_shape": [
+     131072,
+     128
+    ],
+    "cache_dtype": "bfloat16",
+    "recompute_max_abs": 0.0,
+    "quant_max_abs": 0.001953125,
+    "ref_cls": "AscendMRotaryEmbedding",
+    "ref_vs_fork_cache_max_abs": 0.0
+   },
+   "floor_theory": 0.042724609375,
+   "g2_vs_g1f_cache_noise": {
+    "max_abs": 0.03125,
+    "max_rel": 1364.3333740234375,
+    "n_exact": 16354708,
+    "n_elem": 20971520,
+    "n_bad_pre": 17629,
+    "bitwise": false,
+    "pass_pre_bf16": false
+   },
+   "g1f_vs_g1_formula_divergence": {
+    "max_abs": 0.0,
+    "max_rel": 0.0,
+    "n_exact": 20971520,
+    "n_elem": 20971520,
+    "n_bad_pre": 0,
+    "bitwise": true,
+    "pass_pre_bf16": true
+   },
+   "g2_vs_g1_gen_total": {
+    "max_abs": 0.03125,
+    "max_rel": 1364.3333740234375,
+    "n_exact": 16354708,
+    "n_elem": 20971520,
+    "n_bad_pre": 17629,
+    "bitwise": false,
+    "pass_pre_bf16": false
+   },
+   "g3_vs_g1_bf16math": {
+    "max_abs": 0.03125,
+    "max_rel": 1954.0787353515625,
+    "n_exact": 14604777,
+    "n_elem": 20971520,
+    "n_bad_pre": 52987,
+    "bitwise": false,
+    "pass_pre_bf16": false
+   },
+   "g3_vs_g2_bf16math_vs_fp32math": {
+    "max_abs": 0.03125,
+    "max_rel": 63.0,
+    "n_exact": 15808151,
+    "n_elem": 20971520,
+    "n_bad_pre": 19770,
+    "bitwise": false,
+    "pass_pre_bf16": false
+   },
+   "kernel_wrapper": {
+    "ok": true,
+    "note": "AscendMRotaryEmbedding.forward(pos,q,k) 正常返回"
+   },
+   "kernel": {
+    "tag": "triton_mrope(9参数,直读bf16 cache)",
+    "q_vs_g2": {
+     "max_abs": 0.0,
+     "max_rel": 0.0,
+     "n_exact": 20971520,
+     "n_elem": 20971520,
+     "n_bad_pre": 0,
+     "bitwise": true,
+     "pass_pre_bf16": true
+    },
+    "k_vs_g2": {
+     "max_abs": 0.0,
+     "max_rel": 0.0,
+     "n_exact": 4194304,
+     "n_elem": 4194304,
+     "n_bad_pre": 0,
+     "bitwise": true,
+     "pass_pre_bf16": true
+    },
+    "q_vs_g1f": {
+     "max_abs": 0.03125,
+     "max_rel": 1364.3333740234375,
+     "n_exact": 16354708,
+     "n_elem": 20971520,
+     "n_bad_pre": 17629,
+     "bitwise": false,
+     "pass_pre_bf16": false
+    },
+    "q_vs_g1": {
+     "max_abs": 0.03125,
+     "max_rel": 1364.3333740234375,
+     "n_exact": 16354708,
+     "n_elem": 20971520,
+     "n_bad_pre": 17629,
+     "bitwise": false,
+     "pass_pre_bf16": false
+    }
+   },
+   "e2e": {
+    "max_abs": 0.03125,
+    "max_rel": 1364.3333740234375,
+    "pass_pre_bf16_elementwise": false,
+    "n_bad_pre": 17629,
+    "chain_selfconsistent": true,
+    "noise_within_bf16_bound": true,
+    "note": "链自洽判据 = O 与 bf16-cache golden(G2) 逐位一致；端到端偏差上限 = 2·2^-8·max|x|"
+   }
+  },
+  {
+   "variant": "mrope",
+   "combo": "vision",
+   "T": 1024,
+   "pos_ndim": 2,
+   "pos_span": 32768,
+   "pos_min": 0,
+   "pos_max": 1023,
+   "gen": {
+    "cls": "AscendMRotaryEmbedding",
+    "fwd_method": "AscendMRotaryEmbedding.forward_oot",
+    "cache_shape": [
+     131072,
+     128
+    ],
+    "cache_dtype": "bfloat16",
+    "recompute_max_abs": 0.0,
+    "quant_max_abs": 0.001953125,
+    "ref_cls": "AscendMRotaryEmbedding",
+    "ref_vs_fork_cache_max_abs": 0.0
+   },
+   "floor_theory": 0.0390625,
+   "g2_vs_g1f_cache_noise": {
+    "max_abs": 0.03125,
+    "max_rel": 1342.356201171875,
+    "n_exact": 4472972,
+    "n_elem": 5242880,
+    "n_bad_pre": 2487,
+    "bitwise": false,
+    "pass_pre_bf16": false
+   },
+   "g1f_vs_g1_formula_divergence": {
+    "max_abs": 0.0,
+    "max_rel": 0.0,
+    "n_exact": 5242880,
+    "n_elem": 5242880,
+    "n_bad_pre": 0,
+    "bitwise": true,
+    "pass_pre_bf16": true
+   },
+   "g2_vs_g1_gen_total": {
+    "max_abs": 0.03125,
+    "max_rel": 1342.356201171875,
+    "n_exact": 4472972,
+    "n_elem": 5242880,
+    "n_bad_pre": 2487,
+    "bitwise": false,
+    "pass_pre_bf16": false
+   },
+   "g3_vs_g1_bf16math": {
+    "max_abs": 0.03125,
+    "max_rel": 669.7346801757812,
+    "n_exact": 4181088,
+    "n_elem": 5242880,
+    "n_bad_pre": 7704,
+    "bitwise": false,
+    "pass_pre_bf16": false
+   },
+   "g3_vs_g2_bf16math_vs_fp32math": {
+    "max_abs": 0.03125,
+    "max_rel": 63.0,
+    "n_exact": 4392369,
+    "n_elem": 5242880,
+    "n_bad_pre": 2987,
+    "bitwise": false,
+    "pass_pre_bf16": false
+   },
+   "kernel_wrapper": {
+    "ok": true,
+    "note": "AscendMRotaryEmbedding.forward(pos,q,k) 正常返回"
+   },
+   "kernel": {
+    "tag": "triton_mrope(9参数,直读bf16 cache)",
+    "q_vs_g2": {
+     "max_abs": 0.0,
+     "max_rel": 0.0,
+     "n_exact": 5242880,
+     "n_elem": 5242880,
+     "n_bad_pre": 0,
+     "bitwise": true,
+     "pass_pre_bf16": true
+    },
+    "k_vs_g2": {
+     "max_abs": 0.0,
+     "max_rel": 0.0,
+     "n_exact": 1048576,
+     "n_elem": 1048576,
+     "n_bad_pre": 0,
+     "bitwise": true,
+     "pass_pre_bf16": true
+    },
+    "q_vs_g1f": {
+     "max_abs": 0.03125,
+     "max_rel": 1342.356201171875,
+     "n_exact": 4472972,
+     "n_elem": 5242880,
+     "n_bad_pre": 2487,
+     "bitwise": false,
+     "pass_pre_bf16": false
+    },
+    "q_vs_g1": {
+     "max_abs": 0.03125,
+     "max_rel": 1342.356201171875,
+     "n_exact": 4472972,
+     "n_elem": 5242880,
+     "n_bad_pre": 2487,
+     "bitwise": false,
+     "pass_pre_bf16": false
+    }
+   },
+   "e2e": {
+    "max_abs": 0.03125,
+    "max_rel": 1342.356201171875,
+    "pass_pre_bf16_elementwise": false,
+    "n_bad_pre": 2487,
+    "chain_selfconsistent": true,
+    "noise_within_bf16_bound": true,
+    "note": "链自洽判据 = O 与 bf16-cache golden(G2) 逐位一致；端到端偏差上限 = 2·2^-8·max|x|"
+   }
+  }
+ ],
+ "summary": {
+  "interleaved": {
+   "gen": "PASS(cache 恰为公式 fp32 单次舍入)",
+   "kernel": "PASS(逐位==bf16-cache golden)",
+   "kernel_reachable": "PASS(生产类接线到 triton)",
+   "e2e": {
+    "chain_selfconsistent_max_abs": 0.03125,
+    "vs_host_formula_max_abs": 0.03125,
+    "cache_bf16_noise_max_abs": 0.03125,
+    "formula_divergence_max": 0.0,
+    "status": "PASS(链自洽；总偏差=cache bf16 底噪)"
+   }
+  },
+  "llama3": {
+   "gen": "PASS(cache 恰为公式 fp32 单次舍入)",
+   "kernel": "PASS(逐位==bf16-cache golden)",
+   "kernel_reachable": "PASS(生产类接线到 triton)",
+   "e2e": {
+    "chain_selfconsistent_max_abs": 0.03125,
+    "vs_host_formula_max_abs": 0.03125,
+    "cache_bf16_noise_max_abs": 0.03125,
+    "formula_divergence_max": 0.0,
+    "status": "PASS(链自洽；总偏差=cache bf16 底噪)"
+   }
+  },
+  "yarn": {
+   "gen": "PASS(cache 恰为公式 fp32 单次舍入)",
+   "kernel": "PASS(逐位==bf16-cache golden)",
+   "kernel_reachable": "PASS(生产类接线到 triton)",
+   "e2e": {
+    "chain_selfconsistent_max_abs": 0.03125,
+    "vs_host_formula_max_abs": 0.03125,
+    "cache_bf16_noise_max_abs": 0.03125,
+    "formula_divergence_max": 0.0,
+    "status": "PASS(链自洽；总偏差=cache bf16 底噪)"
+   }
+  },
+  "mrope": {
+   "gen": "PASS(cache 恰为公式 fp32 单次舍入)",
+   "kernel": "PASS(逐位==bf16-cache golden)",
+   "kernel_reachable": "PASS(生产类接线到 triton)",
+   "e2e": {
+    "chain_selfconsistent_max_abs": 0.03125,
+    "vs_host_formula_max_abs": 0.03125,
+    "cache_bf16_noise_max_abs": 0.03125,
+    "formula_divergence_max": 0.0,
+    "status": "PASS(链自洽；总偏差=cache bf16 底噪)"
+   }
+  }
+ },
+ "yarn_truncate_divergence": {
+  "fork_cls": "AscendYaRNRotaryEmbedding",
+  "fork_truncate": true,
+  "host_cls": "YaRNScalingRotaryEmbedding",
+  "host_truncate": true,
+  "correction_range_fork": [
+   23.5959476083381,
+   39.6508807104171
+  ],
+  "correction_range_host": [
+   23.0,
+   40.0
+  ],
+  "truncate_matrix": [
+   {
+    "ascend_truncate": true,
+    "by_host": {
+     "truncate=True": 0.0,
+     "truncate=False": 2.28125
+    }
+   },
+   {
+    "ascend_truncate": true,
+    "by_host": {
+     "truncate=True": 0.0,
+     "truncate=False": 2.28125
+    }
+   },
+   {
+    "ascend_truncate": false,
+    "by_host": {
+     "truncate=True": 2.28125,
+     "truncate=False": 0.0
+    }
+   }
+  ],
+  "cache_max_abs": 0.0,
+  "inv_freq_max_abs": 0.0,
+  "inv_freq_argmax": 0,
+  "inv_freq_rel_max": 0.0,
+  "inv_freq_n_diff": 0,
+  "e2e_out_max_abs": 0.0,
+  "e2e_out_n_diff": 0,
+  "e2e_out_max_rel": 0.0,
+  "ref_bf16_cache_noise_max_abs": 0.018970489501953125,
+  "ref_formula_fp32_vs_bf16cache_is_expected": "参考量：host 公式下 bf16 cache 的传播底噪"
+ }
+}

@@ -1,0 +1,57 @@
+[2026-09-12T04:22:12Z] HBM(before): 	HBM Usage Rate(%)              : 5
+[2026-09-12T04:22:12Z] === LEG 1: default-off (no VLLM_HUST_ROPE_FIX) ===
+[2026-09-12T04:22:12Z] serve[off] pid=1736869 port=8453 VLLM_HUST_ROPE_FIX=<unset>
+[2026-09-12T04:25:12Z] serve[off] healthy after 37 polls
+[2026-09-12T04:25:13Z] chat[off/1] {"id":"chatcmpl-8f1ac1900a877e62","object":"chat.completion","created":1789187112,"model":"qwen14b","choices":[{"index":0,"message":{"role":"assistant","content":"ok1","refusal":null,"annotations":nul
+[2026-09-12T04:25:13Z] chat[off/2] {"id":"chatcmpl-abbb7d07402ee679","object":"chat.completion","created":1789187113,"model":"qwen14b","choices":[{"index":0,"message":{"role":"assistant","content":"Ok2 is not a standard word, but I'll 
+/vllm-workspace/vllm-ascend-split-batch-hust/docs/evidence/rope-fix-smoke-20260912/raw/rope-smoke.sh: line 53: tag: unbound variable
+----- smoke EXIT=1 2026-09-12T04:25:13Z -----
+
+### run-1 aborted (harness bug, 2026-09-12T04:25:13Z)
+Cause: `set -u` + `local tag="$1" pidfile="...${tag}..."` in one statement -> bash 5.2.15
+reports "tag: unbound variable" (verified standalone). The OFF serve had already passed
+health + 2 chats; the abort left pid 1736869 (serve) + 1738085 (VLLM::EngineCor) alive.
+Those two were killed by pid (card-7 processes only) before run-2; HBM re-checked at 5%.
+Fix: split the declarations; the reaper now only touches children of OUR serve pid
+(never a host-wide `VLLM::*` match).
+[2026-09-12T04:27:11Z] HBM(before): 	HBM Usage Rate(%)              : 5
+[2026-09-12T04:27:11Z] === LEG 1: default-off (no VLLM_HUST_ROPE_FIX) ===
+[2026-09-12T04:27:11Z] serve[off] pid=1742247 port=8453 VLLM_HUST_ROPE_FIX=<unset>
+[2026-09-12T04:30:07Z] serve[off] healthy after 36 polls
+[2026-09-12T04:30:07Z] chat[off/1] {"id":"chatcmpl-9893b7095ec4ec16","object":"chat.completion","created":1789187407,"model":"qwen14b","choices":[{"index":0,"message":{"role":"assistant","content":"ok1","refusal":null,"annotations":nul
+[2026-09-12T04:30:07Z] chat[off/2] {"id":"chatcmpl-88e6c6269285c672","object":"chat.completion","created":1789187407,"model":"qwen14b","choices":[{"index":0,"message":{"role":"assistant","content":"Ok2 is not a standard word, but I'll 
+[2026-09-12T04:30:12Z] serve[off] stopped; our residual children: <none>
+[2026-09-12T04:30:13Z] HBM(after off): 	HBM Usage Rate(%)              : 5
+[2026-09-12T04:30:13Z] === LEG 2: VLLM_HUST_ROPE_FIX=1 ===
+[2026-09-12T04:30:13Z] serve[on] pid=1744543 port=8454 VLLM_HUST_ROPE_FIX=1
+[2026-09-12T04:33:28Z] serve[on] healthy after 40 polls
+[2026-09-12T04:33:29Z] chat[on/1] {"id":"chatcmpl-be138137ebee2cc3","object":"chat.completion","created":1789187608,"model":"qwen14b","choices":[{"index":0,"message":{"role":"assistant","content":"ok1","refusal":null,"annotations":nul
+[2026-09-12T04:33:29Z] chat[on/2] {"id":"chatcmpl-be754c838413ae1a","object":"chat.completion","created":1789187609,"model":"qwen14b","choices":[{"index":0,"message":{"role":"assistant","content":"Ok2 is not a standard word, but I'll 
+[2026-09-12T04:33:34Z] serve[on] stopped; our residual children: <none>
+[2026-09-12T04:33:35Z] HBM(after on): 	HBM Usage Rate(%)              : 5
+[2026-09-12T04:33:35Z] === evidence greps ===
+## default-off leg: rope traces (expect empty)
+  <none>
+## default-off leg: Traceback/Error (expect empty)
+150:(APIServer pid=1742247) ERROR 09-12 04:30:07 [async_llm.py:829] AsyncLLM output_handler failed.
+151:(APIServer pid=1742247) ERROR 09-12 04:30:07 [async_llm.py:829] Traceback (most recent call last):
+152:(APIServer pid=1742247) ERROR 09-12 04:30:07 [async_llm.py:829]   File "/vllm-workspace/vllm-hust/vllm/v1/engine/async_llm.py", line 775, in output_handler
+153:(APIServer pid=1742247) ERROR 09-12 04:30:07 [async_llm.py:829]     outputs = await engine_core.get_output_async()
+154:(APIServer pid=1742247) ERROR 09-12 04:30:07 [async_llm.py:829]               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+155:(APIServer pid=1742247) ERROR 09-12 04:30:07 [async_llm.py:829]   File "/vllm-workspace/vllm-hust/vllm/v1/engine/core_client.py", line 1175, in get_output_async
+156:(APIServer pid=1742247) ERROR 09-12 04:30:07 [async_llm.py:829]     raise self._format_exception(outputs) from None
+157:(APIServer pid=1742247) ERROR 09-12 04:30:07 [async_llm.py:829] vllm.v1.engine.exceptions.EngineDeadError: EngineCore encountered an issue. See stack trace (above) for the root cause.
+## ON leg: rope carrier lines
+39:(EngineCore pid=1745180) RoPE fix: vllm_ascend.utils.register_ascend_customop is wrapped (call sites rebound: vllm_ascend.utils); the rope overrides are applied right after the host's own registration pass.
+40:(EngineCore pid=1745180) RoPE variant defect carrier is ACTIVE (VLLM_HUST_ROPE_FIX=1): op_registry_oot[Llama3RotaryEmbedding, MRotaryEmbedding, YaRNScalingRotaryEmbedding] will be pointed at the plugin subclasses right after vllm-ascend registers its custom ops -- ① llama3-scaling onto the Ascend rope kernel, ② the missing triton_mrope is_neox_style, ③ the YaRN truncate=True default of vLLM/HF.
+43:(EngineCore pid=1745180) RoPE fix: rope overrides in place: Llama3RotaryEmbedding -> created (defect ①: the fork never wired it); MRotaryEmbedding -> replaced AscendMRotaryEmbedding; YaRNScalingRotaryEmbedding -> replaced AscendYaRNRotaryEmbedding.
+## ON leg: Traceback (expect empty)
+  <none>
+[2026-09-12T04:33:35Z] === smoke done ===
+----- smoke EXIT=0 2026-09-12T04:33:35Z -----
+
+## 阶段结论（STAGE 收尾）
+- 期：run-1 04:22:12Z（harness bug 中断）→ run-2 04:27:11Z → 04:33:35Z 完成。
+- 卡 7 水位：起 5% → OFF 腿末 5% → ON 腿末 5%。
+- 结果：入口点刷新后 rope bundle 被发现；default-off 零 rope 痕迹；ON 三键全部施加（详见 ../rope-fix-smoke-20260912.md）。
+- 进程：我方 serve 子树无残留（`our residual children: <none>`）。

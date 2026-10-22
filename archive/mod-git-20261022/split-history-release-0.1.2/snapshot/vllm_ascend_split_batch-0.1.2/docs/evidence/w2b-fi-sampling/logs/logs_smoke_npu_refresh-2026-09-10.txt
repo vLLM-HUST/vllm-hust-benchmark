@@ -1,0 +1,15 @@
+INFO 09-10 17:26:35 [__init__.py:52] Available plugins for group vllm.platform_plugins:
+INFO 09-10 17:26:35 [__init__.py:54] - ascend -> vllm_ascend:register
+INFO 09-10 17:26:35 [__init__.py:57] All plugins in this group will be loaded. Set `VLLM_PLUGINS` to control which plugins to load.
+INFO 09-10 17:26:35 [__init__.py:272] Platform plugin ascend is activated
+INFO 09-10 17:26:35 [platform.py:70] Breakable CUDAGraph on Ascend is opt-in; using VLLM_USE_BREAKABLE_CUDAGRAPH=0.
+fi_sampling sampling path is ACTIVE (VLLM_HUST_FI_SAMPLING=1): untruncated sampling uses the flashinfer-semantics triton-ascend kernel, joint top-k/top-p at B>=256 with k>=32 uses the joint kernel and k=1 rows use argmax; every other case falls back to the fork chain. Output distribution matches flashinfer semantics, not the fork's exponential-race chain (see docs/fi-sampling.md).
+[W910 17:26:47.545519190 NPUCachingAllocator.cpp:177] Warning: The current CANN and Soc versions require processing for 32 padding size, with memory allocation. (function operator())
+[PASS] default-off: load() is a no-op           load()=False, cls_unchanged=True
+[PASS] on: subclass installed                   installed=True, cls=FiSamplingTopKTopPSampler
+[PASS] on: untruncated route (B=8)              tokens=[124115, 37165, 83626, 6625, 40511, 145240, 143983, 52697]
+[PASS] on: joint route (k=50/p=0.95, B=256)     tokens[:8]=[73118, 68623, 123265, 32528, 116126, 129346, 58954, 91212]
+[PASS] on: k=1 route == argmax (B=256)          tokens[:8]=[73118, 92197, 92779, 123285, 45920, 86954, 33998, 89711], argmax[:8]=[73118, 92197, 92779, 123285, 45920, 86954, 33998, 89711]
+[PASS] on: per-request generator -> fork chain  tokens=[89256, 123038, 19394, 17303, 49861, 141377, 130170, 71978] (fork chain, generator not advanced)
+
+==== SMOKE PASS ====

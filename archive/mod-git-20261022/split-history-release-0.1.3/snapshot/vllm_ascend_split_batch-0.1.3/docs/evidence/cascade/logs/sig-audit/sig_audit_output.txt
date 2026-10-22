@@ -1,0 +1,20 @@
+=== HOST (vllm-hust v1 + vllm-ascend-hust main) ===
+  gpu_model_runner:7059  _capture_cudagraphs(self, batch_descriptors, cudagraph_runtime_mode, profiler)
+  gpu_model_runner:7011  _warmup_and_capture(self, desc, cudagraph_runtime_mode, profile_seq_lens, allow_microbatching, num_warmups, profiler)
+  gpu_model_runner:4040  _determine_batch_execution_and_padding(self, num_tokens, num_reqs, num_scheduled_tokens_np, max_num_scheduled_tokens, use_cascade_attn, allow_microbatching, force_eager, force_uniform_decode, force_has_lora, force_num_active_loras, num_encoder_reqs)
+  gpu_model_runner:3942  _model_forward(self, input_ids, positions, intermediate_tensors, inputs_embeds, **model_kwargs)
+  model_runner_v1:2935  _update_full_graph_params_if_needed(self, forward_context, num_tokens_padded)
+  attention_v1:592  update_graph_params(update_stream, forward_context, num_tokens, vllm_config, speculative_config, draft_attn_metadatas)
+  acl_graph:279  update_full_graph_params(attn_backend, update_stream, forward_context, num_tokens, vllm_config, speculative_config, draft_attn_metadatas)
+
+=== PLUGIN (cascade wrappers) ===
+  cascade_runner_patch:177  _capture_cudagraphs(self, batch_descriptors, cudagraph_runtime_mode)
+  cascade_runner_patch:92  _determine_batch_execution_and_padding(self, num_tokens, num_reqs, num_scheduled_tokens_np, max_num_scheduled_tokens, use_cascade_attn, allow_microbatching, force_eager, force_uniform_decode, force_has_lora, force_num_active_loras, num_encoder_reqs)
+  cascade_runner_patch:274  _model_forward(self, num_tokens_padded, input_ids, positions, intermediate_tensors, inputs_embeds, **model_kwargs)
+  cascade_graph_plugin:881  update_graph_params(update_stream, forward_context, num_tokens, vllm_config, speculative_config, num_dcp_pcp_tokens, draft_attn_metadatas)
+
+=== HOST call sites (how many positional args are passed) ===
+  gpu_model_runner.py:6971  _capture_cudagraphs(pos=0, kw=['batch_descriptors', 'cudagraph_runtime_mode', 'profiler'])
+  model_runner_v1.py:2981  _update_full_graph_params_if_needed(pos=2, kw=[])
+  model_runner_v1.py:2985  _update_full_graph_params_if_needed(pos=2, kw=[])
+  acl_graph.py:295  update_graph_params(pos=5, kw=['draft_attn_metadatas'])

@@ -1,0 +1,123 @@
+================================================================================================
+PER-RUN RAW (every SWEEP line, from the named log)
+================================================================================================
+p1600_b32   OFF graph                      wall= 12.74s out= 4096  sweep_off_b32_a.log
+p1600_b32   OFF graph                      wall= 12.75s out= 4096  sweep_off_b32_b.log
+p1600_b32   OFF graph                      wall= 12.77s out= 4096  sweep_off_b32_c.log
+p1600_b32   ON graph (shimmed)             wall= 10.22s out= 4096  sweep_on_graph_shim_b32_b.log
+p1600_b32   ON graph (shimmed)             wall= 10.30s out= 4096  sweep_on_graph_shim_b32_c.log
+p1600_b32   ON graph (shimmed)             wall= 10.39s out= 4096  sweep_on_graph_shim_b32_a.log
+p1600_b32   ON graph + W2 gate (shimmed)   wall= 10.42s out= 4096  sweep_on_gate_b32.log
+p1600_b64   OFF eager                      wall= 20.63s out= 8192  sweep_off_eager_b64_a.log
+p1600_b64   OFF graph                      wall= 19.65s out= 8192  sweep_off_b64_a.log
+p1600_b64   OFF graph                      wall= 19.65s out= 8192  sweep_off_b64_c.log
+p1600_b64   OFF graph                      wall= 19.83s out= 8192  sweep_off_b64_b.log
+p1600_b64   ON eager                       wall= 20.76s out= 8192  sweep_on_eager_b64_a.log
+p1600_b64   ON graph (shimmed)             wall= 13.48s out= 8192  sweep_on_graph_shim_b64_c.log
+p1600_b64   ON graph (shimmed)             wall= 13.59s out= 8192  sweep_on_graph_shim_b64_e.log
+p1600_b64   ON graph (shimmed)             wall= 13.60s out= 8192  sweep_on_graph_shim_b64_d.log
+p420_b32    OFF graph                      wall=  7.70s out= 4096  sweep_off_b32_b.log
+p420_b32    OFF graph                      wall=  7.72s out= 4096  sweep_off_b32_a.log
+p420_b32    OFF graph                      wall=  7.73s out= 4096  sweep_off_b32_c.log
+p420_b32    ON graph (shimmed)             wall=  8.57s out= 4096  sweep_on_graph_shim_b32_c.log
+p420_b32    ON graph (shimmed)             wall=  8.64s out= 4096  sweep_on_graph_shim_b32_b.log
+p420_b32    ON graph (shimmed)             wall=  8.70s out= 4096  sweep_on_graph_shim_b32_a.log
+p420_b32    ON graph + W2 gate (shimmed)   wall=  7.76s out= 4096  sweep_on_gate_b32.log
+p420_b64    OFF eager                      wall= 17.89s out= 8192  sweep_off_eager_b64_a.log
+p420_b64    OFF graph                      wall= 10.49s out= 8192  sweep_off_b64_a.log
+p420_b64    OFF graph                      wall= 10.58s out= 8192  sweep_off_b64_b.log
+p420_b64    OFF graph                      wall= 10.96s out= 8192  sweep_off_b64_c.log
+p420_b64    ON eager                       wall= 18.80s out= 8192  sweep_on_eager_b64_a.log
+p420_b64    ON graph (shimmed)             wall= 10.80s out= 8192  sweep_on_graph_shim_b64_e.log
+p420_b64    ON graph (shimmed)             wall= 10.81s out= 8192  sweep_on_graph_shim_b64_d.log
+p420_b64    ON graph (shimmed)             wall= 10.99s out= 8192  sweep_on_graph_shim_b64_c.log
+p800_b32    OFF graph                      wall=  8.99s out= 4096  sweep_off_b32_b.log
+p800_b32    OFF graph                      wall=  9.03s out= 4096  sweep_off_b32_a.log
+p800_b32    OFF graph                      wall=  9.21s out= 4096  sweep_off_b32_c.log
+p800_b32    ON graph (shimmed)             wall=  8.74s out= 4096  sweep_on_graph_shim_b32_c.log
+p800_b32    ON graph (shimmed)             wall=  8.76s out= 4096  sweep_on_graph_shim_b32_a.log
+p800_b32    ON graph (shimmed)             wall=  8.82s out= 4096  sweep_on_graph_shim_b32_b.log
+p800_b32    ON graph + W2 gate (shimmed)   wall=  8.96s out= 4096  sweep_on_gate_b32.log
+p800_b64    OFF eager                      wall= 17.06s out= 8192  sweep_off_eager_b64_a.log
+p800_b64    OFF graph                      wall= 13.06s out= 8192  sweep_off_b64_a.log
+p800_b64    OFF graph                      wall= 13.35s out= 8192  sweep_off_b64_b.log
+p800_b64    OFF graph                      wall= 13.36s out= 8192  sweep_off_b64_c.log
+p800_b64    ON eager                       wall= 18.74s out= 8192  sweep_on_eager_b64_a.log
+p800_b64    ON graph (shimmed)             wall= 11.08s out= 8192  sweep_on_graph_shim_b64_e.log
+p800_b64    ON graph (shimmed)             wall= 11.22s out= 8192  sweep_on_graph_shim_b64_d.log
+p800_b64    ON graph (shimmed)             wall= 11.37s out= 8192  sweep_on_graph_shim_b64_c.log
+
+================================================================================================
+DELTA TABLE  (median of repeats; negative = cascade faster)
+================================================================================================
+cell         OFF med   ON med    delta verdict  n off/on  spread off/on %
+-------------------------------------------------------------------------
+p1600_b32      12.75    10.30   -19.2% WIN       3/3        0.2/1.7     
+p1600_b64      19.65    13.59   -30.8% WIN       3/3        0.9/0.9     
+p420_b32        7.72     8.64   +11.9% LOSS      3/3        0.4/1.5     
+p420_b64       10.58    10.81    +2.2% LOSS      3/3        4.5/1.8     
+p800_b32        9.03     8.76    -3.0% WIN       3/3        2.4/0.9     
+p800_b64       13.35    11.22   -16.0% WIN       3/3        2.3/2.6     
+
+EAGER LANE (cascade decode only, no graph capture)
+p1600_b64   OFF  20.63s  ON  20.76s     +0.6%  LOSS
+p420_b64    OFF  17.89s  ON  18.80s     +5.1%  LOSS
+p800_b64    OFF  17.06s  ON  18.74s     +9.8%  LOSS
+
+W2 GATE LEG (B=32, adaptive gate ON; p420_b32 = measured loss cell)
+p1600_b32   OFF  12.75s  ON(ungated)  10.30s  ON(gated)  10.42s   gated vs OFF -18.3%
+p420_b32    OFF   7.72s  ON(ungated)   8.64s  ON(gated)   7.76s   gated vs OFF +0.5%
+p800_b32    OFF   9.03s  ON(ungated)   8.76s  ON(gated)   8.96s   gated vs OFF -0.8%
+
+================================================================================================
+ENGAGEMENT EVIDENCE (per ON log)
+================================================================================================
+sweep_on_gate_b32.log
+    marker=gate=1, graph_gate=1, kernel_wheel=ok capture_body=144 replay_cascade_hit=253 replay_gate_off=1 wrapper_gate_off=1 cascade_active_eager=0 twin_miss=401
+sweep_on_eager_b64_a.log
+    marker=gate=1, graph_gate=0, kernel_wheel=ok capture_body=0 replay_cascade_hit=0 replay_gate_off=0 wrapper_gate_off=0 cascade_active_eager=48 twin_miss=0
+sweep_on_graph_shim_b32_a.log
+    marker=gate=1, graph_gate=1, kernel_wheel=ok capture_body=144 replay_cascade_hit=380 replay_gate_off=0 wrapper_gate_off=0 cascade_active_eager=0 twin_miss=351
+sweep_on_graph_shim_b32_b.log
+    marker=gate=1, graph_gate=1, kernel_wheel=ok capture_body=144 replay_cascade_hit=379 replay_gate_off=0 wrapper_gate_off=0 cascade_active_eager=0 twin_miss=401
+sweep_on_graph_shim_b32_c.log
+    marker=gate=1, graph_gate=1, kernel_wheel=ok capture_body=144 replay_cascade_hit=380 replay_gate_off=0 wrapper_gate_off=0 cascade_active_eager=0 twin_miss=401
+sweep_on_graph_shim_b64_c.log
+    marker=gate=1, graph_gate=1, kernel_wheel=ok capture_body=144 replay_cascade_hit=381 replay_gate_off=0 wrapper_gate_off=0 cascade_active_eager=0 twin_miss=1401
+sweep_on_graph_shim_b64_d.log
+    marker=gate=1, graph_gate=1, kernel_wheel=ok capture_body=144 replay_cascade_hit=380 replay_gate_off=0 wrapper_gate_off=0 cascade_active_eager=0 twin_miss=1451
+sweep_on_graph_shim_b64_e.log
+    marker=gate=1, graph_gate=1, kernel_wheel=ok capture_body=144 replay_cascade_hit=381 replay_gate_off=0 wrapper_gate_off=0 cascade_active_eager=0 twin_miss=1451
+
+OFF-leg negative controls (must show gate=0, no cascade activity)
+sweep_off_b64_a.log
+    marker=gate=0, graph_gate=0, kernel_wheel=ok capture_body=0 replay_cascade_hit=0 cascade_active_eager=0
+sweep_off_b32_a.log
+    marker=gate=0, graph_gate=0, kernel_wheel=ok capture_body=0 replay_cascade_hit=0 cascade_active_eager=0
+sweep_off_eager_b64_a.log
+    marker=gate=0, graph_gate=0, kernel_wheel=ok capture_body=0 replay_cascade_hit=0 cascade_active_eager=0
+
+output-token sanity (out_tokens per leg/cell)
+p1600_b64   OFF eager                        out_tokens=[8192]
+p420_b64    OFF eager                        out_tokens=[8192]
+p800_b64    OFF eager                        out_tokens=[8192]
+p1600_b32   OFF graph                        out_tokens=[4096]
+p1600_b64   OFF graph                        out_tokens=[8192]
+p420_b32    OFF graph                        out_tokens=[4096]
+p420_b64    OFF graph                        out_tokens=[8192]
+p800_b32    OFF graph                        out_tokens=[4096]
+p800_b64    OFF graph                        out_tokens=[8192]
+p1600_b64   ON eager                         out_tokens=[8192]
+p420_b64    ON eager                         out_tokens=[8192]
+p800_b64    ON eager                         out_tokens=[8192]
+p1600_b32   ON graph (shimmed)               out_tokens=[4096]
+p1600_b64   ON graph (shimmed)               out_tokens=[8192]
+p420_b32    ON graph (shimmed)               out_tokens=[4096]
+p420_b64    ON graph (shimmed)               out_tokens=[8192]
+p800_b32    ON graph (shimmed)               out_tokens=[4096]
+p800_b64    ON graph (shimmed)               out_tokens=[8192]
+p1600_b32   ON graph + W2 gate (shimmed)     out_tokens=[4096]
+p420_b32    ON graph + W2 gate (shimmed)     out_tokens=[4096]
+p800_b32    ON graph + W2 gate (shimmed)     out_tokens=[4096]
+
+wrote /vllm-workspace/flashinfer-migration/cascade-evidence/logs/v1-ev3/analysis.json

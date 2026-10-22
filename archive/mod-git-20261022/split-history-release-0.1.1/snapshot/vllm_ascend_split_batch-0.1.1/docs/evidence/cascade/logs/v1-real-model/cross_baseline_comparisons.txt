@@ -1,0 +1,56 @@
+######## NEW real-model run vs HISTORICAL real-model dumps (c3-legacy/dumps-c3) ########
+HIST = source machine, vllm 0.23.0 / CANN 9.0.1 / NPU0, plugin commit per RESULTS.md
+NEW  = this box, vllm 0.28.1 / CANN 9.1.0 / card 7, plugin 783794a
+
+### HISTORICAL baselines (reference) ###
+[HIST G B64 on vs off] total_arms=64 diverged=6 (6/64)
+  diverged_arms=[22, 42, 45, 52, 53, 57]
+  arm 22: first_diff_step=82 lenA=128 lenB=128
+  arm 42: first_diff_step=8 lenA=128 lenB=52
+  arm 45: first_diff_step=3 lenA=128 lenB=128
+  arm 52: first_diff_step=11 lenA=35 lenB=65
+  arm 53: first_diff_step=8 lenA=128 lenB=9
+  arm 57: first_diff_step=14 lenA=128 lenB=128
+[HIST G B64 on_run2 vs on] total_arms=64 diverged=0 (0/64)
+  diverged_arms=[]
+[HIST G B32 on vs off] total_arms=32 diverged=1 (1/32)
+  diverged_arms=[22]
+  arm 22: first_diff_step=36 lenA=128 lenB=128
+
+### NEW real-model (this run) ###
+[NEW G B64 on vs off] total_arms=64 diverged=6 (6/64)
+  diverged_arms=[22, 32, 42, 47, 58, 60]
+  arm 22: first_diff_step=121 lenA=128 lenB=128
+  arm 32: first_diff_step=98 lenA=128 lenB=128
+  arm 42: first_diff_step=6 lenA=128 lenB=128
+  arm 47: first_diff_step=3 lenA=128 lenB=128
+  arm 58: first_diff_step=98 lenA=128 lenB=128
+  arm 60: first_diff_step=4 lenA=9 lenB=128
+[NEW G B64 on_run2 vs on] total_arms=64 diverged=0 (0/64)
+  diverged_arms=[]
+[NEW G B32 on vs off] total_arms=32 diverged=1 (1/32)
+  diverged_arms=[22]
+  arm 22: first_diff_step=36 lenA=128 lenB=128
+
+### CROSS-BASELINE drift sinks (host-version delta, no cascade on either side) ###
+[NEW off vs HIST off] total_arms=64 diverged=8 (8/64)
+  diverged_arms=[22, 32, 42, 47, 52, 54, 57, 59]
+  arm 22: first_diff_step=82 lenA=128 lenB=128
+  arm 32: first_diff_step=98 lenA=128 lenB=128
+  arm 42: first_diff_step=9 lenA=128 lenB=52
+  arm 47: first_diff_step=3 lenA=128 lenB=128
+  arm 52: first_diff_step=11 lenA=35 lenB=65
+  arm 54: first_diff_step=8 lenA=9 lenB=35
+  arm 57: first_diff_step=14 lenA=128 lenB=128
+  arm 59: first_diff_step=10 lenA=126 lenB=128
+[NEW on  vs HIST on] total_arms=64 diverged=9 (9/64)
+  diverged_arms=[22, 42, 45, 47, 53, 54, 58, 59, 60]
+  arm 22: first_diff_step=121 lenA=128 lenB=128
+  arm 42: first_diff_step=6 lenA=128 lenB=128
+  arm 45: first_diff_step=3 lenA=128 lenB=128
+  arm 47: first_diff_step=6 lenA=128 lenB=128
+  arm 53: first_diff_step=8 lenA=9 lenB=128
+  arm 54: first_diff_step=8 lenA=9 lenB=35
+  arm 58: first_diff_step=98 lenA=128 lenB=128
+  arm 59: first_diff_step=10 lenA=126 lenB=128
+  arm 60: first_diff_step=4 lenA=9 lenB=128

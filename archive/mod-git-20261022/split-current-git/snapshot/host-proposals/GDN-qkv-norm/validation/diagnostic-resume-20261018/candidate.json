@@ -1,0 +1,92 @@
+{
+  "id": "gdn-unpack-qk-l2norm-fusion",
+  "route": "028/D3-gdn-high-concurrency-longctx",
+  "caliber": "mmlu-pro-gdn-high-concurrency-longctx",
+  "cohort": "028-qwen35-35b-a3b-tp2-fullgraph",
+  "scenario": "形状来源仍取 1017-093650 light L4 窗口里 rearrange_mixed_qkv 的调用形状（T=16 decode ×570、prefill T∈{825,1489,1587,2048}）；场景只产生形状，不是判据边界",
+  "op": "packed QKV -> normalized Q/K and contiguous V",
+  "phase": "pure non-spec decode T16 only",
+  "method": "Fuse rearrange and both l2norm consumers; one new arithmetic kernel, no old-copy rerun",
+  "stage": "blocked",
+  "next_action": "Capture recurrent consumer inputs including layout/strides and initial state, then compare native/fused recurrent outputs and state updates on identical inputs under graph replay. Do not change arithmetic before locating first divergence.",
+  "stop_condition": "No deployment/accepted/release until full-model L3+compare/L4 and graph replay pass; unsupported shapes use native fallback; do not reopen old copy.",
+  "budget": {
+    "authorization": "用户批注：不用考虑预算，继续工作到落地",
+    "wall_cap": "removed by user for this round",
+    "serve_starts": "no prior cap; actual starts tracked in receipts",
+    "resample": "only for documented correctness/mechanism gaps, not blind retries",
+    "charged_before_s": 683.7947954162211
+  },
+  "evidence": [
+    "/root/包体恢复/records/probes/20261018T131400Z_gdn_norm_receipt.json",
+    "/root/包体恢复/records/ladder/1018-125822-l0-gdn-qkv-norm.json",
+    "/root/包体恢复/records/probes/20261018T130700Z_gdn_norm_trace_analysis.json",
+    "/root/包体恢复/records/probes/20261018T131000Z_gdn_norm_final_pytest.log",
+    "/root/包体恢复/records/probes/20261018T131200Z_gdn_norm_final_sources/manifest.json",
+    "/root/包体恢复/records/probes/20261018T132032Z_gdn_plugin_push_receipt.json",
+    "/root/包体恢复/records/probes/20261018T133700Z_gdn_l4_execution_plan.json",
+    "/root/包体恢复/records/probes/20261018T145800Z_gdn_model_receipt.json",
+    "/root/包体恢复/records/probes/20261018T145600Z_gdn_A_l4.json",
+    "/root/包体恢复/records/probes/20261018T145600Z_gdn_B_l4.json",
+    "/root/包体恢复/records/probes/20261018T144800Z_gdn_l4_analyze.py",
+    "/root/包体恢复/records/probes/20261018T145000Z_gdn_profile_AB_compare.log",
+    "/root/包体恢复/records/probes/20261018T145000Z_gdn_cross_service_BB_compare.log",
+    "/root/包体恢复/records/probes/20261018T144000Z_gdn_AA_batch_compare.log",
+    "/root/包体恢复/records/probes/20261018T145500Z_gdn_mmlu_AB_compare.log",
+    "/root/包体恢复/records/probes/20261018T144700Z_gdn_tools_pytest.log",
+    "/root/包体恢复/records/probes/20261018T145600Z_gdn_coverage.log",
+    "/root/包体恢复/records/probes/20261018T163000Z_gdn_receipt.json",
+    "/root/包体恢复/records/probes/20261018T163000Z_gdn_resume_plan.json",
+    "/root/包体恢复/records/probes/20261018T163000Z_gdn_cpu.log",
+    "/root/包体恢复/records/probes/20261018T163000Z_gdn_batch_r3.json",
+    "/root/包体恢复/records/probes/20261018T163000Z_gdn_batch_compare_A.log",
+    "/root/包体恢复/records/probes/20261018T163000Z_gdn_batch_compare_B.log",
+    "/root/包体恢复/records/probes/20261018T163000Z_gdn_standard_compare.log",
+    "/root/包体恢复/records/probes/20261018T163000Z_gdn_coverage.log",
+    "/root/包体恢复/records/probes/20261018T163000Z_gdn_serve_r3.log",
+    "/root/包体恢复/records/probes/20261018T163000Z_gdn_first_divergence_r3/rank0-summary.json",
+    "/root/包体恢复/records/probes/20261018T163000Z_gdn_first_divergence_r3/rank1-summary.json",
+    "/root/包体恢复/records/ladder/1018-162922-l3.json"
+  ],
+  "reason": "Repaired real-input diagnostic: both ranks 123 covered steps / 30 layers, no QKV divergence. Fixed-batch remains 14/16 different versus A and 16/16 identical versus B; recurrent consumer/state/graph semantics unresolved. Keep default-off.",
+  "reopen_condition": "Not terminal; correctness investigation only. Old rejected standalone-copy method remains closed.",
+  "checks": {
+    "l0": {
+      "status": "PASS",
+      "note": "Five exact-numeric Q/K + bitwise V cases; eager paired improvement; kernel trace independently improved. Only T16/bf16 consumer-chain scope.",
+      "evidence": [
+        {
+          "path": "/root/包体恢复/records/ladder/1018-125822-l0-gdn-qkv-norm.json",
+          "sha256": "5117c8b4192a9ce65f6c13bcf9e299f77762021832f02cc514536de42bf49488"
+        }
+      ],
+      "evidence_detail": [
+        {
+          "path": "/root/包体恢复/records/ladder/1018-125822-l0-gdn-qkv-norm.json",
+          "sha256": "5117c8b4192a9ce65f6c13bcf9e299f77762021832f02cc514536de42bf49488",
+          "current_sha256": "5117c8b4192a9ce65f6c13bcf9e299f77762021832f02cc514536de42bf49488",
+          "ok": true
+        }
+      ]
+    },
+    "l3": {
+      "status": "FAIL",
+      "note": {
+        "standard": "8/8 identical PASS",
+        "fixed_batch_vs_A": "2/16 identical; 14/16 DIFFERENT; FAIL exit1",
+        "fixed_batch_vs_B": "16/16 identical PASS"
+      },
+      "evidence": [
+        "/root/包体恢复/records/probes/20261018T145000Z_gdn_profile_AB_compare.log"
+      ]
+    },
+    "l4": {
+      "status": "PENDING",
+      "note": "Collection complete; both ranks 6->1 and lower target kernel time. Acceptance blocked by L3, single pair only.",
+      "evidence": [
+        "/root/包体恢复/records/probes/20261018T145800Z_gdn_model_receipt.json"
+      ]
+    }
+  },
+  "budget_enforced": false
+}

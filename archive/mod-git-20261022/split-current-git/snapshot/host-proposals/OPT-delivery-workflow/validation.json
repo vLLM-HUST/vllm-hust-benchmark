@@ -1,0 +1,49 @@
+{
+  "schema": "opt-workflow-validation.v1",
+  "recorded_at": "2026-10-18T15:18:59.703653+00:00",
+  "task": "Reduce operator task drift and make target-repository delivery explicit",
+  "base_commit": "3f607dd5f16926203989f06886e1b68064d6a55d",
+  "plugin_tests": "798 passed, 11 skipped",
+  "opt_regressions": "120 passed",
+  "ruff": "PASS",
+  "patch_roundtrip": "PASS; forward/reverse and before/after sha256 in temporary copy",
+  "precommit_delivery_check": "INCOMPLETE, exit3 as expected",
+  "coverage": "FAIL0 WARN57",
+  "scope": [
+    "AGENTS.md",
+    "tools/operator_delivery.py",
+    "tests/test_operator_delivery.py",
+    "tests/test_opt_delivery_integration.py",
+    "host-proposals/OPT-delivery-workflow"
+  ],
+  "simplification": [
+    "Three checkpoints: startup, focused execution, delivery.",
+    "No new candidate database or task registry.",
+    "Status/focus/next and coverage subviews are not mandatory repeated commands.",
+    "Delivery is an endpoint Git check, never an experimental loop step."
+  ],
+  "limits": [
+    "No measured lower-capability-model behavioral improvement; only deterministic tool regressions tested.",
+    "No change to PURPOSE or L0/L3/L4 acceptance criteria.",
+    "Declared base and paths still require review; helper cannot prove task scope completeness.",
+    "No push authorization inferred for this new workflow change."
+  ],
+  "evidence": [
+    {
+      "path": "/root/包体恢复/records/probes/20261018_workflow_plugin_tests.log",
+      "sha256": "747da0ad6a50f5ba26018c6e9949da04ea924c2d35ef18a6e4bbbf8a7880636b"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261018_workflow_opt_tests_final.log",
+      "sha256": "37d9ed9acd9a92ab3666932bccc971f6d61199fd20763209c166499cce852a5d"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261018_workflow_patch_roundtrip.log",
+      "sha256": "5dd79a26ff886886a59c11da96e23cba8abcf3fc539807f877b6451148d34a91"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261018_workflow_coverage.log",
+      "sha256": "b46fe3e87e01e7caba7ad0e5044195d37f6a0bbb158691d5f6c597101ba77756"
+    }
+  ]
+}

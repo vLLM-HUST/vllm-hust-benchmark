@@ -1,0 +1,31 @@
+INFO 09-13 07:57:54 [__init__.py:52] Available plugins for group vllm.platform_plugins:
+INFO 09-13 07:57:54 [__init__.py:54] - ascend -> vllm_ascend:register
+INFO 09-13 07:57:54 [__init__.py:57] All plugins in this group will be loaded. Set `VLLM_PLUGINS` to control which plugins to load.
+INFO 09-13 07:57:55 [__init__.py:272] Platform plugin ascend is activated
+INFO 09-13 07:57:55 [platform.py:70] Breakable CUDAGraph on Ascend is opt-in; using VLLM_USE_BREAKABLE_CUDAGRAPH=0.
+{
+  "command": [
+    "vllm",
+    "serve",
+    "/data/shared_models/Qwen--Qwen2.5-14B-Instruct",
+    "--gpu-memory-utilization",
+    "0.85",
+    "--max-model-len",
+    "4096",
+    "--served-model-name",
+    "qwen14b",
+    "--port",
+    "8353",
+    "--compilation-config",
+    "{\"cudagraph_capture_sizes\":[32,64,128]}"
+  ],
+  "environment": {
+    "VLLM_HUST_FIA_DEMASK": "1",
+    "VLLM_ASCEND_ENABLE_CASCADE_DECODE": "1",
+    "VLLM_ASCEND_ENABLE_CASCADE_GRAPH": "1",
+    "VLLM_HUST_FI_PREFILL_OUT": "1",
+    "VLLM_HUST_SKIP_COS_SIN": "1",
+    "VLLMHUST_EXT_ENABLED_BUNDLES": "org.vllm-hust.fia-demask,org.vllm-hust.split-batch-full-graph,org.vllm-hust.zerocost-wiring"
+  },
+  "native_extension_manifests": {}
+}
