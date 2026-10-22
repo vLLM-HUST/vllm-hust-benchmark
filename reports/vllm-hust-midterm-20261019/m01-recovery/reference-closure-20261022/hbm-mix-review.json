@@ -1,0 +1,67 @@
+{
+  "status": "measured_hbm_reference_with_explicit_direction_mismatch",
+  "repetitions": [
+    {
+      "repetition": 0,
+      "aggregate_direction_capacity_Bps": {
+        "read": 2258390045676.633,
+        "write": 326376814711.4429
+      },
+      "model_direction_reference_seconds": {
+        "read": 25.64614555558359,
+        "write": 26.572539379096813
+      },
+      "direction_constrained_reference_seconds": 26.572539379096813,
+      "pooled_reference_seconds": 25.763120695554704,
+      "relative_read_write_mix_error": [
+        0.03631053698394493,
+        0.03593573279688078
+      ]
+    },
+    {
+      "repetition": 1,
+      "aggregate_direction_capacity_Bps": {
+        "read": 2259076171688.3896,
+        "write": 326479483091.24
+      },
+      "model_direction_reference_seconds": {
+        "read": 25.638356315102232,
+        "write": 26.564183081974203
+      },
+      "direction_constrained_reference_seconds": 26.564183081974203,
+      "pooled_reference_seconds": 25.7552609517213,
+      "relative_read_write_mix_error": [
+        0.03630186147604597,
+        0.035922268646970235
+      ]
+    },
+    {
+      "repetition": 2,
+      "aggregate_direction_capacity_Bps": {
+        "read": 2259488297624.7207,
+        "write": 326542466467.3266
+      },
+      "model_direction_reference_seconds": {
+        "read": 25.63367993257197,
+        "write": 26.55905939331102
+      },
+      "direction_constrained_reference_seconds": 26.55905939331102,
+      "pooled_reference_seconds": 25.75052915792681,
+      "relative_read_write_mix_error": [
+        0.03627450537288146,
+        0.03592798507981465
+      ]
+    }
+  ],
+  "source_sha256": {
+    "/workspace/m01-hbm-reference-worker-r1/audit.json": "1a70fed3dedebde14fe7aa8fea8442a5720995e4ba5104be96c924d130725fac",
+    "/workspace/m01-worker-hbm-mix-plan.json": "21e0c05f904383d95268e5a35565c9bc68ca4591c2151a8af522b75379d5a32b",
+    "/workspace/review_m01_worker_hbm_mix.py": "d565092dd2eb9ab058ce5237a2ea761f87cebf45e5bd73ec9b899b7976598ad5"
+  },
+  "conclusion": "Logical mix was matched before execution; physical mix differs. Retain pooled and direction-constrained empirical resource terms, without treating the physical mix as exact.",
+  "limitations": [
+    "Direction capacities are jointly observed reference rates, not independently proven maxima.",
+    "A reference term does not establish complete arithmetic coverage or overall M01 attainment."
+  ],
+  "m01_attainment": null
+}

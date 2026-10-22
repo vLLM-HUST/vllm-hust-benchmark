@@ -1,0 +1,54 @@
+{
+  "status": "current_recurrence_cases_runtime_cpu_oracle_and_repetitions_checked",
+  "ranks": [
+    {
+      "rank": 0,
+      "cases": 872,
+      "max_abs": {
+        "state": 1.4901161193847656e-08,
+        "output": 7.62939453125e-06
+      },
+      "weighted_reference_ms": [
+        4070.8692860007286,
+        3970.7793817818165,
+        3969.14829698205
+      ],
+      "median_ms": 3970.7793817818165,
+      "stdev_ms": 58.263494818959
+    },
+    {
+      "rank": 1,
+      "cases": 872,
+      "max_abs": {
+        "state": 1.4901161193847656e-08,
+        "output": 7.62939453125e-06
+      },
+      "weighted_reference_ms": [
+        4055.3908601999283,
+        3934.7040599882603,
+        3931.2540405094624
+      ],
+      "median_ms": 3934.7040599882603,
+      "stdev_ms": 70.69554014999626
+    }
+  ],
+  "calls_per_rank": 26520,
+  "source_sha256": {
+    "/root/gennova-evidence/20261019-midterm-aligned/worker-recurrence-reference-plan-r1.json": "d08758ade269ef9167590f3323f1b65d48f839258dd7a05f0084aaf01eaade5c",
+    "/workspace/audit_m01_worker_recurrence.py": "c42b83e3d7e3ed6a0732f509f6b6e9f529c138a6337d6ea3b0cbc495f5604630",
+    "/workspace/m01-recurrence-reference-worker-r1/receipt.json": "d33595feede5af66696e493a54b722057a3360c0e6f80303d70abbef88a08aea",
+    "/workspace/m01-recurrence-reference-worker-r1/results/rank-0.json": "41a422fe7aff270e66e1bf0fca2b6f4a4d4502631af5ad2b6725f97dd3706521",
+    "/workspace/m01-recurrence-reference-worker-r1/results/rank-1.json": "94c411b20a11849b5e758c9382d9859533a887c4301da2c43674c841e8b2ef53"
+  },
+  "limitations": [
+    "Verification CU reconstructed from final device CU and recorded verify IDs using the loaded partition contract, not separately captured.",
+    "Synthetic BF16 activations and FP32 state; hot graph replay reference, not full-model performance.",
+    "Full state allocation may exceed observed slot span; reference preserves observed addresses only.",
+    "No cross-run state reuse: seed restored before each correctness check and timing repetition.",
+    "No full effective FLOPs or M01 attainment claimed.",
+    "Runtime full output/state CPU comparisons retain aggregate errors, not all tensors for offline replay.",
+    "Component synchronous reference sums are not application critical-path latency."
+  ],
+  "model_effective_flops": null,
+  "m01_attainment": null
+}
