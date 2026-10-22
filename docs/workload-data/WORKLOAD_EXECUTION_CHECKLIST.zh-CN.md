@@ -2,6 +2,9 @@
 
 ## 增量验证快照
 
+- [x] AgentBench ALFWorld FC：new_std原索引0–2经原版AgentRL
+  Session完成31次NPU模型请求，原任务正常结束，官方评分1/1/1；实际4/7/20步，原始输入不变。最终公开recipe干净安装及同三题复验完成，结果一致；[交接回执](validation/agentbench-alfworld-public-handoff-npu-20261023.json)。两次仍为三题，且仅pick_and_place_simple，不覆盖其他子类、全109项或DB/KG/OS/Web等环境；历史准备/环境探测0模型调用另列，不混为任务执行。
+
 - [x] LongWriter-6k原train行0–2：原消息/参考隔离回查、双卡NPU生成和响应完整性完成，三条stop，实际输出2168/3064/5497
   token。[回执](validation/longwriter-original-npu-20261022.json)。属于单轮助手任务的长输出运行维度，不新增任务类别；未验证原题篇幅达标、质量、完整6000条或LongBench-Write评测。
 
@@ -185,9 +188,9 @@ GSM8K历史[分批汇总](validation/gsm8k-incremental-progress-20261022.json)�
 - [ ] 首批来源安装、执行、核验与消费链交付
 - [ ] 已纳入来源全部完成（候选不隐藏）
 
-| 来源       | 当前已验证范围 | 全量状态   | 缺项                                |
-| ---------- | -------------- | ---------- | ----------------------------------- |
-| AGENTBENCH | 待核           | [ ] 未完成 | 原生子集/协议、服务器执行及适用核验 |
+| 来源       | 当前已验证范围                | 全量状态   | 缺项                                     |
+| ---------- | ----------------------------- | ---------- | ---------------------------------------- |
+| AGENTBENCH | S：ALFWorld FC 3项，评分1/1/1 | [ ] 未完成 | 全109项、其他ALFWorld子类/协议范围未完成 |
 
 ## [ ] 数据库查询与更新执行 · database-query-update
 
