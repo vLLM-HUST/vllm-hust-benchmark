@@ -57,6 +57,41 @@ python scripts/data_index.py --query 'archive split' --limit 100
 
 ## 增添、改写和验证的最短流程
 
+### 网站引用与 Release 附件入口
+
+[关联入口索引](docs/data-entrypoints.json) 补足目录索引不包含的三类信息：
+
+- `publication_bindings`：网站 `data/` 路径到 benchmark 原文件或压缩描述符/分片的映射，包含还原后 SHA256。
+- `references`：固定网站提交的前端 HTML/JS 字面引用，以及 benchmark 发布数据中的链接、结构化证据路径；保留引用来源，区分已映射、动态模板、未映射和外部链接。
+- `releases`：GitHub 分页 API 返回的全部非 draft Release 及附件名称、下载 URL、大小、资产 ID、API
+  digest。包含历史附件，不将它们自动认定为当前验收证据。
+
+[采集快照](docs/data-entrypoints-sources.json) 固定网站 commit、输入文件摘要、Release 元数据和采集时间。
+发布清单优先采自线上；若获取失败，明确记录错误并标明使用的是网站 Git 中的历史副本，不能当作线上当前版本。 网站部署时会重新生成数据，网站代码提交与线上发布数据身份不是同一个概念。
+
+```bash
+python scripts/data_entrypoints.py --query midterm
+python scripts/data_entrypoints.py --kind publication_bindings --query dataset
+python scripts/data_entrypoints.py --kind releases --query m01 --limit 20
+python scripts/data_entrypoints.py --kind assets --query profiler --limit 20
+python scripts/data_entrypoints.py --query unmapped-frontend-reference
+
+# 本地数据/描述符内容变化：离线重建并检查
+python scripts/data_entrypoints.py --write
+python scripts/data_entrypoints.py --check
+
+# 网站或 Release 更新：显式联网重新采集，不修改网站，不下载 Release 附件
+python scripts/data_entrypoints.py --refresh \
+  --website /path/to/vllm-hust-website --revision <完整网站提交>
+```
+
+`--check` 会发现本地发布内容、分片及映射的过期情况，但不会联网发现新增/删除的远端 Release。 远端更新后应执行 `--refresh` 并审查快照差异。索引不执行
+JavaScript，不保证动态链接已解析，也不证明 外部链接可下载、附件 SHA256 已回验或页面已经完成浏览器验收。`unmapped-embedded-path` 可能是原始机器路径，
+不是自动判定网站断链；`snapshot_publication_status` 仅比较与采集清单的字节身份。 Release 中 manifest/inventory/SHA256SUMS
+等附件也是可直接下载的入口，包内部成员仍由这些清单描述。
+
+### 数据维护步骤
+
 1. 明确要改的是原件、分析、契约还是展示；检查 worktree，保留他人改动。
 1. 新实验写入独立目录，记录来源版本、模型/精度、真实芯片、参数、请求、开始结束时间、失败和局限。 测试脚本不能伪造结果；设备执行需遵守原有资源与审批规则。
 1. 已有报告的结论需要订正时，追加订正/新分析并链接旧证据。可编辑当前展示和导航，但不能倒改原始测量。
@@ -79,5 +114,6 @@ python scripts/data_index.py --check
 python -m pytest -q tests/test_data_index.py
 ```
 
-索引完全离线、按路径确定性生成，不扫描未跟踪目录，不读取证据正文，不下载或解包资产。 生成器只写 `docs/data-index.json`，不要手工修改它。CI 会检查其是否与 tracked
-路径一致。
+目录索引 `data_index.py` 完全离线、按路径确定性生成，不读取证据正文，只写 `docs/data-index.json`。 关联入口生成器 `data_entrypoints.py`
+另行读取发布数据、核验并还原发布分片；只有显式 `--refresh` 才联网， 从固定网站 Git 对象、线上发布清单及 Release API 更新采集快照。不下载或解包 Release
+附件，不执行网站代码。 不要手改生成索引；CI 检查目录路径和关联入口是否与本地来源及采集快照一致。

@@ -6,7 +6,11 @@ Before reading, adding, or editing data, use [DATA_INDEX.md](DATA_INDEX.md) and 
 [collection index](docs/data-index.json). Distinguish immutable originals, versioned analysis,
 contracts, publication sources, and synthetic fixtures. After adding/removing tracked data paths,
 regenerate the index with `python scripts/data_index.py --write` and validate with `--check`. An
-index entry is not experimental acceptance or permission to overwrite evidence or run devices.
+index entry is not experimental acceptance or permission to overwrite evidence or run devices. For
+website references and Release assets, use [linked entry points](docs/data-entrypoints.json) and
+`python scripts/data_entrypoints.py --query <term>`. Regenerate with `--write` after publication
+data changes; refresh remote snapshots explicitly as documented in DATA_INDEX.md. Offline CI does
+not prove that remote inventory or deployment is still current.
 
 This repository is the source of truth for vllm-hust benchmark specs, raw submissions, leaderboard
 snapshots, and CI performance-gate inputs. Agents must preserve the distinction between public
