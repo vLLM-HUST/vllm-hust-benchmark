@@ -1935,7 +1935,7 @@
       "public_effect_en": "Current 0.2.0 code is not beneficial in the tested Qwen3.5-35B-A3B TP2 eager AgentX cells. Across four first-turn shapes (three retained repetitions each), total-time medians ranged from 0.60% faster to 0.81% slower, but TTFT regressed in every cell by 2.09% to 4.43%; exact 128-token output hashes matched in 0/4 cells. A real concurrency-2 probe failed closed and terminated the engine. A component-only host submission change was 18.33% faster while synchronized device time stayed near 68 us, so it does not establish end-to-end gain.",
       "public_effect_zh": "当前 0.2.0 代码在已测 Qwen3.5-35B-A3B、TP2、eager、AgentX 单元中不具收益。四种首轮形状（每格保留 3 次）端到端中位数变化为快 0.60% 至慢 0.81%，但 TTFT 在四格中均回退 2.09%–4.43%；128-token 输出哈希 0/4 一致。真实并发 2 探测 fail-closed，并导致引擎退出。组件级 host submission 降低 18.33%，但同步 device time 仍约 68 us，不能据此声称端到端收益。",
       "public_effect_status": "not-beneficial-in-tested-cell",
-      "public_effect_url": "https://github.com/vLLM-HUST/gdn-state-codec/blob/main/evidence/qwen35-agentx-v020-expanded-20261009/ROUND-RESULTS.md",
+      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/819b1975f346dca514f58880ca62518850100b2d/archive/mod-git-20261022/gdn-state-codec/snapshot/evidence/qwen35-agentx-v020-expanded-20261009/ROUND-RESULTS.md",
       "functional_compatibility": {
         "status": "passed",
         "scope": "ECPA 0.3 managed activation · Qwen3.5-35B-A3B · 2 × Ascend 910B2 · TP2 eager · single request"
@@ -2000,7 +2000,7 @@
       "public_effect_en": "On Qwen2.5-7B-Instruct, Ascend 910B2/CANN 9.0.0, Graph/batch-invariant, a 64-request ShareGPT workload at concurrency 4 gave 3.82% lower steady-state TPOT and 5.24% higher output-token throughput across three matched rounds for linear-SwiGLU fusion. The published compatibility profile is a separate CANN 9.1 beta.3 line; cold-start performance and other paths are not covered by this result.",
       "public_effect_zh": "在 Qwen2.5-7B-Instruct、Ascend 910B2/CANN 9.0.0、batch-invariant Graph 模式下，Linear–SwiGLU 融合于 ShareGPT 64 请求、并发 4 的三轮配对测试中，稳态 TPOT 降低 3.82%，输出 token 吞吐提高 5.24%。已发布的兼容配置是另一条 CANN 9.1 beta.3 版本线；该结果不覆盖冷启动及其他执行路径。",
       "public_effect_status": "beneficial",
-      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-opset/blob/main/docs/optimizations/linear-swiglu-graph.md",
+      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/819b1975f346dca514f58880ca62518850100b2d/archive/mod-git-20261022/vllm-hust-opset/snapshot/docs/optimizations/linear-swiglu-graph.md",
       "compatibility": {
         "status": "verified",
         "host": "vLLM-HUST + vllm-ascend-hust",
