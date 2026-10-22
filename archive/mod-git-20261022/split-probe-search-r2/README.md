@@ -12,11 +12,15 @@ asset metadata. All 8,020 regular archive members were hashed, not merely search
 manifest. Eight missing logs have previously declared SHA256 digests; none matched. Other missing
 paths lack a declared digest, and no exact original-path/provenance identity was established.
 
-The receipt explicitly records exclusions: 26 oversized local logs, one oversized dev-hub blob,
-absent promisor objects, offline storage, excluded dependency/cache trees, and non-recursive
-handling of nested archives. A negative search does not prove permanent loss. Generic coverage logs
-and assessment reports from other experiments are not substitutes for the missing registration
-probes.
+The initial size exclusions (26 local logs and one dev-hub blob) were subsequently hashed in full,
+without a match. Archive member content was also searched for original paths in UTF-8 and
+JSON-escaped forms, without a match. Historical JSON provenance mappings did not resolve to matching
+original bytes.
+
+Remaining exclusions include absent promisor objects, offline storage, excluded dependency/cache
+trees, and non-recursive handling of nested archives. A negative search does not prove permanent
+loss. Generic coverage logs and assessment reports from other experiments are not substitutes for
+the missing registration probes.
 
 No raw data, references, runtime code, Release assets, installation consumers, hardware
 authorization, or reviewer gates were changed. Further recovery needs the original probe/profiler

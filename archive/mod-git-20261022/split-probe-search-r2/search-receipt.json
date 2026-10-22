@@ -54,6 +54,19 @@
     ],
     "limitations": "Selected relevant public assets, not every organizational Release. Nested archives were not recursively unpacked. Directory references require a complete provenance-backed member inventory, not a partial filename match."
   },
+  "followup_checks": {
+    "initial_exclusions_checked": "The size exclusions above describe the initial bounded pass. Subsequently all 26 oversized logs and the one oversized dev-hub blob were hashed; none matched the eight known missing digests.",
+    "additional_large_logs": 26,
+    "additional_large_log_bytes": 770635422,
+    "large_git_blob_oid": "e95a2b43c29cb56f4fa7d90f89075a65b2f09718",
+    "large_git_blob_bytes": 49464025,
+    "large_git_blob_sha256": "8fc14d341330324d228d3a5f3caa7d37d3bf684088ca234f8d1b59f93a271647",
+    "sha256_matches": [],
+    "archive_original_path_mentions": [],
+    "archive_text_method": "Stream every regular member of all eight archives and search original absolute paths in UTF-8 and JSON ASCII-escaped forms, retaining overlap across chunks. No original-path mentions found.",
+    "git_provenance_method": "Inspect JSON source/path/original_path plus SHA256 mappings in the four local Git stores. No mapping had matching original bytes; the previously declared missing digests remain unresolved.",
+    "recoverable_git_maps": 0
+  },
   "next_recovery_requirement": "Original probe directory/backup, original profiler window directories, or a provenance mapping and matching bytes from another accessible source. Do not reconstruct logs from summaries or rerun experiments as historical replacements.",
   "hardware_and_review_gates": "Unchanged; no device execution or approval-label changes."
 }

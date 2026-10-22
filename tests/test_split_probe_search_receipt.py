@@ -38,3 +38,11 @@ def test_negative_search_preserves_unresolved_identity():
     for section in ("git_search", "workspace_search", "release_search"):
         assert receipt[section]["sha256_matches"] == []
         assert receipt[section]["limitations"]
+    followup = receipt["followup_checks"]
+    assert (
+        followup["additional_large_logs"]
+        == receipt["workspace_search"]["oversize_logs_skipped"]
+    )
+    assert followup["sha256_matches"] == []
+    assert followup["archive_original_path_mentions"] == []
+    assert followup["recoverable_git_maps"] == 0
