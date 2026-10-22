@@ -33,6 +33,19 @@ def test_worker_receipts_are_pinned_and_not_formal_b1():
         rank["rows"]["TASK"]["fully_inside_envelope"] > 0 for rank in audit["ranks"]
     )
     assert audit["all_devices_released"]
+    ledger = json.loads(
+        (EVIDENCE / "recovery_model_worker_r1-accounted-families.json").read_text()
+    )
+    assert len(ledger["families"]) == 10
+    assert (
+        sum(f["global_basic_operations"] for f in ledger["families"])
+        == ledger["accounted_basic_operation_subtotal"]
+    )
+    assert ledger["model_effective_flops"] is ledger["m01_attainment"] is None
+    assert (
+        f"{ledger['accounted_basic_operation_subtotal']:,}"
+        in (ROOT / "中期测试报告.md").read_text()
+    )
 
 
 def test_worker_packager_rejects_corruption_before_writing(tmp_path, monkeypatch):

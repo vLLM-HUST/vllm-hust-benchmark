@@ -22,6 +22,7 @@ ARCHIVES = {
     "m01-worker-hccs-unit-audit": "3ce63cb94bb35e44518162b8c170057aaa76125b61d8bf086ee8ebdaf962f99e",  # pragma: allowlist secret
 }
 SELECTED = {
+    "m01-worker-r1-accounting": ["recovery_model_worker_r1-accounted-families.json"],
     "m01-worker-full-model-r1-audit": ["m01-worker-r1-audit.json"],
     "m01-worker-collective-reference": [
         "workspace/m01-worker-collective-reference-joined.json",

@@ -52,6 +52,6 @@
 
 ## 证据
 
-`archive.json`固定11个Release归档的URL、字节数与SHA256。 本目录四个审核JSON均逐字节提取自已校验归档，原成员路径和摘要记在清单中。
+`archive.json`固定11个Release归档的URL、字节数与SHA256。 本目录五个审核JSON均逐字节提取自已校验归档，原成员路径和摘要记在清单中。
 大型原始轨迹保留在Release，不重复纳入Git。 从下载好的归档目录运行上级的`package_worker_evidence.py --source <目录> --output <新目录>`
 可重新校验并提取，不覆盖既有目录。
