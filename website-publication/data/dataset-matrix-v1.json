@@ -70,10 +70,6 @@
     {
       "id": "request-throttling-controller",
       "name": "request-throttling-controller"
-    },
-    {
-      "id": "thunderagent-original",
-      "name": "ThunderAgent original"
     }
   ],
   "datasets": [
@@ -1634,12 +1630,6 @@
               "unit": "token/s",
               "repetitions": 1,
               "speedup": 1.0
-            },
-            "thunderagent-original": {
-              "value": 197.78298652042594,
-              "unit": "token/s",
-              "repetitions": 1,
-              "speedup": 1.305894239638912
             },
             "request-throttling-controller": {
               "value": 213.3221799524691,
@@ -6873,89 +6863,6 @@
         "quality_gate": false,
         "complete_batch_makespan_claim": false,
         "ray_status": "SUCCEEDED",
-        "client_boundary": {
-          "pending": 128,
-          "errors": 0
-        },
-        "archive": {
-          "bytes": 135311624,
-          "files": 6293,
-          "sha256": "8ff9d23d03996e4eedb620e2cfdc014615c400a3be1d889d129dc9b35b85e253",
-          "whole_sha": "PASS",
-          "every_member_sha": "PASS"
-        },
-        "source_report": "https://github.com/vLLM-HUST/vllm-hust-benchmark/tree/main/reports/swe-bench-pro-real-agent-threeway128-1h-20261022-r2"
-      },
-      "limitations": [
-        "Single sequential Native → ThunderAgent original → Controller original triplet; no repetition confidence interval.",
-        "Real generated outputs change later requests, lengths and tools; equal protocol and time window are not identical executed work or complete-batch makespan.",
-        "Client percentiles include admission waiting but only normal returns by window end; censored requests remain separate.",
-        "Counters use actual within-window sampled endpoints; sequential observations are not atomic. Preliminary endpoints just before each boundary differ slightly from this final within-window report.",
-        "Both ThunderAgent and Controller show late cache decline. Common engine, capacity, adaptation and workload are not excluded; no unique algorithm or integration root cause established.",
-        "ThunderAgent original post-Agent engine drain guard timed out after180 seconds; original Ray FAILED retained. Later independent drain verified before Controller start. Guard residue is outside performance window.",
-        "Controller all-hour P95/P99 are worse than Native despite higher throughput and lower mean. Phase-specific adverse results are retained."
-      ]
-    },
-    {
-      "id": "swe-pro-real-hour-thunderagent_original",
-      "dataset": "swe-bench-pro",
-      "solution": "thunderagent-original",
-      "scope": "real-agent-hour",
-      "scope_label": "128 programs · 3600s · single run",
-      "quality": [],
-      "performance": {
-        "arm": "thunderagent_original",
-        "phase_seconds": "0-3600",
-        "engine_sample_start_s": 0.3060353649780154,
-        "engine_sample_end_s": 3599.3061946961097,
-        "engine_output_tokens_per_s": 197.78298652042594,
-        "client_returns_per_s": 1.2258333333333333,
-        "client_output_tokens_per_s": 191.6811111111111,
-        "prefix_hit_fraction": 0.5644870630390063,
-        "preemptions": 416.0,
-        "computed_prefill_tokens": 29412844.0,
-        "engine_mean_running_requests": 43.43683893546947,
-        "engine_mean_waiting_requests": 3.3617706937335505,
-        "mean_kv_pool_fraction": 0.8049584809310154,
-        "mean_latency_s": 82.79939970713018,
-        "p50_latency_s": 17.788227590266615,
-        "p95_latency_s": 429.799742079153,
-        "p99_latency_s": 1130.918771987949
-      },
-      "configuration": {
-        "model": "Qwen3.5-35B-A3B",
-        "precision": "BF16",
-        "hardware": "Ascend 910B2",
-        "parallel": "TP2",
-        "programs_per_arm": 128,
-        "unique_tasks": 8,
-        "replicas_per_task": 16,
-        "arrival_time": 0,
-        "client_concurrency_limit": null,
-        "agent_wall_seconds": 3600,
-        "max_steps": 200,
-        "max_output_tokens": 4096,
-        "context_tokens": 262144,
-        "tool_timeout_seconds": 60,
-        "task_container_seconds": 4200,
-        "http_read_timeout": null,
-        "http_other_timeout_seconds": 180,
-        "http_retries": 0,
-        "resume_timeout_seconds": 7200,
-        "downstream_http_timeout_seconds": 7200,
-        "max_num_seqs": 256,
-        "max_num_batched_tokens": 8192,
-        "kv_bytes_per_rank": 17179869184,
-        "tensor_parallel_size": 2,
-        "scheduling": "Original policy; no aging, continuation yield or candidate algorithm"
-      },
-      "report": "data/swe-bench-pro-real-agent-threeway-20261022/report.json",
-      "protocol": {
-        "evidence_type": "real-agent-system-window",
-        "window_seconds": 3600,
-        "quality_gate": false,
-        "complete_batch_makespan_claim": false,
-        "ray_status": "FAILED_POST_AGENT_DRAIN_GUARD",
         "client_boundary": {
           "pending": 128,
           "errors": 0
