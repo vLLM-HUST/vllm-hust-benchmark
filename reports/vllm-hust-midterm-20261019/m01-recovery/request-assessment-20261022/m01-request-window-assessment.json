@@ -43,7 +43,7 @@
     "Numerical qualification mixes full output/state checks and sampled CPU checks by operator; it does not replace dataset quality validation.",
     "Trace instrumentation remains present; request-window accounting excludes client startup before the first request, but is not an uninstrumented score.",
     "Request interval replaces the device envelope only in this new derivation.",
-    "HBM bounds expand the request window by 2ms on each side; communication uses its separately retained sampling bounds.",
+    "HBM lower bounds contract and upper bounds expand the request window by 2ms on each side; communication uses its separately retained sampling bounds.",
     "Bounds describe sampling boundaries, not confidence intervals or reference repeat uncertainty.",
     "Observed TASK capture coverage does not prove profiler implementation completeness."
   ],
@@ -134,7 +134,8 @@
       "fully_contained_bytes": 33295719079936,
       "intersecting_interval_bytes": 33295724078144,
       "prorated_bytes": 33295721444150.23,
-      "minimum_channel_coverage": 1.0
+      "minimum_channel_coverage": 1.0,
+      "bounds_scope": "contracted-contained lower; expanded-intersecting upper"
     },
     {
       "channels": [
@@ -222,7 +223,8 @@
       "fully_contained_bytes": 33283034309376,
       "intersecting_interval_bytes": 33283038311552,
       "prorated_bytes": 33283036755528.02,
-      "minimum_channel_coverage": 1.0
+      "minimum_channel_coverage": 1.0,
+      "bounds_scope": "contracted-contained lower; expanded-intersecting upper"
     }
   ],
   "source_sha256": {
@@ -233,7 +235,7 @@
     "/workspace/m01-worker-window-review.json": "f415a9a3ecbb539e4fac9ff908229a28a21824eaa954396925c376d7b58443c8",
     "/workspace/m01-hbm-reference-worker-r1/audit.json": "1a70fed3dedebde14fe7aa8fea8442a5720995e4ba5104be96c924d130725fac",
     "/workspace/m01-worker-r1-envelope-hardware.json": "bb6904f9e2385dfcf3ab7a0ce442ad5bf7882fb2b61a46902bc8bf7e4a08ca20",
-    "/workspace/assess_m01_request_window.py": "90bc2fd15805fad0836123aa83879f454931d9a0894178ebfb1d49af96bc041a",
+    "/workspace/assess_m01_request_window.py": "7f83c8f2165b1b209fa09abdcb6dff8d9c03abc6b99ea904abda7d77f0b0b632",
     "/root/gennova-evidence/20261019-midterm-aligned/m01-recovery-model-worker-r1/system/profiler/PROF_000001_20261022013344621_01520198MFCKIGIQ/device_0/sqlite/hbm.db": "3b59ef291b5f31e8a586cc2564b60de792c8dc61b38af241de80bb29449898c3",
     "/root/gennova-evidence/20261019-midterm-aligned/m01-recovery-model-worker-r1/system/profiler/PROF_000001_20261022013344621_01520198MFCKIGIQ/device_1/sqlite/hbm.db": "7d6443dc6c9ed37533783debeb96ecf0d167309565f37e4312ee846d4087a73d"
   }

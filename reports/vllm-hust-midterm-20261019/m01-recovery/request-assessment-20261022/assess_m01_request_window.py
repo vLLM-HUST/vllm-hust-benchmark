@@ -57,7 +57,7 @@ def assess(data, hbm):
                 limitations=accounting['limitations'][2:] + [
                     'Trace instrumentation remains present; request-window accounting excludes client startup before the first request, but is not an uninstrumented score.',
                     'Request interval replaces the device envelope only in this new derivation.',
-                    'HBM bounds expand the request window by 2ms on each side; communication uses its separately retained sampling bounds.',
+                    'HBM lower bounds contract and upper bounds expand the request window by 2ms on each side; communication uses its separately retained sampling bounds.',
                     'Bounds describe sampling boundaries, not confidence intervals or reference repeat uncertainty.',
                     'Observed TASK capture coverage does not prove profiler implementation completeness.'])
 
@@ -87,6 +87,14 @@ def main():
         measured = integrate(samples, data[0]['request_start_ns']-2000000,
                              data[0]['request_end_ns']+2000000)
         assert has_complete_hbm_coverage(measured)
+        contracted = integrate(samples, data[0]['request_start_ns']+2000000,
+                               data[0]['request_end_ns']-2000000)
+        assert has_complete_hbm_coverage(contracted)
+        for outer, inner in zip(measured['channels'], contracted['channels']):
+            assert (outer['channel'], outer['direction']) == (inner['channel'], inner['direction'])
+            outer['fully_contained_bytes'] = inner['fully_contained_bytes']
+        measured['fully_contained_bytes'] = contracted['fully_contained_bytes']
+        measured['bounds_scope'] = 'contracted-contained lower; expanded-intersecting upper'
         hbm.append(measured)
     result = assess(data, hbm)
     result.update(hbm_expanded_window=hbm, source_sha256=sources)

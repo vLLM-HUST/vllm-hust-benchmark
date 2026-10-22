@@ -37,7 +37,9 @@ def test_only_observer_tasks_outside_request():
     tasks = [task for rank in identities["outside_tasks"] for task in rank]
     assert len(tasks) == 7
     assert {t["task_type_name"] for t in tasks} == {
-        "PROFILING_ENABLE", "PROFILING_DISABLE", "EVENT_RECORD"
+        "PROFILING_ENABLE",
+        "PROFILING_DISABLE",
+        "EVENT_RECORD",
     }
     boundary = read("m01-request-task-boundaries.json")
     for rank in boundary["ranks"]:
@@ -53,4 +55,4 @@ def test_hbm_coverage_and_report_value():
         assert all(c["coverage"] == 1 for c in device["channels"])
     text = (BASE / "中期测试报告.md").read_text()
     bounds = result["empirical_attainment_percent"]
-    assert f'{bounds["lower"]:.4f}%–{bounds["upper"]:.4f}%' in text
+    assert f"{bounds['lower']:.4f}%–{bounds['upper']:.4f}%" in text
