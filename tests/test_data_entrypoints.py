@@ -136,6 +136,20 @@ def test_offline_check_detects_stale_output(tmp_path, monkeypatch):
     assert index.main(["--check"]) == 1
 
 
+def test_empty_remote_inventory_does_not_erase_existing_snapshot(tmp_path, monkeypatch):
+    (tmp_path / "docs").mkdir()
+    original = json.dumps(source_snapshot())
+    (tmp_path / index.SOURCES).write_text(original)
+    monkeypatch.setattr(index, "ROOT", tmp_path)
+    monkeypatch.setattr(
+        index, "refresh", lambda *args: {**source_snapshot(), "releases": []}
+    )
+    with pytest.raises(ValueError, match="refusing to erase"):
+        index.main(["--refresh", "--website", ".", "--revision", "main"])
+    assert (tmp_path / index.SOURCES).read_text() == original
+    assert not (tmp_path / index.OUTPUT).exists()
+
+
 @pytest.mark.parametrize("production_available", [True, False])
 def test_refresh_pagination_drafts_and_manifest_identity(
     monkeypatch, production_available
@@ -154,9 +168,11 @@ def test_refresh_pagination_drafts_and_manifest_identity(
         if args[0] == "rev-parse":
             return b"a" * 40
         if args[0] == "ls-tree":
-            return b"index.html\0assets/view.js\0tests/test.js\0"
+            return b"index.html\0assets/view.js\0assets/serving-plan/app.mjs\0tests/test.js\0tests/test.mjs\0"
         if args[-1].endswith("benchmark-source-manifest.json"):
             return json.dumps({**manifest, "commit": "b" * 40}).encode()
+        if args[-1].endswith("app.mjs"):
+            return b"fetch('./data/serving-plans.json')"
         return b"fetch('./data/x.json')"
 
     def fake_open(*args, **kwargs):
@@ -183,7 +199,15 @@ def test_refresh_pagination_drafts_and_manifest_identity(
     monkeypatch.setattr(index.subprocess, "check_output", fake_api)
     snapshot = index.refresh(Path("unused"), "main")
     assert len(snapshot["releases"]) == 2
-    assert list(snapshot["website_inputs_sha256"]) == ["assets/view.js", "index.html"]
+    assert list(snapshot["website_inputs_sha256"]) == [
+        "assets/serving-plan/app.mjs",
+        "assets/view.js",
+        "index.html",
+    ]
+    assert {
+        "target": "./data/serving-plans.json",
+        "consumers": ["assets/serving-plan/app.mjs"],
+    } in snapshot["website_references"]
     assert (
         snapshot["website_publication_manifest"]["commit"]
         == ("c" if production_available else "b") * 40

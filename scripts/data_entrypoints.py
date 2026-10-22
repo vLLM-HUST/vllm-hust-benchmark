@@ -71,7 +71,7 @@ def refresh(website, revision):
     for path in sorted(paths):
         # Public frontend only, not tests, build tools, or historic screenshots.
         if not (
-            path.endswith((".html", ".js"))
+            path.endswith((".html", ".js", ".mjs"))
             and ("/" not in path or path.startswith("assets/"))
         ):
             continue
@@ -148,7 +148,7 @@ def refresh(website, revision):
         "releases": sorted(releases, key=lambda r: r["tag"]),
         "website_repository": WEBSITE,
         "website_commit": commit,
-        "website_scope": "Literal HTTP(S), data/ and benchmark evidence paths in root HTML/JS and assets HTML/JS; dynamic expressions are not evaluated. Source snapshot is independent of production deployment; not a browser audit.",
+        "website_scope": "Literal HTTP(S), data/ and benchmark evidence paths in root HTML/JS/MJS and assets HTML/JS/MJS; dynamic expressions are not evaluated. Source snapshot is independent of production deployment; not a browser audit.",
         "website_inputs_sha256": inputs,
         "website_references": [
             {"target": t, "consumers": consumers[t]} for t in sorted(consumers)
@@ -312,6 +312,13 @@ def main(argv=None):
         )
     if args.refresh:
         sources = refresh(args.website, args.revision)
+        previous_path = ROOT / SOURCES
+        if previous_path.exists():
+            previous = json.loads(previous_path.read_text())
+            if previous.get("releases") and not sources["releases"]:
+                raise ValueError(
+                    "Remote refresh returned no public Releases; refusing to erase the existing inventory. Verify the API response and retry."
+                )
         (ROOT / SOURCES).write_text(render(sources))
     else:
         sources = json.loads((ROOT / SOURCES).read_text())

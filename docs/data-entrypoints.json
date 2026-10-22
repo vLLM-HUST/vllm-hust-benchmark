@@ -1,9 +1,9 @@
 {
   "schema": "benchmark-data-entrypoints/v1",
   "source_snapshot": "docs/data-entrypoints-sources.json",
-  "captured_at": "2026-10-22T13:43:43.873401+00:00",
-  "website_commit": "33d479040744234fe1e18b282bf0a89fa3bf370d",
-  "published_benchmark_commit": "4daf155ccf3e240d4e6eb39f06613b9ec9da0512",
+  "captured_at": "2026-10-22T15:37:10.632539+00:00",
+  "website_commit": "539955e62390ebc79e57edadaafe221397b54b85",
+  "published_benchmark_commit": "5dd8f1fe615c6024783bef59dcf9b3901be55b3a",
   "publication_manifest_source": "https://vllm-hust.sage.org.ai/data/benchmark-source-manifest.json",
   "production_manifest_error": null,
   "limits": "Offline navigation, not browser validation or evidence acceptance. Remote inventory is a dated snapshot. Literal links may be historical, dynamic, or unavailable. Reconstructed publication parts are checked locally; Release asset bytes are not downloaded.",
@@ -200,7 +200,7 @@
         "website-publication/data/benchmark-evidence-links.json"
       ],
       "sha256": "03e39fdacc5110320e2ab5c3e5f4853f05f35a6638c32cb922a44a06bf9b3049",
-      "snapshot_publication_status": "not-in-snapshot"
+      "snapshot_publication_status": "same-bytes"
     },
     {
       "website_path": "data/betterscale-dataset-validation-20261015/report.json",
@@ -326,7 +326,7 @@
         "website-publication/data/dataset-matrix-v1.json"
       ],
       "sha256": "7ffae7c27f01de964d377cdf9420e02233cee1ee7a786fc8380119437e89b47c",
-      "snapshot_publication_status": "changed-since-snapshot"
+      "snapshot_publication_status": "same-bytes"
     },
     {
       "website_path": "data/dataset_program_v1.json",
@@ -1230,7 +1230,7 @@
         "website-publication/data/swe-bench-pro-real-agent-threeway-20261022/report.json"
       ],
       "sha256": "7457b63321dd45b42187a121915ca1274a39e3f3c60618ceca8e7cd0dfd6293c",
-      "snapshot_publication_status": "not-in-snapshot"
+      "snapshot_publication_status": "same-bytes"
     },
     {
       "website_path": "data/traceloom-capture.json",
@@ -1285,6 +1285,14 @@
         "website:assets/agent-dataset-results.js"
       ],
       "benchmark_path": "website-publication/data/agent_dataset_results.json",
+      "resolution": "mapped"
+    },
+    {
+      "target": "./data/benchmark-evidence-links.json",
+      "consumers": [
+        "website:assets/benchmark-source.js"
+      ],
+      "benchmark_path": "website-publication/data/benchmark-evidence-links.json",
       "resolution": "mapped"
     },
     {
@@ -3376,6 +3384,14 @@
       "resolution": "tracked-evidence-path"
     },
     {
+      "target": "data/benchmark-evidence-links.json",
+      "consumers": [
+        "website:assets/benchmark-source.js"
+      ],
+      "benchmark_path": "website-publication/data/benchmark-evidence-links.json",
+      "resolution": "mapped"
+    },
+    {
       "target": "data/betterscale-school-runtime-20261016/report.json",
       "consumers": [
         "website-publication/data/dataset-matrix-v1.json"
@@ -3587,6 +3603,14 @@
         "website-publication/data/FIELD_SPECIFICATION.md"
       ],
       "benchmark_path": "website-publication/data/schemas/leaderboard_v1.schema.json",
+      "resolution": "mapped"
+    },
+    {
+      "target": "data/serving-plans.json?v=native-glm-20261013",
+      "consumers": [
+        "website:assets/serving-plan/app.mjs"
+      ],
+      "benchmark_path": "website-publication/data/serving-plans.json",
       "resolution": "mapped"
     },
     {
@@ -4679,6 +4703,13 @@
         "website:plugins.html"
       ],
       "resolution": "literal-external-link-not-fetched"
+    },
+    {
+      "target": "https://github.com/vLLM-HUST/vllm-hust-benchmark/${record.kind}/${manifest.commit}/${record.path.split(",
+      "consumers": [
+        "website:assets/benchmark-source.js"
+      ],
+      "resolution": "dynamic-template-not-evaluated"
     },
     {
       "target": "https://github.com/vLLM-HUST/vllm-hust-benchmark/${source.kind}/${publicationCommit}/${source.path.split(",
@@ -11334,7 +11365,7 @@
   ],
   "counts": {
     "publication_bindings": 125,
-    "references": 1012,
+    "references": 1016,
     "releases": 13,
     "assets": 228
   }
