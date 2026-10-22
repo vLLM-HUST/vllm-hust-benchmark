@@ -7,7 +7,7 @@
 - [x] StructEval原始Text→JSON前三条：task_id
   000500/000501/000502，原文件行1085–1087。官方语法/路径评分1、1、0.68，错误保留。[回执](validation/structeval-json-original-npu-20261022.json)。
 - [x] 修正后的数据包已在服务器安装，对全部50条Text→JSON原题进行准备/回查，原query一致，VQA与raw_output_metric未进入输入/注释。[组件回查](validation/structeval-provider-roundtrip-20261022.json)。此步骤模型调用0，不是额外50条推理。
-- [ ] 全部50条Text→JSON模型执行/评分正在进行；未结束前不勾。
+- [x] 全部50条原始Text→JSON已完成NPU执行及官方评分，平均final_eval_score为0.9616，其中3条未满分。[完整子集回执](validation/structeval-text-json-full-npu-20261022.json)。它是语法/路径分数，不是语义准确率；与前三条重叠，合计唯一任务仍为50。
 - [ ] 其他输入格式转JSON、其他输出格式、可视渲染/VQA均未验证。完整StructEval共2035条，不能把Text→JSON子集叫完整套件。
 - [ ] PAIO-JSON的语义准确率：未提供独立gold；保持不评估，不因合法JSON或schema通过而打勾。
 
