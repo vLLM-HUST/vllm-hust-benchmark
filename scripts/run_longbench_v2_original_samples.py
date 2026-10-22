@@ -78,9 +78,10 @@ def main():
     run.mkdir(mode=0o700, parents=True, exist_ok=False)
     with zipfile.ZipFile(args.official_archive) as archive:
         archive.extractall(run / "official-source")
-    source = (
-        run / "official-source/THUDM-LongBench-2e00731"
-    )  # pragma: allowlist secret - official archive directory name
+    source_dir_name = (
+        "THUDM-LongBench-2e00731"  # pragma: allowlist secret - public archive directory
+    )
+    source = run / "official-source" / source_dir_name
     from openai import OpenAI
 
     prior = Path.cwd()
