@@ -56,6 +56,9 @@ def main(argv=None):
     longbench = commands.add_parser("prepare-longbench-qasper")
     longbench.add_argument("--data-archive", type=Path, required=True)
     longbench.add_argument("--output", type=Path, required=True)
+    bfcl = commands.add_parser("prepare-bfcl-simple-python")
+    bfcl.add_argument("--official-archive", type=Path, required=True)
+    bfcl.add_argument("--output", type=Path, required=True)
     for name in ("catalog", "pipeline", "replay"):
         passthrough = commands.add_parser(name, add_help=False)
         passthrough.add_argument("arguments", nargs=argparse.REMAINDER)
@@ -112,6 +115,14 @@ def main(argv=None):
                 )
             value = provider.prepare_longbench_qasper(
                 data_archive=args.data_archive, output=args.output
+            )
+        elif args.command == "prepare-bfcl-simple-python":
+            if not hasattr(provider, "prepare_bfcl_simple_python"):
+                raise RuntimeError(
+                    "Install the exact BFCL data component; old wheels lack this preparation API"
+                )
+            value = provider.prepare_bfcl_simple_python(
+                official_archive=args.official_archive, output=args.output
             )
         else:
             value = provider.list_sources(class_id=args.class_id)

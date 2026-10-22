@@ -63,7 +63,11 @@ def bind_source(
                 "file differs from pinned publisher/previous identity; do not overwrite its revision"
             )
         count = 0
-        for row in iter_rows(path, records_path=spec.get("records_path", [])):
+        for row in iter_rows(
+            path,
+            records_path=spec.get("records_path", []),
+            row_format=spec.get("row_format"),
+        ):
             if mapping is not None:
                 from .adapters import adapt_row
 
