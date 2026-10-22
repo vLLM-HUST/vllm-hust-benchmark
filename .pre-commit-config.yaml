@@ -19,6 +19,9 @@ repos:
   - id: check-toml
   - id: check-added-large-files
     args: ["--maxkb=1000"]
+    # Five byte-preserved public SimLLM originals (1.3–1.6 MB each),
+    # verified against the frozen custody manifest by test_website_source_custody.
+    exclude: ^archive/mod-git-20261022/website-source-vllm-ascend-simllm-hust/snapshot/benchmarks/results/qwen35_latency_20261008/(tailanchor512-server\.log|simllm-context1008-(tailanchor512|baseline)-full5000-chat\.jsonl|repeat/(plugin5000|baseline5000)\.jsonl)$
   - id: check-merge-conflict
   - id: check-case-conflict
   - id: mixed-line-ending

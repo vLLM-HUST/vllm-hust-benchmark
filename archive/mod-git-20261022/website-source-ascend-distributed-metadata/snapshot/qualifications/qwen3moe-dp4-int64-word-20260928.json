@@ -1,0 +1,267 @@
+{
+  "schema_version": 1,
+  "evidence_type": "DP4 int64 word metadata synchronization",
+  "status": "three matched service session pairs completed; small gain subject to run variation",
+  "source": {
+    "published_revision": "5d1a2e47304622ba1a3109ffff38cec1b11ed185",
+    "candidate_revision": "e346ea5f489f5151f539f69db100929ce9d9250b",
+    "published_source_sha256": "4bb42bbd2eaceb6dfab95f4d5a9bb9f4195e6d0bb3cac34cead2e06b430eddfd",
+    "candidate_source_sha256": "daa17b4d246653e6f98a99c3141fd84df556c60af4ca38fea5588085be33a7c0",
+    "published_wheel_sha256": "4c64232dd82c84a5a2792626ebe7541e015ca2b289a625d950e10c59245437be",
+    "candidate_wheel_sha256": "4756e301981a63a61a6cec928f18872cdb15f84331f8763d4f689a489037cc35",
+    "vllm_hust_revision": "e1248fa2655fdb8d72f80a5d6c28fa9c75b660c0",
+    "vllm_ascend_revision": "367b8e62da799870a7476ce34f5f7658589a8aad",
+    "benchmark_revision": "e8a68923768adffb85c2d0fa255b2cec79af8ab5",
+    "ascend_target_fingerprint": "3e3cac40908b68c65c45c820efca81073c0a11bef5eab13b2f8cf9ce36e407f5"
+  },
+  "workload": {
+    "model": "Qwen3-30B-A3B-W8A8",
+    "model_config_sha256": "39c0e8a6041b3647888f20449630c6269c4685194f4edfca89caeb8ea385c46d",
+    "quant_description_sha256": "6e2fa90bf57fd6fe039c082625eb0e74d783b15225feea723cd289019a76dd5f",
+    "model_index_sha256": "cea506bfda7724d762de6434025b298e03830b9caa81f73f77afbd40d2e33d5b",
+    "trace_sha256": "3010faf313424f6158a1e9acefdc92a2a9fdf1b296d33cffa1ef2dead3b87c70",
+    "harness_sha256": "6d45b3cb90465a6d7935a84bc6901c347dbc568061a485ef6e14c10b62c91d6b",
+    "benchmark_script_sha256": "3e85c1ba20a8c12901bdfa637b64cb7402cfc233a04776025ba868a68decb882",
+    "devices": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "tensor_parallel_size": 1,
+    "data_parallel_size": 4,
+    "graph_mode": "FULL_DECODE_ONLY",
+    "capture_sizes": [
+      1,
+      2,
+      4,
+      8,
+      16,
+      24,
+      32
+    ],
+    "max_model_len": 2048,
+    "max_num_seqs": 32,
+    "requests_per_round": 64,
+    "input_tokens_per_round": 41547,
+    "output_tokens_per_round": 20444,
+    "rounds_per_session": 2,
+    "adm_enabled_in_both_modes": true
+  },
+  "cpu_gloo_method_calls": {
+    "scope": "four local CPU/Gloo ranks, direct metadata method call; excludes NPU and model execution",
+    "runs": [
+      {
+        "mode": "NONE",
+        "raw_result_sha256": "63fad500172cd75549d132f0c486751e0c46b0106baec6482691c68dc7d42c6e",
+        "published_ms_per_call": 0.5585530970711261,
+        "candidate_ms_per_call": 0.356316250981763,
+        "candidate_change_percent": -36.20727324757995,
+        "correctness": "native, published and candidate returned matching four-rank counts and graph mode"
+      },
+      {
+        "mode": "FULL",
+        "raw_result_sha256": "2516a9cb802d34d0dd7ffd34dd78a7622f0d40400240a1f43e3717d5906616b3",
+        "published_ms_per_call": 0.5261422204785049,
+        "candidate_ms_per_call": 0.365639457013458,
+        "candidate_change_percent": -30.505585223530662,
+        "correctness": "native, published and candidate returned matching four-rank counts and graph mode"
+      }
+    ]
+  },
+  "full_model_serving": {
+    "session_order": [
+      "published",
+      "candidate",
+      "published",
+      "candidate",
+      "candidate",
+      "published"
+    ],
+    "sessions": [
+      {
+        "mode": "published",
+        "run_id": "qwen3moe-tp1-dp4-word-base-20260928-fxucf3",
+        "source_sha256": "4bb42bbd2eaceb6dfab95f4d5a9bb9f4195e6d0bb3cac34cead2e06b430eddfd",
+        "rounds": [
+          {
+            "round": 1,
+            "raw_result_sha256": "616da3ac51eec7cef356f34aee0d2e8e1fd8ee0c71380dd50197d95e9e55d6c9",
+            "completed": 64,
+            "failed": 0,
+            "output_throughput_tokens_per_s": 462.56465274174394,
+            "mean_latency_s": 9.657528707786696,
+            "p99_latency_s": 16.074845608705655
+          },
+          {
+            "round": 2,
+            "raw_result_sha256": "87bb9eb1b9f348de538f0feffd3af3121deb7adea42f8a9fe8db9071c9623647",
+            "completed": 64,
+            "failed": 0,
+            "output_throughput_tokens_per_s": 463.8351814819493,
+            "mean_latency_s": 9.651831004433916,
+            "p99_latency_s": 16.2673584106192
+          }
+        ],
+        "mean_output_throughput_tokens_per_s": 463.1999171118466
+      },
+      {
+        "mode": "candidate",
+        "run_id": "qwen3moe-tp1-dp4-word-candidate-20260928-VwmAvh",
+        "source_sha256": "daa17b4d246653e6f98a99c3141fd84df556c60af4ca38fea5588085be33a7c0",
+        "rounds": [
+          {
+            "round": 1,
+            "raw_result_sha256": "34f3df4b045071f6435a7d298fa045a98f32fe570fef2aaab9e6c4f14b2bb174",
+            "completed": 64,
+            "failed": 0,
+            "output_throughput_tokens_per_s": 460.8659437592394,
+            "mean_latency_s": 9.687735772196902,
+            "p99_latency_s": 16.211793771358206
+          },
+          {
+            "round": 2,
+            "raw_result_sha256": "e7d56492e85fc5f53d3a84a4112adac554371d8bf4b67c636fba75545c11f14f",
+            "completed": 64,
+            "failed": 0,
+            "output_throughput_tokens_per_s": 469.0870512851867,
+            "mean_latency_s": 9.513773683385807,
+            "p99_latency_s": 15.975416672099382
+          }
+        ],
+        "mean_output_throughput_tokens_per_s": 464.9764975222131,
+        "observed_dp4_ranks": [
+          0,
+          1,
+          2,
+          3
+        ]
+      },
+      {
+        "mode": "published",
+        "run_id": "qwen3moe-tp1-dp4-word-base-20260928-YDDBiQ",
+        "source_sha256": "4bb42bbd2eaceb6dfab95f4d5a9bb9f4195e6d0bb3cac34cead2e06b430eddfd",
+        "rounds": [
+          {
+            "round": 1,
+            "raw_result_sha256": "c92e93f77d0572ad001893c978a2d3bec3851ec2753179f08a21b00a9d1b962b",
+            "completed": 64,
+            "failed": 0,
+            "output_throughput_tokens_per_s": 461.86439732702036,
+            "mean_latency_s": 9.668464441463584,
+            "p99_latency_s": 16.08505423544906
+          },
+          {
+            "round": 2,
+            "raw_result_sha256": "5a0e98c97e9ffd7a05346ccdb7cf9a75714ea4f2710f651bc350cfba032e498f",
+            "completed": 64,
+            "failed": 0,
+            "output_throughput_tokens_per_s": 462.5185907750845,
+            "mean_latency_s": 9.682698396209162,
+            "p99_latency_s": 16.117169057223947
+          }
+        ],
+        "mean_output_throughput_tokens_per_s": 462.1914940510524
+      },
+      {
+        "mode": "candidate",
+        "run_id": "qwen3moe-tp1-dp4-word-candidate-20260928-ckFgYQ",
+        "source_sha256": "daa17b4d246653e6f98a99c3141fd84df556c60af4ca38fea5588085be33a7c0",
+        "rounds": [
+          {
+            "round": 1,
+            "raw_result_sha256": "fc26d88eeff3a76667b075d182733fed2ad37f42fd263bd82ef29fb0d83d277d",
+            "completed": 64,
+            "failed": 0,
+            "output_throughput_tokens_per_s": 460.7018547766067,
+            "mean_latency_s": 9.710300865015597,
+            "p99_latency_s": 16.234974069716408
+          },
+          {
+            "round": 2,
+            "raw_result_sha256": "d9eb93c3580e89cc108bd35165b1f71219d97fdb6a28a1c86342caa1105526ad",
+            "completed": 64,
+            "failed": 0,
+            "output_throughput_tokens_per_s": 470.23742872391705,
+            "mean_latency_s": 9.507490506934118,
+            "p99_latency_s": 16.001915149837732
+          }
+        ],
+        "mean_output_throughput_tokens_per_s": 465.46964175026187,
+        "observed_dp4_ranks": [
+          0,
+          1,
+          2,
+          3
+        ]
+      },
+      {
+        "mode": "candidate",
+        "run_id": "qwen3moe-tp1-dp4-word-candidate-20260928-BhAuCr",
+        "source_sha256": "daa17b4d246653e6f98a99c3141fd84df556c60af4ca38fea5588085be33a7c0",
+        "rounds": [
+          {
+            "round": 1,
+            "raw_result_sha256": "d002a8432b9ba3792cc7546c938bdeb2d2a097064e7e4d5005180461b0ecebad",
+            "completed": 64,
+            "failed": 0,
+            "output_throughput_tokens_per_s": 469.8603643808564,
+            "mean_latency_s": 9.466356550983619,
+            "p99_latency_s": 15.943984940918162
+          },
+          {
+            "round": 2,
+            "raw_result_sha256": "9e02717a037f5358a4eb544ff9c1cbf1b37a9b97ccdee10ee5eda6c7a8a64f0a",
+            "completed": 64,
+            "failed": 0,
+            "output_throughput_tokens_per_s": 471.8388053030598,
+            "mean_latency_s": 9.428952940186718,
+            "p99_latency_s": 15.985642522228881
+          }
+        ],
+        "mean_output_throughput_tokens_per_s": 470.8495848419581,
+        "observed_dp4_ranks": [
+          0,
+          1,
+          2,
+          3
+        ]
+      },
+      {
+        "mode": "published",
+        "run_id": "qwen3moe-tp1-dp4-word-base-20260928-5pJSIk",
+        "source_sha256": "4bb42bbd2eaceb6dfab95f4d5a9bb9f4195e6d0bb3cac34cead2e06b430eddfd",
+        "rounds": [
+          {
+            "round": 1,
+            "raw_result_sha256": "9aa22ffb080bdc72c003e7b6d0526906b5af6342681475c7d080001132ba4f7b",
+            "completed": 64,
+            "failed": 0,
+            "output_throughput_tokens_per_s": 463.83756991057527,
+            "mean_latency_s": 9.628126197203528,
+            "p99_latency_s": 16.122419345658273
+          },
+          {
+            "round": 2,
+            "raw_result_sha256": "f0c6bcf6e8ef5bedecfce511734204dbd4da93399aa5a7d610548d8fa1dc68dd",
+            "completed": 64,
+            "failed": 0,
+            "output_throughput_tokens_per_s": 465.63370829069754,
+            "mean_latency_s": 9.607616919282009,
+            "p99_latency_s": 16.260466662971304
+          }
+        ],
+        "mean_output_throughput_tokens_per_s": 464.7356391006364
+      }
+    ],
+    "published_mean_output_throughput_tokens_per_s": 463.37568342117845,
+    "candidate_mean_output_throughput_tokens_per_s": 467.098574704811,
+    "candidate_change_percent": 0.8034282800827741,
+    "matched_session_changes_percent": [
+      0.3835450622365899,
+      0.7092617976321547,
+      1.3155749692779217
+    ],
+    "interpretation": "All twelve 64-request rounds completed. All three session means favored the candidate, including a candidate-first recheck. The first round of each of the first two candidate sessions was slower than its baseline; this is not a guaranteed per-round gain."
+  }
+}
