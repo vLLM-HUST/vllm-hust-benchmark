@@ -17,9 +17,13 @@ def test_publication_rebuilds_from_pinned_report_and_verified_archives(monkeypat
     assert hashlib.sha256(raw).hexdigest() == actual["report_sha256"]
     monkeypatch.setattr(module, "pinned", lambda path: raw)
     assert actual == module.build()
-    assert actual["version"] == "V0.66"
+    assert actual["version"] == "V0.67"
     assert module.REVISION in actual["report_url"]
     sections = {s["id"]: s for s in actual["sections"]}
+    baseline = sections["baseline018"]
+    assert len(baseline["tables"][0]["rows"]) == 5
+    assert "开发栈对照" in baseline["scope"]
+    assert "baseline018-sweprefix" in baseline["evidence"][0]["path"]
     closure = sections["reference-closure"]
     assert closure["tables"]
     assert "请求窗口核算见M01本轮判定" in closure["scope"]
