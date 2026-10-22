@@ -50,6 +50,13 @@ def test_reference_extraction():
         "https://github.com/vLLM-HUST/test",
         "reports/m01/raw.json",
     ]
+    escaped = json.dumps(
+        {"path": "reports/原始记录.json", "url": "https://example.org/raw"}
+    ).replace("/", "\\/")
+    assert index.references(escaped) == [
+        "https://example.org/raw",
+        "reports/原始记录.json",
+    ]
 
 
 def test_binding_content_changes_and_reference_status(tmp_path):

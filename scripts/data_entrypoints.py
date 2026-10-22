@@ -33,11 +33,28 @@ def sha(raw):
 
 def references(text):
     # Literal inventory only: no execution or pretending template expressions resolve.
-    return sorted(
-        set(URL.findall(text))
-        | set(LOCAL.findall(text))
-        | set(BENCHMARK_PATH.findall(text))
-    )
+    def strings(value):
+        if isinstance(value, str):
+            yield '"' + value + '"'
+        elif isinstance(value, dict):
+            for item in value.values():
+                yield from strings(item)
+        elif isinstance(value, list):
+            for item in value:
+                yield from strings(item)
+
+    # Decode JSON escapes (including Unicode and escaped slashes) before scanning.
+    # Non-JSON frontend/Markdown stays a literal text scan, never executable input.
+    try:
+        chunks = strings(json.loads(text))
+    except ValueError:
+        chunks = [text]
+    found = set()
+    for chunk in chunks:
+        found.update(URL.findall(chunk))
+        found.update(LOCAL.findall(chunk))
+        found.update(BENCHMARK_PATH.findall(chunk))
+    return sorted(found)
 
 
 def git(repo, *args):
