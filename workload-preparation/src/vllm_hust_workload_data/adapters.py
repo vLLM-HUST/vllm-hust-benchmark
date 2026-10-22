@@ -53,6 +53,24 @@ def adapt_row(
             raise ValueError(
                 f"{source_id}: invalid text field at row {index}; payload suppressed"
             )
+    if source_id == "NATURAL_INSTRUCTIONS" and (
+        not isinstance(row["Definition"], list)
+        or not row["Definition"]
+        or any(
+            not isinstance(value, str) or not value.strip()
+            for value in row["Definition"]
+        )
+        or not isinstance(row["input"], str)
+        or not row["input"].strip()
+        or not isinstance(row["output"], list)
+        or not row["output"]
+        or any(not isinstance(value, str) for value in row["output"])
+        or not isinstance(row["id"], str)
+        or not row["id"]
+    ):
+        raise ValueError(
+            "Natural Instructions requires original definition/input/reference fields"
+        )
     if source_id == "MMLU_PRO" and (
         not isinstance(row["options"], list) or not row["options"]
     ):
@@ -349,6 +367,7 @@ def iter_workload(
             asset_path(Path(data_root), name),
             records_path=spec.get("records_path", []),
             row_format=spec.get("row_format"),
+            root_fields=spec.get("root_fields", []),
         )
         remaining = None if limit is None else limit - emitted
         try:
