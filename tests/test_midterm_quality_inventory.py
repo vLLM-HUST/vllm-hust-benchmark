@@ -12,9 +12,7 @@ def test_quality_inventory_matches_original_tracks_and_preserves_limits():
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     text = (ROOT / module.REPORT).read_text()
-    selected = module.section(
-        text, "### 5.11 HLE-Verified与FrontierScience既有任务质量"
-    )
+    selected = module.section(text, "### 5.11 既有任务质量与配置配对")
     rows = module.tables(selected)[0]["rows"]
     hle = json.loads(
         (
@@ -35,11 +33,11 @@ def test_quality_inventory_matches_original_tracks_and_preserves_limits():
         assert row[2] == str(track["graded"])
         assert row[3] == str(track.get("unresolved", track.get("judge_unresolved")))
         assert row[4] == str(track["solver_truncated"])
-        assert row[5] == "未测"
+        assert row[5] == "未完成"
     for source in (hle, frontier):
         assert source["formal_acceptance"] is False
         assert source["paired_b1"] is None
-    for limitation in ("替代裁判", "完整分母", "未测", "不能仅凭公开归档独立重评"):
+    for limitation in ("替代裁判", "完整分母", "未完成", "不能仅凭公开归档独立重评"):
         assert limitation in selected
     assert "整模型有效算量覆盖仍待补证" not in text
     publication = json.loads(module.OUTPUT.read_text())
@@ -47,7 +45,59 @@ def test_quality_inventory_matches_original_tracks_and_preserves_limits():
         s for s in publication["sections"] if s["id"] == "dataset-quality-inventory"
     )
     assert section["tables"][0]["rows"] == rows
-    assert len(section["evidence"]) == 2
+    assert len(section["evidence"]) == 9
     for locator in section["evidence"]:
         assert ".." not in Path(locator["path"]).parts
         assert (ROOT / locator["path"]).is_file()
+
+    all_tables = module.tables(selected)
+    assert len(all_tables) == 4
+    matrix = json.loads(
+        (ROOT / "website-publication/data/dataset-matrix-v1.json").read_text()
+    )
+    indexed = {r["id"]: r for r in matrix["records"]}
+    full_ids = (
+        "mmlu-pro-native-test-200",
+        "mmlu-pro-betterscale-test-200",
+        "mmlu-pro-core-attention-boundary-test-200",
+        "mmlu-pro-ascend-attention-boundary-test-200",
+        "mmlu-pro-controller-20261018-native",
+        "mmlu-pro-controller-20261018-request-throttling-controller",
+    )
+    for row, ident in zip(all_tables[1]["rows"], full_ids):
+        result = indexed[ident]["quality"][0]
+        assert row[1] == f"{result['correct']} / {result['total']}"
+    best = json.loads(
+        (
+            ROOT
+            / "website-publication/data/betterscale-school-runtime-20261016/report.json"
+        ).read_text()
+    )
+    source_tracks = [best["accuracy"][k]["tracks"][k] for k in ("gold", "revision")]
+    source_tracks += [
+        best["accuracy"]["frontier"]["tracks"][k] for k in ("olympiad", "research")
+    ]
+    for row, track in zip(all_tables[2]["rows"], source_tracks):
+        assert row[1] == f"{track['successes']} / {track['total']}"
+        assert row[2] == str(track.get("unresolved", track.get("judge_unresolved")))
+    controller = (
+        ROOT / "website-publication/data/request-throttling-dataset-matrix-20261018"
+    )
+    pairs = []
+    for name in ("hle-gold", "hle-revision", "frontierscience"):
+        source = json.loads((controller / (name + ".json")).read_text())
+        assert source["configuration"]["core_version"] == "0.23.0"
+        arms = source["quality_pair"]["arms"]
+        tracks = (
+            ("olympiad", "research")
+            if name == "frontierscience"
+            else (name.removeprefix("hle-"),)
+        )
+        for track in tracks:
+            pairs.append(
+                [
+                    f"{arms[arm]['summary']['tracks'][track]['successes']} / {arms[arm]['summary']['tracks'][track]['total']}"
+                    for arm in ("native", "controller")
+                ]
+            )
+    assert [row[1:] for row in all_tables[3]["rows"]] == pairs
