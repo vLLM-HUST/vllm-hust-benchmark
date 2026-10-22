@@ -1,0 +1,123 @@
+{
+  "native_runtime": {
+    "manifest_sha256": "c4c7f082a4362665efaffda9317321ef43214216452ad36d9b826f9bcb6175a8",
+    "root": "/root/frontierscience-recovery-20261022/native-runtime/vllm_ascend",
+    "files_checked": 1551,
+    "vllm_source_files_checked": 2984,
+    "restored": {
+      "ascend_config.py": {
+        "candidate_sha256": "1de2e80ec645c5513d2270678999a7808c4ba6a03363159b7802080d86b66245",
+        "native_sha256": "c2112268daf08b1c92059baac1f05a71dfb9636c0596d9224648d9e298cf3010"
+      },
+      "ops/gdn.py": {
+        "candidate_sha256": "765eb27018f762e970301978af80a91d86ce4d7110ed7f2c48a3986b2eb78e85",
+        "native_sha256": "d26e15be45ec8a8bb84dab546d8a54963f75f90d0ae1b9fa0ce4167e73b01895"
+      },
+      "ops/vocab_parallel_embedding.py": {
+        "candidate_sha256": "c6aa66851d05881d90c66a045cd4321d95bfe94e944a759632276bb4a82bd066",
+        "native_sha256": "72aef1edfe098c25ce57a84eae1d0f758e6dbadbf4cb97cf160424e6a827a8f4"
+      },
+      "spec_decode/llm_base_proposer.py": {
+        "candidate_sha256": "d106cb3cc2e048734fa2986394c43c2177d04190715dc390d8a62d50830cb6e2",
+        "native_sha256": "5ae11410aee2367a2214640708e131ca57a6f4fb7b19a30443453c5d1c930892"
+      },
+      "worker/model_runner_v1.py": {
+        "candidate_sha256": "83da7d9c6c53f718322328bb43d80651a7cd62992a8d0e8d723d62769bd0b346",
+        "native_sha256": "ceabfc9db30c9d8bf8dc7c9bddf523c4a8d5ef04165994635dca3b94a8e929f4"
+      }
+    },
+    "scope": "Frozen native judge sources, not official v0.18"
+  },
+  "modules": {
+    "torch": {
+      "path": "/root/modcost-runtime-028-20261017/usr/local/python3.12.13/lib/python3.12/site-packages/torch/__init__.py",
+      "sha256": "cf40c075c95864036e835795756d69b8cccfafa76f3bcde5eba9d06065ccd3d1",
+      "version_attribute": "2.13.0+cpu"
+    },
+    "torch_npu": {
+      "path": "/root/modcost-runtime-028-20261017/usr/local/python3.12.13/lib/python3.12/site-packages/torch_npu/__init__.py",
+      "sha256": "582f1b2d2748c7b8f929472c34a4361e494bc498f8266dae2bd2531bef0a3455",
+      "version_attribute": "2.13.0.rc1"
+    },
+    "vllm": {
+      "path": "/root/modcost-runtime-028-20261017/vllm-workspace/vllm/vllm/__init__.py",
+      "sha256": "fd3708e5a13abe98c566afd79a6b1987cef70c0548bb19c1218ff6a7f9d43346",
+      "version_attribute": "0.28.1.post1.dev143+gf18cf803c"
+    },
+    "vllm_ascend": {
+      "path": "/root/frontierscience-recovery-20261022/native-runtime/vllm_ascend/__init__.py",
+      "sha256": "064c2d3dd0aad0fd8e4278b4b2d6c15c98a4352c8df3ba1bd9dc685eb320d47f",
+      "version_attribute": "unavailable"
+    },
+    "triton": {
+      "path": "/root/gennova-runtime/m01-triton-recovery-dev20261007-r2/triton/__init__.py",
+      "sha256": "96e68192cab5dd11fa30d5dc95d56c29ceecda53477fc3af8f37bee026b7a021",
+      "version_attribute": "3.6.0"
+    },
+    "acl": {
+      "path": "/usr/local/Ascend/cann-9.1.0/python/site-packages/acl.so",
+      "sha256": "34303ba302bde3cd44dd5bd7bc01fb216cbc5123e7db797a9834c9fa58e3f185"
+    }
+  },
+  "plugins": "ascend,ascend_model,ascend_model_loader,ascend_kv_connector",
+  "observer_enabled": false,
+  "command": [
+    "/root/frontierscience-recovery-20261022/venv/bin/python",
+    "-m",
+    "vllm.entrypoints.cli.main",
+    "serve",
+    "/models/Qwen3.5-35B-A3B",
+    "--served-model-name",
+    "qwen3.5-35b",
+    "--host",
+    "127.0.0.1",
+    "--port",
+    "18390",
+    "--dtype",
+    "bfloat16",
+    "--kv-cache-dtype",
+    "auto",
+    "--block-size",
+    "128",
+    "--tensor-parallel-size",
+    "2",
+    "--enable-expert-parallel",
+    "--pipeline-parallel-size",
+    "1",
+    "--data-parallel-size",
+    "1",
+    "--max-model-len",
+    "32768",
+    "--gpu-memory-utilization",
+    "0.85",
+    "--max-num-seqs",
+    "16",
+    "--max-num-batched-tokens",
+    "8192",
+    "--no-enable-prefix-caching",
+    "--enable-chunked-prefill",
+    "--no-enforce-eager",
+    "--seed",
+    "0",
+    "--scheduling-policy",
+    "fcfs",
+    "--distributed-executor-backend",
+    "mp",
+    "--disable-custom-all-reduce",
+    "--no-trust-remote-code",
+    "--load-format",
+    "auto",
+    "--no-enable-log-requests",
+    "--uvicorn-log-level",
+    "info",
+    "--compilation-config",
+    "{\"mode\":3,\"cudagraph_mode\":\"FULL_DECODE_ONLY\"}",
+    "--cudagraph-capture-sizes",
+    "1",
+    "2",
+    "4",
+    "8",
+    "16"
+  ],
+  "profile_sha256": "abc7641b0c2095bd1694907a29fa02674754034718d2dab90b5688142c9aa551"
+}
