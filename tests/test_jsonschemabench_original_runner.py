@@ -2,6 +2,7 @@
 
 from copy import deepcopy
 import importlib.util
+import json
 from pathlib import Path
 
 import pytest
@@ -44,3 +45,20 @@ def test_original_schema_not_adapted_and_budget_explicit():
 def test_nested_reference_detection_does_not_fetch():
     assert runner.has_ref({"items": [{"$ref": "https://invalid.example"}]})
     assert not runner.has_ref({"properties": {"fixture": {"type": "string"}}})
+
+
+def test_receipt_keeps_execution_and_conformance_separate():
+    root = Path(__file__).parents[1]
+    receipt = json.loads(
+        (
+            root
+            / "docs/workload-data/validation/jsonschemabench-original-schema-npu-20261023.json"
+        ).read_text(encoding="utf-8")
+    )
+    assert receipt["unique_tasks"] == 3
+    assert receipt["completed_samples"] == list(runner.SCHEMAS)
+    assert all(row["finish_reason"] == "stop" for row in receipt["samples"])
+    assert sum(row["original_validator_valid"] for row in receipt["samples"]) == 1
+    assert receipt["source_checkbox_eligible"] is False
+    assert receipt["full_suite_claim"] is False
+    assert receipt["schema_adaptation"] is False
