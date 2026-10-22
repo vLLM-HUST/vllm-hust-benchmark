@@ -27,11 +27,34 @@ greedy为temperature=0、n=1，请求函数保留其top_p=0.95。 首尾strip是
 未使用发布方无限重试循环，而调用单次请求函数，客户端timeout=300、max_retries=0。 未调用sanitize、代码执行或评分函数，也没有观测/采集钩子。
 请求和输出仅保留于服务器私有目录，公开记录不含生成代码或答案。
 
+## 独立生成入口
+
+`scripts/run_bigcodebench_original_generation.py` 只执行生成阶段，原始数据与发布方代码 由使用者在私有目录取得。`--official-code`
+应包含上述固定版本的 bigcodebench/provider/utility.py 和 bigcodebench/gen/util/openai_request.py；
+入口校验其字节摘要，不修改或分发第三方代码。
+
+本次独立客户端环境为 Python3.12、openai3.1.0、transformers5.5.4、pyarrow19.0.1。
+这些是本次探测版本，不是发布方完整官方环境；没有加载CPU模型或CUDA推理。
+
+```bash
+python -m pip install openai==3.1.0 transformers==5.5.4 pyarrow==19.0.1
+python scripts/run_bigcodebench_original_generation.py \
+  --data-root /private/bigcodebench \
+  --official-code /private/bigcodebench-code \
+  --output /private/bigcodebench-generation-new \
+  --model workload-qwen35-27b-128k-nonthinking \
+  --origin http://127.0.0.1:19466 --context-capacity 131072
+```
+
+原始数据根目录下须有 data/v0.1.4-00000-of-00001.parquet。输出目录必须不存在， 且不能与原始数据或代码目录互相包含。只允许无凭据的本机HTTP服务，不自动下载、
+换模型、缩短题目或执行生成代码。完整输入先经服务tokenize预检，随后核对实际usage。 length单独标为截断；空输出、请求失败或预检不符保留失败类型。
+只在三条生成均正常stop时返回0，但返回0仍不代表功能正确、评分或全套完成。 原始请求和响应留在权限受限的私有目录，不在终端打印代码或答案。
+
 ## 检查清单
 
 - [x] 三个原始任务读取、prepare、resolve输入/参考独立往返。
 - [x] 原版提示/请求函数驱动NPU生成；三条完整输入预检匹配、正常stop。
-- [ ] 可复用公开生成入口、CPU协议测试及交接复跑。
+- [x] 可复用公开生成入口、CPU协议测试及服务器同三题交接复跑；结果一致，不累计独立任务数。
 - [ ] 原版功能测试与适用pass@1评分。
 - [ ] 完整1140条验证、本批最终工件及研究端交接。
 

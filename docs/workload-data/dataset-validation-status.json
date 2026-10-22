@@ -4,7 +4,7 @@
   "scope": "Per-source integration validation; not performance or full-suite acceptance",
   "completion_rule": {
     "minimum_preselected_samples": 3,
-    "server": "root@36.140.239.91:32070",
+    "server": "user-authorized validation instance; private connection details withheld",
     "accelerator": "NPU_ONLY",
     "requires": [
       "original_input",
@@ -134,16 +134,26 @@
         "code-generation-with-tests",
         "code-evaluation"
       ],
-      "acquisition": "VERIFIED_LOCAL",
-      "read_adapter": "VERIFIED_LOCAL_3_SAMPLES",
-      "server_execution": "NOT_RUN",
-      "scoring": "NOT_RUN",
-      "selected_samples": [],
+      "acquisition": "VERIFIED_SELECTED_ORIGINAL_FILE_ON_SERVER",
+      "read_adapter": "VERIFIED_SERVER_INSTALLED_ORIGINAL_3_ROUNDTRIPS",
+      "server_execution": "GENERATION_ONLY_NOT_TASK_VALIDATED",
+      "scoring": "BLOCKED_NO_VERIFIED_SANDBOX",
+      "selected_samples": [
+        "BigCodeBench/0",
+        "BigCodeBench/1",
+        "BigCodeBench/2"
+      ],
       "completed_samples": [],
       "checked": false,
-      "receipt": null,
-      "blocker": "当前安装包已本地读取回查3条；尚未完成服务器任务执行与适用评分。",
-      "local_read_receipt": "docs/workload-data/validation/local-read-24sources-20261022.json"
+      "receipt": "docs/workload-data/validation/bigcodebench-original-generation-npu-20261023.json",
+      "blocker": "Three original Instruct generations stop with full-input usage matching; functional code execution/scoring not run. Final batch CI and research handoff pending.",
+      "local_read_receipt": "docs/workload-data/validation/local-read-24sources-20261022.json",
+      "read_selected_row_indices": [
+        0,
+        1,
+        2
+      ],
+      "read_receipt": "docs/workload-data/validation/public-original-assets-server-reader-20261023.json"
     },
     {
       "source_id": "BILLSUM",
@@ -199,16 +209,22 @@
       "workload_class_ids": [
         "visual-document-chart"
       ],
-      "acquisition": "VERIFIED_LOCAL",
-      "read_adapter": "VERIFIED_LOCAL_3_SAMPLES",
+      "acquisition": "VERIFIED_SELECTED_ORIGINAL_FILE_ON_SERVER",
+      "read_adapter": "VERIFIED_SERVER_INSTALLED_ORIGINAL_3_ROUNDTRIPS",
       "server_execution": "NOT_RUN",
       "scoring": "NOT_RUN",
       "selected_samples": [],
       "completed_samples": [],
       "checked": false,
-      "receipt": null,
-      "blocker": "当前安装包已本地读取回查3条；尚未完成服务器任务执行与适用评分。",
-      "local_read_receipt": "docs/workload-data/validation/local-read-24sources-20261022.json"
+      "receipt": "docs/workload-data/validation/public-original-assets-server-reader-20261023.json",
+      "blocker": "Three original test-file image/question/reference roundtrips passed; active service is language-model-only, so no visual task execution/scoring. Other shards unvalidated.",
+      "local_read_receipt": "docs/workload-data/validation/local-read-24sources-20261022.json",
+      "read_selected_row_indices": [
+        0,
+        1,
+        2
+      ],
+      "read_receipt": "docs/workload-data/validation/public-original-assets-server-reader-20261023.json"
     },
     {
       "source_id": "CROSSCODEEVAL",
@@ -288,16 +304,22 @@
         "code-generation-with-tests",
         "scientific-coding-workflow"
       ],
-      "acquisition": "VERIFIED_LOCAL",
-      "read_adapter": "VERIFIED_LOCAL_3_SAMPLES",
+      "acquisition": "VERIFIED_SELECTED_ORIGINAL_FILE_ON_SERVER",
+      "read_adapter": "VERIFIED_SERVER_INSTALLED_ORIGINAL_3_ROUNDTRIPS",
       "server_execution": "NOT_RUN",
       "scoring": "NOT_RUN",
       "selected_samples": [],
       "completed_samples": [],
       "checked": false,
-      "receipt": null,
-      "blocker": "当前安装包已本地读取回查3条；尚未完成服务器任务执行与适用评分。",
-      "local_read_receipt": "docs/workload-data/validation/local-read-24sources-20261022.json"
+      "receipt": "docs/workload-data/validation/public-original-assets-server-reader-20261023.json",
+      "blocker": "Three original task records roundtrip; original dependency stack, isolated code execution and official scorer not yet validated.",
+      "local_read_receipt": "docs/workload-data/validation/local-read-24sources-20261022.json",
+      "read_selected_row_indices": [
+        0,
+        1,
+        2
+      ],
+      "read_receipt": "docs/workload-data/validation/public-original-assets-server-reader-20261023.json"
     },
     {
       "source_id": "DUREADER",
@@ -1328,16 +1350,22 @@
         "simulation-analysis-verification",
         "scientific-coding-workflow"
       ],
-      "acquisition": "VERIFIED_LOCAL",
-      "read_adapter": "VERIFIED_LOCAL_3_SAMPLES",
+      "acquisition": "VERIFIED_SELECTED_ORIGINAL_FILE_ON_SERVER",
+      "read_adapter": "VERIFIED_SERVER_INSTALLED_ORIGINAL_3_ROUNDTRIPS",
       "server_execution": "NOT_RUN",
       "scoring": "NOT_RUN",
       "selected_samples": [],
       "completed_samples": [],
       "checked": false,
-      "receipt": null,
-      "blocker": "当前安装包已本地读取回查3条；尚未完成服务器任务执行与适用评分。",
-      "local_read_receipt": "docs/workload-data/validation/local-read-24sources-20261022.json"
+      "receipt": "docs/workload-data/validation/public-original-assets-server-reader-20261023.json",
+      "blocker": "Three original task records roundtrip; native scientific task assets, runtime and judge not yet validated.",
+      "local_read_receipt": "docs/workload-data/validation/local-read-24sources-20261022.json",
+      "read_selected_row_indices": [
+        0,
+        1,
+        2
+      ],
+      "read_receipt": "docs/workload-data/validation/public-original-assets-server-reader-20261023.json"
     },
     {
       "source_id": "SCIENCEWORLD",
@@ -1432,16 +1460,22 @@
       "workload_class_ids": [
         "repository-agent-loop"
       ],
-      "acquisition": "VERIFIED_LOCAL",
-      "read_adapter": "VERIFIED_LOCAL_3_SAMPLES",
+      "acquisition": "VERIFIED_SELECTED_ORIGINAL_FILE_ON_SERVER",
+      "read_adapter": "VERIFIED_SERVER_INSTALLED_ORIGINAL_3_ROUNDTRIPS",
       "server_execution": "NOT_RUN",
       "scoring": "NOT_RUN",
       "selected_samples": [],
       "completed_samples": [],
       "checked": false,
-      "receipt": null,
-      "blocker": "当前安装包已本地读取回查3条；尚未完成服务器任务执行与适用评分。",
-      "local_read_receipt": "docs/workload-data/validation/local-read-24sources-20261022.json"
+      "receipt": "docs/workload-data/validation/public-original-assets-server-reader-20261023.json",
+      "blocker": "Three original task records roundtrip; repository setup, repair agent, test container and official task scoring not yet validated.",
+      "local_read_receipt": "docs/workload-data/validation/local-read-24sources-20261022.json",
+      "read_selected_row_indices": [
+        0,
+        1,
+        2
+      ],
+      "read_receipt": "docs/workload-data/validation/public-original-assets-server-reader-20261023.json"
     },
     {
       "source_id": "SWESMITH",
@@ -1483,16 +1517,22 @@
         "structured-generation",
         "tool-call-generation"
       ],
-      "acquisition": "VERIFIED_LOCAL",
-      "read_adapter": "VERIFIED_LOCAL_3_SAMPLES",
-      "server_execution": "NOT_RUN",
-      "scoring": "NOT_RUN",
+      "acquisition": "VERIFIED_SELECTED_ORIGINAL_FILE_ON_SERVER",
+      "read_adapter": "VERIFIED_SERVER_INSTALLED_ORIGINAL_3_ROUNDTRIPS",
+      "server_execution": "NOT_APPLICABLE_HISTORICAL_TOOL_DIALOGUE",
+      "scoring": "NOT_APPLICABLE_NO_NATIVE_TASK_ORACLE",
       "selected_samples": [],
       "completed_samples": [],
       "checked": false,
-      "receipt": null,
-      "blocker": "当前安装包已本地读取回查3条；尚未完成服务器任务执行与适用评分。",
-      "local_read_receipt": "docs/workload-data/validation/local-read-24sources-20261022.json"
+      "receipt": "docs/workload-data/validation/public-original-assets-server-reader-20261023.json",
+      "blocker": "Published synthetic historical dialogue, not an executable agent environment; no invented episode or model prompt. Final batch consumer pending.",
+      "local_read_receipt": "docs/workload-data/validation/local-read-24sources-20261022.json",
+      "read_selected_row_indices": [
+        0,
+        1,
+        2
+      ],
+      "read_receipt": "docs/workload-data/validation/public-original-assets-server-reader-20261023.json"
     },
     {
       "source_id": "TOOLBENCH",
@@ -1518,16 +1558,22 @@
         "evolving-corpus-rag",
         "repository-agent-loop"
       ],
-      "acquisition": "VERIFIED_LOCAL",
-      "read_adapter": "VERIFIED_LOCAL_3_SAMPLES",
-      "server_execution": "NOT_RUN",
-      "scoring": "NOT_RUN",
+      "acquisition": "VERIFIED_SELECTED_ORIGINAL_FILE_ON_SERVER",
+      "read_adapter": "VERIFIED_SERVER_INSTALLED_ORIGINAL_3_ROUNDTRIPS",
+      "server_execution": "NOT_APPLICABLE_METADATA_NO_PROMPT",
+      "scoring": "NOT_APPLICABLE_NO_TASK_ORACLE",
       "selected_samples": [],
       "completed_samples": [],
       "checked": false,
-      "receipt": null,
-      "blocker": "当前安装包已本地读取回查3条；尚未完成服务器任务执行与适用评分。",
-      "local_read_receipt": "docs/workload-data/validation/local-read-24sources-20261022.json"
+      "receipt": "docs/workload-data/validation/public-original-assets-server-reader-20261023.json",
+      "blocker": "Invocation metadata only; no model/observation/analysis calls. Three selected rows, not full file or source. Final batch consumer pending.",
+      "local_read_receipt": "docs/workload-data/validation/local-read-24sources-20261022.json",
+      "read_selected_row_indices": [
+        0,
+        1,
+        2
+      ],
+      "read_receipt": "docs/workload-data/validation/public-original-assets-server-reader-20261023.json"
     },
     {
       "source_id": "TULU3",
