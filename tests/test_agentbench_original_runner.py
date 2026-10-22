@@ -18,6 +18,15 @@ runner = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(runner)
 
 
+@pytest.fixture(autouse=True)
+def optional_data_provider_source(monkeypatch):
+    # The root package deliberately does not require the optional data wheel.
+    # Root-only CI checks the checked-in source; the dedicated wheel CI keeps
+    # testing its installed distribution rather than shadowing it with source.
+    if importlib.util.find_spec("vllm_hust_workload_data") is None:
+        monkeypatch.syspath_prepend(str(ROOT / "workload-preparation/src"))
+
+
 def fixture_inputs(tmp_path, monkeypatch):
     from vllm_hust_workload_data import provider
 
