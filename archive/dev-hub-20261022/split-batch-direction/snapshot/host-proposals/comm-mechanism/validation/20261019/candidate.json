@@ -1,0 +1,32 @@
+{
+  "id": "comm-free-current-window-diagnostic",
+  "route": "028/D1-host-overhead-graph",
+  "caliber": "mmlu-pro-gdn-high-concurrency-longctx",
+  "cohort": "028-qwen35-35b-a3b-tp2-fullgraph",
+  "scenario": "ladder-1019-022857 current truncated TP2 bf16 FULL graph window; 32 iterations, 16 admitted requests lower bound; no new scenario",
+  "op": "Free temporal gaps and all-reduce communication (graph-layer diagnostic only)",
+  "phase": "mixed 13 prefill / 19 decode iterations; per-call phase only inferred from payload",
+  "method": "One dual-rank mechanism-gap collection: true shapes/stack; Text+DB; data_simplification=false; offline parse both ranks; no slimming",
+  "stage": "blocked",
+  "next_action": "Obtain authorization for one replacement serve start after read-only host pinned-memory diagnosis; retain same cohort/load/window and preserve raw data; no speculative overlap change.",
+  "stop_condition": "No restart without extra serve budget authorization; no overlap until user mechanism gates pass.",
+  "budget": {
+    "wall_min": 35,
+    "serve_starts": 1,
+    "profile_windows": 1,
+    "resamples": "none: zero repeats authorized",
+    "accidental_start": "serve --help dispatched a plain startup at 06:25; stopped before collection; outside intended diagnostic start, explicitly recorded"
+  },
+  "evidence": [
+    "/root/\u5305\u4f53\u6062\u590d/records/probes/20261019T055422Z_comm-free-paired-forensics.json",
+    "/root/\u5305\u4f53\u6062\u590d/records/probes/20261019T055617Z_comm-free-evidence-correction.json",
+    "/root/\u5305\u4f53\u6062\u590d/records/probes/20261019T060619Z_free-attribution-v1-final-withdrawal.json",
+    "/root/\u5305\u4f53\u6062\u590d/records/probes/20261019T060705Z_comm-free-coverage.log",
+    "/root/\u5305\u4f53\u6062\u590d/records/probes/20261019T063000Z_comm-mechanism/failure-receipt.json",
+    "/root/\u5305\u4f53\u6062\u590d/logs/ladder-serve-1019-063124.log",
+    "/root/\u5305\u4f53\u6062\u590d/records/probes/20261019T063000Z_comm-mechanism/final-checks.log",
+    "/root/\u5305\u4f53\u6062\u590d/records/probes/20261019T063000Z_comm-mechanism/coverage.log"
+  ],
+  "reason": "rank1 NPUModelRunner CPU pinned buffer initialization: aclrtMallocHostWithCfg 207001 / allocate_host_memory_slowpath / EL0004; profiler not started",
+  "reopen_condition": "Only propose a single-variable overlap trial after all user mechanism gates hold."
+}

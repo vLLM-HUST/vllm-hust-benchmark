@@ -1,0 +1,74 @@
+{
+  "source": "/root/comm-stop-build-20261019T080222Z",
+  "source_commit": "462f4e18a8303698aca3997edfcc5dd3b1707968",
+  "submodules": [
+    {
+      "path": "third_party/op-plugin",
+      "commit": "a365032e8d96befd8e554afba3d60f342a4e6578",
+      "repository": "Ascend/op-plugin",
+      "returncode": 0
+    },
+    {
+      "path": "third_party/fmt",
+      "commit": "123913715afeb8a437e6388b4473fcc4753e1c9a",
+      "repository": "fmtlib/fmt",
+      "returncode": 0
+    },
+    {
+      "path": "third_party/nlohmann",
+      "commit": "87cda1d6646592ac5866dc703c8e1839046a6806",
+      "repository": "nlohmann/json",
+      "returncode": 0
+    },
+    {
+      "path": "third_party/dvm/dvm",
+      "commit": "b64eba7c8abe501cd216f94feddfe12b5c6e2192",
+      "repository": "mindspore-ai/dvm",
+      "returncode": 0
+    }
+  ],
+  "target_torch": "2.13.0+cpu",
+  "target_torch_npu": "2.13.0rc1",
+  "source_version_txt_override": {
+    "from": "2.14.0",
+    "to": "2.13.0",
+    "purpose": "Select installed Torch 2.13 codegen API; source commit matches installed torch_npu git_version."
+  },
+  "headers_bootstrap": "Installed wheel include/third_party/acl/inc/acl copied only to isolated source third_party/acl/inc/acl",
+  "codegen_environment": {
+    "TORCH_DEVICE_BACKEND_AUTOLOAD": "0"
+  },
+  "codegen": [
+    "bash",
+    "generate_code.sh",
+    "/usr/local/python3.12.13/bin/python",
+    "2.13.0"
+  ],
+  "cmake": {
+    "generator": "Ninja",
+    "CMAKE_BUILD_TYPE": "Release",
+    "PYTORCH_INSTALL_DIR": "/usr/local/python3.12.13/lib/python3.12/site-packages/torch",
+    "PYTHON_INCLUDE_DIR": "/usr/local/python3.12.13/include/python3.12",
+    "TORCH_VERSION": "2.13.0.rc1",
+    "GLIBCXX_USE_CXX11_ABI": 1,
+    "TORCHNPU_INSTALL_LIBDIR": "/root/comm-stop-build-20261019T080222Z/build/packages/torch_npu/lib",
+    "BUILD_TORCHAIR": "not enabled",
+    "BUILD_TENSORPIPE": "not enabled"
+  },
+  "build": [
+    "timeout",
+    "1200",
+    "cmake",
+    "--build",
+    "/root/comm-stop-build-20261019T080222Z/build",
+    "--target",
+    "torch_npu",
+    "-j",
+    "8"
+  ],
+  "cap_seconds": 1200,
+  "installed_dependency_modified": false,
+  "patch_sha256": "b1a4da0dded327bf26efbd2f489738d60ace0cc554bc242a5b0282077b62f839",
+  "patch_source_sha256": "853f32ab6abfd1fdc3cc889c416c4ac853b174fe9e2316277d943c59b0b1f03b",
+  "scope": "Isolated attempt only; a completed link and runtime CPU preflight are required before any deployment claim. Build feature parity, model numerical validation and dual-rank device validation remain separate."
+}

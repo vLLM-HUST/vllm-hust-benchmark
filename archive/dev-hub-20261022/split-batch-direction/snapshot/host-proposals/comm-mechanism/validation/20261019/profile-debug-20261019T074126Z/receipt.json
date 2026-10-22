@@ -1,0 +1,318 @@
+{
+  "schema": "comm-mechanism-debug-attempt.v1",
+  "recorded_at": "2026-10-19T07:52:12.242888+00:00",
+  "startup": {
+    "repository": "/root/vllm-workspace/vllm-ascend-split-batch-hust",
+    "branch": "0.28/comm-overlap-free-attribution",
+    "base_head": "852d397d4eded27a2812dba37ae884edeb7f2458",
+    "initial_dirty_files": [],
+    "serve_starts": 1,
+    "profile_windows_started": 1,
+    "profile_windows_completed": 0,
+    "resamples": 0
+  },
+  "scope": {
+    "model": "Qwen3.5-35B-A3B",
+    "precision": "bf16",
+    "weight_format": "floating-point; no quantization",
+    "tp": 2,
+    "graph": "FULL",
+    "max_model_len": 8192,
+    "capture_sizes": [
+      1,
+      2,
+      4,
+      8,
+      16,
+      32
+    ],
+    "workload": "MMLU-Pro smoke first 16; 5-shot CoT; concurrency 16; maximum 2048 generated tokens; temperature 0; harness seed 42",
+    "requested_capture": "32 iterations; shapes/stack/modules; Text+DB; no data simplification; memory=false",
+    "shape_facts": {
+      "status": "UNVERIFIED: raw capture interrupted; no parsed DB/CSV",
+      "per_call_allreduce_shapes": null,
+      "per_call_callsite_and_phase": null,
+      "complete_window_prefill_tokens": null,
+      "planned_iterations": 32,
+      "stop_log": "Max profiling iterations reached; not proof of exactly 32 valid recorded iterations"
+    },
+    "compute_change": false,
+    "communication_schedule_change": false,
+    "overlap_change": false,
+    "e2e_comparison": false
+  },
+  "environment_diagnosis": {
+    "cann": "/usr/local/Ascend/cann-9.1.0",
+    "activate_rv1_sourced_in_server_shell": false,
+    "suspect_prefix_absent_from_server_launcher": true,
+    "correct_extension": "/vllm-workspace/vllm-ascend/vllm_ascend/vllm_ascend_C.cpython-312-aarch64-linux-gnu.so",
+    "correct_dependency": "/vllm-workspace/vllm-ascend/vllm_ascend/libvllm_ascend_kernels.so",
+    "clean_environment_import_exit": 0,
+    "clean_environment_custom_op_registered": true,
+    "isolated_prefix_expected_failure_assertion_exit": 0,
+    "isolated_prefix_result": "Adding only /root/vllm-workspace/.stack/ascend-fbe4911/vllm_ascend to LD_LIBRARY_PATH reproduced the exact undefined symbol and absent npu_gemma_rms_norm. The clean library exports the symbol, the suspect library does not. RUNPATH includes $ORIGIN but dependency can be shadowed by LD_LIBRARY_PATH.",
+    "clean_dependency_sha256": "ae766df73419a4839d27508979fb8df97789266cab52ac969072793b6c58de77",
+    "suspect_dependency_sha256": "31c7ea59b879eeaa75c81d79ef1c2d660eadb79f4f47f9ebda9033dfc7c71653",
+    "probe_correction": "Initial top-level import vllm_ascend_C was invalid (ModuleNotFoundError) in both Python environments; the valid probe is from vllm_ascend import vllm_ascend_C. Those failed probes remain in L2 and are not counted as ABI failures.",
+    "reproduction_commands": [
+      "/usr/local/python3.12.13/bin/python -c \"import torch,torch_npu; from vllm_ascend import vllm_ascend_C; assert hasattr(torch.ops._C_ascend, 'npu_gemma_rms_norm')\"",
+      "env LD_LIBRARY_PATH=\"/root/vllm-workspace/.stack/ascend-fbe4911/vllm_ascend:$LD_LIBRARY_PATH\" /usr/local/python3.12.13/bin/python -c \"import torch,torch_npu; from vllm_ascend import vllm_ascend_C\""
+    ]
+  },
+  "attempt": {
+    "window": "/root/prof/ladder-1019-074126",
+    "health_ready": true,
+    "start_profile_http_200": true,
+    "mmlu_load_started": true,
+    "initial_launcher_exit": 3,
+    "initial_launcher_failure": "Candidate remained blocked from the preceding attempt; deep collection gate rejected it BEFORE /start_profile.",
+    "resume": "Candidate changed to probing under the debug authorization; reused ready PID 1403820. Executed a frozen copy of tools/collect_comm_mechanism.sh omitting only the serve line. No second serve start or second profile window.",
+    "candidate_snapshot_validation_failures": "Two administrative record attempts were rejected for zero-valued budget fields before any writes/profile calls. Valid snapshot uses resamples=none and only positive consumed counts.",
+    "profile_suffix_exit": 1,
+    "first_failure_phase": "Automatic profiler stop after max profiling iterations, not worker startup.",
+    "failure_observations": [
+      "07:49:28: both ranks warn Stop profiler while current state is RECORD.",
+      "Worker_TP0 logs Max profiling iterations reached. Stopping profiler...",
+      "Two Segfault encountered stacks show _PyInterpreterState_GET and _PyObject_Free.",
+      "07:49:31: worker death; EngineCore cancelled/EngineDeadError; all 16 API requests return 500.",
+      "Harness subsequently raises Session is closed; ladder aborts and attempts to stop profile."
+    ],
+    "failure_cause_limit": "Native/Python cause of the stop-time segfault is unproven; do not attribute it to analysis, shapes, stack or carrier without isolation. analyse_flag=False was configured.",
+    "undefined_symbol_in_server_log": false,
+    "missing_npu_gemma_rms_norm_in_server_log": false,
+    "pinned_memory_error_207001": false,
+    "cgroup_oom": 0,
+    "cgroup_oom_kill": 0
+  },
+  "raw_evidence": {
+    "rank_directories": [
+      {
+        "path": "/root/prof/ladder-1019-074126/dp0_pp0_tp0_dcp0_ep0_rank0_1406533_20261019074739526_ascend_pt",
+        "bytes": 999709463,
+        "file_count": 93
+      },
+      {
+        "path": "/root/prof/ladder-1019-074126/dp0_pp0_tp1_dcp0_ep1_rank1_1406534_20261019074739529_ascend_pt",
+        "bytes": 998778273,
+        "file_count": 93
+      }
+    ],
+    "rank_db_count": 0,
+    "rank_kernel_csv_count": 0,
+    "offline_analyse_run": false,
+    "recover_profile_run": false,
+    "audit_run": false,
+    "preserved": true,
+    "slim_enabled": false,
+    "renamed_or_overwritten": false,
+    "manifest": "raw-artifacts-manifest.json"
+  },
+  "gates": {
+    "startup_environment": "PASS for this attempt",
+    "dual_rank_parsed_trace": "MISSING",
+    "communication_order_payload_dtype_rank_size_pairing": "NOT RUN",
+    "reliable_allreduce_callsite_mapping": "NOT RUN",
+    "complete_device_graph_start_end": "NOT RUN",
+    "overlap_proposal": "BLOCKED",
+    "optimization_acceptance": "NOT ACCEPTED",
+    "l3_and_compare": "NOT RUN; diagnostic only, no compute change"
+  },
+  "checks": {
+    "targeted_pytest": "7 passed; exit 0",
+    "repository_pytest": "861 passed, 11 skipped; exit 0",
+    "repository_ruff": "All checks passed; exit 0",
+    "collection_shell_syntax": "PASS; exit 0",
+    "coverage": "exit 0; FAIL 0/WARN 51, metric PASS/layer WARN(13)/caliber WARN(34); not mechanism or numerical acceptance",
+    "startup_drift_notice": "opt status reported pre-existing evidence drift; not repaired or repinned in this task; coverage output does not establish its repair"
+  },
+  "disposition": {
+    "status": "blocked",
+    "experiment_completed": false,
+    "optimization_accepted": false,
+    "implementation_changed": false,
+    "collection_or_computation_changed": false,
+    "service_and_workers_remaining": false,
+    "npu_processes_remaining": false,
+    "remote_published": false,
+    "next_action": "Offline isolate profiler stop/finalization and assess recoverability of preserved raw traces before proposing another collection. No retry/start/resample in this task. Keep default-off and all mechanism gates blocked.",
+    "stop_condition": "No new collection window without a documented stop-path remedy and explicit authorization; no graph/compute/communication/pinned-memory bypass."
+  },
+  "evidence": [
+    {
+      "path": "/root/包体恢复/logs/ladder-serve-1019-074137.log",
+      "bytes": 72856,
+      "sha256": "c27efe44e53da8c7e76aeb655f451ed28778fb2d95e910bbcde34ee85271df66"
+    },
+    {
+      "path": "/root/包体恢复/logs/ladder-serve-1019-074137.env.json",
+      "bytes": 824,
+      "sha256": "83d75d21652c4c460da57fe124485576d1e34225dea9a0d00997120964b700c6"
+    },
+    {
+      "path": "/root/prof/ladder-1019-074126/cohort.json",
+      "bytes": 1475,
+      "sha256": "a8a72195f48967f3a868abbdf37f4630f3531388b694845b003b78c54301f73a"
+    },
+    {
+      "path": "/root/prof/ladder-1019-074126/profile-plan.json",
+      "bytes": 189,
+      "sha256": "476a3da3ccaf6a63586dd9b91652a67b9f4110352b0287fb736a4d7466146add"
+    },
+    {
+      "path": "/root/prof/ladder-1019-074126/metrics-before.txt",
+      "bytes": 53811,
+      "sha256": "97d6f34d03e9f15bd3523f449eeff876b21c511a583ba4098dafad7f900f0a28"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261019T074006Z_comm-trace-debug/candidate-before.json",
+      "bytes": 4070,
+      "sha256": "1f2bf20e719b0b2b6f7438e597959f6e7f63471740e786b2079bbba2a9c5f51d"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261019T074006Z_comm-trace-debug/candidate-probing-budget-valid.json",
+      "bytes": 2776,
+      "sha256": "5e23baaa85094a38467c0f33a500d4da6c429bc8e35bbfc31980cc001ca812a6"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261019T074006Z_comm-trace-debug/candidate-probing-valid.json",
+      "bytes": 2804,
+      "sha256": "06b7b3108c79c2b9a3f0ab76ef94f2923ac20ce18d6a5017e3c6816edb84a8ff"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261019T074006Z_comm-trace-debug/candidate-probing.json",
+      "bytes": 2799,
+      "sha256": "d429fdb7bcb1fe12769cad5ab1dbfc7024b29a42548423c9f106fe3cc80e9796"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261019T074006Z_comm-trace-debug/collection.exit",
+      "bytes": 2,
+      "sha256": "1121cfccd5913f0a63fec40a6ffd44ea64f9dc135c66634ba001d10bcf4302a2"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261019T074006Z_comm-trace-debug/collection.log",
+      "bytes": 2913,
+      "sha256": "8d43002cbc8987b0f1ed5a1f158b17ec6a4ce362d480fc6c53cb31a90687850b"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261019T074006Z_comm-trace-debug/controller.pid",
+      "bytes": 8,
+      "sha256": "c6cc17815be07e4a4608e28966d7d62f760c7b30c0c0c9b2f9c8ad195fbfdc96"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261019T074006Z_comm-trace-debug/coverage.exit",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261019T074006Z_comm-trace-debug/coverage.log",
+      "bytes": 14745,
+      "sha256": "4eab1cff08680d470d6b13294e297f0dc818b742269057b8a4cd44c3e393d27e"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261019T074006Z_comm-trace-debug/first-window.exit",
+      "bytes": 2,
+      "sha256": "1121cfccd5913f0a63fec40a6ffd44ea64f9dc135c66634ba001d10bcf4302a2"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261019T074006Z_comm-trace-debug/isolated-prefix-reproduction.log",
+      "bytes": 876,
+      "sha256": "4a7ff98d09f08e7a48bf129dfa393843642f98423a7cbe8ed39df801cbe05dbe"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261019T074006Z_comm-trace-debug/library-symbols.log",
+      "bytes": 1872,
+      "sha256": "f5e3c62abc4a990075b66a2e229ea36dbf8112c0a8acb18ad335168ed50e6f50"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261019T074006Z_comm-trace-debug/offline-import.log",
+      "bytes": 2032,
+      "sha256": "c6c1e7d3c871d198469b1e412dcd9bae4130597b2bfb4d40efc320ced0b71e09"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261019T074006Z_comm-trace-debug/profile-window.exit",
+      "bytes": 2,
+      "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261019T074006Z_comm-trace-debug/profile-window.log",
+      "bytes": 50991,
+      "sha256": "2f6628f23ac114ce1e839bc745ba118ec9ed7895864e0cc552a76ee5e5bfc0bd"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261019T074006Z_comm-trace-debug/raw-artifacts-manifest.json",
+      "bytes": 62537,
+      "sha256": "6576a8ba64264ce2a50f8ecdb83f1cb65c5c0b9faf531818fad3c67499bf5e07"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261019T074006Z_comm-trace-debug/repository-pytest.exit",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261019T074006Z_comm-trace-debug/repository-pytest.log",
+      "bytes": 1084,
+      "sha256": "3e3c588e9f968365b264ece3bee7023c3cd76e887615a8a77cb136eade572436"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261019T074006Z_comm-trace-debug/repository-ruff.exit",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261019T074006Z_comm-trace-debug/repository-ruff.log",
+      "bytes": 19,
+      "sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261019T074006Z_comm-trace-debug/resources-after.log",
+      "bytes": 2429,
+      "sha256": "9b9fc9da29f93fe36f9d7eb322d1e5a6bebbf3e96e763a5f76d8e0afa5505799"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261019T074006Z_comm-trace-debug/resume-first-window.sh",
+      "bytes": 2019,
+      "sha256": "2b0caf139d27e300c2e2f2cef44e9be9d542ac380fdd73f4adb80a2298706c00"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261019T074006Z_comm-trace-debug/server-extension-import.log",
+      "bytes": 2023,
+      "sha256": "2987c1bcdd600d27f4b428721b1d99c248e4272e2ff726423868c37d74b7bb87"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261019T074006Z_comm-trace-debug/server-python-import.log",
+      "bytes": 490,
+      "sha256": "eb72145dd1e5e670545bd66dca16599dec291fea5dfd56f73829fe91385ef8cd"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261019T074006Z_comm-trace-debug/targeted-checks.log",
+      "bytes": 117,
+      "sha256": "61d0f96b5cdc73dbfe2d656ddf64291f0a51e9b6d4bf6a25971bc37a6eed329a"
+    }
+  ],
+  "repository_log_hashes": [
+    {
+      "path": "host-proposals/comm-mechanism/validation/20261019/profile-debug-20261019T074126Z/checks.log",
+      "sha256": "e55e7a4e03e575d9efde983a9e84dfa2e99d46ac075fd17f0ed859483580aa43"
+    },
+    {
+      "path": "host-proposals/comm-mechanism/validation/20261019/profile-debug-20261019T074126Z/collection.log",
+      "sha256": "8d43002cbc8987b0f1ed5a1f158b17ec6a4ce362d480fc6c53cb31a90687850b"
+    },
+    {
+      "path": "host-proposals/comm-mechanism/validation/20261019/profile-debug-20261019T074126Z/offline-environment.log",
+      "sha256": "58c62814a705daf90b8e7e412419fca4ba1e7c5498c42afc93cd249e4156cb75"
+    },
+    {
+      "path": "host-proposals/comm-mechanism/validation/20261019/profile-debug-20261019T074126Z/profile-window.log",
+      "sha256": "16ba8b27d520a2bf21740b38ce13e33c0b31f6ef9333ca73e0f52e75c4474cb3"
+    },
+    {
+      "path": "host-proposals/comm-mechanism/validation/20261019/profile-debug-20261019T074126Z/raw-artifacts-manifest.json",
+      "sha256": "6576a8ba64264ce2a50f8ecdb83f1cb65c5c0b9faf531818fad3c67499bf5e07"
+    },
+    {
+      "path": "host-proposals/comm-mechanism/validation/20261019/profile-debug-20261019T074126Z/server.log",
+      "sha256": "83333b9a6fe3ac6fd16d39e17ed4fd1311a132c3deafef74c5c4b89ae5d94c3b"
+    }
+  ]
+}

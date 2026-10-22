@@ -1,0 +1,13 @@
+{
+  "schema": "vllm-hust-workbench-proposal-validation.v1",
+  "checked_at_utc": "2026-10-21T09:40:50Z",
+  "checks": [
+    {"name": "json_stdout_strict_parse", "cmd": "opttruth.py gaps --json 2>/dev/null | python3 -c 'import json,sys; json.load(sys.stdin)'", "result": "PASS", "detail": "gaps=12, top=GroupedMatmul"},
+    {"name": "warning_on_stderr", "cmd": "opttruth.py gaps --json 2>&1 >/dev/null", "result": "PASS", "detail": "⚠ 未声明 active 负载口径 … present on stderr only"},
+    {"name": "human_mode_unchanged", "cmd": "opttruth.py gaps 2>/dev/null | head -4", "result": "PASS", "detail": "== 方向建议 gaps == table unchanged"},
+    {"name": "py_compile", "result": "PASS"},
+    {"name": "reversible_patch", "cmd": "patch -R --dry-run /root/opt-ops/scripts/opttruth.py < patch.diff", "result": "PASS"},
+    {"name": "opt_next_hotspot_restored", "cmd": "opt next", "result": "PASS", "detail": "'热点探索不可用' warning gone; queue 17 -> 21 items with hotspot entries"}
+  ],
+  "known_open_state_issue": "state/caliber.json has no active caliber: gap shares are cross-caliber mixes and must not be used for adjudication until 'opt caliber switch <id> --reason' is run (user decision)"
+}

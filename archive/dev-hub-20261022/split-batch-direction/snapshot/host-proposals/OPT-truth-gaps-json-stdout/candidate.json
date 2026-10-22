@@ -1,0 +1,22 @@
+{
+  "id": "opttruth-gaps-json-stdout-fix",
+  "route": "028/global",
+  "caliber": "infrastructure-no-model",
+  "cohort": "workbench-toolchain",
+  "scenario": "opttruth.py gaps --json printed the missing-active-caliber warning to stdout before the JSON document, so opt.py json.loads failed ('Expecting value: line 1 column 3') and hotspot exploration was skipped on every opt next/status run",
+  "op": "-",
+  "phase": "toolchain",
+  "method": "Route the cmd_gaps warning to stderr; stdout carries only the JSON document in --json mode",
+  "stage": "inconclusive",
+  "next_action": "None. Fix applied, verified, reversible; hotspot exploration restored. Separate open item (user decision, not this fix): state/caliber.json has no active caliber, so gap shares remain cross-caliber mixes unusable for adjudication until opt caliber switch is run.",
+  "stop_condition": "N/A (toolchain fix, no experiment window)",
+  "budget": {"npu_min": "none: offline tooling only", "serve_starts": "none"},
+  "evidence": [
+    "/root/vllm-workspace/vllm-ascend-split-batch-hust/host-proposals/OPT-truth-gaps-json-stdout/proposal_meta.json",
+    "/root/vllm-workspace/vllm-ascend-split-batch-hust/host-proposals/OPT-truth-gaps-json-stdout/validation.json",
+    "/root/vllm-workspace/vllm-ascend-split-batch-hust/host-proposals/OPT-truth-gaps-json-stdout/patch.diff",
+    "/root/vllm-workspace/vllm-ascend-split-batch-hust/host-proposals/OPT-truth-gaps-json-stdout/opttruth.py.orig"
+  ],
+  "reason": "Fixed and verified 2026-10-21T09:40Z: strict stdout JSON parse PASS (gaps=12), warning on stderr only, human table unchanged, py_compile PASS, patch -R dry-run reversible, opt next hotspot warning gone (queue 17->21 items). Stage inconclusive is the only structurally reachable terminal for checks-free toolchain candidates (accepted requires operator l0/l4/l3); the verdict 'fixed and verified' is carried by this reason and the proposal validation.json.",
+  "reopen_condition": "Any stdout pollution regression in opttruth --json subcommands, or hotspot exploration failing again in opt next/status."
+}

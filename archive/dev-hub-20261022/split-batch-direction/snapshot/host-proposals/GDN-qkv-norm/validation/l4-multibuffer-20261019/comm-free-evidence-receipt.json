@@ -1,0 +1,28 @@
+{
+  "schema": "comm-free-evidence-receipt.v1",
+  "window": "ladder-1019-022857; TP=2, bf16, FULL; same truncated 32-iteration window",
+  "replacement": "comm-free-paired-forensics.json",
+  "paired_forensics_l2": {"path": "/root/包体恢复/records/probes/20261019T055422Z_comm-free-paired-forensics.json", "sha256": "13212eccec831dbb7ba8c0cc2dafb43967118a890f5b02f01e35b6e534f06ce3"},
+  "prior_evidence_correction_l2": {"path": "/root/包体恢复/records/probes/20261019T055617Z_comm-free-evidence-correction.json", "sha256": "9c72cd944829503138291680738fe0b3e6e3eb5092c113340d24c44d952d6037"},
+  "facts": [
+    "Rank 0 parsed DB and paired rank 0/1 CSV agree on names/order of 2624 communication calls and 2592 all-reduces. Rank 0 all-reduce 1575.57884 ms; rank 1 2251.03296 ms; different ranks are not A/B arms.",
+    "Rank 0 2624 type=1 communication intervals equal type=2 nonoverlapped intervals; rank 0 all-reduce/compute time intersection 0 ms. This is only same-window observed scheduling, not overlap feasibility.",
+    "Rank 0 Free total 2656.7976 ms; execute-start span 424.54029 ms contains 29.176065 ms Free. The complete Free stream-pair table and raw source hashes are in the replacement."
+  ],
+  "limits": [
+    "16/2048/825/1489/1587 token-equivalent payload groups correlate with recorded decode/prefill counts; exact per-call phase and layer/callsite are unobserved (record_shapes=false, with_stack=false).",
+    "Rank 1 has CSV but no parsed DB; no independent rank 1 Free or host API classification.",
+    "Execute-start timestamps are not graph-replay boundaries; Free stream adjacency and host API intersection cannot assign causal host starvation."
+  ],
+  "withdrawal_l2": {"path": "/root/包体恢复/records/probes/20261019T060619Z_free-attribution-v1-final-withdrawal.json", "sha256": "5ace20a1f40d791cf44dcc7ced81d4bc1334e315266af9a7d18a55593eb915cb"},
+  "validation": {
+    "targeted_pytest": "PASS: 5 passed",
+    "ruff_check_all": "PASS",
+    "real_window_replay": "PASS: current analyzer output equals frozen paired artifact, with all 7 source SHA-256 values verified",
+    "full_pytest": "NOT PASS: with PYTHONPATH=src:/root/gh-forks/extension-manager/src, fail-fast run ended at test_carrier_probe_records_absent_package_without_crashing (husk_package expected empty, got vllm_ascend_split_batch); 59 passed, 1 failed. Earlier full run interrupted after failures. No unrelated test changed.",
+    "coverage": "PASS with 50 WARN, exit 0; /root/包体恢复/records/probes/20261019T060705Z_comm-free-coverage.log"
+  },
+  "validation_log_l2": {"path": "/root/包体恢复/records/probes/20261019T061111Z_comm-free-validation.log", "sha256": "ce9096e591f45b1a86611c95d2419151c0b8cbf17fa23a6e6a39af9a4a651cb2"},
+  "candidate": "comm-free-candidate.json: blocked, diagnostic only",
+  "status": "Evidence-only; no overlap intervention, L3/compare, E2E acceptance, or optimization claim."
+}

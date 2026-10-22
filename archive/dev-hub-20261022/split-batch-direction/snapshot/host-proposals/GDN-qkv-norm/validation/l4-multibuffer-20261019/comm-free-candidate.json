@@ -1,0 +1,22 @@
+{
+  "id": "comm-free-current-window-diagnostic",
+  "route": "028/D1-host-overhead-graph",
+  "caliber": "mmlu-pro-gdn-high-concurrency-longctx",
+  "cohort": "028-qwen35-35b-a3b-tp2-fullgraph",
+  "scenario": "ladder-1019-022857 current truncated TP2 bf16 FULL graph window; 32 iterations, 16 admitted requests lower bound; no new scenario",
+  "op": "Free temporal gaps and all-reduce communication (graph-layer diagnostic only)",
+  "phase": "mixed 13 prefill / 19 decode iterations; per-call phase only inferred from payload",
+  "method": "Withdraw v1 host-boundary attribution; pair rank 0 DB with both rank CSV, validate payload, device intervals, temporal Free adjacency",
+  "stage": "blocked",
+  "next_action": "If causality is needed, obtain exact graph execution boundaries, layer/callsite mapping and rank-paired parsed Free traces; then design a single-variable all-reduce overlap test on matched shape and weight.",
+  "stop_condition": "Do not claim host starvation, feasible overlap, optimization acceptance or E2E benefit from stream adjacency, execute-start span, or different-rank time differences. No new experiment under this evidence-only decision.",
+  "budget": "Evidence-only closeout; no further serve start or profile window planned. A causal experiment needs a separately declared plan and cap.",
+  "evidence": [
+    "/root/包体恢复/records/probes/20261019T055422Z_comm-free-paired-forensics.json",
+    "/root/包体恢复/records/probes/20261019T055617Z_comm-free-evidence-correction.json",
+    "/root/包体恢复/records/probes/20261019T060619Z_free-attribution-v1-final-withdrawal.json",
+    "/root/包体恢复/records/probes/20261019T060705Z_comm-free-coverage.log"
+  ],
+  "reason": "Same-window rank sequence and Free total reproduced. Rank 0 all-reduce vs compute overlap is 0 ms; rank 1 lacks a parsed DB. Historical v1 Free block withdrawn; remaining intervals cannot establish graph or causal host boundaries.",
+  "reopen_condition": "New trace with verified boundaries and callsite mapping or a new hypothesis with an independently measurable graph-layer comparison."
+}

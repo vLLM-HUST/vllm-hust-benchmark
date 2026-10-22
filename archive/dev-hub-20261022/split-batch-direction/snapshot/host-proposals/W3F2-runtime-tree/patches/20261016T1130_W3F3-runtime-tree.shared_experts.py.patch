@@ -1,0 +1,107 @@
+--- /root/包体恢复/records/tree-patches/20261016T1130_W3F3-runtime-tree.shared_experts.py.orig
++++ /vllm-workspace/vllm-ascend/vllm_ascend/ops/fused_moe/shared_experts.py
+@@ -35,6 +35,67 @@
+     npu_stream_switch,
+     shared_experts_calculation_stream,
+ )
++
++
++# ---------------------------------------------------------------------------
++# W3-F3 (2026-10-16): shared scalar-gate pack（L0 direct/whole 变体, N=513/640）
++# 共享层（Qwen3NextMLP; 含 gate_up_proj/down_proj/expert_gate）的 pack = cat([gate_up_w, scalar_gate_w], dim=0)
++# 或 640 等宽 pad。同输入三投影合一（L0 bitwise 全 shape PASS）。
++# env `VLLM_HUST_SHARED_GATE_PACK`: 513direct|513whole|640direct|640whole, 默认 0 不启用。
++# 本代码只在 worker hook 阶段（非 dynamo traced 区）里被调用; pack 结果写 layer._f3_wpack。
++# ---------------------------------------------------------------------------
++_F3_ALLOWED = ("513direct", "513whole", "640direct", "640whole")
++
++
++def _f3_parse_mode(raw: str) -> tuple[int, str]:
++    """`513direct` -> (513, 'direct'); 非法返回 (0, 'direct')"""
++    v = (raw or "").strip().lower()
++    if v not in _F3_ALLOWED:
++        return 0, "direct"
++    digits = "".join(c for c in v if c.isdigit())
++    mode = "direct" if "direct" in v else "whole"
++    try:
++        return int(digits), mode
++    except ValueError:
++        return 0, "direct"
++
++
++def pack_shared_gate_weight(shared_layer, mode_str: str) -> None:
++    """worker hook 用 helper: 对 shared layer（Qwen3NextMLP 实例）构建 packed weight.
++
++    要求 shared_layer 有 gate_up_proj / down_proj / expert_gate 权重。
++    写 shared_layer._f3_wpack 与 _f3_pack_mode; 幂等（重复调用覆盖）。
++    fail-closed: 权重缺位/dtype/设备不匹配 → raise。
++    """
++    n, mode = _f3_parse_mode(mode_str)
++    if n == 0:
++        return
++    eg = getattr(shared_layer, "expert_gate", None)
++    if eg is None or getattr(eg, "weight", None) is None:
++        raise RuntimeError(
++            "W3F3: shared layer has no expert_gate weight; "
++            "shared scalar-gate pack not applicable"
++        )
++    w13 = shared_layer.gate_up_proj.weight       # [2*intermediate, hidden]（本 rank shard）
++    w_s = eg.weight                              # [1, hidden]
++    if w13.dtype != w_s.dtype:
++        raise RuntimeError(
++            f"W3F3: dtype mismatch gate_up_proj={w13.dtype} expert_gate={w_s.dtype}"
++        )
++    if w13.device != w_s.device:
++        raise RuntimeError(
++            f"W3F3: device mismatch gate_up_proj={w13.device} expert_gate={w_s.device}"
++        )
++    if n == 513:
++        pack = torch.cat([w13, w_s], dim=0)
++    else:
++        pad_rows = n - (w13.shape[0] + w_s.shape[0])
++        if pad_rows < 0:
++            raise RuntimeError(f"W3F3: target width {n} < rows+1={w13.shape[0]+w_s.shape[0]}")
++        pad = torch.zeros(pad_rows, w13.shape[1], dtype=w13.dtype, device=w13.device)
++        pack = torch.cat([w13, w_s, pad], dim=0)
++    shared_layer._f3_wpack = pack
++    shared_layer._f3_pack_mode = mode
+ 
+ # CANN uses 36 to select FP8 E4M3FN output for situ_mx_quant.
+ SITU_MX_DST_TYPE_E4M3FN = 36
+@@ -395,13 +456,29 @@
+                 torch.npu.current_stream().wait_event(fused_moe_evts.before_routed_experts)
+                 # Execute the gate projection concurrently with dispatch.
+                 maybe_wait_event(fused_moe_evts.before_dispatch)
+-                part1_out = self.part1(hidden_states)
+-                # Execute activation concurrently with routed GMM2.
+-                maybe_wait_event(fused_moe_evts.before_gmm2)
+-                shared_act = self.apply_activation(part1_out)
+-                # Execute the down projection concurrently with combine.
+-                maybe_wait_event(down_projection_ready)
+-                shared_out = self.part2(hidden_states, shared_act)
++                _f3_w = getattr(self.layer, "_f3_wpack", None)
++                _f3_mode = getattr(self.layer, "_f3_pack_mode", "direct")
++                if _f3_w is not None:
++                    # W3-F3: 一次 pack 投影, scalar gate 切列 sigmoid（L0 direct/whole 变体,
++                    # bitwise 已在 L0 全 shape 通过; L3 真模型须再验一次）
++                    y = F.linear(hidden_states, _f3_w)
++                    if _f3_mode == "whole":
++                        y = y.contiguous()
++                    _a, _b = y[..., :256], y[..., 256:512]
++                    _s_col = y[..., 512:513]
++                    _z = F.silu(_a) * _b
++                    maybe_wait_event(fused_moe_evts.before_gmm2)
++                    maybe_wait_event(down_projection_ready)
++                    _down_out, _ = self.layer.down_proj(_z)
++                    shared_out = torch.sigmoid(_s_col) * _down_out
++                else:
++                    part1_out = self.part1(hidden_states)
++                    # Execute activation concurrently with routed GMM2.
++                    maybe_wait_event(fused_moe_evts.before_gmm2)
++                    shared_act = self.apply_activation(part1_out)
++                    # Execute the down projection concurrently with combine.
++                    maybe_wait_event(down_projection_ready)
++                    shared_out = self.part2(hidden_states, shared_act)
+ 
+         if self.multistream_overlap and mode is SharedExpertParallelMode.SEQUENCE_PARALLEL_ONLY:
+             # Keep the shared-expert output collective on the auxiliary stream,

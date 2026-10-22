@@ -1,0 +1,35 @@
+{
+  "id": "comm-free-current-window-diagnostic",
+  "route": "028/D1-host-overhead-graph",
+  "caliber": "mmlu-pro-gdn-high-concurrency-longctx",
+  "cohort": "028-qwen35-35b-a3b-tp2-fullgraph",
+  "scenario": "Same Qwen3.5-35B-A3B bf16 TP2 FULL-graph MMLU-Pro smoke first 16 at concurrency 16; planned 32 worker iterations; no new scenario",
+  "op": "Free temporal gaps and all-reduce communication (graph-layer diagnostic only)",
+  "phase": "Mixed prefill/decode; per-call phase and exact callsite remain unverified",
+  "method": "One deep dual-rank CommTraceWorker attempt with clean default CANN 9.1.0 environment; startup succeeded, automatic profiler stop segfaulted; raw data preserved",
+  "stage": "blocked",
+  "next_action": "Offline isolate profiler stop/finalization and assess saved raw-data recoverability. No further serve start, trace window or resampling in this task.",
+  "stop_condition": "Keep mechanism and overlap gates blocked until two independent rank DB/CSV outputs, reliable per-call shapes/stack mapping and complete device graph boundaries are verified. No graph/compute/communication/pinned-memory bypass.",
+  "budget": {
+    "wall_min": 35,
+    "serve_starts": 1,
+    "profile_windows": 1,
+    "resamples": "none",
+    "consumed": {
+      "serve_starts": 1,
+      "profile_windows": 1
+    },
+    "note": "One new debug server start and one profile window consumed. Collection failed during automatic profiler stop. No resample performed; no additional window in this task."
+  },
+  "evidence": [
+    "/root/vllm-workspace/vllm-ascend-split-batch-hust/host-proposals/comm-mechanism/validation/20261019/profile-debug-20261019T074126Z/receipt.json",
+    "/root/\u5305\u4f53\u6062\u590d/records/probes/20261019T074006Z_comm-trace-debug/raw-artifacts-manifest.json",
+    "/root/\u5305\u4f53\u6062\u590d/records/probes/20261019T074006Z_comm-trace-debug/profile-window.log",
+    "/root/\u5305\u4f53\u6062\u590d/logs/ladder-serve-1019-074137.log",
+    "/root/\u5305\u4f53\u6062\u590d/records/probes/20261019T074006Z_comm-trace-debug/server-extension-import.log",
+    "/root/\u5305\u4f53\u6062\u590d/records/probes/20261019T074006Z_comm-trace-debug/isolated-prefix-reproduction.log"
+  ],
+  "reason": "The suspect LD_LIBRARY_PATH prefix reproduces the prior ABI failure offline; clean import and new server startup pass. At max_iterations stop, both workers emitted _PyObject_Free segfault stacks; load failed with EngineDeadError/HTTP 500, then Session is closed. One raw directory per rank survives, no DB/CSV. No OOM kill, no numerical or optimization acceptance.",
+  "reopen_condition": "Document offline stop-path diagnosis/remedy and recoverability of preserved raw traces before any explicitly authorized new window.",
+  "checks": {}
+}

@@ -1,0 +1,83 @@
+{
+  "schema": "comm-profiler-stop-delivery-review.v1",
+  "recorded_at": "2026-10-19T08:58:03.042389+00:00",
+  "receipt": {
+    "path": "host-proposals/comm-mechanism/validation/20261019/profiler-stop-offline-20261019T080222Z/receipt.json",
+    "bytes": 24663,
+    "sha256": "8de0bb4ea0d383dd8cf05f99e24b364321914a79b107494a88015ff976cfecba"
+  },
+  "preflight_binding": {
+    "serve_console_script": "/usr/local/python3.12.13/bin/vllm",
+    "serve_shebang": "#!/usr/local/python3.12.13/bin/python3",
+    "ladder_python": "/usr/local/python3.12.13/bin/python",
+    "collector_preflight_python": "/usr/local/python3.12.13/bin/python",
+    "prior_probe_python": "/root/venvs/rv1/bin/python",
+    "system_and_rv1_package_library_sha256": "e2e9daa8e4fd17701f6c7772acc4c6236366d5efe13410ec9b5c9ab7cbc0f39f",
+    "library_hash_comparison_exit": 0,
+    "identity_rule": "Probe reports the actual mapped libtorch_npu.so from /proc/self/maps; zero or multiple distinct paths fail closed.",
+    "new_cpu_lifecycle_probe": false,
+    "runtime_repair_verified": false
+  },
+  "checks": {
+    "prior_full_suite": {
+      "passed": 872,
+      "skipped": 11,
+      "exit": 0,
+      "scope": "Before final serve-interpreter binding and its added regression test."
+    },
+    "followup_targeted_suite": {
+      "passed": 14,
+      "exit": 0,
+      "paths": [
+        "tests/test_comm_profiler_stop.py",
+        "tests/test_public_hygiene.py"
+      ],
+      "new_evidence_staged_before_hygiene": true
+    },
+    "followup_ruff_exit": 0,
+    "followup_shell_syntax_exit": 0,
+    "followup_patch_generator_exit": 0,
+    "receipt_artifact_reference_checks": {
+      "count": 57,
+      "exit": 0,
+      "raw_trace_rehashed": false
+    }
+  },
+  "artifacts": [
+    {
+      "path": "README.md",
+      "bytes": 21248,
+      "sha256": "2e328f77b9711c2111ec34c0d4ec492692731156f27ffc7c8f06ad5035eb82c0"
+    },
+    {
+      "path": "tools/collect_comm_mechanism.sh",
+      "bytes": 2309,
+      "sha256": "254d3a90f8084bb835494abae9767d9200d22661337881ce6e02916d875b2102"
+    },
+    {
+      "path": "tools/check_comm_profiler_stop.py",
+      "bytes": 3632,
+      "sha256": "3303aaf835f1a8c0c1fe870114259898c9dd85ee5be1fcea71ac1d29dbc49e05"
+    },
+    {
+      "path": "tests/test_comm_profiler_stop.py",
+      "bytes": 6008,
+      "sha256": "99dfd2e78d770a1228781ff881081136c25ab6e4975af848c143c723fb5a80ca"
+    },
+    {
+      "path": "host-proposals/comm-mechanism/validation/20261019/profiler-stop-offline-20261019T080222Z/followup-checks.log",
+      "bytes": 118,
+      "sha256": "e8151f440fcd64f74ce9c104dc43c6ccf91ba3bd6b040366041a2c0d381a1eb4"
+    }
+  ],
+  "disposition": {
+    "mechanism_status": "blocked",
+    "source_fix_verified": true,
+    "installed_library_modified": false,
+    "build_resumed": false,
+    "new_serve_starts": 0,
+    "new_device_windows": 0,
+    "remote_publication": "NOT PUSHED",
+    "default_action": "Pause at exhausted build cap; request extra offline build budget before resuming preserved objects. No installation or recollection."
+  }
+}

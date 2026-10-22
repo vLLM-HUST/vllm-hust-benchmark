@@ -1,0 +1,15 @@
+{
+  "schema": "vllm-hust-workbench-proposal.v1",
+  "id": "OPT-truth-gaps-json-stdout",
+  "date_utc": "2026-10-21",
+  "target": "/root/opt-ops/scripts/opttruth.py",
+  "defect": "cmd_gaps printed the missing-active-caliber warning to stdout before the --json document, so opt.py's json.loads failed with 'Expecting value: line 1 column 3' and hotspot exploration was skipped on every opt next/status run",
+  "fix": "route the warning to stderr; stdout now carries only the JSON document in --json mode",
+  "reversibility": "patch -R dry-run OK against live file",
+  "sha256": {
+    "live_after": "5e9cba2f58a23c21fe215c5f80609367e5f73d45b51e0d57e189b3e1dff580f6",
+    "orig_before": "a1d52b0912f8d9abac17fe2e7c7c08d10347f70e97b73e46cc7cfad726a843a0"
+  },
+  "repro": "python3 /root/opt-ops/scripts/opttruth.py gaps --json 2>/dev/null | python3 -c 'import json,sys; json.load(sys.stdin)'",
+  "note": "workbench script is not a git repo; this directory is the verifiable landing copy per AGENTS 仓库交付"
+}

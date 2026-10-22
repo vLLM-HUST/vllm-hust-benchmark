@@ -1,0 +1,12 @@
+--- /root/vllm-workspace/vllm-ascend-split-batch-hust/host-proposals/OPT-truth-gaps-json-stdout/opttruth.py.orig	2026-10-21 09:39:58.060829404 +0000
++++ /root/opt-ops/scripts/opttruth.py	2026-10-21 09:39:29.416642985 +0000
+@@ -404,7 +404,8 @@
+             allowed.append(d)
+     if not caliber:
+         print("  ⚠ 未声明 active 负载口径（state/caliber.json 缺 active）且未给 --caliber → "
+-              "本次份额来自**多口径混合**，不得用于裁决；先 `opt caliber switch <id> --reason ...`")
++              "本次份额来自**多口径混合**，不得用于裁决；先 `opt caliber switch <id> --reason ...`",
++              file=sys.stderr)
+     out = []
+     for op in ops:
+         share = totals[op]["share_pct"] if op in totals else 0.0
