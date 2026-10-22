@@ -579,15 +579,19 @@
       "workload_class_ids": [
         "document-grounded-analysis"
       ],
-      "acquisition": "VERIFIED_LOCAL",
-      "read_adapter": "VERIFIED_LOCAL_3_SAMPLES",
-      "server_execution": "NOT_RUN",
-      "scoring": "NOT_RUN",
-      "selected_samples": [],
-      "completed_samples": [],
+      "acquisition": "VERIFIED",
+      "read_adapter": "VERIFIED",
+      "server_execution": "EXECUTED_WITH_ONE_ORIGINAL_BUDGET_LIMIT",
+      "scoring": "COMPLETED",
+      "selected_samples": ["66f36490821e116aacb2cc22", "66ebed525a08c7b9b35e1cb4", "671b3cabbb02136c067d5252"],
+      "completed_samples": ["66f36490821e116aacb2cc22", "66ebed525a08c7b9b35e1cb4", "671b3cabbb02136c067d5252"],
       "checked": false,
-      "receipt": null,
-      "blocker": "当前安装包已本地读取回查3条；尚未完成服务器任务执行与适用评分。",
+      "receipt": "docs/workload-data/validation/longbench-v2-original-attempt-npu-20261022.json",
+      "provider_roundtrip_receipt": "docs/workload-data/validation/longbench-v2-provider-roundtrip-20261022.json",
+      "normal_stop_count": 2,
+      "original_budget_exhaustion_count": 1,
+      "correct_tasks": 0,
+      "blocker": "原三条完整输入并评分0/3，含1条原预算耗尽；仅Short标签，Medium/Long资源受限。公共入口复验遇SSH拒绝连接，暂不勾；不能将模型错误等同执行器故障。",
       "local_read_receipt": "docs/workload-data/validation/local-read-24sources-20261022.json"
     },
     {

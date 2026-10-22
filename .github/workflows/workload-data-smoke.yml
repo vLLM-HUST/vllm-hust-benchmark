@@ -14,9 +14,11 @@ on:
       - 'scripts/run_gsm8k_incremental_samples.py'
       - 'scripts/run_mmlu_pro_original_samples.py'
       - 'scripts/run_structeval_original_json.py'
+      - 'scripts/run_longbench_v2_original_samples.py'
       - 'tests/test_tau2_original_runner.py'
       - 'tests/test_reasoning_original_runners.py'
       - 'tests/test_structeval_original_runner.py'
+      - 'tests/test_longbench_original_runner.py'
       - 'pyproject.toml'
       - '.github/workflows/workload-data-smoke.yml'
   workflow_dispatch:
@@ -44,7 +46,7 @@ jobs:
           (cd workload-data-dist && sha256sum *.whl > SHA256SUMS)
           python -c "import json, pathlib, subprocess; p=pathlib.Path('workload-data-dist'); (p/'BUILD_METADATA.json').write_text(json.dumps({'schema_version':'workload-data-build/v1','source_commit':subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),'distribution':'vllm-hust-workload-data','version':'0.1.0'},indent=2)+'\n',encoding='utf-8')"
       - name: CPU fixtures and data-only boundary
-        run: python -m pytest -q workload-preparation/tests tests/test_workload_data_boundary.py tests/test_workload_gap_catalog.py tests/test_workload_validation_checklist.py tests/test_workload_category_checklist.py tests/test_tau2_original_runner.py tests/test_reasoning_original_runners.py tests/test_structeval_original_runner.py tests/test_workload_response_validation.py
+        run: python -m pytest -q workload-preparation/tests tests/test_workload_data_boundary.py tests/test_workload_gap_catalog.py tests/test_workload_validation_checklist.py tests/test_workload_category_checklist.py tests/test_tau2_original_runner.py tests/test_reasoning_original_runners.py tests/test_structeval_original_runner.py tests/test_longbench_original_runner.py tests/test_workload_response_validation.py
       - name: Installed CLI and packaged catalogs
         working-directory: ${{ runner.temp }}
         run: |
