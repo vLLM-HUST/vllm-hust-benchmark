@@ -48,6 +48,11 @@ def main(argv=None):
     native.add_argument("--official-archive", type=Path, required=True)
     native.add_argument("--data-root", type=Path, required=True)
     native.add_argument("--task-ids", nargs="+", required=True)
+    agentbench = commands.add_parser("agentbench-native-tasks")
+    agentbench.add_argument("--official-archive", type=Path, required=True)
+    agentbench.add_argument("--game-archives", type=Path, nargs=3, required=True)
+    agentbench.add_argument("--data-root", type=Path, required=True)
+    agentbench.add_argument("--indices", type=int, nargs="+", required=True)
     for name in ("catalog", "pipeline", "replay"):
         passthrough = commands.add_parser(name, add_help=False)
         passthrough.add_argument("arguments", nargs=argparse.REMAINDER)
@@ -85,6 +90,17 @@ def main(argv=None):
                 official_archive=args.official_archive,
                 data_root=args.data_root,
                 task_ids=args.task_ids,
+            )
+        elif args.command == "agentbench-native-tasks":
+            if not hasattr(provider, "agentbench_task_references"):
+                raise RuntimeError(
+                    "Install the pinned workload-data component from the AgentBench PR; an older 0.1.0 wheel lacks this native source interface"
+                )
+            value = provider.agentbench_task_references(
+                official_archive=args.official_archive,
+                game_archives=args.game_archives,
+                data_root=args.data_root,
+                indices=args.indices,
             )
         else:
             value = provider.list_sources(class_id=args.class_id)

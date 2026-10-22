@@ -1,5 +1,9 @@
 # vLLM-HUST Workload Data
 
+AgentBench FC
+ALFWorld原生引用入口见[接入与验证](../docs/workload-data/AGENTBENCH_ALFWORLD_ORIGINAL_PREPARATION.zh-CN.md)。`workload-data agentbench-native-tasks`只核验官方索引/游戏字节并输出元数据引用；Python>=3.10数据组件和独立Python
+3.9原生任务环境分离，不把闭环任务退化为静态请求，也不迁入科研观测。
+
 数据来源目录、原始文件读取适配、可校验输入引用和显式请求回放入口。独立发行包 `vllm-hust-workload-data==0.1.0`，导入名
 `vllm_hust_workload_data`；不覆盖科研仓库的 `llm_serving_workloads`。
 

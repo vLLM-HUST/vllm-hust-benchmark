@@ -15,6 +15,113 @@ from .taxonomy import research_classes
 TAU2_ORIGINAL_REVISION = "f8de30c298689cbe0117d76a378e7315a17e5bd8"  # pragma: allowlist secret - public upstream revision
 TAU2_ORIGINAL_ARCHIVE_SHA256 = "65f1d59b3783bfb38664142fb166aa40b369e4b4083170723059d8f1883ccd64"  # pragma: allowlist secret - official archive checksum
 
+AGENTBENCH_REVISION = "d1e4a10db08c87075c78972e48ecc182be03e2d5"  # pragma: allowlist secret - public upstream revision
+AGENTBENCH_ARCHIVE_SHA256 = "426478d0442a542117d4cf517ccc6c8a04c2bdf44a39983ff2f041ed436051d7"  # pragma: allowlist secret - official archive checksum
+AGENTBENCH_GAME_ARCHIVES = {
+    "json": "25171f16e20ad7b048c47275c45b0babf3aa1cbab29cec97387922350a9844bc",  # pragma: allowlist secret - official game archive checksum
+    "pddl": "913942ebed06659ea0da2f8122512d98bc6add30d84961ca803132d8fbcad585",  # pragma: allowlist secret - official game archive checksum
+    "tw-pddl": "d376c4bbb097c068528a2a9805e358e4cd14bc75c4d68a24e5141aebd234ef67",  # pragma: allowlist secret - official game archive checksum
+}
+
+
+def agentbench_task_references(*, official_archive, game_archives, data_root, indices):
+    """Original ALFWorld FC indices and verified file references, no task payload.
+
+    This does not start an environment, select actions, call models or score.
+    Only the fixed new_std loader order is supported, not other AgentBench tasks.
+    """
+    source = Path(official_archive)
+    if hashlib.sha256(source.read_bytes()).hexdigest() != AGENTBENCH_ARCHIVE_SHA256:
+        raise ValueError("official AgentBench archive identity mismatch")
+    if (
+        not isinstance(indices, list)
+        or not indices
+        or any(type(i) is not int or i < 0 for i in indices)
+        or len(set(indices)) != len(indices)
+    ):
+        raise ValueError("explicit unique original integer indices required")
+    with zipfile.ZipFile(source) as bundle:
+        names = [
+            n for n in bundle.namelist() if n.endswith("/data/alfworld/new_std.json")
+        ]
+        if len(names) != 1:
+            raise ValueError("ambiguous original AgentBench index")
+        raw = bundle.read(names[0])
+    rows = [value for group in json.loads(raw).values() for value in group]
+    if any(i >= len(rows) for i in indices):
+        raise ValueError("original AgentBench index outside selected split")
+    roles = {}
+    for path in game_archives:
+        path = Path(path)
+        digest = hashlib.sha256(path.read_bytes()).hexdigest()
+        matches = [
+            key
+            for key, expected in AGENTBENCH_GAME_ARCHIVES.items()
+            if expected == digest
+        ]
+        if len(matches) != 1 or matches[0] in roles:
+            raise ValueError("unknown or repeated original game archive")
+        roles[matches[0]] = path
+    if set(roles) != set(AGENTBENCH_GAME_ARCHIVES):
+        raise ValueError("all three original game release archives required")
+    base = Path(data_root).resolve()
+    results = []
+    for index in indices:
+        relative = rows[index]
+        game = (base / relative).resolve()
+        if not game.is_relative_to(base) or not relative.endswith("/game.tw-pddl"):
+            raise ValueError("unsafe or unsupported original game reference")
+        # Verify all publisher files in this episode directory, including task
+        # description/state files. Return hashes only, never their JSON payloads.
+        assets = []
+        directory = str(Path(relative).parent).replace("\\", "/") + "/"
+        for role, archive_path in roles.items():
+            with zipfile.ZipFile(archive_path) as bundle:
+                for name in bundle.namelist():
+                    if not name.startswith(directory) or name.endswith("/"):
+                        continue
+                    target = (base / name).resolve()
+                    if not target.is_relative_to(base):
+                        raise ValueError("original asset path escapes data root")
+                    original = bundle.read(name)
+                    if target.read_bytes() != original:
+                        raise ValueError(
+                            "original game asset differs from publisher release"
+                        )
+                    assets.append(
+                        {
+                            "file": name,
+                            "sha256": hashlib.sha256(original).hexdigest(),
+                            "release_role": role,
+                        }
+                    )
+        if relative not in {asset["file"] for asset in assets}:
+            raise ValueError("original game absent from release archives")
+        assets.sort(key=lambda asset: (asset["file"], asset["release_role"]))
+        results.append(
+            {
+                "schema_version": "native-task-reference/v1",
+                "source_id": "AGENTBENCH",
+                "revision": AGENTBENCH_REVISION,
+                "domain": "alfworld",
+                "variant": "FC",
+                "task_set": "new_std",
+                "native_task_id": str(index),
+                "input_ref": {
+                    "file": "data/alfworld/new_std.json",
+                    "sha256": hashlib.sha256(raw).hexdigest(),
+                    "row_index": index,
+                    "game_file": relative,
+                    "game_sha256": hashlib.sha256(game.read_bytes()).hexdigest(),
+                    "assets": assets,
+                },
+                "runtime_kind": "official_native_task",
+                "scoring": "OFFICIAL_RUNNER_REQUIRED",
+                "preparation_only_not_execution": True,
+            }
+        )
+    return results
+
 
 def tau2_task_references(*, official_archive, data_root, task_ids):
     """Return original telecom task references, never user/scoring payloads.
@@ -143,6 +250,11 @@ def list_sources(*, class_id: str | None = None) -> list[dict]:
                 "pinned_data_files": sum(
                     f.get("role") == "data" for f in source.get("files", [])
                 ),
+                "pinned_native_archives": sum(
+                    f.get("role") in {"source_archive", "native_game_archive"}
+                    for f in source.get("files", [])
+                ),
+                "native_reference_command": source.get("native_reference_command"),
                 "local_availability": "NOT_CHECKED_ON_THIS_MACHINE",
                 "runtime_validation": "NOT_ESTABLISHED_BY_CATALOG",
                 "class_membership": "CANDIDATE_ONLY" if class_id else "NOT_SELECTED",

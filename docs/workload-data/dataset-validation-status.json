@@ -1,6 +1,6 @@
 {
   "schema_version": "workload-validation-checklist/v1",
-  "updated_at": "2026-10-22",
+  "updated_at": "2026-10-23",
   "scope": "Per-source integration validation; not performance or full-suite acceptance",
   "completion_rule": {
     "minimum_preselected_samples": 3,
@@ -25,15 +25,16 @@
         "web-navigation-interaction",
         "os-command-execution"
       ],
-      "acquisition": "NOT_RECHECKED",
-      "read_adapter": "NOT_RECHECKED",
-      "server_execution": "NOT_RUN",
-      "scoring": "NOT_RUN",
-      "selected_samples": [],
-      "completed_samples": [],
-      "checked": false,
-      "receipt": null,
-      "blocker": "待在当前数据-only版本重新核验；目录登记不代表已接入。"
+      "acquisition": "VERIFIED",
+      "read_adapter": "VERIFIED",
+      "server_execution": "COMPLETED",
+      "scoring": "COMPLETED",
+      "selected_samples": ["ALFWorld_FC:new_std:0", "ALFWorld_FC:new_std:1", "ALFWorld_FC:new_std:2"],
+      "completed_samples": ["ALFWorld_FC:new_std:0", "ALFWorld_FC:new_std:1", "ALFWorld_FC:new_std:2"],
+      "checked": true,
+      "receipt": "docs/workload-data/validation/agentbench-alfworld-public-handoff-npu-20261023.json",
+      "preparation_receipt": "docs/workload-data/validation/agentbench-alfworld-original-preparation-20261022.json",
+      "blocker": "仅ALFWorld FC new_std原索引0–2原生交互及官方评分完成，得分1/1/1；3/109而非全量，DB/KG/OS/Web等其他环境未验证。ARM PDDL构建和模型/生成配置替换明确披露，不声称官方Docker等价。"
     },
     {
       "source_id": "AI2_ARC",
