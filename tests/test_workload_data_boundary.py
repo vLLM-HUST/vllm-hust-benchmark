@@ -15,6 +15,7 @@ DATA_MODULES = {
     "execution",
     "identity",
     "input_views",
+    "locomo",  # Original conversation/question relations, no memory generation.
     "mapping_contract",
     "pipeline",
     "provider",
@@ -50,3 +51,25 @@ def test_quality_expansion_remains_pure_data_only():
     }
     assert imports == {"copy"}
     assert not any(isinstance(node, ast.Import) for node in ast.walk(tree))
+
+
+def test_locomo_expansion_remains_pure_data_only():
+    import ast
+
+    tree = ast.parse(
+        (ROOT / "src/vllm_hust_workload_data/locomo.py").read_text(encoding="utf-8")
+    )
+    assert {
+        node.module for node in ast.walk(tree) if isinstance(node, ast.ImportFrom)
+    } == {"copy"}
+    assert {
+        alias.name
+        for node in ast.walk(tree)
+        if isinstance(node, ast.Import)
+        for alias in node.names
+    } == {"re"}
+    assert not any(
+        isinstance(node, ast.Attribute)
+        and node.attr in {"open", "read_text", "write_text", "post", "request"}
+        for node in ast.walk(tree)
+    )
