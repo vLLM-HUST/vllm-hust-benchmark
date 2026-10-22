@@ -35,14 +35,43 @@ max_tokens=1024、enable_thinking=false。
 prompt/validator 模块通过独立 namespace 加载，绕过自动导入可选模型引擎的 core 初始化器；原文件未修改，但这不是完整参考环境。 原始输出、演示和 schema
 仅保留在服务器私有目录，不随本说明发布。
 
+## 安装与显式执行
+
+在独立 Python 3.12 环境安装纯 prompt/validator 所需依赖，不安装或启动发布方 可选 CUDA 引擎，不改变现有 NPU 服务环境：
+
+```bash
+python3.12 -m venv env-jsonschema
+env-jsonschema/bin/python -m pip install jsonschema==4.23.0 numpy==2.2.3 dacite==1.9.2 omegaconf==2.3.0 matplotlib==3.10.1 prettytable==3.15.1
+env-jsonschema/bin/python scripts/run_jsonschemabench_original_schema.py \
+  --schema-root /private/original-data \
+  --official-code /private/original-code \
+  --output /private/run-new-001 \
+  --model workload-qwen35-27b-128k-nonthinking \
+  --origin http://127.0.0.1:19466 --context-capacity 131072
+```
+
+`schema-root` 下必须有 `Github_easy/o10008.json`、`o10009.json`、`o10010.json`； `official-code` 下必须有固定版本的
+`core/`。入口核验原始文件、prompt 和 validator 摘要；来源版本见前文。首次执行前自行取得原始代码和数据，并确认适用许可。 入口仅允许本机 HTTP
+服务，不接收远端凭据，不自动下载或回退模型。 输出目录必须不存在且与原始数据、代码目录分离；请求和输出保存在私有文件。 完整 prompt 预检、实际 usage、终止原因、JSON 可解析与
+schema 合法性分别记录。 `GENERATED` 不是正确性通过；HTTP 拒绝和执行异常另记为失败。 本入口明确限制到三个已固定的无 `$ref` 原始资产，不代表支持全库引用解析。
+
 ## 待完成检查
 
 - [x] 原始三个约束的 NPU 生成与发布方校验。
 - [x] 对失败输出做独立标准校验，保留原始失败结论。
 - [x] whole-schema 读取适配与合成夹具 CPU 单测。
+- [x] 候选 wheel 在服务器独立安装，原始三文件逐一 bind、prepare、resolve，输入对象完全相等；此项未调用模型。
+- [x] 同一候选 wheel 回归 QuALITY 2086 问题读取/建索引及三个原始问题往返。
 - [ ] 最终 wheel 安装后原始三文件读取、prepare、消费索引往返。
-- [ ] 可复用执行入口及固定环境安装文档。
+- [x] 可复用执行入口及固定环境安装文档；已在现有 NPU 服务执行相同三个任务。
 - [ ] 与研究消费端完成最终固定工件联调。
 - [ ] 完整子集及其他 schema 子集验证。
 
 上述未完成项不能由本次三样本探测或 CPU 测试代替。该来源与长文档理解类别 一起进入下一批 PR，不为单个数据集创建独立 PR。
+
+### 安装验证记录
+
+候选 wheel SHA256： `a3e11c1b64f3edef3f94f5482fc18b253610da06388a40f3cb608928a727b251`。 服务器公开入口复跑目录为
+`jsonschemabench-public-runner-002`，三个任务结果与首次探测一致。 这是三个独立任务的重复执行，不累计为六个或九个独立任务。 最终 CI
+工件及消费端联调仍待完成，不能用此本地构建候选替代。 首次私有安装验证助手误将“无 outcome”假定为空对象；按公共类型契约应为 None。
+该次助手断言失败已保留，修正助手后重新验证通过，未修改生产契约或放宽输入比较。
