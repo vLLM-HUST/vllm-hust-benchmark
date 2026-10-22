@@ -1,0 +1,26 @@
+{
+  "id": "opt-note-delivery-integrity-repair",
+  "route": "028/meta-exp-fixed-cost",
+  "caliber": "offline-toolchain",
+  "cohort": "not applicable: no model execution",
+  "scenario": "temporary Git repositories and workbench metadata fixtures",
+  "op": "",
+  "phase": "toolchain integrity",
+  "method": "Reject empty/misrouted notes before writes; reject pin stdout self-capture; optionally prove preservation of pre-existing same-file dirty content via explicit startup snapshot and three-way merge.",
+  "stage": "validating",
+  "next_action": "Finish repository regression, reversible-patch audit and scoped delivery check. Historical evidence drift remains independently blocked; do not repin to suppress it.",
+  "stop_condition": "Any partial-write regression, false delivery pass, dirty-content loss or patch roundtrip failure: do not accept repair; preserve user changes and diagnostics.",
+  "budget": {
+    "npu_min": "none: offline tooling only",
+    "serve_starts": "none",
+    "resamples": "none"
+  },
+  "evidence": [
+    "/root/包体恢复/records/probes/20261019T042000Z_opt_repair/tool-tests-final.log",
+    "/root/包体恢复/records/probes/20261019T042000Z_opt_repair/workbench-tests.log",
+    "/root/包体恢复/records/probes/20261019T042000Z_opt_repair/drift-diagnosis.json",
+    "/root/包体恢复/records/probes/20261019T042000Z_opt_repair/card-repair.log"
+  ],
+  "reason": "Two preventable write/collection defects fixed; strict delivery preserved by default and extended only with explicit startup provenance. Existing empty GDN card restored through opt note using existing evidence. Two actual archive size changes retained, not waived.",
+  "reopen_condition": "Regression or new evidence of false-positive/false-negative delivery or note writes. No operator method reopened."
+}
