@@ -84,6 +84,14 @@ def test_catalog_data_identity_matches_runner():
             + "/tasks/"
             + row["path"]
         )
-    assert {
-        row["path"]: (row["sha256"], row["rows"]) for row in source["files"]
-    } == runner().TASKS
+    editing_path = ROOT / "scripts/run_ni_editing_extraction_original.py"
+    editing_spec = importlib.util.spec_from_file_location(
+        "ni_additional_assets", editing_path
+    )
+    editing = importlib.util.module_from_spec(editing_spec)
+    editing_spec.loader.exec_module(editing)
+    assert not set(runner().TASKS) & set(editing.TASKS)
+    assert {row["path"]: (row["sha256"], row["rows"]) for row in source["files"]} == {
+        **runner().TASKS,
+        **editing.TASKS,
+    }
