@@ -1,0 +1,57 @@
+{
+  "status": "current_convolution_cases_runtime_cpu_oracle_and_repetitions_checked",
+  "ranks": [
+    {
+      "rank": 0,
+      "cases": 1013,
+      "max_abs": {
+        "output": 0.000244140625,
+        "state": 0.0
+      },
+      "weighted_reference_ms": [
+        1317.7701190710068,
+        1224.0701997876167,
+        1223.2691596746445
+      ],
+      "median_ms": 1224.0701997876167,
+      "stdev_ms": 54.33039030752696
+    },
+    {
+      "rank": 1,
+      "cases": 1013,
+      "max_abs": {
+        "output": 0.000244140625,
+        "state": 0.0
+      },
+      "weighted_reference_ms": [
+        1348.1372402906418,
+        1233.266521036625,
+        1229.4960802793503
+      ],
+      "median_ms": 1233.266521036625,
+      "stdev_ms": 67.43542987463904
+    }
+  ],
+  "calls_per_rank": 30750,
+  "source_sha256": {
+    "/root/gennova-evidence/20261019-midterm-aligned/worker-conv-reference-plan-r1.json": "1ac19abb891221a3529418576f3cc5597270d6060e38d8c36a9f9597ae67fc0a",
+    "/workspace/audit_m01_worker_conv.py": "24c17e2d54f025967f4dff6985e9b26aa6c2e6c3b09dce3b47cea2ded5bbce2c",
+    "/workspace/m01-conv-reference-worker-r1/native-identity-supplement.json": "b4b4f6eeb9a85c604269dd0d2fdd2ccac02a3d3ed685a832019d4fad48518d46",
+    "/workspace/m01-conv-reference-worker-r1/receipt.json": "b0cec26543cf6878fa2b3057ef45357ca23d35d805d33df7312d794e13779a8c",
+    "/workspace/m01-conv-reference-worker-r1/results/rank-0.json": "2dbc121182caa346ee99a8f0bbd20cc2f8cc96dd4afdd71532749d35c6433ad9",
+    "/workspace/m01-conv-reference-worker-r1/results/rank-1.json": "ce08d3d306a19eaf34f3910df8dabce37380d973cb444f1accb640d1e0c87467"
+  },
+  "limitations": [
+    "Synthetic activations and state; actual sequence partitions, slots and accepted offsets.",
+    "History5 inferred from loaded model MTP2 and pinned state-shape implementation, not a new state snapshot.",
+    "Only observed slot span allocated, not the complete model KV allocation.",
+    "State seed restored before correctness and each repetition; hot evolving state within timed replay.",
+    "Installed native binary/source identity retained; not a reproducible source-to-binary build proof.",
+    "Component reference only, not serving throughput or full M01 attainment.",
+    "Supplement captured during the run; not represented as a pre-run freeze. Device object paths identify installed candidates, not per-launch dispatch proof.",
+    "CPU comparisons retain aggregate errors, not all tensors for offline replay.",
+    "Synchronous component sums are not application critical-path latency."
+  ],
+  "model_effective_flops": null,
+  "m01_attainment": null
+}

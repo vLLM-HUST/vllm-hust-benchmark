@@ -1,0 +1,100 @@
+{
+  "status": "same_api_raw_flit_communication_reference_term_derived",
+  "api": {
+    "mapping": [
+      {
+        "card": 4,
+        "device": 0,
+        "logical": 0,
+        "physical": 4
+      },
+      {
+        "card": 5,
+        "device": 0,
+        "logical": 1,
+        "physical": 5
+      }
+    ],
+    "idle_prefix_checks": [
+      {
+        "card": 4,
+        "prefix_matches_u32_at_idle": true
+      },
+      {
+        "card": 5,
+        "prefix_matches_u32_at_idle": true
+      }
+    ],
+    "hashes": {
+      "/usr/local/Ascend/driver/lib64/driver/libdcmi.so": "2e89f3a4d28e0002bb81f3617cede498784fd9cd28b2d0ab0121250e05fea10c",
+      "/usr/local/Ascend/driver/include/dcmi_interface_api.h": "a33dd67031eaf7b786abc400860878fbbe3077b7fdf354961e8af163372d7ac6"
+    },
+    "api": "dcmi_get_device_info: HCCS main_cmd=16, U64 sub_cmd=5; read first two 16-port arrays only",
+    "scope": "Raw flit counters; conversion to bytes requires known-payload qualification."
+  },
+  "window_name": "quiesced_device_envelope",
+  "window_seconds": 186.8029580116272,
+  "nominal_aggregate_tx_flits": {
+    "lower": 20461154363,
+    "upper": 20461154363
+  },
+  "clock_tolerance_expanded_aggregate_tx_flits": {
+    "lower": 20461154363,
+    "upper": 20461154363
+  },
+  "reference_aggregate_tx_flits": [
+    21248211636.0,
+    21248211636.0,
+    21248211636.0
+  ],
+  "reference_seconds": [
+    41.85436984862281,
+    41.5047984906123,
+    44.18865944058234
+  ],
+  "communication_reference_terms": [
+    {
+      "repetition": 0,
+      "aggregate_tx_flits_per_second": 507670088.2810964,
+      "lower_seconds": 40.30403767194312,
+      "upper_seconds": 40.30403767194312
+    },
+    {
+      "repetition": 1,
+      "aggregate_tx_flits_per_second": 511945905.2621589,
+      "lower_seconds": 39.96741482388103,
+      "upper_seconds": 39.96741482388103
+    },
+    {
+      "repetition": 2,
+      "aggregate_tx_flits_per_second": 480852144.07943535,
+      "lower_seconds": 42.551862594211244,
+      "upper_seconds": 42.551862594211244
+    }
+  ],
+  "formula": "CW_i=sum_shape(calls*reference_TX_flits_per_call_i)/sum_shape(calls*reference_seconds_per_call_i); Tcomm_i=observed_TX_flits/CW_i",
+  "source_sha256": {
+    "/root/gennova-evidence/20261019-midterm-aligned/collective-grid-control-r1/receipt.json": "1c1071ea219131b0afb13547fbd2c3f0c6ab0fe09159f16acc0a47d6b1b90726",
+    "/root/gennova-evidence/20261019-midterm-aligned/collective-grid-control-r1/summary-v2.json": "2efc41552458365d111c36d407b32e33e93f309c8569455fb807ceb59d6a3287",
+    "/root/gennova-evidence/20261019-midterm-aligned/integrate_r12_hardware.py": "567f920c4087366313ab27bc53ebed1308aea5ac233237b6438c41df86554013",
+    "/root/gennova-evidence/20261019-midterm-aligned/m01-recovery-model-worker-r1/system/hccs64.jsonl": "6f96d3c830b034e2b08ace9223916a7ba326a82632746eb598bf0ccf72af9836",
+    "/root/gennova-evidence/20261019-midterm-aligned/m01-recovery-model-worker-r1/system/receipt.json": "7c67ffce8f8d3b241c9e86e7afe53ecbbedbe120299d15643d7efb606e386564",
+    "/root/gennova-evidence/20261019-midterm-aligned/recovery-logits-collective-control-r1/receipt.json": "caefe60037b051eb78806df74c55fa6d2261d5378c6a10940106591371428fdf",
+    "/root/gennova-evidence/20261019-midterm-aligned/recovery-logits-collective-control-r1/summary.json": "ea9af43965c9ac814664cde83a8cf8a06b0e686b2dbe2d0909e8c4b8c37a3ae8",
+    "/workspace/derive_m01_worker_comm_flit_bound.py": "a65be1a69b2733148928bab4e271cd42fb4316f73a6ab705ad35865ab3c31a5e",
+    "/workspace/m01-collective-reference-worker-r1/control/receipt.json": "8452cb55bd17e3418db518eff29672458b88310eb855693515519f1652a96ad4",
+    "/workspace/m01-collective-reference-worker-r1/control/summary.json": "d45810dd6210122d601c673c0eb347c3f400240ada2b4ff994c199a15d9b3da3",
+    "/workspace/m01-worker-collective-reference-joined.json": "0e2bc62e25cfb272015882d75664057f9c1d74a2950dae42ccdd3b38b14f937d",
+    "/workspace/m01-worker-r1-envelope-hardware.json": "bb6904f9e2385dfcf3ab7a0ce442ad5bf7882fb2b61a46902bc8bf7e4a08ca20"
+  },
+  "model_effective_flops": null,
+  "m01_attainment": null,
+  "limitations": [
+    "Both arms use cumulative U64 counters; no 20-byte/flit conversion or bandwidth getter enters this formula.",
+    "Physical TX is counted once across both cards, without adding RX; observer traffic remains included.",
+    "Empirical weighted synchronous reference, not vendor peak or application critical path.",
+    "Observed and predicted reference traffic may differ; neither is altered to force agreement.",
+    "Only the communication term is derived; compute, HBM and full M01 acceptance remain separate.",
+    "Original short-window getter disagreement remains preserved but is not a prerequisite for this same-counter calculation."
+  ]
+}
