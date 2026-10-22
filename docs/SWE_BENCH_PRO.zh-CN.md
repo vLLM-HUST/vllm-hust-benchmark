@@ -176,3 +176,11 @@ Controller 可选实现 `integration.hook = "module:factory"`：`before_run`、`
 
 通用准备/评分逻辑从 Controller 的历史 `ea13820` 提取，官方核心保持固定来源； Controller 历史脚本、配置和实验记录可以作为备份保留，但新用户入口以本仓库为准。
 本次迁移不改写历史运行、网站矩阵或已有实验成绩。
+
+### 长运行的任务容器寿命
+
+Agent 的 `wall_budget_seconds` 与 Docker 容器寿命是不同的预算。任务容器寿命现在取
+`max(2400, wall_budget_seconds + 600)` 秒，保留短任务原40分钟最低寿命，同时覆盖启动屏障和收尾余量。
+例如Agent预算3600秒时容器为4200秒；Agent仍在3600秒触发原保护，不因此多运行10分钟。
+此前固定 `container_timeout="40m"` 在Agent预算超过40分钟时可能提前销毁工具环境，不能拿这种失败归因给模型或Controller。
+Agent、工具调用预算、任务输入和调度算法不因本修复改变。

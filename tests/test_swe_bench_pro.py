@@ -329,3 +329,30 @@ finally:
         "agent_query_exception" if phase == "query" else "tool_exception"
     )
     assert events[-1]["error"] == "AgentWallBudgetExceeded"
+
+
+@pytest.mark.parametrize("wall,expected", [(1200, 2400), (3600, 4200), (7200, 7800)])
+def test_sandbox_outlives_agent_and_preserves_tool_contract(wall, expected):
+    c = configuration()
+    c["agent"]["wall_budget_seconds"] = wall
+    captured = []
+    marker = object()
+    def actual_constructor(**kwargs):
+        captured.append(kwargs)
+        return marker
+    assert runner.create_task_environment(c, {"image_id": "immutable-image"}, actual_constructor) is marker
+    options = captured[0]
+    assert options["container_timeout"] == str(expected) + "s"
+    assert expected >= wall + 600
+    assert options["timeout"] == c["agent"]["tool_timeout_seconds"]
+    assert options["image"] == "immutable-image"
+    assert options["run_args"] == ["--rm", "--entrypoint", "", "--network", c["container"]["network"],
+                                   "--cpus", str(c["container"]["cpus"]), "--memory", c["container"]["memory"]]
+    assert c["agent"]["wall_budget_seconds"] == wall
+
+
+@pytest.mark.parametrize("wall", [True, 0, -1, None])
+def test_invalid_sandbox_budget_rejected_before_creation(wall):
+    c = configuration();c["agent"]["wall_budget_seconds"] = wall
+    def forbidden(**kwargs):raise AssertionError("No container may be created")
+    with pytest.raises(ValueError):runner.create_task_environment(c, {"image_id": "image"}, forbidden)
