@@ -1,0 +1,64 @@
+{
+  "original_test_rows_and_question_ids": [
+    [
+      2688,
+      2804
+    ],
+    [
+      2689,
+      2805
+    ],
+    [
+      2690,
+      2806
+    ]
+  ],
+  "source_id": "MMLU_PRO",
+  "server_inventory": {"accelerator": "Ascend 910B2", "chips": 2, "backend": "vllm-ascend", "precision": "bfloat16", "mode": "graph", "text_only": true},
+  "provider_roundtrip": {"model_calls": 0, "prepared_reference_rows": 2691, "verified_original_test_row_indices": [2688,2689,2690], "original_question_ids": [2804,2805,2806], "original_input_matches": true, "outcome_fields_absent_from_task_input": true, "scope": "three exact model-tested rows resolved through installed canonical data provider; prepared rows are not model tasks"},
+  "revision": "b189ec765aa7ed75c8acfea42df31fdae71f97be",
+  "selected_samples": [
+    "biology:0",
+    "biology:1",
+    "biology:2"
+  ],
+  "selection": "first three biology-filtered original test rows, fixed before model execution",
+  "model": "workload-qwen35-27b-128k-nonthinking",
+  "endpoint": "http://127.0.0.1:19466/v1/chat/completions",
+  "started_at_unix": 1792629790.4489744,
+  "runner": "lm-eval==0.4.11",
+  "task_config_sha256": "71dc96ee3c684c68dbd4447d2f10f2971ae6291eb9d3ee78c20e8fc163e5f1c4",
+  "changes_from_upstream_task": [
+    "local byte-identical parquet paths",
+    "three test rows only",
+    "chat API transport",
+    "max_gen_toks=2048",
+    "enable_thinking=false"
+  ],
+  "prompt_filters_metric_fewshot": "unchanged upstream biology recipe; five original validation examples",
+  "claim_boundary": "integration sample, not full benchmark score or performance evaluation",
+  "status": "END_TO_END_EXECUTED_AND_SCORED",
+  "versions": {
+    "lm-eval": "0.4.11",
+    "datasets": "3.6.0",
+    "pyarrow": "19.0.1",
+    "huggingface-hub": "1.31.0"
+  },
+  "metrics": {
+    "mmlu_pro_biology": {
+      "alias": "biology",
+      "exact_match,custom-extract": 1,
+      "exact_match_stderr,custom-extract": "N/A"
+    }
+  },
+  "sample_counts": {
+    "mmlu_pro_biology": {
+      "original": 717,
+      "effective": 3
+    }
+  },
+  "finished_at_unix": 1792629869.6391134,
+  "scope": "FIRST_THREE_BIOLOGY_TASKS_ONLY_NOT_ALL_MMLU_PRO",
+  "service_profile": "text-only-128k-nonthinking/v1",
+  "private_results": "server controlled directory only; questions and answers not published"
+}

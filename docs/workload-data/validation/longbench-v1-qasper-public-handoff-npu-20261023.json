@@ -1,0 +1,146 @@
+{
+  "schema_version": "longbench-qasper-original/v1",
+  "source_id": "LONGBENCH",
+  "subsuite": "qasper",
+  "source_revision": "2e00731f8d0bff23dc4325161044d0ed8af94c1e",
+  "data_revision": "5e628be450b7e67fb7ae6e201bd6d8f7056f7672",
+  "data_sha256": "29aa07d2a63f36f4fb8e8cd200a3428ee3126d750bde6af1c8f9bc41c2366854",
+  "helper_sha256": "333174542868a42ac1eaed7ad180cc0db8bac2deaab5cb013ea5e67ab6c49ee2",
+  "original_source_file_sha256": {
+    "eval.py": "1a3acfc25d9b053e9bb75c479f7e385d0cb9989f0f7115346b7d632655967721",
+    "metrics.py": "e22e2a2662e0f7e683137fa3541f64edb6a801e9138d16d2f3459a6ab9941323",
+    "config/dataset2prompt.json": "56d22ad4f382169c2b8a11ff4c982a4a1bea096c8152b0f0b85b64686b157c30",
+    "config/dataset2maxlen.json": "72966b3c0933e214591637fb085798c5e687ebff4ddaab5d99bbc31120532022"
+  },
+  "selected_ids": [
+    "3ac3eef636db11635a21a61804cb28e92c546a5686dd1e12",
+    "db6c4d611b78c840972b57ee0b245003566b982feaff1084",
+    "e419f2bff9d2ab7c3b60b3250caccd2d9ae1285ec3e8e818"
+  ],
+  "selection": "FIRST_THREE_ORIGINAL_QASPER_ROWS_BEFORE_EXECUTION",
+  "original_qasper_rows": 200,
+  "model": "workload-qwen35-27b-128k-nonthinking",
+  "scorer_dependencies": {
+    "numpy": "2.2.6",
+    "jieba": "0.42.1",
+    "rouge": "1.0.1",
+    "fuzzywuzzy": "0.18.0",
+    "six": "1.17.0"
+  },
+  "transport": "ORIGINAL_TEMPLATE_VERBATIM_AS_SINGLE_USER_MESSAGE_WITH_MODEL_NATIVE_CHAT_TEMPLATE_NO_TRUNCATION",
+  "generation_config": {
+    "temperature": 0,
+    "max_tokens": 128,
+    "n": 1,
+    "chat_template_kwargs": {
+      "enable_thinking": false
+    }
+  },
+  "declared_context_limit": 131072,
+  "started_at_unix": 1792689560.678115,
+  "status": "END_TO_END_EXECUTED_AND_SCORED",
+  "full_suite_claim": false,
+  "performance_claim": false,
+  "samples": [
+    {
+      "row_index": 0,
+      "id": "3ac3eef636db11635a21a61804cb28e92c546a5686dd1e12",
+      "status": "EXECUTED_AND_OFFICIALLY_SCORED",
+      "prompt_sha256": "31f2c87c9fc99a29cee73ab66694c80bc0d96f20bb6d989594cffe712efcf061",
+      "model_request_attempted": true,
+      "preflight_prompt_tokens": 4103,
+      "finish_reason": "stop",
+      "usage": {
+        "prompt_tokens": 4103,
+        "total_tokens": 4121,
+        "completion_tokens": 18,
+        "prompt_tokens_details": null,
+        "completion_tokens_details": null
+      },
+      "official_f1_percent": 19.05,
+      "private_result_sha256": "ef1f1fe20d630c347004a4202310981a4cf5d2b6c0116861bdd3882813bfeeee"
+    },
+    {
+      "row_index": 1,
+      "id": "db6c4d611b78c840972b57ee0b245003566b982feaff1084",
+      "status": "EXECUTED_AND_OFFICIALLY_SCORED",
+      "prompt_sha256": "f8bcf1d870bc299ed10e543e21cfcc2a5e7c336cef0d4ec985c5a462fe881329",
+      "model_request_attempted": true,
+      "preflight_prompt_tokens": 3440,
+      "finish_reason": "stop",
+      "usage": {
+        "prompt_tokens": 3440,
+        "total_tokens": 3476,
+        "completion_tokens": 36,
+        "prompt_tokens_details": null,
+        "completion_tokens_details": null
+      },
+      "official_f1_percent": 36,
+      "private_result_sha256": "86476821a58d786d27afe3ff647a4a5c25430e8b036ccad8cdb374d28326ac17"
+    },
+    {
+      "row_index": 2,
+      "id": "e419f2bff9d2ab7c3b60b3250caccd2d9ae1285ec3e8e818",
+      "status": "EXECUTED_AND_OFFICIALLY_SCORED",
+      "prompt_sha256": "0742af613c25d0e225acc451d63f696f63a45970fb8c293e1ad753ec208ef395",
+      "model_request_attempted": true,
+      "preflight_prompt_tokens": 4461,
+      "finish_reason": "stop",
+      "usage": {
+        "prompt_tokens": 4461,
+        "total_tokens": 4474,
+        "completion_tokens": 13,
+        "prompt_tokens_details": null,
+        "completion_tokens_details": null
+      },
+      "official_f1_percent": 12.5,
+      "private_result_sha256": "6407e35c53c69b4aab21d3080c27da0c2dd0a979dfb4f6094c6922d30fd99d4d"
+    }
+  ],
+  "official_f1_percent": 22.52,
+  "finished_at_unix": 1792689566.405935,
+  "source_checkbox_eligible": true,
+  "private_run": "longbench-v1-qasper-public-handoff-003",
+  "process_returncode": 0,
+  "unique_original_tasks": 3,
+  "selected_samples": [
+    "3ac3eef636db11635a21a61804cb28e92c546a5686dd1e12",
+    "db6c4d611b78c840972b57ee0b245003566b982feaff1084",
+    "e419f2bff9d2ab7c3b60b3250caccd2d9ae1285ec3e8e818"
+  ],
+  "completed_samples": [
+    "3ac3eef636db11635a21a61804cb28e92c546a5686dd1e12",
+    "db6c4d611b78c840972b57ee0b245003566b982feaff1084",
+    "e419f2bff9d2ab7c3b60b3250caccd2d9ae1285ec3e8e818"
+  ],
+  "official_container_equivalence_claim": false,
+  "quality_threshold_claim": false,
+  "private_payloads_published": false,
+  "preparation": {
+    "command": "workload-data prepare-longbench-qasper",
+    "archive_sha256": "cb45b11a4133c6bc1d6a44b0f8e701335ff1e543195db1103472e575857f7f64",
+    "selected_member_sha256": "29aa07d2a63f36f4fb8e8cd200a3428ee3126d750bde6af1c8f9bc41c2366854",
+    "file_bytes": 4829368,
+    "rows": 200,
+    "model_calls": 0,
+    "scorer_runs": 0
+  },
+  "installation": {
+    "root_and_data_wheels_installed": true,
+    "private_scorer_environment": true,
+    "pip_check": "No broken requirements found (PYTHONPATH/PYTHONHOME/LD_PRELOAD cleared)",
+    "initial_adapter_validation_failure": "publisher all_classes is null; initially rejected before output directory/model calls; corrected nullable field contract and regression tested without rewriting data"
+  },
+  "prior_attempts": "private original-001 raw transport all length, F1=2.05; original-002 native model chat transport all stop, F1=22.52; public-handoff-003 same three task IDs. Across runs still three unique tasks; preserve raw diagnostic separately",
+  "server_inventory": {
+    "backend": "vllm-ascend",
+    "chip_model": "910B2",
+    "chip_count": 2,
+    "physical_device_ids": [
+      3,
+      4
+    ],
+    "precision": "BF16",
+    "graph_mode": true
+  }
+}
