@@ -77,6 +77,13 @@ def test_catalog_data_identity_matches_runner():
     )
     source = catalog["sources"]["NATURAL_INSTRUCTIONS"]
     assert source["revision"] == runner().REVISION
+    for row in source["files"]:
+        assert row["url"] == (
+            "https://raw.githubusercontent.com/allenai/natural-instructions/"
+            + source["revision"]
+            + "/tasks/"
+            + row["path"]
+        )
     assert {
         row["path"]: (row["sha256"], row["rows"]) for row in source["files"]
     } == runner().TASKS

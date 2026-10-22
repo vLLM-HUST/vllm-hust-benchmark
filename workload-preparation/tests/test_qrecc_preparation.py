@@ -9,6 +9,22 @@ import pytest
 from vllm_hust_workload_data import provider
 
 
+def test_download_plan_separates_archive_and_original_member():
+    from vllm_hust_workload_data.catalog import download_plan
+
+    plan = download_plan("QRECC")
+    archives = [row for row in plan["files"] if row["role"] == "data_archive"]
+    members = [row for row in plan["files"] if row["role"] == "data"]
+    assert len(archives) == len(members) == 1
+    assert archives[0]["sha256"] == provider.QRECC_ARCHIVE_SHA256
+    assert "/1d174464290790c0198b474ad022952ecd83b76b/" in archives[0]["url"]
+    assert members[0]["sha256"] == provider.QRECC_TEST_SHA256
+    assert members[0]["path"] == members[0]["archive_member"] == "qrecc_test.json"
+    assert members[0]["rows"] == 16451
+    assert "url" not in members[0]  # No zip URL advertised as the JSON member bytes.
+    assert plan["preparation_command"].startswith("workload-data prepare-qrecc-test ")
+
+
 def test_reject_unknown_archive_without_creating_output(tmp_path):
     archive = tmp_path / "unknown.zip"
     archive.write_bytes(b"not original data")
