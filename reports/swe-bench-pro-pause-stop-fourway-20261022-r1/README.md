@@ -76,3 +76,11 @@ AI Core使用真实scrape时间去重；其他指标保留查询观测点。单�
 新增只读audit_initial_admission.py从同一已验SHA原件复算：选择全部128program均step1/REASONING的最早快照，并以下一采样时间早于首个客户端返回为采集上界。ThunderAgent原版与Controller原版各48个活跃program，仅29个相同，对称差38个；两组采集界约开始后0.99–2.03秒，首个客户端返回约32.27/32.57秒。初始实际运行集合已经不同，不能将7.92%差异直接解释成后半程暂停或接入实现错误。请求交错、周期相位与HTTP包装路径的各自贡献仍未确定；相同time0输入不是同一有序准入事件。快照非原子，不能由此推出逐块缓存驱逐或已确定唯一根因。
 
 补充仅修改离线审计及本地测试：启动前超时也必须保存UNKNOWN并禁止重提，不能假定子进程已写开始证据；CLI子日志保留后发现回环metrics请求经过系统代理并返回502。pytest只为loopback追加NO_PROXY，不修改产品/主机/远端配置或延长期限，回归同时验证HTTPX与urllib绕过不可用外部代理。完整串行Python3.11/3.12各264PASS5SKIP、CLI/buildPASS；首次失败和中止检查均保留，不计PASS。该路径不解释以前纯ASGI取消监听偶发失败或远端模型性能；remoteCI未查。
+
+## 相同有序事件的CPU语义对照
+
+使用原SHA不变的128program首轮payload，分别按输入顺序和反序，逐个送到原before入口；fixture引擎逐个受控返回，返回后释放并调用原恢复方法。两种顺序各自比较独立官方HTTP与产品HTTP，129个状态快照、完成顺序、转发payload SHA、17来源SHA全部一致，均128正常fixture返回并全部释放。输入顺序准入48个，反序49个，两集合无交集（对称差97）。这证明入口顺序本身足以改变首轮工作集；本条件下未见HTTP包装引入状态语义分叉。
+
+这不是time0性能实验或历史到达重建：不启动周期调度器，固定fixture usage为40prompt+2completion，每次返回即释放；没有真实引擎、工具等待、上下文增长、KV缓存、抢占或模型请求。因此不能量化原7.92%的原因，不证明NPU性能等价或解释历史后半程缓存下降。主性能协议不改，生产代码不改。复现命令从当前源码checkout设置PYTHONPATH=src，运行python -m benchmarks.audit_ordered_http_parity --input <私有归档fixed-inputs-private.json> --input-sha256 45e36ef48d5ad49d116c4a48659c65c5b939135e54a584b6ee54ea0a63fe09d6 --output <新文件>。公开data保留结果摘要/原结果SHA；私有完整轨迹未发布。
+
+软件标准Python3.11/3.12各266PASS5SKIP、CLI/buildPASS；remoteCI未查。未把旧纯ASGI取消监听偶发失败宣称已解决。
