@@ -30,6 +30,24 @@ def resolve_input(database: Path, record_id: str, *, data_root: Path):
         row_format=spec.get("row_format"),
     )
     try:
+        if spec.get("history_targets") is not None:
+            from .conversations import history_record
+
+            originals = list(rows)
+            index = reference["row_index"]
+            if (
+                index >= len(originals)
+                or originals[index].get("message_id") != task["task_id"]
+            ):
+                raise ValueError("original history target identity changed")
+            result = history_record(
+                originals, task["task_id"], source=source, index=index
+            )
+            result.replay["selection"] = task.get("selection")
+            verify_file(
+                data_root, {"path": reference["file"], "sha256": reference["sha256"]}
+            )
+            return result
         original = next(
             islice(rows, reference["row_index"], reference["row_index"] + 1), None
         )

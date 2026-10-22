@@ -26,7 +26,15 @@ messages = view["messages"]  # 仅此字段作为历史消息输入
 
 调用者负责核验文件 revision、字节 SHA 和选样；函数不以语言或长度偷偷筛选。目标必须是 assistant，路径必须从同一原始根开始、角色交替、没有缺失/重复 ID 或环，并且路径各行明确 deleted=false、synthetic=false。正文保留原样；角色只作 prompter→user、assistant→assistant 映射。synthetic=false 是发布字段，不是对所有文本生成来源的额外保证。
 
-该显式视图尚未写入通用 pipeline/source-index，也尚未得到研究消费者对应视图的联调回执。直接调用函数可用，不声称通用使用链路已完成。
+通用 pipeline 配置可以显式指定 `history_targets` 原始 assistant message_id 列表。仅支持 OASST1、单个完整原始消息树文件，不与自定义 mapping 混用；默认不指定时仍输出原始单消息。`limit` 只进一步限制所选目标，不会裁剪祖先链。索引只保存原目标行、文件身份和视图选择，不保存历史正文或回复；回查时校验同一源文件并重新恢复完整祖先链。
+
+```json
+{"sources":[{"source_id":"OASST1","data_root":"/data/oasst1","manifest":"/data/bindings/oasst1.json","history_targets":["c8dc7c16-e493-4078-bdc7-368b24476ca9"]}]}
+```
+
+此通用视图的夹具准备/索引/回查已通过；随后在服务器独立 OASST 环境安装候选 wheel，使用 `-I` 确认从 site-packages 导入，真实文件经过 bind_source→pipeline→prepared_rows→resolve_input，三条还原输入哈希均匹配既有模型运行。历史回复未进入输入或 SQLite；0 新模型调用。研究消费者对应视图联调仍待补验。
+
+当前安装包验证使用的 wheel SHA-256 为 `1ebccebc7bf6e1c7b931705fb7f8a3f9850da87377a82aac1022f590b6902e20`，私有软件回执 SHA-256 为 `e97d88a0d2e40864c5c36e6cc85bfd0d993dec618c2c8d66aee84d3c7acf53a8`。这是本地候选工件，不是已发布 CI wheel。服务器原始文件副本的 basename 与目录原成员不同，因此绑定明确报告 local snapshot 而非 publisher authenticated；另行核对文件 SHA 与固定原始成员相同，不借改名提升来源认证等级。
 
 ## 已验证范围
 

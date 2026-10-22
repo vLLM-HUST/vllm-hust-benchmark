@@ -4,6 +4,42 @@ from __future__ import annotations
 
 from copy import deepcopy
 
+from .records import WorkloadRecord
+
+
+def validate_history_targets(source_id, targets, mapping=None):
+    if targets is None:
+        return
+    if (
+        source_id != "OASST1"
+        or mapping is not None
+        or not isinstance(targets, list)
+        or not targets
+        or any(not isinstance(t, str) or not t for t in targets)
+        or len(set(targets)) != len(targets)
+    ):
+        raise ValueError("history_targets requires distinct OASST original target IDs")
+
+
+def history_record(rows, target_id, *, source, index):
+    view = oasst_history_prefix(rows, target_id)
+    return WorkloadRecord(
+        source=deepcopy(source),
+        task={
+            "task_id": target_id,
+            "session_id": view["message_tree_id"],
+            "input": {"messages": view["messages"]},
+        },
+        runtime={"kind": "historical_continuation", "execution": "not_executed"},
+        replay={
+            "source_row_index": index,
+            "mapping": view["view"],
+            "prefix_message_ids": view["prefix_message_ids"],
+            "synthetic_fallback": False,
+        },
+        outcome=view["reference"],
+    )
+
 
 def oasst_history_prefix(rows: list[dict], target_message_id: str) -> dict:
     """Restore one complete original path, excluding the target assistant reply.
