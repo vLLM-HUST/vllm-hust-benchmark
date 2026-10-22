@@ -8,14 +8,15 @@ import tarfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-REVISION = "4c98929e214145f93f0172a39060f08fac04d0e2"  # pragma: allowlist secret
+REVISION = "668632ac9b6ae8cb5cc0daa318d346b65feb6f6b"  # pragma: allowlist secret
 REPORT_DIR = "reports/vllm-hust-midterm-20261019"
 REPORT = REPORT_DIR + "/中期测试报告.md"
-OUTPUT = ROOT / "website-publication/data/midterm-v061.json"
+OUTPUT = ROOT / "website-publication/data/midterm-v062.json"
 
 # Repository-relative locators are resolved against the website's exact benchmark
 # publication commit, not a moving main branch or a local acquisition path.
 EVIDENCE = {
+    "fenced-model": ["m01-recovery/fenced-model-20261022"],
     "trace-qualification": ["m01-recovery/trace-qualification-20261021"],
     "long-context-parser": ["m05-parser-confirmation-20261021"],
     "paired-lifecycle": ["m06-paired-20261021"],
@@ -175,9 +176,15 @@ def kv_audit():
 def build():
     raw = pinned(REPORT)
     text = raw.decode()
-    assert "报告版本：V0.61" in text
+    assert "报告版本：V0.62" in text
     url = f"https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/{REVISION}/{REPORT}"
     specs = [
+        (
+            "fenced-model",
+            "完整模型同步边界补采 / Full-model device fences",
+            "#### 完整模型设备同步边界补采",
+            "同工况35B模型200请求全部完成，两卡开始/结束同步回执通过。设备窗口包含客户端启动及控制开销，与原请求区间分开保存。rank 0缺设备任务轨迹，服务管理进程exit 130，副本离线导出完成；完整有效F与匹配参考仍未闭合，M01未通过本轮验收，不替换正式B1。",
+        ),
         (
             "trace-qualification",
             "M01采集资格 / M01 collection qualification",
@@ -317,7 +324,7 @@ def build():
         )
     return {
         "schema": "midterm-publication/v1",
-        "version": "V0.61",
+        "version": "V0.62",
         "report_url": url,
         "report_sha256": hashlib.sha256(raw).hexdigest(),
         "source_commit": REVISION,
