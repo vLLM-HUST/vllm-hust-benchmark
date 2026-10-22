@@ -28,6 +28,59 @@ LONGBENCH_V1_DATA_ARCHIVE_SHA256 = "cb45b11a4133c6bc1d6a44b0f8e701335ff1e543195d
 LONGBENCH_QASPER_SHA256 = "29aa07d2a63f36f4fb8e8cd200a3428ee3126d750bde6af1c8f9bc41c2366854"  # pragma: allowlist secret - original data checksum
 
 
+BFCL_ARCHIVE_SHA256 = "23db73c7b67850696bf4316a92fe97ba54a5dfb46e822bc294e5158b16efffb0"  # pragma: allowlist secret - official source archive checksum
+BFCL_SIMPLE_MEMBERS = {
+    "BFCL_v4_simple_python.json": "82dd63ba502eb2520c6b5d1d9a5c4b590e03ff261565175561f6228a367d1991",  # pragma: allowlist secret - official task checksum
+    "possible_answer/BFCL_v4_simple_python.json": "90cd5bc653690ee8e459b5b3f3fc9458606f7f3fcbf795bb51b7dc581f8c86dc",  # pragma: allowlist secret - official scorer asset checksum
+}
+
+
+def prepare_bfcl_simple_python(*, official_archive, output):
+    """Prepare unchanged task and separate scorer assets; no model/tool execution."""
+    archive = Path(official_archive)
+    if hashlib.sha256(archive.read_bytes()).hexdigest() != BFCL_ARCHIVE_SHA256:
+        raise ValueError("original BFCL archive identity mismatch")
+    raw_files = {}
+    with zipfile.ZipFile(archive) as bundle:
+        prefix = "ShishirPatil-gorilla-6ea5797/berkeley-function-call-leaderboard/bfcl_eval/data/"
+        for relative, expected in BFCL_SIMPLE_MEMBERS.items():
+            if bundle.namelist().count(prefix + relative) != 1:
+                raise ValueError("missing or ambiguous original BFCL member")
+            raw = bundle.read(prefix + relative)
+            if (
+                hashlib.sha256(raw).hexdigest() != expected
+                or len(raw.splitlines()) != 400
+            ):
+                raise ValueError("original BFCL member identity/count mismatch")
+            raw_files[relative] = raw
+    target = Path(output)
+    target.mkdir(mode=0o700, parents=True, exist_ok=False)
+    files = []
+    for relative, raw in raw_files.items():
+        path = target / relative
+        path.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
+        path.write_bytes(raw)
+        path.chmod(0o600)
+        files.append(
+            {
+                "path": relative,
+                "sha256": BFCL_SIMPLE_MEMBERS[relative],
+                "rows": 400,
+                "role": "scorer_reference"
+                if relative.startswith("possible_answer/")
+                else "data",
+            }
+        )
+    return {
+        "source_id": "BFCL",
+        "subsuite": "v4/simple_python",
+        "status": "ORIGINAL_FILES_PREPARED_NOT_EXECUTED",
+        "files": files,
+        "model_calls": 0,
+        "scorer_runs": 0,
+    }
+
+
 def prepare_longbench_qasper(*, data_archive, output):
     """Copy the one fixed publisher member, byte unchanged, to a fresh data root.
 

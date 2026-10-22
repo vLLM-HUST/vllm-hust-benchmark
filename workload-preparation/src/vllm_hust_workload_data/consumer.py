@@ -27,6 +27,7 @@ def resolve_input(database: Path, record_id: str, *, data_root: Path):
     rows = iter_rows(
         asset_path(data_root, reference["file"]),
         records_path=spec.get("records_path", []),
+        row_format=spec.get("row_format"),
     )
     try:
         original = next(

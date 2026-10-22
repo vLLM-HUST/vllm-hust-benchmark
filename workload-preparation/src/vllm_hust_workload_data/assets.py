@@ -53,10 +53,14 @@ def _json(text: str):
     return json.loads(text, parse_constant=reject)
 
 
-def iter_rows(path: Path, *, records_path=()) -> Iterator[dict]:
+def iter_rows(path: Path, *, records_path=(), row_format=None) -> Iterator[dict]:
     """Parse data only. Values are never included in parser error messages."""
     try:
-        if path.name.endswith((".jsonl", ".jsonl.gz")):
+        if row_format is not None and row_format != "jsonl":
+            raise ValueError("unsupported explicit row format")
+        if row_format == "jsonl" and records_path:
+            raise ValueError("JSONL cannot have an array records path")
+        if row_format == "jsonl" or path.name.endswith((".jsonl", ".jsonl.gz")):
             opener = gzip.open if path.name.endswith(".gz") else open
             with opener(path, "rt", encoding="utf-8-sig") as stream:
                 for line in stream:

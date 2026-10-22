@@ -21,7 +21,7 @@
 
 | 范围         | 已登记 | 当前版本已抽样验证闭环 |
 | ------------ | -----: | ---------------------: |
-| 公开候选来源 |     89 |                      9 |
+| 公开候选来源 |     89 |                     10 |
 | 企业私有来源 |      8 |                      8 |
 
 每次验证更新本文件和 [机器可读台账](dataset-validation-status.json)；记录样本
@@ -36,7 +36,7 @@ ID、数据版本、模型、执行器、评分器、终态、失败原因和脱
 | [ ]  | APPWORLD             | application-api-workflow                                                                                                                     | 待复核                      | 待复核                   | 未跑                              | 未跑                               | 待重新核验                                                                                                     |
 | [ ]  | AZURE_LLM            | 待分类核对                                                                                                                                   | 待复核                      | 待复核                   | 未跑                              | 未跑                               | 待重新核验                                                                                                     |
 | [ ]  | BBH                  | standalone-reasoning                                                                                                                         | 待复核                      | 待复核                   | 未跑                              | 未跑                               | 待重新核验                                                                                                     |
-| [ ]  | BFCL                 | structured-generation<br>application-api-workflow<br>tool-call-generation<br>evidence-search-synthesis                                       | 待复核                      | 待复核                   | 未跑                              | 未跑                               | 待重新核验                                                                                                     |
+| [x]  | BFCL                 | structured-generation<br>application-api-workflow<br>tool-call-generation<br>evidence-search-synthesis                                       | 官方原始归档及任务核验      | 原JSONL和索引链路验证    | simple_python原3题完成            | 官方AST valid=3/3                  | 仅静态调用3/400，不执行工具；其他类别未验                                                                      |
 | [ ]  | BIGCODEBENCH         | code-generation-with-tests<br>code-evaluation                                                                                                | 本地已取得                  | 本地 3 条已回查          | 未跑                              | 未跑                               | [本地读取记录](validation/local-read-24sources-20261022.json)，服务器未验证                                    |
 | [ ]  | BILLSUM              | text-summarization                                                                                                                           | 待复核                      | 待复核                   | 未跑                              | 未跑                               | 待重新核验                                                                                                     |
 | [ ]  | BIXBENCH             | simulation-analysis-verification<br>scientific-coding-workflow                                                                               | 待复核                      | 待复核                   | 未跑                              | 未跑                               | 待重新核验                                                                                                     |

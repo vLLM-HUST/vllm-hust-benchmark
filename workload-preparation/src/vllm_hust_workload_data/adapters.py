@@ -84,6 +84,29 @@ def adapt_row(
     ):
         raise ValueError("TOOLACE requires its original dialogue")
     kind = spec["kind"]
+    if source_id == "BFCL":
+        questions, functions = row["question"], row["function"]
+        if (
+            not isinstance(row["id"], str)
+            or not row["id"].startswith("simple_python_")
+            or not isinstance(questions, list)
+            or len(questions) != 1
+            or not isinstance(questions[0], list)
+            or len(questions[0]) != 1
+            or not isinstance(questions[0][0], dict)
+            or questions[0][0].get("role") != "user"
+            or not isinstance(questions[0][0].get("content"), str)
+            or not questions[0][0]["content"].strip()
+            or not isinstance(functions, list)
+            or len(functions) != 1
+            or not isinstance(functions[0], dict)
+            or not isinstance(functions[0].get("name"), str)
+            or not functions[0]["name"].strip()
+            or not isinstance(functions[0].get("parameters"), dict)
+        ):
+            raise ValueError(
+                "BFCL adapter only supports original single-turn simple_python tasks"
+            )
     if source_id == "AZURE_LLM":
         if not isinstance(row["TIMESTAMP"], str) or not row["TIMESTAMP"].strip():
             raise ValueError("AZURE_LLM requires a source timestamp string")
@@ -315,7 +338,9 @@ def iter_workload(
             "provenance_kind": manifest["provenance_kind"],
         }
         rows = iter_rows(
-            asset_path(Path(data_root), name), records_path=spec.get("records_path", [])
+            asset_path(Path(data_root), name),
+            records_path=spec.get("records_path", []),
+            row_format=spec.get("row_format"),
         )
         remaining = None if limit is None else limit - emitted
         try:

@@ -2,6 +2,19 @@
   "version": "source-adapters/v1",
   "status_policy": "Implementation, asset verification and runtime reproduction are independent. All other registered sources remain NOT_IMPLEMENTED.",
   "adapters": {
+    "BFCL": {
+      "kind": "task_dataset",
+      "mapping": "native_function_call",
+      "row_format": "jsonl",
+      "native_structured_fields": ["question", "function"],
+      "input_fields": ["question", "function"],
+      "required_fields": ["id", "question", "function"],
+      "outcome_fields": [],
+      "annotation_fields": [],
+      "id_field": "id",
+      "requirements": ["Original BFCL v4 simple_python only; original .json filename contains JSONL", "Scorer references are separate private assets, never task inputs", "Official AST argument matching does not execute tools or generated code; do not claim other BFCL categories or closed-loop tasks"],
+      "status": "SIMPLE_PYTHON_READER_IMPLEMENTED_NATIVE_VALIDATION_SEPARATE"
+    },
     "LONGBENCH": {
       "kind": "task_dataset",
       "mapping": "native_context_question",

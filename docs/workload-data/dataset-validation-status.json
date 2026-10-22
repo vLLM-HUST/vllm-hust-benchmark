@@ -117,15 +117,15 @@
         "tool-call-generation",
         "evidence-search-synthesis"
       ],
-      "acquisition": "NOT_RECHECKED",
-      "read_adapter": "NOT_RECHECKED",
-      "server_execution": "NOT_RUN",
-      "scoring": "NOT_RUN",
-      "selected_samples": [],
-      "completed_samples": [],
-      "checked": false,
-      "receipt": null,
-      "blocker": "待在当前数据-only版本重新核验；目录登记不代表已接入。"
+      "acquisition": "VERIFIED",
+      "read_adapter": "VERIFIED",
+      "server_execution": "COMPLETED",
+      "scoring": "COMPLETED",
+      "selected_samples": ["simple_python_0", "simple_python_1", "simple_python_2"],
+      "completed_samples": ["simple_python_0", "simple_python_1", "simple_python_2"],
+      "checked": true,
+      "receipt": "docs/workload-data/validation/bfcl-v4-simple-python-public-handoff-npu-20261023.json",
+      "blocker": "仅v4/simple_python原前三题（3/400），公开包/入口复验均stop、官方AST valid=true；静态函数名/参数匹配，不执行工具或生成代码。模型新增路由注册明确披露；全量、其他BFCL类别与闭环任务未验。"
     },
     {
       "source_id": "BIGCODEBENCH",
