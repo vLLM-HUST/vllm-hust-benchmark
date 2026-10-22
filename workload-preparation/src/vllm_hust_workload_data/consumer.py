@@ -33,6 +33,12 @@ def resolve_input(database: Path, record_id: str, *, data_root: Path):
         if spec.get("history_targets") is not None:
             from .conversations import history_record
 
+            if (
+                source["source_id"] != "OASST1"
+                or reference.get("view") != "original-parent-history/v1"
+                or task["task_id"] not in spec["history_targets"]
+            ):
+                raise ValueError("original history view identity mismatch")
             originals = list(rows)
             index = reference["row_index"]
             if (
