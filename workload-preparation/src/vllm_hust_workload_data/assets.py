@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import csv
+from copy import deepcopy
 import gzip
 import hashlib
 import json
@@ -53,9 +54,23 @@ def _json(text: str):
     return json.loads(text, parse_constant=reject)
 
 
-def iter_rows(path: Path, *, records_path=(), row_format=None) -> Iterator[dict]:
+def iter_rows(
+    path: Path, *, records_path=(), row_format=None, root_fields=()
+) -> Iterator[dict]:
     """Parse data only. Values are never included in parser error messages."""
     try:
+        if (
+            not isinstance(root_fields, (list, tuple))
+            or any(not isinstance(key, str) or not key for key in root_fields)
+            or len(set(root_fields)) != len(root_fields)
+        ):
+            raise ValueError("root fields must be distinct nonempty field names")
+        if root_fields and (
+            path.suffix != ".json" or row_format is not None or not records_path
+        ):
+            raise ValueError(
+                "root fields require an explicit nested JSON array contract"
+            )
         if row_format is not None and row_format != "jsonl":
             raise ValueError("unsupported explicit row format")
         if row_format == "jsonl" and records_path:
@@ -72,6 +87,12 @@ def iter_rows(path: Path, *, records_path=(), row_format=None) -> Iterator[dict]
                     yield row
         elif path.suffix == ".json":
             rows = _json(path.read_text(encoding="utf-8-sig"))
+            if root_fields and (
+                not isinstance(rows, dict)
+                or any(key not in rows for key in root_fields)
+            ):
+                raise ValueError("declared original root field missing")
+            context = {key: rows[key] for key in root_fields}
             for component in records_path:
                 if not isinstance(rows, dict) or component not in rows:
                     raise ValueError("declared JSON records path is missing")
@@ -81,7 +102,9 @@ def iter_rows(path: Path, *, records_path=(), row_format=None) -> Iterator[dict]
             for row in rows:
                 if not isinstance(row, dict):
                     raise ValueError("expected object record")
-                yield row
+                if set(row) & set(context):
+                    raise ValueError("original root and instance fields collide")
+                yield {**deepcopy(context), **row}
         elif path.suffix == ".csv":
             with path.open(encoding="utf-8-sig", newline="") as stream:
                 reader = csv.DictReader(stream)

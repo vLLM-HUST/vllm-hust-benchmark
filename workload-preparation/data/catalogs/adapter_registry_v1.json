@@ -2,6 +2,19 @@
   "version": "source-adapters/v1",
   "status_policy": "Implementation, asset verification and runtime reproduction are independent. All other registered sources remain NOT_IMPLEMENTED.",
   "adapters": {
+    "NATURAL_INSTRUCTIONS": {
+      "kind": "task_dataset",
+      "mapping": "native_instruction_instance",
+      "records_path": ["Instances"],
+      "root_fields": ["Definition", "Categories", "Input_language", "Output_language", "Instance License"],
+      "input_fields": ["Definition", "input"],
+      "required_fields": ["Definition", "id", "input", "output"],
+      "outcome_fields": ["output"],
+      "annotation_fields": ["Categories", "Input_language", "Output_language", "Instance License"],
+      "id_field": "id",
+      "requirements": ["Original per-task JSON Definition and instance input preserved separately; no synthetic prompt", "Instance outputs remain scorer references; examples are not automatically inserted", "Instruction-task variants are not equivalent to underlying original benchmarks; source-specific instance terms apply"],
+      "status": "READER_IMPLEMENTED_NATIVE_EXECUTION_NOT_VALIDATED"
+    },
     "BFCL": {
       "kind": "task_dataset",
       "mapping": "native_function_call",

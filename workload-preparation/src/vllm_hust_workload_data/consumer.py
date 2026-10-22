@@ -28,6 +28,7 @@ def resolve_input(database: Path, record_id: str, *, data_root: Path):
         asset_path(data_root, reference["file"]),
         records_path=spec.get("records_path", []),
         row_format=spec.get("row_format"),
+        root_fields=spec.get("root_fields", []),
     )
     try:
         if spec.get("history_targets") is not None:
