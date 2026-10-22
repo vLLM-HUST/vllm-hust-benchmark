@@ -8,10 +8,10 @@ import tarfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-REVISION = "76ecccb99558a084ae59b0024856e54c09b3da62"  # pragma: allowlist secret
+REVISION = "49eafdd80b48685212e5f4962b02531274c0e2d1"  # pragma: allowlist secret
 REPORT_DIR = "reports/vllm-hust-midterm-20261019"
 REPORT = REPORT_DIR + "/中期测试报告.md"
-OUTPUT = ROOT / "website-publication/data/midterm-v067.json"
+OUTPUT = ROOT / "website-publication/data/midterm-v068.json"
 
 # Repository-relative locators are resolved against the website's exact benchmark
 # publication commit, not a moving main branch or a local acquisition path.
@@ -20,6 +20,13 @@ EVIDENCE = {
     "dataset-quality-inventory": [
         "../../website-publication/data/hle-verified-20261015/report.json",
         "../../website-publication/data/frontierscience-20261013/report.json",
+        "../../website-publication/data/mmlu-pro-20261012/report.json",
+        "../../website-publication/data/dataset-matrix-campaign-20261016/report.json",
+        "../../website-publication/data/betterscale-school-runtime-20261016/report.json",
+        "../../website-publication/data/request-throttling-dataset-matrix-20261018/mmlu-pro.json",
+        "../../website-publication/data/request-throttling-dataset-matrix-20261018/frontierscience.json",
+        "../../website-publication/data/request-throttling-dataset-matrix-20261018/hle-gold.json",
+        "../../website-publication/data/request-throttling-dataset-matrix-20261018/hle-revision.json",
     ],
     "reference-closure": ["m01-recovery/reference-closure-20261022"],
     "worker-model": ["m01-recovery/worker-model-20261022"],
@@ -187,20 +194,20 @@ def kv_audit():
 def build():
     raw = pinned(REPORT)
     text = raw.decode()
-    assert "报告版本：V0.67" in text
+    assert "报告版本：V0.68" in text
     url = f"https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/{REVISION}/{REPORT}"
     specs = [
         (
             "baseline018",
             "0.18系列基线 / 0.18 baseline evidence",
             "### 3.3 0.18系列基线证据",
-            "已有Qwen3.5 SWE-prefix-reuse五个900秒正式窗口，零失败，保留0.18/0.18及text-only兼容补丁身份。第五章数据集B0/B1为0.28.1 / Ascend 0.25.1rc2开发栈对照，其收益不代表相对0.18的收益；不同工况不互相代替。",
+            "已有Qwen3.5 SWE-prefix-reuse五个900秒正式窗口，零失败，保留0.18/0.18及text-only兼容补丁身份。第五章主要性能及200题配对为0.28.1 / Ascend 0.25.1rc2开发栈对照，5.11节另列0.23/0.23配对；这些收益不代表相对0.18的收益，不同工况不互相代替。",
         ),
         (
             "dataset-quality-inventory",
             "既有任务质量与配对缺项 / Existing task quality and pairing gaps",
-            "### 5.11 HLE-Verified与FrontierScience既有任务质量",
-            "HLE与FrontierScience已有任务质量观测，不仅是性能遥测。Qwen替代裁判、单次运行，未决项保留完整分母；不是官方评分复现。当前B1组合配对为空，未决及截断评分仍需复核，不宣称质量改善。HLE公开归档未包含全部问答载荷，不能独立重评。",
+            "### 5.11 既有任务质量与配置配对",
+            "三项数据集已有多方案质量观测：MMLU-Pro完整12032题与200题回归分列，HLE/FrontierScience含BetterScale评分及Controller 0.23/0.23同工况配对。Qwen替代裁判、单次运行，未决项保留完整分母；不是官方评分复现。指定0.18及本轮具体组合的对应配对仍未完成，不等于所有优化方案缺测。独立限长压测不代替任务质量；公开投影不能独立重评全部私有问答。",
         ),
         (
             "reference-closure",
@@ -359,7 +366,7 @@ def build():
         )
     return {
         "schema": "midterm-publication/v1",
-        "version": "V0.67",
+        "version": "V0.68",
         "report_url": url,
         "report_sha256": hashlib.sha256(raw).hexdigest(),
         "source_commit": REVISION,
