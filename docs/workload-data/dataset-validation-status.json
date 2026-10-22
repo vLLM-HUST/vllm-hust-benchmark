@@ -912,15 +912,15 @@
         "general-single-turn-assistant",
         "conversation-continuation"
       ],
-      "acquisition": "VERIFIED_LOCAL",
-      "read_adapter": "VERIFIED_LOCAL_3_SAMPLES",
-      "server_execution": "NOT_RUN",
-      "scoring": "NOT_RUN",
-      "selected_samples": [],
-      "completed_samples": [],
+      "acquisition": "VERIFIED",
+      "read_adapter": "VERIFIED_ORIGINAL_PARENT_HISTORY_3_SAMPLES",
+      "server_execution": "COMPLETED_ORIGINAL_HISTORY_CONTINUATIONS",
+      "scoring": "NON_SCORING_INTEGRITY_VERIFIED_NO_QUALITY_ORACLE",
+      "selected_samples": [23, 28, 68],
+      "completed_samples": [23, 28, 68],
       "checked": false,
-      "receipt": null,
-      "blocker": "当前安装包已本地读取回查3条；尚未完成服务器任务执行与适用评分。",
+      "receipt": "docs/workload-data/validation/oasst1-original-history-npu-20261023.json",
+      "blocker": "三条原始父链历史续接已NPU生成并正常stop；首批固定CI wheel源码/安装包研究消费通过。仅两棵树，无独立质量评分、实时会话或全量结论；来源级仍不勾选。",
       "local_read_receipt": "docs/workload-data/validation/local-read-24sources-20261022.json"
     },
     {
@@ -1247,15 +1247,15 @@
         "rag-followup",
         "evolving-corpus-rag"
       ],
-      "acquisition": "NOT_RECHECKED",
-      "read_adapter": "NOT_RECHECKED",
+      "acquisition": "VERIFIED_ORIGINAL_TEST_ARCHIVE_AND_MEMBER",
+      "read_adapter": "VERIFIED_INSTALLED_CLI_3_SAMPLES",
       "server_execution": "NOT_RUN",
       "scoring": "NOT_RUN",
       "selected_samples": [],
       "completed_samples": [],
       "checked": false,
       "receipt": null,
-      "blocker": "待在当前数据-only版本重新核验；目录登记不代表已接入。"
+      "blocker": "原版test成员16451条已完整校验和准备；安装CLI prepare→bind→pipeline输出3条来源索引。研究侧固定候选wheel消费3条通过，发布换锁待CI。尚缺原检索语料与原生检索/阅读执行和评分，0模型任务；Context是会话历史，不是检索证据。"
     },
     {
       "source_id": "QUALITY",
