@@ -30,11 +30,29 @@ run_inference.py。原文件摘要核验后，仅通过AST提取静态generation
 
 code_context包含参考和测试逻辑，未送入模型、未被执行；原始文件保持不变。 本次并非完整原版环境或论文结果复现。请求、原输出和后处理候选仅存服务器私有目录。
 
+## 可复用入口
+
+`scripts/run_ds1000_original_generation.py` 仅依赖Python标准库，无需导入或安装发布方CUDA推理栈。
+使用者私下取得固定test.jsonl及固定run_inference.py；入口先核验两者摘要，再解析后者的 静态配置，绝不执行该脚本。目录和文件须保留原名，输出目录须不存在且不与数据目录互相包含。
+
+```bash
+python scripts/run_ds1000_original_generation.py \
+  --data-root /private/ds1000 \
+  --publisher-inference /private/ds1000-code/run_inference.py \
+  --output /private/ds1000-generation-new \
+  --model workload-qwen35-27b-128k-nonthinking \
+  --origin http://127.0.0.1:19466 --context-capacity 131072
+```
+
+只允许本机HTTP origin，不自动下载、改题或重试。完整原prompt经tokenize预检， 与实际usage核对；code_context从不进入请求。
+退出码0仅表示三条生成均正常stop；2单独表示出现原始预算length；1为请求/协议失败。 退出码2不能通过增加预算或给API提前stop来“修好”。
+即使退出码0或后处理代码非空，也不证明功能正确；真实评分仍须原版环境和安全隔离。 raw响应与后处理候选只在私有输出目录，不在终端打印代码或参考。
+
 ## 清单
 
 - [x] 原始固定文件服务器读取/prepare/resolve三条输入与参考分离回查。
 - [x] 原始前三题NPU补全及真实终止记录；原始预算和后处理顺序保留。
-- [ ] 可复用公开入口、CPU协议测试和服务器交接复跑。
+- [x] 可复用公开入口、CPU协议测试和服务器同三题交接复跑；仍为stop/length/stop，未增预算或改停止方式。
 - [ ] 原版执行环境、隔离、test_execution/test_string及功能评分。
 - [ ] 其他库、全量和最终消费端交接。
 

@@ -10,7 +10,7 @@
 | 来源              | 选定原始文件                                      | 数据链路 | 运行类型            | 原生任务与评分                                                      |
 | ----------------- | ------------------------------------------------- | -------- | ------------------- | ------------------------------------------------------------------- |
 | BIGCODEBENCH      | data/v0.1.4-00000-of-00001.parquet                | 三条通过 | task_dataset        | 未运行；需原版生成/功能测试与隔离执行环境                           |
-| DS1000            | test.jsonl                                        | 三条通过 | task_dataset        | 未运行；需原版依赖栈、代码执行与判定                                |
+| DS1000            | test.jsonl                                        | 三条通过 | task_dataset        | 原三题NPU生成2stop/1length；原版功能判定未运行                      |
 | SWE_VERIFIED      | data/test-00000-of-00001.parquet                  | 三条通过 | task_dataset        | 未运行；需原仓库版本、修复 Agent、测试容器                          |
 | SCIENCEAGENTBENCH | data/verified-00000-of-00001.parquet              | 三条通过 | task_dataset        | 未运行；需原任务资产、执行环境和判定                                |
 | TOOLACE           | data.json                                         | 三条通过 | historical_dialogue | 原始发布方合成历史工具对话；不是可执行 Agent 环境，不生成假 episode |
@@ -30,5 +30,6 @@ source_manifests_v1.json 定义， 使用者不能更换同名文件后沿用结
 
 上述七来源数据链路检查的模型调用0、原生任务执行0、评分调用0。
 后续同三条BigCodeBench原题已另完成NPU生成阶段，见[独立记录](BIGCODEBENCH_ORIGINAL_GENERATION.zh-CN.md)；未运行功能评分，不改变数据链路回执范围。
+DS-1000同三条Pandas原题也完成[单独生成探测和入口复跑](DS1000_ORIGINAL_GENERATION.zh-CN.md)，其中一条原预算length；未运行功能评分，不证明科学闭环。
 这里不改写题目、不注入解题证据，不将历史对话或元数据伪装成在线任务。 已有HumanEval隔离探测失败不能被绕过后裸执行生成代码；其他套件仍需逐项检查。
-本批暂存为下一组多类workload的准备记录，尚未创建新PR。
+本批随[Draft PR #432](https://github.com/vLLM-HUST/vllm-hust-benchmark/pull/432)合并交付多个来源；不是逐数据集开PR。最终增量CI工件与消费端核验状态见PR，不将生成阶段或读取结果混作完整任务通过。
