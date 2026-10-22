@@ -98,15 +98,15 @@
       "workload_class_ids": [
         "standalone-reasoning"
       ],
-      "acquisition": "NOT_RECHECKED",
-      "read_adapter": "NOT_RECHECKED",
-      "server_execution": "NOT_RUN",
-      "scoring": "NOT_RUN",
-      "selected_samples": [],
+      "acquisition": "VERIFIED_ORIGINAL_BOOLEAN_TASK_AND_PROMPT",
+      "read_adapter": "VERIFIED_INSTALLED_250_ROWS_AND_3_INDEX_ROUNDTRIPS",
+      "server_execution": "BLOCKED_PREMATURE_PROTOCOL_STOP",
+      "scoring": "LM_EVAL_0_4_11_SCORED_0_OF_3_NOT_PUBLISHER_SCORER",
+      "selected_samples": [0, 1, 2],
       "completed_samples": [],
       "checked": false,
-      "receipt": null,
-      "blocker": "待在当前数据-only版本重新核验；目录登记不代表已接入。"
+      "receipt": "docs/workload-data/validation/bbh-boolean-original-npu-20261023.json",
+      "blocker": "Boolean原始前三题NPU生成和固定harness评分已执行，但均由双换行停止词提前终止，没有最终答案，0/3；来源仍不勾选。安装候选CLI/250行读取和前三条回查通过；研究消费及CI工件未验，其他BBH任务未覆盖。"
     },
     {
       "source_id": "BFCL",
