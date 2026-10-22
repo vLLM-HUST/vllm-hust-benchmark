@@ -27,6 +27,29 @@ def test_current_git_originals():
     verify(ROOT / "archive/mod-git-20261022/split-current-git")
 
 
+def test_migration_receipt_matches_frozen_originals():
+    folder = ROOT / "archive/mod-git-20261022"
+    receipt = json.loads((folder / "split-history-migration.json").read_text())
+    manifest = json.loads((folder / "split-current-git/manifest.json").read_text())
+    records = {row["path"]: row for row in manifest["files"]}
+    removed = receipt["removed_git_copies"]
+    retained = receipt["retained_source_paths"]
+    assert len(removed) == 374
+    assert len(retained) == 64
+    assert not {r["path"] for r in removed} & {r["path"] for r in retained}
+    for row in removed + retained:
+        assert row["sha256"] == records[row["path"]]["sha256"]
+    audit = receipt["installation_consumer_audit"]
+    assert audit["deleted_release_assets"] == []
+    assert len(audit["releases"]) == 4
+    for release in audit["releases"]:
+        assert len(release["assets"]) == 3
+        distributions = [a for a in release["assets"] if a["name"] != "dist.sha256"]
+        assert all(a["pypi_digest_identity_verified"] for a in distributions)
+    assert receipt["remote_verification"]["files"] == 1833
+    assert receipt["remote_verification"]["bytes"] == 45789686
+
+
 @pytest.mark.parametrize(
     "name,kind",
     [
