@@ -1,0 +1,845 @@
+{
+ "load_caliber": {
+  "id": "synthetic-fixed-protocol",
+  "declared": true,
+  "detail": "反复定长 unit prompt x4 (chat, max_tokens=128, temperature=0, seed=42) — 算子 A/B 复现口径, 非 MMLU-Pro 流量; capture_scope=vllm-max-iterations-32; trace_tier=light; max_iterations=32｜窗口覆盖: prefill_tokens=353, window_iterations=32, captured_requests=1",
+  "collected_at": "2026-10-21T15:11:38Z",
+  "note": "算子占比/热点排名随负载口径（prompt 结构、长度分布、并发、生成长度）变化，不同口径的窗口**只能比方向不能比数值**，更不得把一个口径的占比外推到另一个口径。入库卡必须声明口径（字段 load_caliber.id/detail 或卡正文），未声明（unmarked）的窗口消费端不得引用其占比排名。",
+  "window_coverage": {
+   "schema": "opt-ops-window-coverage.v1",
+   "prefill_token_volume": 353,
+   "window_iterations": 32,
+   "captured_request_count": 1,
+   "declared": true,
+   "sources": [
+    "/root/prof/ladder-1021-150319/dp0_pp0_tp1_dcp0_ep1_rank1_272531_20261021150934542_ascend_pt/ASCEND_PROFILER_OUTPUT/kernel_details.csv",
+    "/models/modelscope_cache/Qwen/Qwen3.5-35B-A3B/config.json",
+    "/root/prof/ladder-1021-150319/load-manifest.json"
+   ],
+   "method": {
+    "window_iterations": "kernel_details: count(FusedInferAttentionScore)=320 / 10 full-attention 层 = 32 次引擎迭代",
+    "prefill_token_volume": "kernel_details: ΣT(aclnnChunkGatedDeltaRule prefill 30 行)=10590 / 30 线性注意力层 = 353",
+    "captured_request_count": "设备: decode 峰值并发序列=1, prefill 槽位下界=1"
+   },
+   "cross_checks": [
+    {
+     "name": "iterations_gdn_vs_attn",
+     "ok": true,
+     "detail": "GDN 家族每层调用数最大 = 32 次迭代 vs attention 32 次（prefill 1 + decode 31）"
+    },
+    {
+     "name": "prefill_tokens_gdn_vs_attn",
+     "ok": true,
+     "detail": "attention prefill ΣT/10=353 vs GDN ΣT/30=353（比值 1.0000; chunk 补零使 attention 略高）"
+    },
+    {
+     "name": "prefill_tokens_le_metrics",
+     "ok": true,
+     "detail": "窗内 353 ≤ /metrics Δprompt_tokens=1412（截断窗: trace 只覆盖墙钟窗的一部分）"
+    },
+    {
+     "name": "captured_le_metrics_success",
+     "ok": true,
+     "detail": "入窗 1 ≤ /metrics Δrequest_success=4"
+    },
+    {
+     "name": "captured_le_requested",
+     "ok": true,
+     "detail": "入窗/完成 1 ≤ 提交 4"
+    }
+   ],
+   "gaps": [
+    "窗口被 capture 迭代上限截断: captured_request_count 只是『入窗请求数下界』, 不是完成数 → 跨窗总量比较前须核对两窗该下界与 prefill 体积"
+   ],
+   "prefill_iterations": 1.0,
+   "decoded_iterations": 31.0,
+   "capture_max_iterations": 32,
+   "truncated": true,
+   "captured_request_count_bound": "入窗请求数下界（窗口被截断，非完成数）",
+   "capture_scope": "vllm-max-iterations-32",
+   "trace_tier": "light",
+   "load_mode": "synthetic",
+   "summary": "prefill_tokens=353, window_iterations=32, captured_requests=1"
+  }
+ },
+ "cohort": {
+  "schema": "opt-ops-window-cohort.v1",
+  "id": "028-qwen35-35b-a3b-tp2-fullgraph",
+  "model": "Qwen3.5-35B-A3B",
+  "host": {
+   "vllm_core": "0.28.1.post1.dev143+gf18cf803c",
+   "vllm_ascend": "0.25.1rc2.dev125+hust.20260903.4.g74f0c0a27.d20260909"
+  },
+  "serve": {
+   "entry": "vllm serve (console script)",
+   "tp": 2,
+   "max_model_len": 8192,
+   "prefix_caching": "off",
+   "extra_args": "--compilation-config {\"mode\":\"VLLM_COMPILE\",\"cudagraph_mode\":\"FULL\",\"cudagraph_capture_sizes\":[1,2,4,8,16,32]}"
+  },
+  "graph": {
+   "mode": "VLLM_COMPILE",
+   "cudagraph_mode": "FULL",
+   "cudagraph_capture_sizes": "1,2,4,8,16,32"
+  },
+  "precision": "bf16",
+  "carriers": {
+   "VLLM_HUST_GATE_FP32": "1",
+   "VLLM_HUST_GDN_MERGE_INPROJ": "1",
+   "husk_package": "vllm_ascend_split_batch"
+  },
+  "carriers_note": "VLLM_HUST_* 是 husk 插件开关; husk_package 为空 = 载体未安装（env 静默 fail-open）。记录轴: 不作门禁、不要求重跑（单变量替换结论具普遍价值）; 只有跨窗口绝对数值比较需要同载体状态; 两臂载体状态不一致才是第二个变量。容器重启后 /root/start-sshd.sh 恢复安装与补丁链。",
+  "recorded_at": "2026-10-21T15:03:31Z",
+  "recorded_by": "bench-ladder.sh cohort_write",
+  "note": "本窗口数字只在本 cohort(模型/宿主/设备/服务配置/图档) 内成立；换坐标不得外推（见 /root/opt-ops/state/cohort.json）"
+ },
+ "ops": {
+  "MatMulV2": {
+   "count": 7712,
+   "total_ms": 101.34896400000001
+  },
+  "GroupedMatmul": {
+   "count": 2560,
+   "total_ms": 97.70672400000001
+  },
+  "RecurrentGatedDeltaRule": {
+   "count": 930,
+   "total_ms": 12.183538
+  },
+  "fused_gdn_gating_kernel": {
+   "count": 960,
+   "total_ms": 12.08621
+  },
+  "CausalConv1d": {
+   "count": 960,
+   "total_ms": 7.1351700000000005
+  },
+  "ChunkGatedDeltaRule": {
+   "count": 30,
+   "total_ms": 5.567636
+  },
+  "Cast": {
+   "count": 2946,
+   "total_ms": 4.446254
+  },
+  "ConcatD": {
+   "count": 30,
+   "total_ms": 0.538808
+  }
+ },
+ "comm": {
+  "hcom_allReduce_": {
+   "count": 2592,
+   "total_ms": 355.639,
+   "wait_ms": 22.963
+  },
+  "hcom_allGather_": {
+   "count": 32,
+   "total_ms": 1.714,
+   "wait_ms": 0.069
+  }
+ },
+ "device_ms": {
+  "compute_ms": 330.894,
+  "comm_ms": 357.353,
+  "all_kernel_ms": 688.247,
+  "compute_share_pct": 48.078,
+  "comm_share_pct": 51.922
+ },
+ "op_profile": {
+  "Fill": {
+   "count": 166,
+   "total_ms": 0.255,
+   "wait_ms": 26.747,
+   "aic_ms": 0.0,
+   "aiv_ms": 0.169,
+   "mac_ms": 0.0,
+   "mte_ms": 0.053,
+   "cube_util_pct": 0.0
+  },
+  "IndexCheck": {
+   "count": 444,
+   "total_ms": 1.377,
+   "wait_ms": 5.13,
+   "aic_ms": 0.0,
+   "aiv_ms": 1.035,
+   "mac_ms": 0.0,
+   "mte_ms": 0.066,
+   "cube_util_pct": 0.0
+  },
+  "Index": {
+   "count": 414,
+   "total_ms": 4.58,
+   "wait_ms": 0.096,
+   "aic_ms": 0.0,
+   "aiv_ms": 2.081,
+   "mac_ms": 0.0,
+   "mte_ms": 0.301,
+   "cube_util_pct": 0.0
+  },
+  "Cast": {
+   "count": 2946,
+   "total_ms": 4.446,
+   "wait_ms": 14.204,
+   "aic_ms": 0.0,
+   "aiv_ms": 2.684,
+   "mac_ms": 0.0,
+   "mte_ms": 1.054,
+   "cube_util_pct": 0.0
+  },
+  "Add": {
+   "count": 4544,
+   "total_ms": 7.539,
+   "wait_ms": 7.769,
+   "aic_ms": 0.0,
+   "aiv_ms": 4.923,
+   "mac_ms": 0.0,
+   "mte_ms": 2.321,
+   "cube_util_pct": 0.0
+  },
+  "_compute_slot_mapping_kernel": {
+   "count": 32,
+   "total_ms": 0.125,
+   "wait_ms": 0.002,
+   "aic_ms": 0.0,
+   "aiv_ms": 0.076,
+   "mac_ms": 0.0,
+   "mte_ms": 0.018,
+   "cube_util_pct": 0.0
+  },
+  "Sub": {
+   "count": 379,
+   "total_ms": 0.58,
+   "wait_ms": 3.577,
+   "aic_ms": 0.0,
+   "aiv_ms": 0.382,
+   "mac_ms": 0.0,
+   "mte_ms": 0.137,
+   "cube_util_pct": 0.0
+  },
+  "Greater": {
+   "count": 3,
+   "total_ms": 0.008,
+   "wait_ms": 0.024,
+   "aic_ms": 0.0,
+   "aiv_ms": 0.007,
+   "mac_ms": 0.0,
+   "mte_ms": 0.001,
+   "cube_util_pct": 0.0
+  },
+  "GreaterEqual": {
+   "count": 32,
+   "total_ms": 0.103,
+   "wait_ms": 0.132,
+   "aic_ms": 0.0,
+   "aiv_ms": 0.085,
+   "mac_ms": 0.0,
+   "mte_ms": 0.011,
+   "cube_util_pct": 0.0
+  },
+  "Less": {
+   "count": 32,
+   "total_ms": 0.095,
+   "wait_ms": 0.071,
+   "aic_ms": 0.0,
+   "aiv_ms": 0.079,
+   "mac_ms": 0.0,
+   "mte_ms": 0.01,
+   "cube_util_pct": 0.0
+  },
+  "LogicalAnd": {
+   "count": 32,
+   "total_ms": 0.047,
+   "wait_ms": 0.53,
+   "aic_ms": 0.0,
+   "aiv_ms": 0.031,
+   "mac_ms": 0.0,
+   "mte_ms": 0.01,
+   "cube_util_pct": 0.0
+  },
+  "Mul": {
+   "count": 1664,
+   "total_ms": 3.332,
+   "wait_ms": 1.137,
+   "aic_ms": 0.0,
+   "aiv_ms": 2.283,
+   "mac_ms": 0.0,
+   "mte_ms": 0.794,
+   "cube_util_pct": 0.0
+  },
+  "LogicalNot": {
+   "count": 32,
+   "total_ms": 0.049,
+   "wait_ms": 0.48,
+   "aic_ms": 0.0,
+   "aiv_ms": 0.031,
+   "mac_ms": 0.0,
+   "mte_ms": 0.009,
+   "cube_util_pct": 0.0
+  },
+  "GatherV2": {
+   "count": 32,
+   "total_ms": 0.359,
+   "wait_ms": 1.113,
+   "aic_ms": 0.0,
+   "aiv_ms": 0.257,
+   "mac_ms": 0.0,
+   "mte_ms": 0.026,
+   "cube_util_pct": 0.0
+  },
+  "MaskedFill": {
+   "count": 32,
+   "total_ms": 0.12,
+   "wait_ms": 0.682,
+   "aic_ms": 0.0,
+   "aiv_ms": 0.098,
+   "mac_ms": 0.0,
+   "mte_ms": 0.017,
+   "cube_util_pct": 0.0
+  },
+  "hcom_allReduce_": {
+   "count": 2592,
+   "total_ms": 355.639,
+   "wait_ms": 22.963,
+   "aic_ms": 0.0,
+   "aiv_ms": 0.0,
+   "mac_ms": 0.0,
+   "mte_ms": 0.0,
+   "cube_util_pct": 0.0
+  },
+  "TensorMove": {
+   "count": 110,
+   "total_ms": 0.742,
+   "wait_ms": 6.012,
+   "aic_ms": 0.0,
+   "aiv_ms": 0.559,
+   "mac_ms": 0.0,
+   "mte_ms": 0.291,
+   "cube_util_pct": 0.0
+  },
+  "BroadcastTo": {
+   "count": 31,
+   "total_ms": 0.218,
+   "wait_ms": 0.432,
+   "aic_ms": 0.0,
+   "aiv_ms": 0.171,
+   "mac_ms": 0.0,
+   "mte_ms": 0.078,
+   "cube_util_pct": 0.0
+  },
+  "GemmaRmsNorm": {
+   "count": 32,
+   "total_ms": 0.167,
+   "wait_ms": 5.69,
+   "aic_ms": 0.0,
+   "aiv_ms": 0.148,
+   "mac_ms": 0.0,
+   "mte_ms": 0.035,
+   "cube_util_pct": 0.0
+  },
+  "MatMulV2": {
+   "count": 7712,
+   "total_ms": 101.349,
+   "wait_ms": 17.695,
+   "aic_ms": 86.648,
+   "aiv_ms": 0.0,
+   "mac_ms": 10.863,
+   "mte_ms": 71.947,
+   "cube_util_pct": 56.572
+  },
+  "Slice": {
+   "count": 910,
+   "total_ms": 2.439,
+   "wait_ms": 7.802,
+   "aic_ms": 0.0,
+   "aiv_ms": 1.761,
+   "mac_ms": 0.0,
+   "mte_ms": 0.655,
+   "cube_util_pct": 0.0
+  },
+  "ZerosLike": {
+   "count": 960,
+   "total_ms": 1.427,
+   "wait_ms": 3.135,
+   "aic_ms": 0.0,
+   "aiv_ms": 0.819,
+   "mac_ms": 0.0,
+   "mte_ms": 0.203,
+   "cube_util_pct": 0.0
+  },
+  "CausalConv1d": {
+   "count": 960,
+   "total_ms": 7.135,
+   "wait_ms": 1.483,
+   "aic_ms": 0.0,
+   "aiv_ms": 6.18,
+   "mac_ms": 0.0,
+   "mte_ms": 1.184,
+   "cube_util_pct": 0.0
+  },
+  "ConcatD": {
+   "count": 30,
+   "total_ms": 0.539,
+   "wait_ms": 0.575,
+   "aic_ms": 0.0,
+   "aiv_ms": 0.442,
+   "mac_ms": 0.0,
+   "mte_ms": 0.087,
+   "cube_util_pct": 0.0
+  },
+  "fused_gdn_gating_kernel": {
+   "count": 960,
+   "total_ms": 12.086,
+   "wait_ms": 4.774,
+   "aic_ms": 0.0,
+   "aiv_ms": 8.035,
+   "mac_ms": 0.0,
+   "mte_ms": 0.776,
+   "cube_util_pct": 0.0
+  },
+  "_clear_ssm_states_kernel": {
+   "count": 30,
+   "total_ms": 0.251,
+   "wait_ms": 1.525,
+   "aic_ms": 0.0,
+   "aiv_ms": 0.186,
+   "mac_ms": 0.0,
+   "mte_ms": 0.072,
+   "cube_util_pct": 0.0
+  },
+  "l2norm_fwd_kernel2": {
+   "count": 1920,
+   "total_ms": 3.729,
+   "wait_ms": 4.15,
+   "aic_ms": 0.0,
+   "aiv_ms": 2.631,
+   "mac_ms": 0.0,
+   "mte_ms": 0.584,
+   "cube_util_pct": 0.0
+  },
+  "ChunkGatedDeltaRule": {
+   "count": 30,
+   "total_ms": 5.568,
+   "wait_ms": 0.71,
+   "aic_ms": 5.365,
+   "aiv_ms": 5.445,
+   "mac_ms": 0.133,
+   "mte_ms": 2.083,
+   "cube_util_pct": 96.361
+  },
+  "IndexPutV2": {
+   "count": 30,
+   "total_ms": 0.875,
+   "wait_ms": 0.222,
+   "aic_ms": 0.0,
+   "aiv_ms": 0.14,
+   "mac_ms": 0.0,
+   "mte_ms": 0.025,
+   "cube_util_pct": 0.0
+  },
+  "_layer_norm_fwd_1pass_kernel_npu": {
+   "count": 960,
+   "total_ms": 4.631,
+   "wait_ms": 8.427,
+   "aic_ms": 0.0,
+   "aiv_ms": 4.063,
+   "mac_ms": 0.0,
+   "mte_ms": 1.157,
+   "cube_util_pct": 0.0
+  },
+  "AddRmsNormBias": {
+   "count": 2560,
+   "total_ms": 7.322,
+   "wait_ms": 0.574,
+   "aic_ms": 0.0,
+   "aiv_ms": 5.622,
+   "mac_ms": 0.0,
+   "mte_ms": 2.958,
+   "cube_util_pct": 0.0
+  },
+  "MoeGatingTopK": {
+   "count": 1280,
+   "total_ms": 5.07,
+   "wait_ms": 3.377,
+   "aic_ms": 0.0,
+   "aiv_ms": 4.219,
+   "mac_ms": 0.0,
+   "mte_ms": 0.579,
+   "cube_util_pct": 0.0
+  },
+  "MoeInitRoutingV3": {
+   "count": 1280,
+   "total_ms": 14.918,
+   "wait_ms": 5.994,
+   "aic_ms": 0.0,
+   "aiv_ms": 8.209,
+   "mac_ms": 0.0,
+   "mte_ms": 3.275,
+   "cube_util_pct": 0.0
+  },
+  "GroupedMatmul": {
+   "count": 2560,
+   "total_ms": 97.707,
+   "wait_ms": 8.951,
+   "aic_ms": 90.555,
+   "aiv_ms": 0.0,
+   "mac_ms": 5.855,
+   "mte_ms": 46.867,
+   "cube_util_pct": 77.582
+  },
+  "SwiGlu": {
+   "count": 2560,
+   "total_ms": 8.133,
+   "wait_ms": 3.999,
+   "aic_ms": 0.0,
+   "aiv_ms": 6.658,
+   "mac_ms": 0.0,
+   "mte_ms": 1.82,
+   "cube_util_pct": 0.0
+  },
+  "Abs": {
+   "count": 1280,
+   "total_ms": 1.535,
+   "wait_ms": 0.64,
+   "aic_ms": 0.0,
+   "aiv_ms": 0.871,
+   "mac_ms": 0.0,
+   "mte_ms": 0.29,
+   "cube_util_pct": 0.0
+  },
+  "MoeTokenUnpermute": {
+   "count": 1280,
+   "total_ms": 4.807,
+   "wait_ms": 1.23,
+   "aic_ms": 0.0,
+   "aiv_ms": 3.993,
+   "mac_ms": 0.0,
+   "mte_ms": 1.951,
+   "cube_util_pct": 0.0
+  },
+  "Sigmoid": {
+   "count": 1600,
+   "total_ms": 2.155,
+   "wait_ms": 1.37,
+   "aic_ms": 0.0,
+   "aiv_ms": 1.271,
+   "mac_ms": 0.0,
+   "mte_ms": 0.407,
+   "cube_util_pct": 0.0
+  },
+  "split_qkv_rmsnorm_mrope_kernel": {
+   "count": 320,
+   "total_ms": 2.071,
+   "wait_ms": 0.843,
+   "aic_ms": 0.0,
+   "aiv_ms": 1.855,
+   "mac_ms": 0.0,
+   "mte_ms": 0.409,
+   "cube_util_pct": 0.0
+  },
+  "ScatterPaKvCache": {
+   "count": 320,
+   "total_ms": 0.852,
+   "wait_ms": 1.023,
+   "aic_ms": 0.0,
+   "aiv_ms": 0.649,
+   "mac_ms": 0.0,
+   "mte_ms": 0.243,
+   "cube_util_pct": 0.0
+  },
+  "FusedInferAttentionScore": {
+   "count": 320,
+   "total_ms": 9.017,
+   "wait_ms": 1.854,
+   "aic_ms": 5.848,
+   "aiv_ms": 5.543,
+   "mac_ms": 0.033,
+   "mte_ms": 1.204,
+   "cube_util_pct": 64.713
+  },
+  "hcom_allGather_": {
+   "count": 32,
+   "total_ms": 1.714,
+   "wait_ms": 0.069,
+   "aic_ms": 0.0,
+   "aiv_ms": 0.0,
+   "mac_ms": 0.0,
+   "mte_ms": 0.0,
+   "cube_util_pct": 0.0
+  },
+  "ArgMaxV2": {
+   "count": 32,
+   "total_ms": 0.953,
+   "wait_ms": 0.002,
+   "aic_ms": 0.0,
+   "aiv_ms": 0.936,
+   "mac_ms": 0.0,
+   "mte_ms": 0.257,
+   "cube_util_pct": 0.0
+  },
+  "RecurrentGatedDeltaRule": {
+   "count": 930,
+   "total_ms": 12.184,
+   "wait_ms": 0.05,
+   "aic_ms": 0.0,
+   "aiv_ms": 10.178,
+   "mac_ms": 0.0,
+   "mte_ms": 2.031,
+   "cube_util_pct": 0.0
+  }
+ },
+ "kernel_top": [
+  {
+   "op": "hcom_allReduce_",
+   "count": 2592,
+   "total_ms": 355.639,
+   "core": "COMMUNICATION",
+   "share_pct": 51.673
+  },
+  {
+   "op": "MatMulV2",
+   "count": 7712,
+   "total_ms": 101.349,
+   "core": "AI_CORE",
+   "share_pct": 14.726
+  },
+  {
+   "op": "GroupedMatmul",
+   "count": 2560,
+   "total_ms": 97.707,
+   "core": "MIX_AIC",
+   "share_pct": 14.196
+  },
+  {
+   "op": "MoeInitRoutingV3",
+   "count": 1280,
+   "total_ms": 14.918,
+   "core": "MIX_AIV",
+   "share_pct": 2.168
+  },
+  {
+   "op": "RecurrentGatedDeltaRule",
+   "count": 930,
+   "total_ms": 12.184,
+   "core": "AI_VECTOR_CORE",
+   "share_pct": 1.77
+  },
+  {
+   "op": "fused_gdn_gating_kernel",
+   "count": 960,
+   "total_ms": 12.086,
+   "core": "AI_VECTOR_CORE",
+   "share_pct": 1.756
+  },
+  {
+   "op": "FusedInferAttentionScore",
+   "count": 320,
+   "total_ms": 9.017,
+   "core": "MIX_AIC",
+   "share_pct": 1.31
+  },
+  {
+   "op": "SwiGlu",
+   "count": 2560,
+   "total_ms": 8.133,
+   "core": "AI_VECTOR_CORE",
+   "share_pct": 1.182
+  },
+  {
+   "op": "Add",
+   "count": 4544,
+   "total_ms": 7.539,
+   "core": "AI_VECTOR_CORE",
+   "share_pct": 1.095
+  },
+  {
+   "op": "AddRmsNormBias",
+   "count": 2560,
+   "total_ms": 7.322,
+   "core": "AI_VECTOR_CORE",
+   "share_pct": 1.064
+  },
+  {
+   "op": "CausalConv1d",
+   "count": 960,
+   "total_ms": 7.135,
+   "core": "MIX_AIC",
+   "share_pct": 1.037
+  },
+  {
+   "op": "ChunkGatedDeltaRule",
+   "count": 30,
+   "total_ms": 5.568,
+   "core": "MIX_AIC",
+   "share_pct": 0.809
+  },
+  {
+   "op": "MoeGatingTopK",
+   "count": 1280,
+   "total_ms": 5.07,
+   "core": "AI_VECTOR_CORE",
+   "share_pct": 0.737
+  },
+  {
+   "op": "MoeTokenUnpermute",
+   "count": 1280,
+   "total_ms": 4.807,
+   "core": "AI_VECTOR_CORE",
+   "share_pct": 0.698
+  },
+  {
+   "op": "_layer_norm_fwd_1pass_kernel_npu",
+   "count": 960,
+   "total_ms": 4.631,
+   "core": "AI_VECTOR_CORE",
+   "share_pct": 0.673
+  },
+  {
+   "op": "Index",
+   "count": 414,
+   "total_ms": 4.58,
+   "core": "AI_VECTOR_CORE",
+   "share_pct": 0.666
+  },
+  {
+   "op": "Cast",
+   "count": 2946,
+   "total_ms": 4.446,
+   "core": "AI_VECTOR_CORE",
+   "share_pct": 0.646
+  },
+  {
+   "op": "l2norm_fwd_kernel2",
+   "count": 1920,
+   "total_ms": 3.729,
+   "core": "AI_VECTOR_CORE",
+   "share_pct": 0.542
+  },
+  {
+   "op": "Mul",
+   "count": 1664,
+   "total_ms": 3.332,
+   "core": "AI_VECTOR_CORE",
+   "share_pct": 0.484
+  },
+  {
+   "op": "Slice",
+   "count": 910,
+   "total_ms": 2.439,
+   "core": "AI_VECTOR_CORE",
+   "share_pct": 0.354
+  },
+  {
+   "op": "Sigmoid",
+   "count": 1600,
+   "total_ms": 2.155,
+   "core": "AI_VECTOR_CORE",
+   "share_pct": 0.313
+  },
+  {
+   "op": "split_qkv_rmsnorm_mrope_kernel",
+   "count": 320,
+   "total_ms": 2.071,
+   "core": "AI_VECTOR_CORE",
+   "share_pct": 0.301
+  },
+  {
+   "op": "hcom_allGather_",
+   "count": 32,
+   "total_ms": 1.714,
+   "core": "COMMUNICATION",
+   "share_pct": 0.249
+  },
+  {
+   "op": "Abs",
+   "count": 1280,
+   "total_ms": 1.535,
+   "core": "AI_VECTOR_CORE",
+   "share_pct": 0.223
+  },
+  {
+   "op": "ZerosLike",
+   "count": 960,
+   "total_ms": 1.427,
+   "core": "AI_VECTOR_CORE",
+   "share_pct": 0.207
+  }
+ ],
+ "step_budget": {
+  "computing_ms": 330.89377199999933,
+  "comm_not_overlapped_ms": 357.3528820000001,
+  "overlapped_ms": 0.0,
+  "comm_ms": 357.3528820000001,
+  "free_ms": 177.07935399991413,
+  "stage_ms": 865.326,
+  "bubble": 0
+ },
+ "comm_detail": {
+  "by_op": {
+   "hcom_allGather__": {
+    "count": 32,
+    "elapse_ms": 1.714,
+    "transit_ms": 0,
+    "wait_ms": 0,
+    "sync_ms": 0,
+    "idle_ms": 1.714
+   },
+   "hcom_allReduce__": {
+    "count": 2592,
+    "elapse_ms": 355.639,
+    "transit_ms": 7.019,
+    "wait_ms": 106.817,
+    "sync_ms": 98.678,
+    "idle_ms": 241.803
+   }
+  },
+  "by_transport": [
+   {
+    "transport_type": "HCCS",
+    "count": 2624,
+    "transit_size_mb": 147.956,
+    "bandwidth_gbps": 3.607,
+    "total_duration_ms": 13.833
+   },
+   {
+    "transport_type": "SDMA",
+    "count": 2624,
+    "transit_size_mb": 147.956,
+    "bandwidth_gbps": 3.607,
+    "total_duration_ms": 0
+   }
+  ]
+ },
+ "free_attribution": {
+  "free_total_ms": 177.079,
+  "caliber": "v1-host-boundary-deprecated",
+  "caliber_note": "v1: host 边界用 aclmdlRIExecuteAsync 时间戳做代理，实测 exe 落在 free gap 内部 → tail 被系统性低估，'94% 在图重放内部/host 不是瓶颈' 已证伪。host_boundary_* / internal_free_ms / internal_pct_of_step_free 属该失效家族，不得作 D1/D5 裁决证据；应走 stream-pair 的 v2（records/ladder/1014-060000-free-attribution-v2-corrected.json）。",
+  "host_api_covered_ms": 153.917,
+  "host_api_covered_pct": 86.92,
+  "host_idle_ms": 23.162,
+  "host_idle_pct": 13.08,
+  "sync_stream_ms": 4.652,
+  "launch_ms": 24.7,
+  "graph_replay": {
+   "n_steps": 30,
+   "region_ms": 465.713,
+   "free_ms": 67.863,
+   "free_pct": 14.57,
+   "step_median_ms": 14.524,
+   "host_boundary_ms": 4.057,
+   "host_boundary_lead_ms": 3.072,
+   "host_boundary_tail_ms": 0.985,
+   "internal_free_ms": 63.806,
+   "internal_pct_of_step_free": 94.02,
+   "step_median_internal_free_us": 1811.6
+  },
+  "non_graph_free_ms": 109.217
+ },
+ "asc_dir": "/root/prof/ladder-1021-150319/dp0_pp0_tp1_dcp0_ep1_rank1_272531_20261021150934542_ascend_pt",
+ "trace_tier": "light",
+ "capture_scope": {
+  "max_iterations": 32,
+  "capture_scope": "vllm-max-iterations-32",
+  "require_shapes": false
+ }
+}

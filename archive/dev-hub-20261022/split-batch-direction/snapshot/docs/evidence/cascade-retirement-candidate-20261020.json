@@ -1,0 +1,31 @@
+{
+  "id": "cascade-registration-retirement-20261020",
+  "route": "028/global",
+  "caliber": "offline-plugin-integration",
+  "cohort": "not applicable: no model execution",
+  "scenario": "installed-wheel discovery and disabled-plugin isolation",
+  "op": "",
+  "phase": "plugin lifecycle",
+  "method": "Remove cascade general-plugin registration and external kernel extra; keep root planner inert; preserve other host contracts",
+  "stage": "blocked",
+  "next_action": "CPU retirement implementation complete. If runtime deployment is requested, install final wheel and restart/recapture on an NPU host; verify real serving smoke without cascade. Do not claim L3/performance acceptance.",
+  "stop_condition": "Any remaining automatic cascade import, external wheel dependency, or change to other plugin gates/host contracts blocks delivery. No new operator performance window for this metadata-only change.",
+  "budget": {
+    "npu_min": "none: offline metadata/load tests only",
+    "serve_starts": "none",
+    "resamples": "none"
+  },
+  "evidence": [
+    "/root/\u5305\u4f53\u6062\u590d/records/probes/20261020T080804Z_cascade_retirement/receipt.json",
+    "/root/\u5305\u4f53\u6062\u590d/records/probes/20261020T080804Z_cascade_retirement/contract-preservation.json",
+    "/root/\u5305\u4f53\u6062\u590d/records/probes/20261020T080804Z_cascade_retirement/installed-default-off.json",
+    "/root/\u5305\u4f53\u6062\u590d/records/probes/20261020T080804Z_cascade_retirement/installed-stale-env.json",
+    "/root/\u5305\u4f53\u6062\u590d/records/probes/20261020T080804Z_cascade_retirement/final-wheel-tests.log",
+    "/root/\u5305\u4f53\u6062\u590d/records/probes/20261020T080804Z_cascade_retirement/final-wheel-audit.json",
+    "/root/\u5305\u4f53\u6062\u590d/records/probes/20261020T080804Z_cascade_retirement/full-tests.log",
+    "/root/\u5305\u4f53\u6062\u590d/records/probes/20261020T080804Z_cascade_retirement/cpu-full-tests.log",
+    "/root/\u5305\u4f53\u6062\u590d/records/probes/20261020T080804Z_cascade_retirement/coverage.log"
+  ],
+  "reason": "Final-wheel CPU CI suite and isolation passed. Unfiltered suites retain device/host-source environment blockers. No NPU, numeric or performance acceptance. Startup archive drift not modified or waived.",
+  "reopen_condition": "Actual runtime deployment validation requires an NPU host and explicit deployment scope; no rejected operator method reopened."
+}

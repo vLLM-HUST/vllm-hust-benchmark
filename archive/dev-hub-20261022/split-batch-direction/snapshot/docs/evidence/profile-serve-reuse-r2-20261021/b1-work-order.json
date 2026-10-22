@@ -1,0 +1,101 @@
+{
+  "schema": "b1-work-order.v1",
+  "candidate": "profile-serve-reuse",
+  "route": "028/meta-exp-fixed-cost",
+  "declared_at": "2026-10-21T05:32:03.934062+00:00",
+  "base_head": "99255c054dea4a82f881d20993e8b13d956df094",
+  "preexisting_dirty": [],
+  "owned_paths": [
+    "tools/probe_profile_serve_reuse.py",
+    "tests/test_probe_profile_serve_reuse.py",
+    "docs/evidence/profile-serve-reuse-r2-20261021"
+  ],
+  "task": "Same TP2 FULL BF16 Qwen3.5-35B-A3B fixed protocol → profiler configuration only, without start_profile → L2 repeatability plus paired L3 → target repository",
+  "shape_source": {
+    "kind": "existing synthetic-fixed-protocol",
+    "nominal_input_tokens": 2048,
+    "output_tokens": 256,
+    "concurrency": 32,
+    "requests": 128,
+    "phase": "prefill and decode",
+    "operator_dimensions": "not sampled; this is a meta workflow comparison, not an operator trial",
+    "actual_input_output_counts": "read from each new L2 artifact before comparing"
+  },
+  "weights": {
+    "model_path": "/models/modelscope_cache/Qwen/Qwen3.5-35B-A3B",
+    "config_sha256": "5e4d7f74fec2f360eb9cfbfcd6ec0c4c76e684d3a11caaed259d9fd9bfbc7944",
+    "dtype": "bfloat16",
+    "quantization_config": null,
+    "format": "safetensors"
+  },
+  "arms": {
+    "A": {
+      "mode": "profile light",
+      "order": 1,
+      "command": [
+        "opt",
+        "bench",
+        "serve",
+        "--profile",
+        "light"
+      ],
+      "collection": "Never call start_profile; no new trace capture"
+    },
+    "B": {
+      "mode": "plain",
+      "order": 2,
+      "command": [
+        "opt",
+        "bench",
+        "serve"
+      ]
+    }
+  },
+  "common": {
+    "logical_devices": "0,1 (npu-smi maps physical 3/6 today)",
+    "tp": 2,
+    "max_model_len": 8192,
+    "APC": "off",
+    "graph": "FULL",
+    "capture_sizes": [
+      1,
+      2,
+      4,
+      8,
+      16,
+      32
+    ],
+    "gate_fp32": "1",
+    "gdn_merge_inproj": "1",
+    "load": "random 2048/256, seed 42, temperature 0, concurrency 32"
+  },
+  "steps": "Per arm: owned startup, carrier snapshot, direct opt bench l2 twice, then opt bench l3, stop own service. Compare paired L3 only after both arms. Do not use bench run or start/stop_profile.",
+  "criteria": {
+    "primary": "second L2 output_throughput; delta=(profile2/plain2-1)*100",
+    "convergence": "Apply existing 0.5% noise band to the two L2 measurements in each mode; outside it stops inconclusive without extra repeats",
+    "supports_reuse": "both modes converged, absolute second-value delta <=0.5%, complete requests and L3 identical, matching configuration/carriers/load facts",
+    "rejects_reuse": "converged absolute second-value delta >=1%; in particular repeatable >=1% degradation confirms the prior concern",
+    "otherwise": "inconclusive; no automatic third measurement",
+    "no_operator_claim": true,
+    "no_default_change": true
+  },
+  "stop_conditions": [
+    "Any startup/PID/configuration/carrier mismatch, incomplete requests, command failure or L3 mismatch: preserve evidence and stop; do not promote",
+    "Same-mode nonconvergence stops before another startup",
+    "Never restart a failed arm automatically; count failed starts",
+    "Hard deadline within 40 NPU minutes; reserve 60 seconds for cleanup",
+    "No repin or edits to historical drifting evidence; drift still blocks acceptance, not this bounded probe"
+  ],
+  "budget": {
+    "npu_min": 40,
+    "wall_min": 80,
+    "serve_starts": 2,
+    "retry": 0,
+    "new_profile_captures": 0
+  },
+  "cleanup": "Only a captured descendant PID/process group with matching /proc start ticks; never broad pkill or opt bench stop",
+  "knowledge": "Two indexed a2-oriented searches yielded no applicable profiler-idle-overhead card; no returned unrelated card is cited",
+  "context_pack": "Existing frozen 028/meta-exp-fixed-cost pack retained; no premise or global criterion changed",
+  "prior_drift": "drift.evidence-changed:records remains FAIL for the two older files identified by startup-status.json; no repin",
+  "source_sha256": "226da76812d1a358f9339d60b82090dec5e96881c39116bcedd50b2192a6f912"
+}

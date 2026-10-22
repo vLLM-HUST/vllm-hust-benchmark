@@ -1,0 +1,154 @@
+{
+  "task": "Existing GeGLU [*,2*inter] bf16 exact-erf interface → replace host class monkeypatch with an OOT provider → offline registration/fallback/packaging checks; device gates blocked → target plugin repository",
+  "base_head": "f1f977234197767bc37db3accf98c10efa94a7b0",
+  "branch": "0.28/comm-overlap-free-attribution",
+  "initial_dirty_files": [],
+  "model_callsite_audit": {
+    "evidence": "/root/包体恢复/records/probes/20261020T083350Z_gelu_oot/model-callsite-audit.json",
+    "sha256": "20d238d3bbac92dc769624a4b981f3fc97e4ad333366cdcd98a48b7b6fbb55c5",
+    "chain": "GemmaMLP.__init__ → _get_gemma_act_fn → GeluAndMul; GemmaMLP.forward → self.act_fn(gate_up)",
+    "scope": "Static model callsite audit only; controlled dynamic constructor/forward execution is separate. No model or NPU execution.",
+    "lifecycle": "Register before the first activation lookup; LazyDict/cached factories may retain earlier instances."
+  },
+  "paths": [
+    "HOST_CONTRACT.md",
+    "README.md",
+    "docs/release.md",
+    "docs/support-matrix.md",
+    "src/vllm_ascend_split_batch/fi_gelu_plugin.py",
+    "tests/test_fi_gelu_plugin.py",
+    "tests/test_gelu_registration_probe.py",
+    "tests/test_npu_w31_gelu_plugin.py",
+    "tools/probe_gelu_registration.py",
+    "docs/evidence/gelu-oot-registration-20261020.json"
+  ],
+  "shape_facts": "Interface-only change: [*,2*inter] → [*,inter]; no sampled production shape distribution or concurrency claim.",
+  "weight_labels": "No model loaded; no weight/cohort performance claim.",
+  "changes": "Only fi_gelu integration mechanism; kernel API, kernel implementations, eligibility and fallback behavior unchanged. Warning text corrected to describe existing per-call retry behavior.",
+  "invariants": [
+    "host source read-only",
+    "no platform plugin registration",
+    "nine general plugins and six bundle descriptors unchanged",
+    "default-off, lazy kernel import, conflict non-overwrite",
+    "AOT guard existing default-on unchanged",
+    "cascade source/entry/dependency removal preserved"
+  ],
+  "checks": {
+    "cpu_ci": {
+      "exit_code": 0,
+      "result": "308 passed, 20 skipped, 14 deselected",
+      "command": "python -m pytest -q -m \"not host_tree\""
+    },
+    "focused": {
+      "exit_code": 0,
+      "result": "25 passed"
+    },
+    "ruff": {
+      "exit_code": 0
+    },
+    "changed_python_format": {
+      "exit_code": 0
+    },
+    "wheel_runtime_matches_checkout": true,
+    "installed_nine_plugins_off": "PASS",
+    "unrelated_runtime_and_descriptors_unchanged": true,
+    "coverage_exit_code": 0,
+    "coverage_is_not_numerical_acceptance": true,
+    "l0": "NOT_RUN",
+    "l3": "NOT_RUN",
+    "compare": "NOT_RUN",
+    "l4": "NOT_RUN",
+    "npu_graph": "NOT_RUN"
+  },
+  "source_execution": {
+    "schema": "gelu-oot-source-execution.v1",
+    "status": "PASS",
+    "sources": {
+      "/root/vllm-workspace/.stack/core-prev/vllm/model_executor/custom_op.py": "caaa422b914d74a58c3d7a1653af76e2834f41cc2d4fbe65d10d4ad50dbb4d38",
+      "/root/vllm-workspace/.stack/core-prev/vllm/model_executor/layers/activation.py": "852ec6c9299635e0267b34dcb747fff9d8ee31f48bb6dc3a4791cf68e093eed6",
+      "/root/vllm-workspace/.stack/ascend-fbe4911/vllm_ascend/utils.py": "3942d7e015c2854f68b1db0f9d14187343dd6180c017159033886c8cefdb6b44"
+    },
+    "checks": [
+      "original class unchanged",
+      "host constructor selects provider",
+      "host forward trampoline reaches adapter",
+      "CPU fallback bit-exact",
+      "custom_ops all/none and +/-gelu_and_mul preserved",
+      "Ascend registration source has no GeluAndMul collision",
+      "uninstall restores future construction"
+    ],
+    "kernel_stub_calls": 2,
+    "scope": "Unmodified host class definitions executed with real CPU PyTorch; controlled config/OOT platform, stub kernel and NPU metadata. Not a normal host import, worker startup, model run or NPU execution.",
+    "l3": "NOT_RUN",
+    "l4": "NOT_RUN",
+    "release_accepted": false
+  },
+  "normal_host_import": {
+    "exit_code": 1,
+    "python": "/root/venvs/rv1/bin/python",
+    "resolved_core": "/root/vllm-workspace/.stack/core-prev",
+    "error": "ModuleNotFoundError: No module named triton.experimental",
+    "limit": "Import attempt failed before model construction. Controlled class-source execution is not a substitute for normal worker startup."
+  },
+  "source_tree_heads": {
+    "core-prev": "0aee727ff6131a1b647941186ceef8f4777bdac2",
+    "ascend-fbe4911": "d409a5b039313f5a4bf88df76bbd575f29c173b4"
+  },
+  "failed_attempts": [
+    "system python3 venv unavailable (ensurepip missing); used existing rv1 Python to create a fresh isolated CPU venv",
+    "initial focused default-off subprocess had relative PYTHONPATH and could not find package; installed wheel and absolute path runs passed",
+    "first controlled source probe lacked vllm.config.compilation stub; retained failure log, corrected harness dependency boundary, second run passed",
+    "first changed-file format check rejected a quote style in new probe unit test; formatted and focused tests plus format rechecked"
+  ],
+  "npu_devices": [],
+  "boundaries": [
+    "No normal serving installation modified; all wheel installs isolated in this new L2 directory.",
+    "No NPU available: L0, L3, compare, graph replay and L4 not run, no numerical/performance acceptance.",
+    "Uninstall affects future instances only; unset env then restart workers and recapture graphs for serving rollback.",
+    "Historical evidence drift from startup remains unresolved and untouched."
+  ],
+  "evidence": {
+    "/root/包体恢复/records/probes/20261020T083350Z_gelu_oot/final-cpu-tests.log": "06dd9e3da4a637a6128025fa997cd53169304578a96e6ead1a186a2d8804b3c2",
+    "/root/包体恢复/records/probes/20261020T083350Z_gelu_oot/focused-final.log": "60729b5b3c9cc644fa4eba971ff1860d948cea64a6e4f7849ff1c8caba43fbf8",
+    "/root/包体恢复/records/probes/20261020T083350Z_gelu_oot/ruff-verified.log": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+    "/root/包体恢复/records/probes/20261020T083350Z_gelu_oot/format-verified.log": "f114d83b30c5c657ee43a847a45bafccaea255d82673feb87c26d252c61e29c1",
+    "/root/包体恢复/records/probes/20261020T083350Z_gelu_oot/source-execution-v2.json": "91d36a733cd88cdedac11e1ccd40396514db49dc69d769b4e545479d6e6dac29",
+    "/root/包体恢复/records/probes/20261020T083350Z_gelu_oot/source-execution.log": "10eafe8264d60bf254f0114166de86f664e2f45c326cfa4a6d6c88df00d1a515",
+    "/root/包体恢复/records/probes/20261020T083350Z_gelu_oot/final-installed-off.json": "dc52400eafa4b97606cdf76a23d97de21d11e23721bbe85e20a2724946ccf551",
+    "/root/包体恢复/records/probes/20261020T083350Z_gelu_oot/coverage.log": "5cdb3319f8c3ccaea3b18af1d507c6b3fa294fe5fa8ddcc0defd30ca3e2da67b",
+    "/root/包体恢复/records/probes/20261020T083350Z_gelu_oot/final-build.log": "c1bb382327b8c5b4e60441dbd5f2a23cd0c236b2c39d6eae0c6f2389f775beff"
+  },
+  "artifacts": {
+    "/root/包体恢复/records/probes/20261020T083350Z_gelu_oot/final-artifacts/vllm_ascend_split_batch-0.1.3-py3-none-any.whl": "a75862b80a88205e1637cec675426fd5f78a89703efdd7d2425c06e0eacaebe6",
+    "/root/包体恢复/records/probes/20261020T083350Z_gelu_oot/final-artifacts/vllm_ascend_split_batch-0.1.3.tar.gz": "5873c9d84f25bf3f8e3675dfda2e1ff945bf8ab8b2031b2ecc05bcad2c3a2be1"
+  },
+  "release_accepted": false,
+  "remote_published": false,
+  "candidate_snapshot": {
+    "id": "fi-gelu-oot-registration-20261020",
+    "route": "028/global",
+    "caliber": "offline-plugin-registration-contract",
+    "cohort": "not applicable: no model run",
+    "scenario": "Controlled host-class source execution plus installed-wheel CPU contracts",
+    "op": "",
+    "phase": "plugin construction and dispatch",
+    "method": "Use CustomOp.register_oot for unoccupied GeluAndMul key; preserve host class and gelu_and_mul configuration name",
+    "stage": "blocked",
+    "next_action": "On a compatible installed host with NPU, validate worker load ordering, real constructor/dispatch, existing NPU tests, L3+compare and light L4. Do not change manifest status or claim performance.",
+    "stop_condition": "Provider conflict, host-class mutation, custom_ops semantic drift, failed fallback or NPU numerical mismatch blocks activation/acceptance.",
+    "budget": {
+      "npu_min": "none: offline integration checks only",
+      "serve_starts": "none",
+      "resamples": "none"
+    },
+    "evidence": [
+      "/root/包体恢复/records/probes/20261020T083350Z_gelu_oot/receipt.json",
+      "/root/包体恢复/records/probes/20261020T083350Z_gelu_oot/source-execution-v2.json",
+      "/root/包体恢复/records/probes/20261020T083350Z_gelu_oot/final-cpu-tests.log",
+      "/root/包体恢复/records/probes/20261020T083350Z_gelu_oot/final-installed-off.json",
+      "/root/包体恢复/records/probes/20261020T083350Z_gelu_oot/coverage.log"
+    ],
+    "reason": "Offline registration and package checks pass; normal host import blocked by missing triton.experimental and no NPU device. Device/numerical/performance gates are unverified; existing archive drift untouched.",
+    "reopen_condition": "Compatible host dependencies and NPU available for bounded runtime validation; not a re-opening of a rejected operator method."
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "id": "cascade-source-removal-20261020",
+  "route": "028/global",
+  "caliber": "offline-plugin-package-cleanup",
+  "cohort": "not applicable: no model run",
+  "scenario": "old-to-new wheel upgrade plus source/wheel/sdist absence audit",
+  "op": "",
+  "phase": "plugin lifecycle",
+  "method": "Delete five cascade modules and six dedicated tests; retain executable AST of surviving modules and host contracts",
+  "stage": "blocked",
+  "next_action": "Code/package cleanup complete. Production installation and restart/recapture smoke remain unverified on this no-NPU host; do not reopen cascade optimization.",
+  "stop_condition": "Any surviving importable cascade implementation, artifact source mismatch, changed non-cascade executable AST, changed descriptor or altered plugin gate blocks delivery.",
+  "budget": {
+    "npu_min": "none: offline checks only",
+    "serve_starts": "none",
+    "resamples": "none"
+  },
+  "evidence": [
+    "/root/包体恢复/records/probes/20261020T081943Z_cascade_source_removal/receipt.json",
+    "/root/包体恢复/records/probes/20261020T081943Z_cascade_source_removal/removal-manifest.json",
+    "/root/包体恢复/records/probes/20261020T081943Z_cascade_source_removal/contract-check.json",
+    "/root/包体恢复/records/probes/20261020T081943Z_cascade_source_removal/artifact-audit.json",
+    "/root/包体恢复/records/probes/20261020T081943Z_cascade_source_removal/final-cpu-tests.log",
+    "/root/包体恢复/records/probes/20261020T081943Z_cascade_source_removal/installed-default-off.json",
+    "/root/包体恢复/records/probes/20261020T081943Z_cascade_source_removal/installed-stale-env.json",
+    "/root/包体恢复/records/probes/20261020T081943Z_cascade_source_removal/coverage.log"
+  ],
+  "reason": "Source/package absence and CPU regression passed. No claim about NPU execution or performance. Existing archive drift untouched.",
+  "reopen_condition": "Only explicit runtime deployment validation on available NPU hardware; source recovery requires a separate decision."
+}

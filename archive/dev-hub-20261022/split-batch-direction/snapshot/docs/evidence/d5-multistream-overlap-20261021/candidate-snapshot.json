@@ -1,0 +1,79 @@
+{
+  "id": "d5_gmm_vector_limit_core_overlap_candidate",
+  "route": "028/D5-multistream-overlap",
+  "caliber": "synthetic-fixed-protocol",
+  "cohort": "028-qwen35-35b-a3b-tp2-fullgraph",
+  "scenario": "same-batch decode dependency audit; existing single-request window only",
+  "op": "GroupedMatmul+GDN-vector",
+  "phase": "decode",
+  "method": "same-batch GMM/GDN dual-stream scheduling with fixed core quotas",
+  "stage": "blocked",
+  "next_action": "Do not implement or measure unrelated-input overlap. Resume this candidate only after a concrete data-independent production branch and its shape/expert-count facts are provided; microbatch splitting or shared-expert-only overlap requires a separate B1 scope, not a silent continuation.",
+  "stop_condition": "Same-batch dependency, unknown graph sync/quota support, numerical failure or declared budget exhausted.",
+  "budget": {
+    "wall_min": 60,
+    "static_gate_wall_min": 20,
+    "serve_starts_max": 4,
+    "plain_arms_max": 2,
+    "light_l4_arms_max": 2,
+    "resamples_max": "0 (prohibited by B1)",
+    "deep_windows_max": "0 (prohibited by B1)",
+    "quota_pairs_max": 1,
+    "repeats": 3,
+    "device_execution_condition": "Static independence, exact shape facts and supported fixed quotas must be declared in a new append-only execution receipt before spending device budget. If static gate blocks, serve starts and NPU measurement time remain zero."
+  },
+  "evidence": [
+    "/root/包体恢复/records/probes/20261021T042500Z_d5_first_probe/b1-work-order.json",
+    "/root/包体恢复/records/probes/20261021T042500Z_d5_first_probe/dependency-audit.json",
+    "/root/包体恢复/records/probes/20261021T042500Z_d5_first_probe/static-review.json",
+    "/root/包体恢复/records/probes/20261021T042500Z_d5_first_probe/coverage.log"
+  ],
+  "reason": "GDN produces the hidden states consumed by post_attention_layernorm and hence by both routing and expert GMM. Moving GMM to another stream while preserving true dependencies still waits for GDN; removing the wait changes model semantics. Core quotas cannot remove the dependency.",
+  "reopen_condition": "Provide a specific independent production GMM/GDN branch with unchanged model semantics, exact shapes/counts and supported FULL-graph event/quota APIs; do not silently split microbatches.",
+  "updated_at": "2026-10-21T04:29:53Z",
+  "checks": {
+    "l0": {
+      "status": "PENDING",
+      "reason": "static dependency gate stopped device execution"
+    },
+    "l3": {
+      "status": "PENDING",
+      "reason": "static dependency gate stopped device execution"
+    },
+    "l4": {
+      "status": "PENDING",
+      "reason": "static dependency gate stopped device execution"
+    }
+  },
+  "evidence_detail": [
+    {
+      "path": "/root/包体恢复/records/probes/20261021T042500Z_d5_first_probe/b1-work-order.json",
+      "sha256": "5f4a8090da013041b98a497b40930f2dac68adf952b1069c9c537f5274a7b71c",
+      "current_sha256": "5f4a8090da013041b98a497b40930f2dac68adf952b1069c9c537f5274a7b71c",
+      "ok": true
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261021T042500Z_d5_first_probe/dependency-audit.json",
+      "sha256": "d2e31dcd7713997bb400ebf9225ec4d98c3e4d03f9ba3ce93382086359e48cae",
+      "current_sha256": "d2e31dcd7713997bb400ebf9225ec4d98c3e4d03f9ba3ce93382086359e48cae",
+      "ok": true
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261021T042500Z_d5_first_probe/static-review.json",
+      "sha256": "95a2dd19876183e884981915c8be58cc4c41c2934bbf63035db1fabb9efbfd8c",
+      "current_sha256": "95a2dd19876183e884981915c8be58cc4c41c2934bbf63035db1fabb9efbfd8c",
+      "ok": true
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261021T042500Z_d5_first_probe/coverage.log",
+      "sha256": "978ab56dfeab122c6351eff396336708b87e56d762724654b1af7f7231b477cb",
+      "current_sha256": "978ab56dfeab122c6351eff396336708b87e56d762724654b1af7f7231b477cb",
+      "ok": true
+    }
+  ],
+  "evidence_ok": true,
+  "problems": [],
+  "revisions": 2,
+  "budget_enforced": false,
+  "checks_gate": "结构证据门: 只校验 checks 字段(l0/l4/l3=PASS)与证据路径存在，不验证真实性能/数值正确性"
+}

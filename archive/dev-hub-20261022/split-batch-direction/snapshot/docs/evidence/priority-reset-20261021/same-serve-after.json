@@ -1,0 +1,32 @@
+{
+  "id": "same-serve-arm-switch",
+  "route": "028/meta-exp-fixed-cost",
+  "caliber": "",
+  "cohort": "028-qwen35-35b-a3b-tp2-fullgraph（仅作为「不能改图档配置」的约束声明；A1/A2 机制探针不在该 cohort 上取数，结论只到机制级）",
+  "scenario": "工作流固定开销 + 测量质量（无负载口径依赖：本候选不引用任何窗口占比／排名）",
+  "op": "",
+  "phase": "",
+  "method": "同 serve 内切臂：把「臂」定义为运行时可切换的载体态。A 类 = 载体态开关（gate.weight_fp32 这类 per-forward hasattr 读取，宿主消费者见 ops/fused_moe/fused_moe.py:229/252），attach/detach 属性即可切；B 类 = 改图结构的开关（F2 GDN in_proj 合并、F3 shared-gate pack），切换意味着图变化，需重编译/重捕获。",
+  "stage": "probing",
+  "next_action": "按用户优先级搁置，非当前执行项；恢复需明确授权。当前不新增探针 worker、collective_rpc 控制入口、插件或控制协议，不起服测重编译/重捕获；不得因 NPU 空闲自动启动。D5 独立 microbatch 真实原型由会话 2 优先推进，属于新机制、新 B1、新候选，不是本候选前置任务。",
+  "stop_condition": "①B 若出现静默旧分支（切换后仍走旧分支且无重编译/重捕获）→ 判死，仅保留 A 类；②B 若实测首次切换代价 ≥ 起服可省时间（≥4.3 min）→ 判死；③B 需要改载体代码（而非探针专用件）才能获得控制通道 → 停止，转「只在独立窗口做 A/B」维持现状；④预算 NPU 30 min / 墙钟 60 min 用尽即停。",
+  "budget": {
+    "npu_min": 30,
+    "wall_min": 60
+  },
+  "evidence": [
+    "/root/包体恢复/records/probes/20261016T1232Z_MFC_a1_hasattr_guard_probe.log",
+    "/root/包体恢复/records/probes/20261016T1232Z_MFC_a1_hasattr_guard_probe.py",
+    "/root/包体恢复/records/probes/20261016T1233Z_MFC_a2_npu_recompile_cost_probe.log",
+    "/root/包体恢复/records/probes/20261016T1233Z_MFC_a2_npu_recompile_cost_probe.py",
+    "/root/包体恢复/records/probes/20261021T055500Z_pipeline_followup/gate_fp32_plugin.historical.py",
+    "/vllm-workspace/vllm-ascend/vllm_ascend/ops/fused_moe/fused_moe.py",
+    "/root/包体恢复/scripts/d4-ab-interleave.sh",
+    "/root/包体恢复/records/ladder/ab-1013-141051/summary.json",
+    "/root/包体恢复/records/ladder/d4-gatefp32-repl/p2-OFF-l1.json",
+    "/root/包体恢复/logs/ladder-serve-1016-043600.log"
+  ],
+  "reason": "A1/A2 机制探针（零卡 CPU + 单卡 NPU，合成复刻 hasattr 门控分支）结论: ①dynamo **确实**给该门控装了守卫（A1/A2 的 recompile 记录: `not hasattr(self._modules['gate'], 'weight_fp32')`）→ 排除「静默旧分支」这一判死结局；②切换生效且数值可辨（attach ×2 后输出翻倍，切回恢复）；③**代价只在第一次切换时付一次**: A2 四次切换只产生 1 次 Recompiling，OFF→ON 首次 8.449s，之后 ON→OFF→ON 均为 ~0.001s（dynamo 对两个守卫变体各自留了编译缓存）；④编译代价在本栈是分钟级（合成小模型冷编译 173.3s），真实栈一次 compile range 36–67s，故首次切换代价预计 ≤ 一次重编译 + 6 张 FULL 图的重新捕获（起服日志显示捕获 6 张 ~13s），显著低于起服 5.4min（其中 4.3min 是权重加载/框架 import，切臂免付）。动因仍是两条: 起服 5.4min/臂固定开销；同臂 3 窗 tpot 12.912/13.276/12.962 极差 2.8% > OFF→ON 成对差 1.3%，即窗间偏移大于待测效应。 Evidence hygiene only: the historical gate_fp32 source at the mutable working path changed. A byte-identical archived copy was recovered from Git 88b9edde60e71503f0a07124eada35e8f1553229; original SHA c079346f5cba19c774440d59948de82899a02e717c1edd91da7e9b7da05aa743 is retained, not refreshed. Stage/method/criteria/budget and B authorization requirement are unchanged. 用户优先级决定：本项只降低实验固定成本，不直接改善目标算子，不能排在 D5 真实原型之前。A1/A2 仅为机制证据，不证明真实 cohort B 的 TP2/FULL 路径已通过；既有阶段、预算和停止判据不变。",
+  "reopen_condition": "需用户明确授权恢复真实 cohort B 控制通道/切臂实验；NPU 空闲、旧预算余额或 A1/A2 机制证据均不是恢复授权。",
+  "checks": {}
+}

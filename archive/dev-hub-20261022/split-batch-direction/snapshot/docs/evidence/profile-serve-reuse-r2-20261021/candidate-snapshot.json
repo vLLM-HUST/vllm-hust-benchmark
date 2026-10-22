@@ -1,0 +1,53 @@
+{
+  "id": "profile-serve-reuse",
+  "route": "028/meta-exp-fixed-cost",
+  "caliber": "",
+  "cohort": "028-qwen35-35b-a3b-tp2-fullgraph",
+  "scenario": "工作流固定开销（同臂内两模式对照；不做跨窗口占比引用）",
+  "op": "",
+  "phase": "",
+  "method": "让 serve --profile 同时承担 L1/L2/L3（不调用 start_profile 即不采集），取消每个实验臂的第二次起服。验证两模式在同臂同 env 下 l1/l2 一致。",
+  "stage": "inconclusive",
+  "next_action": "Keep plain/profile isolation. Do not resume this terminal probe automatically; continue only independent active work or existing passive startup observations.",
+  "stop_condition": "①r2 渐近 out_tok_s 差稳定复现 ≥1% → 判死，L1/L2 判读保留 plain-serve（profile-serve 只跑 L4）; ②两模式 l2 的窗间漂移不可比（同模式内 2 次不收敛）→ 判 inconclusive，关的是「用 1a 证明 reuse 可行」这条路，不否定 profile 模式本身; ③预算 40 min NPU / 80 min 墙钟用尽即停。",
+  "budget": {
+    "npu_min": 40,
+    "wall_min": 80,
+    "serve_starts": 2
+  },
+  "evidence": [
+    "/root/包体恢复/records/ladder/mfc-1a-1016-125234/plain-l1.json",
+    "/root/包体恢复/records/ladder/mfc-1a-1016-125234/plain-l2.json",
+    "/root/包体恢复/records/ladder/mfc-1a-1016-125234/profile-l1.json",
+    "/root/包体恢复/records/ladder/mfc-1a-1016-125234/profile-l1-afterprofile.json",
+    "/root/包体恢复/records/ladder/mfc-1a-1016-125234/profile-l2.json",
+    "/root/包体恢复/records/probes/20261016T1309Z_MFC_1a_plain_vs_profile.log",
+    "/root/包体恢复/records/probes/20261016T1309Z_MFC_1a_ab_plain_vs_profile.sh",
+    "/root/audit/orig-20261017/bench-ladder.sh.orig-20261017",
+    "/root/包体恢复/records/probes/20261017T1055Z_MFC_candidate_evidence_hygiene_audit.json",
+    "/root/包体恢复/records/probes/20261021T052800Z_profile_serve_reuse_r2/b1-work-order.json",
+    "/root/包体恢复/records/probes/20261021T052800Z_profile_serve_reuse_r2/source-pin.json",
+    "/root/包体恢复/records/probes/20261021T052800Z_profile_serve_reuse_r2/reviewed-result.json"
+  ],
+  "reason": "r2 stopped as predeclared: profile L2 444.036888 → 449.836699 tok/s, +1.306155% within-mode drift. Both windows completed 128/128 with failed=0 and identical token counts. Plain not started; no profiler-cost inference. Retained-plain L3 comparison is 8/8 identical, not a paired r2 comparison.",
+  "reopen_condition": "Explicit authorization for a new warmup/convergence protocol and work order; never an automatic third sample or reuse of the unspent startup.",
+  "checks": {
+    "l0": {
+      "status": "SKIP",
+      "reason": "meta workflow, not operator L0"
+    },
+    "l3": {
+      "status": "PASS",
+      "evidence": [
+        "/root/包体恢复/records/probes/20261021T052800Z_profile_serve_reuse_r2/l3-vs-retained-plain.log"
+      ],
+      "reason": "retained baseline only; paired r2 L3 unavailable"
+    },
+    "workflow_repeatability": {
+      "status": "FAIL",
+      "evidence": [
+        "/root/包体恢复/records/probes/20261021T052800Z_profile_serve_reuse_r2/reviewed-result.json"
+      ]
+    }
+  }
+}

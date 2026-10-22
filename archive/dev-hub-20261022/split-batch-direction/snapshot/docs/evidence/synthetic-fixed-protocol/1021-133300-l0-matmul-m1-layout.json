@@ -1,0 +1,218 @@
+{
+ "schema": "opt-ops-l0-matmul-m1-layout.v1",
+ "ts": "2026-10-21T13:33:09Z",
+ "status": "ok",
+ "command": {
+  "argv": [
+   "tools/bench_matmul_m1_layout.py",
+   "--out",
+   "/root/包体恢复/records/ladder/1021-133300-l0-matmul-m1-layout.json"
+  ],
+  "cwd": "/root/vllm-workspace/vllm-ascend-split-batch-hust",
+  "python": "/usr/local/python3.12.13/bin/python3"
+ },
+ "candidate": "matmulv2-decode-m1-layout",
+ "route": "028/D7-matmulv2-decode-fusion",
+ "goal": {
+  "what": "权重布局(ND/物理转置/NZ)对 M=1 skinny GEMM 设备时长的影响",
+  "arbiter": "profiler chrome-trace kernel 设备时长中位（与窗口 kernel_details 同口径）",
+  "gate": "in_proj 任一臂改进 >= 15.0% -> 立 L3 候选; 否则布局领地关闭"
+ },
+ "hardware": {
+  "device": "npu",
+  "device_name": "Ascend910B2",
+  "host": "coder-user-tianyuw-new-profile-78749865b5-zhppg",
+  "torch": "2.13.0+cpu",
+  "torch_npu": "2.13.0.rc1"
+ },
+ "code": {
+  "repo": "/root/vllm-workspace/vllm-ascend-split-batch-hust",
+  "repo_head": "1643788069d16d769c99350a9fd01b05b887181d",
+  "tool_sha256": "66288c7e5df44cb8274522e35f6e7e0f7092409a7626aef7341758065c571f79"
+ },
+ "cells": [
+  {
+   "id": "gdn_inproj",
+   "weight": [
+    6176,
+    2048
+   ],
+   "weight_mb": 25.3,
+   "window_dur_us": 26.46,
+   "window_note": "窗内 0.96TB/s vs 同卡 1.51TB/s",
+   "nz": {
+    "requested_format": 29,
+    "observed_format": 29,
+    "applied": true
+   },
+   "numerics": {
+    "tnd_matmul": {
+     "bitwise_ok": false,
+     "mismatch": 3,
+     "max_abs_diff": 0.000488,
+     "shape_ok": true
+    },
+    "nz_linear": {
+     "bitwise_ok": true,
+     "mismatch": 0,
+     "max_abs_diff": 0.0,
+     "shape_ok": true
+    }
+   },
+   "perf": {
+    "nd_linear": {
+     "method": "npu_graph_capture_k16_replay",
+     "kernels_per_graph": 16,
+     "replays": 40,
+     "median_us": 21.105,
+     "min_us": null,
+     "n_kernels_found": 640
+    },
+    "tnd_matmul": {
+     "method": "npu_graph_capture_k16_replay",
+     "kernels_per_graph": 16,
+     "replays": 40,
+     "median_us": 33.779,
+     "min_us": null,
+     "n_kernels_found": 640,
+     "delta_pct_vs_nd": 60.05
+    },
+    "nz_linear": {
+     "method": "npu_graph_capture_k16_replay",
+     "kernels_per_graph": 16,
+     "replays": 40,
+     "median_us": 21.203,
+     "min_us": null,
+     "n_kernels_found": 640,
+     "delta_pct_vs_nd": 0.46
+    }
+   }
+  },
+  {
+   "id": "fa_qkv",
+   "weight": [
+    4608,
+    2048
+   ],
+   "weight_mb": 18.87,
+   "window_dur_us": 22.91,
+   "window_note": "窗内 MTE2 65%",
+   "nz": {
+    "requested_format": 29,
+    "observed_format": 29,
+    "applied": true
+   },
+   "numerics": {
+    "tnd_matmul": {
+     "bitwise_ok": false,
+     "mismatch": 1,
+     "max_abs_diff": 0.000244,
+     "shape_ok": true
+    },
+    "nz_linear": {
+     "bitwise_ok": true,
+     "mismatch": 0,
+     "max_abs_diff": 0.0,
+     "shape_ok": true
+    }
+   },
+   "perf": {
+    "nd_linear": {
+     "method": "npu_graph_capture_k16_replay",
+     "kernels_per_graph": 16,
+     "replays": 40,
+     "median_us": 10.419,
+     "min_us": null,
+     "n_kernels_found": 640
+    },
+    "tnd_matmul": {
+     "method": "npu_graph_capture_k16_replay",
+     "kernels_per_graph": 16,
+     "replays": 40,
+     "median_us": 11.613,
+     "min_us": null,
+     "n_kernels_found": 640,
+     "delta_pct_vs_nd": 11.46
+    },
+    "nz_linear": {
+     "method": "npu_graph_capture_k16_replay",
+     "kernels_per_graph": 16,
+     "replays": 40,
+     "median_us": 10.48,
+     "min_us": null,
+     "n_kernels_found": 640,
+     "delta_pct_vs_nd": 0.59
+    }
+   }
+  },
+  {
+   "id": "out_o",
+   "weight": [
+    2048,
+    2048
+   ],
+   "weight_mb": 8.39,
+   "window_dur_us": 11.46,
+   "window_note": "窗内 mixed",
+   "nz": {
+    "requested_format": 29,
+    "observed_format": 29,
+    "applied": true
+   },
+   "numerics": {
+    "tnd_matmul": {
+     "bitwise_ok": true,
+     "mismatch": 0,
+     "max_abs_diff": 0.0,
+     "shape_ok": true
+    },
+    "nz_linear": {
+     "bitwise_ok": true,
+     "mismatch": 0,
+     "max_abs_diff": 0.0,
+     "shape_ok": true
+    }
+   },
+   "perf": {
+    "nd_linear": {
+     "method": "npu_graph_capture_k16_replay",
+     "kernels_per_graph": 16,
+     "replays": 40,
+     "median_us": 9.855,
+     "min_us": null,
+     "n_kernels_found": 640
+    },
+    "tnd_matmul": {
+     "method": "npu_graph_capture_k16_replay",
+     "kernels_per_graph": 16,
+     "replays": 40,
+     "median_us": 7.426,
+     "min_us": null,
+     "n_kernels_found": 640,
+     "delta_pct_vs_nd": -24.65
+    },
+    "nz_linear": {
+     "method": "npu_graph_capture_k16_replay",
+     "kernels_per_graph": 16,
+     "replays": 40,
+     "median_us": 9.749,
+     "min_us": null,
+     "n_kernels_found": 640,
+     "delta_pct_vs_nd": -1.08
+    }
+   }
+  }
+ ],
+ "not_claimed": [
+  "profiler 设备时长与 FULL 图模式非严格同构（含 profiling 开销差异），只比方向",
+  "bitwise 记录不裁决; 若中选臂非 bitwise, L3 风险升级须如实上报（F3 教训）",
+  "单变量=布局; 不含 kernel 模板替换（那属更进一步的新领地）"
+ ],
+ "gate": {
+  "passed": false,
+  "reason": "无臂达 in_proj 改进 >= 15.0%"
+ },
+ "budget": {
+  "elapsed_s": 2.55
+ }
+}

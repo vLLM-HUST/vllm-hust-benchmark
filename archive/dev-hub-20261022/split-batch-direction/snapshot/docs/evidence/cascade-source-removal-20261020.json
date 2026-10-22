@@ -1,0 +1,190 @@
+{
+  "task": "Delete cascade implementation source and dedicated tests; retain non-cascade plugin contracts",
+  "base_head": "528315385ae0296ef2cfd0c2c028c0ad677d19ab",
+  "branch": "0.28/comm-overlap-free-attribution",
+  "initial_dirty_files": [],
+  "shape_facts": "not applicable: source/package lifecycle cleanup only",
+  "weight_labels": "not applicable: no model run",
+  "deleted_files": [
+    {
+      "path": "src/vllm_ascend_split_batch/cascade_gate.py",
+      "sha256": "74c0d6f73644331c755838ae1155fc9fad390aec004a49a4fdde3e47f355c233",
+      "lines": 307
+    },
+    {
+      "path": "src/vllm_ascend_split_batch/cascade_gate_self.py",
+      "sha256": "6179f88264d2741b71c0198fee557681a097a516f772b05ce26cf1f4dfe5816a",
+      "lines": 326
+    },
+    {
+      "path": "src/vllm_ascend_split_batch/cascade_graph_plugin.py",
+      "sha256": "4e859c06963864a9c4ca83a0affd6f6088a3a4d0ef196ef16632aec95600536b",
+      "lines": 1106
+    },
+    {
+      "path": "src/vllm_ascend_split_batch/cascade_plugin.py",
+      "sha256": "ddea2a4c8ac8665e2d382c9ed5f1a621f2ded066a84f403904788bf675b964bf",
+      "lines": 763
+    },
+    {
+      "path": "src/vllm_ascend_split_batch/cascade_runner_patch.py",
+      "sha256": "27a54ad6facf2f162ee383be257dfc6148ac3ca7e18e1672d3b5fc943e37cf79",
+      "lines": 437
+    },
+    {
+      "path": "tests/_cascade_kernel.py",
+      "sha256": "1def409e8886013c50e997b1f951f6a612611b2c1c35960127a5519cefd76807",
+      "lines": 62
+    },
+    {
+      "path": "tests/test_cascade_fail_open.py",
+      "sha256": "47549c07f2c41c07f0b7ba751fec662a04dc60b7109044e78f418a79decfdc00",
+      "lines": 307
+    },
+    {
+      "path": "tests/test_cascade_gate.py",
+      "sha256": "ffc741e2f7d43621bf40097e8eb788f3721e2ab6b074c1dcbc834ffb0d2c9b88",
+      "lines": 160
+    },
+    {
+      "path": "tests/test_cascade_graph_updatable.py",
+      "sha256": "3d58982eaf157ecf5e03df03e5570f2a355f2b6105e38a7d938af3de3097256d",
+      "lines": 367
+    },
+    {
+      "path": "tests/test_cascade_plugin.py",
+      "sha256": "7b49ff355f0953cb54caed4ed59c170bfd5a9730de437accfd880c5c6ed36438",
+      "lines": 697
+    },
+    {
+      "path": "tests/test_host_signature_drift.py",
+      "sha256": "40ba514912b4029854031a81ba3066d9075b5f3c5a4cd4642d00d63e57b7cb73",
+      "lines": 512
+    }
+  ],
+  "generated_cache_files_removed": 16,
+  "preserved": [
+    "provenance/ (read-only)",
+    "historical docs/evidence/",
+    "external cascade kernel repository",
+    "split-batch planner",
+    "all six bundle descriptors",
+    "all nine remaining general-plugin registrations and their gates",
+    "host version/protocol/runtime constraints"
+  ],
+  "contract_check": {
+    "status": "PASS",
+    "retained_implementation_ast_unchanged": [
+      "op_selector.py",
+      "gate_fp32_plugin.py",
+      "gdn_merge_inproj_plugin.py",
+      "zerocost_wiring.py"
+    ],
+    "all_bundle_manifests_unchanged": true,
+    "historical_evidence_and_provenance_unchanged": true,
+    "removed_source_lines": 2939,
+    "deleted_files": 11
+  },
+  "project_metadata_unchanged": true,
+  "checks": {
+    "upgrade": "PASS: old wheel initially exposes cascade_plugin; after reinstall all five removed module specs are None",
+    "wheel_and_sdist": "PASS: each runtime source matches checkout and has no cascade references; deleted implementation/test paths absent",
+    "cpu_ci": {
+      "command": "python -m pytest -q -m \"not host_tree\"",
+      "exit_code": 0,
+      "result": "283 passed, 20 skipped, 14 deselected"
+    },
+    "initial_focused_failure": "1 failed, 56 passed: obsolete >=30 source env-reference count after cascade removal; retained all forbidden-configuration scans and replaced incidental count with a nonempty-scan guard; nine installed plugin OFF-path probes remain mandatory",
+    "ruff": {
+      "exit_code": 0
+    },
+    "coverage": {
+      "exit_code": 0,
+      "fails": 0,
+      "warnings": 52
+    },
+    "npu_l0_l3_compare_l4": "NOT_RUN; no NPU/serve; no numerical or performance claim",
+    "unfiltered_host_suite": "Not rerun: previous retirement evidence records absent host/device environment blockers; host_tree tests remain intact",
+    "rollback": "Restore this commit only to recover source; prior registration/dependency retirement stays disabled; rebuild/reinstall/restart/recapture required"
+  },
+  "artifact_audit": {
+    "status": "PASS",
+    "artifacts": [
+      {
+        "path": "/root/包体恢复/records/probes/20261020T081943Z_cascade_source_removal/final-artifacts/vllm_ascend_split_batch-0.1.3-py3-none-any.whl",
+        "sha256": "11d518759e7b879fe5c628d21dddf015f7bf1a027ce8e2305122a757f885a9b3",
+        "runtime_python_files_checked": 37
+      },
+      {
+        "path": "/root/包体恢复/records/probes/20261020T081943Z_cascade_source_removal/final-artifacts/vllm_ascend_split_batch-0.1.3.tar.gz",
+        "sha256": "2668ab7e5319d3bb842c235f587eafe931067d7d501fa419624cf27793d58e1c",
+        "runtime_python_files_checked": 37
+      }
+    ],
+    "removed_paths_absent_from_sdist": [
+      "src/vllm_ascend_split_batch/cascade_gate.py",
+      "src/vllm_ascend_split_batch/cascade_gate_self.py",
+      "src/vllm_ascend_split_batch/cascade_graph_plugin.py",
+      "src/vllm_ascend_split_batch/cascade_plugin.py",
+      "src/vllm_ascend_split_batch/cascade_runner_patch.py",
+      "tests/_cascade_kernel.py",
+      "tests/test_cascade_fail_open.py",
+      "tests/test_cascade_gate.py",
+      "tests/test_cascade_graph_updatable.py",
+      "tests/test_cascade_plugin.py",
+      "tests/test_host_signature_drift.py"
+    ],
+    "runtime_source_contains_no_cascade": true,
+    "historical_evidence_and_provenance_preserved": true
+  },
+  "evidence": [
+    {
+      "path": "/root/包体恢复/records/probes/20261020T081943Z_cascade_source_removal/removal-manifest.json",
+      "sha256": "b84d3f0374a6f9f0d59da7173915af3a37f3daa2d2b40dfc2ee282a04e0da889"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261020T081943Z_cascade_source_removal/contract-check.json",
+      "sha256": "dd80a92f3363b44837b2e1a98949e8da29893527d6d17887cfc8b506d22af009"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261020T081943Z_cascade_source_removal/artifact-audit.json",
+      "sha256": "67a524dfcdfec5ab016c42419f2cf5f1f938e06dfbabb9262b32622ec5126010"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261020T081943Z_cascade_source_removal/baseline-presence.log",
+      "sha256": "b65e2f6d79818f5aaa74a076e8385393e358e03afe48648209b01590478c25b8"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261020T081943Z_cascade_source_removal/focused-tests.log",
+      "sha256": "772b48277153458d1bed9ac0c3a783adc0d34ef7f61df5ab2cf449950b71eb38"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261020T081943Z_cascade_source_removal/final-cpu-tests.log",
+      "sha256": "643ec6504fb8548b654eaaa652a2b1604e05a48425a0d2e7deb406e4397e51fb"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261020T081943Z_cascade_source_removal/installed-default-off.json",
+      "sha256": "b4823ae246f49c3829adb91ad128b8b1600e8498dfeaa263332c492f3c491924"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261020T081943Z_cascade_source_removal/installed-stale-env.json",
+      "sha256": "d9ca85523321d1f619497c58b3b3ce06f9c203a0b48e04c76bf46002841e47da"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261020T081943Z_cascade_source_removal/ruff-final.log",
+      "sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261020T081943Z_cascade_source_removal/coverage.log",
+      "sha256": "5cdb3319f8c3ccaea3b18af1d507c6b3fa294fe5fa8ddcc0defd30ca3e2da67b"
+    }
+  ],
+  "decision": "Source deletion CPU/package validation complete; production serving unverified; no optimization acceptance",
+  "status": {
+    "experiment": "CPU/package PASS",
+    "optimization_acceptance": "NOT_CLAIMED",
+    "code_commit": "See containing commit",
+    "remote_publication": "NOT_PUSHED"
+  },
+  "history_boundary": "This does not rewrite Git history, erase historical evidence/provenance, modify another repository, or uninstall external/runtime environments"
+}

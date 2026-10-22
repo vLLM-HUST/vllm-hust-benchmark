@@ -1,0 +1,56 @@
+{
+  "schema": "d5-independent-microbatch-b1.v1",
+  "candidate": "d5_independent_microbatch_gmm_gdn_interleave",
+  "route": "028/D5-multistream-overlap",
+  "layer": "graph",
+  "base_head": "dc7ae611a39ffca79d89cda62b96613bc4190655",
+  "branch": "0.28/comm-overlap-free-attribution",
+  "initial_dirty": [],
+  "start_utc": "2026-10-21T06:23:39Z",
+  "wall_deadline_utc": "2026-10-21T07:53:39Z",
+  "budget": {
+    "wall_min_max": 90,
+    "npu_min_max": 60,
+    "serve_starts_max": 2,
+    "new_bounded_light_windows_max": 1,
+    "deep_windows_max": 0,
+    "existing_occupancy_at_start": "opt status: NPU idle; serve absent; npu-smi: no running processes",
+    "prior_tiered_r2_budget_reused": false
+  },
+  "scope": "Two request-disjoint microbatches from one actual scheduler step; A routed-expert GMM and B GDN/vector, after freezing both split workloads. No same-batch dependency bypass, quotas, kernel replacement or shape/count changes.",
+  "weights": {
+    "model": "Qwen3.5-35B-A3B",
+    "precision": "bf16",
+    "tp": 2,
+    "physical_layout": "not established for an independent pair; ND/NCL trace formats are not proof of packed NZ storage"
+  },
+  "retained_shape_source": "docs/evidence/d5-multistream-overlap-20261021/result.json and its hashed kernel_details.csv source",
+  "retained_shapes_not_a_pair": {
+    "gmm1": {"expanded_M": [8, 2824], "K": 2048, "N": 512, "experts": 256},
+    "gmm2": {"expanded_M": [8, 2824], "K": 256, "N": 2048, "experts": 256},
+    "gdn_decode": "q/k=[1,8,128], v=[1,16,128], state=[1063,16,128,128] FP32",
+    "gdn_prefill_gating": "[16];[353,16];[353,16]",
+    "gaps": ["No captured independent A/B input tensors or routed per-expert counts", "No proven independent state-index sets, live-buffer ownership or physical weight layout", "Single-request source does not establish saturated independent-microbatch shapes"]
+  },
+  "first_question": "Do current Ascend execution and hybrid metadata interfaces actually create and support a second microbatch, including persistent state and workspace ownership?",
+  "first_evidence": "/root/包体恢复/records/probes/20261021T062339Z_d5_independent_microbatch/interface-probe.json",
+  "first_action": "CPU execution of actual source-extracted selection and GDN metadata methods with explicit stubs; inspect worker, context, workspace and state callsites. No server or trace needed to answer this interface question.",
+  "device_entry_gate": "A reachable supported two-microbatch path, fixed real inputs/counts/layout and disjoint writable storage or explicit ownership events. If current path rejects second GDN metadata, stop and deliver the exact interface contract, not unrelated-input overlap.",
+  "prospective_paired_protocol": {
+    "A": "Identical frozen split work A then B, serial on one stream",
+    "B": "Same frozen split work on separate streams with readiness and join events",
+    "single_variable": "stream/event scheduling only; splitting is identical in both arms",
+    "lifetime": "Hold inputs, weights, outputs, state and workspace references through both completion events; immutable weights may share; writable state-index sets and scratch must be disjoint",
+    "synchronization": "Producer-ready events before each consumer; join both streams before reading outputs or timing end. TP collective ordering remains identical across ranks.",
+    "numerics": "Compare all outputs and mutated conv/recurrent states to serial per pair; exact integer metadata, BF16 rtol=0.01 atol=0.01 and FP32 state rtol=0.0001 atol=0.0001; report first mismatch and stop performance promotion",
+    "timing": "Device start event precedes both branches, end event follows both branch joins; synchronize end before elapsed_time; additionally synchronized host makespan; never enqueue-only timing",
+    "warmup": "At least 10 untimed pairs after allocations/compilation stabilize; reset identical mutable state outside timing",
+    "repeats": "3 independent repeats per fixed M/count distribution, alternate AB/BA order, at least 30 measured pairs per repeat",
+    "noise": "Report each repeat and median separately per shape/distribution; do not pool different M or experts. Promote only with positive paired improvement in all three repeats exceeding repeat dispersion.",
+    "promotion": "L0 numerical PASS plus reproducible paired makespan improvement, then minimal default-off production integration and new L3 + compare. Graph/system L4 requires existing screen contract; no operator-route disguise.",
+    "stop": "Unsupported metadata, overlapping writable state or buffers, numerical failure, reproducibly no improvement, or any budget cap"
+  },
+  "rollback": "Offline probe only until gate opens. No entry point, manifest, host source, worker selection, default environment or runtime carrier changed; no production activation. Any future integration needs explicit default-off gate and restart rollback.",
+  "preexisting_global_fail": "opt status drift.evidence-changed:records for two historical files; do not modify, repin or treat as resolved. Blocks acceptance, not this read-only probe.",
+  "device_mapping": "npu-smi physical IDs 3,6 and /dev/davinci3,/dev/davinci6; logical ACL mapping not yet device-queried. Do not pass physical IDs as ASCEND_RT_VISIBLE_DEVICES. Resolve ACL logical mapping only if device gate opens."
+}

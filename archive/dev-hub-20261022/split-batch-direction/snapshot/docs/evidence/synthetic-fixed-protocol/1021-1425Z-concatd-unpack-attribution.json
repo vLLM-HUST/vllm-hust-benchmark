@@ -1,0 +1,23 @@
+{
+ "schema": "opt-ops-shape-attribution.v1",
+ "id": "1021-concatd-unpack-attribution",
+ "generated_by": "主会话离线复算（kernel_details 签名分桶 + 时间线邻位分析 + 运行树代码核对）；未起服、未跑 NPU",
+ "route": "028/D4-const-hoist",
+ "candidate": "concatd-gdn-unpack-views",
+ "op": "ConcatD",
+ "window": "1021-031741（synthetic-fixed-protocol, rank1）",
+ "facts": [
+  "ConcatD 签名 \"1024;1024;2048\" 为三输入 [q 1024]+[k 1024]+[v 2048] -> [4096]，930 次 decode = 30 GDN 层 x 31 迭代；prefill 迭代 30 次 [361472;361472;722944] 同源",
+  "callsite: /vllm-workspace/vllm/vllm/model_executor/layers/mamba/gdn/qwen_gdn_linear_attn.py:801 rearrange_mixed_qkv 的 torch.cat([q.reshape(-1),k.reshape(-1),v.reshape(-1)])，gdn.py:511/512/567 三路调用",
+  "根因: W3F2 后 in_proj 输出 [T,6176] 行跨度 -> mixed_qkv（前 4096 列）非连续 + conv 输出 empty_like 保跨度 -> q/k/v 切片行跨度 6176，cat 用于物化三段一体连续",
+  "窗内实测: decode 每次中位 15.28us（1 token 仅 ~16KB 拷贝，iris 纯图节点开销）；14.05ms/窗 ≈ 0.49ms/迭代 ≈ 3.0% step",
+  "时间线: CausalConv1d -> ConcatD -> fused_gdn_gating -> l2norm x2 -> RecurrentGatedDeltaRule（同层周期内唯一三输入 cat）"
+ ],
+ "method_surfaces": [
+  {"id": "zero-copy-views", "desc": "跳过 cat，消费端（l2norm triton / RecurrentGatedDeltaRule AscendC / out_proj）直接吃行跨度 6176 的 strided view；L0 须验证消费者接受 strided 输入",
+   "adjacency": "gdn-qkv-unpack-single-pass rejected（单拷贝, T16/rs4096 eager +8.4%）——verdict 明示『不否定算子其它实现或未测形状』；零拷贝为不同机制+未测形状（M=1 图模式），重开需授权(§0.2③)"},
+  {"id": "decode-only-views", "desc": "仅 decode 路径切视图，prefill 保持 cat", "adjacency": "同上"}
+ ],
+ "bench_asset": "tools/bench_gdn_qkv_unpack.py（同族配对 A/B 现成 L0 工具, 可测零拷贝变体）",
+ "evidence_files": ["1021-031741-opstat.json", "1021-140924-opstat.json"]
+}

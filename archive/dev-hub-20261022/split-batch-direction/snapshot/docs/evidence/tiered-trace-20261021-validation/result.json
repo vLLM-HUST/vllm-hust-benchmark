@@ -1,0 +1,179 @@
+{
+  "schema": "tiered-trace-runtime-validation.v1",
+  "base_head": "1ab544a92e8396e5fd890cbe62a57efdb58a4a78",
+  "verdict": "partial validation; startup ownership false-positive requires correction",
+  "scope": "meta workflow only; no operator performance claim",
+  "completed": {
+    "plain_screen": {
+      "path": "/root/包体恢复/records/ladder/tiered-trace-20261021-plain-validation/screen.json",
+      "repeats": 3,
+      "artifact_counts": {
+        "l1": 3,
+        "l2": 3,
+        "l3": 1
+      }
+    },
+    "l3_compare": "8/8 token identical to 1021-025003-l3.json",
+    "real_mixed_mode_guard": "plain -> light rejected with exit3; PID unchanged",
+    "workflow_tests": "23 passed in 3.28s",
+    "reused_light": {
+      "bounded_iterations": 32,
+      "record_shapes": false,
+      "windows": [
+        {
+          "path": "/root/prof/ladder-1021-030320",
+          "auto_stop_line": 377,
+          "manual_stop_line": 393,
+          "successful_requests_after_auto_stop": 4,
+          "ranks": [
+            {
+              "rank": 0,
+              "path": "/root/prof/ladder-1021-030320/dp0_pp0_tp0_dcp0_ep0_rank0_122576_20261021030832684_ascend_pt",
+              "record_shapes": false,
+              "parsed_and_delivered": true,
+              "remaining_db_count": 0,
+              "preserved_framework_files": 0,
+              "profiler_info_sha256": "33b8f232785066b26a3aa43c6dfcf0d13b3a186054587c1d7263634ad0f62f20",
+              "boundary": "rank-local delivery"
+            },
+            {
+              "rank": 1,
+              "path": "/root/prof/ladder-1021-030320/dp0_pp0_tp1_dcp0_ep1_rank1_122577_20261021030832682_ascend_pt",
+              "record_shapes": false,
+              "parsed_and_delivered": false,
+              "remaining_db_count": 0,
+              "preserved_framework_files": 2,
+              "profiler_info_sha256": "abe630ab2f83b6bea563844deaa18dd02a507fee73addf6a137db7292a053c4c",
+              "boundary": "raw inputs preserved, not parsed or delivered; no all-rank claim"
+            }
+          ]
+        },
+        {
+          "path": "/root/prof/ladder-1021-031236",
+          "auto_stop_line": 381,
+          "manual_stop_line": 397,
+          "successful_requests_after_auto_stop": 4,
+          "ranks": [
+            {
+              "rank": 0,
+              "path": "/root/prof/ladder-1021-031236/dp0_pp0_tp0_dcp0_ep0_rank0_140620_20261021031741458_ascend_pt",
+              "record_shapes": false,
+              "parsed_and_delivered": false,
+              "remaining_db_count": 0,
+              "preserved_framework_files": 2,
+              "profiler_info_sha256": "3396912f0d4dd766fda8d67120c9138d0de423caa053f767e6b6582dbcfd8697",
+              "boundary": "raw inputs preserved, not parsed or delivered; no all-rank claim"
+            },
+            {
+              "rank": 1,
+              "path": "/root/prof/ladder-1021-031236/dp0_pp0_tp1_dcp0_ep1_rank1_140621_20261021031741458_ascend_pt",
+              "record_shapes": false,
+              "parsed_and_delivered": true,
+              "remaining_db_count": 0,
+              "preserved_framework_files": 0,
+              "profiler_info_sha256": "7af0e41705f7f274d5f0a55a28faa962f1b5a3922ed6b5bbe26489785033c221",
+              "boundary": "rank-local delivery"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "negative_finding": {
+    "failed_start_log": "/root/包体恢复/logs/ladder-serve-1021-045645.log",
+    "first_attempt_error": "aclInit 107001, invalid device ID before weights; physical3,6 are logical0,1",
+    "unexpected_return": "serve-start.exit is 0 at 05:05:13 although its worker failed at 04:58:29; stdout logs no applied carriers for the failed attempt",
+    "source_mechanism": "cmd_wait only polls shared port /health and does not bind readiness to the PID started by cmd_serve. The earlier wait observed the later successful second service. Interrupting the outer session did not ensure all wait descendants terminated.",
+    "evidence_boundary": "Engine failure and late success marker are observed. Descendant survival is the mechanism inferred from the health-only wait and matching readiness time.",
+    "next_fix": "Bind startup waiting and final mode publication to captured live PID; preserve standalone opt bench wait endpoint-only behavior; CPU regression for dead/replaced PID with healthy unrelated endpoint."
+  },
+  "budget_spent": {
+    "serve_starts": 2,
+    "new_profile_windows": 0,
+    "resamples": 0,
+    "service_stopped": true,
+    "npu_window": "04:56:45 to approximately 05:13:30, within20min cap"
+  },
+  "limits": [
+    "No all-rank delivery claim: OFF parsed rank0 and retained rank1 raw; ON parsed rank1 and retained rank0 raw.",
+    "Reused light and new plain screen validate components, not a newly sampled end-to-end chronological window.",
+    "Plain L2 cohort is id-only with unknown model detail; no cross-window performance comparison performed.",
+    "Global startup drift FAIL was not repinned; opt coverage reports FAIL0/WARN54 independently.",
+    "No accepted state and no operator L0 PASS invented for this meta task."
+  ],
+  "evidence": [
+    {
+      "path": "/root/包体恢复/records/probes/20261021T045600Z_tiered_trace_acceptance/plan.json",
+      "sha256": "0744e6e36d6a2939da2266ae14611c9b1d54aae3b6cadda4f082a3a90cf1224a"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261021T045600Z_tiered_trace_acceptance/input-correction.json",
+      "sha256": "a3bab5825de1d2b1ca42905c2f6009b2f7813667bc7ba35952df32352d208fd0"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261021T045600Z_tiered_trace_acceptance/device-map.txt",
+      "sha256": "6c2181670ce6f6cf1da750ad0c8f6429c9157b05c4aba8e4dae1aa01da44402d"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261021T045600Z_tiered_trace_acceptance/reused-light-audit-v2.json",
+      "sha256": "2423f1aa3f51af396062f88cdb70bd133b7936d2b1cabff4641154ebc4014949"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261021T045600Z_tiered_trace_acceptance/serve-start.log",
+      "sha256": "d3d3cb59d0cbbe3f530f0902b4d20c7432c29d5a8ccb1f5b60160527a88a8462"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261021T045600Z_tiered_trace_acceptance/serve-start.exit",
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261021T045600Z_tiered_trace_acceptance/serve-corrected.log",
+      "sha256": "6abf713f5ca27bed29d2753f79f211ecce0fc01e968c44f0b5f7866506b28e83"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261021T045600Z_tiered_trace_acceptance/serve-corrected.exit",
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261021T045600Z_tiered_trace_acceptance/mixed-mode-guard.log",
+      "sha256": "14c27a673a97fedbe04a47a2930324e9d1a915a6f7b8a06d4044c94ce896d752"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261021T045600Z_tiered_trace_acceptance/mixed-mode-guard.exit",
+      "sha256": "1121cfccd5913f0a63fec40a6ffd44ea64f9dc135c66634ba001d10bcf4302a2"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261021T045600Z_tiered_trace_acceptance/screen.log",
+      "sha256": "d058767e3b38c9748644abefe3383917ceb93f25e59707786c9d50968df52632"
+    },
+    {
+      "path": "/root/包体恢复/records/ladder/tiered-trace-20261021-plain-validation/screen.json",
+      "sha256": "c8eb89ffdb66f9624088bb8e5d887cdd1ac4d15cd6d42041fd53a7a78527a587"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261021T045600Z_tiered_trace_acceptance/l3-compare.log",
+      "sha256": "afe63e2da549a67d518ceadf0788e9588402b898ad8f822d95aad953617a413b"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261021T045600Z_tiered_trace_acceptance/workflow-tests.log",
+      "sha256": "67e905c9689cb9535511740842b0e45b5db84783129053158f39323f17e26f52"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261021T045600Z_tiered_trace_acceptance/coverage.log",
+      "sha256": "7ffbb64fdaa9f10ae8a6a7d0a9b8a32ee05d572a0f0f8e05e3f2ab6e9e250a10"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261021T045600Z_tiered_trace_acceptance/cleanup.log",
+      "sha256": "a6dd9d7169f755a4fe7b7fd13905b41548418530b69ec1dbc0840f67b201b29f"
+    },
+    {
+      "path": "/root/包体恢复/logs/ladder-serve-1021-045645.log",
+      "sha256": "8aba716a2783ee588c8153a1270e77d681ce709c885f9475a468c45c1af8d6a7"
+    },
+    {
+      "path": "/root/包体恢复/logs/ladder-serve-1021-050006.log",
+      "sha256": "80b9373c218215e87327b6cba33913fd7289b3221e87a5a9f762de28746acef7"
+    }
+  ],
+  "rollback": "No implementation/default/manifest changes; task service stopped."
+}

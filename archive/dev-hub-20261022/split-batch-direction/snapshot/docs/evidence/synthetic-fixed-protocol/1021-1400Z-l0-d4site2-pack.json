@@ -1,0 +1,16 @@
+{
+ "schema": "opt-ops-l0-d4site2-pack.v1",
+ "id": "1021-l0-d4site2-pack",
+ "candidate": "d4-conv-transpose-second-site",
+ "status": "PASS",
+ "checks": [
+  {"name": "pack_cpu_stub_bitwise", "ok": true,
+   "detail": "[4096,1,4]->[4,4096] contiguous, bitwise==reference transpose; 二次覆盖(repack via _parameters data)路径 bitwise==reference"},
+  {"name": "anchor_dry_run", "ok": true,
+   "detail": "patch 脚本 8 锚点断言在 orig 副本上全部命中; py_compile OK; 残留 transpose(0,1) 仅 stock 回退行+装载期 helper+非权重 mixed_qkv 转置"},
+  {"name": "worker_trigger", "ok": true,
+   "detail": "ON serve worker 日志: '[D4site2] packed conv weight [W,D] ready'（ladder-serve-1021-140311.log, Worker_TP0）——pack 在 process_weights_after_loading 内触发"},
+  {"name": "live_compile", "ok": true, "detail": "施加后运行树 gdn.py py_compile OK, sha256 3f29e982a7cf"}
+ ],
+ "boundary": "设备级正确性由 L3 8/8 承载; 消除计数由 light L4 承载(960->0)"
+}

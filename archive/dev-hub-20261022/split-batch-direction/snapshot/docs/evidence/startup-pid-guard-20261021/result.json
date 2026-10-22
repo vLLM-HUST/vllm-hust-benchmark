@@ -1,0 +1,69 @@
+{
+  "schema": "startup-pid-guard-review.v1",
+  "task": "TP2 Qwen3.5-35B-A3B workflow (no operator change) → bind startup readiness to captured PID → CPU regression and full pytest → tools/bench-ladder.sh",
+  "base_head": "5195d531e95b44694eb1303304a590ceb20e5546",
+  "branch": "0.28/comm-overlap-free-attribution",
+  "prior_runtime_failure": "/root/包体恢复/records/probes/20261021T045600Z_tiered_trace_acceptance/reviewed-result.json",
+  "changes": [
+    "Capture $! once for PID file, environment snapshot and wait",
+    "Reject invalid/dead/zombie/replaced PIDs before and after health probes and before publishing mode",
+    "Keep standalone wait endpoint-only"
+  ],
+  "tests": {
+    "targeted": "44 passed in 4.38s; exit 0",
+    "full": "888 passed, 7 skipped in 227.30s; exit 0",
+    "ruff": "All checks passed; exit 0",
+    "bash_n": "PASS",
+    "counterexample": "Old code returns 0 for a synthetic unrelated healthy endpoint with a dead expected PID; fixed code returns 1"
+  },
+  "coverage": {
+    "exit": 0,
+    "log": "/root/包体恢复/records/probes/20261021T051800Z_startup_pid_guard/coverage.log",
+    "boundary": "Coverage does not resolve prior startup evidence drift or establish numerical/operator acceptance"
+  },
+  "implementation_sha256": {
+    "tools/bench-ladder.sh": "93d6a0a2c53151c8a551e9e9b79268241d5dccfaa775e36a3516979931b80eed",
+    "tests/test_bench_ladder_process_guard.py": "1f9d3e764bfc9da6b54dad3791288edc6cd947b0786ec7e4abeed22c8f67ac8d",
+    "README.md": "c712e6bcce561b6140abfc48d51445527824bcb3b628046460c11fea924d246a"
+  },
+  "evidence": [
+    {
+      "path": "/root/包体恢复/records/probes/20261021T051800Z_startup_pid_guard/cpu-counterexample.json",
+      "sha256": "dcb2fc5fecf44ca3c5be9d143ebecdcd4de60d5505f8cbc3415a361ba4c76695"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261021T051800Z_startup_pid_guard/bench-ladder-before.sh",
+      "sha256": "c45d9559198a062899b87af78a76e59d0c8e0c37d4241069bf3d3c20602294bc"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261021T051800Z_startup_pid_guard/bench-ladder-after.sh",
+      "sha256": "93d6a0a2c53151c8a551e9e9b79268241d5dccfaa775e36a3516979931b80eed"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261021T051800Z_startup_pid_guard/pytest-full.log",
+      "sha256": "5173a9211595fbe7098b10f1b115e9204a1de699b530c6bd8bd36c70aae1ec53"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261021T051800Z_startup_pid_guard/targeted.log",
+      "sha256": "f0536f622b52a7aa17da34a8299a1d6bae96ea8e8d16c2d156d96bd55a181aac"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261021T051800Z_startup_pid_guard/ruff.log",
+      "sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261021T051800Z_startup_pid_guard/coverage.log",
+      "sha256": "7ffbb64fdaa9f10ae8a6a7d0a9b8a32ee05d572a0f0f8e05e3f2ab6e9e250a10"
+    }
+  ],
+  "integration": "opt bench dispatches to this repository canonical script; no host source or external opt-ops implementation changed",
+  "rollback": "Revert this scoped fix commit after reviewing worktree; standalone wait remains unchanged. Reverting restores the known false-readiness risk.",
+  "limits": [
+    "CPU regression only; no new NPU startup or profile window in this fix",
+    "PID liveness and PID-file consistency are not kernel socket ownership or PID-reuse protection",
+    "Prior real startup failure remains recorded; successful components do not cancel it",
+    "tiered-trace real-validation serve budget remains exhausted at 2/2",
+    "No operator acceptance, default enabling, repin, manifest change or push"
+  ],
+  "next_action": "Proceed with the already planned profile-serve-reuse r2 under its own declared budget; observe normal startup with the fixed guard; do not repeat tiered light collection"
+}

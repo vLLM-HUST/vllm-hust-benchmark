@@ -1,0 +1,14 @@
+{
+ "schema": "opt-ops-probe.v1",
+ "id": "1021-trio-fusion-official-kernel-scan",
+ "question": "官方是否已有 gating+topk+init-routing 融合核（trio 立项前提）",
+ "result": "NO——torch_npu 全命名空间（moe/gating/routing/deep/fused 过滤）与 KB 全库双路确认: 无该融合核",
+ "closest_official_kernel": {
+  "name": "npu_grouped_matmul_finalize_routing (vllm-ascend PR1335 四算子链, fused_allgather_ep_moe_256expert_deepseek_v3r1 卡)",
+  "fusion": "w2 GMM + 按路由权重 finalize 聚合（非 gating+init）",
+  "hard_gates": ["W8A8-dynamic 量化（本栈 bf16, 且 W8A8 主线已裁决不做）", "ep_size>1（本栈 ep_size=1）", "DeepSeek V3/R1 判据（官方按 global_num_experts==256 判但非本模型）", "w2 须 FRACTAL_NZ（已被 207005 图捕获崩溃排除）"],
+  "conclusion": "不适用本栈"
+ },
+ "line_status": "closed——trio 融合前提不存在, 收线; reopen 同 moeinitrouting reopen_condition",
+ "created_at": "2026-10-21T16:10:00Z"
+}

@@ -1,0 +1,50 @@
+{
+  "schema": "tiered-trace-validation-plan.v1",
+  "declared_at": "2026-10-21T04:56:39.609416+00:00",
+  "candidate": "tiered-trace-workflow",
+  "route": "028/meta-exp-fixed-cost",
+  "base_head": "1ab544a92e8396e5fd890cbe62a57efdb58a4a78",
+  "startup_dirty": [],
+  "question": "Does the already-implemented plain/profile workflow pass its real missing plain screen and preserve unparsed ranks while delivering a bounded light window?",
+  "single_change": "No runtime or operator change; validate existing pipeline only.",
+  "load": {
+    "caliber": "synthetic-fixed-protocol",
+    "cohort": "028-qwen35-35b-a3b-tp2-fullgraph",
+    "plain_screen": "L1 x3 (10 prompts each), L2 x3 (128 prompts, random 2048/256, concurrency32), L3 x1 (8 fixed greedy prompts, seed42)",
+    "shape_source": "existing registered synthetic-fixed-protocol; no new scenario; screen timings are workflow signals only, not operator performance claims"
+  },
+  "reuse": [
+    "/root/prof/ladder-1021-030320",
+    "/root/prof/ladder-1021-031236",
+    "/root/包体恢复/records/ladder/1021-030832-opstat.json",
+    "/root/包体恢复/records/ladder/1021-031741-opstat.json"
+  ],
+  "checks": [
+    "screen really uses plain serve and captures L1x3/L2x3/L3x1",
+    "profile config record_shapes=false and max_iterations=32",
+    "real max-iteration stop precedes explicit stop_profile and later requests succeed",
+    "parsed rank has valid all-kernel opstat, CSV and communication preserved and large DB removed",
+    "unparsed rank input must remain preserved, never claim all-rank delivery from rank0 output",
+    "plain/profile mixed mode is refused before starting a second serve"
+  ],
+  "budget": {
+    "wall_min": 60,
+    "npu_min": 20,
+    "serve_starts_max": 2,
+    "planned_new_starts": 1,
+    "new_profile_windows": 0,
+    "resamples": 0
+  },
+  "stop_conditions": [
+    "Any command FAIL: preserve evidence; no automatic retry/resample",
+    "serve readiness timeout capped at 600 seconds; stop this task service",
+    "NPU20min or wall60min exhausted: stop, record inconclusive; no overrun without authorization",
+    "Environment/seam guard rejects: no bypass; preserve failure",
+    "No operator acceptance, no manifest activation, no repin/push, no change to global criteria"
+  ],
+  "delivery_paths": [
+    "docs/evidence/tiered-trace-20261021-validation"
+  ],
+  "plain_screen_tag": "tiered-trace-20261021-plain-validation",
+  "rollback": "No behavior change; stop only the service started by this validation."
+}

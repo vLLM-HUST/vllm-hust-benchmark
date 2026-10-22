@@ -1,0 +1,204 @@
+{
+  "schema": "profile-serve-reuse-r2-review.v1",
+  "candidate": "profile-serve-reuse",
+  "base_head": "99255c054dea4a82f881d20993e8b13d956df094",
+  "implementation_head": "64fbbacd8fbaabe9d240925aeafc8dd18067209b",
+  "decision": "inconclusive",
+  "reason": "Profile mode itself did not converge within the predeclared noise band; stop before plain, not a finding of profiler overhead.",
+  "measurements": {
+    "scope": "same profile server, fixed protocol, no profiler start",
+    "output_throughput_tok_s": [
+      444.03688805685226,
+      449.83669850186266
+    ],
+    "within_mode_drift_pct": 1.3061550967963242,
+    "samples": [
+      {
+        "path": "/root/包体恢复/records/ladder/1021-054419-l2.json",
+        "model_id": "/models/modelscope_cache/Qwen/Qwen3.5-35B-A3B",
+        "completed": 128,
+        "failed": 0,
+        "num_prompts": 128,
+        "total_input_tokens": 263476,
+        "total_output_tokens": 32768,
+        "duration": 73.79567076824605
+      },
+      {
+        "path": "/root/包体恢复/records/ladder/1021-054605-l2.json",
+        "model_id": "/models/modelscope_cache/Qwen/Qwen3.5-35B-A3B",
+        "completed": 128,
+        "failed": 0,
+        "num_prompts": 128,
+        "total_input_tokens": 263476,
+        "total_output_tokens": 32768,
+        "duration": 72.84421237558126
+      }
+    ]
+  },
+  "scope_facts": {
+    "weights": {
+      "model_path": "/models/modelscope_cache/Qwen/Qwen3.5-35B-A3B",
+      "config_sha256": "5e4d7f74fec2f360eb9cfbfcd6ec0c4c76e684d3a11caaed259d9fd9bfbc7944",
+      "dtype": "bfloat16",
+      "quantization_config": null,
+      "format": "safetensors"
+    },
+    "cohort_from_same_profile_startup": {
+      "schema": "opt-ops-window-cohort.v1",
+      "id": "028-qwen35-35b-a3b-tp2-fullgraph",
+      "model": "Qwen3.5-35B-A3B",
+      "host": {
+        "vllm_core": "0.28.1.post1.dev143+gf18cf803c",
+        "vllm_ascend": "0.25.1rc2.dev125+hust.20260903.4.g74f0c0a27.d20260909"
+      },
+      "serve": {
+        "entry": "vllm serve (console script)",
+        "tp": 2,
+        "max_model_len": 8192,
+        "prefix_caching": "off",
+        "extra_args": "--compilation-config {\"mode\":\"VLLM_COMPILE\",\"cudagraph_mode\":\"FULL\",\"cudagraph_capture_sizes\":[1,2,4,8,16,32]}"
+      },
+      "graph": {
+        "mode": "VLLM_COMPILE",
+        "cudagraph_mode": "FULL",
+        "cudagraph_capture_sizes": "1,2,4,8,16,32"
+      },
+      "precision": "bf16",
+      "carriers": {
+        "VLLM_HUST_GATE_FP32": "1",
+        "VLLM_HUST_GDN_MERGE_INPROJ": "1",
+        "husk_package": "vllm_ascend_split_batch"
+      },
+      "carriers_note": "VLLM_HUST_* 是 husk 插件开关; husk_package 为空 = 载体未安装（env 静默 fail-open）。记录轴: 不作门禁、不要求重跑（单变量替换结论具普遍价值）; 只有跨窗口绝对数值比较需要同载体状态; 两臂载体状态不一致才是第二个变量。容器重启后 /root/start-sshd.sh 恢复安装与补丁链。",
+      "recorded_at": "2026-10-21T05:39:21Z",
+      "recorded_by": "bench-ladder.sh cohort_write",
+      "note": "本窗口数字只在本 cohort(模型/宿主/设备/服务配置/图档) 内成立；换坐标不得外推（见 /root/opt-ops/state/cohort.json）"
+    },
+    "operator_shapes": "Not sampled; no operator conclusion. L2 cohort stubs say model unknown, so they are not independently adequate configuration proofs; associate them with this exact owned startup, its log/env snapshot and cohort file."
+  },
+  "gates": {
+    "l2_repeatability": "FAIL: +1.306155% > 0.5%",
+    "plain_arm": "NOT_RUN: early stop",
+    "paired_l3": "NOT_RUN: no second arm",
+    "retained_plain_l3_compare": "PASS: identical 8/8 vs 1021-025003-l3.json; this is not a new paired L3",
+    "startup_pid_guard": "PASS for normal real startup: captured descendant PID 121570 remained owned; synthetic dead/replaced-PID cases were tested in 99255c0",
+    "cpu": "899 passed, 7 skipped in 219.15s; 11 collector tests passed; ruff-v2 exit 0",
+    "coverage": "exit 0; FAIL 0 / WARN 54; does not clear historical drift"
+  },
+  "budget_spent": {
+    "serve_starts": 1,
+    "serve_cap": 2,
+    "explicit_profile_capture_calls": 0,
+    "launch_at": "2026-10-21T05:39:03.644611+00:00",
+    "driver_exit_at": "2026-10-21T05:49:01.370347+00:00",
+    "launch_to_cleanup_wall_min": 9.9620956,
+    "npu_min_upper_bound": 9.9620956,
+    "cap_npu_min": 40,
+    "cap_wall_min": 80,
+    "automatic_retries": 0
+  },
+  "cleanup": "Captured PID/process group only; PID file cleared and both physical cards 3/6 show no running processes. Shutdown shared_memory warnings retained in the service log.",
+  "trace_directory": {
+    "path": "/root/prof/ladder-1021-053909",
+    "files": [
+      "cohort.json",
+      "profile-plan.json"
+    ],
+    "new_trace_found": false
+  },
+  "limits": [
+    "No profile-versus-plain throughput delta is available; the within-profile drift is not profiler overhead or operator benefit",
+    "No third L2, second startup, new trace, host edit, guard relaxation, manifest change, repin or push",
+    "Historical records drift still blocks acceptance; successful component checks do not erase failures",
+    "Any resumption of this now-inconclusive method requires explicit authorization and a new work order"
+  ],
+  "integration": "Explicit opt-only collector: python tools/probe_profile_serve_reuse.py --output <new existing evidence directory>; reviewed B1 required; no native plugin/default change",
+  "rollback": "Revert 64fbbac to remove the standalone probe and its tests/plan; preserve 99255c0 startup safety fix and append-only L2 evidence.",
+  "next_action": "Keep plain/profile isolation. Do not resume this terminal probe automatically; continue only independent active work or existing passive startup observations.",
+  "evidence": [
+    {
+      "path": "/root/包体恢复/records/probes/20261021T052800Z_profile_serve_reuse_r2/b1-work-order.json",
+      "sha256": "435b15d708f73b599f59c3328b73396d5488ba555dab1ac749094a6e8de8143e"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261021T052800Z_profile_serve_reuse_r2/source-pin.json",
+      "sha256": "62f70353840d0cc0457075d24326e1def02605482d9dba30f11c34748e063b41"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261021T052800Z_profile_serve_reuse_r2/launch.json",
+      "sha256": "ca15474a90c8b93114a4a10c83d3b3368b8e19bfac9db515ad1d03fd039d1961"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261021T052800Z_profile_serve_reuse_r2/collection-result.json",
+      "sha256": "d99392aa068cb44ade13a386f86c1cd8ed57def002f742e8dd185c41a483a220"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261021T052800Z_profile_serve_reuse_r2/profile-serve-owner.json",
+      "sha256": "e6df354081cb63559fd8e3d9617c09dfa8a177a4890873b799e45de3132d2560"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261021T052800Z_profile_serve_reuse_r2/profile-serve.exit.json",
+      "sha256": "3e42a2ad3dbeab9d1167d20261ad6305bdea31103ffc09c30f25558345966de2"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261021T052800Z_profile_serve_reuse_r2/profile-cleanup.json",
+      "sha256": "7a682a0c88879185aac25aa66a62a7bad60dd51cab4d7cdaa44e6511be8ba536"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261021T052800Z_profile_serve_reuse_r2/profile-carriers.log",
+      "sha256": "d925291533c88e3651f6fd83d5267885bbb3b0e077c774b97a34d08837c91a1a"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261021T052800Z_profile_serve_reuse_r2/pytest-full.log",
+      "sha256": "95652bc6672845348ac30ddaa799377fe87e7b2c67ddacf1f2c08caf66ebf531"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261021T052800Z_profile_serve_reuse_r2/ruff-v2.log",
+      "sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261021T052800Z_profile_serve_reuse_r2/l3-vs-retained-plain.log",
+      "sha256": "afe63e2da549a67d518ceadf0788e9588402b898ad8f822d95aad953617a413b"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261021T052800Z_profile_serve_reuse_r2/coverage.log",
+      "sha256": "7ffbb64fdaa9f10ae8a6a7d0a9b8a32ee05d572a0f0f8e05e3f2ab6e9e250a10"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261021T052800Z_profile_serve_reuse_r2/resources-after.log",
+      "sha256": "72dbddc1457f752d4c980b1929244d6f0478e946ccaad958e430bc0d707b99b2"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261021T052800Z_profile_serve_reuse_r2/device-map.txt",
+      "sha256": "6c2181670ce6f6cf1da750ad0c8f6429c9157b05c4aba8e4dae1aa01da44402d"
+    },
+    {
+      "path": "/root/包体恢复/logs/ladder-serve-1021-053921.log",
+      "sha256": "8d650452e75c797e534da4897283d610bba838bf69d84121745609b4c712b440"
+    },
+    {
+      "path": "/root/包体恢复/logs/ladder-serve-1021-053921.env.json",
+      "sha256": "97e98471cb03300c566f579414180f1f84d51aee32810443618370d624128d01"
+    },
+    {
+      "path": "/root/包体恢复/records/ladder/1021-054751-l3.json",
+      "sha256": "cedec6f60037f57447c7ffa4067489a27376c21971d9452ea61ce6022e0f9700"
+    },
+    {
+      "path": "/root/包体恢复/records/ladder/1021-054419-l2.json",
+      "sha256": "00ee0cae4f97403a4c92a846995af5f252460602aacb5d1cadefe7e05f7b4c89"
+    },
+    {
+      "path": "/root/包体恢复/records/ladder/1021-054605-l2.json",
+      "sha256": "41a1ae974f385768bb331fb8f0dcbe5fb33c2aa1e001e985350eba9a39b42dfa"
+    },
+    {
+      "path": "/root/prof/ladder-1021-053909/cohort.json",
+      "sha256": "86607e38b1bec5a0ba79de5afa3f6f3e55f8db8c98cde6ac57d7c04c543f1197"
+    },
+    {
+      "path": "/root/prof/ladder-1021-053909/profile-plan.json",
+      "sha256": "1b8f7a82538a527b7d1341f3b863325302369a04d588686ceaf4bd52d96181d1"
+    }
+  ]
+}

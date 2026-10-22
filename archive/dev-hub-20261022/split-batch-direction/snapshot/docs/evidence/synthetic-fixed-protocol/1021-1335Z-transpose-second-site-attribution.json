@@ -1,0 +1,20 @@
+{
+ "schema": "opt-ops-shape-attribution.v1",
+ "id": "1021-transpose-second-site-attribution",
+ "generated_by": "主会话离线复算（kernel_details.csv 签名分桶 + 运行树 grep 定位）；未起服、未跑 NPU",
+ "kind": "derived-evidence",
+ "route": "028/D4-const-hoist",
+ "candidate": "d4-conv-transpose-second-site",
+ "op": "Transpose",
+ "window": "1021-031741（synthetic-fixed-protocol, rank1）",
+ "facts": [
+  "残留 Transpose 960 次/窗 19.50ms, 全部签名 \"4096,4;2\"（输入 [4096,4] perm2）",
+  "960 = 30 次/迭代 x 32 迭代（含 1 个 prefill 迭代）= 30 GDN 层每层每迭代恰 1 次",
+  "[4096,4] = v+z 全宽 4096 x conv 核 4 = GDN causal-conv 权重",
+  "与 D4-10-14 已外提点（15360->0）不同源: 运行树 vllm_ascend/ops/gdn.py 现存 4 处 conv_weights.transpose(0,1)（L365/394/437/456, 分支化落点）, 窗口每迭代仅 1 处活跃",
+  "份额: all-kernel 3.4%（gaps 口径 4.68%）; ~0.61ms/迭代 ≈ 3.8% step(16.2ms)",
+  "同窗附带: ConcatD [1024;1024;2048] 930 次 14.05ms 同为 30/it GDN 层级（待归因后续候选）; MoeInitRoutingV3 [1,2048;1,8] 1240 次 13.21ms 40/it"
+ ],
+ "method_hypothesis": "per-step 常量（conv 权重）转置 -> 加载期物化 [4,4096]（D4-10-14 同机制第二落点）",
+ "evidence_files": ["1021-031741-opstat.json", "1021-102800-matmulv2-shape-attribution.json"]
+}
