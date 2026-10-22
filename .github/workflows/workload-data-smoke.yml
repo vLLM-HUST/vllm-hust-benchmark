@@ -23,6 +23,8 @@ on:
       - 'scripts/run_bfcl_v4_simple_python_original.py'
       - 'scripts/run_oasst_original_continuation.py'
       - 'scripts/run_natural_instructions_original.py'
+      - 'scripts/run_ni_editing_extraction_original.py'
+      - 'scripts/run_bbh_boolean_original.py'
       - 'scripts/build_agentbench_pddl_runtime_wheels.py'
       - 'configs/workload-native/**'
       - 'tests/test_tau2_original_runner.py'
@@ -36,6 +38,9 @@ on:
       - 'tests/test_oasst_original_runner.py'
       - 'tests/test_natural_instructions_original_runner.py'
       - 'tests/test_natural_instructions_validation_receipt.py'
+      - 'tests/test_ni_editing_extraction_original.py'
+      - 'tests/test_bbh_original_runner.py'
+      - 'tests/test_bbh_validation_receipt.py'
       - 'pyproject.toml'
       - '.github/workflows/workload-data-smoke.yml'
   workflow_dispatch:
@@ -67,7 +72,9 @@ jobs:
       - name: OASST runner CPU contract only
         run: python -m pytest -q tests/test_oasst_original_runner.py
       - name: Natural Instructions runner CPU contract only
-        run: python -m pytest -q tests/test_natural_instructions_original_runner.py tests/test_natural_instructions_validation_receipt.py
+        run: python -m pytest -q tests/test_natural_instructions_original_runner.py tests/test_natural_instructions_validation_receipt.py tests/test_ni_editing_extraction_original.py
+      - name: BBH runner CPU contract only
+        run: python -m pytest -q tests/test_bbh_original_runner.py tests/test_bbh_validation_receipt.py
       - name: Installed CLI and packaged catalogs
         working-directory: ${{ runner.temp }}
         run: |

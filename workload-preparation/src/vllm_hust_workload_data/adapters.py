@@ -53,6 +53,11 @@ def adapt_row(
             raise ValueError(
                 f"{source_id}: invalid text field at row {index}; payload suppressed"
             )
+    if source_id == "BBH" and any(
+        not isinstance(row[key], str) or not row[key].strip()
+        for key in ("input", "target")
+    ):
+        raise ValueError("BBH requires original nonempty input and reference strings")
     if source_id == "NATURAL_INSTRUCTIONS" and (
         not isinstance(row["Definition"], list)
         or not row["Definition"]
