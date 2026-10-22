@@ -18,6 +18,7 @@ DATA_MODULES = {
     "mapping_contract",
     "pipeline",
     "provider",
+    "quality",  # Original article/question relation expansion only, no scoring.
     "records",
     "registry",
     "taxonomy",
@@ -36,3 +37,16 @@ def test_no_observation_dependencies_or_hooks():
     )
     assert not list((ROOT / "tools").rglob("*.py"))
     assert not (ROOT / "schemas/full_cycle_trace_v1.schema.json").exists()
+
+
+def test_quality_expansion_remains_pure_data_only():
+    import ast
+
+    tree = ast.parse(
+        (ROOT / "src/vllm_hust_workload_data/quality.py").read_text(encoding="utf-8")
+    )
+    imports = {
+        node.module for node in ast.walk(tree) if isinstance(node, ast.ImportFrom)
+    }
+    assert imports == {"copy"}
+    assert not any(isinstance(node, ast.Import) for node in ast.walk(tree))
