@@ -1,0 +1,110 @@
+{
+  "task": "Retire cascade automatic integration and disconnect external kernel dependency without changing other host/plugin contracts",
+  "repository": "/root/vllm-workspace/vllm-ascend-split-batch-hust",
+  "branch": "0.28/comm-overlap-free-attribution",
+  "base_head": "59cc8509c7cf7fad6a3072dbedcd278a7c236020",
+  "initial_dirty_files": [],
+  "scope": {
+    "shape_facts": "not applicable: metadata/loading isolation only; no model execution",
+    "weight_labels": "not applicable",
+    "layer": "meta"
+  },
+  "decision": "CPU integration verified; no operator optimization acceptance or remote publication",
+  "changes": [
+    "Remove cascade-attention general plugin",
+    "Remove kernels extra and ascend-kernel dependency",
+    "Keep root bundle discoverable but planner-only/import_only with no injected environment",
+    "Keep archived source/tests/evidence and external repository untouched"
+  ],
+  "preserved": [
+    "All other general-plugin targets and bundle descriptors",
+    "Root host/protocol/runtime/lifecycle constraints",
+    "Read-only host sources; no platform plugin",
+    "Existing per-plugin gates, including default-on AOT cache guard"
+  ],
+  "checks": {
+    "cpu_ci_suite": {
+      "command": "python -m pytest -q -m \"not host_tree\"",
+      "exit_code": 0,
+      "result": "282 passed, 25 skipped, 14 deselected"
+    },
+    "focused_initial": {
+      "exit_code": 0,
+      "result": "19 passed before adding the two installed-wheel isolation tests"
+    },
+    "installed_wheel_isolation": {
+      "default_off": "PASS",
+      "stale_cascade_env": "PASS",
+      "forbidden_import_attempts": 0,
+      "note": "AOT guard explicitly disabled only inside offline probe"
+    },
+    "contract_preservation": "PASS: other five manifests byte-identical to base; runtime implementation unchanged",
+    "ruff": {
+      "exit_code": 0
+    },
+    "coverage": {
+      "exit_code": 0,
+      "fails": 0,
+      "warnings": 52,
+      "note": "Does not resolve startup evidence drift warning or prove numerical acceptance"
+    },
+    "device_stack_full_suite": {
+      "exit_code": 2,
+      "result": "collection error in existing host signature test: no-device Triton Ascend get_arch failure"
+    },
+    "cpu_unfiltered_suite": {
+      "exit_code": 1,
+      "result": "2 failed, 283 passed, 25 skipped, 11 errors; host_tree guards require unavailable host package/source discovery"
+    },
+    "l0_l3_compare_l4": "NOT_RUN: no NPU/serving process; no numerical or performance claim",
+    "cli_diagnostics": "opt bench l3 --help is not a help-only path and attempted capture against absent service (connection refused); opt bench compare --help rejected missing positional arguments. No numerical result produced."
+  },
+  "rollout": "Build/reinstall current wheel, remove stale cascade selections from launch configuration, restart all worker processes and recapture graphs; not hot-unpatchable",
+  "rollback": "Revert this scoped retirement commit, rebuild/reinstall and restart/recapture; external kernel installation remains separate and unvalidated",
+  "external_repository": "Not edited, deleted, uninstalled or published; package dependency link only removed",
+  "final_artifact_audit": "/root/包体恢复/records/probes/20261020T080804Z_cascade_retirement/final-wheel-audit.json",
+  "evidence": [
+    {
+      "path": "/root/包体恢复/records/probes/20261020T080804Z_cascade_retirement/cpu-tests.log",
+      "sha256": "21d6c26eeef5cb11766def932e7fc4b8656a3df9ca041ff37b902541fef2cbb7"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261020T080804Z_cascade_retirement/cpu-full-tests.log",
+      "sha256": "d84a9599bd3a5b24cb7e6d9d00c24a461b71e6be0e16ef44907a76e3c8182b04"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261020T080804Z_cascade_retirement/full-tests.log",
+      "sha256": "6ff0de4ab9a2aeabc82e7c4469446a322b9665f884b0e22c4a8ff801cdae625e"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261020T080804Z_cascade_retirement/focused-tests.log",
+      "sha256": "5309882586081c1974f163a11f8eff2278044a456e1fb6a640a6130cc66b7328"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261020T080804Z_cascade_retirement/installed-default-off.json",
+      "sha256": "cf05cdac56b973d3dbd67efb0d3c125e433f8d89834e10497c9b1c2efd333f33"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261020T080804Z_cascade_retirement/installed-stale-env.json",
+      "sha256": "67640793c35d354504e4de128fa1182f8bd6824647da32a942197a20a5a3ce00"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261020T080804Z_cascade_retirement/contract-preservation.json",
+      "sha256": "2c1b089b6d63f2d9bce753f7b938bf9fc99afd81de6a11eb19455a5a70d0dc40"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261020T080804Z_cascade_retirement/ruff-final.log",
+      "sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261020T080804Z_cascade_retirement/coverage.log",
+      "sha256": "5cdb3319f8c3ccaea3b18af1d507c6b3fa294fe5fa8ddcc0defd30ca3e2da67b"
+    }
+  ],
+  "delivery": {
+    "experiment": "CPU integration complete; NPU blocked",
+    "optimization_acceptance": "NOT_CLAIMED",
+    "code_commit": "See containing Git commit",
+    "remote_publication": "NOT_PUSHED"
+  }
+}

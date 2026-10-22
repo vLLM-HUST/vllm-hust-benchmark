@@ -1,0 +1,135 @@
+INFO 09-11 03:48:23 [__init__.py:52] Available plugins for group vllm.platform_plugins:
+INFO 09-11 03:48:23 [__init__.py:54] - ascend -> vllm_ascend:register
+INFO 09-11 03:48:23 [__init__.py:57] All plugins in this group will be loaded. Set `VLLM_PLUGINS` to control which plugins to load.
+INFO 09-11 03:48:23 [__init__.py:272] Platform plugin ascend is activated
+INFO 09-11 03:48:23 [platform.py:70] Breakable CUDAGraph on Ascend is opt-in; using VLLM_USE_BREAKABLE_CUDAGRAPH=0.
+2026-09-11 03:48:34,735 - 345703 - ServiceProfiler - INFO - VLLM_USE_V1 not set, auto-detected via vLLM 0.28.1.post1.dev143+gf18cf803c.empty: default 1
+INFO 09-11 03:48:35 [__init__.py:112] Registered model loader `<class 'vllm_ascend.model_loader.netloader.netloader.ModelNetLoaderElastic'>` with load format `netloader`
+INFO 09-11 03:48:35 [__init__.py:112] Registered model loader `<class 'vllm_ascend.model_loader.rfork.rfork_loader.RForkModelLoader'>` with load format `rfork`
+INFO 09-11 03:48:37 [cascade_plugin.py:147] cascade plugin loaded (gate=1, graph_gate=0, kernel_wheel=ok)
+INFO 09-11 03:48:37 [api_utils.py:286] non-default args: {'max_model_len': 8192, 'enable_prefix_caching': True, 'gpu_memory_utilization': 0.85, 'disable_log_stats': True, 'enforce_eager': True, 'enable_chunked_prefill': False, 'async_scheduling': False, 'model': '/data/shared_models/Qwen--Qwen2.5-14B-Instruct'}
+WARNING 09-11 03:48:37 [envs.py:2296] Unknown vLLM environment variable detected: VLLM_ASCEND_CASCADE_TRACE
+WARNING 09-11 03:48:37 [envs.py:2296] Unknown vLLM environment variable detected: VLLM_ASCEND_ENABLE_CASCADE_DECODE
+WARNING 09-11 03:48:37 [envs.py:2296] Unknown vLLM environment variable detected: VLLM_ASCEND_CASCADE_MIN_PREFIX
+WARNING 09-11 03:48:37 [envs.py:2296] Unknown vLLM environment variable detected: VLLM_ASCEND_CASCADE_MIN_REQS
+WARNING 09-11 03:48:37 [envs.py:2296] Unknown vLLM environment variable detected: VLLM_ASCEND_ENABLE_CASCADE_GRAPH
+INFO 09-11 03:49:07 [model.py:691] Resolved architecture: Qwen2ForCausalLM
+INFO 09-11 03:49:07 [model.py:2031] Using max model len 8192
+WARNING 09-11 03:49:07 [arg_utils.py:2777] This model does not officially support disabling chunked prefill. Disabling this manually may cause the engine to crash or produce incorrect outputs.
+WARNING 09-11 03:49:07 [vllm.py:1382] Enforce eager set, disabling torch.compile and CUDAGraphs. This is equivalent to setting -cc.mode=none -cc.cudagraph_mode=none
+WARNING 09-11 03:49:07 [vllm.py:1417] Inductor compilation was disabled by user settings, optimizations settings that are only active during inductor compilation will be ignored.
+INFO 09-11 03:49:07 [kernel.py:372] Final IR op priority after setting platform defaults: IrOpPriorityConfig(rms_norm=['native'], fused_add_rms_norm=['native'])
+INFO 09-11 03:49:07 [vllm.py:1596] Cudagraph is disabled under eager mode
+INFO 09-11 03:49:07 [utils.py:224] No quantization signature detected from model files for "/data/shared_models/Qwen--Qwen2.5-14B-Instruct". The model will be loaded as float. To force a quantization method, pass "--quantization <method>" explicitly.
+WARNING 09-11 03:49:07 [platform.py:652] GPU-specific parameter is not supported on Ascend. parameter=disable_cascade_attn, value=True, action: resetting to False.
+INFO 09-11 03:49:07 [platform.py:864] The timeout interval of the HCCL operator is 1836s. Timeout in seconds for execute_model RPC calls in multiprocessing must be greater than 1836s, Set VLLM_EXECUTE_MODEL_TIMEOUT_SECONDS=3000
+INFO 09-11 03:49:07 [ascend_config.py:161] Dynamic EPLB is False
+INFO 09-11 03:49:07 [ascend_config.py:162] The number of redundant experts is 0
+INFO 09-11 03:49:07 [platform.py:1091] Compilation disabled, using eager mode by default
+INFO 09-11 03:49:07 [platform.py:1168] FlashComm1 is disabled. Using flashinfer_all2allv as the all2all backend.
+INFO 09-11 03:49:07 [utils.py:1237] Block size is set to 128 if prefix cache or chunked prefill is enabled.
+INFO 09-11 03:49:07 [platform.py:1357] Set PYTORCH_NPU_ALLOC_CONF=expandable_segments:True
+INFO 09-11 03:49:07 [compilation.py:329] Enabled custom fusions: norm_quant, act_quant
+WARNING 09-11 03:49:12 [warnings.py:112] /opt/miniconda3/envs/hust/lib/python3.12/multiprocessing/popen_fork.py:66: DeprecationWarning: This process (pid=345703) is multi-threaded, use of fork() may lead to deadlocks in the child.
+(EngineCore pid=346893) INFO 09-11 03:49:12 [core.py:123] Initializing a V1 LLM engine (v0.28.1.post1.dev143+gf18cf803c) with config: model='/data/shared_models/Qwen--Qwen2.5-14B-Instruct', speculative_config=None, tokenizer='/data/shared_models/Qwen--Qwen2.5-14B-Instruct', skip_tokenizer_init=False, tokenizer_mode=auto, revision=None, tokenizer_revision=None, trust_remote_code=False, dtype=torch.bfloat16, max_seq_len=8192, download_dir=None, load_format=auto, tensor_parallel_size=1, pipeline_parallel_size=1, data_parallel_size=1, decode_context_parallel_size=1, dcp_comm_backend=ag_rs, disable_custom_all_reduce=True, quantization=None, quantization_config=None, enforce_eager=True, enable_return_routed_experts=False, kv_cache_dtype=auto, device_config=npu, structured_outputs_config=StructuredOutputsConfig(backend='auto', disable_any_whitespace=False, disable_additional_properties=False, reasoning_parser='', reasoning_parser_plugin='', enable_in_reasoning=False), observability_config=ObservabilityConfig(show_hidden_metrics_for_version=None, otlp_traces_endpoint=None, collect_detailed_traces=None, per_request_spec_decode_metrics='none', kv_cache_metrics=False, kv_cache_metrics_sample=0.01, cudagraph_metrics=False, enable_layerwise_nvtx_tracing=False, enable_mfu_metrics=False, enable_mm_processor_stats=False, enable_logging_iteration_details=False, jit_monitor_mode='warn', jit_monitor_verbose=False), seed=0, served_model_name=/data/shared_models/Qwen--Qwen2.5-14B-Instruct, enable_prefix_caching=True, enable_chunked_prefill=False, pooler_config=None, compilation_config={'mode': <CompilationMode.NONE: 0>, 'debug_dump_path': None, 'cache_dir': '', 'compile_cache_save_format': 'binary', 'backend': 'vllm_ascend.compilation.compiler_interface.AscendCompiler', 'custom_ops': ['all'], 'ir_enable_torch_wrap': False, 'splitting_ops': [], 'compile_mm_encoder': False, 'cudagraph_mm_encoder': False, 'encoder_cudagraph_token_budgets': [], 'encoder_cudagraph_max_vision_items_per_batch': 0, 'encoder_cudagraph_max_frames_per_batch': None, 'compile_sizes': [], 'compile_ranges_endpoints': [8192], 'inductor_compile_config': {'enable_auto_functionalized_v2': False, 'combo_kernels': True, 'benchmark_combo_kernel': True}, 'inductor_passes': {}, 'cudagraph_mode': <CUDAGraphMode.NONE: 0>, 'cudagraph_num_of_warmups': 1, 'cudagraph_capture_sizes': [], 'cudagraph_copy_inputs': False, 'cudagraph_specialize_lora': True, 'use_inductor_graph_partition': False, 'pass_config': {'fuse_norm_quant': True, 'fuse_act_quant': True, 'fuse_attn_quant': False, 'enable_sp': False, 'fuse_gemm_comms': False, 'fuse_allreduce_rms': False, 'enable_qk_norm_rope_fusion': False, 'fuse_rope_kvcache_cat_mla': False, 'fuse_act_padding': False, 'fuse_qk_norm_rope_kvcache': False}, 'max_cudagraph_capture_size': 0, 'dynamic_shapes_config': {'type': <DynamicShapesType.BACKED: 'backed'>, 'evaluate_guards': False, 'assume_32_bit_indexing': False}, 'local_cache_dir': None, 'fast_moe_cold_start': False, 'static_all_moe_layers': []}, kernel_config=KernelConfig(ir_op_priority=IrOpPriorityConfig(rms_norm=['native'], fused_add_rms_norm=['native']), enable_flashinfer_autotune=True, enable_cutedsl_warmup=True, enable_jit_warmup=True, enable_bf16x3_router_gemm=False, moe_backend='auto', linear_backend='auto')
+(EngineCore pid=346893) WARNING 09-11 03:49:14 [patch_triton.py:332] NPU Triton causal_conv1d_update is unavailable (cannot import name 'causal_conv1d_update_npu' from 'vllm_ascend.ops.triton.mamba.causal_conv1d' (/vllm-workspace/vllm-ascend-hust/vllm_ascend/ops/triton/mamba/causal_conv1d.py)); falling back to the PyTorch implementation, which syncs per request and therefore stalls ACL graph capture at decode-FULL.
+(EngineCore pid=346893) INFO 09-11 03:49:17 [parallel_state.py:1798] world_size=1 rank=0 local_rank=0 distributed_init_method=file:///tmp/vllm_dist_fb0661f0342b495384266f04f5153638 backend=hccl
+(EngineCore pid=346893) INFO 09-11 03:49:21 [parallel_state.py:2142] rank 0 in world size 1 is assigned as DP rank 0, PP rank 0, PCP rank 0, TP rank 0, EP rank N/A, EPLB rank N/A
+[rank0]:[W911 03:49:22.861537520 NPUCachingAllocator.cpp:177] Warning: The current CANN and Soc versions require processing for 32 padding size, with memory allocation. (function operator())
+(EngineCore pid=346893) INFO 09-11 03:49:22 [platform.py:1380] FA3 will not be enabled when rl_config.enable_training_consistency is false. Note that Ascend NPU will use its registered plugin backend instead.
+(EngineCore pid=346893) INFO 09-11 03:49:22 [model_runner_v1.py:3945] Starting to load model /data/shared_models/Qwen--Qwen2.5-14B-Instruct...
+(EngineCore pid=346893) INFO 09-11 03:49:23 [platform.py:1380] FA3 will not be enabled when rl_config.enable_training_consistency is false. Note that Ascend NPU will use its registered plugin backend instead.
+(EngineCore pid=346893) INFO 09-11 03:49:24 [weight_utils.py:895] Filesystem type for checkpoints: XFS. Checkpoint size: 27.51 GiB. Available RAM: 950.54 GiB.
+(EngineCore pid=346893) INFO 09-11 03:49:24 [weight_utils.py:918] Auto-prefetch is disabled because the filesystem (XFS) is not a recognized network FS (NFS/Lustre). If you want to force prefetching, start vLLM with --safetensors-load-strategy=prefetch.
+(EngineCore pid=346893) Loading safetensors checkpoint shards:   0% Completed | 0/8 [00:00<?, ?it/s]
+(EngineCore pid=346893) Loading safetensors checkpoint shards:  12% Completed | 1/8 [00:06<00:45,  6.53s/it]
+(EngineCore pid=346893) Loading safetensors checkpoint shards:  25% Completed | 2/8 [00:09<00:28,  4.70s/it]
+(EngineCore pid=346893) Loading safetensors checkpoint shards:  38% Completed | 3/8 [00:13<00:20,  4.19s/it]
+(EngineCore pid=346893) Loading safetensors checkpoint shards:  50% Completed | 4/8 [00:17<00:16,  4.18s/it]
+(EngineCore pid=346893) Loading safetensors checkpoint shards:  62% Completed | 5/8 [00:22<00:13,  4.42s/it]
+(EngineCore pid=346893) Loading safetensors checkpoint shards:  75% Completed | 6/8 [00:27<00:09,  4.51s/it]
+(EngineCore pid=346893) Loading safetensors checkpoint shards:  88% Completed | 7/8 [00:32<00:04,  4.77s/it]
+(EngineCore pid=346893) Loading safetensors checkpoint shards: 100% Completed | 8/8 [00:35<00:00,  4.09s/it]
+(EngineCore pid=346893) Loading safetensors checkpoint shards: 100% Completed | 8/8 [00:35<00:00,  4.40s/it]
+(EngineCore pid=346893) 
+(EngineCore pid=346893) INFO 09-11 03:50:00 [default_loader.py:430] Loading weights took 35.32 seconds
+(EngineCore pid=346893) INFO 09-11 03:50:01 [model_runner_v1.py:4032] Loading model weights took 27.5350 GB
+(EngineCore pid=346893) INFO 09-11 03:50:01 [model_runner_v1.py:4085] Model runner load_model total time: 38.57 seconds
+(EngineCore pid=346893) INFO 09-11 03:50:01 [utils.py:306] Using LHBNC KV cache layout.
+(EngineCore pid=346893) INFO 09-11 03:50:04 [worker.py:635] Available KV cache memory: 23.20 GiB
+(EngineCore pid=346893) INFO 09-11 03:50:04 [kv_cache_utils.py:2315] GPU KV cache size: 126,720 tokens, Maximum concurrency for 8,192 tokens per request: 15.47x
+(EngineCore pid=346893) INFO 09-11 03:50:05 [kernel_warmup.py:41] Starting Triton kernel warmup.
+(EngineCore pid=346893) INFO 09-11 03:50:05 [kernel_warmup.py:33] rejection_sampler Triton warmup complete in 0.000s.
+(EngineCore pid=346893) INFO 09-11 03:50:05 [kernel_warmup.py:33] penalties Triton warmup complete in 0.083s.
+(EngineCore pid=346893) INFO 09-11 03:50:05 [kernel_warmup.py:33] rms Triton warmup complete in 0.000s.
+(EngineCore pid=346893) INFO 09-11 03:50:05 [kernel_warmup.py:49] Triton kernel warmup finished in 0.084s.
+(EngineCore pid=346893) INFO 09-11 03:50:05 [worker.py:917] Free memory on device (60.59/60.96 GiB) on startup. Desired GPU memory utilization is (0.85, 51.81 GiB). Actual usage: 27.54 GiB for weights, 1.04 GiB for peak activation, 0.03 GiB for non-torch memory, 0.0 GiB for NPU graph memory. Replace gpu_memory_utilization with `--kv-cache-memory=24757822976` (23.06 GiB) to fit into requested memory, or `--kv-cache-memory=34181817856` (31.83 GiB) to fully utilize NPU free memory. Current KV cache memory: 23.2 GiB. After warmup: torch reserved memory 51.62 GiB, torch allocated memory 50.82 GiB.
+(EngineCore pid=346893) INFO 09-11 03:50:08 [cpu_binding.py:539] [cpu_bind_mode] mode=topo_affinity rank=0 visible_npus=[7]
+(EngineCore pid=346893) INFO 09-11 03:50:08 [cpu_binding.py:623] The CPU allocation plan is as follows:
+(EngineCore pid=346893) INFO 09-11 03:50:08 [cpu_binding.py:637] NPU7: main=[74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93]  acl=[94]  release=[[95]]
+(EngineCore pid=346893) INFO 09-11 03:50:08 [cpu_binding.py:663] [migrate] NPU:7 -> NUMA [3]
+(EngineCore pid=346893) WARNING 09-11 03:50:12 [cpu_binding.py:702] /proc/irq is not writable. If running in Docker, start the container with '--privileged=true'.
+(EngineCore pid=346893) INFO 09-11 03:50:12 [core.py:387] init engine (profile, create kv cache, warmup model) took 10.98 s
+(EngineCore pid=346893) INFO 09-11 03:50:12 [preemption.py:135] Preemption policy initialized: policy=builtin enabled=False
+(EngineCore pid=346893) INFO 09-11 03:50:12 [batch_admission.py:144] Batch admission policy initialized: policy=builtin configured=False enabled=False
+(EngineCore pid=346893) INFO 09-11 03:50:12 [kernel.py:372] Final IR op priority after setting platform defaults: IrOpPriorityConfig(rms_norm=['native'], fused_add_rms_norm=['native'])
+(EngineCore pid=346893) INFO 09-11 03:50:12 [utils.py:224] No quantization signature detected from model files for "/data/shared_models/Qwen--Qwen2.5-14B-Instruct". The model will be loaded as float. To force a quantization method, pass "--quantization <method>" explicitly.
+(EngineCore pid=346893) INFO 09-11 03:50:12 [platform.py:1091] Compilation disabled, using eager mode by default
+(EngineCore pid=346893) INFO 09-11 03:50:12 [platform.py:1357] Set PYTORCH_NPU_ALLOC_CONF=expandable_segments:True
+INFO 09-11 03:50:13 [hf.py:590] Detected the chat template content format to be 'string'. You can set `--chat-template-content-format` to override this.
+(EngineCore pid=346893) 2026-09-11 03:50:14,447 - WARNING - Two-stage cascade decode is active for this batch: its output has a bf16-level difference versus the standard full-KV FIA path and is not bit-exact reproducible (see VLLM_ASCEND_CASCADE_STRICT).
+(EngineCore pid=346893) [cascade-active] shared_len=4096 shared_blocks=32 num_tokens=64 heads=40 head_size=128
+(EngineCore pid=346893) [cascade-active] shared_len=4096 shared_blocks=32 num_tokens=64 heads=40 head_size=128
+(EngineCore pid=346893) [cascade-active] shared_len=4096 shared_blocks=32 num_tokens=64 heads=40 head_size=128
+(EngineCore pid=346893) [cascade-active] shared_len=4096 shared_blocks=32 num_tokens=64 heads=40 head_size=128
+(EngineCore pid=346893) [cascade-active] shared_len=4096 shared_blocks=32 num_tokens=64 heads=40 head_size=128
+(EngineCore pid=346893) [cascade-active] shared_len=4096 shared_blocks=32 num_tokens=64 heads=40 head_size=128
+(EngineCore pid=346893) [cascade-active] shared_len=4096 shared_blocks=32 num_tokens=64 heads=40 head_size=128
+(EngineCore pid=346893) [cascade-active] shared_len=4096 shared_blocks=32 num_tokens=64 heads=40 head_size=128
+(EngineCore pid=346893) [cascade-active] shared_len=4096 shared_blocks=32 num_tokens=64 heads=40 head_size=128
+(EngineCore pid=346893) [cascade-active] shared_len=4096 shared_blocks=32 num_tokens=64 heads=40 head_size=128
+(EngineCore pid=346893) [cascade-active] shared_len=4096 shared_blocks=32 num_tokens=64 heads=40 head_size=128
+(EngineCore pid=346893) [cascade-active] shared_len=4096 shared_blocks=32 num_tokens=64 heads=40 head_size=128
+(EngineCore pid=346893) [cascade-active] shared_len=4096 shared_blocks=32 num_tokens=64 heads=40 head_size=128
+(EngineCore pid=346893) [cascade-active] shared_len=4096 shared_blocks=32 num_tokens=64 heads=40 head_size=128
+(EngineCore pid=346893) [cascade-active] shared_len=4096 shared_blocks=32 num_tokens=64 heads=40 head_size=128
+(EngineCore pid=346893) [cascade-active] shared_len=4096 shared_blocks=32 num_tokens=64 heads=40 head_size=128
+(EngineCore pid=346893) [cascade-active] shared_len=4096 shared_blocks=32 num_tokens=64 heads=40 head_size=128
+(EngineCore pid=346893) [cascade-active] shared_len=4096 shared_blocks=32 num_tokens=64 heads=40 head_size=128
+(EngineCore pid=346893) [cascade-active] shared_len=4096 shared_blocks=32 num_tokens=64 heads=40 head_size=128
+(EngineCore pid=346893) [cascade-active] shared_len=4096 shared_blocks=32 num_tokens=64 heads=40 head_size=128
+(EngineCore pid=346893) [cascade-active] shared_len=4096 shared_blocks=32 num_tokens=64 heads=40 head_size=128
+(EngineCore pid=346893) [cascade-active] shared_len=4096 shared_blocks=32 num_tokens=64 heads=40 head_size=128
+(EngineCore pid=346893) [cascade-active] shared_len=4096 shared_blocks=32 num_tokens=64 heads=40 head_size=128
+(EngineCore pid=346893) [cascade-active] shared_len=4096 shared_blocks=32 num_tokens=64 heads=40 head_size=128
+(EngineCore pid=346893) [cascade-active] shared_len=4096 shared_blocks=32 num_tokens=64 heads=40 head_size=128
+(EngineCore pid=346893) [cascade-active] shared_len=4096 shared_blocks=32 num_tokens=64 heads=40 head_size=128
+(EngineCore pid=346893) [cascade-active] shared_len=4096 shared_blocks=32 num_tokens=64 heads=40 head_size=128
+(EngineCore pid=346893) [cascade-active] shared_len=4096 shared_blocks=32 num_tokens=64 heads=40 head_size=128
+(EngineCore pid=346893) [cascade-active] shared_len=4096 shared_blocks=32 num_tokens=64 heads=40 head_size=128
+(EngineCore pid=346893) [cascade-active] shared_len=4096 shared_blocks=32 num_tokens=64 heads=40 head_size=128
+(EngineCore pid=346893) [cascade-active] shared_len=4096 shared_blocks=32 num_tokens=64 heads=40 head_size=128
+(EngineCore pid=346893) [cascade-active] shared_len=4096 shared_blocks=32 num_tokens=64 heads=40 head_size=128
+(EngineCore pid=346893) [cascade-active] shared_len=4096 shared_blocks=32 num_tokens=64 heads=40 head_size=128
+(EngineCore pid=346893) [cascade-active] shared_len=4096 shared_blocks=32 num_tokens=64 heads=40 head_size=128
+(EngineCore pid=346893) [cascade-active] shared_len=4096 shared_blocks=32 num_tokens=64 heads=40 head_size=128
+(EngineCore pid=346893) [cascade-active] shared_len=4096 shared_blocks=32 num_tokens=64 heads=40 head_size=128
+(EngineCore pid=346893) [cascade-active] shared_len=4096 shared_blocks=32 num_tokens=64 heads=40 head_size=128
+(EngineCore pid=346893) [cascade-active] shared_len=4096 shared_blocks=32 num_tokens=64 heads=40 head_size=128
+(EngineCore pid=346893) [cascade-active] shared_len=4096 shared_blocks=32 num_tokens=64 heads=40 head_size=128
+(EngineCore pid=346893) [cascade-active] shared_len=4096 shared_blocks=32 num_tokens=64 heads=40 head_size=128
+(EngineCore pid=346893) [cascade-active] shared_len=4096 shared_blocks=32 num_tokens=64 heads=40 head_size=128
+(EngineCore pid=346893) [cascade-active] shared_len=4096 shared_blocks=32 num_tokens=64 heads=40 head_size=128
+(EngineCore pid=346893) [cascade-active] shared_len=4096 shared_blocks=32 num_tokens=64 heads=40 head_size=128
+(EngineCore pid=346893) [cascade-active] shared_len=4096 shared_blocks=32 num_tokens=64 heads=40 head_size=128
+(EngineCore pid=346893) [cascade-active] shared_len=4096 shared_blocks=32 num_tokens=64 heads=40 head_size=128
+(EngineCore pid=346893) [cascade-active] shared_len=4096 shared_blocks=32 num_tokens=64 heads=40 head_size=128
+(EngineCore pid=346893) [cascade-active] shared_len=4096 shared_blocks=32 num_tokens=64 heads=40 head_size=128
+(EngineCore pid=346893) [cascade-active] shared_len=4096 shared_blocks=32 num_tokens=64 heads=40 head_size=128
+EV2 mode=on tag=eB64_on batch=64 sent=420 gen=128 eager=1 wall=19.66s out_tokens=6368 -> /tmp/ev2_on_eB64_on.json DONE
+INFO 09-11 03:50:33 [utils.py:620] [shutdown] Process manager: send sigterm to process EngineCore
+(EngineCore pid=346893) INFO 09-11 03:50:33 [core.py:1387] [shutdown] EngineCore: trigger received signal=SIGTERM
+(EngineCore pid=346893) INFO 09-11 03:50:33 [core.py:1538] [shutdown] EngineCore: start mode=abort timeout=0s
+(EngineCore pid=346893) INFO 09-11 03:50:33 [core.py:1569] [shutdown] EngineCore: request processing complete; starting resource teardown
+(EngineCore pid=346893) INFO 09-11 03:50:33 [core.py:1400] [shutdown] EngineCore: exiting busy loop
+WARNING 09-11 03:50:35 [core_client.py:791] [shutdown] MPClient: engine core exited unexpectedly; starting cleanup

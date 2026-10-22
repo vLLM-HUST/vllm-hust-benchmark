@@ -1,0 +1,225 @@
+{
+  "schema": "d5-first-probe-result.v1",
+  "base_head": "d0ced29eb3da55472d12bd0ea14b259e745c49c3",
+  "verdict": "blocked",
+  "scope": "same-batch same-layer GDN-vector with routed-expert GMM, scheduling-only; no general multistream refutation",
+  "reason": "GDN produces the hidden states consumed by post_attention_layernorm and hence by both routing and expert GMM. Moving GMM to another stream while preserving true dependencies still waits for GDN; removing the wait changes model semantics. Core quotas cannot remove the dependency.",
+  "dependency_chain": [
+    "GDN gating/recurrent core",
+    "GDN output norm",
+    "GDN output projection",
+    "post_attention_layernorm with residual",
+    "MoE routing from updated hidden_states",
+    "routed GMM1",
+    "activation",
+    "routed GMM2"
+  ],
+  "weight_labels": {
+    "model": "Qwen3.5-35B-A3B",
+    "precision": "bf16",
+    "tp": 2,
+    "weight_format": "not established; Input Formats are not packed weight provenance"
+  },
+  "shape_facts": [
+    {
+      "Input Data Types": "DT_BF16;DT_BF16;DT_BF16;DT_BF16;FLOAT;INT32;INT32;FLOAT",
+      "Input Formats": "NCL;NCL;NCL;ND;NCHW;ND;ND;ND",
+      "Input Shapes": "\"1,8,128;1,8,128;1,16,128;1,16;1063,16,128,128;2;1;1,16\"",
+      "Type": "RecurrentGatedDeltaRule",
+      "count": 930
+    },
+    {
+      "Input Data Types": "DT_BF16;DT_BF16;FLOAT;UINT64;FLOAT;FLOAT16;FLOAT16;INT64",
+      "Input Formats": "ND;NCL;ND;ND;ND;ND;ND;ND",
+      "Input Shapes": "\"2824,2048;256,2048,512;;;;;;256\"",
+      "Type": "GroupedMatmul",
+      "count": 40
+    },
+    {
+      "Input Data Types": "DT_BF16;DT_BF16;FLOAT;UINT64;FLOAT;FLOAT16;FLOAT16;INT64",
+      "Input Formats": "ND;NCL;ND;ND;ND;ND;ND;ND",
+      "Input Shapes": "\"2824,256;256,256,2048;;;;;;256\"",
+      "Type": "GroupedMatmul",
+      "count": 40
+    },
+    {
+      "Input Data Types": "DT_BF16;DT_BF16;FLOAT;UINT64;FLOAT;FLOAT16;FLOAT16;INT64",
+      "Input Formats": "ND;NCL;ND;ND;ND;ND;ND;ND",
+      "Input Shapes": "\"8,2048;256,2048,512;;;;;;256\"",
+      "Type": "GroupedMatmul",
+      "count": 1240
+    },
+    {
+      "Input Data Types": "DT_BF16;DT_BF16;FLOAT;UINT64;FLOAT;FLOAT16;FLOAT16;INT64",
+      "Input Formats": "ND;NCL;ND;ND;ND;ND;ND;ND",
+      "Input Shapes": "\"8,256;256,256,2048;;;;;;256\"",
+      "Type": "GroupedMatmul",
+      "count": 1240
+    },
+    {
+      "Input Data Types": "FLOAT;DT_BF16;DT_BF16",
+      "Input Formats": "ND;ND;ND",
+      "Input Shapes": "\"16;353,16;353,16\"",
+      "Type": "fused_gdn_gating_kernel",
+      "count": 30
+    },
+    {
+      "Input Data Types": "N/A",
+      "Input Formats": "N/A",
+      "Input Shapes": "N/A",
+      "Type": "fused_gdn_gating_kernel",
+      "count": 930
+    }
+  ],
+  "shape_gaps": [
+    "Existing retained window has one captured request; no saturated concurrency shape facts.",
+    "Per-expert group_list values absent; dimension 256 is not expert counts.",
+    "Input Formats ND/NCL are observed, not a physical NZ weight-layout proof.",
+    "No independent production branch identified in the declared same-batch scope."
+  ],
+  "source_witnesses": {
+    "decoder": {
+      "path": "/root/vllm-workspace/vllm-hust/vllm/model_executor/models/qwen3_next.py",
+      "sha256": "a2ccdf974d15d122283af548fa826523503d6e5283d2116f32a13fbf1e43fe7c",
+      "statements": [
+        {
+          "line": 570,
+          "end_line": 570,
+          "statement": "hidden_states = self.linear_attn(hidden_states=hidden_states)"
+        },
+        {
+          "line": 598,
+          "end_line": 598,
+          "statement": "hidden_states, residual = self.post_attention_layernorm(hidden_states, residual)"
+        },
+        {
+          "line": 605,
+          "end_line": 605,
+          "statement": "hidden_states = self.mlp(hidden_states)"
+        }
+      ]
+    },
+    "moe": {
+      "path": "/root/vllm-workspace/vllm-hust/vllm/model_executor/models/qwen3_next.py",
+      "sha256": "a2ccdf974d15d122283af548fa826523503d6e5283d2116f32a13fbf1e43fe7c",
+      "statements": [
+        {
+          "line": 249,
+          "end_line": 249,
+          "statement": "hidden_states = hidden_states.view(-1, hidden_dim)"
+        },
+        {
+          "line": 259,
+          "end_line": 261,
+          "statement": "final_hidden_states = self.experts(hidden_states=hidden_states, router_logits=hidden_states)"
+        }
+      ]
+    },
+    "gdn": {
+      "path": "/root/vllm-workspace/vllm-ascend-hust/vllm_ascend/ops/gdn.py",
+      "sha256": "e9ed210b4ca4431ee40916f06f0272e5e781eb04b61b084bacea216799fbca98",
+      "statements": [
+        {
+          "line": 355,
+          "end_line": 362,
+          "statement": "torch.ops.vllm.qwen_gdn_attention_core(mixed_qkv, b, a, core_attn_out, self.prefix, False)"
+        },
+        {
+          "line": 371,
+          "end_line": 371,
+          "statement": "core_attn_out = self.norm(core_attn_out, z)"
+        },
+        {
+          "line": 374,
+          "end_line": 374,
+          "statement": "out, _ = self.out_proj(core_attn_out)"
+        },
+        {
+          "line": 377,
+          "end_line": 377,
+          "statement": "return out"
+        }
+      ]
+    }
+  },
+  "reproduce": [
+    "python tools/audit_d5_dependencies.py --core /root/vllm-workspace/vllm-hust --ascend /root/vllm-workspace/vllm-ascend-hust --kernels /root/prof/ladder-1021-030320/dp0_pp0_tp0_dcp0_ep0_rank0_122576_20261021030832684_ascend_pt/ASCEND_PROFILER_OUTPUT/kernel_details.csv --out <NEW_EVIDENCE_JSON>",
+    "python -m pytest -q",
+    "ruff check ."
+  ],
+  "validation": {
+    "pytest_full": {
+      "exit": 0,
+      "summary": "873 passed, 7 skipped in 229.61s (0:03:49)"
+    },
+    "ruff_full": {
+      "exit": 0,
+      "summary": "All checks passed!"
+    },
+    "coverage": {
+      "exit_code": 0,
+      "reported_fail": 0,
+      "reported_warn": 54,
+      "caution": "coverage reports no FAIL but startup opt status reports pre-existing drift.evidence-changed:records. No repin performed; the mismatch is not evidence that drift was resolved."
+    },
+    "previous_pytest": "Interrupted by SSH loss at ~49%; no exit code, not counted as PASS."
+  },
+  "device_ab": {
+    "serve_starts": 0,
+    "l0": "NOT_RUN",
+    "l3_compare": "NOT_RUN",
+    "l4": "NOT_RUN",
+    "acceptance": "NOT_ACCEPTED"
+  },
+  "rollback": "No runtime carrier, entry point, host source, model weight, env default or manifest changed. Audit tool is offline only.",
+  "candidate": {
+    "id": "d5_gmm_vector_limit_core_overlap_candidate",
+    "stage": "blocked",
+    "next_action": "Do not implement or measure unrelated-input overlap. Resume this candidate only after a concrete data-independent production branch and its shape/expert-count facts are provided; microbatch splitting or shared-expert-only overlap requires a separate B1 scope, not a silent continuation.",
+    "reopen_condition": "Provide a specific independent production GMM/GDN branch with unchanged model semantics, exact shapes/counts and supported FULL-graph event/quota APIs; do not silently split microbatches."
+  },
+  "evidence": [
+    {
+      "path": "/root/包体恢复/records/probes/20261021T042500Z_d5_first_probe/b1-work-order.json",
+      "sha256": "5f4a8090da013041b98a497b40930f2dac68adf952b1069c9c537f5274a7b71c"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261021T042500Z_d5_first_probe/dependency-audit.json",
+      "sha256": "d2e31dcd7713997bb400ebf9225ec4d98c3e4d03f9ba3ce93382086359e48cae"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261021T042500Z_d5_first_probe/static-review.json",
+      "sha256": "95a2dd19876183e884981915c8be58cc4c41c2934bbf63035db1fabb9efbfd8c"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261021T042500Z_d5_first_probe/coverage.log",
+      "sha256": "978ab56dfeab122c6351eff396336708b87e56d762724654b1af7f7231b477cb"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261021T045100Z_d5_resume/pytest-full.log",
+      "sha256": "74e953b4ab8c7ecbe1d3a9e971d074e90b24b6d5da18d6d3fbfd7b90ff574cbb"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261021T045100Z_d5_resume/pytest-full.exit",
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261021T045100Z_d5_resume/ruff-full.log",
+      "sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261021T045100Z_d5_resume/ruff-full.exit",
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261021T045100Z_d5_resume/candidate-snapshot.json",
+      "sha256": "38bb48cc82d62df94855a3558dc31d5e08d2b617f818878817e68cc29f7f80a4"
+    }
+  ],
+  "boundaries": [
+    "Offline ordered statement witnesses plus manual source review, not a general program dataflow proof.",
+    "No finding about all possible multistream schedules or other models.",
+    "No host source/runtime/carrier/manifest/default changed.",
+    "Local commit and delivery are separate from optimization acceptance and remote publication."
+  ]
+}

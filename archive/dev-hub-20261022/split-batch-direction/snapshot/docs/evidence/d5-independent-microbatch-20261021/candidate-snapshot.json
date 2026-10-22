@@ -1,0 +1,48 @@
+{
+  "id": "d5_independent_microbatch_gmm_gdn_interleave",
+  "route": "028/D5-multistream-overlap",
+  "caliber": "synthetic-fixed-protocol",
+  "cohort": "028-qwen35-35b-a3b-tp2-fullgraph",
+  "scenario": "Independent request microbatches: current-host interface gate only, no new device scenario or model input collection",
+  "op": "GroupedMatmul+GDN-vector",
+  "phase": "prefill+decode",
+  "method": "Fixed request-disjoint microbatches, same split workloads serial versus stream/event interleaving; no core quota or operator implementation change",
+  "stage": "blocked",
+  "next_action": "Stop current-host scheduling-only path. Resume only when per-microbatch hybrid metadata/state ownership and a supported staged execution boundary exist; then freeze real tensors/counts/layout before paired L0. Do not reopen the old same-batch candidate or run random unrelated-input overlap.",
+  "stop_condition": "GDN metadata rejects ubatch, no real independent pair, shared writable state, numerical mismatch, no reproducible paired improvement, or any declared cap reached.",
+  "budget": {
+    "wall_min": 90,
+    "npu_min": 60,
+    "serve_starts_max": 2,
+    "light_windows_max": 1,
+    "deep_windows_max": "0 (prohibited)",
+    "serve_starts_used": "0 (not started)",
+    "light_windows_used": "0 (not collected)",
+    "npu_min_reserved_for_interrupted_diagnostic": 2,
+    "device_ab_runs": "0 (interface gate blocked)",
+    "start_utc": "2026-10-21T06:23:39Z",
+    "wall_deadline_utc": "2026-10-21T07:53:39Z"
+  },
+  "evidence": [
+    "/root/包体恢复/records/probes/20261021T062339Z_d5_independent_microbatch/b1-work-order.json",
+    "/root/包体恢复/records/probes/20261021T062339Z_d5_independent_microbatch/interface-probe-final.json",
+    "/root/包体恢复/records/probes/20261021T062339Z_d5_independent_microbatch/source-ownership-excerpts.json",
+    "/root/包体恢复/records/probes/20261021T062339Z_d5_independent_microbatch/result.json",
+    "/root/包体恢复/records/probes/20261021T062339Z_d5_independent_microbatch/pytest-targeted.log",
+    "/root/包体恢复/records/probes/20261021T062339Z_d5_independent_microbatch/ruff-targeted.log",
+    "/root/包体恢复/records/probes/20261021T062339Z_d5_independent_microbatch/coverage.log"
+  ],
+  "reason": "Actual source-extracted v1 selection returns should_ubatch=False; forced GDN ubid 0/1 raises UBatching not supported with GDN yet; v2 second ubatch raises DBO is not supported on Ascend. Generic token splitting can share request state. Workspace lanes exist but are not sufficient. CPU interface probe is not a device or performance result; custom worker replacement is not proved impossible.",
+  "reopen_condition": "Changed host with supported GDN per-ubatch metadata/state lifecycle and staged executor, or explicitly scoped custom executor implementation with the same ownership contract; fixed real independent inputs, exact expert counts and packed layout required before device A/B.",
+  "checks": {
+    "l0": {"status": "PENDING", "reason": "Device A/B not run: current-host interface gate blocked"},
+    "l3": {"status": "PENDING", "reason": "No runtime activation; numerical acceptance not claimed"},
+    "l4": {"status": "PENDING", "reason": "Graph candidate not promoted; no trace collected"}
+  },
+  "coverage": {
+    "exit": 0,
+    "summary": "FAIL 0 / WARN 55; metric PASS, layer WARN(11), caliber WARN(36)",
+    "caution": "Startup status separately reported historical evidence drift. Coverage does not prove this drift repaired, numerical correctness or optimization acceptance. D5 pack-no-l0 warning retained; KB cards were searched and read directly, no L1 card was created."
+  },
+  "rollback": "Offline opt-in probe only; no host, runtime plugin, entry point, manifest, environment default or production behavior changed."
+}

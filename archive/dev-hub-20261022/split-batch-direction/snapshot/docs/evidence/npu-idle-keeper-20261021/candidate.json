@@ -1,0 +1,26 @@
+{
+  "id": "dedicated-npu-idle-keeper",
+  "route": "028/meta-exp-fixed-cost",
+  "caliber": "infrastructure-no-model",
+  "cohort": "dedicated-2x910B2-or-no-NPU",
+  "scenario": "Two exclusive NPUs confirmed by user; no model weights; 512x512x512 fp16 pulses",
+  "op": "none",
+  "phase": "runtime",
+  "method": "CPU supervisor with singleton lock, yielding NPU pulse subprocess and detached startup hook",
+  "stage": "validating",
+  "next_action": "Observe the existing daemon only. Platform retention is unverified because sampled integer AICore utilization is still 0%; do not automatically increase duty cycle or start model services.",
+  "stop_condition": "Stop for interference or strict profiling. Foreign NPU processes, utilization >=15%, or monitoring failure must suppress the keeper. No model-start budget is consumed by this task.",
+  "budget": {
+    "model_starts": "not applicable; no model service launched",
+    "validation": "Completed 45-second bounded smoke plus one actual foreign-process yield/resume validation",
+    "persistent_work": "10 ms wall-time pulse per device each second, only on the user's exclusive allocation"
+  },
+  "evidence": [
+    "/root/包体恢复/records/probes/20261021T0728Z-npu-idle-keeper/validation.json",
+    "/root/包体恢复/records/probes/20261021T0728Z-npu-idle-keeper/validation-production.log",
+    "/root/包体恢复/records/probes/20261021T0728Z-npu-idle-keeper/tests-final.log",
+    "/root/包体恢复/records/probes/20261021T0728Z-npu-idle-keeper/resumed-device.txt"
+  ],
+  "reason": "22 targeted tests, syntax/static checks, reverse-patch dry run and real NPU yield/reap/resume passed. Startup hook enabled and singleton supervisor left running. This is infrastructure validation, not operator optimization acceptance or proof of platform retention.",
+  "reopen_condition": "If the platform still recycles the allocation or a real task sees interference, inspect the existing logs and platform retention policy before changing the workload."
+}

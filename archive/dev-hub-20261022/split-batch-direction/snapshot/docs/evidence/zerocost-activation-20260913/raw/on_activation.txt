@@ -1,0 +1,7 @@
+## ON-run (vllm-hust-ext run -- vllm serve, cascade graph co-enabled)
+14:INFO 09-13 07:28:40 [cascade_plugin.py:147] cascade plugin loaded (gate=1, graph_gate=1, kernel_wheel=ok)
+15:zero-cost wiring ① refused (VLLM_HUST_FI_PREFILL_OUT=1): a host anchor moved; the process stays on the stock FIA call + copy path
+59:(EngineCore pid=135571) INFO 09-13 07:29:39 [cascade_plugin.py:147] cascade plugin loaded (gate=1, graph_gate=1, kernel_wheel=ok)
+60:(EngineCore pid=135571) FIA decode de-mask is ACTIVE (VLLM_HUST_FIA_DEMASK=1): pure decode FIA calls (npu_fused_infer_attention_score, _npu_fused_infer_attention_score_get_max_workspace) now run without the redundant 2048x2048 int8 causal template (sparse_mode 3->0); prefill / mixed / sliding-window / non-TND calls are untouched.
+61:(EngineCore pid=135571) zero-cost wiring ① refused (VLLM_HUST_FI_PREFILL_OUT=1): a host anchor moved; the process stays on the stock FIA call + copy path
+73:(EngineCore pid=135571) zero-cost wiring ② is ACTIVE (VLLM_HUST_SKIP_COS_SIN=1): update_cos_sin now records positions only and get_cos_and_sin_slice() materialises the rope buffers on demand.

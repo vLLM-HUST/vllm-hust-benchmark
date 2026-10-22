@@ -1,0 +1,19 @@
+{
+  "candidate": "d5_independent_microbatch_gmm_gdn_interleave",
+  "base_head": "40988d48006b869cfc9f36ac70c1440d26cb07f8",
+  "authorization": "User explicitly requested resolving the blocker and continuing; implement a public worker diagnostic, not host edits or a platform plugin.",
+  "layer": "graph",
+  "scope": "First real GDN decoder layer, pure non-spec single-token decode with at least two requests. Request-disjoint fixed halves, real model hidden states, weights and existing operator implementations. Both arms split identically.",
+  "shape_source": "Existing Qwen3.5 BF16 TP2 decode path and retained concurrency-16 evidence 1017-093651-opstat.json; actual hit tokens, state slots, parameter shapes/formats recorded by each rank. New workload uses existing synthetic-fixed-protocol L2, not unrelated random operator tensors.",
+  "single_variable": "A sequential split decoder work; B same split work with A MoE on root stream and B GDN/MoE on side stream. B waits on A-attention completion, not A-MoE completion; root joins side completion before end event.",
+  "integration": "Explicit --worker-cls vllm_ascend_split_batch.d5_pair_worker.D5PairWorker plus VLLM_HUST_D5_PAIR=1. Default-off. Forward pre-hook only in selected worker; direct calls to existing submodules, no host source changes or replacement forward. Prototype restores cache then leaves original layer responsible for production output.",
+  "metadata": "Own cloned request offsets rebased to zero; cloned conv/recurrent state indices; disjoint positive state slots required. No prefill, MTP, graph capture, SP, DP or layer-scale support. Original GDN ubatch assertions remain unchanged.",
+  "lifetime": "Two configured workspace lanes before model loading; immutable weights shared; input/output/metadata references held through stream join; full conv/recurrent snapshots restored outside timing and on exit. Scoped sequential host context switching, no concurrent Python global context writes.",
+  "numerical": "Serial/interleaved hidden and residual BF16 rtol=0.01 atol=0.01; entire conv/recurrent state rtol=0.0001 atol=0.0001. First failure stops timing and promotion. Prototype is not production numerical acceptance.",
+  "timing": "Device events encompass both branches and root wait_event join; end synchronize before elapsed_time. Reset and state snapshots outside timed region; 10 warmup pairs, 3 repeats x 30 paired observations with alternating order, report per rank and per hit shape, no pooling across shapes.",
+  "promotion": "Numerical PASS and all-repeat improvement above dispersion required before profile. L3 + compare required for production activation. Existing graph screen/profile contract retained; no operator-route disguise or unconditional trace.",
+  "budget": {"original_start": "2026-10-21T06:23:39Z", "wall_deadline": "2026-10-21T07:53:39Z", "npu_min_max": 60, "prior_diagnostic_reserved_npu_min": 2, "serve_starts_max": 2, "serve_starts_used_before_this": 0, "light_windows_max": 1, "deep_windows_max": 0},
+  "rollback": "Do not select worker or unset VLLM_HUST_D5_PAIR. No default env, manifest or plugin registration changed; stop owned service after experiment. Restart required to remove diagnostic hook.",
+  "evidence": "/root/包体恢复/records/probes/20261021T064236Z_d5_pair_worker",
+  "stop": "Numerical divergence, invalid metadata or shared/reserved state slots, no reproducible gain, service startup cap or original wall/NPU deadline. Do not auto-extend."
+}

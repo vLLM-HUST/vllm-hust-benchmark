@@ -1,0 +1,83 @@
+{
+  "schema": "vllm-hust-d5-device-validation.v2",
+  "candidate": "d5_independent_microbatch_gmm_gdn_interleave",
+  "window": {
+    "start_utc": "2026-10-21T09:07:51Z",
+    "deadline_utc": "2026-10-21T10:07:51Z",
+    "serve_starts_used": 2,
+    "serve_starts_max": 2,
+    "authorization": "user 2026-10-21: 2 starts / 60 min, round push authorized"
+  },
+  "base_head": "4169207bd0c213b5afe7f622653f5bb759d020c0",
+  "attempts": [
+    {
+      "serve": 1,
+      "log": "/root/包体恢复/logs/ladder-serve-1021-091031.log",
+      "probe_dir": "/root/包体恢复/records/probes/20261021T0907Z_d5_pair_largeM",
+      "outcome": "COMPLETE_AT_WARMUP_STEP",
+      "numerical": "PASS",
+      "note": "capture hit engine step 4 (startup warmup dummy batch) before real requests; D5_PAIR_MIN_TOKENS=32 was matched by the warmup batch; real-request counts were still captured by VLLM_HUST_GMM_COUNTS_DUMP"
+    },
+    {
+      "serve": 2,
+      "log": "/root/包体恢复/logs/ladder-serve-1021-091855.log",
+      "probe_dir": "/root/包体恢复/records/probes/20261021T0907Z_d5_pair_largeM/real-step",
+      "outcome": "COMPLETE_AT_REAL_STEP",
+      "numerical": "PASS",
+      "note": "D5_PAIR_MIN_STEP=8 skipped warmup; capture at step 8 = first real pure-decode step, 32 concurrent requests, reports rank0-step8/rank1-step8"
+    }
+  ],
+  "shape_facts": {
+    "phase": "decode",
+    "tokens": 32,
+    "split": [16, 16],
+    "layer": "language_model.model.layers.0.linear_attn",
+    "gdn_state_slots_rank0": ["even slots 2..62", "odd-slots-batch 66..126, stride 4, disjoint, 0 reserved"],
+    "weight_formats": "w13 [256,2048,512] format 2; w2 [256,256,2048] format 2 (as M=4 window)",
+    "precision": "torch.bfloat16",
+    "tp": 2,
+    "cohort": "028-qwen35-35b-a3b-tp2-fullgraph",
+    "caliber": "synthetic-fixed-protocol"
+  },
+  "paired_makespan_ms": {
+    "warmup_step_M32": {
+      "rank0": [[14.139, 14.189], [14.054, 14.135], [14.079, 14.07]],
+      "note": "serial vs interleaved, 30 alternating runs x3 repeats"
+    },
+    "real_step_M32": {
+      "rank0": [[14.636, 14.627], [13.862, 13.888], [14.161, 14.071]],
+      "rank1": [[14.647, 14.664], [13.875, 13.873], [14.125, 14.061]]
+    },
+    "verdict": "NO_IMPROVEMENT at M=32 (both input sources, both ranks, deltas within +-0.5%)"
+  },
+  "per_expert_counts": {
+    "source": "VLLM_HUST_GMM_COUNTS_DUMP (existing W1R default-off carrier, schema vllm-hust-gmm-counts-dump.v2)",
+    "files": [
+      "/root/包体恢复/records/probes/20261021T0907Z_d5_pair_largeM/counts.json",
+      "/root/包体恢复/records/probes/20261021T0907Z_d5_pair_largeM/real-step/counts.json"
+    ],
+    "observations": [
+      "full-batch decode calls at M=32 recorded (counts_sum 128-256 across gmm1/gmm2 call sites)",
+      "real-batch routing: 88/256 experts active, top-5 experts hold ~15-19% of routed pairs (moderate skew)",
+      "window-1 sample at 09:15:03Z showed extreme skew (5 experts ~55%) — batch-assembly transient, not the steady decode distribution",
+      "dump wrote both ranks into one file (records carry rank/local_rank); documented .rank<RANK> suffix did not occur"
+    ]
+  },
+  "serving_check": {
+    "requests": 32,
+    "responses": "all completed; greedy seed 1234/4321",
+    "engine_errors": 0
+  },
+  "verdict": {
+    "device_feasibility": "PASS (TP2 eager D5PairWorker serves 32-request batches; probe gates work; counts carrier works)",
+    "numerics": "PASS (serial vs interleaved assert_close; both ranks; both input sources)",
+    "paired_makespan": "NO_IMPROVEMENT at M=4 and M=32 (real inputs); interleaving gain not present in the tested decode small-M envelope",
+    "acceptance": "NOT_ACCEPTED: stop condition 'no paired makespan improvement' fired at M=32; method negative in tested envelope (decode M=4-32, layer 0, TP2, eager, bf16)"
+  },
+  "boundaries": [
+    "decode M in {4, 32} only; layer 0 only; one-shot probe per rank per process",
+    "larger M (64/128), other layers, and prefill-phase eligibility untested",
+    "makespan is direction-only: per-arm counts derived from split, not independently dumped",
+    "candidate d5_independent_microbatch_gmm_gdn_interleave recorded inconclusive"
+  ]
+}

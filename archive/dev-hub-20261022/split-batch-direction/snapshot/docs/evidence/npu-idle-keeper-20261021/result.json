@@ -1,0 +1,76 @@
+{
+  "task": "Dedicated NPU allocation idle keeper attached to /root/start-sshd.sh",
+  "base_head": "40988d48006b869cfc9f36ac70c1440d26cb07f8",
+  "branch": "0.28/comm-overlap-free-attribution",
+  "authorization": "User confirmed allocations contain either two exclusive NPUs or no NPU.",
+  "decision": "Functional validation passed; enabled in startup hook; platform retention effectiveness unverified.",
+  "evidence_dir": "/root/包体恢复/records/probes/20261021T0728Z-npu-idle-keeper",
+  "configuration": {
+    "physical_cards": [3, 6],
+    "logical_devices": [0, 1],
+    "weights": "none",
+    "matrix_mkn": [512, 512, 512],
+    "dtype": "fp16",
+    "pulse_ms_per_device": 10,
+    "period_seconds": 1,
+    "poll_wait_seconds": 2,
+    "idle_seconds_before_restart": 15,
+    "busy_percent": 15,
+    "model_starts_this_task": 0
+  },
+  "checks": {
+    "pytest": "python3 -m pytest -q tests/test_npu_idle_keeper.py: 22 passed",
+    "ruff": "ruff check tools/npu_idle_keeper.py tests/test_npu_idle_keeper.py: PASS",
+    "format": "ruff format --check tools/npu_idle_keeper.py tests/test_npu_idle_keeper.py: PASS",
+    "shell_syntax": "bash -n /root/start-sshd.sh: PASS",
+    "rollback_dry_run": "patch --dry-run -R /root/start-sshd.sh < tools/start-sshd-npu-keeper.patch: PASS",
+    "coverage": "opt coverage: exit 0, warnings retained in coverage.log",
+    "hardware": "validation.json: passed=true; foreign NPU process detected, own child reaped, distinct child resumed after foreign exit",
+    "startup_idempotence": "Second invocation of the exact added startup block reported the supervisor already running.",
+    "initial_smoke": "45-second bounded run exited 0; relative-path status identity check initially failed and was fixed with a regression test."
+  },
+  "observations": {
+    "process_memory_mb_per_card": 116,
+    "sampled_aicore_percent": 0,
+    "first_worker_pid": 102169,
+    "foreign_probe_pid": 102675,
+    "resumed_worker_pid": 104578,
+    "yield_detected_utc": "2026-10-21T07:48:45.815Z",
+    "worker_reaped_utc": "2026-10-21T07:48:50.636Z",
+    "resume_ready_utc": "2026-10-21T07:49:30.563Z"
+  },
+  "behavior": [
+    "No allocated devices: skip without importing torch or torch_npu in the supervisor.",
+    "Any foreign NPU process, including an idle resident model, suppresses the keeper on both devices.",
+    "Monitoring failure suppresses the keeper; startup status is supervisor-only, not a promise that computation is active.",
+    "Child exit releases NPU contexts; terminate is followed by bounded wait and owned-child kill fallback.",
+    "Worker receives a Linux parent-death kill signal if its supervisor exits abruptly.",
+    "Singleton lock remains on disk; stale PID files cannot trigger stop without a held lock and verified script identity.",
+    "Startup uses setsid/nohup with redirected stdin/stdout/stderr; the entire recovery script was not rerun during this task."
+  ],
+  "boundaries": [
+    "The pulse duration is a wall-time budget, not a measured NPU utilization percentage.",
+    "Integer utilization samples still showed 0%; this does not prove that the platform retention threshold is met.",
+    "Polling and shutdown add detection/release latency; not a zero-interference guarantee for benchmarks.",
+    "For strict profiling or benchmarking, explicitly stop the keeper before launching the measured task.",
+    "No model L0, L3, profile, service-health validation or operator-performance claim was made.",
+    "The previously failed TP=2 eager service startup remains a consumed startup attempt, not a successful service validation."
+  ],
+  "commands": {
+    "status": "python3 /root/vllm-workspace/vllm-ascend-split-batch-hust/tools/npu_idle_keeper.py status",
+    "stop_now": "python3 /root/vllm-workspace/vllm-ascend-split-batch-hust/tools/npu_idle_keeper.py stop",
+    "disable_on_next_recovery": "NPU_IDLE_KEEPALIVE=0 bash /root/start-sshd.sh",
+    "rollback_hook_after_stop": "patch -R /root/start-sshd.sh < tools/start-sshd-npu-keeper.patch",
+    "reapply_hook": "patch /root/start-sshd.sh < tools/start-sshd-npu-keeper.patch",
+    "log": "tail -f /root/log/npu-idle-keeper.log"
+  },
+  "sha256": {
+    "tools/npu_idle_keeper.py": "05de85e937ca3fab26f3aab1db126c51d38ddb9f34c44e57202273d3aee7e944",
+    "tests/test_npu_idle_keeper.py": "0cc4dd696f6d2a0c816127c62d650a5a98a719afdff7c7b6eaf999c97c3f323d",
+    "tools/start-sshd-npu-keeper.patch": "ce1f801c0446c6038707c142e4ed39e3fd61d1ad5ea4d711a825061513204175",
+    "/root/start-sshd.sh.before": "12e7679a4b3326504625881f287bbef9c9a5b0e1a99013db042136eedf8ebd76",
+    "/root/start-sshd.sh": "89aff5ec00687c189e14da57a2200570ee20a439bd882e3b0037ca74e22ca78a",
+    "evidence/validate.py": "aceee1a5e1b27c5325417f81775c5adf1ce583a13421be28176b91a32ebcf5b5",
+    "evidence/validation.json": "04b72325e34cd2a098b33c6f64e79ab2e162f2cdf5a2334863bdd383812f1156"
+  }
+}

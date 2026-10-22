@@ -1,0 +1,71 @@
+{
+  "schema": "historical-source-recovery.v1",
+  "base_head": "7b8b1e77c3c7488896147e551bc302e47356a2c9",
+  "scope": "CPU evidence hygiene only; no operator experiment or code change",
+  "budget": {
+    "wall_min": 10,
+    "npu_min": 0,
+    "serve_starts": 0
+  },
+  "original_path": "/root/vllm-workspace/vllm-ascend-split-batch-hust/src/vllm_ascend_split_batch/gate_fp32_plugin.py",
+  "expected_sha256": "c079346f5cba19c774440d59948de82899a02e717c1edd91da7e9b7da05aa743",
+  "current_source_sha256": "a6adab2f37fda82d7e347431536aab766fd62769b84e812ee874f97984d77fb4",
+  "recovered_path": "/root/包体恢复/records/probes/20261021T055500Z_pipeline_followup/gate_fp32_plugin.historical.py",
+  "recovered_sha256": "c079346f5cba19c774440d59948de82899a02e717c1edd91da7e9b7da05aa743",
+  "matching_git_commits": [
+    "88b9edde60e71503f0a07124eada35e8f1553229"
+  ],
+  "git_blob": "b7faf531e320d874fd086429d01f6fb15673f952",
+  "non_target_evidence": [
+    {
+      "path": "/root/包体恢复/records/probes/20261016T1232Z_MFC_a1_hasattr_guard_probe.log",
+      "sha256": "be0b8aa77908731822dff5053557d8cbf96b5ce84912ab27bd320ac16fa9cde6",
+      "ok": true
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261016T1232Z_MFC_a1_hasattr_guard_probe.py",
+      "sha256": "d907d6b64d707ec95453d85110f8167669694da76dba1671fd11eaa2bbb46c4f",
+      "ok": true
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261016T1233Z_MFC_a2_npu_recompile_cost_probe.log",
+      "sha256": "da288cf130af858b39e714081fafe7fd3aa57850b6ef2a12e1774ffbcb198c16",
+      "ok": true
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261016T1233Z_MFC_a2_npu_recompile_cost_probe.py",
+      "sha256": "3dd3389222d1b488a4c0659f7f88c8e9aa3a2b6fbeac4175946a1e5738c81d31",
+      "ok": true
+    },
+    {
+      "path": "/vllm-workspace/vllm-ascend/vllm_ascend/ops/fused_moe/fused_moe.py",
+      "sha256": "1c557c9aed1eae9f6a0dba07adb3a5f8235252bd876a39f25c881ffcaac9dbc4",
+      "ok": true
+    },
+    {
+      "path": "/root/包体恢复/scripts/d4-ab-interleave.sh",
+      "sha256": "9a9fe86933d5082ecb9fd6eecf012a6fe9152a85485ad1f73432cbe79e91a3d2",
+      "ok": true
+    },
+    {
+      "path": "/root/包体恢复/records/ladder/ab-1013-141051/summary.json",
+      "sha256": "055c31f1f19bec3aa32b34fb87f9ff5edeb1bc11206f93ba8b3342e3d95e48b7",
+      "ok": true
+    },
+    {
+      "path": "/root/包体恢复/records/ladder/d4-gatefp32-repl/p2-OFF-l1.json",
+      "sha256": "835934902742b1d8a8e8c905b70cb0cae808aab8ec5e0681252c7a6f0f2913b9",
+      "ok": true
+    },
+    {
+      "path": "/root/包体恢复/logs/ladder-serve-1016-043600.log",
+      "sha256": "4bb67a6d303e24a1c827e9ce6ca6ce96fbcb78f1d24f60132623a06fa74506d5",
+      "ok": true
+    }
+  ],
+  "limits": [
+    "Recovered source is read-only historical provenance, never executed or deployed",
+    "No repin; original SHA retained, no new performance/numerical claim",
+    "Stage, method, stop criteria and budget unchanged; real same-serve B still requires explicit authorization"
+  ]
+}

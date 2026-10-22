@@ -1,0 +1,9 @@
+{
+ "schema": "opt-ops-l0-concatd-views.v1", "id": "1021-l0-concatd-views", "status": "PASS",
+ "checks": [
+  {"name": "eager_consumer_compat", "ok": true, "detail": "T=1 连续视图喂 l2norm_fwd(triton) 与 linear 全部正常且与 cat 路径 bitwise 一致（1021-1435Z 探针含 strided 拒绝负证据 -> 设计转连续分配）"},
+  {"name": "slice_contiguity_boundary", "ok": true, "detail": "q/k/v 切片连续性仅 T=1 成立（T=2/4 复现 view 崩溃）——视图门 shape[0]==1, T>=2 stock 回退; 真机 930 次 ConcatD 全为 T=1"},
+  {"name": "graph_capture_compat", "ok": true, "detail": "ON serve 全部 capture sizes(1,2,4,8,16,32)通过, worker 0 traceback"}
+ ],
+ "boundary": "图模式正确性由 L3 8/8 承载; 消除计数由 light L4 承载 (930->0)"
+}

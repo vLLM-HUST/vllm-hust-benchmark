@@ -1,0 +1,32 @@
+INFO 09-11 18:21:50 [__init__.py:52] Available plugins for group vllm.platform_plugins:
+INFO 09-11 18:21:50 [__init__.py:54] - ascend -> vllm_ascend:register
+INFO 09-11 18:21:50 [__init__.py:57] All plugins in this group will be loaded. Set `VLLM_PLUGINS` to control which plugins to load.
+INFO 09-11 18:21:51 [__init__.py:272] Platform plugin ascend is activated
+INFO 09-11 18:21:51 [platform.py:70] Breakable CUDAGraph on Ascend is opt-in; using VLLM_USE_BREAKABLE_CUDAGRAPH=0.
+2026-09-11 18:21:51,310 - 1464344 - ServiceProfiler - INFO - VLLM_USE_V1 not set, auto-detected via vLLM 0.28.1.post1.dev143+gf18cf803c.empty: default 1
+INFO 09-11 18:22:03 [__init__.py:112] Registered model loader `<class 'vllm_ascend.model_loader.netloader.netloader.ModelNetLoaderElastic'>` with load format `netloader`
+INFO 09-11 18:22:03 [__init__.py:112] Registered model loader `<class 'vllm_ascend.model_loader.rfork.rfork_loader.RForkModelLoader'>` with load format `rfork`
+INFO 09-11 18:22:05 [cascade_plugin.py:147] cascade plugin loaded (gate=0, graph_gate=0, kernel_wheel=ok)
+[runner] installed vllm.general_plugins entry points: {"cascade-attention": "vllm_ascend_split_batch.cascade_plugin:load", "fi-gelu": "vllm_ascend_split_batch.fi_gelu_plugin:load", "fi-sampling": "vllm_ascend_split_batch.fi_sampling_plugin:load", "fia-demask": "vllm_ascend_split_batch.fia_demask_plugin:load"}
+[runner] rope-fix entry point discovered: False (metadata is an install-time snapshot)
+RoPE fix: vllm_ascend.utils.register_ascend_customop is wrapped (call sites rebound: vllm_ascend.utils); the rope overrides are applied right after the host's own registration pass.
+RoPE variant defect carrier is ACTIVE (VLLM_HUST_ROPE_FIX=1): op_registry_oot[Llama3RotaryEmbedding, MRotaryEmbedding, YaRNScalingRotaryEmbedding] will be pointed at the plugin subclasses right after vllm-ascend registers its custom ops -- ① llama3-scaling onto the Ascend rope kernel, ② the missing triton_mrope is_neox_style, ③ the YaRN truncate=True default of vLLM/HF.
+[runner] carrier invoked directly (VLLM_HUST_ROPE_FIX='1'): load() -> True
+
+==============================================================================
+RoPE 变体族 part=atb（mrope 的 ATB 备选 kernel：npu_mrope；独立进程隔离污染）
+==============================================================================
+INFO 09-11 18:22:07 [scheduler.py:331] Chunked prefill is enabled with max_num_batched_tokens=2048.
+INFO 09-11 18:22:07 [kernel.py:372] Final IR op priority after setting platform defaults: IrOpPriorityConfig(rms_norm=['native'], fused_add_rms_norm=['native'])
+WARNING 09-11 18:22:07 [platform.py:473] Model config is missing. Skipping Ascend-specific config updates.
+INFO 09-11 18:22:07 [compilation.py:329] Enabled custom fusions: norm_quant, act_quant
+RoPE fix: rope overrides in place: Llama3RotaryEmbedding -> created (defect ①: the fork never wired it); MRotaryEmbedding -> replaced AscendMRotaryEmbedding; YaRNScalingRotaryEmbedding -> replaced AscendYaRNRotaryEmbedding.
+[W911 18:22:07.359991405 NPUCachingAllocator.cpp:177] Warning: The current CANN and Soc versions require processing for 32 padding size, with memory allocation. (function operator())
+[sentinel pre] dev=102.205917 cpu=102.205887 rel=2.99e-07 -> OK
+[sentinel post-seq3] dev=470.031799 cpu=470.031860 rel=1.30e-07 -> OK
+[npu_mrope seq3] vs G1 max_abs=3.125e-02 vs G2 bitwise=True sentinel=OK
+[sentinel post-vision] dev=-232.881882 cpu=-232.882004 rel=5.24e-07 -> OK
+[npu_mrope vision] vs G1 max_abs=3.125e-02 vs G2 bitwise=True sentinel=OK
+ROPE VARIANTS E2E PART ATB DONE
+[runner] probe part=atb done; carrier stats={'installed': True, 'applied': {'Llama3RotaryEmbedding': 'created (defect ①: the fork never wired it)', 'MRotaryEmbedding': 'replaced AscendMRotaryEmbedding', 'YaRNScalingRotaryEmbedding': 'replaced AscendYaRNRotaryEmbedding'}, 'skipped': {}, 'wrapped': ['vllm_ascend.utils']}
+on-atb rc=0

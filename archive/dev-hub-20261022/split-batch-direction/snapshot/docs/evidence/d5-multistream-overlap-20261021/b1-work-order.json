@@ -1,0 +1,55 @@
+{
+  "schema": "d5-b1-work-order.v1",
+  "declared_at": "2026-10-21T04:25:00Z",
+  "candidate": "d5_gmm_vector_limit_core_overlap_candidate",
+  "route": "028/D5-multistream-overlap",
+  "layer": "graph",
+  "repository": "/root/vllm-workspace/vllm-ascend-split-batch-hust",
+  "branch": "0.28/comm-overlap-free-attribution",
+  "base_head": "d0ced29eb3da55472d12bd0ea14b259e745c49c3",
+  "startup_dirty": [],
+  "scope": "Qwen3.5-35B-A3B BF16 TP2 FULL graph, same decode batch, routed-expert GroupedMatmul and GDN vector work; no microbatch split, stale hidden states, model rewrite, quantization, kernel replacement or manifest change",
+  "shape_source": "/root/包体恢复/records/ladder/1021-030832-opstat.json",
+  "shape_policy": "Read M/K/N, expert counts, phase and callsite from retained kernel_details and model callsites. Missing expert counts/weight format or saturated concurrency must remain explicit gaps; the single-request baseline is not saturated evidence and cannot support performance acceptance.",
+  "arms": {
+    "A": "Native serial execution, no new carrier, same inputs/weights/cache/seed/graph buckets and existing carriers.",
+    "B": "Only if independent branches are proved: default-off dual-stream scheduling of the same GMM and GDN operations with one fixed AIC/AIV quota pair. Event producer/consumer ordering and tensor lifetime must be preserved. No quota sweep. Quotas must be derived from a2 capacity and supported graph APIs before device execution."
+  },
+  "static_gate": "First establish whether same-batch GDN and routed GMM are data independent. A serial producer-consumer chain stops this implementation before L0; an unrelated-input synthetic overlap is not serving evidence. Unknown host structure also stops, without claiming absence of all possible overlap.",
+  "criteria": {
+    "correctness": "L0 tensor checks plus independent plain opt bench l3 A/B and opt bench compare PASS, greedy temperature=0 seed=42; any mismatch stops advancement and preserves default-off.",
+    "mechanism": "Paired target device intervals: overlap fraction = intersection duration / min(GMM duration, GDN duration) >= 0.5, not merely distinct stream IDs; supported core quotas sum within a2 capacity, no resource-contention tail.",
+    "graph_performance": "Same shape/weight/carrier facts, three repeats and medians: paired critical path decreases and plain L1/L2 show improvement without regression. L4 all-kernel operator counts/time remain recorded. No graph result is an operator-level acceptance claim. Do not consume deprecated free_attribution v1 fields.",
+    "acceptance": "No accepted state with missing shape/expert-count/saturation facts, failed L3, unsupported graph synchronization/core limiting, or unresolved coverage FAIL. Static evidence alone is not numerical or performance validation."
+  },
+  "stop_conditions": [
+    "Same-batch producer-consumer dependency or hidden dependency: stop before stream implementation and record blocked with exact callsites.",
+    "Missing independent branches or unsupported FULL-graph synchronization/core-limiting contract: stop, do not substitute eager evidence.",
+    "Numerical mismatch, graph hang, overlap fraction < 0.5 or critical-path non-improvement: no promotion, preserve failure evidence.",
+    "Arm shape/weight/carrier mismatch, environment guard rejection, quota totals beyond capacity, or budget exhausted: stop; no guard bypass, no unplanned window.",
+    "No push, repin, manifest activation, cross-branch checkout, or reopening rejected methods."
+  ],
+  "budget": {
+    "wall_min": 60,
+    "static_gate_wall_min": 20,
+    "serve_starts_max": 4,
+    "plain_arms_max": 2,
+    "light_l4_arms_max": 2,
+    "resamples_max": 0,
+    "deep_windows_max": 0,
+    "quota_pairs_max": 1,
+    "repeats": 3,
+    "device_execution_condition": "Static independence, exact shape facts and supported fixed quotas must be declared in a new append-only execution receipt before spending device budget. If static gate blocks, serve starts and NPU measurement time remain zero."
+  },
+  "evidence_directory": "/root/包体恢复/records/probes/20261021T042500Z_d5_first_probe",
+  "delivery_paths": [
+    "docs/evidence/d5-multistream-overlap-20261021",
+    "tools/audit_d5_dependencies.py",
+    "tests/test_audit_d5_dependencies.py"
+  ],
+  "existing_blocker": {
+    "id": "drift.evidence-changed:records",
+    "receipt": "/root/包体恢复/records/probes/20261020T134500Z_drift_origin_receipt.json",
+    "action": "Keep FAIL visible; no repin; does not prevent static investigation."
+  }
+}

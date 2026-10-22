@@ -1,0 +1,199 @@
+{
+ "schema": "opt-ops-l0-matmul-m1-ruler.v1",
+ "ts": "2026-10-21T13:24:18Z",
+ "status": "ok",
+ "command": {
+  "argv": [
+   "tools/bench_matmul_m1_ruler.py",
+   "--out",
+   "/root/包体恢复/records/ladder/1021-132409-l0-matmul-m1-ruler.json"
+  ],
+  "cwd": "/root/vllm-workspace/vllm-ascend-split-batch-hust",
+  "python": "/usr/local/python3.12.13/bin/python3"
+ },
+ "candidate": "matmulv2-decode-m1-l0-ruler",
+ "route": "028/D7-matmulv2-decode-fusion",
+ "goal": {
+  "what": "decode M=1 skinny GEMM kernel headroom 标尺（只立标尺, 不裁决 kernel 替换）",
+  "floors": {
+   "bw": "同权重整读整写 device copy 实测带宽换算（经验地板, 非峰值宣称）",
+   "launch": "最小 GEMM [8,H] 探针（启动/最小工作量地板）",
+   "effective": "max(bw, launch)"
+  }
+ },
+ "hardware": {
+  "device": "npu",
+  "device_name": "Ascend910B2",
+  "host": "coder-user-tianyuw-new-profile-78749865b5-zhppg",
+  "torch": "2.13.0+cpu"
+ },
+ "code": {
+  "repo": "/root/vllm-workspace/vllm-ascend-split-batch-hust",
+  "repo_head": "b9c4d3fafb6cbe7a99f9db68a792dbda1d876219",
+  "tool_sha256": "76fd8eb02a03aad6307a3501d6cc6442b93f2d636556fa80bfecc01447ebaed2"
+ },
+ "cells": [
+  {
+   "id": "gdn_inproj",
+   "weight": [
+    6176,
+    2048
+   ],
+   "weight_mb": 25.3,
+   "callsite": "GDN in_proj（F2 已并）30/it",
+   "window_ms": 25.069,
+   "t_m1_us": 37.415,
+   "t_copy_us": 23.064,
+   "copy_bw_gbps": 2193.6,
+   "bw_floor_us": 11.532,
+   "t_launch_probe_us": 36.555,
+   "effective_floor_us": 36.555,
+   "headroom_vs_effective_floor_pct": 2.3,
+   "binding": "launch"
+  },
+  {
+   "id": "out_o",
+   "weight": [
+    2048,
+    2048
+   ],
+   "weight_mb": 8.39,
+   "callsite": "GDN out(30)+FA o(10) 40/it",
+   "window_ms": 15.319,
+   "t_m1_us": 37.026,
+   "t_copy_us": 22.841,
+   "copy_bw_gbps": 734.5,
+   "bw_floor_us": 11.421,
+   "t_launch_probe_us": 36.223,
+   "effective_floor_us": 36.223,
+   "headroom_vs_effective_floor_pct": 2.17,
+   "binding": "launch"
+  },
+  {
+   "id": "fa_qkv",
+   "weight": [
+    4608,
+    2048
+   ],
+   "weight_mb": 18.87,
+   "callsite": "FA qkv 含 attn_output_gate 10/it",
+   "window_ms": 7.077,
+   "t_m1_us": 37.102,
+   "t_copy_us": 22.071,
+   "copy_bw_gbps": 1710.3,
+   "bw_floor_us": 11.035,
+   "t_launch_probe_us": 35.723,
+   "effective_floor_us": 35.723,
+   "headroom_vs_effective_floor_pct": 3.72,
+   "binding": "launch"
+  },
+  {
+   "id": "router",
+   "weight": [
+    256,
+    2048
+   ],
+   "weight_mb": 1.05,
+   "callsite": "MoE router GateLinear 40/it",
+   "window_ms": 9.674,
+   "t_m1_us": 35.808,
+   "t_copy_us": 21.385,
+   "copy_bw_gbps": 98.1,
+   "bw_floor_us": 10.692,
+   "t_launch_probe_us": 35.217,
+   "effective_floor_us": 35.217,
+   "headroom_vs_effective_floor_pct": 1.65,
+   "binding": "launch"
+  },
+  {
+   "id": "shared_gate_up",
+   "weight": [
+    512,
+    2048
+   ],
+   "weight_mb": 2.1,
+   "callsite": "shared expert gate_up 40/it",
+   "window_ms": 9.672,
+   "t_m1_us": 35.468,
+   "t_copy_us": 21.282,
+   "copy_bw_gbps": 197.1,
+   "bw_floor_us": 10.641,
+   "t_launch_probe_us": 35.13,
+   "effective_floor_us": 35.13,
+   "headroom_vs_effective_floor_pct": 0.95,
+   "binding": "launch"
+  },
+  {
+   "id": "shared_down",
+   "weight": [
+    2048,
+    256
+   ],
+   "weight_mb": 1.05,
+   "callsite": "shared expert down 40/it",
+   "window_ms": 8.916,
+   "t_m1_us": 35.412,
+   "t_copy_us": 21.348,
+   "copy_bw_gbps": 98.2,
+   "bw_floor_us": 10.674,
+   "t_launch_probe_us": 34.935,
+   "effective_floor_us": 34.935,
+   "headroom_vs_effective_floor_pct": 1.35,
+   "binding": "launch"
+  },
+  {
+   "id": "shared_gate",
+   "weight": [
+    1,
+    2048
+   ],
+   "weight_mb": 0.0,
+   "callsite": "shared_expert_gate 标量门 40/it",
+   "window_ms": 6.104,
+   "t_m1_us": 35.186,
+   "t_copy_us": 36.142,
+   "copy_bw_gbps": 0.2,
+   "bw_floor_us": 18.071,
+   "t_launch_probe_us": 35.278,
+   "effective_floor_us": 35.278,
+   "headroom_vs_effective_floor_pct": -0.26,
+   "binding": "launch"
+  },
+  {
+   "id": "lm_head",
+   "weight": [
+    124160,
+    2048
+   ],
+   "weight_mb": 508.56,
+   "callsite": "lm_head 1/it",
+   "window_ms": 11.724,
+   "t_m1_us": 341.619,
+   "t_copy_us": 800.1,
+   "copy_bw_gbps": 1271.2,
+   "bw_floor_us": 400.05,
+   "t_launch_probe_us": 34.63,
+   "effective_floor_us": 400.05,
+   "headroom_vs_effective_floor_pct": -17.1,
+   "binding": "bw"
+  }
+ ],
+ "not_claimed": [
+  "eager Event 链延迟, 不是 FULL/图模式时长; 图模式 kernel 时长以窗 1021-031741 为准",
+  "copy 带宽是读+写混合实测值, 与 GEMM 纯读装载模式不完全同构, bw_floor 是下界近似",
+  "headroom 不构成 kernel 替换收益结论; W1R 相邻家族进入需先问"
+ ],
+ "reading": {
+  "rule": ">4MB 桶 headroom<20% → D7 无 kernel 杠杆（收敛）; 单桶高 headroom 仅立候选不裁决",
+  "big_cells": [
+   "gdn_inproj",
+   "out_o",
+   "fa_qkv",
+   "lm_head"
+  ],
+  "big_headroom_median_pct": 2.23
+ },
+ "budget": {
+  "elapsed_s": 8.91
+ }
+}

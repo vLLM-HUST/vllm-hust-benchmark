@@ -1,0 +1,155 @@
+{
+  "task": "fi-gelu OOT provider device-gate closure (test-verification loop) + reusable device gate runner",
+  "base_head": "e1a50e40fb92f6e6db486151e70b92b11decde13",
+  "branch": "0.28/comm-overlap-free-attribution",
+  "initial_dirty_files": [],
+  "paths": [
+    "HOST_CONTRACT.md",
+    "README.md",
+    "tools/probe_gelu_device.py",
+    "tests/test_gelu_device_probe.py",
+    "docs/evidence/gelu-device-gate-20261020.json"
+  ],
+  "shape_facts": [
+    {
+      "M": 64,
+      "K": 4096,
+      "inter": 2048,
+      "phase": "standalone-op"
+    },
+    {
+      "M": 8,
+      "K": 55296,
+      "inter": 27648,
+      "phase": "standalone-op"
+    }
+  ],
+  "weight_labels": "activation microbench: no model weights, bf16, no weight format",
+  "changes": "New device gate runner and its CPU unit tests; README/HOST_CONTRACT status updated to reflect closed device gates. Plugin runtime code unchanged this round.",
+  "triton_experimental_finding": {
+    "answer": "triton.experimental is the gluon subpackage shipped in newer triton. The 2026-10-20 morning failure came from the rv1 dev venv: its editable vllm resolves to /root/vllm-workspace/.stack/core-prev (newer source) which imports triton.experimental.gluon, while that venv cannot provide it. The serving python imports vllm from /vllm-workspace/vllm (0.28 build) and its triton without hitting this import, so it is an environment/source-generation mismatch in the offline venv, not a defect of the serving stack or the plugin."
+  },
+  "environment": {
+    "serving_python": "/usr/local/python3.12.13/bin/python3",
+    "vllm_file": "/vllm-workspace/vllm/vllm/__init__.py",
+    "versions": {
+      "torch": "2.13.0+cpu",
+      "torch-npu": "2.13.0rc1",
+      "vllm": "0.28.1.post1.dev143+gf18cf803c.empty",
+      "vllm-ascend": "0.25.1rc2.dev125+hust.20260903.4.g74f0c0a27.d20260909",
+      "triton": "3.5.0",
+      "vllm-ascend-split-batch": "0.1.3"
+    },
+    "devices": {
+      "count": 2,
+      "name": "Ascend910B2"
+    }
+  },
+  "checks": {
+    "device_pytest_suite": {
+      "exit_code": 0,
+      "result": "13 passed in 26.89s",
+      "command": "python -m pytest -q tests/test_npu_w31_gelu_plugin.py",
+      "python": "/usr/local/python3.12.13/bin/python3 (serving stack)"
+    },
+    "device_gate_probe": {
+      "status": "PASS",
+      "registration_all_true": true,
+      "numeric_all_pass": true,
+      "graph_replay_bit_exact": true,
+      "fallback_fp32_tanh_delegate": true,
+      "default_off_key_absent": true,
+      "uninstall_restores": true
+    },
+    "source_execution_pinned": {
+      "status": "PASS",
+      "trees": [
+        "/vllm-workspace/vllm",
+        "/vllm-workspace/vllm-ascend"
+      ]
+    },
+    "cpu_ci": {
+      "exit_code": 0,
+      "result": "311 passed, 21 skipped, 14 deselected",
+      "command": "python -m pytest -q -m \"not host_tree\""
+    },
+    "ruff": {
+      "exit_code": 0
+    },
+    "format": {
+      "exit_code": 0
+    },
+    "kernel_sanity": {
+      "max_abs_err_vs_fp32erf": 0.027406692504882812
+    },
+    "l0_microbench_directional": {
+      "M64_inter2048": {
+        "provider_ms": 0.21571192890405655,
+        "host_ms": 0.15341009944677353
+      },
+      "M8_inter27648": {
+        "provider_ms": 0.21619453094899654,
+        "host_ms": 0.15207688324153423
+      }
+    },
+    "l0_interpretation": "provider path slower than host native chain at probed standalone shapes; directional only, default-off stays correct, not an L4 claim",
+    "l3_serving": "NOT_RUN",
+    "l3_compare": "NOT_RUN",
+    "l4": "NOT_RUN"
+  },
+  "failed_attempts": [
+    "probe-device run 1: tanh fallback reused the fp32 half-dim (shape RuntimeError), fixed to d_tanh",
+    "probe-device run 1: versions field missing from result, added _versions() call, v2 run PASS (run 1 kept on disk as superseded)"
+  ],
+  "boundaries": [
+    "Plugin runtime code unchanged; this round is verification closure + infrastructure only.",
+    "L0 numbers are standalone-shape directional microbench; no L4, no serving L3/compare, no performance acceptance.",
+    "Serving installation untouched; probe uses PYTHONPATH=src, isolated venv under this L2 dir.",
+    "Registry candidate previous round (fi-gelu-oot-registration-20261020) remains blocked; this record supersedes its device-gate gap only."
+  ],
+  "evidence": {
+    "/root/包体恢复/records/probes/20261020T092346Z_gelu_device_gate/kernel-sanity.log": "239c5b8a58e051f2b28e07e784bbebe1e46a94f87924afc35662f558fc517a27",
+    "/root/包体恢复/records/probes/20261020T092346Z_gelu_device_gate/device-suite.log": "df8d474b0599d7fc4c16c32dba53315371f78d638b63d2def867d74b759dabd1",
+    "/root/包体恢复/records/probes/20261020T092346Z_gelu_device_gate/probe-device-v2.json": "b39ae8198c5f107f0744cdcf3813c793b1b7c7a13964173c6bdff8e6237ce2d1",
+    "/root/包体恢复/records/probes/20261020T092346Z_gelu_device_gate/probe-device-v2.log": "b9ebf98524fc18781a66176c0ba9f2a205eb9b6e27c32d24b31c1adfbd67b925",
+    "/root/包体恢复/records/probes/20261020T092346Z_gelu_device_gate/probe-device.json": "5ee072192af80172f3a163b15e723394f149f225c70a2fc37b32b3dcfc56b3ff",
+    "/root/包体恢复/records/probes/20261020T092346Z_gelu_device_gate/source-execution-pinned.json": "3fd594495595c5bfe0b4cc63c4a325defff49cd7db3370be70fb212181320f52",
+    "/root/包体恢复/records/probes/20261020T092346Z_gelu_device_gate/source-execution-pinned.log": "b87a4fdcc92348de5630dc163296dd93a2626ece4e3bac99fd776e3fea0195f3",
+    "/root/包体恢复/records/probes/20261020T092346Z_gelu_device_gate/cpu-tests.log": "035f62a05b4b353ad76fdc63e7797bad5909a5207803ea48333791263c0edd48",
+    "/root/包体恢复/records/probes/20261020T092346Z_gelu_device_gate/ruff.log": "c6486b51f483249343d4a4bdb91c41be31f0bdc28887b2f4cd4800e174f8bd6b",
+    "/root/包体恢复/records/probes/20261020T092346Z_gelu_device_gate/build.log": "05aa13242258614107b29120c92d911d4faba74743e2c0df0e0d473424a933c5",
+    "/root/包体恢复/records/probes/20261020T092346Z_gelu_device_gate/install.log": "a7b0c62283ba7563be2fa37fe433eba09aaa3861abd7b2e1a55b634d71a6667c"
+  },
+  "artifacts": {
+    "/root/包体恢复/records/probes/20261020T092346Z_gelu_device_gate/artifacts/vllm_ascend_split_batch-0.1.3-py3-none-any.whl": "6cde7577879b5a913c839726440a8a63963bf385f52cf0ff50dd5d1c23acb351"
+  },
+  "release_accepted": false,
+  "remote_published": false,
+  "candidate_snapshot": {
+    "id": "fi-gelu-device-gate-20261020",
+    "route": "028/global",
+    "caliber": "operator-device-gate-closure",
+    "cohort": "0.28 image stack host (vllm 0.28.1.post1.dev143 + vllm-ascend 0.25.1rc2.dev125+hust, CANN/torch-npu 2.13.0rc1); standalone operator microbench, no model weights",
+    "scenario": "standalone GeluAndMul op on 910B2 (device 0), eager + ACL graph capture",
+    "op": "gelu_and_mul",
+    "phase": "activation forward (standalone)",
+    "method": "CustomOp.register_oot provider; triton-ascend exact-erf kernel vs host native chain",
+    "stage": "validating",
+    "next_action": "Serving-level gates on the 0.28 cohort: plain L3 + opt bench compare, then bounded light L4 for the gelu_and_mul op before any manifest/activation change.",
+    "stop_condition": "Any numeric gate fail, graph replay mismatch, registration conflict, or serving L3 regression keeps default-off and reverts to the host path.",
+    "budget": {
+      "npu_min": "~6 min consumed: device suite + probe x2 + L0 microbench",
+      "serve_starts": "none",
+      "resamples": "none"
+    },
+    "evidence": [
+      "/root/包体恢复/records/probes/20261020T092346Z_gelu_device_gate/receipt.json",
+      "/root/包体恢复/records/probes/20261020T092346Z_gelu_device_gate/probe-device-v2.json",
+      "/root/包体恢复/records/probes/20261020T092346Z_gelu_device_gate/device-suite.log",
+      "/root/包体恢复/records/probes/20261020T092346Z_gelu_device_gate/source-execution-pinned.json",
+      "/root/包体恢复/records/probes/20261020T092346Z_gelu_device_gate/cpu-tests.log"
+    ],
+    "reason": "Device registration, numeric, graph-replay, fallback and default-off gates PASS; serving-level L3/compare/L4 still pending, so not accepted. L0 shows kernel slower than host native chain at standalone shapes, consistent with default-off.",
+    "reopen_condition": "Serving-level gate execution on the 0.28 cohort; hardware/stack change requires re-run of the device gate."
+  }
+}

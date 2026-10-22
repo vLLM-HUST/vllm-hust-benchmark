@@ -1,0 +1,51 @@
+{
+  "id": "tiered-trace-workflow",
+  "route": "028/meta-exp-fixed-cost",
+  "caliber": "",
+  "cohort": "",
+  "scenario": "算子实验工作流固定开销治理（不产、不引用算子占比或性能结论）",
+  "op": "",
+  "phase": "",
+  "method": "固定静态筛选→plain serve 的 L1×3/L2×3/L3×1 screen→仅晋级候选的 bounded light L4→仅 mechanism-gap 的 deep trace→交付后立即离线解析和瘦身；plain/profile serve 强制隔离。",
+  "stage": "probing",
+  "next_action": "Proceed with the already planned profile-serve-reuse r2 under its own declared budget; observe normal startup with the fixed guard; do not repeat tiered light collection",
+  "stop_condition": "①light 窗无法由 max_iterations 有界停止或影响服务后续请求→回 probing；②light 缺 all-kernel/opstat 或瘦身先于有效交付→立即回滚删除策略；③plain/profile 串档未被拒绝→修门禁后再测；④真实验证预算 NPU 20 min/墙钟 60 min 用尽即停并记 inconclusive。",
+  "budget": {
+    "npu_min": 20,
+    "wall_min": 60,
+    "serve_starts": 2
+  },
+  "evidence": [
+    "/root/包体恢复/records/probes/20261016T1620Z_trace_tiered_workflow_validation.log",
+    "/root/包体恢复/records/probes/20261017T1055Z_MFC_candidate_evidence_hygiene_audit.json",
+    "/root/包体恢复/records/probes/20261021T045600Z_tiered_trace_acceptance/reviewed-result.json",
+    "/root/包体恢复/records/probes/20261021T051800Z_startup_pid_guard/reviewed-result.json"
+  ],
+  "checks": {
+    "l0": {
+      "status": "SKIP",
+      "reason": "meta workflow, no operator microbenchmark"
+    },
+    "l3": {
+      "status": "PASS",
+      "evidence": [
+        "/root/包体恢复/records/probes/20261021T045600Z_tiered_trace_acceptance/l3-compare.log"
+      ]
+    },
+    "workflow_runtime": {
+      "status": "FAIL",
+      "evidence": [
+        "/root/包体恢复/records/probes/20261021T045600Z_tiered_trace_acceptance/reviewed-result.json"
+      ],
+      "reason": "Startup ownership false positive; successful components do not offset failure"
+    },
+    "startup_pid_cpu": {
+      "status": "PASS",
+      "evidence": [
+        "/root/包体恢复/records/probes/20261021T051800Z_startup_pid_guard/reviewed-result.json"
+      ]
+    }
+  },
+  "reason": "Plain screen and L3 compare PASS, bounded-light rank-local reuse and real mode guard PASS; a failed first server was falsely reported ready when the second server became healthy because startup waiting was not PID-bound. This blocks complete workflow validation. CPU regression now reproduces and rejects the false-readiness case; 888 full-suite tests pass. Real startup with the fixed guard is not yet observed; retain probing and historical runtime FAIL rather than claim acceptance.",
+  "reopen_condition": ""
+}

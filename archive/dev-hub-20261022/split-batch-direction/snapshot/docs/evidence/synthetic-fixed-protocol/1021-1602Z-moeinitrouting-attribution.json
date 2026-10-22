@@ -1,0 +1,24 @@
+{
+ "schema": "opt-ops-shape-attribution.v1",
+ "id": "1021-moeinitrouting-attribution",
+ "generated_by": "主会话离线复算（kernel_details 签名+时间线邻位 + 运行树 callsite 核对）；未起服、未跑 NPU",
+ "route": "028/D8-weight-nz-layout",
+ "route_note": "挂 D8 备查; 后续方法立项时按实质另立路线",
+ "candidate": "moe-routing-trio-fusion（方向名, 未立项）",
+ "op": "MoeInitRoutingV3",
+ "window": "1021-031741（synthetic-fixed-protocol, rank1）",
+ "facts": [
+  "decode: 1240 次 = 40 层 x 31 迭代, 签名 [1,2048;1,8], 中位 10.44-12.90us, 13.21ms/窗 ≈ 0.426ms/迭代 ≈ 2.6% step; prefill: [353,2048;353,8] 40 次 73.11us 中位",
+  "callsite: /vllm-workspace/vllm-ascend/vllm_ascend/ops/fused_moe/token_dispatcher.py:411 (AllGather 派发), DeviceOperator.npu_moe_init_routing -> torch_npu.npu_moe_init_routing_v2 -> aclnnMoeInitRoutingV3; 输入 = token hidden(算 x_expand) + topk 输出 [1,8]",
+  "MoE decode 每层序列与设备时长(窗内实测): router GEMM [256,2048] 7.88us -> MoeGatingTopK 5.58us -> MoeInitRoutingV3 12.90us -> GroupedMatmulV5 w13 34.50us -> SwiGlu -> w2 29.82us",
+  "路由三小核(router+gating+init)合计 26.4us ≈ GMM 对 64.3us 的 41% —— 路由 overhead 是 MoE 块设备时间的显著组成",
+  "下游消耗: expanded_row_idx/expert_tokens(group_list) 喂 GroupedMatmulV5 与 finalize 路 combine_metadata"
+ ],
+ "method_surfaces": [
+  {"id": "decode-m1-fastpath", "desc": "num_tokens==1 x topk8 时 init routing 退化为 8 行小排序/计组——可在 dispatch 侧走轻量路径或与 gating 融合; 依赖 GMM 对 group_list 的消费契约(bug 面: 空组/tie)"},
+  {"id": "trio-fusion", "desc": "router GEMM(已有 GateLinear) + MoeGatingTopK + InitRouting 三核融合(如 npu_deep_moe_gating 类封装若存在)——最大上限 26.4us/层, 但触及 router 链(此前 router-merge 的接缝教训在列)"},
+  {"id": "keep-nd", "desc": "仅消除 12.9us 单核收益有限(~1.6% step), 需与 fusion 合并立项才值得开"}
+ ],
+ "reopen_note": "router-merge(blocked, 无接缝) 的教训在此继续适用: 任何动 router 前向的方案先核接缝; device_op 封装层(token_dispatcher)是本次的主要改动面, 无跨模块线程化需求——这与 router-merge 不同",
+ "evidence_files": ["1021-031741-opstat.json"]
+}

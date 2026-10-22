@@ -1,0 +1,78 @@
+{
+  "schema": "d5-independent-microbatch-result.v1",
+  "candidate": "d5_independent_microbatch_gmm_gdn_interleave",
+  "verdict": "blocked",
+  "scope": "Current unmodified Ascend Qwen3.5 hybrid execution path, request-disjoint independent microbatches, scheduling-only. Not a rejection of independent-microbatch overlap in general.",
+  "reason": "No supported independent pair is produced in the current runner. v1 selects should_ubatch=False and rejects GDN ubid; v2 hybrid rejects the second ubatch. A stream wrapper cannot supply the missing per-microbatch GDN metadata/state ownership or layer-stage continuation.",
+  "execution_probe": {
+    "kind": "CPU execution of full source-extracted methods with explicit stubs, deferred annotations and decorators removed; NOT normal host import or a device run",
+    "source_hashes_and_full_method_witnesses": "/root/包体恢复/records/probes/20261021T062339Z_d5_independent_microbatch/interface-probe-final.json",
+    "v1_selection": "Two-request [1,1] and [16,16] interface fixtures, allow_microbatching=True, enable_dbo=True, use_ubatching=True: should_ubatch=False. These are not representative device workloads or captured model inputs.",
+    "v1_forced_gdn": "ubid=0 and ubid=1 both raise AssertionError: UBatching not supported with GDN yet",
+    "v2_forced_gdn": "ubatch_idx=1 raises AssertionError: DBO is not supported on Ascend",
+    "splitter": "Actual generic splitter on fixture request lengths [3,1] produces token-disjoint [0,2)/[2,4) but overlapping request 0; [1,1] splits requests disjointly. Token-disjoint slices alone do not prove disjoint GDN state.",
+    "workspace": "Actual _get_workspace_id rejects lane 1 with one configured lane and returns 1 with two lanes. Multi-lane capability exists; current NPUWorker initializes num_ubatches=1 and default num_lanes=1. Workspace API absence is NOT the blocker."
+  },
+  "source_boundaries": [
+    {"path": "vllm_ascend/worker/model_runner_v1.py", "lines": "3331-3424", "finding": "_determine_batch_execution_and_padding initializes should_ubatch=False; no local branch enables it; allow_microbatching does not enable a two-work path"},
+    {"path": "vllm_ascend/worker/model_runner_v1.py", "lines": "3706-3759", "finding": "GDN _build_attn_group_metadata rejects any non-None ubid, not merely the second stream"},
+    {"path": "vllm_ascend/worker/model_runner_v1.py", "lines": "3840-3851,4030-4031", "finding": "One runner-owned unpadded gdn_query_start_loc buffer; dummy/capture path explicitly disables ubatch slices"},
+    {"path": "vllm_ascend/worker/v2/model_states/mamba_hybrid.py", "lines": "250-262", "finding": "prepare_attn only accepts ubatch_idx=0"},
+    {"path": "vllm_ascend/worker/worker.py", "lines": "492-507,753-787", "finding": "Public worker boundary initializes one workspace owner and delegates an entire scheduler step to model_runner.execute_model; it does not expose a GDN/MoE stage continuation"},
+    {"path": "vllm/forward_context.py", "lines": "205-218,263-274", "finding": "Forward metadata is a scoped module-global context; two unsynchronized Python threads cannot independently own it. Sequential host submission under restored contexts may be possible only with separately valid metadata and lifetimes, not demonstrated here."},
+    {"path": "vllm_ascend/ops/gdn.py", "lines": "389-419,478-495,683-700", "finding": "GDN obtains metadata by prefix from the current context, uses layer-owned kv_cache, and writes conv/recurrent states by metadata state indices. Different token slices may still write the same request state."},
+    {"path": "vllm_ascend/ops/fused_moe/token_dispatcher.py", "lines": "411-436", "finding": "Routing owns sorted_hidden_states, expanded_row_idx, expert_tokens/group_list and combine metadata per invocation. Independent GMM input must preserve these actual per-microbatch outputs, not fabricate counts from a dimension of 256."},
+    {"path": "vllm_ascend/ops/fused_moe/moe_mlp.py", "lines": "28-56", "finding": "Typed MoE MLP boundary accepts already dispatched inputs and returns after GMM2; it is not an executor interface for creating or resuming the other microbatch's GDN."}
+  ],
+  "ownership_and_dependencies": {
+    "actual_pair": "NOT_FORMED: maybe_create_ubatch_slices is called with should_ubatch=False in the current TP2/DP1 path. No claim of an observed independent GMM/GDN pair.",
+    "inputs_and_residuals": "Would require separate live hidden/residual tensors for the fixed request split; do not reuse runner input/staging buffers before both consumers finish.",
+    "weights": "Layer weights can be shared read-only; actual physical layout for the independent pair is unobserved.",
+    "kv_and_gdn_state": "Layer-owned caches may share backing storage only if writable state-index sets are disjoint and no precopy/KV-transfer operations race. Chunks of one request require ordered state handoff and are not independent.",
+    "routing": "A owns its routed activations, expert counts, expanded row map, topk weights and unpermute metadata until combine completes; B must not reuse their storage.",
+    "workspace": "Use separately configured ubatch/lane owners and keep all references live through completion; existing lane API can address scratch but cannot create GDN metadata or split stages.",
+    "event_edges_if_supported": ["Each input/metadata/state producer -> its consuming stream", "A GMM1 -> A activation -> A GMM2 -> A combine", "B conv/GDN -> B norm -> B out_proj", "Both completion events -> output consumer, state/buffer reuse and device timing end", "Preserve TP collective submission ordering across ranks"],
+    "not_required_if_independence_is_proven": "No artificial A-GMM -> B-GDN edge; shared read-only weights alone do not require such an edge.",
+    "independence_verdict": "Not established for an actual production pair. No event removal or overlapping-state execution was attempted."
+  },
+  "minimum_missing_interface_contract": [
+    "A runner-supported request-boundary split of one SchedulerOutput with fixed per-request/token ownership; reject any shared writable GDN state index or explicitly serialize it.",
+    "Per-microbatch hybrid/GDN metadata construction: rebased query offsets, correct num_actual_reqs and prefill/decode classification, state-index maps, independent builder/staging storage, and KV/conv/recurrent state-copy completion ownership.",
+    "A supported stage execution/continuation boundary that preserves hidden/residual tensors and per-microbatch context while A MoE and B GDN are submitted, including TP collective ordering and exception cleanup. Current execute_model covers the whole step.",
+    "Configure two workspace owners using the existing manager capability before allocation/capture; validate all target operator scratch and graph pools, rather than merely assigning a new stream.",
+    "Expose/freeze actual routed tensors and counts plus actual weight format for matched serial/interleaved trials, then device numerical/state comparison before timing promotion."
+  ],
+  "public_interface_assessment": {
+    "general_plugin": "Import/registration does not add missing per-ubatch metadata or stage execution. No platform plugin or host method replacement added.",
+    "additional_config_and_dbo_flags": "Can express intent, but cannot bypass the reproduced GDN guards or create independent state owners.",
+    "worker_cls": "A custom worker is public and could host a new executor, so universal impossibility is NOT claimed. Wrapping super().execute_model only exposes whole-step calls. Implementing a replacement hybrid metadata builder and staged runner, or copying whole forwards, is not a stream/event-only adapter to the current supported path. No such replacement is implemented or validated.",
+    "safe_stop": "Do not delete assertions, replace global forward context concurrently, copy/patch host forward methods, restore cascade, or present unrelated random kernels as production overlap. Stop this current-host scheduling-only path at the reproduced interface gate."
+  },
+  "shape_and_weight_status": "Retained M/K/N, dtype and phase/callsite shapes are listed in b1-work-order.json. They are not a captured independent pair. Exact per-expert counts, actual independent inputs/state ownership, packed layout and saturated pair concurrency remain missing. No new scenario or shape collection was performed.",
+  "knowledge": {
+    "search": "askb search 'microbatch 多流 GDN workspace 独立' -k 5 --text",
+    "cards_read": ["multistream_cross_stream_tensor_lifetime_clone", "multistream_branch_variable_name_collision_hang", "graph_mode_multi_stream_sync_failures", "graph_mode_multi_stream_cross_stream_sync_api"],
+    "platforms_status": "Read cards: platforms=agnostic, status=stable; applicable synchronization/lifetime cautions for a2, not proof of this host's GDN ubatch support or performance. GE, ACL graph and eager APIs must not be substituted for one another."
+  },
+  "validation": {
+    "targeted_pytest": {"exit": 0, "result": "18 passed in 0.68s", "paths": ["tests/test_d5_independent_microbatches.py", "tests/test_audit_d5_dependencies.py"]},
+    "targeted_ruff": {"exit": 0, "result": "All checks passed!", "paths": ["tools/probe_d5_independent_microbatches.py", "tests/test_d5_independent_microbatches.py"]},
+    "initial_ruff": "FAIL: ten long lines, then one remaining long string after formatting; fixed before final targeted checks. Not hidden or treated as PASS.",
+    "full_pytest": "NOT_RUN: user explicitly requested focused checks; no runtime code changed",
+    "l0_device_ab": "NOT_RUN: no valid independent production pair or supported execution path",
+    "l3_compare": "NOT_RUN: no runtime candidate to activate; no numerical acceptance claimed",
+    "l4": "NOT_RUN: no promotion; graph route remains graph, not operator",
+    "acceptance": "NOT_ACCEPTED"
+  },
+  "resources": {
+    "physical_to_logical": "npu-smi info -m: physical 3/chip0 -> logic0; physical 6/chip0 -> logic1. Never passed physical 3,6 as ASCEND_RT_VISIBLE_DEVICES.",
+    "serve_starts": 0,
+    "trace_windows": 0,
+    "device_ab_runs": 0,
+    "diagnostic_command": "opt bench l0 --help was incorrectly interpreted as an L0 operand rather than help; imports began at 06:24:46Z, then the owned session 30372 was interrupted and exited 137. No result artifact, completed device check or performance measurement was produced. Reserve 2 NPU-min conservatively; actual device occupancy unmeasured. No retry or borrowed budget.",
+    "remaining_action": "No device process or experiment remains running. No empty service held during CPU review."
+  },
+  "rollback": "No runtime activation or env switch was introduced; default behavior and manifest remain unchanged. The offline probe is opt-in by explicit command; removing it is not required for production rollback.",
+  "reproduce": "python tools/probe_d5_independent_microbatches.py --core /root/vllm-workspace/vllm-hust --ascend /root/vllm-workspace/vllm-ascend-hust --out <NEW_JSON_PATH>",
+  "delivery_states": {"experiment": "interface probe complete; device prototype blocked", "optimization": "NOT_ACCEPTED", "commit": "reported separately by Git delivery check", "publication": "NOT_PUSHED"}
+}

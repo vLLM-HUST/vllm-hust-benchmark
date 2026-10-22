@@ -1,0 +1,78 @@
+{
+  "schema": "priority-reset.v1",
+  "base_head": "dc7ae611a39ffca79d89cda62b96613bc4190655",
+  "branch": "0.28/comm-overlap-free-attribution",
+  "startup_dirty": [],
+  "paths": [
+    "docs/evidence/priority-reset-20261021"
+  ],
+  "scope": "CPU pointer closeout only; no operator shape/weight scope change or optimization acceptance",
+  "changed": {
+    "same-serve-arm-switch": {
+      "fields": [
+        "next_action",
+        "reason",
+        "reopen_condition"
+      ],
+      "stage": "probing (unchanged)",
+      "decision": "Shelved by user priority; not an execution item; explicit authorization required, never idle-NPU auto-resume",
+      "limits": "A1/A2 mechanism evidence does not prove real TP2/FULL cohort B; recovered original source SHA retained"
+    }
+  },
+  "unchanged": {
+    "profile-serve-reuse": "inconclusive; 444.036888 -> 449.836699 tok/s, +1.306155% within-profile drift; plain NOT_RUN; retained-plain L3 8/8 identical is not r2 paired validation; no automatic restart",
+    "tiered-trace-workflow": "historical workflow_runtime FAIL retained; CPU PID checks and normal real startup PASS only in their own scopes; exhausted startup budget; 99255c0 guard retained",
+    "d5_gmm_vector_limit_core_overlap_candidate": "blocked same-batch dependency retained; no stream/quota/event/unrelated-input workaround",
+    "maintenance": "No warning cleanup, relabel, repin, acceptance-criterion change or workbench development"
+  },
+  "ownership": {
+    "session_2": "Independent microbatch real interleaving: new mechanism, B1 and candidate; sole NPU/D5 owner; no changes or evaluation here",
+    "session_1": "AGENTS, test rules and validation entry points untouched"
+  },
+  "checks": {
+    "json_references": "PASS: 5 referenced JSON documents parsed and terminal/FAIL fields asserted",
+    "snapshot_fields": "PASS: only three declared pointer/reason fields changed; all other input fields preserved",
+    "evidence_hashes": "PASS: same-serve 10/10 and original SHA unchanged before/after record",
+    "concurrency": "Latest full same-serve snapshot re-read and equality-checked under session-ledger-write.lock immediately before opt append; no other candidate written",
+    "coverage": {
+      "runs": 1,
+      "exit": 0,
+      "result": "FAIL 0 / WARN 55; metric PASS, layer WARN(11), caliber WARN(36)",
+      "limit": "Startup status separately reported historical two-file drift FAIL; coverage is not archive-drift clearance, numeric acceptance or authority to repin"
+    },
+    "not_run": [
+      "pytest",
+      "model smoke",
+      "L0/L1/L2/L3/L4",
+      "profile collectors",
+      "NPU or service operations"
+    ]
+  },
+  "budget_spent": {
+    "npu_min": 0,
+    "serve_starts": 0
+  },
+  "rollback": "Only with explicit authorization: re-read current candidate, compare against same-serve-recorded.json, extract record fields present in same-serve-after.json from same-serve-before.json, then append via opt candidate record --file. Never edit the ledger or erase L2 history. No code rollback needed.",
+  "references": [
+    {
+      "path": "docs/evidence/pipeline-followup-20261021/historical-source-recovery.json",
+      "sha256": "2e9bd32eab9548fdf038430de44271b3895823e2abaca14f9e18d9b02b7c362a"
+    },
+    {
+      "path": "docs/evidence/pipeline-followup-20261021/tiered-candidate.json",
+      "sha256": "f11b561bb37105fe380bd8037d89d955dce74c80ea82f9e346d1431944afd8df"
+    },
+    {
+      "path": "docs/evidence/profile-serve-reuse-r2-20261021/candidate-snapshot.json",
+      "sha256": "33febdb801fe65b0edcc381d2441ec18b991d3eac339281ce7cfb50ee05f7f6b"
+    },
+    {
+      "path": "docs/evidence/profile-serve-reuse-r2-20261021/result.json",
+      "sha256": "4fc4c5cd5e600985b9c57fb41abfc0302d3b4d070589ce1911e21295bb001b07"
+    },
+    {
+      "path": "docs/evidence/d5-multistream-overlap-20261021/candidate-snapshot.json",
+      "sha256": "fa229f5061160b3fd3aa73656d4179337236b09913132a38c246e4adaa049105"
+    }
+  ]
+}

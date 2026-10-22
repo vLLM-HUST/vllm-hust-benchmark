@@ -1,0 +1,672 @@
+{
+ "schema": "opt-ops-l0-router-merge.v1",
+ "ts": "2026-10-21T13:05:53Z",
+ "status": "ok",
+ "command": {
+  "argv": [
+   "tools/bench_router_merge.py",
+   "--out",
+   "/root/包体恢复/records/ladder/1021-130543-l0-router-merge.json"
+  ],
+  "cwd": "/root/vllm-workspace/vllm-ascend-split-batch-hust",
+  "python": "/usr/local/python3.12.13/bin/python3"
+ },
+ "candidate": "router-merge-into-inproj-qkv",
+ "route": "028/D7-matmulv2-decode-fusion",
+ "caliber_note": "L0 eager 单卡；窗口 1021-031741 的 decode M=1 / prefill M=353 实测形状",
+ "goal": {
+  "baseline": "F.linear(x,W_main) + F.linear(x,W_router) 两次独立 GEMM（qwen3_next ReplicatedLinear 语义, bias=False 假设）",
+  "candidate": "cat([W_main,W_router],0) 一次 F.linear + logits 切片 .contiguous()",
+  "arbiter": "baseline_pair vs candidate_merged 配对中位差; diag_router_only 只诊断"
+ },
+ "kb_constraints": {
+  "card": "ge_graph_moe_gate_router_weight_layout",
+  "applied": "路由输出切片强制 contiguous; 权重 cat(dim=0) 保行连续 ND"
+ },
+ "hardware": {
+  "device": "npu",
+  "device_name": "Ascend910B2",
+  "host": "coder-user-tianyuw-new-profile-78749865b5-zhppg",
+  "torch": "2.13.0+cpu"
+ },
+ "code": {
+  "repo": "/root/vllm-workspace/vllm-ascend-split-batch-hust",
+  "repo_head": "7b45a6e2dc4bdbb781758f0d277ef5430c83077a",
+  "tool_sha256": "d208b31eaaaece8ee65d2bf7ed56d114b9667d3f35c488b71f7a3c101fd4ee54"
+ },
+ "cells": [
+  {
+   "id": "gdn_inproj-M1",
+   "variant": "gdn_inproj",
+   "callsite": "30 GDN 层 in_proj（F2 已并 qkvz+ba）",
+   "m": 1,
+   "phase": "decode",
+   "shapes": {
+    "x": [
+     1,
+     2048
+    ],
+    "w_main": [
+     6176,
+     2048
+    ],
+    "w_router": [
+     256,
+     2048
+    ],
+    "w_merged": [
+     6432,
+     2048
+    ]
+   },
+   "numerics": {
+    "main_slice_vs_baseline": {
+     "bitwise_ok": true,
+     "mismatch": 0,
+     "numel": 6176,
+     "max_abs_diff": 0.0
+    },
+    "router_slice_vs_baseline": {
+     "bitwise_ok": true,
+     "mismatch": 0,
+     "numel": 256,
+     "max_abs_diff": 0.0
+    },
+    "weight_contiguous": {
+     "w_merged": true,
+     "w_baseline": true
+    },
+    "router_slice_contiguous_after_copy": true,
+    "merged_row_stride_pollutes_main_view": {
+     "main_view_stride": [
+      6432,
+      1
+     ],
+     "baseline_stride": [
+      6176,
+      1
+     ]
+    }
+   },
+   "perf": {
+    "dtype": "bfloat16",
+    "iters": 100,
+    "repeats": 3,
+    "warmup": 20,
+    "timer_scope": "npu_event_elapsed_eager_chain_including_host_submission_gaps",
+    "schedule": [
+     [
+      "baseline_pair",
+      "candidate_merged",
+      "diag_router_only"
+     ],
+     [
+      "diag_router_only",
+      "candidate_merged",
+      "baseline_pair"
+     ],
+     [
+      "baseline_pair",
+      "candidate_merged",
+      "diag_router_only"
+     ]
+    ],
+    "arms": {
+     "baseline_pair": {
+      "us_median": 75.384,
+      "runs": [
+       {
+        "event_elapsed_us_total": 7411.86,
+        "us_per_iter_event_elapsed": 74.119,
+        "us_host_enqueue": 81.475,
+        "us_host_total": 82.228
+       },
+       {
+        "event_elapsed_us_total": 7565.92,
+        "us_per_iter_event_elapsed": 75.659,
+        "us_host_enqueue": 76.09,
+        "us_host_total": 77.067
+       },
+       {
+        "event_elapsed_us_total": 7538.38,
+        "us_per_iter_event_elapsed": 75.384,
+        "us_host_enqueue": 75.849,
+        "us_host_total": 77.041
+       }
+      ]
+     },
+     "candidate_merged": {
+      "us_median": 65.959,
+      "runs": [
+       {
+        "event_elapsed_us_total": 6595.9,
+        "us_per_iter_event_elapsed": 65.959,
+        "us_host_enqueue": 66.597,
+        "us_host_total": 67.258
+       },
+       {
+        "event_elapsed_us_total": 6565.32,
+        "us_per_iter_event_elapsed": 65.653,
+        "us_host_enqueue": 66.228,
+        "us_host_total": 67.21
+       },
+       {
+        "event_elapsed_us_total": 7622.28,
+        "us_per_iter_event_elapsed": 76.223,
+        "us_host_enqueue": 76.718,
+        "us_host_total": 77.708
+       }
+      ]
+     },
+     "diag_router_only": {
+      "us_median": 38.304,
+      "runs": [
+       {
+        "event_elapsed_us_total": 3820.4,
+        "us_per_iter_event_elapsed": 38.204,
+        "us_host_enqueue": 38.709,
+        "us_host_total": 39.402
+       },
+       {
+        "event_elapsed_us_total": 3830.4,
+        "us_per_iter_event_elapsed": 38.304,
+        "us_host_enqueue": 38.857,
+        "us_host_total": 39.499
+       },
+       {
+        "event_elapsed_us_total": 3838.36,
+        "us_per_iter_event_elapsed": 38.384,
+        "us_host_enqueue": 38.87,
+        "us_host_total": 39.54
+       }
+      ]
+     }
+    },
+    "paired_delta_pct": [
+     -11.009,
+     -13.225,
+     1.113
+    ],
+    "paired_delta_pct_median": -11.009,
+    "delta_pct_median_of_medians": -12.503
+   }
+  },
+  {
+   "id": "gdn_inproj-M353",
+   "variant": "gdn_inproj",
+   "callsite": "30 GDN 层 in_proj（F2 已并 qkvz+ba）",
+   "m": 353,
+   "phase": "prefill",
+   "shapes": {
+    "x": [
+     353,
+     2048
+    ],
+    "w_main": [
+     6176,
+     2048
+    ],
+    "w_router": [
+     256,
+     2048
+    ],
+    "w_merged": [
+     6432,
+     2048
+    ]
+   },
+   "numerics": {
+    "main_slice_vs_baseline": {
+     "bitwise_ok": false,
+     "mismatch": 185,
+     "numel": 2180128,
+     "max_abs_diff": 0.5
+    },
+    "router_slice_vs_baseline": {
+     "bitwise_ok": false,
+     "mismatch": 7,
+     "numel": 90368,
+     "max_abs_diff": 0.25
+    },
+    "weight_contiguous": {
+     "w_merged": true,
+     "w_baseline": true
+    },
+    "router_slice_contiguous_after_copy": true,
+    "merged_row_stride_pollutes_main_view": {
+     "main_view_stride": [
+      6432,
+      1
+     ],
+     "baseline_stride": [
+      6176,
+      1
+     ]
+    }
+   },
+   "perf": {
+    "dtype": "bfloat16",
+    "iters": 100,
+    "repeats": 3,
+    "warmup": 20,
+    "timer_scope": "npu_event_elapsed_eager_chain_including_host_submission_gaps",
+    "schedule": [
+     [
+      "baseline_pair",
+      "candidate_merged",
+      "diag_router_only"
+     ],
+     [
+      "diag_router_only",
+      "candidate_merged",
+      "baseline_pair"
+     ],
+     [
+      "baseline_pair",
+      "candidate_merged",
+      "diag_router_only"
+     ]
+    ],
+    "arms": {
+     "baseline_pair": {
+      "us_median": 76.52,
+      "runs": [
+       {
+        "event_elapsed_us_total": 6967.12,
+        "us_per_iter_event_elapsed": 69.671,
+        "us_host_enqueue": 70.436,
+        "us_host_total": 71.751
+       },
+       {
+        "event_elapsed_us_total": 8436.28,
+        "us_per_iter_event_elapsed": 84.363,
+        "us_host_enqueue": 75.762,
+        "us_host_total": 85.618
+       },
+       {
+        "event_elapsed_us_total": 7651.98,
+        "us_per_iter_event_elapsed": 76.52,
+        "us_host_enqueue": 75.613,
+        "us_host_total": 85.303
+       }
+      ]
+     },
+     "candidate_merged": {
+      "us_median": 99.371,
+      "runs": [
+       {
+        "event_elapsed_us_total": 9872.92,
+        "us_per_iter_event_elapsed": 98.729,
+        "us_host_enqueue": 99.387,
+        "us_host_total": 100.684
+       },
+       {
+        "event_elapsed_us_total": 10312.62,
+        "us_per_iter_event_elapsed": 103.126,
+        "us_host_enqueue": 103.217,
+        "us_host_total": 105.026
+       },
+       {
+        "event_elapsed_us_total": 9937.1,
+        "us_per_iter_event_elapsed": 99.371,
+        "us_host_enqueue": 105.48,
+        "us_host_total": 106.231
+       }
+      ]
+     },
+     "diag_router_only": {
+      "us_median": 35.55,
+      "runs": [
+       {
+        "event_elapsed_us_total": 3555.0,
+        "us_per_iter_event_elapsed": 35.55,
+        "us_host_enqueue": 36.027,
+        "us_host_total": 36.806
+       },
+       {
+        "event_elapsed_us_total": 3532.38,
+        "us_per_iter_event_elapsed": 35.324,
+        "us_host_enqueue": 35.928,
+        "us_host_total": 36.73
+       },
+       {
+        "event_elapsed_us_total": 3820.74,
+        "us_per_iter_event_elapsed": 38.207,
+        "us_host_enqueue": 38.731,
+        "us_host_total": 39.776
+       }
+      ]
+     }
+    },
+    "paired_delta_pct": [
+     41.707,
+     22.241,
+     29.863
+    ],
+    "paired_delta_pct_median": 29.863,
+    "delta_pct_median_of_medians": 29.863
+   }
+  },
+  {
+   "id": "fa_qkv-M1",
+   "variant": "fa_qkv",
+   "callsite": "10 FA 层 qkv（含 attn_output_gate 列）",
+   "m": 1,
+   "phase": "decode",
+   "shapes": {
+    "x": [
+     1,
+     2048
+    ],
+    "w_main": [
+     4608,
+     2048
+    ],
+    "w_router": [
+     256,
+     2048
+    ],
+    "w_merged": [
+     4864,
+     2048
+    ]
+   },
+   "numerics": {
+    "main_slice_vs_baseline": {
+     "bitwise_ok": true,
+     "mismatch": 0,
+     "numel": 4608,
+     "max_abs_diff": 0.0
+    },
+    "router_slice_vs_baseline": {
+     "bitwise_ok": true,
+     "mismatch": 0,
+     "numel": 256,
+     "max_abs_diff": 0.0
+    },
+    "weight_contiguous": {
+     "w_merged": true,
+     "w_baseline": true
+    },
+    "router_slice_contiguous_after_copy": true,
+    "merged_row_stride_pollutes_main_view": {
+     "main_view_stride": [
+      4864,
+      1
+     ],
+     "baseline_stride": [
+      4608,
+      1
+     ]
+    }
+   },
+   "perf": {
+    "dtype": "bfloat16",
+    "iters": 100,
+    "repeats": 3,
+    "warmup": 20,
+    "timer_scope": "npu_event_elapsed_eager_chain_including_host_submission_gaps",
+    "schedule": [
+     [
+      "baseline_pair",
+      "candidate_merged",
+      "diag_router_only"
+     ],
+     [
+      "diag_router_only",
+      "candidate_merged",
+      "baseline_pair"
+     ],
+     [
+      "baseline_pair",
+      "candidate_merged",
+      "diag_router_only"
+     ]
+    ],
+    "arms": {
+     "baseline_pair": {
+      "us_median": 75.125,
+      "runs": [
+       {
+        "event_elapsed_us_total": 7502.56,
+        "us_per_iter_event_elapsed": 75.026,
+        "us_host_enqueue": 76.335,
+        "us_host_total": 77.151
+       },
+       {
+        "event_elapsed_us_total": 7512.54,
+        "us_per_iter_event_elapsed": 75.125,
+        "us_host_enqueue": 75.635,
+        "us_host_total": 76.935
+       },
+       {
+        "event_elapsed_us_total": 7567.26,
+        "us_per_iter_event_elapsed": 75.673,
+        "us_host_enqueue": 76.183,
+        "us_host_total": 77.326
+       }
+      ]
+     },
+     "candidate_merged": {
+      "us_median": 65.013,
+      "runs": [
+       {
+        "event_elapsed_us_total": 6501.28,
+        "us_per_iter_event_elapsed": 65.013,
+        "us_host_enqueue": 65.559,
+        "us_host_total": 66.688
+       },
+       {
+        "event_elapsed_us_total": 6568.88,
+        "us_per_iter_event_elapsed": 65.689,
+        "us_host_enqueue": 66.24,
+        "us_host_total": 67.198
+       },
+       {
+        "event_elapsed_us_total": 6380.82,
+        "us_per_iter_event_elapsed": 63.808,
+        "us_host_enqueue": 64.001,
+        "us_host_total": 65.553
+       }
+      ]
+     },
+     "diag_router_only": {
+      "us_median": 38.578,
+      "runs": [
+       {
+        "event_elapsed_us_total": 3877.6,
+        "us_per_iter_event_elapsed": 38.776,
+        "us_host_enqueue": 39.465,
+        "us_host_total": 40.365
+       },
+       {
+        "event_elapsed_us_total": 3857.78,
+        "us_per_iter_event_elapsed": 38.578,
+        "us_host_enqueue": 39.087,
+        "us_host_total": 40.319
+       },
+       {
+        "event_elapsed_us_total": 3722.84,
+        "us_per_iter_event_elapsed": 37.228,
+        "us_host_enqueue": 37.773,
+        "us_host_total": 38.429
+       }
+      ]
+     }
+    },
+    "paired_delta_pct": [
+     -13.346,
+     -12.56,
+     -15.679
+    ],
+    "paired_delta_pct_median": -13.346,
+    "delta_pct_median_of_medians": -13.46
+   }
+  },
+  {
+   "id": "fa_qkv-M353",
+   "variant": "fa_qkv",
+   "callsite": "10 FA 层 qkv（含 attn_output_gate 列）",
+   "m": 353,
+   "phase": "prefill",
+   "shapes": {
+    "x": [
+     353,
+     2048
+    ],
+    "w_main": [
+     4608,
+     2048
+    ],
+    "w_router": [
+     256,
+     2048
+    ],
+    "w_merged": [
+     4864,
+     2048
+    ]
+   },
+   "numerics": {
+    "main_slice_vs_baseline": {
+     "bitwise_ok": false,
+     "mismatch": 297,
+     "numel": 1626624,
+     "max_abs_diff": 1.0
+    },
+    "router_slice_vs_baseline": {
+     "bitwise_ok": false,
+     "mismatch": 10,
+     "numel": 90368,
+     "max_abs_diff": 0.25
+    },
+    "weight_contiguous": {
+     "w_merged": true,
+     "w_baseline": true
+    },
+    "router_slice_contiguous_after_copy": true,
+    "merged_row_stride_pollutes_main_view": {
+     "main_view_stride": [
+      4864,
+      1
+     ],
+     "baseline_stride": [
+      4608,
+      1
+     ]
+    }
+   },
+   "perf": {
+    "dtype": "bfloat16",
+    "iters": 100,
+    "repeats": 3,
+    "warmup": 20,
+    "timer_scope": "npu_event_elapsed_eager_chain_including_host_submission_gaps",
+    "schedule": [
+     [
+      "baseline_pair",
+      "candidate_merged",
+      "diag_router_only"
+     ],
+     [
+      "diag_router_only",
+      "candidate_merged",
+      "baseline_pair"
+     ],
+     [
+      "baseline_pair",
+      "candidate_merged",
+      "diag_router_only"
+     ]
+    ],
+    "arms": {
+     "baseline_pair": {
+      "us_median": 69.269,
+      "runs": [
+       {
+        "event_elapsed_us_total": 6926.92,
+        "us_per_iter_event_elapsed": 69.269,
+        "us_host_enqueue": 72.476,
+        "us_host_total": 73.506
+       },
+       {
+        "event_elapsed_us_total": 7053.0,
+        "us_per_iter_event_elapsed": 70.53,
+        "us_host_enqueue": 71.009,
+        "us_host_total": 71.828
+       },
+       {
+        "event_elapsed_us_total": 6921.12,
+        "us_per_iter_event_elapsed": 69.211,
+        "us_host_enqueue": 69.669,
+        "us_host_total": 70.486
+       }
+      ]
+     },
+     "candidate_merged": {
+      "us_median": 101.134,
+      "runs": [
+       {
+        "event_elapsed_us_total": 93976.883,
+        "us_per_iter_event_elapsed": 939.769,
+        "us_host_enqueue": 940.264,
+        "us_host_total": 941.243
+       },
+       {
+        "event_elapsed_us_total": 10113.42,
+        "us_per_iter_event_elapsed": 101.134,
+        "us_host_enqueue": 101.617,
+        "us_host_total": 102.548
+       },
+       {
+        "event_elapsed_us_total": 10010.2,
+        "us_per_iter_event_elapsed": 100.102,
+        "us_host_enqueue": 100.565,
+        "us_host_total": 101.411
+       }
+      ]
+     },
+     "diag_router_only": {
+      "us_median": 35.803,
+      "runs": [
+       {
+        "event_elapsed_us_total": 3586.94,
+        "us_per_iter_event_elapsed": 35.869,
+        "us_host_enqueue": 36.435,
+        "us_host_total": 37.21
+       },
+       {
+        "event_elapsed_us_total": 3540.86,
+        "us_per_iter_event_elapsed": 35.409,
+        "us_host_enqueue": 35.916,
+        "us_host_total": 36.638
+       },
+       {
+        "event_elapsed_us_total": 3580.3,
+        "us_per_iter_event_elapsed": 35.803,
+        "us_host_enqueue": 36.263,
+        "us_host_total": 36.932
+       }
+      ]
+     }
+    },
+    "paired_delta_pct": [
+     1256.695,
+     43.391,
+     44.633
+    ],
+    "paired_delta_pct_median": 44.633,
+    "delta_pct_median_of_medians": 46.002
+   }
+  }
+ ],
+ "not_claimed": [
+  "eager 链流程局部延迟，不是 FULL/图模式时长、不是 all-kernel 占比、不换算端到端",
+  "bitwise 不裁决——GEMM 重结合允许; L3 8/8 输出一致才是数值门",
+  "merged 行跨度会污染 in_proj 输出视图（stride 6432/4864）: 下游 unpack/reshape 的适配成本不在本基准内，属 L3/实现风险",
+  "w_merged 为加载期一次性构造；本基准不含构造耗时（一次性 pay）"
+ ],
+ "budget": {
+  "elapsed_s": 8.87
+ }
+}

@@ -1,0 +1,17 @@
+{
+  "id": "d5_independent_microbatch_gmm_gdn_interleave",
+  "route": "028/D5-multistream-overlap",
+  "caliber": "synthetic-fixed-protocol",
+  "cohort": "028-qwen35-35b-a3b-tp2-fullgraph",
+  "scenario": "Real model GDN diagnostic prototype with fixed request-disjoint token halves; device start blocked by insufficient free NPU memory before model load",
+  "op": "GroupedMatmul+GDN-vector",
+  "phase": "decode",
+  "method": "Default-off explicit worker_cls; cloned GDN metadata/state-slot disjointness; serial vs GDN/GMM event-based interleave proposal",
+  "stage": "blocked",
+  "next_action": "Startup cap exceeded (3 invocations against 2 allowed). Await explicit additional-start authorization; the original wall deadline remains 07:53:39Z. Before profile, prove actual Qwen metadata, routing counts, device numerics and paired makespan.",
+  "stop_condition": "Service cannot reserve requested NPU memory, malformed metadata, shared state slots, numerical mismatch, no paired makespan improvement or declared budget cap",
+  "budget": {"wall_min": 90, "npu_min": 60, "serve_starts_max": 2, "light_windows_max": 1, "deep_windows_max": 1, "start_utc": "2026-10-21T06:23:39Z", "deadline_utc": "2026-10-21T07:53:39Z", "serve_starts_used": 3},
+  "evidence": ["/root/vllm-workspace/vllm-ascend-split-batch-hust/docs/evidence/d5-pair-worker-20261021/b1.json", "/root/vllm-workspace/vllm-ascend-split-batch-hust/docs/evidence/d5-pair-worker-20261021/result.json", "/root/包体恢复/records/probes/20261021T064236Z_d5_pair_worker/result.json", "/root/包体恢复/records/probes/20261021T064236Z_d5_pair_worker/resource-check-20261021T072745Z.json", "/root/包体恢复/logs/ladder-serve-1021-071439.log"],
+  "reason": "CPU metadata unit tests pass but no service got as far as loading. First worker attempt failed with free memory 24.85/60.96 GiB, below 56.08 GiB required at 0.92 utilization. Device correctness and performance are unknown; do not claim overlap feasibility or optimization.",
+  "reopen_condition": "A separately authorized window, exclusive TP2 memory availability confirmed, worker run fixed for same request split in serial/interleaved arms, and actual per-expert counts/layout captured per shape before interpreting makespan."
+}
