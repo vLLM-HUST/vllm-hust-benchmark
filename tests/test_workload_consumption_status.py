@@ -23,12 +23,10 @@ def test_fixed_consumption_receipts_are_linked_without_erasing_native_gaps():
         assert "research-consumer validation pending" not in rows[source]["blocker"]
         assert rows[source]["checked"] is False
     guide = (DOCS / "DATA_CONSUMPTION_VALIDATION.zh-CN.md").read_text("utf-8")
-    assert (
-        "653ad3518e5fcd78c958d86ea39bac6d8714fb3a" in guide
-    )  # pragma: allowlist secret - public data Git commit
-    assert (
-        "4906910e9c5f9909d84e41d59f9f49dcb055a912" in guide
-    )  # pragma: allowlist secret - public consumer Git commit
+    data_commit = "653ad3518e5fcd78c958d86ea39bac6d8714fb3a"  # pragma: allowlist secret - public Git commit
+    consumer_commit = "4906910e9c5f9909d84e41d59f9f49dcb055a912"  # pragma: allowlist secret - public Git commit
+    assert data_commit in guide
+    assert consumer_commit in guide
     assert "language-model-only" in guide
     assert "功能评分仍未执行" in guide
     assert "不因此打勾" in guide
