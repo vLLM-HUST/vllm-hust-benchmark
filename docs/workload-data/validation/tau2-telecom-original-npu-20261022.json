@@ -1,0 +1,98 @@
+{
+  "source_id": "TAUBENCH",
+  "revision": "f8de30c298689cbe0117d76a378e7315a17e5bd8",
+  "status": "END_TO_END_EXECUTED_AND_SCORED",
+  "scope": "FIRST_THREE_OFFICIAL_TELECOM_FULL_LOADER_TASKS_ONLY",
+  "selected_samples": [
+    "[mobile_data_issue]user_abroad_roaming_enabled_off[PERSONA:None]",
+    "[mobile_data_issue]user_abroad_roaming_disabled_on[PERSONA:Easy]",
+    "[mobile_data_issue]user_abroad_roaming_disabled_off[PERSONA:Hard]"
+  ],
+  "tasks": [
+    {
+      "task_id": "[mobile_data_issue]user_abroad_roaming_enabled_off[PERSONA:None]",
+      "termination_reason": "user_stop",
+      "reward": 1,
+      "reward_keys": [
+        "reward",
+        "db_check",
+        "env_assertions",
+        "action_checks",
+        "nl_assertions",
+        "communicate_checks",
+        "reward_basis",
+        "reward_breakdown",
+        "info"
+      ]
+    },
+    {
+      "task_id": "[mobile_data_issue]user_abroad_roaming_disabled_on[PERSONA:Easy]",
+      "termination_reason": "user_stop",
+      "reward": 1,
+      "reward_keys": [
+        "reward",
+        "db_check",
+        "env_assertions",
+        "action_checks",
+        "nl_assertions",
+        "communicate_checks",
+        "reward_basis",
+        "reward_breakdown",
+        "info"
+      ]
+    },
+    {
+      "task_id": "[mobile_data_issue]user_abroad_roaming_disabled_off[PERSONA:Hard]",
+      "termination_reason": "user_stop",
+      "reward": 0,
+      "reward_keys": [
+        "reward",
+        "db_check",
+        "env_assertions",
+        "action_checks",
+        "nl_assertions",
+        "communicate_checks",
+        "reward_basis",
+        "reward_breakdown",
+        "info"
+      ]
+    }
+  ],
+  "server_inventory": {
+    "accelerator": "Ascend 910B2",
+    "chips": 2,
+    "backend": "vllm-ascend",
+    "precision": "bfloat16",
+    "mode": "graph"
+  },
+  "served_model": "workload-qwen35-27b-128k-nonthinking",
+  "model_roles": [
+    "assistant",
+    "user_simulator"
+  ],
+  "model_difference": "Both roles use local Qwen3.5-27B, not upstream reference GPT-4.1",
+  "evaluation_type": "ALL",
+  "scoring": "Original environment assertion scoring; 2 of 3 rewards equal 1; third reward 0 retained",
+  "max_steps": 200,
+  "max_errors": 10,
+  "source_archive_sha256": "65f1d59b3783bfb38664142fb166aa40b369e4b4083170723059d8f1883ccd64",
+  "package": "tau2==0.2.1.dev0",
+  "litellm": "1.65.0",
+  "portable_runner_preflight": "All installed tau2 Python source and original archive data bytes matched fixed archive; no additional model calls",
+  "prior_attempts": [
+    {
+      "run": "001",
+      "status": "IMPORT_ERROR_MISSING_MCP"
+    },
+    {
+      "run": "002",
+      "status": "IMPORT_ERROR_LITELLM_MCP_INTERFACE"
+    },
+    {
+      "run": "003",
+      "status": "COMPLETED_THREE_TASKS"
+    }
+  ],
+  "private_results": "tau2-telecom-original-003/official-results.json on controlled server only",
+  "raw_data_or_answers_published": false
+}

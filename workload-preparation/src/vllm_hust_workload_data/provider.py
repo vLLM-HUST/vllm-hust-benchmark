@@ -4,11 +4,70 @@ from __future__ import annotations
 
 from importlib import metadata
 import json
+import hashlib
 from pathlib import Path
+import zipfile
 
 from . import PROVIDER_CONTRACT_VERSION, __version__
 from .registry import all_adapters, read_catalog, source_spec
 from .taxonomy import research_classes
+
+TAU2_ORIGINAL_REVISION = "f8de30c298689cbe0117d76a378e7315a17e5bd8"  # pragma: allowlist secret - public upstream revision
+TAU2_ORIGINAL_ARCHIVE_SHA256 = "65f1d59b3783bfb38664142fb166aa40b369e4b4083170723059d8f1883ccd64"  # pragma: allowlist secret - official archive checksum
+
+
+def tau2_task_references(*, official_archive, data_root, task_ids):
+    """Return original telecom task references, never user/scoring payloads.
+
+    This is preparation only. The official runner owns task loading, user
+    simulation, environment operations and scoring. Caller fixes IDs first.
+    """
+    archive_path = Path(official_archive)
+    if (
+        hashlib.sha256(archive_path.read_bytes()).hexdigest()
+        != TAU2_ORIGINAL_ARCHIVE_SHA256
+    ):
+        raise ValueError("official tau2 archive identity mismatch")
+    if (
+        not isinstance(task_ids, list)
+        or not task_ids
+        or any(not isinstance(value, str) or not value for value in task_ids)
+        or len(set(task_ids)) != len(task_ids)
+    ):
+        raise ValueError("explicit unique original task IDs required")
+    relative = "tau2/domains/telecom/tasks_full.json"
+    path = Path(data_root) / relative
+    raw = path.read_bytes()
+    with zipfile.ZipFile(archive_path) as archive:
+        names = [
+            name for name in archive.namelist() if name.endswith("/data/" + relative)
+        ]
+        if len(names) != 1 or raw != archive.read(names[0]):
+            raise ValueError("native task file differs from official archive")
+    rows = json.loads(raw)
+    positions = {row["id"]: index for index, row in enumerate(rows)}
+    if len(positions) != len(rows) or not set(task_ids) <= positions.keys():
+        raise ValueError("unknown or ambiguous original task ID")
+    digest = hashlib.sha256(raw).hexdigest()
+    return [
+        {
+            "schema_version": "native-task-reference/v1",
+            "source_id": "TAUBENCH",
+            "revision": TAU2_ORIGINAL_REVISION,
+            "domain": "telecom",
+            "task_set": "telecom_full",
+            "native_task_id": identifier,
+            "input_ref": {
+                "file": relative,
+                "sha256": digest,
+                "row_index": positions[identifier],
+            },
+            "runtime_kind": "official_native_task",
+            "scoring": "OFFICIAL_RUNNER_REQUIRED",
+            "preparation_only_not_execution": True,
+        }
+        for identifier in task_ids
+    ]
 
 
 def provider_identity() -> dict:

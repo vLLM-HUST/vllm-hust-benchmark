@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import importlib
 import json
+from pathlib import Path
 import runpy
 import sys
 
@@ -43,6 +44,10 @@ def main(argv=None):
     sources.add_argument("--class", dest="class_id")
     plan = commands.add_parser("class-plan")
     plan.add_argument("class_id")
+    native = commands.add_parser("native-tasks")
+    native.add_argument("--official-archive", type=Path, required=True)
+    native.add_argument("--data-root", type=Path, required=True)
+    native.add_argument("--task-ids", nargs="+", required=True)
     for name in ("catalog", "pipeline", "replay"):
         passthrough = commands.add_parser(name, add_help=False)
         passthrough.add_argument("arguments", nargs=argparse.REMAINDER)
@@ -75,6 +80,12 @@ def main(argv=None):
             ).research_classes()
         elif args.command == "class-plan":
             value = provider.class_plan(args.class_id)
+        elif args.command == "native-tasks":
+            value = provider.tau2_task_references(
+                official_archive=args.official_archive,
+                data_root=args.data_root,
+                task_ids=args.task_ids,
+            )
         else:
             value = provider.list_sources(class_id=args.class_id)
     except (RuntimeError, ValueError, KeyError) as error:
