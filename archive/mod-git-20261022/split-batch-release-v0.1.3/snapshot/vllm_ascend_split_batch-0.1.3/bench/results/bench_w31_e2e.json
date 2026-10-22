@@ -1,0 +1,468 @@
+{
+  "experiment": "W3.1 fi_gelu e2e A/B",
+  "preregistration": "bench/results/EXPECTATIONS-w31-e2e.md",
+  "fixture": {
+    "kind": "offline LLM.generate, one process per leg",
+    "n_prompts": 64,
+    "max_tokens": 128,
+    "expected_out_tokens": 8192,
+    "model": "/data/shared_models/Qwen--Qwen2.5-Coder-14B-Instruct",
+    "leg_order": [
+      "off_a",
+      "on_a",
+      "off_b",
+      "on_b",
+      "off_c",
+      "on_c"
+    ],
+    "port_slots": [
+      8341,
+      8342,
+      8343,
+      8344,
+      8345,
+      8346
+    ],
+    "compilation_config": {
+      "cudagraph_mode": "FULL"
+    }
+  },
+  "legs": [
+    {
+      "leg": "off_a",
+      "mode": "off",
+      "ok": true,
+      "port_slot": 8341,
+      "wall_s": 7.151,
+      "ready_s": 143.5,
+      "import_s": 19.6,
+      "engine_init_s": 123.9,
+      "out_tokens": 8192,
+      "expected_out_tokens": 8192,
+      "n_prompts": 64,
+      "max_tokens": 128,
+      "prompt_token_min": 254,
+      "prompt_token_max": 257,
+      "prompt_token_mean": 256.5,
+      "env": {
+        "VLLM_HUST_FI_GELU": "<unset>",
+        "VLLM_DISABLE_COMPILE_CACHE": "1",
+        "HF_HUB_OFFLINE": "1",
+        "ASCEND_RT_VISIBLE_DEVICES": "7",
+        "compilation_config": {
+          "cudagraph_mode": "FULL"
+        },
+        "max_model_len": 4096,
+        "max_num_seqs": 64,
+        "gpu_memory_utilization": 0.85
+      },
+      "versions": {
+        "vllm": "0.28.1.post1.dev143+gf18cf803c.empty",
+        "vllm_ascend": "0.25.1rc2.dev125+hust.20260903.4.g74f0c0a27",
+        "torch": "2.13.0+cpu",
+        "torch_npu": "2.13.0rc1",
+        "cann": {
+          "version": "9.1.0",
+          "innerversion": "V100R001C11SPC001B243",
+          "path": "/usr/local/ascend91/Ascend/cann-9.1.0"
+        }
+      },
+      "git": {
+        "head": "51f5818e48ce17ec3f71c539cf036146d4ec87ae",
+        "short": "51f5818",
+        "dirty": false,
+        "modified_tracked": [],
+        "untracked": [
+          "?? bench/bench_w31_e2e.py",
+          "?? bench/bench_w31_e2e.sh",
+          "?? bench/results/EXPECTATIONS-w31-e2e.md",
+          "?? bench/results/logs_w31_e2e/"
+        ],
+        "subject": "feat(fi-gelu): triton gelu_and_mul fusion + default-off host wiring (W3.1)"
+      },
+      "index": 1,
+      "port_slot_free_before": true,
+      "port_slot_free_after": true,
+      "subprocess_rc": 0,
+      "log": "bench/results/logs_w31_e2e/leg_off_a.log",
+      "traces": {
+        "active_lines": 0,
+        "activation_path_lines": 0,
+        "fi_gelu_mentions": 0,
+        "plugin_warn_lines": 0,
+        "kernel_tag_lines": 0
+      }
+    },
+    {
+      "leg": "on_a",
+      "mode": "on",
+      "ok": true,
+      "port_slot": 8342,
+      "wall_s": 7.093,
+      "ready_s": 174.5,
+      "import_s": 20.4,
+      "engine_init_s": 154.1,
+      "out_tokens": 8192,
+      "expected_out_tokens": 8192,
+      "n_prompts": 64,
+      "max_tokens": 128,
+      "prompt_token_min": 254,
+      "prompt_token_max": 257,
+      "prompt_token_mean": 256.5,
+      "env": {
+        "VLLM_HUST_FI_GELU": "1",
+        "VLLM_DISABLE_COMPILE_CACHE": "1",
+        "HF_HUB_OFFLINE": "1",
+        "ASCEND_RT_VISIBLE_DEVICES": "7",
+        "compilation_config": {
+          "cudagraph_mode": "FULL"
+        },
+        "max_model_len": 4096,
+        "max_num_seqs": 64,
+        "gpu_memory_utilization": 0.85
+      },
+      "versions": {
+        "vllm": "0.28.1.post1.dev143+gf18cf803c.empty",
+        "vllm_ascend": "0.25.1rc2.dev125+hust.20260903.4.g74f0c0a27",
+        "torch": "2.13.0+cpu",
+        "torch_npu": "2.13.0rc1",
+        "cann": {
+          "version": "9.1.0",
+          "innerversion": "V100R001C11SPC001B243",
+          "path": "/usr/local/ascend91/Ascend/cann-9.1.0"
+        }
+      },
+      "git": {
+        "head": "51f5818e48ce17ec3f71c539cf036146d4ec87ae",
+        "short": "51f5818",
+        "dirty": false,
+        "modified_tracked": [],
+        "untracked": [
+          "?? bench/bench_w31_e2e.py",
+          "?? bench/bench_w31_e2e.sh",
+          "?? bench/results/EXPECTATIONS-w31-e2e.md",
+          "?? bench/results/bench_w31_e2e.json",
+          "?? bench/results/logs_w31_e2e/"
+        ],
+        "subject": "feat(fi-gelu): triton gelu_and_mul fusion + default-off host wiring (W3.1)"
+      },
+      "index": 2,
+      "port_slot_free_before": true,
+      "port_slot_free_after": true,
+      "subprocess_rc": 0,
+      "log": "bench/results/logs_w31_e2e/leg_on_a.log",
+      "traces": {
+        "active_lines": 1,
+        "activation_path_lines": 1,
+        "fi_gelu_mentions": 1,
+        "plugin_warn_lines": 0,
+        "kernel_tag_lines": 0
+      }
+    },
+    {
+      "leg": "off_b",
+      "mode": "off",
+      "ok": true,
+      "port_slot": 8343,
+      "wall_s": 7.013,
+      "ready_s": 144.0,
+      "import_s": 19.8,
+      "engine_init_s": 124.3,
+      "out_tokens": 8192,
+      "expected_out_tokens": 8192,
+      "n_prompts": 64,
+      "max_tokens": 128,
+      "prompt_token_min": 254,
+      "prompt_token_max": 257,
+      "prompt_token_mean": 256.5,
+      "env": {
+        "VLLM_HUST_FI_GELU": "<unset>",
+        "VLLM_DISABLE_COMPILE_CACHE": "1",
+        "HF_HUB_OFFLINE": "1",
+        "ASCEND_RT_VISIBLE_DEVICES": "7",
+        "compilation_config": {
+          "cudagraph_mode": "FULL"
+        },
+        "max_model_len": 4096,
+        "max_num_seqs": 64,
+        "gpu_memory_utilization": 0.85
+      },
+      "versions": {
+        "vllm": "0.28.1.post1.dev143+gf18cf803c.empty",
+        "vllm_ascend": "0.25.1rc2.dev125+hust.20260903.4.g74f0c0a27",
+        "torch": "2.13.0+cpu",
+        "torch_npu": "2.13.0rc1",
+        "cann": {
+          "version": "9.1.0",
+          "innerversion": "V100R001C11SPC001B243",
+          "path": "/usr/local/ascend91/Ascend/cann-9.1.0"
+        }
+      },
+      "git": {
+        "head": "51f5818e48ce17ec3f71c539cf036146d4ec87ae",
+        "short": "51f5818",
+        "dirty": false,
+        "modified_tracked": [],
+        "untracked": [
+          "?? bench/bench_w31_e2e.py",
+          "?? bench/bench_w31_e2e.sh",
+          "?? bench/results/EXPECTATIONS-w31-e2e.md",
+          "?? bench/results/bench_w31_e2e.json",
+          "?? bench/results/logs_w31_e2e/"
+        ],
+        "subject": "feat(fi-gelu): triton gelu_and_mul fusion + default-off host wiring (W3.1)"
+      },
+      "index": 3,
+      "port_slot_free_before": true,
+      "port_slot_free_after": true,
+      "subprocess_rc": 0,
+      "log": "bench/results/logs_w31_e2e/leg_off_b.log",
+      "traces": {
+        "active_lines": 0,
+        "activation_path_lines": 0,
+        "fi_gelu_mentions": 0,
+        "plugin_warn_lines": 0,
+        "kernel_tag_lines": 0
+      }
+    },
+    {
+      "leg": "on_b",
+      "mode": "on",
+      "ok": true,
+      "port_slot": 8344,
+      "wall_s": 7.012,
+      "ready_s": 144.1,
+      "import_s": 19.8,
+      "engine_init_s": 124.3,
+      "out_tokens": 8192,
+      "expected_out_tokens": 8192,
+      "n_prompts": 64,
+      "max_tokens": 128,
+      "prompt_token_min": 254,
+      "prompt_token_max": 257,
+      "prompt_token_mean": 256.5,
+      "env": {
+        "VLLM_HUST_FI_GELU": "1",
+        "VLLM_DISABLE_COMPILE_CACHE": "1",
+        "HF_HUB_OFFLINE": "1",
+        "ASCEND_RT_VISIBLE_DEVICES": "7",
+        "compilation_config": {
+          "cudagraph_mode": "FULL"
+        },
+        "max_model_len": 4096,
+        "max_num_seqs": 64,
+        "gpu_memory_utilization": 0.85
+      },
+      "versions": {
+        "vllm": "0.28.1.post1.dev143+gf18cf803c.empty",
+        "vllm_ascend": "0.25.1rc2.dev125+hust.20260903.4.g74f0c0a27",
+        "torch": "2.13.0+cpu",
+        "torch_npu": "2.13.0rc1",
+        "cann": {
+          "version": "9.1.0",
+          "innerversion": "V100R001C11SPC001B243",
+          "path": "/usr/local/ascend91/Ascend/cann-9.1.0"
+        }
+      },
+      "git": {
+        "head": "51f5818e48ce17ec3f71c539cf036146d4ec87ae",
+        "short": "51f5818",
+        "dirty": false,
+        "modified_tracked": [],
+        "untracked": [
+          "?? bench/bench_w31_e2e.py",
+          "?? bench/bench_w31_e2e.sh",
+          "?? bench/results/EXPECTATIONS-w31-e2e.md",
+          "?? bench/results/bench_w31_e2e.json",
+          "?? bench/results/logs_w31_e2e/"
+        ],
+        "subject": "feat(fi-gelu): triton gelu_and_mul fusion + default-off host wiring (W3.1)"
+      },
+      "index": 4,
+      "port_slot_free_before": true,
+      "port_slot_free_after": true,
+      "subprocess_rc": 0,
+      "log": "bench/results/logs_w31_e2e/leg_on_b.log",
+      "traces": {
+        "active_lines": 1,
+        "activation_path_lines": 1,
+        "fi_gelu_mentions": 1,
+        "plugin_warn_lines": 0,
+        "kernel_tag_lines": 0
+      }
+    },
+    {
+      "leg": "off_c",
+      "mode": "off",
+      "ok": true,
+      "port_slot": 8345,
+      "wall_s": 7.071,
+      "ready_s": 129.0,
+      "import_s": 20.8,
+      "engine_init_s": 108.2,
+      "out_tokens": 8192,
+      "expected_out_tokens": 8192,
+      "n_prompts": 64,
+      "max_tokens": 128,
+      "prompt_token_min": 254,
+      "prompt_token_max": 257,
+      "prompt_token_mean": 256.5,
+      "env": {
+        "VLLM_HUST_FI_GELU": "<unset>",
+        "VLLM_DISABLE_COMPILE_CACHE": "1",
+        "HF_HUB_OFFLINE": "1",
+        "ASCEND_RT_VISIBLE_DEVICES": "7",
+        "compilation_config": {
+          "cudagraph_mode": "FULL"
+        },
+        "max_model_len": 4096,
+        "max_num_seqs": 64,
+        "gpu_memory_utilization": 0.85
+      },
+      "versions": {
+        "vllm": "0.28.1.post1.dev143+gf18cf803c.empty",
+        "vllm_ascend": "0.25.1rc2.dev125+hust.20260903.4.g74f0c0a27",
+        "torch": "2.13.0+cpu",
+        "torch_npu": "2.13.0rc1",
+        "cann": {
+          "version": "9.1.0",
+          "innerversion": "V100R001C11SPC001B243",
+          "path": "/usr/local/ascend91/Ascend/cann-9.1.0"
+        }
+      },
+      "git": {
+        "head": "51f5818e48ce17ec3f71c539cf036146d4ec87ae",
+        "short": "51f5818",
+        "dirty": false,
+        "modified_tracked": [],
+        "untracked": [
+          "?? bench/bench_w31_e2e.py",
+          "?? bench/bench_w31_e2e.sh",
+          "?? bench/results/EXPECTATIONS-w31-e2e.md",
+          "?? bench/results/bench_w31_e2e.json",
+          "?? bench/results/logs_w31_e2e/"
+        ],
+        "subject": "feat(fi-gelu): triton gelu_and_mul fusion + default-off host wiring (W3.1)"
+      },
+      "index": 5,
+      "port_slot_free_before": true,
+      "port_slot_free_after": true,
+      "subprocess_rc": 0,
+      "log": "bench/results/logs_w31_e2e/leg_off_c.log",
+      "traces": {
+        "active_lines": 0,
+        "activation_path_lines": 0,
+        "fi_gelu_mentions": 0,
+        "plugin_warn_lines": 0,
+        "kernel_tag_lines": 0
+      }
+    },
+    {
+      "leg": "on_c",
+      "mode": "on",
+      "ok": true,
+      "port_slot": 8346,
+      "wall_s": 7.143,
+      "ready_s": 116.7,
+      "import_s": 20.3,
+      "engine_init_s": 96.4,
+      "out_tokens": 8192,
+      "expected_out_tokens": 8192,
+      "n_prompts": 64,
+      "max_tokens": 128,
+      "prompt_token_min": 254,
+      "prompt_token_max": 257,
+      "prompt_token_mean": 256.5,
+      "env": {
+        "VLLM_HUST_FI_GELU": "1",
+        "VLLM_DISABLE_COMPILE_CACHE": "1",
+        "HF_HUB_OFFLINE": "1",
+        "ASCEND_RT_VISIBLE_DEVICES": "7",
+        "compilation_config": {
+          "cudagraph_mode": "FULL"
+        },
+        "max_model_len": 4096,
+        "max_num_seqs": 64,
+        "gpu_memory_utilization": 0.85
+      },
+      "versions": {
+        "vllm": "0.28.1.post1.dev143+gf18cf803c.empty",
+        "vllm_ascend": "0.25.1rc2.dev125+hust.20260903.4.g74f0c0a27",
+        "torch": "2.13.0+cpu",
+        "torch_npu": "2.13.0rc1",
+        "cann": {
+          "version": "9.1.0",
+          "innerversion": "V100R001C11SPC001B243",
+          "path": "/usr/local/ascend91/Ascend/cann-9.1.0"
+        }
+      },
+      "git": {
+        "head": "51f5818e48ce17ec3f71c539cf036146d4ec87ae",
+        "short": "51f5818",
+        "dirty": false,
+        "modified_tracked": [],
+        "untracked": [
+          "?? bench/bench_w31_e2e.py",
+          "?? bench/bench_w31_e2e.sh",
+          "?? bench/results/EXPECTATIONS-w31-e2e.md",
+          "?? bench/results/bench_w31_e2e.json",
+          "?? bench/results/logs_w31_e2e/"
+        ],
+        "subject": "feat(fi-gelu): triton gelu_and_mul fusion + default-off host wiring (W3.1)"
+      },
+      "index": 6,
+      "port_slot_free_before": true,
+      "port_slot_free_after": true,
+      "subprocess_rc": 0,
+      "log": "bench/results/logs_w31_e2e/leg_on_c.log",
+      "traces": {
+        "active_lines": 1,
+        "activation_path_lines": 1,
+        "fi_gelu_mentions": 1,
+        "plugin_warn_lines": 0,
+        "kernel_tag_lines": 0
+      }
+    }
+  ],
+  "summary": {
+    "n_legs": 6,
+    "n_ok": 6,
+    "rule": "\u0394median = (median_off - median_on) / median_off; spread = max - min within an arm (normalized by that arm's median; the pre-registration writes 'spread = max-min' -- reported in both fractional and absolute-seconds form, the fractional form is the primary application of the rule, matching the W2b percent\u53e3\u5f84)",
+    "off_walls_s": [
+      7.013,
+      7.071,
+      7.151
+    ],
+    "off_median_s": 7.071,
+    "off_min_s": 7.013,
+    "off_max_s": 7.151,
+    "off_spread_s": 0.138,
+    "off_spread_frac": 0.01952,
+    "on_walls_s": [
+      7.012,
+      7.093,
+      7.143
+    ],
+    "on_median_s": 7.093,
+    "on_min_s": 7.012,
+    "on_max_s": 7.143,
+    "on_spread_s": 0.131,
+    "on_spread_frac": 0.01847,
+    "delta_median": -0.00311,
+    "delta_median_pct": -0.311,
+    "delta_median_abs_s": -0.022,
+    "noise_band_frac": 0.01952,
+    "noise_band_s": 0.138,
+    "within_noise_band_frac": true,
+    "within_noise_band_abs_s": true,
+    "verdict": "NOISE-BAND / NOT DECIDABLE (|\u0394median| < max(spread_off, spread_on), normalized spread)",
+    "projection": {
+      "projected_abs_delta_pct": [
+        0.2,
+        0.6
+      ],
+      "source": "EXPECTATIONS-w31-e2e.md (graph replay 0.50ms/step @ TPOT~112ms)",
+      "consistency": "within projected band (0.2-0.6%)"
+    }
+  }
+}
