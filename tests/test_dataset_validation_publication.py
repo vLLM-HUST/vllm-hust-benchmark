@@ -28,6 +28,25 @@ def test_checked_in_publication_is_valid_and_complete() -> None:
     assert validate_publication(PUBLICATION) == {"scenarios": 8, "results": 732}
 
 
+def test_mmlu_quality_subset_does_not_promote_full_dataset_readiness() -> None:
+    program = load_json(PUBLICATION / "dataset_program_v1.json")
+    mmlu = program["primary_datasets"][0]
+    assert mmlu["status"] == "subset-measured"
+    assert mmlu["readiness"]["status"] == "asset-frozen"
+    assert mmlu["readiness"]["sample_count"] is None
+    for text in ("147/200", "146/200", "19/22", "V5.5"):
+        assert text in mmlu["note"]
+        assert text in mmlu["note_zh"]
+    assert "不代表全集准确率" in mmlu["note_zh"]
+    assert not any("serving telemetry only" in b for b in mmlu["readiness"]["blockers"])
+    assert all(
+        d["status"] == "contract-pending" for d in program["primary_datasets"][1:]
+    )
+    assert program == load_json(
+        ROOT / "website-publication/data/dataset_program_v1.json"
+    )
+
+
 def test_dataset_program_separates_primary_plan_from_measured_scenarios() -> None:
     index = load_json(PUBLICATION / "dataset_validation_index_v1.json")
     program = load_json(PUBLICATION / index["program_file"])
