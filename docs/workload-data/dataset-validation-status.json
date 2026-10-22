@@ -1445,15 +1445,16 @@
       "workload_class_ids": [
         "policy-constrained-service"
       ],
-      "acquisition": "NOT_RECHECKED",
-      "read_adapter": "NOT_RECHECKED",
-      "server_execution": "NOT_RUN",
-      "scoring": "NOT_RUN",
-      "selected_samples": [],
-      "completed_samples": [],
-      "checked": false,
-      "receipt": null,
-      "blocker": "待在当前数据-only版本重新核验；目录登记不代表已接入。"
+      "acquisition": "VERIFIED",
+      "read_adapter": "VERIFIED",
+      "read_adapter_protocol": "OFFICIAL_NATIVE_TASK_REFERENCES_NOT_FLAT_REQUESTS",
+      "server_execution": "COMPLETED",
+      "scoring": "COMPLETED",
+      "selected_samples": ["[mobile_data_issue]user_abroad_roaming_enabled_off[PERSONA:None]", "[mobile_data_issue]user_abroad_roaming_disabled_on[PERSONA:Easy]", "[mobile_data_issue]user_abroad_roaming_disabled_off[PERSONA:Hard]"],
+      "completed_samples": ["[mobile_data_issue]user_abroad_roaming_enabled_off[PERSONA:None]", "[mobile_data_issue]user_abroad_roaming_disabled_on[PERSONA:Easy]", "[mobile_data_issue]user_abroad_roaming_disabled_off[PERSONA:Hard]"],
+      "checked": true,
+      "receipt": "docs/workload-data/validation/tau2-reference-handoff-npu-20261022.json",
+      "blocker": "仅telecom_full loader前三任务，评分1、1、0；其他任务/domain未跑，研究端新wheel锁联调待完成。"
     },
     {
       "source_id": "TOOLACE",
