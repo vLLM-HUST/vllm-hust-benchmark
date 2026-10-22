@@ -1,0 +1,50 @@
+{
+  "schema": "statecentric-gdn_state_codec-state-capsule-reference-v1",
+  "paper": {
+    "id": "arXiv:2609.38166v1",
+    "title": "LeapQuant: Efficient Linear Attention with Accurate Recurrent State Quantization",
+    "implementation_provenance": "independent-from-paper-formulas",
+    "author_code_found": false,
+    "checked_at_utc": "2026-10-06"
+  },
+  "stateaxis": {
+    "base_commit": "1a298e5fc2e990bc18394a19c531637e151fae3f",
+    "branch": "feature/gdn_state_codec-state-capsule-reference",
+    "enabled_by_default": false,
+    "performance_qualified": false,
+    "runtime_integrated": false,
+    "ascend_kernel_present": true
+  },
+  "parameters": {
+    "bits": 8,
+    "window_size": 16,
+    "compensator_rank": 4,
+    "residual_quantization": "per-value-channel-symmetric-int8",
+    "smoothing": "sqrt(max(key-row-mean-absolute-residual, floor))",
+    "reference_record_dtype": "fp32"
+  },
+  "reference_choices_not_specified_by_paper": {
+    "power_iteration_initialization": "sinusoidal",
+    "power_iteration_steps_per_rank": 32,
+    "deflation": "sequential",
+    "singular_value_storage": "folded-into-compensator-key",
+    "rounding": "half-away-from-zero",
+    "int8_code_range": "[-127,127]",
+    "zero_value_channel_scale": 0
+  },
+  "required_components": [
+    "per-window-quantization",
+    "high-precision-update-records",
+    "compensator-tokens",
+    "residual-smoothing"
+  ],
+  "claim_boundary": {
+    "component_reference_only": true,
+    "online_performance_claim_permitted": false,
+    "paper_gpu_results_transfer_to_ascend": false,
+    "qwen_gdn_adapter_frozen": true,
+    "qwen_state_layout_frozen": true,
+    "ascend_codec_component_screen_only": true,
+    "rank_fit_in_device_measurement": false
+  }
+}

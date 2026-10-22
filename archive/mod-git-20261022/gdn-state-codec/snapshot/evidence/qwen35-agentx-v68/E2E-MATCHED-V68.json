@@ -1,0 +1,93 @@
+{
+  "schema": "stateaxis-leapquant-matched-e2e-v1",
+  "date_utc": "2026-10-07",
+  "evidence_label": "real-online-single-request-workload-qualified",
+  "scope": "Qwen3.5-35B-A3B TP2 eager, first AgentX conversation/turn, 649 prompt tokens, 128 output tokens",
+  "parent_repository_commit": "e74e9ece60e32a7a6e6a93f9f35c0e9ec4434596",
+  "parent_repository_dirty": true,
+  "dirty_status_sha256_before_finalization": "1690159d84b632084eb8853f5193d4832e3272e3ddd6f8b342b6355ba53d8fe8",
+  "materialized_repository_commits": [
+    "034c7f998",
+    "0ebff6c6d"
+  ],
+  "merged_by_pull_request": 461,
+  "merge_commit": "83707092ecec1eba50d4ea33ea2da615ceaa4fd8",
+  "runtime_declared_manifest_sha256": "2af719ca923015eb4e46502112e9dff29393ec256504835a9eb76a816b4b8bb6",
+  "finalized_manifest_sha256": "e83f43093c7020ae0325540ba540c73aeee95c3ba14449596bca3d66564ddc75",
+  "model_config_sha256": "5e4d7f74fec2f360eb9cfbfcd6ec0c4c76e684d3a11caaed259d9fd9bfbc7944",
+  "hardware": {
+    "accelerators": "2x Ascend 910B2",
+    "driver": "26.0.rc1",
+    "firmware": "9.0.0.0.205"
+  },
+  "environment": {
+    "python": "3.12.13",
+    "torch": "2.10.0+cpu",
+    "torch_npu": "2.10.0.post4",
+    "vllm": "0.23.0",
+    "cann_opp": "9.1.0",
+    "graph_mode": "disabled (--enforce-eager)",
+    "tensor_parallel_size": 2,
+    "max_model_len": 2048,
+    "gpu_memory_utilization": 0.9
+  },
+  "candidate": {
+    "initializer": "quant_only",
+    "window": 16,
+    "compensator_rank": 4,
+    "decode_backend": "vector",
+    "boundary_power_iterations": 0,
+    "build_dir": "/workspace/stateaxis-build-leapquant-runtime-v68-final/lib",
+    "window_kernel_sha256": "ff8220f08b904e49208d9f7ee0ca0deb7ac7c55e75429d84d143baf61fb27254",
+    "decode_runtime_sha256": "a26b5bc46b795d1421691b6f030b13a77cab90e57a2105b91a7b5da0754af266",
+    "boundary_kernel_sha256": "42b185687b79fecd6bfa8b5183de3b417c249b319b7d48836931e8bb51348ef5",
+    "boundary_cube_sha256": "2f14f3d36bfec9343fa39d5c551cc3963226b366a3cabd5dabc56c345c2dd7d3",
+    "boundary_runtime_sha256": "e342caa4640b253197504c060644b0de84f76ad89d5eb3153b6d7a1d9729bfa2"
+  },
+  "request": {
+    "conversation_id": "002001296e8a8c38ad9d7cc436d691afc602",
+    "request_sha256": "6af349d2cc579d0cb626bbecb733356f3ac53220444c7f2f98a4f879b6f212cc",
+    "temperature": 0.0,
+    "seed": 0,
+    "stream": true,
+    "content_sha256": "2035b0e9d6d6de9c4fcc6a4adeb0574e198ddbfb66c3cc93c257377659e465ee"
+  },
+  "arms": {
+    "candidate_a": {
+      "measurements": 6,
+      "total_seconds_median": 28.414637899026275,
+      "itl_median_ms": 219.94092408567667,
+      "file": "candidate-v68-agentx-first-turn128-streaming.jsonl"
+    },
+    "native_b": {
+      "measurements": 6,
+      "total_seconds_median": 28.68074907315895,
+      "itl_median_ms": 222.36076090484858,
+      "file": "baseline-v68-era-agentx-first-turn128-streaming.jsonl"
+    },
+    "candidate_a2": {
+      "measurements": 6,
+      "total_seconds_median": 28.434349849820137,
+      "itl_median_ms": 219.89128179848194,
+      "file": "candidate-v68b-agentx-first-turn128-streaming.jsonl"
+    }
+  },
+  "combined_result": {
+    "candidate_measurements": 12,
+    "candidate_total_seconds_median": 28.416406604461372,
+    "native_total_seconds_median": 28.68074907315895,
+    "total_seconds_delta_percent": -0.9216721223817781,
+    "total_seconds_bootstrap_95_percent": [-1.6228745818042456, -0.1753405118727347],
+    "candidate_itl_median_ms": 219.94092408567667,
+    "native_itl_median_ms": 222.36076090484858,
+    "itl_delta_percent": -1.0882481285479084,
+    "itl_bootstrap_95_percent": [-1.8177231153841955, -0.6019468459263377],
+    "interpretation": "small repeatable benefit on this recorded workload only"
+  },
+  "exclusions": [
+    "not a multi-request result",
+    "not a graph-mode result",
+    "not a generalized online performance claim",
+    "not a capacity or memory-saving claim"
+  ]
+}

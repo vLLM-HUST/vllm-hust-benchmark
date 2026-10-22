@@ -4,7 +4,7 @@ import argparse
 import hashlib
 import json
 import subprocess
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 from migrate_devhub_evidence import SECRET, git, tree
 
@@ -29,7 +29,19 @@ def invalid_json_paths(payloads):
     return invalid
 
 
-def prepare(source: Path, repository: str, destination: Path) -> dict:
+def prepare(
+    source: Path,
+    repository: str,
+    destination: Path,
+    prefixes=("evidence/",),
+    context=CONTEXT,
+) -> dict:
+    for value in (*prefixes, *context):
+        path = PurePosixPath(value)
+        if not value or path.is_absolute() or ".." in path.parts or str(path) == ".":
+            raise ValueError("Unsafe source selection")
+    if any(not prefix.endswith("/") for prefix in prefixes):
+        raise ValueError("Source prefixes must name directories")
     if destination.exists():
         raise ValueError("Refusing to overwrite a custody snapshot")
     metadata = json.loads(subprocess.check_output(["gh", "api", f"repos/{repository}"]))
@@ -40,7 +52,7 @@ def prepare(source: Path, repository: str, destination: Path) -> dict:
     selected = {
         p: oid
         for p, oid in entries.items()
-        if p.startswith("evidence/") or p in CONTEXT
+        if p.startswith(tuple(prefixes)) or p in context
     }
     if not selected:
         raise ValueError("Empty source scope")
@@ -68,7 +80,7 @@ def prepare(source: Path, repository: str, destination: Path) -> dict:
         "source_repository": repository,
         "source_commit": commit,
         "source_visibility": "public",
-        "scope": {"prefixes": ["evidence/"], "context": list(CONTEXT)},
+        "scope": {"prefixes": list(prefixes), "context": list(context)},
         "admission": "custody-only; original failures and pairing retained; no new performance qualification",
         "files": rows,
         "invalid_json_paths": invalid_json_paths(payloads),
@@ -104,6 +116,8 @@ def main():
     parser.add_argument("mode", choices=["prepare", "verify"])
     parser.add_argument("--source", type=Path)
     parser.add_argument("--repository")
+    parser.add_argument("--prefix", action="append")
+    parser.add_argument("--context", action="append", default=[])
     parser.add_argument("--destination", required=True, type=Path)
     args = parser.parse_args()
     if args.mode == "verify":
@@ -111,7 +125,13 @@ def main():
     else:
         if args.source is None or args.repository is None:
             parser.error("prepare requires --source and --repository")
-        receipt = prepare(args.source, args.repository, args.destination)
+        receipt = prepare(
+            args.source,
+            args.repository,
+            args.destination,
+            tuple(args.prefix or ["evidence/"]),
+            (*CONTEXT, *args.context),
+        )
         print(
             json.dumps(
                 {
