@@ -9,17 +9,17 @@ import tarfile
 ROOT = Path(__file__).resolve().parent
 BASE = "https://github.com/vLLM-HUST/vllm-hust-benchmark/releases/download/m01-recovery-20261021-r7/"
 ARCHIVES = {
-    "m01-worker-full-model-r1": "afba33d24d1767a1c7f295b5a99eb54a7dfc7e5b5d8df20a0f3e673cc7189b37",
-    "m01-worker-full-model-r1-audit": "6fd7432b3f3801fc83a78d7bdf28977c7257c906f1845a553771681a3ae760b0",
-    "m01-worker-r1-accounting": "ddb0a97eaa43a624b83f1f2615b46a0f2410430fe78ab98e0fedac876473149d",
-    "m01-worker-moe-reference": "5938b6394a043fcf1fb330dd150b8475b44c152ca03bc8be50c37b0e44ef8ec9",
-    "m01-worker-linear-reference": "d0d855665d8cbeb7fe9da8c6b33047ad18bae4f17d0bc98ec33d8725eb62a583",
-    "m01-worker-fia-reference": "c346a59c67076adf22a3bb422338a188d241c8c456b38eecba89a8097038825b",
-    "m01-worker-gdn-reference": "8c360a3ce43deb23a020cbc36e81a7c8717da5d6e1a601cadc57d8f0a3d862fb",
-    "m01-worker-aux-reference": "8fe5c98f8a6d069cb9000ad8b2f7b3c76b77ee3456f6451d8eca12c88ab03eb5",
-    "m01-worker-activation-collective-audit": "85d3dcc39ab83be69f310f2025522fb464db8e118cfb25a0f6d9635bff8cbcc8",
-    "m01-worker-collective-reference": "e482d8b1067ae33bf1256c3d14aeb99d94ce6279e55059c72312e1b79caa2da3",
-    "m01-worker-hccs-unit-audit": "3ce63cb94bb35e44518162b8c170057aaa76125b61d8bf086ee8ebdaf962f99e",
+    "m01-worker-full-model-r1": "afba33d24d1767a1c7f295b5a99eb54a7dfc7e5b5d8df20a0f3e673cc7189b37",  # pragma: allowlist secret
+    "m01-worker-full-model-r1-audit": "6fd7432b3f3801fc83a78d7bdf28977c7257c906f1845a553771681a3ae760b0",  # pragma: allowlist secret
+    "m01-worker-r1-accounting": "ddb0a97eaa43a624b83f1f2615b46a0f2410430fe78ab98e0fedac876473149d",  # pragma: allowlist secret
+    "m01-worker-moe-reference": "5938b6394a043fcf1fb330dd150b8475b44c152ca03bc8be50c37b0e44ef8ec9",  # pragma: allowlist secret
+    "m01-worker-linear-reference": "d0d855665d8cbeb7fe9da8c6b33047ad18bae4f17d0bc98ec33d8725eb62a583",  # pragma: allowlist secret
+    "m01-worker-fia-reference": "c346a59c67076adf22a3bb422338a188d241c8c456b38eecba89a8097038825b",  # pragma: allowlist secret
+    "m01-worker-gdn-reference": "8c360a3ce43deb23a020cbc36e81a7c8717da5d6e1a601cadc57d8f0a3d862fb",  # pragma: allowlist secret
+    "m01-worker-aux-reference": "8fe5c98f8a6d069cb9000ad8b2f7b3c76b77ee3456f6451d8eca12c88ab03eb5",  # pragma: allowlist secret
+    "m01-worker-activation-collective-audit": "85d3dcc39ab83be69f310f2025522fb464db8e118cfb25a0f6d9635bff8cbcc8",  # pragma: allowlist secret
+    "m01-worker-collective-reference": "e482d8b1067ae33bf1256c3d14aeb99d94ce6279e55059c72312e1b79caa2da3",  # pragma: allowlist secret
+    "m01-worker-hccs-unit-audit": "3ce63cb94bb35e44518162b8c170057aaa76125b61d8bf086ee8ebdaf962f99e",  # pragma: allowlist secret
 }
 SELECTED = {
     "m01-worker-full-model-r1-audit": ["m01-worker-r1-audit.json"],
