@@ -122,6 +122,7 @@ def build(paths):
         "scope": "Tracked repository paths only; includes staged additions. No payload parsing, archive extraction, network access or integrity verification.",
         "limits": "Navigation is not an acceptance verdict. Release members and reconstructed publication bytes are indexed by their own manifests, not expanded here. Counts include docs/helpers and may include repeated copies.",
         "roots": list(ROUTES),
+        "linked_entrypoints": "docs/data-entrypoints.json",
         "file_count": sum(g["file_count"] for g in collections),
         "collections": sorted(collections, key=lambda g: g["path"]),
     }

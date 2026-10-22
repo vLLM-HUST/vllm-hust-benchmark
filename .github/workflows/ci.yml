@@ -48,7 +48,9 @@ jobs:
         run: python scripts/validate_public_leaderboard_snapshots.py
 
       - name: Verify data navigation index
-        run: python scripts/data_index.py --check
+        run: |
+          python scripts/data_index.py --check
+          python scripts/data_entrypoints.py --check
 
       - name: Validate independent optimization repo result card registry
         run: python scripts/validate_independent_repo_result_cards.py
