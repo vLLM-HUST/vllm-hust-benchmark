@@ -2,6 +2,17 @@
   "version": "source-adapters/v1",
   "status_policy": "Implementation, asset verification and runtime reproduction are independent. All other registered sources remain NOT_IMPLEMENTED.",
   "adapters": {
+    "HUMANEVAL": {
+      "kind": "task_dataset",
+      "mapping": "native_code_task",
+      "input_fields": ["prompt"],
+      "required_fields": ["task_id", "prompt", "canonical_solution", "test", "entry_point"],
+      "outcome_fields": ["canonical_solution", "test", "entry_point"],
+      "annotation_fields": [],
+      "id_field": "task_id",
+      "requirements": ["Original raw code completion; no test or canonical solution in model input", "Official functional scorer requires verified isolated execution of model-generated code; generation alone is not task validation"],
+      "status": "READ_ADAPTER_IMPLEMENTED_OFFICIAL_EXECUTION_UNVERIFIED"
+    },
     "DOLLY": {
       "kind": "task_dataset",
       "mapping": "instruction_context",

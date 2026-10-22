@@ -415,15 +415,15 @@
       "workload_class_ids": [
         "code-generation-with-tests"
       ],
-      "acquisition": "NOT_RECHECKED",
-      "read_adapter": "NOT_RECHECKED",
-      "server_execution": "NOT_RUN",
-      "scoring": "NOT_RUN",
-      "selected_samples": [],
+      "acquisition": "VERIFIED",
+      "read_adapter": "VERIFIED",
+      "server_execution": "GENERATION_ONLY_NOT_TASK_VALIDATED",
+      "scoring": "BLOCKED_NO_VERIFIED_SANDBOX",
+      "selected_samples": ["HumanEval/0", "HumanEval/1", "HumanEval/2"],
       "completed_samples": [],
       "checked": false,
-      "receipt": null,
-      "blocker": "待在当前数据-only版本重新核验；目录登记不代表已接入。"
+      "receipt": "docs/workload-data/validation/humaneval-original-generation-npu-20261023.json",
+      "blocker": "已取得并校验原164题，公开数据包及入口完成前三题原prompt的NPU生成，均stop；生成代码未执行。官方功能评分需要安全隔离，但bubblewrap挂载探测被容器权限拒绝；无官方评分，不计完整任务通过。"
     },
     {
       "source_id": "INFINITEBENCH",

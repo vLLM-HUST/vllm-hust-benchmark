@@ -8,6 +8,28 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def test_humaneval_generation_without_functional_scoring_stays_unchecked():
+    directory = ROOT / "docs/workload-data"
+    ledger = json.loads(
+        (directory / "dataset-validation-status.json").read_text(encoding="utf-8")
+    )
+    row = next(r for r in ledger["sources"] if r["source_id"] == "HUMANEVAL")
+    receipt = json.loads((ROOT / row["receipt"]).read_text(encoding="utf-8"))
+    assert row["checked"] is False
+    assert row["completed_samples"] == []
+    assert row["scoring"] == "BLOCKED_NO_VERIFIED_SANDBOX"
+    assert receipt["complete_task_validation"] is False
+    assert receipt["source_checkbox_eligible"] is False
+    assert receipt["sandbox_probe"]["generated_code_executed"] is False
+    assert len(receipt["samples"]) == 3
+    assert (
+        receipt["helper_sha256"]
+        == hashlib.sha256(
+            (ROOT / "scripts/run_humaneval_original_generation.py").read_bytes()
+        ).hexdigest()
+    )
+
+
 def test_checklist_covers_registered_sources_once():
     directory = ROOT / "docs" / "workload-data"
     ledger = json.loads(
