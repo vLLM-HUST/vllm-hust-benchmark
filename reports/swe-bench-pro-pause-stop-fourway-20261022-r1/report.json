@@ -1,0 +1,41 @@
+{
+  "run_id": "swe-pro-v1-pause-stop-fourway-20261022-r1",
+  "type": "four-arm frozen-history finite work, not Agent solving",
+  "comparisons": {
+    "controller_integration": {
+      "baseline": "thunderagent_original",
+      "candidate": "controller_original",
+      "comparable_complete_work": true,
+      "makespan_reduction_fraction": -0.0792368235122114
+    },
+    "pause_stop_correction": {
+      "baseline": "controller_original",
+      "candidate": "controller_corrected",
+      "comparable_complete_work": true,
+      "makespan_reduction_fraction": 0.003395586491734104
+    },
+    "controller_vs_native": {
+      "baseline": "native",
+      "candidate": "controller_original",
+      "comparable_complete_work": true,
+      "makespan_reduction_fraction": 0.013875816559867804
+    }
+  },
+  "upstream_commit": "7ddc8610270e56d3b109eed8796b3a4360fc67c9",
+  "runtime_source_commit": "53aa50f",
+  "archive": {
+    "bytes": 20441740,
+    "files": 93,
+    "sha256": "d3929d0fcc6211bf6588566a0ee317c43b9552cd2438e72ec9c04bae6b261b96",
+    "whole_archive_verification": "PASS",
+    "individual_file_verification": "PASS"
+  },
+  "remote_ci": "NOT_CHECKED",
+  "public_precommit": "NOT_RUN",
+  "limits": [
+    "One ordered four-arm replay; no stable or generalized performance equivalence.",
+    "No sustained late Agent cache pressure or preemptions reproduced.",
+    "Controller HTTP wrapper versus independent official route intentionally differs; common capacity/timeout/transport adaptations declared.",
+    "Corrected arm additionally logs pause decisions; overhead uncalibrated."
+  ]
+}
