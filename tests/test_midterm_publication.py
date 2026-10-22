@@ -17,9 +17,13 @@ def test_publication_rebuilds_from_pinned_report_and_verified_archives(monkeypat
     assert hashlib.sha256(raw).hexdigest() == actual["report_sha256"]
     monkeypatch.setattr(module, "pinned", lambda path: raw)
     assert actual == module.build()
-    assert actual["version"] == "V0.62"
+    assert actual["version"] == "V0.63"
     assert module.REVISION in actual["report_url"]
     sections = {s["id"]: s for s in actual["sections"]}
+    worker = sections["worker-model"]
+    assert len(worker["tables"][0]["rows"]) == 6
+    assert "264" in worker["scope"]
+    assert "不替换正式B1" in worker["scope"]
     fenced = sections["fenced-model"]
     assert len(fenced["tables"][0]["rows"]) == 6
     assert "rank 0缺设备任务轨迹" in fenced["scope"]
