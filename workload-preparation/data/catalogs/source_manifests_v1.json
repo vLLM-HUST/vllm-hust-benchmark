@@ -1772,8 +1772,8 @@
     "QRECC": {
       "source_id": "QRECC",
       "platform": "github",
-      "repo_id": "apple/ml-qrecc",
-      "source_url": "https://github.com/apple/ml-qrecc",
+      "repo_id": "apple-aiml-research/ml-qrecc",
+      "source_url": "https://github.com/apple-aiml-research/ml-qrecc",
       "asset_kind": "conversational_retrieval_tasks",
       "independent_source_id": "QRECC",
       "workload_tags": [
@@ -1783,16 +1783,38 @@
       "provenance": "author_release",
       "fitness_status": "VARIABLES_REQUIRE_ASSET_INSPECTION",
       "discovery_status": "ENTRY_IDENTIFIED",
-      "revision": null,
-      "files": [],
+      "revision": "1d174464290790c0198b474ad022952ecd83b76b",
+      "files": [
+        {
+          "path": "qrecc_data.zip",
+          "url": "https://raw.githubusercontent.com/apple-aiml-research/ml-qrecc/1d174464290790c0198b474ad022952ecd83b76b/dataset/qrecc_data.zip",
+          "sha256": "6ed52a0b0e495f752424b15742119a5f8f33ca7a029c07122be1b849de19a308",
+          "bytes": 7971464,
+          "role": "data_archive"
+        },
+        {
+          "path": "qrecc_test.json",
+          "archive_member": "qrecc_test.json",
+          "sha256": "a4d8ef686827feb00c90997e0d6ff135928bf6f4bcb26fb523b5fac025d58f84",
+          "bytes": 17685054,
+          "rows": 16451,
+          "role": "data"
+        }
+      ],
+      "preparation_command": "workload-data prepare-qrecc-test --data-archive /data/qrecc_data.zip --output /data/qrecc-original-test",
+      "preparation": {
+        "archive_url": "https://github.com/apple-aiml-research/ml-qrecc/blob/1d174464290790c0198b474ad022952ecd83b76b/dataset/qrecc_data.zip",
+        "archive_sha256": "6ed52a0b0e495f752424b15742119a5f8f33ca7a029c07122be1b849de19a308",
+        "scope": "Original test task rows only; passage corpus and native retrieval execution not acquired"
+      },
       "unit": "source_rows",
       "provenance_kind": "conversational_retrieval_tasks",
       "access": {
-        "license": null,
-        "gated": null,
-        "note": "Verify publisher terms before acquisition or redistribution"
+        "license": "CC-BY-SA-3.0",
+        "gated": false,
+        "note": "Publisher README distinguishes dataset CC-BY-SA-3.0 from code Apache-2.0; raw data not redistributed here"
       },
-      "metadata_snapshot": "public-source-metadata-v0.5; not a fresh web check"
+      "metadata_snapshot": "2026-10-23 official fixed Git blob acquired; archive/member hashes inspected, no model or retrieval execution"
     },
     "INFINITEBENCH": {
       "source_id": "INFINITEBENCH",
@@ -2518,16 +2540,20 @@
       "provenance": "author_release_mixture",
       "fitness_status": "VARIABLES_REQUIRE_ASSET_INSPECTION",
       "discovery_status": "ENTRY_IDENTIFIED",
-      "revision": null,
-      "files": [],
+      "revision": "55a365637381ce7f3748fa2eac7aef1a113bbb82",
+      "files": [
+        {"path": "task1575_amazon_reviews_multi_sentiment_classification.json", "url": "https://raw.githubusercontent.com/allenai/natural-instructions/55a365637381ce7f3748fa2eac7aef1a113bbb82/tasks/task1575_amazon_reviews_multi_sentiment_classification.json", "sha256": "bbea80b443d94d18b53d016e18f01c50928488f9c9de30964c59880db5ffd6b0", "bytes": 38446, "rows": 102, "role": "data"},
+        {"path": "task778_pawsx_english_french_translation.json", "url": "https://raw.githubusercontent.com/allenai/natural-instructions/55a365637381ce7f3748fa2eac7aef1a113bbb82/tasks/task778_pawsx_english_french_translation.json", "sha256": "7291f56113deffa27fbfc149167293249287c9a36b80d66b8bbecc815b97b50a", "bytes": 103723, "rows": 250, "role": "data"},
+        {"path": "task1290_xsum_summarization.json", "url": "https://raw.githubusercontent.com/allenai/natural-instructions/55a365637381ce7f3748fa2eac7aef1a113bbb82/tasks/task1290_xsum_summarization.json", "sha256": "932e33f4ed3e23587076d938f9e088ae6c0a1b09a88468b493286c085cfeca41", "bytes": 16364902, "rows": 6493, "role": "data"}
+      ],
       "unit": "source_rows",
       "provenance_kind": "multitask_instruction_corpus",
       "access": {
-        "license": null,
-        "gated": null,
-        "note": "Verify publisher terms before acquisition or redistribution"
+        "license": "Apache-2.0 for instructions; per-task instance terms",
+        "gated": false,
+        "note": "Instructions and instances have separate terms; preserve each task Instance License. No raw instances redistributed, no underlying benchmark equivalence claim"
       },
-      "metadata_snapshot": "public-source-metadata-v0.5; not a fresh web check"
+      "metadata_snapshot": "2026-10-23 fixed official task files inspected; original task variants only, no model execution or official scoring yet"
     },
     "OPENMATH2": {
       "source_id": "OPENMATH2",

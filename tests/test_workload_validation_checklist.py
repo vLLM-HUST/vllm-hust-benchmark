@@ -8,6 +8,31 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def test_partial_history_execution_and_retrieval_preparation_stay_distinct():
+    directory = ROOT / "docs/workload-data"
+    sources = json.loads(
+        (directory / "dataset-validation-status.json").read_text(encoding="utf-8")
+    )["sources"]
+    rows = {row["source_id"]: row for row in sources}
+    history = rows["OASST1"]
+    receipt = json.loads((ROOT / history["receipt"]).read_text(encoding="utf-8"))
+    assert history["selected_samples"] == history["completed_samples"] == [23, 28, 68]
+    assert history["selected_samples"] == [
+        row["row_index"] for row in receipt["samples"]
+    ]
+    assert history["server_execution"] == "COMPLETED_ORIGINAL_HISTORY_CONTINUATIONS"
+    assert all(row["finish_reason"] == "stop" for row in receipt["samples"])
+    assert receipt["quality_scored"] is False
+    assert receipt["live_episode_validated"] is False
+    assert history["checked"] is False
+    retrieval = rows["QRECC"]
+    assert retrieval["acquisition"] == "VERIFIED_ORIGINAL_TEST_ARCHIVE_AND_MEMBER"
+    assert retrieval["read_adapter"] == "VERIFIED_INSTALLED_CLI_3_SAMPLES"
+    assert retrieval["server_execution"] == retrieval["scoring"] == "NOT_RUN"
+    assert retrieval["completed_samples"] == []
+    assert retrieval["checked"] is False
+
+
 def test_humaneval_generation_without_functional_scoring_stays_unchecked():
     directory = ROOT / "docs/workload-data"
     ledger = json.loads(

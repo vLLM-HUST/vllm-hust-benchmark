@@ -67,6 +67,7 @@ def bind_source(
             path,
             records_path=spec.get("records_path", []),
             row_format=spec.get("row_format"),
+            root_fields=spec.get("root_fields", []),
         ):
             if mapping is not None:
                 from .adapters import adapt_row

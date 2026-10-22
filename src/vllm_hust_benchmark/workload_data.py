@@ -59,6 +59,9 @@ def main(argv=None):
     bfcl = commands.add_parser("prepare-bfcl-simple-python")
     bfcl.add_argument("--official-archive", type=Path, required=True)
     bfcl.add_argument("--output", type=Path, required=True)
+    qrecc = commands.add_parser("prepare-qrecc-test")
+    qrecc.add_argument("--data-archive", type=Path, required=True)
+    qrecc.add_argument("--output", type=Path, required=True)
     for name in ("catalog", "pipeline", "replay"):
         passthrough = commands.add_parser(name, add_help=False)
         passthrough.add_argument("arguments", nargs=argparse.REMAINDER)
@@ -123,6 +126,14 @@ def main(argv=None):
                 )
             value = provider.prepare_bfcl_simple_python(
                 official_archive=args.official_archive, output=args.output
+            )
+        elif args.command == "prepare-qrecc-test":
+            if not hasattr(provider, "prepare_qrecc_test"):
+                raise RuntimeError(
+                    "Install the pinned text-expansion data component; older wheels lack QReCC preparation"
+                )
+            value = provider.prepare_qrecc_test(
+                data_archive=args.data_archive, output=args.output
             )
         else:
             value = provider.list_sources(class_id=args.class_id)
