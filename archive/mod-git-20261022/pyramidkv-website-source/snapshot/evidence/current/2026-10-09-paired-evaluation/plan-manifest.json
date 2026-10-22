@@ -1,0 +1,28 @@
+{
+  "dataset_files_sha256": {
+    "narrativeqa": "0fb8d08ba5cdad4b74244224b0dc2e8b41ee6b850d954a13eb2d282621ce2f71",
+    "qasper": "29aa07d2a63f36f4fb8e8cd200a3428ee3126d750bde6af1c8f9bc41c2366854",
+    "2wikimqa": "dda279cf93a99e1e5bfa3291fb199fd55978d10a1feb31822953cf77a1742e37"
+  },
+  "template_sha256": "56d22ad4f382169c2b8a11ff4c982a4a1bea096c8152b0f0b85b64686b157c30",
+  "cases_sha256": "91eb73537ac33be26e967d0c89daab52a2f43c9a6f4ce8d79b66e2a07ac08a66",
+  "groups_sha256": "9b29a51b48f73bc6d5509f1f7500dd065714f71356576279c4f598222aa77ef7",
+  "quality_selection": "first 100 examples per task; indices >= 50 are holdout",
+  "quality_tasks": [
+    "narrativeqa",
+    "qasper",
+    "2wikimqa"
+  ],
+  "quality_gate": {
+    "maximum_mean_f1_drop_points": 3,
+    "maximum_task_f1_drop_points": 5
+  },
+  "generation": {
+    "temperature": 0,
+    "seed": 17,
+    "thinking": false
+  },
+  "max_prompt_tokens": 16384,
+  "quality_count": 300,
+  "total_cases": 409
+}
