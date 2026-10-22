@@ -90,7 +90,12 @@ def test_m01_limited_verdict_matches_retained_model_evidence():
         for r in hardware["ranks"]
     )
     report = (report_dir / "中期测试报告.md").read_text()
-    assert f"{ledger['accounted_basic_operation_subtotal']:,}" in report
-    assert f"{hardware['request_phase']['duration_seconds']:.3f} 秒" in report
+    historical = json.loads(
+        (ROOT / "website-publication/data/midterm-v062.json").read_text()
+    )
+    verdict = next(s for s in historical["sections"] if s["id"] == "m01-verdict")
+    original = json.dumps(verdict, ensure_ascii=False)
+    assert f"{ledger['accounted_basic_operation_subtotal']:,}" in original
+    assert f"{hardware['request_phase']['duration_seconds']:.3f}" in original
     assert "证据受限，未通过验收" in report
     assert "不等同于实测有效算力低于 50%" in report

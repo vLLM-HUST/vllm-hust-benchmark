@@ -8,14 +8,15 @@ import tarfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-REVISION = "668632ac9b6ae8cb5cc0daa318d346b65feb6f6b"  # pragma: allowlist secret
+REVISION = "20170fb66ed3cd9f3235d379df48cf5243e1a04c"  # pragma: allowlist secret
 REPORT_DIR = "reports/vllm-hust-midterm-20261019"
 REPORT = REPORT_DIR + "/中期测试报告.md"
-OUTPUT = ROOT / "website-publication/data/midterm-v062.json"
+OUTPUT = ROOT / "website-publication/data/midterm-v063.json"
 
 # Repository-relative locators are resolved against the website's exact benchmark
 # publication commit, not a moving main branch or a local acquisition path.
 EVIDENCE = {
+    "worker-model": ["m01-recovery/worker-model-20261022"],
     "fenced-model": ["m01-recovery/fenced-model-20261022"],
     "trace-qualification": ["m01-recovery/trace-qualification-20261021"],
     "long-context-parser": ["m05-parser-confirmation-20261021"],
@@ -59,6 +60,7 @@ EVIDENCE = {
         "m01-recovery/logits-collective-reference-20261021"
     ],
     "m01-verdict": [
+        "m01-recovery/worker-model-20261022",
         "m01-recovery/model-runtime-20261021",
         "m01-recovery/logits-collective-reference-20261021",
     ],
@@ -176,14 +178,20 @@ def kv_audit():
 def build():
     raw = pinned(REPORT)
     text = raw.decode()
-    assert "报告版本：V0.62" in text
+    assert "报告版本：V0.63" in text
     url = f"https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/{REVISION}/{REPORT}"
     specs = [
+        (
+            "worker-model",
+            "双worker采集与参考补测 / Dual-worker capture and references",
+            "#### 双worker采集修复与实际形状参考补测",
+            "同工况200请求全部完成，双worker任务轨迹已取得，四卡释放。实际75种通信载荷各有三次参考；稠密、专家、词表、FIA、GDN H/O和六类辅助算子集合已匹配。短窗通信接口仍有264个不一致样本；剩余GDN、HBM参考与完整计量未闭合。M01证据受限，不替换正式B1。",
+        ),
         (
             "fenced-model",
             "完整模型同步边界补采 / Full-model device fences",
             "#### 完整模型设备同步边界补采",
-            "同工况35B模型200请求全部完成，两卡开始/结束同步回执通过。设备窗口包含客户端启动及控制开销，与原请求区间分开保存。rank 0缺设备任务轨迹，服务管理进程exit 130，副本离线导出完成；完整有效F与匹配参考仍未闭合，M01未通过本轮验收，不替换正式B1。",
+            "此前fenced-r1记录：同工况35B模型200请求全部完成，两卡同步回执通过；rank 0缺设备任务轨迹，服务管理进程exit 130。此采集问题已在上方worker-r1补测修复，旧证据保留。完整有效F与匹配参考仍未闭合，M01未通过本轮验收，不替换正式B1。",
         ),
         (
             "trace-qualification",
@@ -305,7 +313,7 @@ def build():
                 "m01-verdict",
                 "M01 本轮判定 / M01 acceptance verdict",
                 "#### M01 本轮验收判定",
-                "证据受限，未通过本轮验收；不是实测有效算力低于50%。F及达成率保持未赋值，缺口限定为同窗口覆盖、运算量口径及匹配参考，不影响按各自边界保留的正式B0/B1结果。",
+                "证据受限，未通过本轮验收；不是实测有效算力低于50%。双worker采集已修复，75种实际通信载荷参考已覆盖；F及达成率保持未赋值，剩余为GDN递归/WY/KKT/卷积、HBM参考、完整算量及同口径通信资源界限。正式B0/B1结果按原边界保留。",
             ),
         ]
     )
@@ -324,7 +332,7 @@ def build():
         )
     return {
         "schema": "midterm-publication/v1",
-        "version": "V0.62",
+        "version": "V0.63",
         "report_url": url,
         "report_sha256": hashlib.sha256(raw).hexdigest(),
         "source_commit": REVISION,
