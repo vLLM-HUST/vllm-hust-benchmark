@@ -1,0 +1,106 @@
+[
+  {
+    "batch": 64,
+    "inter": 13824,
+    "op": "native_chain(fp32_cast+gelu+mul)",
+    "us": 130.4,
+    "vs_native": 1.0,
+    "vs_copy_floor": 4.429
+  },
+  {
+    "batch": 64,
+    "inter": 13824,
+    "op": "npu_gelu+mul(fp32 two-step)",
+    "us": 163.2,
+    "vs_native": 1.252,
+    "vs_copy_floor": 5.543
+  },
+  {
+    "batch": 64,
+    "inter": 13824,
+    "op": "npu_gelu+mul(bf16 two-step)",
+    "us": 83.0,
+    "vs_native": 0.637,
+    "vs_copy_floor": 2.819
+  },
+  {
+    "batch": 64,
+    "inter": 13824,
+    "op": "fi_gelu(fused triton kernel)",
+    "us": 188.4,
+    "vs_native": 1.445,
+    "vs_copy_floor": 6.398
+  },
+  {
+    "batch": 64,
+    "inter": 13824,
+    "op": "fi_gelu(out= preallocated)",
+    "us": 146.0,
+    "vs_native": 1.119,
+    "vs_copy_floor": 4.957
+  },
+  {
+    "batch": 64,
+    "inter": 13824,
+    "op": "copy_floor(x.clone())",
+    "us": 29.5,
+    "vs_native": 0.226,
+    "vs_copy_floor": 1.0
+  },
+  {
+    "batch": 256,
+    "inter": 13824,
+    "op": "native_chain(fp32_cast+gelu+mul)",
+    "us": 127.3,
+    "vs_native": 1.0,
+    "vs_copy_floor": 4.148
+  },
+  {
+    "batch": 256,
+    "inter": 13824,
+    "op": "npu_gelu+mul(fp32 two-step)",
+    "us": 153.3,
+    "vs_native": 1.204,
+    "vs_copy_floor": 4.996
+  },
+  {
+    "batch": 256,
+    "inter": 13824,
+    "op": "npu_gelu+mul(bf16 two-step)",
+    "us": 78.0,
+    "vs_native": 0.612,
+    "vs_copy_floor": 2.541
+  },
+  {
+    "batch": 256,
+    "inter": 13824,
+    "op": "fi_gelu(fused triton kernel)",
+    "us": 179.6,
+    "vs_native": 1.41,
+    "vs_copy_floor": 5.851
+  },
+  {
+    "batch": 256,
+    "inter": 13824,
+    "op": "fi_gelu(out= preallocated)",
+    "us": 139.6,
+    "vs_native": 1.096,
+    "vs_copy_floor": 4.547
+  },
+  {
+    "batch": 256,
+    "inter": 13824,
+    "op": "copy_floor(x.clone())",
+    "us": 30.7,
+    "vs_native": 0.241,
+    "vs_copy_floor": 1.0
+  },
+  {
+    "batch": null,
+    "inter": null,
+    "op": "triton_noop_launch",
+    "us": 114.6,
+    "vs_native": null,
+    "vs_copy_floor": null
+  }
+]

@@ -1,0 +1,25 @@
+{
+  "schema": "gdn-first-divergence-plan.v1",
+  "candidate": "gdn-unpack-qk-l2norm-fusion",
+  "base_head": "3da51bba7f011fc1f50f57829a57b6482a11418a",
+  "branch": "fix/husk-carrier-visible",
+  "question": "Does same-input native/fused QKV differ at the first real-model T16 decode step, before recurrent attention?",
+  "scope": {"model": "Qwen3.5-35B-A3B", "precision": "bf16", "format": "ND", "tp": 2, "graph": "FULL", "T": 16, "packed_row": 4096, "q_heads": 8, "k_heads": 8, "v_heads": 16, "head_dim": 128, "phase": "pure non-spec decode"},
+  "shape_origin": "Existing fixed indexed raw batch in tools/bench_gdn_l3.py; prior A/B fixed-batch regression and existing T16 L4 evidence; no new scenario",
+  "method": "Explicit diagnostic-only worker subclass wraps plugin unpack_norm and the host _forward_core in worker memory; native rearrange+l2norm shadow on identical input; graph-replayed copies and per-QKV difference counters; inspect each real scheduler step; persist first differing layer per rank",
+  "functional_return": "Original fused outputs; shadow never updates recurrent state",
+  "run": {"serve_starts": 1, "fixed_batch_requests": 16, "max_tokens": 128, "max_scheduler_steps": 128, "profile_collections": 0, "L1_L2_screen": false},
+  "authorization": "Existing candidate budget has no wall cap; correctness/mechanism gap only, no blind retry",
+  "next_if_divergence": "Replay saved same-input tensors outside model; isolate arithmetic/layout before changing kernel",
+  "next_if_equal": "Keep blocked; extend only to recurrent input/state difference under a documented mechanism gap",
+  "stop": "No performance promotion, accepted status or default activation; save bounded negative result on infrastructure failure or missing coverage",
+  "rollback": "opt bench stop; omit --worker-cls and GDN_DIAGNOSTIC_*; fusion remains default-off; no host file modification or new entrypoint",
+  "unrelated_dirty_preserved": ["HOST_CONTRACT.md", "docs/support-matrix.md", "host-proposals/W1R-gmm-tuning-config/OWNERSHIP.md", "host-proposals/W1R-gmm-tuning-config/proposal_meta.json", "tests/test_w1r_gmm_tuning_patch.py"],
+  "existing_drift": {
+    "gate": "drift.evidence-changed:records",
+    "classification": "Pre-existing W1R log append after pin; not repaired by repinning and not used as GDN evidence",
+    "inspection": "pin recorded w1r_t5_armB_n32.log size757, now844 with completed timeout tail; pin recorded w1r_close_pin_final.txt size0, now257 with pin command output and pin_rc=0. Both mtimes predate this task.",
+    "sha256": {"20261018T094700Z_w1r_t5_armB_n32.log": "7765ce9ca4fa853a83a12b4e81efea3077992b5429558fa62c0f675c6c9f57be", "20261018T101359Z_w1r_close_pin_final.txt": "e0223e7b50636cdb6dd72c8962bf5085de007dd7146977409295b7bd73cddfb5"},
+    "disposition": "Keep original evidence unchanged and gate visible; diagnostic action allowed, acceptance blocked"
+  }
+}

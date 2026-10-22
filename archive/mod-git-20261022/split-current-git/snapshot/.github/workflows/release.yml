@@ -1,0 +1,121 @@
+# Create the GitHub Release for a version tag, attaching the **PyPI bytes**.
+#
+# Why this exists: the tag push already publishes to PyPI over OIDC (see
+# publish.yml), but the repo's own convention is that each version also gets a
+# Release whose assets are the authoritative artifacts. Doing that by hand needs
+# a GitHub API token; this workflow uses the run's own GITHUB_TOKEN instead, so a
+# maintainer with only SSH push rights can cut a complete release.
+#
+# Asset discipline (docs/release.md §11.7): the assets must be the bytes that are
+# on PyPI -- NOT a rebuild. A local/CI rebuild of the same version has different
+# hashes (measured: `a7480733…` vs `e7c2dc4f…` for 0.1.1), so this workflow
+# downloads from PyPI, verifies each file against the digest PyPI reports, and
+# only then uploads. Idempotent: an existing Release is updated, existing assets
+# are replaced.
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write # create/update the Release and upload assets
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # tag message for the release body
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      # The tag must name exactly the project version (same guard as publish.yml).
+      - name: Verify the release tag matches the project version
+        run: |
+          python - <<'PY'
+          import os, pathlib
+          try:
+              import tomllib
+          except ModuleNotFoundError:
+              import tomli as tomllib
+          tag = os.environ["GITHUB_REF_NAME"]
+          version = tomllib.loads(pathlib.Path("pyproject.toml").read_text())["project"]["version"]
+          assert tag == f"v{version}", f"tag {tag!r} does not name the project version (v{version})"
+          print(f"tag {tag} matches pyproject version {version}")
+          PY
+      - name: Wait for the version to appear on PyPI
+        run: |
+          python - <<'PY'
+          import os, pathlib, json, time, urllib.request
+          try:
+              import tomllib
+          except ModuleNotFoundError:
+              import tomli as tomllib
+          project = tomllib.loads(pathlib.Path("pyproject.toml").read_text())["project"]
+          url = f"https://pypi.org/pypi/{project['name']}/{project['version']}/json"
+          for attempt in range(30):
+              try:
+                  with urllib.request.urlopen(url, timeout=30) as r:
+                      data = json.loads(r.read())
+                  print(f"{url} -> {len(data['urls'])} file(s)")
+                  raise SystemExit(0)
+              except urllib.error.HTTPError as exc:
+                  print(f"attempt {attempt + 1}: HTTP {exc.code}; publish job may still be running")
+              except Exception as exc:  # noqa: BLE001
+                  print(f"attempt {attempt + 1}: {type(exc).__name__}: {exc}")
+              time.sleep(20)
+          raise SystemExit("version never appeared on PyPI; refusing to invent assets")
+          PY
+      - name: Download the PyPI bytes and verify their digests
+        run: |
+          python - <<'PY'
+          import hashlib, json, pathlib, urllib.request
+          try:
+              import tomllib
+          except ModuleNotFoundError:
+              import tomli as tomllib
+          project = tomllib.loads(pathlib.Path("pyproject.toml").read_text())["project"]
+          meta = json.load(urllib.request.urlopen(
+              f"https://pypi.org/pypi/{project['name']}/{project['version']}/json", timeout=60))
+          out = pathlib.Path("release-assets"); out.mkdir(exist_ok=True)
+          lines = []
+          for f in meta["urls"]:
+              blob = urllib.request.urlopen(f["url"], timeout=300).read()
+              digest = hashlib.sha256(blob).hexdigest()
+              assert digest == f["digests"]["sha256"], f"{f['filename']}: digest mismatch"
+              (out / f["filename"]).write_bytes(blob)
+              lines.append(f"{digest}  {f['filename']}")
+              print(f"{f['filename']}: {len(blob)} B verified")
+          (out / "dist.sha256").write_text("\n".join(lines) + "\n")
+          print("\n".join(lines))
+          PY
+      - name: Reject evidence-bearing release distributions
+        run: python tools/check_distribution.py release-assets
+      - name: Assemble the release body from the annotated tag
+        run: |
+          {
+            echo "PyPI: https://pypi.org/project/vllm-ascend-split-batch/${GITHUB_REF_NAME#v}/"
+            echo
+            echo "Assets below are the **PyPI bytes** (downloaded and digest-verified in this run),"
+            echo "not a rebuild — see \`docs/release.md\` §11.7 for why that distinction matters."
+            echo
+            git tag -l --format='%(contents)' "$GITHUB_REF_NAME"
+          } > release-body.md
+          head -20 release-body.md
+      - name: Create or update the Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            echo "release exists; updating notes and replacing assets"
+            gh release edit "$GITHUB_REF_NAME" --notes-file release-body.md
+            gh release upload "$GITHUB_REF_NAME" release-assets/* --clobber
+          else
+            gh release create "$GITHUB_REF_NAME" --title "$GITHUB_REF_NAME" \
+              --notes-file release-body.md release-assets/*
+          fi
+          gh release view "$GITHUB_REF_NAME" --json tagName,assets \
+            --jq '.tagName, (.assets[] | "\(.name) \(.size) B")'

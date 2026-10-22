@@ -1,0 +1,58 @@
+FFF....F.F.                                                              [100%]
+=================================== FAILURES ===================================
+_________________________ test_llama3_is_still_unwired _________________________
+anchor drifted → re-audit HOST_CONTRACT: the registry extractor no longer sees 'YaRNScalingRotaryEmbedding' in register_ascend_customop (['Conv3dLayer', 'GateLinear', 'GatedDeltaNetAttention', 'GemmaRMSNorm', 'MMEncoderAttention', 'MRotaryEmbedding', 'MoERunner', 'ParallelLMHead', 'RMSNorm', 'RMSNormGated', 'RotaryEmbedding', 'RoutedExperts', 'SiluAndMul', 'VocabParallelEmbedding']); the dict shape changed.
+______________ test_triton_mrope_call_still_misses_is_neox_style _______________
+anchor drifted → re-audit HOST_CONTRACT: class AscendMRotaryEmbedding is gone from /tmp/ropefix-drift-sim2/vllm_ascend/ops/rotary_embedding.py
+__________________ test_yarn_truncate_default_is_still_false ___________________
+anchor drifted → re-audit HOST_CONTRACT: AscendYaRNRotaryEmbedding.__init__ has no `truncate` parameter any more; re-derive the YaRN override.
+______ test_worker_module_still_binds_the_registration_function_directly _______
+
+    def test_worker_module_still_binds_the_registration_function_directly() -> None:
+        """The wrapper rebinding list is not hypothetical.
+    
+        ``vllm_ascend/worker/worker.py`` does ``from vllm_ascend.utils import
+        register_ascend_customop`` and calls it at ``NPUWorker.__init__`` time, so a
+        carrier that only patched the ``vllm_ascend.utils`` attribute would miss the
+        live call site entirely.  If upstream ever switches to
+        ``vllm_ascend.utils.register_ascend_customop(...)``, the rebinding rationale
+        (and HOST_CONTRACT.md's anchor note) has to be re-audited.
+        """
+>       tree = _parse(WORKER_PY)
+               ^^^^^^^^^^^^^^^^^
+
+tests/test_rope_fix_drift.py:470: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_rope_fix_drift.py:150: in _parse
+    return ast.parse(Path(path).read_text(encoding="utf-8"))
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/miniconda3/envs/hust/lib/python3.12/pathlib.py:1027: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/tmp/ropefix-drift-sim2/vllm_ascend/worker/worker.py')
+mode = 'r', buffering = -1, encoding = 'utf-8', errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/tmp/ropefix-drift-sim2/vllm_ascend/worker/worker.py'
+
+/opt/miniconda3/envs/hust/lib/python3.12/pathlib.py:1013: FileNotFoundError
+_______ test_mirrored_forward_triton_is_the_host_body_plus_one_argument ________
+anchor drifted → re-audit HOST_CONTRACT: class AscendMRotaryEmbedding is gone from /tmp/ropefix-drift-sim2/vllm_ascend/ops/rotary_embedding.py, so the mirrored override has nothing to mirror.
+=========================== short test summary info ============================
+FAILED tests/test_rope_fix_drift.py::test_llama3_is_still_unwired - Failed: a...
+FAILED tests/test_rope_fix_drift.py::test_triton_mrope_call_still_misses_is_neox_style
+FAILED tests/test_rope_fix_drift.py::test_yarn_truncate_default_is_still_false
+FAILED tests/test_rope_fix_drift.py::test_worker_module_still_binds_the_registration_function_directly
+FAILED tests/test_rope_fix_drift.py::test_mirrored_forward_triton_is_the_host_body_plus_one_argument
+5 failed, 6 passed in 22.97s

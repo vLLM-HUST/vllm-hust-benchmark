@@ -1,0 +1,15 @@
+## OFF leg (stock): zerocost traces (expect <none>)
+  <none>
+## OFF leg: FAIL/ERROR lines (expect <none>)
+  <none>
+## ON leg: zerocost ①/② lines
+49:(EngineCore pid=253586) zero-cost wiring ① is ACTIVE (VLLM_HUST_FI_PREFILL_OUT=1): the eager prefill FIA leg now writes into the caller's output buffer through the op's .out overload and the two redundant TensorMove copies per layer are guarded by an exact identity predicate.
+50:(EngineCore pid=253586) zero-cost wiring ② is ACTIVE (VLLM_HUST_SKIP_COS_SIN=1): update_cos_sin now records positions only and get_cos_and_sin_slice() materialises the rope buffers on demand.
+## ON leg: refused lines (expect <none>)
+  <none>
+## ON leg: cascade + demask markers
+14:INFO 09-13 08:02:00 [cascade_plugin.py:147] cascade plugin loaded (gate=1, graph_gate=1, kernel_wheel=ok)
+47:(EngineCore pid=253586) INFO 09-13 08:02:58 [cascade_plugin.py:147] cascade plugin loaded (gate=1, graph_gate=1, kernel_wheel=ok)
+48:(EngineCore pid=253586) FIA decode de-mask is ACTIVE (VLLM_HUST_FIA_DEMASK=1): pure decode FIA calls (npu_fused_infer_attention_score, _npu_fused_infer_attention_score_get_max_workspace) now run without the redundant 2048x2048 int8 causal template (sparse_mode 3->0); prefill / mixed / sliding-window / non-TND calls are untouched.
+## ON leg: Traceback/CRITICAL (expect <none>)
+166:(APIServer pid=251454) ERROR 09-13 08:04:25 [async_llm.py:829] Traceback (most recent call last):

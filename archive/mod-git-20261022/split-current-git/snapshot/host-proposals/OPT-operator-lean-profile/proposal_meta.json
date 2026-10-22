@@ -1,0 +1,48 @@
+{
+  "schema": "opt-operator-lean-profile.v1",
+  "authorization": "用户明确允许简化 L1/L2，并要求先修改合同、保留历史数据",
+  "base_plugin_commit": "b59615e937b25af663892e72760ce7a1e3d68e2a",
+  "deployment_root": "/root",
+  "depends_on": "OPT-delivery-workflow deployment",
+  "apply": "patch --dry-run -p1 -d /root < patch.diff; then patch -p1 -d /root < patch.diff",
+  "rollback": "patch --dry-run -R -p1 -d /root < patch.diff; then patch -R -p1 -d /root < patch.diff",
+  "files": [
+    {
+      "target": "PURPOSE.md",
+      "before_sha256": "734f93653e5da4bea46e8f6913e17f8de8ced402acf64c246ca9157dd4760025",
+      "after_sha256": "4331f9ff51965e039733aa032bc9dd11536a8edb105cd51044495a2bd16d9ebd"
+    },
+    {
+      "target": "AGENTS.md",
+      "before_sha256": "6b179eb6ec7f2c392507c0be1701e7901adf89427b1967853a7b191e03e2adf6",
+      "after_sha256": "8afc3141d61e052e3928d69db155a80abf4aae020fc02f590b1426d20826d5ee"
+    },
+    {
+      "target": "opt-ops/AGENTS.md",
+      "before_sha256": "b04e5c28b1e05f6ba2fbaead459eaa6b14c8216d488e6be17314e5beaedf5a83",
+      "after_sha256": "0da4cd817ed69229f4dda015222dd08404b557fad60e1c2bfe1ac817ac198907"
+    },
+    {
+      "target": "opt-ops/README.md",
+      "before_sha256": "a8562cee61969acb7bfeb1605e5e63c3c39f9014b922fe0d201de7c3f29265b6",
+      "after_sha256": "8517e6a684b84bffa8b9ce150586ac69aa4376394718749f17f1af9a32e39982"
+    },
+    {
+      "target": "opt-ops/scripts/opt.py",
+      "before_sha256": "44d3d10060216aa11e0c12751ecb263fbdcbd3230d3f7383749aa94edc5814a8",
+      "after_sha256": "bb231c287aac1578c52df7339f5a5b47bb00ea1d45454508de806a500d853c6a"
+    }
+  ],
+  "contract": {
+    "default_operator": "L0 -> plain L3 + compare -> light L4; no mandatory L1/L2 screen",
+    "optional_e2e": "Explicit screen/l1/l2 commands and original screen schema retained",
+    "no_screen_gate": "registry operator route; L0/L3 PASS with per-check existing evidence; ready/validating",
+    "diagnostic": "mechanism-gap permits evidenced PASS/FAIL and probing/blocked; no acceptance claim; terminal candidates denied",
+    "legacy": "Explicit screen retains full legacy checks; malformed reports never fall back; known L0/L3 FAIL blocks non-diagnostic collection",
+    "unchanged": "L0/L3/L4 acceptance, all-kernel denominator, repeatability, shape/weight matching and default-off"
+  },
+  "tests": [
+    "tests/test_operator_profile_contract.py"
+  ],
+  "history_policy": "No rewriting, removal, migration or recollection of historical screen/trace/evidence. No candidate status changes from this workflow deployment."
+}

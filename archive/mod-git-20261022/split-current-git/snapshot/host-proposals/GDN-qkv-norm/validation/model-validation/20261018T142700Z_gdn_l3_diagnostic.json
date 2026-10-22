@@ -1,0 +1,26 @@
+{
+  "candidate": "gdn-unpack-qk-l2norm-fusion",
+  "stage": "validating",
+  "concurrent_L3": {
+    "A_B_by_id": "FAIL 3/16",
+    "B_B_by_id": "FAIL 3/16",
+    "A_B_text_multiset_equal": true,
+    "B_B_text_multiset_equal": false,
+    "unique_texts": [
+      6,
+      6,
+      7
+    ],
+    "prompt_tokens": 331,
+    "max_output_tokens": 128,
+    "requests": 16,
+    "files": [
+      "/root/包体恢复/records/ladder/1018-141533-gdn16-l3.json",
+      "/root/包体恢复/records/ladder/1018-142108-gdn16-l3.json",
+      "/root/包体恢复/records/ladder/1018-142200-gdn16-l3.json"
+    ]
+  },
+  "standard_L3": "PASS 8/8; does not cover T16 by itself",
+  "interpretation": "Concurrency per-request-id comparison not reproducible even within candidate; A/B text multisets equal but this is only diagnosis, not replacement acceptance gate. Cannot assign differences uniquely to fused kernel.",
+  "next": "Complete B screen; isolate graph correctness; paired L4 for actual kernel activation/shape mechanism evidence. Do not mark accepted with unresolved concurrent L3."
+}

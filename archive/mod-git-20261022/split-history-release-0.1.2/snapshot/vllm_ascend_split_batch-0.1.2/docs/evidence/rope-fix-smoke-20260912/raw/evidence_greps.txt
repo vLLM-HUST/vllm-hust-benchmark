@@ -1,0 +1,17 @@
+## default-off leg: rope traces (expect empty)
+  <none>
+## default-off leg: Traceback/Error (expect empty)
+150:(APIServer pid=1742247) ERROR 09-12 04:30:07 [async_llm.py:829] AsyncLLM output_handler failed.
+151:(APIServer pid=1742247) ERROR 09-12 04:30:07 [async_llm.py:829] Traceback (most recent call last):
+152:(APIServer pid=1742247) ERROR 09-12 04:30:07 [async_llm.py:829]   File "/vllm-workspace/vllm-hust/vllm/v1/engine/async_llm.py", line 775, in output_handler
+153:(APIServer pid=1742247) ERROR 09-12 04:30:07 [async_llm.py:829]     outputs = await engine_core.get_output_async()
+154:(APIServer pid=1742247) ERROR 09-12 04:30:07 [async_llm.py:829]               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+155:(APIServer pid=1742247) ERROR 09-12 04:30:07 [async_llm.py:829]   File "/vllm-workspace/vllm-hust/vllm/v1/engine/core_client.py", line 1175, in get_output_async
+156:(APIServer pid=1742247) ERROR 09-12 04:30:07 [async_llm.py:829]     raise self._format_exception(outputs) from None
+157:(APIServer pid=1742247) ERROR 09-12 04:30:07 [async_llm.py:829] vllm.v1.engine.exceptions.EngineDeadError: EngineCore encountered an issue. See stack trace (above) for the root cause.
+## ON leg: rope carrier lines
+39:(EngineCore pid=1745180) RoPE fix: vllm_ascend.utils.register_ascend_customop is wrapped (call sites rebound: vllm_ascend.utils); the rope overrides are applied right after the host's own registration pass.
+40:(EngineCore pid=1745180) RoPE variant defect carrier is ACTIVE (VLLM_HUST_ROPE_FIX=1): op_registry_oot[Llama3RotaryEmbedding, MRotaryEmbedding, YaRNScalingRotaryEmbedding] will be pointed at the plugin subclasses right after vllm-ascend registers its custom ops -- ① llama3-scaling onto the Ascend rope kernel, ② the missing triton_mrope is_neox_style, ③ the YaRN truncate=True default of vLLM/HF.
+43:(EngineCore pid=1745180) RoPE fix: rope overrides in place: Llama3RotaryEmbedding -> created (defect ①: the fork never wired it); MRotaryEmbedding -> replaced AscendMRotaryEmbedding; YaRNScalingRotaryEmbedding -> replaced AscendYaRNRotaryEmbedding.
+## ON leg: Traceback (expect empty)
+  <none>

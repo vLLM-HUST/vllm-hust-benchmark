@@ -1,0 +1,27 @@
+bench-ladder: 附加 serve 参数(显式): --compilation-config {"mode":"VLLM_COMPILE","cudagraph_mode":"PIECEWISE","cudagraph_capture_sizes":[1,2,4,8,16,32]}
+启动 serve -> /root/包体恢复/logs/ladder-serve-1018-175655.log
+   serve env 快照 -> /root/包体恢复/logs/ladder-serve-1018-175655.env.json（keys_set=VLLM_HUST_GATE_FP32,VLLM_HUST_GDN_MERGE_INPROJ；未导出=VLLM_HUST_SHARED_GATE_PACK）
+serve 就绪 (端口 8000)
+== 载体（记录轴: 只记录不判定成败）==
+   探针 Python: /usr/local/python3.12.13/bin/python
+   husk 包: vllm_ascend_split_batch  find_spec=/root/vllm-workspace/vllm-ascend-split-batch-hust/src/vllm_ascend_split_batch/__init__.py  入口点 10 个: aot-cache-guard, cascade-attention, fi-gelu, fi-sampling, fia-demask, gate-fp32, gdn-merge-inproj, mlp-chunk, rope-fix, zerocost-wiring
+   serve env（scope=serve-process, source=serve-env-file:/root/包体恢复/logs/ladder-serve-1018-175655.env.json）
+     VLLM_HUST_GATE_FP32=1
+     VLLM_HUST_GDN_MERGE_INPROJ=1
+     VLLM_HUST_SHARED_GATE_PACK=<unknown/未导出>
+   serve 日志: /root/包体恢复/logs/ladder-serve-1018-175655.log  present=True
+     cascade_plugin_loaded: count=4 first_line=8
+     gate_fp32_cache_populated: count=2 first_line=243
+     gdn_merge_inproj_fail_closed: count=2 first_line=244
+     w3f2_gdn_merge_applied: count=2 first_line=179
+     w3f2_gdn_merge_skipped: count=0 first_line=None
+     w3f3_shared_gate_pack_applied: count=0 first_line=None
+     w3f3_shared_gate_pack_failed: count=0 first_line=None
+   注意: 日志里 Unknown vLLM env 警告 4 次 —— **不是**缺席判据（载体存在/不存在都会出现）
+   归因（仓内 husk 插件 / 运行树补丁 分开记, 不合并）:
+     husk.cascade=effective  (cascade_plugin_loaded×4（首行 8）)
+     husk.gate_fp32=effective  (gate_fp32_cache_populated×2（首行 243）)
+     husk.gdn_merge_inproj=present-but-fail-closed  (gdn_merge_inproj_fail_closed×2（首行 244）: 插件拒接合并, 模型保持 stock)
+     runtime_tree.w3f2=applied  (w3f2_gdn_merge_applied×2（首行 179）)
+     runtime_tree.w3f3=not-enabled  (日志里无对应补丁行（补丁未应用/未开/尚未加载）)
+   总体: axis=record-only cross_carrier_merge=not-computed

@@ -1,0 +1,173 @@
+{
+  "scope": "isolated L0 consumer-chain trace, not full-model L4",
+  "shape": {
+    "T": 16,
+    "row_stride": 4096,
+    "q": 1024,
+    "k": 1024,
+    "v": 2048,
+    "head_dim": 128,
+    "phase": "pure decode"
+  },
+  "weights": {
+    "model": "Qwen3.5-35B-A3B",
+    "precision": "bf16",
+    "format": "ND",
+    "tp": 2,
+    "input": "seeded synthetic"
+  },
+  "arms": {
+    "baseline": {
+      "calls": [
+        {
+          "call": 0,
+          "kernel_count": 6,
+          "kernel_active_us": 12.82,
+          "first_to_last_kernel_span_us": 931.66,
+          "between_kernel_gap_us": 918.84,
+          "profiled_host_wrapper_us": 3223.35
+        },
+        {
+          "call": 1,
+          "kernel_count": 6,
+          "kernel_active_us": 13.48,
+          "first_to_last_kernel_span_us": 818.08,
+          "between_kernel_gap_us": 804.6,
+          "profiled_host_wrapper_us": 1104.99
+        },
+        {
+          "call": 2,
+          "kernel_count": 6,
+          "kernel_active_us": 13.42,
+          "first_to_last_kernel_span_us": 827.78,
+          "between_kernel_gap_us": 814.36,
+          "profiled_host_wrapper_us": 1070.98
+        },
+        {
+          "call": 3,
+          "kernel_count": 6,
+          "kernel_active_us": 12.62,
+          "first_to_last_kernel_span_us": 810.26,
+          "between_kernel_gap_us": 797.64,
+          "profiled_host_wrapper_us": 1052.65
+        },
+        {
+          "call": 4,
+          "kernel_count": 6,
+          "kernel_active_us": 12.32,
+          "first_to_last_kernel_span_us": 810.02,
+          "between_kernel_gap_us": 797.7,
+          "profiled_host_wrapper_us": 1058.99
+        }
+      ],
+      "all_kernel_count": 30,
+      "all_kernel_total_us": 64.66000000000001,
+      "active_us_per_call_mean": 12.932,
+      "active_us_per_call_median": 12.82,
+      "streams": [
+        [
+          882074048,
+          47
+        ]
+      ],
+      "attribution": "async_npu flow links each kernel timestamp to exactly one named CPU call; no overlapping kernels"
+    },
+    "candidate": {
+      "calls": [
+        {
+          "call": 0,
+          "kernel_count": 1,
+          "kernel_active_us": 2.86,
+          "first_to_last_kernel_span_us": 2.86,
+          "between_kernel_gap_us": 0.0,
+          "profiled_host_wrapper_us": 752.87
+        },
+        {
+          "call": 1,
+          "kernel_count": 1,
+          "kernel_active_us": 2.58,
+          "first_to_last_kernel_span_us": 2.58,
+          "between_kernel_gap_us": 0.0,
+          "profiled_host_wrapper_us": 375.09
+        },
+        {
+          "call": 2,
+          "kernel_count": 1,
+          "kernel_active_us": 2.58,
+          "first_to_last_kernel_span_us": 2.58,
+          "between_kernel_gap_us": 0.0,
+          "profiled_host_wrapper_us": 354.32
+        },
+        {
+          "call": 3,
+          "kernel_count": 1,
+          "kernel_active_us": 2.96,
+          "first_to_last_kernel_span_us": 2.96,
+          "between_kernel_gap_us": 0.0,
+          "profiled_host_wrapper_us": 346.98
+        },
+        {
+          "call": 4,
+          "kernel_count": 1,
+          "kernel_active_us": 2.98,
+          "first_to_last_kernel_span_us": 2.98,
+          "between_kernel_gap_us": 0.0,
+          "profiled_host_wrapper_us": 345.58
+        }
+      ],
+      "all_kernel_count": 5,
+      "all_kernel_total_us": 13.96,
+      "active_us_per_call_mean": 2.792,
+      "active_us_per_call_median": 2.86,
+      "streams": [
+        [
+          882074048,
+          47
+        ]
+      ],
+      "attribution": "async_npu flow links each kernel timestamp to exactly one named CPU call; no overlapping kernels"
+    }
+  },
+  "eager_medians": {
+    "baseline": {
+      "host_enqueue_us": 844.2428894340992,
+      "event_eager_chain_us": 842.9089546203613,
+      "host_total_us": 846.1836725473404
+    },
+    "candidate": {
+      "host_enqueue_us": 263.6938588693738,
+      "event_eager_chain_us": 262.01748847961426,
+      "host_total_us": 265.91962669044733
+    },
+    "candidate_launch_only": {
+      "host_enqueue_us": 121.16318102926016,
+      "event_eager_chain_us": 119.94849443435669,
+      "host_total_us": 123.24894778430462
+    }
+  },
+  "sources": [
+    {
+      "path": "/root/包体恢复/records/ladder/1018-125822-l0-gdn-qkv-norm/baseline/coder-user-tianyuw-new-profile-59445888f-qs6v5_861400_20261018125840999_ascend_pt/ASCEND_PROFILER_OUTPUT/kernel_details.csv",
+      "sha256": "cdfd26dfeebc0f5653a4171e638c29ff8971aa12bf6bfa1f41f5ccddcbf43f5a"
+    },
+    {
+      "path": "/root/包体恢复/records/ladder/1018-125822-l0-gdn-qkv-norm/baseline/coder-user-tianyuw-new-profile-59445888f-qs6v5_861400_20261018125840999_ascend_pt/ASCEND_PROFILER_OUTPUT/trace_view.json",
+      "sha256": "afd66a526941a0ee4aa4370e909e27e289a8a87f2c9c00dd2e5ba04a7eab428f"
+    },
+    {
+      "path": "/root/包体恢复/records/ladder/1018-125822-l0-gdn-qkv-norm/candidate/coder-user-tianyuw-new-profile-59445888f-qs6v5_861400_20261018125841879_ascend_pt/ASCEND_PROFILER_OUTPUT/kernel_details.csv",
+      "sha256": "2221389abbcf4421e9efd9c34e7cc602687f4ed1405c46718bfd1d4d0c868bb1"
+    },
+    {
+      "path": "/root/包体恢复/records/ladder/1018-125822-l0-gdn-qkv-norm/candidate/coder-user-tianyuw-new-profile-59445888f-qs6v5_861400_20261018125841879_ascend_pt/ASCEND_PROFILER_OUTPUT/trace_view.json",
+      "sha256": "b460c7f5dca3958dd4c4cfb6a3d78c7ccb3a3ca6688762d0bad798025cbc9a3f"
+    }
+  ],
+  "limits": [
+    "Only one five-call diagnostic trace per arm; no full-model acceptance claim.",
+    "Profiled CPU wrapper time is instrumented and not comparable to unprofiled eager timing.",
+    "Preallocated-launch vs full-wrapper timing difference is diagnostic; it is not a CPU self-time decomposition.",
+    "Old rejected copy kernel was not run; its kernel self-time remains unknown.",
+    "All-kernel denominator here is isolated synthetic consumer-chain only, not the historical model window."
+  ]
+}

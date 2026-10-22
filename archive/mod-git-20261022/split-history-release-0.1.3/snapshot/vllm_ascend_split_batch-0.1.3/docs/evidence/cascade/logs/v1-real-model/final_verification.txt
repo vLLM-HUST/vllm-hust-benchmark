@@ -1,0 +1,36 @@
+=== per-leg sweep (real-model evidence-#2 re-run) ===
+tag              TypeError Traceback drift-warn twin-miss    bf16-notice  wheel-unavail capture-fallback
+gB64_off         0        0        0          0            0            0          0
+gB64_on          0        0        0          1            1            0          0
+gB64_on_run2     0        0        0          1            1            0          0
+gB32_off         0        0        0          0            0            0          0
+gB32_on          0        0        0          1            1            0          0
+eB64_off         0        0        0          0            0            0          0
+eB64_off2        0        0        0          0            0            0          0
+eB64_on          0        0        0          0            1            0          0
+
+=== card 7 release check ===
+HBM before: 	HBM Usage Rate(%)              : 5  / after: 	HBM Usage Rate(%)              : 5
+leftover processes of ours on card 7 (after matrix):
+root      324955       1  0 03:30 ?        00:00:00 bash /vllm-workspace/knowledge/evidence/cascade/logs/v1-real-model/matrix_real.sh
+root      347700  324955  0 03:50 ?        00:00:00 tee /vllm-workspace/knowledge/evidence/cascade/logs/v1-real-model/card7_leftover_procs.txt
+
+=== rc from runner ===
+rc=0 tag=gB64_off
+rc=0 tag=gB64_on
+rc=0 tag=gB64_on_run2
+rc=0 tag=gB32_off
+rc=0 tag=gB32_on
+rc=0 tag=eB64_off
+rc=0 tag=eB64_off2
+rc=0 tag=eB64_on
+
+=== EV2 wall/summary lines ===
+EV2 mode=off tag=eB64_off batch=64 sent=420 gen=128 eager=1 wall=16.76s out_tokens=6543 -> /tmp/ev2_off_eB64_off.json DONE
+EV2 mode=off tag=eB64_off2 batch=64 sent=420 gen=128 eager=1 wall=16.66s out_tokens=6543 -> /tmp/ev2_off_eB64_off2.json DONE
+EV2 mode=off tag=gB32_off batch=32 sent=420 gen=128 eager=0 wall=7.39s out_tokens=3636 -> /tmp/ev2_off_gB32_off.json DONE
+EV2 mode=off tag=gB64_off batch=64 sent=420 gen=128 eager=0 wall=9.49s out_tokens=6487 -> /tmp/ev2_off_gB64_off.json DONE
+EV2 mode=on tag=eB64_on batch=64 sent=420 gen=128 eager=1 wall=19.66s out_tokens=6368 -> /tmp/ev2_on_eB64_on.json DONE
+EV2 mode=on tag=gB32_on batch=32 sent=420 gen=128 eager=0 wall=8.51s out_tokens=3636 -> /tmp/ev2_on_gB32_on.json DONE
+EV2 mode=on tag=gB64_on batch=64 sent=420 gen=128 eager=0 wall=10.42s out_tokens=6368 -> /tmp/ev2_on_gB64_on.json DONE
+EV2 mode=on_run2 tag=gB64_on_run2 batch=64 sent=420 gen=128 eager=0 wall=10.57s out_tokens=6368 -> /tmp/ev2_on_run2_gB64_on_run2.json DONE

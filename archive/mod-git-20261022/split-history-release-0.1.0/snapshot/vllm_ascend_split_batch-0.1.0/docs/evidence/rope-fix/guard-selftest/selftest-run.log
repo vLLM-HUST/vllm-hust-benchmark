@@ -1,0 +1,16 @@
+### case=fixed  VLLM_ASCEND_HUST_ROOT=/tmp/ropefix-drift-sim
+upstream fixed defect ① → drop the corresponding override: vllm_ascend/utils.py now registers 'Llama3RotaryEmbedding' -> the fork is wired itself, so the llama3 override in rope_fix_plugin is dead code.
+upstream fixed defect ② → drop the corresponding override: forward_triton now passes is_neox_style (9 positional, keywords=[]) -> drop the mirrored forward_triton override.
+upstream fixed defect ③ → drop the corresponding override: the fork's `truncate` default is now True (it must still be False for this override to be needed) -> drop the YaRN override.
+upstream fixed defect ② → drop the corresponding override: the mirrored forward_triton no longer equals the host body plus the injected `self.is_neox_style` (the host call site now passes it).
+5 failed, 6 passed in 21.99s
+### case=drifted  VLLM_ASCEND_HUST_ROOT=/tmp/ropefix-drift-sim2
+anchor drifted → re-audit HOST_CONTRACT: the registry extractor no longer sees 'YaRNScalingRotaryEmbedding' in register_ascend_customop (['Conv3dLayer', 'GateLinear', 'GatedDeltaNetAttention', 'GemmaRMSNorm', 'MMEncoderAttention', 'MRotaryEmbedding', 'MoERunner', 'ParallelLMHead', 'RMSNorm', 'RMSNormGated', 'RotaryEmbedding', 'RoutedExperts', 'SiluAndMul', 'VocabParallelEmbedding']); the dict shape changed.
+anchor drifted → re-audit HOST_CONTRACT: class AscendMRotaryEmbedding is gone from /tmp/ropefix-drift-sim2/vllm_ascend/ops/rotary_embedding.py
+anchor drifted → re-audit HOST_CONTRACT: AscendYaRNRotaryEmbedding.__init__ has no `truncate` parameter any more; re-derive the YaRN override.
+anchor drifted → re-audit HOST_CONTRACT: class AscendMRotaryEmbedding is gone from /tmp/ropefix-drift-sim2/vllm_ascend/ops/rotary_embedding.py, so the mirrored override has nothing to mirror.
+5 failed, 6 passed in 22.97s
+### case=no-host  (host tree undiscoverable)
+vllm-ascend source tree not found; the reverse defect guard (and the mirror-equivalence proof) cannot be evaluated.  Set VLLM_ASCEND_HUST_ROOT to the vllm-ascend checkout to run it.
+!!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!
+1 error in 0.22s

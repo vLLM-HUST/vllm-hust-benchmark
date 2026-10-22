@@ -1,0 +1,642 @@
+scope 校验通过: candidate=gdn-unpack-qk-l2norm-fusion（v4: 不再要求 active 口径；窗口可比性看产物自带的形状事实与权重标签）
+算子采集前置通过：复用 L0/L3 证据，不强制 L1/L2 screen；结构检查不替代数值及形状覆盖验收。
+== 采集门（面向决策）: candidate=gdn-unpack-qk-l2norm-fusion reason=candidate-ab ==
+（采集门 = 意图/证据复用预检: 只读、不采集、不写库；不登记『采集已完成』、不扣预算、不校验采集是否真发生。重复检测是启发式, 非保证。）
+{
+ "ok": true,
+ "collected": false,
+ "id": "gdn-unpack-qk-l2norm-fusion",
+ "stage": "validating",
+ "reason": "candidate-ab",
+ "gap": "multibuffer fusion arm L4 window absent; paired same-day A window collected at ladder-1019-021225",
+ "repeat_reason": "",
+ "checks": [
+  {
+   "name": "candidate-non-terminal",
+   "ok": true,
+   "detail": "stage=validating"
+  },
+  {
+   "name": "gap-declared",
+   "ok": true,
+   "detail": "multibuffer fusion arm L4 window absent; paired same-day A window collected at ladder-1019-021225"
+  },
+  {
+   "name": "evidence-intent",
+   "ok": true,
+   "detail": "1 个路径"
+  },
+  {
+   "name": "no-blind-repeat",
+   "ok": true,
+   "detail": "本次证据均为新证据"
+  },
+  {
+   "name": "same-purpose-completed",
+   "ok": true,
+   "detail": "无同源重复；已有证据里基线/探针 10 条（可直接复用作参照）、既往采集产物 43 条（不是本轮意图）"
+  },
+  {
+   "name": "reuse-hinted",
+   "ok": true,
+   "detail": "可复用已有证据 53 条 / 新证据 1 条；建议先复用: /root/包体恢复/records/ladder/1018-125822-l0-gdn-qkv-norm.json, /root/包体恢复/records/probes/20261018T164700Z_gdn_separate/multibuffer-l0.json, /root/包体恢复/records/probes/20261018T173500Z_gdn_determinism/baseline-full-standard-l3.json"
+  },
+  {
+   "name": "ab-not-blocked",
+   "ok": true,
+   "detail": "必要 A/B 不受限：reason=candidate-ab（或任何新证据路径）永不被拦，只有「重复采集同一份已有证据」才要 repeat reason；非终态（含 blocked）的 warning 不阻塞采集"
+  }
+ ],
+ "violations": [],
+ "reuse": [
+  {
+   "path": "/root/包体恢复/records/probes/20261018T131400Z_gdn_norm_receipt.json",
+   "sha256": "509a6b7c407985482f78906b8e1a8556c45acc684e84299d8c28968e7a0758dd",
+   "source": "current",
+   "already_recorded": true,
+   "in_intent": false,
+   "class": "collected"
+  },
+  {
+   "path": "/root/包体恢复/records/ladder/1018-125822-l0-gdn-qkv-norm.json",
+   "sha256": "5117c8b4192a9ce65f6c13bcf9e299f77762021832f02cc514536de42bf49488",
+   "source": "current",
+   "already_recorded": true,
+   "in_intent": false,
+   "class": "baseline-or-probe"
+  },
+  {
+   "path": "/root/包体恢复/records/probes/20261018T130700Z_gdn_norm_trace_analysis.json",
+   "sha256": "69f55e20f98b315fa4e3bc01fa0693832a369cd81e7961120820a72e0a9fa699",
+   "source": "current",
+   "already_recorded": true,
+   "in_intent": false,
+   "class": "collected"
+  },
+  {
+   "path": "/root/包体恢复/records/probes/20261018T131000Z_gdn_norm_final_pytest.log",
+   "sha256": "7aa0da25aa362658c0aefad6215ec26b8d0da4bfe51b966516084b45430935f7",
+   "source": "current",
+   "already_recorded": true,
+   "in_intent": false,
+   "class": "collected"
+  },
+  {
+   "path": "/root/包体恢复/records/probes/20261018T131200Z_gdn_norm_final_sources/manifest.json",
+   "sha256": "989ed6999f1ba936bb5f6ae08086654be309ce7f25d1c20ba88a46d5539e768c",
+   "source": "current",
+   "already_recorded": true,
+   "in_intent": false,
+   "class": "collected"
+  },
+  {
+   "path": "/root/包体恢复/records/probes/20261018T132032Z_gdn_plugin_push_receipt.json",
+   "sha256": "fd81cb431c4a6b6c42187b09ac24725338a826dacc97ab208f9fce35aa24ea1e",
+   "source": "current",
+   "already_recorded": true,
+   "in_intent": false,
+   "class": "collected"
+  },
+  {
+   "path": "/root/包体恢复/records/probes/20261018T133700Z_gdn_l4_execution_plan.json",
+   "sha256": "b18cfa2105cbdf4af1471c3ea590e39dcbd252ccb985fb6cdafd1471b7be8bfa",
+   "source": "current",
+   "already_recorded": true,
+   "in_intent": false,
+   "class": "collected"
+  },
+  {
+   "path": "/root/包体恢复/records/probes/20261018T145800Z_gdn_model_receipt.json",
+   "sha256": "e98572743b372de41b8c71199763cf3be4ab34add5d4ecabc6c3f8f709d39cfc",
+   "source": "current",
+   "already_recorded": true,
+   "in_intent": false,
+   "class": "collected"
+  },
+  {
+   "path": "/root/包体恢复/records/probes/20261018T145600Z_gdn_A_l4.json",
+   "sha256": "5518a6ac22cd93094dfd3c3db957372c6f5acafe26a020779e15afed12942453",
+   "source": "current",
+   "already_recorded": true,
+   "in_intent": false,
+   "class": "collected"
+  },
+  {
+   "path": "/root/包体恢复/records/probes/20261018T145600Z_gdn_B_l4.json",
+   "sha256": "16716513dba59efaf7b043f48699a85c4f3a6a1d7e6e83ec4c83d8f9659d8d14",
+   "source": "current",
+   "already_recorded": true,
+   "in_intent": false,
+   "class": "collected"
+  },
+  {
+   "path": "/root/包体恢复/records/probes/20261018T144800Z_gdn_l4_analyze.py",
+   "sha256": "8e15647107889af02682a967d701352f4fe0b587396e69674e73638dcb3026ef",
+   "source": "current",
+   "already_recorded": true,
+   "in_intent": false,
+   "class": "collected"
+  },
+  {
+   "path": "/root/包体恢复/records/probes/20261018T145000Z_gdn_profile_AB_compare.log",
+   "sha256": "0849d9b90da319f108f961705d504412b533d255fcbe2d7ab71008e966f2a002",
+   "source": "current",
+   "already_recorded": true,
+   "in_intent": false,
+   "class": "collected"
+  },
+  {
+   "path": "/root/包体恢复/records/probes/20261018T145000Z_gdn_cross_service_BB_compare.log",
+   "sha256": "06d6ad679db0a961b38f0e86850203945ac647dbad73d26efff73a3c6f4fac9a",
+   "source": "current",
+   "already_recorded": true,
+   "in_intent": false,
+   "class": "collected"
+  },
+  {
+   "path": "/root/包体恢复/records/probes/20261018T144000Z_gdn_AA_batch_compare.log",
+   "sha256": "06d6ad679db0a961b38f0e86850203945ac647dbad73d26efff73a3c6f4fac9a",
+   "source": "current",
+   "already_recorded": true,
+   "in_intent": false,
+   "class": "collected"
+  },
+  {
+   "path": "/root/包体恢复/records/probes/20261018T145500Z_gdn_mmlu_AB_compare.log",
+   "sha256": "06d6ad679db0a961b38f0e86850203945ac647dbad73d26efff73a3c6f4fac9a",
+   "source": "current",
+   "already_recorded": true,
+   "in_intent": false,
+   "class": "collected"
+  },
+  {
+   "path": "/root/包体恢复/records/probes/20261018T144700Z_gdn_tools_pytest.log",
+   "sha256": "fdf572a0131fb646045aae1a31f7d3183efc2c2c8d74ebb6ed4fbbad1d8c4c4f",
+   "source": "current",
+   "already_recorded": true,
+   "in_intent": false,
+   "class": "collected"
+  },
+  {
+   "path": "/root/包体恢复/records/probes/20261018T145600Z_gdn_coverage.log",
+   "sha256": "b46fe3e87e01e7caba7ad0e5044195d37f6a0bbb158691d5f6c597101ba77756",
+   "source": "current",
+   "already_recorded": true,
+   "in_intent": false,
+   "class": "collected"
+  },
+  {
+   "path": "/root/包体恢复/records/probes/20261018T163000Z_gdn_receipt.json",
+   "sha256": "0a139ba7a082c54738616dfd86e752623c0c58c18920e0b419d62a02f162d336",
+   "source": "current",
+   "already_recorded": true,
+   "in_intent": false,
+   "class": "collected"
+  },
+  {
+   "path": "/root/包体恢复/records/probes/20261018T163000Z_gdn_resume_plan.json",
+   "sha256": "c51218448a84438266d1a615a2cfdfb21f39a6b6384b8055d2fe5327c0375947",
+   "source": "current",
+   "already_recorded": true,
+   "in_intent": false,
+   "class": "collected"
+  },
+  {
+   "path": "/root/包体恢复/records/probes/20261018T163000Z_gdn_cpu.log",
+   "sha256": "fe6b224eb23d4e27faf643bfad8da7f5e90585aa5e5d4082a0d107d84ce6501b",
+   "source": "current",
+   "already_recorded": true,
+   "in_intent": false,
+   "class": "collected"
+  },
+  {
+   "path": "/root/包体恢复/records/probes/20261018T163000Z_gdn_batch_r3.json",
+   "sha256": "312b5644dbdd52df5bde61e757563c31a63a939a8c1771c3bdda8341b0a0a1c3",
+   "source": "current",
+   "already_recorded": true,
+   "in_intent": false,
+   "class": "collected"
+  },
+  {
+   "path": "/root/包体恢复/records/probes/20261018T163000Z_gdn_batch_compare_A.log",
+   "sha256": "0849d9b90da319f108f961705d504412b533d255fcbe2d7ab71008e966f2a002",
+   "source": "current",
+   "already_recorded": true,
+   "in_intent": false,
+   "class": "collected"
+  },
+  {
+   "path": "/root/包体恢复/records/probes/20261018T163000Z_gdn_batch_compare_B.log",
+   "sha256": "06d6ad679db0a961b38f0e86850203945ac647dbad73d26efff73a3c6f4fac9a",
+   "source": "current",
+   "already_recorded": true,
+   "in_intent": false,
+   "class": "collected"
+  },
+  {
+   "path": "/root/包体恢复/records/probes/20261018T163000Z_gdn_standard_compare.log",
+   "sha256": "a077f1b23b093a4ed12e90d74d6306f82ffce795dbdee8a969cef3a016691dc2",
+   "source": "current",
+   "already_recorded": true,
+   "in_intent": false,
+   "class": "collected"
+  },
+  {
+   "path": "/root/包体恢复/records/probes/20261018T163000Z_gdn_coverage.log",
+   "sha256": "671eee0c49763c1a812a589497a0cb6d91e74b7425f44b278fe83d1b3c149542",
+   "source": "current",
+   "already_recorded": true,
+   "in_intent": false,
+   "class": "collected"
+  },
+  {
+   "path": "/root/包体恢复/records/probes/20261018T163000Z_gdn_serve_r3.log",
+   "sha256": "59715af4da7b6f172f52cec0337570f794cf191ad1b4ba9c1719cae89a8c396c",
+   "source": "current",
+   "already_recorded": true,
+   "in_intent": false,
+   "class": "collected"
+  },
+  {
+   "path": "/root/包体恢复/records/probes/20261018T163000Z_gdn_first_divergence_r3/rank0-summary.json",
+   "sha256": "bcaa51435ff748b71d73ee6be6166a140a5d69d3ed12970b404c9ff07a91ddd3",
+   "source": "current",
+   "already_recorded": true,
+   "in_intent": false,
+   "class": "collected"
+  },
+  {
+   "path": "/root/包体恢复/records/probes/20261018T163000Z_gdn_first_divergence_r3/rank1-summary.json",
+   "sha256": "daac52182dd5ae2ec432bfabe293a45b9d5d2da65a3e924e04a27e1b3bd4be14",
+   "source": "current",
+   "already_recorded": true,
+   "in_intent": false,
+   "class": "collected"
+  },
+  {
+   "path": "/root/包体恢复/records/ladder/1018-162922-l3.json",
+   "sha256": "cedec6f60037f57447c7ffa4067489a27376c21971d9452ea61ce6022e0f9700",
+   "source": "current",
+   "already_recorded": true,
+   "in_intent": false,
+   "class": "collected"
+  },
+  {
+   "path": "/root/包体恢复/records/probes/20261018T173500Z_gdn_determinism_plan.json",
+   "sha256": "b2efae141dfc20b3943b5bc9a76fb8beb5df8771990033cfb2e2351be4806958",
+   "source": "current",
+   "already_recorded": true,
+   "in_intent": false,
+   "class": "collected"
+  },
+  {
+   "path": "/root/包体恢复/records/probes/20261018T164700Z_gdn_separate/multibuffer-l0.json",
+   "sha256": "4b3851b0ebb49249765c9ad1d94b23fec3858f51681beb47ff71b70f393a67ab",
+   "source": "current",
+   "already_recorded": true,
+   "in_intent": false,
+   "class": "baseline-or-probe"
+  },
+  {
+   "path": "/root/包体恢复/records/probes/20261018T164700Z_gdn_separate/multibuffer-graph.json",
+   "sha256": "7df2815f654ed2251acb538c68c5f70d676c41d88220a2979bc5d2ca3279e400",
+   "source": "current",
+   "already_recorded": true,
+   "in_intent": false,
+   "class": "collected"
+  },
+  {
+   "path": "/root/包体恢复/records/probes/20261018T173500Z_gdn_determinism/baseline-repeat-compare.log",
+   "sha256": "06d6ad679db0a961b38f0e86850203945ac647dbad73d26efff73a3c6f4fac9a",
+   "source": "current",
+   "already_recorded": true,
+   "in_intent": false,
+   "class": "baseline-or-probe"
+  },
+  {
+   "path": "/root/包体恢复/records/probes/20261018T173500Z_gdn_determinism/fusion-mb-repeat-compare.log",
+   "sha256": "06d6ad679db0a961b38f0e86850203945ac647dbad73d26efff73a3c6f4fac9a",
+   "source": "current",
+   "already_recorded": true,
+   "in_intent": false,
+   "class": "collected"
+  },
+  {
+   "path": "/root/包体恢复/records/probes/20261018T173500Z_gdn_determinism/fusion-mb-vs-baseline.log",
+   "sha256": "06d6ad679db0a961b38f0e86850203945ac647dbad73d26efff73a3c6f4fac9a",
+   "source": "current",
+   "already_recorded": true,
+   "in_intent": false,
+   "class": "baseline-or-probe"
+  },
+  {
+   "path": "/root/包体恢复/records/probes/20261018T173500Z_gdn_determinism/det-baseline-vs-oldA.log",
+   "sha256": "7580934f398e92760fadc6da73f753c516cd059430e306522e4b4fdc2172d074",
+   "source": "current",
+   "already_recorded": true,
+   "in_intent": false,
+   "class": "baseline-or-probe"
+  },
+  {
+   "path": "/root/包体恢复/records/probes/20261018T173500Z_gdn_determinism/fusionmb-vs-oldA.log",
+   "sha256": "7580934f398e92760fadc6da73f753c516cd059430e306522e4b4fdc2172d074",
+   "source": "current",
+   "already_recorded": true,
+   "in_intent": false,
+   "class": "collected"
+  },
+  {
+   "path": "/root/包体恢复/records/probes/20261018T173500Z_gdn_determinism/fusionmb-vs-oldB.log",
+   "sha256": "b4a0692f404735dc1b2e28941dc2308daebe51f289aa1440d00d61ed15ca7c3a",
+   "source": "current",
+   "already_recorded": true,
+   "in_intent": false,
+   "class": "collected"
+  },
+  {
+   "path": "/root/包体恢复/records/probes/20261018T173500Z_gdn_determinism/fusion-full-mb.json",
+   "sha256": "312b5644dbdd52df5bde61e757563c31a63a939a8c1771c3bdda8341b0a0a1c3",
+   "source": "current",
+   "already_recorded": true,
+   "in_intent": false,
+   "class": "collected"
+  },
+  {
+   "path": "/root/包体恢复/records/probes/20261018T173500Z_gdn_determinism/fusion-full-mb.log",
+   "sha256": "e9f339555b3a23308880592567a45b7ac62d55b601d662c2f4fd8d78b425eb3b",
+   "source": "current",
+   "already_recorded": true,
+   "in_intent": false,
+   "class": "collected"
+  },
+  {
+   "path": "/root/包体恢复/records/probes/20261018T173500Z_gdn_determinism/baseline-full.json",
+   "sha256": "312b5644dbdd52df5bde61e757563c31a63a939a8c1771c3bdda8341b0a0a1c3",
+   "source": "current",
+   "already_recorded": true,
+   "in_intent": false,
+   "class": "baseline-or-probe"
+  },
+  {
+   "path": "/root/包体恢复/records/probes/20261018T173500Z_gdn_determinism/baseline-full.log",
+   "sha256": "15752e8e8d8fe56ad4937ee78ca26bc43fcd7501acb33e23e80f1bedec2aad0d",
+   "source": "current",
+   "already_recorded": true,
+   "in_intent": false,
+   "class": "baseline-or-probe"
+  },
+  {
+   "path": "/root/包体恢复/records/probes/20261018T173500Z_gdn_determinism/fusion-full-mb-vs-baseline-full.log",
+   "sha256": "06d6ad679db0a961b38f0e86850203945ac647dbad73d26efff73a3c6f4fac9a",
+   "source": "current",
+   "already_recorded": true,
+   "in_intent": false,
+   "class": "baseline-or-probe"
+  },
+  {
+   "path": "/root/包体恢复/records/probes/20261018T173500Z_gdn_determinism/fusion-full-mb-standard-l3.json",
+   "sha256": "cedec6f60037f57447c7ffa4067489a27376c21971d9452ea61ce6022e0f9700",
+   "source": "current",
+   "already_recorded": true,
+   "in_intent": false,
+   "class": "collected"
+  },
+  {
+   "path": "/root/包体恢复/records/probes/20261018T173500Z_gdn_determinism/baseline-full-standard-l3.json",
+   "sha256": "cedec6f60037f57447c7ffa4067489a27376c21971d9452ea61ce6022e0f9700",
+   "source": "current",
+   "already_recorded": true,
+   "in_intent": false,
+   "class": "baseline-or-probe"
+  },
+  {
+   "path": "/root/包体恢复/records/probes/20261018T173500Z_gdn_determinism/standard-l3-compare.log",
+   "sha256": "a077f1b23b093a4ed12e90d74d6306f82ffce795dbdee8a969cef3a016691dc2",
+   "source": "current",
+   "already_recorded": true,
+   "in_intent": false,
+   "class": "collected"
+  },
+  {
+   "path": "/root/包体恢复/records/probes/20261018T173500Z_gdn_determinism/fusion-mb-serve-command.log",
+   "sha256": "fd3bed38551f3cbb3bff35da98b1c89ab19a910d9d848972f89aeae0eabc3c01",
+   "source": "current",
+   "already_recorded": true,
+   "in_intent": false,
+   "class": "collected"
+  },
+  {
+   "path": "/root/包体恢复/records/probes/20261018T173500Z_gdn_determinism/baseline-serve-command.log",
+   "sha256": "23b0d22e2d300a427cb2b537590d7a790dcc1e88456bc4e0bcb1139d587035ae",
+   "source": "current",
+   "already_recorded": true,
+   "in_intent": false,
+   "class": "baseline-or-probe"
+  },
+  {
+   "path": "/root/包体恢复/logs/ladder-serve-1018-173500.env.json",
+   "sha256": "0e45613fd54255e3d45801a518310e99ccfcdd02a3df055eed3a237de44d1307",
+   "source": "current",
+   "already_recorded": true,
+   "in_intent": false,
+   "class": "collected"
+  },
+  {
+   "path": "/root/包体恢复/logs/ladder-serve-1018-175655.env.json",
+   "sha256": "a4fdcaaeb1aef62c6ac754fecfc300a5ae337bf18933aafd8fa43b0962bf4e23",
+   "source": "current",
+   "already_recorded": true,
+   "in_intent": false,
+   "class": "collected"
+  },
+  {
+   "path": "/root/vllm-workspace/vllm-ascend-split-batch-hust/host-proposals/GDN-qkv-norm/validation/multibuffer-determinism-20261018/receipt.json",
+   "sha256": "6827660f1552094624fa1ec2561208e082efe9e8b245a39a2add758f0537a7ed",
+   "source": "current",
+   "already_recorded": true,
+   "in_intent": false,
+   "class": "collected"
+  },
+  {
+   "path": "/root/包体恢复/records/probes/20261018T125900Z_gdn_norm_plan.json",
+   "sha256": "4846171d2cffd2210e360c74e5b6090a4ed59294b1ccaf5d814f24761a32eef2",
+   "source": "history",
+   "already_recorded": true,
+   "in_intent": false,
+   "class": "collected"
+  },
+  {
+   "path": "/root/包体恢复/records/probes/20261018T124400Z_gdn_host_kernel_analysis.json",
+   "sha256": "af44de687841ea1793d6f50c2b6029e8746a5fefdc42e434666f396210c8bd42",
+   "source": "history",
+   "already_recorded": true,
+   "in_intent": false,
+   "class": "collected"
+  },
+  {
+   "path": "/root/包体恢复/records/ladder/1019-022000-opstat.json",
+   "sha256": "4274439d770ee8d31f1e4fd71f2cb83bd3b7c5c939fe7aa4219993a8790825f3",
+   "source": "intent",
+   "already_recorded": false,
+   "in_intent": true,
+   "class": "intent (new)"
+  }
+ ],
+ "existing_classification": {
+  "baseline_or_probe": [
+   "/root/包体恢复/records/ladder/1018-125822-l0-gdn-qkv-norm.json",
+   "/root/包体恢复/records/probes/20261018T164700Z_gdn_separate/multibuffer-l0.json",
+   "/root/包体恢复/records/probes/20261018T173500Z_gdn_determinism/baseline-repeat-compare.log",
+   "/root/包体恢复/records/probes/20261018T173500Z_gdn_determinism/fusion-mb-vs-baseline.log",
+   "/root/包体恢复/records/probes/20261018T173500Z_gdn_determinism/det-baseline-vs-oldA.log",
+   "/root/包体恢复/records/probes/20261018T173500Z_gdn_determinism/baseline-full.json",
+   "/root/包体恢复/records/probes/20261018T173500Z_gdn_determinism/baseline-full.log",
+   "/root/包体恢复/records/probes/20261018T173500Z_gdn_determinism/fusion-full-mb-vs-baseline-full.log",
+   "/root/包体恢复/records/probes/20261018T173500Z_gdn_determinism/baseline-full-standard-l3.json",
+   "/root/包体恢复/records/probes/20261018T173500Z_gdn_determinism/baseline-serve-command.log"
+  ],
+  "completed_collection": [
+   "/root/包体恢复/records/probes/20261018T131400Z_gdn_norm_receipt.json",
+   "/root/包体恢复/records/probes/20261018T130700Z_gdn_norm_trace_analysis.json",
+   "/root/包体恢复/records/probes/20261018T131000Z_gdn_norm_final_pytest.log",
+   "/root/包体恢复/records/probes/20261018T131200Z_gdn_norm_final_sources/manifest.json",
+   "/root/包体恢复/records/probes/20261018T132032Z_gdn_plugin_push_receipt.json",
+   "/root/包体恢复/records/probes/20261018T133700Z_gdn_l4_execution_plan.json",
+   "/root/包体恢复/records/probes/20261018T145800Z_gdn_model_receipt.json",
+   "/root/包体恢复/records/probes/20261018T145600Z_gdn_A_l4.json",
+   "/root/包体恢复/records/probes/20261018T145600Z_gdn_B_l4.json",
+   "/root/包体恢复/records/probes/20261018T144800Z_gdn_l4_analyze.py",
+   "/root/包体恢复/records/probes/20261018T145000Z_gdn_profile_AB_compare.log",
+   "/root/包体恢复/records/probes/20261018T145000Z_gdn_cross_service_BB_compare.log",
+   "/root/包体恢复/records/probes/20261018T144000Z_gdn_AA_batch_compare.log",
+   "/root/包体恢复/records/probes/20261018T145500Z_gdn_mmlu_AB_compare.log",
+   "/root/包体恢复/records/probes/20261018T144700Z_gdn_tools_pytest.log",
+   "/root/包体恢复/records/probes/20261018T145600Z_gdn_coverage.log",
+   "/root/包体恢复/records/probes/20261018T163000Z_gdn_receipt.json",
+   "/root/包体恢复/records/probes/20261018T163000Z_gdn_resume_plan.json",
+   "/root/包体恢复/records/probes/20261018T163000Z_gdn_cpu.log",
+   "/root/包体恢复/records/probes/20261018T163000Z_gdn_batch_r3.json",
+   "/root/包体恢复/records/probes/20261018T163000Z_gdn_batch_compare_A.log",
+   "/root/包体恢复/records/probes/20261018T163000Z_gdn_batch_compare_B.log",
+   "/root/包体恢复/records/probes/20261018T163000Z_gdn_standard_compare.log",
+   "/root/包体恢复/records/probes/20261018T163000Z_gdn_coverage.log",
+   "/root/包体恢复/records/probes/20261018T163000Z_gdn_serve_r3.log",
+   "/root/包体恢复/records/probes/20261018T163000Z_gdn_first_divergence_r3/rank0-summary.json",
+   "/root/包体恢复/records/probes/20261018T163000Z_gdn_first_divergence_r3/rank1-summary.json",
+   "/root/包体恢复/records/ladder/1018-162922-l3.json",
+   "/root/包体恢复/records/probes/20261018T173500Z_gdn_determinism_plan.json",
+   "/root/包体恢复/records/probes/20261018T164700Z_gdn_separate/multibuffer-graph.json",
+   "/root/包体恢复/records/probes/20261018T173500Z_gdn_determinism/fusion-mb-repeat-compare.log",
+   "/root/包体恢复/records/probes/20261018T173500Z_gdn_determinism/fusionmb-vs-oldA.log",
+   "/root/包体恢复/records/probes/20261018T173500Z_gdn_determinism/fusionmb-vs-oldB.log",
+   "/root/包体恢复/records/probes/20261018T173500Z_gdn_determinism/fusion-full-mb.json",
+   "/root/包体恢复/records/probes/20261018T173500Z_gdn_determinism/fusion-full-mb.log",
+   "/root/包体恢复/records/probes/20261018T173500Z_gdn_determinism/fusion-full-mb-standard-l3.json",
+   "/root/包体恢复/records/probes/20261018T173500Z_gdn_determinism/standard-l3-compare.log",
+   "/root/包体恢复/records/probes/20261018T173500Z_gdn_determinism/fusion-mb-serve-command.log",
+   "/root/包体恢复/logs/ladder-serve-1018-173500.env.json",
+   "/root/包体恢复/logs/ladder-serve-1018-175655.env.json",
+   "/root/vllm-workspace/vllm-ascend-split-batch-hust/host-proposals/GDN-qkv-norm/validation/multibuffer-determinism-20261018/receipt.json",
+   "/root/包体恢复/records/probes/20261018T125900Z_gdn_norm_plan.json",
+   "/root/包体恢复/records/probes/20261018T124400Z_gdn_host_kernel_analysis.json"
+  ]
+ },
+ "same_purpose_repeat": [],
+ "budget": {
+  "authorization": "用户批注：不用考虑预算，继续工作到落地",
+  "wall_cap": "removed by user for this round",
+  "serve_starts": "no prior cap; actual starts tracked in receipts",
+  "resample": "only for documented correctness/mechanism gaps, not blind retries",
+  "charged_before_s": 683.7947954162211
+ },
+ "budget_enforced": false,
+ "note": "本检查只做前置校验（不采集、不写库）；budget 为**预声明**，本工具不自动扣减/不计账（不虚报执行）。",
+ "limits": "重复判定只看本候选已登记的证据（路径或 sha256）；未落库的采集历史不受保护，不能据此声称「持久重复历史已保护」。"
+}== L4 light 窗口: start_profile -> 负载[mmlu-pro-eval-traffic] -> stop_profile (capture=vllm-max-iterations-32, trace: /root/prof/ladder-1019-022857, /root 余 316G) ==
+   负载: lm-eval mmlu_pro_smoke(第一 16 条, 5-shot CoT, num_concurrent=16, max_gen_toks=2048, chat) — 数据集派生评测流量口径; capture_scope=vllm-max-iterations-32; trace_tier=light; max_iterations=32
+   cohort: ladder-1019-022857/cohort.json（模型/宿主/配置档随窗口记录）
+2026-10-19:02:34:11 INFO     [config.evaluate_config:357] Using default fewshot_as_multiturn=True.
+2026-10-19:02:34:29 INFO     [_cli.run:391] Including path: /root/包体恢复/scripts/lm-eval-tasks
+2026-10-19:02:34:29 INFO     [_cli.run:392] Selected Tasks: ['mmlu_pro_smoke']
+2026-10-19:02:34:29 INFO     [evaluator:214] Setting random seed to 0 | Setting numpy seed to 1234 | Setting torch manual seed to 1234 | Setting fewshot manual seed to 1234
+2026-10-19:02:34:29 INFO     [evaluator:239] Initializing local-chat-completions model, with arguments: {'base_url': 'http://127.0.0.1:8000/v1/chat/completions', 'model': '/models/Qwen3.5-35B-A3B', 'num_concurrent': 16, 'timeout': 600, 'max_retries': 2}
+2026-10-19:02:34:29 INFO     [models.api_models:176] Using max length 2048 - 1
+2026-10-19:02:34:29 INFO     [models.api_models:197] Using tokenizer None
+2026-10-19:02:34:30 INFO     [evaluator_utils:472] Selected tasks:
+2026-10-19:02:34:30 INFO     [evaluator_utils:506] Task: mmlu_pro_smoke (/root/包体恢复/scripts/lm-eval-tasks/mmlu_pro_local/mmlu_pro_smoke.yaml)
+2026-10-19:02:34:30 INFO     [evaluator:314] mmlu_pro_smoke: Using gen_kwargs: {'until': ['Question:'], 'max_gen_toks': 2048, 'do_sample': False, 'temperature': 0.0}
+2026-10-19:02:34:30 WARNING  [evaluator:335] Overwriting default num_fewshot of mmlu_pro_smoke from 5 to 5
+2026-10-19:02:34:30 INFO     [evaluator:487] Evaluating examples for tasks ['mmlu_pro_smoke']
+2026-10-19:02:34:30 INFO     [api.task:312] Building contexts for mmlu_pro_smoke on rank 0...
+2026-10-19:02:34:30 INFO     [api.task:589] mmlu_pro_smoke: Evaluating on 16 examples
+  0%|          | 0/16 [00:00<?, ?it/s]100%|██████████| 16/16 [00:00<00:00, 1065.59it/s]
+2026-10-19:02:34:31 INFO     [evaluator:589] Running generate_until requests
+2026-10-19:02:34:31 INFO     [models.api_models:752] Tokenized requests are disabled. Context + generation length is not checked.
+Requesting API:   0%|          | 0/16 [00:00<?, ?it/s]Requesting API:   6%|▋         | 1/16 [00:27<06:55, 27.73s/it]Requesting API:  12%|█▎        | 2/16 [00:28<02:43, 11.65s/it]Requesting API:  19%|█▉        | 3/16 [00:29<01:29,  6.89s/it]Requesting API:  25%|██▌       | 4/16 [00:32<01:03,  5.30s/it]Requesting API:  31%|███▏      | 5/16 [00:32<00:38,  3.52s/it]Requesting API:  38%|███▊      | 6/16 [00:40<00:49,  4.96s/it]Requesting API:  50%|█████     | 8/16 [00:42<00:24,  3.06s/it]Requesting API:  56%|█████▋    | 9/16 [00:44<00:18,  2.65s/it]Requesting API:  62%|██████▎   | 10/16 [00:44<00:12,  2.00s/it]Requesting API:  69%|██████▉   | 11/16 [00:44<00:08,  1.62s/it]Requesting API:  75%|███████▌  | 12/16 [00:53<00:14,  3.60s/it]Requesting API:  94%|█████████▍| 15/16 [00:53<00:01,  1.64s/it]Requesting API: 100%|██████████| 16/16 [00:53<00:00,  3.35s/it]
+2026-10-19:02:35:24 INFO     [api.task:589] mmlu_pro_smoke: Evaluating on 16 examples
+fatal: not a git repository (or any parent up to mount point /)
+Stopping at filesystem boundary (GIT_DISCOVERY_ACROSS_FILESYSTEM not set).
+2026-10-19:02:35:24 INFO     [loggers.evaluation_tracker:247] Saving results aggregated
+2026-10-19:02:35:24 INFO     [loggers.evaluation_tracker:119] Saving per-task samples to /root/prof/ladder-1019-022857/eval/__models__Qwen3.5-35B-A3B/*.jsonl
+local-chat-completions ({'base_url': 'http://127.0.0.1:8000/v1/chat/completions', 'model': '/models/Qwen3.5-35B-A3B', 'num_concurrent': 16, 'timeout': 600, 'max_retries': 2}), gen_kwargs: ({}), limit: None, num_fewshot: 5, batch_size: 1
+|    Tasks    |Version|    Filter    |n-shot|  Metric   |   |Value|   |Stderr|
+|-------------|------:|--------------|-----:|-----------|---|----:|---|-----:|
+|smoke-biology|    3.1|custom-extract|     5|exact_match|↑  |0.625|±  | 0.125|
+
+  执行体记录: completed=16/16 -> /root/prof/ladder-1019-022857/load-exec.json
+  窗口 manifest -> /root/prof/ladder-1019-022857/load-manifest.json（metrics Δ={'prompt_tokens': 24288, 'prompt_tokens_local_compute': 24288, 'generation_tokens': 24145, 'request_success': 16}）
+
+等待 trace 落盘（ascend_pt 目录出现在 /root/prof/ladder-1019-022857）...
+trace 落盘稳定（192M），开始解析
+ascend_pt: /root/prof/ladder-1019-022857/dp0_pp0_tp1_dcp0_ep1_rank1_1213890_20261019023410359_ascend_pt （离线解析走 rv1 venv, ascend_pt 父目录口径, ulimit -v 45000M）
+LADDER_STOP_SERVE_FOR_PARSE=1 → 解析前停 serve（opt bench stop）释放常驻内存
+serve 已停止
+  负载口径: mmlu-pro-eval-traffic — lm-eval mmlu_pro_smoke(第一 16 条, 5-shot CoT, num_concurrent=16, max_gen_toks=2048, chat) — 数据集派生评测流量口径; capture_scope=vllm-max-iterations-32; trace_tier=light; max_iterations=32｜窗口覆盖: prefill_tokens=24288, window_iterations=32, captured_requests=16
+  cohort: 028-qwen35-35b-a3b-tp2-fullgraph | model=Qwen3.5-35B-A3B | core=0.28.1.post1.dev143+gf18cf803c ascend=0.25.1rc2.dev125+hust.20260903.4.g74f0c0a27.d20260909 | graph=FULL | apc=off
+  窗口覆盖: prefill_tokens=24288 | window_iterations=32 (cap=32, truncated=True) | captured_requests=16
+    [ok] iterations_gdn_vs_attn: GDN 家族每层调用数最大 = 32 次迭代 vs attention 32 次（prefill 13 + decode 19）
+    [ok] prefill_tokens_gdn_vs_attn: attention prefill ΣT/10=24381 vs GDN ΣT/30=24288（比值 1.0038; chunk 补零使 attention 略高）
+    [ok] prefill_tokens_le_metrics: 窗内 24288 ≤ /metrics Δprompt_tokens=24288（截断窗: trace 只覆盖墙钟窗的一部分）
+    [ok] captured_le_metrics_success: 入窗 16 ≤ /metrics Δrequest_success=16
+    [ok] captured_le_requested: 入窗/完成 16 ≤ 提交 16
+    [gap] 窗口被 capture 迭代上限截断: captured_request_count 只是『入窗请求数下界』, 不是完成数 → 跨窗总量比较前须核对两窗该下界与 prefill 体积
+  GroupedMatmul                    2560 次       527.5 ms
+  ChunkGatedDeltaRule               391 次       236.0 ms
+  MatMulV2                         7232 次       162.2 ms
+  CausalConv1d                      960 次        47.2 ms
+  RecurrentGatedDeltaRule           930 次        36.0 ms
+  Cast                             4160 次        20.1 ms
+  Transpose                         991 次        18.1 ms
+  ConcatD                          1110 次        16.6 ms
+  fused_gdn_gating_kernel           960 次        16.4 ms
+目标算子合计(compute-only) 1080.1 ms
+  device 口径: compute 1651.2 ms (42.2%) | comm 2259.7 ms (57.8%) | all-kernel 3910.9 ms
+    [comm] hcom_allReduce_              2592 次     2251.0 ms  (share 57.56%)
+    [comm] hcom_allGather_                32 次        8.7 ms  (share 0.22%)
+    [comm-detail] hcom_allGather__       elapse      8.7ms = wait     0.0 + sync     0.0 + transit    0.0
+    [comm-detail] hcom_allReduce__       elapse   2251.0ms = wait    18.7 + sync    13.8 + transit   12.6
+    [comm-transport] HCCS   n=2624 size=8402.1MB bw=17.24GB/s
+    [comm-transport] SDMA   n=2624 size=8402.1MB bw=17.24GB/s
+  step 预算: Computing 1651.1 ms (28.0%) | Comm(NotOverlapped) 2259.7 ms (38.3%) | Overlapped 0.0 ms | Free 1984.8 ms (33.7%) | Stage 5895.7 ms
+  Free 归因: total 1984.8ms | host API 覆盖 95.13% | host 空闲 4.87% | sync 7.72ms
+    ⚠ caliber=v1-host-boundary-deprecated（已失效）: decode 18 step(中位 23.207ms), free 29.4ms (6.92%) | 非图区 free 1955.396ms
+      host_boundary_*/internal_* 属 v1 失效家族（exe 边界代理被证伪）→ 勿引用; D1/D5 归因走 v2 stream-pair
+  op_profile(aic/aiv/mac/mte ms, cube%):
+    hcom_allReduce_            tot=  2251.0 aic=    0.0 aiv=    0.0 mac=    0.0 mte=    0.0 cube=0.0 wait= 185.4
+    GroupedMatmul              tot=   527.5 aic=  500.2 aiv=    0.0 mac=  103.9 mte=  610.8 cube=93.561 wait=  33.9
+    ChunkGatedDeltaRule        tot=   236.0 aic=  234.5 aiv=  234.7 mac=    8.8 mte=   96.4 cube=99.346 wait=  11.4
+    MatMulV2                   tot=   162.2 aic=  145.0 aiv=    0.0 mac=   55.6 mte=  149.4 cube=67.02 wait= 284.1
+    MatMulV3                   tot=    93.2 aic=   90.6 aiv=    0.0 mac=   64.5 mte=  125.3 cube=97.172 wait=   0.9
+    MoeInitRoutingV3           tot=    68.6 aic=    0.0 aiv=   62.3 mac=    0.0 mte=   19.8 cube=0.0 wait=  98.6
+    AddRmsNormBias             tot=    62.3 aic=    0.0 aiv=   55.2 mac=    0.0 mte=   33.2 cube=0.0 wait=   0.8
+    CausalConv1d               tot=    47.2 aic=    0.0 aiv=   39.3 mac=    0.0 mte=    7.9 cube=0.0 wait=   3.1
+saved -> /root/包体恢复/records/ladder/1019-023410-opstat.json
+   coverage: prefill_tokens=24288, window_iterations=32, captured_requests=16  declared=True
+   [gap] 窗口被 capture 迭代上限截断: captured_request_count 只是『入窗请求数下界』, 不是完成数 → 跨窗总量比较前须核对两窗该下界与 prefill 体积
+  light profile: 只交付算子/all-kernel/通信；shape 沿用同 cohort 已冻结基线
+== 瘦身窗口 'ladder-1019-022857'（1 个 rank; shapes=0; dryrun=0）==
+  dp0_pp0_tp1_dcp0_ep1_rank1_1213890_20261019023410359_ascend_pt     0.4G ->    0.0G (可回收 0.4G, pt db 保留 0 个)
+  台账 -> /root/包体恢复/records/ladder/1019-023410-slim.json
+  抢救产物 -> /root/包体恢复/records/ladder/raw/ladder-1019-022857/ （PVC 持久层）
+
+采集门通过 → 启动 light bench profile；复用证据 ['/root/包体恢复/records/ladder/1019-022000-opstat.json']

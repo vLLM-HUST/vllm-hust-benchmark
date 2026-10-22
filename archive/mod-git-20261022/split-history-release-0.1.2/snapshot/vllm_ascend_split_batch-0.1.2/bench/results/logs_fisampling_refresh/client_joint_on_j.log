@@ -1,0 +1,54 @@
+INFO 09-10 17:18:25 [__init__.py:52] Available plugins for group vllm.platform_plugins:
+INFO 09-10 17:18:25 [__init__.py:54] - ascend -> vllm_ascend:register
+INFO 09-10 17:18:25 [__init__.py:57] All plugins in this group will be loaded. Set `VLLM_PLUGINS` to control which plugins to load.
+INFO 09-10 17:18:25 [__init__.py:272] Platform plugin ascend is activated
+INFO 09-10 17:18:25 [platform.py:70] Breakable CUDAGraph on Ascend is opt-in; using VLLM_USE_BREAKABLE_CUDAGRAPH=0.
+2026-09-10 17:18:37,582 - 240635 - ServiceProfiler - INFO - VLLM_USE_V1 not set, auto-detected via vLLM 0.28.1.post1.dev143+gf18cf803c.empty: default 1
+INFO 09-10 17:18:38 [__init__.py:112] Registered model loader `<class 'vllm_ascend.model_loader.netloader.netloader.ModelNetLoaderElastic'>` with load format `netloader`
+INFO 09-10 17:18:38 [__init__.py:112] Registered model loader `<class 'vllm_ascend.model_loader.rfork.rfork_loader.RForkModelLoader'>` with load format `rfork`
+INFO 09-10 17:18:40 [cascade_plugin.py:147] cascade plugin loaded (gate=0, graph_gate=0, kernel_wheel=ok)
+Namespace(subparser='bench', bench_type='serve', dispatch_function=<function BenchmarkServingSubcommand.cmd at 0xfffb5f8e07c0>, trust_remote_code=False, seed=0, num_prompts=512, dataset_name='random', no_stream=False, dataset_path=None, no_oversample=False, skip_chat_template=False, enable_multimodal_chat=False, disable_shuffle=False, custom_output_len=256, custom_ensure_client_side_data=False, spec_bench_output_len=256, spec_bench_category=None, sonnet_input_len=550, sonnet_output_len=150, sonnet_prefix_len=200, sharegpt_output_len=None, timed_trace_chunk_hash_size=16, timed_trace_sec_multiplier=1, timed_trace_label_timestamp='timestamp', timed_trace_label_input_length='input_length', timed_trace_label_output_length='output_length', timed_trace_label_hash_ids='hash_ids', blazedit_min_distance=0.0, blazedit_max_distance=1.0, asr_max_audio_len_sec=inf, asr_min_audio_len_sec=0.0, random_input_len=128, random_output_len=64, random_range_ratio='0.0', random_prefix_len=0, random_batch_size=1, no_reranker=False, random_mm_base_items_per_request=1, random_mm_num_mm_items_range_ratio=0.0, random_mm_limit_mm_per_prompt={'image': 255, 'video': 1}, random_mm_bucket_config={(256, 256, 1): 0.5, (720, 1280, 1): 0.5, (720, 1280, 16): 0.0}, hf_subset=None, hf_split=None, hf_name=None, hf_output_len=None, bfcl_categories=None, prefix_repetition_prefix_len=256, prefix_repetition_suffix_len=256, prefix_repetition_num_prefixes=10, prefix_repetition_output_len=128, speed_bench_dataset_subset='qualitative', speed_bench_output_len=4096, speed_bench_category=None, label=None, backend='openai-chat', base_url=None, host='127.0.0.1', port=8451, endpoint='/v1/chat/completions', header=None, max_concurrency=512, model='qwen14b', input_len=None, output_len=None, tokenizer='/data/shared_models/Qwen--Qwen2.5-Coder-14B-Instruct', tokenizer_mode='auto', use_beam_search=False, logprobs=None, request_rate=inf, burstiness=1.0, probe_request_rate=0.0, disable_tqdm=False, num_warmups=8, profile=False, save_result=True, save_detailed=False, append_result=False, metadata=None, result_dir='/vllm-workspace/vllm-ascend-split-batch-hust/bench/results/logs_fisampling_refresh', result_filename='serve_joint_on_j.json', ignore_eos=True, self_timed=None, percentile_metrics='ttft,tpot,itl', metric_percentiles='50,95,99', goodput=None, request_id_prefix='bench-318f4069-', top_p=0.95, top_k=50, min_p=None, temperature=None, frequency_penalty=None, presence_penalty=None, repetition_penalty=None, served_model_name=None, lora_modules=None, lora_assignment='random', ramp_up_strategy=None, ramp_up_start_rps=None, ramp_up_end_rps=None, ready_check_timeout_sec=0, chat_template_kwargs=None, extra_body=None, skip_tokenizer_init=False, insecure=False, plot_timeline=False, timeline_itl_thresholds='25,50', plot_dataset_stats=False)
+INFO 09-10 17:18:41 [utils.py:90] Sampling input_len from [128, 128] and output_len from [64, 64]
+WARNING: vllm bench serve no longer sets temperature==0 (greedy) in requests by default. The default will be determined on the server side and can be model/API specific. For the old behavior, include --temperature=0.
+Starting initial single prompt test run...
+Skipping endpoint ready check.
+Warming up with 8 requests...
+  0%|          | 0/8 [00:00<?, ?it/s] 12%|█▎        | 1/8 [00:02<00:14,  2.13s/it]100%|██████████| 8/8 [00:02<00:00,  3.73it/s]
+Warmup run completed.
+Starting main benchmark run...
+Traffic request rate: inf
+Burstiness factor: 1.0 (Poisson process)
+Maximum request concurrency: 512
+  0%|          | 0/512 [00:00<?, ?it/s]  0%|          | 1/512 [00:10<1:32:36, 10.87s/it]  0%|          | 2/512 [00:11<39:43,  4.67s/it]    1%|          | 4/512 [00:11<15:39,  1.85s/it]  2%|▏         | 9/512 [00:18<12:49,  1.53s/it]  4%|▎         | 19/512 [00:18<04:17,  1.91it/s]  6%|▌         | 31/512 [00:18<02:01,  3.96it/s]  9%|▊         | 44/512 [00:18<01:07,  6.91it/s] 11%|█         | 57/512 [00:19<00:42, 10.73it/s] 14%|█▎        | 70/512 [00:19<00:28, 15.54it/s] 16%|█▌        | 82/512 [00:19<00:20, 20.82it/s] 19%|█▊        | 95/512 [00:19<00:15, 27.49it/s] 21%|██        | 107/512 [00:19<00:11, 34.20it/s] 23%|██▎       | 120/512 [00:19<00:09, 42.24it/s] 26%|██▌       | 132/512 [00:20<00:07, 49.15it/s] 28%|██▊       | 144/512 [00:20<00:06, 55.76it/s] 30%|███       | 156/512 [00:20<00:05, 61.67it/s] 33%|███▎      | 168/512 [00:20<00:05, 67.34it/s] 35%|███▌      | 180/512 [00:20<00:04, 71.96it/s] 38%|███▊      | 193/512 [00:20<00:04, 78.35it/s] 40%|████      | 205/512 [00:20<00:03, 82.64it/s] 42%|████▏     | 217/512 [00:21<00:03, 85.61it/s] 45%|████▍     | 228/512 [00:21<00:03, 86.31it/s] 47%|████▋     | 240/512 [00:21<00:03, 90.21it/s] 51%|█████▏    | 263/512 [00:21<00:02, 110.73it/s] 54%|█████▍    | 277/512 [00:21<00:02, 117.12it/s] 57%|█████▋    | 294/512 [00:21<00:01, 130.42it/s] 60%|██████    | 309/512 [00:21<00:01, 112.03it/s] 65%|██████▍   | 331/512 [00:22<00:01, 115.53it/s] 69%|██████▉   | 353/512 [00:22<00:01, 122.71it/s] 73%|███████▎  | 374/512 [00:22<00:01, 125.03it/s] 77%|███████▋  | 395/512 [00:22<00:00, 139.07it/s] 81%|████████▏ | 417/512 [00:22<00:00, 153.91it/s] 86%|████████▌ | 438/512 [00:22<00:00, 166.14it/s] 92%|█████████▏| 469/512 [00:22<00:00, 188.13it/s] 97%|█████████▋| 499/512 [00:22<00:00, 214.52it/s]100%|██████████| 512/512 [00:22<00:00, 22.35it/s] 
+tip: install termplotlib and gnuplot to plot the metrics
+============ Serving Benchmark Result ============
+Successful requests:                     512       
+Failed requests:                         0         
+Maximum request concurrency:             512       
+Benchmark duration (s):                  22.91     
+Total input tokens:                      80383     
+Total generated tokens:                  32768     
+Request throughput (req/s):              22.35     
+Output token throughput (tok/s):         1430.25   
+Peak output token throughput (tok/s):    2847.00   
+Peak concurrent requests:                512.00    
+Total token throughput (tok/s):          4938.80   
+---------------Time to First Token----------------
+Mean TTFT (ms):                          7288.18   
+Median TTFT (ms):                        7038.40   
+P50 TTFT (ms):                           7038.40   
+P95 TTFT (ms):                           13895.01  
+P99 TTFT (ms):                           14506.54  
+-----Time per Output Token (excl. 1st token)------
+Mean TPOT (ms):                          216.74    
+Median TPOT (ms):                        223.13    
+P50 TPOT (ms):                           223.13    
+P95 TPOT (ms):                           267.27    
+P99 TPOT (ms):                           269.12    
+---------------Inter-token Latency----------------
+Mean ITL (ms):                           214.14    
+Median ITL (ms):                         193.30    
+P50 ITL (ms):                            193.30    
+P95 ITL (ms):                            349.54    
+P99 ITL (ms):                            356.94    
+==================================================

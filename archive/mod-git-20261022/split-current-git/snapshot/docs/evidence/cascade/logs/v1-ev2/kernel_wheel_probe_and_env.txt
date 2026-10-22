@@ -1,0 +1,22 @@
+=== env ===
+python 3.12.14
+torch 2.13.0+cpu
+torch_npu 2.13.0.rc1
+vllm 0.28.1.post1.dev143+gf18cf803c.empty
+vllm-ascend 0.25.1rc2.dev125+hust.20260903.4.g74f0c0a27
+vllm-ascend-split-batch 0.1.0.dev0
+vllm-hust-ext 0.2.0.dev0
+ascend-kernel 2026.3.9
+triton-ascend 3.2.2
+CANN n/a
+=== kernel wheel probe ===
+INFO 09-09 15:44:29 [__init__.py:52] Available plugins for group vllm.platform_plugins:
+INFO 09-09 15:44:29 [__init__.py:54] - ascend -> vllm_ascend:register
+INFO 09-09 15:44:29 [__init__.py:57] All plugins in this group will be loaded. Set `VLLM_PLUGINS` to control which plugins to load.
+INFO 09-09 15:44:29 [__init__.py:272] Platform plugin ascend is activated
+INFO 09-09 15:44:29 [platform.py:70] Breakable CUDAGraph on Ascend is opt-in; using VLLM_USE_BREAKABLE_CUDAGRAPH=0.
+probe_ok= True reason= ''
+has fa_fp32_stage1: True
+has lse_merge: True
+=== card ===
+	HBM Usage Rate(%)              : 5

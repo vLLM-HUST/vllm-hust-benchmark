@@ -1,0 +1,55 @@
+# 入仓证据的 sha256 清单（本清单针对**入仓后**的字节）。
+#
+# 本文件是入仓时新增的自述件（非工作区原件），口径与 `docs/evidence/cascade/MANIFEST.sha256`
+# 一致：每行 = `<入仓字节的 sha256>  <相对本目录的路径>`；以 `#` 开头的行是注释。
+#
+# 入仓范围：本目录 **35 个文件全部入仓，无裁剪**——含 `results/superseded/` 的 2 份作废 JSON，
+# 保留它们是为了对上 `REPORT.md` §1.2 的“6 份参与 + 2 份 superseded”口径。工作区原件即本目录
+# 字节，没有第二份可比对的原件（与 cascade 目录不同：那边有 209 件未入仓的逐步 sweep 日志）。
+#
+# 遮蔽（2026-09-26 首发前执行；与 `docs/evidence/cascade/` 那批同一处理）：
+#   - 1 类 10 处：torch distributed init 打印的本机私网地址
+#     （`distributed_init_method=tcp://<address>:<port>`）已替换为 `192.168.x.x`，
+#     位置 = `logs/w2b_serve_{api1_off_r1,api1_off_r2,api1_on_r1,api1_on_r2,joint_off,joint_on}.log`
+#     与 `logs/w2b_probe{,2,3,4}.log`，各 1 处。
+#   - 其余地址：`127.0.0.1`（客户端回环）与 `0.0.0.0`（服务绑定）是服务本身用语，原样保留。
+#   - 机器化判据：`tests/test_public_hygiene.py`（对 `git ls-files` 的全文本扫 RFC1918 与凭据样式串）。
+#
+# 被遮蔽的行因此与工作区原件不再逐字节相同——这是本目录唯一的有意改动；遮蔽之外的运行日志、
+# 结果 JSON 与脚本均为原件字节。
+
+fcb1b82c7ad16be83bd9408efc9479d2d2462e8dfdedd8cab3bd21afcd027810  EVIDENCE-refresh-2026-09-10.md
+535bac114456c3185785ea3e03ce0e27d8aa7118e78318bfea8ec76c0aa1bd7f  REPORT.md
+7f3208fb7b1706e54d6996adb6077b12fd9f90d836f98ec10a75787653e51360  logs/logs_bench_api1_off_r1.txt
+c27d8bb5c766b322abf96f7763841fc8f542422c040433e57e61a79d33e40ebf  logs/logs_bench_api1_off_r2.txt
+5c3dc77dfb0cd501540f6956bda0598343011b6ca73659c646fb2888b945bab6  logs/logs_bench_api1_on_r1.txt
+9cce2544322c4356aa24e3d5383aa7cdcfaedad5a592614d23b6b29ec2056bf8  logs/logs_bench_api1_on_r2.txt
+7d33647999771c987dcb8e3a4607592b6dcce337caabe2d384ae51800d832d25  logs/logs_smoke_npu.txt
+2b2ff221ac161d5df877ede814d8d50ca1fc6bad1a226ded6492940e57d27cc6  logs/logs_smoke_npu_refresh-2026-09-10.txt
+e13a7a71ca1c30e5333027230a491828186d392b205c85406d86f213b5e90a38  logs/micro_host_top_k.txt
+a8bbc05678fd1ca0563c8f3acf67040c370a45445634801d22aab7f59411d750  logs/w2b_bench_api1_off.log
+8a990422664ce5f337fc0ee972367e16d970f992eb1da89162bc6490e4b1e5d8  logs/w2b_bench_api1_on.log
+fae3fb1a41bde17e14a6f5f4f53a8f749342087c459abb5d5f40f3dc63af6686  logs/w2b_bench_joint_off.log
+47667eca414fd9ac182c2d8249268f344dbd8e14f49479aa5e3edd1b70d19124  logs/w2b_bench_joint_on.log
+65ea03ce29da4cb73f50ee5bf60c8fda1fbd73598e7c2c5af485c0431847357d  logs/w2b_probe.log
+80e6162c8c70144429c2cf00b602e82a264182ea277d2ddc17e4d07af9731336  logs/w2b_probe2.log
+748009e02e581701c8a2b7dc8de477f287bba4becf32e36dad2fecc4cdc0b8eb  logs/w2b_probe3.log
+b6d1a605c337099d7a0d89bcd3082a8b5af0572d77103f8cdf5272dbc2e23f0a  logs/w2b_probe4.log
+fdd3e5433c4c9fcf65c4b87ce16403efec5f71036303c54431285d5d5ac62d6b  logs/w2b_serve_api1_off_r1.log
+798026227b51e4612fb955ca7c9e447443ec99e9ef0ec66aa3b1d05cdc1e6854  logs/w2b_serve_api1_off_r2.log
+c3d6a1f8607aaab534ccc3945e5a8cedec2e54148ada7904991740a02a09b035  logs/w2b_serve_api1_on_r1.log
+d2ba842dbd335d582c7bd37b2ca05f76cccc60410fe64321d2ab10b561499451  logs/w2b_serve_api1_on_r2.log
+b1801ef390bf33d7c6125abdcb9bae61bf778ea970faaa921c0191caa259d40a  logs/w2b_serve_joint_off.log
+f8b459686e3dc7c5cf7466542ba996053d8f48f7c7256667dc3a1386a1770f28  logs/w2b_serve_joint_on.log
+27fb79d339c2f029bf86ad8e184ae16dc1084e0a38c88b8ef68a55203d01c806  results/serve_api1_off_r1.json
+d4cd51b3c45b65cbe17ac508940e9245ece12048b43d38dd25b923157ff9d3f9  results/serve_api1_off_r2.json
+65cdf7ee0fe8a88422c4d1931a2a30eeceac26149d28da00b771841018c4c90a  results/serve_api1_on_r1.json
+ebdf4a528f0b08e075bf802f702cd9b0bba3efed86cc914607e4083fc08f4de8  results/serve_api1_on_r2.json
+66320286e1cb2d2310d42fe5a7823ef9bc9106b9bd426680c2f49b55b427543b  results/serve_joint_off.json
+d74d886c7a7f7f4e95413abfc0abb60a527b41cc3b2388b4ea15040171da1c45  results/serve_joint_on.json
+42aedebcd41c5b38cf9340c48a662869b5a9972e5002244d1477667563b8d913  results/superseded/serve_api1_off.json
+f191c7a11ce26114f8a5d4ea449ac58db0d370506ac55ee5939888a0f9a28fee  results/superseded/serve_api1_on.json
+beb7a2f35fd89c6220525c077f3c0877fa620a94acb071a2cadaccd7e22818b6  run_e2e_matrix.sh
+c4fe62a06a55bd48700764cf660806d898dfc8518007176e6d09023c5924c316  run_e2e_tpot.sh
+d73ec4c7550d3ac219cd445c75753547fd93693c25dfbdf887b6e9c9727efacf  smoke_npu_fi_sampling.py
+6f56881461f7314b42f3e5e6919a36a1fad2a1da0889836ab9157f21b8963f0f  summarize_e2e.py

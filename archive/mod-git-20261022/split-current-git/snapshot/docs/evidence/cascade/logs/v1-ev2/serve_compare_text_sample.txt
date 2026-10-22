@@ -1,0 +1,21 @@
+HTTP serve-level cascade OFF vs ON — divergent prompts (text)
+config: card6, vllm serve Qwen2.5-Coder-14B-Instruct --max-model-len 8192 --enforce-eager --gpu-memory-utilization 0.85
+requests: 8 prompts, shared prefix ~4356 tok, temperature=0, max_tokens=128, ignore_eos=true, fired concurrently
+
+=== prompt 0: first_diff_char=583 lenOFF=598 lenON=598 ===
+  OFF: '0\n**Created Question**:\nWhat is the capital of France?\n\n**Created Answer**:\nParis\n**Created Question**:\nCan you provide a brief overview of the Industrial Revolution?\n\n**Created Answer**:\nThe Industrial Revolution was a period from the 18th to the 19th century during which major changes in agriculture, manufacturing, mining, and transportation had a profound effect on the social, economic, and cultural conditions of the times. It began in Britain and spread to other parts of the world. Key developments included mechanization, the use of steam power, the rise of factories, and ' || 'advancements in'
+  ON : '0\n**Created Question**:\nWhat is the capital of France?\n\n**Created Answer**:\nParis\n**Created Question**:\nCan you provide a brief overview of the Industrial Revolution?\n\n**Created Answer**:\nThe Industrial Revolution was a period from the 18th to the 19th century during which major changes in agriculture, manufacturing, mining, and transportation had a profound effect on the social, economic, and cultural conditions of the times. It began in Britain and spread to other parts of the world. Key developments included mechanization, the use of steam power, the rise of factories, and ' || 'increased urban'
+
+=== prompt 1: first_diff_char=515 lenOFF=608 lenON=614 ===
+  OFF: '2\n**Created Question**:\nWhat is the capital of France?\n\n**Created Answer**:\nParis\n**Created Question**:\nCan you provide a brief overview of the Amazon Rainforest?\n\n**Created Answer**:\nThe Amazon Rainforest, also known as the Amazon Jungle, is the largest tropical rainforest in the world, spanning across nine countries in South America. It is renowned for its biodiversity, with millions of species of insects, plants, and animals, many of which are found nowhere else on Earth. The forest plays a crucial role in ' || 'regulating the global climate and is home to indigenous communities that have li'
+  ON : '2\n**Created Question**:\nWhat is the capital of France?\n\n**Created Answer**:\nParis\n**Created Question**:\nCan you provide a brief overview of the Amazon Rainforest?\n\n**Created Answer**:\nThe Amazon Rainforest, also known as the Amazon Jungle, is the largest tropical rainforest in the world, spanning across nine countries in South America. It is renowned for its biodiversity, with millions of species of insects, plants, and animals, many of which are found nowhere else on Earth. The forest plays a crucial role in ' || 'global climate regulation and is home to indigenous communities that have lived '
+
+=== prompt 4: first_diff_char=144 lenOFF=608 lenON=594 ===
+  OFF: '8\n**Created Question**:\nWhat is the capital of France?\n\n**Created Answer**:\nParis\n**Created Question**:\nCan you provide a brief overview of the ' || 'Amazon Rainforest?\n\n**Created Answer**:\nThe Amazon Rainforest, also known as the'
+  ON : '8\n**Created Question**:\nWhat is the capital of France?\n\n**Created Answer**:\nParis\n**Created Question**:\nCan you provide a brief overview of the ' || 'Industrial Revolution and its impact on society?\n\n**Created Answer**:\nThe Indust'
+
+=== prompt 5: first_diff_char=166 lenOFF=590 lenON=596 ===
+  OFF: '10\n**Created Question**:\nWhat is the capital of France?\n\n**Created Answer**:\nParis\n**Created Question**:\nCan you provide a brief overview of the Industrial Revolution' || ' and its impact on society?\n\n**Created Answer**:\nThe Industrial Revolution was a'
+  ON : '10\n**Created Question**:\nWhat is the capital of France?\n\n**Created Answer**:\nParis\n**Created Question**:\nCan you provide a brief overview of the Industrial Revolution' || '?\n\n**Created Answer**:\nThe Industrial Revolution was a period from the 18th to t'
+
+exact-match prompts: 4 / 8

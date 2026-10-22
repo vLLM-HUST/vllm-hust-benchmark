@@ -1,0 +1,54 @@
+{
+  "schema": "gdn-determinism-plan.v1",
+  "candidate": "gdn-unpack-qk-l2norm-fusion",
+  "base_head": "5cccd3071628accd06637a09096cc93290cbeb89",
+  "question": "Do the prior fixed-batch A/B differences persist when batch invariance and documented deterministic communication/ATB settings are enabled?",
+  "shape": {
+    "T": 16,
+    "row_stride": 4096,
+    "q": 1024,
+    "k": 1024,
+    "v": 2048,
+    "head_dim": 128,
+    "phase": "pure non-spec decode"
+  },
+  "weights": {
+    "model": "Qwen3.5-35B-A3B",
+    "precision": "bf16",
+    "format": "ND",
+    "tp": 2
+  },
+  "protocol": {
+    "requests": 16,
+    "endpoint": "single /v1/completions batched-raw",
+    "temperature": 0,
+    "seed": 42,
+    "max_tokens": 128,
+    "compare": "exact per-index text"
+  },
+  "determinism": {
+    "VLLM_BATCH_INVARIANT": "1",
+    "HCCL_DETERMINISTIC": "strict",
+    "LCCL_DETERMINISTIC": "1",
+    "ATB_MATMUL_SHUFFLE_K_ENABLE": "0",
+    "ATB_LLM_LCOC_ENABLE": "0",
+    "cudagraph_mode": "PIECEWISE",
+    "batch_invariant_ops": "absent; Triton fallback"
+  },
+  "arms": [
+    {
+      "name": "baseline",
+      "VLLM_HUST_GDN_QKV_NORM": "0",
+      "repeats": 2
+    },
+    {
+      "name": "fusion_shared",
+      "VLLM_HUST_GDN_QKV_NORM": "1",
+      "VLLM_HUST_GDN_QKV_NORM_SEPARATE": "0",
+      "repeats": 2
+    }
+  ],
+  "stop": "If baseline repeat differs, do not attribute A/B; retain negative determinism result. No L4 or acceptance.",
+  "evidence_dir": "/root/\u5305\u4f53\u6062\u590d/records/probes/20261018T173500Z_gdn_determinism",
+  "recorded_at": "2026-10-18T17:34:27Z"
+}
