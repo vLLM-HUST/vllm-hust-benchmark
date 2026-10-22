@@ -53,6 +53,9 @@ def main(argv=None):
     agentbench.add_argument("--game-archives", type=Path, nargs=3, required=True)
     agentbench.add_argument("--data-root", type=Path, required=True)
     agentbench.add_argument("--indices", type=int, nargs="+", required=True)
+    longbench = commands.add_parser("prepare-longbench-qasper")
+    longbench.add_argument("--data-archive", type=Path, required=True)
+    longbench.add_argument("--output", type=Path, required=True)
     for name in ("catalog", "pipeline", "replay"):
         passthrough = commands.add_parser(name, add_help=False)
         passthrough.add_argument("arguments", nargs=argparse.REMAINDER)
@@ -101,6 +104,14 @@ def main(argv=None):
                 game_archives=args.game_archives,
                 data_root=args.data_root,
                 indices=args.indices,
+            )
+        elif args.command == "prepare-longbench-qasper":
+            if not hasattr(provider, "prepare_longbench_qasper"):
+                raise RuntimeError(
+                    "Install the pinned LongBench data component; an older wheel lacks this preparation interface"
+                )
+            value = provider.prepare_longbench_qasper(
+                data_archive=args.data_archive, output=args.output
             )
         else:
             value = provider.list_sources(class_id=args.class_id)

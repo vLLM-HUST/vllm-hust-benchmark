@@ -21,7 +21,7 @@
 
 | 范围         | 已登记 | 当前版本已抽样验证闭环 |
 | ------------ | -----: | ---------------------: |
-| 公开候选来源 |     89 |                      8 |
+| 公开候选来源 |     89 |                      9 |
 | 企业私有来源 |      8 |                      8 |
 
 每次验证更新本文件和 [机器可读台账](dataset-validation-status.json)；记录样本
@@ -62,7 +62,7 @@ ID、数据版本、模型、执行器、评分器、终态、失败原因和脱
 | [ ]  | LMSYS_CHAT           | general-single-turn-assistant<br>conversation-continuation                                                                                   | 待复核                      | 待复核                   | 未跑                              | 未跑                               | 待重新核验                                                                                                     |
 | [ ]  | LOCOMO               | conversation-memory-recall                                                                                                                   | 待复核                      | 待复核                   | 未跑                              | 未跑                               | 待重新核验                                                                                                     |
 | [ ]  | LONGALPACA           | document-grounded-analysis                                                                                                                   | 待复核                      | 待复核                   | 未跑                              | 未跑                               | 待重新核验                                                                                                     |
-| [ ]  | LONGBENCH            | rag-followup<br>document-grounded-analysis                                                                                                   | 待复核                      | 待复核                   | 未跑                              | 未跑                               | 待重新核验                                                                                                     |
+| [x]  | LONGBENCH            | rag-followup<br>document-grounded-analysis                                                                                                   | 官方归档及Qasper校验        | 安装及原字段隔离验证     | qasper原3题完成                   | 官方QA-F1 22.52%                   | 仅3/200；模型chat传输披露，其他子集未验                                                                        |
 | [ ]  | LONGBENCH_V2         | document-grounded-analysis                                                                                                                   | 官方文件SHA已核验           | 服务器同三题完整输入回查 | 公共入口同三题复验，1条原预算耗尽 | 官方评分0/3，错误保留              | [尝试与范围说明](LONGBENCH_V2_ORIGINAL_ATTEMPT.zh-CN.md)，入口已复验；原预算终态及更长范围未完成               |
 | [ ]  | LONGMEMEVAL          | rag-followup<br>conversation-memory-recall                                                                                                   | 待复核                      | 待复核                   | 未跑                              | 未跑                               | 待重新核验                                                                                                     |
 | [ ]  | LONGMEMEVAL_V2       | evolving-corpus-rag<br>experience-memory-recall                                                                                              | 待复核                      | 待复核                   | 未跑                              | 未跑                               | 待重新核验                                                                                                     |

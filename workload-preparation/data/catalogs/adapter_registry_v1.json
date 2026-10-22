@@ -2,6 +2,18 @@
   "version": "source-adapters/v1",
   "status_policy": "Implementation, asset verification and runtime reproduction are independent. All other registered sources remain NOT_IMPLEMENTED.",
   "adapters": {
+    "LONGBENCH": {
+      "kind": "task_dataset",
+      "mapping": "native_context_question",
+      "input_fields": ["context", "input"],
+      "required_fields": ["_id", "context", "input", "answers", "all_classes", "dataset", "length", "language"],
+      "nullable_fields": ["all_classes"],
+      "outcome_fields": ["answers", "all_classes"],
+      "annotation_fields": ["dataset", "length", "language"],
+      "id_field": "_id",
+      "requirements": ["Pinned original qasper subset only; no claim for other LongBench tasks", "Use official dataset2prompt, original 128-token budget and unchanged official QA-F1 scorer; disclose model-native chat transport and no context truncation"],
+      "status": "QASPER_READ_ADAPTER_IMPLEMENTED_VALIDATION_RECORDED_SEPARATELY"
+    },
     "HUMANEVAL": {
       "kind": "task_dataset",
       "mapping": "native_code_task",
