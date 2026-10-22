@@ -34,6 +34,46 @@ BFCL_SIMPLE_MEMBERS = {
     "possible_answer/BFCL_v4_simple_python.json": "90cd5bc653690ee8e459b5b3f3fc9458606f7f3fcbf795bb51b7dc581f8c86dc",  # pragma: allowlist secret - official scorer asset checksum
 }
 
+QRECC_ARCHIVE_SHA256 = "6ed52a0b0e495f752424b15742119a5f8f33ca7a029c07122be1b849de19a308"  # pragma: allowlist secret - official archive checksum
+QRECC_TEST_SHA256 = "a4d8ef686827feb00c90997e0d6ff135928bf6f4bcb26fb523b5fac025d58f84"  # pragma: allowlist secret - official test member checksum
+
+
+def prepare_qrecc_test(*, data_archive, output):
+    """Copy unchanged original test tasks only, not retrieval passages or a runner."""
+    archive = Path(data_archive)
+    if hashlib.sha256(archive.read_bytes()).hexdigest() != QRECC_ARCHIVE_SHA256:
+        raise ValueError("original QReCC archive identity mismatch")
+    name = "qrecc_test.json"
+    with zipfile.ZipFile(archive) as bundle:
+        if bundle.namelist().count(name) != 1:
+            raise ValueError("missing or ambiguous original QReCC member")
+        raw = bundle.read(name)
+    if hashlib.sha256(raw).hexdigest() != QRECC_TEST_SHA256:
+        raise ValueError("original QReCC member identity mismatch")
+    rows = json.loads(raw)
+    if not isinstance(rows, list) or len(rows) != 16451:
+        raise ValueError("original QReCC test row count mismatch")
+    target = Path(output)
+    target.mkdir(mode=0o700, parents=True, exist_ok=False)
+    path = target / name
+    path.write_bytes(raw)
+    path.chmod(0o600)
+    return {
+        "source_id": "QRECC",
+        "status": "ORIGINAL_TEST_FILE_PREPARED_NOT_EXECUTED",
+        "files": [
+            {
+                "path": name,
+                "sha256": QRECC_TEST_SHA256,
+                "rows": len(rows),
+                "role": "data",
+            }
+        ],
+        "model_calls": 0,
+        "retrieval_corpus_prepared": False,
+        "scorer_runs": 0,
+    }
+
 
 def prepare_bfcl_simple_python(*, official_archive, output):
     """Prepare unchanged task and separate scorer assets; no model/tool execution."""
