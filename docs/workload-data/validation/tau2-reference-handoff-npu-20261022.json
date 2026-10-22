@@ -1,0 +1,64 @@
+{
+  "source_id": "TAUBENCH",
+  "revision": "f8de30c298689cbe0117d76a378e7315a17e5bd8",
+  "task_set": "telecom_full",
+  "selected_task_ids": [
+    "[mobile_data_issue]user_abroad_roaming_enabled_off[PERSONA:None]",
+    "[mobile_data_issue]user_abroad_roaming_disabled_on[PERSONA:Easy]",
+    "[mobile_data_issue]user_abroad_roaming_disabled_off[PERSONA:Hard]"
+  ],
+  "selection": "first three original official task-loader rows before execution",
+  "agent": "llm_agent",
+  "user": "user_simulator",
+  "model": "openai/workload-qwen35-27b-128k-nonthinking",
+  "evaluation_type": "ALL (official run_domain default; not ALL_WITH_NL_ASSERTIONS)",
+  "max_steps": 200,
+  "max_errors": 10,
+  "num_trials": 1,
+  "status": "END_TO_END_EXECUTED_AND_SCORED",
+  "started_at_unix": 1792652644.0605135,
+  "reference_model_difference": "both roles use deployable local Qwen3.5-27B, not reference GPT-4.1",
+  "network_guard": "completion rejects other models/endpoints; no task/prompt/tool changes",
+  "native_task_reference_sha256": "0d62584a783d9fa15d027c3165f2e74d54dcf46b217c85cb40870af82ffb7e84",
+  "native_task_reference_handoff_verified": true,
+  "finished_at_unix": 1792653076.5210593,
+  "selected_samples": [
+    "[mobile_data_issue]user_abroad_roaming_enabled_off[PERSONA:None]",
+    "[mobile_data_issue]user_abroad_roaming_disabled_on[PERSONA:Easy]",
+    "[mobile_data_issue]user_abroad_roaming_disabled_off[PERSONA:Hard]"
+  ],
+  "tasks": [
+    {
+      "task_id": "[mobile_data_issue]user_abroad_roaming_enabled_off[PERSONA:None]",
+      "termination_reason": "user_stop",
+      "reward": 1
+    },
+    {
+      "task_id": "[mobile_data_issue]user_abroad_roaming_disabled_on[PERSONA:Easy]",
+      "termination_reason": "user_stop",
+      "reward": 1
+    },
+    {
+      "task_id": "[mobile_data_issue]user_abroad_roaming_disabled_off[PERSONA:Hard]",
+      "termination_reason": "user_stop",
+      "reward": 0
+    }
+  ],
+  "private_result_sha256": "448172f37fe9c90a4e89a01755d107dd3b941018d8b63da48a6ca0ec50568d20",
+  "execution_script_sha256": "adf091a6b5ed01995ca5302d1c7f1479f0592d11a4e6257c6145b3afe10760ff",
+  "software_versions": {
+    "tau2": "0.2.1.dev0",
+    "litellm": "1.65.0",
+    "openai": "2.54.0",
+    "pydantic": "2.14.1"
+  },
+  "server_inventory": {
+    "accelerator": "Ascend 910B2",
+    "chips": 2,
+    "backend": "vllm-ascend",
+    "precision": "bfloat16",
+    "mode": "graph"
+  },
+  "scope": "THREE_ORIGINAL_TASKS_REFERENCE_HANDOFF_REVALIDATION_NOT_NEW_TASKS",
+  "raw_payloads_published": false
+}
