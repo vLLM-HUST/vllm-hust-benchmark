@@ -2,6 +2,17 @@
   "version": "source-adapters/v1",
   "status_policy": "Implementation, asset verification and runtime reproduction are independent. All other registered sources remain NOT_IMPLEMENTED.",
   "adapters": {
+    "JSONSCHEMABENCH": {
+      "kind": "task_dataset",
+      "mapping": "whole_json_schema",
+      "input_fields": ["schema"],
+      "required_fields": ["schema"],
+      "outcome_fields": [],
+      "annotation_fields": [],
+      "id_field": "",
+      "requirements": ["One original schema object or boolean per JSON file, not an observed request", "No schema rewriting, added required fields, synthetic prompt or external reference resolution during preparation", "Publisher prompt/validator execution is a separate explicit profile; JSON parsing does not prove conformance"],
+      "status": "SCHEMA_READER_IMPLEMENTED_NATIVE_VALIDATION_SEPARATE"
+    },
     "QUALITY": {
       "kind": "task_dataset",
       "mapping": "quality_questions",
