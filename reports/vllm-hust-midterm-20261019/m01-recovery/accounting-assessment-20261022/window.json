@@ -1,0 +1,61 @@
+{
+  "status": "recorded_semantic_cohorts_contained_in_device_envelope",
+  "checks": [
+    {
+      "ledger": "matrix-accounting",
+      "cohort_count": 1,
+      "boundary_or_tail_numeric_values_all_zero": true
+    },
+    {
+      "ledger": "norm-semantics",
+      "cohort_count": 1,
+      "boundary_or_tail_numeric_values_all_zero": true
+    },
+    {
+      "ledger": "softmax-semantics",
+      "cohort_count": 1,
+      "boundary_or_tail_numeric_values_all_zero": true
+    },
+    {
+      "ledger": "scalar-semantics",
+      "cohort_count": 1,
+      "boundary_or_tail_numeric_values_all_zero": true
+    },
+    {
+      "ledger": "device-gdn-ledger",
+      "cohort_count": 2,
+      "boundary_or_tail_numeric_values_all_zero": true
+    },
+    {
+      "ledger": "device-gdn-prefill",
+      "cohort_count": 2,
+      "boundary_or_tail_numeric_values_all_zero": true
+    },
+    {
+      "ledger": "gdn-preprocess-semantics",
+      "cohort_count": 2,
+      "boundary_or_tail_numeric_values_all_zero": true
+    }
+  ],
+  "request_seconds": 135.3401261921972,
+  "device_envelope_seconds": 186.802958029,
+  "before_request_seconds": 49.02104473114014,
+  "after_request_seconds": 2.441787004470825,
+  "interpretation": "Recorded semantic workload cohorts are inside the request interval, which is inside the synchronized device envelope. This verifies placement, not completeness of every possible model operation.",
+  "resource_window": "quiesced_device_envelope",
+  "forbidden_substitution": "Do not divide envelope-wide HBM or communication reference terms by request-only elapsed time.",
+  "model_effective_flops": null,
+  "m01_attainment": null,
+  "source_sha256": {
+    "/root/gennova-evidence/20261019-midterm-aligned/recovery_model_worker_r1-matrix-accounting.json": "3e905cd1bb0e40bd2ec9ce55704e6bb99a4ca4b760ba9f778baa1e5cb2a4de34",
+    "/root/gennova-evidence/20261019-midterm-aligned/recovery_model_worker_r1-norm-semantics.json": "85c848f65cc5fb0224e563d62811ec00550d2a6955b7745522de64d1815cceb6",
+    "/root/gennova-evidence/20261019-midterm-aligned/recovery_model_worker_r1-softmax-semantics.json": "af94785642b788bcfe43a4c722f63f64cff7b207a772436db1e39745c8fb7e6e",
+    "/root/gennova-evidence/20261019-midterm-aligned/recovery_model_worker_r1-scalar-semantics.json": "98933ba1773861d61c20e115fe6106f049ca499687707a7f0f6bdab36b504a3f",
+    "/root/gennova-evidence/20261019-midterm-aligned/recovery_model_worker_r1-device-gdn-ledger.json": "3aede9b3e11b53f189d1ab209b7435a8d6c273067861ecfb145f24c251166ef5",
+    "/root/gennova-evidence/20261019-midterm-aligned/recovery_model_worker_r1-device-gdn-prefill.json": "b7031d5346ce040753ac959be32419073880077264e09fe38971f9954f97f3f4",
+    "/root/gennova-evidence/20261019-midterm-aligned/recovery_model_worker_r1-gdn-preprocess-semantics.json": "234305730d5aa4dcca9e6c30b0e48d9e75b53c8ab7e7b6a2c5bbb3f735fcbf18",
+    "/root/gennova-evidence/20261019-midterm-aligned/recovery_model_worker_r1-accounted-families.json": "11d5ba3fc3f4fb2446721afb5842b1c03e69b97a6f36eae0133d1783ac47ab6e",
+    "/workspace/m01-worker-r1-audit.json": "c9e18ffdaa764729c7b62ef5283383477be4af1553877613690e7494afa3c201",
+    "/workspace/review_m01_worker_windows.py": "d9ac6882b1b7bccee15169570258c14997c8bd5e06eb43bbb95239c05e4f6729"
+  }
+}

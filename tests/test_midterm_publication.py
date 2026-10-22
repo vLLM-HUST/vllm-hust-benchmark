@@ -17,12 +17,12 @@ def test_publication_rebuilds_from_pinned_report_and_verified_archives(monkeypat
     assert hashlib.sha256(raw).hexdigest() == actual["report_sha256"]
     monkeypatch.setattr(module, "pinned", lambda path: raw)
     assert actual == module.build()
-    assert actual["version"] == "V0.64"
+    assert actual["version"] == "V0.65"
     assert module.REVISION in actual["report_url"]
     sections = {s["id"]: s for s in actual["sections"]}
     closure = sections["reference-closure"]
     assert closure["tables"]
-    assert "达成率未赋值" in closure["scope"]
+    assert "请求窗口核算见M01本轮判定" in closure["scope"]
     assert "3.6%" in closure["scope"]
     assert "reference-closure-20261022" in closure["evidence"][0]["path"]
     worker = sections["worker-model"]
@@ -80,7 +80,14 @@ def test_publication_rebuilds_from_pinned_report_and_verified_archives(monkeypat
     assert "不是整模型HCCL覆盖" in communication["scope"]
     verdict = sections["m01-verdict"]
     assert len(verdict["tables"][0]["rows"]) == 3
-    assert "不是实测有效算力低于50%" in verdict["scope"]
+    assert "30.2443%–30.2505%" in verdict["scope"]
+    assert (
+        "E24/R36 + KV materialization请求重计算 + Prefill Microflow FA"
+        in verdict["scope"]
+    )
+    assert "不是同一轮联合成绩" in verdict["scope"]
+    assert "不外推为未插桩服务结果" in verdict["scope"]
+    assert "21.92%仅为诊断值" in verdict["scope"]
     assert actual["kv_audit"]["runs"] == module.kv_audit()
     assert module.tables("| A | B |\n| --- | ---: |\n| 1 | 2 |\n") == [
         {"headers": ["A", "B"], "rows": [["1", "2"]]}

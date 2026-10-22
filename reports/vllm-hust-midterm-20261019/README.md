@@ -8,7 +8,7 @@
 
 V0.64纳入GDN递归、WY/KKT、卷积、HBM及同接口通信参考，18类计算参考和设备最终预处理映射已完成汇总核对。
 完整证据见[参考补测与汇总](m01-recovery/reference-closure-20261022/README.md)。
-总体M01判定仍待最终计量复核，不将组件参考累计、近似匹配的HBM带宽或计量诊断吞吐替换正式B1结果。
+V0.65完成本次插桩请求窗口的经验参考核算：达成率30.2443%–30.2505%，未达到内部50%阈值。不外推为未插桩服务结果，也不替换正式B1。见[请求窗口核算](m01-recovery/request-assessment-20261022/m01-request-window-assessment.json)。含请求前后开销的[设备包络核算](m01-recovery/accounting-assessment-20261022/README.md)仅作诊断保留。
 
 ## 恢复环境性能与成本配对
 

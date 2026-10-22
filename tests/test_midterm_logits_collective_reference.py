@@ -97,5 +97,7 @@ def test_m01_limited_verdict_matches_retained_model_evidence():
     original = json.dumps(verdict, ensure_ascii=False)
     assert f"{ledger['accounted_basic_operation_subtotal']:,}" in original
     assert f"{hardware['request_phase']['duration_seconds']:.3f}" in original
-    assert "证据受限，未通过验收" in report
-    assert "不等同于实测有效算力低于 50%" in report
+    assert "证据受限" in original
+    assert "未通过" in original
+    assert "30.2443%–30.2505%" in report
+    assert "不代表未插桩服务的有效算力" in report
