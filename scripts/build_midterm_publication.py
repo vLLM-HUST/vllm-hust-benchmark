@@ -8,14 +8,15 @@ import tarfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-REVISION = "20170fb66ed3cd9f3235d379df48cf5243e1a04c"  # pragma: allowlist secret
+REVISION = "2a443d04dc1bd22a45cc7b94bdac52282050eb88"  # pragma: allowlist secret
 REPORT_DIR = "reports/vllm-hust-midterm-20261019"
 REPORT = REPORT_DIR + "/中期测试报告.md"
-OUTPUT = ROOT / "website-publication/data/midterm-v063.json"
+OUTPUT = ROOT / "website-publication/data/midterm-v064.json"
 
 # Repository-relative locators are resolved against the website's exact benchmark
 # publication commit, not a moving main branch or a local acquisition path.
 EVIDENCE = {
+    "reference-closure": ["m01-recovery/reference-closure-20261022"],
     "worker-model": ["m01-recovery/worker-model-20261022"],
     "fenced-model": ["m01-recovery/fenced-model-20261022"],
     "trace-qualification": ["m01-recovery/trace-qualification-20261021"],
@@ -60,6 +61,7 @@ EVIDENCE = {
         "m01-recovery/logits-collective-reference-20261021"
     ],
     "m01-verdict": [
+        "m01-recovery/reference-closure-20261022",
         "m01-recovery/worker-model-20261022",
         "m01-recovery/model-runtime-20261021",
         "m01-recovery/logits-collective-reference-20261021",
@@ -178,14 +180,20 @@ def kv_audit():
 def build():
     raw = pinned(REPORT)
     text = raw.decode()
-    assert "报告版本：V0.63" in text
+    assert "报告版本：V0.64" in text
     url = f"https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/{REVISION}/{REPORT}"
     specs = [
+        (
+            "reference-closure",
+            "同工况参考补测汇总 / Matched reference measurements",
+            "#### 同工况参考补测汇总",
+            "GDN递归、WY/KKT、卷积、HBM及同API通信参考已完成；设备映射原始记录已核验。HBM物理读写比例偏差约3.6%，分别保留合并带宽与方向约束项。参考分量时间不等于模型关键路径；完整算量、融合范围及时间分母仍待最终核算，M01达成率未赋值，不替换正式B1。",
+        ),
         (
             "worker-model",
             "双worker采集与参考补测 / Dual-worker capture and references",
             "#### 双worker采集修复与实际形状参考补测",
-            "同工况200请求全部完成，双worker任务轨迹已取得，四卡释放。实际75种通信载荷各有三次参考；稠密、专家、词表、FIA、GDN H/O和六类辅助算子集合已匹配。短窗通信接口仍有264个不一致样本；剩余GDN、HBM参考与完整计量未闭合。M01证据受限，不替换正式B1。",
+            "同工况200请求全部完成，双worker任务轨迹已取得，四卡释放。实际75种通信载荷各有三次参考；新增GDN、HBM与设备映射核验见同工况参考汇总。跨接口264个不一致样本保留为限制，同API通信参考已完成。M01最终计量待核算，不替换正式B1。",
         ),
         (
             "fenced-model",
@@ -313,7 +321,7 @@ def build():
                 "m01-verdict",
                 "M01 本轮判定 / M01 acceptance verdict",
                 "#### M01 本轮验收判定",
-                "证据受限，未通过本轮验收；不是实测有效算力低于50%。双worker采集已修复，75种实际通信载荷参考已覆盖；F及达成率保持未赋值，剩余为GDN递归/WY/KKT/卷积、HBM参考、完整算量及同口径通信资源界限。正式B0/B1结果按原边界保留。",
+                "证据受限，未通过本轮验收；不是实测有效算力低于50%。双worker采集、GDN递归/WY/KKT/卷积、HBM、同API通信参考与设备映射核验已完成；剩余为完整算量、融合范围和统一时间分母的最终核算，F及达成率保持未赋值。正式B0/B1结果按原边界保留。",
             ),
         ]
     )
@@ -332,7 +340,7 @@ def build():
         )
     return {
         "schema": "midterm-publication/v1",
-        "version": "V0.63",
+        "version": "V0.64",
         "report_url": url,
         "report_sha256": hashlib.sha256(raw).hexdigest(),
         "source_commit": REVISION,
