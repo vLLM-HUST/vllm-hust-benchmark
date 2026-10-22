@@ -1,0 +1,45 @@
+== recover-profile（离线 / 无 NPU / 无覆盖）: /root/prof/ladder-1019-022857/recover-copy-1019-0240_ascend_pt ==
+  负载口径: mmlu-pro-gdn-high-concurrency-longctx — recover-profile: 口径 mmlu-pro-gdn-high-concurrency-longctx（导航，不设门）｜窗口覆盖: prefill_tokens=24288, window_iterations=32, captured_requests=16
+  cohort: unmarked | model=unknown | core=- ascend=- | graph=- | apc=-
+  窗口覆盖: prefill_tokens=24288 | window_iterations=32 (cap=32, truncated=True) | captured_requests=16
+    [ok] iterations_gdn_vs_attn: GDN 家族每层调用数最大 = 32 次迭代 vs attention 32 次（prefill 13 + decode 19）
+    [ok] prefill_tokens_gdn_vs_attn: attention prefill ΣT/10=24381 vs GDN ΣT/30=24288（比值 1.0038; chunk 补零使 attention 略高）
+    [ok] prefill_tokens_le_metrics: 窗内 24288 ≤ /metrics Δprompt_tokens=24288（截断窗: trace 只覆盖墙钟窗的一部分）
+    [ok] captured_le_metrics_success: 入窗 16 ≤ /metrics Δrequest_success=16
+    [ok] captured_le_requested: 入窗/完成 16 ≤ 提交 16
+    [gap] 窗口被 capture 迭代上限截断: captured_request_count 只是『入窗请求数下界』, 不是完成数 → 跨窗总量比较前须核对两窗该下界与 prefill 体积
+  GroupedMatmul                    2560 次       526.9 ms
+  ChunkGatedDeltaRule               391 次       235.9 ms
+  MatMulV2                         7232 次       163.2 ms
+  CausalConv1d                      960 次        47.5 ms
+  RecurrentGatedDeltaRule           930 次        36.1 ms
+  Cast                             4160 次        20.0 ms
+  Transpose                         991 次        18.1 ms
+  ConcatD                          1110 次        16.6 ms
+  fused_gdn_gating_kernel           960 次        16.4 ms
+目标算子合计(compute-only) 1081.0 ms
+  device 口径: compute 1654.0 ms (51.1%) | comm 1584.9 ms (48.9%) | all-kernel 3238.8 ms
+    [comm] hcom_allReduce_              2592 次     1575.6 ms  (share 48.65%)
+    [comm] hcom_allGather_                32 次        9.3 ms  (share 0.29%)
+    [comm-detail] hcom_allGather__       elapse      9.3ms = wait     0.0 + sync     0.0 + transit    0.0
+    [comm-detail] hcom_allReduce__       elapse   1575.6ms = wait    20.9 + sync    20.9 + transit    0.0
+    [comm-transport] HCCS   n=1085 size=8187.8MB bw=19.00GB/s
+    [comm-transport] SDMA   n=1085 size=8187.8MB bw=19.00GB/s
+  step 预算: Computing 1654.0 ms (28.1%) | Comm(NotOverlapped) 1584.9 ms (26.9%) | Overlapped 0.0 ms | Free 2656.8 ms (45.1%) | Stage 5895.6 ms
+  Free 归因: total 2656.8ms | host API 覆盖 95.86% | host 空闲 4.14% | sync 7.71ms
+    ⚠ caliber=v1-host-boundary-deprecated（已失效）: decode 18 step(中位 23.189ms), free 29.2ms (6.87%) | 非图区 free 2627.622ms
+      host_boundary_*/internal_* 属 v1 失效家族（exe 边界代理被证伪）→ 勿引用; D1/D5 归因走 v2 stream-pair
+  op_profile(aic/aiv/mac/mte ms, cube%):
+    hcom_allReduce_            tot=  1575.6 aic=    0.0 aiv=    0.0 mac=    0.0 mte=    0.0 cube=0.0 wait= 268.7
+    GroupedMatmul              tot=   526.9 aic=  499.5 aiv=    0.0 mac=  103.9 mte=  609.6 cube=93.593 wait=  37.2
+    ChunkGatedDeltaRule        tot=   235.9 aic=  234.4 aiv=  234.7 mac=    8.8 mte=   95.6 cube=99.297 wait=  15.2
+    MatMulV2                   tot=   163.2 aic=  145.9 aiv=    0.0 mac=   55.6 mte=  149.9 cube=67.237 wait= 405.5
+    MatMulV3                   tot=    91.4 aic=   88.7 aiv=    0.0 mac=   64.5 mte=  123.5 cube=97.031 wait=   0.9
+    MoeInitRoutingV3           tot=    70.3 aic=    0.0 aiv=   64.2 mac=    0.0 mte=   23.1 cube=0.0 wait= 135.7
+    AddRmsNormBias             tot=    62.3 aic=    0.0 aiv=   55.3 mac=    0.0 mte=   33.4 cube=0.0 wait=   0.3
+    CausalConv1d               tot=    47.5 aic=    0.0 aiv=   39.4 mac=    0.0 mte=    8.2 cube=0.0 wait=   3.8
+saved -> /root/包体恢复/records/ladder/1019-023853-recover-opstat.json
+   coverage: prefill_tokens=24288, window_iterations=32, captured_requests=16  declared=True
+   [gap] 窗口被 capture 迭代上限截断: captured_request_count 只是『入窗请求数下界』, 不是完成数 → 跨窗总量比较前须核对两窗该下界与 prefill 体积
+   L4 产物 -> /root/包体恢复/records/ladder/1019-023853-recover-opstat.json
+   恢复完成; 如需回收磁盘: opt bench slim /root/prof/ladder-1019-022857/recover-copy-1019-0240_ascend_pt
