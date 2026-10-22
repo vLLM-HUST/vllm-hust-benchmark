@@ -17,9 +17,14 @@ def test_publication_rebuilds_from_pinned_report_and_verified_archives(monkeypat
     assert hashlib.sha256(raw).hexdigest() == actual["report_sha256"]
     monkeypatch.setattr(module, "pinned", lambda path: raw)
     assert actual == module.build()
-    assert actual["version"] == "V0.61"
+    assert actual["version"] == "V0.62"
     assert module.REVISION in actual["report_url"]
     sections = {s["id"]: s for s in actual["sections"]}
+    fenced = sections["fenced-model"]
+    assert len(fenced["tables"][0]["rows"]) == 6
+    assert "rank 0缺设备任务轨迹" in fenced["scope"]
+    assert "M01未通过本轮验收" in fenced["scope"]
+    assert "175.853432" in fenced["tables"][0]["rows"][2][1]
     historical = json.loads(
         (ROOT / "website-publication/data/midterm-v050.json").read_text()
     )
