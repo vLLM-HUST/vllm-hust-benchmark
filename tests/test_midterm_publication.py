@@ -17,9 +17,27 @@ def test_publication_rebuilds_from_pinned_report_and_verified_archives(monkeypat
     assert hashlib.sha256(raw).hexdigest() == actual["report_sha256"]
     monkeypatch.setattr(module, "pinned", lambda path: raw)
     assert actual == module.build()
-    assert actual["version"] == "V0.57"
+    assert actual["version"] == "V0.68"
     assert module.REVISION in actual["report_url"]
     sections = {s["id"]: s for s in actual["sections"]}
+    baseline = sections["baseline018"]
+    assert len(baseline["tables"][0]["rows"]) == 5
+    assert "开发栈对照" in baseline["scope"]
+    assert "baseline018-sweprefix" in baseline["evidence"][0]["path"]
+    closure = sections["reference-closure"]
+    assert closure["tables"]
+    assert "请求窗口核算见M01本轮判定" in closure["scope"]
+    assert "3.6%" in closure["scope"]
+    assert "reference-closure-20261022" in closure["evidence"][0]["path"]
+    worker = sections["worker-model"]
+    assert len(worker["tables"][0]["rows"]) == 6
+    assert "264" in worker["scope"]
+    assert "不替换正式B1" in worker["scope"]
+    fenced = sections["fenced-model"]
+    assert len(fenced["tables"][0]["rows"]) == 6
+    assert "rank 0缺设备任务轨迹" in fenced["scope"]
+    assert "M01未通过本轮验收" in fenced["scope"]
+    assert "175.853432" in fenced["tables"][0]["rows"][2][1]
     historical = json.loads(
         (ROOT / "website-publication/data/midterm-v050.json").read_text()
     )
@@ -66,7 +84,14 @@ def test_publication_rebuilds_from_pinned_report_and_verified_archives(monkeypat
     assert "不是整模型HCCL覆盖" in communication["scope"]
     verdict = sections["m01-verdict"]
     assert len(verdict["tables"][0]["rows"]) == 3
-    assert "不是实测有效算力低于50%" in verdict["scope"]
+    assert "30.2443%–30.2505%" in verdict["scope"]
+    assert (
+        "E24/R36 + KV materialization请求重计算 + Prefill Microflow FA"
+        in verdict["scope"]
+    )
+    assert "不是同一轮联合成绩" in verdict["scope"]
+    assert "不外推为未插桩服务结果" in verdict["scope"]
+    assert "21.92%仅为诊断值" in verdict["scope"]
     assert actual["kv_audit"]["runs"] == module.kv_audit()
     assert module.tables("| A | B |\n| --- | ---: |\n| 1 | 2 |\n") == [
         {"headers": ["A", "B"], "rows": [["1", "2"]]}
@@ -90,6 +115,10 @@ def test_publication_rebuilds_from_pinned_report_and_verified_archives(monkeypat
         == f"{result['correct']}/{result['total']}"
     )
     assert "不冒充同环境新增性能配对" in recovered_quality["scope"]
+    native = sections["native-paired-quality"]
+    assert [row[2] for row in native["tables"][0]["rows"]] == ["147/200", "146/200"]
+    assert [row[4] for row in native["tables"][0]["rows"]] == ["19", "22"]
+    assert "不宣称全集质量或统计非劣性" in native["scope"]
     assert len(actual["kv_audit"]["runs"]) == 2
     adjacent = (
         "| A | B |\n| --- | ---: |\n| 1 | 2 |\n\n| C | D |\n| --- | --- |\n| 3 | 4 |\n"

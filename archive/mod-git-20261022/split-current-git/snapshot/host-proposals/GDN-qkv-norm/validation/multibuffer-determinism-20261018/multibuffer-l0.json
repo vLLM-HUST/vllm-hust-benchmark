@@ -1,0 +1,127 @@
+{
+  "schema": "gdn-qkv-norm-l0.v1",
+  "status": "ok",
+  "candidate": "gdn-unpack-qk-l2norm-fusion",
+  "output_storage": "shared",
+  "shape": {
+    "T": 16,
+    "row_stride": 4096,
+    "q": 1024,
+    "k": 1024,
+    "v": 2048,
+    "head_dim": 128,
+    "phase": "pure decode"
+  },
+  "weights": {
+    "model": "Qwen3.5-35B-A3B",
+    "precision": "bf16",
+    "format": "ND",
+    "tp": 2,
+    "input": "seeded synthetic"
+  },
+  "shape_source": "/root/包体恢复/records/probes/20261018T112829Z_gdn_qkv_unpack_hotspot_recheck.json",
+  "callsite": "/vllm-workspace/vllm-ascend/vllm_ascend/ops/gdn.py:480,619-620 pure non-spec decode",
+  "scope": "isolated matched consumer-chain; NOT full-model L3/L4",
+  "timing_contract": "host enqueue and event overlap; event includes host supply gaps, never subtract them for kernel time",
+  "iters": 40,
+  "repeats": 3,
+  "warmup": 3,
+  "correctness": [
+    {
+      "case": "random",
+      "status": "PASS"
+    },
+    {
+      "case": "zero",
+      "status": "PASS"
+    },
+    {
+      "case": "small",
+      "status": "PASS"
+    },
+    {
+      "case": "special",
+      "status": "PASS"
+    },
+    {
+      "case": "offset",
+      "status": "PASS"
+    }
+  ],
+  "timings": {
+    "baseline": [
+      {
+        "host_enqueue_us": 2923.943428322673,
+        "event_eager_chain_us": 2905.6299209594727,
+        "host_total_us": 2926.967479288578
+      },
+      {
+        "host_enqueue_us": 796.1575407534838,
+        "event_eager_chain_us": 794.8915004730225,
+        "host_total_us": 798.58407843858
+      },
+      {
+        "host_enqueue_us": 790.8377563580871,
+        "event_eager_chain_us": 789.5715236663818,
+        "host_total_us": 793.2452717795968
+      }
+    ],
+    "candidate": [
+      {
+        "host_enqueue_us": 247.12090380489826,
+        "event_eager_chain_us": 245.48499584197998,
+        "host_total_us": 248.79388511180878
+      },
+      {
+        "host_enqueue_us": 249.05519094318151,
+        "event_eager_chain_us": 247.54900932312012,
+        "host_total_us": 250.7204655557871
+      },
+      {
+        "host_enqueue_us": 247.81441316008568,
+        "event_eager_chain_us": 246.31049633026123,
+        "host_total_us": 249.681924469769
+      }
+    ],
+    "candidate_launch_only": [
+      {
+        "host_enqueue_us": 120.43442111462355,
+        "event_eager_chain_us": 119.46300268173218,
+        "host_total_us": 122.87194840610027
+      },
+      {
+        "host_enqueue_us": 119.57241222262383,
+        "event_eager_chain_us": 118.2170033454895,
+        "host_total_us": 121.51743285357952
+      },
+      {
+        "host_enqueue_us": 116.36284179985523,
+        "event_eager_chain_us": 115.04199504852295,
+        "host_total_us": 118.61263774335384
+      }
+    ]
+  },
+  "traces": {},
+  "reference": {
+    "path": "/vllm-workspace/vllm/vllm/third_party/flash_linear_attention/ops/l2norm.py",
+    "sha256": "520f4513ef4fc97e6b88dc07877cca8e29da0d34e44673fe989e3af002d86381"
+  },
+  "medians": {
+    "baseline": {
+      "host_enqueue_us": 796.1575407534838,
+      "event_eager_chain_us": 794.8915004730225,
+      "host_total_us": 798.58407843858
+    },
+    "candidate": {
+      "host_enqueue_us": 247.81441316008568,
+      "event_eager_chain_us": 246.31049633026123,
+      "host_total_us": 249.681924469769
+    },
+    "candidate_launch_only": {
+      "host_enqueue_us": 119.57241222262383,
+      "event_eager_chain_us": 118.2170033454895,
+      "host_total_us": 121.51743285357952
+    }
+  },
+  "wall_s": 4.351654215715826
+}

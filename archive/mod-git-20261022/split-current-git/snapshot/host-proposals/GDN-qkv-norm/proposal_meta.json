@@ -1,0 +1,56 @@
+{
+  "schema": "vllm-hust-host-proposal.v1",
+  "id": "GDN-qkv-norm",
+  "kind": "local tier-2 default-off host proposal; not deployed",
+  "owner": "028/D3-gdn-high-concurrency-longctx main session",
+  "upstream_status": "not submitted; no upstream action planned",
+  "host": {
+    "file": "vllm_ascend/ops/gdn.py",
+    "sha256": "1081d19738da1130cf85beb7c1bcb4d061a0ca83f0edd4f3a7f2b30bd185e35d",
+    "revision": "installed runtime snapshot; no .git available; exact full-file hash is mandatory"
+  },
+  "env": {
+    "name": "VLLM_HUST_GDN_QKV_NORM",
+    "default": "0",
+    "on": "1 with USE_DEFAULT_FLA_NORM=0"
+  },
+  "scope": {
+    "model": "Qwen3.5-35B-A3B",
+    "precision": "bf16",
+    "format": "ND",
+    "T": 16,
+    "q": 1024,
+    "k": 1024,
+    "v": 2048,
+    "row_stride": 4096,
+    "head_dim": 128,
+    "phase": "pure non-spec decode; PCP world_size=1; no grad"
+  },
+  "fallback": "native unpack and native q/k norm on every unsupported branch; speculative/mixed/prefill unchanged",
+  "implementation": "src/vllm_ascend_split_batch/gdn_qkv_norm.py (launch_into passes multibuffer=True) and gdn_qkv_norm_kernel.py",
+  "tests": [
+    "tests/test_gdn_qkv_norm.py",
+    "tests/test_gdn_qkv_norm_patch.py",
+    "tests/test_bench_gdn_qkv_norm.py"
+  ],
+  "artifacts": {
+    "gen_patch.py": "e1933b2c3611be83216bdfcb2c16cc9770e9dac92cfebe81b8fad823326b7400",
+    "patch.diff": "f5493d62cc0c5b5e6056a92fe518d04949f82d619d8b13c6ce7b3c38b84e54c4",
+    "host_orig/gdn.py.orig": "1081d19738da1130cf85beb7c1bcb4d061a0ca83f0edd4f3a7f2b30bd185e35d"
+  },
+  "evidence": [
+    "/root/包体恢复/records/ladder/1018-125822-l0-gdn-qkv-norm.json",
+    "/root/包体恢复/records/probes/20261018T130700Z_gdn_norm_trace_analysis.json",
+    "host-proposals/GDN-qkv-norm/validation/multibuffer-determinism-20261018/receipt.json",
+    "host-proposals/GDN-qkv-norm/validation/l4-multibuffer-20261019/receipt.json"
+  ],
+  "deployment_gate": [
+    "Exact source hash, forward and reverse patch checks",
+    "Fullgraph capture/replay correctness: PASS (isolated 8/8; in-model FULL windows captured and L3-identical)",
+    "Full-model L3 and opt bench compare PASS: 16/16 fixed batch, 8/8 standard (production cohort, multibuffer=True)",
+    "Matched model L4 target counts/durations and all-kernel denominator: PASS, both ranks (validation/l4-multibuffer-20261019/receipt.json)"
+  ],
+  "rollback": "patch -R -p1 < host-proposals/GDN-qkv-norm/patch.diff; verified on a temporary copy only",
+  "decision": "Optimization accepted 2026-10-19: paired same-day L4 (6->1 kernels/call, per-call active -69.2%/-67.6%) with L3 exact equality (16/16 batch, 8/8 standard) and L0 exact+graph replay; plugin remains default-off pending bundle release gate",
+  "delete_when": "host source changes or candidate is superseded; fail closed until source and evidence are revalidated"
+}

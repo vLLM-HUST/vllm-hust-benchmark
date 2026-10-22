@@ -1,0 +1,56 @@
+{
+  "schema": "gdn-state-codec-ecpa-launch-smoke-v1",
+  "date": "2026-10-09",
+  "evidence_label": "real-online-activation-smoke",
+  "performance_claim": false,
+  "extension": {
+    "id": "org.vllm-hust.gdn-state-codec",
+    "version": "0.2.0.dev1",
+    "commit": "0de7f0c30910421c78b082efe84d4316871b11c3",
+    "dirty": false,
+    "wheel_sha256": "40cb8a4fdcfcc986052e411beb751e58fe8578e55d2cafb1d4f9b126ec5b905a"
+  },
+  "extension_manager": {
+    "commit": "075dbcbee641e22376300069aab1f7e9f275aa5d",
+    "dirty": false,
+    "manifest_schema": "0.3-experimental"
+  },
+  "host": {
+    "vllm_commit": "0fc695fc6d1d82e9a5ac6835ac8e4e1c83703665",
+    "vllm_dirty": false,
+    "vllm_ascend_commit": "1cdb8c4db6e50f36f1fb3283b3e3dd618f6821e8",
+    "vllm_ascend_dirty": false,
+    "runtime": "vLLM 0.23.0, vLLM Ascend 0.23.0.post1, CANN 9.1.0",
+    "hardware": "2x Ascend 910B2",
+    "graph_mode": "enforce-eager",
+    "tensor_parallel_size": 2
+  },
+  "model": {
+    "path": "/models/Qwen3.5-35B-A3B",
+    "architecture": "Qwen3_5MoeForConditionalGeneration",
+    "config_sha256": "5e4d7f74fec2f360eb9cfbfcd6ec0c4c76e684d3a11caaed259d9fd9bfbc7944"
+  },
+  "native_library_set_sha256": "cd766fcd8ffa315defd887ef9571693126924cfaa8c6fab64f7964510e9a2e1a",
+  "activation": {
+    "discovery": "passed",
+    "compatibility_check": "passed",
+    "dry_run": "passed",
+    "server_start": "passed",
+    "health": "HTTP 200",
+    "request": "HTTP 200",
+    "worker_runtime_effective_events": 2,
+    "request_usage": {
+      "prompt_tokens": 19,
+      "completion_tokens": 16,
+      "total_tokens": 35
+    }
+  },
+  "preserved_setup_failure": {
+    "result": "failed before model load",
+    "cause": "native DT_NEEDED dependencies were not discoverable without a StateAxis-owned LD_LIBRARY_PATH",
+    "fix": "preload the six same-directory native dependencies with RTLD_GLOBAL inside the codec runtime",
+    "retest": "passed"
+  },
+  "shutdown": "operator SIGINT after successful request; no NPU process remained",
+  "decision": "ECPA activation path validated; no performance qualification implied"
+}

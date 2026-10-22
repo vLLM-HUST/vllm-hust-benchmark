@@ -5,6 +5,19 @@ certification or a claim about actual procurement expense.
 
 ## Scope And Gates
 
+### Baseline Identity Clarification (2026-10-22)
+
+The designated acceptance baseline is the official vLLM 0.18 / vLLM-Ascend 0.18 release line. Reuse
+existing 0.18 evidence wherever its workload, metric and provenance support the comparison.
+Compatibility backports or environment differences do not automatically require a rerun: assess
+their actual effect, disclose the applied source identities and retain the original records. An
+unmodified official binary is not an additional acceptance gate.
+
+Existing 0.28.1 / Ascend 0.25.1rc2 development-stack comparisons remain useful independent
+observations, but are not measurements against the designated 0.18 baseline. B1 may use its
+explicitly identified optimized runtime. Historical plans and measured values remain unchanged. See
+`BASELINE-IDENTITY-AUDIT-20261022.md` for the recovered evidence and its scope.
+
 B1 means "currently best measured vLLM-HUST optimization solution" （当前已实测最优的vLLM-HUST优化方案）, selected
 per workload and metric among eligible measured MODs or compatible combinations. Selection retains
 exact configuration and provenance; different optima are not a jointly measured configuration.

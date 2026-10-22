@@ -1,0 +1,108 @@
+{
+  "rank_compute_seconds": [
+    {
+      "mean": 40.28855586775398,
+      "min": 40.13670313131421,
+      "max": 40.529818046607076
+    },
+    {
+      "mean": 40.34883570728195,
+      "min": 40.183129500847905,
+      "max": 40.60246563469767
+    }
+  ],
+  "resource_mean_seconds": {
+    "compute": 40.34883570728195,
+    "communication": 40.9411050300118,
+    "hbm_directional": 26.565260618127347,
+    "hbm_pooled": 25.75630360173427
+  },
+  "reference_seconds": 40.9411050300118,
+  "reference_over_device_envelope_percent": 21.916732723073874,
+  "sensitivity_seconds": [
+    40.183129500847905,
+    42.551862594211244
+  ],
+  "sensitivity_percent": [
+    21.510970663863752,
+    22.779008985288836
+  ],
+  "sensitivity_is_confidence_interval": false,
+  "resource_aggregation": "Maximum, not sum. Means retain every repetition; independent component repetitions are not paired by index.",
+  "model_effective_flops": null,
+  "m01_attainment": null,
+  "status": "empirical_resource_composition_reviewed_not_full_M01_verdict",
+  "probe_scopes": {
+    "gdn_worker_reference_r1.py": {
+      "sha256": "dfd95a254031685a4e93d8714dc9449a5a34ed66199088e9264943f99acd173e",
+      "timed_call_definitions": [
+        "def call():\n                return meta.engine.pool_forward(q, k, w, u, g, bank, meta.cu, meta.state, meta.indices[64])"
+      ]
+    },
+    "wy_worker_reference_r2.py": {
+      "sha256": "de109b46da2b7b79a62ef32888beecb9444eb0806b4affa3c8abf41371387e9a",
+      "timed_call_definitions": [
+        "def call():\n                return chunk_layout.chunk_wy(dk, dv, db, dg, meta)"
+      ]
+    },
+    "moe_reference_full.py": {
+      "sha256": "2b318fcc46c9304c942738b721071536b91ad11400017b7be2f6a7e8081664f8",
+      "timed_call_definitions": [
+        "def call():\n                    return torch_npu.npu_grouped_matmul(\n                        x=[x], weight=[weight], bias=None, split_item=2,\n                        group_list_type=1, group_type=0, group_list=groups)[0]"
+      ]
+    },
+    "swiglu_worker_reference_r1.py": {
+      "sha256": "075385f01756a9aec9d179815145b55be72f30ead45261eb39b57205ae8b6bbf",
+      "timed_call_definitions": [
+        "def call():\n                if case['kind'] == 'shared':\n                    return AscendSiluAndMul.forward_oot(None, x)\n                return torch_npu.npu_swiglu(x)"
+      ]
+    },
+    "moe_combine_worker_reference_r1.py": {
+      "sha256": "37df86793c9826b5be34a7ce7773cde4dc5a1d7c392a74ef3eadf26141800974",
+      "timed_call_definitions": [
+        "def call():\n                combined = DeviceOperator.npu_moe_token_unpermute(routed, indices, probs)\n                gated = torch.sigmoid(gate) * shared\n                return (combined, gated + combined)"
+      ]
+    },
+    "router_gate_worker_reference_r1.py": {
+      "sha256": "624f0fdf703bc19b4f22c7e427bbd85496f07df6693ea587ad387f01fd5c8260",
+      "timed_call_definitions": [
+        "def call():\n                    return router._compute_routing(hidden, x, torch.int32)",
+        "def call():\n                    return (hidden * torch.sigmoid(x),)"
+      ]
+    },
+    "norm_worker_reference_r1.py": {
+      "sha256": "7dc00e666f6a5a22e6a5e4e7ba389e02c6f85e11722a784a4658eec4c3013fb3",
+      "timed_call_definitions": [
+        "def call():\n                if kind == 'gdn_output':\n                    return (AscendRMSNormGated.forward_oot(module, x, extra),)\n                if kind == 'hidden_residual':\n                    return AscendGemmaRMSNorm.forward_oot(module, x, extra)\n                return (AscendGemmaRMSNorm.forward_oot(module, x),)"
+      ]
+    },
+    "preprocess_worker_reference_r1.py": {
+      "sha256": "131561d6151d47f7a502e0b81b54b9e0991aeaf8c64c2bcff1b048494e4feea0",
+      "timed_call_definitions": [
+        "def call():\n                return preprocess(x, a, b, log, bias, mapping, q_head_major=case['q_head_major'])"
+      ]
+    },
+    "fia_worker_reference_r1.py": {
+      "sha256": "c4494d8e0755ab2a2874054df42dddf93ef33740eb02581a11c774a14011e8cc",
+      "timed_call_definitions": [
+        "def call():\n                    function(torch.npu.current_stream().npu_stream, ptrs)"
+      ]
+    }
+  },
+  "review_decisions": [
+    "GMM is timed without SwiGLU. SwiGLU is a separate component.",
+    "Shared sigmoid gate and shared/routed addition are in combine only; router-gate covers routing and the distinct full-attention gate.",
+    "GDN output gated RMSNorm is distinct from MoE SwiGLU and full-attention gating.",
+    "Q/K L2 is in preprocessing, excluded from RMS arithmetic; attention softmax is included in FIA, not an extra timed component.",
+    "H/O receives cumulative gates; its timed call excludes prefix scan. WY chunk_wy includes cumulative_gates, KKT, inverse and W/U reconstruction.",
+    "Dense projection references exclude vocabulary and routed expert grouped projections.",
+    "Memory-only movement and collectives are not invented floating-point arithmetic. HBM and communication terms remain separate resource bounds."
+  ],
+  "interpretation": "The numeric ratio describes the measured component-reference envelope. It is not a whole-model effective-F certificate, an uninstrumented serving score, or an accepted M01 attainment.",
+  "remaining_review": "Establish completeness of the declared valid-row arithmetic convention against the loaded forward paths; preserve excluded special functions, padding and TP duplication explicitly.",
+  "source_sha256": {
+    "/workspace/m01-worker-resource-terms.json": "4014439fef1320ec48b7370aa6cd9b3cc0e5baf4a0848924055d25ebce661b2d",
+    "/workspace/m01-worker-window-review.json": "f415a9a3ecbb539e4fac9ff908229a28a21824eaa954396925c376d7b58443c8",
+    "/workspace/review_m01_resource_composition.py": "5be862834dc3ab373917d7118db79916fadd39cb7893f99ec21cfe86c54d8d9d"
+  }
+}

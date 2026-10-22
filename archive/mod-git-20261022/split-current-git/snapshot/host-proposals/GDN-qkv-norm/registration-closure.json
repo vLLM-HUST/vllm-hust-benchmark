@@ -1,0 +1,26 @@
+{
+  "schema": "gdn-registration-closure.v1",
+  "base_head": "4d92559ea85b8d223a5c8fd9631e6e68ac46721d",
+  "bundle_registration": "withdrawn",
+  "reason": "Actual registered core remains opaque in CPU export. Static inventory confirms unpack is self.rearrange_mixed_qkv and normalization is direct l2norm_fwd inside _forward_core, alongside KV/communication side effects. No reachable narrow registered boundary has been proven. Stop instead of copying whole forward or installing a non-matching rule.",
+  "scope": "Qwen3.5-35B-A3B bf16 ND TP2 FULL pure non-spec decode T16 width4096 stride4096 Q/K/V1024/1024/2048 head128 PCP1",
+  "kernel_changed": false,
+  "host_changed": false,
+  "device_execution": false,
+  "serve_starts": 0,
+  "removed": [
+    "gdn-qkv-norm general plugin entry",
+    "org.vllm-hust.gdn-qkv-norm bundle entry and descriptor",
+    "source-hash preflight loader and loader-specific tests"
+  ],
+  "retained": [
+    "accepted multibuffer kernel and tests",
+    "reversible tier-2 host proposal",
+    "historical evidence and registration assessments",
+    "read-only registration probe and tests"
+  ],
+  "evidence": "/root/包体恢复/records/probes/20261019T042000Z_opt_repair/gdn-final-probe.json",
+  "limits": "CPU export and static call inventory, not a production graph dump or universal proof that no registration route can ever exist. No new correctness/performance acceptance claim.",
+  "reopen_condition": "Host exposes a reachable narrow dispatch/inner graph boundary, or new mechanism evidence establishes one without whole-core decomposition, global norm bypass or registry overwrite. Declare integration validation budget, then L3+compare and graph replay before release lifecycle checks.",
+  "runtime": "No service started; no host patch/env changed; tier-2 remains default-off. Pre-existing unrelated user work preserved, not discarded or committed."
+}

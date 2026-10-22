@@ -1,0 +1,67 @@
+{
+  "schema": "gdn-state-codec-component-result-v1",
+  "date": "2026-10-09",
+  "evidence_label": "model-shaped-component-candidate",
+  "hardware": "2x Ascend 910B2",
+  "software": {
+    "cann": "9.1.0",
+    "soc_version": "ascend910b2",
+    "build_type": "Release"
+  },
+  "geometry": {
+    "states": 16,
+    "keys": 128,
+    "values": 128,
+    "binding": "Qwen3.5-35B-A3B TP2 local GDN state"
+  },
+  "correctness": {
+    "invalid_zero_states_rejected": true,
+    "quantized_mismatches_against_cpu_oracle": 4915,
+    "elements": 262144,
+    "relative_rms": 0.00738162,
+    "relative_rms_limit": 0.02
+  },
+  "synchronized_device_us": [
+    {
+      "device": 0,
+      "split_median": 68.011,
+      "combined_median": 68.041
+    },
+    {
+      "device": 1,
+      "split_median": 67.93,
+      "combined_median": 68.011
+    }
+  ],
+  "python_ctypes_host_submit_us": {
+    "device": 0,
+    "repetitions": 200,
+    "split": {
+      "median": 21.2805,
+      "p10": 20.96,
+      "p90": 21.91
+    },
+    "combined": {
+      "median": 17.38,
+      "p10": 16.921,
+      "p90": 17.9
+    },
+    "median_reduction_pct": 18.328
+  },
+  "rejected_experiments": [
+    {
+      "name": "python-side-same-dtype-workspace-slabs",
+      "baseline_full_initializer_median_us": 537.811,
+      "candidate_full_initializer_median_us": 623.1875,
+      "delta_pct": 15.875,
+      "decision": "rejected-and-reverted"
+    }
+  ],
+  "artifact_sha256": {
+    "provider_runtime_so": "5ca6a72c236a43159a1009b91687a5baa26c4f23f0c0d11023944f9c039061a5",
+    "smoothing_kernel_so": "5fce840e5ac300f5b67eca371fd18de3f6a80aafe687329abb16a7accc482b44",
+    "quantize_kernel_so": "b76c6b6a3b318dc52702f680e2f9a877136623d7e65e5f805b6888bd77554e55",
+    "provider_probe": "ff09ce20e287772ecd77e569f93df1f5fee813ae380865c703d1dea8643e5396"
+  },
+  "decision": "retain combined host ABI as a bounded host-submit optimization; no end-to-end performance claim"
+}

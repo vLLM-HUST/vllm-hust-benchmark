@@ -1,0 +1,104 @@
+{
+ "schema": "vllm-hust-host-proposal.v1",
+ "id": "W1R-gmm-tuning-config",
+ "kind": "tier-2 host proposal patch (PURPOSE sec.8 mode 2)",
+ "upstream_status": {
+  "state": "未提交（proposal snapshot；本仓自持）",
+  "issue_or_pr": null,
+  "rule": "未经上游接受，任何引用不得写『上游已接受/已合入』；提交后回填 issue/pr 并追加新快照（旧快照不改）"
+ },
+ "owner": "SwarmWorker（本包唯一 Writer）；责任会话 = 028/D3-gdn-high-concurrency-longctx 主线会话",
+ "delete_when": [
+  "上游接受并合入等价能力（届时删除本目录并在 HOST_CONTRACT.md 记录删除原因）",
+  "或宿主升级使 routed_experts.py 调用点签名/语义变化，patch 无法再对齐（先重做 P0 静态判定）"
+ ],
+ "follow_up_actions": [
+  "向上游提交 issue/PR 并回填 upstream_status.issue_or_pr",
+  "等待 capture-safe 的真实 per-expert count 机制（当前 hook 在 FULL graph capture 内必须跳过，拿不到 M=128 真实 decode counts）",
+  "若上游拒绝，记录原因并把候选记 blocked（载体不可达），不得改判 rejected"
+ ],
+ "host": {
+  "file": "vllm_ascend/ops/fused_moe/routed_experts.py",
+  "file_rel_in_runtime_tree": "ops/fused_moe/routed_experts.py",
+  "sha256": "b17e5a105d59fc280f244bdc4036b4cb41efd1d5a2ff1accca4b56620cc91ab7",
+  "sha256_reproduce": "git -C /root/vllm-workspace/vllm-ascend-hust cat-file -p 74f0c0a27:vllm_ascend/ops/fused_moe/routed_experts.py | sha256sum",
+  "call_sites": [
+   "AscendUnquantizedFusedMoEMethod.apply_gmm1 -> torch_npu.npu_grouped_matmul(split_item=2, group_type=0)",
+   "AscendUnquantizedFusedMoEMethod.apply_gmm2 -> torch_npu.npu_grouped_matmul(split_item=2, group_type=0)"
+  ]
+ },
+ "host_version_range": "==0.25.1rc2.dev125+hust.20260903.4.g74f0c0a27.d20260909",
+ "host_version_range_note": "点钉（==），禁止写成 >=0 或区间；升级宿主必须先重跑 gen_patch --check 与 CPU 门",
+ "artifacts": {
+  "host_orig": "host_orig/routed_experts.py.orig",
+  "generator": "gen_patch.py",
+  "patch": "patch.diff",
+  "tests": "tests/test_w1r_gmm_tuning_patch.py",
+  "ownership": "OWNERSHIP.md"
+ },
+ "hashes": {
+  "host_sha256": "b17e5a105d59fc280f244bdc4036b4cb41efd1d5a2ff1accca4b56620cc91ab7",
+  "patch_sha256": "a86cee731138bc817ef59a1e6b99d16582a28791d7fac06ad0f4c6168f64b438",
+  "patched_sha256": "26fcacab198e64cce9117843892242d4abfd9a80500f3abf6c9af29fb2cc8dc4"
+ },
+ "env": {
+  "tuning": {
+   "name": "VLLM_HUST_GMM_TUNING_CONFIG",
+   "default": "unset（关闭）",
+   "grammar": "**单值**正整数，白名单 {1,2,8,32}；逗号列表被显式拒绝（会破坏单臂单变量）",
+   "forwarding": "以 tuning_config=[value] 传入 apply_gmm1 / apply_gmm2 两处 npu_grouped_matmul；签名依据 torch_npu npu_grouped_matmul(..., int[]? tuning_config=None)",
+   "fail_fast": "首次 GMM 调用（起服 profile/dummy run 阶段，非 capture 内部）即解析并抛 ValueError；错误被缓存后每次调用继续抛出，不允许静默降级",
+   "disabled_effect": "零 import、零 IO、零额外 kwargs、零 shape 读取"
+  },
+  "dump": {
+   "name": "VLLM_HUST_GMM_COUNTS_DUMP",
+   "default": "unset（关闭）",
+   "value": "输出文件路径；支持 {rank} 占位符；无占位符且存在 RANK 时自动追加 .rank<RANK>（TP=2 两 rank 不共文件）",
+   "aux_env": [
+    "VLLM_HUST_GMM_COUNTS_DUMP_MAX_PER_KEY（默认 2；每 (call_site, group_list_type, x_shape, w_shape, sample_source) 键的采样上限，只有成功写入才递增）",
+    "VLLM_HUST_COHORT_ID / VLLM_HUST_LOAD_CALIBER_ID（可选，写入 provenance）"
+   ],
+   "records": "meta 行 + 每样本：m/k/n/experts、x_shape/weight_shape、split_weight_list、need_trans、group_list_type、counts（归一化 counts）、group_list_raw（原始向量）、counts_len/counts_sum/nonzero_experts、phase、call_site、sample_source、capture_state、seq、pid/rank/local_rank、cohort/caliber",
+   "sample_source_values": [
+    "eager：host 在 graph capture 之外执行本 Python 调用（可作为 fixture 候选）",
+    "skipped_inside_capture：capture 内 → 跳过，任何 device 读取都未发生；capture dummy 行绝不当真实 counts",
+    "skipped_unknown_capture_state：无法静态/运行时判定 capture 状态 → 同样跳过（fail-safe）"
+   ],
+   "capture_policy": "开启路径可 lazy import torch 做官方 capture 检测 torch.npu.is_current_stream_capturing()；检测为 capture 或检测失败时，在读取任何 device tensor 之前返回",
+   "output_invariance": "hook 恒返回 None 且不参与返回值构造；AST 门 test_call_sites_forward_output_unchanged 断言 op 结果原样返回",
+   "error_policy": "写失败/路径不可用 → 仅 warning 一次（logger.warning）、不抛出、不伪造样本行；该错误不会被当成『门通过』",
+   "disabled_effect": "零 IO、零 import、零 shape 读取、不建文件",
+   "sampling_semantics": "sample_source=eager means the host ran this Python call outside graph capture; inside capture the hook skips before any device read, so capture dummy rows are never recorded as counts; a FULL graph replay does not execute Python at all"
+  }
+ },
+ "notes": {
+  "tuning_config_semantics": "tuning_config 是 CANN GMM 的 tiling hint：数组首值表示『各专家预期处理的 token 数』。torch_npu 只承诺首值语义，故本补丁只接受单值，保证一个值=一臂；若要扫多值，必须逐值单独起服（一值一臂），不得在一臂内传列表。",
+  "dump_window_status": "The dump run is NOT a measurement window: it adds an env-gated hook plus file IO, i.e. a second variable. Its only product would be an immutable counts fixture for L0.",
+  "fixture_blocker": "active FULL graph 下 M=128 的真实 decode counts 无法经本 hook 取得（capture 内必须跳过，replay 不执行 Python），因此当前口径的完整 fixture 不可达；prefill eager 样本也不构成『完整 fixture 门已过』。",
+  "why_tier2": "宿主公有面无 tuning_config 开关；两处调用点在宿主私有方法体内；插件侧复制方法体被仓内契约禁止；全局 monkeypatch torch_npu.npu_grouped_matmul 非已列公开面且影响所有 GMM 调用方。",
+  "rollback": "The w1r-gmm-tuning layer is REMOVED from the apply-runtime-patches.sh MANIFEST, so the script has no such layer name. If the runtime tree is still patched: (1) run `patch -R --dry-run` then `patch -R` against the already-verified patch.diff, or (2) re-add the layer per OWNERSHIP.md sec.5 and use apply-runtime-patches.sh --rollback. Never invent an unregistered layer name.",
+  "cpu_gates": "tests/test_w1r_gmm_tuning_patch.py（G-P0a..e/h 的 CPU 半 + F1/F2/F3/F6/F7/F8/F10 回归项）",
+  "default_off_cost": "default-off cost: no device difference, zero shape read, zero IO, zero import; every GMM call still performs two early-return Python calls (tuning kwargs lookup + dump early return). The host file text is not byte-identical (it carries the injected block): do not claim byte-equivalent or fully identical host behaviour.",
+  "group_list_type_support": "group_list_type=1 -> counts as-is; =0 -> cumsum bounds normalised to counts (raw kept); any other value -> counts=None with counts_normalization=unsupported_group_list_type and raw kept.",
+  "split_weight_experts": "when weight is a per-expert list/tuple, experts=len(weight) and the first element supplies K/N; a stacked [E,K,N] tensor uses shape[0]."
+ },
+ "runtime_deployment": {
+  "state": "deployed (default-off)",
+  "manifold_layer": "apply-runtime-patches.sh MANIFEST: w1r-gmm-tuning",
+  "runtime_tree_file": "/vllm-workspace/vllm-ascend/vllm_ascend/ops/fused_moe/routed_experts.py",
+  "sha256_baseline": "b17e5a105d59fc280f244bdc4036b4cb41efd1d5a2ff1accca4b56620cc91ab7",
+  "sha256_deployed": "26fcacab198e64cce9117843892242d4abfd9a80500f3abf6c9af29fb2cc8dc4",
+  "reverse_patch_check": "patch -p1 -R --dry-run rc=0",
+  "idempotent_check": "apply-runtime-patches.sh --check -> [skip] w1r-gmm-tuning",
+  "seam_check": "接口面校验 PASS（4 条）",
+  "deployed_at": "2026-10-18T07:5xZ",
+  "receipt": "/root/包体恢复/records/probes/20261018T075800Z_w1r_p0_recheck_deploy.json"
+ },
+ "blocker_status": {
+  "id": "fixture-unreachable-fullgraph-decode",
+  "full_graph_path": "still blocked（decode M=128 在 capture 内，hook 必须跳过；FULL counts 仍不可得）",
+  "none_diagnostic_path": "unblocked by user authorization 2026-10-18T07:5xZ；仅用于取真实 counts，不作测量窗",
+  "constraints_doc": "OWNERSHIP.md §5.2",
+  "p1_0a_executed": "no（尚未运行任何 NPU 动作）"
+ }
+}

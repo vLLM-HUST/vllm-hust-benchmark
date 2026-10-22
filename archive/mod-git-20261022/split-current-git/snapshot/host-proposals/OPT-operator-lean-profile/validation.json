@@ -1,0 +1,55 @@
+{
+  "schema": "operator-lean-profile-validation.v1",
+  "recorded_at": "2026-10-18T15:50:57.885967+00:00",
+  "base_commit": "b59615e937b25af663892e72760ce7a1e3d68e2a",
+  "authorization": "用户允许修改 L1/L2 合同、要求保留历史数据",
+  "result": "Contract and deployed dispatcher use L0/L3-backed operator profile path without mandatory throughput screen.",
+  "tests": {
+    "combined_full_suite": "943 passed, 11 skipped",
+    "after_hash_cache_refactor": "145 passed",
+    "ruff": "PASS",
+    "final_patch_roundtrip": "PASS: reverse/forward and before/after hashes",
+    "historical_gdn_integrity": "16 source and bundled evidence files verified unchanged",
+    "live_check_only": "normal A/B denied rc3 for known FAIL; mechanism diagnostic accepted rc0 without launching",
+    "coverage": "FAIL0 WARN57"
+  },
+  "scope": [
+    "AGENTS.md",
+    "tests/test_operator_profile_contract.py",
+    "host-proposals/OPT-operator-lean-profile"
+  ],
+  "boundaries": [
+    "L1/L2 commands, legacy screen schema and historical data retained unchanged.",
+    "No NPU launch, service start, profiling collection or candidate status update for this workflow change.",
+    "L0/L3/L4 acceptance gates unchanged; structure evidence checks do not certify numerical correctness.",
+    "Shared hash cache reused instead of additional per-path hashing.",
+    "Known FAIL cannot be bypassed with legacy screen.",
+    "This is not a claim of measured improvement in lower-capability-model behavior."
+  ],
+  "evidence": [
+    {
+      "path": "/root/包体恢复/records/probes/20261018_operator_lean_final_tests.log",
+      "sha256": "da9d58a6585cdd640b3ed4eb29e52ddd4a3d7c745863728248c1359bb526e1e5"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261018_operator_lean_hashcache_tests.log",
+      "sha256": "8fd3ac30366442f0ba4dc8f7f5aeed5e660bf7c8b39774080a95e327d718c8a3"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261018_operator_lean_integrity.log",
+      "sha256": "4f187c8402734cf28ec35bf286caa43b9777abe1e01cfd3b59524a7c2f3ae9d9"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261018_operator_lean_coverage.log",
+      "sha256": "b46fe3e87e01e7caba7ad0e5044195d37f6a0bbb158691d5f6c597101ba77756"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261018_operator_lean_cached_check.log",
+      "sha256": "93a5c10cb568709d6544e4909cd946f5c99ef7c77994978ca7b29ef8ba26ed04"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261018_operator_lean_failed_ab_check.log",
+      "sha256": "b45331449b0a1ea08fff5b93425fc4a8557fe5c39e7668484ff9be8ae530e938"
+    }
+  ]
+}

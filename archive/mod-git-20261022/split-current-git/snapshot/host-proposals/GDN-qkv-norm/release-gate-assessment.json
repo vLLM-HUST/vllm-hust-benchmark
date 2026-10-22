@@ -1,0 +1,96 @@
+{
+  "schema": "gdn-bundle-release-assessment.v1",
+  "candidate": "gdn-qkv-norm-bundle-release",
+  "base_head": "6cde143d76e1ed13bf33a78b6d08f6aab540c9fe",
+  "branch": "fix/husk-carrier-visible",
+  "decision": "proposed; release blocked; no activation or runtime changes",
+  "owner": "main session / repository owner",
+  "target": "Dedicated bundle may become active for explicit enable; env remains default-off. Default-on requires a separate decision.",
+  "scope": {
+    "model": "Qwen3.5-35B-A3B",
+    "precision": "bf16",
+    "format": "ND",
+    "platform": "a2 / 2x910B2 / TP2",
+    "graph": "FULL",
+    "shape": "T16, row_stride4096, Q/K/V widths1024/1024/2048, head_dim128",
+    "phase": "pure non-spec decode, PCP=1, inference",
+    "callsite": "post-CausalConv1d before RecurrentGatedDeltaRule",
+    "env": "VLLM_HUST_GDN_QKV_NORM=1 AND USE_DEFAULT_FLA_NORM=0"
+  },
+  "existing_evidence": [
+    {
+      "path": "host-proposals/GDN-qkv-norm/validation/multibuffer-determinism-20261018/receipt.json",
+      "credit": "L0 exact 5/5, stable-address graph replay 8/8, FULL fixed-batch L3 16/16 and standard L3+compare 8/8",
+      "limit": "Only multibuffer=True production FULL evidence; older failures retained, PIECEWISE deterministic protocol is not interchangeable"
+    },
+    {
+      "path": "host-proposals/GDN-qkv-norm/validation/l4-multibuffer-20261019/receipt.json",
+      "credit": "Accepted operator evidence: 6->1 kernels/call on both ranks, all-kernel denominators recorded",
+      "limit": "One paired truncated light window, not three repeats; A540/B570 calls, compare per-call not totals; no throughput claim"
+    },
+    {
+      "path": "tests/test_gdn_qkv_norm_patch.py",
+      "credit": "Exact source hash, reversible patch, env and unsupported-branch guards",
+      "limit": "Temporary-copy and CPU tests do not prove packaged carrier activation or live rollback"
+    }
+  ],
+  "gates": [
+    {
+      "id": "R1-carrier",
+      "status": "MISSING",
+      "material": "Dedicated bundle ID, descriptor, general_plugins loader, bounded verified host range, package version and wheel contents. Start import_only. Do not reuse gdn-merge-inproj identity.",
+      "acceptance": "Identify a supported host seam that preserves the accepted callsite and avoids double normalization. If unavailable, remain tier-2 blocked; no silent host source rewrite or whole-forward replacement.",
+      "next": "Read-only seam feasibility review before implementing loader; keep accepted kernel and guards unchanged."
+    },
+    {
+      "id": "R2-provenance",
+      "status": "PARTIAL",
+      "material": "Refresh proposal deployment metadata from actual runtime facts; record exact core/ascend/CANN/torch/torch_npu/triton builds, source hashes, plugin commit, wheel SHA256 and carrier env.",
+      "acceptance": "Reconcile proposal kind 'not deployed' with historical deployed validation; distinguish shipped wheel from runtime patch; exact host mismatch fails closed. Do not inherit unrelated bundle compatibility claims."
+    },
+    {
+      "id": "R3-default-off",
+      "status": "PARTIAL",
+      "material": "Fresh-process tests and isolated wheel smoke: disabled loader imports no Triton/kernel, alters no host functions or weights; native model smoke with bundle installed but disabled.",
+      "acceptance": "Unset/0 env unchanged; repeated load idempotent; only explicit 1 with norm env0 enables; unsupported shapes, prefill/mixed/speculative/PCP/dtype/stride/grad fall back without double norm. CPU guards already exist but bundle tests do not."
+    },
+    {
+      "id": "R4-numerics-performance",
+      "status": "ACCEPTED_OPERATOR_NOT_RELEASE_CARRIER",
+      "material": "Hash-bound existing L0/L3+compare/L4 evidence plus final carrier identity and compatibility review.",
+      "acceptance": "Reuse existing evidence only for identical arithmetic, guards, host callsite and environment. New integration requires targeted real carrier L3+compare and FULL replay; new L4 only for a documented changed-path or performance gap. No reopening rejected standalone-copy method.",
+      "limit": "docs/release.md includes latency/TPOT release checks; if an end-to-end release claim is requested, explicitly scope a separate screen. Never substitute throughput for operator evidence or silently redefine release criteria."
+    },
+    {
+      "id": "R5-manager-lifecycle",
+      "status": "MISSING",
+      "material": "Isolated candidate wheel install; list/inspect/check/status, enable and run --dry-run; env injection; real managed serve startup snapshot, both-rank activation and /health; disable and restart verification.",
+      "acceptance": "Before promotion import_only must reject enable. Promotion candidate must prove explicit enable reaches actual fusion, not merely descriptor discovery. Inject both required env values and reject conflicts rather than silently changing unrelated norm behavior."
+    },
+    {
+      "id": "R6-rollback",
+      "status": "PARTIAL",
+      "material": "Disable/unset env and restart/recapture instructions; uninstall/native-path smoke; exact-source forward/reverse patch proof where tier-2 deployment remains necessary.",
+      "acceptance": "Rollback verified against the release artifact; environment is read at import, so do not promise live toggling of captured graphs. Keep patch -R temporary-copy evidence distinct from runtime rollback."
+    },
+    {
+      "id": "R7-integrity-delivery",
+      "status": "BLOCKED",
+      "material": "Coverage result and attribution of pre-existing empty GDN acceptance card plus two changed archived evidence files; candidate snapshot; tests; staged-diff review; commit/delivery; separate publish authorization and remote hash verification.",
+      "acceptance": "Explain evidence integrity failures without rewriting archived evidence. Preserve unrelated dirty W1R and shared docs. Clean release artifact from committed source; no default-on, push, baseline pin or acceptance-rule change in this assessment."
+    }
+  ],
+  "execution_plan": {
+    "current_question": "Can the accepted host callsite be delivered through an allowed bundle seam without changing semantics?",
+    "next_action": "Read-only carrier/seam feasibility and source identity audit; record feasible interface or exact blocker, then scope implementation and release validation budget.",
+    "budget": {"npu_min": 0, "serve_starts": 0, "resamples": 0, "scope": "offline assessment only"},
+    "stop_condition": "No suitable seam, source mismatch, unresolved evidence integrity, L3 mismatch, or need to widen supported scope: keep default-off/import_only and record blocker; no new NPU window under this plan."
+  },
+  "initial_dirty_paths": [
+    "HOST_CONTRACT.md",
+    "docs/support-matrix.md",
+    "host-proposals/W1R-gmm-tuning-config/OWNERSHIP.md",
+    "host-proposals/W1R-gmm-tuning-config/proposal_meta.json",
+    "tests/test_w1r_gmm_tuning_patch.py"
+  ]
+}

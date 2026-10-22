@@ -1,0 +1,26 @@
+{
+  "source": "/root/extension-manager/src/vllm_hust_ext/process_supervisor.py",
+  "source_sha256": "bf0cbc8cbb83671e6c376b6f6cb375eeda480b7cdd39cde08a1144c1c17334bd",
+  "cases": [
+    {
+      "grace_s": 0.15,
+      "child_drain_s": 0.6,
+      "drain_completed": false,
+      "manager_exit": 130,
+      "elapsed_s": 0.16543110460042953,
+      "stderr": "",
+      "stdout": ""
+    },
+    {
+      "grace_s": 2.0,
+      "child_drain_s": 0.6,
+      "drain_completed": true,
+      "manager_exit": 130,
+      "elapsed_s": 0.6198761900886893,
+      "stderr": "",
+      "stdout": ""
+    }
+  ],
+  "scope": "Actual CPU supervisor behavior, not a model or historical runtime reproduction",
+  "finding": "Exit 130 alone does not distinguish completed drain from forced truncation; outer grace must exceed inner shutdown budget."
+}

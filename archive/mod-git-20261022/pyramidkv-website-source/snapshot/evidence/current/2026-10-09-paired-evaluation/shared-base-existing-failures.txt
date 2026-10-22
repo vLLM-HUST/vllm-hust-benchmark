@@ -1,0 +1,73 @@
+FF                                                                       [100%]
+=================================== FAILURES ===================================
+________________ test_grouped_topk_router_scaling_compatibility ________________
+
+    def test_grouped_topk_router_scaling_compatibility() -> None:
+        from vllm.model_executor.layers.fused_moe.config import RoutingMethodType
+>       from vllm_ascend.ops.fused_moe.router import grouped_topk_router
+E       ModuleNotFoundError: No module named 'vllm_ascend.ops.fused_moe.router'
+
+../pyramidkv-runtime/review-shared-base/tests/test_current_host_contract.py:76: ModuleNotFoundError
+____________ test_runner_generates_calibration_before_loading_model ____________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0xfffcc2df9310>
+
+    def test_runner_generates_calibration_before_loading_model(monkeypatch) -> None:
+        events = []
+    
+        class Runner:
+            def load_model(self):
+                events.append("load")
+    
+            def initialize_kv_cache(self, config):
+                return config
+    
+            def _update_states(self, output):
+                return output
+    
+            def _build_attention_metadata(self, *args, **kwargs):
+                return args, kwargs
+    
+            def sample_tokens(self, grammar):
+                return grammar
+    
+        import vllm_ascend_kvcompress.calibration as calibration
+    
+        monkeypatch.setattr(
+            calibration,
+            "ensure_calibration_for_runner",
+            lambda runner, selection: events.append("calibrate") or True,
+        )
+        _install_runner_hooks(Runner, object())
+    
+>       Runner().load_model()
+
+../pyramidkv-runtime/review-shared-base/tests/test_plugin.py:713: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../pyramidkv-runtime/review-shared-base/src/vllm_ascend_kvcompress/plugin.py:197: in load_model
+    install_grouped_topk_router_compat()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def install_grouped_topk_router_compat() -> bool:
+        """Preserve the Ascend router's scaling check on newer vLLM hosts.
+    
+        The Ascend router still passes ``routed_scaling_factor`` to vLLM's
+        classifier. Newer vLLM removed that argument, but the old classifier
+        returned ``Unspecified`` for a biased, ungrouped sigmoid router with a
+        non-unit scale. Keep that behavior without changing the host itself.
+        """
+        from vllm.model_executor.layers.fused_moe.config import RoutingMethodType
+>       from vllm_ascend.ops.fused_moe.router import grouped_topk_router
+E       ModuleNotFoundError: No module named 'vllm_ascend.ops.fused_moe.router'
+
+../pyramidkv-runtime/review-shared-base/src/vllm_ascend_kvcompress/host_compat.py:39: ModuleNotFoundError
+=============================== warnings summary ===============================
+../../../usr/local/python3.12.13/lib/python3.12/site-packages/torch/jit/_script.py:362: 14 warnings
+  /usr/local/python3.12.13/lib/python3.12/site-packages/torch/jit/_script.py:362: DeprecationWarning: `torch.jit.script_method` is deprecated. Please switch to `torch.compile` or `torch.export`.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED ../pyramidkv-runtime/review-shared-base/tests/test_current_host_contract.py::test_grouped_topk_router_scaling_compatibility
+FAILED ../pyramidkv-runtime/review-shared-base/tests/test_plugin.py::test_runner_generates_calibration_before_loading_model
+2 failed, 14 warnings in 20.09s

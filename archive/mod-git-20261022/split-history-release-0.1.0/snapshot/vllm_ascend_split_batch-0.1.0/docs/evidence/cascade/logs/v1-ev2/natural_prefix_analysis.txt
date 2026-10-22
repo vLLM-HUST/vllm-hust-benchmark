@@ -1,0 +1,80 @@
+############ Natural-region vs post-EOS divergence locus ############
+[eager B64 on(bf16) vs off] arms=64 diverged=21 natural_region=1 post_EOS_forced=20
+  arm  first_diff  first_EOS_in_OFF  locus
+    1          53             None  NATURAL
+    7          13                3  post-EOS
+    8          13                3  post-EOS
+    9          13                3  post-EOS
+   18          13                3  post-EOS
+   22           6                3  post-EOS
+   26           6                3  post-EOS
+   27          83                3  post-EOS
+   28           6                3  post-EOS
+   29          54                3  post-EOS
+   30          56                3  post-EOS
+   36           7                3  post-EOS
+   37          55                3  post-EOS
+   47          13                3  post-EOS
+   53          15                4  post-EOS
+   56          15                4  post-EOS
+   57          15                4  post-EOS
+   58          15                4  post-EOS
+   59          15                4  post-EOS
+   62           8                4  post-EOS
+   63          62                4  post-EOS
+  natural-prefix exact match: 63/64
+
+[eager B64 on_fp32 vs off] arms=64 diverged=14 natural_region=1 post_EOS_forced=13
+  arm  first_diff  first_EOS_in_OFF  locus
+    1          53             None  NATURAL
+    8          13                3  post-EOS
+    9          13                3  post-EOS
+   13          47                3  post-EOS
+   21          54                3  post-EOS
+   22           6                3  post-EOS
+   27          12                3  post-EOS
+   29          54                3  post-EOS
+   30          56                3  post-EOS
+   37          55                3  post-EOS
+   38          55                3  post-EOS
+   40          62                3  post-EOS
+   56          15                4  post-EOS
+   63          15                4  post-EOS
+  natural-prefix exact match: 63/64
+
+[SHIM graph B64 on vs off] arms=64 diverged=22 natural_region=1 post_EOS_forced=21
+  arm  first_diff  first_EOS_in_OFF  locus
+    1          53             None  NATURAL
+    7          13                3  post-EOS
+    8          13                3  post-EOS
+    9          13                3  post-EOS
+   18          13                3  post-EOS
+   22           6                3  post-EOS
+   26           6                3  post-EOS
+   27          83                3  post-EOS
+   28           6                3  post-EOS
+   29          54                3  post-EOS
+   30          56                3  post-EOS
+   36           7                3  post-EOS
+   38          55                3  post-EOS
+   42          55                3  post-EOS
+   47          13                3  post-EOS
+   53          15                4  post-EOS
+   56          15                4  post-EOS
+   57          15                4  post-EOS
+   58          15                4  post-EOS
+   59          15                4  post-EOS
+   62           8                4  post-EOS
+   63          62                4  post-EOS
+  natural-prefix exact match: 63/64
+
+[eager B32 on vs off] arms=32 diverged=7 natural_region=1 post_EOS_forced=6
+  arm  first_diff  first_EOS_in_OFF  locus
+    1         103             None  NATURAL
+   21          54                3  post-EOS
+   22          62                3  post-EOS
+   26          72                3  post-EOS
+   27          12                3  post-EOS
+   29          54                3  post-EOS
+   30          56                3  post-EOS
+  natural-prefix exact match: 31/32

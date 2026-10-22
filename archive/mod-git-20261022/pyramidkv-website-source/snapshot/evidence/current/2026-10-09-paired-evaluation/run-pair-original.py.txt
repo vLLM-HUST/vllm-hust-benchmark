@@ -1,0 +1,55 @@
+import hashlib,json,os,re,signal,subprocess,time,urllib.request
+from pathlib import Path
+root=Path('/root/workspace/pyramidkv-runtime/evaluation/aligned')
+root.mkdir(exist_ok=False)
+parent=root.parent
+client=urllib.request.build_opener(urllib.request.ProxyHandler({}))
+venv='/root/workspace/pyramidkv-runtime/venv/bin/python'
+config=parent/'pyramidkv-aligned.json'
+plan=parent/'plan-extended'
+def stop_current(label):
+    pid=int(Path('/root/workspace/pyramidkv-runtime/server.pid').read_text())
+    cmd=Path(f'/proc/{pid}/cmdline').read_bytes()
+    assert b'vllm.entrypoints.cli.main' in cmd and b'/root/workspace/Qwen3.5-35B-A3B' in cmd
+    os.kill(pid,signal.SIGTERM)
+    for _ in range(90):
+        status=subprocess.check_output(['npu-smi','info'],text=True)
+        hbm=[int(x) for x in re.findall(r'(\d+)\s*/\s*65536',status)]
+        if 'VLLMWorker' not in status and hbm and max(hbm)<5000:
+            (root/f'{label}-npu-idle.txt').write_text(status)
+            return
+        time.sleep(1)
+    raise RuntimeError('Old workers did not fully release HBM')
+stop_current('before')
+for arm,enabled in [('baseline','0'),('pyramidkv','1')]:
+    env=dict(os.environ,PYRAMIDKV_ENABLED=enabled,PYRAMIDKV_CONFIG=str(config),VLLMHUST_EXT_ENABLED_BUNDLES='')
+    server_log=(root/f'{arm}-server.log').open('w')
+    server=subprocess.Popen(['bash','/root/workspace/pyramidkv-runtime/serve.sh'],env=env,stdout=server_log,stderr=subprocess.STDOUT,start_new_session=True)
+    print('Started',arm,server.pid,flush=True)
+    for _ in range(180):
+        if server.poll() is not None: raise RuntimeError(f'{arm} server exited: {server.returncode}')
+        try:
+            with client.open('http://127.0.0.1:8000/health',timeout=2) as response:
+                if response.status==200: break
+        except Exception: pass
+        time.sleep(5)
+    else: raise RuntimeError(f'{arm} startup timed out')
+    procenv=dict(s.split('=',1) for s in Path(f'/proc/{server.pid}/environ').read_bytes().decode().split('\0') if '=' in s)
+    keys=['ASCEND_RT_VISIBLE_DEVICES','VLLM_ASCEND_KVCOMPRESS_ENABLED','VLLMHUST_EXT_ENABLED_BUNDLES','VLLM_VERSION','VLLM_PLUGINS','VLLM_ASCEND_KVCOMPRESS_CONFIG']
+    record={'command':Path(f'/proc/{server.pid}/cmdline').read_bytes().decode().split('\0')[:-1],'environment':{k:procenv.get(k) for k in keys},'source_commit':subprocess.check_output(['git','-C','/root/workspace/vllm-ascend-pyramidkv-hust','rev-parse','HEAD'],text=True).strip(),'adapter_commit':subprocess.check_output(['git','-C','/root/workspace/pyramidkv-runtime/src/kvcompress','rev-parse','HEAD'],text=True).strip(),'method_config_sha256':hashlib.sha256(config.read_bytes()).hexdigest()}
+    assert record['environment']['VLLM_ASCEND_KVCOMPRESS_ENABLED']==enabled
+    assert not record['environment']['VLLMHUST_EXT_ENABLED_BUNDLES']
+    if arm=='pyramidkv':
+        previous=json.loads((root/'baseline-launch.json').read_text())
+        assert record['command']==previous['command']
+        assert record['source_commit']==previous['source_commit']
+        assert record['adapter_commit']==previous['adapter_commit']
+    (root/f'{arm}-launch.json').write_text(json.dumps(record,indent=2)+'\n')
+    print(arm,'healthy; start fixed 409-case plan',flush=True)
+    with (root/f'{arm}-client.log').open('w') as output:
+        subprocess.run([venv,'/root/workspace/vllm-ascend-pyramidkv-hust/scripts/qwen35/evaluate.py','run','--arm',arm,'--plan',str(plan),'--output',str(root/arm)],stdout=output,stderr=subprocess.STDOUT,check=True)
+    summary=json.loads((root/arm/'summary.json').read_text())
+    assert summary['requests']==409 and summary['failures']==0
+    print(arm,'complete',summary['quality_f1'],flush=True)
+    if arm=='baseline': stop_current('between-arms')
+print('Corrected pair completed; PyramidKV service remains running.',flush=True)

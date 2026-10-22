@@ -1,0 +1,72 @@
+{
+  "schema": "split-probe-search-receipt/v1",
+  "date": "2026-10-22",
+  "previous_audit": {
+    "commit": "6864562eb2feb741a904ca18822cc2481983e039",
+    "path": "archive/mod-git-20261022/split-probe-recovery/local-reference-audit.json",
+    "sha256": "0501afbd761229778ca66efc986cf68164262908860f39d34858bfad1ae60554"
+  },
+  "target_occurrences": 33,
+  "target_unique_references": 30,
+  "target_declared_sha256_count": 8,
+  "newly_recovered_occurrences": 0,
+  "remaining_occurrences": 33,
+  "admission": "No recovered original, no reference replacement, no new qualification. Absence in this bounded search is not proof of permanent loss.",
+  "git_search": {
+    "method": "Enumerate all locally present Git objects, including unreachable objects, with cat-file --batch-all-objects; SHA256 blob bytes up to 20 MiB. Search fetched refs/reflogs for target basenames in the non-promisor repositories.",
+    "split_remote_refs": "Fetched all advertised heads, tags and pull-request head refs before the final Split-Batch scan.",
+    "repositories": [
+      {"repository": "vLLM-HUST/vllm-ascend-split-batch-hust", "copy": "current full clone", "objects": 2805, "hashed_blobs": 1426, "oversize_blobs_skipped": 0},
+      {"repository": "vLLM-HUST/vllm-ascend-split-batch-hust", "copy": "older campaign checkout", "objects": 522, "hashed_blobs": 458, "oversize_blobs_skipped": 0},
+      {"repository": "vLLM-HUST/vllm-hust-dev-hub", "copy": "local full clone", "objects": 3933, "hashed_blobs": 1795, "oversize_blobs_skipped": 1},
+      {"repository": "vLLM-HUST/vllm-hust-benchmark", "copy": "local promisor object store", "objects": 16589, "hashed_blobs": 7846, "oversize_blobs_skipped": 0}
+    ],
+    "sha256_matches": [],
+    "rejected_basename_matches": [
+      "docs/evidence/priority-reset-20261021/coverage.log",
+      "host-proposals/comm-mechanism/validation/20261019/profiler-stop-offline-20261019T080222Z/coverage.log"
+    ],
+    "limitations": "Not an exhaustive scan of absent promisor objects, remote deleted refs or other machines. Matching a generic basename is not original-path identity. Object counts are observations, not unique contents across clones."
+  },
+  "workspace_search": {
+    "method": "Check original locations; search target basenames and hash non-symlink .log files up to 20 MiB in accessible root/workspace/admin-workspace/mount trees.",
+    "hashed_log_occurrences": 32276,
+    "oversize_logs_skipped": 26,
+    "sha256_matches": [],
+    "read_errors": 0,
+    "limitations": "Excluded Git stores, caches, virtual environments, dependency trees and private agent/configuration directories. Does not cover every container layer, offline volume, renamed non-log file or symlink target. Repeated working copies are counted separately.",
+    "rejected_basename_matches": "Generic assessment.json files belong to Qwen3.5 B0 XLSX cross-validation. Existing GDN multibuffer coverage.log belongs to the separate earlier validation, not the missing registration run."
+  },
+  "release_search": {
+    "method": "Read gzip tar members without extracting or executing them; inspect every member name and SHA256 every regular member, including large files. Verify archive SHA256 against GitHub asset metadata.",
+    "hashed_members": 8020,
+    "sha256_matches": [],
+    "target_basename_matches": [],
+    "assets": [
+      {"repository": "vLLM-HUST/vllm-hust-benchmark", "tag": "evidence-devhub-20261020-v1", "name": "devhub-evidence-20261020.tar.gz", "bytes": 756139, "sha256": "272075416b9b0006a0a9697d68327a2be2e370a25c158609cbf543dafc7398b8", "hashed_members": 343},
+      {"repository": "vLLM-HUST/vllm-hust-benchmark", "tag": "evidence-frontier-capsules-20261021-v1", "name": "frontier-recovered-capsules-20261021.tar.gz", "bytes": 11393138, "sha256": "3cdcaec49a243a2a8ed2049362256daad683d6dc1c20c3c735677c82a7f1a4bb", "hashed_members": 18},
+      {"repository": "vLLM-HUST/vllm-hust-benchmark", "tag": "evidence-frontier-recovered-20261021-v1", "name": "frontier-recovered-receipts-20261021.tar.gz", "bytes": 66619397, "sha256": "10d00f015d98e7a73f110bad8f5817f9c13163fcd1bbde3aa82c7a1aff532ab9", "hashed_members": 4630},
+      {"repository": "vLLM-HUST/vllm-hust-benchmark", "tag": "evidence-terminal-history-20261021-v1", "name": "terminal-history.tar.gz", "bytes": 732551165, "sha256": "d2bf607a922f552922ad718a71ebe912b301f734a1d6290f18d3d52fa4cf53fd", "hashed_members": 1196},
+      {"repository": "vLLM-HUST/vllm-ascend-split-batch-hust", "tag": "v0.1.0", "name": "vllm_ascend_split_batch-0.1.0.tar.gz", "bytes": 1262939, "sha256": "4d309887cac9b0b99da72bcf13f833504f86d99201c9c499a21ae030738ab9b3", "hashed_members": 452},
+      {"repository": "vLLM-HUST/vllm-ascend-split-batch-hust", "tag": "v0.1.1", "name": "vllm_ascend_split_batch-0.1.1.tar.gz", "bytes": 1265895, "sha256": "7e364f13c59d4fa0e6e36305d6e44821e9eee4080e219b14f9e107120431acd3", "hashed_members": 452},
+      {"repository": "vLLM-HUST/vllm-ascend-split-batch-hust", "tag": "v0.1.2", "name": "vllm_ascend_split_batch-0.1.2.tar.gz", "bytes": 1303626, "sha256": "418c84cc8419f6ea0261295b208fdbb350f06211c07724d7864f14cec735fd6e", "hashed_members": 464},
+      {"repository": "vLLM-HUST/vllm-ascend-split-batch-hust", "tag": "v0.1.3", "name": "vllm_ascend_split_batch-0.1.3.tar.gz", "bytes": 1319978, "sha256": "d3f3a55e69c84a25d62eb29ddd98ae4e616c54f4bd622a011e4641cad007ab90", "hashed_members": 465}
+    ],
+    "limitations": "Selected relevant public assets, not every organizational Release. Nested archives were not recursively unpacked. Directory references require a complete provenance-backed member inventory, not a partial filename match."
+  },
+  "followup_checks": {
+    "initial_exclusions_checked": "The size exclusions above describe the initial bounded pass. Subsequently all 26 oversized logs and the one oversized dev-hub blob were hashed; none matched the eight known missing digests.",
+    "additional_large_logs": 26,
+    "additional_large_log_bytes": 770635422,
+    "large_git_blob_oid": "e95a2b43c29cb56f4fa7d90f89075a65b2f09718",
+    "large_git_blob_bytes": 49464025,
+    "large_git_blob_sha256": "8fc14d341330324d228d3a5f3caa7d37d3bf684088ca234f8d1b59f93a271647",
+    "sha256_matches": [],
+    "archive_original_path_mentions": [],
+    "archive_text_method": "Stream every regular member of all eight archives and search original absolute paths in UTF-8 and JSON ASCII-escaped forms, retaining overlap across chunks. No original-path mentions found.",
+    "git_provenance_method": "Inspect JSON source/path/original_path plus SHA256 mappings in the four local Git stores. No mapping had matching original bytes; the previously declared missing digests remain unresolved.",
+    "recoverable_git_maps": 0
+  },
+  "next_recovery_requirement": "Original probe directory/backup, original profiler window directories, or a provenance mapping and matching bytes from another accessible source. Do not reconstruct logs from summaries or rerun experiments as historical replacements.",
+  "hardware_and_review_gates": "Unchanged; no device execution or approval-label changes."
+}

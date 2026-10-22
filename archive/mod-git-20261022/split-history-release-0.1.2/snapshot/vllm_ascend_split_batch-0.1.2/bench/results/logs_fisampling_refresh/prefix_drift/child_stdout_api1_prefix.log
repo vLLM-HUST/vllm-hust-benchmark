@@ -1,0 +1,5 @@
+[leg api1_prefix] begin mode=on port=8357 pid=172249
+[leg api1_prefix] server: /opt/miniconda3/envs/hust/bin/vllm serve /data/shared_models/Qwen--Qwen2.5-Coder-14B-Instruct --served-model-name qwen14b --generation-config vllm --gpu-memory-utilization 0.85 --compilation-config {"cudagraph_mode":"FULL"} --port 8357 --max-model-len 4096 --max-num-seqs 512
+[leg api1_prefix] server ready in 155.0s
+[leg api1_prefix] ACTIVE lines = 1
+@@FISAMP_LEG_JSON@@{"kind": "api1", "leg": "prefix", "mode": "on", "port": 8357, "ok": true, "ready_s": 155.0, "client_wall_s": 119.8, "client_rc": 0, "metrics": {"median_tpot_ms": 75.14369370707986, "mean_tpot_ms": 72.32129555329675, "p95_tpot_ms": 75.86816632754956, "p99_tpot_ms": 77.49830207659625, "median_ttft_ms": 1018.8081692904234, "output_throughput": 805.2874893590587, "completed": 256, "failed": 0, "num_prompts": 256, "max_concurrency": 64, "duration": 81.38211615849286}, "port_free_after": true, "total_wall_s": 276.5}

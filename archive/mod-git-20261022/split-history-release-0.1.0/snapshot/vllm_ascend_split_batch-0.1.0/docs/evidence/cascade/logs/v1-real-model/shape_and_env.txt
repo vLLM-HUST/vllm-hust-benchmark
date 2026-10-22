@@ -1,0 +1,21 @@
+=== prompt shape (verbatim ev2_run_real.py construction, EV2_SENT=420) ===
+base tokens            : 4207
+full prompt tokens     : 4224
+model                  : /data/shared_models/Qwen--Qwen2.5-14B-Instruct (48 layers, hidden 5120, 40 heads, 8 kv heads, bf16)
+cascade split (from logs): shared_len=4096 shared_blocks=32 heads=40 head_size=128  (MIN_PREFIX=4096, MIN_REQS=2)
+historical shape label : shared~4356tok/aligned 4608 (RESULTS.md); measured here 4224 split @4096
+
+=== per-leg token dump stats (raw_dumps/ev2_<mode>_<tag>.json) ===
+tag             mode      arms    sum    avg  min  max arms_eos
+off_eB64_off                64   6543  102.2    7  128       16
+off_eB64_off2               64   6543  102.2    7  128       16
+off_gB32_off                32   3636  113.6    7  128        4
+off_gB64_off                64   6487  101.4    7  128       16
+on_eB64_on                  64   6368   99.5    7  128       17
+on_gB32_on                  32   3636  113.6    7  128        4
+on_gB64_on                  64   6368   99.5    7  128       17
+on_run2_gB64_on_run2            64   6368   99.5    7  128       17
+
+=== card 7 HBM before/after ===
+card7_before.txt -> HBM Usage Rate(%)              : 5
+card7_after.txt -> HBM Usage Rate(%)              : 5

@@ -1,0 +1,87 @@
+{
+  "sources": {
+    "core": "d0f22d2bda562156e4dbf433ce645e1769b4f804",
+    "ascend": "03766ac696fde5ab1980d80ca0b8543d3580c989",
+    "adapter": "19f322130e1b3841da953b1b421bcf3259e9b8dc",
+    "pyramidkv": "01379d29a3f3ce938be4271760cb7ac0e61ef5d4",
+    "worker": "1265f52680a9530cfcf77a5de13a6bf7ef30dc2c",
+    "longbench": "2e00731f8d0bff23dc4325161044d0ed8af94c1e",
+    "manager": "98903e416bdb593186b8245fd95180dafde995b9",
+    "shared_pr_head": "2a0dc155d5a6aced292808f852892d4383878f7a"
+  },
+  "python": "3.12.13",
+  "machine": "aarch64",
+  "model_revision": "59d61f3ce65a6d9863b86d2e96597125219dc754",
+  "protocol_source": {
+    "commit": "5553b95afda64623b115f4be35a433293b3b543c",
+    "official_metric_comparison_cases": 1000,
+    "passed": true,
+    "corrective_commit": "01379d29a3f3ce938be4271760cb7ac0e61ef5d4"
+  },
+  "dataset_source": {
+    "dataset": "THUDM/LongBench",
+    "revision": "5e628be450b7e67fb7ae6e201bd6d8f7056f7672",
+    "url": "https://huggingface.co/datasets/THUDM/LongBench/resolve/5e628be450b7e67fb7ae6e201bd6d8f7056f7672/data.zip",
+    "sha256": "cb45b11a4133c6bc1d6a44b0f8e701335ff1e543195db1103472e575857f7f64",
+    "bytes": 113932529
+  },
+  "method_config": {
+    "schema_version": 1,
+    "provider": "ascend_kvcompress",
+    "method": "pyramidkv",
+    "method_config": {
+      "max_capacity_prompt": 1368,
+      "min_compression_prompt_tokens": 4096,
+      "window_size": 8,
+      "kernel_size": 7,
+      "pooling": "maxpool",
+      "beta": 2,
+      "kv_cache_granularity": "kv_head",
+      "gqa_score_aggregation": "mean",
+      "merge": null
+    }
+  },
+  "notes": [
+    "Both final arms use identical saved prompt IDs, host arguments, adapter commit and provider sources. Baseline starts first; server and device allocations are released between arms.",
+    "Provider Python sources are unchanged from b0cd3fd73635b97b7c7372219e393e366df7c8d0. Evaluation source is 01379d29a3f3ce938be4271760cb7ac0e61ef5d4.",
+    "The adapter validation branch applies the FULL-graph per-layer cache-write fix and existing Manifest 0.3 migration to the older host-compatible revision; PR #19 carries the runtime fix against shared master.",
+    "The 1368/beta-2 profile and 150-case holdout gate were fixed before inspecting holdout outputs. Original 512/beta-20 failure and development diagnostics are retained separately.",
+    "Evidence directory date and server timestamps are UTC 2026-10-09.",
+    "Final candidate startup attempt 1 failed before any test request due to pinned-host allocation error near the cgroup limit; attempt 2 uses startup-only POSIX_FADV_DONTNEED on local model shards. The full failed attempt and retry are retained."
+  ],
+  "files_sha256": {
+    "/root/workspace/pyramidkv-runtime/env.sh": "a91bf5857a0d8ee83d87208167a599e7ba03e50fa4945b5dc5237ca964f44cb6",
+    "/root/workspace/pyramidkv-runtime/serve.sh": "6111c7665fc0b164ad2390858a6a27e8f35df24fef1c6ee01b506209adeaa297",
+    "/root/workspace/pyramidkv-runtime/evaluation/pyramidkv-aligned.json": "0c617f9d817cec168b4abd6fadab9300bdf491168810539533c5f1049efd7846",
+    "/root/workspace/pyramidkv-runtime/evaluation/plan-extended/cases.json": "91eb73537ac33be26e967d0c89daab52a2f43c9a6f4ce8d79b66e2a07ac08a66",
+    "/root/workspace/pyramidkv-runtime/evaluation/plan-extended/groups.json": "9b29a51b48f73bc6d5509f1f7500dd065714f71356576279c4f598222aa77ef7",
+    "/root/workspace/Qwen3.5-35B-A3B/config.json": "5e4d7f74fec2f360eb9cfbfcd6ec0c4c76e684d3a11caaed259d9fd9bfbc7944",
+    "/root/workspace/Qwen3.5-35B-A3B/model.safetensors.index.json": "d8d0b7ca4e61ae107e3e87a3ff21136b3ac7c789e64bb24267227ca804e04205",
+    "/root/workspace/Qwen3.5-35B-A3B/tokenizer.json": "5f9e4d4901a92b997e463c1f46055088b6cca5ca61a6522d1b9f64c4bb81cb42"
+  },
+  "packages": {
+    "vllm": "0.23.0+empty",
+    "vllm-ascend": "0.23.0.post1",
+    "torch": "2.10.0+cpu",
+    "torch-npu": "2.10.0.post4",
+    "transformers": "5.14.1",
+    "triton-ascend": "3.2.2",
+    "vllm-ascend-pyramidkv-hust": "0.2.0.dev0",
+    "vllm-ascend-kvcompress-hust": "0.9.0",
+    "vllm-hust-ext": "0.2.0.dev0"
+  },
+  "hardware": {
+    "model": "Ascend 910B2",
+    "physical_devices": [
+      6,
+      7
+    ],
+    "logical_devices": [
+      0,
+      1
+    ],
+    "hbm_mib_per_device": 65536,
+    "cann": "9.1.0"
+  },
+  "container_memory_limit_bytes": 68719476736
+}

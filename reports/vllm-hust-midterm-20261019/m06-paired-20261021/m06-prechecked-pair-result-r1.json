@@ -1,0 +1,80 @@
+{
+  "schema": "m06-prechecked-lifecycle-result/v1",
+  "arms": {
+    "b1": {
+      "requests": 200,
+      "failed": 0,
+      "output_tokens": 51200,
+      "lifecycle_s": 1213.2931800354272,
+      "lifecycle_wall_s": 1213.2931818962097,
+      "pre_client_s": 1018.4401333900169,
+      "client_s": 172.1361995153129,
+      "post_client_release_s": 22.71684713009745,
+      "burst_s": 83.03267413470894,
+      "output_tok_per_s": 616.6247267543755,
+      "mean_ttft_s": 44.1949915160425,
+      "mean_tpot_s": 0.028274065039431057,
+      "p99_tpot_s": 0.07151712569608992,
+      "p99_sample_count": 200,
+      "p99_nearest_rank": 198,
+      "lifecycle_reservation_card_s_per_token": 0.09478852969026776,
+      "lifecycle_service_card_s_per_token": 0.04739426484513388,
+      "request_reservation_card_s_per_token": 0.006486927666774136,
+      "shutdown": {
+        "manager_signals": [
+          {
+            "event": "launch_leader",
+            "pid": 1013773,
+            "signal": 2
+          }
+        ],
+        "manager_sigkill": false,
+        "engine_timeout_force_kill": false,
+        "engine_dead_error_logged": true,
+        "api_shutdown_complete": true
+      }
+    },
+    "b0": {
+      "requests": 200,
+      "failed": 0,
+      "output_tokens": 51200,
+      "lifecycle_s": 772.156840546988,
+      "lifecycle_wall_s": 772.1568417549133,
+      "pre_client_s": 581.6676919311285,
+      "client_s": 173.75186776183546,
+      "post_client_release_s": 16.737280854023993,
+      "burst_s": 107.27935517393053,
+      "output_tok_per_s": 477.2586479196314,
+      "mean_ttft_s": 49.23096104586031,
+      "mean_tpot_s": 0.029584111599050753,
+      "p99_tpot_s": 0.03229050581507823,
+      "p99_sample_count": 200,
+      "p99_nearest_rank": 198,
+      "lifecycle_reservation_card_s_per_token": 0.06032475316773343,
+      "lifecycle_service_card_s_per_token": 0.030162376583866717,
+      "request_reservation_card_s_per_token": 0.008381199622963322,
+      "shutdown": {
+        "manager_signals": [],
+        "manager_sigkill": false,
+        "engine_timeout_force_kill": false,
+        "engine_dead_error_logged": true,
+        "api_shutdown_complete": true
+      }
+    }
+  },
+  "lifecycle_cost_reduction_percent": -57.13040619778009,
+  "m06_lifecycle_gate_pass": false,
+  "request_cost_reduction_percent": 22.601441815073166,
+  "throughput_change_percent": 29.20137318459084,
+  "mean_ttft_reduction_percent": 10.229273251697514,
+  "mean_tpot_reduction_percent": 4.428209903256752,
+  "order": [
+    "b1",
+    "b0"
+  ],
+  "repetitions": 1,
+  "quality_scored": false,
+  "original_prechecked_protocol_confirmation": true,
+  "precheck_requests_per_arm": 1,
+  "limitations": "Output256 performance only; initial client precheck included in lifecycle time but not output denominator; equal-rate resource cost, not currency expense; no invented amortization or statistical certainty."
+}

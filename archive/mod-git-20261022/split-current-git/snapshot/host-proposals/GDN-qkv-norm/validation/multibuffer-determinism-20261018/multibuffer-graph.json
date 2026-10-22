@@ -1,0 +1,44 @@
+{
+  "schema": "gdn-qkv-norm-l0.v1",
+  "status": "ok",
+  "candidate": "gdn-unpack-qk-l2norm-fusion",
+  "output_storage": "shared",
+  "shape": {
+    "T": 16,
+    "row_stride": 4096,
+    "q": 1024,
+    "k": 1024,
+    "v": 2048,
+    "head_dim": 128,
+    "phase": "pure decode"
+  },
+  "weights": {
+    "model": "Qwen3.5-35B-A3B",
+    "precision": "bf16",
+    "format": "ND",
+    "tp": 2,
+    "input": "seeded synthetic"
+  },
+  "shape_source": "/root/包体恢复/records/probes/20261018T112829Z_gdn_qkv_unpack_hotspot_recheck.json",
+  "callsite": "/vllm-workspace/vllm-ascend/vllm_ascend/ops/gdn.py:480,619-620 pure non-spec decode",
+  "scope": "graph replay correctness only; no timing",
+  "timing_contract": "host enqueue and event overlap; event includes host supply gaps, never subtract them for kernel time",
+  "iters": 40,
+  "repeats": 3,
+  "warmup": 3,
+  "correctness": [],
+  "timings": {},
+  "traces": {},
+  "reference": {
+    "path": "/vllm-workspace/vllm/vllm/third_party/flash_linear_attention/ops/l2norm.py",
+    "sha256": "520f4513ef4fc97e6b88dc07877cca8e29da0d34e44673fe989e3af002d86381"
+  },
+  "graph_check": {
+    "status": "PASS",
+    "replays": 8,
+    "changing_input": true,
+    "stable_output_addresses": true,
+    "scope": "isolated kernel graph only"
+  },
+  "wall_s": 2.706119667738676
+}

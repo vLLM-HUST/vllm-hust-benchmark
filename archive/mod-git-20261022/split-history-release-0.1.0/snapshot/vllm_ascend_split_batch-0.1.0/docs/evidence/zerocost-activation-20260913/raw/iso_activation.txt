@@ -1,0 +1,5 @@
+## isolation leg (plain vllm serve + the two zerocost envs, cascade gate off)
+9:INFO 09-13 07:35:04 [cascade_plugin.py:147] cascade plugin loaded (gate=0, graph_gate=0, kernel_wheel=ok)
+39:(EngineCore pid=166875) INFO 09-13 07:36:03 [cascade_plugin.py:147] cascade plugin loaded (gate=0, graph_gate=0, kernel_wheel=ok)
+40:(EngineCore pid=166875) zero-cost wiring ① is ACTIVE (VLLM_HUST_FI_PREFILL_OUT=1): the eager prefill FIA leg now writes into the caller's output buffer through the op's .out overload and the two redundant TensorMove copies per layer are guarded by an exact identity predicate.
+41:(EngineCore pid=166875) zero-cost wiring ② is ACTIVE (VLLM_HUST_SKIP_COS_SIN=1): update_cos_sin now records positions only and get_cos_and_sin_slice() materialises the rope buffers on demand.

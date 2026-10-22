@@ -1,0 +1,65 @@
+{
+  "activation": {
+    "additional_config": [],
+    "entry_points": [],
+    "environment": [
+      [
+        "VLLM_HUST_FI_PREFILL_OUT",
+        "1"
+      ],
+      [
+        "VLLM_HUST_SKIP_COS_SIN",
+        "1"
+      ]
+    ]
+  },
+  "activation_blocker": "extension is descriptor-only and cannot be enabled (implementation status: import_only)",
+  "activation_ready": false,
+  "bundle_id": "org.vllm-hust.zerocost-wiring",
+  "bundle_version": "0.1.0.dev0",
+  "components": [
+    {
+      "component_id": "zerocost-host-wiring",
+      "contracts": [
+        "vllm.general_plugins"
+      ],
+      "execution_planes": [
+        "worker",
+        "device"
+      ],
+      "implementation_ref": "vllm_ascend_split_batch.zerocost_wiring:load",
+      "isolation": "trusted_in_process",
+      "permissions": [
+        "device_access"
+      ]
+    }
+  ],
+  "distribution": "vllm-ascend-split-batch",
+  "distribution_version": "0.1.0.dev0",
+  "enabled": false,
+  "experimental": true,
+  "host": {
+    "api_range": null,
+    "name": "vllm-ascend",
+    "provider": "vllm",
+    "version_range": "==0.25.1rc2.dev125+hust.20260903.4.g74f0c0a27"
+  },
+  "implementation": [
+    {
+      "module": "vllm_ascend_split_batch.zerocost_wiring",
+      "object": "load",
+      "status": "import_only",
+      "type": "python_module"
+    }
+  ],
+  "kind": "in_process_plugin",
+  "lifecycle_owner": "vllm",
+  "manifest_path": "/vllm-workspace/vllm-ascend-split-batch-hust/src/vllm_ascend_split_batch/zerocost/vllm-hust-extension-v0.2.json",
+  "protocols": [],
+  "requires_services": [],
+  "runtime": {
+    "isolation": "trusted_in_process",
+    "process_scope": "vllm-processes",
+    "type": "python"
+  }
+}

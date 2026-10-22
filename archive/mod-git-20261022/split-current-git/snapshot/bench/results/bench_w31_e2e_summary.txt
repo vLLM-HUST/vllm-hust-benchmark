@@ -1,0 +1,39 @@
+W3.1 fi_gelu e2e A/B -- mechanical summary
+preregistration: bench/results/EXPECTATIONS-w31-e2e.md
+
+per-leg
+leg	mode	wall_s	ready_s	import_s	engine_init_s	out_tokens	rc	ok	ACTIVE	fi_gelu
+off_a	off	7.151	143.5	19.6	123.9	8192	0	True	0	0
+on_a	on	7.093	174.5	20.4	154.1	8192	0	True	1	1
+off_b	off	7.013	144.0	19.8	124.3	8192	0	True	0	0
+on_b	on	7.012	144.1	19.8	124.3	8192	0	True	1	1
+off_c	off	7.071	129.0	20.8	108.2	8192	0	True	0	0
+on_c	on	7.143	116.7	20.3	96.4	8192	0	True	1	1
+
+summary
+n_legs = 6
+n_ok = 6
+rule = Δmedian = (median_off - median_on) / median_off; spread = max - min within an arm (normalized by that arm's median; the pre-registration writes 'spread = max-min' -- reported in both fractional and absolute-seconds form, the fractional form is the primary application of the rule, matching the W2b percent口径)
+off_walls_s = [7.013, 7.071, 7.151]
+off_median_s = 7.071
+off_min_s = 7.013
+off_max_s = 7.151
+off_spread_s = 0.138
+off_spread_frac = 0.01952
+on_walls_s = [7.012, 7.093, 7.143]
+on_median_s = 7.093
+on_min_s = 7.012
+on_max_s = 7.143
+on_spread_s = 0.131
+on_spread_frac = 0.01847
+delta_median = -0.00311
+delta_median_pct = -0.311
+delta_median_abs_s = -0.022
+noise_band_frac = 0.01952
+noise_band_s = 0.138
+within_noise_band_frac = True
+within_noise_band_abs_s = True
+verdict = NOISE-BAND / NOT DECIDABLE (|Δmedian| < max(spread_off, spread_on), normalized spread)
+projection = {'projected_abs_delta_pct': [0.2, 0.6], 'source': 'EXPECTATIONS-w31-e2e.md (graph replay 0.50ms/step @ TPOT~112ms)', 'consistency': 'within projected band (0.2-0.6%)'}
+
+note: offline LLM fixture (EXPECTATIONS) binds no HTTP port; the 8341+ slot per leg is a bookkeeping guard checked free before/after.

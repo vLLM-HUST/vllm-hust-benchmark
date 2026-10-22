@@ -1,0 +1,52 @@
+{
+  "schema": "m06-shutdown-boundary/v1",
+  "archives": {
+    "aligned-mmlu-common.tar.gz": "a3b87b3791879a1a73b9487a7d449bd728fba5c43d71305799e520c679fc3fb9",
+    "aligned-mmlu-b0.tar.gz": "f935334dd37f9fb1667b38da16c4192dd1f2c26fc98dd564258e43eef8193604",
+    "aligned-mmlu-b1.tar.gz": "ef7474dcb421e9c64a8d67b68394470f2e03dbf38197af23b424dfe8905d0de4"
+  },
+  "arms": {
+    "b0": {
+      "run_id": "mmlu-b0-r2",
+      "explicit_shutdown_timeout_s": null,
+      "shutdown_log_evidence": [
+        "(APIServer pid=2848561) INFO 10-19 10:38:47 [core_client.py:744] [shutdown] MPClient: start timeout=0s",
+        "(APIServer pid=2848561) WARNING 10-19 10:38:47 [utils.py:645] [shutdown] Process manager: force killing remaining process EngineCore pid 2850136"
+      ],
+      "pre_client_s": 328.9590015411377,
+      "client_s": 150.0210532657802,
+      "post_client_s": 4.741584300994873,
+      "lifecycle_s": 483.721638917923,
+      "request_burst_s": 113.20096322055906,
+      "output_tokens": 51200,
+      "reserved_cards": 4,
+      "lifecycle_card_seconds_per_token": 0.037790753040462734,
+      "request_card_seconds_per_token": 0.008843825251606176
+    },
+    "b1": {
+      "run_id": "mmlu-b1-r2",
+      "explicit_shutdown_timeout_s": 60,
+      "shutdown_log_evidence": [
+        "(APIServer pid=2862363) INFO 10-19 10:47:33 [core_client.py:744] [shutdown] MPClient: start timeout=60s",
+        "(APIServer pid=2862363) WARNING 10-19 10:48:33 [utils.py:645] [shutdown] Process manager: force killing remaining process EngineCore pid 2863434"
+      ],
+      "pre_client_s": 298.90708017349243,
+      "client_s": 133.03978176694363,
+      "post_client_s": 64.74778509140015,
+      "lifecycle_s": 496.6946475505829,
+      "request_burst_s": 96.6387366130948,
+      "output_tokens": 51200,
+      "reserved_cards": 4,
+      "lifecycle_card_seconds_per_token": 0.038804269339889286,
+      "request_card_seconds_per_token": 0.007549901297898032
+    }
+  },
+  "lifecycle_cost_increase_percent": 2.681916124670436,
+  "request_cost_reduction_percent": 14.630817738886769,
+  "limitations": [
+    "Missing CLI timeout means unspecified, not independently proven default zero; use archived service logs for observed behavior.",
+    "Pre-client duration includes admission and startup, not model loading alone.",
+    "B1 non-exit root cause remains unproven; no time is subtracted from measured cost.",
+    "No new run or changed acceptance verdict is implied."
+  ]
+}

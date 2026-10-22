@@ -1,0 +1,64 @@
+[orch] fi_sampling refresh A/B -> /vllm-workspace/vllm-ascend-split-batch-hust/bench/results/fisampling_refresh_e2e.json
+[orch] card=7 cwd=/tmp logs=/vllm-workspace/vllm-ascend-split-batch-hust/bench/results/logs_fisampling_refresh
+[orch] case=api1 leg 1/6 off_a port=8351 free_before=True start=15:57:13
+[orch] case=api1 off_a done rc=0 ok=True median_tpot=74.86461972927347 ACTIVE=0 hist=None
+[orch] sleep 10s
+[orch] case=api1 leg 2/6 on_a port=8352 free_before=True start=16:02:13
+[orch] case=api1 on_a done rc=0 ok=True median_tpot=75.00087710864403 ACTIVE=1 hist={'fi_api1': 1300}
+[orch] sleep 10s
+[orch] case=api1 leg 3/6 off_b port=8353 free_before=True start=16:07:09
+[orch] case=api1 off_b done rc=0 ok=True median_tpot=74.92090162693285 ACTIVE=0 hist=None
+[orch] sleep 10s
+[orch] case=api1 leg 4/6 on_b port=8354 free_before=True start=16:11:52
+[orch] case=api1 on_b done rc=0 ok=True median_tpot=74.71110208106099 ACTIVE=1 hist={'fi_api1': 1300}
+[orch] sleep 10s
+[orch] case=api1 leg 5/6 off_c port=8355 free_before=True start=16:16:42
+[orch] case=api1 off_c done rc=0 ok=True median_tpot=75.08057532466802 ACTIVE=0 hist=None
+[orch] sleep 10s
+[orch] case=api1 leg 6/6 on_c port=8356 free_before=True start=16:21:42
+[orch] case=api1 on_c done rc=0 ok=True median_tpot=74.83938867591468 ACTIVE=1 hist={'fi_api1': 1300}
+[orch] case=joint leg 1/1 on_j port=8451 free_before=True start=16:26:28
+[orch] case=joint on_j done rc=0 ok=True median_tpot=216.4573675051095 ACTIVE=1 hist={'fork': 136, 'fi_joint': 64}
+
+==============================================================================
+W2b fi_sampling e2e refresh -- summary
+==============================================================================
+leg       mode   median_tpot      p95      p99  out_tput  ok ACTIVE                  route_hist
+api1_off_aoff          74.86    75.82    77.22    810.48True      0                        None
+api1_on_a on           75.00    75.78    77.25    808.77True      1           {'fi_api1': 1300}
+api1_off_boff          74.92    75.60    77.16    809.58True      0                        None
+api1_on_b on           74.71    75.44    77.10    810.19True      1           {'fi_api1': 1300}
+api1_off_coff          75.08    75.92    77.38    807.20True      0                        None
+api1_on_c on           74.84    75.86    77.21    810.12True      1           {'fi_api1': 1300}
+joint_on_jon          216.46   260.90   263.00   1464.41True      1{'fork': 136, 'fi_joint': 64}
+------------------------------------------------------------------------------
+### case api1
+  n_legs = 6
+  n_ok = 6
+  health = {'type_error_lines_total': 0, 'off_legs_active_lines': [0, 0, 0], 'on_legs_active_lines': [1, 1, 1], 'all_ports_free_after': True}
+  off_tpot_medians_ms = [74.86, 74.92, 75.08]
+  off_tpot_median_ms = 74.921
+  off_tpot_spread_ms = 0.216
+  off_tpot_spread_frac = 0.00288
+  on_tpot_medians_ms = [74.71, 74.84, 75.0]
+  on_tpot_median_ms = 74.839
+  on_tpot_spread_ms = 0.29
+  on_tpot_spread_frac = 0.00387
+  delta_median_ms = -0.082
+  delta_median_pct = -0.109
+  noise_band_frac = 0.00387
+  noise_band_pct = 0.387
+  within_noise_band = True
+  verdict = NOISE-BAND / NOT DECIDABLE (|Δmedian| < max(spread_off, spread_on))
+  projection = {'saved_ms_per_step_w2_bench_b64': 0.9, 'projected_delta_pct': -1.201, 'note': '|-0.9/TPOT| is the analytical ceiling of the e2e effect'}
+### case joint
+  n_legs = 1
+  n_ok = 1
+  health = {'type_error_lines_total': 0, 'off_legs_active_lines': [], 'on_legs_active_lines': [1], 'all_ports_free_after': True}
+  on_tpot_medians_ms = [216.46]
+  on_tpot_median_ms = 216.457
+  on_tpot_spread_ms = 0.0
+  on_tpot_spread_frac = 0.0
+==============================================================================
+
+[orch] DONE -> /vllm-workspace/vllm-ascend-split-batch-hust/bench/results/fisampling_refresh_e2e.json

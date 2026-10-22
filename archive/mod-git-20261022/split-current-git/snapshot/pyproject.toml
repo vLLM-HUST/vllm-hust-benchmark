@@ -1,0 +1,113 @@
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[project]
+name = "vllm-ascend-split-batch"
+version = "0.1.3"
+description = "vLLM-HUST plugin carriers for vllm-ascend: cascade two-stage decode, decode FIA de-mask, RoPE variant fixes, zero-cost wiring, MLP chunking (all default-off)"
+readme = "README.md"
+requires-python = ">=3.10"
+license = "Apache-2.0"
+dependencies = []
+# Honest maturity label: the carriers are validated on a point-pinned host build
+# (see host.version_range and docs/release.md §0.1), every capability defaults to
+# off, and the split-batch planner is descriptor-only.
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+
+[project.optional-dependencies]
+# CCE op wheel (fa_fp32_stage1 / lse_merge), Tier-1 fp32 tier; not on PyPI --
+# install with --find-links pointing at the kernel repo output/ (see README).
+kernels = ["ascend-kernel==2026.9.26"]
+test = [
+    "pytest>=8",
+    "ruff>=0.12",
+    # NOTE: `vllm-hust-ext` is deliberately NOT pinned here (removed 2026-09-26).
+    # It is the org's extension-manager package and is not on any index, so a
+    # pin in this extra made `pip install "vllm-ascend-split-batch[test]"`
+    # unresolvable (measured: "Could not find a version that satisfies the
+    # requirement vllm-hust-ext==0.2.0.dev0 (from versions: none)"). Install it
+    # from git first, as CI and publish.yml do:
+    #   pip install "vllm-hust-ext @ git+https://github.com/vLLM-HUST/extension-manager.git@main"
+    # Only tests/test_manifest.py consumes it (load_manifest / activation_blocker).
+    #
+    # stdlib tomllib landed in 3.11; the manifest tests read pyproject.toml on
+    # every matrix leg (3.10 included), so pin the backport there.
+    "tomli>=2; python_version < '3.11'",
+]
+
+[project.entry-points."vllm_hust.extension_bundles"]
+"org.vllm-hust.split-batch-full-graph" = "vllm_ascend_split_batch"
+"org.vllm-hust.fia-demask" = "vllm_ascend_split_batch.fia_demask"
+"org.vllm-hust.rope-fix" = "vllm_ascend_split_batch.rope_fix"
+"org.vllm-hust.zerocost-wiring" = "vllm_ascend_split_batch.zerocost"
+"org.vllm-hust.gate-fp32" = "vllm_ascend_split_batch.gate_fp32"
+"org.vllm-hust.gdn-merge-inproj" = "vllm_ascend_split_batch.gdn_merge_inproj"
+
+[project.entry-points."vllm.general_plugins"]
+"cascade-attention" = "vllm_ascend_split_batch.cascade_plugin:load"
+"fi-sampling" = "vllm_ascend_split_batch.fi_sampling_plugin:load"
+"fi-gelu" = "vllm_ascend_split_batch.fi_gelu_plugin:load"
+"fia-demask" = "vllm_ascend_split_batch.fia_demask_plugin:load"
+"aot-cache-guard" = "vllm_ascend_split_batch.aot_cache_guard_plugin:load"
+"mlp-chunk" = "vllm_ascend_split_batch.mlp_chunk_plugin:load"
+"gate-fp32" = "vllm_ascend_split_batch.gate_fp32_plugin:load"
+"gdn-merge-inproj" = "vllm_ascend_split_batch.gdn_merge_inproj_plugin:load"
+"rope-fix" = "vllm_ascend_split_batch.rope_fix_plugin:load"
+"zerocost-wiring" = "vllm_ascend_split_batch.zerocost_wiring:load"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/vllm_ascend_split_batch"]
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/src/vllm_ascend_split_batch",
+    "/pyproject.toml",
+    "/README.md",
+    "/LICENSE",
+    "/PROVENANCE.md",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+    # Tests that need the vllm-ascend source checkout (source-level drift guards).
+    # They FAIL (not skip) when the tree is missing, so the dependency-free CI job
+    # deselects them: `pytest -q -m "not host_tree"`.  The full local run keeps
+    # them, which is what makes the guard loud.
+    "host_tree: needs the vllm-ascend source checkout (deselected on the CPU CI job)",
+    # The archived 0.25-line cascade bundle.  Its native kernel wheel cannot load
+    # on the 0.28 base (built against glibc >= 2.38; the image is Ubuntu 22.04.5 /
+    # glibc 2.35 -- see tests/_cascade_kernel.py).  The wheel-dependent tests skip
+    # by themselves; this marker is the coarse escape hatch for a run that wants
+    # the whole legacy family out: `pytest -q -m "not legacy_kernel"`.  Re-enable
+    # only after rebuilding the wheel on the 22.04 base (ops/kernels/AGENTS.md 6,
+    # ruling 2026-10-11: keep cascade archived on the 0.28 stack).
+    "legacy_kernel: archived 0.25-line cascade bundle (wheel unusable on the 0.28 base)",
+]
+
+[tool.ruff]
+target-version = "py310"
+line-length = 88
+# Vendored verbatim from flashinfer-migration/sampling/fi_sampling (see
+# PROVENANCE.md): byte-identical copies are required for provenance diffing, so
+# they keep the source package's formatting (its own repo lints with ruff's
+# default line length, not 88).
+#
+# docs/evidence/** is the same kind of material: the cascade evidence snapshot
+# (reports, reproduction scripts, raw logs) is archived verbatim from the
+# development workspace, with only the private-address masking noted in its
+# README. Reformatting it would break the sha256 manifest that ties each file
+# to the original run.
+extend-exclude = [
+    "src/vllm_ascend_split_batch/fi_sampling",
+    "docs/evidence",
+]
+
+[tool.ruff.lint]
+select = ["B", "E", "F", "I", "SIM", "UP"]

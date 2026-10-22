@@ -1,0 +1,118 @@
+--- a/opt-ops/scripts/kbctl.py
++++ b/opt-ops/scripts/kbctl.py
+@@ -526,6 +526,16 @@
+     narrative 清单一并存下, 仅用于 drift 时展示改名/更新/删除的信息（不阻断）。
+     2026-10-18: 每个归档根只遍历一次（同一遍同时产出证据/叙述清单）。
+     """
++    try:
++        output = os.readlink("/proc/self/fd/1")
++    except OSError:
++        output = ""
++    if os.path.isabs(output):
++        output = os.path.realpath(output)
++        if any(os.path.commonpath([output, os.path.realpath(root)])
++               == os.path.realpath(root) for root in ARCHIVE_ROOTS):
++            die("pin stdout 不能写入归档根（会钉住自身尚未完成的输出）；"
++                "先写归档外临时日志，命令结束后再复制为新证据", 2)
+     pin = {"ts": now(), "l0": {}, "archive": {}}
+     try:
+         head = subprocess.run(["git", "-C", L0, "rev-parse", "HEAD"], capture_output=True, text=True, timeout=30)
+@@ -671,8 +681,17 @@
+             if bad:
+                 die(f"非法 tag {bad}（词表见 governance/schemas/registries.yaml tags）", 2)
+         path = card_path(args.id, route)
++        meta = read_sidecar(args.id)
++        if meta.get("route") and meta["route"] != route:
++            die(f"note 已归属 {meta['route']}，不能写入 {route}", 2)
++        if args.action == "new" and os.path.exists(path):
++            die("note 已存在；请用 update", 2)
++        old_body = (open(path).read().split("---", 2)[-1].strip()
++                    if os.path.exists(path) else "")
++        body = args.body if args.body is not None else old_body
++        if not body.strip():
++            die("note 正文不能为空；新卡/缺失卡必须给 --body，未写入任何文件", 2)
+         os.makedirs(os.path.dirname(path), exist_ok=True)
+-        meta = read_sidecar(args.id)
+         # stable 卡（validated）必须挂上游钉版出处（治理契约: 非 draft 卡 source.required）
+         if args.status == "validated" and not (args.source or meta.get("sources")):
+             die("validated→stable 卡必须给 --source（上游钉版 URL, 40-hex commit）; "
+@@ -703,7 +722,6 @@
+         })
+         if args.action == "supersede":
+             meta["supersedes"] = args.supersedes or meta.get("supersedes", args.id)
+-        body = args.body or (open(path).read().split("---", 2)[-1].strip() if os.path.exists(path) else "")
+         with open(path, "w") as f:
+             f.write(render_card(meta, body))
+         write_sidecar(args.id, meta)
+@@ -2952,7 +2970,7 @@
+     p.add_argument("--source", action="append", default=[],
+                    help="外部/注册来源 URL（卡的 sources; 本机证据走 --evidence/sidecar）")
+     p.add_argument("--supersedes", default="")
+-    p.add_argument("--body", default="")
++    p.add_argument("--body", default=None)
+     p.add_argument("--reason", default="")
+     p.set_defaults(fn=cmd_note)
+ 
+--- a/opt-ops/scripts/opt.py
++++ b/opt-ops/scripts/opt.py
+@@ -1261,7 +1261,7 @@
+         cmd = [PY, TOOLS["kbctl"], "note", "supersede", "--id", args.id, "--route", args.route,
+                "--supersedes", args.supersedes or args.id]
+         for flag, val in (("--title", args.title), ("--body", args.body)):
+-            if val:
++            if val or (flag == "--body" and val is not None):
+                 cmd += [flag, str(val)]
+         for e in args.evidence or []:
+             cmd += ["--evidence", e]
+@@ -1273,7 +1273,7 @@
+         for flag, val in (("--title", args.title), ("--description", args.description),
+                           ("--status", args.status), ("--confidence", args.confidence),
+                           ("--body", args.body)):
+-            if val:
++            if val or (flag == "--body" and val is not None):
+                 cmd += [flag, str(val)]
+         for e in args.evidence or []:
+             cmd += ["--evidence", e]
+@@ -1688,6 +1688,9 @@
+     p.add_argument("--json", action="store_true", default=argparse.SUPPRESS,
+                    help="机器可读（与 opt --json status 等价）")
+     p = sub.add_parser("delivery")
++    group = p.add_mutually_exclusive_group()
++    group.add_argument("--capture-dirty-baseline")
++    group.add_argument("--dirty-baseline")
+     p.add_argument("--base")
+     p.add_argument("--path", action="append", default=[])
+     p.add_argument("--check", action="store_true")
+@@ -1746,7 +1749,7 @@
+     p.add_argument("--description", default="")
+     p.add_argument("--status", default="")
+     p.add_argument("--confidence", default="")
+-    p.add_argument("--body", default="")
++    p.add_argument("--body", default=None)
+     p.add_argument("--evidence", action="append", default=[])
+     p.add_argument("--tags", action="append", default=[])
+     p.add_argument("--supersedes", default="")
+@@ -1872,6 +1875,10 @@
+             argv += ["--base", args.base]
+         for path in args.path:
+             argv += ["--path", path]
++        if args.capture_dirty_baseline:
++            argv += ["--capture-dirty-baseline", args.capture_dirty_baseline]
++        if args.dirty_baseline:
++            argv += ["--dirty-baseline", args.dirty_baseline]
+         if args.check:
+             argv.append("--check")
+         if args.json:
+--- a/opt-ops/README.md
++++ b/opt-ops/README.md
+@@ -70,7 +70,10 @@
+ 
+ - 范围必须是仓内明确路径，禁止整个仓、上级目录和 glob。起点须为 HEAD 的祖先。
+ - 声明路径均有相对起点的已提交变更且无 dirty 时为 `COMMITTED_LOCAL`；无范围为 `UNSCOPED`；未提交或未变更为 `INCOMPLETE`。未声明的 dirty 文件不阻断本轮交付，也不得夹带提交。
++- 同文件含已有用户改动时，开工先用 `opt delivery --path <明确文件> --capture-dirty-baseline <新JSON路径>` 留快照。只接受 unstaged tracked 普通文件，拒绝覆盖快照。收尾显式加 `--dirty-baseline <快照>`：仓库与起点须一致，三方合并（HEAD / 起点 / 开工脏内容）无冲突且逐字节等于当前文件，才标记 `preexisting_dirty_preserved`；新增未提交内容、staged 改动、删除、冲突均阻断。不得事后给历史任务补造开工快照。未提供快照仍执行严格 clean 检查。
+ - `--check` 仅 `COMMITTED_LOCAL` 返回 0；其余非错误状态返回 3；工具错误返回 4。无 `--check` 是信息视图，不是门禁。
++- `note new/update/supersede` 写入前必须有非空正文；省略 `--body` 只可沿用已有正文。缺失/空卡须显式重建正文；route 不同于已有 sidecar 时拒绝写入。失败不生成空卡、sidecar 或索引项。
++- `pin` 不得将 stdout 重定向至归档根；先输出到归档外临时日志，结束后再复制成新证据。既有日志增长仍属于真实漂移，不能自动重钉或忽略。
+ - 工具不修改 Git，不访问远端，不判定测试/数值正确，不自称 push 成功；远端始终 `NOT_VERIFIED`。push 仍须用户授权及实际远端 hash 核验。
+ - 算子失败可以提交其 default-off 载体、测试和负结果；只有验收门通过才能宣称优化有效。`opt coverage` 仍是证据收尾门，`delivery` 不替代或复制其判据。
+ 

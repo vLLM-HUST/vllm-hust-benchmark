@@ -1,0 +1,12 @@
+# default-off serve 冒烟 chat completions 记录 (2026-09-08)
+# 服务: vllm serve /data/shared_models/Qwen--Qwen2.5-Coder-14B-Instruct
+#       --max-model-len 4096 --enforce-eager --port 8321
+# 环境: ASCEND_RT_VISIBLE_DEVICES=6, HF_HUB_OFFLINE=1, CWD=/tmp
+# 结果: HTTP 200, /health 200; 响应体如下 (原样捕获)
+
+{"id":"chatcmpl-81f11264fef8dd57","object":"chat.completion","created":1788873653,"model":"/data/shared_models/Qwen--Qwen2.5-Coder-14B-Instruct","choices":[{"index":0,"message":{"role":"assistant","content":"Hello! How can I assist you today?","refusal":null,"annotations":null,"audio":null,"function_call":null,"reasoning":null},"logprobs":null,"finish_reason":"stop","stop_reason":null,"token_ids":null,"routed_experts":null}],"service_tier":null,"system_fingerprint":"vllm-0.23.0-7aa4f65e","usage":{"prompt_tokens":30,"total_tokens":40,"completion_tokens":10,"prompt_tokens_details":null,"completi(截断)
+
+# 冒烟后检查 (grep 计数, 均为 default-off 预期):
+#   grep -c 'cascade-active' serve-default-off-card6.log  -> 0 (cascade 从未激活)
+#   grep -c 'ascend_kernel wheel unavailable' ...          -> 0 (wheel 在位, 无告警)
+# 测后清理: vllm serve 进程已 kill, 端口 8321 已释放 (curl 连接拒绝=000)

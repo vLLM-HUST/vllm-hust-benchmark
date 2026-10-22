@@ -1,0 +1,584 @@
++ OUT=/vllm-workspace/knowledge/evidence/cascade/logs/v1-real-model
++ RUN=/vllm-workspace/knowledge/evidence/cascade/logs/v1-real-model/ev2_run_real.py
++ LOCK=/tmp/w3-npu.lock
++ mkdir -p /vllm-workspace/knowledge/evidence/cascade/logs/v1-real-model/raw_dumps
++ source /opt/miniconda3/etc/profile.d/conda.sh
+++ export CONDA_EXE=/opt/miniconda3/bin/conda
+++ CONDA_EXE=/opt/miniconda3/bin/conda
+++ export _CONDA_EXE=/opt/miniconda3/bin/conda
+++ _CONDA_EXE=/opt/miniconda3/bin/conda
+++ export _CE_M=
+++ _CE_M=
+++ export _CE_CONDA=
+++ _CE_CONDA=
+++ export CONDA_PYTHON_EXE=/opt/miniconda3/bin/python
+++ CONDA_PYTHON_EXE=/opt/miniconda3/bin/python
+++ export _CONDA_ROOT=/opt/miniconda3
+++ _CONDA_ROOT=/opt/miniconda3
+++ '[' -z x ']'
++ conda activate hust
++ local cmd=activate
++ case "$cmd" in
++ __conda_activate activate hust
++ '[' -n '' ']'
++ local ask_conda
+++ PS1=
+++ __conda_exe shell.posix activate hust
+++ '[' -n '' ']'
+++ /opt/miniconda3/bin/conda shell.posix activate hust
++ ask_conda='. "/opt/miniconda3/envs/hust/etc/conda/deactivate.d/zz-cann910.sh"
+export _CE_M='\'''\''
+export _CE_CONDA='\'''\''
+PS1='\''(hust) '\''
+export PATH='\''/usr/local/ascend91/Ascend/nnal/atb/latest/atb/cxx_abi_1/bin:/usr/local/ascend91/Ascend/cann-9.1.0/bin:/usr/local/ascend91/Ascend/cann-9.1.0/tools/ccec_compiler/bin:/usr/local/ascend91/Ascend/cann-9.1.0/tools/profiler/bin:/usr/local/ascend91/Ascend/cann-9.1.0/tools/ascend_system_advisor/asys:/usr/local/ascend91/Ascend/cann-9.1.0/tools/show_kernel_debug_data:/usr/local/ascend91/Ascend/cann-9.1.0/tools/msobjdump:/usr/local/Ascend/nnal/atb/latest/atb/cxx_abi_1/bin:/usr/local/Ascend/cann-9.0.1/tools/bishengir/bin:/usr/local/Ascend/cann-9.0.1/bin:/usr/local/Ascend/cann-9.0.1/tools/ccec_compiler/bin:/usr/local/Ascend/cann-9.0.1/tools/profiler/bin:/usr/local/Ascend/cann-9.0.1/tools/ascend_system_advisor/asys:/usr/local/Ascend/cann-9.0.1/tools/show_kernel_debug_data:/usr/local/Ascend/cann-9.0.1/tools/msobjdump:/usr/local/ascend91/Ascend/nnal/atb/latest/atb/cxx_abi_1/bin:/usr/local/Ascend/nnal/atb/latest/atb/cxx_abi_1/bin:/usr/local/ascend91/Ascend/nnal/atb/latest/atb/cxx_abi_1/bin:/opt/miniconda3/envs/hust/bin:/opt/miniconda3/condabin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/root/bin:/root/bin'\''
+export CONDA_SHLVL='\''6'\''
+export CONDA_PROMPT_MODIFIER='\''(hust) '\''
+export CONDA_EXE='\''/opt/miniconda3/bin/conda'\''
+export _CONDA_EXE='\''/opt/miniconda3/bin/conda'\''
+export CONDA_PYTHON_EXE='\''/opt/miniconda3/bin/python'\''
+export _CONDA_ROOT='\''/opt/miniconda3'\''
+. "/opt/miniconda3/envs/hust/etc/conda/activate.d/zz-cann910.sh"'
++ eval '. "/opt/miniconda3/envs/hust/etc/conda/deactivate.d/zz-cann910.sh"
+export _CE_M='\'''\''
+export _CE_CONDA='\'''\''
+PS1='\''(hust) '\''
+export PATH='\''/usr/local/ascend91/Ascend/nnal/atb/latest/atb/cxx_abi_1/bin:/usr/local/ascend91/Ascend/cann-9.1.0/bin:/usr/local/ascend91/Ascend/cann-9.1.0/tools/ccec_compiler/bin:/usr/local/ascend91/Ascend/cann-9.1.0/tools/profiler/bin:/usr/local/ascend91/Ascend/cann-9.1.0/tools/ascend_system_advisor/asys:/usr/local/ascend91/Ascend/cann-9.1.0/tools/show_kernel_debug_data:/usr/local/ascend91/Ascend/cann-9.1.0/tools/msobjdump:/usr/local/Ascend/nnal/atb/latest/atb/cxx_abi_1/bin:/usr/local/Ascend/cann-9.0.1/tools/bishengir/bin:/usr/local/Ascend/cann-9.0.1/bin:/usr/local/Ascend/cann-9.0.1/tools/ccec_compiler/bin:/usr/local/Ascend/cann-9.0.1/tools/profiler/bin:/usr/local/Ascend/cann-9.0.1/tools/ascend_system_advisor/asys:/usr/local/Ascend/cann-9.0.1/tools/show_kernel_debug_data:/usr/local/Ascend/cann-9.0.1/tools/msobjdump:/usr/local/ascend91/Ascend/nnal/atb/latest/atb/cxx_abi_1/bin:/usr/local/Ascend/nnal/atb/latest/atb/cxx_abi_1/bin:/usr/local/ascend91/Ascend/nnal/atb/latest/atb/cxx_abi_1/bin:/opt/miniconda3/envs/hust/bin:/opt/miniconda3/condabin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/root/bin:/root/bin'\''
+export CONDA_SHLVL='\''6'\''
+export CONDA_PROMPT_MODIFIER='\''(hust) '\''
+export CONDA_EXE='\''/opt/miniconda3/bin/conda'\''
+export _CONDA_EXE='\''/opt/miniconda3/bin/conda'\''
+export CONDA_PYTHON_EXE='\''/opt/miniconda3/bin/python'\''
+export _CONDA_ROOT='\''/opt/miniconda3'\''
+. "/opt/miniconda3/envs/hust/etc/conda/activate.d/zz-cann910.sh"'
+++ . /opt/miniconda3/envs/hust/etc/conda/deactivate.d/zz-cann910.sh
++++ export LD_LIBRARY_PATH=
++++ LD_LIBRARY_PATH=
++++ export PATH=/usr/local/Ascend/nnal/atb/latest/atb/cxx_abi_1/bin:/usr/local/Ascend/cann-9.0.1/tools/bishengir/bin:/usr/local/Ascend/cann-9.0.1/bin:/usr/local/Ascend/cann-9.0.1/tools/ccec_compiler/bin:/usr/local/Ascend/cann-9.0.1/tools/profiler/bin:/usr/local/Ascend/cann-9.0.1/tools/ascend_system_advisor/asys:/usr/local/Ascend/cann-9.0.1/tools/show_kernel_debug_data:/usr/local/Ascend/cann-9.0.1/tools/msobjdump:/usr/local/ascend91/Ascend/nnal/atb/latest/atb/cxx_abi_1/bin:/usr/local/ascend91/Ascend/cann-9.1.0/bin:/usr/local/ascend91/Ascend/cann-9.1.0/tools/ccec_compiler/bin:/usr/local/ascend91/Ascend/cann-9.1.0/tools/profiler/bin:/usr/local/ascend91/Ascend/cann-9.1.0/tools/ascend_system_advisor/asys:/usr/local/ascend91/Ascend/cann-9.1.0/tools/show_kernel_debug_data:/usr/local/ascend91/Ascend/cann-9.1.0/tools/msobjdump:/usr/local/Ascend/nnal/atb/latest/atb/cxx_abi_1/bin:/usr/local/ascend91/Ascend/nnal/atb/latest/atb/cxx_abi_1/bin:/opt/miniconda3/envs/hust/bin:/opt/miniconda3/condabin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/root/bin
++++ PATH=/usr/local/Ascend/nnal/atb/latest/atb/cxx_abi_1/bin:/usr/local/Ascend/cann-9.0.1/tools/bishengir/bin:/usr/local/Ascend/cann-9.0.1/bin:/usr/local/Ascend/cann-9.0.1/tools/ccec_compiler/bin:/usr/local/Ascend/cann-9.0.1/tools/profiler/bin:/usr/local/Ascend/cann-9.0.1/tools/ascend_system_advisor/asys:/usr/local/Ascend/cann-9.0.1/tools/show_kernel_debug_data:/usr/local/Ascend/cann-9.0.1/tools/msobjdump:/usr/local/ascend91/Ascend/nnal/atb/latest/atb/cxx_abi_1/bin:/usr/local/ascend91/Ascend/cann-9.1.0/bin:/usr/local/ascend91/Ascend/cann-9.1.0/tools/ccec_compiler/bin:/usr/local/ascend91/Ascend/cann-9.1.0/tools/profiler/bin:/usr/local/ascend91/Ascend/cann-9.1.0/tools/ascend_system_advisor/asys:/usr/local/ascend91/Ascend/cann-9.1.0/tools/show_kernel_debug_data:/usr/local/ascend91/Ascend/cann-9.1.0/tools/msobjdump:/usr/local/Ascend/nnal/atb/latest/atb/cxx_abi_1/bin:/usr/local/ascend91/Ascend/nnal/atb/latest/atb/cxx_abi_1/bin:/opt/miniconda3/envs/hust/bin:/opt/miniconda3/condabin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/root/bin
++++ export PYTHONPATH=
++++ PYTHONPATH=
++++ unset CANN910_SAVED_LD_LIBRARY_PATH CANN910_SAVED_PATH CANN910_SAVED_PYTHONPATH
+++ export _CE_M=
+++ _CE_M=
+++ export _CE_CONDA=
+++ _CE_CONDA=
+++ PS1='(hust) '
+++ export PATH=/usr/local/ascend91/Ascend/nnal/atb/latest/atb/cxx_abi_1/bin:/usr/local/ascend91/Ascend/cann-9.1.0/bin:/usr/local/ascend91/Ascend/cann-9.1.0/tools/ccec_compiler/bin:/usr/local/ascend91/Ascend/cann-9.1.0/tools/profiler/bin:/usr/local/ascend91/Ascend/cann-9.1.0/tools/ascend_system_advisor/asys:/usr/local/ascend91/Ascend/cann-9.1.0/tools/show_kernel_debug_data:/usr/local/ascend91/Ascend/cann-9.1.0/tools/msobjdump:/usr/local/Ascend/nnal/atb/latest/atb/cxx_abi_1/bin:/usr/local/Ascend/cann-9.0.1/tools/bishengir/bin:/usr/local/Ascend/cann-9.0.1/bin:/usr/local/Ascend/cann-9.0.1/tools/ccec_compiler/bin:/usr/local/Ascend/cann-9.0.1/tools/profiler/bin:/usr/local/Ascend/cann-9.0.1/tools/ascend_system_advisor/asys:/usr/local/Ascend/cann-9.0.1/tools/show_kernel_debug_data:/usr/local/Ascend/cann-9.0.1/tools/msobjdump:/usr/local/ascend91/Ascend/nnal/atb/latest/atb/cxx_abi_1/bin:/usr/local/Ascend/nnal/atb/latest/atb/cxx_abi_1/bin:/usr/local/ascend91/Ascend/nnal/atb/latest/atb/cxx_abi_1/bin:/opt/miniconda3/envs/hust/bin:/opt/miniconda3/condabin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/root/bin:/root/bin
+++ PATH=/usr/local/ascend91/Ascend/nnal/atb/latest/atb/cxx_abi_1/bin:/usr/local/ascend91/Ascend/cann-9.1.0/bin:/usr/local/ascend91/Ascend/cann-9.1.0/tools/ccec_compiler/bin:/usr/local/ascend91/Ascend/cann-9.1.0/tools/profiler/bin:/usr/local/ascend91/Ascend/cann-9.1.0/tools/ascend_system_advisor/asys:/usr/local/ascend91/Ascend/cann-9.1.0/tools/show_kernel_debug_data:/usr/local/ascend91/Ascend/cann-9.1.0/tools/msobjdump:/usr/local/Ascend/nnal/atb/latest/atb/cxx_abi_1/bin:/usr/local/Ascend/cann-9.0.1/tools/bishengir/bin:/usr/local/Ascend/cann-9.0.1/bin:/usr/local/Ascend/cann-9.0.1/tools/ccec_compiler/bin:/usr/local/Ascend/cann-9.0.1/tools/profiler/bin:/usr/local/Ascend/cann-9.0.1/tools/ascend_system_advisor/asys:/usr/local/Ascend/cann-9.0.1/tools/show_kernel_debug_data:/usr/local/Ascend/cann-9.0.1/tools/msobjdump:/usr/local/ascend91/Ascend/nnal/atb/latest/atb/cxx_abi_1/bin:/usr/local/Ascend/nnal/atb/latest/atb/cxx_abi_1/bin:/usr/local/ascend91/Ascend/nnal/atb/latest/atb/cxx_abi_1/bin:/opt/miniconda3/envs/hust/bin:/opt/miniconda3/condabin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/root/bin:/root/bin
+++ export CONDA_SHLVL=6
+++ CONDA_SHLVL=6
+++ export 'CONDA_PROMPT_MODIFIER=(hust) '
+++ CONDA_PROMPT_MODIFIER='(hust) '
+++ export CONDA_EXE=/opt/miniconda3/bin/conda
+++ CONDA_EXE=/opt/miniconda3/bin/conda
+++ export _CONDA_EXE=/opt/miniconda3/bin/conda
+++ _CONDA_EXE=/opt/miniconda3/bin/conda
+++ export CONDA_PYTHON_EXE=/opt/miniconda3/bin/python
+++ CONDA_PYTHON_EXE=/opt/miniconda3/bin/python
+++ export _CONDA_ROOT=/opt/miniconda3
+++ _CONDA_ROOT=/opt/miniconda3
+++ . /opt/miniconda3/envs/hust/etc/conda/activate.d/zz-cann910.sh
++++ export CANN910_SAVED_LD_LIBRARY_PATH=
++++ CANN910_SAVED_LD_LIBRARY_PATH=
++++ export CANN910_SAVED_PATH=/usr/local/ascend91/Ascend/nnal/atb/latest/atb/cxx_abi_1/bin:/usr/local/ascend91/Ascend/cann-9.1.0/bin:/usr/local/ascend91/Ascend/cann-9.1.0/tools/ccec_compiler/bin:/usr/local/ascend91/Ascend/cann-9.1.0/tools/profiler/bin:/usr/local/ascend91/Ascend/cann-9.1.0/tools/ascend_system_advisor/asys:/usr/local/ascend91/Ascend/cann-9.1.0/tools/show_kernel_debug_data:/usr/local/ascend91/Ascend/cann-9.1.0/tools/msobjdump:/usr/local/Ascend/nnal/atb/latest/atb/cxx_abi_1/bin:/usr/local/Ascend/cann-9.0.1/tools/bishengir/bin:/usr/local/Ascend/cann-9.0.1/bin:/usr/local/Ascend/cann-9.0.1/tools/ccec_compiler/bin:/usr/local/Ascend/cann-9.0.1/tools/profiler/bin:/usr/local/Ascend/cann-9.0.1/tools/ascend_system_advisor/asys:/usr/local/Ascend/cann-9.0.1/tools/show_kernel_debug_data:/usr/local/Ascend/cann-9.0.1/tools/msobjdump:/usr/local/ascend91/Ascend/nnal/atb/latest/atb/cxx_abi_1/bin:/usr/local/Ascend/nnal/atb/latest/atb/cxx_abi_1/bin:/usr/local/ascend91/Ascend/nnal/atb/latest/atb/cxx_abi_1/bin:/opt/miniconda3/envs/hust/bin:/opt/miniconda3/condabin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/root/bin:/root/bin
++++ CANN910_SAVED_PATH=/usr/local/ascend91/Ascend/nnal/atb/latest/atb/cxx_abi_1/bin:/usr/local/ascend91/Ascend/cann-9.1.0/bin:/usr/local/ascend91/Ascend/cann-9.1.0/tools/ccec_compiler/bin:/usr/local/ascend91/Ascend/cann-9.1.0/tools/profiler/bin:/usr/local/ascend91/Ascend/cann-9.1.0/tools/ascend_system_advisor/asys:/usr/local/ascend91/Ascend/cann-9.1.0/tools/show_kernel_debug_data:/usr/local/ascend91/Ascend/cann-9.1.0/tools/msobjdump:/usr/local/Ascend/nnal/atb/latest/atb/cxx_abi_1/bin:/usr/local/Ascend/cann-9.0.1/tools/bishengir/bin:/usr/local/Ascend/cann-9.0.1/bin:/usr/local/Ascend/cann-9.0.1/tools/ccec_compiler/bin:/usr/local/Ascend/cann-9.0.1/tools/profiler/bin:/usr/local/Ascend/cann-9.0.1/tools/ascend_system_advisor/asys:/usr/local/Ascend/cann-9.0.1/tools/show_kernel_debug_data:/usr/local/Ascend/cann-9.0.1/tools/msobjdump:/usr/local/ascend91/Ascend/nnal/atb/latest/atb/cxx_abi_1/bin:/usr/local/Ascend/nnal/atb/latest/atb/cxx_abi_1/bin:/usr/local/ascend91/Ascend/nnal/atb/latest/atb/cxx_abi_1/bin:/opt/miniconda3/envs/hust/bin:/opt/miniconda3/condabin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/root/bin:/root/bin
++++ export CANN910_SAVED_PYTHONPATH=
++++ CANN910_SAVED_PYTHONPATH=
++++ source /usr/local/ascend91/Ascend/ascend-toolkit/set_env.sh
+++++ setenv_main activate hust
+++++ local version_dirpath install_dirpath my_ld_library_path my_path driver_install_path_param dep_hal_path
+++++ local dep_hal_name=libascend_hal.so
+++++ local dep_info_file=/etc/ascend_install.info
+++++ local is_install_driver=n
+++++ local architecture remove_regex
+++++ version_dirpath=/usr/local/ascend91/Ascend/cann-9.1.0
++++++ dirname /usr/local/ascend91/Ascend/cann-9.1.0
+++++ install_dirpath=/usr/local/ascend91/Ascend
+++++ remove_regex='^/usr/local/ascend91/Ascend/cann[/_-]'
+++++ remove_env PATH '^/usr/local/ascend91/Ascend/cann[/_-]'
+++++ local name=PATH
+++++ local 'regex=^/usr/local/ascend91/Ascend/cann[/_-]'
++++++ eval echo '${PATH}'
+++++++ echo /usr/local/ascend91/Ascend/nnal/atb/latest/atb/cxx_abi_1/bin:/usr/local/ascend91/Ascend/cann-9.1.0/bin:/usr/local/ascend91/Ascend/cann-9.1.0/tools/ccec_compiler/bin:/usr/local/ascend91/Ascend/cann-9.1.0/tools/profiler/bin:/usr/local/ascend91/Ascend/cann-9.1.0/tools/ascend_system_advisor/asys:/usr/local/ascend91/Ascend/cann-9.1.0/tools/show_kernel_debug_data:/usr/local/ascend91/Ascend/cann-9.1.0/tools/msobjdump:/usr/local/Ascend/nnal/atb/latest/atb/cxx_abi_1/bin:/usr/local/Ascend/cann-9.0.1/tools/bishengir/bin:/usr/local/Ascend/cann-9.0.1/bin:/usr/local/Ascend/cann-9.0.1/tools/ccec_compiler/bin:/usr/local/Ascend/cann-9.0.1/tools/profiler/bin:/usr/local/Ascend/cann-9.0.1/tools/ascend_system_advisor/asys:/usr/local/Ascend/cann-9.0.1/tools/show_kernel_debug_data:/usr/local/Ascend/cann-9.0.1/tools/msobjdump:/usr/local/ascend91/Ascend/nnal/atb/latest/atb/cxx_abi_1/bin:/usr/local/Ascend/nnal/atb/latest/atb/cxx_abi_1/bin:/usr/local/ascend91/Ascend/nnal/atb/latest/atb/cxx_abi_1/bin:/opt/miniconda3/envs/hust/bin:/opt/miniconda3/condabin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/root/bin:/root/bin
+++++ local env_value=/usr/local/ascend91/Ascend/nnal/atb/latest/atb/cxx_abi_1/bin:/usr/local/ascend91/Ascend/cann-9.1.0/bin:/usr/local/ascend91/Ascend/cann-9.1.0/tools/ccec_compiler/bin:/usr/local/ascend91/Ascend/cann-9.1.0/tools/profiler/bin:/usr/local/ascend91/Ascend/cann-9.1.0/tools/ascend_system_advisor/asys:/usr/local/ascend91/Ascend/cann-9.1.0/tools/show_kernel_debug_data:/usr/local/ascend91/Ascend/cann-9.1.0/tools/msobjdump:/usr/local/Ascend/nnal/atb/latest/atb/cxx_abi_1/bin:/usr/local/Ascend/cann-9.0.1/tools/bishengir/bin:/usr/local/Ascend/cann-9.0.1/bin:/usr/local/Ascend/cann-9.0.1/tools/ccec_compiler/bin:/usr/local/Ascend/cann-9.0.1/tools/profiler/bin:/usr/local/Ascend/cann-9.0.1/tools/ascend_system_advisor/asys:/usr/local/Ascend/cann-9.0.1/tools/show_kernel_debug_data:/usr/local/Ascend/cann-9.0.1/tools/msobjdump:/usr/local/ascend91/Ascend/nnal/atb/latest/atb/cxx_abi_1/bin:/usr/local/Ascend/nnal/atb/latest/atb/cxx_abi_1/bin:/usr/local/ascend91/Ascend/nnal/atb/latest/atb/cxx_abi_1/bin:/opt/miniconda3/envs/hust/bin:/opt/miniconda3/condabin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/root/bin:/root/bin
+++++ read -r PATH
++++++ echo /usr/local/ascend91/Ascend/nnal/atb/latest/atb/cxx_abi_1/bin:/usr/local/ascend91/Ascend/cann-9.1.0/bin:/usr/local/ascend91/Ascend/cann-9.1.0/tools/ccec_compiler/bin:/usr/local/ascend91/Ascend/cann-9.1.0/tools/profiler/bin:/usr/local/ascend91/Ascend/cann-9.1.0/tools/ascend_system_advisor/asys:/usr/local/ascend91/Ascend/cann-9.1.0/tools/show_kernel_debug_data:/usr/local/ascend91/Ascend/cann-9.1.0/tools/msobjdump:/usr/local/Ascend/nnal/atb/latest/atb/cxx_abi_1/bin:/usr/local/Ascend/cann-9.0.1/tools/bishengir/bin:/usr/local/Ascend/cann-9.0.1/bin:/usr/local/Ascend/cann-9.0.1/tools/ccec_compiler/bin:/usr/local/Ascend/cann-9.0.1/tools/profiler/bin:/usr/local/Ascend/cann-9.0.1/tools/ascend_system_advisor/asys:/usr/local/Ascend/cann-9.0.1/tools/show_kernel_debug_data:/usr/local/Ascend/cann-9.0.1/tools/msobjdump:/usr/local/ascend91/Ascend/nnal/atb/latest/atb/cxx_abi_1/bin:/usr/local/Ascend/nnal/atb/latest/atb/cxx_abi_1/bin:/usr/local/ascend91/Ascend/nnal/atb/latest/atb/cxx_abi_1/bin:/opt/miniconda3/envs/hust/bin:/opt/miniconda3/condabin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/root/bin:/root/bin
++++++ tr : '\n'
++++++ grep -v -E '^/usr/local/ascend91/Ascend/cann[/_-]'
++++++ tr '\n' :
++++++ sed 's/:$//'
+++++ export PATH
+++++ remove_env LD_LIBRARY_PATH '^/usr/local/ascend91/Ascend/cann[/_-]'
+++++ local name=LD_LIBRARY_PATH
+++++ local 'regex=^/usr/local/ascend91/Ascend/cann[/_-]'
++++++ eval echo '${LD_LIBRARY_PATH}'
+++++++ echo
+++++ local env_value=
+++++ read -r LD_LIBRARY_PATH
++++++ echo ''
++++++ tr : '\n'
++++++ grep -v -E '^/usr/local/ascend91/Ascend/cann[/_-]'
++++++ tr '\n' :
++++++ sed 's/:$//'
+++++ export LD_LIBRARY_PATH
+++++ remove_env PYTHONPATH '^/usr/local/ascend91/Ascend/cann[/_-]'
+++++ local name=PYTHONPATH
+++++ local 'regex=^/usr/local/ascend91/Ascend/cann[/_-]'
++++++ eval echo '${PYTHONPATH}'
+++++++ echo
+++++ local env_value=
+++++ read -r PYTHONPATH
++++++ echo ''
++++++ tr : '\n'
++++++ grep -v -E '^/usr/local/ascend91/Ascend/cann[/_-]'
++++++ tr '\n' :
++++++ sed 's/:$//'
+++++ export PYTHONPATH
+++++ my_ld_library_path=
+++++ '[' '!' -z '' ']'
+++++ '[' -f /etc/ascend_install.info ']'
++++++ grep -iw driver_install_path_param /etc/ascend_install.info
++++++ cut --only-delimited -d= -f2-
+++++ driver_install_path_param=/usr/local/Ascend
+++++ '[' '!' -z /usr/local/Ascend ']'
+++++ my_path=/usr/local/Ascend/driver/lib64
+++++ '[' -d /usr/local/Ascend/driver/lib64 ']'
++++++ find /usr/local/Ascend/driver/lib64 -name libascend_hal.so
+++++ dep_hal_path=/usr/local/Ascend/driver/lib64/driver/libascend_hal.so
+++++ '[' '!' -z /usr/local/Ascend/driver/lib64/driver/libascend_hal.so ']'
+++++ is_install_driver=y
+++++ case ":$PATH:" in
+++++ command -v ldconfig
+++++ ldconfig -p
+++++ grep -q -- libascend_hal.so
+++++ command -v arch
++++++ arch
+++++ architecture=aarch64
+++++ prepend_env PATH /usr/local/ascend91/Ascend/cann-9.1.0/bin:/usr/local/ascend91/Ascend/cann-9.1.0/tools/ccec_compiler/bin:/usr/local/ascend91/Ascend/cann-9.1.0/tools/profiler/bin:/usr/local/ascend91/Ascend/cann-9.1.0/tools/ascend_system_advisor/asys:/usr/local/ascend91/Ascend/cann-9.1.0/tools/show_kernel_debug_data:/usr/local/ascend91/Ascend/cann-9.1.0/tools/msobjdump
+++++ local name=PATH
+++++ local value=/usr/local/ascend91/Ascend/cann-9.1.0/bin:/usr/local/ascend91/Ascend/cann-9.1.0/tools/ccec_compiler/bin:/usr/local/ascend91/Ascend/cann-9.1.0/tools/profiler/bin:/usr/local/ascend91/Ascend/cann-9.1.0/tools/ascend_system_advisor/asys:/usr/local/ascend91/Ascend/cann-9.1.0/tools/show_kernel_debug_data:/usr/local/ascend91/Ascend/cann-9.1.0/tools/msobjdump
++++++ eval echo '${PATH}'
+++++++ echo /usr/local/ascend91/Ascend/nnal/atb/latest/atb/cxx_abi_1/bin:/usr/local/Ascend/nnal/atb/latest/atb/cxx_abi_1/bin:/usr/local/Ascend/cann-9.0.1/tools/bishengir/bin:/usr/local/Ascend/cann-9.0.1/bin:/usr/local/Ascend/cann-9.0.1/tools/ccec_compiler/bin:/usr/local/Ascend/cann-9.0.1/tools/profiler/bin:/usr/local/Ascend/cann-9.0.1/tools/ascend_system_advisor/asys:/usr/local/Ascend/cann-9.0.1/tools/show_kernel_debug_data:/usr/local/Ascend/cann-9.0.1/tools/msobjdump:/usr/local/ascend91/Ascend/nnal/atb/latest/atb/cxx_abi_1/bin:/usr/local/Ascend/nnal/atb/latest/atb/cxx_abi_1/bin:/usr/local/ascend91/Ascend/nnal/atb/latest/atb/cxx_abi_1/bin:/opt/miniconda3/envs/hust/bin:/opt/miniconda3/condabin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/root/bin:/root/bin
+++++ local env_value=/usr/local/ascend91/Ascend/nnal/atb/latest/atb/cxx_abi_1/bin:/usr/local/Ascend/nnal/atb/latest/atb/cxx_abi_1/bin:/usr/local/Ascend/cann-9.0.1/tools/bishengir/bin:/usr/local/Ascend/cann-9.0.1/bin:/usr/local/Ascend/cann-9.0.1/tools/ccec_compiler/bin:/usr/local/Ascend/cann-9.0.1/tools/profiler/bin:/usr/local/Ascend/cann-9.0.1/tools/ascend_system_advisor/asys:/usr/local/Ascend/cann-9.0.1/tools/show_kernel_debug_data:/usr/local/Ascend/cann-9.0.1/tools/msobjdump:/usr/local/ascend91/Ascend/nnal/atb/latest/atb/cxx_abi_1/bin:/usr/local/Ascend/nnal/atb/latest/atb/cxx_abi_1/bin:/usr/local/ascend91/Ascend/nnal/atb/latest/atb/cxx_abi_1/bin:/opt/miniconda3/envs/hust/bin:/opt/miniconda3/condabin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/root/bin:/root/bin
+++++ '[' /usr/local/ascend91/Ascend/nnal/atb/latest/atb/cxx_abi_1/bin:/usr/local/Ascend/nnal/atb/latest/atb/cxx_abi_1/bin:/usr/local/Ascend/cann-9.0.1/tools/bishengir/bin:/usr/local/Ascend/cann-9.0.1/bin:/usr/local/Ascend/cann-9.0.1/tools/ccec_compiler/bin:/usr/local/Ascend/cann-9.0.1/tools/profiler/bin:/usr/local/Ascend/cann-9.0.1/tools/ascend_system_advisor/asys:/usr/local/Ascend/cann-9.0.1/tools/show_kernel_debug_data:/usr/local/Ascend/cann-9.0.1/tools/msobjdump:/usr/local/ascend91/Ascend/nnal/atb/latest/atb/cxx_abi_1/bin:/usr/local/Ascend/nnal/atb/latest/atb/cxx_abi_1/bin:/usr/local/ascend91/Ascend/nnal/atb/latest/atb/cxx_abi_1/bin:/opt/miniconda3/envs/hust/bin:/opt/miniconda3/condabin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/root/bin:/root/bin = '' ']'
+++++ read -r PATH
+++++ export PATH
+++++ prepend_env LD_LIBRARY_PATH /usr/local/ascend91/Ascend/cann-9.1.0/lib64:/usr/local/ascend91/Ascend/cann-9.1.0/lib64/plugin/opskernel:/usr/local/ascend91/Ascend/cann-9.1.0/lib64/plugin/nnengine:/usr/local/ascend91/Ascend/cann-9.1.0/opp/built-in/op_impl/ai_core/tbe/op_tiling/lib/linux/aarch64:/usr/local/Ascend/driver/lib64:/usr/local/Ascend/driver/lib64/common:/usr/local/Ascend/driver/lib64/driver
+++++ local name=LD_LIBRARY_PATH
+++++ local value=/usr/local/ascend91/Ascend/cann-9.1.0/lib64:/usr/local/ascend91/Ascend/cann-9.1.0/lib64/plugin/opskernel:/usr/local/ascend91/Ascend/cann-9.1.0/lib64/plugin/nnengine:/usr/local/ascend91/Ascend/cann-9.1.0/opp/built-in/op_impl/ai_core/tbe/op_tiling/lib/linux/aarch64:/usr/local/Ascend/driver/lib64:/usr/local/Ascend/driver/lib64/common:/usr/local/Ascend/driver/lib64/driver
++++++ eval echo '${LD_LIBRARY_PATH}'
+++++++ echo
+++++ local env_value=
+++++ '[' '' = '' ']'
+++++ read -r LD_LIBRARY_PATH
+++++ export LD_LIBRARY_PATH
+++++ export PYTHONPATH=/usr/local/ascend91/Ascend/cann-9.1.0/python/site-packages:/usr/local/ascend91/Ascend/cann-9.1.0/opp/built-in/op_impl/ai_core/tbe:
+++++ PYTHONPATH=/usr/local/ascend91/Ascend/cann-9.1.0/python/site-packages:/usr/local/ascend91/Ascend/cann-9.1.0/opp/built-in/op_impl/ai_core/tbe:
+++++ '[' y = n ']'
+++++ export ASCEND_OPP_PATH=/usr/local/ascend91/Ascend/cann-9.1.0/opp
+++++ ASCEND_OPP_PATH=/usr/local/ascend91/Ascend/cann-9.1.0/opp
+++++ export ASCEND_AICPU_PATH=/usr/local/ascend91/Ascend/cann-9.1.0
+++++ ASCEND_AICPU_PATH=/usr/local/ascend91/Ascend/cann-9.1.0
+++++ export TOOLCHAIN_HOME=/usr/local/ascend91/Ascend/cann-9.1.0/toolkit
+++++ TOOLCHAIN_HOME=/usr/local/ascend91/Ascend/cann-9.1.0/toolkit
+++++ export ASCEND_HOME_PATH=/usr/local/ascend91/Ascend/cann-9.1.0
+++++ ASCEND_HOME_PATH=/usr/local/ascend91/Ascend/cann-9.1.0
+++++ export ASCEND_TOOLKIT_HOME=/usr/local/ascend91/Ascend/cann-9.1.0
+++++ ASCEND_TOOLKIT_HOME=/usr/local/ascend91/Ascend/cann-9.1.0
+++++ prepend_env CMAKE_PREFIX_PATH /usr/local/ascend91/Ascend/cann-9.1.0/lib64/cmake
+++++ local name=CMAKE_PREFIX_PATH
+++++ local value=/usr/local/ascend91/Ascend/cann-9.1.0/lib64/cmake
++++++ eval echo '${CMAKE_PREFIX_PATH}'
+++++++ echo /usr/local/ascend91/Ascend/cann-9.1.0/toolkit/tools/tikicpulib/lib/cmake:/usr/local/ascend91/Ascend/cann-9.1.0/lib64/cmake:/usr/local/Ascend/cann-9.0.1/toolkit/tools/tikicpulib/lib/cmake:/usr/local/Ascend/cann-9.0.1/lib64/cmake:/usr/local/ascend91/Ascend/cann-9.1.0/toolkit/tools/tikicpulib/lib/cmake:/usr/local/ascend91/Ascend/cann-9.1.0/lib64/cmake:/usr/local/Ascend/cann-9.0.1/toolkit/tools/tikicpulib/lib/cmake:/usr/local/Ascend/cann-9.0.1/lib64/cmake:/usr/local/ascend91/Ascend/cann-9.1.0/toolkit/tools/tikicpulib/lib/cmake:/usr/local/ascend91/Ascend/cann-9.1.0/lib64/cmake
+++++ local env_value=/usr/local/ascend91/Ascend/cann-9.1.0/toolkit/tools/tikicpulib/lib/cmake:/usr/local/ascend91/Ascend/cann-9.1.0/lib64/cmake:/usr/local/Ascend/cann-9.0.1/toolkit/tools/tikicpulib/lib/cmake:/usr/local/Ascend/cann-9.0.1/lib64/cmake:/usr/local/ascend91/Ascend/cann-9.1.0/toolkit/tools/tikicpulib/lib/cmake:/usr/local/ascend91/Ascend/cann-9.1.0/lib64/cmake:/usr/local/Ascend/cann-9.0.1/toolkit/tools/tikicpulib/lib/cmake:/usr/local/Ascend/cann-9.0.1/lib64/cmake:/usr/local/ascend91/Ascend/cann-9.1.0/toolkit/tools/tikicpulib/lib/cmake:/usr/local/ascend91/Ascend/cann-9.1.0/lib64/cmake
+++++ '[' /usr/local/ascend91/Ascend/cann-9.1.0/toolkit/tools/tikicpulib/lib/cmake:/usr/local/ascend91/Ascend/cann-9.1.0/lib64/cmake:/usr/local/Ascend/cann-9.0.1/toolkit/tools/tikicpulib/lib/cmake:/usr/local/Ascend/cann-9.0.1/lib64/cmake:/usr/local/ascend91/Ascend/cann-9.1.0/toolkit/tools/tikicpulib/lib/cmake:/usr/local/ascend91/Ascend/cann-9.1.0/lib64/cmake:/usr/local/Ascend/cann-9.0.1/toolkit/tools/tikicpulib/lib/cmake:/usr/local/Ascend/cann-9.0.1/lib64/cmake:/usr/local/ascend91/Ascend/cann-9.1.0/toolkit/tools/tikicpulib/lib/cmake:/usr/local/ascend91/Ascend/cann-9.1.0/lib64/cmake = '' ']'
+++++ read -r CMAKE_PREFIX_PATH
+++++ export CMAKE_PREFIX_PATH
+++++ prepend_env CMAKE_PREFIX_PATH /usr/local/ascend91/Ascend/cann-9.1.0/toolkit/tools/tikicpulib/lib/cmake
+++++ local name=CMAKE_PREFIX_PATH
+++++ local value=/usr/local/ascend91/Ascend/cann-9.1.0/toolkit/tools/tikicpulib/lib/cmake
++++++ eval echo '${CMAKE_PREFIX_PATH}'
+++++++ echo /usr/local/ascend91/Ascend/cann-9.1.0/lib64/cmake:/usr/local/ascend91/Ascend/cann-9.1.0/toolkit/tools/tikicpulib/lib/cmake:/usr/local/ascend91/Ascend/cann-9.1.0/lib64/cmake:/usr/local/Ascend/cann-9.0.1/toolkit/tools/tikicpulib/lib/cmake:/usr/local/Ascend/cann-9.0.1/lib64/cmake:/usr/local/ascend91/Ascend/cann-9.1.0/toolkit/tools/tikicpulib/lib/cmake:/usr/local/ascend91/Ascend/cann-9.1.0/lib64/cmake:/usr/local/Ascend/cann-9.0.1/toolkit/tools/tikicpulib/lib/cmake:/usr/local/Ascend/cann-9.0.1/lib64/cmake:/usr/local/ascend91/Ascend/cann-9.1.0/toolkit/tools/tikicpulib/lib/cmake:/usr/local/ascend91/Ascend/cann-9.1.0/lib64/cmake
+++++ local env_value=/usr/local/ascend91/Ascend/cann-9.1.0/lib64/cmake:/usr/local/ascend91/Ascend/cann-9.1.0/toolkit/tools/tikicpulib/lib/cmake:/usr/local/ascend91/Ascend/cann-9.1.0/lib64/cmake:/usr/local/Ascend/cann-9.0.1/toolkit/tools/tikicpulib/lib/cmake:/usr/local/Ascend/cann-9.0.1/lib64/cmake:/usr/local/ascend91/Ascend/cann-9.1.0/toolkit/tools/tikicpulib/lib/cmake:/usr/local/ascend91/Ascend/cann-9.1.0/lib64/cmake:/usr/local/Ascend/cann-9.0.1/toolkit/tools/tikicpulib/lib/cmake:/usr/local/Ascend/cann-9.0.1/lib64/cmake:/usr/local/ascend91/Ascend/cann-9.1.0/toolkit/tools/tikicpulib/lib/cmake:/usr/local/ascend91/Ascend/cann-9.1.0/lib64/cmake
+++++ '[' /usr/local/ascend91/Ascend/cann-9.1.0/lib64/cmake:/usr/local/ascend91/Ascend/cann-9.1.0/toolkit/tools/tikicpulib/lib/cmake:/usr/local/ascend91/Ascend/cann-9.1.0/lib64/cmake:/usr/local/Ascend/cann-9.0.1/toolkit/tools/tikicpulib/lib/cmake:/usr/local/Ascend/cann-9.0.1/lib64/cmake:/usr/local/ascend91/Ascend/cann-9.1.0/toolkit/tools/tikicpulib/lib/cmake:/usr/local/ascend91/Ascend/cann-9.1.0/lib64/cmake:/usr/local/Ascend/cann-9.0.1/toolkit/tools/tikicpulib/lib/cmake:/usr/local/Ascend/cann-9.0.1/lib64/cmake:/usr/local/ascend91/Ascend/cann-9.1.0/toolkit/tools/tikicpulib/lib/cmake:/usr/local/ascend91/Ascend/cann-9.1.0/lib64/cmake = '' ']'
+++++ read -r CMAKE_PREFIX_PATH
+++++ export CMAKE_PREFIX_PATH
++++ '[' -f /usr/local/ascend91/Ascend/nnal/atb/set_env.sh ']'
++++ source /usr/local/ascend91/Ascend/nnal/atb/set_env.sh --cxx_abi=1
+++++ set_env_path=/usr/local/ascend91/Ascend/nnal/atb/set_env.sh
+++++ [[ -n '' ]]
+++++ [[ -f /usr/local/ascend91/Ascend/nnal/atb/set_env.sh ]]
+++++ [[ /usr/local/ascend91/Ascend/nnal/atb/set_env.sh =~ (^|/)set_env\.sh$ ]]
+++++++ dirname /usr/local/ascend91/Ascend/nnal/atb/set_env.sh
++++++ cd /usr/local/ascend91/Ascend/nnal/atb
++++++ pwd
+++++ atb_path=/usr/local/ascend91/Ascend/nnal/atb
+++++ get_cxx_abi_option --cxx_abi=1
+++++ cxx_abi=
+++++ [[ -z --cxx_abi=1 ]]
+++++ case "$1" in
+++++ cxx_abi=1
+++++ shift
+++++ [[ -z '' ]]
+++++ [[ 1 == '' ]]
+++++ export ATB_HOME_PATH=/usr/local/ascend91/Ascend/nnal/atb/latest/atb/cxx_abi_1
+++++ ATB_HOME_PATH=/usr/local/ascend91/Ascend/nnal/atb/latest/atb/cxx_abi_1
+++++ export LD_LIBRARY_PATH=/usr/local/ascend91/Ascend/nnal/atb/latest/atb/cxx_abi_1/lib:/usr/local/ascend91/Ascend/nnal/atb/latest/atb/cxx_abi_1/examples:/usr/local/ascend91/Ascend/nnal/atb/latest/atb/cxx_abi_1/tests/atbopstest:/usr/local/ascend91/Ascend/cann-9.1.0/lib64:/usr/local/ascend91/Ascend/cann-9.1.0/lib64/plugin/opskernel:/usr/local/ascend91/Ascend/cann-9.1.0/lib64/plugin/nnengine:/usr/local/ascend91/Ascend/cann-9.1.0/opp/built-in/op_impl/ai_core/tbe/op_tiling/lib/linux/aarch64:/usr/local/Ascend/driver/lib64:/usr/local/Ascend/driver/lib64/common:/usr/local/Ascend/driver/lib64/driver
+++++ LD_LIBRARY_PATH=/usr/local/ascend91/Ascend/nnal/atb/latest/atb/cxx_abi_1/lib:/usr/local/ascend91/Ascend/nnal/atb/latest/atb/cxx_abi_1/examples:/usr/local/ascend91/Ascend/nnal/atb/latest/atb/cxx_abi_1/tests/atbopstest:/usr/local/ascend91/Ascend/cann-9.1.0/lib64:/usr/local/ascend91/Ascend/cann-9.1.0/lib64/plugin/opskernel:/usr/local/ascend91/Ascend/cann-9.1.0/lib64/plugin/nnengine:/usr/local/ascend91/Ascend/cann-9.1.0/opp/built-in/op_impl/ai_core/tbe/op_tiling/lib/linux/aarch64:/usr/local/Ascend/driver/lib64:/usr/local/Ascend/driver/lib64/common:/usr/local/Ascend/driver/lib64/driver
+++++ export PATH=/usr/local/ascend91/Ascend/nnal/atb/latest/atb/cxx_abi_1/bin:/usr/local/ascend91/Ascend/cann-9.1.0/bin:/usr/local/ascend91/Ascend/cann-9.1.0/tools/ccec_compiler/bin:/usr/local/ascend91/Ascend/cann-9.1.0/tools/profiler/bin:/usr/local/ascend91/Ascend/cann-9.1.0/tools/ascend_system_advisor/asys:/usr/local/ascend91/Ascend/cann-9.1.0/tools/show_kernel_debug_data:/usr/local/ascend91/Ascend/cann-9.1.0/tools/msobjdump:/usr/local/ascend91/Ascend/nnal/atb/latest/atb/cxx_abi_1/bin:/usr/local/Ascend/nnal/atb/latest/atb/cxx_abi_1/bin:/usr/local/Ascend/cann-9.0.1/tools/bishengir/bin:/usr/local/Ascend/cann-9.0.1/bin:/usr/local/Ascend/cann-9.0.1/tools/ccec_compiler/bin:/usr/local/Ascend/cann-9.0.1/tools/profiler/bin:/usr/local/Ascend/cann-9.0.1/tools/ascend_system_advisor/asys:/usr/local/Ascend/cann-9.0.1/tools/show_kernel_debug_data:/usr/local/Ascend/cann-9.0.1/tools/msobjdump:/usr/local/ascend91/Ascend/nnal/atb/latest/atb/cxx_abi_1/bin:/usr/local/Ascend/nnal/atb/latest/atb/cxx_abi_1/bin:/usr/local/ascend91/Ascend/nnal/atb/latest/atb/cxx_abi_1/bin:/opt/miniconda3/envs/hust/bin:/opt/miniconda3/condabin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/root/bin:/root/bin
+++++ PATH=/usr/local/ascend91/Ascend/nnal/atb/latest/atb/cxx_abi_1/bin:/usr/local/ascend91/Ascend/cann-9.1.0/bin:/usr/local/ascend91/Ascend/cann-9.1.0/tools/ccec_compiler/bin:/usr/local/ascend91/Ascend/cann-9.1.0/tools/profiler/bin:/usr/local/ascend91/Ascend/cann-9.1.0/tools/ascend_system_advisor/asys:/usr/local/ascend91/Ascend/cann-9.1.0/tools/show_kernel_debug_data:/usr/local/ascend91/Ascend/cann-9.1.0/tools/msobjdump:/usr/local/ascend91/Ascend/nnal/atb/latest/atb/cxx_abi_1/bin:/usr/local/Ascend/nnal/atb/latest/atb/cxx_abi_1/bin:/usr/local/Ascend/cann-9.0.1/tools/bishengir/bin:/usr/local/Ascend/cann-9.0.1/bin:/usr/local/Ascend/cann-9.0.1/tools/ccec_compiler/bin:/usr/local/Ascend/cann-9.0.1/tools/profiler/bin:/usr/local/Ascend/cann-9.0.1/tools/ascend_system_advisor/asys:/usr/local/Ascend/cann-9.0.1/tools/show_kernel_debug_data:/usr/local/Ascend/cann-9.0.1/tools/msobjdump:/usr/local/ascend91/Ascend/nnal/atb/latest/atb/cxx_abi_1/bin:/usr/local/Ascend/nnal/atb/latest/atb/cxx_abi_1/bin:/usr/local/ascend91/Ascend/nnal/atb/latest/atb/cxx_abi_1/bin:/opt/miniconda3/envs/hust/bin:/opt/miniconda3/condabin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/root/bin:/root/bin
+++++ export ATB_STREAM_SYNC_EVERY_KERNEL_ENABLE=0
+++++ ATB_STREAM_SYNC_EVERY_KERNEL_ENABLE=0
+++++ export ATB_STREAM_SYNC_EVERY_RUNNER_ENABLE=0
+++++ ATB_STREAM_SYNC_EVERY_RUNNER_ENABLE=0
+++++ export ATB_STREAM_SYNC_EVERY_OPERATION_ENABLE=0
+++++ ATB_STREAM_SYNC_EVERY_OPERATION_ENABLE=0
+++++ export ATB_OPSRUNNER_KERNEL_CACHE_LOCAL_COUNT=1
+++++ ATB_OPSRUNNER_KERNEL_CACHE_LOCAL_COUNT=1
+++++ export ATB_OPSRUNNER_KERNEL_CACHE_GLOABL_COUNT=5
+++++ ATB_OPSRUNNER_KERNEL_CACHE_GLOABL_COUNT=5
+++++ export ATB_WORKSPACE_MEM_ALLOC_ALG_TYPE=1
+++++ ATB_WORKSPACE_MEM_ALLOC_ALG_TYPE=1
+++++ export ATB_COMPARE_TILING_EVERY_KERNEL=0
+++++ ATB_COMPARE_TILING_EVERY_KERNEL=0
+++++ export ATB_SHARE_MEMORY_NAME_SUFFIX=
+++++ ATB_SHARE_MEMORY_NAME_SUFFIX=
+++++ export ATB_MATMUL_SHUFFLE_K_ENABLE=1
+++++ ATB_MATMUL_SHUFFLE_K_ENABLE=1
+++++ export LCCL_DETERMINISTIC=0
+++++ LCCL_DETERMINISTIC=0
+++++ export LCCL_PARALLEL=0
+++++ LCCL_PARALLEL=0
++ __conda_hashr
++ '[' -n '' ']'
++ '[' -n '' ']'
++ hash -r
++ cd /tmp
++ export ASCEND_RT_VISIBLE_DEVICES=7 HF_HUB_OFFLINE=1 VLLM_DISABLE_COMPILE_CACHE=1
++ ASCEND_RT_VISIBLE_DEVICES=7
++ HF_HUB_OFFLINE=1
++ VLLM_DISABLE_COMPILE_CACHE=1
++ flock /tmp/w3-npu.lock npu-smi info -t usages -i 7
++ grep -i 'HBM Usage Rate'
++ tee /vllm-workspace/knowledge/evidence/cascade/logs/v1-real-model/card7_before.txt
+	HBM Usage Rate(%)              : 5
++ echo '##### LANE G (graph, main acceptance) B=64 shared~4224 gen128 NATURAL EOS #####'
+##### LANE G (graph, main acceptance) B=64 shared~4224 gen128 NATURAL EOS #####
++ run off gB64_off 64 420 128 0 1 0 0
++ local mode=off tag=gB64_off batch=64 sent=420 gen=128 eager=0 graph=1 ie=0 trace=0
++ shift 9
++ rm -rf /tmp/ev2real_cache_gB64_off
++ echo '== gB64_off =='
++ flock /tmp/w3-npu.lock npu-smi info -t usages -i 7
++ grep -i 'HBM Usage Rate'
++ flock /tmp/w3-npu.lock timeout 3600 env VLLM_CACHE_ROOT=/tmp/ev2real_cache_gB64_off VLLM_ASCEND_CASCADE_TRACE=0 EV2_BATCH=64 EV2_SENT=420 EV2_GEN=128 EV2_MAXLEN=8192 EV2_EAGER=0 EV2_GRAPH=1 EV2_IGNORE_EOS=0 python -u /vllm-workspace/knowledge/evidence/cascade/logs/v1-real-model/ev2_run_real.py off gB64_off
++ local rc=0
++ cp -f /tmp/ev2_off_gB64_off.json /vllm-workspace/knowledge/evidence/cascade/logs/v1-real-model/raw_dumps/
++ echo 'rc=0 tag=gB64_off'
+rc=0 tag=gB64_off
++ tail -1 /vllm-workspace/knowledge/evidence/cascade/logs/v1-real-model/gB64_off.log
+INFO 09-11 03:33:12 [core_client.py:749] [shutdown] MPClient: cleaning up background resources
++ grep -m1 'cascade plugin loaded' /vllm-workspace/knowledge/evidence/cascade/logs/v1-real-model/gB64_off.log
+INFO 09-11 03:30:51 [cascade_plugin.py:147] cascade plugin loaded (gate=0, graph_gate=0, kernel_wheel=ok)
+++ grep -c cascade-active /vllm-workspace/knowledge/evidence/cascade/logs/v1-real-model/gB64_off.log
++ echo cascade-active=0
+cascade-active=0
+++ grep -c 'capture body SUCCESS' /vllm-workspace/knowledge/evidence/cascade/logs/v1-real-model/gB64_off.log
++ echo capture-SUCCESS=0
+capture-SUCCESS=0
+++ grep -c 'replay update: cascade key hit' /vllm-workspace/knowledge/evidence/cascade/logs/v1-real-model/gB64_off.log
++ echo replay-key-hit=0
+replay-key-hit=0
+++ grep -c 'cascade twin missing for descriptor' /vllm-workspace/knowledge/evidence/cascade/logs/v1-real-model/gB64_off.log
++ echo twin-miss=0
+twin-miss=0
+++ grep -c 'delegating to the original implementation' /vllm-workspace/knowledge/evidence/cascade/logs/v1-real-model/gB64_off.log
++ echo drift-warn=0
+drift-warn=0
+++ grep -c TypeError /vllm-workspace/knowledge/evidence/cascade/logs/v1-real-model/gB64_off.log
++ echo typeerror=0
+typeerror=0
++ flock /tmp/w3-npu.lock npu-smi info -t usages -i 7
++ grep -i 'HBM Usage Rate'
++ run on gB64_on 64 420 128 0 1 0 1
++ local mode=on tag=gB64_on batch=64 sent=420 gen=128 eager=0 graph=1 ie=0 trace=1
++ shift 9
++ rm -rf /tmp/ev2real_cache_gB64_on
++ echo '== gB64_on =='
++ flock /tmp/w3-npu.lock npu-smi info -t usages -i 7
++ grep -i 'HBM Usage Rate'
++ flock /tmp/w3-npu.lock timeout 3600 env VLLM_CACHE_ROOT=/tmp/ev2real_cache_gB64_on VLLM_ASCEND_CASCADE_TRACE=1 EV2_BATCH=64 EV2_SENT=420 EV2_GEN=128 EV2_MAXLEN=8192 EV2_EAGER=0 EV2_GRAPH=1 EV2_IGNORE_EOS=0 python -u /vllm-workspace/knowledge/evidence/cascade/logs/v1-real-model/ev2_run_real.py on gB64_on
++ local rc=0
++ cp -f /tmp/ev2_on_gB64_on.json /vllm-workspace/knowledge/evidence/cascade/logs/v1-real-model/raw_dumps/
++ echo 'rc=0 tag=gB64_on'
+rc=0 tag=gB64_on
++ tail -1 /vllm-workspace/knowledge/evidence/cascade/logs/v1-real-model/gB64_on.log
+WARNING 09-11 03:35:50 [core_client.py:791] [shutdown] MPClient: engine core exited unexpectedly; starting cleanup
++ grep -m1 'cascade plugin loaded' /vllm-workspace/knowledge/evidence/cascade/logs/v1-real-model/gB64_on.log
+INFO 09-11 03:33:40 [cascade_plugin.py:147] cascade plugin loaded (gate=1, graph_gate=1, kernel_wheel=ok)
+++ grep -c cascade-active /vllm-workspace/knowledge/evidence/cascade/logs/v1-real-model/gB64_on.log
++ echo cascade-active=0
+cascade-active=0
+++ grep -c 'capture body SUCCESS' /vllm-workspace/knowledge/evidence/cascade/logs/v1-real-model/gB64_on.log
++ echo capture-SUCCESS=96
+capture-SUCCESS=96
+++ grep -c 'replay update: cascade key hit' /vllm-workspace/knowledge/evidence/cascade/logs/v1-real-model/gB64_on.log
++ echo replay-key-hit=127
+replay-key-hit=127
+++ grep -c 'cascade twin missing for descriptor' /vllm-workspace/knowledge/evidence/cascade/logs/v1-real-model/gB64_on.log
++ echo twin-miss=1
+twin-miss=1
+++ grep -c 'delegating to the original implementation' /vllm-workspace/knowledge/evidence/cascade/logs/v1-real-model/gB64_on.log
++ echo drift-warn=0
+drift-warn=0
+++ grep -c TypeError /vllm-workspace/knowledge/evidence/cascade/logs/v1-real-model/gB64_on.log
++ echo typeerror=0
+typeerror=0
++ flock /tmp/w3-npu.lock npu-smi info -t usages -i 7
++ grep -i 'HBM Usage Rate'
++ run on_run2 gB64_on_run2 64 420 128 0 1 0 1
++ local mode=on_run2 tag=gB64_on_run2 batch=64 sent=420 gen=128 eager=0 graph=1 ie=0 trace=1
++ shift 9
++ rm -rf /tmp/ev2real_cache_gB64_on_run2
++ echo '== gB64_on_run2 =='
++ flock /tmp/w3-npu.lock npu-smi info -t usages -i 7
++ grep -i 'HBM Usage Rate'
++ flock /tmp/w3-npu.lock timeout 3600 env VLLM_CACHE_ROOT=/tmp/ev2real_cache_gB64_on_run2 VLLM_ASCEND_CASCADE_TRACE=1 EV2_BATCH=64 EV2_SENT=420 EV2_GEN=128 EV2_MAXLEN=8192 EV2_EAGER=0 EV2_GRAPH=1 EV2_IGNORE_EOS=0 python -u /vllm-workspace/knowledge/evidence/cascade/logs/v1-real-model/ev2_run_real.py on_run2 gB64_on_run2
++ local rc=0
++ cp -f /tmp/ev2_on_run2_gB64_on_run2.json /vllm-workspace/knowledge/evidence/cascade/logs/v1-real-model/raw_dumps/
++ echo 'rc=0 tag=gB64_on_run2'
+rc=0 tag=gB64_on_run2
++ tail -1 /vllm-workspace/knowledge/evidence/cascade/logs/v1-real-model/gB64_on_run2.log
+WARNING 09-11 03:38:34 [core_client.py:791] [shutdown] MPClient: engine core exited unexpectedly; starting cleanup
++ grep -m1 'cascade plugin loaded' /vllm-workspace/knowledge/evidence/cascade/logs/v1-real-model/gB64_on_run2.log
+INFO 09-11 03:36:19 [cascade_plugin.py:147] cascade plugin loaded (gate=1, graph_gate=1, kernel_wheel=ok)
+++ grep -c cascade-active /vllm-workspace/knowledge/evidence/cascade/logs/v1-real-model/gB64_on_run2.log
++ echo cascade-active=0
+cascade-active=0
+++ grep -c 'capture body SUCCESS' /vllm-workspace/knowledge/evidence/cascade/logs/v1-real-model/gB64_on_run2.log
++ echo capture-SUCCESS=96
+capture-SUCCESS=96
+++ grep -c 'replay update: cascade key hit' /vllm-workspace/knowledge/evidence/cascade/logs/v1-real-model/gB64_on_run2.log
++ echo replay-key-hit=127
+replay-key-hit=127
+++ grep -c 'cascade twin missing for descriptor' /vllm-workspace/knowledge/evidence/cascade/logs/v1-real-model/gB64_on_run2.log
++ echo twin-miss=1
+twin-miss=1
+++ grep -c 'delegating to the original implementation' /vllm-workspace/knowledge/evidence/cascade/logs/v1-real-model/gB64_on_run2.log
++ echo drift-warn=0
+drift-warn=0
+++ grep -c TypeError /vllm-workspace/knowledge/evidence/cascade/logs/v1-real-model/gB64_on_run2.log
++ echo typeerror=0
+typeerror=0
++ flock /tmp/w3-npu.lock npu-smi info -t usages -i 7
++ grep -i 'HBM Usage Rate'
++ echo '##### LANE G B=32 NATURAL EOS #####'
+##### LANE G B=32 NATURAL EOS #####
++ run off gB32_off 32 420 128 0 1 0 0
++ local mode=off tag=gB32_off batch=32 sent=420 gen=128 eager=0 graph=1 ie=0 trace=0
++ shift 9
++ rm -rf /tmp/ev2real_cache_gB32_off
++ echo '== gB32_off =='
++ flock /tmp/w3-npu.lock npu-smi info -t usages -i 7
++ grep -i 'HBM Usage Rate'
++ flock /tmp/w3-npu.lock timeout 3600 env VLLM_CACHE_ROOT=/tmp/ev2real_cache_gB32_off VLLM_ASCEND_CASCADE_TRACE=0 EV2_BATCH=32 EV2_SENT=420 EV2_GEN=128 EV2_MAXLEN=8192 EV2_EAGER=0 EV2_GRAPH=1 EV2_IGNORE_EOS=0 python -u /vllm-workspace/knowledge/evidence/cascade/logs/v1-real-model/ev2_run_real.py off gB32_off
++ local rc=0
++ cp -f /tmp/ev2_off_gB32_off.json /vllm-workspace/knowledge/evidence/cascade/logs/v1-real-model/raw_dumps/
++ echo 'rc=0 tag=gB32_off'
+rc=0 tag=gB32_off
++ tail -1 /vllm-workspace/knowledge/evidence/cascade/logs/v1-real-model/gB32_off.log
+WARNING 09-11 03:41:19 [core_client.py:791] [shutdown] MPClient: engine core exited unexpectedly; starting cleanup
++ grep -m1 'cascade plugin loaded' /vllm-workspace/knowledge/evidence/cascade/logs/v1-real-model/gB32_off.log
+INFO 09-11 03:39:03 [cascade_plugin.py:147] cascade plugin loaded (gate=0, graph_gate=0, kernel_wheel=ok)
+++ grep -c cascade-active /vllm-workspace/knowledge/evidence/cascade/logs/v1-real-model/gB32_off.log
++ echo cascade-active=0
+cascade-active=0
+++ grep -c 'capture body SUCCESS' /vllm-workspace/knowledge/evidence/cascade/logs/v1-real-model/gB32_off.log
++ echo capture-SUCCESS=0
+capture-SUCCESS=0
+++ grep -c 'replay update: cascade key hit' /vllm-workspace/knowledge/evidence/cascade/logs/v1-real-model/gB32_off.log
++ echo replay-key-hit=0
+replay-key-hit=0
+++ grep -c 'cascade twin missing for descriptor' /vllm-workspace/knowledge/evidence/cascade/logs/v1-real-model/gB32_off.log
++ echo twin-miss=0
+twin-miss=0
+++ grep -c 'delegating to the original implementation' /vllm-workspace/knowledge/evidence/cascade/logs/v1-real-model/gB32_off.log
++ echo drift-warn=0
+drift-warn=0
+++ grep -c TypeError /vllm-workspace/knowledge/evidence/cascade/logs/v1-real-model/gB32_off.log
++ echo typeerror=0
+typeerror=0
++ flock /tmp/w3-npu.lock npu-smi info -t usages -i 7
++ grep -i 'HBM Usage Rate'
++ run on gB32_on 32 420 128 0 1 0 1
++ local mode=on tag=gB32_on batch=32 sent=420 gen=128 eager=0 graph=1 ie=0 trace=1
++ shift 9
++ rm -rf /tmp/ev2real_cache_gB32_on
++ echo '== gB32_on =='
++ flock /tmp/w3-npu.lock npu-smi info -t usages -i 7
++ grep -i 'HBM Usage Rate'
++ flock /tmp/w3-npu.lock timeout 3600 env VLLM_CACHE_ROOT=/tmp/ev2real_cache_gB32_on VLLM_ASCEND_CASCADE_TRACE=1 EV2_BATCH=32 EV2_SENT=420 EV2_GEN=128 EV2_MAXLEN=8192 EV2_EAGER=0 EV2_GRAPH=1 EV2_IGNORE_EOS=0 python -u /vllm-workspace/knowledge/evidence/cascade/logs/v1-real-model/ev2_run_real.py on gB32_on
++ local rc=0
++ cp -f /tmp/ev2_on_gB32_on.json /vllm-workspace/knowledge/evidence/cascade/logs/v1-real-model/raw_dumps/
++ echo 'rc=0 tag=gB32_on'
+rc=0 tag=gB32_on
++ tail -1 /vllm-workspace/knowledge/evidence/cascade/logs/v1-real-model/gB32_on.log
+WARNING 09-11 03:43:59 [core_client.py:791] [shutdown] MPClient: engine core exited unexpectedly; starting cleanup
++ grep -m1 'cascade plugin loaded' /vllm-workspace/knowledge/evidence/cascade/logs/v1-real-model/gB32_on.log
+INFO 09-11 03:41:48 [cascade_plugin.py:147] cascade plugin loaded (gate=1, graph_gate=1, kernel_wheel=ok)
+++ grep -c cascade-active /vllm-workspace/knowledge/evidence/cascade/logs/v1-real-model/gB32_on.log
++ echo cascade-active=0
+cascade-active=0
+++ grep -c 'capture body SUCCESS' /vllm-workspace/knowledge/evidence/cascade/logs/v1-real-model/gB32_on.log
++ echo capture-SUCCESS=96
+capture-SUCCESS=96
+++ grep -c 'replay update: cascade key hit' /vllm-workspace/knowledge/evidence/cascade/logs/v1-real-model/gB32_on.log
++ echo replay-key-hit=127
+replay-key-hit=127
+++ grep -c 'cascade twin missing for descriptor' /vllm-workspace/knowledge/evidence/cascade/logs/v1-real-model/gB32_on.log
++ echo twin-miss=1
+twin-miss=1
+++ grep -c 'delegating to the original implementation' /vllm-workspace/knowledge/evidence/cascade/logs/v1-real-model/gB32_on.log
++ echo drift-warn=0
+drift-warn=0
+++ grep -c TypeError /vllm-workspace/knowledge/evidence/cascade/logs/v1-real-model/gB32_on.log
++ echo typeerror=0
+typeerror=0
++ flock /tmp/w3-npu.lock npu-smi info -t usages -i 7
++ grep -i 'HBM Usage Rate'
++ echo '##### LANE E (eager, bf16 reference frame) B=64 NATURAL EOS #####'
+##### LANE E (eager, bf16 reference frame) B=64 NATURAL EOS #####
++ run off eB64_off 64 420 128 1 0 0 0
++ local mode=off tag=eB64_off batch=64 sent=420 gen=128 eager=1 graph=0 ie=0 trace=0
++ shift 9
++ rm -rf /tmp/ev2real_cache_eB64_off
++ echo '== eB64_off =='
++ flock /tmp/w3-npu.lock npu-smi info -t usages -i 7
++ grep -i 'HBM Usage Rate'
++ flock /tmp/w3-npu.lock timeout 3600 env VLLM_CACHE_ROOT=/tmp/ev2real_cache_eB64_off VLLM_ASCEND_CASCADE_TRACE=0 EV2_BATCH=64 EV2_SENT=420 EV2_GEN=128 EV2_MAXLEN=8192 EV2_EAGER=1 EV2_GRAPH=0 EV2_IGNORE_EOS=0 python -u /vllm-workspace/knowledge/evidence/cascade/logs/v1-real-model/ev2_run_real.py off eB64_off
++ local rc=0
++ cp -f /tmp/ev2_off_eB64_off.json /vllm-workspace/knowledge/evidence/cascade/logs/v1-real-model/raw_dumps/
++ echo 'rc=0 tag=eB64_off'
+rc=0 tag=eB64_off
++ tail -1 /vllm-workspace/knowledge/evidence/cascade/logs/v1-real-model/eB64_off.log
+WARNING 09-11 03:46:04 [core_client.py:791] [shutdown] MPClient: engine core exited unexpectedly; starting cleanup
++ grep -m1 'cascade plugin loaded' /vllm-workspace/knowledge/evidence/cascade/logs/v1-real-model/eB64_off.log
+INFO 09-11 03:44:28 [cascade_plugin.py:147] cascade plugin loaded (gate=0, graph_gate=0, kernel_wheel=ok)
+++ grep -c cascade-active /vllm-workspace/knowledge/evidence/cascade/logs/v1-real-model/eB64_off.log
++ echo cascade-active=0
+cascade-active=0
+++ grep -c 'capture body SUCCESS' /vllm-workspace/knowledge/evidence/cascade/logs/v1-real-model/eB64_off.log
++ echo capture-SUCCESS=0
+capture-SUCCESS=0
+++ grep -c 'replay update: cascade key hit' /vllm-workspace/knowledge/evidence/cascade/logs/v1-real-model/eB64_off.log
++ echo replay-key-hit=0
+replay-key-hit=0
+++ grep -c 'cascade twin missing for descriptor' /vllm-workspace/knowledge/evidence/cascade/logs/v1-real-model/eB64_off.log
++ echo twin-miss=0
+twin-miss=0
+++ grep -c 'delegating to the original implementation' /vllm-workspace/knowledge/evidence/cascade/logs/v1-real-model/eB64_off.log
++ echo drift-warn=0
+drift-warn=0
+++ grep -c TypeError /vllm-workspace/knowledge/evidence/cascade/logs/v1-real-model/eB64_off.log
++ echo typeerror=0
+typeerror=0
++ flock /tmp/w3-npu.lock npu-smi info -t usages -i 7
++ grep -i 'HBM Usage Rate'
++ run off eB64_off2 64 420 128 1 0 0 0
++ local mode=off tag=eB64_off2 batch=64 sent=420 gen=128 eager=1 graph=0 ie=0 trace=0
++ shift 9
++ rm -rf /tmp/ev2real_cache_eB64_off2
++ echo '== eB64_off2 =='
++ flock /tmp/w3-npu.lock npu-smi info -t usages -i 7
++ grep -i 'HBM Usage Rate'
++ flock /tmp/w3-npu.lock timeout 3600 env VLLM_CACHE_ROOT=/tmp/ev2real_cache_eB64_off2 VLLM_ASCEND_CASCADE_TRACE=0 EV2_BATCH=64 EV2_SENT=420 EV2_GEN=128 EV2_MAXLEN=8192 EV2_EAGER=1 EV2_GRAPH=0 EV2_IGNORE_EOS=0 python -u /vllm-workspace/knowledge/evidence/cascade/logs/v1-real-model/ev2_run_real.py off eB64_off2
++ local rc=0
++ cp -f /tmp/ev2_off_eB64_off2.json /vllm-workspace/knowledge/evidence/cascade/logs/v1-real-model/raw_dumps/
++ echo 'rc=0 tag=eB64_off2'
+rc=0 tag=eB64_off2
++ tail -1 /vllm-workspace/knowledge/evidence/cascade/logs/v1-real-model/eB64_off2.log
+INFO 09-11 03:48:08 [core_client.py:751] [shutdown] MPClient: complete
++ grep -m1 'cascade plugin loaded' /vllm-workspace/knowledge/evidence/cascade/logs/v1-real-model/eB64_off2.log
+INFO 09-11 03:46:32 [cascade_plugin.py:147] cascade plugin loaded (gate=0, graph_gate=0, kernel_wheel=ok)
+++ grep -c cascade-active /vllm-workspace/knowledge/evidence/cascade/logs/v1-real-model/eB64_off2.log
++ echo cascade-active=0
+cascade-active=0
+++ grep -c 'capture body SUCCESS' /vllm-workspace/knowledge/evidence/cascade/logs/v1-real-model/eB64_off2.log
++ echo capture-SUCCESS=0
+capture-SUCCESS=0
+++ grep -c 'replay update: cascade key hit' /vllm-workspace/knowledge/evidence/cascade/logs/v1-real-model/eB64_off2.log
++ echo replay-key-hit=0
+replay-key-hit=0
+++ grep -c 'cascade twin missing for descriptor' /vllm-workspace/knowledge/evidence/cascade/logs/v1-real-model/eB64_off2.log
++ echo twin-miss=0
+twin-miss=0
+++ grep -c 'delegating to the original implementation' /vllm-workspace/knowledge/evidence/cascade/logs/v1-real-model/eB64_off2.log
++ echo drift-warn=0
+drift-warn=0
+++ grep -c TypeError /vllm-workspace/knowledge/evidence/cascade/logs/v1-real-model/eB64_off2.log
++ echo typeerror=0
+typeerror=0
++ flock /tmp/w3-npu.lock npu-smi info -t usages -i 7
++ grep -i 'HBM Usage Rate'
++ run on eB64_on 64 420 128 1 0 0 1
++ local mode=on tag=eB64_on batch=64 sent=420 gen=128 eager=1 graph=0 ie=0 trace=1
++ shift 9
++ rm -rf /tmp/ev2real_cache_eB64_on
++ echo '== eB64_on =='
++ flock /tmp/w3-npu.lock npu-smi info -t usages -i 7
++ grep -i 'HBM Usage Rate'
++ flock /tmp/w3-npu.lock timeout 3600 env VLLM_CACHE_ROOT=/tmp/ev2real_cache_eB64_on VLLM_ASCEND_CASCADE_TRACE=1 EV2_BATCH=64 EV2_SENT=420 EV2_GEN=128 EV2_MAXLEN=8192 EV2_EAGER=1 EV2_GRAPH=0 EV2_IGNORE_EOS=0 python -u /vllm-workspace/knowledge/evidence/cascade/logs/v1-real-model/ev2_run_real.py on eB64_on
++ local rc=0
++ cp -f /tmp/ev2_on_eB64_on.json /vllm-workspace/knowledge/evidence/cascade/logs/v1-real-model/raw_dumps/
++ echo 'rc=0 tag=eB64_on'
+rc=0 tag=eB64_on
++ tail -1 /vllm-workspace/knowledge/evidence/cascade/logs/v1-real-model/eB64_on.log
+WARNING 09-11 03:50:35 [core_client.py:791] [shutdown] MPClient: engine core exited unexpectedly; starting cleanup
++ grep -m1 'cascade plugin loaded' /vllm-workspace/knowledge/evidence/cascade/logs/v1-real-model/eB64_on.log
+INFO 09-11 03:48:37 [cascade_plugin.py:147] cascade plugin loaded (gate=1, graph_gate=0, kernel_wheel=ok)
+++ grep -c cascade-active /vllm-workspace/knowledge/evidence/cascade/logs/v1-real-model/eB64_on.log
++ echo cascade-active=48
+cascade-active=48
+++ grep -c 'capture body SUCCESS' /vllm-workspace/knowledge/evidence/cascade/logs/v1-real-model/eB64_on.log
++ echo capture-SUCCESS=0
+capture-SUCCESS=0
+++ grep -c 'replay update: cascade key hit' /vllm-workspace/knowledge/evidence/cascade/logs/v1-real-model/eB64_on.log
++ echo replay-key-hit=0
+replay-key-hit=0
+++ grep -c 'cascade twin missing for descriptor' /vllm-workspace/knowledge/evidence/cascade/logs/v1-real-model/eB64_on.log
++ echo twin-miss=0
+twin-miss=0
+++ grep -c 'delegating to the original implementation' /vllm-workspace/knowledge/evidence/cascade/logs/v1-real-model/eB64_on.log
++ echo drift-warn=0
+drift-warn=0
+++ grep -c TypeError /vllm-workspace/knowledge/evidence/cascade/logs/v1-real-model/eB64_on.log
++ echo typeerror=0
+typeerror=0
++ flock /tmp/w3-npu.lock npu-smi info -t usages -i 7
++ grep -i 'HBM Usage Rate'
++ echo '##### MATRIX DONE #####'
+##### MATRIX DONE #####
++ flock /tmp/w3-npu.lock npu-smi info -t usages -i 7
++ grep -i 'HBM Usage Rate'
++ tee /vllm-workspace/knowledge/evidence/cascade/logs/v1-real-model/card7_after.txt
+	HBM Usage Rate(%)              : 5
++ ls -la /vllm-workspace/knowledge/evidence/cascade/logs/v1-real-model/raw_dumps
+total 232
+drwxr-xr-x 2 root root  4096 Sep 11 03:50 .
+drwxr-xr-x 3 root root  4096 Sep 11 03:50 ..
+-rw-r--r-- 1 root root 29691 Sep 11 03:46 ev2_off_eB64_off.json
+-rw-r--r-- 1 root root 29691 Sep 11 03:48 ev2_off_eB64_off2.json
+-rw-r--r-- 1 root root 16277 Sep 11 03:41 ev2_off_gB32_off.json
+-rw-r--r-- 1 root root 29462 Sep 11 03:33 ev2_off_gB64_off.json
+-rw-r--r-- 1 root root 28834 Sep 11 03:50 ev2_on_eB64_on.json
+-rw-r--r-- 1 root root 16297 Sep 11 03:44 ev2_on_gB32_on.json
+-rw-r--r-- 1 root root 28833 Sep 11 03:35 ev2_on_gB64_on.json
+-rw-r--r-- 1 root root 28833 Sep 11 03:38 ev2_on_run2_gB64_on_run2.json
++ echo '##### leftover python/vllm processes (yours + others) #####'
+##### leftover python/vllm processes (yours + others) #####
++ ps -ef
++ grep -E 'python|vllm'
++ grep -v grep
++ tee /vllm-workspace/knowledge/evidence/cascade/logs/v1-real-model/card7_leftover_procs.txt
+root      324955       1  0 03:30 ?        00:00:00 bash /vllm-workspace/knowledge/evidence/cascade/logs/v1-real-model/matrix_real.sh
+root      347700  324955  0 03:50 ?        00:00:00 tee /vllm-workspace/knowledge/evidence/cascade/logs/v1-real-model/card7_leftover_procs.txt

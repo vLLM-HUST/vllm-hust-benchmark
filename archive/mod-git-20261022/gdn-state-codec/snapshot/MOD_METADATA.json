@@ -1,0 +1,58 @@
+{
+  "schema_version": "vllm-hust-mod-metadata-v1",
+  "mod_id": "org.vllm-hust.gdn-state-codec",
+  "repository": "gdn-state-codec",
+  "display_name": "GDN State Codec",
+  "canonical_repository": "https://github.com/vLLM-HUST/gdn-state-codec",
+  "responsibility": {
+    "organization": "vLLM-HUST",
+    "maintainers": [
+      {
+        "name": "Shuhao Zhang (Tony)",
+        "github": "ShuhaoZhangTony"
+      }
+    ],
+    "advisor_status": "none",
+    "advisors": []
+  },
+  "lifecycle": {
+    "status": "experimental",
+    "default_enabled": false,
+    "activation_contract": "Enable the ECPA Bundle and set VLLM_HUST_GDN_STATE_CODEC_ENABLE=1 only for explicit experiments; a compatible host source guard must pass.",
+    "rollback_contract": "Set VLLM_HUST_GDN_STATE_CODEC_KILL_SWITCH=1 or disable the org.vllm-hust.gdn-state-codec Bundle and restart vLLM."
+  },
+  "scope": {
+    "mechanism": "bounded recurrent-state compression for Qwen gated-delta layers on Ascend",
+    "supported_workloads": [
+      "No performance-qualified workload for version 0.2.0; the historical v68 observation is not inherited"
+    ],
+    "out_of_scope": [
+      "general online serving gain",
+      "graph-mode gain",
+      "multi-request gain",
+      "memory-capacity gain",
+      "other model families"
+    ]
+  },
+  "evidence": {
+    "qualification": "unqualified",
+    "latest_result": "evidence/ecpa-manager03-launch-20261009/ROUND-RESULTS.md",
+    "index": "catalog.json",
+    "performance_claims": [
+      {
+        "label": "real-online-e2e",
+        "scope": "Qwen3.5-35B-A3B TP2 eager, four AgentX first-turn shapes, 128 output tokens",
+        "result": "Version 0.2.0 ranged from 0.60% faster to 0.81% slower in total-time medians, regressed TTFT in all four cells, and changed every output hash; no stable gain qualified."
+      },
+      {
+        "label": "model-derived-component-negative",
+        "scope": "paper-aligned p16/r4 encoded Cube boundary on the frozen layer-0 fixture",
+        "result": "Correctness passed, but matched 82-step total time was 1.5829x native, so the no-harm gate failed."
+      }
+    ]
+  },
+  "metadata_source": {
+    "catalog": "catalog.json",
+    "provenance": "PROVENANCE.json"
+  }
+}
