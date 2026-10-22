@@ -1,0 +1,167 @@
+"""Invented LoCoMo-shaped fixtures, never original source or execution evidence."""
+
+from copy import deepcopy
+import hashlib
+import json
+from pathlib import Path
+
+import pytest
+
+from vllm_hust_workload_data import iter_workload
+from vllm_hust_workload_data.consumer import resolve_input
+from vllm_hust_workload_data.locomo import question_rows
+from vllm_hust_workload_data.pipeline import prepared_rows, run
+from vllm_hust_workload_data.registry import source_spec
+
+
+def parents():
+    return [
+        {
+            "sample_id": "fixture-conversation",
+            "conversation": {
+                "speaker_a": "A",
+                "speaker_b": "B",
+                "session_1_date_time": "original local date, no timezone assertion",
+                "session_1": [
+                    {
+                        "speaker": "A",
+                        "text": " original\nturn ",
+                        "dia_id": "D1:1",
+                        "img_url": "https://example.invalid/image",
+                        "blip_caption": "publisher caption",
+                    }
+                ],
+            },
+            "qa": [
+                {
+                    "question": "original question",
+                    (
+                        "adversarial_answer" if category == 5 else "answer"
+                    ): "REFERENCE_SENTINEL",
+                    "category": category,
+                    "evidence": ["D1:1"],
+                }
+                for category in (2, 3, 5)
+            ],
+            "observation": {"private": "OBSERVATION_SENTINEL"},
+            "session_summary": {"private": "SUMMARY_SENTINEL"},
+            "event_summary": {"private": "EVENT_GOLD_SENTINEL"},
+        }
+    ]
+
+
+def test_expansion_preserves_complete_context_original_positions_and_isolation():
+    original = parents()
+    frozen = deepcopy(original)
+    rows = list(question_rows(original))
+    assert len(rows) == 3
+    assert [r["source_question_index"] for r in rows] == [0, 1, 2]
+    assert all(r["source_parent_row_index"] == 0 for r in rows)
+    assert all(r["conversation"] == original[0]["conversation"] for r in rows)
+    assert all(
+        not {"qa", "observation", "session_summary", "event_summary"} & r.keys()
+        for r in rows
+    )
+    assert "answer" not in rows[2]  # Do not rename publisher adversarial_answer.
+    assert rows[2]["adversarial_answer"] == "REFERENCE_SENTINEL"
+    rows[0]["conversation"]["session_1"][0]["text"] = "mutated output"
+    assert original == frozen
+
+
+@pytest.mark.parametrize(
+    "failure", ["duplicate_id", "date", "turn", "category", "collision", "empty"]
+)
+def test_malformed_relations_fail_without_exposing_payload(failure):
+    data = parents()
+    if failure == "duplicate_id":
+        data.append(deepcopy(data[0]))
+    elif failure == "date":
+        data[0]["conversation"].pop("session_1_date_time")
+    elif failure == "turn":
+        data[0]["conversation"]["session_1"][0]["text"] = None
+    elif failure == "category":
+        data[0]["qa"][0]["category"] = True
+    elif failure == "collision":
+        data[0]["qa"][0]["conversation"] = "PRIVATE_SENTINEL"
+    else:
+        data[0]["qa"] = []
+    with pytest.raises(ValueError) as error:
+        list(question_rows(data))
+    assert "SENTINEL" not in str(error.value)
+
+
+def test_source_pipeline_and_resolver_use_same_question_view(tmp_path):
+    data = tmp_path / "data"
+    data.mkdir()
+    path = data / "fixture.json"
+    path.write_text(json.dumps(parents()), encoding="utf-8")
+    manifest = deepcopy(source_spec("LOCOMO"))
+    manifest["revision"] = "synthetic-unit-fixture-not-original"
+    manifest["files"] = [
+        {
+            "path": path.name,
+            "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+            "bytes": path.stat().st_size,
+            "rows": 3,
+            "role": "data",
+        }
+    ]
+    original = list(iter_workload("LOCOMO", data_root=data, manifest=manifest, limit=3))
+    for record in original:
+        assert set(record.task["input"]) == {"conversation", "question"}
+        assert "SENTINEL" not in json.dumps(record.input_record())
+        outcome = record.outcome_record()
+        assert (
+            outcome.get("answer", outcome.get("adversarial_answer"))
+            == "REFERENCE_SENTINEL"
+        )
+    binding = tmp_path / "binding.json"
+    binding.write_text(json.dumps(manifest), encoding="utf-8")
+    run(
+        {
+            "sources": [
+                {
+                    "source_id": "LOCOMO",
+                    "data_root": str(data),
+                    "manifest": str(binding),
+                    "limit": 3,
+                }
+            ]
+        },
+        output=tmp_path / "prepared",
+    )
+    database = tmp_path / "prepared/workload.sqlite"
+    references = list(prepared_rows(database))
+    assert len(references) == 3
+    for ref, expected in zip(references, original):
+        actual = resolve_input(database, ref["record_id"], data_root=data)
+        assert actual.input_record() == expected.input_record()
+        assert actual.outcome_record() == expected.outcome_record()
+
+
+def test_original_reader_and_failed_execution_evidence_do_not_claim_completion():
+    root = Path(__file__).resolve().parents[2]
+    docs = root / "docs/workload-data"
+    manifest = source_spec("LOCOMO")
+    assert manifest["files"][0]["rows"] == 1986
+    assert manifest["files"][0]["original_conversations"] == 10
+    assert manifest["unit"] == "original_questions"
+    assert manifest["access"]["license"] == "CC-BY-NC-4.0"
+    reader = json.loads(
+        (docs / "validation/locomo-original-reader-20261023.json").read_text("utf-8")
+    )
+    failure = json.loads(
+        (docs / "validation/locomo-original-qa-failure-20261023.json").read_text(
+            "utf-8"
+        )
+    )
+    assert reader["original_questions_field_checked"] == 1986
+    assert reader["category_5_reference_only_records"] == 444
+    assert reader["model_calls"] == reader["scorer_runs"] == 0
+    assert failure["completed_model_generations"] == failure["scorer_runs"] == 0
+    assert failure["model_requests_attempted"] == 1
+    assert (
+        reader["source_checkbox_eligible"]
+        is failure["source_checkbox_eligible"]
+        is False
+    )

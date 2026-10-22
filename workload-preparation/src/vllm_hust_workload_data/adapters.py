@@ -37,6 +37,10 @@ def iter_source_rows(path, spec):
             from .quality import question_rows
 
             yield from question_rows(rows)
+        elif spec["mapping"] == "locomo_questions":
+            from .locomo import question_rows
+
+            yield from question_rows(rows)
         else:
             yield from rows
     finally:
