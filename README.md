@@ -1,5 +1,8 @@
 # vllm-hust-benchmark
 
+数据检索与维护入口（Agent）：[数据索引与读写指南](DATA_INDEX.md) ·
+[机器可读集合索引](docs/data-index.json)。覆盖原始运行、报告、历史归档、网站来源和契约，明确读取、 追加、订正与验证规则；不移动或覆盖历史证据。
+
 SWE-bench Pro V1 真实 Agent 的独立环境与运行入口： [用户指南](docs/SWE_BENCH_PRO.zh-CN.md)（从一个 ARM 任务开始，无需
 Controller）。
 
