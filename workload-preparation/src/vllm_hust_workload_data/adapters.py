@@ -13,6 +13,19 @@ from .registry import adapter_spec, source_spec
 
 def iter_source_rows(path, spec):
     """Use one source view for reading, binding and index resolution."""
+    if spec["mapping"] == "whole_json_schema":
+        try:
+            schema = _json(path.read_text(encoding="utf-8-sig"))
+        except (ValueError, UnicodeError):
+            raise ValueError(
+                "invalid original JSON schema asset; payload suppressed"
+            ) from None
+        if not isinstance(schema, (dict, bool)):
+            raise ValueError("JSON schema asset must be an object or boolean")
+        # A schema is one constraint asset, not a request or a collection of rows.
+        # Preserve all keywords, including unknown extensions and nested values.
+        yield {"schema": schema}
+        return
     rows = iter_rows(
         path,
         records_path=spec.get("records_path", []),
