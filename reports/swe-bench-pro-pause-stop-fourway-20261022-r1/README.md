@@ -84,3 +84,11 @@ AI Core使用真实scrape时间去重；其他指标保留查询观测点。单�
 这不是time0性能实验或历史到达重建：不启动周期调度器，固定fixture usage为40prompt+2completion，每次返回即释放；没有真实引擎、工具等待、上下文增长、KV缓存、抢占或模型请求。因此不能量化原7.92%的原因，不证明NPU性能等价或解释历史后半程缓存下降。主性能协议不改，生产代码不改。复现命令从当前源码checkout设置PYTHONPATH=src，运行python -m benchmarks.audit_ordered_http_parity --input <私有归档fixed-inputs-private.json> --input-sha256 45e36ef48d5ad49d116c4a48659c65c5b939135e54a584b6ee54ea0a63fe09d6 --output <新文件>。公开data保留结果摘要/原结果SHA；私有完整轨迹未发布。
 
 软件标准Python3.11/3.12各266PASS5SKIP、CLI/buildPASS；remoteCI未查。未把旧纯ASGI取消监听偶发失败宣称已解决。
+
+## 首轮预算和下一次恢复的账目
+
+同一原件SHA只读复算：独立ThunderAgent与Controller对全部128program首轮token估计相同，首轮各48active，但选中集合的token合计为931542/946748，剩余预算35162/19956；二者最小排队需求均27248（含每program预留14335），shared/future均0。下一采样ThunderAgent仅新增task-082，预算35162→7914，差额27248完全对应新增program成本；Controller保持48且剩余预算不足。队列成员、program总和和scheduler预算交叉一致；采样是依次HTTP请求，非原子事件。下一样本另有首个客户端返回前的采集上界。
+
+这支持该步为何前者可恢复一个而后者不能的容量条件，不支持把整个7.92%耗时差归给它，也不能确定准确tick时间。初始工作集为何不同仍缺服务端逐事件到达/准入记录；不能说估计器不同已造成首轮分叉。旧版真机2program各6调用真实完成47.6197/47.3247秒（Controller略快）；50.02/50.03是采集总时长，不能当完成时间。这只是smoke；历史128program/C32为官方4994.2728、Controller5176.0590秒（多3.64%），不应将历史接近或工程容差验收写成所有负载性能相同。
+
+软件：Python3.11标准270PASS5SKIP、CLI/buildPASS；Python3.12首检269PASS1FAIL5SKIP，为既有legacy test_session_affinity_end_to_end一次出现两个后端，伴随后续legacy线程警告。源码/期限不改，原失败与隔离9PASS保留；完整r2复查270PASS5SKIP、CLI/buildPASS。不称该偶发已修复或已确定原因，remoteCI未查。没有生产代码修改、新推理或新归档。
