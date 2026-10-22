@@ -62,7 +62,7 @@ python scripts/data_index.py --query 'archive split' --limit 100
 [关联入口索引](docs/data-entrypoints.json) 补足目录索引不包含的三类信息：
 
 - `publication_bindings`：网站 `data/` 路径到 benchmark 原文件或压缩描述符/分片的映射，包含还原后 SHA256。
-- `references`：固定网站提交的前端 HTML/JS 字面引用，以及 benchmark 发布数据中的链接、结构化证据路径；保留引用来源，区分已映射、动态模板、未映射和外部链接。
+- `references`：固定网站提交的前端 HTML/JS/MJS 字面引用，以及 benchmark 发布数据中的链接、结构化证据路径；保留引用来源，区分已映射、动态模板、未映射和外部链接。
 - `releases`：GitHub 分页 API 返回的全部非 draft Release 及附件名称、下载 URL、大小、资产 ID、API
   digest。包含历史附件，不将它们自动认定为当前验收证据。
 
@@ -89,6 +89,8 @@ python scripts/data_entrypoints.py --refresh \
 JavaScript，不保证动态链接已解析，也不证明 外部链接可下载、附件 SHA256 已回验或页面已经完成浏览器验收。`unmapped-embedded-path` 可能是原始机器路径，
 不是自动判定网站断链；`snapshot_publication_status` 仅比较与采集清单的字节身份。 Release 中 manifest/inventory/SHA256SUMS
 等附件也是可直接下载的入口，包内部成员仍由这些清单描述。
+
+若既有快照包含公开 Release，而刷新返回空清单，工具会拒绝覆盖；先独立核对 API 和可见性， 不能把一次空响应当作所有附件已删除。线上清单获取失败时的历史副本回退也必须保留错误标记。
 
 ### 数据维护步骤
 
