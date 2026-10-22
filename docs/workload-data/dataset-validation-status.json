@@ -4,7 +4,7 @@
   "scope": "Per-source integration validation; not performance or full-suite acceptance",
   "completion_rule": {
     "minimum_preselected_samples": 3,
-    "server": "root@36.140.239.91:32066",
+    "server": "root@36.140.239.91:32070",
     "accelerator": "NPU_ONLY",
     "requires": [
       "original_input",
@@ -591,7 +591,7 @@
       "normal_stop_count": 2,
       "original_budget_exhaustion_count": 1,
       "correct_tasks": 0,
-      "blocker": "原三条完整输入并评分0/3，含1条原预算耗尽；仅Short标签，Medium/Long资源受限。公共入口复验遇SSH拒绝连接，暂不勾；不能将模型错误等同执行器故障。",
+      "blocker": "原三条完整输入并评分0/3，含1条原预算耗尽；仅Short标签，Medium/Long资源受限。公共入口已在恢复的双卡NPU上同题复验，退出0；预算终态仍保留，来源不勾。不能将模型错误等同执行器故障。",
       "local_read_receipt": "docs/workload-data/validation/local-read-24sources-20261022.json"
     },
     {

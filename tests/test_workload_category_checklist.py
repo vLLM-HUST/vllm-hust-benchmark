@@ -34,3 +34,24 @@ def test_incremental_receipt_does_not_claim_full_split():
     assert receipt["verified_unique_tasks"] == 6
     assert receipt["scope"] == "INCREMENTAL_SAMPLE_VALIDATION_NOT_FULL_SUITE"
     assert "1319" in receipt["sample_count_caveat"]
+
+
+def test_resumed_gsm_coverage_counts_actual_ids_not_upstream_effective_total():
+    receipt = json.loads(
+        (
+            ROOT / "docs/workload-data/validation/gsm8k-resumed-coverage-20261022.json"
+        ).read_text("utf-8")
+    )
+    assert receipt["unique_verified_tasks"] == 201 < receipt["original_test_size"]
+    assert receipt["original_doc_id_range_inclusive"] == [0, 200]
+    assert receipt["selection_matches_actual_logged_doc_ids"] is True
+    assert (
+        receipt["prior_frozen_snapshot_unique_tasks"]
+        + receipt["additional_pre_restart_unique_tasks_recovered"]
+        + receipt["new_post_restart_unique_tasks"]
+        == 201
+    )
+    assert receipt["new_batch"]["selected_doc_ids"] == list(range(195, 201))
+    assert receipt["new_batch"]["verified_unique_tasks"] == 6
+    assert receipt["new_batch"]["upstream_reported_effective_count"] == 1319
+    assert receipt["full_suite_claim"] is False
