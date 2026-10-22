@@ -3,8 +3,27 @@
 from pathlib import Path
 import subprocess
 import sys
+import json
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+def test_full_text_json_receipt_is_not_full_structeval_claim():
+    receipt = json.loads(
+        (
+            ROOT
+            / "docs/workload-data/validation/structeval-text-json-full-npu-20261022.json"
+        ).read_text("utf-8")
+    )
+    assert receipt["unique_tasks"] == 50
+    assert len(set(receipt["selected_samples"])) == 50
+    assert receipt["all_text_to_json_requested"] is True
+    assert receipt["full_structeval_size"] == 2035
+    assert len(receipt["tasks"]) == 50
+    assert (
+        sum(t["final_eval_score"] for t in receipt["tasks"]) / 50
+        == receipt["mean_official_final_score"]
+    )
 
 
 def test_help_without_optional_task_dependencies():
