@@ -1,0 +1,173 @@
+{
+  "schema": "gdn-l4-multibuffer.v1",
+  "candidate": "gdn-unpack-qk-l2norm-fusion",
+  "base_head": "8b2968f005229435e06ec6e75729088a442ae58c",
+  "windows": {
+    "A": "/root/prof/ladder-1019-021225 (VLLM_HUST_GDN_QKV_NORM=0)",
+    "B": "/root/prof/ladder-1019-022857 (VLLM_HUST_GDN_QKV_NORM=1, multibuffer=True)"
+  },
+  "load": "mmlu_pro_smoke first 16, concurrent 16, light tier max_iterations=32; both windows truncated=True, captured_requests=16, prefill_tokens=24288",
+  "weights": {
+    "model": "Qwen3.5-35B-A3B",
+    "precision": "bf16",
+    "format": "ND",
+    "tp": 2,
+    "graph": "FULL"
+  },
+  "shape": {
+    "T": 16,
+    "row_stride": 4096,
+    "q": 8,
+    "k": 8,
+    "v": 16,
+    "head_dim": 128,
+    "phase": "pure non-spec decode",
+    "callsite": "post-CausalConv1d before RecurrentGatedDeltaRule"
+  },
+  "A_per_rank": [
+    {
+      "target_calls": 540,
+      "target_kernel_count": 3240,
+      "target_active_us": 16139.38,
+      "active_us_per_call_mean": 29.887740740740742,
+      "active_us_per_call_median": 29.759999999999998,
+      "all_kernel_count": 62129,
+      "all_kernel_us": 3748309.16,
+      "target_fraction_all_kernel": 0.004305776100923329,
+      "all_fused_kernel_count": 0
+    },
+    {
+      "target_calls": 540,
+      "target_kernel_count": 3240,
+      "target_active_us": 16056.84,
+      "active_us_per_call_mean": 29.73488888888889,
+      "active_us_per_call_median": 29.61,
+      "all_kernel_count": 62129,
+      "all_kernel_us": 3984424.16,
+      "target_fraction_all_kernel": 0.004029902278275514,
+      "all_fused_kernel_count": 0
+    }
+  ],
+  "B_per_rank": [
+    {
+      "target_calls": 570,
+      "target_kernel_count": 570,
+      "target_active_us": 5250.86,
+      "active_us_per_call_mean": 9.212035087719299,
+      "active_us_per_call_median": 8.96,
+      "all_kernel_count": 59582,
+      "all_kernel_us": 3238834.48,
+      "target_fraction_all_kernel": 0.0016212190009784013,
+      "all_fused_kernel_count": 570
+    },
+    {
+      "target_calls": 570,
+      "target_kernel_count": 570,
+      "target_active_us": 5497.66,
+      "active_us_per_call_mean": 9.64501754385965,
+      "active_us_per_call_median": 9.22,
+      "all_kernel_count": 59582,
+      "all_kernel_us": 3910894.84,
+      "target_fraction_all_kernel": 0.0014057294365910386,
+      "all_fused_kernel_count": 570
+    }
+  ],
+  "verdict": {
+    "kernel_count_per_call": "6 -> 1 both ranks",
+    "per_call_active_us": {
+      "rank0": [
+        29.888,
+        9.212
+      ],
+      "rank1": [
+        29.735,
+        9.645
+      ]
+    },
+    "per_call_reduction_pct": {
+      "rank0": 69.2,
+      "rank1": 67.6
+    },
+    "all_fused_kernel_count": {
+      "A": 0,
+      "B": 570
+    }
+  },
+  "limits": [
+    "Single window pair per arm, not three repeats; per-call mean is the comparison basis",
+    "A captured 540 T16 calls, B captured 570 (window truncation at 32 iterations); totals are not compared, per-call means and per-call kernel counts are",
+    "all-kernel denominator includes communication; per-rank all_kernel_us differ between arms and are not attributed to this fusion",
+    "Rank CSVs recovered offline (rank1-A via recover-copy-1019-0226, rank0-B via recover-copy-1019-0240); sha256 of each csv recorded inside the analyze artifacts"
+  ],
+  "acceptance": "l0 PASS + l3 PASS (16/16 fixed batch and 8/8 standard, production cohort) + l4 PASS (this pair); graph replay 8/8; plugin stays default-off, bundle manifest promotion is a separate release gate",
+  "evidence": [
+    {
+      "path": "/root/包体恢复/records/probes/20261019T024000Z_gdn_l4mb_A.json",
+      "sha256": "9517f9b29f52273dde8e54ab31ef9912f474c359e87e5d040b9382e89786607a"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261019T024000Z_gdn_l4mb_B.json",
+      "sha256": "0f61537ee715b2b6e07de6e88255cebab86b2fce3635cceca6edebdda7a17745"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261019T024000Z_gdn_l4mb_analyze.py",
+      "sha256": "8e15647107889af02682a967d701352f4fe0b587396e69674e73638dcb3026ef"
+    },
+    {
+      "path": "/root/包体恢复/records/ladder/1019-022000-opstat.json",
+      "sha256": "4274439d770ee8d31f1e4fd71f2cb83bd3b7c5c939fe7aa4219993a8790825f3"
+    },
+    {
+      "path": "/root/包体恢复/records/ladder/1019-022835-recover-opstat.json",
+      "sha256": "0edf89d04f59f57467a4b02f794be631d00231ac82ffc308e796e130d07f540b"
+    },
+    {
+      "path": "/root/包体恢复/records/ladder/1019-023410-opstat.json",
+      "sha256": "094feead4781f420d2e9f9bbe3939426a799d3663d4cc4785d2f574efd5ccb97"
+    },
+    {
+      "path": "/root/包体恢复/records/ladder/1019-023853-recover-opstat.json",
+      "sha256": "52134f05c3609be1eda37451fcbdf14fb4e4748143452a2a68cbfd0430f746ce"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261018T190000Z_gdn_l4mb_A.log",
+      "sha256": "25d646d5837d93ce23543240b90625ac542c42119280f8ecbd056ad89b5fe625"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261018T190000Z_gdn_l4mb_B.log",
+      "sha256": "5c0bcf4c2a8491611d23c4e27ae5c56a4d72696c4362840d100b9598e1223f65"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261018T190000Z_gdn_l4mb_A_rank1_recover.log",
+      "sha256": "abb6f99a9bb1501c115ad9b59c57bab021c97803e1aebc4ec0cdde492abe704e"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261018T190000Z_gdn_l4mb_B_rank0_recover.log",
+      "sha256": "bb1ca36ebe687063a09cf70e0d578e774bc3d7bde8d4dc971d3d0aff856c317b"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261018T190000Z_gdn_l4mb_serveA.log",
+      "sha256": "a882e50a562b1511bd8bacf1e9925b709da0e9a25a848a081292ff6fad9a604d"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261018T190000Z_gdn_l4mb_serveB.log",
+      "sha256": "be9c06584b1abdd46b16a23384ce5589b424ff0102ec34346346b8743a73a350"
+    },
+    {
+      "path": "/root/prof/ladder-1019-021225/load-manifest.json",
+      "sha256": "c184c5bd43f7fd87d6faeb2b43d4a2e4bbe1a9ee24a85da72041e76987e96665"
+    },
+    {
+      "path": "/root/prof/ladder-1019-021225/cohort.json",
+      "sha256": "60ad5a917c4c8c254dd5a7b858259fe5720796afc9bd0843157600531c28989d"
+    },
+    {
+      "path": "/root/prof/ladder-1019-022857/load-manifest.json",
+      "sha256": "99b1a01e17fb9ea0831d6db66eb4773d300851cd0d711094f9f100d033fbae85"
+    },
+    {
+      "path": "/root/prof/ladder-1019-022857/cohort.json",
+      "sha256": "48bf66e56b66490d911f1721c9fc4d5c3b6b7345c666c186e2c59e39a6f5b5c9"
+    }
+  ]
+}

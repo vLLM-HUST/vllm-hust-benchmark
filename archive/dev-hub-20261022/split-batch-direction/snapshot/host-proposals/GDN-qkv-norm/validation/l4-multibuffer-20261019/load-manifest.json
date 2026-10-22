@@ -1,0 +1,64 @@
+{
+ "schema": "opt-ops-load-manifest.v1",
+ "window": "ladder-1019-022857",
+ "recorded_at": "2026-10-19T02:35:25Z",
+ "recorded_by": "bench-ladder.sh cmd_profile",
+ "load": {
+  "mode": "mmlu-pro",
+  "task": "mmlu_pro_smoke",
+  "num_prompts": 16,
+  "num_concurrent": 16,
+  "dataset": "lm-eval mmlu_pro_smoke 前 16 条（5-shot CoT 展平 prompt）",
+  "max_output_tokens": 2048,
+  "temperature": 0,
+  "seed": 42,
+  "executor": {
+   "kind": "lm-eval",
+   "task": "mmlu_pro_smoke",
+   "samples_path": "/root/prof/ladder-1019-022857/eval/__models__Qwen3.5-35B-A3B/samples_mmlu_pro_smoke_2026-10-19T02-35-24.903806.jsonl",
+   "results_path": "/root/prof/ladder-1019-022857/eval/__models__Qwen3.5-35B-A3B/results_2026-10-19T02-35-24.903806.json",
+   "eval_out": "/root/prof/ladder-1019-022857/eval"
+  }
+ },
+ "capture": {
+  "tier": "light",
+  "max_iterations": 32,
+  "capture_scope": "vllm-max-iterations-32",
+  "require_shapes": false
+ },
+ "execution": {
+  "requested": 16,
+  "completed": 16,
+  "completed_source": "lm-eval samples 行数"
+ },
+ "metrics": {
+  "before": "/root/prof/ladder-1019-022857/metrics-before.txt",
+  "after": "/root/prof/ladder-1019-022857/metrics-after.txt",
+  "delta": {
+   "prompt_tokens": 24288,
+   "prompt_tokens_local_compute": 24288,
+   "generation_tokens": 24145,
+   "request_success": 16
+  },
+  "note": "prometheus 快照增量＝墙钟窗口内的真实负载量；trace 窗 ⊆ 墙钟窗"
+ },
+ "model": {
+  "path": "/models/Qwen3.5-35B-A3B",
+  "config": "/models/Qwen3.5-35B-A3B/config.json",
+  "layer_counts": {
+   "num_hidden_layers": 40,
+   "layer_type_counts": {
+    "linear_attention": 30,
+    "full_attention": 10
+   },
+   "linear_attention_layers": 30,
+   "full_attention_layers": 10
+  }
+ },
+ "load_caliber": {
+  "id": "mmlu-pro-eval-traffic",
+  "detail": "lm-eval mmlu_pro_smoke(第一 16 条, 5-shot CoT, num_concurrent=16, max_gen_toks=2048, chat) — 数据集派生评测流量口径; capture_scope=vllm-max-iterations-32; trace_tier=light; max_iterations=32"
+ },
+ "cohort_file": "/root/prof/ladder-1019-022857/cohort.json",
+ "note": "窗口覆盖元数据（opt-ops-window-coverage.v1）的结构化来源: 负载特征参数/capture 档位/执行体完成记录/指标增量/模型层结构。缺任一项 → ladder-opstat 产物 declared=false。"
+}
