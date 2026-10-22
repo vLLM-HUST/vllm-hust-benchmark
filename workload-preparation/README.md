@@ -1,7 +1,7 @@
 # vLLM-HUST Workload Data
 
 OASST1 原始消息树的显式历史续接视图见[使用与验证边界](../docs/workload-data/OASST1_ORIGINAL_CONTINUATION.zh-CN.md)。
-它保留原始父子关系、排除目标回复；不是实时交互环境，也尚未接通通用索引和研究端续接视图。
+它保留原始父子关系、排除目标回复；不是实时交互环境。通用索引可显式选择 `history_targets`，研究端续接视图尚待联调。
 
 BFCL v4
 simple_python的原始JSONL读取和独立静态评分入口见[接入与验证](../docs/workload-data/BFCL_V4_SIMPLE_PYTHON_ORIGINAL.zh-CN.md)。

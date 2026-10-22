@@ -289,10 +289,14 @@ def iter_workload(
     catalog_root: Path | None = None,
     manifest: dict | None = None,
     mapping: dict | None = None,
+    history_targets: list[str] | None = None,
 ):
     """Read explicit pinned assets. limit is a diagnostic slice, never full coverage."""
     if limit is not None and (type(limit) is not int or limit <= 0):
         raise ValueError("limit must be a positive integer or omitted")
+    from .conversations import history_record, validate_history_targets
+
+    validate_history_targets(source_id, history_targets, mapping)
     if mapping is not None:
         from .mapping_contract import mapping_spec
 
@@ -326,6 +330,10 @@ def iter_workload(
             "select nonempty, distinct registered data files for this source revision"
         )
     emitted = 0
+    if history_targets is not None and len(selected) != 1:
+        raise ValueError(
+            "historical continuation requires one complete original tree file"
+        )
     for name in selected:
         file_spec = available[name]
         receipt = verify_file(Path(data_root), file_spec)
@@ -344,6 +352,30 @@ def iter_workload(
         )
         remaining = None if limit is None else limit - emitted
         try:
+            if history_targets is not None:
+                original_rows = list(rows)
+                if (
+                    file_spec.get("rows") is not None
+                    and len(original_rows) != file_spec["rows"]
+                ):
+                    raise ValueError("source row count mismatch")
+                indices = {
+                    row["message_id"]: index for index, row in enumerate(original_rows)
+                }
+                if any(target not in indices for target in history_targets):
+                    raise ValueError("selected original history target missing")
+                for target in history_targets[:remaining]:
+                    record = history_record(
+                        original_rows, target, source=source, index=indices[target]
+                    )
+                    record.replay["selection"] = {
+                        "files": list(selected),
+                        "limit": limit,
+                        "history_targets": history_targets,
+                    }
+                    yield record
+                verify_file(Path(data_root), file_spec)
+                return
             count = 0
             for index, row in enumerate(islice(rows, remaining)):
                 record = adapt_row(

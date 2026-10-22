@@ -15,7 +15,15 @@ from .mapping_contract import example_mapping, load_mapping, mapping_spec
 from .registry import adapter_spec, source_spec
 
 SCHEMA = "workload-source-index/v1"
-OPTIONS = {"source_id", "data_root", "manifest", "mapping", "files", "limit"}
+OPTIONS = {
+    "source_id",
+    "data_root",
+    "manifest",
+    "mapping",
+    "files",
+    "limit",
+    "history_targets",
+}
 SQL = """
 CREATE TABLE sources(source_id TEXT PRIMARY KEY,source_json TEXT NOT NULL,adapter_json TEXT NOT NULL);
 CREATE TABLE records(record_id TEXT PRIMARY KEY,source_id TEXT NOT NULL REFERENCES sources(source_id),
@@ -42,6 +50,11 @@ def _binding(entry, catalog_root=None):
         else source_spec(sid, catalog_root)
     )
     spec = mapping_spec(mapping) if mapping else adapter_spec(sid, catalog_root)
+    from .conversations import validate_history_targets
+
+    validate_history_targets(sid, entry.get("history_targets"), mapping)
+    if entry.get("history_targets") is not None:
+        spec = {**spec, "history_targets": entry["history_targets"]}
     if mapping and mapping["source"]["source_id"] != sid:
         raise ValueError("mapping source identity mismatch")
     return manifest, spec, mapping
@@ -144,6 +157,7 @@ def run(config, *, output, allow_partial=False, catalog_root=None):
                     manifest=manifest,
                     mapping=mapping,
                     catalog_root=catalog_root,
+                    history_targets=entry.get("history_targets"),
                 )
                 try:
                     for record in records:
@@ -187,7 +201,7 @@ def run(config, *, output, allow_partial=False, catalog_root=None):
                         "status": "PREPARED_REFERENCES_ONLY",
                         "records": count,
                         "scope": "BOUNDED_SLICE"
-                        if entry.get("limit")
+                        if entry.get("limit") or entry.get("history_targets")
                         else "SELECTED_FILES_FULLY_READ",
                     }
                 )

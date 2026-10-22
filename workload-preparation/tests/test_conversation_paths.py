@@ -82,3 +82,70 @@ def test_unknown_or_nonassistant_target_rejected():
     for target in ["missing", "u"]:
         with pytest.raises(ValueError):
             oasst_history_prefix(fixture_rows(), target)
+
+
+def test_history_pipeline_roundtrip_and_default_unchanged(tmp_path):
+    import hashlib
+    import json
+
+    from vllm_hust_workload_data import iter_workload
+    from vllm_hust_workload_data.consumer import resolve_input
+    from vllm_hust_workload_data.pipeline import prepared_rows, run
+
+    root = tmp_path / "source"
+    root.mkdir()
+    data = root / "messages.jsonl"
+    data.write_text(
+        "\n".join(json.dumps(row) for row in fixture_rows()), encoding="utf-8"
+    )
+    manifest = {
+        "source_id": "OASST1",
+        "revision": "test-fixture",
+        "unit": "message",
+        "provenance_kind": "test_fixture",
+        "files": [
+            {
+                "path": data.name,
+                "role": "data",
+                "rows": 4,
+                "sha256": hashlib.sha256(data.read_bytes()).hexdigest(),
+            }
+        ],
+    }
+    binding = tmp_path / "binding.json"
+    binding.write_text(json.dumps(manifest), encoding="utf-8")
+    ordinary = list(iter_workload("OASST1", data_root=root, manifest=manifest))
+    assert len(ordinary) == 4
+    assert all(r.runtime["kind"] == "historical_message" for r in ordinary)
+    config = {
+        "sources": [
+            {
+                "source_id": "OASST1",
+                "data_root": str(root),
+                "manifest": str(binding),
+                "history_targets": ["target"],
+            }
+        ]
+    }
+    out = tmp_path / "prepared"
+    report = run(config, output=out)
+    assert report["sources"][0]["scope"] == "BOUNDED_SLICE"
+    database = out / "workload.sqlite"
+    refs = list(prepared_rows(database))
+    assert len(refs) == 1
+    record = resolve_input(database, refs[0]["record_id"], data_root=root)
+    assert record.runtime["kind"] == "historical_continuation"
+    assert len(record.task["input"]["messages"]) == 3
+    assert "excluded reference" not in json.dumps(record.input_record())
+    assert record.outcome_record()["text"] == "excluded reference"
+    assert "excluded reference".encode() not in database.read_bytes()
+
+
+@pytest.mark.parametrize(
+    "source,targets", [("GSM8K", ["a"]), ("OASST1", []), ("OASST1", ["a", "a"])]
+)
+def test_history_selection_contract(source, targets):
+    from vllm_hust_workload_data.conversations import validate_history_targets
+
+    with pytest.raises(ValueError):
+        validate_history_targets(source, targets)
