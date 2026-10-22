@@ -195,6 +195,24 @@ def adopt_inputs(c, existing, output):
     return proof
 
 
+def create_task_environment(c, image, factory):
+    """Keep the sandbox alive through Agent budget, preparation and cleanup.
+
+    The 40-minute historical minimum remains for short runs. The extra ten
+    minutes cover the existing preparation barrier and evidence collection;
+    they do not extend the Agent's own wall-clock budget.
+    """
+    wall = c["agent"]["wall_budget_seconds"]
+    if type(wall) is not int or wall <= 0:
+        raise ValueError("Positive Agent wall budget required for container lifetime")
+    return factory(
+        image=image["image_id"], cwd="/app", executable=c["paths"]["docker"],
+        timeout=c["agent"]["tool_timeout_seconds"],
+        container_timeout=f"{max(2400, wall + 600)}s",
+        run_args=["--rm", "--entrypoint", "", "--network", c["container"]["network"],
+                  "--cpus", str(c["container"]["cpus"]), "--memory", c["container"]["memory"]])
+
+
 def _agent_task(c, row, image, folder, barrier):
     folder = Path(folder)
     folder.mkdir(exist_ok=False)
@@ -244,24 +262,7 @@ def _agent_task(c, row, image, folder, barrier):
     stop = threading.Event()
     observer = None
     try:
-        env = DockerEnvironment(
-            image=image["image_id"],
-            cwd="/app",
-            executable=c["paths"]["docker"],
-            timeout=c["agent"]["tool_timeout_seconds"],
-            container_timeout="40m",
-            run_args=[
-                "--rm",
-                "--entrypoint",
-                "",
-                "--network",
-                c["container"]["network"],
-                "--cpus",
-                str(c["container"]["cpus"]),
-                "--memory",
-                c["container"]["memory"],
-            ],
-        )
+        env = create_task_environment(c, image, DockerEnvironment)
         (folder / "container-id.txt").write_text(env.container_id)
         before = env.execute("git rev-parse HEAD && git status --porcelain")
         save(folder / "code-before.json", before)
