@@ -8,14 +8,15 @@ import tarfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-REVISION = "15ad285b06f40a9f89ddf63b95bd80ecce17e5d8"  # pragma: allowlist secret
+REVISION = "76ecccb99558a084ae59b0024856e54c09b3da62"  # pragma: allowlist secret
 REPORT_DIR = "reports/vllm-hust-midterm-20261019"
 REPORT = REPORT_DIR + "/中期测试报告.md"
-OUTPUT = ROOT / "website-publication/data/midterm-v066.json"
+OUTPUT = ROOT / "website-publication/data/midterm-v067.json"
 
 # Repository-relative locators are resolved against the website's exact benchmark
 # publication commit, not a moving main branch or a local acquisition path.
 EVIDENCE = {
+    "baseline018": ["baseline018-sweprefix", "BASELINE-IDENTITY-AUDIT-20261022.md"],
     "dataset-quality-inventory": [
         "../../website-publication/data/hle-verified-20261015/report.json",
         "../../website-publication/data/frontierscience-20261013/report.json",
@@ -186,9 +187,15 @@ def kv_audit():
 def build():
     raw = pinned(REPORT)
     text = raw.decode()
-    assert "报告版本：V0.66" in text
+    assert "报告版本：V0.67" in text
     url = f"https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/{REVISION}/{REPORT}"
     specs = [
+        (
+            "baseline018",
+            "0.18系列基线 / 0.18 baseline evidence",
+            "### 3.3 0.18系列基线证据",
+            "已有Qwen3.5 SWE-prefix-reuse五个900秒正式窗口，零失败，保留0.18/0.18及text-only兼容补丁身份。第五章数据集B0/B1为0.28.1 / Ascend 0.25.1rc2开发栈对照，其收益不代表相对0.18的收益；不同工况不互相代替。",
+        ),
         (
             "dataset-quality-inventory",
             "既有任务质量与配对缺项 / Existing task quality and pairing gaps",
@@ -352,7 +359,7 @@ def build():
         )
     return {
         "schema": "midterm-publication/v1",
-        "version": "V0.66",
+        "version": "V0.67",
         "report_url": url,
         "report_sha256": hashlib.sha256(raw).hexdigest(),
         "source_commit": REVISION,
