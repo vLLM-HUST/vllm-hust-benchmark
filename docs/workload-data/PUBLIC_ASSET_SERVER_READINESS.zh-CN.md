@@ -9,7 +9,7 @@
 
 | 来源              | 选定原始文件                                      | 数据链路 | 运行类型            | 原生任务与评分                                                      |
 | ----------------- | ------------------------------------------------- | -------- | ------------------- | ------------------------------------------------------------------- |
-| BIGCODEBENCH      | data/v0.1.4-00000-of-00001.parquet                | 三条通过 | task_dataset        | 未运行；需原版生成/功能测试与隔离执行环境                           |
+| BIGCODEBENCH      | data/v0.1.4-00000-of-00001.parquet                | 三条通过 | task_dataset        | 原三题NPU生成3stop；功能执行与评分尚需隔离环境                      |
 | DS1000            | test.jsonl                                        | 三条通过 | task_dataset        | 原三题NPU生成2stop/1length；原版功能判定未运行                      |
 | SWE_VERIFIED      | data/test-00000-of-00001.parquet                  | 三条通过 | task_dataset        | 未运行；需原仓库版本、修复 Agent、测试容器                          |
 | SCIENCEAGENTBENCH | data/verified-00000-of-00001.parquet              | 三条通过 | task_dataset        | 未运行；需原任务资产、执行环境和判定                                |
@@ -26,7 +26,8 @@ source_manifests_v1.json 定义， 使用者不能更换同名文件后沿用结
 - [x] 固定 CI wheel 安装，21条输入及参考的独立往返通过。
 - [ ] 适用的模型生成、原生完整任务终止和官方评分。
 - [ ] 各原生执行环境、模态能力和安全隔离逐项核验。
-- [ ] 本批固定最终提交与研究消费端联调。
+- [x] 固定数据版本653ad351的最终CI工件已在服务器重新安装并完成七源21条往返；研究端原PR
+  #37亦完成双模式21条及旧来源9条回归，四项CI成功。见[固定版本消费记录](DATA_CONSUMPTION_VALIDATION.zh-CN.md)。
 
 上述七来源数据链路检查的模型调用0、原生任务执行0、评分调用0。
 后续同三条BigCodeBench原题已另完成NPU生成阶段，见[独立记录](BIGCODEBENCH_ORIGINAL_GENERATION.zh-CN.md)；未运行功能评分，不改变数据链路回执范围。

@@ -90,7 +90,7 @@
       "completed_samples": [],
       "checked": false,
       "receipt": "docs/workload-data/validation/original-serving-traces-reader-20261023.json",
-      "blocker": "Final batch wheel and research consumer pending; metadata-only checks are not model/task execution. Other years excluded."
+      "blocker": "Fixed 84b901f6/dec0c49b wheel and research consumer 72068e98 verified (DATA_CONSUMPTION_VALIDATION.zh-CN.md). Metadata-only checks are not model/task execution. Other years excluded."
     },
     {
       "source_id": "BBH",
@@ -200,7 +200,7 @@
       "completed_samples": [],
       "checked": false,
       "receipt": "docs/workload-data/validation/burstgpt-original-metadata-reader-20261023.json",
-      "blocker": "Only first original file three metadata rows resolved; final batch wheel/research consumer and other files pending. No raw turns: not a conversation task execution source.",
+      "blocker": "Fixed 84b901f6/dec0c49b wheel and research consumer 72068e98 verified. Only first original file three metadata rows resolved; other files pending. No raw turns: not a conversation task execution source.",
       "local_read_receipt": "docs/workload-data/validation/local-read-24sources-20261022.json"
     },
     {
@@ -475,7 +475,7 @@
       "completed_samples": ["o10008.json", "o10009.json", "o10010.json"],
       "checked": false,
       "receipt": "docs/workload-data/validation/jsonschemabench-original-schema-npu-20261023.json",
-      "blocker": "Final CI artifact and research-consumer validation pending; original constraint profile, not reference OpenAIEngine/full suite. Two outputs fail maxLength; failures retained."
+      "blocker": "Fixed 49506ccb/49a607dc wheel and research consumer 43ef0932 verified (DATA_CONSUMPTION_VALIDATION.zh-CN.md). Original constraint profile, not reference OpenAIEngine/full suite. Two outputs fail maxLength; failures retained."
     },
     {
       "source_id": "LABBENCH",
@@ -809,7 +809,7 @@
       "completed_samples": [],
       "checked": false,
       "receipt": "docs/workload-data/validation/original-serving-traces-reader-20261023.json",
-      "blocker": "Final batch wheel and research consumer pending; synthetic/arxiv traces unvalidated. No inference/cache-hit or performance claim."
+      "blocker": "Fixed 84b901f6/dec0c49b wheel and research consumer 72068e98 verified. Synthetic/arxiv traces unvalidated. No inference/cache-hit or performance claim."
     },
     {
       "source_id": "MULTINEWS",
@@ -1235,15 +1235,15 @@
       "source_id": "PAWS",
       "scope": "public",
       "workload_class_ids": [],
-      "acquisition": "NOT_RECHECKED",
+      "acquisition": "BLOCKED_ORIGINAL_DOWNLOAD_HTTP_403_AND_FIXED_HF_TIMEOUT",
       "read_adapter": "NOT_RECHECKED",
       "server_execution": "NOT_RUN",
       "scoring": "NOT_RUN",
       "selected_samples": [],
       "completed_samples": [],
       "checked": false,
-      "receipt": null,
-      "blocker": "待在当前数据-only版本重新核验；目录登记不代表已接入。"
+      "receipt": "docs/workload-data/validation/paws-original-acquisition-20261023.json",
+      "blocker": "Publisher README verified at 02b29f3a. Original Wiki Labeled Final archive returns HTTP403 locally and on server; fixed HF metadata times out. No raw data obtained or adapter/task validated; no QQP reconstruction or unverified substitute used."
     },
     {
       "source_id": "QASPER",
@@ -1525,7 +1525,7 @@
       "completed_samples": [],
       "checked": false,
       "receipt": "docs/workload-data/validation/public-original-assets-server-reader-20261023.json",
-      "blocker": "Published synthetic historical dialogue, not an executable agent environment; no invented episode or model prompt. Final batch consumer pending.",
+      "blocker": "Published synthetic historical dialogue, not an executable agent environment; no invented episode or model prompt. Fixed 653ad351/54af5022 consumer at 4906910e verified, no native task/scorer claim.",
       "local_read_receipt": "docs/workload-data/validation/local-read-24sources-20261022.json",
       "read_selected_row_indices": [
         0,
@@ -1566,7 +1566,7 @@
       "completed_samples": [],
       "checked": false,
       "receipt": "docs/workload-data/validation/public-original-assets-server-reader-20261023.json",
-      "blocker": "Invocation metadata only; no model/observation/analysis calls. Three selected rows, not full file or source. Final batch consumer pending.",
+      "blocker": "Invocation metadata only; no model/observation/analysis calls. Three selected rows, not full file or source. Fixed 653ad351/54af5022 consumer at 4906910e verified.",
       "local_read_receipt": "docs/workload-data/validation/local-read-24sources-20261022.json",
       "read_selected_row_indices": [
         0,
