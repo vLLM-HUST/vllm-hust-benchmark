@@ -1,0 +1,81 @@
+{
+  "status": "blocked_pending_explicit_replacement_serve_budget",
+  "startup_head": "da16099ce555079a9436fc736f79f976a12d88cb",
+  "scope": "Qwen3.5-35B-A3B bf16 TP2 FULL; diagnosis only; no overlap or E2E changes",
+  "historical_failure": {
+    "request_bytes": 2048,
+    "driver_physical_allocation_bytes": 2097152,
+    "drvRetCode": 6,
+    "runtime_host_current_bytes": 42799104,
+    "root_cause": "NOT ESTABLISHED"
+  },
+  "current_cgroup": {
+    "memory.current": "62627487744\n",
+    "memory.max": "68719476736\n",
+    "memory.events": "low 0\nhigh 0\nmax 11\noom 0\noom_kill 0\n",
+    "memory.stat": "anon 819654656\nfile 61228994560\nkernel_stack 2129920\npagetables 6004736\npercpu 0\nsock 32768\nshmem 0\nfile_mapped 97226752\nfile_dirty 20480\nfile_writeback 0\nswapcached 0\nanon_thp 0\nfile_thp 0\nshmem_thp 0\ninactive_anon 819539968\nactive_anon 69632\ninactive_file 4736868352\nactive_file 56492122112\nunevictable 0\nslab_reclaimable 568558248\nslab_unreclaimable 1304704\nslab 569862952\nworkingset_refault_anon 0\nworkingset_refault_file 9699451\nworkingset_activate_anon 0\nworkingset_activate_file 4709721\nworkingset_restore_anon 0\nworkingset_restore_file 1269819\nworkingset_nodereclaim 25029\npgfault 1016596428\npgmajfault 13391\npgrefill 9192038\npgscan 19044089\npgsteal 19020595\npgactivate 20951732\npgdeactivate 9187998\npglazyfree 0\npglazyfreed 0\nthp_fault_alloc 141272\nthp_collapse_alloc 102\n",
+    "cpuset.mems.effective": "0-7\n",
+    "hugetlb.2MB.max": "max\n",
+    "hugetlb.2MB.events": "max 0\n"
+  },
+  "initial_probe_missing_cann_environment": [
+    {
+      "rank": 0,
+      "returncode": 1,
+      "stdout": "Warning : ASCEND_HOME_PATH environment variable is not set.\n",
+      "stderr": "Traceback (most recent call last):\n  File \"<string>\", line 2, in <module>\n  File \"/root/venvs/rv1/lib/python3.12/site-packages/torch_npu/npu/utils.py\", line 91, in set_device\n    torch_npu._C._npu_setDevice(device_id)\n  File \"/root/venvs/rv1/lib/python3.12/site-packages/torch_npu/npu/__init__.py\", line 309, in _lazy_init\n    torch_npu._C._npu_init()\nRuntimeError: SetPrecisionMode:../torch_npu/csrc/framework/LazyInitAclops.cpp:247 NPU function error: at_npu::native::AclSetCompileopt( aclCompileOpt::ACL_PRECISION_MODE, precision_mode), error code is 500001\n[ERROR] 2026-10-19-06:55:27 (PID:1370043, Device:0, RankID:-1) ERR00100 PTA call acl api failed\n[Error]: The internal ACL of the system is incorrect.\n        Rectify the fault based on the error information in the ascend log.\n[PID: 1370043] 2026-10-19-06:55:27.721.638 Config_Error_Invalid_Environment_Variable(EC0008): Environment variable ASCEND_OPP_PATH is not set. Use bash command env to check whether the environment variable is missing, and then use the export command to set it correctly.\nTraceBack (most recent call last):\n        AOE failed to call InitCannKB.[FUNC:Initialize][FILE:python_adapter_manager.cc][LINE:52]\n        Failed to initialize TeConfigInfo.[FUNC:TeInnerErrMessageReport][FILE:common_utils.cc][LINE:397]\n        [GraphOpt][InitializeInner][InitTbeFunc] Failed to init tbe.[FUNC:InitializeTeFusion][FILE:tbe_op_store_adapter.cc][LINE:1974]\n        [GraphOpt][InitializeInner][InitTeFusion]: Failed to initialize TeFusion.[FUNC:InitializeInner][FILE:tbe_op_store_adapter.cc][LINE:1941]\n        [SubGraphOpt][PreCompileOp][InitAdapter] InitializeAdapter adapter [tbe_op_adapter] failed! Ret [4294967295][FUNC:InitializeAdapter][FILE:op_store_adapter_manager.cc][LINE:80]\n        [SubGraphOpt][PreCompileOp][Init] Initialize op store adapter failed, OpsStoreName[tbe-custom].[FUNC:Initialize][FILE:op_store_adapter_manager.cc][LINE:121]\n        [FusionMngr][Init] Op store adapter manager init failed.[FUNC:Initialize][FILE:fusion_manager.cc][LINE:118]\n        PluginManager InvokeAll failed.[FUNC:Initialize][FILE:ops_kernel_manager.cc][LINE:100]\n        OpsManager initialize failed.[FUNC:InnerInitialize][FILE:gelib.cc][LINE:223]\n        GELib::InnerInitialize failed.[FUNC:Initialize][FILE:gelib.cc][LINE:161]\n        GEInitializeV2 failed.[FUNC:GEInitializeV2][FILE:ge_api_v2.cc][LINE:370]\n        GEInitializeV2 initialize failed.[FUNC:GEInitialize][FILE:ge_api.cc][LINE:220]\n        [Initialize][Ge]GEInitialize failed. ge result = 4294967295[FUNC:ReportCallError][FILE:log_inner.cpp][LINE:148]\n        [Init][Compiler]Init compiler failed[FUNC:ReportInnerError][FILE:log_inner.cpp][LINE:132]\n        [Set][Options]OpCompileProcessor init failed![FUNC:ReportInnerError][FILE:log_inner.cpp][LINE:132]\n\n"
+    },
+    {
+      "rank": 1,
+      "returncode": 1,
+      "stdout": "Warning : ASCEND_HOME_PATH environment variable is not set.\n",
+      "stderr": "Traceback (most recent call last):\n  File \"<string>\", line 2, in <module>\n  File \"/root/venvs/rv1/lib/python3.12/site-packages/torch_npu/npu/utils.py\", line 91, in set_device\n    torch_npu._C._npu_setDevice(device_id)\n  File \"/root/venvs/rv1/lib/python3.12/site-packages/torch_npu/npu/__init__.py\", line 309, in _lazy_init\n    torch_npu._C._npu_init()\nRuntimeError: SetPrecisionMode:../torch_npu/csrc/framework/LazyInitAclops.cpp:247 NPU function error: at_npu::native::AclSetCompileopt( aclCompileOpt::ACL_PRECISION_MODE, precision_mode), error code is 500001\n[ERROR] 2026-10-19-06:55:27 (PID:1370044, Device:0, RankID:-1) ERR00100 PTA call acl api failed\n[Error]: The internal ACL of the system is incorrect.\n        Rectify the fault based on the error information in the ascend log.\n[PID: 1370044] 2026-10-19-06:55:27.589.593 Config_Error_Invalid_Environment_Variable(EC0008): Environment variable ASCEND_OPP_PATH is not set. Use bash command env to check whether the environment variable is missing, and then use the export command to set it correctly.\nTraceBack (most recent call last):\n        AOE failed to call InitCannKB.[FUNC:Initialize][FILE:python_adapter_manager.cc][LINE:52]\n        Failed to initialize TeConfigInfo.[FUNC:TeInnerErrMessageReport][FILE:common_utils.cc][LINE:397]\n        [GraphOpt][InitializeInner][InitTbeFunc] Failed to init tbe.[FUNC:InitializeTeFusion][FILE:tbe_op_store_adapter.cc][LINE:1974]\n        [GraphOpt][InitializeInner][InitTeFusion]: Failed to initialize TeFusion.[FUNC:InitializeInner][FILE:tbe_op_store_adapter.cc][LINE:1941]\n        [SubGraphOpt][PreCompileOp][InitAdapter] InitializeAdapter adapter [tbe_op_adapter] failed! Ret [4294967295][FUNC:InitializeAdapter][FILE:op_store_adapter_manager.cc][LINE:80]\n        [SubGraphOpt][PreCompileOp][Init] Initialize op store adapter failed, OpsStoreName[tbe-custom].[FUNC:Initialize][FILE:op_store_adapter_manager.cc][LINE:121]\n        [FusionMngr][Init] Op store adapter manager init failed.[FUNC:Initialize][FILE:fusion_manager.cc][LINE:118]\n        PluginManager InvokeAll failed.[FUNC:Initialize][FILE:ops_kernel_manager.cc][LINE:100]\n        OpsManager initialize failed.[FUNC:InnerInitialize][FILE:gelib.cc][LINE:223]\n        GELib::InnerInitialize failed.[FUNC:Initialize][FILE:gelib.cc][LINE:161]\n        GEInitializeV2 failed.[FUNC:GEInitializeV2][FILE:ge_api_v2.cc][LINE:370]\n        GEInitializeV2 initialize failed.[FUNC:GEInitialize][FILE:ge_api.cc][LINE:220]\n        [Initialize][Ge]GEInitialize failed. ge result = 4294967295[FUNC:ReportCallError][FILE:log_inner.cpp][LINE:148]\n        [Init][Compiler]Init compiler failed[FUNC:ReportInnerError][FILE:log_inner.cpp][LINE:132]\n        [Set][Options]OpCompileProcessor init failed![FUNC:ReportInnerError][FILE:log_inner.cpp][LINE:132]\n\n"
+    }
+  ],
+  "configured_probe": [
+    {
+      "rank": 0,
+      "returncode": 0,
+      "stdout": "{\"rank\": 0, \"bytes\": 35653632, \"pinned_read_write\": \"PASS\"}\n",
+      "stderr": ""
+    },
+    {
+      "rank": 1,
+      "returncode": 0,
+      "stdout": "{\"rank\": 1, \"bytes\": 35653632, \"pinned_read_write\": \"PASS\"}\n",
+      "stderr": ""
+    }
+  ],
+  "probe_source": "import torch, torch_npu, sys, json\nrank=int(sys.argv[1]); torch.npu.set_device(rank)\nbufs=[torch.zeros(n,dtype=torch.uint8,pin_memory=True) for n in (2048,2*1024*1024,32*1024*1024)]\nfor b in bufs:\n assert b.is_pinned()\n b.fill_(37)\n assert torch.all(b == 37).item()\nprint(json.dumps({\"rank\":rank,\"bytes\":sum(b.numel() for b in bufs),\"pinned_read_write\":\"PASS\"}))\n",
+  "probe_launch": "source /root/包体恢复/scripts/activate-rv1.sh; /root/venvs/rv1/bin/python -c <probe_source> <rank>, concurrent rank 0 and rank 1",
+  "interpretation": [
+    "Both logical devices currently pass 35653632-byte pinned allocation and read/write validation per process.",
+    "This does not reproduce full model startup and does not establish historical root cause.",
+    "memory.max is 64 GiB; most current usage is file cache, shmem is zero. max=11 already present in prior post-stop snapshot; no causal timestamp.",
+    "Current 64 KiB RLIMIT_MEMLOCK does not prevent this probe; no permission or limit changes performed.",
+    "dmesg inaccessible: Operation not permitted. Driver/kernel failure details require host-side access if failure recurs."
+  ],
+  "actions_not_taken": [
+    "serve restart",
+    "profile collection",
+    "cache reclamation",
+    "device reset",
+    "memory limit change",
+    "pin_memory bypass",
+    "host source modification"
+  ],
+  "coverage": "opt coverage exit 0; FAIL 0 / WARN 51; not mechanism acceptance; opening opt status independently reported historical evidence drift",
+  "next_action": "Explicit authorization for one replacement serve start under unchanged cohort/load, bounded existing 32-iteration window; capture cgroup counters before/during/after; retain raw dual-rank outputs. If 207001 recurs, stop without retry and request host driver/kernel diagnostics.",
+  "sources": [
+    {
+      "original": "/root/ascend/log/debug/plog/plog-1357931_20261019063318158.log",
+      "preserved": "/root/包体恢复/records/probes/20261019T065632Z_comm-pinned-diagnosis/plog-1357931_20261019063318158.log",
+      "sha256": "d5ec30d2dbdf75afc29dea2be2d03f6dcc12d7a1a4440f7dd71eecffc5d5f625"
+    },
+    {
+      "original": "/root/ascend/log/run/plog/plog-1357931_20261019063248112.log",
+      "preserved": "/root/包体恢复/records/probes/20261019T065632Z_comm-pinned-diagnosis/plog-1357931_20261019063248112.log",
+      "sha256": "ff7e6a04e699d949a5444148ab362378b5401052ae434bf624e32d9cc8645281"
+    }
+  ]
+}

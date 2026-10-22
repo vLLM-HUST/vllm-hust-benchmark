@@ -1,0 +1,15 @@
+{
+  "schema": "opt-ops-evidence-correction.v1",
+  "id": "free-attribution-v1-withdrawal-1019",
+  "reason": "v1 used aclmdlRIExecuteAsync start timestamps as Free/graph replay boundaries. Calls occur inside Free gaps, so host-boundary/internal splits and graph/non-graph labels cannot support causal attribution.",
+  "removed": "free_attribution (entire block) from four repository opstat copies",
+  "retained": "step_budget.free_ms and all independent kernel/communication stats; original L2 opstat unchanged",
+  "opstat_sha256_before_after": {
+    "1019-022000-opstat.json": ["4274439d770ee8d31f1e4fd71f2cb83bd3b7c5c939fe7aa4219993a8790825f3", "560f30eb020e8ec9444cdf6817414c04227f4af868228cdadfa3694d98a5868e"],
+    "1019-022835-recover-opstat.json": ["0edf89d04f59f57467a4b02f794be631d00231ac82ffc308e796e130d07f540b", "6212fccf9e7df700ff2381c17791decae7cf890fdf936566e46aea24ee42cc76"],
+    "1019-023410-opstat.json": ["094feead4781f420d2e9f9bbe3939426a799d3663d4cc4785d2f574efd5ccb97", "fa7fc7634850b9821839de8bd2b82271d67aa3d23164f161e8b1909796b2c236"],
+    "1019-023853-recover-opstat.json": ["52134f05c3609be1eda37451fcbdf14fb4e4748143452a2a68cbfd0430f746ce", "edd612d6e1ea63ce38bfc447543fc439ca6a852f86f35a412ae59c025582a5c7"]
+  },
+  "prior_partial_withdrawal_l2": {"path": "/root/包体恢复/records/probes/20261019T052518Z_free-attribution-v1-withdrawal.json", "sha256": "da1ec9c4e49cfd4e8bf0a0f52ca9d1994db1abf8966cb74a520bddd5436aebfe"},
+  "replacement": "comm-free-paired-forensics.json (rank 0 DB + rank 0/1 CSV)"
+}

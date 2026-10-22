@@ -1,0 +1,113 @@
+{
+  "schema": "comm-mechanism-collection-receipt.v1",
+  "status": "blocked",
+  "startup": {
+    "branch": "0.28/comm-overlap-free-attribution",
+    "head": "62a8673dc89949084d6cc740daa94e3b9b3c01f0",
+    "dirty": []
+  },
+  "scope": {
+    "cohort": "028-qwen35-35b-a3b-tp2-fullgraph",
+    "model": "Qwen3.5-35B-A3B",
+    "precision": "bf16",
+    "tp": 2,
+    "graph": "FULL",
+    "load": "mmlu_pro_smoke first 16, 5-shot, concurrency 16, max output 2048, temperature 0, seed 42",
+    "capture": "32 worker iterations planned; zero collected"
+  },
+  "experiment_completed": false,
+  "optimization_accepted": false,
+  "attempt": {
+    "window": "/root/prof/ladder-1019-063113",
+    "serve_log": "/root/\u5305\u4f53\u6062\u590d/logs/ladder-serve-1019-063124.log",
+    "failure_lines": "80-103",
+    "failure": "rank1 NPUModelRunner CPU pinned buffer initialization: aclrtMallocHostWithCfg 207001 / allocate_host_memory_slowpath / EL0004; profiler not started",
+    "runner": "stopped after confirmed startup failure; profile endpoint/load never reached",
+    "serve_starts": 1,
+    "profile_windows": 0,
+    "retry": "not attempted; declared serve cap exhausted",
+    "accidental_start": "serve --help was interpreted as startup at 06:25; stopped before collection; not concealed"
+  },
+  "profiler_gap": {
+    "runtime_source": "/vllm-workspace/vllm-ascend/vllm_ascend/profiler/torch_npu_profiler.py",
+    "observed": "factory does not pass record_shapes; with_stack=False; with_modules=CLI stack; Text only; data_simplification=True",
+    "carrier": "explicit worker-cls plus VLLM_HUST_COMM_TRACE=1; true record_shapes/with_stack/with_modules; Text+Db; data_simplification=False; analyse_flag=False; LADDER_SLIM=0",
+    "runtime_validation": "NOT RUN: startup failed before profiler creation; mock tests are not proof of allreduce field coverage"
+  },
+  "required_artifacts": {
+    "raw_profiler_trace": "MISSING: collection not started",
+    "rank0_db": "MISSING",
+    "rank1_db": "MISSING",
+    "rank0_kernel_csv": "MISSING",
+    "rank1_kernel_csv": "MISSING",
+    "trace_communication_opstat": "MISSING",
+    "preserved": [
+      "cohort.json",
+      "profile-plan.json",
+      "startup logs"
+    ],
+    "slimming": "none"
+  },
+  "questions": {
+    "allreduce_graph_layer_callsite": "UNANSWERED",
+    "payload_16_825_1489_1587_2048_phase_callsite": "UNANSWERED",
+    "free_outside_verified_device_graph_boundaries_and_overlap_gap": "UNANSWERED"
+  },
+  "gates": {
+    "dual_rank_pairing": "NOT RUN",
+    "rank1_independent_db": "MISSING",
+    "reliable_callsite_or_graph_node": "NOT RUN",
+    "graph_start_end": "NOT RUN",
+    "single_variable_overlap_proposal": "BLOCKED: insufficient new mechanism evidence"
+  },
+  "validation": {
+    "full_pytest": "860 passed, 11 skipped, 227.19s; before new offline audit test was added",
+    "final_targeted_pytest": "30 passed, 3.21s; includes offline audit fixture",
+    "ruff_all": "PASS",
+    "shell_syntax": "PASS",
+    "coverage": "exit 0; warnings retained; does not imply mechanism acceptance",
+    "l3_compare": "NOT RUN; no compute or scheduling modification, and no successful model startup"
+  },
+  "rollback": "Omit --worker-cls and VLLM_HUST_COMM_TRACE; default profiler stack setting remains false. No host source or installed entry points modified.",
+  "next_action": "Obtain authorization for one replacement serve start after read-only host pinned-memory diagnosis; retain same cohort/load/window and preserve raw data; no speculative overlap change.",
+  "limits": [
+    "Host API start/end is not device graph completion.",
+    "CallchainId presence alone does not establish a reliable callsite.",
+    "Memory.current after stop was near 60 GB with page cache dominant; driver pinned-memory exhaustion cause not established. No cache/shm/process cleanup performed beyond own failed service and waiting runner.",
+    "Runner dual-rank parse completion path and real profiler factory remain device-unvalidated."
+  ],
+  "sources": [
+    {
+      "path": "/root/\u5305\u4f53\u6062\u590d/records/probes/20261019T063000Z_comm-mechanism/collection.log",
+      "sha256": "d1f7b4b3c49559e869877ee8904c937239357abced1fbb94b9f74c8c003e85d0"
+    },
+    {
+      "path": "/root/\u5305\u4f53\u6062\u590d/logs/ladder-serve-1019-063124.log",
+      "sha256": "0839d61692322e2f7784fb27449da022647a5b36122756211b5fe5d9d2717acd"
+    },
+    {
+      "path": "/root/\u5305\u4f53\u6062\u590d/records/probes/20261019T063000Z_comm-mechanism/full-pytest.log",
+      "sha256": "81a5da24e2ac4644c1c9061d8266d538416d6ef7dc805983a47d94b76f1ab17e"
+    },
+    {
+      "path": "/root/\u5305\u4f53\u6062\u590d/records/probes/20261019T063000Z_comm-mechanism/final-checks.log",
+      "sha256": "3605096cab1445724104e849ebf01cb5235e9efbdad51db0f4d503d7e99f017d"
+    },
+    {
+      "path": "/root/\u5305\u4f53\u6062\u590d/records/probes/20261019T063000Z_comm-mechanism/coverage.log",
+      "sha256": "4eab1cff08680d470d6b13294e297f0dc818b742269057b8a4cd44c3e393d27e"
+    },
+    {
+      "path": "/root/\u5305\u4f53\u6062\u590d/records/probes/20261019T063000Z_comm-mechanism/resource-after-stop.log",
+      "sha256": "4d929e8c4b0811912e3573c2da90e4d30098eb64b2fbca4e8705cce04ccf9627"
+    },
+    {
+      "path": "/root/prof/ladder-1019-063113/cohort.json",
+      "sha256": "1eab7d7b9c74cd21505e4089ddeccc7569a45fc19a986c7a7fadd6dddb480c9f"
+    },
+    {
+      "path": "/root/prof/ladder-1019-063113/profile-plan.json",
+      "sha256": "be672a19de061925d87a5313590cfeab070c387427081ccea3d41db179962d78"
+    }
+  ]
+}

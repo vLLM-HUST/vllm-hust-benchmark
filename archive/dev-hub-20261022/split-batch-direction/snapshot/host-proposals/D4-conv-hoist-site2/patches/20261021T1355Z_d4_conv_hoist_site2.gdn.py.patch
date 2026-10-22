@@ -1,0 +1,91 @@
+--- /root/operator-experiments/records/tree-patches/20261021T1355Z_d4_conv_hoist_site2.orig-gdn.py	2026-10-21 13:55:26.712824784 +0000
++++ /vllm-workspace/vllm-ascend/vllm_ascend/ops/gdn.py	2026-10-21 14:01:51.243364105 +0000
+@@ -51,6 +51,30 @@
+ _MERGE_GDN_INPROJ = os.environ.get("VLLM_HUST_GDN_MERGE_INPROJ", "0") == "1"
+ 
+ 
++_PACKED_CONV_WEIGHT_NAME = "ascend_conv1d_weight_packed"
++_PACK_CONV_ENV = "VLLM_HUST_D4_CONV_PACK"
++
++
++def _pack_conv_weights(conv1d) -> bool:
++    """D4 site-2: materialise conv1d.weight [D,1,W] as contiguous [W,D] once."""
++    source = conv1d.weight
++    if source.is_meta:
++        return False
++    packed = (
++        source.view(source.size(0), source.size(2))
++        .transpose(0, 1)
++        .contiguous()
++    )
++    if _PACKED_CONV_WEIGHT_NAME in conv1d._parameters:
++        conv1d._parameters[_PACKED_CONV_WEIGHT_NAME].data = packed
++    else:
++        conv1d.register_parameter(
++            _PACKED_CONV_WEIGHT_NAME,
++            torch.nn.Parameter(packed, requires_grad=False),
++        )
++    return True
++
++
+ class AscendGatedDeltaNetAttention(GatedDeltaNetAttention, HpcModule):
+     # Cached fused-op availability probe result, shared across all layers so the
+     # smoke call runs at most once per process.
+@@ -61,6 +85,12 @@
+ 
+         由 model_loader 的 HpcModule 协议在权重加载后、dynamo 编译/图捕获前调用。
+         """
++        if os.environ.get(_PACK_CONV_ENV) == "1":
++            try:
++                _pack_conv_weights(self.conv1d)
++                print("[D4site2] packed conv weight [W,D] ready", flush=True)
++            except Exception as _e:  # noqa: BLE001
++                print(f"[D4site2] pack skipped: {_e!r}", flush=True)
+         print(f"[W3F2v2] hook: env={_MERGE_GDN_INPROJ} gqa={getattr(self, 'gqa_interleaved_layout', None)} "
+               f"has_qkv={hasattr(self, 'in_proj_qkv')} merged={getattr(self, '_w3f2_merged', False)}", flush=True)
+         if (not _MERGE_GDN_INPROJ) or getattr(self, "_w3f2_merged", False):
+@@ -349,6 +379,12 @@
+ 
+         # 1. Convolution sequence transformation
+         conv_weights = self.conv1d.weight.view(self.conv1d.weight.size(0), self.conv1d.weight.size(2))
++        _packed_conv_w = getattr(self.conv1d, _PACKED_CONV_WEIGHT_NAME, None)
++        conv_weights_T = (
++            _packed_conv_w
++            if _packed_conv_w is not None
++            else conv_weights.transpose(0, 1)
++        )
+         if spec_sequence_masks is not None:
+             if attn_metadata.num_prefills == 0 and attn_metadata.num_decodes == 0:
+                 mixed_qkv_spec = mixed_qkv
+@@ -362,7 +398,6 @@
+ 
+         # 1.1: Process the multi-query part
+         if spec_sequence_masks is not None:
+-            conv_weights_T = conv_weights.transpose(0, 1)
+             activation_num = 1 if self.activation else 0
+             spec_causal_conv1d_meta = attn_metadata.spec_decode_metadata.spec_causal_conv1d
+             spec_query_start_loc_device = spec_causal_conv1d_meta.query_start_loc
+@@ -391,7 +426,6 @@
+                 cache_indices_opt = non_spec_causal_conv1d_meta.cache_indices
+                 initial_state_mode_opt = non_spec_causal_conv1d_meta.initial_state_mode
+                 if get_pcp_group().world_size > 1:
+-                    conv_weights_T = conv_weights.transpose(0, 1)
+                     activation_num = 1 if self.activation else 0
+                     non_spec_query_start_loc = attn_metadata.non_spec_query_start_loc
+                     assert non_spec_query_start_loc is not None
+@@ -434,7 +468,6 @@
+                             -1, ...
+                         ].transpose(-1, -2)
+                 else:
+-                    conv_weights_T = conv_weights.transpose(0, 1)
+                     activation_num = 1 if self.activation else 0
+                     mixed_qkv_non_spec_output = torch.empty_like(mixed_qkv_non_spec)
+                     torch.ops._C_ascend.npu_causal_conv1d_custom(
+@@ -453,7 +486,6 @@
+                     )
+                     mixed_qkv_non_spec = mixed_qkv_non_spec_output
+         elif attn_metadata.num_decodes > 0:
+-            conv_weights_T = conv_weights.transpose(0, 1)
+             activation_num = 1 if self.activation else 0
+             non_spec_causal_conv1d_meta = attn_metadata.non_spec_decode_metadata.causal_conv1d
+             non_spec_query_start_loc_device = non_spec_causal_conv1d_meta.query_start_loc

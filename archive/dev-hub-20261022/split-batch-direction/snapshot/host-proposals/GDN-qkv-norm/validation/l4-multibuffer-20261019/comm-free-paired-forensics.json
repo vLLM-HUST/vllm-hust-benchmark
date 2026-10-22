@@ -1,0 +1,149 @@
+{
+  "schema": "comm-free-paired-forensics.v2",
+  "cohort": {
+    "model": "Qwen3.5-35B-A3B",
+    "precision": "bf16",
+    "tp": 2,
+    "graph": {
+      "mode": "VLLM_COMPILE",
+      "cudagraph_mode": "FULL",
+      "cudagraph_capture_sizes": "1,2,4,8,16,32"
+    },
+    "carriers": {
+      "VLLM_HUST_GATE_FP32": "1",
+      "VLLM_HUST_GDN_MERGE_INPROJ": "1",
+      "husk_package": "vllm_ascend_split_batch"
+    },
+    "hidden_size": 2048
+  },
+  "coverage": {
+    "prefill_token_volume": 24288,
+    "window_iterations": 32,
+    "captured_request_count": 16,
+    "truncated": true,
+    "prefill_iterations": 13.0,
+    "decoded_iterations": 19.0
+  },
+  "rank_pair": {
+    "communication_name_sequence_equal": true,
+    "all_comm_calls": 2624,
+    "allreduce_calls": 2592,
+    "totals": [
+      {
+        "rank": 0,
+        "all_kernel_ms": 3238.83448,
+        "comm_ms": 1584.86662,
+        "allreduce_ms": 1575.57884
+      },
+      {
+        "rank": 1,
+        "all_kernel_ms": 3910.89484,
+        "comm_ms": 2259.745,
+        "allreduce_ms": 2251.03296
+      }
+    ]
+  },
+  "allreduce": {
+    "dtype": "BFP16",
+    "payload_by_element_count": {
+      "32768": {
+        "calls": 1539,
+        "rank0_ms": 38.89262,
+        "rank1_ms": 47.09184,
+        "token_equivalent": 16
+      },
+      "1689600": {
+        "calls": 81,
+        "rank0_ms": 97.76634,
+        "rank1_ms": 97.7846,
+        "token_equivalent": 825
+      },
+      "3049472": {
+        "calls": 81,
+        "rank0_ms": 140.69702,
+        "rank1_ms": 52.06532,
+        "token_equivalent": 1489
+      },
+      "3250176": {
+        "calls": 81,
+        "rank0_ms": 170.95236,
+        "rank1_ms": 40.25868,
+        "token_equivalent": 1587
+      },
+      "4194304": {
+        "calls": 810,
+        "rank0_ms": 1127.2705,
+        "rank1_ms": 2013.83252,
+        "token_equivalent": 2048
+      }
+    },
+    "nonoverlap_rows_equal": 2624,
+    "compute_overlap_ms_rank0": 0.0,
+    "execute_start_span_calls": 1457,
+    "outside_execute_start_span_calls": 1135,
+    "host_allreduce_api_rows_rank0": 4288,
+    "host_api_rows_with_shapes": 0,
+    "host_api_rows_with_callchain": 0,
+    "phase_note": "16-token calls repeat 19*81 times; other token-equivalent groups repeat 13*81 times. This matches recorded 19 decode/13 prefill iterations, but per-call phase is only inferred.",
+    "callsite_note": "81 collectives per iteration; without a recorded layer index or stack, graph nodes cannot be mapped to exact callsites."
+  },
+  "free_rank0": {
+    "total_ms": 2656.7976,
+    "host_api_temporal_intersection_ms": 2546.92506,
+    "all_window_adjacent_stream_pair_ms": {
+      "10_to_10": 10.80994,
+      "10_to_47": 1.02112,
+      "10_to_COMM": 3.4215,
+      "47_to_10": 10.5811,
+      "47_to_47": 2357.04064,
+      "47_to_COMM": 265.33862,
+      "COMM_to_10": 3.99262,
+      "COMM_to_47": 3.26492
+    },
+    "all_window_unpaired_ms": 1.32714,
+    "execute_start_span_ms": 424.54029,
+    "execute_start_span_free_ms": 29.176065,
+    "execute_start_span_adjacent_stream_pair_ms": {
+      "10_to_10": 10.27788,
+      "10_to_47": 0.96892,
+      "10_to_COMM": 3.24596,
+      "47_to_10": 9.683225,
+      "47_to_47": 1.02568,
+      "47_to_COMM": 0.07944,
+      "COMM_to_10": 3.793,
+      "COMM_to_47": 0.10196
+    },
+    "execute_start_span_unpaired_ms": 0.0,
+    "scope_note": "The execute-start span is not a proven complete graph replay or a phase boundary. Stream adjacency and host API intersection describe time, not causal host or communication attribution. Rank1 lacks a parsed DB for Free classification."
+  },
+  "sources": [
+    {
+      "path": "/root/prof/ladder-1019-022857/recover-copy-1019-0240_ascend_pt/ASCEND_PROFILER_OUTPUT/ascend_pytorch_profiler_0.db",
+      "sha256": "985cf0bac45a46ebde3f57ed2339a13d5a1c471e96fc6da06b27acf7ab67b873"
+    },
+    {
+      "path": "/root/prof/ladder-1019-022857/recover-copy-1019-0240_ascend_pt/ASCEND_PROFILER_OUTPUT/kernel_details.csv",
+      "sha256": "9feb38159307349c28b63d52c22735de22e5128af650ef4124664ed3ac6142e5"
+    },
+    {
+      "path": "/root/prof/ladder-1019-022857/dp0_pp0_tp1_dcp0_ep1_rank1_1213890_20261019023410359_ascend_pt/ASCEND_PROFILER_OUTPUT/kernel_details.csv",
+      "sha256": "4c7d4932f325f705d1a58f8939098151e1a60aa3cef64565b0fba91045888174"
+    },
+    {
+      "path": "/root/prof/ladder-1019-022857/cohort.json",
+      "sha256": "48bf66e56b66490d911f1721c9fc4d5c3b6b7345c666c186e2c59e39a6f5b5c9"
+    },
+    {
+      "path": "/root/包体恢复/records/ladder/1019-023853-recover-opstat.json",
+      "sha256": "52134f05c3609be1eda37451fcbdf14fb4e4748143452a2a68cbfd0430f746ce"
+    },
+    {
+      "path": "/root/包体恢复/records/ladder/1019-023410-opstat.json",
+      "sha256": "094feead4781f420d2e9f9bbe3939426a799d3663d4cc4785d2f574efd5ccb97"
+    },
+    {
+      "path": "/models/Qwen3.5-35B-A3B/config.json",
+      "sha256": "5e4d7f74fec2f360eb9cfbfcd6ec0c4c76e684d3a11caaed259d9fd9bfbc7944"
+    }
+  ]
+}

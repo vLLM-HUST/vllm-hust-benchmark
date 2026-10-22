@@ -1,0 +1,131 @@
+{
+  "schema": "comm-mechanism-profile-startup-failure.v1",
+  "recorded_at": "2026-10-19T07:22:47Z",
+  "startup": {
+    "branch": "0.28/comm-overlap-free-attribution",
+    "head": "314515ad8346d3786639b7d3170ac10f3f29e3c5",
+    "serve_starts": 1,
+    "profile_windows_started": 0,
+    "profile_windows_completed": 0,
+    "controller_exit": 137,
+    "controller_note": "The API server exited during startup; the profile waiter remained in its 1800-second health wait. The waiter/controller group was terminated after confirming no vLLM or NPU worker remained. No collection retry was made."
+  },
+  "scope": {
+    "cohort": "028-qwen35-35b-a3b-tp2-fullgraph",
+    "model": "Qwen3.5-35B-A3B",
+    "precision": "bf16",
+    "tp": 2,
+    "max_model_len": 8192,
+    "graph": "FULL",
+    "load": "mmlu_pro_smoke first 16, 5-shot, concurrency 16, max output 2048, temperature 0, seed 42",
+    "capture": "deep; maximum 32 worker iterations; CLI record_shapes=true and with_stack=true; memory recording=false; intended factory settings were Text+DB and data_simplification=false; profiler factory was not reached",
+    "compute_or_communication_change": false,
+    "overlap_change": false,
+    "e2e_comparison": false
+  },
+  "attempt": {
+    "plain_server_stopped_before_profile_start": true,
+    "launcher": "tools/collect_comm_mechanism.sh",
+    "profile_server_command": "opt bench serve --profile deep",
+    "worker_class": "vllm_ascend_split_batch.comm_trace_worker.CommTraceWorker",
+    "window": "/root/prof/ladder-1019-071928",
+    "serve_log": "/root/包体恢复/logs/ladder-serve-1019-071939.log",
+    "serve_env_snapshot": "/root/包体恢复/logs/ladder-serve-1019-071939.env.json",
+    "profile_plan": "/root/prof/ladder-1019-071928/profile-plan.json",
+    "cohort_file": "/root/prof/ladder-1019-071928/cohort.json",
+    "failure_phase": "Worker model_runner.profile_run during FULL-graph compilation, before health readiness and before /start_profile or eval load.",
+    "error": "vllm_ascend_C import failed with undefined symbol _ZN11vllm_ascend27batch_matmul_transpose_implEPvS0_S0_S0_S0_j; worker TP0 then raised AttributeError: torch.ops._C_ascend.npu_gemma_rms_norm is missing during Dynamo compilation. EngineCore and API server exited.",
+    "pinned_memory_error_207001": false,
+    "EL0004": false,
+    "health_ready": false,
+    "start_profile_called": false,
+    "mmlu_eval_started": false,
+    "raw_ascend_pt_directories": 0,
+    "rank_db_outputs": 0,
+    "rank_kernel_csv_outputs": 0,
+    "callsite_or_graph_boundary_audit": "NOT RUN"
+  },
+  "environment": {
+    "cann": "9.1.0",
+    "rv1_activation_script_sourced_in_launcher_shell": true,
+    "added_ld_library_path_prefix": "/root/vllm-workspace/.stack/ascend-fbe4911/vllm_ascend",
+    "default_login_ld_library_path_contained_that_prefix": false,
+    "assessment": "The extra shared-library search path is the leading environment-difference hypothesis: the failed run logged the undefined symbol and missing custom op, while the earlier successful plain-serve log had neither. This does not establish causality; do not attribute the failure to the profiler carrier or claim a verified ABI root cause."
+  },
+  "resources_after_failure": {
+    "memory_current_bytes": 58611224576,
+    "memory_max_bytes": 68719476736,
+    "memory_events": {
+      "low": 0,
+      "high": 0,
+      "max": 14,
+      "oom": 0,
+      "oom_kill": 0
+    },
+    "npu_workers_remaining": false,
+    "service_running": false
+  },
+  "gates": {
+    "paired_dual_rank_trace": "MISSING",
+    "per_rank_db_csv_outputs": "MISSING",
+    "allreduce_callsite_mapping": "NOT RUN",
+    "complete_graph_start_end_boundary": "NOT RUN",
+    "overlap_proposal": "BLOCKED"
+  },
+  "interpretation": {
+    "experiment_completed": false,
+    "optimization_accepted": false,
+    "collection_change_runtime_validated": false,
+    "status": "blocked",
+    "next_action": "No retry under the exhausted one-start budget. An explicitly authorized future attempt must use the default login CANN environment without sourcing activate-rv1.sh into the vLLM server environment, then stop at the first startup or profiling failure.",
+    "actions_not_taken": [
+      "retry or resample",
+      "change model computation or communication scheduling",
+      "disable pinned memory",
+      "clear caches",
+      "change cgroup limits",
+      "reset either NPU",
+      "slim or delete trace data"
+    ]
+  },
+  "evidence": [
+    {
+      "path": "/root/包体恢复/logs/ladder-serve-1019-071939.log",
+      "sha256": "820e24f29a48bddfc0066a16217c904a7682502d969db92c82027cf2cf8e472a"
+    },
+    {
+      "path": "/root/包体恢复/logs/ladder-serve-1019-071939.env.json",
+      "sha256": "67a3e8db97d48a55ee80792440e0fb9598ed5d2d3b8bc5fb1689ff2911ef2c8e"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261019T071922Z_comm-mechanism-retest.log",
+      "sha256": "7b23fc0126636bd545c3f4ce685b12305c5ba081e4907ec7a709ca1b3bd7d79c"
+    },
+    {
+      "path": "/root/prof/ladder-1019-071928/cohort.json",
+      "sha256": "877e8acda85a513fec8fbfeaea5f7d08521969014ab2944fc0b5f4234d2f8fc8"
+    },
+    {
+      "path": "/root/prof/ladder-1019-071928/profile-plan.json",
+      "sha256": "b56f3bbf405be8f5d44fd289be73f0f54d46f0a03609d1bbebe076548ad2d1f9"
+    },
+    {
+      "path": "/root/包体恢复/logs/ladder-serve-1019-070505.log",
+      "sha256": "a800312533a75b83574e38224211271b9a8a71dcdee5756876e3cbf4ab3b96eb",
+      "note": "Current hash after normal health/access log appends while the earlier plain server was serving. The prior retest record captured an earlier prefix hash."
+    }
+  ],
+  "carrier_implementation": {
+    "repository_files": [
+      "src/vllm_ascend_split_batch/comm_trace.py",
+      "src/vllm_ascend_split_batch/comm_trace_worker.py",
+      "tests/test_comm_trace.py",
+      "tools/collect_comm_mechanism.sh"
+    ],
+    "existing_commits": [
+      "3133a5a feat(profile): add opt-in complete dual-rank mechanism trace carrier",
+      "da16099 test(profile): retain dual-rank audit path and blocked startup evidence"
+    ],
+    "this_attempt_changed_carrier_code": false
+  }
+}

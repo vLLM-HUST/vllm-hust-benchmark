@@ -1,0 +1,54 @@
+=== server-extension-import.log ===
+[W1019 07:41:00.155596718 FunctionLoader.cpp:44] Warning: LD_PRELOAD detected, FunctionLoader prefers RTLD_DEFAULT for symbol resolution. (function operator())
+INFO 10-19 07:41:06 [__init__.py:52] Available plugins for group vllm.platform_plugins:
+INFO 10-19 07:41:06 [__init__.py:54] - ascend -> vllm_ascend:register
+INFO 10-19 07:41:06 [__init__.py:57] All plugins in this group will be loaded. Set `VLLM_PLUGINS` to control which plugins to load.
+INFO 10-19 07:41:06 [__init__.py:272] Platform plugin ascend is activated
+INFO 10-19 07:41:07 [platform.py:70] Breakable CUDAGraph on Ascend is opt-in; using VLLM_USE_BREAKABLE_CUDAGRAPH=0.
+python /usr/local/python3.12.13/bin/python extension /vllm-workspace/vllm-ascend/vllm_ascend/vllm_ascend_C.cpython-312-aarch64-linux-gnu.so
+npu_gemma_rms_norm REGISTERED
+loaded_libraries
+fffd80e40000-fffd80e9b000 r-xp 00000000 103:01 111170694                 /vllm-workspace/vllm-ascend/vllm_ascend/libvllm_ascend_kernels.so
+fffd80e9b000-fffd80eab000 ---p 0005b000 103:01 111170694                 /vllm-workspace/vllm-ascend/vllm_ascend/libvllm_ascend_kernels.so
+fffd80eab000-fffd80eae000 r--p 0005b000 103:01 111170694                 /vllm-workspace/vllm-ascend/vllm_ascend/libvllm_ascend_kernels.so
+fffd80eae000-fffd80f29000 rw-p 0005e000 103:01 111170694                 /vllm-workspace/vllm-ascend/vllm_ascend/libvllm_ascend_kernels.so
+fffd80f30000-fffd81017000 r-xp 00000000 103:01 111170695                 /vllm-workspace/vllm-ascend/vllm_ascend/vllm_ascend_C.cpython-312-aarch64-linux-gnu.so
+fffd81017000-fffd81026000 ---p 000e7000 103:01 111170695                 /vllm-workspace/vllm-ascend/vllm_ascend/vllm_ascend_C.cpython-312-aarch64-linux-gnu.so
+fffd81026000-fffd81029000 r--p 000e6000 103:01 111170695                 /vllm-workspace/vllm-ascend/vllm_ascend/vllm_ascend_C.cpython-312-aarch64-linux-gnu.so
+fffd81029000-fffd8102d000 rw-p 000e9000 103:01 111170695                 /vllm-workspace/vllm-ascend/vllm_ascend/vllm_ascend_C.cpython-312-aarch64-linux-gnu.so
+
+=== isolated-prefix-reproduction.log ===
+[W1019 07:41:55.237754381 FunctionLoader.cpp:44] Warning: LD_PRELOAD detected, FunctionLoader prefers RTLD_DEFAULT for symbol resolution. (function operator())
+INFO 10-19 07:42:02 [__init__.py:52] Available plugins for group vllm.platform_plugins:
+INFO 10-19 07:42:02 [__init__.py:54] - ascend -> vllm_ascend:register
+INFO 10-19 07:42:02 [__init__.py:57] All plugins in this group will be loaded. Set `VLLM_PLUGINS` to control which plugins to load.
+INFO 10-19 07:42:02 [__init__.py:272] Platform plugin ascend is activated
+INFO 10-19 07:42:02 [platform.py:70] Breakable CUDAGraph on Ascend is opt-in; using VLLM_USE_BREAKABLE_CUDAGRAPH=0.
+IMPORT_ERROR /vllm-workspace/vllm-ascend/vllm_ascend/vllm_ascend_C.cpython-312-aarch64-linux-gnu.so: undefined symbol: _ZN11vllm_ascend27batch_matmul_transpose_implEPvS0_S0_S0_S0_j
+EXPECTED_FAILURE_REPRODUCED; npu_gemma_rms_norm absent
+
+=== library-symbols.log ===
+/usr/bin/nm
+/usr/bin/readelf
+LIB=/vllm-workspace/vllm-ascend/vllm_ascend/libvllm_ascend_kernels.so
+ae766df73419a4839d27508979fb8df97789266cab52ac969072793b6c58de77  /vllm-workspace/vllm-ascend/vllm_ascend/libvllm_ascend_kernels.so
+000000000002f3a8 T _ZN11vllm_ascend27batch_matmul_transpose_implEPvS0_S0_S0_S0_j
+LIB=/root/vllm-workspace/.stack/ascend-fbe4911/vllm_ascend/libvllm_ascend_kernels.so
+31c7ea59b879eeaa75c81d79ef1c2d660eadb79f4f47f9ebda9033dfc7c71653  /root/vllm-workspace/.stack/ascend-fbe4911/vllm_ascend/libvllm_ascend_kernels.so
+ 0x0000000000000001 (NEEDED)             Shared library: [libvllm_ascend_kernels.so]
+ 0x0000000000000001 (NEEDED)             Shared library: [libtorch.so]
+ 0x0000000000000001 (NEEDED)             Shared library: [libc10.so]
+ 0x0000000000000001 (NEEDED)             Shared library: [libtorch_npu.so]
+ 0x0000000000000001 (NEEDED)             Shared library: [libascendcl.so]
+ 0x0000000000000001 (NEEDED)             Shared library: [libregister.so]
+ 0x0000000000000001 (NEEDED)             Shared library: [libplatform.so]
+ 0x0000000000000001 (NEEDED)             Shared library: [libopapi.so]
+ 0x0000000000000001 (NEEDED)             Shared library: [libruntime.so]
+ 0x0000000000000001 (NEEDED)             Shared library: [libunified_dlog.so]
+ 0x0000000000000001 (NEEDED)             Shared library: [libtorch_cpu.so]
+ 0x0000000000000001 (NEEDED)             Shared library: [libstdc++.so.6]
+ 0x0000000000000001 (NEEDED)             Shared library: [libm.so.6]
+ 0x0000000000000001 (NEEDED)             Shared library: [libgcc_s.so.1]
+ 0x0000000000000001 (NEEDED)             Shared library: [libc.so.6]
+ 0x0000000000000001 (NEEDED)             Shared library: [ld-linux-aarch64.so.1]
+ 0x000000000000001d (RUNPATH)            Library runpath: [$ORIGIN:$ORIGIN/lib:$ORIGIN/_cann_ops_custom/vendors/custom_transformer/op_api/lib]

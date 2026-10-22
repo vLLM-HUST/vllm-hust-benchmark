@@ -1,0 +1,41 @@
+{
+  "id": "comm-free-current-window-diagnostic",
+  "route": "028/D1-host-overhead-graph",
+  "caliber": "mmlu-pro-gdn-high-concurrency-longctx",
+  "cohort": "028-qwen35-35b-a3b-tp2-fullgraph",
+  "scenario": "Same Qwen3.5-35B-A3B bf16 TP2 FULL-graph MMLU-Pro smoke first 16 at concurrency 16; planned 32 worker iterations; no new scenario",
+  "op": "Free temporal gaps and all-reduce communication (graph-layer diagnostic only)",
+  "phase": "Mixed prefill/decode; per-call phase and exact callsite remain unverified",
+  "method": "Offline native PythonTracer GIL cleanup repair; source/native minimal checks pass, complete dependency build capped before link, stock dependency remains unsafe",
+  "stage": "blocked",
+  "next_action": "Obtain additional offline build budget and resume preserved Ninja build in /root/comm-stop-build-20261019T080222Z. Then verify selected rebuilt library with CPU stop/finalize before any separate device-window authorization.",
+  "stop_condition": "Build cap exhausted: no further build/install/serve/profile in this task. Remain blocked until an actually selected rebuilt dependency passes CPU lifecycle verification and separately authorized dual-rank mechanism gates pass.",
+  "budget": {
+    "wall_min": 60,
+    "offline_dependency_build_min": 20,
+    "serve_starts": "none: offline continuation",
+    "profile_windows": "none: offline continuation",
+    "resamples": "none",
+    "prior_task_consumption": {
+      "serve_starts": 1,
+      "profile_windows": 1
+    },
+    "consumed": {
+      "offline_dependency_build_seconds": 1200,
+      "cpu_lifecycle_probes": 8
+    },
+    "note": "No new serve start/device profile/model request; complete library build hit declared 20-minute cap and is paused."
+  },
+  "evidence": [
+    "/root/vllm-workspace/vllm-ascend-split-batch-hust/host-proposals/comm-mechanism/validation/20261019/profiler-stop-offline-20261019T080222Z/delivery-review.json",
+    "/root/vllm-workspace/vllm-ascend-split-batch-hust/host-proposals/comm-mechanism/validation/20261019/profiler-stop-offline-20261019T080222Z/receipt.json",
+    "/root/vllm-workspace/vllm-ascend-split-batch-hust/host-proposals/comm-mechanism/validation/20261019/profiler-stop-offline-20261019T080222Z/native-clear-results.json",
+    "/root/vllm-workspace/vllm-ascend-split-batch-hust/host-proposals/comm-mechanism/validation/20261019/profiler-stop-offline-20261019T080222Z/patched-tu-build.json",
+    "/root/vllm-workspace/vllm-ascend-split-batch-hust/host-proposals/comm-mechanism/validation/20261019/profiler-stop-offline-20261019T080222Z/installed-preflight-result.json",
+    "/root/vllm-workspace/vllm-ascend-split-batch-hust/host-proposals/comm-mechanism/validation/20261019/profiler-stop-offline-20261019T080222Z/build-outcome.json",
+    "/root/vllm-workspace/vllm-ascend-split-batch-hust/host-proposals/comm-mechanism/validation/20261019/profiler-stop-offline-20261019T080222Z/raw-recoverability-assessment.json"
+  ],
+  "reason": "Native clear root cause reproduced; fixed source and complete translation unit pass. Installed library still segfaults in CPU preflight. Full isolated library build timed out after 529/1193 steps with 529 objects retained; no compiler errors reported. Source fix is not runtime or mechanism acceptance.",
+  "reopen_condition": "Additional offline build budget is required to resume. A repaired selected runtime must pass CPU preflight before considering a separately authorized new device window.",
+  "checks": {}
+}

@@ -1,0 +1,10 @@
+--- /root/包体恢复/records/tree-patches/20261015T1731_W3F2-runtime-tree.patch_qwen3_5.py.orig	2026-10-16 04:35:20.317819281 +0000
++++ /vllm-workspace/vllm-ascend/vllm_ascend/patch/worker/patch_qwen3_5.py	2026-10-16 04:34:04.513328836 +0000
+@@ -198,6 +198,7 @@
+ 
+ Qwen3NextAttention.forward = AscendQwen3NextAttention.forward
+ _GDN_PATCH_TARGET._split_ba_for_tp = AscendGatedDeltaNetAttention._split_ba_for_tp
++_GDN_PATCH_TARGET.process_weights_after_loading = AscendGatedDeltaNetAttention.process_weights_after_loading
+ _GDN_PATCH_TARGET.get_state_shape = AscendGatedDeltaNetAttention.get_state_shape
+ _GDN_PATCH_TARGET.get_attn_backend = AscendGatedDeltaNetAttention.get_attn_backend
+ 

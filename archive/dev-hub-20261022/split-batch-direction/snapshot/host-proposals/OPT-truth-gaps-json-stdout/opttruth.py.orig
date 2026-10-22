@@ -1,0 +1,580 @@
+#!/usr/bin/env python3
+"""opttruth — 算子真值库 + 覆盖度矩阵 + 方向建议（gaps）。
+
+合约:
+  谁调用: `opt truth ...`（统一入口）/ 测试。
+  保证: 只用标准库; 幂等建表与幂等 upsert; 去重键与覆盖度**全由程序算**, 不由人填;
+        coverage 的 direction 维度取自 registry.json, 算子提及判定读 L1 卡正文。
+  不保证: 跨机搬运（state/truth.sqlite3 是本机状态）; 算子别名的自动归并（当前按算子名精确匹配）。
+
+数据源（真实）:
+  --shapes  records/ladder/l0-shapes-s3-rank0.json  （shape 签名 + 次数 + 总时长）
+  --opstat  prof-s3/**/ASCEND_PROFILER_OUTPUT/op_statistic.csv（算子总量 + Ratio(%) 份额）
+  覆盖度     /root/opt-ops/kb-working/INDEX.json + 各卡正文 + /root/opt-ops/registry.json
+"""
+from __future__ import annotations
+
+import argparse
+import csv
+import hashlib
+import json
+import os
+import re
+import sqlite3
+import sys
+import time
+
+ROOT = "/root/opt-ops"
+DB = f"{ROOT}/state/truth.sqlite3"
+REGISTRY = f"{ROOT}/registry.json"
+KB_INDEX = f"{ROOT}/kb-working/INDEX.json"
+CALIBER_STATE = f"{ROOT}/state/caliber.json"
+LOAD_CALIBER = f"{ROOT}/state/load-caliber.json"
+
+# 覆盖度权重（w_uncovered）
+W = {"unknown": 1.0, "in_progress": 0.3, "covered": 0.0, "refuted": 0.6, "stale": 0.5}
+# 已知标尺（让建议"可直接下手"）
+RULERS = {
+    "GroupedMatmul": "bench-l0 --sig 4/5（大 M prefill 已有实测标尺）",
+    "MatMulV2": "L4 目标算子表（次数/总时长）",
+    "Cast": "L4 签名次数（[256,2048] 权重常量候选）",
+    "Transpose": "L4 签名次数（[4096,4] conv 权重转置候选）",
+    "ConcatD": "L4 签名次数（[1024]+[1024] 待归因）",
+    "RecurrentGatedDeltaRule": "bench-l0 捕获形态（decode）",
+    "CausalConv1d": "bench-l0 --sig 0/2（decode/prefill）",
+    "fused_gdn_gating_kernel": "bench-l0（triton kernel）",
+    "ChunkGatedDeltaRule": "bench-l0（prefill 形态）",
+}
+
+
+def now() -> str:
+    return time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+
+
+def sha256_file(p: str) -> str:
+    h = hashlib.sha256()
+    with open(p, "rb") as f:
+        for b in iter(lambda: f.read(1 << 20), b""):
+            h.update(b)
+    return h.hexdigest()
+
+
+def norm_sig(shapes) -> str:
+    """shape 签名规范化: 去空白; N/A·None 统一成空位。"""
+    if not shapes:
+        return ""
+    parts = []
+    for s in shapes:
+        if s is None:
+            parts.append("-")
+        elif isinstance(s, list):
+            parts.append(",".join(str(x) for x in s))
+        else:
+            parts.append(str(s).strip().strip('"'))
+    return ";".join(parts)
+
+
+def active_caliber() -> str:
+    """当前生效负载口径（state/caliber.json 的 active）。缺省空 = 未声明。"""
+    try:
+        return (json.load(open(CALIBER_STATE)) or {}).get("active") or ""
+    except Exception:
+        return ""
+
+
+def connect(path: str = DB) -> sqlite3.Connection:
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    con = sqlite3.connect(path, isolation_level=None)
+    con.row_factory = sqlite3.Row
+    con.executescript("""
+    CREATE TABLE IF NOT EXISTS op_facts (
+      op TEXT NOT NULL, version TEXT NOT NULL, shape_sig TEXT NOT NULL, dtype TEXT NOT NULL DEFAULT '',
+      count INTEGER NOT NULL DEFAULT 0, total_us REAL NOT NULL DEFAULT 0, avg_us REAL NOT NULL DEFAULT 0,
+      source TEXT NOT NULL DEFAULT '', source_sha256 TEXT NOT NULL DEFAULT '',
+      ingested_at TEXT NOT NULL DEFAULT '',
+      PRIMARY KEY (op, version, shape_sig, dtype));
+    CREATE TABLE IF NOT EXISTS coverage (
+      op TEXT NOT NULL, version TEXT NOT NULL, direction TEXT NOT NULL, route TEXT NOT NULL,
+      state TEXT NOT NULL, evidence_ref TEXT NOT NULL DEFAULT '', verified_at TEXT NOT NULL DEFAULT '',
+      PRIMARY KEY (op, version, direction));
+    """)
+    _ensure_op_totals_caliber(con)
+    return con
+
+
+def _ensure_op_totals_caliber(con: sqlite3.Connection) -> None:
+    """op_totals 迁到带 caliber 的主键 (op, version, caliber)。
+
+    2026-10-14 负载状态隔离: 同一算子的 device 份额在不同负载口径下不同（合成 vs MMLU-Pro），
+    旧表 PK=(op,version) 会让两条口径互相覆盖 → 迁移成 (op,version,caliber)。
+    历史行（迁移前摄入）按 state/load-caliber.json 的登记标为 synthetic-fixed-protocol
+    （2026-10-14T03:09 那次摄入来自合成窗口 1014-030803 的 kernel_details.csv）。
+    """
+    cols = [r[1] for r in con.execute("PRAGMA table_info(op_totals)")]
+    if not cols:
+        con.executescript("""
+        CREATE TABLE IF NOT EXISTS op_totals (
+          op TEXT NOT NULL, version TEXT NOT NULL, caliber TEXT NOT NULL DEFAULT '',
+          count INTEGER NOT NULL DEFAULT 0, total_us REAL NOT NULL DEFAULT 0,
+          share_pct REAL NOT NULL DEFAULT 0, source TEXT NOT NULL DEFAULT '',
+          ingested_at TEXT NOT NULL DEFAULT '', PRIMARY KEY (op, version, caliber));""")
+        return
+    if "caliber" in cols:
+        return
+    rows = con.execute("SELECT op,version,count,total_us,share_pct,source,ingested_at FROM op_totals").fetchall()
+    con.execute("ALTER TABLE op_totals RENAME TO op_totals_v1")
+    con.executescript("""
+    CREATE TABLE op_totals (
+      op TEXT NOT NULL, version TEXT NOT NULL, caliber TEXT NOT NULL DEFAULT '',
+      count INTEGER NOT NULL DEFAULT 0, total_us REAL NOT NULL DEFAULT 0,
+      share_pct REAL NOT NULL DEFAULT 0, source TEXT NOT NULL DEFAULT '',
+      ingested_at TEXT NOT NULL DEFAULT '', PRIMARY KEY (op, version, caliber));""")
+    legacy = "synthetic-fixed-protocol"
+    for r in rows:
+        con.execute("INSERT INTO op_totals(op,version,caliber,count,total_us,share_pct,source,ingested_at)"
+                    " VALUES(?,?,?,?,?,?,?,?)",
+                    (r["op"], r["version"], legacy, r["count"], r["total_us"], r["share_pct"],
+                     r["source"], r["ingested_at"]))
+    con.execute("DROP TABLE op_totals_v1")
+    print(f"  [migrate] op_totals 加 caliber 列: {len(rows)} 行历史数据标为 {legacy}"
+          "（来源=合成窗口, 见 state/load-caliber.json）")
+
+
+# ---------------------------------------------------------------- ingest
+def ingest_shapes(con: sqlite3.Connection, path: str, version: str) -> int:
+    data = json.load(open(path))
+    src, sha, n = os.path.basename(path), sha256_file(path), 0
+    for op, info in (data.get("ops") or {}).items():
+        for sig in info.get("signatures") or []:
+            sig_key = norm_sig(sig.get("shapes"))
+            dt = (sig.get("dtypes") or "")[:120]
+            cnt = int(sig.get("count") or 0)
+            tot_us = float(sig.get("total_ms") or 0) * 1000.0
+            con.execute(
+                "INSERT INTO op_facts(op,version,shape_sig,dtype,count,total_us,avg_us,source,"
+                "source_sha256,ingested_at) VALUES(?,?,?,?,?,?,?,?,?,?)"
+                " ON CONFLICT(op,version,shape_sig,dtype) DO UPDATE SET"
+                " count=excluded.count, total_us=excluded.total_us, avg_us=excluded.avg_us,"
+                " source=excluded.source, source_sha256=excluded.source_sha256,"
+                " ingested_at=excluded.ingested_at",
+                (op, version, sig_key, dt, cnt, tot_us,
+                 (tot_us / cnt) if cnt else 0.0, src, sha, now()))
+            n += 1
+    return n
+
+
+def ingest_opstat(con: sqlite3.Connection, path: str, version: str, caliber: str = "") -> int:
+    src, n = os.path.basename(path), 0
+    caliber = caliber or "unmarked"
+    with open(path) as f:
+        for row in csv.DictReader(f):
+            op = (row.get("OP Type") or "").strip()
+            if not op:
+                continue
+            con.execute(
+                "INSERT INTO op_totals(op,version,caliber,count,total_us,share_pct,source,ingested_at)"
+                " VALUES(?,?,?,?,?,?,?,?) ON CONFLICT(op,version,caliber) DO UPDATE SET"
+                " count=excluded.count, total_us=excluded.total_us, share_pct=excluded.share_pct,"
+                " source=excluded.source, ingested_at=excluded.ingested_at",
+                (op, version, caliber, int(row.get("Count") or 0), float(row.get("Total Time(us)") or 0),
+                 float(row.get("Ratio(%)") or 0), src, now()))
+            n += 1
+    return n
+
+
+def ingest_kernel_details(con: sqlite3.Connection, path: str, version: str, caliber: str = ""):
+    """以 kernel_details.csv 为权威口径入库：分母 = all-kernel（compute + COMMUNICATION）。
+
+    2026-10-14 口径修复：op_statistic.csv 只含 compute 任务，通信 kernel（hcom_*，
+    Accelerator Core=COMMUNICATION）完全不在表里（本栈约占 device 22%）。这里一次遍历
+    拿全 kernel 总量，把通信作为一等算子入库，share_pct = 100 * op_total_us / all_kernel_us
+    （不再沿用 op_statistic 的 compute-only Ratio）。
+    返回 (入库行数, all_kernel_us)。
+    """
+    src = os.path.basename(path)
+    caliber = caliber or "unmarked"
+    agg: dict = {}   # op -> [count, total_us, core]
+    with open(path, newline="", encoding="utf-8", errors="replace") as f:
+        for row in csv.DictReader(f):
+            op = (row.get("Type") or "").strip()
+            if not op:
+                continue
+            a = agg.setdefault(op, [0, 0.0, (row.get("Accelerator Core") or "").strip()])
+            a[0] += 1
+            a[1] += float(row.get("Duration(us)") or 0)
+    all_us = sum(a[1] for a in agg.values())
+    n = 0
+    for op, (cnt, tot, _core) in agg.items():
+        share = (100.0 * tot / all_us) if all_us else 0.0
+        con.execute(
+            "INSERT INTO op_totals(op,version,caliber,count,total_us,share_pct,source,ingested_at)"
+            " VALUES(?,?,?,?,?,?,?,?) ON CONFLICT(op,version,caliber) DO UPDATE SET"
+            " count=excluded.count, total_us=excluded.total_us, share_pct=excluded.share_pct,"
+            " source=excluded.source, ingested_at=excluded.ingested_at",
+            (op, version, caliber, cnt, tot, share, src, now()))
+        n += 1
+    return n, all_us
+
+
+# ---------------------------------------------------------------- 覆盖度推导
+def _registry() -> dict:
+    try:
+        return json.load(open(REGISTRY))
+    except Exception:
+        return {}
+
+
+def _notes() -> list[dict]:
+    try:
+        return json.load(open(KB_INDEX)).get("notes", [])
+    except Exception:
+        return []
+
+
+def _card_text(path: str) -> str:
+    try:
+        raw = open(path, encoding="utf-8").read()
+        return re.sub(r"^---.*?---", "", raw, flags=re.DOTALL)
+    except Exception:
+        return ""
+
+
+def _op_mentioned(op: str, text: str) -> bool:
+    """算子名是否被提及：词边界 + 可选 aclnn 前缀，大小写不敏感。
+
+    `_` 视为词内字符（`rms_norm_cast` 不算提到 Cast），但允许 `aclnnCast_`；
+    裸子串匹配会把 `BroadCast` 当 Cast，也漏掉正文里小写的 `cast`。
+    """
+    if not op or not text:
+        return False
+    pat = r"(?<![A-Za-z0-9_])(?:aclnn)?" + re.escape(op) + r"(?![A-Za-z0-9])"
+    return re.search(pat, text, re.IGNORECASE) is not None
+
+
+def derive_coverage(con: sqlite3.Connection, version: str) -> int:
+    """按 (op, version, direction) 推导覆盖状态——纯程序，无人填字段。
+
+    判定: 卡的 route 属于该 direction, 且卡正文/标题提到该算子名 →
+          lifecycle=validated 记 covered, hypothesis 记 in_progress,
+          refuted/superseded 记 refuted; 该 direction 下无卡提到 → unknown。
+    """
+    registry = _registry()
+    dirs = list((registry.get("versions", {}).get(version, {}).get("directions") or {}).keys())
+    notes = [n for n in _notes() if str(n.get("route", "")).startswith(version + "/")]
+    op_names = {r["op"] for r in con.execute(
+        "SELECT DISTINCT op FROM op_totals WHERE version=?", (version,)).fetchall()}
+    op_names |= {r["op"] for r in con.execute(
+        "SELECT DISTINCT op FROM op_facts WHERE version=?", (version,)).fetchall()}
+    n = 0
+    for op in sorted(op_names):
+        for d in dirs:
+            route = f"{version}/{d}"
+            state, ref = "unknown", ""
+            for nt in notes:
+                if nt.get("route") != route:
+                    continue
+                text = f"{nt.get('title', '')}\n{_card_text(nt.get('path', ''))}"
+                if not _op_mentioned(op, text):
+                    continue
+                lc = str(nt.get("lifecycle") or "")
+                state = "refuted" if lc in ("refuted", "superseded") else (
+                    "covered" if lc == "validated" else "in_progress")
+                ref = str(nt.get("id", ""))
+                if state == "covered":
+                    break
+            con.execute(
+                "INSERT INTO coverage(op,version,direction,route,state,evidence_ref,verified_at)"
+                " VALUES(?,?,?,?,?,?,?) ON CONFLICT(op,version,direction) DO UPDATE SET"
+                " state=excluded.state, route=excluded.route, evidence_ref=excluded.evidence_ref,"
+                " verified_at=excluded.verified_at",
+                (op, version, d, route, state, ref, now()))
+            n += 1
+    return n
+
+
+# ---------------------------------------------------------------- 查询
+def cmd_ingest(a) -> int:
+    con = connect()
+    nf = nt = 0
+    all_us = 0.0
+    caliber = (getattr(a, "caliber", "") or "").strip() or active_caliber() or "unmarked"
+    print(f"  负载口径 caliber={caliber}（默认取 state/caliber.json 的 active；显式 --caliber 可覆盖）")
+    if a.shapes:
+        nf = ingest_shapes(con, a.shapes, a.version)
+    # kernel_details 优先：分母=all-kernel（compute+comm），通信作为一等算子入库。
+    # 只给 --opstat 时退回旧口径（compute-only），并显式提示以免又漏通信。
+    if getattr(a, "kernel_details", None):
+        nt, all_us = ingest_kernel_details(con, a.kernel_details, a.version, caliber)
+    elif a.opstat:
+        nt = ingest_opstat(con, a.opstat, a.version, caliber)
+        print("  注意: 只 ingest op_statistic.csv = compute-only 口径（通信不在内）。"
+              "要含通信请加 --kernel-details <kernel_details.csv>。")
+    nc = derive_coverage(con, a.version)
+    tot_f = con.execute("SELECT COUNT(*) c FROM op_facts WHERE version=?", (a.version,)).fetchone()["c"]
+    tot_t = con.execute("SELECT COUNT(*) c FROM op_totals WHERE version=? AND caliber=?",
+                        (a.version, caliber)).fetchone()["c"]
+    print(f"ingest ok: op_facts +{nf}（库内 {tot_f}）｜ op_totals[{caliber}] +{nt}（该口径库内 {tot_t}）"
+          f"｜ coverage {nc} 行")
+    if all_us:
+        print(f"  all-kernel 分母 = {all_us / 1000:.1f} ms（compute+comm）")
+    print(f"  version={a.version}  db={DB}")
+    return 0
+
+
+def cmd_cover(a) -> int:
+    con = connect()
+    rows = con.execute("SELECT * FROM coverage WHERE version=? ORDER BY op,direction", (a.version,)).fetchall()
+    if a.json:
+        print(json.dumps({"version": a.version,
+                          "coverage": [dict(r) for r in rows]}, ensure_ascii=False, indent=1))
+        return 0
+    ops = sorted({r["op"] for r in rows})
+    dirs = sorted({r["direction"] for r in rows})
+    if not ops:
+        print("（空：先 opt truth ingest --shapes ... --opstat ...）")
+        return 0
+    sym = {"covered": "C", "in_progress": "~", "unknown": ".", "refuted": "R", "stale": "S"}
+    print(f"== 覆盖度矩阵 (version={a.version})   C=covered ~=in_progress .=unknown R=refuted ==")
+    print("  " + "算子".ljust(26) + "".join(d[:10].ljust(11) for d in dirs))
+    m = {(r["op"], r["direction"]): sym.get(r["state"], "?") for r in rows}
+    for op in ops:
+        print(f"  {op[:24].ljust(26)}" + "".join(m.get((op, d), "?").ljust(11) for d in dirs))
+    return 0
+
+
+# 方向亲和度（**这是让建议可信的关键**：没有它，"未覆盖×份额"会把任何算子配到任意方向）
+# 依据: 算子所在核类型与机制。cube/MoE 类 ↔ GMM/MFU/多流; vector/GDN/搬运类 ↔ 常量外提/GDN/多流;
+# 全部算子对 D1(host 开销) 与 D5(多流重叠) 都有天然亲和（它们与算子类型正交）。
+AFFINITY = {
+    "GroupedMatmul": ["D2-gmm-prefill-mfu", "D5-multistream-overlap", "D1-host-overhead-graph"],
+    "MatMulV2": ["D2-gmm-prefill-mfu", "D5-multistream-overlap", "D1-host-overhead-graph"],
+    "MoeInitRoutingV3": ["D2-gmm-prefill-mfu", "D5-multistream-overlap", "D1-host-overhead-graph"],
+    "GroupedMatmulSwigluQuant": ["D2-gmm-prefill-mfu", "D5-multistream-overlap"],
+    "RecurrentGatedDeltaRule": ["D3-gdn-small-op", "D4-const-hoist", "D1-host-overhead-graph"],
+    "ChunkGatedDeltaRule": ["D3-gdn-small-op", "D1-host-overhead-graph"],
+    "CausalConv1d": ["D4-const-hoist", "D3-gdn-small-op", "D1-host-overhead-graph"],
+    # GDN 递推/门控是 D3 的主体（conv 权重转置这类常量外提仍由 D4 覆盖 CausalConv1d/Transpose），
+    # 故这两项首项必须是 D3：否则"亲和度顺序优先"规则会把它们错配到 D4。
+    "fused_gdn_gating_kernel": ["D3-gdn-small-op", "D4-const-hoist", "D1-host-overhead-graph"],
+    "Transpose": ["D4-const-hoist", "D1-host-overhead-graph"],
+    "Cast": ["D4-const-hoist", "D1-host-overhead-graph"],
+    "ConcatD": ["D4-const-hoist", "D1-host-overhead-graph"],
+    "Concat": ["D4-const-hoist", "D1-host-overhead-graph"],
+}
+AFFINITY_FALLBACK = ["D1-host-overhead-graph", "D5-multistream-overlap"]
+
+
+def affinities(op: str, dirs: list[str]) -> list[str]:
+    """该算子的候选方向（按亲和度表；表外算子退到通用两项）。"""
+    cand = [d for d in AFFINITY.get(op, AFFINITY_FALLBACK) if d in dirs]
+    return cand or list(dirs)
+
+
+def cmd_gaps(a) -> int:
+    con = connect()
+    reg = _registry()
+    dirs = reg.get("versions", {}).get(a.version, {}).get("directions") or {}
+    caliber = (getattr(a, "caliber", "") or "").strip() or active_caliber()
+    facts = {r["op"]: r for r in con.execute(
+        "SELECT op, SUM(total_us) tu, SUM(count) c FROM op_facts WHERE version=? GROUP BY op",
+        (a.version,)).fetchall()}
+    if caliber:
+        totals = {r["op"]: r for r in con.execute(
+            "SELECT * FROM op_totals WHERE version=? AND caliber=?", (a.version, caliber)).fetchall()}
+    else:
+        totals = {r["op"]: r for r in con.execute("SELECT * FROM op_totals WHERE version=?",
+                                                 (a.version,)).fetchall()}
+    cov = {(r["op"], r["direction"]): dict(r) for r in con.execute(
+        "SELECT * FROM coverage WHERE version=?", (a.version,)).fetchall()}
+    ops = sorted(set(totals) | set(facts))
+    # 负载状态隔离: 方向声明口径 != 本次口径的方向不进推荐; 归档/关闭/显式 recommend=false 也不进。
+    skipped_dir = {}
+    allowed = []
+    for d, info in dirs.items():
+        why = None
+        if info.get("status") in ("archived", "closed", "backlog"):
+            why = f"status={info.get('status')}"
+        elif info.get("recommend") is False:
+            why = "recommend=false"
+        elif caliber and info.get("caliber") and info["caliber"] not in (caliber, "agnostic"):
+            why = f"caliber={info['caliber']}≠{caliber}"
+        if why:
+            skipped_dir[d] = why
+        else:
+            allowed.append(d)
+    if not caliber:
+        print("  ⚠ 未声明 active 负载口径（state/caliber.json 缺 active）且未给 --caliber → "
+              "本次份额来自**多口径混合**，不得用于裁决；先 `opt caliber switch <id> --reason ...`")
+    out = []
+    for op in ops:
+        share = totals[op]["share_pct"] if op in totals else 0.0
+        cands = affinities(op, allowed)        # ← 只在亲和方向 ∪ 本口径允许方向里选
+        specs = []                                # 保持亲和度列表顺序 = 优先序
+        for d in cands:
+            info = dirs[d]
+            st = cov.get((op, d), {}).get("state", "unknown")
+            w = W.get(st, 1.0)
+            seeds = len(info.get("kb_seeds") or [])
+            pb = min(1.0, seeds / 4.0) if seeds else 0.5
+            score = share * w * pb                # 输出分（含 playbook 可得性）
+            core = share * w                      # 亲和度比较用的核心分: 剔除 playbook 噪声(seeds 数量差异)
+            specs.append((d, st, seeds, score, core))
+        if not specs:
+            continue
+        # 亲和度列表顺序即优先序: 仅在"分数近等"(相对最高核心分 5% 以内)时取亲和度更靠前者;
+        # 明显更高(>5%)的方向仍会顶替靠前的亲和度。
+        # 目的: 修 playbook(kb_seeds 数不同 → D5=1.0/D2=0.75)把 GroupedMatmul 推偏到 D5 的缺陷,
+        #       使大 M GMM MFU 的主方向 D2 优先于多流 D5。
+        top_core = max(s[4] for s in specs)
+        d, st, seeds, score, core = next(s for s in specs if s[4] >= top_core * 0.95)
+        out.append({"op": op, "version": a.version, "share_pct": round(share, 3),
+                    "route": f"{a.version}/{d}", "state": st, "score": round(score, 3),
+                    "kb_seeds": seeds, "ruler": RULERS.get(op, ""),
+                    "affinity": cands, "core_score": round(core, 3),
+                    "count": int(facts[op]["c"]) if op in facts else 0,
+                    "total_ms": round((facts[op]["tu"] or 0) / 1000.0, 1) if op in facts else 0.0})
+    out.sort(key=lambda x: (-x["score"], x["op"]))
+    out = out[:a.top]
+    if a.json:
+        print(json.dumps({"version": a.version, "caliber": caliber,
+                          "skipped_directions": skipped_dir, "gaps": out,
+                          "facts_note": ("gaps[].count/total_ms 来自 op_facts（无 caliber 列，"
+                                         "跨口径共享）；share_pct 才属于上面 caliber")},
+                         ensure_ascii=False, indent=1))
+        return 0
+    if not out:
+        print("（空：先 opt truth ingest --shapes ... --opstat ...）")
+        return 0
+    print(f"== 方向建议 gaps (version={a.version}, caliber={caliber or '未声明'}) ==")
+    if skipped_dir:
+        print("  已按负载状态隔离排除方向: "
+              + "；".join(f"{d}({w})" for d, w in sorted(skipped_dir.items())))
+    print(f"  {'#':>2} {'算子':26s}{'份额%':>7} {'建议方向':32s}{'状态':12s}标尺")
+    for i, g in enumerate(out, 1):
+        print(f"  {i:>2} {g['op'][:24]:26s}{g['share_pct']:>7.2f} {g['route'][:30]:32s}"
+              f"{g['state']:12s}{g['ruler'][:40]}")
+    return 0
+
+
+def _show_totals(con, op: str, version: str, caliber: str):
+    """→ (row|None, 可选 caliber 列表)。
+
+    op_totals 的 PK 含 caliber：指定/active 口径优先，命中唯一行才返回；
+    多口径且未指定时把候选交给调用方显式选择，不任取一行。
+    """
+    if caliber:
+        row = con.execute("SELECT * FROM op_totals WHERE op=? AND version=? AND caliber=?",
+                          (op, version, caliber)).fetchone()
+        if row:
+            return row, [caliber]
+    rows = con.execute("SELECT * FROM op_totals WHERE op=? AND version=? AND caliber!=''",
+                       (op, version)).fetchall()
+    if len(rows) == 1:
+        return rows[0], [rows[0]["caliber"]]
+    return None, sorted({str(r["caliber"]) for r in rows})
+
+
+def cmd_show(a) -> int:
+    con = connect()
+    facts = con.execute("SELECT * FROM op_facts WHERE op=? AND version=? ORDER BY count DESC LIMIT 10",
+                        (a.op, a.version)).fetchall()
+    want = (getattr(a, "caliber", "") or "").strip() or active_caliber()
+    tot, calibers = _show_totals(con, a.op, a.version, want)
+    cov = con.execute("SELECT * FROM coverage WHERE op=? AND version=? ORDER BY direction",
+                      (a.op, a.version)).fetchall()
+    payload = {"op": a.op, "version": a.version,
+               "totals": dict(tot) if tot else None,
+               "caliber": (tot["caliber"] if tot else want),
+               "calibers_available": calibers,
+               "top_signatures": [dict(r) for r in facts],
+               "top_signatures_note": ("op_facts 尚无 caliber 列（shape 库跨口径共享）；"
+                                       "sig 的 count/total 可能来自其它口径，勿与上面份额联用"),
+               "coverage": [dict(r) for r in cov],
+               "ruler": RULERS.get(a.op, "")}
+    if tot is None and calibers:
+        msg = (f"{a.op} @ {a.version} 在口径 {want or '(未声明)'} 下没有总量行；"
+               f"库里有: {', '.join(calibers)} → 用 --caliber <id> 明确选择（不同口径份额不可混用）")
+        if a.json:
+            print(json.dumps(payload | {"reason": msg}, ensure_ascii=False, indent=1))
+        else:
+            print(f"（{msg}）")
+        return 2
+    if a.json:
+        print(json.dumps(payload, ensure_ascii=False, indent=1))
+        return 0
+    if not (tot or facts):
+        print(f"（库里没有 {a.op}；先 ingest）")
+        return 0
+    print(f"== {a.op} @ {a.version} ==")
+    if tot:
+        print(f"  口径: {tot['caliber']}")
+        print(f"  总量: {tot['count']} 次 / {tot['total_us']/1000:.1f} ms / "
+              f"device 份额 {tot['share_pct']}%（caliber={tot['caliber']}）")
+    if facts:
+        print("  sig（op_facts 未按 caliber 分区，仅作 shape 参考）:")
+    for r in facts[:5]:
+        print(f"  sig: [{r['shape_sig'][:60]}] n={r['count']} avg={r['avg_us']:.2f}us")
+    for c in cov:
+        print(f"  覆盖: {c['direction']:22s} {c['state']:12s} {c['evidence_ref']}")
+    if payload["ruler"]:
+        print(f"  标尺: {payload['ruler']}")
+    return 0
+
+
+def cmd_directions(a) -> int:
+    con = connect()
+    reg = _registry()
+    dirs = reg.get("versions", {}).get(a.version, {}).get("directions") or {}
+    rows = []
+    for d, info in dirs.items():
+        c = con.execute("SELECT COUNT(*) c FROM coverage WHERE version=? AND direction=? AND state='covered'",
+                        (a.version, d)).fetchone()["c"] if os.path.exists(DB) else 0
+        rows.append({"direction": d, "status": info.get("status"), "covered_ops": c,
+                     "caliber": info.get("caliber") or "",
+                     "recommend": info.get("recommend"),
+                     "carriers": len(info.get("carriers") or []),
+                     "kb_seeds": len(info.get("kb_seeds") or []),
+                     "hypothesis": (info.get("hypothesis") or "")[:90]})
+    if a.json:
+        print(json.dumps({"directions": rows, "active_caliber": active_caliber()},
+                         ensure_ascii=False, indent=1))
+        return 0
+    print(f"  （active 口径 = {active_caliber() or '未设'}）")
+    for r in rows:
+        star = "★" if r["caliber"] and r["caliber"] == active_caliber() else " "
+        print(f" {star}{r['direction']:26s} {str(r['status']):9s} covered={r['covered_ops']:<3} "
+              f"rec={str(r['recommend']):5s} carriers={r['carriers']} "
+              f"caliber={r['caliber'][:24]:24s} {r['hypothesis'][:44]}")
+    return 0
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser(prog="opttruth", description=__doc__)
+    sub = ap.add_subparsers(dest="cmd", required=True)
+    p = sub.add_parser("ingest")
+    p.add_argument("--shapes"); p.add_argument("--opstat")
+    p.add_argument("--kernel-details", help="kernel_details.csv：all-kernel 分母（含通信），优先于 --opstat")
+    p.add_argument("--caliber", default="",
+                   help="负载口径 id（合成/MMLU-Pro…）；缺省取 state/caliber.json 的 active，再缺省 unmarked")
+    p.add_argument("--version", default="028"); p.set_defaults(fn=cmd_ingest)
+    for name, fn in (("cover", cmd_cover), ("gaps", cmd_gaps), ("directions", cmd_directions)):
+        p = sub.add_parser(name)
+        p.add_argument("--version", default="028"); p.add_argument("--json", action="store_true")
+        p.add_argument("--caliber", default="",
+                       help="只统计该口径的 op_totals（默认取 state/caliber.json 的 active）")
+        if name == "gaps":
+            p.add_argument("--top", type=int, default=12)
+        p.set_defaults(fn=fn)
+    p = sub.add_parser("show")
+    p.add_argument("--op", required=True); p.add_argument("--version", default="028")
+    p.add_argument("--json", action="store_true")
+    p.add_argument("--caliber", default="",
+                   help="只显示该负载口径的总量（缺省取 state/caliber.json 的 active；"
+                        "多口径命中且未指定时显式失败，不任取一行）")
+    p.set_defaults(fn=cmd_show)
+    a = ap.parse_args()
+    return a.fn(a)
+
+
+if __name__ == "__main__":
+    sys.exit(main())

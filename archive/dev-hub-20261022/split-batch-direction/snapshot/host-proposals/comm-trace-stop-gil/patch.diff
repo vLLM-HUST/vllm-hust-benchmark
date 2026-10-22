@@ -1,0 +1,10 @@
+--- a/torch_npu/csrc/profiler/profiler_python.cpp
++++ b/torch_npu/csrc/profiler/profiler_python.cpp
+@@ -431,6 +431,7 @@
+ }
+ 
+ void PythonTracer::clear() {
++  pybind11::gil_scoped_acquire gil;
+   TORCH_CHECK(
+       !active_.load(),
+       "Cannot clear state while PythonTracer is active.",

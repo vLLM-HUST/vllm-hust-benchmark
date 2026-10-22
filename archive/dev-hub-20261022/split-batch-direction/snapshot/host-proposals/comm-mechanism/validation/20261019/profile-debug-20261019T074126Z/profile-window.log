@@ -1,0 +1,606 @@
+scope 校验通过: candidate=comm-free-current-window-diagnostic（v4: 不再要求 active 口径；窗口可比性看产物自带的形状事实与权重标签）
+plain screen 通过: /root/包体恢复/records/ladder/1018-gdn-norm-B-plain/screen.json（L1=3, L2=3, L3=1, caliber_id=(未写)）
+== 采集门（面向决策）: candidate=comm-free-current-window-diagnostic reason=mechanism-gap ==
+（采集门 = 意图/证据复用预检: 只读、不采集、不写库；不登记『采集已完成』、不扣预算、不校验采集是否真发生。重复检测是启发式, 非保证。）
+{
+ "ok": true,
+ "collected": false,
+ "id": "comm-free-current-window-diagnostic",
+ "stage": "probing",
+ "reason": "mechanism-gap",
+ "gap": "Missing rank1 DB, allreduce shapes/stacks and complete graph execution intervals",
+ "repeat_reason": "One user-requested dual-rank diagnostic; no overlap or E2E comparison",
+ "checks": [
+  {
+   "name": "candidate-non-terminal",
+   "ok": true,
+   "detail": "stage=probing"
+  },
+  {
+   "name": "gap-declared",
+   "ok": true,
+   "detail": "Missing rank1 DB, allreduce shapes/stacks and complete graph execution intervals"
+  },
+  {
+   "name": "evidence-intent",
+   "ok": true,
+   "detail": "1 个路径"
+  },
+  {
+   "name": "no-blind-repeat",
+   "ok": true,
+   "detail": "本次证据已登记过: /root/包体恢复/records/probes/20261019T055422Z_comm-free-paired-forensics.json"
+  },
+  {
+   "name": "same-purpose-completed",
+   "ok": true,
+   "detail": "本次要采的数据与已登记产物同源（/root/包体恢复/records/probes/20261019T055422Z_comm-free-paired-forensics.json）：属「同一采集目的已完成」→ 复用，或给 --repeat-reason 明确再采的理由"
+  },
+  {
+   "name": "reuse-hinted",
+   "ok": true,
+   "detail": "可复用已有证据 15 条 / 新证据 0 条"
+  },
+  {
+   "name": "ab-not-blocked",
+   "ok": true,
+   "detail": "必要 A/B 不受限：reason=candidate-ab（或任何新证据路径）永不被拦，只有「重复采集同一份已有证据」才要 repeat reason；非终态（含 blocked）的 warning 不阻塞采集"
+  }
+ ],
+ "violations": [],
+ "reuse": [
+  {
+   "path": "/root/vllm-workspace/vllm-ascend-split-batch-hust/host-proposals/comm-mechanism/validation/20261019/profile-startup-failure-20261019T071928Z.json",
+   "sha256": "99543562bac1f23793d1e317fbdca2ced3c7e5fa24f50b1b56e2e7a2bba4d88a",
+   "source": "current",
+   "already_recorded": true,
+   "in_intent": false,
+   "class": "collected"
+  },
+  {
+   "path": "/root/包体恢复/logs/ladder-serve-1019-071939.log",
+   "sha256": "820e24f29a48bddfc0066a16217c904a7682502d969db92c82027cf2cf8e472a",
+   "source": "current",
+   "already_recorded": true,
+   "in_intent": false,
+   "class": "collected"
+  },
+  {
+   "path": "/root/包体恢复/records/probes/20261019T071922Z_comm-mechanism-retest.log",
+   "sha256": "7b23fc0126636bd545c3f4ce685b12305c5ba081e4907ec7a709ca1b3bd7d79c",
+   "source": "current",
+   "already_recorded": true,
+   "in_intent": false,
+   "class": "collected"
+  },
+  {
+   "path": "/root/包体恢复/records/probes/20261019T063000Z_comm-mechanism/failure-receipt.json",
+   "sha256": "26fe3b987c1e9e690738f9a057f6460a2a04f11ec6c295902bf11bf8b9bb5c4f",
+   "source": "current",
+   "already_recorded": true,
+   "in_intent": false,
+   "class": "collected"
+  },
+  {
+   "path": "/root/包体恢复/records/probes/20261019T074006Z_comm-trace-debug/server-extension-import.log",
+   "sha256": "2987c1bcdd600d27f4b428721b1d99c248e4272e2ff726423868c37d74b7bb87",
+   "source": "current",
+   "already_recorded": true,
+   "in_intent": false,
+   "class": "collected"
+  },
+  {
+   "path": "/root/包体恢复/records/probes/20261019T074006Z_comm-trace-debug/isolated-prefix-reproduction.log",
+   "sha256": "4a7ff98d09f08e7a48bf129dfa393843642f98423a7cbe8ed39df801cbe05dbe",
+   "source": "current",
+   "already_recorded": true,
+   "in_intent": false,
+   "class": "collected"
+  },
+  {
+   "path": "/root/包体恢复/records/probes/20261019T074006Z_comm-trace-debug/library-symbols.log",
+   "sha256": "f5e3c62abc4a990075b66a2e229ea36dbf8112c0a8acb18ad335168ed50e6f50",
+   "source": "current",
+   "already_recorded": true,
+   "in_intent": false,
+   "class": "collected"
+  },
+  {
+   "path": "/root/包体恢复/records/probes/20261019T074006Z_comm-trace-debug/collection.log",
+   "sha256": "8d43002cbc8987b0f1ed5a1f158b17ec6a4ce362d480fc6c53cb31a90687850b",
+   "source": "current",
+   "already_recorded": true,
+   "in_intent": false,
+   "class": "collected"
+  },
+  {
+   "path": "/root/包体恢复/records/probes/20261019T055422Z_comm-free-paired-forensics.json",
+   "sha256": "13212eccec831dbb7ba8c0cc2dafb43967118a890f5b02f01e35b6e534f06ce3",
+   "source": "history",
+   "already_recorded": true,
+   "in_intent": true,
+   "class": "collected"
+  },
+  {
+   "path": "/root/包体恢复/records/probes/20261019T055617Z_comm-free-evidence-correction.json",
+   "sha256": "9c72cd944829503138291680738fe0b3e6e3eb5092c113340d24c44d952d6037",
+   "source": "history",
+   "already_recorded": true,
+   "in_intent": false,
+   "class": "collected"
+  },
+  {
+   "path": "/root/包体恢复/records/probes/20261019T060619Z_free-attribution-v1-final-withdrawal.json",
+   "sha256": "5ace20a1f40d791cf44dcc7ced81d4bc1334e315266af9a7d18a55593eb915cb",
+   "source": "history",
+   "already_recorded": true,
+   "in_intent": false,
+   "class": "collected"
+  },
+  {
+   "path": "/root/包体恢复/records/probes/20261019T060705Z_comm-free-coverage.log",
+   "sha256": "b348deba718d68de56208423d4bdd14ccc33593ada58d03fdcf26aa21d29ece6",
+   "source": "history",
+   "already_recorded": true,
+   "in_intent": false,
+   "class": "collected"
+  },
+  {
+   "path": "/root/包体恢复/logs/ladder-serve-1019-063124.log",
+   "sha256": "0839d61692322e2f7784fb27449da022647a5b36122756211b5fe5d9d2717acd",
+   "source": "history",
+   "already_recorded": true,
+   "in_intent": false,
+   "class": "collected"
+  },
+  {
+   "path": "/root/包体恢复/records/probes/20261019T063000Z_comm-mechanism/final-checks.log",
+   "sha256": "3605096cab1445724104e849ebf01cb5235e9efbdad51db0f4d503d7e99f017d",
+   "source": "history",
+   "already_recorded": true,
+   "in_intent": false,
+   "class": "collected"
+  },
+  {
+   "path": "/root/包体恢复/records/probes/20261019T063000Z_comm-mechanism/coverage.log",
+   "sha256": "4eab1cff08680d470d6b13294e297f0dc818b742269057b8a4cd44c3e393d27e",
+   "source": "history",
+   "already_recorded": true,
+   "in_intent": false,
+   "class": "collected"
+  }
+ ],
+ "existing_classification": {
+  "baseline_or_probe": [],
+  "completed_collection": [
+   "/root/vllm-workspace/vllm-ascend-split-batch-hust/host-proposals/comm-mechanism/validation/20261019/profile-startup-failure-20261019T071928Z.json",
+   "/root/包体恢复/logs/ladder-serve-1019-071939.log",
+   "/root/包体恢复/records/probes/20261019T071922Z_comm-mechanism-retest.log",
+   "/root/包体恢复/records/probes/20261019T063000Z_comm-mechanism/failure-receipt.json",
+   "/root/包体恢复/records/probes/20261019T074006Z_comm-trace-debug/server-extension-import.log",
+   "/root/包体恢复/records/probes/20261019T074006Z_comm-trace-debug/isolated-prefix-reproduction.log",
+   "/root/包体恢复/records/probes/20261019T074006Z_comm-trace-debug/library-symbols.log",
+   "/root/包体恢复/records/probes/20261019T074006Z_comm-trace-debug/collection.log",
+   "/root/包体恢复/records/probes/20261019T055422Z_comm-free-paired-forensics.json",
+   "/root/包体恢复/records/probes/20261019T055617Z_comm-free-evidence-correction.json",
+   "/root/包体恢复/records/probes/20261019T060619Z_free-attribution-v1-final-withdrawal.json",
+   "/root/包体恢复/records/probes/20261019T060705Z_comm-free-coverage.log",
+   "/root/包体恢复/logs/ladder-serve-1019-063124.log",
+   "/root/包体恢复/records/probes/20261019T063000Z_comm-mechanism/final-checks.log",
+   "/root/包体恢复/records/probes/20261019T063000Z_comm-mechanism/coverage.log"
+  ]
+ },
+ "same_purpose_repeat": [
+  "/root/包体恢复/records/probes/20261019T055422Z_comm-free-paired-forensics.json"
+ ],
+ "budget": {
+  "wall_min": 35,
+  "serve_starts": 1,
+  "profile_windows": 1,
+  "resamples": "none",
+  "consumed": {
+   "serve_starts": 1
+  },
+  "note": "New debug authorization in /root/COMM_TRACE_STARTUP_DEBUG.md supersedes prior exhausted start allowance. First script stopped at candidate state gate before /start_profile; reuse healthy server, no new start."
+ },
+ "budget_enforced": false,
+ "note": "本检查只做前置校验（不采集、不写库）；budget 为**预声明**，本工具不自动扣减/不计账（不虚报执行）。",
+ "limits": "重复判定只看本候选已登记的证据（路径或 sha256）；未落库的采集历史不受保护，不能据此声称「持久重复历史已保护」。"
+}== L4 deep 窗口: start_profile -> 负载[mmlu-pro-eval-traffic] -> stop_profile (capture=vllm-max-iterations-32, trace: /root/prof/ladder-1019-074126, /root 余 315G) ==
+   负载: lm-eval mmlu_pro_smoke(第一 16 条, 5-shot CoT, num_concurrent=16, max_gen_toks=2048, chat) — 数据集派生评测流量口径; capture_scope=vllm-max-iterations-32; trace_tier=deep; max_iterations=32
+   cohort: ladder-1019-074126/cohort.json（模型/宿主/配置档随窗口记录）
+2026-10-19:07:47:40 INFO     [config.evaluate_config:357] Using default fewshot_as_multiturn=True.
+2026-10-19:07:48:22 INFO     [_cli.run:391] Including path: /root/包体恢复/scripts/lm-eval-tasks
+2026-10-19:07:48:22 INFO     [_cli.run:392] Selected Tasks: ['mmlu_pro_smoke']
+2026-10-19:07:48:22 INFO     [evaluator:214] Setting random seed to 0 | Setting numpy seed to 1234 | Setting torch manual seed to 1234 | Setting fewshot manual seed to 1234
+2026-10-19:07:48:22 INFO     [evaluator:239] Initializing local-chat-completions model, with arguments: {'base_url': 'http://127.0.0.1:8000/v1/chat/completions', 'model': '/models/Qwen3.5-35B-A3B', 'num_concurrent': 16, 'timeout': 600, 'max_retries': 2}
+2026-10-19:07:48:22 INFO     [models.api_models:176] Using max length 2048 - 1
+2026-10-19:07:48:22 INFO     [models.api_models:197] Using tokenizer None
+2026-10-19:07:48:23 INFO     [evaluator_utils:472] Selected tasks:
+2026-10-19:07:48:23 INFO     [evaluator_utils:506] Task: mmlu_pro_smoke (/root/包体恢复/scripts/lm-eval-tasks/mmlu_pro_local/mmlu_pro_smoke.yaml)
+2026-10-19:07:48:23 INFO     [evaluator:314] mmlu_pro_smoke: Using gen_kwargs: {'until': ['Question:'], 'max_gen_toks': 2048, 'do_sample': False, 'temperature': 0.0}
+2026-10-19:07:48:23 WARNING  [evaluator:335] Overwriting default num_fewshot of mmlu_pro_smoke from 5 to 5
+2026-10-19:07:48:23 INFO     [evaluator:487] Evaluating examples for tasks ['mmlu_pro_smoke']
+2026-10-19:07:48:23 INFO     [api.task:312] Building contexts for mmlu_pro_smoke on rank 0...
+2026-10-19:07:48:23 INFO     [api.task:589] mmlu_pro_smoke: Evaluating on 16 examples
+
+  0%|          | 0/16 [00:00<?, ?it/s]
+100%|██████████| 16/16 [00:00<00:00, 901.96it/s]
+2026-10-19:07:48:24 INFO     [evaluator:589] Running generate_until requests
+2026-10-19:07:48:24 INFO     [models.api_models:752] Tokenized requests are disabled. Context + generation length is not checked.
+
+Requesting API:   0%|          | 0/16 [00:00<?, ?it/s]2026-10-19:07:49:31 WARNING  [models.api_models:521] API request failed! Status code: 500, Response text: {"error":{"message":"EngineCore encountered an issue. See stack trace (above) for the root cause.","type":"InternalServerError","param":null,"code":500}}. Retrying...
+2026-10-19:07:49:31 ERROR    [models.api_models:557] Exception:ClientResponseError(RequestInfo(url=URL('http://127.0.0.1:8000/v1/chat/completions'), method='POST', headers=<CIMultiDictProxy('Host': '127.0.0.1:8000', 'Authorization': 'Bearer ', 'Accept': '*/*', 'Accept-Encoding': 'gzip, deflate', 'User-Agent': 'Python/3.12 aiohttp/3.14.4', 'Content-Length': '5998', 'Content-Type': 'application/json')>, real_url=URL('http://127.0.0.1:8000/v1/chat/completions')), (), status=500, message='Internal Server Error', headers=<CIMultiDictProxy('Date': 'Mon, 19 Oct 2026 07:48:23 GMT', 'Server': 'uvicorn', 'Content-Length': '153', 'Content-Type': 'application/json')>), (no outputs), retrying.
+2026-10-19:07:49:31 INFO     [models.api_models:607] Retry attempt 1
+2026-10-19:07:49:31 WARNING  [models.api_models:521] API request failed! Status code: 500, Response text: {"error":{"message":"EngineCore encountered an issue. See stack trace (above) for the root cause.","type":"InternalServerError","param":null,"code":500}}. Retrying...
+2026-10-19:07:49:31 ERROR    [models.api_models:557] Exception:ClientResponseError(RequestInfo(url=URL('http://127.0.0.1:8000/v1/chat/completions'), method='POST', headers=<CIMultiDictProxy('Host': '127.0.0.1:8000', 'Authorization': 'Bearer ', 'Accept': '*/*', 'Accept-Encoding': 'gzip, deflate', 'User-Agent': 'Python/3.12 aiohttp/3.14.4', 'Content-Length': '6525', 'Content-Type': 'application/json')>, real_url=URL('http://127.0.0.1:8000/v1/chat/completions')), (), status=500, message='Internal Server Error', headers=<CIMultiDictProxy('Date': 'Mon, 19 Oct 2026 07:48:23 GMT', 'Server': 'uvicorn', 'Content-Length': '153', 'Content-Type': 'application/json')>), (no outputs), retrying.
+2026-10-19:07:49:31 INFO     [models.api_models:607] Retry attempt 1
+2026-10-19:07:49:31 WARNING  [models.api_models:521] API request failed! Status code: 500, Response text: {"error":{"message":"EngineCore encountered an issue. See stack trace (above) for the root cause.","type":"InternalServerError","param":null,"code":500}}. Retrying...
+2026-10-19:07:49:31 ERROR    [models.api_models:557] Exception:ClientResponseError(RequestInfo(url=URL('http://127.0.0.1:8000/v1/chat/completions'), method='POST', headers=<CIMultiDictProxy('Host': '127.0.0.1:8000', 'Authorization': 'Bearer ', 'Accept': '*/*', 'Accept-Encoding': 'gzip, deflate', 'User-Agent': 'Python/3.12 aiohttp/3.14.4', 'Content-Length': '6038', 'Content-Type': 'application/json')>, real_url=URL('http://127.0.0.1:8000/v1/chat/completions')), (), status=500, message='Internal Server Error', headers=<CIMultiDictProxy('Date': 'Mon, 19 Oct 2026 07:48:23 GMT', 'Server': 'uvicorn', 'Content-Length': '153', 'Content-Type': 'application/json')>), (no outputs), retrying.
+2026-10-19:07:49:31 INFO     [models.api_models:607] Retry attempt 1
+2026-10-19:07:49:31 WARNING  [models.api_models:521] API request failed! Status code: 500, Response text: {"error":{"message":"EngineCore encountered an issue. See stack trace (above) for the root cause.","type":"InternalServerError","param":null,"code":500}}. Retrying...
+2026-10-19:07:49:31 ERROR    [models.api_models:557] Exception:ClientResponseError(RequestInfo(url=URL('http://127.0.0.1:8000/v1/chat/completions'), method='POST', headers=<CIMultiDictProxy('Host': '127.0.0.1:8000', 'Authorization': 'Bearer ', 'Accept': '*/*', 'Accept-Encoding': 'gzip, deflate', 'User-Agent': 'Python/3.12 aiohttp/3.14.4', 'Content-Length': '6375', 'Content-Type': 'application/json')>, real_url=URL('http://127.0.0.1:8000/v1/chat/completions')), (), status=500, message='Internal Server Error', headers=<CIMultiDictProxy('Date': 'Mon, 19 Oct 2026 07:48:23 GMT', 'Server': 'uvicorn', 'Content-Length': '153', 'Content-Type': 'application/json')>), (no outputs), retrying.
+2026-10-19:07:49:31 INFO     [models.api_models:607] Retry attempt 1
+2026-10-19:07:49:31 WARNING  [models.api_models:521] API request failed! Status code: 500, Response text: {"error":{"message":"EngineCore encountered an issue. See stack trace (above) for the root cause.","type":"InternalServerError","param":null,"code":500}}. Retrying...
+2026-10-19:07:49:31 ERROR    [models.api_models:557] Exception:ClientResponseError(RequestInfo(url=URL('http://127.0.0.1:8000/v1/chat/completions'), method='POST', headers=<CIMultiDictProxy('Host': '127.0.0.1:8000', 'Authorization': 'Bearer ', 'Accept': '*/*', 'Accept-Encoding': 'gzip, deflate', 'User-Agent': 'Python/3.12 aiohttp/3.14.4', 'Content-Length': '6387', 'Content-Type': 'application/json')>, real_url=URL('http://127.0.0.1:8000/v1/chat/completions')), (), status=500, message='Internal Server Error', headers=<CIMultiDictProxy('Date': 'Mon, 19 Oct 2026 07:48:23 GMT', 'Server': 'uvicorn', 'Content-Length': '153', 'Content-Type': 'application/json')>), (no outputs), retrying.
+2026-10-19:07:49:31 INFO     [models.api_models:607] Retry attempt 1
+2026-10-19:07:49:31 WARNING  [models.api_models:521] API request failed! Status code: 500, Response text: {"error":{"message":"EngineCore encountered an issue. See stack trace (above) for the root cause.","type":"InternalServerError","param":null,"code":500}}. Retrying...
+2026-10-19:07:49:31 ERROR    [models.api_models:557] Exception:ClientResponseError(RequestInfo(url=URL('http://127.0.0.1:8000/v1/chat/completions'), method='POST', headers=<CIMultiDictProxy('Host': '127.0.0.1:8000', 'Authorization': 'Bearer ', 'Accept': '*/*', 'Accept-Encoding': 'gzip, deflate', 'User-Agent': 'Python/3.12 aiohttp/3.14.4', 'Content-Length': '6272', 'Content-Type': 'application/json')>, real_url=URL('http://127.0.0.1:8000/v1/chat/completions')), (), status=500, message='Internal Server Error', headers=<CIMultiDictProxy('Date': 'Mon, 19 Oct 2026 07:48:23 GMT', 'Server': 'uvicorn', 'Content-Length': '153', 'Content-Type': 'application/json')>), (no outputs), retrying.
+2026-10-19:07:49:31 INFO     [models.api_models:607] Retry attempt 1
+2026-10-19:07:49:31 WARNING  [models.api_models:521] API request failed! Status code: 500, Response text: {"error":{"message":"EngineCore encountered an issue. See stack trace (above) for the root cause.","type":"InternalServerError","param":null,"code":500}}. Retrying...
+2026-10-19:07:49:31 ERROR    [models.api_models:557] Exception:ClientResponseError(RequestInfo(url=URL('http://127.0.0.1:8000/v1/chat/completions'), method='POST', headers=<CIMultiDictProxy('Host': '127.0.0.1:8000', 'Authorization': 'Bearer ', 'Accept': '*/*', 'Accept-Encoding': 'gzip, deflate', 'User-Agent': 'Python/3.12 aiohttp/3.14.4', 'Content-Length': '5966', 'Content-Type': 'application/json')>, real_url=URL('http://127.0.0.1:8000/v1/chat/completions')), (), status=500, message='Internal Server Error', headers=<CIMultiDictProxy('Date': 'Mon, 19 Oct 2026 07:48:23 GMT', 'Server': 'uvicorn', 'Content-Length': '153', 'Content-Type': 'application/json')>), (no outputs), retrying.
+2026-10-19:07:49:31 INFO     [models.api_models:607] Retry attempt 1
+2026-10-19:07:49:31 WARNING  [models.api_models:521] API request failed! Status code: 500, Response text: {"error":{"message":"EngineCore encountered an issue. See stack trace (above) for the root cause.","type":"InternalServerError","param":null,"code":500}}. Retrying...
+2026-10-19:07:49:31 ERROR    [models.api_models:557] Exception:ClientResponseError(RequestInfo(url=URL('http://127.0.0.1:8000/v1/chat/completions'), method='POST', headers=<CIMultiDictProxy('Host': '127.0.0.1:8000', 'Authorization': 'Bearer ', 'Accept': '*/*', 'Accept-Encoding': 'gzip, deflate', 'User-Agent': 'Python/3.12 aiohttp/3.14.4', 'Content-Length': '6601', 'Content-Type': 'application/json')>, real_url=URL('http://127.0.0.1:8000/v1/chat/completions')), (), status=500, message='Internal Server Error', headers=<CIMultiDictProxy('Date': 'Mon, 19 Oct 2026 07:48:23 GMT', 'Server': 'uvicorn', 'Content-Length': '153', 'Content-Type': 'application/json')>), (no outputs), retrying.
+2026-10-19:07:49:31 INFO     [models.api_models:607] Retry attempt 1
+2026-10-19:07:49:31 WARNING  [models.api_models:521] API request failed! Status code: 500, Response text: {"error":{"message":"EngineCore encountered an issue. See stack trace (above) for the root cause.","type":"InternalServerError","param":null,"code":500}}. Retrying...
+2026-10-19:07:49:31 ERROR    [models.api_models:557] Exception:ClientResponseError(RequestInfo(url=URL('http://127.0.0.1:8000/v1/chat/completions'), method='POST', headers=<CIMultiDictProxy('Host': '127.0.0.1:8000', 'Authorization': 'Bearer ', 'Accept': '*/*', 'Accept-Encoding': 'gzip, deflate', 'User-Agent': 'Python/3.12 aiohttp/3.14.4', 'Content-Length': '6389', 'Content-Type': 'application/json')>, real_url=URL('http://127.0.0.1:8000/v1/chat/completions')), (), status=500, message='Internal Server Error', headers=<CIMultiDictProxy('Date': 'Mon, 19 Oct 2026 07:48:23 GMT', 'Server': 'uvicorn', 'Content-Length': '153', 'Content-Type': 'application/json')>), (no outputs), retrying.
+2026-10-19:07:49:31 INFO     [models.api_models:607] Retry attempt 1
+2026-10-19:07:49:31 WARNING  [models.api_models:521] API request failed! Status code: 500, Response text: {"error":{"message":"EngineCore encountered an issue. See stack trace (above) for the root cause.","type":"InternalServerError","param":null,"code":500}}. Retrying...
+2026-10-19:07:49:31 ERROR    [models.api_models:557] Exception:ClientResponseError(RequestInfo(url=URL('http://127.0.0.1:8000/v1/chat/completions'), method='POST', headers=<CIMultiDictProxy('Host': '127.0.0.1:8000', 'Authorization': 'Bearer ', 'Accept': '*/*', 'Accept-Encoding': 'gzip, deflate', 'User-Agent': 'Python/3.12 aiohttp/3.14.4', 'Content-Length': '5901', 'Content-Type': 'application/json')>, real_url=URL('http://127.0.0.1:8000/v1/chat/completions')), (), status=500, message='Internal Server Error', headers=<CIMultiDictProxy('Date': 'Mon, 19 Oct 2026 07:48:23 GMT', 'Server': 'uvicorn', 'Content-Length': '153', 'Content-Type': 'application/json')>), (no outputs), retrying.
+2026-10-19:07:49:31 INFO     [models.api_models:607] Retry attempt 1
+2026-10-19:07:49:31 WARNING  [models.api_models:521] API request failed! Status code: 500, Response text: {"error":{"message":"EngineCore encountered an issue. See stack trace (above) for the root cause.","type":"InternalServerError","param":null,"code":500}}. Retrying...
+2026-10-19:07:49:31 ERROR    [models.api_models:557] Exception:ClientResponseError(RequestInfo(url=URL('http://127.0.0.1:8000/v1/chat/completions'), method='POST', headers=<CIMultiDictProxy('Host': '127.0.0.1:8000', 'Authorization': 'Bearer ', 'Accept': '*/*', 'Accept-Encoding': 'gzip, deflate', 'User-Agent': 'Python/3.12 aiohttp/3.14.4', 'Content-Length': '6050', 'Content-Type': 'application/json')>, real_url=URL('http://127.0.0.1:8000/v1/chat/completions')), (), status=500, message='Internal Server Error', headers=<CIMultiDictProxy('Date': 'Mon, 19 Oct 2026 07:48:23 GMT', 'Server': 'uvicorn', 'Content-Length': '153', 'Content-Type': 'application/json')>), (no outputs), retrying.
+2026-10-19:07:49:31 INFO     [models.api_models:607] Retry attempt 1
+2026-10-19:07:49:31 WARNING  [models.api_models:521] API request failed! Status code: 500, Response text: {"error":{"message":"EngineCore encountered an issue. See stack trace (above) for the root cause.","type":"InternalServerError","param":null,"code":500}}. Retrying...
+2026-10-19:07:49:31 ERROR    [models.api_models:557] Exception:ClientResponseError(RequestInfo(url=URL('http://127.0.0.1:8000/v1/chat/completions'), method='POST', headers=<CIMultiDictProxy('Host': '127.0.0.1:8000', 'Authorization': 'Bearer ', 'Accept': '*/*', 'Accept-Encoding': 'gzip, deflate', 'User-Agent': 'Python/3.12 aiohttp/3.14.4', 'Content-Length': '5780', 'Content-Type': 'application/json')>, real_url=URL('http://127.0.0.1:8000/v1/chat/completions')), (), status=500, message='Internal Server Error', headers=<CIMultiDictProxy('Date': 'Mon, 19 Oct 2026 07:48:23 GMT', 'Server': 'uvicorn', 'Content-Length': '153', 'Content-Type': 'application/json')>), (no outputs), retrying.
+2026-10-19:07:49:31 INFO     [models.api_models:607] Retry attempt 1
+2026-10-19:07:49:31 WARNING  [models.api_models:521] API request failed! Status code: 500, Response text: {"error":{"message":"EngineCore encountered an issue. See stack trace (above) for the root cause.","type":"InternalServerError","param":null,"code":500}}. Retrying...
+2026-10-19:07:49:31 ERROR    [models.api_models:557] Exception:ClientResponseError(RequestInfo(url=URL('http://127.0.0.1:8000/v1/chat/completions'), method='POST', headers=<CIMultiDictProxy('Host': '127.0.0.1:8000', 'Authorization': 'Bearer ', 'Accept': '*/*', 'Accept-Encoding': 'gzip, deflate', 'User-Agent': 'Python/3.12 aiohttp/3.14.4', 'Content-Length': '5942', 'Content-Type': 'application/json')>, real_url=URL('http://127.0.0.1:8000/v1/chat/completions')), (), status=500, message='Internal Server Error', headers=<CIMultiDictProxy('Date': 'Mon, 19 Oct 2026 07:48:23 GMT', 'Server': 'uvicorn', 'Content-Length': '153', 'Content-Type': 'application/json')>), (no outputs), retrying.
+2026-10-19:07:49:31 INFO     [models.api_models:607] Retry attempt 1
+2026-10-19:07:49:31 WARNING  [models.api_models:521] API request failed! Status code: 500, Response text: {"error":{"message":"EngineCore encountered an issue. See stack trace (above) for the root cause.","type":"InternalServerError","param":null,"code":500}}. Retrying...
+2026-10-19:07:49:31 ERROR    [models.api_models:557] Exception:ClientResponseError(RequestInfo(url=URL('http://127.0.0.1:8000/v1/chat/completions'), method='POST', headers=<CIMultiDictProxy('Host': '127.0.0.1:8000', 'Authorization': 'Bearer ', 'Accept': '*/*', 'Accept-Encoding': 'gzip, deflate', 'User-Agent': 'Python/3.12 aiohttp/3.14.4', 'Content-Length': '5910', 'Content-Type': 'application/json')>, real_url=URL('http://127.0.0.1:8000/v1/chat/completions')), (), status=500, message='Internal Server Error', headers=<CIMultiDictProxy('Date': 'Mon, 19 Oct 2026 07:48:23 GMT', 'Server': 'uvicorn', 'Content-Length': '153', 'Content-Type': 'application/json')>), (no outputs), retrying.
+2026-10-19:07:49:31 INFO     [models.api_models:607] Retry attempt 1
+2026-10-19:07:49:31 WARNING  [models.api_models:521] API request failed! Status code: 500, Response text: {"error":{"message":"EngineCore encountered an issue. See stack trace (above) for the root cause.","type":"InternalServerError","param":null,"code":500}}. Retrying...
+2026-10-19:07:49:31 ERROR    [models.api_models:557] Exception:ClientResponseError(RequestInfo(url=URL('http://127.0.0.1:8000/v1/chat/completions'), method='POST', headers=<CIMultiDictProxy('Host': '127.0.0.1:8000', 'Authorization': 'Bearer ', 'Accept': '*/*', 'Accept-Encoding': 'gzip, deflate', 'User-Agent': 'Python/3.12 aiohttp/3.14.4', 'Content-Length': '6021', 'Content-Type': 'application/json')>, real_url=URL('http://127.0.0.1:8000/v1/chat/completions')), (), status=500, message='Internal Server Error', headers=<CIMultiDictProxy('Date': 'Mon, 19 Oct 2026 07:48:23 GMT', 'Server': 'uvicorn', 'Content-Length': '153', 'Content-Type': 'application/json')>), (no outputs), retrying.
+2026-10-19:07:49:31 INFO     [models.api_models:607] Retry attempt 1
+2026-10-19:07:49:31 WARNING  [models.api_models:521] API request failed! Status code: 500, Response text: {"error":{"message":"EngineCore encountered an issue. See stack trace (above) for the root cause.","type":"InternalServerError","param":null,"code":500}}. Retrying...
+2026-10-19:07:49:31 ERROR    [models.api_models:557] Exception:ClientResponseError(RequestInfo(url=URL('http://127.0.0.1:8000/v1/chat/completions'), method='POST', headers=<CIMultiDictProxy('Host': '127.0.0.1:8000', 'Authorization': 'Bearer ', 'Accept': '*/*', 'Accept-Encoding': 'gzip, deflate', 'User-Agent': 'Python/3.12 aiohttp/3.14.4', 'Content-Length': '5754', 'Content-Type': 'application/json')>, real_url=URL('http://127.0.0.1:8000/v1/chat/completions')), (), status=500, message='Internal Server Error', headers=<CIMultiDictProxy('Date': 'Mon, 19 Oct 2026 07:48:23 GMT', 'Server': 'uvicorn', 'Content-Length': '153', 'Content-Type': 'application/json')>), (no outputs), retrying.
+2026-10-19:07:49:31 INFO     [models.api_models:607] Retry attempt 1
+2026-10-19:07:49:32 ERROR    [models.api_models:557] Exception:ClientConnectorError(ConnectionKey(host='127.0.0.1', port=8000, is_ssl=False, ssl=True, proxy=None, proxy_auth=None, proxy_headers_hash=None, server_hostname=None), ConnectionRefusedError(111, "Connect call failed ('127.0.0.1', 8000)")), (no outputs), retrying.
+2026-10-19:07:49:32 ERROR    [models.api_models:557] Exception:ClientConnectorError(ConnectionKey(host='127.0.0.1', port=8000, is_ssl=False, ssl=True, proxy=None, proxy_auth=None, proxy_headers_hash=None, server_hostname=None), ConnectionRefusedError(111, "Connect call failed ('127.0.0.1', 8000)")), (no outputs), retrying.
+2026-10-19:07:49:32 ERROR    [models.api_models:557] Exception:ClientConnectorError(ConnectionKey(host='127.0.0.1', port=8000, is_ssl=False, ssl=True, proxy=None, proxy_auth=None, proxy_headers_hash=None, server_hostname=None), ConnectionRefusedError(111, "Connect call failed ('127.0.0.1', 8000)")), (no outputs), retrying.
+
+Requesting API:   0%|          | 0/16 [01:08<?, ?it/s]
+2026-10-19:07:49:32 ERROR    [models.api_models:557] Exception:RuntimeError('Session is closed'), (no outputs), retrying.
+2026-10-19:07:49:32 ERROR    [models.api_models:557] Exception:ClientConnectorError(ConnectionKey(host='127.0.0.1', port=8000, is_ssl=False, ssl=True, proxy=None, proxy_auth=None, proxy_headers_hash=None, server_hostname=None), ConnectionRefusedError(111, "Connect call failed ('127.0.0.1', 8000)")), (no outputs), retrying.
+2026-10-19:07:49:32 ERROR    [models.api_models:557] Exception:ClientConnectorError(ConnectionKey(host='127.0.0.1', port=8000, is_ssl=False, ssl=True, proxy=None, proxy_auth=None, proxy_headers_hash=None, server_hostname=None), ConnectionRefusedError(111, "Connect call failed ('127.0.0.1', 8000)")), (no outputs), retrying.
+2026-10-19:07:49:32 ERROR    [models.api_models:557] Exception:ClientConnectorError(ConnectionKey(host='127.0.0.1', port=8000, is_ssl=False, ssl=True, proxy=None, proxy_auth=None, proxy_headers_hash=None, server_hostname=None), ConnectionRefusedError(111, "Connect call failed ('127.0.0.1', 8000)")), (no outputs), retrying.
+2026-10-19:07:49:32 ERROR    [models.api_models:557] Exception:RuntimeError('Session is closed'), (no outputs), retrying.
+2026-10-19:07:49:32 ERROR    [models.api_models:557] Exception:RuntimeError('Session is closed'), (no outputs), retrying.
+2026-10-19:07:49:32 ERROR    [models.api_models:557] Exception:RuntimeError('Session is closed'), (no outputs), retrying.
+2026-10-19:07:49:32 ERROR    [models.api_models:557] Exception:RuntimeError('Session is closed'), (no outputs), retrying.
+Traceback (most recent call last):
+  File "/root/venvs/harness/lib/python3.12/site-packages/aiohttp/connector.py", line 1322, in _wrap_create_connection
+    sock = await aiohappyeyeballs.start_connection(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/venvs/harness/lib/python3.12/site-packages/aiohappyeyeballs/impl.py", line 124, in start_connection
+    raise first_exception
+  File "/root/venvs/harness/lib/python3.12/site-packages/aiohappyeyeballs/impl.py", line 75, in start_connection
+    sock = await _connect_sock(
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/root/venvs/harness/lib/python3.12/site-packages/aiohappyeyeballs/impl.py", line 210, in _connect_sock
+    await loop.sock_connect(sock, address)
+  File "/usr/local/python3.12.13/lib/python3.12/asyncio/selector_events.py", line 651, in sock_connect
+    return await fut
+           ^^^^^^^^^
+  File "/usr/local/python3.12.13/lib/python3.12/asyncio/selector_events.py", line 691, in _sock_connect_cb
+    raise OSError(err, f'Connect call failed {address}')
+ConnectionRefusedError: [Errno 111] Connect call failed ('127.0.0.1', 8000)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/root/venvs/harness/bin/lm_eval", line 6, in <module>
+    sys.exit(cli_evaluate())
+             ^^^^^^^^^^^^^^
+  File "/root/venvs/harness/lib/python3.12/site-packages/lm_eval/__main__.py", line 10, in cli_evaluate
+    parser.execute(args)
+  File "/root/venvs/harness/lib/python3.12/site-packages/lm_eval/_cli/harness.py", line 60, in execute
+    args.func(args)
+  File "/root/venvs/harness/lib/python3.12/site-packages/lm_eval/_cli/run.py", line 395, in _execute
+    results = simple_evaluate(
+              ^^^^^^^^^^^^^^^^
+  File "/root/venvs/harness/lib/python3.12/site-packages/lm_eval/utils.py", line 580, in _wrapper
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/root/venvs/harness/lib/python3.12/site-packages/lm_eval/evaluator.py", line 363, in simple_evaluate
+    results = evaluate(
+              ^^^^^^^^^
+  File "/root/venvs/harness/lib/python3.12/site-packages/lm_eval/utils.py", line 580, in _wrapper
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/root/venvs/harness/lib/python3.12/site-packages/lm_eval/evaluator.py", line 600, in evaluate
+    resps = getattr(lm, reqtype)(cloned_reqs)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/venvs/harness/lib/python3.12/site-packages/lm_eval/models/api_models.py", line 831, in generate_until
+    asyncio.run(
+  File "/usr/local/python3.12.13/lib/python3.12/asyncio/runners.py", line 195, in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "/usr/local/python3.12.13/lib/python3.12/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/python3.12.13/lib/python3.12/asyncio/base_events.py", line 691, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "/root/venvs/harness/lib/python3.12/site-packages/lm_eval/models/api_models.py", line 632, in get_batched_requests
+    return await tqdm_asyncio.gather(*tasks, desc="Requesting API")
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/venvs/harness/lib/python3.12/site-packages/tqdm/asyncio.py", line 89, in gather
+    res = [await f for f in cls.as_completed(ifs, loop=loop, timeout=timeout,
+           ^^^^^^^
+  File "/usr/local/python3.12.13/lib/python3.12/asyncio/tasks.py", line 631, in _wait_for_one
+    return f.result()  # May raise f.exception().
+           ^^^^^^^^^^
+  File "/root/venvs/harness/lib/python3.12/site-packages/tqdm/asyncio.py", line 82, in wrap_awaitable
+    return i, await f
+              ^^^^^^^
+  File "/root/venvs/harness/lib/python3.12/site-packages/tenacity/asyncio/__init__.py", line 232, in async_wrapped
+    return await copy(fn, *args, **kwargs)  # type: ignore[type-var]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/venvs/harness/lib/python3.12/site-packages/tenacity/asyncio/__init__.py", line 126, in __call__
+    do = await self.iter(retry_state=retry_state)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/venvs/harness/lib/python3.12/site-packages/tenacity/asyncio/__init__.py", line 171, in iter
+    result = await action(retry_state)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/venvs/harness/lib/python3.12/site-packages/tenacity/_utils.py", line 130, in inner
+    return call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/root/venvs/harness/lib/python3.12/site-packages/tenacity/__init__.py", line 482, in exc_check
+    retry_exc.reraise()
+  File "/root/venvs/harness/lib/python3.12/site-packages/tenacity/__init__.py", line 216, in reraise
+    raise self.last_attempt.result()
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/python3.12.13/lib/python3.12/concurrent/futures/_base.py", line 449, in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/python3.12.13/lib/python3.12/concurrent/futures/_base.py", line 401, in __get_result
+    raise self._exception
+  File "/root/venvs/harness/lib/python3.12/site-packages/tenacity/asyncio/__init__.py", line 130, in __call__
+    result = await fn(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/venvs/harness/lib/python3.12/site-packages/lm_eval/models/api_models.py", line 514, in amodel_call
+    async with session.post(
+               ^^^^^^^^^^^^^
+  File "/root/venvs/harness/lib/python3.12/site-packages/aiohttp/client.py", line 1756, in __aenter__
+    self._resp: _RetType_co = await self._coro
+                              ^^^^^^^^^^^^^^^^
+  File "/root/venvs/harness/lib/python3.12/site-packages/aiohttp/client.py", line 900, in _request
+    resp = await handler(req)
+           ^^^^^^^^^^^^^^^^^^
+  File "/root/venvs/harness/lib/python3.12/site-packages/aiohttp/client.py", line 854, in _connect_and_send_request
+    conn = await self._connector.connect(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/venvs/harness/lib/python3.12/site-packages/aiohttp/connector.py", line 665, in connect
+    proto = await self._create_connection(req, traces, timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/venvs/harness/lib/python3.12/site-packages/aiohttp/connector.py", line 1263, in _create_connection
+    _, proto = await self._create_direct_connection(req, traces, timeout)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/venvs/harness/lib/python3.12/site-packages/aiohttp/connector.py", line 1641, in _create_direct_connection
+    raise last_exc
+  File "/root/venvs/harness/lib/python3.12/site-packages/aiohttp/connector.py", line 1610, in _create_direct_connection
+    transp, proto = await self._wrap_create_connection(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/venvs/harness/lib/python3.12/site-packages/aiohttp/connector.py", line 1345, in _wrap_create_connection
+    raise client_error(req.connection_key, exc) from exc
+aiohttp.client_exceptions.ClientConnectorError: Cannot connect to host 127.0.0.1:8000 ssl:default [Connect call failed ('127.0.0.1', 8000)]
+Task exception was never retrieved
+future: <Task finished name='Task-33' coro=<tqdm_asyncio.gather.<locals>.wrap_awaitable() done, defined at /root/venvs/harness/lib/python3.12/site-packages/tqdm/asyncio.py:80> exception=ClientConnectorError(ConnectionKey(host='127.0.0.1', port=8000, is_ssl=False, ssl=True, proxy=None, proxy_auth=None, proxy_headers_hash=None, server_hostname=None), ConnectionRefusedError(111, "Connect call failed ('127.0.0.1', 8000)"))>
+Traceback (most recent call last):
+  File "/root/venvs/harness/lib/python3.12/site-packages/aiohttp/connector.py", line 1322, in _wrap_create_connection
+    sock = await aiohappyeyeballs.start_connection(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/venvs/harness/lib/python3.12/site-packages/aiohappyeyeballs/impl.py", line 124, in start_connection
+    raise first_exception
+  File "/root/venvs/harness/lib/python3.12/site-packages/aiohappyeyeballs/impl.py", line 75, in start_connection
+    sock = await _connect_sock(
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/root/venvs/harness/lib/python3.12/site-packages/aiohappyeyeballs/impl.py", line 210, in _connect_sock
+    await loop.sock_connect(sock, address)
+  File "/usr/local/python3.12.13/lib/python3.12/asyncio/selector_events.py", line 651, in sock_connect
+    return await fut
+           ^^^^^^^^^
+  File "/usr/local/python3.12.13/lib/python3.12/asyncio/selector_events.py", line 691, in _sock_connect_cb
+    raise OSError(err, f'Connect call failed {address}')
+ConnectionRefusedError: [Errno 111] Connect call failed ('127.0.0.1', 8000)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/root/venvs/harness/lib/python3.12/site-packages/tqdm/asyncio.py", line 82, in wrap_awaitable
+    return i, await f
+              ^^^^^^^
+  File "/root/venvs/harness/lib/python3.12/site-packages/tenacity/asyncio/__init__.py", line 232, in async_wrapped
+    return await copy(fn, *args, **kwargs)  # type: ignore[type-var]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/venvs/harness/lib/python3.12/site-packages/tenacity/asyncio/__init__.py", line 126, in __call__
+    do = await self.iter(retry_state=retry_state)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/venvs/harness/lib/python3.12/site-packages/tenacity/asyncio/__init__.py", line 171, in iter
+    result = await action(retry_state)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/venvs/harness/lib/python3.12/site-packages/tenacity/_utils.py", line 130, in inner
+    return call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/root/venvs/harness/lib/python3.12/site-packages/tenacity/__init__.py", line 482, in exc_check
+    retry_exc.reraise()
+  File "/root/venvs/harness/lib/python3.12/site-packages/tenacity/__init__.py", line 216, in reraise
+    raise self.last_attempt.result()
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/python3.12.13/lib/python3.12/concurrent/futures/_base.py", line 449, in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/python3.12.13/lib/python3.12/concurrent/futures/_base.py", line 401, in __get_result
+    raise self._exception
+  File "/root/venvs/harness/lib/python3.12/site-packages/tenacity/asyncio/__init__.py", line 130, in __call__
+    result = await fn(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/venvs/harness/lib/python3.12/site-packages/lm_eval/models/api_models.py", line 514, in amodel_call
+    async with session.post(
+               ^^^^^^^^^^^^^
+  File "/root/venvs/harness/lib/python3.12/site-packages/aiohttp/client.py", line 1756, in __aenter__
+    self._resp: _RetType_co = await self._coro
+                              ^^^^^^^^^^^^^^^^
+  File "/root/venvs/harness/lib/python3.12/site-packages/aiohttp/client.py", line 900, in _request
+    resp = await handler(req)
+           ^^^^^^^^^^^^^^^^^^
+  File "/root/venvs/harness/lib/python3.12/site-packages/aiohttp/client.py", line 854, in _connect_and_send_request
+    conn = await self._connector.connect(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/venvs/harness/lib/python3.12/site-packages/aiohttp/connector.py", line 665, in connect
+    proto = await self._create_connection(req, traces, timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/venvs/harness/lib/python3.12/site-packages/aiohttp/connector.py", line 1263, in _create_connection
+    _, proto = await self._create_direct_connection(req, traces, timeout)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/venvs/harness/lib/python3.12/site-packages/aiohttp/connector.py", line 1641, in _create_direct_connection
+    raise last_exc
+  File "/root/venvs/harness/lib/python3.12/site-packages/aiohttp/connector.py", line 1610, in _create_direct_connection
+    transp, proto = await self._wrap_create_connection(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/venvs/harness/lib/python3.12/site-packages/aiohttp/connector.py", line 1345, in _wrap_create_connection
+    raise client_error(req.connection_key, exc) from exc
+aiohttp.client_exceptions.ClientConnectorError: Cannot connect to host 127.0.0.1:8000 ssl:default [Connect call failed ('127.0.0.1', 8000)]
+Task exception was never retrieved
+future: <Task finished name='Task-22' coro=<tqdm_asyncio.gather.<locals>.wrap_awaitable() done, defined at /root/venvs/harness/lib/python3.12/site-packages/tqdm/asyncio.py:80> exception=ClientConnectorError(ConnectionKey(host='127.0.0.1', port=8000, is_ssl=False, ssl=True, proxy=None, proxy_auth=None, proxy_headers_hash=None, server_hostname=None), ConnectionRefusedError(111, "Connect call failed ('127.0.0.1', 8000)"))>
+Traceback (most recent call last):
+  File "/root/venvs/harness/lib/python3.12/site-packages/aiohttp/connector.py", line 1322, in _wrap_create_connection
+    sock = await aiohappyeyeballs.start_connection(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/venvs/harness/lib/python3.12/site-packages/aiohappyeyeballs/impl.py", line 124, in start_connection
+    raise first_exception
+  File "/root/venvs/harness/lib/python3.12/site-packages/aiohappyeyeballs/impl.py", line 75, in start_connection
+    sock = await _connect_sock(
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/root/venvs/harness/lib/python3.12/site-packages/aiohappyeyeballs/impl.py", line 210, in _connect_sock
+    await loop.sock_connect(sock, address)
+  File "/usr/local/python3.12.13/lib/python3.12/asyncio/selector_events.py", line 651, in sock_connect
+    return await fut
+           ^^^^^^^^^
+  File "/usr/local/python3.12.13/lib/python3.12/asyncio/selector_events.py", line 691, in _sock_connect_cb
+    raise OSError(err, f'Connect call failed {address}')
+ConnectionRefusedError: [Errno 111] Connect call failed ('127.0.0.1', 8000)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/root/venvs/harness/lib/python3.12/site-packages/tqdm/asyncio.py", line 82, in wrap_awaitable
+    return i, await f
+              ^^^^^^^
+  File "/root/venvs/harness/lib/python3.12/site-packages/tenacity/asyncio/__init__.py", line 232, in async_wrapped
+    return await copy(fn, *args, **kwargs)  # type: ignore[type-var]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/venvs/harness/lib/python3.12/site-packages/tenacity/asyncio/__init__.py", line 126, in __call__
+    do = await self.iter(retry_state=retry_state)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/venvs/harness/lib/python3.12/site-packages/tenacity/asyncio/__init__.py", line 171, in iter
+    result = await action(retry_state)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/venvs/harness/lib/python3.12/site-packages/tenacity/_utils.py", line 130, in inner
+    return call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/root/venvs/harness/lib/python3.12/site-packages/tenacity/__init__.py", line 482, in exc_check
+    retry_exc.reraise()
+  File "/root/venvs/harness/lib/python3.12/site-packages/tenacity/__init__.py", line 216, in reraise
+    raise self.last_attempt.result()
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/python3.12.13/lib/python3.12/concurrent/futures/_base.py", line 449, in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/python3.12.13/lib/python3.12/concurrent/futures/_base.py", line 401, in __get_result
+    raise self._exception
+  File "/root/venvs/harness/lib/python3.12/site-packages/tenacity/asyncio/__init__.py", line 130, in __call__
+    result = await fn(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/venvs/harness/lib/python3.12/site-packages/lm_eval/models/api_models.py", line 514, in amodel_call
+    async with session.post(
+               ^^^^^^^^^^^^^
+  File "/root/venvs/harness/lib/python3.12/site-packages/aiohttp/client.py", line 1756, in __aenter__
+    self._resp: _RetType_co = await self._coro
+                              ^^^^^^^^^^^^^^^^
+  File "/root/venvs/harness/lib/python3.12/site-packages/aiohttp/client.py", line 900, in _request
+    resp = await handler(req)
+           ^^^^^^^^^^^^^^^^^^
+  File "/root/venvs/harness/lib/python3.12/site-packages/aiohttp/client.py", line 854, in _connect_and_send_request
+    conn = await self._connector.connect(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/venvs/harness/lib/python3.12/site-packages/aiohttp/connector.py", line 665, in connect
+    proto = await self._create_connection(req, traces, timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/venvs/harness/lib/python3.12/site-packages/aiohttp/connector.py", line 1263, in _create_connection
+    _, proto = await self._create_direct_connection(req, traces, timeout)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/venvs/harness/lib/python3.12/site-packages/aiohttp/connector.py", line 1641, in _create_direct_connection
+    raise last_exc
+  File "/root/venvs/harness/lib/python3.12/site-packages/aiohttp/connector.py", line 1610, in _create_direct_connection
+    transp, proto = await self._wrap_create_connection(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/venvs/harness/lib/python3.12/site-packages/aiohttp/connector.py", line 1345, in _wrap_create_connection
+    raise client_error(req.connection_key, exc) from exc
+aiohttp.client_exceptions.ClientConnectorError: Cannot connect to host 127.0.0.1:8000 ssl:default [Connect call failed ('127.0.0.1', 8000)]
+Task exception was never retrieved
+future: <Task finished name='Task-32' coro=<tqdm_asyncio.gather.<locals>.wrap_awaitable() done, defined at /root/venvs/harness/lib/python3.12/site-packages/tqdm/asyncio.py:80> exception=RuntimeError('Session is closed')>
+Traceback (most recent call last):
+  File "/root/venvs/harness/lib/python3.12/site-packages/tqdm/asyncio.py", line 82, in wrap_awaitable
+    return i, await f
+              ^^^^^^^
+  File "/root/venvs/harness/lib/python3.12/site-packages/tenacity/asyncio/__init__.py", line 232, in async_wrapped
+    return await copy(fn, *args, **kwargs)  # type: ignore[type-var]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/venvs/harness/lib/python3.12/site-packages/tenacity/asyncio/__init__.py", line 126, in __call__
+    do = await self.iter(retry_state=retry_state)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/venvs/harness/lib/python3.12/site-packages/tenacity/asyncio/__init__.py", line 171, in iter
+    result = await action(retry_state)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/venvs/harness/lib/python3.12/site-packages/tenacity/_utils.py", line 130, in inner
+    return call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/root/venvs/harness/lib/python3.12/site-packages/tenacity/__init__.py", line 482, in exc_check
+    retry_exc.reraise()
+  File "/root/venvs/harness/lib/python3.12/site-packages/tenacity/__init__.py", line 216, in reraise
+    raise self.last_attempt.result()
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/python3.12.13/lib/python3.12/concurrent/futures/_base.py", line 449, in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/python3.12.13/lib/python3.12/concurrent/futures/_base.py", line 401, in __get_result
+    raise self._exception
+  File "/root/venvs/harness/lib/python3.12/site-packages/tenacity/asyncio/__init__.py", line 130, in __call__
+    result = await fn(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/venvs/harness/lib/python3.12/site-packages/lm_eval/models/api_models.py", line 514, in amodel_call
+    async with session.post(
+               ^^^^^^^^^^^^^
+  File "/root/venvs/harness/lib/python3.12/site-packages/aiohttp/client.py", line 1756, in __aenter__
+    self._resp: _RetType_co = await self._coro
+                              ^^^^^^^^^^^^^^^^
+  File "/root/venvs/harness/lib/python3.12/site-packages/aiohttp/client.py", line 615, in _request
+    raise RuntimeError("Session is closed")
+RuntimeError: Session is closed
+run-prof-load.sh 失败，停 profile 避免窗口作废
+
+采集门通过 → 启动 deep bench profile；复用证据 ['/root/包体恢复/records/probes/20261019T055422Z_comm-free-paired-forensics.json']

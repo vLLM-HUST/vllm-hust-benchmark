@@ -1,0 +1,542 @@
+{
+  "schema": "comm-profiler-stop-repair.v1",
+  "recorded_at": "2026-10-19T08:51:09.387372+00:00",
+  "startup": {
+    "repository": "/root/vllm-workspace/vllm-ascend-split-batch-hust",
+    "branch": "0.28/comm-overlap-free-attribution",
+    "base_head": "745dda1c2222838ddecb8ab8558fba140393f21d",
+    "initial_dirty_files": [],
+    "implementation_checkpoint": "889b527",
+    "new_serve_starts": 0,
+    "new_device_profile_windows": 0,
+    "new_model_requests": 0,
+    "cpu_native_profiler_probes": 8
+  },
+  "scope": {
+    "model_context": "Qwen3.5-35B-A3B",
+    "precision_context": "bf16; unquantized floating-point weights",
+    "tp_context": 2,
+    "graph_context": "FULL",
+    "workload_context": "MMLU-Pro first16 / concurrency16 (not rerun)",
+    "shape_facts": "Per-call model allreduce shapes, callsites, phases and full device graph intervals remain unverified; no new model artifact was produced.",
+    "cpu_probe_shapes": {
+      "dtype": "float32",
+      "input": [
+        16,
+        32
+      ],
+      "operations": "CPU ones/matmul/sum; lifecycle reproduction only, not a model performance or numerical comparison"
+    },
+    "compute_or_communication_change": false,
+    "with_stack_disabled": false,
+    "with_modules_disabled": false,
+    "record_shapes_disabled": false,
+    "pinned_memory_bypass": false,
+    "in_process_analyse": false,
+    "e2e_comparison": false
+  },
+  "diagnosis": {
+    "status": "Source mechanism and native clear lifecycle reproduced",
+    "dependency_git_version": "462f4e18a8303698aca3997edfcc5dd3b1707968",
+    "installed_dependency_identity": {
+      "python": "/root/venvs/rv1/bin/python",
+      "torch": "2.13.0+cpu",
+      "torch_npu": "2.13.0.rc1",
+      "git_version": "462f4e18a8303698aca3997edfcc5dd3b1707968",
+      "library": "/root/venvs/rv1/lib/python3.12/site-packages/torch_npu/lib/libtorch_npu.so",
+      "library_sha256": "e2e9daa8e4fd17701f6c7772acc4c6236366d5efe13410ec9b5c9ab7cbc0f39f"
+    },
+    "caller": "host-proposals/comm-trace-stop-gil/host_orig/npu_profiler.cpp.orig: stopNpuProfiler releases the GIL, then calls PythonTracer stop and clear.",
+    "cleanup": "host-proposals/comm-trace-stop-gil/host_orig/profiler_python.cpp.orig: stop reacquires GIL locally, clear has no GIL guard and destroys ThreadLocalResult with Py_DECREF(ctx_).",
+    "cause": "CPython 3.12 pymalloc free requires the active Python thread state. Context destruction outside the GIL produces the observed stop-time segfault. This reproduction never invokes analyse/finalize before the fault.",
+    "cpu_matrix": [
+      [
+        "cpu-modules0-stack0",
+        0
+      ],
+      [
+        "cpu-modules0-stack1",
+        -11
+      ],
+      [
+        "cpu-modules1-stack0",
+        -11
+      ],
+      [
+        "cpu-modules1-stack1",
+        -11
+      ]
+    ],
+    "negative_workarounds": "sys.setprofile(None) and threading.setprofile_all_threads(None) both still segfault at _stop_profiler. Neither workaround is deployed."
+  },
+  "repair": {
+    "source_patch": "host-proposals/comm-trace-stop-gil/patch.diff",
+    "change": "Acquire pybind11::gil_scoped_acquire at PythonTracer::clear entry; retain stop/finalize outer GIL release and shapes/stack/modules configuration.",
+    "sha_pinned_generator": "host-proposals/comm-trace-stop-gil/gen_patch.py",
+    "apply_rollback_contract": "host-proposals/comm-trace-stop-gil/proposal_meta.json",
+    "collector_safety": "tools/collect_comm_mechanism.sh invokes isolated CPU stop/finalize preflight before opt bench serve, failing closed on crash/timeout/incomplete result.",
+    "preflight_identity": "Hash the libtorch_npu.so actually mapped in /proc/self/maps, not merely the package-relative library.",
+    "installed_binary_replaced": false,
+    "default_off": true
+  },
+  "verification": {
+    "native_clear": {
+      "original_gil_held": "3/3 exit0",
+      "original_gil_released": "3/3 SIGSEGV(-11)",
+      "fixed_gil_held_or_released": "6/6 exit0",
+      "scope": "Original TraceContext/ThreadLocalResult declarations and clear body compiled against real Python/pybind headers; unrelated cache state is inert and this is not a complete dependency runtime test."
+    },
+    "complete_patched_translation_unit": {
+      "returncode": 0,
+      "source_sha256": "853f32ab6abfd1fdc3cc889c416c4ac853b174fe9e2316277d943c59b0b1f03b",
+      "command": [
+        "/usr/bin/c++",
+        "-DAT_PARALLEL_OPENMP=1",
+        "-DFMT_HEADER_ONLY=1",
+        "-DPYTORCH_NPU_VERSION=\"2.13.0.rc1\"",
+        "-DUSE_C10D_GLOO",
+        "-DUSE_DISTRIBUTED",
+        "-DUSE_RPC",
+        "-DUSE_TENSORPIPE",
+        "-I/root/comm-stop-build-20261019T080222Z",
+        "-I/root/comm-stop-build-20261019T080222Z/torch_npu/csrc/aten",
+        "-I/root/comm-stop-build-20261019T080222Z/torch_npu/csrc/inductor",
+        "-I/root/comm-stop-build-20261019T080222Z/third_party/hccl/inc",
+        "-I/root/comm-stop-build-20261019T080222Z/third_party/acl/inc",
+        "-I/root/comm-stop-build-20261019T080222Z/third_party/Tensorpipe",
+        "-I/root/comm-stop-build-20261019T080222Z/third_party/nlohmann/include",
+        "-I/usr/local/python3.12.13/lib/python3.12/site-packages/torch/include/torch/csrc/distributed",
+        "-I/usr/local/python3.12.13/include/python3.12",
+        "-I/root/comm-stop-build-20261019T080222Z/third_party/op-plugin",
+        "-I/root/comm-stop-build-20261019T080222Z/third_party/fmt/include",
+        "-isystem",
+        "/usr/local/python3.12.13/lib/python3.12/site-packages/torch/include",
+        "-isystem",
+        "/usr/local/python3.12.13/lib/python3.12/site-packages/torch/include/torch/csrc/api/include",
+        "-fstack-protector-all",
+        "-Wl,-z,relro,-z,now,-z,noexecstack",
+        "-fPIE",
+        "-pie",
+        "-DNDEBUG",
+        "-DUSE_NPU",
+        "-fPIC",
+        "-Wno-narrowing",
+        "-Wall",
+        "-Wextra",
+        "-Wno-missing-field-initializers",
+        "-Wno-type-limits",
+        "-Wno-array-bounds",
+        "-Wno-unknown-pragmas",
+        "-Wno-sign-compare",
+        "-Wno-unused-parameter",
+        "-Wno-unused-variable",
+        "-Wno-unused-function",
+        "-Wno-unused-result",
+        "-Wno-strict-overflow",
+        "-Wno-strict-aliasing",
+        "-Wno-error=deprecated-declarations",
+        "-Wno-ignored-qualifiers",
+        "-Wno-stringop-overflow",
+        "-Wno-error=pedantic",
+        "-Wno-error=redundant-decls",
+        "-Wno-error=old-style-cast",
+        "-faligned-new",
+        "-Wno-unused-but-set-variable",
+        "-Wno-uninitialized",
+        "-fno-math-errno",
+        "-fno-trapping-math",
+        "-D_GLIBCXX_USE_CXX11_ABI=1",
+        "-DCURRENT_VERSION=V2R13",
+        "-O2",
+        "-std=c++20",
+        "-fmacro-prefix-map=/root/comm-stop-build-20261019T080222Z/=",
+        "-fvisibility=hidden",
+        "-DC10_BUILD_MAIN_LIB",
+        "-o",
+        "/root/包体恢复/records/probes/20261019T080222Z_comm-stop-offline/patched-profiler-python.o",
+        "-c",
+        "/root/comm-stop-build-20261019T080222Z/torch_npu/csrc/profiler/profiler_python.cpp"
+      ],
+      "scope": "Complete patched profiler_python.cpp translation unit with installed torch/torch_npu headers; compilation only, no complete library link or runtime deployment."
+    },
+    "installed_dependency_cpu_preflight": {
+      "schema": "comm-profiler-stop-preflight.v1",
+      "status": "FAIL",
+      "returncode": -11,
+      "timeout": false,
+      "cpu_only": true,
+      "record_shapes": true,
+      "with_stack": true,
+      "with_modules": true,
+      "native_stop_finalize_verified": false,
+      "mechanism_gates_accepted": false
+    },
+    "pytest_final": {
+      "passed": 872,
+      "skipped": 11,
+      "exit": 0
+    },
+    "pytest_prior_failures": {
+      "initial": {
+        "passed": 870,
+        "skipped": 11,
+        "failed": 1,
+        "reason": "Prior committed server-log copy contained a private address, caught by public-hygiene test. Raw L2 log retained; repository copy masked."
+      },
+      "after_sanitization_before_mapped_identity_test": {
+        "passed": 871,
+        "skipped": 11,
+        "exit": 0
+      }
+    },
+    "ruff": "PASS exit0",
+    "shell_syntax": "PASS exit0",
+    "deterministic_generator_and_patch_roundtrip": "PASS; pytest includes drift rejection, exact guard insertion, patch apply/reverse and fail-closed preflight cases.",
+    "coverage": {
+      "exit": 0,
+      "fail": 0,
+      "warn": 51,
+      "metric": "PASS",
+      "layer": "WARN(13)",
+      "caliber": "WARN(34)",
+      "does_not_accept_mechanism_or_numerics": true
+    },
+    "l3_and_compare": "Not run: no model computation or numerical optimization changed; no service start/device load authorized in this offline continuation."
+  },
+  "dependency_build": {
+    "returncode": 124,
+    "limit_seconds": 1200,
+    "last_progress": [
+      529,
+      1193
+    ],
+    "object_files_preserved": 529,
+    "library_link_complete": false,
+    "installed_dependency_modified": false,
+    "compiler_error_reported": false,
+    "next_action": "Request additional offline build budget, then resume the existing Ninja build. Do not recodegen, overwrite installed libraries, start vLLM, or collect a device trace in this task."
+  },
+  "raw_evidence": {
+    "window": "/root/prof/ladder-1019-074126",
+    "preserved": true,
+    "file_count": 186,
+    "size_manifest_check": "All 186 files still match saved sizes; no raw-data writes or repeat 2GB hash pass performed.",
+    "hash_manifest": "host-proposals/comm-mechanism/validation/20261019/profile-debug-20261019T074126Z/raw-artifacts-manifest.json",
+    "assessment": "raw-recoverability-assessment.json",
+    "offline_analyse_run": false,
+    "rank_pairing": "NOT RUN",
+    "reliable_callsites": "BLOCKED",
+    "complete_device_graph_boundaries": "BLOCKED"
+  },
+  "evidence_sanitization": {
+    "path": "host-proposals/comm-mechanism/validation/20261019/profile-debug-20261019T074126Z/server.log",
+    "source_commit": "745dda1c2222838ddecb8ab8558fba140393f21d",
+    "historical_repository_sha256": "83333b9a6fe3ac6fd16d39e17ed4fd1311a132c3deafef74c5c4b89ae5d94c3b",
+    "current_masked_sha256": "98f84a7613d0b85c7c202d0874c62176b79dc087e01329d3ba6a3998250634b0",
+    "changed_lines": 1,
+    "change": "Mask only the mq_connect_ip private-address value; no history rewrite. The old receipt remains the snapshot of its original commit.",
+    "raw_L2_log_unchanged": true,
+    "raw_L2_path": "/root/包体恢复/logs/ladder-serve-1019-074137.log",
+    "raw_L2_sha256": "c27efe44e53da8c7e76aeb655f451ed28778fb2d95e910bbcde34ee85271df66"
+  },
+  "disposition": {
+    "experiment": "Offline diagnosis and minimal source repair verified; complete library build incomplete at declared cap.",
+    "source_fix_verified": true,
+    "runtime_repair_verified": false,
+    "optimization_accepted": false,
+    "mechanism_status": "blocked",
+    "code_delivery": "Implementation committed at 889b527; this receipt and mapped-library identity follow-up are pending scoped commit at creation.",
+    "remote_publication": "NOT PUSHED; no authorization",
+    "next_action": "Obtain additional offline build budget and resume preserved Ninja build in /root/comm-stop-build-20261019T080222Z. Then verify selected rebuilt library with CPU stop/finalize before any separate device-window authorization.",
+    "default_action": "Pause; retain source/objects/raw data and fail-closed collector. No additional build beyond cap, install, serve start or recollection in this task."
+  },
+  "evidence": [
+    {
+      "path": "/root/包体恢复/records/probes/20261019T080222Z_comm-stop-offline/cpu-stop-probe.py",
+      "bytes": 738,
+      "sha256": "eb6cc9efa0d3d67dc012f4128965aaec8e4e46574e7f6d6b3890a3b7814f6ffe"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261019T080222Z_comm-stop-offline/cpu-probe-results.json",
+      "bytes": 177,
+      "sha256": "f6e29e9ed527b0ed630c6919ef87135d8d60e78bcc545de88cb62aa1c82dcac7"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261019T080222Z_comm-stop-offline/cpu-detach-results.json",
+      "bytes": 82,
+      "sha256": "7aee9e3ff4ec05eb4715d3b6d5d87e61d6d833206dc9622df331bcc15bda479b"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261019T080222Z_comm-stop-offline/cpu-detach-main.log",
+      "bytes": 1178,
+      "sha256": "c7aca664df1d5ba8b9201ae24dbf23e5b56d4af33bebcbbdd3843c6aae131484"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261019T080222Z_comm-stop-offline/cpu-detach-all.log",
+      "bytes": 1177,
+      "sha256": "4d3256b320ca68d01192fb2813ebdeb5ba35327311c6c66d3473f4fa59c22b9f"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261019T080222Z_comm-stop-offline/native-clear-v2.log",
+      "bytes": 1107,
+      "sha256": "99d77651a5879b6cd97ab4102673a7af60367118bcfbfffe50245a704e1142b5"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261019T080222Z_comm-stop-offline/native-clear-v2/results.json",
+      "bytes": 1107,
+      "sha256": "99d77651a5879b6cd97ab4102673a7af60367118bcfbfffe50245a704e1142b5"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261019T080222Z_comm-stop-offline/native-clear-v2/original.cpp",
+      "bytes": 3842,
+      "sha256": "781656c6d5b68b1aa2308ec5ebddb835089de49e1cac5347a9d89d653431dbdd"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261019T080222Z_comm-stop-offline/native-clear-v2/fixed.cpp",
+      "bytes": 3878,
+      "sha256": "df63f4071cb3e241675594e68831a0bf79dd76d39b2c11380e680ae1ff05a91c"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261019T080222Z_comm-stop-offline/native-clear-v2/original",
+      "bytes": 3082792,
+      "sha256": "cf584174923421623562e27ee3d0ff83535950395f77d54d7f90a1a3f7f9e04e"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261019T080222Z_comm-stop-offline/native-clear-v2/fixed",
+      "bytes": 3091048,
+      "sha256": "cff54471d3bc63769dc54fb1aad14bdaba056566b36bdec7b9e921ee7964ecd2"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261019T080222Z_comm-stop-offline/patched-tu-build.json",
+      "bytes": 2754,
+      "sha256": "a80215238f25aef9e52d92c0984aeb1a0796c06e2d10ad073796d6fa9ecefe62"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261019T080222Z_comm-stop-offline/patched-tu-build.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261019T080222Z_comm-stop-offline/patched-profiler-python.o",
+      "bytes": 494528,
+      "sha256": "4e2f582428ed4d077afaed99674453c53815f0f6338da8bec52d6f1f5fec84df"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261019T080222Z_comm-stop-offline/installed-preflight-mapped/probe.log",
+      "bytes": 1422,
+      "sha256": "48154b0eff2f43a1d66e4861fcf2387581fc7157841109ab3e384cdd8ad59cf8"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261019T080222Z_comm-stop-offline/installed-preflight-mapped/result.json",
+      "bytes": 281,
+      "sha256": "36a83e94f5bb9e8d2ccdc94f5d108219bd751b00f0241dd6384e1a68a3e458ef"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261019T080222Z_comm-stop-offline/source-fetch.log",
+      "bytes": 170,
+      "sha256": "434c042d19de45507c286ccfb872a6d5743ad946e16f071e9f6b576c1e1950b9"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261019T080222Z_comm-stop-offline/submodule-fetch-results.json",
+      "bytes": 633,
+      "sha256": "1a198dc5c546fa8dc02c458ac9f154e77693082e7d3aef693a84409fee2edbba"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261019T080222Z_comm-stop-offline/build-configuration.json",
+      "bytes": 2522,
+      "sha256": "c5b951c3b7dd104aae0ac9370aeb05e3f6931460922570b5ec9bfd692d8e9d36"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261019T080222Z_comm-stop-offline/build-outcome.json",
+      "bytes": 438,
+      "sha256": "ed43c6e72670d549ba93a8ed6daf49ac3814f6a06aebdcc7654781a5e3e82190"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261019T080222Z_comm-stop-offline/dependency-build.log",
+      "bytes": 297461,
+      "sha256": "351a5b32082a7f44fd05dd738faa5a449e772ab7962fe2e89d79b006021ee729"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261019T080222Z_comm-stop-offline/dependency-build.exit",
+      "bytes": 4,
+      "sha256": "ca2ebdf97d7469496b1f4b78958f9dc8447efdcb623953fee7b6996b762f6fff"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261019T080222Z_comm-stop-offline/codegen.log",
+      "bytes": 2972,
+      "sha256": "767f87cf561ed28cddd98dc7cdfaed5b5b0356f768e99d0f50a4e6254ea6a006"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261019T080222Z_comm-stop-offline/codegen-autoload-off.log",
+      "bytes": 1824,
+      "sha256": "e817d7c8b8c3722743c36569da3860ee2a19821e407bb16a36437f2983727a26"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261019T080222Z_comm-stop-offline/codegen-v213.log",
+      "bytes": 205,
+      "sha256": "690e01cd5abf6a776ae8c3116ba194959ed646e61edcd8064aed32021b065fea"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261019T080222Z_comm-stop-offline/cmake-configure.log",
+      "bytes": 1421,
+      "sha256": "a1f01a6c6573f10773225972cc505797a8fcd6d135c6228db266adf08c7ca2e3"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261019T080222Z_comm-stop-offline/build-stubs.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261019T080222Z_comm-stop-offline/full-pytest.log",
+      "bytes": 2908,
+      "sha256": "052deb40a54a798915a3cbe96289558b105481a0b883cb10973e5223c06fb307"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261019T080222Z_comm-stop-offline/full-pytest-sanitized.log",
+      "bytes": 1084,
+      "sha256": "f472ba81eaeb949473520249159e17f4d1d11ad2ec6332902d573c1d8fd2d655"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261019T080222Z_comm-stop-offline/full-pytest-final.log",
+      "bytes": 1084,
+      "sha256": "403bf4e62cb554aa7762bcc11d7ca8fa24c95daf6f003eec7fe28cb6fc28d8fa"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261019T080222Z_comm-stop-offline/full-pytest-final.exit",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261019T080222Z_comm-stop-offline/ruff-final.log",
+      "bytes": 19,
+      "sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261019T080222Z_comm-stop-offline/static-final.exit",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261019T080222Z_comm-stop-offline/coverage.log",
+      "bytes": 14745,
+      "sha256": "4eab1cff08680d470d6b13294e297f0dc818b742269057b8a4cd44c3e393d27e"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261019T080222Z_comm-stop-offline/coverage.exit",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261019T080222Z_comm-stop-offline/raw-recoverability-assessment.json",
+      "bytes": 1287,
+      "sha256": "53e309e0f0f5b1a60c1cf242c1b91f6f9fc9c7b20493d337ba2def024c49fbc7"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261019T080222Z_comm-stop-offline/resources-after.log",
+      "bytes": 2248,
+      "sha256": "e7ab0d4fa9221780028f4271d468f8e110d3b877ab72e6f95fcb8f7304c08185"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261019T080222Z_comm-stop-offline/build-processes-after.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261019T080222Z_comm-stop-offline/cpu-modules0-stack0.log",
+      "bytes": 218,
+      "sha256": "615006a289df381f342d0953afa133c5b0e747cf16fc6684ef9ed235de0d4430"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261019T080222Z_comm-stop-offline/cpu-modules0-stack1.log",
+      "bytes": 1048,
+      "sha256": "4e9b9ee3926821925b589f4433a524a3fc0eff125e03a3644e36bc56ce5d626d"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261019T080222Z_comm-stop-offline/cpu-modules1-stack0.log",
+      "bytes": 1048,
+      "sha256": "5b6124a63b60e3c65ff45fa8875cafac757d19c3b46fe9aab14a3fec256c5a77"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261019T080222Z_comm-stop-offline/cpu-modules1-stack1.log",
+      "bytes": 1048,
+      "sha256": "474f4d8856f262c891608ee0e668f7c506fa3c60566da225bc616f8f575c6a8d"
+    }
+  ],
+  "repository_artifacts": [
+    {
+      "path": "host-proposals/comm-mechanism/validation/20261019/profiler-stop-offline-20261019T080222Z/build-configuration.json",
+      "bytes": 2522,
+      "sha256": "c5b951c3b7dd104aae0ac9370aeb05e3f6931460922570b5ec9bfd692d8e9d36"
+    },
+    {
+      "path": "host-proposals/comm-mechanism/validation/20261019/profiler-stop-offline-20261019T080222Z/build-outcome.json",
+      "bytes": 438,
+      "sha256": "ed43c6e72670d549ba93a8ed6daf49ac3814f6a06aebdcc7654781a5e3e82190"
+    },
+    {
+      "path": "host-proposals/comm-mechanism/validation/20261019/profiler-stop-offline-20261019T080222Z/checks.log",
+      "bytes": 1258,
+      "sha256": "bf199ed23c3f4eb9e9d54d1d8f5863cb2eadd16947d78f8f2b95113e98ce0ffe"
+    },
+    {
+      "path": "host-proposals/comm-mechanism/validation/20261019/profiler-stop-offline-20261019T080222Z/coverage.log",
+      "bytes": 14745,
+      "sha256": "4eab1cff08680d470d6b13294e297f0dc818b742269057b8a4cd44c3e393d27e"
+    },
+    {
+      "path": "host-proposals/comm-mechanism/validation/20261019/profiler-stop-offline-20261019T080222Z/cpu-detach-results.json",
+      "bytes": 82,
+      "sha256": "7aee9e3ff4ec05eb4715d3b6d5d87e61d6d833206dc9622df331bcc15bda479b"
+    },
+    {
+      "path": "host-proposals/comm-mechanism/validation/20261019/profiler-stop-offline-20261019T080222Z/cpu-probe-results.json",
+      "bytes": 177,
+      "sha256": "f6e29e9ed527b0ed630c6919ef87135d8d60e78bcc545de88cb62aa1c82dcac7"
+    },
+    {
+      "path": "host-proposals/comm-mechanism/validation/20261019/profiler-stop-offline-20261019T080222Z/dependency-build-tail.log",
+      "bytes": 8951,
+      "sha256": "3470cbe41ff613e22878bc75e9123b5cca8c8a65bc6055e15eb9a72111776bd8"
+    },
+    {
+      "path": "host-proposals/comm-mechanism/validation/20261019/profiler-stop-offline-20261019T080222Z/installed-preflight-result.json",
+      "bytes": 281,
+      "sha256": "36a83e94f5bb9e8d2ccdc94f5d108219bd751b00f0241dd6384e1a68a3e458ef"
+    },
+    {
+      "path": "host-proposals/comm-mechanism/validation/20261019/profiler-stop-offline-20261019T080222Z/installed-preflight.log",
+      "bytes": 1422,
+      "sha256": "48154b0eff2f43a1d66e4861fcf2387581fc7157841109ab3e384cdd8ad59cf8"
+    },
+    {
+      "path": "host-proposals/comm-mechanism/validation/20261019/profiler-stop-offline-20261019T080222Z/native-clear-results.json",
+      "bytes": 1107,
+      "sha256": "99d77651a5879b6cd97ab4102673a7af60367118bcfbfffe50245a704e1142b5"
+    },
+    {
+      "path": "host-proposals/comm-mechanism/validation/20261019/profiler-stop-offline-20261019T080222Z/native-clear.log",
+      "bytes": 1107,
+      "sha256": "99d77651a5879b6cd97ab4102673a7af60367118bcfbfffe50245a704e1142b5"
+    },
+    {
+      "path": "host-proposals/comm-mechanism/validation/20261019/profiler-stop-offline-20261019T080222Z/patched-tu-build.json",
+      "bytes": 2754,
+      "sha256": "a80215238f25aef9e52d92c0984aeb1a0796c06e2d10ad073796d6fa9ecefe62"
+    },
+    {
+      "path": "host-proposals/comm-mechanism/validation/20261019/profiler-stop-offline-20261019T080222Z/patched-tu-build.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "host-proposals/comm-mechanism/validation/20261019/profiler-stop-offline-20261019T080222Z/raw-recoverability-assessment.json",
+      "bytes": 1287,
+      "sha256": "53e309e0f0f5b1a60c1cf242c1b91f6f9fc9c7b20493d337ba2def024c49fbc7"
+    },
+    {
+      "path": "host-proposals/comm-mechanism/validation/20261019/profiler-stop-offline-20261019T080222Z/resources-after.log",
+      "bytes": 2248,
+      "sha256": "e7ab0d4fa9221780028f4271d468f8e110d3b877ab72e6f95fcb8f7304c08185"
+    }
+  ]
+}

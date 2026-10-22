@@ -1,0 +1,95 @@
+{
+  "schema": "pinned-serve-retest.v1",
+  "recorded_at": "2026-10-19T07:10:49Z",
+  "startup_head": "227e896b7ecbb72ceb2abbddb6722f26f27981fa",
+  "scope": {
+    "model": "Qwen3.5-35B-A3B",
+    "precision": "bf16",
+    "tensor_parallel_size": 2,
+    "max_model_len": 8192,
+    "port": 8000,
+    "CANN": "9.1.0",
+    "profile": "plain"
+  },
+  "launch": {
+    "log": "/root/包体恢复/logs/ladder-serve-1019-070505.log",
+    "env_snapshot": "/root/包体恢复/logs/ladder-serve-1019-070505.env.json",
+    "process_pid": 1374935,
+    "invocation": "opt bench serve --help",
+    "dispatch_note": "The bench command treated this as serve and ignored --help; it started the default plain TP2 server. This was the sole serve start in this retest.",
+    "effective_argv": [
+      "/usr/local/python3.12.13/bin/vllm",
+      "serve",
+      "/models/Qwen3.5-35B-A3B",
+      "--tensor-parallel-size",
+      "2",
+      "--max-model-len",
+      "8192",
+      "--port",
+      "8000",
+      "--no-enable-prefix-caching",
+      "--compilation-config",
+      "{\"mode\":\"VLLM_COMPILE\",\"cudagraph_mode\":\"FULL\",\"cudagraph_capture_sizes\":[1,2,4,8,16,32]}"
+    ]
+  },
+  "observed": {
+    "health_http_status": 200,
+    "served_model": "/models/Qwen3.5-35B-A3B",
+    "rank0_weights_loaded_gb": 32.851,
+    "rank1_weights_loaded_gb": 32.851,
+    "rank1_pinned_allocation_error_207001": false,
+    "rank1_EL0004": false,
+    "startup_log_matches_for_207001_aclrtMallocHostWithCfg_EL0004": 0,
+    "chat_requests_returned": [
+      {
+        "completion_tokens": 8,
+        "finish_reason": "length"
+      },
+      {
+        "completion_tokens": 64,
+        "finish_reason": "length"
+      }
+    ],
+    "chat_smoke_boundary": "Requests reached generation and returned token responses; both were length-limited and do not establish semantic answer correctness.",
+    "cgroup_snapshot": {
+      "memory_current_bytes": 67539468288,
+      "memory_max_bytes": 68719476736,
+      "memory_events": {
+        "low": 0,
+        "high": 0,
+        "max": 14,
+        "oom": 0,
+        "oom_kill": 0
+      }
+    },
+    "npu_smi": "Both 910B2 devices healthy; worker processes present on both devices."
+  },
+  "interpretation": {
+    "current_session_startup_recovered": true,
+    "historical_root_cause_established": false,
+    "permanent_bug_fix_established": false,
+    "reason": "The same TP2 model startup and generation succeeded without source/config/resource changes, but the earlier driver-side failure is not reproduced or causally explained. The cgroup max counter rose from the prior snapshot's 11 to 14; oom and oom_kill remained 0, and this counter does not establish causality.",
+    "service_left_running": true
+  },
+  "actions_not_taken": [
+    "pinned-memory bypass",
+    "memory limit modification",
+    "cache reclamation",
+    "device reset",
+    "host-side driver/kernel inspection"
+  ],
+  "evidence": [
+    {
+      "path": "/root/包体恢复/logs/ladder-serve-1019-070505.log",
+      "sha256": "1e00ee32d1962d2085f91f71c7ee959faa231ed0378c3ec5bb8e04bfd549b312"
+    },
+    {
+      "path": "/root/包体恢复/logs/ladder-serve-1019-070505.env.json",
+      "sha256": "89b8d3ace3cd6a33fe9a75cf83923b67720ee1e74ff4dc7b48251a94d0a7f6d5"
+    },
+    {
+      "path": "host-proposals/comm-mechanism/validation/20261019/pinned-diagnosis-20261019T065632Z.json",
+      "sha256": "4f6cf9526479abecc06f68e118e7ab5e5a7f86bc5365640ec3c9028124b77159"
+    }
+  ]
+}

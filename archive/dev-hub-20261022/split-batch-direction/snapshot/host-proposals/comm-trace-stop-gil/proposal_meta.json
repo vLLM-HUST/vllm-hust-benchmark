@@ -1,0 +1,51 @@
+{
+  "schema": "vllm-hust-host-proposal.v1",
+  "id": "comm-trace-stop-gil",
+  "kind": "optional native dependency source repair; no runtime binary overwritten",
+  "owner": "028/D1-host-overhead-graph main session",
+  "upstream_status": {
+    "state": "local proposal only; no upstream PR",
+    "issue_or_pr": null
+  },
+  "host_version_range": "==2.13.0rc1",
+  "host": {
+    "project": "Ascend/pytorch (torch_npu)",
+    "git_version": "462f4e18a8303698aca3997edfcc5dd3b1707968",
+    "source_url": "https://github.com/Ascend/pytorch/blob/462f4e18a8303698aca3997edfcc5dd3b1707968/torch_npu/csrc/profiler/profiler_python.cpp",
+    "file": "torch_npu/csrc/profiler/profiler_python.cpp",
+    "sha256": "8469611bd1d08bcd12201058089965d31bcd0df490d046f547f7b7e364066a55",
+    "caller_sha256": "cbee1cc77c3d394b8948d9ef1f5e4a0ae24c32ed1479c391cadf61552761b315",
+    "license": "Apache-2.0"
+  },
+  "root_cause": "stopNpuProfiler releases the GIL. PythonTracer::stop acquires it only within its own scope. PythonTracer::clear subsequently destroys ThreadLocalResult objects with Py_DECREF, without holding the GIL. CPython 3.12 pymalloc requires the current thread state when freeing TraceContext.",
+  "repair": "Acquire the GIL across PythonTracer::clear, including its context destruction. Do not remove stack, modules, shapes or release-GIL sections of stop/finalize.",
+  "deployment": {
+    "automatic": false,
+    "installed_binary_changed": false,
+    "stock_service_path": "unchanged",
+    "collector_preflight": "CPU-only isolated child with the same interpreter before opt bench serve; failure exits 3 and retains diagnostic data",
+    "numerical_or_performance_claim": false
+  },
+  "artifacts": {
+    "host_orig": "host_orig/profiler_python.cpp.orig",
+    "generator": "gen_patch.py",
+    "patch": "patch.diff",
+    "tests": "../../tests/test_comm_profiler_stop.py",
+    "native_regression": "run_native_probe.py",
+    "installed_dependency_preflight": "../../tools/check_comm_profiler_stop.py"
+  },
+  "patch_sha256": "b1a4da0dded327bf26efbd2f489738d60ace0cc554bc242a5b0282077b62f839",
+  "apply": [
+    "python gen_patch.py --host <source>/torch_npu/csrc/profiler/profiler_python.cpp --check",
+    "patch --batch --fuzz=0 -d <source> -p1 -i <absolute-proposal>/patch.diff",
+    "Rebuild the point-pinned dependency in a separate directory; do not treat source patching as binary deployment.",
+    "Run tools/check_comm_profiler_stop.py with the rebuilt library selected before requesting a new device window."
+  ],
+  "rollback": [
+    "patch --batch --fuzz=0 -R -d <source> -p1 -i <absolute-proposal>/patch.diff",
+    "Remove the optional rebuilt-library environment prefix; the installed dependency remains untouched."
+  ],
+  "delete_when": "A newer point-pinned torch_npu has an equivalent GIL repair and passes isolated stop/finalize regression.",
+  "verification_scope": "Native isolated regression compiles the original TraceContext/ThreadLocalResult declarations and clear body, with unrelated state containers replaced by inert vectors. It is not a full dependency rebuild or dual-rank trace validation.",
+  "evidence": "/root/\u5305\u4f53\u6062\u590d/records/probes/20261019T080222Z_comm-stop-offline"
+}
