@@ -49,3 +49,27 @@ def test_paws_acquisition_failure_is_not_adapter_or_task_validation():
     assert set(receipt["fixed_hf_metadata_attempts"].values()) == {"CONNECTION_TIMEOUT"}
     assert row["server_execution"] == row["scoring"] == "NOT_RUN"
     assert row["checked"] is False
+
+
+def test_locomo_final_input_consumption_does_not_hide_failed_native_execution():
+    ledger = json.loads((DOCS / "dataset-validation-status.json").read_text("utf-8"))
+    row = next(r for r in ledger["sources"] if r["source_id"] == "LOCOMO")
+    final = json.loads(
+        (ROOT / row["fixed_input_consumption_receipt"]).read_text("utf-8")
+    )
+    failure = json.loads((ROOT / row["execution_receipt"]).read_text("utf-8"))
+    assert final["server_installed_original_question_fields_checked"] == 1986
+    assert (
+        final["server_prepare_resolve_roundtrips"]
+        == final["consumer_records_per_mode"]
+        == 3
+    )
+    assert final["consumer_modes_equal"] is True
+    assert final["old_source_regression_records_per_mode"] == 9
+    assert final["source_checkbox_eligible"] is row["checked"] is False
+    assert final["native_task_executions_in_this_input_audit"] == 0
+    assert failure["completed_model_generations"] == failure["scorer_runs"] == 0
+    assert (
+        row["server_execution"]
+        == "FIRST_ORIGINAL_REQUEST_HTTP500_ENGINE_EXITED_NO_COMPLETION"
+    )

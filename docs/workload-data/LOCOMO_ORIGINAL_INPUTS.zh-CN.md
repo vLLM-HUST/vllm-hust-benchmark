@@ -44,9 +44,10 @@ for record in iter_workload("LOCOMO", data_root=Path("/data/locomo"), limit=3):
 - [x] 官方固定文件取得，本地Git blob与发布方固定元数据一致，服务器SHA256再次一致。
 - [x] 候选wheel独立安装，1986题输入和参考逐项对原始JSON检查，完整会话及原父/题位置一致；前三条准备及回查通过。
 - [x] CPU夹具覆盖字段隔离、日期/轮次契约、对抗题、重复ID、字段冲突和输入回查；夹具不是原题执行证据。
-- [ ] 固定最终CI工件及指定研究端消费联调。
+- [x] 固定04113e35
+  CI工件及指定研究端b3e1f9f消费联调：31个软件payload核对、服务器1986题字段与前三条回查、双模式前三条及旧九条回归通过；两端对应CI均成功。见[固定工件消费记录](validation/locomo-fixed-input-consumption-20261023.json)。
 - [ ] 原始前三题模型执行、终止、预算和适用的发布方评分：首次原0题请求HTTP500，编译阶段异常后服务退出，未返回答案，评分未运行；见[失败记录](validation/locomo-original-qa-failure-20261023.json)。未改题、裁剪上下文或提高预算。
 - [ ] 第5类官方生成路径兼容、其他问题与图像任务。
 
-详见[候选读取回执](validation/locomo-original-reader-20261023.json)。零模型调用、零任务执行、零评分，不因此勾选来源完成。
+此前[候选读取回执](validation/locomo-original-reader-20261023.json)保持原样，固定工件回查记录另行保存。数据链路检查零模型调用、零任务执行、零评分，不因此勾选来源完成。
 本能力与相关长会话/历史来源合批交付，不创建LoCoMo单独PR；原始载荷仅由使用者私有保存。

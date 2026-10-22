@@ -24,3 +24,19 @@ ChartQA保留原始图像字段，但当前NPU服务使用language-model-only，
 BigCodeBench生成三条正常终止；DS-1000三条中一条触及原始1024预算；两者功能评分仍未执行。 这些事实不因消费测试或CI通过而改变，来源级完成状态也不因此打勾。
 
 CI工件保留期为30天；长期使用应从表中固定Git提交按安装文档自行构建，不能假定临时工件永久可下载。 既有候选工件、失败记录和原始回执保留，不用新验证重写历史身份。
+
+## LoCoMo 固定版本增量
+
+固定数据提交`04113e35405d959aaa6191c3d7a6fdfdd9ece942`，CI wheel
+SHA256为`a1fb1efd188cee7ace85a3f911894509bcfd401c41cf4ecd7ca6ef36eb83c26c`，31个软件payload逐项对固定Git核验。
+服务器实际安装后，原10会话/1986问题的输入和参考逐项对原JSON检查，展平前三题prepare/resolve通过。
+研究端固定提交`b3e1f9f397afca1a4181b0969b34705f61046bca`的[独立消费回执](https://github.com/intellistream/agent-workload-suite/blob/b3e1f9f397afca1a4181b0969b34705f61046bca/docs/evidence/locomo-original-consumer-20261023.json)已核对：安装包与固定Git两模式各3题、旧来源各9条回归一致。
+前三题均来自首会话，每题保留19个历史session和419个原始turn；不把这些历史轮次计为新模型调用。
+
+数据端[主CI](https://github.com/vLLM-HUST/vllm-hust-benchmark/actions/runs/39873172357)为2419通过、4跳过，lint与[CPU smoke](https://github.com/vLLM-HUST/vllm-hust-benchmark/actions/runs/39873172330)成功。
+研究端[测试、打包及论文构建](https://github.com/intellistream/agent-workload-suite/actions/runs/39873904563)和[准备链路](https://github.com/intellistream/agent-workload-suite/actions/runs/39873904546)全部成功，Linux消费92项、组件948项、harness及前批回归127项通过，无跳过。
+研究侧多会话文本投影只用于其离线消费，明确不是官方模型提示词或tokenizer输入，不迁入benchmark。
+
+上述核验为零模型/零任务/零评分，不能覆盖[首次原题执行失败](validation/locomo-original-qa-failure-20261023.json)：HTTP500后引擎退出，没有完成答案或分数。
+第5类兼容和视觉执行仍未核验，CC-BY-NC-4.0原始使用条款仍适用。
+[固定工件汇总](validation/locomo-fixed-input-consumption-20261023.json)与先前候选、失败回执分别保存；文档更新不自动重锁数据版本或重写旧证据。
