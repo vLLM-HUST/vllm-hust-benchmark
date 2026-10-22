@@ -81,6 +81,11 @@ def test_publication_rebuilds_from_pinned_report_and_verified_archives(monkeypat
     verdict = sections["m01-verdict"]
     assert len(verdict["tables"][0]["rows"]) == 3
     assert "30.2443%–30.2505%" in verdict["scope"]
+    assert (
+        "E24/R36 + KV materialization请求重计算 + Prefill Microflow FA"
+        in verdict["scope"]
+    )
+    assert "不是同一轮联合成绩" in verdict["scope"]
     assert "不外推为未插桩服务结果" in verdict["scope"]
     assert "21.92%仅为诊断值" in verdict["scope"]
     assert actual["kv_audit"]["runs"] == module.kv_audit()
