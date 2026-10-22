@@ -17,9 +17,20 @@ def test_publication_rebuilds_from_pinned_report_and_verified_archives(monkeypat
     assert hashlib.sha256(raw).hexdigest() == actual["report_sha256"]
     monkeypatch.setattr(module, "pinned", lambda path: raw)
     assert actual == module.build()
-    assert actual["version"] == "V0.69"
+    assert actual["version"] == "V0.70"
     assert module.REVISION in actual["report_url"]
     sections = {s["id"]: s for s in actual["sections"]}
+    inventory = sections["dataset-quality-inventory"]
+    assert len(inventory["tables"]) == 6
+    assert sum(len(table["rows"]) for table in inventory["tables"]) == 24
+    assert [row[1] for row in inventory["tables"][-1]["rows"]] == [
+        "151 / 200",
+        "152 / 200",
+        "149 / 200",
+        "146 / 200",
+    ]
+    assert "mmlu-quality018-20261022" in inventory["evidence"][-1]["path"]
+    assert "同题同评分器" in inventory["scope"]
     baseline = sections["baseline018"]
     assert len(baseline["tables"][0]["rows"]) == 5
     assert "开发栈对照" in baseline["scope"]
