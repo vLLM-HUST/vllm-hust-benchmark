@@ -89,3 +89,20 @@ def test_canonical_matrix_is_same_archived_measurement():
         dataset["parts"][0]["scores"]["request-throttling-controller"]["value"]
         == report["full_window"]["controller_original"]["engine_output_tokens_per_s"]
     )
+
+
+def test_website_displays_only_native_and_controller_without_removing_archive():
+    report = json.loads((REPORT / "report.json").read_text())
+    assert "thunderagent_original" in report["full_window"]
+    matrix = json.loads(
+        (ROOT / "website-publication/data/dataset-matrix-v1.json").read_text()
+    )
+    dataset = next(d for d in matrix["datasets"] if d["id"] == "swe-bench-pro")
+    assert set(dataset["parts"][0]["scores"]) == {
+        "native",
+        "request-throttling-controller",
+    }
+    assert not any(s["id"] == "thunderagent-original" for s in matrix["solutions"])
+    assert {
+        r["solution"] for r in matrix["records"] if r["dataset"] == "swe-bench-pro"
+    } == {"native", "request-throttling-controller"}
