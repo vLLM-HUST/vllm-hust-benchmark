@@ -11,6 +11,19 @@ from vllm_hust_workload_data.bindings import bind_source
 from vllm_hust_workload_data.registry import source_spec
 
 
+def test_fixed_acquisition_urls_match_original_version_and_paths():
+    manifest = source_spec("JSONSCHEMABENCH")
+    assert len(manifest["files"]) == 3
+    for file in manifest["files"]:
+        assert file["url"] == (
+            "https://raw.githubusercontent.com/guidance-ai/jsonschemabench/"
+            + manifest["revision"]
+            + "/data/"
+            + file["path"]
+        )
+        assert file["rows"] == 1
+
+
 @pytest.mark.parametrize(
     "schema",
     [
