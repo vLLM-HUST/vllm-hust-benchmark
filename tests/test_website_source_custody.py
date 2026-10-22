@@ -17,3 +17,15 @@ def test_public_website_source_custody():
         assert manifest["source_visibility"] == "public"
         count += len(manifest["files"])
     assert count == 48
+
+
+def test_additional_public_sources():
+    for name, count in [
+        ("pyramidkv-website-source", 24),
+        ("state-scheduler-website-source", 3),
+    ]:
+        archive = ROOT / "archive/mod-git-20261022" / name
+        verify(archive)
+        manifest = json.loads((archive / "manifest.json").read_text())
+        assert manifest["source_visibility"] == "public"
+        assert len(manifest["files"]) == count

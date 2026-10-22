@@ -1,0 +1,43 @@
+import hashlib,json,os,subprocess,time,urllib.request
+from pathlib import Path
+root=Path('/root/workspace/pyramidkv-runtime/evaluation/aligned'); parent=root.parent
+client=urllib.request.build_opener(urllib.request.ProxyHandler({}))
+config=parent/'pyramidkv-aligned.json'
+status=subprocess.check_output(['npu-smi','info'],text=True)
+assert 'VLLMWorker' not in status
+(root/'before-retry-npu-idle.txt').write_text(status)
+env=dict(os.environ,PYRAMIDKV_ENABLED='1',PYRAMIDKV_CONFIG=str(config),VLLMHUST_EXT_ENABLED_BUNDLES='')
+with (root/'pyramidkv-server.log').open('w') as log:
+ server=subprocess.Popen(['bash','/root/workspace/pyramidkv-runtime/serve.sh'],env=env,stdout=log,stderr=subprocess.STDOUT,start_new_session=True)
+print('Candidate retry started',server.pid,flush=True)
+reclaims=[]
+for _ in range(240):
+ if server.poll() is not None: raise RuntimeError(f'Server exited {server.returncode}')
+ try:
+  with client.open('http://127.0.0.1:8000/health',timeout=2) as response:
+   if response.status==200: break
+ except Exception: pass
+ current=int(Path('/sys/fs/cgroup/memory.current').read_text())
+ if current > 48*1024**3:
+  row={'time_unix':time.time(),'memory_current_before':current}
+  for p in sorted(Path('/root/workspace/Qwen3.5-35B-A3B').glob('*.safetensors')):
+   fd=os.open(p,os.O_RDONLY)
+   try: os.posix_fadvise(fd,0,0,os.POSIX_FADV_DONTNEED)
+   finally: os.close(fd)
+  row['memory_current_after']=int(Path('/sys/fs/cgroup/memory.current').read_text()); reclaims.append(row)
+  print('Startup-only model page-cache reclaim',row,flush=True)
+ time.sleep(5)
+else: raise RuntimeError('Retry startup timed out')
+(root/'startup-cache-reclaim.json').write_text(json.dumps({'scope':'model shard page cache only; startup only; no cache advice during evaluation','cgroup_memory_max':Path('/sys/fs/cgroup/memory.max').read_text().strip(),'events':reclaims},indent=2)+'\n')
+procenv=dict(s.split('=',1) for s in Path(f'/proc/{server.pid}/environ').read_bytes().decode().split('\0') if '=' in s)
+keys=['ASCEND_RT_VISIBLE_DEVICES','VLLM_ASCEND_KVCOMPRESS_ENABLED','VLLMHUST_EXT_ENABLED_BUNDLES','VLLM_VERSION','VLLM_PLUGINS','VLLM_ASCEND_KVCOMPRESS_CONFIG']
+record={'command':Path(f'/proc/{server.pid}/cmdline').read_bytes().decode().split('\0')[:-1],'environment':{k:procenv.get(k) for k in keys},'source_commit':subprocess.check_output(['git','-C','/root/workspace/vllm-ascend-pyramidkv-hust','rev-parse','HEAD'],text=True).strip(),'adapter_commit':subprocess.check_output(['git','-C','/root/workspace/pyramidkv-runtime/src/kvcompress','rev-parse','HEAD'],text=True).strip(),'method_config_sha256':hashlib.sha256(config.read_bytes()).hexdigest(),'startup_attempt':2}
+baseline=json.loads((root/'baseline-launch.json').read_text())
+for key in ['command','source_commit','adapter_commit','method_config_sha256']: assert record[key]==baseline[key],key
+assert record['environment']['VLLM_ASCEND_KVCOMPRESS_ENABLED']=='1' and not record['environment']['VLLMHUST_EXT_ENABLED_BUNDLES']
+(root/'pyramidkv-launch.json').write_text(json.dumps(record,indent=2)+'\n')
+print('Healthy; startup cache monitor ended. Start unchanged 409-case plan.',flush=True)
+with (root/'pyramidkv-client.log').open('w') as log:
+ subprocess.run(['/root/workspace/pyramidkv-runtime/venv/bin/python','/root/workspace/vllm-ascend-pyramidkv-hust/scripts/qwen35/evaluate.py','run','--arm','pyramidkv','--plan',str(parent/'plan-extended'),'--output',str(root/'pyramidkv')],stdout=log,stderr=subprocess.STDOUT,check=True)
+s=json.loads((root/'pyramidkv/summary.json').read_text()); assert s['requests']==409 and s['failures']==0
+print('Candidate complete',s['quality_f1'],flush=True)
