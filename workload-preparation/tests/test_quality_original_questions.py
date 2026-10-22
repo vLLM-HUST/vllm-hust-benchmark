@@ -170,5 +170,13 @@ def test_reader_receipt_does_not_become_native_task_acceptance():
         )
     )
     row = next(r for r in ledger["sources"] if r["source_id"] == "QUALITY")
-    assert row["server_execution"] == row["scoring"] == "NOT_RUN"
+    assert row["reader_receipt"].endswith("quality-original-reader-20261023.json")
+    assert row["receipt"].endswith("quality-original-mc-npu-20261023.json")
+    native = json.loads((root / row["receipt"]).read_text(encoding="utf-8"))
+    assert (
+        native["unique_original_questions"]
+        == 3
+        < receipt["original_questions_read_checked_and_indexed"]
+    )
+    assert native["full_suite_validated"] is False
     assert row["checked"] is False

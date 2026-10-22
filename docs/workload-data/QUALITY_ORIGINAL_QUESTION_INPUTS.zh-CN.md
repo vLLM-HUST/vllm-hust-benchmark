@@ -45,5 +45,24 @@ for record in iter_workload("QUALITY", data_root=Path("/data/quality"), limit=3)
   `e7afd01dc8d8d900d663dd9a3109ab1994b2c7ba24bded5bb8d145fb554b0489`），全部2086个原问题逐条与源文章、问题、选项及gold对照并建立索引；原顺序前三篇不同文章的首题（平坦问题索引0、6、15）完整输入/参考回查通过，0模型调用。
 - 私有核验脚本先因索引目录位于数据根下被正确拒绝，再因误以为prepared_rows返回task_id而失败。修正核验脚本目录与公开引用接口用法后通过，未修改生产隔离规则或原始数据，两次失败脚本保留。
 
-**未完成**：模型执行、适用评分、公开执行入口、研究消费和最终CI工件复验。当前不勾选来源完成，不将2086行读取或3条回查称作2086/3题执行。将与其他workload一起合批，未单独新建QuALITY
-PR。
+以上是读取阶段的独立证据，0模型调用不被后续执行追溯改写。
+
+## 原题多选似然执行
+
+```sh
+python scripts/run_quality_original_mc.py --data-root /data/quality --output /data/quality-mc-private --tokenizer /models/matching-tokenizer --model MODEL_ALIAS
+```
+
+需要固定`lm-eval==0.4.11`环境和匹配现有NPU模型的本地tokenizer。脚本核对原文件、harness源码及预先选定的0、6、15号原问题，不执行SCROLLS数据下载、去重或长度剪枝。复用该harness的QuALITY提示、多选请求和评分方法，不修改上游源码；原文章和问题保持完整，选项仅使用该实现原有的空白归一化。使用raw
+completions，不转换chat。
+
+每题对四个原选项分别计算完整续接似然，gold只在评分侧，不参与请求文档。保留原始acc和按选项字符数归一化的acc_norm，不只挑较高指标。该实现的em等于acc_norm乘100，不是自由生成文本精确匹配。
+
+12个选项请求均检查完整输入token数、有限似然和返回条数。接口按原harness使用`echo=True`、`logprobs=1`、`max_tokens=1`，其`length`终态来自附加单token预算，不是将任务答案截成一个token；判据是四个完整选项的似然已取得，而非生成答案是否stop。没有以此协议声称验证自由生成或长输出。
+
+授权双910B2、Qwen3.5-27B、BF16、TP2、graph服务已执行原三题；原始acc为1/3、acc_norm为2/3，原输入约6.1K至6.9K
+tokens，未截断。最终公开脚本同三题复验一致，仍是三题、合计24次选项模型调用，不是六个唯一问题。见[原题执行回执](validation/quality-original-mc-npu-20261023.json)。
+
+这是原NYU dev题目与固定第三方harness方法的集成验证，**不是SCROLLS数据集、发布方训练基线复现、官方完整榜单成绩或性能提升证明**。替代模型、选择范围及输入呈现差异均保留。
+
+**未完成**：研究消费、最终CI工件及完整2086题执行。当前不勾选来源完成，不将全部读取称作全部模型执行。将与其他workload一起合批，未单独新建QuALITY PR。
