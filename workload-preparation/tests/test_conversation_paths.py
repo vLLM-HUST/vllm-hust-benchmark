@@ -139,6 +139,14 @@ def test_history_pipeline_roundtrip_and_default_unchanged(tmp_path):
     assert "excluded reference" not in json.dumps(record.input_record())
     assert record.outcome_record()["text"] == "excluded reference"
     assert "excluded reference".encode() not in database.read_bytes()
+    ordinary_config = {
+        "sources": [
+            {k: v for k, v in config["sources"][0].items() if k != "history_targets"}
+        ]
+    }
+    run(ordinary_config, output=tmp_path / "ordinary")
+    ordinary_refs = list(prepared_rows(tmp_path / "ordinary/workload.sqlite"))
+    assert refs[0]["record_id"] != ordinary_refs[3]["record_id"]
 
 
 @pytest.mark.parametrize(

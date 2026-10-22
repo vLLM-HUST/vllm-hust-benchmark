@@ -34,6 +34,8 @@ messages = view["messages"]  # 仅此字段作为历史消息输入
 
 此通用视图的夹具准备/索引/回查已通过；随后在服务器独立 OASST 环境安装候选 wheel，使用 `-I` 确认从 site-packages 导入，真实文件经过 bind_source→pipeline→prepared_rows→resolve_input，三条还原输入哈希均匹配既有模型运行。历史回复未进入输入或 SQLite；0 新模型调用。研究消费者对应视图联调仍待补验。
 
+索引身份额外固定 `input_ref.view=original-parent-history/v1`，使同一原行的历史消息与续接视图产生不同 record_id；默认旧视图 ID 不变。加入该身份隔离后重新构建 wheel（SHA-256 `933fbba59c4d1e31ce84734189854c750d6dddeaadc207a4ba5ed2f2448b9788`），服务器安装包三条原始输入索引回查再次通过，仍为软件补验、无新模型调用。
+
 当前安装包验证使用的 wheel SHA-256 为 `1ebccebc7bf6e1c7b931705fb7f8a3f9850da87377a82aac1022f590b6902e20`，私有软件回执 SHA-256 为 `e97d88a0d2e40864c5c36e6cc85bfd0d993dec618c2c8d66aee84d3c7acf53a8`。这是本地候选工件，不是已发布 CI wheel。服务器原始文件副本的 basename 与目录原成员不同，因此绑定明确报告 local snapshot 而非 publisher authenticated；另行核对文件 SHA 与固定原始成员相同，不借改名提升来源认证等级。
 
 ## 已验证范围
