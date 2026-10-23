@@ -160,6 +160,17 @@ def test_original_reader_failure_is_preserved_and_recovery_sample_is_scored():
             "utf-8"
         )
     )
+    recovery_batch2 = json.loads(
+        (
+            docs
+            / "validation/locomo-original-qa-recovery-batch2-20261023.json"
+        ).read_text("utf-8")
+    )
+    sampled = json.loads(
+        (docs / "validation/locomo-original-qa-sampled-20261023.json").read_text(
+            "utf-8"
+        )
+    )
     ledger = json.loads((docs / "dataset-validation-status.json").read_text("utf-8"))
     row = next(source for source in ledger["sources"] if source["source_id"] == "LOCOMO")
     assert reader["original_questions_field_checked"] == 1986
@@ -187,7 +198,21 @@ def test_original_reader_failure_is_preserved_and_recovery_sample_is_scored():
     ]
     assert recovery["aggregate"]["publisher_f1_mean"] == 0.31746031746031744
     assert recovery["raw_requests_and_model_responses_published"] is False
+    assert recovery_batch2["selected_samples"] == [3, 4, 5]
+    assert [sample["publisher_f1"] for sample in recovery_batch2["samples"]] == [
+        1.0,
+        0.5,
+        0.7499999999999999,
+    ]
+    assert sampled["selected_samples"] == list(range(6))
+    assert sampled["aggregate"]["publisher_f1_mean"] == 0.5337301587301587
+    assert len(sampled["samples"]) == 6
     assert row["checked"] is True
-    assert row["receipt"] == "docs/workload-data/validation/locomo-original-qa-recovery-20261023.json"
+    assert row["selected_samples"] == list(range(6))
+    assert row["receipt"] == "docs/workload-data/validation/locomo-original-qa-sampled-20261023.json"
+    assert row["execution_attempt_receipts"] == [
+        "docs/workload-data/validation/locomo-original-qa-recovery-20261023.json",
+        "docs/workload-data/validation/locomo-original-qa-recovery-batch2-20261023.json",
+    ]
     assert row["prior_failure_receipt"] == "docs/workload-data/validation/locomo-original-qa-failure-20261023.json"
     assert row["blocker"].find("第5类") >= 0
