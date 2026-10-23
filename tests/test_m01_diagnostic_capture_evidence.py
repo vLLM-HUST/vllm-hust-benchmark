@@ -123,3 +123,68 @@ def test_retry_preserves_responses_without_accepting_invalid_metadata():
         assert not any(
             Path(m.name).name.startswith("scheduler-") for m in bundle.getmembers()
         )
+
+
+def test_third_capture_closes_metadata_not_m01_acceptance():
+    with tarfile.open(BASE / "m01-capture-r3-derived-20261023.tar.gz") as bundle:
+        summary = json.loads(
+            bundle.extractfile("m01-capture-r3-derived-summary.json").read()
+        )
+    with tarfile.open(BASE / "m01-capture-r3-evidence-20261023.tar.gz") as bundle:
+
+        def read(name):
+            raw = bundle.extractfile("m01-capture-b1-r3/" + name).read()
+            assert hashlib.sha256(raw).hexdigest() == summary["source_sha256"][name]
+            return json.loads(raw)
+
+        receipt = read("receipt.json")
+        assert receipt["status"] == "diagnostic_capture_joined"
+        assert receipt["client_exit_code"] == 0
+        assert receipt["sessions_drained"] and receipt["all_devices_released"]
+        result = read("mmlu-pro.json")
+        assert result["completed"] == 200 and result["failed"] == 0
+        assert result["total_input_tokens"] == 282265
+        assert result["total_output_tokens"] == 51200
+        boundary = read("boundary.jsonl")
+        assert boundary["performance_acceptance"] is False
+        low = boundary["calls"][2]["clock_after"]["perf_after_ns"]
+        high = boundary["calls"][3]["clock_before"]["perf_before_ns"]
+        scheduler = read("scheduler-805337.json")
+        assert scheduler["retained_count_complete"] is False
+        events = [e for e in scheduler["events"] if low <= e["perf_ns"] <= high]
+        outputs, skipped = Counter(), Counter()
+        updates = []
+        for e in events:
+            if e["event"] == "output_update":
+                obs = e["observation"]
+                assert obs["status"] == "accepted_prefix_then_bonus_host_counts"
+                assert not obs["is_stale"]
+                outputs[e["request_key"]] += obs["appended_count"]
+                updates.append(obs)
+            elif e["event"] == "not_updated":
+                skipped[(e["drafts"], outputs[e["request_key"]])] += 1
+        assert len(outputs) == 200 and set(outputs.values()) == {256}
+        assert skipped == {(0, 0): 18, (2, 256): 110}
+        for key in ("raw_accepted_drafts", "retained_drafts"):
+            assert sum(o[key] for o in updates) == summary[key]
+        assert summary["raw_accepted_drafts"] - summary["retained_drafts"] == 67
+        for rank, pid in enumerate((805910, 805911)):
+            worker = read(f"worker-{pid}.json")
+            assert worker["rank"] == rank
+            assert worker["run_id"] == scheduler["run_id"] == receipt["run_id"]
+            assert worker["complete"] and worker["errors"] == worker["dropped"] == 0
+            counts = Counter(e["event"] for e in worker["events"])
+            assert counts["execute_begin"] == counts["execute_end"] == 874
+            assert (
+                counts["host_gdn_metadata"]
+                == counts["sample_begin"]
+                == counts["sample_end"]
+                == 873
+            )
+            for e in worker["events"]:
+                if e["event"] == "host_gdn_metadata":
+                    layers = [name for g in e["groups"] for name in g["layers"]]
+                    assert len(layers) == len(set(layers)) == 30
+                    assert all(g["live"] == len(e["request_keys"]) for g in e["groups"])
+        assert summary["effective_flops"] is None
+        assert summary["reference_time"] is None and summary["m01_attainment"] is None
