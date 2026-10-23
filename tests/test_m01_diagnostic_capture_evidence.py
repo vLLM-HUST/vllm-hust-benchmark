@@ -11,6 +11,82 @@ BASE = (
 )
 
 
+def test_fourth_capture_device_lengths_match_request_progress():
+    with tarfile.open(BASE / "m01-capture-r4-evidence-20261023.tar.gz") as bundle:
+
+        def read(name):
+            return json.loads(bundle.extractfile("m01-capture-b1-r4/" + name).read())
+
+        receipt = read("receipt.json")
+        assert receipt["status"] == "diagnostic_capture_joined"
+        assert receipt["client_exit_code"] == 0
+        assert receipt["sessions_drained"] and receipt["all_devices_released"]
+        scheduler = read("scheduler-894022.json")
+        maps = []
+        for pid in (894394, 894395):
+            worker = read(f"worker-{pid}.json")
+            lengths = worker["draft_device_lengths"]
+            assert (
+                lengths["complete"]
+                and not lengths["errors"]
+                and not lengths["binding_errors"]
+            )
+            assert lengths["stream_order_qualified"] is False
+            assert len(lengths["records"]) == 1758
+            rows = {}
+            for r in lengths["records"]:
+                m = r["metadata"]
+                assert m["identity"]["run_id"] == receipt["run_id"]
+                prior = 0
+                for i, key in enumerate(m["request_keys"]):
+                    identity = (m["identity"]["wave"], key, m["draft_step"])
+                    assert identity not in rows
+                    end = r["device_query_lengths"][i]
+                    rows[identity] = (end - prior, r["device_kv_lengths"][i])
+                    prior = end
+            maps.append(rows)
+        assert maps[0] == maps[1]
+        frames = {
+            e["frame"]: e["identity"]["wave"]
+            for e in scheduler["events"]
+            if e["event"] == "delivery"
+        }
+        prefill, output, counts = Counter(), Counter(), Counter()
+        seen = set()
+        retained = 0
+        for e in scheduler["events"]:
+            if e["event"] not in ("output_update", "not_updated"):
+                continue
+            key, wave = e["request_key"], frames[e["frame"]]
+            if e["drafts"] == 0:
+                prefill[key] += e["scheduled_tokens"]
+            first, second = (wave, key, 0), (wave, key, 1)
+            q0, kv0 = maps[0][first]
+            q1, kv1 = maps[0][second]
+            seen.update((first, second))
+            assert q0 == e["scheduled_tokens"] and q1 == 1 and kv1 == kv0 + 1
+            delta = kv0 - (prefill[key] + output[key] + e["drafts"])
+            if e["event"] == "output_update":
+                assert delta == 0
+                counts["updated"] += 1
+                output[key] += e["observation"]["appended_count"]
+                retained += e["observation"]["retained_drafts"]
+            else:
+                assert delta in (0, 1)
+                if delta:
+                    assert output[key] == 256
+                counts[f"skipped_delta_{delta}"] += 1
+        assert seen == set(maps[0])
+        assert counts == {
+            "updated": 19292,
+            "skipped_delta_0": 81,
+            "skipped_delta_1": 61,
+        }
+        assert len(output) == 200 and set(output.values()) == {256}
+        assert sum(prefill.values()) == 282265 and retained == 32042
+        assert receipt["effective_flops"] is None and receipt["m01_attainment"] is None
+
+
 def test_partial_arithmetic_remains_separate_from_acceptance():
     with tarfile.open(BASE / "m01-r3-accounting-progress-20261023.tar.gz") as outer:
         draft = json.loads(
