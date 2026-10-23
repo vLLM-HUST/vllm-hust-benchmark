@@ -2,21 +2,39 @@ import importlib.util
 import hashlib
 import json
 from pathlib import Path
+import subprocess
 
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def test_publication_rebuilds_from_pinned_report_and_verified_archives(monkeypatch):
+def test_publication_rebuilds_from_pinned_report_and_verified_archives():
     spec = importlib.util.spec_from_file_location(
         "midterm", ROOT / "scripts/build_midterm_publication.py"
     )
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     actual = json.loads(module.OUTPUT.read_text())
-    raw = (ROOT / module.REPORT).read_bytes()
-    assert hashlib.sha256(raw).hexdigest() == actual["report_sha256"]
-    monkeypatch.setattr(module, "pinned", lambda path: (ROOT / path).read_bytes())
-    assert actual == module.build()
+    assert actual["source_commit"] == module.REVISION
+    assert (
+        actual["report_sha256"]
+        == (
+            "b755512e642918346816c3700cc2ab7efa2674efa4b2b77cc888ca5396843efb"  # pragma: allowlist secret
+        )
+    )
+    # PR CI uses a shallow checkout; the frozen V0.72 source commit may be absent.
+    has_pinned_source = (
+        subprocess.run(
+            ["git", "cat-file", "-e", f"{module.REVISION}:{module.REPORT}"],
+            cwd=ROOT,
+            check=False,
+            capture_output=True,
+        ).returncode
+        == 0
+    )
+    if has_pinned_source:
+        raw = module.pinned(module.REPORT)
+        assert hashlib.sha256(raw).hexdigest() == actual["report_sha256"]
+        assert actual == module.build()
     assert actual["version"] == "V0.72"
     method = actual["m01_method"]
     assert method["method_version"] == "V5.27"
