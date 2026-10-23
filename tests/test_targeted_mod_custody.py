@@ -12,6 +12,7 @@ def test_targeted_original_bytes():
         ("compress-history", 46),
         ("vspec-regression", 317),
         ("manager-paper", 7),
+        ("manager-experiments", 208),
     ):
         capsule = root / name
         manifest = json.loads((capsule / "manifest.json").read_text())

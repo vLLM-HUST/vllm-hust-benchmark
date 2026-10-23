@@ -1,0 +1,49 @@
+{
+  "schema_version": "0.2-experimental",
+  "extension_id": "org.vllm-hust.mooncake-provider",
+  "extension_version": "0.2.0.dev0",
+  "kind": "kv_service_adapter",
+  "host": {
+    "provider": "mooncake",
+    "name": "Mooncake",
+    "version_range": ">=0.3.11.post1,<0.4"
+  },
+  "runtime": {
+    "type": "composite",
+    "process_scope": "external_service_and_vllm_connector",
+    "isolation": "external_service"
+  },
+  "lifecycle_owner": "external_operator",
+  "protocols": [
+    {"name": "mooncake-store-rest", "version_range": null},
+    {"name": "vllm-kv-transfer-config", "version_range": null}
+  ],
+  "implementation": [
+    {
+      "type": "external_service",
+      "service": "Mooncake Store",
+      "source_repository": "https://github.com/vLLM-HUST/mooncake-hust",
+      "upstream_repository": "https://github.com/kvcache-ai/Mooncake",
+      "module": "mooncake.mooncake_store_service",
+      "console_scripts": ["mooncake_master", "mc_store_rest_server"],
+      "validated_distribution": "mooncake-transfer-engine-non-cuda==0.3.12.post1",
+      "validated_npu_distribution": "mooncake-transfer-engine-npu==0.3.11.post1",
+      "validated_npu_transport": "ascend",
+      "required_vllm_patch": "aa2781f7bc"
+    },
+    {
+      "type": "host_builtin",
+      "host": "vllm",
+      "symbols": ["MooncakeConnector", "MooncakeStoreConnector"]
+    }
+  ],
+  "requires_services": [
+    {
+      "service_id": "mooncake-store",
+      "protocol": "http-health",
+      "version_range": null,
+      "endpoint_config": "health_url",
+      "optional": false
+    }
+  ]
+}

@@ -1,0 +1,131 @@
+{
+  "captured_utc": "2026-10-13T15:46:00Z",
+  "classification": "real-host-process-contract-probe-not-model-serving-or-runtime-effectiveness",
+  "host": {
+    "request_lifecycle_events_api": "1.0",
+    "vllm_ascend_commit": "873584026",
+    "vllm_ascend_wheel_sha256": "16438dc60e86c7bc4741a3520d80d5f9de54676daabe2035ebff0d6b2dceefcf",
+    "vllm_commit": "973d9ef5acd2b9beb03e399dec1511a41fc941b5",
+    "vllm_wheel_sha256": "97b27b347889d6e140415e674509519f2ed65848cc51e4b888189fb28f29671a"
+  },
+  "manager_preflight": {
+    "both_discovered": true,
+    "both_enabled": true,
+    "classification": "planning-and-launch-environment-only-not-host-execution",
+    "combined_dry_run_exit_code": 0,
+    "combined_vllm_plugins": [
+      "ascend",
+      "ascend_kvcompress",
+      "request_lifecycle_profiler"
+    ],
+    "kvcompress_activation_ready": true,
+    "lifecycle_profiler_activation_ready": true,
+    "manager_source_commit": "d87c97e"
+  },
+  "members": {
+    "kvcompress": {
+      "source_commit": "00cc78dc7f3491eecbc79c5068e29aed9f59afc3",
+      "source_tree": "8661770207782c912316ad9e5529bf3dbfcce563",
+      "wheel_sha256": "b859f165140de0390f2e6a794a1dc36adb6de4c686e40c3dfc66b3bde11f06c3"
+    },
+    "lifecycle_profiler": {
+      "base_commit": "8b8245cdba61b2ccc92a02c81b158c8fc9f90d14",
+      "manifest_host_range": ">=0.31.1,<0.32",
+      "source_commit": "88ffdce5fc6639c0b7b86a54d197f7394705c54b",
+      "source_tree": "3cefa6d2b59e190e24ab30b11344c6284be70a5b",
+      "wheel_sha256": "8d77e6d98969831e994de4f7b7e4e9cf45b97ac9eeafc94da101543c9bee7891"
+    }
+  },
+  "orders": [
+    {
+      "entry_point_call_order": [
+        "request_lifecycle_profiler",
+        "ascend_kvcompress"
+      ],
+      "event_bus_enabled_after_profiler_close": false,
+      "event_bus_enabled_after_registration": true,
+      "event_snapshot": {
+        "event_count": 1,
+        "finished_count": 1,
+        "preempted_count": 0,
+        "reclaimed_count": 0
+      },
+      "install_order": [
+        "lifecycle_profiler",
+        "kvcompress"
+      ],
+      "kv_manager_patched": true,
+      "order_id": "profiler-then-kvcompress",
+      "process_exit_code": 0,
+      "profiler_sink": "NativeLifecycleEventSink",
+      "scheduler_patched": true,
+      "versions": {
+        "vllm": "0.31.1.post1.dev163+g973d9ef5a.empty",
+        "vllm-ascend-kvcompress-hust": "0.9.0",
+        "vllm-request-lifecycle-profiler-plugin": "0.1.2",
+        "vllm_ascend": "0.25.1rc2.dev872+hust.20260903.4.g873584026"
+      }
+    },
+    {
+      "entry_point_call_order": [
+        "ascend_kvcompress",
+        "request_lifecycle_profiler"
+      ],
+      "event_bus_enabled_after_profiler_close": false,
+      "event_bus_enabled_after_registration": true,
+      "event_snapshot": {
+        "event_count": 1,
+        "finished_count": 1,
+        "preempted_count": 0,
+        "reclaimed_count": 0
+      },
+      "install_order": [
+        "kvcompress",
+        "lifecycle_profiler"
+      ],
+      "kv_manager_patched": true,
+      "order_id": "kvcompress-then-profiler",
+      "process_exit_code": 0,
+      "profiler_sink": "NativeLifecycleEventSink",
+      "scheduler_patched": true,
+      "versions": {
+        "vllm": "0.31.1.post1.dev163+g973d9ef5a.empty",
+        "vllm-ascend-kvcompress-hust": "0.9.0",
+        "vllm-request-lifecycle-profiler-plugin": "0.1.2",
+        "vllm_ascend": "0.25.1rc2.dev872+hust.20260903.4.g873584026"
+      }
+    }
+  ],
+  "qualification": {
+    "actual_model_started": false,
+    "actual_workload_completed": false,
+    "both_install_orders_isolated": true,
+    "h2_oracle_label": null,
+    "lifecycle_profiler_activation_ready_for_exact_host": true,
+    "pair_contract_activation_ready_for_model_serving_campaign": true,
+    "performance_benefit": "unmeasured",
+    "runtime_effective": "unmeasured",
+    "score_eligible": false
+  },
+  "raw_evidence": {
+    "kvcompress_then_profiler": {
+      "path": "/root/ecpa-audit-20261013/profiler-kvcompress-orders/kvcompress-then-profiler.stdout.json",
+      "sha256": "55af37d987da2a7b3cd8aea5f864c98924368aa5992cb054de90e1640772c404"
+    },
+    "probe_script": {
+      "path": "/root/ecpa-audit-20261013/profiler-kvcompress-orders/probe_order.py",
+      "sha256": "68406b388537bc25bc2ec754fc48a8d08a9c868dd131dfe616f57de488d9bf70"
+    },
+    "profiler_then_kvcompress": {
+      "path": "/root/ecpa-audit-20261013/profiler-kvcompress-orders/profiler-then-kvcompress.stdout.json",
+      "sha256": "07641a9ddbc2ed6c415e40ff63a83763744c92fbf2418adde42dc8943c8dc938"
+    }
+  },
+  "schema": "ecpa-h2-host-contract-qualification/v1",
+  "tests": {
+    "focused": "12 passed",
+    "full_cpu": "244 passed, 9 skipped",
+    "ruff_critical": "passed",
+    "wheel_build": "passed"
+  }
+}

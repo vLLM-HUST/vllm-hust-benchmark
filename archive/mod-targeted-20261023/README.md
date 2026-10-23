@@ -19,6 +19,12 @@ is not new hardware acceptance or a serving-performance claim.
   results and five H1-r5 paper records. Schemas and executable validators remain implementation;
   semantic, hash and negative assertions must survive migration. Other large experimental artifacts
   remain a separate queue, not permission to remove whole experiments directories.
+- [Manager additional experimental archives](manager-experiments/manifest.json): exposure-gate,
+  false-effective, real-MOD-composition and bounded-transaction collections, frozen from
+  `00797c39344caa98db10940557f72c3b9cb3d9d6`. Synthetic/reference records remain explicitly
+  synthetic; their source fixtures need not be removed. Original failures, qualification-only
+  boundaries and source snapshots are preserved. Large formal-campaign archives and executable
+  generators remain separate consumer work, not authorized wholesale deletion.
 - [PyramidKV remaining current originals](pyramid-current/manifest.json): 98 records plus LICENSE
   and NOTICE, frozen from source commit `534bcc0` before consumer edits. Together with the existing
   paired capsule these preserve all 118 current evidence files. Original SHA256SUMS and their

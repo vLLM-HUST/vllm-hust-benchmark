@@ -1,0 +1,107 @@
+{
+  "case_id": "pair-pipeline-microbatch-bidkv-vllm-0281",
+  "classification": "source-bound-pre-launch-oracle-input",
+  "dimension": "conditional-compatible-distinct-scheduler-contracts",
+  "frozen_utc": "2026-10-13T18:27:55.240045+00:00",
+  "host": {
+    "commit": "3e57b2f75cffffd26dda0df4d9bcac890cfe99fc",
+    "protocol_versions": {
+      "vllm.batch-admission-policy": "1.1",
+      "vllm.preemption-policy": "1.0"
+    },
+    "repository": "vLLM-HUST/vllm-hust",
+    "tree": "b0e682747b3b7242c1b857841136b784f6c7f6a3",
+    "version": "0.28.1rc1.dev319"
+  },
+  "members": [
+    {
+      "extension_id": "org.vllm-hust.pipeline-microbatch",
+      "id": "pipeline_microbatch",
+      "implementation_source": "pipeline_policy",
+      "manifest_source": "pipeline_microbatch"
+    },
+    {
+      "extension_id": "org.vllm-hust.bidkv",
+      "id": "bidkv",
+      "implementation_source": "bidkv_selector",
+      "manifest_source": "bidkv"
+    }
+  ],
+  "nonclaims": [
+    "source-only pre-launch case; not host runtime",
+    "not performance evidence",
+    "does not show either policy was invoked",
+    "does not establish behavior under simultaneous policy calls"
+  ],
+  "planned_evaluation": {
+    "host_launch": false,
+    "manager_prediction_after_oracle_freeze": true,
+    "runtime_execution": false
+  },
+  "schema": "ecpa-h2-source-bound-case/v1",
+  "sources": {
+    "bidkv": {
+      "blob": "3aefff871f0b818a98168f907da3e33f17b66276",
+      "commit": "6f1fc75d694c6901051bdeae784d18b836c6fa70",
+      "path": "src/bidkv/manifests/vllm-hust-extension-v0.3.json",
+      "repository": "vLLM-HUST/vllm-hust-bidkv",
+      "sha256": "sha256:a7d3d7815a537a3e0c1b993bc2037b49d346c238572cc016b4931491a9dd4aa9",
+      "snapshot": "experiments/real_mod_composition/artifacts/h2-pipeline-bidkv-oracle-20261013/snapshots/bidkv-manifest.json",
+      "tree": "fb91042005020189c30cb525e811af89e511be88"
+    },
+    "bidkv_selector": {
+      "blob": "39741ac096fba633de867e9cf4c445f80e839152",
+      "commit": "6f1fc75d694c6901051bdeae784d18b836c6fa70",
+      "path": "src/bidkv/adapters/vllm_hust/selector.py",
+      "repository": "vLLM-HUST/vllm-hust-bidkv",
+      "sha256": "sha256:6503840d2c825caf3c6251f514724b36ca129293dae0f980ae6ccc94fae1d66b",
+      "snapshot": "experiments/real_mod_composition/artifacts/h2-pipeline-bidkv-oracle-20261013/snapshots/bidkv-selector.py.snapshot",
+      "tree": "fb91042005020189c30cb525e811af89e511be88"
+    },
+    "host_batch_admission": {
+      "blob": "af0a432437a04739da82cb69a3b306de2c1d296f",
+      "commit": "3e57b2f75cffffd26dda0df4d9bcac890cfe99fc",
+      "path": "vllm/v1/core/sched/batch_admission.py",
+      "repository": "vLLM-HUST/vllm-hust",
+      "sha256": "sha256:317e0d52d2658a928f0296ed77c7f6704b1daa1f6e5629b6b13d709dac0a46a7",
+      "snapshot": "experiments/real_mod_composition/artifacts/h2-pipeline-bidkv-oracle-20261013/snapshots/host-batch-admission.py.snapshot",
+      "tree": "b0e682747b3b7242c1b857841136b784f6c7f6a3"
+    },
+    "host_preemption": {
+      "blob": "8b85664c71aead4141a47e9646bf73dc707c5901",
+      "commit": "3e57b2f75cffffd26dda0df4d9bcac890cfe99fc",
+      "path": "vllm/v1/core/sched/preemption.py",
+      "repository": "vLLM-HUST/vllm-hust",
+      "sha256": "sha256:fbfd13fe97ed6328a12996711b5fec3f354fe27953d7a66e5173607a710bb60e",
+      "snapshot": "experiments/real_mod_composition/artifacts/h2-pipeline-bidkv-oracle-20261013/snapshots/host-preemption.py.snapshot",
+      "tree": "b0e682747b3b7242c1b857841136b784f6c7f6a3"
+    },
+    "host_scheduler_config": {
+      "blob": "d6ff1a67e8d4475e53c9ebf0dbd25634006ac6c1",
+      "commit": "3e57b2f75cffffd26dda0df4d9bcac890cfe99fc",
+      "path": "vllm/config/scheduler.py",
+      "repository": "vLLM-HUST/vllm-hust",
+      "sha256": "sha256:139284fc91373e8d9d1243b6243cbd7f56a82ef9a9d64633e3828c5327fea71b",
+      "snapshot": "experiments/real_mod_composition/artifacts/h2-pipeline-bidkv-oracle-20261013/snapshots/host-scheduler-config.py.snapshot",
+      "tree": "b0e682747b3b7242c1b857841136b784f6c7f6a3"
+    },
+    "pipeline_microbatch": {
+      "blob": "af8a1e1c6b659c4dcbf65e16ecc9cc8ad5cf071c",
+      "commit": "5831ea0e0fd51eb86ce87af386614dc14df6d477",
+      "path": "src/vllm_hust_pipeline_microbatch/vllm-hust-extension-v0.2.json",
+      "repository": "vLLM-HUST/vllm-hust-pipeline-microbatch",
+      "sha256": "sha256:76287ce444b0e2125a04abfc3b08e42e88cd60b5a21cbdac52557cc91caa8d7f",
+      "snapshot": "experiments/real_mod_composition/artifacts/h2-pipeline-bidkv-oracle-20261013/snapshots/pipeline-manifest.json",
+      "tree": "c4d1d60816f787efa4e798340653b2fb5cb6e5bc"
+    },
+    "pipeline_policy": {
+      "blob": "df8a9ba1f51aaa5629a82527406d8699a5f00340",
+      "commit": "5831ea0e0fd51eb86ce87af386614dc14df6d477",
+      "path": "src/vllm_hust_pipeline_microbatch/policy.py",
+      "repository": "vLLM-HUST/vllm-hust-pipeline-microbatch",
+      "sha256": "sha256:194da88d7363a00daba25a3b3accc6aee89a96c14de56e1c7d7083d842822ebf",
+      "snapshot": "experiments/real_mod_composition/artifacts/h2-pipeline-bidkv-oracle-20261013/snapshots/pipeline-policy.py.snapshot",
+      "tree": "c4d1d60816f787efa4e798340653b2fb5cb6e5bc"
+    }
+  }
+}

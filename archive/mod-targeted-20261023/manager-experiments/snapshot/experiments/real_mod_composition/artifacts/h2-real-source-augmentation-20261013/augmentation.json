@@ -1,0 +1,466 @@
+{
+  "classification": "frozen-real-source-candidates-and-preexisting-oracle-cases",
+  "coverage": {
+    "CLI/config-collision": "gap: no second real same-projection active bundle frozen",
+    "communication": "source-frozen; preexisting labeled Mooncake case is Manager-unavailable; two richer cases await independent oracle",
+    "explicit-process-carrier-conflict": "candidate sources frozen; independent oracle pending before planner",
+    "external-authority-conflict": "gap: provider source frozen, competing real controller/autoscaler manifest absent",
+    "external-service": "source-frozen and preexisting independent oracle; Manager unavailable",
+    "provider-translation": "Mooncake and Production Stack manifests frozen; preexisting independent oracles; Manager unavailable"
+  },
+  "nonclaims": [
+    "not runtime execution",
+    "not a new independent oracle",
+    "modeled contract labels are retained only as prior labels and are not promoted into the scored H2 corpus",
+    "no pending candidate has a Manager prediction"
+  ],
+  "oracle_pending_cases": [
+    {
+      "case_id": "pending-communication-process-carriers",
+      "dimensions": [
+        "communication",
+        "explicit-process-carrier-conflict"
+      ],
+      "members": [
+        "unified-communication",
+        "qos-scheduler",
+        "kv-transfer-observability"
+      ],
+      "oracle_status": "pending-independent-source-review",
+      "planner_status": "not-run-to-preserve-oracle-before-prediction-order",
+      "score_eligible": false
+    },
+    {
+      "case_id": "pending-scheduler-config-collision",
+      "dimensions": [
+        "CLI/config-collision"
+      ],
+      "members": [
+        "pipeline-microbatch"
+      ],
+      "oracle_status": "candidate-incomplete",
+      "planner_status": "not-run",
+      "required_addition": "a second independently developed real active bundle claiming the same batch-admission CLI/config projection",
+      "score_eligible": false
+    },
+    {
+      "case_id": "pending-external-authority-conflict",
+      "dimensions": [
+        "external-authority-conflict"
+      ],
+      "members": [
+        "production-stack-provider"
+      ],
+      "oracle_status": "candidate-incomplete",
+      "planner_status": "not-run",
+      "required_addition": "a source-bound real controller or autoscaler manifest that competes for Deployment.spec.replicas",
+      "score_eligible": false
+    },
+    {
+      "case_id": "pending-worker-carrier-overlap",
+      "dimensions": [
+        "communication",
+        "explicit-process-carrier-conflict"
+      ],
+      "members": [
+        "unified-communication",
+        "split-batch-full-graph",
+        "kv-transfer-observability"
+      ],
+      "oracle_status": "pending-independent-source-review",
+      "planner_status": "not-run-to-preserve-oracle-before-prediction-order",
+      "score_eligible": false
+    }
+  ],
+  "preexisting_oracle_cases": [
+    {
+      "case_id": "real-pair-bidkv-mooncake-provider",
+      "dimensions": [
+        "communication",
+        "external-service",
+        "provider-translation"
+      ],
+      "members": [
+        "bidkv-corpus-v02",
+        "mooncake-provider"
+      ],
+      "oracle": {
+        "case_id": "case.pair-bidkv-mooncake",
+        "conflict_class": null,
+        "decision": "admit",
+        "expected_error": null,
+        "reason": "The contracts own different canonical resources."
+      },
+      "oracle_frozen_before_this_prediction": true,
+      "oracle_source_case": "case.pair-bidkv-mooncake",
+      "prediction": {
+        "composition_error": null,
+        "declared_surface_decision": "admit",
+        "performance_claim": false,
+        "plans": [
+          {
+            "actions": [
+              {
+                "details": {
+                  "enabled": false
+                },
+                "lifecycle_owner": "vllm",
+                "mutating": false,
+                "operation": "configure_launch",
+                "target": "vllm"
+              }
+            ],
+            "config_claims": [
+              {
+                "path": [
+                  "environment",
+                  "BIDKV_UTILITY_CASCADE_GAIN_RATIO"
+                ],
+                "value": "1.25"
+              },
+              {
+                "path": [
+                  "environment",
+                  "BIDKV_UTILITY_ENABLE"
+                ],
+                "value": "1"
+              },
+              {
+                "path": [
+                  "environment",
+                  "BIDKV_UTILITY_LIVENESS_PREEMPTIONS"
+                ],
+                "value": "2"
+              },
+              {
+                "path": [
+                  "environment",
+                  "BIDKV_UTILITY_STRATEGY"
+                ],
+                "value": "bidkv"
+              },
+              {
+                "path": [
+                  "vllm_options",
+                  "--preemption-policy"
+                ],
+                "value": "bidkv.adapters.vllm_hust.selector.BidkvPreemptionPolicy"
+              }
+            ],
+            "extension_id": "org.vllm-hust.bidkv",
+            "generated_config": {
+              "additional_config": {},
+              "environment": {
+                "BIDKV_UTILITY_CASCADE_GAIN_RATIO": "1.25",
+                "BIDKV_UTILITY_ENABLE": "1",
+                "BIDKV_UTILITY_LIVENESS_PREEMPTIONS": "2",
+                "BIDKV_UTILITY_STRATEGY": "bidkv"
+              },
+              "native_extension_manifest": {
+                "bundle_id": "org.vllm-hust.bidkv",
+                "bundle_version": "0.2.1",
+                "components": [
+                  {
+                    "component_id": "victim-selector",
+                    "contracts": [
+                      "vllm.preemption-policy.v1"
+                    ],
+                    "execution_planes": [
+                      "scheduler"
+                    ],
+                    "implementation_ref": "bidkv.adapters.vllm_hust.selector:BidkvPreemptionPolicy",
+                    "isolation": "trusted_in_process",
+                    "permissions": []
+                  }
+                ],
+                "host_api_range": ">=1,<2",
+                "schema_version": "1.0"
+              },
+              "user_config": {},
+              "vllm_json_options": {},
+              "vllm_options": {
+                "--preemption-policy": "bidkv.adapters.vllm_hust.selector.BidkvPreemptionPolicy"
+              }
+            },
+            "provider": "vllm",
+            "resource_claims": [],
+            "warnings": [
+              "in-process scheduler activation requires explicit host and protocol compatibility evidence; run refuses unverified policies"
+            ]
+          },
+          {
+            "actions": [
+              {
+                "details": {
+                  "enabled": false
+                },
+                "lifecycle_owner": "vllm",
+                "mutating": false,
+                "operation": "render_connector_config",
+                "target": "vllm"
+              },
+              {
+                "details": {
+                  "protocol": "http-health"
+                },
+                "lifecycle_owner": "external_operator",
+                "mutating": false,
+                "operation": "check_service",
+                "target": "mooncake-store"
+              }
+            ],
+            "config_claims": null,
+            "extension_id": "org.vllm-hust.mooncake-provider",
+            "generated_config": {
+              "kv_transfer_config": {
+                "kv_connector": "MooncakeConnector",
+                "kv_role": "kv_both"
+              }
+            },
+            "provider": "mooncake",
+            "resource_claims": [],
+            "warnings": [
+              "Mooncake service lifecycle remains owned by its external operator; the manager will not start, stop, upgrade, or delete it.",
+              "For Ascend NPU caches, render the external Mooncake configuration with transport_protocol=ascend. MooncakeStoreConnector requires load_async enabled on the validated execution path."
+            ]
+          }
+        ],
+        "qualification_decision": "unavailable",
+        "reason": "the frozen source tuple lacks exact host capability and external-authority reachability receipts",
+        "runtime_claim": false
+      },
+      "score_eligible": false
+    },
+    {
+      "case_id": "real-single-production-stack-provider",
+      "dimensions": [
+        "provider-translation",
+        "external-authority"
+      ],
+      "members": [
+        "production-stack-provider"
+      ],
+      "oracle": {
+        "case_id": "case.single-production",
+        "conflict_class": null,
+        "decision": "admit",
+        "expected_error": null,
+        "reason": "A single known exclusive owner has no competing claimant."
+      },
+      "oracle_frozen_before_this_prediction": true,
+      "oracle_source_case": "case.single-production",
+      "prediction": {
+        "composition_error": null,
+        "declared_surface_decision": "admit",
+        "performance_claim": false,
+        "plans": [
+          {
+            "actions": [
+              {
+                "details": {},
+                "lifecycle_owner": "kubernetes",
+                "mutating": false,
+                "operation": "helm_template",
+                "target": "vllm/vllm-stack"
+              },
+              {
+                "details": {},
+                "lifecycle_owner": "kubernetes",
+                "mutating": false,
+                "operation": "server_dry_run",
+                "target": "default"
+              },
+              {
+                "details": {},
+                "lifecycle_owner": "kubernetes",
+                "mutating": false,
+                "operation": "check_rollout",
+                "target": "vllm"
+              },
+              {
+                "details": {},
+                "lifecycle_owner": "kubernetes",
+                "mutating": false,
+                "operation": "check_ownership_conflicts",
+                "target": "vllm"
+              }
+            ],
+            "config_claims": null,
+            "extension_id": "org.vllm-hust.production-stack-provider",
+            "generated_config": {
+              "chart": "vllm/vllm-stack",
+              "enabled": false,
+              "namespace": "default",
+              "release": "vllm",
+              "replica_ownership": "single-writer-required",
+              "values": {}
+            },
+            "provider": "production-stack",
+            "resource_claims": [],
+            "warnings": [
+              "Rendering is non-mutating. Applying Helm releases, CRDs, controllers, routers, autoscalers, or OCI images remains an explicit Kubernetes operator action."
+            ]
+          }
+        ],
+        "qualification_decision": "unavailable",
+        "reason": "the frozen source tuple lacks exact host capability and external-authority reachability receipts",
+        "runtime_claim": false
+      },
+      "score_eligible": false
+    }
+  ],
+  "schema": "ecpa-h2-real-source-augmentation/v1",
+  "source_authorities": {
+    "contract_cases_sha256": "sha256:cd1f853cccc9d4c9b74d505d4c5d304fa7817520067ad1fb716774fc568b3f49",
+    "contract_oracle_review": {
+      "cases_sha256": "cd1f853cccc9d4c9b74d505d4c5d304fa7817520067ad1fb716774fc568b3f49",
+      "notes": "Independent live GitHub verification matched 15/15 repository identities and pinned trees, 41/41 evidence objects, and 31/31 decisions and expected errors; no P0/P1/P2 findings.",
+      "reviewed_commit": "c373c1506018974502012cd0114fc35e33fe66f9",
+      "reviewer": "Codex independent Agent ecpa_source_binding_review",
+      "source_corpus_sha256": "41dd4504a166d594ccd3e07b3aac9561ab1878a76a1d51aceca56f7eb2e17550",
+      "source_snapshots_sha256": "72166123ce677cf10d7bab7a38b0e20df8c5c58ee6f09f504f1802951a0dfbbb",
+      "taxonomy_sha256": "4ce872bb430365de198a1c74129da981e826601f58750dd15497b637cc3321b9",
+      "verdict": "MERGE"
+    },
+    "contract_oracle_sha256": "sha256:918f9e2daf88b049f573650ef0f7e86ef56238f7ffaa305d5778c6aa7f195c67",
+    "source_snapshots_sha256": "sha256:72166123ce677cf10d7bab7a38b0e20df8c5c58ee6f09f504f1802951a0dfbbb",
+    "workshop_mods_sha256": "sha256:56270a4e87620b7a2a6eb3f2f5993adc38fc4bff618cfb108b80c60cd7f10bab"
+  },
+  "sources": {
+    "bidkv-corpus-v02": {
+      "bundle_id": "org.vllm-hust.bidkv",
+      "commit": "a0cba97d9abdc99908e46616db622f0e0099127f",
+      "implementation_statuses": [
+        "active"
+      ],
+      "lifecycle_owner": "vllm",
+      "manifest_blob": "28834665fb7a73556630599cee48a66385f78359",
+      "manifest_path": "src/bidkv/manifests/vllm-hust-extension-v0.2.json",
+      "manifest_schema": "0.2-experimental",
+      "manifest_sha256": "sha256:5b4ffd46e50bd36a1c55e5fad0c4e095e2601b2501cca3b8771dc0a90e086e97",
+      "process_scope": "scheduler",
+      "repository": "vLLM-HUST/vllm-hust-bidkv",
+      "snapshot_path": "experiments/real_mod_composition/artifacts/h2-real-source-augmentation-20261013/bidkv-corpus-v02-manifest.json",
+      "tree": "c74c2762ad9175d59bac7b24f647e0ebcd2b9b22"
+    },
+    "kv-transfer-observability": {
+      "bundle_id": "org.vllm-hust.kv-transfer-observability",
+      "commit": "53e69013dcf27fd08a93d142288c93c701edabd3",
+      "implementation_statuses": [
+        "import_only",
+        "import_only"
+      ],
+      "lifecycle_owner": "vllm",
+      "manifest_blob": "25beabe7e71fc25b5f4e4f81892950a49eedaae4",
+      "manifest_path": "src/vllm_hust_kv_transfer_observability/vllm-hust-extension-v0.2.json",
+      "manifest_schema": "0.2-experimental",
+      "manifest_sha256": "sha256:637b980343f41ad73dc1e4dbbbd2b89af1807b68eae41be2cd8819e0d856da8e",
+      "process_scope": "vllm-processes",
+      "repository": "vLLM-HUST/vllm-hust-kv-transfer-observability",
+      "snapshot_path": "experiments/real_mod_composition/artifacts/h2-real-source-augmentation-20261013/kv-transfer-observability-manifest.json",
+      "tree": "a3c89d926513461d9c31f74c82bf4f8fcb24e6bb"
+    },
+    "mooncake-provider": {
+      "bundle_id": "org.vllm-hust.mooncake-provider",
+      "commit": "9a1369d23ee32f3bb84583fb1695b2ff7cf4eb43",
+      "implementation_statuses": [
+        null,
+        null
+      ],
+      "lifecycle_owner": "external_operator",
+      "manifest_blob": "3ab0835f2bc157b0f09d8792bce033590008151d",
+      "manifest_path": "examples/mooncake-provider/src/vllm_hust_mooncake_provider/manifests/vllm-hust-extension-v0.2.json",
+      "manifest_schema": "0.2-experimental",
+      "manifest_sha256": "sha256:b506554a0335e8e6bc9dd2e2d667e2baf9389e7afcec3e30dc8414966afc1324",
+      "process_scope": "external_service_and_vllm_connector",
+      "repository": "intellistream/vllm-hust-ext-manager",
+      "snapshot_path": "experiments/real_mod_composition/artifacts/h2-real-source-augmentation-20261013/mooncake-provider-manifest.json",
+      "tree": "ef9151532e2c34eb42554795f67b248e11ee92ef"
+    },
+    "pipeline-microbatch": {
+      "bundle_id": "org.vllm-hust.pipeline-microbatch",
+      "commit": "a15a22961a0e4858da74a0ab806575c82cb254e6",
+      "implementation_statuses": [
+        "active"
+      ],
+      "lifecycle_owner": "vllm",
+      "manifest_blob": "af8a1e1c6b659c4dcbf65e16ecc9cc8ad5cf071c",
+      "manifest_path": "src/vllm_hust_pipeline_microbatch/vllm-hust-extension-v0.2.json",
+      "manifest_schema": "0.2-experimental",
+      "manifest_sha256": "sha256:76287ce444b0e2125a04abfc3b08e42e88cd60b5a21cbdac52557cc91caa8d7f",
+      "process_scope": "scheduler",
+      "repository": "vLLM-HUST/vllm-hust-pipeline-microbatch",
+      "snapshot_path": "experiments/real_mod_composition/artifacts/h2-real-source-augmentation-20261013/pipeline-microbatch-manifest.json",
+      "tree": "6944e78e49843026ed91423dcd4add94a8039929"
+    },
+    "production-stack-provider": {
+      "bundle_id": "org.vllm-hust.production-stack-provider",
+      "commit": "9a1369d23ee32f3bb84583fb1695b2ff7cf4eb43",
+      "implementation_statuses": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "lifecycle_owner": "kubernetes",
+      "manifest_blob": "f7c4502f77b697266069d7c4cc3f28d8b42fdc63",
+      "manifest_path": "examples/production-stack-provider/src/vllm_hust_production_stack_provider/manifests/vllm-hust-extension-v0.2.json",
+      "manifest_schema": "0.2-experimental",
+      "manifest_sha256": "sha256:0a751df04ebc8c5a6e52e4eb0ef07e26980d2efdb4e8757c20f3aa26a3e614f0",
+      "process_scope": "cluster_control_plane",
+      "repository": "intellistream/vllm-hust-ext-manager",
+      "snapshot_path": "experiments/real_mod_composition/artifacts/h2-real-source-augmentation-20261013/production-stack-provider-manifest.json",
+      "tree": "ef9151532e2c34eb42554795f67b248e11ee92ef"
+    },
+    "qos-scheduler": {
+      "bundle_id": "org.vllm-hust.qos-scheduler",
+      "commit": "13d376a7d8990c4dcf5c0903cb6fbf2398ef0fb0",
+      "implementation_statuses": [
+        "import_only"
+      ],
+      "lifecycle_owner": "vllm",
+      "manifest_blob": "7bbf6144566fcb4b020f90b79b3786475efa55eb",
+      "manifest_path": "src/vllm_hust_qos_scheduler/vllm-hust-extension-v0.2.json",
+      "manifest_schema": "0.2-experimental",
+      "manifest_sha256": "sha256:1bf6b9f5f792f05a7ab268874f2cae6130ae3df6eec77570852ce55a0ecd27db",
+      "process_scope": "vllm-processes",
+      "repository": "vLLM-HUST/vllm-hust-qos-scheduler",
+      "snapshot_path": "experiments/real_mod_composition/artifacts/h2-real-source-augmentation-20261013/qos-scheduler-manifest.json",
+      "tree": "2a1a7b934e8ce68068dfac69a8be13b9dd32e96c"
+    },
+    "split-batch-full-graph": {
+      "bundle_id": "org.vllm-hust.split-batch-full-graph",
+      "commit": "b46de46e90204a0a7636a1dbc952f73178859ada",
+      "implementation_statuses": [
+        "import_only"
+      ],
+      "lifecycle_owner": "vllm",
+      "manifest_blob": "104007c8c7d3ae0c0b47486505a761200641efe7",
+      "manifest_path": "src/vllm_ascend_split_batch/vllm-hust-extension-v0.2.json",
+      "manifest_schema": "0.2-experimental",
+      "manifest_sha256": "sha256:f58e7425bea31719a3a771fcab4a3f0a614049488341b6479dcb76a710eae614",
+      "process_scope": "vllm-processes",
+      "repository": "vLLM-HUST/vllm-ascend-split-batch-hust",
+      "snapshot_path": "experiments/real_mod_composition/artifacts/h2-real-source-augmentation-20261013/split-batch-full-graph-manifest.json",
+      "tree": "d9832ad7c22b6e6dc2050c75353c3e994cddd6f0"
+    },
+    "unified-communication": {
+      "bundle_id": "org.vllm-hust.unified-communication",
+      "commit": "f00d1ef4c19a992d67ef8012952a9405d52dd447",
+      "implementation_statuses": [
+        "import_only",
+        "import_only"
+      ],
+      "lifecycle_owner": "vllm",
+      "manifest_blob": "0f836829e706830f6bbcb6cc0768f6878928be2d",
+      "manifest_path": "src/vllm_hust_unified_comm/vllm-hust-extension-v0.2.json",
+      "manifest_schema": "0.2-experimental",
+      "manifest_sha256": "sha256:913b8a2df5c5fff5bd8f9ed52070f624132a7482f41f27cfa6b04fdd956c9a53",
+      "process_scope": "vllm-processes",
+      "repository": "vLLM-HUST/vllm-hust-unified-comm",
+      "snapshot_path": "experiments/real_mod_composition/artifacts/h2-real-source-augmentation-20261013/unified-communication-manifest.json",
+      "tree": "1eee1fe9cb3c49d4b588203af59ac35704323395"
+    }
+  }
+}

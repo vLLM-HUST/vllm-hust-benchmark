@@ -1,0 +1,74 @@
+    32	        "router_version",
+    33	        "architecture",
+    34	        "release_image_supported",
+    35	    )
+    36	
+    37	    def supports(self, manifest: BundleManifest) -> bool:
+    38	        return manifest.host.provider == self.name
+    39	
+    40	    def plan(
+    41	        self,
+    42	        manifest: BundleManifest,
+    43	        configuration: dict[str, Any],
+    44	        *,
+    45	        enabled: bool,
+    46	    ) -> ProviderPlan:
+    47	        values = configuration.get("values", {})
+    48	        if not isinstance(values, dict):
+    49	            raise ValueError("Production Stack values must be an object")
+    50	        chart = str(configuration.get("chart", "vllm/vllm-stack"))
+    51	        release = str(configuration.get("release", "vllm"))
+    52	        namespace = str(configuration.get("namespace", "default"))
+    53	        generated = {
+    54	            "chart": chart,
+    55	            "release": release,
+    56	            "namespace": namespace,
+    57	            "values": values,
+    58	            "enabled": enabled,
+    59	            "replica_ownership": "single-writer-required",
+    60	        }
+    61	        return ProviderPlan(
+    62	            manifest.bundle_id,
+    63	            self.name,
+    64	            (
+    65	                PlanAction("helm_template", chart, "kubernetes"),
+    66	                PlanAction("server_dry_run", namespace, "kubernetes"),
+    67	                PlanAction("check_rollout", release, "kubernetes"),
+    68	                PlanAction("check_ownership_conflicts", release, "kubernetes"),
+    69	            ),
+    70	            generated,
+    71	            (
+    72	                "Rendering is non-mutating. Applying Helm releases, CRDs, "
+    73	                "controllers, routers, autoscalers, or OCI images remains an "
+    74	                "explicit Kubernetes operator action.",
+    75	            ),
+    76	        )
+    77	
+   365	            for item in ownership_conflicts
+   366	        ):
+   367	            return ProviderCheck(
+   368	                compatible,
+   369	                False,
+   370	                degraded=True,
+   371	                evidence=compatibility_evidence
+   372	                + ("ownership_conflicts must be a list of non-empty strings",),
+   373	            )
+   374	        if ownership_conflicts:
+   375	            return ProviderCheck(
+   376	                False,
+   377	                False,
+   378	                reachable=reachable,
+   379	                healthy=False,
+   380	                degraded=True,
+   381	                evidence=compatibility_evidence
+   382	                + tuple(f"ownership conflict: {item}" for item in ownership_conflicts),
+   383	            )
+   384	        if reachable is True and not cluster_evidence:
+   385	            return ProviderCheck(
+   386	                compatible,
+   387	                False,
+   388	                degraded=True,
+   389	                evidence=compatibility_evidence
+   390	                + ("cluster_reachable=true requires cluster_evidence",),
+   391	            )
+   392	        if healthy is True and not rollout_evidence:

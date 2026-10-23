@@ -1,0 +1,49 @@
+{
+  "authorities": {
+    "current_exact_pair_oracle": {
+      "path": "experiments/real_mod_composition/artifacts/h2-profiler-kvcompress-formal-r2-20261013/oracle.json",
+      "receipt_sha256": "sha256:fa3b25cbac7be0040b1d6bc6275e0a09307a382ee85935812051cf8471e1e7cc",
+      "sha256": "sha256:5ea6f2ff4e89d8bddb0e69ca99d04ee00278d4a7f70396e5ac72f2632cf4c6d2",
+      "verdict": "admit"
+    },
+    "old_five_case_oracle": {
+      "path": "experiments/real_mod_composition/artifacts/h2-minimal-real-source-corpus-20261013/oracle.json",
+      "sha256": "sha256:5eaf3a00e46780bf2d78900f981aa4ec114ee1d306be5e06d93371a2ded05ac5"
+    }
+  },
+  "campaign_sha256": "sha256:7407fc03d9f37099e44333d928102bc41d630759f501ac4fb372d8a5ce3ba554",
+  "labels": [
+    {
+      "case_id": "single-bidkv-vllm-0281",
+      "decision": "admit",
+      "score_eligible": false
+    },
+    {
+      "case_id": "pair-profiler-kvcompress-vllm-0233",
+      "decision": "admit",
+      "score_eligible": false
+    },
+    {
+      "case_id": "pair-kvcompress-knorm-host973d",
+      "decision": "reject",
+      "score_eligible": true
+    },
+    {
+      "case_id": "pair-diffspec-kvcompress-ascend-0251",
+      "decision": "conditional",
+      "score_eligible": false
+    },
+    {
+      "case_id": "three-vspec-knorm-profiler-vllm-0233",
+      "decision": "reject",
+      "score_eligible": true
+    },
+    {
+      "case_id": "kvcompress-lifecycle-profiler-host031-tp2",
+      "decision": "admit",
+      "score_eligible": true
+    }
+  ],
+  "policy": "index existing independent labels verbatim; do not infer or relabel unavailable/conditional cases",
+  "schema": "ecpa-h2-real-source-oracle-index/v2"
+}

@@ -1,0 +1,156 @@
+{
+  "schema": "ecpa-h2-independent-source-oracle/v2",
+  "case_id": "kvcompress-lifecycle-profiler-host031-tp2",
+  "verdict": "admit",
+  "campaign": {
+    "path": "/root/ecpa-h2-formal-pair-20261013-r2/campaign.json",
+    "revision": 2,
+    "sha256": "38df00167ad727e11668f66d5c6a3db54b65675482bfb5cabe15fccf3d231474"
+  },
+  "prior_independent_receipt": {
+    "path": "/root/ecpa-h2-real-pair-20261013/independent-oracle-receipt.json",
+    "sha256": "fe47203408de25ac91e3a68ad9dd2caf3935077a859598dca06680c572877b79",
+    "review_sha256": "d7c3537592a906f8b16dacb930b9430d2327bbacac47d70d1733787adaf9069f",
+    "prior_campaign_sha256": "0e6d657a30f0ed5977c6451797c4175c6a14e5e56e44dfc21afca4f2c22d6507"
+  },
+  "independence": {
+    "used": [
+      "revision-2 campaign",
+      "original frozen Git objects",
+      "content-addressed runner named by revision-2 campaign",
+      "previous independent source receipt"
+    ],
+    "excluded": [
+      "Manager planner output or score",
+      "old runtime score",
+      "main-agent validator or verifier",
+      "excluded-attempt manifests and results",
+      "summary.json"
+    ]
+  },
+  "campaign_digest_update": {
+    "previous_campaign_sha256": "246aac5ce1d73576a8e73541bbddd632ebd1143691c601a5ce4a2d8f99491a2c",
+    "current_campaign_sha256": "38df00167ad727e11668f66d5c6a3db54b65675482bfb5cabe15fccf3d231474",
+    "previous_runner_sha256": "64a812108f1d02a7bac02953137c79420625b870ebb0bb7f411bc6d8bc422dc6",
+    "current_runner_sha256": "a4676b7b1f41c9d14639ccaac3b1b41931bd9f14c23b0335b23653fe0339eaa3",
+    "changed_fields": [
+      "runner.sha256"
+    ],
+    "proof": "The new runner digest occurs exactly once in the campaign bytes. Replacing only that value with the previous runner digest reproduces previous campaign SHA256 246aac5c... exactly."
+  },
+  "revision_2_assessment": {
+    "classification": "runner-binding-and-fail-closed-workload-drift-exclusion",
+    "source_ownership_changed": false,
+    "frozen_runtime_inputs_changed": false,
+    "runner": {
+      "path": "/root/ecpa-audit-20261013/run_profiler_kvcompress_tp2.py",
+      "sha256": "a4676b7b1f41c9d14639ccaac3b1b41931bd9f14c23b0335b23653fe0339eaa3",
+      "binding": "Campaign binds the exact runner. Before launch, runner checks campaign.runner.sha256 against its own file digest. It then validates frozen source/host/order identities, derives model path, served name, TP size and max length from the campaign, and builds the request model/prompt/max_tokens/temperature/seed from the same frozen campaign.",
+      "evidence_lines": [
+        "17-25 exact source/host/model constants",
+        "147-156 pre-launch freeze and runner self-digest checks",
+        "157-175 frozen source, host, TP and order checks",
+        "177-209 campaign-derived model, served name, TP and max length",
+        "300-319 campaign-derived request body using the rendered served name"
+      ]
+    },
+    "excluded_attempts": {
+      "count": 2,
+      "names": ["formal-a", "formal-b"],
+      "reason": "Each request.model differed from model.served_name_template rendered for its order_id.",
+      "score_eligible": false,
+      "use_in_this_oracle": "Neither manifest nor result was opened; their campaign entries are treated only as fail-closed exclusions and supply no admission evidence."
+    },
+    "predecessor": {
+      "sha256": "0e6d657a30f0ed5977c6451797c4175c6a14e5e56e44dfc21afca4f2c22d6507",
+      "status": "excluded-fail-closed",
+      "binding_check": "Matches campaign_sha256 in the previous independent receipt."
+    }
+  },
+  "frozen_runtime_inputs": {
+    "model": {
+      "dtype": "bfloat16",
+      "max_model_len": 2048,
+      "path": "/data/shared_models/Qwen--Qwen2.5-14B-Instruct",
+      "served_name_template": "ecpa-h2-formal-{order_id}"
+    },
+    "workload": {
+      "endpoint": "/v1/completions",
+      "max_tokens": 24,
+      "prompt": "Return exactly: ECPA-H2-PAIR-OK",
+      "seed": 1234,
+      "temperature": 0
+    },
+    "tensor_parallel_size": 2,
+    "compression_threshold_tokens": 9216,
+    "workload_expected_to_cross_threshold": false
+  },
+  "sources": {
+    "lifecycle_profiler": {
+      "repo": "/root/ecpa-h2-sources/vllm-hust-request-lifecycle-profiler",
+      "commit": "88ffdce5fc6639c0b7b86a54d197f7394705c54b",
+      "tree": "3cefa6d2b59e190e24ab30b11344c6284be70a5b",
+      "files": {
+        "src/vllm_request_lifecycle_profiler/plugin.py": "aee8c1f52c5bdbcebf54f2b23851e75c1f26e478",
+        "src/vllm_request_lifecycle_profiler/native_event_bus.py": "918350e7325ddd3cf005e56eadaf1320a99fd924",
+        "src/vllm_request_lifecycle_profiler/runtime_hooks.py": "0d1c67f1969f598442574c216958cf0b01445fb5"
+      }
+    },
+    "kvcompress": {
+      "repo": "/root/ecpa-h2-sources/vllm-ascend-kvcompress-hust",
+      "commit": "00cc78dc7f3491eecbc79c5068e29aed9f59afc3",
+      "tree": "8661770207782c912316ad9e5529bf3dbfcce563",
+      "files": {
+        "src/vllm_ascend_kvcompress/plugin.py": "53110d8570eed4d0cd438d9cf5a37e4bfba05d33",
+        "src/vllm_ascend_kvcompress/provider.py": "f32c6dd0e04e0f70503ba90ac5b3c19f6040f467",
+        "src/vllm_ascend_kvcompress/stateful.py": "3142c55ce11d0f0e01be8fbb02740d98aff3435f"
+      }
+    },
+    "host_core": {
+      "repo": "/root/vllm-hust-stock-973d",
+      "commit": "973d9ef5acd2b9beb03e399dec1511a41fc941b5",
+      "tree": "9bc1a9a7dceab8bf1002a5ec5f735e5b454f11af",
+      "files": {
+        "vllm/plugins/__init__.py": "5a4cc98fc78d23d51a41f2220f4ca197fd8e1865",
+        "vllm/v1/events.py": "b9886f378107569abe88c70326f92417a778b3f7",
+        "vllm/v1/core/sched/scheduler.py": "c7bd49a50b4eb198e9fa6141349c8f30b3526157"
+      }
+    },
+    "host_ascend": {
+      "repo": "/root/vllm-ascend-pr54",
+      "commit": "873584026f8a683ac73523f15127569e9f6ab34b",
+      "tree": "3a21eb6bec128786be61d3739268b93fda1095ac",
+      "files": {
+        "vllm_ascend/worker/model_runner_v1.py": "c87553ee873f2727c208fd96dc4081ecc1c1a839"
+      }
+    }
+  },
+  "ownership_decision": {
+    "lifecycle_profiler": "Shared, read-only EventBus observer plus process-local trace writer and trace files.",
+    "kvcompress": "Exclusive scheduler/KV manager/coordinator/block-table/NPUModelRunner and device-KV mutation owner.",
+    "host": "Owns process, scheduler, executor, worker, distributed and device-memory shutdown.",
+    "conflict": false,
+    "reason": "Frozen sources and trees are unchanged from the independent source review. Profiler does not patch any KVCompress-owned scheduler, KV manager, coordinator, block table, attention or NPUModelRunner seam. Host EventBus supports multiple sinks and dispatches lifecycle observations after the host/KV manager free path. Revision 2 changes evidence binding and exclusion policy, not runtime ownership."
+  },
+  "admit_scope": [
+    "Exactly the frozen profiler, KVCompress, Host core and Ascend commits/trees listed here.",
+    "Fresh-process serving with both distinct general-plugin entry points enabled.",
+    "The two frozen installation orders only.",
+    "Ownership compatibility and lifecycle observation for the frozen max_model_len=2048 workload."
+  ],
+  "conditions": [
+    "The runner file must retain SHA256 a4676b7b1f41c9d14639ccaac3b1b41931bd9f14c23b0335b23653fe0339eaa3 and pass its pre-launch campaign self-digest check.",
+    "Every new run must bind campaign SHA256 38df00167ad727e11668f66d5c6a3db54b65675482bfb5cabe15fccf3d231474 before launch.",
+    "Request.model must equal ecpa-h2-formal-{order_id}; any drift is excluded fail-closed.",
+    "KVCompress remains the sole owner of its exclusive mutation seams, and trace/config/calibration paths remain distinct.",
+    "Both installation orders must independently satisfy all required runtime evidence before a dynamic composition claim."
+  ],
+  "unverified": [
+    "No revision-2 formal run exists in the frozen campaign and none was launched by this oracle review.",
+    "Health/completion, EngineCore-owned request_finished observation, KVCompress scheduler/cache binding, process identities, NPU quiescence, port closure and both installation orders remain unverified runtime outcomes.",
+    "The two excluded attempts were not inspected and are not evidence for admission.",
+    "max_model_len 2048 is below compression threshold 9216, so this workload cannot validate a compression transaction, device KV mutation, compression correctness, performance, H3 or H4.",
+    "Wheel bytes, calibration/config bytes, model weights, native Ascend/Triton operators and installed dependency behavior were not re-audited.",
+    "No claim applies to third-party plugin collisions, hot unload/reload, changed host commits, KV transfer, model-native compression or other unsupported configurations."
+  ]
+}

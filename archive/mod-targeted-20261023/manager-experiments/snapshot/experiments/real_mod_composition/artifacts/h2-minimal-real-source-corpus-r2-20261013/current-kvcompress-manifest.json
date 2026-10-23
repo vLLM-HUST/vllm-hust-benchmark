@@ -1,0 +1,69 @@
+{
+  "schema_version": "0.3-experimental",
+  "extension_id": "org.vllm-hust.ascend-kvcompress",
+  "extension_version": "0.9.0",
+  "kind": "in_process_plugin",
+  "host": {
+    "provider": "vllm",
+    "name": "vllm-ascend",
+    "version_range": ">=0.23.0.post1,<0.26,!=0.24.*,!=0.25.0.*",
+    "api_range": ">=1,<2"
+  },
+  "runtime": {
+    "type": "python",
+    "process_scope": "scheduler_and_ascend_worker",
+    "isolation": "trusted_in_process"
+  },
+  "lifecycle_owner": "vllm",
+  "protocols": [
+    {
+      "name": "vllm.general_plugins",
+      "version_range": null
+    }
+  ],
+  "implementation": [
+    {
+      "type": "python_entry_point",
+      "group": "vllm.general_plugins",
+      "name": "ascend_kvcompress",
+      "object": "vllm_ascend_kvcompress.plugin:register",
+      "status": "active"
+    }
+  ],
+  "requires_services": [],
+  "requires_extensions": [],
+  "resource_claims": [
+    {
+      "resource": "vllm-ascend.kv-cache.mutation",
+      "scope": "vllm-process",
+      "mode": "exclusive"
+    }
+  ],
+  "components": [
+    {
+      "component_id": "ascend-kvcompress",
+      "contracts": ["vllm.general_plugins"],
+      "execution_planes": ["scheduler", "worker", "device"],
+      "isolation": "trusted_in_process",
+      "implementation_ref": "vllm_ascend_kvcompress.plugin:register",
+      "permissions": [
+        "device_access",
+        "filesystem_read",
+        "filesystem_write",
+        "network_egress"
+      ]
+    }
+  ],
+  "activation": {
+    "entry_points": [
+      {
+        "group": "vllm.general_plugins",
+        "name": "ascend_kvcompress"
+      }
+    ],
+    "environment": {
+      "VLLM_ASCEND_KVCOMPRESS_ENABLED": "1"
+    },
+    "additional_config": {}
+  }
+}

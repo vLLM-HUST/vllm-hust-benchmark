@@ -1,0 +1,369 @@
+{
+  "cases": [
+    {
+      "activation_ready": true,
+      "basis": "active carrier; exact declared host range; no inter-MOD ownership overlap exists in a singleton",
+      "case_id": "single-bidkv-vllm-0281",
+      "category": "single_mod",
+      "error": null,
+      "host": {
+        "vllm": "0.28.1rc1.dev319"
+      },
+      "members": [
+        {
+          "commit": "6f1fc75d694c6901051bdeae784d18b836c6fa70",
+          "id": "bidkv",
+          "manifest_blob": "3aefff871f0b818a98168f907da3e33f17b66276",
+          "manifest_path": "src/bidkv/manifests/vllm-hust-extension-v0.3.json",
+          "manifest_schema": "0.3-experimental",
+          "manifest_sha256": "sha256:a7d3d7815a537a3e0c1b993bc2037b49d346c238572cc016b4931491a9dd4aa9",
+          "repository": "vLLM-HUST/vllm-hust-bidkv",
+          "snapshot_path": "experiments/real_mod_composition/source_manifests/bidkv.json",
+          "tree": "fb91042005020189c30cb525e811af89e511be88"
+        }
+      ],
+      "oracle_decision": "admit",
+      "prediction": {
+        "decision": "unavailable",
+        "declared_surface_decision": "unavailable",
+        "formal_prelaunch": false,
+        "reason": "frozen tuple lacks a required host or protocol capability receipt",
+        "source": "experiments/real_mod_composition/artifacts/h2-source-corpus-manager-predictions-20261013.json",
+        "source_sha256": "sha256:290cab55d456b549bbb1c7d05823588d0d64f85b4ebd61f3225a7f1bd21b4b68"
+      },
+      "score_eligible": false,
+      "score_role": "calibration-only-single-mod"
+    },
+    {
+      "activation_ready": true,
+      "basis": "profiler registers a shared EventBus sink while KVCompress exclusively owns scheduler/worker/device KV mutation; exact source surfaces and declared resources do not overlap",
+      "case_id": "pair-profiler-kvcompress-vllm-0233",
+      "category": "compatible_pair",
+      "error": null,
+      "host": {
+        "vllm": "0.23.3",
+        "vllm-ascend": "0.23.3"
+      },
+      "members": [
+        {
+          "commit": "8b8245cdba61b2ccc92a02c81b158c8fc9f90d14",
+          "id": "lifecycle_profiler",
+          "manifest_blob": "1fc7b3df1c2cc4f4d609bd70367c41c5e9285bc0",
+          "manifest_path": "src/vllm_request_lifecycle_profiler/manifests/vllm-hust-extension-v0.3.json",
+          "manifest_schema": "0.3-experimental",
+          "manifest_sha256": "sha256:650160eb2c69a93b1bfc09d1ebc7728b1045b5411d1be817c216038121028c87",
+          "repository": "vLLM-HUST/vllm-hust-request-lifecycle-profiler",
+          "snapshot_path": "experiments/real_mod_composition/source_manifests/lifecycle_profiler.json",
+          "tree": "d3b752078d74a9d384de35b5010d7ac9bd3742e6"
+        },
+        {
+          "commit": "00cc78dc7f3491eecbc79c5068e29aed9f59afc3",
+          "id": "kvcompress",
+          "manifest_blob": "fd6b1b703ba7eec7587c16d27370c5b75801c89d",
+          "manifest_path": "src/vllm_ascend_kvcompress/manifests/vllm-hust-extension-v0.3.json",
+          "manifest_schema": "0.3-experimental",
+          "manifest_sha256": "sha256:ad0a3e62602108e54503bb81c8fda162a730e1a422fe940d09a2463ee2d0eb54",
+          "repository": "vLLM-HUST/vllm-ascend-kvcompress-hust",
+          "snapshot_path": "experiments/real_mod_composition/source_manifests/kvcompress.json",
+          "tree": "8661770207782c912316ad9e5529bf3dbfcce563"
+        }
+      ],
+      "oracle_decision": "admit",
+      "prediction": {
+        "decision": "unavailable",
+        "declared_surface_decision": "unavailable",
+        "formal_prelaunch": false,
+        "reason": "frozen tuple lacks a required host or protocol capability receipt",
+        "source": "experiments/real_mod_composition/artifacts/h2-source-corpus-manager-predictions-20261013.json",
+        "source_sha256": "sha256:290cab55d456b549bbb1c7d05823588d0d64f85b4ebd61f3225a7f1bd21b4b68"
+      },
+      "runtime_status": "unexecuted for these exact old source commits",
+      "score_eligible": false,
+      "score_role": "definite-source-label-awaiting-exact-planner-run"
+    },
+    {
+      "activation_ready": false,
+      "basis": "KNorm scheduler-side indexed block replacements are absent from the exact Host scheduler-to-worker append-only protocol; KNorm also truthfully remains import_only",
+      "case_id": "pair-kvcompress-knorm-host973d",
+      "category": "incompatible_pair",
+      "error": {
+        "class": "unsafe_activation_blocked_by_import_only_descriptor",
+        "owners": [
+          "org.vllm-hust.ascend-kvcompress",
+          "org.vllm-hust.knorm"
+        ],
+        "remediation": "publish an active KNorm implementation only after exact-host synchronization and rollback qualification",
+        "resources": [
+          "vllm-ascend.kv-cache.mutation",
+          "vllm.kv-cache.compression-policy",
+          "scheduler-to-worker block-table synchronization"
+        ]
+      },
+      "formal_admission_sha256": "sha256:19f677fadb8a2c29690e851bcadaf92ec3fa87a1c527c1467b170cf2457b7a74",
+      "host": {
+        "vllm-ascend_commit": "873584026f8a683ac73523f15127569e9f6ab34b",
+        "vllm_commit": "973d9ef5acd2b9beb03e399dec1511a41fc941b5"
+      },
+      "members": [
+        {
+          "commit": "00cc78dc7f3491eecbc79c5068e29aed9f59afc3",
+          "id": "kvcompress",
+          "manifest_blob": "fd6b1b703ba7eec7587c16d27370c5b75801c89d",
+          "manifest_path": "src/vllm_ascend_kvcompress/manifests/vllm-hust-extension-v0.3.json",
+          "manifest_schema": "0.3-experimental",
+          "manifest_sha256": "sha256:ad0a3e62602108e54503bb81c8fda162a730e1a422fe940d09a2463ee2d0eb54",
+          "repository": "vLLM-HUST/vllm-ascend-kvcompress-hust",
+          "snapshot_path": "experiments/real_mod_composition/source_manifests/kvcompress.json",
+          "tree": "8661770207782c912316ad9e5529bf3dbfcce563"
+        },
+        {
+          "commit": "c490cfbfd2372635e8e874c8d7ba866ca5c476fb",
+          "id": "knorm",
+          "manifest_blob": "9dd3b208f4de382e1c8c451174ae461afeef7cff",
+          "manifest_path": "src/vllm_hust_knorm/manifests/vllm-hust-extension-v0.3.json",
+          "manifest_schema": "0.3-experimental",
+          "manifest_sha256": "sha256:272aece6dcb74a48f38cb0f9598b7ce81fe729d49d22494d68c7181e7f16afd8",
+          "repository": "vLLM-HUST/vllm-hust-knorm",
+          "snapshot_path": "experiments/real_mod_composition/source_manifests/knorm.json",
+          "tree": "3cf0928f202a0d9c5111333fd7ad4be5f13d97aa"
+        }
+      ],
+      "oracle_decision": "reject",
+      "prediction": {
+        "decision": "reject",
+        "formal_prelaunch": true,
+        "source": "experiments/real_mod_composition/artifacts/h2-knorm-prelaunch-reject-20261013.json",
+        "source_sha256": "sha256:2e85811ee379cd420dd8a19a388a39717a117d5a6b3d7f187498a9658b514456"
+      },
+      "score_eligible": true,
+      "score_role": "formal-true-negative"
+    },
+    {
+      "activation_ready": null,
+      "basis": "declared exclusive resources differ and Ascend ranges overlap, but both install in-process scheduler/runner hooks; coexistence depends on exact core/Ascend surfaces and wrapper order",
+      "case_id": "pair-diffspec-kvcompress-ascend-0251",
+      "category": "conditionally_compatible_pair",
+      "error": null,
+      "host": {
+        "vllm": "requires DiffSpec general-plugin-capable core",
+        "vllm-ascend": "0.25.1rc1"
+      },
+      "members": [
+        {
+          "commit": "9d9ddc9bfae2b93d03f9e66715e288b229c75e07",
+          "id": "diffspec",
+          "manifest_blob": "ecb9f079ce77616d1f00ca3a4ab3d38d940e1389",
+          "manifest_path": "diffspec/manifests/vllm-hust-extension-v0.3.json",
+          "manifest_schema": "0.3-experimental",
+          "manifest_sha256": "sha256:fa00f67430eeca8064dc1d566081826b1113a77173c509a18ee4d510fd141d57",
+          "repository": "vLLM-HUST/vllm-ascend-hust-diffspec",
+          "snapshot_path": "experiments/real_mod_composition/source_manifests/diffspec.json",
+          "tree": "59faaf815e5d4d7a98a6e1743ee895a4b596f1fa"
+        },
+        {
+          "commit": "00cc78dc7f3491eecbc79c5068e29aed9f59afc3",
+          "id": "kvcompress",
+          "manifest_blob": "fd6b1b703ba7eec7587c16d27370c5b75801c89d",
+          "manifest_path": "src/vllm_ascend_kvcompress/manifests/vllm-hust-extension-v0.3.json",
+          "manifest_schema": "0.3-experimental",
+          "manifest_sha256": "sha256:ad0a3e62602108e54503bb81c8fda162a730e1a422fe940d09a2463ee2d0eb54",
+          "repository": "vLLM-HUST/vllm-ascend-kvcompress-hust",
+          "snapshot_path": "experiments/real_mod_composition/source_manifests/kvcompress.json",
+          "tree": "8661770207782c912316ad9e5529bf3dbfcce563"
+        }
+      ],
+      "oracle_decision": "conditional",
+      "prediction": {
+        "decision": "excluded",
+        "declared_surface_decision": "admit",
+        "formal_prelaunch": false,
+        "reason": "independent oracle is conditional pending physical ownership review",
+        "source": "experiments/real_mod_composition/artifacts/h2-source-corpus-manager-predictions-20261013.json",
+        "source_sha256": "sha256:290cab55d456b549bbb1c7d05823588d0d64f85b4ebd61f3225a7f1bd21b4b68"
+      },
+      "score_eligible": false,
+      "score_role": "excluded-until-physical-ownership-and-install-order-review"
+    },
+    {
+      "activation_ready": false,
+      "basis": "KNorm manifest is import_only, so the requested active three-MOD composition must fail closed before launch regardless of the other two members",
+      "case_id": "three-vspec-knorm-profiler-vllm-0233",
+      "category": "three_mod",
+      "error": {
+        "class": "activation_blocker_import_only",
+        "owners": [
+          "org.vllm-hust.knorm"
+        ],
+        "remediation": "replace the import_only KNorm descriptor with an exact-host-qualified active implementation before launch",
+        "resources": [
+          "vllm.kv-cache.compression-policy"
+        ]
+      },
+      "host": {
+        "vllm": "0.23.3"
+      },
+      "members": [
+        {
+          "commit": "bdd919d24669f09e6eb1987157dfdb5561460f45",
+          "id": "vspec",
+          "manifest_blob": "3d75a1647a912df057ea13150aa4a359a679281d",
+          "manifest_path": "src/vllm_hust_vspec/manifests/vllm-hust-extension-v0.3.json",
+          "manifest_schema": "0.3-experimental",
+          "manifest_sha256": "sha256:2d644f2ce0b87e2b96617e222dc44849a61e5c17dba9015a986c0a2e7d49bf06",
+          "repository": "vLLM-HUST/vllm-hust-vSpec",
+          "snapshot_path": "experiments/real_mod_composition/source_manifests/vspec.json",
+          "tree": "2fbdc00c87517334efe73c3b9f02bf35b0f56283"
+        },
+        {
+          "commit": "c490cfbfd2372635e8e874c8d7ba866ca5c476fb",
+          "id": "knorm",
+          "manifest_blob": "9dd3b208f4de382e1c8c451174ae461afeef7cff",
+          "manifest_path": "src/vllm_hust_knorm/manifests/vllm-hust-extension-v0.3.json",
+          "manifest_schema": "0.3-experimental",
+          "manifest_sha256": "sha256:272aece6dcb74a48f38cb0f9598b7ce81fe729d49d22494d68c7181e7f16afd8",
+          "repository": "vLLM-HUST/vllm-hust-knorm",
+          "snapshot_path": "experiments/real_mod_composition/source_manifests/knorm.json",
+          "tree": "3cf0928f202a0d9c5111333fd7ad4be5f13d97aa"
+        },
+        {
+          "commit": "8b8245cdba61b2ccc92a02c81b158c8fc9f90d14",
+          "id": "lifecycle_profiler",
+          "manifest_blob": "1fc7b3df1c2cc4f4d609bd70367c41c5e9285bc0",
+          "manifest_path": "src/vllm_request_lifecycle_profiler/manifests/vllm-hust-extension-v0.3.json",
+          "manifest_schema": "0.3-experimental",
+          "manifest_sha256": "sha256:650160eb2c69a93b1bfc09d1ebc7728b1045b5411d1be817c216038121028c87",
+          "repository": "vLLM-HUST/vllm-hust-request-lifecycle-profiler",
+          "snapshot_path": "experiments/real_mod_composition/source_manifests/lifecycle_profiler.json",
+          "tree": "d3b752078d74a9d384de35b5010d7ac9bd3742e6"
+        }
+      ],
+      "oracle_decision": "reject",
+      "prediction": {
+        "decision": "reject",
+        "declared_surface_decision": "reject",
+        "formal_prelaunch": false,
+        "reason": "extension is descriptor-only and cannot be enabled (implementation status: import_only)",
+        "source": "experiments/real_mod_composition/artifacts/h2-source-corpus-manager-predictions-20261013.json",
+        "source_sha256": "sha256:290cab55d456b549bbb1c7d05823588d0d64f85b4ebd61f3225a7f1bd21b4b68"
+      },
+      "score_eligible": true,
+      "score_role": "definite-source-label-awaiting-exact-planner-run"
+    },
+    {
+      "case_id": "kvcompress-lifecycle-profiler-host031-tp2",
+      "category": "compatible_pair_current_exact_host",
+      "error": null,
+      "evidence_binding": {
+        "campaign_sha256": "sha256:38df00167ad727e11668f66d5c6a3db54b65675482bfb5cabe15fccf3d231474",
+        "oracle_frozen_before_planner": true,
+        "oracle_receipt_sha256": "sha256:fa3b25cbac7be0040b1d6bc6275e0a09307a382ee85935812051cf8471e1e7cc",
+        "oracle_sha256": "sha256:5ea6f2ff4e89d8bddb0e69ca99d04ee00278d4a7f70396e5ac72f2632cf4c6d2",
+        "planner_receipt_sha256": "sha256:f3ef0d671fe9777620b6d1dd39e94640a281295c321c3df90da134ae6cee7a62",
+        "score_admission_sha256": "sha256:c9682697fbc98525e3d65fef8301e919501a1e28427c9da539625aebb16ae813"
+      },
+      "formal_runtime": {
+        "accepted_installation_orders": 2,
+        "compatible_host_execution": true,
+        "compression_transaction": false,
+        "performance": false,
+        "source": "experiments/real_mod_composition/artifacts/h2-profiler-kvcompress-formal-r2-20261013/score-admission.json",
+        "source_sha256": "sha256:c9682697fbc98525e3d65fef8301e919501a1e28427c9da539625aebb16ae813",
+        "status": "ADMITTED"
+      },
+      "host": {
+        "ascend": {
+          "commit": "873584026f8a683ac73523f15127569e9f6ab34b",
+          "version": "0.25.1rc2.dev872+hust.20260903.4.g873584026",
+          "wheel_sha256": "16438dc60e86c7bc4741a3520d80d5f9de54676daabe2035ebff0d6b2dceefcf"
+        },
+        "core": {
+          "commit": "973d9ef5acd2b9beb03e399dec1511a41fc941b5",
+          "version": "0.31.1.post1.dev163+g973d9ef5a.empty",
+          "wheel_sha256": "97b27b347889d6e140415e674509519f2ed65848cc51e4b888189fb28f29671a"
+        },
+        "hardware": "2x Ascend 910B2",
+        "physical_devices": [
+          3,
+          6
+        ],
+        "tensor_parallel_size": 2
+      },
+      "members": [
+        {
+          "commit": "88ffdce5fc6639c0b7b86a54d197f7394705c54b",
+          "entry_point": "request_lifecycle_profiler",
+          "id": "lifecycle_profiler",
+          "manifest_blob": "5ee2fe11020519730be2a9257a07b899b604835d",
+          "manifest_path": "src/vllm_request_lifecycle_profiler/manifests/vllm-hust-extension-v0.3.json",
+          "manifest_schema": "0.3-experimental",
+          "manifest_sha256": "sha256:fa7d1033919e300062c9f5ade6b9842088a59dde8d7652de2b6a844a85c06a29",
+          "repository": "vLLM-HUST/vllm-hust-request-lifecycle-profiler",
+          "snapshot_path": "experiments/real_mod_composition/artifacts/h2-minimal-real-source-corpus-r2-20261013/current-lifecycle_profiler-manifest.json",
+          "tree": "3cefa6d2b59e190e24ab30b11344c6284be70a5b",
+          "wheel_sha256": "8d77e6d98969831e994de4f7b7e4e9cf45b97ac9eeafc94da101543c9bee7891"
+        },
+        {
+          "commit": "00cc78dc7f3491eecbc79c5068e29aed9f59afc3",
+          "entry_point": "ascend_kvcompress",
+          "id": "kvcompress",
+          "manifest_blob": "fd6b1b703ba7eec7587c16d27370c5b75801c89d",
+          "manifest_path": "src/vllm_ascend_kvcompress/manifests/vllm-hust-extension-v0.3.json",
+          "manifest_schema": "0.3-experimental",
+          "manifest_sha256": "sha256:ad0a3e62602108e54503bb81c8fda162a730e1a422fe940d09a2463ee2d0eb54",
+          "repository": "vLLM-HUST/vllm-ascend-kvcompress-hust",
+          "snapshot_path": "experiments/real_mod_composition/artifacts/h2-minimal-real-source-corpus-r2-20261013/current-kvcompress-manifest.json",
+          "tree": "8661770207782c912316ad9e5529bf3dbfcce563",
+          "wheel_sha256": "b859f165140de0390f2e6a794a1dc36adb6de4c686e40c3dfc66b3bde11f06c3"
+        }
+      ],
+      "oracle_decision": "admit",
+      "oracle_scope": [
+        "Exactly the frozen profiler, KVCompress, Host core and Ascend commits/trees listed here.",
+        "Fresh-process serving with both distinct general-plugin entry points enabled.",
+        "The two frozen installation orders only.",
+        "Ownership compatibility and lifecycle observation for the frozen max_model_len=2048 workload."
+      ],
+      "prediction": {
+        "all_exit_zero": true,
+        "classification": "source-and-command-bound-static-planner-decision-before-formal-launch",
+        "decision": "admit",
+        "manager_commit": "041060527f43ef0843e54a58f4cfc40b659effcc",
+        "source": "experiments/real_mod_composition/artifacts/h2-profiler-kvcompress-formal-r2-20261013/planner/planner-receipt.json",
+        "source_sha256": "sha256:f3ef0d671fe9777620b6d1dd39e94640a281295c321c3df90da134ae6cee7a62"
+      },
+      "score_eligible": true
+    }
+  ],
+  "classification": "successor-index-over-preexisting-source-oracle-and-manager-evidence",
+  "evidence_ordering": {
+    "current_pair_oracle_frozen_before_manager_prediction_and_formal_launch": true,
+    "labels_reassigned_after_predictions": false,
+    "old_five_case_oracle_frozen_before_remaining_manager_predictions": true,
+    "successor_index_created_after_underlying_evidence": true
+  },
+  "nonclaims": [
+    "not a universal plugin compatibility result",
+    "prelaunch predictions are not runtime effectiveness",
+    "runtime execution is not a compression transaction or performance result",
+    "the three scored cases are too small to estimate population prevalence"
+  ],
+  "predecessor": {
+    "campaign_sha256": "sha256:c1b7106aaa36522de976512d1db19dd2a977918f517577b8aa95f6272bfa3edd",
+    "oracle_sha256": "sha256:5eaf3a00e46780bf2d78900f981aa4ec114ee1d306be5e06d93371a2ded05ac5",
+    "prediction_artifact_sha256": "sha256:290cab55d456b549bbb1c7d05823588d0d64f85b4ebd61f3225a7f1bd21b4b68"
+  },
+  "revision": 2,
+  "schema": "ecpa-h2-minimal-real-source-corpus/v2",
+  "scoring_policy": {
+    "exclude": [
+      "single-mod calibration",
+      "conditional",
+      "unavailable",
+      "host-range-mismatch"
+    ],
+    "include_only": "independent definite oracle plus binary Manager prediction",
+    "minimum_target": 0.95,
+    "negative_class": "reject",
+    "positive_class": "admit"
+  }
+}

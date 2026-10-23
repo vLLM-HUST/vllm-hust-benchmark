@@ -1,0 +1,210 @@
+{
+  "schema": "ecpa-h2-independent-ownership-oracle/v1",
+  "case_id": "kvcompress-lifecycle-profiler-host031-tp2",
+  "reviewer_role": "independent-H2-ownership-oracle",
+  "review_type": "source-bound-static-ownership-review",
+  "verdict": "admit",
+  "verdict_scope": "The two frozen extensions may be co-activated on the frozen Host/Ascend pair because their owned mutation surfaces are disjoint. This is an ownership verdict, not runtime, correctness, performance, H3, or H4 evidence.",
+  "campaign_binding": {
+    "path": "/root/ecpa-h2-formal-pair-20261013/campaign.json",
+    "sha256": "0e6d657a30f0ed5977c6451797c4175c6a14e5e56e44dfc21afca4f2c22d6507"
+  },
+  "independence": {
+    "excluded_inputs": [
+      "/root/ecpa-h2-real-pair-20261013/summary.json",
+      "Extension Manager planner decisions and scores",
+      "pre-existing H2 oracle labels"
+    ],
+    "method": "Read frozen Git objects directly with git show/git grep/git rev-parse; read only the frozen campaign metadata supplied after the source review began; did not use campaign formal_runs, which is empty."
+  },
+  "sources": {
+    "lifecycle_profiler": {
+      "repo": "/root/ecpa-h2-sources/vllm-hust-request-lifecycle-profiler",
+      "commit": "88ffdce5fc6639c0b7b86a54d197f7394705c54b",
+      "tree": "3cefa6d2b59e190e24ab30b11344c6284be70a5b",
+      "files": {
+        "pyproject.toml": "2297fe06bf0c17af6ea275c2427b1de23e2d6e2b",
+        "src/vllm_request_lifecycle_profiler/launcher.py": "78207ce60d36f698a34cfd3aa6dc8dbadee59f34",
+        "src/vllm_request_lifecycle_profiler/manifests/vllm-hust-extension-v0.3.json": "5ee2fe11020519730be2a9257a07b899b604835d",
+        "src/vllm_request_lifecycle_profiler/native_event_bus.py": "918350e7325ddd3cf005e56eadaf1320a99fd924",
+        "src/vllm_request_lifecycle_profiler/plugin.py": "aee8c1f52c5bdbcebf54f2b23851e75c1f26e478",
+        "src/vllm_request_lifecycle_profiler/runtime_hooks.py": "0d1c67f1969f598442574c216958cf0b01445fb5"
+      }
+    },
+    "kvcompress": {
+      "repo": "/root/ecpa-h2-sources/vllm-ascend-kvcompress-hust",
+      "commit": "00cc78dc7f3491eecbc79c5068e29aed9f59afc3",
+      "tree": "8661770207782c912316ad9e5529bf3dbfcce563",
+      "files": {
+        "pyproject.toml": "9b3c6d91702d82a4094995ab25e5245f7a062fa4",
+        "src/vllm_ascend_kvcompress/calibration.py": "eaf9d77829bb312899e36afcffe07a2c8b575f95",
+        "src/vllm_ascend_kvcompress/config.py": "ffad5ba6e1d522fcde544c3eb9aa23ff01283c8c",
+        "src/vllm_ascend_kvcompress/host_compat.py": "bedda47252ea48ca9b0b49e644a42904dbce0695",
+        "src/vllm_ascend_kvcompress/manifests/vllm-hust-extension-v0.3.json": "fd6b1b703ba7eec7587c16d27370c5b75801c89d",
+        "src/vllm_ascend_kvcompress/plugin.py": "53110d8570eed4d0cd438d9cf5a37e4bfba05d33",
+        "src/vllm_ascend_kvcompress/provider.py": "f32c6dd0e04e0f70503ba90ac5b3c19f6040f467",
+        "src/vllm_ascend_kvcompress/stateful.py": "3142c55ce11d0f0e01be8fbb02740d98aff3435f"
+      }
+    },
+    "host_core": {
+      "repo": "/root/vllm-hust-stock-973d",
+      "commit": "973d9ef5acd2b9beb03e399dec1511a41fc941b5",
+      "tree": "9bc1a9a7dceab8bf1002a5ec5f735e5b454f11af",
+      "files": {
+        "vllm/plugins/__init__.py": "5a4cc98fc78d23d51a41f2220f4ca197fd8e1865",
+        "vllm/v1/core/sched/scheduler.py": "c7bd49a50b4eb198e9fa6141349c8f30b3526157",
+        "vllm/v1/engine/core.py": "865907d51a94e02e090ca7f49a1d61795d17adeb",
+        "vllm/v1/events.py": "b9886f378107569abe88c70326f92417a778b3f7"
+      },
+      "absent_paths": [
+        "vllm/v1/kv_recovery_profile.py"
+      ]
+    },
+    "host_ascend": {
+      "repo": "/root/vllm-ascend-pr54",
+      "commit": "873584026f8a683ac73523f15127569e9f6ab34b",
+      "tree": "3a21eb6bec128786be61d3739268b93fda1095ac",
+      "files": {
+        "vllm_ascend/worker/model_runner_v1.py": "c87553ee873f2727c208fd96dc4081ecc1c1a839"
+      }
+    }
+  },
+  "activation_and_carriers": {
+    "shared_carrier": "Both use distinct names in the vllm.general_plugins group. The host loads this group in API, EngineCore, and worker processes and invokes each discovered callable once per process.",
+    "order_assessment": "Both campaign installation orders are admissible. Python distribution/entry-point order may change invocation order, but profiler does not patch any KVCompress-owned class or symbol. The profiler launcher appends its own name to an existing VLLM_PLUGINS allowlist rather than replacing the other member.",
+    "evidence": [
+      {"source": "host_core", "file": "vllm/plugins/__init__.py", "lines": "17-24,33-40,63-98,101-147", "claim": "general plugin carrier, allowlist, once-per-process invocation, and fork handling"},
+      {"source": "lifecycle_profiler", "file": "pyproject.toml", "lines": "26-30", "claim": "distinct profiler entry point and extension bundle"},
+      {"source": "kvcompress", "file": "pyproject.toml", "lines": "54-61", "claim": "distinct KVCompress entry point and extension bundle"},
+      {"source": "lifecycle_profiler", "file": "src/vllm_request_lifecycle_profiler/launcher.py", "lines": "6-23", "claim": "preserves existing plugin allowlist and appends profiler"},
+      {"source": "host_core", "file": "vllm/v1/engine/core.py", "lines": "112-128", "claim": "EngineCore loads general plugins before constructing scheduler state"}
+    ]
+  },
+  "ownership": [
+    {
+      "resource": "vllm.request-lifecycle-events.EventBus sink list",
+      "lifecycle_profiler": {"mode": "shared observer", "actions": ["register process-local sink", "unregister only its inherited/current sink", "consume typed immutable events", "emit host evidence receipt"]},
+      "kvcompress": {"mode": "none", "actions": []},
+      "conflict": false,
+      "conditions": ["Host API version must equal 1.0", "EventBus delivery remains fail-open and removes only a failing sink"],
+      "evidence": [
+        {"source": "lifecycle_profiler", "file": "src/vllm_request_lifecycle_profiler/manifests/vllm-hust-extension-v0.3.json", "lines": "31-38", "claim": "shared lifecycle observer claim"},
+        {"source": "lifecycle_profiler", "file": "src/vllm_request_lifecycle_profiler/plugin.py", "lines": "23-76,135-147", "claim": "version gate, registration, and sink-local unregister"},
+        {"source": "lifecycle_profiler", "file": "src/vllm_request_lifecycle_profiler/native_event_bus.py", "lines": "24-49,49-145,148-165", "claim": "read-only event translation and evidence emission"},
+        {"source": "host_core", "file": "vllm/v1/events.py", "lines": "129-165", "claim": "multi-sink shared bus and per-failing-sink isolation"}
+      ]
+    },
+    {
+      "resource": "scheduler class and KVCacheManager/coordinator methods",
+      "lifecycle_profiler": {"mode": "none", "actions": []},
+      "kvcompress": {"mode": "exclusive mutation", "actions": ["wrap Scheduler.__init__/schedule/update_from_output", "wrap KVCacheManager.free/get_computed_blocks", "conditionally wrap coordinator allocation/prefix methods", "attach per-request compression state"]},
+      "conflict": false,
+      "conditions": ["No third enabled extension may claim the same exclusive mutation seams without an explicit composition contract", "KVCompress activation and validated provider config are required"],
+      "evidence": [
+        {"source": "kvcompress", "file": "src/vllm_ascend_kvcompress/manifests/vllm-hust-extension-v0.3.json", "lines": "34-40", "claim": "exclusive vllm-ascend.kv-cache.mutation claim"},
+        {"source": "kvcompress", "file": "src/vllm_ascend_kvcompress/plugin.py", "lines": "42-62", "claim": "installs scheduler and KV manager hooks only when enabled"},
+        {"source": "kvcompress", "file": "src/vllm_ascend_kvcompress/stateful.py", "lines": "137-175,573-619,622-688,691-825", "claim": "scheduler, manager, coordinator, and attached-state ownership"}
+      ]
+    },
+    {
+      "resource": "KV blocks, block tables, compression transactions, and device KV tensors",
+      "lifecycle_profiler": {"mode": "observer only", "actions": ["observe host-reported KV block counts after host lifecycle decisions"]},
+      "kvcompress": {"mode": "exclusive owner", "actions": ["reserve private destination blocks", "copy/compress device KV", "swap request block rows after worker acknowledgement", "release old/pending/deferred blocks", "translate slot mappings and physical lengths"]},
+      "conflict": false,
+      "conditions": ["Campaign max_model_len 2048 remains below compression threshold 9216, so this workload validates binding but not a compression transaction", "KV transfer is absent because KVCompress rejects it", "Per-request pending/deferred blocks must be released through the wrapped free/commit paths"],
+      "evidence": [
+        {"source": "kvcompress", "file": "src/vllm_ascend_kvcompress/stateful.py", "lines": "282-394,520-561,622-640", "claim": "transaction commit, reservation, deferred release, and request cleanup"},
+        {"source": "kvcompress", "file": "src/vllm_ascend_kvcompress/provider.py", "lines": "321-360,461-469,471-570,1039-1065", "claim": "worker state cleanup, compression execution, and incompatibility with KV transfer"},
+        {"source": "host_core", "file": "vllm/v1/core/sched/scheduler.py", "lines": "2957-2985,3008-3064", "claim": "host frees through KVCacheManager before emitting finished/reclaimed observer events"}
+      ]
+    },
+    {
+      "resource": "Ascend NPUModelRunner and attention/slot-mapping hook points",
+      "lifecycle_profiler": {"mode": "none", "actions": []},
+      "kvcompress": {"mode": "exclusive mutation", "actions": ["install scoped meta_path loader for NPUModelRunner", "wrap load_model/initialize_kv_cache/_update_states/_build_attention_metadata/sample_tokens and conditionally execute_model", "wrap attention forward/GDN metadata/slot mapping"]},
+      "conflict": false,
+      "conditions": ["Ascend host must retain the exact standard v1 NPUModelRunner and expected method signatures", "Process-lifetime patches are not dynamically uninstalled"],
+      "evidence": [
+        {"source": "kvcompress", "file": "src/vllm_ascend_kvcompress/plugin.py", "lines": "65-112,115-325,328-378,463-506", "claim": "import hook and runner/attention/slot patch ownership"},
+        {"source": "kvcompress", "file": "src/vllm_ascend_kvcompress/provider.py", "lines": "1109-1118", "claim": "exact runner identity and incompatible native compression checks"},
+        {"source": "host_ascend", "file": "vllm_ascend/worker/model_runner_v1.py", "lines": "960-998,2218-2299,2753-2790,3431-3431,4585-4623", "claim": "frozen Ascend host exposes patched runner seams"}
+      ]
+    },
+    {
+      "resource": "trace files, calibration file, file descriptors, locks, and background execution",
+      "lifecycle_profiler": {"mode": "exclusive per-process trace shard owner", "actions": ["create bounded daemon writer thread", "own trace descriptors and staging/formal shard names", "close through bounded atexit handler"]},
+      "kvcompress": {"mode": "exclusive calibration artifact owner", "actions": ["lock and atomically create/validate configured calibration artifact", "temporarily install and remove model forward hooks during calibration"]},
+      "conflict": false,
+      "conditions": ["Trace export path and calibration stats path must remain distinct", "Calibration artifact must already be valid or generation must have exclusive filesystem/device capacity"],
+      "evidence": [
+        {"source": "lifecycle_profiler", "file": "src/vllm_request_lifecycle_profiler/runtime_hooks.py", "lines": "59-64,232-341,648-713,1186-1237", "claim": "env namespace, writer thread, descriptor/shard ownership, atexit and bounded close"},
+        {"source": "kvcompress", "file": "src/vllm_ascend_kvcompress/calibration.py", "lines": "150-194,280-331,406-423,479-494", "claim": "calibration artifact lock/write and temporary hook cleanup"}
+      ]
+    },
+    {
+      "resource": "CLI, environment, configuration, and MessageQueue defaults",
+      "lifecycle_profiler": {"mode": "own namespace", "actions": ["read VLLM_RLP_* and VLLM_ECPA_LAUNCH_ID", "append request_lifecycle_profiler to VLLM_PLUGINS in its launcher"]},
+      "kvcompress": {"mode": "own namespace plus conditional host default mutation", "actions": ["read VLLM_ASCEND_KVCOMPRESS_* and manager configuration", "if VLLM_MQ_MAX_CHUNK_BYTES_MB is explicitly set, change MessageQueue.__init__ max_chunk_bytes default"]},
+      "conflict": false,
+      "conditions": ["VLLM_PLUGINS includes both request_lifecycle_profiler and ascend_kvcompress", "VLLM_MQ_MAX_CHUNK_BYTES_MB, when set, must be a positive integer; profiler does not own MessageQueue defaults"],
+      "evidence": [
+        {"source": "lifecycle_profiler", "file": "src/vllm_request_lifecycle_profiler/runtime_hooks.py", "lines": "59-64,89-150", "claim": "profiler configuration namespace and gates"},
+        {"source": "kvcompress", "file": "src/vllm_ascend_kvcompress/config.py", "lines": "13-22,102-142", "claim": "KVCompress enable/config namespaces and explicit activation"},
+        {"source": "kvcompress", "file": "src/vllm_ascend_kvcompress/plugin.py", "lines": "421-460", "claim": "conditional MessageQueue default patch"}
+      ]
+    },
+    {
+      "resource": "external services and process lifecycle",
+      "lifecycle_profiler": {"mode": "no external service owner", "actions": ["runs in host processes", "writes local evidence only"]},
+      "kvcompress": {"mode": "no serving-time external service owner", "actions": ["runs in scheduler/Ascend worker/device planes", "calibration may resolve model/tokenizer through Transformers unless local-files-only"]},
+      "conflict": false,
+      "conditions": ["Campaign uses a local model and a pre-frozen calibration artifact", "Host remains lifecycle owner and terminates all EngineCore/worker processes"],
+      "evidence": [
+        {"source": "lifecycle_profiler", "file": "src/vllm_request_lifecycle_profiler/manifests/vllm-hust-extension-v0.3.json", "lines": "10-14,25-30", "claim": "API/scheduler in-process scope and no required services"},
+        {"source": "kvcompress", "file": "src/vllm_ascend_kvcompress/manifests/vllm-hust-extension-v0.3.json", "lines": "10-14,31-33,41-53", "claim": "scheduler/worker/device in-process scope, no required services, host lifecycle owner"},
+        {"source": "kvcompress", "file": "src/vllm_ascend_kvcompress/calibration.py", "lines": "197-220,229-283,457-476", "claim": "optional Transformers model/tokenizer resolution belongs to calibration path"},
+        {"source": "host_core", "file": "vllm/v1/engine/core.py", "lines": "864-880", "claim": "host owns executor, scheduler, distributed, and memory shutdown"}
+      ]
+    }
+  ],
+  "monkey_patch_inventory": {
+    "lifecycle_profiler": "No class/function/module monkey patch was found in frozen package source. It uses registration APIs and an optional observer-factory API.",
+    "kvcompress": [
+      "sys.meta_path scoped NPUModelRunner loader",
+      "NPUModelRunner methods and compatibility attributes",
+      "Scheduler methods",
+      "KVCacheManager methods",
+      "KV coordinator methods",
+      "concrete Ascend BlockTable.compute_slot_mapping",
+      "AscendAttentionBackendImpl.forward",
+      "AscendGDNAttentionMetadataBuilder.build",
+      "conditional MessageQueue.__init__.__defaults__",
+      "conditional host compatibility shims for routed-expert output, DCP helper, Step3p5 linear alias, model routing flag, and Qwen GDN op ABI"
+    ],
+    "composition_result": "None of the KVCompress targets is written by lifecycle_profiler at the frozen commit. Both may touch the same Scheduler process, but only KVCompress owns mutation; profiler observes host EventBus output."
+  },
+  "cleanup_ownership": {
+    "lifecycle_profiler": "Owns and bounds its writer close through atexit; exposes sink-local unregister but the frozen host does not call that helper during EngineCore.shutdown. The remaining sink and process globals die with the process.",
+    "kvcompress": "Owns per-request pending/deferred block release and calibration forward-hook cleanup. Class/module patches and meta_path finder are process-lifetime and have no unpatch routine.",
+    "host": "Owns server, EngineCore, scheduler, executor, worker, distributed-state, and device-memory shutdown.",
+    "conflict": false,
+    "condition": "Admission assumes a normal fresh-process serve lifecycle; in-process unload/reload or hot disable without process replacement is outside this verdict."
+  },
+  "admission_conditions": [
+    "Use exactly the four frozen commits/trees and source blobs verified by verify-independent-oracle.py.",
+    "Activate both distinct entry points in every relevant process; do not let a replacement VLLM_PLUGINS value omit either name.",
+    "Keep KVCompress as the only extension claiming vllm-ascend.kv-cache.mutation and its listed scheduler/KV/runner patch seams.",
+    "Use valid, distinct profiler trace and KVCompress calibration/config paths; preserve host-owned shutdown.",
+    "Treat the campaign workload only as binding/lifecycle composition evidence because max_model_len 2048 cannot cross compression_threshold_tokens 9216.",
+    "Require both campaign installation orders to meet the frozen runtime evidence requirements before making a dynamic composition claim."
+  ],
+  "explicitly_unverified": [
+    "No real Host 973d9ef5 / Ascend 873584026 service was launched by this independent static review.",
+    "Campaign health, completion, process-owned request_finished_observed receipt, KVCompress bind log, process identities, NPU quiescence, port closure, and both installation-order executions remain runtime evidence to be produced elsewhere.",
+    "The campaign workload cannot exercise a KV compression transaction or device mutation because max_model_len is below the configured threshold; compression correctness and cleanup after a real transaction remain unverified here.",
+    "Campaign wheel files and their declared SHA-256 values were not available as inputs to this source review; source commits/trees/blobs were verified instead.",
+    "The configured calibration artifact bytes, KVCompress config bytes, model weights, native Ascend operators, Triton runtime, Transformers/Accelerate packages, and Extension Manager stored configuration were not independently audited.",
+    "No composition guarantee is made for a third plugin, in-process hot unload/reload, a different host/Ascend commit, KV transfer, model-native compression, unsupported runner type, or a changed method signature.",
+    "Profiler optional KV-recovery observer-factory integration is unavailable in frozen Host 973d9ef5 because vllm/v1/kv_recovery_profile.py is absent; the code catches that optional registration failure. Base EventBus lifecycle profiling remains the reviewed surface."
+  ]
+}
