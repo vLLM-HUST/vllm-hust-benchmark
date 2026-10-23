@@ -78,6 +78,23 @@ def test_binding_content_changes_and_reference_status(tmp_path):
     assert first != index.build(tmp_path, paths, sources)
 
 
+def test_dynamic_evidence_path_is_not_a_missing_literal(tmp_path):
+    sources = source_snapshot()
+    targets = [
+        "website-publication/data/matrix/${name}.json",
+        "reports/m01/%24%7Bname%7D.json",
+        "reports/m01/missing.json",
+    ]
+    sources["website_references"] = [
+        {"target": target, "consumers": ["assets/report.js"]} for target in targets
+    ]
+    refs = index.build(tmp_path, [], sources)["references"]
+    resolved = {ref["target"]: ref["resolution"] for ref in refs}
+    assert resolved[targets[0]] == "dynamic-template-not-evaluated"
+    assert resolved[targets[1]] == "dynamic-template-not-evaluated"
+    assert resolved[targets[2]] == "not-in-current-checkout"
+
+
 def test_packed_publication_hashes_and_safe_paths(tmp_path):
     part = "website-publication/data/x.json.publication.part-000"
     descriptor = "website-publication/data/x.json.publication.json"
