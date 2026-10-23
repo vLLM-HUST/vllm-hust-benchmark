@@ -8,10 +8,10 @@ import tarfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-REVISION = "f345f07a52bc6159e541001fd008f9dc15d1ce73"  # pragma: allowlist secret
+REVISION = "5a79f65fe62573175e4e0a3433c4bfd2f896c1b7"  # pragma: allowlist secret
 REPORT_DIR = "reports/vllm-hust-midterm-20261019"
 REPORT = REPORT_DIR + "/中期测试报告.md"
-OUTPUT = ROOT / "website-publication/data/midterm-v071.json"
+OUTPUT = ROOT / "website-publication/data/midterm-v072.json"
 
 # Repository-relative locators are resolved against the website's exact benchmark
 # publication commit, not a moving main branch or a local acquisition path.
@@ -76,6 +76,11 @@ EVIDENCE = {
         "m01-recovery/logits-collective-reference-20261021"
     ],
     "m01-verdict": [
+        "m01-method-v527.json",
+        "test-outline-v527.docx",
+        "m01-recovery/method-v526-20261023",
+    ],
+    "m01-historical": [
         "m01-recovery/request-assessment-20261022",
         "m01-recovery/accounting-assessment-20261022",
         "m01-recovery/reference-closure-20261022",
@@ -240,7 +245,7 @@ def current_summary():
 def build():
     raw = pinned(REPORT)
     text = raw.decode()
-    assert "报告版本：V0.71" in text
+    assert "报告版本：V0.72" in text
     url = f"https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/{REVISION}/{REPORT}"
     specs = [
         (
@@ -393,7 +398,13 @@ def build():
                 "m01-verdict",
                 "M01 本轮判定 / M01 acceptance verdict",
                 "#### M01 本轮验收判定",
-                "测试方案为vLLM-HUST E24/R36 + KV materialization请求重计算 + Prefill Microflow FA；Qwen3.5-35B-A3B BF16/TP2、FULL、MTP2、每卡20 GiB KV。恢复环境worker-r1单独计量，与第五章824.894609 token/s吞吐中位数不是同一轮联合成绩。本次插桩请求窗口135.340126192秒，基础运算口径经验参考达成率30.2443%–30.2505%，低于内部50%阈值。计数范围反映采样边界，不是置信区间。两卡任务边界、同窗口HBM和通信计数已核验；不外推为未插桩服务结果，不替换正式开发栈对照/B1。186.80秒设备包络的21.92%仅为诊断值。",
+                "V5.27：C=F/(k×T×10¹²)（TFLOPS/参与芯片），η=T参/T×100%，门槛50%。有效F排除填充、重复计算、未采纳草稿及缓存省略算量；T为匹配工作量的无插桩同步墙钟，不能估算扣减插桩开销。T参由独立标定、实际阶段依赖、资源重叠和必要调度推导，不用资源总时间最大值或反向拟合实测耗时替代。当前F、T、T参、C和η均未核验齐备：复算中 / 未判定。历史插桩经验参考另列，不作为新版当前成绩。",
+            ),
+            (
+                "m01-historical",
+                "历史插桩经验参考 / Historical instrumented empirical reference",
+                "#### 历史插桩请求窗口经验参考",
+                "历史worker-r1为E24/R36 + KV materialization请求重计算 + Prefill Microflow FA，Qwen3.5-35B-A3B BF16/TP2、FULL、MTP2、每卡20 GiB KV。135.340126192秒及30.2443%–30.2505%按原经验资源最大值方法保留，不作为V5.27当前效率或达标判定；186.80秒包络21.92%仅为诊断。与第五章824.894609 token/s不是同一轮联合成绩，不外推为未插桩服务结果。原件和旧公式保留。",
             ),
         ]
     )
@@ -410,9 +421,53 @@ def build():
                 "evidence": [evidence_locator(path) for path in EVIDENCE[ident]],
             }
         )
+    verdict = next(s for s in sections if s["id"] == "m01-verdict")
+    verdict["scope_en"] = (
+        "V5.27: C=F/(k*T*10^12), TFLOPS per participating chip; eta=T_reference/T*100%, threshold 50%. "
+        "Exclude padding, redundant computation, unaccepted drafts and cache-omitted work from F. "
+        "Use matched-workload uninstrumented synchronized wall-clock T; do not subtract estimated instrumentation overhead. "
+        "Derive T_reference independently from calibration, actual stage dependencies, resource overlap and necessary scheduling, "
+        "not a global resource-time maximum or reverse fitting to measured B0/B1 time. "
+        "Current F, T, T_reference, C and eta: recalculation pending / not determined. Historical instrumented estimates are separate."
+    )
+    verdict["tables_en"] = [
+        {
+            "headers": ["Current check", "Existing evidence", "Status / gap"],
+            "rows": [
+                [
+                    "Effective F",
+                    "Model counts and per-run MTP counts",
+                    "Useful-work mapping pending; old counts include all draft work; no acceptance-rate scaling",
+                ],
+                [
+                    "Uninstrumented T and workload",
+                    "Three Microflow client/request time-span audits",
+                    "Full device completion boundary not established; do not divide instrumented F by another run's T",
+                ],
+                [
+                    "Independent reference and dependencies",
+                    "75 communication shapes and reference sources audited",
+                    "Synchronized component sums are not graph-mode critical paths; dependencies and overlap pending",
+                ],
+                [
+                    "C, eta and verdict",
+                    "V5.27 formulas; 50% threshold",
+                    "Recalculation pending / not determined until F, T and reference are valid and scope-matched",
+                ],
+            ],
+        }
+    ]
+    historical = next(s for s in sections if s["id"] == "m01-historical")
+    historical["scope_en"] = (
+        "Historical worker-r1 instrumented window: 135.340126192 seconds and 30.2443%–30.2505% under the old "
+        "maximum-resource-time method. These are not current V5.27 efficiency or acceptance results. "
+        "The 186.80-second envelope and 21.92% are diagnostic only, not uninstrumented performance. "
+        "Not the same run as the 824.894609 token/s performance result. Original files and formulas are preserved."
+    )
     return {
         "schema": "midterm-publication/v1",
-        "version": "V0.71",
+        "version": "V0.72",
+        "m01_method": json.loads(pinned(REPORT_DIR + "/m01-method-v527.json")),
         "comparison_contract": {
             "b0": {"vllm": "0.18", "vllm_ascend": "0.18", "fixed": True},
             "b1": {"base_version_constraint": None, "require_actual_versions": True},
