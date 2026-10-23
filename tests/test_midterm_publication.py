@@ -17,7 +17,25 @@ def test_publication_rebuilds_from_pinned_report_and_verified_archives(monkeypat
     assert hashlib.sha256(raw).hexdigest() == actual["report_sha256"]
     monkeypatch.setattr(module, "pinned", lambda path: raw)
     assert actual == module.build()
-    assert actual["version"] == "V0.70"
+    assert actual["version"] == "V0.71"
+    assert actual["comparison_contract"]["b0"] == {
+        "vllm": "0.18",
+        "vllm_ascend": "0.18",
+        "fixed": True,
+    }
+    assert actual["comparison_contract"]["b1"]["base_version_constraint"] is None
+    assert actual["comparison_contract"]["b1"]["require_actual_versions"] is True
+    candidates = next(s for s in actual["sections"] if s["id"] == "candidates")
+    assert "B0" not in json.dumps(candidates["tables"], ensure_ascii=False)
+    assert "开发栈对照" in json.dumps(candidates["tables"], ensure_ascii=False)
+    summary = actual["current_summary"]
+    assert summary["quality"]["b0"]["correct"] == 151
+    assert summary["quality"]["b1"]["candidate_correct"] == 152
+    assert summary["quality"]["b1"]["candidate_run"] == "mmlu-quality-kvmat-r1"
+    assert summary["performance"]["b0"] is None
+    assert all(
+        row["delta_vs_b0"] is None for row in summary["performance"]["b1_metrics"]
+    )
     assert module.REVISION in actual["report_url"]
     sections = {s["id"]: s for s in actual["sections"]}
     inventory = sections["dataset-quality-inventory"]
@@ -53,6 +71,11 @@ def test_publication_rebuilds_from_pinned_report_and_verified_archives(monkeypat
         (ROOT / "website-publication/data/midterm-v050.json").read_text()
     )
     for prior in historical["sections"]:
+        # V0.71 corrects presentation identity only; all recorded numbers and
+        # historical payload bytes must survive the explicit label migration.
+        prior = json.loads(
+            json.dumps(prior, ensure_ascii=False).replace("B0", "开发栈对照")
+        )
         if prior["id"] != "m01":
             excluded = {"evidence"}
             if prior["id"] == "long-context":
