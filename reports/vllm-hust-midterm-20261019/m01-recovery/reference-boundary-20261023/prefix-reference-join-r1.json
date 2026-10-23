@@ -1,0 +1,1210 @@
+{
+  "status": "exact_shape_independent_component_join_overlap_applicability_pending",
+  "rows": [
+    {
+      "rank": 0,
+      "tokens": 1024,
+      "pieces": 2,
+      "norm": {
+        "shape": {
+          "case": 35,
+          "kind": "hidden_residual",
+          "rows": 512,
+          "width": 2048,
+          "calls": 40
+        },
+        "samples_seconds": [
+          2.686579942703247e-05,
+          2.6840400695800783e-05,
+          2.671679973602295e-05
+        ],
+        "mean_seconds": 2.6807666619618734e-05
+      },
+      "qkv": {
+        "shape": {
+          "case": 105,
+          "m": 512,
+          "n": 4608,
+          "k": 2048,
+          "observed_calls": 40
+        },
+        "samples_seconds": [
+          3.9994800090789794e-05,
+          3.9964399337768554e-05,
+          3.996520042419434e-05,
+          3.9958600997924807e-05,
+          3.9983799457550046e-05
+        ],
+        "mean_seconds": 3.997336006164551e-05
+      },
+      "post": [
+        {
+          "shape": {
+            "case": 14,
+            "kind": "partitioned",
+            "rows": 512,
+            "cos_tokens": 1024,
+            "offset": 0,
+            "calls": 20
+          },
+          "samples_seconds": [
+            3.5287799835205076e-05,
+            3.5271999835968015e-05,
+            3.51446008682251e-05
+          ],
+          "mean_seconds": 3.5234800179799396e-05
+        },
+        {
+          "shape": {
+            "case": 15,
+            "kind": "partitioned",
+            "rows": 512,
+            "cos_tokens": 1024,
+            "offset": 512,
+            "calls": 20
+          },
+          "samples_seconds": [
+            3.60506010055542e-05,
+            3.584820032119751e-05,
+            3.586060047149658e-05
+          ],
+          "mean_seconds": 3.5919800599416094e-05
+        }
+      ],
+      "schedule": {
+        "nodes": [
+          {
+            "node": "norm.0",
+            "start": 0.0,
+            "end": 2.6807666619618734e-05,
+            "predecessors": []
+          },
+          {
+            "node": "qkv.0",
+            "start": 2.6807666619618734e-05,
+            "end": 6.678102668126424e-05,
+            "predecessors": [
+              "norm.0"
+            ]
+          },
+          {
+            "node": "norm.1",
+            "start": 2.6807666619618734e-05,
+            "end": 5.361533323923747e-05,
+            "predecessors": [
+              "norm.0"
+            ]
+          },
+          {
+            "node": "qkv.1",
+            "start": 6.678102668126424e-05,
+            "end": 0.00010675438674290975,
+            "predecessors": [
+              "norm.1",
+              "qkv.0"
+            ]
+          },
+          {
+            "node": "post.0",
+            "start": 6.678102668126424e-05,
+            "end": 0.00010201582686106363,
+            "predecessors": [
+              "qkv.0",
+              "norm.1"
+            ]
+          },
+          {
+            "node": "post.1",
+            "start": 0.00010675438674290975,
+            "end": 0.00014267418734232584,
+            "predecessors": [
+              "qkv.1",
+              "post.0"
+            ]
+          }
+        ],
+        "prefix_reference_seconds": 0.00014267418734232584,
+        "serial_phase_sum": 0.000204716654141744,
+        "scope": "Independent reference durations under pinned vector/cube queue dependencies; not measured model time",
+        "limitations": [
+          "Durations must match partition shapes and precision, including each kernel memory cost.",
+          "Concurrent-resource interference and necessary launch/event costs require applicability checks.",
+          "Do not use this uncongested schedule as attainable hardware time without validating overlap.",
+          "No separately added global HBM term and no efficiency inferred."
+        ]
+      }
+    },
+    {
+      "rank": 0,
+      "tokens": 2048,
+      "pieces": 2,
+      "norm": {
+        "shape": {
+          "case": 36,
+          "kind": "hidden_residual",
+          "rows": 1024,
+          "width": 2048,
+          "calls": 3028
+        },
+        "samples_seconds": [
+          4.2389202117919925e-05,
+          4.2445597648620606e-05,
+          4.259699821472168e-05
+        ],
+        "mean_seconds": 4.247726599375407e-05
+      },
+      "qkv": {
+        "shape": {
+          "case": 106,
+          "m": 1024,
+          "n": 4608,
+          "k": 2048,
+          "observed_calls": 2884
+        },
+        "samples_seconds": [
+          7.385419845581054e-05,
+          7.384699821472168e-05,
+          7.386340141296387e-05,
+          7.382579803466796e-05,
+          7.3783597946167e-05
+        ],
+        "mean_seconds": 7.383479881286621e-05
+      },
+      "post": [
+        {
+          "shape": {
+            "case": 16,
+            "kind": "partitioned",
+            "rows": 1024,
+            "cos_tokens": 2048,
+            "offset": 0,
+            "calls": 380
+          },
+          "samples_seconds": [
+            5.5338997840881345e-05,
+            5.511340141296387e-05,
+            5.512579917907715e-05
+          ],
+          "mean_seconds": 5.519273281097412e-05
+        },
+        {
+          "shape": {
+            "case": 17,
+            "kind": "partitioned",
+            "rows": 1024,
+            "cos_tokens": 2048,
+            "offset": 1024,
+            "calls": 380
+          },
+          "samples_seconds": [
+            5.5403399467468264e-05,
+            5.552519798278808e-05,
+            5.5409998893737796e-05
+          ],
+          "mean_seconds": 5.544619878133138e-05
+        }
+      ],
+      "schedule": {
+        "nodes": [
+          {
+            "node": "norm.0",
+            "start": 0.0,
+            "end": 4.247726599375407e-05,
+            "predecessors": []
+          },
+          {
+            "node": "qkv.0",
+            "start": 4.247726599375407e-05,
+            "end": 0.00011631206480662028,
+            "predecessors": [
+              "norm.0"
+            ]
+          },
+          {
+            "node": "norm.1",
+            "start": 4.247726599375407e-05,
+            "end": 8.495453198750814e-05,
+            "predecessors": [
+              "norm.0"
+            ]
+          },
+          {
+            "node": "qkv.1",
+            "start": 0.00011631206480662028,
+            "end": 0.0001901468636194865,
+            "predecessors": [
+              "norm.1",
+              "qkv.0"
+            ]
+          },
+          {
+            "node": "post.0",
+            "start": 0.00011631206480662028,
+            "end": 0.0001715047976175944,
+            "predecessors": [
+              "qkv.0",
+              "norm.1"
+            ]
+          },
+          {
+            "node": "post.1",
+            "start": 0.0001901468636194865,
+            "end": 0.00024559306240081786,
+            "predecessors": [
+              "qkv.1",
+              "post.0"
+            ]
+          }
+        ],
+        "prefix_reference_seconds": 0.00024559306240081786,
+        "serial_phase_sum": 0.00034326306120554607,
+        "scope": "Independent reference durations under pinned vector/cube queue dependencies; not measured model time",
+        "limitations": [
+          "Durations must match partition shapes and precision, including each kernel memory cost.",
+          "Concurrent-resource interference and necessary launch/event costs require applicability checks.",
+          "Do not use this uncongested schedule as attainable hardware time without validating overlap.",
+          "No separately added global HBM term and no efficiency inferred."
+        ]
+      }
+    },
+    {
+      "rank": 0,
+      "tokens": 4096,
+      "pieces": 4,
+      "norm": {
+        "shape": {
+          "case": 36,
+          "kind": "hidden_residual",
+          "rows": 1024,
+          "width": 2048,
+          "calls": 3028
+        },
+        "samples_seconds": [
+          4.2389202117919925e-05,
+          4.2445597648620606e-05,
+          4.259699821472168e-05
+        ],
+        "mean_seconds": 4.247726599375407e-05
+      },
+      "qkv": {
+        "shape": {
+          "case": 106,
+          "m": 1024,
+          "n": 4608,
+          "k": 2048,
+          "observed_calls": 2884
+        },
+        "samples_seconds": [
+          7.385419845581054e-05,
+          7.384699821472168e-05,
+          7.386340141296387e-05,
+          7.382579803466796e-05,
+          7.3783597946167e-05
+        ],
+        "mean_seconds": 7.383479881286621e-05
+      },
+      "post": [
+        {
+          "shape": {
+            "case": 18,
+            "kind": "partitioned",
+            "rows": 1024,
+            "cos_tokens": 4096,
+            "offset": 0,
+            "calls": 530
+          },
+          "samples_seconds": [
+            5.562359809875488e-05,
+            5.5807199478149415e-05,
+            5.5632200241088866e-05
+          ],
+          "mean_seconds": 5.5687665939331054e-05
+        },
+        {
+          "shape": {
+            "case": 19,
+            "kind": "partitioned",
+            "rows": 1024,
+            "cos_tokens": 4096,
+            "offset": 1024,
+            "calls": 530
+          },
+          "samples_seconds": [
+            5.5275402069091795e-05,
+            5.531660079956055e-05,
+            5.529620170593262e-05
+          ],
+          "mean_seconds": 5.529606819152832e-05
+        },
+        {
+          "shape": {
+            "case": 20,
+            "kind": "partitioned",
+            "rows": 1024,
+            "cos_tokens": 4096,
+            "offset": 2048,
+            "calls": 530
+          },
+          "samples_seconds": [
+            5.5766401290893555e-05,
+            5.574120044708252e-05,
+            5.571859836578369e-05
+          ],
+          "mean_seconds": 5.5742066701253254e-05
+        },
+        {
+          "shape": {
+            "case": 21,
+            "kind": "partitioned",
+            "rows": 1024,
+            "cos_tokens": 4096,
+            "offset": 3072,
+            "calls": 530
+          },
+          "samples_seconds": [
+            5.46265983581543e-05,
+            5.477759838104248e-05,
+            5.48114013671875e-05
+          ],
+          "mean_seconds": 5.473853270212809e-05
+        }
+      ],
+      "schedule": {
+        "nodes": [
+          {
+            "node": "norm.0",
+            "start": 0.0,
+            "end": 4.247726599375407e-05,
+            "predecessors": []
+          },
+          {
+            "node": "qkv.0",
+            "start": 4.247726599375407e-05,
+            "end": 0.00011631206480662028,
+            "predecessors": [
+              "norm.0"
+            ]
+          },
+          {
+            "node": "norm.1",
+            "start": 4.247726599375407e-05,
+            "end": 8.495453198750814e-05,
+            "predecessors": [
+              "norm.0"
+            ]
+          },
+          {
+            "node": "qkv.1",
+            "start": 0.00011631206480662028,
+            "end": 0.0001901468636194865,
+            "predecessors": [
+              "norm.1",
+              "qkv.0"
+            ]
+          },
+          {
+            "node": "norm.2",
+            "start": 8.495453198750814e-05,
+            "end": 0.0001274317979812622,
+            "predecessors": [
+              "norm.1"
+            ]
+          },
+          {
+            "node": "qkv.2",
+            "start": 0.0001901468636194865,
+            "end": 0.0002639816624323527,
+            "predecessors": [
+              "norm.2",
+              "qkv.1"
+            ]
+          },
+          {
+            "node": "norm.3",
+            "start": 0.0001274317979812622,
+            "end": 0.00016990906397501627,
+            "predecessors": [
+              "norm.2"
+            ]
+          },
+          {
+            "node": "qkv.3",
+            "start": 0.0002639816624323527,
+            "end": 0.00033781646124521895,
+            "predecessors": [
+              "norm.3",
+              "qkv.2"
+            ]
+          },
+          {
+            "node": "post.0",
+            "start": 0.00016990906397501627,
+            "end": 0.00022559672991434733,
+            "predecessors": [
+              "qkv.0",
+              "norm.3"
+            ]
+          },
+          {
+            "node": "post.1",
+            "start": 0.00022559672991434733,
+            "end": 0.00028089279810587564,
+            "predecessors": [
+              "qkv.1",
+              "post.0"
+            ]
+          },
+          {
+            "node": "post.2",
+            "start": 0.00028089279810587564,
+            "end": 0.0003366348648071289,
+            "predecessors": [
+              "qkv.2",
+              "post.1"
+            ]
+          },
+          {
+            "node": "post.3",
+            "start": 0.00033781646124521895,
+            "end": 0.00039255499394734704,
+            "predecessors": [
+              "qkv.3",
+              "post.2"
+            ]
+          }
+        ],
+        "prefix_reference_seconds": 0.00039255499394734704,
+        "serial_phase_sum": 0.0006867125927607218,
+        "scope": "Independent reference durations under pinned vector/cube queue dependencies; not measured model time",
+        "limitations": [
+          "Durations must match partition shapes and precision, including each kernel memory cost.",
+          "Concurrent-resource interference and necessary launch/event costs require applicability checks.",
+          "Do not use this uncongested schedule as attainable hardware time without validating overlap.",
+          "No separately added global HBM term and no efficiency inferred."
+        ]
+      }
+    },
+    {
+      "rank": 1,
+      "tokens": 1024,
+      "pieces": 2,
+      "norm": {
+        "shape": {
+          "case": 35,
+          "kind": "hidden_residual",
+          "rows": 512,
+          "width": 2048,
+          "calls": 40
+        },
+        "samples_seconds": [
+          2.7730998992919923e-05,
+          2.7581400871276856e-05,
+          2.7599198818206786e-05
+        ],
+        "mean_seconds": 2.763719956080119e-05
+      },
+      "qkv": {
+        "shape": {
+          "case": 105,
+          "m": 512,
+          "n": 4608,
+          "k": 2048,
+          "observed_calls": 40
+        },
+        "samples_seconds": [
+          4.3117799758911136e-05,
+          4.0698599815368654e-05,
+          4.070499897003174e-05,
+          4.0689802169799806e-05,
+          4.071020126342773e-05
+        ],
+        "mean_seconds": 4.1184280395507815e-05
+      },
+      "post": [
+        {
+          "shape": {
+            "case": 14,
+            "kind": "partitioned",
+            "rows": 512,
+            "cos_tokens": 1024,
+            "offset": 0,
+            "calls": 20
+          },
+          "samples_seconds": [
+            3.425899982452392e-05,
+            3.422019958496094e-05,
+            3.423099994659424e-05
+          ],
+          "mean_seconds": 3.4236733118693033e-05
+        },
+        {
+          "shape": {
+            "case": 15,
+            "kind": "partitioned",
+            "rows": 512,
+            "cos_tokens": 1024,
+            "offset": 512,
+            "calls": 20
+          },
+          "samples_seconds": [
+            3.486299991607666e-05,
+            3.471839904785156e-05,
+            3.490099906921387e-05
+          ],
+          "mean_seconds": 3.482746601104736e-05
+        }
+      ],
+      "schedule": {
+        "nodes": [
+          {
+            "node": "norm.0",
+            "start": 0.0,
+            "end": 2.763719956080119e-05,
+            "predecessors": []
+          },
+          {
+            "node": "qkv.0",
+            "start": 2.763719956080119e-05,
+            "end": 6.8821479956309e-05,
+            "predecessors": [
+              "norm.0"
+            ]
+          },
+          {
+            "node": "norm.1",
+            "start": 2.763719956080119e-05,
+            "end": 5.527439912160238e-05,
+            "predecessors": [
+              "norm.0"
+            ]
+          },
+          {
+            "node": "qkv.1",
+            "start": 6.8821479956309e-05,
+            "end": 0.00011000576035181682,
+            "predecessors": [
+              "norm.1",
+              "qkv.0"
+            ]
+          },
+          {
+            "node": "post.0",
+            "start": 6.8821479956309e-05,
+            "end": 0.00010305821307500203,
+            "predecessors": [
+              "qkv.0",
+              "norm.1"
+            ]
+          },
+          {
+            "node": "post.1",
+            "start": 0.00011000576035181682,
+            "end": 0.0001448332263628642,
+            "predecessors": [
+              "qkv.1",
+              "post.0"
+            ]
+          }
+        ],
+        "prefix_reference_seconds": 0.0001448332263628642,
+        "serial_phase_sum": 0.0002067071590423584,
+        "scope": "Independent reference durations under pinned vector/cube queue dependencies; not measured model time",
+        "limitations": [
+          "Durations must match partition shapes and precision, including each kernel memory cost.",
+          "Concurrent-resource interference and necessary launch/event costs require applicability checks.",
+          "Do not use this uncongested schedule as attainable hardware time without validating overlap.",
+          "No separately added global HBM term and no efficiency inferred."
+        ]
+      }
+    },
+    {
+      "rank": 1,
+      "tokens": 2048,
+      "pieces": 2,
+      "norm": {
+        "shape": {
+          "case": 36,
+          "kind": "hidden_residual",
+          "rows": 1024,
+          "width": 2048,
+          "calls": 3028
+        },
+        "samples_seconds": [
+          4.192699909210205e-05,
+          4.1942601203918456e-05,
+          4.426340103149414e-05
+        ],
+        "mean_seconds": 4.2711000442504884e-05
+      },
+      "qkv": {
+        "shape": {
+          "case": 106,
+          "m": 1024,
+          "n": 4608,
+          "k": 2048,
+          "observed_calls": 2884
+        },
+        "samples_seconds": [
+          7.253119945526123e-05,
+          7.257880210876464e-05,
+          7.261899948120117e-05,
+          7.254559993743897e-05,
+          7.25324010848999e-05
+        ],
+        "mean_seconds": 7.256140041351318e-05
+      },
+      "post": [
+        {
+          "shape": {
+            "case": 16,
+            "kind": "partitioned",
+            "rows": 1024,
+            "cos_tokens": 2048,
+            "offset": 0,
+            "calls": 380
+          },
+          "samples_seconds": [
+            5.378880023956299e-05,
+            5.376200199127197e-05,
+            5.382480144500732e-05
+          ],
+          "mean_seconds": 5.379186789194743e-05
+        },
+        {
+          "shape": {
+            "case": 17,
+            "kind": "partitioned",
+            "rows": 1024,
+            "cos_tokens": 2048,
+            "offset": 1024,
+            "calls": 380
+          },
+          "samples_seconds": [
+            5.3562798500061035e-05,
+            5.356560230255127e-05,
+            5.3583002090454104e-05
+          ],
+          "mean_seconds": 5.357046763102214e-05
+        }
+      ],
+      "schedule": {
+        "nodes": [
+          {
+            "node": "norm.0",
+            "start": 0.0,
+            "end": 4.2711000442504884e-05,
+            "predecessors": []
+          },
+          {
+            "node": "qkv.0",
+            "start": 4.2711000442504884e-05,
+            "end": 0.00011527240085601806,
+            "predecessors": [
+              "norm.0"
+            ]
+          },
+          {
+            "node": "norm.1",
+            "start": 4.2711000442504884e-05,
+            "end": 8.542200088500977e-05,
+            "predecessors": [
+              "norm.0"
+            ]
+          },
+          {
+            "node": "qkv.1",
+            "start": 0.00011527240085601806,
+            "end": 0.00018783380126953124,
+            "predecessors": [
+              "norm.1",
+              "qkv.0"
+            ]
+          },
+          {
+            "node": "post.0",
+            "start": 0.00011527240085601806,
+            "end": 0.0001690642687479655,
+            "predecessors": [
+              "qkv.0",
+              "norm.1"
+            ]
+          },
+          {
+            "node": "post.1",
+            "start": 0.00018783380126953124,
+            "end": 0.00024140426890055338,
+            "predecessors": [
+              "qkv.1",
+              "post.0"
+            ]
+          }
+        ],
+        "prefix_reference_seconds": 0.00024140426890055338,
+        "serial_phase_sum": 0.0003379071372350057,
+        "scope": "Independent reference durations under pinned vector/cube queue dependencies; not measured model time",
+        "limitations": [
+          "Durations must match partition shapes and precision, including each kernel memory cost.",
+          "Concurrent-resource interference and necessary launch/event costs require applicability checks.",
+          "Do not use this uncongested schedule as attainable hardware time without validating overlap.",
+          "No separately added global HBM term and no efficiency inferred."
+        ]
+      }
+    },
+    {
+      "rank": 1,
+      "tokens": 4096,
+      "pieces": 4,
+      "norm": {
+        "shape": {
+          "case": 36,
+          "kind": "hidden_residual",
+          "rows": 1024,
+          "width": 2048,
+          "calls": 3028
+        },
+        "samples_seconds": [
+          4.192699909210205e-05,
+          4.1942601203918456e-05,
+          4.426340103149414e-05
+        ],
+        "mean_seconds": 4.2711000442504884e-05
+      },
+      "qkv": {
+        "shape": {
+          "case": 106,
+          "m": 1024,
+          "n": 4608,
+          "k": 2048,
+          "observed_calls": 2884
+        },
+        "samples_seconds": [
+          7.253119945526123e-05,
+          7.257880210876464e-05,
+          7.261899948120117e-05,
+          7.254559993743897e-05,
+          7.25324010848999e-05
+        ],
+        "mean_seconds": 7.256140041351318e-05
+      },
+      "post": [
+        {
+          "shape": {
+            "case": 18,
+            "kind": "partitioned",
+            "rows": 1024,
+            "cos_tokens": 4096,
+            "offset": 0,
+            "calls": 530
+          },
+          "samples_seconds": [
+            5.33597993850708e-05,
+            5.3150601387023924e-05,
+            5.3340997695922854e-05
+          ],
+          "mean_seconds": 5.328379948933919e-05
+        },
+        {
+          "shape": {
+            "case": 19,
+            "kind": "partitioned",
+            "rows": 1024,
+            "cos_tokens": 4096,
+            "offset": 1024,
+            "calls": 530
+          },
+          "samples_seconds": [
+            5.384799957275391e-05,
+            5.4081401824951174e-05,
+            5.3904600143432614e-05
+          ],
+          "mean_seconds": 5.394466718037923e-05
+        },
+        {
+          "shape": {
+            "case": 20,
+            "kind": "partitioned",
+            "rows": 1024,
+            "cos_tokens": 4096,
+            "offset": 2048,
+            "calls": 530
+          },
+          "samples_seconds": [
+            5.4173998832702635e-05,
+            5.409239768981934e-05,
+            5.420720100402832e-05
+          ],
+          "mean_seconds": 5.415786584218343e-05
+        },
+        {
+          "shape": {
+            "case": 21,
+            "kind": "partitioned",
+            "rows": 1024,
+            "cos_tokens": 4096,
+            "offset": 3072,
+            "calls": 530
+          },
+          "samples_seconds": [
+            5.380579948425293e-05,
+            5.398880004882812e-05,
+            5.3804402351379395e-05
+          ],
+          "mean_seconds": 5.386633396148682e-05
+        }
+      ],
+      "schedule": {
+        "nodes": [
+          {
+            "node": "norm.0",
+            "start": 0.0,
+            "end": 4.2711000442504884e-05,
+            "predecessors": []
+          },
+          {
+            "node": "qkv.0",
+            "start": 4.2711000442504884e-05,
+            "end": 0.00011527240085601806,
+            "predecessors": [
+              "norm.0"
+            ]
+          },
+          {
+            "node": "norm.1",
+            "start": 4.2711000442504884e-05,
+            "end": 8.542200088500977e-05,
+            "predecessors": [
+              "norm.0"
+            ]
+          },
+          {
+            "node": "qkv.1",
+            "start": 0.00011527240085601806,
+            "end": 0.00018783380126953124,
+            "predecessors": [
+              "norm.1",
+              "qkv.0"
+            ]
+          },
+          {
+            "node": "norm.2",
+            "start": 8.542200088500977e-05,
+            "end": 0.00012813300132751465,
+            "predecessors": [
+              "norm.1"
+            ]
+          },
+          {
+            "node": "qkv.2",
+            "start": 0.00018783380126953124,
+            "end": 0.0002603952016830444,
+            "predecessors": [
+              "norm.2",
+              "qkv.1"
+            ]
+          },
+          {
+            "node": "norm.3",
+            "start": 0.00012813300132751465,
+            "end": 0.00017084400177001953,
+            "predecessors": [
+              "norm.2"
+            ]
+          },
+          {
+            "node": "qkv.3",
+            "start": 0.0002603952016830444,
+            "end": 0.0003329566020965576,
+            "predecessors": [
+              "norm.3",
+              "qkv.2"
+            ]
+          },
+          {
+            "node": "post.0",
+            "start": 0.00017084400177001953,
+            "end": 0.00022412780125935874,
+            "predecessors": [
+              "qkv.0",
+              "norm.3"
+            ]
+          },
+          {
+            "node": "post.1",
+            "start": 0.00022412780125935874,
+            "end": 0.000278072468439738,
+            "predecessors": [
+              "qkv.1",
+              "post.0"
+            ]
+          },
+          {
+            "node": "post.2",
+            "start": 0.000278072468439738,
+            "end": 0.0003322303342819214,
+            "predecessors": [
+              "qkv.2",
+              "post.1"
+            ]
+          },
+          {
+            "node": "post.3",
+            "start": 0.0003329566020965576,
+            "end": 0.00038682293605804443,
+            "predecessors": [
+              "qkv.3",
+              "post.2"
+            ]
+          }
+        ],
+        "prefix_reference_seconds": 0.00038682293605804443,
+        "serial_phase_sum": 0.0006763422698974608,
+        "scope": "Independent reference durations under pinned vector/cube queue dependencies; not measured model time",
+        "limitations": [
+          "Durations must match partition shapes and precision, including each kernel memory cost.",
+          "Concurrent-resource interference and necessary launch/event costs require applicability checks.",
+          "Do not use this uncongested schedule as attainable hardware time without validating overlap.",
+          "No separately added global HBM term and no efficiency inferred."
+        ]
+      }
+    }
+  ],
+  "model_reference_seconds": null,
+  "efficiency_percent": null,
+  "source_sha256": {
+    "/workspace/m01-critical-path-review-20261023/linear-restored-r1/root/gennova-evidence/20261019-midterm-aligned/audit_dense_worker_reference_r1.py": "0e27037a7ad69c17ef27fea6d3f2b180ee4f2cfde2c4fc7943b3c80b2874981a",
+    "/workspace/m01-critical-path-review-20261023/linear-restored-r1/root/gennova-evidence/20261019-midterm-aligned/audit_moe_reference.py": "9a3d017e438a542cb03dd5b7e11a5f570f839ff2e1fef031237d41807e84fd86",
+    "/workspace/m01-critical-path-review-20261023/linear-restored-r1/root/gennova-evidence/20261019-midterm-aligned/audit_vocab_worker_reference_r1.py": "ecd0e9cec24e75e1c94ce9ec094a44dc77e00d87d6b6644f4421777638c5f679",
+    "/workspace/m01-critical-path-review-20261023/linear-restored-r1/root/gennova-evidence/20261019-midterm-aligned/dense-recovery-reference-summary-r1.json": "e7f01a699a572c5f9e3a458ab0af0cff4080f4e6c6f55d053a76734df5a7855f",
+    "/workspace/m01-critical-path-review-20261023/linear-restored-r1/root/gennova-evidence/20261019-midterm-aligned/dense-reference-plan-r2.json": "9fd4aad4d0a084f8f4dcdb60b2a356e65c0e5e8023ec0a97e5821e8fde25adc2",
+    "/workspace/m01-critical-path-review-20261023/linear-restored-r1/root/gennova-evidence/20261019-midterm-aligned/dense-worker-reference-summary-r1.json": "9341cb274b0c89e03ac41870b553eac036da16c219f426f23315443009c234f0",
+    "/workspace/m01-critical-path-review-20261023/linear-restored-r1/root/gennova-evidence/20261019-midterm-aligned/dense_reference_repeat.py": "d363d6723599f3ca7afa9e3a0b92c2820d593103d7977ab80d8f838e81bd4cd5",
+    "/workspace/m01-critical-path-review-20261023/linear-restored-r1/root/gennova-evidence/20261019-midterm-aligned/dense_worker_reference_r1.py": "067b71070b971e3d32f296499ce7730ceff57050772736436853815635ef8000",
+    "/workspace/m01-critical-path-review-20261023/linear-restored-r1/root/gennova-evidence/20261019-midterm-aligned/measure_microflow.py": "c0c119b80ac3adfc44885a77a20662d9ece817e72eb2a2058ce41a3964084057",
+    "/workspace/m01-critical-path-review-20261023/linear-restored-r1/root/gennova-evidence/20261019-midterm-aligned/recovery-vocab-reference-plan-r1.json": "e42d9ee6f1f9f6c73fa20c06997096ce7f8aed8076d3a229ecb70fa9c5b852d3",
+    "/workspace/m01-critical-path-review-20261023/linear-restored-r1/root/gennova-evidence/20261019-midterm-aligned/recovery_reference_controller.py": "d56d0f1122679271835191048176f1c070d12fbd05ecbf3fd36c5450b4933dcc",
+    "/workspace/m01-critical-path-review-20261023/linear-restored-r1/root/gennova-evidence/20261019-midterm-aligned/run_dense_worker_reference_r1.py": "163d984e711345dfb505cdbd8d5f4c2782402f06b99e7a16e9d43c04eb5bb830",
+    "/workspace/m01-critical-path-review-20261023/linear-restored-r1/root/gennova-evidence/20261019-midterm-aligned/run_vocab_worker_reference_r1.py": "ba95b4f36cc4776667ea9741683fa3f65be46d25dd3f67d0821f9eed74e04ccd",
+    "/workspace/m01-critical-path-review-20261023/linear-restored-r1/root/gennova-evidence/20261019-midterm-aligned/runtime-gdn-recovery-r2.sh": "4c925989086996d984ed5b6c4901eb1a5bb2040392deb98c04977b56ae5e252a",
+    "/workspace/m01-critical-path-review-20261023/linear-restored-r1/root/gennova-evidence/20261019-midterm-aligned/vocab-recovery-reference-summary-r1.json": "9e53d616c7c7292bc1fc18a8f7bc79037ce1a4733854b668e78946175fe83eee",
+    "/workspace/m01-critical-path-review-20261023/linear-restored-r1/root/gennova-evidence/20261019-midterm-aligned/vocab-worker-reference-summary-r1.json": "edb33bf082de785d055dd9f753fa7d034909d219f9b6c340914f46373c3a7ba9",
+    "/workspace/m01-critical-path-review-20261023/linear-restored-r1/root/gennova-evidence/20261019-midterm-aligned/vocab_reference_probe.py": "488c550094060d8db186f517f79d8fc6eac655e1ee1d7ae2b5ebab39b823ccbf",
+    "/workspace/m01-critical-path-review-20261023/linear-restored-r1/root/gennova-evidence/20261019-midterm-aligned/vocab_worker_reference_r1.py": "b95ab377b7965c8c36f674bb6567ca2ea48fb0e3a1d06b7882be4edc2dec8cd9",
+    "/workspace/m01-critical-path-review-20261023/linear-restored-r1/root/gennova-evidence/20261019-midterm-aligned/worker-dense-coverage-r1.json": "4d2470898081aa5c331cacd1dfe6b7db6dee7dae1a50ac5d8edd565e56515f61",
+    "/workspace/m01-critical-path-review-20261023/linear-restored-r1/root/gennova-evidence/20261019-midterm-aligned/worker-dense-reference-plan-r1.json": "b518d59f0701c7966878a660646e2e73365178218d7c6c7a6e6f840cad2d53c4",
+    "/workspace/m01-critical-path-review-20261023/linear-restored-r1/root/gennova-evidence/20261019-midterm-aligned/worker-vocab-reference-plan-r1.json": "b4751a002d7c68578e5d1ef8f1776b630135a31d41f3facce88ad03a42719d70",
+    "/workspace/m01-critical-path-review-20261023/linear-restored-r1/workspace/audit_m01_worker_linear_references.py": "9f27c33d6116f5e901deb38043bd84557c40c8d1dbfe4b764d729837cb15b9f8",
+    "/workspace/m01-critical-path-review-20261023/linear-restored-r1/workspace/join_m01_worker_linear_references.py": "aca61063ae756b1587355505ad25632fc62d8a31019692f876bd5fc88b046f34",
+    "/workspace/m01-critical-path-review-20261023/linear-restored-r1/workspace/m01-dense-reference-recovery-r1/receipt.json": "d9fbcd42928841f512525c8a4ffc6feff2ed9c9b1a657341c07a3b004ceb40e7",
+    "/workspace/m01-critical-path-review-20261023/linear-restored-r1/workspace/m01-dense-reference-recovery-r1/results/rank-0.json": "7557506a2eeab1c5cdf17ef3fdd24b6f84b230e465dc2a40061dc35d59426b07",
+    "/workspace/m01-critical-path-review-20261023/linear-restored-r1/workspace/m01-dense-reference-recovery-r1/results/rank-1.json": "9a1284ce70c6c30733f853aab6d5deecb7590da8f4a71750c15393e4ef051887",
+    "/workspace/m01-critical-path-review-20261023/linear-restored-r1/workspace/m01-dense-reference-recovery-r1/results/ready-0.json": "078105a466026eae187262c2a6c224b1300b2634ab701f1536c2671863936282",
+    "/workspace/m01-critical-path-review-20261023/linear-restored-r1/workspace/m01-dense-reference-recovery-r1/results/ready-1.json": "ac70775403f36bbfd699ace054d28ff594f46acc9df13171db568233207f5656",
+    "/workspace/m01-critical-path-review-20261023/linear-restored-r1/workspace/m01-dense-reference-worker-r1/child.log": "4807acc30fb76efeeffbb4caf73c136f8ae40869e0729b0f13699bff539cf6ba",
+    "/workspace/m01-critical-path-review-20261023/linear-restored-r1/workspace/m01-dense-reference-worker-r1/npu-after.txt": "2d72259e705f7c3820d74633d6d6b5a6d86f7871224520bf0f43c81af8fefb45",
+    "/workspace/m01-critical-path-review-20261023/linear-restored-r1/workspace/m01-dense-reference-worker-r1/npu-before-0.txt": "591aaca05ee6c0ff3db72360f2941c32f049cc81e439f188bc84a12f95996b3f",
+    "/workspace/m01-critical-path-review-20261023/linear-restored-r1/workspace/m01-dense-reference-worker-r1/npu-before-1.txt": "e81f9e735297a46e77ef20507457cfe12550d6bf2ff2f97660fa7832115ef5f4",
+    "/workspace/m01-critical-path-review-20261023/linear-restored-r1/workspace/m01-dense-reference-worker-r1/npu-before-2.txt": "13e58c5f12169de247ac3fc685deed46cb29cb81232e94f73c2ad5a4147aa56d",
+    "/workspace/m01-critical-path-review-20261023/linear-restored-r1/workspace/m01-dense-reference-worker-r1/npu-samples.jsonl": "126e97d6486eb46dbb249774fcb2db41f054db3169423f859cb321cbc9316b5c",
+    "/workspace/m01-critical-path-review-20261023/linear-restored-r1/workspace/m01-dense-reference-worker-r1/receipt.json": "1b9598014936acf20539c19992eee2702a8d71a91298c13a821aef27669b0d90",
+    "/workspace/m01-critical-path-review-20261023/linear-restored-r1/workspace/m01-dense-reference-worker-r1/results/go": "6a2d1d9badc50f6532d86690c7b2f6da7d8ecff95efa0d7358ae32b82a991eda",
+    "/workspace/m01-critical-path-review-20261023/linear-restored-r1/workspace/m01-dense-reference-worker-r1/results/rank-0.json": "7566929750230f3a0d198b930a42471b0195c7d1774c939fdcc2510c12cf1c03",
+    "/workspace/m01-critical-path-review-20261023/linear-restored-r1/workspace/m01-dense-reference-worker-r1/results/rank-1.json": "f3394b37f567a6325cb5f694f91dee6446c4bf1df92eba86ff4924e6f79f15e8",
+    "/workspace/m01-critical-path-review-20261023/linear-restored-r1/workspace/m01-dense-reference-worker-r1/results/ready-0.json": "1650076a0a345a7cef15cf43e8773577447fda4fcb8787f349290ad53cf701bd",
+    "/workspace/m01-critical-path-review-20261023/linear-restored-r1/workspace/m01-dense-reference-worker-r1/results/ready-1.json": "443f968dbe2d90c0a898037abb4268d5253ea3892aad2a2f113903e661666c71",
+    "/workspace/m01-critical-path-review-20261023/linear-restored-r1/workspace/m01-vocab-reference-recovery-r1/receipt.json": "cb83cc43f8f7455037d14ec2d0339acab1e6ca8cd2910029e9253e69ee3793d0",
+    "/workspace/m01-critical-path-review-20261023/linear-restored-r1/workspace/m01-vocab-reference-recovery-r1/results/rank-0.json": "1d32275111429dfac74776ddba8c9e1b48161f36b42d6db7c94072abf6956a59",
+    "/workspace/m01-critical-path-review-20261023/linear-restored-r1/workspace/m01-vocab-reference-recovery-r1/results/rank-1.json": "051536fcca894d3f3b791f6b09b7033c0659a8d30eae5afd94ade85882d6edc8",
+    "/workspace/m01-critical-path-review-20261023/linear-restored-r1/workspace/m01-vocab-reference-recovery-r1/results/ready-0.json": "0d6f69a0539f3fddd1459b2efc472647f99a6b5fbccfe937d8b9a39c9b4f6c12",
+    "/workspace/m01-critical-path-review-20261023/linear-restored-r1/workspace/m01-vocab-reference-recovery-r1/results/ready-1.json": "4fd8fa48578506aba9e1074d44120b92f3a8d767f22e8fbab3ad3edaec94a147",
+    "/workspace/m01-critical-path-review-20261023/linear-restored-r1/workspace/m01-vocab-reference-worker-r1/child.log": "9a563856a1ef073d15e1b0caf98dcdf3c2af61de4df5ddf2c17f2925595a8bc1",
+    "/workspace/m01-critical-path-review-20261023/linear-restored-r1/workspace/m01-vocab-reference-worker-r1/npu-after.txt": "de45c51f0fd979ab71af3db9d931fb259b4d75489e4aa3e075c84e45a8d96355",
+    "/workspace/m01-critical-path-review-20261023/linear-restored-r1/workspace/m01-vocab-reference-worker-r1/npu-before-0.txt": "690d5af2011df71c774fd1603e7f98ef87b1e209e30a0fbb4e980d0367a8dae3",
+    "/workspace/m01-critical-path-review-20261023/linear-restored-r1/workspace/m01-vocab-reference-worker-r1/npu-before-1.txt": "fc0e0d006a2d8f9613f6288d0eed0a3ae5a68dd1882e63b200ffb57418b704a8",
+    "/workspace/m01-critical-path-review-20261023/linear-restored-r1/workspace/m01-vocab-reference-worker-r1/npu-before-2.txt": "c0d0660c2cd84bab597a1415021004d833255050751930d355586a6ae808e8b7",
+    "/workspace/m01-critical-path-review-20261023/linear-restored-r1/workspace/m01-vocab-reference-worker-r1/npu-samples.jsonl": "1e5dfe9992cca6b8cd6c8a3aaeb11f3646af62c9b104d90c291cbefe5c14fed3",
+    "/workspace/m01-critical-path-review-20261023/linear-restored-r1/workspace/m01-vocab-reference-worker-r1/receipt.json": "29a31ba14fd9afad7067f69d08ba98d724e1496ee990f48d2cd801b77e37872d",
+    "/workspace/m01-critical-path-review-20261023/linear-restored-r1/workspace/m01-vocab-reference-worker-r1/results/go": "b90052c954e15dfb857ebcc8e11e32cda5e44e6351b35eb31046bf2b127e1a4a",
+    "/workspace/m01-critical-path-review-20261023/linear-restored-r1/workspace/m01-vocab-reference-worker-r1/results/rank-0.json": "0a55e015d13d73beb218d9eaca586351f327c0155e4e467956304834f9e1e1d1",
+    "/workspace/m01-critical-path-review-20261023/linear-restored-r1/workspace/m01-vocab-reference-worker-r1/results/rank-1.json": "c6c4e18215b355c3c5a0d24acfa70bd73a66e470e8e1b07e94d20e19e39a9322",
+    "/workspace/m01-critical-path-review-20261023/linear-restored-r1/workspace/m01-vocab-reference-worker-r1/results/ready-0.json": "f3c7e8d8b4f2813df0492d16ea636fad31bfff711f06d93ffcf6c5de6a03701b",
+    "/workspace/m01-critical-path-review-20261023/linear-restored-r1/workspace/m01-vocab-reference-worker-r1/results/ready-1.json": "f06af9704767b8ec4c78962c9bd4cc53a680b9ca8e4b0d6554e377442fbb75c0",
+    "/workspace/m01-critical-path-review-20261023/linear-restored-r1/workspace/m01-worker-linear-calibration-build.json": "df1c7fb8b98cace27b931e3e273a860a68f162ab8ad1f9a611859233c2360a47",
+    "/workspace/m01-critical-path-review-20261023/linear-restored-r1/workspace/m01-worker-linear-calibration-tests.xml": "a31c1a351e5b764ab6801114c6861ce25cde92e56e9b0e3af882807188e7f1a3",
+    "/workspace/m01-critical-path-review-20261023/linear-restored-r1/workspace/m01-worker-r1-linear-reference-coverage.json": "3562d6f30eb819d9a7a45793d2a61ec616c370b5f5d4f933ef85bd25e33690dc",
+    "/workspace/m01-critical-path-review-20261023/linear-restored-r1/workspace/m01-worker-r1-linear-reference-joined.json": "5bc2c3026c7be6c275bdd6ab57e9e44d064efbd6a4a2867ece08db24138b2421",
+    "/workspace/m01-critical-path-review-20261023/linear-restored-r1/workspace/prepare_m01_worker_linear_calibration.py": "0ee21abf8e88da0c8154075da3beed9e03f614f18d0c7a3aedc8a2c4565ef0dc",
+    "/workspace/m01-critical-path-review-20261023/linear-restored-r1/workspace/seal_m01_worker_linear.py": "cfa82a4a80c06763e8d8320ae2218e893a793e7d709223d43f7a18a82e1b7cac",
+    "/workspace/m01-critical-path-review-20261023/linear-restored-r1/workspace/test_m01_worker_linear_calibration.py": "1a42a5e32c892ce0cb50bbe97aa634cd995f4bdd76c153f43db85134f2cde51e",
+    "/workspace/m01-critical-path-review-20261023/linear-restored-r1/workspace/m01-worker-linear-reference-manifest.json": "ee308d331c9ff5797c3ef50787ffcdf60eac8ff846faa7cf560142c1b77603fd",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/root/gennova-evidence/20261019-midterm-aligned/measure_microflow.py": "c0c119b80ac3adfc44885a77a20662d9ece817e72eb2a2058ce41a3964084057",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/root/gennova-evidence/20261019-midterm-aligned/microflow-payload-r4/hust_prefill_microflow/runtime/microflow.py": "78e7d291de4e431e478991ecec273ab0a11d6e2206d1f02a1ed6ab0a1ecd1d26",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/root/gennova-evidence/20261019-midterm-aligned/microflow-payload-r4/hust_prefill_microflow/runtime/microflow_attention.py": "bd9f8c126a69384a0c6af597513a13fb5107dc71540e9d3da07ff45c98ff10f0",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/root/gennova-evidence/20261019-midterm-aligned/microflow-payload-r4/hust_prefill_microflow/runtime/microflow_rope.py": "5fce33befe9ccf5fd20910d7dcb83e4ba86d4f42872623761151f0aad384c2e4",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/root/gennova-evidence/20261019-midterm-aligned/microflow-recovery-payload-r2/hust_prefill_microflow/runtime/microflow_rope.py": "5fce33befe9ccf5fd20910d7dcb83e4ba86d4f42872623761151f0aad384c2e4",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/root/gennova-evidence/20261019-midterm-aligned/moe-combine-reference-control-r2/receipt.json": "f384ed2dbbcfd8da3f55f670b6a10255902fc752d860f218e5b3643c06e5bdb9",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/root/gennova-evidence/20261019-midterm-aligned/moe-combine-reference-plan-r2.json": "411d6e70759ae915746b5afa6b3f35164abf6e1439fe511a842177620e4d494e",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/root/gennova-evidence/20261019-midterm-aligned/moe-combine-reference-r2/rank-0.json": "5452108f0b6c4dac61dce357e2c8da370afcccb2ea55db8882c12a8f21eca230",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/root/gennova-evidence/20261019-midterm-aligned/moe-combine-reference-r2/rank-1.json": "37f55465b2a2241072daf905736b8e6f314862e60ee701b658c554f1449cea3b",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/root/gennova-evidence/20261019-midterm-aligned/moe_combine_reference_probe_r2.py": "9f639e46b0bab5dd4d4743d3f019db8ed74a2f1fe23e4f3b8023a628149d52a4",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/root/gennova-evidence/20261019-midterm-aligned/moe_combine_worker_reference_r1.py": "37df86793c9826b5be34a7ce7773cde4dc5a1d7c392a74ef3eadf26141800974",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/root/gennova-evidence/20261019-midterm-aligned/norm-reference-control-r2/receipt.json": "6c09b5cde93a3879ed80c7e549ae7c4486267dd948d8d3b72c378c7fe5a0d112",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/root/gennova-evidence/20261019-midterm-aligned/norm-reference-plan-r2.json": "94c87a4434184736249c4ec88a6d12f1c1a573459ab08861d211ed89531b240e",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/root/gennova-evidence/20261019-midterm-aligned/norm-reference-r2/rank-0.json": "5956894b8a5191112ae52e0c1dd4680531200da542f07b6369422525aaa537c2",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/root/gennova-evidence/20261019-midterm-aligned/norm-reference-r2/rank-1.json": "a6b48fb7709079a782d4cd14db3da8429ed89e068f2ed00974090c3da2c2ad1f",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/root/gennova-evidence/20261019-midterm-aligned/norm_reference_probe_r2.py": "eb8220317fb54825608fc0f21ae1c284fd30c8c33bba516ae66b15e5c519d37d",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/root/gennova-evidence/20261019-midterm-aligned/norm_worker_reference_r1.py": "7dc00e666f6a5a22e6a5e4e7ba389e02c6f85e11722a784a4658eec4c3013fb3",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/root/gennova-evidence/20261019-midterm-aligned/payload/betterscale/models/qwen35/mixed_core.py": "9755886fada242e6fc77bdd2ffc363f5d5a74cf08e5302a1d9943ef25c0dd657",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/root/gennova-evidence/20261019-midterm-aligned/payload/betterscale/models/qwen35/preprocess.py": "45d217d8404a8c223f933b507f9d1bb70933e16f093193040f545b71a5ec4dd2",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/root/gennova-evidence/20261019-midterm-aligned/payload/betterscale/models/qwen35/service_metadata.py": "c5a84859236fa7623e888ce5aa214f82e36ce478143e671d4f93e298d911d34d",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/root/gennova-evidence/20261019-midterm-aligned/preprocess-reference-control-r1/receipt.json": "5ec72f0b03ec6012491fc8de1b6c22f98ac2436a255337c88062824ae6405cae",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/root/gennova-evidence/20261019-midterm-aligned/preprocess-reference-plan-r1.json": "d608214c5ce06012c9df432a1c5bd059b0eec29e5cd6876f4531c93ca18518de",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/root/gennova-evidence/20261019-midterm-aligned/preprocess-reference-r1/rank-0.json": "efdd4c7a98f15bb7f127cc8e84287ef1ddc3d01e7764a62f75f9a236f294213a",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/root/gennova-evidence/20261019-midterm-aligned/preprocess-reference-r1/rank-1.json": "9dfdd5e38ee97bdb7be8128bbdf614d8de5418b7ae2ec17b3602f3bf170a2e49",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/root/gennova-evidence/20261019-midterm-aligned/preprocess_reference_probe.py": "9ba28fb8cba10dee8b2e78bf7e6bdc38665a1e95b71d9c273cf8acf46d05148a",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/root/gennova-evidence/20261019-midterm-aligned/preprocess_worker_reference_r1.py": "131561d6151d47f7a502e0b81b54b9e0991aeaf8c64c2bcff1b048494e4feea0",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/root/gennova-evidence/20261019-midterm-aligned/recovery_reference_controller.py": "d56d0f1122679271835191048176f1c070d12fbd05ecbf3fd36c5450b4933dcc",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/root/gennova-evidence/20261019-midterm-aligned/rope-reference-control-r2/receipt.json": "da17e9a3d4e08707fd13c60a417ee04e9a03511b1646357ca68e3ea8f1f1bab2",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/root/gennova-evidence/20261019-midterm-aligned/rope-reference-plan-r2.json": "523bcc97bc1419cc7b0d4599e20471371dd83651fab336f7313d86c58af9cce4",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/root/gennova-evidence/20261019-midterm-aligned/rope-reference-r2/rank-0.json": "c68b8322ebdb661dfaf3bb02951a1f940d24ebefffb28acab2ba2d00af10be2b",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/root/gennova-evidence/20261019-midterm-aligned/rope-reference-r2/rank-1.json": "50d3d6e716cbed8e9010355ac1333e9e15e2c9b2789580ba9bc7cffdeda4f185",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/root/gennova-evidence/20261019-midterm-aligned/rope_reference_probe_r2.py": "bb1d941bfa3d1a378b767f760356c5cc549d9e626f04dcb2b6dcdf928927638a",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/root/gennova-evidence/20261019-midterm-aligned/rope_worker_reference_r1.py": "d1fce3e567dad77c9a3d0871131f71505cb767b3c2aa03d45ae6931b334621f7",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/root/gennova-evidence/20261019-midterm-aligned/router-gate-reference-control-r1/receipt.json": "b59f3cfe88f122b10fc0e706e568cc1df151832a0a05002cb1fdab14d173b7a0",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/root/gennova-evidence/20261019-midterm-aligned/router-gate-reference-plan-r1.json": "d583292cac8d7d1a224d75b977f8e3a88a6a55013ee1acb4c6135046be5c479f",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/root/gennova-evidence/20261019-midterm-aligned/router-gate-reference-r1/rank-0.json": "be31cdff9ffc59d20b08401ff387a19a2884a7fb9eca27b25b1a62e56a260b63",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/root/gennova-evidence/20261019-midterm-aligned/router-gate-reference-r1/rank-1.json": "caf01824853122f5976d1bc52792b70172698c5ad86fb4c8e38c4a51fed97b64",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/root/gennova-evidence/20261019-midterm-aligned/router_gate_reference_probe.py": "c9f137b66c4647cc3fe08b663be7c033bc3a948b4bdb32aab6695e1fdf7d3d0f",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/root/gennova-evidence/20261019-midterm-aligned/router_gate_worker_reference_r1.py": "624f0fdf703bc19b4f22c7e427bbd85496f07df6693ea587ad387f01fd5c8260",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/root/gennova-evidence/20261019-midterm-aligned/run_moe_combine_worker_reference_r1.py": "6c893dc830665341f06e69c946655e7ca2984b70e9eff31e5fe14d59058b3785",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/root/gennova-evidence/20261019-midterm-aligned/run_norm_worker_reference_r1.py": "f7766c338898100848d0f28774e4441eff1bfb80b37f51d83254964be8639205",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/root/gennova-evidence/20261019-midterm-aligned/run_preprocess_worker_reference_r1.py": "80a8b1ffc54118447d8a6377c7ec68bb457ea016b36d7e7aa50daf7d02a62bb9",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/root/gennova-evidence/20261019-midterm-aligned/run_rope_worker_reference_r1.py": "2b2cd02e42c2a7a4ef2463a04b4bfd6057b951c245b80d5bc35af78f26b7f5b1",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/root/gennova-evidence/20261019-midterm-aligned/run_router_gate_worker_reference_r1.py": "186dae4c0d2ac67be6ff386c7786da6829b10ebdfcc40eaf07ee004556ac3c78",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/root/gennova-evidence/20261019-midterm-aligned/run_swiglu_worker_reference_r1.py": "e6cf3a07aeddad99bc6bec8de644ea5c34b3cad982b10dfa737991b72410b0bc",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/root/gennova-evidence/20261019-midterm-aligned/runtime/vllm_ascend/_cann_ops_custom/vendors/custom_transformer/op_impl/ai_core/tbe/custom_transformer_impl/ascendc/moe_gating_top_k/moe_gating_top_k.cpp": "3b995e06d726b6c4f7b041d69f7f46a59feab5232c2ddbc6ba749cebdedff7eb",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/root/gennova-evidence/20261019-midterm-aligned/runtime/vllm_ascend/_cann_ops_custom/vendors/custom_transformer/op_impl/ai_core/tbe/custom_transformer_impl/ascendc/moe_gating_top_k/moe_gating_top_k_without_group.h": "0a3ba990a9503c48129a03b28d178f0040fb73b34eb37b7dfdda25726e5845d6",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/root/gennova-evidence/20261019-midterm-aligned/runtime/vllm_ascend/device/device_op.py": "151f03a3344f2651317db0c9d5503a272dcdd61ff8b5712cbef4e112f6e4a013",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/root/gennova-evidence/20261019-midterm-aligned/runtime/vllm_ascend/ops/activation.py": "79185cd8bae9801aef50873cb082bb977ff8d2b3ddb27766e4f42ffbfa12b5c0",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/root/gennova-evidence/20261019-midterm-aligned/runtime/vllm_ascend/ops/fused_moe/moe_mlp.py": "2bf107e3287e3a4c69512e60e65495448f34a4451eab32ae3b23b5c2a46d2558",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/root/gennova-evidence/20261019-midterm-aligned/runtime/vllm_ascend/ops/fused_moe/routed_experts.py": "b17e5a105d59fc280f244bdc4036b4cb41efd1d5a2ff1accca4b56620cc91ab7",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/root/gennova-evidence/20261019-midterm-aligned/runtime/vllm_ascend/ops/fused_moe/router/fused_topk_router.py": "ab6147b770c11a22c9cfdf46aee2995fb9ce19ce25174995f1541ab2f54f97a6",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/root/gennova-evidence/20261019-midterm-aligned/runtime/vllm_ascend/ops/fused_moe/router/grouped_topk_router.py": "2c952bfe7d39809f1e01944e5c6461ab16bcf778338393ef7c911cdeef18520f",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/root/gennova-evidence/20261019-midterm-aligned/runtime/vllm_ascend/ops/fused_moe/router/router_factory.py": "3043c3ff106ae811ed7b7e1d78683c8266f8288a88603db6abe8e1421987b3ef",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/root/gennova-evidence/20261019-midterm-aligned/runtime/vllm_ascend/ops/fused_moe/shared_experts.py": "78d6ad231159b907571b609538e38fa682a7d5e994d7c24749c1ece075fcc881",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/root/gennova-evidence/20261019-midterm-aligned/runtime/vllm_ascend/ops/fused_moe/token_dispatcher.py": "cf4e44a06db2dd7d1a0abce35381ed270aef6b75e4d3bf6557a50b0bb7ffebb5",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/root/gennova-evidence/20261019-midterm-aligned/runtime/vllm_ascend/ops/layernorm.py": "50dedf714c6e485d47fea1cc4f0c8fc8058b43f1ad6e33b0df36dfaca0782991",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/root/gennova-evidence/20261019-midterm-aligned/runtime/vllm_ascend/ops/triton/layernorm_gated.py": "ecdd125ce32f969e1b1c0e4f8b4e84ee8657332cd02cdcc4c72edd2bff13aff2",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/root/gennova-evidence/20261019-midterm-aligned/runtime/vllm_ascend/ops/triton/linearnorm/split_qkv_rmsnorm_mrope.py": "ba3c7e740c3a2a9c8850733d3be77fefac79bc3ed02a45b4be076b58d6f7632d",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/root/gennova-evidence/20261019-midterm-aligned/runtime/vllm_ascend/ops/triton/triton_utils.py": "f94d81f163f0076e8243990dd687f7ec8d42ce1ed30d67eea3155bf1c3a073a4",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/root/gennova-evidence/20261019-midterm-aligned/runtime/vllm_ascend/patch/worker/patch_qwen3_5.py": "0ea5111173d5a02e4f8ab89130a1a1bd7d44ad86885a4c64bb3cb4649afbb48c",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/root/gennova-evidence/20261019-midterm-aligned/runtime-gdn-recovery-r2.sh": "4c925989086996d984ed5b6c4901eb1a5bb2040392deb98c04977b56ae5e252a",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/root/gennova-evidence/20261019-midterm-aligned/swiglu-reference-control-r1/receipt.json": "e8507168ddf4170c34eb9497bab748f81682dcf1564459e5bfcea7689c9a4197",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/root/gennova-evidence/20261019-midterm-aligned/swiglu-reference-plan-r1.json": "74664854e54f064977bcf9e581a32cc1502dc248aa38b462b4ed6bbf9a3bc759",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/root/gennova-evidence/20261019-midterm-aligned/swiglu-reference-r1/rank-0.json": "ea016480691c12bc183081ca6281c589fd89c9582413816cae6cae3c5e9756a4",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/root/gennova-evidence/20261019-midterm-aligned/swiglu-reference-r1/rank-1.json": "840f3e19a3ade6a9bc8734bca0ea4714f144436f7d09b702ab86c746115b1e68",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/root/gennova-evidence/20261019-midterm-aligned/swiglu_reference_probe.py": "41e031b2972cd72571c944c159001e495bcdc10a84845b6629f2e4cf70f3cafb",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/root/gennova-evidence/20261019-midterm-aligned/swiglu_worker_reference_r1.py": "075385f01756a9aec9d179815145b55be72f30ead45261eb39b57205ae8b6bbf",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/root/gennova-evidence/20261019-midterm-aligned/worker-moe-combine-reference-plan-r1.json": "9875344ff337166df8a6c8d87b8831d887cdd004318275d2751e83a7b7cff24c",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/root/gennova-evidence/20261019-midterm-aligned/worker-norm-reference-plan-r1.json": "6ef6afde0547f9c891c47fafcc8a472b4c975b7aeea156146caa9293fea27807",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/root/gennova-evidence/20261019-midterm-aligned/worker-preprocess-reference-plan-r1.json": "d2b4cd986e1bdeaa6c6416f3da2778e2b0546d39b9c46e42ac4dbc85d041a04b",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/root/gennova-evidence/20261019-midterm-aligned/worker-rope-reference-plan-r1.json": "be66de2973f66d40859ee1be0f6e7d23fc1e92396bc3faf2a21c64370c97c916",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/root/gennova-evidence/20261019-midterm-aligned/worker-router-gate-reference-plan-r1.json": "48d1e896ee45d3546298595a8d082b53ad431c95b09ca732b8d3cda3c8d246e0",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/root/gennova-evidence/20261019-midterm-aligned/worker-swiglu-reference-plan-r1.json": "6a551260ddaeff267dc9a22e5d7e18222ce307005c48054b738fb424e0617b5f",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/workspace/audit_m01_worker_aux_batch.py": "d599ed6101fe4d66c5a7c87432ee7d1dd2ec4849b3427d7f999f69374c358f04",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/workspace/audit_m01_worker_aux_reference_coverage.py": "0ebb736823cb9e37a01dc05ace167a3d5abb3733b941ecf8c285b23e54389e0f",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/workspace/join_m01_worker_aux_references.py": "49934462bb6adfe76c0e12ff2f763a2718fdffd965d75629019491300d95281a",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/workspace/m01-moe-combine-reference-worker-r1/child.log": "a30eadf62c6d54685556aae2854f45427582382f6780c35b5a921857d353dcbf",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/workspace/m01-moe-combine-reference-worker-r1/npu-after.txt": "0af734d7f40cc65535fca4b2ea8e32ba597ac38f284d0eb0579d431c2839e089",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/workspace/m01-moe-combine-reference-worker-r1/npu-before-0.txt": "4199f26015edf2d0bccd3d3b6f6f69f435c09ad2c3f55e2e516cada0eb3f16f0",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/workspace/m01-moe-combine-reference-worker-r1/npu-before-1.txt": "1663c12117bb46868a81918151e9158582d8eebbcc7c8437cb3e948518338d54",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/workspace/m01-moe-combine-reference-worker-r1/npu-before-2.txt": "763d9ef51fa6a0665b84a24c076530af4c1ea67da2ae23ae759017c96453bc51",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/workspace/m01-moe-combine-reference-worker-r1/npu-samples.jsonl": "c2489061bf84cb8af52f07b062540799ba4312901effdb90603e21d4dae5b0ed",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/workspace/m01-moe-combine-reference-worker-r1/receipt.json": "8503e6b4669f537dbd7f193cce272a45d1c0bc0d613166f763a20dbd87143d07",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/workspace/m01-moe-combine-reference-worker-r1/results/go": "0b5636842a4e0cba8640d30695cf58d461ef301cfd9a68694ebaba10cc3a18fa",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/workspace/m01-moe-combine-reference-worker-r1/results/rank-0.json": "9732f3172423fbad720e457ca67170f393855c8ea35a76040bc3919a664d8532",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/workspace/m01-moe-combine-reference-worker-r1/results/rank-1.json": "21b5276f221b1a8681e872e76bc73deb6f14889f4d9c7bb50096adad52fd322d",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/workspace/m01-moe-combine-reference-worker-r1/results/ready-0.json": "f39edfad35f6767d98460b6ec6fc398cacdb585d3aa0b1a75f80f37a36d47778",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/workspace/m01-moe-combine-reference-worker-r1/results/ready-1.json": "85b94cb99115e94409e19848db07cc481f35313f89e2f842489671338ade47db",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/workspace/m01-norm-reference-worker-r1/child.log": "2081853100d36d079a838ee3086d79df5a103025029093f5fb66ce1f64313247",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/workspace/m01-norm-reference-worker-r1/npu-after.txt": "fcaf7d175de69c5e4bbc11e70d57a1c385eb3b856d40624c2203a91ecf2431d0",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/workspace/m01-norm-reference-worker-r1/npu-before-0.txt": "567ccab9db1c0c7daf807359bbb096384288f710a347eae4cc08153d2994eede",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/workspace/m01-norm-reference-worker-r1/npu-before-1.txt": "25f08694e902c72effbc94ea69a823dc1132c4a50328e389ad637f257b09ee5f",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/workspace/m01-norm-reference-worker-r1/npu-before-2.txt": "bb7efa20e4d87d5ad26af17783ab2e3359dd6bc49a038018708e72709cf0abe2",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/workspace/m01-norm-reference-worker-r1/npu-samples.jsonl": "3bf5155b57068a0e173efa1113c57656653529dd81ae57d79454e0e0dd97738e",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/workspace/m01-norm-reference-worker-r1/receipt.json": "e6f11d6014de70984a5328fb368340cbc9bc6c1f0780a5b4307aca87fec2a2df",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/workspace/m01-norm-reference-worker-r1/results/go": "048475cebc49c66c2093cab4c18984627cc79ac7b1657454881ef9548a7979a3",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/workspace/m01-norm-reference-worker-r1/results/rank-0.json": "db69025a5f1e5ef856cb775a4bcb7f85ab33f576f38ad95dd8c98faa93dea58b",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/workspace/m01-norm-reference-worker-r1/results/rank-1.json": "bb471b430685384f9a978c0d1da815752aaa4027fc2d5a9b3189ce58c25f2cd4",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/workspace/m01-norm-reference-worker-r1/results/ready-0.json": "963fc15d83a2c5bcec3e3976851b89a6f6b1e6462866bfc6e3dfa28d03f5e70a",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/workspace/m01-norm-reference-worker-r1/results/ready-1.json": "9fce96da5e44e79a43edf1d6949bacd630ee451a350a011a1001b57e5cd48185",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/workspace/m01-preprocess-reference-worker-r1/child.log": "cd06989983dbcc3a58370cb77f4df8f33a7592eeff811076382747489438427f",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/workspace/m01-preprocess-reference-worker-r1/npu-after.txt": "c01b2a8cf7712c3952344f23f632b45fcee4fb7034900dc8285e1ba7d63a7a00",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/workspace/m01-preprocess-reference-worker-r1/npu-before-0.txt": "2c583da8a24fe6c66f03cc45f162f8f425994916c85abd4a010757140885177b",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/workspace/m01-preprocess-reference-worker-r1/npu-before-1.txt": "ab66e97b358bde530d45ef15691c900622ecff99253952beb150fd898447e5e2",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/workspace/m01-preprocess-reference-worker-r1/npu-before-2.txt": "6dac885bac1bd343d45a258087b15f108dd7b2afbf55bf09dd496365405e7923",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/workspace/m01-preprocess-reference-worker-r1/npu-samples.jsonl": "c6e33afab62f512aba080e7ba76a27e044e28cfa718904a5a8b809b6e2e3bd34",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/workspace/m01-preprocess-reference-worker-r1/receipt.json": "40f7a9adf76845b4baaf4332ff66af7c8d91dd7b99cfdbff53a6a88b5c7156ff",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/workspace/m01-preprocess-reference-worker-r1/results/go": "74a525511e55bd8910fe736fb448f6ea576f1b4cda795cec5922120bea9afaa4",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/workspace/m01-preprocess-reference-worker-r1/results/rank-0.json": "0c001bbfd45749341eb7581b0062061b6f91e9fa75437661957cc40bf1aa5eae",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/workspace/m01-preprocess-reference-worker-r1/results/rank-1.json": "6dc69ecdfacad903fb21272ed216cbc8b416b72a08579264b194caf69ffa463f",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/workspace/m01-preprocess-reference-worker-r1/results/ready-0.json": "47be5e2b88b73e5bdadac414c9300c858ad985df29f590a1c783657797555bbf",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/workspace/m01-preprocess-reference-worker-r1/results/ready-1.json": "5b59326c552a06bb7f8c67c6454322015b0bde26ea61183064102b50050ab6a3",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/workspace/m01-rope-reference-worker-r1/child.log": "0d9919f5bdb06f87d3ac55190bf7563b793bb3d1bb56f4090708b3db853d0f19",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/workspace/m01-rope-reference-worker-r1/npu-after.txt": "50122f9c6f45d63932db863ccb29b8f6b0df8c159b22e8ef976a13aa4c0043d2",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/workspace/m01-rope-reference-worker-r1/npu-before-0.txt": "0245676f71b66d9451d877f259e8e71f0669ba98f3fb8ee6f0bb076b852c8584",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/workspace/m01-rope-reference-worker-r1/npu-before-1.txt": "7a64b02adfd4401d862dd81cd6eda067cdc87d95b13a4933e908ae9ee27203fc",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/workspace/m01-rope-reference-worker-r1/npu-before-2.txt": "a6257a4a62d38476960e196a1d3be00f112c58bc52353ad55dadc852128ce6c4",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/workspace/m01-rope-reference-worker-r1/npu-samples.jsonl": "754620833099750881d92f7ae31130ce0e9d9147c99426089f3b5d008c7685fa",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/workspace/m01-rope-reference-worker-r1/receipt.json": "374ddd7395b3235773e05b4d4c089242696fb941fb92bd58427cd663d9ded1eb",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/workspace/m01-rope-reference-worker-r1/results/go": "55ff5d29c2c0365d457d7e85f11294dee0280ec1210d62db13381a5954244271",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/workspace/m01-rope-reference-worker-r1/results/rank-0.json": "45092f1fc1ff413eb7e6dedb80526cbf0508a40158eaae415a75e39cbdb41ad6",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/workspace/m01-rope-reference-worker-r1/results/rank-1.json": "b588b15a7cd0f8168abfe78e2aba73b8199064ed331cebaecd5a7d09a39ca5d7",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/workspace/m01-rope-reference-worker-r1/results/ready-0.json": "22d5289dee8e91d4e4b13a834496ba2da5587f212190fcf5409ace491587ba86",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/workspace/m01-rope-reference-worker-r1/results/ready-1.json": "99b2507c202ae22882b1fc0acd842c1440c96bdd8059ef41efbd527b32497f6c",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/workspace/m01-router-gate-reference-worker-r1/child.log": "b5aa7ed154bd21d22b4f10c55cb08731dbaeb390f846e54750af090ced29b916",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/workspace/m01-router-gate-reference-worker-r1/npu-after.txt": "fb5effbd60a73032f2aa3762ad5d89944e4fa9809d80ba287267ac13b6ecba4b",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/workspace/m01-router-gate-reference-worker-r1/npu-before-0.txt": "cd89e743ac9a2164b1e455b1d0546ebff33902155dbc89c9a8787501bfa9c4ac",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/workspace/m01-router-gate-reference-worker-r1/npu-before-1.txt": "6c18ad7f26380940bf61e078e1fb7f501631a949e94dd7d204e2575da1ffcb84",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/workspace/m01-router-gate-reference-worker-r1/npu-before-2.txt": "b2202a02f4d2fb2e85a1f64cdfcaa27e742b6e9fc19c87e66f49648db9fdf498",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/workspace/m01-router-gate-reference-worker-r1/npu-samples.jsonl": "0e72380c12b53457b1409da9ccc9a2a8a0d4624d229928f0e5f2252c15eb8bbc",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/workspace/m01-router-gate-reference-worker-r1/receipt.json": "5334bc9c037d6e23977f3b596ff7e8c0811b67d147769754bf51d4b4a862c363",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/workspace/m01-router-gate-reference-worker-r1/results/go": "e324bb9bc701ec4784e997ab921abba465bae4c6c00b1217d022f84f8dc63e5b",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/workspace/m01-router-gate-reference-worker-r1/results/rank-0.json": "95109887a317a34eb581f4f31eda2019667f8d8d6863ba65aa9eb5771fbae27f",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/workspace/m01-router-gate-reference-worker-r1/results/rank-1.json": "feaee8c3d85d04990983573ac25f1e76c3845150bc2f03ed18cadc863f93e222",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/workspace/m01-router-gate-reference-worker-r1/results/ready-0.json": "0fb005c84597d5dea1c5009a34ea54330da4751f8a4b8a4f86516274a947036a",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/workspace/m01-router-gate-reference-worker-r1/results/ready-1.json": "a78d523dc8e7e713e9964ba06b59f7cdd3b71509215797806ae7191c4bb5c73b",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/workspace/m01-swiglu-reference-worker-r1/child.log": "4802e7be1cfc709932aa115b143068bbb5c51c2280077a2573730016141c76ed",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/workspace/m01-swiglu-reference-worker-r1/npu-after.txt": "f99d811ed2782108eebb5776ccd9a61e3c1ef69ec533b5809dc0a17a643186cc",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/workspace/m01-swiglu-reference-worker-r1/npu-before-0.txt": "1b03434fe0e418963c9839f6e50b37e06771cb49e86cbdb9b79c9f4eae8dbfc7",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/workspace/m01-swiglu-reference-worker-r1/npu-before-1.txt": "4435afe372df11dbd07e6e857bd0b0526670342c82815cb30fb78dcc8dd3489a",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/workspace/m01-swiglu-reference-worker-r1/npu-before-2.txt": "b706da58adf7e20e55757deff8c18752d61d829811807f30d491b72cb378edb6",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/workspace/m01-swiglu-reference-worker-r1/npu-samples.jsonl": "0ee473f29d5cb70be56f338ca3c108f3b7a410171b2a93a7ca0dd67b97ba5b2b",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/workspace/m01-swiglu-reference-worker-r1/receipt.json": "d7150254ad91df5351fec51ed5bbe79b4a69bb53ec945f236eed398c5cb8d18b",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/workspace/m01-swiglu-reference-worker-r1/results/go": "0d0dfa8dd513ba0a37d4272a8d84a7d0349e6121e0ecff41691c5bf059db266b",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/workspace/m01-swiglu-reference-worker-r1/results/rank-0.json": "065b91f2f103987ea4bf1b49043a7b5888c12e38ab03d431448d8fd695554e58",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/workspace/m01-swiglu-reference-worker-r1/results/rank-1.json": "1cd90bd8221e3f5b21598e0730eefc8c764726ffa8234bc436de819d19e648dd",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/workspace/m01-swiglu-reference-worker-r1/results/ready-0.json": "8a810e70aa52527877a85a95beb9695a9998efb4a3f579aacdb545f266f220e3",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/workspace/m01-swiglu-reference-worker-r1/results/ready-1.json": "47aae248500686312c7d8a5af5330d91507041c201ae2b91389c42c67c12812f",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/workspace/m01-worker-aux-batch-audit.json": "3cafd083f93ba7b2b0de995835b1944b4d31cfcffac8d442424be9876dd1404e",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/workspace/m01-worker-aux-batch-execution.json": "95b5970eb3c67d00f86373cb7dd43e38615e25f6b47d8bb51aafcbc065bf690a",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/workspace/m01-worker-aux-reference-batch.json": "13dfca85af8c589cd3b3db003e8766b94b1f7fee43d27b59679ddbcad86ade6c",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/workspace/m01-worker-aux-reference-joined.json": "68a9b200975689fdff7a34ee3c204fc4df956012a07bfb7bd0524dbc4d5edc1d",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/workspace/m01-worker-aux-tests.xml": "ca80ad53a6fc12e7ca0eae75e013eeb0490e6de5cb4e432cf9b64afc62c4151e",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/workspace/m01-worker-r1-aux-reference-coverage.json": "a790df96de059abfba3333687eaf304409057ab76528ef62b509d6b7427b64f4",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/workspace/prepare_m01_worker_aux_references.py": "7a80755cf0f948a4cdfd35b7bb952239c015005b7020bd6411f5402b9be6b06f",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/workspace/run_m01_worker_aux_batch.py": "e893a85532602779272db67c0f334021607379e26ab9b15ce659c974b750556b",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/workspace/seal_m01_worker_aux_references.py": "e2c58fb62998b05238eebc0951fe85e47dfb23e1fdb99dd1f3059d9ff0e44dcc",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/workspace/test_m01_worker_aux_audit.py": "ce5900a3533e93f6c2dc925ecefc5f510f526101cc17217314443b493399b83e",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/workspace/test_m01_worker_aux_plans.py": "edbec0780b8ae130306521ff4c41073ff29c09456ddf652c356783a7d4b50a40",
+    "/workspace/m01-critical-path-review-20261023/aux-restored-r1/workspace/m01-worker-aux-reference-manifest.json": "d4680e3e58397cd38562004c3c40415581772aa9ad7632f16c6640483654aa3e",
+    "/workspace/m01-critical-path-review-20261023/join_prefix_reference.py": "52d9912f413254b5b1ba177e85dd116a725daa5ec0a2646d4dc7877aeb2fe247",
+    "/workspace/m01-critical-path-review-20261023/prefix_reference_schedule.py": "8dda180c106684405a72cb5181055785f4c63d9c32151b55c0f6e95bbabc7bf8"
+  },
+  "limitations": [
+    "Only split FA prefixes with residual input; no full-model invocation weighting.",
+    "All independent repetitions retained; component means are not falsely paired by repetition index.",
+    "Uncongested queue schedule requires overlap/interference and event/launch-cost validation.",
+    "Copy/allocation/residual movement not separately calibrated here; do not claim an end-to-end prefix latency.",
+    "References include each kernel memory accesses; no additional global HBM term."
+  ]
+}

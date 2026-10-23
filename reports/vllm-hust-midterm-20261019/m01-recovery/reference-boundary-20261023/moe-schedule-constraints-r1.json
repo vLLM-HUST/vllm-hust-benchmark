@@ -1,0 +1,64 @@
+{
+  "status": "configured_schedule_constraints_recovered",
+  "runs": {
+    "m01-recovery-model-worker-r1": {
+      "donor_multistream": false,
+      "betterscale_shared_overlap_patch": false
+    },
+    "mmlu-b1-microflow-fa-on-r9": {
+      "donor_multistream": false,
+      "betterscale_shared_overlap_patch": false
+    },
+    "mmlu-b1-microflow-fa-on-r10": {
+      "donor_multistream": false,
+      "betterscale_shared_overlap_patch": false
+    },
+    "mmlu-b1-microflow-fa-on-r11": {
+      "donor_multistream": false,
+      "betterscale_shared_overlap_patch": false
+    }
+  },
+  "loaded_inventory": [
+    {
+      "file": "/root/gennova-evidence/20261019-midterm-aligned/m01-recovery-model-worker-r1/token-accounting-1477342.jsonl",
+      "layers": 40,
+      "tp_size": 2,
+      "ep_size": 1,
+      "sequence_parallel": false
+    },
+    {
+      "file": "/root/gennova-evidence/20261019-midterm-aligned/m01-recovery-model-worker-r1/token-accounting-1477343.jsonl",
+      "layers": 40,
+      "tp_size": 2,
+      "ep_size": 1,
+      "sequence_parallel": false
+    }
+  ],
+  "reference_rules": [
+    "For these configured arms, do not assume shared and routed experts run on independent streams.",
+    "Shared/routed projections, activation and final combination must retain actual dependencies.",
+    "The separate Microflow full-attention prefix overlap remains applicable only to its admitted partitions.",
+    "Independent kernel times already include kernel memory accesses; do not add global HBM time again.",
+    "Do not add historical host-synchronized collective totals; use the planned graph collective calibration."
+  ],
+  "evidence_scope": "Launch options plus current pinned source defaults; runner identity and TP/EP/SP bound to recorded loaded inventory",
+  "limitations": [
+    "No recorded runtime value of AscendSharedExperts.multistream_overlap; configuration inference is not a measured stream trace.",
+    "No weighted necessary-work reference time is derived by this audit."
+  ],
+  "source_sha256": {
+    "/workspace/m01-critical-path-review-20261023/audit_moe_schedule.py": "ce8de4b74e062f1edd7eeecf74dd9b9f670bf6f17a4429c9dfa7b24ecdee1f8d",
+    "/root/gennova-evidence/20261019-midterm-aligned/runtime/vllm_ascend/ascend_config.py": "1de2e80ec645c5513d2270678999a7808c4ba6a03363159b7802080d86b66245",
+    "/root/gennova-evidence/20261019-midterm-aligned/runtime/vllm_ascend/ops/fused_moe/fused_moe.py": "1c557c9aed1eae9f6a0dba07adb3a5f8235252bd876a39f25c881ffcaac9dbc4",
+    "/root/gennova-evidence/20261019-midterm-aligned/runtime/vllm_ascend/ops/fused_moe/shared_experts.py": "78d6ad231159b907571b609538e38fa682a7d5e994d7c24749c1ece075fcc881",
+    "/root/gennova-evidence/20261019-midterm-aligned/recovery-model-payload-r1/betterscale/models/qwen35/moe_overlap.py": "e1454f298ea160c79fb157fbc6c0c4ad43d312949d7fdd6c505bec1c1ea812e4",
+    "/root/gennova-evidence/20261019-midterm-aligned/m01-recovery-model-worker-r1/launch-command.json": "39ac8a221a6ce46873ff46192b4e9e1977c46049e285699731b43662cef29204",
+    "/root/gennova-evidence/20261019-midterm-aligned/mmlu-b1-microflow-fa-on-r9/launch-command.json": "5032a2cd083517a7399912af8c68a39fff3c99a8d975077579e656e1bf64ec32",
+    "/root/gennova-evidence/20261019-midterm-aligned/mmlu-b1-microflow-fa-on-r10/launch-command.json": "5032a2cd083517a7399912af8c68a39fff3c99a8d975077579e656e1bf64ec32",
+    "/root/gennova-evidence/20261019-midterm-aligned/mmlu-b1-microflow-fa-on-r11/launch-command.json": "5032a2cd083517a7399912af8c68a39fff3c99a8d975077579e656e1bf64ec32",
+    "/root/gennova-evidence/20261019-midterm-aligned/m01-recovery-model-worker-r1/token-accounting-1477342.jsonl": "261ce3308ea95f42aae581d20ad6017cae6ee24cc3ed9dcc5a424e2353901fd5",
+    "/root/gennova-evidence/20261019-midterm-aligned/m01-recovery-model-worker-r1/token-accounting-1477343.jsonl": "21aff554c9d92bd91fab6aae654d1b0275913c38843c2f3006437b9f9f075140"
+  },
+  "reference_seconds": null,
+  "efficiency_percent": null
+}
