@@ -77,4 +77,4 @@ def test_report_table_generated_from_measured_summaries():
     )
     assert "6372.136" in rendered and "5389.571" in rendered
     assert "完整有效 F 和 M01 达成率仍不报告" in rendered
-    assert "报告版本：V0.75" in (REPORT / "中期测试报告.md").read_text()
+    assert "报告版本：V0.76" in (REPORT / "中期测试报告.md").read_text()
