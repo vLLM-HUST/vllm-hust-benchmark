@@ -15,16 +15,22 @@ def test_publication_rebuilds_from_pinned_report_and_verified_archives():
     spec.loader.exec_module(module)
     actual = json.loads(module.OUTPUT.read_text())
     assert actual["source_commit"] == module.REVISION
-    assert actual["report_sha256"] == (
-        "b755512e642918346816c3700cc2ab7efa2674efa4b2b77cc888ca5396843efb"
+    assert (
+        actual["report_sha256"]
+        == (
+            "b755512e642918346816c3700cc2ab7efa2674efa4b2b77cc888ca5396843efb"  # pragma: allowlist secret
+        )
     )
     # PR CI uses a shallow checkout; the frozen V0.72 source commit may be absent.
-    has_pinned_source = subprocess.run(
-        ["git", "cat-file", "-e", f"{module.REVISION}:{module.REPORT}"],
-        cwd=ROOT,
-        check=False,
-        capture_output=True,
-    ).returncode == 0
+    has_pinned_source = (
+        subprocess.run(
+            ["git", "cat-file", "-e", f"{module.REVISION}:{module.REPORT}"],
+            cwd=ROOT,
+            check=False,
+            capture_output=True,
+        ).returncode
+        == 0
+    )
     if has_pinned_source:
         raw = module.pinned(module.REPORT)
         assert hashlib.sha256(raw).hexdigest() == actual["report_sha256"]
