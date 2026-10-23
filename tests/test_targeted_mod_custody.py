@@ -13,6 +13,7 @@ def test_targeted_original_bytes():
         ("vspec-regression", 317),
         ("manager-paper", 7),
         ("manager-experiments", 208),
+        ("pyramid-legacy", 7),
     ):
         capsule = root / name
         manifest = json.loads((capsule / "manifest.json").read_text())

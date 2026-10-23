@@ -40,7 +40,9 @@ has been audited or migrated.
   provenance assertions. Its two README files are navigation/context. Preserve the EAGER +
   prefix-caching historical identity; these are not current graph-mode results.
   `tests/test_provenance.py` retains legacy anchors, while `legacy_contracts.py` is implementation
-  and must remain. Observed default commit: `c1746c4a593007393dd30f6181227356ad8144e9`.
+  and must remain. Observed default commit: `c1746c4a593007393dd30f6181227356ad8144e9`. These five
+  files are additionally preserved in the [legacy capsule](pyramid-legacy/manifest.json); source
+  consumer migration retains every original hash, ratio and provenance assertion.
 - KVCompress: at merged `c077a6a0f4854e065d68bef52f742b71bd654536`,
   `docs/optimization/triattention-tp-score-batching-20261017.zh.md` mixes implementation
   explanations, historic configuration labels and numerical comparisons. Its paired JSON links
