@@ -100,5 +100,5 @@ def test_m01_limited_verdict_matches_retained_model_evidence():
     assert "证据受限" in original
     assert "未通过" in original
     assert "30.2443%–30.2505%" in report
-    assert "不是V5.27当前C、η或达标判定" in report
+    assert "不是V1.5当前C、η或达标判定" in report
     assert "复算中，当前C、η与达标结论均未判定" in report
