@@ -27,6 +27,8 @@ provenance。涉及原件订正时保留旧字节及说明， 不要仅重新计
 - **Frontier 原始并发曲线：** [56-run 索引](reports/frontier-raw-recovery-20261020/README.md)。
 - **迁入 benchmark 的 MOD 数据：** [2026-10-21](archive/mod-git-20261021/)、
   [2026-10-22](archive/mod-git-20261022/)；每个 capsule 的 manifest 记录原仓库、固定提交、路径和 SHA256。
+  [2026-10-23 后续盘点](archive/mod-followup-20261023/README.md)列出尚待分类的 MOD 数据、BiDKV 消费者迁移、
+  旧安装资产保留依据及硬件/审核阻塞；路径命中不等于可删除实测原件。
 - **大文件/Release：** [Frontier 原件](archive/frontier-recovered-20261021/README.md)、
   [源码和校准附件](archive/frontier-capsules-20261021/README.md)、
   [terminal history](archive/terminal-history-20261021/README.md)。下载固定资产后先核验包摘要，再核验成员； 本索引不联网，不枚举
