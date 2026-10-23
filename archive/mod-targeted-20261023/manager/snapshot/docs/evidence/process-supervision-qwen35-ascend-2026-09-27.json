@@ -1,0 +1,52 @@
+{
+  "schema": "vllm-hust-ext.runtime-lifecycle-acceptance.v1",
+  "result": "pass",
+  "manager_commit": "a9c2e7a369e52acf0c13e1ac29a074e757de212b",
+  "process_supervisor_sha256": "b59004c1244fd369b54c3cca632c25a59480cd833dbbf4cc52f25c79073a52f5",
+  "host": {
+    "hostname": "host-192-168-0-84",
+    "accelerator": "Ascend 910B2",
+    "device_ids": [2, 3]
+  },
+  "runtime": {
+    "image": "vllm-hust-verification:latest",
+    "image_id": "sha256:c037d56b32ebbfaab0deb00fdc632222266ff9d31e536648b1a6daebb7a40efa",
+    "vllm_version": "0.28.1.post1.dev143+gf18cf803c.empty",
+    "vllm_ascend_version": "0.25.1rc2.dev125+hust.20260903.4.g74f0c0a27.d20260909",
+    "model": "Qwen3.5-35B-A3B",
+    "tensor_parallel_size": 2,
+    "manager_shutdown_grace_seconds": 30
+  },
+  "request": {
+    "endpoint": "/v1/completions",
+    "finish_reason": "stop",
+    "expected_text": "ECPA_READY",
+    "observed_text_contains_expected": true
+  },
+  "processes": {
+    "manager_host_pid": 32533,
+    "launch_pgid": 32543,
+    "engine_host_pid": 44612,
+    "worker_host_pids": [48034, 48035],
+    "manager_exit_code": 143,
+    "outer_wrapper_remained_alive": true,
+    "launch_group_empty_after_manager_exit": true
+  },
+  "hbm_mib": {
+    "baseline": {"device_2": 3424, "device_3": 3424},
+    "active": {"device_2": 59769, "device_3": 59769},
+    "immediately_after_manager_exit": {"device_2": 7547, "device_3": 9595},
+    "five_seconds_after_manager_exit": {"device_2": 3424, "device_3": 3424}
+  },
+  "timestamps": {
+    "ready": "2026-09-27T04:19:41Z",
+    "sigterm_sent": "2026-09-27T04:20:24Z",
+    "manager_exited": "2026-09-27T04:20:25Z"
+  },
+  "scope": "Manager-owned launch-group shutdown and accelerator release",
+  "excluded_claims": [
+    "Mooncake data-path effectiveness",
+    "general plugin runtime effectiveness",
+    "performance improvement"
+  ]
+}
