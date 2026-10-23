@@ -182,6 +182,22 @@ def test_refresh_pagination_drafts_and_manifest_identity(
 
     def fake_api(args):
         assert "--paginate" in args and "--slurp" in args
+        if "/assets?" in args[-1]:
+            return json.dumps(
+                [
+                    [
+                        {
+                            "name": "incomplete.tar.gz",
+                            "browser_download_url": "https://example.org/incomplete",
+                            "id": 7,
+                            "size": 12,
+                            "digest": None,
+                            "updated_at": None,
+                            "state": "starter",
+                        }
+                    ]
+                ]
+            ).encode()
         release = {
             "draft": False,
             "tag_name": "r1",
@@ -199,6 +215,8 @@ def test_refresh_pagination_drafts_and_manifest_identity(
     monkeypatch.setattr(index.subprocess, "check_output", fake_api)
     snapshot = index.refresh(Path("unused"), "main")
     assert len(snapshot["releases"]) == 2
+    assert snapshot["releases"][0]["assets"][0]["state"] == "starter"
+    assert snapshot["releases"][0]["assets"][0]["digest"] is None
     assert list(snapshot["website_inputs_sha256"]) == [
         "assets/serving-plan/app.mjs",
         "assets/view.js",

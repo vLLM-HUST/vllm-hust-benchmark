@@ -59,12 +59,16 @@ python scripts/data_index.py --query 'archive split' --limit 100
 
 ### 网站引用与 Release 附件入口
 
+[V0.72 上线与索引复核回执](docs/data-entrypoints-v072-audit.json)记录 2026-10-23 的线上字节校验、
+发布身份订正及附件状态；它是带时间的验收快照，不替代下述当前索引，也不代表 M01 已通过。
+
 [关联入口索引](docs/data-entrypoints.json) 补足目录索引不包含的三类信息：
 
 - `publication_bindings`：网站 `data/` 路径到 benchmark 原文件或压缩描述符/分片的映射，包含还原后 SHA256。
 - `references`：固定网站提交的前端 HTML/JS/MJS 字面引用，以及 benchmark 发布数据中的链接、结构化证据路径；保留引用来源，区分已映射、动态模板、未映射和外部链接。
-- `releases`：GitHub 分页 API 返回的全部非 draft Release 及附件名称、下载 URL、大小、资产 ID、API
-  digest。包含历史附件，不将它们自动认定为当前验收证据。
+- `releases`：GitHub 分页 API 返回的全部非 draft Release 及附件名称、下载 URL、大小、资产 ID、API digest、上传状态。附件通过逐 Release
+  分页端点读取，避免列表内嵌清单漏项。仅 `state=uploaded` 表示上传完成； `starter`
+  是未完成上传，保留失败元数据但不可当作可下载证据。包含历史附件，不将它们自动认定为当前验收证据。
 
 [采集快照](docs/data-entrypoints-sources.json) 固定网站 commit、输入文件摘要、Release 元数据和采集时间。
 发布清单优先采自线上；若获取失败，明确记录错误并标明使用的是网站 Git 中的历史副本，不能当作线上当前版本。 网站部署时会重新生成数据，网站代码提交与线上发布数据身份不是同一个概念。
