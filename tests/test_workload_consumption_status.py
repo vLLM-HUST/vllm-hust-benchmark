@@ -80,3 +80,24 @@ def test_locomo_input_audit_and_prior_failure_remain_distinct_from_sampled_compl
         "docs/workload-data/validation/locomo-original-qa-recovery-20261023.json",
         "docs/workload-data/validation/locomo-original-qa-recovery-batch2-20261023.json",
     ]
+
+
+def test_gsm8k_tail_receipt_tracks_three_actual_ids_not_harness_effective_count():
+    ledger = json.loads((DOCS / "dataset-validation-status.json").read_text("utf-8"))
+    row = next(r for r in ledger["sources"] if r["source_id"] == "GSM8K")
+    receipt = json.loads(
+        (ROOT / row["supplemental_execution_receipts"][0]).read_text("utf-8")
+    )
+    assert receipt["status"] == "END_TO_END_EXECUTED_AND_SCORED"
+    assert receipt["selected_samples"] == ["test:1316", "test:1317", "test:1318"]
+    assert receipt["verified_unique_tasks"] == 3
+    metrics = receipt["metrics"]["gsm8k"]
+    assert metrics["exact_match,strict-match"] == 1.0
+    assert metrics["exact_match,flexible-extract"] == 1.0
+    assert receipt["sample_counts"]["gsm8k"] == {"original": 1319, "effective": 1319}
+    assert "counts three tasks only" in receipt["harness_cardinality_caveat"]
+    assert receipt["prior_failed_invocation"]["model_generations"] == 0
+    assert receipt["raw_requests_answers_and_model_outputs_published"] is False
+    assert row["supplemental_execution_receipts"] == [
+        "docs/workload-data/validation/gsm8k-tail-npu-20261023.json"
+    ]

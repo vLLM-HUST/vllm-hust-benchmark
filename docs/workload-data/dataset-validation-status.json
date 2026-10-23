@@ -426,7 +426,10 @@
       ],
       "checked": true,
       "receipt": "docs/workload-data/validation/gsm8k-npu-20261022.json",
-      "blocker": null,
+      "supplemental_execution_receipts": [
+        "docs/workload-data/validation/gsm8k-tail-npu-20261023.json"
+      ],
+      "blocker": "首批test:0–2维持本来源勾选；另在原test文件末尾补测test:1316–1318，三题官方strict/flexible exact-match均为1.0。合计只抽测6/1319，未跑全量；该补测中一次错误/v1端点调用导致404且无模型生成，失败记录保留在私有服务器。lm-eval报告的effective=1319不等于完成数，实际doc_id核验为3个新任务。",
       "local_read_receipt": "docs/workload-data/validation/local-read-24sources-20261022.json"
     },
     {
