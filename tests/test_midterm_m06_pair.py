@@ -53,7 +53,10 @@ def test_report_render_and_protocol_deviation_preserved():
     result = renderer.load(DATA)
     builder = module(REPORT.parents[1] / "scripts/build_midterm_publication.py")
     report = (REPORT / "中期测试报告.md").read_text()
-    assert builder.tables(renderer.render(result)) == builder.tables(
+    # Preserve the sealed renderer, raw metrics and explicit display migration.
+    assert builder.tables(
+        renderer.render(result).replace("B0", "开发栈对照")
+    ) == builder.tables(
         builder.section(report, "### 5.10 恢复环境配对性能与全流程成本")
     )
     prior = json.loads((DATA / "m06-pair-result-r2.json").read_text())

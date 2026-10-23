@@ -147,7 +147,7 @@ def test_report_quality_table_is_derived_from_raw_results():
     builder = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(builder)
     report = (REPORT / "中期测试报告.md").read_text()
-    assert builder.tables(rendered) == builder.tables(
+    assert builder.tables(rendered.replace("B0", "开发栈对照")) == builder.tables(
         builder.section(report, "### 5.8 恢复环境完整回答质量复核")
     )
     assert "-0.50" in rendered and "-1.50" in rendered
@@ -221,6 +221,8 @@ def test_native_pair_table_is_derived_from_raw_results():
     builder = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(builder)
     report = (REPORT / "中期测试报告.md").read_text()
-    assert builder.tables(renderer.render(native, candidate)) == builder.tables(
+    assert builder.tables(
+        renderer.render(native, candidate).replace("B0", "开发栈对照")
+    ) == builder.tables(
         builder.section(report, "### 5.9 恢复环境 Native 与优化方案配对质量")
     )

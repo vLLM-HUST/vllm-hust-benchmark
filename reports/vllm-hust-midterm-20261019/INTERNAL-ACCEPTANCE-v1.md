@@ -7,6 +7,12 @@ certification or a claim about actual procurement expense.
 
 ### Baseline Identity Clarification (2026-10-22)
 
+Clarified 2026-10-23: **B0 exclusively means vLLM 0.18 + vLLM-Ascend 0.18.** Other-version Native
+controls must not be labeled B0. **B1 may use any base runtime version**; identify the actual
+versions and optimization configuration. Cross-version B0/B1 comparisons are allowed where workload,
+resources and quality constraints support them; same runtime version is not an admission condition.
+Immutable historical run IDs are not current presentation labels.
+
 The designated acceptance baseline is the official vLLM 0.18 / vLLM-Ascend 0.18 release line. Reuse
 existing 0.18 evidence wherever its workload, metric and provenance support the comparison.
 Compatibility backports or environment differences do not automatically require a rerun: assess
