@@ -8,6 +8,25 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def _script_hashes_for_line_endings(payload):
+    """Accept only Git LF/CRLF transport variants, never alter old receipts."""
+    lf = payload.replace(b"\r\n", b"\n")
+    return {
+        hashlib.sha256(lf).hexdigest(),
+        hashlib.sha256(lf.replace(b"\n", b"\r\n")).hexdigest(),
+    }
+
+
+def test_line_ending_compatibility_does_not_accept_changed_script_content():
+    lf = b"print('fixture')\n"
+    crlf = lf.replace(b"\n", b"\r\n")
+    assert _script_hashes_for_line_endings(lf) == _script_hashes_for_line_endings(crlf)
+    assert hashlib.sha256(lf).hexdigest() in _script_hashes_for_line_endings(crlf)
+    assert hashlib.sha256(b"print('changed')\n").hexdigest() not in (
+        _script_hashes_for_line_endings(lf)
+    )
+
+
 def test_partial_history_execution_and_retrieval_preparation_stay_distinct():
     directory = ROOT / "docs/workload-data"
     sources = json.loads(
@@ -47,11 +66,10 @@ def test_humaneval_generation_without_functional_scoring_stays_unchecked():
     assert receipt["source_checkbox_eligible"] is False
     assert receipt["sandbox_probe"]["generated_code_executed"] is False
     assert len(receipt["samples"]) == 3
-    assert (
-        receipt["helper_sha256"]
-        == hashlib.sha256(
-            (ROOT / "scripts/run_humaneval_original_generation.py").read_bytes()
-        ).hexdigest()
+    # Historical execution hashed actual LF bytes. A Windows Git archive may
+    # export CRLF; this check proves content continuity, not byte-identical replay.
+    assert receipt["helper_sha256"] in _script_hashes_for_line_endings(
+        (ROOT / "scripts/run_humaneval_original_generation.py").read_bytes()
     )
 
 
