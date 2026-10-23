@@ -551,17 +551,27 @@
       "workload_class_ids": [
         "conversation-memory-recall"
       ],
-      "acquisition": "VERIFIED_ORIGINAL_FIXED_GIT_FILE_ON_SERVER",
-      "read_adapter": "FIXED_CI_INSTALLED_1986_QUESTION_FIELDS_3_ROUNDTRIPS_AND_CONSUMER_VERIFIED",
-      "server_execution": "FIRST_ORIGINAL_REQUEST_HTTP500_ENGINE_EXITED_NO_COMPLETION",
-      "scoring": "NOT_RUN",
-      "selected_samples": [],
-      "completed_samples": [],
-      "checked": false,
-      "receipt": "docs/workload-data/validation/locomo-original-reader-20261023.json",
-      "execution_receipt": "docs/workload-data/validation/locomo-original-qa-failure-20261023.json",
+      "acquisition": "VERIFIED",
+      "read_adapter": "VERIFIED",
+      "server_execution": "COMPLETED",
+      "scoring": "COMPLETED",
+      "selected_samples": [
+        0,
+        1,
+        2
+      ],
+      "completed_samples": [
+        0,
+        1,
+        2
+      ],
+      "checked": true,
+      "receipt": "docs/workload-data/validation/locomo-original-qa-recovery-20261023.json",
+      "reader_receipt": "docs/workload-data/validation/locomo-original-reader-20261023.json",
+      "execution_receipt": "docs/workload-data/validation/locomo-original-qa-recovery-20261023.json",
       "fixed_input_consumption_receipt": "docs/workload-data/validation/locomo-fixed-input-consumption-20261023.json",
-      "blocker": "Fixed 04113e35/a1fb1efd reader and b3e1f9f consumer verified; full original conversations retained, no observation/summary input. First original model request HTTP500, engine exited, no completed answer/scoring. Category5 publisher generation assumes answer but 444 original rows only provide adversarial_answer; not silently repaired. CC-BY-NC-4.0 terms apply."
+      "prior_failure_receipt": "docs/workload-data/validation/locomo-original-qa-failure-20261023.json",
+      "blocker": "抽样级执行与发布方F1已完成（原索引0–2，3/1986）；Qwen3.5-27B替代发布方GPT-4-Turbo，且恢复运行仅将TMPDIR切至实例本地/tmp，均已披露。旧NFS临时目录崩溃记录保留，根因未证实。第5类444题原始字段只有adversarial_answer、发布方生成路径对answer字段的兼容性未核；其余问题和全套未验证。CC-BY-NC-4.0条款适用。"
     },
     {
       "source_id": "LONGALPACA",

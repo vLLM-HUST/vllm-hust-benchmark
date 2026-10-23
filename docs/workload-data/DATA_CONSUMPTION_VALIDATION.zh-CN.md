@@ -37,6 +37,6 @@ SHA256为`a1fb1efd188cee7ace85a3f911894509bcfd401c41cf4ecd7ca6ef36eb83c26c`，31
 研究端[测试、打包及论文构建](https://github.com/intellistream/agent-workload-suite/actions/runs/39873904563)和[准备链路](https://github.com/intellistream/agent-workload-suite/actions/runs/39873904546)全部成功，Linux消费92项、组件948项、harness及前批回归127项通过，无跳过。
 研究侧多会话文本投影只用于其离线消费，明确不是官方模型提示词或tokenizer输入，不迁入benchmark。
 
-上述核验为零模型/零任务/零评分，不能覆盖[首次原题执行失败](validation/locomo-original-qa-failure-20261023.json)：HTTP500后引擎退出，没有完成答案或分数。
+上述固定工件与跨仓消费核验本身为零模型、零任务、零评分，不能覆盖[首次原题执行失败](validation/locomo-original-qa-failure-20261023.json)：HTTP500后引擎退出，没有完成答案或分数。随后按原模型和推理参数恢复服务，并仅将编译临时目录改到实例本地`/tmp`；[重试回执](validation/locomo-original-qa-recovery-20261023.json)记录了原始前三题均完成、发布方F1为0.6667/0/0.2857、均值0.3175。该结果支持这三条原题的读取、生成、终止及评分链路，不能证明NFS故障根因已修复，也不代表全量LoCoMo或发布方GPT-4-Turbo复现。原始任务和模型响应仍留在私有服务器，没有提交到公开仓库。
 第5类兼容和视觉执行仍未核验，CC-BY-NC-4.0原始使用条款仍适用。
 [固定工件汇总](validation/locomo-fixed-input-consumption-20261023.json)与先前候选、失败回执分别保存；文档更新不自动重锁数据版本或重写旧证据。

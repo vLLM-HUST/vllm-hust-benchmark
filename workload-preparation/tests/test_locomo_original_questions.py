@@ -139,7 +139,7 @@ def test_source_pipeline_and_resolver_use_same_question_view(tmp_path):
         assert actual.outcome_record() == expected.outcome_record()
 
 
-def test_original_reader_and_failed_execution_evidence_do_not_claim_completion():
+def test_original_reader_failure_is_preserved_and_recovery_sample_is_scored():
     root = Path(__file__).resolve().parents[2]
     docs = root / "docs/workload-data"
     manifest = source_spec("LOCOMO")
@@ -155,6 +155,13 @@ def test_original_reader_and_failed_execution_evidence_do_not_claim_completion()
             "utf-8"
         )
     )
+    recovery = json.loads(
+        (docs / "validation/locomo-original-qa-recovery-20261023.json").read_text(
+            "utf-8"
+        )
+    )
+    ledger = json.loads((docs / "dataset-validation-status.json").read_text("utf-8"))
+    row = next(source for source in ledger["sources"] if source["source_id"] == "LOCOMO")
     assert reader["original_questions_field_checked"] == 1986
     assert reader["category_5_reference_only_records"] == 444
     assert reader["model_calls"] == reader["scorer_runs"] == 0
@@ -165,3 +172,22 @@ def test_original_reader_and_failed_execution_evidence_do_not_claim_completion()
         is failure["source_checkbox_eligible"]
         is False
     )
+    assert recovery["status"] == "END_TO_END_EXECUTED_AND_SCORED"
+    assert recovery["selected_samples"] == [0, 1, 2]
+    assert recovery["scoring"] == "COMPLETED"
+    assert [sample["finish_reason"] for sample in recovery["samples"]] == [
+        "stop",
+        "stop",
+        "stop",
+    ]
+    assert [sample["publisher_f1"] for sample in recovery["samples"]] == [
+        0.6666666666666666,
+        0.0,
+        0.28571428571428575,
+    ]
+    assert recovery["aggregate"]["publisher_f1_mean"] == 0.31746031746031744
+    assert recovery["raw_requests_and_model_responses_published"] is False
+    assert row["checked"] is True
+    assert row["receipt"] == "docs/workload-data/validation/locomo-original-qa-recovery-20261023.json"
+    assert row["prior_failure_receipt"] == "docs/workload-data/validation/locomo-original-qa-failure-20261023.json"
+    assert row["blocker"].find("第5类") >= 0
