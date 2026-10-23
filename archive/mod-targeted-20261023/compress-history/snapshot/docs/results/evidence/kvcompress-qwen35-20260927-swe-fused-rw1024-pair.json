@@ -1,0 +1,77 @@
+{
+  "schema_version": 1,
+  "kind": "official-client-paired-engineering-result",
+  "date_utc": "2026-09-27",
+  "status": "valid-protocol-performance-regression",
+  "leaderboard_eligible_positive": false,
+  "workload": {
+    "name": "SWE prefix reuse",
+    "prepared_sha256": "8105957b4001e7fd21373150fb7b844a9931abe9f88c699b3db191b84a8596d3",
+    "client_commit": "6861242dbd9f17b707003191e4200b7752911d7c",
+    "concurrency": 4,
+    "measurement_seconds": 900,
+    "chips": 2
+  },
+  "deployment": {
+    "model": "Qwen3.5-35B-A3B",
+    "model_revision": "59d61f3ce65a6d9863b86d2e96597125219dc754",
+    "precision": "bfloat16",
+    "configured_context_tokens": 262144,
+    "hardware": "2× Ascend 910B2 devices 2,3",
+    "tensor_parallel_size": 2,
+    "vllm_commit": "fc06902b7dd7aa1610438cd061ccf7f04b31c609",
+    "vllm_ascend_commit": "5422a07c4dd471c2224afcfdfdca62fb4c5f75f3",
+    "scorer_source_sha256": "3a03a62ff303c4ed3b50307584845487457c952a089f0cd708d4db9116777449",
+    "method_source_sha256": "367cca624759713eeccd2ebdefe3d75d27494c9ced538d2a08d6fb7c38700e1a",
+    "features": "APC, real MTP2, async, mamba_cache_mode=align, FULL_AND_PIECEWISE",
+    "baseline_compression_threshold_tokens": 262272,
+    "candidate_compression_threshold_tokens": 9216,
+    "candidate_physical_budget_tokens": 8192,
+    "candidate_recompute_window_tokens": 1024
+  },
+  "arms": {
+    "B0": {
+      "run_id": "dc2e6b1f22ad4220a26b3b547af5678c",
+      "valid": true,
+      "failed_requests": 0,
+      "requests_completed_in_window": 325,
+      "max_prompt_tokens_observed": 73616,
+      "output_tokens_per_second": 219.37555555555556,
+      "output_tokens_per_second_per_chip": 109.68777777777778,
+      "decode_tokens_per_second_p90": 70.78060413546544,
+      "ttft_p95_ms": 1353.4618567675352,
+      "summary_sha256": "103fa696aa0c91c720c3c5cc3678d8a812d94ad46a83a68b55c408c1f1dbd4bf",
+      "config_sha256": "11faecfe817e65ac2bd2e4f7dda733e26cc14317aaacc2f4015c98baca13917a"
+    },
+    "B1": {
+      "run_id": "1d2b535552d541f2a88412afb147accd",
+      "valid": true,
+      "failed_requests": 0,
+      "requests_completed_in_window": 306,
+      "max_prompt_tokens_observed": 73616,
+      "output_tokens_per_second": 213.33444444444444,
+      "output_tokens_per_second_per_chip": 106.66722222222222,
+      "decode_tokens_per_second_p90": 69.83209407454075,
+      "ttft_p95_ms": 1354.4439258985221,
+      "summary_sha256": "255ab8df21d753095fdd2fc64e3d1a2aa4e223bf8b0b2d77b94c63f15f06e68f",
+      "config_sha256": "d1de868d9e8558f29daa1a4c71bf7a9489c2dd4d2bd503cdba0f6105cedc3e43"
+    }
+  },
+  "candidate_vs_baseline": {
+    "output_tps_change_pct": -2.7537758688803593,
+    "decode_p90_tps_change_pct": -1.3400705920923683,
+    "ttft_p95_ms_change_pct": 0.07255979369322763
+  },
+  "service_observations": {
+    "preemptions": "zero on both arms at final metrics sample",
+    "prefix_caching": "server-side hit counters increased on both arms",
+    "mtp": "real accepted-token counters increased on both arms",
+    "compression": "B1 scheduler commits and TP-rank acknowledgements observed in live logs; exact log counts were not archived"
+  },
+  "limitations": [
+    "Maximum observed prompt was 73,616 tokens, not 256K.",
+    "The fixed-window arms completed different turn mixes (325 vs 306 requests).",
+    "One run per arm cannot establish repeatability or statistical significance.",
+    "This is a plugin-local negative record, not an official website submission."
+  ]
+}

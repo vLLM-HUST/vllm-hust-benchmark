@@ -1,0 +1,72 @@
+{
+  "schema_version": 1,
+  "test_id": "kvcompress-v0.5.0-auto-calibration-a1",
+  "date_utc": "2026-09-15",
+  "verdict": "engineering_pass",
+  "plugin_version": "0.5.0",
+  "source_base_commit": "7c0d21144d99096736138812f727d6f59a93028a",
+  "host": {
+    "vllm": "0.28.1.post1.dev260+g6cdc0304a",
+    "vllm_ascend": "0.25.1rc2.dev232+hust.20260903.4.g5901bedbb",
+    "python": "3.11.16",
+    "torch": "2.10.0",
+    "torch_npu": "2.10.0.post2",
+    "transformers": "5.15.1",
+    "device": "one Ascend 910B2, physical NPU 6"
+  },
+  "model": {
+    "path": "/data/shared_datasets/Qwen--Qwen2.5-Coder-14B-Instruct",
+    "model_type": "qwen2",
+    "layers": 48,
+    "query_heads": 40,
+    "kv_heads": 8,
+    "head_dim": 128,
+    "rope_theta": 1000000.0,
+    "model_source_fingerprint": "local-manifest:225b1198243886641717f2f146f6d0074ca01157740ae7918cbe8828270d7aa1"
+  },
+  "generation": {
+    "input_source": "builtin:multilingual-systems-v1",
+    "input_sha256": "6aaa07f09f489b1421a35fb8436ea95ed0c6c3a4fafe3e46dcce84e990d602dd",
+    "token_count": 4096,
+    "dtype": "bfloat16",
+    "attention_implementation": "eager",
+    "artifact_size_bytes": 1565471,
+    "artifact_sha256": "f53898b153fe8b3177b7e10e3c0f979eb6b470a9e5fc335a3f0ed3258f42846b",
+    "structural_validation_reasons": [],
+    "cosine_similarity_to_legacy_full": {
+      "q_mean_real": 0.9540379047393799,
+      "q_mean_imag": 0.9532702565193176,
+      "q_abs_mean": 0.9908033609390259
+    }
+  },
+  "startup_missing_artifact": {
+    "generated_before_serving_weight_load": true,
+    "temporary_model_released_before_serving_weight_load": true,
+    "layers_bound": 48,
+    "health_http_status": 200,
+    "completion_http_status": 200,
+    "completion_text": "calibration startup passed"
+  },
+  "generated_artifact_use": {
+    "input_tokens": 3072,
+    "requested_output_tokens": 64,
+    "completed": 1,
+    "correct": 1,
+    "prompt_lengths_valid": true,
+    "scheduler_commits": 1,
+    "worker_acknowledgements": 1,
+    "source_blocks": 24,
+    "destination_blocks": 16,
+    "released_blocks": 8
+  },
+  "other_checks": {
+    "ascend_kernel_smoke": "pass",
+    "unit_contract_tests": "77 passed, 1 skipped",
+    "ruff": "pass"
+  },
+  "limitations": [
+    "The built-in calibration corpus is a bootstrap default, not a substitute for a production-representative licensed corpus.",
+    "The 3072-token generated-artifact use test is a single deterministic correctness case, not a repeated throughput benchmark.",
+    "Long-context throughput and public quality claims remain those recorded for version 0.4 unless a new matched matrix is run."
+  ]
+}

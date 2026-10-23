@@ -1,0 +1,90 @@
+{
+  "schema_version": 1,
+  "kind": "v0.9.0-official-client-paired-engineering-result",
+  "date_utc": "2026-10-08",
+  "status": "valid-protocol-decode-p90-positive-throughput-regression",
+  "client": {
+    "repository": "https://github.com/vLLM-HUST/swe-prefix-reuse",
+    "commit": "6861242dbd9f17b707003191e4200b7752911d7c",
+    "prepared_workload_sha256": "8044561ffa1bb430bea8f778ef814d96649321e1a92654b95f64263b996d5e85",
+    "concurrency": 4,
+    "chips": 2,
+    "measurement_seconds": 900,
+    "both_separate_60s_checks_valid": true
+  },
+  "deployment": {
+    "model": "Qwen3.5-35B-A3B",
+    "model_revision": "712cf74392b05026a6db2bf213d343747d1f6d45",
+    "precision": "bfloat16",
+    "configured_context_tokens": 262144,
+    "hardware": "2 x Ascend 910B2, devices 2 and 7",
+    "tensor_parallel_size": 2,
+    "vllm_commit": "ebfcfba6507501c3a359a75eb4911ecc442bc2ff",
+    "vllm_ascend_commit": "7c8ec865a12f7b6a14d53b61b5e811dd483",
+    "plugin_code_commit": "222b568",
+    "benchmarked_wheel_sha256": "c8de9f513a1ff0ef5ccc26531051194e2a8f546478d02daa92b3c7a237656295",
+    "extension_manager_commit": "075dbcbee641e22376300069aab1f7e9f275aa5d",
+    "calibration_sha256": "c138ffa859396d1e7c6f06c62f13696bd87d8548b9de0536ec251538c9b8e18c",
+    "features": "APC, real MTP2, async scheduling, align, FULL_AND_PIECEWISE",
+    "baseline_compression_threshold_tokens": 263680,
+    "candidate_compression_threshold_tokens": 9088,
+    "candidate_physical_budget_tokens": 8064,
+    "candidate_recompute_window_tokens": 1024
+  },
+  "arms": {
+    "B0": {
+      "run_id": "d46c73d5fe1649b69a2de0c5e6cb3ca1",
+      "valid": true,
+      "aborted": false,
+      "failed_requests": 0,
+      "requests_completed_in_window": 221,
+      "max_prompt_tokens_observed": 52505,
+      "output_tokens_per_second": 153.29666666666665,
+      "output_tokens_per_second_per_chip": 76.64833333333333,
+      "decode_tokens_per_second_p90": 47.91979853233613,
+      "ttft_p95_ms": 1472.5664518773556,
+      "summary_sha256": "ad529e69973701bddd207e553e044116faf3627410bbce531b24a43eeb4dd9d8",
+      "config_sha256": "b9667a512a4dad2a85389f8656d53ce4fce5a2c9e7b08c2c9c454b22ab8edd22",
+      "requests_sha256": "273cf4f4e75f7ef1cd5f28f09b3c01b4c147686e47b7af8fdcd665ec51d44026"
+    },
+    "B1": {
+      "run_id": "d277efb3d74446feaa3c4ac7392ef71c",
+      "valid": true,
+      "aborted": false,
+      "failed_requests": 0,
+      "requests_completed_in_window": 218,
+      "max_prompt_tokens_observed": 52505,
+      "output_tokens_per_second": 149.14333333333335,
+      "output_tokens_per_second_per_chip": 74.57166666666667,
+      "decode_tokens_per_second_p90": 48.42429305327926,
+      "ttft_p95_ms": 1610.3340400964944,
+      "summary_sha256": "fcaee8cf38c3b7ac8c409833b095ce07a4f4c36be1d21e7180dc6a4ff84596f1",
+      "config_sha256": "49b2b1b0fe2b4b78b5aeb489ec897e6d2224e056b0ad020e3817e32504f89cc7",
+      "requests_sha256": "609f83dd2a674f31a095755e77bb322b7360778277c12e07e037e717b37d1a3e"
+    }
+  },
+  "candidate_vs_baseline": {
+    "output_tps_pct": -2.709343538672271,
+    "decode_p90_tps_pct": 1.0527893196435212,
+    "ttft_p95_ms_pct": 9.355610950086547
+  },
+  "service_observations": {
+    "b1_lifetime_scheduler_commits": 60,
+    "b1_lifetime_tp_rank_acknowledgements": 120,
+    "all_commits_acknowledged_by_both_ranks": true,
+    "b0_compression_commits": 0,
+    "b0_server_log_sha256": "806aed46b4af7adf310a16e1a4a1a6ab35f82cd345a0ca4d84e0a0fb33dde83a",
+    "b1_server_log_sha256": "6fd9b599d4c9dbd4db6ca20683f416ceae4029f1848ba6850a3534c7bddd8bfc",
+    "real_mtp_acceptance_metrics_logged": true,
+    "server_side_prefix_hits_logged": true,
+    "preemptions_observed": 0
+  },
+  "limitations": [
+    "Maximum observed prompt was 52,505 tokens in both arms; 262,144 is configured capacity, not achieved length.",
+    "Fixed-window closed-loop arms completed different request mixes (221 versus 218 in-window).",
+    "One pair cannot establish statistical significance or repeatability.",
+    "Total output throughput and TTFT P95 regressed despite the decode P90 improvement.",
+    "SWE synthetic replay does not measure task success or semantic answer quality.",
+    "This local result is not an official website submission."
+  ]
+}

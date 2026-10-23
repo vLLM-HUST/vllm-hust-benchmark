@@ -1,0 +1,156 @@
+[W904 11:26:24.855001431 FunctionLoader.cpp:44] Warning: LD_PRELOAD detected, FunctionLoader prefers RTLD_DEFAULT for symbol resolution. (function operator())
+INFO 09-04 11:26:29 [__init__.py:52] Available plugins for group vllm.platform_plugins:
+INFO 09-04 11:26:29 [__init__.py:54] - ascend -> vllm_ascend:register
+INFO 09-04 11:26:29 [__init__.py:66] Loading plugin ascend
+INFO 09-04 11:26:30 [__init__.py:272] Platform plugin ascend is activated
+INFO 09-04 11:26:30 [platform.py:70] Breakable CUDAGraph on Ascend is opt-in; using VLLM_USE_BREAKABLE_CUDAGRAPH=0.
+VSPEC_BENCH_CONFIG: {"additional_config": {"ascend_compilation_config": {"enable_npugraph_ex": true, "enable_static_kernel": true}}, "async_scheduling": true, "compilation_config": {"cudagraph_capture_sizes": [1, 2, 3, 4, 5, 6, 8, 10, 12, 16, 20, 24, 32, 40, 48, 56, 64, 72, 80, 88, 96, 104, 112, 120, 128, 144, 160, 168, 176, 192, 200, 208, 216, 224, 240, 256, 264, 280, 288, 312, 320, 336, 352, 360, 384, 400, 416, 440, 448, 480, 512, 520, 560, 600, 640], "cudagraph_mode": "FULL", "cudagraph_num_of_warmups": 0, "mode": 3}, "disable_log_stats": true, "dtype": "bfloat16", "enable_prefix_caching": true, "enforce_eager": false, "gpu_memory_utilization": 0.92, "max_model_len": 1024, "max_num_batched_tokens": 33280, "max_num_seqs": 128, "model": "/data/shared-models/Qwen2.5-14B-Instruct", "seed": 0, "speculative_config": {"draft_tensor_parallel_size": 1, "enforce_eager": false, "method": "draft_model", "model": "/data/shared-models/Qwen2.5-0.5B-Instruct", "num_speculative_tokens": 4, "use_heterogeneous_vocab": true}, "tensor_parallel_size": 1, "trust_remote_code": true}
+INFO 09-04 11:26:43 [api_utils.py:286] non-default args: {'trust_remote_code': True, 'dtype': 'bfloat16', 'max_model_len': 1024, 'enable_prefix_caching': True, 'max_num_batched_tokens': 33280, 'max_num_seqs': 128, 'disable_log_stats': True, 'speculative_config': {'method': 'draft_model', 'model': '/data/shared-models/Qwen2.5-0.5B-Instruct', 'draft_tensor_parallel_size': 1, 'num_speculative_tokens': 4, 'enforce_eager': False, 'use_heterogeneous_vocab': True}, 'compilation_config': {'mode': <CompilationMode.VLLM_COMPILE: 3>, 'debug_dump_path': None, 'cache_dir': '', 'compile_cache_save_format': 'binary', 'backend': 'vllm_ascend.compilation.compiler_interface.AscendCompiler', 'custom_ops': [], 'ir_enable_torch_wrap': None, 'splitting_ops': None, 'compile_mm_encoder': False, 'cudagraph_mm_encoder': False, 'encoder_cudagraph_token_budgets': [], 'encoder_cudagraph_max_vision_items_per_batch': 0, 'encoder_cudagraph_max_frames_per_batch': None, 'compile_sizes': None, 'compile_ranges_endpoints': None, 'inductor_compile_config': {'enable_auto_functionalized_v2': False, 'combo_kernels': True, 'benchmark_combo_kernel': True}, 'inductor_passes': {}, 'cudagraph_mode': <CUDAGraphMode.FULL: 2>, 'cudagraph_num_of_warmups': 0, 'cudagraph_capture_sizes': [1, 2, 3, 4, 5, 6, 8, 10, 12, 16, 20, 24, 32, 40, 48, 56, 64, 72, 80, 88, 96, 104, 112, 120, 128, 144, 160, 168, 176, 192, 200, 208, 216, 224, 240, 256, 264, 280, 288, 312, 320, 336, 352, 360, 384, 400, 416, 440, 448, 480, 512, 520, 560, 600, 640], 'cudagraph_copy_inputs': False, 'cudagraph_specialize_lora': True, 'use_inductor_graph_partition': None, 'pass_config': {}, 'max_cudagraph_capture_size': None, 'dynamic_shapes_config': {'type': <DynamicShapesType.BACKED: 'backed'>, 'evaluate_guards': False, 'assume_32_bit_indexing': False}, 'local_cache_dir': None, 'fast_moe_cold_start': None, 'static_all_moe_layers': []}, 'additional_config': {'ascend_compilation_config': {'enable_npugraph_ex': True, 'enable_static_kernel': True}}, 'async_scheduling': True, 'model': '/data/shared-models/Qwen2.5-14B-Instruct'}
+INFO 09-04 11:27:06 [model.py:688] Resolved architecture: Qwen2ForCausalLM
+INFO 09-04 11:27:06 [model.py:2025] Using max model len 1024
+INFO 09-04 11:27:06 [model.py:688] Resolved architecture: Qwen2ForCausalLM
+INFO 09-04 11:27:06 [model.py:2025] Using max model len 32768
+INFO 09-04 11:27:06 [speculative.py:1591] Overriding draft model max model len from 32768 to 1024
+INFO 09-04 11:27:06 [scheduler.py:277] Chunked prefill is enabled with max_num_batched_tokens=33280.
+INFO 09-04 11:27:06 [kernel.py:372] Final IR op priority after setting platform defaults: IrOpPriorityConfig(rms_norm=['native'], fused_add_rms_norm=['native'])
+INFO 09-04 11:27:06 [utils.py:224] No quantization signature detected from model files for "/data/shared-models/Qwen2.5-14B-Instruct". The model will be loaded as float. To force a quantization method, pass "--quantization <method>" explicitly.
+WARNING 09-04 11:27:06 [platform.py:622] GPU-specific parameter is not supported on Ascend. parameter=disable_cascade_attn, value=True, action: resetting to False.
+INFO 09-04 11:27:06 [platform.py:834] The timeout interval of the HCCL operator is 1836s. Timeout in seconds for execute_model RPC calls in multiprocessing must be greater than 1836s, Set VLLM_EXECUTE_MODEL_TIMEOUT_SECONDS=3000
+INFO 09-04 11:27:06 [ascend_config.py:161] Dynamic EPLB is False
+INFO 09-04 11:27:06 [ascend_config.py:162] The number of redundant experts is 0
+INFO 09-04 11:27:06 [platform.py:1138] FlashComm1 is disabled. Using flashinfer_all2allv as the all2all backend.
+INFO 09-04 11:27:06 [utils.py:1208] Block size is set to 128 if prefix cache or chunked prefill is enabled.
+INFO 09-04 11:27:06 [platform.py:1327] Set PYTORCH_NPU_ALLOC_CONF=expandable_segments:True
+INFO 09-04 11:27:06 [compilation.py:329] Enabled custom fusions: norm_quant, act_quant
+[W904 11:27:14.883841430 FunctionLoader.cpp:44] Warning: LD_PRELOAD detected, FunctionLoader prefers RTLD_DEFAULT for symbol resolution. (function operator())
+INFO 09-04 11:27:19 [__init__.py:52] Available plugins for group vllm.platform_plugins:
+INFO 09-04 11:27:19 [__init__.py:54] - ascend -> vllm_ascend:register
+INFO 09-04 11:27:19 [__init__.py:66] Loading plugin ascend
+INFO 09-04 11:27:19 [__init__.py:272] Platform plugin ascend is activated
+INFO 09-04 11:27:19 [platform.py:70] Breakable CUDAGraph on Ascend is opt-in; using VLLM_USE_BREAKABLE_CUDAGRAPH=0.
+(EngineCore pid=1490526) INFO 09-04 11:27:32 [core.py:123] Initializing a V1 LLM engine (v0.17.2rc1.dev5871+g762f85b31) with config: model='/data/shared-models/Qwen2.5-14B-Instruct', speculative_config=SpeculativeConfig(method='draft_model', model='/data/shared-models/Qwen2.5-0.5B-Instruct', num_spec_tokens=4), tokenizer='/data/shared-models/Qwen2.5-14B-Instruct', skip_tokenizer_init=False, tokenizer_mode=auto, revision=None, tokenizer_revision=None, trust_remote_code=True, dtype=torch.bfloat16, max_seq_len=1024, download_dir=None, load_format=auto, tensor_parallel_size=1, pipeline_parallel_size=1, data_parallel_size=1, decode_context_parallel_size=1, dcp_comm_backend=ag_rs, disable_custom_all_reduce=True, quantization=None, quantization_config=None, enforce_eager=False, enable_return_routed_experts=False, kv_cache_dtype=auto, device_config=npu, structured_outputs_config=StructuredOutputsConfig(backend='auto', disable_any_whitespace=False, disable_additional_properties=False, reasoning_parser='', reasoning_parser_plugin='', enable_in_reasoning=False), observability_config=ObservabilityConfig(show_hidden_metrics_for_version=None, otlp_traces_endpoint=None, collect_detailed_traces=None, per_request_spec_decode_metrics='none', kv_cache_metrics=False, kv_cache_metrics_sample=0.01, cudagraph_metrics=False, enable_layerwise_nvtx_tracing=False, enable_mfu_metrics=False, enable_mm_processor_stats=False, enable_logging_iteration_details=False, jit_monitor_mode='warn', jit_monitor_verbose=False), seed=0, served_model_name=/data/shared-models/Qwen2.5-14B-Instruct, enable_prefix_caching=True, enable_chunked_prefill=True, pooler_config=None, compilation_config={'mode': <CompilationMode.VLLM_COMPILE: 3>, 'debug_dump_path': None, 'cache_dir': '', 'compile_cache_save_format': 'binary', 'backend': 'vllm_ascend.compilation.compiler_interface.AscendCompiler', 'custom_ops': ['all'], 'ir_enable_torch_wrap': False, 'splitting_ops': [], 'compile_mm_encoder': False, 'cudagraph_mm_encoder': False, 'encoder_cudagraph_token_budgets': [], 'encoder_cudagraph_max_vision_items_per_batch': 0, 'encoder_cudagraph_max_frames_per_batch': None, 'compile_sizes': [], 'compile_ranges_endpoints': [33280], 'inductor_compile_config': {'enable_auto_functionalized_v2': False, 'combo_kernels': True, 'benchmark_combo_kernel': True}, 'inductor_passes': {}, 'cudagraph_mode': <CUDAGraphMode.FULL: 2>, 'cudagraph_num_of_warmups': 1, 'cudagraph_capture_sizes': [1, 2, 3, 4, 5, 6, 8, 10, 12, 16, 20, 24, 32, 40, 48, 56, 64, 72, 80, 88, 96, 104, 112, 120, 128, 144, 160, 168, 176, 192, 200, 208, 216, 224, 240, 256, 264, 280, 288, 312, 320, 336, 352, 360, 384, 400, 416, 440, 448, 480, 512, 520, 560, 600, 640], 'cudagraph_copy_inputs': False, 'cudagraph_specialize_lora': True, 'use_inductor_graph_partition': False, 'pass_config': {'fuse_norm_quant': True, 'fuse_act_quant': True, 'fuse_attn_quant': False, 'enable_sp': False, 'fuse_gemm_comms': False, 'fuse_allreduce_rms': False, 'enable_qk_norm_rope_fusion': False, 'fuse_rope_kvcache_cat_mla': False, 'fuse_act_padding': False, 'fuse_qk_norm_rope_kvcache': False}, 'max_cudagraph_capture_size': 640, 'dynamic_shapes_config': {'type': <DynamicShapesType.BACKED: 'backed'>, 'evaluate_guards': False, 'assume_32_bit_indexing': False}, 'local_cache_dir': None, 'fast_moe_cold_start': False, 'static_all_moe_layers': []}, kernel_config=KernelConfig(ir_op_priority=IrOpPriorityConfig(rms_norm=['native'], fused_add_rms_norm=['native']), enable_flashinfer_autotune=True, enable_cutedsl_warmup=True, enable_jit_warmup=True, enable_bf16x3_router_gemm=False, moe_backend='auto', linear_backend='auto')
+(EngineCore pid=1490526) INFO 09-04 11:27:33 [ascend_config.py:161] Dynamic EPLB is False
+(EngineCore pid=1490526) INFO 09-04 11:27:33 [ascend_config.py:162] The number of redundant experts is 0
+(EngineCore pid=1490526) INFO 09-04 11:27:34 [parallel_state.py:1798] world_size=1 rank=0 local_rank=0 distributed_init_method=file:///tmp/vllm_dist_2764062bedec464f809011bf98e1fe35 backend=hccl
+(EngineCore pid=1490526) INFO 09-04 11:27:36 [parallel_state.py:2142] rank 0 in world size 1 is assigned as DP rank 0, PP rank 0, PCP rank 0, TP rank 0, EP rank N/A, EPLB rank N/A
+[rank0]:[W904 11:27:36.390025754 NPUCachingAllocator.cpp:177] Warning: The current CANN and Soc versions require processing for 32 padding size, with memory allocation. (function operator())
+(EngineCore pid=1490526) WARNING 09-04 11:27:38 [vocab_mapping.py:55] VocabMapping: target tokenizer has no unk_token_id; falling back to eos_token_id=151645 for out-of-intersection tokens
+(EngineCore pid=1490526) WARNING 09-04 11:27:38 [vocab_mapping.py:55] VocabMapping: draft tokenizer has no unk_token_id; falling back to eos_token_id=151645 for out-of-intersection tokens
+(EngineCore pid=1490526) INFO 09-04 11:27:42 [vocab_mapping.py:122] VocabMapping initialized: target_vocab=152064, draft_vocab=151936, intersection=151665 (99.8% of draft, 99.7% of target)
+(EngineCore pid=1490526) WARNING 09-04 11:27:42 [__init__.py:205] min_p and logit_bias parameters won't work with speculative decoding.
+(EngineCore pid=1490526) INFO 09-04 11:27:42 [platform.py:1350] FA3 will not be enabled when rl_config.enable_training_consistency is false. Note that Ascend NPU will use its registered plugin backend instead.
+(EngineCore pid=1490526) WARNING 09-04 11:27:44 [vocab_mapping.py:55] VocabMapping: target tokenizer has no unk_token_id; falling back to eos_token_id=151645 for out-of-intersection tokens
+(EngineCore pid=1490526) WARNING 09-04 11:27:44 [vocab_mapping.py:55] VocabMapping: draft tokenizer has no unk_token_id; falling back to eos_token_id=151645 for out-of-intersection tokens
+(EngineCore pid=1490526) INFO 09-04 11:27:47 [vocab_mapping.py:122] VocabMapping initialized: target_vocab=152064, draft_vocab=151936, intersection=151665 (99.8% of draft, 99.7% of target)
+(EngineCore pid=1490526) WARNING 09-04 11:27:47 [__init__.py:205] min_p and logit_bias parameters won't work with speculative decoding.
+(EngineCore pid=1490526) INFO 09-04 11:27:47 [model_runner_v1.py:3788] Starting to load model /data/shared-models/Qwen2.5-14B-Instruct...
+(EngineCore pid=1490526) INFO 09-04 11:27:48 [platform.py:1350] FA3 will not be enabled when rl_config.enable_training_consistency is false. Note that Ascend NPU will use its registered plugin backend instead.
+(EngineCore pid=1490526) INFO 09-04 11:27:49 [compilation.py:1107] Using OOT custom backend for compilation.
+(EngineCore pid=1490526) INFO 09-04 11:27:49 [weight_utils.py:863] Filesystem type for checkpoints: OVERLAY. Checkpoint size: 27.51 GiB. Available RAM: 1068.66 GiB.
+(EngineCore pid=1490526) INFO 09-04 11:27:49 [weight_utils.py:886] Auto-prefetch is disabled because the filesystem (OVERLAY) is not a recognized network FS (NFS/Lustre). If you want to force prefetching, start vLLM with --safetensors-load-strategy=prefetch.
+(EngineCore pid=1490526) Loading safetensors checkpoint shards:   0% Completed | 0/8 [00:00<?, ?it/s]
+(EngineCore pid=1490526) Loading safetensors checkpoint shards:  12% Completed | 1/8 [00:06<00:48,  6.90s/it]
+(EngineCore pid=1490526) Loading safetensors checkpoint shards:  25% Completed | 2/8 [00:14<00:44,  7.44s/it]
+(EngineCore pid=1490526) Loading safetensors checkpoint shards:  38% Completed | 3/8 [00:22<00:37,  7.49s/it]
+(EngineCore pid=1490526) Loading safetensors checkpoint shards:  50% Completed | 4/8 [00:29<00:29,  7.41s/it]
+(EngineCore pid=1490526) Loading safetensors checkpoint shards:  62% Completed | 5/8 [00:36<00:21,  7.23s/it]
+(EngineCore pid=1490526) Loading safetensors checkpoint shards:  75% Completed | 6/8 [00:44<00:14,  7.41s/it]
+(EngineCore pid=1490526) Loading safetensors checkpoint shards:  88% Completed | 7/8 [00:51<00:07,  7.38s/it]
+(EngineCore pid=1490526) Loading safetensors checkpoint shards: 100% Completed | 8/8 [00:54<00:00,  6.02s/it]
+(EngineCore pid=1490526) Loading safetensors checkpoint shards: 100% Completed | 8/8 [00:54<00:00,  6.83s/it]
+(EngineCore pid=1490526) 
+(EngineCore pid=1490526) INFO 09-04 11:28:44 [default_loader.py:430] Loading weights took 54.83 seconds
+(EngineCore pid=1490526) INFO 09-04 11:28:44 [model_runner_v1.py:3813] Loading drafter model...
+(EngineCore pid=1490526) WARNING 09-04 11:28:44 [vllm.py:1336] Disabling cascade attention (not yet compatible with async speculative decoding).
+(EngineCore pid=1490526) INFO 09-04 11:28:44 [kernel.py:372] Final IR op priority after setting platform defaults: IrOpPriorityConfig(rms_norm=['native'], fused_add_rms_norm=['native'])
+(EngineCore pid=1490526) INFO 09-04 11:28:44 [utils.py:224] No quantization signature detected from model files for "/data/shared-models/Qwen2.5-14B-Instruct". The model will be loaded as float. To force a quantization method, pass "--quantization <method>" explicitly.
+(EngineCore pid=1490526) WARNING 09-04 11:28:44 [platform.py:622] GPU-specific parameter is not supported on Ascend. parameter=disable_cascade_attn, value=True, action: resetting to False.
+(EngineCore pid=1490526) INFO 09-04 11:28:44 [platform.py:834] The timeout interval of the HCCL operator is 1836s. Timeout in seconds for execute_model RPC calls in multiprocessing must be greater than 1836s, Set VLLM_EXECUTE_MODEL_TIMEOUT_SECONDS=3000
+(EngineCore pid=1490526) INFO 09-04 11:28:44 [ascend_config.py:161] Dynamic EPLB is False
+(EngineCore pid=1490526) INFO 09-04 11:28:44 [ascend_config.py:162] The number of redundant experts is 0
+(EngineCore pid=1490526) INFO 09-04 11:28:44 [platform.py:1138] FlashComm1 is disabled. Using flashinfer_all2allv as the all2all backend.
+(EngineCore pid=1490526) INFO 09-04 11:28:44 [platform.py:1327] Set PYTORCH_NPU_ALLOC_CONF=expandable_segments:True
+(EngineCore pid=1490526) INFO 09-04 11:28:44 [compilation.py:329] Enabled custom fusions: norm_quant, act_quant
+(EngineCore pid=1490526) INFO 09-04 11:28:44 [kernel.py:372] Final IR op priority after setting platform defaults: IrOpPriorityConfig(rms_norm=['native'], fused_add_rms_norm=['native'])
+(EngineCore pid=1490526) INFO 09-04 11:28:44 [utils.py:224] No quantization signature detected from model files for "/data/shared-models/Qwen2.5-0.5B-Instruct". The model will be loaded as float. To force a quantization method, pass "--quantization <method>" explicitly.
+(EngineCore pid=1490526) WARNING 09-04 11:28:44 [platform.py:622] GPU-specific parameter is not supported on Ascend. parameter=disable_cascade_attn, value=True, action: resetting to False.
+(EngineCore pid=1490526) INFO 09-04 11:28:44 [ascend_config.py:161] Dynamic EPLB is False
+(EngineCore pid=1490526) INFO 09-04 11:28:44 [ascend_config.py:162] The number of redundant experts is 0
+(EngineCore pid=1490526) INFO 09-04 11:28:44 [platform.py:1327] Set PYTORCH_NPU_ALLOC_CONF=expandable_segments:True
+(EngineCore pid=1490526) INFO 09-04 11:28:44 [platform.py:1350] FA3 will not be enabled when rl_config.enable_training_consistency is false. Note that Ascend NPU will use its registered plugin backend instead.
+(EngineCore pid=1490526) INFO 09-04 11:28:44 [compilation.py:1107] Using OOT custom backend for compilation.
+(EngineCore pid=1490526) INFO 09-04 11:28:45 [weight_utils.py:863] Filesystem type for checkpoints: OVERLAY. Checkpoint size: 0.92 GiB. Available RAM: 1068.65 GiB.
+(EngineCore pid=1490526) Loading safetensors checkpoint shards:   0% Completed | 0/1 [00:00<?, ?it/s]
+(EngineCore pid=1490526) Loading safetensors checkpoint shards: 100% Completed | 1/1 [00:01<00:00,  1.67s/it]
+(EngineCore pid=1490526) Loading safetensors checkpoint shards: 100% Completed | 1/1 [00:01<00:00,  1.67s/it]
+(EngineCore pid=1490526) 
+(EngineCore pid=1490526) INFO 09-04 11:28:46 [default_loader.py:430] Loading weights took 1.76 seconds
+(EngineCore pid=1490526) INFO 09-04 11:28:47 [model_runner_v1.py:3875] Loading model weights took 28.4592 GB
+(EngineCore pid=1490526) INFO 09-04 11:28:47 [model_runner_v1.py:3928] Model runner load_model total time: 60.23 seconds
+(EngineCore pid=1490526) INFO 09-04 11:28:47 [utils.py:306] Using LBHNC KV cache layout.
+(EngineCore pid=1490526) INFO 09-04 11:28:59 [compiler_interface.py:285] AscendCompiler hash factors: {'torch_npu_version': '2.13.0.rc1', 'enable_npugraph_ex': True, 'enable_static_kernel': True}
+(EngineCore pid=1490526) INFO 09-04 11:28:59 [backends.py:1094] Using cache directory: /tmp/vspec-cache-draft-static-20260904-5/torch_compile_cache/8030980c72/rank_0_0/backbone for vLLM's torch.compile
+(EngineCore pid=1490526) INFO 09-04 11:28:59 [backends.py:1155] Dynamo bytecode transform time: 10.40 s
+(EngineCore pid=1490526) INFO 09-04 11:29:04 [compiler_interface.py:322] enable_npugraph_ex is enabled, which will bring graph compilation optimization.
+(EngineCore pid=1490526) INFO 09-04 11:29:04 [compiler_interface.py:138] Setting LOCAL_WORLD_SIZE=1 for static kernel (local_world_size=1 * data_parallel_size_local=1).
+(EngineCore pid=1490526) INFO 09-04 11:29:04 [compiler_interface.py:159] enable_static_kernel is enabled, static shape kernel will be used to accelerate aclgraph execution.
+(EngineCore pid=1490526) [rank0]:W0904 11:29:04.785000 1490526 site-packages/torch/_inductor/codecache.py:1193] pre_grad_custom_pass run_register_pre_custom_passes does not implement uuid(); falling back to early timing (pre-grad pass cache will be bypassed). Implement uuid() on your CustomGraphPass to enable caching.
+(EngineCore pid=1490526) INFO 09-04 11:29:26 [compiler_interface.py:235] Saved compiled graph to cache: /tmp/vspec-cache-draft-static-20260904-5/torch_compile_cache/8030980c72/rank_0_0/backbone/artifact_compile_range_1_33280_subgraph_0
+(EngineCore pid=1490526) INFO 09-04 11:29:26 [backends.py:378] Cache the graph of compile range (1, 33280) for later use
+(EngineCore pid=1490526) INFO 09-04 11:29:26 [backends.py:393] Compiling a graph for compile range (1, 33280) takes 22.34 s
+(EngineCore pid=1490526) WARNING 09-04 11:29:33 [decorators.py:724] unable to save AOT compiled function to /tmp/vspec-cache-draft-static-20260904-5/torch_compile_cache/torch_aot_compile/2313cdfd26128e3308021522a95f953ea054604432731733d74d242c248df1c0/rank_0_0/model: 'NoneType' object is not callable
+(EngineCore pid=1490526) INFO 09-04 11:29:33 [monitor.py:53] torch.compile took 44.11 s in total
+(EngineCore pid=1490526) INFO 09-04 11:29:33 [monitor.py:81] Initial profiling/warmup run took 0.44 s
+(EngineCore pid=1490526) INFO 09-04 11:29:38 [compiler_interface.py:285] AscendCompiler hash factors: {'torch_npu_version': '2.13.0.rc1', 'enable_npugraph_ex': True, 'enable_static_kernel': True}
+(EngineCore pid=1490526) INFO 09-04 11:29:38 [backends.py:1094] Using cache directory: /tmp/vspec-cache-draft-static-20260904-5/torch_compile_cache/8030980c72/rank_0_0/draft_model for vLLM's torch.compile
+(EngineCore pid=1490526) INFO 09-04 11:29:38 [backends.py:1155] Dynamo bytecode transform time: 5.25 s
+(EngineCore pid=1490526) INFO 09-04 11:29:49 [compiler_interface.py:235] Saved compiled graph to cache: /tmp/vspec-cache-draft-static-20260904-5/torch_compile_cache/8030980c72/rank_0_0/draft_model/artifact_compile_range_1_33280_subgraph_0
+(EngineCore pid=1490526) INFO 09-04 11:29:49 [backends.py:393] Compiling a graph for compile range (1, 33280) takes 10.83 s
+(EngineCore pid=1490526) WARNING 09-04 11:29:52 [decorators.py:724] unable to save AOT compiled function to /tmp/vspec-cache-draft-static-20260904-5/torch_compile_cache/torch_aot_compile/96302ad584d7277143fb528483e536931c209079ffe69ec54407e6f715bee93b/rank_0_0/model: 'NoneType' object is not callable
+(EngineCore pid=1490526) INFO 09-04 11:29:52 [monitor.py:53] torch.compile took 19.26 s in total
+(EngineCore pid=1490526) INFO 09-04 11:29:56 [monitor.py:81] Initial profiling/warmup run took 3.91 s
+(EngineCore pid=1490526) INFO 09-04 11:29:59 [worker.py:622] Available KV cache memory: 24.67 GiB
+(EngineCore pid=1490526) INFO 09-04 11:29:59 [kv_cache_utils.py:2042] GPU KV cache size: 126,720 tokens, Maximum concurrency for 1,024 tokens per request: 123.75x
+(EngineCore pid=1490526) INFO 09-04 11:30:00 [kernel_warmup.py:41] Starting Triton kernel warmup.
+(EngineCore pid=1490526) INFO 09-04 11:30:48 [kernel_warmup.py:33] rejection_sampler Triton warmup complete in 48.011s.
+(EngineCore pid=1490526) [WARNING] AutoBlockify disabled for kernel 'token_bin_counts_and_mask_kernel'. Unsafe ops: atomic operations. Enabling may cause correctness issues. The compiler keeps AutoBlockify disabled for this kernel.
+(EngineCore pid=1490526) INFO 09-04 11:30:55 [kernel_warmup.py:33] penalties Triton warmup complete in 6.512s.
+(EngineCore pid=1490526) INFO 09-04 11:30:55 [kernel_warmup.py:33] rms Triton warmup complete in 0.000s.
+(EngineCore pid=1490526) INFO 09-04 11:30:55 [kernel_warmup.py:49] Triton kernel warmup finished in 54.524s.
+(EngineCore pid=1490526) INFO 09-04 11:30:55 [gpu_model_runner.py:6936] Rank 0: Torch profiler disabled for CUDA graph capture
+(EngineCore pid=1490526) Capturing CUDA graphs (mixed prefill-decode, FULL):   0%|          | 0/55 [00:00<?, ?it/s]/tmp/vspec-static-pythonpath-20260904/torch_npu/dynamo/npugraph_ex/_acl_concrete_graph/static_kernel.py:117: UserWarning: The current version now supports caching run packages from static kernel compilation, it is recommended to delete the compilation cache and recompile when you use `torch.npu.npugraph_ex.inference.cache_compile` and do not use force_eager=True.
+(EngineCore pid=1490526)   warnings.warn(warn_msg)
+(EngineCore pid=1490526) /tmp/vspec-static-pythonpath-20260904/torch_npu/dynamo/npugraph_ex/_acl_concrete_graph/static_kernel.py:292: UserWarning: Starting static kernel compilation, the build directory is /root/data/vllm-hust-vSpec/static_kernel_compile_outputs/ts20260904113056188761_pid1490526_outputs
+(EngineCore pid=1490526)   warnings.warn(f"Starting static kernel compilation, the build directory is {result_root}")
+[op_compiler] static kernel compile start
+  0%|          | 0/14 [00:00<?, ?it/s]  7%|▋         | 1/14 [00:13<03:00, 13.91s/it] 14%|█▍        | 2/14 [00:14<01:11,  5.95s/it] 36%|███▌      | 5/14 [00:17<00:22,  2.45s/it] 43%|████▎     | 6/14 [00:17<00:14,  1.86s/it] 57%|█████▋    | 8/14 [00:18<00:06,  1.16s/it] 64%|██████▍   | 9/14 [00:18<00:05,  1.08s/it] 71%|███████▏  | 10/14 [00:19<00:03,  1.09it/s] 86%|████████▌ | 12/14 [00:19<00:01,  1.47it/s]100%|██████████| 14/14 [00:20<00:00,  2.20it/s]100%|██████████| 14/14 [00:20<00:00,  1.43s/it]
+[summary] 14/14 JSON files compiled successfully.
+generate run package static_kernel_260904113103067322_1494156.run success
+[op_compiler] static kernel compile success
+(EngineCore pid=1490526) /tmp/vspec-static-pythonpath-20260904/torch_npu/dynamo/npugraph_ex/_acl_concrete_graph/static_kernel.py:292: UserWarning: Starting static kernel compilation, the build directory is /root/data/vllm-hust-vSpec/static_kernel_compile_outputs/ts20260904113125841633_pid1490526_outputs
+(EngineCore pid=1490526)   warnings.warn(f"Starting static kernel compilation, the build directory is {result_root}")
+[op_compiler] static kernel compile start
+  0%|          | 0/11 [00:00<?, ?it/s]  9%|▉         | 1/11 [00:05<00:55,  5.53s/it] 27%|██▋       | 3/11 [00:09<00:23,  2.96s/it] 36%|███▋      | 4/11 [00:09<00:14,  2.02s/it] 45%|████▌     | 5/11 [00:11<00:11,  1.96s/it] 55%|█████▍    | 6/11 [00:11<00:06,  1.38s/it] 64%|██████▎   | 7/11 [00:12<00:04,  1.00s/it] 73%|███████▎  | 8/11 [00:12<00:02,  1.08it/s] 82%|████████▏ | 9/11 [00:18<00:05,  2.52s/it] 91%|█████████ | 10/11 [00:21<00:02,  2.39s/it]100%|██████████| 11/11 [00:23<00:00,  2.31s/it]100%|██████████| 11/11 [00:23<00:00,  2.11s/it]
+[summary] 11/11 JSON files compiled successfully.
+generate run package static_kernel_260904113129700804_1526208.run success
+[op_compiler] static kernel compile success
+(EngineCore pid=1490526) Capturing CUDA graphs (mixed prefill-decode, FULL):   2%|▏         | 1/55 [01:02<55:54, 62.12s/it]/tmp/vspec-static-pythonpath-20260904/torch_npu/dynamo/npugraph_ex/_acl_concrete_graph/static_kernel.py:292: UserWarning: Starting static kernel compilation, the build directory is /root/data/vllm-hust-vSpec/static_kernel_compile_outputs/ts20260904113158208086_pid1490526_outputs
+(EngineCore pid=1490526)   warnings.warn(f"Starting static kernel compilation, the build directory is {result_root}")
+[op_compiler] static kernel compile start
+  0%|          | 0/13 [00:00<?, ?it/s]  8%|▊         | 1/13 [00:05<01:08,  5.70s/it] 15%|█▌        | 2/13 [00:05<00:27,  2.49s/it] 23%|██▎       | 3/13 [00:06<00:14,  1.47s/it] 31%|███       | 4/13 [00:06<00:08,  1.05it/s] 38%|███▊      | 5/13 [00:09<00:13,  1.74s/it] 46%|████▌     | 6/13 [00:10<00:11,  1.60s/it] 54%|█████▍    | 7/13 [00:11<00:07,  1.25s/it] 69%|██████▉   | 9/13 [00:12<00:03,  1.23it/s] 77%|███████▋  | 10/13 [00:17<00:05,  1.97s/it] 85%|████████▍ | 11/13 [00:18<00:03,  1.63s/it] 92%|█████████▏| 12/13 [00:18<00:01,  1.39s/it]100%|██████████| 13/13 [00:21<00:00,  1.62s/it]100%|██████████| 13/13 [00:21<00:00,  1.62s/it]
+[summary] 13/13 JSON files compiled successfully.
+generate run package static_kernel_260904113205111814_1558526.run success
+[op_compiler] static kernel compile success
+(EngineCore pid=1490526) /tmp/vspec-static-pythonpath-20260904/torch_npu/dynamo/npugraph_ex/_acl_concrete_graph/static_kernel.py:292: UserWarning: Starting static kernel compilation, the build directory is /root/data/vllm-hust-vSpec/static_kernel_compile_outputs/ts20260904113230303339_pid1490526_outputs
+(EngineCore pid=1490526)   warnings.warn(f"Starting static kernel compilation, the build directory is {result_root}")
+[op_compiler] static kernel compile start
+  0%|          | 0/10 [00:00<?, ?it/s] 10%|█         | 1/10 [00:06<00:54,  6.01s/it] 20%|██        | 2/10 [00:06<00:22,  2.79s/it] 30%|███       | 3/10 [00:09<00:19,  2.82s/it] 40%|████      | 4/10 [00:11<00:14,  2.41s/it] 50%|█████     | 5/10 [00:11<00:08,  1.76s/it] 70%|███████   | 7/10 [00:12<00:02,  1.07it/s] 80%|████████  | 8/10 [00:19<00:05,  2.61s/it] 90%|█████████ | 9/10 [00:22<00:02,  2.66s/it]100%|██████████| 10/10 [00:23<00:00,  2.31s/it]100%|██████████| 10/10 [00:23<00:00,  2.35s/it]
+[summary] 10/10 JSON files compiled successfully.
+generate run package static_kernel_260904113234244628_1584926.run success
+[op_compiler] static kernel compile success
+(EngineCore pid=1490526) Capturing CUDA graphs (mixed prefill-decode, FULL):   4%|▎         | 2/55 [02:06<56:02, 63.45s/it]/tmp/vspec-static-pythonpath-20260904/torch_npu/dynamo/npugraph_ex/_acl_concrete_graph/static_kernel.py:292: UserWarning: Starting static kernel compilation, the build directory is /root/data/vllm-hust-vSpec/static_kernel_compile_outputs/ts20260904113302592444_pid1490526_outputs
+(EngineCore pid=1490526)   warnings.warn(f"Starting static kernel compilation, the build directory is {result_root}")
+[op_compiler] static kernel compile start
+  0%|          | 0/13 [00:00<?, ?it/s]  8%|▊         | 1/13 [00:05<01:06,  5.57s/it] 15%|█▌        | 2/13 [00:05<00:25,  2.35s/it] 23%|██▎       | 3/13 [00:05<00:13,  1.34s/it] 38%|███▊      | 5/13 [00:09<00:12,  1.57s/it]/opt/vllm-hust-cann91/lib/python3.11/multiprocessing/resource_tracker.py:254: UserWarning: resource_tracker: There appear to be 1 leaked semaphore objects to clean up at shutdown
+  warnings.warn('resource_tracker: There appear to be %d '
+ 46%|████▌     | 6/13 [00:10<00:11,  1.60s/it] 54%|█████▍    | 7/13 [00:11<00:07,  1.28s/it] 62%|██████▏   | 8/13 [00:11<00:05,  1.04s/it] 69%|██████▉   | 9/13 [00:12<00:03,  1.28it/s] 77%|███████▋  | 10/13 [00:16<00:05,  1.88s/it]

@@ -10,6 +10,15 @@ is not new hardware acceptance or a serving-performance claim.
 
 - [KVCompress original manifest](compress/manifest.json)
 - [Extension Manager original manifest](manager/manifest.json)
+- [KVCompress leaderboard and mixed history](compress-history/manifest.json): original JSON/JS
+  bundles, dated bilingual reports, result navigation and HTML context. The source HTML remains
+  presentation code; only its input location changes. Historic values are not current admission.
+- [vSpec remaining regression originals](vspec-regression/manifest.json): all 316 remaining tracked
+  benchmark result files, including logs, failures and eager diagnostics, plus LICENSE.
+- [Manager planner and paper inputs](manager-paper/manifest.json): two contract-planner derived
+  results and five H1-r5 paper records. Schemas and executable validators remain implementation;
+  semantic, hash and negative assertions must survive migration. Other large experimental artifacts
+  remain a separate queue, not permission to remove whole experiments directories.
 - [PyramidKV remaining current originals](pyramid-current/manifest.json): 98 records plus LICENSE
   and NOTICE, frozen from source commit `534bcc0` before consumer edits. Together with the existing
   paired capsule these preserve all 118 current evidence files. Original SHA256SUMS and their

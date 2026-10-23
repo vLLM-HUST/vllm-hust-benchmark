@@ -1,0 +1,36 @@
+{
+  "schema": "kvcompress/frontier-workload-preparation/v1",
+  "date_utc": "2026-09-27",
+  "scope": "CPU-only input preparation and client checks; no serving or performance result",
+  "model": "Qwen3.5-35B-A3B",
+  "swe_prefix_reuse": {
+    "client_commit": "6861242dbd9f17b707003191e4200b7752911d7c",
+    "source_dataset_revision": "fb0c0dccc7a5cce79b3f6de891848acdede36685",
+    "source_gzip_sha256": "a31abfc7dea176a8b4bf339ff8b104194040f29244577eab9ba4ca951a01739b",
+    "tokenizer_fingerprint": "3f9ca78537850303ee04bfa6640c020be89723c62f37121c0f27a4c0babc53e0",
+    "transformers_version": "5.17.0",
+    "enable_thinking": true,
+    "max_context_configured": 262144,
+    "prepared_file": ".benchmarks/swe-qwen35-262144.json",
+    "prepared_file_sha256": "8105957b4001e7fd21373150fb7b844a9931abe9f88c699b3db191b84a8596d3",
+    "accepted_sessions": 8,
+    "rejected_sessions": 0,
+    "turns": 360,
+    "maximum_prompt_tokens": 140423,
+    "maximum_context_tokens": 141269,
+    "client_tests": "24 passed",
+    "client_lint": "Ruff passed"
+  },
+  "agentx_256k": {
+    "client_commit": "e0c34de525246c98d14df590f9864d7be7a25075",
+    "dataset_revision": "8fecd2fc56694469f758f0afbbb6335ad3043740",
+    "dataset_fingerprint": "0d8fdac271289f80",
+    "dataset_sessions": 393,
+    "offline_identity_verified": true,
+    "smoke_measurement_seconds": 900,
+    "warmup": "Official primers plus 10 requests per lane before measurement",
+    "client_tests": "18 passed"
+  },
+  "qualification": "not_run",
+  "performance": "not_measured"
+}

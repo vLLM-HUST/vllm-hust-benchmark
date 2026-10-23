@@ -1,0 +1,22 @@
+{
+  "url": "http://127.0.0.1:18185",
+  "model": "qwen3.5-35b-a3b-frontier-baseline",
+  "model_revision": "sha256:d8d0b7ca4e61ae107e3e87a3ff21136b3ac7c789e64bb24267227ca804e04205",
+  "tokenizer": "/workspace/models/Qwen3.5-35B-A3B",
+  "tokenizer_revision": "sha256:5f9e4d4901a92b997e463c1f46055088b6cca5ca61a6522d1b9f64c4bb81cb42",
+  "engine": {
+    "name": "vLLM-HUST + vLLM-Ascend-HUST + vSpec host compatibility",
+    "revision": "vllm:762f85b311fbab0bcf8921dd216f5093cd58b9b8;ascend:4e57439e58ed3d78e675f9fd7b4614fb183c5394;vspec-execution-tree-sha256:2e37ad547a6b9ee75a9ac7fc714e0166eea13d27c363ddc14f3fdb40f5f1006d",
+    "launch_command_without_secrets": "See /root/data/vllm-hust-vSpec-github/docs/agentx_256k_benchmark.md#target-only"
+  },
+  "hardware": {
+    "accelerator": "Ascend 910B2",
+    "device_count": 2,
+    "allocated_host_dram_gib": 0
+  },
+  "max_model_len": 262144,
+  "host_kv_budget_gib": 0,
+  "speculative_decoding": {
+    "enabled": false
+  }
+}

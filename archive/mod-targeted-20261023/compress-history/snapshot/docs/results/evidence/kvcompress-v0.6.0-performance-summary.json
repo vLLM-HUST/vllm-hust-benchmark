@@ -1,0 +1,135 @@
+{
+  "schema_version": 1,
+  "test_id": "kvcompress-v0.6.0-phase-precompute-public-a3-v1",
+  "date_utc": "2026-09-15",
+  "verdict": "engineering_quality_pass_with_workload_dependent_performance",
+  "release_state": "local_candidate_not_published",
+  "environment": {
+    "plugin_version": "0.6.0",
+    "source_base_commit": "1f78d51af71ab5201741d4367cbc76d0df23077a",
+    "vllm_hust_commit": "6cdc0304a8bac6f0275a7aa90493226aa38d83f4",
+    "vllm_ascend_hust_commit": "5901bedbb718c4e87f2d24a06cb70128c393bd81",
+    "extension_manager_commit": "cf1ea71e3e2cb81ab06267ef05eddb3e580ea20b",
+    "python": "3.11.16",
+    "torch": "2.10.0",
+    "torch_npu": "2.10.0.post2",
+    "triton_ascend": "3.6.0+git8f0a4de8",
+    "device": "one Ascend 910B2, physical NPU 6",
+    "model": "Qwen/Qwen2.5-Coder-14B-Instruct, local snapshot, FP16"
+  },
+  "optimization": {
+    "description": "Prepare RoPE phase coefficients once for all sampled layers and reuse them in direct paged-K scoring.",
+    "validated_configuration": {
+      "kv_budget_tokens": 8192,
+      "recompute_window_tokens": 1024,
+      "protected_recent_window_tokens": 512,
+      "score_chunk_size_tokens": 8192,
+      "score_layer_stride": 8,
+      "sampled_layers_of_48": 6,
+      "min_output_tokens_for_compression": 64
+    },
+    "npu_microbenchmark_median_of_three_processes_ms": {
+      "paged_copy_reference": 0.562,
+      "paged_copy_persistent_workspace": 0.339,
+      "score_reference": 1.247,
+      "score_compatibility_wrapper": 0.671,
+      "score_precomputed": 0.253,
+      "phase_prepare_six_layers": 0.102,
+      "score_precomputed_amortized_per_layer": 0.270,
+      "aggregate_reference": 0.150,
+      "aggregate_kernel": 0.113,
+      "offset_reference": 0.044,
+      "offset_helper": 0.053
+    },
+    "comparison_to_preoptimization_kernel": {
+      "previous_in_kernel_phase_score_ms": 0.460,
+      "new_amortized_score_ms": 0.270,
+      "latency_reduction_percent": 41.3
+    },
+    "negative_experiment": {
+      "description": "A fused Triton K/V gather-scatter kernel was implemented and tested, then removed.",
+      "fused_ms": 14.504,
+      "retained_persistent_workspace_ms": 0.334,
+      "reason": "The fused candidate was about 43x slower on Ascend 910B2 despite passing numerical correctness."
+    }
+  },
+  "public_benchmarks": [
+    {
+      "name": "LongBench-v2 eligible short stratum",
+      "cases": 116,
+      "dataset_sha256": "06255143af59844e1983c6e92b4d72d743cfeff8295981edcf87be95b538be6c",
+      "quality_baseline": 34.48275862068966,
+      "quality_candidate": 34.48275862068966,
+      "quality_delta_percentage_points": 0.0,
+      "request_throughput_change_percent": 2.80712040346629,
+      "total_token_throughput_change_percent": 2.8114879595760423,
+      "mean_ttft_change_percent": -3.2939437736481225,
+      "mean_tpot_change_percent": -13.220556823799246,
+      "mean_e2e_change_percent": -2.7212568437457785,
+      "scheduler_commits": 116,
+      "worker_acknowledgements": 116,
+      "source_blocks": 19517,
+      "destination_blocks": 7424,
+      "physical_block_reduction_percent": 61.96136701337296,
+      "device_hbm_peak_percent": 88.0,
+      "verdict": "PASS"
+    },
+    {
+      "name": "LongBench passage_retrieval_en",
+      "cases": 200,
+      "dataset_sha256": "cc0155305f8e9af4391b7379454fd43dd2eb60921b3f516465a5db97a98a2cb6",
+      "quality_baseline": 100.0,
+      "quality_candidate": 100.0,
+      "quality_delta_percentage_points": 0.0,
+      "request_throughput_change_percent": 0.090291997054881,
+      "mean_ttft_change_percent": 3.0556785682455123,
+      "mean_tpot_change_percent": -2.515330635800672,
+      "mean_e2e_change_percent": -0.09814402370735831,
+      "scheduler_commits": 0,
+      "worker_acknowledgements": 0,
+      "compression_note": "Deliberately bypassed because max output is 32 tokens and the configured minimum is 64.",
+      "device_hbm_peak_percent": 88.0,
+      "verdict": "PASS"
+    },
+    {
+      "name": "LongBench Qasper pressure subset",
+      "cases": 93,
+      "dataset_sha256": "20b04612d857f0913c0f94bb1ad48ae71cf5ba713de06e04d4611143b8a6da94",
+      "quality_baseline": 42.514070040831,
+      "quality_candidate": 42.514070040831,
+      "quality_delta_percentage_points": 0.0,
+      "request_throughput_change_percent": 0.02557856836482575,
+      "mean_ttft_change_percent": 6.813227911918074,
+      "mean_tpot_change_percent": -2.3975541507514686,
+      "mean_e2e_change_percent": 0.43163683597851055,
+      "scheduler_commits": 11,
+      "worker_acknowledgements": 11,
+      "source_blocks": 1149,
+      "destination_blocks": 704,
+      "physical_block_reduction_percent": 38.72932985204526,
+      "device_hbm_peak_percent": 88.0,
+      "verdict": "PASS"
+    }
+  ],
+  "tuning_record": {
+    "superseded_score_layer_stride": 4,
+    "stride_4_qasper_quality_delta_percentage_points": -0.4797353184450017,
+    "stride_8_qasper_quality_delta_percentage_points": 0.0,
+    "rejected_kv_budget_tokens": 4096,
+    "rejected_4k_qasper_quality_delta_percentage_points": -4.708615307122848
+  },
+  "raw_artifact_sha256": {
+    "candidate_longbench_v2": "8cabd64d5a3817cf5ed412e370f1df0d20ccd1fab51264a511493d527e8a79f8",
+    "candidate_qasper": "9ed622c4470300aa15df28d57556020829241c78800cf615d36f2c45649dafcd",
+    "candidate_passage_retrieval_en": "c04f72935a7ee371e3361f6328597c82206cc91687584f7eb8ab5d308ebd3014",
+    "paired_longbench_v2": "89ed3e796e25f9d944e7ae61f39821a1c68dc4b942b75479194a5d14598cbbab",
+    "paired_qasper": "ed9b50ee03235c2afeaafae9b07d5ada2afdab1b59c25dcc4957ae2783cabbc9",
+    "paired_passage_retrieval_en": "f28164ff67c1382b521badb22dddf302d3421cfbcf8bad6069520b67b05c5169"
+  },
+  "limitations": [
+    "The public performance comparison reuses the frozen same-host B0 because host, model, tokenizer, datasets, and service flags are unchanged; each candidate workload has one run.",
+    "This is engineering evidence, not the formal V4.6 official baseline or repeated-run performance statistics.",
+    "Qasper mean TTFT and E2E are slightly worse even though TPOT improves; performance is workload-dependent.",
+    "The local model and calibration snapshots do not have complete upstream revision and generation provenance."
+  ]
+}

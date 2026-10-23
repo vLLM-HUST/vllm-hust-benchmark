@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "date_utc": "2026-09-11",
+  "status": "engineering_pass_not_formal_v4_6_acceptance",
+  "profile": "A2-LONG-FP16-16K",
+  "model": "Qwen2.5-14B-Instruct",
+  "device": "Ascend 910B2",
+  "request_shape": {
+    "runs_per_arm": 3,
+    "requests_per_run": 4,
+    "input_tokens": 16384,
+    "output_tokens": 1024,
+    "request_rate_rps": 0.4,
+    "concurrency": 4,
+    "ignore_eos": true
+  },
+  "control_medians": {
+    "request_throughput_rps": 0.0648858,
+    "input_throughput_tps": 1063.0889,
+    "output_throughput_tps": 66.4431,
+    "total_throughput_tps": 1129.532,
+    "mean_ttft_ms": 4167.672,
+    "p99_ttft_ms": 5499.591,
+    "mean_tpot_ms": 52.4304,
+    "p99_tpot_ms": 57.4138,
+    "mean_e2e_ms": 57811.565,
+    "p99_e2e_ms": 61448.705
+  },
+  "compression_medians": {
+    "request_throughput_rps": 0.0822195,
+    "input_throughput_tps": 1347.085,
+    "output_throughput_tps": 84.1928,
+    "total_throughput_tps": 1431.278,
+    "mean_ttft_ms": 4326.319,
+    "p99_ttft_ms": 5678.55,
+    "mean_tpot_ms": 39.1638,
+    "p99_tpot_ms": 44.1982,
+    "mean_e2e_ms": 44372.476,
+    "p99_e2e_ms": 48026.379
+  },
+  "ratios": {
+    "total_throughput_b1_over_b0": 1.267142,
+    "physical_kv_reduction": 0.75,
+    "mean_tpot_change": -0.253,
+    "mean_e2e_change": -0.2325,
+    "mean_ttft_change": 0.038
+  },
+  "correctness": {
+    "control_passed": 12,
+    "compression_passed": 12,
+    "failed": 0,
+    "truncated_or_short": 0,
+    "compression_commits": 12,
+    "worker_acknowledgements": 12
+  },
+  "provenance": {
+    "vllm_hust_commit": "6cdc0304a8",
+    "vllm_ascend_hust_commit": "5901bedbb718c4e87f2d24a06cb70128c393bd81",
+    "extension_manager_commit": "cf1ea71e3e2cb81ab06267ef05eddb3e580ea20b",
+    "plugin_base_commit": "db18568aa8ce01c6d66d4e96b9357fdf766fdcde",
+    "dataset_sha256": "3f68a54ee4028aa63418534466e3763d8e7c1da308af58cec2506cc16b067ab0",
+    "comparison_sha256": "cc3ff75e921665c5649032447e2e0efa168e3f1958e3227f80a50fc0799743f6"
+  },
+  "limitations": [
+    "B0 is a same-host compatibility control, not the official vLLM 0.18 baseline required by V4.6.",
+    "The commissioning fixture is deterministic synthetic retrieval data.",
+    "The available calibration artifact does not match the exact tested model and lacks complete provenance.",
+    "The full A2 request-rate matrix and A3 30-minute stability run were not completed."
+  ]
+}

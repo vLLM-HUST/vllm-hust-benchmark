@@ -1,0 +1,349 @@
+[W904 10:17:17.939029260 FunctionLoader.cpp:44] Warning: LD_PRELOAD detected, FunctionLoader prefers RTLD_DEFAULT for symbol resolution. (function operator())
+INFO 09-04 10:17:22 [__init__.py:52] Available plugins for group vllm.platform_plugins:
+INFO 09-04 10:17:22 [__init__.py:54] - ascend -> vllm_ascend:register
+INFO 09-04 10:17:22 [__init__.py:66] Loading plugin ascend
+INFO 09-04 10:17:22 [__init__.py:272] Platform plugin ascend is activated
+INFO 09-04 10:17:23 [platform.py:70] Breakable CUDAGraph on Ascend is opt-in; using VLLM_USE_BREAKABLE_CUDAGRAPH=0.
+VSPEC_BENCH_CONFIG: {"async_scheduling": true, "compilation_config": {"cudagraph_capture_sizes": [1, 2, 3, 4, 5, 6, 8, 10, 12, 16, 20, 24, 32, 40, 48, 56, 64, 72, 80, 88, 96, 104, 112, 120, 128, 144, 160, 168, 176, 192, 200, 208, 216, 224, 240, 256, 264, 280, 288, 312, 320, 336, 352, 360, 384, 400, 416, 440, 448, 480, 512, 520, 560, 600, 640], "cudagraph_mode": "FULL", "mode": 3}, "disable_log_stats": true, "dtype": "bfloat16", "enable_prefix_caching": true, "enforce_eager": false, "gpu_memory_utilization": 0.92, "max_model_len": 1024, "max_num_batched_tokens": 33280, "max_num_seqs": 128, "model": "/data/shared-models/Qwen2.5-14B-Instruct", "seed": 0, "speculative_config": {"draft_tensor_parallel_size": 1, "enforce_eager": false, "method": "draft_model", "model": "/data/shared-models/Qwen2.5-0.5B-Instruct", "num_speculative_tokens": 4, "use_heterogeneous_vocab": true}, "tensor_parallel_size": 1, "trust_remote_code": true}
+INFO 09-04 10:17:35 [api_utils.py:286] non-default args: {'trust_remote_code': True, 'dtype': 'bfloat16', 'max_model_len': 1024, 'enable_prefix_caching': True, 'max_num_batched_tokens': 33280, 'max_num_seqs': 128, 'disable_log_stats': True, 'speculative_config': {'method': 'draft_model', 'model': '/data/shared-models/Qwen2.5-0.5B-Instruct', 'draft_tensor_parallel_size': 1, 'num_speculative_tokens': 4, 'enforce_eager': False, 'use_heterogeneous_vocab': True}, 'compilation_config': {'mode': <CompilationMode.VLLM_COMPILE: 3>, 'debug_dump_path': None, 'cache_dir': '', 'compile_cache_save_format': 'binary', 'backend': 'vllm_ascend.compilation.compiler_interface.AscendCompiler', 'custom_ops': [], 'ir_enable_torch_wrap': None, 'splitting_ops': None, 'compile_mm_encoder': False, 'cudagraph_mm_encoder': False, 'encoder_cudagraph_token_budgets': [], 'encoder_cudagraph_max_vision_items_per_batch': 0, 'encoder_cudagraph_max_frames_per_batch': None, 'compile_sizes': None, 'compile_ranges_endpoints': None, 'inductor_compile_config': {'enable_auto_functionalized_v2': False, 'combo_kernels': True, 'benchmark_combo_kernel': True}, 'inductor_passes': {}, 'cudagraph_mode': <CUDAGraphMode.FULL: 2>, 'cudagraph_num_of_warmups': 0, 'cudagraph_capture_sizes': [1, 2, 3, 4, 5, 6, 8, 10, 12, 16, 20, 24, 32, 40, 48, 56, 64, 72, 80, 88, 96, 104, 112, 120, 128, 144, 160, 168, 176, 192, 200, 208, 216, 224, 240, 256, 264, 280, 288, 312, 320, 336, 352, 360, 384, 400, 416, 440, 448, 480, 512, 520, 560, 600, 640], 'cudagraph_copy_inputs': False, 'cudagraph_specialize_lora': True, 'use_inductor_graph_partition': None, 'pass_config': {}, 'max_cudagraph_capture_size': None, 'dynamic_shapes_config': {'type': <DynamicShapesType.BACKED: 'backed'>, 'evaluate_guards': False, 'assume_32_bit_indexing': False}, 'local_cache_dir': None, 'fast_moe_cold_start': None, 'static_all_moe_layers': []}, 'async_scheduling': True, 'model': '/data/shared-models/Qwen2.5-14B-Instruct'}
+INFO 09-04 10:17:57 [model.py:688] Resolved architecture: Qwen2ForCausalLM
+INFO 09-04 10:17:57 [model.py:2025] Using max model len 1024
+INFO 09-04 10:17:57 [model.py:688] Resolved architecture: Qwen2ForCausalLM
+INFO 09-04 10:17:57 [model.py:2025] Using max model len 32768
+INFO 09-04 10:17:57 [speculative.py:1591] Overriding draft model max model len from 32768 to 1024
+INFO 09-04 10:17:57 [scheduler.py:277] Chunked prefill is enabled with max_num_batched_tokens=33280.
+INFO 09-04 10:17:57 [kernel.py:372] Final IR op priority after setting platform defaults: IrOpPriorityConfig(rms_norm=['native'], fused_add_rms_norm=['native'])
+INFO 09-04 10:17:57 [utils.py:224] No quantization signature detected from model files for "/data/shared-models/Qwen2.5-14B-Instruct". The model will be loaded as float. To force a quantization method, pass "--quantization <method>" explicitly.
+WARNING 09-04 10:17:57 [platform.py:622] GPU-specific parameter is not supported on Ascend. parameter=disable_cascade_attn, value=True, action: resetting to False.
+INFO 09-04 10:17:57 [platform.py:834] The timeout interval of the HCCL operator is 1836s. Timeout in seconds for execute_model RPC calls in multiprocessing must be greater than 1836s, Set VLLM_EXECUTE_MODEL_TIMEOUT_SECONDS=3000
+INFO 09-04 10:17:57 [ascend_config.py:161] Dynamic EPLB is False
+INFO 09-04 10:17:57 [ascend_config.py:162] The number of redundant experts is 0
+INFO 09-04 10:17:57 [platform.py:1138] FlashComm1 is disabled. Using flashinfer_all2allv as the all2all backend.
+INFO 09-04 10:17:57 [utils.py:1208] Block size is set to 128 if prefix cache or chunked prefill is enabled.
+INFO 09-04 10:17:57 [platform.py:1327] Set PYTORCH_NPU_ALLOC_CONF=expandable_segments:True
+INFO 09-04 10:17:57 [compilation.py:329] Enabled custom fusions: norm_quant, act_quant
+[W904 10:18:05.052159758 FunctionLoader.cpp:44] Warning: LD_PRELOAD detected, FunctionLoader prefers RTLD_DEFAULT for symbol resolution. (function operator())
+INFO 09-04 10:18:10 [__init__.py:52] Available plugins for group vllm.platform_plugins:
+INFO 09-04 10:18:10 [__init__.py:54] - ascend -> vllm_ascend:register
+INFO 09-04 10:18:10 [__init__.py:66] Loading plugin ascend
+INFO 09-04 10:18:10 [__init__.py:272] Platform plugin ascend is activated
+INFO 09-04 10:18:10 [platform.py:70] Breakable CUDAGraph on Ascend is opt-in; using VLLM_USE_BREAKABLE_CUDAGRAPH=0.
+(EngineCore pid=1440276) INFO 09-04 10:18:22 [core.py:123] Initializing a V1 LLM engine (v0.17.2rc1.dev5871+g762f85b31) with config: model='/data/shared-models/Qwen2.5-14B-Instruct', speculative_config=SpeculativeConfig(method='draft_model', model='/data/shared-models/Qwen2.5-0.5B-Instruct', num_spec_tokens=4), tokenizer='/data/shared-models/Qwen2.5-14B-Instruct', skip_tokenizer_init=False, tokenizer_mode=auto, revision=None, tokenizer_revision=None, trust_remote_code=True, dtype=torch.bfloat16, max_seq_len=1024, download_dir=None, load_format=auto, tensor_parallel_size=1, pipeline_parallel_size=1, data_parallel_size=1, decode_context_parallel_size=1, dcp_comm_backend=ag_rs, disable_custom_all_reduce=True, quantization=None, quantization_config=None, enforce_eager=False, enable_return_routed_experts=False, kv_cache_dtype=auto, device_config=npu, structured_outputs_config=StructuredOutputsConfig(backend='auto', disable_any_whitespace=False, disable_additional_properties=False, reasoning_parser='', reasoning_parser_plugin='', enable_in_reasoning=False), observability_config=ObservabilityConfig(show_hidden_metrics_for_version=None, otlp_traces_endpoint=None, collect_detailed_traces=None, per_request_spec_decode_metrics='none', kv_cache_metrics=False, kv_cache_metrics_sample=0.01, cudagraph_metrics=False, enable_layerwise_nvtx_tracing=False, enable_mfu_metrics=False, enable_mm_processor_stats=False, enable_logging_iteration_details=False, jit_monitor_mode='warn', jit_monitor_verbose=False), seed=0, served_model_name=/data/shared-models/Qwen2.5-14B-Instruct, enable_prefix_caching=True, enable_chunked_prefill=True, pooler_config=None, compilation_config={'mode': <CompilationMode.VLLM_COMPILE: 3>, 'debug_dump_path': None, 'cache_dir': '', 'compile_cache_save_format': 'binary', 'backend': 'vllm_ascend.compilation.compiler_interface.AscendCompiler', 'custom_ops': ['all'], 'ir_enable_torch_wrap': False, 'splitting_ops': [], 'compile_mm_encoder': False, 'cudagraph_mm_encoder': False, 'encoder_cudagraph_token_budgets': [], 'encoder_cudagraph_max_vision_items_per_batch': 0, 'encoder_cudagraph_max_frames_per_batch': None, 'compile_sizes': [], 'compile_ranges_endpoints': [33280], 'inductor_compile_config': {'enable_auto_functionalized_v2': False, 'combo_kernels': True, 'benchmark_combo_kernel': True}, 'inductor_passes': {}, 'cudagraph_mode': <CUDAGraphMode.FULL: 2>, 'cudagraph_num_of_warmups': 1, 'cudagraph_capture_sizes': [1, 2, 3, 4, 5, 6, 8, 10, 12, 16, 20, 24, 32, 40, 48, 56, 64, 72, 80, 88, 96, 104, 112, 120, 128, 144, 160, 168, 176, 192, 200, 208, 216, 224, 240, 256, 264, 280, 288, 312, 320, 336, 352, 360, 384, 400, 416, 440, 448, 480, 512, 520, 560, 600, 640], 'cudagraph_copy_inputs': False, 'cudagraph_specialize_lora': True, 'use_inductor_graph_partition': False, 'pass_config': {'fuse_norm_quant': True, 'fuse_act_quant': True, 'fuse_attn_quant': False, 'enable_sp': False, 'fuse_gemm_comms': False, 'fuse_allreduce_rms': False, 'enable_qk_norm_rope_fusion': False, 'fuse_rope_kvcache_cat_mla': False, 'fuse_act_padding': False, 'fuse_qk_norm_rope_kvcache': False}, 'max_cudagraph_capture_size': 640, 'dynamic_shapes_config': {'type': <DynamicShapesType.BACKED: 'backed'>, 'evaluate_guards': False, 'assume_32_bit_indexing': False}, 'local_cache_dir': None, 'fast_moe_cold_start': False, 'static_all_moe_layers': []}, kernel_config=KernelConfig(ir_op_priority=IrOpPriorityConfig(rms_norm=['native'], fused_add_rms_norm=['native']), enable_flashinfer_autotune=True, enable_cutedsl_warmup=True, enable_jit_warmup=True, enable_bf16x3_router_gemm=False, moe_backend='auto', linear_backend='auto')
+(EngineCore pid=1440276) INFO 09-04 10:18:22 [ascend_config.py:161] Dynamic EPLB is False
+(EngineCore pid=1440276) INFO 09-04 10:18:22 [ascend_config.py:162] The number of redundant experts is 0
+(EngineCore pid=1440276) INFO 09-04 10:18:24 [parallel_state.py:1798] world_size=1 rank=0 local_rank=0 distributed_init_method=file:///tmp/vllm_dist_2f5f8d7b670c45888e4d474efb268edc backend=hccl
+(EngineCore pid=1440276) INFO 09-04 10:18:26 [parallel_state.py:2142] rank 0 in world size 1 is assigned as DP rank 0, PP rank 0, PCP rank 0, TP rank 0, EP rank N/A, EPLB rank N/A
+[rank0]:[W904 10:18:26.066264628 NPUCachingAllocator.cpp:177] Warning: The current CANN and Soc versions require processing for 32 padding size, with memory allocation. (function operator())
+(EngineCore pid=1440276) WARNING 09-04 10:18:28 [vocab_mapping.py:55] VocabMapping: target tokenizer has no unk_token_id; falling back to eos_token_id=151645 for out-of-intersection tokens
+(EngineCore pid=1440276) WARNING 09-04 10:18:28 [vocab_mapping.py:55] VocabMapping: draft tokenizer has no unk_token_id; falling back to eos_token_id=151645 for out-of-intersection tokens
+(EngineCore pid=1440276) INFO 09-04 10:18:31 [vocab_mapping.py:122] VocabMapping initialized: target_vocab=152064, draft_vocab=151936, intersection=151665 (99.8% of draft, 99.7% of target)
+(EngineCore pid=1440276) WARNING 09-04 10:18:31 [__init__.py:205] min_p and logit_bias parameters won't work with speculative decoding.
+(EngineCore pid=1440276) INFO 09-04 10:18:31 [platform.py:1350] FA3 will not be enabled when rl_config.enable_training_consistency is false. Note that Ascend NPU will use its registered plugin backend instead.
+(EngineCore pid=1440276) WARNING 09-04 10:18:33 [vocab_mapping.py:55] VocabMapping: target tokenizer has no unk_token_id; falling back to eos_token_id=151645 for out-of-intersection tokens
+(EngineCore pid=1440276) WARNING 09-04 10:18:33 [vocab_mapping.py:55] VocabMapping: draft tokenizer has no unk_token_id; falling back to eos_token_id=151645 for out-of-intersection tokens
+(EngineCore pid=1440276) INFO 09-04 10:18:36 [vocab_mapping.py:122] VocabMapping initialized: target_vocab=152064, draft_vocab=151936, intersection=151665 (99.8% of draft, 99.7% of target)
+(EngineCore pid=1440276) WARNING 09-04 10:18:36 [__init__.py:205] min_p and logit_bias parameters won't work with speculative decoding.
+(EngineCore pid=1440276) INFO 09-04 10:18:36 [model_runner_v1.py:3788] Starting to load model /data/shared-models/Qwen2.5-14B-Instruct...
+(EngineCore pid=1440276) INFO 09-04 10:18:37 [platform.py:1350] FA3 will not be enabled when rl_config.enable_training_consistency is false. Note that Ascend NPU will use its registered plugin backend instead.
+(EngineCore pid=1440276) INFO 09-04 10:18:38 [compilation.py:1107] Using OOT custom backend for compilation.
+(EngineCore pid=1440276) INFO 09-04 10:18:38 [weight_utils.py:863] Filesystem type for checkpoints: OVERLAY. Checkpoint size: 27.51 GiB. Available RAM: 1068.73 GiB.
+(EngineCore pid=1440276) INFO 09-04 10:18:38 [weight_utils.py:886] Auto-prefetch is disabled because the filesystem (OVERLAY) is not a recognized network FS (NFS/Lustre). If you want to force prefetching, start vLLM with --safetensors-load-strategy=prefetch.
+(EngineCore pid=1440276) Loading safetensors checkpoint shards:   0% Completed | 0/8 [00:00<?, ?it/s]
+(EngineCore pid=1440276) Loading safetensors checkpoint shards:  12% Completed | 1/8 [00:05<00:41,  5.89s/it]
+(EngineCore pid=1440276) Loading safetensors checkpoint shards:  25% Completed | 2/8 [00:13<00:40,  6.75s/it]
+(EngineCore pid=1440276) Loading safetensors checkpoint shards:  38% Completed | 3/8 [00:20<00:34,  6.93s/it]
+(EngineCore pid=1440276) Loading safetensors checkpoint shards:  50% Completed | 4/8 [00:27<00:27,  6.93s/it]
+(EngineCore pid=1440276) Loading safetensors checkpoint shards:  62% Completed | 5/8 [00:33<00:19,  6.61s/it]
+(EngineCore pid=1440276) Loading safetensors checkpoint shards:  75% Completed | 6/8 [00:40<00:13,  6.74s/it]
+(EngineCore pid=1440276) Loading safetensors checkpoint shards:  88% Completed | 7/8 [00:47<00:06,  6.74s/it]
+(EngineCore pid=1440276) Loading safetensors checkpoint shards: 100% Completed | 8/8 [00:49<00:00,  5.40s/it]
+(EngineCore pid=1440276) Loading safetensors checkpoint shards: 100% Completed | 8/8 [00:49<00:00,  6.20s/it]
+(EngineCore pid=1440276) 
+(EngineCore pid=1440276) INFO 09-04 10:19:28 [default_loader.py:430] Loading weights took 49.80 seconds
+(EngineCore pid=1440276) INFO 09-04 10:19:28 [model_runner_v1.py:3813] Loading drafter model...
+(EngineCore pid=1440276) WARNING 09-04 10:19:28 [vllm.py:1336] Disabling cascade attention (not yet compatible with async speculative decoding).
+(EngineCore pid=1440276) INFO 09-04 10:19:28 [kernel.py:372] Final IR op priority after setting platform defaults: IrOpPriorityConfig(rms_norm=['native'], fused_add_rms_norm=['native'])
+(EngineCore pid=1440276) INFO 09-04 10:19:28 [utils.py:224] No quantization signature detected from model files for "/data/shared-models/Qwen2.5-14B-Instruct". The model will be loaded as float. To force a quantization method, pass "--quantization <method>" explicitly.
+(EngineCore pid=1440276) WARNING 09-04 10:19:28 [platform.py:622] GPU-specific parameter is not supported on Ascend. parameter=disable_cascade_attn, value=True, action: resetting to False.
+(EngineCore pid=1440276) INFO 09-04 10:19:28 [platform.py:834] The timeout interval of the HCCL operator is 1836s. Timeout in seconds for execute_model RPC calls in multiprocessing must be greater than 1836s, Set VLLM_EXECUTE_MODEL_TIMEOUT_SECONDS=3000
+(EngineCore pid=1440276) INFO 09-04 10:19:28 [ascend_config.py:161] Dynamic EPLB is False
+(EngineCore pid=1440276) INFO 09-04 10:19:28 [ascend_config.py:162] The number of redundant experts is 0
+(EngineCore pid=1440276) INFO 09-04 10:19:28 [platform.py:1138] FlashComm1 is disabled. Using flashinfer_all2allv as the all2all backend.
+(EngineCore pid=1440276) INFO 09-04 10:19:28 [platform.py:1327] Set PYTORCH_NPU_ALLOC_CONF=expandable_segments:True
+(EngineCore pid=1440276) INFO 09-04 10:19:28 [compilation.py:329] Enabled custom fusions: norm_quant, act_quant
+(EngineCore pid=1440276) INFO 09-04 10:19:28 [kernel.py:372] Final IR op priority after setting platform defaults: IrOpPriorityConfig(rms_norm=['native'], fused_add_rms_norm=['native'])
+(EngineCore pid=1440276) INFO 09-04 10:19:28 [utils.py:224] No quantization signature detected from model files for "/data/shared-models/Qwen2.5-0.5B-Instruct". The model will be loaded as float. To force a quantization method, pass "--quantization <method>" explicitly.
+(EngineCore pid=1440276) WARNING 09-04 10:19:28 [platform.py:622] GPU-specific parameter is not supported on Ascend. parameter=disable_cascade_attn, value=True, action: resetting to False.
+(EngineCore pid=1440276) INFO 09-04 10:19:28 [ascend_config.py:161] Dynamic EPLB is False
+(EngineCore pid=1440276) INFO 09-04 10:19:28 [ascend_config.py:162] The number of redundant experts is 0
+(EngineCore pid=1440276) INFO 09-04 10:19:28 [platform.py:1327] Set PYTORCH_NPU_ALLOC_CONF=expandable_segments:True
+(EngineCore pid=1440276) INFO 09-04 10:19:28 [platform.py:1350] FA3 will not be enabled when rl_config.enable_training_consistency is false. Note that Ascend NPU will use its registered plugin backend instead.
+(EngineCore pid=1440276) INFO 09-04 10:19:28 [compilation.py:1107] Using OOT custom backend for compilation.
+(EngineCore pid=1440276) INFO 09-04 10:19:28 [weight_utils.py:863] Filesystem type for checkpoints: OVERLAY. Checkpoint size: 0.92 GiB. Available RAM: 1068.69 GiB.
+(EngineCore pid=1440276) Loading safetensors checkpoint shards:   0% Completed | 0/1 [00:00<?, ?it/s]
+(EngineCore pid=1440276) Loading safetensors checkpoint shards: 100% Completed | 1/1 [00:01<00:00,  1.39s/it]
+(EngineCore pid=1440276) Loading safetensors checkpoint shards: 100% Completed | 1/1 [00:01<00:00,  1.39s/it]
+(EngineCore pid=1440276) 
+(EngineCore pid=1440276) INFO 09-04 10:19:30 [default_loader.py:430] Loading weights took 1.47 seconds
+(EngineCore pid=1440276) INFO 09-04 10:19:31 [model_runner_v1.py:3875] Loading model weights took 28.4592 GB
+(EngineCore pid=1440276) INFO 09-04 10:19:31 [model_runner_v1.py:3928] Model runner load_model total time: 54.81 seconds
+(EngineCore pid=1440276) INFO 09-04 10:19:31 [utils.py:306] Using LBHNC KV cache layout.
+(EngineCore pid=1440276) INFO 09-04 10:19:42 [compiler_interface.py:285] AscendCompiler hash factors: {'torch_npu_version': '2.13.0.rc1', 'enable_npugraph_ex': True, 'enable_static_kernel': False}
+(EngineCore pid=1440276) INFO 09-04 10:19:42 [backends.py:1094] Using cache directory: /tmp/vspec-cache-draft-taskqueue2-affinity-20260904-1/torch_compile_cache/daf785f78c/rank_0_0/backbone for vLLM's torch.compile
+(EngineCore pid=1440276) INFO 09-04 10:19:42 [backends.py:1155] Dynamo bytecode transform time: 10.32 s
+(EngineCore pid=1440276) INFO 09-04 10:19:44 [compiler_interface.py:322] enable_npugraph_ex is enabled, which will bring graph compilation optimization.
+(EngineCore pid=1440276) [rank0]:W0904 10:19:44.407000 1440276 site-packages/torch/_inductor/codecache.py:1193] pre_grad_custom_pass run_register_pre_custom_passes does not implement uuid(); falling back to early timing (pre-grad pass cache will be bypassed). Implement uuid() on your CustomGraphPass to enable caching.
+(EngineCore pid=1440276) INFO 09-04 10:20:06 [compiler_interface.py:235] Saved compiled graph to cache: /tmp/vspec-cache-draft-taskqueue2-affinity-20260904-1/torch_compile_cache/daf785f78c/rank_0_0/backbone/artifact_compile_range_1_33280_subgraph_0
+(EngineCore pid=1440276) INFO 09-04 10:20:06 [backends.py:378] Cache the graph of compile range (1, 33280) for later use
+(EngineCore pid=1440276) INFO 09-04 10:20:06 [backends.py:393] Compiling a graph for compile range (1, 33280) takes 21.97 s
+(EngineCore pid=1440276) WARNING 09-04 10:20:12 [decorators.py:724] unable to save AOT compiled function to /tmp/vspec-cache-draft-taskqueue2-affinity-20260904-1/torch_compile_cache/torch_aot_compile/f8204a81014e0a62a09ab54e85da8a0b02ec0ef390124aaa3e798be8f706dd67/rank_0_0/model: 'NoneType' object is not callable
+(EngineCore pid=1440276) INFO 09-04 10:20:12 [monitor.py:53] torch.compile took 39.92 s in total
+(EngineCore pid=1440276) INFO 09-04 10:20:12 [monitor.py:81] Initial profiling/warmup run took 0.37 s
+(EngineCore pid=1440276) INFO 09-04 10:20:17 [compiler_interface.py:285] AscendCompiler hash factors: {'torch_npu_version': '2.13.0.rc1', 'enable_npugraph_ex': True, 'enable_static_kernel': False}
+(EngineCore pid=1440276) INFO 09-04 10:20:17 [backends.py:1094] Using cache directory: /tmp/vspec-cache-draft-taskqueue2-affinity-20260904-1/torch_compile_cache/daf785f78c/rank_0_0/draft_model for vLLM's torch.compile
+(EngineCore pid=1440276) INFO 09-04 10:20:17 [backends.py:1155] Dynamo bytecode transform time: 5.19 s
+(EngineCore pid=1440276) INFO 09-04 10:20:28 [compiler_interface.py:235] Saved compiled graph to cache: /tmp/vspec-cache-draft-taskqueue2-affinity-20260904-1/torch_compile_cache/daf785f78c/rank_0_0/draft_model/artifact_compile_range_1_33280_subgraph_0
+(EngineCore pid=1440276) INFO 09-04 10:20:28 [backends.py:393] Compiling a graph for compile range (1, 33280) takes 10.69 s
+(EngineCore pid=1440276) WARNING 09-04 10:20:31 [decorators.py:724] unable to save AOT compiled function to /tmp/vspec-cache-draft-taskqueue2-affinity-20260904-1/torch_compile_cache/torch_aot_compile/c7b1081e1b0d02f2762972ebf04806a901ba6558c65413c62395725c54ca2090/rank_0_0/model: 'NoneType' object is not callable
+(EngineCore pid=1440276) INFO 09-04 10:20:31 [monitor.py:53] torch.compile took 19.01 s in total
+(EngineCore pid=1440276) INFO 09-04 10:20:31 [monitor.py:81] Initial profiling/warmup run took 0.12 s
+(EngineCore pid=1440276) INFO 09-04 10:20:35 [worker.py:622] Available KV cache memory: 24.66 GiB
+(EngineCore pid=1440276) INFO 09-04 10:20:35 [kv_cache_utils.py:2042] GPU KV cache size: 126,720 tokens, Maximum concurrency for 1,024 tokens per request: 123.75x
+(EngineCore pid=1440276) INFO 09-04 10:20:36 [kernel_warmup.py:41] Starting Triton kernel warmup.
+(EngineCore pid=1440276) INFO 09-04 10:20:36 [kernel_warmup.py:33] rejection_sampler Triton warmup complete in 0.136s.
+(EngineCore pid=1440276) INFO 09-04 10:20:36 [kernel_warmup.py:33] penalties Triton warmup complete in 0.026s.
+(EngineCore pid=1440276) INFO 09-04 10:20:36 [kernel_warmup.py:33] rms Triton warmup complete in 0.000s.
+(EngineCore pid=1440276) INFO 09-04 10:20:36 [kernel_warmup.py:49] Triton kernel warmup finished in 0.162s.
+(EngineCore pid=1440276) INFO 09-04 10:20:36 [gpu_model_runner.py:6936] Rank 0: Torch profiler disabled for CUDA graph capture
+(EngineCore pid=1440276) Capturing CUDA graphs (mixed prefill-decode, FULL):   0%|          | 0/55 [00:00<?, ?it/s]Capturing CUDA graphs (mixed prefill-decode, FULL):   0%|          | 0/55 [00:00<?, ?it/s]
+(EngineCore pid=1440276) ERROR 09-04 10:20:37 [core.py:1374] EngineCore failed to start.
+(EngineCore pid=1440276) ERROR 09-04 10:20:37 [core.py:1374] Traceback (most recent call last):
+(EngineCore pid=1440276) ERROR 09-04 10:20:37 [core.py:1374]   File "/root/data/vllm-ascend-hust-latest/vllm_ascend/worker/model_runner_v1.py", line 5401, in _replace_gpu_model_runner_function_wrapper
+(EngineCore pid=1440276) ERROR 09-04 10:20:37 [core.py:1374]     yield
+(EngineCore pid=1440276) ERROR 09-04 10:20:37 [core.py:1374]   File "/root/data/vllm-ascend-hust-latest/vllm_ascend/worker/model_runner_v1.py", line 5261, in capture_model
+(EngineCore pid=1440276) ERROR 09-04 10:20:37 [core.py:1374]     cuda_graph_size = GPUModelRunner.capture_model(self)
+(EngineCore pid=1440276) ERROR 09-04 10:20:37 [core.py:1374]                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=1440276) ERROR 09-04 10:20:37 [core.py:1374]   File "/root/data/vllm-hust-latest/vllm/tracing/otel.py", line 178, in sync_wrapper
+(EngineCore pid=1440276) ERROR 09-04 10:20:37 [core.py:1374]     return func(*args, **kwargs)
+(EngineCore pid=1440276) ERROR 09-04 10:20:37 [core.py:1374]            ^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=1440276) ERROR 09-04 10:20:37 [core.py:1374]   File "/root/data/vllm-hust-latest/vllm/v1/worker/gpu_model_runner.py", line 6949, in capture_model
+(EngineCore pid=1440276) ERROR 09-04 10:20:37 [core.py:1374]     self._capture_cudagraphs(
+(EngineCore pid=1440276) ERROR 09-04 10:20:37 [core.py:1374]   File "/root/data/vllm-hust-latest/vllm/v1/worker/gpu_model_runner.py", line 7080, in _capture_cudagraphs
+(EngineCore pid=1440276) ERROR 09-04 10:20:37 [core.py:1374]     self._warmup_and_capture(
+(EngineCore pid=1440276) ERROR 09-04 10:20:37 [core.py:1374]   File "/opt/vllm-hust-cann91/lib/python3.11/site-packages/vllm_hust_vspec/adaptive/runtime.py", line 1789, in warmup_and_capture
+(EngineCore pid=1440276) ERROR 09-04 10:20:37 [core.py:1374]     return original_warmup_and_capture(
+(EngineCore pid=1440276) ERROR 09-04 10:20:37 [core.py:1374]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=1440276) ERROR 09-04 10:20:37 [core.py:1374]   File "/root/data/vllm-hust-latest/vllm/v1/worker/gpu_model_runner.py", line 7025, in _warmup_and_capture
+(EngineCore pid=1440276) ERROR 09-04 10:20:37 [core.py:1374]     self._dummy_run(
+(EngineCore pid=1440276) ERROR 09-04 10:20:37 [core.py:1374]   File "/opt/vllm-hust-cann91/lib/python3.11/site-packages/torch/utils/_contextlib.py", line 124, in decorate_context
+(EngineCore pid=1440276) ERROR 09-04 10:20:37 [core.py:1374]     return func(*args, **kwargs)
+(EngineCore pid=1440276) ERROR 09-04 10:20:37 [core.py:1374]            ^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=1440276) ERROR 09-04 10:20:37 [core.py:1374]   File "/root/data/vllm-ascend-hust-latest/vllm_ascend/worker/model_runner_v1.py", line 3701, in _dummy_run
+(EngineCore pid=1440276) ERROR 09-04 10:20:37 [core.py:1374]     outputs = self._model_forward(
+(EngineCore pid=1440276) ERROR 09-04 10:20:37 [core.py:1374]               ^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=1440276) ERROR 09-04 10:20:37 [core.py:1374]   File "/root/data/vllm-ascend-hust-latest/vllm_ascend/worker/model_runner_v1.py", line 2934, in _model_forward
+(EngineCore pid=1440276) ERROR 09-04 10:20:37 [core.py:1374]     hidden_states = run_model()
+(EngineCore pid=1440276) ERROR 09-04 10:20:37 [core.py:1374]                     ^^^^^^^^^^^
+(EngineCore pid=1440276) ERROR 09-04 10:20:37 [core.py:1374]   File "/root/data/vllm-ascend-hust-latest/vllm_ascend/compilation/acl_graph.py", line 187, in __call__
+(EngineCore pid=1440276) ERROR 09-04 10:20:37 [core.py:1374]     with torch.npu.graph(aclgraph, pool=self.graph_pool):
+(EngineCore pid=1440276) ERROR 09-04 10:20:37 [core.py:1374]   File "/opt/vllm-hust-cann91/lib/python3.11/site-packages/torch_npu/npu/graphs.py", line 912, in __enter__
+(EngineCore pid=1440276) ERROR 09-04 10:20:37 [core.py:1374]     self.npu_graph.capture_begin(
+(EngineCore pid=1440276) ERROR 09-04 10:20:37 [core.py:1374]   File "/opt/vllm-hust-cann91/lib/python3.11/site-packages/torch_npu/npu/graphs.py", line 624, in capture_begin
+(EngineCore pid=1440276) ERROR 09-04 10:20:37 [core.py:1374]     super().capture_begin(pool=pool, capture_error_mode=capture_error_mode, report_shape=True)
+(EngineCore pid=1440276) ERROR 09-04 10:20:37 [core.py:1374] RuntimeError: Do not support TASK_QUEUE_ENABLE = 2 during NPU graph capture, please export TASK_QUEUE_ENABLE=1/0.
+(EngineCore pid=1440276) ERROR 09-04 10:20:37 [core.py:1374] [ERROR] 2026-09-04-10:20:37 (PID:1440276, Device:0, RankID:-1) ERR00007 PTA feature not supported
+(EngineCore pid=1440276) ERROR 09-04 10:20:37 [core.py:1374] 
+(EngineCore pid=1440276) ERROR 09-04 10:20:37 [core.py:1374] During handling of the above exception, another exception occurred:
+(EngineCore pid=1440276) ERROR 09-04 10:20:37 [core.py:1374] 
+(EngineCore pid=1440276) ERROR 09-04 10:20:37 [core.py:1374] Traceback (most recent call last):
+(EngineCore pid=1440276) ERROR 09-04 10:20:37 [core.py:1374]   File "/root/data/vllm-ascend-hust-latest/vllm_ascend/worker/model_runner_v1.py", line 5360, in _torch_cuda_wrapper
+(EngineCore pid=1440276) ERROR 09-04 10:20:37 [core.py:1374]     yield
+(EngineCore pid=1440276) ERROR 09-04 10:20:37 [core.py:1374]   File "/root/data/vllm-ascend-hust-latest/vllm_ascend/worker/model_runner_v1.py", line 5260, in capture_model
+(EngineCore pid=1440276) ERROR 09-04 10:20:37 [core.py:1374]     with _torch_cuda_wrapper(), _replace_gpu_model_runner_function_wrapper(parent_module_name):
+(EngineCore pid=1440276) ERROR 09-04 10:20:37 [core.py:1374]   File "/opt/vllm-hust-cann91/lib/python3.11/contextlib.py", line 158, in __exit__
+(EngineCore pid=1440276) ERROR 09-04 10:20:37 [core.py:1374]     self.gen.throw(typ, value, traceback)
+(EngineCore pid=1440276) ERROR 09-04 10:20:37 [core.py:1374]   File "/root/data/vllm-ascend-hust-latest/vllm_ascend/worker/model_runner_v1.py", line 5403, in _replace_gpu_model_runner_function_wrapper
+(EngineCore pid=1440276) ERROR 09-04 10:20:37 [core.py:1374]     raise RuntimeError(f"NPUModelRunner failed, error is {e}")
+(EngineCore pid=1440276) ERROR 09-04 10:20:37 [core.py:1374] RuntimeError: NPUModelRunner failed, error is Do not support TASK_QUEUE_ENABLE = 2 during NPU graph capture, please export TASK_QUEUE_ENABLE=1/0.
+(EngineCore pid=1440276) ERROR 09-04 10:20:37 [core.py:1374] [ERROR] 2026-09-04-10:20:37 (PID:1440276, Device:0, RankID:-1) ERR00007 PTA feature not supported
+(EngineCore pid=1440276) ERROR 09-04 10:20:37 [core.py:1374] 
+(EngineCore pid=1440276) ERROR 09-04 10:20:37 [core.py:1374] During handling of the above exception, another exception occurred:
+(EngineCore pid=1440276) ERROR 09-04 10:20:37 [core.py:1374] 
+(EngineCore pid=1440276) ERROR 09-04 10:20:37 [core.py:1374] Traceback (most recent call last):
+(EngineCore pid=1440276) ERROR 09-04 10:20:37 [core.py:1374]   File "/root/data/vllm-hust-latest/vllm/v1/engine/core.py", line 1336, in run_engine_core
+(EngineCore pid=1440276) ERROR 09-04 10:20:37 [core.py:1374]     engine_core = EngineCoreProc(*args, engine_index=dp_rank, **kwargs)
+(EngineCore pid=1440276) ERROR 09-04 10:20:37 [core.py:1374]                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=1440276) ERROR 09-04 10:20:37 [core.py:1374]   File "/root/data/vllm-hust-latest/vllm/tracing/otel.py", line 178, in sync_wrapper
+(EngineCore pid=1440276) ERROR 09-04 10:20:37 [core.py:1374]     return func(*args, **kwargs)
+(EngineCore pid=1440276) ERROR 09-04 10:20:37 [core.py:1374]            ^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=1440276) ERROR 09-04 10:20:37 [core.py:1374]   File "/root/data/vllm-hust-latest/vllm/v1/engine/core.py", line 1093, in __init__
+(EngineCore pid=1440276) ERROR 09-04 10:20:37 [core.py:1374]     super().__init__(
+(EngineCore pid=1440276) ERROR 09-04 10:20:37 [core.py:1374]   File "/root/data/vllm-hust-latest/vllm/v1/engine/core.py", line 145, in __init__
+(EngineCore pid=1440276) ERROR 09-04 10:20:37 [core.py:1374]     kv_cache_config = self._initialize_kv_caches(vllm_config)
+(EngineCore pid=1440276) ERROR 09-04 10:20:37 [core.py:1374]                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=1440276) ERROR 09-04 10:20:37 [core.py:1374]   File "/root/data/vllm-hust-latest/vllm/tracing/otel.py", line 178, in sync_wrapper
+(EngineCore pid=1440276) ERROR 09-04 10:20:37 [core.py:1374]     return func(*args, **kwargs)
+(EngineCore pid=1440276) ERROR 09-04 10:20:37 [core.py:1374]            ^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=1440276) ERROR 09-04 10:20:37 [core.py:1374]   File "/root/data/vllm-hust-latest/vllm/v1/engine/core.py", line 345, in _initialize_kv_caches
+(EngineCore pid=1440276) ERROR 09-04 10:20:37 [core.py:1374]     self.model_executor.compile_or_warm_up_model()
+(EngineCore pid=1440276) ERROR 09-04 10:20:37 [core.py:1374]   File "/root/data/vllm-hust-latest/vllm/v1/executor/abstract.py", line 126, in compile_or_warm_up_model
+(EngineCore pid=1440276) ERROR 09-04 10:20:37 [core.py:1374]     compilation_times: list[CompilationTimes] = self.collective_rpc(
+(EngineCore pid=1440276) ERROR 09-04 10:20:37 [core.py:1374]                                                 ^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=1440276) ERROR 09-04 10:20:37 [core.py:1374]   File "/root/data/vllm-hust-latest/vllm/v1/executor/uniproc_executor.py", line 103, in collective_rpc
+(EngineCore pid=1440276) ERROR 09-04 10:20:37 [core.py:1374]     result = run_method(self.driver_worker, method, args, kwargs)
+(EngineCore pid=1440276) ERROR 09-04 10:20:37 [core.py:1374]              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=1440276) ERROR 09-04 10:20:37 [core.py:1374]   File "/root/data/vllm-hust-latest/vllm/v1/serial_utils.py", line 510, in run_method
+(EngineCore pid=1440276) ERROR 09-04 10:20:37 [core.py:1374]     return func(*args, **kwargs)
+(EngineCore pid=1440276) ERROR 09-04 10:20:37 [core.py:1374]            ^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=1440276) ERROR 09-04 10:20:37 [core.py:1374]   File "/root/data/vllm-ascend-hust-latest/vllm_ascend/worker/worker.py", line 779, in compile_or_warm_up_model
+(EngineCore pid=1440276) ERROR 09-04 10:20:37 [core.py:1374]     npugraph_memory_bytes = self.model_runner.capture_model()
+(EngineCore pid=1440276) ERROR 09-04 10:20:37 [core.py:1374]                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=1440276) ERROR 09-04 10:20:37 [core.py:1374]   File "/opt/vllm-hust-cann91/lib/python3.11/site-packages/vllm_hust_vspec/adaptive/runtime.py", line 1919, in capture_model
+(EngineCore pid=1440276) ERROR 09-04 10:20:37 [core.py:1374]     return original_capture_model(self, *args, **kwargs)
+(EngineCore pid=1440276) ERROR 09-04 10:20:37 [core.py:1374]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=1440276) ERROR 09-04 10:20:37 [core.py:1374]   File "/root/data/vllm-ascend-hust-latest/vllm_ascend/worker/model_runner_v1.py", line 5260, in capture_model
+(EngineCore pid=1440276) ERROR 09-04 10:20:37 [core.py:1374]     with _torch_cuda_wrapper(), _replace_gpu_model_runner_function_wrapper(parent_module_name):
+(EngineCore pid=1440276) ERROR 09-04 10:20:37 [core.py:1374]   File "/opt/vllm-hust-cann91/lib/python3.11/contextlib.py", line 158, in __exit__
+(EngineCore pid=1440276) ERROR 09-04 10:20:37 [core.py:1374]     self.gen.throw(typ, value, traceback)
+(EngineCore pid=1440276) ERROR 09-04 10:20:37 [core.py:1374]   File "/root/data/vllm-ascend-hust-latest/vllm_ascend/worker/model_runner_v1.py", line 5370, in _torch_cuda_wrapper
+(EngineCore pid=1440276) ERROR 09-04 10:20:37 [core.py:1374]     raise RuntimeError(f"NPUModelRunner init failed, error is {e}")
+(EngineCore pid=1440276) ERROR 09-04 10:20:37 [core.py:1374] RuntimeError: NPUModelRunner init failed, error is NPUModelRunner failed, error is Do not support TASK_QUEUE_ENABLE = 2 during NPU graph capture, please export TASK_QUEUE_ENABLE=1/0.
+(EngineCore pid=1440276) ERROR 09-04 10:20:37 [core.py:1374] [ERROR] 2026-09-04-10:20:37 (PID:1440276, Device:0, RankID:-1) ERR00007 PTA feature not supported
+(EngineCore pid=1440276) Process EngineCore:
+(EngineCore pid=1440276) Traceback (most recent call last):
+(EngineCore pid=1440276)   File "/root/data/vllm-ascend-hust-latest/vllm_ascend/worker/model_runner_v1.py", line 5401, in _replace_gpu_model_runner_function_wrapper
+(EngineCore pid=1440276)     yield
+(EngineCore pid=1440276)   File "/root/data/vllm-ascend-hust-latest/vllm_ascend/worker/model_runner_v1.py", line 5261, in capture_model
+(EngineCore pid=1440276)     cuda_graph_size = GPUModelRunner.capture_model(self)
+(EngineCore pid=1440276)                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=1440276)   File "/root/data/vllm-hust-latest/vllm/tracing/otel.py", line 178, in sync_wrapper
+(EngineCore pid=1440276)     return func(*args, **kwargs)
+(EngineCore pid=1440276)            ^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=1440276)   File "/root/data/vllm-hust-latest/vllm/v1/worker/gpu_model_runner.py", line 6949, in capture_model
+(EngineCore pid=1440276)     self._capture_cudagraphs(
+(EngineCore pid=1440276)   File "/root/data/vllm-hust-latest/vllm/v1/worker/gpu_model_runner.py", line 7080, in _capture_cudagraphs
+(EngineCore pid=1440276)     self._warmup_and_capture(
+(EngineCore pid=1440276)   File "/opt/vllm-hust-cann91/lib/python3.11/site-packages/vllm_hust_vspec/adaptive/runtime.py", line 1789, in warmup_and_capture
+(EngineCore pid=1440276)     return original_warmup_and_capture(
+(EngineCore pid=1440276)            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=1440276)   File "/root/data/vllm-hust-latest/vllm/v1/worker/gpu_model_runner.py", line 7025, in _warmup_and_capture
+(EngineCore pid=1440276)     self._dummy_run(
+(EngineCore pid=1440276)   File "/opt/vllm-hust-cann91/lib/python3.11/site-packages/torch/utils/_contextlib.py", line 124, in decorate_context
+(EngineCore pid=1440276)     return func(*args, **kwargs)
+(EngineCore pid=1440276)            ^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=1440276)   File "/root/data/vllm-ascend-hust-latest/vllm_ascend/worker/model_runner_v1.py", line 3701, in _dummy_run
+(EngineCore pid=1440276)     outputs = self._model_forward(
+(EngineCore pid=1440276)               ^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=1440276)   File "/root/data/vllm-ascend-hust-latest/vllm_ascend/worker/model_runner_v1.py", line 2934, in _model_forward
+(EngineCore pid=1440276)     hidden_states = run_model()
+(EngineCore pid=1440276)                     ^^^^^^^^^^^
+(EngineCore pid=1440276)   File "/root/data/vllm-ascend-hust-latest/vllm_ascend/compilation/acl_graph.py", line 187, in __call__
+(EngineCore pid=1440276)     with torch.npu.graph(aclgraph, pool=self.graph_pool):
+(EngineCore pid=1440276)   File "/opt/vllm-hust-cann91/lib/python3.11/site-packages/torch_npu/npu/graphs.py", line 912, in __enter__
+(EngineCore pid=1440276)     self.npu_graph.capture_begin(
+(EngineCore pid=1440276)   File "/opt/vllm-hust-cann91/lib/python3.11/site-packages/torch_npu/npu/graphs.py", line 624, in capture_begin
+(EngineCore pid=1440276)     super().capture_begin(pool=pool, capture_error_mode=capture_error_mode, report_shape=True)
+(EngineCore pid=1440276) RuntimeError: Do not support TASK_QUEUE_ENABLE = 2 during NPU graph capture, please export TASK_QUEUE_ENABLE=1/0.
+(EngineCore pid=1440276) [ERROR] 2026-09-04-10:20:37 (PID:1440276, Device:0, RankID:-1) ERR00007 PTA feature not supported
+(EngineCore pid=1440276) 
+(EngineCore pid=1440276) During handling of the above exception, another exception occurred:
+(EngineCore pid=1440276) 
+(EngineCore pid=1440276) Traceback (most recent call last):
+(EngineCore pid=1440276)   File "/root/data/vllm-ascend-hust-latest/vllm_ascend/worker/model_runner_v1.py", line 5360, in _torch_cuda_wrapper
+(EngineCore pid=1440276)     yield
+(EngineCore pid=1440276)   File "/root/data/vllm-ascend-hust-latest/vllm_ascend/worker/model_runner_v1.py", line 5260, in capture_model
+(EngineCore pid=1440276)     with _torch_cuda_wrapper(), _replace_gpu_model_runner_function_wrapper(parent_module_name):
+(EngineCore pid=1440276)   File "/opt/vllm-hust-cann91/lib/python3.11/contextlib.py", line 158, in __exit__
+(EngineCore pid=1440276)     self.gen.throw(typ, value, traceback)
+(EngineCore pid=1440276)   File "/root/data/vllm-ascend-hust-latest/vllm_ascend/worker/model_runner_v1.py", line 5403, in _replace_gpu_model_runner_function_wrapper
+(EngineCore pid=1440276)     raise RuntimeError(f"NPUModelRunner failed, error is {e}")
+(EngineCore pid=1440276) RuntimeError: NPUModelRunner failed, error is Do not support TASK_QUEUE_ENABLE = 2 during NPU graph capture, please export TASK_QUEUE_ENABLE=1/0.
+(EngineCore pid=1440276) [ERROR] 2026-09-04-10:20:37 (PID:1440276, Device:0, RankID:-1) ERR00007 PTA feature not supported
+(EngineCore pid=1440276) 
+(EngineCore pid=1440276) During handling of the above exception, another exception occurred:
+(EngineCore pid=1440276) 
+(EngineCore pid=1440276) Traceback (most recent call last):
+(EngineCore pid=1440276)   File "/opt/vllm-hust-cann91/lib/python3.11/multiprocessing/process.py", line 314, in _bootstrap
+(EngineCore pid=1440276)     self.run()
+(EngineCore pid=1440276)   File "/opt/vllm-hust-cann91/lib/python3.11/multiprocessing/process.py", line 108, in run
+(EngineCore pid=1440276)     self._target(*self._args, **self._kwargs)
+(EngineCore pid=1440276)   File "/root/data/vllm-ascend-hust-latest/vllm_ascend/patch/platform/patch_dyntra_lb_core.py", line 532, in _dyntra_lb_run_engine_core
+(EngineCore pid=1440276)     return _PreviousRunEngineCore(*args, dp_rank=dp_rank, local_dp_rank=local_dp_rank, **kwargs)
+(EngineCore pid=1440276)            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=1440276)   File "/root/data/vllm-ascend-hust-latest/vllm_ascend/patch/platform/patch_balance_schedule.py", line 909, in _balance_run_engine_core
+(EngineCore pid=1440276)     return _OriginalRunEngineCore(*args, dp_rank=dp_rank, local_dp_rank=local_dp_rank, **kwargs)
+(EngineCore pid=1440276)            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=1440276)   File "/root/data/vllm-hust-latest/vllm/v1/engine/core.py", line 1378, in run_engine_core
+(EngineCore pid=1440276)     raise e
+(EngineCore pid=1440276)   File "/root/data/vllm-hust-latest/vllm/v1/engine/core.py", line 1336, in run_engine_core
+(EngineCore pid=1440276)     engine_core = EngineCoreProc(*args, engine_index=dp_rank, **kwargs)
+(EngineCore pid=1440276)                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=1440276)   File "/root/data/vllm-hust-latest/vllm/tracing/otel.py", line 178, in sync_wrapper
+(EngineCore pid=1440276)     return func(*args, **kwargs)
+(EngineCore pid=1440276)            ^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=1440276)   File "/root/data/vllm-hust-latest/vllm/v1/engine/core.py", line 1093, in __init__
+(EngineCore pid=1440276)     super().__init__(
+(EngineCore pid=1440276)   File "/root/data/vllm-hust-latest/vllm/v1/engine/core.py", line 145, in __init__
+(EngineCore pid=1440276)     kv_cache_config = self._initialize_kv_caches(vllm_config)
+(EngineCore pid=1440276)                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=1440276)   File "/root/data/vllm-hust-latest/vllm/tracing/otel.py", line 178, in sync_wrapper
+(EngineCore pid=1440276)     return func(*args, **kwargs)
+(EngineCore pid=1440276)            ^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=1440276)   File "/root/data/vllm-hust-latest/vllm/v1/engine/core.py", line 345, in _initialize_kv_caches
+(EngineCore pid=1440276)     self.model_executor.compile_or_warm_up_model()
+(EngineCore pid=1440276)   File "/root/data/vllm-hust-latest/vllm/v1/executor/abstract.py", line 126, in compile_or_warm_up_model
+(EngineCore pid=1440276)     compilation_times: list[CompilationTimes] = self.collective_rpc(
+(EngineCore pid=1440276)                                                 ^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=1440276)   File "/root/data/vllm-hust-latest/vllm/v1/executor/uniproc_executor.py", line 103, in collective_rpc
+(EngineCore pid=1440276)     result = run_method(self.driver_worker, method, args, kwargs)
+(EngineCore pid=1440276)              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=1440276)   File "/root/data/vllm-hust-latest/vllm/v1/serial_utils.py", line 510, in run_method
+(EngineCore pid=1440276)     return func(*args, **kwargs)
+(EngineCore pid=1440276)            ^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=1440276)   File "/root/data/vllm-ascend-hust-latest/vllm_ascend/worker/worker.py", line 779, in compile_or_warm_up_model
+(EngineCore pid=1440276)     npugraph_memory_bytes = self.model_runner.capture_model()
+(EngineCore pid=1440276)                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=1440276)   File "/opt/vllm-hust-cann91/lib/python3.11/site-packages/vllm_hust_vspec/adaptive/runtime.py", line 1919, in capture_model
+(EngineCore pid=1440276)     return original_capture_model(self, *args, **kwargs)
+(EngineCore pid=1440276)            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=1440276)   File "/root/data/vllm-ascend-hust-latest/vllm_ascend/worker/model_runner_v1.py", line 5260, in capture_model
+(EngineCore pid=1440276)     with _torch_cuda_wrapper(), _replace_gpu_model_runner_function_wrapper(parent_module_name):
+(EngineCore pid=1440276)   File "/opt/vllm-hust-cann91/lib/python3.11/contextlib.py", line 158, in __exit__
+(EngineCore pid=1440276)     self.gen.throw(typ, value, traceback)
+(EngineCore pid=1440276)   File "/root/data/vllm-ascend-hust-latest/vllm_ascend/worker/model_runner_v1.py", line 5370, in _torch_cuda_wrapper
+(EngineCore pid=1440276)     raise RuntimeError(f"NPUModelRunner init failed, error is {e}")
+(EngineCore pid=1440276) RuntimeError: NPUModelRunner init failed, error is NPUModelRunner failed, error is Do not support TASK_QUEUE_ENABLE = 2 during NPU graph capture, please export TASK_QUEUE_ENABLE=1/0.
+(EngineCore pid=1440276) [ERROR] 2026-09-04-10:20:37 (PID:1440276, Device:0, RankID:-1) ERR00007 PTA feature not supported
+Traceback (most recent call last):
+  File "/root/data/vllm-hust-vSpec/benchmarks/offline_ab.py", line 769, in <module>
+    main()
+  File "/root/data/vllm-hust-vSpec/benchmarks/offline_ab.py", line 640, in main
+    llm = LLM(**llm_args)
+          ^^^^^^^^^^^^^^^
+  File "/root/data/vllm-hust-latest/vllm/entrypoints/llm.py", line 343, in __init__
+    self.llm_engine = LLMEngine.from_engine_args(
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/data/vllm-hust-latest/vllm/v1/engine/llm_engine.py", line 179, in from_engine_args
+    return cls(
+           ^^^^
+  File "/root/data/vllm-hust-latest/vllm/v1/engine/llm_engine.py", line 105, in __init__
+    self.engine_core = EngineCoreClient.make_client(
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/data/vllm-hust-latest/vllm/v1/engine/core_client.py", line 110, in make_client
+    return SyncMPClient(vllm_config, executor_class, log_stats)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/data/vllm-hust-latest/vllm/tracing/otel.py", line 178, in sync_wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/root/data/vllm-hust-latest/vllm/v1/engine/core_client.py", line 813, in __init__
+    super().__init__(
+  File "/root/data/vllm-hust-latest/vllm/v1/engine/core_client.py", line 609, in __init__
+    with launch_core_engines(
+  File "/opt/vllm-hust-cann91/lib/python3.11/contextlib.py", line 144, in __exit__
+    next(self.gen)
+  File "/root/data/vllm-hust-latest/vllm/v1/engine/utils.py", line 1240, in launch_core_engines
+    wait_for_engine_startup(
+  File "/root/data/vllm-hust-latest/vllm/v1/engine/utils.py", line 1320, in wait_for_engine_startup
+    raise RuntimeError(
+RuntimeError: Engine core initialization failed. See root cause above. Failed core proc(s): {}
+[ERROR] 2026-09-04-10:20:44 (PID:1439453, Device:-1, RankID:-1) ERR99999 UNKNOWN applicaiton exception

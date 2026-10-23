@@ -1,0 +1,94 @@
+{
+  "schema_version": 1,
+  "kind": "official-client-paired-engineering-result",
+  "date_utc": "2026-09-27",
+  "status": "valid-protocol-performance-regression",
+  "leaderboard_eligible_positive": false,
+  "source_guide": "https://github.com/vLLM-HUST/vllm-hust-website/blob/codex/frontier-submission-example/data/examples/frontier-submission/README.md",
+  "client": {
+    "repository": "https://github.com/vLLM-HUST/swe-prefix-reuse",
+    "commit": "6861242dbd9f17b707003191e4200b7752911d7c",
+    "tool_version": "0.1.2",
+    "prepared_sha256": "8105957b4001e7fd21373150fb7b844a9931abe9f88c699b3db191b84a8596d3",
+    "concurrency": 4,
+    "measurement_seconds": 900,
+    "warmup": "separate 60-second protocol checks; measured plays use fresh per-session salts",
+    "chips": 2
+  },
+  "model": {
+    "name": "Qwen3.5-35B-A3B",
+    "revision": "59d61f3ce65a6d9863b86d2e96597125219dc754",
+    "dtype": "bfloat16",
+    "configured_context_tokens": 262144
+  },
+  "runtime": {
+    "accelerator": "Ascend 910B2",
+    "devices": "2,3",
+    "tensor_parallel_size": 2,
+    "vllm_commit": "fc06902b7dd7aa1610438cd061ccf7f04b31c609",
+    "vllm_ascend_commit": "5422a07c4dd471c2224afcfdfdca62fb4c5f75f3",
+    "triton_ascend_commit": "b90ab001238f8dde175aebfea23de36bd2cf06a6",
+    "cann_version": "9.1.0",
+    "pytorch_version": "2.13.0+cpu",
+    "torch_npu_version": "2.13.0rc1",
+    "plugin_version": "0.8.0 uncommitted development candidate",
+    "settings": "APC, MTP2 real acceptance, async, mamba_cache_mode=align, FULL_AND_PIECEWISE, block_size=128, max_num_batched_tokens=8192, max_num_seqs=8",
+    "baseline_compression_threshold_tokens": 262272,
+    "candidate_compression_threshold_tokens": 9216,
+    "candidate_physical_budget_tokens": 8192
+  },
+  "arms": {
+    "B0": {
+      "run_id": "372d0867591349649182bf8c87b035d8",
+      "valid": true,
+      "aborted": false,
+      "failed_requests": 0,
+      "requests_started": 322,
+      "requests_completed_in_window": 318,
+      "max_prompt_tokens_observed": 74706,
+      "mean_client_inflight": 3.997902978790096,
+      "full_concurrency_fraction": 0.9979066917341617,
+      "output_tokens_per_second": 220.32222222222222,
+      "output_tokens_per_second_per_chip": 110.16111111111111,
+      "decode_tokens_per_second_p90": 71.67425212749013,
+      "ttft_seconds_p95": 1.3821713418234138,
+      "summary_sha256": "1e62cd6ba3a806005686ffd295c1d01cf56f01b8a15bf50102dae6990d2c48f5",
+      "config_sha256": "c8345dc91961a93161050744cc632917bd80fb3198c4e38c7098f482c2e54fe8"
+    },
+    "B1": {
+      "run_id": "5045b4ed7537474caf177305575a3fb7",
+      "valid": true,
+      "aborted": false,
+      "failed_requests": 0,
+      "requests_started": 299,
+      "requests_completed_in_window": 295,
+      "max_prompt_tokens_observed": 70940,
+      "mean_client_inflight": 3.998094389527622,
+      "full_concurrency_fraction": 0.9980981693985975,
+      "output_tokens_per_second": 202.95444444444445,
+      "output_tokens_per_second_per_chip": 101.47722222222222,
+      "decode_tokens_per_second_p90": 70.44289528408224,
+      "ttft_seconds_p95": 1.631715123448521,
+      "summary_sha256": "fac519bb570ccb83fb46072215efc78be11ebc8defe0fe4637a592de7da8e7ca",
+      "config_sha256": "fc765a46f492d2d2d30f60ef3a6c426e26b53b32f14013782c37097cbfdd9d23"
+    }
+  },
+  "candidate_vs_baseline": {
+    "output_tps_change_pct": -7.882898784608406,
+    "decode_p90_tps_change_pct": -1.7179905012718155,
+    "ttft_p95_ms_change_pct": 18.054475163397576
+  },
+  "service_observations": {
+    "preemptions": "zero on both arms at final metrics sample",
+    "prefix_caching": "server-side hit counters increased on both arms; final cumulative samples include the separate protocol checks",
+    "compression": "B1 scheduler commits and two TP-rank acknowledgements observed in live logs; exact log counts were not archived",
+    "mtp": "real accepted-token counters increased on both arms; no synthetic sampler or fixed acceptance length"
+  },
+  "limitations": [
+    "Maximum observed prompts were 74,706/B0 and 70,940/B1, not 256K; 262,144 is configured capacity.",
+    "The 8-session workload reached different turn mixes in the fixed 900-second windows.",
+    "One run per arm cannot establish repeatability or statistical significance.",
+    "Original requests.jsonl contains generated content and remains in ignored local result directories, not in this public summary.",
+    "This local excerpt is not a publicly accessible complete raw report or an official website submission."
+  ]
+}

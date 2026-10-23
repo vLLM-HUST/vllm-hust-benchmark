@@ -1,0 +1,157 @@
+{
+  "schema_version": 1,
+  "kind": "v0.10.0-source-tree-local-swe-paired-engineering-result",
+  "date_utc": "2026-10-17",
+  "status": "one-valid-pair-positive-on-both-target-metrics-with-ttft-regression",
+  "deployment": {
+    "model": "Qwen3.5-35B-A3B",
+    "model_revision": "712cf74392b05026a6db2bf213d343747d1f6d45",
+    "precision": "bfloat16",
+    "configured_context_tokens": 262144,
+    "hardware": "2 x Ascend 910B2, TP=2",
+    "physical_devices": [
+      4,
+      5
+    ],
+    "vllm_commit": "ebfcfba6507501c3a359a75eb4911ecc442bc2ff",
+    "vllm_ascend_commit": "7c8ec865a12f7b6a14d53b61b5e811dd483",
+    "manager_commit": "36cd420b28c0569d94d5205b9e9e4cc1c8bc0e31",
+    "plugin_base_commit": "7a8c8dfaef4245bc9cf0e77e6d7f6dbf3924729a",
+    "plugin_method_sha256": "e5a2f758329d7c630c560a9c5f327c53fc824f0664f5fb050f22cf6ec7f2f585",
+    "plugin_kernels_sha256": "c7ba4d06282814bdf33ebb13a29ef8d319fa80802b7dbdb82ecdfae2410ef602",
+    "calibration_sha256": "c138ffa859396d1e7c6f06c62f13696bd87d8548b9de0536ec251538c9b8e18c",
+    "host_versions": {
+      "atb": "9.1.0",
+      "cann": "9.1.0",
+      "torch": "2.13.0+cpu",
+      "torch_npu": "2.13.0rc1",
+      "triton_ascend": "3.6.0"
+    },
+    "features": "APC, real MTP2, async scheduling, align, FULL_AND_PIECEWISE"
+  },
+  "client": {
+    "repository": "https://github.com/vLLM-HUST/swe-prefix-reuse",
+    "commit": "6861242dbd9f17b707003191e4200b7752911d7c",
+    "prepared_workload_sha256": "8044561ffa1bb430bea8f778ef814d96649321e1a92654b95f64263b996d5e85",
+    "concurrency": 4,
+    "chips": 2,
+    "measurement_seconds": 900,
+    "separate_60s_smokes_valid": true
+  },
+  "arms": {
+    "b0": {
+      "run_id": "cbf2cbe48a1d4b9291d098b318114695",
+      "valid": true,
+      "aborted": false,
+      "failed_requests": 0,
+      "requests_completed_in_window": 218,
+      "max_prompt_tokens_observed": 52505,
+      "kv_budget": 262656,
+      "recompute_window": 1024,
+      "min_output_tokens_for_compression": 512,
+      "score_layer_stride": 2,
+      "output_tokens_per_second": 148.85222222222222,
+      "output_tokens_per_second_per_chip": 74.42611111111111,
+      "decode_tokens_per_second_p90": 47.84298232458495,
+      "ttft_p95_ms": 1560.708981845527,
+      "summary_sha256": "334c1e082d7f3df962a9e588b082a360f70b0f92fbeb73197f10a3d8b87d798a",
+      "config_sha256": "f3abc3ac911df826af4928f9a16d196aeead7532699297e7a117b01f1886fd58",
+      "requests_sha256": "6a3d85b777b41699356788acca1b9ecdb35d5a3a89372427aaf5932d38693616",
+      "server_log_sha256": "5497df456b3a6e53bb3e5113f58b38b8da7b210835a4621de19c0cfbcd657a52"
+    },
+    "b1": {
+      "run_id": "9abbe025cc694e2ba8fdb04b29439e4f",
+      "valid": true,
+      "aborted": false,
+      "failed_requests": 0,
+      "requests_completed_in_window": 214,
+      "max_prompt_tokens_observed": 52505,
+      "kv_budget": 8064,
+      "recompute_window": 1024,
+      "min_output_tokens_for_compression": 512,
+      "score_layer_stride": 2,
+      "output_tokens_per_second": 146.3088888888889,
+      "output_tokens_per_second_per_chip": 73.15444444444445,
+      "decode_tokens_per_second_p90": 48.5602052902483,
+      "ttft_p95_ms": 1828.315907297656,
+      "summary_sha256": "bafe858ef1b435fff06ac5e12d97c33f520787a64592f9b336c84c14584c1df6",
+      "config_sha256": "c12bf1c09adcbc40061fde9132a133642083e448b260aeb73b2c21e9658f4d47",
+      "requests_sha256": "261d89824bac2d2be61da2d4c9dec3328289ebea11ccb2f18275e96defbc2312",
+      "server_log_sha256": "14180be34813423f40472d1c31456df74c5439ce5fd43b8ab2095ea0430ad96b"
+    },
+    "b1_tuned": {
+      "run_id": "d017f8d403ec47f79150b2a63bffd747",
+      "valid": true,
+      "aborted": false,
+      "failed_requests": 0,
+      "requests_completed_in_window": 217,
+      "max_prompt_tokens_observed": 52505,
+      "kv_budget": 4608,
+      "recompute_window": 1024,
+      "min_output_tokens_for_compression": 1024,
+      "score_layer_stride": 2,
+      "output_tokens_per_second": 148.19555555555556,
+      "output_tokens_per_second_per_chip": 74.09777777777778,
+      "decode_tokens_per_second_p90": 48.42585488610553,
+      "ttft_p95_ms": 1826.8961643800133,
+      "summary_sha256": "dd659618f0294e39216550cd2e26d92634869f97dcdd92ece45fba6be605d7fa",
+      "config_sha256": "f67ee935d7ee364e0a7bd8cb2270dd812637ed9227286562fb7b41f3cf439fc7",
+      "requests_sha256": "e592f90d9434f51cdd8dbed2ec344abc7ea872befb246118d8243cb6337124f4",
+      "server_log_sha256": "a92b0d2c622b19fffc3901389afd6973d01be604d6dbe7f73377d6d3cbda0177"
+    },
+    "b1_sparse": {
+      "run_id": "6b2b9de1da7346b88969c2e544e08a19",
+      "valid": true,
+      "aborted": false,
+      "failed_requests": 0,
+      "requests_completed_in_window": 218,
+      "max_prompt_tokens_observed": 52505,
+      "kv_budget": 4608,
+      "recompute_window": 1024,
+      "min_output_tokens_for_compression": 2048,
+      "score_layer_stride": 2,
+      "output_tokens_per_second": 150.83555555555554,
+      "output_tokens_per_second_per_chip": 75.41777777777777,
+      "decode_tokens_per_second_p90": 48.616470403706344,
+      "ttft_p95_ms": 1695.7500156015126,
+      "summary_sha256": "b8afb18a1afc65a228a4795578de79757c3d3a13e21e68ee1828e5aaa2b70eba",
+      "config_sha256": "7430a4750a8f0f0f3cebd907502f854b1ed9b313600227f27226f4ebf8df35b5",
+      "requests_sha256": "e212617d7fbdbf9b31e98f7a1d40d16c432525c3f33c71399e2c4ed50d75f1f4",
+      "server_log_sha256": "2f6824c9bef05a1402adaeef6482a34820358624a6bf73f2d6ad11da626ba0cd"
+    }
+  },
+  "candidate_vs_baseline": {
+    "b1": {
+      "output_tps_per_chip_pct": -1.7086297371740722,
+      "decode_p90_tps_pct": 1.4991184303633887,
+      "ttft_p95_ms_pct": 17.146497429372488
+    },
+    "b1_tuned": {
+      "output_tps_per_chip_pct": -0.4411534183791477,
+      "decode_p90_tps_pct": 1.2183031516851406,
+      "ttft_p95_ms_pct": 17.05552961063388
+    },
+    "b1_sparse": {
+      "output_tps_per_chip_pct": 1.3324176849522473,
+      "decode_p90_tps_pct": 1.6167221221155437,
+      "ttft_p95_ms_pct": 8.652544153125884
+    }
+  },
+  "selected_candidate": "b1_sparse",
+  "service_observations": {
+    "selected_candidate_lifetime_scheduler_commits": 20,
+    "selected_candidate_lifetime_tp_rank_acknowledgements": 40,
+    "all_commits_acknowledged_by_both_ranks": true,
+    "b0_compression_commits": 0,
+    "selected_candidate_32k_retrieval_checks": "4/4 correct with four compression commits; limited deterministic fixture"
+  },
+  "limitations": [
+    "This is one 900-second pair, not a repeatability or statistical-significance estimate.",
+    "TTFT P95 regressed 8.65% on the selected candidate.",
+    "The selected 2048-token requested-output guard bypasses shorter requests; performance and quality depend on workload mix.",
+    "Maximum observed prompt was 52,505 tokens, not the configured 262,144-token context capacity.",
+    "The 32K retrieval fixture is limited and does not establish SWE semantic answer quality.",
+    "This local result is not an official website submission.",
+    "The working-tree code was benchmarked before its version metadata was changed to 0.10.0; method and kernel hashes identify the tested implementation."
+  ]
+}

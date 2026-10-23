@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "date_utc": "2026-09-27",
+  "status": "engineering-smoke-only",
+  "formal_acceptance": false,
+  "model": "Qwen3.5-35B-A3B",
+  "dtype": "bfloat16",
+  "hardware": "Ascend 910B2 devices 2 and 3",
+  "tensor_parallel_size": 2,
+  "max_model_len": 16384,
+  "mamba_cache_mode": "align",
+  "prefix_cache": true,
+  "speculative_decoding": false,
+  "async_scheduling": false,
+  "prompt_construction": "kvcompress_m3_quality._build_case(index=0, input_len=10000), decoded and wrapped in Qwen3.5 chat template with enable_thinking=False",
+  "prompt_tokens": 10012,
+  "prompt_token_sha256": "4de9e0652b4326f5b92fc1fad79bf78bc750f66ed1677c4f6d702d415b25f2c5",
+  "expected_answer": "10001337",
+  "attempts": [
+    {
+      "http_status": 200,
+      "reported_prompt_tokens": 10012,
+      "reported_completion_tokens": 9,
+      "correct": true,
+      "output_sha256": "35dcf3c48677c801bc93d0e9c62e71c6c46670836f4083148e866b517ed481e6",
+      "latency_seconds": 2.618,
+      "scheduler_commit": 1,
+      "tp_worker_acknowledgements": 2,
+      "semantic_tokens_at_commit": 10012,
+      "physical_tokens_after_commit": 8192,
+      "cumulative_prefix_queries": 30012,
+      "cumulative_prefix_hits": 8192
+    },
+    {
+      "http_status": 200,
+      "reported_prompt_tokens": 10012,
+      "reported_completion_tokens": 9,
+      "correct": true,
+      "output_sha256": "35dcf3c48677c801bc93d0e9c62e71c6c46670836f4083148e866b517ed481e6",
+      "latency_seconds": 2.128,
+      "scheduler_commit": 1,
+      "tp_worker_acknowledgements": 2,
+      "semantic_tokens_at_commit": 10012,
+      "physical_tokens_after_commit": 8192,
+      "cumulative_prefix_queries": 40024,
+      "cumulative_prefix_hits": 16384,
+      "prefix_hit_delta": 8192
+    }
+  ],
+  "limitations": [
+    "Only two short-output correctness requests; no statistical performance comparison",
+    "The first attempt started after a separate raw-completions replay had already accrued 8192 prefix-hit tokens; compare the cumulative counters by delta",
+    "No 262144-token context or official 900-second workload",
+    "MTP2, async scheduling and FULL_AND_PIECEWISE were not enabled"
+  ]
+}
