@@ -3,6 +3,24 @@
 Status: prospective internal protocol, frozen before new measurements. This is not third-party
 certification or a claim about actual procurement expense.
 
+## Current Method Addendum (2026-10-23)
+
+The current report follows `test-outline-v527.docx` (SHA256
+`64b6d5824899377e8eab749e1e614eb06613d8b53898b7df7e44c58f2a4efbed`). V5.27 refines the schedule;
+V5.26 metrics, methods and fair-comparison conditions remain unchanged. For M01 use
+`C = F / (k * T * 10^12)` and `eta = T_reference / T * 100%`, with matched-workload uninstrumented
+timing and an independent dependency-aware reference. The historical empirical-resource maximum and
+instrumented results below do not determine current efficiency or acceptance. Current values and
+verdict remain null pending validation.
+
+Implementation configurations may differ, including weight/activation/KV quantization, speculation,
+graph mode, caching, operators, batching, scheduling and logical parallelism. Keep the source
+model/weights, task and request semantics, sampling/output constraints, quality/SLO, statistics and
+physical resources comparable; record all actual differences and include auxiliary resources.
+Historical fixed-configuration restrictions below are not universal admission gates. The fixed B0
+identity and explicitly versioned, unrestricted-base B1 remain as clarified below. See
+`m01-method-v527.json` for the current machine-readable method and status.
+
 ## Scope And Gates
 
 ### Baseline Identity Clarification (2026-10-22)
