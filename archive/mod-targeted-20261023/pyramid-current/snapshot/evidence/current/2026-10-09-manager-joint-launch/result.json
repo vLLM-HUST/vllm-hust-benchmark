@@ -1,0 +1,90 @@
+{
+  "passed": true,
+  "scope": "functional smoke only; run on an otherwise idle server",
+  "requests": [
+    {
+      "name": "short",
+      "id": "chatcmpl-9764fd15f71c9013",
+      "status": 200,
+      "elapsed_seconds": 0.6589289819821715,
+      "usage": {
+        "prompt_tokens": 23,
+        "total_tokens": 25,
+        "completion_tokens": 2,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "multimodal_tokens": null
+        }
+      }
+    },
+    {
+      "name": "long",
+      "id": "chatcmpl-89412c6fca0151db",
+      "status": 200,
+      "elapsed_seconds": 1.0565141327679157,
+      "usage": {
+        "prompt_tokens": 5312,
+        "total_tokens": 5318,
+        "completion_tokens": 6,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "multimodal_tokens": null
+        }
+      }
+    },
+    {
+      "name": "long-repeat",
+      "id": "chatcmpl-941a7a0baa2e56e6",
+      "status": 200,
+      "elapsed_seconds": 0.5442954348400235,
+      "usage": {
+        "prompt_tokens": 5312,
+        "total_tokens": 5318,
+        "completion_tokens": 6,
+        "prompt_tokens_details": {
+          "cached_tokens": 2048,
+          "multimodal_tokens": null
+        }
+      }
+    }
+  ],
+  "compression_transactions": [
+    {
+      "request_id": "chatcmpl-89412c6fca0151db",
+      "engine_request_id": "chatcmpl-89412c6fca0151db-975852bb",
+      "semantic_tokens": 5312,
+      "physical_tokens": 2048,
+      "tp_ranks": [
+        0,
+        1
+      ]
+    },
+    {
+      "request_id": "chatcmpl-941a7a0baa2e56e6",
+      "engine_request_id": "chatcmpl-941a7a0baa2e56e6-b68e5a19",
+      "semantic_tokens": 5312,
+      "physical_tokens": 2048,
+      "tp_ranks": [
+        0,
+        1
+      ]
+    }
+  ],
+  "prefix_hit_tokens": 2048,
+  "mtp_delta": {
+    "num_draft_tokens": 14.0,
+    "num_accepted_tokens": 10.0
+  },
+  "manager_commit": "d22088cf6a45aeb7c47e39101607a00d87bf2006",
+  "manager_merge_commit": "3f69d7943d1587779f3525fed5228c83e22e0925",
+  "model_revision": "59d61f3ce65a6d9863b86d2e96597125219dc754",
+  "dtype": "bfloat16",
+  "tensor_parallel_size": 2,
+  "hardware": "Ascend 910B2 physical 6/7, logical 0/1",
+  "startup_cache_events": 2,
+  "configuration_source": "isolated Manager state, no direct selection environment override",
+  "final_server_left_running": true,
+  "performance_or_quality_claim": false,
+  "preparatory_managed_shutdown_verified_by_npu_idle_snapshot": true,
+  "exact_final_wheel_shutdown_repeated": false
+}

@@ -10,6 +10,10 @@ is not new hardware acceptance or a serving-performance claim.
 
 - [KVCompress original manifest](compress/manifest.json)
 - [Extension Manager original manifest](manager/manifest.json)
+- [PyramidKV remaining current originals](pyramid-current/manifest.json): 98 records plus LICENSE
+  and NOTICE, frozen from source commit `534bcc0` before consumer edits. Together with the existing
+  paired capsule these preserve all 118 current evidence files. Original SHA256SUMS and their
+  covered README files are retained byte-for-byte, rather than re-signed after link edits.
 - Existing [PyramidKV paired originals](../mod-git-20261022/pyramidkv-website-source/manifest.json)
   and [vSpec originals](../vspec-browser-raw-20261022/manifest.json) are reused rather than uploaded
   again.

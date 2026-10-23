@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+# Isolated reproduction of the PyramidKV 2026-09-30 host stack.
+set -eo pipefail
+PYRAMID_RUNTIME=/root/workspace/pyramidkv-runtime
+source /usr/local/Ascend/cann-9.1.0/set_env.sh
+export PATH="$PYRAMID_RUNTIME/venv/bin:$PATH"
+export PYTHONPATH="$PYRAMID_RUNTIME/src/vllm:$PYRAMID_RUNTIME/src/vllm-ascend:$PYRAMID_RUNTIME/src/dev-hub/scripts/frontier_pipeline:$PYRAMID_RUNTIME/src/dev-hub/scripts/frontier_runtime:${PYTHONPATH:-}"
+PYRAMID_VENDOR_ENV="$PYRAMID_RUNTIME/src/vllm-ascend/vllm_ascend/_cann_ops_custom/vendors/custom_transformer/bin/set_env.bash"
+if [[ -f "$PYRAMID_VENDOR_ENV" ]]; then source "$PYRAMID_VENDOR_ENV"; fi
+export ASCEND_RT_VISIBLE_DEVICES=0,1
+export VLLM_WORKER_MULTIPROC_METHOD=spawn
+# The pinned HUST qualification launcher selects this host ABI branch.
+export VLLM_VERSION=0.25.1
+export PYTHONUNBUFFERED=1
+export PYTHONHASHSEED=0
+export TASK_QUEUE_ENABLE=1
+export OMP_NUM_THREADS=4
+export HF_HUB_OFFLINE=1
+export NO_PROXY="localhost,127.0.0.1,::1,${NO_PROXY:-}"
+export no_proxy="$NO_PROXY"
+export XDG_CONFIG_HOME="$PYRAMID_RUNTIME/manager/config"
+export XDG_STATE_HOME="$PYRAMID_RUNTIME/manager/state"
+export XDG_CACHE_HOME="$PYRAMID_RUNTIME/cache"
+export TORCHINDUCTOR_AUTOGRAD_CACHE=0
+if [[ "${BASH_SOURCE[0]}" == "$0" && $# -gt 0 ]]; then exec "$@"; fi

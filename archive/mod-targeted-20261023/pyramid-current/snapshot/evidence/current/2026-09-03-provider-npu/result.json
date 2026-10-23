@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "recorded_at_utc": "2026-09-03",
+  "scope": "provider-only Qwen2.5-14B grouped-GQA selection oracle",
+  "repository_base_commit": "77b0862c1e5be8c883fda934cdb383c57cf7ad0d",
+  "tested_files": {
+    "src/vllm_ascend_pyramidkv/provider.py": "sha256:1ac0dceb22c61fa4786230e84d9a95729c946fd2dd730b72ca7c6bf6608a6876",
+    "src/vllm_ascend_pyramidkv/contracts.py": "sha256:71e18be260b2bbab9b64f585a3ec77adc9ac442d2fec2b2ba75b74be400c744c",
+    "tests/npu/test_selection.py": "sha256:46ee15e430c2522b25a69bcf90e6a3b6757ff9097b373156c8574398bd8d6bb6"
+  },
+  "command": "ASCEND_RT_VISIBLE_DEVICES=6 PYRAMIDKV_RUN_NPU_TESTS=1 .venv/bin/python -m pytest -q tests/npu/test_selection.py",
+  "result": {
+    "exit_code": 0,
+    "passed": 1,
+    "failed": 0,
+    "duration_seconds": 18.13
+  },
+  "hardware": {
+    "visible_host_devices": 8,
+    "selected_device": 6,
+    "device_name": "Ascend910B2"
+  },
+  "software": {
+    "cann": "9.0.0",
+    "torch": "2.9.0+cpu",
+    "torch_npu": "2.9.0"
+  },
+  "limitations": [
+    "This is a provider algorithm oracle, not a vLLM serving test.",
+    "The current vLLM-Ascend-HUST main branch targets CANN 9.1; exact-head NPU validation remains pending.",
+    "No quality, capacity, latency, or throughput claim is derived from this result."
+  ]
+}

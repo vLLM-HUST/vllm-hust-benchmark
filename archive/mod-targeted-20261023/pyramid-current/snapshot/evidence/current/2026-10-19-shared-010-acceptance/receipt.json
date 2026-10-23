@@ -1,0 +1,16 @@
+{
+  "observed_at_utc": "2026-10-19T11:55:43.632047+00:00",
+  "health_http_status": 200,
+  "candidate_smoke_passed": true,
+  "published_shared_wheel_runtime_accepted": false,
+  "candidate_model_calls": 3,
+  "dataset_tasks_executed": 0,
+  "scope": "local repaired candidate functional check, not public 0.10.0 acceptance or performance",
+  "process_commands": {
+    "87440": "/root/workspace/pyramidkv-runtime/release-acceptance-20261019/venv/bin/python /root/workspace/pyramidkv-runtime/release-acceptance-20261019/venv/bin/vllm-hust-ext run -- python -m vllm.entrypoints.cli.main serve /root/workspace/Qwen3.5-35B-A3B --host 127.0.0.1 --port 8000 --served-model-name qwen35-pyramidkv --tensor-parallel-size 2 --distributed-executor-backend mp --worker-cls pipeline_worker.Worker --dtype bfloat16 --max-model-len 32768 --max-num-seqs 4 --max-num-batched-tokens 4096 --gpu-memory-utilization 0.9 --kv-cache-memory-bytes 8589934592 --seed 17 --enable-prefix-caching --mamba-cache-mode align --enable-chunked-prefill --async-scheduling --enable-prompt-tokens-details --additional-config {\"enable_cpu_binding\":false} --limit-mm-per-prompt {\"image\":0,\"video\":0} --compilation-config {\"cudagraph_mode\":\"FULL_AND_PIECEWISE\",\"cudagraph_capture_sizes\":[3,6,12],\"max_cudagraph_capture_size\":12} --speculative-config {\"method\":\"mtp\",\"num_speculative_tokens\":2} --generation-config vllm ",
+    "88229": "python -m vllm.entrypoints.cli.main serve /root/workspace/Qwen3.5-35B-A3B --host 127.0.0.1 --port 8000 --served-model-name qwen35-pyramidkv --tensor-parallel-size 2 --distributed-executor-backend mp --worker-cls pipeline_worker.Worker --dtype bfloat16 --max-model-len 32768 --max-num-seqs 4 --max-num-batched-tokens 4096 --gpu-memory-utilization 0.9 --kv-cache-memory-bytes 8589934592 --seed 17 --enable-prefix-caching --mamba-cache-mode align --enable-chunked-prefill --async-scheduling --enable-prompt-tokens-details --additional-config {\"enable_cpu_binding\":false} --limit-mm-per-prompt {\"image\":0,\"video\":0} --compilation-config {\"cudagraph_mode\":\"FULL_AND_PIECEWISE\",\"cudagraph_capture_sizes\":[3,6,12],\"max_cudagraph_capture_size\":12} --speculative-config {\"method\":\"mtp\",\"num_speculative_tokens\":2} --generation-config vllm ",
+    "91430": "VLLM::Worker_TP0                                                                                                                                                                                ",
+    "91431": "VLLM::Worker_TP1                                                                                                                                                                                "
+  },
+  "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\n"
+}

@@ -1,0 +1,12 @@
+[W1009 21:10:55.910289845 FunctionLoader.cpp:48] Warning: LD_PRELOAD detected, FunctionLoader prefers RTLD_DEFAULT for symbol resolution. (function operator())
+INFO 10-09 21:11:01 [__init__.py:44] Available plugins for group vllm.platform_plugins:
+INFO 10-09 21:11:01 [__init__.py:46] - ascend -> vllm_ascend:register
+INFO 10-09 21:11:01 [__init__.py:49] All plugins in this group will be loaded. Set `VLLM_PLUGINS` to control which plugins to load.
+INFO 10-09 21:11:01 [__init__.py:237] Platform plugin ascend is activated
+INFO 10-09 21:11:01 [platform.py:61] Breakable cudagraph is force disabled on Ascend because DeepSeek V4 PIECEWISE cudagraph is not supported yet.
+[W1009 21:11:11.519634170 NPUCachingAllocator.cpp:202] Warning: The current CANN and HDK(driver) versions require processing for 32 padding size, with memory allocation. (function operator())
+/root/workspace/vllm-ascend-pyramidkv-hust/src/vllm_ascend_pyramidkv/method.py:94: UserWarning: Cannot create tensor with interal format while allow_internel_format=False, tensor will be created with base format. (Triggered internally at ../torch_npu/csrc/aten/common/TensorFactories.cpp:423.)
+  slots.add_(positions.remainder(ASCEND_CACHE_BLOCK_SIZE))
+{"input_tokens": 8192, "whole_cache_bitwise_equal": true, "source_unchanged": true, "median_ms": [17.814054619520903, 11.426294688135386], "median_reduction_percent": 35.85797881401865}
+{"input_tokens": 24576, "whole_cache_bitwise_equal": true, "source_unchanged": true, "median_ms": [17.918807920068502, 11.465334566310048], "median_reduction_percent": 36.01508193260315}
+{"input_tokens": 32704, "whole_cache_bitwise_equal": true, "source_unchanged": true, "median_ms": [18.132443306967616, 11.618816526606679], "median_reduction_percent": 35.92249908129036}

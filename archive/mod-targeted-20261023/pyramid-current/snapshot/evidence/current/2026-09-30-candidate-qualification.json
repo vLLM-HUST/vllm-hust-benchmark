@@ -1,0 +1,165 @@
+{
+  "date": "2026-09-30",
+  "scope": "Local candidate-wheel Manager lifecycle and SWE C4/60-second protocol qualification; not production-PyPI acceptance or a formal performance result",
+  "passed": true,
+  "pyramidkv_source_commit": "565077be6b6946f1ac8fb262695d2e2dd59af1c0",
+  "shared_host_source_commit": "a82e08798c10cee8bc0f0468fb0b05def064ae78",
+  "shared_host_version": "0.9.0",
+  "method_api_version": 1,
+  "host": {
+    "core": "d0f22d2bda562156e4dbf433ce645e1769b4f804",
+    "ascend": "03766ac696fde5ab1980d80ca0b8543d3580c989",
+    "cann": "9.1.0",
+    "torch": "2.10.0+cpu",
+    "torch_npu": "2.10.0.post4",
+    "worker": "pipeline_worker.Worker",
+    "worker_repository_commit": "1265f52680a9530cfcf77a5de13a6bf7ef30dc2c"
+  },
+  "model": {
+    "id": "Qwen/Qwen3.5-35B-A3B",
+    "revision": "712cf74392b05026a6db2bf213d343747d1f6d45",
+    "dtype": "bfloat16"
+  },
+  "configuration": {
+    "hardware": "Ascend 910B2",
+    "devices": [
+      0,
+      1
+    ],
+    "tp": 2,
+    "max_model_len": 262144,
+    "concurrency": 4,
+    "max_num_seqs": 16,
+    "max_num_batched_tokens": 4096,
+    "kv_cache_memory_bytes_per_chip": 26038239232,
+    "prefix_caching": true,
+    "mtp_draft_tokens": 2,
+    "async_scheduling": true,
+    "chunked_prefill": true,
+    "graph_mode": "FULL_AND_PIECEWISE",
+    "mamba_cache_mode": "align",
+    "method_max_capacity_prompt": 512,
+    "method_threshold_tokens": 4097,
+    "allocation_max_physical_tokens": 2048,
+    "query_window": 8
+  },
+  "client": {
+    "source_commit": "6861242dbd9f17b707003191e4200b7752911d7c",
+    "prepared_sha256": "d685f375329d8fedc70e51c1c47aac86f7df6827213f90fc01460fecd53899eb",
+    "accepted_sessions": 8,
+    "rejected_sessions": 0,
+    "turns": 360
+  },
+  "summary": {
+    "valid": true,
+    "measurement_seconds": 60,
+    "requests_started": 21,
+    "max_prompt_tokens_observed": 10148,
+    "prompt_tokens_p50": 3726,
+    "max_turn_index_reached": 6,
+    "distinct_trajectories_started": 4,
+    "sessions_completed": 0,
+    "requests_completed_in_window": 17,
+    "requests_drained": 4,
+    "failed_requests": 0,
+    "observed_output_tokens_in_window": 3149,
+    "output_tokens_per_second": 52.483333333333334,
+    "output_tokens_per_second_per_chip": 26.241666666666667,
+    "decode_tokens_per_second_p90": 56.44150500049663,
+    "decode_speed_samples": 17,
+    "ttft_seconds_p95": 30.498443934810346,
+    "client_inflight_seconds": {
+      "0": 0.00012245203834027052,
+      "1": 0.0010221130214631557,
+      "2": 0.0007325399201363325,
+      "3": 0.016911297803744674,
+      "4": 59.981211597216316
+    },
+    "mean_client_inflight": 3.9996344579189707,
+    "full_concurrency_fraction": 0.9996868599536053,
+    "drain_seconds": 11.259486121009104,
+    "aborted": false,
+    "planned_measurement_seconds": 60
+  },
+  "transactions": {
+    "scheduler_commits": 10,
+    "worker_acknowledgements": {
+      "0": 10,
+      "1": 10
+    },
+    "identity_matches": true
+  },
+  "observations": {
+    "prefix_cache_hit_tokens": 28672,
+    "mtp_draft_tokens": 3690,
+    "mtp_accepted_tokens": 2570,
+    "preemptions": 0
+  },
+  "manager": {
+    "steps": [
+      "inspect",
+      "configure",
+      "check",
+      "plan",
+      "enable",
+      "status",
+      "dry-run",
+      "run",
+      "disable",
+      "status",
+      "env"
+    ],
+    "rollback": "passed",
+    "devices_released": true,
+    "disabled_environment": {
+      "VLLMHUST_EXT_ENABLED_BUNDLES": ""
+    }
+  },
+  "limitations": [
+    "No paired baseline, no quality benchmark, and no complete 256K request; maximum observed prompt was 10148 tokens.",
+    "Cold protocol test includes initialization effects; TTFT P95 was 30.50 seconds and integer ArgSort reported an AiCPU fallback. These are not a demonstrated speedup.",
+    "60 seconds is the measurement window; four requests drained afterward for 11.26 seconds.",
+    "First harness attempt failed on diagnostic-prefixed JSON; second was stopped after local health requests incorrectly used an HTTP proxy. Both original attempts are retained locally.",
+    "Server shutdown was explicitly requested via SIGTERM; launcher exit code -15 is expected, API shutdown completed, and both cards were released.",
+    "Candidate wheels are installed in the matched host environment, not a newly provisioned host or installation from production PyPI."
+  ],
+  "local_raw_evidence": "/workspace/pyramidkv-validation-20260930/qualification/attempt3",
+  "artifact_sha256": {
+    "npu-before.txt": "91d6031ec8aff53c327b7585da689e603c59e4a23e57fb2aa5ac8bb0c29d2dec",
+    "packages.json": "b2aabd71653e8c9c80e7f0ada4748f97d4dd03dfb6ac52d8721861949e5b2802",
+    "0-inspect.json": "d0ed3301aaa136f58e8b4b3bfa745bdf6f083e293c4a344ea0bcb956d23592e2",
+    "1-inspect.json": "dbb35198660ef197ac8ec29b164f9910d0f581e88e74ee650cadbc3953403baf",
+    "manager-state.json": "861ad621f186e05f4efb49e004c271ae1cce9ef6833ac2e3ad1590149d7b48d8",
+    "0-configure.txt": "7b1da655a702cc53eb55f3ab1c17507933603b1e48bc099ba880d3ab5d99a08a",
+    "method-manager-config.json": "ca3d163bab055381827226140568f3bef7eaac187cebd76878e0b63e9e442356",
+    "1-configure.txt": "ced77694cf1f64c869da9af78bcba139cddc533230a05b42c870c95dafa1bf17",
+    "0-check.json": "84c21d261d8a21c6749f10bcdf57cd04a3f17488fa15729acc285bc28e1fee4b",
+    "0-plan.json": "d88820789c195ed7c003ff9199f9dc4b3de0c01be3201ae3ddcb4be41fafbecf",
+    "0-enable.txt": "54258c7e64663ad29e10626363c5013fa71db8a4cee0ff0f1aa930a38ac3486e",
+    "0-status.json": "a48962d2ca162b589adec1e35befca8a43721347feaadd846c54aadec79610eb",
+    "1-check.json": "dcd83bc15eb6dc4c7c768ef74a9f48eb0bc335a617a2745c70c48c1009717e7f",
+    "1-plan.json": "13413d350f5d4ae28ac0ca24efa0a9d37ae8aa3ff23ce0b0eb28c3b7c1430157",
+    "1-enable.txt": "ab8ce951dfa0fc39c56feb8d76406edd21a297df4799f6f714f951d39b294afa",
+    "1-status.json": "2442fd914414cd4c6a65dac25672c5a2c7506c6e627d56d558f2373bfb4c08ed",
+    "dry-run.json": "eb6e622cd73c6aafa50951aa4357357d99b568e2748a808c44b2d0223aa41f74",
+    "manager-enabled-snapshot.json": "7f0f8060e738b1d59fdc04a0e5bd0f5f65c5cc0a1edad2be07795c3f656485be",
+    "server-metadata.json": "9993b002f7e9b5594edfc5726570c2c7a29f5e91025d97e8eb38548e66038346",
+    "status.json": "a1ec560a3313f6193b91d12f5a2e865a7954c7c3e7418a682f1abcbb2ba13b67",
+    "server.log": "3a79111e475bdfb55044a5e3672cb678109fa3f8b102ec6ab87ac23e5f779331",
+    "health.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "metrics-before.txt": "5df78bce3436a71d6df25755efc4e4197939aaeaa0905b5a812bcaaba607b7f2",
+    "client-command.json": "c4383132ff6d0e2b82cde99a5910fe7e94bc33782bb0eab293e096e0bd6194bc",
+    "client.log": "615cb36a87c4ec511837246c0d3f9f9563d6fb3b1f4d95669e2fd6cebb2e3202",
+    "npu-serving.txt": "071089286f021c65aa7538364e43a34b72891611c08dc85e6c0344eebb66425d",
+    "metrics-after.txt": "04ac94b7afcd492824ac1735d0df992efecf7a3043a2e0bcbe2dffe328d0a0a3",
+    "1-disable.txt": "758963f30a94c6ad6d0b8fa4e7adede9d59372df856c4fb8653aca1739f3f223",
+    "1-disabled-status.json": "4c5d6f5bb3a22a1b3ea1dde4dc3b0e672c40e24c449a3e8d4930155ee43703a1",
+    "0-disable.txt": "ab08e07c1d6233afc033608694f06e0b7cab2f23e8ffb602f26d453fbd049617",
+    "0-disabled-status.json": "133e4bb00124d055fc8c5429549fbafa96f260ecc8329c8f7387f21dbfdfab83",
+    "disabled-env.json": "b2a3bdfc65bd2e81c0092365ac157bf227b2314bf024de3cdd86840fba4372b1",
+    "npu-after.txt": "fc395a6cc55e40be9ba4d084babc550807c17fa15acecf2b1f55bac42a05b90e",
+    "swe-c4-60s/config.json": "f4cea0e1de63df66fe0bfd73ff1ae10e6a2306ae104f0caf37bd10d6a41bcfe7",
+    "swe-c4-60s/requests.jsonl": "bb374a58049c32c5b9bc82ec94afe0e4cf13b3563658560af21dd7ee6b085ab9",
+    "swe-c4-60s/summary.json": "615cb36a87c4ec511837246c0d3f9f9563d6fb3b1f4d95669e2fd6cebb2e3202"
+  }
+}

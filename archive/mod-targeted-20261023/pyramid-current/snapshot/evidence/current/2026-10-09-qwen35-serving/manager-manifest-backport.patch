@@ -1,0 +1,38 @@
+diff --git a/src/vllm_ascend_kvcompress/manifests/vllm-hust-extension-v0.2.json b/src/vllm_ascend_kvcompress/manifests/vllm-hust-extension-v0.3.json
+similarity index 81%
+rename from src/vllm_ascend_kvcompress/manifests/vllm-hust-extension-v0.2.json
+rename to src/vllm_ascend_kvcompress/manifests/vllm-hust-extension-v0.3.json
+index 4152536..fd6b1b7 100644
+--- a/src/vllm_ascend_kvcompress/manifests/vllm-hust-extension-v0.2.json
++++ b/src/vllm_ascend_kvcompress/manifests/vllm-hust-extension-v0.3.json
+@@ -1,12 +1,13 @@
+ {
+-  "schema_version": "0.2-experimental",
++  "schema_version": "0.3-experimental",
+   "extension_id": "org.vllm-hust.ascend-kvcompress",
+   "extension_version": "0.9.0",
+   "kind": "in_process_plugin",
+   "host": {
+     "provider": "vllm",
+     "name": "vllm-ascend",
+-    "version_range": ">=0.23.0.post1,<0.26,!=0.24.*,!=0.25.0.*"
++    "version_range": ">=0.23.0.post1,<0.26,!=0.24.*,!=0.25.0.*",
++    "api_range": ">=1,<2"
+   },
+   "runtime": {
+     "type": "python",
+@@ -30,6 +31,14 @@
+     }
+   ],
+   "requires_services": [],
++  "requires_extensions": [],
++  "resource_claims": [
++    {
++      "resource": "vllm-ascend.kv-cache.mutation",
++      "scope": "vllm-process",
++      "mode": "exclusive"
++    }
++  ],
+   "components": [
+     {
+       "component_id": "ascend-kvcompress",

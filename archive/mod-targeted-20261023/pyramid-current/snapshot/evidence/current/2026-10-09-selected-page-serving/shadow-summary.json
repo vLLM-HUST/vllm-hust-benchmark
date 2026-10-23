@@ -1,0 +1,34 @@
+{
+  "scope": "same-real-cache diagnostic only; no performance claim",
+  "requests": 20,
+  "request_failures": 0,
+  "worker_checks": 40,
+  "target_tensor_checks": 880,
+  "all_destinations_bitwise_equal": true,
+  "all_results_equal": true,
+  "scheduler_commits": 20,
+  "worker_commit_acknowledgements": 40,
+  "request_pairing_verified": true,
+  "devices": {
+    "npu:1": 20,
+    "npu:0": 20
+  },
+  "semantic_lengths": {
+    "24576": 18,
+    "8192": 8,
+    "32704": 8,
+    "16212": 2,
+    "4103": 2,
+    "7406": 2
+  },
+  "c1_repeats_distinct_outputs": 1,
+  "apc_cached_prompt_tokens": [
+    0,
+    20480
+  ],
+  "limitations": [
+    "Same inputs and queries for each old/new method check; does not explain cross-process prefill or decoding differences",
+    "Diagnostic doubles compression and synchronizes transfers; not a timing measurement",
+    "CPU self-test records include intentional corruption rejection and are excluded from NPU counts"
+  ]
+}
