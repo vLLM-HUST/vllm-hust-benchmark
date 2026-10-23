@@ -19,12 +19,22 @@ semantics, sampling/output constraints, quality/SLO, statistics and comparable p
 Quantization, caches, speculation, graphs, scheduling and logical parallelism may differ. Do not
 weaken B0, tune during execution, or splice different configurations' best metrics.
 
-M01: C=F/(k×T×10¹²), eta=T_reference/T×100%, threshold 50%. Exclude padding, redundant work,
-unaccepted drafts and cache-omitted work from F. Use matched-workload uninstrumented synchronized
-wall clock; no estimated instrumentation subtraction. Derive the reference independently using
-actual dependencies, overlap and necessary scheduling, not global max(resource times) or reverse
-fitting. The new communication graph reference is available; model-level attribution remains open.
-Current C/eta/pass remain undetermined, not zero and not the historical instrumented 30.25%.
+M01: C=F/(k×T×10¹²), C_reference=F/(k×T_reference×10¹²), eta=C/C_reference×100%=T_reference/T×100%,
+threshold 50%. Within each efficiency calculation, measured and reference compute must use the same
+F and k. The equivalent gate is C>=0.5×C_reference; both compute values are TFLOPS per participating
+chip. The calibrated reference is not a proven theoretical upper bound or vendor peak utilization.
+Exclude padding, redundant work, unaccepted drafts and cache-omitted work from F. Use
+matched-workload uninstrumented synchronized wall clock; no estimated instrumentation subtraction.
+Derive the reference independently using actual dependencies, overlap and necessary scheduling, not
+global max(resource times) or reverse fitting. The new communication graph reference is available;
+model-level attribution remains open. Current C/eta/pass remain undetermined, not zero and not the
+historical instrumented 30.25%.
+
+### M01 计算关系
+
+单芯片平均有效算力 C=F/(k×T×10¹²)，同工况参考有效算力 C参=F/(k×T参×10¹²)，有效算力达成率 η=C/C参×100%。每次计算中实测与参考使用 同一有效工作量 F
+和参与芯片数 k，因此 η=T参/T×100%。C 和 C参均以 TFLOPS 表示。 达标条件为 C≥0.5×C参，即 η≥50%；结果同时列出 C、C参和 η。
+参考值由独立标定和阶段依赖推导，不自动构成理论上限。不同参考下的 η 不作为 B1 相对 B0 的性能提升率。原始大纲摘录保持不变；此处补全公式定义，不改变阈值或生成实测成绩。
 
 Performance: throughput gain >=10%, request-weighted mean TTFT and TPOT improvement each >=5%, with
 applicable quality/SLO. C16 fixed-B0 throughput is existing evidence, not a new test or a full

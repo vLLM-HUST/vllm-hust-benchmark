@@ -10,7 +10,11 @@
   "status": "recalculation-pending-not-determined",
   "effective_compute_formula": "C = F / (k * T * 10^12)",
   "effective_compute_unit": "TFLOPS per participating chip",
-  "efficiency_formula": "eta = T_reference / T * 100%",
+  "reference_effective_compute_formula": "C_reference = F / (k * T_reference * 10^12)",
+  "reference_effective_compute_unit": "TFLOPS per participating chip",
+  "efficiency_formula": "eta = C / C_reference * 100% = T_reference / T * 100%",
+  "reference_scope": "Measured and reference compute use the same effective work F and participating chip count k within each efficiency calculation. The calibrated reference is not a proven theoretical upper bound or vendor peak.",
+  "equivalent_threshold": "C >= 0.5 * C_reference",
   "threshold_percent": 50,
   "current": {
     "effective_flops": null,
@@ -18,6 +22,7 @@
     "matched_uninstrumented_seconds": null,
     "reference_seconds": null,
     "effective_tflops_per_chip": null,
+    "reference_effective_tflops_per_chip": null,
     "efficiency_percent": null,
     "passed": null
   },
