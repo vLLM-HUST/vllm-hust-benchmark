@@ -1,0 +1,91 @@
+{
+  "schema_version": 1,
+  "date_utc": "2026-09-27",
+  "status": "engineering-smoke-only",
+  "formal_acceptance": false,
+  "model": "Qwen3.5-35B-A3B",
+  "model_path": "/workspace/models/Qwen--Qwen3.5-35B-A3B",
+  "dtype": "bfloat16",
+  "hardware": "Ascend 910B2 devices 2 and 3",
+  "tensor_parallel_size": 2,
+  "host_revisions": {
+    "vllm_hust": "fc06902b7d",
+    "vllm_ascend_hust": "5422a07c4",
+    "triton_ascend_hust": "b90ab0012"
+  },
+  "plugin_source": "0.8 working tree; not a published wheel",
+  "max_model_len": 16384,
+  "block_size": 128,
+  "mamba_cache_mode": "align",
+  "prefix_cache": true,
+  "async_scheduling": true,
+  "speculative_config": {
+    "method": "mtp",
+    "num_speculative_tokens": 2
+  },
+  "graph_mode": "eager",
+  "compatibility_flags": {
+    "VLLM_ASCEND_KVCOMPRESS_EXPERIMENTAL_MTP2": "1",
+    "VLLM_ASCEND_KVCOMPRESS_QWEN_GDN_LIST_COMPAT": "1"
+  },
+  "cases": [
+    {
+      "type": "uncompressed control",
+      "case_id": "m3-quality-000",
+      "prompt_tokens": 7012,
+      "expected_code": "10001337",
+      "answer": "10001337",
+      "correct": true,
+      "completion_tokens": 9,
+      "elapsed_s": 19.14
+    },
+    {
+      "type": "compressed first request",
+      "case_id": "m3-quality-000",
+      "prompt_tokens": 10012,
+      "expected_code": "10001337",
+      "answer": "10001337",
+      "correct": true,
+      "completion_tokens": 9,
+      "elapsed_s": 2.27,
+      "physical_tokens_after_compression": 8192
+    },
+    {
+      "type": "compressed repeated request",
+      "case_id": "m3-quality-000",
+      "prompt_tokens": 10012,
+      "expected_code": "10001337",
+      "answer": "10001337",
+      "correct": true,
+      "completion_tokens": 9,
+      "elapsed_s": 1.55,
+      "physical_tokens_after_compression": 8192
+    },
+    {
+      "type": "compressed independent fact",
+      "case_id": "m3-quality-001",
+      "prompt_tokens": 10012,
+      "expected_code": "10009256",
+      "answer": "10009256",
+      "correct": true,
+      "completion_tokens": 9,
+      "elapsed_s": 2.29,
+      "physical_tokens_after_compression": 8192
+    }
+  ],
+  "observed_scheduler_commits": 3,
+  "observed_tp_worker_acknowledgements": 6,
+  "observed_prefix_cache_hit_rate_after_requests_pct": 38.7,
+  "observed_speculative_mean_acceptance_length": 2.5,
+  "service_stopped_normally": true,
+  "fix_under_test": [
+    "Legacy int[] GDN ABI uses only target-state column of the MTP block table for non-speculative prefill",
+    "Plugin-owned speculative convolution reads accepted-token offset in the extended rolling state and computes all draft positions"
+  ],
+  "limitations": [
+    "Unpaired single-session engineering smoke; elapsed times are not a performance comparison",
+    "Prefix cache was enabled and hit, but an exact per-request hit count was not collected",
+    "FULL_AND_PIECEWISE graph, 262144-token context, and official 900-second SWE/AgentX workloads were not tested",
+    "MTP2 remains experimental and rejected by default pending broader validation"
+  ]
+}

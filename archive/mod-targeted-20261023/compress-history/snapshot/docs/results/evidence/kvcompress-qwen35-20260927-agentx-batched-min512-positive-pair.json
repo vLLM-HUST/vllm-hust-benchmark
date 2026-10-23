@@ -1,0 +1,107 @@
+{
+  "schema_version": 1,
+  "kind": "official-client-paired-engineering-result",
+  "date_utc": "2026-09-27",
+  "status": "valid-protocol-positive-throughput",
+  "leaderboard_eligible_positive": true,
+  "client": {
+    "repository": "https://github.com/vLLM-HUST/agentx-bench",
+    "commit": "e0c34de525246c98d14df590f9864d7be7a25075",
+    "harness_commit": "56a0cf70f4c0359454ee4bd15a17770b541a3e3e",
+    "aiperf_version": "0.12.0",
+    "dataset": "semianalysisai/cc-traces-weka-062126-256k",
+    "dataset_revision": "8fecd2fc56694469f758f0afbbb6335ad3043740",
+    "dataset_sessions": 393,
+    "dataset_fingerprint": "0d8fdac271289f80",
+    "concurrent_agent_clients": 4,
+    "measurement_seconds": 900,
+    "warmup": "official primers plus 10 additional requests per lane",
+    "chips": 2
+  },
+  "model": {
+    "name": "Qwen3.5-35B-A3B",
+    "revision": "59d61f3ce65a6d9863b86d2e96597125219dc754",
+    "dtype": "bfloat16",
+    "configured_context_tokens": 262144
+  },
+  "runtime": {
+    "accelerator": "Ascend 910B2",
+    "devices": "2,3",
+    "tensor_parallel_size": 2,
+    "vllm_commit": "fc06902b7dd7aa1610438cd061ccf7f04b31c609",
+    "vllm_ascend_commit": "5422a07c4dd471c2224afcfdfdca62fb4c5f75f3",
+    "triton_ascend_commit": "b90ab001238f8dde175aebfea23de36bd2cf06a6",
+    "cann_version": "9.1.0",
+    "pytorch_version": "2.13.0+cpu",
+    "torch_npu_version": "2.13.0rc1",
+    "plugin_version": "0.8.0 uncommitted development candidate",
+    "selection_source_sha256": "d0b970ce1a6e7c4188a87a2680d37c550ac866ed0b40ccdade7df9c69e4f37e1",
+    "scorer_source_sha256": "3a03a62ff303c4ed3b50307584845487457c952a089f0cd708d4db9116777449",
+    "method_source_sha256": "367cca624759713eeccd2ebdefe3d75d27494c9ced538d2a08d6fb7c38700e1a",
+    "settings": "APC, async, mamba_cache_mode=align, FULL_AND_PIECEWISE, MTP disabled for AgentX forced-acceptance rule, block_size=128, max_num_batched_tokens=8192, max_num_seqs=8, thinking disabled",
+    "baseline_compression_threshold_tokens": 262272,
+    "candidate_compression_threshold_tokens": 9216,
+    "candidate_physical_budget_tokens": 8192,
+    "candidate_recompute_window_tokens": 1024,
+    "candidate_score_layer_stride": 2,
+    "candidate_min_output_tokens_for_compression": 512,
+    "baseline_config_sha256": "8aabe03ae63bc1579902dd78aa28650bdac42b391ae56c27e31cd8b5a49948f8",
+    "candidate_config_sha256": "622f0078363dfa0639cd945413638dcffeb7addd6cc42433622fab5e093fb271"
+  },
+  "arms": {
+    "B0": {
+      "run_id": "20260927T180300Z-smoke-c4-99c0b951",
+      "submission_valid": true,
+      "submission_invalid_reasons": [],
+      "completed_requests": 84,
+      "max_input_tokens_observed": 169167,
+      "output_tokens_per_second": 52.95306749828949,
+      "output_tokens_per_second_per_chip": 26.476533749144746,
+      "decode_tokens_per_second_p90": 60.92517465161425,
+      "ttft_p95_ms": 1618.9346265499998,
+      "itl_p90_ms": 22.429271990093753,
+      "run_json_sha256": "e44d77a952b72184c5aaba4734cdb03f3db39df7249fc760e6a67d765fc1d067",
+      "aiperf_report_sha256": "92c32715eec9228a7495f2a0a9ebf0e182bce4274662ff2fad0ee797848f12a0",
+      "server_log_sha256": "bbf452bac0bd44edab72f3a8737905d30c1afde17c20118d32589cb745e8c7e0"
+    },
+    "B1": {
+      "run_id": "20260927T182636Z-smoke-c4-bd262dfb",
+      "submission_valid": true,
+      "submission_invalid_reasons": [],
+      "completed_requests": 91,
+      "max_input_tokens_observed": 169165,
+      "output_tokens_per_second": 59.22648590733554,
+      "output_tokens_per_second_per_chip": 29.61324295366777,
+      "decode_tokens_per_second_p90": 64.16215236188937,
+      "ttft_p95_ms": 1952.3816709999999,
+      "itl_p90_ms": 22.423571457142856,
+      "run_json_sha256": "2afb4f9c95a0f01faf2701b22747a0482c07f9dd9fd589a6b188f2341413da3f",
+      "aiperf_report_sha256": "8fcdfc4b15a2df4475edbf382128474dee26da68e3536c91430fbc22a5bbab92",
+      "server_log_sha256": "6185217aa7ee990c1009f37e1556e8daa2b3f66fbf7823ebd9a6374f956fa8e5"
+    }
+  },
+  "candidate_vs_baseline": {
+    "output_tps_change_pct": 11.847129364599486,
+    "request_throughput_change_pct": 8.333386091223094,
+    "decode_p90_tps_change_pct": 5.313038048368335,
+    "ttft_p95_ms_change_pct": 20.596696060580655,
+    "itl_p90_ms_change_pct": -0.025415595091160537
+  },
+  "service_observations": {
+    "preemptions": "none observed in either measured arm",
+    "prefix_caching": "both server-side cumulative hit counters increased, ending at 88.8% B0 and 88.1% B1 including warmup",
+    "compression": "B1 service log records 57 scheduler commits and 114 TP-rank acknowledgements, including warmup",
+    "mtp": "disabled in both arms as required without matched forced-acceptance evidence",
+    "shutdown": "Both server logs show AsyncLLM EngineDeadError only after the client completed and the service received SIGINT; neither report records a request failure"
+  },
+  "limitations": [
+    "The longest observed input was about 169K tokens, not 256K; 262,144 is configured capacity.",
+    "The fixed-window closed-loop arms completed different turn mixes (84 vs 91 requests).",
+    "One run per arm cannot establish repeatability or statistical significance; an earlier B0-only run on the same host produced a different absolute throughput.",
+    "TTFT P95 regressed by 20.60% even though throughput and decode P90 improved.",
+    "AIPerf warned that streamed usage lacked cached-token detail; server-side prefix counters were available.",
+    "The 900-second smoke is not the formal one-hour AgentX result.",
+    "Original request records contain generated content and remain in ignored local result directories.",
+    "This local excerpt is not a publicly accessible complete raw report or an official website submission."
+  ]
+}

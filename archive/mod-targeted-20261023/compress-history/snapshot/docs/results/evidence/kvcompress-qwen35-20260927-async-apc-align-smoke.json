@@ -1,0 +1,68 @@
+{
+  "schema_version": 1,
+  "date_utc": "2026-09-27",
+  "status": "engineering-smoke-only",
+  "formal_acceptance": false,
+  "model": "Qwen3.5-35B-A3B",
+  "dtype": "bfloat16",
+  "hardware": "Ascend 910B2 devices 2 and 3",
+  "tensor_parallel_size": 2,
+  "max_model_len": 16384,
+  "mamba_cache_mode": "align",
+  "prefix_cache": true,
+  "speculative_decoding": false,
+  "async_scheduling": true,
+  "graph_mode": "eager",
+  "prompt_construction": "kvcompress_m3_quality._build_case(index, input_len=10000), decoded and wrapped in Qwen3.5 chat template with enable_thinking=False",
+  "serial_reuse": {
+    "prompt_tokens_per_request": 10012,
+    "prompt_token_sha256": "4de9e0652b4326f5b92fc1fad79bf78bc750f66ed1677c4f6d702d415b25f2c5",
+    "expected_answer": "10001337",
+    "http_statuses": [200, 200],
+    "correct": [true, true],
+    "completion_tokens": [9, 9],
+    "output_sha256": [
+      "35dcf3c48677c801bc93d0e9c62e71c6c46670836f4083148e866b517ed481e6",
+      "35dcf3c48677c801bc93d0e9c62e71c6c46670836f4083148e866b517ed481e6"
+    ],
+    "latency_seconds": [3.166, 2.374],
+    "cumulative_prefix_queries": [10012, 20024],
+    "cumulative_prefix_hits": [0, 8192],
+    "second_request_prefix_hit_delta": 8192
+  },
+  "concurrent_distinct_requests": [
+    {
+      "case_id": "m3-quality-000",
+      "expected_answer": "10001337",
+      "correct": true,
+      "http_status": 200,
+      "prompt_tokens": 10012,
+      "completion_tokens": 9,
+      "latency_seconds": 2.687
+    },
+    {
+      "case_id": "m3-quality-001",
+      "expected_answer": "10009256",
+      "correct": true,
+      "http_status": 200,
+      "prompt_tokens": 10012,
+      "completion_tokens": 9,
+      "latency_seconds": 3.579
+    }
+  ],
+  "compression_transactions": {
+    "request_count": 4,
+    "scheduler_commits": 4,
+    "tp_worker_acknowledgements": 8,
+    "semantic_tokens_at_commit": 10012,
+    "physical_tokens_after_commit": 8192,
+    "per_request_source_blocks": 5,
+    "per_request_destination_blocks": 4
+  },
+  "limitations": [
+    "Concurrent clients do not by themselves prove two model batches overlapped on device",
+    "Only four short-output correctness requests; no statistical performance comparison",
+    "No MTP2 or graph execution",
+    "No 262144-token context or official 900-second workload"
+  ]
+}

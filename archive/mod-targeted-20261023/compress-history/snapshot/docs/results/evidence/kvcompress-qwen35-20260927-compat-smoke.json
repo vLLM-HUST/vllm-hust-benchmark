@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "date_utc": "2026-09-27",
+  "status": "engineering-smoke-only",
+  "formal_acceptance": false,
+  "model": "Qwen3.5-35B-A3B",
+  "dtype": "bfloat16",
+  "hardware": "Ascend 910B2 devices 2 and 3",
+  "tensor_parallel_size": 2,
+  "max_model_len": 16384,
+  "mamba_cache_mode": "none",
+  "prefix_cache": false,
+  "speculative_decoding": false,
+  "async_scheduling": false,
+  "input_tokens": 10000,
+  "output_token_budget": 128,
+  "prompt_token_sha256": "e3e11a53dbe68cf57aa6c3ebbbb773ad7a92573f3ee5370406fb959272938502",
+  "request_completed": true,
+  "http_status": 200,
+  "reported_prompt_tokens": 10000,
+  "reported_completion_tokens": 128,
+  "latency_seconds": 29.070392463356256,
+  "quality_correct": false,
+  "quality_reason": "The model generated reasoning text and reached the output limit without returning the target code.",
+  "scheduler_commits": 1,
+  "worker_acknowledgements": 2,
+  "semantic_tokens_at_commit": 10000,
+  "physical_tokens_after_commit": 8192,
+  "scheduler_source_blocks": 5,
+  "scheduler_destination_blocks": 4,
+  "scheduler_released_blocks": 5,
+  "log_excerpt": [
+    "KV compression scheduler commit request_id=cmpl-84ba6ccb3d55b6a0-0-a2677109 semantic_tokens=10000 physical_tokens=8192 source_blocks=5 destination_blocks=4 released_blocks=5",
+    "Worker_TP0: KV compression worker commit acknowledged request_id=cmpl-84ba6ccb3d55b6a0-0-a2677109 semantic_tokens=10000 physical_tokens=8192 destination_blocks=4",
+    "Worker_TP1: KV compression worker commit acknowledged request_id=cmpl-84ba6ccb3d55b6a0-0-a2677109 semantic_tokens=10000 physical_tokens=8192 destination_blocks=4"
+  ],
+  "limitations": [
+    "No baseline pairing or performance comparison",
+    "No 262144-token context or official 900-second workload",
+    "APC, MTP2, async scheduling, FULL_AND_PIECEWISE and mamba align not enabled",
+    "Single request with negative quality result"
+  ]
+}

@@ -1,0 +1,333 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>KV Compression · Benchmark Leaderboard</title>
+  <style>
+    :root {
+      --ink: #172026;
+      --muted: #637079;
+      --paper: #f3f0e9;
+      --surface: rgba(255, 255, 255, .82);
+      --line: rgba(23, 32, 38, .12);
+      --teal: #087f73;
+      --teal-soft: #d8eee8;
+      --orange: #e0692d;
+      --red: #ad3d35;
+      --shadow: 0 18px 45px rgba(34, 49, 54, .09);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 88% 4%, rgba(224, 105, 45, .15), transparent 29rem),
+        radial-gradient(circle at 8% 18%, rgba(8, 127, 115, .12), transparent 31rem),
+        var(--paper);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", "Noto Sans SC", sans-serif;
+      min-height: 100vh;
+    }
+    .wrap { width: min(1480px, calc(100% - 40px)); margin: 0 auto; }
+    header { padding: 54px 0 28px; }
+    .eyebrow {
+      display: inline-flex; align-items: center; gap: 9px; color: var(--teal);
+      font-size: 12px; font-weight: 800; letter-spacing: .13em; text-transform: uppercase;
+    }
+    .eyebrow::before { content: ""; width: 28px; height: 2px; background: currentColor; }
+    h1 { margin: 13px 0 9px; font: 700 clamp(34px, 5vw, 64px)/1.02 Georgia, serif; letter-spacing: -.045em; }
+    .lede { max-width: 850px; margin: 0; color: var(--muted); font-size: 16px; line-height: 1.7; }
+    .notice {
+      margin-top: 22px; border-left: 3px solid var(--orange); padding: 11px 14px;
+      color: #72401f; background: rgba(255, 247, 233, .72); border-radius: 0 8px 8px 0;
+      font-size: 13px; line-height: 1.55;
+    }
+    .summary { display: grid; grid-template-columns: repeat(4, 1fr); gap: 13px; margin: 24px 0; }
+    .card {
+      background: var(--surface); border: 1px solid rgba(255,255,255,.9); border-radius: 14px;
+      padding: 18px 20px; box-shadow: var(--shadow); backdrop-filter: blur(12px);
+    }
+    .card span { display: block; color: var(--muted); font-size: 12px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; }
+    .card strong { display: block; margin-top: 4px; font: 700 30px/1.15 Georgia, serif; }
+    .card small { color: var(--muted); }
+    .toolbar {
+      display: grid; grid-template-columns: minmax(240px, 1fr) repeat(3, minmax(150px, 220px));
+      gap: 10px; padding: 13px; margin-bottom: 14px; border: 1px solid var(--line);
+      background: rgba(255,255,255,.56); border-radius: 14px;
+    }
+    input, select {
+      width: 100%; border: 1px solid var(--line); border-radius: 9px; padding: 10px 12px;
+      color: var(--ink); background: rgba(255,255,255,.88); font: inherit; outline: none;
+    }
+    input:focus, select:focus { border-color: var(--teal); box-shadow: 0 0 0 3px rgba(8,127,115,.1); }
+    .table-shell {
+      overflow: auto; border: 1px solid var(--line); border-radius: 16px;
+      background: var(--surface); box-shadow: var(--shadow);
+    }
+    table { width: 100%; min-width: 1410px; border-collapse: collapse; font-size: 13px; }
+    th {
+      position: sticky; top: 0; z-index: 1; padding: 13px 14px; color: var(--muted);
+      background: #f8f7f3; border-bottom: 1px solid var(--line); text-align: left;
+      font-size: 11px; letter-spacing: .055em; text-transform: uppercase; white-space: nowrap;
+    }
+    td { padding: 15px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+    tbody tr { transition: background .16s ease; }
+    tbody tr:hover { background: rgba(8,127,115,.045); }
+    tbody tr:last-child td { border-bottom: 0; }
+    .model { min-width: 190px; font-weight: 750; }
+    .model small, .dataset small { display: block; margin-top: 5px; color: var(--muted); font-weight: 450; line-height: 1.35; }
+    .dataset { min-width: 235px; font-weight: 650; }
+    .dataset .note { max-width: 320px; color: var(--ink); opacity: .72; }
+    .number { font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .good { color: var(--teal); font-weight: 760; }
+    .bad { color: var(--red); font-weight: 760; }
+    .neutral { color: var(--muted); }
+    .pill {
+      display: inline-block; padding: 4px 8px; border-radius: 999px; font-size: 11px;
+      font-weight: 800; letter-spacing: .02em; white-space: nowrap;
+    }
+    .pill.pass { color: #086a61; background: var(--teal-soft); }
+    .pill.fail { color: #8a2e28; background: #f6d9d5; }
+    .pill.pending { color: #82501f; background: #f8e8c9; }
+    .pill.formal { color: #fff; background: var(--teal); }
+    .view-switch { display: flex; gap: 9px; margin: 8px 0 18px; }
+    .view-switch button {
+      border: 1px solid var(--line); border-radius: 10px; padding: 10px 16px;
+      background: var(--surface); color: var(--ink); font-family: inherit;
+      font-size: 14px; font-weight: 700; line-height: 1.2; cursor: pointer;
+    }
+    .view-switch button[aria-pressed="true"] { background: var(--ink); color: #fff; }
+    .frontier-panel { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 24px; box-shadow: var(--shadow); }
+    .frontier-head { display: flex; justify-content: space-between; align-items: start; gap: 20px; }
+    .frontier-head h2 { margin: 0 0 6px; font: 700 28px/1.2 Georgia, serif; }
+    .frontier-head p, .frontier-note { color: var(--muted); line-height: 1.55; }
+    .frontier-head p { margin: 0; }
+    .frontier-picker { display: grid; grid-template-columns: minmax(250px, 550px) 1fr; gap: 18px; margin: 24px 0 12px; align-items: end; }
+    .frontier-picker label { font-size: 12px; font-weight: 700; color: var(--muted); }
+    .frontier-picker select { display: block; margin-top: 6px; }
+    .frontier-plot { border: 1px solid var(--line); border-radius: 12px; background: #fff; padding: 10px; }
+    .frontier-plot svg { display: block; width: 100%; height: auto; }
+    .frontier-plot line { stroke: #d9e2e2; }
+    .frontier-plot text { fill: var(--muted); font: 12px ui-sans-serif, system-ui, sans-serif; }
+    .frontier-empty { padding: 76px 20px; text-align: center; color: var(--muted); line-height: 1.6; }
+    .frontier-table { margin-top: 16px; }
+    .frontier-table table { min-width: 950px; }
+    a { color: var(--teal); text-underline-offset: 3px; }
+    .empty { padding: 48px; text-align: center; color: var(--muted); }
+    footer { display: flex; justify-content: space-between; gap: 24px; padding: 22px 2px 48px; color: var(--muted); font-size: 12px; }
+    code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    @media (max-width: 900px) {
+      .summary { grid-template-columns: repeat(2, 1fr); }
+      .toolbar { grid-template-columns: 1fr 1fr; }
+      .frontier-picker { grid-template-columns: 1fr; }
+      header { padding-top: 34px; }
+    }
+    @media (max-width: 560px) {
+      .wrap { width: min(100% - 22px, 1480px); }
+      .summary, .toolbar { grid-template-columns: 1fr; }
+      footer { display: block; }
+      footer span { display: block; margin-top: 7px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="wrap">
+    <div class="eyebrow">HUST · Ascend · TriAttention</div>
+    <h1>KV Compression<br>Benchmark Board</h1>
+    <p class="lede">测试结果榜单与历史档案。按模型、数据集和证据等级筛选，并同时查看质量、吞吐、时延与物理 KV 缩减；每条记录都链接回机器可读证据。</p>
+    <div class="notice">当前 0.8 目标是 Qwen3.5 BF16/TP=2、262,144-token 容量，以及 SWE prefix-reuse 与 AgentX 官方各 900 秒配对负载；尚无合格的 0.8 榜单成绩。下方 0.7 及更早记录是历史证据，不与新负载混排计算性能增益。短请求冒烟仅证明局部功能。<a href="frontier-benchmarking.zh.md">查看当前协议</a>。</div>
+  </header>
+
+  <main class="wrap">
+    <nav class="view-switch" aria-label="榜单视图">
+      <button id="view-history" type="button" aria-pressed="true" aria-controls="history-panel">历史榜单</button>
+      <button id="view-frontier" type="button" aria-pressed="false" aria-controls="frontier-panel">Frontier 实测</button>
+    </nav>
+    <section id="frontier-panel" class="frontier-panel" aria-label="Frontier 实测" hidden>
+      <div class="frontier-head">
+        <div><h2>Frontier</h2><p>P90 解码速度 × 每卡输出吞吐。只呈现同一模型、精度和 workload 下可审计的完整实测配置。</p></div>
+        <a href="https://vllm-hust.sage.org.ai/leaderboard-runs.html#frontier" rel="noopener" target="_blank">官方 Frontier ↗</a>
+      </div>
+      <div class="frontier-picker">
+        <label>模型 · 精度 · Workload<select id="frontier-cohort"></select></label>
+        <p id="frontier-contract" class="frontier-note"></p>
+      </div>
+      <div class="frontier-plot">
+        <svg id="frontier-chart" viewBox="0 0 900 420" role="img" aria-label="P90 解码速度和每卡输出吞吐散点图" hidden></svg>
+        <div id="frontier-empty" class="frontier-empty" role="status"></div>
+      </div>
+      <p class="frontier-note">每个点对应一次完整的官方 900 秒窗口，不合并不同数据集、tokenizer 准备文件或并发设置。60 秒协议预检、工程小样本与待测项仅留在历史榜单；AgentX 900 秒 smoke 不等同于一小时正式成绩。</p>
+      <div class="table-shell frontier-table" tabindex="0" role="region" aria-label="Frontier 测量明细">
+        <table><thead><tr><th>配置</th><th>并发</th><th>P90 解码速度</th><th>输出吞吐 / 卡</th><th>最长实际 prompt</th><th>证据</th></tr></thead><tbody id="frontier-rows"></tbody></table>
+      </div>
+    </section>
+    <section id="history-panel" aria-label="历史榜单">
+    <section class="summary" aria-label="summary">
+      <div class="card"><span>历史记录</span><strong id="record-count">—</strong><small>visible / total</small></div>
+      <div class="card"><span>模型</span><strong id="model-count">—</strong><small>unique model entries</small></div>
+      <div class="card"><span>公开样本</span><strong id="public-cases">—</strong><small>public benchmark cases</small></div>
+      <div class="card"><span>正式验收</span><strong id="formal-count">—</strong><small>qualified current records</small></div>
+    </section>
+
+    <section class="toolbar" aria-label="filters">
+      <input id="search" type="search" placeholder="搜索模型、数据集或测试配置…" aria-label="搜索">
+      <select id="model-filter" aria-label="模型筛选"><option value="">全部模型</option></select>
+      <select id="category-filter" aria-label="类别筛选">
+        <option value="">全部类别</option><option value="model">模型测试</option><option value="kernel">内核测试</option>
+      </select>
+      <select id="status-filter" aria-label="状态筛选"><option value="">全部状态</option></select>
+    </section>
+
+    <section class="table-shell">
+      <table>
+        <thead><tr>
+          <th>模型 / Model</th><th>数据集与配置 / Dataset</th><th>质量 B0 → B1</th>
+          <th>质量 Δ</th><th>请求吞吐 Δ</th><th>总吞吐 Δ</th><th>TTFT Δ</th><th>TPOT Δ</th>
+          <th>E2E Δ</th><th>物理 KV ↓</th><th>证据 / Evidence</th>
+        </tr></thead>
+        <tbody id="rows"></tbody>
+      </table>
+      <div id="empty" class="empty" hidden>没有匹配的历史记录。</div>
+    </section>
+    </section>
+  </main>
+
+  <footer class="wrap">
+    <div>数据源：<code>docs/results/evidence/leaderboard-history.json</code></div>
+    <span id="updated">Last updated —</span>
+  </footer>
+
+  <script src="evidence/leaderboard-history.js"></script>
+  <script src="evidence/frontier-results.js"></script>
+  <script>
+    (() => {
+      "use strict";
+      const data = window.KV_LEADERBOARD_HISTORY;
+      if (!data || !Array.isArray(data.records)) {
+        document.getElementById("empty").hidden = false;
+        document.getElementById("empty").textContent = "榜单数据未生成，请运行 scripts/kvcompress_leaderboard.py。";
+        return;
+      }
+      const records = [...data.records].sort((a, b) => b.date_utc.localeCompare(a.date_utc));
+      const $ = id => document.getElementById(id);
+      const escape = value => String(value ?? "").replace(/[&<>\"']/g, char => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[char]);
+      const frontier = window.KV_FRONTIER_RESULTS;
+      const safeEvidence = value => /^https:\/\//.test(value) || /^evidence\/[a-zA-Z0-9._/-]+\.json$/.test(value) ? value : null;
+      const number = (value, digits = 2) => value == null ? "—" : Number(value).toFixed(digits);
+      const delta = (value, betterWhenPositive = false) => {
+        if (value == null) return '<span class="neutral">—</span>';
+        const good = betterWhenPositive ? value >= 0 : value <= 0;
+        const sign = value > 0 ? "+" : "";
+        return `<span class="number ${good ? "good" : "bad"}">${sign}${number(value)}%</span>`;
+      };
+      const options = (id, values) => {
+        const target = $(id);
+        values.forEach(value => target.insertAdjacentHTML("beforeend", `<option value="${escape(value)}">${escape(value)}</option>`));
+      };
+      options("model-filter", [...new Set(records.map(r => r.model))].sort());
+      options("status-filter", [...new Set(records.map(r => r.status))].sort());
+      $("updated").textContent = `Last updated ${new Date(data.updated_at_utc).toLocaleString()}`;
+
+      if (frontier?.schema_version === "leaderboard-frontier/v1" && Array.isArray(frontier.cohorts) && Array.isArray(frontier.points)) {
+        options("frontier-cohort", frontier.cohorts.map(c => c.id));
+        [...$("frontier-cohort").options].forEach((option, index) => {
+          const c = frontier.cohorts[index];
+          option.textContent = `${c.model.label} · ${c.precision.label} · ${c.workload.label}`;
+        });
+        const measured = frontier.points.find(p => p.evidence?.status === "measured");
+        if (measured) $("frontier-cohort").value = measured.cohort_id;
+      }
+      function renderFrontier() {
+        if (!frontier?.cohorts?.length) {
+          $("frontier-empty").textContent = "Frontier 数据尚未生成。";
+          return;
+        }
+        const cohort = frontier.cohorts.find(c => c.id === $("frontier-cohort").value) || frontier.cohorts[0];
+        const contract = cohort.workload.contract;
+        $("frontier-contract").textContent = `${cohort.context_tokens.toLocaleString()} token 容量 · ${contract.measurement_seconds} 秒测量 · ${contract.warmup}`;
+        const points = frontier.points.filter(p => p.cohort_id === cohort.id && p.evidence?.status === "measured");
+        $("frontier-empty").hidden = points.length > 0;
+        $("frontier-chart").hidden = points.length === 0;
+        $("frontier-empty").textContent = "尚无合格的官方实测点；准备记录、工程冒烟与待测项均不绘制。";
+        const xValue = p => p.metrics.decode_p90_tps;
+        const yValue = p => p.metrics.output_tps / p.configuration.hardware.accelerator_count;
+        $("frontier-rows").innerHTML = points.map(p => {
+          const url = safeEvidence(p.evidence.url);
+          return `<tr><td>${escape(p.configuration.experiment_group || p.configuration.engine)}<small>${escape(p.configuration.hardware.label)}</small></td><td>${escape(p.load.concurrency)}</td><td class="number">${number(xValue(p))} tok/s/user</td><td class="number">${number(yValue(p))} tok/s/chip</td><td class="number">${escape(p.load.max_observed_prompt_tokens ?? "—")}</td><td>${url ? `<a href="${escape(url)}">配对证据</a>` : "—"}</td></tr>`;
+        }).join("");
+        if (!points.length) return;
+        const width = 900, height = 420, left = 100, right = 30, top = 25, bottom = 78;
+        const xmax = Math.max(1, ...points.map(xValue)) * 1.15;
+        const ymax = Math.max(1, ...points.map(yValue)) * 1.15;
+        const x = v => left + v / xmax * (width - left - right);
+        const y = v => height - bottom - v / ymax * (height - top - bottom);
+        let svg = `<title>${escape(cohort.workload.label)} · P90 decode speed × output throughput per chip</title>`;
+        for (let i = 0; i <= 4; i++) {
+          const xv = xmax * i / 4, yv = ymax * i / 4;
+          svg += `<line x1="${x(xv)}" y1="${top}" x2="${x(xv)}" y2="${height-bottom}"/><line x1="${left}" y1="${y(yv)}" x2="${width-right}" y2="${y(yv)}"/><text x="${x(xv)}" y="${height-bottom+22}" text-anchor="middle">${number(xv, 0)}</text><text x="${left-12}" y="${y(yv)+4}" text-anchor="end">${number(yv, 0)}</text>`;
+        }
+        svg += `<text x="${width/2}" y="${height-18}" text-anchor="middle">P90 解码速度 · output tok/s/user</text><text transform="translate(20 ${height/2}) rotate(-90)" text-anchor="middle">输出吞吐 / 卡 · output tok/s/chip</text>`;
+        for (const p of points) {
+          const url = safeEvidence(p.evidence.url);
+          const label = `${p.configuration.experiment_group || p.configuration.engine}: ${number(xValue(p))} tok/s/user, ${number(yValue(p))} tok/s/chip`;
+          const dot = `<circle cx="${x(xValue(p))}" cy="${y(yValue(p))}" r="8" fill="${p.configuration.mods?.length ? "#087f73" : "#637079"}"><title>${escape(label)}</title></circle>`;
+          svg += url ? `<a href="${escape(url)}" aria-label="${escape(label)}">${dot}</a>` : dot;
+        }
+        $("frontier-chart").innerHTML = svg;
+      }
+      $("frontier-cohort").addEventListener("change", renderFrontier);
+      for (const view of ["history", "frontier"]) {
+        $(`view-${view}`).addEventListener("click", () => {
+          for (const name of ["history", "frontier"]) {
+            const selected = name === view;
+            $(`${name}-panel`).hidden = !selected;
+            $(`view-${name}`).setAttribute("aria-pressed", String(selected));
+          }
+          if (view === "frontier") location.hash = "frontier";
+          else if (location.hash === "#frontier") history.replaceState(null, "", location.pathname + location.search);
+        });
+      }
+      if (location.hash === "#frontier") $("view-frontier").click();
+      renderFrontier();
+
+      function render() {
+        const query = $("search").value.trim().toLowerCase();
+        const model = $("model-filter").value;
+        const category = $("category-filter").value;
+        const status = $("status-filter").value;
+        const visible = records.filter(record => {
+          const haystack = `${record.model} ${record.dataset} ${record.profile} ${record.note}`.toLowerCase();
+          return (!query || haystack.includes(query)) && (!model || record.model === model) &&
+            (!category || record.category === category) && (!status || record.status === status);
+        });
+        $("rows").innerHTML = visible.map(record => {
+          const quality = record.quality_baseline == null ? "—" :
+            `<span class="number">${number(record.quality_baseline)} → ${number(record.quality_candidate)}</span><small>${escape(record.quality_metric)}</small>`;
+          const kv = record.physical_kv_reduction_pct == null ?
+            (record.score_speedup_x ? `<span class="good number">copy ${number(record.copy_speedup_x)}×<br>score ${number(record.score_speedup_x)}×<br>aggregate ${number(record.aggregate_speedup_x)}×</span>` : "—") :
+            `<span class="good number">−${number(record.physical_kv_reduction_pct)}%</span>`;
+          const badge = record.formal_acceptance ? "formal" :
+            (record.status.includes("pass") ? "pass" : (record.status.includes("fail") ? "fail" : "pending"));
+          return `<tr>
+            <td class="model">${escape(record.model)}<small>v${escape(record.plugin_version)} · ${escape(record.hardware)}</small></td>
+            <td class="dataset">${escape(record.dataset)}<small>${escape(record.profile)}${record.cases == null ? "" : ` · n=${record.cases}`}</small><small class="note">${escape(record.note)}</small></td>
+            <td>${quality}</td><td>${delta(record.quality_delta_pp, true).replace("%", " pp")}</td>
+            <td>${delta(record.request_throughput_delta_pct, true)}</td><td>${delta(record.total_throughput_delta_pct, true)}</td><td>${delta(record.ttft_delta_pct)}</td>
+            <td>${delta(record.tpot_delta_pct)}</td><td>${delta(record.e2e_delta_pct)}</td><td>${kv}</td>
+            <td><span class="pill ${badge}">${escape(record.status)}</span><small style="display:block;margin:7px 0 5px;color:var(--muted)">${escape(record.date_utc)}</small><a href="${escape(record.evidence)}">查看证据</a></td>
+          </tr>`;
+        }).join("");
+        $("empty").hidden = visible.length !== 0;
+        $("record-count").textContent = `${visible.length} / ${records.length}`;
+        $("model-count").textContent = new Set(visible.map(r => r.model)).size;
+        $("public-cases").textContent = visible.filter(r => r.dataset.startsWith("LongBench")).reduce((sum, r) => sum + (r.cases || 0), 0).toLocaleString();
+        $("formal-count").textContent = visible.filter(r => r.formal_acceptance).length;
+      }
+      ["search", "model-filter", "category-filter", "status-filter"].forEach(id => $(id).addEventListener("input", render));
+      render();
+    })();
+  </script>
+</body>
+</html>

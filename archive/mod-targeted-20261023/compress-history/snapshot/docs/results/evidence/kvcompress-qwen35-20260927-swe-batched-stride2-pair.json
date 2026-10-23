@@ -1,0 +1,83 @@
+{
+  "schema_version": 1,
+  "kind": "official-client-paired-engineering-result",
+  "date_utc": "2026-09-27",
+  "status": "valid-protocol-performance-regression",
+  "leaderboard_eligible_positive": false,
+  "workload": {
+    "name": "SWE prefix reuse",
+    "prepared_sha256": "8105957b4001e7fd21373150fb7b844a9931abe9f88c699b3db191b84a8596d3",
+    "client_commit": "6861242dbd9f17b707003191e4200b7752911d7c",
+    "concurrency": 4,
+    "measurement_seconds": 900,
+    "chips": 2
+  },
+  "deployment": {
+    "model": "Qwen3.5-35B-A3B",
+    "model_revision": "59d61f3ce65a6d9863b86d2e96597125219dc754",
+    "precision": "bfloat16",
+    "configured_context_tokens": 262144,
+    "hardware": "2× Ascend 910B2 devices 2,3",
+    "tensor_parallel_size": 2,
+    "vllm_commit": "fc06902b7dd7aa1610438cd061ccf7f04b31c609",
+    "vllm_ascend_commit": "5422a07c4dd471c2224afcfdfdca62fb4c5f75f3",
+    "scorer_source_sha256": "3a03a62ff303c4ed3b50307584845487457c952a089f0cd708d4db9116777449",
+    "method_source_sha256": "367cca624759713eeccd2ebdefe3d75d27494c9ced538d2a08d6fb7c38700e1a",
+    "selection_source_sha256": "d0b970ce1a6e7c4188a87a2680d37c550ac866ed0b40ccdade7df9c69e4f37e1",
+    "features": "APC, real MTP2, async, mamba_cache_mode=align, FULL_AND_PIECEWISE",
+    "baseline_compression_threshold_tokens": 262272,
+    "candidate_compression_threshold_tokens": 9216,
+    "candidate_physical_budget_tokens": 8192,
+    "candidate_recompute_window_tokens": 1024,
+    "candidate_score_layer_stride": 2,
+    "candidate_min_output_tokens_for_compression": 64,
+    "candidate_config_sha256": "dd2dec9c420cb5e128a8fed725926d5dfc28a301ff66f345ef442b8e44951e5d"
+  },
+  "arms": {
+    "B0": {
+      "run_id": "62907b0d074a43d181afe4a956bc84ca",
+      "valid": true,
+      "failed_requests": 0,
+      "requests_completed_in_window": 327,
+      "max_prompt_tokens_observed": 73616,
+      "output_tokens_per_second": 221.5,
+      "output_tokens_per_second_per_chip": 110.75,
+      "decode_tokens_per_second_p90": 72.12339227253436,
+      "ttft_p95_ms": 1381.694942060858,
+      "summary_sha256": "065179b665a8f54d0772ddee1d4d3de350dcaa86f30db04a484dbde5a33449a2",
+      "config_sha256": "dde78e21cba29241f1ee9949c837ccb3f89382f1fada5a811db5129b23d16b14"
+    },
+    "B1": {
+      "run_id": "a8d4761c7bd04573ae426a17ffc9ee31",
+      "valid": true,
+      "failed_requests": 0,
+      "requests_completed_in_window": 315,
+      "max_prompt_tokens_observed": 73616,
+      "output_tokens_per_second": 214.95888888888888,
+      "output_tokens_per_second_per_chip": 107.47944444444444,
+      "decode_tokens_per_second_p90": 70.51686849518678,
+      "ttft_p95_ms": 1610.6592316180468,
+      "summary_sha256": "f45cd6c3991672090127a36353e08e21cfa08369a30681ebd249f0f03cdaba73",
+      "config_sha256": "1da6be8f30a0c36f57e185cad086d8b89f1982038aa5ec6cc6fff3f1c9f44e05"
+    }
+  },
+  "candidate_vs_baseline": {
+    "output_tps_change_pct": -2.953097567093055,
+    "decode_p90_tps_change_pct": -2.227465634557191,
+    "ttft_p95_ms_change_pct": 16.57126204831283
+  },
+  "separate_quality_smoke": "evidence/kvcompress-qwen35-20260927-batched-stride2-quality.json",
+  "service_observations": {
+    "preemptions": "none observed in either arm",
+    "prefix_caching": "server-side hit counters increased on both arms; per-request cached-token counts were not archived",
+    "mtp": "real accepted-token counters increased on both arms",
+    "compression": "B1 scheduler commits and both TP-rank acknowledgements observed"
+  },
+  "limitations": [
+    "Maximum observed prompt was 73,616 tokens, not 256K.",
+    "Fixed-window arms completed different turn mixes (327 vs 315 requests).",
+    "One run per arm cannot establish repeatability or statistical significance.",
+    "The small separate quality smoke does not measure SWE task success.",
+    "This is a plugin-local negative record, not an official website submission."
+  ]
+}

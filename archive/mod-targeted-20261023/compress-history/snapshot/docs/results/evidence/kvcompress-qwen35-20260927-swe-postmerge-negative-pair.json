@@ -1,0 +1,90 @@
+{
+  "schema_version": 1,
+  "kind": "official-client-paired-engineering-result",
+  "date_utc": "2026-09-27",
+  "status": "valid-protocol-performance-regression",
+  "leaderboard_eligible_positive": false,
+  "workload": {
+    "name": "SWE prefix reuse",
+    "prepared_sha256": "8105957b4001e7fd21373150fb7b844a9931abe9f88c699b3db191b84a8596d3",
+    "client_commit": "6861242dbd9f17b707003191e4200b7752911d7c",
+    "concurrency": 4,
+    "measurement_seconds": 900,
+    "chips": 2
+  },
+  "deployment": {
+    "model": "Qwen3.5-35B-A3B",
+    "model_revision": "59d61f3ce65a6d9863b86d2e96597125219dc754",
+    "precision": "bfloat16",
+    "configured_context_tokens": 262144,
+    "hardware": "2× Ascend 910B2 devices 2,3",
+    "tensor_parallel_size": 2,
+    "vllm_commit": "fc06902b7dd7aa1610438cd061ccf7f04b31c609",
+    "vllm_ascend_commit": "5422a07c4dd471c2224afcfdfdca62fb4c5f75f3",
+    "scorer_source_sha256": "3a03a62ff303c4ed3b50307584845487457c952a089f0cd708d4db9116777449",
+    "method_source_sha256": "7887b2d9e7dc30806d718c7111ad806700c59b97149bc182de0631d4f0645e52",
+    "selection_source_sha256": "d0b970ce1a6e7c4188a87a2680d37c550ac866ed0b40ccdade7df9c69e4f37e1",
+    "features": "APC, real MTP2, async, mamba_cache_mode=align, FULL_AND_PIECEWISE",
+    "baseline_compression_threshold_tokens": 262272,
+    "candidate_compression_threshold_tokens": 9216,
+    "candidate_physical_budget_tokens": 8192,
+    "candidate_recompute_window_tokens": 1024,
+    "candidate_score_layer_stride": 2,
+    "candidate_min_output_tokens_for_compression": 512,
+    "candidate_config_sha256": "622f0078363dfa0639cd945413638dcffeb7addd6cc42433622fab5e093fb271",
+    "plugin_commit": "17ffdc7",
+    "stateful_source_sha256": "5addf4029abc75ab620c37fd71874130c334568014107c965e8fda9c078fb152",
+    "baseline_config_sha256": "8aabe03ae63bc1579902dd78aa28650bdac42b391ae56c27e31cd8b5a49948f8"
+  },
+  "arms": {
+    "B0": {
+      "run_id": "e595ce7deecf4656ba8e22e55870a23e",
+      "valid": true,
+      "failed_requests": 0,
+      "requests_completed_in_window": 329,
+      "max_prompt_tokens_observed": 74706,
+      "output_tokens_per_second": 222.5811111111111,
+      "output_tokens_per_second_per_chip": 111.29055555555556,
+      "decode_tokens_per_second_p90": 72.34089203258199,
+      "ttft_p95_ms": 1283.6148621514435,
+      "summary_sha256": "054a91a8002be2378cecec1d2ec67855216c46115d4b610fbdc6e9a5ed360f21",
+      "config_sha256": "e6a85dfaa0cc81e3b4a95fc8ee7d20ff59b29d02c6a0d91e5456e5aa13f893cb",
+      "requests_started": 333,
+      "sessions_completed": 8
+    },
+    "B1": {
+      "run_id": "be7218425a3a4b20973b66a91ea736a5",
+      "valid": true,
+      "failed_requests": 0,
+      "requests_completed_in_window": 315,
+      "max_prompt_tokens_observed": 73616,
+      "output_tokens_per_second": 216.0077777777778,
+      "output_tokens_per_second_per_chip": 108.0038888888889,
+      "decode_tokens_per_second_p90": 71.36836494347173,
+      "ttft_p95_ms": 1477.0111246965828,
+      "summary_sha256": "f2bce5643da9306d24a6b4deab4fae1d8ecf2257d5d63debb25039477b6e7d34",
+      "config_sha256": "94755490189ee5ae238a9a4a12672bb1859a6faaa98e1b78a262f1907cbf0ff1",
+      "requests_started": 319,
+      "sessions_completed": 8
+    }
+  },
+  "candidate_vs_baseline": {
+    "output_tps_change_pct": -2.953230532689699,
+    "decode_p90_tps_change_pct": -1.344367012605041,
+    "ttft_p95_ms_change_pct": 15.06653344765667
+  },
+  "limitations": [
+    "Maximum observed prompt was 74,706 tokens in B0 and 73,616 in B1, not 256K.",
+    "Fixed-window arms completed different turn mixes (329 vs 315 in-window requests).",
+    "One run per arm cannot establish repeatability or statistical significance.",
+    "Both 60-second checks were valid but are separate from these 900-second reports.",
+    "This protocol-valid run does not measure SWE task success or semantic answer quality.",
+    "This is a plugin-local negative record, not an official website submission."
+  ],
+  "service_observations": {
+    "compression": "B1 service log records 99 scheduler commits and 198 TP-rank acknowledgements, including the 60-second protocol check and 900-second window",
+    "mtp": "Real MTP2 enabled in both arms; server reported live draft acceptance statistics",
+    "prefix_caching": "Enabled in both arms with server-side hit counters",
+    "shutdown": "Both services received SIGINT only after completed reports; the B1 API logger emitted EngineDeadError during shutdown, after all measured requests had finished"
+  }
+}

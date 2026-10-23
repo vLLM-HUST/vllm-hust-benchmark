@@ -5,7 +5,14 @@ from pathlib import Path
 
 def test_targeted_original_bytes():
     root = Path(__file__).resolve().parents[1] / "archive/mod-targeted-20261023"
-    for name, count in (("compress", 3), ("manager", 2), ("pyramid-current", 100)):
+    for name, count in (
+        ("compress", 3),
+        ("manager", 2),
+        ("pyramid-current", 100),
+        ("compress-history", 46),
+        ("vspec-regression", 317),
+        ("manager-paper", 7),
+    ):
         capsule = root / name
         manifest = json.loads((capsule / "manifest.json").read_text())
         assert manifest["source_visibility"] == "public"

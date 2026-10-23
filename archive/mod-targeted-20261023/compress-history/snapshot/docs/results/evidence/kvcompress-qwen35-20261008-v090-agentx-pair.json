@@ -1,0 +1,96 @@
+{
+  "schema_version": 1,
+  "kind": "v0.9.0-official-client-paired-engineering-result",
+  "date_utc": "2026-10-08",
+  "status": "valid-protocol-decode-p90-positive-throughput-flat",
+  "client": {
+    "repository": "https://github.com/vLLM-HUST/agentx-bench",
+    "commit": "e0c34de525246c98d14df590f9864d7be7a25075",
+    "harness_commit": "56a0cf70f4c0359454ee4bd15a17770b541a3e3e",
+    "dataset": "semianalysisai/cc-traces-weka-062126-256k",
+    "dataset_revision": "8fecd2fc56694469f758f0afbbb6335ad3043740",
+    "dataset_sessions": 393,
+    "dataset_fingerprint": "0d8fdac271289f80",
+    "concurrent_agent_clients": 4,
+    "measurement_seconds": 900,
+    "warmup": "official primers plus 10 additional requests per lane",
+    "chips": 2
+  },
+  "deployment": {
+    "model": "Qwen3.5-35B-A3B",
+    "model_revision": "712cf74392b05026a6db2bf213d343747d1f6d45",
+    "precision": "bfloat16",
+    "configured_context_tokens": 262144,
+    "hardware": "2 x Ascend 910B2, devices 2 and 7",
+    "tensor_parallel_size": 2,
+    "vllm_commit": "ebfcfba6507501c3a359a75eb4911ecc442bc2ff",
+    "vllm_ascend_commit": "7c8ec865a12f7b6a14d53b61b5e811dd483",
+    "plugin_code_commit": "222b568",
+    "benchmarked_wheel_sha256": "c8de9f513a1ff0ef5ccc26531051194e2a8f546478d02daa92b3c7a237656295",
+    "extension_manager_commit": "075dbcbee641e22376300069aab1f7e9f275aa5d",
+    "calibration_sha256": "c138ffa859396d1e7c6f06c62f13696bd87d8548b9de0536ec251538c9b8e18c",
+    "features": "APC, async scheduling, align, FULL_AND_PIECEWISE; MTP disabled in both arms",
+    "baseline_compression_threshold_tokens": 263680,
+    "candidate_compression_threshold_tokens": 9088,
+    "candidate_physical_budget_tokens": 8064,
+    "candidate_recompute_window_tokens": 1024
+  },
+  "arms": {
+    "B0": {
+      "run_id": "20261008T063748Z-smoke-c4-1232d5ac",
+      "submission_valid": true,
+      "submission_invalid_reasons": [],
+      "completed_requests": 65,
+      "max_input_tokens_observed": 91566,
+      "output_tokens_per_second": 33.865874386644435,
+      "output_tokens_per_second_per_chip": 16.932937193322218,
+      "decode_tokens_per_second_p90": 27.70905827540481,
+      "ttft_p95_ms": 1819.2206251999994,
+      "itl_p90_ms": 45.77876842902178,
+      "run_json_sha256": "0e768ff23bf44157ec4b437ef4b4e3d1c60b13e71dbfe81f94dc8b942dd46256",
+      "aiperf_report_sha256": "08d413415768c6d1fe3f5f177c9e358106bee5f79439572d8efb2a6e18ce0965",
+      "server_log_sha256": "4a26d7e5ec56e085c48548f10984eff98d8b1df4000336e4721b2f1ff14c344d"
+    },
+    "B1": {
+      "run_id": "20261008T070427Z-smoke-c4-d0c46530",
+      "submission_valid": true,
+      "submission_invalid_reasons": [],
+      "completed_requests": 65,
+      "max_input_tokens_observed": 91565,
+      "output_tokens_per_second": 33.86584459788826,
+      "output_tokens_per_second_per_chip": 16.93292229894413,
+      "decode_tokens_per_second_p90": 28.024483464242902,
+      "ttft_p95_ms": 1793.1507425999998,
+      "itl_p90_ms": 43.225726570367755,
+      "run_json_sha256": "d5425047de7cc333890ff1f01838847c8dbd54f147ab56da0bf4973991e89908",
+      "aiperf_report_sha256": "2be3f3f4750c9e53d1099aeaba777cb198fa7cff5eee0be5d01a1286ed7ae39f",
+      "server_log_sha256": "f3b1b70b542161b2f1b39abef067dc1080731969034e36a71627d20eeffa2ac7"
+    }
+  },
+  "candidate_vs_baseline": {
+    "output_tps_change_pct": -0.00008796098347474413,
+    "decode_p90_tps_change_pct": 1.1383468384346784,
+    "ttft_p95_ms_change_pct": -1.4330247930832263,
+    "itl_p90_ms_change_pct": -5.576912499540965,
+    "request_latency_p95_ms_change_pct": -2.922999192875686
+  },
+  "service_observations": {
+    "b1_lifetime_scheduler_commits": 31,
+    "b1_lifetime_tp_rank_acknowledgements": 62,
+    "all_commits_acknowledged_by_both_ranks": true,
+    "b0_compression_commits": 0,
+    "server_errors": 0,
+    "preemptions_observed": 0,
+    "prefix_caching": "enabled in both arms with server-side hit counters",
+    "mtp": "disabled in both arms under the AgentX forced-acceptance rule",
+    "cleanup": "B1 logged a post-window cancelled-credit timeout; all 66 credits returned and the upstream report remained valid"
+  },
+  "limitations": [
+    "The longest observed input was about 91.6K tokens, not 256K; 262,144 is configured capacity.",
+    "Total output throughput was effectively flat and slightly lower by 0.00009% despite decode and latency improvements.",
+    "One pair cannot establish statistical significance or repeatability.",
+    "The 900-second smoke is not the formal one-hour AgentX result.",
+    "Synthetic content does not assess semantic answer quality or real tool success.",
+    "This local result is not an official website submission."
+  ]
+}

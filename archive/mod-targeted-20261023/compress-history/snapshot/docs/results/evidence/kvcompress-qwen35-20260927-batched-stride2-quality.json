@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "kind": "paired-engineering-quality-smoke",
+  "date_utc": "2026-09-27",
+  "status": "pass-limited-sample",
+  "formal_acceptance": false,
+  "model": "Qwen3.5-35B-A3B",
+  "model_revision": "59d61f3ce65a6d9863b86d2e96597125219dc754",
+  "hardware": "2× Ascend 910B2 devices 2,3; tensor parallel size 2",
+  "precision": "bfloat16",
+  "configured_context_tokens": 262144,
+  "workload": {
+    "name": "historical A3-32K-FP16 commissioning fixture",
+    "dataset_sha256": "d1cf1cb02561f78255e92c6c916fcec300fdad341600a93d63ebd988530aa3c7",
+    "cases_per_arm": 4,
+    "input_tokens_per_case": 30720,
+    "requested_output_tokens_per_case": 2048,
+    "not_frontier_quality": true
+  },
+  "candidate": {
+    "position_policy": "v3",
+    "physical_budget_tokens": 8192,
+    "score_layer_stride": 2,
+    "scoring_attention_layers": 5,
+    "materialized_attention_layers": 10,
+    "selection_source_sha256": "d0b970ce1a6e7c4188a87a2680d37c550ac866ed0b40ccdade7df9c69e4f37e1"
+  },
+  "baseline": {
+    "correct": 4,
+    "failed": 0,
+    "silent_truncations": 0,
+    "scheduler_commits": 0,
+    "worker_acknowledgements": 0,
+    "raw_result_sha256": "bcd745dd83cbdcf66b2bf0b038df42407c5f68bb74b51b7110e355bcfcace1a1"
+  },
+  "plugin": {
+    "correct": 4,
+    "failed": 0,
+    "silent_truncations": 0,
+    "scheduler_commits": 4,
+    "worker_acknowledgements": 8,
+    "semantic_tokens_before_each_commit": 30720,
+    "physical_tokens_after_each_commit": 8192,
+    "raw_result_sha256": "0e83df1f6c1e768e82eba94894cfe25cdb403fbbe7c6e22f92e952849c4e6772"
+  },
+  "limitations": [
+    "Four deterministic examples per arm are a functional regression smoke, not broad answer-quality evidence.",
+    "The historical A3 fixture is separate from the official SWE and AgentX workloads.",
+    "The SWE 900-second measurement does not score tool-task correctness."
+  ]
+}
