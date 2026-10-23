@@ -8,7 +8,7 @@ from pathlib import Path
 from build_midterm_publication import section, tables
 
 ROOT = Path(__file__).resolve().parents[1]
-REVISION = "8df59f62424749c81d0ec9318e752cbb65802e00"  # pragma: allowlist secret
+REVISION = "3955305eab7d6ccd0be75f9ce88eb5c576320158"  # pragma: allowlist secret
 REPORT_DIR = "reports/vllm-hust-midterm-20261019"
 REPORT = REPORT_DIR + "/中期测试报告.md"
 OUTPUT = ROOT / "website-publication/data/midterm-v074.json"
@@ -79,6 +79,12 @@ def build():
             "V1.5 requires actual >=16K continuous intervals, comparable 4K load, window throughput and P95/P99 TTFT/TPOT, "
             "plus task completion and anomaly checks. Compatible 32K records can be reused. Original scores and parser-repair confirmations remain separate."
         )
+    by_id["long-context-parser"]["scope_en"] += (
+        " Independent parser-repair confirmation: 6/6 strict body matches, zero failures; original 0/6 retained."
+    )
+    by_id["current-b1-long-context"]["scope_en"] += (
+        " Original strict body score 0/6; supplemental final-answer parsing 6/6 does not replace the original score."
+    )
     current = {
         "id": "milestone-v15",
         "title": "V1.5 当前依据与结论 / V1.5 current method and conclusions",
