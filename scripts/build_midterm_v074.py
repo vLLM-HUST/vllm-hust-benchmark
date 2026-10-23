@@ -8,7 +8,7 @@ from pathlib import Path
 from build_midterm_publication import section, tables
 
 ROOT = Path(__file__).resolve().parents[1]
-REVISION = "3955305eab7d6ccd0be75f9ce88eb5c576320158"  # pragma: allowlist secret
+REVISION = "77a12492dcd07c7eec85ea0a01de6a896f1cfe74"  # pragma: allowlist secret
 REPORT_DIR = "reports/vllm-hust-midterm-20261019"
 REPORT = REPORT_DIR + "/中期测试报告.md"
 OUTPUT = ROOT / "website-publication/data/midterm-v074.json"
@@ -44,6 +44,17 @@ def build():
         by_id["m01-historical"][key] = by_id["m01-historical"][key].replace(
             "V5.27", "V1.5"
         )
+    verdict["scope"] += (
+        " 已取得200请求同步B1包络120.65347687713802秒；F与同工作量参考仍待关联，不以旧约62秒替换。"
+    )
+    verdict["scope_en"] += (
+        " A 200-request synchronized B1 envelope of 120.65347687713802 seconds is now available; effective F and same-workload reference still need attribution. Do not substitute the older ~62-second run."
+    )
+    verdict["tables_en"][0]["rows"][1] = [
+        "Uninstrumented synchronized T",
+        "200/0 requests; envelope 120.65347687713802 s",
+        "Measured; associate this workload with valid F and reference. Initial compiler-cache conditions differ from the old ~62 s run; no estimated deduction.",
+    ]
     verdict["tables_en"][0]["rows"][2] = [
         "Independent reference and dependencies",
         "75 communication graph shapes measured; 10,800 verified samples per rank",
@@ -54,6 +65,7 @@ def build():
         locator(REPORT_DIR + "/milestone-v15/method-status.json"),
         locator(REPORT_DIR + "/milestone-v15/project4-v1.5.txt"),
         locator(REPORT_DIR + "/m01-recovery/collective-graph-20261023/manifest.json"),
+        locator(REPORT_DIR + "/m01-recovery/boundary-measured-20261023/manifest.json"),
     ]
     for ident in ("paired-lifecycle", "resources"):
         by_id[ident]["scope"] += (
@@ -65,6 +77,9 @@ def build():
             "No monetary acceptance without a documented fee basis, matched successful-request population, quality/SLO and same-interval utilization. "
             "All original values, tail-latency regressions and shutdown limitations remain unchanged."
         )
+    by_id["resources"]["scope_en"] += (
+        " Historical request resource cost decreased 14.63%, lifecycle cost increased 2.68%, and P99 TPOT increased 57.07%; no RMB fee basis."
+    )
     for ident in (
         "long-context",
         "current-b1-long-context",
@@ -98,7 +113,7 @@ def build():
                     [
                         "3.4.1 Effective compute",
                         "C=F/(k*T*10^12); eta=T_reference/T*100%; >=50%",
-                        "F, matched uninstrumented synchronized T and model dependency reference not closed; graph communication samples already measured",
+                        "Synchronized B1 timing and graph communication samples measured; effective F and same-workload model reference still require attribution",
                     ],
                     [
                         "3.4.2 Performance",

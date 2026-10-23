@@ -74,7 +74,7 @@
     },
     "pending_evidence": [
       "Validated effective-work mapping including accepted draft attribution",
-      "Matched uninstrumented timing and synchronized workload boundary",
+      "Associate the measured 120.65347687713802-second synchronized B1 envelope with valid effective F and same-workload reference; do not substitute the older ~62-second run",
       "Independent reference with actual dependencies, overlap and applicability"
     ],
     "existing_audit_path": "reports/vllm-hust-midterm-20261019/m01-recovery/method-v526-20261023/README.md",
@@ -89,8 +89,17 @@
       "evidence_path": "reports/vllm-hust-midterm-20261019/m01-recovery/request-assessment-20261022/m01-request-window-assessment.json"
     },
     "additional_existing_evidence": [
-      "reports/vllm-hust-midterm-20261019/m01-recovery/collective-graph-20261023/manifest.json"
-    ]
+      "reports/vllm-hust-midterm-20261019/m01-recovery/collective-graph-20261023/manifest.json",
+      "reports/vllm-hust-midterm-20261019/m01-recovery/boundary-measured-20261023/manifest.json"
+    ],
+    "measured_synchronized_b1": {
+      "completed": 200,
+      "failed": 0,
+      "client_seconds": 120.6243702378124,
+      "synchronized_seconds": 120.65347687713802,
+      "effective_flops": null,
+      "efficiency_percent": null
+    }
   },
   "comparison_contract": {
     "b0": {
@@ -229,9 +238,9 @@
       "ascend": "0.25.1rc2 development"
     }
   },
-  "report_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/3955305eab7d6ccd0be75f9ce88eb5c576320158/reports/vllm-hust-midterm-20261019/中期测试报告.md",
-  "report_sha256": "af8250d15afae7fabbada49908de0a102e319e58b0e3217b2ad23eccc8651365",
-  "source_commit": "3955305eab7d6ccd0be75f9ce88eb5c576320158",
+  "report_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/77a12492dcd07c7eec85ea0a01de6a896f1cfe74/reports/vllm-hust-midterm-20261019/中期测试报告.md",
+  "report_sha256": "9ce7f56bca17e49b9eeaa92f66c3f7000590e01a87e25c6829113e532c3b8466",
+  "source_commit": "77a12492dcd07c7eec85ea0a01de6a896f1cfe74",
   "sections": [
     {
       "id": "milestone-v15",
@@ -249,7 +258,7 @@
             [
               "3.4.1 有效算力",
               "C=F/(k×T×10¹²)，η=T参/T×100%，η≥50%",
-              "完整有效F、匹配无插桩同步T和模型级依赖参考待闭合；已完成75种通信图参考，不重复列为未测"
+              "同步B1计时已取得；有效F及同工作量模型参考待关联；已完成75种通信图参考，不重复列为未测"
             ],
             [
               "3.4.2 吞吐与时延",
@@ -280,7 +289,7 @@
             [
               "3.4.1 Effective compute",
               "C=F/(k*T*10^12); eta=T_reference/T*100%; >=50%",
-              "F, matched uninstrumented synchronized T and model dependency reference not closed; graph communication samples already measured"
+              "Synchronized B1 timing and graph communication samples measured; effective F and same-workload model reference still require attribution"
             ],
             [
               "3.4.2 Performance",
@@ -1680,7 +1689,7 @@
           "label": "aligned-mmlu-common.tar.gz"
         }
       ],
-      "scope_en": "Historical development-stack control and B1, not the fixed 0.18 B0. Request-window and full-lifecycle resource costs are separate. V1.5 allocates fees over the measurement interval: lifecycle increases are not a current cost veto. No monetary acceptance without a documented fee basis, matched successful-request population, quality/SLO and same-interval utilization. All original values, tail-latency regressions and shutdown limitations remain unchanged."
+      "scope_en": "Historical development-stack control and B1, not the fixed 0.18 B0. Request-window and full-lifecycle resource costs are separate. V1.5 allocates fees over the measurement interval: lifecycle increases are not a current cost veto. No monetary acceptance without a documented fee basis, matched successful-request population, quality/SLO and same-interval utilization. All original values, tail-latency regressions and shutdown limitations remain unchanged. Historical request resource cost decreased 14.63%, lifecycle cost increased 2.68%, and P99 TPOT increased 57.07%; no RMB fee basis."
     },
     {
       "id": "m01",
@@ -2055,7 +2064,7 @@
     {
       "id": "m01-verdict",
       "title": "M01 本轮判定 / M01 acceptance verdict",
-      "scope": "V1.5：C=F/(k×T×10¹²)（TFLOPS/参与芯片），η=T参/T×100%，门槛50%。有效F排除填充、重复计算、未采纳草稿及缓存省略算量；T为匹配工作量的无插桩同步墙钟，不能估算扣减插桩开销。T参由独立标定、实际阶段依赖、资源重叠和必要调度推导，不用资源总时间最大值或反向拟合实测耗时替代。当前F、T、T参、C和η均未核验齐备：复算中 / 未判定。历史插桩经验参考另列，不作为新版当前成绩。",
+      "scope": "V1.5：C=F/(k×T×10¹²)（TFLOPS/参与芯片），η=T参/T×100%，门槛50%。有效F排除填充、重复计算、未采纳草稿及缓存省略算量；T为匹配工作量的无插桩同步墙钟，不能估算扣减插桩开销。T参由独立标定、实际阶段依赖、资源重叠和必要调度推导，不用资源总时间最大值或反向拟合实测耗时替代。当前F、T、T参、C和η均未核验齐备：复算中 / 未判定。历史插桩经验参考另列，不作为新版当前成绩。 已取得200请求同步B1包络120.65347687713802秒；F与同工作量参考仍待关联，不以旧约62秒替换。",
       "tables": [
         {
           "headers": [
@@ -2071,8 +2080,8 @@
             ],
             [
               "无插桩T及工作量",
-              "三轮Microflow客户端时钟与200请求跨度核对",
-              "不单独证明全部应计设备工作的同步边界；不将插桩轮F直接除以另一轮T"
+              "已取得200请求同步B1包络120.65347687713802秒，零失败",
+              "将本轮工作量关联有效F及参考；与旧约62秒轮次编译缓存初始条件不同，不替换、不估算扣时"
             ],
             [
               "独立T参与依赖",
@@ -2103,9 +2112,14 @@
           "path": "reports/vllm-hust-midterm-20261019/m01-recovery/collective-graph-20261023/manifest.json",
           "kind": "blob",
           "label": "核验原文与复算证据 / Verified source and reuse evidence"
+        },
+        {
+          "path": "reports/vllm-hust-midterm-20261019/m01-recovery/boundary-measured-20261023/manifest.json",
+          "kind": "blob",
+          "label": "核验原文与复算证据 / Verified source and reuse evidence"
         }
       ],
-      "scope_en": "V1.5: C=F/(k*T*10^12), TFLOPS per participating chip; eta=T_reference/T*100%, threshold 50%. Exclude padding, redundant computation, unaccepted drafts and cache-omitted work from F. Use matched-workload uninstrumented synchronized wall-clock T; do not subtract estimated instrumentation overhead. Derive T_reference independently from calibration, actual stage dependencies, resource overlap and necessary scheduling, not a global resource-time maximum or reverse fitting to measured B0/B1 time. Current F, T, T_reference, C and eta: recalculation pending / not determined. Historical instrumented estimates are separate.",
+      "scope_en": "V1.5: C=F/(k*T*10^12), TFLOPS per participating chip; eta=T_reference/T*100%, threshold 50%. Exclude padding, redundant computation, unaccepted drafts and cache-omitted work from F. Use matched-workload uninstrumented synchronized wall-clock T; do not subtract estimated instrumentation overhead. Derive T_reference independently from calibration, actual stage dependencies, resource overlap and necessary scheduling, not a global resource-time maximum or reverse fitting to measured B0/B1 time. Current F, T, T_reference, C and eta: recalculation pending / not determined. Historical instrumented estimates are separate. A 200-request synchronized B1 envelope of 120.65347687713802 seconds is now available; effective F and same-workload reference still need attribution. Do not substitute the older ~62-second run.",
       "tables_en": [
         {
           "headers": [
@@ -2120,9 +2134,9 @@
               "Useful-work mapping pending; old counts include all draft work; no acceptance-rate scaling"
             ],
             [
-              "Uninstrumented T and workload",
-              "Three Microflow client/request time-span audits",
-              "Full device completion boundary not established; do not divide instrumented F by another run's T"
+              "Uninstrumented synchronized T",
+              "200/0 requests; envelope 120.65347687713802 s",
+              "Measured; associate this workload with valid F and reference. Initial compiler-cache conditions differ from the old ~62 s run; no estimated deduction."
             ],
             [
               "Independent reference and dependencies",
@@ -2306,7 +2320,7 @@
       },
       "pending_evidence": [
         "Validated effective-work mapping including accepted draft attribution",
-        "Matched uninstrumented timing and synchronized workload boundary",
+        "Associate the measured 120.65347687713802-second synchronized B1 envelope with valid effective F and same-workload reference; do not substitute the older ~62-second run",
         "Independent reference with actual dependencies, overlap and applicability"
       ],
       "existing_audit_path": "reports/vllm-hust-midterm-20261019/m01-recovery/method-v526-20261023/README.md",
@@ -2321,8 +2335,17 @@
         "evidence_path": "reports/vllm-hust-midterm-20261019/m01-recovery/request-assessment-20261022/m01-request-window-assessment.json"
       },
       "additional_existing_evidence": [
-        "reports/vllm-hust-midterm-20261019/m01-recovery/collective-graph-20261023/manifest.json"
-      ]
+        "reports/vllm-hust-midterm-20261019/m01-recovery/collective-graph-20261023/manifest.json",
+        "reports/vllm-hust-midterm-20261019/m01-recovery/boundary-measured-20261023/manifest.json"
+      ],
+      "measured_synchronized_b1": {
+        "completed": 200,
+        "failed": 0,
+        "client_seconds": 120.6243702378124,
+        "synchronized_seconds": 120.65347687713802,
+        "effective_flops": null,
+        "efficiency_percent": null
+      }
     },
     "cost_method": {
       "section": "3.4.4",
@@ -2388,7 +2411,7 @@
     "decision_relevant_gaps": {
       "m01": [
         "Validated effective-work mapping including accepted draft attribution",
-        "Matched uninstrumented timing and synchronized workload boundary",
+        "Associate the measured 120.65347687713802-second synchronized B1 envelope with valid effective F and same-workload reference; do not substitute the older ~62-second run",
         "Independent reference with actual dependencies, overlap and applicability"
       ],
       "performance": [
