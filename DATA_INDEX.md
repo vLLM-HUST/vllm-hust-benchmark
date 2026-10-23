@@ -61,6 +61,10 @@ python scripts/data_index.py --query 'archive split' --limit 100
 
 ### 网站引用与 Release 附件入口
 
+[V0.75 上线与索引复核回执](docs/data-entrypoints-v075-audit.json)同步当前采集快照、133 份线上文件及 Release
+附件入口；[MOD 与外部门禁复核](archive/mod-followup-20261023/V075-FOLLOWUP.md)列出仍待迁移和受阻项。 V0.75 浏览器回执见其中的公开
+issue 链接，未伪称已经上传为 Release 附件。
+
 [V0.72 上线与索引复核回执](docs/data-entrypoints-v072-audit.json)记录 2026-10-23 的线上字节校验、
 发布身份订正及附件状态；它是带时间的验收快照，不替代下述当前索引，也不代表 M01 已通过。
 

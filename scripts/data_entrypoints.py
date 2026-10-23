@@ -259,7 +259,9 @@ def build(root, paths, sources):
         elif not parsed.scheme:
             record["benchmark_path"] = unquote(local)
             record["resolution"] = (
-                "tracked-evidence-path"
+                "dynamic-template-not-evaluated"
+                if "${" in unquote(local)
+                else "tracked-evidence-path"
                 if unquote(local) in tracked
                 else "tracked-evidence-directory"
                 if any(p.startswith(unquote(local).rstrip("/") + "/") for p in tracked)
