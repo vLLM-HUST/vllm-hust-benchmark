@@ -1,0 +1,23 @@
+import hashlib
+import json
+from pathlib import Path
+
+
+def test_targeted_original_bytes():
+    root = Path(__file__).resolve().parents[1] / "archive/mod-targeted-20261023"
+    for name in ("compress", "manager"):
+        capsule = root / name
+        manifest = json.loads((capsule / "manifest.json").read_text())
+        assert manifest["source_visibility"] == "public"
+        assert len(manifest["source_commit"]) == 40
+        rows = manifest["files"]
+        assert len(rows) == (3 if name == "compress" else 2)
+        assert {row["path"] for row in rows} == {
+            p.relative_to(capsule / "snapshot").as_posix()
+            for p in (capsule / "snapshot").rglob("*")
+            if p.is_file()
+        }
+        for row in rows:
+            raw = (capsule / "snapshot" / row["path"]).read_bytes()
+            assert len(raw) == row["bytes"]
+            assert hashlib.sha256(raw).hexdigest() == row["sha256"]
