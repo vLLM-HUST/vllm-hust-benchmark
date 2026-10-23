@@ -1,5 +1,9 @@
 # Issue 326: MOD custody follow-up
 
+Latest bounded follow-up: [remaining MOD and installation consumers](REMAINING-CONSUMERS.md). That
+receipt supersedes the candidate counts and completed migration queue below, while preserving this
+earlier observation unchanged as history.
+
 This dated audit continues [#326](https://github.com/vLLM-HUST/vllm-hust-benchmark/issues/326). It
 is not a claim that all organization evidence has migrated. No hardware task, approval label,
 branch-protection bypass or new experiment was started.
