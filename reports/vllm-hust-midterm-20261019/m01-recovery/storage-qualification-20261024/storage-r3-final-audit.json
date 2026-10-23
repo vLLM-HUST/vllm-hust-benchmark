@@ -1,0 +1,160 @@
+{
+  "run_id": "capture-b1-storage-r3",
+  "observed_at": "2026-10-24T00:52:58.452295+08:00",
+  "status": "diagnostic_capture_and_derived_host_counts_verified",
+  "raw_evidence_directory": "/root/m01-capture-b1-storage-r3",
+  "verified_sha_entries": 21,
+  "raw_manifest_sha256": "cb1213775e905afa0f23240477d3b5744e310c64cdccf7503cf4094f112898cb",
+  "workload": {
+    "completed": 200,
+    "failed": 0,
+    "total_input_tokens": 282265,
+    "total_output_tokens": 51200,
+    "scope": "diagnostic workload; timing includes instrumentation",
+    "effective_flops": null,
+    "m01_attainment": null
+  },
+  "join": {
+    "status": "joined",
+    "errors": [],
+    "run_id": "capture-b1-storage-r3",
+    "scheduled_waves": 873,
+    "worker_ranks": [
+      0,
+      1
+    ],
+    "retained_count_complete": false,
+    "scope": "Diagnostic transport and phase closure only; no FLOPs or timing acceptance",
+    "effective_flops": null,
+    "reference_time": null,
+    "m01_attainment": null
+  },
+  "workers": [
+    {
+      "rank": 0,
+      "lengths": {
+        "status": "device_length_values_covered_stream_qualification_separate",
+        "records": 1742,
+        "stream_order_qualified": false,
+        "effective_flops": null
+      },
+      "inputs": {
+        "waves": 871,
+        "table_publications": 1742,
+        "complete": true,
+        "stream_order_qualified": false,
+        "effective_flops": null
+      },
+      "progress_source_protection": {
+        "enabled": true,
+        "failed": false,
+        "implementation": "two-pinned-buffers-current-stream-fences/v1",
+        "prepare_calls": 871
+      }
+    },
+    {
+      "rank": 1,
+      "lengths": {
+        "status": "device_length_values_covered_stream_qualification_separate",
+        "records": 1742,
+        "stream_order_qualified": false,
+        "effective_flops": null
+      },
+      "inputs": {
+        "waves": 871,
+        "table_publications": 1742,
+        "complete": true,
+        "stream_order_qualified": false,
+        "effective_flops": null
+      },
+      "progress_source_protection": {
+        "enabled": true,
+        "failed": false,
+        "implementation": "two-pinned-buffers-current-stream-fences/v1",
+        "prepare_calls": 871
+      }
+    }
+  ],
+  "original_retained_count_complete": false,
+  "original_unclassified_event_count": 155,
+  "derived_nonupdate_classification": {
+    "classes": {
+      "before_first_output_no_drafts": 22,
+      "after_complete_output_budget": 133
+    },
+    "unclassified": 0,
+    "retained_output_addition_from_nonupdates": 0,
+    "limitation": "Host output-retention classification only. Before-output rows may contain useful prefill work; no device FLOP classification."
+  },
+  "derived_output_counts": {
+    "requests": 200,
+    "per_request": 256,
+    "total": 51200,
+    "matches_engine_request_identities": true
+  },
+  "derived_host_draft_counts": {
+    "raw_accepted_drafts": 32170,
+    "retained_drafts": 32122,
+    "retained_first_draft": 17298,
+    "retained_second_draft": 14824
+  },
+  "kv_materialization": {
+    "engine_admissions": 200,
+    "policy_records": 200,
+    "salt_bindings_verified": true,
+    "decisions": "recompute",
+    "reuse_tokens": 0,
+    "scope": "actual request admission and recompute control; no cache reuse benefit claimed"
+  },
+  "microflow": [
+    {
+      "file": "microflow-54596.jsonl",
+      "event_counts": {
+        "partition_equivalence": 3,
+        "model_loaded": 1,
+        "prefix": 690,
+        "graph_replay": 1742
+      }
+    },
+    {
+      "file": "microflow-54597.jsonl",
+      "event_counts": {
+        "partition_equivalence": 3,
+        "model_loaded": 1,
+        "prefix": 690,
+        "graph_replay": 1742
+      }
+    }
+  ],
+  "client_exit_code": 0,
+  "service_exit_codes": [
+    {
+      "pid": 82668,
+      "code": 0
+    },
+    {
+      "pid": 50081,
+      "code": 130
+    }
+  ],
+  "remaining_sessions": [],
+  "physical_devices_released": [
+    3,
+    6
+  ],
+  "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\n",
+  "diagnostic_only_metrics": {
+    "client_seconds": 116.85563399270177,
+    "output_tokens_per_second": 438.1474666698373,
+    "scope": "includes instrumentation and cold request kernel work; not formal B1 performance"
+  },
+  "effective_flops": null,
+  "reference_time": null,
+  "m01_attainment": null,
+  "remaining_work": [
+    "Same-run device arithmetic and reference-time accounting has not been established by this transport/host audit.",
+    "Host nonupdate classification does not classify useful prefill device work.",
+    "Draft device stream ordering remains unqualified; do not transfer these counts to another run timing."
+  ],
+  "audit_source_sha256": "4dd997e794aa410fefc7c12238ca214ba138a899a00a1435a33e3dcaf9980ac5"
+}
