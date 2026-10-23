@@ -108,7 +108,8 @@ def test_gsm8k_cumulative_coverage_includes_prior_audit_and_tail_without_pooled_
     row = next(r for r in ledger["sources"] if r["source_id"] == "GSM8K")
     receipt = json.loads((ROOT / row["cumulative_coverage_receipt"]).read_text("utf-8"))
     assert row["checked"] is True
-    assert receipt["source_revision"] == "740312add88f781978c0658806c59bc2815b9866"
+    expected_revision = "740312add88f781978c0658806c59bc2815b9866"  # pragma: allowlist secret - public dataset revision
+    assert receipt["source_revision"] == expected_revision
     assert receipt["evidence"][0]["unique_task_count"] == 201
     assert receipt["evidence"][1]["selected_samples"] == [
         "test:1316",
