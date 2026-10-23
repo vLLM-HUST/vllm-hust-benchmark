@@ -9,6 +9,8 @@
 
 ## M01 同工况参考补测
 
+当前V0.72按[V5.27原大纲](test-outline-v527.docx)报告`C=F/(k×T×10¹²)`和`η=T参/T×100%`，有效工作量、匹配无插桩计时及独立依赖参考复算中，未判定。见[机器可读方法和状态](m01-method-v527.json)。下述旧经验资源参考仅作历史插桩结果，不作为新版当前效率或达标判定。
+
 V0.64纳入GDN递归、WY/KKT、卷积、HBM及同接口通信参考，18类计算参考和设备最终预处理映射已完成汇总核对。
 完整证据见[参考补测与汇总](m01-recovery/reference-closure-20261022/README.md)。
 V0.65完成本次插桩请求窗口的经验参考核算：达成率30.2443%–30.2505%，未达到内部50%阈值。不外推为未插桩服务结果，也不替换正式B1。见[请求窗口核算](m01-recovery/request-assessment-20261022/m01-request-window-assessment.json)。含请求前后开销的[设备包络核算](m01-recovery/accounting-assessment-20261022/README.md)仅作诊断保留。
