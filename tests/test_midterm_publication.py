@@ -6,16 +6,15 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def test_publication_rebuilds_from_pinned_report_and_verified_archives(monkeypatch):
+def test_publication_rebuilds_from_pinned_report_and_verified_archives():
     spec = importlib.util.spec_from_file_location(
         "midterm", ROOT / "scripts/build_midterm_publication.py"
     )
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     actual = json.loads(module.OUTPUT.read_text())
-    raw = (ROOT / module.REPORT).read_bytes()
+    raw = module.pinned(module.REPORT)
     assert hashlib.sha256(raw).hexdigest() == actual["report_sha256"]
-    monkeypatch.setattr(module, "pinned", lambda path: (ROOT / path).read_bytes())
     assert actual == module.build()
     assert actual["version"] == "V0.72"
     method = actual["m01_method"]
