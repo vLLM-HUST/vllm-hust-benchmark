@@ -1,9 +1,9 @@
 {
   "schema": "benchmark-data-entrypoints/v1",
   "source_snapshot": "docs/data-entrypoints-sources.json",
-  "captured_at": "2026-10-22T15:37:10.632539+00:00",
-  "website_commit": "539955e62390ebc79e57edadaafe221397b54b85",
-  "published_benchmark_commit": "5dd8f1fe615c6024783bef59dcf9b3901be55b3a",
+  "captured_at": "2026-10-23T04:14:55.465013+00:00",
+  "website_commit": "809e8d722dda78fc51fdbc794c6b811d3e5996df",
+  "published_benchmark_commit": "be59d171b0c45df6a9dc1d7eef1aac0750a91527",
   "publication_manifest_source": "https://vllm-hust.sage.org.ai/data/benchmark-source-manifest.json",
   "production_manifest_error": null,
   "limits": "Offline navigation, not browser validation or evidence acceptance. Remote inventory is a dated snapshot. Literal links may be historical, dynamic, or unavailable. Reconstructed publication parts are checked locally; Release asset bytes are not downloaded.",
@@ -975,7 +975,7 @@
         "website-publication/data/midterm-v067.json"
       ],
       "sha256": "387cd284a632705c639ff1ef0ac87168bac60408419e052d7af69e0bfbae3f6c",
-      "snapshot_publication_status": "not-in-snapshot"
+      "snapshot_publication_status": "same-bytes"
     },
     {
       "website_path": "data/midterm-v068.json",
@@ -984,7 +984,7 @@
         "website-publication/data/midterm-v068.json"
       ],
       "sha256": "8a936577fda190b9110d649c7b473670b9bd46300b7696d89184cd326762abe9",
-      "snapshot_publication_status": "not-in-snapshot"
+      "snapshot_publication_status": "same-bytes"
     },
     {
       "website_path": "data/midterm-v069.json",
@@ -993,7 +993,7 @@
         "website-publication/data/midterm-v069.json"
       ],
       "sha256": "5711330763790e1be56279ae1cf2922299ace5823224c4bfa9d9d86a7d4e475b",
-      "snapshot_publication_status": "not-in-snapshot"
+      "snapshot_publication_status": "same-bytes"
     },
     {
       "website_path": "data/midterm-v070.json",
@@ -1002,7 +1002,7 @@
         "website-publication/data/midterm-v070.json"
       ],
       "sha256": "b8dc7cf1aa18a9665d0cd1612c4bfa94ecbeefb8dcf390f9a4c71f9c2fa15ebf",
-      "snapshot_publication_status": "not-in-snapshot"
+      "snapshot_publication_status": "same-bytes"
     },
     {
       "website_path": "data/midterm-v071.json",
@@ -1011,7 +1011,7 @@
         "website-publication/data/midterm-v071.json"
       ],
       "sha256": "d57584141b6bcf73e3e2e4b23def53971581beaa60adff6d78984ce8f4b38d5a",
-      "snapshot_publication_status": "not-in-snapshot"
+      "snapshot_publication_status": "same-bytes"
     },
     {
       "website_path": "data/midterm-v072.json",
@@ -1020,7 +1020,7 @@
         "website-publication/data/midterm-v072.json"
       ],
       "sha256": "ea1f7a4d25fc8305e01b9a6600ecd5a3fc9f7ef59a5b6ce343be5deb4e5e3f11",
-      "snapshot_publication_status": "not-in-snapshot"
+      "snapshot_publication_status": "same-bytes"
     },
     {
       "website_path": "data/mmlu-pro-20261012/accuracy.json",
@@ -1720,11 +1720,12 @@
       "resolution": "mapped"
     },
     {
-      "target": "./data/midterm-v066.json",
+      "target": "./data/midterm-v072.json",
       "consumers": [
+        "website:assets/current-measurements.js",
         "website:assets/midterm-report.js"
       ],
-      "benchmark_path": "website-publication/data/midterm-v066.json",
+      "benchmark_path": "website-publication/data/midterm-v072.json",
       "resolution": "mapped"
     },
     {
@@ -4796,6 +4797,13 @@
       "target": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/${manifest.commit}/${file.benchmark_path.split(",
       "consumers": [
         "website:assets/benchmark-source.js"
+      ],
+      "resolution": "dynamic-template-not-evaluated"
+    },
+    {
+      "target": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/${reportData.source_commit}/${quality.evidence_path}",
+      "consumers": [
+        "website:assets/current-measurements.js"
       ],
       "resolution": "dynamic-template-not-evaluated"
     },
@@ -8287,7 +8295,8 @@
         "website-publication/data/midterm-v069.json",
         "website-publication/data/midterm-v070.json",
         "website-publication/data/midterm-v071.json",
-        "website-publication/data/midterm-v072.json"
+        "website-publication/data/midterm-v072.json",
+        "website:assets/midterm-report.js"
       ],
       "benchmark_path": "reports/frontierscience-combination-quality-20261022/summary.json",
       "resolution": "tracked-evidence-path"
@@ -8305,7 +8314,8 @@
       "consumers": [
         "website-publication/data/midterm-v070.json",
         "website-publication/data/midterm-v071.json",
-        "website-publication/data/midterm-v072.json"
+        "website-publication/data/midterm-v072.json",
+        "website:assets/midterm-report.js"
       ],
       "benchmark_path": "reports/mmlu-quality018-20261022/quality018-completed-audit-r1.json",
       "resolution": "tracked-evidence-path"
@@ -8316,7 +8326,8 @@
         "website-publication/data/midterm-v069.json",
         "website-publication/data/midterm-v070.json",
         "website-publication/data/midterm-v071.json",
-        "website-publication/data/midterm-v072.json"
+        "website-publication/data/midterm-v072.json",
+        "website:assets/midterm-report.js"
       ],
       "benchmark_path": "reports/native-version-recovery-20261022/version-mapping.json",
       "resolution": "tracked-evidence-path"
@@ -9734,7 +9745,8 @@
         "website-publication/data/midterm-v069.json",
         "website-publication/data/midterm-v070.json",
         "website-publication/data/midterm-v071.json",
-        "website-publication/data/midterm-v072.json"
+        "website-publication/data/midterm-v072.json",
+        "website:assets/midterm-report.js"
       ],
       "benchmark_path": "website-publication/data/betterscale-school-runtime-20261016/report.json",
       "resolution": "tracked-evidence-path"
@@ -9746,7 +9758,8 @@
         "website-publication/data/midterm-v069.json",
         "website-publication/data/midterm-v070.json",
         "website-publication/data/midterm-v071.json",
-        "website-publication/data/midterm-v072.json"
+        "website-publication/data/midterm-v072.json",
+        "website:assets/midterm-report.js"
       ],
       "benchmark_path": "website-publication/data/dataset-matrix-campaign-20261016/report.json",
       "resolution": "tracked-evidence-path"
@@ -9877,10 +9890,19 @@
         "website-publication/data/midterm-v069.json",
         "website-publication/data/midterm-v070.json",
         "website-publication/data/midterm-v071.json",
-        "website-publication/data/midterm-v072.json"
+        "website-publication/data/midterm-v072.json",
+        "website:assets/midterm-report.js"
       ],
       "benchmark_path": "website-publication/data/mmlu-pro-20261012/report.json",
       "resolution": "tracked-evidence-path"
+    },
+    {
+      "target": "website-publication/data/request-throttling-dataset-matrix-20261018/${name}.json",
+      "consumers": [
+        "website:assets/midterm-report.js"
+      ],
+      "benchmark_path": "website-publication/data/request-throttling-dataset-matrix-20261018/${name}.json",
+      "resolution": "not-in-current-checkout"
     },
     {
       "target": "website-publication/data/request-throttling-dataset-matrix-20261018/frontierscience.json",
@@ -9944,7 +9966,8 @@
           "id": 659604979,
           "bytes": 756139,
           "digest": "sha256:272075416b9b0006a0a9697d68327a2be2e370a25c158609cbf543dafc7398b8",
-          "updated_at": "2026-10-20T14:49:46Z"
+          "updated_at": "2026-10-20T14:49:46Z",
+          "state": "uploaded"
         }
       ],
       "verification": "API metadata only; verify downloaded bytes against custody manifests before use"
@@ -9961,7 +9984,8 @@
           "id": 659546615,
           "bytes": 14153035,
           "digest": "sha256:2655ee0138afc296962bc3922e4e3f262736dfeb164b023f6af576fa7455c5c9",
-          "updated_at": "2026-10-20T14:26:36Z"
+          "updated_at": "2026-10-20T14:26:36Z",
+          "state": "uploaded"
         },
         {
           "name": "benchmark-archive-followup-20261020.tar.gz",
@@ -9969,7 +9993,8 @@
           "id": 659546618,
           "bytes": 13512897,
           "digest": "sha256:49092d97fdfb544ad15fa5ca5b154f9ecbb52b423ec8212cf15d0d7995ffaaf6",
-          "updated_at": "2026-10-20T14:26:36Z"
+          "updated_at": "2026-10-20T14:26:36Z",
+          "state": "uploaded"
         },
         {
           "name": "benchmark-archive-native-20261020.tar.gz",
@@ -9977,7 +10002,8 @@
           "id": 659546613,
           "bytes": 8012861,
           "digest": "sha256:bb5194fc2090f914d550f4f76b6b1ba76563baaf802870e3640dd52f8118971d",
-          "updated_at": "2026-10-20T14:26:36Z"
+          "updated_at": "2026-10-20T14:26:36Z",
+          "state": "uploaded"
         }
       ],
       "verification": "API metadata only; verify downloaded bytes against custody manifests before use"
@@ -9994,7 +10020,8 @@
           "id": 659966464,
           "bytes": 21576,
           "digest": "sha256:6f5ccc58100b9a984d524ec771e80f8fb8b9ab7912c29b80b5c444b219b19a95",
-          "updated_at": "2026-10-20T17:16:31Z"
+          "updated_at": "2026-10-20T17:16:31Z",
+          "state": "uploaded"
         },
         {
           "name": "frontier-recovered-capsules-20261021.tar.gz",
@@ -10002,7 +10029,8 @@
           "id": 659966496,
           "bytes": 11393138,
           "digest": "sha256:3cdcaec49a243a2a8ed2049362256daad683d6dc1c20c3c735677c82a7f1a4bb",
-          "updated_at": "2026-10-20T17:16:33Z"
+          "updated_at": "2026-10-20T17:16:33Z",
+          "state": "uploaded"
         },
         {
           "name": "manifest.json",
@@ -10010,7 +10038,8 @@
           "id": 659966493,
           "bytes": 34743,
           "digest": "sha256:74da580b1be4df85674ff2d343492babc110c33aca74588f71de6e2f5a5eac8f",
-          "updated_at": "2026-10-20T17:16:31Z"
+          "updated_at": "2026-10-20T17:16:31Z",
+          "state": "uploaded"
         }
       ],
       "verification": "API metadata only; verify downloaded bytes against custody manifests before use"
@@ -10027,7 +10056,8 @@
           "id": 659937636,
           "bytes": 66619397,
           "digest": "sha256:10d00f015d98e7a73f110bad8f5817f9c13163fcd1bbde3aa82c7a1aff532ab9",
-          "updated_at": "2026-10-20T17:03:14Z"
+          "updated_at": "2026-10-20T17:03:14Z",
+          "state": "uploaded"
         },
         {
           "name": "inventory.json",
@@ -10035,7 +10065,8 @@
           "id": 659937639,
           "bytes": 2148159,
           "digest": "sha256:9973aff73b1581db387639a66f7af699e210dcda9f6bb134c9f1fc07dfa1e255",
-          "updated_at": "2026-10-20T17:03:08Z"
+          "updated_at": "2026-10-20T17:03:08Z",
+          "state": "uploaded"
         },
         {
           "name": "manifest.json",
@@ -10043,7 +10074,8 @@
           "id": 659937638,
           "bytes": 4454503,
           "digest": "sha256:b079458b7607112f05b2a64c3542c35e027e4050ee319bb5df345d42ac046c5d",
-          "updated_at": "2026-10-20T17:03:09Z"
+          "updated_at": "2026-10-20T17:03:09Z",
+          "state": "uploaded"
         }
       ],
       "verification": "API metadata only; verify downloaded bytes against custody manifests before use"
@@ -10060,7 +10092,8 @@
           "id": 662148286,
           "bytes": 4237,
           "digest": "sha256:3e9ad266cb4415519c019d35fc4b16d5faaa9334697c115687f3f27049ca014e",
-          "updated_at": "2026-10-21T10:33:19Z"
+          "updated_at": "2026-10-21T10:33:19Z",
+          "state": "uploaded"
         },
         {
           "name": "cleanup-receipt.json",
@@ -10068,7 +10101,8 @@
           "id": 662153414,
           "bytes": 211868,
           "digest": "sha256:305219c9e5a370445804abac217d39a15597f21b84d1b40d88ff25c8fe087c7d",
-          "updated_at": "2026-10-21T10:35:25Z"
+          "updated_at": "2026-10-21T10:35:25Z",
+          "state": "uploaded"
         },
         {
           "name": "history-custody-safety-tests.xml",
@@ -10076,7 +10110,8 @@
           "id": 662148292,
           "bytes": 809,
           "digest": "sha256:adda7f5be0800d709f74f0dcee3d623b1c970bcdaeff90169439f811332bc597",
-          "updated_at": "2026-10-21T10:33:19Z"
+          "updated_at": "2026-10-21T10:33:19Z",
+          "state": "uploaded"
         },
         {
           "name": "manifest.json",
@@ -10084,7 +10119,8 @@
           "id": 662139708,
           "bytes": 577587,
           "digest": "sha256:7eb1d989590d1fc863f05972d6d04a746bfcc552312fe88427234baeb81f9cf7",
-          "updated_at": "2026-10-21T10:29:49Z"
+          "updated_at": "2026-10-21T10:29:49Z",
+          "state": "uploaded"
         },
         {
           "name": "terminal-history.tar.gz",
@@ -10092,7 +10128,8 @@
           "id": 662139706,
           "bytes": 732551165,
           "digest": "sha256:d2bf607a922f552922ad718a71ebe912b301f734a1d6290f18d3d52fa4cf53fd",
-          "updated_at": "2026-10-21T10:31:19Z"
+          "updated_at": "2026-10-21T10:31:19Z",
+          "state": "uploaded"
         },
         {
           "name": "test_history_custody_safety.py",
@@ -10100,7 +10137,8 @@
           "id": 662148293,
           "bytes": 3410,
           "digest": "sha256:89266e59616243c0180035e78436404a0e5c334a231399d8a92fbc87137af2e6",
-          "updated_at": "2026-10-21T10:33:19Z"
+          "updated_at": "2026-10-21T10:33:19Z",
+          "state": "uploaded"
         },
         {
           "name": "verification.json",
@@ -10108,7 +10146,8 @@
           "id": 662139705,
           "bytes": 441,
           "digest": "sha256:65dfaa457345b73f334e4ab1975aa2d12ce339f49f0cf52c8dfddf23f56cf92d",
-          "updated_at": "2026-10-21T10:29:48Z"
+          "updated_at": "2026-10-21T10:29:48Z",
+          "state": "uploaded"
         },
         {
           "name": "verify_history_custody_v1.py",
@@ -10116,7 +10155,8 @@
           "id": 662148294,
           "bytes": 4915,
           "digest": "sha256:38c6c97ed31fbea089d2daa7dd20fbaa06d5952b0580531f15815157ad04e99d",
-          "updated_at": "2026-10-21T10:33:19Z"
+          "updated_at": "2026-10-21T10:33:19Z",
+          "state": "uploaded"
         }
       ],
       "verification": "API metadata only; verify downloaded bytes against custody manifests before use"
@@ -10133,7 +10173,8 @@
           "id": 662140807,
           "bytes": 165382,
           "digest": "sha256:77a52b18cffae608e82bab8f9e6896d6e609e0bea3739b835083c1ef5732f3b2",
-          "updated_at": "2026-10-21T10:30:12Z"
+          "updated_at": "2026-10-21T10:30:12Z",
+          "state": "uploaded"
         },
         {
           "name": "tp4-goodput-evidence.tar.gz",
@@ -10141,7 +10182,8 @@
           "id": 662141898,
           "bytes": 94280420,
           "digest": "sha256:58e97810b71bfb32c4717c1e590695f6ca6cebb09e1922577e6758c18ce41502",
-          "updated_at": "2026-10-21T10:30:57Z"
+          "updated_at": "2026-10-21T10:30:57Z",
+          "state": "uploaded"
         },
         {
           "name": "verification.json",
@@ -10149,7 +10191,8 @@
           "id": 662144899,
           "bytes": 364,
           "digest": "sha256:f75ab2d5e8963d6b7a35f91840bf7c2729a8211c16caddd62193ca25a2083ec4",
-          "updated_at": "2026-10-21T10:31:44Z"
+          "updated_at": "2026-10-21T10:31:44Z",
+          "state": "uploaded"
         }
       ],
       "verification": "API metadata only; verify downloaded bytes against custody manifests before use"
@@ -10166,7 +10209,8 @@
           "id": 662145460,
           "bytes": 15707721,
           "digest": "sha256:a931a7329ad534f03fb7d05e7845b43125c19637b7daf33b146dd9aeebcfe951",
-          "updated_at": "2026-10-21T10:32:03Z"
+          "updated_at": "2026-10-21T10:32:03Z",
+          "state": "uploaded"
         }
       ],
       "verification": "API metadata only; verify downloaded bytes against custody manifests before use"
@@ -10183,7 +10227,8 @@
           "id": 662132682,
           "bytes": 2662,
           "digest": "sha256:15cbe694ab737376a4e55b09477b0289ccb387ac4183ec813dbe6e2f8e185f8c",
-          "updated_at": "2026-10-21T10:26:40Z"
+          "updated_at": "2026-10-21T10:26:40Z",
+          "state": "uploaded"
         },
         {
           "name": "EXTERNAL_PR_CLEANUP.json",
@@ -10191,7 +10236,8 @@
           "id": 662132965,
           "bytes": 1211,
           "digest": "sha256:4781c19ee3b2ab912f9143dde2f5ae01562b63c2f8d320564f8cdc229f763fbd",
-          "updated_at": "2026-10-21T10:26:49Z"
+          "updated_at": "2026-10-21T10:26:49Z",
+          "state": "uploaded"
         },
         {
           "name": "g0-formal-stop-v2.tar.gz",
@@ -10199,7 +10245,8 @@
           "id": 662133494,
           "bytes": 16033682,
           "digest": "sha256:6474d718f65aeee3824e25897934922672c2a51e92f6c218be6f5b16a7f0ad4a",
-          "updated_at": "2026-10-21T10:27:03Z"
+          "updated_at": "2026-10-21T10:27:03Z",
+          "state": "uploaded"
         },
         {
           "name": "g0_formal_report.json",
@@ -10207,7 +10254,8 @@
           "id": 662134125,
           "bytes": 341630,
           "digest": "sha256:1cc9244ce1b11cc6ae642080f94e419786bee9bfd29b5755a3be1a9b6bf06698",
-          "updated_at": "2026-10-21T10:27:16Z"
+          "updated_at": "2026-10-21T10:27:16Z",
+          "state": "uploaded"
         },
         {
           "name": "g0_formal_report.md",
@@ -10215,7 +10263,8 @@
           "id": 662134436,
           "bytes": 1003,
           "digest": "sha256:7ee0c26105d57c1ff3f7bfd2ca0cccae715791257b9e255a2b88c32a54d4f597",
-          "updated_at": "2026-10-21T10:27:25Z"
+          "updated_at": "2026-10-21T10:27:25Z",
+          "state": "uploaded"
         },
         {
           "name": "g0_pathology.csv",
@@ -10223,7 +10272,8 @@
           "id": 662134756,
           "bytes": 1721,
           "digest": "sha256:8b7153120900fb485d7687c4cac7b830feec2ee54fe5084e1c77cff4ffd23d51",
-          "updated_at": "2026-10-21T10:27:34Z"
+          "updated_at": "2026-10-21T10:27:34Z",
+          "state": "uploaded"
         },
         {
           "name": "g0_pathology.svg",
@@ -10231,7 +10281,8 @@
           "id": 662135104,
           "bytes": 4350,
           "digest": "sha256:0c25aa7bc5c21e161c6433b636203f5894cb5c9b2230c2fb58087ace0a9685c6",
-          "updated_at": "2026-10-21T10:27:42Z"
+          "updated_at": "2026-10-21T10:27:42Z",
+          "state": "uploaded"
         },
         {
           "name": "raw_manifest_v2.json",
@@ -10239,7 +10290,8 @@
           "id": 662135516,
           "bytes": 297064,
           "digest": "sha256:7847e2cbfd12858e09bc0ade41e55dc31219110f33f223e156428ee17781a2a4",
-          "updated_at": "2026-10-21T10:27:52Z"
+          "updated_at": "2026-10-21T10:27:52Z",
+          "state": "uploaded"
         }
       ],
       "verification": "API metadata only; verify downloaded bytes against custody manifests before use"
@@ -10256,7 +10308,8 @@
           "id": 662511130,
           "bytes": 200063,
           "digest": "sha256:32a2bbfe9e0a8a5ce6c307196c6eb54353ede74df7d8b9022bc67293798f7c2a",
-          "updated_at": "2026-10-21T12:55:29Z"
+          "updated_at": "2026-10-21T12:55:29Z",
+          "state": "uploaded"
         },
         {
           "name": "completed-model-r5-reclaim.json",
@@ -10264,7 +10317,8 @@
           "id": 662545371,
           "bytes": 106505,
           "digest": "sha256:cf80b6d6c3d6b45ee54e8bb411069c6a51cbca9a4e2dfb5d307c1ebd69d47504",
-          "updated_at": "2026-10-21T13:08:27Z"
+          "updated_at": "2026-10-21T13:08:27Z",
+          "state": "uploaded"
         },
         {
           "name": "m01-analysis-common-20261021.tar.gz",
@@ -10272,7 +10326,8 @@
           "id": 662557242,
           "bytes": 60263,
           "digest": "sha256:65d0b643e5c48010752ef9db676a838e8a7fb855abec67e4ebc183975ebfa75a",
-          "updated_at": "2026-10-21T13:13:02Z"
+          "updated_at": "2026-10-21T13:13:02Z",
+          "state": "uploaded"
         },
         {
           "name": "m01-completed-model-r5.tar.gz",
@@ -10280,7 +10335,8 @@
           "id": 662511132,
           "bytes": 271000959,
           "digest": "sha256:51edc0bcec3d1e59645f81a9858e41ccc0bcdd7c86c4a4ae2fe70f27ae6a26be",
-          "updated_at": "2026-10-21T12:56:02Z"
+          "updated_at": "2026-10-21T12:56:02Z",
+          "state": "uploaded"
         },
         {
           "name": "m01-model-recovery-r5.tar.gz",
@@ -10288,7 +10344,8 @@
           "id": 662511120,
           "bytes": 842613182,
           "digest": "sha256:c7385bd1b7026b4ff7151a3f0750679815e7c91290c643ebd20c7a137f8d132b",
-          "updated_at": "2026-10-21T12:57:40Z"
+          "updated_at": "2026-10-21T12:57:40Z",
+          "state": "uploaded"
         },
         {
           "name": "model-recovery-archive-r5.json",
@@ -10296,7 +10353,8 @@
           "id": 662511112,
           "bytes": 143792,
           "digest": "sha256:1dcc7e9838c28f73564415abdb1410dbae25caa51003df4f937568e1543ab065",
-          "updated_at": "2026-10-21T12:55:28Z"
+          "updated_at": "2026-10-21T12:55:28Z",
+          "state": "uploaded"
         },
         {
           "name": "recovery-analysis-common-archive.json",
@@ -10304,7 +10362,8 @@
           "id": 662557245,
           "bytes": 10672,
           "digest": "sha256:e2295ee98be5a074ddcc27e491fe02f00a621bb48253123c7b0fa7009bad4a1d",
-          "updated_at": "2026-10-21T13:13:02Z"
+          "updated_at": "2026-10-21T13:13:02Z",
+          "state": "uploaded"
         }
       ],
       "verification": "API metadata only; verify downloaded bytes against custody manifests before use"
@@ -10321,7 +10380,8 @@
           "id": 662910091,
           "bytes": 5610,
           "digest": "sha256:530672c445a4c9ec85688c903180bb4e108eedc2ee4837945228bb8b9e0a9ad8",
-          "updated_at": "2026-10-21T15:18:05Z"
+          "updated_at": "2026-10-21T15:18:05Z",
+          "state": "uploaded"
         },
         {
           "name": "audit_recovery_outputs_r1.py",
@@ -10329,7 +10389,8 @@
           "id": 662683683,
           "bytes": 2162,
           "digest": "sha256:388caf6ff0c325e0abea02d98bcf4a943225a3ca2c7c32b5ff765d571bd5f6e0",
-          "updated_at": "2026-10-21T13:57:15Z"
+          "updated_at": "2026-10-21T13:57:15Z",
+          "state": "uploaded"
         },
         {
           "name": "audit_recovery_request_identity_r1.py",
@@ -10337,7 +10398,8 @@
           "id": 662792316,
           "bytes": 4686,
           "digest": "sha256:2021e1c00c2911b8df68926a3f25647f95805aceaccbbde339969c86d65687ef",
-          "updated_at": "2026-10-21T14:35:20Z"
+          "updated_at": "2026-10-21T14:35:20Z",
+          "state": "uploaded"
         },
         {
           "name": "completed-model-r7-archive.json",
@@ -10345,7 +10407,8 @@
           "id": 662624327,
           "bytes": 242963,
           "digest": "sha256:3ebff75fbf7f39a138b1416851f50199ca17da2fbb06b99a7eab1a61c7ee21c5",
-          "updated_at": "2026-10-21T13:36:13Z"
+          "updated_at": "2026-10-21T13:36:13Z",
+          "state": "uploaded"
         },
         {
           "name": "completed-model-r7-reclaim.json",
@@ -10353,7 +10416,8 @@
           "id": 662640177,
           "bytes": 141055,
           "digest": "sha256:f470d2714cc513b4d4be53fbf07ef7bd171f4d6f3951c9a07d77547593bdc4a5",
-          "updated_at": "2026-10-21T13:41:56Z"
+          "updated_at": "2026-10-21T13:41:56Z",
+          "state": "uploaded"
         },
         {
           "name": "dense-recovery-reference-summary-r1.json",
@@ -10361,7 +10425,8 @@
           "id": 662920350,
           "bytes": 3991,
           "digest": "sha256:e7f01a699a572c5f9e3a458ab0af0cff4080f4e6c6f55d053a76734df5a7855f",
-          "updated_at": "2026-10-21T15:21:43Z"
+          "updated_at": "2026-10-21T15:21:43Z",
+          "state": "uploaded"
         },
         {
           "name": "frontierscience-combination-preflight-20261022.tar.gz",
@@ -10369,7 +10434,8 @@
           "id": 664946614,
           "bytes": 3631,
           "digest": "sha256:922afcba19a4d887e8424e3f012ad49c91e76dce6c6d8e7371e35cfbaca3526a",
-          "updated_at": "2026-10-22T06:45:44Z"
+          "updated_at": "2026-10-22T06:45:44Z",
+          "state": "uploaded"
         },
         {
           "name": "frontierscience-frozen-plans-20261022.tar.gz",
@@ -10377,7 +10443,8 @@
           "id": 665004137,
           "bytes": 9939,
           "digest": "sha256:7ca2c192724b0b0c0c28fa194c19457b26df11c19c6c345ce7b1377da585bee3",
-          "updated_at": "2026-10-22T07:09:43Z"
+          "updated_at": "2026-10-22T07:09:43Z",
+          "state": "uploaded"
         },
         {
           "name": "frontierscience-input-identity-20261022.tar.gz",
@@ -10385,7 +10452,8 @@
           "id": 664957816,
           "bytes": 1419,
           "digest": "sha256:c2aa87f550777a125faf657e4479eb6dc7fd4a7814cab79380f4e81cfb3432b1",
-          "updated_at": "2026-10-22T06:50:49Z"
+          "updated_at": "2026-10-22T06:50:49Z",
+          "state": "uploaded"
         },
         {
           "name": "frontierscience-paired-auditor-r1-20261022.tar.gz",
@@ -10393,7 +10461,8 @@
           "id": 665150317,
           "bytes": 3188,
           "digest": "sha256:bee83d31d78a87bc9241311beefd2b03cb78af6c4b18d86b642403401bd67cb5",
-          "updated_at": "2026-10-22T08:13:55Z"
+          "updated_at": "2026-10-22T08:13:55Z",
+          "state": "uploaded"
         },
         {
           "name": "frontierscience-paired-b1-solver-public-20261022.tar.gz",
@@ -10401,7 +10470,8 @@
           "id": 665520458,
           "bytes": 33636,
           "digest": "sha256:4c7415105605205973e2ea7bdc799680ffd58d68004b997e98ee58c03f47eafe",
-          "updated_at": "2026-10-22T10:38:02Z"
+          "updated_at": "2026-10-22T10:38:02Z",
+          "state": "uploaded"
         },
         {
           "name": "frontierscience-paired-controller-r1-20261022.tar.gz",
@@ -10409,7 +10479,8 @@
           "id": 665099803,
           "bytes": 249825,
           "digest": "sha256:27321622279fb6beb3a661f7fc71871f47ac31ce2bc69cf176780b8308a134bd",
-          "updated_at": "2026-10-22T07:52:50Z"
+          "updated_at": "2026-10-22T07:52:50Z",
+          "state": "uploaded"
         },
         {
           "name": "frontierscience-qualification-public-20261022.tar.gz",
@@ -10417,7 +10488,8 @@
           "id": 665070827,
           "bytes": 17271,
           "digest": "sha256:24eb60b8703bff2e2aae843c03d28a10ebcf79723a97764a83fd76677ae26cd5",
-          "updated_at": "2026-10-22T07:40:35Z"
+          "updated_at": "2026-10-22T07:40:35Z",
+          "state": "uploaded"
         },
         {
           "name": "frontierscience-solver-lengths-20261022.tar.gz",
@@ -10425,7 +10497,8 @@
           "id": 664984258,
           "bytes": 2779,
           "digest": "sha256:b8a095ac684e8e2557a89ed91034f36d32a972dbbd501c7f29dee3bb711b272c",
-          "updated_at": "2026-10-22T07:01:15Z"
+          "updated_at": "2026-10-22T07:01:15Z",
+          "state": "uploaded"
         },
         {
           "name": "inspect_recovery_moe_archive_r1.py",
@@ -10433,7 +10506,8 @@
           "id": 662871847,
           "bytes": 3017,
           "digest": "sha256:bc657b8054136663138e32b10fda7fae144735e1092e61a9580ee90d2a45bbb5",
-          "updated_at": "2026-10-21T15:03:56Z"
+          "updated_at": "2026-10-21T15:03:56Z",
+          "state": "uploaded"
         },
         {
           "name": "inspect_recovery_moe_archive_r2.py",
@@ -10441,7 +10515,8 @@
           "id": 662871848,
           "bytes": 3216,
           "digest": "sha256:36271ba2b3711eab63919fa231131d501c26c394fb24edaf396f470c0c1b59c7",
-          "updated_at": "2026-10-21T15:03:56Z"
+          "updated_at": "2026-10-21T15:03:56Z",
+          "state": "uploaded"
         },
         {
           "name": "long-context-archive-r1.json",
@@ -10449,7 +10524,8 @@
           "id": 663316282,
           "bytes": 50921,
           "digest": "sha256:04da95caac92727865418a61987b6e261d4eece9841506e4c5461bfdd0ecfae3",
-          "updated_at": "2026-10-21T17:46:39Z"
+          "updated_at": "2026-10-21T17:46:39Z",
+          "state": "uploaded"
         },
         {
           "name": "long-context-archive-r2.json",
@@ -10457,7 +10533,8 @@
           "id": 663362229,
           "bytes": 59115,
           "digest": "sha256:6efe31cd0c010e9ea82156f830533322d811da35eb3e2fdc17087bfbc684f476",
-          "updated_at": "2026-10-21T18:05:38Z"
+          "updated_at": "2026-10-21T18:05:38Z",
+          "state": "uploaded"
         },
         {
           "name": "m01-completed-model-r7.tar.gz",
@@ -10465,7 +10542,8 @@
           "id": 662624329,
           "bytes": 381813889,
           "digest": "sha256:c1a29290bcec6659b260d5c22051b1084ff07c2e893e08d242c442fb87a7d3a0",
-          "updated_at": "2026-10-21T13:37:53Z"
+          "updated_at": "2026-10-21T13:37:53Z",
+          "state": "uploaded"
         },
         {
           "name": "m01-dense-reference-recovery-r1-evidence.tar.gz",
@@ -10473,7 +10551,8 @@
           "id": 662920348,
           "bytes": 315129,
           "digest": "sha256:8836c00685b2001b462da0637fe979acc6b53870dcd4f62da974ed2145aeca47",
-          "updated_at": "2026-10-21T15:21:43Z"
+          "updated_at": "2026-10-21T15:21:43Z",
+          "state": "uploaded"
         },
         {
           "name": "m01-event-identity-r2-evidence.tar.gz",
@@ -10481,7 +10560,8 @@
           "id": 664077229,
           "bytes": 2433363,
           "digest": "sha256:b656a1b55e31688363ded2ce8aa544608bb8f5a00bacfdb1d8f3973cce02d3f6",
-          "updated_at": "2026-10-21T23:22:25Z"
+          "updated_at": "2026-10-21T23:22:25Z",
+          "state": "uploaded"
         },
         {
           "name": "m01-fenced-full-model-r1-20261022.tar.gz",
@@ -10489,7 +10569,8 @@
           "id": 664190685,
           "bytes": 446581352,
           "digest": "sha256:f4e8281f3df743e2b907bbb79fbf578fe92ea426f9d3b2dcd9d4d72dc245e214",
-          "updated_at": "2026-10-22T00:27:02Z"
+          "updated_at": "2026-10-22T00:27:02Z",
+          "state": "uploaded"
         },
         {
           "name": "m01-fenced-full-model-r1-audit-20261022.tar.gz",
@@ -10497,7 +10578,8 @@
           "id": 664201466,
           "bytes": 67855,
           "digest": "sha256:d886bdc523870e9b49d7b2517d336deadc71fe1016197019f748022a38b52a49",
-          "updated_at": "2026-10-22T00:30:45Z"
+          "updated_at": "2026-10-22T00:30:45Z",
+          "state": "uploaded"
         },
         {
           "name": "m01-fenced-profiler-ownership-20261022.tar.gz",
@@ -10505,7 +10587,8 @@
           "id": 664259287,
           "bytes": 60151,
           "digest": "sha256:96f5858ad5b7ae4424c48fe430a3229f28cdafe8962a9040ac4775ff9988f1d2",
-          "updated_at": "2026-10-22T00:57:40Z"
+          "updated_at": "2026-10-22T00:57:40Z",
+          "state": "uploaded"
         },
         {
           "name": "m01-fenced-window-prospective-20261021.tar.gz",
@@ -10513,7 +10596,8 @@
           "id": 664126675,
           "bytes": 5551,
           "digest": "sha256:840103fd45a1109b147e03f56d5d9ccbf4c092c78a58e1652f6303dbb5171a85",
-          "updated_at": "2026-10-21T23:49:42Z"
+          "updated_at": "2026-10-21T23:49:42Z",
+          "state": "uploaded"
         },
         {
           "name": "m01-gdn-merge-admission-20261022.tar.gz",
@@ -10521,7 +10605,8 @@
           "id": 664881931,
           "bytes": 4407,
           "digest": "sha256:5f15ce95701f59cd58a3f5390e1c943397cac299606671ee49ab45df968e281e",
-          "updated_at": "2026-10-22T06:18:13Z"
+          "updated_at": "2026-10-22T06:18:13Z",
+          "state": "uploaded"
         },
         {
           "name": "m01-logits-collective-recovery-r1-evidence.tar.gz",
@@ -10529,7 +10614,17 @@
           "id": 663091685,
           "bytes": 2057161,
           "digest": "sha256:54d38454e4e091ce9a3acce38ec2974313e049d0d36e75dcf530cee28019cd40",
-          "updated_at": "2026-10-21T16:21:11Z"
+          "updated_at": "2026-10-21T16:21:11Z",
+          "state": "uploaded"
+        },
+        {
+          "name": "m01-method-v526-review-20261023.tar.gz",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/releases/download/m01-recovery-20261021-r7/m01-method-v526-review-20261023.tar.gz",
+          "id": 667775972,
+          "bytes": 49753,
+          "digest": "sha256:6558ec747c6a89be63201c431fd973de8ca33bcc3465b531ad49098ee8878f1c",
+          "updated_at": "2026-10-23T02:52:55Z",
+          "state": "uploaded"
         },
         {
           "name": "m01-moe-reference-recovery-r1-evidence.tar.gz",
@@ -10537,7 +10632,8 @@
           "id": 662956201,
           "bytes": 20170283,
           "digest": "sha256:2e4a93d7f33e81df43c8e8d67b501242418df60c19b8cce556f192393ba9dd77",
-          "updated_at": "2026-10-21T15:33:25Z"
+          "updated_at": "2026-10-21T15:33:25Z",
+          "state": "uploaded"
         },
         {
           "name": "m01-preprocess-publication-20261021-r3.tar.gz",
@@ -10545,7 +10641,8 @@
           "id": 662826428,
           "bytes": 770681599,
           "digest": "sha256:eed54fe64e9e7bbcec32a0d015c3089b60542733110803430226d5a62ec5b31d",
-          "updated_at": "2026-10-21T14:50:36Z"
+          "updated_at": "2026-10-21T14:50:36Z",
+          "state": "uploaded"
         },
         {
           "name": "m01-quality-b0-recovery-r1-evidence.tar.gz",
@@ -10553,7 +10650,8 @@
           "id": 663463617,
           "bytes": 1527405,
           "digest": "sha256:ebbd8648c60dd6f03ea6e174f9e9a3ccdfe33f1510b3f9dee1c4c2b803e0c922",
-          "updated_at": "2026-10-21T18:46:45Z"
+          "updated_at": "2026-10-21T18:46:45Z",
+          "state": "uploaded"
         },
         {
           "name": "m01-quality-b0-recovery-r2-evidence.tar.gz",
@@ -10561,7 +10659,8 @@
           "id": 663493751,
           "bytes": 1677874,
           "digest": "sha256:92bdfecbac725a64e33e38a42f05119b935c04d340d484a25f8aed4b182e3240",
-          "updated_at": "2026-10-21T18:58:56Z"
+          "updated_at": "2026-10-21T18:58:56Z",
+          "state": "uploaded"
         },
         {
           "name": "m01-quality-b0-recovery-r3-evidence.tar.gz",
@@ -10569,7 +10668,8 @@
           "id": 663576266,
           "bytes": 5210097,
           "digest": "sha256:521be62b5e04c785da178f795f5021ad5de35592c0df6b497cda28ed0ee12a60",
-          "updated_at": "2026-10-21T19:33:35Z"
+          "updated_at": "2026-10-21T19:33:35Z",
+          "state": "uploaded"
         },
         {
           "name": "m01-quality-recovery-r1-evidence.tar.gz",
@@ -10577,7 +10677,8 @@
           "id": 663187304,
           "bytes": 4870212,
           "digest": "sha256:978e7b42a8f7f6a85194321b51697bc329cd5563835ce1129a6adcf2d821a77c",
-          "updated_at": "2026-10-21T16:55:12Z"
+          "updated_at": "2026-10-21T16:55:12Z",
+          "state": "uploaded"
         },
         {
           "name": "m01-r2-dependency-inventory-20261021.tar.gz",
@@ -10585,7 +10686,8 @@
           "id": 664118136,
           "bytes": 5499,
           "digest": "sha256:9c4a2e48e44c903a8026b73dce683d3400b076ed02d18070834c44616d6a5ff4",
-          "updated_at": "2026-10-21T23:44:56Z"
+          "updated_at": "2026-10-21T23:44:56Z",
+          "state": "uploaded"
         },
         {
           "name": "m01-r7-map-reconciliation-20261021.tar.gz",
@@ -10593,7 +10695,8 @@
           "id": 664053896,
           "bytes": 68072,
           "digest": "sha256:1f429404b0a47a080230d8f156200a1dc91c6a568e32c79b853287305b4e62ef",
-          "updated_at": "2026-10-21T23:10:13Z"
+          "updated_at": "2026-10-21T23:10:13Z",
+          "state": "uploaded"
         },
         {
           "name": "m01-r7-trace-capability-20261021.tar.gz",
@@ -10601,7 +10704,8 @@
           "id": 664059918,
           "bytes": 53136,
           "digest": "sha256:4fb900b431f9d00db91d50889da7100c57df7cc031e1f682a24135349e96c2b2",
-          "updated_at": "2026-10-21T23:13:18Z"
+          "updated_at": "2026-10-21T23:13:18Z",
+          "state": "uploaded"
         },
         {
           "name": "m01-trace-qualification-r1-evidence.tar.gz",
@@ -10609,7 +10713,8 @@
           "id": 664068555,
           "bytes": 2361079,
           "digest": "sha256:db117a7a1cc1404307d685aee7a1c096b59e4a003c817fb04e7db3278400d9fc",
-          "updated_at": "2026-10-21T23:17:41Z"
+          "updated_at": "2026-10-21T23:17:41Z",
+          "state": "uploaded"
         },
         {
           "name": "m01-v053-production-browser-20261021.tar.gz",
@@ -10617,7 +10722,8 @@
           "id": 662773903,
           "bytes": 16024673,
           "digest": "sha256:49371a4ea6a84de52fbf71f6d034e44d43b4368ff0f0556a6f802bd9fb7bbabf",
-          "updated_at": "2026-10-21T14:28:50Z"
+          "updated_at": "2026-10-21T14:28:50Z",
+          "state": "uploaded"
         },
         {
           "name": "m01-v053-production-browser-20261021.tar.gz.sha256",
@@ -10625,7 +10731,8 @@
           "id": 662773913,
           "bytes": 110,
           "digest": "sha256:7204305b73369291bc0fc3ba2dd5f2643c8d229173a6e7e88b5c1172732a2223",
-          "updated_at": "2026-10-21T14:28:46Z"
+          "updated_at": "2026-10-21T14:28:46Z",
+          "state": "uploaded"
         },
         {
           "name": "m01-v054-production-browser-20261021.tar.gz",
@@ -10633,7 +10740,8 @@
           "id": 662902652,
           "bytes": 16912222,
           "digest": "sha256:7777b304df8e817a5a6be065d41ce343cdbd1f15f4471a454ae46e8f192ecc6d",
-          "updated_at": "2026-10-21T15:15:19Z"
+          "updated_at": "2026-10-21T15:15:19Z",
+          "state": "uploaded"
         },
         {
           "name": "m01-v055-local-browser-20261021.tar.gz",
@@ -10641,7 +10749,8 @@
           "id": 663036039,
           "bytes": 19065349,
           "digest": "sha256:6d83c1ee9dcdcadd4ce8118cbdc006c2acb82604ae3657fe32a2f1829e352188",
-          "updated_at": "2026-10-21T16:02:40Z"
+          "updated_at": "2026-10-21T16:02:40Z",
+          "state": "uploaded"
         },
         {
           "name": "m01-v055-production-browser-20261021.tar.gz",
@@ -10649,7 +10758,8 @@
           "id": 663036033,
           "bytes": 19064247,
           "digest": "sha256:eb4cfb1eacf226bc1935defa2b35f2d7223dcc16ae916e0e459a0d8e2d9c428c",
-          "updated_at": "2026-10-21T16:02:40Z"
+          "updated_at": "2026-10-21T16:02:40Z",
+          "state": "uploaded"
         },
         {
           "name": "m01-v056-local-browser-20261021.tar.gz",
@@ -10657,7 +10767,8 @@
           "id": 663214337,
           "bytes": 23757785,
           "digest": "sha256:318f79cec8d3417ac646ce7adb527cc249ad108399e3b371a7b5135a344ebfc7",
-          "updated_at": "2026-10-21T17:05:20Z"
+          "updated_at": "2026-10-21T17:05:20Z",
+          "state": "uploaded"
         },
         {
           "name": "m01-v056-production-browser-20261021.tar.gz",
@@ -10665,7 +10776,8 @@
           "id": 663259109,
           "bytes": 23764376,
           "digest": "sha256:0628f157bfe8718e38bd9cc1259f9fcdc43dd9c4218974425e0e54b7ed4678b5",
-          "updated_at": "2026-10-21T17:23:02Z"
+          "updated_at": "2026-10-21T17:23:02Z",
+          "state": "uploaded"
         },
         {
           "name": "m01-v064-production-window-review-20261022.tar.gz",
@@ -10673,7 +10785,8 @@
           "id": 664778951,
           "bytes": 1335347,
           "digest": "sha256:70aff7b32601ab63ebaa522d4ee0136d08a42ade99bf6f5cf5ad6580a76192d7",
-          "updated_at": "2026-10-22T05:26:45Z"
+          "updated_at": "2026-10-22T05:26:45Z",
+          "state": "uploaded"
         },
         {
           "name": "m01-v065-production-request-assessment-20261022.tar.gz",
@@ -10681,7 +10794,8 @@
           "id": 664875202,
           "bytes": 2115152,
           "digest": "sha256:997c468fb134430203187c94612dc5f11704fd559cff889118dfe95749fce635",
-          "updated_at": "2026-10-22T06:15:09Z"
+          "updated_at": "2026-10-22T06:15:09Z",
+          "state": "uploaded"
         },
         {
           "name": "m01-vocab-reference-recovery-r1-evidence.tar.gz",
@@ -10689,7 +10803,8 @@
           "id": 662967351,
           "bytes": 124983,
           "digest": "sha256:f4761f8c6801d2fd3a47972c3e812264d99a75a2295820e3682b6a0f958b1a1f",
-          "updated_at": "2026-10-21T15:37:32Z"
+          "updated_at": "2026-10-21T15:37:32Z",
+          "state": "uploaded"
         },
         {
           "name": "m01-worker-accounting-assessment-20261022.tar.gz",
@@ -10697,7 +10812,8 @@
           "id": 664797309,
           "bytes": 68403,
           "digest": "sha256:aa515aa2a6982ba45cd0de896fe127c710f2ca8ae6d4c87babcfb894171d0e38",
-          "updated_at": "2026-10-22T05:35:54Z"
+          "updated_at": "2026-10-22T05:35:54Z",
+          "state": "uploaded"
         },
         {
           "name": "m01-worker-acquisition-20261022.tar.gz",
@@ -10705,7 +10821,8 @@
           "id": 664303807,
           "bytes": 18068,
           "digest": "sha256:7a8acbd083ed8f1137a7f35856d81f28640394c28981e2ac737242feff703ae5",
-          "updated_at": "2026-10-22T01:20:07Z"
+          "updated_at": "2026-10-22T01:20:07Z",
+          "state": "uploaded"
         },
         {
           "name": "m01-worker-activation-collective-audit-20261022.tar.gz",
@@ -10713,7 +10830,8 @@
           "id": 664517926,
           "bytes": 8281,
           "digest": "sha256:85d3dcc39ab83be69f310f2025522fb464db8e118cfb25a0f6d9635bff8cbcc8",
-          "updated_at": "2026-10-22T03:11:40Z"
+          "updated_at": "2026-10-22T03:11:40Z",
+          "state": "uploaded"
         },
         {
           "name": "m01-worker-aux-reference-20261022.tar.gz",
@@ -10721,7 +10839,8 @@
           "id": 664509049,
           "bytes": 287132,
           "digest": "sha256:8fe5c98f8a6d069cb9000ad8b2f7b3c76b77ee3456f6451d8eca12c88ab03eb5",
-          "updated_at": "2026-10-22T03:06:30Z"
+          "updated_at": "2026-10-22T03:06:30Z",
+          "state": "uploaded"
         },
         {
           "name": "m01-worker-collective-reference-20261022.tar.gz",
@@ -10729,7 +10848,8 @@
           "id": 664530330,
           "bytes": 473390,
           "digest": "sha256:e482d8b1067ae33bf1256c3d14aeb99d94ce6279e55059c72312e1b79caa2da3",
-          "updated_at": "2026-10-22T03:18:23Z"
+          "updated_at": "2026-10-22T03:18:23Z",
+          "state": "uploaded"
         },
         {
           "name": "m01-worker-comm-flit-bound-20261022.tar.gz",
@@ -10737,7 +10857,8 @@
           "id": 664634237,
           "bytes": 5515294,
           "digest": "sha256:42656f499ddb13649517d1e418421aa33b903ef82d77fb8baf670ffb90772d19",
-          "updated_at": "2026-10-22T04:11:01Z"
+          "updated_at": "2026-10-22T04:11:01Z",
+          "state": "uploaded"
         },
         {
           "name": "m01-worker-conv-reference-20261022.tar.gz",
@@ -10745,7 +10866,8 @@
           "id": 664697936,
           "bytes": 3017785,
           "digest": "sha256:1984b963c6d4b0826c7ba73db661e03b928154ddcaaea21955ac34e6d7c77ecb",
-          "updated_at": "2026-10-22T04:44:17Z"
+          "updated_at": "2026-10-22T04:44:17Z",
+          "state": "uploaded"
         },
         {
           "name": "m01-worker-fia-reference-20261022.tar.gz",
@@ -10753,7 +10875,8 @@
           "id": 664462244,
           "bytes": 144682360,
           "digest": "sha256:c346a59c67076adf22a3bb422338a188d241c8c456b38eecba89a8097038825b",
-          "updated_at": "2026-10-22T02:40:50Z"
+          "updated_at": "2026-10-22T02:40:50Z",
+          "state": "uploaded"
         },
         {
           "name": "m01-worker-full-model-r1-20261022.tar.gz",
@@ -10761,7 +10884,8 @@
           "id": 664362862,
           "bytes": 577730185,
           "digest": "sha256:afba33d24d1767a1c7f295b5a99eb54a7dfc7e5b5d8df20a0f3e673cc7189b37",
-          "updated_at": "2026-10-22T01:50:26Z"
+          "updated_at": "2026-10-22T01:50:26Z",
+          "state": "uploaded"
         },
         {
           "name": "m01-worker-full-model-r1-audit-20261022.tar.gz",
@@ -10769,7 +10893,8 @@
           "id": 664379681,
           "bytes": 140039,
           "digest": "sha256:6fd7432b3f3801fc83a78d7bdf28977c7257c906f1845a553771681a3ae760b0",
-          "updated_at": "2026-10-22T01:57:27Z"
+          "updated_at": "2026-10-22T01:57:27Z",
+          "state": "uploaded"
         },
         {
           "name": "m01-worker-gdn-coverage-20261022.tar.gz",
@@ -10777,7 +10902,8 @@
           "id": 664467899,
           "bytes": 5460,
           "digest": "sha256:309e332c082ebb1deed3726888aad313544ab8e58dfb14dfb511ebed3eac57a8",
-          "updated_at": "2026-10-22T02:43:27Z"
+          "updated_at": "2026-10-22T02:43:27Z",
+          "state": "uploaded"
         },
         {
           "name": "m01-worker-gdn-reference-20261022.tar.gz",
@@ -10785,7 +10911,8 @@
           "id": 664478721,
           "bytes": 15787731,
           "digest": "sha256:8c360a3ce43deb23a020cbc36e81a7c8717da5d6e1a601cadc57d8f0a3d862fb",
-          "updated_at": "2026-10-22T02:49:42Z"
+          "updated_at": "2026-10-22T02:49:42Z",
+          "state": "uploaded"
         },
         {
           "name": "m01-worker-hbm-reference-20261022.tar.gz",
@@ -10793,7 +10920,8 @@
           "id": 664711545,
           "bytes": 63549020,
           "digest": "sha256:ec3c93e5a75190b6b30d8101504f22b31b9cac01c8f7080153e1924e6b2e1702",
-          "updated_at": "2026-10-22T04:51:34Z"
+          "updated_at": "2026-10-22T04:51:34Z",
+          "state": "uploaded"
         },
         {
           "name": "m01-worker-hccs-unit-audit-20261022.tar.gz",
@@ -10801,7 +10929,8 @@
           "id": 664538322,
           "bytes": 40783,
           "digest": "sha256:3ce63cb94bb35e44518162b8c170057aaa76125b61d8bf086ee8ebdaf962f99e",
-          "updated_at": "2026-10-22T03:22:30Z"
+          "updated_at": "2026-10-22T03:22:30Z",
+          "state": "uploaded"
         },
         {
           "name": "m01-worker-linear-reference-20261022.tar.gz",
@@ -10809,7 +10938,8 @@
           "id": 664440289,
           "bytes": 470932,
           "digest": "sha256:d0d855665d8cbeb7fe9da8c6b33047ad18bae4f17d0bc98ec33d8725eb62a583",
-          "updated_at": "2026-10-22T02:29:36Z"
+          "updated_at": "2026-10-22T02:29:36Z",
+          "state": "uploaded"
         },
         {
           "name": "m01-worker-moe-reference-20261022.tar.gz",
@@ -10817,7 +10947,8 @@
           "id": 664414762,
           "bytes": 40453095,
           "digest": "sha256:5938b6394a043fcf1fb330dd150b8475b44c152ca03bc8be50c37b0e44ef8ec9",
-          "updated_at": "2026-10-22T02:16:39Z"
+          "updated_at": "2026-10-22T02:16:39Z",
+          "state": "uploaded"
         },
         {
           "name": "m01-worker-only-profile-prospective-20261022.tar.gz",
@@ -10825,7 +10956,8 @@
           "id": 664273766,
           "bytes": 9387,
           "digest": "sha256:29faff9c720ddc8c36ce9c515c72178bc59613f00616e7000568bc96bd00d315",
-          "updated_at": "2026-10-22T01:05:02Z"
+          "updated_at": "2026-10-22T01:05:02Z",
+          "state": "uploaded"
         },
         {
           "name": "m01-worker-r1-accounting-20261022.tar.gz",
@@ -10833,7 +10965,8 @@
           "id": 664396966,
           "bytes": 8042692,
           "digest": "sha256:ddb0a97eaa43a624b83f1f2615b46a0f2410430fe78ab98e0fedac876473149d",
-          "updated_at": "2026-10-22T02:07:01Z"
+          "updated_at": "2026-10-22T02:07:01Z",
+          "state": "uploaded"
         },
         {
           "name": "m01-worker-recurrence-reference-20261022.tar.gz",
@@ -10841,7 +10974,8 @@
           "id": 664650760,
           "bytes": 331248,
           "digest": "sha256:34c34a819689dd2e19c314d143f7507652f2eee3b72329be12867bcb7916135b",
-          "updated_at": "2026-10-22T04:19:46Z"
+          "updated_at": "2026-10-22T04:19:46Z",
+          "state": "uploaded"
         },
         {
           "name": "m01-worker-resource-terms-20261022.tar.gz",
@@ -10849,7 +10983,8 @@
           "id": 664727791,
           "bytes": 1157566,
           "digest": "sha256:0e57723036698d8b3e5885a32b8c5c018c6f15bd07b79d8545bc0c2f65fb6de0",
-          "updated_at": "2026-10-22T05:00:04Z"
+          "updated_at": "2026-10-22T05:00:04Z",
+          "state": "uploaded"
         },
         {
           "name": "m01-worker-wy-reference-20261022.tar.gz",
@@ -10857,7 +10992,8 @@
           "id": 664676071,
           "bytes": 112495,
           "digest": "sha256:46074283f8e9c04dfa08dee3250eb8dea3ae520bf6f10be1add00f8f598af00e",
-          "updated_at": "2026-10-22T04:32:51Z"
+          "updated_at": "2026-10-22T04:32:51Z",
+          "state": "uploaded"
         },
         {
           "name": "m05-current-b1-long-context-r1-evidence.tar.gz",
@@ -10865,7 +11001,8 @@
           "id": 663316287,
           "bytes": 5120348,
           "digest": "sha256:b4fb9c8e738552dc37c65699097dc8c805b1f2e21bff59ec72d3327e1336f9a0",
-          "updated_at": "2026-10-21T17:46:40Z"
+          "updated_at": "2026-10-21T17:46:40Z",
+          "state": "uploaded"
         },
         {
           "name": "m05-current-b1-long-context-r2-evidence.tar.gz",
@@ -10873,7 +11010,8 @@
           "id": 663362228,
           "bytes": 5307651,
           "digest": "sha256:ba4c3815a5fee58a850ef1f5c7437676929564685ea2c85e12dcd2c1becf1f65",
-          "updated_at": "2026-10-21T18:05:39Z"
+          "updated_at": "2026-10-21T18:05:39Z",
+          "state": "uploaded"
         },
         {
           "name": "m05-parser-audit-r1.json",
@@ -10881,7 +11019,8 @@
           "id": 664007802,
           "bytes": 1852,
           "digest": "sha256:a7bef2971143efeee3e011cef20eb979105467987399c6b79d7857e7c5a5e11b",
-          "updated_at": "2026-10-21T22:47:19Z"
+          "updated_at": "2026-10-21T22:47:19Z",
+          "state": "uploaded"
         },
         {
           "name": "m05-parser-plan-r1.tar.gz",
@@ -10889,7 +11028,8 @@
           "id": 663970297,
           "bytes": 5158643,
           "digest": "sha256:90e15334b57a4a66781e5c1ba7e8a1661d800cea9c2a7e38ba428e555b9c223b",
-          "updated_at": "2026-10-21T22:28:10Z"
+          "updated_at": "2026-10-21T22:28:10Z",
+          "state": "uploaded"
         },
         {
           "name": "m05-parser-r1-evidence.tar.gz",
@@ -10897,7 +11037,8 @@
           "id": 664007804,
           "bytes": 5482631,
           "digest": "sha256:01518b2fc78a62b33cf38276cc0f45e84067ef81db15df76a499fd11352f9157",
-          "updated_at": "2026-10-21T22:47:20Z"
+          "updated_at": "2026-10-21T22:47:20Z",
+          "state": "uploaded"
         },
         {
           "name": "m05-v057-local-browser-20261021.tar.gz",
@@ -10905,7 +11046,8 @@
           "id": 663380447,
           "bytes": 24975873,
           "digest": "sha256:03e5caaf0dba3f9af7923e5165278d4a3d5fcf36c54c9981e499975a383f3eca",
-          "updated_at": "2026-10-21T18:13:39Z"
+          "updated_at": "2026-10-21T18:13:39Z",
+          "state": "uploaded"
         },
         {
           "name": "m05-v057-production-browser-20261021.tar.gz",
@@ -10913,7 +11055,8 @@
           "id": 663426997,
           "bytes": 24983483,
           "digest": "sha256:300c567745331a84201ee72c9ef9a35a47753f09f5733cbf3eb2919353ad54df",
-          "updated_at": "2026-10-21T18:32:03Z"
+          "updated_at": "2026-10-21T18:32:03Z",
+          "state": "uploaded"
         },
         {
           "name": "m05-v057-production-table-themes-20261021.tar.gz",
@@ -10921,7 +11064,8 @@
           "id": 663435157,
           "bytes": 2396126,
           "digest": "sha256:e362665059947ed7356bd5bd7a2dd85b44382d86fbac4a9877e789e250a0cf81",
-          "updated_at": "2026-10-21T18:34:48Z"
+          "updated_at": "2026-10-21T18:34:48Z",
+          "state": "uploaded"
         },
         {
           "name": "m06-manager-shutdown-envelope-r1.tar.gz",
@@ -10929,7 +11073,8 @@
           "id": 663677990,
           "bytes": 4705,
           "digest": "sha256:39d275db5338d860bb5db8e82ea25a77c608e10d0920efcebeb8af612e243031",
-          "updated_at": "2026-10-21T20:18:29Z"
+          "updated_at": "2026-10-21T20:18:29Z",
+          "state": "uploaded"
         },
         {
           "name": "m06-pair-admission-amendment-r2.tar.gz",
@@ -10937,7 +11082,8 @@
           "id": 663785306,
           "bytes": 7825,
           "digest": "sha256:ac9b4c90b5be2d788533c1f026f6d8885d11b06e7da463cf0e43ca2f4a24755c",
-          "updated_at": "2026-10-21T21:04:16Z"
+          "updated_at": "2026-10-21T21:04:16Z",
+          "state": "uploaded"
         },
         {
           "name": "m06-pair-b0-r1-evidence.tar.gz",
@@ -10945,7 +11091,8 @@
           "id": 663815507,
           "bytes": 786803,
           "digest": "sha256:8e82bbc6d79d0c3be2177e5d2c6e83b0bb0318282132acda1dd3209a5422e29f",
-          "updated_at": "2026-10-21T21:18:34Z"
+          "updated_at": "2026-10-21T21:18:34Z",
+          "state": "uploaded"
         },
         {
           "name": "m06-pair-b1-r1-evidence.tar.gz",
@@ -10953,7 +11100,8 @@
           "id": 663782538,
           "bytes": 607822,
           "digest": "sha256:49f3d4e401a10e2e119445ced2a0374827dcb07313f57e4b892b2c3c6cc25a9e",
-          "updated_at": "2026-10-21T21:03:04Z"
+          "updated_at": "2026-10-21T21:03:04Z",
+          "state": "uploaded"
         },
         {
           "name": "m06-pair-plan-r1.tar.gz",
@@ -10961,7 +11109,8 @@
           "id": 663731342,
           "bytes": 10632,
           "digest": "sha256:7cce50d2cb41d0860782f36c69455a6ba7b72acb5b286970ed36293834bc7427",
-          "updated_at": "2026-10-21T20:40:39Z"
+          "updated_at": "2026-10-21T20:40:39Z",
+          "state": "uploaded"
         },
         {
           "name": "m06-pair-result-r2.json",
@@ -10969,7 +11118,8 @@
           "id": 663815506,
           "bytes": 3663,
           "digest": "sha256:418d932a5a8ce6b6193f555a6f6fb395005924111e46d404c7bcdfee4ff353aa",
-          "updated_at": "2026-10-21T21:18:33Z"
+          "updated_at": "2026-10-21T21:18:33Z",
+          "state": "uploaded"
         },
         {
           "name": "m06-prechecked-b0-r1-evidence.tar.gz",
@@ -10977,7 +11127,8 @@
           "id": 663909338,
           "bytes": 787974,
           "digest": "sha256:932cdd02ccc2ebc875bd6f1cd0216761f03b44689fb165f60cd6a5eefa6db157",
-          "updated_at": "2026-10-21T21:59:58Z"
+          "updated_at": "2026-10-21T21:59:58Z",
+          "state": "uploaded"
         },
         {
           "name": "m06-prechecked-b1-r1-evidence.tar.gz",
@@ -10985,7 +11136,8 @@
           "id": 663872323,
           "bytes": 611151,
           "digest": "sha256:26b26323143c3f93505de345cd07362e5fe5367e455e114cd790d4f8a35e7f48",
-          "updated_at": "2026-10-21T21:43:25Z"
+          "updated_at": "2026-10-21T21:43:25Z",
+          "state": "uploaded"
         },
         {
           "name": "m06-prechecked-pair-plan-r1.tar.gz",
@@ -10993,7 +11145,8 @@
           "id": 663824923,
           "bytes": 32909,
           "digest": "sha256:e8ac065727340316baca146ecc0dc379ae2a89bb9978603c5621095637ba9ef0",
-          "updated_at": "2026-10-21T21:22:14Z"
+          "updated_at": "2026-10-21T21:22:14Z",
+          "state": "uploaded"
         },
         {
           "name": "m06-prechecked-pair-result-r1.json",
@@ -11001,7 +11154,8 @@
           "id": 663909339,
           "bytes": 2879,
           "digest": "sha256:3d9feb32f97d81a0f5c8a530cf87d950d719daea58ed72f1db91567a9bcf9c87",
-          "updated_at": "2026-10-21T21:59:57Z"
+          "updated_at": "2026-10-21T21:59:57Z",
+          "state": "uploaded"
         },
         {
           "name": "m06-shutdown-b0-r1-evidence.tar.gz",
@@ -11009,7 +11163,8 @@
           "id": 663672732,
           "bytes": 143574,
           "digest": "sha256:1cf216831d2b0e6fa6ed12a8553bfa15a6869d568fa64b76a40ed81b9c020482",
-          "updated_at": "2026-10-21T20:16:14Z"
+          "updated_at": "2026-10-21T20:16:14Z",
+          "state": "uploaded"
         },
         {
           "name": "m06-shutdown-b1-r1-evidence.tar.gz",
@@ -11017,7 +11172,8 @@
           "id": 663725055,
           "bytes": 120301,
           "digest": "sha256:f7804954665feb5fb72f1748a9d11f2ed59b6cece8dd1be4e47c6ec05265a510",
-          "updated_at": "2026-10-21T20:37:52Z"
+          "updated_at": "2026-10-21T20:37:52Z",
+          "state": "uploaded"
         },
         {
           "name": "m06-shutdown-boundary-audit-20261021.tar.gz",
@@ -11025,7 +11181,8 @@
           "id": 663644139,
           "bytes": 2374,
           "digest": "sha256:df7ae531a4abc9ccf73d68ee00afe403c89a59e1c1cdd630189811943bd76f8c",
-          "updated_at": "2026-10-21T20:03:26Z"
+          "updated_at": "2026-10-21T20:03:26Z",
+          "state": "uploaded"
         },
         {
           "name": "midterm-v058-local-browser-20261021.tar.gz",
@@ -11033,7 +11190,8 @@
           "id": 663598078,
           "bytes": 28954389,
           "digest": "sha256:fe3d6aab5558424c6ad43dff4fe9fd6a113071f50d74ca90cb4b02fdb5678c36",
-          "updated_at": "2026-10-21T19:43:18Z"
+          "updated_at": "2026-10-21T19:43:18Z",
+          "state": "uploaded"
         },
         {
           "name": "midterm-v058-production-browser-20261021.tar.gz",
@@ -11041,7 +11199,8 @@
           "id": 663628489,
           "bytes": 28955010,
           "digest": "sha256:a35f4522b05b2cd79ff5b8276b98696327a7d7be289213cd5fe9f950fb72d713",
-          "updated_at": "2026-10-21T19:56:40Z"
+          "updated_at": "2026-10-21T19:56:40Z",
+          "state": "uploaded"
         },
         {
           "name": "midterm-v059-local-browser-20261021.tar.gz",
@@ -11049,7 +11208,8 @@
           "id": 663935713,
           "bytes": 29762393,
           "digest": "sha256:f5f70e6a344455e70cb5b12b7e8531b5d477da61b176abaff7064f3624a8acbc",
-          "updated_at": "2026-10-21T22:11:51Z"
+          "updated_at": "2026-10-21T22:11:51Z",
+          "state": "uploaded"
         },
         {
           "name": "midterm-v059-production-browser-20261021.tar.gz",
@@ -11057,7 +11217,8 @@
           "id": 663961211,
           "bytes": 29771141,
           "digest": "sha256:1d4c31c9eb8b721253f9ede92288e8679a2edf229431ff8073ed908a03bf4a7a",
-          "updated_at": "2026-10-21T22:23:35Z"
+          "updated_at": "2026-10-21T22:23:35Z",
+          "state": "uploaded"
         },
         {
           "name": "midterm-v060-local-browser-20261021.tar.gz",
@@ -11065,7 +11226,8 @@
           "id": 664021701,
           "bytes": 31366759,
           "digest": "sha256:c10d4a0a55012646bba12c66f2d21a33b939b766c9b721515240159166924b0c",
-          "updated_at": "2026-10-21T22:54:23Z"
+          "updated_at": "2026-10-21T22:54:23Z",
+          "state": "uploaded"
         },
         {
           "name": "midterm-v060-production-browser-20261021.tar.gz",
@@ -11073,7 +11235,8 @@
           "id": 664045461,
           "bytes": 31400966,
           "digest": "sha256:bd6951b8b294f0b17499f49fcc151c773acb1eb48ebf3b3c105e97b5a4f9d652",
-          "updated_at": "2026-10-21T23:06:23Z"
+          "updated_at": "2026-10-21T23:06:23Z",
+          "state": "uploaded"
         },
         {
           "name": "midterm-v061-production-browser-20261021.tar.gz",
@@ -11081,7 +11244,8 @@
           "id": 664113625,
           "bytes": 32723753,
           "digest": "sha256:b8c5d05c6c36a6c609de0b5a367d7bba01e38209504adc2d0d09cb2bee4d237e",
-          "updated_at": "2026-10-21T23:41:59Z"
+          "updated_at": "2026-10-21T23:41:59Z",
+          "state": "uploaded"
         },
         {
           "name": "midterm-v062-production-browser-20261022.tar.gz",
@@ -11089,7 +11253,8 @@
           "id": 664250905,
           "bytes": 36866681,
           "digest": "sha256:4aa4d733be7a08beae690af2412bc711a03fef8d4055af153611f7bd0b7b383e",
-          "updated_at": "2026-10-22T00:54:13Z"
+          "updated_at": "2026-10-22T00:54:13Z",
+          "state": "uploaded"
         },
         {
           "name": "midterm-v063-production-browser-20261022.tar.gz",
@@ -11097,7 +11262,8 @@
           "id": 664601052,
           "bytes": 3463629,
           "digest": "sha256:51edf36fbe3f138173f8be704c1b95a240568f99141448d7950b5673471c6dec",
-          "updated_at": "2026-10-22T03:53:54Z"
+          "updated_at": "2026-10-22T03:53:54Z",
+          "state": "uploaded"
         },
         {
           "name": "midterm-v066-production-20261022.tar.gz",
@@ -11105,7 +11271,53 @@
           "id": 664985495,
           "bytes": 1258653,
           "digest": "sha256:a80f440a81afb3e937aee419d54d4ebb2f3c1488284f0ef6283e92b3c7ee45c2",
-          "updated_at": "2026-10-22T07:01:46Z"
+          "updated_at": "2026-10-22T07:01:46Z",
+          "state": "uploaded"
+        },
+        {
+          "name": "midterm-v067-production-browser-20261022.tar.gz",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/releases/download/m01-recovery-20261021-r7/midterm-v067-production-browser-20261022.tar.gz",
+          "id": 666469155,
+          "bytes": 41834382,
+          "digest": "sha256:36cc33e0238b61acfeab39857317f122b5d1e3466dbaa7dbcd5a1450d7d936c3",
+          "updated_at": "2026-10-22T16:51:42Z",
+          "state": "uploaded"
+        },
+        {
+          "name": "midterm-v068-production-browser-20261022.tar.gz",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/releases/download/m01-recovery-20261021-r7/midterm-v068-production-browser-20261022.tar.gz",
+          "id": 666750021,
+          "bytes": 41743171,
+          "digest": null,
+          "updated_at": "2026-10-22T18:45:57Z",
+          "state": "starter"
+        },
+        {
+          "name": "midterm-v068-production-selected-20261022.tar.gz",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/releases/download/m01-recovery-20261021-r7/midterm-v068-production-selected-20261022.tar.gz",
+          "id": 666753933,
+          "bytes": 1232807,
+          "digest": "sha256:3147d9373b1e78984a6b24934415f4f136214937c78cf70d7ff38d78c568cf31",
+          "updated_at": "2026-10-22T18:47:32Z",
+          "state": "uploaded"
+        },
+        {
+          "name": "midterm-v069-production-selected-20261022.tar.gz",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/releases/download/m01-recovery-20261021-r7/midterm-v069-production-selected-20261022.tar.gz",
+          "id": 667040737,
+          "bytes": 1224227,
+          "digest": "sha256:7307137cbf9c43c7a72459391b68e203d7c3e492860b94aee9d30312184a414b",
+          "updated_at": "2026-10-22T20:45:03Z",
+          "state": "uploaded"
+        },
+        {
+          "name": "midterm-v070-production-selected-20261022.tar.gz",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/releases/download/m01-recovery-20261021-r7/midterm-v070-production-selected-20261022.tar.gz",
+          "id": 667257885,
+          "bytes": 208883,
+          "digest": "sha256:1152c02c316d67a982c4b3266844eb896e17108aec2757405b1b1c6e46f38f15",
+          "updated_at": "2026-10-22T22:23:54Z",
+          "state": "uploaded"
         },
         {
           "name": "mmlu-subset-production-20261022.tar.gz",
@@ -11113,7 +11325,8 @@
           "id": 664924319,
           "bytes": 1152504,
           "digest": "sha256:5c87370590dfd30962b6c1c401f1599d6e74a13b127fe4faa72254525ea1fa92",
-          "updated_at": "2026-10-22T06:37:25Z"
+          "updated_at": "2026-10-22T06:37:25Z",
+          "state": "uploaded"
         },
         {
           "name": "moe-recovery-reference-summary-r1.json",
@@ -11121,7 +11334,8 @@
           "id": 662956210,
           "bytes": 5589,
           "digest": "sha256:bd47c999c42eb0f3246224b4de444fc19c007845f15df317dcae1f01af6fa1a5",
-          "updated_at": "2026-10-21T15:33:23Z"
+          "updated_at": "2026-10-21T15:33:23Z",
+          "state": "uploaded"
         },
         {
           "name": "preprocess-publication-archive-r3.json",
@@ -11129,7 +11343,8 @@
           "id": 662826421,
           "bytes": 20436,
           "digest": "sha256:ab2fdbaa6249f81857da8eba84a86c624d41c7dc5603748143b54a9c8703b48d",
-          "updated_at": "2026-10-21T14:47:59Z"
+          "updated_at": "2026-10-21T14:47:59Z",
+          "state": "uploaded"
         },
         {
           "name": "production-v053-verification-20261021.json",
@@ -11137,7 +11352,8 @@
           "id": 662773915,
           "bytes": 1088,
           "digest": "sha256:7835fad4a3d1fe949e0cadbabd9958eebbec8daf4e5cc63507234ec611de5e58",
-          "updated_at": "2026-10-21T14:28:46Z"
+          "updated_at": "2026-10-21T14:28:46Z",
+          "state": "uploaded"
         },
         {
           "name": "quality-b0-recovery-archive-r1.json",
@@ -11145,7 +11361,8 @@
           "id": 663463619,
           "bytes": 50023,
           "digest": "sha256:03e9b4aa72d8aeded47f147960049df46afbcd853bb04c6ad4c7ce2e6b8310e0",
-          "updated_at": "2026-10-21T18:46:45Z"
+          "updated_at": "2026-10-21T18:46:45Z",
+          "state": "uploaded"
         },
         {
           "name": "quality-b0-recovery-archive-r2.json",
@@ -11153,7 +11370,8 @@
           "id": 663493752,
           "bytes": 93892,
           "digest": "sha256:344ba93c4cdbe8bb4be17915a2c69f216d6f09d7512aaa2120ebcedf2e71f996",
-          "updated_at": "2026-10-21T18:58:56Z"
+          "updated_at": "2026-10-21T18:58:56Z",
+          "state": "uploaded"
         },
         {
           "name": "quality-b0-recovery-archive-r3.json",
@@ -11161,7 +11379,8 @@
           "id": 663576277,
           "bytes": 129091,
           "digest": "sha256:581ad44eded68b21a783ef2929e062e7647e29a0ffb801c428cc06fd554ebcb6",
-          "updated_at": "2026-10-21T19:33:34Z"
+          "updated_at": "2026-10-21T19:33:34Z",
+          "state": "uploaded"
         },
         {
           "name": "quality-recovery-archive-r1.json",
@@ -11169,7 +11388,8 @@
           "id": 663187311,
           "bytes": 125118,
           "digest": "sha256:4493e83fe3a60792f7823cad409207fc8566d4ec175fef77cbaba1970c5dfe4d",
-          "updated_at": "2026-10-21T16:55:11Z"
+          "updated_at": "2026-10-21T16:55:11Z",
+          "state": "uploaded"
         },
         {
           "name": "recovery-dense-coverage-r1.json",
@@ -11177,7 +11397,8 @@
           "id": 662910093,
           "bytes": 39242,
           "digest": "sha256:a14f601149101f521b586bc071800a05c54aa349381936d81455a6ab06b7b932",
-          "updated_at": "2026-10-21T15:18:05Z"
+          "updated_at": "2026-10-21T15:18:05Z",
+          "state": "uploaded"
         },
         {
           "name": "recovery-dense-coverage-tests-r1.xml",
@@ -11185,7 +11406,8 @@
           "id": 662910092,
           "bytes": 641,
           "digest": "sha256:7e74487cf374dfa0d656558632d0d9863112c497844f5f3ab42ff515cb58b4b7",
-          "updated_at": "2026-10-21T15:18:05Z"
+          "updated_at": "2026-10-21T15:18:05Z",
+          "state": "uploaded"
         },
         {
           "name": "recovery-logits-collective-archive-r1.json",
@@ -11193,7 +11415,8 @@
           "id": 663091687,
           "bytes": 10434,
           "digest": "sha256:94461142f3ddb38b2c030d5be6f46d549e57f7dc6e85b9981766f5b2a6c2dea3",
-          "updated_at": "2026-10-21T16:21:10Z"
+          "updated_at": "2026-10-21T16:21:10Z",
+          "state": "uploaded"
         },
         {
           "name": "recovery-moe-retained-counts-r1.json",
@@ -11201,7 +11424,8 @@
           "id": 662871864,
           "bytes": 41417,
           "digest": "sha256:d9cca87ed0c92b54871261b533ce8f7156cf5be8232d911a06eff24aa014b0e4",
-          "updated_at": "2026-10-21T15:03:57Z"
+          "updated_at": "2026-10-21T15:03:57Z",
+          "state": "uploaded"
         },
         {
           "name": "recovery-moe-retained-counts-r2.json",
@@ -11209,7 +11433,8 @@
           "id": 662871900,
           "bytes": 75222,
           "digest": "sha256:23af04857340cf6af5620f90fa95c0efdd490e6a61e76f458cf5004adb98c97a",
-          "updated_at": "2026-10-21T15:03:57Z"
+          "updated_at": "2026-10-21T15:03:57Z",
+          "state": "uploaded"
         },
         {
           "name": "recovery-output-comparison-r1.json",
@@ -11217,7 +11442,8 @@
           "id": 662683684,
           "bytes": 67278,
           "digest": "sha256:195aa6fe4b05838da638eb6a1047ee981ac97ca512647e9bded9b716eebbceca",
-          "updated_at": "2026-10-21T13:57:15Z"
+          "updated_at": "2026-10-21T13:57:15Z",
+          "state": "uploaded"
         },
         {
           "name": "recovery-request-identity-r1.json",
@@ -11225,7 +11451,8 @@
           "id": 662792318,
           "bytes": 95295,
           "digest": "sha256:a8e66387f8b920393db076805b4cad388754fa1ad45f85e8877a7f52c5f23101",
-          "updated_at": "2026-10-21T14:35:20Z"
+          "updated_at": "2026-10-21T14:35:20Z",
+          "state": "uploaded"
         },
         {
           "name": "recovery_moe_frame_alignment.py",
@@ -11233,7 +11460,8 @@
           "id": 662871853,
           "bytes": 2088,
           "digest": "sha256:5bde3482b94ca96fcb1e2a91c0c6ce0b817bc4f7b96989e3c1a3a09c31bcd0c5",
-          "updated_at": "2026-10-21T15:03:56Z"
+          "updated_at": "2026-10-21T15:03:56Z",
+          "state": "uploaded"
         },
         {
           "name": "test_recovery_dense_coverage_r1.py",
@@ -11241,7 +11469,8 @@
           "id": 662910089,
           "bytes": 2056,
           "digest": "sha256:4886bd281ebafb265fd9af74d1faf4767d18030f6d0900ba558b9912e9c4e5e5",
-          "updated_at": "2026-10-21T15:18:05Z"
+          "updated_at": "2026-10-21T15:18:05Z",
+          "state": "uploaded"
         },
         {
           "name": "test_recovery_moe_frame_alignment.py",
@@ -11249,7 +11478,8 @@
           "id": 662871845,
           "bytes": 1225,
           "digest": "sha256:a8c897c78cfea038b6569f34e977c84120ba53af8f17008a0c27ac4698830a9a",
-          "updated_at": "2026-10-21T15:03:56Z"
+          "updated_at": "2026-10-21T15:03:56Z",
+          "state": "uploaded"
         },
         {
           "name": "test_recovery_request_identity_r1.py",
@@ -11257,7 +11487,8 @@
           "id": 662792317,
           "bytes": 977,
           "digest": "sha256:fd8f978a56614c00da150614d2831f10d9743ddcb9e462ebba6e978638ac7b2d",
-          "updated_at": "2026-10-21T14:35:20Z"
+          "updated_at": "2026-10-21T14:35:20Z",
+          "state": "uploaded"
         },
         {
           "name": "verify_and_reclaim_model_r7.py",
@@ -11265,7 +11496,8 @@
           "id": 662640181,
           "bytes": 3471,
           "digest": "sha256:c96ca4da728f899a158cd67491646a82b8b7abd939084e67c92d95606efdd85e",
-          "updated_at": "2026-10-21T13:41:56Z"
+          "updated_at": "2026-10-21T13:41:56Z",
+          "state": "uploaded"
         },
         {
           "name": "vocab-recovery-reference-summary-r1.json",
@@ -11273,7 +11505,8 @@
           "id": 662967348,
           "bytes": 4113,
           "digest": "sha256:9e53d616c7c7292bc1fc18a8f7bc79037ce1a4733854b668e78946175fe83eee",
-          "updated_at": "2026-10-21T15:37:32Z"
+          "updated_at": "2026-10-21T15:37:32Z",
+          "state": "uploaded"
         }
       ],
       "verification": "API metadata only; verify downloaded bytes against custody manifests before use"
@@ -11290,7 +11523,8 @@
           "id": 662136065,
           "bytes": 10767560,
           "digest": "sha256:56803f152b19e7f30aba6195bacba25eb2adb1de9db9e42369752ccb9fae37c4",
-          "updated_at": "2026-10-21T10:28:07Z"
+          "updated_at": "2026-10-21T10:28:07Z",
+          "state": "uploaded"
         }
       ],
       "verification": "API metadata only; verify downloaded bytes against custody manifests before use"
@@ -11307,7 +11541,8 @@
           "id": 659685501,
           "bytes": 665,
           "digest": "sha256:6051f430b19febc86ef25f55bbae6ea135fc99f258bba3d098b69ca318c276d6",
-          "updated_at": "2026-10-20T15:21:31Z"
+          "updated_at": "2026-10-20T15:21:31Z",
+          "state": "uploaded"
         },
         {
           "name": "SHA256SUMS.inputs",
@@ -11315,7 +11550,8 @@
           "id": 659685614,
           "bytes": 1469,
           "digest": "sha256:457a145f0d9e6a7c06bcc9fddf6d3dc4468aa019d92ce88a954fae3db7c129b4",
-          "updated_at": "2026-10-20T15:21:34Z"
+          "updated_at": "2026-10-20T15:21:34Z",
+          "state": "uploaded"
         },
         {
           "name": "dev-hub-head.txt",
@@ -11323,7 +11559,8 @@
           "id": 659683853,
           "bytes": 41,
           "digest": "sha256:6954e9f9b85fa90a4f974e921a04b389a771e2e16e2d68ec8420ae89d5269726",
-          "updated_at": "2026-10-20T15:20:50Z"
+          "updated_at": "2026-10-20T15:20:50Z",
+          "state": "uploaded"
         },
         {
           "name": "dev-hub-status.txt",
@@ -11331,7 +11568,8 @@
           "id": 659684011,
           "bytes": 6,
           "digest": "sha256:2e22da2ab13713309ac75219e525b8e06ed02f3f1963b8feef203fa25827f93d",
-          "updated_at": "2026-10-20T15:20:53Z"
+          "updated_at": "2026-10-20T15:20:53Z",
+          "state": "uploaded"
         },
         {
           "name": "npu-after-server-restart.txt",
@@ -11339,7 +11577,8 @@
           "id": 659684135,
           "bytes": 2871,
           "digest": "sha256:235c7fd166d44e119d2980051f8ec1d23e849e684d4e62bbe5a39702beebc231",
-          "updated_at": "2026-10-20T15:20:56Z"
+          "updated_at": "2026-10-20T15:20:56Z",
+          "state": "uploaded"
         },
         {
           "name": "npu-before-attempt3.txt",
@@ -11347,7 +11586,8 @@
           "id": 659684256,
           "bytes": 2871,
           "digest": "sha256:3fa7b50fc8e11add291282ceab6bac54286211f99470b70848b6db7ef3462bb9",
-          "updated_at": "2026-10-20T15:20:59Z"
+          "updated_at": "2026-10-20T15:20:59Z",
+          "state": "uploaded"
         },
         {
           "name": "npu-before-server-restart.txt",
@@ -11355,7 +11595,8 @@
           "id": 659684392,
           "bytes": 2871,
           "digest": "sha256:41b7bdd28a7c0230798f4538cd5ad8795dc17be21a0361de0237db757b083752",
-          "updated_at": "2026-10-20T15:21:02Z"
+          "updated_at": "2026-10-20T15:21:02Z",
+          "state": "uploaded"
         },
         {
           "name": "reference-separation-preflight.txt",
@@ -11363,7 +11604,8 @@
           "id": 659684542,
           "bytes": 232,
           "digest": "sha256:b49c91f63e87a0e89347f4839f722e34b3ce8334bf84d9841e77245c63563dd6",
-          "updated_at": "2026-10-20T15:21:05Z"
+          "updated_at": "2026-10-20T15:21:05Z",
+          "state": "uploaded"
         },
         {
           "name": "reused-server-processes.txt",
@@ -11371,7 +11613,8 @@
           "id": 659684671,
           "bytes": 3532,
           "digest": "sha256:8397db1be3c21df94999b550145345d6404694bc1b696478a1723143fcc0cc7e",
-          "updated_at": "2026-10-20T15:21:07Z"
+          "updated_at": "2026-10-20T15:21:07Z",
+          "state": "uploaded"
         },
         {
           "name": "run_szyn_swebench_collection.py",
@@ -11379,7 +11622,8 @@
           "id": 659684809,
           "bytes": 19448,
           "digest": "sha256:2604fb638cbc9552a0c9ec90f3664f75212b06e87fecc4fc594d8e467673418f",
-          "updated_at": "2026-10-20T15:21:10Z"
+          "updated_at": "2026-10-20T15:21:10Z",
+          "state": "uploaded"
         },
         {
           "name": "run_szyn_swebench_grading.py",
@@ -11387,7 +11631,8 @@
           "id": 659684911,
           "bytes": 33232,
           "digest": "sha256:205a7a2b54977808dc2f8b2db3c31c7dd28e241b155541daf68e56f476962ba6",
-          "updated_at": "2026-10-20T15:21:14Z"
+          "updated_at": "2026-10-20T15:21:14Z",
+          "state": "uploaded"
         },
         {
           "name": "server-health-after-restart.txt",
@@ -11395,7 +11640,8 @@
           "id": 659685050,
           "bytes": 8,
           "digest": "sha256:63745aef95742025c6d7a1b4fc0e7107e6f3c3eb2e0cb290f33c46f176e6740d",
-          "updated_at": "2026-10-20T15:21:17Z"
+          "updated_at": "2026-10-20T15:21:17Z",
+          "state": "uploaded"
         },
         {
           "name": "server-health-before-attempt3.txt",
@@ -11403,7 +11649,8 @@
           "id": 659685147,
           "bytes": 8,
           "digest": "sha256:63745aef95742025c6d7a1b4fc0e7107e6f3c3eb2e0cb290f33c46f176e6740d",
-          "updated_at": "2026-10-20T15:21:19Z"
+          "updated_at": "2026-10-20T15:21:19Z",
+          "state": "uploaded"
         },
         {
           "name": "server-models-after-restart.json",
@@ -11411,7 +11658,8 @@
           "id": 659685232,
           "bytes": 514,
           "digest": "sha256:1cc2a91584cf02904f7d6dd361a13df45998f4d2b24b1bb175667f5f45d5972d",
-          "updated_at": "2026-10-20T15:21:22Z"
+          "updated_at": "2026-10-20T15:21:22Z",
+          "state": "uploaded"
         },
         {
           "name": "server-models-before-attempt3.json",
@@ -11419,7 +11667,8 @@
           "id": 659685321,
           "bytes": 514,
           "digest": "sha256:7f420e29e7c42e8eebdc5523e08dbc7c639015ee25174ced43c6cd968dd165b7",
-          "updated_at": "2026-10-20T15:21:25Z"
+          "updated_at": "2026-10-20T15:21:25Z",
+          "state": "uploaded"
         },
         {
           "name": "server-processes-after-restart.txt",
@@ -11427,7 +11676,8 @@
           "id": 659685401,
           "bytes": 4127,
           "digest": "sha256:47831886ddf7514734f2e73a15e6a5f4590e2d2d781f732ed74c392e3621ac31",
-          "updated_at": "2026-10-20T15:21:28Z"
+          "updated_at": "2026-10-20T15:21:28Z",
+          "state": "uploaded"
         },
         {
           "name": "summarize_szyn_swebench_results.py",
@@ -11435,7 +11685,8 @@
           "id": 659685738,
           "bytes": 9527,
           "digest": "sha256:243336865efb119a2658c159f59be162a2aea2663d358068dccf04547052be56",
-          "updated_at": "2026-10-20T15:21:37Z"
+          "updated_at": "2026-10-20T15:21:37Z",
+          "state": "uploaded"
         },
         {
           "name": "szyn-attempt3-500-adjudication-addendum.tar.gz",
@@ -11443,7 +11694,8 @@
           "id": 659685869,
           "bytes": 801839,
           "digest": "sha256:0cd8a2013dced4c9b05895ff893240e398a2fc4c124beb97a53eeb9360532ef1",
-          "updated_at": "2026-10-20T15:21:40Z"
+          "updated_at": "2026-10-20T15:21:40Z",
+          "state": "uploaded"
         },
         {
           "name": "szyn-attempt3-500-adjudication-addendum.tar.gz.sha256",
@@ -11451,7 +11703,8 @@
           "id": 659686035,
           "bytes": 113,
           "digest": "sha256:126ccde262dd0b16a0b386afdb5513179c6895ca2e9c51bad72af6082c05fd1f",
-          "updated_at": "2026-10-20T15:21:43Z"
+          "updated_at": "2026-10-20T15:21:43Z",
+          "state": "uploaded"
         },
         {
           "name": "szyn-attempt3-terminal-0001-0025.tar.gz",
@@ -11459,7 +11712,8 @@
           "id": 659686158,
           "bytes": 2842722,
           "digest": "sha256:f578b664f6ba4147c9a47bb90c46024b6e79672706301cb44538e638f1e3f706",
-          "updated_at": "2026-10-20T15:21:46Z"
+          "updated_at": "2026-10-20T15:21:46Z",
+          "state": "uploaded"
         },
         {
           "name": "szyn-attempt3-terminal-0001-0025.tar.gz.sha256",
@@ -11467,7 +11721,8 @@
           "id": 659686363,
           "bytes": 106,
           "digest": "sha256:f43753eb26cee33cd7a336af0945480e8cfacfaa717814b470703b27a8f0a975",
-          "updated_at": "2026-10-20T15:21:49Z"
+          "updated_at": "2026-10-20T15:21:49Z",
+          "state": "uploaded"
         },
         {
           "name": "szyn-attempt3-terminal-0026-0050.tar.gz",
@@ -11475,7 +11730,8 @@
           "id": 659686462,
           "bytes": 10153169,
           "digest": "sha256:3a10a00bcd584288f58ed27fe89e36a409bae4dc14d66253e5cdddf5dcb33f0a",
-          "updated_at": "2026-10-20T15:21:55Z"
+          "updated_at": "2026-10-20T15:21:55Z",
+          "state": "uploaded"
         },
         {
           "name": "szyn-attempt3-terminal-0026-0050.tar.gz.sha256",
@@ -11483,7 +11739,8 @@
           "id": 659686697,
           "bytes": 106,
           "digest": "sha256:ca71e62a177bea36212c5c6400678f2ce397f3104b490011004e9f50d1733d80",
-          "updated_at": "2026-10-20T15:21:58Z"
+          "updated_at": "2026-10-20T15:21:58Z",
+          "state": "uploaded"
         },
         {
           "name": "szyn-attempt3-terminal-0051-0075.tar.gz",
@@ -11491,7 +11748,8 @@
           "id": 659686831,
           "bytes": 22310945,
           "digest": "sha256:b1d4504d0867eb801f3472d5ba1c54013fe4281690e2d060f7a98dfd481145a3",
-          "updated_at": "2026-10-20T15:22:06Z"
+          "updated_at": "2026-10-20T15:22:06Z",
+          "state": "uploaded"
         },
         {
           "name": "szyn-attempt3-terminal-0051-0075.tar.gz.sha256",
@@ -11499,7 +11757,8 @@
           "id": 659687255,
           "bytes": 106,
           "digest": "sha256:6aeb17ea2e316d078eb97d2ec08bb1035eaf9c1d4f73c7a52e1ee4a7c8c2ac6e",
-          "updated_at": "2026-10-20T15:22:09Z"
+          "updated_at": "2026-10-20T15:22:09Z",
+          "state": "uploaded"
         },
         {
           "name": "szyn-attempt3-terminal-0076-0100.tar.gz",
@@ -11507,7 +11766,8 @@
           "id": 659687424,
           "bytes": 91782485,
           "digest": "sha256:a48d9c9673ca5701a8abceeea97ac199ba4fa70d40de0abb9788c0a35b2873fe",
-          "updated_at": "2026-10-20T15:22:39Z"
+          "updated_at": "2026-10-20T15:22:39Z",
+          "state": "uploaded"
         },
         {
           "name": "szyn-attempt3-terminal-0076-0100.tar.gz.sha256",
@@ -11515,7 +11775,8 @@
           "id": 659688858,
           "bytes": 106,
           "digest": "sha256:1c348928a3847baf3d86fbb132df33afb22b3822740d6065ad3f5e87a2105115",
-          "updated_at": "2026-10-20T15:22:43Z"
+          "updated_at": "2026-10-20T15:22:43Z",
+          "state": "uploaded"
         },
         {
           "name": "szyn-attempt3-terminal-0101-0125.tar.gz",
@@ -11523,7 +11784,8 @@
           "id": 659689075,
           "bytes": 10753151,
           "digest": "sha256:5e323a47dcb15543def387e0c9a57a4066ea185dd890d970d344171dc785b43a",
-          "updated_at": "2026-10-20T15:22:55Z"
+          "updated_at": "2026-10-20T15:22:55Z",
+          "state": "uploaded"
         },
         {
           "name": "szyn-attempt3-terminal-0101-0125.tar.gz.sha256",
@@ -11531,7 +11793,8 @@
           "id": 659689555,
           "bytes": 106,
           "digest": "sha256:58d3dd668434f67957b11dc87a93484804c71af7582613b3a1add6e57af19971",
-          "updated_at": "2026-10-20T15:22:58Z"
+          "updated_at": "2026-10-20T15:22:58Z",
+          "state": "uploaded"
         },
         {
           "name": "szyn-attempt3-terminal-0126-0150.tar.gz",
@@ -11539,7 +11802,8 @@
           "id": 659689662,
           "bytes": 10875150,
           "digest": "sha256:b420d2e2eed5b4c85bbecde95f0b966cec71af07c478b6b7f0c2ceddd10c6bf9",
-          "updated_at": "2026-10-20T15:23:05Z"
+          "updated_at": "2026-10-20T15:23:05Z",
+          "state": "uploaded"
         },
         {
           "name": "szyn-attempt3-terminal-0126-0150.tar.gz.sha256",
@@ -11547,7 +11811,8 @@
           "id": 659689932,
           "bytes": 106,
           "digest": "sha256:eba38d6683a6954db4840c2a21e70cd007631b19faf7bbb2d94ba1674b0ee76f",
-          "updated_at": "2026-10-20T15:23:08Z"
+          "updated_at": "2026-10-20T15:23:08Z",
+          "state": "uploaded"
         },
         {
           "name": "szyn-attempt3-terminal-0151-0175.tar.gz",
@@ -11555,7 +11820,8 @@
           "id": 659690092,
           "bytes": 17572581,
           "digest": "sha256:6c00d1b63a91b37f3f19b712b03fdab3cc54daf036831f0ef40358dddfde5712",
-          "updated_at": "2026-10-20T15:23:17Z"
+          "updated_at": "2026-10-20T15:23:17Z",
+          "state": "uploaded"
         },
         {
           "name": "szyn-attempt3-terminal-0151-0175.tar.gz.sha256",
@@ -11563,7 +11829,8 @@
           "id": 659690471,
           "bytes": 106,
           "digest": "sha256:7c010ed19691f73a55a6e0eccfd46359d6a327ce9b18276d0d296d9f5b78daeb",
-          "updated_at": "2026-10-20T15:23:20Z"
+          "updated_at": "2026-10-20T15:23:20Z",
+          "state": "uploaded"
         },
         {
           "name": "szyn-attempt3-terminal-0176-0200.tar.gz",
@@ -11571,7 +11838,8 @@
           "id": 659690601,
           "bytes": 24098223,
           "digest": "sha256:b39e7692e173ffdcb1fe19ee13019dd20463b37127185240c0b998f841e4e036",
-          "updated_at": "2026-10-20T15:23:41Z"
+          "updated_at": "2026-10-20T15:23:41Z",
+          "state": "uploaded"
         },
         {
           "name": "szyn-attempt3-terminal-0176-0200.tar.gz.sha256",
@@ -11579,7 +11847,8 @@
           "id": 659691569,
           "bytes": 106,
           "digest": "sha256:e76e500b76fe5357ce368752bd2f670e966123357a7bdbc07ec503a65c5ad678",
-          "updated_at": "2026-10-20T15:23:44Z"
+          "updated_at": "2026-10-20T15:23:44Z",
+          "state": "uploaded"
         },
         {
           "name": "szyn-attempt3-terminal-0201-0225.tar.gz",
@@ -11587,7 +11856,8 @@
           "id": 659691719,
           "bytes": 8121242,
           "digest": "sha256:914fb775e699db4ffb0ff200d1da2a6524bd1f30a6057150f2080e2f95a4504e",
-          "updated_at": "2026-10-20T15:23:50Z"
+          "updated_at": "2026-10-20T15:23:50Z",
+          "state": "uploaded"
         },
         {
           "name": "szyn-attempt3-terminal-0201-0225.tar.gz.sha256",
@@ -11595,7 +11865,8 @@
           "id": 659691904,
           "bytes": 106,
           "digest": "sha256:31a76d70710d972ab17557248afbafe1089272b31027f0fa7dfb0997c052b5c1",
-          "updated_at": "2026-10-20T15:23:53Z"
+          "updated_at": "2026-10-20T15:23:53Z",
+          "state": "uploaded"
         },
         {
           "name": "szyn-attempt3-terminal-0226-0250.tar.gz",
@@ -11603,7 +11874,8 @@
           "id": 659692020,
           "bytes": 9476580,
           "digest": "sha256:63a7d93048aac7758d791c966ce3aa597085f865f201797e85673da127e97d8a",
-          "updated_at": "2026-10-20T15:24:03Z"
+          "updated_at": "2026-10-20T15:24:03Z",
+          "state": "uploaded"
         },
         {
           "name": "szyn-attempt3-terminal-0226-0250.tar.gz.sha256",
@@ -11611,7 +11883,8 @@
           "id": 659692425,
           "bytes": 106,
           "digest": "sha256:27ba9a2d4c35c638f789161d851a51189a9f2bdff0883544e331c697aff76362",
-          "updated_at": "2026-10-20T15:24:06Z"
+          "updated_at": "2026-10-20T15:24:06Z",
+          "state": "uploaded"
         },
         {
           "name": "szyn-attempt3-terminal-0251-0275.tar.gz",
@@ -11619,7 +11892,8 @@
           "id": 659692515,
           "bytes": 14513869,
           "digest": "sha256:15b10196708f11317d4ead20f177d26462de02ed1580e23757cfc7668eb05d39",
-          "updated_at": "2026-10-20T15:24:11Z"
+          "updated_at": "2026-10-20T15:24:11Z",
+          "state": "uploaded"
         },
         {
           "name": "szyn-attempt3-terminal-0251-0275.tar.gz.sha256",
@@ -11627,7 +11901,8 @@
           "id": 659692704,
           "bytes": 106,
           "digest": "sha256:bbd8d99ce84811f7861e0f47d3ef004903e0337e2aa513b3b30a2eb0611515f2",
-          "updated_at": "2026-10-20T15:24:14Z"
+          "updated_at": "2026-10-20T15:24:14Z",
+          "state": "uploaded"
         },
         {
           "name": "szyn-attempt3-terminal-0276-0300.tar.gz",
@@ -11635,7 +11910,8 @@
           "id": 659692792,
           "bytes": 27270834,
           "digest": "sha256:bfaf6d6fc3b1a7cba42d84e084154af4e427e7150a8abba84bb6688df33a1b38",
-          "updated_at": "2026-10-20T15:24:22Z"
+          "updated_at": "2026-10-20T15:24:22Z",
+          "state": "uploaded"
         },
         {
           "name": "szyn-attempt3-terminal-0276-0300.tar.gz.sha256",
@@ -11643,7 +11919,8 @@
           "id": 659693040,
           "bytes": 106,
           "digest": "sha256:6a36c40ee711961a499bb95637dd172ab401c9db627a1a2260b65de461e12086",
-          "updated_at": "2026-10-20T15:24:25Z"
+          "updated_at": "2026-10-20T15:24:25Z",
+          "state": "uploaded"
         },
         {
           "name": "szyn-attempt3-terminal-0301-0325.tar.gz",
@@ -11651,7 +11928,8 @@
           "id": 659693149,
           "bytes": 9513380,
           "digest": "sha256:dbc042abe74b70f3242f1b7349416c96b0f70c3de08cef093cd9ec277c0fda20",
-          "updated_at": "2026-10-20T15:24:31Z"
+          "updated_at": "2026-10-20T15:24:31Z",
+          "state": "uploaded"
         },
         {
           "name": "szyn-attempt3-terminal-0301-0325.tar.gz.sha256",
@@ -11659,7 +11937,8 @@
           "id": 659693489,
           "bytes": 106,
           "digest": "sha256:a4207709c0f8bd09be808f1eac52a667f7e0b966294db74626876bd2946c0678",
-          "updated_at": "2026-10-20T15:24:36Z"
+          "updated_at": "2026-10-20T15:24:36Z",
+          "state": "uploaded"
         },
         {
           "name": "szyn-attempt3-terminal-0326-0350.tar.gz",
@@ -11667,7 +11946,8 @@
           "id": 659693608,
           "bytes": 20988650,
           "digest": "sha256:1885b87dbe8605fea81c8bdb71511cf549d25774f78f9efacae46e8dde3f4ecf",
-          "updated_at": "2026-10-20T15:24:44Z"
+          "updated_at": "2026-10-20T15:24:44Z",
+          "state": "uploaded"
         },
         {
           "name": "szyn-attempt3-terminal-0326-0350.tar.gz.sha256",
@@ -11675,7 +11955,8 @@
           "id": 659693936,
           "bytes": 106,
           "digest": "sha256:e2c7f46e6bcc36ed2abee7e77c036af7f5423e986a6f55e66236283d4677cc70",
-          "updated_at": "2026-10-20T15:24:47Z"
+          "updated_at": "2026-10-20T15:24:47Z",
+          "state": "uploaded"
         },
         {
           "name": "szyn-attempt3-terminal-0351-0375.tar.gz",
@@ -11683,7 +11964,8 @@
           "id": 659694049,
           "bytes": 2618923,
           "digest": "sha256:d3970d76c15d6ecf43ae251862eab0af8410bfea3304229e9f1619d80ae252d4",
-          "updated_at": "2026-10-20T15:24:51Z"
+          "updated_at": "2026-10-20T15:24:51Z",
+          "state": "uploaded"
         },
         {
           "name": "szyn-attempt3-terminal-0351-0375.tar.gz.sha256",
@@ -11691,7 +11973,8 @@
           "id": 659694204,
           "bytes": 106,
           "digest": "sha256:b52557a8bbd1eb48f9a8d137c17787228036c31b603eb942db140d74184964f6",
-          "updated_at": "2026-10-20T15:24:54Z"
+          "updated_at": "2026-10-20T15:24:54Z",
+          "state": "uploaded"
         },
         {
           "name": "szyn-attempt3-terminal-0376-0400.tar.gz",
@@ -11699,7 +11982,8 @@
           "id": 659694306,
           "bytes": 2834939,
           "digest": "sha256:eacfe7279678cd34da28ab68d221d9ed77c7a5aaeb1c74b1d1bfa9bb7043b7f7",
-          "updated_at": "2026-10-20T15:25:05Z"
+          "updated_at": "2026-10-20T15:25:05Z",
+          "state": "uploaded"
         },
         {
           "name": "szyn-attempt3-terminal-0376-0400.tar.gz.sha256",
@@ -11707,7 +11991,8 @@
           "id": 659694779,
           "bytes": 106,
           "digest": "sha256:2d70491670e62612f2936beadb65145bd0b1c61e055b3918bef6b391a6c3a1b4",
-          "updated_at": "2026-10-20T15:25:08Z"
+          "updated_at": "2026-10-20T15:25:08Z",
+          "state": "uploaded"
         },
         {
           "name": "szyn-attempt3-terminal-0401-0425.tar.gz",
@@ -11715,7 +12000,8 @@
           "id": 659694939,
           "bytes": 33161560,
           "digest": "sha256:e6ad81c5936c97953e0e9d79335076c026edbdd1f600a5e4345c99bf09e5dac6",
-          "updated_at": "2026-10-20T15:25:21Z"
+          "updated_at": "2026-10-20T15:25:21Z",
+          "state": "uploaded"
         },
         {
           "name": "szyn-attempt3-terminal-0401-0425.tar.gz.sha256",
@@ -11723,7 +12009,8 @@
           "id": 659695440,
           "bytes": 106,
           "digest": "sha256:9dc63b5bd9f24ac084f182e883519489d575ba0f6f30782be7e7249695466403",
-          "updated_at": "2026-10-20T15:25:24Z"
+          "updated_at": "2026-10-20T15:25:24Z",
+          "state": "uploaded"
         },
         {
           "name": "szyn-attempt3-terminal-0426-0450.tar.gz",
@@ -11731,7 +12018,8 @@
           "id": 659695541,
           "bytes": 50485548,
           "digest": "sha256:f622dee99b11867993389da7be0b2712ad53bcf0a10f8a1c8b8e54e4f1676bb0",
-          "updated_at": "2026-10-20T15:25:45Z"
+          "updated_at": "2026-10-20T15:25:45Z",
+          "state": "uploaded"
         },
         {
           "name": "szyn-attempt3-terminal-0426-0450.tar.gz.sha256",
@@ -11739,7 +12027,8 @@
           "id": 659696363,
           "bytes": 106,
           "digest": "sha256:aa76caad37807b4bf9a2783dc682770dcb0b3516e115bdf405744d6fc7d8f5fe",
-          "updated_at": "2026-10-20T15:25:48Z"
+          "updated_at": "2026-10-20T15:25:48Z",
+          "state": "uploaded"
         },
         {
           "name": "szyn-attempt3-terminal-0451-0475.tar.gz",
@@ -11747,7 +12036,8 @@
           "id": 659696518,
           "bytes": 8501796,
           "digest": "sha256:cf728927fbac9db5e5c84a6b5b02c4bb78263a566a844d4d166baa824e408fa9",
-          "updated_at": "2026-10-20T15:25:55Z"
+          "updated_at": "2026-10-20T15:25:55Z",
+          "state": "uploaded"
         },
         {
           "name": "szyn-attempt3-terminal-0451-0475.tar.gz.sha256",
@@ -11755,7 +12045,8 @@
           "id": 659696769,
           "bytes": 106,
           "digest": "sha256:2a7f47f6176837b554792e1eab798545316ddb8af55087d8e3d8b9a8721ce12a",
-          "updated_at": "2026-10-20T15:25:57Z"
+          "updated_at": "2026-10-20T15:25:57Z",
+          "state": "uploaded"
         },
         {
           "name": "szyn-attempt3-terminal-0476-0491.tar.gz",
@@ -11763,7 +12054,8 @@
           "id": 659696876,
           "bytes": 23645382,
           "digest": "sha256:9dde90b73b7c79cadce4838a6ea8ca00a7e7ba5cbadfcaea7976a68c26f6aa2e",
-          "updated_at": "2026-10-20T15:26:08Z"
+          "updated_at": "2026-10-20T15:26:08Z",
+          "state": "uploaded"
         },
         {
           "name": "szyn-attempt3-terminal-0476-0491.tar.gz.sha256",
@@ -11771,7 +12063,8 @@
           "id": 659697293,
           "bytes": 106,
           "digest": "sha256:09054c252250e2f03d23c217fe0b3f15397f01deaff33c1c6e33fe6f7a0217a7",
-          "updated_at": "2026-10-20T15:26:11Z"
+          "updated_at": "2026-10-20T15:26:11Z",
+          "state": "uploaded"
         },
         {
           "name": "szyn-attempt3-terminal-0492-0500.tar.gz",
@@ -11779,7 +12072,8 @@
           "id": 659697412,
           "bytes": 43622179,
           "digest": "sha256:86546c6021ea18288dc1a4c2e03c6e8a0e8e4e10019e19bc1a8585f0cc6ea52c",
-          "updated_at": "2026-10-20T15:26:23Z"
+          "updated_at": "2026-10-20T15:26:23Z",
+          "state": "uploaded"
         },
         {
           "name": "szyn-attempt3-terminal-0492-0500.tar.gz.sha256",
@@ -11787,7 +12081,8 @@
           "id": 659698031,
           "bytes": 106,
           "digest": "sha256:1ddfb192d9b689e3e4051fd3abb828c8134240f857e2a02945aa3f86945eff3c",
-          "updated_at": "2026-10-20T15:26:26Z"
+          "updated_at": "2026-10-20T15:26:26Z",
+          "state": "uploaded"
         },
         {
           "name": "szyn-swebench-qwen35-execution-v3.json",
@@ -11795,7 +12090,8 @@
           "id": 659698154,
           "bytes": 6232,
           "digest": "sha256:0648425ceafcfb48d5670e8a2626d0910fb09c99d2f4598d9d2144d87b43466d",
-          "updated_at": "2026-10-20T15:26:29Z"
+          "updated_at": "2026-10-20T15:26:29Z",
+          "state": "uploaded"
         }
       ],
       "verification": "API metadata only; verify downloaded bytes against custody manifests before use"
@@ -11812,7 +12108,8 @@
           "id": 662136619,
           "bytes": 18699274,
           "digest": "sha256:e3cb82f4d1385e93020cb92e6098461cdf1098865861a25502f99033a26fd47d",
-          "updated_at": "2026-10-21T10:28:26Z"
+          "updated_at": "2026-10-21T10:28:26Z",
+          "state": "uploaded"
         },
         {
           "name": "m0_tp1_eager_p2_gate.log.gz",
@@ -11820,7 +12117,8 @@
           "id": 662137249,
           "bytes": 10992,
           "digest": "sha256:b35bf61e334eee813da6edc8c49272f5fd3290b512cec44acce6714a888d3fed",
-          "updated_at": "2026-10-21T10:28:37Z"
+          "updated_at": "2026-10-21T10:28:37Z",
+          "state": "uploaded"
         },
         {
           "name": "m0_tp1_eager_p2_trace_view.json.gz",
@@ -11828,7 +12126,8 @@
           "id": 662137589,
           "bytes": 18677027,
           "digest": "sha256:385f88b94704a2741669d40874ae70648e7d2ad97a5c8a9f2920ec2ec7573fdb",
-          "updated_at": "2026-10-21T10:28:50Z"
+          "updated_at": "2026-10-21T10:28:50Z",
+          "state": "uploaded"
         },
         {
           "name": "m0_tp1_eager_p4_trace_view.json.gz",
@@ -11836,7 +12135,8 @@
           "id": 662141572,
           "bytes": 18646197,
           "digest": "sha256:6f80e2ea2caa518e3ae60f94907e8725f66bcc034fb2f4c0ac536f60ce5ee5eb",
-          "updated_at": "2026-10-21T10:30:30Z"
+          "updated_at": "2026-10-21T10:30:30Z",
+          "state": "uploaded"
         },
         {
           "name": "m0_tp1_graph_p1_trace_view.json.gz",
@@ -11844,7 +12144,8 @@
           "id": 662142614,
           "bytes": 18696268,
           "digest": "sha256:ac660ae6c73f1a76bf9f5be3ea7fffecc83d0c8cca19b831956695a8b41c7b6f",
-          "updated_at": "2026-10-21T10:30:56Z"
+          "updated_at": "2026-10-21T10:30:56Z",
+          "state": "uploaded"
         },
         {
           "name": "m0_tp1_graph_p2_gate.log.gz",
@@ -11852,7 +12153,8 @@
           "id": 662143299,
           "bytes": 11832,
           "digest": "sha256:b49a6a36d8b0f0809e0d1d3bb59a347eaf3a327aaddde63ec5971519f0d47bee",
-          "updated_at": "2026-10-21T10:31:08Z"
+          "updated_at": "2026-10-21T10:31:08Z",
+          "state": "uploaded"
         },
         {
           "name": "m0_tp1_graph_p2_trace_view.json.gz",
@@ -11860,7 +12162,8 @@
           "id": 662145225,
           "bytes": 18714324,
           "digest": "sha256:95ed6af3dcea3e48fe909e051e139d69a3f6aa2c541c05d59b5cc55d9e2c8868",
-          "updated_at": "2026-10-21T10:31:57Z"
+          "updated_at": "2026-10-21T10:31:57Z",
+          "state": "uploaded"
         },
         {
           "name": "m0_tp1_graph_p4_trace_view.json.gz",
@@ -11868,7 +12171,8 @@
           "id": 662146324,
           "bytes": 18690755,
           "digest": "sha256:436174983164b1208d75ac22eb97dcc620fdaa57d76581a9de9169cce57acbc5",
-          "updated_at": "2026-10-21T10:32:22Z"
+          "updated_at": "2026-10-21T10:32:22Z",
+          "state": "uploaded"
         }
       ],
       "verification": "API metadata only; verify downloaded bytes against custody manifests before use"
@@ -11876,8 +12180,8 @@
   ],
   "counts": {
     "publication_bindings": 131,
-    "references": 1040,
+    "references": 1042,
     "releases": 13,
-    "assets": 228
+    "assets": 234
   }
 }

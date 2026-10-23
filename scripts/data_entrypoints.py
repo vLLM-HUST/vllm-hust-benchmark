@@ -118,6 +118,21 @@ def refresh(website, revision):
         for release in page:
             if release["draft"]:
                 continue
+            # The releases list can omit incomplete uploads from embedded assets.
+            # Enumerate each attachment endpoint; retain failed uploads as metadata,
+            # never silently advertise them as downloadable evidence.
+            asset_pages = json.loads(
+                subprocess.check_output(
+                    [
+                        "gh",
+                        "api",
+                        "--paginate",
+                        "--slurp",
+                        f"repos/{REPO}/releases/{release['id']}/assets?per_page=100",
+                    ]
+                )
+            )
+            assets = [asset for asset_page in asset_pages for asset in asset_page]
             releases.append(
                 {
                     "tag": release["tag_name"],
@@ -133,8 +148,9 @@ def refresh(website, revision):
                                 "bytes": a["size"],
                                 "digest": a.get("digest"),
                                 "updated_at": a["updated_at"],
+                                "state": a["state"],
                             }
-                            for a in release["assets"]
+                            for a in assets
                         ],
                         key=lambda a: a["name"],
                     ),
@@ -144,7 +160,7 @@ def refresh(website, revision):
         "schema": "benchmark-navigation-sources/v1",
         "captured_at": datetime.now(timezone.utc).isoformat(),
         "release_repository": REPO,
-        "release_scope": "All non-draft Releases and attached assets returned by paginated GitHub API; no asset download or checksum verification.",
+        "release_scope": "All non-draft Releases and separately paginated attachment metadata, including incomplete uploads. Only state=uploaded denotes a completed attachment; no asset download or checksum verification.",
         "releases": sorted(releases, key=lambda r: r["tag"]),
         "website_repository": WEBSITE,
         "website_commit": commit,
