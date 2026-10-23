@@ -1,0 +1,76 @@
+{
+  "status": "aggregate_mtp_counters_validated_useful_flop_mapping_pending",
+  "method": "V5.25",
+  "participating_chips": 2,
+  "runs": {
+    "m01-recovery-model-worker-r1": {
+      "counters": {
+        "proposed": 38202,
+        "accepted": 32105,
+        "rejected": 6097
+      },
+      "client_duration_s": 135.34325635712594,
+      "input_tokens": 282265,
+      "output_tokens": 51200
+    },
+    "mmlu-b1-microflow-fa-on-r9": {
+      "counters": {
+        "proposed": 38086,
+        "accepted": 32126,
+        "rejected": 5960
+      },
+      "client_duration_s": 61.999477847479284,
+      "input_tokens": 282265,
+      "output_tokens": 51200
+    },
+    "mmlu-b1-microflow-fa-on-r10": {
+      "counters": {
+        "proposed": 38142,
+        "accepted": 32113,
+        "rejected": 6029
+      },
+      "client_duration_s": 62.06853510718793,
+      "input_tokens": 282265,
+      "output_tokens": 51200
+    },
+    "mmlu-b1-microflow-fa-on-r11": {
+      "counters": {
+        "proposed": 37956,
+        "accepted": 32237,
+        "rejected": 5719
+      },
+      "client_duration_s": 62.20474243257195,
+      "input_tokens": 282265,
+      "output_tokens": 51200
+    }
+  },
+  "old_matrix_valid_rows": {
+    "target": 339916,
+    "draft": 359351
+  },
+  "old_draft_projection_flops": 46348712505344,
+  "effective_flops": null,
+  "reference_time_s": null,
+  "efficiency_percent": null,
+  "findings": [
+    "Valid tensor rows are not equivalent to accepted speculative output tokens.",
+    "Draft step zero includes processing of target hidden-state rows, not only proposed output positions.",
+    "Aggregate acceptance cannot be used to scale all target/draft/attention FLOPs uniformly.",
+    "Counters are preserved per run; no instrumented FLOPs are spliced into another run timing.",
+    "Timing values are client measurements; synchronized M01 boundary applicability remains to be established."
+  ],
+  "next_required_mapping": [
+    "Separate necessary draft state preparation from rejected speculative work and duplicate target verification.",
+    "Map accepted positions and context lengths where they affect useful attention work; quantify uncertainty if only aggregates exist.",
+    "Bind useful workload and independent dependency-aware reference to the applicable uninstrumented timing."
+  ],
+  "source_sha256": {
+    "/root/gennova-evidence/20261023-outline-v525/vLLM-HUST-midterm-V5.25.docx": "4c9b16a3551ec7e1d9d27e230be5ef1f4c61c3d4540065fa29e3dca87e1b0a5f",
+    "/root/gennova-evidence/20261019-midterm-aligned/m01-recovery-model-worker-r1/mmlu-pro.json": "a6f21ecafac3e322a7659eee1c1e4cbb1e0a19cc4cb1d17620706172446cdf50",
+    "/root/gennova-evidence/20261019-midterm-aligned/mmlu-b1-microflow-fa-on-r9/mmlu-pro.json": "a64fd63315227893a4bd48781a030dde3b23026d17cc0ef3c02fc2e10a4fb872",
+    "/root/gennova-evidence/20261019-midterm-aligned/mmlu-b1-microflow-fa-on-r10/mmlu-pro.json": "ba43b6fd407c13ec09c7a52c367344ff1560058a7edd88da41cbb37f9ce77e60",
+    "/root/gennova-evidence/20261019-midterm-aligned/mmlu-b1-microflow-fa-on-r11/mmlu-pro.json": "aa3acf9278e39d42828fc5ab1648f67a13fa2cc553c65505ecbaea45db002e19",
+    "/root/gennova-evidence/20261019-midterm-aligned/recovery_model_worker_r1-matrix-accounting.json": "3e905cd1bb0e40bd2ec9ce55704e6bb99a4ca4b760ba9f778baa1e5cb2a4de34",
+    "/workspace/m01-critical-path-review-20261023/audit_useful_draft_counts.py": "1060960190f96413ed027fc622fcba06f7d8d1a2627087afbbc1dcfa4c6db67a"
+  }
+}
