@@ -1,0 +1,58 @@
+{
+  "status": "draft_scope_source_bound_retained_vocabulary_interval_only",
+  "proposer_method_lines": {
+    "_run_merged_draft": [
+      1241,
+      1616
+    ],
+    "set_inputs_first_pass": [
+      1618,
+      1783
+    ],
+    "prepare_inputs_padded": [
+      2212,
+      2308
+    ]
+  },
+  "retained_draft_vocab_rows_lower": 32021,
+  "retained_draft_vocab_rows_upper": 32056,
+  "retained_draft_vocab_flops_lower": 32569158533120,
+  "retained_draft_vocab_flops_upper": 32604757688320,
+  "effective_flops": null,
+  "efficiency_percent": null,
+  "source_sha256": {
+    "/root/gennova-evidence/20261019-midterm-aligned/vocab-projection-summary-recovery_model_worker_r1.json": "055a709d64800bc959f685e8ca52524b6c5cb0466b5085170c50702a020547fd",
+    "/root/gennova-evidence/20261019-midterm-aligned/m01-recovery-model-worker-r1/receipt.json": "5be7b32992642def8fb52c40681169945df34886a72078dfaeba1c24a72c7c07",
+    "/root/gennova-evidence/20261019-midterm-aligned/m01-recovery-model-worker-r1/mmlu-pro.json": "a6f21ecafac3e322a7659eee1c1e4cbb1e0a19cc4cb1d17620706172446cdf50",
+    "/root/gennova-evidence/20261019-midterm-aligned/m01-recovery-model-worker-r1/launch-command.json": "39ac8a221a6ce46873ff46192b4e9e1977c46049e285699731b43662cef29204",
+    "/root/gennova-evidence/20261019-midterm-aligned/audit_vocab_projection_recovery_model_worker_r1.py": "c263b6e7a4989fa7ee6ce4b9500cb75f05320acff597203e0b71c6da9e7786a0",
+    "/root/gennova-evidence/20261019-midterm-aligned/recover_model_hardware.py": "f54fe93b229f347f59e233d3def0d85486ce2dcbe6d25413815457ac3fbcbf7a",
+    "/root/gennova-evidence/20261019-midterm-aligned/payload-receipt.json": "c2079ded7c2922c55a32e27af3eaed39e00432f7bfa39efe54a35cdfdbdfefa7",
+    "/root/gennova-evidence/20261019-midterm-aligned/actual-runtime.json": "8cfb331e6b4431574d8374c6fbee9c3957f4188852d2b4fc67f397f2abc889d3",
+    "/root/gennova-evidence/20261019-midterm-aligned/payload/betterscale/models/qwen35/__init__.py": "9c42ec68ba530defafae0eae9eae5844898a258b924b0121211e76bbe9a12bc5",
+    "/root/gennova-evidence/20261019-midterm-aligned/payload/betterscale/models/qwen35/small_fish_runtime.py": "9a545c72f79215eb9ce3fdb052fc509385ce6a35d452faec6c611dbc4781bb03",
+    "/root/gennova-evidence/20261019-midterm-aligned/payload/betterscale/models/qwen35/integration.py": "1f3a84db4c10de285fa623732781d34dc773685d6714472f6774a77baf832bb5",
+    "/root/gennova-evidence/20261019-midterm-aligned/runtime/vllm_ascend/spec_decode/llm_base_proposer.py": "d106cb3cc2e048734fa2986394c43c2177d04190715dc390d8a62d50830cb6e2",
+    "/root/gennova-evidence/20261019-midterm-aligned/runtime/vllm_ascend/ops/vocab_parallel_embedding.py": "c6aa66851d05881d90c66a045cd4321d95bfe94e944a759632276bb4a82bd066",
+    "/root/gennova-evidence/20261019-midterm-aligned/m01-recovery-model-worker-r1/token-accounting-1477342.jsonl": "261ce3308ea95f42aae581d20ad6017cae6ee24cc3ed9dcc5a424e2353901fd5",
+    "/root/gennova-evidence/20261019-midterm-aligned/token-observer-recovery-r1/hust_token_observer/logits.py": "8dea13bb4786e85099d086c245965778b0e28e68a87acc934bdff2d44fb3240b",
+    "/root/gennova-evidence/20261019-midterm-aligned/m01-recovery-model-worker-r1/token-accounting-1477343.jsonl": "21aff554c9d92bd91fab6aae654d1b0275913c38843c2f3006437b9f9f075140",
+    "/workspace/m01-critical-path-review-20261023/terminal-draft-acceptance-bounds-r1.json": "f81d07f49d21f79968897241fae721fa7a49160f485c33aecf68fa24f505be7b",
+    "/workspace/m01-critical-path-review-20261023/acceptance-epoch-reconstruction-r1.json": "1bac87e02b19ab8b7784fde87ea4a280b9157862bfe4135f4e708e02f271db23",
+    "/workspace/m01-critical-path-review-20261023/acceptance-aggregate-reconciliation-r1.json": "da432a76ea0f8810a027fd9338269cc2de0d9f172e38d1f88c19004a65c2a339",
+    "/workspace/m01-critical-path-review-20261023/bound_terminal_draft_acceptance.py": "a6246d259e044e8951769558a592833e8731ff164cc18e8d3a61c9e1d0fedc11",
+    "/workspace/m01-critical-path-review-20261023/audit_useful_draft_scope.py": "02d80c6e49ffff04d8e7ca88a5dd506b195140c3b2a4ef0f00b49239557d9bc7"
+  },
+  "findings": [
+    "The first draft model pass consumes input-position hidden states before selecting per-request rows for logits.",
+    "A retained draft token count cannot replace first-pass context rows or attention pairs.",
+    "The output-only vocabulary interval inherits terminal-clipping assumptions; it does not certify total useful draft work.",
+    "Source binding proves the pinned implementation, not which conditional branches ran on each request."
+  ],
+  "unresolved": [
+    "Map draft first-pass context/cache rows and later-step attention pairs to retained outputs.",
+    "Separate necessary reusable context preparation from rejected/terminal work without blanket scaling.",
+    "Bind terminal sampler ordering to actual runtime identity, or recover exact final raw outputs.",
+    "If existing captures cannot resolve this mapping, collect only the missing per-step map in an isolated matched run."
+  ]
+}
