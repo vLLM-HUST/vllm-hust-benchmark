@@ -37,8 +37,16 @@ def build():
         "historical empirical-resource reference, not current V1.5 efficiency or acceptance"
     )
     method["additional_existing_evidence"] = [
-        "reports/vllm-hust-midterm-20261019/m01-recovery/collective-graph-20261023/manifest.json"
+        "reports/vllm-hust-midterm-20261019/m01-recovery/collective-graph-20261023/manifest.json",
+        "reports/vllm-hust-midterm-20261019/m01-recovery/boundary-measured-20261023/manifest.json",
     ]
+    boundary = json.loads(
+        (ROOT / method["additional_existing_evidence"][1]).read_text()
+    )
+    method["measured_synchronized_b1"] = boundary["measurement"]
+    method["pending_evidence"][1] = (
+        "Associate the measured 120.65347687713802-second synchronized B1 envelope with valid effective F and same-workload reference; do not substitute the older ~62-second run"
+    )
     c16 = module(ROOT / "reports/c16-baseline018-reuse-20261022/audit.py").audit()
     pair = module(REPORT / "render_m06_pair.py").load(REPORT / "m06-paired-20261021")
     arms = pair["arms"]
