@@ -8,6 +8,48 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def test_all_source_receipts_are_local_json_and_cover_the_referenced_source():
+    """Check single/multi-source receipts without treating readers as task runs."""
+    rows = json.loads(
+        (ROOT / "docs/workload-data/dataset-validation-status.json").read_text("utf-8")
+    )["sources"]
+    for row in rows:
+        if not row.get("receipt"):
+            continue
+        path = (ROOT / row["receipt"]).resolve()
+        assert path.is_relative_to((ROOT / "docs/workload-data/validation").resolve())
+        receipt = json.loads(path.read_text("utf-8"))
+        ids = set(receipt.get("source_ids", []))
+        if receipt.get("source_id"):
+            ids.add(receipt["source_id"])
+        ids.update(
+            item["source_id"]
+            for item in receipt.get("sources", [])
+            if isinstance(item, dict) and "source_id" in item
+        )
+        assert row["source_id"] in ids
+
+
+def test_status_summary_does_not_erase_native_subsets_or_upgrade_generation():
+    summary = (ROOT / "docs/workload-data/VALIDATION_STATUS.zh-CN.md").read_text(
+        "utf-8"
+    )
+    assert "WORKLOAD_PR_REORGANIZATION_PLAN.zh-CN.md" in summary
+    for receipt in (
+        "agentbench-alfworld-public-handoff-npu-20261023.json",
+        "tau2-reference-handoff-npu-20261022.json",
+    ):
+        assert receipt in summary
+        evidence = json.loads(
+            (ROOT / "docs/workload-data/validation" / receipt).read_text("utf-8")
+        )
+        assert evidence["status"] == "END_TO_END_EXECUTED_AND_SCORED"
+    assert "GAIA官方原版闭环仍未完成" in summary
+    assert "缺隔离功能评分" in summary
+    assert "零新模型/原生任务" in summary
+    assert "AgentBench、GAIA、tau2官方执行器仍待逐环境接入" not in summary
+
+
 def _script_hashes_for_line_endings(payload):
     """Accept only Git LF/CRLF transport variants, never alter old receipts."""
     lf = payload.replace(b"\r\n", b"\n")

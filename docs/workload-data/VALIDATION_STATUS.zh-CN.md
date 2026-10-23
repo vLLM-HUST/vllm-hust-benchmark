@@ -2,6 +2,8 @@
 
 更新：2026-10-23。逐来源进度见[可打勾清单](DATASET_CHECKLIST.zh-CN.md)。
 
+当前统一计划及整体打勾状态只维护在[40类完整迁移清单](WORKLOAD_PR_REORGANIZATION_PLAN.zh-CN.md)。本文是固定证据的导读，不另设一套迁移完成表。“原能力迁移/消费接通”与“各来源原生任务验证”是两个层次；下列历史软件数量不累计为当前测试数。
+
 ## 已验证
 
 - 当前软件专项130项通过：原文回查、输入/答案隔离、失败事务、模型显式绑定、流式终止、响应/原schema校验、清单与脚本指纹和数据-only边界。夹具不是模型执行证据。
@@ -18,15 +20,16 @@
 
 ## 尚未完成及证据边界
 
-- AgentBench、GAIA、tau2官方执行器仍待逐环境接入。既有tau2环境仅留可编辑安装元数据，其源码路径已缺失，不能称可运行的官方环境。QBI753/165/solo114仅历史派生登记，不提供默认回退，本次未重跑。
-- 研究端配套[PR #37](https://github.com/intellistream/agent-workload-suite/pull/37)当前head为`b3e1f9f`，四项CI均通过，仍为Draft未合并；已锁定上游数据包提交`04113e35`/wheel
-  SHA256
-  `a1fb1efd188cee7ace85a3f911894509bcfd401c41cf4ecd7ca6ef36eb83c26c`，完成固定安装包消费及旧来源回归。Linux安装消费92项、组件948项、harness及七批127项通过，无跳过。此为软件消费链验证，model_calls/native_task_runs均为0，不冒充NPU新任务。
+- AgentBench已有ALFWorld FC
+  `new_std`原索引0–2的原生交互和官方评分[交接回执](validation/agentbench-alfworld-public-handoff-npu-20261023.json)，3/109、得分1/1/1；不覆盖DB/KG/OS/Web等环境，也不称ARM构建与官方Docker等价。tau2已有`telecom_full`前三条双角色原生交互和评分[交接回执](validation/tau2-reference-handoff-npu-20261022.json)，reward为1/1/0；其他domain/mode未完成。旧环境探测失败保留为历史，不能据此否定后来具名环境的成功。GAIA官方原版闭环仍未完成；QBI753/165/solo114不提供默认回退。
+- 研究端配套[PR #37](https://github.com/intellistream/llm-workload-suite/pull/37)的已验证提交为`6ca466e9a278ae5b3dfa33ce380cd9a23ee7c772`，锁定数据源码`1a9776865546d85edd667425661b4a5603696e35`；[消费检查](https://github.com/intellistream/llm-workload-suite/actions/runs/39958054179)及[test/package/paper](https://github.com/intellistream/llm-workload-suite/actions/runs/39958054031)均成功，Linux安装消费92、组件955、harness及七批127项通过、无跳过。它是软件消费证据，零新模型/原生任务。原`b3e1f9f`/`04113e35`身份继续按[历史消费记录](DATA_CONSUMPTION_VALIDATION.zh-CN.md)保留，不改写为新版本验证。
+- 未完成状态分开读：HumanEval/BigCodeBench只有生成、缺隔离功能评分；DS-1000另有一条原预算终止及原环境缺口；LongBench
+  v2三题有评分但含一条`length`，来源级仍未勾；BBH原协议提前终止，不把0/3解释为正常任务完成；JSONSchemaBench三条原schema生成与原validator运行完成，仅一条符合schema，不能写成三条格式均正确。OASST1只有历史续接，没有在线交互或独立语义评分；服务轨迹只有元数据，不虚构prompt或模型任务。这些状态与逐源台账及相应回执一致，未改原始失败或增加来源级勾选。
 - 初始16K/思考配置的企业v1预算终止及上下文拒绝继续保留在[既往尝试](validation/enterprise-v1-attempts-20261022.json)。新128K/非思考配置单列，不作为因果性能对比。
 - 整库Windows旧回归1836 passed、258 failed、60 errors、11
   skipped，包含fcntl/脚本平台/编码等，未逐项归因，不称Windows整库全绿。新增源码指纹检查采用规范LF，避免把Windows CRLF检出当成代码漂移。
 - CPU smoke不取企业/gated数据、不加载模型、不做性能测试。目录候选不等于已取得/已适配/已完成服务器任务；真实任务、原始请求、静态语料和历史轨迹单位不同，不汇总成同一种任务数量。
-- 2026-10-21 21:13
+- 历史连接事件：2026-10-21 21:13
   UTC起，授权SSH入口返回连接拒绝，TCP复核相同；不能仅凭此确认回收原因。已完成NPU结果的脱敏回执、输入/模型校验及代码指纹已取回本地；原始响应只在受控服务器data卷，当前可恢复性未重新核实。恢复入口后先检查已有原始归档，不因观察失败擅自重启已完成任务，不用模拟或CPU推理补造证据。
 
 ## 使用
