@@ -1,12 +1,14 @@
 # Targeted MOD original custody
 
 This collection continues [issue 326](https://github.com/vLLM-HUST/vllm-hust-benchmark/issues/326).
-It preserves the KVCompress bilingual early-version result report and Extension Manager's
-process-supervision acceptance report/companion record. KVCompress's source license is included;
-Extension Manager has no tracked LICENSE file in this source tree (its package declares Apache-2.0).
-Each manifest binds the public source repository, full source commit, Git blob, length and SHA256.
-Failures, diagnostic/eager identity, original version labels and claim limits are unchanged. Custody
-is not new hardware acceptance or a serving-performance claim.
+The [Manager/legacy consumer inventory](MANAGER-CONSUMERS-20261024.md) separates migrated real
+archives, retained synthetic fixtures and still-coupled consumers. It preserves the KVCompress
+bilingual early-version result report and Extension Manager's process-supervision acceptance
+report/companion record. KVCompress's source license is included; Extension Manager has no tracked
+LICENSE file in this source tree (its package declares Apache-2.0). Each manifest binds the public
+source repository, full source commit, Git blob, length and SHA256. Failures, diagnostic/eager
+identity, original version labels and claim limits are unchanged. Custody is not new hardware
+acceptance or a serving-performance claim.
 
 - [KVCompress original manifest](compress/manifest.json)
 - [Extension Manager original manifest](manager/manifest.json)
