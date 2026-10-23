@@ -11,6 +11,74 @@ BASE = (
 )
 
 
+def test_fourth_capture_previous_batch_producer_mapping():
+    with tarfile.open(BASE / "m01-r4-draft-producers-20261023.tar.gz") as bundle:
+        report = json.loads(bundle.extractfile("m01-r4-draft-producers.json").read())
+    with tarfile.open(BASE / "m01-capture-r4-evidence-20261023.tar.gz") as bundle:
+
+        def read(name):
+            return json.loads(bundle.extractfile("m01-capture-b1-r4/" + name).read())
+
+        scheduler = read("scheduler-894022.json")
+        frames = {
+            e["frame"]: e["identity"]["wave"]
+            for e in scheduler["events"]
+            if e["event"] == "delivery"
+        }
+        updates = {
+            (frames[e["frame"]], e["request_key"]): e
+            for e in scheduler["events"]
+            if e["event"] in ("output_update", "not_updated")
+        }
+        for pid in (894394, 894395):
+            worker = read(f"worker-{pid}.json")
+            waves = [
+                e["identity"]["wave"]
+                for e in worker["events"]
+                if e["event"] == "sample_begin"
+            ]
+            assert waves == sorted(set(waves))
+            previous = dict(zip(waves[1:], waves[:-1]))
+            slots = {}
+            for record in worker["draft_device_lengths"]["records"]:
+                m = record["metadata"]
+                for row, key in enumerate(m["request_keys"]):
+                    identity = (m["identity"]["wave"], key, m["draft_step"])
+                    assert identity not in slots
+                    slots[identity] = row
+            used, consumers = set(), set()
+            for record in report["records"]:
+                producer, consumer, key = (
+                    record["producer_wave"],
+                    record["consumer_wave"],
+                    record["request_key"],
+                )
+                assert producer == previous[consumer]
+                assert (consumer, key) not in consumers
+                consumers.add((consumer, key))
+                assert updates[producer, key]["event"] == "output_update"
+                event = updates[consumer, key]
+                assert record["scheduled_drafts"] == event["drafts"] == 2
+                assert record["consumer_status"] == event["event"]
+                assert record["retained_drafts"] == event.get("observation", {}).get(
+                    "retained_drafts", 0
+                )
+                for step in range(2):
+                    identity = (producer, key, step)
+                    assert (
+                        slots[identity] == record["producer_row"]
+                        and identity not in used
+                    )
+                    used.add(identity)
+            assert consumers == {
+                identity for identity, event in updates.items() if event["drafts"]
+            }
+            assert len(used) == 38428 and len(set(slots) - used) == 440
+    assert len(report["records"]) == 19214
+    assert sum(r["retained_drafts"] for r in report["records"]) == 32042
+    assert report["effective_flops"] is None and report["reference_seconds"] is None
+
+
 def test_fourth_capture_device_lengths_match_request_progress():
     with tarfile.open(BASE / "m01-capture-r4-evidence-20261023.tar.gz") as bundle:
 
