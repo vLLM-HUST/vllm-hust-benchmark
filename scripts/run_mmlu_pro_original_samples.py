@@ -22,6 +22,22 @@ FILES = {
         "0e24a191921c2f453518a537a8b2117bd137e7714d4ef1565e9ba06c1ecb9ad8",  # pragma: allowlist secret - original data checksum
     ),
 }
+SUBJECTS = (
+    "biology",
+    "business",
+    "chemistry",
+    "computer_science",
+    "economics",
+    "engineering",
+    "health",
+    "history",
+    "law",
+    "math",
+    "other",
+    "philosophy",
+    "physics",
+    "psychology",
+)
 
 
 def main():
@@ -29,6 +45,7 @@ def main():
     parser.add_argument("--data-root", required=True, type=Path)
     parser.add_argument("--endpoint", required=True)
     parser.add_argument("--model", required=True)
+    parser.add_argument("--subject", choices=SUBJECTS, default="biology")
     parser.add_argument("--output", required=True, type=Path)
     args = parser.parse_args()
     if metadata.version("lm-eval") != "0.4.11":
@@ -44,7 +61,8 @@ def main():
     from lm_eval import evaluator
     from lm_eval.utils import load_yaml_config
 
-    yaml_path = Path(lm_eval.__file__).parent / "tasks/mmlu_pro/mmlu_pro_biology.yaml"
+    task_name = f"mmlu_pro_{args.subject}"
+    yaml_path = Path(lm_eval.__file__).parent / "tasks/mmlu_pro" / f"{task_name}.yaml"
     config = load_yaml_config(str(yaml_path))
     config.update(
         dataset_path="parquet", dataset_name=None, dataset_kwargs={"data_files": paths}
@@ -52,19 +70,20 @@ def main():
     import pyarrow.parquet as pq
 
     original = pq.read_table(paths["test"]).to_pylist()
-    biology = [
+    selected_rows = [
         (i, row.get("question_id"))
         for i, row in enumerate(original)
-        if row["category"] == "biology"
+        if row["category"] == args.subject
     ][:3]
-    if len(biology) != 3:
-        raise RuntimeError("three original biology rows required")
+    if len(selected_rows) != 3:
+        raise RuntimeError(f"three original {args.subject} rows required")
     receipt = {
-        "original_test_rows_and_question_ids": biology,
+        "original_test_rows_and_question_ids": selected_rows,
         "source_id": "MMLU_PRO",
         "revision": "b189ec765aa7ed75c8acfea42df31fdae71f97be",  # pragma: allowlist secret - public dataset revision
-        "selected_samples": ["biology:0", "biology:1", "biology:2"],
-        "selection": "first three biology-filtered original test rows, fixed before model execution",
+        "subject": args.subject,
+        "selected_samples": [f"{args.subject}:{i}" for i in range(3)],
+        "selection": f"first three {args.subject}-filtered original test rows, fixed before model execution",
         "model": args.model,
         "endpoint": args.endpoint,
         "started_at_unix": time.time(),
@@ -77,7 +96,7 @@ def main():
             "max_gen_toks=2048",
             "enable_thinking=false",
         ],
-        "prompt_filters_metric_fewshot": "unchanged upstream biology recipe; five original validation examples",
+        "prompt_filters_metric_fewshot": f"unchanged upstream {args.subject} recipe; five original validation examples",
         "claim_boundary": "integration sample, not full benchmark score or performance evaluation",
         "status": "STARTED",
         "versions": {
@@ -111,10 +130,10 @@ def main():
                 "chat_template_kwargs": {"enable_thinking": False},
             },
         )
-        if result is None or result["n-samples"]["mmlu_pro_biology"]["effective"] != 3:
+        if result is None or result["n-samples"][task_name]["effective"] != 3:
             raise RuntimeError("expected exactly three evaluated test tasks")
         # The harness logs each task once per filter; these are not extra tasks.
-        if {sample["doc_id"] for sample in result["samples"]["mmlu_pro_biology"]} != {
+        if {sample["doc_id"] for sample in result["samples"][task_name]} != {
             0,
             1,
             2,

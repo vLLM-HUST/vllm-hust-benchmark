@@ -101,3 +101,26 @@ def test_gsm8k_tail_receipt_tracks_three_actual_ids_not_harness_effective_count(
     assert row["supplemental_execution_receipts"] == [
         "docs/workload-data/validation/gsm8k-tail-npu-20261023.json"
     ]
+
+
+def test_mmlu_pro_chemistry_receipt_is_supplemental_and_sample_scoped():
+    ledger = json.loads((DOCS / "dataset-validation-status.json").read_text("utf-8"))
+    row = next(r for r in ledger["sources"] if r["source_id"] == "MMLU_PRO")
+    receipt_path = row["supplemental_execution_receipts"][0]
+    receipt = json.loads((ROOT / receipt_path).read_text("utf-8"))
+    assert row["checked"] is True
+    assert row["supplemental_samples"] == [
+        "chemistry:0",
+        "chemistry:1",
+        "chemistry:2",
+    ]
+    assert receipt["status"] == "END_TO_END_EXECUTED_AND_SCORED"
+    assert receipt["selected_samples"] == row["supplemental_samples"]
+    assert receipt["task_counts"] == {
+        "chemistry_original": 1132,
+        "executed_unique": 3,
+        "entire_test_split": 12032,
+    }
+    assert receipt["metrics"]["mmlu_pro_chemistry"]["exact_match,custom-extract"] == 1.0
+    assert receipt["raw_questions_answers_and_model_outputs_published"] is False
+    assert "其余12个学科及全量未跑" in row["blocker"]

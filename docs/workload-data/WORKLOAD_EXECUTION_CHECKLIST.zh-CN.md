@@ -27,7 +27,7 @@
   合计覆盖9/1319，不是全量。见[增量回执](validation/gsm8k-incremental-20261022.json)。初次计数断言失败的同六条尝试保留，不重复计数。
 
 - [x] MMLU-Pro
-  biology：原始前三条执行、固定评分及安装数据组件同题回查已完成，3/3正确；只覆盖biology子集。见[回执](validation/mmlu-pro-biology-npu-20261022.json)。已随[PR #406](https://github.com/vLLM-HUST/vllm-hust-benchmark/pull/406)提交，其他学科与全量未验证。
+  biology与chemistry各完成原始前三条执行和固定评分，各3/3正确；biology另有安装数据组件同题回查。两学科合计6/12032，不代表其他学科或全量。见[biology回执](validation/mmlu-pro-biology-npu-20261022.json)与[chemistry回执](validation/mmlu-pro-chemistry-npu-20261023.json)。
 
 更新：2026-10-22。来源层历史验证不自动升级为类别完成。每项只根据实际证据打勾；小集先估时尽量全量，大集预选样本分批扩充。候选不等于已正式接入。
 
@@ -117,7 +117,7 @@ GSM8K历史[分批汇总](validation/gsm8k-incremental-progress-20261022.json)�
 | MATH500       | 待核                                           | [ ] 未完成 | 原生子集/协议、服务器执行及适用核验                        |
 | BBH           | 原Boolean前三题生成；固定harness 0/3，提前停止 | [ ] 未完成 | 无最终答案；候选读取/CLI通过不等于任务完成，其他子任务未验 |
 | GPQA          | 待核                                           | [ ] 未完成 | 原生子集/协议、服务器执行及适用核验                        |
-| MMLU_PRO      | S：biology原始前三条，3/3正确                  | [ ] 未完成 | 其他学科、余下原始任务                                     |
+| MMLU_PRO      | S：biology与chemistry各原始前三条，各3/3正确   | [ ] 未完成 | 其余12个学科、各学科余题、全量任务                         |
 | AI2_ARC       | S：3条；仅Challenge，2对1错                    | [ ] 未完成 | 本类适配范围复核、余下原始任务                             |
 | OPENMATH2     | 待核                                           | [ ] 未完成 | 原生子集/协议、服务器执行及适用核验                        |
 | OPENTHOUGHTS3 | 待核                                           | [ ] 未完成 | 原生子集/协议、服务器执行及适用核验                        |

@@ -800,9 +800,13 @@
       "scoring": "COMPLETED",
       "selected_samples": ["biology:0", "biology:1", "biology:2"],
       "completed_samples": ["biology:0", "biology:1", "biology:2"],
+      "supplemental_samples": ["chemistry:0", "chemistry:1", "chemistry:2"],
       "checked": true,
       "receipt": "docs/workload-data/validation/mmlu-pro-biology-npu-20261022.json",
-      "blocker": "仅biology前三条闭环；其他学科和全量未跑。",
+      "supplemental_execution_receipts": [
+        "docs/workload-data/validation/mmlu-pro-chemistry-npu-20261023.json"
+      ],
+      "blocker": "biology和chemistry各仅前三条闭环，合计6/12032；其余12个学科及全量未跑。",
       "local_read_receipt": "docs/workload-data/validation/local-read-24sources-20261022.json"
     },
     {
