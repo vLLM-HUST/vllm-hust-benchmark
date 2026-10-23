@@ -103,6 +103,25 @@ def test_gsm8k_tail_receipt_tracks_three_actual_ids_not_harness_effective_count(
     ]
 
 
+def test_gsm8k_cumulative_coverage_includes_prior_audit_and_tail_without_pooled_score():
+    ledger = json.loads((DOCS / "dataset-validation-status.json").read_text("utf-8"))
+    row = next(r for r in ledger["sources"] if r["source_id"] == "GSM8K")
+    receipt = json.loads((ROOT / row["cumulative_coverage_receipt"]).read_text("utf-8"))
+    assert row["checked"] is True
+    assert receipt["source_revision"] == "740312add88f781978c0658806c59bc2815b9866"
+    assert receipt["evidence"][0]["unique_task_count"] == 201
+    assert receipt["evidence"][1]["selected_samples"] == [
+        "test:1316",
+        "test:1317",
+        "test:1318",
+    ]
+    assert receipt["evidence"][1]["disjoint_from_prior_range"] is True
+    assert receipt["cumulative"]["unique_task_count"] == 204
+    assert receipt["cumulative"]["coverage_fraction"] == "204/1319"
+    assert receipt["cumulative"]["pooled_accuracy_reported"] is False
+    assert receipt["raw_tasks_answers_and_model_outputs_published"] is False
+
+
 def test_mmlu_pro_chemistry_receipt_is_supplemental_and_sample_scoped():
     ledger = json.loads((DOCS / "dataset-validation-status.json").read_text("utf-8"))
     row = next(r for r in ledger["sources"] if r["source_id"] == "MMLU_PRO")
