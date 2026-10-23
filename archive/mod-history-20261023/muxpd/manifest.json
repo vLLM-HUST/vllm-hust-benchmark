@@ -1,0 +1,650 @@
+{
+  "schema": "mod-git-custody/v1",
+  "source_repository": "vLLM-HUST/vllm-ascend-MuxPD-hust",
+  "source_commit": "292e3b7c451b86e28aacff471716af4e4ef9d5e3",
+  "source_visibility": "public",
+  "scope": {
+    "prefixes": [
+      "evidence/2026-10-10-tp4-optimization/"
+    ],
+    "context": [
+      "README.md",
+      "LICENSE",
+      "docs/performance-tp4.md"
+    ]
+  },
+  "admission": "custody-only; original failures and pairing retained; no new performance qualification",
+  "files": [
+    {
+      "path": "LICENSE",
+      "bytes": 11357,
+      "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+      "git_blob": "261eeb9e9f8b2b4b0d119366dda99c6fd7d35c64"
+    },
+    {
+      "path": "README.md",
+      "bytes": 16389,
+      "sha256": "3291d4a6bfd52d8d59a33d4bcae4a346497c3606ff8352f9941d526adf75710b",
+      "git_blob": "11e1af2d3108b784a18e3ac868e331fca737578e"
+    },
+    {
+      "path": "docs/performance-tp4.md",
+      "bytes": 53210,
+      "sha256": "670bd1cccc6a753c9e0feb1791cfb85b12813878a20539b7c3813a362fcdb211",
+      "git_blob": "fc2f75c897dbfb63e480ad17a37e0d5b4ea77e39"
+    },
+    {
+      "path": "evidence/2026-10-10-tp4-optimization/README.md",
+      "bytes": 4377,
+      "sha256": "c8c00b15310faebb523ea2cdaeec4aa0f92af49a76f22c856299ec946b9fd647",
+      "git_blob": "448a0c1d73ff5ae343ca2c715cefd13ce11e0a5f"
+    },
+    {
+      "path": "evidence/2026-10-10-tp4-optimization/archive-index.json",
+      "bytes": 24785,
+      "sha256": "89436d294aa714cad4ff317522269460edb0cf7dd9adf3e21b1be25f1aebe87b",
+      "git_blob": "82c4b22029678377b468eaac6e2f634ca20cea2b"
+    },
+    {
+      "path": "evidence/2026-10-10-tp4-optimization/decode-graph-design.md",
+      "bytes": 8139,
+      "sha256": "49da555e2c3ba6e35c3c343a57ed787c7a096295154343f49afec8ef6024b422",
+      "git_blob": "ec4c813c16a4e280048c436b53a9d67096e97609"
+    },
+    {
+      "path": "evidence/2026-10-10-tp4-optimization/eager-summary.json",
+      "bytes": 1376,
+      "sha256": "eebcf27a5a0d85b66add9a7585e5e95b600b7ff63de1dafcb2a792edd5707dd8",
+      "git_blob": "007f40e713e3ffab80f9d5f8afe725b588be6882"
+    },
+    {
+      "path": "evidence/2026-10-10-tp4-optimization/graph-adaptive-decode-heavy.json",
+      "bytes": 64817,
+      "sha256": "190e0f66b6234d3011aeca01a608ac469ba93287952b01366dc23c33bf15ffcf",
+      "git_blob": "dfcb1c667ca20e28bc6b93c55fc8435b650ac392"
+    },
+    {
+      "path": "evidence/2026-10-10-tp4-optimization/graph-adaptive-manifest.json",
+      "bytes": 3026,
+      "sha256": "e30205e231eeb7578dfdc3d7c6dabc169041f75b13553f73cb8cc026eef1e085",
+      "git_blob": "965e44cc799b984e8f4a76eaeef3fc91965fa1ce"
+    },
+    {
+      "path": "evidence/2026-10-10-tp4-optimization/graph-adaptive-mixed.json",
+      "bytes": 64689,
+      "sha256": "29f7d2ac10160605b42d3cb94c8aab5fde8a4aae9a7d9ea8a37638217865c971",
+      "git_blob": "3b1dcd56b086a01421c28342691605aef5a01bf4"
+    },
+    {
+      "path": "evidence/2026-10-10-tp4-optimization/graph-adaptive-state-reuse.json",
+      "bytes": 981080,
+      "sha256": "b22e9436c58cfcb03afa254c24536d3c60c356330e6231c3e58e0a93fcac598e",
+      "git_blob": "7110bf8edf7d9ae1415ef450b4ec212714b3331c"
+    },
+    {
+      "path": "evidence/2026-10-10-tp4-optimization/graph-compiled-cancel.json",
+      "bytes": 1577,
+      "sha256": "34430071e763660a29b93486a6e8209723ddb0fe2913a4a25e49320dba2c76c4",
+      "git_blob": "0cc05200ced8be56b7679a5933c3d65dafabbee4"
+    },
+    {
+      "path": "evidence/2026-10-10-tp4-optimization/graph-compiled-decode-heavy.json",
+      "bytes": 64802,
+      "sha256": "8fa574f2f814e1edaa39e71d2d4b08889f5b9fc53aad2afd0a13cd0baa1475c2",
+      "git_blob": "389595a7c9f27fa8f11c051089d2b4fa8e08a6e0"
+    },
+    {
+      "path": "evidence/2026-10-10-tp4-optimization/graph-compiled-manifest.json",
+      "bytes": 3523,
+      "sha256": "dd2543515393ec0321f6fee090616ae25430a5f4fe6d2b6b247216087225109f",
+      "git_blob": "dc8b69604267c162478e2dbd17c5a1fb6a1f8458"
+    },
+    {
+      "path": "evidence/2026-10-10-tp4-optimization/graph-compiled-mixed.json",
+      "bytes": 64680,
+      "sha256": "972d9c9e6886b921169fadb551e5de1ecbf8bc5b1d844c53f7a463632f62f720",
+      "git_blob": "0c892a93bda0b90832e3cc5847265ff6d5ea9d63"
+    },
+    {
+      "path": "evidence/2026-10-10-tp4-optimization/graph-compiled-profile-client.json",
+      "bytes": 2033,
+      "sha256": "7a94a286e1bebecd10a333a1ef2b6a36facefe1fa06247261288888b937b8c5a",
+      "git_blob": "b402bfd2d3b4665b1624c0d47eea456a0895796a"
+    },
+    {
+      "path": "evidence/2026-10-10-tp4-optimization/graph-compiled-profile-proof-audit.py",
+      "bytes": 13999,
+      "sha256": "6c0fb4ae8166d79b0a2fd23389c10c7fb432970a7a689afdbdfb28b9f55b77be",
+      "git_blob": "0648a4d1eb3d4ab7e5abd18b1c2e1eacd19f6307"
+    },
+    {
+      "path": "evidence/2026-10-10-tp4-optimization/graph-compiled-profile-proof.json",
+      "bytes": 133901,
+      "sha256": "cccc6e6a2c2fb7742eb24cfed01523255d21065d124f8bbc1eb3a50594454b81",
+      "git_blob": "6ca156b52e0c72e93744317653028f4b6859e6cd"
+    },
+    {
+      "path": "evidence/2026-10-10-tp4-optimization/graph-compiled-profile-proof.md",
+      "bytes": 3889,
+      "sha256": "9f01fa1c7ce0caa2683834cd734be7b4d05842c9b07e5777d3d3a2d59f3480d5",
+      "git_blob": "f15481ae88e08a481b40204a4c02fa1eee8abd9a"
+    },
+    {
+      "path": "evidence/2026-10-10-tp4-optimization/graph-compiled-progress.json",
+      "bytes": 2029,
+      "sha256": "478bada9bc831f7a58cabe1224c04ce20412c1332932468626ac21ec34df4474",
+      "git_blob": "416fe348d9bdd02363469068e6ca5a28935c904e"
+    },
+    {
+      "path": "evidence/2026-10-10-tp4-optimization/graph-compiled-state-reuse.json",
+      "bytes": 981215,
+      "sha256": "7dd31a21ca74485279938b2aef72f59554223a5414274135beaad9816cfc9222",
+      "git_blob": "ffa532d558675c09886707ab37e34ad1907fc135"
+    },
+    {
+      "path": "evidence/2026-10-10-tp4-optimization/graph-compiled-trace-check.json",
+      "bytes": 645,
+      "sha256": "35cf1528a79e078f6762b6ed325bc9f92aa4e97552bfdaf7a15b7ae99567b7a2",
+      "git_blob": "53e7163e9b928146f5dcd330d3f5b31e919d2e9b"
+    },
+    {
+      "path": "evidence/2026-10-10-tp4-optimization/graph-work256-cancel.json",
+      "bytes": 1602,
+      "sha256": "e680bc86cbe98f2c195733b94bbb89b8d6782a2fb9a0c24195b62206ea61c954",
+      "git_blob": "383cab31be7a8fc61cfd00141a99d4726a458476"
+    },
+    {
+      "path": "evidence/2026-10-10-tp4-optimization/graph-work256-confirm-decode-heavy.json",
+      "bytes": 64793,
+      "sha256": "4031dea6dc89c76390765662897bb27b14b8024aaea4da00ccbaed5219d089d3",
+      "git_blob": "9dab1a7076e04f017bf5e2f4338b09dc3adbfe13"
+    },
+    {
+      "path": "evidence/2026-10-10-tp4-optimization/graph-work256-confirm-mixed.json",
+      "bytes": 64732,
+      "sha256": "e2e013064350358edd2233e9a6b65f21b95d0869ca5ad7d6d9ba21e5d20faf0b",
+      "git_blob": "80d0c956c1d0a759038e5829a0618258b1188144"
+    },
+    {
+      "path": "evidence/2026-10-10-tp4-optimization/graph-work256-decode-heavy.json",
+      "bytes": 64837,
+      "sha256": "29fa467c8a7960988f9b819f6f81b59eb3a6cd672bd12b032786908ea4ea4eb0",
+      "git_blob": "ad3c7780f97c4c4aaa2e7f3dd6ec26410c397392"
+    },
+    {
+      "path": "evidence/2026-10-10-tp4-optimization/graph-work256-manifest.json",
+      "bytes": 4568,
+      "sha256": "6d5511e5075287d45179037b4911bf0964ac666bc07022eef716edf29f16f04d",
+      "git_blob": "9b6b7bb284f60e9ce1a306848d7ba0081941f297"
+    },
+    {
+      "path": "evidence/2026-10-10-tp4-optimization/graph-work256-mixed.json",
+      "bytes": 64757,
+      "sha256": "3620aa4e15c06c3cd41c3bddb1b04f4172c01368a75fab3579c24a3283ff961e",
+      "git_blob": "3c94acf5d23b3bdedca716eef1fd5cf2b179e8b9"
+    },
+    {
+      "path": "evidence/2026-10-10-tp4-optimization/graph-work256-progress.json",
+      "bytes": 2052,
+      "sha256": "291dc5361c268c03e035881dc2365c7471163af770f262a823f884c6ba294d66",
+      "git_blob": "47735a0809a836773b29438637449f0348b66c6f"
+    },
+    {
+      "path": "evidence/2026-10-10-tp4-optimization/graph-work256-stage1-summary.json",
+      "bytes": 13498,
+      "sha256": "ff2844bf59f9ac3c86d86f20f493609bb1ef92a0ff4c49bc05acc42b7221248d",
+      "git_blob": "a43a2607cf965956285bda7344675856d7642159"
+    },
+    {
+      "path": "evidence/2026-10-10-tp4-optimization/graph-work256-state-reuse.json",
+      "bytes": 981237,
+      "sha256": "50bc3a95186798d599a719f924893fb407da9c581cf44b02acc657619ab60d42",
+      "git_blob": "2e1724bb6a767bf27705c76eaffc990c85cf62c5"
+    },
+    {
+      "path": "evidence/2026-10-10-tp4-optimization/graph-work256-summary.json",
+      "bytes": 28100,
+      "sha256": "fe23a6bcf09df82609d4cacbe71fb47ef4665046fb6527380e20a0bfaa75882c",
+      "git_blob": "d0fc023353ae171a79b5de048671f8c393c8826d"
+    },
+    {
+      "path": "evidence/2026-10-10-tp4-optimization/graph-work256-traced-calibration.json",
+      "bytes": 1761,
+      "sha256": "47e5bd13176e56b87b1c1e228f93a20453f00c038e7a71d7e6a94b0fa3bca478",
+      "git_blob": "a771642ca486e64e09a74a72600d5495add710fb"
+    },
+    {
+      "path": "evidence/2026-10-10-tp4-optimization/graph-work256-traced-cancel.json",
+      "bytes": 1600,
+      "sha256": "1a25b64c1f943508a346510da58cb398362429c285c2ce3aa175647e43f5bcc8",
+      "git_blob": "8995b66bcf4b8068798c5e151f5be693e7d5e543"
+    },
+    {
+      "path": "evidence/2026-10-10-tp4-optimization/graph-work256-traced-check.json",
+      "bytes": 681,
+      "sha256": "aa88e4421e022761e52ac2a8ff1bd961f308be2bf09431488be7984c5b85822c",
+      "git_blob": "9688482be1bd3bf1a69a62757e21bf2dcae84813"
+    },
+    {
+      "path": "evidence/2026-10-10-tp4-optimization/graph-work256-traced-manifest.json",
+      "bytes": 3781,
+      "sha256": "3f8c51e927caae1d971f21162cfd761bfdea25f2dc03f4ea35b1af109212c58a",
+      "git_blob": "c9fc3efa88a8587c6e76a52bc64988f7d778314b"
+    },
+    {
+      "path": "evidence/2026-10-10-tp4-optimization/graph-work256-traced-progress.json",
+      "bytes": 2059,
+      "sha256": "fc1bdf91f4dd98d66163fb360e8c87b50d638fe4f53f5c802d655bed46827ea7",
+      "git_blob": "d34443abb7bc51f9b471e1c47d0f0f35138f3b78"
+    },
+    {
+      "path": "evidence/2026-10-10-tp4-optimization/graph-work256-traced-proof-audit.py",
+      "bytes": 8651,
+      "sha256": "529a1c5b7116430179a3d55497456a4a59d362762278146c05bde86c0c0362e1",
+      "git_blob": "f7653d091cdde5fe9f160e9084d5fd0d981991f3"
+    },
+    {
+      "path": "evidence/2026-10-10-tp4-optimization/graph-work256-traced-proof.json",
+      "bytes": 52882,
+      "sha256": "b5de2f9d415fa585c872f18e0a86692ebd81e9c781621c11795bf5bb13bb4bd4",
+      "git_blob": "ed5f17f1ef474e8295aa2479c0e96e007f3a6c3e"
+    },
+    {
+      "path": "evidence/2026-10-10-tp4-optimization/graph8-cancel.json",
+      "bytes": 1553,
+      "sha256": "79ed7f2dfec5a50a81cb4f6a7df8ebab87431b0576b400ad5bf99183ec0f7647",
+      "git_blob": "7bcc97a2e53dca1d3bb52bce4069aece6e47c600"
+    },
+    {
+      "path": "evidence/2026-10-10-tp4-optimization/graph8-decode-heavy.json",
+      "bytes": 64733,
+      "sha256": "e9cb85bc59ec1430dead24a45e5fadfe6b3fc4fe2f6127ad5eecf401d6aa8854",
+      "git_blob": "9446d9f0dd0fff2bd269698801159fe2a0a80556"
+    },
+    {
+      "path": "evidence/2026-10-10-tp4-optimization/graph8-manifest.json",
+      "bytes": 3289,
+      "sha256": "d3ceac186286abc56b033f24bc87023624293d0384202b6361fe532dcec8a499",
+      "git_blob": "8670fe2f0be88df57671446293d8384f3bc5994e"
+    },
+    {
+      "path": "evidence/2026-10-10-tp4-optimization/graph8-mixed.json",
+      "bytes": 64537,
+      "sha256": "036a51cf28136a51ae61c75484828675deb179828e81f2fa1e7197e8d74fbba4",
+      "git_blob": "000a53a0c913615eab6b3623a6e45b78a0abf0b4"
+    },
+    {
+      "path": "evidence/2026-10-10-tp4-optimization/graph8-profile-client.json",
+      "bytes": 1975,
+      "sha256": "d158fb50b28482c471a9dec53a001ca755f7a3d6ea654b41f14f72a021ddcb46",
+      "git_blob": "c121434ffb5e10ddd36795e97e77baf6229ada5f"
+    },
+    {
+      "path": "evidence/2026-10-10-tp4-optimization/graph8-profile-proof-audit.py",
+      "bytes": 6130,
+      "sha256": "d9f52dde009e102a0af506adc9b59f091e2de0fb909d372130fab4af3f6ef70c",
+      "git_blob": "153bd362ec0927b9ab2498803401fd95b8417737"
+    },
+    {
+      "path": "evidence/2026-10-10-tp4-optimization/graph8-profile-proof.json",
+      "bytes": 21163,
+      "sha256": "c8b027396467c71f5220d5ad97a435cebc46c82d023746312eb9b32884514a69",
+      "git_blob": "d250680a5b1c93477ec5a95358aa8f27aa112f7e"
+    },
+    {
+      "path": "evidence/2026-10-10-tp4-optimization/graph8-progress.json",
+      "bytes": 2030,
+      "sha256": "da5eb657c722816f8577a2ad7d47a29de97f5d05aeaadf778c67805b7bb6c36f",
+      "git_blob": "a8ff359d653d16a434cf831e9ca2ae18fb9fb959"
+    },
+    {
+      "path": "evidence/2026-10-10-tp4-optimization/graph8-trace-check.json",
+      "bytes": 439,
+      "sha256": "099b6026017c436e9e708c67afdebc377ece04496d0f5a782d7b894724741f5f",
+      "git_blob": "0ddeb940f90d23a49424bd92832b97b986a0f180"
+    },
+    {
+      "path": "evidence/2026-10-10-tp4-optimization/isolated-communication-audit.md",
+      "bytes": 12498,
+      "sha256": "5002f6a4205366449b64b7f52ac84eacae4f02a76b987ee0d7c8a929c6cead43",
+      "git_blob": "6ddf29a1dbc48716687e8a5b6cd956eb5457c0a0"
+    },
+    {
+      "path": "evidence/2026-10-10-tp4-optimization/isolated-vs-shared-profile-audit.py",
+      "bytes": 11990,
+      "sha256": "ef57f654bb881ff534d89e537d1c853726a4a697135a967497aab95fee842be0",
+      "git_blob": "0ed0e0f00c9249ca06db0c50303c3a5371b4afaa"
+    },
+    {
+      "path": "evidence/2026-10-10-tp4-optimization/isolated-vs-shared-profile.json",
+      "bytes": 179788,
+      "sha256": "cea59426c91bb3a6d01f3d5637198b746e56f23a26d2c4e54f96377faec6b4b9",
+      "git_blob": "afcd13f317995388565130c9f94282e4e90cd024"
+    },
+    {
+      "path": "evidence/2026-10-10-tp4-optimization/isolated-vs-shared-profile.md",
+      "bytes": 6474,
+      "sha256": "d96c40aa8ee2d5cc3cf62491bf2175c33b6b94180891346d8b0b3908b000841f",
+      "git_blob": "4de950d80ee7ad99e45bfa1a2be9dadbaaff4e03"
+    },
+    {
+      "path": "evidence/2026-10-10-tp4-optimization/isolated8-cancel.json",
+      "bytes": 1576,
+      "sha256": "2af809a5af60aa97f5b082f12c9d39e2559ab403877e0e4f03bbcb119b4f7bad",
+      "git_blob": "e0230eb33542ce4cceb0ce234fd1f19fc9db3911"
+    },
+    {
+      "path": "evidence/2026-10-10-tp4-optimization/isolated8-decode-heavy.json",
+      "bytes": 64158,
+      "sha256": "c7b7379b59f75c093ae51b83e701772ff2116e33c9ab51b1debe6e2234324534",
+      "git_blob": "f1a9e308d758276b6a844848bed5289a27010b8b"
+    },
+    {
+      "path": "evidence/2026-10-10-tp4-optimization/isolated8-manifest.json",
+      "bytes": 3257,
+      "sha256": "18b8ea153c3e5c8af5ded9135ba9617a9d196142e017ca8946c6ea039c809b0c",
+      "git_blob": "1513b93d654d40b03077b74e679bba2124108122"
+    },
+    {
+      "path": "evidence/2026-10-10-tp4-optimization/isolated8-mixed.json",
+      "bytes": 64105,
+      "sha256": "3b057f12cfd0eb7d3814bced71898083ba8a73a8c0378bf2af2b4dea0aa791e8",
+      "git_blob": "d39f4ee99e22d78a69e2bae05ecde6caa1717de7"
+    },
+    {
+      "path": "evidence/2026-10-10-tp4-optimization/isolated8-profile-client.json",
+      "bytes": 2031,
+      "sha256": "71cd75ba50f80a3d8e806fa6d62f53353916379fc5d45fcc7377a33681ace466",
+      "git_blob": "9277108d4a417b668816c8975786b315a3e3a14a"
+    },
+    {
+      "path": "evidence/2026-10-10-tp4-optimization/isolated8-progress.json",
+      "bytes": 2029,
+      "sha256": "9623b8c3ae36662994f9d8fe233c37421703107ae2886760d8aaa091efe346ed",
+      "git_blob": "b7f8589a16d71525d9fd4ebb2f1a265465caaa30"
+    },
+    {
+      "path": "evidence/2026-10-10-tp4-optimization/isolated8-trace-check.json",
+      "bytes": 462,
+      "sha256": "ce91961d78bdfd58e1d03959c975bfd287190b74499b9526c810d88236c77210",
+      "git_blob": "4f5aea10ab5a9a60295bed0d78e72b37a97e1820"
+    },
+    {
+      "path": "evidence/2026-10-10-tp4-optimization/native-correctness.json",
+      "bytes": 249266,
+      "sha256": "3a54c8e832726a6bcf1bef00577436d41220a36f6daab1acb1c5480947982b83",
+      "git_blob": "129a3770687db85040ce20a7ebfa90be79005adb"
+    },
+    {
+      "path": "evidence/2026-10-10-tp4-optimization/native-decode-heavy.json",
+      "bytes": 64284,
+      "sha256": "d3721df7c077c466a1c1be2f4a84d3a20819fe6bb428e49d9ddd9b297dc573c4",
+      "git_blob": "9b91c9237873f2f0dc32203f5b08980b2ee84945"
+    },
+    {
+      "path": "evidence/2026-10-10-tp4-optimization/native-eager-state-manifest.json",
+      "bytes": 1416,
+      "sha256": "310bf5da2bddeb5cbfed66a38db07e8bade52f0b6062a235a98ff8c64ec5a940",
+      "git_blob": "76b0882a0243a2119e9f59d046781c614f0b858e"
+    },
+    {
+      "path": "evidence/2026-10-10-tp4-optimization/native-eager-state-reuse.json",
+      "bytes": 981312,
+      "sha256": "69a706bb87043e12804bf13006da02ef5c4030d8ff3a8fab53397f496ced01c7",
+      "git_blob": "f800da7c5583387de64a7e992ca0599934882c55"
+    },
+    {
+      "path": "evidence/2026-10-10-tp4-optimization/native-graph-baseline-summary.json",
+      "bytes": 10738,
+      "sha256": "402feae4c27666c256b2f92ab2b656f05e037e7a1211c697939e48146b1fa683",
+      "git_blob": "bee04de8f7e83959c334938f3610318aa37c082a"
+    },
+    {
+      "path": "evidence/2026-10-10-tp4-optimization/native-graph-bracket-decode-heavy.json",
+      "bytes": 64835,
+      "sha256": "f8c5e3560573ef39010e88d4266dc3bc3893729e508218fc5b90827e5ca048cb",
+      "git_blob": "ba92fd9d1a410283cb474cb51ef262095455eca5"
+    },
+    {
+      "path": "evidence/2026-10-10-tp4-optimization/native-graph-bracket-manifest.json",
+      "bytes": 1393,
+      "sha256": "4200b7ec30c1e3d2fe5d0b8e8ba9fd56aa4c30f2f6c3a6a1b492e40bfe90eaf6",
+      "git_blob": "9b08d0fe3be22bb5d85ecca23761ca690a7f8fa6"
+    },
+    {
+      "path": "evidence/2026-10-10-tp4-optimization/native-graph-bracket-mixed.json",
+      "bytes": 64683,
+      "sha256": "1be9428c43db5555e45a33c73855fc79d9ab9b024b5d4fb053bd60bc5895dab8",
+      "git_blob": "b870c2ed8a63c6bb371614162695275b1e3f8c87"
+    },
+    {
+      "path": "evidence/2026-10-10-tp4-optimization/native-graph-correctness.json",
+      "bytes": 249421,
+      "sha256": "8337a6b3cf64957a59bfc645050f8bbcc9f5326812d372d67d227197b8263a29",
+      "git_blob": "4252d99696e81d6766745eed4d85fb31c677e435"
+    },
+    {
+      "path": "evidence/2026-10-10-tp4-optimization/native-graph-decode-heavy.json",
+      "bytes": 64830,
+      "sha256": "9f6cc8d5d3f6c5928bfedf1fa42c7bcd25e8c773987fd8d06e0ee8e33fb1da5e",
+      "git_blob": "565bb13b2a939a09a670cc801b916675af720881"
+    },
+    {
+      "path": "evidence/2026-10-10-tp4-optimization/native-graph-manifest.json",
+      "bytes": 2628,
+      "sha256": "91016ec3dadedee56962c9d3090f23ac7bf29620f35c68a28d5518a21222ecfd",
+      "git_blob": "864f133defed6e8bf1a473775599e75b87df1c36"
+    },
+    {
+      "path": "evidence/2026-10-10-tp4-optimization/native-graph-mixed.json",
+      "bytes": 64589,
+      "sha256": "1fb2c066347a4f19b2d44677e743ef755017f53aa6abc22fa4f3771b164254d9",
+      "git_blob": "9304a173f6f88887cd014ad98d91311f6277b7c0"
+    },
+    {
+      "path": "evidence/2026-10-10-tp4-optimization/native-graph-progress.json",
+      "bytes": 2028,
+      "sha256": "25ab3b151713def6e7285bb61048ed0b2119ed6a36e44a6d0c6db19576fd0a5e",
+      "git_blob": "af4d56bbb7621cd42280ce5e7679f51e68dc69bf"
+    },
+    {
+      "path": "evidence/2026-10-10-tp4-optimization/native-graph-serving.json",
+      "bytes": 605272,
+      "sha256": "bfd628bb8b8171b91193f9c69c4fb8977563c4c9ff63f4f7c9f493bc327c3851",
+      "git_blob": "7e47324137410e9f5842a2e94cf469b33d74a50c"
+    },
+    {
+      "path": "evidence/2026-10-10-tp4-optimization/native-graph-state-reuse.json",
+      "bytes": 984812,
+      "sha256": "29650c7a95242f7cd06b7ea712f1faad0b22b5f09f64b84802c233e7e939825a",
+      "git_blob": "38905dab3e32ddd1514ea5cdb7479ab28a970206"
+    },
+    {
+      "path": "evidence/2026-10-10-tp4-optimization/native-graph-vs-graph-adaptive.json",
+      "bytes": 490208,
+      "sha256": "d9ffd69d5abcdd94bb196f8326d9fcca5fab019cd4436fdb4ff6477ea1ee1674",
+      "git_blob": "37f314fd91a0c47f4716d88ce7cb70baf5bb668d"
+    },
+    {
+      "path": "evidence/2026-10-10-tp4-optimization/native-graph-vs-graph-compiled-serving.json",
+      "bytes": 1205885,
+      "sha256": "05e00374f5f6ab68171da73487f821455a47172e78f175665d30a7b969926f9d",
+      "git_blob": "d1e2bc90200cddd112a9286b8068a848c4f12bf2"
+    },
+    {
+      "path": "evidence/2026-10-10-tp4-optimization/native-graph-vs-graph-compiled.json",
+      "bytes": 490195,
+      "sha256": "2e9bfb74d7bca1050f1984c6db714bc9802b7fcb702effea62b7fe0e75916552",
+      "git_blob": "fc54cb5cbd9a042f846920ee849043db220fc805"
+    },
+    {
+      "path": "evidence/2026-10-10-tp4-optimization/native-graph-vs-graph-work256-serving.json",
+      "bytes": 1205676,
+      "sha256": "c73baad9967ab52a836485eff33721bca6b97ebe41f321095e83a153826f051f",
+      "git_blob": "38b3b4dcda31080394ee3ae5d84cb76ee491ef99"
+    },
+    {
+      "path": "evidence/2026-10-10-tp4-optimization/native-graph-vs-graph-work256-traced.json",
+      "bytes": 490194,
+      "sha256": "3af61caaf0d174679b05910b6327df9f8bf2ade363c3834fe37d5dcd7ed8bbf9",
+      "git_blob": "3824d05b112f22d2a655f761cccdf9b1ff0046f1"
+    },
+    {
+      "path": "evidence/2026-10-10-tp4-optimization/native-graph-vs-graph-work256.json",
+      "bytes": 490187,
+      "sha256": "50faf752961942c07a6217ff66bc5ad094bada5bc77ac07e2da5130132f0df8d",
+      "git_blob": "e61b2ad9d96dabd34036ff494e2eb1630927d4ae"
+    },
+    {
+      "path": "evidence/2026-10-10-tp4-optimization/native-graph-vs-graph8-serving.json",
+      "bytes": 1205841,
+      "sha256": "7249bb5b3ee775fe51ed17249a9f1e78ae5347bfb41e5b322517c2cd875eba7e",
+      "git_blob": "19d61f6d3cba260e14ee80bd04dfa50cf7de1981"
+    },
+    {
+      "path": "evidence/2026-10-10-tp4-optimization/native-graph-vs-graph8.json",
+      "bytes": 490183,
+      "sha256": "1a0b170ce64756540576d3ce68f320a00222e7233cc84bc532075bb9f474cc66",
+      "git_blob": "9418b2daca0074e596bbc498052f1ab050ec9e98"
+    },
+    {
+      "path": "evidence/2026-10-10-tp4-optimization/native-manifest.json",
+      "bytes": 3508,
+      "sha256": "c5874b01ca5037779e7a52dffab316fa295c713aef6ec3b9ebb5cdab53781981",
+      "git_blob": "f388f60bc93d7a45422fdd0791e49348e8654712"
+    },
+    {
+      "path": "evidence/2026-10-10-tp4-optimization/native-mixed.json",
+      "bytes": 64157,
+      "sha256": "3b361649815a35f42534c1996eb923562f9e2ebaf10f28e048d87f63a017a9d5",
+      "git_blob": "6a8c6a581b04f65c7dbcdd0e8cccd655b1c3062d"
+    },
+    {
+      "path": "evidence/2026-10-10-tp4-optimization/native-profile-client.json",
+      "bytes": 2002,
+      "sha256": "5b8ca4006f90a1d7ff7bb3fd552943d56b249c3dbf3017db1fe9a7d0477d6e7c",
+      "git_blob": "4f04f948a315e6c52bb2875d50c4c2b3272925a3"
+    },
+    {
+      "path": "evidence/2026-10-10-tp4-optimization/native-vs-isolated8.json",
+      "bytes": 489874,
+      "sha256": "bad84f436125aaf25f21ba80c08e59f913790d15680de5f31d565191cc24cd59",
+      "git_blob": "038a87650c2bc1fac115a8f9a1abed5756f9c58d"
+    },
+    {
+      "path": "evidence/2026-10-10-tp4-optimization/native-vs-pfirst.json",
+      "bytes": 489859,
+      "sha256": "68d25201731e9cc984baabc04fba48b1138346c28e1b891dfc0ec3ee3236341a",
+      "git_blob": "771fa05bec49f9e3fa147ab4bf639c4046409dc4"
+    },
+    {
+      "path": "evidence/2026-10-10-tp4-optimization/native-vs-shared-profile-audit.py",
+      "bytes": 19657,
+      "sha256": "2636e8e17d34cb6ab5dcc6b9c3d71115954572693d8482fabeed1edb19ba00b9",
+      "git_blob": "1948e370e074a236c7f8b1f0b6c246ada033580f"
+    },
+    {
+      "path": "evidence/2026-10-10-tp4-optimization/native-vs-shared-profile.json",
+      "bytes": 192824,
+      "sha256": "e4e499fea32d0da83fbac5b7877eb8f59bfaf40ecae6620aad8204c362b85167",
+      "git_blob": "bc68800cbd47526509441cf2a542cb11339c91e9"
+    },
+    {
+      "path": "evidence/2026-10-10-tp4-optimization/native-vs-shared-profile.md",
+      "bytes": 6151,
+      "sha256": "681cb1e970bdc571edc34a6c7eeda96033464ae0d26ea295a9c3351713dde044",
+      "git_blob": "c4b77539c0a59fe4d48ac4ad608f7d16bb50da68"
+    },
+    {
+      "path": "evidence/2026-10-10-tp4-optimization/one-token-prefill-investigation.md",
+      "bytes": 14347,
+      "sha256": "cf0128cc25f46aef20a41b16a89c27a3995ce9e0865d8a5c9dc930d6b3cda511",
+      "git_blob": "53c1caff45f2559f8c6fb9e8dbbcfd5ee8d15a18"
+    },
+    {
+      "path": "evidence/2026-10-10-tp4-optimization/one-token-prefill-issue-draft.md",
+      "bytes": 6122,
+      "sha256": "5a409ba867b7211bc47fdf0dbc4d4ee1643b253780280167756ae3fabc063fdd",
+      "git_blob": "ff892a0010596a94003ec12d2133150495736450"
+    },
+    {
+      "path": "evidence/2026-10-10-tp4-optimization/original-comparison.md",
+      "bytes": 10721,
+      "sha256": "bb724fbebd172ee2c4cc8ec13276dc287d0dab14d5d5b50039bb9db917f6290a",
+      "git_blob": "b56d83b45c94d39981aa18831a6bc5efb723d20a"
+    },
+    {
+      "path": "evidence/2026-10-10-tp4-optimization/pfirst-cancel.json",
+      "bytes": 1579,
+      "sha256": "80d202564246c33c6c447276d7e688105479fc3d556c35ad1f3e9f816f79af0f",
+      "git_blob": "92836319e8609decc73328b192c38cae513672c9"
+    },
+    {
+      "path": "evidence/2026-10-10-tp4-optimization/pfirst-decode-heavy.json",
+      "bytes": 64198,
+      "sha256": "b16b08af68cbf076532750a7fb6ec872e29a74e835e4ce881bf1e8ea2a3c5d1a",
+      "git_blob": "e3f0382806cc53fe090303a46522613f4d475b83"
+    },
+    {
+      "path": "evidence/2026-10-10-tp4-optimization/pfirst-manifest.json",
+      "bytes": 2854,
+      "sha256": "f125701856792abf771ff0d0c06656f51dbfbeaec6d37fde6a7a815253ce3b7f",
+      "git_blob": "9688a6e411dcc2eabd4e74c42a04991a31a3631b"
+    },
+    {
+      "path": "evidence/2026-10-10-tp4-optimization/pfirst-mixed.json",
+      "bytes": 64097,
+      "sha256": "f1a9b02cffd9fccff3053424efe86f58b042e4cbd779eee0722a62da11d7c15b",
+      "git_blob": "eb638e1aaaab68f2792b0ecbf21c2cc12264561e"
+    },
+    {
+      "path": "evidence/2026-10-10-tp4-optimization/pfirst-progress.json",
+      "bytes": 2030,
+      "sha256": "4cd1ebd61caf0823e26d7af56abd652be1bc0d38ef9d450a9c92d43d17ad22b2",
+      "git_blob": "d532bc78ec93e9b21c0a6d661c38d638b22a6d87"
+    },
+    {
+      "path": "evidence/2026-10-10-tp4-optimization/pfirst-trace-check.json",
+      "bytes": 489,
+      "sha256": "7f27266b54df5a4e1dbe6874c3baa39b2e094949eb6b54ca5e14fd2b5144841f",
+      "git_blob": "2bc75c8eaeaf63829d4e5e1ee992331f0dbfbae7"
+    },
+    {
+      "path": "evidence/2026-10-10-tp4-optimization/restored-muxpd-smoke.json",
+      "bytes": 85156,
+      "sha256": "5ee42ea0f90bc6bd52728650c5c0efee8331ba42fa6c9625890488313a8165ff",
+      "git_blob": "95ca5db87117e8fd48f50038e67641434afddda4"
+    },
+    {
+      "path": "evidence/2026-10-10-tp4-optimization/restored-native-smoke.json",
+      "bytes": 86321,
+      "sha256": "7a2f93011ba77f0ed277804c7a54ef23aa4ba3638476a12b30a01e7b96d5beb4",
+      "git_blob": "4342c0efa405782b42e249674281988d115b90b0"
+    },
+    {
+      "path": "evidence/2026-10-10-tp4-optimization/restored-services.json",
+      "bytes": 3520,
+      "sha256": "17ad88047d335a9b3bac0d13e8b49b5c8198b81fe404c57a02f11efe0bf3f442",
+      "git_blob": "e755fadd5aefe2bab48eceabc3619e804b86e53e"
+    },
+    {
+      "path": "evidence/2026-10-10-tp4-optimization/scheduler-findings.md",
+      "bytes": 7581,
+      "sha256": "a2d86140e14d6836efc97388a1f6146eced5d1a6de60271a1bf047c10e3315a9",
+      "git_blob": "16db852a9a2437c376176600316d01ce3a757194"
+    },
+    {
+      "path": "evidence/2026-10-10-tp4-optimization/validation-final.json",
+      "bytes": 2395,
+      "sha256": "55c558789829a432fae2d18fda1b099391f79da0b963a49df606b444fcd18522",
+      "git_blob": "c178d4439dc46f29dd0d210397ae82c5f50c5ac7"
+    }
+  ],
+  "invalid_json_paths": [],
+  "archive": {
+    "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/releases/download/evidence-mod-history-20261023-v1/muxpd.tar.gz",
+    "bytes": 1019697,
+    "sha256": "ff8fb16c96ffa7ca4b7fbdb03f21b4e6d6cec63d92d53fd63234cc25d8797313",
+    "member_prefix": "snapshot/"
+  }
+}
