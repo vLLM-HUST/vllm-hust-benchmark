@@ -5,13 +5,13 @@ from pathlib import Path
 
 def test_targeted_original_bytes():
     root = Path(__file__).resolve().parents[1] / "archive/mod-targeted-20261023"
-    for name in ("compress", "manager"):
+    for name, count in (("compress", 3), ("manager", 2), ("pyramid-current", 100)):
         capsule = root / name
         manifest = json.loads((capsule / "manifest.json").read_text())
         assert manifest["source_visibility"] == "public"
         assert len(manifest["source_commit"]) == 40
         rows = manifest["files"]
-        assert len(rows) == (3 if name == "compress" else 2)
+        assert len(rows) == count
         assert {row["path"] for row in rows} == {
             p.relative_to(capsule / "snapshot").as_posix()
             for p in (capsule / "snapshot").rglob("*")

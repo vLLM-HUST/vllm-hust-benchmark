@@ -1,0 +1,20 @@
+{
+  "scope": "old PyramidKV vs selected-page PyramidKV; both compression enabled; preliminary sequential process pair, not B0/B1 optimization claim",
+  "baseline_revision": "47580977a2dca108054470b3132811bd690020a6",
+  "candidate_files": {
+    "/root/workspace/pyramidkv-perf/src/vllm_ascend_pyramidkv/method.py": "e92cf01f75995a1eedae43c85a97d82112cd93c022465b9698674bc4d530dbc1",
+    "/root/workspace/pyramidkv-perf/src/vllm_ascend_pyramidkv/provider.py": "1ac0dceb22c61fa4786230e84d9a95729c946fd2dd730b72ca7c6bf6608a6876",
+    "/root/workspace/pyramidkv-perf/scripts/qwen35/evaluate.py": "4b8f2e99bc9bd81ab3f934f4c2cb7a4fa575a7b73626a950e8fd0d10b5bfaaed",
+    "/root/workspace/pyramidkv-runtime/serve-managed.sh": "767bcb3f8bcf3b9af529d4a2fb0a6cc407d86dd387a27197a332c1abe5ba8b48"
+  },
+  "plan": {
+    "manifest.json": "5d0ed735b61e1fa97e3ddb0f0f51b3c17f75bfe99e5905c446aa41212ce3afe8",
+    "cases.json": "91eb73537ac33be26e967d0c89daab52a2f43c9a6f4ce8d79b66e2a07ac08a66",
+    "groups.json": "9b29a51b48f73bc6d5509f1f7500dd065714f71356576279c4f598222aa77ef7"
+  },
+  "source_equality_gate": "whole-cache BF16 NPU comparison on 8192/24576/32704, including MTP and source immutability",
+  "serving_quality_gate": "no request errors, report per-task F1 and exact generated-output agreement for all 300 existing development/holdout cases; retain all mismatches",
+  "performance": "3 distinct workload repetitions for 1K/8K/24K at concurrency 1/4; retain negative results; no stable throughput claim from one process pair",
+  "runtime": "same managed server command, graph mode, BF16, TP2, seed 17, aligned 1368/beta2; only method implementation differs",
+  "startup": "fresh process for each arm; startup-only cache advice stops at readiness; no NPU diagnostics during requests"
+}

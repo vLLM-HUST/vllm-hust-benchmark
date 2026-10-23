@@ -1,0 +1,41 @@
+import json, os, signal, subprocess, time, urllib.request
+from pathlib import Path
+b=Path(__file__).parent
+client=urllib.request.build_opener(urllib.request.ProxyHandler({}))
+pid=int(Path('/root/workspace/pyramidkv-runtime/server.pid').read_text())
+cmd=Path(f'/proc/{pid}/cmdline').read_bytes()
+assert b'qwen35-pyramidkv' in cmd and b'vllm.entrypoints.cli.main' in cmd
+os.kill(pid,signal.SIGTERM)
+for _ in range(60):
+    try:
+        with client.open('http://127.0.0.1:8000/health',timeout=1): pass
+    except Exception: break
+    time.sleep(1)
+time.sleep(12)
+subprocess.run(['npu-smi','info'],stdout=(b/'between-launches-npu.txt').open('w'),stderr=subprocess.STDOUT,check=True)
+
+log=(b/'server.log').open('wb')
+p=subprocess.Popen(['bash',str(b/'serve.sh')],stdout=log,stderr=subprocess.STDOUT,start_new_session=True)
+(b/'manager.pid').write_text(str(p.pid)+'\n')
+Path('/root/workspace/pyramidkv-runtime/server.pid').write_text(str(p.pid)+'\n')
+events=[]
+for attempt in range(450):
+    mem=int(Path('/sys/fs/cgroup/memory.current').read_text())
+    if mem>48*1024**3:
+        for shard in Path('/root/workspace/Qwen3.5-35B-A3B').glob('*.safetensors'):
+            fd=os.open(shard,os.O_RDONLY)
+            try: os.posix_fadvise(fd,0,0,os.POSIX_FADV_DONTNEED)
+            finally: os.close(fd)
+        events.append({'time':time.time(),'memory_bytes_before':mem})
+        (b/'startup-cache-events.json').write_text(json.dumps(events,indent=2))
+    if p.poll() is not None:
+        raise SystemExit(f'Manager exited {p.returncode}')
+    try:
+        with client.open('http://127.0.0.1:8000/health',timeout=1) as r:
+            if r.status==200:
+                (b/'ready.json').write_text(json.dumps({'manager_pid':p.pid,'ready_at':time.time(),'startup_cache_events':len(events)},indent=2))
+                print('Managed server ready',p.pid,flush=True)
+                break
+    except Exception: pass
+    time.sleep(2)
+else: raise SystemExit('Readiness timed out')

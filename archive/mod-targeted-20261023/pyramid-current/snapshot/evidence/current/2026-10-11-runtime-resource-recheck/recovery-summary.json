@@ -1,0 +1,78 @@
+{
+  "passed": true,
+  "scope": "functional smoke only; run on an otherwise idle server",
+  "requests": [
+    {
+      "name": "short",
+      "id": "chatcmpl-8893e4a402fcf664",
+      "status": 200,
+      "elapsed_seconds": 0.6644880771636963,
+      "usage": {
+        "prompt_tokens": 23,
+        "total_tokens": 25,
+        "completion_tokens": 2,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "multimodal_tokens": null
+        }
+      }
+    },
+    {
+      "name": "long",
+      "id": "chatcmpl-9bec4121a9fce62d",
+      "status": 200,
+      "elapsed_seconds": 1.0657281326130033,
+      "usage": {
+        "prompt_tokens": 5312,
+        "total_tokens": 5318,
+        "completion_tokens": 6,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "multimodal_tokens": null
+        }
+      }
+    },
+    {
+      "name": "long-repeat",
+      "id": "chatcmpl-916d027340890b3b",
+      "status": 200,
+      "elapsed_seconds": 0.5856754295527935,
+      "usage": {
+        "prompt_tokens": 5312,
+        "total_tokens": 5318,
+        "completion_tokens": 6,
+        "prompt_tokens_details": {
+          "cached_tokens": 2048,
+          "multimodal_tokens": null
+        }
+      }
+    }
+  ],
+  "compression_transactions": [
+    {
+      "request_id": "chatcmpl-9bec4121a9fce62d",
+      "engine_request_id": "chatcmpl-9bec4121a9fce62d-95a8780b",
+      "semantic_tokens": 5312,
+      "physical_tokens": 2048,
+      "tp_ranks": [
+        0,
+        1
+      ]
+    },
+    {
+      "request_id": "chatcmpl-916d027340890b3b",
+      "engine_request_id": "chatcmpl-916d027340890b3b-881b856c",
+      "semantic_tokens": 5312,
+      "physical_tokens": 2048,
+      "tp_ranks": [
+        0,
+        1
+      ]
+    }
+  ],
+  "prefix_hit_tokens": 2048,
+  "mtp_delta": {
+    "num_draft_tokens": 14.0,
+    "num_accepted_tokens": 10.0
+  }
+}

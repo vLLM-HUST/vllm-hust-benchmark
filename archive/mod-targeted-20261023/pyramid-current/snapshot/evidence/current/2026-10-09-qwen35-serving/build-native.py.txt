@@ -1,0 +1,14 @@
+import importlib.util, pathlib, subprocess, sys, sysconfig
+src = pathlib.Path.cwd()
+pybind = subprocess.check_output([sys.executable, '-m', 'pybind11', '--cmakedir'], text=True).strip()
+npu = pathlib.Path(importlib.util.find_spec('torch_npu').origin).parent
+subprocess.run(['cmake', '-S', str(src), '-B', 'build-qwen-native',
+    '-DCMAKE_BUILD_TYPE=Release', '-DCMAKE_EXPORT_COMPILE_COMMANDS=1',
+    '-DASCEND_HOME_PATH=/usr/local/Ascend/cann-9.1.0',
+    '-DPYTHON_EXECUTABLE='+sys.executable,
+    '-DPYTHON_INCLUDE_PATH='+sysconfig.get_paths()['include'],
+    '-DCMAKE_INSTALL_PREFIX='+str(src/'vllm_ascend'),
+    '-DCMAKE_PREFIX_PATH='+pybind, '-DSOC_VERSION=ascend910b2',
+    '-DFETCHCONTENT_BASE_DIR='+str(src/'.deps'), '-DTORCH_NPU_PATH='+str(npu)], check=True)
+subprocess.run(['cmake', '--build', 'build-qwen-native', '-j', '4', '--target', 'vllm_ascend_C'], check=True)
+subprocess.run(['cmake', '--install', 'build-qwen-native'], check=True)
