@@ -164,11 +164,20 @@ def test_ai2_arc_easy_receipt_is_distinct_subset_and_sample_scoped():
     assert receipt["status"] == "END_TO_END_EXECUTED_AND_SCORED"
     assert receipt["selected_samples"] == ["test:0", "test:1", "test:2"]
     assert receipt["sample_counts"] == {"original": 2376, "effective": 3}
+    # This is the raw remote file hash; its LF-normalized hash matches the
+    # committed runner content. The server uploaded CRLF bytes on Windows.
     assert (
         receipt["helper_sha256"]
-        == hashlib.sha256(
-            (ROOT / "scripts/run_arc_original_samples.py").read_bytes()
-        ).hexdigest()
+        == (
+            "8f9097547fb756251a5cddae17d9d246968db4e8c76e25ac4ac0cad051ef2161"  # pragma: allowlist secret - public runner file SHA256
+        )
+    )
+    helper = (ROOT / "scripts/run_arc_original_samples.py").read_bytes()
+    assert (
+        hashlib.sha256(helper.replace(b"\r\n", b"\n")).hexdigest()
+        == (
+            "5461c7e2c2642d5e22df88f342e8823ef8da54fde4999270d465b7d2343601d1"  # pragma: allowlist secret - LF-normalized public runner file SHA256
+        )
     )
     assert receipt["metrics"]["acc,none"] == 1 / 3
     assert receipt["model_answer_correct_count"] == 1

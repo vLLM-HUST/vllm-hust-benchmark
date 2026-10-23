@@ -175,7 +175,7 @@ def test_arc_task_count_and_protocol_are_not_chat_or_full_suite_claims():
     # shared ARC-Easy support was added.
     assert (
         evidence["helper_sha256"]
-        == "f45dbe69e17309fcd74dd49fc3b74ce8dc6d7921a4c46c3268c1dcc593088568"
+        == "f45dbe69e17309fcd74dd49fc3b74ce8dc6d7921a4c46c3268c1dcc593088568"  # pragma: allowlist secret - public historical runner file SHA256
     )
 
 

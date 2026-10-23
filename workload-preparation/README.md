@@ -107,7 +107,8 @@ python -m pytest -q workload-preparation/tests tests/test_workload_data_boundary
 
 上述测试是 CPU 软件正确性检查，不加载模型，不证明真实数据集完整执行或性能提升。
 
-独立知识问答任务的原版候选似然执行示例见 [AI2-ARC Challenge/Easy 抽样复现](../docs/workload-data/ARC_CHALLENGE.zh-CN.md)，可用 `--suite` 选择子集，与聊天生成协议分开。
+独立知识问答任务的原版候选似然执行示例见 [AI2-ARC Challenge/Easy 抽样复现](../docs/workload-data/ARC_CHALLENGE.zh-CN.md)，可用
+`--suite` 选择子集，与聊天生成协议分开。
 
 通用单轮指令语料的原始字段生成入口见
 [Dolly 接入说明](../docs/workload-data/DOLLY_ORIGINAL_INSTRUCTIONS.zh-CN.md)：原instruction/context不改，参考response隔离，提示格式与模型替换显式声明；只验证生成完整性，不冒充官方质量评分。
