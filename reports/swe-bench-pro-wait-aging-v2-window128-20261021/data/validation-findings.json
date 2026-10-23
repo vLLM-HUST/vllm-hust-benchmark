@@ -1,0 +1,12 @@
+{
+  "status": "20分钟机制验证：本轮零回复和准入超时均为0；未证明性能改善，任务均未提交",
+  "findings": [
+    "两组各128个真实Agent、8题16副本、time0整批到达，客户端不设并发限制，均使用1200秒/200步/4096输出/262144上下文。Native每个9–24次正常回复，Controller11–23次，两组均0零回复；进展分布需以图为准。",
+    "本轮Controller计数按结束减开始：1411次aged恢复、1691次请求边界让出容量、0准入超时。此为本轮观测，不是全局公平性或所有输入的保证。",
+    "Native2298次正常回复/139724输出token；Controller2212次/139070输出token。Controller输出量减少约0.47%，正常返回调用减少约3.74%；p95为111.66秒，Native97.40秒。本轮未观察到性能改善，生成工作不同，不能作同工作量因果加速结论。",
+    "两组均128份终态、Submitted0，评分未决。Native127个总时限退出，另1个代理下游httpx.ReadTimeout导致HTTP500/InternalServerError；Controller128个总时限退出。模型与两卡保留，终态请求和缓存均排空。",
+    "严格逐事件核对：1200秒后无新模型请求或Agent工具步骤。预算后git diff和git status来自冻结runner收集结果，独立列在strict-budget-audit-private.json，未当成继续Agent步骤。",
+    "计划文字继承错误保留：300秒、a4和PENDING旧文本与typed1200秒/d082实际stage/资格回执不符，另存protocol-clarification与plan-text-audit；未修改运行或历史计划。Native精确终态现场UI漏采；Controller开始/10min/截止/终态现场与自动逐秒状态保留，组件非同时采样。",
+    "本地软件检查：两个干净3.11/3.12各206PASS5可选SKIP，标准CLI/build通过；benchmark相关28项通过，全benchmark同环境前后69失败集合相同。未声称远端LinuxCI或全benchmark通过。"
+  ]
+}

@@ -1,0 +1,68 @@
+{
+  "run_id": "swe-pro-v1-wait-aging-20261021-r3",
+  "runtime_controller_commit": "d082c987b551bb784410715c43aca4470796be19",
+  "runtime_benchmark_commit": "bd5bfef5fffb8df985ba57d669d7c691fc9d41bf",
+  "report_generator_commit": "d082c98",
+  "configuration": {
+    "programs_per_group": 128,
+    "unique_tasks": 8,
+    "replicas_per_task": 16,
+    "arrival_time": 0,
+    "client_concurrency_limit": null,
+    "window_seconds": 300,
+    "step_limit": 200,
+    "context_tokens": 262144,
+    "output_limit": 4096,
+    "tool_timeout_seconds": 60,
+    "max_num_batched_tokens": 8192,
+    "max_num_seqs": 256,
+    "kv_bytes_per_rank": 17179869184,
+    "tensor_parallel_size": 2,
+    "async_scheduling": true,
+    "priority_wait_seconds": 30,
+    "admission_wait_seconds": 180
+  },
+  "normally_returned_calls": {
+    "native": {
+      "returns": 1201,
+      "output_tokens": 65328,
+      "mean_latency_s": 29.136290092934715,
+      "p50_latency_s": 26.21639555785805,
+      "p95_latency_s": 49.24943056097254,
+      "mean_input_tokens": 5510.372189841799
+    },
+    "controller": {
+      "returns": 1208,
+      "output_tokens": 68586,
+      "mean_latency_s": 27.941072269897933,
+      "p50_latency_s": 20.643810515059158,
+      "p95_latency_s": 60.95573639252688,
+      "mean_input_tokens": 5588.123344370861
+    }
+  },
+  "validation_findings": {
+    "status": "短多轮验证通过；尚非长窗口或整批完成收益",
+    "findings": [
+      "两组各128个真实Agent、300秒窗口、time0整批到达，无客户端并发限制；Native每个Agent7–12次正常回复，Controller6–12次，均0个零回复。",
+      "Controller在实际请求边界让出容量598次、等待恢复368次，准入超时0次。此为一次短窗口的实机证据，不承诺所有输入、长窗口或持续无容量时的完成时间。",
+      "两组各128份终态完整，均在预算截止后退出，未发现整批开始300秒后继续发起的模型请求。全部终态均含墙预算到期，Submitted0/128，评分未决；本次不是任务完成率或完整makespan实验。",
+      "两个干净Python3.11/3.12标准检查各206passed5skip，CLI和build通过。benchmark相关28项通过；全benchmark macOS修改前后均69项失败且失败集合相同，未宣称全仓或Linux远端CI通过。"
+    ]
+  },
+  "archive": {
+    "bytes": 19055863,
+    "files": 4234,
+    "sha256": "4ed4fb2960715224b1731d971061e7956406b8ea4f29e94abf8068fe49f66fc0",
+    "whole_archive_verification": "PASS",
+    "individual_file_verification": "PASS"
+  },
+  "raw_problem_answers_patches_published": false,
+  "ci": "NOT_CHECKED; earlier source Actions blocked before steps by account billing/spending limits",
+  "local_software_checks": {
+    "controller": "Python3.11/3.12 each206passed5skipped plus CLI/build PASS for v2; earlier r2 used a4",
+    "benchmark_relevant": "28passed for wall-budget repair",
+    "benchmark_full_macos": "69 failures on both frozen baseline and changed tree; no introduced failures, not a full-suite PASS"
+  },
+  "validity": "One300s NC diagnostic; generated work differs; no causal speedup or completed-batch makespan claim",
+  "public_text_normalization": "SVG trailing whitespace removed with XML token equality check; CSV normalized to LF with parsed row equality; original private artifacts unchanged"
+}

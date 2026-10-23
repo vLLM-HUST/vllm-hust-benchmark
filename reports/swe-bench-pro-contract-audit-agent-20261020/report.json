@@ -1,0 +1,98 @@
+{
+  "schema": "swe-bench-pro-contract-audit-agent-v1",
+  "run_id": "swe-pro-v1-contract-audit-single-agent-20261020-r1",
+  "execution_source_commit": "026170155b61095f7e51f36289439116882c7073",
+  "runner_sha256": "e17d685cd2f492985471b27dcda4e58b2cf1185be628eb37379a6da9c86d4fbf",
+  "configuration_diff": {
+    "changed_fields": [
+      "run_id",
+      "agent.task_instructions"
+    ],
+    "step_limit": 200,
+    "prompt_change": "generic repository-contract audit; no oracle details",
+    "program_instances": 1
+  },
+  "configuration": {
+    "program_instances": 1,
+    "context": 262144,
+    "step_limit": 200,
+    "wall_budget_seconds": 1200,
+    "tool_timeout_seconds": 60,
+    "max_tokens": 4096,
+    "temperature": 0,
+    "seed": 0,
+    "thinking": false,
+    "http_timeouts": {
+      "connect": 180,
+      "read": null,
+      "write": 180,
+      "pool": 180
+    },
+    "automatic_retries": 0,
+    "task_instructions": "Before submitting, run the repository's existing relevant project tests against your code changes. Inspect the project test commands and required services in its own documentation and package configuration. Use actual runtime tests exercising the changed behavior; source-text checks or scripts that only inspect source strings are not a substitute. If a relevant test fails, use the failure output to fix the implementation and rerun it within the remaining budget. Preserve existing passing behavior. If tests cannot run, report the exact command and blocker honestly. Do not claim tests passed without executing them.\n\nBefore implementing, audit the existing repository contracts instead of assuming them: inspect how configuration values are represented by the configuration UI, persistence layer and consumers; verify how human-readable error messages are represented and localized at API boundaries. Follow those existing conventions. When extending a function signature, search all call sites and preserve each caller contract. Include integration checks through the actual configuration and API paths, not only tests matching your implementation assumptions. Do not change tests or requirements just to make them pass.",
+    "model_restarted": false
+  },
+  "oracle_isolation": {
+    "official_tests_given_to_agent": false,
+    "reference_or_manual_patch_given_to_agent": false,
+    "prompt_status": "diagnosis-informed generic contract-audit guidance, not blind evaluation"
+  },
+  "agent_result": {
+    "status": "Submitted",
+    "agent_submitted": true,
+    "elapsed_seconds": 276.8589916592464,
+    "model_calls": 96,
+    "patch_bytes": 7818,
+    "patch_sha256": "302a9fc928a0c0750469ac07eed1a8e0b77061d5e85fd1b3b088360411e88310",
+    "container_cleanup_exit_code": 0
+  },
+  "query_replies": 96,
+  "query_exceptions": 0,
+  "max_prompt_tokens": 47535,
+  "project_test_suite_invocations": 0,
+  "self_written_script_executions": 6,
+  "self_check_limitation": "scripts mocked the nonexistent dependency method and checked source text; no real project test suite",
+  "official_grading": {
+    "resolved": 0,
+    "total": 1,
+    "unresolved": 0,
+    "new_model_calls": 0,
+    "all_parsed_tests": {
+      "PASSED": 124,
+      "FAILED": 8
+    },
+    "fail_to_pass": {
+      "expected": 1,
+      "statuses": {
+        "FAILED": 1
+      }
+    },
+    "pass_to_pass": {
+      "expected": 148,
+      "statuses": {
+        "PASSED": 124,
+        "FAILED": 4,
+        "MISSING": 20
+      }
+    },
+    "failure_kind": "call to a method not present on the real privilege module"
+  },
+  "archive": {
+    "bytes": 240656,
+    "sha256": "4845e510fee559edcabccc853cbccab27723ffb1d066ba6271c5a7b3b59f1c3e",
+    "files": 77,
+    "archive_verification": "PASS",
+    "individual_file_verification": "PASS"
+  },
+  "cleanup": {
+    "execution_actor_stopped": true,
+    "grading_actor_stopped": true,
+    "model_stopped": false
+  },
+  "limitations": [
+    "One task and one Agent",
+    "A generic instruction does not enforce actual project-test execution",
+    "Manual counterfactual success remains separate from Agent failure",
+    "No performance or model-quality leaderboard claim"
+  ]
+}
