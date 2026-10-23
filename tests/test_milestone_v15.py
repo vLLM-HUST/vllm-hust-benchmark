@@ -1,6 +1,7 @@
 import hashlib
 import importlib.util
 import json
+import subprocess
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -50,3 +51,50 @@ def test_v15_exact_extract_and_offline_reuse():
     assert "V1.5第3.4.4节按测量区间分摊费用" in report
     assert "M06全流程验收未通过" not in report
     assert "已完成75种通信图参考" in report
+
+
+def test_v074_publication_identity_and_bilingual_current_scope(monkeypatch):
+    monkeypatch.syspath_prepend(str(ROOT / "scripts"))
+    import build_midterm_v074 as builder
+
+    published = json.loads(builder.OUTPUT.read_text())
+    assert published["version"] == "V0.74"
+    assert published["source_commit"] == builder.REVISION
+    exists = (
+        subprocess.run(
+            ["git", "cat-file", "-e", f"{builder.REVISION}:{builder.REPORT}"],
+            cwd=ROOT,
+            capture_output=True,
+            check=False,
+        ).returncode
+        == 0
+    )
+    if exists:
+        assert published == builder.build()
+        assert (
+            published["report_sha256"]
+            == hashlib.sha256(builder.pinned(builder.REPORT)).hexdigest()
+        )
+    assert published["m01_method"]["method_version"] == "V1.5"
+    sections = {s["id"]: s for s in published["sections"]}
+    assert sections["milestone-v15"]["tables_en"][0]["rows"]
+    assert "258.30%" in json.dumps(sections["milestone-v15"], ensure_ascii=False)
+    for ident in (
+        "milestone-v15",
+        "m01-verdict",
+        "resources",
+        "paired-lifecycle",
+        "long-context-parser",
+    ):
+        assert sections[ident]["scope_en"]
+    for item in published["sections"]:
+        for evidence in item["evidence"]:
+            assert (ROOT / evidence["path"]).exists()
+    historical = json.loads(
+        (ROOT / "website-publication/data/midterm-v072.json").read_text()
+    )
+    old_sections = {s["id"]: s for s in historical["sections"]}
+    for ident in old_sections:
+        if ident != "m01-verdict":
+            assert sections[ident]["tables"] == old_sections[ident]["tables"]
+    assert published["kv_audit"]["runs"] == historical["kv_audit"]["runs"]
