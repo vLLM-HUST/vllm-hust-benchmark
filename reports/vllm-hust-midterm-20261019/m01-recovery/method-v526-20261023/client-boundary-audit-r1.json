@@ -1,0 +1,46 @@
+{
+  "status": "existing_client_timings_reconciled",
+  "runs": {
+    "mmlu-b1-microflow-fa-on-r9": {
+      "request_span_s": 61.99637063033879,
+      "recorded_duration_s": 61.999477847479284,
+      "duration_minus_request_span_s": 0.003107217140495777,
+      "first_request_monotonic": 8140844.783220627,
+      "last_response_monotonic": 8140906.779591258,
+      "client_process_envelope_s": 92.99855848774314
+    },
+    "mmlu-b1-microflow-fa-on-r10": {
+      "request_span_s": 62.065271499566734,
+      "recorded_duration_s": 62.06853510718793,
+      "duration_minus_request_span_s": 0.003263607621192932,
+      "first_request_monotonic": 8141835.305916335,
+      "last_response_monotonic": 8141897.371187835,
+      "client_process_envelope_s": 91.9962242655456
+    },
+    "mmlu-b1-microflow-fa-on-r11": {
+      "request_span_s": 62.2016191566363,
+      "recorded_duration_s": 62.20474243257195,
+      "duration_minus_request_span_s": 0.003123275935649872,
+      "first_request_monotonic": 8142775.095703863,
+      "last_response_monotonic": 8142837.297323019,
+      "client_process_envelope_s": 91.99656321387738
+    }
+  },
+  "source_sha256": {
+    "/root/gennova-evidence/20261019-midterm-aligned/mmlu-b1-microflow-fa-on-r9/mmlu-pro.json": "a64fd63315227893a4bd48781a030dde3b23026d17cc0ef3c02fc2e10a4fb872",
+    "/root/gennova-evidence/20261019-midterm-aligned/mmlu-b1-microflow-fa-on-r9/receipt.json": "66a047a351d0ac56f3751a8ac563459257991c0949c349944a2e9ec8f78d85c5",
+    "/root/gennova-evidence/20261019-midterm-aligned/mmlu-b1-microflow-fa-on-r10/mmlu-pro.json": "ba43b6fd407c13ec09c7a52c367344ff1560058a7edd88da41cbb37f9ce77e60",
+    "/root/gennova-evidence/20261019-midterm-aligned/mmlu-b1-microflow-fa-on-r10/receipt.json": "2f2f9b8553e270ad6a32753961a534dce214f0417bf4754d502d518c60dc7e9e",
+    "/root/gennova-evidence/20261019-midterm-aligned/mmlu-b1-microflow-fa-on-r11/mmlu-pro.json": "aa3acf9278e39d42828fc5ab1648f67a13fa2cc553c65505ecbaea45db002e19",
+    "/root/gennova-evidence/20261019-midterm-aligned/mmlu-b1-microflow-fa-on-r11/receipt.json": "81ff63a980cdde65cd3423066b2bea979b8cd74f76a06cfc8ed2922a936484e6",
+    "/workspace/m01-critical-path-review-20261023/audit_client_boundaries.py": "f2f184f3157f1362b41dd36bd8a93f4b00c5ffffe0a6e30d973d86e9d74cb2d7"
+  },
+  "conclusions": [
+    "The approximately 62-second measurements enclose all 200 recorded request latencies.",
+    "They are not the approximately 93-second client process lifetime including startup.",
+    "No interval is subtracted from published timing.",
+    "This arithmetic reconciliation does not establish device synchronization or historical client source identity.",
+    "No new inference run is required solely to reproduce these client timing extents."
+  ],
+  "remaining_boundary_question": "Establish whether response completion includes all in-scope device work; distinguish necessary finalization from out-of-scope service teardown."
+}
