@@ -1,0 +1,50 @@
+{
+  "status": "candidate_nonredundant_target_matrix_demand_not_full_effective_flops",
+  "input_tokens": 282265,
+  "output_tokens": 51200,
+  "requests": 200,
+  "candidate_target_rows": 333265,
+  "observed_target_valid_rows": 339916,
+  "observed_extra_rows": 6651,
+  "candidate_causal_pairs": 287475848,
+  "target_projection_coefficients_per_row": {
+    ".self_attn.qkv_proj": 377487360,
+    ".self_attn.o_proj": 167772160,
+    ".shared_expert.gate_up_proj": 167772160,
+    ".shared_expert.down_proj": 83886080,
+    ".mlp.gate": 41943040,
+    ".mlp.shared_expert_gate": 163840,
+    ".linear_attn.in_proj_qkvz": 1509949440,
+    ".linear_attn.in_proj_ba": 7864320,
+    ".linear_attn.out_proj": 503316480,
+    "routed_expert_projection": 2013265920
+  },
+  "candidate_target_projection_flops": 1624140582912000,
+  "candidate_target_qk_av_flops": 47100042936320,
+  "candidate_target_matrix_subtotal": 1671240625848320,
+  "effective_flops": null,
+  "efficiency_percent": null,
+  "convention": "For each completed autoregressive request with I input and O output tokens, necessary target positions are I+O-1; the final emitted token is not needed as a next-step input.",
+  "limitations": [
+    "A candidate semantic demand, not an accepted new M01 numerator.",
+    "Assumes exact client token extents and ordinary causal continuation; verify against token identity before final adoption.",
+    "No-cache policy and unique request salts support the absence of cross-request APC reuse; policy evidence is not a device cache counter.",
+    "Includes only target projection and causal QK/AV; excludes draft, vocabulary, GDN, convolution, normalization and other arithmetic.",
+    "Observed extra rows are not attributed entirely to rejected draft tokens; no aggregate acceptance-rate scaling.",
+    "No candidate count is divided by another run timing."
+  ],
+  "source_sha256": {
+    "/root/gennova-evidence/20261019-midterm-aligned/m01-recovery-model-worker-r1/mmlu-pro.json": "a6f21ecafac3e322a7659eee1c1e4cbb1e0a19cc4cb1d17620706172446cdf50",
+    "/root/gennova-evidence/20261019-midterm-aligned/m01-recovery-model-worker-r1/kvmat-policy.jsonl": "81bfc96027103f3f4c0997196880dd3f673159cd181e9a852beefe47a3966168",
+    "/root/gennova-evidence/20261019-midterm-aligned/m01-recovery-model-worker-r1/kvmat-engine.jsonl": "b8459870e2e436aa1a8d438464548d281c347b10b7b96038390cc088aca4e422",
+    "/root/gennova-evidence/20261019-midterm-aligned/recovery_model_worker_r1-matrix-accounting.json": "3e905cd1bb0e40bd2ec9ce55704e6bb99a4ca4b760ba9f778baa1e5cb2a4de34",
+    "/root/gennova-evidence/20261019-midterm-aligned/recovery_model_worker_r1-request-attention.json": "74e09ac97adc86e89f3669fe87a90059aee7310dceb5ed61f1a2f516437bf27a",
+    "/root/gennova-evidence/20261019-midterm-aligned/runtime/vllm_ascend/ops/fused_moe/token_dispatcher.py": "cf4e44a06db2dd7d1a0abce35381ed270aef6b75e4d3bf6557a50b0bb7ffebb5",
+    "/root/gennova-evidence/20261019-midterm-aligned/m01-recovery-model-worker-r1/receipt.json": "5be7b32992642def8fb52c40681169945df34886a72078dfaeba1c24a72c7c07",
+    "/root/gennova-evidence/20261019-midterm-aligned/derive_recovery_model_worker_r1_matrix.py": "24bc5b3d8e3e5322066ba3d90241b1cc388c2b167e824bb5ead992e0700a2e59",
+    "/root/gennova-evidence/20261019-midterm-aligned/m01-recovery-model-worker-r1/token-accounting-1477342.jsonl": "261ce3308ea95f42aae581d20ad6017cae6ee24cc3ed9dcc5a424e2353901fd5",
+    "/root/gennova-evidence/20261019-midterm-aligned/m01-recovery-model-worker-r1/token-accounting-1477343.jsonl": "21aff554c9d92bd91fab6aae654d1b0275913c38843c2f3006437b9f9f075140",
+    "/models/Qwen3.5-35B-A3B/config.json": "5e4d7f74fec2f360eb9cfbfcd6ec0c4c76e684d3a11caaed259d9fd9bfbc7944",
+    "/workspace/m01-critical-path-review-20261023/derive_target_useful_candidate.py": "c63d43b10f87bd9cbdb0808416c6a825f8942d0db383b6e59a7cf15857d01c62"
+  }
+}

@@ -1,0 +1,193 @@
+{
+  "status": "conditional_target_nonmatrix_candidate_not_full_effective_flops",
+  "candidate_target_rows": 333265,
+  "candidate_causal_pairs": 287475848,
+  "norm_entries": [
+    {
+      "name": "target.hidden_no_residual",
+      "rows": 333265,
+      "width": 2048,
+      "residual": false,
+      "gated": false,
+      "operations": {
+        "square": 682526720,
+        "reduction_add": 682193455,
+        "mean_scale": 333265,
+        "epsilon_add": 333265,
+        "normalize_multiply": 682526720,
+        "weight_multiply": 682526720,
+        "residual_add": 0,
+        "output_gate_multiply": 0,
+        "inverse_sqrt_evaluations": 333265,
+        "silu_evaluations": 0
+      },
+      "basic_arithmetic_subtotal": 2730440145
+    },
+    {
+      "name": "target.hidden_with_residual",
+      "rows": 26661200,
+      "width": 2048,
+      "residual": true,
+      "gated": false,
+      "operations": {
+        "square": 54602137600,
+        "reduction_add": 54575476400,
+        "mean_scale": 26661200,
+        "epsilon_add": 26661200,
+        "normalize_multiply": 54602137600,
+        "weight_multiply": 54602137600,
+        "residual_add": 54602137600,
+        "output_gate_multiply": 0,
+        "inverse_sqrt_evaluations": 26661200,
+        "silu_evaluations": 0
+      },
+      "basic_arithmetic_subtotal": 273037349200
+    },
+    {
+      "name": "target.full_attention_qk",
+      "rows": 59987700,
+      "width": 256,
+      "residual": false,
+      "gated": false,
+      "operations": {
+        "square": 15356851200,
+        "reduction_add": 15296863500,
+        "mean_scale": 59987700,
+        "epsilon_add": 59987700,
+        "normalize_multiply": 15356851200,
+        "weight_multiply": 15356851200,
+        "residual_add": 0,
+        "output_gate_multiply": 0,
+        "inverse_sqrt_evaluations": 59987700,
+        "silu_evaluations": 0
+      },
+      "basic_arithmetic_subtotal": 61487392500
+    },
+    {
+      "name": "target.gdn_output",
+      "rows": 319934400,
+      "width": 128,
+      "residual": false,
+      "gated": true,
+      "operations": {
+        "square": 40951603200,
+        "reduction_add": 40631668800,
+        "mean_scale": 319934400,
+        "epsilon_add": 319934400,
+        "normalize_multiply": 40951603200,
+        "weight_multiply": 40951603200,
+        "residual_add": 0,
+        "output_gate_multiply": 40951603200,
+        "inverse_sqrt_evaluations": 319934400,
+        "silu_evaluations": 40951603200
+      },
+      "basic_arithmetic_subtotal": 205077950400
+    }
+  ],
+  "scalar": {
+    "target_valid_rows": 333265,
+    "draft_valid_rows": 0,
+    "moe_token_layers": 13330600,
+    "attention_token_layers": 3332650,
+    "moe_basic": {
+      "routed_swiglu_outer_multiply": 54602137600,
+      "shared_swiglu_outer_multiply": 6825267200,
+      "routed_weight_multiply": 218408550400,
+      "routed_weighted_sum_add": 191107481600,
+      "shared_gate_multiply": 27301068800,
+      "shared_routed_add": 27301068800
+    },
+    "router_basic": {
+      "subtract_max": 3412633600,
+      "full_sum_add": 3399303000,
+      "full_normalize_multiply": 3412633600,
+      "selected_sum_add": 93314200,
+      "selected_denominator_epsilon_add": 13330600
+    },
+    "rope_basic": {
+      "multiply": 7678425600,
+      "add_or_subtract": 3839212800
+    },
+    "attention_gate_multiply": 13650534400,
+    "basic_subtotal": 561044962200,
+    "separate": {
+      "moe_silu": 61427404800,
+      "shared_gate_sigmoid": 13330600,
+      "attention_gate_sigmoid": 13650534400,
+      "router_exp": 3412633600,
+      "router_reciprocal": 13330600,
+      "router_selected_normalize_divide": 106644800,
+      "router_reduce_max_semantic_comparisons": 3399303000
+    }
+  },
+  "softmax": {
+    "score_scale_multiply": 45996135680,
+    "stability_subtract": 45996135680,
+    "denominator_add": 45942813280,
+    "exponential": 45996135680,
+    "normalization_divide": 45996135680,
+    "maximum_compare": 45942813280,
+    "query_rows_all_heads_layers": 53322400,
+    "causal_scores_all_heads_layers": 45996135680
+  },
+  "basic_subtotals": {
+    "normalization_residual_gate": 542333132245,
+    "rope_moe_router_attention_gate": 561044962200,
+    "attention_softmax": 137935084640
+  },
+  "basic_subtotal": 1241313179085,
+  "target_matrix_subtotal": 1671240625848320,
+  "combined_target_partial_subtotal": 1672481939027405,
+  "effective_flops": null,
+  "efficiency_percent": null,
+  "source_sha256": {
+    "/workspace/m01-critical-path-review-20261023/target-useful-candidate-r1.json": "a819d41bc1a5153598cae1b8d2418b6dda96d6cb3a3a12ba07c913e264b5525a",
+    "/root/gennova-evidence/20261019-midterm-aligned/m01-recovery-model-worker-r1/mmlu-pro.json": "a6f21ecafac3e322a7659eee1c1e4cbb1e0a19cc4cb1d17620706172446cdf50",
+    "/root/gennova-evidence/20261019-midterm-aligned/m01-recovery-model-worker-r1/kvmat-policy.jsonl": "81bfc96027103f3f4c0997196880dd3f673159cd181e9a852beefe47a3966168",
+    "/root/gennova-evidence/20261019-midterm-aligned/m01-recovery-model-worker-r1/kvmat-engine.jsonl": "b8459870e2e436aa1a8d438464548d281c347b10b7b96038390cc088aca4e422",
+    "/root/gennova-evidence/20261019-midterm-aligned/recovery_model_worker_r1-matrix-accounting.json": "3e905cd1bb0e40bd2ec9ce55704e6bb99a4ca4b760ba9f778baa1e5cb2a4de34",
+    "/root/gennova-evidence/20261019-midterm-aligned/recovery_model_worker_r1-request-attention.json": "74e09ac97adc86e89f3669fe87a90059aee7310dceb5ed61f1a2f516437bf27a",
+    "/root/gennova-evidence/20261019-midterm-aligned/runtime/vllm_ascend/ops/fused_moe/token_dispatcher.py": "cf4e44a06db2dd7d1a0abce35381ed270aef6b75e4d3bf6557a50b0bb7ffebb5",
+    "/root/gennova-evidence/20261019-midterm-aligned/m01-recovery-model-worker-r1/receipt.json": "5be7b32992642def8fb52c40681169945df34886a72078dfaeba1c24a72c7c07",
+    "/root/gennova-evidence/20261019-midterm-aligned/derive_recovery_model_worker_r1_matrix.py": "24bc5b3d8e3e5322066ba3d90241b1cc388c2b167e824bb5ead992e0700a2e59",
+    "/root/gennova-evidence/20261019-midterm-aligned/m01-recovery-model-worker-r1/token-accounting-1477342.jsonl": "261ce3308ea95f42aae581d20ad6017cae6ee24cc3ed9dcc5a424e2353901fd5",
+    "/root/gennova-evidence/20261019-midterm-aligned/m01-recovery-model-worker-r1/token-accounting-1477343.jsonl": "21aff554c9d92bd91fab6aae654d1b0275913c38843c2f3006437b9f9f075140",
+    "/models/Qwen3.5-35B-A3B/config.json": "5e4d7f74fec2f360eb9cfbfcd6ec0c4c76e684d3a11caaed259d9fd9bfbc7944",
+    "/workspace/m01-critical-path-review-20261023/derive_target_useful_candidate.py": "c63d43b10f87bd9cbdb0808416c6a825f8942d0db383b6e59a7cf15857d01c62",
+    "/root/gennova-evidence/20261019-midterm-aligned/recovery_model_worker_r1-norm-semantics.json": "85c848f65cc5fb0224e563d62811ec00550d2a6955b7745522de64d1815cceb6",
+    "/root/gennova-evidence/20261019-midterm-aligned/derive_recovery_model_worker_r1_norm.py": "2ceb9cd4059140e447a68c9545b812b9673651dc309cf92cac0a897590750833",
+    "/root/gennova-evidence/20261019-midterm-aligned/audit_norm_accounting.py": "b77c7e05daccd468c279a3f83daa9913d1eea7c876d802b37459245fb4c86e56",
+    "/root/modcost-runtime-028-20261017/vllm-workspace/vllm/vllm/model_executor/models/qwen3_5.py": "3abeac36180df7bd1bd96b1a7c698a8f212d92c063026420cbdd16d1980e90e6",
+    "/root/gennova-evidence/20261019-midterm-aligned/runtime/vllm_ascend/ops/gdn.py": "765eb27018f762e970301978af80a91d86ce4d7110ed7f2c48a3986b2eb78e85",
+    "/root/gennova-evidence/20261019-midterm-aligned/runtime/vllm_ascend/patch/worker/patch_qwen3_5.py": "0ea5111173d5a02e4f8ab89130a1a1bd7d44ad86885a4c64bb3cb4649afbb48c",
+    "/root/modcost-runtime-028-20261017/vllm-workspace/vllm/vllm/model_executor/models/qwen3_5_mtp.py": "89b0bde1d11fe5768a634e4365c78274e20694b26f4c6bb68e934328d8d0b190",
+    "/root/gennova-evidence/20261019-midterm-aligned/recovery_model_worker_r1-scalar-semantics.json": "98933ba1773861d61c20e115fe6106f049ca499687707a7f0f6bdab36b504a3f",
+    "/root/gennova-evidence/20261019-midterm-aligned/recovery_model_worker_r1-loaded-configuration.json": "efd0d0e63b1d33c8a11eed310513b998c71ae7188081e5e9711dbd71aa0cfb59",
+    "/root/gennova-evidence/20261019-midterm-aligned/derive_recovery_model_worker_r1_scalar.py": "52294aea2eb9ac8f3e23bfe560d769bddc3f77f0cee299dac61c997a6cea3215",
+    "/root/gennova-evidence/20261019-midterm-aligned/audit_moe_scalar_sources.py": "edf9047db491a9d7356ce59c009a9adcca859cbd0472fe95324da24758a1ac00",
+    "/root/gennova-evidence/20261019-midterm-aligned/audit_rope_reference.py": "9124e0d48c2830d567325c804492c2722cd06f09a86f7ebd836a390d9fe76cc2",
+    "/root/gennova-evidence/20261019-midterm-aligned/audit_router_gate_reference.py": "9be78c14a36228a557cd01ee8bc613a9cc4a1e841bad70ba3d97c5a29d3f4767",
+    "/root/gennova-evidence/20261019-midterm-aligned/derive_r12_softmax_semantics.py": "b264d2c4c836a16ac5c715a6dfc44e6ab9543872b6f277877ca7ffd29b2899a8",
+    "/workspace/m01-critical-path-review-20261023/derive_target_nonmatrix_candidate.py": "692e74c1783f0dd06ecf01c27c9adf7126ceda8e974750076444096f28a10bd7"
+  },
+  "parent_matrix_limitations": [
+    "A candidate semantic demand, not an accepted new M01 numerator.",
+    "Assumes exact client token extents and ordinary causal continuation; verify against token identity before final adoption.",
+    "No-cache policy and unique request salts support the absence of cross-request APC reuse; policy evidence is not a device cache counter.",
+    "Includes only target projection and causal QK/AV; excludes draft, vocabulary, GDN, convolution, normalization and other arithmetic.",
+    "Observed extra rows are not attributed entirely to rejected draft tokens; no aggregate acceptance-rate scaling.",
+    "No candidate count is divided by another run timing."
+  ],
+  "limitations": [
+    "A candidate semantic demand, not an accepted new M01 numerator.",
+    "Assumes exact client token extents and ordinary causal continuation; verify against token identity before final adoption.",
+    "No-cache policy and unique request salts support the absence of cross-request APC reuse; policy evidence is not a device cache counter.",
+    "Observed extra rows are not attributed entirely to rejected draft tokens; no aggregate acceptance-rate scaling.",
+    "No candidate count is divided by another run timing.",
+    "This adds target RMS/residual/gates, RoPE, MoE scalar and canonical attention softmax only.",
+    "Draft, vocabulary projection, GDN recurrence/preprocessing and convolution remain excluded.",
+    "Special functions, division and comparison counts remain separate with no arbitrary FLOP conversion.",
+    "Semantic work is counted once globally, not once per TP rank; this is not physical instruction counting.",
+    "No timing or reference denominator is combined with this conditional partial numerator."
+  ]
+}

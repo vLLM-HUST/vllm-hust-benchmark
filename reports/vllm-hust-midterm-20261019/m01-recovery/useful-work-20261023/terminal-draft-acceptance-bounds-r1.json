@@ -1,0 +1,28 @@
+{
+  "status": "terminal_clipping_interpretation_corrected_interval_not_point_estimate",
+  "supersedes_interpretation": "The useful_accepted_draft_tokens field in acceptance-epoch-reconstruction-r1.json was mislabeled: it is committed output minus one per verification, not exact useful draft acceptance at clipped final steps.",
+  "committed_minus_one_per_verification": 31899,
+  "final_committed_histogram": {
+    "3": 43,
+    "2": 73,
+    "1": 84
+  },
+  "aggregate_clipped_output_tokens": 206,
+  "clipped_final_requests_lower": 122,
+  "clipped_final_requests_upper": 157,
+  "useful_accepted_draft_tokens_lower": 32021,
+  "useful_accepted_draft_tokens_upper": 32056,
+  "effective_flops": null,
+  "efficiency_percent": null,
+  "reasoning": "Sampler output is an accepted draft prefix followed by one correction/bonus token. Final budget truncation can discard that last token; subtracting one for every clipped final step therefore undercounts useful drafts by one per clipped request.",
+  "assumptions": [
+    "Two proposed drafts per active verification; raw accepted aggregate and reconstructed requests have matching scope.",
+    "Only final output budget truncation accounts for the aggregate 206 excess; no unrecorded stop-string or external abort.",
+    "No individual final raw sampler outcome is inferred uniquely."
+  ],
+  "source_sha256": {
+    "/workspace/m01-critical-path-review-20261023/acceptance-epoch-reconstruction-r1.json": "1bac87e02b19ab8b7784fde87ea4a280b9157862bfe4135f4e708e02f271db23",
+    "/workspace/m01-critical-path-review-20261023/acceptance-aggregate-reconciliation-r1.json": "da432a76ea0f8810a027fd9338269cc2de0d9f172e38d1f88c19004a65c2a339",
+    "/workspace/m01-critical-path-review-20261023/bound_terminal_draft_acceptance.py": "a6246d259e044e8951769558a592833e8731ff164cc18e8d3a61c9e1d0fedc11"
+  }
+}
