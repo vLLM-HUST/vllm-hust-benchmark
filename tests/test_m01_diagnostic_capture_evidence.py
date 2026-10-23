@@ -90,3 +90,36 @@ def test_failed_capture_preserves_identity_and_recovered_counts():
     for record in (manifest, recovery, skipped):
         assert record["effective_flops"] is None and record["m01_attainment"] is None
     assert manifest["performance_acceptance"] is False
+
+
+def test_retry_preserves_responses_without_accepting_invalid_metadata():
+    archive = BASE / "m01-capture-r2-evidence-20261023.tar.gz"
+    with tarfile.open(archive) as bundle:
+
+        def read(name):
+            return json.loads(bundle.extractfile("m01-capture-b1-r2/" + name).read())
+
+        receipt = read("receipt.json")
+        checkpoint = read("request-checkpoint.json")
+        assert receipt["status"] == "failed"
+        assert receipt["client_exit_code"] == 1
+        assert receipt["sessions_drained"] and receipt["all_devices_released"]
+        assert checkpoint["run_id"] == receipt["run_id"] == "capture-b1-r2"
+        requests = checkpoint["requests"]
+        assert len(requests) == 200
+        assert all(row["output"]["success"] is True for row in requests)
+        assert sum(row["output"]["output_tokens"] for row in requests) == 51200
+        assert all(isinstance(row["output"]["itl"], list) for row in requests)
+        assert checkpoint["m01_attainment"] is None
+        for rank, pid in enumerate((747955, 747956)):
+            worker = read(f"worker-{pid}.json")
+            assert worker["rank"] == rank and worker["run_id"] == receipt["run_id"]
+            events = Counter(event["event"] for event in worker["events"])
+            assert events["execute_begin"] == events["execute_end"] == 882
+            assert events["sample_begin"] == events["sample_end"] == 881
+            assert events["host_gdn_metadata_invalid"] == worker["errors"] == 881
+            assert worker["complete"] is False and worker["dropped"] == 0
+            assert worker["pending"] is False
+        assert not any(
+            Path(m.name).name.startswith("scheduler-") for m in bundle.getmembers()
+        )
