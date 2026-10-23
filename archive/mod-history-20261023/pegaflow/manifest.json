@@ -1,0 +1,2792 @@
+{
+  "schema": "mod-git-custody/v1",
+  "source_repository": "vLLM-HUST/pegaflow-hust",
+  "source_commit": "d1028ed6f4a6c9af3f6afa5b0caaaf260505fce4",
+  "source_visibility": "public",
+  "scope": {
+    "prefixes": [
+      "results/issue23/20261012-attention-diagnostic/"
+    ],
+    "context": [
+      "README.md",
+      "LICENSE",
+      "docs/experiments/issue23-pilot-20261012.md"
+    ]
+  },
+  "admission": "custody-only; original failures and pairing retained; no new performance qualification",
+  "files": [
+    {
+      "path": "LICENSE",
+      "bytes": 11358,
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+      "git_blob": "d645695673349e3947e8e5ae42332d0ac3164cd7"
+    },
+    {
+      "path": "README.md",
+      "bytes": 7035,
+      "sha256": "614155ae542fcce4749e46f6a3f616fd4d008826f180411b1aab727489024ce2",
+      "git_blob": "9ba32f6802ab61f11ac3a9f43cb5f1201fb9c923"
+    },
+    {
+      "path": "docs/experiments/issue23-pilot-20261012.md",
+      "bytes": 3359,
+      "sha256": "eba6649096b7f643f905940705a46247f7b6fa60b2c1f4ca736f8e0b5206c24d",
+      "git_blob": "2dddcc4d7d58918e71c5cfd35293b32fead726c0"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/.gitattributes",
+      "bytes": 55,
+      "sha256": "be44806039e51069e5e3f4af1799f532e7737f927fbf88bfcaf361406d8f09a4",
+      "git_blob": "4ca76a819d3528974d3eb1c8376fcc1b79af55aa"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/README.md",
+      "bytes": 1431,
+      "sha256": "1f824b497eae59585d06222aa9d045f9441ca1bb1d2e093f0f0d8a73aac90319",
+      "git_blob": "7c0e116634df2151061259056ac33f29579b849e"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/checks/cpu-tests.xml",
+      "bytes": 2515,
+      "sha256": "0058f41bfaf3e957c06b1d2064eb505f567fc9c53a706f40aa33dd19a9c1f71f",
+      "git_blob": "1d6a5183861f9e42365ec3474bd02f7eada1307b"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/checks/reproducibility.json",
+      "bytes": 852,
+      "sha256": "75f2293660b824422f2c8c9b6dc738b2e35d53c5cf38f8f05de12785984342f4",
+      "git_blob": "d8ecbe00439c8c452728a4156472e168dd6258c4"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/checks/runtime-protocol.json",
+      "bytes": 844,
+      "sha256": "cad8e110ee439bc806c22c7cbcd60398f95f4871d360b7605a46b7682ad075cf",
+      "git_blob": "e06778ba89357e09c498aec0ef48187e380be4d4"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/config/deployment.actual.json",
+      "bytes": 1605,
+      "sha256": "12e331fb5e62366164ad1d9c3184f04fd7e5738f0211c08244749a46638b7e42",
+      "git_blob": "5ff4a6e56cf653fcecd5114983389ad72188fe35"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/manifest.json",
+      "bytes": 92506,
+      "sha256": "13d5281d1c5686af309bc830fdb0f168e2e46845a04dfad3a42b365eeb8ab4fb",
+      "git_blob": "0f923178363935bcac7b60ba227a4d8094fcc638"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/prepared/contract.json",
+      "bytes": 3832,
+      "sha256": "ad3e8d7cc7967453636d3389e02a1200faef05e05e62d8a94ff6b0e09def2976",
+      "git_blob": "8b7604732c3408de7a2b26af5251f11c5bdc8ae5"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/prepared/plans-smoke/decode-engine-0.json",
+      "bytes": 157610,
+      "sha256": "b9b1e1a59f43a2d95749dfad51039d6060e2a8ed1f199a7454e7df763464a577",
+      "git_blob": "5d8ff5f5cde0ce921878f502e2a9933c761b4855"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/prepared/plans-smoke/decode-engine-1.json",
+      "bytes": 157610,
+      "sha256": "212372ad85dd1e7fca9a213c2e4e1a7560a997bd4f7751963bd0bdd8e35418d6",
+      "git_blob": "dbb39ee247e7e563f6ed7e84d651073c75d9ad60"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/prepared/plans-smoke/summary.json",
+      "bytes": 743,
+      "sha256": "ae6e6a13e0b8f7450ad7c0a00b92a0db99a46e7cb0b3187e692bfea732bc028e",
+      "git_blob": "b1dd60f2b733dba929ded61c19f69f33b4448a23"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/prepared/smoke.json.gz",
+      "bytes": 51809,
+      "sha256": "7ed9c1cd634b03848c494ebd42d63f560f301f5974ee9cb53b43cc4019d91344",
+      "git_blob": "bff36c7e31d33c0cba3755b0d159f1aed5d6bbc5"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/report.md",
+      "bytes": 5127,
+      "sha256": "e992b3b3b3f9e42d737c7c569c3d27d2b7fc80f6a3634312280f56a428d19615",
+      "git_blob": "e6b484ea194ada3ed78a477d06ccc6f10bccb124"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/qualification-capture-default-05/after-capture-decode-engine-0.prom",
+      "bytes": 25862,
+      "sha256": "2d2c3486f757b3fbc4311b673f0e5be548209fcd7cd1dc8dffb54183a8a079f9",
+      "git_blob": "c8f85eeb53a17b59c48c9d02e3175a54233d438c"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/qualification-capture-default-05/after-capture-decode-engine-1.prom",
+      "bytes": 25855,
+      "sha256": "fa70615429ce30903cee1190ae857ec20f9b7d232fb5b7366f2d3078335198f4",
+      "git_blob": "42768ac5b8afa8a7eebb7783ed2c454f32ebbc0c"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/qualification-capture-default-05/before-capture-decode-engine-0.prom",
+      "bytes": 3717,
+      "sha256": "b8cce9b403e368e03b7e9d34237410879855d5f6353f02a7cdde5a0c4ad5d114",
+      "git_blob": "cda10f8cd20c852f3a96be69e46efbbdfe4b5a9f"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/qualification-capture-default-05/before-capture-decode-engine-1.prom",
+      "bytes": 3717,
+      "sha256": "13cfd6a6335cae49538aaff2440b5a6ea49f14eaacccc5942971ec8454b0be48",
+      "git_blob": "5a72d7f3f9c4ec7045c6f23ba4100dbb5dc9b323"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/qualification-capture-default-05/correctness-reference/client.jsonl",
+      "bytes": 536,
+      "sha256": "9be65b7f2fed57610409c26e73d656f517865f70cc6e3937f321e722359b87c1",
+      "git_blob": "af9d37ab63da9d60592f1bf0b99abd4cc150585f"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/qualification-capture-default-05/correctness-reference/prefill-device-cache.json",
+      "bytes": 26,
+      "sha256": "07c872c555795ea5ab0ef965e45c1becfb2d0d549c499c78aabf125a3f5cb958",
+      "git_blob": "28c8ecd539a76b305e809cf070aec149a15619c1"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/qualification-capture-default-05/correctness-reference/prefill-engine-0-host-cache.json",
+      "bytes": 118,
+      "sha256": "46b5604e10aa238b6dbe527aa200cea5864d80b94c3c9176bd8721e5db65f878",
+      "git_blob": "9c697167c79806ccd083fd3c846fbf2b7b92b077"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/qualification-capture-default-05/correctness-reference/prefill-engine-1-host-cache.json",
+      "bytes": 118,
+      "sha256": "46b5604e10aa238b6dbe527aa200cea5864d80b94c3c9176bd8721e5db65f878",
+      "git_blob": "9c697167c79806ccd083fd3c846fbf2b7b92b077"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/qualification-capture-default-05/correctness-reference/sse/issue23-mmlu-pro-smoke-0000-0-reference.jsonl",
+      "bytes": 11421,
+      "sha256": "5472b66e0d0970b18d173ded523c30b6c5620bed613b7f51d121abb6df0578a8",
+      "git_blob": "8fa698caf7e9e2ece2bbfe69c017d74336d196b2"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/qualification-capture-default-05/decode-engine-0.log",
+      "bytes": 31891,
+      "sha256": "598e45855ddf575e86ff3443b222d3cd5613e86baa7ad7274ab9d3c2496e49c1",
+      "git_blob": "764afebf707d25c0f1dd7a4a2c99cac84d76ccbe"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/qualification-capture-default-05/decode-engine-1.log",
+      "bytes": 32185,
+      "sha256": "87c038b3fae2c98b143d260a2b931299da5f19963feb0715d8e0dca928e34b76",
+      "git_blob": "a3ceca085ccea07fa50d854d8b05231824a02470"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/qualification-capture-default-05/decode-metaserver.log",
+      "bytes": 1865,
+      "sha256": "e0b869dd32156c536d023f7f7a0c1ab45591c3a2ae1abda85cbe073e0cee1446",
+      "git_blob": "704c9e70cee3687c922106d8a9f61d3f8026342d"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/qualification-capture-default-05/decode-vllm.log",
+      "bytes": 89036,
+      "sha256": "f64b5bc46c7e4e91426eb2a510962cc0838474bd6d7eca9a89b27f5ede5253bf",
+      "git_blob": "34128dbf8f0ab02ce2a853f699b14165f76d5255"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/qualification-capture-default-05/pd-correctness.json",
+      "bytes": 1365,
+      "sha256": "c31419437cac721a52d3563b0238b2cf2d8671328fbd86ccf3183313761bdd28",
+      "git_blob": "d41fb6dbaa14d1d77169774546903d9c5969ad71"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/qualification-capture-default-05/prefill-engine-0.log",
+      "bytes": 24437,
+      "sha256": "d8013fa273f9e627ebe29b54eabbf7409832e7ae63a404e92a9d4ebc56903cb4",
+      "git_blob": "0763995f01eb1cff5dba43667fea9bdcb693e437"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/qualification-capture-default-05/prefill-engine-1.log",
+      "bytes": 24441,
+      "sha256": "e63d1ff4ba784606e162ddcd5914a6af797dd274178c57d875302a358919bf43",
+      "git_blob": "de7a563a331d4753a0f89f5f20f9828043fa07cd"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/qualification-capture-default-05/prefill-router.log",
+      "bytes": 5400,
+      "sha256": "071a7b84032044340a65ca2cc96f8d4383d6b1b3c781275c4672eacc13308d96",
+      "git_blob": "5b79398a134d8bca7ce75170f3fbba7801a55ccf"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/qualification-capture-default-05/prefill-vllm.log",
+      "bytes": 87433,
+      "sha256": "6e48ce78a1dd579e90c4479fcfb017d3654de2558d3fadfcdee918a8ff81b96b",
+      "git_blob": "9bdc6b290f1fbf533350764c2786ba4ee26ce1ec"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/qualification-capture-default-05/prepare/client.jsonl",
+      "bytes": 3670,
+      "sha256": "b7fa637437d1d315f7bf6fb6030bc4c12336a232b281003182d722cadda180f6",
+      "git_blob": "4ed89abc643199448c643b3207bd550e2681a3d5"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/qualification-capture-default-05/prepare/request-0000-decode-engine-0-host-cache.json",
+      "bytes": 104,
+      "sha256": "0fe3f76b4dc0a0e0e7ff5b5f8660dc72524670a6a5664a30beb1d33d6a4502c1",
+      "git_blob": "c07f3d69a155464fa7a1ae2f900a353e004f351f"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/qualification-capture-default-05/prepare/request-0000-decode-engine-1-host-cache.json",
+      "bytes": 104,
+      "sha256": "0fe3f76b4dc0a0e0e7ff5b5f8660dc72524670a6a5664a30beb1d33d6a4502c1",
+      "git_blob": "c07f3d69a155464fa7a1ae2f900a353e004f351f"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/qualification-capture-default-05/prepare/request-0000-device-cache.json",
+      "bytes": 26,
+      "sha256": "07c872c555795ea5ab0ef965e45c1becfb2d0d549c499c78aabf125a3f5cb958",
+      "git_blob": "28c8ecd539a76b305e809cf070aec149a15619c1"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/qualification-capture-default-05/prepare/request-0001-decode-engine-0-host-cache.json",
+      "bytes": 104,
+      "sha256": "0fe3f76b4dc0a0e0e7ff5b5f8660dc72524670a6a5664a30beb1d33d6a4502c1",
+      "git_blob": "c07f3d69a155464fa7a1ae2f900a353e004f351f"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/qualification-capture-default-05/prepare/request-0001-decode-engine-1-host-cache.json",
+      "bytes": 104,
+      "sha256": "0fe3f76b4dc0a0e0e7ff5b5f8660dc72524670a6a5664a30beb1d33d6a4502c1",
+      "git_blob": "c07f3d69a155464fa7a1ae2f900a353e004f351f"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/qualification-capture-default-05/prepare/request-0001-device-cache.json",
+      "bytes": 26,
+      "sha256": "07c872c555795ea5ab0ef965e45c1becfb2d0d549c499c78aabf125a3f5cb958",
+      "git_blob": "28c8ecd539a76b305e809cf070aec149a15619c1"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/qualification-capture-default-05/prepare/request-0002-decode-engine-0-host-cache.json",
+      "bytes": 104,
+      "sha256": "0fe3f76b4dc0a0e0e7ff5b5f8660dc72524670a6a5664a30beb1d33d6a4502c1",
+      "git_blob": "c07f3d69a155464fa7a1ae2f900a353e004f351f"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/qualification-capture-default-05/prepare/request-0002-decode-engine-1-host-cache.json",
+      "bytes": 104,
+      "sha256": "0fe3f76b4dc0a0e0e7ff5b5f8660dc72524670a6a5664a30beb1d33d6a4502c1",
+      "git_blob": "c07f3d69a155464fa7a1ae2f900a353e004f351f"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/qualification-capture-default-05/prepare/request-0002-device-cache.json",
+      "bytes": 26,
+      "sha256": "07c872c555795ea5ab0ef965e45c1becfb2d0d549c499c78aabf125a3f5cb958",
+      "git_blob": "28c8ecd539a76b305e809cf070aec149a15619c1"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/qualification-capture-default-05/prepare/request-0003-decode-engine-0-host-cache.json",
+      "bytes": 104,
+      "sha256": "0fe3f76b4dc0a0e0e7ff5b5f8660dc72524670a6a5664a30beb1d33d6a4502c1",
+      "git_blob": "c07f3d69a155464fa7a1ae2f900a353e004f351f"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/qualification-capture-default-05/prepare/request-0003-decode-engine-1-host-cache.json",
+      "bytes": 104,
+      "sha256": "0fe3f76b4dc0a0e0e7ff5b5f8660dc72524670a6a5664a30beb1d33d6a4502c1",
+      "git_blob": "c07f3d69a155464fa7a1ae2f900a353e004f351f"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/qualification-capture-default-05/prepare/request-0003-device-cache.json",
+      "bytes": 26,
+      "sha256": "07c872c555795ea5ab0ef965e45c1becfb2d0d549c499c78aabf125a3f5cb958",
+      "git_blob": "28c8ecd539a76b305e809cf070aec149a15619c1"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/qualification-capture-default-05/prepare/request-0004-decode-engine-0-host-cache.json",
+      "bytes": 104,
+      "sha256": "0fe3f76b4dc0a0e0e7ff5b5f8660dc72524670a6a5664a30beb1d33d6a4502c1",
+      "git_blob": "c07f3d69a155464fa7a1ae2f900a353e004f351f"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/qualification-capture-default-05/prepare/request-0004-decode-engine-1-host-cache.json",
+      "bytes": 104,
+      "sha256": "0fe3f76b4dc0a0e0e7ff5b5f8660dc72524670a6a5664a30beb1d33d6a4502c1",
+      "git_blob": "c07f3d69a155464fa7a1ae2f900a353e004f351f"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/qualification-capture-default-05/prepare/request-0004-device-cache.json",
+      "bytes": 26,
+      "sha256": "07c872c555795ea5ab0ef965e45c1becfb2d0d549c499c78aabf125a3f5cb958",
+      "git_blob": "28c8ecd539a76b305e809cf070aec149a15619c1"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/qualification-capture-default-05/prepare/request-0005-decode-engine-0-host-cache.json",
+      "bytes": 104,
+      "sha256": "0fe3f76b4dc0a0e0e7ff5b5f8660dc72524670a6a5664a30beb1d33d6a4502c1",
+      "git_blob": "c07f3d69a155464fa7a1ae2f900a353e004f351f"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/qualification-capture-default-05/prepare/request-0005-decode-engine-1-host-cache.json",
+      "bytes": 104,
+      "sha256": "0fe3f76b4dc0a0e0e7ff5b5f8660dc72524670a6a5664a30beb1d33d6a4502c1",
+      "git_blob": "c07f3d69a155464fa7a1ae2f900a353e004f351f"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/qualification-capture-default-05/prepare/request-0005-device-cache.json",
+      "bytes": 26,
+      "sha256": "07c872c555795ea5ab0ef965e45c1becfb2d0d549c499c78aabf125a3f5cb958",
+      "git_blob": "28c8ecd539a76b305e809cf070aec149a15619c1"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/qualification-capture-default-05/prepare/request-0006-decode-engine-0-host-cache.json",
+      "bytes": 104,
+      "sha256": "0fe3f76b4dc0a0e0e7ff5b5f8660dc72524670a6a5664a30beb1d33d6a4502c1",
+      "git_blob": "c07f3d69a155464fa7a1ae2f900a353e004f351f"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/qualification-capture-default-05/prepare/request-0006-decode-engine-1-host-cache.json",
+      "bytes": 104,
+      "sha256": "0fe3f76b4dc0a0e0e7ff5b5f8660dc72524670a6a5664a30beb1d33d6a4502c1",
+      "git_blob": "c07f3d69a155464fa7a1ae2f900a353e004f351f"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/qualification-capture-default-05/prepare/request-0006-device-cache.json",
+      "bytes": 26,
+      "sha256": "07c872c555795ea5ab0ef965e45c1becfb2d0d549c499c78aabf125a3f5cb958",
+      "git_blob": "28c8ecd539a76b305e809cf070aec149a15619c1"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/qualification-capture-default-05/prepare/request-0007-decode-engine-0-host-cache.json",
+      "bytes": 104,
+      "sha256": "0fe3f76b4dc0a0e0e7ff5b5f8660dc72524670a6a5664a30beb1d33d6a4502c1",
+      "git_blob": "c07f3d69a155464fa7a1ae2f900a353e004f351f"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/qualification-capture-default-05/prepare/request-0007-decode-engine-1-host-cache.json",
+      "bytes": 104,
+      "sha256": "0fe3f76b4dc0a0e0e7ff5b5f8660dc72524670a6a5664a30beb1d33d6a4502c1",
+      "git_blob": "c07f3d69a155464fa7a1ae2f900a353e004f351f"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/qualification-capture-default-05/prepare/request-0007-device-cache.json",
+      "bytes": 26,
+      "sha256": "07c872c555795ea5ab0ef965e45c1becfb2d0d549c499c78aabf125a3f5cb958",
+      "git_blob": "28c8ecd539a76b305e809cf070aec149a15619c1"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/qualification-capture-default-05/prepare/sse/issue23-mmlu-pro-smoke-0000-0.jsonl",
+      "bytes": 11083,
+      "sha256": "3899dcc631f384ff820f5782d53618180e4dbcb75d2b161172564ad267e0d313",
+      "git_blob": "a022b0024c9a43101908f72c2f48937c31ec636c"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/qualification-capture-default-05/prepare/sse/issue23-mmlu-pro-smoke-0000-1.jsonl",
+      "bytes": 728,
+      "sha256": "e19618ff0fdeaa3ac4eb2efaa577ae3f21486ceece435ed8140f77a6852dd577",
+      "git_blob": "0a5e4cc612ac267a2e65f994a8ecdddcc054aa76"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/qualification-capture-default-05/prepare/sse/issue23-mmlu-pro-smoke-0000-2.jsonl",
+      "bytes": 729,
+      "sha256": "a53e1b6dfddc4d9ae3b11d2215421be37cd06a41026b5775ec01eeb774e89134",
+      "git_blob": "01447103d3083c87dd50115de943e7cda8c1a23a"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/qualification-capture-default-05/prepare/sse/issue23-mmlu-pro-smoke-0000-3.jsonl",
+      "bytes": 728,
+      "sha256": "f8acc335b8a43435f9d8acb7b12fbfed20304c095424545bdbb67f8f883a26f4",
+      "git_blob": "de3712525307292a93d6ea9d2db135dd32859fb1"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/qualification-capture-default-05/prepare/sse/issue23-mmlu-pro-smoke-0001-0.jsonl",
+      "bytes": 727,
+      "sha256": "d8c54d670ce9d0b812cea5966ef32fa32ec04c56f13c26e651e1428f1c5b8f95",
+      "git_blob": "a37bea7b2a15331ae25df797b55deba67e41bbe7"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/qualification-capture-default-05/prepare/sse/issue23-mmlu-pro-smoke-0001-1.jsonl",
+      "bytes": 729,
+      "sha256": "f76b8fbe82acf32376fb10b7ca898303044d406b2e66c9d3131d614a59b99236",
+      "git_blob": "e3dc0f0a0b6bfe3a1c6f2485e94c62e2210507e9"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/qualification-capture-default-05/prepare/sse/issue23-mmlu-pro-smoke-0001-2.jsonl",
+      "bytes": 727,
+      "sha256": "9c5313e8e72e84eae12de46e1ade80096d9c43d2a501c2934a0ceb45c2ff6852",
+      "git_blob": "b88f5ed6205e3c6528ef42873d28a934ffe785dd"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/qualification-capture-default-05/prepare/sse/issue23-mmlu-pro-smoke-0001-3.jsonl",
+      "bytes": 727,
+      "sha256": "6dc73ca2d6f929fffbdf793826f0cfdf79ab758c17c619da48518e3c1617e177",
+      "git_blob": "ce5c3ec2dde9f93d61daa8c4de1fb78d0219a4c4"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/qualification-capture-default-05/processes-decode.json",
+      "bytes": 3216,
+      "sha256": "2560d4db35db13a2a03b18fca318a82adee75aa96dcbece3e4f0785ba4e0f482",
+      "git_blob": "6f453c77720dd1adf61ff459373b22220d388821"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/qualification-capture-default-05/processes-prefill.json",
+      "bytes": 3201,
+      "sha256": "b9341a649e44937f05e18589b2c80d15e2231ee9fd9082d6426944b19471f52f",
+      "git_blob": "9e4bf882337ec68ae37a2d7238899afc28a865c5"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/qualification-capture-default-05/qualification.json",
+      "bytes": 1366,
+      "sha256": "a3e3e0ac697a89b48885fa80b11834f1987d6ee05e79c8e962eed79558b41fb8",
+      "git_blob": "8d397e72050bda80b2c093192c882f3276839f63"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/qualification-capture-default-05/run-contract.json",
+      "bytes": 1620,
+      "sha256": "b632476603ddd1af40a594c3fc0e1a5f66f046bc8b46cf53d4994a999eb60c49",
+      "git_blob": "553c7fa320225b014f96abc9791f99b4b29d98bc"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/qualification-capture-default-05/status.json",
+      "bytes": 28,
+      "sha256": "0cb87b61f0afab118ac222a0af92bc06c579959aeea208461294d16becf11b39",
+      "git_blob": "396d718be0d9c2b06c505a6bc238dc71c530c6ad"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/qualification-capture-default-05/trace-decode-engine-0.jsonl",
+      "bytes": 117695,
+      "sha256": "6dc307cf69ccfe362170fc97c6ef3bf2c50e34965d7b5824154985691fe098f8",
+      "git_blob": "2e401fe81163f9d0ea230afc6e8754c030dc0c68"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/qualification-capture-default-05/trace-decode-engine-1.jsonl",
+      "bytes": 117695,
+      "sha256": "9ff2275939e9c03430278c25c07626b53f32557990a876e08116a6f98c292b45",
+      "git_blob": "03119a3825377732b34261e623e17a1045a68cd8"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/qualification-capture-default-05/visibility/issue23-mmlu-pro-smoke-0000-0-reference.tp0.visible",
+      "bytes": 81,
+      "sha256": "ed4a01e0f0a52706a056da927bc13f26828c0bf25b952837632864253da61348",
+      "git_blob": "222fe6d306b97131edaa89502f08105b92072e6a"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/qualification-capture-default-05/visibility/issue23-mmlu-pro-smoke-0000-0-reference.tp1.visible",
+      "bytes": 81,
+      "sha256": "5f4a6897f1801cfe9d64464891eb5b4d9013d221e265a8420e65a4b858f175ef",
+      "git_blob": "5ebe70db55866b19f0a1000c11aea80c2d923fd2"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/qualification-capture-default-05/visibility/issue23-mmlu-pro-smoke-0000-0.tp0.visible",
+      "bytes": 71,
+      "sha256": "f739f026bbdfd34a377d56c69e2f68f24a8bd2bf0410ca40c70903e20bb8f375",
+      "git_blob": "43321f839e0f9d00d6690b14da67a702f83dfef5"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/qualification-capture-default-05/visibility/issue23-mmlu-pro-smoke-0000-0.tp1.visible",
+      "bytes": 71,
+      "sha256": "4f4034b8c9c0b29c562efc477ca3e48732bce929b41327d6ce8a3ed0b4b49a50",
+      "git_blob": "6e79cd570c951f4e9b614fcc050deced4da93b9f"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/qualification-capture-default-05/visibility/issue23-mmlu-pro-smoke-0000-1.tp0.visible",
+      "bytes": 71,
+      "sha256": "4648d146dff28a7c19f390ac63a8a17365140b90b17bccd02468adeea3a44508",
+      "git_blob": "29a093e5a092dec55fb17e62fcbaaa99fe90509b"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/qualification-capture-default-05/visibility/issue23-mmlu-pro-smoke-0000-1.tp1.visible",
+      "bytes": 71,
+      "sha256": "49be067765cce22534f212eed9eab94c97d0ab235b4471d1e42333d118e9fa37",
+      "git_blob": "0d6e26b65fc1b78eaba3024831dfa7796a2ff7f1"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/qualification-capture-default-05/visibility/issue23-mmlu-pro-smoke-0000-2.tp0.visible",
+      "bytes": 71,
+      "sha256": "ac513cfe66a61fde12e64541a6e3152566c510778836b411a04df9f830d772d5",
+      "git_blob": "bacb6806d2b88dc9af2a2231bfa170d8b4bb2ab5"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/qualification-capture-default-05/visibility/issue23-mmlu-pro-smoke-0000-2.tp1.visible",
+      "bytes": 71,
+      "sha256": "9014ef23fc95ebc9ad7e7413726738f3f5a2d4928fc468184f1e231bb6e3a2e9",
+      "git_blob": "389fece3ae9970fa33b17b6037c7ee218e25ec9c"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/qualification-capture-default-05/visibility/issue23-mmlu-pro-smoke-0000-3.tp0.visible",
+      "bytes": 71,
+      "sha256": "06351dcae9dba1305142cfec9dab748becf90485fdb965bff8e0b68440aa6f62",
+      "git_blob": "3ee0b402c2b73c76d86f63385509da83aabe77e7"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/qualification-capture-default-05/visibility/issue23-mmlu-pro-smoke-0000-3.tp1.visible",
+      "bytes": 71,
+      "sha256": "f9a035b1eaa213614da1ed2b8c01f36d957d3a801e737ac246d8c380fb5a88bb",
+      "git_blob": "52480bdab5f285112f9511c51dc2867bc5f0d246"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/qualification-capture-default-05/visibility/issue23-mmlu-pro-smoke-0001-0.tp0.visible",
+      "bytes": 71,
+      "sha256": "ea4bcaace9300289475d7c7cac7614311951c3079185df5ad79a6a96ebf72746",
+      "git_blob": "e31490fab841ba22870e3fd234b1e411f04a2bd8"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/qualification-capture-default-05/visibility/issue23-mmlu-pro-smoke-0001-0.tp1.visible",
+      "bytes": 71,
+      "sha256": "c59b3ddef4883e2d25729b4e5a7c8d40d0698249ce75a66c7dfcdf304da9df6a",
+      "git_blob": "084c17c813784b6e41399290ac3e46055668baf3"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/qualification-capture-default-05/visibility/issue23-mmlu-pro-smoke-0001-1.tp0.visible",
+      "bytes": 71,
+      "sha256": "c839f8b367f8c4e4f064809e93063cfd5e66c00743928b8ec7078a0f850e52d1",
+      "git_blob": "81decd6acf354f1adc32032709d9f2834fe8889c"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/qualification-capture-default-05/visibility/issue23-mmlu-pro-smoke-0001-1.tp1.visible",
+      "bytes": 71,
+      "sha256": "b523512af8cdf90d6cfb2bcf842c717423cff2999ae16f760ebf68f431a6d33e",
+      "git_blob": "1f194dd2a4bd28e92612cef653fd626048179fb1"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/qualification-capture-default-05/visibility/issue23-mmlu-pro-smoke-0001-2.tp0.visible",
+      "bytes": 71,
+      "sha256": "4d08801472ebdc40887f5d2a736f721d4ef852975ebad6a4bbf2389af33eb91e",
+      "git_blob": "0562a67ea7cb093ebbffd9c5d3866801cd6f6db5"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/qualification-capture-default-05/visibility/issue23-mmlu-pro-smoke-0001-2.tp1.visible",
+      "bytes": 71,
+      "sha256": "b5cb509290aedd3ab1476acdeaeb8ec0fbf1416d8ce5d836d8f279438f2bd162",
+      "git_blob": "6beb524f48c19e599d8123fc47e7f0b966f59d75"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/qualification-capture-default-05/visibility/issue23-mmlu-pro-smoke-0001-3.tp0.visible",
+      "bytes": 71,
+      "sha256": "420ccc654cfb8f953bfe4c94e2870e11cefd0005b82252fbfa541097017bbf6e",
+      "git_blob": "34f2c10235536a47a882fff5fbbbd373d4ad9714"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/qualification-capture-default-05/visibility/issue23-mmlu-pro-smoke-0001-3.tp1.visible",
+      "bytes": 71,
+      "sha256": "7564cd99e47b40ecfc4bb03ae05200c825fb75d3e94badde464c289053fd88d4",
+      "git_blob": "69ff7bf3bee7aa2868a27248dcd6db6c5eca9145"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/setup-20261012/connector-tests-final.xml",
+      "bytes": 9974,
+      "sha256": "b6636dd8d87b97f77608c65a60f84cf4d925f9565a4296d488d01fc30e4d0431",
+      "git_blob": "a8123f2c27c1504bd8aa654545436f5ac91173dd"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/setup-20261012/pilot-resume.log",
+      "bytes": 129,
+      "sha256": "a7b8f00be72d79de82e1b01ed12c1a4d7ca4399422861d8c3696e18ed8c4d1bc",
+      "git_blob": "1c257c078639e3df81ac7268cbb0e309fb402494"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/setup-20261012/python-overlay-identity.json",
+      "bytes": 346,
+      "sha256": "f262a762af97a9c4a26674c61d808707b3be2f4ac9d71ca863292f935fb328c3",
+      "git_blob": "7022b5f78ed0c819f407fea9b7065509a2d1711e"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/setup-20261012/qualification-orchestrator-08.log",
+      "bytes": 721,
+      "sha256": "2b4c55cfc3ac98f68ff0e23ed8435aa418631579fd941709d09fc84b63f92c27",
+      "git_blob": "32f7fed20c4e7ec8c12267fa6f72a1ee9917b463"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/setup-20261012/runtime-identity-host-192-168-0-2.json",
+      "bytes": 1467,
+      "sha256": "a263a4262f7ffae05b95575709ea62cbac63ba1e27f5fcbe987c0e3fc4d0eeeb",
+      "git_blob": "3800ea426d0f32cdcda337d06255a60e53cf4be2"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/setup-20261012/runtime-identity-host-192-168-0-4.json",
+      "bytes": 1467,
+      "sha256": "aa2beeac08df821cc7c30d40ee993a8e307f161f7ffb48ccfa7f4d77d3cff219",
+      "git_blob": "b40004d911f8a084f70df5247cf49cd427a6d12a"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/setup-20261012/smoke-pilot-orchestrator-06.log",
+      "bytes": 76,
+      "sha256": "5f7a726dccdf0ba098df68e801fc7d9e9090609ff2efd75ffe12632f2c476fc3",
+      "git_blob": "41105ffabef6d47810da27a5c478c19fb8198d08"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-local_copy-smooth/activate-decode-engine-0.json",
+      "bytes": 74,
+      "sha256": "44db608f32108116b1fd57a86eedae2ff1479a299c8e0fe18a098704d4a2a716",
+      "git_blob": "aa9092024d05f8867770f013a61ebbe04bef7f8c"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-local_copy-smooth/activate-decode-engine-1.json",
+      "bytes": 74,
+      "sha256": "44db608f32108116b1fd57a86eedae2ff1479a299c8e0fe18a098704d4a2a716",
+      "git_blob": "aa9092024d05f8867770f013a61ebbe04bef7f8c"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-local_copy-smooth/after-measurement-decode-engine-0.prom",
+      "bytes": 25926,
+      "sha256": "5f65408467c2f489c68e628e7b1c0ac261e4b42be28764ef585f1ade80092880",
+      "git_blob": "890a902899cbd6abf64e971948caa8188eecb10b"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-local_copy-smooth/after-measurement-decode-engine-1.prom",
+      "bytes": 25928,
+      "sha256": "c9423f89858628034c2b8833a31841ef58d0db10324067ebd1c10a3cf2ae8fa8",
+      "git_blob": "e6f6595ad3339dba0e4822b5f98931e114b88ab9"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-local_copy-smooth/after-prepare-decode-engine-0.prom",
+      "bytes": 25864,
+      "sha256": "8a112fb82f356f10b91203ae849229d3b4ac85f8c497567affc953de3370cbca",
+      "git_blob": "523c9df316c94baad10f06b19828bc4cd0af3ee7"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-local_copy-smooth/after-prepare-decode-engine-1.prom",
+      "bytes": 25846,
+      "sha256": "be753ea9828022848c1a4f98e7197b6e7933b3ed00e02f57bfa84755621bdcb8",
+      "git_blob": "5bcdfac2f13733865a393af33547f117e1de3fc1"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-local_copy-smooth/analysis.json",
+      "bytes": 8187,
+      "sha256": "275ca87ca7c7734403a88a2a91db5d7cd21c65846c1f9de3cc3de06ca5583026",
+      "git_blob": "2c2178d25f3fb17e28f126f84e1e8d314d0950e2"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-local_copy-smooth/before-prepare-decode-engine-0.prom",
+      "bytes": 3717,
+      "sha256": "ac51980facf6671b02fb5f1f3a194ae7751e9cbde3a1333f634dcdc6b8bcdaa1",
+      "git_blob": "81848916d7cb6ca35c5e6e453ec568e55685b131"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-local_copy-smooth/before-prepare-decode-engine-1.prom",
+      "bytes": 3717,
+      "sha256": "9de772d562fad24bdd0e86c9bb09ca887833e0bec5ae8640c78c1e689f5c024b",
+      "git_blob": "475228d9046bcac463a95ab31e2c11411662cc3a"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-local_copy-smooth/client.jsonl",
+      "bytes": 14668,
+      "sha256": "9a7397163baea3b2a8d8e64771914438e00fadffce3384eaecf68ea6a4d43f79",
+      "git_blob": "2241f4776d7dfb7d3c3c8887caf7db97fe602d09"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-local_copy-smooth/decode-engine-0.log",
+      "bytes": 37219,
+      "sha256": "1e70fe42137eb67e7ac3f0209399211b679171de2202f886bbe68aa47fdf2976",
+      "git_blob": "a8b931f38365ebd6088b2289d3d95b8b34a25597"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-local_copy-smooth/decode-engine-1.log",
+      "bytes": 37207,
+      "sha256": "e03fa09d88e76977624755ad68de50c8edde55cc082b32d0342a3bee9731f66e",
+      "git_blob": "aaf01ef66c17ff92c4d3a92cb8b49cbb513adcfd"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-local_copy-smooth/decode-metaserver.log",
+      "bytes": 1774,
+      "sha256": "26126d0682449c92287afa6e64b938783a32c4d2246a3d739ea58cf446b49180",
+      "git_blob": "f9cd67ed0cc7a31828ff3002b9e7af6e60b47158"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-local_copy-smooth/decode-vllm.log",
+      "bytes": 92430,
+      "sha256": "a02dacbb67366563a864e8a43d6a80047c0236f263d6c6ebc34fd76070de5f44",
+      "git_blob": "fdac5709623f77d545dfc3043409bcc7df746952"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-local_copy-smooth/marker_clear_argv.log",
+      "bytes": 42,
+      "sha256": "9fde034d46aba157a23da076e94825a02add0cfa3ab9b4d5c99fe29abd8ea196",
+      "git_blob": "f7df4447ce442bbeca6f38ebdd7ab144614720f9"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-local_copy-smooth/pre-activation-decode-engine-0-host-cache.json",
+      "bytes": 104,
+      "sha256": "0fe3f76b4dc0a0e0e7ff5b5f8660dc72524670a6a5664a30beb1d33d6a4502c1",
+      "git_blob": "c07f3d69a155464fa7a1ae2f900a353e004f351f"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-local_copy-smooth/pre-activation-decode-engine-1-host-cache.json",
+      "bytes": 104,
+      "sha256": "0fe3f76b4dc0a0e0e7ff5b5f8660dc72524670a6a5664a30beb1d33d6a4502c1",
+      "git_blob": "c07f3d69a155464fa7a1ae2f900a353e004f351f"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-local_copy-smooth/pre-activation-device-cache.json",
+      "bytes": 26,
+      "sha256": "07c872c555795ea5ab0ef965e45c1becfb2d0d549c499c78aabf125a3f5cb958",
+      "git_blob": "28c8ecd539a76b305e809cf070aec149a15619c1"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-local_copy-smooth/prefill-engine-0.log",
+      "bytes": 24240,
+      "sha256": "447244d96c0b841c8c741cba6920dbb8a12449e19186698d27f5cdf88dff8fe9",
+      "git_blob": "1adb6bb4c9676bd0d0f28c308b975cef28c30e58"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-local_copy-smooth/prefill-engine-1.log",
+      "bytes": 24244,
+      "sha256": "4f81360fb9f5d0faf0e59555cd9516c2cd9f4ff91a759ecb712fb997f8b9d737",
+      "git_blob": "8e92a8a8971958cfb769cf81fdaba32f6c96efd3"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-local_copy-smooth/prefill-router.log",
+      "bytes": 10188,
+      "sha256": "4b36adb6292a5a6f809917f4ca248388edb2f6fa9d16c1c170b5d101bb5087c9",
+      "git_blob": "f89f97ab6f856ece5b2b1fc692a5c9cd6797d1f9"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-local_copy-smooth/prefill-vllm.log",
+      "bytes": 94663,
+      "sha256": "35c23a13bc97040cd3c832ba82cd20013ae9928d5ad1ed933e966786ad1589a2",
+      "git_blob": "0d53b1fc040602f67f670adf3c309a3a077903b3"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-local_copy-smooth/prepare/client.jsonl",
+      "bytes": 3593,
+      "sha256": "ffe9d2d9432b400fca850adc69ba3dcbd865ed0e57b913b0920e0f970679c7b7",
+      "git_blob": "3d58521c73c0423e86daa7599d557d5dcb8e0f9b"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-local_copy-smooth/prepare/request-0000-decode-engine-0-host-cache.json",
+      "bytes": 104,
+      "sha256": "0fe3f76b4dc0a0e0e7ff5b5f8660dc72524670a6a5664a30beb1d33d6a4502c1",
+      "git_blob": "c07f3d69a155464fa7a1ae2f900a353e004f351f"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-local_copy-smooth/prepare/request-0000-decode-engine-1-host-cache.json",
+      "bytes": 104,
+      "sha256": "0fe3f76b4dc0a0e0e7ff5b5f8660dc72524670a6a5664a30beb1d33d6a4502c1",
+      "git_blob": "c07f3d69a155464fa7a1ae2f900a353e004f351f"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-local_copy-smooth/prepare/request-0000-device-cache.json",
+      "bytes": 26,
+      "sha256": "07c872c555795ea5ab0ef965e45c1becfb2d0d549c499c78aabf125a3f5cb958",
+      "git_blob": "28c8ecd539a76b305e809cf070aec149a15619c1"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-local_copy-smooth/prepare/request-0001-decode-engine-0-host-cache.json",
+      "bytes": 104,
+      "sha256": "0fe3f76b4dc0a0e0e7ff5b5f8660dc72524670a6a5664a30beb1d33d6a4502c1",
+      "git_blob": "c07f3d69a155464fa7a1ae2f900a353e004f351f"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-local_copy-smooth/prepare/request-0001-decode-engine-1-host-cache.json",
+      "bytes": 104,
+      "sha256": "0fe3f76b4dc0a0e0e7ff5b5f8660dc72524670a6a5664a30beb1d33d6a4502c1",
+      "git_blob": "c07f3d69a155464fa7a1ae2f900a353e004f351f"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-local_copy-smooth/prepare/request-0001-device-cache.json",
+      "bytes": 26,
+      "sha256": "07c872c555795ea5ab0ef965e45c1becfb2d0d549c499c78aabf125a3f5cb958",
+      "git_blob": "28c8ecd539a76b305e809cf070aec149a15619c1"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-local_copy-smooth/prepare/request-0002-decode-engine-0-host-cache.json",
+      "bytes": 104,
+      "sha256": "0fe3f76b4dc0a0e0e7ff5b5f8660dc72524670a6a5664a30beb1d33d6a4502c1",
+      "git_blob": "c07f3d69a155464fa7a1ae2f900a353e004f351f"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-local_copy-smooth/prepare/request-0002-decode-engine-1-host-cache.json",
+      "bytes": 104,
+      "sha256": "0fe3f76b4dc0a0e0e7ff5b5f8660dc72524670a6a5664a30beb1d33d6a4502c1",
+      "git_blob": "c07f3d69a155464fa7a1ae2f900a353e004f351f"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-local_copy-smooth/prepare/request-0002-device-cache.json",
+      "bytes": 26,
+      "sha256": "07c872c555795ea5ab0ef965e45c1becfb2d0d549c499c78aabf125a3f5cb958",
+      "git_blob": "28c8ecd539a76b305e809cf070aec149a15619c1"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-local_copy-smooth/prepare/request-0003-decode-engine-0-host-cache.json",
+      "bytes": 104,
+      "sha256": "0fe3f76b4dc0a0e0e7ff5b5f8660dc72524670a6a5664a30beb1d33d6a4502c1",
+      "git_blob": "c07f3d69a155464fa7a1ae2f900a353e004f351f"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-local_copy-smooth/prepare/request-0003-decode-engine-1-host-cache.json",
+      "bytes": 104,
+      "sha256": "0fe3f76b4dc0a0e0e7ff5b5f8660dc72524670a6a5664a30beb1d33d6a4502c1",
+      "git_blob": "c07f3d69a155464fa7a1ae2f900a353e004f351f"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-local_copy-smooth/prepare/request-0003-device-cache.json",
+      "bytes": 26,
+      "sha256": "07c872c555795ea5ab0ef965e45c1becfb2d0d549c499c78aabf125a3f5cb958",
+      "git_blob": "28c8ecd539a76b305e809cf070aec149a15619c1"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-local_copy-smooth/prepare/request-0004-decode-engine-0-host-cache.json",
+      "bytes": 104,
+      "sha256": "0fe3f76b4dc0a0e0e7ff5b5f8660dc72524670a6a5664a30beb1d33d6a4502c1",
+      "git_blob": "c07f3d69a155464fa7a1ae2f900a353e004f351f"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-local_copy-smooth/prepare/request-0004-decode-engine-1-host-cache.json",
+      "bytes": 104,
+      "sha256": "0fe3f76b4dc0a0e0e7ff5b5f8660dc72524670a6a5664a30beb1d33d6a4502c1",
+      "git_blob": "c07f3d69a155464fa7a1ae2f900a353e004f351f"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-local_copy-smooth/prepare/request-0004-device-cache.json",
+      "bytes": 26,
+      "sha256": "07c872c555795ea5ab0ef965e45c1becfb2d0d549c499c78aabf125a3f5cb958",
+      "git_blob": "28c8ecd539a76b305e809cf070aec149a15619c1"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-local_copy-smooth/prepare/request-0005-decode-engine-0-host-cache.json",
+      "bytes": 104,
+      "sha256": "0fe3f76b4dc0a0e0e7ff5b5f8660dc72524670a6a5664a30beb1d33d6a4502c1",
+      "git_blob": "c07f3d69a155464fa7a1ae2f900a353e004f351f"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-local_copy-smooth/prepare/request-0005-decode-engine-1-host-cache.json",
+      "bytes": 104,
+      "sha256": "0fe3f76b4dc0a0e0e7ff5b5f8660dc72524670a6a5664a30beb1d33d6a4502c1",
+      "git_blob": "c07f3d69a155464fa7a1ae2f900a353e004f351f"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-local_copy-smooth/prepare/request-0005-device-cache.json",
+      "bytes": 26,
+      "sha256": "07c872c555795ea5ab0ef965e45c1becfb2d0d549c499c78aabf125a3f5cb958",
+      "git_blob": "28c8ecd539a76b305e809cf070aec149a15619c1"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-local_copy-smooth/prepare/request-0006-decode-engine-0-host-cache.json",
+      "bytes": 104,
+      "sha256": "0fe3f76b4dc0a0e0e7ff5b5f8660dc72524670a6a5664a30beb1d33d6a4502c1",
+      "git_blob": "c07f3d69a155464fa7a1ae2f900a353e004f351f"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-local_copy-smooth/prepare/request-0006-decode-engine-1-host-cache.json",
+      "bytes": 104,
+      "sha256": "0fe3f76b4dc0a0e0e7ff5b5f8660dc72524670a6a5664a30beb1d33d6a4502c1",
+      "git_blob": "c07f3d69a155464fa7a1ae2f900a353e004f351f"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-local_copy-smooth/prepare/request-0006-device-cache.json",
+      "bytes": 26,
+      "sha256": "07c872c555795ea5ab0ef965e45c1becfb2d0d549c499c78aabf125a3f5cb958",
+      "git_blob": "28c8ecd539a76b305e809cf070aec149a15619c1"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-local_copy-smooth/prepare/request-0007-decode-engine-0-host-cache.json",
+      "bytes": 104,
+      "sha256": "0fe3f76b4dc0a0e0e7ff5b5f8660dc72524670a6a5664a30beb1d33d6a4502c1",
+      "git_blob": "c07f3d69a155464fa7a1ae2f900a353e004f351f"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-local_copy-smooth/prepare/request-0007-decode-engine-1-host-cache.json",
+      "bytes": 104,
+      "sha256": "0fe3f76b4dc0a0e0e7ff5b5f8660dc72524670a6a5664a30beb1d33d6a4502c1",
+      "git_blob": "c07f3d69a155464fa7a1ae2f900a353e004f351f"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-local_copy-smooth/prepare/request-0007-device-cache.json",
+      "bytes": 26,
+      "sha256": "07c872c555795ea5ab0ef965e45c1becfb2d0d549c499c78aabf125a3f5cb958",
+      "git_blob": "28c8ecd539a76b305e809cf070aec149a15619c1"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-local_copy-smooth/prepare/sse/issue23-mmlu-pro-smoke-0000-0.jsonl",
+      "bytes": 728,
+      "sha256": "ea9267e20297cf4d564e2ba4f601a72c5361c1f85859be5863c4956439efce22",
+      "git_blob": "76dcbbf56d46fac54d49ca06a6c4ae1f06157013"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-local_copy-smooth/prepare/sse/issue23-mmlu-pro-smoke-0000-1.jsonl",
+      "bytes": 729,
+      "sha256": "12ae3522a1ef450605699c74be0bcf23c8fe6d46fdec3ef078c26894d4e649ff",
+      "git_blob": "7fe39966c68f6cd575da489eca4073a7b455ffbf"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-local_copy-smooth/prepare/sse/issue23-mmlu-pro-smoke-0000-2.jsonl",
+      "bytes": 729,
+      "sha256": "49f5bb63ebf6684493511056f8c53a3adb75ddd14e935539152ea9199511ee14",
+      "git_blob": "bb2f7113350a4e089b8ad0c544a1afefc27cc4d2"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-local_copy-smooth/prepare/sse/issue23-mmlu-pro-smoke-0000-3.jsonl",
+      "bytes": 728,
+      "sha256": "d725ba06e69e69942310bcc448b0fcbe23acd50a3ab94cd54c372476cae54c7a",
+      "git_blob": "9be6c68db26fb5758af1c7ffbbbe38781313a43f"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-local_copy-smooth/prepare/sse/issue23-mmlu-pro-smoke-0001-0.jsonl",
+      "bytes": 728,
+      "sha256": "94676b6fce506f18d19b6cbace7a619187be031fe46c76c007ad0bcea6d8d6df",
+      "git_blob": "8c1fbc4d705f69df33142accc42a655dec840c71"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-local_copy-smooth/prepare/sse/issue23-mmlu-pro-smoke-0001-1.jsonl",
+      "bytes": 728,
+      "sha256": "b5ceece7622660ac9678159a26adfa8282def946c203177df82a1a5007353f94",
+      "git_blob": "02ced813c9b679f33fdc0e2c9d2d8ad1e2fd9057"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-local_copy-smooth/prepare/sse/issue23-mmlu-pro-smoke-0001-2.jsonl",
+      "bytes": 729,
+      "sha256": "620f13344ed7330281c8265494d617e0f6ac8daf28a997a35bb717f76355f2bb",
+      "git_blob": "ad3fd6e47845017a38513fb57380e2b9ec3f607e"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-local_copy-smooth/prepare/sse/issue23-mmlu-pro-smoke-0001-3.jsonl",
+      "bytes": 728,
+      "sha256": "2286be16dc852132d22595760189976e2c0cd2d160d91c9ed068b106417b183f",
+      "git_blob": "88812020c7b28891ab023e267eb435c19985d5f0"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-local_copy-smooth/processes-decode.json",
+      "bytes": 3676,
+      "sha256": "dd383bd7362d7b0d1650736a1e7f8fb719cc5f0fc4ffcdde2eb22178998d9f7a",
+      "git_blob": "810681874158df0fc355eb2d156158481f1550b3"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-local_copy-smooth/processes-prefill.json",
+      "bytes": 3209,
+      "sha256": "ffcb1f0554ed9ed232d6761b66b89acff11744d0f9926e5f03ee9e127b677cd4",
+      "git_blob": "fdccc920915a445dcf85344a063f10bf60b72644"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-local_copy-smooth/run-contract.json",
+      "bytes": 2688,
+      "sha256": "51872ba510953cff48ee9d5733dcd5c4235c278a8dec571334b676c956ae6bd9",
+      "git_blob": "80eee4d0fa23100a2e142ae946480bb8aa00af48"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-local_copy-smooth/sse/issue23-mmlu-pro-smoke-0000-0.jsonl",
+      "bytes": 96897,
+      "sha256": "9732770e77bfc09ad503b5dc5f830e2a0d0f33cdac816198bdb5f08cee9098d0",
+      "git_blob": "8b30f8841edb4407686be069fe76d84b593934ef"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-local_copy-smooth/sse/issue23-mmlu-pro-smoke-0000-1.jsonl",
+      "bytes": 171438,
+      "sha256": "86c80df355e7dcff8273c4e5bc811708e995d4e74275415ef975771df6d9b7c8",
+      "git_blob": "8268bec88e08325165b9b1f91883133c77c97a7e"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-local_copy-smooth/sse/issue23-mmlu-pro-smoke-0000-2.jsonl",
+      "bytes": 171528,
+      "sha256": "4eba67d9988b924910f1bdc2dfcfc45dd662714dc52a1b7811aabf5dca1c9996",
+      "git_blob": "ad03e61bcc26b2b064bc2a5a3a8f5d480fa80f88"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-local_copy-smooth/sse/issue23-mmlu-pro-smoke-0000-3.jsonl",
+      "bytes": 171677,
+      "sha256": "36a919a2e623b4cdaf78708e5942bdce52a54808863a6979bb21e3b14a9e0b94",
+      "git_blob": "7385a09925443114d5fd3bdaa7fc4bf1a00e1790"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-local_copy-smooth/sse/issue23-mmlu-pro-smoke-0001-0.jsonl",
+      "bytes": 171695,
+      "sha256": "80a75e8801a43c7c43fe1dcc6749ce0f827a0ce59e8043bc27e3ce1b7e813ae1",
+      "git_blob": "d6610a59e487629c8473ac13747f1a03bedc376c"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-local_copy-smooth/sse/issue23-mmlu-pro-smoke-0001-1.jsonl",
+      "bytes": 171380,
+      "sha256": "9198f04972a67370c66f78097b89527f5d3c3203c6917546d30135995a69e466",
+      "git_blob": "80752b056d3641de1b1301c4eecd3e3c6e1c6ac0"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-local_copy-smooth/sse/issue23-mmlu-pro-smoke-0001-2.jsonl",
+      "bytes": 171318,
+      "sha256": "09387b6d773da543601987ebe5c63568ea885dfdac51b36163cde3157df1532d",
+      "git_blob": "cb8d6454f6114a306b742ab7aa8f00e2961e0333"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-local_copy-smooth/sse/issue23-mmlu-pro-smoke-0001-3.jsonl",
+      "bytes": 162801,
+      "sha256": "e0fba6e2ded4de316b33a79e2f1361abdad5ca0814df1b3c047012dcc034708a",
+      "git_blob": "9261516e7b44ab9884cd5c6e915c5e47aad76d21"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-local_copy-smooth/start_argv.log",
+      "bytes": 245,
+      "sha256": "3c0e0ccd53d7308bdb62332c365df06fa2f462f6f5a023f29cd8094dd7a5563c",
+      "git_blob": "ed8a2182836be2bf1ea128ca4c6f558e6465a712"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-local_copy-smooth/status-before-recovery.json",
+      "bytes": 66,
+      "sha256": "113670bedb17fe402bd26629be479ff79ac18335dcbcddbd8babcedd07a89b0d",
+      "git_blob": "4492b3a5e7ad000fdeb962879376a5bd4760a614"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-local_copy-smooth/status.json",
+      "bytes": 268,
+      "sha256": "4620544b0f7727bc9fdbb70326f9f8248eec67273cc085462988d67151e873fe",
+      "git_blob": "2d40cff2fc809b45dd2719348993c0fb6a841a86"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-local_copy-smooth/stop_argv.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "git_blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-local_copy-smooth/trace-decode-engine-0.jsonl",
+      "bytes": 242762,
+      "sha256": "6e481dd6b68bd5f7200d1aecd38e9f4a61e277c879f85357959ac25a0c970fac",
+      "git_blob": "85608b05ca56a6b09d027605db809becd7993672"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-local_copy-smooth/trace-decode-engine-1.jsonl",
+      "bytes": 242762,
+      "sha256": "c333814caff95ea202334feee373a73be446b3304238d7e4d063adaab64dd073",
+      "git_blob": "3b9027bbf6daa106051c4b1b21ecfdd64188bf53"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-local_copy-smooth/visibility/issue23-mmlu-pro-smoke-0000-0.tp0.visible",
+      "bytes": 71,
+      "sha256": "a6565e93d67d62d6d6d181dd147ddb2785254cab2e402259ab0fa3e481aad3f5",
+      "git_blob": "affe493732ac2ca85962d11693e8a19d8ab394c5"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-local_copy-smooth/visibility/issue23-mmlu-pro-smoke-0000-0.tp1.visible",
+      "bytes": 71,
+      "sha256": "5aa92047c8f23f4d0d4d37a2cd87f991da83908c475b87ef9cdfbc7f88750946",
+      "git_blob": "4e45e5be3f7458579febfad3a5d12bd5b3f3f64a"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-local_copy-smooth/visibility/issue23-mmlu-pro-smoke-0000-1.tp0.visible",
+      "bytes": 71,
+      "sha256": "fb23db6203f92229d53de675a2f1b9f3d187098078ac6aa6e3542856f54bb751",
+      "git_blob": "f6086eaf47f14bf7926c562369a0668940de00b5"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-local_copy-smooth/visibility/issue23-mmlu-pro-smoke-0000-1.tp1.visible",
+      "bytes": 71,
+      "sha256": "29d4888e226e6dc86bb8ebca17683847602d29013f312394e891461f746d2763",
+      "git_blob": "dcd8d6dcb00bb2eabff62872a40c336bbb743bb4"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-local_copy-smooth/visibility/issue23-mmlu-pro-smoke-0000-2.tp0.visible",
+      "bytes": 71,
+      "sha256": "7092bf90a894cea0158ea39c0723846e07417ba19b4da23242dc1b0e1bbfccff",
+      "git_blob": "f6203151678efa7e5ab10e2084e2d37b4d00516c"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-local_copy-smooth/visibility/issue23-mmlu-pro-smoke-0000-2.tp1.visible",
+      "bytes": 71,
+      "sha256": "06c85edb935e51bb6be8253de590921ede62cad0a1c4ea7e521e919999329c9f",
+      "git_blob": "a300c4b7d9a660fd49d29d3cc48e13169c8f034f"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-local_copy-smooth/visibility/issue23-mmlu-pro-smoke-0000-3.tp0.visible",
+      "bytes": 71,
+      "sha256": "e50ec8951b0d8b71b86a8bd4b9502734d321f824951c0157ceffdec4ed5fb3b2",
+      "git_blob": "44034825f792a8574a356baf51c61fb1f781c7a4"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-local_copy-smooth/visibility/issue23-mmlu-pro-smoke-0000-3.tp1.visible",
+      "bytes": 71,
+      "sha256": "a75e61ef8b9b895c90392b3d7d47730012b14eb3d3aaaf3c8bedd2f53c05b2fc",
+      "git_blob": "e6d12c8033761139e057a4e4f968f3bc97a19da4"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-local_copy-smooth/visibility/issue23-mmlu-pro-smoke-0001-0.tp0.visible",
+      "bytes": 71,
+      "sha256": "1151342404777d5500b1efb45d4f259ad09f28da4cd3ecf8a7aac0a6c1451cb8",
+      "git_blob": "33b7da288fabd3a93eb00f6fed1a168fada1fdad"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-local_copy-smooth/visibility/issue23-mmlu-pro-smoke-0001-0.tp1.visible",
+      "bytes": 71,
+      "sha256": "652cd573c69d4fc80dc5944cbf17c95461704f36fccdd7b20878bef6f024f87d",
+      "git_blob": "54e23bc4a6a71314887e8ccd86cd3ce5f25c6475"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-local_copy-smooth/visibility/issue23-mmlu-pro-smoke-0001-1.tp0.visible",
+      "bytes": 71,
+      "sha256": "c108f8f7d2fbd2d10c97f5605806298c6380cce1ba9852f1ebe943743ce7c6ac",
+      "git_blob": "07f8dc8ef84d7acd2a41cd289b493e86ed795804"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-local_copy-smooth/visibility/issue23-mmlu-pro-smoke-0001-1.tp1.visible",
+      "bytes": 71,
+      "sha256": "4e2d6bf6159c70967dcc199100861f441773f43962c25897946c41a70f584267",
+      "git_blob": "14e4d5ac14f2be324c7219258e70ff9a32edebe9"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-local_copy-smooth/visibility/issue23-mmlu-pro-smoke-0001-2.tp0.visible",
+      "bytes": 71,
+      "sha256": "77c2c56fc351c20615726e63925bdfb33baa7207f5531b116bfd778352b0e78e",
+      "git_blob": "241a4f0e4e17f1cb813cc557ba2db3c012a795a1"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-local_copy-smooth/visibility/issue23-mmlu-pro-smoke-0001-2.tp1.visible",
+      "bytes": 71,
+      "sha256": "3ae22a757da72957609190000a86ff2b05324ccc260e95a5b5f3df7bfa0fe980",
+      "git_blob": "1667f24fae1322dc8faedab02424d84caaa85f97"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-local_copy-smooth/visibility/issue23-mmlu-pro-smoke-0001-3.tp0.visible",
+      "bytes": 71,
+      "sha256": "cc9ba7dd1ee70c5f0ae2ec6cf4dbe943f294f0581e3d0a8f07e3c0a1abf61625",
+      "git_blob": "66e3e86407b604e67b79391936425882bc4737da"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-local_copy-smooth/visibility/issue23-mmlu-pro-smoke-0001-3.tp1.visible",
+      "bytes": 71,
+      "sha256": "a853322d24446c0a2a049eda27921496846676722dc02308d1c5f764154ca1e0",
+      "git_blob": "427d34fe7953d6c53d980c80b74deb9bcbb9bae0"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-rdma-smooth/activate-decode-engine-0.json",
+      "bytes": 74,
+      "sha256": "44db608f32108116b1fd57a86eedae2ff1479a299c8e0fe18a098704d4a2a716",
+      "git_blob": "aa9092024d05f8867770f013a61ebbe04bef7f8c"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-rdma-smooth/activate-decode-engine-1.json",
+      "bytes": 74,
+      "sha256": "44db608f32108116b1fd57a86eedae2ff1479a299c8e0fe18a098704d4a2a716",
+      "git_blob": "aa9092024d05f8867770f013a61ebbe04bef7f8c"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-rdma-smooth/after-measurement-decode-engine-0.prom",
+      "bytes": 25947,
+      "sha256": "5da1680038945c472b5c929f0c9af1b5a8aa09d7ebc92c3bc79da5eaf0c04ded",
+      "git_blob": "cb90ce908c4299b686804a2a7f035f8395ea8b7b"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-rdma-smooth/after-measurement-decode-engine-1.prom",
+      "bytes": 25933,
+      "sha256": "d6daa8e6c2f8b5358a1f2b0c37c531a833cae5e423321bf120d95d5d5d184d09",
+      "git_blob": "c4fe66a646f69115024f06c471c574950c66fcdd"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-rdma-smooth/after-prepare-decode-engine-0.prom",
+      "bytes": 25874,
+      "sha256": "ae76f43ea9e3361609c3edde5ba5c7b093189e0e98b150f11e12cb173f695d72",
+      "git_blob": "0680a6eea9ebb47eb81352305f5999fb9fe09186"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-rdma-smooth/after-prepare-decode-engine-1.prom",
+      "bytes": 25840,
+      "sha256": "f36457de7492f1eaea3c658ad5645cf6b5a95bd130ab29dbfbf0a6120c721f50",
+      "git_blob": "078e3bb7db15e6858cf85aebc7d78a98945a9fee"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-rdma-smooth/analysis.json",
+      "bytes": 8172,
+      "sha256": "12ec239960da613946547c8211eb30086676d7d345b1b972f1a238ae27f5b206",
+      "git_blob": "f876fde6a33d01907d3f9e7712a5b752932f41e8"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-rdma-smooth/before-prepare-decode-engine-0.prom",
+      "bytes": 3717,
+      "sha256": "0f8c6a7f6eee224193b1b1520c820b6aed677ba865810c306867e3cb69898453",
+      "git_blob": "3881302d6c48c56f7c73f2a965685704fb626297"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-rdma-smooth/before-prepare-decode-engine-1.prom",
+      "bytes": 3717,
+      "sha256": "2aada7abad8b1c3bc957bb9469bd99849f2ff0c3641f7e9f423a38fabf4dd009",
+      "git_blob": "ad4b34e7793d00862ea545ce51c2ce6fd75c91ce"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-rdma-smooth/client.jsonl",
+      "bytes": 13474,
+      "sha256": "eeaccc1eaeabc9d3fed7345b400fd16c6dfbfb184a13b2ef192088a8288851b7",
+      "git_blob": "aae68bc88e03baaf8d71eddda72eb99ba8b17f3f"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-rdma-smooth/decode-engine-0.log",
+      "bytes": 39181,
+      "sha256": "73f70cf877d556feae4be022ad76569e91b62bd2a87bcf0d0a77182dcda9bf4a",
+      "git_blob": "4ae8841095b4d51e05500e952d8f564c0e9e177c"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-rdma-smooth/decode-engine-1.log",
+      "bytes": 38717,
+      "sha256": "42fa8ac73caade549901e65656689584943d10af0dc40aaf3f1174c0dbec80ad",
+      "git_blob": "76e7032fdfb05b48db2ac0ef41e635ed162ba09a"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-rdma-smooth/decode-metaserver.log",
+      "bytes": 1865,
+      "sha256": "cdb12956dd6789f6cb87856c0497d301dab3cd38f50ee41b3219a0b659fe0dbc",
+      "git_blob": "b2438242d9fa57a4d03237fcc437a45d0460a7ea"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-rdma-smooth/decode-vllm.log",
+      "bytes": 92591,
+      "sha256": "8b2195024550df967bfadd389ce40eb64923e518999656a51c545ee4ce4b9e94",
+      "git_blob": "8f27be5e31e296ad23d037ae842d9097367aa028"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-rdma-smooth/marker_clear_argv.log",
+      "bytes": 42,
+      "sha256": "9fde034d46aba157a23da076e94825a02add0cfa3ab9b4d5c99fe29abd8ea196",
+      "git_blob": "f7df4447ce442bbeca6f38ebdd7ab144614720f9"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-rdma-smooth/pre-activation-decode-engine-0-host-cache.json",
+      "bytes": 104,
+      "sha256": "0fe3f76b4dc0a0e0e7ff5b5f8660dc72524670a6a5664a30beb1d33d6a4502c1",
+      "git_blob": "c07f3d69a155464fa7a1ae2f900a353e004f351f"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-rdma-smooth/pre-activation-decode-engine-1-host-cache.json",
+      "bytes": 104,
+      "sha256": "0fe3f76b4dc0a0e0e7ff5b5f8660dc72524670a6a5664a30beb1d33d6a4502c1",
+      "git_blob": "c07f3d69a155464fa7a1ae2f900a353e004f351f"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-rdma-smooth/pre-activation-device-cache.json",
+      "bytes": 26,
+      "sha256": "07c872c555795ea5ab0ef965e45c1becfb2d0d549c499c78aabf125a3f5cb958",
+      "git_blob": "28c8ecd539a76b305e809cf070aec149a15619c1"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-rdma-smooth/prefill-engine-0.log",
+      "bytes": 24241,
+      "sha256": "88b6078784ffb91e303aa4925e48d30a5e32d728c5f32695ec33285d837bcfba",
+      "git_blob": "309bc2631e7ca3d82ba5e8dcfdcff8a09af9e74a"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-rdma-smooth/prefill-engine-1.log",
+      "bytes": 24244,
+      "sha256": "60926dc4e0f6ed3387f944b89e4b0a03e53f2efe96f70a0be67a0f6662f313df",
+      "git_blob": "b9b46cf7159ac9dc1219d51dddf0427713738e3e"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-rdma-smooth/prefill-router.log",
+      "bytes": 10182,
+      "sha256": "de9c413fa845114cd9b10cfc2ee63f7360ac1817a1fb391133cff28f6bbf0965",
+      "git_blob": "cbbb29452c746382077506991f87f99a240df0cb"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-rdma-smooth/prefill-vllm.log",
+      "bytes": 94471,
+      "sha256": "d3bbf4c98c23f8e0df96d612928bc38a72e95ff6b583be4c01beee01a0d95258",
+      "git_blob": "7d4b1ff3e80778ae949e166873b9939330850d27"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-rdma-smooth/prepare/client.jsonl",
+      "bytes": 3600,
+      "sha256": "10e0963c8c957fca81f73302edbf51c570a6fdc740db980693748cd3b11fc9ec",
+      "git_blob": "18b88393c2298bafb10fd6f9160fa458c1e63008"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-rdma-smooth/prepare/request-0000-decode-engine-0-host-cache.json",
+      "bytes": 104,
+      "sha256": "0fe3f76b4dc0a0e0e7ff5b5f8660dc72524670a6a5664a30beb1d33d6a4502c1",
+      "git_blob": "c07f3d69a155464fa7a1ae2f900a353e004f351f"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-rdma-smooth/prepare/request-0000-decode-engine-1-host-cache.json",
+      "bytes": 104,
+      "sha256": "0fe3f76b4dc0a0e0e7ff5b5f8660dc72524670a6a5664a30beb1d33d6a4502c1",
+      "git_blob": "c07f3d69a155464fa7a1ae2f900a353e004f351f"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-rdma-smooth/prepare/request-0000-device-cache.json",
+      "bytes": 26,
+      "sha256": "07c872c555795ea5ab0ef965e45c1becfb2d0d549c499c78aabf125a3f5cb958",
+      "git_blob": "28c8ecd539a76b305e809cf070aec149a15619c1"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-rdma-smooth/prepare/request-0001-decode-engine-0-host-cache.json",
+      "bytes": 104,
+      "sha256": "0fe3f76b4dc0a0e0e7ff5b5f8660dc72524670a6a5664a30beb1d33d6a4502c1",
+      "git_blob": "c07f3d69a155464fa7a1ae2f900a353e004f351f"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-rdma-smooth/prepare/request-0001-decode-engine-1-host-cache.json",
+      "bytes": 104,
+      "sha256": "0fe3f76b4dc0a0e0e7ff5b5f8660dc72524670a6a5664a30beb1d33d6a4502c1",
+      "git_blob": "c07f3d69a155464fa7a1ae2f900a353e004f351f"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-rdma-smooth/prepare/request-0001-device-cache.json",
+      "bytes": 26,
+      "sha256": "07c872c555795ea5ab0ef965e45c1becfb2d0d549c499c78aabf125a3f5cb958",
+      "git_blob": "28c8ecd539a76b305e809cf070aec149a15619c1"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-rdma-smooth/prepare/request-0002-decode-engine-0-host-cache.json",
+      "bytes": 104,
+      "sha256": "0fe3f76b4dc0a0e0e7ff5b5f8660dc72524670a6a5664a30beb1d33d6a4502c1",
+      "git_blob": "c07f3d69a155464fa7a1ae2f900a353e004f351f"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-rdma-smooth/prepare/request-0002-decode-engine-1-host-cache.json",
+      "bytes": 104,
+      "sha256": "0fe3f76b4dc0a0e0e7ff5b5f8660dc72524670a6a5664a30beb1d33d6a4502c1",
+      "git_blob": "c07f3d69a155464fa7a1ae2f900a353e004f351f"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-rdma-smooth/prepare/request-0002-device-cache.json",
+      "bytes": 26,
+      "sha256": "07c872c555795ea5ab0ef965e45c1becfb2d0d549c499c78aabf125a3f5cb958",
+      "git_blob": "28c8ecd539a76b305e809cf070aec149a15619c1"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-rdma-smooth/prepare/request-0003-decode-engine-0-host-cache.json",
+      "bytes": 104,
+      "sha256": "0fe3f76b4dc0a0e0e7ff5b5f8660dc72524670a6a5664a30beb1d33d6a4502c1",
+      "git_blob": "c07f3d69a155464fa7a1ae2f900a353e004f351f"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-rdma-smooth/prepare/request-0003-decode-engine-1-host-cache.json",
+      "bytes": 104,
+      "sha256": "0fe3f76b4dc0a0e0e7ff5b5f8660dc72524670a6a5664a30beb1d33d6a4502c1",
+      "git_blob": "c07f3d69a155464fa7a1ae2f900a353e004f351f"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-rdma-smooth/prepare/request-0003-device-cache.json",
+      "bytes": 26,
+      "sha256": "07c872c555795ea5ab0ef965e45c1becfb2d0d549c499c78aabf125a3f5cb958",
+      "git_blob": "28c8ecd539a76b305e809cf070aec149a15619c1"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-rdma-smooth/prepare/request-0004-decode-engine-0-host-cache.json",
+      "bytes": 104,
+      "sha256": "0fe3f76b4dc0a0e0e7ff5b5f8660dc72524670a6a5664a30beb1d33d6a4502c1",
+      "git_blob": "c07f3d69a155464fa7a1ae2f900a353e004f351f"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-rdma-smooth/prepare/request-0004-decode-engine-1-host-cache.json",
+      "bytes": 104,
+      "sha256": "0fe3f76b4dc0a0e0e7ff5b5f8660dc72524670a6a5664a30beb1d33d6a4502c1",
+      "git_blob": "c07f3d69a155464fa7a1ae2f900a353e004f351f"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-rdma-smooth/prepare/request-0004-device-cache.json",
+      "bytes": 26,
+      "sha256": "07c872c555795ea5ab0ef965e45c1becfb2d0d549c499c78aabf125a3f5cb958",
+      "git_blob": "28c8ecd539a76b305e809cf070aec149a15619c1"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-rdma-smooth/prepare/request-0005-decode-engine-0-host-cache.json",
+      "bytes": 104,
+      "sha256": "0fe3f76b4dc0a0e0e7ff5b5f8660dc72524670a6a5664a30beb1d33d6a4502c1",
+      "git_blob": "c07f3d69a155464fa7a1ae2f900a353e004f351f"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-rdma-smooth/prepare/request-0005-decode-engine-1-host-cache.json",
+      "bytes": 104,
+      "sha256": "0fe3f76b4dc0a0e0e7ff5b5f8660dc72524670a6a5664a30beb1d33d6a4502c1",
+      "git_blob": "c07f3d69a155464fa7a1ae2f900a353e004f351f"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-rdma-smooth/prepare/request-0005-device-cache.json",
+      "bytes": 26,
+      "sha256": "07c872c555795ea5ab0ef965e45c1becfb2d0d549c499c78aabf125a3f5cb958",
+      "git_blob": "28c8ecd539a76b305e809cf070aec149a15619c1"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-rdma-smooth/prepare/request-0006-decode-engine-0-host-cache.json",
+      "bytes": 104,
+      "sha256": "0fe3f76b4dc0a0e0e7ff5b5f8660dc72524670a6a5664a30beb1d33d6a4502c1",
+      "git_blob": "c07f3d69a155464fa7a1ae2f900a353e004f351f"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-rdma-smooth/prepare/request-0006-decode-engine-1-host-cache.json",
+      "bytes": 104,
+      "sha256": "0fe3f76b4dc0a0e0e7ff5b5f8660dc72524670a6a5664a30beb1d33d6a4502c1",
+      "git_blob": "c07f3d69a155464fa7a1ae2f900a353e004f351f"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-rdma-smooth/prepare/request-0006-device-cache.json",
+      "bytes": 26,
+      "sha256": "07c872c555795ea5ab0ef965e45c1becfb2d0d549c499c78aabf125a3f5cb958",
+      "git_blob": "28c8ecd539a76b305e809cf070aec149a15619c1"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-rdma-smooth/prepare/request-0007-decode-engine-0-host-cache.json",
+      "bytes": 104,
+      "sha256": "0fe3f76b4dc0a0e0e7ff5b5f8660dc72524670a6a5664a30beb1d33d6a4502c1",
+      "git_blob": "c07f3d69a155464fa7a1ae2f900a353e004f351f"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-rdma-smooth/prepare/request-0007-decode-engine-1-host-cache.json",
+      "bytes": 104,
+      "sha256": "0fe3f76b4dc0a0e0e7ff5b5f8660dc72524670a6a5664a30beb1d33d6a4502c1",
+      "git_blob": "c07f3d69a155464fa7a1ae2f900a353e004f351f"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-rdma-smooth/prepare/request-0007-device-cache.json",
+      "bytes": 26,
+      "sha256": "07c872c555795ea5ab0ef965e45c1becfb2d0d549c499c78aabf125a3f5cb958",
+      "git_blob": "28c8ecd539a76b305e809cf070aec149a15619c1"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-rdma-smooth/prepare/sse/issue23-mmlu-pro-smoke-0000-0.jsonl",
+      "bytes": 729,
+      "sha256": "40a5c7418e9e1afda07350a585b7f55cb19f3959677ef12a495591cbdd77445f",
+      "git_blob": "b7f38470e29cbebd56f86a369638824b9909f419"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-rdma-smooth/prepare/sse/issue23-mmlu-pro-smoke-0000-1.jsonl",
+      "bytes": 728,
+      "sha256": "ccf022c370e1bfc8e3d6858a4ad624d88821cc2f0a89fc63304258368312e5ce",
+      "git_blob": "8b7eddfa0a6fe3a041e839869864ffd9e19433c0"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-rdma-smooth/prepare/sse/issue23-mmlu-pro-smoke-0000-2.jsonl",
+      "bytes": 729,
+      "sha256": "a9b84c1ab38b8f0e61c085d3c5088ff6f2ca3bfbb4e0d4eedd097148399b95f3",
+      "git_blob": "98ab07731dd0e2c384d2e2c500ef4279cfacf181"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-rdma-smooth/prepare/sse/issue23-mmlu-pro-smoke-0000-3.jsonl",
+      "bytes": 729,
+      "sha256": "947047a74fbeab3758cca261851f179b8adc8d9db473df41566e003b1b4afb2d",
+      "git_blob": "507fd00279f2695cc1384db6d89a1fc46ee858d3"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-rdma-smooth/prepare/sse/issue23-mmlu-pro-smoke-0001-0.jsonl",
+      "bytes": 728,
+      "sha256": "a4c76c17b71dca621f8ef0d718785b681864f27fbfa8e82d125ce9a5f1d18b12",
+      "git_blob": "459b6236e4eb8e8318ee7803f959c9a16e2a30c1"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-rdma-smooth/prepare/sse/issue23-mmlu-pro-smoke-0001-1.jsonl",
+      "bytes": 729,
+      "sha256": "e92ca62faf84a08de346cd5d4a7ea8bd2a2f72a0d901e9dd526abdcbc466fc27",
+      "git_blob": "7869fe7781174e531e7a0fc2ddf5cff045852046"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-rdma-smooth/prepare/sse/issue23-mmlu-pro-smoke-0001-2.jsonl",
+      "bytes": 725,
+      "sha256": "b87f416d730c336d77f4f32ce8db2c01dacb4e5ef494991f8b99201f47fff4da",
+      "git_blob": "3ee6aa900b11898512ecf153377883d9327c38ef"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-rdma-smooth/prepare/sse/issue23-mmlu-pro-smoke-0001-3.jsonl",
+      "bytes": 728,
+      "sha256": "2798446ef7a1b3e99bf79b35f0d75d406425b36be37fd4119ee345a8a3daa179",
+      "git_blob": "da284737cd0ad442e80044fca4265666e80ef348"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-rdma-smooth/processes-decode.json",
+      "bytes": 3652,
+      "sha256": "17c7bf4f7ab84db16cd0ab7a985b96976e512bb8e3c2ff987547e75afbcc50b4",
+      "git_blob": "65834518e482c5ddd4eaa32cb494b197ad3fbb9b"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-rdma-smooth/processes-prefill.json",
+      "bytes": 3203,
+      "sha256": "fdf8b8c5e23c3fda5fcbade2c74af1a8fec60e0b61d01a1b54125380fcb27051",
+      "git_blob": "6ab1584e042f0ce6620b0dc321a084273c086855"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-rdma-smooth/run-contract.json",
+      "bytes": 2664,
+      "sha256": "b2413d771b5ce9fed04f24c6e0f815f81e6dae660a180022a1516e2f6f2587f0",
+      "git_blob": "7383b489dd908df9afd082464f45cd705d39f771"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-rdma-smooth/sse/issue23-mmlu-pro-smoke-0000-0.jsonl",
+      "bytes": 96905,
+      "sha256": "2151c42a23563268c7fb81ac7cb2c185118fb8465db7483addf52ffb8620f737",
+      "git_blob": "58ffcb1a703e572a3b02926d4c8284bbd43be2df"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-rdma-smooth/sse/issue23-mmlu-pro-smoke-0000-1.jsonl",
+      "bytes": 171467,
+      "sha256": "6ed9ace506d564c4e75828ae8444b5b5afb2857fc619ed045b359057adaf7442",
+      "git_blob": "4fcbba6e6a5dde1bbe4edf7cffd593c0174a4533"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-rdma-smooth/sse/issue23-mmlu-pro-smoke-0000-2.jsonl",
+      "bytes": 171551,
+      "sha256": "f1f0b27b7eeee64c0e666422e2c5998502ebbd74f0b0288854fdfcc955660ab6",
+      "git_blob": "407c9a2b0422f316ea8596c9189383ec1d82b6fa"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-rdma-smooth/sse/issue23-mmlu-pro-smoke-0000-3.jsonl",
+      "bytes": 171751,
+      "sha256": "0a25ae9f7f26f66ba643177c35d6731cced3d493ef4022b21d25cd4803098398",
+      "git_blob": "1a9fe221398008f32a224a7c6d885347a977af0b"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-rdma-smooth/sse/issue23-mmlu-pro-smoke-0001-0.jsonl",
+      "bytes": 153516,
+      "sha256": "adfc36bead6d08b420aaf6d79058523df4ca87943b86a2741b7f5d5ceda3e346",
+      "git_blob": "e05fe72eb75f52c3e892c748e1fed1cca04d20bb"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-rdma-smooth/sse/issue23-mmlu-pro-smoke-0001-1.jsonl",
+      "bytes": 171448,
+      "sha256": "b08531d309ac3205296c49491a119eb7cf9fba57c61db96e4a7c47f6ca690348",
+      "git_blob": "c52dbb7ea8cc4a99e9d5ba280ee77c51fdb11d70"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-rdma-smooth/sse/issue23-mmlu-pro-smoke-0001-2.jsonl",
+      "bytes": 171386,
+      "sha256": "a5c784313a5aac52ca4d79d50081f237537dce2489fac347a1d6875eedf90105",
+      "git_blob": "6277b2edc876ca7acba87accb3c02f1c5b99decf"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-rdma-smooth/sse/issue23-mmlu-pro-smoke-0001-3.jsonl",
+      "bytes": 70707,
+      "sha256": "c6a0c303c18f9536c5c9be4a73dcadf19c99f810cbc09e9b9ba0535b38cccce7",
+      "git_blob": "6a6d1b4ef8098a98f8cbe9cb747e7533fe2d24e8"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-rdma-smooth/start_argv.log",
+      "bytes": 245,
+      "sha256": "3c0e0ccd53d7308bdb62332c365df06fa2f462f6f5a023f29cd8094dd7a5563c",
+      "git_blob": "ed8a2182836be2bf1ea128ca4c6f558e6465a712"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-rdma-smooth/status.json",
+      "bytes": 104,
+      "sha256": "5c057558255a7db06afe3434ad1547b72db93a07a01740608cb862a60aeb6717",
+      "git_blob": "2b0edc998a6e1ae1781d17e2fcede5b6395cc67c"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-rdma-smooth/stop_argv.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "git_blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-rdma-smooth/trace-decode-engine-0.jsonl",
+      "bytes": 242756,
+      "sha256": "997d40662f424d1b8e830dcd05b25b4837cb4a155e838fcee856419b8d64f760",
+      "git_blob": "22137e56cc56ea8fd33a64a1b5b14111f65d02fe"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-rdma-smooth/trace-decode-engine-1.jsonl",
+      "bytes": 242756,
+      "sha256": "0b13103b4e99a87913e589a89a827a5befadbaf13cbcccb94b95c9d60eb444cb",
+      "git_blob": "6694d477e3dc660bc1f899107f5b4d81804b6e36"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-rdma-smooth/visibility/issue23-mmlu-pro-smoke-0000-0.tp0.visible",
+      "bytes": 71,
+      "sha256": "64fae3e2115a67073040c1c4df23356a2b0294692450a3190462d8df5a5de322",
+      "git_blob": "73edcbc06b4687d3aec291771f86c26ed686b729"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-rdma-smooth/visibility/issue23-mmlu-pro-smoke-0000-0.tp1.visible",
+      "bytes": 71,
+      "sha256": "d50eaa53c3b271d2dfd4bb491536caf1201d03ddac0c365f4c949c72fa394b9d",
+      "git_blob": "132b49d2c3d25f5df42ad8a57b7e7cace7ea82d5"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-rdma-smooth/visibility/issue23-mmlu-pro-smoke-0000-1.tp0.visible",
+      "bytes": 71,
+      "sha256": "0a4fc545ab0520137e14065c6fdd7f72d45a10afea3f8ccbe897476691795798",
+      "git_blob": "88c6a071ba522989b4445ae03293ba91c4927b13"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-rdma-smooth/visibility/issue23-mmlu-pro-smoke-0000-1.tp1.visible",
+      "bytes": 71,
+      "sha256": "5c9fea21f8108591aa8d0e0a5f327e6d8b6ecaec99028663f5eb09f470b0434c",
+      "git_blob": "335fa32f695958242c31d8111433ae5bf350273f"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-rdma-smooth/visibility/issue23-mmlu-pro-smoke-0000-2.tp0.visible",
+      "bytes": 71,
+      "sha256": "44f127afe19dbe30588d28b7939fe11cb5f699b754163f0ace032651b931cd22",
+      "git_blob": "52b2abbd03f78cc8f430eb82ef13967ef7903d25"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-rdma-smooth/visibility/issue23-mmlu-pro-smoke-0000-2.tp1.visible",
+      "bytes": 71,
+      "sha256": "99fd07312c6428c57af2a0281f6944dbd6736316df37d7bb48057ee41323b931",
+      "git_blob": "27dd96e204c7e5edd1a46a1b6ae3b132a9f87192"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-rdma-smooth/visibility/issue23-mmlu-pro-smoke-0000-3.tp0.visible",
+      "bytes": 71,
+      "sha256": "9900c6a18ff194c2be5359c9eced3e82333b18ef05b63668430fddd84473cef5",
+      "git_blob": "144f4ee912450fae845f9631dd0810272ca5cc51"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-rdma-smooth/visibility/issue23-mmlu-pro-smoke-0000-3.tp1.visible",
+      "bytes": 71,
+      "sha256": "255202796cb40efeceb47b94816010b724ef5fb2185d6f038ce23e154254e1d9",
+      "git_blob": "4d4d094292efac7923706204f0d45f2c35d49c51"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-rdma-smooth/visibility/issue23-mmlu-pro-smoke-0001-0.tp0.visible",
+      "bytes": 71,
+      "sha256": "c99590b30984ad659589f2a42c2b676ee32d8a6d7169f6d0b891434013ddea11",
+      "git_blob": "375bcd867f6666fbd54d5713749d5736ba567662"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-rdma-smooth/visibility/issue23-mmlu-pro-smoke-0001-0.tp1.visible",
+      "bytes": 71,
+      "sha256": "e3a6da8f77a1921fa64523f2c626d56c8dac6364125729144dcce36fabe949b9",
+      "git_blob": "476d9c3262c56f3d1a453dc15daa1c2798efcf40"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-rdma-smooth/visibility/issue23-mmlu-pro-smoke-0001-1.tp0.visible",
+      "bytes": 71,
+      "sha256": "62c5d3779ed4f60e5b12708cb935ee64385210901228fe5e958341b3a67f2dec",
+      "git_blob": "51cfa9a77aefe14af0f02bfdf8e7723f952d90b5"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-rdma-smooth/visibility/issue23-mmlu-pro-smoke-0001-1.tp1.visible",
+      "bytes": 71,
+      "sha256": "0566341222bb7026939fb9c551c850303e9e74ed12f0ba682fbbbe2cbaa03c7c",
+      "git_blob": "c7ce79ab2b71ae8bd5eff991bcc0bf58bfe4dc6e"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-rdma-smooth/visibility/issue23-mmlu-pro-smoke-0001-2.tp0.visible",
+      "bytes": 71,
+      "sha256": "7d953e8c46518b45ef5205c24f04a904ad808316dd1cb8dce3fad515a88ab622",
+      "git_blob": "4ca79229b0fbff80fe84855372335aa4598b7aea"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-rdma-smooth/visibility/issue23-mmlu-pro-smoke-0001-2.tp1.visible",
+      "bytes": 71,
+      "sha256": "1f139122b4f99f1e1d5e532d305dd20d9cc9ea6f7ba7a192a97c784c3f25f0ca",
+      "git_blob": "d459fd30e6d052f86ca81f4c1c2e90e020587be0"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-rdma-smooth/visibility/issue23-mmlu-pro-smoke-0001-3.tp0.visible",
+      "bytes": 71,
+      "sha256": "08c21c86e7e1c5fdf8657a5792bfe91f2a53493d8c91fddd55a94e76982f5a31",
+      "git_blob": "1dfaf4df70eb5607030a1b7a48eebc4a216ea7e3"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-02-rdma-smooth/visibility/issue23-mmlu-pro-smoke-0001-3.tp1.visible",
+      "bytes": 71,
+      "sha256": "d05c5bd2a143a145881be9a874c863931cdd1d590d9093864a24ed8c05d73a50",
+      "git_blob": "4db92b8fd755820f10b446bd7d1efe997123803f"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-local_copy-burst/activate-decode-engine-0.json",
+      "bytes": 74,
+      "sha256": "44db608f32108116b1fd57a86eedae2ff1479a299c8e0fe18a098704d4a2a716",
+      "git_blob": "aa9092024d05f8867770f013a61ebbe04bef7f8c"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-local_copy-burst/activate-decode-engine-1.json",
+      "bytes": 74,
+      "sha256": "44db608f32108116b1fd57a86eedae2ff1479a299c8e0fe18a098704d4a2a716",
+      "git_blob": "aa9092024d05f8867770f013a61ebbe04bef7f8c"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-local_copy-burst/after-measurement-decode-engine-0.prom",
+      "bytes": 25923,
+      "sha256": "6e573f0045eb95263650660b226eae7345be93f6b62fdb209c7c699291bf55fb",
+      "git_blob": "c08001e60fb4b3d751084cc81a687d38ce1bbfa7"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-local_copy-burst/after-measurement-decode-engine-1.prom",
+      "bytes": 25931,
+      "sha256": "e0f9339059c2d8e7e2cdeff7d84fb06eb04dd00de6a941fad1152f6d2b08c97a",
+      "git_blob": "a22e86d21db9783624de77981c16210229416419"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-local_copy-burst/after-prepare-decode-engine-0.prom",
+      "bytes": 25842,
+      "sha256": "87b76298ad3a43cb8e4312984db65f45af43d32ac5699dca4a714acb37f389e3",
+      "git_blob": "f70554e42d7434c253f66895a6e49c62256afc4f"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-local_copy-burst/after-prepare-decode-engine-1.prom",
+      "bytes": 25854,
+      "sha256": "4737236b7d6adc69a150fbf12a3abf1c36d82db781932b47d452c4a61df57878",
+      "git_blob": "2b53e20f6b93c475322c343b5645c6b071bf7833"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-local_copy-burst/analysis.json",
+      "bytes": 8158,
+      "sha256": "b572e9727c59985a712239e32d1e6afca048e57f58c5d108ff842f7fff94f385",
+      "git_blob": "352bdbe722ba94227450d047023f26ed17048c30"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-local_copy-burst/before-prepare-decode-engine-0.prom",
+      "bytes": 3717,
+      "sha256": "94061844a75c7aef5af20b504f3b74002a1bf4677c7ac76c2c6770d1ba8f748b",
+      "git_blob": "153170fdb9a505d9ce57d5bbfb89161fef227c9d"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-local_copy-burst/before-prepare-decode-engine-1.prom",
+      "bytes": 3717,
+      "sha256": "1543c42c5c2166a19258073f0bb7b847f3b224f5166052401f563baed44d7741",
+      "git_blob": "40acfbbab09c6ed796dc9132e62bd7cc42f82037"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-local_copy-burst/client.jsonl",
+      "bytes": 13719,
+      "sha256": "8341a3ff296f6c617e3d93f7a0402f5a3eb8e05a48fe1b3203370f09842bbb9e",
+      "git_blob": "a417ccf9641be1ccd276f03201d157b974f7089a"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-local_copy-burst/decode-engine-0.log",
+      "bytes": 37805,
+      "sha256": "b8e1588e2ae9a05236eea5730a4acedf8dda505bb520065f3e6d36b117bcc66e",
+      "git_blob": "8c30390d305829e2909787ea7004a9d4857b621c"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-local_copy-burst/decode-engine-1.log",
+      "bytes": 38734,
+      "sha256": "99c3ace8f6b521b4a7fe6e9bb40dfe6e1f96a409f3165744665bc51c64314186",
+      "git_blob": "5250e59cca465cf2f4f9bfd1fba854e9290774b8"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-local_copy-burst/decode-metaserver.log",
+      "bytes": 1865,
+      "sha256": "d4bd98854ccea6e699b102a4465b528968f5bcd50b7e9b0b7ab77c553c97abf1",
+      "git_blob": "caf9eba8e7a2e45c72305a1020ba94cdf250a7cc"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-local_copy-burst/decode-vllm.log",
+      "bytes": 92106,
+      "sha256": "3bee7c33d5b34f68d7d9518cc66ecffb4f5a5734122f9869fb9a090a8030e003",
+      "git_blob": "51250c5681b17c82344e2dbd3de0342beb8ab802"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-local_copy-burst/marker_clear_argv.log",
+      "bytes": 42,
+      "sha256": "9fde034d46aba157a23da076e94825a02add0cfa3ab9b4d5c99fe29abd8ea196",
+      "git_blob": "f7df4447ce442bbeca6f38ebdd7ab144614720f9"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-local_copy-burst/pre-activation-decode-engine-0-host-cache.json",
+      "bytes": 104,
+      "sha256": "0fe3f76b4dc0a0e0e7ff5b5f8660dc72524670a6a5664a30beb1d33d6a4502c1",
+      "git_blob": "c07f3d69a155464fa7a1ae2f900a353e004f351f"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-local_copy-burst/pre-activation-decode-engine-1-host-cache.json",
+      "bytes": 104,
+      "sha256": "0fe3f76b4dc0a0e0e7ff5b5f8660dc72524670a6a5664a30beb1d33d6a4502c1",
+      "git_blob": "c07f3d69a155464fa7a1ae2f900a353e004f351f"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-local_copy-burst/pre-activation-device-cache.json",
+      "bytes": 26,
+      "sha256": "07c872c555795ea5ab0ef965e45c1becfb2d0d549c499c78aabf125a3f5cb958",
+      "git_blob": "28c8ecd539a76b305e809cf070aec149a15619c1"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-local_copy-burst/prefill-engine-0.log",
+      "bytes": 24240,
+      "sha256": "565d6c858f986dd82cc851cac21347c0ec21d733dce7b6279c467eb102c8a92d",
+      "git_blob": "f0009450f3f04e7a9b33b8808e589bd21c9de8e3"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-local_copy-burst/prefill-engine-1.log",
+      "bytes": 24244,
+      "sha256": "3ea4d210dfa3b017dbbc4436120c071b7ab1020eb245af1b920bbb373c0c3ea4",
+      "git_blob": "8f43caf920517127b10048349bdf2096937d0b25"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-local_copy-burst/prefill-router.log",
+      "bytes": 10187,
+      "sha256": "ab55b0ff72e7c22eaf582988928f6358557e227ea18e9a8d547b8e8fd159cbef",
+      "git_blob": "4ca5728b45b81eb5afc5a252e36b1da9088c04e5"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-local_copy-burst/prefill-vllm.log",
+      "bytes": 93596,
+      "sha256": "789c5867b1e7e9ef37992b8a75b22d4a07121edc9fe3bf042a303f475530bde8",
+      "git_blob": "6b924e9cd7d2c3923c9a8a2750267b2b8790fae4"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-local_copy-burst/prepare/client.jsonl",
+      "bytes": 3601,
+      "sha256": "e4f19def29557386e3d2e381f261953f1147db6c6851eaa8bb09a61b3160c76f",
+      "git_blob": "57c903d055dc17cca5478c4a99e10941e6304bfe"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-local_copy-burst/prepare/request-0000-decode-engine-0-host-cache.json",
+      "bytes": 104,
+      "sha256": "0fe3f76b4dc0a0e0e7ff5b5f8660dc72524670a6a5664a30beb1d33d6a4502c1",
+      "git_blob": "c07f3d69a155464fa7a1ae2f900a353e004f351f"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-local_copy-burst/prepare/request-0000-decode-engine-1-host-cache.json",
+      "bytes": 104,
+      "sha256": "0fe3f76b4dc0a0e0e7ff5b5f8660dc72524670a6a5664a30beb1d33d6a4502c1",
+      "git_blob": "c07f3d69a155464fa7a1ae2f900a353e004f351f"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-local_copy-burst/prepare/request-0000-device-cache.json",
+      "bytes": 26,
+      "sha256": "07c872c555795ea5ab0ef965e45c1becfb2d0d549c499c78aabf125a3f5cb958",
+      "git_blob": "28c8ecd539a76b305e809cf070aec149a15619c1"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-local_copy-burst/prepare/request-0001-decode-engine-0-host-cache.json",
+      "bytes": 104,
+      "sha256": "0fe3f76b4dc0a0e0e7ff5b5f8660dc72524670a6a5664a30beb1d33d6a4502c1",
+      "git_blob": "c07f3d69a155464fa7a1ae2f900a353e004f351f"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-local_copy-burst/prepare/request-0001-decode-engine-1-host-cache.json",
+      "bytes": 104,
+      "sha256": "0fe3f76b4dc0a0e0e7ff5b5f8660dc72524670a6a5664a30beb1d33d6a4502c1",
+      "git_blob": "c07f3d69a155464fa7a1ae2f900a353e004f351f"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-local_copy-burst/prepare/request-0001-device-cache.json",
+      "bytes": 26,
+      "sha256": "07c872c555795ea5ab0ef965e45c1becfb2d0d549c499c78aabf125a3f5cb958",
+      "git_blob": "28c8ecd539a76b305e809cf070aec149a15619c1"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-local_copy-burst/prepare/request-0002-decode-engine-0-host-cache.json",
+      "bytes": 104,
+      "sha256": "0fe3f76b4dc0a0e0e7ff5b5f8660dc72524670a6a5664a30beb1d33d6a4502c1",
+      "git_blob": "c07f3d69a155464fa7a1ae2f900a353e004f351f"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-local_copy-burst/prepare/request-0002-decode-engine-1-host-cache.json",
+      "bytes": 104,
+      "sha256": "0fe3f76b4dc0a0e0e7ff5b5f8660dc72524670a6a5664a30beb1d33d6a4502c1",
+      "git_blob": "c07f3d69a155464fa7a1ae2f900a353e004f351f"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-local_copy-burst/prepare/request-0002-device-cache.json",
+      "bytes": 26,
+      "sha256": "07c872c555795ea5ab0ef965e45c1becfb2d0d549c499c78aabf125a3f5cb958",
+      "git_blob": "28c8ecd539a76b305e809cf070aec149a15619c1"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-local_copy-burst/prepare/request-0003-decode-engine-0-host-cache.json",
+      "bytes": 104,
+      "sha256": "0fe3f76b4dc0a0e0e7ff5b5f8660dc72524670a6a5664a30beb1d33d6a4502c1",
+      "git_blob": "c07f3d69a155464fa7a1ae2f900a353e004f351f"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-local_copy-burst/prepare/request-0003-decode-engine-1-host-cache.json",
+      "bytes": 104,
+      "sha256": "0fe3f76b4dc0a0e0e7ff5b5f8660dc72524670a6a5664a30beb1d33d6a4502c1",
+      "git_blob": "c07f3d69a155464fa7a1ae2f900a353e004f351f"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-local_copy-burst/prepare/request-0003-device-cache.json",
+      "bytes": 26,
+      "sha256": "07c872c555795ea5ab0ef965e45c1becfb2d0d549c499c78aabf125a3f5cb958",
+      "git_blob": "28c8ecd539a76b305e809cf070aec149a15619c1"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-local_copy-burst/prepare/request-0004-decode-engine-0-host-cache.json",
+      "bytes": 104,
+      "sha256": "0fe3f76b4dc0a0e0e7ff5b5f8660dc72524670a6a5664a30beb1d33d6a4502c1",
+      "git_blob": "c07f3d69a155464fa7a1ae2f900a353e004f351f"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-local_copy-burst/prepare/request-0004-decode-engine-1-host-cache.json",
+      "bytes": 104,
+      "sha256": "0fe3f76b4dc0a0e0e7ff5b5f8660dc72524670a6a5664a30beb1d33d6a4502c1",
+      "git_blob": "c07f3d69a155464fa7a1ae2f900a353e004f351f"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-local_copy-burst/prepare/request-0004-device-cache.json",
+      "bytes": 26,
+      "sha256": "07c872c555795ea5ab0ef965e45c1becfb2d0d549c499c78aabf125a3f5cb958",
+      "git_blob": "28c8ecd539a76b305e809cf070aec149a15619c1"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-local_copy-burst/prepare/request-0005-decode-engine-0-host-cache.json",
+      "bytes": 104,
+      "sha256": "0fe3f76b4dc0a0e0e7ff5b5f8660dc72524670a6a5664a30beb1d33d6a4502c1",
+      "git_blob": "c07f3d69a155464fa7a1ae2f900a353e004f351f"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-local_copy-burst/prepare/request-0005-decode-engine-1-host-cache.json",
+      "bytes": 104,
+      "sha256": "0fe3f76b4dc0a0e0e7ff5b5f8660dc72524670a6a5664a30beb1d33d6a4502c1",
+      "git_blob": "c07f3d69a155464fa7a1ae2f900a353e004f351f"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-local_copy-burst/prepare/request-0005-device-cache.json",
+      "bytes": 26,
+      "sha256": "07c872c555795ea5ab0ef965e45c1becfb2d0d549c499c78aabf125a3f5cb958",
+      "git_blob": "28c8ecd539a76b305e809cf070aec149a15619c1"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-local_copy-burst/prepare/request-0006-decode-engine-0-host-cache.json",
+      "bytes": 104,
+      "sha256": "0fe3f76b4dc0a0e0e7ff5b5f8660dc72524670a6a5664a30beb1d33d6a4502c1",
+      "git_blob": "c07f3d69a155464fa7a1ae2f900a353e004f351f"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-local_copy-burst/prepare/request-0006-decode-engine-1-host-cache.json",
+      "bytes": 104,
+      "sha256": "0fe3f76b4dc0a0e0e7ff5b5f8660dc72524670a6a5664a30beb1d33d6a4502c1",
+      "git_blob": "c07f3d69a155464fa7a1ae2f900a353e004f351f"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-local_copy-burst/prepare/request-0006-device-cache.json",
+      "bytes": 26,
+      "sha256": "07c872c555795ea5ab0ef965e45c1becfb2d0d549c499c78aabf125a3f5cb958",
+      "git_blob": "28c8ecd539a76b305e809cf070aec149a15619c1"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-local_copy-burst/prepare/request-0007-decode-engine-0-host-cache.json",
+      "bytes": 104,
+      "sha256": "0fe3f76b4dc0a0e0e7ff5b5f8660dc72524670a6a5664a30beb1d33d6a4502c1",
+      "git_blob": "c07f3d69a155464fa7a1ae2f900a353e004f351f"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-local_copy-burst/prepare/request-0007-decode-engine-1-host-cache.json",
+      "bytes": 104,
+      "sha256": "0fe3f76b4dc0a0e0e7ff5b5f8660dc72524670a6a5664a30beb1d33d6a4502c1",
+      "git_blob": "c07f3d69a155464fa7a1ae2f900a353e004f351f"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-local_copy-burst/prepare/request-0007-device-cache.json",
+      "bytes": 26,
+      "sha256": "07c872c555795ea5ab0ef965e45c1becfb2d0d549c499c78aabf125a3f5cb958",
+      "git_blob": "28c8ecd539a76b305e809cf070aec149a15619c1"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-local_copy-burst/prepare/sse/issue23-mmlu-pro-smoke-0000-0.jsonl",
+      "bytes": 729,
+      "sha256": "7889fae7508a83dbb5146c79c9e4c7391eb8e4c4f8f9a62bb5ef09bfcce0e58e",
+      "git_blob": "1a71eb4f7792445e8b06356029bd500de8b0d92b"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-local_copy-burst/prepare/sse/issue23-mmlu-pro-smoke-0000-1.jsonl",
+      "bytes": 728,
+      "sha256": "c84f1b7a3f0478e3bc27300560037c43e302562e3337af5c7fe68324bc81fde2",
+      "git_blob": "ebe2e08171e9c51404780f4b46316e639d15c418"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-local_copy-burst/prepare/sse/issue23-mmlu-pro-smoke-0000-2.jsonl",
+      "bytes": 728,
+      "sha256": "ed936bf6bee7d4a23c3d9ea40225e1e80618cbd9d3d9bb9e513dc04263cf4d8a",
+      "git_blob": "f7e4cac46c885ec3215b3d179698f0b86900cda6"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-local_copy-burst/prepare/sse/issue23-mmlu-pro-smoke-0000-3.jsonl",
+      "bytes": 728,
+      "sha256": "1a8ca1c1b2684a914c21e0563f09ce1ac422d8f2cffe3c1de2caed2aefb11c48",
+      "git_blob": "ba7d3668020ed5edb197c052d64b6ede8f1a0076"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-local_copy-burst/prepare/sse/issue23-mmlu-pro-smoke-0001-0.jsonl",
+      "bytes": 729,
+      "sha256": "3ac5341d80513c46c644fae3c5751a35542043d9f3b22361cc8db4a4e27b29bc",
+      "git_blob": "f5e8b4f84d7fa06ee6e6995f457562c51355919c"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-local_copy-burst/prepare/sse/issue23-mmlu-pro-smoke-0001-1.jsonl",
+      "bytes": 729,
+      "sha256": "3f152a10ba3fc5dd739563cd3239fcf2dce4e3d0d93803daaecc6665d6e91335",
+      "git_blob": "d29bd2e741ce4f1dbffbf83bc90e0ff95acd909e"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-local_copy-burst/prepare/sse/issue23-mmlu-pro-smoke-0001-2.jsonl",
+      "bytes": 729,
+      "sha256": "183ecb5f3904edfd001d98f54d558479c0453fb3a3302f6650da6c8543019939",
+      "git_blob": "8cd72692ea4a548a93bfe80e0701748b0bd95f33"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-local_copy-burst/prepare/sse/issue23-mmlu-pro-smoke-0001-3.jsonl",
+      "bytes": 728,
+      "sha256": "1443a398181e59970c8911e049e72482e612e28beb0446527b49c79ecc2ce4ca",
+      "git_blob": "2e3d76087a072e45ceaa1685dcb36cfb98ebb8f5"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-local_copy-burst/processes-decode.json",
+      "bytes": 3668,
+      "sha256": "880a09334978c2b3675cfd97cba246de817203e8be3919b28f52cd6c02efd859",
+      "git_blob": "cff7a4f59f332aba1cfff918ad667db98131e870"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-local_copy-burst/processes-prefill.json",
+      "bytes": 3208,
+      "sha256": "0a58f2b57d7eddbdd7cd000f7e31e6a896a7b5cc9ad94c1a917b3d6000e9e78e",
+      "git_blob": "e95dbd315d0ab88a379a497102713dc24b3f5ec7"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-local_copy-burst/run-contract.json",
+      "bytes": 2684,
+      "sha256": "81aca23ae9dee863fd008ec24974b7f32838213b6435666e359dfb0d24192ab6",
+      "git_blob": "c4e91a8e02a3c55a0d1646ae8af7891b47cc646b"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-local_copy-burst/sse/issue23-mmlu-pro-smoke-0000-0.jsonl",
+      "bytes": 96926,
+      "sha256": "e8d4fb3c2a1163f98de569bf0a7114683a313112638c9fe68fbf37cb92506236",
+      "git_blob": "a6ee0f6cbd2e94d5955c1704611e75687d47bc31"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-local_copy-burst/sse/issue23-mmlu-pro-smoke-0000-1.jsonl",
+      "bytes": 171497,
+      "sha256": "f5651ed5dbe1d920ea94567f0d7b55d2c0409e42d9dbcf3075f0d2fb5eb356cf",
+      "git_blob": "a1b879326f197fd1c6d952d1b475f4a6f0317c98"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-local_copy-burst/sse/issue23-mmlu-pro-smoke-0000-2.jsonl",
+      "bytes": 171575,
+      "sha256": "ffbfff35ba2dc5b371f3a61a48ae7d218e71a3ea07672ebe000ab4143b06708a",
+      "git_blob": "66a0a08ee051e500903f52e48e27d9c1c7c5bb49"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-local_copy-burst/sse/issue23-mmlu-pro-smoke-0000-3.jsonl",
+      "bytes": 171748,
+      "sha256": "6e0a9e8a1b6ac22fcfb36d75403f6af35ebe6810824c39efc45c78ea3604325c",
+      "git_blob": "574fee857b720a48f141dfdb38409ea432d4c9b6"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-local_copy-burst/sse/issue23-mmlu-pro-smoke-0001-0.jsonl",
+      "bytes": 171755,
+      "sha256": "6d778a41440f2eacb9f28130f6e86f9891bb682d63f89331b944cbb46f6ab187",
+      "git_blob": "35da064cf2b67d2c8cd20e7b32cf87c315d80cba"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-local_copy-burst/sse/issue23-mmlu-pro-smoke-0001-1.jsonl",
+      "bytes": 171455,
+      "sha256": "567b00f42159331e57a4ff713b74602347c888d6e67ac64d2c8dfd4ac08e7f41",
+      "git_blob": "4612b53234cff0858d71c8a6e9fdef5adaca3167"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-local_copy-burst/sse/issue23-mmlu-pro-smoke-0001-2.jsonl",
+      "bytes": 171435,
+      "sha256": "78c02a0ad344d7f6ed3f9b6560a44484f4caa81fdac35f3533cd64036116aa4b",
+      "git_blob": "b528c748865ff46c4e25605e57f061f30b630423"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-local_copy-burst/sse/issue23-mmlu-pro-smoke-0001-3.jsonl",
+      "bytes": 92067,
+      "sha256": "e3233db1bef37d43d2e0b73a00a58ba351b4f5d92bf6cc3d477875d4ee1dbc27",
+      "git_blob": "2e9ef5ebba1d026e91d46400d3ca37ad8dc82338"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-local_copy-burst/start_argv.log",
+      "bytes": 245,
+      "sha256": "e1f56e9ceaf8f177b51787e5f49dcda5b7e2efd39f5bd4016d6e3c7dc1fbaca7",
+      "git_blob": "f6d75165ed1b82ed8eebbd04521fb0d5418fa814"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-local_copy-burst/status.json",
+      "bytes": 105,
+      "sha256": "af0a04ac31a41a6887530df223f4003462a4f991c3b02af7aeab9b9061fa9511",
+      "git_blob": "a0caa62176cdd3636cb0d83d583366bf6c32a689"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-local_copy-burst/stop_argv.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "git_blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-local_copy-burst/trace-decode-engine-0.jsonl",
+      "bytes": 243145,
+      "sha256": "352d68de2081a2264be29c8daa1d95f93c09a9a4ffd637c5840077377d71e126",
+      "git_blob": "a9514cdfbd1ee949df23189bf710584cd5a7da9e"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-local_copy-burst/trace-decode-engine-1.jsonl",
+      "bytes": 243145,
+      "sha256": "9fd37060f3c86806d17ad1b04bb3eb325a50a1544e73ec28f37d8d80be9a5534",
+      "git_blob": "16772fb27ea37a6f1d43fdfc3a4382a1223f61c5"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-local_copy-burst/visibility/issue23-mmlu-pro-smoke-0000-0.tp0.visible",
+      "bytes": 71,
+      "sha256": "b0afaeb29dace3afd830591044b1610c43e35ed0097bbe3d4a41ed3aa9b7b178",
+      "git_blob": "7b10db762d90798ad7213b2ff39db68f0a4f8a92"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-local_copy-burst/visibility/issue23-mmlu-pro-smoke-0000-0.tp1.visible",
+      "bytes": 71,
+      "sha256": "71d7d8082841e459bb556dec54490e9b37c8fb1358f521a6d7ceae9d1cfae1f9",
+      "git_blob": "71b1715a26bb5af8e54809d6d84ded77aa1fdd1b"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-local_copy-burst/visibility/issue23-mmlu-pro-smoke-0000-1.tp0.visible",
+      "bytes": 71,
+      "sha256": "85b9c312f5c28529aaf533a008a338b2503901a2e87fb5ddd0a64bdd4ab1e420",
+      "git_blob": "167f518f66f068bb1d11734c102666080aeddba8"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-local_copy-burst/visibility/issue23-mmlu-pro-smoke-0000-1.tp1.visible",
+      "bytes": 71,
+      "sha256": "f3a558b989da275c754a4f9c36283e0bb54521a2ed710d695aed5e76ebb2ad52",
+      "git_blob": "ee22a6ad012bf99b159fb119f618f5d27d5c7c77"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-local_copy-burst/visibility/issue23-mmlu-pro-smoke-0000-2.tp0.visible",
+      "bytes": 71,
+      "sha256": "24363f60fbd077dba04de17ab20234517d57af140b3dfc8df570281ca68a7ba5",
+      "git_blob": "38d901f613189b55aad5be9b01ccad6c7a665817"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-local_copy-burst/visibility/issue23-mmlu-pro-smoke-0000-2.tp1.visible",
+      "bytes": 71,
+      "sha256": "d90a26d7a45fa8e83063c9851522045fb4f185259d508adb576e47477ded4aca",
+      "git_blob": "65eeafa7acdda8333d683be15f2d246d0b59a913"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-local_copy-burst/visibility/issue23-mmlu-pro-smoke-0000-3.tp0.visible",
+      "bytes": 71,
+      "sha256": "fca334127e88d0959e44c5923431e33daf54dbf887e67bb2005dc16790c597d4",
+      "git_blob": "0c7e08aa12b9b87fa2c8b7757a90a8c287c87441"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-local_copy-burst/visibility/issue23-mmlu-pro-smoke-0000-3.tp1.visible",
+      "bytes": 71,
+      "sha256": "539a521191c065f1f99f51351f7ef7e8e0cb13802497e98b9e8db2d7c6711a9a",
+      "git_blob": "c92745c104d0643d49f1518651d46c485a7736b4"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-local_copy-burst/visibility/issue23-mmlu-pro-smoke-0001-0.tp0.visible",
+      "bytes": 71,
+      "sha256": "ed1b3d0e41b542b268074b636fb7fe63fde092052aa86807b52591115e21bc46",
+      "git_blob": "267e79c5f94415b397e5135f70aad4b1864f488f"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-local_copy-burst/visibility/issue23-mmlu-pro-smoke-0001-0.tp1.visible",
+      "bytes": 71,
+      "sha256": "92074cc72e877fce6bb25ed064d0b0630b4d2ca695f114405b48942ec4feb659",
+      "git_blob": "a601e4288decd61b5da8536a0761104d8e5b0528"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-local_copy-burst/visibility/issue23-mmlu-pro-smoke-0001-1.tp0.visible",
+      "bytes": 71,
+      "sha256": "8f3fe780aead45723b7454569d16a2cbb9d18346ef04e0b7f18a3eef11cf82c9",
+      "git_blob": "30bcb37ac742d17ac3de4e2680ba5fa466a16bc6"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-local_copy-burst/visibility/issue23-mmlu-pro-smoke-0001-1.tp1.visible",
+      "bytes": 71,
+      "sha256": "951cf25dba23366e315d9d54ef06ad53b9e6bfeea91e766fec5314060553d8f7",
+      "git_blob": "67cc3887d9a7455c311e987ed7793549385b1c02"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-local_copy-burst/visibility/issue23-mmlu-pro-smoke-0001-2.tp0.visible",
+      "bytes": 71,
+      "sha256": "e85039181768ae308bb25ec110f2465cd7324112083786a842ca658771cb4042",
+      "git_blob": "285b6567c62c484edc0677a26455059fd47e0d40"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-local_copy-burst/visibility/issue23-mmlu-pro-smoke-0001-2.tp1.visible",
+      "bytes": 71,
+      "sha256": "25f13637f3ae597cec7b5c34ffda6166d66c3c96cf0bbcb6c8cc45942e5f6054",
+      "git_blob": "2d2e54ca9423a855a3225a78a142b0337a468885"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-local_copy-burst/visibility/issue23-mmlu-pro-smoke-0001-3.tp0.visible",
+      "bytes": 71,
+      "sha256": "3efbd3f375940494206ca74906c6700b133bb8a54a319c05d29c5a878aa3381b",
+      "git_blob": "aaeafc2743525b93e5689d45d831612b727b2777"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-local_copy-burst/visibility/issue23-mmlu-pro-smoke-0001-3.tp1.visible",
+      "bytes": 71,
+      "sha256": "ff8ecfaefd3691c3662fa488db61f43c1badcb1ebbf1d2b8363e2dab83c30cc9",
+      "git_blob": "50b5d451abf867a652ae587893b0a391fa93a119"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-rdma-burst/activate-decode-engine-0.json",
+      "bytes": 74,
+      "sha256": "44db608f32108116b1fd57a86eedae2ff1479a299c8e0fe18a098704d4a2a716",
+      "git_blob": "aa9092024d05f8867770f013a61ebbe04bef7f8c"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-rdma-burst/activate-decode-engine-1.json",
+      "bytes": 74,
+      "sha256": "44db608f32108116b1fd57a86eedae2ff1479a299c8e0fe18a098704d4a2a716",
+      "git_blob": "aa9092024d05f8867770f013a61ebbe04bef7f8c"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-rdma-burst/after-measurement-decode-engine-0.prom",
+      "bytes": 25945,
+      "sha256": "75c5a7d7b9d6a955a144a6d1ebddfac99de25e517ef6475b500d0295fac748bd",
+      "git_blob": "fee65011b3214722ca18f350412ee317def288b1"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-rdma-burst/after-measurement-decode-engine-1.prom",
+      "bytes": 25909,
+      "sha256": "a71323bb48acc3a13f9ba0969c87cbec07e37dd4cbfa5685752d903e564d8c37",
+      "git_blob": "ff77ce94d5656b7e8ae47fe50612bf941d194b8c"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-rdma-burst/after-prepare-decode-engine-0.prom",
+      "bytes": 25861,
+      "sha256": "a0d8eae1f1913b6862bad7c9dce1a824d9856b5bbd52daa9536446c4c60fb292",
+      "git_blob": "26f04b1200923699f73c0ba431c11eaf452df4d5"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-rdma-burst/after-prepare-decode-engine-1.prom",
+      "bytes": 25872,
+      "sha256": "7b63c165be0415f4f7963baa63c3d811104e8a04ede6bb8a67f49834943be2dc",
+      "git_blob": "d550a8cf585f1502662c7f385f42798f74e9e08d"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-rdma-burst/analysis.json",
+      "bytes": 8204,
+      "sha256": "eace6d67003d8d4eb073676db9caf88bd5b4df5d3c884ce61a23d0a5b818aa8d",
+      "git_blob": "7855c92babe90efa8f6f1159d7d5c6a5b5c74b1f"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-rdma-burst/before-prepare-decode-engine-0.prom",
+      "bytes": 3717,
+      "sha256": "7696c72a1cd9aeccdcf416cf70db1bf841ff0de464a6300ea8439fbc024b469c",
+      "git_blob": "c192a65cb4abf8f67ca91b067378367f0b9cce17"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-rdma-burst/before-prepare-decode-engine-1.prom",
+      "bytes": 3717,
+      "sha256": "0bd3ebf2e59d55837be4f4817666c7d08a6a6d0b8adb3bc30dccfb907d279607",
+      "git_blob": "8a14be9cd4585bf9cb03df34e7ecacce465b456d"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-rdma-burst/client.jsonl",
+      "bytes": 13432,
+      "sha256": "e40ba65a9078ba2046bbf48369727c4a84984d0a1e406bf6bfed2e4ac03281ce",
+      "git_blob": "f3abfe7701d023e90e2d84e6a63e68d4e0dff57d"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-rdma-burst/decode-engine-0.log",
+      "bytes": 38681,
+      "sha256": "1f9203091f82e1ae12b52e51d574c2a0aa55bc035e0e7925229a3a0b58d90478",
+      "git_blob": "8e2abfefeb6866499559492a3e2e25898f0f8195"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-rdma-burst/decode-engine-1.log",
+      "bytes": 38835,
+      "sha256": "8f98c3983523bd72acd1d3d6edb4ef4393b2d58ddbc8d2fb9e6e4e4c6655a2f3",
+      "git_blob": "8573a58138566caceade8614342b821cc353bb7b"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-rdma-burst/decode-metaserver.log",
+      "bytes": 1865,
+      "sha256": "0b8c9b57c8009148ba672042aed14a93b28f3bde443f01bdfae41055523f67ea",
+      "git_blob": "ebbef0df6b73c1a8ba56d2490310b464d15c6b48"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-rdma-burst/decode-vllm.log",
+      "bytes": 90681,
+      "sha256": "ede2899515f6fa1bfd4ed53e56bd1ab26880b5e4fb4cd2d9b6d318a60eefdd33",
+      "git_blob": "f7657cbf942ecfadb34556b1362926087bb75760"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-rdma-burst/marker_clear_argv.log",
+      "bytes": 42,
+      "sha256": "9fde034d46aba157a23da076e94825a02add0cfa3ab9b4d5c99fe29abd8ea196",
+      "git_blob": "f7df4447ce442bbeca6f38ebdd7ab144614720f9"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-rdma-burst/pre-activation-decode-engine-0-host-cache.json",
+      "bytes": 104,
+      "sha256": "0fe3f76b4dc0a0e0e7ff5b5f8660dc72524670a6a5664a30beb1d33d6a4502c1",
+      "git_blob": "c07f3d69a155464fa7a1ae2f900a353e004f351f"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-rdma-burst/pre-activation-decode-engine-1-host-cache.json",
+      "bytes": 104,
+      "sha256": "0fe3f76b4dc0a0e0e7ff5b5f8660dc72524670a6a5664a30beb1d33d6a4502c1",
+      "git_blob": "c07f3d69a155464fa7a1ae2f900a353e004f351f"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-rdma-burst/pre-activation-device-cache.json",
+      "bytes": 26,
+      "sha256": "07c872c555795ea5ab0ef965e45c1becfb2d0d549c499c78aabf125a3f5cb958",
+      "git_blob": "28c8ecd539a76b305e809cf070aec149a15619c1"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-rdma-burst/prefill-engine-0.log",
+      "bytes": 24240,
+      "sha256": "05beedd5da3a4a118f3c671605b004ecba33f4632cc11961ac8f793eb622882e",
+      "git_blob": "8578d193c79d1da9602790e00682470ea4004327"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-rdma-burst/prefill-engine-1.log",
+      "bytes": 24244,
+      "sha256": "dd4057667dbcbf574d2cbaf16fc6d6207311187e7b842f4ff2097e1f87ae8256",
+      "git_blob": "069fa5d33802b3979e51e5224eab1e04e688a167"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-rdma-burst/prefill-router.log",
+      "bytes": 10181,
+      "sha256": "a7b6d096f32a150fc1ec2471ffec28269e84b68d8910628e0810829b910ede06",
+      "git_blob": "6944b6978558c62d69fe7f594e6ccf6579dc69ae"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-rdma-burst/prefill-vllm.log",
+      "bytes": 93445,
+      "sha256": "6817d95a1e1711e2b280c8d7dd0ef817c4a50ebce9815eb93784338237aa3cd3",
+      "git_blob": "34f5cdba241ebb7db6bb23ad8e97ad677d5b4f48"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-rdma-burst/prepare/client.jsonl",
+      "bytes": 3602,
+      "sha256": "ebfc3c324dd16f743803ddf83e138936c3c9e2444c7ee194a849b82d43a57f42",
+      "git_blob": "c93642f035c4a92ae0025ffeb5de6ec65380ab98"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-rdma-burst/prepare/request-0000-decode-engine-0-host-cache.json",
+      "bytes": 104,
+      "sha256": "0fe3f76b4dc0a0e0e7ff5b5f8660dc72524670a6a5664a30beb1d33d6a4502c1",
+      "git_blob": "c07f3d69a155464fa7a1ae2f900a353e004f351f"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-rdma-burst/prepare/request-0000-decode-engine-1-host-cache.json",
+      "bytes": 104,
+      "sha256": "0fe3f76b4dc0a0e0e7ff5b5f8660dc72524670a6a5664a30beb1d33d6a4502c1",
+      "git_blob": "c07f3d69a155464fa7a1ae2f900a353e004f351f"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-rdma-burst/prepare/request-0000-device-cache.json",
+      "bytes": 26,
+      "sha256": "07c872c555795ea5ab0ef965e45c1becfb2d0d549c499c78aabf125a3f5cb958",
+      "git_blob": "28c8ecd539a76b305e809cf070aec149a15619c1"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-rdma-burst/prepare/request-0001-decode-engine-0-host-cache.json",
+      "bytes": 104,
+      "sha256": "0fe3f76b4dc0a0e0e7ff5b5f8660dc72524670a6a5664a30beb1d33d6a4502c1",
+      "git_blob": "c07f3d69a155464fa7a1ae2f900a353e004f351f"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-rdma-burst/prepare/request-0001-decode-engine-1-host-cache.json",
+      "bytes": 104,
+      "sha256": "0fe3f76b4dc0a0e0e7ff5b5f8660dc72524670a6a5664a30beb1d33d6a4502c1",
+      "git_blob": "c07f3d69a155464fa7a1ae2f900a353e004f351f"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-rdma-burst/prepare/request-0001-device-cache.json",
+      "bytes": 26,
+      "sha256": "07c872c555795ea5ab0ef965e45c1becfb2d0d549c499c78aabf125a3f5cb958",
+      "git_blob": "28c8ecd539a76b305e809cf070aec149a15619c1"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-rdma-burst/prepare/request-0002-decode-engine-0-host-cache.json",
+      "bytes": 104,
+      "sha256": "0fe3f76b4dc0a0e0e7ff5b5f8660dc72524670a6a5664a30beb1d33d6a4502c1",
+      "git_blob": "c07f3d69a155464fa7a1ae2f900a353e004f351f"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-rdma-burst/prepare/request-0002-decode-engine-1-host-cache.json",
+      "bytes": 104,
+      "sha256": "0fe3f76b4dc0a0e0e7ff5b5f8660dc72524670a6a5664a30beb1d33d6a4502c1",
+      "git_blob": "c07f3d69a155464fa7a1ae2f900a353e004f351f"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-rdma-burst/prepare/request-0002-device-cache.json",
+      "bytes": 26,
+      "sha256": "07c872c555795ea5ab0ef965e45c1becfb2d0d549c499c78aabf125a3f5cb958",
+      "git_blob": "28c8ecd539a76b305e809cf070aec149a15619c1"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-rdma-burst/prepare/request-0003-decode-engine-0-host-cache.json",
+      "bytes": 104,
+      "sha256": "0fe3f76b4dc0a0e0e7ff5b5f8660dc72524670a6a5664a30beb1d33d6a4502c1",
+      "git_blob": "c07f3d69a155464fa7a1ae2f900a353e004f351f"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-rdma-burst/prepare/request-0003-decode-engine-1-host-cache.json",
+      "bytes": 104,
+      "sha256": "0fe3f76b4dc0a0e0e7ff5b5f8660dc72524670a6a5664a30beb1d33d6a4502c1",
+      "git_blob": "c07f3d69a155464fa7a1ae2f900a353e004f351f"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-rdma-burst/prepare/request-0003-device-cache.json",
+      "bytes": 26,
+      "sha256": "07c872c555795ea5ab0ef965e45c1becfb2d0d549c499c78aabf125a3f5cb958",
+      "git_blob": "28c8ecd539a76b305e809cf070aec149a15619c1"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-rdma-burst/prepare/request-0004-decode-engine-0-host-cache.json",
+      "bytes": 104,
+      "sha256": "0fe3f76b4dc0a0e0e7ff5b5f8660dc72524670a6a5664a30beb1d33d6a4502c1",
+      "git_blob": "c07f3d69a155464fa7a1ae2f900a353e004f351f"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-rdma-burst/prepare/request-0004-decode-engine-1-host-cache.json",
+      "bytes": 104,
+      "sha256": "0fe3f76b4dc0a0e0e7ff5b5f8660dc72524670a6a5664a30beb1d33d6a4502c1",
+      "git_blob": "c07f3d69a155464fa7a1ae2f900a353e004f351f"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-rdma-burst/prepare/request-0004-device-cache.json",
+      "bytes": 26,
+      "sha256": "07c872c555795ea5ab0ef965e45c1becfb2d0d549c499c78aabf125a3f5cb958",
+      "git_blob": "28c8ecd539a76b305e809cf070aec149a15619c1"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-rdma-burst/prepare/request-0005-decode-engine-0-host-cache.json",
+      "bytes": 104,
+      "sha256": "0fe3f76b4dc0a0e0e7ff5b5f8660dc72524670a6a5664a30beb1d33d6a4502c1",
+      "git_blob": "c07f3d69a155464fa7a1ae2f900a353e004f351f"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-rdma-burst/prepare/request-0005-decode-engine-1-host-cache.json",
+      "bytes": 104,
+      "sha256": "0fe3f76b4dc0a0e0e7ff5b5f8660dc72524670a6a5664a30beb1d33d6a4502c1",
+      "git_blob": "c07f3d69a155464fa7a1ae2f900a353e004f351f"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-rdma-burst/prepare/request-0005-device-cache.json",
+      "bytes": 26,
+      "sha256": "07c872c555795ea5ab0ef965e45c1becfb2d0d549c499c78aabf125a3f5cb958",
+      "git_blob": "28c8ecd539a76b305e809cf070aec149a15619c1"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-rdma-burst/prepare/request-0006-decode-engine-0-host-cache.json",
+      "bytes": 104,
+      "sha256": "0fe3f76b4dc0a0e0e7ff5b5f8660dc72524670a6a5664a30beb1d33d6a4502c1",
+      "git_blob": "c07f3d69a155464fa7a1ae2f900a353e004f351f"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-rdma-burst/prepare/request-0006-decode-engine-1-host-cache.json",
+      "bytes": 104,
+      "sha256": "0fe3f76b4dc0a0e0e7ff5b5f8660dc72524670a6a5664a30beb1d33d6a4502c1",
+      "git_blob": "c07f3d69a155464fa7a1ae2f900a353e004f351f"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-rdma-burst/prepare/request-0006-device-cache.json",
+      "bytes": 26,
+      "sha256": "07c872c555795ea5ab0ef965e45c1becfb2d0d549c499c78aabf125a3f5cb958",
+      "git_blob": "28c8ecd539a76b305e809cf070aec149a15619c1"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-rdma-burst/prepare/request-0007-decode-engine-0-host-cache.json",
+      "bytes": 104,
+      "sha256": "0fe3f76b4dc0a0e0e7ff5b5f8660dc72524670a6a5664a30beb1d33d6a4502c1",
+      "git_blob": "c07f3d69a155464fa7a1ae2f900a353e004f351f"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-rdma-burst/prepare/request-0007-decode-engine-1-host-cache.json",
+      "bytes": 104,
+      "sha256": "0fe3f76b4dc0a0e0e7ff5b5f8660dc72524670a6a5664a30beb1d33d6a4502c1",
+      "git_blob": "c07f3d69a155464fa7a1ae2f900a353e004f351f"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-rdma-burst/prepare/request-0007-device-cache.json",
+      "bytes": 26,
+      "sha256": "07c872c555795ea5ab0ef965e45c1becfb2d0d549c499c78aabf125a3f5cb958",
+      "git_blob": "28c8ecd539a76b305e809cf070aec149a15619c1"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-rdma-burst/prepare/sse/issue23-mmlu-pro-smoke-0000-0.jsonl",
+      "bytes": 729,
+      "sha256": "76cd5fd140343cde51fab01156c426dd853d80fb10180756c4110627c32fba9e",
+      "git_blob": "9be727e9507950678da1fdcfabfd4887abba9959"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-rdma-burst/prepare/sse/issue23-mmlu-pro-smoke-0000-1.jsonl",
+      "bytes": 729,
+      "sha256": "378bbeecb4ed6f0ed5c2be72fdc2ca2d2f5119b4167f29ae7d99023d680cd26e",
+      "git_blob": "19ebb78474e1bbb58fb6f6bab2f7d29f312a5aa9"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-rdma-burst/prepare/sse/issue23-mmlu-pro-smoke-0000-2.jsonl",
+      "bytes": 727,
+      "sha256": "a82cb267048ab4f5f24d2e4c6067f347ebef743696e905e459487baa590da472",
+      "git_blob": "d609bfd6d269fbd85335bcc3f28e46066ab442b5"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-rdma-burst/prepare/sse/issue23-mmlu-pro-smoke-0000-3.jsonl",
+      "bytes": 729,
+      "sha256": "8ceedc6ca58bb8d5618db5fa07d0f75992d1da5bf02b975e08fa94c201b73767",
+      "git_blob": "39b80f09b69579149c6ad6ec59e2a6e0446fa215"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-rdma-burst/prepare/sse/issue23-mmlu-pro-smoke-0001-0.jsonl",
+      "bytes": 728,
+      "sha256": "4512bede58450884696596ee1ac849148cf261189f3e402f0e85f03a6b6dec24",
+      "git_blob": "97680de4a7577f3f26be224357046e4ac1d442d6"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-rdma-burst/prepare/sse/issue23-mmlu-pro-smoke-0001-1.jsonl",
+      "bytes": 729,
+      "sha256": "d140e452ccb658301bd92be554c2c44d2f6c962a8e42f567eb18bc4cd455bec9",
+      "git_blob": "ec83f629bfd81d56c93532c8ae30c142fb998681"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-rdma-burst/prepare/sse/issue23-mmlu-pro-smoke-0001-2.jsonl",
+      "bytes": 728,
+      "sha256": "0628c1e2b0a75091e769ad625b909010f5e8371242e5adc1328398df9e15c03b",
+      "git_blob": "009f0a9a4b1d3956243709b6a189aee273ac44dd"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-rdma-burst/prepare/sse/issue23-mmlu-pro-smoke-0001-3.jsonl",
+      "bytes": 727,
+      "sha256": "f04a45f1d0156b1fc686f9d3b0d337252f0f0db45947354eaa6884d0d58b9e0a",
+      "git_blob": "fa40b146b2a997b461c718d805bc4555f97438f1"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-rdma-burst/processes-decode.json",
+      "bytes": 3644,
+      "sha256": "b784e8593dd8ff08b95b1fa5198edc38c359385874b3f2dd2fcbbd0207ac6d4f",
+      "git_blob": "d646da6a0239f838cc2d69f2992f982ad5abc5f7"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-rdma-burst/processes-prefill.json",
+      "bytes": 3202,
+      "sha256": "8a6eba77021b5df11db16952da4f0f92b038c1cd87eb9c807c4d85b286a9ecc1",
+      "git_blob": "bf80f0d79e093a0160bff6a6c9fef503d24ed2cd"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-rdma-burst/run-contract.json",
+      "bytes": 2660,
+      "sha256": "176e083acf01e8047f7282c2db36f74c2019b6671caf85b90747034bf45bc37d",
+      "git_blob": "2b610bc15d9ef441b2f8953b2640c7de657c2f15"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-rdma-burst/sse/issue23-mmlu-pro-smoke-0000-0.jsonl",
+      "bytes": 96914,
+      "sha256": "ee67f49d96f5ddc59c2e80184f8b4877a1f75215e8702fcdfb8afa746d161d20",
+      "git_blob": "90fb9aafcbbc375daa2ccfdaad976396cc14f4fc"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-rdma-burst/sse/issue23-mmlu-pro-smoke-0000-1.jsonl",
+      "bytes": 171532,
+      "sha256": "040d628119a8c66aad4baa97918462b501bf586bac9c19b6aceb860566345b8e",
+      "git_blob": "03bfe765f31884dac4a7ebe75b9ec81c4b7adbab"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-rdma-burst/sse/issue23-mmlu-pro-smoke-0000-2.jsonl",
+      "bytes": 171618,
+      "sha256": "0542200a46250a97f089cf2f5632c07db937427a1843f4f1158cd73eb61d93a1",
+      "git_blob": "30a7abe6d830935f2895308a16f41e281b0591bf"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-rdma-burst/sse/issue23-mmlu-pro-smoke-0000-3.jsonl",
+      "bytes": 171856,
+      "sha256": "f0549eb894808fa22aab1ba2fc6a97de26c3629ce72782bcabaeaa177ede3380",
+      "git_blob": "d6881301613e91a4e8475d9adce45f0bccdca021"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-rdma-burst/sse/issue23-mmlu-pro-smoke-0001-0.jsonl",
+      "bytes": 153536,
+      "sha256": "e7cf95b2054415085726fed009dda05df96bcd77b828ad34ae7548483ed15df1",
+      "git_blob": "367e29eb6850e2320421d985163ce3acab8da70e"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-rdma-burst/sse/issue23-mmlu-pro-smoke-0001-1.jsonl",
+      "bytes": 171497,
+      "sha256": "34c45ebb2defb8a9cac843e0d5f3c2c699d0ce46587c8d42ca3db978875658fe",
+      "git_blob": "c809bd1dcf96584ca5d50f1e15d94a7d15af9fc5"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-rdma-burst/sse/issue23-mmlu-pro-smoke-0001-2.jsonl",
+      "bytes": 171429,
+      "sha256": "6f59736527159d9a6c1217b90e5e94555e924fa3d1bbf48152df6ad2f5a15bcd",
+      "git_blob": "689c50a2bc1d2373cdad2b31ec1c99b3e7b04735"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-rdma-burst/sse/issue23-mmlu-pro-smoke-0001-3.jsonl",
+      "bytes": 65303,
+      "sha256": "b8096e9499de831d75e44014ad760890fcdf9542ca7463fe8a8f8ca261812946",
+      "git_blob": "9f3a2c79fff47f59110376b3e6c330ed4ee5859f"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-rdma-burst/start_argv.log",
+      "bytes": 245,
+      "sha256": "668d56ab4fcd3cc02343bebb9d5641015104279ea0b0dcd106f1fd65e9e129a3",
+      "git_blob": "5bdca343f604a96414254e698302184746cab787"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-rdma-burst/status.json",
+      "bytes": 105,
+      "sha256": "617509a679116661a710aa89dd7b59e82ce1d79b970395f9298eea941efff6dc",
+      "git_blob": "d2615b1d9d5a2176da787766f9266155dda4fa51"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-rdma-burst/stop_argv.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "git_blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-rdma-burst/trace-decode-engine-0.jsonl",
+      "bytes": 243137,
+      "sha256": "e6e1791cea42868516effb8d773c83dd82f54c54c62324ef409243cc86832688",
+      "git_blob": "a25e0ac93c1b187cb11d182e3fff3aa105759e65"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-rdma-burst/trace-decode-engine-1.jsonl",
+      "bytes": 243137,
+      "sha256": "68c6b6f5e5ae2b4e1960220753d49248f6e7c60efdf16225c4a9b780e0a7b31a",
+      "git_blob": "39f24ce105c4d07fc3cb458d809d63c270224d2c"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-rdma-burst/visibility/issue23-mmlu-pro-smoke-0000-0.tp0.visible",
+      "bytes": 71,
+      "sha256": "e7b6d482ee4502dc355835c69c2f29d53f5b003bdc810c8d72fc39571e993cbb",
+      "git_blob": "ef54f9059f7137bc198b298dea24ed66fb6b48f3"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-rdma-burst/visibility/issue23-mmlu-pro-smoke-0000-0.tp1.visible",
+      "bytes": 71,
+      "sha256": "874c64b7f34008287163a6f4dce6e3c3cb106f354d84983c93c2bf2f30fcc368",
+      "git_blob": "732cab3a962f10467ab196798b6aa73925bfde04"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-rdma-burst/visibility/issue23-mmlu-pro-smoke-0000-1.tp0.visible",
+      "bytes": 71,
+      "sha256": "17cfb5b1633ae46db76f4c0add8565cb9d136766ddf4e987d0dd0ee6d1020b3d",
+      "git_blob": "ad16c84a10ea9039c59f306ab3093f4e1555d576"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-rdma-burst/visibility/issue23-mmlu-pro-smoke-0000-1.tp1.visible",
+      "bytes": 71,
+      "sha256": "d600742524146379a6ea1038b7216b0ccf376f537afcb02bc2a77dd48d8e474e",
+      "git_blob": "6c600e6c7cc2f8671f5bd6ed395d3498da478879"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-rdma-burst/visibility/issue23-mmlu-pro-smoke-0000-2.tp0.visible",
+      "bytes": 71,
+      "sha256": "d08744acb3abb6c71883a73ead2eeb15b328ef3502c446aa3371b5d15b98ed98",
+      "git_blob": "749973ece52bff2e3a7da068929c449f79d5acc8"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-rdma-burst/visibility/issue23-mmlu-pro-smoke-0000-2.tp1.visible",
+      "bytes": 71,
+      "sha256": "2df8358798760ffd27a363ddc2177fee850b8d55156907169da92524f2c13b40",
+      "git_blob": "e46894f636d0f1c7533a6de2036493173d429fe0"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-rdma-burst/visibility/issue23-mmlu-pro-smoke-0000-3.tp0.visible",
+      "bytes": 71,
+      "sha256": "c106ff27df2ca3b040d69dddc60229eee69dc08212d728942720dd24e493bbaf",
+      "git_blob": "0e60397986c7dcc0bed21babee228f278f7e2150"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-rdma-burst/visibility/issue23-mmlu-pro-smoke-0000-3.tp1.visible",
+      "bytes": 71,
+      "sha256": "6e26559691e71127e71577a883b2735b6de49de29d4663cd6876b88ae8d42376",
+      "git_blob": "874c8589c14a45674fce79554fb5de44827e6ead"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-rdma-burst/visibility/issue23-mmlu-pro-smoke-0001-0.tp0.visible",
+      "bytes": 71,
+      "sha256": "671a974a129bf9c2a9587dd32fd1fc0949c1acc0cc93af246ba7bd121dfa773d",
+      "git_blob": "cd596751386fc8b4316ddc9f9039f9f9f5810644"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-rdma-burst/visibility/issue23-mmlu-pro-smoke-0001-0.tp1.visible",
+      "bytes": 71,
+      "sha256": "830876672eabd16bc5d7c8aeedb64d2e663061ef912016002e428d6c7f922091",
+      "git_blob": "22fbc48ac975e2d7fcb9b82962e30a4b8f0c5448"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-rdma-burst/visibility/issue23-mmlu-pro-smoke-0001-1.tp0.visible",
+      "bytes": 71,
+      "sha256": "f5e8d8a7a3d08bf9a8fbbfee336767186cc019e5f090bbd9e88062e67eadf295",
+      "git_blob": "aa7e436386760c0ef7723954c0759b00daa27207"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-rdma-burst/visibility/issue23-mmlu-pro-smoke-0001-1.tp1.visible",
+      "bytes": 71,
+      "sha256": "19a29149b16cca6dcfcc4e39c0db44d6cd2b1ba995a46cb6a2a4218f82b60852",
+      "git_blob": "1a0c6d9e031ac9fa87934a0ee804bc34eb11b7ab"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-rdma-burst/visibility/issue23-mmlu-pro-smoke-0001-2.tp0.visible",
+      "bytes": 71,
+      "sha256": "ee085a23d7487313fca81b20b0a3c28f20234c84c64d652627dc85718adba436",
+      "git_blob": "1daf11d7fbb74418808197a4fe2b8eafbbdca1fb"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-rdma-burst/visibility/issue23-mmlu-pro-smoke-0001-2.tp1.visible",
+      "bytes": 71,
+      "sha256": "e5a2fe33c0bef8b7a482e18e94e376a56ec8c3fe19b6aff3e517de6410cf4e75",
+      "git_blob": "d193530a41201735341a41286f4504c5a9133311"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-rdma-burst/visibility/issue23-mmlu-pro-smoke-0001-3.tp0.visible",
+      "bytes": 71,
+      "sha256": "af3830fd0a1ee7d047bbf972b0b6fe08e75ce0e257fc84f1071070cd74cee96e",
+      "git_blob": "3f61ea16ef4743430534beec4d0e85d1d5e331f3"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-03-rdma-burst/visibility/issue23-mmlu-pro-smoke-0001-3.tp1.visible",
+      "bytes": 71,
+      "sha256": "31901e5ac7344b689c662451aac8a7c4a681e5372a8a405f169aa017eb281400",
+      "git_blob": "56f93bfe6766d0f75e89c7872d7692ffb403e29b"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-default-summary.json",
+      "bytes": 40110,
+      "sha256": "862dc35f373476c1951936e081e1efe5784453a25a4d3d94dffd8c5f0c237e70",
+      "git_blob": "54b42fbba30a7af6e19ec8ecd5f981745e528f8f"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runs/smoke-pilot-result-evidence.json",
+      "bytes": 8245,
+      "sha256": "3788f8384dcbabbea6488fc47b45c09d56f248a123e70c5f50a602bf4c5315c3",
+      "git_blob": "d39501bf524aab3c71d4697a0d43466a407ef876"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runtime-snapshot/collect_pilot.py",
+      "bytes": 2258,
+      "sha256": "1fbfe5a857dc24ee1b18c854293452dcf4255dabaa49cb517870219c6db8da41",
+      "git_blob": "4310f6275f9be34bca0bdae508fc493c826681d9"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runtime-snapshot/lifecycle.py",
+      "bytes": 6834,
+      "sha256": "7c7a55fd5c88c252f17ed77c8616a160b9ffe2c25e477d29d8c8d619643ea871",
+      "git_blob": "6ab2cf5ac1bdab002354cfa15b0d379e44eb47ee"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runtime-snapshot/node_agent.py",
+      "bytes": 5803,
+      "sha256": "dff2b66975f78d275d9cbc91bb06317c61d03a7e9af08fddf019e4debfefcfd4",
+      "git_blob": "223c62e2b62cb6035a5e0cd139ff04b09b712105"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runtime-snapshot/prepare_transfer_context.py",
+      "bytes": 2342,
+      "sha256": "a06f4e895f79f3bc975267b31cd0f8ec5385ebc07a556afa3edb7915e5cf53b1",
+      "git_blob": "94df81875e378f91640f11b391811fb18bb3a431"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runtime-snapshot/qualify_and_capture.py",
+      "bytes": 7527,
+      "sha256": "e7fbc32b9890b3efece061354cd936217cfd1d5855467e6f48b1173936882487",
+      "git_blob": "2d52854f10679a3e622e1f7c6309acd441f4bea9"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runtime-snapshot/resume_pilot.py",
+      "bytes": 2495,
+      "sha256": "38a49b280150ff9393b55d6d3ebd0ef43d7c29217ca7b95f58cf936fa4aba8f0",
+      "git_blob": "6df00aad65e4be280a9f833ad775d4f4cd6fb352"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runtime-snapshot/run_smoke_pilot.py",
+      "bytes": 3390,
+      "sha256": "e95f1c5864169553acaa0ed56673040691356c6544e5cc9c5fc9169b6a1d881e",
+      "git_blob": "8a257b6b1bcdff2cf2885e4f5b702f3f1156c110"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runtime-snapshot/summarize_pilot.py",
+      "bytes": 4288,
+      "sha256": "f4bf2c419429839d0533f2356a53bc3ef532223d747a8b9eab8f8566b9a599c9",
+      "git_blob": "4bdd055858e26f46b979e19cc3a52bb75a73f48a"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runtime/Cargo.lock",
+      "bytes": 104155,
+      "sha256": "d3039a6c275023788c1bde170012e9b1753484f5ed7c424ac478a09d9d771a22",
+      "git_blob": "3bc1ea4c49a6f253403460fb2769ba92dc355d87"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/runtime/issue23-pilot.patch",
+      "bytes": 16602,
+      "sha256": "d59fa675695091fe4649af378ec9366e0c9432199dc9381ebf36984a81f66dae",
+      "git_blob": "e9abb0b78c39a5df5afdc633d886e247af3aec4d"
+    },
+    {
+      "path": "results/issue23/20261012-attention-diagnostic/verification.json",
+      "bytes": 1036,
+      "sha256": "88839f34c629f937d55b4c218b959201dbf07f0e6a28bb5c8d743d248fd3b2ae",
+      "git_blob": "b8d8f4867368da6619eb48e966dde332b64b2946"
+    }
+  ],
+  "invalid_json_paths": [],
+  "archive": {
+    "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/releases/download/evidence-mod-history-20261023-v1/pegaflow.tar.gz",
+    "bytes": 706207,
+    "sha256": "883b5ab7f70884a90343b6f4d033b9c2dd6e7afd315060f5d5227fa023faf3fa",
+    "member_prefix": "snapshot/"
+  }
+}
