@@ -2,9 +2,49 @@
 
 import json
 from pathlib import Path
+import re
 
 ROOT = Path(__file__).resolve().parents[1]
 DOCS = ROOT / "docs/workload-data"
+
+
+def test_forty_class_plan_and_migration_audit_do_not_upgrade_runtime_evidence():
+    plan = (DOCS / "WORKLOAD_PR_REORGANIZATION_PLAN.zh-CN.md").read_text("utf-8")
+    ids = re.findall(r"^\| W(\d{2}) ", plan, flags=re.MULTILINE)
+    assert ids == [f"{index:02d}" for index in range(1, 41)]
+    anchors = re.findall(r'<a id="(src-[^"]+)"></a>', plan)
+    assert len(anchors) == len(set(anchors)) == 110
+    assert all(
+        source in plan
+        for source in (
+            "MMLU_PRO",
+            "HLE_VERIFIED",
+            "SWE_BENCH_PRO",
+            "FRONTIERSCIENCE",
+            "TERMINAL_BENCH_2_1",
+        )
+    )
+    for source in json.loads(
+        (DOCS / "dataset-validation-status.json").read_text("utf-8")
+    )["sources"]:
+        assert source["source_id"] in plan
+    audit = json.loads(
+        (
+            DOCS / "validation/migration-existing-capability-audit-20261023.json"
+        ).read_text("utf-8")
+    )
+    assert audit["status"] == "PASS_SOFTWARE_FIXTURES_NOT_REAL_TASKS"
+    assert audit["baseline_adapter_definitions"] == 45
+    assert audit["compared_data_adapters"] == len(audit["rows"]) == 42
+    assert len(audit["intentionally_excluded_qbi_definitions"]) == 3
+    assert (
+        audit["model_calls"]
+        == audit["native_tasks_run"]
+        == audit["new_datasets_acquired"]
+        == 0
+    )
+    assert audit["checks"]["baseline_adapter_ids_missing"] == []
+    assert audit["checks"]["baseline_fixed_data_file_identities_covered"] == 38
 
 
 def test_category_checklist_preserves_every_class_and_source():
