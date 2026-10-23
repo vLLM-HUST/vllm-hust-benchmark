@@ -1,0 +1,100 @@
+{
+  "schema": "m01-method-status/v1",
+  "method_version": "V1.5",
+  "outline": {
+    "path": "reports/vllm-hust-midterm-20261019/milestone-v15/project4-v1.5.txt",
+    "bytes": 19177,
+    "sha256": "7f9352a85ec8025731b37b57362d80bfc48f8204ae9d1877eba521377267fa24",
+    "source_docx_sha256": "08196093d69c655bbae39f902a77ed89b2aaba71237adabe13f9122e8769a1ca",
+    "source_docx_available_in_this_repository": false,
+    "scope": "Exact Project 4 extract; source DOCX digest supplied by document owner"
+  },
+  "status": "recalculation-pending-not-determined",
+  "effective_compute_formula": "C = F / (k * T * 10^12)",
+  "effective_compute_unit": "TFLOPS per participating chip",
+  "efficiency_formula": "eta = T_reference / T * 100%",
+  "threshold_percent": 50,
+  "current": {
+    "effective_flops": null,
+    "participating_chips": null,
+    "matched_uninstrumented_seconds": null,
+    "reference_seconds": null,
+    "effective_tflops_per_chip": null,
+    "efficiency_percent": null,
+    "passed": null
+  },
+  "requirements": {
+    "effective_flops_excludes": [
+      "padding",
+      "redundant computation",
+      "unaccepted draft tokens",
+      "cache-omitted work"
+    ],
+    "timing": "Matched-workload uninstrumented synchronized wall clock including transfer, communication and synchronization; no estimated subtraction of instrumentation overhead.",
+    "reference": "Independent calibration, necessary workload, actual stage dependencies, resource overlap and necessary scheduling; exclude redundant work and extra implementation waiting.",
+    "forbidden_reference_substitutes": [
+      "global max(compute, HBM, communication)",
+      "reverse fitting to measured B0 or B1 time"
+    ],
+    "comparison": "Same reference method; separately derive reference time when precision, workload or execution path differs. Efficiency ratios under different references are not performance gains."
+  },
+  "fair_comparison": {
+    "fixed_b0": {
+      "vllm": "0.18",
+      "vllm_ascend": "0.18"
+    },
+    "b1_base_version_constraint": null,
+    "common_conditions": [
+      "base model and source weights",
+      "data and task scope",
+      "request semantics",
+      "sampling and output constraints",
+      "quality and SLO",
+      "statistics",
+      "physical accelerator model, count and interconnect",
+      "comparable host resources"
+    ],
+    "allowed_implementation_differences": [
+      "weight quantization",
+      "activation quantization",
+      "KV quantization",
+      "speculative decoding",
+      "cache management",
+      "graph mode",
+      "operators",
+      "batching",
+      "scheduling",
+      "logical parallelism"
+    ],
+    "auxiliary_resources_included": true,
+    "quality_and_performance_bind_actual_configuration": true
+  },
+  "pending_evidence": [
+    "Validated effective-work mapping including accepted draft attribution",
+    "Associate the measured 120.65347687713802-second synchronized B1 envelope with valid effective F and same-workload reference; do not substitute the older ~62-second run",
+    "Independent reference with actual dependencies, overlap and applicability"
+  ],
+  "existing_audit_path": "reports/vllm-hust-midterm-20261019/m01-recovery/method-v526-20261023/README.md",
+  "historical_instrumented": {
+    "classification": "historical empirical-resource reference, not current V1.5 efficiency or acceptance",
+    "request_window_seconds": 135.340126192,
+    "empirical_attainment_percent_range": [
+      30.2443,
+      30.2505
+    ],
+    "reference_formula": "T_ref = max(T_compute, T_HBM, T_comm)",
+    "evidence_path": "reports/vllm-hust-midterm-20261019/m01-recovery/request-assessment-20261022/m01-request-window-assessment.json"
+  },
+  "additional_existing_evidence": [
+    "reports/vllm-hust-midterm-20261019/m01-recovery/collective-graph-20261023/manifest.json",
+    "reports/vllm-hust-midterm-20261019/m01-recovery/boundary-measured-20261023/manifest.json"
+  ],
+  "measured_synchronized_b1": {
+    "completed": 200,
+    "failed": 0,
+    "client_seconds": 120.6243702378124,
+    "synchronized_seconds": 120.65347687713802,
+    "effective_flops": null,
+    "efficiency_percent": null
+  }
+}
