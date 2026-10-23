@@ -51,13 +51,14 @@ def test_paws_acquisition_failure_is_not_adapter_or_task_validation():
     assert row["checked"] is False
 
 
-def test_locomo_final_input_consumption_does_not_hide_failed_native_execution():
+def test_locomo_input_audit_and_prior_failure_remain_distinct_from_sampled_completion():
     ledger = json.loads((DOCS / "dataset-validation-status.json").read_text("utf-8"))
     row = next(r for r in ledger["sources"] if r["source_id"] == "LOCOMO")
     final = json.loads(
         (ROOT / row["fixed_input_consumption_receipt"]).read_text("utf-8")
     )
-    failure = json.loads((ROOT / row["execution_receipt"]).read_text("utf-8"))
+    failure = json.loads((ROOT / row["prior_failure_receipt"]).read_text("utf-8"))
+    sampled = json.loads((ROOT / row["execution_receipt"]).read_text("utf-8"))
     assert final["server_installed_original_question_fields_checked"] == 1986
     assert (
         final["server_prepare_resolve_roundtrips"]
@@ -66,10 +67,16 @@ def test_locomo_final_input_consumption_does_not_hide_failed_native_execution():
     )
     assert final["consumer_modes_equal"] is True
     assert final["old_source_regression_records_per_mode"] == 9
-    assert final["source_checkbox_eligible"] is row["checked"] is False
+    assert final["source_checkbox_eligible"] is False
     assert final["native_task_executions_in_this_input_audit"] == 0
     assert failure["completed_model_generations"] == failure["scorer_runs"] == 0
-    assert (
-        row["server_execution"]
-        == "FIRST_ORIGINAL_REQUEST_HTTP500_ENGINE_EXITED_NO_COMPLETION"
-    )
+    assert failure["model_requests_attempted"] == 1
+    assert row["checked"] is True
+    assert row["server_execution"] == row["scoring"] == "COMPLETED"
+    assert sampled["status"] == "END_TO_END_EXECUTED_AND_SCORED"
+    assert sampled["selected_samples"] == list(range(6))
+    assert sampled["aggregate"]["publisher_f1_mean"] == 0.5337301587301587
+    assert row["execution_attempt_receipts"] == [
+        "docs/workload-data/validation/locomo-original-qa-recovery-20261023.json",
+        "docs/workload-data/validation/locomo-original-qa-recovery-batch2-20261023.json",
+    ]

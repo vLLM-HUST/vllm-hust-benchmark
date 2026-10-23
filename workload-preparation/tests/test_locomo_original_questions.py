@@ -162,8 +162,7 @@ def test_original_reader_failure_is_preserved_and_recovery_sample_is_scored():
     )
     recovery_batch2 = json.loads(
         (
-            docs
-            / "validation/locomo-original-qa-recovery-batch2-20261023.json"
+            docs / "validation/locomo-original-qa-recovery-batch2-20261023.json"
         ).read_text("utf-8")
     )
     sampled = json.loads(
@@ -172,7 +171,9 @@ def test_original_reader_failure_is_preserved_and_recovery_sample_is_scored():
         )
     )
     ledger = json.loads((docs / "dataset-validation-status.json").read_text("utf-8"))
-    row = next(source for source in ledger["sources"] if source["source_id"] == "LOCOMO")
+    row = next(
+        source for source in ledger["sources"] if source["source_id"] == "LOCOMO"
+    )
     assert reader["original_questions_field_checked"] == 1986
     assert reader["category_5_reference_only_records"] == 444
     assert reader["model_calls"] == reader["scorer_runs"] == 0
@@ -209,10 +210,16 @@ def test_original_reader_failure_is_preserved_and_recovery_sample_is_scored():
     assert len(sampled["samples"]) == 6
     assert row["checked"] is True
     assert row["selected_samples"] == list(range(6))
-    assert row["receipt"] == "docs/workload-data/validation/locomo-original-qa-sampled-20261023.json"
+    assert (
+        row["receipt"]
+        == "docs/workload-data/validation/locomo-original-qa-sampled-20261023.json"
+    )
     assert row["execution_attempt_receipts"] == [
         "docs/workload-data/validation/locomo-original-qa-recovery-20261023.json",
         "docs/workload-data/validation/locomo-original-qa-recovery-batch2-20261023.json",
     ]
-    assert row["prior_failure_receipt"] == "docs/workload-data/validation/locomo-original-qa-failure-20261023.json"
+    assert (
+        row["prior_failure_receipt"]
+        == "docs/workload-data/validation/locomo-original-qa-failure-20261023.json"
+    )
     assert row["blocker"].find("第5类") >= 0
