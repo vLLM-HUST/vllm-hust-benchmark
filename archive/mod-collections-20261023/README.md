@@ -12,11 +12,9 @@ manifest。归档不代表原实验通过。
 
 下载到 checkout 外的新目录，不执行下载包中的代码：
 
-PegaFlow Issue28 的实现摘要绑定 22 个文件，不能拿当前源码代替。
-[补充源码 capsule](pegaflow-issue28-source/manifest.json) 来自公开合并提交 `f3cfb19`，
-逐项满足原 validation 的 LF-normalized SHA256；原始字节另按 capsule SHA256 保留。
-记录中的 `37d2119` 已从远端取回，但尚不含两份后补文档；公开合并提交同时包含这些文档和原实现。
-不把当前版本的代码格式变化伪装为原摘要，不修改原 validation。
+PegaFlow Issue28 的实现摘要绑定 22 个文件，不能拿当前源码代替。 [补充源码 capsule](pegaflow-issue28-source/manifest.json)
+来自公开合并提交 `f3cfb19`， 逐项满足原 validation 的 LF-normalized SHA256；原始字节另按 capsule SHA256 保留。 记录中的 `37d2119`
+已从远端取回，但尚不含两份后补文档；公开合并提交同时包含这些文档和原实现。 不把当前版本的代码格式变化伪装为原摘要，不修改原 validation。
 
 ```sh
 python scripts/fetch_mod_consumer_evidence.py \
