@@ -92,7 +92,10 @@ def test_report_generated_from_results():
     section = report.split("<!-- BEGIN ALIGNED_MMLU -->")[1].split(
         "<!-- END ALIGNED_MMLU -->"
     )[0]
-    expected = mdformat.text(text, options={"wrap": 100}, extensions={"gfm"})
+    # The archived renderer remains byte-identical; migrate only its display label.
+    expected = mdformat.text(
+        text.replace("B0", "开发栈对照"), options={"wrap": 100}, extensions={"gfm"}
+    )
     assert section.strip() == expected.strip()
 
 

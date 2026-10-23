@@ -40,8 +40,11 @@ def test_reused_018_windows_retain_identity_and_arithmetic(concurrency):
 
 def test_report_distinguishes_development_comparison_and_designated_baseline():
     text = " ".join((REPORT / "中期测试报告.md").read_text().split())
-    assert "指定基线为vLLM 0.18 / vLLM-Ascend 0.18" in text
-    assert "不代表0.18指定基线" in text
+    assert "B0：固定为vLLM 0.18 + vLLM-Ascend 0.18" in text
+    assert "B1" in text and "基座版本不限" in text
+    assert "B0表示该栈" not in text
+    assert "B0为147/200" not in text
+    assert "开发栈对照收益不作为相对B0的收益" in text
     assert "原生基线证据，10月12日至15日" not in text
     assert "不替代MMLU-Pro质量测量或M01运算计数" in text
     assert text.count("0.18对应工况判定待完成") == 2
