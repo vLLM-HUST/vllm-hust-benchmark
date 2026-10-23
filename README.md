@@ -23,12 +23,14 @@ Historical Frontier raw measurements and offline recomputation:
 [56-run raw archive](reports/frontier-raw-recovery-20261020/README.md) (BetterScale/Native and six
 additional MOD series; includes complete concurrency curves and SHA-256).
 
-The active delivery test plan is **V5.5**. Its machine-readable authority is
-`src/vllm_hust_benchmark/data/acceptance_v5_5.json`; see `docs/ACCEPTANCE_V5_5.md` for the human
-boundary and semantic-mirror provenance. V4.x material is historical only and cannot generate a
-current target, config ID, measurement queue or verdict.
+The current Project 4 midterm authority is **Project Milestone Test Outline V1.5**, sections 2.4 and
+3.4.1–3.4.4. See the
+[verified extract and current report](reports/vllm-hust-midterm-20261019/README.md). Prior
+standalone V5.5/V5.27 contracts and their validators are retained for historical records, not as
+additional current midterm acceptance requirements. Existing measurements remain immutable; reuse or
+recalculate applicable records before proposing missing measurements.
 
-Validate the contract with:
+Validate the historical V5.5 contract with:
 
 ```bash
 PYTHONPATH=src python scripts/validate_acceptance_v5_5.py
