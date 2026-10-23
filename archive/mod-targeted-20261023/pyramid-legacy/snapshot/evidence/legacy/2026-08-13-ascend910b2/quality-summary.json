@@ -1,0 +1,127 @@
+{
+  "core_sha": "4861aab3af39e721c1b5a8b27b72c4f6bebda888",
+  "ascend_sha": "a0a2ffffce472220061c3e9696defa6b8ddbe63a",
+  "sample_method": "first_n",
+  "sample_count_per_dataset": 50,
+  "comparisons": {
+    "llama": {
+      "disabled": {
+        "name": "llama-disabled",
+        "model": "/workspace/models/Meta-Llama-3-8B-Instruct",
+        "sample_count": 50,
+        "scores": {
+          "narrativeqa": 21.0205,
+          "qasper": 38.0566,
+          "2wikimqa": 28.0155
+        },
+        "mean_score": 29.0309,
+        "prompt_token_ranges": {
+          "narrativeqa": [
+            8039,
+            8040
+          ],
+          "qasper": [
+            2422,
+            8040
+          ],
+          "2wikimqa": [
+            1134,
+            8136
+          ]
+        }
+      },
+      "enabled": {
+        "name": "llama-enabled",
+        "model": "/workspace/models/Meta-Llama-3-8B-Instruct",
+        "sample_count": 50,
+        "scores": {
+          "narrativeqa": 21.0215,
+          "qasper": 36.5696,
+          "2wikimqa": 27.0758
+        },
+        "mean_score": 28.2223,
+        "prompt_token_ranges": {
+          "narrativeqa": [
+            8039,
+            8040
+          ],
+          "qasper": [
+            2422,
+            8040
+          ],
+          "2wikimqa": [
+            1134,
+            8136
+          ]
+        }
+      },
+      "drops": {
+        "narrativeqa": -0.001,
+        "qasper": 1.487,
+        "2wikimqa": 0.9397
+      },
+      "mean_drop": 0.8086,
+      "passed": true
+    },
+    "qwen": {
+      "disabled": {
+        "name": "qwen-disabled",
+        "model": "/workspace/models/Qwen2.5-14B-Instruct",
+        "sample_count": 50,
+        "scores": {
+          "narrativeqa": 26.3373,
+          "qasper": 48.2221,
+          "2wikimqa": 35.9724
+        },
+        "mean_score": 36.8439,
+        "prompt_token_ranges": {
+          "narrativeqa": [
+            8058,
+            8059
+          ],
+          "qasper": [
+            2470,
+            8059
+          ],
+          "2wikimqa": [
+            1199,
+            8155
+          ]
+        }
+      },
+      "enabled": {
+        "name": "qwen-enabled",
+        "model": "/workspace/models/Qwen2.5-14B-Instruct",
+        "sample_count": 50,
+        "scores": {
+          "narrativeqa": 26.6767,
+          "qasper": 44.9167,
+          "2wikimqa": 31.6933
+        },
+        "mean_score": 34.4289,
+        "prompt_token_ranges": {
+          "narrativeqa": [
+            8058,
+            8059
+          ],
+          "qasper": [
+            2470,
+            8059
+          ],
+          "2wikimqa": [
+            1199,
+            8155
+          ]
+        }
+      },
+      "drops": {
+        "narrativeqa": -0.3394,
+        "qasper": 3.3054,
+        "2wikimqa": 4.2791
+      },
+      "mean_drop": 2.415,
+      "passed": true
+    }
+  },
+  "passed": true
+}

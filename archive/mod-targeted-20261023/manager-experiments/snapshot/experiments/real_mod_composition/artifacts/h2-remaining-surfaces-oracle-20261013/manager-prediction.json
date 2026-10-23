@@ -1,0 +1,156 @@
+{
+  "aggregate_definite_subset": {
+    "admit_precision": 1.0,
+    "admit_recall": 1.0,
+    "case_count": 4,
+    "false_negative": 0,
+    "false_positive": 0,
+    "reject_precision": 1.0,
+    "reject_recall": 1.0,
+    "true_negative": 3,
+    "true_positive": 1
+  },
+  "captured_utc": "2026-10-13T18:05:50.641367+00:00",
+  "case_id": "external-authority-production-stack-keda",
+  "classification": "source-bound-pre-launch-provider-check",
+  "configuration": {
+    "chart": "vllm/vllm-stack",
+    "namespace": "default",
+    "ownership_conflicts": [
+      "Production Stack and KEDA-generated HPA both claim Deployment/default/vllm-llama3-deployment-vllm spec.replicas without delegation"
+    ],
+    "release": "vllm",
+    "values": {
+      "servingEngineSpec": {
+        "modelSpec": [
+          {
+            "keda": {
+              "enabled": false
+            },
+            "name": "llama3",
+            "replicaCount": 1
+          }
+        ]
+      }
+    }
+  },
+  "decision_match": true,
+  "h2_complete": false,
+  "manager": {
+    "base_commit": "0884e3568d0b674f5e135f858e8e7f8016d2aa97",
+    "provider_source": "src/vllm_hust_ext/providers/production_stack.py",
+    "provider_source_sha256": "edc6f484e8d7fd0ee290fdd1d06f30eda43f9921df23d4c606f4b851706b9815",
+    "source_tree_unchanged_from_base": true
+  },
+  "nonclaims": [
+    "not runtime execution",
+    "not performance evidence",
+    "does not label the explicit Production Stack KEDA delegation mode as conflicting",
+    "does not close H2"
+  ],
+  "oracle": {
+    "frozen_before_prediction": true,
+    "frozen_commit": "dfc533d33582f80fae0ee172e17aa47406d98e48",
+    "receipt_sha256": "28b91ac94c6085c2b53547f693214b0faec784805a040c3f4b52a86cf22f4e3a",
+    "sha256": "b1342628f4b0dfae2be42197cfd20e1a4b64bde65979730b0b1a2e70916b8478"
+  },
+  "oracle_decision": "reject",
+  "plan": {
+    "actions": [
+      {
+        "details": {},
+        "lifecycle_owner": "kubernetes",
+        "mutating": false,
+        "operation": "helm_template",
+        "target": "vllm/vllm-stack"
+      },
+      {
+        "details": {},
+        "lifecycle_owner": "kubernetes",
+        "mutating": false,
+        "operation": "server_dry_run",
+        "target": "default"
+      },
+      {
+        "details": {},
+        "lifecycle_owner": "kubernetes",
+        "mutating": false,
+        "operation": "check_rollout",
+        "target": "vllm"
+      },
+      {
+        "details": {},
+        "lifecycle_owner": "kubernetes",
+        "mutating": false,
+        "operation": "check_ownership_conflicts",
+        "target": "vllm"
+      }
+    ],
+    "config_claims": null,
+    "extension_id": "org.vllm-hust.production-stack-provider",
+    "generated_config": {
+      "chart": "vllm/vllm-stack",
+      "enabled": true,
+      "namespace": "default",
+      "release": "vllm",
+      "replica_ownership": "single-writer-required",
+      "values": {
+        "servingEngineSpec": {
+          "modelSpec": [
+            {
+              "keda": {
+                "enabled": false
+              },
+              "name": "llama3",
+              "replicaCount": 1
+            }
+          ]
+        }
+      }
+    },
+    "provider": "production-stack",
+    "resource_claims": [],
+    "warnings": [
+      "Rendering is non-mutating. Applying Helm releases, CRDs, controllers, routers, autoscalers, or OCI images remains an explicit Kubernetes operator action."
+    ]
+  },
+  "prediction": "reject",
+  "process_boundary": {
+    "host_pids_after": [],
+    "host_pids_before": [],
+    "host_process_started": false,
+    "npu_after": {
+      "exit_code": 0,
+      "no_running_processes_for_allocated_devices": true,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "06a586ec4f2a61ba9ee0646732e8353a4fcf26e1452b568c952ecae580d96b7d"
+    },
+    "npu_before": {
+      "exit_code": 0,
+      "no_running_processes_for_allocated_devices": true,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "26c43ed9fd78198d26abf6ee43172bdd0c82e177e1110376b2e46c7d919343bc"
+    }
+  },
+  "provider_check": {
+    "compatible": false,
+    "configured": false,
+    "degraded": true,
+    "evidence": [
+      "host version is unavailable; compatibility is unverified",
+      "host API version is unavailable",
+      "protocol helm-values version is unavailable",
+      "protocol kubernetes-api version is unavailable",
+      "ownership conflict: Production Stack and KEDA-generated HPA both claim Deployment/default/vllm-llama3-deployment-vllm spec.replicas without delegation"
+    ],
+    "healthy": false,
+    "reachable": null
+  },
+  "remaining_gaps": [
+    "no second independently developed active batch-admission bundle was found for the same CLI/config projection",
+    "n=4 definite cases remains too small for a strong population estimate",
+    "the new external-authority result is source-level and pre-launch, not a Kubernetes runtime receipt"
+  ],
+  "schema": "ecpa-h2-remaining-surface-manager-prediction/v1",
+  "score_eligible": true
+}

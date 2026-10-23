@@ -1,0 +1,533 @@
+{
+  "allocated_npu_process_tables_empty": true,
+  "argv": [
+    "/root/ecpa-h2-formal-profiler-kv-b-v1/bin/vllm-request-lifecycle-profiler-serve",
+    "serve",
+    "/data/shared_models/Qwen--Qwen2.5-14B-Instruct",
+    "--served-model-name",
+    "ecpa-h2-kvcompress-then-profiler",
+    "--host",
+    "127.0.0.1",
+    "--port",
+    "8187",
+    "--tensor-parallel-size",
+    "2",
+    "--enforce-eager",
+    "--max-model-len",
+    "2048",
+    "--gpu-memory-utilization",
+    "0.7",
+    "--block-size",
+    "128",
+    "--no-enable-prefix-caching"
+  ],
+  "classification": "formal-real-host-composition-raw-run",
+  "cleanup_proven": true,
+  "completion_nonempty": true,
+  "completion_status": 200,
+  "completion_text": "\nECPA-H2-PAIR-OK\n\nThat's the exact text you requested. Is there anything else you",
+  "config_sha256": "d3ff1c4d7d0a50fbb7eccb925a69fa41b4c6e4fd629e09c76a00a1210a12e65d",
+  "failure": null,
+  "formal_h2_result": false,
+  "formal_inputs": {
+    "campaign_path": "/root/ecpa-h2-formal-pair-20261013/campaign.json",
+    "campaign_sha256": "sha256:0e6d657a30f0ed5977c6451797c4175c6a14e5e56e44dfc21afca4f2c22d6507",
+    "oracle_path": "/root/ecpa-h2-formal-pair-20261013/oracle.json",
+    "oracle_sha256": "sha256:ce7503def6b08d78b83aeb9c529c99afaf07379b91913b9ada3b6c17dc65c53c",
+    "planner_receipt_path": "/root/ecpa-h2-formal-pair-20261013/planner-receipt.json",
+    "planner_receipt_sha256": "sha256:10ddc7f7c62b3127411a929b25061998c3218122ad8f9f8dd141d3d64c9ecd4c"
+  },
+  "formal_record_candidate": true,
+  "health_status": 200,
+  "kvcompress_cache_bound_log": true,
+  "kvcompress_plugin_loaded_log": true,
+  "model": "/data/shared_models/Qwen--Qwen2.5-14B-Instruct",
+  "order": "kvcompress-then-profiler",
+  "packages": {
+    "vllm": "0.31.1.post1.dev163+g973d9ef5a.empty",
+    "vllm-ascend": "0.25.1rc2.dev872+hust.20260903.4.g873584026",
+    "vllm-ascend-kvcompress-hust": "0.9.0",
+    "vllm-request-lifecycle-profiler-plugin": "0.1.2"
+  },
+  "performance_result": false,
+  "port": 8187,
+  "port_refused_after_stop": true,
+  "process_identities": [
+    {
+      "argv": [
+        "/root/ecpa-h2-formal-profiler-kv-b-v1/bin/python",
+        "/root/ecpa-h2-formal-profiler-kv-b-v1/bin/vllm-request-lifecycle-profiler-serve",
+        "serve",
+        "/data/shared_models/Qwen--Qwen2.5-14B-Instruct",
+        "--served-model-name",
+        "ecpa-h2-kvcompress-then-profiler",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "8187",
+        "--tensor-parallel-size",
+        "2",
+        "--enforce-eager",
+        "--max-model-len",
+        "2048",
+        "--gpu-memory-utilization",
+        "0.7",
+        "--block-size",
+        "128",
+        "--no-enable-prefix-caching"
+      ],
+      "pid": 551057,
+      "start_ticks": 1093726979
+    },
+    {
+      "argv": [
+        "/root/ecpa-h2-formal-profiler-kv-b-v1/bin/python",
+        "-s",
+        "-c",
+        "from multiprocessing.resource_tracker import main;main(65)"
+      ],
+      "pid": 551204,
+      "start_ticks": 1093729629
+    },
+    {
+      "argv": [
+        "VLLM::EngineCore"
+      ],
+      "pid": 551205,
+      "start_ticks": 1093729629
+    },
+    {
+      "argv": [
+        "VLLM::Worker_TP0"
+      ],
+      "pid": 551269,
+      "start_ticks": 1093731581
+    },
+    {
+      "argv": [
+        "VLLM::Worker_TP1"
+      ],
+      "pid": 551270,
+      "start_ticks": 1093731581
+    },
+    {
+      "argv": [
+        "/root/ecpa-h2-formal-profiler-kv-b-v1/lib/python3.12/site-packages/triton/_C/triton-mlir-opt",
+        "/tmp/tmpe1_vglgz/kernel.ttadapter.mlir",
+        "--emit-bytecode",
+        "-o",
+        "/tmp/tmpe1_vglgz/kernel.mlirbc"
+      ],
+      "pid": 551841,
+      "start_ticks": 1093736857
+    },
+    {
+      "argv": [
+        "/usr/local/Ascend/cann-9.1.0/tools/bishengir/bin/bishengir-compile",
+        "/tmp/tmpr3sx01iy/kernel.mlir",
+        "--target=Ascend910B2",
+        "--enable-auto-multi-buffer=True",
+        "--enable-auto-bind-sub-block=True",
+        "--enable-auto-blockify-loop",
+        "--enable-hfusion-compile=true",
+        "--enable-hivm-compile=true",
+        "--enable-triton-kernel-compile=true",
+        "-o",
+        "/tmp/tmpr3sx01iy/kernel"
+      ],
+      "pid": 551850,
+      "start_ticks": 1093736869
+    },
+    {
+      "argv": [
+        "/usr/local/Ascend/cann-9.1.0/tools/bishengir/bin/hivmc",
+        "/tmp/bishengir-compile-4c0dc1/module.hivm.opt.mlir",
+        "--enable-debug-info=false",
+        "--enable-static-bare-ptr=true",
+        "--enable-bin-relocation=true",
+        "--enable-hivm-inject-barrier-all-sync=false",
+        "--enable-sanitizer=false",
+        "-o",
+        "/tmp/tmpr3sx01iy/kernel"
+      ],
+      "pid": 551875,
+      "start_ticks": 1093736895
+    },
+    {
+      "argv": [
+        "/usr/local/Ascend/cann-9.1.0/bin/bisheng",
+        "/tmp/tmpr3sx01iy/kernel.ll",
+        "-o",
+        "/tmp/tmpr3sx01iy/kernel.o",
+        "--cce-aicore-arch=dav-c220-vec",
+        "--cce-aicore-only",
+        "-O2",
+        "-cce-bitcode-is-aicore",
+        "-Wno-override-module",
+        "-cce-link-aicore-ll-module",
+        "/usr/local/Ascend/cann-9.1.0/tools/bishengir/lib/meta_op.aiv.bc",
+        "-mllvm",
+        "-cce-aicore-dcci-insert-for-scalar=false",
+        "--cce-aicore-input-parameter-size=1536"
+      ],
+      "pid": 551892,
+      "start_ticks": 1093736904
+    },
+    {
+      "argv": [
+        "/usr/local/Ascend/cann-9.1.0/tools/bishengir/bin/bishengir-compile",
+        "/tmp/tmpgble5oof/kernel.mlir",
+        "--target=Ascend910B2",
+        "--enable-auto-multi-buffer=True",
+        "--enable-auto-bind-sub-block=True",
+        "--enable-auto-blockify-loop",
+        "--enable-hfusion-compile=true",
+        "--enable-hivm-compile=true",
+        "--enable-triton-kernel-compile=true",
+        "-o",
+        "/tmp/tmpgble5oof/kernel"
+      ],
+      "pid": 551849,
+      "start_ticks": 1093736868
+    },
+    {
+      "argv": [
+        "/usr/local/Ascend/cann-9.1.0/tools/bishengir/bin/hivmc",
+        "/tmp/bishengir-compile-de63c5/module.hivm.opt.mlir",
+        "--enable-debug-info=false",
+        "--enable-static-bare-ptr=true",
+        "--enable-bin-relocation=true",
+        "--enable-hivm-inject-barrier-all-sync=false",
+        "--enable-sanitizer=false",
+        "-o",
+        "/tmp/tmpgble5oof/kernel"
+      ],
+      "pid": 551860,
+      "start_ticks": 1093736892
+    },
+    {
+      "argv": [
+        "/usr/local/Ascend/cann-9.1.0/bin/bisheng",
+        "/tmp/tmpgble5oof/kernel.ll",
+        "-o",
+        "/tmp/tmpgble5oof/kernel.o",
+        "--cce-aicore-arch=dav-c220-vec",
+        "--cce-aicore-only",
+        "-O2",
+        "-cce-bitcode-is-aicore",
+        "-Wno-override-module",
+        "-cce-link-aicore-ll-module",
+        "/usr/local/Ascend/cann-9.1.0/tools/bishengir/lib/meta_op.aiv.bc",
+        "-mllvm",
+        "-cce-aicore-dcci-insert-for-scalar=false",
+        "--cce-aicore-input-parameter-size=1536"
+      ],
+      "pid": 551890,
+      "start_ticks": 1093736901
+    },
+    {
+      "argv": [
+        "/usr/local/Ascend/cann-9.1.0/tools/bishengir/bin/bishengir-compile",
+        "/tmp/tmp4_x2yy27/kernel.mlir",
+        "--target=Ascend910B2",
+        "--enable-auto-multi-buffer=False",
+        "--enable-auto-bind-sub-block=True",
+        "--enable-hfusion-compile=true",
+        "--enable-hivm-compile=true",
+        "--enable-triton-kernel-compile=true",
+        "-o",
+        "/tmp/tmp4_x2yy27/kernel"
+      ],
+      "pid": 552083,
+      "start_ticks": 1093737412
+    },
+    {
+      "argv": [
+        "/usr/local/Ascend/cann-9.1.0/tools/bishengir/bin/bishengir-compile",
+        "/tmp/tmpbyhfgfjk/kernel.mlir",
+        "--target=Ascend910B2",
+        "--enable-auto-multi-buffer=False",
+        "--enable-auto-bind-sub-block=True",
+        "--enable-hfusion-compile=true",
+        "--enable-hivm-compile=true",
+        "--enable-triton-kernel-compile=true",
+        "-o",
+        "/tmp/tmpbyhfgfjk/kernel"
+      ],
+      "pid": 552082,
+      "start_ticks": 1093737412
+    },
+    {
+      "argv": [
+        "/usr/local/Ascend/cann-9.1.0/tools/bishengir/bin/hivmc",
+        "/tmp/bishengir-compile-df1f1d/module.hivm.opt.mlir",
+        "--enable-debug-info=false",
+        "--enable-static-bare-ptr=true",
+        "--enable-bin-relocation=true",
+        "--enable-hivm-inject-barrier-all-sync=false",
+        "--enable-sanitizer=false",
+        "-o",
+        "/tmp/tmp4_x2yy27/kernel"
+      ],
+      "pid": 552095,
+      "start_ticks": 1093737425
+    },
+    {
+      "argv": [
+        "/usr/local/Ascend/cann-9.1.0/bin/bisheng",
+        "/tmp/tmp4_x2yy27/kernel.ll",
+        "-o",
+        "/tmp/tmp4_x2yy27/kernel.o",
+        "--cce-aicore-arch=dav-c220-vec",
+        "--cce-aicore-only",
+        "-O2",
+        "-cce-bitcode-is-aicore",
+        "-Wno-override-module",
+        "-cce-link-aicore-ll-module",
+        "/usr/local/Ascend/cann-9.1.0/tools/bishengir/lib/meta_op.aiv.bc",
+        "-mllvm",
+        "-cce-aicore-dcci-insert-for-scalar=false",
+        "--cce-aicore-input-parameter-size=1536"
+      ],
+      "pid": 552113,
+      "start_ticks": 1093737428
+    },
+    {
+      "argv": [
+        "/usr/local/Ascend/cann-9.1.0/tools/bishengir/bin/hivmc",
+        "/tmp/bishengir-compile-257093/module.hivm.opt.mlir",
+        "--enable-debug-info=false",
+        "--enable-static-bare-ptr=true",
+        "--enable-bin-relocation=true",
+        "--enable-hivm-inject-barrier-all-sync=false",
+        "--enable-sanitizer=false",
+        "-o",
+        "/tmp/tmpbyhfgfjk/kernel"
+      ],
+      "pid": 552093,
+      "start_ticks": 1093737424
+    },
+    {
+      "argv": [
+        "/usr/local/Ascend/cann-9.1.0/bin/bisheng",
+        "/tmp/tmpbyhfgfjk/kernel.ll",
+        "-o",
+        "/tmp/tmpbyhfgfjk/kernel.o",
+        "--cce-aicore-arch=dav-c220-vec",
+        "--cce-aicore-only",
+        "-O2",
+        "-cce-bitcode-is-aicore",
+        "-Wno-override-module",
+        "-cce-link-aicore-ll-module",
+        "/usr/local/Ascend/cann-9.1.0/tools/bishengir/lib/meta_op.aiv.bc",
+        "-mllvm",
+        "-cce-aicore-dcci-insert-for-scalar=false",
+        "--cce-aicore-input-parameter-size=1536"
+      ],
+      "pid": 552112,
+      "start_ticks": 1093737427
+    },
+    {
+      "argv": [
+        "/usr/local/Ascend/cann-9.1.0/tools/bishengir/bin/bishengir-compile",
+        "/tmp/tmp0kmab5lt/kernel.mlir",
+        "--target=Ascend910B2",
+        "--enable-auto-multi-buffer=True",
+        "--enable-auto-bind-sub-block=True",
+        "--enable-auto-blockify-loop",
+        "--enable-hfusion-compile=true",
+        "--enable-hivm-compile=true",
+        "--enable-triton-kernel-compile=true",
+        "-o",
+        "/tmp/tmp0kmab5lt/kernel"
+      ],
+      "pid": 552243,
+      "start_ticks": 1093737685
+    },
+    {
+      "argv": [
+        "/usr/local/Ascend/cann-9.1.0/tools/bishengir/bin/hivmc",
+        "/tmp/bishengir-compile-d35a4f/module.hivm.opt.mlir",
+        "--enable-debug-info=false",
+        "--enable-static-bare-ptr=true",
+        "--enable-bin-relocation=true",
+        "--enable-hivm-inject-barrier-all-sync=false",
+        "--enable-sanitizer=false",
+        "-o",
+        "/tmp/tmp0kmab5lt/kernel"
+      ],
+      "pid": 552280,
+      "start_ticks": 1093737707
+    },
+    {
+      "argv": [
+        "/usr/local/Ascend/cann-9.1.0/bin/bisheng",
+        "/tmp/tmp0kmab5lt/kernel.ll",
+        "-o",
+        "/tmp/tmp0kmab5lt/kernel.o",
+        "--cce-aicore-arch=dav-c220-vec",
+        "--cce-aicore-only",
+        "-O2",
+        "-cce-bitcode-is-aicore",
+        "-Wno-override-module",
+        "-cce-link-aicore-ll-module",
+        "/usr/local/Ascend/cann-9.1.0/tools/bishengir/lib/meta_op.aiv.bc",
+        "-mllvm",
+        "-cce-aicore-dcci-insert-for-scalar=false",
+        "--cce-aicore-input-parameter-size=1536"
+      ],
+      "pid": 552298,
+      "start_ticks": 1093737713
+    },
+    {
+      "argv": [
+        "/usr/local/Ascend/cann-9.1.0/tools/bishengir/bin/bishengir-compile",
+        "/tmp/tmp4mnopeed/kernel.mlir",
+        "--target=Ascend910B2",
+        "--enable-auto-multi-buffer=True",
+        "--enable-auto-bind-sub-block=True",
+        "--enable-auto-blockify-loop",
+        "--enable-hfusion-compile=true",
+        "--enable-hivm-compile=true",
+        "--enable-triton-kernel-compile=true",
+        "-o",
+        "/tmp/tmp4mnopeed/kernel"
+      ],
+      "pid": 552238,
+      "start_ticks": 1093737675
+    },
+    {
+      "argv": [
+        "/usr/local/Ascend/cann-9.1.0/tools/bishengir/bin/hivmc",
+        "/tmp/bishengir-compile-78c299/module.hivm.opt.mlir",
+        "--enable-debug-info=false",
+        "--enable-static-bare-ptr=true",
+        "--enable-bin-relocation=true",
+        "--enable-hivm-inject-barrier-all-sync=false",
+        "--enable-sanitizer=false",
+        "-o",
+        "/tmp/tmp4mnopeed/kernel"
+      ],
+      "pid": 552255,
+      "start_ticks": 1093737697
+    },
+    {
+      "argv": [
+        "/usr/local/Ascend/cann-9.1.0/bin/bisheng",
+        "/tmp/tmp4mnopeed/kernel.ll",
+        "-o",
+        "/tmp/tmp4mnopeed/kernel.o",
+        "--cce-aicore-arch=dav-c220-vec",
+        "--cce-aicore-only",
+        "-O2",
+        "-cce-bitcode-is-aicore",
+        "-Wno-override-module",
+        "-cce-link-aicore-ll-module",
+        "/usr/local/Ascend/cann-9.1.0/tools/bishengir/lib/meta_op.aiv.bc",
+        "-mllvm",
+        "-cce-aicore-dcci-insert-for-scalar=false",
+        "--cce-aicore-input-parameter-size=1536"
+      ],
+      "pid": 552274,
+      "start_ticks": 1093737704
+    },
+    {
+      "argv": [
+        "npu-smi",
+        "info"
+      ],
+      "pid": 552471,
+      "start_ticks": 1093738065
+    },
+    {
+      "argv": [
+        "npu-smi",
+        "info"
+      ],
+      "pid": 552455,
+      "start_ticks": 1093738060
+    },
+    {
+      "argv": [
+        "npu-smi",
+        "info",
+        "-t",
+        "topo"
+      ],
+      "pid": 552487,
+      "start_ticks": 1093738114
+    },
+    {
+      "argv": [
+        "sh",
+        "-c",
+        "/usr/sbin/dmidecode 2>&1 | grep -E \"Manufacturer: QEMU|Manufacturer: qemu\" > /dev/null"
+      ],
+      "pid": 552491,
+      "start_ticks": 1093738116
+    },
+    {
+      "argv": [
+        "grep",
+        "-E",
+        "Manufacturer: QEMU|Manufacturer: qemu"
+      ],
+      "pid": 552493,
+      "start_ticks": 1093738116
+    },
+    {
+      "argv": [
+        "lscpu",
+        "-e=CPU,NODE"
+      ],
+      "pid": 552520,
+      "start_ticks": 1093738162
+    }
+  ],
+  "profiler_request_finished_observed": true,
+  "profiler_trace_files": [
+    "profiler-trace.jsonl.rlp.062249f0ebf24973a33f7751c0e048dc.jsonl",
+    "profiler-trace.jsonl.rlp.36f6526230a74e7f882b31cb4bb980fd.jsonl",
+    "profiler-trace.jsonl.rlp.96c6417bc4e6470fb3a7b530c2ce5257.jsonl",
+    "profiler-trace.jsonl.rlp.dc761bf0a0d24716b482c4063c13b5c4.jsonl"
+  ],
+  "profiler_trace_record_count": 7,
+  "schema": "ecpa-h2-real-two-mod-tp2-preflight/v1",
+  "score_eligible": false,
+  "server_exit_code": 0,
+  "server_identity": {
+    "argv": [
+      "/root/ecpa-h2-formal-profiler-kv-b-v1/bin/python",
+      "/root/ecpa-h2-formal-profiler-kv-b-v1/bin/vllm-request-lifecycle-profiler-serve",
+      "serve",
+      "/data/shared_models/Qwen--Qwen2.5-14B-Instruct",
+      "--served-model-name",
+      "ecpa-h2-kvcompress-then-profiler",
+      "--host",
+      "127.0.0.1",
+      "--port",
+      "8187",
+      "--tensor-parallel-size",
+      "2",
+      "--enforce-eager",
+      "--max-model-len",
+      "2048",
+      "--gpu-memory-utilization",
+      "0.7",
+      "--block-size",
+      "128",
+      "--no-enable-prefix-caching"
+    ],
+    "pid": 551057,
+    "start_ticks": 1093726979
+  },
+  "source_commits": {
+    "ascend": "873584026f8a683ac73523f15127569e9f6ab34b",
+    "host": "973d9ef5acd2b9beb03e399dec1511a41fc941b5",
+    "kvcompress": "00cc78dc7f3491eecbc79c5068e29aed9f59afc3",
+    "lifecycle_profiler": "88ffdce5fc6639c0b7b86a54d197f7394705c54b"
+  },
+  "stats_sha256": "a9db411b48ea39d0953dd64b94f87995ca61412f4b3d8fb24c4f7f38fa2a40cf",
+  "success": true,
+  "surviving_owned_processes": []
+}

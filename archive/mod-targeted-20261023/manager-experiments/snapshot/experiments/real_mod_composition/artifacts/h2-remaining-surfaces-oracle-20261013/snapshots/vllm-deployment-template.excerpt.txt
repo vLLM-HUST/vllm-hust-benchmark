@@ -1,0 +1,14 @@
+    25	    model: {{ $modelSpec.name }}
+    26	    helm-release-name: {{ .Release.Name }}
+    27	  {{- include "chart.engineStandardLabels" (dict "releaseName" .Release.Name "modelName" $modelSpec.name "chartName" .Chart.Name) | nindent 4 }}
+    28	  {{- include "chart.engineLabels" . | nindent 4 }}
+    29	  {{- with $modelSpec.labels }}
+    30	    {{- toYaml . | nindent 4 }}
+    31	  {{- end }}
+    32	spec:
+    33	{{- if not (and $modelSpec.keda $modelSpec.keda.enabled) }}
+    34	  replicas: {{ $modelSpec.replicaCount }}
+    35	{{- end }}
+    36	  {{- include "chart.engineStrategy" . | nindent 2 }}
+    37	  selector:
+    38	    matchLabels:

@@ -1,0 +1,32 @@
+{
+  "case_decisions": {
+    "pending-communication-process-carriers": "abstain",
+    "pending-worker-carrier-overlap": "abstain"
+  },
+  "isolation": {
+    "excluded_inputs": [
+      "Manager planner output",
+      "Manager composition errors",
+      "Manager-derived scores"
+    ],
+    "planner_seen_or_run_before_oracle_freeze": false
+  },
+  "oracle": "oracle.json",
+  "oracle_sha256": "d17cebf4e8dc722814fa78cfe56c0990891ed1400574d1436c42c6828168d576",
+  "review_inputs": {
+    "augmentation_sha256": "38a776f8c7840d3f855006aac7128b9db18158d573c106dbcd312edce351ef3d",
+    "canonical_sources_sha256": "428445f87e3593fd9868cf522f1833bc752735f95c0c2b71084374b43aff20a3",
+    "source_object_count": 25
+  },
+  "review_kind": "independent-pinned-source-object-review",
+  "reviewed_at": "2026-10-13T18:00:00Z",
+  "schema": "ecpa-h2-independent-process-carrier-review-receipt/v1",
+  "verdict": "PASS",
+  "verification": {
+    "pinned_source_command": "python3 experiments/real_mod_composition/verify_h2_process_carrier_oracle.py --source-root <checkout-root>",
+    "portable_command": "python3 experiments/real_mod_composition/verify_h2_process_carrier_oracle.py",
+    "result": "PASS"
+  },
+  "verifier": "experiments/real_mod_composition/verify_h2_process_carrier_oracle.py",
+  "verifier_sha256": "b28aed8cab938043a64dd2ea3ef8f6d655cbe899f4b7b943de20a978a31b7887"
+}

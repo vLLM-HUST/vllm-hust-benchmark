@@ -1,0 +1,81 @@
+{
+  "schema": "ecpa-exposure-proxy-functional-preflight/v1",
+  "classification": "unregistered-functional-preflight",
+  "formal_result": false,
+  "performance_result": false,
+  "executed_at": "2026-10-13",
+  "stack": {
+    "runtime_base_commit": "973d9ef5acd2b9beb03e399dec1511a41fc941b5",
+    "runtime_candidate_commit": "379a0ad35e9de6928e3481d375692204b0dee6e4",
+    "runtime_wheel": "vllm-0.31.1.post1.dev164+g379a0ad35.empty-cp312-cp312-linux_aarch64.whl",
+    "runtime_wheel_sha256": "sha256:a850a238b7ac0b6fdb9fd0ceb833dd843c0242570977b0f14fae482fe8d3d551",
+    "manager_candidate_commit": "71a64b1f8bba6d24e870ecfed790d6baf20909b0",
+    "manager_merged_commit": "26825758d34933b3938ff449da7f574d767a09a6",
+    "accelerator_plugin_commit": "873584026f8a683ac73523f15127569e9f6ab34b",
+    "model": "Qwen/Qwen2.5-7B-Instruct@a09a35458c702b33eeacc393d103063234e8bc28",
+    "hardware": "2x Ascend 910B2",
+    "topology": "single-host TP2 eager"
+  },
+  "execution": {
+    "health_status": 200,
+    "completion_status": 200,
+    "completion_content": "ECPA-PROXY-OK",
+    "event_count": 85,
+    "journal_count": 8,
+    "host_assigned_processes": [
+      {
+        "role": "api-server",
+        "ordinal": 0,
+        "pid": 503692,
+        "start_identity": "pid:503692:start_ticks:1093409117",
+        "process_epoch": 255705717419162,
+        "events": ["discovered", "invoked", "resolved", "skipped"]
+      },
+      {
+        "role": "engine-core-scheduler",
+        "ordinal": 0,
+        "pid": 504085,
+        "start_identity": "pid:504085:start_ticks:1093411892",
+        "process_epoch": 195471065600098,
+        "events": ["discovered", "effective", "invoked", "resolved", "skipped"]
+      },
+      {
+        "role": "worker",
+        "ordinal": 0,
+        "pid": 504448,
+        "start_identity": "pid:504448:start_ticks:1093413907",
+        "process_epoch": 27029639659968,
+        "events": ["discovered", "invoked", "resolved", "skipped"]
+      },
+      {
+        "role": "worker",
+        "ordinal": 1,
+        "pid": 504449,
+        "start_identity": "pid:504449:start_ticks:1093413908",
+        "process_epoch": 75698363746855,
+        "events": ["discovered", "invoked", "resolved", "skipped"]
+      }
+    ],
+    "pre_binding_environment_events_retained": true,
+    "pre_binding_environment_event_note": "Platform discovery occurs while importing the vLLM package and is retained with unknown/environment identity. Formal membership ignores it and consumes only later host-assigned identities."
+  },
+  "retained_local_artifacts": {
+    "root": "/root/ecpa-exposure-parent-preflight-20261013",
+    "completion_sha256": "sha256:253d290af8ae3f9de56af61fc0e43391f66057927840417c107ef4c04ee0fcd2",
+    "live_summary_sha256": "sha256:6436d2d394e8bf1e58ff3b71a3a451726e62d4506712d8750c205cd361b81d27",
+    "journal_digest_list_sha256": "sha256:959592c00dfd44b0f30715134b2b871e1038072a4aeaf1f24173c3aa86654731"
+  },
+  "cleanup": {
+    "port_8187": "free",
+    "related_processes": 0,
+    "npu_3_processes": 0,
+    "npu_6_processes": 0
+  },
+  "public_ledger": "https://github.com/vLLM-HUST/extension-manager/issues/60#issuecomment-6149185367",
+  "remaining_gate": "Register the exact independent proxy command and integrate proxy launch, observation, and cleanup into a fresh runner-owned three-arm campaign.",
+  "non_claims": [
+    "This preflight is not a formal-real result.",
+    "It does not relabel the retained H1 r5 records.",
+    "It does not establish traffic-gate prevention, rollback, H2 composition, or H4 performance."
+  ]
+}

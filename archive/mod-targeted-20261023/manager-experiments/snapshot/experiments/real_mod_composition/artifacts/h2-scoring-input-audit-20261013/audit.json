@@ -1,0 +1,102 @@
+{
+  "actual_checks": {
+    "with_report": {
+      "compatible": false,
+      "configured": false,
+      "degraded": true,
+      "evidence": [
+        "host version is unavailable; compatibility is unverified",
+        "host API version is unavailable",
+        "protocol helm-values version is unavailable",
+        "protocol kubernetes-api version is unavailable",
+        "ownership conflict: Production Stack and KEDA-generated HPA both claim Deployment/default/vllm-llama3-deployment-vllm spec.replicas without delegation"
+      ],
+      "healthy": false,
+      "reachable": null
+    },
+    "without_report": {
+      "compatible": null,
+      "configured": false,
+      "degraded": true,
+      "evidence": [
+        "host version is unavailable; compatibility is unverified",
+        "host API version is unavailable",
+        "protocol helm-values version is unavailable",
+        "protocol kubernetes-api version is unavailable",
+        "no cluster mutation was attempted"
+      ],
+      "healthy": null,
+      "reachable": null
+    }
+  },
+  "analysis_source_commit": "49f1c153e377204610a736fd3c700c8e9d422904",
+  "audited_at": "2026-10-13T20:56:01.411623+00:00",
+  "case_id": "external-authority-production-stack-keda",
+  "classification": "source-bound-conflict-report-consumption-only",
+  "configurations": {
+    "with_report": {
+      "chart": "vllm/vllm-stack",
+      "namespace": "default",
+      "ownership_conflicts": [
+        "Production Stack and KEDA-generated HPA both claim Deployment/default/vllm-llama3-deployment-vllm spec.replicas without delegation"
+      ],
+      "release": "vllm",
+      "values": {
+        "servingEngineSpec": {
+          "modelSpec": [
+            {
+              "keda": {
+                "enabled": false
+              },
+              "name": "llama3",
+              "replicaCount": 1
+            }
+          ]
+        }
+      }
+    },
+    "without_report": {
+      "chart": "vllm/vllm-stack",
+      "namespace": "default",
+      "release": "vllm",
+      "values": {
+        "servingEngineSpec": {
+          "modelSpec": [
+            {
+              "keda": {
+                "enabled": false
+              },
+              "name": "llama3",
+              "replicaCount": 1
+            }
+          ]
+        }
+      }
+    }
+  },
+  "historical_oracle_preserved": true,
+  "historical_paths": {
+    "manifest": "experiments/real_mod_composition/artifacts/h2-remaining-surfaces-oracle-20261013/snapshots/production-stack-provider-manifest.json",
+    "prediction": "experiments/real_mod_composition/artifacts/h2-remaining-surfaces-oracle-20261013/manager-prediction.json",
+    "provider": "src/vllm_hust_ext/providers/production_stack.py"
+  },
+  "historical_prediction_sha256": "79671befe3b0968b7ede114720a7735dc2576d7e23bf6add061f22dbca975bfc",
+  "performance_claim": false,
+  "provider_source_sha256": "edc6f484e8d7fd0ee290fdd1d06f30eda43f9921df23d4c606f4b851706b9815",
+  "reason": "Pre-diagnosed ownership_conflicts is supplied to the detector; this measures report consumption, not independent conflict detection. Unknown compatibility is not admission.",
+  "runtime_claim": false,
+  "schema": "ecpa-h2-prediction-input-audit/v1",
+  "score_eligible": false,
+  "scoring_exclusion": {
+    "applies_to": "independent-H2-conflict-detection-score",
+    "case_id": "external-authority-production-stack-keda",
+    "corrected_definite_subset": {
+      "case_count": 4,
+      "false_negative": 0,
+      "false_positive": 0,
+      "true_negative": 2,
+      "true_positive": 2
+    },
+    "excluded_true_negatives": 1
+  }
+}

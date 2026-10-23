@@ -1,0 +1,69 @@
+{
+  "campaign_sha256": "f92661148dd582b863908872b315237c8e2a8579af0589af1856cb6607d85b4b",
+  "claims": [
+    "both installation orders completed a real TP2 compression transaction",
+    "scheduler commit and both TP worker acknowledgements agree on the transaction",
+    "the same request is bound to an EngineCore-owned lifecycle trace and clean shutdown"
+  ],
+  "classification": "real-compatible-pair-compression-transaction",
+  "nonclaims": [
+    "performance benefit",
+    "compression quality parity",
+    "H3",
+    "H4"
+  ],
+  "oracle_sha256": "01d5921a85656b86f0a38b9906fb3f35c274bb3e3cb2b8e04df74de14accfa3f",
+  "performance_result": false,
+  "qualification_boundary": {
+    "formal_h2_result": false,
+    "preregistered_timestamp_claim": false,
+    "reason": "campaign frozen_utc is later than the observed first launch; the field is inaccurate and is not admission evidence",
+    "retained_prelaunch_binding": "the immutable runner reads and validates the exact campaign, oracle, and runner digests before spawning the server"
+  },
+  "runner_sha256": "331fbe4a444332a396a04c0ea7f73e5c32a1a8d9d254c374822dffc4b26bc074",
+  "runs": [
+    {
+      "destination_blocks": 8,
+      "engine_core": {
+        "argv": [
+          "VLLM::EngineCore"
+        ],
+        "boot_id": "93818238-892f-4e39-8e08-c00b444af45b",
+        "pid": 626228,
+        "start_ticks": 1094238560
+      },
+      "manifest_sha256": "d4c1a3974e349524c86a3b26875496553dedabc9feedcd6976c6ea8a117329f2",
+      "order": "profiler-then-kvcompress",
+      "physical_tokens": 1024,
+      "profiler_process_uuid": "dfa56eda6af748a39f8b36251778dc84",
+      "request_id": "cmpl-a4f866734971b77d-0-aaff7e5d",
+      "response_sha256": "dbe158cc308ace05968e6bc4bf3457243e5c11252af184912cbfd035d7000320",
+      "result_sha256": "10350bc737c180280e155150682ee71ce96f8fd3b8775e32efd6580f59fc48b8",
+      "semantic_tokens": 1201,
+      "worker_ack_count": 2
+    },
+    {
+      "destination_blocks": 8,
+      "engine_core": {
+        "argv": [
+          "VLLM::EngineCore"
+        ],
+        "boot_id": "93818238-892f-4e39-8e08-c00b444af45b",
+        "pid": 629187,
+        "start_ticks": 1094254072
+      },
+      "manifest_sha256": "0512801fbc72aca2aa58f68370c95b847ebd9ce4681baa69fa82b47e02ff6490",
+      "order": "kvcompress-then-profiler",
+      "physical_tokens": 1024,
+      "profiler_process_uuid": "7336b7aad28b4943a0be2ae87b099bcb",
+      "request_id": "cmpl-a4e7d7ce8f25f0af-0-8ce7a596",
+      "response_sha256": "a94a84a3175eecb05208336b043fd20a664c952af2f229f4fb1a9656cf6fa81d",
+      "result_sha256": "d62f1c9f896258026327f3ad5340ce5f0fd1ce3cc65138fdbb3eccaf6cb9c5ae",
+      "semantic_tokens": 1201,
+      "worker_ack_count": 2
+    }
+  ],
+  "schema": "ecpa-h2-compression-transaction-admission/v1",
+  "score_eligible": false,
+  "status": "QUALIFIED_NONFORMAL"
+}

@@ -1,0 +1,40 @@
+{
+  "schema": "ecpa-h2-compression-transaction-oracle/v1",
+  "frozen_utc": "2026-10-13T17:47:00Z",
+  "case_id": "kvcompress-lifecycle-profiler-compression-transaction-tp2",
+  "planner_runtime_blind": true,
+  "review_inputs": {
+    "lifecycle_profiler_commit": "88ffdce5fc6639c0b7b86a54d197f7394705c54b",
+    "kvcompress_commit": "00cc78dc7f3491eecbc79c5068e29aed9f59afc3",
+    "kvcompress_tree": "8661770207782c912316ad9e5529bf3dbfcce563",
+    "host_commit": "973d9ef5acd2b9beb03e399dec1511a41fc941b5",
+    "ascend_commit": "873584026f8a683ac73523f15127569e9f6ab34b"
+  },
+  "source_findings": [
+    "the profiler observes request lifecycle state and exports process-owned trace records without replacing scheduler or worker cache tables",
+    "KVCompress owns the scheduler plan, destination block reservation, worker physical cache rewrite, worker acknowledgement, and scheduler commit",
+    "the reviewed hooks occupy distinct control surfaces and no source-level ownership conflict was found",
+    "TriAttention threshold equals kv_budget plus recompute_window and both values must be positive 128-token multiples",
+    "a non-speculative final prefill with prompt tokens at or above threshold and max_tokens at or above min_output_tokens is transaction eligible"
+  ],
+  "frozen_transaction_expectation": {
+    "kv_budget": 1024,
+    "recompute_window": 128,
+    "compression_threshold_tokens": 1152,
+    "expected_prompt_tokens": 1201,
+    "min_output_tokens_for_compression": 16,
+    "request_max_tokens": 24,
+    "expected_physical_anchor": 1024,
+    "required_runtime_evidence": [
+      "matching scheduler commit and worker acknowledgement for one request id",
+      "semantic and physical anchors match across both records",
+      "process-owned lifecycle profiler request_finished_observed event",
+      "HTTP 200 nonempty response",
+      "clean allocated NPU process tables before and after launch"
+    ]
+  },
+  "label": "compatible-compression-transaction-expected",
+  "performance_claim": false,
+  "h3_claim": false,
+  "h4_claim": false
+}

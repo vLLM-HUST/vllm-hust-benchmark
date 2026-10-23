@@ -1,0 +1,61 @@
+{
+  "schema_version": "0.2-experimental",
+  "extension_id": "org.vllm-hust.kv-transfer-observability",
+  "extension_version": "0.1.0.dev0",
+  "kind": "in_process_plugin",
+  "host": {
+    "provider": "vllm",
+    "name": "vllm",
+    "version_range": ">=0"
+  },
+  "runtime": {
+    "type": "python",
+    "process_scope": "vllm-processes",
+    "isolation": "trusted_in_process"
+  },
+  "lifecycle_owner": "vllm",
+  "protocols": [
+    {"name": "vllm.kv-transfer.events", "version_range": ">=2,<3"},
+    {"name": "vllm.kv-transfer.descriptors", "version_range": ">=2,<3"},
+    {"name": "vllm.kv-transfer.identity", "version_range": ">=1,<2"},
+    {"name": "vllm.kv-transfer.observer", "version_range": ">=1,<2"}
+  ],
+  "components": [
+    {
+      "component_id": "jsonl-kv-transfer-event-sink",
+      "implementation_ref": "vllm_hust_kv_transfer_observability.events:JsonlKVTransferEventSink",
+      "contracts": ["vllm.kv-transfer.events.v2", "vllm.kv-transfer.identity.v1"],
+      "execution_planes": ["scheduler", "worker"],
+      "isolation": "trusted_in_process",
+      "permissions": ["filesystem_write"]
+    },
+    {
+      "component_id": "descriptor-layout-capture",
+      "implementation_ref": "vllm_hust_kv_transfer_observability.descriptors:DescriptorLayoutCapture",
+      "contracts": ["vllm.kv-transfer.descriptors.v2"],
+      "execution_planes": ["worker"],
+      "isolation": "trusted_in_process",
+      "permissions": ["filesystem_write"]
+    }
+  ],
+  "implementation": [
+    {
+      "type": "python_module",
+      "module": "vllm_hust_kv_transfer_observability.events",
+      "object": "JsonlKVTransferEventSink",
+      "status": "import_only"
+    },
+    {
+      "type": "python_module",
+      "module": "vllm_hust_kv_transfer_observability.descriptors",
+      "object": "DescriptorLayoutCapture",
+      "status": "import_only"
+    }
+  ],
+  "requires_services": [],
+  "activation": {
+    "entry_points": [],
+    "environment": {},
+    "additional_config": {}
+  }
+}

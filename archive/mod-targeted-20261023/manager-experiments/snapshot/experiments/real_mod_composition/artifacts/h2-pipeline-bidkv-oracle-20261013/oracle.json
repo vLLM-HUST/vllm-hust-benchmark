@@ -1,0 +1,45 @@
+{
+  "campaign_sha256": "sha256:a0c36781ee9776935f673e4d5904ec3dc03ffe6401971227b35b3904438eb7a5",
+  "case_id": "pair-pipeline-microbatch-bidkv-vllm-0281",
+  "corpus_effect_if_matched": {
+    "expected_increment": "true_positive",
+    "next_n": 5,
+    "previous_n": 4
+  },
+  "decision": "admit",
+  "dimension": "conditional-compatible-distinct-scheduler-contracts",
+  "error": null,
+  "expected_manager_decision": "admit",
+  "findings": {
+    "activation_carriers": "Both source manifests declare active carriers and neither requires an external service or another extension.",
+    "conditional_boundary": "Admission holds for this exact host/source tuple and declared projections; a later shared mutable scheduler field or host revision requires a new oracle.",
+    "configuration": "The frozen source projections target distinct options: --batch-admission-policy versus --preemption-policy. No same-key CLI, environment, or additional-config write is present.",
+    "host_compatibility": "Both manifests include 0.28.1rc1.dev319 in their declared host ranges.",
+    "ownership": "Pipeline Microbatch owns the batch-admission-policy contract; BidKV owns the preemption-policy contract. The exact host exposes separate controller types and separate scheduler configuration fields.",
+    "protocol_compatibility": "The exact host source exports batch-admission API 1.1 and preemption-policy API 1.0, satisfying both declared ranges."
+  },
+  "frozen_utc": "2026-10-13T18:27:55.240045+00:00",
+  "independence": {
+    "excluded": [
+      "Manager planner or provider output",
+      "Manager composition decision",
+      "runtime or performance observations produced after freeze"
+    ],
+    "used": [
+      "exact source snapshots listed by the frozen campaign",
+      "host API constants and scheduler configuration at the exact host commit",
+      "manifest-declared carrier status, contracts, services, and activation projections"
+    ]
+  },
+  "nonclaims": [
+    "source-only pre-launch case; not host runtime",
+    "not performance evidence",
+    "does not show either policy was invoked",
+    "does not establish behavior under simultaneous policy calls"
+  ],
+  "performance_claim": false,
+  "runtime_claim": false,
+  "schema": "ecpa-h2-independent-source-oracle/v3",
+  "scope": "source-bound-pre-launch-composition",
+  "score_eligible": true
+}

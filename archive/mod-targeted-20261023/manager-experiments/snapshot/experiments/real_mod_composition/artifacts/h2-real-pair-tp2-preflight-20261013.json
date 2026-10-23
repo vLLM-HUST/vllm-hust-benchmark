@@ -1,0 +1,106 @@
+{
+  "additional_runtime_dependency": {
+    "accelerate_version": "1.11.0",
+    "reason": "exact current-mount calibration generation"
+  },
+  "calibration": {
+    "current_mount_generated": true,
+    "model_source_fingerprint_gate_honored": true,
+    "path": "/root/ecpa-h2-real-pair-20261013/calibration-current-mount-v2/qwen2.5-14b-current-mount-stats-v3.pt",
+    "sha256": "a9db411b48ea39d0953dd64b94f87995ca61412f4b3d8fb24c4f7f38fa2a40cf"
+  },
+  "captured_utc": "2026-10-13T16:12:00Z",
+  "classification": "real-model-serving-activation-preflight-not-formal-h2-or-performance",
+  "formal_h2_result": false,
+  "hardware": {
+    "accelerator": "Ascend 910B2",
+    "allocated_physical_devices": [
+      3,
+      6
+    ],
+    "tensor_parallel_size": 2
+  },
+  "model": "/data/shared_models/Qwen--Qwen2.5-14B-Instruct",
+  "orders": [
+    {
+      "cleanup_proven": true,
+      "completion_nonempty": true,
+      "completion_status": 200,
+      "health_status": 200,
+      "kvcompress_cache_bound_log": true,
+      "npu_process_tables_empty": true,
+      "order": "profiler-then-kvcompress",
+      "port_refused_after_stop": true,
+      "profiler_request_finished_observed": true,
+      "profiler_trace_record_count": 7,
+      "raw_manifest_sha256": "de1b61fa4aae5c27ccf683d000f7159c5d1c68a0444d7112bffc744c1efc897c",
+      "result_path": "/root/ecpa-h2-real-pair-20261013/order-a-v3/result.json",
+      "result_sha256": "5ef80a5696bd0f1db75d2ba1d71720def2d37ad088dc746b4c2eeac3163104c5",
+      "success": true
+    },
+    {
+      "cleanup_proven": true,
+      "completion_nonempty": true,
+      "completion_status": 200,
+      "health_status": 200,
+      "kvcompress_cache_bound_log": true,
+      "npu_process_tables_empty": true,
+      "order": "kvcompress-then-profiler",
+      "port_refused_after_stop": true,
+      "profiler_request_finished_observed": true,
+      "profiler_trace_record_count": 7,
+      "raw_manifest_sha256": "90f73cce1dd45537d78fad55bc2958069b6aada534bcfe301f957b80401e9406",
+      "result_path": "/root/ecpa-h2-real-pair-20261013/order-b-v1/result.json",
+      "result_sha256": "cf91310f16b881c7982e55face22ed0b460974b53d69c3088bf5403ff69927f0",
+      "success": true
+    }
+  ],
+  "performance_result": false,
+  "retained_failed_attempts": [
+    {
+      "cleanup_proven": true,
+      "path": "/root/ecpa-h2-real-pair-20261013/order-a/result.json",
+      "reason": "model path and model_source_fingerprint mismatch"
+    },
+    {
+      "cleanup_proven": true,
+      "path": "/root/ecpa-h2-real-pair-20261013/order-a-v2/result.json",
+      "reason": "model_source_fingerprint mismatch"
+    },
+    {
+      "path": "/root/ecpa-h2-real-pair-20261013/calibration-current-mount-v1/stderr.log",
+      "reason": "accelerate missing; no artifact produced"
+    }
+  ],
+  "schema": "ecpa-h2-real-two-mod-tp2-pair-preflight-summary/v1",
+  "scientific_boundary": {
+    "established": [
+      "both isolated installation orders launch real TP2 model service",
+      "health and one completion succeed in both orders",
+      "lifecycle_profiler observes a real request_finished event in both orders",
+      "KVCompress binds scheduler/cache path in both orders",
+      "all owned processes and NPU process tables are clean after both runs"
+    ],
+    "not_established": [
+      "compression transaction occurred",
+      "H2 independent correctness/ownership oracle",
+      "matched control/candidate repetitions",
+      "latency or throughput benefit",
+      "formal H2 result",
+      "H3 or H4 result"
+    ]
+  },
+  "score_eligible": false,
+  "source_commits": {
+    "ascend": "873584026f8a683ac73523f15127569e9f6ab34b",
+    "host": "973d9ef5acd2b9beb03e399dec1511a41fc941b5",
+    "kvcompress": "00cc78dc7f3491eecbc79c5068e29aed9f59afc3",
+    "lifecycle_profiler": "88ffdce5fc6639c0b7b86a54d197f7394705c54b"
+  },
+  "wheel_sha256": {
+    "ascend": "16438dc60e86c7bc4741a3520d80d5f9de54676daabe2035ebff0d6b2dceefcf",
+    "host": "97b27b347889d6e140415e674509519f2ed65848cc51e4b888189fb28f29671a",
+    "kvcompress": "b859f165140de0390f2e6a794a1dc36adb6de4c686e40c3dfc66b3bde11f06c3",
+    "lifecycle_profiler": "8d77e6d98969831e994de4f7b7e4e9cf45b97ac9eeafc94da101543c9bee7891"
+  }
+}

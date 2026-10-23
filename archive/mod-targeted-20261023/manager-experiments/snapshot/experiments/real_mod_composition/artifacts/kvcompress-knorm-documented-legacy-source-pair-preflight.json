@@ -1,0 +1,567 @@
+{
+  "case_id": "kvcompress-knorm-vllm-0.23.0-d0f22-03766",
+  "classification": "documented-legacy-python-source-pair-install-import-registration-and-manager-static-preflight-not-host-start-or-oracle",
+  "conclusion": "Both exact sequential wheel-install orders imported and both entry-point call orders registered wrappers against the documented legacy Python source pair. Manager still rejected KNorm activation because its carrier is import_only. No native extension, model, server, workload, runtime effect, or semantic compatibility was measured.",
+  "executed_at_utc": "2026-10-13T10:43:30Z",
+  "host": {
+    "components": {
+      "vllm": {
+        "commit": "d0f22d2bda562156e4dbf433ce645e1769b4f804",
+        "module_path": "/root/ecpa-h2-host-vllm-d0f22/vllm/__init__.py",
+        "repository_path": "/root/ecpa-h2-host-vllm-d0f22",
+        "tree": "0910e4ad02152dabf80ce42b513aca89257bac6e",
+        "version": "0.23.0+empty",
+        "worktree_porcelain": ""
+      },
+      "vllm-ascend": {
+        "commit": "03766ac696fde5ab1980d80ca0b8543d3580c989",
+        "module_path": "/root/ecpa-h2-host-ascend-03766/vllm_ascend/__init__.py",
+        "repository_path": "/root/ecpa-h2-host-ascend-03766",
+        "tree": "316c38ac7ff9133c565fa01259a2a18692a8a05e",
+        "version": "0.23.0.post1",
+        "worktree_porcelain": ""
+      }
+    },
+    "matches_kvcompress_documented_validated_source_pair": true,
+    "native_extension_artifacts_exercised": false,
+    "native_extension_provenance": "unmeasured; no host or device start was attempted",
+    "provider": "vllm",
+    "python": "3.12.13",
+    "python_source_override": true
+  },
+  "host_started": false,
+  "manager": {
+    "commit": "646d175835ffc74cb9668dc03986ef823d23ae82",
+    "wheel": "vllm_hust_ext-0.3.0-py3-none-any.whl",
+    "wheel_sha256": "ec7d718a92361f77da53095547ae3ab407eabce9d471e6cc2e5f859bb69173da"
+  },
+  "members": {
+    "knorm": {
+      "commit": "c490cfbfd2372635e8e874c8d7ba866ca5c476fb",
+      "tree": "3cf0928f202a0d9c5111333fd7ad4be5f13d97aa",
+      "wheel": "vllm_hust_knorm-0.1.0-py3-none-any.whl",
+      "wheel_sha256": "a3dc5f84b2a4a7df3a8141c4772d4ac499c9d41b799438a1307fb656c01f2083"
+    },
+    "kvcompress": {
+      "commit": "00cc78dc7f3491eecbc79c5068e29aed9f59afc3",
+      "tree": "8661770207782c912316ad9e5529bf3dbfcce563",
+      "wheel": "vllm_ascend_kvcompress_hust-0.9.0-py3-none-any.whl",
+      "wheel_sha256": "cad71c30bbf4025bfa53fb8e87b742cd6413f60089c818a3039c502d1738cebe"
+    }
+  },
+  "npu_used": false,
+  "oracle": {
+    "label": null,
+    "status": "unreviewed"
+  },
+  "orders": [
+    {
+      "entrypoint_call": {
+        "classification": "entrypoint-call-and-wrapper-registration-preflight-not-host-start-or-oracle",
+        "host_started": false,
+        "oracle_label": null,
+        "order": [
+          "ascend_kvcompress",
+          "vllm-hust-knorm"
+        ],
+        "results": [
+          {
+            "called": true,
+            "name": "ascend_kvcompress",
+            "return": null
+          },
+          {
+            "called": true,
+            "name": "vllm-hust-knorm",
+            "return": [
+              "knorm"
+            ]
+          }
+        ],
+        "runtime_effective": "unmeasured",
+        "scheduler_registration": {
+          "current_knorm_marker": true,
+          "knorm_wraps_current": true,
+          "kvcompress_captured_knorm_predecessor": false,
+          "kvcompress_marker": true
+        },
+        "schema": "ecpa-h2-legacy-entrypoint-call-preflight/0.1",
+        "score_eligible": false
+      },
+      "install_and_import": {
+        "classification": "validated-source-pair-isolated-sequential-install-and-import-preflight-not-host-start-or-oracle",
+        "entries": [
+          {
+            "callable": true,
+            "distribution": "vllm-ascend-kvcompress-hust",
+            "loaded": true,
+            "name": "ascend_kvcompress",
+            "value": "vllm_ascend_kvcompress.plugin:register"
+          },
+          {
+            "callable": true,
+            "distribution": "vllm-hust-knorm",
+            "loaded": true,
+            "name": "vllm-hust-knorm",
+            "value": "vllm_hust_knorm.bootstrap:register_plugins"
+          }
+        ],
+        "host_modules": {
+          "vllm": "/root/ecpa-h2-host-vllm-d0f22/vllm/__init__.py",
+          "vllm-ascend": "/root/ecpa-h2-host-ascend-03766/vllm_ascend/__init__.py"
+        },
+        "host_started": false,
+        "installation_order": [
+          "kvcompress",
+          "knorm"
+        ],
+        "oracle_label": null,
+        "schema": "ecpa-h2-legacy-install-import-preflight/0.1",
+        "score_eligible": false
+      },
+      "manager_static": {
+        "classification": "manager-static-plan-and-activation-rejection-preflight-not-host-start-or-oracle",
+        "host_started": false,
+        "installation_order": "kvcompress-then-knorm",
+        "knorm_check": {
+          "argv": [
+            "/root/ecpa-h2-legacy-order-kv-kn-20261013/bin/vllm-hust-ext",
+            "extension",
+            "check",
+            "org.vllm-hust.knorm"
+          ],
+          "returncode": 0,
+          "stderr": "[W1013 10:43:08.222544723 FunctionLoader.cpp:48] Warning: LD_PRELOAD detected, FunctionLoader prefers RTLD_DEFAULT for symbol resolution. (function operator())",
+          "stdout": "INFO 10-13 10:43:14 [__init__.py:44] Available plugins for group vllm.platform_plugins:\nINFO 10-13 10:43:14 [__init__.py:46] - ascend -> vllm_ascend:register\nINFO 10-13 10:43:14 [__init__.py:49] All plugins in this group will be loaded. Set `VLLM_PLUGINS` to control which plugins to load.\nINFO 10-13 10:43:14 [__init__.py:237] Platform plugin ascend is activated\nINFO 10-13 10:43:14 [platform.py:61] Breakable cudagraph is force disabled on Ascend because DeepSeek V4 PIECEWISE cudagraph is not supported yet.\n{\n  \"extension_id\": \"org.vllm-hust.knorm\",\n  \"provider\": \"vllm\",\n  \"states\": [\n    \"installed\",\n    \"discovered\",\n    \"compatible\",\n    \"degraded\"\n  ],\n  \"evidence\": [\n    \"host capability registry is unavailable; used legacy module probes\",\n    \"host version 0.23.0+empty satisfies the declared range\",\n    \"host API 1.0 satisfies the declared range\",\n    \"protocol vllm.general_plugins is not independently versioned; compatibility is governed by host ranges and acceptance evidence\",\n    \"protocol vllm.v1.kv_cache_spec_registry is not independently versioned; compatibility is governed by host ranges and acceptance evidence\",\n    \"protocol vllm.v1.worker.gpu_model_runner is not independently versioned; compatibility is governed by host ranges and acceptance evidence\",\n    \"extension is descriptor-only and cannot be enabled (implementation status: import_only)\",\n    \"extension is descriptor-only and cannot be enabled (implementation status: import_only)\"\n  ]\n}"
+        },
+        "knorm_enable_after_kvcompress": {
+          "argv": [
+            "/root/ecpa-h2-legacy-order-kv-kn-20261013/bin/vllm-hust-ext",
+            "extension",
+            "enable",
+            "org.vllm-hust.knorm"
+          ],
+          "returncode": 2,
+          "stderr": "usage: vllm-hust-ext [-h] [--version] {extension,catalog,run,formal-run} ...\nvllm-hust-ext: error: cannot enable 'org.vllm-hust.knorm': extension is descriptor-only and cannot be enabled (implementation status: import_only)",
+          "stdout": ""
+        },
+        "knorm_plan": {
+          "argv": [
+            "/root/ecpa-h2-legacy-order-kv-kn-20261013/bin/vllm-hust-ext",
+            "extension",
+            "plan",
+            "org.vllm-hust.knorm"
+          ],
+          "returncode": 0,
+          "stderr": "",
+          "stdout": {
+            "actions": [
+              {
+                "details": {
+                  "enabled": false
+                },
+                "lifecycle_owner": "vllm",
+                "mutating": false,
+                "operation": "inspect_only",
+                "target": "org.vllm-hust.knorm"
+              }
+            ],
+            "config_claims": null,
+            "extension_id": "org.vllm-hust.knorm",
+            "generated_config": {},
+            "provider": "vllm",
+            "resource_claims": [
+              {
+                "mode": "exclusive",
+                "resource": "vllm.kv-cache.compression-policy",
+                "scope": "vllm-process"
+              }
+            ],
+            "warnings": [
+              "extension is descriptor-only and cannot be enabled (implementation status: import_only)"
+            ]
+          }
+        },
+        "kvcompress_check": {
+          "argv": [
+            "/root/ecpa-h2-legacy-order-kv-kn-20261013/bin/vllm-hust-ext",
+            "extension",
+            "check",
+            "org.vllm-hust.ascend-kvcompress"
+          ],
+          "returncode": 0,
+          "stderr": "[W1013 10:42:57.865500243 FunctionLoader.cpp:48] Warning: LD_PRELOAD detected, FunctionLoader prefers RTLD_DEFAULT for symbol resolution. (function operator())",
+          "stdout": "INFO 10-13 10:43:02 [__init__.py:44] Available plugins for group vllm.platform_plugins:\nINFO 10-13 10:43:02 [__init__.py:46] - ascend -> vllm_ascend:register\nINFO 10-13 10:43:02 [__init__.py:49] All plugins in this group will be loaded. Set `VLLM_PLUGINS` to control which plugins to load.\nINFO 10-13 10:43:02 [__init__.py:237] Platform plugin ascend is activated\nINFO 10-13 10:43:02 [platform.py:61] Breakable cudagraph is force disabled on Ascend because DeepSeek V4 PIECEWISE cudagraph is not supported yet.\n{\n  \"extension_id\": \"org.vllm-hust.ascend-kvcompress\",\n  \"provider\": \"vllm\",\n  \"states\": [\n    \"installed\",\n    \"discovered\",\n    \"compatible\",\n    \"configured\"\n  ],\n  \"evidence\": [\n    \"host capability registry is unavailable; used legacy module probes\",\n    \"host version 0.23.0.post1 satisfies the declared range\",\n    \"host API 1.0 satisfies the declared range\",\n    \"protocol vllm.general_plugins is not independently versioned; compatibility is governed by host ranges and acceptance evidence\",\n    \"vLLM launch configuration can be rendered\"\n  ]\n}"
+        },
+        "kvcompress_enable": {
+          "argv": [
+            "/root/ecpa-h2-legacy-order-kv-kn-20261013/bin/vllm-hust-ext",
+            "extension",
+            "enable",
+            "org.vllm-hust.ascend-kvcompress"
+          ],
+          "returncode": 0,
+          "stderr": "",
+          "stdout": "enabled org.vllm-hust.ascend-kvcompress"
+        },
+        "kvcompress_plan": {
+          "argv": [
+            "/root/ecpa-h2-legacy-order-kv-kn-20261013/bin/vllm-hust-ext",
+            "extension",
+            "plan",
+            "org.vllm-hust.ascend-kvcompress"
+          ],
+          "returncode": 0,
+          "stderr": "",
+          "stdout": {
+            "actions": [
+              {
+                "details": {
+                  "enabled": false
+                },
+                "lifecycle_owner": "vllm",
+                "mutating": false,
+                "operation": "configure_launch",
+                "target": "vllm"
+              }
+            ],
+            "config_claims": [
+              {
+                "path": [
+                  "environment",
+                  "VLLM_ASCEND_KVCOMPRESS_ENABLED"
+                ],
+                "value": "1"
+              },
+              {
+                "path": [
+                  "vllm_plugins",
+                  "ascend_kvcompress"
+                ],
+                "value": true
+              }
+            ],
+            "extension_id": "org.vllm-hust.ascend-kvcompress",
+            "generated_config": {
+              "additional_config": {},
+              "environment": {
+                "VLLM_ASCEND_KVCOMPRESS_ENABLED": "1"
+              },
+              "native_extension_manifest": {
+                "bundle_id": "org.vllm-hust.ascend-kvcompress",
+                "bundle_version": "0.9.0",
+                "components": [
+                  {
+                    "component_id": "ascend-kvcompress",
+                    "contracts": [
+                      "vllm.general_plugins"
+                    ],
+                    "execution_planes": [
+                      "scheduler",
+                      "worker",
+                      "device"
+                    ],
+                    "implementation_ref": "vllm_ascend_kvcompress.plugin:register",
+                    "isolation": "trusted_in_process",
+                    "permissions": [
+                      "device_access",
+                      "filesystem_read",
+                      "filesystem_write",
+                      "network_egress"
+                    ]
+                  }
+                ],
+                "host_api_range": ">=1,<2",
+                "schema_version": "1.0"
+              },
+              "user_config": {},
+              "vllm_json_options": {},
+              "vllm_plugins": [
+                "ascend_kvcompress"
+              ]
+            },
+            "provider": "vllm",
+            "resource_claims": [
+              {
+                "mode": "exclusive",
+                "resource": "vllm-ascend.kv-cache.mutation",
+                "scope": "vllm-process"
+              }
+            ],
+            "warnings": []
+          }
+        },
+        "oracle_label": null,
+        "runtime_effective": "unmeasured",
+        "schema": "ecpa-h2-legacy-manager-static-preflight/0.1",
+        "score_eligible": false
+      },
+      "members": [
+        "kvcompress",
+        "knorm"
+      ],
+      "order_id": "kvcompress-then-knorm",
+      "raw_evidence": {
+        "entrypoint_call_log_sha256": "0a631a832d9ded1fd0187ee1d5d127f1291eeed205842d9554faa143bcbb9cc0",
+        "install_import_sha256": "573ff1fc5f7e76da444fb43b911d7dd2709e89d0d29b0032bd4774b9d8a0a2fe",
+        "manager_static_sha256": "f86f9bb4abd79674774e4f3a8094beadce4383cf116a0a923452a2e32780ea9c"
+      }
+    },
+    {
+      "entrypoint_call": {
+        "classification": "entrypoint-call-and-wrapper-registration-preflight-not-host-start-or-oracle",
+        "host_started": false,
+        "oracle_label": null,
+        "order": [
+          "vllm-hust-knorm",
+          "ascend_kvcompress"
+        ],
+        "results": [
+          {
+            "called": true,
+            "name": "vllm-hust-knorm",
+            "return": [
+              "knorm"
+            ]
+          },
+          {
+            "called": true,
+            "name": "ascend_kvcompress",
+            "return": null
+          }
+        ],
+        "runtime_effective": "unmeasured",
+        "scheduler_registration": {
+          "current_knorm_marker": false,
+          "knorm_wraps_current": false,
+          "kvcompress_captured_knorm_predecessor": true,
+          "kvcompress_marker": true
+        },
+        "schema": "ecpa-h2-legacy-entrypoint-call-preflight/0.1",
+        "score_eligible": false
+      },
+      "install_and_import": {
+        "classification": "validated-source-pair-isolated-sequential-install-and-import-preflight-not-host-start-or-oracle",
+        "entries": [
+          {
+            "callable": true,
+            "distribution": "vllm-ascend-kvcompress-hust",
+            "loaded": true,
+            "name": "ascend_kvcompress",
+            "value": "vllm_ascend_kvcompress.plugin:register"
+          },
+          {
+            "callable": true,
+            "distribution": "vllm-hust-knorm",
+            "loaded": true,
+            "name": "vllm-hust-knorm",
+            "value": "vllm_hust_knorm.bootstrap:register_plugins"
+          }
+        ],
+        "host_modules": {
+          "vllm": "/root/ecpa-h2-host-vllm-d0f22/vllm/__init__.py",
+          "vllm-ascend": "/root/ecpa-h2-host-ascend-03766/vllm_ascend/__init__.py"
+        },
+        "host_started": false,
+        "installation_order": [
+          "knorm",
+          "kvcompress"
+        ],
+        "oracle_label": null,
+        "schema": "ecpa-h2-legacy-install-import-preflight/0.1",
+        "score_eligible": false
+      },
+      "manager_static": {
+        "classification": "manager-static-plan-and-activation-rejection-preflight-not-host-start-or-oracle",
+        "host_started": false,
+        "installation_order": "knorm-then-kvcompress",
+        "knorm_check": {
+          "argv": [
+            "/root/ecpa-h2-legacy-order-kn-kv-20261013/bin/vllm-hust-ext",
+            "extension",
+            "check",
+            "org.vllm-hust.knorm"
+          ],
+          "returncode": 0,
+          "stderr": "[W1013 10:43:08.464935978 FunctionLoader.cpp:48] Warning: LD_PRELOAD detected, FunctionLoader prefers RTLD_DEFAULT for symbol resolution. (function operator())",
+          "stdout": "INFO 10-13 10:43:14 [__init__.py:44] Available plugins for group vllm.platform_plugins:\nINFO 10-13 10:43:14 [__init__.py:46] - ascend -> vllm_ascend:register\nINFO 10-13 10:43:14 [__init__.py:49] All plugins in this group will be loaded. Set `VLLM_PLUGINS` to control which plugins to load.\nINFO 10-13 10:43:14 [__init__.py:237] Platform plugin ascend is activated\nINFO 10-13 10:43:14 [platform.py:61] Breakable cudagraph is force disabled on Ascend because DeepSeek V4 PIECEWISE cudagraph is not supported yet.\n{\n  \"extension_id\": \"org.vllm-hust.knorm\",\n  \"provider\": \"vllm\",\n  \"states\": [\n    \"installed\",\n    \"discovered\",\n    \"compatible\",\n    \"degraded\"\n  ],\n  \"evidence\": [\n    \"host capability registry is unavailable; used legacy module probes\",\n    \"host version 0.23.0+empty satisfies the declared range\",\n    \"host API 1.0 satisfies the declared range\",\n    \"protocol vllm.general_plugins is not independently versioned; compatibility is governed by host ranges and acceptance evidence\",\n    \"protocol vllm.v1.kv_cache_spec_registry is not independently versioned; compatibility is governed by host ranges and acceptance evidence\",\n    \"protocol vllm.v1.worker.gpu_model_runner is not independently versioned; compatibility is governed by host ranges and acceptance evidence\",\n    \"extension is descriptor-only and cannot be enabled (implementation status: import_only)\",\n    \"extension is descriptor-only and cannot be enabled (implementation status: import_only)\"\n  ]\n}"
+        },
+        "knorm_enable_after_kvcompress": {
+          "argv": [
+            "/root/ecpa-h2-legacy-order-kn-kv-20261013/bin/vllm-hust-ext",
+            "extension",
+            "enable",
+            "org.vllm-hust.knorm"
+          ],
+          "returncode": 2,
+          "stderr": "usage: vllm-hust-ext [-h] [--version] {extension,catalog,run,formal-run} ...\nvllm-hust-ext: error: cannot enable 'org.vllm-hust.knorm': extension is descriptor-only and cannot be enabled (implementation status: import_only)",
+          "stdout": ""
+        },
+        "knorm_plan": {
+          "argv": [
+            "/root/ecpa-h2-legacy-order-kn-kv-20261013/bin/vllm-hust-ext",
+            "extension",
+            "plan",
+            "org.vllm-hust.knorm"
+          ],
+          "returncode": 0,
+          "stderr": "",
+          "stdout": {
+            "actions": [
+              {
+                "details": {
+                  "enabled": false
+                },
+                "lifecycle_owner": "vllm",
+                "mutating": false,
+                "operation": "inspect_only",
+                "target": "org.vllm-hust.knorm"
+              }
+            ],
+            "config_claims": null,
+            "extension_id": "org.vllm-hust.knorm",
+            "generated_config": {},
+            "provider": "vllm",
+            "resource_claims": [
+              {
+                "mode": "exclusive",
+                "resource": "vllm.kv-cache.compression-policy",
+                "scope": "vllm-process"
+              }
+            ],
+            "warnings": [
+              "extension is descriptor-only and cannot be enabled (implementation status: import_only)"
+            ]
+          }
+        },
+        "kvcompress_check": {
+          "argv": [
+            "/root/ecpa-h2-legacy-order-kn-kv-20261013/bin/vllm-hust-ext",
+            "extension",
+            "check",
+            "org.vllm-hust.ascend-kvcompress"
+          ],
+          "returncode": 0,
+          "stderr": "[W1013 10:42:57.879613945 FunctionLoader.cpp:48] Warning: LD_PRELOAD detected, FunctionLoader prefers RTLD_DEFAULT for symbol resolution. (function operator())",
+          "stdout": "INFO 10-13 10:43:03 [__init__.py:44] Available plugins for group vllm.platform_plugins:\nINFO 10-13 10:43:03 [__init__.py:46] - ascend -> vllm_ascend:register\nINFO 10-13 10:43:03 [__init__.py:49] All plugins in this group will be loaded. Set `VLLM_PLUGINS` to control which plugins to load.\nINFO 10-13 10:43:03 [__init__.py:237] Platform plugin ascend is activated\nINFO 10-13 10:43:03 [platform.py:61] Breakable cudagraph is force disabled on Ascend because DeepSeek V4 PIECEWISE cudagraph is not supported yet.\n{\n  \"extension_id\": \"org.vllm-hust.ascend-kvcompress\",\n  \"provider\": \"vllm\",\n  \"states\": [\n    \"installed\",\n    \"discovered\",\n    \"compatible\",\n    \"configured\"\n  ],\n  \"evidence\": [\n    \"host capability registry is unavailable; used legacy module probes\",\n    \"host version 0.23.0.post1 satisfies the declared range\",\n    \"host API 1.0 satisfies the declared range\",\n    \"protocol vllm.general_plugins is not independently versioned; compatibility is governed by host ranges and acceptance evidence\",\n    \"vLLM launch configuration can be rendered\"\n  ]\n}"
+        },
+        "kvcompress_enable": {
+          "argv": [
+            "/root/ecpa-h2-legacy-order-kn-kv-20261013/bin/vllm-hust-ext",
+            "extension",
+            "enable",
+            "org.vllm-hust.ascend-kvcompress"
+          ],
+          "returncode": 0,
+          "stderr": "",
+          "stdout": "enabled org.vllm-hust.ascend-kvcompress"
+        },
+        "kvcompress_plan": {
+          "argv": [
+            "/root/ecpa-h2-legacy-order-kn-kv-20261013/bin/vllm-hust-ext",
+            "extension",
+            "plan",
+            "org.vllm-hust.ascend-kvcompress"
+          ],
+          "returncode": 0,
+          "stderr": "",
+          "stdout": {
+            "actions": [
+              {
+                "details": {
+                  "enabled": false
+                },
+                "lifecycle_owner": "vllm",
+                "mutating": false,
+                "operation": "configure_launch",
+                "target": "vllm"
+              }
+            ],
+            "config_claims": [
+              {
+                "path": [
+                  "environment",
+                  "VLLM_ASCEND_KVCOMPRESS_ENABLED"
+                ],
+                "value": "1"
+              },
+              {
+                "path": [
+                  "vllm_plugins",
+                  "ascend_kvcompress"
+                ],
+                "value": true
+              }
+            ],
+            "extension_id": "org.vllm-hust.ascend-kvcompress",
+            "generated_config": {
+              "additional_config": {},
+              "environment": {
+                "VLLM_ASCEND_KVCOMPRESS_ENABLED": "1"
+              },
+              "native_extension_manifest": {
+                "bundle_id": "org.vllm-hust.ascend-kvcompress",
+                "bundle_version": "0.9.0",
+                "components": [
+                  {
+                    "component_id": "ascend-kvcompress",
+                    "contracts": [
+                      "vllm.general_plugins"
+                    ],
+                    "execution_planes": [
+                      "scheduler",
+                      "worker",
+                      "device"
+                    ],
+                    "implementation_ref": "vllm_ascend_kvcompress.plugin:register",
+                    "isolation": "trusted_in_process",
+                    "permissions": [
+                      "device_access",
+                      "filesystem_read",
+                      "filesystem_write",
+                      "network_egress"
+                    ]
+                  }
+                ],
+                "host_api_range": ">=1,<2",
+                "schema_version": "1.0"
+              },
+              "user_config": {},
+              "vllm_json_options": {},
+              "vllm_plugins": [
+                "ascend_kvcompress"
+              ]
+            },
+            "provider": "vllm",
+            "resource_claims": [
+              {
+                "mode": "exclusive",
+                "resource": "vllm-ascend.kv-cache.mutation",
+                "scope": "vllm-process"
+              }
+            ],
+            "warnings": []
+          }
+        },
+        "oracle_label": null,
+        "runtime_effective": "unmeasured",
+        "schema": "ecpa-h2-legacy-manager-static-preflight/0.1",
+        "score_eligible": false
+      },
+      "members": [
+        "knorm",
+        "kvcompress"
+      ],
+      "order_id": "knorm-then-kvcompress",
+      "raw_evidence": {
+        "entrypoint_call_log_sha256": "2a07e3fc46c02f049b1644dcf30bc466b6e3e2361e7c55cd5ab3006adc4813a6",
+        "install_import_sha256": "383411e169e978330ff3237ead035b06fca326e6d95a6ccc53cd3cf25697f4a9",
+        "manager_static_sha256": "e993e65dc9241db96558eef53492134ec7d6d880d6492832cd3095ce0eac8aba"
+      }
+    }
+  ],
+  "performance_benefit": "unmeasured",
+  "runtime_effective": "unmeasured",
+  "schema": "ecpa-h2-documented-legacy-source-pair-preflight/0.1",
+  "score_eligible": false
+}

@@ -1,0 +1,75 @@
+{
+  "schema_version": "0.2-experimental",
+  "extension_id": "org.vllm-hust.scheduler-policy-lab",
+  "extension_version": "0.1.0.dev0",
+  "kind": "in_process_plugin",
+  "host": {
+    "provider": "vllm",
+    "name": "vllm",
+    "version_range": ">=0"
+  },
+  "runtime": {
+    "type": "python",
+    "process_scope": "vllm-processes",
+    "isolation": "trusted_in_process"
+  },
+  "lifecycle_owner": "vllm",
+  "protocols": [
+    {"name": "vllm.scheduler.policy", "version_range": ">=1,<2"},
+    {"name": "vllm.scheduler.snapshot", "version_range": ">=1,<2"},
+    {"name": "vllm.scheduler.lifecycle", "version_range": ">=1,<2"},
+    {"name": "vllm.scheduler.observer", "version_range": ">=1,<2"}
+  ],
+  "components": [
+    {
+      "component_id": "past-future-admission-policy",
+      "implementation_ref": "vllm_hust_scheduler_policy_lab.past_future:PastFuturePolicy",
+      "contracts": ["vllm.scheduler.policy.v1", "vllm.scheduler.snapshot.v1", "vllm.scheduler.lifecycle.v1"],
+      "execution_planes": ["scheduler"],
+      "isolation": "trusted_in_process",
+      "permissions": []
+    },
+    {
+      "component_id": "sarathi-policy",
+      "implementation_ref": "vllm_hust_scheduler_policy_lab.sarathi:SarathiPolicy",
+      "contracts": ["vllm.scheduler.policy.v1"],
+      "execution_planes": ["scheduler"],
+      "isolation": "trusted_in_process",
+      "permissions": []
+    },
+    {
+      "component_id": "native-recapture-observer",
+      "implementation_ref": "vllm_hust_scheduler_policy_lab.observer:NativeRecaptureScopeObserver",
+      "contracts": ["vllm.scheduler.observer.v1"],
+      "execution_planes": ["scheduler"],
+      "isolation": "trusted_in_process",
+      "permissions": []
+    }
+  ],
+  "implementation": [
+    {
+      "type": "python_module",
+      "module": "vllm_hust_scheduler_policy_lab.past_future",
+      "object": "PastFuturePolicy",
+      "status": "import_only"
+    },
+    {
+      "type": "python_module",
+      "module": "vllm_hust_scheduler_policy_lab.sarathi",
+      "object": "SarathiPolicy",
+      "status": "import_only"
+    },
+    {
+      "type": "python_module",
+      "module": "vllm_hust_scheduler_policy_lab.observer",
+      "object": "NativeRecaptureScopeObserver",
+      "status": "import_only"
+    }
+  ],
+  "requires_services": [],
+  "activation": {
+    "entry_points": [],
+    "environment": {},
+    "additional_config": {}
+  }
+}

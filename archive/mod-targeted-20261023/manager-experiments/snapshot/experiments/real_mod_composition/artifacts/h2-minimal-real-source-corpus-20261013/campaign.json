@@ -1,0 +1,208 @@
+{
+  "cases": [
+    {
+      "activation_ready": true,
+      "basis": "active carrier; exact declared host range; no inter-MOD ownership overlap exists in a singleton",
+      "case_id": "single-bidkv-vllm-0281",
+      "category": "single_mod",
+      "host": {
+        "vllm": "0.28.1rc1.dev319"
+      },
+      "members": [
+        {
+          "commit": "6f1fc75d694c6901051bdeae784d18b836c6fa70",
+          "id": "bidkv",
+          "manifest_blob": "3aefff871f0b818a98168f907da3e33f17b66276",
+          "manifest_path": "src/bidkv/manifests/vllm-hust-extension-v0.3.json",
+          "manifest_sha256": "sha256:a7d3d7815a537a3e0c1b993bc2037b49d346c238572cc016b4931491a9dd4aa9",
+          "repository": "vLLM-HUST/vllm-hust-bidkv",
+          "snapshot_path": "/root/ecpa-manager-h2-reject-build-v1/experiments/real_mod_composition/source_manifests/bidkv.json",
+          "tree": "fb91042005020189c30cb525e811af89e511be88"
+        }
+      ],
+      "oracle_decision": "admit",
+      "score_role": "calibration-only-single-mod"
+    },
+    {
+      "activation_ready": true,
+      "basis": "profiler registers a shared EventBus sink while KVCompress exclusively owns scheduler/worker/device KV mutation; exact source surfaces and declared resources do not overlap",
+      "case_id": "pair-profiler-kvcompress-vllm-0233",
+      "category": "compatible_pair",
+      "host": {
+        "vllm": "0.23.3",
+        "vllm-ascend": "0.23.3"
+      },
+      "members": [
+        {
+          "commit": "8b8245cdba61b2ccc92a02c81b158c8fc9f90d14",
+          "id": "lifecycle_profiler",
+          "manifest_blob": "1fc7b3df1c2cc4f4d609bd70367c41c5e9285bc0",
+          "manifest_path": "src/vllm_request_lifecycle_profiler/manifests/vllm-hust-extension-v0.3.json",
+          "manifest_sha256": "sha256:650160eb2c69a93b1bfc09d1ebc7728b1045b5411d1be817c216038121028c87",
+          "repository": "vLLM-HUST/vllm-hust-request-lifecycle-profiler",
+          "snapshot_path": "/root/ecpa-manager-h2-reject-build-v1/experiments/real_mod_composition/source_manifests/lifecycle_profiler.json",
+          "tree": "d3b752078d74a9d384de35b5010d7ac9bd3742e6"
+        },
+        {
+          "commit": "00cc78dc7f3491eecbc79c5068e29aed9f59afc3",
+          "id": "kvcompress",
+          "manifest_blob": "fd6b1b703ba7eec7587c16d27370c5b75801c89d",
+          "manifest_path": "src/vllm_ascend_kvcompress/manifests/vllm-hust-extension-v0.3.json",
+          "manifest_sha256": "sha256:ad0a3e62602108e54503bb81c8fda162a730e1a422fe940d09a2463ee2d0eb54",
+          "repository": "vLLM-HUST/vllm-ascend-kvcompress-hust",
+          "snapshot_path": "/root/ecpa-manager-h2-reject-build-v1/experiments/real_mod_composition/source_manifests/kvcompress.json",
+          "tree": "8661770207782c912316ad9e5529bf3dbfcce563"
+        }
+      ],
+      "oracle_decision": "admit",
+      "runtime_status": "unexecuted for these exact old source commits",
+      "score_role": "definite-source-label-awaiting-exact-planner-run"
+    },
+    {
+      "activation_ready": false,
+      "basis": "KNorm scheduler-side indexed block replacements are absent from the exact Host scheduler-to-worker append-only protocol; KNorm also truthfully remains import_only",
+      "case_id": "pair-kvcompress-knorm-host973d",
+      "category": "incompatible_pair",
+      "formal_admission_sha256": "sha256:19f677fadb8a2c29690e851bcadaf92ec3fa87a1c527c1467b170cf2457b7a74",
+      "host": {
+        "vllm-ascend_commit": "873584026f8a683ac73523f15127569e9f6ab34b",
+        "vllm_commit": "973d9ef5acd2b9beb03e399dec1511a41fc941b5"
+      },
+      "members": [
+        {
+          "commit": "00cc78dc7f3491eecbc79c5068e29aed9f59afc3",
+          "id": "kvcompress",
+          "manifest_blob": "fd6b1b703ba7eec7587c16d27370c5b75801c89d",
+          "manifest_path": "src/vllm_ascend_kvcompress/manifests/vllm-hust-extension-v0.3.json",
+          "manifest_sha256": "sha256:ad0a3e62602108e54503bb81c8fda162a730e1a422fe940d09a2463ee2d0eb54",
+          "repository": "vLLM-HUST/vllm-ascend-kvcompress-hust",
+          "snapshot_path": "/root/ecpa-manager-h2-reject-build-v1/experiments/real_mod_composition/source_manifests/kvcompress.json",
+          "tree": "8661770207782c912316ad9e5529bf3dbfcce563"
+        },
+        {
+          "commit": "c490cfbfd2372635e8e874c8d7ba866ca5c476fb",
+          "id": "knorm",
+          "manifest_blob": "9dd3b208f4de382e1c8c451174ae461afeef7cff",
+          "manifest_path": "src/vllm_hust_knorm/manifests/vllm-hust-extension-v0.3.json",
+          "manifest_sha256": "sha256:272aece6dcb74a48f38cb0f9598b7ce81fe729d49d22494d68c7181e7f16afd8",
+          "repository": "vLLM-HUST/vllm-hust-knorm",
+          "snapshot_path": "/root/ecpa-manager-h2-reject-build-v1/experiments/real_mod_composition/source_manifests/knorm.json",
+          "tree": "3cf0928f202a0d9c5111333fd7ad4be5f13d97aa"
+        }
+      ],
+      "oracle_decision": "reject",
+      "score_role": "formal-true-negative"
+    },
+    {
+      "activation_ready": null,
+      "basis": "declared exclusive resources differ and Ascend ranges overlap, but both install in-process scheduler/runner hooks; coexistence depends on exact core/Ascend surfaces and wrapper order",
+      "case_id": "pair-diffspec-kvcompress-ascend-0251",
+      "category": "conditionally_compatible_pair",
+      "host": {
+        "vllm": "requires DiffSpec general-plugin-capable core",
+        "vllm-ascend": "0.25.1rc1"
+      },
+      "members": [
+        {
+          "commit": "9d9ddc9bfae2b93d03f9e66715e288b229c75e07",
+          "id": "diffspec",
+          "manifest_blob": "ecb9f079ce77616d1f00ca3a4ab3d38d940e1389",
+          "manifest_path": "diffspec/manifests/vllm-hust-extension-v0.3.json",
+          "manifest_sha256": "sha256:fa00f67430eeca8064dc1d566081826b1113a77173c509a18ee4d510fd141d57",
+          "repository": "vLLM-HUST/vllm-ascend-hust-diffspec",
+          "snapshot_path": "/root/ecpa-manager-h2-reject-build-v1/experiments/real_mod_composition/source_manifests/diffspec.json",
+          "tree": "59faaf815e5d4d7a98a6e1743ee895a4b596f1fa"
+        },
+        {
+          "commit": "00cc78dc7f3491eecbc79c5068e29aed9f59afc3",
+          "id": "kvcompress",
+          "manifest_blob": "fd6b1b703ba7eec7587c16d27370c5b75801c89d",
+          "manifest_path": "src/vllm_ascend_kvcompress/manifests/vllm-hust-extension-v0.3.json",
+          "manifest_sha256": "sha256:ad0a3e62602108e54503bb81c8fda162a730e1a422fe940d09a2463ee2d0eb54",
+          "repository": "vLLM-HUST/vllm-ascend-kvcompress-hust",
+          "snapshot_path": "/root/ecpa-manager-h2-reject-build-v1/experiments/real_mod_composition/source_manifests/kvcompress.json",
+          "tree": "8661770207782c912316ad9e5529bf3dbfcce563"
+        }
+      ],
+      "oracle_decision": "conditional",
+      "score_role": "excluded-until-physical-ownership-and-install-order-review"
+    },
+    {
+      "activation_ready": false,
+      "basis": "KNorm manifest is import_only, so the requested active three-MOD composition must fail closed before launch regardless of the other two members",
+      "case_id": "three-vspec-knorm-profiler-vllm-0233",
+      "category": "three_mod",
+      "host": {
+        "vllm": "0.23.3"
+      },
+      "members": [
+        {
+          "commit": "bdd919d24669f09e6eb1987157dfdb5561460f45",
+          "id": "vspec",
+          "manifest_blob": "3d75a1647a912df057ea13150aa4a359a679281d",
+          "manifest_path": "src/vllm_hust_vspec/manifests/vllm-hust-extension-v0.3.json",
+          "manifest_sha256": "sha256:2d644f2ce0b87e2b96617e222dc44849a61e5c17dba9015a986c0a2e7d49bf06",
+          "repository": "vLLM-HUST/vllm-hust-vSpec",
+          "snapshot_path": "/root/ecpa-manager-h2-reject-build-v1/experiments/real_mod_composition/source_manifests/vspec.json",
+          "tree": "2fbdc00c87517334efe73c3b9f02bf35b0f56283"
+        },
+        {
+          "commit": "c490cfbfd2372635e8e874c8d7ba866ca5c476fb",
+          "id": "knorm",
+          "manifest_blob": "9dd3b208f4de382e1c8c451174ae461afeef7cff",
+          "manifest_path": "src/vllm_hust_knorm/manifests/vllm-hust-extension-v0.3.json",
+          "manifest_sha256": "sha256:272aece6dcb74a48f38cb0f9598b7ce81fe729d49d22494d68c7181e7f16afd8",
+          "repository": "vLLM-HUST/vllm-hust-knorm",
+          "snapshot_path": "/root/ecpa-manager-h2-reject-build-v1/experiments/real_mod_composition/source_manifests/knorm.json",
+          "tree": "3cf0928f202a0d9c5111333fd7ad4be5f13d97aa"
+        },
+        {
+          "commit": "8b8245cdba61b2ccc92a02c81b158c8fc9f90d14",
+          "id": "lifecycle_profiler",
+          "manifest_blob": "1fc7b3df1c2cc4f4d609bd70367c41c5e9285bc0",
+          "manifest_path": "src/vllm_request_lifecycle_profiler/manifests/vllm-hust-extension-v0.3.json",
+          "manifest_sha256": "sha256:650160eb2c69a93b1bfc09d1ebc7728b1045b5411d1be817c216038121028c87",
+          "repository": "vLLM-HUST/vllm-hust-request-lifecycle-profiler",
+          "snapshot_path": "/root/ecpa-manager-h2-reject-build-v1/experiments/real_mod_composition/source_manifests/lifecycle_profiler.json",
+          "tree": "d3b752078d74a9d384de35b5010d7ac9bd3742e6"
+        }
+      ],
+      "oracle_decision": "reject",
+      "score_role": "definite-source-label-awaiting-exact-planner-run"
+    }
+  ],
+  "categories_required": [
+    "single_mod",
+    "compatible_pair",
+    "incompatible_pair",
+    "conditionally_compatible_pair",
+    "three_mod"
+  ],
+  "classification": "frozen-source-bound-oracle-corpus-before-planner-evaluation",
+  "frozen_utc": "2026-10-13T16:36:57.346012+00:00",
+  "nonclaims": [
+    "not a runtime corpus",
+    "not an H2 precision/recall result",
+    "old source commits are not substitutes for the current formal TP2 compatible-pair execution",
+    "no synthetic controls"
+  ],
+  "schema": "ecpa-h2-minimal-real-source-corpus/v1",
+  "scoring_policy": {
+    "definite_labels": [
+      "admit",
+      "reject"
+    ],
+    "excluded_labels": [
+      "conditional"
+    ],
+    "metrics_status": "pending",
+    "reason": "only the incompatible pair currently has an exact Manager prediction receipt; do not infer predictions for the remaining cases",
+    "require_manager_prediction_bound_after_freeze": true,
+    "single_mod_in_precision_recall": false
+  },
+  "source_registry": {
+    "path": "/root/ecpa-manager-h2-reject-build-v1/experiments/real_mod_composition/sources.json",
+    "schema": "ecpa-h2-source-candidates/0.1",
+    "sha256": "sha256:f9b57a216b42bd62bedd5a545836b52a5852d2274972a5091b00b8dae7c3ecde"
+  }
+}

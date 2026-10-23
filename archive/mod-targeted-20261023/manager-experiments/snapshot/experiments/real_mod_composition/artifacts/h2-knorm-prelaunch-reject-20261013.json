@@ -1,0 +1,606 @@
+{
+  "campaign": {
+    "ascend": {
+      "commit": "873584026f8a683ac73523f15127569e9f6ab34b",
+      "repository": "vLLM-HUST/vllm-ascend-hust",
+      "tree": "3a21eb6bec128786be61d3739268b93fda1095ac",
+      "wheel_sha256": "sha256:16438dc60e86c7bc4741a3520d80d5f9de54676daabe2035ebff0d6b2dceefcf"
+    },
+    "case_id": "kvcompress-knorm-host973d-prelaunch",
+    "classification": "frozen-before-manager-prelaunch-decision",
+    "formal_runs": [],
+    "frozen_utc": "2026-10-13T16:31:43.595982+00:00",
+    "host": {
+      "commit": "973d9ef5acd2b9beb03e399dec1511a41fc941b5",
+      "files": [
+        {
+          "blob": "a5af5a3d5755c699a55b853faa515650970283e8",
+          "path": "vllm/v1/core/sched/output.py",
+          "relevant_lines": [
+            137,
+            150
+          ],
+          "sha256": "sha256:cb7652417495ab9121f733cdeb94660efd6f8a9db5f897fc8b2a40a0f08034c4"
+        },
+        {
+          "blob": "cf67d45df857a169ecdba89f77df351c90377154",
+          "path": "vllm/v1/worker/gpu_model_runner.py",
+          "relevant_lines": [
+            1427,
+            1460
+          ],
+          "sha256": "sha256:b286cba03d7a5f842805e707fb274f343052ef4eff49268bb666845450af9643"
+        },
+        {
+          "blob": "218d59f430c948dfc52debf29699fc4b61b96cc0",
+          "path": "vllm/v1/core/single_type_kv_cache_manager.py",
+          "sha256": "sha256:3fc3d6cb7c332438e554e1e3388addce00a843c4d529ab497abdb535e830fa74"
+        }
+      ],
+      "repository": "vLLM-HUST/vllm-hust",
+      "tree": "9bc1a9a7dceab8bf1002a5ec5f735e5b454f11af",
+      "wheel_sha256": "sha256:97b27b347889d6e140415e674509519f2ed65848cc51e4b888189fb28f29671a"
+    },
+    "installation_orders": [
+      {
+        "environment": "/root/ecpa-h2-formal-reject-env-kv-kn-v1",
+        "order_id": "kvcompress-then-knorm"
+      },
+      {
+        "environment": "/root/ecpa-h2-formal-reject-env-kn-kv-v1",
+        "order_id": "knorm-then-kvcompress"
+      }
+    ],
+    "intended_prelaunch_sequence": [
+      "install exact wheels in stated order into isolated exact-host environment",
+      "Manager check and plan each member",
+      "enable KVCompress",
+      "attempt Manager enable KNorm",
+      "require KNorm rejection before any run/formal-run/server command"
+    ],
+    "manager": {
+      "commit": "041060527f43ef0843e54a58f4cfc40b659effcc",
+      "tree": "5f989529686e6aa9082dc7f153c640c329c5f7a1",
+      "wheel_sha256": "sha256:3cf7e92087ae0b71e6555a8415a8a03d8fbfb20cc1338f36b19012ce56cd4fba"
+    },
+    "members": [
+      {
+        "commit": "00cc78dc7f3491eecbc79c5068e29aed9f59afc3",
+        "manifest_blob": "fd6b1b703ba7eec7587c16d27370c5b75801c89d",
+        "repository": "vLLM-HUST/vllm-ascend-kvcompress-hust",
+        "tree": "8661770207782c912316ad9e5529bf3dbfcce563",
+        "wheel_sha256": "sha256:b859f165140de0390f2e6a794a1dc36adb6de4c686e40c3dfc66b3bde11f06c3"
+      },
+      {
+        "commit": "c490cfbfd2372635e8e874c8d7ba866ca5c476fb",
+        "manager_source": {
+          "blob": "4527ad73960b7a77f0aaf064f14926dba2a7c6eb",
+          "path": "src/vllm_hust_knorm/knorm/manager.py",
+          "relevant_lines": [
+            106,
+            161
+          ],
+          "sha256": "sha256:567707f15273d1de83cc7399f2998326f4d101704a9607c8a857bdc5db80b5a0"
+        },
+        "manifest": {
+          "blob": "9dd3b208f4de382e1c8c451174ae461afeef7cff",
+          "implementation_status": "import_only",
+          "path": "src/vllm_hust_knorm/manifests/vllm-hust-extension-v0.3.json",
+          "sha256": "sha256:272aece6dcb74a48f38cb0f9598b7ce81fe729d49d22494d68c7181e7f16afd8"
+        },
+        "repository": "vLLM-HUST/vllm-hust-knorm",
+        "tree": "3cf0928f202a0d9c5111333fd7ad4be5f13d97aa",
+        "wheel_sha256": "sha256:a3dc5f84b2a4a7df3a8141c4772d4ac499c9d41b799438a1307fb656c01f2083"
+      }
+    ],
+    "nonclaims": [
+      "not runtime execution",
+      "not performance",
+      "not full H2 precision/recall corpus"
+    ],
+    "schema": "ecpa-h2-real-mod-prelaunch-reject-campaign/v1",
+    "success_condition": {
+      "host_started": false,
+      "manager_decision": "reject",
+      "npu_processes_after": [],
+      "npu_processes_before": [],
+      "oracle_decision": "reject"
+    }
+  },
+  "campaign_sha256": "sha256:02abf54a24ebe7e80691df681b158434e86e5e30baa9f2349bfb560542d1c473",
+  "classification": "formal-real-source-exact-stack-manager-prelaunch-rejection",
+  "formal_admission": {
+    "campaign_sha256": "sha256:02abf54a24ebe7e80691df681b158434e86e5e30baa9f2349bfb560542d1c473",
+    "case_id": "kvcompress-knorm-host973d-prelaunch",
+    "host_started": false,
+    "limits": [
+      "This is one true-negative safety case, not a full H2 precision/recall corpus.",
+      "The Manager rejection is the manifest import_only activation blocker; source review establishes why activation is unsafe on the exact host.",
+      "No runtime effectiveness, compression transaction, or performance result is claimed."
+    ],
+    "manager_decision": "reject",
+    "npu_processes_observed": false,
+    "oracle_decision": "reject",
+    "oracle_sha256": "sha256:703712950e9b32073e6129f81e85daf0fc9208b5d6286571317d423a8dee5e49",
+    "records": [
+      {
+        "order_id": "kvcompress-then-knorm",
+        "path": "/root/ecpa-h2-formal-reject-20261013/kvcompress-then-knorm/formal-runtime-record.json",
+        "receipt_sha256": "sha256:441674bf831cc52ef6f8abdd8ac425479f97d1245600470830bb5ed99a315191",
+        "sha256": "sha256:f15bd6bf7279ecd9a18d447ecb7775edd1646f42413e5e8289935ee877e9505b"
+      },
+      {
+        "order_id": "knorm-then-kvcompress",
+        "path": "/root/ecpa-h2-formal-reject-20261013/knorm-then-kvcompress/formal-runtime-record.json",
+        "receipt_sha256": "sha256:56794b107d9bf91146e40542c6c73d955de1f5d1b91a46092c9cd4dfa0ade187",
+        "sha256": "sha256:cf383b72019cec8ee143c6d7aa0c1c329eb6b2c93ea3f4ec9caea2b674f62e17"
+      }
+    ],
+    "schema": "ecpa-h2-formal-reject-admission/v1",
+    "scope": "one exact-stack real-source prelaunch reject case in both installation orders",
+    "score_eligible": true,
+    "source_review_sha256": "sha256:f4506e800ed64f62b733c60971705a5f125ba202d98969a68213603ecfc5454a",
+    "status": "ADMITTED",
+    "summary_sha256": "sha256:518ef38f05964af5c6a74c1d717490ed160d99f57feb587e23c19b0352aa17b3"
+  },
+  "formal_admission_sha256": "sha256:19f677fadb8a2c29690e851bcadaf92ec3fa87a1c527c1467b170cf2457b7a74",
+  "oracle": {
+    "campaign_sha256": "sha256:02abf54a24ebe7e80691df681b158434e86e5e30baa9f2349bfb560542d1c473",
+    "explicitly_unverified": [
+      "no host service launch",
+      "no NPU execution",
+      "no runtime-effectiveness result",
+      "no performance result",
+      "not a same-name declared-resource conflict"
+    ],
+    "labels": [
+      {
+        "case_id": "kvcompress-knorm-host973d-prelaunch",
+        "decision": "reject",
+        "reason_code": "scheduler_worker_block_table_replacement_not_synchronized",
+        "scope": "activation safety on exact Host/Ascend/source/wheel tuple"
+      }
+    ],
+    "review": {
+      "kind": "automated-independent",
+      "planner_output_seen": false,
+      "source_review_sha256": "sha256:f4506e800ed64f62b733c60971705a5f125ba202d98969a68213603ecfc5454a",
+      "verdict": "PASS"
+    },
+    "schema": "ecpa-h2-real-mod-oracle/v1",
+    "status": "automated-independent-reviewed"
+  },
+  "oracle_sha256": "sha256:703712950e9b32073e6129f81e85daf0fc9208b5d6286571317d423a8dee5e49",
+  "orders": [
+    {
+      "all_npu_snapshots_empty": true,
+      "commands": [
+        {
+          "args": [
+            "extension",
+            "list"
+          ],
+          "exit_code": 0,
+          "stderr": "",
+          "stderr_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stdout": "org.vllm-hust.ascend-kvcompress 0.9.0 disabled\norg.vllm-hust.knorm 0.1.0 disabled\norg.vllm-hust.kv-materialization-arrival-control 0.1.0 disabled\n",
+          "stdout_sha256": "sha256:623926bc27c71bf03586e8d5778a233cf6da77c57b27413857854641f23667b4"
+        },
+        {
+          "args": [
+            "extension",
+            "inspect",
+            "org.vllm-hust.ascend-kvcompress"
+          ],
+          "exit_code": 0,
+          "stderr": "",
+          "stderr_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stdout": "{\n  \"activation\": {\n    \"additional_config\": [],\n    \"entry_points\": [\n      {\n        \"group\": \"vllm.general_plugins\",\n        \"name\": \"ascend_kvcompress\"\n      }\n    ],\n    \"environment\": [\n      [\n        \"VLLM_ASCEND_KVCOMPRESS_ENABLED\",\n        \"1\"\n      ]\n    ]\n  },\n  \"activation_blocker\": null,\n  \"activation_ready\": true,\n  \"bundle_id\": \"org.vllm-hust.ascend-kvcompress\",\n  \"bundle_version\": \"0.9.0\",\n  \"components\": [\n    {\n      \"component_id\": \"ascend-kvcompress\",\n      \"contracts\": [\n        \"vllm.general_plugins\"\n      ],\n      \"execution_planes\": [\n        \"scheduler\",\n        \"worker\",\n        \"device\"\n      ],\n      \"implementation_ref\": \"vllm_ascend_kvcompress.plugin:register\",\n      \"isolation\": \"trusted_in_process\",\n      \"permissions\": [\n        \"device_access\",\n        \"filesystem_read\",\n        \"filesystem_write\",\n        \"network_egress\"\n      ]\n    }\n  ],\n  \"distribution\": \"vllm-ascend-kvcompress-hust\",\n  \"distribution_version\": \"0.9.0\",\n  \"enabled\": false,\n  \"experimental\": true,\n  \"host\": {\n    \"api_range\": \">=1,<2\",\n    \"name\": \"vllm-ascend\",\n    \"provider\": \"vllm\",\n    \"version_range\": \">=0.23.0.post1,<0.26,!=0.24.*,!=0.25.0.*\"\n  },\n  \"implementation\": [\n    {\n      \"group\": \"vllm.general_plugins\",\n      \"name\": \"ascend_kvcompress\",\n      \"object\": \"vllm_ascend_kvcompress.plugin:register\",\n      \"status\": \"active\",\n      \"type\": \"python_entry_point\"\n    }\n  ],\n  \"kind\": \"in_process_plugin\",\n  \"lifecycle_owner\": \"vllm\",\n  \"manifest_path\": \"/root/ecpa-h2-formal-reject-env-kv-kn-v1/lib/python3.12/site-packages/vllm_ascend_kvcompress/manifests/vllm-hust-extension-v0.3.json\",\n  \"protocols\": [\n    {\n      \"name\": \"vllm.general_plugins\",\n      \"version_range\": null\n    }\n  ],\n  \"requires_extensions\": [],\n  \"requires_services\": [],\n  \"resource_claims\": [\n    {\n      \"mode\": \"exclusive\",\n      \"resource\": \"vllm-ascend.kv-cache.mutation\",\n      \"scope\": \"vllm-process\"\n    }\n  ],\n  \"runtime\": {\n    \"isolation\": \"trusted_in_process\",\n    \"process_scope\": \"scheduler_and_ascend_worker\",\n    \"type\": \"python\"\n  }\n}\n",
+          "stdout_sha256": "sha256:29ef145ce58a4fb28c6f2463fbabe0be32af34887db9fc1fd77cb7918e572c09"
+        },
+        {
+          "args": [
+            "extension",
+            "inspect",
+            "org.vllm-hust.knorm"
+          ],
+          "exit_code": 0,
+          "stderr": "",
+          "stderr_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stdout": "{\n  \"activation\": {\n    \"additional_config\": [],\n    \"entry_points\": [\n      {\n        \"group\": \"vllm.general_plugins\",\n        \"name\": \"vllm-hust-knorm\"\n      }\n    ],\n    \"environment\": [\n      [\n        \"VLLM_KNORM_COMPRESSION_RATIO\",\n        \"0.5\"\n      ],\n      [\n        \"VLLM_KNORM_ENABLED\",\n        \"1\"\n      ],\n      [\n        \"VLLM_KNORM_WARMUP_TOKENS\",\n        \"32\"\n      ]\n    ]\n  },\n  \"activation_blocker\": \"extension is descriptor-only and cannot be enabled (implementation status: import_only)\",\n  \"activation_ready\": false,\n  \"bundle_id\": \"org.vllm-hust.knorm\",\n  \"bundle_version\": \"0.1.0\",\n  \"components\": [\n    {\n      \"component_id\": \"kv-compression-manager\",\n      \"contracts\": [\n        \"vllm.kv_cache.compression.v1\"\n      ],\n      \"execution_planes\": [\n        \"scheduler\",\n        \"worker\"\n      ],\n      \"implementation_ref\": \"vllm_hust_knorm.knorm.manager:get_knorm_manager_class\",\n      \"isolation\": \"trusted_in_process\",\n      \"permissions\": []\n    },\n    {\n      \"component_id\": \"attention-norm-collector\",\n      \"contracts\": [\n        \"vllm.attention.norm_collection.v1\"\n      ],\n      \"execution_planes\": [\n        \"worker\",\n        \"device\"\n      ],\n      \"implementation_ref\": \"vllm_hust_knorm.knorm.attention_backend:install_attention_wrapper\",\n      \"isolation\": \"trusted_in_process\",\n      \"permissions\": [\n        \"device_access\"\n      ]\n    }\n  ],\n  \"distribution\": \"vllm-hust-knorm\",\n  \"distribution_version\": \"0.1.0\",\n  \"enabled\": false,\n  \"experimental\": true,\n  \"host\": {\n    \"api_range\": \">=1,<2\",\n    \"name\": \"vllm\",\n    \"provider\": \"vllm\",\n    \"version_range\": \">=0.23\"\n  },\n  \"implementation\": [\n    {\n      \"module\": \"vllm_hust_knorm.bootstrap\",\n      \"object\": \"register_plugins\",\n      \"status\": \"import_only\",\n      \"type\": \"python_module\"\n    }\n  ],\n  \"kind\": \"in_process_plugin\",\n  \"lifecycle_owner\": \"vllm\",\n  \"manifest_path\": \"/root/ecpa-h2-formal-reject-env-kv-kn-v1/lib/python3.12/site-packages/vllm_hust_knorm/manifests/vllm-hust-extension-v0.3.json\",\n  \"protocols\": [\n    {\n      \"name\": \"vllm.general_plugins\",\n      \"version_range\": null\n    },\n    {\n      \"name\": \"vllm.v1.kv_cache_spec_registry\",\n      \"version_range\": null\n    },\n    {\n      \"name\": \"vllm.v1.worker.gpu_model_runner\",\n      \"version_range\": null\n    }\n  ],\n  \"requires_extensions\": [],\n  \"requires_services\": [],\n  \"resource_claims\": [\n    {\n      \"mode\": \"exclusive\",\n      \"resource\": \"vllm.kv-cache.compression-policy\",\n      \"scope\": \"vllm-process\"\n    }\n  ],\n  \"runtime\": {\n    \"isolation\": \"trusted_in_process\",\n    \"process_scope\": \"scheduler\",\n    \"type\": \"python\"\n  }\n}\n",
+          "stdout_sha256": "sha256:dd74fb987ec084b8e0339bd17410dfbd75d86bfa4dfdd5d8e67219ad012870c6"
+        },
+        {
+          "args": [
+            "extension",
+            "check",
+            "org.vllm-hust.ascend-kvcompress"
+          ],
+          "exit_code": 0,
+          "stderr": "[W1013 16:32:32.028575436 FunctionLoader.cpp:44] Warning: LD_PRELOAD detected, FunctionLoader prefers RTLD_DEFAULT for symbol resolution. (function operator())\n/root/ecpa-h2-formal-reject-env-kv-kn-v1/lib/python3.12/site-packages/triton/language/extra/cann/extension/math_ops.py:13: FutureWarning: triton.language.extra.cann.extension.atan2 is deprecated and will be removed in the next release; use triton.language.extra.cann.libdevice.atan2 instead.\n  @_deprecated(replacement=\"triton.language.extra.cann.libdevice.atan2\")\n/root/ecpa-h2-formal-reject-env-kv-kn-v1/lib/python3.12/site-packages/triton/language/extra/cann/extension/math_ops.py:35: FutureWarning: triton.language.extra.cann.extension.isfinited is deprecated and will be removed in the next release; use triton.language.extra.cann.libdevice.isfinited instead.\n  @_deprecated(replacement=\"triton.language.extra.cann.libdevice.isfinited\")\n/root/ecpa-h2-formal-reject-env-kv-kn-v1/lib/python3.12/site-packages/triton/language/extra/cann/extension/math_ops.py:49: FutureWarning: triton.language.extra.cann.extension.finitef is deprecated and will be removed in the next release; use triton.language.extra.cann.libdevice.finitef instead.\n  @_deprecated(replacement=\"triton.language.extra.cann.libdevice.finitef\")\n",
+          "stderr_sha256": "sha256:dda81773fc9dcf7fe18cba3142c05d29d945eb90eec36a58017584ca0fc3961b",
+          "stdout": "{\n  \"extension_id\": \"org.vllm-hust.ascend-kvcompress\",\n  \"provider\": \"vllm\",\n  \"states\": [\n    \"installed\",\n    \"discovered\",\n    \"compatible\",\n    \"configured\"\n  ],\n  \"evidence\": [\n    \"loaded 7 protocols from the host capability registry\",\n    \"host version 0.25.1rc2.dev872+hust.20260903.4.g873584026 satisfies the declared range\",\n    \"host API 1.0 satisfies the declared range\",\n    \"protocol vllm.general_plugins is not independently versioned; compatibility is governed by host ranges and acceptance evidence\",\n    \"vLLM launch configuration can be rendered\"\n  ]\n}\n",
+          "stdout_sha256": "sha256:101158edd0163afeeeb1f76bb6ed4cedfd3a3ed0bd2604b134e66342776cc3ce"
+        },
+        {
+          "args": [
+            "extension",
+            "check",
+            "org.vllm-hust.knorm"
+          ],
+          "exit_code": 0,
+          "stderr": "[W1013 16:32:53.592606654 FunctionLoader.cpp:44] Warning: LD_PRELOAD detected, FunctionLoader prefers RTLD_DEFAULT for symbol resolution. (function operator())\n/root/ecpa-h2-formal-reject-env-kv-kn-v1/lib/python3.12/site-packages/triton/language/extra/cann/extension/math_ops.py:13: FutureWarning: triton.language.extra.cann.extension.atan2 is deprecated and will be removed in the next release; use triton.language.extra.cann.libdevice.atan2 instead.\n  @_deprecated(replacement=\"triton.language.extra.cann.libdevice.atan2\")\n/root/ecpa-h2-formal-reject-env-kv-kn-v1/lib/python3.12/site-packages/triton/language/extra/cann/extension/math_ops.py:35: FutureWarning: triton.language.extra.cann.extension.isfinited is deprecated and will be removed in the next release; use triton.language.extra.cann.libdevice.isfinited instead.\n  @_deprecated(replacement=\"triton.language.extra.cann.libdevice.isfinited\")\n/root/ecpa-h2-formal-reject-env-kv-kn-v1/lib/python3.12/site-packages/triton/language/extra/cann/extension/math_ops.py:49: FutureWarning: triton.language.extra.cann.extension.finitef is deprecated and will be removed in the next release; use triton.language.extra.cann.libdevice.finitef instead.\n  @_deprecated(replacement=\"triton.language.extra.cann.libdevice.finitef\")\n",
+          "stderr_sha256": "sha256:551adc26262be51c287d65e95ae1661e2a6f935f3d76ebdfef8b46aeae16d01e",
+          "stdout": "{\n  \"extension_id\": \"org.vllm-hust.knorm\",\n  \"provider\": \"vllm\",\n  \"states\": [\n    \"installed\",\n    \"discovered\",\n    \"compatible\",\n    \"degraded\"\n  ],\n  \"evidence\": [\n    \"loaded 7 protocols from the host capability registry\",\n    \"host version 0.31.1.post1.dev163+g973d9ef5a.empty satisfies the declared range\",\n    \"host API 1.0 satisfies the declared range\",\n    \"protocol vllm.general_plugins is not independently versioned; compatibility is governed by host ranges and acceptance evidence\",\n    \"protocol vllm.v1.kv_cache_spec_registry is not independently versioned; compatibility is governed by host ranges and acceptance evidence\",\n    \"protocol vllm.v1.worker.gpu_model_runner is not independently versioned; compatibility is governed by host ranges and acceptance evidence\",\n    \"extension is descriptor-only and cannot be enabled (implementation status: import_only)\",\n    \"extension is descriptor-only and cannot be enabled (implementation status: import_only)\"\n  ]\n}\n",
+          "stdout_sha256": "sha256:648951719ada9cb64f13cf589fce8773a9f796744b816bb12fd8b9541fd02a10"
+        },
+        {
+          "args": [
+            "extension",
+            "plan",
+            "org.vllm-hust.ascend-kvcompress"
+          ],
+          "exit_code": 0,
+          "stderr": "",
+          "stderr_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stdout": "{\n  \"actions\": [\n    {\n      \"details\": {\n        \"enabled\": false\n      },\n      \"lifecycle_owner\": \"vllm\",\n      \"mutating\": false,\n      \"operation\": \"configure_launch\",\n      \"target\": \"vllm\"\n    }\n  ],\n  \"config_claims\": [\n    {\n      \"path\": [\n        \"environment\",\n        \"VLLM_ASCEND_KVCOMPRESS_ENABLED\"\n      ],\n      \"value\": \"1\"\n    },\n    {\n      \"path\": [\n        \"vllm_plugins\",\n        \"ascend_kvcompress\"\n      ],\n      \"value\": true\n    }\n  ],\n  \"extension_id\": \"org.vllm-hust.ascend-kvcompress\",\n  \"generated_config\": {\n    \"additional_config\": {},\n    \"environment\": {\n      \"VLLM_ASCEND_KVCOMPRESS_ENABLED\": \"1\"\n    },\n    \"native_extension_manifest\": {\n      \"bundle_id\": \"org.vllm-hust.ascend-kvcompress\",\n      \"bundle_version\": \"0.9.0\",\n      \"components\": [\n        {\n          \"component_id\": \"ascend-kvcompress\",\n          \"contracts\": [\n            \"vllm.general_plugins\"\n          ],\n          \"execution_planes\": [\n            \"scheduler\",\n            \"worker\",\n            \"device\"\n          ],\n          \"implementation_ref\": \"vllm_ascend_kvcompress.plugin:register\",\n          \"isolation\": \"trusted_in_process\",\n          \"permissions\": [\n            \"device_access\",\n            \"filesystem_read\",\n            \"filesystem_write\",\n            \"network_egress\"\n          ]\n        }\n      ],\n      \"host_api_range\": \">=1,<2\",\n      \"schema_version\": \"1.0\"\n    },\n    \"user_config\": {},\n    \"vllm_json_options\": {},\n    \"vllm_plugins\": [\n      \"ascend_kvcompress\"\n    ]\n  },\n  \"provider\": \"vllm\",\n  \"resource_claims\": [\n    {\n      \"mode\": \"exclusive\",\n      \"resource\": \"vllm-ascend.kv-cache.mutation\",\n      \"scope\": \"vllm-process\"\n    }\n  ],\n  \"warnings\": []\n}\n",
+          "stdout_sha256": "sha256:53156e5b36e8578402b3786e6d17f1c001354d99581123db08e2d3a9f3ab2622"
+        },
+        {
+          "args": [
+            "extension",
+            "plan",
+            "org.vllm-hust.knorm"
+          ],
+          "exit_code": 0,
+          "stderr": "",
+          "stderr_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stdout": "{\n  \"actions\": [\n    {\n      \"details\": {\n        \"enabled\": false\n      },\n      \"lifecycle_owner\": \"vllm\",\n      \"mutating\": false,\n      \"operation\": \"inspect_only\",\n      \"target\": \"org.vllm-hust.knorm\"\n    }\n  ],\n  \"config_claims\": null,\n  \"extension_id\": \"org.vllm-hust.knorm\",\n  \"generated_config\": {},\n  \"provider\": \"vllm\",\n  \"resource_claims\": [\n    {\n      \"mode\": \"exclusive\",\n      \"resource\": \"vllm.kv-cache.compression-policy\",\n      \"scope\": \"vllm-process\"\n    }\n  ],\n  \"warnings\": [\n    \"extension is descriptor-only and cannot be enabled (implementation status: import_only)\"\n  ]\n}\n",
+          "stdout_sha256": "sha256:eadb74c4599623a65465ff47c07b420cd6a07f87b408d96a6773a1dcbbdd7f49"
+        },
+        {
+          "args": [
+            "extension",
+            "enable",
+            "org.vllm-hust.ascend-kvcompress"
+          ],
+          "exit_code": 0,
+          "stderr": "",
+          "stderr_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stdout": "enabled org.vllm-hust.ascend-kvcompress\n",
+          "stdout_sha256": "sha256:54258c7e64663ad29e10626363c5013fa71db8a4cee0ff0f1aa930a38ac3486e"
+        },
+        {
+          "args": [
+            "extension",
+            "enable",
+            "org.vllm-hust.knorm"
+          ],
+          "exit_code": 2,
+          "stderr": "usage: vllm-hust-ext [-h] [--version] {extension,catalog,run,formal-run} ...\nvllm-hust-ext: error: cannot enable 'org.vllm-hust.knorm': extension is descriptor-only and cannot be enabled (implementation status: import_only)\n",
+          "stderr_sha256": "sha256:7f07345cbf7a7a7afb838110f22862fe2bd6458751b56a25633072745e4d25a0",
+          "stdout": "",
+          "stdout_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ],
+      "formal_record": {
+        "campaign_sha256": "sha256:02abf54a24ebe7e80691df681b158434e86e5e30baa9f2349bfb560542d1c473",
+        "case_id": "kvcompress-knorm-host973d-prelaunch",
+        "classification": "formal-real-host-composition",
+        "oracle_sha256": "sha256:703712950e9b32073e6129f81e85daf0fc9208b5d6286571317d423a8dee5e49",
+        "order_id": "kvcompress-then-knorm",
+        "planner_decision": "reject",
+        "runtime_evidence": {
+          "cleanup_complete": true,
+          "host_started": false,
+          "model_loaded": false,
+          "process_owned_observation": false,
+          "receipt_sha256": "sha256:441674bf831cc52ef6f8abdd8ac425479f97d1245600470830bb5ed99a315191",
+          "workload_completed": false
+        },
+        "schema": "ecpa-h2-formal-runtime-record/v1"
+      },
+      "formal_record_sha256": "sha256:f15bd6bf7279ecd9a18d447ecb7775edd1646f42413e5e8289935ee877e9505b",
+      "host_launch_command_invoked": false,
+      "host_processes_before_after": [
+        [],
+        []
+      ],
+      "npu_snapshot_count": 10,
+      "npu_snapshot_digests": [
+        "sha256:16d35e355d07aa7ee730598e8067cbc88248133125e82d7fe1327849510a8d02",
+        "sha256:65c47495ca0746d5cc6aea92e0075758a6dc28ff2ad706b55948ed5e39449c9f",
+        "sha256:9c81a9e2879e67112fc0533c983d059b878239ac15eb739a14eceb359be8f625",
+        "sha256:9c81a9e2879e67112fc0533c983d059b878239ac15eb739a14eceb359be8f625",
+        "sha256:c84cc2a8838df97e18cdae847ce43ab8eea7eacfbfeacfc0f81de4e8050fa719",
+        "sha256:c293190411a435326cc991cba34bb53543a5ec55f28e075024888346d73356ee",
+        "sha256:da5048456f7195f2c60ba0f310858e85da76d86abdbfd8b81ca52abd33466a53",
+        "sha256:58987f7ac458a2c4f48b1de129525bde55d15b3b4dad1ceeade1a9050638007c",
+        "sha256:da5048456f7195f2c60ba0f310858e85da76d86abdbfd8b81ca52abd33466a53",
+        "sha256:bbf2cd5e706e9fe112796d6f74dac4b8e73ebd1eb24880ab616572c4995ea661"
+      ],
+      "order_id": "kvcompress-then-knorm",
+      "receipt_sha256": "sha256:441674bf831cc52ef6f8abdd8ac425479f97d1245600470830bb5ed99a315191"
+    },
+    {
+      "all_npu_snapshots_empty": true,
+      "commands": [
+        {
+          "args": [
+            "extension",
+            "list"
+          ],
+          "exit_code": 0,
+          "stderr": "",
+          "stderr_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stdout": "org.vllm-hust.ascend-kvcompress 0.9.0 disabled\norg.vllm-hust.knorm 0.1.0 disabled\norg.vllm-hust.kv-materialization-arrival-control 0.1.0 disabled\n",
+          "stdout_sha256": "sha256:623926bc27c71bf03586e8d5778a233cf6da77c57b27413857854641f23667b4"
+        },
+        {
+          "args": [
+            "extension",
+            "inspect",
+            "org.vllm-hust.ascend-kvcompress"
+          ],
+          "exit_code": 0,
+          "stderr": "",
+          "stderr_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stdout": "{\n  \"activation\": {\n    \"additional_config\": [],\n    \"entry_points\": [\n      {\n        \"group\": \"vllm.general_plugins\",\n        \"name\": \"ascend_kvcompress\"\n      }\n    ],\n    \"environment\": [\n      [\n        \"VLLM_ASCEND_KVCOMPRESS_ENABLED\",\n        \"1\"\n      ]\n    ]\n  },\n  \"activation_blocker\": null,\n  \"activation_ready\": true,\n  \"bundle_id\": \"org.vllm-hust.ascend-kvcompress\",\n  \"bundle_version\": \"0.9.0\",\n  \"components\": [\n    {\n      \"component_id\": \"ascend-kvcompress\",\n      \"contracts\": [\n        \"vllm.general_plugins\"\n      ],\n      \"execution_planes\": [\n        \"scheduler\",\n        \"worker\",\n        \"device\"\n      ],\n      \"implementation_ref\": \"vllm_ascend_kvcompress.plugin:register\",\n      \"isolation\": \"trusted_in_process\",\n      \"permissions\": [\n        \"device_access\",\n        \"filesystem_read\",\n        \"filesystem_write\",\n        \"network_egress\"\n      ]\n    }\n  ],\n  \"distribution\": \"vllm-ascend-kvcompress-hust\",\n  \"distribution_version\": \"0.9.0\",\n  \"enabled\": false,\n  \"experimental\": true,\n  \"host\": {\n    \"api_range\": \">=1,<2\",\n    \"name\": \"vllm-ascend\",\n    \"provider\": \"vllm\",\n    \"version_range\": \">=0.23.0.post1,<0.26,!=0.24.*,!=0.25.0.*\"\n  },\n  \"implementation\": [\n    {\n      \"group\": \"vllm.general_plugins\",\n      \"name\": \"ascend_kvcompress\",\n      \"object\": \"vllm_ascend_kvcompress.plugin:register\",\n      \"status\": \"active\",\n      \"type\": \"python_entry_point\"\n    }\n  ],\n  \"kind\": \"in_process_plugin\",\n  \"lifecycle_owner\": \"vllm\",\n  \"manifest_path\": \"/root/ecpa-h2-formal-reject-env-kn-kv-v1/lib/python3.12/site-packages/vllm_ascend_kvcompress/manifests/vllm-hust-extension-v0.3.json\",\n  \"protocols\": [\n    {\n      \"name\": \"vllm.general_plugins\",\n      \"version_range\": null\n    }\n  ],\n  \"requires_extensions\": [],\n  \"requires_services\": [],\n  \"resource_claims\": [\n    {\n      \"mode\": \"exclusive\",\n      \"resource\": \"vllm-ascend.kv-cache.mutation\",\n      \"scope\": \"vllm-process\"\n    }\n  ],\n  \"runtime\": {\n    \"isolation\": \"trusted_in_process\",\n    \"process_scope\": \"scheduler_and_ascend_worker\",\n    \"type\": \"python\"\n  }\n}\n",
+          "stdout_sha256": "sha256:2384dc0e871a6bd16486d7f8edb65642c5035d63b92f1fc236bf3f35c7fadc12"
+        },
+        {
+          "args": [
+            "extension",
+            "inspect",
+            "org.vllm-hust.knorm"
+          ],
+          "exit_code": 0,
+          "stderr": "",
+          "stderr_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stdout": "{\n  \"activation\": {\n    \"additional_config\": [],\n    \"entry_points\": [\n      {\n        \"group\": \"vllm.general_plugins\",\n        \"name\": \"vllm-hust-knorm\"\n      }\n    ],\n    \"environment\": [\n      [\n        \"VLLM_KNORM_COMPRESSION_RATIO\",\n        \"0.5\"\n      ],\n      [\n        \"VLLM_KNORM_ENABLED\",\n        \"1\"\n      ],\n      [\n        \"VLLM_KNORM_WARMUP_TOKENS\",\n        \"32\"\n      ]\n    ]\n  },\n  \"activation_blocker\": \"extension is descriptor-only and cannot be enabled (implementation status: import_only)\",\n  \"activation_ready\": false,\n  \"bundle_id\": \"org.vllm-hust.knorm\",\n  \"bundle_version\": \"0.1.0\",\n  \"components\": [\n    {\n      \"component_id\": \"kv-compression-manager\",\n      \"contracts\": [\n        \"vllm.kv_cache.compression.v1\"\n      ],\n      \"execution_planes\": [\n        \"scheduler\",\n        \"worker\"\n      ],\n      \"implementation_ref\": \"vllm_hust_knorm.knorm.manager:get_knorm_manager_class\",\n      \"isolation\": \"trusted_in_process\",\n      \"permissions\": []\n    },\n    {\n      \"component_id\": \"attention-norm-collector\",\n      \"contracts\": [\n        \"vllm.attention.norm_collection.v1\"\n      ],\n      \"execution_planes\": [\n        \"worker\",\n        \"device\"\n      ],\n      \"implementation_ref\": \"vllm_hust_knorm.knorm.attention_backend:install_attention_wrapper\",\n      \"isolation\": \"trusted_in_process\",\n      \"permissions\": [\n        \"device_access\"\n      ]\n    }\n  ],\n  \"distribution\": \"vllm-hust-knorm\",\n  \"distribution_version\": \"0.1.0\",\n  \"enabled\": false,\n  \"experimental\": true,\n  \"host\": {\n    \"api_range\": \">=1,<2\",\n    \"name\": \"vllm\",\n    \"provider\": \"vllm\",\n    \"version_range\": \">=0.23\"\n  },\n  \"implementation\": [\n    {\n      \"module\": \"vllm_hust_knorm.bootstrap\",\n      \"object\": \"register_plugins\",\n      \"status\": \"import_only\",\n      \"type\": \"python_module\"\n    }\n  ],\n  \"kind\": \"in_process_plugin\",\n  \"lifecycle_owner\": \"vllm\",\n  \"manifest_path\": \"/root/ecpa-h2-formal-reject-env-kn-kv-v1/lib/python3.12/site-packages/vllm_hust_knorm/manifests/vllm-hust-extension-v0.3.json\",\n  \"protocols\": [\n    {\n      \"name\": \"vllm.general_plugins\",\n      \"version_range\": null\n    },\n    {\n      \"name\": \"vllm.v1.kv_cache_spec_registry\",\n      \"version_range\": null\n    },\n    {\n      \"name\": \"vllm.v1.worker.gpu_model_runner\",\n      \"version_range\": null\n    }\n  ],\n  \"requires_extensions\": [],\n  \"requires_services\": [],\n  \"resource_claims\": [\n    {\n      \"mode\": \"exclusive\",\n      \"resource\": \"vllm.kv-cache.compression-policy\",\n      \"scope\": \"vllm-process\"\n    }\n  ],\n  \"runtime\": {\n    \"isolation\": \"trusted_in_process\",\n    \"process_scope\": \"scheduler\",\n    \"type\": \"python\"\n  }\n}\n",
+          "stdout_sha256": "sha256:da352e26a8202d2b3a81906ec6d5c740150aa824d13482b0811ebf1e24b2173c"
+        },
+        {
+          "args": [
+            "extension",
+            "check",
+            "org.vllm-hust.ascend-kvcompress"
+          ],
+          "exit_code": 0,
+          "stderr": "[W1013 16:33:24.912186219 FunctionLoader.cpp:44] Warning: LD_PRELOAD detected, FunctionLoader prefers RTLD_DEFAULT for symbol resolution. (function operator())\n/root/ecpa-h2-formal-reject-env-kn-kv-v1/lib/python3.12/site-packages/triton/language/extra/cann/extension/math_ops.py:13: FutureWarning: triton.language.extra.cann.extension.atan2 is deprecated and will be removed in the next release; use triton.language.extra.cann.libdevice.atan2 instead.\n  @_deprecated(replacement=\"triton.language.extra.cann.libdevice.atan2\")\n/root/ecpa-h2-formal-reject-env-kn-kv-v1/lib/python3.12/site-packages/triton/language/extra/cann/extension/math_ops.py:35: FutureWarning: triton.language.extra.cann.extension.isfinited is deprecated and will be removed in the next release; use triton.language.extra.cann.libdevice.isfinited instead.\n  @_deprecated(replacement=\"triton.language.extra.cann.libdevice.isfinited\")\n/root/ecpa-h2-formal-reject-env-kn-kv-v1/lib/python3.12/site-packages/triton/language/extra/cann/extension/math_ops.py:49: FutureWarning: triton.language.extra.cann.extension.finitef is deprecated and will be removed in the next release; use triton.language.extra.cann.libdevice.finitef instead.\n  @_deprecated(replacement=\"triton.language.extra.cann.libdevice.finitef\")\n",
+          "stderr_sha256": "sha256:2f3738aa4456890ef51636a05fed4dfd76bd3dde25f1cb33a80bce503bf0846e",
+          "stdout": "{\n  \"extension_id\": \"org.vllm-hust.ascend-kvcompress\",\n  \"provider\": \"vllm\",\n  \"states\": [\n    \"installed\",\n    \"discovered\",\n    \"compatible\",\n    \"configured\"\n  ],\n  \"evidence\": [\n    \"loaded 7 protocols from the host capability registry\",\n    \"host version 0.25.1rc2.dev872+hust.20260903.4.g873584026 satisfies the declared range\",\n    \"host API 1.0 satisfies the declared range\",\n    \"protocol vllm.general_plugins is not independently versioned; compatibility is governed by host ranges and acceptance evidence\",\n    \"vLLM launch configuration can be rendered\"\n  ]\n}\n",
+          "stdout_sha256": "sha256:101158edd0163afeeeb1f76bb6ed4cedfd3a3ed0bd2604b134e66342776cc3ce"
+        },
+        {
+          "args": [
+            "extension",
+            "check",
+            "org.vllm-hust.knorm"
+          ],
+          "exit_code": 0,
+          "stderr": "[W1013 16:33:44.399392238 FunctionLoader.cpp:44] Warning: LD_PRELOAD detected, FunctionLoader prefers RTLD_DEFAULT for symbol resolution. (function operator())\n/root/ecpa-h2-formal-reject-env-kn-kv-v1/lib/python3.12/site-packages/triton/language/extra/cann/extension/math_ops.py:13: FutureWarning: triton.language.extra.cann.extension.atan2 is deprecated and will be removed in the next release; use triton.language.extra.cann.libdevice.atan2 instead.\n  @_deprecated(replacement=\"triton.language.extra.cann.libdevice.atan2\")\n/root/ecpa-h2-formal-reject-env-kn-kv-v1/lib/python3.12/site-packages/triton/language/extra/cann/extension/math_ops.py:35: FutureWarning: triton.language.extra.cann.extension.isfinited is deprecated and will be removed in the next release; use triton.language.extra.cann.libdevice.isfinited instead.\n  @_deprecated(replacement=\"triton.language.extra.cann.libdevice.isfinited\")\n/root/ecpa-h2-formal-reject-env-kn-kv-v1/lib/python3.12/site-packages/triton/language/extra/cann/extension/math_ops.py:49: FutureWarning: triton.language.extra.cann.extension.finitef is deprecated and will be removed in the next release; use triton.language.extra.cann.libdevice.finitef instead.\n  @_deprecated(replacement=\"triton.language.extra.cann.libdevice.finitef\")\n",
+          "stderr_sha256": "sha256:b9b5b3cec9c22a6cd61968ea6e70a886e206c518ec32cc75bb7949410aaaa565",
+          "stdout": "{\n  \"extension_id\": \"org.vllm-hust.knorm\",\n  \"provider\": \"vllm\",\n  \"states\": [\n    \"installed\",\n    \"discovered\",\n    \"compatible\",\n    \"degraded\"\n  ],\n  \"evidence\": [\n    \"loaded 7 protocols from the host capability registry\",\n    \"host version 0.31.1.post1.dev163+g973d9ef5a.empty satisfies the declared range\",\n    \"host API 1.0 satisfies the declared range\",\n    \"protocol vllm.general_plugins is not independently versioned; compatibility is governed by host ranges and acceptance evidence\",\n    \"protocol vllm.v1.kv_cache_spec_registry is not independently versioned; compatibility is governed by host ranges and acceptance evidence\",\n    \"protocol vllm.v1.worker.gpu_model_runner is not independently versioned; compatibility is governed by host ranges and acceptance evidence\",\n    \"extension is descriptor-only and cannot be enabled (implementation status: import_only)\",\n    \"extension is descriptor-only and cannot be enabled (implementation status: import_only)\"\n  ]\n}\n",
+          "stdout_sha256": "sha256:648951719ada9cb64f13cf589fce8773a9f796744b816bb12fd8b9541fd02a10"
+        },
+        {
+          "args": [
+            "extension",
+            "plan",
+            "org.vllm-hust.ascend-kvcompress"
+          ],
+          "exit_code": 0,
+          "stderr": "",
+          "stderr_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stdout": "{\n  \"actions\": [\n    {\n      \"details\": {\n        \"enabled\": false\n      },\n      \"lifecycle_owner\": \"vllm\",\n      \"mutating\": false,\n      \"operation\": \"configure_launch\",\n      \"target\": \"vllm\"\n    }\n  ],\n  \"config_claims\": [\n    {\n      \"path\": [\n        \"environment\",\n        \"VLLM_ASCEND_KVCOMPRESS_ENABLED\"\n      ],\n      \"value\": \"1\"\n    },\n    {\n      \"path\": [\n        \"vllm_plugins\",\n        \"ascend_kvcompress\"\n      ],\n      \"value\": true\n    }\n  ],\n  \"extension_id\": \"org.vllm-hust.ascend-kvcompress\",\n  \"generated_config\": {\n    \"additional_config\": {},\n    \"environment\": {\n      \"VLLM_ASCEND_KVCOMPRESS_ENABLED\": \"1\"\n    },\n    \"native_extension_manifest\": {\n      \"bundle_id\": \"org.vllm-hust.ascend-kvcompress\",\n      \"bundle_version\": \"0.9.0\",\n      \"components\": [\n        {\n          \"component_id\": \"ascend-kvcompress\",\n          \"contracts\": [\n            \"vllm.general_plugins\"\n          ],\n          \"execution_planes\": [\n            \"scheduler\",\n            \"worker\",\n            \"device\"\n          ],\n          \"implementation_ref\": \"vllm_ascend_kvcompress.plugin:register\",\n          \"isolation\": \"trusted_in_process\",\n          \"permissions\": [\n            \"device_access\",\n            \"filesystem_read\",\n            \"filesystem_write\",\n            \"network_egress\"\n          ]\n        }\n      ],\n      \"host_api_range\": \">=1,<2\",\n      \"schema_version\": \"1.0\"\n    },\n    \"user_config\": {},\n    \"vllm_json_options\": {},\n    \"vllm_plugins\": [\n      \"ascend_kvcompress\"\n    ]\n  },\n  \"provider\": \"vllm\",\n  \"resource_claims\": [\n    {\n      \"mode\": \"exclusive\",\n      \"resource\": \"vllm-ascend.kv-cache.mutation\",\n      \"scope\": \"vllm-process\"\n    }\n  ],\n  \"warnings\": []\n}\n",
+          "stdout_sha256": "sha256:53156e5b36e8578402b3786e6d17f1c001354d99581123db08e2d3a9f3ab2622"
+        },
+        {
+          "args": [
+            "extension",
+            "plan",
+            "org.vllm-hust.knorm"
+          ],
+          "exit_code": 0,
+          "stderr": "",
+          "stderr_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stdout": "{\n  \"actions\": [\n    {\n      \"details\": {\n        \"enabled\": false\n      },\n      \"lifecycle_owner\": \"vllm\",\n      \"mutating\": false,\n      \"operation\": \"inspect_only\",\n      \"target\": \"org.vllm-hust.knorm\"\n    }\n  ],\n  \"config_claims\": null,\n  \"extension_id\": \"org.vllm-hust.knorm\",\n  \"generated_config\": {},\n  \"provider\": \"vllm\",\n  \"resource_claims\": [\n    {\n      \"mode\": \"exclusive\",\n      \"resource\": \"vllm.kv-cache.compression-policy\",\n      \"scope\": \"vllm-process\"\n    }\n  ],\n  \"warnings\": [\n    \"extension is descriptor-only and cannot be enabled (implementation status: import_only)\"\n  ]\n}\n",
+          "stdout_sha256": "sha256:eadb74c4599623a65465ff47c07b420cd6a07f87b408d96a6773a1dcbbdd7f49"
+        },
+        {
+          "args": [
+            "extension",
+            "enable",
+            "org.vllm-hust.ascend-kvcompress"
+          ],
+          "exit_code": 0,
+          "stderr": "",
+          "stderr_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stdout": "enabled org.vllm-hust.ascend-kvcompress\n",
+          "stdout_sha256": "sha256:54258c7e64663ad29e10626363c5013fa71db8a4cee0ff0f1aa930a38ac3486e"
+        },
+        {
+          "args": [
+            "extension",
+            "enable",
+            "org.vllm-hust.knorm"
+          ],
+          "exit_code": 2,
+          "stderr": "usage: vllm-hust-ext [-h] [--version] {extension,catalog,run,formal-run} ...\nvllm-hust-ext: error: cannot enable 'org.vllm-hust.knorm': extension is descriptor-only and cannot be enabled (implementation status: import_only)\n",
+          "stderr_sha256": "sha256:7f07345cbf7a7a7afb838110f22862fe2bd6458751b56a25633072745e4d25a0",
+          "stdout": "",
+          "stdout_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ],
+      "formal_record": {
+        "campaign_sha256": "sha256:02abf54a24ebe7e80691df681b158434e86e5e30baa9f2349bfb560542d1c473",
+        "case_id": "kvcompress-knorm-host973d-prelaunch",
+        "classification": "formal-real-host-composition",
+        "oracle_sha256": "sha256:703712950e9b32073e6129f81e85daf0fc9208b5d6286571317d423a8dee5e49",
+        "order_id": "knorm-then-kvcompress",
+        "planner_decision": "reject",
+        "runtime_evidence": {
+          "cleanup_complete": true,
+          "host_started": false,
+          "model_loaded": false,
+          "process_owned_observation": false,
+          "receipt_sha256": "sha256:56794b107d9bf91146e40542c6c73d955de1f5d1b91a46092c9cd4dfa0ade187",
+          "workload_completed": false
+        },
+        "schema": "ecpa-h2-formal-runtime-record/v1"
+      },
+      "formal_record_sha256": "sha256:cf383b72019cec8ee143c6d7aa0c1c329eb6b2c93ea3f4ec9caea2b674f62e17",
+      "host_launch_command_invoked": false,
+      "host_processes_before_after": [
+        [],
+        []
+      ],
+      "npu_snapshot_count": 10,
+      "npu_snapshot_digests": [
+        "sha256:0b23d689f59214be1de40d4eeb49e794c3945d45993bb66d9237295528c32327",
+        "sha256:42f15bec6ebdaca2b533160442ec38fccbc1a7ae39290da81d32df9f6066a64d",
+        "sha256:169736fb07c0549a41019379ccdff96eb4786d7c2c75cd47b21c04b3e94cea89",
+        "sha256:06a586ec4f2a61ba9ee0646732e8353a4fcf26e1452b568c952ecae580d96b7d",
+        "sha256:58987f7ac458a2c4f48b1de129525bde55d15b3b4dad1ceeade1a9050638007c",
+        "sha256:65c47495ca0746d5cc6aea92e0075758a6dc28ff2ad706b55948ed5e39449c9f",
+        "sha256:58987f7ac458a2c4f48b1de129525bde55d15b3b4dad1ceeade1a9050638007c",
+        "sha256:ec20ac251213a098cba5d91cfa37260f7652b09e4d7f4e73f5a75fc55a19c433",
+        "sha256:06a586ec4f2a61ba9ee0646732e8353a4fcf26e1452b568c952ecae580d96b7d",
+        "sha256:06a586ec4f2a61ba9ee0646732e8353a4fcf26e1452b568c952ecae580d96b7d"
+      ],
+      "order_id": "knorm-then-kvcompress",
+      "receipt_sha256": "sha256:56794b107d9bf91146e40542c6c73d955de1f5d1b91a46092c9cd4dfa0ade187"
+    }
+  ],
+  "portable_artifact_limits": [
+    "Embedded command output is exact text decoded with replacement for any invalid byte; command SHA-256 values bind the original raw byte streams.",
+    "NPU raw snapshots are bound by digest and empty-process parsing; they are not duplicated ten times per order in this portable artifact.",
+    "This artifact records one true-negative case and cannot establish full H2 precision/recall."
+  ],
+  "schema": "ecpa-h2-formal-prelaunch-reject-portable-artifact/v1",
+  "source_review": {
+    "activation_ready": false,
+    "case_id": "kvcompress-knorm-host973d-prelaunch",
+    "causal_chain": [
+      "KNorm replaces selected existing scheduler req_to_blocks positions with the null block and returns the old physical blocks to the free queue, including immediate reuse for uncached blocks.",
+      "Host CachedRequestData communicates only new_block_ids; for non-resumed requests its protocol specifies append semantics.",
+      "Host GPUModelRunner extends retained block IDs and appends the same IDs to the device-facing persistent block table; it has no indexed replacement field for KNorm scheduler mutations.",
+      "After an evicted physical block ID is reused, the worker may retain that ID at the old logical position while also appending it for a new allocation. Launching the active pair would therefore risk scheduler/worker/device KV-address disagreement."
+    ],
+    "classification": "independent-source-review-before-manager-decision",
+    "decision": "reject",
+    "independence": {
+      "basis": "exact Git objects and immutable wheel contents only",
+      "manager_command_run": false,
+      "planner_output_seen": false
+    },
+    "nonclaims": [
+      "no host service launch",
+      "no NPU execution",
+      "no runtime-effectiveness result",
+      "no performance result",
+      "not a same-name declared-resource conflict"
+    ],
+    "reason_code": "scheduler_worker_block_table_replacement_not_synchronized",
+    "reviewed_utc": "2026-10-13T16:31:43.545843+00:00",
+    "schema": "ecpa-h2-source-bound-reject-review/v1",
+    "sources": {
+      "ascend": {
+        "commit": "873584026f8a683ac73523f15127569e9f6ab34b",
+        "repository": "vLLM-HUST/vllm-ascend-hust",
+        "tree": "3a21eb6bec128786be61d3739268b93fda1095ac",
+        "wheel_sha256": "sha256:16438dc60e86c7bc4741a3520d80d5f9de54676daabe2035ebff0d6b2dceefcf"
+      },
+      "host": {
+        "commit": "973d9ef5acd2b9beb03e399dec1511a41fc941b5",
+        "files": [
+          {
+            "blob": "a5af5a3d5755c699a55b853faa515650970283e8",
+            "path": "vllm/v1/core/sched/output.py",
+            "relevant_lines": [
+              137,
+              150
+            ],
+            "sha256": "sha256:cb7652417495ab9121f733cdeb94660efd6f8a9db5f897fc8b2a40a0f08034c4"
+          },
+          {
+            "blob": "cf67d45df857a169ecdba89f77df351c90377154",
+            "path": "vllm/v1/worker/gpu_model_runner.py",
+            "relevant_lines": [
+              1427,
+              1460
+            ],
+            "sha256": "sha256:b286cba03d7a5f842805e707fb274f343052ef4eff49268bb666845450af9643"
+          },
+          {
+            "blob": "218d59f430c948dfc52debf29699fc4b61b96cc0",
+            "path": "vllm/v1/core/single_type_kv_cache_manager.py",
+            "sha256": "sha256:3fc3d6cb7c332438e554e1e3388addce00a843c4d529ab497abdb535e830fa74"
+          }
+        ],
+        "repository": "vLLM-HUST/vllm-hust",
+        "tree": "9bc1a9a7dceab8bf1002a5ec5f735e5b454f11af",
+        "wheel_sha256": "sha256:97b27b347889d6e140415e674509519f2ed65848cc51e4b888189fb28f29671a"
+      },
+      "knorm": {
+        "commit": "c490cfbfd2372635e8e874c8d7ba866ca5c476fb",
+        "manager_source": {
+          "blob": "4527ad73960b7a77f0aaf064f14926dba2a7c6eb",
+          "path": "src/vllm_hust_knorm/knorm/manager.py",
+          "relevant_lines": [
+            106,
+            161
+          ],
+          "sha256": "sha256:567707f15273d1de83cc7399f2998326f4d101704a9607c8a857bdc5db80b5a0"
+        },
+        "manifest": {
+          "blob": "9dd3b208f4de382e1c8c451174ae461afeef7cff",
+          "implementation_status": "import_only",
+          "path": "src/vllm_hust_knorm/manifests/vllm-hust-extension-v0.3.json",
+          "sha256": "sha256:272aece6dcb74a48f38cb0f9598b7ce81fe729d49d22494d68c7181e7f16afd8"
+        },
+        "repository": "vLLM-HUST/vllm-hust-knorm",
+        "tree": "3cf0928f202a0d9c5111333fd7ad4be5f13d97aa",
+        "wheel_sha256": "sha256:a3dc5f84b2a4a7df3a8141c4772d4ac499c9d41b799438a1307fb656c01f2083"
+      },
+      "kvcompress": {
+        "commit": "00cc78dc7f3491eecbc79c5068e29aed9f59afc3",
+        "manifest_blob": "fd6b1b703ba7eec7587c16d27370c5b75801c89d",
+        "repository": "vLLM-HUST/vllm-ascend-kvcompress-hust",
+        "tree": "8661770207782c912316ad9e5529bf3dbfcce563",
+        "wheel_sha256": "sha256:b859f165140de0390f2e6a794a1dc36adb6de4c686e40c3dfc66b3bde11f06c3"
+      }
+    }
+  },
+  "source_review_sha256": "sha256:f4506e800ed64f62b733c60971705a5f125ba202d98969a68213603ecfc5454a",
+  "summary": {
+    "campaign_sha256": "sha256:02abf54a24ebe7e80691df681b158434e86e5e30baa9f2349bfb560542d1c473",
+    "case_id": "kvcompress-knorm-host973d-prelaunch",
+    "classification": "real-source exact-stack manager prelaunch rejection; no runtime launch",
+    "formal_reject_candidate": true,
+    "host_started": false,
+    "manager_decision": "reject",
+    "npu_processes_observed": false,
+    "oracle_decision": "reject",
+    "oracle_sha256": "sha256:703712950e9b32073e6129f81e85daf0fc9208b5d6286571317d423a8dee5e49",
+    "orders": [
+      {
+        "formal_reject_candidate": true,
+        "manager_decision": "reject",
+        "order_id": "kvcompress-then-knorm",
+        "path": "/root/ecpa-h2-formal-reject-20261013/kvcompress-then-knorm/receipt.json",
+        "sha256": "sha256:441674bf831cc52ef6f8abdd8ac425479f97d1245600470830bb5ed99a315191"
+      },
+      {
+        "formal_reject_candidate": true,
+        "manager_decision": "reject",
+        "order_id": "knorm-then-kvcompress",
+        "path": "/root/ecpa-h2-formal-reject-20261013/knorm-then-kvcompress/receipt.json",
+        "sha256": "sha256:56794b107d9bf91146e40542c6c73d955de1f5d1b91a46092c9cd4dfa0ade187"
+      }
+    ],
+    "schema": "ecpa-h2-formal-prelaunch-reject-summary/v1"
+  },
+  "summary_sha256": "sha256:518ef38f05964af5c6a74c1d717490ed160d99f57feb587e23c19b0352aa17b3"
+}

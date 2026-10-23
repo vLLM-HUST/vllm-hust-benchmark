@@ -1,0 +1,80 @@
+{
+  "core_sha": "4861aab3af39e721c1b5a8b27b72c4f6bebda888",
+  "ascend_sha": "a0a2ffffce472220061c3e9696defa6b8ddbe63a",
+  "hardware": "Ascend 910B2",
+  "runtime": "CANN 9.0.0",
+  "execution_mode": "EAGER",
+  "prefix_caching": true,
+  "physical_card": "6",
+  "lifecycle_order": [
+    "disabled:1",
+    "enabled:1",
+    "disabled:2",
+    "enabled:2",
+    "disabled:3",
+    "enabled:3"
+  ],
+  "metrics": {
+    "disabled": {
+      "lifecycles": 3,
+      "short": {
+        "request_throughput": 0.6783130845165486,
+        "mean_ttft_ms": 314.60101026782974,
+        "mean_tpot_ms": 91.31446172006952,
+        "mean_e2e_ms": 23599.78903326232
+      },
+      "long": {
+        "request_throughput": 0.20483843391216627,
+        "mean_ttft_ms": 40295.7784938529,
+        "mean_tpot_ms": 101.03479950061406,
+        "mean_e2e_ms": 91924.56131146658
+      },
+      "peak_kv_cache_usage": 0.9992517770295549,
+      "preemptions": 2.0
+    },
+    "enabled": {
+      "lifecycles": 3,
+      "short": {
+        "request_throughput": 0.6758728148569478,
+        "mean_ttft_ms": 323.64972492602345,
+        "mean_tpot_ms": 93.18097871288195,
+        "mean_e2e_ms": 24084.7995824782
+      },
+      "long": {
+        "request_throughput": 0.2896054883301597,
+        "mean_ttft_ms": 27811.258584736304,
+        "mean_tpot_ms": 152.05965797075973,
+        "mean_e2e_ms": 105513.74407940602
+      },
+      "peak_kv_cache_usage": 0.42424242424242414,
+      "preemptions": 0.0
+    }
+  },
+  "enabled_to_disabled_ratios": {
+    "short": {
+      "request_throughput": 0.9964024434802994,
+      "mean_ttft_ms": 1.028762509854912,
+      "mean_tpot_ms": 1.0204405409357213,
+      "mean_e2e_ms": 1.0205514781734824
+    },
+    "long": {
+      "request_throughput": 1.4138239723817705,
+      "mean_ttft_ms": 0.6901779696098661,
+      "mean_tpot_ms": 1.505022613221849,
+      "mean_e2e_ms": 1.1478297266156694
+    }
+  },
+  "short_outputs_match_across_all_lifecycles": true,
+  "enabled_guards_passed": true,
+  "enabled_long_repeats_stable": true,
+  "memory_reduction_recorded": true,
+  "active_kv_reduction_per_7168_request": {
+    "source_blocks": 56,
+    "destination_blocks": 8,
+    "released_blocks": 48,
+    "bytes_per_qwen_bf16_block": 25165824,
+    "released_bytes": 1207959552,
+    "released_gib": 1.125
+  },
+  "evidence_complete": true
+}

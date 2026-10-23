@@ -1,0 +1,287 @@
+{
+  "captured_utc": "2026-10-13T15:12:00Z",
+  "classification": "exact-source-wheel-current-host-activation-preflight-not-formal-runtime-or-performance",
+  "conclusion": {
+    "activation_ready_pair_count": 0,
+    "cards_are_not_the_blocker": true,
+    "formal_h2_eligible_pair_count": 0,
+    "formal_h4_eligible_pair_count": 0,
+    "performance_claim_eligible": false,
+    "reason": "source compatibility and activation authority gates fail before device execution",
+    "score_eligible": false
+  },
+  "host": {
+    "accelerator": "Ascend 910B2",
+    "components": {
+      "vllm": {
+        "commit": "973d9ef5a",
+        "version": "0.31.1.post1.dev163+g973d9ef5a.empty",
+        "wheel_sha256": "sha256:97b27b347889d6e140415e674509519f2ed65848cc51e4b888189fb28f29671a"
+      },
+      "vllm-ascend": {
+        "commit": "873584026",
+        "version": "0.25.1rc2.dev872+hust.20260903.4.g873584026",
+        "wheel_sha256": "sha256:16438dc60e86c7bc4741a3520d80d5f9de54676daabe2035ebff0d6b2dceefcf"
+      }
+    },
+    "device_processes_before_and_after": "none",
+    "host_started": false,
+    "model_loaded": false,
+    "model_target": "Qwen2.5-7B",
+    "python": "3.12.13",
+    "tensor_parallel_size": 2,
+    "visible_devices": [
+      3,
+      6
+    ],
+    "workload_completed": false
+  },
+  "manager": {
+    "commit": "58a2c32c6564d201f100b082628d3a0498567412",
+    "execution": "PYTHONPATH source checkout; console-script distribution is the already-qualified e583 Manager wheel",
+    "remote_ref": "refs/heads/main",
+    "repository": "vLLM-HUST/extension-manager",
+    "tree": "b259c218017e193c2b2d33d8f11dedf4becaae54"
+  },
+  "manager_checks": {
+    "knorm": {
+      "evidence": [
+        "loaded 7 protocols from the host capability registry",
+        "host version 0.31.1.post1.dev163+g973d9ef5a.empty satisfies the declared range",
+        "host API 1.0 satisfies the declared range",
+        "protocol vllm.general_plugins is not independently versioned; compatibility is governed by host ranges and acceptance evidence",
+        "protocol vllm.v1.kv_cache_spec_registry is not independently versioned; compatibility is governed by host ranges and acceptance evidence",
+        "protocol vllm.v1.worker.gpu_model_runner is not independently versioned; compatibility is governed by host ranges and acceptance evidence",
+        "extension is descriptor-only and cannot be enabled (implementation status: import_only)",
+        "extension is descriptor-only and cannot be enabled (implementation status: import_only)"
+      ],
+      "receipt_sha256": "sha256:648951719ada9cb64f13cf589fce8773a9f796744b816bb12fd8b9541fd02a10",
+      "states": [
+        "installed",
+        "discovered",
+        "compatible",
+        "degraded"
+      ]
+    },
+    "kvcompress": {
+      "evidence": [
+        "loaded 7 protocols from the host capability registry",
+        "host version 0.25.1rc2.dev872+hust.20260903.4.g873584026 satisfies the declared range",
+        "host API 1.0 satisfies the declared range",
+        "protocol vllm.general_plugins is not independently versioned; compatibility is governed by host ranges and acceptance evidence",
+        "vLLM launch configuration can be rendered"
+      ],
+      "receipt_sha256": "sha256:101158edd0163afeeeb1f76bb6ed4cedfd3a3ed0bd2604b134e66342776cc3ce",
+      "states": [
+        "installed",
+        "discovered",
+        "compatible",
+        "configured"
+      ]
+    },
+    "lifecycle_profiler": {
+      "evidence": [
+        "loaded 7 protocols from the host capability registry",
+        "host version 0.31.1.post1.dev163+g973d9ef5a.empty is outside >=0.23,<0.24",
+        "vLLM launch configuration can be rendered"
+      ],
+      "receipt_sha256": "sha256:4eef3d2c375c3c43631fd7b37ac2729f0d3da2ffcd4438788c10ce9e327522b9",
+      "states": [
+        "installed",
+        "discovered",
+        "incompatible"
+      ]
+    }
+  },
+  "ranked_pairs": [
+    {
+      "activation_order_preflights": [
+        {
+          "receipt": {
+            "observations": [
+              {
+                "elapsed_ms": 7931.361,
+                "member": "kvcompress",
+                "return": null,
+                "status": "returned"
+              },
+              {
+                "elapsed_ms": 2.167,
+                "member": "lifecycle_profiler",
+                "return": null,
+                "status": "returned"
+              }
+            ],
+            "order": [
+              "kvcompress",
+              "lifecycle_profiler"
+            ]
+          },
+          "receipt_sha256": "sha256:27ae83227c3717f08bd6f8c0c9b5c945f45367b9233c70f437eff4b156f93252",
+          "stderr_sha256": "sha256:247979d6969c48aafb9ab83ed218c463b7c8cc4dfd2c40fcc125aed3eb598800"
+        },
+        {
+          "receipt": {
+            "observations": [
+              {
+                "elapsed_ms": 8.312,
+                "member": "lifecycle_profiler",
+                "return": null,
+                "status": "returned"
+              },
+              {
+                "elapsed_ms": 8165.498,
+                "member": "kvcompress",
+                "return": null,
+                "status": "returned"
+              }
+            ],
+            "order": [
+              "lifecycle_profiler",
+              "kvcompress"
+            ]
+          },
+          "receipt_sha256": "sha256:d3d0073a7be3b7f7f6f07e12dd622a2d9979e69ca94f726f811a1499f976eddd",
+          "stderr_sha256": "sha256:987cac0da9ddff872986ed7671e2ec91e05b2a40e6b0c5cf66c920bfc575832b"
+        }
+      ],
+      "activation_ready": false,
+      "blockers": [
+        "lifecycle_profiler declares vLLM >=0.23,<0.24; current exact host is 0.31.1.post1.dev163+g973d9ef5a.empty",
+        "a direct entry-point return cannot override the source manifest compatibility contract",
+        "no pair host start, model load, TP2 workload, process-owned effectiveness, cleanup receipt, or H4 performance receipt exists"
+      ],
+      "entry_points_present": true,
+      "manager_admissible": false,
+      "members": [
+        "kvcompress",
+        "lifecycle_profiler"
+      ],
+      "pair_id": "kvcompress-lifecycle-profiler-current-tp2",
+      "qualification_status": "BLOCKED",
+      "rank": 1,
+      "required_to_unblock": [
+        "port and independently test lifecycle_profiler against exact vLLM 973d9ef5a and publish a source manifest whose host range binds that acceptance evidence",
+        "rebuild both wheels, obtain Manager pair admission, then register a fresh TP2 qualification before any formal H2/H4 run"
+      ],
+      "source_bound": true,
+      "wheels_built": true
+    },
+    {
+      "activation_order_preflights": [
+        {
+          "receipt": {
+            "observations": [
+              {
+                "elapsed_ms": 8156.927,
+                "member": "kvcompress",
+                "return": null,
+                "status": "returned"
+              },
+              {
+                "elapsed_ms": 1593.999,
+                "member": "knorm",
+                "return": [
+                  "knorm"
+                ],
+                "status": "returned"
+              }
+            ],
+            "order": [
+              "kvcompress",
+              "knorm"
+            ]
+          },
+          "receipt_sha256": "sha256:55490a13d930d73a2e051bffecb086c6e45969a681a6f1adffce51e53e9e27c6",
+          "stderr_sha256": "sha256:dfb4d362c4c9fbf2e2f22ffd6f299d46dcb543f2752be9f565bb6c6a330d595e"
+        },
+        {
+          "receipt": {
+            "observations": [
+              {
+                "elapsed_ms": 10391.372,
+                "member": "knorm",
+                "return": [
+                  "knorm"
+                ],
+                "status": "returned"
+              },
+              {
+                "elapsed_ms": 33.99,
+                "member": "kvcompress",
+                "return": null,
+                "status": "returned"
+              }
+            ],
+            "order": [
+              "knorm",
+              "kvcompress"
+            ]
+          },
+          "receipt_sha256": "sha256:61583fa682f2ad1a03d83efd3f24e9455a2e80241f7239e43beca11063cd6130",
+          "stderr_sha256": "sha256:342affa2833b8fc6557bfbdb600826f8b047ea5e0b7fe6fe93f288d735aedae4"
+        }
+      ],
+      "activation_ready": false,
+      "blockers": [
+        "KNorm manifest implementation status is import_only, so Manager marks it descriptor-only and refuses enablement",
+        "both MODs alter KV compression state under differently named exclusive claims; an independent physical-ownership oracle is absent",
+        "no pair host start, model load, TP2 workload, process-owned effectiveness, cleanup receipt, or H4 performance receipt exists"
+      ],
+      "entry_points_present": true,
+      "manager_admissible": false,
+      "members": [
+        "kvcompress",
+        "knorm"
+      ],
+      "pair_id": "kvcompress-knorm-current-tp2",
+      "qualification_status": "BLOCKED",
+      "rank": 2,
+      "required_to_unblock": [
+        "publish a KNorm 0.3 manifest with an active implementation only after exact-host acceptance proves the entry point and rollback contract",
+        "freeze an independent ownership label and both activation orders, then register a fresh TP2 qualification before any formal H2/H4 run"
+      ],
+      "source_bound": true,
+      "wheels_built": true
+    }
+  ],
+  "schema": "ecpa-active-mod-pair-preflight/v1",
+  "sources": {
+    "knorm": {
+      "build": "passed-no-isolation-no-deps",
+      "commit": "c490cfbfd2372635e8e874c8d7ba866ca5c476fb",
+      "implementation_status": "import_only",
+      "manifest_git_blob": "9dd3b208f4de382e1c8c451174ae461afeef7cff",
+      "manifest_sha256": "sha256:272aece6dcb74a48f38cb0f9598b7ce81fe729d49d22494d68c7181e7f16afd8",
+      "remote_object_reachable": true,
+      "remote_ref": "refs/heads/main",
+      "repository": "vLLM-HUST/vllm-hust-knorm",
+      "tree": "3cf0928f202a0d9c5111333fd7ad4be5f13d97aa",
+      "wheel_sha256": "sha256:5ac57719199578e97dd60ce12529721a583a9e19025b5d5ae3be4462713cb897"
+    },
+    "kvcompress": {
+      "build": "passed-no-isolation-no-deps",
+      "commit": "9309a0f9fbf0b4693d67eac2afc263608d37cc79",
+      "implementation_status": "active",
+      "manifest_git_blob": "fd6b1b703ba7eec7587c16d27370c5b75801c89d",
+      "manifest_sha256": "sha256:ad0a3e62602108e54503bb81c8fda162a730e1a422fe940d09a2463ee2d0eb54",
+      "remote_object_reachable": true,
+      "remote_ref": "refs/pull/20/head",
+      "repository": "vLLM-HUST/vllm-ascend-kvcompress-hust",
+      "tree": "e35092a9e84d23a05eea40aa1ca4bff1dd123a1d",
+      "wheel_sha256": "sha256:b859f165140de0390f2e6a794a1dc36adb6de4c686e40c3dfc66b3bde11f06c3"
+    },
+    "lifecycle_profiler": {
+      "build": "passed-no-isolation-no-deps",
+      "commit": "8b8245cdba61b2ccc92a02c81b158c8fc9f90d14",
+      "implementation_status": "active",
+      "manifest_git_blob": "1fc7b3df1c2cc4f4d609bd70367c41c5e9285bc0",
+      "manifest_sha256": "sha256:650160eb2c69a93b1bfc09d1ebc7728b1045b5411d1be817c216038121028c87",
+      "remote_object_reachable": true,
+      "remote_ref": "refs/heads/main",
+      "repository": "vLLM-HUST/vllm-hust-request-lifecycle-profiler",
+      "tree": "d3b752078d74a9d384de35b5010d7ac9bd3742e6",
+      "wheel_sha256": "sha256:d65c571a5feb1c468251fc5fa41c4d1591cf25500f18a3eaececc9918f989245"
+    }
+  }
+}

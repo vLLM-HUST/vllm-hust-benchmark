@@ -1,0 +1,196 @@
+{
+  "allocated_npu_process_tables_empty": true,
+  "argv": [
+    "/root/ecpa-h2-formal-profiler-kv-a-v1/bin/vllm-request-lifecycle-profiler-serve",
+    "serve",
+    "/data/shared_models/Qwen--Qwen2.5-14B-Instruct",
+    "--served-model-name",
+    "ecpa-h2-formal-profiler-then-kvcompress",
+    "--host",
+    "127.0.0.1",
+    "--port",
+    "8187",
+    "--tensor-parallel-size",
+    "2",
+    "--enforce-eager",
+    "--max-model-len",
+    "2048",
+    "--gpu-memory-utilization",
+    "0.7",
+    "--block-size",
+    "128",
+    "--no-enable-prefix-caching"
+  ],
+  "classification": "formal-real-host-composition-raw-run",
+  "cleanup_proven": true,
+  "completion_nonempty": true,
+  "completion_status": 200,
+  "completion_text": "\nECPA-H2-PAIR-OK\n\nThat's the exact text you requested. Is there anything else you",
+  "config_sha256": "d3ff1c4d7d0a50fbb7eccb925a69fa41b4c6e4fd629e09c76a00a1210a12e65d",
+  "failure": null,
+  "formal_h2_result": false,
+  "formal_inputs": {
+    "campaign_path": "/root/ecpa-h2-formal-pair-20261013-r2/campaign.json",
+    "campaign_sha256": "sha256:38df00167ad727e11668f66d5c6a3db54b65675482bfb5cabe15fccf3d231474",
+    "oracle_path": "/root/ecpa-h2-formal-pair-20261013-r2/oracle.json",
+    "oracle_sha256": "sha256:5ea6f2ff4e89d8bddb0e69ca99d04ee00278d4a7f70396e5ac72f2632cf4c6d2",
+    "planner_receipt_path": "/root/ecpa-h2-formal-pair-20261013-r2/planner-receipt.json",
+    "planner_receipt_sha256": "sha256:f3ef0d671fe9777620b6d1dd39e94640a281295c321c3df90da134ae6cee7a62"
+  },
+  "formal_record_candidate": true,
+  "health_status": 200,
+  "kvcompress_cache_bound_log": true,
+  "kvcompress_plugin_loaded_log": true,
+  "model": "/data/shared_models/Qwen--Qwen2.5-14B-Instruct",
+  "order": "profiler-then-kvcompress",
+  "packages": {
+    "vllm": "0.31.1.post1.dev163+g973d9ef5a.empty",
+    "vllm-ascend": "0.25.1rc2.dev872+hust.20260903.4.g873584026",
+    "vllm-ascend-kvcompress-hust": "0.9.0",
+    "vllm-request-lifecycle-profiler-plugin": "0.1.2"
+  },
+  "performance_result": false,
+  "port": 8187,
+  "port_refused_after_stop": true,
+  "process_identities": [
+    {
+      "argv": [
+        "/root/ecpa-h2-formal-profiler-kv-a-v1/bin/python",
+        "/root/ecpa-h2-formal-profiler-kv-a-v1/bin/vllm-request-lifecycle-profiler-serve",
+        "serve",
+        "/data/shared_models/Qwen--Qwen2.5-14B-Instruct",
+        "--served-model-name",
+        "ecpa-h2-formal-profiler-then-kvcompress",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "8187",
+        "--tensor-parallel-size",
+        "2",
+        "--enforce-eager",
+        "--max-model-len",
+        "2048",
+        "--gpu-memory-utilization",
+        "0.7",
+        "--block-size",
+        "128",
+        "--no-enable-prefix-caching"
+      ],
+      "pid": 565866,
+      "start_ticks": 1093842583
+    },
+    {
+      "argv": [
+        "/root/ecpa-h2-formal-profiler-kv-a-v1/bin/python",
+        "-s",
+        "-c",
+        "from multiprocessing.resource_tracker import main;main(65)"
+      ],
+      "pid": 565986,
+      "start_ticks": 1093845233
+    },
+    {
+      "argv": [
+        "VLLM::EngineCore"
+      ],
+      "pid": 565987,
+      "start_ticks": 1093845233
+    },
+    {
+      "argv": [
+        "VLLM::Worker_TP0"
+      ],
+      "pid": 566071,
+      "start_ticks": 1093847199
+    },
+    {
+      "argv": [
+        "VLLM::Worker_TP1"
+      ],
+      "pid": 566072,
+      "start_ticks": 1093847199
+    },
+    {
+      "argv": [
+        "npu-smi",
+        "info"
+      ],
+      "pid": 566703,
+      "start_ticks": 1093852613
+    },
+    {
+      "argv": [
+        "npu-smi",
+        "info"
+      ],
+      "pid": 566704,
+      "start_ticks": 1093852614
+    },
+    {
+      "argv": [
+        "lscpu",
+        "-e=CPU,NODE"
+      ],
+      "pid": 566785,
+      "start_ticks": 1093852714
+    },
+    {
+      "argv": [
+        "npu-smi",
+        "info",
+        "-t",
+        "topo"
+      ],
+      "pid": 566751,
+      "start_ticks": 1093852678
+    }
+  ],
+  "profiler_request_finished_observed": true,
+  "profiler_trace_files": [
+    "profiler-trace.jsonl.rlp.341eee51b86741369060af3d57d393a3.jsonl",
+    "profiler-trace.jsonl.rlp.8793eecf3f2949b79e0237122f100db1.jsonl",
+    "profiler-trace.jsonl.rlp.a62a839b23c343fa81e443c4f8a5080b.jsonl",
+    "profiler-trace.jsonl.rlp.d957daeb0dd7423d991f894afcb5c741.jsonl"
+  ],
+  "profiler_trace_record_count": 7,
+  "runner_sha256": "a4676b7b1f41c9d14639ccaac3b1b41931bd9f14c23b0335b23653fe0339eaa3",
+  "schema": "ecpa-h2-real-two-mod-tp2-preflight/v1",
+  "score_eligible": false,
+  "served_model": "ecpa-h2-formal-profiler-then-kvcompress",
+  "server_exit_code": 0,
+  "server_identity": {
+    "argv": [
+      "/root/ecpa-h2-formal-profiler-kv-a-v1/bin/python",
+      "/root/ecpa-h2-formal-profiler-kv-a-v1/bin/vllm-request-lifecycle-profiler-serve",
+      "serve",
+      "/data/shared_models/Qwen--Qwen2.5-14B-Instruct",
+      "--served-model-name",
+      "ecpa-h2-formal-profiler-then-kvcompress",
+      "--host",
+      "127.0.0.1",
+      "--port",
+      "8187",
+      "--tensor-parallel-size",
+      "2",
+      "--enforce-eager",
+      "--max-model-len",
+      "2048",
+      "--gpu-memory-utilization",
+      "0.7",
+      "--block-size",
+      "128",
+      "--no-enable-prefix-caching"
+    ],
+    "pid": 565866,
+    "start_ticks": 1093842583
+  },
+  "source_commits": {
+    "ascend": "873584026f8a683ac73523f15127569e9f6ab34b",
+    "host": "973d9ef5acd2b9beb03e399dec1511a41fc941b5",
+    "kvcompress": "00cc78dc7f3491eecbc79c5068e29aed9f59afc3",
+    "lifecycle_profiler": "88ffdce5fc6639c0b7b86a54d197f7394705c54b"
+  },
+  "stats_sha256": "a9db411b48ea39d0953dd64b94f87995ca61412f4b3d8fb24c4f7f38fa2a40cf",
+  "success": true,
+  "surviving_owned_processes": []
+}

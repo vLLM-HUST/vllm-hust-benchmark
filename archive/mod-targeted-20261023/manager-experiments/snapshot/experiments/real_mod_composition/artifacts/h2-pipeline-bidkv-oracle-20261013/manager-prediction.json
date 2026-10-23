@@ -1,0 +1,278 @@
+{
+  "campaign_sha256": "sha256:a0c36781ee9776935f673e4d5904ec3dc03ffe6401971227b35b3904438eb7a5",
+  "captured_utc": "2026-10-13T18:31:11.345736+00:00",
+  "case_id": "pair-pipeline-microbatch-bidkv-vllm-0281",
+  "classification": "source-bound-pre-launch-manager-prediction",
+  "composition_error": null,
+  "corpus_update": {
+    "current": {
+      "admit_precision": 1.0,
+      "admit_recall": 1.0,
+      "case_count": 5,
+      "false_negative": 0,
+      "false_positive": 0,
+      "true_negative": 3,
+      "true_positive": 2
+    },
+    "h2_complete": false,
+    "previous": {
+      "case_count": 4,
+      "false_negative": 0,
+      "false_positive": 0,
+      "true_negative": 3,
+      "true_positive": 1
+    }
+  },
+  "manager": {
+    "base_commit": "8651f1d629575709264c6ad7ed8eb93c6c296fc7",
+    "evaluation_commit": "a8e9d42153875e0fe88b5abed658463bc7487375",
+    "source_diff_receipt": {
+      "argv": [
+        "git",
+        "diff",
+        "--exit-code",
+        "8651f1d629575709264c6ad7ed8eb93c6c296fc7",
+        "--",
+        "src"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stderr_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout": "",
+      "stdout_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "source_unchanged_from_base": true
+  },
+  "matched": true,
+  "members": [
+    {
+      "activation_blocker": null,
+      "bundle_id": "org.vllm-hust.pipeline-microbatch",
+      "compatibility": true,
+      "compatibility_evidence": [
+        "host version 0.28.1rc1.dev319 satisfies the declared range",
+        "host API 1.0 satisfies the declared range",
+        "protocol vllm.batch-admission-policy 1.1 satisfies the declared range"
+      ],
+      "id": "pipeline_microbatch",
+      "plan": {
+        "actions": [
+          {
+            "details": {
+              "enabled": true
+            },
+            "lifecycle_owner": "vllm",
+            "mutating": false,
+            "operation": "configure_launch",
+            "target": "vllm"
+          }
+        ],
+        "config_claims": [
+          {
+            "path": [
+              "vllm_options",
+              "--batch-admission-policy"
+            ],
+            "value": "vllm_hust_pipeline_microbatch.policy.PipelineMicrobatchPolicy"
+          }
+        ],
+        "extension_id": "org.vllm-hust.pipeline-microbatch",
+        "generated_config": {
+          "additional_config": {},
+          "environment": {},
+          "native_extension_manifest": {
+            "bundle_id": "org.vllm-hust.pipeline-microbatch",
+            "bundle_version": "0.2.0",
+            "components": [
+              {
+                "component_id": "batch-admission-policy",
+                "contracts": [
+                  "vllm.batch-admission-policy.v1"
+                ],
+                "execution_planes": [
+                  "scheduler"
+                ],
+                "implementation_ref": "vllm_hust_pipeline_microbatch.policy:PipelineMicrobatchPolicy",
+                "isolation": "trusted_in_process",
+                "permissions": []
+              }
+            ],
+            "host_api_range": ">=1,<2",
+            "schema_version": "1.0"
+          },
+          "user_config": {},
+          "vllm_json_options": {},
+          "vllm_options": {
+            "--batch-admission-policy": "vllm_hust_pipeline_microbatch.policy.PipelineMicrobatchPolicy"
+          }
+        },
+        "provider": "vllm",
+        "resource_claims": [],
+        "warnings": [
+          "in-process scheduler activation requires explicit host and protocol compatibility evidence; run refuses unverified policies"
+        ]
+      }
+    },
+    {
+      "activation_blocker": null,
+      "bundle_id": "org.vllm-hust.bidkv",
+      "compatibility": true,
+      "compatibility_evidence": [
+        "host version 0.28.1rc1.dev319 satisfies the declared range",
+        "host API 1.0 satisfies the declared range",
+        "protocol vllm.preemption-policy 1.0 satisfies the declared range"
+      ],
+      "id": "bidkv",
+      "plan": {
+        "actions": [
+          {
+            "details": {
+              "enabled": true
+            },
+            "lifecycle_owner": "vllm",
+            "mutating": false,
+            "operation": "configure_launch",
+            "target": "vllm"
+          }
+        ],
+        "config_claims": [
+          {
+            "path": [
+              "environment",
+              "BIDKV_UTILITY_CASCADE_GAIN_RATIO"
+            ],
+            "value": "1.25"
+          },
+          {
+            "path": [
+              "environment",
+              "BIDKV_UTILITY_ENABLE"
+            ],
+            "value": "1"
+          },
+          {
+            "path": [
+              "environment",
+              "BIDKV_UTILITY_LIVENESS_PREEMPTIONS"
+            ],
+            "value": "2"
+          },
+          {
+            "path": [
+              "environment",
+              "BIDKV_UTILITY_STRATEGY"
+            ],
+            "value": "bidkv"
+          },
+          {
+            "path": [
+              "vllm_options",
+              "--preemption-policy"
+            ],
+            "value": "bidkv.adapters.vllm_hust.selector.BidkvPreemptionPolicy"
+          }
+        ],
+        "extension_id": "org.vllm-hust.bidkv",
+        "generated_config": {
+          "additional_config": {},
+          "environment": {
+            "BIDKV_UTILITY_CASCADE_GAIN_RATIO": "1.25",
+            "BIDKV_UTILITY_ENABLE": "1",
+            "BIDKV_UTILITY_LIVENESS_PREEMPTIONS": "2",
+            "BIDKV_UTILITY_STRATEGY": "bidkv"
+          },
+          "native_extension_manifest": {
+            "bundle_id": "org.vllm-hust.bidkv",
+            "bundle_version": "0.2.1",
+            "components": [
+              {
+                "component_id": "victim-selector",
+                "contracts": [
+                  "vllm.preemption-policy.v1"
+                ],
+                "execution_planes": [
+                  "scheduler"
+                ],
+                "implementation_ref": "bidkv.adapters.vllm_hust.selector:BidkvPreemptionPolicy",
+                "isolation": "trusted_in_process",
+                "permissions": []
+              }
+            ],
+            "host_api_range": ">=1,<2",
+            "schema_version": "1.0"
+          },
+          "user_config": {},
+          "vllm_json_options": {},
+          "vllm_options": {
+            "--preemption-policy": "bidkv.adapters.vllm_hust.selector.BidkvPreemptionPolicy"
+          }
+        },
+        "provider": "vllm",
+        "resource_claims": [
+          {
+            "mode": "exclusive",
+            "resource": "vllm.scheduler.preemption-policy",
+            "scope": "vllm-process"
+          }
+        ],
+        "warnings": [
+          "in-process scheduler activation requires explicit host and protocol compatibility evidence; run refuses unverified policies"
+        ]
+      }
+    }
+  ],
+  "nonclaims": [
+    "source-only pre-launch case; not host runtime",
+    "not performance evidence",
+    "does not show either policy was invoked",
+    "does not establish behavior under simultaneous policy calls"
+  ],
+  "oracle_decision": "admit",
+  "oracle_sha256": "sha256:9ba8f59096de7ecc8864a67a25f27cd5a41cf8f4f182636410f1a2e3ac410a45",
+  "performance_claim": false,
+  "prediction": "admit",
+  "process_boundary": {
+    "host_process_started": false,
+    "host_processes_after": [],
+    "host_processes_before": [],
+    "npu_after": {
+      "allocated_devices_empty": true,
+      "argv": [
+        "npu-smi",
+        "info"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stderr_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout": "+------------------------------------------------------------------------------------------------+\n| npu-smi 25.2.1                   Version: 25.2.1                                               |\n+---------------------------+---------------+----------------------------------------------------+\n| NPU   Name                | Health        | Power(W)    Temp(C)           Hugepages-Usage(page)|\n| Chip                      | Bus-Id        | AICore(%)   Memory-Usage(MB)  HBM-Usage(MB)        |\n+===========================+===============+====================================================+\n| 3     910B2               | OK            | 99.4        38                0    / 0             |\n| 0                         | 0000:82:00.0  | 0           0    / 0          3430 / 65536         |\n+===========================+===============+====================================================+\n| 6     910B2               | OK            | 90.6        41                0    / 0             |\n| 0                         | 0000:41:00.0  | 0           0    / 0          3429 / 65536         |\n+===========================+===============+====================================================+\n+---------------------------+---------------+----------------------------------------------------+\n| NPU     Chip              | Process id    | Process name             | Process memory(MB)      |\n+===========================+===============+====================================================+\n| No running processes found in NPU 3                                                            |\n+===========================+===============+====================================================+\n| No running processes found in NPU 6                                                            |\n+===========================+===============+====================================================+\n",
+      "stdout_sha256": "sha256:aaee979d45a7a50a85d11f3bc5b2920849370b6e8740c8513b15beedf4de4f39"
+    },
+    "npu_before": {
+      "allocated_devices_empty": true,
+      "argv": [
+        "npu-smi",
+        "info"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stderr_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout": "+------------------------------------------------------------------------------------------------+\n| npu-smi 25.2.1                   Version: 25.2.1                                               |\n+---------------------------+---------------+----------------------------------------------------+\n| NPU   Name                | Health        | Power(W)    Temp(C)           Hugepages-Usage(page)|\n| Chip                      | Bus-Id        | AICore(%)   Memory-Usage(MB)  HBM-Usage(MB)        |\n+===========================+===============+====================================================+\n| 3     910B2               | OK            | 99.3        38                0    / 0             |\n| 0                         | 0000:82:00.0  | 0           0    / 0          3430 / 65536         |\n+===========================+===============+====================================================+\n| 6     910B2               | OK            | 90.8        40                0    / 0             |\n| 0                         | 0000:41:00.0  | 0           0    / 0          3429 / 65536         |\n+===========================+===============+====================================================+\n+---------------------------+---------------+----------------------------------------------------+\n| NPU     Chip              | Process id    | Process name             | Process memory(MB)      |\n+===========================+===============+====================================================+\n| No running processes found in NPU 3                                                            |\n+===========================+===============+====================================================+\n| No running processes found in NPU 6                                                            |\n+===========================+===============+====================================================+\n",
+      "stdout_sha256": "sha256:6864f8f3e7fcfce56444ebef64a60a10f71fdacb80dee3aaa2649dd2b8d955ba"
+    }
+  },
+  "projected_options": {
+    "org.vllm-hust.bidkv": {
+      "--preemption-policy": "bidkv.adapters.vllm_hust.selector.BidkvPreemptionPolicy"
+    },
+    "org.vllm-hust.pipeline-microbatch": {
+      "--batch-admission-policy": "vllm_hust_pipeline_microbatch.policy.PipelineMicrobatchPolicy"
+    }
+  },
+  "runtime": {
+    "claim": false,
+    "host_launch_command_invoked": false,
+    "reason": "the exact source-qualified Pipeline Microbatch cell is PP2+TP2 on four devices; only two devices are allocated"
+  },
+  "schema": "ecpa-h2-scheduler-pair-manager-prediction/v1",
+  "score_eligible": true
+}

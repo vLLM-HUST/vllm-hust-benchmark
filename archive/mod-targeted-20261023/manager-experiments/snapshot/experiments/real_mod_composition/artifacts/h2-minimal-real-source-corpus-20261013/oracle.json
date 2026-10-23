@@ -1,0 +1,51 @@
+{
+  "campaign_sha256": "sha256:c1b7106aaa36522de976512d1db19dd2a977918f517577b8aa95f6272bfa3edd",
+  "labels": [
+    {
+      "basis": "active carrier; exact declared host range; no inter-MOD ownership overlap exists in a singleton",
+      "case_id": "single-bidkv-vllm-0281",
+      "category": "single_mod",
+      "decision": "admit",
+      "score_role": "calibration-only-single-mod"
+    },
+    {
+      "basis": "profiler registers a shared EventBus sink while KVCompress exclusively owns scheduler/worker/device KV mutation; exact source surfaces and declared resources do not overlap",
+      "case_id": "pair-profiler-kvcompress-vllm-0233",
+      "category": "compatible_pair",
+      "decision": "admit",
+      "score_role": "definite-source-label-awaiting-exact-planner-run"
+    },
+    {
+      "basis": "KNorm scheduler-side indexed block replacements are absent from the exact Host scheduler-to-worker append-only protocol; KNorm also truthfully remains import_only",
+      "case_id": "pair-kvcompress-knorm-host973d",
+      "category": "incompatible_pair",
+      "decision": "reject",
+      "score_role": "formal-true-negative"
+    },
+    {
+      "basis": "declared exclusive resources differ and Ascend ranges overlap, but both install in-process scheduler/runner hooks; coexistence depends on exact core/Ascend surfaces and wrapper order",
+      "case_id": "pair-diffspec-kvcompress-ascend-0251",
+      "category": "conditionally_compatible_pair",
+      "decision": "conditional",
+      "score_role": "excluded-until-physical-ownership-and-install-order-review"
+    },
+    {
+      "basis": "KNorm manifest is import_only, so the requested active three-MOD composition must fail closed before launch regardless of the other two members",
+      "case_id": "three-vspec-knorm-profiler-vllm-0233",
+      "category": "three_mod",
+      "decision": "reject",
+      "score_role": "definite-source-label-awaiting-exact-planner-run"
+    }
+  ],
+  "review": {
+    "basis": "exact frozen manifest blobs plus direct implementation-source review where repositories were reachable",
+    "planner_outputs_seen_for_labeling": false,
+    "verdict": "PASS"
+  },
+  "schema": "ecpa-h2-minimal-real-source-oracle/v1",
+  "source_access_limits": [
+    "LatchMoE repository checkout was not reachable in this container; its exact frozen manifest bytes independently reproduce the registered Git blob ID.",
+    "Only pair-kvcompress-knorm-host973d has a completed exact Manager prediction receipt in this corpus revision."
+  ],
+  "status": "automated-independent-reviewed"
+}

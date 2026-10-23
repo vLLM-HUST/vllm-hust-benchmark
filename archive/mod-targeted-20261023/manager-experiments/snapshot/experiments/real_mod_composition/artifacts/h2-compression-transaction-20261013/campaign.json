@@ -1,0 +1,108 @@
+{
+  "campaign_revision": 1,
+  "case_id": "kvcompress-lifecycle-profiler-compression-transaction-tp2",
+  "classification": "frozen-before-real-compression-transaction-runs",
+  "formal_runs": [],
+  "frozen_utc": "2026-10-13T17:48:00Z",
+  "host": {
+    "ascend": {
+      "commit": "873584026f8a683ac73523f15127569e9f6ab34b",
+      "version": "0.25.1rc2.dev872+hust.20260903.4.g873584026",
+      "wheel_sha256": "16438dc60e86c7bc4741a3520d80d5f9de54676daabe2035ebff0d6b2dceefcf"
+    },
+    "core": {
+      "commit": "973d9ef5acd2b9beb03e399dec1511a41fc941b5",
+      "version": "0.31.1.post1.dev163+g973d9ef5a.empty",
+      "wheel_sha256": "97b27b347889d6e140415e674509519f2ed65848cc51e4b888189fb28f29671a"
+    },
+    "hardware": "2x Ascend 910B2",
+    "physical_devices": [
+      3,
+      6
+    ],
+    "tensor_parallel_size": 2
+  },
+  "installation_orders": [
+    {
+      "order_id": "profiler-then-kvcompress",
+      "pip_order": [
+        "lifecycle_profiler",
+        "kvcompress"
+      ]
+    },
+    {
+      "order_id": "kvcompress-then-profiler",
+      "pip_order": [
+        "kvcompress",
+        "lifecycle_profiler"
+      ]
+    }
+  ],
+  "kvcompress": {
+    "method": "triattention",
+    "method_config": {
+      "auto_calibrate": false,
+      "kv_budget": 1024,
+      "layer_aggregation": "mean",
+      "min_output_tokens_for_compression": 16,
+      "position_policy": "v3",
+      "position_segments": 8,
+      "protected_prefix_window": 128,
+      "protected_recent_window": 512,
+      "recompute_window": 128,
+      "score_aggregation": "mean",
+      "score_chunk_size": 1024,
+      "score_layer_stride": 8
+    },
+    "stats_sha256": "a9db411b48ea39d0953dd64b94f87995ca61412f4b3d8fb24c4f7f38fa2a40cf"
+  },
+  "members": [
+    {
+      "commit": "88ffdce5fc6639c0b7b86a54d197f7394705c54b",
+      "id": "lifecycle_profiler",
+      "wheel_sha256": "8d77e6d98969831e994de4f7b7e4e9cf45b97ac9eeafc94da101543c9bee7891"
+    },
+    {
+      "commit": "00cc78dc7f3491eecbc79c5068e29aed9f59afc3",
+      "id": "kvcompress",
+      "tree": "8661770207782c912316ad9e5529bf3dbfcce563",
+      "wheel_sha256": "b859f165140de0390f2e6a794a1dc36adb6de4c686e40c3dfc66b3bde11f06c3"
+    }
+  ],
+  "model": {
+    "dtype": "bfloat16",
+    "max_model_len": 2048,
+    "path": "/data/shared_models/Qwen--Qwen2.5-14B-Instruct",
+    "served_name_template": "ecpa-h2-compression-{order_id}"
+  },
+  "nonclaims": [
+    "performance benefit",
+    "compression quality parity",
+    "H3",
+    "H4"
+  ],
+  "oracle_sha256": "sha256:01d5921a85656b86f0a38b9906fb3f35c274bb3e3cb2b8e04df74de14accfa3f",
+  "required_evidence": [
+    "exact frozen prompt token count",
+    "matching scheduler commit and worker acknowledgement",
+    "EngineCore lifecycle trace and process epoch",
+    "HTTP response",
+    "owned process cleanup",
+    "NPU before and after cleanup"
+  ],
+  "runner": {
+    "path": "/root/ecpa-audit-20261013/run_profiler_kvcompress_transaction_tp2.py",
+    "sha256": "331fbe4a444332a396a04c0ea7f73e5c32a1a8d9d254c374822dffc4b26bc074"
+  },
+  "schema": "ecpa-h2-compression-transaction-campaign/v1",
+  "workload": {
+    "endpoint": "/v1/completions",
+    "expected_prompt_tokens": 1201,
+    "max_tokens": 24,
+    "prompt_repeat": 200,
+    "prompt_sha256": "sha256:385aff7e785af5196d2358414a4f791928ec44b6bc5e11765fbf1d0450c5a727",
+    "prompt_unit": "Evidence-bound compression transaction sentence. ",
+    "seed": 20261013,
+    "temperature": 0
+  }
+}

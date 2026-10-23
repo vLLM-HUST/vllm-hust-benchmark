@@ -1,12 +1,14 @@
 # Targeted MOD original custody
 
 This collection continues [issue 326](https://github.com/vLLM-HUST/vllm-hust-benchmark/issues/326).
-It preserves the KVCompress bilingual early-version result report and Extension Manager's
-process-supervision acceptance report/companion record. KVCompress's source license is included;
-Extension Manager has no tracked LICENSE file in this source tree (its package declares Apache-2.0).
-Each manifest binds the public source repository, full source commit, Git blob, length and SHA256.
-Failures, diagnostic/eager identity, original version labels and claim limits are unchanged. Custody
-is not new hardware acceptance or a serving-performance claim.
+The [Manager/legacy consumer inventory](MANAGER-CONSUMERS-20261024.md) separates migrated real
+archives, retained synthetic fixtures and still-coupled consumers. It preserves the KVCompress
+bilingual early-version result report and Extension Manager's process-supervision acceptance
+report/companion record. KVCompress's source license is included; Extension Manager has no tracked
+LICENSE file in this source tree (its package declares Apache-2.0). Each manifest binds the public
+source repository, full source commit, Git blob, length and SHA256. Failures, diagnostic/eager
+identity, original version labels and claim limits are unchanged. Custody is not new hardware
+acceptance or a serving-performance claim.
 
 - [KVCompress original manifest](compress/manifest.json)
 - [Extension Manager original manifest](manager/manifest.json)
@@ -19,10 +21,19 @@ is not new hardware acceptance or a serving-performance claim.
   results and five H1-r5 paper records. Schemas and executable validators remain implementation;
   semantic, hash and negative assertions must survive migration. Other large experimental artifacts
   remain a separate queue, not permission to remove whole experiments directories.
+- [Manager additional experimental archives](manager-experiments/manifest.json): exposure-gate,
+  false-effective, real-MOD-composition and bounded-transaction collections, frozen from
+  `00797c39344caa98db10940557f72c3b9cb3d9d6`. Synthetic/reference records remain explicitly
+  synthetic; their source fixtures need not be removed. Original failures, qualification-only
+  boundaries and source snapshots are preserved. Large formal-campaign archives and executable
+  generators remain separate consumer work, not authorized wholesale deletion.
 - [PyramidKV remaining current originals](pyramid-current/manifest.json): 98 records plus LICENSE
   and NOTICE, frozen from source commit `534bcc0` before consumer edits. Together with the existing
   paired capsule these preserve all 118 current evidence files. Original SHA256SUMS and their
   covered README files are retained byte-for-byte, rather than re-signed after link edits.
+- [PyramidKV legacy originals](pyramid-legacy/manifest.json): five legacy records/navigation
+  documents plus LICENSE and NOTICE; the original EAGER/prefix-caching identity remains
+  archive-only.
 - Existing [PyramidKV paired originals](../mod-git-20261022/pyramidkv-website-source/manifest.json)
   and [vSpec originals](../vspec-browser-raw-20261022/manifest.json) are reused rather than uploaded
   again.

@@ -1,0 +1,61 @@
+{
+  "schema_version": "0.2-experimental",
+  "extension_id": "org.vllm-hust.unified-communication",
+  "extension_version": "0.1.0.dev0",
+  "kind": "in_process_plugin",
+  "host": {
+    "provider": "vllm",
+    "name": "vllm",
+    "version_range": ">=0"
+  },
+  "runtime": {
+    "type": "python",
+    "process_scope": "vllm-processes",
+    "isolation": "trusted_in_process"
+  },
+  "lifecycle_owner": "vllm",
+  "protocols": [
+    {"name": "vllm.communication.backend", "version_range": ">=1,<2"},
+    {"name": "vllm.communication.group", "version_range": ">=1,<2"},
+    {"name": "vllm.communication.collectives", "version_range": ">=1,<2"},
+    {"name": "vllm.communication.topology", "version_range": ">=1,<2"}
+  ],
+  "components": [
+    {
+      "component_id": "communication-backend-registry",
+      "implementation_ref": "vllm_hust_unified_comm.contracts:CommBackendRegistry",
+      "contracts": ["vllm.communication.backend.v1"],
+      "execution_planes": ["worker"],
+      "isolation": "trusted_in_process",
+      "permissions": []
+    },
+    {
+      "component_id": "communication-strategy",
+      "implementation_ref": "vllm_hust_unified_comm.strategy:DefaultStrategy",
+      "contracts": ["vllm.communication.topology.v1", "vllm.communication.collectives.v1"],
+      "execution_planes": ["worker"],
+      "isolation": "trusted_in_process",
+      "permissions": []
+    }
+  ],
+  "implementation": [
+    {
+      "type": "python_module",
+      "module": "vllm_hust_unified_comm.contracts",
+      "object": "CommBackendRegistry",
+      "status": "import_only"
+    },
+    {
+      "type": "python_module",
+      "module": "vllm_hust_unified_comm.strategy",
+      "object": "DefaultStrategy",
+      "status": "import_only"
+    }
+  ],
+  "requires_services": [],
+  "activation": {
+    "entry_points": [],
+    "environment": {},
+    "additional_config": {}
+  }
+}

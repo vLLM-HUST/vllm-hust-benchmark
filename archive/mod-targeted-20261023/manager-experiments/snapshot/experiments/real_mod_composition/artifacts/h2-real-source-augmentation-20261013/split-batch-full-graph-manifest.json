@@ -1,0 +1,47 @@
+{
+  "schema_version": "0.2-experimental",
+  "extension_id": "org.vllm-hust.split-batch-full-graph",
+  "extension_version": "0.1.0.dev0",
+  "kind": "in_process_plugin",
+  "host": {
+    "provider": "vllm",
+    "name": "vllm-ascend",
+    "version_range": ">=0"
+  },
+  "runtime": {
+    "type": "python",
+    "process_scope": "vllm-processes",
+    "isolation": "trusted_in_process"
+  },
+  "lifecycle_owner": "vllm",
+  "protocols": [
+    {"name": "vllm.graph.runtime-key", "version_range": ">=1,<2"},
+    {"name": "vllm.forward.split-context", "version_range": ">=1,<2"},
+    {"name": "vllm.ascend.graph-pool", "version_range": ">=1,<2"},
+    {"name": "vllm.worker.split-executor", "version_range": ">=1,<2"}
+  ],
+  "components": [
+    {
+      "component_id": "dual-pad-planner",
+      "implementation_ref": "vllm_ascend_split_batch.planner:plan_dual_pad",
+      "contracts": ["vllm.graph.runtime-key.v1", "vllm.forward.split-context.v1", "vllm.worker.split-executor.v1"],
+      "execution_planes": ["worker", "device"],
+      "isolation": "trusted_in_process",
+      "permissions": ["device_access"]
+    }
+  ],
+  "implementation": [
+    {
+      "type": "python_module",
+      "module": "vllm_ascend_split_batch.planner",
+      "object": "plan_dual_pad",
+      "status": "import_only"
+    }
+  ],
+  "requires_services": [],
+  "activation": {
+    "entry_points": [],
+    "environment": {},
+    "additional_config": {}
+  }
+}

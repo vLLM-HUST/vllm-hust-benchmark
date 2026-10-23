@@ -1,0 +1,28 @@
+{
+  "campaign_sha256": "sha256:0e6d657a30f0ed5977c6451797c4175c6a14e5e56e44dfc21afca4f2c22d6507",
+  "explicitly_unverified": [
+    "No real Host 973d9ef5 / Ascend 873584026 service was launched by this independent static review.",
+    "Campaign health, completion, process-owned request_finished_observed receipt, KVCompress bind log, process identities, NPU quiescence, port closure, and both installation-order executions remain runtime evidence to be produced elsewhere.",
+    "The campaign workload cannot exercise a KV compression transaction or device mutation because max_model_len is below the configured threshold; compression correctness and cleanup after a real transaction remain unverified here.",
+    "Campaign wheel files and their declared SHA-256 values were not available as inputs to this source review; source commits/trees/blobs were verified instead.",
+    "The configured calibration artifact bytes, KVCompress config bytes, model weights, native Ascend operators, Triton runtime, Transformers/Accelerate packages, and Extension Manager stored configuration were not independently audited.",
+    "No composition guarantee is made for a third plugin, in-process hot unload/reload, a different host/Ascend commit, KV transfer, model-native compression, unsupported runner type, or a changed method signature.",
+    "Profiler optional KV-recovery observer-factory integration is unavailable in frozen Host 973d9ef5 because vllm/v1/kv_recovery_profile.py is absent; the code catches that optional registration failure. Base EventBus lifecycle profiling remains the reviewed surface."
+  ],
+  "labels": [
+    {
+      "case_id": "kvcompress-lifecycle-profiler-host031-tp2",
+      "decision": "admit",
+      "scope": "physical-ownership compatibility under exact frozen source and fresh-process conditions"
+    }
+  ],
+  "review": {
+    "independence_method": "Read frozen Git objects directly with git show/git grep/git rev-parse; read only the frozen campaign metadata supplied after the source review began; did not use campaign formal_runs, which is empty.",
+    "kind": "automated-independent",
+    "source_receipt_sha256": "sha256:fe47203408de25ac91e3a68ad9dd2caf3935077a859598dca06680c572877b79",
+    "source_review_sha256": "sha256:d7c3537592a906f8b16dacb930b9430d2327bbacac47d70d1733787adaf9069f",
+    "verdict": "PASS"
+  },
+  "schema": "ecpa-h2-real-mod-oracle/v1",
+  "status": "automated-independent-reviewed"
+}

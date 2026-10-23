@@ -1,0 +1,1295 @@
+{
+  "campaign_sha256": "sha256:c1b7106aaa36522de976512d1db19dd2a977918f517577b8aa95f6272bfa3edd",
+  "captured_utc": "2026-10-13T17:07:04.936400+00:00",
+  "classification": "real-source-manager-prelaunch-predictions-not-runtime",
+  "confusion_matrix": {
+    "abstained_definite_cases": [
+      "pair-profiler-kvcompress-vllm-0233"
+    ],
+    "excluded_cases": [
+      "single-bidkv-vllm-0281",
+      "pair-profiler-kvcompress-vllm-0233",
+      "pair-diffspec-kvcompress-ascend-0251"
+    ],
+    "false_negative": 0,
+    "false_positive": 0,
+    "score_eligible_cases": 2,
+    "true_negative": 2,
+    "true_positive": 0
+  },
+  "existing_incompatible_pair": {
+    "artifact": "experiments/real_mod_composition/artifacts/h2-knorm-prelaunch-reject-20261013.json",
+    "formal_admission_sha256": "sha256:19f677fadb8a2c29690e851bcadaf92ec3fa87a1c527c1467b170cf2457b7a74",
+    "manager_decision": "reject",
+    "oracle_decision": "reject",
+    "sha256": "sha256:2e85811ee379cd420dd8a19a388a39717a117d5a6b3d7f187498a9658b514456"
+  },
+  "h2_acceptance_complete": false,
+  "manager": {
+    "commit": "08ab570fb00c4206b8d2c6c296ac9580b0f892bc",
+    "tree": "7f49e308bd1e68cd51a1129ca09eb635bf4f0a3a"
+  },
+  "metrics": {
+    "precision": null,
+    "recall": null,
+    "status": "not-computable-no-score-eligible-manager-admit"
+  },
+  "nonclaims": [
+    "not runtime execution",
+    "not performance",
+    "not a complete H2 precision/recall result",
+    "no unavailable or host-range-mismatch case is forced into a binary label"
+  ],
+  "oracle_sha256": "sha256:5eaf3a00e46780bf2d78900f981aa4ec114ee1d306be5e06d93371a2ded05ac5",
+  "predictions": [
+    {
+      "case_id": "single-bidkv-vllm-0281",
+      "command": {
+        "argv": [
+          "/root/ecpa-h2-formal-reject-env-kv-kn-v1/bin/python",
+          "/root/extension-manager-h2-corpus-predictions/experiments/real_mod_composition/evaluate_h2_source_corpus.py",
+          "single-bidkv-vllm-0281"
+        ],
+        "exit_code": 0,
+        "stderr": "",
+        "stderr_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout": "{\n  \"campaign_sha256\": \"sha256:c1b7106aaa36522de976512d1db19dd2a977918f517577b8aa95f6272bfa3edd\",\n  \"case_id\": \"single-bidkv-vllm-0281\",\n  \"category\": \"single_mod\",\n  \"classification\": \"real-source-prelaunch-manager-prediction-not-runtime\",\n  \"composition_error\": null,\n  \"declared_surface_decision\": \"unavailable\",\n  \"host_launch_command_invoked\": false,\n  \"manager_commit\": \"08ab570fb00c4206b8d2c6c296ac9580b0f892bc\",\n  \"members\": [\n    {\n      \"activation_blocker\": null,\n      \"bundle_id\": \"org.vllm-hust.bidkv\",\n      \"commit\": \"6f1fc75d694c6901051bdeae784d18b836c6fa70\",\n      \"compatibility\": null,\n      \"compatibility_evidence\": [\n        \"host version 0.28.1rc1.dev319 satisfies the declared range\",\n        \"host API 1.0 satisfies the declared range\",\n        \"protocol vllm.preemption-policy version is unavailable\"\n      ],\n      \"declared_host_range\": \">=0.28.1rc1.dev319,<0.29\",\n      \"host_name\": \"vllm\",\n      \"host_version\": \"0.28.1rc1.dev319\",\n      \"id\": \"bidkv\",\n      \"manifest_blob\": \"3aefff871f0b818a98168f907da3e33f17b66276\",\n      \"manifest_sha256\": \"sha256:a7d3d7815a537a3e0c1b993bc2037b49d346c238572cc016b4931491a9dd4aa9\",\n      \"plan\": {\n        \"actions\": [\n          {\n            \"details\": {\n              \"enabled\": false\n            },\n            \"lifecycle_owner\": \"vllm\",\n            \"mutating\": false,\n            \"operation\": \"configure_launch\",\n            \"target\": \"vllm\"\n          }\n        ],\n        \"config_claims\": [\n          {\n            \"path\": [\n              \"environment\",\n              \"BIDKV_UTILITY_CASCADE_GAIN_RATIO\"\n            ],\n            \"value\": \"1.25\"\n          },\n          {\n            \"path\": [\n              \"environment\",\n              \"BIDKV_UTILITY_ENABLE\"\n            ],\n            \"value\": \"1\"\n          },\n          {\n            \"path\": [\n              \"environment\",\n              \"BIDKV_UTILITY_LIVENESS_PREEMPTIONS\"\n            ],\n            \"value\": \"2\"\n          },\n          {\n            \"path\": [\n              \"environment\",\n              \"BIDKV_UTILITY_STRATEGY\"\n            ],\n            \"value\": \"bidkv\"\n          },\n          {\n            \"path\": [\n              \"vllm_options\",\n              \"--preemption-policy\"\n            ],\n            \"value\": \"bidkv.adapters.vllm_hust.selector.BidkvPreemptionPolicy\"\n          }\n        ],\n        \"extension_id\": \"org.vllm-hust.bidkv\",\n        \"generated_config\": {\n          \"additional_config\": {},\n          \"environment\": {\n            \"BIDKV_UTILITY_CASCADE_GAIN_RATIO\": \"1.25\",\n            \"BIDKV_UTILITY_ENABLE\": \"1\",\n            \"BIDKV_UTILITY_LIVENESS_PREEMPTIONS\": \"2\",\n            \"BIDKV_UTILITY_STRATEGY\": \"bidkv\"\n          },\n          \"native_extension_manifest\": {\n            \"bundle_id\": \"org.vllm-hust.bidkv\",\n            \"bundle_version\": \"0.2.1\",\n            \"components\": [\n              {\n                \"component_id\": \"victim-selector\",\n                \"contracts\": [\n                  \"vllm.preemption-policy.v1\"\n                ],\n                \"execution_planes\": [\n                  \"scheduler\"\n                ],\n                \"implementation_ref\": \"bidkv.adapters.vllm_hust.selector:BidkvPreemptionPolicy\",\n                \"isolation\": \"trusted_in_process\",\n                \"permissions\": []\n              }\n            ],\n            \"host_api_range\": \">=1,<2\",\n            \"schema_version\": \"1.0\"\n          },\n          \"user_config\": {},\n          \"vllm_json_options\": {},\n          \"vllm_options\": {\n            \"--preemption-policy\": \"bidkv.adapters.vllm_hust.selector.BidkvPreemptionPolicy\"\n          }\n        },\n        \"provider\": \"vllm\",\n        \"resource_claims\": [\n          {\n            \"mode\": \"exclusive\",\n            \"resource\": \"vllm.scheduler.preemption-policy\",\n            \"scope\": \"vllm-process\"\n          }\n        ],\n        \"warnings\": [\n          \"in-process scheduler activation requires explicit host and protocol compatibility evidence; run refuses unverified policies\"\n        ]\n      },\n      \"tree\": \"fb91042005020189c30cb525e811af89e511be88\"\n    }\n  ],\n  \"oracle_decision\": \"admit\",\n  \"performance_claim\": false,\n  \"prediction\": \"unavailable\",\n  \"reason\": \"frozen tuple lacks a required host or protocol capability receipt\",\n  \"runtime_claim\": false,\n  \"schema\": \"ecpa-h2-source-corpus-manager-prediction/v1\",\n  \"score_eligible\": false\n}\n",
+        "stdout_sha256": "sha256:df63af7c2e7abd3e891afaf1fd2799627a3286d8f6da01e66752cdac656cb8f2"
+      },
+      "host_process_started": false,
+      "host_processes_after": [],
+      "host_processes_before": [],
+      "npu_after": {
+        "argv": [
+          "npu-smi",
+          "info"
+        ],
+        "exit_code": 0,
+        "no_running_processes": true,
+        "stderr": "",
+        "stderr_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout": "+------------------------------------------------------------------------------------------------+\n| npu-smi 25.2.1                   Version: 25.2.1                                               |\n+---------------------------+---------------+----------------------------------------------------+\n| NPU   Name                | Health        | Power(W)    Temp(C)           Hugepages-Usage(page)|\n| Chip                      | Bus-Id        | AICore(%)   Memory-Usage(MB)  HBM-Usage(MB)        |\n+===========================+===============+====================================================+\n| 3     910B2               | OK            | 99.3        38                0    / 0             |\n| 0                         | 0000:82:00.0  | 0           0    / 0          3430 / 65536         |\n+===========================+===============+====================================================+\n| 6     910B2               | OK            | 90.6        41                0    / 0             |\n| 0                         | 0000:41:00.0  | 0           0    / 0          3429 / 65536         |\n+===========================+===============+====================================================+\n+---------------------------+---------------+----------------------------------------------------+\n| NPU     Chip              | Process id    | Process name             | Process memory(MB)      |\n+===========================+===============+====================================================+\n| No running processes found in NPU 3                                                            |\n+===========================+===============+====================================================+\n| No running processes found in NPU 6                                                            |\n+===========================+===============+====================================================+\n",
+        "stdout_sha256": "sha256:ec20ac251213a098cba5d91cfa37260f7652b09e4d7f4e73f5a75fc55a19c433"
+      },
+      "npu_before": {
+        "argv": [
+          "npu-smi",
+          "info"
+        ],
+        "exit_code": 0,
+        "no_running_processes": true,
+        "stderr": "",
+        "stderr_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout": "+------------------------------------------------------------------------------------------------+\n| npu-smi 25.2.1                   Version: 25.2.1                                               |\n+---------------------------+---------------+----------------------------------------------------+\n| NPU   Name                | Health        | Power(W)    Temp(C)           Hugepages-Usage(page)|\n| Chip                      | Bus-Id        | AICore(%)   Memory-Usage(MB)  HBM-Usage(MB)        |\n+===========================+===============+====================================================+\n| 3     910B2               | OK            | 99.2        38                0    / 0             |\n| 0                         | 0000:82:00.0  | 0           0    / 0          3430 / 65536         |\n+===========================+===============+====================================================+\n| 6     910B2               | OK            | 90.6        41                0    / 0             |\n| 0                         | 0000:41:00.0  | 0           0    / 0          3429 / 65536         |\n+===========================+===============+====================================================+\n+---------------------------+---------------+----------------------------------------------------+\n| NPU     Chip              | Process id    | Process name             | Process memory(MB)      |\n+===========================+===============+====================================================+\n| No running processes found in NPU 3                                                            |\n+===========================+===============+====================================================+\n| No running processes found in NPU 6                                                            |\n+===========================+===============+====================================================+\n",
+        "stdout_sha256": "sha256:58987f7ac458a2c4f48b1de129525bde55d15b3b4dad1ceeade1a9050638007c"
+      },
+      "result": {
+        "campaign_sha256": "sha256:c1b7106aaa36522de976512d1db19dd2a977918f517577b8aa95f6272bfa3edd",
+        "case_id": "single-bidkv-vllm-0281",
+        "category": "single_mod",
+        "classification": "real-source-prelaunch-manager-prediction-not-runtime",
+        "composition_error": null,
+        "declared_surface_decision": "unavailable",
+        "host_launch_command_invoked": false,
+        "manager_commit": "08ab570fb00c4206b8d2c6c296ac9580b0f892bc",
+        "members": [
+          {
+            "activation_blocker": null,
+            "bundle_id": "org.vllm-hust.bidkv",
+            "commit": "6f1fc75d694c6901051bdeae784d18b836c6fa70",
+            "compatibility": null,
+            "compatibility_evidence": [
+              "host version 0.28.1rc1.dev319 satisfies the declared range",
+              "host API 1.0 satisfies the declared range",
+              "protocol vllm.preemption-policy version is unavailable"
+            ],
+            "declared_host_range": ">=0.28.1rc1.dev319,<0.29",
+            "host_name": "vllm",
+            "host_version": "0.28.1rc1.dev319",
+            "id": "bidkv",
+            "manifest_blob": "3aefff871f0b818a98168f907da3e33f17b66276",
+            "manifest_sha256": "sha256:a7d3d7815a537a3e0c1b993bc2037b49d346c238572cc016b4931491a9dd4aa9",
+            "plan": {
+              "actions": [
+                {
+                  "details": {
+                    "enabled": false
+                  },
+                  "lifecycle_owner": "vllm",
+                  "mutating": false,
+                  "operation": "configure_launch",
+                  "target": "vllm"
+                }
+              ],
+              "config_claims": [
+                {
+                  "path": [
+                    "environment",
+                    "BIDKV_UTILITY_CASCADE_GAIN_RATIO"
+                  ],
+                  "value": "1.25"
+                },
+                {
+                  "path": [
+                    "environment",
+                    "BIDKV_UTILITY_ENABLE"
+                  ],
+                  "value": "1"
+                },
+                {
+                  "path": [
+                    "environment",
+                    "BIDKV_UTILITY_LIVENESS_PREEMPTIONS"
+                  ],
+                  "value": "2"
+                },
+                {
+                  "path": [
+                    "environment",
+                    "BIDKV_UTILITY_STRATEGY"
+                  ],
+                  "value": "bidkv"
+                },
+                {
+                  "path": [
+                    "vllm_options",
+                    "--preemption-policy"
+                  ],
+                  "value": "bidkv.adapters.vllm_hust.selector.BidkvPreemptionPolicy"
+                }
+              ],
+              "extension_id": "org.vllm-hust.bidkv",
+              "generated_config": {
+                "additional_config": {},
+                "environment": {
+                  "BIDKV_UTILITY_CASCADE_GAIN_RATIO": "1.25",
+                  "BIDKV_UTILITY_ENABLE": "1",
+                  "BIDKV_UTILITY_LIVENESS_PREEMPTIONS": "2",
+                  "BIDKV_UTILITY_STRATEGY": "bidkv"
+                },
+                "native_extension_manifest": {
+                  "bundle_id": "org.vllm-hust.bidkv",
+                  "bundle_version": "0.2.1",
+                  "components": [
+                    {
+                      "component_id": "victim-selector",
+                      "contracts": [
+                        "vllm.preemption-policy.v1"
+                      ],
+                      "execution_planes": [
+                        "scheduler"
+                      ],
+                      "implementation_ref": "bidkv.adapters.vllm_hust.selector:BidkvPreemptionPolicy",
+                      "isolation": "trusted_in_process",
+                      "permissions": []
+                    }
+                  ],
+                  "host_api_range": ">=1,<2",
+                  "schema_version": "1.0"
+                },
+                "user_config": {},
+                "vllm_json_options": {},
+                "vllm_options": {
+                  "--preemption-policy": "bidkv.adapters.vllm_hust.selector.BidkvPreemptionPolicy"
+                }
+              },
+              "provider": "vllm",
+              "resource_claims": [
+                {
+                  "mode": "exclusive",
+                  "resource": "vllm.scheduler.preemption-policy",
+                  "scope": "vllm-process"
+                }
+              ],
+              "warnings": [
+                "in-process scheduler activation requires explicit host and protocol compatibility evidence; run refuses unverified policies"
+              ]
+            },
+            "tree": "fb91042005020189c30cb525e811af89e511be88"
+          }
+        ],
+        "oracle_decision": "admit",
+        "performance_claim": false,
+        "prediction": "unavailable",
+        "reason": "frozen tuple lacks a required host or protocol capability receipt",
+        "runtime_claim": false,
+        "schema": "ecpa-h2-source-corpus-manager-prediction/v1",
+        "score_eligible": false
+      }
+    },
+    {
+      "case_id": "pair-profiler-kvcompress-vllm-0233",
+      "command": {
+        "argv": [
+          "/root/ecpa-h2-formal-reject-env-kv-kn-v1/bin/python",
+          "/root/extension-manager-h2-corpus-predictions/experiments/real_mod_composition/evaluate_h2_source_corpus.py",
+          "pair-profiler-kvcompress-vllm-0233"
+        ],
+        "exit_code": 0,
+        "stderr": "",
+        "stderr_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout": "{\n  \"campaign_sha256\": \"sha256:c1b7106aaa36522de976512d1db19dd2a977918f517577b8aa95f6272bfa3edd\",\n  \"case_id\": \"pair-profiler-kvcompress-vllm-0233\",\n  \"category\": \"compatible_pair\",\n  \"classification\": \"real-source-prelaunch-manager-prediction-not-runtime\",\n  \"composition_error\": null,\n  \"declared_surface_decision\": \"unavailable\",\n  \"host_launch_command_invoked\": false,\n  \"manager_commit\": \"08ab570fb00c4206b8d2c6c296ac9580b0f892bc\",\n  \"members\": [\n    {\n      \"activation_blocker\": null,\n      \"bundle_id\": \"org.vllm-hust.request-lifecycle-profiler\",\n      \"commit\": \"8b8245cdba61b2ccc92a02c81b158c8fc9f90d14\",\n      \"compatibility\": null,\n      \"compatibility_evidence\": [\n        \"host version 0.23.3 satisfies the declared range\",\n        \"host API 1.0 satisfies the declared range\",\n        \"protocol vllm.general_plugins is not independently versioned; compatibility is governed by host ranges and acceptance evidence\",\n        \"protocol vllm.request-lifecycle-events version is unavailable\"\n      ],\n      \"declared_host_range\": \">=0.23,<0.24\",\n      \"host_name\": \"vllm\",\n      \"host_version\": \"0.23.3\",\n      \"id\": \"lifecycle_profiler\",\n      \"manifest_blob\": \"1fc7b3df1c2cc4f4d609bd70367c41c5e9285bc0\",\n      \"manifest_sha256\": \"sha256:650160eb2c69a93b1bfc09d1ebc7728b1045b5411d1be817c216038121028c87\",\n      \"plan\": {\n        \"actions\": [\n          {\n            \"details\": {\n              \"enabled\": false\n            },\n            \"lifecycle_owner\": \"vllm\",\n            \"mutating\": false,\n            \"operation\": \"configure_launch\",\n            \"target\": \"vllm\"\n          }\n        ],\n        \"config_claims\": [\n          {\n            \"path\": [\n              \"vllm_plugins\",\n              \"request_lifecycle_profiler\"\n            ],\n            \"value\": true\n          }\n        ],\n        \"extension_id\": \"org.vllm-hust.request-lifecycle-profiler\",\n        \"generated_config\": {\n          \"additional_config\": {},\n          \"environment\": {},\n          \"native_extension_manifest\": {\n            \"bundle_id\": \"org.vllm-hust.request-lifecycle-profiler\",\n            \"bundle_version\": \"0.1.1\",\n            \"components\": [\n              {\n                \"component_id\": \"request-lifecycle-profiler-native-sink\",\n                \"contracts\": [\n                  \"vllm.request-lifecycle-events.v1\"\n                ],\n                \"execution_planes\": [\n                  \"api\",\n                  \"scheduler\"\n                ],\n                \"implementation_ref\": \"vllm_request_lifecycle_profiler.plugin:register_plugin\",\n                \"isolation\": \"trusted_in_process\",\n                \"permissions\": []\n              }\n            ],\n            \"host_api_range\": \">=1,<2\",\n            \"schema_version\": \"1.0\"\n          },\n          \"user_config\": {},\n          \"vllm_json_options\": {},\n          \"vllm_plugins\": [\n            \"request_lifecycle_profiler\"\n          ]\n        },\n        \"provider\": \"vllm\",\n        \"resource_claims\": [\n          {\n            \"mode\": \"shared\",\n            \"resource\": \"vllm.request-lifecycle-events.observer\",\n            \"scope\": \"vllm-process\"\n          }\n        ],\n        \"warnings\": []\n      },\n      \"tree\": \"d3b752078d74a9d384de35b5010d7ac9bd3742e6\"\n    },\n    {\n      \"activation_blocker\": null,\n      \"bundle_id\": \"org.vllm-hust.ascend-kvcompress\",\n      \"commit\": \"00cc78dc7f3491eecbc79c5068e29aed9f59afc3\",\n      \"compatibility\": true,\n      \"compatibility_evidence\": [\n        \"host version 0.23.3 satisfies the declared range\",\n        \"host API 1.0 satisfies the declared range\",\n        \"protocol vllm.general_plugins is not independently versioned; compatibility is governed by host ranges and acceptance evidence\"\n      ],\n      \"declared_host_range\": \">=0.23.0.post1,<0.26,!=0.24.*,!=0.25.0.*\",\n      \"host_name\": \"vllm-ascend\",\n      \"host_version\": \"0.23.3\",\n      \"id\": \"kvcompress\",\n      \"manifest_blob\": \"fd6b1b703ba7eec7587c16d27370c5b75801c89d\",\n      \"manifest_sha256\": \"sha256:ad0a3e62602108e54503bb81c8fda162a730e1a422fe940d09a2463ee2d0eb54\",\n      \"plan\": {\n        \"actions\": [\n          {\n            \"details\": {\n              \"enabled\": false\n            },\n            \"lifecycle_owner\": \"vllm\",\n            \"mutating\": false,\n            \"operation\": \"configure_launch\",\n            \"target\": \"vllm\"\n          }\n        ],\n        \"config_claims\": [\n          {\n            \"path\": [\n              \"environment\",\n              \"VLLM_ASCEND_KVCOMPRESS_ENABLED\"\n            ],\n            \"value\": \"1\"\n          },\n          {\n            \"path\": [\n              \"vllm_plugins\",\n              \"ascend_kvcompress\"\n            ],\n            \"value\": true\n          }\n        ],\n        \"extension_id\": \"org.vllm-hust.ascend-kvcompress\",\n        \"generated_config\": {\n          \"additional_config\": {},\n          \"environment\": {\n            \"VLLM_ASCEND_KVCOMPRESS_ENABLED\": \"1\"\n          },\n          \"native_extension_manifest\": {\n            \"bundle_id\": \"org.vllm-hust.ascend-kvcompress\",\n            \"bundle_version\": \"0.9.0\",\n            \"components\": [\n              {\n                \"component_id\": \"ascend-kvcompress\",\n                \"contracts\": [\n                  \"vllm.general_plugins\"\n                ],\n                \"execution_planes\": [\n                  \"scheduler\",\n                  \"worker\",\n                  \"device\"\n                ],\n                \"implementation_ref\": \"vllm_ascend_kvcompress.plugin:register\",\n                \"isolation\": \"trusted_in_process\",\n                \"permissions\": [\n                  \"device_access\",\n                  \"filesystem_read\",\n                  \"filesystem_write\",\n                  \"network_egress\"\n                ]\n              }\n            ],\n            \"host_api_range\": \">=1,<2\",\n            \"schema_version\": \"1.0\"\n          },\n          \"user_config\": {},\n          \"vllm_json_options\": {},\n          \"vllm_plugins\": [\n            \"ascend_kvcompress\"\n          ]\n        },\n        \"provider\": \"vllm\",\n        \"resource_claims\": [\n          {\n            \"mode\": \"exclusive\",\n            \"resource\": \"vllm-ascend.kv-cache.mutation\",\n            \"scope\": \"vllm-process\"\n          }\n        ],\n        \"warnings\": []\n      },\n      \"tree\": \"8661770207782c912316ad9e5529bf3dbfcce563\"\n    }\n  ],\n  \"oracle_decision\": \"admit\",\n  \"performance_claim\": false,\n  \"prediction\": \"unavailable\",\n  \"reason\": \"frozen tuple lacks a required host or protocol capability receipt\",\n  \"runtime_claim\": false,\n  \"schema\": \"ecpa-h2-source-corpus-manager-prediction/v1\",\n  \"score_eligible\": false\n}\n",
+        "stdout_sha256": "sha256:3b56e8e01aa4d9ff902e341e906b0b8ed263b9d23eae4fb9f2ad6a3816d10c7e"
+      },
+      "host_process_started": false,
+      "host_processes_after": [],
+      "host_processes_before": [],
+      "npu_after": {
+        "argv": [
+          "npu-smi",
+          "info"
+        ],
+        "exit_code": 0,
+        "no_running_processes": true,
+        "stderr": "",
+        "stderr_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout": "+------------------------------------------------------------------------------------------------+\n| npu-smi 25.2.1                   Version: 25.2.1                                               |\n+---------------------------+---------------+----------------------------------------------------+\n| NPU   Name                | Health        | Power(W)    Temp(C)           Hugepages-Usage(page)|\n| Chip                      | Bus-Id        | AICore(%)   Memory-Usage(MB)  HBM-Usage(MB)        |\n+===========================+===============+====================================================+\n| 3     910B2               | OK            | 99.1        38                0    / 0             |\n| 0                         | 0000:82:00.0  | 0           0    / 0          3430 / 65536         |\n+===========================+===============+====================================================+\n| 6     910B2               | OK            | 90.7        41                0    / 0             |\n| 0                         | 0000:41:00.0  | 0           0    / 0          3429 / 65536         |\n+===========================+===============+====================================================+\n+---------------------------+---------------+----------------------------------------------------+\n| NPU     Chip              | Process id    | Process name             | Process memory(MB)      |\n+===========================+===============+====================================================+\n| No running processes found in NPU 3                                                            |\n+===========================+===============+====================================================+\n| No running processes found in NPU 6                                                            |\n+===========================+===============+====================================================+\n",
+        "stdout_sha256": "sha256:fc5595e8a2fe23acd91952b82e45d4c9ae8ff95d2ccbf65501c990ff864a2125"
+      },
+      "npu_before": {
+        "argv": [
+          "npu-smi",
+          "info"
+        ],
+        "exit_code": 0,
+        "no_running_processes": true,
+        "stderr": "",
+        "stderr_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout": "+------------------------------------------------------------------------------------------------+\n| npu-smi 25.2.1                   Version: 25.2.1                                               |\n+---------------------------+---------------+----------------------------------------------------+\n| NPU   Name                | Health        | Power(W)    Temp(C)           Hugepages-Usage(page)|\n| Chip                      | Bus-Id        | AICore(%)   Memory-Usage(MB)  HBM-Usage(MB)        |\n+===========================+===============+====================================================+\n| 3     910B2               | OK            | 99.4        38                0    / 0             |\n| 0                         | 0000:82:00.0  | 0           0    / 0          3430 / 65536         |\n+===========================+===============+====================================================+\n| 6     910B2               | OK            | 90.8        41                0    / 0             |\n| 0                         | 0000:41:00.0  | 0           0    / 0          3429 / 65536         |\n+===========================+===============+====================================================+\n+---------------------------+---------------+----------------------------------------------------+\n| NPU     Chip              | Process id    | Process name             | Process memory(MB)      |\n+===========================+===============+====================================================+\n| No running processes found in NPU 3                                                            |\n+===========================+===============+====================================================+\n| No running processes found in NPU 6                                                            |\n+===========================+===============+====================================================+\n",
+        "stdout_sha256": "sha256:4535085eec78eb603c8dc3cc9c64fc8e6e5cf96fc0296893154fb2ddb3a5ced3"
+      },
+      "result": {
+        "campaign_sha256": "sha256:c1b7106aaa36522de976512d1db19dd2a977918f517577b8aa95f6272bfa3edd",
+        "case_id": "pair-profiler-kvcompress-vllm-0233",
+        "category": "compatible_pair",
+        "classification": "real-source-prelaunch-manager-prediction-not-runtime",
+        "composition_error": null,
+        "declared_surface_decision": "unavailable",
+        "host_launch_command_invoked": false,
+        "manager_commit": "08ab570fb00c4206b8d2c6c296ac9580b0f892bc",
+        "members": [
+          {
+            "activation_blocker": null,
+            "bundle_id": "org.vllm-hust.request-lifecycle-profiler",
+            "commit": "8b8245cdba61b2ccc92a02c81b158c8fc9f90d14",
+            "compatibility": null,
+            "compatibility_evidence": [
+              "host version 0.23.3 satisfies the declared range",
+              "host API 1.0 satisfies the declared range",
+              "protocol vllm.general_plugins is not independently versioned; compatibility is governed by host ranges and acceptance evidence",
+              "protocol vllm.request-lifecycle-events version is unavailable"
+            ],
+            "declared_host_range": ">=0.23,<0.24",
+            "host_name": "vllm",
+            "host_version": "0.23.3",
+            "id": "lifecycle_profiler",
+            "manifest_blob": "1fc7b3df1c2cc4f4d609bd70367c41c5e9285bc0",
+            "manifest_sha256": "sha256:650160eb2c69a93b1bfc09d1ebc7728b1045b5411d1be817c216038121028c87",
+            "plan": {
+              "actions": [
+                {
+                  "details": {
+                    "enabled": false
+                  },
+                  "lifecycle_owner": "vllm",
+                  "mutating": false,
+                  "operation": "configure_launch",
+                  "target": "vllm"
+                }
+              ],
+              "config_claims": [
+                {
+                  "path": [
+                    "vllm_plugins",
+                    "request_lifecycle_profiler"
+                  ],
+                  "value": true
+                }
+              ],
+              "extension_id": "org.vllm-hust.request-lifecycle-profiler",
+              "generated_config": {
+                "additional_config": {},
+                "environment": {},
+                "native_extension_manifest": {
+                  "bundle_id": "org.vllm-hust.request-lifecycle-profiler",
+                  "bundle_version": "0.1.1",
+                  "components": [
+                    {
+                      "component_id": "request-lifecycle-profiler-native-sink",
+                      "contracts": [
+                        "vllm.request-lifecycle-events.v1"
+                      ],
+                      "execution_planes": [
+                        "api",
+                        "scheduler"
+                      ],
+                      "implementation_ref": "vllm_request_lifecycle_profiler.plugin:register_plugin",
+                      "isolation": "trusted_in_process",
+                      "permissions": []
+                    }
+                  ],
+                  "host_api_range": ">=1,<2",
+                  "schema_version": "1.0"
+                },
+                "user_config": {},
+                "vllm_json_options": {},
+                "vllm_plugins": [
+                  "request_lifecycle_profiler"
+                ]
+              },
+              "provider": "vllm",
+              "resource_claims": [
+                {
+                  "mode": "shared",
+                  "resource": "vllm.request-lifecycle-events.observer",
+                  "scope": "vllm-process"
+                }
+              ],
+              "warnings": []
+            },
+            "tree": "d3b752078d74a9d384de35b5010d7ac9bd3742e6"
+          },
+          {
+            "activation_blocker": null,
+            "bundle_id": "org.vllm-hust.ascend-kvcompress",
+            "commit": "00cc78dc7f3491eecbc79c5068e29aed9f59afc3",
+            "compatibility": true,
+            "compatibility_evidence": [
+              "host version 0.23.3 satisfies the declared range",
+              "host API 1.0 satisfies the declared range",
+              "protocol vllm.general_plugins is not independently versioned; compatibility is governed by host ranges and acceptance evidence"
+            ],
+            "declared_host_range": ">=0.23.0.post1,<0.26,!=0.24.*,!=0.25.0.*",
+            "host_name": "vllm-ascend",
+            "host_version": "0.23.3",
+            "id": "kvcompress",
+            "manifest_blob": "fd6b1b703ba7eec7587c16d27370c5b75801c89d",
+            "manifest_sha256": "sha256:ad0a3e62602108e54503bb81c8fda162a730e1a422fe940d09a2463ee2d0eb54",
+            "plan": {
+              "actions": [
+                {
+                  "details": {
+                    "enabled": false
+                  },
+                  "lifecycle_owner": "vllm",
+                  "mutating": false,
+                  "operation": "configure_launch",
+                  "target": "vllm"
+                }
+              ],
+              "config_claims": [
+                {
+                  "path": [
+                    "environment",
+                    "VLLM_ASCEND_KVCOMPRESS_ENABLED"
+                  ],
+                  "value": "1"
+                },
+                {
+                  "path": [
+                    "vllm_plugins",
+                    "ascend_kvcompress"
+                  ],
+                  "value": true
+                }
+              ],
+              "extension_id": "org.vllm-hust.ascend-kvcompress",
+              "generated_config": {
+                "additional_config": {},
+                "environment": {
+                  "VLLM_ASCEND_KVCOMPRESS_ENABLED": "1"
+                },
+                "native_extension_manifest": {
+                  "bundle_id": "org.vllm-hust.ascend-kvcompress",
+                  "bundle_version": "0.9.0",
+                  "components": [
+                    {
+                      "component_id": "ascend-kvcompress",
+                      "contracts": [
+                        "vllm.general_plugins"
+                      ],
+                      "execution_planes": [
+                        "scheduler",
+                        "worker",
+                        "device"
+                      ],
+                      "implementation_ref": "vllm_ascend_kvcompress.plugin:register",
+                      "isolation": "trusted_in_process",
+                      "permissions": [
+                        "device_access",
+                        "filesystem_read",
+                        "filesystem_write",
+                        "network_egress"
+                      ]
+                    }
+                  ],
+                  "host_api_range": ">=1,<2",
+                  "schema_version": "1.0"
+                },
+                "user_config": {},
+                "vllm_json_options": {},
+                "vllm_plugins": [
+                  "ascend_kvcompress"
+                ]
+              },
+              "provider": "vllm",
+              "resource_claims": [
+                {
+                  "mode": "exclusive",
+                  "resource": "vllm-ascend.kv-cache.mutation",
+                  "scope": "vllm-process"
+                }
+              ],
+              "warnings": []
+            },
+            "tree": "8661770207782c912316ad9e5529bf3dbfcce563"
+          }
+        ],
+        "oracle_decision": "admit",
+        "performance_claim": false,
+        "prediction": "unavailable",
+        "reason": "frozen tuple lacks a required host or protocol capability receipt",
+        "runtime_claim": false,
+        "schema": "ecpa-h2-source-corpus-manager-prediction/v1",
+        "score_eligible": false
+      }
+    },
+    {
+      "case_id": "pair-diffspec-kvcompress-ascend-0251",
+      "command": {
+        "argv": [
+          "/root/ecpa-h2-formal-reject-env-kv-kn-v1/bin/python",
+          "/root/extension-manager-h2-corpus-predictions/experiments/real_mod_composition/evaluate_h2_source_corpus.py",
+          "pair-diffspec-kvcompress-ascend-0251"
+        ],
+        "exit_code": 0,
+        "stderr": "",
+        "stderr_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout": "{\n  \"campaign_sha256\": \"sha256:c1b7106aaa36522de976512d1db19dd2a977918f517577b8aa95f6272bfa3edd\",\n  \"case_id\": \"pair-diffspec-kvcompress-ascend-0251\",\n  \"category\": \"conditionally_compatible_pair\",\n  \"classification\": \"real-source-prelaunch-manager-prediction-not-runtime\",\n  \"composition_error\": null,\n  \"declared_surface_decision\": \"admit\",\n  \"host_launch_command_invoked\": false,\n  \"manager_commit\": \"08ab570fb00c4206b8d2c6c296ac9580b0f892bc\",\n  \"members\": [\n    {\n      \"activation_blocker\": null,\n      \"bundle_id\": \"org.vllm-hust.diffspec\",\n      \"commit\": \"9d9ddc9bfae2b93d03f9e66715e288b229c75e07\",\n      \"compatibility\": null,\n      \"compatibility_evidence\": [\n        \"host version 0.25.1rc1 satisfies the declared range\",\n        \"host API 1.0 satisfies the declared range\",\n        \"protocol vllm.general_plugins version is unavailable\",\n        \"protocol vllm-ascend.runtime-patch-surface version is unavailable\"\n      ],\n      \"declared_host_range\": \">=0.25.1rc1,<0.25.2\",\n      \"host_name\": \"vllm-ascend\",\n      \"host_version\": \"0.25.1rc1\",\n      \"id\": \"diffspec\",\n      \"manifest_blob\": \"ecb9f079ce77616d1f00ca3a4ab3d38d940e1389\",\n      \"manifest_sha256\": \"sha256:fa00f67430eeca8064dc1d566081826b1113a77173c509a18ee4d510fd141d57\",\n      \"plan\": {\n        \"actions\": [\n          {\n            \"details\": {\n              \"enabled\": false\n            },\n            \"lifecycle_owner\": \"vllm\",\n            \"mutating\": false,\n            \"operation\": \"configure_launch\",\n            \"target\": \"vllm\"\n          }\n        ],\n        \"config_claims\": [\n          {\n            \"path\": [\n              \"vllm_plugins\",\n              \"diffspec\"\n            ],\n            \"value\": true\n          }\n        ],\n        \"extension_id\": \"org.vllm-hust.diffspec\",\n        \"generated_config\": {\n          \"additional_config\": {},\n          \"environment\": {},\n          \"native_extension_manifest\": {\n            \"bundle_id\": \"org.vllm-hust.diffspec\",\n            \"bundle_version\": \"0.3.0\",\n            \"components\": [\n              {\n                \"component_id\": \"differential-speculative-decoder\",\n                \"contracts\": [\n                  \"vllm.general_plugins\"\n                ],\n                \"execution_planes\": [\n                  \"scheduler\",\n                  \"worker\",\n                  \"native\",\n                  \"device\"\n                ],\n                \"implementation_ref\": \"diffspec.plugin:register\",\n                \"isolation\": \"trusted_in_process\",\n                \"permissions\": [\n                  \"device_access\"\n                ]\n              }\n            ],\n            \"host_api_range\": \">=1,<2\",\n            \"schema_version\": \"1.0\"\n          },\n          \"user_config\": {},\n          \"vllm_json_options\": {},\n          \"vllm_plugins\": [\n            \"diffspec\"\n          ]\n        },\n        \"provider\": \"vllm\",\n        \"resource_claims\": [\n          {\n            \"mode\": \"exclusive\",\n            \"resource\": \"vllm-ascend.speculative-decoding.pipeline\",\n            \"scope\": \"vllm-process\"\n          }\n        ],\n        \"warnings\": []\n      },\n      \"tree\": \"59faaf815e5d4d7a98a6e1743ee895a4b596f1fa\"\n    },\n    {\n      \"activation_blocker\": null,\n      \"bundle_id\": \"org.vllm-hust.ascend-kvcompress\",\n      \"commit\": \"00cc78dc7f3491eecbc79c5068e29aed9f59afc3\",\n      \"compatibility\": true,\n      \"compatibility_evidence\": [\n        \"host version 0.25.1rc1 satisfies the declared range\",\n        \"host API 1.0 satisfies the declared range\",\n        \"protocol vllm.general_plugins is not independently versioned; compatibility is governed by host ranges and acceptance evidence\"\n      ],\n      \"declared_host_range\": \">=0.23.0.post1,<0.26,!=0.24.*,!=0.25.0.*\",\n      \"host_name\": \"vllm-ascend\",\n      \"host_version\": \"0.25.1rc1\",\n      \"id\": \"kvcompress\",\n      \"manifest_blob\": \"fd6b1b703ba7eec7587c16d27370c5b75801c89d\",\n      \"manifest_sha256\": \"sha256:ad0a3e62602108e54503bb81c8fda162a730e1a422fe940d09a2463ee2d0eb54\",\n      \"plan\": {\n        \"actions\": [\n          {\n            \"details\": {\n              \"enabled\": false\n            },\n            \"lifecycle_owner\": \"vllm\",\n            \"mutating\": false,\n            \"operation\": \"configure_launch\",\n            \"target\": \"vllm\"\n          }\n        ],\n        \"config_claims\": [\n          {\n            \"path\": [\n              \"environment\",\n              \"VLLM_ASCEND_KVCOMPRESS_ENABLED\"\n            ],\n            \"value\": \"1\"\n          },\n          {\n            \"path\": [\n              \"vllm_plugins\",\n              \"ascend_kvcompress\"\n            ],\n            \"value\": true\n          }\n        ],\n        \"extension_id\": \"org.vllm-hust.ascend-kvcompress\",\n        \"generated_config\": {\n          \"additional_config\": {},\n          \"environment\": {\n            \"VLLM_ASCEND_KVCOMPRESS_ENABLED\": \"1\"\n          },\n          \"native_extension_manifest\": {\n            \"bundle_id\": \"org.vllm-hust.ascend-kvcompress\",\n            \"bundle_version\": \"0.9.0\",\n            \"components\": [\n              {\n                \"component_id\": \"ascend-kvcompress\",\n                \"contracts\": [\n                  \"vllm.general_plugins\"\n                ],\n                \"execution_planes\": [\n                  \"scheduler\",\n                  \"worker\",\n                  \"device\"\n                ],\n                \"implementation_ref\": \"vllm_ascend_kvcompress.plugin:register\",\n                \"isolation\": \"trusted_in_process\",\n                \"permissions\": [\n                  \"device_access\",\n                  \"filesystem_read\",\n                  \"filesystem_write\",\n                  \"network_egress\"\n                ]\n              }\n            ],\n            \"host_api_range\": \">=1,<2\",\n            \"schema_version\": \"1.0\"\n          },\n          \"user_config\": {},\n          \"vllm_json_options\": {},\n          \"vllm_plugins\": [\n            \"ascend_kvcompress\"\n          ]\n        },\n        \"provider\": \"vllm\",\n        \"resource_claims\": [\n          {\n            \"mode\": \"exclusive\",\n            \"resource\": \"vllm-ascend.kv-cache.mutation\",\n            \"scope\": \"vllm-process\"\n          }\n        ],\n        \"warnings\": []\n      },\n      \"tree\": \"8661770207782c912316ad9e5529bf3dbfcce563\"\n    }\n  ],\n  \"oracle_decision\": \"conditional\",\n  \"performance_claim\": false,\n  \"prediction\": \"excluded\",\n  \"reason\": \"independent oracle is conditional pending physical ownership review\",\n  \"runtime_claim\": false,\n  \"schema\": \"ecpa-h2-source-corpus-manager-prediction/v1\",\n  \"score_eligible\": false\n}\n",
+        "stdout_sha256": "sha256:5295a3784ccf71e30a77983d8fc5e28d08c966be7be6dbcb181f38e2dc8636d4"
+      },
+      "host_process_started": false,
+      "host_processes_after": [],
+      "host_processes_before": [],
+      "npu_after": {
+        "argv": [
+          "npu-smi",
+          "info"
+        ],
+        "exit_code": 0,
+        "no_running_processes": true,
+        "stderr": "",
+        "stderr_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout": "+------------------------------------------------------------------------------------------------+\n| npu-smi 25.2.1                   Version: 25.2.1                                               |\n+---------------------------+---------------+----------------------------------------------------+\n| NPU   Name                | Health        | Power(W)    Temp(C)           Hugepages-Usage(page)|\n| Chip                      | Bus-Id        | AICore(%)   Memory-Usage(MB)  HBM-Usage(MB)        |\n+===========================+===============+====================================================+\n| 3     910B2               | OK            | 99.3        38                0    / 0             |\n| 0                         | 0000:82:00.0  | 0           0    / 0          3429 / 65536         |\n+===========================+===============+====================================================+\n| 6     910B2               | OK            | 90.7        40                0    / 0             |\n| 0                         | 0000:41:00.0  | 0           0    / 0          3429 / 65536         |\n+===========================+===============+====================================================+\n+---------------------------+---------------+----------------------------------------------------+\n| NPU     Chip              | Process id    | Process name             | Process memory(MB)      |\n+===========================+===============+====================================================+\n| No running processes found in NPU 3                                                            |\n+===========================+===============+====================================================+\n| No running processes found in NPU 6                                                            |\n+===========================+===============+====================================================+\n",
+        "stdout_sha256": "sha256:42861ce1cfeac9be183c8cfa6761f1688b458b6ff75dc1a236cdb5e45a15c7b0"
+      },
+      "npu_before": {
+        "argv": [
+          "npu-smi",
+          "info"
+        ],
+        "exit_code": 0,
+        "no_running_processes": true,
+        "stderr": "",
+        "stderr_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout": "+------------------------------------------------------------------------------------------------+\n| npu-smi 25.2.1                   Version: 25.2.1                                               |\n+---------------------------+---------------+----------------------------------------------------+\n| NPU   Name                | Health        | Power(W)    Temp(C)           Hugepages-Usage(page)|\n| Chip                      | Bus-Id        | AICore(%)   Memory-Usage(MB)  HBM-Usage(MB)        |\n+===========================+===============+====================================================+\n| 3     910B2               | OK            | 99.2        38                0    / 0             |\n| 0                         | 0000:82:00.0  | 0           0    / 0          3430 / 65536         |\n+===========================+===============+====================================================+\n| 6     910B2               | OK            | 90.6        41                0    / 0             |\n| 0                         | 0000:41:00.0  | 0           0    / 0          3429 / 65536         |\n+===========================+===============+====================================================+\n+---------------------------+---------------+----------------------------------------------------+\n| NPU     Chip              | Process id    | Process name             | Process memory(MB)      |\n+===========================+===============+====================================================+\n| No running processes found in NPU 3                                                            |\n+===========================+===============+====================================================+\n| No running processes found in NPU 6                                                            |\n+===========================+===============+====================================================+\n",
+        "stdout_sha256": "sha256:58987f7ac458a2c4f48b1de129525bde55d15b3b4dad1ceeade1a9050638007c"
+      },
+      "result": {
+        "campaign_sha256": "sha256:c1b7106aaa36522de976512d1db19dd2a977918f517577b8aa95f6272bfa3edd",
+        "case_id": "pair-diffspec-kvcompress-ascend-0251",
+        "category": "conditionally_compatible_pair",
+        "classification": "real-source-prelaunch-manager-prediction-not-runtime",
+        "composition_error": null,
+        "declared_surface_decision": "admit",
+        "host_launch_command_invoked": false,
+        "manager_commit": "08ab570fb00c4206b8d2c6c296ac9580b0f892bc",
+        "members": [
+          {
+            "activation_blocker": null,
+            "bundle_id": "org.vllm-hust.diffspec",
+            "commit": "9d9ddc9bfae2b93d03f9e66715e288b229c75e07",
+            "compatibility": null,
+            "compatibility_evidence": [
+              "host version 0.25.1rc1 satisfies the declared range",
+              "host API 1.0 satisfies the declared range",
+              "protocol vllm.general_plugins version is unavailable",
+              "protocol vllm-ascend.runtime-patch-surface version is unavailable"
+            ],
+            "declared_host_range": ">=0.25.1rc1,<0.25.2",
+            "host_name": "vllm-ascend",
+            "host_version": "0.25.1rc1",
+            "id": "diffspec",
+            "manifest_blob": "ecb9f079ce77616d1f00ca3a4ab3d38d940e1389",
+            "manifest_sha256": "sha256:fa00f67430eeca8064dc1d566081826b1113a77173c509a18ee4d510fd141d57",
+            "plan": {
+              "actions": [
+                {
+                  "details": {
+                    "enabled": false
+                  },
+                  "lifecycle_owner": "vllm",
+                  "mutating": false,
+                  "operation": "configure_launch",
+                  "target": "vllm"
+                }
+              ],
+              "config_claims": [
+                {
+                  "path": [
+                    "vllm_plugins",
+                    "diffspec"
+                  ],
+                  "value": true
+                }
+              ],
+              "extension_id": "org.vllm-hust.diffspec",
+              "generated_config": {
+                "additional_config": {},
+                "environment": {},
+                "native_extension_manifest": {
+                  "bundle_id": "org.vllm-hust.diffspec",
+                  "bundle_version": "0.3.0",
+                  "components": [
+                    {
+                      "component_id": "differential-speculative-decoder",
+                      "contracts": [
+                        "vllm.general_plugins"
+                      ],
+                      "execution_planes": [
+                        "scheduler",
+                        "worker",
+                        "native",
+                        "device"
+                      ],
+                      "implementation_ref": "diffspec.plugin:register",
+                      "isolation": "trusted_in_process",
+                      "permissions": [
+                        "device_access"
+                      ]
+                    }
+                  ],
+                  "host_api_range": ">=1,<2",
+                  "schema_version": "1.0"
+                },
+                "user_config": {},
+                "vllm_json_options": {},
+                "vllm_plugins": [
+                  "diffspec"
+                ]
+              },
+              "provider": "vllm",
+              "resource_claims": [
+                {
+                  "mode": "exclusive",
+                  "resource": "vllm-ascend.speculative-decoding.pipeline",
+                  "scope": "vllm-process"
+                }
+              ],
+              "warnings": []
+            },
+            "tree": "59faaf815e5d4d7a98a6e1743ee895a4b596f1fa"
+          },
+          {
+            "activation_blocker": null,
+            "bundle_id": "org.vllm-hust.ascend-kvcompress",
+            "commit": "00cc78dc7f3491eecbc79c5068e29aed9f59afc3",
+            "compatibility": true,
+            "compatibility_evidence": [
+              "host version 0.25.1rc1 satisfies the declared range",
+              "host API 1.0 satisfies the declared range",
+              "protocol vllm.general_plugins is not independently versioned; compatibility is governed by host ranges and acceptance evidence"
+            ],
+            "declared_host_range": ">=0.23.0.post1,<0.26,!=0.24.*,!=0.25.0.*",
+            "host_name": "vllm-ascend",
+            "host_version": "0.25.1rc1",
+            "id": "kvcompress",
+            "manifest_blob": "fd6b1b703ba7eec7587c16d27370c5b75801c89d",
+            "manifest_sha256": "sha256:ad0a3e62602108e54503bb81c8fda162a730e1a422fe940d09a2463ee2d0eb54",
+            "plan": {
+              "actions": [
+                {
+                  "details": {
+                    "enabled": false
+                  },
+                  "lifecycle_owner": "vllm",
+                  "mutating": false,
+                  "operation": "configure_launch",
+                  "target": "vllm"
+                }
+              ],
+              "config_claims": [
+                {
+                  "path": [
+                    "environment",
+                    "VLLM_ASCEND_KVCOMPRESS_ENABLED"
+                  ],
+                  "value": "1"
+                },
+                {
+                  "path": [
+                    "vllm_plugins",
+                    "ascend_kvcompress"
+                  ],
+                  "value": true
+                }
+              ],
+              "extension_id": "org.vllm-hust.ascend-kvcompress",
+              "generated_config": {
+                "additional_config": {},
+                "environment": {
+                  "VLLM_ASCEND_KVCOMPRESS_ENABLED": "1"
+                },
+                "native_extension_manifest": {
+                  "bundle_id": "org.vllm-hust.ascend-kvcompress",
+                  "bundle_version": "0.9.0",
+                  "components": [
+                    {
+                      "component_id": "ascend-kvcompress",
+                      "contracts": [
+                        "vllm.general_plugins"
+                      ],
+                      "execution_planes": [
+                        "scheduler",
+                        "worker",
+                        "device"
+                      ],
+                      "implementation_ref": "vllm_ascend_kvcompress.plugin:register",
+                      "isolation": "trusted_in_process",
+                      "permissions": [
+                        "device_access",
+                        "filesystem_read",
+                        "filesystem_write",
+                        "network_egress"
+                      ]
+                    }
+                  ],
+                  "host_api_range": ">=1,<2",
+                  "schema_version": "1.0"
+                },
+                "user_config": {},
+                "vllm_json_options": {},
+                "vllm_plugins": [
+                  "ascend_kvcompress"
+                ]
+              },
+              "provider": "vllm",
+              "resource_claims": [
+                {
+                  "mode": "exclusive",
+                  "resource": "vllm-ascend.kv-cache.mutation",
+                  "scope": "vllm-process"
+                }
+              ],
+              "warnings": []
+            },
+            "tree": "8661770207782c912316ad9e5529bf3dbfcce563"
+          }
+        ],
+        "oracle_decision": "conditional",
+        "performance_claim": false,
+        "prediction": "excluded",
+        "reason": "independent oracle is conditional pending physical ownership review",
+        "runtime_claim": false,
+        "schema": "ecpa-h2-source-corpus-manager-prediction/v1",
+        "score_eligible": false
+      }
+    },
+    {
+      "case_id": "three-vspec-knorm-profiler-vllm-0233",
+      "command": {
+        "argv": [
+          "/root/ecpa-h2-formal-reject-env-kv-kn-v1/bin/python",
+          "/root/extension-manager-h2-corpus-predictions/experiments/real_mod_composition/evaluate_h2_source_corpus.py",
+          "three-vspec-knorm-profiler-vllm-0233"
+        ],
+        "exit_code": 0,
+        "stderr": "",
+        "stderr_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout": "{\n  \"campaign_sha256\": \"sha256:c1b7106aaa36522de976512d1db19dd2a977918f517577b8aa95f6272bfa3edd\",\n  \"case_id\": \"three-vspec-knorm-profiler-vllm-0233\",\n  \"category\": \"three_mod\",\n  \"classification\": \"real-source-prelaunch-manager-prediction-not-runtime\",\n  \"composition_error\": null,\n  \"declared_surface_decision\": \"reject\",\n  \"host_launch_command_invoked\": false,\n  \"manager_commit\": \"08ab570fb00c4206b8d2c6c296ac9580b0f892bc\",\n  \"members\": [\n    {\n      \"activation_blocker\": null,\n      \"bundle_id\": \"org.vllm-hust.vspec\",\n      \"commit\": \"bdd919d24669f09e6eb1987157dfdb5561460f45\",\n      \"compatibility\": true,\n      \"compatibility_evidence\": [\n        \"host version 0.23.3 satisfies the declared range\",\n        \"protocol vllm.general_plugins is not independently versioned; compatibility is governed by host ranges and acceptance evidence\",\n        \"protocol vllm-ascend.spec-decode-private-abi is not independently versioned; compatibility is governed by host ranges and acceptance evidence\"\n      ],\n      \"declared_host_range\": \">=0.17.2rc1.dev5871,<0.26\",\n      \"host_name\": \"vllm\",\n      \"host_version\": \"0.23.3\",\n      \"id\": \"vspec\",\n      \"manifest_blob\": \"3d75a1647a912df057ea13150aa4a359a679281d\",\n      \"manifest_sha256\": \"sha256:2d644f2ce0b87e2b96617e222dc44849a61e5c17dba9015a986c0a2e7d49bf06\",\n      \"plan\": {\n        \"actions\": [\n          {\n            \"details\": {\n              \"enabled\": false\n            },\n            \"lifecycle_owner\": \"vllm\",\n            \"mutating\": false,\n            \"operation\": \"configure_launch\",\n            \"target\": \"vllm\"\n          }\n        ],\n        \"config_claims\": [\n          {\n            \"path\": [\n              \"environment\",\n              \"HUST_VSPEC_ENABLED\"\n            ],\n            \"value\": \"1\"\n          },\n          {\n            \"path\": [\n              \"vllm_plugins\",\n              \"vspec\"\n            ],\n            \"value\": true\n          }\n        ],\n        \"extension_id\": \"org.vllm-hust.vspec\",\n        \"generated_config\": {\n          \"additional_config\": {},\n          \"environment\": {\n            \"HUST_VSPEC_ENABLED\": \"1\"\n          },\n          \"user_config\": {},\n          \"vllm_json_options\": {},\n          \"vllm_plugins\": [\n            \"vspec\"\n          ]\n        },\n        \"provider\": \"vllm\",\n        \"resource_claims\": [\n          {\n            \"mode\": \"exclusive\",\n            \"resource\": \"vllm.speculative-decoding.patchset\",\n            \"scope\": \"vllm-process\"\n          },\n          {\n            \"mode\": \"exclusive\",\n            \"resource\": \"vllm.model-registry.qwen2-eagle\",\n            \"scope\": \"vllm-process\"\n          }\n        ],\n        \"warnings\": []\n      },\n      \"tree\": \"2fbdc00c87517334efe73c3b9f02bf35b0f56283\"\n    },\n    {\n      \"activation_blocker\": \"extension is descriptor-only and cannot be enabled (implementation status: import_only)\",\n      \"bundle_id\": \"org.vllm-hust.knorm\",\n      \"commit\": \"c490cfbfd2372635e8e874c8d7ba866ca5c476fb\",\n      \"compatibility\": true,\n      \"compatibility_evidence\": [\n        \"host version 0.23.3 satisfies the declared range\",\n        \"host API 1.0 satisfies the declared range\",\n        \"protocol vllm.general_plugins is not independently versioned; compatibility is governed by host ranges and acceptance evidence\",\n        \"protocol vllm.v1.kv_cache_spec_registry is not independently versioned; compatibility is governed by host ranges and acceptance evidence\",\n        \"protocol vllm.v1.worker.gpu_model_runner is not independently versioned; compatibility is governed by host ranges and acceptance evidence\"\n      ],\n      \"declared_host_range\": \">=0.23\",\n      \"host_name\": \"vllm\",\n      \"host_version\": \"0.23.3\",\n      \"id\": \"knorm\",\n      \"manifest_blob\": \"9dd3b208f4de382e1c8c451174ae461afeef7cff\",\n      \"manifest_sha256\": \"sha256:272aece6dcb74a48f38cb0f9598b7ce81fe729d49d22494d68c7181e7f16afd8\",\n      \"plan\": {\n        \"actions\": [\n          {\n            \"details\": {\n              \"enabled\": false\n            },\n            \"lifecycle_owner\": \"vllm\",\n            \"mutating\": false,\n            \"operation\": \"inspect_only\",\n            \"target\": \"org.vllm-hust.knorm\"\n          }\n        ],\n        \"config_claims\": null,\n        \"extension_id\": \"org.vllm-hust.knorm\",\n        \"generated_config\": {},\n        \"provider\": \"vllm\",\n        \"resource_claims\": [\n          {\n            \"mode\": \"exclusive\",\n            \"resource\": \"vllm.kv-cache.compression-policy\",\n            \"scope\": \"vllm-process\"\n          }\n        ],\n        \"warnings\": [\n          \"extension is descriptor-only and cannot be enabled (implementation status: import_only)\"\n        ]\n      },\n      \"tree\": \"3cf0928f202a0d9c5111333fd7ad4be5f13d97aa\"\n    },\n    {\n      \"activation_blocker\": null,\n      \"bundle_id\": \"org.vllm-hust.request-lifecycle-profiler\",\n      \"commit\": \"8b8245cdba61b2ccc92a02c81b158c8fc9f90d14\",\n      \"compatibility\": null,\n      \"compatibility_evidence\": [\n        \"host version 0.23.3 satisfies the declared range\",\n        \"host API 1.0 satisfies the declared range\",\n        \"protocol vllm.general_plugins is not independently versioned; compatibility is governed by host ranges and acceptance evidence\",\n        \"protocol vllm.request-lifecycle-events version is unavailable\"\n      ],\n      \"declared_host_range\": \">=0.23,<0.24\",\n      \"host_name\": \"vllm\",\n      \"host_version\": \"0.23.3\",\n      \"id\": \"lifecycle_profiler\",\n      \"manifest_blob\": \"1fc7b3df1c2cc4f4d609bd70367c41c5e9285bc0\",\n      \"manifest_sha256\": \"sha256:650160eb2c69a93b1bfc09d1ebc7728b1045b5411d1be817c216038121028c87\",\n      \"plan\": {\n        \"actions\": [\n          {\n            \"details\": {\n              \"enabled\": false\n            },\n            \"lifecycle_owner\": \"vllm\",\n            \"mutating\": false,\n            \"operation\": \"configure_launch\",\n            \"target\": \"vllm\"\n          }\n        ],\n        \"config_claims\": [\n          {\n            \"path\": [\n              \"vllm_plugins\",\n              \"request_lifecycle_profiler\"\n            ],\n            \"value\": true\n          }\n        ],\n        \"extension_id\": \"org.vllm-hust.request-lifecycle-profiler\",\n        \"generated_config\": {\n          \"additional_config\": {},\n          \"environment\": {},\n          \"native_extension_manifest\": {\n            \"bundle_id\": \"org.vllm-hust.request-lifecycle-profiler\",\n            \"bundle_version\": \"0.1.1\",\n            \"components\": [\n              {\n                \"component_id\": \"request-lifecycle-profiler-native-sink\",\n                \"contracts\": [\n                  \"vllm.request-lifecycle-events.v1\"\n                ],\n                \"execution_planes\": [\n                  \"api\",\n                  \"scheduler\"\n                ],\n                \"implementation_ref\": \"vllm_request_lifecycle_profiler.plugin:register_plugin\",\n                \"isolation\": \"trusted_in_process\",\n                \"permissions\": []\n              }\n            ],\n            \"host_api_range\": \">=1,<2\",\n            \"schema_version\": \"1.0\"\n          },\n          \"user_config\": {},\n          \"vllm_json_options\": {},\n          \"vllm_plugins\": [\n            \"request_lifecycle_profiler\"\n          ]\n        },\n        \"provider\": \"vllm\",\n        \"resource_claims\": [\n          {\n            \"mode\": \"shared\",\n            \"resource\": \"vllm.request-lifecycle-events.observer\",\n            \"scope\": \"vllm-process\"\n          }\n        ],\n        \"warnings\": []\n      },\n      \"tree\": \"d3b752078d74a9d384de35b5010d7ac9bd3742e6\"\n    }\n  ],\n  \"oracle_decision\": \"reject\",\n  \"performance_claim\": false,\n  \"prediction\": \"reject\",\n  \"reason\": \"extension is descriptor-only and cannot be enabled (implementation status: import_only)\",\n  \"runtime_claim\": false,\n  \"schema\": \"ecpa-h2-source-corpus-manager-prediction/v1\",\n  \"score_eligible\": true\n}\n",
+        "stdout_sha256": "sha256:48f785d69c59daba7a909ed7ebab7572f7a5051c05eb8684fab177195a840b40"
+      },
+      "host_process_started": false,
+      "host_processes_after": [],
+      "host_processes_before": [],
+      "npu_after": {
+        "argv": [
+          "npu-smi",
+          "info"
+        ],
+        "exit_code": 0,
+        "no_running_processes": true,
+        "stderr": "",
+        "stderr_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout": "+------------------------------------------------------------------------------------------------+\n| npu-smi 25.2.1                   Version: 25.2.1                                               |\n+---------------------------+---------------+----------------------------------------------------+\n| NPU   Name                | Health        | Power(W)    Temp(C)           Hugepages-Usage(page)|\n| Chip                      | Bus-Id        | AICore(%)   Memory-Usage(MB)  HBM-Usage(MB)        |\n+===========================+===============+====================================================+\n| 3     910B2               | OK            | 99.2        37                0    / 0             |\n| 0                         | 0000:82:00.0  | 0           0    / 0          3430 / 65536         |\n+===========================+===============+====================================================+\n| 6     910B2               | OK            | 90.7        41                0    / 0             |\n| 0                         | 0000:41:00.0  | 0           0    / 0          3429 / 65536         |\n+===========================+===============+====================================================+\n+---------------------------+---------------+----------------------------------------------------+\n| NPU     Chip              | Process id    | Process name             | Process memory(MB)      |\n+===========================+===============+====================================================+\n| No running processes found in NPU 3                                                            |\n+===========================+===============+====================================================+\n| No running processes found in NPU 6                                                            |\n+===========================+===============+====================================================+\n",
+        "stdout_sha256": "sha256:6ae22ce1f2be630a68fb6553d2faf3ce11ab608d569dab09f596956096dbc1bc"
+      },
+      "npu_before": {
+        "argv": [
+          "npu-smi",
+          "info"
+        ],
+        "exit_code": 0,
+        "no_running_processes": true,
+        "stderr": "",
+        "stderr_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout": "+------------------------------------------------------------------------------------------------+\n| npu-smi 25.2.1                   Version: 25.2.1                                               |\n+---------------------------+---------------+----------------------------------------------------+\n| NPU   Name                | Health        | Power(W)    Temp(C)           Hugepages-Usage(page)|\n| Chip                      | Bus-Id        | AICore(%)   Memory-Usage(MB)  HBM-Usage(MB)        |\n+===========================+===============+====================================================+\n| 3     910B2               | OK            | 99.3        38                0    / 0             |\n| 0                         | 0000:82:00.0  | 0           0    / 0          3429 / 65536         |\n+===========================+===============+====================================================+\n| 6     910B2               | OK            | 90.7        41                0    / 0             |\n| 0                         | 0000:41:00.0  | 0           0    / 0          3429 / 65536         |\n+===========================+===============+====================================================+\n+---------------------------+---------------+----------------------------------------------------+\n| NPU     Chip              | Process id    | Process name             | Process memory(MB)      |\n+===========================+===============+====================================================+\n| No running processes found in NPU 3                                                            |\n+===========================+===============+====================================================+\n| No running processes found in NPU 6                                                            |\n+===========================+===============+====================================================+\n",
+        "stdout_sha256": "sha256:3282519e28ec3db988f79ae76b4bc416d949f5ff7c648d883806da71f6beddf5"
+      },
+      "result": {
+        "campaign_sha256": "sha256:c1b7106aaa36522de976512d1db19dd2a977918f517577b8aa95f6272bfa3edd",
+        "case_id": "three-vspec-knorm-profiler-vllm-0233",
+        "category": "three_mod",
+        "classification": "real-source-prelaunch-manager-prediction-not-runtime",
+        "composition_error": null,
+        "declared_surface_decision": "reject",
+        "host_launch_command_invoked": false,
+        "manager_commit": "08ab570fb00c4206b8d2c6c296ac9580b0f892bc",
+        "members": [
+          {
+            "activation_blocker": null,
+            "bundle_id": "org.vllm-hust.vspec",
+            "commit": "bdd919d24669f09e6eb1987157dfdb5561460f45",
+            "compatibility": true,
+            "compatibility_evidence": [
+              "host version 0.23.3 satisfies the declared range",
+              "protocol vllm.general_plugins is not independently versioned; compatibility is governed by host ranges and acceptance evidence",
+              "protocol vllm-ascend.spec-decode-private-abi is not independently versioned; compatibility is governed by host ranges and acceptance evidence"
+            ],
+            "declared_host_range": ">=0.17.2rc1.dev5871,<0.26",
+            "host_name": "vllm",
+            "host_version": "0.23.3",
+            "id": "vspec",
+            "manifest_blob": "3d75a1647a912df057ea13150aa4a359a679281d",
+            "manifest_sha256": "sha256:2d644f2ce0b87e2b96617e222dc44849a61e5c17dba9015a986c0a2e7d49bf06",
+            "plan": {
+              "actions": [
+                {
+                  "details": {
+                    "enabled": false
+                  },
+                  "lifecycle_owner": "vllm",
+                  "mutating": false,
+                  "operation": "configure_launch",
+                  "target": "vllm"
+                }
+              ],
+              "config_claims": [
+                {
+                  "path": [
+                    "environment",
+                    "HUST_VSPEC_ENABLED"
+                  ],
+                  "value": "1"
+                },
+                {
+                  "path": [
+                    "vllm_plugins",
+                    "vspec"
+                  ],
+                  "value": true
+                }
+              ],
+              "extension_id": "org.vllm-hust.vspec",
+              "generated_config": {
+                "additional_config": {},
+                "environment": {
+                  "HUST_VSPEC_ENABLED": "1"
+                },
+                "user_config": {},
+                "vllm_json_options": {},
+                "vllm_plugins": [
+                  "vspec"
+                ]
+              },
+              "provider": "vllm",
+              "resource_claims": [
+                {
+                  "mode": "exclusive",
+                  "resource": "vllm.speculative-decoding.patchset",
+                  "scope": "vllm-process"
+                },
+                {
+                  "mode": "exclusive",
+                  "resource": "vllm.model-registry.qwen2-eagle",
+                  "scope": "vllm-process"
+                }
+              ],
+              "warnings": []
+            },
+            "tree": "2fbdc00c87517334efe73c3b9f02bf35b0f56283"
+          },
+          {
+            "activation_blocker": "extension is descriptor-only and cannot be enabled (implementation status: import_only)",
+            "bundle_id": "org.vllm-hust.knorm",
+            "commit": "c490cfbfd2372635e8e874c8d7ba866ca5c476fb",
+            "compatibility": true,
+            "compatibility_evidence": [
+              "host version 0.23.3 satisfies the declared range",
+              "host API 1.0 satisfies the declared range",
+              "protocol vllm.general_plugins is not independently versioned; compatibility is governed by host ranges and acceptance evidence",
+              "protocol vllm.v1.kv_cache_spec_registry is not independently versioned; compatibility is governed by host ranges and acceptance evidence",
+              "protocol vllm.v1.worker.gpu_model_runner is not independently versioned; compatibility is governed by host ranges and acceptance evidence"
+            ],
+            "declared_host_range": ">=0.23",
+            "host_name": "vllm",
+            "host_version": "0.23.3",
+            "id": "knorm",
+            "manifest_blob": "9dd3b208f4de382e1c8c451174ae461afeef7cff",
+            "manifest_sha256": "sha256:272aece6dcb74a48f38cb0f9598b7ce81fe729d49d22494d68c7181e7f16afd8",
+            "plan": {
+              "actions": [
+                {
+                  "details": {
+                    "enabled": false
+                  },
+                  "lifecycle_owner": "vllm",
+                  "mutating": false,
+                  "operation": "inspect_only",
+                  "target": "org.vllm-hust.knorm"
+                }
+              ],
+              "config_claims": null,
+              "extension_id": "org.vllm-hust.knorm",
+              "generated_config": {},
+              "provider": "vllm",
+              "resource_claims": [
+                {
+                  "mode": "exclusive",
+                  "resource": "vllm.kv-cache.compression-policy",
+                  "scope": "vllm-process"
+                }
+              ],
+              "warnings": [
+                "extension is descriptor-only and cannot be enabled (implementation status: import_only)"
+              ]
+            },
+            "tree": "3cf0928f202a0d9c5111333fd7ad4be5f13d97aa"
+          },
+          {
+            "activation_blocker": null,
+            "bundle_id": "org.vllm-hust.request-lifecycle-profiler",
+            "commit": "8b8245cdba61b2ccc92a02c81b158c8fc9f90d14",
+            "compatibility": null,
+            "compatibility_evidence": [
+              "host version 0.23.3 satisfies the declared range",
+              "host API 1.0 satisfies the declared range",
+              "protocol vllm.general_plugins is not independently versioned; compatibility is governed by host ranges and acceptance evidence",
+              "protocol vllm.request-lifecycle-events version is unavailable"
+            ],
+            "declared_host_range": ">=0.23,<0.24",
+            "host_name": "vllm",
+            "host_version": "0.23.3",
+            "id": "lifecycle_profiler",
+            "manifest_blob": "1fc7b3df1c2cc4f4d609bd70367c41c5e9285bc0",
+            "manifest_sha256": "sha256:650160eb2c69a93b1bfc09d1ebc7728b1045b5411d1be817c216038121028c87",
+            "plan": {
+              "actions": [
+                {
+                  "details": {
+                    "enabled": false
+                  },
+                  "lifecycle_owner": "vllm",
+                  "mutating": false,
+                  "operation": "configure_launch",
+                  "target": "vllm"
+                }
+              ],
+              "config_claims": [
+                {
+                  "path": [
+                    "vllm_plugins",
+                    "request_lifecycle_profiler"
+                  ],
+                  "value": true
+                }
+              ],
+              "extension_id": "org.vllm-hust.request-lifecycle-profiler",
+              "generated_config": {
+                "additional_config": {},
+                "environment": {},
+                "native_extension_manifest": {
+                  "bundle_id": "org.vllm-hust.request-lifecycle-profiler",
+                  "bundle_version": "0.1.1",
+                  "components": [
+                    {
+                      "component_id": "request-lifecycle-profiler-native-sink",
+                      "contracts": [
+                        "vllm.request-lifecycle-events.v1"
+                      ],
+                      "execution_planes": [
+                        "api",
+                        "scheduler"
+                      ],
+                      "implementation_ref": "vllm_request_lifecycle_profiler.plugin:register_plugin",
+                      "isolation": "trusted_in_process",
+                      "permissions": []
+                    }
+                  ],
+                  "host_api_range": ">=1,<2",
+                  "schema_version": "1.0"
+                },
+                "user_config": {},
+                "vllm_json_options": {},
+                "vllm_plugins": [
+                  "request_lifecycle_profiler"
+                ]
+              },
+              "provider": "vllm",
+              "resource_claims": [
+                {
+                  "mode": "shared",
+                  "resource": "vllm.request-lifecycle-events.observer",
+                  "scope": "vllm-process"
+                }
+              ],
+              "warnings": []
+            },
+            "tree": "d3b752078d74a9d384de35b5010d7ac9bd3742e6"
+          }
+        ],
+        "oracle_decision": "reject",
+        "performance_claim": false,
+        "prediction": "reject",
+        "reason": "extension is descriptor-only and cannot be enabled (implementation status: import_only)",
+        "runtime_claim": false,
+        "schema": "ecpa-h2-source-corpus-manager-prediction/v1",
+        "score_eligible": true
+      }
+    }
+  ],
+  "process_boundary": {
+    "all_npu_snapshots_empty": true,
+    "host_process_started": false,
+    "host_processes_end": [],
+    "host_processes_start": [],
+    "npu_end": {
+      "argv": [
+        "npu-smi",
+        "info"
+      ],
+      "exit_code": 0,
+      "no_running_processes": true,
+      "stderr": "",
+      "stderr_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout": "+------------------------------------------------------------------------------------------------+\n| npu-smi 25.2.1                   Version: 25.2.1                                               |\n+---------------------------+---------------+----------------------------------------------------+\n| NPU   Name                | Health        | Power(W)    Temp(C)           Hugepages-Usage(page)|\n| Chip                      | Bus-Id        | AICore(%)   Memory-Usage(MB)  HBM-Usage(MB)        |\n+===========================+===============+====================================================+\n| 3     910B2               | OK            | 99.3        38                0    / 0             |\n| 0                         | 0000:82:00.0  | 0           0    / 0          3430 / 65536         |\n+===========================+===============+====================================================+\n| 6     910B2               | OK            | 90.7        41                0    / 0             |\n| 0                         | 0000:41:00.0  | 0           0    / 0          3429 / 65536         |\n+===========================+===============+====================================================+\n+---------------------------+---------------+----------------------------------------------------+\n| NPU     Chip              | Process id    | Process name             | Process memory(MB)      |\n+===========================+===============+====================================================+\n| No running processes found in NPU 3                                                            |\n+===========================+===============+====================================================+\n| No running processes found in NPU 6                                                            |\n+===========================+===============+====================================================+\n",
+      "stdout_sha256": "sha256:9c81a9e2879e67112fc0533c983d059b878239ac15eb739a14eceb359be8f625"
+    },
+    "npu_start": {
+      "argv": [
+        "npu-smi",
+        "info"
+      ],
+      "exit_code": 0,
+      "no_running_processes": true,
+      "stderr": "",
+      "stderr_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout": "+------------------------------------------------------------------------------------------------+\n| npu-smi 25.2.1                   Version: 25.2.1                                               |\n+---------------------------+---------------+----------------------------------------------------+\n| NPU   Name                | Health        | Power(W)    Temp(C)           Hugepages-Usage(page)|\n| Chip                      | Bus-Id        | AICore(%)   Memory-Usage(MB)  HBM-Usage(MB)        |\n+===========================+===============+====================================================+\n| 3     910B2               | OK            | 99.4        38                0    / 0             |\n| 0                         | 0000:82:00.0  | 0           0    / 0          3430 / 65536         |\n+===========================+===============+====================================================+\n| 6     910B2               | OK            | 90.7        41                0    / 0             |\n| 0                         | 0000:41:00.0  | 0           0    / 0          3429 / 65536         |\n+===========================+===============+====================================================+\n+---------------------------+---------------+----------------------------------------------------+\n| NPU     Chip              | Process id    | Process name             | Process memory(MB)      |\n+===========================+===============+====================================================+\n| No running processes found in NPU 3                                                            |\n+===========================+===============+====================================================+\n| No running processes found in NPU 6                                                            |\n+===========================+===============+====================================================+\n",
+      "stdout_sha256": "sha256:bb5f99ac111c8aaab543eed9ac964c851f79f06ff516752c7e6f003480b5a3bd"
+    }
+  },
+  "remaining_acceptance_gaps": [
+    "no score-eligible Manager admit exists in this frozen old-source corpus",
+    "the old profiler/kvcompress case lacks a bound vLLM 0.23.3 request-lifecycle-events capability receipt",
+    "precision and recall are undefined with zero score-eligible admit predictions",
+    "pre-launch predictions do not replace formal runtime evidence",
+    "the conditional pair still needs exact physical ownership and install-order review"
+  ],
+  "schema": "ecpa-h2-source-corpus-manager-predictions/v1",
+  "source_verification": {
+    "bidkv": {
+      "blob_lookup": {
+        "argv": [
+          "git",
+          "-C",
+          "/root/ecpa-h2-corpus-src-bidkv",
+          "rev-parse",
+          "6f1fc75d694c6901051bdeae784d18b836c6fa70:src/bidkv/manifests/vllm-hust-extension-v0.3.json"
+        ],
+        "exit_code": 0,
+        "stderr": "",
+        "stderr_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout": "3aefff871f0b818a98168f907da3e33f17b66276\n",
+        "stdout_sha256": "sha256:55a5f73001623ff1442c9f48271765cc93953e33c7532516ac87448bb858bc55"
+      },
+      "commit_check": {
+        "argv": [
+          "git",
+          "-C",
+          "/root/ecpa-h2-corpus-src-bidkv",
+          "cat-file",
+          "-e",
+          "6f1fc75d694c6901051bdeae784d18b836c6fa70^{commit}"
+        ],
+        "exit_code": 0,
+        "stderr": "",
+        "stderr_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout": "",
+        "stdout_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "manifest_read": {
+        "argv": [
+          "git",
+          "-C",
+          "/root/ecpa-h2-corpus-src-bidkv",
+          "show",
+          "6f1fc75d694c6901051bdeae784d18b836c6fa70:src/bidkv/manifests/vllm-hust-extension-v0.3.json"
+        ],
+        "exit_code": 0,
+        "stderr": "",
+        "stderr_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout": "{\n  \"schema_version\": \"0.3-experimental\",\n  \"extension_id\": \"org.vllm-hust.bidkv\",\n  \"extension_version\": \"0.2.1\",\n  \"kind\": \"scheduler_policy\",\n  \"host\": {\n    \"provider\": \"vllm\",\n    \"name\": \"vllm\",\n    \"version_range\": \">=0.28.1rc1.dev319,<0.29\",\n    \"api_range\": \">=1,<2\"\n  },\n  \"runtime\": {\n    \"type\": \"python\",\n    \"process_scope\": \"scheduler\",\n    \"isolation\": \"trusted_in_process\"\n  },\n  \"lifecycle_owner\": \"vllm\",\n  \"protocols\": [\n    {\n      \"name\": \"vllm.preemption-policy\",\n      \"version_range\": \">=1,<2\"\n    }\n  ],\n  \"implementation\": [\n    {\n      \"type\": \"python_module\",\n      \"module\": \"bidkv.adapters.vllm_hust.selector\",\n      \"object\": \"BidkvPreemptionPolicy\",\n      \"status\": \"active\"\n    }\n  ],\n  \"requires_services\": [],\n  \"requires_extensions\": [],\n  \"resource_claims\": [\n    {\n      \"resource\": \"vllm.scheduler.preemption-policy\",\n      \"scope\": \"vllm-process\",\n      \"mode\": \"exclusive\"\n    }\n  ],\n  \"components\": [\n    {\n      \"component_id\": \"victim-selector\",\n      \"contracts\": [\n        \"vllm.preemption-policy.v1\"\n      ],\n      \"execution_planes\": [\n        \"scheduler\"\n      ],\n      \"isolation\": \"trusted_in_process\",\n      \"implementation_ref\": \"bidkv.adapters.vllm_hust.selector:BidkvPreemptionPolicy\",\n      \"permissions\": []\n    }\n  ],\n  \"activation\": {\n    \"entry_points\": [],\n    \"environment\": {\n      \"BIDKV_UTILITY_ENABLE\": \"1\",\n      \"BIDKV_UTILITY_STRATEGY\": \"bidkv\",\n      \"BIDKV_UTILITY_LIVENESS_PREEMPTIONS\": \"2\",\n      \"BIDKV_UTILITY_CASCADE_GAIN_RATIO\": \"1.25\"\n    },\n    \"additional_config\": {\n      \"_manager_runtime_qualification\": {\n        \"accelerator\": \"ascend\",\n        \"execution_mode\": \"graph\",\n        \"model\": \"Qwen3.8-27B\",\n        \"tensor_parallel_size\": 4,\n        \"functional_compatibility\": {\n          \"status\": \"passed\",\n          \"scope\": \"Qwen3.8-27B / Ascend TP4 / FULL_DECODE_ONLY graph\"\n        },\n        \"effectiveness_qualifications\": [\n          {\n            \"status\": \"inconclusive\",\n            \"scope\": \"ascending mixed / concurrency=4 / 1-GiB KV pressure / n=3\",\n            \"reason\": \"The policy was not invoked in every repeat and the paired intervals overlap.\"\n          },\n          {\n            \"status\": \"not-beneficial-in-tested-cell\",\n            \"scope\": \"interactive batch / concurrency=8 / 1-GiB KV pressure / n=3\",\n            \"reason\": \"Throughput delta mean -25.31% (95% CI -26.66% to -23.96%); P95 latency delta mean +34.57% (95% CI +31.96% to +37.17%).\"\n          }\n        ],\n        \"runtime_state_source\": \"live_instance_observation_only\",\n        \"tested_runtime_commit\": \"199e0bdc6fc38fc9b14b626515efdcbf81de0b62\",\n        \"evidence\": \"docs/evidence/sage-mate-20260905-bounded-preemption-matrix.md\"\n      }\n    }\n  }\n}\n",
+        "stdout_sha256": "sha256:a7d3d7815a537a3e0c1b993bc2037b49d346c238572cc016b4931491a9dd4aa9"
+      },
+      "repository_path": "/root/ecpa-h2-corpus-src-bidkv",
+      "snapshot_path": "experiments/real_mod_composition/source_manifests/bidkv.json",
+      "snapshot_sha256": "sha256:a7d3d7815a537a3e0c1b993bc2037b49d346c238572cc016b4931491a9dd4aa9",
+      "verified": true
+    },
+    "diffspec": {
+      "blob_lookup": {
+        "argv": [
+          "git",
+          "-C",
+          "/root/ecpa-h2-corpus-src-diffspec",
+          "rev-parse",
+          "9d9ddc9bfae2b93d03f9e66715e288b229c75e07:diffspec/manifests/vllm-hust-extension-v0.3.json"
+        ],
+        "exit_code": 0,
+        "stderr": "",
+        "stderr_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout": "ecb9f079ce77616d1f00ca3a4ab3d38d940e1389\n",
+        "stdout_sha256": "sha256:8fd5bae623e5c599062f285a11defc0d9117ba00884e4ea75be3e7c9fec24107"
+      },
+      "commit_check": {
+        "argv": [
+          "git",
+          "-C",
+          "/root/ecpa-h2-corpus-src-diffspec",
+          "cat-file",
+          "-e",
+          "9d9ddc9bfae2b93d03f9e66715e288b229c75e07^{commit}"
+        ],
+        "exit_code": 0,
+        "stderr": "",
+        "stderr_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout": "",
+        "stdout_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "manifest_read": {
+        "argv": [
+          "git",
+          "-C",
+          "/root/ecpa-h2-corpus-src-diffspec",
+          "show",
+          "9d9ddc9bfae2b93d03f9e66715e288b229c75e07:diffspec/manifests/vllm-hust-extension-v0.3.json"
+        ],
+        "exit_code": 0,
+        "stderr": "",
+        "stderr_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout": "{\n  \"schema_version\": \"0.3-experimental\",\n  \"extension_id\": \"org.vllm-hust.diffspec\",\n  \"extension_version\": \"0.3.0\",\n  \"kind\": \"in_process_plugin\",\n  \"host\": {\n    \"provider\": \"vllm\",\n    \"name\": \"vllm-ascend\",\n    \"version_range\": \">=0.25.1rc1,<0.25.2\",\n    \"api_range\": \">=1,<2\"\n  },\n  \"runtime\": {\n    \"type\": \"python\",\n    \"process_scope\": \"vllm_engine_and_ascend_worker\",\n    \"isolation\": \"trusted_in_process\"\n  },\n  \"lifecycle_owner\": \"vllm\",\n  \"protocols\": [\n    {\n      \"name\": \"vllm.general_plugins\",\n      \"version_range\": \">=0.28.1rc1.dev319,<0.28.2\"\n    },\n    {\n      \"name\": \"vllm-ascend.runtime-patch-surface\",\n      \"version_range\": \">=0.25.1rc1,<0.25.2\"\n    }\n  ],\n  \"implementation\": [\n    {\n      \"type\": \"python_entry_point\",\n      \"group\": \"vllm.general_plugins\",\n      \"name\": \"diffspec\",\n      \"status\": \"active\"\n    }\n  ],\n  \"requires_services\": [],\n  \"requires_extensions\": [],\n  \"resource_claims\": [\n    {\n      \"resource\": \"vllm-ascend.speculative-decoding.pipeline\",\n      \"scope\": \"vllm-process\",\n      \"mode\": \"exclusive\"\n    }\n  ],\n  \"components\": [\n    {\n      \"component_id\": \"differential-speculative-decoder\",\n      \"contracts\": [\n        \"vllm.general_plugins\"\n      ],\n      \"execution_planes\": [\n        \"scheduler\",\n        \"worker\",\n        \"native\",\n        \"device\"\n      ],\n      \"isolation\": \"trusted_in_process\",\n      \"implementation_ref\": \"diffspec.plugin:register\",\n      \"permissions\": [\n        \"device_access\"\n      ]\n    }\n  ],\n  \"activation\": {\n    \"entry_points\": [\n      {\n        \"group\": \"vllm.general_plugins\",\n        \"name\": \"diffspec\"\n      }\n    ],\n    \"environment\": {},\n    \"additional_config\": {\n      \"_manager_runtime_qualification\": {\n        \"accelerator\": \"ascend\",\n        \"core_commit\": \"762f85b311fbab0bcf8921dd216f5093cd58b9b8\",\n        \"execution_mode\": \"graph\",\n        \"model\": \"Qwen3.8-27B\",\n        \"plugin_commit\": \"4e57439e58ed3d78e675f9fd7b4614fb183c5394\",\n        \"tensor_parallel_size\": 4,\n        \"status\": \"compatible_performance_degraded\",\n        \"draft_model\": \"VirVen/Qwen3.5-27B-EAGLE3-v2\",\n        \"artifact_image_id\": \"sha256:6dec9e68eaa61d5a3297abc5006d939d5644aa203c16ef1f9af65fb54d60722b\",\n        \"reason\": \"TP4 graph functional matrix passed; measured acceptance and latency do not justify a performance recommendation\",\n        \"evidence\": \"docs/evidence/sage-mate-20260904-tp4-graph.md\"\n      }\n    }\n  }\n}\n",
+        "stdout_sha256": "sha256:fa00f67430eeca8064dc1d566081826b1113a77173c509a18ee4d510fd141d57"
+      },
+      "repository_path": "/root/ecpa-h2-corpus-src-diffspec",
+      "snapshot_path": "experiments/real_mod_composition/source_manifests/diffspec.json",
+      "snapshot_sha256": "sha256:fa00f67430eeca8064dc1d566081826b1113a77173c509a18ee4d510fd141d57",
+      "verified": true
+    },
+    "knorm": {
+      "blob_lookup": {
+        "argv": [
+          "git",
+          "-C",
+          "/root/ecpa-h2-sources/vllm-hust-knorm",
+          "rev-parse",
+          "c490cfbfd2372635e8e874c8d7ba866ca5c476fb:src/vllm_hust_knorm/manifests/vllm-hust-extension-v0.3.json"
+        ],
+        "exit_code": 0,
+        "stderr": "",
+        "stderr_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout": "9dd3b208f4de382e1c8c451174ae461afeef7cff\n",
+        "stdout_sha256": "sha256:47f9d1b9ef480233121c3e04365f2d9cc3e78a59cf2016f919efced8b3638539"
+      },
+      "commit_check": {
+        "argv": [
+          "git",
+          "-C",
+          "/root/ecpa-h2-sources/vllm-hust-knorm",
+          "cat-file",
+          "-e",
+          "c490cfbfd2372635e8e874c8d7ba866ca5c476fb^{commit}"
+        ],
+        "exit_code": 0,
+        "stderr": "",
+        "stderr_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout": "",
+        "stdout_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "manifest_read": {
+        "argv": [
+          "git",
+          "-C",
+          "/root/ecpa-h2-sources/vllm-hust-knorm",
+          "show",
+          "c490cfbfd2372635e8e874c8d7ba866ca5c476fb:src/vllm_hust_knorm/manifests/vllm-hust-extension-v0.3.json"
+        ],
+        "exit_code": 0,
+        "stderr": "",
+        "stderr_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout": "{\n  \"schema_version\": \"0.3-experimental\",\n  \"extension_id\": \"org.vllm-hust.knorm\",\n  \"extension_version\": \"0.1.0\",\n  \"kind\": \"in_process_plugin\",\n  \"host\": {\n    \"provider\": \"vllm\",\n    \"name\": \"vllm\",\n    \"version_range\": \">=0.23\",\n    \"api_range\": \">=1,<2\"\n  },\n  \"runtime\": {\n    \"type\": \"python\",\n    \"process_scope\": \"scheduler\",\n    \"isolation\": \"trusted_in_process\"\n  },\n  \"lifecycle_owner\": \"vllm\",\n  \"protocols\": [\n    {\n      \"name\": \"vllm.general_plugins\",\n      \"version_range\": null\n    },\n    {\n      \"name\": \"vllm.v1.kv_cache_spec_registry\",\n      \"version_range\": null\n    },\n    {\n      \"name\": \"vllm.v1.worker.gpu_model_runner\",\n      \"version_range\": null\n    }\n  ],\n  \"implementation\": [\n    {\n      \"type\": \"python_module\",\n      \"module\": \"vllm_hust_knorm.bootstrap\",\n      \"object\": \"register_plugins\",\n      \"status\": \"import_only\"\n    }\n  ],\n  \"requires_services\": [],\n  \"requires_extensions\": [],\n  \"resource_claims\": [\n    {\n      \"resource\": \"vllm.kv-cache.compression-policy\",\n      \"scope\": \"vllm-process\",\n      \"mode\": \"exclusive\"\n    }\n  ],\n  \"components\": [\n    {\n      \"component_id\": \"kv-compression-manager\",\n      \"contracts\": [\"vllm.kv_cache.compression.v1\"],\n      \"execution_planes\": [\"scheduler\", \"worker\"],\n      \"isolation\": \"trusted_in_process\",\n      \"implementation_ref\": \"vllm_hust_knorm.knorm.manager:get_knorm_manager_class\",\n      \"permissions\": []\n    },\n    {\n      \"component_id\": \"attention-norm-collector\",\n      \"contracts\": [\"vllm.attention.norm_collection.v1\"],\n      \"execution_planes\": [\"worker\", \"device\"],\n      \"isolation\": \"trusted_in_process\",\n      \"implementation_ref\": \"vllm_hust_knorm.knorm.attention_backend:install_attention_wrapper\",\n      \"permissions\": [\"device_access\"]\n    }\n  ],\n  \"activation\": {\n    \"entry_points\": [\n      {\n        \"group\": \"vllm.general_plugins\",\n        \"name\": \"vllm-hust-knorm\"\n      }\n    ],\n    \"environment\": {\n      \"VLLM_KNORM_ENABLED\": \"1\",\n      \"VLLM_KNORM_COMPRESSION_RATIO\": \"0.5\",\n      \"VLLM_KNORM_WARMUP_TOKENS\": \"32\"\n    },\n    \"additional_config\": {}\n  }\n}\n",
+        "stdout_sha256": "sha256:272aece6dcb74a48f38cb0f9598b7ce81fe729d49d22494d68c7181e7f16afd8"
+      },
+      "repository_path": "/root/ecpa-h2-sources/vllm-hust-knorm",
+      "snapshot_path": "experiments/real_mod_composition/source_manifests/knorm.json",
+      "snapshot_sha256": "sha256:272aece6dcb74a48f38cb0f9598b7ce81fe729d49d22494d68c7181e7f16afd8",
+      "verified": true
+    },
+    "kvcompress": {
+      "blob_lookup": {
+        "argv": [
+          "git",
+          "-C",
+          "/root/ecpa-h2-sources/vllm-ascend-kvcompress-hust",
+          "rev-parse",
+          "00cc78dc7f3491eecbc79c5068e29aed9f59afc3:src/vllm_ascend_kvcompress/manifests/vllm-hust-extension-v0.3.json"
+        ],
+        "exit_code": 0,
+        "stderr": "",
+        "stderr_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout": "fd6b1b703ba7eec7587c16d27370c5b75801c89d\n",
+        "stdout_sha256": "sha256:f285f2e048875cba36d6915253ddaf0325ab69df6d333f87247d2f5df92cccf0"
+      },
+      "commit_check": {
+        "argv": [
+          "git",
+          "-C",
+          "/root/ecpa-h2-sources/vllm-ascend-kvcompress-hust",
+          "cat-file",
+          "-e",
+          "00cc78dc7f3491eecbc79c5068e29aed9f59afc3^{commit}"
+        ],
+        "exit_code": 0,
+        "stderr": "",
+        "stderr_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout": "",
+        "stdout_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "manifest_read": {
+        "argv": [
+          "git",
+          "-C",
+          "/root/ecpa-h2-sources/vllm-ascend-kvcompress-hust",
+          "show",
+          "00cc78dc7f3491eecbc79c5068e29aed9f59afc3:src/vllm_ascend_kvcompress/manifests/vllm-hust-extension-v0.3.json"
+        ],
+        "exit_code": 0,
+        "stderr": "",
+        "stderr_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout": "{\n  \"schema_version\": \"0.3-experimental\",\n  \"extension_id\": \"org.vllm-hust.ascend-kvcompress\",\n  \"extension_version\": \"0.9.0\",\n  \"kind\": \"in_process_plugin\",\n  \"host\": {\n    \"provider\": \"vllm\",\n    \"name\": \"vllm-ascend\",\n    \"version_range\": \">=0.23.0.post1,<0.26,!=0.24.*,!=0.25.0.*\",\n    \"api_range\": \">=1,<2\"\n  },\n  \"runtime\": {\n    \"type\": \"python\",\n    \"process_scope\": \"scheduler_and_ascend_worker\",\n    \"isolation\": \"trusted_in_process\"\n  },\n  \"lifecycle_owner\": \"vllm\",\n  \"protocols\": [\n    {\n      \"name\": \"vllm.general_plugins\",\n      \"version_range\": null\n    }\n  ],\n  \"implementation\": [\n    {\n      \"type\": \"python_entry_point\",\n      \"group\": \"vllm.general_plugins\",\n      \"name\": \"ascend_kvcompress\",\n      \"object\": \"vllm_ascend_kvcompress.plugin:register\",\n      \"status\": \"active\"\n    }\n  ],\n  \"requires_services\": [],\n  \"requires_extensions\": [],\n  \"resource_claims\": [\n    {\n      \"resource\": \"vllm-ascend.kv-cache.mutation\",\n      \"scope\": \"vllm-process\",\n      \"mode\": \"exclusive\"\n    }\n  ],\n  \"components\": [\n    {\n      \"component_id\": \"ascend-kvcompress\",\n      \"contracts\": [\"vllm.general_plugins\"],\n      \"execution_planes\": [\"scheduler\", \"worker\", \"device\"],\n      \"isolation\": \"trusted_in_process\",\n      \"implementation_ref\": \"vllm_ascend_kvcompress.plugin:register\",\n      \"permissions\": [\n        \"device_access\",\n        \"filesystem_read\",\n        \"filesystem_write\",\n        \"network_egress\"\n      ]\n    }\n  ],\n  \"activation\": {\n    \"entry_points\": [\n      {\n        \"group\": \"vllm.general_plugins\",\n        \"name\": \"ascend_kvcompress\"\n      }\n    ],\n    \"environment\": {\n      \"VLLM_ASCEND_KVCOMPRESS_ENABLED\": \"1\"\n    },\n    \"additional_config\": {}\n  }\n}\n",
+        "stdout_sha256": "sha256:ad0a3e62602108e54503bb81c8fda162a730e1a422fe940d09a2463ee2d0eb54"
+      },
+      "repository_path": "/root/ecpa-h2-sources/vllm-ascend-kvcompress-hust",
+      "snapshot_path": "experiments/real_mod_composition/source_manifests/kvcompress.json",
+      "snapshot_sha256": "sha256:ad0a3e62602108e54503bb81c8fda162a730e1a422fe940d09a2463ee2d0eb54",
+      "verified": true
+    },
+    "lifecycle_profiler": {
+      "blob_lookup": {
+        "argv": [
+          "git",
+          "-C",
+          "/root/ecpa-h2-corpus-src-profiler",
+          "rev-parse",
+          "8b8245cdba61b2ccc92a02c81b158c8fc9f90d14:src/vllm_request_lifecycle_profiler/manifests/vllm-hust-extension-v0.3.json"
+        ],
+        "exit_code": 0,
+        "stderr": "",
+        "stderr_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout": "1fc7b3df1c2cc4f4d609bd70367c41c5e9285bc0\n",
+        "stdout_sha256": "sha256:f658ac11cd1cb4316bb0e6804571538d06e2e81f8a34da340940fbcb7aca93b4"
+      },
+      "commit_check": {
+        "argv": [
+          "git",
+          "-C",
+          "/root/ecpa-h2-corpus-src-profiler",
+          "cat-file",
+          "-e",
+          "8b8245cdba61b2ccc92a02c81b158c8fc9f90d14^{commit}"
+        ],
+        "exit_code": 0,
+        "stderr": "",
+        "stderr_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout": "",
+        "stdout_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "manifest_read": {
+        "argv": [
+          "git",
+          "-C",
+          "/root/ecpa-h2-corpus-src-profiler",
+          "show",
+          "8b8245cdba61b2ccc92a02c81b158c8fc9f90d14:src/vllm_request_lifecycle_profiler/manifests/vllm-hust-extension-v0.3.json"
+        ],
+        "exit_code": 0,
+        "stderr": "",
+        "stderr_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout": "{\n  \"schema_version\": \"0.3-experimental\",\n  \"extension_id\": \"org.vllm-hust.request-lifecycle-profiler\",\n  \"extension_version\": \"0.1.1\",\n  \"kind\": \"in_process_plugin\",\n  \"host\": {\n    \"provider\": \"vllm\",\n    \"name\": \"vllm\",\n    \"version_range\": \">=0.23,<0.24\",\n    \"api_range\": \">=1,<2\"\n  },\n  \"runtime\": {\n    \"type\": \"python\",\n    \"process_scope\": \"api-and-scheduler\",\n    \"isolation\": \"trusted_in_process\"\n  },\n  \"lifecycle_owner\": \"vllm\",\n  \"protocols\": [\n    {\n      \"name\": \"vllm.general_plugins\",\n      \"version_range\": null\n    },\n    {\n      \"name\": \"vllm.request-lifecycle-events\",\n      \"version_range\": \">=1,<2\"\n    }\n  ],\n  \"implementation\": [\n    {\n      \"type\": \"python_module\",\n      \"module\": \"vllm_request_lifecycle_profiler.plugin\",\n      \"object\": \"register_plugin\",\n      \"status\": \"active\"\n    }\n  ],\n  \"requires_services\": [],\n  \"requires_extensions\": [],\n  \"resource_claims\": [\n    {\n      \"resource\": \"vllm.request-lifecycle-events.observer\",\n      \"scope\": \"vllm-process\",\n      \"mode\": \"shared\"\n    }\n  ],\n  \"components\": [\n    {\n      \"component_id\": \"request-lifecycle-profiler-native-sink\",\n      \"contracts\": [\n        \"vllm.request-lifecycle-events.v1\"\n      ],\n      \"execution_planes\": [\n        \"api\",\n        \"scheduler\"\n      ],\n      \"isolation\": \"trusted_in_process\",\n      \"implementation_ref\": \"vllm_request_lifecycle_profiler.plugin:register_plugin\",\n      \"permissions\": []\n    }\n  ],\n  \"activation\": {\n    \"entry_points\": [\n      {\n        \"group\": \"vllm.general_plugins\",\n        \"name\": \"request_lifecycle_profiler\"\n      }\n    ],\n    \"environment\": {},\n    \"additional_config\": {}\n  }\n}\n",
+        "stdout_sha256": "sha256:650160eb2c69a93b1bfc09d1ebc7728b1045b5411d1be817c216038121028c87"
+      },
+      "repository_path": "/root/ecpa-h2-corpus-src-profiler",
+      "snapshot_path": "experiments/real_mod_composition/source_manifests/lifecycle_profiler.json",
+      "snapshot_sha256": "sha256:650160eb2c69a93b1bfc09d1ebc7728b1045b5411d1be817c216038121028c87",
+      "verified": true
+    },
+    "vspec": {
+      "blob_lookup": {
+        "argv": [
+          "git",
+          "-C",
+          "/root/ecpa-h2-corpus-src-vspec",
+          "rev-parse",
+          "bdd919d24669f09e6eb1987157dfdb5561460f45:src/vllm_hust_vspec/manifests/vllm-hust-extension-v0.3.json"
+        ],
+        "exit_code": 0,
+        "stderr": "",
+        "stderr_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout": "3d75a1647a912df057ea13150aa4a359a679281d\n",
+        "stdout_sha256": "sha256:0d685bc34ef4dc1bcbfea161e56bf849141a0ddd97d330d6c8b7d2421e77de46"
+      },
+      "commit_check": {
+        "argv": [
+          "git",
+          "-C",
+          "/root/ecpa-h2-corpus-src-vspec",
+          "cat-file",
+          "-e",
+          "bdd919d24669f09e6eb1987157dfdb5561460f45^{commit}"
+        ],
+        "exit_code": 0,
+        "stderr": "",
+        "stderr_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout": "",
+        "stdout_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "manifest_read": {
+        "argv": [
+          "git",
+          "-C",
+          "/root/ecpa-h2-corpus-src-vspec",
+          "show",
+          "bdd919d24669f09e6eb1987157dfdb5561460f45:src/vllm_hust_vspec/manifests/vllm-hust-extension-v0.3.json"
+        ],
+        "exit_code": 0,
+        "stderr": "",
+        "stderr_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout": "{\n  \"schema_version\": \"0.3-experimental\",\n  \"extension_id\": \"org.vllm-hust.vspec\",\n  \"extension_version\": \"0.14.3\",\n  \"kind\": \"in_process_plugin\",\n  \"host\": {\n    \"provider\": \"vllm\",\n    \"name\": \"vllm\",\n    \"version_range\": \">=0.17.2rc1.dev5871,<0.26\"\n  },\n  \"runtime\": {\n    \"type\": \"python\",\n    \"process_scope\": \"vllm-processes\",\n    \"isolation\": \"trusted_in_process\"\n  },\n  \"lifecycle_owner\": \"vllm\",\n  \"protocols\": [\n    {\n      \"name\": \"vllm.general_plugins\",\n      \"version_range\": null\n    },\n    {\n      \"name\": \"vllm-ascend.spec-decode-private-abi\",\n      \"version_range\": null\n    }\n  ],\n  \"implementation\": [\n    {\n      \"type\": \"python_entry_point\",\n      \"group\": \"vllm.general_plugins\",\n      \"name\": \"vspec\",\n      \"value\": \"vllm_hust_vspec:register\"\n    }\n  ],\n  \"requires_services\": [],\n  \"requires_extensions\": [],\n  \"resource_claims\": [\n    {\n      \"resource\": \"vllm.speculative-decoding.patchset\",\n      \"scope\": \"vllm-process\",\n      \"mode\": \"exclusive\"\n    },\n    {\n      \"resource\": \"vllm.model-registry.qwen2-eagle\",\n      \"scope\": \"vllm-process\",\n      \"mode\": \"exclusive\"\n    }\n  ],\n  \"components\": [],\n  \"activation\": {\n    \"entry_points\": [\n      {\n        \"group\": \"vllm.general_plugins\",\n        \"name\": \"vspec\"\n      }\n    ],\n    \"environment\": {\n      \"HUST_VSPEC_ENABLED\": \"1\"\n    },\n    \"additional_config\": {}\n  }\n}\n",
+        "stdout_sha256": "sha256:2d644f2ce0b87e2b96617e222dc44849a61e5c17dba9015a986c0a2e7d49bf06"
+      },
+      "repository_path": "/root/ecpa-h2-corpus-src-vspec",
+      "snapshot_path": "experiments/real_mod_composition/source_manifests/vspec.json",
+      "snapshot_sha256": "sha256:2d644f2ce0b87e2b96617e222dc44849a61e5c17dba9015a986c0a2e7d49bf06",
+      "verified": true
+    }
+  }
+}

@@ -1,0 +1,133 @@
+{
+  "schema": "ecpa-h2-independent-process-carrier-oracle/v1",
+  "reviewed_at": "2026-10-13T18:00:00Z",
+  "independence": {
+    "used": [
+      "the four frozen source manifests from h2-real-source-augmentation-20261013",
+      "the pinned commits, trees, and source objects listed in this oracle"
+    ],
+    "excluded_until_this_oracle_was_frozen": [
+      "Manager planner output",
+      "Manager composition errors",
+      "any score derived from Manager output"
+    ]
+  },
+  "sources": {
+    "unified-communication": {
+      "repository": "vLLM-HUST/vllm-hust-unified-comm",
+      "commit": "f00d1ef4c19a992d67ef8012952a9405d52dd447",
+      "tree": "1eee1fe9cb3c49d4b588203af59ac35704323395",
+      "snapshot": "experiments/real_mod_composition/artifacts/h2-real-source-augmentation-20261013/unified-communication-manifest.json",
+      "files": {
+        "src/vllm_hust_unified_comm/vllm-hust-extension-v0.2.json": {"blob": "0f836829e706830f6bbcb6cc0768f6878928be2d", "sha256": "913b8a2df5c5fff5bd8f9ed52070f624132a7482f41f27cfa6b04fdd956c9a53"},
+        "src/vllm_hust_unified_comm/contracts.py": {"blob": "fa373df51752c998472c4c5a3301c64a30322a91", "sha256": "83c22861ad18b329291cfca91ebb2cc8cf5a1709f2f6f536334872293e7ed1dd"},
+        "src/vllm_hust_unified_comm/strategy.py": {"blob": "af453ca3a3c1db6e5d360a2e72f00c1c8dab8c3b", "sha256": "ed1696a6193d185df12c05aef83390e6837ffdeae107d1dfc7d04acdf2bf28b2"},
+        "HOST_CONTRACT.md": {"blob": "3baa621e163be1bf03b20e3b0d3360fd9e534002", "sha256": "5b762945248c95fe81636686e692e27ca7a4b196d4c7cd1689863e4e5333d621"},
+        "README.md": {"blob": "0b6202999a612bb306f2307d998d3994636d4a36", "sha256": "f51aef5aec3e33fdca6df0bba8a492ce7d19ee9e7446cbde8b8fccc1ba16d1a3"},
+        "pyproject.toml": {"blob": "360d3ebd733799d3fb77a2b5d8567c2378116885", "sha256": "73c7e27ea353f8e4ca6d2ea4498a5be6476363fba723ac5de1874b4a38f6be63"}
+      },
+      "source_facts": {
+        "status": "import_only",
+        "resource": "backend registry and decision policy only; no backend or process group is activated",
+        "authority": "the host GroupCoordinator retains process-group and communicator lifecycle",
+        "process_carrier": "future worker-side host provider in existing vLLM processes",
+        "ordering": "a future host registration must reject backend-name collisions and must not create or destroy host-owned communicators"
+      }
+    },
+    "qos-scheduler": {
+      "repository": "vLLM-HUST/vllm-hust-qos-scheduler",
+      "commit": "13d376a7d8990c4dcf5c0903cb6fbf2398ef0fb0",
+      "tree": "2a1a7b934e8ce68068dfac69a8be13b9dd32e96c",
+      "snapshot": "experiments/real_mod_composition/artifacts/h2-real-source-augmentation-20261013/qos-scheduler-manifest.json",
+      "files": {
+        "src/vllm_hust_qos_scheduler/vllm-hust-extension-v0.2.json": {"blob": "7bbf6144566fcb4b020f90b79b3786475efa55eb", "sha256": "1bf6b9f5f792f05a7ab268874f2cae6130ae3df6eec77570852ce55a0ecd27db"},
+        "src/vllm_hust_qos_scheduler/policy.py": {"blob": "275f802b6cd3e7aac38257f62d9394a18a936960", "sha256": "6f1b07f9605ebfbb5db5104c26bb9f5325fdfb95212bc32cd15c664fb6e44a23"},
+        "HOST_CONTRACT.md": {"blob": "71bc48d5f8a9d94b2ce5fd96eff208eccb6dfbc3", "sha256": "03ad81ec1a76cb94e3f6777065689717f44c678bccea04eba397ed1802741191"},
+        "README.md": {"blob": "cea8858075f9cf1b63e41bae77ca14a5c210fecb", "sha256": "088f5992e7a3bb327fe4dad0ab49a72667bda3a82f38db0b0f1ab77fbfbb2aca"},
+        "pyproject.toml": {"blob": "9addb9f999e8d4af4df007cb232931a712ba82bb", "sha256": "1c0639ebcff9ebe4533f810e1406d5802243e7c5c149b39201887890917df71a"}
+      },
+      "source_facts": {
+        "status": "import_only",
+        "resource": "pure waiting/running ordering keys over immutable request snapshots",
+        "authority": "the host remains sole token-budget and scheduler owner",
+        "process_carrier": "future scheduler-side policy inside the engine process",
+        "ordering": "activation must fail closed for untested KV disaggregation and parallel modes"
+      }
+    },
+    "kv-transfer-observability": {
+      "repository": "vLLM-HUST/vllm-hust-kv-transfer-observability",
+      "commit": "53e69013dcf27fd08a93d142288c93c701edabd3",
+      "tree": "a3c89d926513461d9c31f74c82bf4f8fcb24e6bb",
+      "snapshot": "experiments/real_mod_composition/artifacts/h2-real-source-augmentation-20261013/kv-transfer-observability-manifest.json",
+      "files": {
+        "src/vllm_hust_kv_transfer_observability/vllm-hust-extension-v0.2.json": {"blob": "25beabe7e71fc25b5f4e4f81892950a49eedaae4", "sha256": "637b980343f41ad73dc1e4dbbbd2b89af1807b68eae41be2cd8819e0d856da8e"},
+        "src/vllm_hust_kv_transfer_observability/adapter.py": {"blob": "2fbc569cdfecfdb1a2ad31c1c8d3b2f66c5df239", "sha256": "6b5028b614ad1bc088990333581d4133188aba8f2809006ea29e4a6615431fa5"},
+        "src/vllm_hust_kv_transfer_observability/events.py": {"blob": "0161f7fd4ee1645da553582405f88e97ada1ebed", "sha256": "003a78a081382e37e9984916c65603780cfbc098b4525ba5adb6eacda661047d"},
+        "src/vllm_hust_kv_transfer_observability/descriptors.py": {"blob": "5b2f954e9b9853e7ad564440e665596627f8c806", "sha256": "490e3700ffae4fd2cee526b10fad8e8dea11331f5bd4c1842518b3546a19aa2b"},
+        "HOST_CONTRACT.md": {"blob": "c04ff34951c8f390be04315b5305c72e93878806", "sha256": "9097de1cdd82eddf8bd656f64d51155700bf2cc8e0ac83ce383ebacd4b980bf1"},
+        "docs/current_host_seam_proposal.md": {"blob": "daf14b04bde104d24db9807af923b68c1c3bd68e", "sha256": "e29c86f2b9c3cbd95a72a20c814bfffd30c86a66a5c5664e1113670b31e2ef8f"},
+        "README.md": {"blob": "bfe9316eb07878e91cab90faa1dc58c91a3f4785", "sha256": "79fed1d15863333e8ee620382c247099db5bc2a51a4eb94c11b5d3493bc27828"},
+        "pyproject.toml": {"blob": "274a01f5f594f986b24a0e58af75bfdfd227ccad", "sha256": "b43990177e918a79370bb626f6600e89620050ad9a3bbb00583dc46cf8ed2c66"}
+      },
+      "source_facts": {
+        "status": "import_only",
+        "resource": "bounded event sink, descriptor files, and one background writer thread only after explicit configuration",
+        "authority": "host owns transfer lifecycle and the shared process-local event bus; plugin owns only observation normalization and configured output files",
+        "process_carrier": "future callbacks in scheduler and worker processes through one shared host registry",
+        "ordering": "register after resource preparation; unregister before closing owned resources; current host seam is explicitly unimplemented"
+      }
+    },
+    "split-batch-full-graph": {
+      "repository": "vLLM-HUST/vllm-ascend-split-batch-hust",
+      "commit": "b46de46e90204a0a7636a1dbc952f73178859ada",
+      "tree": "d9832ad7c22b6e6dc2050c75353c3e994cddd6f0",
+      "snapshot": "experiments/real_mod_composition/artifacts/h2-real-source-augmentation-20261013/split-batch-full-graph-manifest.json",
+      "files": {
+        "src/vllm_ascend_split_batch/vllm-hust-extension-v0.2.json": {"blob": "104007c8c7d3ae0c0b47486505a761200641efe7", "sha256": "f58e7425bea31719a3a771fcab4a3f0a614049488341b6479dcb76a710eae614"},
+        "src/vllm_ascend_split_batch/planner.py": {"blob": "de8ef9388ac94800969c0d162b11b31050fd9175", "sha256": "7d5a9cbeaa9232716c298200270a11b5fc66df3308c2949a9de466b9c8a6f59c"},
+        "HOST_CONTRACT.md": {"blob": "8fba46723ecc116b1f10f529b4144df9cfde92ac", "sha256": "6283b9b6a7b13c1bc2990b87316698d6a42e8b735061e713ad0664b236fe1e38"},
+        "README.md": {"blob": "827b2ee5b1ed723ecd84115739a1dc0c5c43fcdc", "sha256": "0dcbe94134ddd7a97f4ed5c2f78378a201bafe4491b52df46f5f29f7a14191cc"},
+        "pyproject.toml": {"blob": "e1548045251560f3a62773ad19347ebf140fa878", "sha256": "100caa508cc562425cefb978106f41493e3bc6083c40572b7c32c4d0ad62fd35"}
+      },
+      "source_facts": {
+        "status": "import_only",
+        "resource": "pure dual-pad plan; graph pools, streams, buffers, and forward context remain proposed host resources",
+        "authority": "the Ascend host provider must own graph pools and execute/restore a committed plan",
+        "process_carrier": "future worker/device path in vllm-ascend processes",
+        "ordering": "the host must restore buffers and context after success, error, or cancellation; no implementation supplies ordering with other worker callbacks"
+      }
+    }
+  },
+  "cases": [
+    {
+      "case_id": "pending-communication-process-carriers",
+      "members": ["unified-communication", "qos-scheduler", "kv-transfer-observability"],
+      "decision": "abstain",
+      "score_eligible": false,
+      "resource_analysis": "The frozen sources declare distinct logical contracts, but none activates them. QoS would reorder scheduler requests, unified communication would select worker communication behavior, and observability would attach scheduler/worker callbacks plus optional files and a writer thread.",
+      "authority_analysis": "Host authority is retained for the token budget, GroupCoordinator/process groups, transfer lifecycle, and shared event registry. No source claims a second token budget, process group, or transfer owner.",
+      "process_carrier_analysis": "All three request vLLM process carriers and overlap at least in the engine/worker topology, but the manifests do not identify concrete process instances or a host provider that wires all three.",
+      "ordering_analysis": "No pinned source specifies joint policy registration, callback dispatch, shutdown, or failure ordering. QoS explicitly requires fail-closed activation for untested KV-disaggregation combinations, while the observability host seam is unimplemented.",
+      "reason": "The sources rule out a proven static exclusive-owner collision but do not establish a runnable joint carrier or safe lifecycle order. Admit and reject would both exceed the evidence."
+    },
+    {
+      "case_id": "pending-worker-carrier-overlap",
+      "members": ["unified-communication", "split-batch-full-graph", "kv-transfer-observability"],
+      "decision": "abstain",
+      "score_eligible": false,
+      "resource_analysis": "The packages describe communication selection, split-batch graph planning, and transfer observation. Their logical resources differ, but the future implementations converge on worker execution, streams/collectives, transfer callbacks, graph context, and teardown.",
+      "authority_analysis": "Core GroupCoordinator retains communicator authority, the Ascend host must own graph pools/execution, and the host owns transfer lifecycle/event dispatch. The plugins remain policy/observer proposals.",
+      "process_carrier_analysis": "The unified and observability manifests target generic vLLM processes while split-batch targets vllm-ascend worker/device paths. No exact core/Ascend host tuple or carrier map is bound for the composition.",
+      "ordering_analysis": "No pinned source defines ordering between collective selection, split execution/context restoration, first-compute/transfer callbacks, and shutdown. All three host attachment paths are absent or proposal-only.",
+      "reason": "Distinct declared contracts are insufficient to prove compatibility across a shared worker/device carrier. There is also no source-proven exclusive collision, so the independent decision is abstain."
+    }
+  ],
+  "oracle_summary": {
+    "admit": 0,
+    "reject": 0,
+    "abstain": 2,
+    "score_eligible": 0,
+    "runtime_claim": false,
+    "performance_claim": false
+  }
+}
