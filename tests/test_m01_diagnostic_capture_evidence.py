@@ -1,5 +1,6 @@
 from collections import Counter
 import hashlib
+import io
 import json
 from pathlib import Path
 import tarfile
@@ -8,6 +9,33 @@ BASE = (
     Path(__file__).resolve().parents[1]
     / "reports/vllm-hust-midterm-20261019/m01-recovery/diagnostic-capture-20261023"
 )
+
+
+def test_partial_arithmetic_remains_separate_from_acceptance():
+    with tarfile.open(BASE / "m01-r3-accounting-progress-20261023.tar.gz") as outer:
+        draft = json.loads(
+            outer.extractfile("m01-r3-draft-input-candidates.json").read()
+        )
+        nested = outer.extractfile("m01-r3-target-catalog-20261023.tar.gz").read()
+    assert draft["effective_flops"] is None
+    assert len(draft["records"]) == draft["counts"]["output_update"] == 19281
+    assert sum(r["rejected_rows"] for r in draft["records"]) == 6033
+    for row in draft["records"]:
+        assert (
+            row["local_sample_index"]
+            == row["scheduled_rows"] - 1 - row["rejected_rows"]
+        )
+        assert 0 <= row["local_sample_index"] < row["scheduled_rows"]
+    with tarfile.open(fileobj=io.BytesIO(nested)) as bundle:
+        target = json.loads(bundle.extractfile("m01-r3-target-catalog.json").read())
+    assert (
+        sum(target["parts"].values())
+        == target["listed_target_subtotal"]
+        == 1768655972286925
+    )
+    assert target["retained_draft_vocabulary_subset"] == 32610860400640
+    assert target["effective_flops"] is None
+    assert target["reference_time"] is None and target["efficiency_percent"] is None
 
 
 def test_failed_capture_preserves_identity_and_recovered_counts():
