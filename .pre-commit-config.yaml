@@ -40,17 +40,17 @@ repos:
   - id: ruff
     name: ruff check
     args: [--fix]
-    exclude: ^(website-publication/data/|archive/mod-git-2026102[12]/[^/]+/snapshot/|reports/vllm-hust-midterm-20261019/(m06-paired-20261021/|m01-recovery/request-assessment-20261022/))
+    exclude: ^(archive/mod-targeted-20261023/manager-experiments/snapshot/|website-publication/data/|archive/mod-git-2026102[12]/[^/]+/snapshot/|reports/vllm-hust-midterm-20261019/(m06-paired-20261021/|m01-recovery/request-assessment-20261022/))
   - id: ruff-format
     name: ruff format
-    exclude: ^(website-publication/data/|archive/mod-git-2026102[12]/[^/]+/snapshot/|reports/vllm-hust-midterm-20261019/(m06-paired-20261021/|m01-recovery/request-assessment-20261022/))
+    exclude: ^(archive/mod-targeted-20261023/manager-experiments/snapshot/|website-publication/data/|archive/mod-git-2026102[12]/[^/]+/snapshot/|reports/vllm-hust-midterm-20261019/(m06-paired-20261021/|m01-recovery/request-assessment-20261022/))
 
 - repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
   rev: v2.16.0
   hooks:
   - id: pretty-format-yaml
     args: [--autofix, --indent=2, --preserve-quotes]
-    exclude: ^(\.github/|archive/mod-git-20261022/split-current-git/snapshot/)
+    exclude: ^(\.github/|archive/mod-git-20261022/split-current-git/snapshot/|archive/mod-targeted-20261023/manager-experiments/snapshot/)
 
 - repo: https://github.com/executablebooks/mdformat
   rev: 1.0.0
