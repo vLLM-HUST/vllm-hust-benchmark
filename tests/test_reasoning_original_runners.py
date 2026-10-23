@@ -46,3 +46,14 @@ def test_incremental_range_rejected_before_data_or_model_access(tmp_path):
     assert result.returncode == 2
     assert "within the 1319" in result.stderr
     assert not (tmp_path / "out").exists()
+
+
+def test_arc_runner_help_lists_both_original_suites_without_optional_dependencies():
+    result = subprocess.run(
+        [sys.executable, str(ROOT / "scripts/run_arc_original_samples.py"), "--help"],
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 0
+    assert "ARC-Challenge" in result.stdout
+    assert "ARC-Easy" in result.stdout

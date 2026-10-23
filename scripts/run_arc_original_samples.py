@@ -1,4 +1,4 @@
-"""Validate three original ARC-Challenge tasks with upstream likelihood scoring.
+"""Validate three original AI2-ARC tasks with upstream likelihood scoring.
 
 Separate environment: lm-eval[api]==0.4.11 datasets==3.6.0 pyarrow==19.0.1
 huggingface-hub==1.31.0. Output includes private tasks/answers: never publish it.
@@ -10,22 +10,25 @@ from importlib import metadata
 import json
 from pathlib import Path
 
-from vllm_hust_workload_data.bindings import bind_source
-from vllm_hust_workload_data.consumer import resolve_input
-from vllm_hust_workload_data.pipeline import prepared_rows, run
-
-
 REVISION = "210d026faf9955653af8916fad021475a3f00453"  # pragma: allowlist secret - public dataset revision
-HASHES = {
-    "train": "e488c1587ffdcfc8443f916c53488a95cd471c5790e0746c6bfe4cecf20962cb",  # pragma: allowlist secret - original parquet SHA
-    "validation": "395a5c88d1580d69855fbaee9450270578df1ad5af6259771cd0a42c20e99f05",  # pragma: allowlist secret - original parquet SHA
-    "test": "62f03257e737aed263f55c6abf87c7bb0028a44a6bdd2a26eb1279eb42c1d1e9",  # pragma: allowlist secret - original parquet SHA
+SUITE_HASHES = {
+    "ARC-Challenge": {
+        "train": "e488c1587ffdcfc8443f916c53488a95cd471c5790e0746c6bfe4cecf20962cb",  # pragma: allowlist secret - original parquet SHA
+        "validation": "395a5c88d1580d69855fbaee9450270578df1ad5af6259771cd0a42c20e99f05",  # pragma: allowlist secret - original parquet SHA
+        "test": "62f03257e737aed263f55c6abf87c7bb0028a44a6bdd2a26eb1279eb42c1d1e9",  # pragma: allowlist secret - original parquet SHA
+    },
+    "ARC-Easy": {
+        "train": "b315db8a4be597dc7daa50a4e70d48dd7c990c32085629e6ccd8c926beaa80b5",  # pragma: allowlist secret - original parquet SHA
+        "validation": "ed890ff1e4cef7a7140d3a30dcea3ed2c9d467c6458f447ad9ef0176d8dcbb74",  # pragma: allowlist secret - original parquet SHA
+        "test": "4160597d618ae851c7eb04e281574f3f654776216ac6b6641588d64527b47177",  # pragma: allowlist secret - original parquet SHA
+    },
 }
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--data-root", required=True, type=Path)
+    parser.add_argument("--suite", choices=tuple(SUITE_HASHES), default="ARC-Challenge")
     parser.add_argument(
         "--endpoint",
         required=True,
@@ -41,6 +44,10 @@ def main():
     parser.add_argument("--max-length", type=int, default=16384)
     parser.add_argument("--output", required=True, type=Path)
     args = parser.parse_args()
+    from vllm_hust_workload_data.bindings import bind_source
+    from vllm_hust_workload_data.consumer import resolve_input
+    from vllm_hust_workload_data.pipeline import prepared_rows, run
+
     if metadata.version("lm-eval") != "0.4.11":
         raise RuntimeError("requires reviewed lm-eval==0.4.11")
     if not args.endpoint.endswith("/v1/completions"):
@@ -49,16 +56,17 @@ def main():
         raise ValueError(
             "positive context length and explicit local tokenizer required"
         )
+    hashes = SUITE_HASHES[args.suite]
     files = {
-        s: args.data_root / f"ARC-Challenge/{s}-00000-of-00001.parquet" for s in HASHES
+        s: args.data_root / f"{args.suite}/{s}-00000-of-00001.parquet" for s in hashes
     }
     for split, path in files.items():
-        if hashlib.sha256(path.read_bytes()).hexdigest() != HASHES[split]:
+        if hashlib.sha256(path.read_bytes()).hexdigest() != hashes[split]:
             raise ValueError("original dataset file identity mismatch")
     binding = bind_source(
         "AI2_ARC",
         data_root=args.data_root,
-        files=["ARC-Challenge/test-00000-of-00001.parquet"],
+        files=[f"{args.suite}/test-00000-of-00001.parquet"],
         revision=REVISION,
     )
     args.output.mkdir(mode=0o700, parents=True, exist_ok=False)
@@ -90,7 +98,9 @@ def main():
     from lm_eval.utils import load_yaml_config
 
     task_root = Path(lm_eval.__file__).parent / "tasks/arc"
-    config = load_yaml_config(str(task_root / "arc_challenge.yaml"))
+    task_name = "arc_easy" if args.suite == "ARC-Easy" else "arc_challenge"
+    task_config = task_root / f"{task_name}.yaml"
+    config = load_yaml_config(str(task_config))
     config.update(
         dataset_path="parquet",
         dataset_name=None,
@@ -99,10 +109,10 @@ def main():
     receipt = {
         "schema_version": "workload-server-validation/v1",
         "source_id": "AI2_ARC",
-        "subsuite": "ARC-Challenge",
+        "subsuite": args.suite,
         "revision": REVISION,
         "selected_samples": ["test:0", "test:1", "test:2"],
-        "selection": "first three original ARC-Challenge test rows, fixed before execution",
+        "selection": f"first three original {args.suite} test rows, fixed before execution",
         "runner": "lm-eval==0.4.11",
         "served_model": args.model,
         "protocol": "original multiple-choice loglikelihood; no chat conversion",
@@ -110,13 +120,10 @@ def main():
             "local byte-identical parquet paths",
             "three test rows only",
         ],
-        "claim_boundary": "ARC-Challenge sample integration, not ARC-Easy, full benchmark accuracy or performance",
+        "claim_boundary": f"{args.suite} sample integration only; not full-suite accuracy or performance",
         "status": "STARTED",
         "max_length": args.max_length,
-        "task_config_sha256": {
-            p.name: hashlib.sha256(p.read_bytes()).hexdigest()
-            for p in (task_root / "arc_challenge.yaml", task_root / "arc_easy.yaml")
-        },
+        "task_config_sha256": hashlib.sha256(task_config.read_bytes()).hexdigest(),
         "tokenizer_sha256": {
             name: hashlib.sha256((args.tokenizer / name).read_bytes()).hexdigest()
             for name in ("config.json", "tokenizer.json", "tokenizer_config.json")
@@ -151,9 +158,9 @@ def main():
             bootstrap_iters=0,
             log_samples=True,
         )
-        if result is None or result["n-samples"]["arc_challenge"]["effective"] != 3:
+        if result is None or result["n-samples"][task_name]["effective"] != 3:
             raise RuntimeError("expected three evaluated original tasks")
-        if {s["doc_id"] for s in result["samples"]["arc_challenge"]} != {0, 1, 2}:
+        if {s["doc_id"] for s in result["samples"][task_name]} != {0, 1, 2}:
             raise RuntimeError("sample IDs differ from preselection")
         private = args.output / "private-results.json"
         private.write_text(json.dumps(result, default=str, indent=2), encoding="utf-8")

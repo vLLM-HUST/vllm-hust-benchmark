@@ -8,7 +8,7 @@
 - 安装包对24来源各3条完成本地读取、准备及原文回查，共72条；该步骤没有模型调用或评分。
 - GSM8K历史执行回执按实际`doc_id`去重覆盖原test:0–200，共201条；另完成尾部test:1316–1318三条，固定revision累计204/1319个唯一题号。尾部三题strict/flexible均正确；跨配置不汇总准确率，也不解读为全量或性能结论。lm-eval尾部补测的effective
   count异常另列。
-- ARC-Challenge原始test:0–2用原版多选似然评分：3题、12个候选请求，2正确、1错误，全部保留；ARC-Easy未跑。见[复现说明](ARC_CHALLENGE.zh-CN.md)。
+- ARC-Challenge与ARC-Easy均按原版多选似然协议抽测test:0–2，各3题、每题4个候选请求；Challenge 2/3、Easy 1/3，分别保留，不合并成全量正确率。两子集test共6/3548，未跑全量。见[复现说明](ARC_CHALLENGE.zh-CN.md)。
 - 全部8份企业文件SHA核验，每源前三条共24条在双卡NPU完成回放及响应完整性/原声明格式检查。服务端prompt
   token数与预检24/24一致；未截断输入或改变显式预算。没有独立语义gold，不称任务准确率，见[企业说明](ENTERPRISE_REQUESTS.zh-CN.md)。
 - 本地现有Qwen3.5-27B的11份完整权重、9份配置/tokenizer文件与发布方固定提交匹配，见[工件记录](validation/qwen35-27b-deployable-artifact-20261022.json)。

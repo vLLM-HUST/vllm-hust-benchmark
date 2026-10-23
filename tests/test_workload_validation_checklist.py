@@ -171,13 +171,11 @@ def test_arc_task_count_and_protocol_are_not_chat_or_full_suite_claims():
         == "original multiple-choice loglikelihood; no chat conversion"
     )
     assert evidence["subsuite"] == "ARC-Challenge"
+    # Historical receipt pins the helper that ran ARC-Challenge before the
+    # shared ARC-Easy support was added.
     assert (
         evidence["helper_sha256"]
-        == hashlib.sha256(
-            (ROOT / "scripts/run_arc_original_samples.py")
-            .read_bytes()
-            .replace(b"\r\n", b"\n")
-        ).hexdigest()
+        == "f45dbe69e17309fcd74dd49fc3b74ce8dc6d7921a4c46c3268c1dcc593088568"
     )
 
 

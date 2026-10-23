@@ -118,7 +118,7 @@ GSM8K历史[分批汇总](validation/gsm8k-incremental-progress-20261022.json)�
 | BBH           | 原Boolean前三题生成；固定harness 0/3，提前停止 | [ ] 未完成 | 无最终答案；候选读取/CLI通过不等于任务完成，其他子任务未验 |
 | GPQA          | 待核                                           | [ ] 未完成 | 原生子集/协议、服务器执行及适用核验                        |
 | MMLU_PRO      | S：biology与chemistry各原始前三条，各3/3正确   | [ ] 未完成 | 其余12个学科、各学科余题、全量任务                         |
-| AI2_ARC       | S：3条；仅Challenge，2对1错                    | [ ] 未完成 | 本类适配范围复核、余下原始任务                             |
+| AI2_ARC       | S：Challenge与Easy各原始前三条；分别2/3、1/3   | [ ] 未完成 | 两子集其余题及独立推理类别其他来源                         |
 | OPENMATH2     | 待核                                           | [ ] 未完成 | 原生子集/协议、服务器执行及适用核验                        |
 | OPENTHOUGHTS3 | 待核                                           | [ ] 未完成 | 原生子集/协议、服务器执行及适用核验                        |
 | LABBENCH      | 待核                                           | [ ] 未完成 | 原生子集/协议、服务器执行及适用核验                        |

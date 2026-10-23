@@ -1,6 +1,7 @@
 """Bookkeeping checks only; these tests do not rerun consumers or native tasks."""
 
 import json
+import hashlib
 from pathlib import Path
 
 
@@ -144,3 +145,32 @@ def test_mmlu_pro_chemistry_receipt_is_supplemental_and_sample_scoped():
     assert receipt["metrics"]["mmlu_pro_chemistry"]["exact_match,custom-extract"] == 1.0
     assert receipt["raw_questions_answers_and_model_outputs_published"] is False
     assert "其余12个学科及全量未跑" in row["blocker"]
+
+
+def test_ai2_arc_easy_receipt_is_distinct_subset_and_sample_scoped():
+    ledger = json.loads((DOCS / "dataset-validation-status.json").read_text("utf-8"))
+    row = next(r for r in ledger["sources"] if r["source_id"] == "AI2_ARC")
+    receipt = json.loads(
+        (ROOT / "docs/workload-data/validation/arc-easy-npu-20261023.json").read_text(
+            "utf-8"
+        )
+    )
+    assert row["checked"] is True
+    assert row["supplemental_samples"] == [
+        "ARC-Easy/test:0",
+        "ARC-Easy/test:1",
+        "ARC-Easy/test:2",
+    ]
+    assert receipt["status"] == "END_TO_END_EXECUTED_AND_SCORED"
+    assert receipt["selected_samples"] == ["test:0", "test:1", "test:2"]
+    assert receipt["sample_counts"] == {"original": 2376, "effective": 3}
+    assert (
+        receipt["helper_sha256"]
+        == hashlib.sha256(
+            (ROOT / "scripts/run_arc_original_samples.py").read_bytes()
+        ).hexdigest()
+    )
+    assert receipt["metrics"]["acc,none"] == 1 / 3
+    assert receipt["model_answer_correct_count"] == 1
+    assert receipt["model_answer_incorrect_count"] == 2
+    assert receipt["raw_tasks_answers_and_model_outputs_published"] is False

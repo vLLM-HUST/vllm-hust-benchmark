@@ -9,7 +9,7 @@
 
 现有登记范围为 36 个任务细类、89 个公开候选来源和 8 份企业数据；另有 17 个补接候选。候选不是已接入，不保证每个候选都适合作为该类的原生任务。
 
-当前完成来源级 NPU 抽样验证的是 GSM8K、ARC-Challenge 及八份企业数据，每源三条。公开两源有任务评分；企业八源仅有回放/响应完整性检查，没有独立语义正确率。24
+当前完成来源级 NPU 抽样验证的是 GSM8K、AI2-ARC（Challenge/Easy子集）及八份企业数据。公开两源有任务评分；企业八源仅有回放/响应完整性检查，没有独立语义正确率。24
 来源完成过本地三条输入读取，包括 16 个公开来源；本地读取不等于 NPU 执行。
 
 上述为拟定计划时的初始截面，后续进展以[分类执行清单](WORKLOAD_EXECUTION_CHECKLIST.zh-CN.md)和[来源台账](DATASET_CHECKLIST.zh-CN.md)为准。已新增按类Draft
@@ -33,7 +33,7 @@ biology及tau2原三任务已补验证，公开来源现有四个抽样闭环；
 | conversation-continuation / 对话续接              | WILDCHAT、LMSYS_CHAT、OASST1、BURSTGPT、ULTRACHAT、SPOKENWOZ、DAILYTALK                                             | L：OASST1、BURSTGPT；✓R：PAIO-CHAT、PAIO-REUSE-CONV（来源级，分类待逐记录确认）；首批 OASST1 | 历史上下文与真实连续交互分开；不能伪造跨请求会话                    |
 | rag-followup / 检索条件下问答与跟进               | QRECC、QASPER、NARRATIVEQA、DUREADER、NATURALQUESTIONS、LONGBENCH、LONGMEMEVAL                                      | 首批 QRECC                                                                                   | 原生对话、检索库与检索协议；单轮 QA 不自动证明跟进                  |
 | document-grounded-analysis / 文档条件分析         | LONGBENCH、LONGBENCH_V2、INFINITEBENCH、QUALITY、QASPER、NARRATIVEQA、NATURALQUESTIONS、DUREADER、LONGALPACA、DOLLY | L：LONGBENCH_V2、DOLLY；首批 LONGBENCH_V2                                                    | 原始上下文与官方评分；企业长输入不自动归文档分析                    |
-| standalone-reasoning / 独立推理                   | GSM8K、MATH500、BBH、GPQA、MMLU_PRO、AI2_ARC、OPENMATH2、OPENTHOUGHTS3、LABBENCH                                    | ✓S：GSM8K 3/3正确，ARC-Challenge 2/3正确；L：MMLU_PRO；先交现有两源                          | ARC-Easy 未跑；其他源未完成服务器评分；知识选择题与多步推理分别标签 |
+| standalone-reasoning / 独立推理                   | GSM8K、MATH500、BBH、GPQA、MMLU_PRO、AI2_ARC、OPENMATH2、OPENTHOUGHTS3、LABBENCH                                    | ✓S：GSM8K抽样已执行；AI2-ARC Challenge 2/3、Easy 1/3；L：MMLU_PRO；先交现有两源          | 两个ARC子集均非全量；其他来源未完成服务器评分；知识选择题与多步推理分别标签 |
 | structured-generation / 结构化生成转换            | JSONSCHEMABENCH、STRUCTEVAL、SPIDER、SCHEMASTORE、BFCL、TOOLACE、XLAM_TOOL、NATURAL_INSTRUCTIONS                    | L：STRUCTEVAL、TOOLACE；✓R：PAIO-JSON；首批 STRUCTEVAL                                       | schema 资源不等于任务集；格式有效不等于抽取/转换正确                |
 | code-generation-with-tests / 单题代码生成测试     | HUMANEVAL、MBPP、BIGCODEBENCH、DS1000、LIVECODEBENCH、OPENCODE、OPENTHOUGHTS3                                       | L：BIGCODEBENCH、DS1000；首批 BIGCODEBENCH                                                   | 隔离执行依赖、官方测试；不能仅检查代码文本生成                      |
 | code-evaluation / 代码评判请求                    | LIVECODEBENCH、OPENCODE、BIGCODEBENCH                                                                               | ✓R：PAIO-CODE-EVAL；首批企业原始请求，公开补 CodeJudge-Eval                                  | 现有公开候选多偏代码生成，不能自造评判题；缺独立评判标签            |
