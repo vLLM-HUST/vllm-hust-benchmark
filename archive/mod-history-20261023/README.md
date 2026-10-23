@@ -3,12 +3,12 @@
 本批次延续 [消费者首批迁移](../mod-consumers-20261023/README.md)，不改变原测量、 历史基线名称、失败或配对关系，不启动设备测试。每份 manifest
 给出公开源提交、 原路径、字节数、Git blob、SHA256 及可下载的 Release 包。
 
-| 集合                                   | 原目录 / 文档                                                                                                                              | 消费者与身份                                                                                             |
-| -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------- |
-| [KV Arrival](kv-arrival/manifest.json) | `.benchmarks/results/`；`docs/NPU_LIVE_VALIDATION_20260910.md`                                                                             | 工作负载生成 smoke 不是模型性能；旧 NPU 验证报告的 live 原件在首批 capsule，运行生成器保留               |
-| [PegaFlow](pegaflow/manifest.json)     | `results/issue23/20261012-attention-diagnostic/`；`docs/experiments/issue23-pilot-20261012.md`                                             | 四臂 attention-transfer diagnostic，非完整 P/D 正确性验收；CI 的 457 文件审计改读外部归档                |
-| [MuxPD](muxpd/manifest.json)           | `evidence/2026-10-10-tp4-optimization/`；`docs/performance-tp4.md`                                                                         | 历史 eager/graph、正确性差异、负收益、状态复用诊断均保留；冻结审计脚本不是可直接重跑的完整 profiler 输入 |
-| [Profiler](profiler/manifest.json)     | `npu6_existing_server_probe_blocked/`、`npu6_existing_server_trace_overhead_smoke/`（位于 `.benchmarks/results/`）；`docs/claim_ledger.md` | 保留受阻记录；客户端 proxy 开销不等于内部 runtime overhead；论文导出读取外部归档，其他 claim 暂留源仓库  |
+| 集合                                   | 原目录 / 文档                                                                                                                              | 消费者与身份                                                                                                     |
+| -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------- |
+| [KV Arrival](kv-arrival/manifest.json) | `.benchmarks/results/`；`docs/NPU_LIVE_VALIDATION_20260910.md`                                                                             | 工作负载生成 smoke 不是模型性能；旧 NPU 验证报告原文保留，但所称 ignored live 日志未在两批清单中找到，不声称恢复 |
+| [PegaFlow](pegaflow/manifest.json)     | `results/issue23/20261012-attention-diagnostic/`；`docs/experiments/issue23-pilot-20261012.md`                                             | 四臂 attention-transfer diagnostic，非完整 P/D 正确性验收；CI 的 457 文件审计改读外部归档                        |
+| [MuxPD](muxpd/manifest.json)           | `evidence/2026-10-10-tp4-optimization/`；`docs/performance-tp4.md`                                                                         | 历史 eager/graph、正确性差异、负收益、状态复用诊断均保留；冻结审计脚本不是可直接重跑的完整 profiler 输入         |
+| [Profiler](profiler/manifest.json)     | `npu6_existing_server_probe_blocked/`、`npu6_existing_server_trace_overhead_smoke/`（位于 `.benchmarks/results/`）；`docs/claim_ledger.md` | 保留受阻记录；客户端 proxy 开销不等于内部 runtime overhead；论文导出读取外部归档，其他 claim 暂留源仓库          |
 
 ## 读取与复核
 
