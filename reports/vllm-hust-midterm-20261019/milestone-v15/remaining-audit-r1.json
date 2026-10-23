@@ -1,0 +1,3072 @@
+{
+  "schema": "v15-remaining-audit/v1",
+  "new_measurements_started": false,
+  "source_baseline_commit": "3f317690161e996803ef3c297280604faa7d6b97",
+  "m01": {
+    "source_path": "reports/vllm-hust-midterm-20261019/m01-recovery/boundary-accounting-20261023/manifest.json",
+    "derivations": {
+      "boundary-workload-join-r1.json": {
+        "status": "semantic_extent_match_with_conditional_current_run_draft_bounds",
+        "requests": 200,
+        "ordered_input_lengths_equal": true,
+        "ordered_output_lengths_equal": true,
+        "identical_output_texts": 30,
+        "candidate_target_positions": 333265,
+        "candidate_causal_pairs": 287475848,
+        "current_raw_accepted": 32173,
+        "current_raw_accepted_per_position": [
+          17341,
+          14832
+        ],
+        "current_draft_bounds": {
+          "implied_terminal_excess": 186,
+          "clipped_requests_min": 93,
+          "clipped_requests_max": 186,
+          "retained_draft_min": 32080,
+          "retained_draft_max": 32173
+        },
+        "old_raw_accepted": 32105,
+        "old_draft_count_reused": false,
+        "old_execution_shape_counts_reused": false,
+        "effective_flops": null,
+        "reference_seconds": null,
+        "efficiency_percent": null,
+        "assumptions": [
+          "Each request emits one initial target token, then two-draft verification rounds emit an accepted prefix and one correction/bonus token.",
+          "Benchmark before/after counters cover the same 200 completed requests.",
+          "Only final output-budget clipping removes outputs; no stop-string removal or unrecorded retry.",
+          "Semantic target extent I+O-1 is a candidate needed-position convention, not measured execution work."
+        ],
+        "limitations": [
+          "Length equality does not establish equal generated tokens, routing or physical schedules.",
+          "Draft bounds are aggregate conditional bounds, not per-request terminal reconstruction.",
+          "No inherited full F, timing division or M01 attainment is performed.",
+          "Actual model coefficients, retained draft context work and dependency reference applicability still require mapping."
+        ],
+        "source_sha256": {
+          "/root/gennova-evidence/20261019-midterm-aligned/m01-recovery-model-worker-r1/mmlu-pro.json": "a6f21ecafac3e322a7659eee1c1e4cbb1e0a19cc4cb1d17620706172446cdf50",
+          "/workspace/m01-boundary-b1-r1/mmlu-pro.json": "311a4b9d3b476accda06a94be2d8adeb91e17d67b2e9122af97c806000993900",
+          "/workspace/m01-boundary-b1-r1/execution-plan.json": "bd2da0a668633eb446c281be527899b9f068023497b0487ce06a1195a40f9c47",
+          "/workspace/m01-critical-path-review-20261023/boundary-b1-audit-r1.json": "247d7dbaf43a718a9881ff4da72ddd933d7ca844231470811abe7674f3554b4b",
+          "/workspace/m01-critical-path-review-20261023/target-useful-candidate-r1.json": "a819d41bc1a5153598cae1b8d2418b6dda96d6cb3a3a12ba07c913e264b5525a",
+          "/workspace/m01-critical-path-review-20261023/join_boundary_workload.py": "e3d25c92128d8f3ce8b99202100871d1ab164406d466e6f53a6d1ced13f2bbd7",
+          "/root/modcost-runtime-028-20261017/vllm-workspace/vllm/vllm/benchmarks/serve.py": "bebbfafbe4b23f6f6323159c77c74c37d2144c94d317b88340b9c9b105af51a0"
+        }
+      },
+      "boundary-matrix-demand-r1.json": {
+        "status": "architecture_checked_target_matrix_semantic_demand_only",
+        "coefficients_per_position": {
+          ".self_attn.qkv_proj": 377487360,
+          ".self_attn.o_proj": 167772160,
+          ".shared_expert.gate_up_proj": 167772160,
+          ".shared_expert.down_proj": 83886080,
+          ".mlp.gate": 41943040,
+          ".mlp.shared_expert_gate": 163840,
+          ".linear_attn.in_proj_qkvz": 1509949440,
+          ".linear_attn.in_proj_ba": 7864320,
+          ".linear_attn.out_proj": 503316480,
+          "routed_expert_projection": 2013265920
+        },
+        "coefficients_match_previous_loaded_shape_derivation": true,
+        "target_projection_flops": 1624140582912000,
+        "causal_qk_av_flops": 47100042936320,
+        "target_output_vocabulary_flops": 52076478464000,
+        "partial_target_matrix_flops": 1723317104312320,
+        "effective_flops": null,
+        "reference_seconds": null,
+        "efficiency_percent": null,
+        "scope": "Global TP2 demand counted once; 2MNK, activated experts only, no padding or rejected draft work.",
+        "assumptions": [
+          "Necessary target positions I+O-1; causal attention evaluated over those semantic positions.",
+          "One necessary target vocabulary projection per emitted output token.",
+          "Configured architecture matches executed dense and routed matrix structure; no weight sparsity or altered expert count."
+        ],
+        "missing": [
+          "GDN and convolution arithmetic, norms and scalar operations must be reconciled separately.",
+          "Retained draft context work is not included.",
+          "This semantic demand is not a physical execution schedule or full F; no timing division."
+        ],
+        "source_sha256": {
+          "/models/Qwen3.5-35B-A3B/config.json": "5e4d7f74fec2f360eb9cfbfcd6ec0c4c76e684d3a11caaed259d9fd9bfbc7944",
+          "/workspace/m01-critical-path-review-20261023/boundary-workload-join-r1.json": "bb795ece638f78ab16f67cfd1dc230d5c2f4fe6206bf973c671d9d4f88e4c841",
+          "/workspace/m01-critical-path-review-20261023/target-useful-candidate-r1.json": "a819d41bc1a5153598cae1b8d2418b6dda96d6cb3a3a12ba07c913e264b5525a",
+          "/workspace/m01-boundary-b1-r1/mmlu-pro.json": "311a4b9d3b476accda06a94be2d8adeb91e17d67b2e9122af97c806000993900",
+          "/workspace/m01-critical-path-review-20261023/derive_boundary_matrix_demand.py": "25dd2aa76195cdb1f340a47a0d5a3aeddc17a122673e9a5a508c7d1be5ddc3e0"
+        }
+      },
+      "boundary-scalar-demand-r1.json": {
+        "status": "recomputed_target_arithmetic_excluding_prefill_gdn_and_draft",
+        "positions": 333265,
+        "causal_pairs": 287475848,
+        "basic_parts": {
+          "normalization_residual_gate": 542333132245,
+          "rope_moe_router_attention_gate": 561044962200,
+          "attention_softmax": 137935084640,
+          "causal_convolution": 572732620800,
+          "gdn_decode_recurrence": 5621391360000,
+          "gdn_preprocessing": 123814612800
+        },
+        "basic_subtotal": 7559251772685,
+        "nonmatrix_detail": {
+          "norm_entries": [
+            {
+              "name": "target.hidden_no_residual",
+              "rows": 333265,
+              "width": 2048,
+              "residual": false,
+              "gated": false,
+              "operations": {
+                "square": 682526720,
+                "reduction_add": 682193455,
+                "mean_scale": 333265,
+                "epsilon_add": 333265,
+                "normalize_multiply": 682526720,
+                "weight_multiply": 682526720,
+                "residual_add": 0,
+                "output_gate_multiply": 0,
+                "inverse_sqrt_evaluations": 333265,
+                "silu_evaluations": 0
+              },
+              "basic_arithmetic_subtotal": 2730440145
+            },
+            {
+              "name": "target.hidden_with_residual",
+              "rows": 26661200,
+              "width": 2048,
+              "residual": true,
+              "gated": false,
+              "operations": {
+                "square": 54602137600,
+                "reduction_add": 54575476400,
+                "mean_scale": 26661200,
+                "epsilon_add": 26661200,
+                "normalize_multiply": 54602137600,
+                "weight_multiply": 54602137600,
+                "residual_add": 54602137600,
+                "output_gate_multiply": 0,
+                "inverse_sqrt_evaluations": 26661200,
+                "silu_evaluations": 0
+              },
+              "basic_arithmetic_subtotal": 273037349200
+            },
+            {
+              "name": "target.full_attention_qk",
+              "rows": 59987700,
+              "width": 256,
+              "residual": false,
+              "gated": false,
+              "operations": {
+                "square": 15356851200,
+                "reduction_add": 15296863500,
+                "mean_scale": 59987700,
+                "epsilon_add": 59987700,
+                "normalize_multiply": 15356851200,
+                "weight_multiply": 15356851200,
+                "residual_add": 0,
+                "output_gate_multiply": 0,
+                "inverse_sqrt_evaluations": 59987700,
+                "silu_evaluations": 0
+              },
+              "basic_arithmetic_subtotal": 61487392500
+            },
+            {
+              "name": "target.gdn_output",
+              "rows": 319934400,
+              "width": 128,
+              "residual": false,
+              "gated": true,
+              "operations": {
+                "square": 40951603200,
+                "reduction_add": 40631668800,
+                "mean_scale": 319934400,
+                "epsilon_add": 319934400,
+                "normalize_multiply": 40951603200,
+                "weight_multiply": 40951603200,
+                "residual_add": 0,
+                "output_gate_multiply": 40951603200,
+                "inverse_sqrt_evaluations": 319934400,
+                "silu_evaluations": 40951603200
+              },
+              "basic_arithmetic_subtotal": 205077950400
+            }
+          ],
+          "scalar": {
+            "target_valid_rows": 333265,
+            "draft_valid_rows": 0,
+            "moe_token_layers": 13330600,
+            "attention_token_layers": 3332650,
+            "moe_basic": {
+              "routed_swiglu_outer_multiply": 54602137600,
+              "shared_swiglu_outer_multiply": 6825267200,
+              "routed_weight_multiply": 218408550400,
+              "routed_weighted_sum_add": 191107481600,
+              "shared_gate_multiply": 27301068800,
+              "shared_routed_add": 27301068800
+            },
+            "router_basic": {
+              "subtract_max": 3412633600,
+              "full_sum_add": 3399303000,
+              "full_normalize_multiply": 3412633600,
+              "selected_sum_add": 93314200,
+              "selected_denominator_epsilon_add": 13330600
+            },
+            "rope_basic": {
+              "multiply": 7678425600,
+              "add_or_subtract": 3839212800
+            },
+            "attention_gate_multiply": 13650534400,
+            "basic_subtotal": 561044962200,
+            "separate": {
+              "moe_silu": 61427404800,
+              "shared_gate_sigmoid": 13330600,
+              "attention_gate_sigmoid": 13650534400,
+              "router_exp": 3412633600,
+              "router_reciprocal": 13330600,
+              "router_selected_normalize_divide": 106644800,
+              "router_reduce_max_semantic_comparisons": 3399303000
+            }
+          },
+          "softmax": {
+            "score_scale_multiply": 45996135680,
+            "stability_subtract": 45996135680,
+            "denominator_add": 45942813280,
+            "exponential": 45996135680,
+            "normalization_divide": 45996135680,
+            "maximum_compare": 45942813280,
+            "query_rows_all_heads_layers": 53322400,
+            "causal_scores_all_heads_layers": 45996135680
+          },
+          "basic_subtotals": {
+            "normalization_residual_gate": 542333132245,
+            "rope_moe_router_attention_gate": 561044962200,
+            "attention_softmax": 137935084640
+          },
+          "basic_subtotal": 1241313179085
+        },
+        "convolution_detail": {
+          "convolution_multiply": 327317913600,
+          "convolution_add": 245414707200,
+          "silu_evaluations": 81903206400,
+          "zero_history_multiply_excluded": 294912000
+        },
+        "gdn_decode_and_preprocessing_detail": {
+          "necessary_decode_rows": 51000,
+          "recurrent_basic_flops": 5621391360000,
+          "recurrent_exp_evaluations": 48960000,
+          "preprocess_operations": {
+            "qk_square_multiply": 40951603200,
+            "qk_reduce_add": 40631668800,
+            "qk_epsilon_add": 319934400,
+            "qk_normalize_multiply": 40951603200,
+            "gate_bias_add": 319934400,
+            "softplus_expression_add": 319934400,
+            "gate_scale_multiply": 319934400,
+            "inverse_sqrt_evaluations": 319934400,
+            "softplus_expression_exp_evaluations": 319934400,
+            "softplus_expression_log_evaluations": 319934400,
+            "parameter_exp_expression_evaluations": 319934400,
+            "sigmoid_evaluations": 319934400,
+            "threshold_comparisons": 319934400,
+            "unary_negations": 319934400
+          },
+          "preprocess_basic_flops": 123814612800
+        },
+        "matrix_subtotal": 1723317104312320,
+        "listed_target_subtotal": 1730876356085005,
+        "inherited_prefill_gdn_flops": false,
+        "effective_flops": null,
+        "efficiency_percent": null,
+        "assumptions": [
+          "Length-derived semantic target work under the validated fixed model dimensions.",
+          "No reused request prefix; each request begins with structural zero convolution history.",
+          "Global TP2 arithmetic counted once; special functions stay separately enumerated."
+        ],
+        "remaining": [
+          "Actual prefill GDN chunk algorithm and initial-state work for this run.",
+          "Useful retained draft context arithmetic and source/runtime applicability.",
+          "Independent stage dependency reference, not global resource maximum."
+        ],
+        "source_sha256": {
+          "/workspace/m01-boundary-b1-r1/mmlu-pro.json": "311a4b9d3b476accda06a94be2d8adeb91e17d67b2e9122af97c806000993900",
+          "/workspace/m01-critical-path-review-20261023/boundary-matrix-demand-r1.json": "25f8a5c0f6ee9e29bc05094f9f3986533c2d38a4642ab4fc50015f1f897e47a2",
+          "/models/Qwen3.5-35B-A3B/config.json": "5e4d7f74fec2f360eb9cfbfcd6ec0c4c76e684d3a11caaed259d9fd9bfbc7944",
+          "/workspace/m01-critical-path-review-20261023/derive_target_nonmatrix_candidate.py": "692e74c1783f0dd06ecf01c27c9adf7126ceda8e974750076444096f28a10bd7",
+          "/workspace/m01-critical-path-review-20261023/derive_target_vocab_conv_candidate.py": "5ef076ab9b997ef0c0602ac87e14beda6bb82ee2f50876819083bef6cb8d501d",
+          "/workspace/m01-critical-path-review-20261023/derive_target_gdn_candidate.py": "a80343a156c75ad4ae213a941657f72a0ebe116779091cc8e7daadbe45bafff7",
+          "/root/gennova-evidence/20261019-midterm-aligned/audit_norm_accounting.py": "b77c7e05daccd468c279a3f83daa9913d1eea7c876d802b37459245fb4c86e56",
+          "/root/gennova-evidence/20261019-midterm-aligned/derive_recovery_model_worker_r1_scalar.py": "52294aea2eb9ac8f3e23bfe560d769bddc3f77f0cee299dac61c997a6cea3215",
+          "/root/gennova-evidence/20261019-midterm-aligned/derive_r12_softmax_semantics.py": "b264d2c4c836a16ac5c715a6dfc44e6ab9543872b6f277877ca7ffd29b2899a8",
+          "/root/gennova-evidence/20261019-midterm-aligned/audit_conv_accounting.py": "5f21010dc3aac2d7a4a453f8fd5bf771232ea93cb65d827ce2c6f1a87c72c74b",
+          "/root/gennova-evidence/20261019-midterm-aligned/audit_gdn_preprocess_semantics.py": "fcd4a19760c57df73d5c73f228df3defc2dc3752a2a9e9bb52b6ab47a9557f56",
+          "/root/gennova-evidence/20261019-midterm-aligned/audit_gdn_recurrence_r9.py": "ad8fca372cbf7d894ff0c1d0e209236607772301b233fee6d09b198f4a852012",
+          "/workspace/m01-critical-path-review-20261023/derive_boundary_scalar_demand.py": "2d5e2e345783c7d9934add921a17baa993aacdae7745f65a2517a6a056689d99"
+        }
+      },
+      "boundary-norm-consumers-r1.json": {
+        "status": "source_review_rejects_logits_only_norm_exclusion",
+        "target_rows": 333265,
+        "output_rows": 51200,
+        "disputed_rows": 282065,
+        "hypothetical_logits_only_exclusion_basic_flops": 2888627665,
+        "hypothetical_exclusion_operations": {
+          "square": 577669120,
+          "reduction_add": 577387055,
+          "mean_scale": 282065,
+          "epsilon_add": 282065,
+          "normalize_multiply": 577669120,
+          "weight_multiply": 577669120,
+          "residual_add": 577669120,
+          "output_gate_multiply": 0
+        },
+        "applied_exclusion_flops": 0,
+        "reviewed_source_edges": [
+          {
+            "path": "/root/modcost-runtime-028-20261017/vllm-workspace/vllm/vllm/model_executor/models/qwen3_5.py",
+            "sha256": "3abeac36180df7bd1bd96b1a7c698a8f212d92c063026420cbdd16d1980e90e6",
+            "lines": [
+              217
+            ],
+            "fragment": "class Qwen3_5Model(Qwen3NextModel):",
+            "interpretation": "Qwen3.5 inherits target forward"
+          },
+          {
+            "path": "/root/modcost-runtime-028-20261017/vllm-workspace/vllm/vllm/model_executor/models/qwen3_next.py",
+            "sha256": "4a27cf7b065c2097688421e6ea849704cef946f347978fb426abbc72b77f00b2",
+            "lines": [
+              727
+            ],
+            "fragment": "hidden_states, _ = self.norm(hidden_states, residual)",
+            "interpretation": "Target final norm"
+          },
+          {
+            "path": "/root/gennova-evidence/20261019-midterm-aligned/runtime/vllm_ascend/worker/model_runner_v1.py",
+            "sha256": "83da7d9c6c53f718322328bb43d80651a7cd62992a8d0e8d723d62769bd0b346",
+            "lines": [
+              1936
+            ],
+            "fragment": "target_hidden_states = hidden_states[:num_scheduled_tokens]",
+            "interpretation": "Non-spec-metadata branch sends scheduled target states to drafter"
+          },
+          {
+            "path": "/root/gennova-evidence/20261019-midterm-aligned/runtime/vllm_ascend/spec_decode/llm_base_proposer.py",
+            "sha256": "d106cb3cc2e048734fa2986394c43c2177d04190715dc390d8a62d50830cb6e2",
+            "lines": [
+              1678
+            ],
+            "fragment": "self.hidden_states[:num_tokens] = target_hidden_states.view(num_tokens, -1)",
+            "interpretation": "First pass copies full supplied target state extent"
+          },
+          {
+            "path": "/root/gennova-evidence/20261019-midterm-aligned/runtime/vllm_ascend/spec_decode/llm_base_proposer.py",
+            "sha256": "d106cb3cc2e048734fa2986394c43c2177d04190715dc390d8a62d50830cb6e2",
+            "lines": [
+              1271
+            ],
+            "fragment": "model_hidden_states = self.hidden_states[:num_input_tokens]",
+            "interpretation": "Draft model input is not restricted to sampled logits positions"
+          },
+          {
+            "path": "/root/gennova-evidence/20261019-midterm-aligned/runtime/vllm_ascend/patch/worker/patch_qwen3_5.py",
+            "sha256": "0ea5111173d5a02e4f8ab89130a1a1bd7d44ad86885a4c64bb3cb4649afbb48c",
+            "lines": [
+              161
+            ],
+            "fragment": "hidden_states = self.pre_fc_norm_hidden(hidden_states)",
+            "interpretation": "MTP normalizes and projects target hidden-state input"
+          }
+        ],
+        "interpretation": [
+          "Logits selection alone cannot establish that other final-norm outputs are unused.",
+          "The reviewed MTP source path consumes target states to construct draft context.",
+          "Source existence is not per-request runtime liveness or retained-draft provenance.",
+          "Do not subtract this sensitivity, or certify every consumed row as useful, without that provenance."
+        ],
+        "effective_flops": null,
+        "reference_seconds": null,
+        "efficiency_percent": null,
+        "source_sha256": {
+          "/workspace/m01-critical-path-review-20261023/boundary-execution-plan-r7.json": "bd2da0a668633eb446c281be527899b9f068023497b0487ce06a1195a40f9c47",
+          "/workspace/m01-boundary-b1-r1/mmlu-pro.json": "311a4b9d3b476accda06a94be2d8adeb91e17d67b2e9122af97c806000993900",
+          "/workspace/m01-critical-path-review-20261023/review_boundary_norm_consumers.py": "d42f1f7b0b4650eca2838eebbe5ceb6728fab843a8d94e9b4f8b1a09f7eb341b",
+          "/root/gennova-evidence/20261019-midterm-aligned/audit_norm_accounting.py": "b77c7e05daccd468c279a3f83daa9913d1eea7c876d802b37459245fb4c86e56"
+        }
+      },
+      "boundary-gdn-prefill-partition-bounds-r1.json": {
+        "status": "conditional_partition_bounds_not_observed_prefill_flops",
+        "input_tokens": 282265,
+        "requests": 200,
+        "global_heads": 32,
+        "linear_layers": 30,
+        "minimum_basic_flops": 29101726539840,
+        "maximum_basic_flops": 38619850757760,
+        "interval_width": 9518124217920,
+        "per_request_single_head_layer": [
+          {
+            "length": 1369,
+            "minimum": 146963148,
+            "maximum": 195118966
+          },
+          {
+            "length": 1562,
+            "minimum": 167980328,
+            "maximum": 222664886
+          },
+          {
+            "length": 1485,
+            "minimum": 159594643,
+            "maximum": 211796688
+          },
+          {
+            "length": 1385,
+            "minimum": 148704225,
+            "maximum": 197248934
+          },
+          {
+            "length": 1519,
+            "minimum": 163296918,
+            "maximum": 216322870
+          },
+          {
+            "length": 1520,
+            "minimum": 163406318,
+            "maximum": 216455993
+          },
+          {
+            "length": 1511,
+            "minimum": 162426255,
+            "maximum": 215257886
+          },
+          {
+            "length": 1501,
+            "minimum": 161338113,
+            "maximum": 213926656
+          },
+          {
+            "length": 1574,
+            "minimum": 169287270,
+            "maximum": 224262362
+          },
+          {
+            "length": 1611,
+            "minimum": 173316673,
+            "maximum": 229805640
+          },
+          {
+            "length": 1333,
+            "minimum": 143042073,
+            "maximum": 189790970
+          },
+          {
+            "length": 1514,
+            "minimum": 162753383,
+            "maximum": 215657255
+          },
+          {
+            "length": 1135,
+            "minimum": 121477893,
+            "maximum": 161497276
+          },
+          {
+            "length": 1092,
+            "minimum": 116794483,
+            "maximum": 155772987
+          },
+          {
+            "length": 1024,
+            "minimum": 109389933,
+            "maximum": 146050547
+          },
+          {
+            "length": 1051,
+            "minimum": 112329873,
+            "maximum": 149697217
+          },
+          {
+            "length": 1084,
+            "minimum": 115923820,
+            "maximum": 154460338
+          },
+          {
+            "length": 1109,
+            "minimum": 118647353,
+            "maximum": 158036078
+          },
+          {
+            "length": 1041,
+            "minimum": 111241708,
+            "maximum": 148365987
+          },
+          {
+            "length": 1045,
+            "minimum": 111676938,
+            "maximum": 148898479
+          },
+          {
+            "length": 1191,
+            "minimum": 127576573,
+            "maximum": 169569891
+          },
+          {
+            "length": 1091,
+            "minimum": 116686155,
+            "maximum": 155639864
+          },
+          {
+            "length": 999,
+            "minimum": 106667698,
+            "maximum": 142157094
+          },
+          {
+            "length": 1110,
+            "minimum": 118756753,
+            "maximum": 158169201
+          },
+          {
+            "length": 1157,
+            "minimum": 123874298,
+            "maximum": 165043709
+          },
+          {
+            "length": 1312,
+            "minimum": 140755068,
+            "maximum": 186913228
+          },
+          {
+            "length": 1614,
+            "minimum": 173644873,
+            "maximum": 230205009
+          },
+          {
+            "length": 1572,
+            "minimum": 169070863,
+            "maximum": 223996116
+          },
+          {
+            "length": 1613,
+            "minimum": 173535473,
+            "maximum": 230071886
+          },
+          {
+            "length": 1636,
+            "minimum": 176040183,
+            "maximum": 233133715
+          },
+          {
+            "length": 1818,
+            "minimum": 195860893,
+            "maximum": 259215282
+          },
+          {
+            "length": 1799,
+            "minimum": 193790318,
+            "maximum": 256685945
+          },
+          {
+            "length": 1688,
+            "minimum": 181702358,
+            "maximum": 240673838
+          },
+          {
+            "length": 1689,
+            "minimum": 181811758,
+            "maximum": 240806961
+          },
+          {
+            "length": 1720,
+            "minimum": 185188203,
+            "maximum": 245130952
+          },
+          {
+            "length": 1675,
+            "minimum": 180287088,
+            "maximum": 238943239
+          },
+          {
+            "length": 1697,
+            "minimum": 182683493,
+            "maximum": 241871945
+          },
+          {
+            "length": 1534,
+            "minimum": 164930988,
+            "maximum": 218784623
+          },
+          {
+            "length": 1591,
+            "minimum": 171139068,
+            "maximum": 226682900
+          },
+          {
+            "length": 1589,
+            "minimum": 170920268,
+            "maximum": 226341366
+          },
+          {
+            "length": 1594,
+            "minimum": 171466173,
+            "maximum": 227205646
+          },
+          {
+            "length": 1732,
+            "minimum": 186495168,
+            "maximum": 247148977
+          },
+          {
+            "length": 1600,
+            "minimum": 172120203,
+            "maximum": 228288938
+          },
+          {
+            "length": 1626,
+            "minimum": 174950743,
+            "maximum": 231802485
+          },
+          {
+            "length": 1576,
+            "minimum": 169504998,
+            "maximum": 224528608
+          },
+          {
+            "length": 1521,
+            "minimum": 163515718,
+            "maximum": 216589116
+          },
+          {
+            "length": 1569,
+            "minimum": 168742663,
+            "maximum": 223596747
+          },
+          {
+            "length": 1498,
+            "minimum": 161009913,
+            "maximum": 213527287
+          },
+          {
+            "length": 1553,
+            "minimum": 167000265,
+            "maximum": 221466779
+          },
+          {
+            "length": 1664,
+            "minimum": 179089523,
+            "maximum": 237426537
+          },
+          {
+            "length": 1647,
+            "minimum": 177237748,
+            "maximum": 234598068
+          },
+          {
+            "length": 1255,
+            "minimum": 134546988,
+            "maximum": 178707490
+          },
+          {
+            "length": 1267,
+            "minimum": 135852858,
+            "maximum": 180317389
+          },
+          {
+            "length": 1254,
+            "minimum": 134437588,
+            "maximum": 178574367
+          },
+          {
+            "length": 1221,
+            "minimum": 130844713,
+            "maximum": 174181308
+          },
+          {
+            "length": 1354,
+            "minimum": 145329078,
+            "maximum": 193122121
+          },
+          {
+            "length": 1300,
+            "minimum": 139448103,
+            "maximum": 185315752
+          },
+          {
+            "length": 1385,
+            "minimum": 148704225,
+            "maximum": 197248934
+          },
+          {
+            "length": 1286,
+            "minimum": 137923433,
+            "maximum": 183452030
+          },
+          {
+            "length": 1347,
+            "minimum": 144566743,
+            "maximum": 192190260
+          },
+          {
+            "length": 1316,
+            "minimum": 141189203,
+            "maximum": 187445720
+          },
+          {
+            "length": 1405,
+            "minimum": 150883128,
+            "maximum": 200328177
+          },
+          {
+            "length": 1350,
+            "minimum": 144892550,
+            "maximum": 192589629
+          },
+          {
+            "length": 1492,
+            "minimum": 160356978,
+            "maximum": 212728549
+          },
+          {
+            "length": 1277,
+            "minimum": 136943393,
+            "maximum": 182052979
+          },
+          {
+            "length": 1330,
+            "minimum": 142713873,
+            "maximum": 189309442
+          },
+          {
+            "length": 1595,
+            "minimum": 171574275,
+            "maximum": 227382688
+          },
+          {
+            "length": 1388,
+            "minimum": 149031353,
+            "maximum": 197648303
+          },
+          {
+            "length": 1655,
+            "minimum": 178109483,
+            "maximum": 235820499
+          },
+          {
+            "length": 1270,
+            "minimum": 136181058,
+            "maximum": 180823443
+          },
+          {
+            "length": 1342,
+            "minimum": 144022113,
+            "maximum": 191371826
+          },
+          {
+            "length": 1357,
+            "minimum": 145654885,
+            "maximum": 193521490
+          },
+          {
+            "length": 1333,
+            "minimum": 143042073,
+            "maximum": 189790970
+          },
+          {
+            "length": 1384,
+            "minimum": 148596123,
+            "maximum": 197115811
+          },
+          {
+            "length": 1324,
+            "minimum": 142060938,
+            "maximum": 188510704
+          },
+          {
+            "length": 1367,
+            "minimum": 146744348,
+            "maximum": 194852720
+          },
+          {
+            "length": 1196,
+            "minimum": 128121180,
+            "maximum": 170235506
+          },
+          {
+            "length": 1637,
+            "minimum": 176148285,
+            "maximum": 233266838
+          },
+          {
+            "length": 1324,
+            "minimum": 142060938,
+            "maximum": 188510704
+          },
+          {
+            "length": 1382,
+            "minimum": 148378418,
+            "maximum": 196849565
+          },
+          {
+            "length": 1337,
+            "minimum": 143476208,
+            "maximum": 190479606
+          },
+          {
+            "length": 1147,
+            "minimum": 122784835,
+            "maximum": 163419495
+          },
+          {
+            "length": 1243,
+            "minimum": 133241118,
+            "maximum": 177110014
+          },
+          {
+            "length": 1106,
+            "minimum": 118319153,
+            "maximum": 157636709
+          },
+          {
+            "length": 1113,
+            "minimum": 119081488,
+            "maximum": 158568570
+          },
+          {
+            "length": 1125,
+            "minimum": 120389728,
+            "maximum": 160166046
+          },
+          {
+            "length": 1282,
+            "minimum": 137486928,
+            "maximum": 182919538
+          },
+          {
+            "length": 1327,
+            "minimum": 142389138,
+            "maximum": 188910073
+          },
+          {
+            "length": 1294,
+            "minimum": 138793870,
+            "maximum": 184517014
+          },
+          {
+            "length": 1218,
+            "minimum": 130516513,
+            "maximum": 173781939
+          },
+          {
+            "length": 1260,
+            "minimum": 135090523,
+            "maximum": 179373105
+          },
+          {
+            "length": 1225,
+            "minimum": 131278848,
+            "maximum": 174713800
+          },
+          {
+            "length": 1282,
+            "minimum": 137486928,
+            "maximum": 182919538
+          },
+          {
+            "length": 1090,
+            "minimum": 116578053,
+            "maximum": 155506741
+          },
+          {
+            "length": 1171,
+            "minimum": 125398968,
+            "maximum": 166907431
+          },
+          {
+            "length": 2207,
+            "minimum": 238224548,
+            "maximum": 314706491
+          },
+          {
+            "length": 2323,
+            "minimum": 250857115,
+            "maximum": 331384213
+          },
+          {
+            "length": 2502,
+            "minimum": 270352018,
+            "maximum": 357066411
+          },
+          {
+            "length": 2251,
+            "minimum": 243017358,
+            "maximum": 321181630
+          },
+          {
+            "length": 2281,
+            "minimum": 246283105,
+            "maximum": 325175320
+          },
+          {
+            "length": 2151,
+            "minimum": 232125868,
+            "maximum": 306633876
+          },
+          {
+            "length": 1442,
+            "minimum": 154911233,
+            "maximum": 205454672
+          },
+          {
+            "length": 1388,
+            "minimum": 149031353,
+            "maximum": 197648303
+          },
+          {
+            "length": 1649,
+            "minimum": 177456548,
+            "maximum": 234864314
+          },
+          {
+            "length": 1537,
+            "minimum": 165259188,
+            "maximum": 219336811
+          },
+          {
+            "length": 1277,
+            "minimum": 136943393,
+            "maximum": 182052979
+          },
+          {
+            "length": 1521,
+            "minimum": 163515718,
+            "maximum": 216589116
+          },
+          {
+            "length": 1637,
+            "minimum": 176148285,
+            "maximum": 233266838
+          },
+          {
+            "length": 1775,
+            "minimum": 191178578,
+            "maximum": 252873266
+          },
+          {
+            "length": 1646,
+            "minimum": 177128348,
+            "maximum": 234464945
+          },
+          {
+            "length": 1711,
+            "minimum": 184208163,
+            "maximum": 243735667
+          },
+          {
+            "length": 1610,
+            "minimum": 173207273,
+            "maximum": 229672517
+          },
+          {
+            "length": 1676,
+            "minimum": 180396488,
+            "maximum": 239076362
+          },
+          {
+            "length": 1547,
+            "minimum": 166346258,
+            "maximum": 220668041
+          },
+          {
+            "length": 1591,
+            "minimum": 171139068,
+            "maximum": 226682900
+          },
+          {
+            "length": 1619,
+            "minimum": 174188408,
+            "maximum": 230870624
+          },
+          {
+            "length": 1585,
+            "minimum": 170486133,
+            "maximum": 225726715
+          },
+          {
+            "length": 1567,
+            "minimum": 168524935,
+            "maximum": 223330501
+          },
+          {
+            "length": 1858,
+            "minimum": 200217198,
+            "maximum": 265157929
+          },
+          {
+            "length": 1648,
+            "minimum": 177347148,
+            "maximum": 234731191
+          },
+          {
+            "length": 1833,
+            "minimum": 197493665,
+            "maximum": 261212127
+          },
+          {
+            "length": 1840,
+            "minimum": 198256000,
+            "maximum": 262143988
+          },
+          {
+            "length": 1791,
+            "minimum": 192919655,
+            "maximum": 255517673
+          },
+          {
+            "length": 1798,
+            "minimum": 193681990,
+            "maximum": 256552822
+          },
+          {
+            "length": 1961,
+            "minimum": 211433423,
+            "maximum": 279487325
+          },
+          {
+            "length": 1871,
+            "minimum": 201632468,
+            "maximum": 266888528
+          },
+          {
+            "length": 1910,
+            "minimum": 205879350,
+            "maximum": 272199433
+          },
+          {
+            "length": 1789,
+            "minimum": 192703248,
+            "maximum": 255153771
+          },
+          {
+            "length": 1854,
+            "minimum": 199780670,
+            "maximum": 264472618
+          },
+          {
+            "length": 1767,
+            "minimum": 190306843,
+            "maximum": 251808282
+          },
+          {
+            "length": 1862,
+            "minimum": 200651333,
+            "maximum": 265690421
+          },
+          {
+            "length": 1820,
+            "minimum": 196077323,
+            "maximum": 259481528
+          },
+          {
+            "length": 1812,
+            "minimum": 195206660,
+            "maximum": 258416544
+          },
+          {
+            "length": 1880,
+            "minimum": 202613603,
+            "maximum": 268086635
+          },
+          {
+            "length": 1781,
+            "minimum": 191831513,
+            "maximum": 253754163
+          },
+          {
+            "length": 1848,
+            "minimum": 199126663,
+            "maximum": 263406150
+          },
+          {
+            "length": 1860,
+            "minimum": 200434903,
+            "maximum": 265424175
+          },
+          {
+            "length": 1833,
+            "minimum": 197493665,
+            "maximum": 261212127
+          },
+          {
+            "length": 1803,
+            "minimum": 194227918,
+            "maximum": 257218437
+          },
+          {
+            "length": 1808,
+            "minimum": 194771453,
+            "maximum": 257884052
+          },
+          {
+            "length": 1788,
+            "minimum": 192593848,
+            "maximum": 254973927
+          },
+          {
+            "length": 1795,
+            "minimum": 193356183,
+            "maximum": 256153453
+          },
+          {
+            "length": 959,
+            "minimum": 102310118,
+            "maximum": 136728886
+          },
+          {
+            "length": 1074,
+            "minimum": 114835678,
+            "maximum": 152759046
+          },
+          {
+            "length": 1147,
+            "minimum": 122784835,
+            "maximum": 163419495
+          },
+          {
+            "length": 1037,
+            "minimum": 110805203,
+            "maximum": 147833495
+          },
+          {
+            "length": 925,
+            "minimum": 98607843,
+            "maximum": 131688265
+          },
+          {
+            "length": 938,
+            "minimum": 100023113,
+            "maximum": 133418864
+          },
+          {
+            "length": 934,
+            "minimum": 99588978,
+            "maximum": 132886372
+          },
+          {
+            "length": 958,
+            "minimum": 102201790,
+            "maximum": 136546232
+          },
+          {
+            "length": 959,
+            "minimum": 102310118,
+            "maximum": 136728886
+          },
+          {
+            "length": 1051,
+            "minimum": 112329873,
+            "maximum": 149697217
+          },
+          {
+            "length": 993,
+            "minimum": 106013465,
+            "maximum": 141358356
+          },
+          {
+            "length": 937,
+            "minimum": 99914785,
+            "maximum": 133285741
+          },
+          {
+            "length": 944,
+            "minimum": 100677120,
+            "maximum": 134217602
+          },
+          {
+            "length": 971,
+            "minimum": 103618358,
+            "maximum": 138429650
+          },
+          {
+            "length": 940,
+            "minimum": 100241913,
+            "maximum": 133685110
+          },
+          {
+            "length": 1048,
+            "minimum": 112004043,
+            "maximum": 149297848
+          },
+          {
+            "length": 1017,
+            "minimum": 108627598,
+            "maximum": 144791611
+          },
+          {
+            "length": 1037,
+            "minimum": 110805203,
+            "maximum": 147833495
+          },
+          {
+            "length": 978,
+            "minimum": 104380693,
+            "maximum": 139361511
+          },
+          {
+            "length": 1052,
+            "minimum": 112439273,
+            "maximum": 149830340
+          },
+          {
+            "length": 1016,
+            "minimum": 108518198,
+            "maximum": 144617363
+          },
+          {
+            "length": 1045,
+            "minimum": 111676938,
+            "maximum": 148898479
+          },
+          {
+            "length": 971,
+            "minimum": 103618358,
+            "maximum": 138429650
+          },
+          {
+            "length": 1003,
+            "minimum": 107102928,
+            "maximum": 142689586
+          },
+          {
+            "length": 1246,
+            "minimum": 133565853,
+            "maximum": 177509383
+          },
+          {
+            "length": 1404,
+            "minimum": 150774823,
+            "maximum": 200148333
+          },
+          {
+            "length": 1152,
+            "minimum": 123330763,
+            "maximum": 164325745
+          },
+          {
+            "length": 1258,
+            "minimum": 134874093,
+            "maximum": 179106859
+          },
+          {
+            "length": 1244,
+            "minimum": 133349423,
+            "maximum": 177243137
+          },
+          {
+            "length": 1279,
+            "minimum": 137161098,
+            "maximum": 182416881
+          },
+          {
+            "length": 1453,
+            "minimum": 156111168,
+            "maximum": 206919025
+          },
+          {
+            "length": 1210,
+            "minimum": 129645850,
+            "maximum": 172380052
+          },
+          {
+            "length": 1750,
+            "minimum": 188453973,
+            "maximum": 249545191
+          },
+          {
+            "length": 1203,
+            "minimum": 128883515,
+            "maximum": 171179790
+          },
+          {
+            "length": 1252,
+            "minimum": 134219860,
+            "maximum": 178308121
+          },
+          {
+            "length": 1377,
+            "minimum": 147833788,
+            "maximum": 196183950
+          },
+          {
+            "length": 1289,
+            "minimum": 138249263,
+            "maximum": 183851399
+          },
+          {
+            "length": 1177,
+            "minimum": 126051903,
+            "maximum": 167706169
+          },
+          {
+            "length": 1163,
+            "minimum": 124527233,
+            "maximum": 165842447
+          },
+          {
+            "length": 1344,
+            "minimum": 144238543,
+            "maximum": 191738542
+          },
+          {
+            "length": 1182,
+            "minimum": 126596510,
+            "maximum": 168371784
+          },
+          {
+            "length": 1219,
+            "minimum": 130625913,
+            "maximum": 173915062
+          },
+          {
+            "length": 1255,
+            "minimum": 134546988,
+            "maximum": 178707490
+          },
+          {
+            "length": 1217,
+            "minimum": 130408185,
+            "maximum": 173648816
+          },
+          {
+            "length": 1384,
+            "minimum": 148596123,
+            "maximum": 197115811
+          },
+          {
+            "length": 1044,
+            "minimum": 111567538,
+            "maximum": 148765356
+          },
+          {
+            "length": 1146,
+            "minimum": 122676733,
+            "maximum": 163242453
+          },
+          {
+            "length": 1136,
+            "minimum": 121587293,
+            "maximum": 161630399
+          },
+          {
+            "length": 1317,
+            "minimum": 141298603,
+            "maximum": 187578843
+          },
+          {
+            "length": 1264,
+            "minimum": 135528123,
+            "maximum": 179905597
+          },
+          {
+            "length": 1112,
+            "minimum": 118973160,
+            "maximum": 158435447
+          },
+          {
+            "length": 1170,
+            "minimum": 125289568,
+            "maximum": 166774308
+          },
+          {
+            "length": 1178,
+            "minimum": 126161303,
+            "maximum": 167839292
+          },
+          {
+            "length": 1115,
+            "minimum": 119300288,
+            "maximum": 158834816
+          },
+          {
+            "length": 1179,
+            "minimum": 126270703,
+            "maximum": 167972415
+          },
+          {
+            "length": 1123,
+            "minimum": 120172023,
+            "maximum": 159899800
+          },
+          {
+            "length": 1260,
+            "minimum": 135090523,
+            "maximum": 179373105
+          },
+          {
+            "length": 1173,
+            "minimum": 125617768,
+            "maximum": 167173677
+          }
+        ],
+        "conditions": [
+          "Each prompt token processed once, with no initial cached state at the first chunk.",
+          "Every chunk has length 1..64 and follows the imported H/O, WY and inverse convention.",
+          "Later chunks consume the preceding state; no repeated or omitted prompt work.",
+          "All compositions are allowed, a superset of scheduler-feasible partitions."
+        ],
+        "limitations": [
+          "No current-run per-request chunk/state log is available in microflow events.",
+          "These bounds do not identify the actual partition or validate every listed operation as useful.",
+          "No old-run chunk multiplicity is reused; no midpoint is substituted for missing observations.",
+          "Reference timing, retained draft work and runtime applicability remain separate."
+        ],
+        "effective_flops": null,
+        "efficiency_percent": null,
+        "source_sha256": {
+          "/workspace/m01-boundary-b1-r1/mmlu-pro.json": "311a4b9d3b476accda06a94be2d8adeb91e17d67b2e9122af97c806000993900",
+          "/workspace/m01-critical-path-review-20261023/bound_gdn_prefill_partitions.py": "082948ea79c04d96d74334ed93295012b9ce879b5e3a44ff2c6393146665a08c",
+          "/root/gennova-evidence/20261019-midterm-aligned/audit_gdn_ho_accounting.py": "f82daa69b596892609cb328556ec1df2992193ed20faefc4f73fe6e6bd173da1",
+          "/root/gennova-evidence/20261019-midterm-aligned/audit_gdn_wy_accounting.py": "83e69151368a67b3198850a022399b8f84fccbdf397a8bec54093d57aeafdef2",
+          "/root/gennova-evidence/20261019-midterm-aligned/gdn_inverse_accounting.py": "43a80df55a746a627950192a858ed5229cb2bf4dcdb025600aad5a415d2a49b0"
+        }
+      }
+    },
+    "effective_flops": null,
+    "reference_seconds": null,
+    "passed": null
+  },
+  "cost": {
+    "arms": {
+      "b0": {
+        "identity": "0.28.1/0.25.1rc2 development control, not fixed B0",
+        "archive_path": "reports/vllm-hust-midterm-20261019/m06-paired-20261021/m06-prechecked-b0-r1-evidence.tar.gz",
+        "archive_sha256": "932cdd02ccc2ebc875bd6f1cd0216761f03b44689fb165f60cd6a5eefa6db157",
+        "request_json_sha256": "ea9cbea8d130ed25df715f0f67bb01ba34b5138d60031d398cf2d5c51076deb5",
+        "interval_monotonic": [
+          8335350.200174981,
+          8335457.476383979
+        ],
+        "interval_seconds": 107.27620899863541,
+        "interval_method": "Retrospective first request start to last successful response; differs from original benchmark duration, which remains unchanged",
+        "successful_requests": 200,
+        "cross_interval_requests_in_this_burst": 0,
+        "input_tokens": 282265,
+        "new_input_tokens": null,
+        "cached_input_tokens": null,
+        "output_tokens": 51200,
+        "reserved_cards": 4,
+        "card_seconds_per_output_token": 0.008380953828018392,
+        "yuan_per_million_coefficient_times_P_over_D": 0.09700178041687953,
+        "monthly_fee_P": null,
+        "month_days_D": null,
+        "yuan_per_million_output_tokens": null,
+        "utilization": {
+          "method": "Left hold at sampling command end; clipped to envelope; no extension beyond final sample",
+          "per_card_percent": {
+            "4": 61.24306577089333,
+            "5": 61.717448377095536,
+            "6": 0.0,
+            "7": 0.0
+          },
+          "covered_seconds": {
+            "4": 107.27620899863541,
+            "5": 107.27620899863541,
+            "6": 107.27620899863541,
+            "7": 107.27620899863541
+          },
+          "maximum_sampling_gap_seconds": 1.0677012214437127,
+          "node_identity": "Same archived execution host; card IDs from npu-smi, not a cross-node aggregate",
+          "scope": "Retrospective sampled estimate, not continuous instrumentation or current fixed-B0 acceptance"
+        }
+      },
+      "b1": {
+        "identity": "E24/R36 + KV recomputation + Prefill Microflow B1 on development stack",
+        "archive_path": "reports/vllm-hust-midterm-20261019/m06-paired-20261021/m06-prechecked-b1-r1-evidence.tar.gz",
+        "archive_sha256": "26b26323143c3f93505de345cd07362e5fe5367e455e114cd790d4f8a35e7f48",
+        "request_json_sha256": "dfe8b13a87642b50aa9db9daa7228105f2265391d7d5e59593b4e7610396ed97",
+        "interval_monotonic": [
+          8334586.584508012,
+          8334669.614200453
+        ],
+        "interval_seconds": 83.02969244122505,
+        "interval_method": "Retrospective first request start to last successful response; differs from original benchmark duration, which remains unchanged",
+        "successful_requests": 200,
+        "cross_interval_requests_in_this_burst": 0,
+        "input_tokens": 282265,
+        "new_input_tokens": null,
+        "cached_input_tokens": null,
+        "output_tokens": 51200,
+        "reserved_cards": 4,
+        "card_seconds_per_output_token": 0.0064866947219707075,
+        "yuan_per_million_coefficient_times_P_over_D": 0.0750774852079943,
+        "monthly_fee_P": null,
+        "month_days_D": null,
+        "yuan_per_million_output_tokens": null,
+        "utilization": {
+          "method": "Left hold at sampling command end; clipped to envelope; no extension beyond final sample",
+          "per_card_percent": {
+            "4": 60.034946016434816,
+            "5": 61.00197773848346,
+            "6": 0.0,
+            "7": 0.0
+          },
+          "covered_seconds": {
+            "4": 83.02969244122505,
+            "5": 83.02969244122505,
+            "6": 83.02969244122505,
+            "7": 83.02969244122505
+          },
+          "maximum_sampling_gap_seconds": 1.2502619978040457,
+          "node_identity": "Same archived execution host; card IDs from npu-smi, not a cross-node aggregate",
+          "scope": "Retrospective sampled estimate, not continuous instrumentation or current fixed-B0 acceptance"
+        }
+      }
+    },
+    "equal_fee_basis_resource_reduction_percent": 22.60195134013244,
+    "current_passed": null,
+    "remaining": [
+      "Fixed-B0 representative comparison with applicable quality/SLO",
+      "Documented all-in fee P and month-day D, not chart display assumptions",
+      "Request-level new/cache-hit input split; retrospective utilization method is not a frozen acceptance protocol"
+    ]
+  },
+  "swe_continuous_records": {
+    "source_path": "reports/swe-bench-pro-real-agent-threeway128-1h-20261022-r2/data/normal-client-returns.csv.gz",
+    "sha256": "376912d094a2409e266351d9883224924697500a440b76c82b79777e7d286d03",
+    "windows": [
+      {
+        "arm": "controller_original",
+        "window_seconds": [
+          0,
+          600
+        ],
+        "normal_returns": 1974,
+        "actual_context_ge16k_returns": 127,
+        "output_tokens": 120537,
+        "delivered_output_tokens_per_second": 200.895,
+        "e2e_p95_seconds": 85.24237547395751,
+        "e2e_p99_seconds": 237.66594896279275,
+        "ttft_p95_seconds": null,
+        "tpot_p99_seconds": null
+      },
+      {
+        "arm": "controller_original",
+        "window_seconds": [
+          600,
+          1800
+        ],
+        "normal_returns": 1676,
+        "actual_context_ge16k_returns": 1270,
+        "output_tokens": 319234,
+        "delivered_output_tokens_per_second": 266.0283333333333,
+        "e2e_p95_seconds": 463.33988580526784,
+        "e2e_p99_seconds": 790.2273851009086,
+        "ttft_p95_seconds": null,
+        "tpot_p99_seconds": null
+      },
+      {
+        "arm": "controller_original",
+        "window_seconds": [
+          1800,
+          3600
+        ],
+        "normal_returns": 1196,
+        "actual_context_ge16k_returns": 1196,
+        "output_tokens": 305874,
+        "delivered_output_tokens_per_second": 169.93,
+        "e2e_p95_seconds": 828.2731210561469,
+        "e2e_p99_seconds": 1715.7318247789517,
+        "ttft_p95_seconds": null,
+        "tpot_p99_seconds": null
+      },
+      {
+        "arm": "controller_original",
+        "window_seconds": [
+          0,
+          3600
+        ],
+        "normal_returns": 4846,
+        "actual_context_ge16k_returns": 2593,
+        "output_tokens": 745645,
+        "delivered_output_tokens_per_second": 207.1236111111111,
+        "e2e_p95_seconds": 411.32255921233445,
+        "e2e_p99_seconds": 965.2462406298146,
+        "ttft_p95_seconds": null,
+        "tpot_p99_seconds": null
+      },
+      {
+        "arm": "native",
+        "window_seconds": [
+          0,
+          600
+        ],
+        "normal_returns": 1694,
+        "actual_context_ge16k_returns": 42,
+        "output_tokens": 88337,
+        "delivered_output_tokens_per_second": 147.22833333333332,
+        "e2e_p95_seconds": 74.3801247109659,
+        "e2e_p99_seconds": 84.91562462691218,
+        "ttft_p95_seconds": null,
+        "tpot_p99_seconds": null
+      },
+      {
+        "arm": "native",
+        "window_seconds": [
+          600,
+          1800
+        ],
+        "normal_returns": 961,
+        "actual_context_ge16k_returns": 534,
+        "output_tokens": 121122,
+        "delivered_output_tokens_per_second": 100.935,
+        "e2e_p95_seconds": 321.6534509588964,
+        "e2e_p99_seconds": 636.7994735147804,
+        "ttft_p95_seconds": null,
+        "tpot_p99_seconds": null
+      },
+      {
+        "arm": "native",
+        "window_seconds": [
+          1800,
+          3600
+        ],
+        "normal_returns": 900,
+        "actual_context_ge16k_returns": 804,
+        "output_tokens": 311773,
+        "delivered_output_tokens_per_second": 173.2072222222222,
+        "e2e_p95_seconds": 768.950424190145,
+        "e2e_p99_seconds": 1083.8575611389242,
+        "ttft_p95_seconds": null,
+        "tpot_p99_seconds": null
+      },
+      {
+        "arm": "native",
+        "window_seconds": [
+          0,
+          3600
+        ],
+        "normal_returns": 3555,
+        "actual_context_ge16k_returns": 1380,
+        "output_tokens": 521232,
+        "delivered_output_tokens_per_second": 144.78666666666666,
+        "e2e_p95_seconds": 340.7359280702658,
+        "e2e_p99_seconds": 822.2611818560399,
+        "ttft_p95_seconds": null,
+        "tpot_p99_seconds": null
+      },
+      {
+        "arm": "thunderagent_original",
+        "window_seconds": [
+          0,
+          600
+        ],
+        "normal_returns": 1838,
+        "actual_context_ge16k_returns": 119,
+        "output_tokens": 110672,
+        "delivered_output_tokens_per_second": 184.45333333333335,
+        "e2e_p95_seconds": 98.77012200001627,
+        "e2e_p99_seconds": 197.36903470708057,
+        "ttft_p95_seconds": null,
+        "tpot_p99_seconds": null
+      },
+      {
+        "arm": "thunderagent_original",
+        "window_seconds": [
+          600,
+          1800
+        ],
+        "normal_returns": 1557,
+        "actual_context_ge16k_returns": 1095,
+        "output_tokens": 356474,
+        "delivered_output_tokens_per_second": 297.06166666666667,
+        "e2e_p95_seconds": 442.4772945311852,
+        "e2e_p99_seconds": 808.6653500148095,
+        "ttft_p95_seconds": null,
+        "tpot_p99_seconds": null
+      },
+      {
+        "arm": "thunderagent_original",
+        "window_seconds": [
+          1800,
+          3600
+        ],
+        "normal_returns": 1018,
+        "actual_context_ge16k_returns": 1018,
+        "output_tokens": 222906,
+        "delivered_output_tokens_per_second": 123.83666666666667,
+        "e2e_p95_seconds": 1081.1002790853381,
+        "e2e_p99_seconds": 1648.9316573510878,
+        "ttft_p95_seconds": null,
+        "tpot_p99_seconds": null
+      },
+      {
+        "arm": "thunderagent_original",
+        "window_seconds": [
+          0,
+          3600
+        ],
+        "normal_returns": 4413,
+        "actual_context_ge16k_returns": 2232,
+        "output_tokens": 690052,
+        "delivered_output_tokens_per_second": 191.6811111111111,
+        "e2e_p95_seconds": 430.8856800952926,
+        "e2e_p99_seconds": 1131.2648945599794,
+        "ttft_p95_seconds": null,
+        "tpot_p99_seconds": null
+      }
+    ],
+    "scope": "Existing one-hour real-agent records; completion-time windows and nearest-rank E2E quantiles. Actual input+output context, not configured maximum. E2E is not TTFT/TPOT; mixed context is not a controlled 4K/16K pair; censored requests absent from this normal-return extract remain in original report. No five-task pass.",
+    "passed": null
+  },
+  "quality_inventory_all_solutions": [
+    {
+      "id": "mmlu-pro-native-test-200",
+      "dataset": "mmlu-pro",
+      "solution": "native",
+      "quality": [
+        {
+          "label": "Test",
+          "correct": 9609,
+          "total": 12032,
+          "value": 0.7986203457446809,
+          "audit": {
+            "cases": 12032,
+            "correct": 9609,
+            "accuracy": 0.7986203457446809,
+            "invalid_answers": 56,
+            "transport_failures": 0,
+            "length_limited": 1533,
+            "length_limited_but_correct": 426,
+            "finish_reasons": {
+              "length": 1533,
+              "stop": 10499
+            }
+          }
+        }
+      ],
+      "report": "data/mmlu-pro-20261012/report.json",
+      "limitations": [
+        "Single run; legacy extraction; accuracy and load test are separate."
+      ]
+    },
+    {
+      "id": "frontierscience-native-full-160",
+      "dataset": "frontierscience",
+      "solution": "native",
+      "quality": [
+        {
+          "label": "Olympiad",
+          "correct": 57,
+          "total": 100,
+          "value": 0.57,
+          "audit": {
+            "total": 100,
+            "graded": 97,
+            "successes": 57,
+            "solver_failures": 0,
+            "judge_unresolved": 3,
+            "judge_invalid": 3,
+            "judge_transport_failures": 0,
+            "judge_truncated_with_grade": 2,
+            "judge_audit_flagged": 2,
+            "solver_truncated": 33,
+            "judge_truncated": 4,
+            "success_rate": 0.57,
+            "observed_success_lower_bound": 0.57,
+            "mean_research_score_valid_only": null
+          }
+        },
+        {
+          "label": "Research",
+          "correct": 5,
+          "total": 60,
+          "value": 0.08333333333333333,
+          "audit": {
+            "total": 60,
+            "graded": 57,
+            "successes": 5,
+            "solver_failures": 0,
+            "judge_unresolved": 3,
+            "judge_invalid": 3,
+            "judge_transport_failures": 0,
+            "judge_truncated_with_grade": 4,
+            "judge_audit_flagged": 5,
+            "solver_truncated": 6,
+            "judge_truncated": 7,
+            "success_rate": 0.08333333333333333,
+            "observed_success_lower_bound": 0.08333333333333333,
+            "mean_research_score_valid_only": 2.530877192982456
+          }
+        }
+      ],
+      "report": "data/frontierscience-20261013/report.json",
+      "limitations": [
+        "Official Appendix B prompts; Qwen judge replaces official judge; one trial, local extraction; not official leaderboard replication.",
+        "First complete explicit VERDICT is used, including length-ended replies; invalid judges remain in denominator as nonsuccess.",
+        "Invalid judge means unresolved evaluation, not proof of a scientifically incorrect solver answer.",
+        "Audit flags are heuristic, nonexhaustive and do not change scores; human review remains required.",
+        "Research mean uses 57 valid scores; missing grades are not assigned zero numeric points.",
+        "Solver and judge use the same served model; no independent expert validation.",
+        "Bench is separate: 160 prompts, max output 256, request-rate inf, temperature 0, seed 0, default server chat template.",
+        "Single service lifecycle reused after smoke; not a cold-start run or three-repeat V5.5 acceptance. No B1 or improvement claims.",
+        "Full weight shards were not hashed; image digest not captured. Only 11 small artifact files were hashed."
+      ]
+    },
+    {
+      "id": "hle-verified-native-gold-text",
+      "dataset": "hle-verified",
+      "solution": "native",
+      "quality": [
+        {
+          "label": "Gold · text",
+          "correct": 137,
+          "total": 575,
+          "value": 0.2382608695652174,
+          "audit": {
+            "total": 575,
+            "graded": 546,
+            "successes": 137,
+            "accuracy": 0.2382608695652174,
+            "unresolved": 29,
+            "complete_grading": false,
+            "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+            "wald_95_half_width": 0.03482183418452217,
+            "solver_failures": 0,
+            "judge_invalid": 29,
+            "judge_transport_failures": 0,
+            "solver_truncated": 374,
+            "judge_truncated": 29
+          }
+        }
+      ],
+      "report": "data/hle-verified-20261015/report.json",
+      "limitations": [
+        "Author HLE-Verified Gold 668 and Revision 1143; Uncertain 689 excluded. Not the original unmodified HLE dataset.",
+        "Original HLE system/judge prompts and schema; same Qwen solver and substitute judge, one trial. Not official leaderboard replication or V5.5 acceptance.",
+        "Strict JSON grading requires normal completion; all 72 length-ended judges remain unresolved in the full denominator. No partial JSON rescue or retry.",
+        "Solver length-ended outputs are sent to judge, not automatically marked incorrect. Gold 383 and Revision 688 solver truncations materially limit interpretation.",
+        "Bench: raw user question plus real images; no accuracy system prompt; template once, thinking=false, max output256, temperature0, request seed0, EOS allowed, rate inf, no client concurrency cap; server max_num_seqs16.",
+        "Text selection floor(i*N/200) from frozen modality-filtered order; images all93/all118, no repetitions. No correctness-based selection.",
+        "Per-request input token counts match same-server /tokenize including images. No separate visual token count claimed. TTFT includes burst queueing.",
+        "Reused service after accuracy, request validation and tokenization preflight; not a cold-cache run, not paired B1 and not three-repeat acceptance.",
+        "Full weights were inventoried but not hashed; model small files matched. Image digest and verified local model revision are unavailable.",
+        "Public evidence omits question/image/answer payloads and environment dumps. Original raw records remain private and cannot be independently regraded from this package."
+      ]
+    },
+    {
+      "id": "hle-verified-native-revision-text",
+      "dataset": "hle-verified",
+      "solution": "native",
+      "quality": [
+        {
+          "label": "Revision · text",
+          "correct": 292,
+          "total": 1025,
+          "value": 0.2848780487804878,
+          "audit": {
+            "total": 1025,
+            "graded": 986,
+            "successes": 292,
+            "accuracy": 0.2848780487804878,
+            "unresolved": 39,
+            "complete_grading": false,
+            "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+            "wald_95_half_width": 0.027632086917668795,
+            "solver_failures": 0,
+            "judge_invalid": 39,
+            "judge_transport_failures": 0,
+            "solver_truncated": 674,
+            "judge_truncated": 39
+          }
+        }
+      ],
+      "report": "data/hle-verified-20261015/report.json",
+      "limitations": [
+        "Author HLE-Verified Gold 668 and Revision 1143; Uncertain 689 excluded. Not the original unmodified HLE dataset.",
+        "Original HLE system/judge prompts and schema; same Qwen solver and substitute judge, one trial. Not official leaderboard replication or V5.5 acceptance.",
+        "Strict JSON grading requires normal completion; all 72 length-ended judges remain unresolved in the full denominator. No partial JSON rescue or retry.",
+        "Solver length-ended outputs are sent to judge, not automatically marked incorrect. Gold 383 and Revision 688 solver truncations materially limit interpretation.",
+        "Bench: raw user question plus real images; no accuracy system prompt; template once, thinking=false, max output256, temperature0, request seed0, EOS allowed, rate inf, no client concurrency cap; server max_num_seqs16.",
+        "Text selection floor(i*N/200) from frozen modality-filtered order; images all93/all118, no repetitions. No correctness-based selection.",
+        "Per-request input token counts match same-server /tokenize including images. No separate visual token count claimed. TTFT includes burst queueing.",
+        "Reused service after accuracy, request validation and tokenization preflight; not a cold-cache run, not paired B1 and not three-repeat acceptance.",
+        "Full weights were inventoried but not hashed; model small files matched. Image digest and verified local model revision are unavailable.",
+        "Public evidence omits question/image/answer payloads and environment dumps. Original raw records remain private and cannot be independently regraded from this package."
+      ]
+    },
+    {
+      "id": "hle-verified-native-gold-image",
+      "dataset": "hle-verified",
+      "solution": "native",
+      "quality": [
+        {
+          "label": "Gold · image",
+          "correct": 19,
+          "total": 93,
+          "value": 0.20430107526881722,
+          "audit": {
+            "total": 93,
+            "graded": 90,
+            "successes": 19,
+            "accuracy": 0.20430107526881722,
+            "unresolved": 3,
+            "complete_grading": false,
+            "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+            "wald_95_half_width": 0.08194534893600774,
+            "solver_failures": 0,
+            "judge_invalid": 3,
+            "judge_transport_failures": 0,
+            "solver_truncated": 9,
+            "judge_truncated": 3
+          }
+        }
+      ],
+      "report": "data/hle-verified-20261015/report.json",
+      "limitations": [
+        "Author HLE-Verified Gold 668 and Revision 1143; Uncertain 689 excluded. Not the original unmodified HLE dataset.",
+        "Original HLE system/judge prompts and schema; same Qwen solver and substitute judge, one trial. Not official leaderboard replication or V5.5 acceptance.",
+        "Strict JSON grading requires normal completion; all 72 length-ended judges remain unresolved in the full denominator. No partial JSON rescue or retry.",
+        "Solver length-ended outputs are sent to judge, not automatically marked incorrect. Gold 383 and Revision 688 solver truncations materially limit interpretation.",
+        "Bench: raw user question plus real images; no accuracy system prompt; template once, thinking=false, max output256, temperature0, request seed0, EOS allowed, rate inf, no client concurrency cap; server max_num_seqs16.",
+        "Text selection floor(i*N/200) from frozen modality-filtered order; images all93/all118, no repetitions. No correctness-based selection.",
+        "Per-request input token counts match same-server /tokenize including images. No separate visual token count claimed. TTFT includes burst queueing.",
+        "Reused service after accuracy, request validation and tokenization preflight; not a cold-cache run, not paired B1 and not three-repeat acceptance.",
+        "Full weights were inventoried but not hashed; model small files matched. Image digest and verified local model revision are unavailable.",
+        "Public evidence omits question/image/answer payloads and environment dumps. Original raw records remain private and cannot be independently regraded from this package."
+      ]
+    },
+    {
+      "id": "hle-verified-native-revision-image",
+      "dataset": "hle-verified",
+      "solution": "native",
+      "quality": [
+        {
+          "label": "Revision · image",
+          "correct": 21,
+          "total": 118,
+          "value": 0.17796610169491525,
+          "audit": {
+            "total": 118,
+            "graded": 117,
+            "successes": 21,
+            "accuracy": 0.17796610169491525,
+            "unresolved": 1,
+            "complete_grading": false,
+            "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+            "wald_95_half_width": 0.0690126294695939,
+            "solver_failures": 0,
+            "judge_invalid": 1,
+            "judge_transport_failures": 0,
+            "solver_truncated": 14,
+            "judge_truncated": 1
+          }
+        }
+      ],
+      "report": "data/hle-verified-20261015/report.json",
+      "limitations": [
+        "Author HLE-Verified Gold 668 and Revision 1143; Uncertain 689 excluded. Not the original unmodified HLE dataset.",
+        "Original HLE system/judge prompts and schema; same Qwen solver and substitute judge, one trial. Not official leaderboard replication or V5.5 acceptance.",
+        "Strict JSON grading requires normal completion; all 72 length-ended judges remain unresolved in the full denominator. No partial JSON rescue or retry.",
+        "Solver length-ended outputs are sent to judge, not automatically marked incorrect. Gold 383 and Revision 688 solver truncations materially limit interpretation.",
+        "Bench: raw user question plus real images; no accuracy system prompt; template once, thinking=false, max output256, temperature0, request seed0, EOS allowed, rate inf, no client concurrency cap; server max_num_seqs16.",
+        "Text selection floor(i*N/200) from frozen modality-filtered order; images all93/all118, no repetitions. No correctness-based selection.",
+        "Per-request input token counts match same-server /tokenize including images. No separate visual token count claimed. TTFT includes burst queueing.",
+        "Reused service after accuracy, request validation and tokenization preflight; not a cold-cache run, not paired B1 and not three-repeat acceptance.",
+        "Full weights were inventoried but not hashed; model small files matched. Image digest and verified local model revision are unavailable.",
+        "Public evidence omits question/image/answer payloads and environment dumps. Original raw records remain private and cannot be independently regraded from this package."
+      ]
+    },
+    {
+      "id": "mmlu-pro-core-attention-boundary-test-200",
+      "dataset": "mmlu-pro",
+      "solution": "core-attention-boundary",
+      "quality": [
+        {
+          "label": "Test",
+          "correct": 9619,
+          "total": 12032,
+          "value": 0.7994514627659575,
+          "audit": {
+            "cases": 12032,
+            "correct": 9619,
+            "accuracy": 0.7994514627659575,
+            "invalid_answers": 51,
+            "transport_failures": 0,
+            "length_limited": 1532,
+            "wall_seconds_this_invocation": 19986.62586674746,
+            "mean_ttft_s": 0.6500791938696181,
+            "mean_e2e_s": 26.560784062922547,
+            "smoke_only": false
+          }
+        }
+      ],
+      "report": "data/dataset-matrix-campaign-20261016/report.json",
+      "limitations": [
+        "Single run; different runtime, MTP and cache configuration from BetterScale. Not an isolated optimization comparison or SLO-qualified goodput.",
+        "Core uses measured public source; Ascend uses current public head because the historical curve commit was unavailable. Exact revisions retained.",
+        "No candidate repair, rerun or regrading. Invalid and length-limited answers remain in the original denominator.",
+        "Total-input accounting is the original benchmark client's value; per-request server tokenization verification was not captured for these runs."
+      ]
+    },
+    {
+      "id": "mmlu-pro-ascend-attention-boundary-test-200",
+      "dataset": "mmlu-pro",
+      "solution": "ascend-attention-boundary",
+      "quality": [
+        {
+          "label": "Test",
+          "correct": 9582,
+          "total": 12032,
+          "value": 0.796376329787234,
+          "audit": {
+            "cases": 12032,
+            "correct": 9582,
+            "accuracy": 0.796376329787234,
+            "invalid_answers": 57,
+            "transport_failures": 0,
+            "length_limited": 1518,
+            "wall_seconds_this_invocation": 20194.479384713806,
+            "mean_ttft_s": 0.6387931657064133,
+            "mean_e2e_s": 26.828634242624485,
+            "smoke_only": false
+          }
+        }
+      ],
+      "report": "data/dataset-matrix-campaign-20261016/report.json",
+      "limitations": [
+        "Single run; different runtime, MTP and cache configuration from BetterScale. Not an isolated optimization comparison or SLO-qualified goodput.",
+        "Core uses measured public source; Ascend uses current public head because the historical curve commit was unavailable. Exact revisions retained.",
+        "No candidate repair, rerun or regrading. Invalid and length-limited answers remain in the original denominator.",
+        "Total-input accounting is the original benchmark client's value; per-request server tokenization verification was not captured for these runs."
+      ]
+    },
+    {
+      "id": "frontierscience-core-attention-boundary-full-160",
+      "dataset": "frontierscience",
+      "solution": "core-attention-boundary",
+      "quality": [
+        {
+          "label": "Olympiad",
+          "correct": 62,
+          "total": 100,
+          "value": 0.62,
+          "audit": {
+            "total": 100,
+            "graded": 98,
+            "successes": 62,
+            "solver_failures": 0,
+            "judge_unresolved": 2,
+            "judge_invalid": 2,
+            "judge_transport_failures": 0,
+            "judge_truncated_with_grade": 6,
+            "judge_audit_flagged": 6,
+            "solver_truncated": 32,
+            "judge_truncated": 8,
+            "success_rate": 0.62,
+            "observed_success_lower_bound": 0.62,
+            "mean_research_score_valid_only": null
+          }
+        },
+        {
+          "label": "Research",
+          "correct": 4,
+          "total": 60,
+          "value": 0.06666666666666667,
+          "audit": {
+            "total": 60,
+            "graded": 58,
+            "successes": 4,
+            "solver_failures": 0,
+            "judge_unresolved": 2,
+            "judge_invalid": 2,
+            "judge_transport_failures": 0,
+            "judge_truncated_with_grade": 6,
+            "judge_audit_flagged": 6,
+            "solver_truncated": 9,
+            "judge_truncated": 8,
+            "success_rate": 0.06666666666666667,
+            "observed_success_lower_bound": 0.06666666666666667,
+            "mean_research_score_valid_only": 2.565086206896552
+          }
+        }
+      ],
+      "report": "data/dataset-matrix-campaign-20261016/report.json",
+      "limitations": [
+        "Single run, same-model Qwen judge; not official replication or SLO-qualified goodput.",
+        "Two unresolved judges per track retained as nonsuccess in the full denominator; not confirmed incorrect answers. No repair, regrading or retry.",
+        "Frontier runtime is Ascend 0.23.0, unlike this solution's MMLU 0.23.0.post1 host. BetterScale also differs in runtime, MTP and cache configuration; not an isolated mechanism comparison.",
+        "Native load-test token accounting; per-request server tokenization verification not captured. HLE judging was running on the other TP2 pair."
+      ]
+    },
+    {
+      "id": "hle-verified-core-attention-boundary-gold-text",
+      "dataset": "hle-verified",
+      "solution": "core-attention-boundary",
+      "quality": [
+        {
+          "label": "Gold · text",
+          "correct": 70,
+          "total": 575,
+          "value": 0.12173913043478261,
+          "audit": {
+            "total": 575,
+            "graded": 278,
+            "successes": 70,
+            "accuracy": 0.12173913043478261,
+            "unresolved": 297,
+            "complete_grading": false,
+            "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+            "wald_95_half_width": 0.02672692613427203,
+            "solver_failures": 0,
+            "judge_invalid": 297,
+            "judge_transport_failures": 0,
+            "solver_truncated": 379,
+            "judge_truncated": 297
+          }
+        }
+      ],
+      "report": "data/dataset-matrix-campaign-20261016/report.json",
+      "limitations": [
+        "Gold only. Owner stopped the campaign after this result; queued Revision was cancelled, and its partial transition receipts do not supply a score.",
+        "333 of 668 Gold judges reached 8192 tokens and are unresolved. All remain nonsuccess in the denominator, not confirmed incorrect answers. This is a lower-bound observed score, not fully resolved accuracy.",
+        "Single trial, same-model Qwen judge; no repair, regrading or retry; not official leaderboard replication.",
+        "Runtime, MTP, cache settings and shared-host conditions differ from BetterScale. No isolated causal optimization comparison.",
+        "Text/image load tests are separate from full Gold quality and from one another; server tokenization matches every input length."
+      ]
+    },
+    {
+      "id": "hle-verified-core-attention-boundary-gold-image",
+      "dataset": "hle-verified",
+      "solution": "core-attention-boundary",
+      "quality": [
+        {
+          "label": "Gold · image",
+          "correct": 7,
+          "total": 93,
+          "value": 0.07526881720430108,
+          "audit": {
+            "total": 93,
+            "graded": 57,
+            "successes": 7,
+            "accuracy": 0.07526881720430108,
+            "unresolved": 36,
+            "complete_grading": false,
+            "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+            "wald_95_half_width": 0.053620380828891624,
+            "solver_failures": 0,
+            "judge_invalid": 36,
+            "judge_transport_failures": 0,
+            "solver_truncated": 9,
+            "judge_truncated": 36
+          }
+        }
+      ],
+      "report": "data/dataset-matrix-campaign-20261016/report.json",
+      "limitations": [
+        "Gold only. Owner stopped the campaign after this result; queued Revision was cancelled, and its partial transition receipts do not supply a score.",
+        "333 of 668 Gold judges reached 8192 tokens and are unresolved. All remain nonsuccess in the denominator, not confirmed incorrect answers. This is a lower-bound observed score, not fully resolved accuracy.",
+        "Single trial, same-model Qwen judge; no repair, regrading or retry; not official leaderboard replication.",
+        "Runtime, MTP, cache settings and shared-host conditions differ from BetterScale. No isolated causal optimization comparison.",
+        "Text/image load tests are separate from full Gold quality and from one another; server tokenization matches every input length."
+      ]
+    },
+    {
+      "id": "mmlu-pro-betterscale-test-200",
+      "dataset": "mmlu-pro",
+      "solution": "betterscale",
+      "quality": [
+        {
+          "label": "Test",
+          "correct": 9589,
+          "total": 12032,
+          "value": 0.7969581117021277,
+          "audit": {
+            "cases": 12032,
+            "correct": 9589,
+            "accuracy": 0.7969581117021277,
+            "invalid_answers": 57,
+            "transport_failures": 0,
+            "length_limited": 1523,
+            "wall_seconds_this_invocation": 9333.749879706651,
+            "mean_ttft_s": 0.25057767139747117,
+            "mean_e2e_s": 12.399422423773819,
+            "smoke_only": false
+          }
+        }
+      ],
+      "report": "data/betterscale-school-runtime-20261016/report.json",
+      "limitations": [
+        "Single run; same evaluation inputs/prompts/scoring as the referenced website, not an isolated runtime ablation.",
+        "Qwen same-model judge; invalid and length-ended unresolved grades retained in denominators; no retries.",
+        "Two TP2 services ran concurrently; no attribution study for small performance/quality differences.",
+        "HLE full text plus image; performance is separate capped-output burst testing, not SLO goodput.",
+        "School-runtime compatibility acceptance, not formal fixed-target leaderboard admission.",
+        "Aggregate-only public projection; independent regrading requires private raw responses.",
+        "HLE unresolved judges: Gold 18, Revision 28; Frontier 3 per track. Retained as nonsuccess, not confirmed incorrect."
+      ]
+    },
+    {
+      "id": "frontierscience-betterscale-full-160",
+      "dataset": "frontierscience",
+      "solution": "betterscale",
+      "quality": [
+        {
+          "label": "Olympiad",
+          "correct": 60,
+          "total": 100,
+          "value": 0.6,
+          "audit": {
+            "total": 100,
+            "graded": 97,
+            "successes": 60,
+            "solver_failures": 0,
+            "judge_unresolved": 3,
+            "judge_invalid": 3,
+            "judge_transport_failures": 0,
+            "judge_truncated_with_grade": 3,
+            "judge_audit_flagged": 3,
+            "solver_truncated": 32,
+            "judge_truncated": 5,
+            "success_rate": 0.6,
+            "observed_success_lower_bound": 0.6,
+            "mean_research_score_valid_only": null
+          }
+        },
+        {
+          "label": "Research",
+          "correct": 3,
+          "total": 60,
+          "value": 0.05,
+          "audit": {
+            "total": 60,
+            "graded": 57,
+            "successes": 3,
+            "solver_failures": 0,
+            "judge_unresolved": 3,
+            "judge_invalid": 3,
+            "judge_transport_failures": 0,
+            "judge_truncated_with_grade": 6,
+            "judge_audit_flagged": 6,
+            "solver_truncated": 7,
+            "judge_truncated": 9,
+            "success_rate": 0.05,
+            "observed_success_lower_bound": 0.05,
+            "mean_research_score_valid_only": 2.5179824561403508
+          }
+        }
+      ],
+      "report": "data/betterscale-school-runtime-20261016/report.json",
+      "limitations": [
+        "Single run; same evaluation inputs/prompts/scoring as the referenced website, not an isolated runtime ablation.",
+        "Qwen same-model judge; invalid and length-ended unresolved grades retained in denominators; no retries.",
+        "Two TP2 services ran concurrently; no attribution study for small performance/quality differences.",
+        "HLE full text plus image; performance is separate capped-output burst testing, not SLO goodput.",
+        "School-runtime compatibility acceptance, not formal fixed-target leaderboard admission.",
+        "Aggregate-only public projection; independent regrading requires private raw responses.",
+        "HLE unresolved judges: Gold 18, Revision 28; Frontier 3 per track. Retained as nonsuccess, not confirmed incorrect."
+      ]
+    },
+    {
+      "id": "hle-verified-betterscale-gold-text",
+      "dataset": "hle-verified",
+      "solution": "betterscale",
+      "quality": [
+        {
+          "label": "Gold · text",
+          "correct": 150,
+          "total": 575,
+          "value": 0.2608695652173913,
+          "audit": {
+            "total": 575,
+            "graded": 559,
+            "successes": 150,
+            "accuracy": 0.2608695652173913,
+            "unresolved": 16,
+            "complete_grading": false,
+            "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+            "wald_95_half_width": 0.03589173056346642,
+            "solver_failures": 0,
+            "judge_invalid": 16,
+            "judge_transport_failures": 0,
+            "solver_truncated": 370,
+            "judge_truncated": 16
+          }
+        }
+      ],
+      "report": "data/betterscale-school-runtime-20261016/report.json",
+      "limitations": [
+        "Single run; same evaluation inputs/prompts/scoring as the referenced website, not an isolated runtime ablation.",
+        "Qwen same-model judge; invalid and length-ended unresolved grades retained in denominators; no retries.",
+        "Two TP2 services ran concurrently; no attribution study for small performance/quality differences.",
+        "HLE full text plus image; performance is separate capped-output burst testing, not SLO goodput.",
+        "School-runtime compatibility acceptance, not formal fixed-target leaderboard admission.",
+        "Aggregate-only public projection; independent regrading requires private raw responses.",
+        "HLE unresolved judges: Gold 18, Revision 28; Frontier 3 per track. Retained as nonsuccess, not confirmed incorrect."
+      ]
+    },
+    {
+      "id": "hle-verified-betterscale-revision-text",
+      "dataset": "hle-verified",
+      "solution": "betterscale",
+      "quality": [
+        {
+          "label": "Revision · text",
+          "correct": 299,
+          "total": 1025,
+          "value": 0.2917073170731707,
+          "audit": {
+            "total": 1025,
+            "graded": 1001,
+            "successes": 299,
+            "accuracy": 0.2917073170731707,
+            "unresolved": 24,
+            "complete_grading": false,
+            "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+            "wald_95_half_width": 0.027827499125890862,
+            "solver_failures": 0,
+            "judge_invalid": 24,
+            "judge_transport_failures": 0,
+            "solver_truncated": 654,
+            "judge_truncated": 24
+          }
+        }
+      ],
+      "report": "data/betterscale-school-runtime-20261016/report.json",
+      "limitations": [
+        "Single run; same evaluation inputs/prompts/scoring as the referenced website, not an isolated runtime ablation.",
+        "Qwen same-model judge; invalid and length-ended unresolved grades retained in denominators; no retries.",
+        "Two TP2 services ran concurrently; no attribution study for small performance/quality differences.",
+        "HLE full text plus image; performance is separate capped-output burst testing, not SLO goodput.",
+        "School-runtime compatibility acceptance, not formal fixed-target leaderboard admission.",
+        "Aggregate-only public projection; independent regrading requires private raw responses.",
+        "HLE unresolved judges: Gold 18, Revision 28; Frontier 3 per track. Retained as nonsuccess, not confirmed incorrect."
+      ]
+    },
+    {
+      "id": "hle-verified-betterscale-gold-image",
+      "dataset": "hle-verified",
+      "solution": "betterscale",
+      "quality": [
+        {
+          "label": "Gold · image",
+          "correct": 23,
+          "total": 93,
+          "value": 0.24731182795698925,
+          "audit": {
+            "total": 93,
+            "graded": 91,
+            "successes": 23,
+            "accuracy": 0.24731182795698925,
+            "unresolved": 2,
+            "complete_grading": false,
+            "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+            "wald_95_half_width": 0.08768889280610007,
+            "solver_failures": 0,
+            "judge_invalid": 2,
+            "judge_transport_failures": 0,
+            "solver_truncated": 10,
+            "judge_truncated": 2
+          }
+        }
+      ],
+      "report": "data/betterscale-school-runtime-20261016/report.json",
+      "limitations": [
+        "Single run; same evaluation inputs/prompts/scoring as the referenced website, not an isolated runtime ablation.",
+        "Qwen same-model judge; invalid and length-ended unresolved grades retained in denominators; no retries.",
+        "Two TP2 services ran concurrently; no attribution study for small performance/quality differences.",
+        "HLE full text plus image; performance is separate capped-output burst testing, not SLO goodput.",
+        "School-runtime compatibility acceptance, not formal fixed-target leaderboard admission.",
+        "Aggregate-only public projection; independent regrading requires private raw responses.",
+        "HLE unresolved judges: Gold 18, Revision 28; Frontier 3 per track. Retained as nonsuccess, not confirmed incorrect."
+      ]
+    },
+    {
+      "id": "hle-verified-betterscale-revision-image",
+      "dataset": "hle-verified",
+      "solution": "betterscale",
+      "quality": [
+        {
+          "label": "Revision · image",
+          "correct": 17,
+          "total": 118,
+          "value": 0.1440677966101695,
+          "audit": {
+            "total": 118,
+            "graded": 114,
+            "successes": 17,
+            "accuracy": 0.1440677966101695,
+            "unresolved": 4,
+            "complete_grading": false,
+            "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+            "wald_95_half_width": 0.06336044342452424,
+            "solver_failures": 0,
+            "judge_invalid": 4,
+            "judge_transport_failures": 0,
+            "solver_truncated": 20,
+            "judge_truncated": 4
+          }
+        }
+      ],
+      "report": "data/betterscale-school-runtime-20261016/report.json",
+      "limitations": [
+        "Single run; same evaluation inputs/prompts/scoring as the referenced website, not an isolated runtime ablation.",
+        "Qwen same-model judge; invalid and length-ended unresolved grades retained in denominators; no retries.",
+        "Two TP2 services ran concurrently; no attribution study for small performance/quality differences.",
+        "HLE full text plus image; performance is separate capped-output burst testing, not SLO goodput.",
+        "School-runtime compatibility acceptance, not formal fixed-target leaderboard admission.",
+        "Aggregate-only public projection; independent regrading requires private raw responses.",
+        "HLE unresolved judges: Gold 18, Revision 28; Frontier 3 per track. Retained as nonsuccess, not confirmed incorrect."
+      ]
+    },
+    {
+      "id": "offline-window-request-throttling-controller-short-20261017-r15-off",
+      "dataset": "swe-smith-tranjactory-offline-window",
+      "solution": "native",
+      "quality": [],
+      "report": "data/request-throttling-offline-window-20261017/report.json",
+      "limitations": [
+        "Fixed windows do not establish complete-batch makespan or task repair accuracy.",
+        "Runtime profile must be read alongside the attached deployment evidence; original matrix qualification is false.",
+        "Order repeat is separate and excluded from the primary seed median."
+      ]
+    },
+    {
+      "id": "offline-window-request-throttling-controller-short-20261017-r15-on",
+      "dataset": "swe-smith-tranjactory-offline-window",
+      "solution": "request-throttling-controller",
+      "quality": [],
+      "report": "data/request-throttling-offline-window-20261017/report.json",
+      "limitations": [
+        "Fixed windows do not establish complete-batch makespan or task repair accuracy.",
+        "Runtime profile must be read alongside the attached deployment evidence; original matrix qualification is false.",
+        "Order repeat is separate and excluded from the primary seed median."
+      ]
+    },
+    {
+      "id": "offline-window-request-throttling-controller-short-20261017-r17-off",
+      "dataset": "swe-smith-tranjactory-offline-window",
+      "solution": "native",
+      "quality": [],
+      "report": "data/request-throttling-offline-window-20261017/report.json",
+      "limitations": [
+        "Fixed windows do not establish complete-batch makespan or task repair accuracy.",
+        "Runtime profile must be read alongside the attached deployment evidence; original matrix qualification is false.",
+        "Order repeat is separate and excluded from the primary seed median."
+      ]
+    },
+    {
+      "id": "offline-window-request-throttling-controller-short-20261017-r17-on",
+      "dataset": "swe-smith-tranjactory-offline-window",
+      "solution": "request-throttling-controller",
+      "quality": [],
+      "report": "data/request-throttling-offline-window-20261017/report.json",
+      "limitations": [
+        "Fixed windows do not establish complete-batch makespan or task repair accuracy.",
+        "Runtime profile must be read alongside the attached deployment evidence; original matrix qualification is false.",
+        "Order repeat is separate and excluded from the primary seed median."
+      ]
+    },
+    {
+      "id": "offline-window-request-throttling-controller-short-20261017-r18-off",
+      "dataset": "swe-smith-tranjactory-offline-window",
+      "solution": "native",
+      "quality": [],
+      "report": "data/request-throttling-offline-window-20261017/report.json",
+      "limitations": [
+        "Fixed windows do not establish complete-batch makespan or task repair accuracy.",
+        "Runtime profile must be read alongside the attached deployment evidence; original matrix qualification is false.",
+        "Order repeat is separate and excluded from the primary seed median."
+      ]
+    },
+    {
+      "id": "offline-window-request-throttling-controller-short-20261017-r18-on",
+      "dataset": "swe-smith-tranjactory-offline-window",
+      "solution": "request-throttling-controller",
+      "quality": [],
+      "report": "data/request-throttling-offline-window-20261017/report.json",
+      "limitations": [
+        "Fixed windows do not establish complete-batch makespan or task repair accuracy.",
+        "Runtime profile must be read alongside the attached deployment evidence; original matrix qualification is false.",
+        "Order repeat is separate and excluded from the primary seed median."
+      ]
+    },
+    {
+      "id": "offline-window-request-throttling-controller-short-20261017-r16-off",
+      "dataset": "swe-smith-tranjactory-offline-window",
+      "solution": "native",
+      "quality": [],
+      "report": "data/request-throttling-offline-window-20261017/report.json",
+      "limitations": [
+        "Fixed windows do not establish complete-batch makespan or task repair accuracy.",
+        "Runtime profile must be read alongside the attached deployment evidence; original matrix qualification is false.",
+        "Order repeat is separate and excluded from the primary seed median."
+      ]
+    },
+    {
+      "id": "offline-window-request-throttling-controller-short-20261017-r16-on",
+      "dataset": "swe-smith-tranjactory-offline-window",
+      "solution": "request-throttling-controller",
+      "quality": [],
+      "report": "data/request-throttling-offline-window-20261017/report.json",
+      "limitations": [
+        "Fixed windows do not establish complete-batch makespan or task repair accuracy.",
+        "Runtime profile must be read alongside the attached deployment evidence; original matrix qualification is false.",
+        "Order repeat is separate and excluded from the primary seed median."
+      ]
+    },
+    {
+      "id": "frontierscience-controller-20261018-native",
+      "dataset": "frontierscience",
+      "solution": "native",
+      "quality": [
+        {
+          "label": "Olympiad",
+          "correct": 60,
+          "total": 100,
+          "value": 0.6,
+          "audit": {
+            "total": 100,
+            "graded": 98,
+            "successes": 60,
+            "solver_failures": 0,
+            "judge_unresolved": 2,
+            "judge_invalid": 2,
+            "judge_transport_failures": 0,
+            "judge_truncated_with_grade": 3,
+            "judge_audit_flagged": 3,
+            "solver_truncated": 30,
+            "judge_truncated": 5,
+            "success_rate": 0.6,
+            "observed_success_lower_bound": 0.6,
+            "mean_research_score_valid_only": null
+          }
+        },
+        {
+          "label": "Research",
+          "correct": 5,
+          "total": 60,
+          "value": 0.08333333333333333,
+          "audit": {
+            "total": 60,
+            "graded": 59,
+            "successes": 5,
+            "solver_failures": 0,
+            "judge_unresolved": 1,
+            "judge_invalid": 1,
+            "judge_transport_failures": 0,
+            "judge_truncated_with_grade": 2,
+            "judge_audit_flagged": 4,
+            "solver_truncated": 11,
+            "judge_truncated": 3,
+            "success_rate": 0.08333333333333333,
+            "observed_success_lower_bound": 0.08333333333333333,
+            "mean_research_score_valid_only": 2.505508474576271
+          }
+        }
+      ],
+      "report": "data/request-throttling-dataset-matrix-20261018/frontierscience.json",
+      "limitations": [
+        "Single quality trial per arm; not official leaderboard replication; Qwen substitute judge.",
+        "All unresolved and truncated cases retained in full denominators.",
+        "Different runtime from historical matrix; use matching new Native only.",
+        "Performance mean latency is from vllm client aggregate reports; per-request timing records were not retained.",
+        "All six formal performance runs complete; entire multi-dataset queue still running."
+      ]
+    },
+    {
+      "id": "frontierscience-controller-20261018-request-throttling-controller",
+      "dataset": "frontierscience",
+      "solution": "request-throttling-controller",
+      "quality": [
+        {
+          "label": "Olympiad",
+          "correct": 58,
+          "total": 100,
+          "value": 0.58,
+          "audit": {
+            "total": 100,
+            "graded": 98,
+            "successes": 58,
+            "solver_failures": 0,
+            "judge_unresolved": 2,
+            "judge_invalid": 2,
+            "judge_transport_failures": 0,
+            "judge_truncated_with_grade": 4,
+            "judge_audit_flagged": 4,
+            "solver_truncated": 27,
+            "judge_truncated": 6,
+            "success_rate": 0.58,
+            "observed_success_lower_bound": 0.58,
+            "mean_research_score_valid_only": null
+          }
+        },
+        {
+          "label": "Research",
+          "correct": 4,
+          "total": 60,
+          "value": 0.06666666666666667,
+          "audit": {
+            "total": 60,
+            "graded": 59,
+            "successes": 4,
+            "solver_failures": 0,
+            "judge_unresolved": 1,
+            "judge_invalid": 1,
+            "judge_transport_failures": 0,
+            "judge_truncated_with_grade": 9,
+            "judge_audit_flagged": 12,
+            "solver_truncated": 9,
+            "judge_truncated": 10,
+            "success_rate": 0.06666666666666667,
+            "observed_success_lower_bound": 0.06666666666666667,
+            "mean_research_score_valid_only": 2.250084745762712
+          }
+        }
+      ],
+      "report": "data/request-throttling-dataset-matrix-20261018/frontierscience.json",
+      "limitations": [
+        "Single quality trial per arm; not official leaderboard replication; Qwen substitute judge.",
+        "All unresolved and truncated cases retained in full denominators.",
+        "Different runtime from historical matrix; use matching new Native only.",
+        "Performance mean latency is from vllm client aggregate reports; per-request timing records were not retained.",
+        "All six formal performance runs complete; entire multi-dataset queue still running."
+      ]
+    },
+    {
+      "id": "hle-gold-controller-20261018-native-text",
+      "dataset": "hle-verified",
+      "solution": "native",
+      "quality": [
+        {
+          "label": "Gold · text",
+          "correct": 145,
+          "total": 575,
+          "value": 0.25217391304347825,
+          "audit": {
+            "total": 575,
+            "graded": 551,
+            "successes": 145,
+            "accuracy": 0.25217391304347825,
+            "unresolved": 24,
+            "complete_grading": false,
+            "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+            "wald_95_half_width": 0.03549543748181095,
+            "solver_failures": 0,
+            "judge_invalid": 24,
+            "judge_transport_failures": 0,
+            "solver_truncated": 365,
+            "judge_truncated": 24
+          }
+        }
+      ],
+      "report": "data/request-throttling-dataset-matrix-20261018/hle-gold.json",
+      "limitations": [
+        "Single full quality pass per arm; Qwen substitute judge, not official leaderboard replication.",
+        "Unresolved and failed cases stay in the full denominator; truncated outputs retained.",
+        "Historical Native overview is preserved; current matched Native is in dated details.",
+        "Independent max256 performance is separate from complete task solving; ordinary forwarding has no demonstrated throttle action.",
+        "TTFT/TPOT are original vllm aggregate metrics; no per-request timing for independent mean recomputation."
+      ]
+    },
+    {
+      "id": "hle-gold-controller-20261018-native-image",
+      "dataset": "hle-verified",
+      "solution": "native",
+      "quality": [
+        {
+          "label": "Gold · image",
+          "correct": 19,
+          "total": 93,
+          "value": 0.20430107526881722,
+          "audit": {
+            "total": 93,
+            "graded": 92,
+            "successes": 19,
+            "accuracy": 0.20430107526881722,
+            "unresolved": 1,
+            "complete_grading": false,
+            "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+            "wald_95_half_width": 0.08194534893600774,
+            "solver_failures": 0,
+            "judge_invalid": 1,
+            "judge_transport_failures": 0,
+            "solver_truncated": 7,
+            "judge_truncated": 1
+          }
+        }
+      ],
+      "report": "data/request-throttling-dataset-matrix-20261018/hle-gold.json",
+      "limitations": [
+        "Single full quality pass per arm; Qwen substitute judge, not official leaderboard replication.",
+        "Unresolved and failed cases stay in the full denominator; truncated outputs retained.",
+        "Historical Native overview is preserved; current matched Native is in dated details.",
+        "Independent max256 performance is separate from complete task solving; ordinary forwarding has no demonstrated throttle action.",
+        "TTFT/TPOT are original vllm aggregate metrics; no per-request timing for independent mean recomputation."
+      ]
+    },
+    {
+      "id": "hle-gold-controller-20261018-request-throttling-controller-text",
+      "dataset": "hle-verified",
+      "solution": "request-throttling-controller",
+      "quality": [
+        {
+          "label": "Gold · text",
+          "correct": 140,
+          "total": 575,
+          "value": 0.24347826086956523,
+          "audit": {
+            "total": 575,
+            "graded": 554,
+            "successes": 140,
+            "accuracy": 0.24347826086956523,
+            "unresolved": 21,
+            "complete_grading": false,
+            "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+            "wald_95_half_width": 0.03508027188415771,
+            "solver_failures": 0,
+            "judge_invalid": 21,
+            "judge_transport_failures": 0,
+            "solver_truncated": 369,
+            "judge_truncated": 21
+          }
+        }
+      ],
+      "report": "data/request-throttling-dataset-matrix-20261018/hle-gold.json",
+      "limitations": [
+        "Single full quality pass per arm; Qwen substitute judge, not official leaderboard replication.",
+        "Unresolved and failed cases stay in the full denominator; truncated outputs retained.",
+        "Historical Native overview is preserved; current matched Native is in dated details.",
+        "Independent max256 performance is separate from complete task solving; ordinary forwarding has no demonstrated throttle action.",
+        "TTFT/TPOT are original vllm aggregate metrics; no per-request timing for independent mean recomputation."
+      ]
+    },
+    {
+      "id": "hle-gold-controller-20261018-request-throttling-controller-image",
+      "dataset": "hle-verified",
+      "solution": "request-throttling-controller",
+      "quality": [
+        {
+          "label": "Gold · image",
+          "correct": 19,
+          "total": 93,
+          "value": 0.20430107526881722,
+          "audit": {
+            "total": 93,
+            "graded": 89,
+            "successes": 19,
+            "accuracy": 0.20430107526881722,
+            "unresolved": 4,
+            "complete_grading": false,
+            "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+            "wald_95_half_width": 0.08194534893600774,
+            "solver_failures": 0,
+            "judge_invalid": 4,
+            "judge_transport_failures": 0,
+            "solver_truncated": 8,
+            "judge_truncated": 4
+          }
+        }
+      ],
+      "report": "data/request-throttling-dataset-matrix-20261018/hle-gold.json",
+      "limitations": [
+        "Single full quality pass per arm; Qwen substitute judge, not official leaderboard replication.",
+        "Unresolved and failed cases stay in the full denominator; truncated outputs retained.",
+        "Historical Native overview is preserved; current matched Native is in dated details.",
+        "Independent max256 performance is separate from complete task solving; ordinary forwarding has no demonstrated throttle action.",
+        "TTFT/TPOT are original vllm aggregate metrics; no per-request timing for independent mean recomputation."
+      ]
+    },
+    {
+      "id": "mmlu-pro-controller-20261018-native",
+      "dataset": "mmlu-pro",
+      "solution": "native",
+      "quality": [
+        {
+          "label": "Test",
+          "correct": 9632,
+          "total": 12032,
+          "value": 0.800531914893617,
+          "audit": {
+            "cases": 12032,
+            "correct": 9632,
+            "accuracy": 0.800531914893617,
+            "invalid_answers": 62,
+            "transport_failures": 0,
+            "length_limited": 1520,
+            "wall_seconds_this_invocation": 23828.67192309769,
+            "mean_ttft_s": 0.7931139659728054,
+            "mean_e2e_s": 31.65954308515296,
+            "smoke_only": false
+          }
+        }
+      ],
+      "report": "data/request-throttling-dataset-matrix-20261018/mmlu-pro.json",
+      "limitations": [
+        "Single quality pass; not statistical significance.",
+        "Fixedclient16 quality profile; independent rateinf200request short performance.",
+        "No raw SSE/actual HTTP bodies retained by quality client; assembled records only.",
+        "Aggregate TTFT/TPOT only; no independent per-request latency reconstruction.",
+        "Ordinary single-turn forwarding; no program-level scheduling causal claim.",
+        "Short outputcap256 performance is not full-solution cost."
+      ]
+    },
+    {
+      "id": "mmlu-pro-controller-20261018-request-throttling-controller",
+      "dataset": "mmlu-pro",
+      "solution": "request-throttling-controller",
+      "quality": [
+        {
+          "label": "Test",
+          "correct": 9599,
+          "total": 12032,
+          "value": 0.7977892287234043,
+          "audit": {
+            "cases": 12032,
+            "correct": 9599,
+            "accuracy": 0.7977892287234043,
+            "invalid_answers": 66,
+            "transport_failures": 0,
+            "length_limited": 1536,
+            "wall_seconds_this_invocation": 23372.755430921912,
+            "mean_ttft_s": 0.7452685288230219,
+            "mean_e2e_s": 31.056554580021103,
+            "smoke_only": false
+          }
+        }
+      ],
+      "report": "data/request-throttling-dataset-matrix-20261018/mmlu-pro.json",
+      "limitations": [
+        "Single quality pass; not statistical significance.",
+        "Fixedclient16 quality profile; independent rateinf200request short performance.",
+        "No raw SSE/actual HTTP bodies retained by quality client; assembled records only.",
+        "Aggregate TTFT/TPOT only; no independent per-request latency reconstruction.",
+        "Ordinary single-turn forwarding; no program-level scheduling causal claim.",
+        "Short outputcap256 performance is not full-solution cost."
+      ]
+    },
+    {
+      "id": "hle-revision-controller-20261018-native-text",
+      "dataset": "hle-verified",
+      "solution": "native",
+      "quality": [
+        {
+          "label": "Revision · text",
+          "correct": 285,
+          "total": 1025,
+          "value": 0.2780487804878049,
+          "audit": {
+            "total": 1025,
+            "graded": 986,
+            "successes": 285,
+            "accuracy": 0.2780487804878049,
+            "unresolved": 39,
+            "complete_grading": false,
+            "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+            "wald_95_half_width": 0.0274289108627201,
+            "solver_failures": 0,
+            "judge_invalid": 39,
+            "judge_transport_failures": 0,
+            "solver_truncated": 685,
+            "judge_truncated": 39
+          }
+        }
+      ],
+      "report": "data/request-throttling-dataset-matrix-20261018/hle-revision.json",
+      "limitations": [
+        "Single full quality pass per arm; Qwen substitute judge, not official leaderboard replication.",
+        "Unresolved and failed cases stay in the full denominator; truncated outputs retained.",
+        "Historical Native overview is preserved; current matched Native is in dated details.",
+        "Independent max256 performance is separate from complete task solving; ordinary forwarding has no demonstrated throttle action.",
+        "TTFT/TPOT are original vllm aggregate metrics; detailed per-request timings are privately retained but not independently recomputed."
+      ]
+    },
+    {
+      "id": "hle-revision-controller-20261018-native-image",
+      "dataset": "hle-verified",
+      "solution": "native",
+      "quality": [
+        {
+          "label": "Revision · image",
+          "correct": 18,
+          "total": 118,
+          "value": 0.15254237288135594,
+          "audit": {
+            "total": 118,
+            "graded": 118,
+            "successes": 18,
+            "accuracy": 0.15254237288135594,
+            "unresolved": 0,
+            "complete_grading": true,
+            "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+            "wald_95_half_width": 0.06487379631925799,
+            "solver_failures": 0,
+            "judge_invalid": 0,
+            "judge_transport_failures": 0,
+            "solver_truncated": 18,
+            "judge_truncated": 0
+          }
+        }
+      ],
+      "report": "data/request-throttling-dataset-matrix-20261018/hle-revision.json",
+      "limitations": [
+        "Single full quality pass per arm; Qwen substitute judge, not official leaderboard replication.",
+        "Unresolved and failed cases stay in the full denominator; truncated outputs retained.",
+        "Historical Native overview is preserved; current matched Native is in dated details.",
+        "Independent max256 performance is separate from complete task solving; ordinary forwarding has no demonstrated throttle action.",
+        "TTFT/TPOT are original vllm aggregate metrics; detailed per-request timings are privately retained but not independently recomputed."
+      ]
+    },
+    {
+      "id": "hle-revision-controller-20261018-request-throttling-controller-text",
+      "dataset": "hle-verified",
+      "solution": "request-throttling-controller",
+      "quality": [
+        {
+          "label": "Revision · text",
+          "correct": 287,
+          "total": 1025,
+          "value": 0.28,
+          "audit": {
+            "total": 1025,
+            "graded": 995,
+            "successes": 287,
+            "accuracy": 0.28,
+            "unresolved": 30,
+            "complete_grading": false,
+            "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+            "wald_95_half_width": 0.027487763308558174,
+            "solver_failures": 0,
+            "judge_invalid": 30,
+            "judge_transport_failures": 0,
+            "solver_truncated": 680,
+            "judge_truncated": 30
+          }
+        }
+      ],
+      "report": "data/request-throttling-dataset-matrix-20261018/hle-revision.json",
+      "limitations": [
+        "Single full quality pass per arm; Qwen substitute judge, not official leaderboard replication.",
+        "Unresolved and failed cases stay in the full denominator; truncated outputs retained.",
+        "Historical Native overview is preserved; current matched Native is in dated details.",
+        "Independent max256 performance is separate from complete task solving; ordinary forwarding has no demonstrated throttle action.",
+        "TTFT/TPOT are original vllm aggregate metrics; detailed per-request timings are privately retained but not independently recomputed."
+      ]
+    },
+    {
+      "id": "hle-revision-controller-20261018-request-throttling-controller-image",
+      "dataset": "hle-verified",
+      "solution": "request-throttling-controller",
+      "quality": [
+        {
+          "label": "Revision · image",
+          "correct": 21,
+          "total": 118,
+          "value": 0.17796610169491525,
+          "audit": {
+            "total": 118,
+            "graded": 116,
+            "successes": 21,
+            "accuracy": 0.17796610169491525,
+            "unresolved": 2,
+            "complete_grading": false,
+            "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+            "wald_95_half_width": 0.0690126294695939,
+            "solver_failures": 0,
+            "judge_invalid": 2,
+            "judge_transport_failures": 0,
+            "solver_truncated": 11,
+            "judge_truncated": 2
+          }
+        }
+      ],
+      "report": "data/request-throttling-dataset-matrix-20261018/hle-revision.json",
+      "limitations": [
+        "Single full quality pass per arm; Qwen substitute judge, not official leaderboard replication.",
+        "Unresolved and failed cases stay in the full denominator; truncated outputs retained.",
+        "Historical Native overview is preserved; current matched Native is in dated details.",
+        "Independent max256 performance is separate from complete task solving; ordinary forwarding has no demonstrated throttle action.",
+        "TTFT/TPOT are original vllm aggregate metrics; detailed per-request timings are privately retained but not independently recomputed."
+      ]
+    },
+    {
+      "id": "swe-pro-real-hour-native",
+      "dataset": "swe-bench-pro",
+      "solution": "native",
+      "quality": [],
+      "report": "data/swe-bench-pro-real-agent-threeway-20261022/report.json",
+      "limitations": [
+        "Single sequential Native → ThunderAgent original → Controller original triplet; no repetition confidence interval.",
+        "Real generated outputs change later requests, lengths and tools; equal protocol and time window are not identical executed work or complete-batch makespan.",
+        "Client percentiles include admission waiting but only normal returns by window end; censored requests remain separate.",
+        "Counters use actual within-window sampled endpoints; sequential observations are not atomic. Preliminary endpoints just before each boundary differ slightly from this final within-window report.",
+        "Both ThunderAgent and Controller show late cache decline. Common engine, capacity, adaptation and workload are not excluded; no unique algorithm or integration root cause established.",
+        "ThunderAgent original post-Agent engine drain guard timed out after180 seconds; original Ray FAILED retained. Later independent drain verified before Controller start. Guard residue is outside performance window.",
+        "Controller all-hour P95/P99 are worse than Native despite higher throughput and lower mean. Phase-specific adverse results are retained."
+      ]
+    },
+    {
+      "id": "swe-pro-real-hour-controller_original",
+      "dataset": "swe-bench-pro",
+      "solution": "request-throttling-controller",
+      "quality": [],
+      "report": "data/swe-bench-pro-real-agent-threeway-20261022/report.json",
+      "limitations": [
+        "Single sequential Native → ThunderAgent original → Controller original triplet; no repetition confidence interval.",
+        "Real generated outputs change later requests, lengths and tools; equal protocol and time window are not identical executed work or complete-batch makespan.",
+        "Client percentiles include admission waiting but only normal returns by window end; censored requests remain separate.",
+        "Counters use actual within-window sampled endpoints; sequential observations are not atomic. Preliminary endpoints just before each boundary differ slightly from this final within-window report.",
+        "Both ThunderAgent and Controller show late cache decline. Common engine, capacity, adaptation and workload are not excluded; no unique algorithm or integration root cause established.",
+        "ThunderAgent original post-Agent engine drain guard timed out after180 seconds; original Ray FAILED retained. Later independent drain verified before Controller start. Guard residue is outside performance window.",
+        "Controller all-hour P95/P99 are worse than Native despite higher throughput and lower mean. Phase-specific adverse results are retained."
+      ]
+    }
+  ],
+  "mmlu_fixed_b0_completion": {
+    "source_path": "reports/mmlu-quality018-20261022/quality018-completed-audit-r1.json",
+    "counts": {
+      "total": 200,
+      "completed": 200,
+      "failed": 0,
+      "correct": 151,
+      "truncated": 18,
+      "unparsed": 0
+    },
+    "candidates": [
+      {
+        "candidate_run": "m01-recovery-model-quality-r1",
+        "candidate_correct": 146,
+        "candidate_failed": 0,
+        "candidate_truncated": 22,
+        "accuracy_delta_percentage_points": -2.5,
+        "improved_cases": 17,
+        "regressed_cases": 22,
+        "requests_byte_content_equivalent": true,
+        "scorer_identical": true,
+        "scope": "Same frozen requests, different disclosed runtime stacks and optimization configurations; not same-runtime ablation",
+        "candidate_summary_sha256": "9b5c7d57b6cd3831e52dd4548c674f285ff3f64aa4624c0f4a7da82fee263291"
+      },
+      {
+        "candidate_run": "mmlu-quality-kvmat-r1",
+        "candidate_correct": 152,
+        "candidate_failed": 0,
+        "candidate_truncated": 23,
+        "accuracy_delta_percentage_points": 0.5,
+        "improved_cases": 20,
+        "regressed_cases": 19,
+        "requests_byte_content_equivalent": true,
+        "scorer_identical": true,
+        "scope": "Same frozen requests, different disclosed runtime stacks and optimization configurations; not same-runtime ablation",
+        "candidate_summary_sha256": "b54b1b6e0ca137b604e98d4f78233fe50d03ab94385eeedddec7a063952e306b"
+      },
+      {
+        "candidate_run": "mmlu-quality-microflow-r1",
+        "candidate_correct": 149,
+        "candidate_failed": 0,
+        "candidate_truncated": 25,
+        "accuracy_delta_percentage_points": -1.0,
+        "improved_cases": 17,
+        "regressed_cases": 19,
+        "requests_byte_content_equivalent": true,
+        "scorer_identical": true,
+        "scope": "Same frozen requests, different disclosed runtime stacks and optimization configurations; not same-runtime ablation",
+        "candidate_summary_sha256": "68621e5b127746164c15559f47e05b888fa3ae998313f168a3573c7dc10574a6"
+      }
+    ]
+  },
+  "stability_passed": null,
+  "boundary": "Completion, budget-length termination, scoring unresolved and service anomaly are different states. This inventory does not assert absence of OOM/deadlock/silent truncation in logs not inspected."
+}
