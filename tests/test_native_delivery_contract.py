@@ -8,6 +8,24 @@ ROOT = Path(__file__).resolve().parents[1]
 DOCS = ROOT / "docs/workload-data"
 
 
+def test_locomo_supplement_does_not_close_unverified_category5_or_full_delivery():
+    ledger = json.loads((DOCS / "dataset-validation-status.json").read_text("utf-8"))
+    item = ledger["delivery_inventory"]["LOCOMO"]
+    assert item["checked"] is False
+    receipt = json.loads((ROOT / item["category4_receipt"]).read_text("utf-8"))
+    assert receipt["original_question_indices"] == [82, 83, 84]
+    assert receipt["new_model_calls"] == 3
+    assert receipt["combined_original_question_count"] == 9
+    assert not receipt["category5_validated"]
+    assert not receipt["source_checkbox_eligible"]
+    assert not receipt["raw_data_or_outputs_published"]
+    assert all(
+        sample["prompt_tokens"] == sample["preflight_tokens"]
+        for sample in receipt["samples"]
+    )
+    assert all(sample["finish_reason"] == "stop" for sample in receipt["samples"])
+
+
 def test_private_request_delivery_reuses_native_responses_without_publishing_them():
     import hashlib
 
