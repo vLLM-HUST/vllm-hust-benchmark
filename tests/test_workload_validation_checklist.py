@@ -8,6 +8,46 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def test_qasper_delivery_separates_full_native_run_and_sampled_research_handoff():
+    directory = ROOT / "docs/workload-data"
+    ledger = json.loads(
+        (directory / "dataset-validation-status.json").read_text("utf-8")
+    )
+    row = ledger["delivery_inventory"]["LONGBENCH"]
+    assert row["checked"] and row["blocker"] is None
+    delivery = json.loads((ROOT / row["delivery_receipt"]).read_text("utf-8"))
+    native = json.loads(
+        (
+            directory
+            / "validation"
+            / delivery["native_execution_and_official_scoring_receipt"]
+        ).read_text("utf-8")
+    )
+    handoff = json.loads(
+        (
+            directory
+            / "validation"
+            / delivery["exact_installed_research_handoff_receipt"]
+        ).read_text("utf-8")
+    )
+    assert native["original_unique_tasks"] == 200
+    assert native["historical_native_tasks_reused"] == 3
+    assert native["new_native_tasks"] == 197
+    assert native["all_saved_response_hashes_and_official_scores_recalculated"]
+    assert handoff["installed_provider_payload_files_equal"] == 32
+    assert handoff["research_installed_python_files_equal"] == 40
+    assert handoff["fixed_original_indices"] == [0, 1, 2]
+    assert handoff["public_prepare_resolve_rows"] == 3
+    assert handoff["research_source_index_import_rows"] == 3
+    assert handoff["research_direct_prepare_resolve_rows"] == 3
+    assert handoff["original_inputs_references_source_identity_and_relations_equal"]
+    assert handoff["new_native_tasks_or_model_calls"] == 0
+    assert not delivery["all200_research_handoff_claim"]
+    assert not delivery["all_longbench_other_subsuites_completed"]
+    assert not delivery["original_qasper_full_corpus_completed"]
+    assert not handoff["research_features_or_observation_migrated_into_benchmark"]
+
+
 def test_all_source_receipts_are_local_json_and_cover_the_referenced_source():
     """Check single/multi-source receipts without treating readers as task runs."""
     rows = json.loads(
