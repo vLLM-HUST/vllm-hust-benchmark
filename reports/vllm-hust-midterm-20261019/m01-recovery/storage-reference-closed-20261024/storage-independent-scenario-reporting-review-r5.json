@@ -1,0 +1,31 @@
+{
+  "status": "approved_before_complete_reference_result",
+  "reviewer": "storage independent semantics reviewer /root/reference_semantics_review",
+  "method": "/root/m01-storage-accounting-20261024/reference-r5-scenario-reporting-method.json",
+  "method_sha256": "47f655f0415d3cb62d6371ba82faa3216fa3c76e53e11862076033cd0b2caa55",
+  "conclusion": "符合原方法的事前展示约定：seed0为现在固定的主展示情景，seed1/2完整报告敏感性；不把seed0称为历史验收条款，不按结果选优。",
+  "basis": [
+    {
+      "path": "/root/m01-storage-accounting-20261024/formal-workgroup-model-method-r2.json",
+      "field": "variants",
+      "supports": "三个seed事前独立于时间数据，保留每个可行情景；range不是置信区间或全可行集合保证。"
+    },
+    {
+      "path": "/root/m01-delivery-benchmark-20261024/reports/vllm-hust-midterm-20261019/milestone-v15/project4-v1.5.txt",
+      "lines": [
+        55,
+        59,
+        61
+      ],
+      "supports": "复算前固定方法及范围；同工作量、独立标定、不得以实测T反向拟合；有效指标与达标判定分开。"
+    }
+  ],
+  "accepted_rules": [
+    "不平均、不挑最高η；逐情景完整DAG和每个必要节点资格齐全后才出数值。",
+    "全部三个情景及其min/max同时报告；保持formal F/T/k不变。",
+    "逐情景报告50%门槛实际pass/fail；若结论跨情景变化，明确标为对情景敏感，不将seed0结论泛化为所有允许调度。",
+    "原协议没有要求所有可能调度均≥50%，本审核不增加这种门槛；同时不将三个情景范围称为统计置信区间或最优/最坏理论界。"
+  ],
+  "complete_Tref_seen_by_reviewer": false,
+  "new_measurements": 0
+}

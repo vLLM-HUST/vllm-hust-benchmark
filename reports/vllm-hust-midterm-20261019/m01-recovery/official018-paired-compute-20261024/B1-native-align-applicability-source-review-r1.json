@@ -1,0 +1,69 @@
+{
+  "status": "B1_same_native_align_omission_not_applicable_to_live_resident_path",
+  "reviewer_agent": "/root/reference_semantics_review",
+  "raw": "/root/m01-timing-b1-storage-r1",
+  "source_pin_checks": {
+    "/root/gennova-evidence/20261019-midterm-aligned/recovery-model-payload-r1/betterscale/models/qwen35/__init__.py": "9c42ec68ba530defafae0eae9eae5844898a258b924b0121211e76bbe9a12bc5",
+    "/root/gennova-evidence/20261019-midterm-aligned/recovery-model-payload-r1/betterscale/models/qwen35/state_address.py": "fd8e334e31fa385e55049c3234b5c17ee3949782cff1709a880f2da8522f707a",
+    "/root/gennova-evidence/20261019-midterm-aligned/recovery-model-payload-r1/betterscale/models/qwen35/state_slots.py": "7bb73ec31a293c97edb87fe45045406f8a66206344d0055924186c1d331e70e8",
+    "/root/gennova-evidence/20261019-midterm-aligned/recovery-model-payload-r1/betterscale/models/qwen35/state_commit.py": "4d832c59889d253d8677c43144d210133835d9afdd717d75e2c4d5f4400a958d",
+    "/root/gennova-evidence/20261019-midterm-aligned/recovery-model-payload-r1/betterscale/models/qwen35/integration.py": "1f3a84db4c10de285fa623732781d34dc773685d6714472f6774a77baf832bb5",
+    "/root/gennova-evidence/20261019-midterm-aligned/recovery-model-payload-r1/betterscale/models/qwen35/host_policy.py": "c26c2c8d56631cb46b03a0343e5c2763ac7fd1a5535404a69c390d6b214e09a1",
+    "/root/gennova-evidence/20261019-midterm-aligned/recovery-model-payload-r1/betterscale/models/qwen35/state_backend.py": "b8918ed6955de98c034444ef8e2bb14e2244eb75f1612b9980fe91a2cd00d564"
+  },
+  "evidence_sha256": {
+    "/root/m01-timing-b1-storage-r1/execution-plan.json": "0d25361e5ccca43939d856b26685c20412bd0df709fa5f1f1292c722418caec8",
+    "/root/m01-timing-b1-storage-r1/service.log": "0f31c60b25437cfedabf88a59a826228ea88a8c12ec627f4cdd2359ba3916978",
+    "/root/m01-timing-b1-storage-r1/receipt.json": "ada9a8d88c42ad2f507fb0e1943e1c6bb0642e40a0718ba29d6e97637764294c"
+  },
+  "source_rules": [
+    {
+      "file": "/root/gennova-evidence/20261019-midterm-aligned/recovery-model-payload-r1/betterscale/models/qwen35/__init__.py",
+      "lines": [
+        218,
+        226
+      ],
+      "rule": "Actual using_live_runtime=True selects after_init state_address.install after generic integration hooks."
+    },
+    {
+      "file": "/root/gennova-evidence/20261019-midterm-aligned/recovery-model-payload-r1/betterscale/models/qwen35/state_address.py",
+      "lines": [
+        9,
+        57
+      ],
+      "rule": "Worker-private GDN mapping repeats one resident seat in every block column; fresh epoch explicitly clears that seat and resets selections. It is not Native rotating 2048-token temporal blocks."
+    },
+    {
+      "file": "/root/gennova-evidence/20261019-midterm-aligned/recovery-model-payload-r1/betterscale/models/qwen35/state_address.py",
+      "lines": [
+        105,
+        165,
+        215,
+        225
+      ],
+      "rule": "Override device_metadata.publish_slots and Runner._update_states_after_model_execute. Verify->bulk-prefill alone normalizes three conv history rows; temporal matrix remains selected candidate without Native align-copy."
+    },
+    {
+      "file": "/root/gennova-evidence/20261019-midterm-aligned/recovery-model-payload-r1/betterscale/models/qwen35/state_slots.py",
+      "lines": [
+        40,
+        79
+      ],
+      "rule": "Actual prefill/verify state indices are resident seat*WIDTH+candidate with current selection; terminal unwritable seats publish sentinel -1. No seq_end/2048 offset selects native physical state."
+    },
+    {
+      "file": "/root/gennova-evidence/20261019-midterm-aligned/recovery-model-payload-r1/betterscale/models/qwen35/state_commit.py",
+      "lines": [
+        20,
+        38
+      ],
+      "rule": "Commit selection uses min(accepted,remaining), preserves terminal state; no aligned-block publication/reset-to1 at2048 boundary."
+    }
+  ],
+  "decision": "Do not apply B0 44-copy/975-running-index repair or replay B0 F to B1. The same service configuration label align routes to a different pinned implementation. No mechanical remeasurement/rebuild is warranted by this B0-specific omission.",
+  "limits": [
+    "This is a narrow source/identity check of the newly discovered Native align omission, not a fresh blanket proof of every B1 necessary-work term.",
+    "B1 actual per-layer/wave state tensor values were not recorded; this source review does not invent them.",
+    "No device, timing, formal rerun, or sealed-file edit."
+  ]
+}

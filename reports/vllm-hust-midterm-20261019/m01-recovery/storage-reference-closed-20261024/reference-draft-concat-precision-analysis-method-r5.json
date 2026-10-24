@@ -1,0 +1,70 @@
+{
+  "schema": "single-unqualified-precision-input-repair/v5",
+  "frozen_before_repair_raw_read": true,
+  "repair_execution_path": "/root/m01-storage-accounting-20261024/reference-recheck-short-kernel-execution-r5b.json",
+  "repair_execution_sha256": "08d489931ff4248e293d57e3b637171b5c351f277f410e99a5563942c6c308e5",
+  "source_sha256": {
+    "/root/m01-storage-accounting-20261024/reference-recheck-short-kernel-execution-r5b.json": "08d489931ff4248e293d57e3b637171b5c351f277f410e99a5563942c6c308e5",
+    "/root/m01-storage-accounting-20261024/storage-independent-short-kernel-execution-r5-review.json": "f373f163883f78d5ad021afeddaee1273472df481dd3ddc3babba9b770fc6d37",
+    "/root/m01-storage-accounting-20261024/reference-necessary-domain-audit-r5.json": "67b940fc08118d2e1aac6e3aa19908a58a7b0ab20c23774ad6da4786c15141ca",
+    "/root/m01-storage-accounting-20261024/reference-necessary-domain-models-r5.json": "56b11a7681ad03428cd87478e23c6e5decef1c1328c52431c917b3c1af24f498",
+    "/root/m01-storage-accounting-20261024/reference-necessary-domain-plan-r5.json": "d51b74642cc7753dffee9e273322bce829081a10d2c04bc1298ead5e19f2aaeb",
+    "/root/m01-storage-accounting-20261024/reference-necessary-domain-analysis-method-r5.json": "a54af43d54e2f1a82141b8a8e689b3b63cc75ffff00efd3d1e7d7ee4393e6ef7",
+    "/root/m01-storage-accounting-20261024/audit_reference_recheck_short_kernel_r5b.py": "b79fcc8258c363990767d50f3305389b654df8bc4085b7424740e8051be9fb04",
+    "/root/m01-storage-accounting-20261024/update_reference_draft_concat_precision_r5.py": "ff6d3feb38081b567e47f6752029fc5cfea57ed2fed61c3f571e975e97bd754c",
+    "/root/m01-storage-accounting-20261024/update_reference_necessary_domains_r5.py": "31f8273cac1cf617385fe38d1b96cb897e4eb8144311b48cc6c80d576cea3c5e",
+    "/root/m01-storage-accounting-20261024/reference_necessary_domain_binding_r5.py": "0aa4ae8e45e8e13f20f67bc61528f1b97817f1f88092701f4810b755d471b40c",
+    "/root/m01-storage-accounting-20261024/reference_necessary_domain_binding_r5b.py": "52a6c49a47f13b6067cf92f3b10dbcb5385a476fad4b2e5c642abea687896e5c",
+    "/root/m01-storage-accounting-20261024/component_geometry_models.py": "104b84d9489efdea58e68ac82bba7dba2b4d5c5ffa0e6fca9b73fc608b094ecb"
+  },
+  "input_replacement": {
+    "case": 81,
+    "rank": 0,
+    "family": "primitive",
+    "kind": "draft_concat",
+    "rows": 4,
+    "old_ratio": 1.1947405430500615,
+    "new_batches": [
+      1024,
+      4096
+    ],
+    "primary_batch": 4096,
+    "repetitions": 9,
+    "unchanged_stability_ratio": 1.15
+  },
+  "unchanged_model_hashes": {
+    "('fia:decode', 0)": "5ad4e63c40ddebbd2c9588700a3878882911280e08eb5a522902e18c41e22489",
+    "('fia:decode', 1)": "14d77dda7caf7b4cb4084f85852648b66275b88f40f8ab2d7f8c9f0b5cd6e71c",
+    "('fia:prefill_or_verify', 0)": "a18fdea2e46df0b859b597cd4c52110d56f63be70d4174c816f99a9d549e4d23",
+    "('fia:prefill_or_verify', 1)": "d66bffa4a4e453dee51077350b72d9d043ddc759915ba11315544199793acf71",
+    "('conv:1', 0)": "2b2a54dddbb75f6e5f461f87d1102d2ef6b45f8ec3717bf5443572eb63dde94a",
+    "('conv:1', 1)": "dcfc1dc8ba103e894a2bc7fe811f4ccc106d06023fd02e117fe4095eb903904e",
+    "('dense:(512, 2048)', 1)": "35512e2f4cd46671cc93406a3953a006799145a26b2207cca03a54e9f850d05d",
+    "('primitive:kv_scatter', 0)": "1b4745f002d71e92ed78fe727759caaf1b66cc119c385b51bbbbe1e750c15fa6",
+    "('primitive:kv_scatter', 1)": "457c45f3edadd297762dec2efa4f4af003834cae48cbb2952c28d43a25b99583",
+    "('primitive:key_norm_rope', 0)": "11417057fee556f6bd284cb14a330e7dea4e64d8615942b815f47180a5fc5cf8",
+    "('primitive:key_norm_rope', 1)": "a26da680054c3df8b84277fbab3a49939ee26773f3fbeb570e4e2e9a4d7cef83"
+  },
+  "model_rule": "Only if repaired input independently qualifies, replace exactly oldunqualifiedcase81rank0 in original frozen draftconcat calibration list; retain other9newcalibrationpoints and fixed oldcalibration/10oldheldout verbatim. Original log1p(rows)/log(ms) interpolation. Previously blocked model had no fit; perform its first evaluable fit once. All other11model objects preserved exactly.",
+  "source_protocol": "The replaced input alone uses1024/4096 primary4096, matching previous precision repair policy. Other calibration and heldout protocols remain asoriginal frozen source records. Keep explicit per-input provenance; no rescaling or fastest-batch choice.",
+  "thresholds": {
+    "minimum_validation": 10,
+    "p95_relative_max": 0.3,
+    "p99_relative_max": 0.6
+  },
+  "failure": "If precision still fails:zero fits, preserve base models and missingpoint. Iffixedholdoutmodel fails:retain failed diagnostics and exactqualifiednewpoint, no additional fitting, split/threshold tuning or retry.",
+  "output": "/root/m01-storage-accounting-20261024/reference-necessary-domain-models-r5b.json",
+  "cli": [
+    "python",
+    "update_reference_draft_concat_precision_r5.py",
+    "--repair-audit",
+    "reference-recheck-short-kernel-audit-r5.json"
+  ],
+  "review_cpu_affinity": [
+    0,
+    1,
+    2,
+    3
+  ],
+  "no_device_or_timing_execution": true
+}

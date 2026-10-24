@@ -1,0 +1,60 @@
+{
+  "schema": "m01-own-compute-pair/v1",
+  "status": "own_F_T_C_closed_reference_method_pending",
+  "rows": {
+    "B0": {
+      "F": 1829161955258989,
+      "T_seconds": 238.12670116312802,
+      "chips": 2,
+      "C_TFLOPS_per_chip": 3.840732572879189
+    },
+    "B1": {
+      "F": 1812905151088034,
+      "T_seconds": 127.59352582134306,
+      "chips": 2,
+      "C_TFLOPS_per_chip": 7.1042207644080255
+    }
+  },
+  "C_gain_percent": 84.97046148366367,
+  "reference_seconds": null,
+  "reference_tflops_per_chip": null,
+  "eta_percent": null,
+  "attainment": null,
+  "reference_method_status": "whole_chain_execution_protocol_not_frozen",
+  "baseline_is_reference_ceiling": false,
+  "identities": {
+    "B0": "vLLM 0.18.0 / vLLM-Ascend 0.18.0 with disclosed text-only compatibility patches",
+    "B1": "vLLM 0.28.1.post1.dev143+gf18cf803c / vLLM-Ascend 0.25.1rc2 development stack; vLLM-HUST combined optimization"
+  },
+  "workload": {
+    "model": "Qwen3.5-35B-A3B",
+    "dtype": "BF16",
+    "hardware": "Ascend 910B2",
+    "TP": 2,
+    "requests_per_arm": 200,
+    "dataset": "MMLU-Pro",
+    "actual_input_tokens_per_arm": 282265,
+    "actual_output_tokens_per_arm": 51200,
+    "output_budget": 256,
+    "ignore_eos": false
+  },
+  "measurement": {
+    "same_run_F_T": true,
+    "all_accounting_cost_retained": true,
+    "strict_uninstrumented": false,
+    "fresh_per_run_cache": true
+  },
+  "scope": "Effective-compute gain, not independent reference attainment or a task-quality score. Actual implementation differences and necessary arithmetic differ.",
+  "supersedes": {
+    "B0_r1_F": 1829506984194363,
+    "reason": "Native Mamba aligned-block publication dependencies corrected; original timing and raw requests unchanged."
+  },
+  "evidence": {
+    "paired-own-metrics-closed-r2.json": "2b73f3c8a79a80a4fce4e4d3f26fbb6070992659f5057d1a2ad0b49e4710d503",
+    "profiling-final-export-audit-r2.json": "6711f48dffa99b19a73b211d40c25b5f51f8d8505ef3def4644234f3bed54224",
+    "profiling-group-sum-audit-r2.json": "2b9f3d50ecd8ef0e971ab9ba3e5bda5d22488cf385e2e9797e663bd1c2795320",
+    "formal-necessary-full-export-audit-r2.json": "180b93a1a4cd20c6a8bcf0e51c9d0f3f1890b93c3f9d0cf6784c0fcbef4a488e",
+    "native-align-independent-source-review-r2.json": "d191b1c7ce993f82941864a8e30cb6d1e98058f53db27dc1a6b891e1b62b5073",
+    "B1-native-align-applicability-source-review-r1.json": "5342fd3eb12a83bb46e6024589d9f31cf67d6449ebf1bd50f1452f22ebfba3e2"
+  }
+}

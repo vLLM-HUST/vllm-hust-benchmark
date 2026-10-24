@@ -9,7 +9,7 @@
     "source_docx_available_in_this_repository": false,
     "scope": "Exact Project 4 extract; source DOCX digest supplied by document owner"
   },
-  "status": "compute-measured-reference-supplement-complete-applicability-unresolved",
+  "status": "own-compute-pair-closed-whole-chain-reference-pending",
   "effective_compute_formula": "C = F / (k * T * 10^12)",
   "effective_compute_unit": "TFLOPS per participating chip",
   "reference_effective_compute_formula": "C_reference = F / (k * T_reference * 10^12)",
@@ -43,7 +43,7 @@
       "reverse fitting to measured B0 or B1 time"
     ],
     "comparison": "Same reference method; separately derive reference time when precision, workload or execution path differs. Efficiency ratios under different references are not performance gains.",
-    "timing_refinement": "This run uses predeclared host-only prefill aggregates and native detailed acceptance statistics, with all costs retained inside synchronized T. It is not strictly uninstrumented. Same-run F and C are reported under the disclosed basic-operation convention; no efficiency or attainment until the independent reference is complete."
+    "timing_refinement": "Same-run basic-operation F and synchronized T retain all native statistics and host-counting costs. Official B0/B1 own F/T/C pairing is closed. Prior operator-DAG eta remains attached to its own method. New whole-chain reference and acceptance remain unresolved. Not strictly uninstrumented."
   },
   "fair_comparison": {
     "fixed_b0": {
@@ -77,11 +77,8 @@
     "quality_and_performance_bind_actual_configuration": true
   },
   "pending_evidence": [
-    "A必要元数据程序18个固定wave已测且字段/页表正确；其他wave缺少合格的几何推广，不能把同requests/rows视为相同页表增量工作。",
-    "固定计时协议仍有60个未过稳定性的rank/part组，原始值保留。其中rank0索引加0已证明可省，其他实际必要小算子失败不能填0或挑更快批次。",
-    "26个新域留出组的预测误差未通过；原始数值与计时成功仍成立。旧capacity/padding、inactive slots和计时协议差异已列出，未将相关性冒称单一因果。",
-    "采样回传与解析已有源格式测量；N×3无效项及双rank复制是否属于必要参考工作仍有语义适用性限制。",
-    "路由分布条件区间及三组工作分配不是全模型保证界；阶段通过不等于完整效率或50%达标结论。"
+    "Freeze executable whole-chain reference identity, calibration/validation samples and applicability checks",
+    "Independent whole-chain reference evidence; official 0.18 is B0, not an automatic reference ceiling"
   ],
   "existing_audit_path": "reports/vllm-hust-midterm-20261019/m01-recovery/method-v526-20261023/README.md",
   "historical_instrumented": {
@@ -156,5 +153,109 @@
         "qualified_duration": 27509
       }
     ]
+  },
+  "paired_own_compute": {
+    "schema": "m01-own-compute-pair/v1",
+    "status": "own_F_T_C_closed_reference_method_pending",
+    "rows": {
+      "B0": {
+        "F": 1829161955258989,
+        "T_seconds": 238.12670116312802,
+        "chips": 2,
+        "C_TFLOPS_per_chip": 3.840732572879189
+      },
+      "B1": {
+        "F": 1812905151088034,
+        "T_seconds": 127.59352582134306,
+        "chips": 2,
+        "C_TFLOPS_per_chip": 7.1042207644080255
+      }
+    },
+    "C_gain_percent": 84.97046148366367,
+    "reference_seconds": null,
+    "reference_tflops_per_chip": null,
+    "eta_percent": null,
+    "attainment": null,
+    "reference_method_status": "whole_chain_execution_protocol_not_frozen",
+    "baseline_is_reference_ceiling": false,
+    "identities": {
+      "B0": "vLLM 0.18.0 / vLLM-Ascend 0.18.0 with disclosed text-only compatibility patches",
+      "B1": "vLLM 0.28.1.post1.dev143+gf18cf803c / vLLM-Ascend 0.25.1rc2 development stack; vLLM-HUST combined optimization"
+    },
+    "workload": {
+      "model": "Qwen3.5-35B-A3B",
+      "dtype": "BF16",
+      "hardware": "Ascend 910B2",
+      "TP": 2,
+      "requests_per_arm": 200,
+      "dataset": "MMLU-Pro",
+      "actual_input_tokens_per_arm": 282265,
+      "actual_output_tokens_per_arm": 51200,
+      "output_budget": 256,
+      "ignore_eos": false
+    },
+    "measurement": {
+      "same_run_F_T": true,
+      "all_accounting_cost_retained": true,
+      "strict_uninstrumented": false,
+      "fresh_per_run_cache": true
+    },
+    "scope": "Effective-compute gain, not independent reference attainment or a task-quality score. Actual implementation differences and necessary arithmetic differ.",
+    "supersedes": {
+      "B0_r1_F": 1829506984194363,
+      "reason": "Native Mamba aligned-block publication dependencies corrected; original timing and raw requests unchanged."
+    },
+    "evidence": {
+      "paired-own-metrics-closed-r2.json": "2b73f3c8a79a80a4fce4e4d3f26fbb6070992659f5057d1a2ad0b49e4710d503",
+      "profiling-final-export-audit-r2.json": "6711f48dffa99b19a73b211d40c25b5f51f8d8505ef3def4644234f3bed54224",
+      "profiling-group-sum-audit-r2.json": "2b9f3d50ecd8ef0e971ab9ba3e5bda5d22488cf385e2e9797e663bd1c2795320",
+      "formal-necessary-full-export-audit-r2.json": "180b93a1a4cd20c6a8bcf0e51c9d0f3f1890b93c3f9d0cf6784c0fcbef4a488e",
+      "native-align-independent-source-review-r2.json": "d191b1c7ce993f82941864a8e30cb6d1e98058f53db27dc1a6b891e1b62b5073",
+      "B1-native-align-applicability-source-review-r1.json": "5342fd3eb12a83bb46e6024589d9f31cf67d6449ebf1bd50f1452f22ebfba3e2"
+    }
+  },
+  "paired_own_compute_source": {
+    "path": "reports/vllm-hust-midterm-20261019/m01-recovery/official018-paired-compute-20261024/summary.json",
+    "sha256": "7b31cd029e6a00217be5e32e9cc56c92c19875a3a47f57d4624bfce5b7722c3a"
+  },
+  "reference_closure": {
+    "path": "reports/vllm-hust-midterm-20261019/m01-recovery/storage-reference-closed-20261024/summary.json",
+    "sha256": "353635dd911b9a54cddab95e01734774bb52577b4b9cd64458b5c9369d0ad6ab",
+    "primary_display_seed": 0,
+    "scenario_sensitivity_range": {
+      "reference_seconds": [
+        47.503348961177785,
+        47.557189519622206
+      ],
+      "reference_tflops_per_chip": [
+        19.060263751919415,
+        19.081866760274465
+      ],
+      "efficiency_percent": [
+        37.2302188966015,
+        37.27241583261204
+      ]
+    },
+    "reference_identity": "Declared independent empirical reference: canonical r6 target and validated same-request/step draft statistical route payloads, regrouped by formal own workgroups/F/T/dependencies. Not recovered formal actual expert paths.",
+    "limitations": [
+      "All three schedule scenarios are reported. Their range is sensitivity, not a confidence interval or bound over all schedules.",
+      "CPU timings mix existing pinned-slab/DMA transaction-context anchors with new pre-touched ordinary-slab intrinsic CPU measurements. Rank anchor median new/old ratios are about0.741 and0.687; no ratio correction, subtraction or overwrite was applied.",
+      "Draft routes are an independently validated aggregate statistical reference. Hidden/KV state and expert IDs are not claimed identical to formal execution. The archive and reused oracle points are disclosed in the route methods.",
+      "Original failed measurements and earlier nonqualified snapshots remain preserved. Only the previously failed concat rank0 rows4 input received the frozen longer-graph precision correction.",
+      "Component model error criteria and calibration support are empirical. They are not a whole-model uncertainty guarantee or hardware peak theorem.",
+      "B1 remains its actual measured development stack. Official vLLM0.18/Ascend0.18 B0 identity is unchanged."
+    ],
+    "classification": "Prior operator-DAG method; not current whole-chain reference acceptance",
+    "reference_seconds": 47.503348961177785,
+    "reference_tflops_per_chip": 19.081866760274465,
+    "efficiency_percent": 37.2302188966015,
+    "threshold_percent": 50,
+    "attainment": false
+  },
+  "whole_chain_method_revision": {
+    "status": "principles_recorded_execution_protocol_not_frozen",
+    "requested_threshold_percent": 90,
+    "external_acceptance_approval_record": null,
+    "baseline_normalization_is_reference_attainment": false
   }
 }

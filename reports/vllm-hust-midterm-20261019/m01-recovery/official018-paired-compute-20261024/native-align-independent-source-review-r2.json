@@ -1,0 +1,87 @@
+{
+  "status": "independent_alignment_source_and_cpu_checks_passed_pending_final_F_delta",
+  "source_checks": {
+    "/root/m01-b0-accounting-20261024/runtime/text-only-overlay-r1/vllm/vllm/v1/worker/mamba_utils.py": true,
+    "/root/m01-b0-accounting-20261024/runtime/text-only-overlay-r1/vllm/vllm/model_executor/layers/mamba/mamba_utils.py": true,
+    "/root/m01-b0-accounting-20261024/runtime/text-only-overlay-r1/vllm/vllm/v1/attention/backends/utils.py": true,
+    "/root/m01-b0-accounting-20261024/replay_native_mamba_align_r1.py": true,
+    "/root/m01-b0-formal-storage-r1/b0-minimal-worker-rank-0.json": true,
+    "/root/m01-b0-formal-storage-r1/b0-minimal-scheduler-1663830.json": true,
+    "/root/m01-b0-formal-storage-r1/service.log": true
+  },
+  "checked_source_sha256": {
+    "/root/m01-b0-accounting-20261024/build_native_interval_work_r2.py": "c997a48eb4431d108b267bad97370a14140c345b2cbc8033449a9e5e002bab40",
+    "/root/m01-b0-accounting-20261024/build_native_interval_work_r1.py": "7c224addf7bf74ddf0eb901991e7b8b05a9308e35330f6b24b8c96be7da6248d",
+    "/root/m01-b0-accounting-20261024/native_interval_closure_r1.py": "8fafb0d334caadd685be6c40c7e9d363bb298488e15dcbecac7bdd75ff38d640",
+    "/root/m01-b0-accounting-20261024/replay_native_mamba_align_r1.py": "c267d9521079a8016afb3804d22c242e3644114f1c8b91d70ee0f3e1ed15b9ca",
+    "/root/m01-b0-accounting-20261024/native-mamba-align-source-delta-r1.json": "77d939da26e1dfb0fe2cb5b3b3cbaeef4fc9780b9f3ceec315fd37174428725d",
+    "/root/m01-b0-accounting-20261024/native-mamba-align-transition-replay-r1.json": "bc6b28848088599756e753fc65c1e73963fde2943ff10c029fede8062e0f3898",
+    "/root/m01-b0-accounting-20261024/test_build_native_interval_work_r2.py": "a258c64263a4e65412002c58d0d1edcc047f0662bce80aabf071030bafe95ee7"
+  },
+  "actual": {
+    "spec_transitions": 19140,
+    "accepted_mismatches": 0,
+    "copy_events": 44,
+    "copy_batches": 42,
+    "group_copy_entries": 264,
+    "same_block_group_entries": 24,
+    "cross_copy_alias_conflicts": [],
+    "copy_bias_classes": [
+      {
+        "phase": "post",
+        "bias": 0,
+        "events": 6
+      },
+      {
+        "phase": "post",
+        "bias": 1,
+        "events": 8
+      },
+      {
+        "phase": "post",
+        "bias": 2,
+        "events": 7
+      },
+      {
+        "phase": "pre",
+        "bias": 0,
+        "events": 9
+      },
+      {
+        "phase": "pre",
+        "bias": 1,
+        "events": 1
+      },
+      {
+        "phase": "pre",
+        "bias": 2,
+        "events": 13
+      }
+    ]
+  },
+  "independent_cpu_checks": {
+    "original_fixture_tests": 4,
+    "memcpy_byte_direction_cases": 3,
+    "full_mapping_slice_cases": 6,
+    "allocation_epoch_retains_physical_producer": true
+  },
+  "findings": [
+    "Mamba running table is a 3-slot view of the full physical mapping at floor((logical_start+q-1)/2048); full-attention table remains unsliced.",
+    "Convolution copy length is full 5-bias suffix, not a forced three-element history; destination tail is retained.",
+    "Temporal source is original table[src_index+accepted_bias]; reset accepted=1 changes selection only after physical copy.",
+    "Snapshot batching is valid for these actual events: no source/destination aliases between distinct copy entries of the same group/kind; same-block conv movement checked against ascending original 1024-byte loop.",
+    "Allocation epochs are checked against sealed mapping but do not implicitly clear bytes. Physical producer state persists until native write/copy.",
+    "Builder applies pre copy before input validation and target; post copy after current target/draft. Draft path has no target GDN state accesses, so this placement preserves target state ordering."
+  ],
+  "limitations": [
+    "No device numerical or timing validation added. Original native source decides copy addresses; symbolic replay checks provenance.",
+    "Actual replay rejects zeroer-present/preempted scope; it does not claim generic resume/reset support.",
+    "Independent source/replay review does not replace final r2 necessary-work delta and same-run F audit."
+  ],
+  "runtime_affinity": [
+    0,
+    1,
+    2,
+    3
+  ]
+}
