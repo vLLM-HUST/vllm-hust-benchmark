@@ -10,6 +10,7 @@ def test_targeted_original_bytes():
         ("profiler-runbooks", 4),
         ("profiler-notes", 5),
         ("profiler-entry-docs", 5),
+        ("profiler-m0-consumers", 3),
         ("compress", 3),
         ("manager", 2),
         ("pyramid-current", 100),
