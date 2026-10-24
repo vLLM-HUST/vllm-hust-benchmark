@@ -1,5 +1,12 @@
 # Targeted MOD original custody
 
+- [Manager paper source binding and derived projections](manager-projections/manifest.json): three
+  unchanged historical outputs, including finite nonformal R4 scope. Recalculation and new build
+  output must remain separate from these immutable inputs.
+- [PyramidKV mixed historical narratives](pyramid-mixed/manifest.json): two complete original
+  documents plus LICENSE and NOTICE. Operator improvement is not serving acceleration; historical
+  smoke and paired observations remain distinct from current baseline admission.
+
 This collection continues [issue 326](https://github.com/vLLM-HUST/vllm-hust-benchmark/issues/326).
 The [Manager/legacy consumer inventory](MANAGER-CONSUMERS-20261024.md) separates migrated real
 archives, retained synthetic fixtures and still-coupled consumers. It preserves the KVCompress
