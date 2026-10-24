@@ -1,10 +1,90 @@
 """CPU interface/safety checks, never native task execution evidence."""
 
 from pathlib import Path
+import importlib.util
+import hashlib
+import json
 import subprocess
 import sys
+from types import SimpleNamespace
+
+import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+def test_full_source_preflight_and_snapshot_are_not_new_native_tasks():
+    receipt = json.loads(
+        (
+            ROOT / "docs/workload-data/validation/tau2-readiness-cpu-20261024.json"
+        ).read_text("utf-8")
+    )
+    assert receipt["original_telecom_tasks_preflighted"] == 2285
+    assert receipt["original_native_references_prepared"] == 2285
+    assert receipt["explicit_action_reference_preflight_tasks"] == 3
+    assert receipt["explicit_action_reference_handoff_verified"]
+    assert receipt["original_reward_basis_counts"] == {
+        "ENV_ASSERTION": 2253,
+        "ENV_ASSERTION,ACTION": 32,
+    }
+    assert receipt["dependency_snapshot_packages_equal"] == 125
+    assert receipt["existing_environment_pip_check_passed"]
+    assert not receipt["new_clean_environment_install_verified"]
+    assert receipt["model_calls"] == receipt["new_native_tasks"] == 0
+    assert not receipt["full_telecom_native_completed"]
+    recipe = ROOT / "configs/workload-native/tau2-v020-py312-dependencies.txt"
+    assert (
+        hashlib.sha256(recipe.read_bytes().replace(b"\r\n", b"\n")).hexdigest()
+        == receipt["dependency_snapshot_sha256"]
+    )
+    assert (
+        hashlib.sha256(
+            (ROOT / "scripts/run_tau2_original_telecom.py")
+            .read_bytes()
+            .replace(b"\r\n", b"\n")
+        ).hexdigest()
+        == receipt["current_runner_sha256"]
+    )
+
+
+def test_original_selection_keeps_official_order_and_never_invents_ids():
+    spec = importlib.util.spec_from_file_location(
+        "tau2_entry", ROOT / "scripts/run_tau2_original_telecom.py"
+    )
+    entry = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(entry)
+    tasks = [SimpleNamespace(id=str(index)) for index in range(5)]
+    assert entry.select_official_tasks(tasks) == tasks[:3]
+    assert entry.select_official_tasks(tasks, full=True) is tasks
+    selected = entry.select_official_tasks(tasks, ["4", "1"])
+    assert selected == [tasks[1], tasks[4]]
+    assert selected[0] is tasks[1]
+    for ids in (["1", "1"], ["unknown"]):
+        with pytest.raises(ValueError):
+            entry.select_official_tasks(tasks, ids)
+    with pytest.raises(ValueError):
+        entry.select_official_tasks(tasks, ["1"], full=True)
+
+
+def test_original_action_basis_is_supported_without_changing_official_scorer():
+    spec = importlib.util.spec_from_file_location(
+        "tau2_reward_entry", ROOT / "scripts/run_tau2_original_telecom.py"
+    )
+    entry = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(entry)
+
+    def task(*values):
+        return SimpleNamespace(
+            evaluation_criteria=SimpleNamespace(
+                reward_basis=[SimpleNamespace(value=value) for value in values]
+            )
+        )
+
+    assert entry.supported_reward_bases(
+        [task("ENV_ASSERTION"), task("ENV_ASSERTION", "ACTION")]
+    ) == {"ENV_ASSERTION": 1, "ENV_ASSERTION,ACTION": 1}
+    with pytest.raises(ValueError, match="do not drop"):
+        entry.supported_reward_bases([task("NL_ASSERTION")])
 
 
 def test_tau2_help_does_not_load_optional_environment():

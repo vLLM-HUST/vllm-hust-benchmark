@@ -197,6 +197,9 @@ TB；服务器/data约1.42TB可用，未缩小语料。ChartQA当前两卡主机
 
 ### 不占卡准备进展
 
+- [x] TAUBENCH/τ²：2285个原telecom任务与引用全量准备/预检，新增3个原ACTION类任务公共引用交接预检通过；补齐显式ID/全量入口，125包实测环境快照和pip
+  check通过，模型调用0。[CPU回执](validation/tau2-readiness-cpu-20261024.json)。
+- [ ] TAUBENCH/τ²：从零重装、修改后入口的原生执行/评分及研究侧工件联调未完成；原3题不重跑、不算全2285题通过。当前模型服务恢复失败，NPU队列未恢复；CPU准备继续。
 - [x] TRACELAB：原压缩文件SHA、665453条调用元数据全字段/顺序核查及前三条索引回查完成；20份官方回放源码/示例/许可文件已在服务器取得并逐文件核对Git
   blob。[数据回执](validation/tracelab-cpu-audit-20261024.json)、[官方入口准备](validation/tracelab-official-replay-preparation-20261024.json)。
 - [ ] TRACELAB：全量索引、Rust工具链与锁定构建、官方DuckDB→CSV、独立文本池及真实回放未完成。官方工具是合成文本会话驱动，不是原私有请求重放；来源继续未勾，运行边界见[服务轨迹说明](ORIGINAL_SERVING_TRACES.zh-CN.md)。

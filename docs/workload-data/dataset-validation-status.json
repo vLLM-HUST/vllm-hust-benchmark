@@ -1,6 +1,20 @@
 {
   "schema_version": "workload-validation-checklist/v1",
   "updated_at": "2026-10-24",
+  "native_runtime_latest": {
+    "status": "ORIGINAL_PROFILE_RESTORE_FAILED_HOST_PINNED_ALLOCATION",
+    "configuration_changed": false,
+    "first_error": "torch.OutOfMemoryError: aclrtMallocHostWithCfg error207001",
+    "task_generation_started": false,
+    "queued_controllers_resumed": false,
+    "sampled_cgroup_memory_current_bytes": 64308355072,
+    "sampled_cgroup_memory_max_bytes": 68719476736,
+    "sampled_cgroup_file_cache_bytes": 63586885632,
+    "cache_causality_proven": false,
+    "weights_or_evidence_deleted": false,
+    "global_drop_caches_or_device_reset_performed": false,
+    "next_action": "Await user decision on targeted reclaimable model-file page-cache advice, then at most one unchanged-profile retry; CPU work continues."
+  },
   "scope": "Per-source integration validation; not performance or full-suite acceptance",
   "completion_rule": {
     "minimum_preselected_samples": 3,
@@ -1248,7 +1262,7 @@
       "native_protocol_audit_receipt": "docs/workload-data/validation/structeval-nonrender-protocols-audit-20261024.json",
       "completed_protocols_audit_receipt": "docs/workload-data/validation/structeval-nonrender-complete-protocols-audit-20261024.json",
       "verified_unique_native_tasks": 339,
-      "native_queue_state": "YIELDED_TO_RESEARCH_MODEL_SERVICE_RELEASED",
+      "native_queue_state": "WAITING_FOR_RUNTIME_RECOVERY_NOT_RESUMED",
       "blocker": "Text→JSON plus CSV→JSON/XML/YAML and JSON→CSV/XML each all50 original tasks audited; other13 nonrendering protocols each3. Remaining611 nonrendering tasks and1085 rendered/VQA tasks pending. Final atomic task exited naturally; controller holds next launch, owned model service shut down normally for research priority. CPU audits continue."
     },
     "PAWS": {
@@ -1416,7 +1430,10 @@
       "legacy_checked": true,
       "existing_receipt": "docs/workload-data/validation/tau2-reference-handoff-npu-20261022.json",
       "delivery_receipt": null,
-      "blocker": null
+      "cpu_readiness_audit": "docs/workload-data/validation/tau2-readiness-cpu-20261024.json",
+      "dependency_snapshot": "configs/workload-native/tau2-v020-py312-dependencies.txt",
+      "non_npu_preparation_checked": true,
+      "blocker": "All2285 original telecom tasks/references and explicit3 ACTION-basis references preflighted without model calls; original ALL scorer retained, 2253 ENV-only and32 ENV+ACTION supported. Existing125-package environment matches snapshot and pip check; clean reinstall and modified entry native execution unverified. Historical three native tasks reused, not rerun; exact research artifact handoff and other domains still pending."
     },
     "TOOLBENCH": {
       "scope": "public",
@@ -1439,7 +1456,7 @@
       "original_groups_preparation": "docs/workload-data/validation/agentbench-original-groups-preparation-20261024.json",
       "completed_groups_audit_receipt": "docs/workload-data/validation/agentbench-original-complete-groups-audit-20261024.json",
       "verified_unique_native_tasks": 41,
-      "native_queue_state": "YIELDED_TO_RESEARCH_NO_NEW_LAUNCH",
+      "native_queue_state": "WAITING_FOR_RUNTIME_RECOVERY_NOT_RESUMED",
       "blocker": "Official FC ALFWorld new_std first three groups all41 original tasks audited: reuse0..2 plus new3..40. Remaining68 tasks pending; no next group launched, research priority. Other AgentBench domains are not covered by this registered native entry."
     },
     "SCHEMASTORE": {

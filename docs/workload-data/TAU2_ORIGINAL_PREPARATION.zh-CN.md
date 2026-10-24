@@ -32,7 +32,8 @@ python scripts/run_tau2_original_telecom.py \
   --endpoint http://127.0.0.1:19466/v1 --model workload-qwen35-27b-128k-nonthinking
 ```
 
-ID1–3须为官方telecom_full loader预选的前三条，不是任意构造ID。`--preflight-only`只验证源契约，不运行模型。官方tau2环境需安装
+默认仍为官方telecom_full
+loader预选的前三条。指定其他原始任务时，执行器同步添加可重复的`--task-id ID`，或使用`--full`选择完整任务集；全量与指定ID互斥。执行器始终保留官方loader顺序，引用列表须与该顺序一致，未知/重复ID拒绝，不构造替代任务。`--preflight-only`只验证源契约，不运行模型。官方tau2环境需安装
 `litellm==1.65.0`，助手与用户共用已有本地NPU服务。原始完整任务/答案不由本项目打包分发。
 
 - [x] 取得官方固定提交归档，两端SHA一致；不引入 QBI overlay。
@@ -48,6 +49,29 @@ ID1–3须为官方telecom_full loader预选的前三条，不是任意构造ID�
 completion 并传递模型参数；本批具名模型和 `api_base` 已实际验证工具循环，不扩称其他模型/模式可用。
 
 已有 Qwen3.5-27B 是双卡可部署备选，不是官方参考模型等价替代；双角色同服务的相关误差必须披露。使用原始工具/规则，不改题或补答案。原始任务、用户私有说明、对话与答案不放公开 Git/CI。
+
+## 2026-10-24可复用入口与环境补齐
+
+- [x] 全2285个原telecom任务的源码/数据字节及加载预检完成，官方任务引用全量准备；完整ID索引只在服务器私有保存。
+- [x] 补齐显式原task ID及全量入口，指定的前三个原ACTION类任务通过公共引用→官方入口预检，模型调用0。
+- [x] 修复旧入口只接受ENV_ASSERTION的限制：原任务有2253个ENV_ASSERTION及32个ENV_ASSERTION+ACTION，均由原版ALL评分覆盖，不跳过32个任务、不改评分、不引入外部自然语言judge。
+- [x] 现有独立Python3.12.13/Linux
+  aarch64环境的125个包与[依赖快照](../../configs/workload-native/tau2-v020-py312-dependencies.txt)逐项相等，pip
+  check通过。[CPU回执](validation/tau2-readiness-cpu-20261024.json)。
+- [ ] 新环境从零安装、修改后入口的新原生交互/评分、全2285题及其他domain尚未验证；旧三题结果不冒充新执行器实跑。
+
+依赖文件是实测环境快照（含辅助工具），不是最小依赖或跨平台锁文件。tau2须从上述固定归档单独安装，不能仅按`0.2.1-dev`版本号从PyPI换包；原构建系统为pdm-backend，构建依赖锁与全新安装仍需补验证。使用独立虚拟环境，不升级推理服务环境：
+
+```sh
+python3.12 -m venv /private/tau2-runtime
+env -u PYTHONPATH -u PYTHONHOME -u LD_PRELOAD /private/tau2-runtime/bin/python -m pip install \
+  -r configs/workload-native/tau2-v020-py312-dependencies.txt
+env -u PYTHONPATH -u PYTHONHOME -u LD_PRELOAD /private/tau2-runtime/bin/python -m pip install \
+  --no-deps /authorized/tau2-fixed-source
+env -u PYTHONPATH -u PYTHONHOME -u LD_PRELOAD /private/tau2-runtime/bin/python -m pip check
+```
+
+全量预检可在前述原执行命令中加`--full --preflight-only`；它验证源码、数据、选择及评分类型，不发起角色交互、工具执行或评分，不计入已完成题数。正式运行仍保留200步、10错误上限、一次trial、两个角色及原ALL评分，不能为提速削减流程。研究窗口已释放后的原模型服务恢复遇到主机锁页分配错误，尚未重新开始NPU任务；该运行环境问题不抹掉旧验证结果，也不把预检算作实跑。
 
 ## 历史准备及失败记录
 
