@@ -1,0 +1,81 @@
+{
+  "run_id": "capture-b1-storage-r6",
+  "status": "corrected_diagnostic_qualification_passed",
+  "implementation_variant": "diagnostic-owned-optimistic-causal-draft/v1",
+  "measurement_role": "diagnostic_qualification",
+  "formal_measurement": false,
+  "raw_evidence_directory": "/root/m01-capture-b1-storage-r6",
+  "raw_manifest_sha256": "3a38cbba10380666efee7e6e031cb46802f5830279d5a702467c710419443f2a",
+  "verified_sha_entries": 23,
+  "workload": {
+    "completed": 200,
+    "failed": 0,
+    "total_input_tokens": 282265,
+    "total_output_tokens": 51200,
+    "scope": "diagnostic workload; timing includes instrumentation",
+    "effective_flops": null,
+    "m01_attainment": null
+  },
+  "released": true,
+  "sessions_drained": true,
+  "correction": {
+    "calls_per_rank": 876,
+    "all_policy_calls_covered": true,
+    "second_draft_rows_per_rank": 19354,
+    "causal_endpoint_mismatches": 0,
+    "stage_waves_per_rank": 128,
+    "all_six_position_stage_mismatches": 0,
+    "full_slot_address_mismatches": 0
+  },
+  "routes": {
+    "layers_per_rank": 41,
+    "target_calls_per_layer": 876,
+    "draft_calls": 1752,
+    "canonical_target_rows": 333265,
+    "additional_target_hidden_prerequisite_rows": 0
+  },
+  "host_draft_counts": {
+    "raw_accepted_drafts": 32157,
+    "retained_drafts": 32100,
+    "retained_first_draft": 17286,
+    "retained_second_draft": 14814
+  },
+  "necessary_draft_counts": {
+    "status": "replayed",
+    "retained_output_roots": 32100,
+    "prerequisite_kv_rows": 347668,
+    "prerequisite_full_query_rows": 32100,
+    "prerequisite_attention_pairs": 49433590,
+    "prerequisite_full_without_retained_output": 0,
+    "needed_kv_by_step": {
+      "0": 332854,
+      "1": 14814
+    },
+    "needed_full_by_step": {
+      "0": 17286,
+      "1": 14814
+    },
+    "first_step_kv_requiring_target_positions": 332854,
+    "effective_flops": null,
+    "execution_stream_qualified": false,
+    "interpretation": "Observed cache-version prerequisites under recorded step ordering; excludes overwritten versions with no retained-output path. Not final useful-work arithmetic."
+  },
+  "logical_reconstruction_matches_both_rank_physical_dependencies": true,
+  "diagnostic_duration_seconds": 136.27416584081948,
+  "effective_flops": null,
+  "reference_seconds": null,
+  "m01_attainment": null,
+  "remaining": [
+    "Formal corrected timing with actual same-run native work evidence; no cross-run numerator transfer.",
+    "Complete independently calibrated necessary-work dependency reference and source/arithmetic coverage review.",
+    "Publication owner maintains benchmark/report/site."
+  ],
+  "source_sha256": {
+    "/root/vllm-hust-migration-20261023/storage-r6-final-audit.json": "1f148cdd673297ba009a8462082974e1df13cabfbd3827b243ec9b3e1cb40ae9",
+    "/root/m01-storage-accounting-20261024/r6-accounting-audit.json": "092d255fdd5d273d251abbd11c997148338b541d07c9da80b5bf663ccfd433e2",
+    "/root/m01-storage-accounting-20261024/r6-draft-causal-lengths.json": "45183942bea4cd3c39ddf432e68f307000b976c818d172bbfc1c58d9bb1c5255",
+    "/root/m01-storage-accounting-20261024/r6-logical-dependency-comparison.json": "f4ebdd1bc4b3bc02e428d862b69eb67ffb07323c6849d05be946cd1aa945682d",
+    "/root/m01-storage-accounting-20261024/r6-necessary-routes/summary.json": "0051010fae551661df4a2e788abbd61ab1012eb84b98d18e25c8d4769fb00f2f",
+    "/root/m01-capture-b1-storage-r6/SHA256SUMS": "3a38cbba10380666efee7e6e031cb46802f5830279d5a702467c710419443f2a"
+  }
+}
