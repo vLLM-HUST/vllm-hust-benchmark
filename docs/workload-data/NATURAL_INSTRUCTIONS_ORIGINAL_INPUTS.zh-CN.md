@@ -2,6 +2,16 @@
 
 ## 2026-10-24固定工件复核
 
+新增通用入口`scripts/run_ni_original_range.py`复用摘要所固定的旧核心及改写/抽取任务配置，支持五个已登记文件的`--start/--count`原题连续区间和`--full`完整文件。必须显式选择`--task-files`，评分目录必填；核心collator/scorer、完整输入、1024生成预算不变。示例：
+
+```sh
+python scripts/run_ni_original_range.py --task-files task1290_xsum_summarization.json --start 6490 --count 3 --data-root /data/ni-original-tasks --collator-source /data/upstream/ni_collator.py --scorer-root /data/ni-original-scorer --output /private/ni-xsum-tail
+```
+
+同一命令把区间参数换成`--full`即可选择该原文件全量，不与区间混用。执行前在输出目录旁独占创建`*.selection.private.json`冻结原题号；完成后`range-receipt.json`核验实际题号和核心回执摘要。核心历史回执的旧selection标签可能仍为first_three，不能据此判断本适配入口范围；以冻结选择、实际samples和range回执共同核对，核心回执字节不重写。原题、响应及完整题号只留私有目录。
+
+新增入口已完成三个任务各末三条共9条原题的NPU生成与评分，见[区间原生审计](validation/ni-native-range-audit-20261024.json)。使用原collator重建九条完整prompt，均与实际请求一致；原scorer重新计算指标，均与保存分数一致。审计没有新增生成调用，仅有九次模型tokenizer请求用于原拼接器长度校验。抽取task1453按本轮实测成本适合全量，正在补原中间3–257共255条，与历史0–2和本轮258–260合成完整题号覆盖，不为凑全量重跑首尾六条；该批终态和评分未收口前仍不勾选。
+
 [本轮复核回执](validation/ni-fixed-ci-audit-20261024.json)覆盖已登记五个原任务文件（另含改写task275及实体抽取task1453），共8284实例：完整文件SHA、每行原Definition/input及output参考隔离一致；固定CI数据组件逐文件原前三条prepare→resolve输入和参考一致。已保存的两组原生回执共15条交接样本，其原始实例ID、请求prompt摘要、响应包摘要、usage和终态逐条核对，原评分保留，没有新增模型调用或重算分数。这15条不是累计原生覆盖总数；355条主任务与6条改写/抽取的历史覆盖仍按原回执分别引用。
 
 当前公开入口仍有明确缺口：主入口默认前三条，`--full-small`只覆盖不超过250实例的选中任务；摘要、改写和实体抽取不能通过通用原题区间或全量入口运行。后续应补齐事前选择的原题区间及全任务文件选择，保留固定上游collator/scorer、不缩短预算、不重跑已有ID；旧脚本身份与历史回执须保留，不能改写成新入口实跑证据。来源本轮暂不打勾，也不把五个登记任务说成整个NI发布集。

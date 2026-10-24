@@ -25,6 +25,8 @@ on:
       - 'scripts/run_bfcl_v4_simple_python_original.py'
       - 'scripts/run_oasst_original_continuation.py'
       - 'scripts/run_natural_instructions_original.py'
+      - 'scripts/run_ni_original_range.py'
+      - 'tests/test_ni_original_range.py'
       - 'scripts/run_ni_editing_extraction_original.py'
       - 'scripts/run_bbh_boolean_original.py'
       - 'scripts/run_bbh_original_tasks.py'
@@ -89,7 +91,7 @@ jobs:
       - name: OASST runner CPU contract only
         run: python -m pytest -q tests/test_oasst_original_runner.py
       - name: Natural Instructions runner CPU contract only
-        run: python -m pytest -q tests/test_natural_instructions_original_runner.py tests/test_natural_instructions_validation_receipt.py tests/test_ni_editing_extraction_original.py
+        run: python -m pytest -q tests/test_natural_instructions_original_runner.py tests/test_natural_instructions_validation_receipt.py tests/test_ni_editing_extraction_original.py tests/test_ni_original_range.py
       - name: BBH runner CPU contract only
         run: python -m pytest -q tests/test_bbh_original_runner.py tests/test_bbh_validation_receipt.py
       - name: Native evaluation delivery contracts, no model calls
