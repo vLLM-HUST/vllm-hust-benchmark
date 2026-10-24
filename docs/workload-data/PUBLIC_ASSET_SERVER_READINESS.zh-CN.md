@@ -166,7 +166,7 @@ token预算在部署容量内，未截断。其余VT/FWE/QA_1各全500条继续�
   "model_template_type": "base",
   "tokenizer_type": "hf",
   "tokenizer_model": "Qwen/Qwen3.5-27B",
-  "tokenizer_revision": "fc05daec18b0a78c049392ed2e771dde82bdf654",
+  "tokenizer_revision": "fc05daec18b0a78c049392ed2e771dde82bdf654", "revision_note": "pragma: allowlist secret - public tokenizer revision",
   "subset": "validation",
   "num_samples": 500
 }
