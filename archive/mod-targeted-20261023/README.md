@@ -42,6 +42,10 @@ Source copies may be removed only after remote fixed-commit readback and per-fil
 verification, and after updating their consumers. Other historical collections, missing local inputs
 and installation distributions are separate queues, not declared migrated by these capsules.
 
+[Formal archives and mixed-document consumer inventory](FORMAL-CONSUMERS-20261024.md) adds Manager
+formal/native archives and the frozen KVCompress/vSpec narratives, with identity and failure
+boundaries.
+
 Skill review: E04/E31/E37/E42/E43/E47. No new measurement, host-volume write, raw-byte rewrite,
 installation-asset deletion or gate bypass is authorized by the index. This batch uses the existing
 persistent root volume with sparse checkout, not the ephemeral host workspace.

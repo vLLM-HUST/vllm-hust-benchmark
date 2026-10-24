@@ -1,0 +1,120 @@
+{
+  "schema": "ecpa-independent-r2-rehashed-negative-audit/v1",
+  "analysis_source_sha256": "ee62c51444acde7b813c33ea4c2b20ab07248ea050753199cbfc79d73f1c5075",
+  "fully_rehashed_chain_and_matching_ACK_except_explicit_missing_case": true,
+  "scope": "native-request-upload-transport-only",
+  "results": [
+    {
+      "case": "foreign-external",
+      "rejected_qualification": true,
+      "reason": "actual native API mapping is unknown or repeated"
+    },
+    {
+      "case": "wrong-runtime-one-upload",
+      "rejected_qualification": true,
+      "reason": "GPU upload lacks native API mapping or worker source"
+    },
+    {
+      "case": "wrong-worker-role",
+      "rejected_qualification": true,
+      "reason": "authority raw source/peer/request scope differs"
+    },
+    {
+      "case": "barrier-before-producer",
+      "rejected_qualification": true,
+      "reason": "native uploaded-row evidence is unsupported or promoted"
+    },
+    {
+      "case": "upload-before-mapping",
+      "rejected_qualification": true,
+      "reason": "upload predates actual native API request mapping"
+    },
+    {
+      "case": "cpu-device-as-NPU",
+      "rejected_qualification": true,
+      "reason": "native uploaded-row evidence is unsupported or promoted"
+    },
+    {
+      "case": "prefix-digest-diverges",
+      "rejected_qualification": true,
+      "reason": "native uploaded-row evidence is unsupported or promoted"
+    },
+    {
+      "case": "semantic-promotion",
+      "rejected_qualification": true,
+      "reason": "native uploaded-row evidence is unsupported or promoted"
+    },
+    {
+      "case": "one-rank-only",
+      "rejected_qualification": true,
+      "reason": "incomplete/unknown proof",
+      "facts": {
+        "classification": "CPU_REVIEW_CANDIDATE_ONLY",
+        "source_authenticated_native_envelopes": 41,
+        "native_API_mappings": 1,
+        "observed_two_rank_raw_phases": 0,
+        "complete_two_rank_transport_phases": 0,
+        "native_chronology_status": "verified",
+        "runtime_collector_source_sha256": "ee62c51444acde7b813c33ea4c2b20ab07248ea050753199cbfc79d73f1c5075",
+        "analysis_source_sha256": "ee62c51444acde7b813c33ea4c2b20ab07248ea050753199cbfc79d73f1c5075",
+        "durable_ACK_status": "verified-authenticated-prefix",
+        "expected_phase_count": 1,
+        "formal_producer_registration": false,
+        "formal_result": false,
+        "GPU_semantic_qualification": null,
+        "full_objective_satisfied": null,
+        "journal_sha256": "e24e5fd36196e71fa5e2ac7fcd2c0c02211bea2eb9dab7d7f1cffc819b5c456f"
+      }
+    },
+    {
+      "case": "source-snapshot-substitution",
+      "rejected_qualification": true,
+      "reason": "authority raw chain source or frozen spec differs"
+    },
+    {
+      "case": "missing-accept-clock",
+      "rejected_qualification": true,
+      "reason": "incomplete/unknown proof",
+      "facts": {
+        "classification": "CPU_REVIEW_CANDIDATE_ONLY",
+        "source_authenticated_native_envelopes": 81,
+        "native_API_mappings": 1,
+        "observed_two_rank_raw_phases": 1,
+        "complete_two_rank_transport_phases": null,
+        "native_chronology_status": "unverified-missing-accept-clock",
+        "runtime_collector_source_sha256": "ee62c51444acde7b813c33ea4c2b20ab07248ea050753199cbfc79d73f1c5075",
+        "analysis_source_sha256": "ee62c51444acde7b813c33ea4c2b20ab07248ea050753199cbfc79d73f1c5075",
+        "durable_ACK_status": "verified-authenticated-prefix",
+        "expected_phase_count": 1,
+        "formal_producer_registration": false,
+        "formal_result": false,
+        "GPU_semantic_qualification": null,
+        "full_objective_satisfied": null,
+        "journal_sha256": "6b656b7ce3a0d34d9da709370373d4cfbdd87e65c22b22d7ec2733578aab08f1"
+      }
+    },
+    {
+      "case": "missing-ACK-prefix",
+      "rejected_qualification": true,
+      "reason": "incomplete/unknown proof",
+      "facts": {
+        "classification": "CPU_REVIEW_CANDIDATE_ONLY",
+        "source_authenticated_native_envelopes": 81,
+        "native_API_mappings": 1,
+        "observed_two_rank_raw_phases": 1,
+        "complete_two_rank_transport_phases": null,
+        "native_chronology_status": "verified",
+        "runtime_collector_source_sha256": "ee62c51444acde7b813c33ea4c2b20ab07248ea050753199cbfc79d73f1c5075",
+        "analysis_source_sha256": "ee62c51444acde7b813c33ea4c2b20ab07248ea050753199cbfc79d73f1c5075",
+        "durable_ACK_status": "unverified",
+        "expected_phase_count": 1,
+        "formal_producer_registration": false,
+        "formal_result": false,
+        "GPU_semantic_qualification": null,
+        "full_objective_satisfied": null,
+        "journal_sha256": "436b1c6ca67d7a9cfae02467861f62ef81d61398556574b1066fea369cd3f1d9"
+      }
+    }
+  ],
+  "formal_result": false
+}
