@@ -1,5 +1,12 @@
 # Targeted MOD original custody
 
+- [Profiler mixed protocols and implementation context](profiler-protocols/manifest.json): five
+  unchanged documents, including the experiment history, G4/G6 specifications, Issue #19 public
+  export method and pinned call-site map. Protocol parameters and thresholds are not measurements.
+  Original negative results remain unchanged; private G1/G4 captures and withheld logs are not
+  recovered by preserving prose. Maintained consumers retain methods and read historical results
+  from benchmark.
+
 - [Profiler mixed research and paper projections](profiler-research/manifest.json): eight complete
   research records and the paper workspace at the recorded source commit. PDF, TeX, logs, CSVs,
   generated tables and figures retain original bytes and historical limitations. Archived helper
