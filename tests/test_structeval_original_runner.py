@@ -4,8 +4,38 @@ from pathlib import Path
 import subprocess
 import sys
 import json
+import importlib.util
+
+import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+def test_nonrendering_protocol_selection_keeps_original_rows_and_boundaries():
+    spec = importlib.util.spec_from_file_location(
+        "structeval_selection", ROOT / "scripts/run_structeval_original_json.py"
+    )
+    runner = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(runner)
+    rows = [
+        {
+            "input_type": "Text",
+            "output_type": "JSON",
+            "rendering": False,
+            "task_id": str(index),
+        }
+        for index in range(5)
+    ]
+    rows.insert(1, {"input_type": "Text", "output_type": "HTML", "rendering": True})
+    selected, available = runner.select_original_rows(rows, start=3, count=2)
+    assert available == 5
+    assert [index for index, row in selected] == [4, 5]
+    assert [row["task_id"] for index, row in selected] == ["3", "4"]
+    assert len(runner.select_original_rows(rows, full=True)[0]) == 5
+    with pytest.raises(ValueError, match="range"):
+        runner.select_original_rows(rows, start=4, count=2)
+    with pytest.raises(ValueError, match="no original"):
+        runner.select_original_rows(rows, output_type="CSV")
 
 
 def test_full_text_json_receipt_is_not_full_structeval_claim():

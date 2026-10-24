@@ -4,6 +4,10 @@
 
 ## 已验证与未验证
 
+2026-10-24按原2035行核查输入格式、输出格式及rendering组合：44种协议中，非渲染19种共950题、渲染25种共1085题，不能用Text→JSON一个子集代替其余协议。公开历史入口保留原默认行为及`--all-json`，新增显式`--input-type/--output-type`选择非渲染格式协议、`--start/--count`选择该协议内原始连续位置、`--all-selected`选择完整协议。选择保留原总表行号及task_id，不改query/参考或官方workflow。示例参数`--input-type CSV --output-type JSON --all-selected`运行原CSV→JSON；官方原文件、归档和模型参数仍按下文命令提供。不存在的协议或越界区间拒绝，不自动改成Text→JSON。
+
+新增入口仅通过4项CPU测试和代码检查，尚未新增其他协议的NPU结果；渲染/VQA仍需独立环境及合适模型，当前text-only服务不能据此声称支持。旧50题Text→JSON的源码身份继续由历史回执保留，不改写成新选择功能实跑证据。
+
 - [x] StructEval原始Text→JSON前三条：task_id
   000500/000501/000502，原文件行1085–1087。官方语法/路径评分1、1、0.68，错误保留。[回执](validation/structeval-json-original-npu-20261022.json)。
 - [x] 修正后的数据包已在服务器安装，对全部50条Text→JSON原题进行准备/回查，原query一致，VQA与raw_output_metric未进入输入/注释。[组件回查](validation/structeval-provider-roundtrip-20261022.json)。此步骤模型调用0，不是额外50条推理。
