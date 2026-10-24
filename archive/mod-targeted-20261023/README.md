@@ -135,6 +135,10 @@ persistent root volume with sparse checkout, not the ephemeral host workspace.
 
 # Profiler entry documentation custody
 
+`profiler-m0-consumers/manifest.json` preserves the M0 evaluation pipeline, Issue19 preflight
+documentation and historical development driver. Missing private inputs are not recovered by
+archiving this narrative and source.
+
 `profiler-entry-docs/manifest.json` binds five unchanged README, changelog and research/roadmap
 originals. Numeric observations and historical consumer instructions remain historical; this does
 not establish current device readiness.
