@@ -42,10 +42,11 @@ repos:
   - id: ruff
     name: ruff check
     args: [--fix]
-    exclude: ^(archive/mod-targeted-20261023/manager-experiments/snapshot/|website-publication/data/|archive/mod-git-2026102[12]/[^/]+/snapshot/|reports/vllm-hust-midterm-20261019/(m06-paired-20261021/|m01-recovery/request-assessment-20261022/))
+    # Immutable historical driver: exact bytes are checked by custody tests.
+    exclude: ^(archive/mod-targeted-20261023/profiler-m0-consumers/snapshot/\.benchmarks/run_m0_development_validation\.py$|archive/mod-targeted-20261023/manager-experiments/snapshot/|website-publication/data/|archive/mod-git-2026102[12]/[^/]+/snapshot/|reports/vllm-hust-midterm-20261019/(m06-paired-20261021/|m01-recovery/request-assessment-20261022/))
   - id: ruff-format
     name: ruff format
-    exclude: ^(archive/mod-targeted-20261023/manager-experiments/snapshot/|website-publication/data/|archive/mod-git-2026102[12]/[^/]+/snapshot/|reports/vllm-hust-midterm-20261019/(m06-paired-20261021/|m01-recovery/request-assessment-20261022/))
+    exclude: ^(archive/mod-targeted-20261023/profiler-m0-consumers/snapshot/\.benchmarks/run_m0_development_validation\.py$|archive/mod-targeted-20261023/manager-experiments/snapshot/|website-publication/data/|archive/mod-git-2026102[12]/[^/]+/snapshot/|reports/vllm-hust-midterm-20261019/(m06-paired-20261021/|m01-recovery/request-assessment-20261022/))
 
 - repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
   rev: v2.16.0
