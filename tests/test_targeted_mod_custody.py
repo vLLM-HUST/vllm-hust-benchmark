@@ -22,6 +22,7 @@ def test_targeted_original_bytes():
         ("vspec-legacy-narratives", 4),
         ("compress-release", 3),
         ("compress-host", 3),
+        ("pyramid-selected", 3),
         ("vspec-adaptive-narratives", 3),
         ("vspec-b16-frontier", 7),
     ):

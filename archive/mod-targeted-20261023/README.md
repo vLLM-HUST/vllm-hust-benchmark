@@ -1,5 +1,10 @@
 # Targeted MOD original custody
 
+- [PyramidKV selected-page mixed narrative](pyramid-selected/manifest.json): the complete original
+  operator/serving diagnostic document with LICENSE and NOTICE. Negative serving results,
+  repeatability limits and implementation instructions remain unchanged. Original timings and
+  serving diagnostics reuse the existing pyramid-current capsule; this is not new qualification.
+
 - [KVCompress historical installation narratives](compress-host/manifest.json): unchanged bilingual
   host installation records and LICENSE. Device smoke, operator correctness and serving protocol
   observations remain historical, not current acceptance. Legacy local wheel paths and its recorded
