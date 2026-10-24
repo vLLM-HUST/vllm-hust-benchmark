@@ -67,6 +67,21 @@ python3 scripts/mirror_swe_bench_pro_image.py \
 该入口直接从固定上游摘要复制，不读取任何旧工作区或 Docker 数据目录。发布完成后重新读取目标摘要验证一致；私有仓库凭据使用正常 Docker 凭据机制，不写入源码。HTTP 仓库需显式追加
 `--insecure`。 网络限制应在管理员准备阶段解决，不能把“镜像在某台机器的缓存里”当成可交付制品。
 
+慢链路先下载为 OCI 制品；上传超过仓库请求时限时，把完整制品传到仓库节点，在节点本机发布。 zot 接收该上游 Docker Schema 2 镜像时，需要官方支持的
+[`http.compat: ["docker2s2"]`](https://zotregistry.dev/v2.1.18/admin-guide/admin-configuration/#compatibility-with-other-image-schema-types)。
+平台仓库提供 `configure_registry_compat.py`，按实际运行版本验证配置并备份；不能为绕过 415 错误转换清单后仍宣称摘要相同。
+
+### 干净工作区的实际验收
+
+2026-10-24，使用新建 CPU 工作区、新建 40 GiB 持久卷、初始 Docker 镜像数量 0， 从 GitHub 固定版本
+`820f6af85434367973c1131ea5e608845e328252` 下载安装入口， 自动建立客户端、下载校验数据与镜像，并复用既有模型 API 跑了一道真实 V1 任务。 结果为
+`RUN_RECORDED` / `Submitted`：99 次模型返回，270.78 秒，补丁 66,725 字节；任务容器已清理。 准备阶段的镜像发布失败记录保留，修正仓库后显式
+`--resume`，实际 Agent 仅提交运行一次。
+
+这是部署链路验收，官方评分仍为 `DEFERRED`、`quality_score: null`，不代表补丁正确、项目测试通过或性能提升。
+原始题目、轨迹、补丁和运行日志保存在私有目录，不上传到本仓库。两平台均发布独立 CPU 模板与固定摘要镜像； 上述真实 Agent 运行只发生在其中一个平台，不能据此声称两个平台都完成了 Agent
+评测。
+
 ## 运行链路与前提
 
 ```text

@@ -354,6 +354,66 @@ def main():
         state.setdefault("initial_docker", state["docker"])
         save()
         lock = json.loads(LOCK.read_text())
+        crane = args.crane
+        if not crane:
+            archive = work / "crane-arm64.tar.gz"
+            download(
+                args.crane_archive_url,
+                archive,
+                args.crane_archive_sha256,
+                headers={"Accept": "application/octet-stream"},
+            )
+            binary = work / "bin/crane"
+            binary.parent.mkdir(exist_ok=True)
+            with tarfile.open(archive) as tar:
+                member = tar.getmember("crane")
+                if not member.isfile():
+                    raise ValueError("crane release entry is not a regular file")
+                binary.write_bytes(tar.extractfile(member).read())
+            binary.chmod(0o700)
+            crane = str(binary)
+        dataset = work / "v1.parquet"
+        if args.dataset:
+            if sha256(args.dataset) != lock["dataset"]["parquet_sha256"]:
+                raise ValueError("local dataset SHA256 differs from pinned V1")
+            if not dataset.exists():
+                shutil.copyfile(args.dataset, dataset)
+        else:
+            dataset_pin = lock["dataset"]
+            base = args.dataset_base.rstrip("/")
+            url = (
+                base
+                + "/datasets/"
+                + dataset_pin["repository"]
+                + "/resolve/"
+                + dataset_pin["revision"]
+                + "/data/v1/test-00000-of-00001.parquet"
+            )
+            download(url, dataset, dataset_pin["parquet_sha256"])
+        if sha256(dataset) != lock["dataset"]["parquet_sha256"]:
+            raise ValueError("prepared V1 dataset SHA256 differs")
+        image_pin = artifact_lock["single_task_image"]
+        image_reference = (
+            args.image_mirror_prefix + image_pin["source"] + ":" + image_pin["tag"]
+        )
+        crane_command = [crane] + (
+            ["--insecure"] if args.insecure_image_registry else []
+        )
+        observed_digest = subprocess.check_output(
+            crane_command + ["digest", "--platform=linux/arm64", image_reference],
+            env=env,
+            text=True,
+            timeout=45,
+        ).strip()
+        if observed_digest != image_pin["manifest_digest"]:
+            raise ValueError(
+                "task image is absent or differs from the frozen upstream digest; ask the platform operator to publish it before client installation"
+            )
+        state["preflight_image"] = {
+            "reference": image_reference,
+            "manifest_digest": observed_digest,
+        }
+        save()
         if "sources" not in state["completed"]:
             if (work / "sources").exists():
                 raise ValueError(
@@ -395,44 +455,6 @@ def main():
                 env=env,
                 timeout=60,
             )
-        crane = args.crane
-        if not crane:
-            archive = work / "crane-arm64.tar.gz"
-            download(
-                args.crane_archive_url,
-                archive,
-                args.crane_archive_sha256,
-                headers={"Accept": "application/octet-stream"},
-            )
-            binary = work / "bin/crane"
-            binary.parent.mkdir(exist_ok=True)
-            with tarfile.open(archive) as tar:
-                member = tar.getmember("crane")
-                if not member.isfile():
-                    raise ValueError("crane release entry is not a regular file")
-                binary.write_bytes(tar.extractfile(member).read())
-            binary.chmod(0o700)
-            crane = str(binary)
-        dataset = work / "v1.parquet"
-        if args.dataset:
-            if sha256(args.dataset) != lock["dataset"]["parquet_sha256"]:
-                raise ValueError("local dataset SHA256 differs from pinned V1")
-            if not dataset.exists():
-                shutil.copyfile(args.dataset, dataset)
-        else:
-            dataset_pin = lock["dataset"]
-            base = args.dataset_base.rstrip("/")
-            url = (
-                base
-                + "/datasets/"
-                + dataset_pin["repository"]
-                + "/resolve/"
-                + dataset_pin["revision"]
-                + "/data/v1/test-00000-of-00001.parquet"
-            )
-            download(url, dataset, dataset_pin["parquet_sha256"])
-        if sha256(dataset) != lock["dataset"]["parquet_sha256"]:
-            raise ValueError("prepared V1 dataset SHA256 differs")
         settings_path = work / "settings-private.json"
         if not settings_path.exists():
             settings = json.loads(

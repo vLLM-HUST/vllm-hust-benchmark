@@ -136,3 +136,58 @@ def test_standalone_installer_pins_source_and_refuses_changed_files(
     (target / "src/vllm_hust_benchmark/swe_bench_pro.py").write_text("changed")
     with pytest.raises(ValueError, match="installed source changed"):
         bootstrap.source_repository(args)
+
+
+def test_wrong_registry_image_fails_before_client_installation(tmp_path, monkeypatch):
+    monkeypatch.setattr(bootstrap.platform, "system", lambda: "Linux")
+    monkeypatch.setattr(bootstrap.platform, "machine", lambda: "aarch64")
+    monkeypatch.setattr(
+        bootstrap, "model_check", lambda *a: {"model_name": "openai/example"}
+    )
+    dataset = tmp_path / "authorized.parquet"
+    dataset.write_bytes(b"test V1 input")
+    lock = tmp_path / "lock.json"
+    lock.write_text(
+        json.dumps({"dataset": {"parquet_sha256": bootstrap.sha256(dataset)}})
+    )
+    monkeypatch.setattr(bootstrap, "LOCK", lock)
+
+    def check(command, **kwargs):
+        if "info" in command:
+            return json.dumps(
+                {"OSType": "linux", "Architecture": "aarch64", "Images": 0}
+            )
+        assert "digest" in command
+        return "sha256:" + "b" * 64
+
+    monkeypatch.setattr(bootstrap.subprocess, "check_output", check)
+    monkeypatch.setattr(
+        bootstrap.subprocess,
+        "run",
+        lambda *a, **k: pytest.fail("client installation must not start"),
+    )
+    work = tmp_path / "fresh-work"
+    monkeypatch.setattr(
+        bootstrap.sys,
+        "argv",
+        [
+            "bootstrap",
+            "--work",
+            str(work),
+            "--docker",
+            "/example/docker",
+            "--crane",
+            "/example/crane",
+            "--dataset",
+            str(dataset),
+            "--model-api",
+            "http://model.example/v1",
+            "--model-name",
+            "openai/example",
+        ],
+    )
+    with pytest.raises(ValueError, match="frozen upstream digest"):
+        bootstrap.main()
+    assert not (work / "client").exists()
+    assert not (work / "sources").exists()
+    assert json.loads((work / "bootstrap-state.json").read_text())["status"] == "FAILED"
