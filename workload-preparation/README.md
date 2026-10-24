@@ -15,7 +15,9 @@ NPU 生成与公开入口复跑完成，功能执行/评分未完成。
 代码、科学、图表与历史来源的[服务器准备记录](../docs/workload-data/PUBLIC_ASSET_SERVER_READINESS.zh-CN.md)
 仅证明七源21条读取/准备/回查，不能代替其原生任务执行。
 
-[LoCoMo原始长会话问答](../docs/workload-data/LOCOMO_ORIGINAL_INPUTS.zh-CN.md)提供问题级输入，保留完整会话，参考答案与发布方生成记忆不作为默认输入；候选包已核验1986题字段和前三条回查，原生模型执行/评分仍未验证，须遵守CC-BY-NC-4.0条款。
+[LoCoMo原始长会话问答](../docs/workload-data/LOCOMO_ORIGINAL_INPUTS.zh-CN.md)保留完整会话和参考隔离，原生完整上下文文本QA已验证108个唯一原题，含显式缺键兼容；不是全1986题或RAG/图像任务完成，须遵守CC-BY-NC-4.0条款。
+
+[独立QASPER原发布版准备](../docs/workload-data/PUBLIC_ASSET_SERVER_READINESS.zh-CN.md)保留三split共5049个原问题、完整论文与全部答案/证据标注；提供归档提取、读取和索引，原生模型及答案/证据评分尚未完成，不能与LongBench派生200题混计。
 
 上表是使用导航，不代表全来源或全类别完成。精确已验证范围见各来源说明、
 [类别执行清单](../docs/workload-data/WORKLOAD_EXECUTION_CHECKLIST.zh-CN.md)和对应 PR 的固定工件记录。

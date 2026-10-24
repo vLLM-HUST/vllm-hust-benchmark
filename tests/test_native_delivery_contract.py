@@ -8,6 +8,55 @@ ROOT = Path(__file__).resolve().parents[1]
 DOCS = ROOT / "docs/workload-data"
 
 
+def test_qasper_full_original_provider_proof_is_not_native_or_ci_completion():
+    receipt = json.loads(
+        (
+            DOCS / "validation/qasper-original-provider-cpu-audit-20261025.json"
+        ).read_text("utf-8")
+    )
+    assert receipt["installed_payload_files_equal"] == 33
+    assert (
+        receipt["all_original_inputs_references_and_parent_question_indices_equal"]
+        == 5049
+    )
+    assert receipt["original_papers"] == 1585
+    assert receipt["full_index_rows"] == 5049
+    assert receipt["prepare_resolve_roundtrips"] == 18
+    assert [row["original_questions"] for row in receipt["splits"]] == [
+        2593,
+        1005,
+        1451,
+    ]
+    assert receipt["all_answer_evidence_annotations_remain_reference_only"]
+    assert not receipt["candidate_is_successful_ci_artifact"]
+    assert not receipt["research_handoff_completed_by_this_audit"]
+    assert not receipt["official_scoring_executed"]
+    assert not receipt["source_checkbox_eligible"]
+    assert receipt["model_calls"] == 0
+
+
+def test_burstgpt_first_file_native_simulation_keeps_other_file_gaps():
+    receipt = json.loads(
+        (DOCS / "validation/burstgpt-release1-native-audit-20261025.json").read_text(
+            "utf-8"
+        )
+    )
+    assert receipt["original_indices"] == list(range(20))
+    assert receipt["native_requests"] == 20
+    assert receipt["terminal_counts"] == {"length": 12, "stop": 8}
+    assert receipt["all_native_requests_equal_original_publisher_query_generator"]
+    assert receipt["legacy_response_prefix_mapping_and_saved_hashes_equal"]
+    assert receipt["official_detail_events_and_final_summary_verified"]
+    assert receipt["original_output_budget"] == 1024
+    assert receipt["scale"] == 1
+    assert receipt["model_calls_by_audit"] == 0
+    assert not receipt["arrival_offset_shifted_or_time_compressed"]
+    assert not receipt["other_two_release_files_native_simulation_verified"]
+    assert not receipt["external_pool_is_original_private_burstgpt_prompt"]
+    assert not receipt["source_checkbox_eligible"]
+    assert not receipt["research_observation_or_analysis_migrated"]
+
+
 def test_longbench_v2_capacity_blockers_are_not_filtered_into_completion():
     receipt = json.loads(
         (

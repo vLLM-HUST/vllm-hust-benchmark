@@ -701,7 +701,7 @@
     },
     "QASPER": {
       "source_id": "QASPER",
-      "platform": "hf",
+      "platform": "publisher_archive",
       "repo_id": "allenai/qasper",
       "source_url": "https://huggingface.co/datasets/allenai/qasper",
       "asset_kind": "task_corpus",
@@ -712,11 +712,19 @@
         "long_context"
       ],
       "provenance": "author_release",
-      "fitness_status": "VARIABLES_REQUIRE_ASSET_INSPECTION",
-      "discovery_status": "ENTRY_IDENTIFIED",
-      "revision": "fdc9d8214fbab5dd782958601db4d678e6934a54",
-      "files": [],
-      "unit": "source_rows",
+      "fitness_status": "ORIGINAL_V03_ASSETS_ACQUIRED_NATIVE_EXECUTION_PENDING",
+      "discovery_status": "PINNED_PUBLISHER_ARCHIVES",
+      "revision": "publisher-v0.3",
+      "previous_hf_discovery_revision": "fdc9d8214fbab5dd782958601db4d678e6934a54",
+      "publisher_loader_revision": "7bde7e4a9f805bed6c6e79e664c37057263dbc1d",
+      "preparation_command": "python scripts/prepare_qasper_original_assets.py --train-dev-archive /private/qasper-train-dev-v0.3.tgz --test-archive /private/qasper-test-and-evaluator-v0.3.tgz --output /private/fresh-qasper-v03",
+      "files": [
+        {"path": "qasper-train-v0.3.json", "role": "data", "split": "train", "rows": 2593, "original_papers": 888, "bytes": 31969387, "sha256": "9458bfe76074a8fa8d1685af02bcc73537aa6d338ad20591dfaff1946bc88bf4", "archive_member": "qasper-train-v0.3.json", "url": "https://qasper-dataset.s3.us-west-2.amazonaws.com/qasper-train-dev-v0.3.tgz"},
+        {"path": "qasper-dev-v0.3.json", "role": "data", "split": "validation", "rows": 1005, "original_papers": 281, "bytes": 11398686, "sha256": "2ae7ee62a65b1c4225791c70de80c2aad4e8998cf1fd4f09a53103db4f21af93", "archive_member": "qasper-dev-v0.3.json", "url": "https://qasper-dataset.s3.us-west-2.amazonaws.com/qasper-train-dev-v0.3.tgz"},
+        {"path": "qasper-test-v0.3.json", "role": "data", "split": "test", "rows": 1451, "original_papers": 416, "bytes": 18078957, "sha256": "6e29ad410e6e39aa1936017fb965b30a20eb2e7751997f55b97c9d281aa884e5", "archive_member": "qasper-test-v0.3.json", "url": "https://qasper-dataset.s3.us-west-2.amazonaws.com/qasper-test-and-evaluator-v0.3.tgz"},
+        {"path": "publisher-assets/qasper_evaluator.py", "role": "publisher_scorer", "bytes": 6345, "sha256": "781aba7cd8e524bef4f0a1b4bf3504e5b02cb1d8d5bf32a8f0a89dfa83e86bfe", "archive_member": "qasper_evaluator.py", "url": "https://qasper-dataset.s3.us-west-2.amazonaws.com/qasper-test-and-evaluator-v0.3.tgz"}
+      ],
+      "unit": "original_questions",
       "provenance_kind": "task_corpus",
       "access": {
         "license": [

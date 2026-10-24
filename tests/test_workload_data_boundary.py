@@ -20,6 +20,7 @@ DATA_MODULES = {
     "pipeline",
     "provider",
     "quality",  # Original article/question relation expansion only, no scoring.
+    "qasper",  # Original paper/question/reference relations only, no analysis.
     "records",
     "registry",
     "taxonomy",

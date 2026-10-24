@@ -13,6 +13,11 @@ from .registry import adapter_spec, source_spec
 
 def iter_source_rows(path, spec):
     """Use one source view for reading, binding and index resolution."""
+    if spec["mapping"] == "qasper_original_questions":
+        from .qasper import question_rows
+
+        yield from question_rows(path)
+        return
     if spec["mapping"] == "whole_json_schema":
         try:
             schema = _json(path.read_text(encoding="utf-8-sig"))

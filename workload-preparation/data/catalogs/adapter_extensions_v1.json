@@ -2,6 +2,17 @@
   "version": "adapter-extensions/v1",
   "boundary": "Field contracts from publisher metadata/docs. No real source payload downloaded or full adapter validation claimed.",
   "adapters": {
+    "QASPER": {
+      "kind": "task_dataset",
+      "mapping": "qasper_original_questions",
+      "input_fields": ["title", "abstract", "full_text", "figures_and_tables", "question"],
+      "required_fields": ["paper_id", "title", "abstract", "full_text", "figures_and_tables", "question", "question_id", "answers", "source_paper_row_index", "source_question_index"],
+      "outcome_fields": ["answers"],
+      "annotation_fields": ["paper_id", "question_id", "question_metadata", "paper_metadata", "source_paper_row_index", "source_question_index"],
+      "id_field": "question_id",
+      "requirements": ["Original publisher v0.3 paper-ID keyed JSON only; one original question with full paper per record", "All original references and evidence remain reference-only; sibling questions/answers never enter context", "Keep all answer annotations and caption/file metadata; this does not provide image bytes or prove multimodal execution", "Not the derived LongBench qasper200 subset; publisher answer/evidence scoring and model execution remain separate"],
+      "status": "ORIGINAL_V03_READER_IMPLEMENTED_NATIVE_VALIDATION_PENDING"
+    },
     "LOCOMO": {
       "kind": "task_dataset",
       "mapping": "locomo_questions",
