@@ -1,4 +1,4 @@
-"""Run original LongBench qasper first three tasks with unchanged QA-F1 scoring.
+"""Run original LongBench qasper rows with unchanged QA-F1 scoring.
 
 Install separately: numpy==2.2.6 jieba==0.42.1 rouge==1.0.1 fuzzywuzzy==0.18.0
 six==1.17.0, plus the exact reviewed workload-data component. Output is PRIVATE.
@@ -60,6 +60,17 @@ def official_resources(archive):
         return {name: bundle.read(prefix + name) for name in names}
 
 
+def select_original_records(records, *, start=0, count=3, full=False):
+    """Select original positions, never filter on task length or model outcomes."""
+    if full:
+        if start != 0 or count != 3:
+            raise ValueError("full selection cannot be combined with a range")
+        return list(enumerate(records))
+    if start < 0 or count < 1 or start + count > len(records):
+        raise ValueError("range must stay within the original dataset")
+    return list(enumerate(records))[start : start + count]
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--data-root", required=True, type=Path)
@@ -68,7 +79,14 @@ def main():
     parser.add_argument("--endpoint", default="http://127.0.0.1:19466/v1")
     parser.add_argument("--model", default="workload-qwen35-27b-128k-nonthinking")
     parser.add_argument("--context-limit", type=int, default=131072)
+    parser.add_argument("--start", type=int, default=0)
+    parser.add_argument("--count", type=int, default=3)
+    parser.add_argument(
+        "--full", action="store_true", help="All 200 original Qasper rows"
+    )
     args = parser.parse_args()
+    if args.full and (args.start != 0 or args.count != 3):
+        parser.error("--full cannot be combined with a range")
     route = urlparse(args.endpoint)
     if (
         route.scheme != "http"
@@ -94,13 +112,23 @@ def main():
     versions = {name: metadata.version(name) for name in DEPENDENCIES}
     if versions != DEPENDENCIES:
         raise ValueError("requires reviewed isolated scorer dependency versions")
-    records = list(
-        iter_workload(
-            "LONGBENCH", data_root=args.data_root, files=["qasper.jsonl"], limit=3
-        )
+    if (
+        hashlib.sha256((args.data_root / "qasper.jsonl").read_bytes()).hexdigest()
+        != DATA_SHA
+    ):
+        raise ValueError("original qasper file identity mismatch")
+    all_records = list(
+        iter_workload("LONGBENCH", data_root=args.data_root, files=["qasper.jsonl"])
     )
-    if [r.task["task_id"] for r in records] != EXPECTED_IDS:
-        raise ValueError("requires first three original qasper task IDs")
+    if (
+        len(all_records) != 200
+        or [r.task["task_id"] for r in all_records[:3]] != EXPECTED_IDS
+    ):
+        raise ValueError("requires the original 200-row qasper order and identity")
+    selected = select_original_records(
+        all_records, start=args.start, count=args.count, full=args.full
+    )
+    records = [record for _, record in selected]
     resources = official_resources(args.official_archive)
     template = json.loads(resources["config/dataset2prompt.json"])["qasper"]
     budget = json.loads(resources["config/dataset2maxlen.json"])["qasper"]
@@ -128,8 +156,10 @@ def main():
         "original_source_file_sha256": {
             k: hashlib.sha256(v).hexdigest() for k, v in resources.items()
         },
-        "selected_ids": EXPECTED_IDS,
-        "selection": "FIRST_THREE_ORIGINAL_QASPER_ROWS_BEFORE_EXECUTION",
+        "selected_ids": [r.task["task_id"] for r in records],
+        "original_row_indices": [index for index, _ in selected],
+        "selection": "ORIGINAL_ORDER_RANGE_OR_FULL_FIXED_BEFORE_EXECUTION",
+        "all_original_qasper_requested": args.full,
         "original_qasper_rows": 200,
         "model": args.model,
         "scorer_dependencies": versions,
@@ -167,7 +197,7 @@ def main():
     save()
     predictions = []
     try:
-        for index, record in enumerate(records):
+        for index, record in selected:
             prompt = render_prompt(record, template)
             messages = [{"role": "user", "content": prompt}]
             item = {
@@ -254,8 +284,10 @@ def main():
                 records[0].outcome_record()["all_classes"],
             ),
             finished_at_unix=time.time(),
-            source_checkbox_eligible=all(
-                s["finish_reason"] == "stop" for s in receipt["samples"]
+            source_checkbox_eligible=len(records) >= 3
+            and all(
+                s["status"] == "EXECUTED_AND_OFFICIALLY_SCORED"
+                for s in receipt["samples"]
             ),
         )
     except Exception as error:

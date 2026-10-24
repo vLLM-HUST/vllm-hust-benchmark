@@ -61,6 +61,24 @@ def test_gold_and_reference_annotations_never_enter_model_document():
     )
 
 
+def test_explicit_and_full_selection_keep_original_flat_identity():
+    parents = [
+        {"article_id": "a", "questions": [{}, {}]},
+        {"article_id": "b", "questions": [{}]},
+    ]
+    chosen, total = runner.select_original_questions(parents, [2, 0])
+    assert total == 3 and [item[0] for item in chosen] == [2, 0]
+    assert [item[1:3] for item in chosen] == [(1, 0), (0, 0)]
+    assert [
+        item[0] for item in runner.select_original_questions(parents, full=True)[0]
+    ] == [0, 1, 2]
+    for indices in [[], [-1], [3], [1, 1]]:
+        with pytest.raises(ValueError):
+            runner.select_original_questions(parents, indices)
+    with pytest.raises(ValueError):
+        runner.select_original_questions(parents, [0], full=True)
+
+
 @pytest.mark.parametrize("gold", [True, 0, 5, "2", None])
 def test_bad_gold_label_not_coerced(gold):
     with pytest.raises(ValueError):
@@ -89,7 +107,8 @@ def test_mc_receipt_is_not_free_generation_or_full_dataset_accuracy():
     receipt = json.loads(path.read_text(encoding="utf-8"))
     assert (
         receipt["public_runner_sha256"]
-        == hashlib.sha256(PATH.read_bytes().replace(b"\r\n", b"\n")).hexdigest()
+        # Historical execution identity, not the current range-capable script.
+        == "71376a3ab7404caca0707e7cecd074769ffa8d7cd23396237eeefd93faaca78a"  # pragma: allowlist secret - public historical runner SHA
     )
     assert receipt["file_sha256"] == runner.DATA_SHA
     assert receipt["harness_task_sha256"] == runner.TASK_SHA
@@ -116,3 +135,30 @@ def test_mc_receipt_is_not_free_generation_or_full_dataset_accuracy():
     assert receipt["official_publisher_scoring_source"] is False
     assert receipt["full_suite_validated"] is False
     assert receipt["source_checkbox_eligible"] is False
+
+
+def test_current_native_delivery_preserves_original_token_ids_and_scoring_scope():
+    docs = ROOT / "docs/workload-data"
+    ledger = json.loads((docs / "dataset-validation-status.json").read_text("utf-8"))
+    item = ledger["delivery_inventory"]["QUALITY"]
+    delivery = json.loads((ROOT / item["delivery_receipt"]).read_text("utf-8"))
+    audit = json.loads(
+        (docs / "validation" / delivery["native_execution_receipt"]).read_text("utf-8")
+    )
+    assert item["checked"] and item["status"] == "AVAILABLE"
+    assert audit["unique_original_questions"] == len(audit["checks"]) == 6
+    assert audit["option_likelihood_requests_audited"] == 24
+    assert audit["fixed_ci_indexed_questions"] == 2086
+    assert audit["original_prepare_resolve_roundtrips"] == 6
+    for sample in audit["checks"]:
+        assert sample["original_article_question_options_token_ids_equal"]
+        assert sample["all_four_original_options_scored"]
+        assert sample["pinned_harness_metrics_recomputed_equal"]
+    assert (
+        audit["current_runner_sha256"]
+        == hashlib.sha256(PATH.read_bytes().replace(b"\r\n", b"\n")).hexdigest()
+    )
+    assert not delivery["official_publisher_scoring_source"]
+    assert not delivery["publisher_baseline_reproduced"]
+    assert not delivery["full_dev_validated"]
+    assert audit["audit_new_model_calls"] == 0

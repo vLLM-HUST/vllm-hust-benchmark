@@ -38,3 +38,28 @@ python scripts/run_dolly_original_samples.py \
 ```
 
 先按[数据组件安装说明](../../workload-preparation/README.md)安装根包及独立数据包。执行器使用标准库HTTP，不另加生产依赖；真实文件、固定发布方源码、原始输入/输出和参考回答均留在授权目录。输出目录必须新建。不是将科研观测、特征分析或机制实验迁入benchmark。
+
+## 八类原请求的固定覆盖（2026-10-24）
+
+以上三题回执保留为历史证据。本轮按每个原始`category`在原文件中首次出现的三条选择，八类共24个唯一原请求；其中原索引0、1、2复用上述回执，新增21条在双NPU服务完成生成和响应完整性核验，均正常stop。没有换题、截断或参考答案注入；数据集整体仍为15011条，不把24条称为全量。见[类别覆盖回执](validation/dolly-original-categories-20261024.json)。
+
+新入口复用旧入口的发布方模板拼接和HTTP代码，不另造提示或评分器。服务器以该入口对保存的21条实际请求/响应离线复核，逐条请求与原字段和同一模板一致、响应完整，新增模型调用为0；CPU类别选择/协议复用/路径、端点及回执检查与旧入口合计12项通过。固定提交8c4c62e0的CPU
+smoke、lint及主CI tests均通过，再使用固定3f397e69
+CI数据wheel运行相同离线核对，通过21条新请求及3条旧证据复用，0新增模型调用。见[请求语料抽样交付回执](validation/dolly-request-corpus-delivery-20261024.json)，按此范围打勾，非全量或官方质量测评。
+
+客户端仅需匹配根软件包和独立数据wheel，使用Python
+3.12标准库；模型工件及完整双NPU启动命令见[已验证服务环境](BBH_ORIGINAL_INPUTS.zh-CN.md#%E6%9C%AC%E8%BD%AE%E5%B7%B2%E9%AA%8C%E8%AF%81%E7%9A%84%E5%8F%8Cnpu%E6%A8%A1%E5%9E%8B%E6%9C%8D%E5%8A%A1%E9%85%8D%E7%BD%AE)。调用者须核实服务实际模型工件与配置；相同模型别名本身不证明权重身份相同。
+
+```sh
+# 全新验证：按原类别各取前三条，少于三条时取全部。
+python scripts/run_dolly_original_categories.py \
+  --data-root /authorized/dolly-original \
+  --publisher-constants /authorized/dolly-fixed/training/consts.py \
+  --output /private/fresh-dolly-categories \
+  --max-model-len 131072
+# 若有同来源/模板/模型/预算且完整性已验证的旧回执，可额外给出：
+# --reuse-receipt /private/prior-dolly-receipt.json
+# 所有15011条：在上述命令后显式追加 --full。
+```
+
+`--verify-existing-run EXTERNAL_RUN`替代`--output`，检查已有私有运行的固定选择、终态、原请求和保存响应，不发模型请求。该模式适用于本入口格式及本轮具名私有运行；不把任意第三方日志解释成已验证结果。不支持任意改选索引、缩短预算、自动失败重试或换题；参考回答仍保留在原文件与outcome，不进入生成请求。没有独立语义评分器，因此输出完整性不等于回答正确，亦不报告虚构的准确率。

@@ -11,6 +11,27 @@ from urllib.parse import urlparse
 import zipfile
 
 
+def select_original_rows(
+    rows, input_type="Text", output_type="JSON", *, start=0, count=3, full=False
+):
+    available = [
+        (index, row)
+        for index, row in enumerate(rows)
+        if row["input_type"] == input_type
+        and row["output_type"] == output_type
+        and not row["rendering"]
+    ]
+    if not available:
+        raise ValueError("no original non-rendering tasks for selected protocol")
+    if full:
+        if start != 0 or count != 3:
+            raise ValueError("full selection cannot be combined with range")
+        return available, len(available)
+    if start < 0 or count < 1 or start + count > len(available):
+        raise ValueError("range must be within the original protocol")
+    return available[start : start + count], len(available)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--data-file", type=Path, required=True)
@@ -19,11 +40,28 @@ def main():
     parser.add_argument("--endpoint", default="http://127.0.0.1:19466/v1")
     parser.add_argument("--model", default="workload-qwen35-27b-128k-nonthinking")
     parser.add_argument(
+        "--input-type",
+        default="Text",
+        choices=["Text", "CSV", "JSON", "XML", "YAML", "TOML"],
+    )
+    parser.add_argument(
+        "--output-type", default="JSON", choices=["CSV", "JSON", "XML", "YAML", "TOML"]
+    )
+    parser.add_argument("--start", type=int, default=0)
+    parser.add_argument("--count", type=int, default=3)
+    parser.add_argument(
+        "--all-selected",
+        action="store_true",
+        help="All original rows of the explicit non-rendering protocol",
+    )
+    parser.add_argument(
         "--all-json",
         action="store_true",
         help="All original Text-to-JSON tasks only; excludes format-to-JSON conversions",
     )
     args = parser.parse_args()
+    if args.all_json and (args.input_type != "Text" or args.output_type != "JSON"):
+        parser.error("--all-json is only the historical Text-to-JSON selection")
     url = urlparse(args.endpoint)
     if (
         url.scheme != "http"
@@ -57,18 +95,14 @@ def main():
                 if (package_root / relative).read_bytes() != archive.read(name):
                     raise ValueError("installed official workflow source mismatch")
     rows = pq.read_table(args.data_file).to_pylist()
-    selected = [
-        (i, r)
-        for i, r in enumerate(rows)
-        if r["input_type"] == "Text"
-        and r["output_type"] == "JSON"
-        and not r["rendering"]
-    ]
-    available = len(selected)
-    if not args.all_json:
-        selected = selected[:3]
-    if len(selected) < 3:
-        raise ValueError("at least three original text-to-JSON tasks required")
+    selected, available = select_original_rows(
+        rows,
+        args.input_type,
+        args.output_type,
+        start=args.start,
+        count=args.count,
+        full=args.all_json or args.all_selected,
+    )
     dataset = args.output / "original-selected.private.json"
     dataset.write_text(json.dumps([r for _, r in selected]), encoding="utf-8")
     model = "openai/" + args.model
@@ -87,7 +121,13 @@ def main():
         "selected_samples": [r["task_id"] for _, r in selected],
         "original_row_indices": [i for i, _ in selected],
         "available_text_to_json_tasks": available,
-        "selection": "original order, text input, JSON output, non-renderable; fixed before model calls",
+        "selected_protocol": {
+            "input_type": args.input_type,
+            "output_type": args.output_type,
+            "rendering": False,
+        },
+        "available_selected_protocol_tasks": available,
+        "selection": "explicit non-rendering protocol and original order/range, fixed before model calls",
         "model": args.model,
         "temperature": 0.0,
         "max_tokens": None,

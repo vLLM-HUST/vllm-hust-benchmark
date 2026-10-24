@@ -14,6 +14,53 @@ import zipfile
 from urllib.parse import urlparse
 
 
+def validate_capacity_selection(capacity, model):
+    """Keep every explicitly selected original task; reject, never filter, overflow."""
+    if (
+        not isinstance(capacity, dict)
+        or capacity.get("model") != model
+        or type(capacity.get("model_max_length")) is not int
+        or capacity.get("model_max_length") != 131072
+    ):
+        raise ValueError("capacity profile differs from model/window binding")
+    selected = capacity.get("selected")
+    if not isinstance(selected, list) or not 1 <= len(selected) <= 503:
+        raise ValueError("one to 503 explicitly preselected original tasks required")
+    if any(
+        not isinstance(row, dict)
+        or type(row.get("row_index")) is not int
+        or not 0 <= row["row_index"] < 503
+        for row in selected
+    ):
+        raise ValueError("invalid original row position")
+    indices = [row["row_index"] for row in selected]
+    if len(set(indices)) != len(indices):
+        raise ValueError("duplicate original task rows")
+    if indices != sorted(indices):
+        raise ValueError("selected tasks must retain original row order")
+    for row in selected:
+        digest = row.get("prompt_sha256")
+        if (
+            not isinstance(row.get("id"), str)
+            or not row["id"]
+            or not isinstance(digest, str)
+            or len(digest) != 64
+            or any(char not in "0123456789abcdef" for char in digest)
+        ):
+            raise ValueError("original task ID and complete prompt digest required")
+        if (
+            row.get("status") != "FULL_INPUT_FITS"
+            or type(row.get("full_prompt_tokens")) is not int
+            or not 0 < row["full_prompt_tokens"] <= 131072 - 128
+        ):
+            raise ValueError("complete original inputs do not fit deployment window")
+    if len({row["id"] for row in selected}) != len(selected) or len(
+        {row["prompt_sha256"] for row in selected}
+    ) != len(selected):
+        raise ValueError("duplicate task IDs or ambiguous prompt identities")
+    return selected
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--data-file", type=Path, required=True)
@@ -32,9 +79,10 @@ def main():
         or url.password
         or url.query
         or url.fragment
+        or url.path.rstrip("/") != "/v1"
     ):
         parser.error(
-            "only local HTTP NPU endpoints without credentials/query are permitted"
+            "only local HTTP NPU endpoints ending in /v1 without credentials/query are permitted"
         )
     if (
         hashlib.sha256(args.data_file.read_bytes()).hexdigest()
@@ -47,32 +95,11 @@ def main():
     ):  # pragma: allowlist secret - official archive checksum
         raise ValueError("official LongBench archive identity mismatch")
     capacity = json.loads(args.capacity_selection.read_text(encoding="utf-8"))
-    selected = capacity["selected"]
-    if (
-        capacity.get("model") != args.model
-        or capacity.get("model_max_length") != 131072
-    ):
-        raise ValueError("capacity profile differs from model/window binding")
-    if not isinstance(selected, list) or len(selected) != 3:
-        raise ValueError("exactly three preselected original tasks required")
-    if any(
-        type(r.get("row_index")) is not int or not 0 <= r["row_index"] < 503
-        for r in selected
-    ):
-        raise ValueError("invalid original row position")
-    if len({r["row_index"] for r in selected}) != 3:
-        raise ValueError("duplicate original task rows")
+    selected = validate_capacity_selection(capacity, args.model)
     rows = json.loads(args.data_file.read_text())
     items = [copy.deepcopy(rows[r["row_index"]]) for r in selected]
     if [r["_id"] for r in items] != [r["id"] for r in selected]:
         raise ValueError("original task identities differ from capacity selection")
-    if not all(
-        r["status"] == "FULL_INPUT_FITS"
-        and type(r["full_prompt_tokens"]) is int
-        and 0 < r["full_prompt_tokens"] + 128 <= 131072
-        for r in selected
-    ):
-        raise ValueError("complete original inputs do not fit deployment window")
     run = args.output.resolve()
     os.umask(0o077)
     run.mkdir(mode=0o700, parents=True, exist_ok=False)
@@ -157,7 +184,7 @@ def main():
         "source_id": "LONGBENCH_V2",
         "source_revision": "2b48e494f2c7a2f0af81aae178e05c7e1dde0fe9",  # pragma: allowlist secret - public dataset revision
         "runner_revision": "2e00731f8d0bff23dc4325161044d0ed8af94c1e",  # pragma: allowlist secret - public official source revision
-        "selection": "first three original-order tasks whose entire official prompt plus128 output fit128K; resource rejects retained",
+        "selection": "explicitly preselected original-order tasks with complete prompt plus128 output bound; no automatic filtering, replacement or truncation",
         "selected_samples": [r["_id"] for r in items],
         "original_row_indices": [r["row_index"] for r in selected],
         "status": "STARTED",
@@ -182,7 +209,7 @@ def main():
             json.loads(line)
             for line in (run / "predictions.private.jsonl").read_text().splitlines()
         ]
-        if len(results) != 3 or len(requests) != 3:
+        if len(results) != len(items) or len(requests) != len(items):
             raise ValueError("original tasks did not all produce scored results")
         if [r["_id"] for r in results] != receipt["selected_samples"]:
             raise ValueError("scored task IDs differ from preselection")
@@ -194,7 +221,7 @@ def main():
                 for r in results
             ],
             correct_tasks=sum(r["judge"] for r in results),
-            unique_tasks=3,
+            unique_tasks=len(items),
             scorer="unchanged official extract_answer then pred==answer, no compensated score",
         )
     except BaseException as error:

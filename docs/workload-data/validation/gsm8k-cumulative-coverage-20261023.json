@@ -1,0 +1,31 @@
+{
+  "schema_version": "gsm8k-cumulative-coverage/v1",
+  "source_id": "GSM8K",
+  "source_revision": "740312add88f781978c0658806c59bc2815b9866",
+  "original_test_size": 1319,
+  "evidence": [
+    {
+      "receipt": "docs/workload-data/validation/gsm8k-resumed-coverage-20261022.json",
+      "unique_task_count": 201,
+      "original_doc_id_range_inclusive": [0, 200],
+      "coverage_is_contiguous": true,
+      "deduplicated_by_actual_doc_ids": true
+    },
+    {
+      "receipt": "docs/workload-data/validation/gsm8k-tail-npu-20261023.json",
+      "unique_task_count": 3,
+      "selected_samples": ["test:1316", "test:1317", "test:1318"],
+      "disjoint_from_prior_range": true
+    }
+  ],
+  "cumulative": {
+    "unique_task_count": 204,
+    "coverage_fraction": "204/1319",
+    "covered_intervals_inclusive": [[0, 200], [1316, 1318]],
+    "execution_profiles_homogeneous": false,
+    "pooled_accuracy_reported": false
+  },
+  "aggregation_model_calls": 0,
+  "claim_boundary": "Deduplicated task-ID coverage across historical successful execution receipts for one fixed source revision. Runs used more than one execution profile, so metrics are not pooled. This is not full GSM8K validation or a performance result.",
+  "raw_tasks_answers_and_model_outputs_published": false
+}

@@ -15,6 +15,33 @@ runner = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(runner)
 
 
+def test_research_asset_handoff_does_not_complete_original_official_bench():
+    root = Path(__file__).parents[1]
+    ledger = json.loads(
+        (root / "docs/workload-data/dataset-validation-status.json").read_text("utf-8")
+    )
+    row = ledger["delivery_inventory"]["JSONSCHEMABENCH"]
+    handoff = json.loads(
+        (root / row["research_exact_artifact_handoff_receipt"]).read_text("utf-8")
+    )
+    workflow = json.loads(
+        (root / row["official_workflow_readiness_receipt"]).read_text("utf-8")
+    )
+    assert not row["checked"]
+    assert handoff["public_prepare_resolve_rows"] == 3
+    assert handoff["research_source_index_import_rows"] == 3
+    assert handoff["research_direct_prepare_resolve_rows"] == 3
+    assert handoff["whole_original_schema_and_source_identity_equal"]
+    assert not handoff["schema_keywords_added_removed_or_rewritten"]
+    assert not handoff["native_official_bench_executed"]
+    assert workflow["original_entry"] == "core.bench.bench"
+    assert workflow["original_dataset_repository"] == "epfl-dlab/JSONSchemaBench"
+    assert workflow["original_named_partitions_excluding_default"] == 10
+    assert not workflow["new_original_dataset_revision_verified"]
+    assert not workflow["source_completion_checked"]
+    assert workflow["public_metadata_fetch"]["downloaded_dataset_files"] == 0
+
+
 @pytest.mark.parametrize(
     "origin",
     [

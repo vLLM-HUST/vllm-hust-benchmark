@@ -47,7 +47,10 @@ def test_invalid_original_field_types_fail_closed(field, value):
 
 def synthetic_archive(tmp_path, monkeypatch):
     task = json.dumps({"examples": [{"input": "test", "target": "hidden"}]}).encode()
-    prompt = b"INVENTED_UNIT_TEST_PROMPT_NOT_WORKLOAD_EVIDENCE"
+    prompt = (
+        "fixture description\n-----\n"
+        + "\n\n".join(f"Q: demo-{index}\nA: fixture answer" for index in range(3))
+    ).encode()
     assets = {
         "boolean_expressions.json": task,
         "cot-prompts/boolean_expressions.txt": prompt,
@@ -59,9 +62,51 @@ def synthetic_archive(tmp_path, monkeypatch):
         bundle.writestr("fixture-root/ignored/private.json", "not copied")
     spec = deepcopy(source_spec("BBH"))
     for asset in spec["files"]:
+        if asset["path"] not in assets:
+            continue
         asset["sha256"] = hashlib.sha256(assets[asset["path"]]).hexdigest()
+        asset["bytes"] = len(assets[asset["path"]])
         if asset["role"] == "data":
             asset["rows"] = 1
+    monkeypatch.setattr(
+        provider, "BBH_ARCHIVE_SHA256", hashlib.sha256(archive.read_bytes()).hexdigest()
+    )
+    monkeypatch.setattr(provider, "source_spec", lambda source_id: spec)
+    return archive, spec, assets
+
+
+def synthetic_all_bbh_archive(tmp_path, monkeypatch):
+    original = source_spec("BBH")
+    spec = deepcopy(original)
+    task_assets = [asset for asset in original["files"] if asset["role"] == "data"]
+    prompt_assets = [
+        asset for asset in original["files"] if asset["role"] == "publisher_prompt"
+    ]
+    assets = {}
+    for index, asset in enumerate(task_assets):
+        assets[asset["path"]] = json.dumps(
+            {
+                "examples": [
+                    {"input": f"fixture-{index}", "target": f"TARGET_SENTINEL_{index}"}
+                ]
+            }
+        ).encode()
+    for asset in prompt_assets:
+        assets[asset["path"]] = (
+            "fixture description\n-----\n"
+            + "\n\n".join(f"Q: demo-{index}\nA: fixture answer" for index in range(3))
+        ).encode()
+    for asset in spec["files"]:
+        asset["sha256"] = hashlib.sha256(assets[asset["path"]]).hexdigest()
+        asset["bytes"] = len(assets[asset["path"]])
+        if asset["role"] == "data":
+            asset["rows"] = 1
+    archive = tmp_path / "all-fixture.zip"
+    with zipfile.ZipFile(archive, "w") as bundle:
+        for asset in spec["files"]:
+            bundle.writestr(
+                "fixture-root/" + asset["archive_member"], assets[asset["path"]]
+            )
     monkeypatch.setattr(
         provider, "BBH_ARCHIVE_SHA256", hashlib.sha256(archive.read_bytes()).hexdigest()
     )
@@ -76,11 +121,19 @@ def test_two_original_assets_copied_without_executing_or_overwriting(
     out = tmp_path / "prepared"
     result = provider.prepare_bbh_boolean(data_archive=archive, output=out)
     assert result["model_calls"] == result["scorer_runs"] == 0
+    assert result["subtasks"] == ["boolean_expressions"]
     assert {
         p.relative_to(out).as_posix() for p in out.rglob("*") if p.is_file()
     } == set(assets)
     assert all((out / name).read_bytes() == raw for name, raw in assets.items())
-    records = list(iter_workload("BBH", data_root=out, manifest=spec))
+    records = list(
+        iter_workload(
+            "BBH",
+            data_root=out,
+            files=["boolean_expressions.json"],
+            manifest=spec,
+        )
+    )
     assert len(records) == 1
     assert records[0].task["input"] == {"input": "test"}
     assert records[0].outcome_record() == {"target": "hidden"}
@@ -140,3 +193,28 @@ def test_member_checksum_mismatch_rejected_before_output_creation(
     with pytest.raises(ValueError, match="member identity"):
         provider.prepare_bbh_boolean(data_archive=archive, output=out)
     assert not out.exists()
+
+
+def test_all_original_bbh_task_and_prompt_pairs_prepare_and_read_without_execution(
+    tmp_path, monkeypatch
+):
+    archive, spec, assets = synthetic_all_bbh_archive(tmp_path, monkeypatch)
+    out = tmp_path / "prepared-all"
+    result = provider.prepare_bbh_original_tasks(data_archive=archive, output=out)
+    assert result["task_file_count"] == result["publisher_prompt_file_count"] == 27
+    assert result["original_rows"] == 27
+    assert result["model_calls"] == result["scorer_runs"] == 0
+    assert len(result["subtasks"]) == 27
+    assert {
+        path.relative_to(out).as_posix() for path in out.rglob("*") if path.is_file()
+    } == set(assets)
+    assert all((out / name).read_bytes() == raw for name, raw in assets.items())
+
+    records = list(iter_workload("BBH", data_root=out, manifest=spec))
+    assert len(records) == 27
+    assert all(
+        record.task["input"]["input"].startswith("fixture-")
+        and record.outcome_record()["target"].startswith("TARGET_SENTINEL_")
+        and "TARGET_SENTINEL_" not in json.dumps(record.input_record())
+        for record in records
+    )

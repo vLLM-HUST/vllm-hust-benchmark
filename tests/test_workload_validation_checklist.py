@@ -8,6 +8,169 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def test_longwriter_delivery_preserves_corpus_and_non_scoring_boundary():
+    directory = ROOT / "docs/workload-data"
+    ledger = json.loads(
+        (directory / "dataset-validation-status.json").read_text("utf-8")
+    )
+    row = ledger["delivery_inventory"]["LONGWRITER"]
+    assert row["checked"] and row["status"] == "AVAILABLE"
+    delivery = json.loads((ROOT / row["delivery_receipt"]).read_text("utf-8"))
+    native = json.loads((ROOT / row["range_runner_native_audit"]).read_text("utf-8"))
+    handoff = json.loads(
+        (ROOT / row["research_exact_artifact_handoff_receipt"]).read_text("utf-8")
+    )
+    assert delivery["fixed_original_indices"] == [0, 1, 2, 5997, 5998, 5999]
+    assert native["verified_unique_original_tasks"] == 6
+    assert native["previous_unique_original_tasks_reused"] == 3
+    assert [sample["original_row_index"] for sample in native["samples"]] == [
+        5997,
+        5998,
+        5999,
+    ]
+    assert native["generation_config"] == {"temperature": 0.5, "max_tokens": 32768}
+    assert native["new_range_runner_native_validated"]
+    assert handoff["complete_inputs_and_independent_references_equal"]
+    assert handoff["research_source_index_import_rows"] == 3
+    assert handoff["research_direct_prepare_resolve_rows"] == 3
+    assert not delivery["semantic_or_length_quality_claim"]
+    assert not delivery["is_longbench_write_evaluation"]
+    assert not delivery["full_corpus_native_completed"]
+    assert not native["request_wire_capture_claim"]
+
+
+def test_structeval_checkpoint_counts_only_audited_terminal_protocols():
+    directory = ROOT / "docs/workload-data"
+    ledger = json.loads(
+        (directory / "dataset-validation-status.json").read_text("utf-8")
+    )
+    row = ledger["delivery_inventory"]["STRUCTEVAL"]
+    checkpoint = json.loads(
+        (ROOT / row["completed_protocols_checkpoint_chain"][0]).read_text("utf-8")
+    )
+    assert not row["checked"]
+    assert checkpoint["verified_unique_native_tasks"] == 480
+    assert checkpoint["previous_unique_original_tasks_reused"] == 339
+    assert checkpoint["new_unique_original_tasks_audited"] == 141
+    assert {item["protocol"] for item in checkpoint["protocols"]} == {
+        "JSON-to-YAML",
+        "TOML-to-JSON",
+        "TOML-to-YAML",
+    }
+    assert all(
+        item["new_original_tasks"] == 47
+        and item["previous_original_tasks_reused"] == 3
+        and item["all_original_protocol_tasks"] == 50
+        and item["official_saved_output_rescore_equal"]
+        for item in checkpoint["protocols"]
+    )
+    assert checkpoint["running_sibling_jobs_excluded"]
+    assert checkpoint["audit_model_calls"] == 0
+    assert not checkpoint["full_source_completed"]
+    assert not checkpoint["original_prompts_output_budget_and_scoring_changed"]
+
+
+def test_qasper_delivery_separates_full_native_run_and_sampled_research_handoff():
+    directory = ROOT / "docs/workload-data"
+    ledger = json.loads(
+        (directory / "dataset-validation-status.json").read_text("utf-8")
+    )
+    row = ledger["delivery_inventory"]["LONGBENCH"]
+    assert row["checked"] and row["blocker"] is None
+    delivery = json.loads((ROOT / row["delivery_receipt"]).read_text("utf-8"))
+    native = json.loads(
+        (
+            directory
+            / "validation"
+            / delivery["native_execution_and_official_scoring_receipt"]
+        ).read_text("utf-8")
+    )
+    handoff = json.loads(
+        (
+            directory
+            / "validation"
+            / delivery["exact_installed_research_handoff_receipt"]
+        ).read_text("utf-8")
+    )
+    assert native["original_unique_tasks"] == 200
+    assert native["historical_native_tasks_reused"] == 3
+    assert native["new_native_tasks"] == 197
+    assert native["all_saved_response_hashes_and_official_scores_recalculated"]
+    assert handoff["installed_provider_payload_files_equal"] == 32
+    assert handoff["research_installed_python_files_equal"] == 40
+    assert handoff["fixed_original_indices"] == [0, 1, 2]
+    assert handoff["public_prepare_resolve_rows"] == 3
+    assert handoff["research_source_index_import_rows"] == 3
+    assert handoff["research_direct_prepare_resolve_rows"] == 3
+    assert handoff["original_inputs_references_source_identity_and_relations_equal"]
+    assert handoff["new_native_tasks_or_model_calls"] == 0
+    assert not delivery["all200_research_handoff_claim"]
+    assert not delivery["all_longbench_other_subsuites_completed"]
+    assert not delivery["original_qasper_full_corpus_completed"]
+    assert not handoff["research_features_or_observation_migrated_into_benchmark"]
+
+
+def test_all_source_receipts_are_local_json_and_cover_the_referenced_source():
+    """Check single/multi-source receipts without treating readers as task runs."""
+    rows = json.loads(
+        (ROOT / "docs/workload-data/dataset-validation-status.json").read_text("utf-8")
+    )["sources"]
+    for row in rows:
+        if not row.get("receipt"):
+            continue
+        path = (ROOT / row["receipt"]).resolve()
+        assert path.is_relative_to((ROOT / "docs/workload-data/validation").resolve())
+        receipt = json.loads(path.read_text("utf-8"))
+        ids = set(receipt.get("source_ids", []))
+        if receipt.get("source_id"):
+            ids.add(receipt["source_id"])
+        ids.update(
+            item["source_id"]
+            for item in receipt.get("sources", [])
+            if isinstance(item, dict) and "source_id" in item
+        )
+        assert row["source_id"] in ids
+
+
+def test_status_summary_does_not_erase_native_subsets_or_upgrade_generation():
+    summary = (ROOT / "docs/workload-data/VALIDATION_STATUS.zh-CN.md").read_text(
+        "utf-8"
+    )
+    assert "WORKLOAD_PR_REORGANIZATION_PLAN.zh-CN.md" in summary
+    for receipt in (
+        "agentbench-alfworld-public-handoff-npu-20261023.json",
+        "tau2-reference-handoff-npu-20261022.json",
+    ):
+        assert receipt in summary
+        evidence = json.loads(
+            (ROOT / "docs/workload-data/validation" / receipt).read_text("utf-8")
+        )
+        assert evidence["status"] == "END_TO_END_EXECUTED_AND_SCORED"
+    assert "GAIA官方原版闭环仍未完成" in summary
+    assert "缺隔离功能评分" in summary
+    assert "零新模型/原生任务" in summary
+    assert "AgentBench、GAIA、tau2官方执行器仍待逐环境接入" not in summary
+
+
+def _script_hashes_for_line_endings(payload):
+    """Accept only Git LF/CRLF transport variants, never alter old receipts."""
+    lf = payload.replace(b"\r\n", b"\n")
+    return {
+        hashlib.sha256(lf).hexdigest(),
+        hashlib.sha256(lf.replace(b"\n", b"\r\n")).hexdigest(),
+    }
+
+
+def test_line_ending_compatibility_does_not_accept_changed_script_content():
+    lf = b"print('fixture')\n"
+    crlf = lf.replace(b"\n", b"\r\n")
+    assert _script_hashes_for_line_endings(lf) == _script_hashes_for_line_endings(crlf)
+    assert hashlib.sha256(lf).hexdigest() in _script_hashes_for_line_endings(crlf)
+    assert hashlib.sha256(b"print('changed')\n").hexdigest() not in (
+        _script_hashes_for_line_endings(lf)
+    )
+
+
 def test_partial_history_execution_and_retrieval_preparation_stay_distinct():
     directory = ROOT / "docs/workload-data"
     sources = json.loads(
@@ -47,11 +210,10 @@ def test_humaneval_generation_without_functional_scoring_stays_unchecked():
     assert receipt["source_checkbox_eligible"] is False
     assert receipt["sandbox_probe"]["generated_code_executed"] is False
     assert len(receipt["samples"]) == 3
-    assert (
-        receipt["helper_sha256"]
-        == hashlib.sha256(
-            (ROOT / "scripts/run_humaneval_original_generation.py").read_bytes()
-        ).hexdigest()
+    # Historical execution hashed actual LF bytes. A Windows Git archive may
+    # export CRLF; this check proves content continuity, not byte-identical replay.
+    assert receipt["helper_sha256"] in _script_hashes_for_line_endings(
+        (ROOT / "scripts/run_humaneval_original_generation.py").read_bytes()
     )
 
 
@@ -171,13 +333,11 @@ def test_arc_task_count_and_protocol_are_not_chat_or_full_suite_claims():
         == "original multiple-choice loglikelihood; no chat conversion"
     )
     assert evidence["subsuite"] == "ARC-Challenge"
+    # Historical receipt pins the helper that ran ARC-Challenge before the
+    # shared ARC-Easy support was added.
     assert (
         evidence["helper_sha256"]
-        == hashlib.sha256(
-            (ROOT / "scripts/run_arc_original_samples.py")
-            .read_bytes()
-            .replace(b"\r\n", b"\n")
-        ).hexdigest()
+        == "f45dbe69e17309fcd74dd49fc3b74ce8dc6d7921a4c46c3268c1dcc593088568"  # pragma: allowlist secret - public historical runner file SHA256
     )
 
 

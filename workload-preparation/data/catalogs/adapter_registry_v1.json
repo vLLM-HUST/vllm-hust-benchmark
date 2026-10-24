@@ -34,8 +34,8 @@
       "outcome_fields": ["target"],
       "annotation_fields": [],
       "id_field": "",
-      "requirements": ["Original publisher Examples array and unchanged task text; target remains reference-only", "Current fixed asset scope is boolean_expressions; file index is not an arrival timestamp", "Publisher CoT demonstrations are separate prompt assets, never selected evaluation targets; harness scoring and paper equivalence are separate claims"],
-      "status": "READER_IMPLEMENTED_NATIVE_VALIDATION_SEPARATE"
+      "requirements": ["Preserve all 27 original publisher task JSON files and unchanged task text; target remains reference-only", "Use original file path plus row index as stable task identity; do not invent arrival time", "All 27 publisher CoT prompt files remain separate from evaluation rows and are never scored as task targets", "Task-level runner, fixed harness scorer, and paper equivalence are separate claims"],
+      "status": "ALL_27_TASK_READERS_IMPLEMENTED_NATIVE_EXECUTION_NOT_VALIDATED"
     },
     "NATURAL_INSTRUCTIONS": {
       "kind": "task_dataset",
@@ -123,6 +123,28 @@
       "annotation_fields": [],
       "id_field": "",
       "requirements": [],
+      "status": "IMPLEMENTED_ASSET_VALIDATION_RECORDED_SEPARATELY"
+    },
+    "MATH500": {
+      "kind": "task_dataset",
+      "mapping": "native_math_problem",
+      "input_fields": ["problem"],
+      "required_fields": [
+        "unique_id",
+        "problem",
+        "solution",
+        "answer",
+        "subject",
+        "level"
+      ],
+      "outcome_fields": ["answer", "solution"],
+      "annotation_fields": ["unique_id", "subject", "level"],
+      "id_field": "unique_id",
+      "requirements": [
+        "Preserve each original held-out MATH problem as one task",
+        "Never expose answer or solution to model input",
+        "No prompt rewriting or fallback dataset is permitted"
+      ],
       "status": "IMPLEMENTED_ASSET_VALIDATION_RECORDED_SEPARATELY"
     },
     "MMLU_PRO": {

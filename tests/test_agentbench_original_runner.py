@@ -18,6 +18,58 @@ runner = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(runner)
 
 
+def test_original_group_preparation_does_not_claim_new_native_execution():
+    receipt = json.loads(
+        (
+            ROOT
+            / "docs/workload-data/validation/agentbench-original-groups-preparation-20261024.json"
+        ).read_text("utf-8")
+    )
+    groups = receipt["groups"]
+    assert [g["total_original_tasks"] for g in groups] == [9, 5, 27, 29, 18, 21]
+    assert [i for g in groups for i in g["original_indices"]] == list(range(109))
+    assert [i for g in groups for i in g["reused_native_indices"]] == [0, 1, 2]
+    assert [i for g in groups for i in g["remaining_native_indices"]] == list(
+        range(3, 109)
+    )
+    assert receipt["model_calls"] == receipt["native_tasks_executed_in_this_step"] == 0
+
+
+def test_completed_group_receipt_matches_executed_runner_not_whole_suite():
+    receipt = json.loads(
+        (
+            ROOT
+            / "docs/workload-data/validation/agentbench-original-complete-groups-audit-20261024.json"
+        ).read_text("utf-8")
+    )
+    groups = receipt["completed_groups"]
+    assert groups
+    current_sha = hashlib.sha256(
+        SCRIPT.read_bytes().replace(b"\r\n", b"\n")
+    ).hexdigest()
+    for group in groups:
+        assert group["helper_sha256"] == current_sha
+        assert (
+            group["official_rescore_equal"] and group["original_episode_assets_equal"]
+        )
+        assert len(group["native_tasks"]) == group["new_native_tasks"]
+        assert runner.native_tasks_scored(group["native_tasks"])
+        for task in group["native_tasks"]:
+            assert task["model_calls"] > 0
+            assert task["reward"] in (0, 1)
+        overall = group["official_overall_including_reused"]["overall"]
+        assert (
+            overall["total"]
+            == overall["pass"] + overall["wrong"]
+            == group["total_original_tasks"]
+        )
+    assert receipt["verified_unique_native_tasks"] == 3 + sum(
+        g["new_native_tasks"] for g in groups
+    )
+    assert receipt["audit_model_calls"] == 0
+    assert not receipt["full_agentbench_suite_completed"]
+
+
 @pytest.fixture(autouse=True)
 def optional_data_provider_source(monkeypatch):
     # The root package deliberately does not require the optional data wheel.
@@ -249,7 +301,7 @@ def test_runtime_build_only_changes_packaging_not_input_arguments_or_task_source
     )
 
 
-def test_final_public_handoff_matches_current_entry_and_dependency_recipe():
+def test_historical_public_handoff_preserves_executed_entry_and_dependency_recipe():
     receipt = json.loads(
         (
             ROOT
@@ -260,7 +312,13 @@ def test_final_public_handoff_matches_current_entry_and_dependency_recipe():
     def sha(path):
         return hashlib.sha256(path.read_bytes().replace(b"\r\n", b"\n")).hexdigest()
 
-    assert receipt["helper_sha256"] == sha(SCRIPT)
+    # This receipt belongs to the actual 2026-10-23 run, not later runner fixes.
+    assert (
+        receipt["helper_sha256"]
+        == (
+            "1bdccaa85b4f692e3bf29ff997ebb6875b5faeb838e87ab7883c41a492e4622d"  # pragma: allowlist secret - historical public helper checksum
+        )
+    )
     assert receipt["runtime_recipe"]["build_helper_sha256"] == sha(
         ROOT / "scripts/build_agentbench_pddl_runtime_wheels.py"
     )
@@ -276,3 +334,48 @@ def test_final_public_handoff_matches_current_entry_and_dependency_recipe():
     assert receipt["new_unique_tasks_vs_initial_attempt"] == 0
     assert receipt["unique_original_tasks"] == 3 < receipt["original_task_count"]
     assert [row["reward"] for row in receipt["tasks"]] == [True, True, True]
+
+
+@pytest.mark.parametrize(
+    "status", ["completed", "task limit reached", "agent invalid action"]
+)
+def test_native_scored_failure_is_not_an_infrastructure_failure(status):
+    task = {"status": status, "reward": 0, "model_calls": 20}
+    assert runner.native_tasks_scored([task.copy() for _ in range(3)])
+
+
+@pytest.mark.parametrize(
+    "status",
+    [
+        "running",
+        "unknown",
+        "task error",
+        "cancelled",
+        "agent context limit",
+        "agent validation failed",
+    ],
+)
+def test_incomplete_or_unsupported_native_end_does_not_pass_delivery(status):
+    task = {"status": status, "reward": 0, "model_calls": 1}
+    assert not runner.native_tasks_scored([task.copy() for _ in range(3)])
+
+
+def test_native_scoring_requires_actual_model_calls_and_reward():
+    task = {"status": "completed", "reward": 0, "model_calls": 1}
+    assert not runner.native_tasks_scored([task.copy() for _ in range(2)])
+    for override in ({"reward": None}, {"model_calls": 0}):
+        bad = dict(task, **override)
+        assert not runner.native_tasks_scored([task, task, bad])
+
+
+def test_bounded_model_output_is_forwarded_without_rewriting():
+    message = {"role": "assistant", "content": "unfinished original output"}
+    choice = {"finish_reason": "length", "message": message}
+    assert runner.model_choice({"choices": [choice]}) is choice
+    for response in (
+        {"choices": []},
+        {"choices": [dict(choice, finish_reason="error")]},
+        {"choices": [dict(choice, message=None)]},
+    ):
+        with pytest.raises(ValueError):
+            runner.model_choice(response)

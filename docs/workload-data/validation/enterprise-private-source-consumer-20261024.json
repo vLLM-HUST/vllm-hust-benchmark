@@ -1,0 +1,87 @@
+{
+  "schema_version": "research-consumer-source-read-receipt/v1",
+  "date": "2026-10-24",
+  "status": "ORIGINAL_DATA_SOURCE_CONSUMER_ROUNDTRIP_PASSED_NOT_BENCHMARK_EXECUTION",
+  "scope": "CPU-only source preparation and original-input resolution through the fixed research consumer path; not model inference, native task execution, scoring, or performance evaluation",
+  "research_repository": "https://github.com/intellistream/llm-workload-suite",
+  "research_consumer_commit": "6ca466e9a278ae5b3dfa33ce380cd9a23ee7c772",
+  "benchmark_repository": "https://github.com/vLLM-HUST/vllm-hust-benchmark",
+  "benchmark_data_package_commit": "1a9776865546d85edd667425661b4a5603696e35",
+  "consumer_entrypoints": [
+    "llm_serving_workloads.pipeline.run",
+    "llm_serving_workloads.consumer.resolve_input"
+  ],
+  "selection": {
+    "rows_per_source": 3,
+    "rule": "First three rows yielded by the source provider for each source, fixed before execution; no outcome-based replacement",
+    "source_files_and_local_paths_recorded": false,
+    "row_ids_recorded": false,
+    "source_payload_hashes_recorded": false,
+    "request_or_answer_content_recorded": false
+  },
+  "results": [
+    {
+      "source_id": "PAIO-CHAT-1000",
+      "prepared_rows": 3,
+      "original_input_resolved_rows": 3,
+      "status": "PASS"
+    },
+    {
+      "source_id": "PAIO-CODE-EVAL-1000",
+      "prepared_rows": 3,
+      "original_input_resolved_rows": 3,
+      "status": "PASS"
+    },
+    {
+      "source_id": "PAIO-JSON-500",
+      "prepared_rows": 3,
+      "original_input_resolved_rows": 3,
+      "status": "PASS"
+    },
+    {
+      "source_id": "PAIO-LONG-PREFILL-5000",
+      "prepared_rows": 3,
+      "original_input_resolved_rows": 3,
+      "status": "PASS"
+    },
+    {
+      "source_id": "PAIO-LONGTEXT-4000",
+      "prepared_rows": 3,
+      "original_input_resolved_rows": 3,
+      "status": "PASS"
+    },
+    {
+      "source_id": "PAIO-PREFIX-SHARED-5000",
+      "prepared_rows": 3,
+      "original_input_resolved_rows": 3,
+      "status": "PASS"
+    },
+    {
+      "source_id": "PAIO-REUSE-CONV-5000",
+      "prepared_rows": 3,
+      "original_input_resolved_rows": 3,
+      "status": "PASS"
+    },
+    {
+      "source_id": "PAIO-SEMANTIC-SIMILAR-5000",
+      "prepared_rows": 3,
+      "original_input_resolved_rows": 3,
+      "status": "PASS"
+    }
+  ],
+  "totals": {
+    "sources": 8,
+    "prepared_rows": 24,
+    "original_input_resolved_rows": 24,
+    "model_calls": 0,
+    "native_task_executions": 0,
+    "scorer_calls": 0,
+    "npu_requests": 0,
+    "raw_enterprise_payloads_published": false
+  },
+  "limitations": [
+    "Validates source loading, adaptation, index creation, and consumer resolution for three original rows per source only.",
+    "Does not establish native benchmark completion, task quality, full-source integrity, or runtime/performance behavior.",
+    "This receipt supplements but does not modify or claim to be part of research PR #37's fixed commit or historical CI run."
+  ]
+}

@@ -1,5 +1,12 @@
 # OASST1 原始历史续接视图
 
+当前来源级交付已收口，见[交付回执](validation/oasst-corpus-delivery-20261024.json)。训练集[prepare/resolve回查](validation/oasst-train-pipeline-20261024.json)三条完整历史与实际模型请求一致、参考回复未进入SQLite，0新增模型调用。下文保留分阶段历史证据，较早的“待核验”表述不代表当前状态；完成范围仅为原始语料和已声明的六点历史续接，不是官方质量评分或全量推理。
+
+## 当前原始成员取得状态
+
+2026-10-24服务器已取得同一固定revision的两个原始Parquet成员：train 84437行、validation
+4401行，完整文件SHA均与登记的发布资产一致。validation复用原副本硬链接；train直连未完成后，通过同revision镜像取得并强校验，不替换数据版本。见[成员核验回执](validation/oasst-members-20261024.json)。这证明原资产取得及文件身份，不证明训练集已做模型生成或完整会话适配验证；公开续接入口当前固定validation身份，train的原始消息读取与相应实验入口仍需分别核验。
+
 ## 数据与能力边界
 
 来源为 OpenAssistant/oasst1，固定 revision `fdf72ae0827c1cda404aff25b6603abec9e3399b`。 validation 原始成员
@@ -12,6 +19,10 @@ assistant 回复当作输入。
 这是历史上下文条件下的续接，不是原始 API 请求回放，也不是与真实用户重新交互的完整 episode。历史回复不是独立语义正确性标准；此接口不评分，不分析 KV 或计算科研特征。
 
 ## 使用
+
+运行入口支持`--split validation`（默认）与`--split train`，分别强制核对对应原文件SHA和行数；训练集必须显式重复指定`--target-message-id`，不会误用验证集三点。两个split的文件不能互换。训练集历史续接沿用完整祖先、目标回复隔离及相同生成/响应检查，不把原始会话语料包装成官方质量评分benchmark。
+
+训练集新增三目标已在现有双NPU服务生成并完成[原文及响应审计](validation/oasst-native-train-audit-20261024.json)，按发布顺序预选英文、不同parent、至少三条完整历史输入的首三目标，未重跑验证集三点、未换失败题。固定CI数据包对train/validation合计88838行逐行核对原文本、角色、目标ID、parent/tree和输出参考标注；三个新增原历史与保存请求一致。原始语料没有官方语义正确率评分器，这里仅生成和关系/响应完整性成立，不是实时交互、独立质量认证或KV性能结论。训练集prepare/resolve交接仍需补核，尚不提升为来源级完成。
 
 先按发布方条件取得原始文件，在仓库外保存；安装本仓数据组件的 `[data]` 可选依赖。此函数不隐式下载数据。
 
@@ -62,8 +73,12 @@ wheel。服务器原始文件副本的 basename 与目录原成员不同，因�
 python scripts/run_oasst_original_continuation.py --data-file /data/oasst1/validation.parquet --output /data/private/oasst-run-001 --endpoint http://127.0.0.1:19466/v1 --model workload-qwen35-27b-128k-nonthinking
 ```
 
-该入口固定下述三个目标和原始 validation SHA，预检完整输入 token 预算（128K、输出2048），不修改题目、不裁剪祖先链。只允许本地模型 endpoint。运行依赖数据组件
+该入口默认下述三个目标并固定原始 validation SHA，预检完整输入 token 预算（128K、输出2048），不修改题目、不裁剪祖先链。只允许本地模型 endpoint。运行依赖数据组件
 `[data]`，无额外 Agent 框架；原始请求和回答仅写入私有输出目录，不写入 Git。这是历史续接生成入口，不是官方质量评测器。
+
+2026-10-24补齐原目标选择入口：默认仍为历史三点，可重复传入`--target-message-id ORIGINAL_ASSISTANT_ID`指定任意事前选择的原始目标列表；不是只能运行三个硬编码样本。目标顺序原样保留，重复ID直接拒绝，缺失或不合规祖先链在模型请求前拒绝，不替换失败目标。原文件SHA、完整祖先恢复、回复隔离、生成预算及响应检查不变。历史脚本摘要只对应当时实际执行版本；新增选择入口尚待真实服务器交接复核，本来源不提前勾选。
+
+随后已完成[固定CI安装包及新增入口离线交接复核](validation/oasst-fixed-ci-handoff-20261024.json)：服务器原文件4401行及完整SHA核对，三个历史目标经安装包prepare/resolve后，与原祖先恢复及保存请求逐字一致；参考回复不进入SQLite。新增公开入口显式传入相同三目标，以保存响应替代网络传输核对三份完整请求载荷，均匹配。此步骤为离线保存证据复用，0新模型调用，不冒称新选择入口在线NPU实测或研究侧新依赖锁已接通；历史在线生成证据仍按原回执引用。来源其余原始成员及完整交付范围仍待核对，暂不勾选。
 
 在既有双 NPU Qwen3.5-27B 服务上，按执行前规则选取发布顺序中前三个不同 parent 的续接点：英文 assistant 目标，完整交替路径至少四节点，路径各行
 deleted=false/synthetic=false。符合规则的 distinct parent 共 288 个；本次只执行三个，不代表全量 4401 行或 288 个点。

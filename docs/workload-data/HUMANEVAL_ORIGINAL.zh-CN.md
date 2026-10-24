@@ -46,6 +46,9 @@ NPU服务，不在CPU加载模型。输出含模型补全，只限私有保存�
 
 ## 官方评分隔离要求
 
+2026-10-24在当前服务器重新完成[隔离能力预检](validation/code-execution-isolation-preflight-20261024.json)：user/network
+namespace无害探测成功，但mount/PID隔离及原私有bubblewrap的`/bin/true`探测均因挂载传播权限失败；未发现Docker/Podman或socket。因此功能评分仍阻塞，未执行生成代码或参考代码，未改主机安全配置。此结论基于当前实例，不沿用旧服务器的占卡描述。
+
 [官方README](https://github.com/openai/human-eval/blob/b9453e8f1865df0a0057a1383767caa400acfbcf/README.md)
 要求隔离运行模型生成代码；reliability_guard不是安全沙箱。 本次从官方openEuler软件源取得bubblewrap0.8.0并验证RPM签名和载荷摘要，
 仅解包到任务私有目录，无系统包安装或模型服务环境修改。 实际无害探测在创建隔离挂载时返回`Failed to make / slave: Permission denied`。

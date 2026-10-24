@@ -7,7 +7,38 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def test_bbh_receipt_preserves_stopped_before_answer_boundary():
+def test_all_task_variants_receipt_binds_runner_and_preserves_delivery_gap():
+    receipt = json.loads(
+        (
+            ROOT
+            / "docs/workload-data/validation/bbh-all-task-variants-original-npu-20261024.json"
+        ).read_text("utf-8")
+    )
+    assert receipt["generation_calls"] == receipt["unique_original_tasks"] == 78
+    assert receipt["task_files"] == len(receipt["tasks"]) == 26
+    assert len({task["task_id"] for task in receipt["tasks"]}) == 26
+    assert all(task["task_id"] != "boolean_expressions" for task in receipt["tasks"])
+    for task in receipt["tasks"]:
+        assert [sample["original_index"] for sample in task["samples"]] == [0, 1, 2]
+        assert all(sample["finish_reason"] == "stop" for sample in task["samples"])
+    assert receipt["normal_stop_samples"] == 78
+    assert receipt["automatic_retries"] == 0
+    assert receipt["reused_boolean_tasks"] == 3
+    assert not receipt["task_rewriting"]
+    assert not receipt["prompt_truncation"]
+    assert not receipt["full_suite_validated"]
+    assert not receipt["source_checkbox_eligible"]
+    assert not receipt["raw_data_published"]
+    script = ROOT / receipt["runner"]
+    assert (
+        hashlib.sha256(script.read_bytes().replace(b"\r\n", b"\n")).hexdigest()
+        == receipt["formatted_public_runner_sha256"]
+    )
+    assert receipt["formatting_only_ast_equivalent"] is True
+    assert receipt["runner_sha256"] != receipt["formatted_public_runner_sha256"]
+
+
+def test_bbh_receipt_preserves_zero_score_as_model_outcome_not_pipeline_failure():
     receipt = json.loads(
         (
             ROOT
@@ -40,4 +71,7 @@ def test_bbh_receipt_preserves_stopped_before_answer_boundary():
     row = next(row for row in ledger["sources"] if row["source_id"] == "BBH")
     assert row["checked"] is False
     assert row["selected_samples"] == receipt["selected_original_indices"]
-    assert row["completed_samples"] == []
+    assert row["completed_samples"] == receipt["selected_original_indices"]
+    assert row["server_execution"] == "COMPLETED_EXPECTED_STOP"
+    assert "VALID_MODEL_OUTCOME" in row["scoring"]
+    assert "不是pipeline故障" in row["blocker"]

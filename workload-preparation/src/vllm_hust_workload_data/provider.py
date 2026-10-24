@@ -40,58 +40,146 @@ QRECC_TEST_SHA256 = "a4d8ef686827feb00c90997e0d6ff135928bf6f4bcb26fb523b5fac025d
 BBH_ARCHIVE_SHA256 = "8406fd092f7050638d60e7560952a62f78eeea38ac5a2e5755dff1e12efe44fc"  # pragma: allowlist secret - official publisher archive checksum
 
 
-def prepare_bbh_boolean(*, data_archive, output):
-    """Prepare two byte-preserved publisher assets, not a model run or full BBH."""
+def _validate_bbh_publisher_prompt(raw: bytes, expected_demos: int = 3) -> None:
+    try:
+        text = raw.decode("utf-8").replace("\r\n", "\n")
+    except UnicodeDecodeError:
+        raise ValueError("original BBH publisher prompt is not UTF-8") from None
+    separator = "\n-----\n"
+    if text.count(separator) != 1:
+        raise ValueError("original BBH publisher prompt header boundary changed")
+    prefix = text.split(separator, 1)[1]
+    demonstrations = [item for item in prefix.split("\n\n") if item.startswith("Q: ")]
+    if len(demonstrations) != expected_demos:
+        raise ValueError("original BBH publisher prompt demonstration count mismatch")
+
+
+def _prepare_bbh_assets(*, data_archive, output, task_ids):
     archive = Path(data_archive)
     if hashlib.sha256(archive.read_bytes()).hexdigest() != BBH_ARCHIVE_SHA256:
         raise ValueError("original BBH archive identity mismatch")
     spec = source_spec("BBH")
-    if len(spec["files"]) != 2 or {
-        asset["path"]: asset["role"] for asset in spec["files"]
-    } != {
-        "boolean_expressions.json": "data",
-        "cot-prompts/boolean_expressions.txt": "publisher_prompt",
-    }:
-        raise ValueError("unexpected fixed BBH preparation asset contract")
+    task_assets = [asset for asset in spec["files"] if asset["role"] == "data"]
+    prompt_assets = [
+        asset for asset in spec["files"] if asset["role"] == "publisher_prompt"
+    ]
+    task_ids_available = {Path(asset["path"]).stem for asset in task_assets}
+    prompt_ids_available = {Path(asset["path"]).stem for asset in prompt_assets}
+    if (
+        len(task_assets) != 27
+        or len(prompt_assets) != 27
+        or task_ids_available != prompt_ids_available
+        or len(task_ids_available) != 27
+    ):
+        raise ValueError("BBH manifest must register all 27 task/prompt pairs")
+    if not task_ids or not task_ids.issubset(task_ids_available):
+        raise ValueError("requested BBH task IDs are not registered in this revision")
+    selected = [
+        asset for asset in spec["files"] if Path(asset["path"]).stem in task_ids
+    ]
     contents = {}
     with zipfile.ZipFile(archive) as bundle:
-        for asset in spec["files"]:
+        members = bundle.namelist()
+        for asset in selected:
             relative = asset["path"]
-            suffix = (
-                "/bbh/boolean_expressions.json"
-                if asset["role"] == "data"
-                else "/cot-prompts/boolean_expressions.txt"
-            )
-            names = [name for name in bundle.namelist() if name.endswith(suffix)]
+            member = asset.get("archive_member")
+            if not member:
+                member = (
+                    f"bbh/{Path(relative).name}"
+                    if asset["role"] == "data"
+                    else relative
+                )
+            names = [
+                name
+                for name in members
+                if name == member or name.endswith("/" + member)
+            ]
             if len(names) != 1:
-                raise ValueError("missing or ambiguous original BBH member")
+                raise ValueError("missing or ambiguous original BBH archive member")
             raw = bundle.read(names[0])
             if hashlib.sha256(raw).hexdigest() != asset["sha256"]:
                 raise ValueError("original BBH member identity mismatch")
+            if asset.get("bytes") is not None and len(raw) != asset["bytes"]:
+                raise ValueError("original BBH member size mismatch")
             if asset["role"] == "data":
-                rows = json.loads(raw).get("examples")
+                try:
+                    rows = json.loads(raw).get("examples")
+                except (UnicodeDecodeError, json.JSONDecodeError, AttributeError):
+                    raise ValueError("invalid original BBH task JSON") from None
                 if not isinstance(rows, list) or len(rows) != asset["rows"]:
                     raise ValueError("original BBH example count mismatch")
+                if any(
+                    not isinstance(row, dict)
+                    or not isinstance(row.get("input"), str)
+                    or not row["input"].strip()
+                    or not isinstance(row.get("target"), str)
+                    or not row["target"].strip()
+                    for row in rows
+                ):
+                    raise ValueError("original BBH task fields are incomplete")
+            else:
+                _validate_bbh_publisher_prompt(
+                    raw, expected_demos=asset.get("publisher_demos", 3)
+                )
             contents[relative] = raw
+    for relative in contents:
+        path = Path(relative)
+        if path.is_absolute() or path.drive or ".." in path.parts or not path.parts:
+            raise ValueError("unsafe BBH output path in pinned manifest")
     target = Path(output)
     target.mkdir(mode=0o700, parents=True, exist_ok=False)
     for relative, raw in contents.items():
-        path = target / relative
-        path.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
-        path.write_bytes(raw)
-        path.chmod(0o600)
+        path = Path(relative)
+        destination = target / path
+        destination.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
+        destination.write_bytes(raw)
+        destination.chmod(0o600)
+    data_assets = [asset for asset in selected if asset["role"] == "data"]
     return {
         "source_id": "BBH",
-        "subsuite": "boolean_expressions",
+        "subtasks": sorted(task_ids),
+        "task_file_count": len(data_assets),
+        "publisher_prompt_file_count": len(selected) - len(data_assets),
+        "original_rows": sum(asset["rows"] for asset in data_assets),
         "status": "ORIGINAL_FILES_PREPARED_NOT_EXECUTED",
         "revision": spec["revision"],
         "files": [
             {"path": name, "sha256": hashlib.sha256(raw).hexdigest()}
-            for name, raw in contents.items()
+            for name, raw in sorted(contents.items())
         ],
         "model_calls": 0,
         "scorer_runs": 0,
     }
+
+
+def prepare_bbh_boolean(*, data_archive, output):
+    """Backward-compatible preparation of the historically validated BBH task."""
+    result = _prepare_bbh_assets(
+        data_archive=data_archive,
+        output=output,
+        task_ids={"boolean_expressions"},
+    )
+    result["subsuite"] = "boolean_expressions"
+    result["status"] = "ORIGINAL_FILES_PREPARED_NOT_EXECUTED"
+    result.pop("task_file_count", None)
+    result.pop("publisher_prompt_file_count", None)
+    result.pop("original_rows", None)
+    return result
+
+
+def prepare_bbh_original_tasks(*, data_archive, output):
+    """Prepare all original BBH task/prompt assets without model or scorer calls."""
+    spec = source_spec("BBH")
+    task_ids = {
+        Path(asset["path"]).stem for asset in spec["files"] if asset["role"] == "data"
+    }
+    result = _prepare_bbh_assets(
+        data_archive=data_archive,
+        output=output,
+        task_ids=task_ids,
+    )
+    result["status"] = "ALL_ORIGINAL_BBH_FILES_PREPARED_NOT_EXECUTED"
+    return result
 
 
 def prepare_qrecc_test(*, data_archive, output):

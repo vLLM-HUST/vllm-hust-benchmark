@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from copy import deepcopy
 
 from .assets import asset_path, sha256
 from .adapters import iter_source_rows
@@ -63,6 +64,12 @@ def bind_source(
             raise ValueError(
                 "file differs from pinned publisher/previous identity; do not overwrite its revision"
             )
+        if source_id == "RULER" and (
+            relative not in known or not known[relative].get("generation")
+        ):
+            raise ValueError(
+                "new RULER profile requires an explicit manifest with actual generator provenance; do not infer it"
+            )
         count = 0
         for row in iter_source_rows(path, spec):
             if mapping is not None:
@@ -89,6 +96,11 @@ def bind_source(
                 "bytes": path.stat().st_size,
                 "rows": count,
                 "role": "data",
+                **(
+                    {"generation": deepcopy(known[relative]["generation"])}
+                    if source_id == "RULER"
+                    else {}
+                ),
                 "identity_assurance": "matches_recorded_identity"
                 if relative in known
                 else "user_selected_local_snapshot_not_publisher_authenticated",

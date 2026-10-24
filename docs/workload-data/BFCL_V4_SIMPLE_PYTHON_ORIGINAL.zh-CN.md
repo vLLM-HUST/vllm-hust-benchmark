@@ -1,15 +1,27 @@
 # BFCL v4 simple_python 原始函数调用任务
 
+登记类别现已完成[400题原生交付](validation/bfcl-native-delivery-20261024.json)。[完整审计](validation/bfcl-native-complete-audit-20261024.json)覆盖原0–399，复用首尾六题，仅新增中间394题，题号无重复/遗漏；全部原prompt、输入token、响应摘要及官方AST
+valid判定一致，固定CI包400条索引/prepare→resolve通过。以下保留历史阶段记录，较早“中间待验”不代表当前状态。原始模型服务配置见[双NPU环境](BBH_ORIGINAL_INPUTS.zh-CN.md#%E6%9C%AC%E8%BD%AE%E5%B7%B2%E9%AA%8C%E8%AF%81%E7%9A%84%E5%8F%8Cnpu%E6%A8%A1%E5%9E%8B%E6%9C%8D%E5%8A%A1%E9%85%8D%E7%BD%AE)。不将simple_python完整覆盖称为全部BFCL或真实工具执行。
+
 所属workload为`tool-call-generation`。本批只覆盖原始单轮函数选择与参数生成， 官方AST checker匹配函数名及参数，不执行工具或模型生成代码。
 不能据此声称应用闭环、检索、记忆、多轮、多函数、并行调用或全部BFCL已完成。
 
 ## 验证状态
 
+2026-10-24已完成[首尾六题及固定CI工件审计](validation/bfcl-native-edges-audit-20261024.json)：原0–2复用，不重跑；新增397–399由新入口实际生成及官方评分。原handler重建prompt、完整输入token数、保存响应摘要及原AST
+valid判定均一致。固定3f397e69
+CI包全400题原字段及索引一致，6条prepare/resolve一致；全部110个原运行源码文件与归档字节匹配。0新增审计生成调用，静态评分未执行工具或生成代码。中间3–396共394题仍待终态/审计，未完成前来源级不打勾。
+
+2026-10-24补齐`--start/--count`原始连续题号及`--full`完整400题入口；默认仍为原0–2。选择在模型调用前冻结并与原任务逐字段核对，不重复或替换失败题，其他BFCL类别仍不在此入口范围。新入口改为直接调用固定官方`eval_runner._evaluate_single_ast_entry`，保留官方AST解析失败/输出格式错误的invalid判定，而非把模型答错当程序崩溃；原预算内length若已取得响应并完成原评分，按实际终态记录，不仅因非stop就判链路未完成。
+
+4项CPU测试及代码检查通过；在原BFCL独立环境用人为无效输出夹具验证官方函数返回`ast_decoder:decoder_failed`且valid=false，0模型调用、未执行工具或代码。这不是原题模型实测。历史三题回执保持旧脚本身份；新增范围与评分入口仍待新的原题NPU验证，不提前打勾。
+
 - [x] 官方固定源码/任务/独立评分参考字节及400条ID对齐核验。
 - [x] 安装根包和数据包后，通过公开准备命令保持原文件名和内容。
 - [x] BFCL原前三题simple_python_0/1/2的公开入口NPU复验，均stop，官方valid均为true。
 - [x] 安装的110个上游Python文件与固定官方归档逐字节一致；独立环境pip check通过。
-- [ ] 全400题、其他BFCL类别、统计代表性、真实工具执行或性能评价。
+- [x] 登记simple_python完整400题原生生成、官方AST静态评分与安装工件回查。
+- [ ] 其他BFCL类别、统计代表性、真实工具执行或性能评价。
 - [ ] 本批新数据API的研究端精确工件消费联调。
 
 [脱敏回执](validation/bfcl-v4-simple-python-public-handoff-npu-20261023.json)。私有预备和公开复验是同三题，

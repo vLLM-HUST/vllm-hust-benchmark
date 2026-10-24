@@ -1,4 +1,4 @@
-# QReCC 原始测试数据准备（下一批本地候选）
+# QReCC 原始测试数据准备与原生检索缺口
 
 ## 来源与任务范围
 
@@ -44,5 +44,7 @@ for record in records:
 - 服务器独立 Python 3.12 环境已安装候选数据wheel（SHA-256
   `43832634c5678f10a9a9a8e65ec47b091209d8466f8f4f645d3e2281d276bc6d`），`-I`
   确认site-packages导入；原归档准备、原test前三条读取、pipeline索引和resolve_input逐条一致，参考字段保持分离。首次私有核验脚本定位归档目录错误，0模型调用，纠正脚本路径后通过，未放宽数据身份检查。
-- 检索语料尚未取得、原版检索执行与官方评分均未验证，模型运行0次；候选包不是公开CI工件，不改变首批固定工件。
-- 该能力处于“对话检索与文本任务”下一批本地候选，不追加到已稳定的首批PR，也不单独新建QReCC PR。
+- 发布方固定README说明端到端任务使用包含1000万网页、5400万 passages
+  的集合，并分别提供检索和阅读评估脚本：[`evaluate_retrieval.py`](https://github.com/apple-aiml-research/ml-qrecc/blob/1d174464290790c0198b474ad022952ecd83b76b/utils/evaluate_retrieval.py)、[`evaluate_qa.py`](https://github.com/apple-aiml-research/ml-qrecc/blob/1d174464290790c0198b474ad022952ecd83b76b/utils/evaluate_qa.py)。当前取得的16451行test成员不是该检索集合；仅凭Context、Rewrite或答案字段不能宣称检索/端到端通过。
+- 原始检索集合尚未取得，检索运行、阅读链路和发布方评分均未执行，模型调用0次。现有本地与服务器读取/准备回执可复用；不得为填空改用另一套语料或用QReCC的Context伪造检索结果。
+- 该能力已在叠加草稿PR #426 的分支中；PR尚未合并。当前可以复用原归档准备、安装读取和三条消费记录，端到端检索与阅读缺口继续保持未完成，不另开单数据集PR。

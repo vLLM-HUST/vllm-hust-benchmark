@@ -10,6 +10,34 @@ import sys
 import time
 
 
+def select_official_tasks(tasks, task_ids=None, full=False):
+    """Keep the official loader order and objects; never construct replacement tasks."""
+    ids = [task.id for task in tasks]
+    if not tasks or len(set(ids)) != len(ids):
+        raise ValueError("official task IDs are missing or ambiguous")
+    if full and task_ids:
+        raise ValueError("full selection cannot be combined with task IDs")
+    if task_ids:
+        if len(set(task_ids)) != len(task_ids) or not set(task_ids) <= set(ids):
+            raise ValueError("unknown or duplicate original task ID")
+        return [task for task in tasks if task.id in task_ids]
+    return tasks if full else tasks[:3]
+
+
+def supported_reward_bases(tasks):
+    """Allow both native telecom branches evaluated by the original ALL scorer."""
+    counts = {}
+    for task in tasks:
+        basis = [str(value.value) for value in task.evaluation_criteria.reward_basis]
+        if not basis or not set(basis) <= {"ENV_ASSERTION", "ACTION"}:
+            raise ValueError(
+                "unsupported scoring basis; do not drop or rewrite the task"
+            )
+        key = ",".join(basis)
+        counts[key] = counts.get(key, 0) + 1
+    return counts
+
+
 def run_validation():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--data-root", type=Path, required=True)
@@ -19,7 +47,15 @@ def run_validation():
     parser.add_argument("--model", default="workload-qwen35-27b-128k-nonthinking")
     parser.add_argument("--preflight-only", action="store_true")
     parser.add_argument("--task-references", type=Path)
+    parser.add_argument(
+        "--task-id", action="append", help="Original task ID; repeatable"
+    )
+    parser.add_argument(
+        "--full", action="store_true", help="All official telecom_full tasks"
+    )
     args = parser.parse_args()
+    if args.full and args.task_id:
+        parser.error("--full cannot be combined with --task-id")
     from urllib.parse import urlparse
 
     url = urlparse(args.endpoint)
@@ -28,6 +64,9 @@ def run_validation():
         or url.hostname not in ("127.0.0.1", "localhost")
         or url.username
         or url.password
+        or url.path.rstrip("/") != "/v1"
+        or url.query
+        or url.fragment
     ):
         parser.error("this NPU validation runner only permits local HTTP endpoints")
     if (
@@ -74,14 +113,14 @@ def run_validation():
     from tau2.utils import llm_utils
     from tau2.cli import main
 
-    tasks = get_tasks("telecom_full", num_tasks=3)
-    assert len(tasks) == 3
+    all_tasks = get_tasks("telecom_full")
+    tasks = select_official_tasks(all_tasks, args.task_id, args.full)
     if args.task_references:
         references = json.loads(args.task_references.read_text(encoding="utf-8"))
         if isinstance(references, dict):
             references = references["native_task_refs"]
-        if not isinstance(references, list) or len(references) != 3:
-            raise ValueError("exactly three prepared native references required")
+        if not isinstance(references, list) or len(references) != len(tasks):
+            raise ValueError("one prepared native reference per selected task required")
         if [row["native_task_id"] for row in references] != [task.id for task in tasks]:
             raise ValueError(
                 "prepared task IDs differ from preselected original loader tasks"
@@ -104,10 +143,7 @@ def run_validation():
                 raise ValueError("native task file identity mismatch")
             if json.loads(raw)[reference["row_index"]]["id"] != row["native_task_id"]:
                 raise ValueError("native task row identity mismatch")
-    assert all(
-        [str(v.value) for v in t.evaluation_criteria.reward_basis] == ["ENV_ASSERTION"]
-        for t in tasks
-    )
+    reward_bases = supported_reward_bases(tasks)
     original_completion = llm_utils.completion
     endpoint = args.endpoint.rstrip("/")
     model = "openai/" + args.model
@@ -132,7 +168,10 @@ def run_validation():
         "revision": "f8de30c298689cbe0117d76a378e7315a17e5bd8",  # pragma: allowlist secret - public upstream revision
         "task_set": "telecom_full",
         "selected_task_ids": [t.id for t in tasks],
-        "selection": "first three original official task-loader rows before execution",
+        "selection": "official loader order; explicit original IDs, full set or default first three, fixed before execution",
+        "original_telecom_full_task_count": len(all_tasks),
+        "all_original_telecom_tasks_requested": args.full,
+        "selected_original_reward_basis_counts": reward_bases,
         "agent": "llm_agent",
         "user": "user_simulator",
         "model": model,

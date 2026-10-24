@@ -49,13 +49,32 @@ def post(url, body):
         return json.load(response)
 
 
+def original_indices(*, start=0, count=3, full=False):
+    if full:
+        if start != 0 or count != 3:
+            raise ValueError("full selection cannot be combined with a range")
+        return range(6000)
+    if start < 0 or count < 1 or start + count > 6000:
+        raise ValueError("range must stay within the original 6000 rows")
+    return range(start, start + count)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--data-root", required=True, type=Path)
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--endpoint", default="http://127.0.0.1:19466/v1")
     parser.add_argument("--model", default="workload-qwen35-27b-128k-nonthinking")
+    parser.add_argument("--start", type=int, default=0)
+    parser.add_argument("--count", type=int, default=3)
+    parser.add_argument(
+        "--full", action="store_true", help="All 6000 original corpus rows"
+    )
     args = parser.parse_args()
+    try:
+        indices = original_indices(start=args.start, count=args.count, full=args.full)
+    except ValueError as error:
+        parser.error(str(error))
     endpoint = args.endpoint.rstrip("/")
     url = urlparse(endpoint)
     if (
@@ -72,9 +91,11 @@ def main():
     if hashlib.sha256(path.read_bytes()).hexdigest() != DATA_SHA:
         raise ValueError("original LongWriter-6k file identity mismatch")
     with path.open(encoding="utf-8") as handle:
-        originals = [json.loads(line) for line in islice(handle, 3)]
-    if len(originals) != 3:
-        raise ValueError("three original preselected rows required")
+        originals = [
+            json.loads(line) for line in islice(handle, indices.start, indices.stop)
+        ]
+    if len(originals) != len(indices):
+        raise ValueError("original preselected rows missing; no replacement")
     from vllm_hust_workload_data.bindings import bind_source
     from vllm_hust_workload_data.consumer import resolve_input
     from vllm_hust_workload_data.pipeline import prepared_rows, run
@@ -95,15 +116,15 @@ def main():
                     "source_id": "LONGWRITER",
                     "data_root": str(args.data_root.resolve()),
                     "manifest": str(manifest),
-                    "limit": 3,
+                    "limit": indices.stop,
                 }
             ]
         },
         output=output / "prepared",
     )
     database = output / "prepared/workload.sqlite"
-    references = list(prepared_rows(database))
-    if len(references) != 3:
+    references = list(islice(prepared_rows(database), indices.start, indices.stop))
+    if len(references) != len(indices):
         raise ValueError("prepared input count mismatch")
     receipt = {
         "source_id": "LONGWRITER",
@@ -112,8 +133,9 @@ def main():
         "helper_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
         "status": "STARTED",
         "started_at_unix": time.time(),
-        "selection": "FIRST_3_ORIGINAL_TRAIN_ROWS_BEFORE_EXECUTION",
-        "selected_row_indices": [0, 1, 2],
+        "selection": "ORIGINAL_TRAIN_RANGE_OR_FULL_FIXED_BEFORE_EXECUTION",
+        "selected_row_indices": list(indices),
+        "all_original_rows_requested": args.full,
         "model": args.model,
         "original_user_messages_unchanged": True,
         "reference_final_assistant_excluded": True,
@@ -127,7 +149,7 @@ def main():
     target = output / "receipt.json"
     try:
         target.write_text(json.dumps(receipt, indent=2))
-        for index, (reference, original) in enumerate(zip(references, originals)):
+        for index, reference, original in zip(indices, references, originals):
             messages = original_messages(original)
             record = resolve_input(
                 database, reference["record_id"], data_root=args.data_root

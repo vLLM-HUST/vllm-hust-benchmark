@@ -4,8 +4,38 @@ from pathlib import Path
 import subprocess
 import sys
 import json
+import importlib.util
+
+import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+def test_nonrendering_protocol_selection_keeps_original_rows_and_boundaries():
+    spec = importlib.util.spec_from_file_location(
+        "structeval_selection", ROOT / "scripts/run_structeval_original_json.py"
+    )
+    runner = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(runner)
+    rows = [
+        {
+            "input_type": "Text",
+            "output_type": "JSON",
+            "rendering": False,
+            "task_id": str(index),
+        }
+        for index in range(5)
+    ]
+    rows.insert(1, {"input_type": "Text", "output_type": "HTML", "rendering": True})
+    selected, available = runner.select_original_rows(rows, start=3, count=2)
+    assert available == 5
+    assert [index for index, row in selected] == [4, 5]
+    assert [row["task_id"] for index, row in selected] == ["3", "4"]
+    assert len(runner.select_original_rows(rows, full=True)[0]) == 5
+    with pytest.raises(ValueError, match="range"):
+        runner.select_original_rows(rows, start=4, count=2)
+    with pytest.raises(ValueError, match="no original"):
+        runner.select_original_rows(rows, output_type="CSV")
 
 
 def test_full_text_json_receipt_is_not_full_structeval_claim():
@@ -38,6 +68,77 @@ def test_help_without_optional_task_dependencies():
     )
     assert result.returncode == 0
     assert "--all-json" in result.stdout
+
+
+def test_nonrendering_native_audit_keeps_source_incomplete():
+    receipt = json.loads(
+        (
+            ROOT
+            / "docs/workload-data/validation/structeval-nonrender-protocols-audit-20261024.json"
+        ).read_text("utf-8")
+    )
+    protocols = receipt["protocols"]
+    assert len(protocols) == len({p["protocol"] for p in protocols}) == 18
+    assert "Text-to-JSON" not in {p["protocol"] for p in protocols}
+    assert all(p["tasks"] == 3 and p["official_rescore_equal"] for p in protocols)
+    ids = [task_id for p in protocols for task_id in p["task_ids"]]
+    assert len(ids) == len(set(ids)) == receipt["new_unique_tasks"] == 54
+    assert receipt["historical_text_to_json_tasks_reused"] == 50
+    assert receipt["audit_model_calls"] == 0
+    assert receipt["official_saved_output_rescore_equal"] is True
+    assert receipt["full_source_completed"] is False
+    assert receipt["nonrendering_total_tasks"] == 950
+    assert receipt["full_source_tasks"] == 2035
+
+
+def test_completed_protocol_audit_adds_only_previously_unexecuted_rows():
+    receipt = json.loads(
+        (
+            ROOT
+            / "docs/workload-data/validation/structeval-nonrender-complete-protocols-audit-20261024.json"
+        ).read_text("utf-8")
+    )
+    protocols = receipt["completed_additional_protocols"]
+    assert protocols
+    assert all(p["new_tasks"] == 47 and p["reused_tasks"] == 3 for p in protocols)
+    assert all(len(set(p["all_original_task_ids"])) == 50 for p in protocols)
+    assert receipt["new_tasks_audited"] == 47 * len(protocols)
+    assert receipt["verified_unique_native_tasks"] == 104 + 47 * len(protocols)
+    assert receipt["audit_model_calls"] == 0
+    assert receipt["official_saved_output_rescore_equal"]
+    assert not receipt["full_source_completed"]
+    ledger = json.loads(
+        (ROOT / "docs/workload-data/dataset-validation-status.json").read_text("utf-8")
+    )["delivery_inventory"]["STRUCTEVAL"]
+    assert not ledger["checked"]
+    # The earlier audit is immutable; current counts include a separate,
+    # explicitly linked incremental checkpoint rather than rewriting history.
+    count = receipt["verified_unique_native_tasks"]
+    seen = {p["protocol"] for p in protocols} | {"Text-to-JSON"}
+    chain = ledger["completed_protocols_checkpoint_chain"]
+    assert chain and chain[-1] == ledger["latest_completed_protocols_checkpoint"]
+    for path in chain:
+        checkpoint = json.loads((ROOT / path).read_text("utf-8"))
+        assert checkpoint["previous_unique_original_tasks_reused"] == count
+        names = {p["protocol"] for p in checkpoint["protocols"]}
+        assert names and not seen & names
+        assert checkpoint["new_unique_original_tasks_audited"] == 47 * len(names)
+        assert all(
+            p["new_original_tasks"] == 47 and p["previous_original_tasks_reused"] == 3
+            for p in checkpoint["protocols"]
+        )
+        count += checkpoint["new_unique_original_tasks_audited"]
+        seen.update(names)
+        assert checkpoint["verified_unique_native_tasks"] == count
+        assert checkpoint["full_nonrendering_protocols"] == len(seen)
+        assert checkpoint["audit_model_calls"] == 0
+        assert not checkpoint["full_source_completed"]
+    assert ledger["verified_unique_native_tasks"] == count
+    held = receipt.get("held_native_exit_evidence")
+    if held:
+        assert held["native_exit_code"] == 0
+        assert held["controller_launch_held"]
+        assert held["protocol"] in {p["protocol"] for p in protocols}
 
 
 def test_external_endpoint_refused_before_inputs(tmp_path):

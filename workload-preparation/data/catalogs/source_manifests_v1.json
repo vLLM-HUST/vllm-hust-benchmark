@@ -290,27 +290,39 @@
     },
     "MATH500": {
       "source_id": "MATH500",
-      "platform": "hf",
-      "repo_id": "HuggingFaceH4/MATH-500",
-      "source_url": "https://huggingface.co/datasets/HuggingFaceH4/MATH-500",
+      "platform": "github",
+      "repo_id": "openai/prm800k",
+      "source_url": "https://github.com/openai/prm800k",
       "asset_kind": "task_corpus",
       "independent_source_id": "MATH",
       "workload_tags": [
         "reasoning"
       ],
-      "provenance": "curated_derivative",
-      "fitness_status": "VARIABLES_REQUIRE_ASSET_INSPECTION",
-      "discovery_status": "ENTRY_IDENTIFIED",
-      "revision": "6e4ed1a2a79af7d8630a6b768ec859cb5af4d3be",
-      "files": [],
-      "unit": "source_rows",
-      "provenance_kind": "task_corpus",
+      "provenance": "author_release",
+      "fitness_status": "FIXED_500_HELD_OUT_MATH_TEST_PROBLEMS",
+      "discovery_status": "SOURCE_ASSET_HASH_VERIFIED",
+      "revision": "7ecc794703b2877f63226f2477a49b34f9b25163",
+      "files": [
+        {
+          "path": "prm800k/math_splits/test.jsonl",
+          "url": "https://huggingface.co/datasets/HuggingFaceH4/MATH-500/resolve/6e4ed1a2a79af7d8630a6b768ec859cb5af4d3be/test.jsonl",
+          "sha256": "35dc41080a3680858b27fa7e0533d2d547825316fc5dafe5d316f4ccc5a06132",
+          "bytes": 446564,
+          "rows": 500,
+          "role": "data",
+          "fields": ["problem", "solution", "answer", "subject", "level", "unique_id"],
+          "mirror_revision": "6e4ed1a2a79af7d8630a6b768ec859cb5af4d3be",
+          "mirror_lfs_sha256_matches_upstream": true
+        }
+      ],
+      "unit": "original_math_problem",
+      "provenance_kind": "held_out_subset_of_math_test",
       "access": {
-        "license": null,
+        "license": "MIT",
         "gated": false,
-        "note": "Verify publisher terms before acquisition or redistribution"
+        "note": "OpenAI PRM800K and the source MATH repository declare MIT. No raw tasks, answers, or solutions are redistributed in this repository."
       },
-      "metadata_snapshot": "public-source-metadata-v0.5; not a fresh web check"
+      "metadata_snapshot": "2026-10-23 pinned OpenAI PRM800K tree and LICENSE; LFS pointer SHA256 matched the pinned HuggingFaceH4 MATH-500 mirror byte-for-byte"
     },
     "GPQA": {
       "source_id": "GPQA",
@@ -689,7 +701,7 @@
     },
     "QASPER": {
       "source_id": "QASPER",
-      "platform": "hf",
+      "platform": "publisher_archive",
       "repo_id": "allenai/qasper",
       "source_url": "https://huggingface.co/datasets/allenai/qasper",
       "asset_kind": "task_corpus",
@@ -700,11 +712,23 @@
         "long_context"
       ],
       "provenance": "author_release",
-      "fitness_status": "VARIABLES_REQUIRE_ASSET_INSPECTION",
-      "discovery_status": "ENTRY_IDENTIFIED",
-      "revision": "fdc9d8214fbab5dd782958601db4d678e6934a54",
-      "files": [],
-      "unit": "source_rows",
+      "fitness_status": "ORIGINAL_V03_ASSETS_ACQUIRED_NATIVE_EXECUTION_PENDING",
+      "discovery_status": "PINNED_PUBLISHER_ARCHIVES",
+      "revision": "publisher-v0.3",
+      "previous_hf_discovery_revision": "fdc9d8214fbab5dd782958601db4d678e6934a54",
+      "publisher_loader_revision": "7bde7e4a9f805bed6c6e79e664c37057263dbc1d", "publisher_loader_revision_note": "pragma: allowlist secret - public publisher dataset loader commit",
+      "media_archives": [
+        {"path": "train_dev_figures_and_tables.tgz", "url": "https://qasper-dataset.s3.us-west-2.amazonaws.com/train_dev_figures_and_tables.tgz", "bytes": 458760148, "sha256": "e0c81f3bf3cfad1f2af88b44426d59e4856ab08e86fc6b17f5d62fc966023883", "splits": ["train", "validation"], "archive_namespaces": ["train_dev_figures_and_tables/train", "train_dev_figures_and_tables/dev"], "digest_note": "pragma: allowlist secret - direct publisher media download SHA256, S3 version and conditional ETag verified"},
+        {"path": "test_figures_and_tables.tgz", "url": "https://qasper-dataset.s3.us-west-2.amazonaws.com/test_figures_and_tables.tgz", "bytes": 144352683, "sha256": "2f8db7074eddee2dd03e1e7670628e80a47e833be2f6dfeac2c35a04549f2c2d", "splits": ["test"], "archive_namespaces": ["test_figures_and_tables"], "digest_note": "pragma: allowlist secret - direct publisher media download SHA256, S3 version and conditional ETag verified"}
+      ],
+      "preparation_command": "python scripts/prepare_qasper_original_assets.py --train-dev-archive /private/qasper-train-dev-v0.3.tgz --test-archive /private/qasper-test-and-evaluator-v0.3.tgz --output /private/fresh-qasper-v03",
+      "files": [
+        {"path": "qasper-train-v0.3.json", "role": "data", "split": "train", "rows": 2593, "original_papers": 888, "bytes": 31969387, "sha256": "9458bfe76074a8fa8d1685af02bcc73537aa6d338ad20591dfaff1946bc88bf4", "archive_member": "qasper-train-v0.3.json", "url": "https://qasper-dataset.s3.us-west-2.amazonaws.com/qasper-train-dev-v0.3.tgz", "digest_note": "pragma: allowlist secret - original publisher archive member SHA256"},
+        {"path": "qasper-dev-v0.3.json", "role": "data", "split": "validation", "rows": 1005, "original_papers": 281, "bytes": 11398686, "sha256": "2ae7ee62a65b1c4225791c70de80c2aad4e8998cf1fd4f09a53103db4f21af93", "archive_member": "qasper-dev-v0.3.json", "url": "https://qasper-dataset.s3.us-west-2.amazonaws.com/qasper-train-dev-v0.3.tgz", "digest_note": "pragma: allowlist secret - original publisher archive member SHA256"},
+        {"path": "qasper-test-v0.3.json", "role": "data", "split": "test", "rows": 1451, "original_papers": 416, "bytes": 18078957, "sha256": "6e29ad410e6e39aa1936017fb965b30a20eb2e7751997f55b97c9d281aa884e5", "archive_member": "qasper-test-v0.3.json", "url": "https://qasper-dataset.s3.us-west-2.amazonaws.com/qasper-test-and-evaluator-v0.3.tgz", "digest_note": "pragma: allowlist secret - original publisher archive member SHA256"},
+        {"path": "publisher-assets/qasper_evaluator.py", "role": "publisher_scorer", "bytes": 6345, "sha256": "781aba7cd8e524bef4f0a1b4bf3504e5b02cb1d8d5bf32a8f0a89dfa83e86bfe", "archive_member": "qasper_evaluator.py", "url": "https://qasper-dataset.s3.us-west-2.amazonaws.com/qasper-test-and-evaluator-v0.3.tgz", "digest_note": "pragma: allowlist secret - original publisher archive member SHA256"}
+      ],
+      "unit": "original_questions",
       "provenance_kind": "task_corpus",
       "access": {
         "license": [
@@ -1861,10 +1885,26 @@
         "retrieval"
       ],
       "provenance": "author_release",
-      "fitness_status": "VARIABLES_REQUIRE_ASSET_INSPECTION",
-      "discovery_status": "ENTRY_IDENTIFIED",
-      "revision": null,
-      "files": [],
+      "fitness_status": "ORIGINAL_GENERATOR_PROFILE_READER_NATIVE_EXECUTION_SEPARATE",
+      "discovery_status": "PINNED_GENERATOR_PROFILE_PREPARED",
+      "revision": "c3f5e3b4f87f97e048793bb510a3a6b19a46bf3a", "revision_note": "pragma: allowlist secret - publisher RULER commit",
+      "files": [
+        {
+          "path": "niah_single_1/validation.jsonl",
+          "role": "data",
+          "sha256": "dcfd360b535919ac2d04d3d4aa6fb8daee097633809356d3dc456cc94fcd3c17", "digest_note": "pragma: allowlist secret - generated profile file SHA256",
+          "rows": 500,
+          "generation": {
+            "task": "niah_single_1", "max_seq_length": 4096, "random_seed": 42,
+            "model_template_type": "base", "tokenizer_type": "hf",
+            "tokenizer_model": "Qwen/Qwen3.5-27B",
+            "tokenizer_revision": "fc05daec18b0a78c049392ed2e771dde82bdf654", "revision_note": "pragma: allowlist secret - public tokenizer revision",
+            "subset": "validation", "num_samples": 500,
+            "origin": "unchanged publisher generator; generated locally on server, not a downloadable fixed publisher dataset",
+            "reproduction_note": "Different tokenizer or generation dependencies can produce another digest; bind and disclose the resulting manifest, never overwrite a mismatch or claim equal length."
+          }
+        }
+      ],
       "unit": "source_rows",
       "provenance_kind": "synthetic_long_context_probe",
       "access": {
@@ -1914,13 +1954,65 @@
         "reasoning"
       ],
       "provenance": "author_release",
-      "fitness_status": "VARIABLES_REQUIRE_ASSET_INSPECTION",
-      "discovery_status": "ENTRY_IDENTIFIED",
+      "fitness_status": "ALL_PUBLISHER_TASK_ASSETS_VERIFIED",
+      "discovery_status": "27_TASK_JSON_AND_27_COT_PROMPTS_HASHED_AND_SHAPE_CHECKED",
       "revision": "9ee07bd481feebf959a6b59d61ea57bdcf30964d",
-      "asset_scope": "boolean_expressions task file and separate original publisher CoT prompt; not all BBH tasks",
+      "asset_scope": "All 27 publisher task JSON files (23 paper categories with object-count variants) and all 27 matching original CoT prompt files.",
       "files": [
-        {"path": "boolean_expressions.json", "url": "https://raw.githubusercontent.com/suzgunmirac/BIG-Bench-Hard/9ee07bd481feebf959a6b59d61ea57bdcf30964d/bbh/boolean_expressions.json", "sha256": "ea6c754ec005e2d3f2d085d349a740f593b5764f32ea4638ffed4cfc0061b12a", "rows": 250, "role": "data"},
-        {"path": "cot-prompts/boolean_expressions.txt", "url": "https://raw.githubusercontent.com/suzgunmirac/BIG-Bench-Hard/9ee07bd481feebf959a6b59d61ea57bdcf30964d/cot-prompts/boolean_expressions.txt", "sha256": "685affba97425cdf3549d5d313ba876caed2fa7c8a4cf1ea7549faf22179609d", "role": "publisher_prompt"}
+      { "path": "boolean_expressions.json", "url": "https://raw.githubusercontent.com/suzgunmirac/BIG-Bench-Hard/9ee07bd481feebf959a6b59d61ea57bdcf30964d/bbh/boolean_expressions.json", "sha256": "ea6c754ec005e2d3f2d085d349a740f593b5764f32ea4638ffed4cfc0061b12a", "bytes": 17172, "rows": 250, "role": "data", "fields": ["input", "target"], "archive_member": "bbh/boolean_expressions.json" },
+      { "path": "causal_judgement.json", "url": "https://raw.githubusercontent.com/suzgunmirac/BIG-Bench-Hard/9ee07bd481feebf959a6b59d61ea57bdcf30964d/bbh/causal_judgement.json", "sha256": "6e8bca44dd402008ed41c07a3d0a1d5e7b03db7001a7e002fcdf4c60985ea081", "bytes": 202943, "rows": 187, "role": "data", "fields": ["input", "target"], "archive_member": "bbh/causal_judgement.json" },
+      { "path": "date_understanding.json", "url": "https://raw.githubusercontent.com/suzgunmirac/BIG-Bench-Hard/9ee07bd481feebf959a6b59d61ea57bdcf30964d/bbh/date_understanding.json", "sha256": "0148d4ac5fca05b2f82373e5fef7208e15363b9c6079493034d77b3dab496bf5", "bytes": 61760, "rows": 250, "role": "data", "fields": ["input", "target"], "archive_member": "bbh/date_understanding.json" },
+      { "path": "disambiguation_qa.json", "url": "https://raw.githubusercontent.com/suzgunmirac/BIG-Bench-Hard/9ee07bd481feebf959a6b59d61ea57bdcf30964d/bbh/disambiguation_qa.json", "sha256": "cf06df9ebf911b883671cb1b35d3fbd1a1c306b19b9e9a012407e596c85fe8c6", "bytes": 85255, "rows": 250, "role": "data", "fields": ["input", "target"], "archive_member": "bbh/disambiguation_qa.json" },
+      { "path": "dyck_languages.json", "url": "https://raw.githubusercontent.com/suzgunmirac/BIG-Bench-Hard/9ee07bd481feebf959a6b59d61ea57bdcf30964d/bbh/dyck_languages.json", "sha256": "3f9badedf15c2be1ce53d94fdf016299bb30ba231ef087ab9f51a7ed6d0bdc25", "bytes": 43814, "rows": 250, "role": "data", "fields": ["input", "target"], "archive_member": "bbh/dyck_languages.json" },
+      { "path": "formal_fallacies.json", "url": "https://raw.githubusercontent.com/suzgunmirac/BIG-Bench-Hard/9ee07bd481feebf959a6b59d61ea57bdcf30964d/bbh/formal_fallacies.json", "sha256": "4c1adb664821157faade1d4153685403afcc02648f3c180a608a18f17f589629", "bytes": 145562, "rows": 250, "role": "data", "fields": ["input", "target"], "archive_member": "bbh/formal_fallacies.json" },
+      { "path": "geometric_shapes.json", "url": "https://raw.githubusercontent.com/suzgunmirac/BIG-Bench-Hard/9ee07bd481feebf959a6b59d61ea57bdcf30964d/bbh/geometric_shapes.json", "sha256": "07be68a124420caa2ebc0b2c858ad79fc55c5c8806170e496e1e17ebfb11f31c", "bytes": 77242, "rows": 250, "role": "data", "fields": ["input", "target"], "archive_member": "bbh/geometric_shapes.json" },
+      { "path": "hyperbaton.json", "url": "https://raw.githubusercontent.com/suzgunmirac/BIG-Bench-Hard/9ee07bd481feebf959a6b59d61ea57bdcf30964d/bbh/hyperbaton.json", "sha256": "b6d7f55c75f5d02f2987a4f3123802dfa093872089a56a334144aae8a7264fdc", "bytes": 44706, "rows": 250, "role": "data", "fields": ["input", "target"], "archive_member": "bbh/hyperbaton.json" },
+      { "path": "logical_deduction_five_objects.json", "url": "https://raw.githubusercontent.com/suzgunmirac/BIG-Bench-Hard/9ee07bd481feebf959a6b59d61ea57bdcf30964d/bbh/logical_deduction_five_objects.json", "sha256": "d2df31394b903b7f0e085d42a69572a092987856eac076799017d70ef266fa8f", "bytes": 155477, "rows": 250, "role": "data", "fields": ["input", "target"], "archive_member": "bbh/logical_deduction_five_objects.json" },
+      { "path": "logical_deduction_seven_objects.json", "url": "https://raw.githubusercontent.com/suzgunmirac/BIG-Bench-Hard/9ee07bd481feebf959a6b59d61ea57bdcf30964d/bbh/logical_deduction_seven_objects.json", "sha256": "2896c7e3482eea318dd37bcc370d24ec3cc91e8374c1784287b5dbd38a529e33", "bytes": 198404, "rows": 250, "role": "data", "fields": ["input", "target"], "archive_member": "bbh/logical_deduction_seven_objects.json" },
+      { "path": "logical_deduction_three_objects.json", "url": "https://raw.githubusercontent.com/suzgunmirac/BIG-Bench-Hard/9ee07bd481feebf959a6b59d61ea57bdcf30964d/bbh/logical_deduction_three_objects.json", "sha256": "e590fae72e3a6041fbd23bd8ff6b74baf44ca563f6ba40a041c55e7b867c1681", "bytes": 112213, "rows": 250, "role": "data", "fields": ["input", "target"], "archive_member": "bbh/logical_deduction_three_objects.json" },
+      { "path": "movie_recommendation.json", "url": "https://raw.githubusercontent.com/suzgunmirac/BIG-Bench-Hard/9ee07bd481feebf959a6b59d61ea57bdcf30964d/bbh/movie_recommendation.json", "sha256": "a8b53a87ee21a865b7248e694f388a9b8f7cf6b839b11d44796a2dd3fc088983", "bytes": 57684, "rows": 250, "role": "data", "fields": ["input", "target"], "archive_member": "bbh/movie_recommendation.json" },
+      { "path": "multistep_arithmetic_two.json", "url": "https://raw.githubusercontent.com/suzgunmirac/BIG-Bench-Hard/9ee07bd481feebf959a6b59d61ea57bdcf30964d/bbh/multistep_arithmetic_two.json", "sha256": "c9d5a6433c9b78256422a15c78463949c8bec8d85607aa28b52d7234ad4a8595", "bytes": 18325, "rows": 250, "role": "data", "fields": ["input", "target"], "archive_member": "bbh/multistep_arithmetic_two.json" },
+      { "path": "navigate.json", "url": "https://raw.githubusercontent.com/suzgunmirac/BIG-Bench-Hard/9ee07bd481feebf959a6b59d61ea57bdcf30964d/bbh/navigate.json", "sha256": "b7944dfd3c81da5c4815bd75b00d6fa3c64140823498e78ed496f4c3d36f7f0d", "bytes": 55163, "rows": 250, "role": "data", "fields": ["input", "target"], "archive_member": "bbh/navigate.json" },
+      { "path": "object_counting.json", "url": "https://raw.githubusercontent.com/suzgunmirac/BIG-Bench-Hard/9ee07bd481feebf959a6b59d61ea57bdcf30964d/bbh/object_counting.json", "sha256": "8acef14dbbdd40d2326ef7755750b6b5fe919fef06276af1bab3f1c297f022ff", "bytes": 35890, "rows": 250, "role": "data", "fields": ["input", "target"], "archive_member": "bbh/object_counting.json" },
+      { "path": "penguins_in_a_table.json", "url": "https://raw.githubusercontent.com/suzgunmirac/BIG-Bench-Hard/9ee07bd481feebf959a6b59d61ea57bdcf30964d/bbh/penguins_in_a_table.json", "sha256": "bb87ee449698eee51215e025a453b1bcb2f5e6589c2063b2c79e68b8f0655228", "bytes": 74516, "rows": 146, "role": "data", "fields": ["input", "target"], "archive_member": "bbh/penguins_in_a_table.json" },
+      { "path": "reasoning_about_colored_objects.json", "url": "https://raw.githubusercontent.com/suzgunmirac/BIG-Bench-Hard/9ee07bd481feebf959a6b59d61ea57bdcf30964d/bbh/reasoning_about_colored_objects.json", "sha256": "0a8850cf95166020fce7a78244026ceedd7ea839302471512b4f8744e85a6a49", "bytes": 98694, "rows": 250, "role": "data", "fields": ["input", "target"], "archive_member": "bbh/reasoning_about_colored_objects.json" },
+      { "path": "ruin_names.json", "url": "https://raw.githubusercontent.com/suzgunmirac/BIG-Bench-Hard/9ee07bd481feebf959a6b59d61ea57bdcf30964d/bbh/ruin_names.json", "sha256": "b6f723aef2bafdd4c7bfc3c7e0329c7e8a8279391a609969c8ed76c9319f5f7f", "bytes": 53178, "rows": 250, "role": "data", "fields": ["input", "target"], "archive_member": "bbh/ruin_names.json" },
+      { "path": "salient_translation_error_detection.json", "url": "https://raw.githubusercontent.com/suzgunmirac/BIG-Bench-Hard/9ee07bd481feebf959a6b59d61ea57bdcf30964d/bbh/salient_translation_error_detection.json", "sha256": "becf3eb8dd53c821a555ecd5c1334ecd93eb25f980e63be963c518e7138de5da", "bytes": 286443, "rows": 250, "role": "data", "fields": ["input", "target"], "archive_member": "bbh/salient_translation_error_detection.json" },
+      { "path": "snarks.json", "url": "https://raw.githubusercontent.com/suzgunmirac/BIG-Bench-Hard/9ee07bd481feebf959a6b59d61ea57bdcf30964d/bbh/snarks.json", "sha256": "54a0661fe2de06167645a4965e6bcf963c4ba307e76262a7c750998b0e3d0d0e", "bytes": 42646, "rows": 178, "role": "data", "fields": ["input", "target"], "archive_member": "bbh/snarks.json" },
+      { "path": "sports_understanding.json", "url": "https://raw.githubusercontent.com/suzgunmirac/BIG-Bench-Hard/9ee07bd481feebf959a6b59d61ea57bdcf30964d/bbh/sports_understanding.json", "sha256": "63ca262858f6176864515cd8cf53cdaa40839ebecc155b726d77930855d167bf", "bytes": 28617, "rows": 250, "role": "data", "fields": ["input", "target"], "archive_member": "bbh/sports_understanding.json" },
+      { "path": "temporal_sequences.json", "url": "https://raw.githubusercontent.com/suzgunmirac/BIG-Bench-Hard/9ee07bd481feebf959a6b59d61ea57bdcf30964d/bbh/temporal_sequences.json", "sha256": "92a1189faaa84aacc4c405aaa13f13f48c2992eb884772eedb622505252baef5", "bytes": 148176, "rows": 250, "role": "data", "fields": ["input", "target"], "archive_member": "bbh/temporal_sequences.json" },
+      { "path": "tracking_shuffled_objects_five_objects.json", "url": "https://raw.githubusercontent.com/suzgunmirac/BIG-Bench-Hard/9ee07bd481feebf959a6b59d61ea57bdcf30964d/bbh/tracking_shuffled_objects_five_objects.json", "sha256": "2063a46a4fb484236ed4310523606543a3e1dd4a4dc34eda65d407910ece25a5", "bytes": 169722, "rows": 250, "role": "data", "fields": ["input", "target"], "archive_member": "bbh/tracking_shuffled_objects_five_objects.json" },
+      { "path": "tracking_shuffled_objects_seven_objects.json", "url": "https://raw.githubusercontent.com/suzgunmirac/BIG-Bench-Hard/9ee07bd481feebf959a6b59d61ea57bdcf30964d/bbh/tracking_shuffled_objects_seven_objects.json", "sha256": "b59fd05b850c37cf57cb514ae1e6975c00b1638ade2291722056b2af3c54084d", "bytes": 214906, "rows": 250, "role": "data", "fields": ["input", "target"], "archive_member": "bbh/tracking_shuffled_objects_seven_objects.json" },
+      { "path": "tracking_shuffled_objects_three_objects.json", "url": "https://raw.githubusercontent.com/suzgunmirac/BIG-Bench-Hard/9ee07bd481feebf959a6b59d61ea57bdcf30964d/bbh/tracking_shuffled_objects_three_objects.json", "sha256": "546cc7bf10c6a01a6a4c17ae28a4966485f21f29fd5d111f37858ec78e354f6b", "bytes": 128736, "rows": 250, "role": "data", "fields": ["input", "target"], "archive_member": "bbh/tracking_shuffled_objects_three_objects.json" },
+      { "path": "web_of_lies.json", "url": "https://raw.githubusercontent.com/suzgunmirac/BIG-Bench-Hard/9ee07bd481feebf959a6b59d61ea57bdcf30964d/bbh/web_of_lies.json", "sha256": "3e60323f8514a107fdb4edf35f8832a9171c5a09c0eaa47823559de905e8ab8b", "bytes": 52964, "rows": 250, "role": "data", "fields": ["input", "target"], "archive_member": "bbh/web_of_lies.json" },
+      { "path": "word_sorting.json", "url": "https://raw.githubusercontent.com/suzgunmirac/BIG-Bench-Hard/9ee07bd481feebf959a6b59d61ea57bdcf30964d/bbh/word_sorting.json", "sha256": "2a6132d2c99f00d0d2eb1113ac6b4a918bd969d863c48749210d969713db8d43", "bytes": 66300, "rows": 250, "role": "data", "fields": ["input", "target"], "archive_member": "bbh/word_sorting.json" },
+      { "path": "cot-prompts/boolean_expressions.txt", "url": "https://raw.githubusercontent.com/suzgunmirac/BIG-Bench-Hard/9ee07bd481feebf959a6b59d61ea57bdcf30964d/cot-prompts/boolean_expressions.txt", "sha256": "685affba97425cdf3549d5d313ba876caed2fa7c8a4cf1ea7549faf22179609d", "bytes": 1891, "role": "publisher_prompt", "fields": [], "archive_member": "cot-prompts/boolean_expressions.txt", "publisher_demos": 3 },
+      { "path": "cot-prompts/causal_judgement.txt", "url": "https://raw.githubusercontent.com/suzgunmirac/BIG-Bench-Hard/9ee07bd481feebf959a6b59d61ea57bdcf30964d/cot-prompts/causal_judgement.txt", "sha256": "14377e36cccb084b7d0fe73988d08696f7675d712b02d3ae1f5f7f12c77028ea", "bytes": 3763, "role": "publisher_prompt", "fields": [], "archive_member": "cot-prompts/causal_judgement.txt", "publisher_demos": 3 },
+      { "path": "cot-prompts/date_understanding.txt", "url": "https://raw.githubusercontent.com/suzgunmirac/BIG-Bench-Hard/9ee07bd481feebf959a6b59d61ea57bdcf30964d/cot-prompts/date_understanding.txt", "sha256": "a0a13c392f689a1828f5f6ffb9dee3d44483794490da5d92f0e2a723787b1cfb", "bytes": 1277, "role": "publisher_prompt", "fields": [], "archive_member": "cot-prompts/date_understanding.txt", "publisher_demos": 3 },
+      { "path": "cot-prompts/disambiguation_qa.txt", "url": "https://raw.githubusercontent.com/suzgunmirac/BIG-Bench-Hard/9ee07bd481feebf959a6b59d61ea57bdcf30964d/cot-prompts/disambiguation_qa.txt", "sha256": "794fd259297972a4c963a5d13a84dc221edde460de27fa5d8fd64299a2001597", "bytes": 3678, "role": "publisher_prompt", "fields": [], "archive_member": "cot-prompts/disambiguation_qa.txt", "publisher_demos": 3 },
+      { "path": "cot-prompts/dyck_languages.txt", "url": "https://raw.githubusercontent.com/suzgunmirac/BIG-Bench-Hard/9ee07bd481feebf959a6b59d61ea57bdcf30964d/cot-prompts/dyck_languages.txt", "sha256": "b0836603007ec659ed685458647fb6d7543543304e7aca909b995d0c3aff22b2", "bytes": 2515, "role": "publisher_prompt", "fields": [], "archive_member": "cot-prompts/dyck_languages.txt", "publisher_demos": 3 },
+      { "path": "cot-prompts/formal_fallacies.txt", "url": "https://raw.githubusercontent.com/suzgunmirac/BIG-Bench-Hard/9ee07bd481feebf959a6b59d61ea57bdcf30964d/cot-prompts/formal_fallacies.txt", "sha256": "10c06cc362520e9b8dddfc4861e263ff668d228a52d958dcc69f09f1d224935a", "bytes": 4587, "role": "publisher_prompt", "fields": [], "archive_member": "cot-prompts/formal_fallacies.txt", "publisher_demos": 3 },
+      { "path": "cot-prompts/geometric_shapes.txt", "url": "https://raw.githubusercontent.com/suzgunmirac/BIG-Bench-Hard/9ee07bd481feebf959a6b59d61ea57bdcf30964d/cot-prompts/geometric_shapes.txt", "sha256": "f36d9893507eb518d84f388fb677dc0226c74a98873700de0b556548d65d3f76", "bytes": 4941, "role": "publisher_prompt", "fields": [], "archive_member": "cot-prompts/geometric_shapes.txt", "publisher_demos": 3 },
+      { "path": "cot-prompts/hyperbaton.txt", "url": "https://raw.githubusercontent.com/suzgunmirac/BIG-Bench-Hard/9ee07bd481feebf959a6b59d61ea57bdcf30964d/cot-prompts/hyperbaton.txt", "sha256": "19898af91c35cb26bbdf5fdb6f6fb17e138677250332e2994005625ffb50b261", "bytes": 3224, "role": "publisher_prompt", "fields": [], "archive_member": "cot-prompts/hyperbaton.txt", "publisher_demos": 3 },
+      { "path": "cot-prompts/logical_deduction_five_objects.txt", "url": "https://raw.githubusercontent.com/suzgunmirac/BIG-Bench-Hard/9ee07bd481feebf959a6b59d61ea57bdcf30964d/cot-prompts/logical_deduction_five_objects.txt", "sha256": "4ed65246c0c1c4b0b4053d784181892b842bce19cf4358c976f34b1a434ef034", "bytes": 2615, "role": "publisher_prompt", "fields": [], "archive_member": "cot-prompts/logical_deduction_five_objects.txt", "publisher_demos": 3 },
+      { "path": "cot-prompts/logical_deduction_seven_objects.txt", "url": "https://raw.githubusercontent.com/suzgunmirac/BIG-Bench-Hard/9ee07bd481feebf959a6b59d61ea57bdcf30964d/cot-prompts/logical_deduction_seven_objects.txt", "sha256": "4ed65246c0c1c4b0b4053d784181892b842bce19cf4358c976f34b1a434ef034", "bytes": 2615, "role": "publisher_prompt", "fields": [], "archive_member": "cot-prompts/logical_deduction_seven_objects.txt", "publisher_demos": 3 },
+      { "path": "cot-prompts/logical_deduction_three_objects.txt", "url": "https://raw.githubusercontent.com/suzgunmirac/BIG-Bench-Hard/9ee07bd481feebf959a6b59d61ea57bdcf30964d/cot-prompts/logical_deduction_three_objects.txt", "sha256": "4ed65246c0c1c4b0b4053d784181892b842bce19cf4358c976f34b1a434ef034", "bytes": 2615, "role": "publisher_prompt", "fields": [], "archive_member": "cot-prompts/logical_deduction_three_objects.txt", "publisher_demos": 3 },
+      { "path": "cot-prompts/movie_recommendation.txt", "url": "https://raw.githubusercontent.com/suzgunmirac/BIG-Bench-Hard/9ee07bd481feebf959a6b59d61ea57bdcf30964d/cot-prompts/movie_recommendation.txt", "sha256": "cdf765634713b057091d541b4773dd2c998f81447b0bd8564ae70be4cdf3f5d0", "bytes": 2231, "role": "publisher_prompt", "fields": [], "archive_member": "cot-prompts/movie_recommendation.txt", "publisher_demos": 3 },
+      { "path": "cot-prompts/multistep_arithmetic_two.txt", "url": "https://raw.githubusercontent.com/suzgunmirac/BIG-Bench-Hard/9ee07bd481feebf959a6b59d61ea57bdcf30964d/cot-prompts/multistep_arithmetic_two.txt", "sha256": "a546e0b7cde09037bc144ae5c32c9cf78dafdfac929ae76e2051b2dd8f3671ce", "bytes": 2496, "role": "publisher_prompt", "fields": [], "archive_member": "cot-prompts/multistep_arithmetic_two.txt", "publisher_demos": 3 },
+      { "path": "cot-prompts/navigate.txt", "url": "https://raw.githubusercontent.com/suzgunmirac/BIG-Bench-Hard/9ee07bd481feebf959a6b59d61ea57bdcf30964d/cot-prompts/navigate.txt", "sha256": "dc2fd733f1867b8c79685f15b83746064534a94bf73468341c2a9dd335be22fc", "bytes": 2257, "role": "publisher_prompt", "fields": [], "archive_member": "cot-prompts/navigate.txt", "publisher_demos": 3 },
+      { "path": "cot-prompts/object_counting.txt", "url": "https://raw.githubusercontent.com/suzgunmirac/BIG-Bench-Hard/9ee07bd481feebf959a6b59d61ea57bdcf30964d/cot-prompts/object_counting.txt", "sha256": "e51ffc03fd713a13a379a6c938a523dfc1c2f384f2a8447bd7a12d4458f18833", "bytes": 1528, "role": "publisher_prompt", "fields": [], "archive_member": "cot-prompts/object_counting.txt", "publisher_demos": 3 },
+      { "path": "cot-prompts/penguins_in_a_table.txt", "url": "https://raw.githubusercontent.com/suzgunmirac/BIG-Bench-Hard/9ee07bd481feebf959a6b59d61ea57bdcf30964d/cot-prompts/penguins_in_a_table.txt", "sha256": "33be137e76c2a6af0bbacd17a8e7a92801886c0202a45e35ea9c2a88c1f26d51", "bytes": 2496, "role": "publisher_prompt", "fields": [], "archive_member": "cot-prompts/penguins_in_a_table.txt", "publisher_demos": 3 },
+      { "path": "cot-prompts/reasoning_about_colored_objects.txt", "url": "https://raw.githubusercontent.com/suzgunmirac/BIG-Bench-Hard/9ee07bd481feebf959a6b59d61ea57bdcf30964d/cot-prompts/reasoning_about_colored_objects.txt", "sha256": "e4ea02d05b13e8ed9ccc3b0d878bc4df4c5a6fb76c65d39d48d6244f7ff0b9d5", "bytes": 2405, "role": "publisher_prompt", "fields": [], "archive_member": "cot-prompts/reasoning_about_colored_objects.txt", "publisher_demos": 3 },
+      { "path": "cot-prompts/ruin_names.txt", "url": "https://raw.githubusercontent.com/suzgunmirac/BIG-Bench-Hard/9ee07bd481feebf959a6b59d61ea57bdcf30964d/cot-prompts/ruin_names.txt", "sha256": "731446c6c66bb5258677af1417b599a6a5539be6d74a5afc02cf7a716444ea54", "bytes": 3591, "role": "publisher_prompt", "fields": [], "archive_member": "cot-prompts/ruin_names.txt", "publisher_demos": 3 },
+      { "path": "cot-prompts/salient_translation_error_detection.txt", "url": "https://raw.githubusercontent.com/suzgunmirac/BIG-Bench-Hard/9ee07bd481feebf959a6b59d61ea57bdcf30964d/cot-prompts/salient_translation_error_detection.txt", "sha256": "2c8367f75092202cc507fdbfaaf037b1c1eed38e91289084439738367f0785f7", "bytes": 6251, "role": "publisher_prompt", "fields": [], "archive_member": "cot-prompts/salient_translation_error_detection.txt", "publisher_demos": 3 },
+      { "path": "cot-prompts/snarks.txt", "url": "https://raw.githubusercontent.com/suzgunmirac/BIG-Bench-Hard/9ee07bd481feebf959a6b59d61ea57bdcf30964d/cot-prompts/snarks.txt", "sha256": "35084a2a0b86bc4008ab206b838c0b97dd425897dd72198137c3cefc499c0960", "bytes": 3224, "role": "publisher_prompt", "fields": [], "archive_member": "cot-prompts/snarks.txt", "publisher_demos": 3 },
+      { "path": "cot-prompts/sports_understanding.txt", "url": "https://raw.githubusercontent.com/suzgunmirac/BIG-Bench-Hard/9ee07bd481feebf959a6b59d61ea57bdcf30964d/cot-prompts/sports_understanding.txt", "sha256": "2058a9bed717a6edb8ca2f815e88851436a4ee14c8b0d504ccf464865c6d0295", "bytes": 931, "role": "publisher_prompt", "fields": [], "archive_member": "cot-prompts/sports_understanding.txt", "publisher_demos": 3 },
+      { "path": "cot-prompts/temporal_sequences.txt", "url": "https://raw.githubusercontent.com/suzgunmirac/BIG-Bench-Hard/9ee07bd481feebf959a6b59d61ea57bdcf30964d/cot-prompts/temporal_sequences.txt", "sha256": "3e7ebf1e20abe3e219dc6514dcb7474d82db1b2c66acc733cd30af2e9e0b64b0", "bytes": 3133, "role": "publisher_prompt", "fields": [], "archive_member": "cot-prompts/temporal_sequences.txt", "publisher_demos": 3 },
+      { "path": "cot-prompts/tracking_shuffled_objects_five_objects.txt", "url": "https://raw.githubusercontent.com/suzgunmirac/BIG-Bench-Hard/9ee07bd481feebf959a6b59d61ea57bdcf30964d/cot-prompts/tracking_shuffled_objects_five_objects.txt", "sha256": "2ef54cb2a72052adc3484a76209cb6a6535f194d677e79bcec2e2e71cf3768af", "bytes": 2714, "role": "publisher_prompt", "fields": [], "archive_member": "cot-prompts/tracking_shuffled_objects_five_objects.txt", "publisher_demos": 3 },
+      { "path": "cot-prompts/tracking_shuffled_objects_seven_objects.txt", "url": "https://raw.githubusercontent.com/suzgunmirac/BIG-Bench-Hard/9ee07bd481feebf959a6b59d61ea57bdcf30964d/cot-prompts/tracking_shuffled_objects_seven_objects.txt", "sha256": "2ef54cb2a72052adc3484a76209cb6a6535f194d677e79bcec2e2e71cf3768af", "bytes": 2714, "role": "publisher_prompt", "fields": [], "archive_member": "cot-prompts/tracking_shuffled_objects_seven_objects.txt", "publisher_demos": 3 },
+      { "path": "cot-prompts/tracking_shuffled_objects_three_objects.txt", "url": "https://raw.githubusercontent.com/suzgunmirac/BIG-Bench-Hard/9ee07bd481feebf959a6b59d61ea57bdcf30964d/cot-prompts/tracking_shuffled_objects_three_objects.txt", "sha256": "2ef54cb2a72052adc3484a76209cb6a6535f194d677e79bcec2e2e71cf3768af", "bytes": 2714, "role": "publisher_prompt", "fields": [], "archive_member": "cot-prompts/tracking_shuffled_objects_three_objects.txt", "publisher_demos": 3 },
+      { "path": "cot-prompts/web_of_lies.txt", "url": "https://raw.githubusercontent.com/suzgunmirac/BIG-Bench-Hard/9ee07bd481feebf959a6b59d61ea57bdcf30964d/cot-prompts/web_of_lies.txt", "sha256": "c8025ca65ab7f0897c243504c863bda043d04b6e873777536743e94023c929d0", "bytes": 3055, "role": "publisher_prompt", "fields": [], "archive_member": "cot-prompts/web_of_lies.txt", "publisher_demos": 3 },
+      { "path": "cot-prompts/word_sorting.txt", "url": "https://raw.githubusercontent.com/suzgunmirac/BIG-Bench-Hard/9ee07bd481feebf959a6b59d61ea57bdcf30964d/cot-prompts/word_sorting.txt", "sha256": "a2cdbcfe23abaa97b9787f7c03dbf49b1cfd0ff9e63197b7884bb5cd5a096ca6", "bytes": 2274, "role": "publisher_prompt", "fields": [], "archive_member": "cot-prompts/word_sorting.txt", "publisher_demos": 3 }
       ],
       "unit": "source_rows",
       "provenance_kind": "task_corpus",
@@ -1929,7 +2021,7 @@
         "gated": false,
         "note": "No original task, prompt examples or targets redistributed; acquire fixed publisher assets under their terms"
       },
-      "metadata_snapshot": "public-source-metadata-v0.5; not a fresh web check"
+      "metadata_snapshot": "2026-10-24 pinned GitHub revision; all 27 task files and 27 prompt files fetched in memory, SHA-256 and schema/prompt boundaries checked"
     },
     "BFCL": {
       "source_id": "BFCL",
@@ -2249,14 +2341,14 @@
       "provenance": "author_release",
       "fitness_status": "VARIABLES_REQUIRE_ASSET_INSPECTION",
       "discovery_status": "ENTRY_IDENTIFIED",
-      "revision": null,
-      "files": [],
-      "unit": "source_rows",
+      "revision": "3eb6f2c585f5e1699204e3c3bdf7adc5c28cb376",
+      "files": [{"path": "data/locomo10.json", "url": "https://raw.githubusercontent.com/snap-research/locomo/3eb6f2c585f5e1699204e3c3bdf7adc5c28cb376/data/locomo10.json", "sha256": "79fa87e90f04081343b8c8debecb80a9a6842b76a7aa537dc9fdf651ea698ff4", "bytes": 2805274, "rows": 1986, "role": "data", "original_conversations": 10}],
+      "unit": "original_questions",
       "provenance_kind": "constructed_memory_tasks",
       "access": {
-        "license": null,
-        "gated": null,
-        "note": "Verify publisher terms before acquisition or redistribution"
+        "license": "CC-BY-NC-4.0",
+        "gated": false,
+        "note": "Publisher noncommercial terms apply. Raw data and publisher code are not redistributed; image bytes are not provided by this release."
       },
       "metadata_snapshot": "public-source-metadata-v0.5; not a fresh web check"
     },

@@ -1,4 +1,4 @@
-"""Run first three original BFCL v4 simple_python tasks and official AST checker.
+"""Run original BFCL v4 simple_python ranges and the official AST evaluator.
 
 Optional fixed BFCL runtime only. Never executes generated code or real tools.
 Use a local NPU endpoint; keep all tasks, references and responses PRIVATE.
@@ -27,6 +27,16 @@ PREFIX = "ShishirPatil-gorilla-6ea5797/berkeley-function-call-leaderboard/"
 EXPECTED_IDS = ["simple_python_0", "simple_python_1", "simple_python_2"]
 PROFILE = "local-qwen35-27b-npu-FC"
 BASE_PROFILE = "Qwen/Qwen3-32B-FC"
+
+
+def selected_indices(start=0, count=3, full=False):
+    if full:
+        if start != 0 or count != 3:
+            raise ValueError("full selection cannot be combined with range")
+        return list(range(400))
+    if start < 0 or count < 1 or start + count > 400:
+        raise ValueError("range must be within the original 400 tasks")
+    return list(range(start, start + count))
 
 
 def verify_assets(archive, data_root):
@@ -96,7 +106,14 @@ def main():
     parser.add_argument("--model", default="workload-qwen35-27b-128k-nonthinking")
     parser.add_argument("--endpoint", default="http://127.0.0.1:19466/v1")
     parser.add_argument("--context-limit", type=int, default=131072)
+    parser.add_argument("--start", type=int, default=0)
+    parser.add_argument("--count", type=int, default=3)
+    parser.add_argument("--full", action="store_true")
     args = parser.parse_args()
+    try:
+        indices = selected_indices(args.start, args.count, args.full)
+    except ValueError as error:
+        parser.error(str(error))
     url = urlparse(args.endpoint)
     if (
         url.scheme != "http"
@@ -126,22 +143,22 @@ def main():
             "BFCL",
             data_root=args.data_root,
             files=["BFCL_v4_simple_python.json"],
-            limit=3,
+            limit=indices[-1] + 1,
         )
     )
-    entries = [original_task_entry(record) for record in records]
-    if [entry["id"] for entry in entries] != EXPECTED_IDS or entries != rows[:3]:
-        raise ValueError("original first-three task fields/identities changed")
+    entries = [original_task_entry(records[index]) for index in indices]
+    if entries != [rows[index] for index in indices]:
+        raise ValueError("original selected task fields/identities changed")
     os.environ["REMOTE_OPENAI_BASE_URL"] = args.endpoint.rstrip("/")
     os.environ["REMOTE_OPENAI_API_KEY"] = (
         "EMPTY"  # pragma: allowlist secret - local SDK placeholder, not a credential
     )
     # Optional imports: never load or start a local CPU/CUDA serving model.
     import bfcl_eval
-    from bfcl_eval.constants.enums import Language
+    from bfcl_eval.constants.enums import Language, ReturnFormat
     from bfcl_eval.constants.model_config import MODEL_CONFIG_MAPPING
     from bfcl_eval.model_handler.local_inference.qwen_fc import QwenFCHandler
-    from bfcl_eval.eval_checker.ast_eval.ast_checker import ast_checker
+    from bfcl_eval.eval_checker.eval_runner import _evaluate_single_ast_entry
     from transformers import AutoTokenizer
     import torch
 
@@ -176,7 +193,9 @@ def main():
         "revision": REVISION,
         "subsuite": "v4/simple_python",
         "status": "STARTED",
-        "selected_ids": EXPECTED_IDS,
+        "selected_ids": [entry["id"] for entry in entries],
+        "selected_original_indices": indices,
+        "full_simple_python_requested": args.full,
         "original_task_rows": 400,
         "original_file_sha256": MEMBERS,
         "helper_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
@@ -261,16 +280,17 @@ def main():
                 raise ValueError(
                     "response termination or full-input token check failed"
                 )
-            decoded = handler.decode_ast(
-                native["model_responses"], Language.PYTHON, True
-            )
-            result = ast_checker(
-                entry["function"],
-                decoded,
+            result = _evaluate_single_ast_entry(
+                handler,
+                entry["id"],
+                native["model_responses"],
                 answers[entry["id"]]["ground_truth"],
-                Language.PYTHON,
-                "simple_python",
+                entry,
                 PROFILE,
+                "simple_python",
+                Language.PYTHON,
+                ReturnFormat.PYTHON,
+                has_tool_call_tag=True,
             )
             private = args.output / (entry["id"] + ".private.json")
             private.write_text(
@@ -278,7 +298,7 @@ def main():
                     {
                         "api_response": api_response.model_dump(),
                         "official_prompt": prompt,
-                        "decoded_model_output": decoded,
+                        "model_response": native["model_responses"],
                         "official_static_score": result,
                     },
                     default=str,
@@ -300,7 +320,8 @@ def main():
             official_valid_count=sum(s["official_valid"] for s in receipt["samples"]),
             finished_at_unix=time.time(),
             source_checkbox_eligible=all(
-                s["finish_reason"] == "stop" for s in receipt["samples"]
+                s["status"] == "EXECUTED_AND_OFFICIALLY_STATIC_SCORED"
+                for s in receipt["samples"]
             ),
         )
     except Exception as error:
