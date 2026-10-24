@@ -20,7 +20,20 @@ def test_v15_exact_extract_and_offline_reuse():
         (REPORT / "milestone-v15/method-status.json").read_text()
     )
     assert actual["method"]["method_version"] == "V1.5"
-    assert all(v is None for v in actual["method"]["current"].values())
+    current = actual["method"]["current"]
+    assert current["effective_flops"] == 1812905151088034
+    assert current["participating_chips"] == 2
+    assert current["matched_uninstrumented_seconds"] is None
+    assert current["matched_synchronized_seconds"] == 127.59352582134306
+    assert current["effective_tflops_per_chip"] == 7.1042207644080255
+    for key in (
+        "reference_seconds",
+        "reference_effective_tflops_per_chip",
+        "efficiency_percent",
+        "passed",
+    ):
+        assert current[key] is None
+    assert actual["method"]["current_measurement"]["strict_uninstrumented"] is False
     assert actual["method"]["fair_comparison"]["fixed_b0"] == {
         "vllm": "0.18",
         "vllm_ascend": "0.18",
@@ -47,7 +60,7 @@ def test_v15_exact_extract_and_offline_reuse():
         )
     )
     report = (REPORT / "中期测试报告.md").read_text()
-    assert "报告版本：V0.76" in report
+    assert "报告版本：V0.77" in report
     assert "V1.5第3.4.4节按测量区间分摊费用" in report
     assert "M06全流程验收未通过" not in report
     assert "已完成75种通信图参考" in report

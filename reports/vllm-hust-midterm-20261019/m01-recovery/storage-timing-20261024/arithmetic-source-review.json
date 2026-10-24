@@ -1,0 +1,47 @@
+{
+  "status": "source_semantic_arithmetic_coverage_review",
+  "basis": "V1.5 2MNK, activated top8 experts, actual causal structure, necessary draft KV/hidden closure. Basic float additions/subtractions/multiplications and matrix multiply-adds; SFUs/comparisons/division reported separately without invented equivalents.",
+  "target_families": [
+    "FA Q/gate/K/V and output projections",
+    "GDN Q/K/V/gate and beta/alpha input projections and output projections",
+    "40 shared experts and top8 activated routed experts",
+    "router and shared-gate projections",
+    "necessary output vocabulary projections",
+    "all40layers input/post norms plus model final norm; Q/K head norms; gated GDN output norms",
+    "RoPE; attention gates; routed/shared SwiGLU outer multiplication and mixture combine; router basic arithmetic",
+    "causal QK/AV and stable softmax basic arithmetic",
+    "causal convolution with zero-history exclusion",
+    "GDN preprocessing; necessary decode recurrence; actual64chunk prefill KKT/WY/inverse/H/O/scan"
+  ],
+  "draft_families": [
+    "necessary KV rows: input embedding/hidden norms, fusion FC, input norm, K/V projections, K head norm and RoPE",
+    "full-query retained roots and any necessary hidden ancestors: Q/gate, Q norm, causal QK/AV and softmax, output projection, post norm, routed/shared MoE and final norm",
+    "vocabulary only retained output roots"
+  ],
+  "disjointness": [
+    "Global TP2 semantic work once, not duplicate hidden scalar work across ranks",
+    "GDN prefill includes32globalvalueheads via2ranks*16, otherhelpersalreadyglobal",
+    "GDN outputnorm separatedfrompreprocessQ/KL2",
+    "Full-query scalar includesQ+KRoPE; KV-only addsK-onlyRoPE",
+    "No independent HBM flop equivalent",
+    "Rejected outputs excluded, necessary KV/hidden prerequisites retained even when draft token not retained"
+  ],
+  "source_applicability": "Qualified r6 uses same corrected source and model as formal plan; actual formal boundary/pins/counters, no-preemption/no-reuse and request coverage must pass. Current formal run still starting.",
+  "special_operation_limitation": "A point C computed from this ledger is explicitly basic-operation C. No total SFU-weighted hardware instruction throughput or final M01 attainment is asserted.",
+  "paths_sha256": {
+    "/root/gennova-evidence/20261019-midterm-aligned/audit_norm_accounting.py": "b77c7e05daccd468c279a3f83daa9913d1eea7c876d802b37459245fb4c86e56",
+    "/root/gennova-evidence/20261019-midterm-aligned/derive_recovery_model_worker_r1_scalar.py": "52294aea2eb9ac8f3e23bfe560d769bddc3f77f0cee299dac61c997a6cea3215",
+    "/root/gennova-evidence/20261019-midterm-aligned/audit_rope_reference.py": "9124e0d48c2830d567325c804492c2722cd06f09a86f7ebd836a390d9fe76cc2",
+    "/root/gennova-evidence/20261019-midterm-aligned/audit_moe_scalar_sources.py": "edf9047db491a9d7356ce59c009a9adcca859cbd0472fe95324da24758a1ac00",
+    "/root/gennova-evidence/20261019-midterm-aligned/audit_router_gate_reference.py": "9be78c14a36228a557cd01ee8bc613a9cc4a1e841bad70ba3d97c5a29d3f4767",
+    "/root/gennova-evidence/20261019-midterm-aligned/derive_r12_softmax_semantics.py": "b264d2c4c836a16ac5c715a6dfc44e6ab9543872b6f277877ca7ffd29b2899a8",
+    "/root/gennova-evidence/20261019-midterm-aligned/audit_conv_accounting.py": "5f21010dc3aac2d7a4a453f8fd5bf771232ea93cb65d827ce2c6f1a87c72c74b",
+    "/root/gennova-evidence/20261019-midterm-aligned/audit_gdn_preprocess_semantics.py": "fcd4a19760c57df73d5c73f228df3defc2dc3752a2a9e9bb52b6ab47a9557f56",
+    "/root/gennova-evidence/20261019-midterm-aligned/audit_gdn_recurrence_r9.py": "ad8fca372cbf7d894ff0c1d0e209236607772301b233fee6d09b198f4a852012",
+    "/root/gennova-evidence/20261019-midterm-aligned/audit_gdn_ho_accounting.py": "f82daa69b596892609cb328556ec1df2992193ed20faefc4f73fe6e6bd173da1",
+    "/root/gennova-evidence/20261019-midterm-aligned/audit_gdn_wy_accounting.py": "83e69151368a67b3198850a022399b8f84fccbdf397a8bec54093d57aeafdef2",
+    "/root/gennova-evidence/20261019-midterm-aligned/gdn_inverse_accounting.py": "43a80df55a746a627950192a858ed5229cb2bf4dcdb025600aad5a415d2a49b0"
+  },
+  "model_config_sha256": "5e4d7f74fec2f360eb9cfbfcd6ec0c4c76e684d3a11caaed259d9fd9bfbc7944",
+  "full_reference_seconds": null
+}

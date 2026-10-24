@@ -47,6 +47,44 @@ def build():
     method["pending_evidence"][1] = (
         "Associate the measured 120.65347687713802-second synchronized B1 envelope with valid effective F and same-workload reference; do not substitute the older ~62-second run"
     )
+    timing_dir = REPORT / "m01-recovery/storage-timing-20261024"
+    timing_manifest = json.loads((timing_dir / "archive.json").read_text())
+    timing_raw = (timing_dir / "arithmetic.json").read_bytes()
+    assert (
+        hashlib.sha256(timing_raw).hexdigest()
+        == timing_manifest["derived_sha256"]["arithmetic.json"]
+    )
+    timing = json.loads(timing_raw)
+    method["status"] = "compute-measured-reference-pending"
+    method["current"].update(
+        effective_flops=timing["basic_operation_flops"],
+        participating_chips=timing["participating_chips"],
+        matched_synchronized_seconds=timing["synchronized_seconds"],
+        effective_tflops_per_chip=timing["basic_operation_tflops_per_chip"],
+    )
+    method["current_measurement"] = {
+        "run_id": timing["run_id"],
+        "evidence_path": (timing_dir / "arithmetic.json").relative_to(ROOT).as_posix(),
+        "arithmetic_convention": timing["scope"],
+        "implementation_variant": timing["implementation_variant"],
+        "strict_uninstrumented": False,
+        "host_prefill_counting": True,
+        "native_detailed_acceptance": True,
+        "all_measurement_cost_retained": True,
+        "device_journals": False,
+        "model_profiler": False,
+        "replaces_prior_best_b1_performance": False,
+    }
+    method["requirements"]["timing_refinement"] = (
+        "This run uses predeclared host-only prefill aggregates and native detailed acceptance "
+        "statistics, with all costs retained inside synchronized T. It is not strictly "
+        "uninstrumented. Same-run F and C are reported under the disclosed basic-operation "
+        "convention; no efficiency or attainment until the independent reference is complete."
+    )
+    method["pending_evidence"] = [
+        "Complete independent whole-model reference, actual dependencies and applicability",
+        "Quantify reference-model uncertainty without fitting B0/B1 time or selecting faster samples",
+    ]
     c16 = module(ROOT / "reports/c16-baseline018-reuse-20261022/audit.py").audit()
     pair = module(REPORT / "render_m06_pair.py").load(REPORT / "m06-paired-20261021")
     arms = pair["arms"]
