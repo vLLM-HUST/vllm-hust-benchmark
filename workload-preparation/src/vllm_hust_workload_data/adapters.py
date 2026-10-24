@@ -115,6 +115,18 @@ def adapt_row(
         for key in ("input", "target")
     ):
         raise ValueError("BBH requires original nonempty input and reference strings")
+    if source_id == "RULER" and (
+        type(row["index"]) is not int
+        or not isinstance(row["input"], str)
+        or not row["input"].strip()
+        or not isinstance(row.get("answer_prefix", ""), str)
+        or not isinstance(row["outputs"], list)
+        or not row["outputs"]
+        or any(not isinstance(value, str) for value in row["outputs"])
+    ):
+        raise ValueError(
+            "RULER requires original generated input, index and reference list"
+        )
     if source_id == "NATURAL_INSTRUCTIONS" and (
         not isinstance(row["Definition"], list)
         or not row["Definition"]
@@ -442,6 +454,33 @@ def iter_workload(
             "unit": manifest["unit"],
             "provenance_kind": manifest["provenance_kind"],
         }
+        if source_id == "RULER":
+            generation = file_spec.get("generation")
+            generation_text_fields = (
+                "task",
+                "model_template_type",
+                "tokenizer_type",
+                "tokenizer_model",
+                "tokenizer_revision",
+                "subset",
+            )
+            if (
+                not isinstance(generation, dict)
+                or any(
+                    not isinstance(generation.get(key), str)
+                    or not generation[key].strip()
+                    for key in generation_text_fields
+                )
+                or any(
+                    type(generation.get(key)) is not int or generation[key] <= 0
+                    for key in ("max_seq_length", "num_samples")
+                )
+                or type(generation.get("random_seed")) is not int
+                or generation["random_seed"] < 0
+                or generation["num_samples"] != file_spec.get("rows")
+            ):
+                raise ValueError("RULER manifest must preserve generation provenance")
+            source["generation"] = deepcopy(generation)
         rows = iter_source_rows(asset_path(Path(data_root), name), spec)
         remaining = None if limit is None else limit - emitted
         try:

@@ -29,7 +29,7 @@
     {"name":"精确前缀与工作集回访","sources":["MOONCAKE","TRACELAB","WILDCHAT","LMSYS_CHAT"],"asset_ids":["PAIO-PREFIX-SHARED-5000","PAIO-REUSE-CONV-5000"],"fields":["content/hash identity","request ordering","session/group","cache receipts if observed"],"boundary":"同一内容不自动表示运行时命中；构造组单列来源属性。"},
     {"name":"语义相似对照","sources":["PAWS","QRECC"],"asset_ids":["PAIO-SEMANTIC-SIMILAR-5000"],"fields":["text pairs","semantic labels","source identity"],"boundary":"不归为高KV复用小类，不把语义相似当token前缀共享。"},
     {"name":"工具合同共享与依赖","sources":["BFCL","TRACELAB","TOOLACE","XLAM_TOOL"],"asset_ids":[],"fields":["tool schema identity","parent events","tool result","event order/time"],"boundary":"实际依赖与模板标记分开；辅助合成工具对话不作真实等待分布。"},
-    {"name":"长输出、P/D与受控压力参考","sources":["LONGWRITER","RULER","AZURE_LLM"],"asset_ids":[],"fields":["input/output size","actual response or target distinction"],"boundary":"RULER为已有官方合成探针，不生成新数据；P/D部署和handoff成本不是输入语料本身。"},
+    {"name":"长输出、P/D与受控压力参考","sources":["LONGWRITER","RULER","AZURE_LLM"],"asset_ids":[],"fields":["input/output size","actual response or target distinction"],"boundary":"RULER只复现发布方原生成协议并保留种子/tokenizer/长度，不自造替代题；P/D部署和handoff成本不是输入语料本身。"},
     {"name":"取消、恢复、版本与其他生命周期","sources":["TRACELAB","MOONCAKE"],"asset_ids":[],"fields":["event type","parent/attempt","state version","event time/order"],"boundary":"只是待检查来源；缺事件就登记缺口，不编造，也不必强归九类。"}
   ]
 }

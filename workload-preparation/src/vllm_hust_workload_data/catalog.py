@@ -70,6 +70,7 @@ def download_plan(source_id, root=None):
                 "rows",
                 "role",
                 "archive_member",
+                "generation",
             )
             if k in f
         }
@@ -89,7 +90,11 @@ def download_plan(source_id, root=None):
         "preparation_command": source.get("preparation_command"),
         "method": "EXTERNAL_AUTHORIZED_ASSET"
         if source_id.startswith("PAIO-")
-        else ("PINNED_FILE_URLS" if files else "PUBLISHER_DATA_DOWNLOAD_SECTION"),
+        else (
+            "ORIGINAL_PUBLISHER_GENERATOR"
+            if source_id == "RULER"
+            else ("PINNED_FILE_URLS" if files else "PUBLISHER_DATA_DOWNLOAD_SECTION")
+        ),
         "instruction": "Obtain selected files under publisher/owner terms and supply their root explicitly; this command does not download.",
         "asset_availability": "NOT_CHECKED_ON_THIS_MACHINE",
     }
