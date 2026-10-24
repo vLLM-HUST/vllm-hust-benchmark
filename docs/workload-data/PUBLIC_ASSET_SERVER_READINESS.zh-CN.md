@@ -200,3 +200,41 @@ python scripts/prepare_ruler_qa_required_doc_compat.py \
 plan/run、prepared_rows和resolve_input。准备输出目录须与原data_root分开，不能放在其内部。研究侧使用同一manifest导入公共索引或直接prepare/resolve，不需要复制原数据到研究仓。
 
 服务器已用该绑定CLI候选和固定CI50474ec0数据组件完成[8组消费链路核验](validation/ruler-eight-profile-binding-chain-20261025.json)：全4000条绑定/索引、各首尾3条共48条公共回查、研究索引导入及直接prepare/resolve各24条。另独立对原生成文件逐条比较全部4000条输入、参考、原index/行号和生成配置，不只是把provider与自己比较。绑定CLI的实际字节摘要记录在回执中，不冒充它已在当时通过最终CI；研究默认依赖锁仍未改，也不迁观测/特征/分析。
+
+### LongMemEval 原生生成及原评分入口
+
+采用发布方 cleaned v1 的 oracle/S/M
+三个原文件，版本与哈希见来源清单和[获取回执](validation/longmemeval-original-acquisition-20261025.json)。oracle只含原证据会话，不能冒充S/M全历史。数据获取到用户指定的服务器目录，不纳入Git仓库。
+
+固定发布方代码后执行：
+
+```sh
+git clone https://github.com/xiaowu0162/LongMemEval.git /private/longmemeval-source
+git -C /private/longmemeval-source checkout 9e0b455f4ef0e2ab8f2e582289761153549043fc
+python scripts/run_longmemeval_original.py \
+  --source /private/longmemeval-source --data-root /private/longmemeval-cleaned \
+  --variant oracle --model your-served-model --context-window 131072 \
+  --api-base http://127.0.0.1:19466/v1 --output /private/fresh-longmemeval-oracle
+```
+
+`--variant s`、`--variant m`分别使用完整原S/M文件；默认固定物理行0、1、2，`--full`跑该原文件全部500题。默认沿用发布方CoT生成预算800，显式`--direct`才采用发布方direct预算500。不得为了通过容量检查临时换模式、换题或截断历史。
+
+入口核验原代码摘要，直接执行未改写的`prepare_prompt`，保留原json历史格式、日期排序及证据标签隔离。`topk_context`显式取全部原会话数，不隐式截成最近50次会话；保留发布方1000
+token余量，超过其检索历史预算即报容量阻塞，不执行截断分支。通过本地服务tokenize取得实际模型token；原函数只读取token数组长度，接口层以列表代替CPU张量，不改变token内容。模型采用本地已部署模型，非发布方模型结果复现。
+
+生成文件`hypotheses.private.jsonl`保留原`question_id`和模型回答。评分仍用发布方原脚本及其支持的judge：
+
+```sh
+python -m venv /private/longmemeval-eval-env
+/private/longmemeval-eval-env/bin/python -I -m pip install \
+  -r /private/longmemeval-source/requirements-lite.txt \
+  -c configs/workload-native/longmemeval-eval-client-constraints.txt
+/private/longmemeval-eval-env/bin/python -I /private/longmemeval-source/src/evaluation/evaluate_qa.py \
+  llama-3.1-70b-instruct /private/fresh-longmemeval-oracle/hypotheses.private.jsonl \
+  /private/longmemeval-cleaned/longmemeval_oracle.json
+```
+
+客户端约束仅将httpx固定为0.27.2，以兼容发布方openai1.35.1使用的proxies参数；不修改原评分脚本、judge模型或评分提示。服务器Python3.12.13隔离环境已完成原评分模块导入、12个提示分支夹具、无网络客户端构造及pip
+check；不冒充发布方Python3.9整机环境，也不等于judge已执行。
+
+上述本地judge要求按原脚本在`http://localhost:8001/v1`部署`meta-llama/Meta-Llama-3.1-70B-Instruct`；不是当前Qwen服务。发布方还支持GPT-4o及mini评分，需要用户自行配置已授权的API与费用，不自动调用。没有合适judge时保留生成结果并标记评分阻塞，不把Qwen自评或字符串匹配冒充原官方评分。只跑生成、只读数据、CPU夹具测试均不能勾来源完成。
