@@ -96,3 +96,5 @@ env -u PYTHONPATH -u PYTHONHOME -u LD_PRELOAD /private/af-env/bin/python \
 
 模型答错、无效动作、步数耗尽、服务错误和取消分别保留。构建/环境探测是0模型调用的独立证据，不能计入完整任务数；只有完整原生交互/终止和适用官方评分才更新来源勾选。CPU
 CI只测试临时软件夹具、引用契约和来源边界，不下载原题、不构建native runtime、不跑模型或性能。
+
+2026-10-24核查固定官方`task.py`与`SampleStatus`后，修正执行器的结果分类：原生`task limit reached`和`agent invalid action`是可由官方聚合评分的任务失败，不要求答对才算执行过；只有带实际模型调用及原生0/1奖励的受支持终态，才具备所选协议的执行资格。`task error`、`unknown`、取消，以及上下文/协议不适配仍不算完成。模型响应若以`length`结束，则保留2048预算及原输出，交给原生Session和动作校验，不追加生成、不改动作、不换题。这个执行器修正目前仅有软件测试，旧三题执行回执及其源码SHA保持历史事实；不得将旧回执称为修改后执行器的实跑证据。执行器中的`source_checkbox_eligible`只描述本次选题的执行条件，不自动代表全来源交付完成。

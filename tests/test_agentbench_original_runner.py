@@ -266,7 +266,7 @@ def test_runtime_build_only_changes_packaging_not_input_arguments_or_task_source
     )
 
 
-def test_final_public_handoff_matches_current_entry_and_dependency_recipe():
+def test_historical_public_handoff_preserves_executed_entry_and_dependency_recipe():
     receipt = json.loads(
         (
             ROOT
@@ -277,7 +277,10 @@ def test_final_public_handoff_matches_current_entry_and_dependency_recipe():
     def sha(path):
         return hashlib.sha256(path.read_bytes().replace(b"\r\n", b"\n")).hexdigest()
 
-    assert receipt["helper_sha256"] == sha(SCRIPT)
+    # This receipt belongs to the actual 2026-10-23 run, not later runner fixes.
+    assert receipt["helper_sha256"] == (
+        "1bdccaa85b4f692e3bf29ff997ebb6875b5faeb838e87ab7883c41a492e4622d"
+    )  # pragma: allowlist secret - historical executed public helper checksum
     assert receipt["runtime_recipe"]["build_helper_sha256"] == sha(
         ROOT / "scripts/build_agentbench_pddl_runtime_wheels.py"
     )
@@ -293,3 +296,48 @@ def test_final_public_handoff_matches_current_entry_and_dependency_recipe():
     assert receipt["new_unique_tasks_vs_initial_attempt"] == 0
     assert receipt["unique_original_tasks"] == 3 < receipt["original_task_count"]
     assert [row["reward"] for row in receipt["tasks"]] == [True, True, True]
+
+
+@pytest.mark.parametrize(
+    "status", ["completed", "task limit reached", "agent invalid action"]
+)
+def test_native_scored_failure_is_not_an_infrastructure_failure(status):
+    task = {"status": status, "reward": 0, "model_calls": 20}
+    assert runner.native_tasks_scored([task.copy() for _ in range(3)])
+
+
+@pytest.mark.parametrize(
+    "status",
+    [
+        "running",
+        "unknown",
+        "task error",
+        "cancelled",
+        "agent context limit",
+        "agent validation failed",
+    ],
+)
+def test_incomplete_or_unsupported_native_end_does_not_pass_delivery(status):
+    task = {"status": status, "reward": 0, "model_calls": 1}
+    assert not runner.native_tasks_scored([task.copy() for _ in range(3)])
+
+
+def test_native_scoring_requires_actual_model_calls_and_reward():
+    task = {"status": "completed", "reward": 0, "model_calls": 1}
+    assert not runner.native_tasks_scored([task.copy() for _ in range(2)])
+    for override in ({"reward": None}, {"model_calls": 0}):
+        bad = dict(task, **override)
+        assert not runner.native_tasks_scored([task, task, bad])
+
+
+def test_bounded_model_output_is_forwarded_without_rewriting():
+    message = {"role": "assistant", "content": "unfinished original output"}
+    choice = {"finish_reason": "length", "message": message}
+    assert runner.model_choice({"choices": [choice]}) is choice
+    for response in (
+        {"choices": []},
+        {"choices": [dict(choice, finish_reason="error")]},
+        {"choices": [dict(choice, message=None)]},
+    ):
+        with pytest.raises(ValueError):
+            runner.model_choice(response)

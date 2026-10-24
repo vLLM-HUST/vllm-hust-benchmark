@@ -171,6 +171,30 @@ def post(endpoint, body):
         return json.load(response)
 
 
+def native_tasks_scored(tasks):
+    """Completion of a selected protocol is not a guarantee of agent success."""
+    terminal = {"completed", "task limit reached", "agent invalid action"}
+    return len(tasks) >= 3 and all(
+        item["status"] in terminal
+        and item["reward"] in (0, 1)
+        and item["model_calls"] > 0
+        for item in tasks
+    )
+
+
+def model_choice(response):
+    """Retain an original bounded output, including legal token-budget endings."""
+    choices = response.get("choices", [])
+    if (
+        len(choices) != 1
+        or choices[0].get("finish_reason") not in {"stop", "tool_calls", "length"}
+        or not isinstance(choices[0].get("message"), dict)
+        or choices[0]["message"].get("role") != "assistant"
+    ):
+        raise ValueError("local model response lacked a supported assistant output")
+    return choices[0]
+
+
 async def execute_original_task(task, index, endpoint, model, directory):
     from agentrl.worker.task import Session
     from agentrl.worker.typings import (
@@ -224,19 +248,14 @@ async def execute_original_task(task, index, endpoint, model, directory):
             (directory / f"call-{len(calls) - 1}.private.json").write_text(
                 json.dumps(response)
             )
-            choices = response.get("choices", [])
-            if len(choices) != 1 or choices[0].get("finish_reason") not in {
-                "stop",
-                "tool_calls",
-            }:
-                raise ValueError("local model response lacked normal/tool termination")
+            choice = model_choice(response)
             calls[-1].update(
                 response_received=True,
-                finish_reason=choices[0]["finish_reason"],
+                finish_reason=choice["finish_reason"],
                 usage=response.get("usage"),
             )
             (directory / "calls.json").write_text(json.dumps(calls))
-            message = choices[0]["message"]
+            message = choice["message"]
             agent_job = asyncio.create_task(
                 session.controller.agent_pull(AgentOutput(messages=[message]))
             )
@@ -442,12 +461,7 @@ def main():
                         "native runtime changed an original episode input file"
                     )
         receipt["original_episode_input_files_unchanged"] = True
-        receipt["source_checkbox_eligible"] = len(indices) >= 3 and all(
-            item["status"] == "completed"
-            and item["native_environment_steps"] > 0
-            and item["model_calls"] > 0
-            for item in receipt["tasks"]
-        )
+        receipt["source_checkbox_eligible"] = native_tasks_scored(receipt["tasks"])
         if any(
             item["status"] in {"task error", "unknown", "cancelled"}
             for item in receipt["tasks"]
