@@ -77,6 +77,104 @@ def test_tracelab_full_metadata_index_is_not_native_replay():
     assert not receipt["source_completion_checked"]
 
 
+def test_tracelab_full_official_csv_preparation_is_not_model_replay():
+    receipt = json.loads(
+        (DOCS / "validation/tracelab-official-csv-preparation-20261024.json").read_text(
+            "utf-8"
+        )
+    )
+    assert receipt["source_unmodified"] and receipt["original_database_unchanged"]
+    assert receipt["original_database_rows"] == 665453
+    assert len(receipt["source_files"]) == 6
+    assert receipt["isolated_environment"]
+    assert receipt["packages"] == {"duckdb": "1.5.3", "numpy": "2.4.6"}
+    assert receipt["package_versions_match_upstream_lock"]
+    assert not receipt["full_upstream_uv_environment_installed"]
+    assert receipt["pip_check_passed"]
+    assert receipt["repeat_outputs_byte_identical"]
+    assert len(receipt["runs"]) == 2
+    assert all(
+        run["process_returncode"] == 0 and run["csv_rows"] == 665453
+        for run in receipt["runs"]
+    )
+    assert receipt["runs"][0]["csv_sha256"] == receipt["runs"][1]["csv_sha256"]
+    assert receipt["configuration"]["max_sessions"] is None
+    assert not receipt["original_sessions_limited_or_replaced"]
+    assert receipt["upstream_field_clamping_and_synthetic_arrivals_preserved"]
+    assert receipt["model_calls"] == 0
+    assert not receipt["native_replay_executed"]
+    assert not receipt["source_completion_checked"]
+
+
+def test_tracelab_failed_first_locked_build_remains_failed_evidence():
+    receipt = json.loads(
+        (DOCS / "validation/tracelab-original-build-attempt-20261024.json").read_text(
+            "utf-8"
+        )
+    )
+    assert receipt["status"] == "OFFICIAL_LOCKED_BUILD_FAILED"
+    assert receipt["process_returncode"] == 101
+    assert receipt["locked_build"] and receipt["original_source_and_lock_unchanged"]
+    assert receipt["isolated_prefix_cache_and_target"]
+    assert not receipt["global_toolchain_or_model_environment_changed"]
+    assert receipt["binary_sha256"] is None
+    assert not receipt["native_replay_executed"]
+    assert receipt["model_calls"] == 0
+
+
+def test_tracelab_independent_text_pool_is_not_original_trace_prompts():
+    receipt = json.loads(
+        (DOCS / "validation/tracelab-independent-text-pool-20261024.json").read_text(
+            "utf-8"
+        )
+    )
+    assert receipt["zip_bytes"] == 322592222
+    assert receipt["original_text_bytes"] == 1000000000
+    assert receipt["full_utf8_decode_and_zip_crc_verified"]
+    assert not receipt["token_pool_created_or_capacity_verified"]
+    assert not receipt["original_private_trace_prompts"]
+    assert not receipt["new_benchmark_or_dataset_inventory_entry"]
+    assert not receipt["native_replay_executed"]
+    assert receipt["model_calls"] == 0
+    assert not receipt["raw_payloads_public"]
+
+
+def test_tracelab_locked_build_and_cpu_dry_run_are_not_npu_replay():
+    build = json.loads(
+        (DOCS / "validation/tracelab-original-locked-build-20261024.json").read_text(
+            "utf-8"
+        )
+    )
+    dry = json.loads(
+        (DOCS / "validation/tracelab-original-dry-run-20261024.json").read_text("utf-8")
+    )
+    assert build["status"] == "OFFICIAL_LOCKED_BUILD_SUCCEEDED"
+    assert build["process_returncode"] == 0
+    assert build["original_source_and_lock_unchanged"] and build["locked_build"]
+    assert build["isolated_prefix_cache_and_target"]
+    assert not build["global_toolchain_or_model_environment_changed"]
+    assert build["native_library_binding"]["package_version"] == "3.6.4"
+    assert build["binary_sha256"] == dry["binary_sha256"]
+    assert dry["full_native_dry_run_returncode"] == 0
+    assert dry["sample_native_dry_run_returncode"] == 0
+    assert dry["full_sessions"] == 8058 and dry["full_steps"] == 665453
+    assert dry["fixed_sample_sessions"] == 3
+    assert dry["fixed_sample_capacity"] == {
+        "steps": 20,
+        "max_full_prompt_plus_original_output": 46646,
+        "steps_exceeding_131072": 0,
+    }
+    assert dry["full_capacity"]["steps_exceeding_131072"] == 336898
+    assert dry["complete_rounds_preserved"]
+    assert not dry["context_overflow_skip_flag_enabled"]
+    assert not dry["tokenizer_and_text_pool_loaded_by_dry_run"]
+    assert not dry["token_pool_capacity_verified"]
+    assert dry["model_calls"] == dry["native_model_attempted_steps"] == 0
+    assert not dry["mandatory_server_cache_probe_verified"]
+    assert not dry["native_replay_executed"]
+    assert not dry["source_completion_checked"]
+
+
 def test_tracelab_official_replay_sources_are_not_build_or_runtime_evidence():
     receipt = json.loads(
         (

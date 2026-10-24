@@ -209,7 +209,12 @@ TB；服务器/data约1.42TB可用，未缩小语料。ChartQA当前两卡主机
 - [x] TRACELAB：原压缩文件SHA、665453条调用元数据全字段/顺序核查及前三条索引回查完成；20份官方回放源码/示例/许可文件已在服务器取得并逐文件核对Git
   blob。[数据回执](validation/tracelab-cpu-audit-20261024.json)、[官方入口准备](validation/tracelab-official-replay-preparation-20261024.json)。
 - [x] TRACELAB：服务器全665453条原元数据索引、首尾6条回查完成；官方DuckDB资产直接流式传至服务器并核验发布SHA及字节数，本地未保存数据。见[索引回执](validation/tracelab-full-index-20261024.json)及[资产回执](validation/tracelab-duckdb-original-20261024.json)。
-- [ ] TRACELAB：Rust工具链与锁定构建、官方DuckDB→CSV、独立文本池及真实回放未完成。官方工具是合成文本会话驱动，不是原私有请求重放；来源继续未勾，运行边界见[服务轨迹说明](ORIGINAL_SERVING_TRACES.zh-CN.md)。
+- [x] TRACELAB：未改官方转换器、独立Python环境按上游锁版本安装NumPy/DuckDB；完整原DuckDB只读转换两次，各665453行，CSV字节一致、原数据库未变，模型调用0。[转换回执](validation/tracelab-official-csv-preparation-20261024.json)。
+- [x] TRACELAB：取得官方回放说明推荐的独立enwik9文本资产，10亿原始字节、发布MD5/SHA1、完整UTF8解码及ZIP
+  CRC核验通过；不增加数据集清单条目，不把它冒充原轨迹prompt。[辅助资产回执](validation/tracelab-independent-text-pool-20261024.json)。
+- [x] TRACELAB：隔离Rust1.90.0、原Cargo.lock构建通过，绑定现有OpenSSL3.6.4、不改源码/锁；全8058会话/665453轮及固定字典序前三会话完整20轮的官方CPU
+  dry-run通过，模型调用0。[构建回执](validation/tracelab-original-locked-build-20261024.json)、[dry-run回执](validation/tracelab-original-dry-run-20261024.json)。
+- [ ] TRACELAB：原分词器与token池容量、服务缓存明细探测、真实NPU回放未完成。全量336898轮的完整输入+原输出预算超当前131072，保留阻塞，不跳题；固定三会话20轮容量可容纳但尚未调用模型。官方工具是合成文本会话驱动，不是原私有请求重放；来源继续未勾，运行边界见[服务轨迹说明](ORIGINAL_SERVING_TRACES.zh-CN.md)。
 - [x] TOOLACE：原11300条system/历史对话、原轮次与工具描述、全量索引及首尾6条回查完成，保持历史对话资产身份。[CPU回执](validation/toolace-corpus-cpu-audit-20261024.json)。
 - [ ] TOOLACE：服务器新取固定版数据卡网络不可达，不能将目录中的预期SHA当下载验证；没有附带可执行工具环境/任务oracle，不编prompt冒充Agent原生评测，来源级继续未勾。
 - [x] JSONSCHEMABENCH：固定CI包与登记的三个原schema

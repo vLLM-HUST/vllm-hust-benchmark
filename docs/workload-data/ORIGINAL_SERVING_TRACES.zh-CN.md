@@ -10,7 +10,7 @@
 固定发布`uw-syfi/TraceLab@v0.0.2`的`syfi_coding_trace.jsonl.gz`共100939722字节，SHA256为`11ce51ec0a25e3d1d95b025bca2f7d1647e47571eb7cc968acd5fc64d4b4fb65`。现已在服务器逐条对比665453条原记录的全部字段与顺序，包括session/round标识、可选turn标识、tokens、timing_events和tools。它们原样位于`record.replay["annotations"]`；task.input为空、outcome为None，request_body拒绝伪造请求。665453是原文件行数，不是独立父任务或成功任务数。随后以固定CI工件完成全部665453条SQLite索引，并核验原行0、1、2、665450、665451、665452的prepare→resolve，见[全量索引回执](validation/tracelab-full-index-20261024.json)。未运行科研分析或模型，历史三条准备回执不回写。
 
 [固定发布源码](https://github.com/uw-syfi/TraceLab/tree/61fea8f97277d0aa247cc2e4c7e31f90ed2bea1c)中的20份replay、示例及许可文件已在服务器取得，逐文件Git
-blob身份一致，不在本仓重新分发源码、原数据或研究分析模块。[数据审计](validation/tracelab-cpu-audit-20261024.json)与[源码准备回执](validation/tracelab-official-replay-preparation-20261024.json)分别记录，构建/dry-run/回放均未运行。原数据按发布方[数据许可](https://github.com/uw-syfi/TraceLab/blob/61fea8f97277d0aa247cc2e4c7e31f90ed2bea1c/LICENSE-DATASET.md)标为CC-BY-4.0，代码为Apache-2.0，二者不能混用；使用时保留来源与归属，不公开本地原始载荷。
+blob身份一致，不在本仓重新分发源码、原数据或研究分析模块。[数据审计](validation/tracelab-cpu-audit-20261024.json)与[源码准备回执](validation/tracelab-official-replay-preparation-20261024.json)分别保留最初数据核验与源码获取的历史状态，不能据此证明构建/回放通过。原数据按发布方[数据许可](https://github.com/uw-syfi/TraceLab/blob/61fea8f97277d0aa247cc2e4c7e31f90ed2bea1c/LICENSE-DATASET.md)标为CC-BY-4.0，代码为Apache-2.0，二者不能混用；使用时保留来源与归属，不公开本地原始载荷。
 
 ### 官方入口与尚缺的运行条件
 
@@ -30,15 +30,42 @@ python -I -m vllm_hust_workload_data.pipeline run --config tracelab-inputs.json 
 官方[session_runner](https://github.com/uw-syfi/TraceLab/blob/61fea8f97277d0aa247cc2e4c7e31f90ed2bea1c/replay/README.md)按会话顺序提交token-id
 completions，用独立文本池模拟输入；每轮等响应及工具等待后推进。它不是原私有prompt或真实工具执行。官方[CSV准备器](https://github.com/uw-syfi/TraceLab/blob/61fea8f97277d0aa247cc2e4c7e31f90ed2bea1c/artifacts/trace_facts/csv_export/README.md)还会做发布方定义的会话分组、排序、长度下限处理和带种子的合成到达；这些转换参数必须记录，不能称原始请求时间。本仓不复制图表、特征或缓存研究分析。
 
-当前服务器未找到cargo/rustc。官方转换器依赖的`syfi_coding_trace.duckdb`现已由官方GitHub Release
+服务器初始未找到cargo/rustc；本轮已在独立`/tmp`前缀安装官方摘要核验的Rust1.90.0，不修改全局工具链或模型环境。首次按原锁文件构建因找不到OpenSSL开发文件退出101，保留[首次构建回执](validation/tracelab-original-build-attempt-20261024.json)。随后仅为构建进程绑定现有Miniforge
+OpenSSL3.6.4的头文件/库，原Cargo.lock双CPU并发构建退出0，原源码与锁文件全部SHA不变，见[锁定构建回执](validation/tracelab-original-locked-build-20261024.json)。实际系统为openEuler24.03
+LTS-SP3 ARM64；构建使用独立CARGO_HOME/CARGO_TARGET_DIR，运行客户端也需可找到同一OpenSSL动态库，不向模型服务环境注入路径。
+
+官方转换器依赖的`syfi_coding_trace.duckdb`现已由官方GitHub Release
 API资产488289840直接流式传至服务器私有目录，未在本地保存数据文件。160182272字节及SHA256
-`a7bab286bc640844560850965ccf47975cf66407154132abaab90f27ec9be744`均与发布方摘要一致，见[原DuckDB资产回执](validation/tracelab-duckdb-original-20261024.json)。目前只核验原始资产，尚未打开数据库或执行官方CSV转换。另需独立取得文本池和模型tokenizer；Rust锁定依赖、文本池及模型服务兼容性均未验证，不写成环境已就绪。
+`a7bab286bc640844560850965ccf47975cf66407154132abaab90f27ec9be744`均与发布方摘要一致，见[原DuckDB资产回执](validation/tracelab-duckdb-original-20261024.json)。随后补取同一固定提交的官方转换器、数据库工具、schema及锁文件共六份原文件，逐文件核对Git
+blob；以只读方式打开原数据库并完成全量转换，两次各665453行、CSV逐字节一致，原数据库SHA不变，见[全量官方转换回执](validation/tracelab-official-csv-preparation-20261024.json)。历史资产回执仍保留取得当时未打开/转换的状态，不回写。原模型tokenizer与token池容量、模型服务兼容性仍需验证，不写成完整回放环境已就绪。
+
+转换器的实际隔离环境为Linux
+ARM64、Python3.12.13、DuckDB1.5.3、NumPy2.4.6；两项依赖版本与固定版`uv.lock`一致，`pip check`通过。这是该转换器所需的最小依赖环境，不是上游所有科研/网页功能的完整`uv sync`环境。可在独立环境复现，不要安装进模型服务环境：
+
+```sh
+python3.12 -m venv /tmp/tracelab-csv-env
+/tmp/tracelab-csv-env/bin/python -m pip install duckdb==1.5.3 numpy==2.4.6
+/tmp/tracelab-csv-env/bin/python -m pip check
+# 在上述固定提交的官方源码根目录运行；输出路径须未使用。
+/tmp/tracelab-csv-env/bin/python artifacts/trace_facts/csv_export/convert.py \
+  --db /private/syfi_coding_trace.duckdb -o /private/coding-trace-new.csv \
+  --provider all --session-order shuffle --arrival-pattern poisson \
+  --arrival-rate 1 --seed 0 --tool-latency-source wall
+```
+
+不设置`--max-sessions`，保留全部发布记录；这里的shuffle、到达过程、长度下限及工具等待转换均为原官方逻辑，不是原请求正文或原始到达时间。两次完整转换不产生模型请求，也不构成回放或性能结论。
+
+独立文本资产按固定版官方README推荐选择enwik9，已从[原发布地址](https://mattmahoney.net/dc/enwik9.zip)直接取得至服务器，未改写文本。原解压文件10亿字节、MD5和SHA1与[发布方校验页](https://mattmahoney.net/dc/textdata.html)一致，并核验完整UTF8解码与ZIP
+CRC；本机另记SHA256，见[辅助文本资产回执](validation/tracelab-independent-text-pool-20261024.json)。它仅为官方合成会话回放的独立文本池，不是TraceLab原私有prompt，不增加本项目的数据集清单条目；原文件仍不公开分发，使用者应遵守Wikipedia派生文本的适用许可。取得文本不等于已创建token池，更不证明默认1亿token池容量满足实际分词结果。
 
 满足上述条件后，在固定版上游目录按原入口构建和预检：
 
 ```sh
-cargo build --locked --release --manifest-path replay/Cargo.toml --bin session_runner
-replay/target/release/session_runner \
+env PATH="/private/rust-1.90.0/bin:$PATH" \
+  CARGO_HOME=/private/tracelab-cargo-cache CARGO_TARGET_DIR=/private/tracelab-target \
+  OPENSSL_DIR=/root/miniforge3 LD_LIBRARY_PATH=/root/miniforge3/lib \
+  cargo build --locked --release --jobs 2 --manifest-path replay/Cargo.toml --bin session_runner
+LD_LIBRARY_PATH=/root/miniforge3/lib /private/tracelab-target/release/session_runner \
   --trace /private/publisher-export.csv --text-file /private/text-corpus \
   --tokenizer /private/model/tokenizer.json --model LOCAL_MODEL_ALIAS \
   --dry-run --max-model-len 131072 --summary-path /private/replay-dry-run.json
@@ -46,7 +73,9 @@ replay/target/release/session_runner \
 
 dry-run不联系模型，也不加载文本池/tokenizer，成功退出不证明这些资产已存在或上下文适配。须检查summary的overflow记录，并逐轮确认完整输入加原请求输出预算可容纳；超限记阻塞，不截断、不换题。特别注意原版`--fail-on-context-overflow`实际会跳过轮次，本项目固定任务验证不能启用它来凑通过。真实运行时移除dry-run并提供批准的本地`--base-url .../v1`，仍需先验证完整所选会话和原等待/输出设置。
 
-官方回放器启动时会用两次模型请求检查prefix-cache和cached-token明细；服务不支持则终止，不能绕过该检查冒充通过。作者示例CSV只能验证示例链路，不是全部发布轨迹。以上命令尚未实跑，原生构建、数据转换和NPU回放均保持未勾；研究线程占卡期间不启动模型或探测请求。
+上述全量官方dry-run已退出0，识别8058会话/665453轮，但完整输入加原输出预算有336898轮超过当前131072窗口，因此不代表当前部署能跑全量。另按官方`--max-sessions 3`固定抽样完成dry-run：上游使用BTreeMap，选的是会话ID字典序前三个，而非CSV前三条或挑容量合适的会话；完整保留这三会话20轮，最大输入+原输出预算46646，无超限。未启用跳轮选项，也未调用模型。见[dry-run回执](validation/tracelab-original-dry-run-20261024.json)。注意官方summary只检查prompt长度，本项目另核验了原输出预算，不能拿summary中的零实际请求/零失败当成真实通过。
+
+官方回放器启动时会用两次模型请求检查prefix-cache和cached-token明细；服务不支持则终止，不能绕过该检查冒充通过。作者示例CSV只能验证示例链路，不是全部发布轨迹。NPU回放尚未完成，不把已完成的构建、CSV转换或dry-run等同于原生回放；研究线程占卡期间不启动模型或探测请求。
 
 ## 原始来源与已验证范围
 
