@@ -312,9 +312,12 @@ def test_historical_public_handoff_preserves_executed_entry_and_dependency_recip
         return hashlib.sha256(path.read_bytes().replace(b"\r\n", b"\n")).hexdigest()
 
     # This receipt belongs to the actual 2026-10-23 run, not later runner fixes.
-    assert receipt["helper_sha256"] == (
-        "1bdccaa85b4f692e3bf29ff997ebb6875b5faeb838e87ab7883c41a492e4622d"
-    )  # pragma: allowlist secret - historical executed public helper checksum
+    assert (
+        receipt["helper_sha256"]
+        == (
+            "1bdccaa85b4f692e3bf29ff997ebb6875b5faeb838e87ab7883c41a492e4622d"  # pragma: allowlist secret - historical public helper checksum
+        )
+    )
     assert receipt["runtime_recipe"]["build_helper_sha256"] == sha(
         ROOT / "scripts/build_agentbench_pddl_runtime_wheels.py"
     )
