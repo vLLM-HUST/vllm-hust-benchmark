@@ -8,6 +8,42 @@ ROOT = Path(__file__).resolve().parents[1]
 DOCS = ROOT / "docs/workload-data"
 
 
+def test_xlsum_fixed_ci_consumer_and_clean_environment_are_separate_from_full_delivery():
+    fixed = json.loads(
+        (DOCS / "validation/xlsum-fixed-ci-research-handoff-20261025.json").read_text(
+            "utf-8"
+        )
+    )
+    assert fixed["status"] == "FIXED_CI_PROVIDER_AND_RESEARCH_CONSUMPTION_VERIFIED"
+    expected_wheel = "4f7a2be0b0a39e02fd586d730b5ff40550bfa74ee8a9e86c00c36d66d0886cf7"  # pragma: allowlist secret - public CI software artifact digest
+    assert fixed["data_wheel_sha256"] == expected_wheel
+    assert fixed["installed_payload_files_equal"] == 35
+    assert fixed["research_source_files_equal_installed"] == 40
+    assert fixed["language_variants"] == len(fixed["checks"]) == 45
+    assert fixed["prior_full_original_rows_audit_reused"] == 114198
+    assert sum(c["public_first_tail_roundtrip"] for c in fixed["checks"]) == 270
+    assert sum(c["research_direct_prepare_resolve"] for c in fixed["checks"]) == 135
+    assert fixed["model_calls"] == fixed["scoring_runs"] == 0
+    assert not fixed["research_observation_or_analysis_migrated"]
+    assert not fixed["research_default_dependency_lock_updated"]
+    assert not fixed["source_checkbox_eligible"]
+    environment = json.loads(
+        (DOCS / "validation/xlsum-clean-client-environment-20261025.json").read_text(
+            "utf-8"
+        )
+    )
+    assert environment["pip_check"] == "No broken requirements found."
+    assert environment["original_offset_selected_before_output"] == 3
+    assert environment["model_calls"] == 1
+    assert environment["model_parameters_all_npu_fp32"]
+    assert environment["output_device"] == "npu:0"
+    assert environment["encoder_tokens"] == 512 and environment["decoder_tokens"] <= 84
+    assert environment["original_tokenizer_transformers"] == "4.11.3"
+    assert not environment["serving_engine_imported"]
+    assert not environment["global_serving_environment_modified"]
+    assert not environment["source_checkbox_eligible"]
+
+
 def test_qasper_full_original_media_decode_is_not_vision_model_execution():
     receipt = json.loads(
         (DOCS / "validation/qasper-original-media-cpu-audit-20261025.json").read_text(

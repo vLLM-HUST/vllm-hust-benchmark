@@ -269,8 +269,9 @@ git -C /private/xlsum-source checkout afcd803c8d7c98f3be60e9a7ce57fcbc3e729e8c
 运行时必须使用独立的 NPU 生成/评分客户端，不能在运行中的引擎环境直接升级或降级 Transformers。客户端额外依赖固定在
 `configs/workload-native/xlsum-author-npu-client-dependencies.txt`；Torch、torch-npu 和 CANN
 需使用机器对应的兼容栈。服务器已测栈为
-Python3.12、Torch2.10.0、torch-npu2.10.0.post4、Transformers4.57.3。当前验证客户端复用只读系统包，继承的 vllm-ascend 元数据要求
-Transformers5.5.4，与该客户端不兼容；本入口不导入或启动 vllm-ascend，不据此声称整个继承环境 `pip check` 通过。
+Python3.12、Torch2.10.0+cpu配套torch-npu2.10.0.post4、Transformers4.57.3；硬件为Ascend910B2/aarch64，CANN9.1.0，npu-smi报告版本26.0.rc1。CPU字样是Torch发行包标识，实际模型参数和生成输出均在NPU，不能据此误称CPU推理。初期继承系统包的客户端有vllm-ascend元数据冲突，不作为封闭依赖环境交付；已建立不继承引擎包的独立客户端，只读复用匹配的Torch/NPU库与完整UniDic，`pip check`通过，并以事前选定、此前未执行的英语原物理行3完成NPU生成和作者原评分。该条只验证环境，不替代、增加或改变主验收的固定前三条范围。
+
+[固定CI工件与研究侧接通](validation/xlsum-fixed-ci-research-handoff-20261025.json)核验了数据提交f100a0a9的35个安装载荷、45个变体的公共首尾读取和研究侧消费；研究代码40文件与已有安装版本一致。没有升级研究默认依赖锁，也没有迁入研究分析或观测。独立客户端的原题探测见[环境验证](validation/xlsum-clean-client-environment-20261025.json)；与数据接口验证分开记录。
 
 另按作者说明安装其固定源码下的 `multilingual_rouge_scoring/`，**不能以 PyPI 通用英语 rouge-score 替换**。准备显式 `NLTK_DATA` 目录中的
 `stopwords/punkt/punkt_tab`，日语使用作者推荐的完整
@@ -299,7 +300,7 @@ Torch、模型推理或网络服务；已通过该环境 `pip check`。旧Python
 
 修正后45变体固定135条已完成原分词、NPU生成和原多语言评分；134条有效输出复用，仅重新执行了输入不一致的那道原题。全114198行已核验五字段不丢失，45变体均完成公共索引首尾读取及研究侧接通；这是候选代码消费验证，不是固定CI工件交付或研究结论。按
 `60秒 + 1.25 × 该变体前三条中最慢生成耗时 × 原 test 行数`
-估计，10个变体不超过30分钟，需要全跑6068条，范围冻结后不因结果调整；其余35个固定抽样。已停止不兼容预检后的全量进程，保留其证据，恢复时逐条校验并复用有效请求，输入不一致者只重跑同一道原题，不换题。此耗时只用于排期，不是引擎性能结论。全量验证、固定交付工件和生成客户端环境收口仍在推进，XLSUM
+估计，10个变体不超过30分钟，需要全跑6068条，范围冻结后不因结果调整；其余35个固定抽样。已停止不兼容预检后的全量进程，保留其证据，恢复时逐条校验并复用有效请求，输入不一致者只重跑同一道原题，不换题。此耗时只用于排期，不是引擎性能结论。小集全量执行及最终审计仍在推进，XLSUM
 未勾完成。
 
 `--rerun-tokenizer-mismatch` 是修复历史 tokenizer
