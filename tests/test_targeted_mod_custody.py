@@ -8,6 +8,7 @@ def test_targeted_original_bytes():
     for name, count in (
         ("profiler-protocols", 5),
         ("profiler-runbooks", 4),
+        ("profiler-notes", 5),
         ("compress", 3),
         ("manager", 2),
         ("pyramid-current", 100),

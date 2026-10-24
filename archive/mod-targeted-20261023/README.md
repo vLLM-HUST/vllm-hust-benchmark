@@ -1,5 +1,11 @@
 # Targeted MOD original custody
 
+- [Profiler top-level research and progress notes](profiler-notes/manifest.json): five complete
+  public originals retain historical measurements, test/build claims and old local paths. Old PDF
+  build hashes are not interchangeable with the separately archived paper PDF; preserving a note
+  does not recover its referenced local copy. Current source notes separate methods and navigation
+  from historical results and completed planning checklists.
+
 - [Profiler fault-matrix, next-agent, blind execution and NPU probe originals](profiler-runbooks/manifest.json):
   four complete historical documents. Measured observations, invalid attempts and legacy command
   paths remain byte-preserved. Current consumers separate archived inputs from fresh outputs;
