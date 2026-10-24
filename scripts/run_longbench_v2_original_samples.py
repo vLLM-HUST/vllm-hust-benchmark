@@ -32,9 +32,10 @@ def main():
         or url.password
         or url.query
         or url.fragment
+        or url.path.rstrip("/") != "/v1"
     ):
         parser.error(
-            "only local HTTP NPU endpoints without credentials/query are permitted"
+            "only local HTTP NPU endpoints ending in /v1 without credentials/query are permitted"
         )
     if (
         hashlib.sha256(args.data_file.read_bytes()).hexdigest()

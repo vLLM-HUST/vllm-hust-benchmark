@@ -1,7 +1,6 @@
 """CPU interface/claim checks, not original dataset or model evidence."""
 
 import json
-import hashlib
 import importlib.util
 from pathlib import Path
 import subprocess
@@ -96,7 +95,17 @@ def test_qasper_cpu_audit_does_not_claim_new_native_execution():
     assert not receipt["full_qasper_native_completed"]
 
 
-def test_external_endpoint_rejected_before_loading_original_data(tmp_path):
+@pytest.mark.parametrize(
+    "endpoint",
+    [
+        "https://example.com/v1",
+        "http://127.0.0.1:19466",
+        "http://127.0.0.1:19466/v1/chat/completions",
+        "http://127.0.0.1:19466/v1?unexpected=1",
+        "http://localhost:19466/other/v1",
+    ],
+)
+def test_external_endpoint_rejected_before_loading_original_data(tmp_path, endpoint):
     result = subprocess.run(
         [
             sys.executable,
@@ -112,7 +121,7 @@ def test_external_endpoint_rejected_before_loading_original_data(tmp_path):
             "--output",
             str(tmp_path / "out"),
             "--endpoint",
-            "https://example.com/v1",
+            endpoint,
         ],
         capture_output=True,
         text=True,
@@ -134,6 +143,36 @@ def test_help_without_optional_official_environment():
     )
     assert result.returncode == 0
     assert "--capacity-selection" in result.stdout
+
+
+@pytest.mark.parametrize("host", ["127.0.0.1", "localhost"])
+@pytest.mark.parametrize("suffix", ["/v1", "/v1/"])
+def test_valid_local_base_url_reaches_data_identity_check(tmp_path, host, suffix):
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(ROOT / "scripts/run_longbench_v2_original_samples.py"),
+            "--data-file",
+            str(tmp_path / "missing-original.json"),
+            "--official-archive",
+            str(tmp_path / "missing.zip"),
+            "--capacity-selection",
+            str(tmp_path / "selection.json"),
+            "--tokenizer",
+            str(tmp_path / "tokenizer"),
+            "--output",
+            str(tmp_path / "out"),
+            "--endpoint",
+            f"http://{host}:19466{suffix}",
+        ],
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 1
+    assert "FileNotFoundError" in result.stderr
+    assert "missing-original.json" in result.stderr
+    assert "only local HTTP NPU endpoints" not in result.stderr
+    assert not (tmp_path / "out").exists()
 
 
 def test_failed_quality_and_budget_are_not_erased():
@@ -171,7 +210,5 @@ def test_public_handoff_is_same_tasks_not_full_suite_or_quality_success():
     assert handoff["process_returncode"] == 0
     assert (
         handoff["helper_sha256"]
-        == hashlib.sha256(
-            (ROOT / handoff["helper"]).read_bytes().replace(b"\r\n", b"\n")
-        ).hexdigest()
+        == "eb3fe8597204234ece99a1d7bd5f3e671ce89e735d84840d9f2831bdad80114d"  # pragma: allowlist secret - historical executed helper checksum
     )

@@ -197,6 +197,7 @@ TB；服务器/data约1.42TB可用，未缩小语料。ChartQA当前两卡主机
 
 ### 不占卡准备进展
 
+- [x] LONGBENCH_V2：补齐本地原生入口的 `/v1` 基地址校验；服务器 CPU 参数/历史回执回归15项通过，模型调用0。历史三题执行结果保持不变，本项不代表全503题或修改后入口已完成NPU复验。
 - [x] SCIENCEAGENTBENCH：原verified版102题的全部输入、参考及环境字段、全量索引和102条回查核验通过；30份官方执行/评分及依赖源码已固定并核对Git
   blob，未执行代码。[准备回执](validation/scienceagentbench-cpu-preparation-20261024.json)。
 - [ ] SCIENCEAGENTBENCH：verified配套科学数据/参考程序/评价脚本、隔离运行环境、本地模型及辅助评分模型未就绪；发现两个上游直接入口仍读旧validation
