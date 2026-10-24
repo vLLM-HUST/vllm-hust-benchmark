@@ -8,6 +8,60 @@ ROOT = Path(__file__).resolve().parents[1]
 DOCS = ROOT / "docs/workload-data"
 
 
+def test_private_request_delivery_reuses_native_responses_without_publishing_them():
+    import hashlib
+
+    ledger = json.loads((DOCS / "dataset-validation-status.json").read_text("utf-8"))
+    private = {
+        key: row
+        for key, row in ledger["delivery_inventory"].items()
+        if row["scope"] == "enterprise_private"
+    }
+    receipt = json.loads(
+        (DOCS / "validation/enterprise-fixed-ci-handoff-20261024.json").read_text(
+            "utf-8"
+        )
+    )
+    assert len(private) == receipt["source_count"] == len(receipt["sources"]) == 8
+    assert set(private) == {row["source_id"] for row in receipt["sources"]}
+    assert all(
+        row["status"] == "AVAILABLE" and row["checked"] for row in private.values()
+    )
+    assert receipt["delivery_kind"] == "private_request_corpus"
+    assert receipt["source_checkbox_eligible"] is True
+    assert (
+        receipt["original_request_roundtrips"]
+        == receipt["existing_native_responses_revalidated"]
+        == 24
+    )
+    assert receipt["new_model_calls"] == 0
+    assert not receipt["quality_claim"]
+    assert not receipt["full_source_inference_validated"]
+    assert not receipt["raw_enterprise_data_published"]
+    assert not receipt["paths_or_request_ids_exported"]
+    script = ROOT / receipt["public_runner"]
+    assert (
+        hashlib.sha256(script.read_bytes().replace(b"\r\n", b"\n")).hexdigest()
+        == receipt["public_runner_sha256"]
+    )
+    for result in receipt["sources"]:
+        assert result["original_file_sha_matches_native_receipt"]
+        assert result["private_response_bundle_matches_native_receipt"]
+        assert (
+            result["fixed_ci_reader_roundtrips"]
+            == result["private_responses_revalidated"]
+            == 3
+        )
+        original = json.loads(
+            (ROOT / private[result["source_id"]]["existing_receipt"]).read_text("utf-8")
+        )
+        assert (
+            original["status"]
+            == "REQUESTS_EXECUTED_AND_INTEGRITY_VALIDATED_NO_QUALITY_ORACLE"
+        )
+        assert original["quality_claim"] is False
+
+
 def test_current_delivery_inventory_and_checklist_are_aligned():
     ledger = json.loads((DOCS / "dataset-validation-status.json").read_text("utf-8"))
     contract = ledger["delivery_contract"]

@@ -31,6 +31,21 @@ max_tokens**。超长文本前三条实际输入约7.7万～8.2万token。
 
 ## 使用
 
+### 八个来源的参数
+
+下表只列接入参数，不分发文件；`--data-root`指向使用者获授权取得的对应外部目录。文件版本和SHA须与固定目录/原回执一致，不能用同名不同内容文件替代。
+
+| source-id                  | revision           | files                           |
+| -------------------------- | ------------------ | ------------------------------- |
+| PAIO-CHAT-1000             | v1                 | normal_chat_1000.jsonl          |
+| PAIO-CODE-EVAL-1000        | v1                 | code_eval_ttft_1000.jsonl       |
+| PAIO-JSON-500              | v1                 | json_requests_500.jsonl         |
+| PAIO-LONG-PREFILL-5000     | v2                 | long_prefill.jsonl              |
+| PAIO-PREFIX-SHARED-5000    | v2                 | prefix_shared.jsonl             |
+| PAIO-REUSE-CONV-5000       | v2                 | reuse_conversation.jsonl        |
+| PAIO-SEMANTIC-SIMILAR-5000 | v2                 | semantic_similar.jsonl          |
+| PAIO-LONGTEXT-4000         | long-text-delivery | api_long_text_merged_4000.jsonl |
+
 完整服务参数见[固定服务配置](profiles/source-validation-qwen35-27b-128k-nonthinking.json)，MODEL_DIR替换为已校验的实际模型目录。该配置不含数据、不自动启动模型；现有服务满足它时不必重复加载。尤其在服务端设置
 `--default-chat-template-kwargs '{"enable_thinking":false}'`，而不是改写原请求。编译/HF缓存放到本任务数据卷，TMPDIR使用短路径，不占满root分区。
 
@@ -44,4 +59,14 @@ profile 须与实际服务配置一致。数据与输出分离，输出为新的
 
 各源回执见[可勾选清单](DATASET_CHECKLIST.zh-CN.md)。公开记录仅保留来源/版本/SHA、样本标识、模型/环境配置、终态和核验状态，不包含企业正文、schema内容、答案或凭据。
 
-运行后SSH入口暂不可达；脱敏验证记录已保存，但服务器私有原始响应归档的当前可访问性待入口恢复后确认。历史执行状态按已捕获回执记录，不把连接失败说成任务失败，也不把软件CI当原始响应档案。
+### 按原记录用于后续批量实验
+
+前三条入口用于固定集成验证，不限制数据能力只能读取三条。完整原文件通过`workload-data pipeline bind`绑定，再用`pipeline run`准备原记录索引；配置省略`limit`即准备完整文件，原数据不被复制进索引。使用`prepared_rows`枚举记录身份、`resolve_input`取回原记录，调用`vllm_hust_workload_data.execution.replay_request`回放，再以`vllm_hust_benchmark.workload_response_validation.check_response`核验原声明格式；这套公开API支持原任意记录，不需要研究仓或观测模块。单条命令`workload-data replay --database PRIVATE_DATABASE --record-id ORIGINAL_RECORD_ID --data-root AUTHORIZED_ROOT --endpoint LOCAL_CHAT_COMPLETIONS_URL --model VERIFIED_MODEL_ALIAS --output FRESH_PRIVATE_RESPONSE`复用同一API，但自身只保存响应、不宣称任务已评分；需另外执行上述完整性校验。
+
+批量实验须自行明确全量/固定子集和模型环境，不能改写消息、把metadata输出目标补成API预算，或把需工具/环境的任务冒充单次请求。原请求及响应/完整索引均保存在外部授权目录；运行失败保留，不换题。本文已验证范围是每源原前三条，不声称全文件模型执行或任务准确率。
+
+### 固定工件交付复核（2026-10-24）
+
+当前服务器已只读确认原八份文件、24条原响应和私有索引均可访问；原文件SHA及响应束SHA与历史NPU回执逐源一致。固定3f397e69的CI数据wheel独立安装后，24条原输入/outcome往返与旧索引一致，全部保存响应重新通过原格式及输入token核验；0新增模型调用。当前公开回放脚本及响应校验器的规范LF摘要与实际NPU执行时一致，未为凑通过改原请求或校验器。见[八来源交付复核](validation/enterprise-fixed-ci-handoff-20261024.json)。
+
+依此按私有请求语料的固定抽样链路可用范围打勾；原企业正文、schema内容、答案和原响应不公开。旧SSH不可达是历史访问状态，不再作为当前缺口；旧失败尝试和全部原回执仍保留。研究侧原八源消费证据另见[固定消费回执](validation/enterprise-private-source-consumer-20261024.json)，不冒称本次升级了研究依赖锁或开展了新观测/性能实验。
