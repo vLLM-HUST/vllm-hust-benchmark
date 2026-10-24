@@ -42,7 +42,31 @@ def endpoint(value):
     return value
 
 
-def select_original_questions(parents):
+def select_original_questions(parents, indices=None, full=False):
+    require(
+        not (full and indices is not None),
+        "full and explicit indices cannot be combined",
+    )
+    flattened = [
+        (index, pi, qi, parent, question)
+        for index, (pi, qi, parent, question) in enumerate(
+            (pi, qi, parent, question)
+            for pi, parent in enumerate(parents)
+            for qi, question in enumerate(parent["questions"])
+        )
+    ]
+    if full:
+        return flattened, len(flattened)
+    if indices is not None:
+        require(
+            bool(indices) and len(set(indices)) == len(indices),
+            "distinct original indices required",
+        )
+        require(
+            all(0 <= index < len(flattened) for index in indices),
+            "original question index out of range",
+        )
+        return [flattened[index] for index in indices], len(flattened)
     chosen, seen, flat_index = [], set(), 0
     for pi, parent in enumerate(parents):
         for qi, question in enumerate(parent["questions"]):
@@ -85,7 +109,20 @@ def main():
     parser.add_argument("--model", required=True)
     parser.add_argument("--endpoint", default="http://127.0.0.1:19466/v1/completions")
     parser.add_argument("--max-length", type=int, default=131072)
+    parser.add_argument(
+        "--question-index",
+        type=int,
+        action="append",
+        help="Repeat preselected original flat question indices; default is historical distinct-article three",
+    )
+    parser.add_argument(
+        "--full",
+        action="store_true",
+        help="All original dev questions with complete articles",
+    )
     args = parser.parse_args()
+    if args.full and args.question_index is not None:
+        parser.error("--full cannot be combined with --question-index")
     base_url = endpoint(args.endpoint)
     require(args.max_length > 0, "positive declared model context budget required")
     require(not args.output.exists(), "private output directory must not already exist")
@@ -97,10 +134,17 @@ def main():
         "original publisher dev identity mismatch",
     )
     chosen, questions = select_original_questions(
-        [json.loads(line) for line in raw.decode().splitlines()]
+        [json.loads(line) for line in raw.decode().splitlines()],
+        args.question_index,
+        args.full,
     )
     require(
-        questions == 2086 and [x[0] for x in chosen] == [0, 6, 15],
+        questions == 2086
+        and (
+            args.full
+            or args.question_index is not None
+            or [x[0] for x in chosen] == [0, 6, 15]
+        ),
         "fixed original dev selection changed",
     )
     require(
@@ -125,6 +169,8 @@ def main():
     args.output.mkdir(mode=0o700, parents=True, exist_ok=False)
     receipt = {
         "source_id": "QUALITY",
+        "selected_flat_question_indices": [x[0] for x in chosen],
+        "full_dev_requested": args.full,
         "source_revision": REVISION,
         "source_file_sha256": DATA_SHA,
         "harness_version": "0.4.11",
@@ -235,7 +281,7 @@ def main():
             hashlib.sha256(data.read_bytes()).hexdigest() == DATA_SHA,
             "original file changed during execution",
         )
-        receipt["status"] = "THREE_ORIGINAL_QUESTIONS_MC_EXECUTED_HARNESS_SCORED"
+        receipt["status"] = "ORIGINAL_QUESTIONS_MC_EXECUTED_HARNESS_SCORED"
     except BaseException as error:
         receipt.update(status="FAILED", error_type=type(error).__name__)
         raise

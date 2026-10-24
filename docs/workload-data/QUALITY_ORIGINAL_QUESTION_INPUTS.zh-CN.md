@@ -49,6 +49,11 @@ for record in iter_workload("QUALITY", data_root=Path("/data/quality"), limit=3)
 
 ## 原题多选似然执行
 
+2026-10-24已使用固定3f397e69
+CI数据组件重新完成全部2086原题字段核对及建索引、原0/6/15三题完整输入/参考回查，见[固定CI组件回执](validation/quality-fixed-ci-reader-20261024.json)。这是0模型调用的读取/交接证据，不冒充新增原生执行。
+
+原入口默认仍选历史三题；新增可重复`--question-index ORIGINAL_FLAT_INDEX`显式选择原问题，或用`--full`选择整个原dev。保留完整文章、原问题、原选项和固定harness多选似然/评分，不加入聊天模板或截断；重复、越界或full与显式题号并用均拒绝。原生结果记录实际原题号，不能用选项调用数当题数。新增入口13项软件测试通过，仍待新原题的NPU验证；历史回执继续固定旧脚本摘要，不改写为新入口执行证据。
+
 ```sh
 python scripts/run_quality_original_mc.py --data-root /data/quality --output /data/quality-mc-private --tokenizer /models/matching-tokenizer --model MODEL_ALIAS
 ```

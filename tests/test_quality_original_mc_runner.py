@@ -1,7 +1,6 @@
 """CPU-only invented protocol fixtures, not QuALITY model evaluation evidence."""
 
 import importlib.util
-import hashlib
 import json
 from pathlib import Path
 import subprocess
@@ -61,6 +60,24 @@ def test_gold_and_reference_annotations_never_enter_model_document():
     )
 
 
+def test_explicit_and_full_selection_keep_original_flat_identity():
+    parents = [
+        {"article_id": "a", "questions": [{}, {}]},
+        {"article_id": "b", "questions": [{}]},
+    ]
+    chosen, total = runner.select_original_questions(parents, [2, 0])
+    assert total == 3 and [item[0] for item in chosen] == [2, 0]
+    assert [item[1:3] for item in chosen] == [(1, 0), (0, 0)]
+    assert [
+        item[0] for item in runner.select_original_questions(parents, full=True)[0]
+    ] == [0, 1, 2]
+    for indices in [[], [-1], [3], [1, 1]]:
+        with pytest.raises(ValueError):
+            runner.select_original_questions(parents, indices)
+    with pytest.raises(ValueError):
+        runner.select_original_questions(parents, [0], full=True)
+
+
 @pytest.mark.parametrize("gold", [True, 0, 5, "2", None])
 def test_bad_gold_label_not_coerced(gold):
     with pytest.raises(ValueError):
@@ -89,7 +106,8 @@ def test_mc_receipt_is_not_free_generation_or_full_dataset_accuracy():
     receipt = json.loads(path.read_text(encoding="utf-8"))
     assert (
         receipt["public_runner_sha256"]
-        == hashlib.sha256(PATH.read_bytes().replace(b"\r\n", b"\n")).hexdigest()
+        # Historical execution identity, not the current range-capable script.
+        == "71376a3ab7404caca0707e7cecd074769ffa8d7cd23396237eeefd93faaca78a"  # pragma: allowlist secret - public historical runner SHA
     )
     assert receipt["file_sha256"] == runner.DATA_SHA
     assert receipt["harness_task_sha256"] == runner.TASK_SHA
