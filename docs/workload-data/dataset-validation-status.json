@@ -913,8 +913,16 @@
       "checked": false,
       "legacy_checked": true,
       "existing_receipt": "docs/workload-data/validation/dolly-original-npu-20261022.json",
+      "active_run": {
+        "name": "dolly-original-categories-001",
+        "selection": "first three original rows per original category; reuse already verified original indices 0,1,2 when selected",
+        "categories": 8,
+        "new_original_requests_planned": 21,
+        "prior_original_requests_reused": 3,
+        "quality_scorer": "not applicable to this request corpus; original publisher template and response integrity only"
+      },
       "delivery_receipt": null,
-      "blocker": null
+      "blocker": "八个原类别固定覆盖补测在服务器推进，原数据/发布方模板/2048预算不变；不重复已有三题、不造准确率。终态和公共可复用选择入口尚待收口，保持未完成。"
     },
     "GSM8K": {
       "scope": "public",
@@ -1332,8 +1340,8 @@
     "BBH": {
       "scope": "public",
       "delivery_kind": "review_original_source_protocol",
-      "status": "IN_PROGRESS",
-      "checked": false,
+      "status": "AVAILABLE",
+      "checked": true,
       "legacy_checked": false,
       "existing_receipt": "docs/workload-data/validation/bbh-boolean-original-npu-20261023.json",
       "preparation_receipt": "docs/workload-data/validation/bbh-all-original-assets-server-20261024.json",
@@ -1346,8 +1354,8 @@
         "selection_frozen_before_outcomes": true,
         "boolean_prior_samples_reused": 3
       },
-      "delivery_receipt": null,
-      "blocker": "余下26项共78条原题生成及固定harness评分已完成，离线复核78条一致，未重跑模型；复用Boolean前三题后覆盖27个变体81个唯一原题。仍待固定提交软件工件与交付文档回归收口，不勾整个来源。"
+      "delivery_receipt": "docs/workload-data/validation/bbh-native-delivery-20261024.json",
+      "blocker": null
     },
     "BFCL": {
       "scope": "public",
