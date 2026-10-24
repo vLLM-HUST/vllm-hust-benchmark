@@ -53,6 +53,7 @@ def test_completed_group_receipt_matches_executed_runner_not_whole_suite():
             group["official_rescore_equal"] and group["original_episode_assets_equal"]
         )
         assert len(group["native_tasks"]) == group["new_native_tasks"]
+        assert runner.native_tasks_scored(group["native_tasks"])
         for task in group["native_tasks"]:
             assert task["model_calls"] > 0
             assert task["reward"] in (0, 1)

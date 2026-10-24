@@ -112,6 +112,11 @@ def test_completed_protocol_audit_adds_only_previously_unexecuted_rows():
     )["delivery_inventory"]["STRUCTEVAL"]
     assert not ledger["checked"]
     assert ledger["verified_unique_native_tasks"] == receipt["verified_unique_native_tasks"]
+    held = receipt.get("held_native_exit_evidence")
+    if held:
+        assert held["native_exit_code"] == 0
+        assert held["controller_launch_held"]
+        assert held["protocol"] in {p["protocol"] for p in protocols}
 
 
 def test_external_endpoint_refused_before_inputs(tmp_path):
