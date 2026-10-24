@@ -81,10 +81,27 @@ def build():
         "uninstrumented. Same-run F and C are reported under the disclosed basic-operation "
         "convention; no efficiency or attainment until the independent reference is complete."
     )
-    method["pending_evidence"] = [
-        "Complete independent whole-model reference, actual dependencies and applicability",
-        "Quantify reference-model uncertainty without fitting B0/B1 time or selecting faster samples",
-    ]
+    supplement_path = (
+        REPORT / "m01-recovery/storage-reference-supplement-20261024/summary.json"
+    )
+    supplement = json.loads(supplement_path.read_text())
+    method["status"] = (
+        "compute-measured-reference-supplement-complete-applicability-unresolved"
+    )
+    method["reference_supplement"] = {
+        "path": supplement_path.relative_to(ROOT).as_posix(),
+        "sha256": hashlib.sha256(supplement_path.read_bytes()).hexdigest(),
+        "unique_cases": supplement["unique_original_cases_completed"],
+        "numerical_checks": supplement["totals"]["numerical_checks"],
+        "stable_graph_groups": supplement["totals"]["stable_graph_groups"],
+        "unstable_graph_groups": supplement["totals"]["unstable_graph_groups"],
+        "validation": supplement["model_validation"],
+        "scenario_coverage": [
+            {"seed": row["seed"], **row["node_coverage"]}
+            for row in supplement["scenarios"]
+        ],
+    }
+    method["pending_evidence"] = supplement["remaining_reasons_zh"]
     c16 = module(ROOT / "reports/c16-baseline018-reuse-20261022/audit.py").audit()
     pair = module(REPORT / "render_m06_pair.py").load(REPORT / "m06-paired-20261021")
     arms = pair["arms"]
