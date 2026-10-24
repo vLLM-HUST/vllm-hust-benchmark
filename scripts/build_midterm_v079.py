@@ -109,6 +109,14 @@ def build(revision, read=None):
         "label": "官方基线与B1有效算力配对 / Official B0 and B1 own compute",
     }
     verdict["evidence"].insert(0, evidence)
+    verdict["evidence"].append(
+        {
+            "path": REPORT_DIR
+            + "/m01-recovery/storage-reference-closed-20261024/summary.json",
+            "kind": "blob",
+            "label": "旧算子依赖图参考 / Prior operator-DAG reference",
+        }
+    )
     sections["milestone-v15"]["tables"][0]["rows"][0][2] = zh
     sections["milestone-v15"]["tables_en"][0]["rows"][0][2] = en
     remaining = sections["v15-remaining"]
