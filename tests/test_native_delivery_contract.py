@@ -8,6 +8,53 @@ ROOT = Path(__file__).resolve().parents[1]
 DOCS = ROOT / "docs/workload-data"
 
 
+def test_qasper_full_original_media_decode_is_not_vision_model_execution():
+    receipt = json.loads(
+        (DOCS / "validation/qasper-original-media-cpu-audit-20261025.json").read_text(
+            "utf-8"
+        )
+    )
+    assert receipt["unique_original_figure_table_references"] == 11364
+    assert receipt["matched_reference_images_decoded"] == 11364
+    assert receipt["missing_reference_images"] == 0
+    assert receipt["previous_train_dev_cpu_decodes_reused"] == 8486
+    assert receipt["new_test_cpu_decodes"] == 2878
+    assert receipt["all_matched_images_fully_cpu_decoded"]
+    assert receipt["image_formats"] == {"PNG": 11364}
+    assert receipt["test_archive_root_explicitly_mapped_to_test_split"]
+    assert not receipt["images_cropped_resized_or_replaced"]
+    assert not receipt["vision_model_inference_verified"]
+    assert not receipt["source_checkbox_eligible"]
+    assert receipt["model_calls"] == 0
+
+
+def test_qasper_fixed_ci_research_consumer_preserves_raw_tasks_not_scientific_acceptance():
+    receipt = json.loads(
+        (DOCS / "validation/qasper-ci-research-handoff-20261025.json").read_text(
+            "utf-8"
+        )
+    )
+    assert (
+        receipt["data_commit"] == "39556148d18a30bb1f6d3ec04cba663ab8d67db6"
+    )  # pragma: allowlist secret - public CI commit
+    assert receipt["data_cpu_ci_run"] == 40119103024
+    assert receipt["installed_provider_payload_files_equal"] == 33
+    assert receipt["research_installed_source_files_equal"] == 40
+    assert [row["original_positions"] for row in receipt["splits"]] == [[0, 1, 2]] * 3
+    assert receipt["public_prepare_resolve_rows"] == 9
+    assert receipt["research_source_index_import_rows"] == 9
+    assert receipt["research_direct_prepare_resolve_rows"] == 9
+    assert receipt[
+        "original_answer_evidence_annotations_and_full_paper_input_preserved"
+    ]
+    assert receipt["new_model_calls"] == 0
+    assert not receipt["research_default_dependency_lock_updated"]
+    assert not receipt["research_observation_or_analysis_migrated_into_benchmark"]
+    assert not receipt["research_feature_validity_or_observation_acceptance_claim"]
+    assert not receipt["official_scoring_executed"]
+    assert not receipt["source_checkbox_eligible"]
+
+
 def test_qasper_full_original_provider_proof_is_not_native_or_ci_completion():
     receipt = json.loads(
         (

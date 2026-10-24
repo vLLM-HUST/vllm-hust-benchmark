@@ -81,6 +81,11 @@ def download_plan(source_id, root=None):
         "revision": source.get("revision"),
         "access": source["access"],
         "files": files,
+        **(
+            {"media_archives": source["media_archives"]}
+            if source.get("media_archives")
+            else {}
+        ),
         "preparation_command": source.get("preparation_command"),
         "method": "EXTERNAL_AUTHORIZED_ASSET"
         if source_id.startswith("PAIO-")

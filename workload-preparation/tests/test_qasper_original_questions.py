@@ -15,6 +15,7 @@ from vllm_hust_workload_data.consumer import resolve_input
 from vllm_hust_workload_data.pipeline import prepared_rows, run
 from vllm_hust_workload_data.qasper import question_rows
 from vllm_hust_workload_data.registry import source_spec
+from vllm_hust_workload_data.catalog import download_plan
 
 
 def papers():
@@ -175,6 +176,20 @@ def test_publisher_manifest_is_original_three_splits_not_longbench200():
         )
         == 1
     )
+
+
+def test_original_media_downloads_are_distinct_from_raw_json_members():
+    plan = download_plan("QASPER")
+    assert len(plan["media_archives"]) == 2
+    assert sum(asset["bytes"] for asset in plan["media_archives"]) == 603112831
+    assert plan["media_archives"][0]["archive_namespaces"] == [
+        "train_dev_figures_and_tables/train",
+        "train_dev_figures_and_tables/dev",
+    ]
+    assert plan["media_archives"][1]["archive_namespaces"] == [
+        "test_figures_and_tables"
+    ]
+    assert not any(asset["path"].endswith(".tgz") for asset in plan["files"])
 
 
 def test_prepare_helper_extracts_only_verified_members_without_execution(
