@@ -156,7 +156,7 @@ def main():
     args.output.mkdir(parents=True, mode=0o700, exist_ok=False)
     with zipfile.ZipFile(args.official_archive) as archive:
         archive.extractall(args.output / "official-source")
-    source = args.output / "official-source/THUDM-LongBench-2e00731"
+    source = args.output / "official-source" / "THUDM-LongBench-2e00731"
     previous = Path.cwd()
     os.chdir(source)
     try:

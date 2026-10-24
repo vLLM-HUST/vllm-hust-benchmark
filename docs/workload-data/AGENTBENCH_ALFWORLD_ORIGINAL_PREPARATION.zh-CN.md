@@ -1,7 +1,7 @@
 # AgentBench ALFWorld FC 原始任务接入与验证
 
-原new_std索引0–2已完成原版任务/AgentRL
-Session、NPU模型交互及官方评分，三个任务均正常结束并得分1。它们均为pick_and_place_simple，只证明具名三题接入，不是全109项或其他AgentBench环境通过；不是QBI派生任务、静态回放或独立ALFWorld结果冒充AgentBench。
+原new_std索引0–108共109个任务现已全部完成原版任务/AgentRL
+Session、NPU模型交互及官方评分。复用已审计41题，仅新执行其余68题；核验1625次模型交互及保存结果，官方评分函数复算为46/109。此处“完成”指原生执行链路和结果审计完成，不要求模型答对每题，也不代表其他AgentBench环境、官方Docker等价性或研究侧精确工件交接完成。不是QBI派生任务、静态回放或独立ALFWorld结果冒充AgentBench。[全量原生审计回执](validation/agentbench-alfworld-all109-native-20261024.json)。
 
 - [x] 固定官方AgentBench提交`d1e4a10db08c87075c78972e48ecc182be03e2d5`及完整源码归档SHA。
 - [x] 按该版本官方Dockerfile所指的ALFWorld源码和0.2.2发布游戏归档下载、校验并在服务器解包，不使用旧缓存中不存在的预选任务替代题。
@@ -10,10 +10,12 @@ Session、NPU模型交互及官方评分，三个任务均正常结束并得分1
   Session交互及原生终止/评分，分别4/7/20步、合计31次模型请求。[执行回执](validation/agentbench-alfworld-native-npu-20261022.json)。
 - [x] 公开构建脚本、固定依赖的干净安装及pip
   check；最终标准OpenCV环境同三题复验仍为1/1/1。[交接复验](validation/agentbench-alfworld-public-handoff-npu-20261023.json)。两次运行合计仍为三个唯一任务，不计六题。
-- [ ] 其他任务/子集、全部109项，以及AgentBench的其他环境。
+- [x] 此版本ALFWorld全部109项原生执行和官方结果复算。
+- [ ] AgentBench的其他环境及研究侧精确工件交接。
 
-2026-10-24使用固定CI数据组件，在服务器复核并准备了全部109个官方任务引用及其原始归档资产。原索引有六组：pick_and_place 9题、pick_clean_then_place
-5题、pick_heat_then_place 27题、pick_cool_then_place 29题、look_at_obj 18题、pick_two_obj
+初始准备阶段（后续执行进展见文末）：2026-10-24使用固定CI数据组件，在服务器复核并准备了全部109个官方任务引用及其原始归档资产。原索引有六组：pick_and_place
+9题、pick_clean_then_place 5题、pick_heat_then_place 27题、pick_cool_then_place 29题、look_at_obj
+18题、pick_two_obj
 21题。已执行的0–2仅覆盖第一组，其他106题仍未执行；本次引用准备的模型调用和新原生执行均为0，不计完成。各组保持官方连续索引，后续复用旧三题而非重跑。参见[全索引准备回执](validation/agentbench-original-groups-preparation-20261024.json)。
 
 当前官方版本属于Function
