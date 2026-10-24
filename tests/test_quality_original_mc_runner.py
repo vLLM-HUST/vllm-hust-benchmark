@@ -1,6 +1,7 @@
 """CPU-only invented protocol fixtures, not QuALITY model evaluation evidence."""
 
 import importlib.util
+import hashlib
 import json
 from pathlib import Path
 import subprocess
@@ -134,3 +135,30 @@ def test_mc_receipt_is_not_free_generation_or_full_dataset_accuracy():
     assert receipt["official_publisher_scoring_source"] is False
     assert receipt["full_suite_validated"] is False
     assert receipt["source_checkbox_eligible"] is False
+
+
+def test_current_native_delivery_preserves_original_token_ids_and_scoring_scope():
+    docs = ROOT / "docs/workload-data"
+    ledger = json.loads((docs / "dataset-validation-status.json").read_text("utf-8"))
+    item = ledger["delivery_inventory"]["QUALITY"]
+    delivery = json.loads((ROOT / item["delivery_receipt"]).read_text("utf-8"))
+    audit = json.loads(
+        (docs / "validation" / delivery["native_execution_receipt"]).read_text("utf-8")
+    )
+    assert item["checked"] and item["status"] == "AVAILABLE"
+    assert audit["unique_original_questions"] == len(audit["checks"]) == 6
+    assert audit["option_likelihood_requests_audited"] == 24
+    assert audit["fixed_ci_indexed_questions"] == 2086
+    assert audit["original_prepare_resolve_roundtrips"] == 6
+    for sample in audit["checks"]:
+        assert sample["original_article_question_options_token_ids_equal"]
+        assert sample["all_four_original_options_scored"]
+        assert sample["pinned_harness_metrics_recomputed_equal"]
+    assert (
+        audit["current_runner_sha256"]
+        == hashlib.sha256(PATH.read_bytes().replace(b"\r\n", b"\n")).hexdigest()
+    )
+    assert not delivery["official_publisher_scoring_source"]
+    assert not delivery["publisher_baseline_reproduced"]
+    assert not delivery["full_dev_validated"]
+    assert audit["audit_new_model_calls"] == 0

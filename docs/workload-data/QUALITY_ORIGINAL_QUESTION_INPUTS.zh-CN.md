@@ -49,10 +49,16 @@ for record in iter_workload("QUALITY", data_root=Path("/data/quality"), limit=3)
 
 ## 原题多选似然执行
 
+当前[原NYU多选集成交付已收口](validation/quality-native-delivery-20261024.json)，不是发布方训练基线复现。新增末尾2083–2085与历史0/6/15共六题、24个原候选似然已完成[原文及评分审计](validation/quality-native-audit-20261024.json)：完整文章/问题/选项重新分词后与保存请求token逐项一致，有限似然经原harness解析及评分结果一致；固定CI组件全2086题索引、六题prepare/resolve通过。审计0新增模型调用。源文件取得和原问题覆盖与第三方harness协议分别声明，不能称为SCROLLS数据或官方完整榜单成绩。
+
+新运行客户端已核对lm-eval[api]0.4.11、Transformers5.5.4、tokenizers0.22.2、numpy1.26.4、datasets4.3.0、pyarrow22.0.0、huggingface-hub1.33.0、tenacity9.2.1、openai3.1.0；32个已安装数据包文件与固定3f397e69
+CI
+wheel逐字节一致。服务模型/配置见[双NPU环境](BBH_ORIGINAL_INPUTS.zh-CN.md#%E6%9C%AC%E8%BD%AE%E5%B7%B2%E9%AA%8C%E8%AF%81%E7%9A%84%E5%8F%8Cnpu%E6%A8%A1%E5%9E%8B%E6%9C%8D%E5%8A%A1%E9%85%8D%E7%BD%AE)。下文较早的待验记录保留原阶段身份，不覆盖本次具名回执。
+
 2026-10-24已使用固定3f397e69
 CI数据组件重新完成全部2086原题字段核对及建索引、原0/6/15三题完整输入/参考回查，见[固定CI组件回执](validation/quality-fixed-ci-reader-20261024.json)。这是0模型调用的读取/交接证据，不冒充新增原生执行。
 
-原入口默认仍选历史三题；新增可重复`--question-index ORIGINAL_FLAT_INDEX`显式选择原问题，或用`--full`选择整个原dev。保留完整文章、原问题、原选项和固定harness多选似然/评分，不加入聊天模板或截断；重复、越界或full与显式题号并用均拒绝。原生结果记录实际原题号，不能用选项调用数当题数。新增入口13项软件测试通过，仍待新原题的NPU验证；历史回执继续固定旧脚本摘要，不改写为新入口执行证据。
+原入口默认仍选历史三题；新增可重复`--question-index ORIGINAL_FLAT_INDEX`显式选择原问题，或用`--full`选择整个原dev。保留完整文章、原问题、原选项和固定harness多选似然/评分，不加入聊天模板或截断；重复、越界或full与显式题号并用均拒绝。原生结果记录实际原题号，不能用选项调用数当题数。新增入口已完成末尾三原题NPU验证及审计；历史回执继续固定旧脚本摘要，不改写为新入口执行证据。
 
 ```sh
 python scripts/run_quality_original_mc.py --data-root /data/quality --output /data/quality-mc-private --tokenizer /models/matching-tokenizer --model MODEL_ALIAS
@@ -70,4 +76,5 @@ tokens，未截断。最终公开脚本同三题复验一致，仍是三题、�
 
 这是原NYU dev题目与固定第三方harness方法的集成验证，**不是SCROLLS数据集、发布方训练基线复现、官方完整榜单成绩或性能提升证明**。替代模型、选择范围及输入呈现差异均保留。
 
-**未完成**：研究消费、最终CI工件及完整2086题执行。当前不勾选来源完成，不将全部读取称作全部模型执行。将与其他workload一起合批，未单独新建QuALITY PR。
+**剩余范围**：研究端正式新工件消费锁及完整2086题模型执行；固定CI数据组件安装/读取及六题MC集成交付已完成。不将全部读取称作全部模型执行。与其他workload一起合批，未单独新建QuALITY
+PR。
