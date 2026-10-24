@@ -12,6 +12,10 @@ Session、NPU模型交互及官方评分，三个任务均正常结束并得分1
   check；最终标准OpenCV环境同三题复验仍为1/1/1。[交接复验](validation/agentbench-alfworld-public-handoff-npu-20261023.json)。两次运行合计仍为三个唯一任务，不计六题。
 - [ ] 其他任务/子集、全部109项，以及AgentBench的其他环境。
 
+2026-10-24使用固定CI数据组件，在服务器复核并准备了全部109个官方任务引用及其原始归档资产。原索引有六组：pick_and_place 9题、pick_clean_then_place
+5题、pick_heat_then_place 27题、pick_cool_then_place 29题、look_at_obj 18题、pick_two_obj
+21题。已执行的0–2仅覆盖第一组，其他106题仍未执行；本次引用准备的模型调用和新原生执行均为0，不计完成。各组保持官方连续索引，后续复用旧三题而非重跑。参见[全索引准备回执](validation/agentbench-original-groups-preparation-20261024.json)。
+
 当前官方版本属于Function
 Calling版，不能与历史v0.2、其他论文协议或QBI裁剪结果混为同一来源版本。任务类为`stateful-environment-interaction`；DB、KG、OS、Web任务不能因为同属AgentBench而一并勾选。
 

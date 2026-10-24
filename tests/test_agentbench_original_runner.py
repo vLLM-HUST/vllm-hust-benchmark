@@ -18,6 +18,23 @@ runner = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(runner)
 
 
+def test_original_group_preparation_does_not_claim_new_native_execution():
+    receipt = json.loads(
+        (
+            ROOT
+            / "docs/workload-data/validation/agentbench-original-groups-preparation-20261024.json"
+        ).read_text("utf-8")
+    )
+    groups = receipt["groups"]
+    assert [g["total_original_tasks"] for g in groups] == [9, 5, 27, 29, 18, 21]
+    assert [i for g in groups for i in g["original_indices"]] == list(range(109))
+    assert [i for g in groups for i in g["reused_native_indices"]] == [0, 1, 2]
+    assert [i for g in groups for i in g["remaining_native_indices"]] == list(
+        range(3, 109)
+    )
+    assert receipt["model_calls"] == receipt["native_tasks_executed_in_this_step"] == 0
+
+
 @pytest.fixture(autouse=True)
 def optional_data_provider_source(monkeypatch):
     # The root package deliberately does not require the optional data wheel.
