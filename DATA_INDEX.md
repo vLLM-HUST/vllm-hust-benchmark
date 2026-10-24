@@ -131,3 +131,7 @@ python -m pytest -q tests/test_data_index.py
 目录索引 `data_index.py` 完全离线、按路径确定性生成，不读取证据正文，只写 `docs/data-index.json`。 关联入口生成器 `data_entrypoints.py`
 另行读取发布数据、核验并还原发布分片；只有显式 `--refresh` 才联网， 从固定网站 Git 对象、线上发布清单及 Release API 更新采集快照。不下载或解包 Release
 附件，不执行网站代码。 不要手改生成索引；CI 检查目录路径和关联入口是否与本地来源及采集快照一致。
+
+## #326 收尾入口
+
+[活跃消费者收尾与历史保留清单](docs/issue326-closeout.md)区分已验证入口、历史保留、缺失和外部阻塞；不再以逐篇迁移旧数字作为开放式任务。
