@@ -1,5 +1,13 @@
 # Targeted MOD original custody
 
+- [KVCompress historical release narratives](compress-release/manifest.json): unchanged bilingual
+  0.9 release guides and LICENSE. Historical release observations, compiled-start failure and
+  installation recipes are preserved; this does not authorize publishing an old package.
+
+- [vSpec adaptive narratives](vspec-adaptive-narratives/manifest.json): unchanged adaptive NPU and
+  dynamic-gamma reports plus LICENSE. Quality regressions, gamma-zero diagnostics, negative results
+  and hardware limitations remain in the original text. Existing raw capsules are reused.
+
 - [vSpec additional legacy narratives](vspec-legacy-narratives/manifest.json): three complete
   historical default-adaptive, Qwen3.5 MTP2 GSM8K and online-adaptive reports plus LICENSE. Original
   quality differences, negative results, execution modes and legacy paths remain unchanged; their
