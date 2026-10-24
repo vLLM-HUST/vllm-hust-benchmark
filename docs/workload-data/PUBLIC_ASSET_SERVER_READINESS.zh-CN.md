@@ -183,6 +183,18 @@ python -I scripts/bind_ruler_original_profile.py \
 
 入口不生成、不下载、不复制或改写原数据，只核验完整文件的真实行数、字段、摘要与必需生成声明，写入新manifest，拒绝覆盖。未匹配现有登记字节的文件明确标为调用者选择的本地生成快照，不能把声明当作独立验证过的发布方数据签名；相同已登记字节也不能被重新标成另一任务或长度。生成配置必须来自真实原生成命令，不是借此手编新题。
 
+字段完整性修复：原生`length_w_model_temp`应保留为长度元数据；NIAH的`index`可能表示答案字符位置，故与`token_position_answer`一起归入参考答案侧，不发送给模型。绑定入口拒绝未知未映射字段，避免静默丢失。旧CI50474ec0与8组消费回执只验证当时声明的字段投影，不能替代修复后全字段重建核验。
+
+QA2原生成器存在文档数量递减到必要文档数以下后无法退出的控制流问题。兼容入口只允许显式选择独立副本：
+
+```sh
+python scripts/prepare_ruler_qa_required_doc_compat.py \
+  --source /private/immutable-ruler-source \
+  --output /private/fresh-ruler-qa-runtime --allow-required-doc-floor
+```
+
+须保留生成的兼容回执，并把其中`generator_compatibility`所需声明随真实生成配置记录；不得称为官方生成器完全未修改。该修复不修改题目、必要材料、答案、随机种子、提示渲染或原输出预算，原checkout不变。它不是缩短任务以跑通的替代模式。
+
 统一准备配置为
 `{"sources":[{"source_id":"RULER","data_root":"/private/ruler-generated-32k","manifest":"/private/fresh-ruler-manifest.json"}]}`，沿用pipeline
 plan/run、prepared_rows和resolve_input。准备输出目录须与原data_root分开，不能放在其内部。研究侧使用同一manifest导入公共索引或直接prepare/resolve，不需要复制原数据到研究仓。

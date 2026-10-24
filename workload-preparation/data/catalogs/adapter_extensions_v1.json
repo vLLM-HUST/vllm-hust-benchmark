@@ -7,8 +7,8 @@
       "mapping": "native_fields",
       "input_fields": ["input", "answer_prefix"],
       "required_fields": ["index", "input", "outputs"],
-      "outcome_fields": ["outputs"],
-      "annotation_fields": ["index", "others", "length", "truncation"],
+      "outcome_fields": ["outputs", "index", "token_position_answer", "others"],
+      "annotation_fields": ["length", "length_w_model_temp", "truncation"],
       "id_field": "",
       "requirements": ["Unchanged publisher-generated JSONL only; retain generator revision, task, seed, tokenizer and length provenance", "Physical file SHA256 and row offset identify tasks; original index may repeat and must not be deduplicated or rewritten", "Input plus optional answer_prefix remains source-native text, not an invented chat request; outputs stay reference-only", "Original client and metric execution is separate from reading; generated probes are not natural enterprise traffic"],
       "status": "READER_IMPLEMENTED_NATIVE_VALIDATION_SEPARATE"

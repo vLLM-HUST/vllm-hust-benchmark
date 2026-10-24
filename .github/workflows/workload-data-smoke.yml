@@ -45,6 +45,8 @@ on:
       - 'configs/workload-native/ruler-original-client-py312-dependencies.txt'
       - 'tests/test_ruler_original_profile.py'
       - 'scripts/bind_ruler_original_profile.py'
+      - 'scripts/prepare_ruler_qa_required_doc_compat.py'
+      - 'tests/test_ruler_qa_required_doc_compat.py'
       - 'workload-preparation/tests/test_ruler_profile_binding_cli.py'
       - 'scripts/build_agentbench_pddl_runtime_wheels.py'
       - 'configs/workload-native/**'
@@ -117,7 +119,7 @@ jobs:
       - name: DS1000 generation CPU contract only
         run: python -m pytest -q tests/test_ds1000_original_generation.py
       - name: LoCoMo protocol and BurstGPT transport software contracts only
-        run: python -m pytest -q tests/test_locomo_original_qa_runner.py tests/test_burstgpt_original_example.py tests/test_ruler_original_profile.py workload-preparation/tests/test_ruler_profile_binding_cli.py
+        run: python -m pytest -q tests/test_locomo_original_qa_runner.py tests/test_burstgpt_original_example.py tests/test_ruler_original_profile.py tests/test_ruler_qa_required_doc_compat.py workload-preparation/tests/test_ruler_profile_binding_cli.py
       - name: Installed CLI and packaged catalogs
         working-directory: ${{ runner.temp }}
         run: |

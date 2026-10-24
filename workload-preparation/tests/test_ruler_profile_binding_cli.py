@@ -146,3 +146,30 @@ def test_cli_writes_only_fresh_manifest_and_never_original_data(tmp_path, monkey
     with pytest.raises(FileExistsError):
         binding.main()
     assert target.read_bytes() == saved and path.read_bytes() == original
+
+
+def test_undeclared_original_field_is_not_silently_dropped(tmp_path):
+    path, generation = fixture(tmp_path)
+    rows = [json.loads(line) for line in path.read_text().splitlines()]
+    rows[0]["unreviewed_original_field"] = "fixture value"
+    path.write_text("\n".join(json.dumps(row) for row in rows), encoding="utf-8")
+    with pytest.raises(ValueError, match="undeclared original source fields"):
+        binding.bind(path.parent, path.name, generation)
+
+
+def test_reviewed_generator_compatibility_metadata_is_preserved(tmp_path):
+    path, generation = fixture(tmp_path)
+    metadata = {
+        "patch_id": "ruler-qa-required-doc-floor/v1",
+        "target_relative_path": "scripts/data/synthetic/qa.py",
+        "original_source_sha256": "a" * 64,
+        "runtime_source_sha256": "b" * 64,
+        "explicit_opt_in": True,
+        "question_renderer_ast_preserved": True,
+    }
+    generation["generator_compatibility"] = metadata
+    result = binding.bind(path.parent, path.name, generation)
+    assert result["files"][0]["generation"]["generator_compatibility"] == metadata
+    metadata["explicit_opt_in"] = False
+    with pytest.raises(ValueError, match="compatibility metadata"):
+        binding.bind(path.parent, path.name, generation)

@@ -8,6 +8,7 @@ import argparse
 from copy import deepcopy
 import json
 from pathlib import Path
+import re
 
 from vllm_hust_workload_data import iter_workload
 from vllm_hust_workload_data.assets import _json, asset_path, iter_rows, sha256
@@ -85,6 +86,33 @@ def bind(data_root, relative, generation):
     declared["origin"] = (
         "caller-declared unchanged publisher generator profile; binding does not reexecute generator"
     )
+    compat = generation.get("generator_compatibility")
+    if compat is not None:
+        required = {
+            "patch_id",
+            "target_relative_path",
+            "original_source_sha256",
+            "runtime_source_sha256",
+            "explicit_opt_in",
+            "question_renderer_ast_preserved",
+        }
+        if (
+            not isinstance(compat, dict)
+            or not required <= compat.keys()
+            or compat["patch_id"] != "ruler-qa-required-doc-floor/v1"
+            or compat["target_relative_path"] != "scripts/data/synthetic/qa.py"
+            or compat["explicit_opt_in"] is not True
+            or compat["question_renderer_ast_preserved"] is not True
+            or any(
+                not isinstance(compat[key], str)
+                or re.fullmatch(r"[0-9a-f]{64}", compat[key]) is None
+                for key in ("original_source_sha256", "runtime_source_sha256")
+            )
+        ):
+            raise ValueError("reviewed generator compatibility metadata required")
+        declared["generator_compatibility"] = {
+            key: deepcopy(compat[key]) for key in sorted(required)
+        }
     manifest["files"] = [
         {
             "path": relative,
@@ -105,9 +133,13 @@ def bind(data_root, relative, generation):
         native_execution_or_scoring_verified_by_binding=False,
     )
     # Full reader validation checks fields, provenance, counts and digest. No task is run.
-    validated_count = sum(
-        1 for _ in iter_workload("RULER", data_root=Path(data_root), manifest=manifest)
-    )
+    validated_count = 0
+    for record in iter_workload("RULER", data_root=Path(data_root), manifest=manifest):
+        if record.replay["unmapped_field_names"]:
+            raise ValueError(
+                "undeclared original source fields; update matching data component contract before binding"
+            )
+        validated_count += 1
     if validated_count != count:
         raise ValueError("full generated reader count mismatch")
     return manifest

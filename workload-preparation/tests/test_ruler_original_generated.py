@@ -21,6 +21,8 @@ def fixture_row():
         "answer_prefix": " Answer:",
         "outputs": ["REFERENCE_SENTINEL"],
         "length": 40,
+        "length_w_model_temp": 40,
+        "token_position_answer": 13,
         "truncation": -1,
         "others": {"id": "original-relation"},
     }
@@ -37,9 +39,16 @@ def test_ruler_reference_isolated_and_original_index_not_task_identity():
         "answer_prefix": row["answer_prefix"],
     }
     assert "REFERENCE_SENTINEL" not in json.dumps(record.input_record())
-    assert record.outcome_record() == {"outputs": row["outputs"]}
-    assert record.replay["annotations"]["index"] == 17
-    assert record.replay["annotations"]["others"] == row["others"]
+    assert record.outcome_record() == {
+        "outputs": row["outputs"],
+        "index": 17,
+        "token_position_answer": 13,
+        "others": row["others"],
+    }
+    assert "token_position_answer" not in json.dumps(record.input_record())
+    assert record.replay["annotations"]["length_w_model_temp"] == 40
+    assert record.replay["unmapped_field_names"] == []
+    assert record.outcome_record()["others"] == row["others"]
     with pytest.raises(ValueError, match="not a ready model request"):
         record.request_body()
 
@@ -63,7 +72,7 @@ def test_full_reader_duplicate_indices_no_drop_no_mutation(tmp_path):
     records = list(iter_workload("RULER", data_root=tmp_path, manifest=manifest))
     assert len(records) == 3
     assert len({r.task["task_id"] for r in records}) == 3
-    assert [r.replay["annotations"]["index"] for r in records] == [17] * 3
+    assert [r.outcome_record()["index"] for r in records] == [17] * 3
     assert "answer_prefix" not in records[1].task["input"]
     assert path.read_bytes() == raw
     assert all(
