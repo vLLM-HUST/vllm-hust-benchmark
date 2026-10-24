@@ -3,6 +3,7 @@
 from copy import deepcopy
 import hashlib
 import json
+from pathlib import Path
 
 import pytest
 
@@ -154,3 +155,31 @@ def test_reader_rejects_incomplete_or_mislabelled_generation(tmp_path, field, va
     profile["generation"][field] = value
     with pytest.raises(ValueError, match="generation provenance"):
         list(iter_workload("RULER", data_root=tmp_path, manifest=manifest))
+
+
+def test_fixed_ci_handoff_does_not_upgrade_reading_to_native_completion():
+    root = Path(__file__).resolve().parents[2]
+    receipt = json.loads(
+        (
+            root
+            / "docs/workload-data/validation/ruler-ci-research-handoff-20261025.json"
+        ).read_text()
+    )
+    assert receipt["source_id"] == "RULER" and len(receipt["data_commit"]) == 40
+    assert (
+        len(receipt["data_wheel_sha256"]) == 64
+        and receipt["data_cpu_ci_run"] == 40123881426
+    )
+    assert (
+        receipt["public_prepare_resolve_rows"]
+        == receipt["original_generated_rows_checked"]
+        == 500
+    )
+    assert (
+        receipt["research_source_index_import_rows"]
+        == receipt["research_direct_prepare_resolve_rows"]
+        == 3
+    )
+    assert not receipt["candidate_not_final_ci_artifact"]
+    assert not receipt["research_default_dependency_lock_updated"]
+    assert receipt["new_model_calls"] == 0 and not receipt["source_checkbox_eligible"]
