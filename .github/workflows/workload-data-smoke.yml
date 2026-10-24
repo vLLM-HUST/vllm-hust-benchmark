@@ -41,6 +41,9 @@ on:
       - 'scripts/run_burstgpt_original_example.py'
       - 'scripts/prepare_qasper_original_assets.py'
       - 'tests/test_burstgpt_original_example.py'
+      - 'scripts/run_ruler_original_profile.py'
+      - 'configs/workload-native/ruler-original-client-py312-dependencies.txt'
+      - 'tests/test_ruler_original_profile.py'
       - 'scripts/build_agentbench_pddl_runtime_wheels.py'
       - 'configs/workload-native/**'
       - 'tests/test_tau2_original_runner.py'
@@ -112,7 +115,7 @@ jobs:
       - name: DS1000 generation CPU contract only
         run: python -m pytest -q tests/test_ds1000_original_generation.py
       - name: LoCoMo protocol and BurstGPT transport software contracts only
-        run: python -m pytest -q tests/test_locomo_original_qa_runner.py tests/test_burstgpt_original_example.py
+        run: python -m pytest -q tests/test_locomo_original_qa_runner.py tests/test_burstgpt_original_example.py tests/test_ruler_original_profile.py
       - name: Installed CLI and packaged catalogs
         working-directory: ${{ runner.temp }}
         run: |
