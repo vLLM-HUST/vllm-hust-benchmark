@@ -1,10 +1,12 @@
 """CPU artifact/entry checks only, not BFCL task execution or scores."""
 
-import hashlib
+import importlib.util
 import json
 from pathlib import Path
 import subprocess
 import sys
+
+import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -42,11 +44,23 @@ def test_native_handoff_retains_static_scoring_boundary_and_real_identity():
     assert (
         record["samples"][1]["official_error_type"] == "simple_function_checker:unclear"
     )
-    script = ROOT / "scripts/run_bfcl_v4_simple_python_original.py"
     assert (
         record["helper_sha256"]
-        == hashlib.sha256(script.read_bytes().replace(b"\r\n", b"\n")).hexdigest()
+        == "f90797827d70533ad778bf97a4a7c8c498e8103c68d533edd2fc28b2e4734c44"  # pragma: allowlist secret - public historical runner SHA
     )
+
+
+def test_original_ranges_and_full_do_not_substitute_or_duplicate_tasks():
+    path = ROOT / "scripts/run_bfcl_v4_simple_python_original.py"
+    spec = importlib.util.spec_from_file_location("bfcl_native_selection", path)
+    runner = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(runner)
+    assert runner.selected_indices() == [0, 1, 2]
+    assert runner.selected_indices(397, 3) == [397, 398, 399]
+    assert runner.selected_indices(full=True) == list(range(400))
+    for start, count in [(-1, 3), (399, 2), (0, 0)]:
+        with pytest.raises(ValueError):
+            runner.selected_indices(start, count)
 
 
 def test_public_help_without_installed_bfcl_or_model_dependencies():
