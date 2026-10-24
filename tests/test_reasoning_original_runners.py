@@ -37,6 +37,14 @@ def test_gsm8k_delivery_preserves_native_scope_and_no_rerun_boundary():
 
 
 def test_arc_native_tail_receipt_covers_both_suites_and_actual_ids():
+    docs = ROOT / "docs/workload-data"
+    ledger = json.loads((docs / "dataset-validation-status.json").read_text("utf-8"))
+    item = ledger["delivery_inventory"]["AI2_ARC"]
+    delivery = json.loads((ROOT / item["delivery_receipt"]).read_text("utf-8"))
+    assert item["checked"] and item["status"] == "AVAILABLE"
+    assert delivery["verified_unique_original_tasks"] == 12
+    assert sum(len(row["original_doc_ids"]) for row in delivery["subprotocols"]) == 12
+    assert not delivery["full_suite_validated"]
     receipt = json.loads(
         (
             ROOT / "docs/workload-data/validation/arc-tail-native-audit-20261024.json"
