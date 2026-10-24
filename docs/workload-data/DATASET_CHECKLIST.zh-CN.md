@@ -3,7 +3,7 @@
 ## 本轮完整交付清单（2026-10-24）
 
 40 类共登记 110 个公开来源、8 份企业资产，合计 118 项；五个指定来源只分类，本轮推进 113 项。下方历史 19
-个勾保留，不自动提升为本轮完成，也不要求已验证项目重复跑。当前交付可用22/113项：1项服务轨迹资产、10项原任务/固定评测协议交付（BBH、MATH500、GSM8K、AI2-ARC、NI登记任务、BFCL登记类别、QuALITY原NYU多选集成、LongBench登记Qasper200、tau2登记telecom_full、LoCoMo完整上下文文本QA）、Dolly、OASST1与LongWriter三项语料及8份私有企业请求语料。并非22个带官方质量评分的完整benchmark，边界见逐项回执。
+个勾保留，不自动提升为本轮完成，也不要求已验证项目重复跑。当前交付可用23/113项：1项服务轨迹资产、11项原任务/固定评测协议交付（BBH、MATH500、GSM8K、AI2-ARC、NI登记任务、BFCL登记类别、QuALITY原NYU多选集成、LongBench登记Qasper200、tau2登记telecom_full、LoCoMo完整上下文文本QA、RULER原13种任务集成）、Dolly、OASST1与LongWriter三项语料及8份私有企业请求语料。并非23个带官方质量评分的完整benchmark，边界见逐项回执。
 
 完成要求以主方案第零节及机器清单 delivery_contract 为准：原题、完整原生流程与适用评分必须跑通；每个独立协议预计执行和评分不超过 30
 分钟则全跑，否则事前固定至少三条，不足则全跑。不得改题、删工具、截断或缩减原生预算，失败不得换题。资源不足保留未勾并记阻塞；模型答错不等于链路失败。服务轨迹无原始请求回放入口时，只能交付数据资产，不能编
@@ -90,7 +90,7 @@ TB；服务器/data约1.42TB可用，未缩小语料。ChartQA当前两卡主机
 | AI2_ARC                    | [x] 原生抽样交付      | 两子集各原前三题及末三题共12题执行、原版似然评分与回查通过；固定CI组件核对六文件。[交付回执](validation/arc-native-delivery-20261024.json)；支持分别全量，未全跑、不合并分数                                                                                    |
 | LONGBENCH                  | [x] 登记Qasper交付    | 原Qasper200题原生执行、官方评分及完整输入/参考均复核；研究端固定工件三条双路径接通。不宣称其他LongBench子集或原Qasper全库。[交付回执](validation/longbench-qasper-native-delivery-20261024.json)                                                                |
 | LONGBENCH_V2               | [ ] 原上下文容量阻塞  | 原Short三题复用；事前固定Medium原3/5/8行中两题超131072窗口，Long原0/2/7行全部超限。未截断、换题或新增推理，不计完成。[容量回执](validation/longbench-v2-length-group-capacity-20261025.json)                                                                    |
-| LONGMEMEVAL                | [ ] 待开展            | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                    |
+| LONGMEMEVAL                | [ ] 进行中，未完成    | oracle/S/M三份固定原文件均在服务器取得并核对发布方SHA；oracle和S共1000题原字段、会话/日期/证据关系已验。仍缺原生生成入口及原评分环境验证，不用oracle替代S/M、不裁剪历史、不伪称官方judge已跑。                                                                  |
 | LONGMEMEVAL_V2             | [ ] 待开展            | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                    |
 | QASPER                     | [ ] 原始接入准备      | 原v0.3共1585论文/5049问题；候选全字段/5049索引/18回查通过。另固定CPU-CI39556148工件33 payload及研究40文件核对，三split共9条双路径消费接通；本次未改默认锁，原生答案/证据生成评分未完。不是LongBench200题。[准备证据](PUBLIC_ASSET_SERVER_READINESS.zh-CN.md)    |
 | NARRATIVEQA                | [ ] 待开展            | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                    |
@@ -122,7 +122,7 @@ TB；服务器/data约1.42TB可用，未缩小语料。ChartQA当前两卡主机
 | MOONCAKE                   | [ ] 缺口已列待补      | 官方工具未运行；全局无冲突需9.37 TiB；容量受限profile及SSH恢复待办                                                                                                                                                                                              |
 | QRECC                      | [ ] 阻塞              | 官方原始collection规模超过当前约1.42TB可用空间；未缩减或替换                                                                                                                                                                                                    |
 | INFINITEBENCH              | [ ] 待开展            | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                    |
-| RULER                      | [ ] 进行中，未完成    | 13种任务15组配置2530条真实请求及原评分已审计，完整输入/预算保留；15组7500条全字段重建及公共/研究消费已验。QA2显式生成器兼容修复已披露；最终CI工件消费待验，不把候选或部分长度网格当完整来源交付。                                                               |
+| RULER                      | [x] 可用              | 原13种任务15组配置2530条真实请求及原评分审计完成，完整输入/预算保留；固定CI工件完成7500条全字段重建、公共回查90条及研究两路径各45条。QA2显式兼容修复已披露；不声称完整长度网格或复现发布方模型。                                                                |
 | QUALITY                    | [x] 原NYU多选集成可用 | 原6题/24候选似然及固定harness评分、完整文章token与安装包2086题索引/6条回查通过。[交付回执](validation/quality-native-delivery-20261024.json)；非SCROLLS数据、非发布方训练基线，非全2086题执行                                                                   |
 | BBH                        | [x] 原生抽样交付      | 全27变体原任务准备、执行及固定评分可用；81个唯一原题已验证，固定CI工件安装回查及三项CI通过。[交付回执](validation/bbh-native-delivery-20261024.json)。不是6511题全量或高分保证                                                                                  |
 | BFCL                       | [x] 登记原生类别可用  | simple_python原400题生成、官方AST判定及原文/响应/安装包400条prepare→resolve审计通过。[交付回执](validation/bfcl-native-delivery-20261024.json)；静态函数/参数匹配，不代表其他BFCL类别或真实工具执行                                                             |
@@ -300,7 +300,8 @@ RULER仍是113项中的一个来源，以下子配置的勾不计作新增数据
 
 完整[218篇essay资产](validation/ruler-original-essay-corpus-20261025.json)与[原HotpotQA对象](validation/ruler-original-hotpot-object-20261025.json)已取得，均只存服务器。QA2原生成器存在可复现的控制流死循环；[独立兼容副本及准备核验](validation/ruler-qa2-generator-compatibility-20261025.json)保留前251条逐字节等价记录，并核验全部500题的必要材料、答案、题目和预算未改。不得称为官方生成器完全未修改。
 
-累计2530条原生请求已审计，覆盖13种任务和额外32K/128K配置，但不声称完整长度网格。另[全字段消费核验](validation/ruler-full15-complete-fields-candidate-20261025.json)完成15组7500条原字段重建、公共回查90条、研究索引导入及直接prepare/resolve各45条，修复了上述字段遗漏。该核验为候选软件，最终CI工件尚待验证，研究默认锁未改，因此RULER来源主勾仍不提前勾选。
+累计2530条原生请求已审计，覆盖13种任务及额外32K/128K配置，不声称完整长度网格。[最终CI工件消费核验](validation/ruler-fixed-ci-research-handoff-20261025.json)完成15组7500条原字段重建、公共回查90条、研究索引导入及直接prepare/resolve各45条；CPU
+smoke、tests和lint全部通过。[交付回执](validation/ruler-native-delivery-20261025.json)记录原生执行、固定工件与显式兼容边界，RULER来源主勾已勾；研究默认依赖锁未改，观测与分析未迁入。
 
 ## 历史抽样记录（非本轮完成总数）
 

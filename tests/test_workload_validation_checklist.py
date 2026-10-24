@@ -8,6 +8,31 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def test_ruler_delivery_requires_native_metrics_and_final_artifact_handoff():
+    folder = ROOT / "docs/workload-data"
+    ledger = json.loads((folder / "dataset-validation-status.json").read_text("utf-8"))
+    row = ledger["delivery_inventory"]["RULER"]
+    assert row["checked"] and row["status"] == "AVAILABLE"
+    delivery = json.loads((ROOT / row["delivery_receipt"]).read_text("utf-8"))
+    handoff = json.loads(
+        (ROOT / row["fixed_ci_research_handoff_receipt"]).read_text("utf-8")
+    )
+    assert delivery["native_requests_completed_and_audited"] == 2530
+    assert (
+        delivery["original_task_types_verified"] == handoff["original_task_types"] == 13
+    )
+    assert handoff["raw_records_reconstructed_equal_total"] == 7500
+    assert handoff["public_roundtrip_rows_total"] == 90
+    assert handoff["research_index_import_rows_total"] == 45
+    assert handoff["research_direct_prepare_resolve_rows_total"] == 45
+    assert not handoff["new_candidate_not_final_ci_artifact"]
+    assert handoff["model_calls"] == 0
+    assert not delivery["unmodified_publisher_qa2_generator_claim"]
+    assert not delivery["full_original_length_grid_validated"]
+    assert not delivery["research_observation_or_analysis_migrated"]
+    assert not delivery["raw_payloads_published"]
+
+
 def test_longwriter_delivery_preserves_corpus_and_non_scoring_boundary():
     directory = ROOT / "docs/workload-data"
     ledger = json.loads(
