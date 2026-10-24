@@ -1,5 +1,10 @@
 # Targeted MOD original custody
 
+- [MuxPD mixed design and TP4 goodput narratives](muxpd-documents/manifest.json): unchanged full
+  documents and LICENSE. Serving tradeoffs, profiler limits, failure boundaries and methodology
+  remain historical. Raw inputs reuse the existing benchmark capsules and Release archives;
+  preserving prose is not recovery of omitted full captures or a new performance claim.
+
 - [PyramidKV selected-page mixed narrative](pyramid-selected/manifest.json): the complete original
   operator/serving diagnostic document with LICENSE and NOTICE. Negative serving results,
   repeatability limits and implementation instructions remain unchanged. Original timings and
