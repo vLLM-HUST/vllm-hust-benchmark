@@ -501,7 +501,7 @@ SHA256为`251018b09cce181d4e14f00b005f3e373afe96e648836c261e7f14992546c9ae`。�
   replay，不计作vLLM-HUST原生推理执行。只读容量预检显示，无冲突映射两个完整trace需要约9.37 TiB，超过预检时约1.42
   TB可用空间；官方默认2000页profile会触发modulo槽位映射，命中率不能当作无冲突真实KV复用。当前SSH拒绝重连，尚未执行。见[固定版工具说明](https://github.com/kvcache-ai/Mooncake/blob/531790322667942f0368933d0d5960f6e4a4c87b/benchmarks/storage_benchmark_v1/doc/README.md)、[固定版layout](https://github.com/kvcache-ai/Mooncake/blob/531790322667942f0368933d0d5960f6e4a4c87b/benchmarks/storage_benchmark_v1/layout/mla.py)及[固定版trace说明](https://github.com/kvcache-ai/Mooncake/blob/531790322667942f0368933d0d5960f6e4a4c87b/FAST25-release/README.md)。
 
-- ChartQA环境复核：原文件与前三条输入/参考往返证据可复用，但2026-10-24两卡主机检查到Qwen3-VL-32B-Instruct目录仅有配置、tokenizer与权重索引，没有权重分片；没有可用视觉模型，因此未发推理请求。随后SSH拒绝重连，远端传输后的状态未知。此项按环境阻塞记，不算运行失败或已完成；恢复可达主机并确认视觉模型权重后再执行。
+- ChartQA环境最新复核：主机已可达，Qwen3-VL-32B-Instruct仍只有元数据；但现有Qwen3.5-27B为ConditionalGeneration架构，333个视觉张量均在实际权重头中找到，处理器配置存在。当前服务显式language-model-only，视觉处理与Ascend图像推理尚未验证；不能由张量存在推断已可运行。见[现有多模态资产预检](validation/multimodal-existing-model-preflight-20261024.json)。未停服务、未新增下载权重，不再沿用旧SSH拒绝或“完全没有视觉权重”的判断；原图及官方评分未跑通前不打勾。
 
 - 模型运行结果判读补核：BBH原Boolean task:0–2均按固定lm-eval generation
   stop配置正常`stop`，固定regex/exact-match评分成功并得到0/3。答案未抽取说明模型没有作出可识别答案，评分器按配置将其计为0；这是已完成的低分任务结果，不是协议崩溃或评分失败。保留原prompt、stop配置、0分和原receipt；不改停止词追求更高分。2026-10-24新增26变体各三题已完成NPU生成与固定评分，78条离线复核一致；加上复用Boolean共27变体81条唯一原题。最终固定工件及文档回归仍待收口，来源级未勾；不把候选运行当作已交付。

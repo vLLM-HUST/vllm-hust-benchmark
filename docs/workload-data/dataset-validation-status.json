@@ -1120,7 +1120,8 @@
       "legacy_checked": false,
       "existing_receipt": "docs/workload-data/validation/public-original-assets-server-reader-20261023.json",
       "delivery_receipt": null,
-      "blocker": "Current two-NPU host has no Qwen3-VL-32B-Instruct weight shards (only metadata/tokenizer); no compatible local vision model was available. Subsequent SSH reconnection was refused, so no native inference was started and remote transfer state is unconfirmed. Resume only after a reachable host and compatible VLM weights are available."
+      "model_asset_preflight": "docs/workload-data/validation/multimodal-existing-model-preflight-20261024.json",
+      "blocker": "Host reachable; Qwen3-VL-32B still lacks weights, but existing Qwen3.5-27B has333 vision tensors physically present and processor configs. Current service is language-model-only; original-image processing and vision-enabled Ascend serving/scoring remain unvalidated. No service changed or additional weights downloaded."
     },
     "VIDEOMME": {
       "scope": "public",

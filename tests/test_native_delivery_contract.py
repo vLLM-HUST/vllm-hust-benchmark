@@ -8,6 +8,26 @@ ROOT = Path(__file__).resolve().parents[1]
 DOCS = ROOT / "docs/workload-data"
 
 
+def test_vision_weight_headers_do_not_count_as_multimodal_execution():
+    receipt = json.loads(
+        (
+            DOCS / "validation/multimodal-existing-model-preflight-20261024.json"
+        ).read_text("utf-8")
+    )
+    assert receipt["vision_config_present"]
+    assert (
+        receipt["indexed_vision_tensor_count"]
+        == receipt["actual_vision_safetensors_header_entries_matched"]
+        == 333
+    )
+    assert receipt["current_model_service_language_model_only"]
+    assert not receipt["visual_inference_validated"]
+    assert not receipt["source_checkbox_eligible"]
+    assert not receipt["new_weights_downloaded"]
+    assert not receipt["model_service_stopped_or_changed"]
+    assert receipt["model_generation_calls"] == 0
+
+
 def test_code_generation_is_not_functional_execution_without_isolation():
     receipt = json.loads(
         (
