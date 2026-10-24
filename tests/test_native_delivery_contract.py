@@ -46,6 +46,25 @@ def test_code_generation_is_not_functional_execution_without_isolation():
         assert ledger["delivery_inventory"][sid]["isolation_preflight"]
 
 
+def test_original_image_processing_is_not_native_multimodal_execution():
+    receipt = json.loads(
+        (DOCS / "validation/chartqa-original-processor-20261024.json").read_text("utf-8")
+    )
+    assert receipt["status"] == "CPU_ORIGINAL_IMAGES_PROCESSOR_PASSED_NOT_INFERENCE"
+    assert receipt["source_indices"] == [0, 1, 2]
+    assert receipt["native_tasks_executed"] == receipt["model_calls"] == 0
+    assert not receipt["weights_loaded"]
+    assert not receipt["model_service_changed"]
+    assert not receipt["full_benchmark_completed"]
+    for task in receipt["tasks"]:
+        assert task["original_question_used"]
+        assert task["tensor_shapes"]["pixel_values"][0] > 0
+        assert task["tensor_shapes"]["image_grid_thw"] == [1, 3]
+    ledger = json.loads((DOCS / "dataset-validation-status.json").read_text("utf-8"))
+    assert not ledger["delivery_inventory"]["CHARTQA"]["checked"]
+    assert ledger["delivery_inventory"]["CHARTQA"]["original_processor_preflight"]
+
+
 def test_new_installed_research_handoff_is_not_published_lock_or_native_run():
     ledger = json.loads((DOCS / "dataset-validation-status.json").read_text("utf-8"))
     status = ledger["research_consumer_latest"]
