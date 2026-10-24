@@ -60,6 +60,27 @@ def test_actual_range_receipt_preserves_pinned_core_and_original_protocol():
         )
 
 
+def test_complete_extraction_coverage_is_disjoint_and_not_entire_ni():
+    receipt = json.loads(
+        (
+            PATH.parents[1]
+            / "docs/workload-data/validation/ni-extraction-complete-audit-20261024.json"
+        ).read_text("utf-8")
+    )
+    assert receipt["original_task_size"] == receipt["unique_original_tasks"] == 261
+    covered = []
+    for batch in receipt["batches"]:
+        start, end = batch["original_interval_inclusive"]
+        assert end - start + 1 == batch["original_tasks"]
+        covered.extend(range(start, end + 1))
+        assert batch["original_scorer_recomputed_equal"]
+        assert batch["original_collator_requests_and_response_integrity_verified"]
+    assert len(covered) == len(set(covered)) == 261
+    assert set(covered) == set(range(261))
+    assert not receipt["full_ni_suite_validated"]
+    assert receipt["audit_new_generation_calls"] == 0
+
+
 def test_help_without_optional_original_runtime():
     result = subprocess.run(
         [sys.executable, str(PATH), "--help"], capture_output=True, text=True

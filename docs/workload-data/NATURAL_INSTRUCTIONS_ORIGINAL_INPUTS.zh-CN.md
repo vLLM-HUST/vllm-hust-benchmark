@@ -1,5 +1,7 @@
 # Natural Instructions 原始任务输入（下一批候选）
 
+task1453实体抽取已完成[全261题去重覆盖审计](validation/ni-extraction-complete-audit-20261024.json)：复用原0–2与258–260，仅新增3–257共255题，所有原题号恰好覆盖一次。三个批次的完整prompt经原collator重建、响应包SHA及终态核对、原评分器重算均一致；审计0新增生成调用，261次tokenizer请求只作原拼接器长度校验。分批分数保留，不以题号覆盖宣称全NI或跨环境统一准确率。
+
 ## 2026-10-24固定工件复核
 
 新增通用入口`scripts/run_ni_original_range.py`复用摘要所固定的旧核心及改写/抽取任务配置，支持五个已登记文件的`--start/--count`原题连续区间和`--full`完整文件。必须显式选择`--task-files`，评分目录必填；核心collator/scorer、完整输入、1024生成预算不变。示例：
