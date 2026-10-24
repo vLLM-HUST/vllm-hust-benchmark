@@ -103,6 +103,35 @@ def test_new_edge_audit_is_not_full_simple_python_or_bfcl_claim():
     ]
 
 
+def test_complete_registered_category_is_not_full_bfcl_or_tool_execution():
+    docs = ROOT / "docs/workload-data"
+    ledger = json.loads((docs / "dataset-validation-status.json").read_text("utf-8"))
+    item = ledger["delivery_inventory"]["BFCL"]
+    delivery = json.loads((ROOT / item["delivery_receipt"]).read_text("utf-8"))
+    receipt = json.loads(
+        (docs / "validation" / delivery["native_execution_receipt"]).read_text("utf-8")
+    )
+    assert item["checked"] and item["status"] == "AVAILABLE"
+    covered = []
+    for batch in receipt["batches"]:
+        start, end = batch["original_interval_inclusive"]
+        assert end - start + 1 == batch["actual_original_tasks"]
+        covered.extend(range(start, end + 1))
+        assert batch["official_ast_score_recomputed_equal"]
+        assert batch["full_original_handler_prompts_equal"]
+    assert (
+        len(covered)
+        == len(set(covered))
+        == receipt["unique_native_tasks_audited"]
+        == 400
+    )
+    assert set(covered) == set(range(400))
+    assert receipt["original_prepare_resolve_roundtrips"] == 400
+    assert receipt["full_simple_python_validated"]
+    assert not delivery["full_bfcl_suite_validated"]
+    assert not delivery["live_tools_executed"]
+
+
 def test_optional_dependency_snapshot_has_cpu_import_runtime_not_cuda_stack():
     raw = (
         ROOT / "configs/workload-native/bfcl-simple-python-py312-dependencies.txt"

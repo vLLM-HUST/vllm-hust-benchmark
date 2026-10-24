@@ -1,5 +1,8 @@
 # BFCL v4 simple_python 原始函数调用任务
 
+登记类别现已完成[400题原生交付](validation/bfcl-native-delivery-20261024.json)。[完整审计](validation/bfcl-native-complete-audit-20261024.json)覆盖原0–399，复用首尾六题，仅新增中间394题，题号无重复/遗漏；全部原prompt、输入token、响应摘要及官方AST
+valid判定一致，固定CI包400条索引/prepare→resolve通过。以下保留历史阶段记录，较早“中间待验”不代表当前状态。原始模型服务配置见[双NPU环境](BBH_ORIGINAL_INPUTS.zh-CN.md#%E6%9C%AC%E8%BD%AE%E5%B7%B2%E9%AA%8C%E8%AF%81%E7%9A%84%E5%8F%8Cnpu%E6%A8%A1%E5%9E%8B%E6%9C%8D%E5%8A%A1%E9%85%8D%E7%BD%AE)。不将simple_python完整覆盖称为全部BFCL或真实工具执行。
+
 所属workload为`tool-call-generation`。本批只覆盖原始单轮函数选择与参数生成， 官方AST checker匹配函数名及参数，不执行工具或模型生成代码。
 不能据此声称应用闭环、检索、记忆、多轮、多函数、并行调用或全部BFCL已完成。
 
@@ -17,7 +20,8 @@ CI包全400题原字段及索引一致，6条prepare/resolve一致；全部110�
 - [x] 安装根包和数据包后，通过公开准备命令保持原文件名和内容。
 - [x] BFCL原前三题simple_python_0/1/2的公开入口NPU复验，均stop，官方valid均为true。
 - [x] 安装的110个上游Python文件与固定官方归档逐字节一致；独立环境pip check通过。
-- [ ] 全400题、其他BFCL类别、统计代表性、真实工具执行或性能评价。
+- [x] 登记simple_python完整400题原生生成、官方AST静态评分与安装工件回查。
+- [ ] 其他BFCL类别、统计代表性、真实工具执行或性能评价。
 - [ ] 本批新数据API的研究端精确工件消费联调。
 
 [脱敏回执](validation/bfcl-v4-simple-python-public-handoff-npu-20261023.json)。私有预备和公开复验是同三题，
