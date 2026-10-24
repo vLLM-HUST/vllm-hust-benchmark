@@ -297,7 +297,7 @@ def test_server_original_capacity_audit_and_dependency_snapshot_are_not_native_r
     # not rewrite historical execution evidence as if the new bytes ran there.
     assert receipt["helper"] == "scripts/prepare_longbench_v2_original_capacity.py"
     assert receipt["helper_sha256"] == (
-        "d4ca6bd413090c6a936b4aac3681c7d4dd3735aa1972db176cf6d3bbdbcb05f2"
+        "d4ca6bd413090c6a936b4aac3681c7d4dd3735aa1972db176cf6d3bbdbcb05f2"  # pragma: allowlist secret
     )
     assert receipt["fixed_original_indices"] == [1, 4, 6]
     assert receipt["prior_original_prompt_identity_and_token_counts_equal"]
