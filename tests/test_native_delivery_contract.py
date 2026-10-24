@@ -8,6 +8,29 @@ ROOT = Path(__file__).resolve().parents[1]
 DOCS = ROOT / "docs/workload-data"
 
 
+def test_new_installed_research_handoff_is_not_published_lock_or_native_run():
+    ledger = json.loads((DOCS / "dataset-validation-status.json").read_text("utf-8"))
+    status = ledger["research_consumer_latest"]
+    receipt = json.loads((ROOT / status["receipt"]).read_text("utf-8"))
+    assert receipt["software_tests_passed"] == 62
+    assert receipt["software_tests_skipped"] == 0
+    assert {item["source_id"] for item in receipt["checks"]} == set(
+        status["actual_sources_verified"]
+    )
+    assert len(receipt["checks"]) == 4
+    for item in receipt["checks"]:
+        assert item["original_inputs_and_independent_references_equal"]
+        assert (
+            item["public_index_to_research_rows"]
+            == item["direct_research_prepare_resolve_rows"]
+            == 3
+        )
+    assert receipt["new_model_calls"] == 0
+    assert not receipt["research_pr_lock_updated"]
+    assert not receipt["all_37_sources_revalidated"]
+    assert not receipt["observation_or_analysis_code_migrated_into_benchmark"]
+
+
 def test_burstgpt_official_simulation_not_claimed_as_original_request_replay():
     receipt = json.loads(
         (DOCS / "validation/burstgpt-official-demo-review-20261024.json").read_text(
