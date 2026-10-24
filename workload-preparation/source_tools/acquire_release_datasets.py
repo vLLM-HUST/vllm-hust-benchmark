@@ -81,9 +81,7 @@ def acquire(source, *, data_root=None):
         raise ValueError("unsafe release path")
     explicit_root = data_root is not None
     cache_root = (
-        Path(data_root).resolve()
-        if explicit_root
-        else ROOT / ".cache/public_datasets"
+        Path(data_root).resolve() if explicit_root else ROOT / ".cache/public_datasets"
     )
     if explicit_root and cache_root.is_relative_to(ROOT.resolve()):
         raise ValueError("explicit data root must be outside the component checkout")

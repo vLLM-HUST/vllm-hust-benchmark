@@ -6,7 +6,11 @@
 
 ## 已验证
 
-- 2026-10-24在服务器当前候选源码快照复现CPU smoke的九组pytest检查：418通过、1跳过（无Git元数据的归档快照不执行Git跟踪检查）；实际本地checkout另行`git ls-files`确认组件无跟踪的JSONL/CSV/Parquet。不是GitHub CI结果，不新增模型任务。初次快照缺配置文件及两份既有runner字节不一致的问题已补齐重跑，无需改历史回执或测试。见[软件回归回执](validation/server-software-regression-20261024.json)。
+- 固定提交`e2de9812`的CPU
+  smoke通过，其CI软件归档ID`12550944059`在服务器校验发布摘要与wheel摘要后独立安装，BBH全27变体各前三条共81条及BurstGPT三文件各前三条共9条原记录回查通过。见[固定工件回执](validation/ci-installed-reader-e2de9812-20261024.json)。这不是研究侧的新联调或新增模型执行；该提交主CI仍暴露格式/公开摘要误报及导航索引过期问题，修复中的后续提交不能冒用本次工件身份。
+- 2026-10-24在服务器当前候选源码快照复现CPU
+  smoke的九组pytest检查：418通过、1跳过（无Git元数据的归档快照不执行Git跟踪检查）；实际本地checkout另行`git ls-files`确认组件无跟踪的JSONL/CSV/Parquet。不是GitHub
+  CI结果，不新增模型任务。初次快照缺配置文件及两份既有runner字节不一致的问题已补齐重跑，无需改历史回执或测试。见[软件回归回执](validation/server-software-regression-20261024.json)。
 - 当前软件专项130项通过：原文回查、输入/答案隔离、失败事务、模型显式绑定、流式终止、响应/原schema校验、清单与脚本指纹和数据-only边界。夹具不是模型执行证据。
 - 安装包对24来源各3条完成本地读取、准备及原文回查，共72条；该步骤没有模型调用或评分。
 - GSM8K历史执行回执按实际`doc_id`去重覆盖原test:0–200，共201条；另完成尾部test:1316–1318三条，固定revision累计204/1319个唯一题号。尾部三题strict/flexible均正确；跨配置不汇总准确率，也不解读为全量或性能结论。lm-eval尾部补测的effective

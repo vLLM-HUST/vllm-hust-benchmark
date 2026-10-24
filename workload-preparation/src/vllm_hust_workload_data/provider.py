@@ -49,9 +49,7 @@ def _validate_bbh_publisher_prompt(raw: bytes, expected_demos: int = 3) -> None:
     if text.count(separator) != 1:
         raise ValueError("original BBH publisher prompt header boundary changed")
     prefix = text.split(separator, 1)[1]
-    demonstrations = [
-        item for item in prefix.split("\n\n") if item.startswith("Q: ")
-    ]
+    demonstrations = [item for item in prefix.split("\n\n") if item.startswith("Q: ")]
     if len(demonstrations) != expected_demos:
         raise ValueError("original BBH publisher prompt demonstration count mismatch")
 
@@ -77,9 +75,7 @@ def _prepare_bbh_assets(*, data_archive, output, task_ids):
     if not task_ids or not task_ids.issubset(task_ids_available):
         raise ValueError("requested BBH task IDs are not registered in this revision")
     selected = [
-        asset
-        for asset in spec["files"]
-        if Path(asset["path"]).stem in task_ids
+        asset for asset in spec["files"] if Path(asset["path"]).stem in task_ids
     ]
     contents = {}
     with zipfile.ZipFile(archive) as bundle:
@@ -175,9 +171,7 @@ def prepare_bbh_original_tasks(*, data_archive, output):
     """Prepare all original BBH task/prompt assets without model or scorer calls."""
     spec = source_spec("BBH")
     task_ids = {
-        Path(asset["path"]).stem
-        for asset in spec["files"]
-        if asset["role"] == "data"
+        Path(asset["path"]).stem for asset in spec["files"] if asset["role"] == "data"
     }
     result = _prepare_bbh_assets(
         data_archive=data_archive,

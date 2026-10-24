@@ -61,7 +61,10 @@ def test_existing_37_audit_checkmarks_do_not_mean_native_delivery():
     assert revalidation["npu_requests"] == 0
     assert revalidation["enterprise_payloads_added"] is False
     snapshot = ledger["existing_37_review"]["comparison_snapshot"]
-    assert snapshot["benchmark_main_sha"] == "140a046d34ecf50bb8de3d8b19a7d70a6b0490e0"
+    assert (
+        # pragma: allowlist nextline secret - public source revision
+        snapshot["benchmark_main_sha"] == "140a046d34ecf50bb8de3d8b19a7d70a6b0490e0"
+    )
     assert snapshot["benchmark_pr_stack_state"] == "All six PRs open Draft and unmerged"
     assert (
         snapshot["benchmark_pr_ci"]["head_sha"]

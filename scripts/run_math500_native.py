@@ -43,7 +43,9 @@ def validate_base_url(base_url: str) -> str:
         or parsed.username
         or parsed.password
     ):
-        raise ValueError("base URL must be an http(s) /v1 endpoint without credentials or query")
+        raise ValueError(
+            "base URL must be an http(s) /v1 endpoint without credentials or query"
+        )
     return base_url.rstrip("/")
 
 
@@ -64,7 +66,9 @@ def build_command(
     full: bool = False,
 ) -> list[str]:
     if not model_id.strip() or model_id.startswith("vllm/"):
-        raise ValueError("provide the served model ID without the Inspect provider prefix")
+        raise ValueError(
+            "provide the served model ID without the Inspect provider prefix"
+        )
     command = [
         inspect_bin,
         "eval",
@@ -85,10 +89,25 @@ def build_command(
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--model-id", required=True, help="Model ID advertised by the existing server")
-    parser.add_argument("--base-url", required=True, help="Existing OpenAI-compatible server base URL, ending in /v1")
-    parser.add_argument("--log-dir", required=True, type=Path, help="Private Inspect log directory outside this repository")
-    parser.add_argument("--full", action="store_true", help="Run all 500 tasks; default is the preselected first three")
+    parser.add_argument(
+        "--model-id", required=True, help="Model ID advertised by the existing server"
+    )
+    parser.add_argument(
+        "--base-url",
+        required=True,
+        help="Existing OpenAI-compatible server base URL, ending in /v1",
+    )
+    parser.add_argument(
+        "--log-dir",
+        required=True,
+        type=Path,
+        help="Private Inspect log directory outside this repository",
+    )
+    parser.add_argument(
+        "--full",
+        action="store_true",
+        help="Run all 500 tasks; default is the preselected first three",
+    )
     args = parser.parse_args(argv)
 
     hf_home = os.environ.get("HF_HOME")
@@ -96,7 +115,9 @@ def main(argv: list[str] | None = None) -> int:
         parser.error("set HF_HOME to a cache directory outside this repository")
     inspect_bin = shutil.which("inspect")
     if inspect_bin is None:
-        parser.error(f"install inspect-ai=={INSPECT_VERSION} in the active evaluation environment")
+        parser.error(
+            f"install inspect-ai=={INSPECT_VERSION} in the active evaluation environment"
+        )
     try:
         require_external_path(hf_home, label="HF_HOME")
         log_dir = require_external_path(args.log_dir, label="Inspect log directory")

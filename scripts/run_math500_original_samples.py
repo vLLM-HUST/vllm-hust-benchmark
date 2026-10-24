@@ -119,7 +119,9 @@ def request_completion(endpoint: str, payload: dict, *, timeout: int) -> dict:
     except urllib.error.HTTPError as error:
         raise RuntimeError(f"model endpoint returned HTTP {error.code}") from None
     except (urllib.error.URLError, TimeoutError) as error:
-        raise RuntimeError(f"model endpoint request failed: {type(error).__name__}") from None
+        raise RuntimeError(
+            f"model endpoint request failed: {type(error).__name__}"
+        ) from None
     if not isinstance(result, dict):
         raise ValueError("model endpoint returned a non-object response")
     return result
@@ -143,7 +145,9 @@ def main() -> int:
     args = parser.parse_args()
 
     if not args.endpoint.endswith("/v1/completions"):
-        raise ValueError("use the original text completion interface, not chat conversion")
+        raise ValueError(
+            "use the original text completion interface, not chat conversion"
+        )
     if min(args.max_model_len, args.max_tokens, args.timeout) <= 0:
         raise ValueError("model length, output budget, and timeout must be positive")
     if not args.tokenizer.is_dir():
@@ -199,9 +203,13 @@ def main() -> int:
     ]
     for expected, actual in zip(source_rows, resolved):
         if actual.input_record() != expected.input_record():
-            raise ValueError("prepared consumer input differs from the original adapter")
+            raise ValueError(
+                "prepared consumer input differs from the original adapter"
+            )
         if actual.outcome_record() != expected.outcome_record():
-            raise ValueError("prepared consumer reference differs from the source adapter")
+            raise ValueError(
+                "prepared consumer reference differs from the source adapter"
+            )
         if set(actual.task["input"]) != {"problem"}:
             raise ValueError("only the original problem may enter the model")
     selected_ids = (
@@ -220,7 +228,9 @@ def main() -> int:
         "file": DATA_PATH,
         "file_sha256": DATA_SHA256,
         "mirror_revision": "6e4ed1a2a79af7d8630a6b768ec859cb5af4d3be",
-        "selected_tasks": [record.replay["annotations"]["unique_id"] for record in model_records],
+        "selected_tasks": [
+            record.replay["annotations"]["unique_id"] for record in model_records
+        ],
         "selection": "first three original held-out MATH test tasks; fixed before model calls",
         "model": args.model,
         "server_protocol": "OpenAI-compatible raw text completions; no chat conversion",
@@ -257,7 +267,9 @@ def main() -> int:
             prompt = build_prompt(record.task["input"]["problem"])
             prompt_tokens = len(tokenizer.encode(prompt, add_special_tokens=False))
             if prompt_tokens + args.max_tokens > args.max_model_len:
-                raise ValueError("original task plus output budget exceeds model context")
+                raise ValueError(
+                    "original task plus output budget exceeds model context"
+                )
             result = request_completion(
                 args.endpoint,
                 {
@@ -303,7 +315,8 @@ def main() -> int:
             receipt_path.write_text(json.dumps(receipt, indent=2), encoding="utf-8")
         receipt["status"] = (
             "END_TO_END_EXECUTED_AND_SCORED"
-            if len(sample_receipts) == len(model_records) and all(item["terminal"] for item in sample_receipts)
+            if len(sample_receipts) == len(model_records)
+            and all(item["terminal"] for item in sample_receipts)
             else "INCOMPLETE_GENERATION"
         )
     except Exception as error:

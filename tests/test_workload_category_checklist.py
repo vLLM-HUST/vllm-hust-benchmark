@@ -21,7 +21,10 @@ def test_target_repository_inventory_preserves_existing_versions_and_aliases():
     assert sum(len(re.findall(r"`([^`]+)`", row[1])) for row in rows) == 35
     assert sum(row[0].startswith("PAIO-") for row in rows) == 8
     assert "SWE_BENCH" not in {row[0] for row in rows}
-    assert "6e0cc61db57487778b2147cc18bf5a726cac4817" in section
+    assert (
+        # pragma: allowlist nextline secret - public source revision
+        "6e0cc61db57487778b2147cc18bf5a726cac4817" in section
+    )
     for path in (
         "src/vllm_hust_benchmark/mmlu_pro_pyramidkv.py",
         "scripts/audit_pyramidkv_hle.py",

@@ -145,13 +145,24 @@ def test_release_external_data_root_reuses_original_bytes(tmp_path, monkeypatch)
             tool, "urlopen", lambda *args, **kwargs: pytest.fail("network forbidden")
         )
         source = {
-            "source_id": "BURSTGPT", "repo_id": "fixture/data", "tag": "vfixture",
-            "asset_kind": "metadata", "unit": "request_records", "scope": "fixture",
-            "files": [{"name": "fixture.csv", "bytes": len(raw),
-                       "sha256": hashlib.sha256(raw).hexdigest()}],
+            "source_id": "BURSTGPT",
+            "repo_id": "fixture/data",
+            "tag": "vfixture",
+            "asset_kind": "metadata",
+            "unit": "request_records",
+            "scope": "fixture",
+            "files": [
+                {
+                    "name": "fixture.csv",
+                    "bytes": len(raw),
+                    "sha256": hashlib.sha256(raw).hexdigest(),
+                }
+            ],
         }
         result = tool.acquire(source, data_root=root)
-        assert result["files"][0]["relative_local_path"] == "BURSTGPT/vfixture/fixture.csv"
+        assert (
+            result["files"][0]["relative_local_path"] == "BURSTGPT/vfixture/fixture.csv"
+        )
         assert result["files"][0]["path_relative_to"] == "explicit_data_root"
         assert not (component / ".cache").exists()
         with pytest.raises(ValueError, match="outside the component"):
@@ -164,12 +175,18 @@ def test_release_failures_expose_cause_types_without_private_details():
 
     with load_tool("acquire_release_datasets") as tool:
         assert tool.failure_metadata(URLError(TimeoutError("PRIVATE_SENTINEL"))) == {
-            "error_type": "URLError", "reason_type": "TimeoutError",
+            "error_type": "URLError",
+            "reason_type": "TimeoutError",
         }
-        assert tool.failure_metadata(HTTPError("https://secret.invalid", 403, "PRIVATE_SENTINEL", {}, None)) == {
-            "error_type": "HTTPError", "http_status": 403,
+        assert tool.failure_metadata(
+            HTTPError("https://secret.invalid", 403, "PRIVATE_SENTINEL", {}, None)
+        ) == {
+            "error_type": "HTTPError",
+            "http_status": 403,
         }
-        assert tool.failure_metadata(ValueError("PRIVATE_SENTINEL")) == {"error_type": "ValueError"}
+        assert tool.failure_metadata(ValueError("PRIVATE_SENTINEL")) == {
+            "error_type": "ValueError"
+        }
 
 
 def test_release_jsonl_gzip_and_unsafe_selection(tmp_path, monkeypatch):

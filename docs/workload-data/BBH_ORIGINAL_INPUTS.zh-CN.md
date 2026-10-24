@@ -24,7 +24,8 @@ workload-data prepare-bbh-original --data-archive "$BBH_ROOT/publisher-legacy.zi
 workload-data prepare-bbh-boolean --data-archive "$BBH_ROOT/publisher-legacy.zip" --output "$BBH_ROOT/original-boolean"
 ```
 
-归档校验对应上面的固定`legacy.zip`入口；其他GitHub ZIP入口的归档封装和摘要可能不同，不能据此跳过校验。准备后任务目录可命名为示例中的`/data/bbh-original-all`或任何服务器可写路径。
+归档校验对应上面的固定`legacy.zip`入口；其他GitHub
+ZIP入口的归档封装和摘要可能不同，不能据此跳过校验。准备后任务目录可命名为示例中的`/data/bbh-original-all`或任何服务器可写路径。
 
 输出目录必须不存在。准备接口验证固定原归档、所有选中成员的唯一性、SHA/字节数、任务行数与字段、原始提示分隔符和发布方示例数；原样复制任务JSON与提示文件，0模型调用、0评分，不解压无关文件。旧Boolean命令保留兼容；全量准备命令复制54个原始文件。
 
@@ -41,7 +42,8 @@ for record in iter_workload("BBH", data_root=Path("/data/bbh-original-all"), lim
 
 ## 分层验证记录
 
-- 2026-10-24在测试服务器的独立Python 3.12.13环境构建并安装当前未提交候选wheel，SHA-256为`21d12bc002757a1b54955c0e6b18bdd03a09f5fa7637cf5a377cd37051d8cddb`。公开CLI从固定归档准备全部54个文件；27个任务共6511条逐行核对原始`input`与`target`，每个任务原前三条共81条完成bind→pipeline→resolve，输入、参考和来源身份一致；27份提示的字节摘要和原三示例结构全部核验。数据、wheel和索引仅在服务器，本地仅保存[脱敏回执](validation/bbh-all-original-assets-server-20261024.json)。这是已安装候选的真实数据准备/读取证据，0模型调用、0原生任务执行、0评分；不是CI最终工件或研究消费端的新联调证据。
+- 2026-10-24在测试服务器的独立Python
+  3.12.13环境构建并安装当前未提交候选wheel，SHA-256为`21d12bc002757a1b54955c0e6b18bdd03a09f5fa7637cf5a377cd37051d8cddb`。公开CLI从固定归档准备全部54个文件；27个任务共6511条逐行核对原始`input`与`target`，每个任务原前三条共81条完成bind→pipeline→resolve，输入、参考和来源身份一致；27份提示的字节摘要和原三示例结构全部核验。数据、wheel和索引仅在服务器，本地仅保存[脱敏回执](validation/bbh-all-original-assets-server-20261024.json)。这是已安装候选的真实数据准备/读取证据，0模型调用、0原生任务执行、0评分；不是CI最终工件或研究消费端的新联调证据。
 - CPU夹具覆盖原字段、非空文本检查、参考隔离、错误归档/成员拒绝、原字节复制、已有目录拒绝覆盖，以及显式绑定的索引回查。这些人工夹具不是BBH任务证据。
 - 服务器已独立安装本地候选数据wheel，SHA256
   `55c77277f73c1e3f757bfc66ac08be84966cbfb904f03ada4aa2f4a1b99b3ce8`。全部250行逐条对照原始input/target，前三条bind→pipeline→resolve回查通过，0模型调用。候选不是CI工件，未与研究侧联调。
@@ -71,15 +73,19 @@ smoke，不在CI跑真实模型。
 
 2026-10-24，余下26个任务变体各按预先固定的原索引0、1、2在独立双NPU窗口完成生成与固定harness评分，共78条，全部正常停止，未自动重试或换题。随后在兼容依赖环境中对保存的原响应离线复核，78条评分全部一致，没有再次请求模型。见[脱敏原生执行回执](validation/bbh-all-task-variants-original-npu-20261024.json)。加上复用的Boolean三题，已覆盖全部27个任务变体的81个唯一原题；不是6511题全量评测，也不合并不同运行的模型准确率。78条中23条提取到答案，其余依固定评分规则保留低分，不改停止规则。
 
-评测客户端使用独立Python 3.12环境：`lm-eval==0.4.11`、`datasets==4.3.0`、`pyarrow==22.0.0`、`numpy==1.26.4`、`huggingface-hub==1.33.0`。生成时环境的可选Arrow依赖存在兼容问题，但本运行的原JSON读取与固定评分器不依赖Arrow；任务结束后修正客户端依赖并离线复核原响应，未修改共享推理环境。数据工具独立环境依赖检查通过，8项迁移工具测试通过；这些软件测试与原题执行分别记账。
+评测客户端使用独立Python
+3.12环境：`lm-eval==0.4.11`、`datasets==4.3.0`、`pyarrow==22.0.0`、`numpy==1.26.4`、`huggingface-hub==1.33.0`。生成时环境的可选Arrow依赖存在兼容问题，但本运行的原JSON读取与固定评分器不依赖Arrow；任务结束后修正客户端依赖并离线复核原响应，未修改共享推理环境。数据工具独立环境依赖检查通过，8项迁移工具测试通过；这些软件测试与原题执行分别记账。
 
 当前完成了候选软件上的数据准备、27类原题覆盖和固定评分复核；最终固定提交的软件工件及交付文档回归尚待收口，来源级交付仍不打勾，不能用候选执行代替最终可复用交付确认。
 
 ## 本轮已验证的双NPU模型服务配置
 
-BBH与MATH500本轮复用同一现有模型服务。模型为`Qwen/Qwen3.5-27B`，revision `fc05daec18b0a78c049392ed2e771dde82bdf654`；11份权重及9份运行文件与[固定工件摘要](validation/qwen35-27b-deployable-artifact-20261022.json)再次逐一匹配。硬件是两张Ascend 910B2，BF16、TP2；不是原论文模型，也不称官方容器复现。
+BBH与MATH500本轮复用同一现有模型服务。模型为`Qwen/Qwen3.5-27B`，revision
+`fc05daec18b0a78c049392ed2e771dde82bdf654`；11份权重及9份运行文件与[固定工件摘要](validation/qwen35-27b-deployable-artifact-20261022.json)再次逐一匹配。硬件是两张Ascend
+910B2，BF16、TP2；不是原论文模型，也不称官方容器复现。
 
-实测服务环境为Python 3.12.13、CANN 9.1.0、`torch==2.10.0+cpu`、`torch-npu==2.10.0.post4`、`vllm==0.23.0+empty`、`vllm-ascend==0.23.0`。两份已安装的可编辑源码树均干净，提交分别是`0fc695fc6d1d82e9a5ac6835ac8e4e1c83703665`和`5cb98caaadeff42b5b62b996e34bb2aaa29d20fd`。这里记录的是复用现有环境的真实验证，不声称已完成全新机器的编译安装验证；使用者需要匹配Ascend驱动、CANN及这两份源码工件。
+实测服务环境为Python 3.12.13、CANN
+9.1.0、`torch==2.10.0+cpu`、`torch-npu==2.10.0.post4`、`vllm==0.23.0+empty`、`vllm-ascend==0.23.0`。两份已安装的可编辑源码树均干净，提交分别是`0fc695fc6d1d82e9a5ac6835ac8e4e1c83703665`和`5cb98caaadeff42b5b62b996e34bb2aaa29d20fd`。这里记录的是复用现有环境的真实验证，不声称已完成全新机器的编译安装验证；使用者需要匹配Ascend驱动、CANN及这两份源码工件。
 
 在已分配两张NPU的环境内，确认原服务端口空闲、没有占用他人的卡后运行下列配置；`MODEL_DIR`指向与上述摘要匹配的外部模型目录，`RUNTIME_DIR`是外部缓存/日志目录：
 
@@ -111,4 +117,5 @@ python -m vllm.entrypoints.openai.api_server \
   --additional-config '{"enable_cpu_binding":false}'
 ```
 
-服务就绪后检查`/health`及`/v1/models`。没有强制eager，日志中实际出现graph replay；不从本轮功能探测推导性能结论。本轮容器已经正确映射两张设备，不再手工覆盖`ASCEND_RT_VISIBLE_DEVICES`。客户端环境必须与服务端隔离，不用评测依赖修复去修改共享模型服务。
+服务就绪后检查`/health`及`/v1/models`。没有强制eager，日志中实际出现graph
+replay；不从本轮功能探测推导性能结论。本轮容器已经正确映射两张设备，不再手工覆盖`ASCEND_RT_VISIBLE_DEVICES`。客户端环境必须与服务端隔离，不用评测依赖修复去修改共享模型服务。

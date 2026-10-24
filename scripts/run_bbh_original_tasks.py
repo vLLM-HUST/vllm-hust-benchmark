@@ -100,10 +100,14 @@ def selected_assets(task_ids):
     }
     if len(task_assets) != 27 or task_assets.keys() != prompt_assets.keys():
         raise ValueError("pinned manifest must register all 27 BBH task/prompt pairs")
-    if not task_ids or len(set(task_ids)) != len(task_ids) or any(
-        task_id not in task_assets for task_id in task_ids
+    if (
+        not task_ids
+        or len(set(task_ids)) != len(task_ids)
+        or any(task_id not in task_assets for task_id in task_ids)
     ):
-        raise ValueError("task IDs must be distinct tasks registered in the pinned manifest")
+        raise ValueError(
+            "task IDs must be distinct tasks registered in the pinned manifest"
+        )
     return spec, task_assets, prompt_assets
 
 
@@ -172,7 +176,9 @@ def run(args):
         "source_id": "BBH",
         "revision": spec["revision"],
         "task_ids": list(args.task_ids),
-        "sample_policy": "all_original_rows" if args.full else "first_three_original_rows",
+        "sample_policy": "all_original_rows"
+        if args.full
+        else "first_three_original_rows",
         "selected_indices_by_task": {},
         "tasks": [],
         "model": args.model,
@@ -210,9 +216,7 @@ def run(args):
             for index, row in enumerate(selected):
                 body = {
                     "model": args.model,
-                    "messages": [
-                        {"role": "user", "content": task_prompt(prefix, row)}
-                    ],
+                    "messages": [{"role": "user", "content": task_prompt(prefix, row)}],
                     "temperature": 0,
                     "max_tokens": config["generation_kwargs"]["max_gen_toks"],
                     "stop": config["generation_kwargs"]["until"],
@@ -235,7 +239,11 @@ def run(args):
                 private_path = args.output / f"{task_id}-sample-{index}.private.json"
                 private_path.write_text(
                     json.dumps(
-                        {"request": body, "response": response, "reference": row["target"]}
+                        {
+                            "request": body,
+                            "response": response,
+                            "reference": row["target"],
+                        }
                     ),
                     encoding="utf-8",
                 )
@@ -243,13 +251,17 @@ def run(args):
                 if len(choices) != 1 or not isinstance(
                     choices[0].get("message", {}).get("content"), str
                 ):
-                    raise ValueError(f"one complete textual response required: {task_id}:{index}")
+                    raise ValueError(
+                        f"one complete textual response required: {task_id}:{index}"
+                    )
                 content = choices[0]["message"]["content"]
                 filtered = extractor.apply([[content]], [row])[0][0]
                 task_result["samples"].append(
                     {
                         "original_index": index,
-                        "input_sha256": hashlib.sha256(row["input"].encode()).hexdigest(),
+                        "input_sha256": hashlib.sha256(
+                            row["input"].encode()
+                        ).hexdigest(),
                         "finish_reason": choices[0].get("finish_reason"),
                         "stop_reason": choices[0].get("stop_reason"),
                         "answer_extracted": filtered != extractor.fallback,

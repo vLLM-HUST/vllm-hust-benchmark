@@ -94,7 +94,9 @@ def test_generic_runner_help_without_optional_evaluation_dependencies():
     assert "--full" in result.stdout
 
 
-def test_root_cli_delegates_all_task_preparation_to_provider(tmp_path, monkeypatch, capsys):
+def test_root_cli_delegates_all_task_preparation_to_provider(
+    tmp_path, monkeypatch, capsys
+):
     seen = {}
 
     def prepare(**kwargs):
@@ -105,15 +107,18 @@ def test_root_cli_delegates_all_task_preparation_to_provider(tmp_path, monkeypat
     monkeypatch.setattr(workload_cli, "load_provider", lambda: fake_provider)
     archive = tmp_path / "publisher.zip"
     output = tmp_path / "prepared"
-    assert workload_cli.main(
-        [
-            "prepare-bbh-original",
-            "--data-archive",
-            str(archive),
-            "--output",
-            str(output),
-        ]
-    ) == 0
+    assert (
+        workload_cli.main(
+            [
+                "prepare-bbh-original",
+                "--data-archive",
+                str(archive),
+                "--output",
+                str(output),
+            ]
+        )
+        == 0
+    )
     assert seen == {"data_archive": archive, "output": output}
     assert json.loads(capsys.readouterr().out)["source_id"] == "BBH"
 
@@ -123,7 +128,9 @@ def test_generic_runner_supports_boolean_and_rejects_invalid_selection(monkeypat
     monkeypatch.setattr(generic_runner, "source_spec", lambda source_id: source)
     _, tasks, prompts = generic_runner.selected_assets(["boolean_expressions"])
     assert tasks["boolean_expressions"]["path"] == "boolean_expressions.json"
-    assert prompts["boolean_expressions"]["path"] == "cot-prompts/boolean_expressions.txt"
+    assert (
+        prompts["boolean_expressions"]["path"] == "cot-prompts/boolean_expressions.txt"
+    )
     for invalid in ([], ["unknown_task"], ["causal_judgement", "causal_judgement"]):
         with pytest.raises(ValueError, match="distinct tasks"):
             generic_runner.selected_assets(invalid)
@@ -154,9 +161,7 @@ def test_generic_runner_uses_original_rows_and_never_sends_references(
         ).encode()
         raw_by_path[prompt_path] = (
             "fixture description\n-----\n"
-            + "\n\n".join(
-                f"Q: demo-{index}\nA: fixture answer" for index in range(3)
-            )
+            + "\n\n".join(f"Q: demo-{index}\nA: fixture answer" for index in range(3))
         ).encode()
         for path in (task_path, prompt_path):
             asset = assets_by_path[path]

@@ -133,7 +133,9 @@ manifest 的 `pipeline plan`、`pipeline run` 命令；63824 条索引和每文�
 
 ### BurstGPT本轮补充（2026-10-24）
 
-官方v2.0的三个保留失败记录的完整发布文件均已在服务器核验字节数、发布SHA和全CSV解码：`BurstGPT_1.csv` 1429737行、`BurstGPT_2.csv` 3858436行、`BurstGPT_3.csv` 5344021行，合计10632194行；不代表三文件互不重叠的独立请求总数。首文件复用，不重下载；其余两文件通过官方GitHub Release API资产341027213、341026736的`application/octet-stream`下载，所得字节与发布摘要一致。之后复用`acquire_release_datasets.py --source BURSTGPT --data-root EXTERNAL_DATA_ROOT --output EXTERNAL_REPORT`重新核验全部三文件。见[资产回执](validation/burstgpt-original-release-assets-20261024.json)，其中`download_url`表示规范发布地址，不表示本次实际传输绕过API。
+官方v2.0的三个保留失败记录的完整发布文件均已在服务器核验字节数、发布SHA和全CSV解码：`BurstGPT_1.csv` 1429737行、`BurstGPT_2.csv`
+3858436行、`BurstGPT_3.csv` 5344021行，合计10632194行；不代表三文件互不重叠的独立请求总数。首文件复用，不重下载；其余两文件通过官方GitHub Release
+API资产341027213、341026736的`application/octet-stream`下载，所得字节与发布摘要一致。之后复用`acquire_release_datasets.py --source BURSTGPT --data-root EXTERNAL_DATA_ROOT --output EXTERNAL_REPORT`重新核验全部三文件。见[资产回执](validation/burstgpt-original-release-assets-20261024.json)，其中`download_url`表示规范发布地址，不表示本次实际传输绕过API。
 
 此证据仅证明原资产完整取得、全文件可解码，不替代全部文件适配/prepare/resolve或模型回放。发布方存在`example/`示例，用外部ShareGPT提示池按轨迹到达/长度构造模拟压力，不能称为原始请求重放；该官方示例的依赖与运行范围尚待复核，不宣称无官方工具或已跑过示例。原CSV无prompt，不能自行补prompt伪装原请求。
 

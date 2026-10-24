@@ -49,9 +49,7 @@ def synthetic_archive(tmp_path, monkeypatch):
     task = json.dumps({"examples": [{"input": "test", "target": "hidden"}]}).encode()
     prompt = (
         "fixture description\n-----\n"
-        + "\n\n".join(
-            f"Q: demo-{index}\nA: fixture answer" for index in range(3)
-        )
+        + "\n\n".join(f"Q: demo-{index}\nA: fixture answer" for index in range(3))
     ).encode()
     assets = {
         "boolean_expressions.json": task,
@@ -96,9 +94,7 @@ def synthetic_all_bbh_archive(tmp_path, monkeypatch):
     for asset in prompt_assets:
         assets[asset["path"]] = (
             "fixture description\n-----\n"
-            + "\n\n".join(
-                f"Q: demo-{index}\nA: fixture answer" for index in range(3)
-            )
+            + "\n\n".join(f"Q: demo-{index}\nA: fixture answer" for index in range(3))
         ).encode()
     for asset in spec["files"]:
         asset["sha256"] = hashlib.sha256(assets[asset["path"]]).hexdigest()

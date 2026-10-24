@@ -9,7 +9,10 @@ ROOT = Path(__file__).resolve().parents[1]
 
 def test_all_task_variants_receipt_binds_runner_and_preserves_delivery_gap():
     receipt = json.loads(
-        (ROOT / "docs/workload-data/validation/bbh-all-task-variants-original-npu-20261024.json").read_text("utf-8")
+        (
+            ROOT
+            / "docs/workload-data/validation/bbh-all-task-variants-original-npu-20261024.json"
+        ).read_text("utf-8")
     )
     assert receipt["generation_calls"] == receipt["unique_original_tasks"] == 78
     assert receipt["task_files"] == len(receipt["tasks"]) == 26
@@ -27,7 +30,12 @@ def test_all_task_variants_receipt_binds_runner_and_preserves_delivery_gap():
     assert not receipt["source_checkbox_eligible"]
     assert not receipt["raw_data_published"]
     script = ROOT / receipt["runner"]
-    assert hashlib.sha256(script.read_bytes().replace(b"\r\n", b"\n")).hexdigest() == receipt["runner_sha256"]
+    assert (
+        hashlib.sha256(script.read_bytes().replace(b"\r\n", b"\n")).hexdigest()
+        == receipt["formatted_public_runner_sha256"]
+    )
+    assert receipt["formatting_only_ast_equivalent"] is True
+    assert receipt["runner_sha256"] != receipt["formatted_public_runner_sha256"]
 
 
 def test_bbh_receipt_preserves_zero_score_as_model_outcome_not_pipeline_failure():

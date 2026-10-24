@@ -16,7 +16,9 @@ from scripts.run_math500_native import (
 )
 
 
-def test_default_command_runs_fixed_first_three_with_pinned_upstream_task(tmp_path: Path):
+def test_default_command_runs_fixed_first_three_with_pinned_upstream_task(
+    tmp_path: Path,
+):
     command = build_command(
         inspect_bin="inspect",
         model_id="Qwen/Qwen3.5-27B",
@@ -34,7 +36,9 @@ def test_default_command_runs_fixed_first_three_with_pinned_upstream_task(tmp_pa
     assert "--epochs-reducer" not in command
 
 
-def test_full_command_preserves_upstream_epoch_and_scorer_config_without_sample_limit(tmp_path: Path):
+def test_full_command_preserves_upstream_epoch_and_scorer_config_without_sample_limit(
+    tmp_path: Path,
+):
     command = build_command(
         inspect_bin="inspect",
         model_id="served-qwen",
@@ -54,7 +58,7 @@ def test_full_command_preserves_upstream_epoch_and_scorer_config_without_sample_
     [
         "http://localhost:8000",
         "file:///v1",
-        "http://user:secret@localhost:8000/v1",
+        "http://user:secret@localhost:8000/v1",  # pragma: allowlist secret - invalid URL fixture, not credentials
         "http://localhost:8000/v1?token=secret",
     ],
 )
@@ -67,7 +71,9 @@ def test_rejects_hf_cache_and_logs_inside_repository(tmp_path: Path):
     with pytest.raises(ValueError, match="outside the repository"):
         require_external_path(REPOSITORY_ROOT / "dataset-cache", label="HF_HOME")
     with pytest.raises(ValueError, match="outside the repository"):
-        require_external_path(REPOSITORY_ROOT / "private-logs", label="Inspect log directory")
+        require_external_path(
+            REPOSITORY_ROOT / "private-logs", label="Inspect log directory"
+        )
 
 
 def test_requires_the_pinned_inspect_release(monkeypatch):
@@ -104,7 +110,10 @@ def test_delivery_ledger_keeps_math500_unchecked_until_native_inspect_run():
 
 def test_native_receipt_covers_three_original_tasks_and_all_four_epochs():
     receipt = json.loads(
-        (REPOSITORY_ROOT / "docs/workload-data/validation/math500-upstream-inspect-native-20261024.json").read_text("utf-8")
+        (
+            REPOSITORY_ROOT
+            / "docs/workload-data/validation/math500-upstream-inspect-native-20261024.json"
+        ).read_text("utf-8")
     )
     assert receipt["upstream_task"] == INSPECT_TASK
     assert receipt["unique_original_tasks"] == 3
@@ -116,8 +125,17 @@ def test_native_receipt_covers_three_original_tasks_and_all_four_epochs():
     assert not receipt["full_suite_validated"]
     assert not receipt["raw_data_published"]
     for index in [0, 1, 2]:
-        samples = [sample for sample in receipt["samples"] if sample["original_index"] == index]
+        samples = [
+            sample for sample in receipt["samples"] if sample["original_index"] == index
+        ]
         assert {sample["epoch"] for sample in samples} == {1, 2, 3, 4}
-        assert all(sample["stop_reason"] == "stop" and sample["scores"] for sample in samples)
+        assert all(
+            sample["stop_reason"] == "stop" and sample["scores"] for sample in samples
+        )
     script = REPOSITORY_ROOT / receipt["wrapper"]
-    assert hashlib.sha256(script.read_bytes().replace(b"\r\n", b"\n")).hexdigest() == receipt["wrapper_sha256"]
+    assert (
+        hashlib.sha256(script.read_bytes().replace(b"\r\n", b"\n")).hexdigest()
+        == receipt["formatted_public_wrapper_sha256"]
+    )
+    assert receipt["formatting_only_ast_equivalent"] is True
+    assert receipt["wrapper_sha256"] != receipt["formatted_public_wrapper_sha256"]
