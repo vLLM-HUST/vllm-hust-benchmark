@@ -10,7 +10,8 @@ from vllm_hust_workload_data.registry import adapter_spec, source_spec
 
 def test_three_original_variants_are_pinned_without_equating_their_histories():
     spec = source_spec("LONGMEMEVAL")
-    assert spec["revision"] == "98d7416c24c778c2fee6e6f3006e7a073259d48f"
+    expected_revision = "98d7416c24c778c2fee6e6f3006e7a073259d48f"  # pragma: allowlist secret - public publisher revision
+    assert spec["revision"] == expected_revision
     assert {f["publisher_variant"] for f in spec["files"]} == {
         "oracle",
         "s_cleaned",

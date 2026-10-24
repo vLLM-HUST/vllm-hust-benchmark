@@ -20,7 +20,7 @@ spec.loader.exec_module(runner)
     "url",
     [
         "https://example.com/v1",
-        "http://user:secret@localhost/v1",
+        "http://user:secret@localhost/v1",  # pragma: allowlist secret - deliberately fake credential fixture
         "http://localhost/v1?key=value",
     ],
 )

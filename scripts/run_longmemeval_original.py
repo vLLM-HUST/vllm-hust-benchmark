@@ -16,7 +16,7 @@ from urllib.parse import urlparse
 from urllib.request import Request, urlopen
 
 
-SOURCE_COMMIT = "9e0b455f4ef0e2ab8f2e582289761153549043fc"
+SOURCE_COMMIT = "9e0b455f4ef0e2ab8f2e582289761153549043fc"  # pragma: allowlist secret - public publisher commit
 GENERATOR_SHA256 = "4f1eb3c69d7ad40f04065b9c0bc86f6582441018fc6ff751d162d66c95baf672"  # pragma: allowlist secret - publisher code digest
 DATA_FILES = {
     "oracle": (
