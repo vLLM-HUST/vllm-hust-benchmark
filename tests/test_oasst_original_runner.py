@@ -37,6 +37,17 @@ def test_local_endpoint_and_explicit_three_original_targets():
     assert len(set(RUNNER.TARGETS)) == 3
 
 
+def test_explicit_original_targets_are_not_replaced_filtered_or_deduplicated():
+    assert RUNNER.selected_targets(None) == RUNNER.TARGETS
+    assert RUNNER.selected_targets(["original-assistant-id"]) == [
+        "original-assistant-id"
+    ]
+    assert RUNNER.selected_targets(["second", "first"]) == ["second", "first"]
+    for targets in [[], [""], [" "], ["same", "same"]]:
+        with pytest.raises(ValueError):
+            RUNNER.selected_targets(targets)
+
+
 def test_help_needs_no_optional_data_sdk():
     result = subprocess.run(
         [sys.executable, "-I", str(PATH), "--help"], capture_output=True, text=True

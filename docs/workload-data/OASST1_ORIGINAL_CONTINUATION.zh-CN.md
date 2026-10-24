@@ -62,8 +62,12 @@ wheel。服务器原始文件副本的 basename 与目录原成员不同，因�
 python scripts/run_oasst_original_continuation.py --data-file /data/oasst1/validation.parquet --output /data/private/oasst-run-001 --endpoint http://127.0.0.1:19466/v1 --model workload-qwen35-27b-128k-nonthinking
 ```
 
-该入口固定下述三个目标和原始 validation SHA，预检完整输入 token 预算（128K、输出2048），不修改题目、不裁剪祖先链。只允许本地模型 endpoint。运行依赖数据组件
+该入口默认下述三个目标并固定原始 validation SHA，预检完整输入 token 预算（128K、输出2048），不修改题目、不裁剪祖先链。只允许本地模型 endpoint。运行依赖数据组件
 `[data]`，无额外 Agent 框架；原始请求和回答仅写入私有输出目录，不写入 Git。这是历史续接生成入口，不是官方质量评测器。
+
+2026-10-24补齐原目标选择入口：默认仍为历史三点，可重复传入`--target-message-id ORIGINAL_ASSISTANT_ID`指定任意事前选择的原始目标列表；不是只能运行三个硬编码样本。目标顺序原样保留，重复ID直接拒绝，缺失或不合规祖先链在模型请求前拒绝，不替换失败目标。原文件SHA、完整祖先恢复、回复隔离、生成预算及响应检查不变。历史脚本摘要只对应当时实际执行版本；新增选择入口尚待真实服务器交接复核，本来源不提前勾选。
+
+随后已完成[固定CI安装包及新增入口离线交接复核](validation/oasst-fixed-ci-handoff-20261024.json)：服务器原文件4401行及完整SHA核对，三个历史目标经安装包prepare/resolve后，与原祖先恢复及保存请求逐字一致；参考回复不进入SQLite。新增公开入口显式传入相同三目标，以保存响应替代网络传输核对三份完整请求载荷，均匹配。此步骤为离线保存证据复用，0新模型调用，不冒称新选择入口在线NPU实测或研究侧新依赖锁已接通；历史在线生成证据仍按原回执引用。来源其余原始成员及完整交付范围仍待核对，暂不勾选。
 
 在既有双 NPU Qwen3.5-27B 服务上，按执行前规则选取发布顺序中前三个不同 parent 的续接点：英文 assistant 目标，完整交替路径至少四节点，路径各行
 deleted=false/synthetic=false。符合规则的 distinct parent 共 288 个；本次只执行三个，不代表全量 4401 行或 288 个点。

@@ -1,4 +1,4 @@
-"""Generate from three original OASST histories; no quality or live-episode score."""
+"""Generate from explicit original OASST histories; no quality or episode score."""
 
 import argparse
 import hashlib
@@ -13,6 +13,15 @@ TARGETS = [
     "48ac2156-f823-4e97-81ab-a66354549f59",
     "3f509e81-40ff-47dc-a677-4cb4a1623d7b",
 ]
+
+
+def selected_targets(explicit):
+    targets = list(TARGETS if explicit is None else explicit)
+    if not targets or any(not target.strip() for target in targets):
+        raise ValueError("at least one nonempty original target ID is required")
+    if len(set(targets)) != len(targets):
+        raise ValueError("duplicate target IDs are not independent tasks")
+    return targets
 
 
 def validate_endpoint(endpoint):
@@ -46,7 +55,16 @@ def main():
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--endpoint", default="http://127.0.0.1:19466/v1")
     parser.add_argument("--model", default="workload-qwen35-27b-128k-nonthinking")
+    parser.add_argument(
+        "--target-message-id",
+        action="append",
+        help="Repeat for preselected original assistant IDs; default is historical three. No filtering or failed-target replacement.",
+    )
     args = parser.parse_args()
+    try:
+        targets = selected_targets(args.target_message_id)
+    except ValueError as error:
+        parser.error(str(error))
     endpoint = validate_endpoint(args.endpoint.rstrip("/"))
     if hashlib.sha256(args.data_file.read_bytes()).hexdigest() != DATA_SHA:
         raise ValueError("original OASST validation file identity mismatch")
@@ -56,10 +74,12 @@ def main():
     rows = pq.read_table(args.data_file).to_pylist()
     if len(rows) != 4401:
         raise ValueError("original OASST validation row count mismatch")
-    views = [oasst_history_prefix(rows, target) for target in TARGETS]
+    views = [oasst_history_prefix(rows, target) for target in targets]
     args.output.mkdir(mode=0o700, parents=True, exist_ok=False)
     receipt = {
         "source_id": "OASST1",
+        "selected_target_message_ids": targets,
+        "selection": "explicit original target IDs, fixed before execution; complete original ancestors",
         "source_sha256": DATA_SHA,
         "model": args.model,
         "status": "STARTED",
