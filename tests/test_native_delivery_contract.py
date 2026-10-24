@@ -8,6 +8,32 @@ ROOT = Path(__file__).resolve().parents[1]
 DOCS = ROOT / "docs/workload-data"
 
 
+def test_longbench_v2_capacity_blockers_are_not_filtered_into_completion():
+    receipt = json.loads(
+        (
+            DOCS / "validation/longbench-v2-length-group-capacity-20261025.json"
+        ).read_text("utf-8")
+    )
+    assert receipt["original_group_counts"] == {
+        "short": 180,
+        "medium": 215,
+        "long": 108,
+    }
+    medium, long = receipt["groups"]
+    assert medium["fixed_original_indices"] == [3, 5, 8]
+    assert medium["full_original_prompt_tokens"] == [149662, 138653, 68762]
+    assert long["fixed_original_indices"] == [0, 2, 7]
+    assert long["full_original_prompt_tokens"] == [295877, 530991, 815430]
+    assert receipt["deployed_context_limit"] == 131072
+    assert receipt["original_output_budget"] == 128
+    assert receipt["selection_frozen_before_capacity_checks"]
+    assert receipt["original_three_short_tasks_reused_not_rerun"]
+    assert not any(group["group_ready_for_execution"] for group in receipt["groups"])
+    assert not receipt["blocked_tasks_truncated_replaced_or_skipped_for_completion"]
+    assert not receipt["source_checkbox_eligible"]
+    assert receipt["model_calls"] == 0
+
+
 def test_qasper_complete_native_tasks_are_not_full_longbench_or_research_handoff():
     receipt = json.loads(
         (DOCS / "validation/longbench-qasper-all200-native-20261024.json").read_text(
