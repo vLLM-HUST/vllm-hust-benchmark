@@ -419,10 +419,9 @@ def test_burstgpt_official_simulation_not_claimed_as_original_request_replay():
     assert receipt["new_model_calls"] == 0
 
 
-def test_locomo_supplement_does_not_close_unverified_category5_or_full_delivery():
+def test_locomo_historical_supplement_does_not_rewrite_category5_preflight():
     ledger = json.loads((DOCS / "dataset-validation-status.json").read_text("utf-8"))
     item = ledger["delivery_inventory"]["LOCOMO"]
-    assert item["checked"] is False
     receipt = json.loads((ROOT / item["category4_receipt"]).read_text("utf-8"))
     assert receipt["original_question_indices"] == [82, 83, 84]
     assert receipt["new_model_calls"] == 3
@@ -443,6 +442,46 @@ def test_locomo_supplement_does_not_close_unverified_category5_or_full_delivery(
     assert preflight["model_api_attempts"] == preflight["model_calls"] == 0
     assert not preflight["task_fields_renamed_or_filled"]
     assert not preflight["source_checkbox_eligible"]
+
+
+def test_locomo_delivery_requires_native_all_categories_and_exact_handoff():
+    ledger = json.loads((DOCS / "dataset-validation-status.json").read_text("utf-8"))
+    item = ledger["delivery_inventory"]["LOCOMO"]
+    assert item["checked"] and item["status"] == "AVAILABLE"
+    delivery = json.loads((ROOT / item["delivery_receipt"]).read_text("utf-8"))
+    native = json.loads(
+        (ROOT / item["native_execution_audit_receipt"]).read_text("utf-8")
+    )
+    handoff = json.loads(
+        (ROOT / item["research_exact_artifact_handoff_receipt"]).read_text("utf-8")
+    )
+    assert (
+        delivery["verified_unique_original_tasks"]
+        == native["verified_unique_original_tasks"]
+        == 108
+    )
+    assert native["new_unique_native_original_tasks"] == 99
+    assert native["historical_unique_native_original_tasks_reused"] == 9
+    assert native["original_category_coverage"] == {
+        "1": 3,
+        "2": 3,
+        "3": 96,
+        "4": 3,
+        "5": 3,
+    }
+    assert native["all_native_queries_original_replay_equal"]
+    assert native["all_saved_responses_and_scores_equal"]
+    assert native["native_original32_token_budget_and_sleep_retained"]
+    assert native["audit_model_calls"] == 0
+    assert native["saved_responses_replayed_not_model_rerun"] == 99
+    assert handoff["original_full_conversation_question_and_reference_equal"]
+    assert handoff["original_cat5_reference_rows_preserved"] == 3
+    assert not handoff["missing_answer_field_added_to_raw_data_or_research_record"]
+    assert not handoff["observation_or_analysis_migrated_into_benchmark"]
+    assert not delivery["full1986_native_execution_claim"]
+    assert not delivery["upstream_merged_fix_claim"]
+    assert not delivery["image_byte_task_or_rag_validation_claim"]
+    assert not delivery["raw_payloads_published"]
 
 
 def test_private_request_delivery_reuses_native_responses_without_publishing_them():

@@ -1,6 +1,6 @@
 {
   "schema_version": "workload-validation-checklist/v1",
-  "updated_at": "2026-10-24",
+  "updated_at": "2026-10-25",
   "native_runtime_latest": {
     "status": "ORIGINAL_PROFILE_READY_NATIVE_BATCHES_AWAITING_AUDIT",
     "previous_host_model_runtime_status": "ORIGINAL_PROFILE_RESTORE_FAILED_HOST_PINNED_ALLOCATION",
@@ -22,7 +22,7 @@
     "current_profile_tensor_parallel_size": 2,
     "current_model_metadata_and_nine_runtime_file_digests_match_prior_binding": true,
     "current_full_weight_hashes_recomputed": false,
-    "next_action": "Qasper200 and registered tau2 telecom native delivery complete. ALFWorld109 audited; other AgentBench domains remain open. StructEval all950 nonrender tasks executed and officially rescored;1085 rendering/VQA pending. LoCoMo new99 native tasks generated and scored; saved-response/query audit in progress, no model rerun. No cache reclaim or device reset performed."
+    "next_action": "Qasper200, registered tau2 telecom and sampled full-context LoCoMo textQA native delivery complete. ALFWorld109 audited; other AgentBench domains remain open. StructEval all950 nonrender tasks audited;1085 rendering/VQA pending. LongBenchV2 fixed Medium/Long groups capacity-blocked. BurstGPT pinned official demo source acquired on server; external prompt pool, compatible transport and original demo execution pending. No cache reclaim or device reset performed."
   },
   "scope": "Per-source integration validation; not performance or full-suite acceptance",
   "runtime_prerequisite_latest": "docs/workload-data/validation/runtime-prerequisite-recheck-20261025.json",
@@ -1589,9 +1589,9 @@
     },
     "LOCOMO": {
       "scope": "public",
-      "delivery_kind": "review_original_source_protocol",
-      "status": "IN_PROGRESS",
-      "checked": false,
+      "delivery_kind": "original_full_context_text_qa",
+      "status": "AVAILABLE",
+      "checked": true,
       "legacy_checked": true,
       "existing_receipt": "docs/workload-data/validation/locomo-original-qa-sampled-20261023.json",
       "category4_receipt": "docs/workload-data/validation/locomo-category4-native-20261024.json",
@@ -1600,9 +1600,12 @@
       "research_exact_artifact_handoff_receipt": "docs/workload-data/validation/locomo-research-handoff-20261025.json",
       "native_public_runner": "scripts/run_locomo_original_qa.py",
       "native_client_dependencies": "configs/workload-native/locomo-text-qa-py312-dependencies.txt",
-      "native_queue_state": "RUNNING_PRESELECTED_NEW99_ORIGINAL_QA_TASKS",
-      "delivery_receipt": null,
-      "blocker": "复用已审计9个原题。新增公共入口提供显式缺键兼容开关：原1542个answer读取保留，仅缺键的444个cat5回退原adversarial_answer；原数据/源码文件不改，保留两题既有冲突字段的原answer。CPU回归1540个cat1–4评分分支及旧9题真实分数相等，非新模型证据。原5类已事前固定验证选择，新99题正在原生成/评分函数执行（cat3按预估30分钟规则全96，复用旧1题）；未完成原生审计及最终研究端交接前不勾来源。"
+      "native_queue_state": "FIXED_NEW99_NATIVE_TASKS_AND_SAVED_PUBLISHER_SCORES_AUDITED",
+      "native_execution_audit_receipt": "docs/workload-data/validation/locomo-original-native-audit-20261025.json",
+      "verified_unique_native_tasks": 108,
+      "delivery_receipt": "docs/workload-data/validation/locomo-native-delivery-20261025.json",
+      "blocker": null,
+      "unvalidated_scope": "Not full1986 native execution, RAG, generated summaries or image-byte tasks. Explicit missing-key compatibility is not an upstream merged fix."
     },
     "NATUREBENCH": {
       "scope": "public",
