@@ -1,4 +1,4 @@
-"""Software fixtures only: no publisher data, model, downloads or NPU."""
+"""Software fixtures and frozen evidence contracts; no downloads or model calls."""
 
 import argparse
 import hashlib
@@ -205,3 +205,83 @@ def test_cpu_receipt_matches_entry_without_upgrading_native_completion():
     assert replay["original_rows_checked"] == 75 and replay["new_model_calls"] == 0
     assert not replay["full500_native_profile_complete"]
     assert not replay["new_public_entry_live_native_run_claim"]
+
+
+def test_original_full500_evidence_is_single_profile_and_not_a_fresh_rerun():
+    root = Path(__file__).resolve().parents[1] / "docs/workload-data/validation"
+    receipt = json.loads(
+        (root / "ruler-niah4k-full500-native-audit-20261025.json").read_text()
+    )
+    assert (
+        receipt["original_rows_selected"]
+        == receipt["original_rows_completed_and_audited"]
+        == receipt["original_generation_attempts"]
+        == 500
+    )
+    assert (
+        receipt["original_output_budget"] == 128
+        and sum(receipt["finish_reasons"].values()) == 500
+    )
+    assert receipt["public_entry_saved_native_transcript_replay_rows"] == 500
+    assert receipt["new_model_calls_during_audit"] == 0
+    assert not receipt["new_live_public_entry_execution_claim"]
+    assert (
+        not receipt["source_checkbox_eligible"]
+        and receipt["not_all13_tasks_or_other_lengths"]
+    )
+
+
+def test_five_live_public_profiles_preserve_full_long_inputs_and_original_budgets():
+    root = Path(__file__).resolve().parents[1] / "docs/workload-data/validation"
+    receipt = json.loads(
+        (root / "ruler-public-first5-native-audit-20261025.json").read_text()
+    )
+    assert len(receipt["profiles"]) == receipt["completed_profile_count"] == 5
+    assert receipt["completed_original_rows_total"] == 15
+    for profile in receipt["profiles"]:
+        assert (
+            profile["original_row_offsets"] == [0, 1, 2]
+            and profile["completed_original_rows"] == 3
+        )
+        assert profile["live_public_entry_execution_verified"]
+        assert sum(profile["finish_reasons"].values()) == 3
+        assert all(
+            count + profile["original_output_budget"] <= 131072
+            for count in profile["actual_input_tokens"]
+        )
+        assert profile["new_model_calls_during_audit"] == 0
+    assert any(p["generator_max_seq_length"] == 131072 for p in receipt["profiles"])
+    assert (
+        not receipt["source_checkbox_eligible"]
+        and not receipt["all13_tasks_or_complete_length_grid_claim"]
+    )
+
+
+def test_eight_profile_consumer_checks_compare_raw_data_without_claiming_native_completion():
+    root = Path(__file__).resolve().parents[1] / "docs/workload-data/validation"
+    receipt = json.loads(
+        (root / "ruler-eight-profile-binding-chain-20261025.json").read_text()
+    )
+    assert len(receipt["profiles"]) == 8
+    assert (
+        receipt["bound_and_indexed_rows_total"]
+        == receipt["raw_original_projection_verified_rows_total"]
+        == 4000
+    )
+    assert receipt[
+        "raw_original_inputs_references_indices_and_generation_metadata_equal"
+    ]
+    assert receipt["public_roundtrip_rows_total"] == 48
+    assert (
+        receipt["research_index_import_rows_total"]
+        == receipt["research_direct_prepare_resolve_rows_total"]
+        == 24
+    )
+    assert receipt["binding_cli_is_candidate_not_final_ci_claim"]
+    assert (
+        receipt["model_calls"] == 0 and not receipt["native_execution_or_scoring_claim"]
+    )
+    assert (
+        not receipt["research_default_dependency_lock_updated"]
+        and not receipt["source_checkbox_eligible"]
+    )

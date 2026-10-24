@@ -141,3 +141,50 @@ QA profile预估30分钟内，保留完整500条；其他较长输出或更长�
 
 QA依赖只从发布方固定脚本列出的URL取得：SQuAD v2
 dev原文件已取得，4370528字节、11873个原问题；HotpotQA的原HTTP地址和脚本指定的固定HF备用地址均以URLError失败，尚未取得，不改用自造文档或其他问答集顶替。依赖获取和原生成过程继续在服务器完成，不把原始数据放入软件包或公开提交；其他原任务、长度profile和最终原生评分仍按清单继续推进。
+
+### 已验证原生范围与其他原生成profile的消费入口
+
+首个NIAH
+4K全500条已执行和[终态审计](validation/ruler-niah4k-full500-native-audit-20261025.json)：逐条原数据、实际请求/响应哈希、原字段、token预算和finish
+reason均核对，发布方原指标在该profile为100.0。500条均为原128
+token预算的合法length结果，保留评分；没有因此加预算、换题或重跑。公共入口对这500条保存记录的CPU回放也一致，但这一回放不称新的现场模型执行。
+
+公共入口另有[5组真实执行审计](validation/ruler-public-first5-native-audit-20261025.json)，各为预先固定的原物理行0、1、2：4K
+multikey_2、4K multikey_3、32K/128K single_1及4K CWE，合计15条；实际128K组输入为130930至130939 tokens，完整输入加原128
+token预算在部署容量内，未截断。其余VT/FWE/QA_1各全500条继续排队执行。此处是可执行性及原任务评分证明，不是整套RULER、完整长度网格、模型能力排名或引擎性能提升。
+
+后续8组原生成文件共4000条的[准备回执](validation/ruler-eight-profiles-preparation-20261025.json)逐一给出摘要、长度、种子和固定选样规则。生成文件仍留在服务器，源码仓不附数据。RULER原13任务仍缺5个essay任务和HotpotQA任务，不以当前7种任务覆盖替代完整原任务集合。
+
+其他原生成profile接入统一索引时，使用 `scripts/bind_ruler_original_profile.py`，不要手动改默认清单中的固定摘要。将真实原生成参数记录为私有
+`generation.json`，例如前述原生成命令仅将长度改为32768时：
+
+```json
+{
+  "task": "niah_single_1",
+  "max_seq_length": 32768,
+  "random_seed": 42,
+  "model_template_type": "base",
+  "tokenizer_type": "hf",
+  "tokenizer_model": "Qwen/Qwen3.5-27B",
+  "tokenizer_revision": "fc05daec18b0a78c049392ed2e771dde82bdf654",
+  "subset": "validation",
+  "num_samples": 500
+}
+```
+
+安装固定数据组件后执行：
+
+```sh
+python -I scripts/bind_ruler_original_profile.py \
+  --data-root /private/ruler-generated-32k \
+  --file niah_single_1/validation.jsonl \
+  --generation /private/generation.json --output /private/fresh-ruler-manifest.json
+```
+
+入口不生成、不下载、不复制或改写原数据，只核验完整文件的真实行数、字段、摘要与必需生成声明，写入新manifest，拒绝覆盖。未匹配现有登记字节的文件明确标为调用者选择的本地生成快照，不能把声明当作独立验证过的发布方数据签名；相同已登记字节也不能被重新标成另一任务或长度。生成配置必须来自真实原生成命令，不是借此手编新题。
+
+统一准备配置为
+`{"sources":[{"source_id":"RULER","data_root":"/private/ruler-generated-32k","manifest":"/private/fresh-ruler-manifest.json"}]}`，沿用pipeline
+plan/run、prepared_rows和resolve_input。准备输出目录须与原data_root分开，不能放在其内部。研究侧使用同一manifest导入公共索引或直接prepare/resolve，不需要复制原数据到研究仓。
+
+服务器已用该绑定CLI候选和固定CI50474ec0数据组件完成[8组消费链路核验](validation/ruler-eight-profile-binding-chain-20261025.json)：全4000条绑定/索引、各首尾3条共48条公共回查、研究索引导入及直接prepare/resolve各24条。另独立对原生成文件逐条比较全部4000条输入、参考、原index/行号和生成配置，不只是把provider与自己比较。绑定CLI的实际字节摘要记录在回执中，不冒充它已在当时通过最终CI；研究默认依赖锁仍未改，也不迁观测/特征/分析。

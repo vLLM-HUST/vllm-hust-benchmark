@@ -122,7 +122,7 @@ TB；服务器/data约1.42TB可用，未缩小语料。ChartQA当前两卡主机
 | MOONCAKE                   | [ ] 缺口已列待补      | 官方工具未运行；全局无冲突需9.37 TiB；容量受限profile及SSH恢复待办                                                                                                                                                                                              |
 | QRECC                      | [ ] 阻塞              | 官方原始collection规模超过当前约1.42TB可用空间；未缩减或替换                                                                                                                                                                                                    |
 | INFINITEBENCH              | [ ] 待开展            | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                    |
-| RULER                      | [ ] 进行中，未完成    | 首个 niah_single_1 / 4K / seed=42 全500条原生运行中，未终态评分审计。公共入口已补；固定CI全500条输入/参考/生成配置及索引回查、研究原前三条接通已验，原生未完成。其他任务/长度待补；保留原index，以物理行号标识，不去重。                                        |
+| RULER                      | [ ] 进行中，未完成    | 原4K NIAH全500条及另5组15条真实执行/原评分已审计；含完整128K输入。VT/FWE/QA_1各全500条继续。固定CI消费已验，8组4000条绑定/索引和研究消费已验；尚缺原13任务中的6项，见下方子配置勾选表。                                                                         |
 | QUALITY                    | [x] 原NYU多选集成可用 | 原6题/24候选似然及固定harness评分、完整文章token与安装包2086题索引/6条回查通过。[交付回执](validation/quality-native-delivery-20261024.json)；非SCROLLS数据、非发布方训练基线，非全2086题执行                                                                   |
 | BBH                        | [x] 原生抽样交付      | 全27变体原任务准备、执行及固定评分可用；81个唯一原题已验证，固定CI工件安装回查及三项CI通过。[交付回执](validation/bbh-native-delivery-20261024.json)。不是6511题全量或高分保证                                                                                  |
 | BFCL                       | [x] 登记原生类别可用  | simple_python原400题生成、官方AST判定及原文/响应/安装包400条prepare→resolve审计通过。[交付回执](validation/bfcl-native-delivery-20261024.json)；静态函数/参数匹配，不代表其他BFCL类别或真实工具执行                                                             |
@@ -262,6 +262,30 @@ for record in iter_workload("TOOLACE", data_root=Path("/private/ToolACE")):
 ```
 
 全量准备配置为`{"sources":[{"source_id":"TOOLACE","data_root":"/private/ToolACE"}]}`，使用现有pipeline的plan/run及resolve_input入口即可。`system`中的工具描述和所有历史assistant/tool消息保留原样；`outcome_record()`为None符合资产契约，不从历史对话中虚构独立任务参考。`request_body()`明确拒绝将其当作原始API请求。后续若需预测某一轮、执行工具或评估模型，须另行声明并验证实验协议，不能把本次数据准备称作已完成这些原生流程。
+
+#### RULER 子配置执行进度（不增加来源完成数）
+
+RULER仍是113项中的一个来源，以下子配置的勾不计作新增数据集，也不把部分子配置完成称为原13任务全部完成。模型沿用既有双NPU Qwen3.5-27B配置，原题、完整输入及原输出预算不改。
+
+原首个500条的保存请求/响应、原字段和原评分已完成[终态审计](validation/ruler-niah4k-full500-native-audit-20261025.json)，公共入口仅对这500条做无模型CPU回放，没有重跑。其余5组使用公共入口的15条真实请求及原评分也已[逐条审计](validation/ruler-public-first5-native-audit-20261025.json)，不是读取证明。
+
+| 子配置               | 固定验证范围    | 原生执行与原评分                                              |
+| -------------------- | --------------- | ------------------------------------------------------------- |
+| niah_single_1 / 4K   | 全500条         | [x] 500条已审计，原128 token预算                              |
+| niah_multikey_2 / 4K | 原物理行0、1、2 | [x] 3条已审计，原128 token预算                                |
+| niah_multikey_3 / 4K | 原物理行0、1、2 | [x] 3条已审计，原128 token预算                                |
+| niah_single_1 / 32K  | 原物理行0、1、2 | [x] 3条已审计，完整输入未裁剪                                 |
+| niah_single_1 / 128K | 原物理行0、1、2 | [x] 3条已审计，实际输入130930至130939 tokens，原128 token预算 |
+| cwe / 4K             | 原物理行0、1、2 | [x] 3条已审计，原120 token预算                                |
+| vt / 4K              | 全500条         | [ ] 队列执行中，完成后审计                                    |
+| fwe / 4K             | 全500条         | [ ] 已排队，完成后审计                                        |
+| qa_1 / 4K            | 全500条         | [ ] 已排队，完成后审计                                        |
+
+后续8组生成文件合计4000条均已按原生成器和字段完成[CPU准备审计](validation/ruler-eight-profiles-preparation-20261025.json)，包括128K原500条，不把准备当执行。另已完成[显式绑定及消费链路](validation/ruler-eight-profile-binding-chain-20261025.json)：8组全4000条绑定/索引、各首尾3条共48条公共回查、研究侧索引导入和直接prepare/resolve各24条。绑定CLI当时是候选软件，数据组件是固定CI50474ec0工件，研究默认锁未改；不迁观测或研究分析。
+
+原13任务仍有6项未补齐：依赖完整原essay资产的
+niah_single_2、niah_single_3、niah_multikey_1、niah_multivalue、niah_multiquery，以及依赖原HotpotQA的
+qa_2。不能用noise替换essay、换QA集合或只取下载成功的一部分冒充完整原资产。获取与补接继续进行，RULER来源主勾保持未完成。
 
 ## 历史抽样记录（非本轮完成总数）
 
