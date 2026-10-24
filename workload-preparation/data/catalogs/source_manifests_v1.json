@@ -326,9 +326,9 @@
     },
     "GPQA": {
       "source_id": "GPQA",
-      "platform": "hf",
-      "repo_id": "Idavidrein/gpqa",
-      "source_url": "https://huggingface.co/datasets/Idavidrein/gpqa",
+      "platform": "github",
+      "repo_id": "idavidrein/gpqa",
+      "source_url": "https://github.com/idavidrein/gpqa",
       "asset_kind": "task_corpus",
       "independent_source_id": "GPQA",
       "workload_tags": [
@@ -338,14 +338,48 @@
       "provenance": "author_release",
       "fitness_status": "VARIABLES_REQUIRE_ASSET_INSPECTION",
       "discovery_status": "ENTRY_IDENTIFIED",
-      "revision": "633f5ee89ab8ad4522a9f850766b73f62147ffdd",
-      "files": [],
+      "revision": "56686c06f5e19865c153de0fdb11be3890014df7", "revision_note": "pragma: allowlist secret - public publisher commit",
+      "files": [
+        {
+          "path": "dataset.zip",
+          "role": "source_archive",
+          "sha256": "461ae7329f15a3e35f8184d2dac24b990f34fdf12f366ca4062d8e6638cd08dc", "revision_note": "pragma: allowlist secret - public publisher file digest",
+          "bytes": 2348038,
+          "url": "https://raw.githubusercontent.com/idavidrein/gpqa/56686c06f5e19865c153de0fdb11be3890014df7/dataset.zip"
+        },
+        {
+          "path": "gpqa_main.csv",
+          "role": "data",
+          "sha256": "acdeeac8f622267f2cd727d7d474202ea08dec80f7d3c3593b3ef8644f19b8e3", "revision_note": "pragma: allowlist secret - public publisher file digest",
+          "bytes": 3214603,
+          "rows": 448,
+          "archive_member": "dataset/gpqa_main.csv"
+        },
+        {
+          "path": "gpqa_diamond.csv",
+          "role": "data",
+          "sha256": "41d1213cd7a4998605a26c2798500652572007161b3a92817ba46b35befcd305", "revision_note": "pragma: allowlist secret - public publisher file digest",
+          "bytes": 1373492,
+          "rows": 198,
+          "archive_member": "dataset/gpqa_diamond.csv"
+        },
+        {
+          "path": "gpqa_extended.csv",
+          "role": "data",
+          "sha256": "0926ee24949d02ed6748eb75a2611546c34479e30ddc42efd01d6f1681aaa48a", "revision_note": "pragma: allowlist secret - public publisher file digest",
+          "bytes": 4091077,
+          "rows": 546,
+          "archive_member": "dataset/gpqa_extended.csv"
+        }
+      ],
+      "preparation_command": "workload-data prepare-gpqa-original --data-archive /private/dataset.zip --output /private/fresh-gpqa-data",
+      "historical_hf_release": {"repo_id": "Idavidrein/gpqa", "revision": "633f5ee89ab8ad4522a9f850766b73f62147ffdd", "access": "auto-gated; not used for publisher public GitHub ZIP acquisition"},
       "unit": "source_rows",
       "provenance_kind": "task_corpus",
       "access": {
         "license": "cc-by-4.0",
-        "gated": "auto",
-        "note": "Verify publisher terms before acquisition or redistribution"
+        "gated": false,
+        "note": "Publisher public GitHub ZIP and its README-published password; not a bypass of HF gating. Do not redistribute raw questions here."
       },
       "metadata_snapshot": "public-source-metadata-v0.5; not a fresh web check"
     },

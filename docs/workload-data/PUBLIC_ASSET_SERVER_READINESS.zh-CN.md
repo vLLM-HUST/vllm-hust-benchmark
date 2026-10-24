@@ -246,15 +246,19 @@ check；不冒充发布方Python3.9整机环境，也不等于judge已执行。
 ```sh
 git clone https://github.com/idavidrein/gpqa.git /private/gpqa-source
 git -C /private/gpqa-source checkout 56686c06f5e19865c153de0fdb11be3890014df7
-# 在服务器按固定README说明解压dataset.zip，保留三个原CSV的完整字节。
+workload-data prepare-gpqa-original \
+  --data-archive /private/gpqa-source/dataset.zip --output /private/fresh-gpqa-data
 python scripts/run_gpqa_original.py \
-  --source /private/gpqa-source --data-root /private/gpqa-data/dataset \
+  --source /private/gpqa-source --data-root /private/fresh-gpqa-data \
   --split diamond --model your-served-model --context-window 131072 \
   --api-base http://127.0.0.1:19466/v1 --full --output /private/fresh-gpqa-diamond
 ```
 
-运行依赖Python和pandas。发布方原环境为Python3.9/pandas1.5.2；本服务器使用已有Python3.12客户端环境，其具体版本随真实审计记录披露，不能冒充发布方整机环境。原代码顶层会初始化商业API客户端，因此入口在逐文件核对摘要后只载入所需原函数/类，不初始化外部凭据或调用商业API。
+运行依赖Python和pandas。发布方原环境为Python3.9/pandas1.5.2；服务器独立客户端使用Python3.12、pandas2.2.3、numpy1.26.4，安装项见`configs/workload-native/gpqa-original-client-py312-dependencies.txt`，不能冒充发布方整机环境。原代码顶层会初始化商业API客户端，因此入口在逐文件核对摘要后只载入所需原函数/类，不初始化外部凭据或调用商业API。
+
+统一数据入口为`GPQA`及三个原CSV，按同一source
+manifest执行pipeline/resolve。输入只包含原`Question`与按作者seed0打乱的匿名`choices`；答案索引、原答案标记、解释、专家注释和canary全部在参考侧，所有原列均保留，物理文件SHA+行号标识案例。不是手编题目或自造选项。服务器[候选组件与原Diamond运行审计](validation/gpqa-diamond-native-and-candidate-consumption-20261025.json)核对三split共1192条原字段及作者选项顺序、公共回查18条、研究索引导入与直接prepare/resolve各9条；最终CI工件尚待核验，不以候选代替固定交付工件。
 
 当前绑定原`load_examples`、seed0选项打乱、`zero_shot_prompt`、`select_and_call_model`的系统/用户消息与原`parse_sampled_answer`，输出预算1000不改，仅将模型传输指向已声明的本地模型。原主循环对索引69有显式跳过逻辑，本入口如实保留为未生成且答错，计入原分母；不能隐藏该行为后声称每题都发出了模型请求。结果不是作者GPT-4基线复现，也不代表CoT、检索或self-consistency协议已验证。
 
-`--split main`、`--split extended`分别选原split；不带`--full`为固定物理行0、1、2，不能在看到失败后换题。新输出目录拒绝覆盖，保存请求/响应和原解析结果；缺失答案按原逻辑记错，不重试凑分。完整入口、统一数据组件及研究消费链路仍需逐项实证核验，来源主勾不因下载、CPU测试或运行中的文件提前勾选。
+`--split main`、`--split extended`分别选原split；不带`--full`为固定物理行0、1、2，不能在看到失败后换题。新输出目录拒绝覆盖，保存请求/响应和原解析结果；缺失答案按原逻辑记错，不重试凑分。`--reuse /private/completed-original-run`只复用已完成同协议、同服务模型且私有记录摘要一致、实际请求完全等价的保存响应；题目相同但选项不同不会误复用，不能只按题目ID命中。复用后仍重新执行原解析与评分，不再调用模型。来源主勾不因下载、CPU测试或运行中的文件提前勾选。

@@ -13,6 +13,7 @@ DATA_MODULES = {
     "consumer",
     "conversations",  # Original parent-link input restoration, no research analysis.
     "execution",
+    "gpqa",  # Publisher archive extraction and original option permutation only.
     "identity",
     "input_views",
     "locomo",  # Original conversation/question relations, no memory generation.
@@ -39,6 +40,31 @@ def test_no_observation_dependencies_or_hooks():
     )
     assert not list((ROOT / "tools").rglob("*.py"))
     assert not (ROOT / "schemas/full_cycle_trace_v1.schema.json").exists()
+
+
+def test_gpqa_helper_contains_only_original_data_preparation_dependencies():
+    import ast
+
+    tree = ast.parse((ROOT / "src/vllm_hust_workload_data/gpqa.py").read_text("utf-8"))
+    imports = {
+        node.module for node in ast.walk(tree) if isinstance(node, ast.ImportFrom)
+    }
+    imports.update(
+        alias.name
+        for node in ast.walk(tree)
+        if isinstance(node, ast.Import)
+        for alias in node.names
+    )
+    assert imports == {
+        "csv",
+        "hashlib",
+        "io",
+        "json",
+        "pathlib",
+        "random",
+        "zipfile",
+        "registry",
+    }
 
 
 def test_quality_expansion_remains_pure_data_only():

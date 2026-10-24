@@ -93,7 +93,13 @@ def download_plan(source_id, root=None):
         else (
             "ORIGINAL_PUBLISHER_GENERATOR"
             if source_id == "RULER"
-            else ("PINNED_FILE_URLS" if files else "PUBLISHER_DATA_DOWNLOAD_SECTION")
+            else (
+                "PINNED_PUBLISHER_ARCHIVE"
+                if source_id == "GPQA"
+                else (
+                    "PINNED_FILE_URLS" if files else "PUBLISHER_DATA_DOWNLOAD_SECTION"
+                )
+            )
         ),
         "instruction": "Obtain selected files under publisher/owner terms and supply their root explicitly; this command does not download.",
         "asset_availability": "NOT_CHECKED_ON_THIS_MACHINE",

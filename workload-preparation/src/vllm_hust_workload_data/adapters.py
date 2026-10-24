@@ -288,6 +288,12 @@ def adapt_row(
         if not task_input["messages"]:
             raise ValueError("reference has no task input")
         outcome = {"reference_message": deepcopy(messages[-1])}
+    if spec["mapping"] == "gpqa_original_seed0_choices":
+        from .gpqa import seed_zero_choices
+
+        choices, correct_index = seed_zero_choices(row, index)
+        task_input["choices"] = choices
+        outcome["correct_index"] = correct_index
     if spec["mapping"] == "longmemeval_history":
         sessions = row["haystack_sessions"]
         if (

@@ -151,6 +151,8 @@ def run(args):
         "source_checkbox_eligible": False,
         "raw_payloads_published": False,
         "started_at_unix": time.time(),
+        "reused_generations": 0,
+        "model_generation_calls_attempted": 0,
     }
 
     def save():
@@ -160,6 +162,34 @@ def run(args):
 
     save()
     current = {}
+    cached = {}
+
+    def fill_cache():
+        for previous in getattr(args, "reuse", []) or []:
+            prior = json.loads((previous / "receipt.json").read_text("utf-8"))
+            if (
+                prior["source_commit"] != SOURCE_COMMIT
+                or prior["model"] != args.model
+                or prior["publisher_protocol"] != "zero_shot"
+                or prior["generation_budget"] != budget
+                or prior["data_sha256"] not in DATA_SHA256.values()
+                or prior["status"]
+                != "ORIGINAL_ZERO_SHOT_EXECUTION_AND_SCORING_COMPLETED_REQUIRES_AUDIT"
+            ):
+                raise ValueError(
+                    "prior original GPQA run is not compatible for exact-request reuse"
+                )
+            for sample in prior["samples"]:
+                if sample.get("publisher_skipped"):
+                    continue
+                file = previous / f"row-{sample['original_offset']}.private.json"
+                raw = file.read_bytes()
+                if hashlib.sha256(raw).hexdigest() != sample["private_record_sha256"]:
+                    raise ValueError("prior GPQA private record identity mismatch")
+                record = json.loads(raw)
+                cached[json.dumps(record["request"], sort_keys=True)] = record[
+                    "response"
+                ]
 
     def transport(**original_request):
         if (
@@ -178,7 +208,16 @@ def run(args):
             raise ValueError(
                 "complete original GPQA prompt exceeds model context; no truncation"
             )
-        response = post(api + "/chat/completions", request)
+        key = json.dumps(request, sort_keys=True)
+        reused = key in cached
+        if reused:
+            response = cached[key]
+            receipt["reused_generations"] += 1
+        else:
+            receipt["model_generation_calls_attempted"] += 1
+            save()
+            response = post(api + "/chat/completions", request)
+            cached[key] = response
         answer = response["choices"][0]["message"]["content"]
         if (
             not isinstance(answer, str)
@@ -186,13 +225,19 @@ def run(args):
             or response["usage"]["prompt_tokens"] != count
         ):
             raise ValueError("invalid model response or input identity mismatch")
-        current.update(request=request, response=response, input_tokens=count)
+        current.update(
+            request=request,
+            response=response,
+            input_tokens=count,
+            reused_saved_response=reused,
+        )
         return answer
 
     namespace["client"] = SimpleNamespace(
         chat=SimpleNamespace(completions=SimpleNamespace(create=transport))
     )
     try:
+        fill_cache()
         for offset in offsets:
             example = examples[offset]
             if offset == 69:
@@ -264,6 +309,13 @@ def main():
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--full", action="store_true")
+    parser.add_argument(
+        "--reuse",
+        type=Path,
+        nargs="*",
+        default=[],
+        help="reuse only hash-checked byte-equivalent native requests from completed original runs",
+    )
     print(json.dumps(run(parser.parse_args())))
 
 

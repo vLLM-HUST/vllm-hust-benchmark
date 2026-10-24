@@ -68,6 +68,9 @@ def main(argv=None):
     bbh_all = commands.add_parser("prepare-bbh-original")
     bbh_all.add_argument("--data-archive", type=Path, required=True)
     bbh_all.add_argument("--output", type=Path, required=True)
+    gpqa = commands.add_parser("prepare-gpqa-original")
+    gpqa.add_argument("--data-archive", type=Path, required=True)
+    gpqa.add_argument("--output", type=Path, required=True)
     for name in ("catalog", "pipeline", "replay"):
         passthrough = commands.add_parser(name, add_help=False)
         passthrough.add_argument("arguments", nargs=argparse.REMAINDER)
@@ -137,6 +140,12 @@ def main(argv=None):
             if not hasattr(provider, "prepare_bbh_boolean"):
                 raise RuntimeError("Install the pinned BBH-capable data component")
             value = provider.prepare_bbh_boolean(
+                data_archive=args.data_archive, output=args.output
+            )
+        elif args.command == "prepare-gpqa-original":
+            from vllm_hust_workload_data.gpqa import prepare_original_archive
+
+            value = prepare_original_archive(
                 data_archive=args.data_archive, output=args.output
             )
         elif args.command == "prepare-bbh-original":

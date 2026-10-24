@@ -41,7 +41,7 @@ def test_transport_preserves_budget_and_publisher_full_index_skip(
     example = namedtuple(
         "Example", "question choice1 choice2 choice3 choice4 correct_index"
     )
-    examples = [example("question", "a", "b", "c", "d", 1) for _ in range(70)]
+    examples = [example(f"question {i}", "a", "b", "c", "d", 1) for i in range(70)]
 
     class Parser:
         LETTER_TO_INDEX = {"A": 0, "B": 1, "C": 2, "D": 3}
@@ -52,7 +52,7 @@ def test_transport_preserves_budget_and_publisher_full_index_skip(
 
     namespace = {
         "load_examples": lambda path, seed: examples,
-        "zero_shot_prompt": lambda entry: "original fixture prompt",
+        "zero_shot_prompt": lambda entry: "original fixture prompt " + entry.question,
         "AnswerPredictor": Parser,
     }
 
@@ -115,6 +115,13 @@ def test_transport_preserves_budget_and_publisher_full_index_skip(
         assert receipt["accuracy"] == 69 / 70
     with pytest.raises(FileExistsError):
         runner.run(args)
+    assert len(calls) == count
+    prior_output = args.output
+    args.output = tmp_path / "reused"
+    args.reuse = [prior_output]
+    reused = runner.run(args)
+    assert reused["reused_generations"] == count
+    assert reused["model_generation_calls_attempted"] == 0
     assert len(calls) == count
     assert (
         json.loads((args.output / "receipt.json").read_text())[
