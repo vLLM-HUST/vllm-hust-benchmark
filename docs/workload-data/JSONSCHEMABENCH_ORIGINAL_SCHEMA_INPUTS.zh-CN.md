@@ -67,7 +67,8 @@ schema 合法性分别记录。 `GENERATED` 不是正确性通过；HTTP 拒绝�
   数据wheel已安装并逐文件核对；原始三文件读取、bind、prepare、resolve逐对象相等，保存的发布方two-shot提示、原schema请求和官方validator重算均一致。[CPU复核](validation/jsonschemabench-cpu-audit-20261024.json)。模型及Tokenizer
   API调用0，保留两条maxLength失败，不新增独立任务数。
 - [x] 可复用执行入口及固定环境安装文档；已在现有 NPU 服务执行相同三个任务。
-- [ ] 与研究消费端完成最终固定工件联调。
+- [x] 原三份schema资产与研究消费端完成固定工件双路径联调：公共索引→研究读取、研究直接prepare→resolve各3条，完整原schema和来源身份一致，不增删约束、不调用模型。[研究接通回执](validation/jsonschemabench-research-handoff-20261024.json)。
+- [ ] 完整官方`core.bench.bench`流程及其他原分区。已核查固定官方`core.dataset.Dataset`读取`epfl-dlab/JSONSchemaBench`的`test`及`json_schema`字段、10个具名分区；官方允许实现`core.engine.Engine`自定义后端，后续应复用这一协议而非仅拼接formatter/validator。服务器取得该公开仓库元数据时返回`httpx.ConnectError: Errno101 Network is unreachable`，因此尚未取得并核实其固定revision，不填写预期摘要冒充下载成功。不改网络、不从本地缓存原数据，保留原三份样本和失败结果。[官方流程准备及阻塞](validation/jsonschemabench-official-workflow-readiness-20261024.json)。来源整项仍不打勾。
 - [ ] 完整子集及其他 schema 子集验证。
 
 上述未完成项不能由本次三样本探测或 CPU 测试代替。该来源与长文档理解类别 一起进入下一批 PR，不为单个数据集创建独立 PR。
