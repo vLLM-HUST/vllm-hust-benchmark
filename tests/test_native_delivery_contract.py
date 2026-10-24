@@ -35,8 +35,9 @@ def test_qasper_fixed_ci_research_consumer_preserves_raw_tasks_not_scientific_ac
         )
     )
     assert (
-        receipt["data_commit"] == "39556148d18a30bb1f6d3ec04cba663ab8d67db6"
-    )  # pragma: allowlist secret - public CI commit
+        receipt["data_commit"]
+        == "39556148d18a30bb1f6d3ec04cba663ab8d67db6"  # pragma: allowlist secret - public CI commit
+    )
     assert receipt["data_cpu_ci_run"] == 40119103024
     assert receipt["installed_provider_payload_files_equal"] == 33
     assert receipt["research_installed_source_files_equal"] == 40
