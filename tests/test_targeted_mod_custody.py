@@ -25,6 +25,7 @@ def test_targeted_original_bytes():
         ("pyramid-selected", 3),
         ("muxpd-documents", 3),
         ("muxpd-tp8-groupfx", 5),
+        ("kv-school-document", 1),
         ("vspec-adaptive-narratives", 3),
         ("vspec-b16-frontier", 7),
     ):
