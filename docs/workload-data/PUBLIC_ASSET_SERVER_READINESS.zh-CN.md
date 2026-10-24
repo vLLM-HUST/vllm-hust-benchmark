@@ -238,3 +238,23 @@ python -m venv /private/longmemeval-eval-env
 check；不冒充发布方Python3.9整机环境，也不等于judge已执行。
 
 上述本地judge要求按原脚本在`http://localhost:8001/v1`部署`meta-llama/Meta-Llama-3.1-70B-Instruct`；不是当前Qwen服务。发布方还支持GPT-4o及mini评分，需要用户自行配置已授权的API与费用，不自动调用。没有合适judge时保留生成结果并标记评分阻塞，不把Qwen自评或字符串匹配冒充原官方评分。只跑生成、只读数据、CPU夹具测试均不能勾来源完成。
+
+### GPQA 作者原发布包与原zero-shot协议
+
+使用作者公开GitHub的`dataset.zip`，固定代码版本见[原资产回执](validation/gpqa-original-acquisition-20261025.json)。按该版本README公开提供的密码解压；不需要绕过HF门槛，也不把题目下载到本地工作站或提交进Git。main448、diamond198、extended546是有重叠的原split，不能相加称为1192个独立问题；`gpqa_experts.csv`是专家元数据，不是第四个benchmark。
+
+```sh
+git clone https://github.com/idavidrein/gpqa.git /private/gpqa-source
+git -C /private/gpqa-source checkout 56686c06f5e19865c153de0fdb11be3890014df7
+# 在服务器按固定README说明解压dataset.zip，保留三个原CSV的完整字节。
+python scripts/run_gpqa_original.py \
+  --source /private/gpqa-source --data-root /private/gpqa-data/dataset \
+  --split diamond --model your-served-model --context-window 131072 \
+  --api-base http://127.0.0.1:19466/v1 --full --output /private/fresh-gpqa-diamond
+```
+
+运行依赖Python和pandas。发布方原环境为Python3.9/pandas1.5.2；本服务器使用已有Python3.12客户端环境，其具体版本随真实审计记录披露，不能冒充发布方整机环境。原代码顶层会初始化商业API客户端，因此入口在逐文件核对摘要后只载入所需原函数/类，不初始化外部凭据或调用商业API。
+
+当前绑定原`load_examples`、seed0选项打乱、`zero_shot_prompt`、`select_and_call_model`的系统/用户消息与原`parse_sampled_answer`，输出预算1000不改，仅将模型传输指向已声明的本地模型。原主循环对索引69有显式跳过逻辑，本入口如实保留为未生成且答错，计入原分母；不能隐藏该行为后声称每题都发出了模型请求。结果不是作者GPT-4基线复现，也不代表CoT、检索或self-consistency协议已验证。
+
+`--split main`、`--split extended`分别选原split；不带`--full`为固定物理行0、1、2，不能在看到失败后换题。新输出目录拒绝覆盖，保存请求/响应和原解析结果；缺失答案按原逻辑记错，不重试凑分。完整入口、统一数据组件及研究消费链路仍需逐项实证核验，来源主勾不因下载、CPU测试或运行中的文件提前勾选。
