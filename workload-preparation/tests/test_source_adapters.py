@@ -31,6 +31,7 @@ def adapt(sid, row):
     [
         ("DOLLY", "instruction", "response"),
         ("GSM8K", "question", "answer"),
+        ("MATH500", "problem", "answer"),
         ("MMLU_PRO", "question", "cot_content"),
         ("AI2_ARC", "question", "answerKey"),
         ("BIGCODEBENCH", "complete_prompt", "canonical_solution"),
@@ -47,6 +48,9 @@ def test_explicit_projection_never_puts_reference_into_input(
     spec = adapter_spec(sid)
     row = {key: "fixture" for key in spec["required_fields"]}
     row[input_field] = "test input"
+    if sid == "MATH500":
+        row["level"] = 3
+        row["unique_id"] = "fixture/math"
     if sid == "MMLU_PRO":
         row["options"] = ["one", "two"]
     if sid == "AI2_ARC":

@@ -9,10 +9,21 @@ import gzip
 import hashlib
 import json
 from pathlib import Path
+from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
 ROOT = Path(__file__).resolve().parents[1]
 SELECTION = ROOT / "data/catalogs/release_dataset_selection_v1.json"
+
+
+def failure_metadata(error):
+    """Keep actionable failure types without exporting URLs, paths or credentials."""
+    result = {"error_type": type(error).__name__}
+    if isinstance(error, HTTPError):
+        result["http_status"] = error.code
+    elif isinstance(error, URLError):
+        result["reason_type"] = type(error.reason).__name__
+    return result
 
 
 def sha(path):
@@ -57,7 +68,7 @@ def inspect(path, max_uncompressed_bytes=8_000_000_000):
     return {"row_count": count, "columns": columns, "all_batches_decoded": True}
 
 
-def acquire(source):
+def acquire(source, *, data_root=None):
     # Selection is a local reviewed allowlist, not filenames extracted from an archive.
     if any(
         Path(x).name != x or x in {".", ".."} or ":" in x
@@ -68,7 +79,15 @@ def acquire(source):
         ]
     ):
         raise ValueError("unsafe release path")
-    base = ROOT / ".cache/public_datasets" / source["source_id"] / source["tag"]
+    explicit_root = data_root is not None
+    cache_root = (
+        Path(data_root).resolve()
+        if explicit_root
+        else ROOT / ".cache/public_datasets"
+    )
+    if explicit_root and cache_root.is_relative_to(ROOT.resolve()):
+        raise ValueError("explicit data root must be outside the component checkout")
+    base = cache_root / source["source_id"] / source["tag"]
     base.mkdir(parents=True, exist_ok=True)
     files = []
     for entry in source["files"]:
@@ -100,7 +119,12 @@ def acquire(source):
         files.append(
             {
                 "file": entry["name"],
-                "relative_local_path": path.relative_to(ROOT).as_posix(),
+                "relative_local_path": path.relative_to(
+                    cache_root if explicit_root else ROOT
+                ).as_posix(),
+                "path_relative_to": "explicit_data_root"
+                if explicit_root
+                else "component_root_legacy_cache",
                 "download_url": url,
                 "bytes": entry["bytes"],
                 "sha256": entry["sha256"],
@@ -139,6 +163,11 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--source", choices=["BURSTGPT", "TRACELAB"])
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument(
+        "--data-root",
+        type=Path,
+        help="external server data directory; omitted only for legacy cache compatibility",
+    )
     parser.add_argument("--overwrite", action="store_true")
     args = parser.parse_args()
     if args.output.exists() and not args.overwrite:
@@ -149,12 +178,12 @@ def main():
 
     def attempt(source):
         try:
-            return acquire(source)
+            return acquire(source, data_root=args.data_root)
         except Exception as error:
             return {
                 "source_id": source["source_id"],
                 "status": "ACQUISITION_FAILED",
-                "error_type": type(error).__name__,
+                **failure_metadata(error),
             }
 
     with ThreadPoolExecutor(max_workers=2) as pool:

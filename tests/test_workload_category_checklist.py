@@ -8,6 +8,86 @@ ROOT = Path(__file__).resolve().parents[1]
 DOCS = ROOT / "docs/workload-data"
 
 
+def test_target_repository_inventory_preserves_existing_versions_and_aliases():
+    plan = (DOCS / "WORKLOAD_PR_REORGANIZATION_PLAN.zh-CN.md").read_text("utf-8")
+    section = plan.split("### 8.6 ", 1)[1].split("## 九、", 1)[0]
+    matrix = section.split("以下表只说明", 1)[1].split("#### 8.6.2", 1)[0]
+    rows = [
+        [cell.strip() for cell in line.split("|")[1:-1]]
+        for line in matrix.splitlines()
+        if line.startswith("|") and "`" in line
+    ]
+    assert len(rows) == len({row[0] for row in rows}) == 31
+    assert sum(len(re.findall(r"`([^`]+)`", row[1])) for row in rows) == 35
+    assert sum(row[0].startswith("PAIO-") for row in rows) == 8
+    assert "SWE_BENCH" not in {row[0] for row in rows}
+    assert "6e0cc61db57487778b2147cc18bf5a726cac4817" in section
+    for path in (
+        "src/vllm_hust_benchmark/mmlu_pro_pyramidkv.py",
+        "scripts/audit_pyramidkv_hle.py",
+        "src/vllm_hust_benchmark/swe_bench_pro.py",
+        "src/vllm_hust_benchmark/frontierscience_inputs.py",
+        "scripts/prepare_pyramidkv_terminal.py",
+    ):
+        assert path in section
+    assert "不是整个benchmark仓的全部已有成果" in section
+    assert "缺backend、缺评分器、坏协议或服务崩溃" in section
+
+
+def test_inventory_snapshot_separates_read_run_consume_and_legacy_checks():
+    """Frozen PR inventory, not current model execution or whole-suite quality."""
+    plan = (DOCS / "WORKLOAD_PR_REORGANIZATION_PLAN.zh-CN.md").read_text("utf-8")
+    section = plan.split("#### 8.5.2 ", 1)[1].split("#### 8.5.3 ", 1)[0]
+    rows = [
+        [cell.strip() for cell in line.split("|")[1:-1]]
+        for line in section.splitlines()
+        if line.startswith("|") and "[x]" in line
+    ]
+    assert len(rows) == len({row[0] for row in rows}) == 37
+    assert all(row[1].startswith("[x]") for row in rows)
+    assert sum(row[2].startswith("[x]") for row in rows) == 28
+    assert (
+        sum(
+            row[4].startswith("[x]")
+            and "本地CPU-only消费回执" not in row[4]
+            and "本地补充消费回执" not in row[4]
+            for row in rows
+        )
+        == 23
+    )
+    assert (
+        sum(
+            "本地补充消费回执" in row[4] or "本地CPU-only消费回执" in row[4]
+            for row in rows
+        )
+        == 14
+    )
+    assert sum(row[4].startswith("[x]") for row in rows) == 37
+    assert sum("旧[x]" in row[5] for row in rows) == 19
+    assert (
+        sum(
+            "已执行并得到评分/validator结果" in row[3] or "固定harness评分0/3" in row[3]
+            for row in rows
+        )
+        == 13
+    )
+    assert sum("响应完整性；无语义gold" in row[3] for row in rows) == 11
+    assert "MATH500" not in {row[0] for row in rows}
+    initial = json.loads(
+        (DOCS / "validation/natural-instructions-original-npu-20261023.json").read_text(
+            "utf-8"
+        )
+    )
+    extra = json.loads(
+        (
+            DOCS / "validation/ni-editing-extraction-original-npu-20261023.json"
+        ).read_text("utf-8")
+    )
+    tasks = initial["task_results"] + extra["task_results"]
+    assert len({task["task_file"] for task in tasks}) == len(tasks) == 5
+    assert sum(task["executed_unique"] for task in tasks) == 361
+
+
 def test_forty_class_plan_and_migration_audit_do_not_upgrade_runtime_evidence():
     plan = (DOCS / "WORKLOAD_PR_REORGANIZATION_PLAN.zh-CN.md").read_text("utf-8")
     ids = re.findall(r"^\| W(\d{2}) ", plan, flags=re.MULTILINE)

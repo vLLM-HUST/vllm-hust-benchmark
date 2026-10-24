@@ -128,6 +128,23 @@ def adapt_row(
         raise ValueError(
             "Natural Instructions requires original definition/input/reference fields"
         )
+    if source_id == "MATH500" and (
+        not isinstance(row["unique_id"], str)
+        or not row["unique_id"].strip()
+        or not isinstance(row["problem"], str)
+        or not row["problem"].strip()
+        or not isinstance(row["solution"], str)
+        or not row["solution"].strip()
+        or not isinstance(row["answer"], str)
+        or not row["answer"].strip()
+        or not isinstance(row["subject"], str)
+        or not row["subject"].strip()
+        or type(row["level"]) is not int
+        or not 1 <= row["level"] <= 5
+    ):
+        raise ValueError(
+            "MATH500 requires original problem, reference, subject, level, and unique ID"
+        )
     if source_id == "MMLU_PRO" and (
         not isinstance(row["options"], list) or not row["options"]
     ):
