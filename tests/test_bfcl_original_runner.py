@@ -1,6 +1,7 @@
 """CPU artifact/entry checks only, not BFCL task execution or scores."""
 
 import importlib.util
+import hashlib
 import json
 from pathlib import Path
 import subprocess
@@ -71,6 +72,35 @@ def test_public_help_without_installed_bfcl_or_model_dependencies():
         ).returncode
         == 0
     )
+
+
+def test_new_edge_audit_is_not_full_simple_python_or_bfcl_claim():
+    receipt = json.loads(
+        (
+            ROOT / "docs/workload-data/validation/bfcl-native-edges-audit-20261024.json"
+        ).read_text("utf-8")
+    )
+    assert receipt["unique_native_tasks_audited"] == 6
+    assert (
+        receipt["all_original_task_fields_checked"]
+        == receipt["fixed_ci_indexed_tasks"]
+        == 400
+    )
+    assert receipt["original_prepare_resolve_roundtrips"] == 6
+    assert receipt["official_runtime_python_files_verified"] == 110
+    assert receipt["audit_generation_calls"] == 0
+    assert not receipt["full_simple_python_validated"]
+    assert not receipt["full_bfcl_suite_validated"]
+    assert not receipt["generated_code_or_tools_executed"]
+    script = ROOT / "scripts/run_bfcl_v4_simple_python_original.py"
+    assert (
+        receipt["current_runner_sha256"]
+        == hashlib.sha256(script.read_bytes().replace(b"\r\n", b"\n")).hexdigest()
+    )
+    assert [item["original_interval_inclusive"] for item in receipt["batches"]] == [
+        [0, 2],
+        [397, 399],
+    ]
 
 
 def test_optional_dependency_snapshot_has_cpu_import_runtime_not_cuda_stack():
