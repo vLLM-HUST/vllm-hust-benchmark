@@ -1480,8 +1480,9 @@
       "legacy_checked": true,
       "existing_receipt": "docs/workload-data/validation/locomo-original-qa-sampled-20261023.json",
       "category4_receipt": "docs/workload-data/validation/locomo-category4-native-20261024.json",
+      "category5_original_preflight": "docs/workload-data/validation/locomo-category5-original-preflight-20261024.json",
       "delivery_receipt": null,
-      "blocker": "复用前六题，并完成原对话0类别4索引82/83/84三题完整会话生成及原F1评分，累计9个唯一原题。第5类原生生成/评分兼容和完整公共入口仍待收口，来源未完成，不使用QBI派生题替代。"
+      "blocker": "已覆盖类别1–4共9个唯一原题。原版第5类共有446题，其中444题无answer；直接调用固定作者生成及评分函数均在模型前触发KeyError:answer，已0模型调用复现。发布方PR11/41均未合并；兼容修复须显式留痕并保持原数据/MC任务/评分规则，当前尚未实施或验证；完整公共入口亦待补，不勾来源。"
     },
     "NATUREBENCH": {
       "scope": "public",

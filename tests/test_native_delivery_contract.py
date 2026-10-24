@@ -24,6 +24,14 @@ def test_locomo_supplement_does_not_close_unverified_category5_or_full_delivery(
         for sample in receipt["samples"]
     )
     assert all(sample["finish_reason"] == "stop" for sample in receipt["samples"])
+    preflight = json.loads(
+        (ROOT / item["category5_original_preflight"]).read_text("utf-8")
+    )
+    assert preflight["category5_original_tasks"] == 446
+    assert preflight["category5_without_answer_key"] == 444
+    assert preflight["model_api_attempts"] == preflight["model_calls"] == 0
+    assert not preflight["task_fields_renamed_or_filled"]
+    assert not preflight["source_checkbox_eligible"]
 
 
 def test_private_request_delivery_reuses_native_responses_without_publishing_them():
