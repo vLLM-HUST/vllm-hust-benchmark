@@ -21,9 +21,13 @@ def test_closeout_keeps_history_and_explicit_reopening_scope():
         "private-issue19-and-calibration",
         "hardware-and-review",
     }
+    # This inventory is a point-in-time receipt, not the mutable live index.
+    # Refreshing website navigation must not rewrite its historical identity.
+    receipt = (ROOT / "docs/issue326-closeout.md").read_text()
+    assert data["website_commit"] in receipt
+    assert data["publication_commit"] in receipt
+
+
+def test_current_navigation_capture_has_no_production_error():
     sources = json.loads((ROOT / "docs/data-entrypoints-sources.json").read_text())
-    assert data["website_commit"] == sources["website_commit"]
-    assert (
-        data["publication_commit"] == sources["website_publication_manifest"]["commit"]
-    )
     assert sources["production_manifest_error"] is None
