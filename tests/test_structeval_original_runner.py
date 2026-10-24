@@ -70,6 +70,27 @@ def test_help_without_optional_task_dependencies():
     assert "--all-json" in result.stdout
 
 
+def test_nonrendering_native_audit_keeps_source_incomplete():
+    receipt = json.loads(
+        (
+            ROOT
+            / "docs/workload-data/validation/structeval-nonrender-protocols-audit-20261024.json"
+        ).read_text("utf-8")
+    )
+    protocols = receipt["protocols"]
+    assert len(protocols) == len({p["protocol"] for p in protocols}) == 18
+    assert "Text-to-JSON" not in {p["protocol"] for p in protocols}
+    assert all(p["tasks"] == 3 and p["official_rescore_equal"] for p in protocols)
+    ids = [task_id for p in protocols for task_id in p["task_ids"]]
+    assert len(ids) == len(set(ids)) == receipt["new_unique_tasks"] == 54
+    assert receipt["historical_text_to_json_tasks_reused"] == 50
+    assert receipt["audit_model_calls"] == 0
+    assert receipt["official_saved_output_rescore_equal"] is True
+    assert receipt["full_source_completed"] is False
+    assert receipt["nonrendering_total_tasks"] == 950
+    assert receipt["full_source_tasks"] == 2035
+
+
 def test_external_endpoint_refused_before_inputs(tmp_path):
     result = subprocess.run(
         [

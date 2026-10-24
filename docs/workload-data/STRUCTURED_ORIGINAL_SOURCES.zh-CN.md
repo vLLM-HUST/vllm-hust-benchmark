@@ -6,13 +6,14 @@
 
 2026-10-24按原2035行核查输入格式、输出格式及rendering组合：44种协议中，非渲染19种共950题、渲染25种共1085题，不能用Text→JSON一个子集代替其余协议。公开历史入口保留原默认行为及`--all-json`，新增显式`--input-type/--output-type`选择非渲染格式协议、`--start/--count`选择该协议内原始连续位置、`--all-selected`选择完整协议。选择保留原总表行号及task_id，不改query/参考或官方workflow。示例参数`--input-type CSV --output-type JSON --all-selected`运行原CSV→JSON；官方原文件、归档和模型参数仍按下文命令提供。不存在的协议或越界区间拒绝，不自动改成Text→JSON。
 
-新增入口仅通过4项CPU测试和代码检查，尚未新增其他协议的NPU结果；渲染/VQA仍需独立环境及合适模型，当前text-only服务不能据此声称支持。旧50题Text→JSON的源码身份继续由历史回执保留，不改写成新选择功能实跑证据。
+新增入口已完成18个其他非渲染协议各原始前三题的NPU执行与官方评分，共54条；保存的原题全部字段与固定选择一致，安装的官方Python源码与归档一致，官方评分器重算与保存分数一致，复核过程模型调用0。与历史Text→JSON全50题不重叠，合计104条唯一任务。参见[新增协议审计回执](validation/structeval-nonrender-protocols-audit-20261024.json)。渲染/VQA仍需独立隔离环境及合适模型，当前text-only服务不能据此声称支持。旧50题源码身份继续由历史回执保留，不改写成新选择功能实跑证据。
 
 - [x] StructEval原始Text→JSON前三条：task_id
   000500/000501/000502，原文件行1085–1087。官方语法/路径评分1、1、0.68，错误保留。[回执](validation/structeval-json-original-npu-20261022.json)。
 - [x] 修正后的数据包已在服务器安装，对全部50条Text→JSON原题进行准备/回查，原query一致，VQA与raw_output_metric未进入输入/注释。[组件回查](validation/structeval-provider-roundtrip-20261022.json)。此步骤模型调用0，不是额外50条推理。
 - [x] 全部50条原始Text→JSON已完成NPU执行及官方评分，平均final_eval_score为0.9616，其中3条未满分。[完整子集回执](validation/structeval-text-json-full-npu-20261022.json)。它是语法/路径分数，不是语义准确率；与前三条重叠，合计唯一任务仍为50。
-- [ ] 其他输入格式转JSON、其他输出格式、可视渲染/VQA均未验证。完整StructEval共2035条，不能把Text→JSON子集叫完整套件。
+- [x] 其余18个非渲染协议各原始前三题，共54条，完成原生执行及官方评分复核；错误分数保留，不以满分作为链路完成条件。
+- [ ] 其余18个非渲染协议各剩47题，共846题尚未执行；可视渲染/VQA的1085题未验证。完整StructEval共2035条，当前104条不能称完整套件或完整非渲染测试。
 - [ ] PAIO-JSON的语义准确率：未提供独立gold；保持不评估，不因合法JSON或schema通过而打勾。
 
 ## 原始数据和官方实现
@@ -23,7 +24,7 @@ parquet完整SHA校验。该文件在数据卡中对应test split，不依据文
 官方仓库作者推荐的LiteLLM分支固定提交
 `7781339a5b033965ac664133543ebd10773643dd`，完整源码归档SHA与安装Python源码一致。官方`build_prompt(query)`加原有代码标记，官方workflow执行生成、语法解析和路径评分；不是自行追加新提示/答案或自制评分器。
 
-使用现有Qwen3.5-27B、双卡910B2、BF16/graph、本地NPU服务，text-only/nonthinking配置。原官方workflow的temperature=0、max_tokens=None，concurrency=1、render_concurrency=1，关闭重试并设置请求timeout300秒。只对非渲染JSON调用原生语法/路径检查，不调用VLM或外部judge；这一分数不等同通用语义正确率。
+使用现有Qwen3.5-27B、双卡910B2、BF16/graph、本地NPU服务，text-only/nonthinking配置。原官方workflow的temperature=0、max_tokens=None，concurrency=1、render_concurrency=1，关闭重试并设置请求timeout300秒。对所选非渲染格式调用官方语法/路径检查，不调用VLM或外部judge；这一分数不等同通用语义正确率。
 
 ## 输入与评分隔离修正
 
