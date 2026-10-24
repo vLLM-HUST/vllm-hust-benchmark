@@ -8,6 +8,35 @@ ROOT = Path(__file__).resolve().parents[1]
 DOCS = ROOT / "docs/workload-data"
 
 
+def test_science_verified_task_metadata_and_source_are_not_native_execution():
+    receipt = json.loads(
+        (DOCS / "validation/scienceagentbench-cpu-preparation-20261024.json").read_text(
+            "utf-8"
+        )
+    )
+    assert receipt["dataset_split"] == "verified"
+    assert receipt["all_original_rows_fields_and_separation_equal"] == 102
+    assert (
+        receipt["prepared_original_tasks"]
+        == receipt["prepare_resolve_roundtrips"]
+        == 102
+    )
+    assert receipt["original_reference_files_kept_scorer_side"]
+    assert receipt["native_source_original_blob_verified"]
+    assert len(receipt["native_source_files"]) == 30
+    assert receipt["legacy_validation_split_entrypoints"] == [
+        "run_infer.py",
+        "run_eval.py",
+    ]
+    assert not receipt["verified_benchmark_archive_acquired"]
+    assert not receipt["source_requirements_installed_or_compatible_verified"]
+    assert not receipt["sandbox_execution_verified"]
+    assert not receipt["native_source_modified"]
+    assert receipt["model_calls"] == receipt["native_tasks_executed_or_scored"] == 0
+    assert not receipt["generated_or_reference_programs_executed"]
+    assert not receipt["source_completion_checked"]
+
+
 def test_tracelab_original_metadata_is_not_parent_tasks_or_full_index():
     receipt = json.loads(
         (DOCS / "validation/tracelab-cpu-audit-20261024.json").read_text("utf-8")

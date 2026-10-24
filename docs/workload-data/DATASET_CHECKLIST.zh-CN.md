@@ -197,6 +197,10 @@ TB；服务器/data约1.42TB可用，未缩小语料。ChartQA当前两卡主机
 
 ### 不占卡准备进展
 
+- [x] SCIENCEAGENTBENCH：原verified版102题的全部输入、参考及环境字段、全量索引和102条回查核验通过；30份官方执行/评分及依赖源码已固定并核对Git
+  blob，未执行代码。[准备回执](validation/scienceagentbench-cpu-preparation-20261024.json)。
+- [ ] SCIENCEAGENTBENCH：verified配套科学数据/参考程序/评价脚本、隔离运行环境、本地模型及辅助评分模型未就绪；发现两个上游直接入口仍读旧validation
+  split，不能与当前verified版混跑，不勾原生通过。
 - [x] TAUBENCH/τ²：2285个原telecom任务与引用全量准备/预检，新增3个原ACTION类任务公共引用交接预检通过；补齐显式ID/全量入口，125包实测环境快照和pip
   check通过，模型调用0。[CPU回执](validation/tau2-readiness-cpu-20261024.json)。
 - [ ] TAUBENCH/τ²：从零重装、修改后入口的原生执行/评分及研究侧工件联调未完成；原3题不重跑、不算全2285题通过。当前模型服务恢复失败，NPU队列未恢复；CPU准备继续。
@@ -212,6 +216,19 @@ TB；服务器/data约1.42TB可用，未缩小语料。ChartQA当前两卡主机
 - [ ] LONGWRITER：修改后入口新实跑及长度/语义质量评估未完成；本来源是作者训练语料，不冒充LongBench-Write评测。
 - [x] LONGBENCH/Qasper：固定CI数据包、200条原始数据/参考、全量准备索引及首尾6条回查完成；旧三题原生请求和官方评分已离线复核；补齐原始区间/全量入口及依赖说明。[CPU回执](validation/longbench-qasper-cpu-audit-20261024.json)。
 - [ ] LONGBENCH/Qasper：修改后入口的新原生任务验证、剩余197题执行及研究端精确工件接通尚未完成。准备项打勾不增加来源完成总数，等待研究线程归还NPU窗口。
+
+#### ScienceAgentBench verified版原生链路准备
+
+数据沿用`osunlp/ScienceAgentBench@9c6e96c9e74572e979b0930ee735041cef528cb7`的原`verified`文件，102题；代码固定为`OSU-NLP-Group/ScienceAgentBench@c26e151ed601ba109dc4d35e057ff8e73fec469d`。原适配保留task_inst、domain_knowledge、dataset_folder_tree和dataset_preview；gold_program_name与eval_script_name仅作参考，其余instance/domain/源码及输出路径字段保留元数据。不要把整个envelope或参考侧直接当模型输入。
+
+原数据URL及SHA可用`workload-data catalog download-plan SCIENCEAGENTBENCH`查看。配置`{"sources":[{"source_id":"SCIENCEAGENTBENCH","data_root":"/private/ScienceAgentBench"}]}`即可用现有pipeline全量准备/回查；数据目录须保留原`data/verified-00000-of-00001.parquet`路径。本次102条均实测回查，不仅前三题，也未修改源Parquet。
+
+[发布方当前说明](https://github.com/OSU-NLP-Group/ScienceAgentBench/tree/c26e151ed601ba109dc4d35e057ff8e73fec469d)要求verified版使用配套`benchmark_verified.zip`，并明确不得在线重新分发解包数据。该包中科学数据、参考程序及原评价脚本尚未取得；预览文字不能替代真实数据文件，旧benchmark压缩包不能冒充verified修正版。
+
+原生生成入口为上游run_infer.py/agent.py，评估可使用上游`evaluation.harness.run_evaluation`容器化路径，直接Conda评估为另一官方路径。当前两份直接脚本run_infer.py和run_eval.py仍硬编码`validation`
+split；后续必须明确将生成和评估同时绑定原verified版本，并核验instance ID及配套评价脚本，不能静默运行不同split或回退main。原源码未修改，本次未执行任何生成程序或评分。
+
+环境不能写成只装一个requirements就可用：上游主Agent和科学程序评估环境分开，直接路径使用Python3.10及独立sci-agent-eval环境；任务还会配置各自的科学依赖，CodeBERT和视觉judge也是评分链路的一部分。本机有Conda命令但其环境未核验，未找到Docker；既有隔离预检未证明可安全运行生成程序。本地NPU模型、辅助评分模型、原框架模型表/上下文和loopback配置尚待适配与验证；不得在全局推理环境执行上游会卸载/同步包的评估脚本，不发默认外部付费模型请求，不删指标以凑通过。原代码与依赖文件已私有保存并校验，但未安装或冒充干净环境复现。
 
 #### TOOLACE原始语料使用入口
 
