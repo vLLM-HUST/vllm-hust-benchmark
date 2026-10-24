@@ -95,6 +95,7 @@ def prepare(configuration, output):
     output.mkdir(parents=True, exist_ok=False)
     lock = read(LOCK_PATH)
     paths = c["paths"]
+    registry_args = ["--insecure"] if c.get("image_registry_insecure", False) else []
     assert digest(paths["dataset_parquet"]) == lock["dataset"]["parquet_sha256"]
     agent_source = Path(paths["agent_source"])
     for relative, expected in lock["agent_source_files"].items():
@@ -136,7 +137,13 @@ def prepare(configuration, output):
         )
         mirror = c["image_mirror_prefix"] + uri
         raw = command(
-            [paths["crane"], "manifest", "--platform=linux/arm64", mirror],
+            [
+                paths["crane"],
+                *registry_args,
+                "manifest",
+                "--platform=linux/arm64",
+                mirror,
+            ],
             output / f"image-{index}-manifest-command.json",
         )
         image_manifest = json.loads(raw)
@@ -145,7 +152,13 @@ def prepare(configuration, output):
         )
         # crane digest reads the registry's actual selected-platform digest.
         frozen_manifest = command(
-            [paths["crane"], "digest", "--platform=linux/arm64", mirror],
+            [
+                paths["crane"],
+                *registry_args,
+                "digest",
+                "--platform=linux/arm64",
+                mirror,
+            ],
             output / f"image-{index}-digest-command.json",
         ).strip()
         image_id = image_manifest["config"]["digest"]
@@ -160,6 +173,7 @@ def prepare(configuration, output):
             command(
                 [
                     paths["crane"],
+                    *registry_args,
                     "pull",
                     "--platform=linux/arm64",
                     immutable,
