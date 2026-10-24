@@ -1,5 +1,11 @@
 # Targeted MOD original custody
 
+- [Profiler mixed research and paper projections](profiler-research/manifest.json): eight complete
+  research records and the paper workspace at the recorded source commit. PDF, TeX, logs, CSVs,
+  generated tables and figures retain original bytes and historical limitations. Archived helper
+  code is context only; maintained consumers must not execute it. G1/G4 local captures and omitted
+  runtime traces remain unavailable; preserving a narrative is not recovery of its raw inputs.
+
 - [MuxPD mixed design and TP4 goodput narratives](muxpd-documents/manifest.json): unchanged full
   documents and LICENSE. Serving tradeoffs, profiler limits, failure boundaries and methodology
   remain historical. Raw inputs reuse the existing benchmark capsules and Release archives;
