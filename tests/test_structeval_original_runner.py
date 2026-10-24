@@ -91,6 +91,29 @@ def test_nonrendering_native_audit_keeps_source_incomplete():
     assert receipt["full_source_tasks"] == 2035
 
 
+def test_completed_protocol_audit_adds_only_previously_unexecuted_rows():
+    receipt = json.loads(
+        (
+            ROOT
+            / "docs/workload-data/validation/structeval-nonrender-complete-protocols-audit-20261024.json"
+        ).read_text("utf-8")
+    )
+    protocols = receipt["completed_additional_protocols"]
+    assert protocols
+    assert all(p["new_tasks"] == 47 and p["reused_tasks"] == 3 for p in protocols)
+    assert all(len(set(p["all_original_task_ids"])) == 50 for p in protocols)
+    assert receipt["new_tasks_audited"] == 47 * len(protocols)
+    assert receipt["verified_unique_native_tasks"] == 104 + 47 * len(protocols)
+    assert receipt["audit_model_calls"] == 0
+    assert receipt["official_saved_output_rescore_equal"]
+    assert not receipt["full_source_completed"]
+    ledger = json.loads(
+        (ROOT / "docs/workload-data/dataset-validation-status.json").read_text("utf-8")
+    )["delivery_inventory"]["STRUCTEVAL"]
+    assert not ledger["checked"]
+    assert ledger["verified_unique_native_tasks"] == receipt["verified_unique_native_tasks"]
+
+
 def test_external_endpoint_refused_before_inputs(tmp_path):
     result = subprocess.run(
         [

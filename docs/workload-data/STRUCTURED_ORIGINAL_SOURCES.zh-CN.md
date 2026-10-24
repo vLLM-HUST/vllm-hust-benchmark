@@ -13,7 +13,8 @@
 - [x] 修正后的数据包已在服务器安装，对全部50条Text→JSON原题进行准备/回查，原query一致，VQA与raw_output_metric未进入输入/注释。[组件回查](validation/structeval-provider-roundtrip-20261022.json)。此步骤模型调用0，不是额外50条推理。
 - [x] 全部50条原始Text→JSON已完成NPU执行及官方评分，平均final_eval_score为0.9616，其中3条未满分。[完整子集回执](validation/structeval-text-json-full-npu-20261022.json)。它是语法/路径分数，不是语义准确率；与前三条重叠，合计唯一任务仍为50。
 - [x] 其余18个非渲染协议各原始前三题，共54条，完成原生执行及官方评分复核；错误分数保留，不以满分作为链路完成条件。
-- [ ] 其余18个非渲染协议各剩47题，共846题尚未执行；可视渲染/VQA的1085题未验证。完整StructEval共2035条，当前104条不能称完整套件或完整非渲染测试。
+- [x] CSV→JSON其余47题已完成原生执行，原题字段和官方重评分均核查一致；与此前该协议3题合计全50题。复核模型调用0，见[完整协议增量回执](validation/structeval-nonrender-complete-protocols-audit-20261024.json)。当前合计151条唯一任务；Text→JSON和CSV→JSON各自全50题，其余17个非渲染协议各3题。
+- [ ] 其余17个非渲染协议各剩47题，共799题待完成验证，固定队列仍在运行；可视渲染/VQA的1085题未验证。完整StructEval共2035条，当前151条不能称完整套件或完整非渲染测试。
 - [ ] PAIO-JSON的语义准确率：未提供独立gold；保持不评估，不因合法JSON或schema通过而打勾。
 
 ## 原始数据和官方实现
