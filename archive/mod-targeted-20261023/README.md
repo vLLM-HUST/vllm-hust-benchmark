@@ -135,6 +135,6 @@ persistent root volume with sparse checkout, not the ephemeral host workspace.
 
 # Profiler entry documentation custody
 
-`profiler-entry-docs/manifest.json` binds five unchanged README, changelog and
-research/roadmap originals. Numeric observations and historical consumer
-instructions remain historical; this does not establish current device readiness.
+`profiler-entry-docs/manifest.json` binds five unchanged README, changelog and research/roadmap
+originals. Numeric observations and historical consumer instructions remain historical; this does
+not establish current device readiness.
