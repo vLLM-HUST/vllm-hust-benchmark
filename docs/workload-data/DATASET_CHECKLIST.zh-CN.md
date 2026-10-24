@@ -197,10 +197,29 @@ TB；服务器/data约1.42TB可用，未缩小语料。ChartQA当前两卡主机
 
 ### 不占卡准备进展
 
+- [x] TOOLACE：原11300条system/历史对话、原轮次与工具描述、全量索引及首尾6条回查完成，保持历史对话资产身份。[CPU回执](validation/toolace-corpus-cpu-audit-20261024.json)。
+- [ ] TOOLACE：服务器新取固定版数据卡网络不可达，不能将目录中的预期SHA当下载验证；没有附带可执行工具环境/任务oracle，不编prompt冒充Agent原生评测，来源级继续未勾。
+- [x] JSONSCHEMABENCH：固定CI包与登记的三个原schema
+  prepare→resolve完成，旧原始请求、two-shot提示与官方validator复核一致，保留两条不符合约束的输出。[CPU回执](validation/jsonschemabench-cpu-audit-20261024.json)。
+- [ ] JSONSCHEMABENCH：其他schema子集及研究端精确工件联调未验证；不将三个登记资产称全库通过。
 - [x] LONGWRITER：固定CI数据包、6000条原始消息/独立参考、全量索引和首尾6条回查完成，旧三题响应完整性复核；区间/全量入口及环境边界补齐。[CPU回执](validation/longwriter-cpu-audit-20261024.json)。
 - [ ] LONGWRITER：修改后入口新实跑及长度/语义质量评估未完成；本来源是作者训练语料，不冒充LongBench-Write评测。
 - [x] LONGBENCH/Qasper：固定CI数据包、200条原始数据/参考、全量准备索引及首尾6条回查完成；旧三题原生请求和官方评分已离线复核；补齐原始区间/全量入口及依赖说明。[CPU回执](validation/longbench-qasper-cpu-audit-20261024.json)。
 - [ ] LONGBENCH/Qasper：修改后入口的新原生任务验证、剩余197题执行及研究端精确工件接通尚未完成。准备项打勾不增加来源完成总数，等待研究线程归还NPU窗口。
+
+#### TOOLACE原始语料使用入口
+
+来源固定为`Team-ACE/ToolACE@6bda777c88d21e5a204703c1ee45597a8fa4f734`，原`data.json`为37154735字节、11300条，SHA256为`ba12c083fca7e8da48c67ad5b895e495447da7c66e39a2e19742c082e6cb537e`。使用数据组件的`workload-data catalog download-plan TOOLACE`查看原始URL；将自行取得并校验的文件放在私有目录，不放入Git。JSON读取/准备不需要模型、工具服务或科研观测环境，数据包安装及固定工件核对见[安装说明](INSTALLATION.zh-CN.md)。
+
+```python
+from pathlib import Path
+from vllm_hust_workload_data import iter_workload
+
+for record in iter_workload("TOOLACE", data_root=Path("/private/ToolACE")):
+    original = record.task["input"]  # 原system和完整conversations，非待生成请求
+```
+
+全量准备配置为`{"sources":[{"source_id":"TOOLACE","data_root":"/private/ToolACE"}]}`，使用现有pipeline的plan/run及resolve_input入口即可。`system`中的工具描述和所有历史assistant/tool消息保留原样；`outcome_record()`为None符合资产契约，不从历史对话中虚构独立任务参考。`request_body()`明确拒绝将其当作原始API请求。后续若需预测某一轮、执行工具或评估模型，须另行声明并验证实验协议，不能把本次数据准备称作已完成这些原生流程。
 
 ## 历史抽样记录（非本轮完成总数）
 

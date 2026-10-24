@@ -63,7 +63,9 @@ schema 合法性分别记录。 `GENERATED` 不是正确性通过；HTTP 拒绝�
 - [x] whole-schema 读取适配与合成夹具 CPU 单测。
 - [x] 候选 wheel 在服务器独立安装，原始三文件逐一 bind、prepare、resolve，输入对象完全相等；此项未调用模型。
 - [x] 同一候选 wheel 回归 QuALITY 2086 问题读取/建索引及三个原始问题往返。
-- [ ] 最终 wheel 安装后原始三文件读取、prepare、消费索引往返。
+- [x] 固定CI `3f397e69`
+  数据wheel已安装并逐文件核对；原始三文件读取、bind、prepare、resolve逐对象相等，保存的发布方two-shot提示、原schema请求和官方validator重算均一致。[CPU复核](validation/jsonschemabench-cpu-audit-20261024.json)。模型及Tokenizer
+  API调用0，保留两条maxLength失败，不新增独立任务数。
 - [x] 可复用执行入口及固定环境安装文档；已在现有 NPU 服务执行相同三个任务。
 - [ ] 与研究消费端完成最终固定工件联调。
 - [ ] 完整子集及其他 schema 子集验证。
@@ -76,3 +78,5 @@ schema 合法性分别记录。 `GENERATED` 不是正确性通过；HTTP 拒绝�
 `jsonschemabench-public-runner-002`，三个任务结果与首次探测一致。 这是三个独立任务的重复执行，不累计为六个或九个独立任务。 最终 CI
 工件及消费端联调仍待完成，不能用此本地构建候选替代。 首次私有安装验证助手误将“无 outcome”假定为空对象；按公共类型契约应为 None。
 该次助手断言失败已保留，修正助手后重新验证通过，未修改生产契约或放宽输入比较。
+
+2026-10-24补充：在独立原评分环境（jsonschema4.23.0、numpy2.2.3）安装并核对指定成功CI数据工件后，上述三资产的准备及旧响应复核已完成；研究端最终工件联调仍未完成。先前候选wheel/复跑记录保留为历史，不与当前固定CI来源混用，也不把三文件验证外推到全部schema集合。等待研究窗口期间不调用模型服务、不启动新的生成。

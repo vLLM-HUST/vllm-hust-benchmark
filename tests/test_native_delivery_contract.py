@@ -8,6 +8,40 @@ ROOT = Path(__file__).resolve().parents[1]
 DOCS = ROOT / "docs/workload-data"
 
 
+def test_toolace_full_dialogue_preparation_is_not_agent_execution():
+    receipt = json.loads(
+        (DOCS / "validation/toolace-corpus-cpu-audit-20261024.json").read_text("utf-8")
+    )
+    assert receipt["all_original_rows_fields_and_dialogue_order_equal"] == 11300
+    assert receipt["prepared_original_rows"] == 11300
+    assert receipt["prepare_resolve_roundtrips"] == 6
+    assert receipt["system_tool_descriptions_preserved"]
+    assert receipt["original_request_body_conversion_refused"]
+    assert receipt["model_calls"] == receipt["native_agent_tasks_executed"] == 0
+    assert not receipt["native_task_scorer_executed"]
+    assert not receipt["publisher_card_download_verified"]
+    assert not receipt["source_completion_checked"]
+
+
+def test_schema_cpu_audit_preserves_failures_and_registered_scope():
+    receipt = json.loads(
+        (DOCS / "validation/jsonschemabench-cpu-audit-20261024.json").read_text("utf-8")
+    )
+    assert (
+        receipt["prepared_original_assets"] == receipt["saved_native_tasks_reused"] == 3
+    )
+    assert receipt["prepare_resolve_roundtrips"] == 3
+    assert receipt["audit_model_calls"] == receipt["audit_tokenizer_api_calls"] == 0
+    assert [row["original_validator_valid"] for row in receipt["checks"]] == [
+        True,
+        False,
+        False,
+    ]
+    assert receipt["original_conformance_failures_preserved"] == 2
+    assert not receipt["schema_or_prompt_rewritten"]
+    assert not receipt["full_schema_collection_validated"]
+
+
 def test_vision_weight_headers_do_not_count_as_multimodal_execution():
     receipt = json.loads(
         (
