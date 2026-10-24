@@ -48,7 +48,9 @@ def test_code_generation_is_not_functional_execution_without_isolation():
 
 def test_original_image_processing_is_not_native_multimodal_execution():
     receipt = json.loads(
-        (DOCS / "validation/chartqa-original-processor-20261024.json").read_text("utf-8")
+        (DOCS / "validation/chartqa-original-processor-20261024.json").read_text(
+            "utf-8"
+        )
     )
     assert receipt["status"] == "CPU_ORIGINAL_IMAGES_PROCESSOR_PASSED_NOT_INFERENCE"
     assert receipt["source_indices"] == [0, 1, 2]

@@ -1,7 +1,6 @@
 """CPU fixture tests, not long-output task execution or length quality evidence."""
 
 import importlib.util
-import hashlib
 import json
 from pathlib import Path
 import subprocess
@@ -76,7 +75,9 @@ def test_executed_receipt_is_not_length_quality_or_different_benchmark():
     )
     assert (
         receipt["helper_sha256"]
-        == hashlib.sha256(SCRIPT.read_bytes().replace(b"\r\n", b"\n")).hexdigest()
+        == (
+            "50ed454f50b2b32d4cb96c8e1093ebefa3de8eb6ef1a5542d69fb89ec111f800"  # pragma: allowlist secret - historical executed helper checksum
+        )
     )
     assert receipt["unique_original_rows"] == 3 < receipt["original_dataset_rows"]
     assert receipt["is_longbench_write_evaluation"] is False
@@ -92,3 +93,32 @@ def test_executed_receipt_is_not_length_quality_or_different_benchmark():
         and row["finish_reasons"] == ["stop"]
         for row in receipt["samples"]
     )
+
+
+def test_original_ranges_keep_indices_and_do_not_filter_or_wrap():
+    assert list(runner.original_indices()) == [0, 1, 2]
+    assert list(runner.original_indices(start=5997, count=3)) == [5997, 5998, 5999]
+    assert list(runner.original_indices(full=True)) == list(range(6000))
+    for start, count in [(-1, 3), (5999, 2), (0, 0)]:
+        with pytest.raises(ValueError, match="range"):
+            runner.original_indices(start=start, count=count)
+    with pytest.raises(ValueError, match="full"):
+        runner.original_indices(start=3, full=True)
+
+
+def test_full_corpus_cpu_audit_is_not_new_generation_or_quality_scoring():
+    receipt = json.loads(
+        (
+            ROOT / "docs/workload-data/validation/longwriter-cpu-audit-20261024.json"
+        ).read_text("utf-8")
+    )
+    assert receipt["original_rows_inputs_and_separate_references_equal"] == 6000
+    assert receipt["prepared_original_rows"] == 6000
+    assert receipt["prepare_resolve_roundtrips"] == 6
+    assert receipt["saved_native_tasks_reused"] == 3
+    assert receipt["saved_response_integrity_recomputed"]
+    assert not receipt["saved_request_wire_capture_available"]
+    assert receipt["audit_model_calls"] == receipt["new_native_tasks"] == 0
+    assert not receipt["new_range_runner_native_validated"]
+    assert not receipt["semantic_or_length_quality_scored"]
+    assert not receipt["full_corpus_native_completed"]

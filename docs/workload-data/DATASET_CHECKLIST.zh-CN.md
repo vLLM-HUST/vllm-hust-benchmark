@@ -197,6 +197,8 @@ TB；服务器/data约1.42TB可用，未缩小语料。ChartQA当前两卡主机
 
 ### 不占卡准备进展
 
+- [x] LONGWRITER：固定CI数据包、6000条原始消息/独立参考、全量索引和首尾6条回查完成，旧三题响应完整性复核；区间/全量入口及环境边界补齐。[CPU回执](validation/longwriter-cpu-audit-20261024.json)。
+- [ ] LONGWRITER：修改后入口新实跑及长度/语义质量评估未完成；本来源是作者训练语料，不冒充LongBench-Write评测。
 - [x] LONGBENCH/Qasper：固定CI数据包、200条原始数据/参考、全量准备索引及首尾6条回查完成；旧三题原生请求和官方评分已离线复核；补齐原始区间/全量入口及依赖说明。[CPU回执](validation/longbench-qasper-cpu-audit-20261024.json)。
 - [ ] LONGBENCH/Qasper：修改后入口的新原生任务验证、剩余197题执行及研究端精确工件接通尚未完成。准备项打勾不增加来源完成总数，等待研究线程归还NPU窗口。
 
