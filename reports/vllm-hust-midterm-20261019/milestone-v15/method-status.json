@@ -9,7 +9,7 @@
     "source_docx_available_in_this_repository": false,
     "scope": "Exact Project 4 extract; source DOCX digest supplied by document owner"
   },
-  "status": "recalculation-pending-not-determined",
+  "status": "compute-measured-reference-pending",
   "effective_compute_formula": "C = F / (k * T * 10^12)",
   "effective_compute_unit": "TFLOPS per participating chip",
   "reference_effective_compute_formula": "C_reference = F / (k * T_reference * 10^12)",
@@ -19,14 +19,15 @@
   "equivalent_threshold": "C >= 0.5 * C_reference",
   "threshold_percent": 50,
   "current": {
-    "effective_flops": null,
-    "participating_chips": null,
+    "effective_flops": 1812905151088034,
+    "participating_chips": 2,
     "matched_uninstrumented_seconds": null,
     "reference_seconds": null,
-    "effective_tflops_per_chip": null,
+    "effective_tflops_per_chip": 7.1042207644080255,
     "reference_effective_tflops_per_chip": null,
     "efficiency_percent": null,
-    "passed": null
+    "passed": null,
+    "matched_synchronized_seconds": 127.59352582134306
   },
   "requirements": {
     "effective_flops_excludes": [
@@ -41,7 +42,8 @@
       "global max(compute, HBM, communication)",
       "reverse fitting to measured B0 or B1 time"
     ],
-    "comparison": "Same reference method; separately derive reference time when precision, workload or execution path differs. Efficiency ratios under different references are not performance gains."
+    "comparison": "Same reference method; separately derive reference time when precision, workload or execution path differs. Efficiency ratios under different references are not performance gains.",
+    "timing_refinement": "This run uses predeclared host-only prefill aggregates and native detailed acceptance statistics, with all costs retained inside synchronized T. It is not strictly uninstrumented. Same-run F and C are reported under the disclosed basic-operation convention; no efficiency or attainment until the independent reference is complete."
   },
   "fair_comparison": {
     "fixed_b0": {
@@ -75,9 +77,8 @@
     "quality_and_performance_bind_actual_configuration": true
   },
   "pending_evidence": [
-    "Validated effective-work mapping including accepted draft attribution",
-    "Associate the measured 120.65347687713802-second synchronized B1 envelope with valid effective F and same-workload reference; do not substitute the older ~62-second run",
-    "Independent reference with actual dependencies, overlap and applicability"
+    "Complete independent whole-model reference, actual dependencies and applicability",
+    "Quantify reference-model uncertainty without fitting B0/B1 time or selecting faster samples"
   ],
   "existing_audit_path": "reports/vllm-hust-midterm-20261019/m01-recovery/method-v526-20261023/README.md",
   "historical_instrumented": {
@@ -101,5 +102,18 @@
     "synchronized_seconds": 120.65347687713802,
     "effective_flops": null,
     "efficiency_percent": null
+  },
+  "current_measurement": {
+    "run_id": "timing-b1-storage-r1",
+    "evidence_path": "reports/vllm-hust-midterm-20261019/m01-recovery/storage-timing-20261024/arithmetic.json",
+    "arithmetic_convention": "V1.5 2MNK, activated top8 experts, actual causal structure, necessary draft KV/hidden closure. Basic float additions/subtractions/multiplications and matrix multiply-adds; SFUs/comparisons/division reported separately without invented equivalents.",
+    "implementation_variant": "owned-optimistic-causal-draft/v1",
+    "strict_uninstrumented": false,
+    "host_prefill_counting": true,
+    "native_detailed_acceptance": true,
+    "all_measurement_cost_retained": true,
+    "device_journals": false,
+    "model_profiler": false,
+    "replaces_prior_best_b1_performance": false
   }
 }
