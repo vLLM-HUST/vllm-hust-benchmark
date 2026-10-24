@@ -11,6 +11,31 @@ import pytest
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def test_gsm8k_delivery_preserves_native_scope_and_no_rerun_boundary():
+    docs = ROOT / "docs/workload-data"
+    ledger = json.loads((docs / "dataset-validation-status.json").read_text("utf-8"))
+    item = ledger["delivery_inventory"]["GSM8K"]
+    receipt = json.loads((ROOT / item["delivery_receipt"]).read_text("utf-8"))
+    cumulative = json.loads(
+        (docs / "validation" / receipt["native_execution_receipt"]).read_text("utf-8")
+    )
+    assert item["checked"] and item["status"] == "AVAILABLE"
+    assert (
+        receipt["verified_unique_original_tasks"]
+        == cumulative["cumulative"]["unique_task_count"]
+        == 204
+    )
+    assert (
+        receipt["available_original_tasks"] == cumulative["original_test_size"] == 1319
+    )
+    assert receipt["source_checkbox_eligible"]
+    assert not receipt["full_suite_validated"]
+    assert not receipt["pooled_accuracy_reported"]
+    assert receipt["new_model_calls"] == 0
+    assert (ROOT / receipt["public_runner"]).is_file()
+    assert (ROOT / receipt["documentation"]).is_file()
+
+
 def test_arc_native_tail_receipt_covers_both_suites_and_actual_ids():
     receipt = json.loads(
         (
