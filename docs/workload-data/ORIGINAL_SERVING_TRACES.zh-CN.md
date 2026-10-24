@@ -7,18 +7,32 @@
 
 ## TraceLab：原调用元数据与官方合成会话回放
 
-固定发布`uw-syfi/TraceLab@v0.0.2`的`syfi_coding_trace.jsonl.gz`共100939722字节，SHA256为`11ce51ec0a25e3d1d95b025bca2f7d1647e47571eb7cc968acd5fc64d4b4fb65`。现已在服务器逐条对比665453条原记录的全部字段与顺序，包括session/round标识、可选turn标识、tokens、timing_events和tools。它们原样位于`record.replay["annotations"]`；task.input为空、outcome为None，request_body拒绝伪造请求。665453是原文件行数，不是独立父任务或成功任务数。仅前三条prepare→resolve已核查，全量SQLite索引未建；未运行科研分析或模型。
+固定发布`uw-syfi/TraceLab@v0.0.2`的`syfi_coding_trace.jsonl.gz`共100939722字节，SHA256为`11ce51ec0a25e3d1d95b025bca2f7d1647e47571eb7cc968acd5fc64d4b4fb65`。现已在服务器逐条对比665453条原记录的全部字段与顺序，包括session/round标识、可选turn标识、tokens、timing_events和tools。它们原样位于`record.replay["annotations"]`；task.input为空、outcome为None，request_body拒绝伪造请求。665453是原文件行数，不是独立父任务或成功任务数。随后以固定CI工件完成全部665453条SQLite索引，并核验原行0、1、2、665450、665451、665452的prepare→resolve，见[全量索引回执](validation/tracelab-full-index-20261024.json)。未运行科研分析或模型，历史三条准备回执不回写。
 
 [固定发布源码](https://github.com/uw-syfi/TraceLab/tree/61fea8f97277d0aa247cc2e4c7e31f90ed2bea1c)中的20份replay、示例及许可文件已在服务器取得，逐文件Git
 blob身份一致，不在本仓重新分发源码、原数据或研究分析模块。[数据审计](validation/tracelab-cpu-audit-20261024.json)与[源码准备回执](validation/tracelab-official-replay-preparation-20261024.json)分别记录，构建/dry-run/回放均未运行。原数据按发布方[数据许可](https://github.com/uw-syfi/TraceLab/blob/61fea8f97277d0aa247cc2e4c7e31f90ed2bea1c/LICENSE-DATASET.md)标为CC-BY-4.0，代码为Apache-2.0，二者不能混用；使用时保留来源与归属，不公开本地原始载荷。
 
 ### 官方入口与尚缺的运行条件
 
+元数据准备可直接使用已安装的数据组件。先将官方原压缩文件放在独立私有目录，建立 `tracelab-inputs.json`（不填 `limit` 即全量）：
+
+```json
+{"sources": [{"source_id": "TRACELAB", "data_root": "/private/original-tracelab", "files": ["syfi_coding_trace.jsonl.gz"]}]}
+```
+
+```sh
+python -I -m vllm_hust_workload_data.pipeline plan --config tracelab-inputs.json
+python -I -m vllm_hust_workload_data.pipeline run --config tracelab-inputs.json --output /private/tracelab-index-new
+```
+
+输出须使用不存在的新目录，并与原数据目录分离。索引不替代原文件；下游回查还需保留原文件和绑定版本。此入口只准备调用元数据，不调用模型或启动官方回放器。安装及工件核验见[安装说明](INSTALLATION.zh-CN.md)。
+
 官方[session_runner](https://github.com/uw-syfi/TraceLab/blob/61fea8f97277d0aa247cc2e4c7e31f90ed2bea1c/replay/README.md)按会话顺序提交token-id
 completions，用独立文本池模拟输入；每轮等响应及工具等待后推进。它不是原私有prompt或真实工具执行。官方[CSV准备器](https://github.com/uw-syfi/TraceLab/blob/61fea8f97277d0aa247cc2e4c7e31f90ed2bea1c/artifacts/trace_facts/csv_export/README.md)还会做发布方定义的会话分组、排序、长度下限处理和带种子的合成到达；这些转换参数必须记录，不能称原始请求时间。本仓不复制图表、特征或缓存研究分析。
 
-当前服务器未找到cargo/rustc。官方转换器依赖的`syfi_coding_trace.duckdb`也尚未取得（发布方v0.0.2资产160182272字节、预期SHA256
-`a7bab286bc640844560850965ccf47975cf66407154132abaab90f27ec9be744`；此值是发布方摘要，不是本机下载校验）。另需独立取得文本池和模型tokenizer；Rust锁定依赖、文本池及模型服务兼容性均未验证，不写成环境已就绪。
+当前服务器未找到cargo/rustc。官方转换器依赖的`syfi_coding_trace.duckdb`现已由官方GitHub Release
+API资产488289840直接流式传至服务器私有目录，未在本地保存数据文件。160182272字节及SHA256
+`a7bab286bc640844560850965ccf47975cf66407154132abaab90f27ec9be744`均与发布方摘要一致，见[原DuckDB资产回执](validation/tracelab-duckdb-original-20261024.json)。目前只核验原始资产，尚未打开数据库或执行官方CSV转换。另需独立取得文本池和模型tokenizer；Rust锁定依赖、文本池及模型服务兼容性均未验证，不写成环境已就绪。
 
 满足上述条件后，在固定版上游目录按原入口构建和预检：
 

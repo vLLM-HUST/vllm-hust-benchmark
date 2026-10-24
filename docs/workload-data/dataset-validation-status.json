@@ -1321,9 +1321,12 @@
       "delivery_receipt": null,
       "cpu_field_audit": "docs/workload-data/validation/tracelab-cpu-audit-20261024.json",
       "official_replay_preparation": "docs/workload-data/validation/tracelab-official-replay-preparation-20261024.json",
+      "official_duckdb_asset_receipt": "docs/workload-data/validation/tracelab-duckdb-original-20261024.json",
+      "full_index_receipt": "docs/workload-data/validation/tracelab-full-index-20261024.json",
+      "full_original_metadata_index_checked": true,
       "original_field_audit_checked": true,
       "non_npu_preparation_checked": false,
-      "blocker": "All665453 original invocation rows and field/order fidelity audited; only three rows indexed/resolved, full index pending. Official pinned Rust replay source acquired and blob-verified, but cargo/rustc absent, build/dry-run/replay not executed. Official synthetic-session CSV conversion also requires unacquired DuckDB asset; text pool/tokenizer and mandatory cache-detail probe remain unvalidated. No raw prompts or parent-task count fabricated.",
+      "blocker": "All665453 original invocation rows field/order audited and fully indexed; six fixed first/last positions resolved using installed fixed CI component. Official DuckDB release asset acquired and publisher SHA/size verified, but not opened or converted. Official pinned Rust replay source acquired and blob-verified, but cargo/rustc absent, build/dry-run/replay not executed. Text pool/tokenizer and mandatory cache-detail probe remain unvalidated. No raw prompts or parent-task count fabricated.",
       "license_review": {
         "source_commit": "61fea8f97277d0aa247cc2e4c7e31f90ed2bea1c",
         "dataset_license": "CC-BY-4.0",

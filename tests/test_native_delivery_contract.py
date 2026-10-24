@@ -51,6 +51,32 @@ def test_tracelab_original_metadata_is_not_parent_tasks_or_full_index():
     assert not receipt["source_completion_checked"]
 
 
+def test_tracelab_duckdb_asset_acquisition_is_not_conversion_or_replay():
+    receipt = json.loads(
+        (DOCS / "validation/tracelab-duckdb-original-20261024.json").read_text("utf-8")
+    )
+    assert receipt["asset_id"] == 488289840
+    assert receipt["asset_bytes_verified"] == 160182272
+    assert not receipt["duckdb_open_or_csv_conversion_verified"]
+    assert not receipt["native_replay_executed"]
+    assert receipt["model_calls"] == 0
+    assert not receipt["source_completion_checked"]
+    assert not receipt["raw_payloads_public"]
+
+
+def test_tracelab_full_metadata_index_is_not_native_replay():
+    receipt = json.loads(
+        (DOCS / "validation/tracelab-full-index-20261024.json").read_text("utf-8")
+    )
+    assert receipt["prepared_rows"] == 665453
+    assert receipt["full_source_index_prepared"]
+    assert receipt["prepare_resolve_roundtrips"] == 6
+    assert receipt["fixed_original_positions"] == [0, 1, 2, 665450, 665451, 665452]
+    assert receipt["model_request_rendering_refused"]
+    assert receipt["model_calls"] == receipt["native_parent_tasks_executed"] == 0
+    assert not receipt["source_completion_checked"]
+
+
 def test_tracelab_official_replay_sources_are_not_build_or_runtime_evidence():
     receipt = json.loads(
         (

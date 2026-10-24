@@ -197,7 +197,8 @@ TB；服务器/data约1.42TB可用，未缩小语料。ChartQA当前两卡主机
 
 ### 不占卡准备进展
 
-- [x] LONGBENCH_V2：补齐本地原生入口的 `/v1` 基地址校验；服务器 CPU 参数/历史回执回归15项通过，模型调用0。历史三题执行结果保持不变，本项不代表全503题或修改后入口已完成NPU复验。
+- [x] LONGBENCH_V2：补齐本地原生入口的 `/v1` 基地址校验；服务器 CPU
+  参数/历史回执回归15项通过，模型调用0。历史三题执行结果保持不变，本项不代表全503题或修改后入口已完成NPU复验。
 - [x] SCIENCEAGENTBENCH：原verified版102题的全部输入、参考及环境字段、全量索引和102条回查核验通过；30份官方执行/评分及依赖源码已固定并核对Git
   blob，未执行代码。[准备回执](validation/scienceagentbench-cpu-preparation-20261024.json)。
 - [ ] SCIENCEAGENTBENCH：verified配套科学数据/参考程序/评价脚本、隔离运行环境、本地模型及辅助评分模型未就绪；发现两个上游直接入口仍读旧validation
@@ -207,7 +208,8 @@ TB；服务器/data约1.42TB可用，未缩小语料。ChartQA当前两卡主机
 - [ ] TAUBENCH/τ²：从零重装、修改后入口的原生执行/评分及研究侧工件联调未完成；原3题不重跑、不算全2285题通过。当前模型服务恢复失败，NPU队列未恢复；CPU准备继续。
 - [x] TRACELAB：原压缩文件SHA、665453条调用元数据全字段/顺序核查及前三条索引回查完成；20份官方回放源码/示例/许可文件已在服务器取得并逐文件核对Git
   blob。[数据回执](validation/tracelab-cpu-audit-20261024.json)、[官方入口准备](validation/tracelab-official-replay-preparation-20261024.json)。
-- [ ] TRACELAB：全量索引、Rust工具链与锁定构建、官方DuckDB→CSV、独立文本池及真实回放未完成。官方工具是合成文本会话驱动，不是原私有请求重放；来源继续未勾，运行边界见[服务轨迹说明](ORIGINAL_SERVING_TRACES.zh-CN.md)。
+- [x] TRACELAB：服务器全665453条原元数据索引、首尾6条回查完成；官方DuckDB资产直接流式传至服务器并核验发布SHA及字节数，本地未保存数据。见[索引回执](validation/tracelab-full-index-20261024.json)及[资产回执](validation/tracelab-duckdb-original-20261024.json)。
+- [ ] TRACELAB：Rust工具链与锁定构建、官方DuckDB→CSV、独立文本池及真实回放未完成。官方工具是合成文本会话驱动，不是原私有请求重放；来源继续未勾，运行边界见[服务轨迹说明](ORIGINAL_SERVING_TRACES.zh-CN.md)。
 - [x] TOOLACE：原11300条system/历史对话、原轮次与工具描述、全量索引及首尾6条回查完成，保持历史对话资产身份。[CPU回执](validation/toolace-corpus-cpu-audit-20261024.json)。
 - [ ] TOOLACE：服务器新取固定版数据卡网络不可达，不能将目录中的预期SHA当下载验证；没有附带可执行工具环境/任务oracle，不编prompt冒充Agent原生评测，来源级继续未勾。
 - [x] JSONSCHEMABENCH：固定CI包与登记的三个原schema
