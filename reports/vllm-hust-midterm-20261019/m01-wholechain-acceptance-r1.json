@@ -1,0 +1,59 @@
+{
+  "schema": "m01-wholechain-acceptance-freeze/v1",
+  "status": "engineering_criteria_frozen_pending_exact_execution_manifest_review",
+  "authority": "Human explicitly delegated reasonable numeric criteria selection on 2026-10-24; existing authorization covers necessary measurement and publication. This is a new project implementation rule, not a quotation or external approval of the original guideline.",
+  "scope": "Qwen3.5-35B-A3B BF16 TP2 MMLU-Pro fixed C200/H200, corrected KV-only independent reference and current corrected B1",
+  "reference": {
+    "kind": "independently_executed_empirical_wholechain_capability_not_theoretical_or_global_upper_bound",
+    "implementation": "recovered-corrected-kv-only/v1",
+    "C_window": "own_F / (2 * own_T_seconds * 1e12)",
+    "C_ref": "median(C_C1, C_C2, C_C3)",
+    "T_ref_i": "own_F_i / (2 * C_ref * 1e12)",
+    "eta_percent_i": "100 * own_C_i / C_ref",
+    "eta_target_percent": 90,
+    "no_clipping_or_denominator_retuning": true
+  },
+  "order": ["Q_corrected_KV_C200_max8192", "Q_current_corrected_B1_C200_max8192", "reference_C200_1_max256", "reference_C200_2_max256", "reference_C200_3_max256", "reference_H200_max256"],
+  "total_windows": 6,
+  "total_requests": 1200,
+  "quality": {
+    "reuse_official018_B0_correct": 151,
+    "denominator": 200,
+    "minimum_correct_for_each_new_arm": 151,
+    "maximum_failed_requests": 0,
+    "rule": "Use existing C200 quality inputs/order, scorer, template, sampling and EOS contract. max8192 in both new quality arms. Actual implementation and resource identities must bind to the corresponding performance arm. No adjacent-source score transfer.",
+    "interpretation": "No decrease in this fixed subset point estimate; not a statistical non-inferiority proof or a full-corpus claim.",
+    "reason": "No task-quality degradation budget was supplied; do not introduce one merely to admit an optimization."
+  },
+  "service": {
+    "absolute_latency_slo_claim": false,
+    "maximum_failed_requests": 0,
+    "startup_deadline_seconds": 3600,
+    "performance_client_deadline_seconds": 1800,
+    "quality_client_deadline_seconds": 7200,
+    "rule": "Retain observed latency distributions; unavailable token-level timings stay unavailable. Deadlines are execution safety limits, not latency acceptance SLOs."
+  },
+  "repeatability": {
+    "valid_calibration_windows": 3,
+    "maximum_range_over_median": 0.05,
+    "reason": "A 5% full-range limit bounds repeat instability of the reported empirical reference; it is a deterministic engineering screen, not a confidence interval."
+  },
+  "applicability": {
+    "maximum_absolute_H_C_relative_C_deviation": 0.10,
+    "maximum_prefill_or_decode_effective_F_share_difference_percentage_points": 5,
+    "maximum_effective_F_per_actual_output_token_relative_deviation": 0.05,
+    "workload_rule": "Preserve C/H selection, category counts and input length bins. Compute C composition from pooled calibration ownF and actual token totals. Compare H composition to C; separately check B0/B1 composition against C before assigning a common reference. Use the same unambiguous necessary-work accounting categories, not implementation overhead or rejected draft work.",
+    "reason": "10% permits limited workload-induced variation beyond 5% repeat instability; separate work-composition gates prevent matching throughput alone from establishing applicability. None establishes equivalence outside this declared scope.",
+    "on_failure": "Keep all own C results and failure evidence; no common-reference attainment claim."
+  },
+  "execution": {
+    "attempts_per_window": 1,
+    "fresh_service_results_and_six_caches_per_window": true,
+    "first_window_integrates_identity_graph_hook_and_accounting_checks": true,
+    "separate_qualification_probe": false,
+    "keep_all_measurement_cost_in_T": true,
+    "invalid_stop": "First quality failure, runtime failure, source drift, missing ownF/T evidence, preemption, resource or cache contamination stops remaining windows. Slow valid results are retained; a stability/applicability failure is not a reason to replace a run. Any future retry requires a separately versioned plan and preserved failed evidence.",
+    "device_execution_permitted_by_this_file_alone": false
+  },
+  "change_control": "Freeze before new device results. Later scope changes require a prospective version and rationale; never change thresholds to obtain 90% or silently reevaluate prior outcomes."
+}
