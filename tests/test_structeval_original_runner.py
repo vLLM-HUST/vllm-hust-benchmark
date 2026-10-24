@@ -111,9 +111,20 @@ def test_completed_protocol_audit_adds_only_previously_unexecuted_rows():
         (ROOT / "docs/workload-data/dataset-validation-status.json").read_text("utf-8")
     )["delivery_inventory"]["STRUCTEVAL"]
     assert not ledger["checked"]
+    # The earlier audit is immutable; current counts include a separate,
+    # explicitly linked incremental checkpoint rather than rewriting history.
+    checkpoint = json.loads(
+        (ROOT / ledger["latest_completed_protocols_checkpoint"]).read_text("utf-8")
+    )
+    assert (
+        checkpoint["previous_unique_original_tasks_reused"]
+        == receipt["verified_unique_native_tasks"]
+    )
+    assert checkpoint["new_unique_original_tasks_audited"] == 141
     assert (
         ledger["verified_unique_native_tasks"]
-        == receipt["verified_unique_native_tasks"]
+        == checkpoint["verified_unique_native_tasks"]
+        == 480
     )
     held = receipt.get("held_native_exit_evidence")
     if held:
