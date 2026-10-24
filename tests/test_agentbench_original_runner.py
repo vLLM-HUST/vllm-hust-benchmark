@@ -35,6 +35,40 @@ def test_original_group_preparation_does_not_claim_new_native_execution():
     assert receipt["model_calls"] == receipt["native_tasks_executed_in_this_step"] == 0
 
 
+def test_completed_group_receipt_matches_executed_runner_not_whole_suite():
+    receipt = json.loads(
+        (
+            ROOT
+            / "docs/workload-data/validation/agentbench-original-complete-groups-audit-20261024.json"
+        ).read_text("utf-8")
+    )
+    groups = receipt["completed_groups"]
+    assert groups
+    current_sha = hashlib.sha256(
+        SCRIPT.read_bytes().replace(b"\r\n", b"\n")
+    ).hexdigest()
+    for group in groups:
+        assert group["helper_sha256"] == current_sha
+        assert (
+            group["official_rescore_equal"] and group["original_episode_assets_equal"]
+        )
+        assert len(group["native_tasks"]) == group["new_native_tasks"]
+        for task in group["native_tasks"]:
+            assert task["model_calls"] > 0
+            assert task["reward"] in (0, 1)
+        overall = group["official_overall_including_reused"]["overall"]
+        assert (
+            overall["total"]
+            == overall["pass"] + overall["wrong"]
+            == group["total_original_tasks"]
+        )
+    assert receipt["verified_unique_native_tasks"] == 3 + sum(
+        g["new_native_tasks"] for g in groups
+    )
+    assert receipt["audit_model_calls"] == 0
+    assert not receipt["full_agentbench_suite_completed"]
+
+
 @pytest.fixture(autouse=True)
 def optional_data_provider_source(monkeypatch):
     # The root package deliberately does not require the optional data wheel.
