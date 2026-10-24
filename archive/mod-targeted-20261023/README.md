@@ -93,6 +93,10 @@ acceptance or a serving-performance claim.
   boundaries remain unchanged; document custody does not recover missing raw runs or qualify new
   hardware results.
 
+- [KV Arrival School 0.28 mixed original](kv-school-document/manifest.json): complete historical
+  adapter/screen document. Existing benchmark raw requests and summary are reused, not remeasured;
+  recompute admission does not imply partial reuse or task-accuracy qualification.
+
 Source copies may be removed only after remote fixed-commit readback and per-file length/SHA256
 verification, and after updating their consumers. Other historical collections, missing local inputs
 and installation distributions are separate queues, not declared migrated by these capsules.
