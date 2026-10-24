@@ -8,6 +8,43 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def test_gpqa_fixed_artifact_and_native_main_do_not_hide_skipped_task():
+    directory = ROOT / "docs/workload-data"
+    ledger = json.loads(
+        (directory / "dataset-validation-status.json").read_text("utf-8")
+    )
+    row = ledger["delivery_inventory"]["GPQA"]
+    fixed = json.loads(
+        (ROOT / row["fixed_ci_research_handoff_receipt"]).read_text("utf-8")
+    )
+    main = json.loads((ROOT / row["main_native_audit"]).read_text("utf-8"))
+    publisher = json.loads(
+        (ROOT / row["publisher_py39_verification_receipt"]).read_text("utf-8")
+    )
+    assert fixed["final_ci_artifact_verified"]
+    assert fixed["installed_payloads_equal"] == 34
+    assert fixed["raw_records_all_fields_and_original_permutation_verified"] == 1192
+    assert (
+        fixed["research_index_import_rows"]
+        == fixed["research_direct_prepare_resolve_rows"]
+        == 9
+    )
+    assert main["completed_generations"] == 447
+    assert (
+        main["actual_new_model_requests"]
+        + main["byte_equivalent_previous_requests_reused"]
+        == 447
+    )
+    assert main["publisher_skipped_original_offsets"] == [69]
+    assert not main["source_checkbox_eligible"]
+    assert publisher["pandas"] == "1.5.2" and publisher["new_model_calls"] == 0
+    assert publisher["python"].startswith("3.9.")
+    if row["checked"]:
+        delivery = json.loads((ROOT / row["delivery_receipt"]).read_text("utf-8"))
+        assert delivery["all_original_question_positions_have_native_model_response"]
+        assert delivery["source_checkbox_eligible"]
+
+
 def test_ruler_delivery_requires_native_metrics_and_final_artifact_handoff():
     folder = ROOT / "docs/workload-data"
     ledger = json.loads((folder / "dataset-validation-status.json").read_text("utf-8"))

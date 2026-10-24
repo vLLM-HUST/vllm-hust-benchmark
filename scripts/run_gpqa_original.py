@@ -1,6 +1,8 @@
 """Original GPQA zero-shot task formatting, seeded choices and answer parser.
 
-Preserves publisher system instruction, 1000-token budget and index69 skip.
+Preserves publisher system instruction, 1000-token budget and default index69
+skip. Explicit --include-index69 executes that unchanged original task as a
+separate compatibility profile; never pretend the publisher loop did so.
 Only model transport changes to a declared local served model. This is not the
 publisher GPT-4 baseline or the retrieval/CoT/self-consistency protocols.
 """
@@ -141,7 +143,10 @@ def run(args):
         "seed": args.seed,
         "selected_original_offsets": offsets,
         "generation_budget": budget,
-        "publisher_index69_skip_retained": True,
+        "publisher_index69_skip_retained": not getattr(args, "include_index69", False),
+        "index69_compatibility": "EXECUTE_UNCHANGED_ORIGINAL_ROW_SKIPPED_BY_PUBLISHER_LOOP"
+        if getattr(args, "include_index69", False)
+        else None,
         "status": "GENERATING",
         "completed_generations": 0,
         "correct": 0,
@@ -240,7 +245,7 @@ def run(args):
         fill_cache()
         for offset in offsets:
             example = examples[offset]
-            if offset == 69:
+            if offset == 69 and not getattr(args, "include_index69", False):
                 receipt["samples"].append(
                     {
                         "original_offset": offset,
@@ -309,6 +314,11 @@ def main():
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--full", action="store_true")
+    parser.add_argument(
+        "--include-index69",
+        action="store_true",
+        help="explicit compatibility mode: execute unchanged original row69 rather than preserve publisher loop skip; all other task settings stay identical",
+    )
     parser.add_argument(
         "--reuse",
         type=Path,

@@ -254,11 +254,15 @@ python scripts/run_gpqa_original.py \
   --api-base http://127.0.0.1:19466/v1 --full --output /private/fresh-gpqa-diamond
 ```
 
-运行依赖Python和pandas。发布方原环境为Python3.9/pandas1.5.2；服务器独立客户端使用Python3.12、pandas2.2.3、numpy1.26.4，安装项见`configs/workload-native/gpqa-original-client-py312-dependencies.txt`，不能冒充发布方整机环境。原代码顶层会初始化商业API客户端，因此入口在逐文件核对摘要后只载入所需原函数/类，不初始化外部凭据或调用商业API。
+运行依赖Python和pandas。发布方原环境为Python3.9/pandas1.5.2；服务器已建立独立Python3.9.25/pandas1.5.2/numpy1.23.5客户端，安装项见`configs/workload-native/gpqa-publisher-py39-loader-dependencies.txt`。[原版本复核](validation/gpqa-publisher-py39-verification-20261025.json)确认全部1192行输入/选项与固定CI组件一致，并对main447、Diamond197个保存结果重建原提示和重算评分，未重复调用模型。原NPU生成复用的服务器客户端为Python3.12/pandas3.0.5；独立固定CI消费环境为Python3.12/pandas2.2.3/numpy1.26.4（见`gpqa-original-client-py312-dependencies.txt`），三者边界不可混称。
+
+上述验证只涉及原CSV加载、提示、解析和评分路径，不能冒充发布方完整训练、商业SDK或GPT-4模型环境。原代码顶层会初始化商业API客户端，因此入口在逐文件核对摘要后只载入所需原函数/类，不初始化外部凭据或调用商业API。
 
 统一数据入口为`GPQA`及三个原CSV，按同一source
-manifest执行pipeline/resolve。输入只包含原`Question`与按作者seed0打乱的匿名`choices`；答案索引、原答案标记、解释、专家注释和canary全部在参考侧，所有原列均保留，物理文件SHA+行号标识案例。不是手编题目或自造选项。服务器[候选组件与原Diamond运行审计](validation/gpqa-diamond-native-and-candidate-consumption-20261025.json)核对三split共1192条原字段及作者选项顺序、公共回查18条、研究索引导入与直接prepare/resolve各9条；最终CI工件尚待核验，不以候选代替固定交付工件。
+manifest执行pipeline/resolve。输入只包含原`Question`与按作者seed0打乱的匿名`choices`；答案索引、原答案标记、解释、专家注释和canary全部在参考侧，所有原列均保留，物理文件SHA+行号标识案例。不是手编题目或自造选项。服务器[固定CI工件与研究消费核验](validation/gpqa-fixed-ci-research-handoff-20261025.json)核对34个安装payload、三split全部1192条原字段及作者选项顺序、公共回查18条、研究索引导入与直接prepare/resolve各9条；既往候选回执仍保留，不用候选冒充固定交付工件。
 
 当前绑定原`load_examples`、seed0选项打乱、`zero_shot_prompt`、`select_and_call_model`的系统/用户消息与原`parse_sampled_answer`，输出预算1000不改，仅将模型传输指向已声明的本地模型。原主循环对索引69有显式跳过逻辑，本入口如实保留为未生成且答错，计入原分母；不能隐藏该行为后声称每题都发出了模型请求。结果不是作者GPT-4基线复现，也不代表CoT、检索或self-consistency协议已验证。
+
+为验证所有原题确实可运行，提供显式`--include-index69`兼容模式，只取消本入口对原物理行索引69（从0计数，即第70条）的跳过；原题、选项、提示、1000预算及解析器不变，不改官方源码。应配合`--full --reuse`复用已有等价请求，单独保存兼容模式回执与分数，不覆盖或冒充作者原循环结果。仅“原循环已结束”不足以证明被跳过题的执行能力；兼容验证未完成前不据此声称全题生成已验证。
 
 `--split main`、`--split extended`分别选原split；不带`--full`为固定物理行0、1、2，不能在看到失败后换题。新输出目录拒绝覆盖，保存请求/响应和原解析结果；缺失答案按原逻辑记错，不重试凑分。`--reuse /private/completed-original-run`只复用已完成同协议、同服务模型且私有记录摘要一致、实际请求完全等价的保存响应；题目相同但选项不同不会误复用，不能只按题目ID命中。复用后仍重新执行原解析与评分，不再调用模型。来源主勾不因下载、CPU测试或运行中的文件提前勾选。

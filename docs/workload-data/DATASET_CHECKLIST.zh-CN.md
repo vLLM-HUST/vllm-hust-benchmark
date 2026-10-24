@@ -85,7 +85,7 @@ TB；服务器/data约1.42TB可用，未缩小语料。ChartQA当前两卡主机
 | DOLLY                      | [x] 原请求语料可用    | 八原类别各三条共24条生成/完整性及固定版本CI、安装回核通过。[交付回执](validation/dolly-request-corpus-delivery-20261024.json)；非15011条全量，无官方语义评分                                                                                                                        |
 | GSM8K                      | [x] 原生抽样交付      | 复用204/1319唯一原题执行评分；固定CI组件核对完整原资产及输入/参考隔离、保存原生结果回查。[交付回执](validation/gsm8k-native-delivery-20261024.json)；支持原生全量，未全跑、跨配置不汇总分数                                                                                         |
 | MATH500                    | [x] 原生抽样交付      | H4原前三题完整4轮及评分完成；固定CI wheel全500条字段、3条往返及三项CI通过。[交付回执](validation/math500-native-delivery-20261024.json)；非全500题，不冒充独立裁判质量认证                                                                                                          |
-| GPQA                       | [ ] 进行中，未完成    | Diamond原完整198位置已审计（197生成、原skip69保留，103/198）；三split1192条原字段/原seed0选项已核对，候选公共回查18及研究9+9通过。main全量复用等价保存请求继续，extended全量及最终CI工件待验。                                                                                      |
+| GPQA                       | [ ] 进行中，未完成    | Diamond和main原循环已审计（197、447个结果；main复用12），固定CI组件全部1192行及研究消费通过；作者Python3.9环境复核一致。extended全量执行中，原索引69还需显式补验，原分数不覆盖。                                                                                                    |
 | MMLU_PRO                   | — 仅分类              | 复用历史回执，核对完整使用链路                                                                                                                                                                                                                                                      |
 | AI2_ARC                    | [x] 原生抽样交付      | 两子集各原前三题及末三题共12题执行、原版似然评分与回查通过；固定CI组件核对六文件。[交付回执](validation/arc-native-delivery-20261024.json)；支持分别全量，未全跑、不合并分数                                                                                                        |
 | LONGBENCH                  | [x] 登记Qasper交付    | 原Qasper200题原生执行、官方评分及完整输入/参考均复核；研究端固定工件三条双路径接通。不宣称其他LongBench子集或原Qasper全库。[交付回执](validation/longbench-qasper-native-delivery-20261024.json)                                                                                    |
@@ -305,17 +305,24 @@ smoke、tests和lint全部通过。[交付回执](validation/ruler-native-delive
 
 #### GPQA 子流程进度（不增加来源完成数）
 
-| 子流程              | 固定范围                             | 证据状态                                                              |
-| ------------------- | ------------------------------------ | --------------------------------------------------------------------- |
-| 原CSV获取/准备      | main448、diamond198、extended546     | [x] 原压缩包及三个成员摘要核对，真实公共CLI准备验证                   |
-| 原字段及seed0顺序   | 三split全部1192行                    | [x] 与原CSV及作者load_examples逐行核对；split重叠不去重计独立题       |
-| 候选公共/研究消费   | 公共回查首尾各3；研究每split原前三行 | [x] 公共18条、研究索引导入9条及直接prepare/resolve9条                 |
-| Diamond原zero-shot  | 原全部198位置                        | [x] 197次真实生成，原索引69跳过计错，原评分103/198；4条length结果保留 |
-| Main原zero-shot     | 原全部448位置                        | [ ] 运行中；仅复用同模型/同实际请求且摘要核对的保存响应               |
-| Extended原zero-shot | 原全部546位置                        | [ ] 尚待执行，不换题或缩预算                                          |
-| 最终CI工件消费      | 固定软件包、同一原数据和两侧消费     | [ ] 候选验证不能替代固定CI工件验证                                    |
+| 子流程                  | 固定范围                             | 证据状态                                                                        |
+| ----------------------- | ------------------------------------ | ------------------------------------------------------------------------------- |
+| 原CSV获取/准备          | main448、diamond198、extended546     | [x] 原压缩包及三个成员摘要核对，真实公共CLI准备验证                             |
+| 原字段及seed0顺序       | 三split全部1192行                    | [x] 与原CSV及作者load_examples逐行核对；split重叠不去重计独立题                 |
+| 候选公共/研究消费       | 公共回查首尾各3；研究每split原前三行 | [x] 公共18条、研究索引导入9条及直接prepare/resolve9条                           |
+| Diamond原zero-shot      | 原全部198位置                        | [x] 197次真实生成，原索引69跳过计错，原评分103/198；4条length结果保留           |
+| Main原zero-shot         | 原全部448位置                        | [x] 447个生成结果已审计，其中435次新增推理、12次等价保存响应复用；原评分222/448 |
+| Extended原zero-shot     | 原全部546位置                        | [ ] 全量执行中，复用等价请求，不换题或缩预算                                    |
+| 最终CI工件消费          | 固定软件包、同一原数据和两侧消费     | [x] 固定CI5e76949a包34个payload逐字节核对；1192行、公共18条及研究9+9通过        |
+| 发布方Python3.9环境复核 | 原CSV加载/提示/解析与保存响应        | [x] Python3.9.25/pandas1.5.2，全部1192行及main/Diamond保存结果一致；不重跑模型  |
 
-证据见[Diamond及候选消费审计](validation/gpqa-diamond-native-and-candidate-consumption-20261025.json)。此处保留的是作者原zero-shot协议，不宣称GPT-4基线、CoT或检索协议复现；GPQA来源主勾仍未勾。
+证据见[Diamond及候选消费审计](validation/gpqa-diamond-native-and-candidate-consumption-20261025.json)、[main原生审计](validation/gpqa-main-full-native-audit-20261025.json)、[固定CI消费](validation/gpqa-fixed-ci-research-handoff-20261025.json)及[发布方Python版本复核](validation/gpqa-publisher-py39-verification-20261025.json)。此处保留的是作者原zero-shot协议，不宣称GPT-4基线、CoT或检索协议复现；GPQA来源主勾仍未勾。
+
+原循环固定跳过物理行索引69（从0计数，即第70条），因此还需显式兼容模式补验该原位置、复用其余保存请求，才可声称全原题生成能力核验完成：`--full --include-index69 --reuse ...`不修改题目、提示或预算。原循环分数与兼容验证结果分别保留，不因补验覆盖历史结果。
+
+| 补充执行能力核验 | 范围                                   | 状态                         |
+| ---------------- | -------------------------------------- | ---------------------------- |
+| 原索引69补验     | 三个split各1个原位置，其余保存请求复用 | [ ] 显式兼容模式待运行和审计 |
 
 ## 历史抽样记录（非本轮完成总数）
 

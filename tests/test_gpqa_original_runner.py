@@ -35,8 +35,9 @@ def test_source_is_checked_before_import_or_execution(tmp_path):
 
 
 @pytest.mark.parametrize("full", [False, True])
+@pytest.mark.parametrize("include_index69", [False, True])
 def test_transport_preserves_budget_and_publisher_full_index_skip(
-    tmp_path, monkeypatch, full
+    tmp_path, monkeypatch, full, include_index69
 ):
     example = namedtuple(
         "Example", "question choice1 choice2 choice3 choice4 correct_index"
@@ -97,16 +98,17 @@ def test_transport_preserves_budget_and_publisher_full_index_skip(
         model="fixture-model",
         context_window=2048,
         output=tmp_path / "result",
+        include_index69=include_index69,
     )
     receipt = runner.run(args)
-    count = 69 if full else 3
+    count = (70 if include_index69 else 69) if full else 3
     assert receipt["completed_generations"] == len(calls) == count
     assert all(
         r["model"] == "fixture-model" and r["max_tokens"] == 1000 and r["stop"] is None
         for r in calls
     )
     assert receipt["correct"] == count and receipt["automatic_retries"] == 0
-    if full:
+    if full and not include_index69:
         assert receipt["samples"][69] == {
             "original_offset": 69,
             "publisher_skipped": True,
@@ -129,3 +131,13 @@ def test_transport_preserves_budget_and_publisher_full_index_skip(
         ]
         is False
     )
+    # Corrupt reuse evidence cannot trigger a fresh model call or leave a
+    # misleading GENERATING checkpoint.
+    (prior_output / "row-0.private.json").write_text("tampered fixture")
+    args.output = tmp_path / "rejected-reuse"
+    with pytest.raises(ValueError, match="record identity"):
+        runner.run(args)
+    assert len(calls) == count
+    failure = json.loads((args.output / "receipt.json").read_text())
+    assert failure["status"] == "FAILED_NO_REPLACEMENT_OR_RETRY"
+    assert failure["model_generation_calls_attempted"] == 0
