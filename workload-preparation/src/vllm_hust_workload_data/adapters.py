@@ -13,6 +13,11 @@ from .registry import adapter_spec, source_spec
 
 def iter_source_rows(path, spec):
     """Use one source view for reading, binding and index resolution."""
+    if spec["mapping"] == "xlsum_original_summary":
+        from .xlsum import original_rows
+
+        yield from original_rows(path)
+        return
     if spec["mapping"] == "qasper_original_questions":
         from .qasper import question_rows
 
@@ -460,6 +465,11 @@ def iter_workload(
             "unit": manifest["unit"],
             "provenance_kind": manifest["provenance_kind"],
         }
+        if source_id == "XLSUM":
+            language = file_spec.get("language_variant")
+            if not isinstance(language, str) or not language:
+                raise ValueError("XL-Sum original language variant must be preserved")
+            source["language_variant"] = language
         if source_id == "RULER":
             generation = file_spec.get("generation")
             generation_text_fields = (

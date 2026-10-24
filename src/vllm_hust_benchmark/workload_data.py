@@ -71,6 +71,9 @@ def main(argv=None):
     gpqa = commands.add_parser("prepare-gpqa-original")
     gpqa.add_argument("--data-archive", type=Path, required=True)
     gpqa.add_argument("--output", type=Path, required=True)
+    xlsum = commands.add_parser("prepare-xlsum-original")
+    xlsum.add_argument("--archive-root", type=Path, required=True)
+    xlsum.add_argument("--output", type=Path, required=True)
     for name in ("catalog", "pipeline", "replay"):
         passthrough = commands.add_parser(name, add_help=False)
         passthrough.add_argument("arguments", nargs=argparse.REMAINDER)
@@ -141,6 +144,12 @@ def main(argv=None):
                 raise RuntimeError("Install the pinned BBH-capable data component")
             value = provider.prepare_bbh_boolean(
                 data_archive=args.data_archive, output=args.output
+            )
+        elif args.command == "prepare-xlsum-original":
+            from vllm_hust_workload_data.xlsum import prepare_original_archives
+
+            value = prepare_original_archives(
+                archive_root=args.archive_root, output=args.output
             )
         elif args.command == "prepare-gpqa-original":
             from vllm_hust_workload_data.gpqa import prepare_original_archive

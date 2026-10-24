@@ -2,6 +2,18 @@
   "version": "adapter-extensions/v1",
   "boundary": "Field contracts from publisher metadata/docs. No real source payload downloaded or full adapter validation claimed.",
   "adapters": {
+    "XLSUM": {
+      "kind": "task_dataset",
+      "mapping": "xlsum_original_summary",
+      "input_fields": ["text"],
+      "required_fields": ["id", "url", "title", "summary", "text"],
+      "outcome_fields": ["summary"],
+      "annotation_fields": ["id", "url", "title"],
+      "id_field": "id",
+      "requirements": ["Original publisher mT5 model-card generation and multilingual ROUGE; CC-BY-NC-SA-4.0 non-commercial research use"],
+      "status": "CONTRACT_MAPPED_ASSET_VALIDATION_PENDING",
+      "evidence": {"kind": "publisher_original_v2_test_files", "url": "https://github.com/csebuetnlp/xl-sum"}
+    },
     "GPQA": {
       "kind": "task_dataset",
       "mapping": "gpqa_original_seed0_choices",

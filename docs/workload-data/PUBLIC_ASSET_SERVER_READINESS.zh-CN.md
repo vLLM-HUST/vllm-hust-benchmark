@@ -239,6 +239,73 @@ check；不冒充发布方Python3.9整机环境，也不等于judge已执行。
 
 上述本地judge要求按原脚本在`http://localhost:8001/v1`部署`meta-llama/Meta-Llama-3.1-70B-Instruct`；不是当前Qwen服务。发布方还支持GPT-4o及mini评分，需要用户自行配置已授权的API与费用，不自动调用。没有合适judge时保留生成结果并标记评分阻塞，不把Qwen自评或字符串匹配冒充原官方评分。只跑生成、只读数据、CPU夹具测试均不能勾来源完成。
 
+### XL-Sum 原摘要任务、作者 mT5 与多语言评分（进行中）
+
+[固定原资产](validation/xlsum-original-assets-20261025.json)、[原分词修正后的135条原生运行](validation/xlsum-original-native-samples-20261025.json)、[全字段与候选研究消费核验](validation/xlsum-candidate-raw-consumer-20261025.json)分别记录获取、原生运行和读取接通证据；不互相替代。
+
+采用 `csebuetnlp/xlsum` 固定版本的45个 v2 语言/书写变体，原 test 共114198行；不是旧论文版本44种语言的同一统计口径。每行原 `text`
+是输入，`summary` 是参考答案，`id/url/title` 保留为来源注释；不把标题或答案添加进模型输入。中文及塞尔维亚语书写变体不合并，来源文件摘要与物理行位置仍参与记录身份。
+
+数据与作者推荐模型 `csebuetnlp/mT5_multilingual_XLSum` 均限 **CC-BY-NC-SA-4.0
+非商业研究用途**，不可不加审查地用于商业验收或再分发。本仓仅登记元数据、准备器和运行入口，不包含原数据、模型权重或生成文本。固定数据文件及模型/评分代码摘要分别见来源目录和
+`configs/workload-native/xlsum-author-pins.json`。
+
+在有足够存储的服务器上，按发布方条款取得固定资产后执行：
+
+```sh
+hf download csebuetnlp/xlsum --repo-type dataset \
+  --revision 30fece425f9a3866e04321773ca7a80056d55ca6 \
+  --include 'data/*_XLSum_v2.0.tar.bz2' --local-dir /private/xlsum-archives
+workload-data prepare-xlsum-original \
+  --archive-root /private/xlsum-archives --output /private/fresh-xlsum-test
+hf download csebuetnlp/mT5_multilingual_XLSum \
+  --revision 2437a524effdbadc327ced84595508f1e32025b3 \
+  --include config.json tokenizer_config.json special_tokens_map.json spiece.model pytorch_model.bin README.md \
+  --local-dir /private/xlsum-model
+git clone https://github.com/csebuetnlp/xl-sum.git /private/xlsum-source
+git -C /private/xlsum-source checkout afcd803c8d7c98f3be60e9a7ce57fcbc3e729e8c
+```
+
+运行时必须使用独立的 NPU 生成/评分客户端，不能在运行中的引擎环境直接升级或降级 Transformers。客户端额外依赖固定在
+`configs/workload-native/xlsum-author-npu-client-dependencies.txt`；Torch、torch-npu 和 CANN
+需使用机器对应的兼容栈。服务器已测栈为
+Python3.12、Torch2.10.0、torch-npu2.10.0.post4、Transformers4.57.3。当前验证客户端复用只读系统包，继承的 vllm-ascend 元数据要求
+Transformers5.5.4，与该客户端不兼容；本入口不导入或启动 vllm-ascend，不据此声称整个继承环境 `pip check` 通过。
+
+另按作者说明安装其固定源码下的 `multilingual_rouge_scoring/`，**不能以 PyPI 通用英语 rouge-score 替换**。准备显式 `NLTK_DATA` 目录中的
+`stopwords/punkt/punkt_tab`，日语使用作者推荐的完整
+UniDic；中文、泰语、孟加拉语、土耳其语等分别使用原评分器的依赖。作者原本没有专用词干器的语言，沿用其原回退逻辑，不伪装成英语评分。
+
+```sh
+NLTK_DATA=/private/xlsum-nltk-data python scripts/run_xlsum_original.py \
+  --source-root /private/xlsum-source --model-root /private/xlsum-model \
+  --tokenizer-python /private/xlsum-tokenizer-env/bin/python \
+  --data-root /private/fresh-xlsum-test --language english \
+  --output /private/fresh-xlsum-english
+```
+
+默认固定原物理行0、1、2；`--language` 可重复指定，`--language all` 选择45个变体，`--full` 执行所选变体全部原
+test。小集按统一30分钟规则全跑，大集固定抽样；前三条预检仅用于检查可执行性和安排后续范围，不自动等于来源交付完成。`--reuse /private/prior-native-output`
+校验原文件、模型、配置、分词输入、输出解码与私有记录摘要后复用已完成请求，损坏证据直接报错，不通过重复生成凑通过。
+
+生成严格沿用作者模型卡：空白规范化、编码长度512、解码长度84、beam4、禁止重复2-gram，保留模型配置 `length_penalty=0.6` 和未绑定输入/输出权重，FP32/NPU
+执行。**512是作者原协议，不是容量不足时临时截题；原文完整保留，也不能据此宣称验证了长上下文能力。** 评分直接执行固定作者源码中的 `calculate_rouge`、句子切分及多语言
+ROUGE，保留四类 ROUGE 和 bootstrap；这是模型卡生成加原评分接口，不冒充整套训练/Trainer 流程或论文结果复现。
+
+兼容性核验发现两处不可忽略的差异：Transformers5.5.4
+会强制改变作者未绑定权重配置；4.57.3虽保留配置，但固定135条中有1条的分词输入与4.11.3不一致。因此生成客户端保留4.57.3/NPU模型后端，分词与解码通过本地管道调用独立的原4.11.3慢分词器，绝不修改原文或猜测替代
+token。分词环境用 Python3.9，完整依赖见 `xlsum-original-tokenizer-py39-dependencies.txt`，以 `-I` 隔离环境启动，无
+Torch、模型推理或网络服务；已通过该环境 `pip check`。旧Python只用于离线分词兼容，不作为公网服务运行环境。
+
+修正后45变体固定135条已完成原分词、NPU生成和原多语言评分；134条有效输出复用，仅重新执行了输入不一致的那道原题。全114198行已核验五字段不丢失，45变体均完成公共索引首尾读取及研究侧接通；这是候选代码消费验证，不是固定CI工件交付或研究结论。按
+`60秒 + 1.25 × 该变体前三条中最慢生成耗时 × 原 test 行数`
+估计，10个变体不超过30分钟，需要全跑6068条，范围冻结后不因结果调整；其余35个固定抽样。已停止不兼容预检后的全量进程，保留其证据，恢复时逐条校验并复用有效请求，输入不一致者只重跑同一道原题，不换题。此耗时只用于排期，不是引擎性能结论。全量验证、固定交付工件和生成客户端环境收口仍在推进，XLSUM
+未勾完成。
+
+`--rerun-tokenizer-mismatch` 是修复历史 tokenizer
+输入差异的显式选项：只有同一原文件、同一行、同一模型和预算且私有证据摘要完整，但原编码输入不同的旧结果才失效并重跑原题。默认遇此差异报错；文件损坏、改题、配置不符仍报错，不被此选项忽略。保存生成
+token 可用原解码器重解码，不需要再请求模型。
+
 ### GPQA 作者原发布包与原zero-shot协议
 
 使用作者公开GitHub的`dataset.zip`，固定代码版本见[原资产回执](validation/gpqa-original-acquisition-20261025.json)。按该版本README公开提供的密码解压；不需要绕过HF门槛，也不把题目下载到本地工作站或提交进Git。main448、diamond198、extended546是有重叠的原split，不能相加称为1192个独立问题；`gpqa_experts.csv`是专家元数据，不是第四个benchmark。

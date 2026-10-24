@@ -25,6 +25,7 @@ DATA_MODULES = {
     "records",
     "registry",
     "taxonomy",
+    "xlsum",  # Exact publisher test extraction/schema validation, no analysis.
 }
 
 
