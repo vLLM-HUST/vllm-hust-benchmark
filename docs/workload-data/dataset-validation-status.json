@@ -1335,7 +1335,11 @@
       "roundtrip_receipt": "docs/workload-data/validation/burstgpt-original-roundtrips-20261024.json",
       "delivery_receipt": null,
       "official_tool_review": "docs/workload-data/validation/burstgpt-official-demo-review-20261024.json",
-      "blocker": "三文件10632194行资产/绑定及9条往返已核；官方example已审，是外部prompt池模拟压力而非原请求回放。其旧/generate接口当前服务不提供，官方示例尚未运行；需明确兼容传输后单独验证，不伪造原请求或提前打勾。"
+      "official_example_preparation_receipt": "docs/workload-data/validation/burstgpt-official-example-preparation-20261025.json",
+      "native_public_runner": "scripts/run_burstgpt_original_example.py",
+      "native_client_dependencies": "configs/workload-native/burstgpt-original-demo-py312-dependencies.txt",
+      "native_queue_state": "ORIGINAL_RELEASE1_FIRST20_NATIVE_SIMULATION_RUNNING_AWAITING_AUDIT",
+      "blocker": "三文件10632194行资产/绑定及9条往返复用。官方18文件及自带300条外部prompt池已核，独立官方依赖pip check通过；非流式/generate传输兼容已补，不改原工具、prompt或1024预算。原第1份前20条scale1已启动，未审计终态前不勾。第2/3份原首时间戳约61/225天，上游直接sleep；未归零或压缩，须明确适用调度配置。不是原私有请求回放。"
     },
     "TRACELAB": {
       "scope": "public",

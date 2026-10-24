@@ -211,6 +211,31 @@ manifest 的 `pipeline plan`、`pipeline run` 命令；63824 条索引和每文�
 
 官方固定提交`7eb2c4f8350f8a6985272386f5c14af1f678b299`的example说明及客户端代码已核对，见[官方示例适用性复核](validation/burstgpt-official-demo-review-20261024.json)。它显式另读ShareGPT等prompt池，按trace长度映射外部例子，内部维度上限1024并有长度裁剪；这属于官方模拟压力工具，不是原始请求回放。CSV按20行chunk读取，prompt_num不是严格读取条数；surplus默认16384可能超出已读轨迹，不能直接套默认参数。客户端调用旧`/generate`，当前服务OpenAPI确认不提供该接口，因此尚未运行官方示例。后续需明确兼容传输/支持服务后单独验证，保持外部prompt来源披露；不修改原CSV、不把外部prompt冒充BurstGPT原请求。此项仍未勾选，不把模拟工具未执行隐去。
 
+### BurstGPT原官方示例兼容入口（2026-10-25）
+
+新增`scripts/run_burstgpt_original_example.py`，在回环地址提供旧式非流式`/generate`，转发到已部署模型的`/v1/completions`。只适配传输，不改原prompt、temperature0、ignore_eos=False及原工具实际使用的1024-token输出预算。旧接口返回`prompt + 生成后缀`；这与chat模板请求不同，不自动改成chat请求或附加思维提示。合法stop/length及零token的空stop均保留，不换题重试。桥接错误或缺少任一选定请求的原生响应都会使整批失败，不能被原工具的HTTP错误日志吞掉后误记成功。尚不提供流式桥接；非流式路径没有TTFT测量结论。
+
+入口核验固定提交18份原文件的Git blob、三份原trace的发布SHA，以及官方自带外部prompt池的Git
+blob。该池已在服务器取得，共6473720字节、300条，见[准备回执](validation/burstgpt-official-example-preparation-20261025.json)。它不是BurstGPT原私有请求。原工具长度映射使用池内既有长度字段，未重新按Qwen分词；桥接另存实际服务usage，不能把这些字段混为实测token长度。原工具的out_len是返回文本字符数，也不能当生成token数。固定根LICENSE为CC-BY-4.0，而example说明称MIT；使用者须分别核查数据、示例代码及外部prompt池条款，本仓不重新分发这些原件。
+
+在服务器取得固定版源码及原trace，安装独立Python3.12客户端；不向模型服务环境安装这些依赖：
+
+```sh
+python3.12 -m venv /private/burstgpt-client
+/private/burstgpt-client/bin/python -m pip install -r configs/workload-native/burstgpt-original-demo-py312-dependencies.txt
+/private/burstgpt-client/bin/python -m pip check
+/private/burstgpt-client/bin/python -I scripts/run_burstgpt_original_example.py \
+  --source-root /private/BurstGPT-fixed \
+  --prompt-pool /private/BurstGPT-fixed/example/preprocess_data/shareGPT.json \
+  --trace /private/original-traces/BurstGPT_1.csv \
+  --output /private/fresh-burstgpt-native --count 20 --scale 1 \
+  --endpoint http://127.0.0.1:19466/v1 --model workload-qwen35-27b-128k-nonthinking
+```
+
+`--source-root`须是固定提交`7eb2c4f8350f8a6985272386f5c14af1f678b299`的根目录，至少包含example子树和LICENSE，不能指向修改过的客户端。默认选前20条，`--count N`可显式选原前N条或全部发布行；不允许越过原行数进入上游Gamma模拟分支。原读取器仍按20行块加载；surplus=N恰好只发N条，不把多读行当已执行。输出必须是不存在的新私有目录，含原工具日志、每次请求/响应及终态回执，不得公开原载荷。
+
+本轮在模型结果产生前固定三个文件各原前20条，scale=1。原第1份的选定时间戳为5–1072秒；已启动原官方CLI及现有双NPU服务执行，终态和保存结果审计前不计完成。第2、3份开头时间戳延续全局时轴，分别约5270414秒和19440110秒；上游按启动后等待时间直接sleep，scale=1对应约61天和225天的初始等待。未静默减去首时间戳、压缩到达或跳过原行；这两份的模拟执行仍待适用的显式调度配置，元数据资产核验不受影响。官方`--scale`是RPS缩放参数，若后续选择它必须单列配置和改变后的到达时间，不能称原始到达回放。旧适用性回执保留当时未实现兼容层的历史状态。
+
 官方v2.0的三个保留失败记录的完整发布文件均已在服务器核验字节数、发布SHA和全CSV解码：`BurstGPT_1.csv` 1429737行、`BurstGPT_2.csv`
 3858436行、`BurstGPT_3.csv` 5344021行，合计10632194行；不代表三文件互不重叠的独立请求总数。首文件复用，不重下载；其余两文件通过官方GitHub Release
 API资产341027213、341026736的`application/octet-stream`下载，所得字节与发布摘要一致。之后复用`acquire_release_datasets.py --source BURSTGPT --data-root EXTERNAL_DATA_ROOT --output EXTERNAL_REPORT`重新核验全部三文件。见[资产回执](validation/burstgpt-original-release-assets-20261024.json)，其中`download_url`表示规范发布地址，不表示本次实际传输绕过API。
@@ -220,6 +245,8 @@ API资产341027213、341026736的`application/octet-stream`下载，所得字节
 随后三文件完整绑定均匹配原发布SHA与行数，各取原行0、1、2，共9条完成安装包读取→prepare→resolve往返，输入与历史结果分离且逐项一致；9条均明确为`request_metadata`，请求体接口按预期拒绝，不产生模型请求。见[原元数据往返回执](validation/burstgpt-original-roundtrips-20261024.json)。首文件跨数据根目录的软链接被安全检查拒绝；使用同一NFS内原文件的硬链接形成合法外部数据根目录，不放宽越界校验，不复制正文进仓库。官方示例适用性和最终软件交付仍待收口，不勾整个来源。
 
 ### 旧首文件尝试（保留历史范围）
+
+以下保留当时的文件范围、勾选与PR状态，不是当前总进度；当前以本节前面的新回执、机器清单及原PR #432为准。
 
 BurstGPT 旧范围：官方 v2.0 Release 的 `BurstGPT_1.csv` 已取得，52283111 bytes，
 摘要与已有固定目录相符，绑定时计数1429737条。原始行0、1、2的读取、prepare、resolve 在服务器通过。未验证所有记录的字段语义，也未取得/验证本批中的其他 BurstGPT 文件。
