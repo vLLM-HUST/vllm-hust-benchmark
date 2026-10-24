@@ -11,6 +11,110 @@ import pytest
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def load_v2_runner():
+    spec = importlib.util.spec_from_file_location(
+        "longbench_v2_runner", ROOT / "scripts/run_longbench_v2_original_samples.py"
+    )
+    runner = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(runner)
+    return runner
+
+
+def capacity_software_fixture(count=3):
+    return {
+        "model": "software-fixture-model",
+        "model_max_length": 131072,
+        "selected": [
+            {
+                "row_index": index,
+                "id": f"software-fixture-{index}",
+                "prompt_sha256": f"{index:064x}",
+                "full_prompt_tokens": 100,
+                "status": "FULL_INPUT_FITS",
+            }
+            for index in range(count)
+        ],
+    }
+
+
+@pytest.mark.parametrize("count", [1, 3, 4, 503])
+def test_v2_explicit_selection_has_no_three_task_hardcoding(count):
+    capacity = capacity_software_fixture(count)
+    selected = load_v2_runner().validate_capacity_selection(
+        capacity, "software-fixture-model"
+    )
+    assert selected is capacity["selected"]
+    assert [row["row_index"] for row in selected] == list(range(count))
+
+
+def test_v2_historical_three_selection_is_accepted_without_changes():
+    capacity = json.loads(
+        (
+            ROOT
+            / "docs/workload-data/validation/longbench-v2-capacity-selection-20261022.json"
+        ).read_text("utf-8")
+    )
+    selected = load_v2_runner().validate_capacity_selection(capacity, capacity["model"])
+    assert selected is capacity["selected"]
+    assert [row["row_index"] for row in selected] == [1, 4, 6]
+
+
+def test_v2_updated_entry_does_not_relabel_historical_npu_evidence():
+    ledger = json.loads(
+        (ROOT / "docs/workload-data/dataset-validation-status.json").read_text("utf-8")
+    )["delivery_inventory"]["LONGBENCH_V2"]
+    assert ledger["explicit_selection_entry_software_checked"]
+    assert not ledger["entry_native_after_update_checked"]
+    assert not ledger["checked"]
+    assert ledger["delivery_receipt"] is None
+
+
+@pytest.mark.parametrize(
+    "field,value",
+    [
+        ("row_index", -1),
+        ("row_index", 503),
+        ("row_index", True),
+        ("full_prompt_tokens", 0),
+        ("full_prompt_tokens", -1),
+        ("full_prompt_tokens", True),
+        ("full_prompt_tokens", 130945),
+        ("status", "RESOURCE_LIMIT_FULL_CONTEXT"),
+        ("id", ""),
+        ("prompt_sha256", "incomplete-software-fixture"),
+    ],
+)
+def test_v2_invalid_or_overflow_task_rejects_entire_selection(field, value):
+    capacity = capacity_software_fixture()
+    capacity["selected"][0][field] = value
+    with pytest.raises(ValueError):
+        load_v2_runner().validate_capacity_selection(capacity, "software-fixture-model")
+    assert len(capacity["selected"]) == 3  # No filtering into an easier subset.
+
+
+def test_v2_selection_order_and_identity_are_fail_closed():
+    runner = load_v2_runner()
+    for field in ("row_index", "id", "prompt_sha256"):
+        capacity = capacity_software_fixture()
+        capacity["selected"][1][field] = capacity["selected"][0][field]
+        with pytest.raises(ValueError, match="duplicate"):
+            runner.validate_capacity_selection(capacity, "software-fixture-model")
+    capacity = capacity_software_fixture()
+    capacity["selected"].reverse()
+    with pytest.raises(ValueError, match="original row order"):
+        runner.validate_capacity_selection(capacity, "software-fixture-model")
+    for count in (0, 504):
+        with pytest.raises(ValueError, match="one to 503"):
+            runner.validate_capacity_selection(
+                capacity_software_fixture(count), "software-fixture-model"
+            )
+    capacity = capacity_software_fixture()
+    capacity["selected"][0]["full_prompt_tokens"] = 130944
+    assert runner.validate_capacity_selection(capacity, "software-fixture-model")
+    with pytest.raises(ValueError, match="model/window"):
+        runner.validate_capacity_selection(capacity, "different-software-fixture-model")
+
+
 def test_qasper_public_handoff_is_original_three_not_full_suite_or_raw_diagnostic():
     directory = ROOT / "docs/workload-data/validation"
     receipt = json.loads(

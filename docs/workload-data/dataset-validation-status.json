@@ -2,7 +2,9 @@
   "schema_version": "workload-validation-checklist/v1",
   "updated_at": "2026-10-24",
   "native_runtime_latest": {
-    "status": "ORIGINAL_PROFILE_RESTORE_FAILED_HOST_PINNED_ALLOCATION",
+    "status": "SSH_CONNECTION_REFUSED_CURRENT_REMOTE_STATE_UNKNOWN",
+    "last_verified_model_runtime_status": "ORIGINAL_PROFILE_RESTORE_FAILED_HOST_PINNED_ALLOCATION",
+    "server_reclaimed_or_connection_refusal_cause_verified": false,
     "configuration_changed": false,
     "first_error": "torch.OutOfMemoryError: aclrtMallocHostWithCfg error207001",
     "task_generation_started": false,
@@ -13,7 +15,7 @@
     "cache_causality_proven": false,
     "weights_or_evidence_deleted": false,
     "global_drop_caches_or_device_reset_performed": false,
-    "next_action": "Await user decision on targeted reclaimable model-file page-cache advice, then at most one unchanged-profile retry; CPU work continues."
+    "next_action": "User asked for restored SSH entry. Preserve completed CPU evidence captured before connection refusal; do not infer current remote process or server state. No cache reclaim, reset, or blind model restart performed."
   },
   "scope": "Per-source integration validation; not performance or full-suite acceptance",
   "completion_rule": {
@@ -1025,7 +1027,9 @@
       "legacy_checked": false,
       "existing_receipt": "docs/workload-data/validation/longbench-v2-original-attempt-npu-20261022.json",
       "delivery_receipt": null,
-      "blocker": null
+      "explicit_selection_entry_software_checked": true,
+      "entry_native_after_update_checked": false,
+      "blocker": "Historical Short original rows1/4/6 executed and officially scored0/3; legal128-token length finish is retained, not an executor failure or requirement to rerun for stop. Updated explicit1..503 selection entry has31 CPU software tests and no new NPU run. Whole source not complete: Medium/Long full-input resource coverage and current entry/artifact handoff remain pending; never truncate or replace blocked original tasks."
     },
     "LONGMEMEVAL": {
       "scope": "public",
@@ -1333,9 +1337,12 @@
       "official_locked_build_checked": true,
       "official_dry_run_receipt": "docs/workload-data/validation/tracelab-original-dry-run-20261024.json",
       "official_cpu_dry_run_checked": true,
+      "original_token_pool_cpu_receipt": "docs/workload-data/validation/tracelab-original-token-pool-cpu-20261024.json",
+      "original_tokenizer_and_default_pool_cpu_checked": true,
       "original_field_audit_checked": true,
-      "non_npu_preparation_checked": false,
-      "blocker": "Full665453-row index and official all-row CSV conversion verified; independent enwik9 corpus verified, no raw prompts fabricated. Isolated Rust1.90 locked build succeeded using existing read-only OpenSSL3.6.4; original source/lock unchanged, first failed build retained. Official native CPU dry-runs verified full8058 sessions/665453 rounds and fixed lexical3 sessions/all20 rounds. Full prompt+original output exceeds131072 in336898 rows, no rows skipped. Fixed sample max46646 fits, but tokenizer/token-pool capacity, mandatory server cache probe and native NPU replay remain unvalidated. No source completion or performance claim.",
+      "non_npu_preparation_checked": true,
+      "non_npu_preparation_scope": "Fixed official lexical3 sessions/all20 rounds; full8058 sessions have retained context resource blocks. CPU pool diagnostic imports unchanged upstream functions but is not original runner/NPU replay.",
+      "blocker": "Full665453-row index and official CSV conversion, original locked Rust build and CPU dry-runs verified. Standalone CPU diagnostic with unchanged upstream Rust0.19 tokenizer functions loaded current Qwen3.5 tokenizer and built unreduced default100M-token pool. Fixed lexical3 sessions/all20 rounds max46646 fits current131072, but mandatory server cache-detail probe and actual NPU replay remain unverified. Full336898 rounds exceed current context with original output reserved; not skipped or substituted. No source completion or performance claim.",
       "license_review": {
         "source_commit": "61fea8f97277d0aa247cc2e4c7e31f90ed2bea1c",
         "dataset_license": "CC-BY-4.0",

@@ -37,7 +37,7 @@ LTS-SP3 ARM64；构建使用独立CARGO_HOME/CARGO_TARGET_DIR，运行客户端�
 官方转换器依赖的`syfi_coding_trace.duckdb`现已由官方GitHub Release
 API资产488289840直接流式传至服务器私有目录，未在本地保存数据文件。160182272字节及SHA256
 `a7bab286bc640844560850965ccf47975cf66407154132abaab90f27ec9be744`均与发布方摘要一致，见[原DuckDB资产回执](validation/tracelab-duckdb-original-20261024.json)。随后补取同一固定提交的官方转换器、数据库工具、schema及锁文件共六份原文件，逐文件核对Git
-blob；以只读方式打开原数据库并完成全量转换，两次各665453行、CSV逐字节一致，原数据库SHA不变，见[全量官方转换回执](validation/tracelab-official-csv-preparation-20261024.json)。历史资产回执仍保留取得当时未打开/转换的状态，不回写。原模型tokenizer与token池容量、模型服务兼容性仍需验证，不写成完整回放环境已就绪。
+blob；以只读方式打开原数据库并完成全量转换，两次各665453行、CSV逐字节一致，原数据库SHA不变，见[全量官方转换回执](validation/tracelab-official-csv-preparation-20261024.json)。历史资产回执仍保留取得当时未打开/转换的状态，不回写。真实服务接入、缓存明细探测与NPU回放仍需验证，不写成完整回放环境已就绪。
 
 转换器的实际隔离环境为Linux
 ARM64、Python3.12.13、DuckDB1.5.3、NumPy2.4.6；两项依赖版本与固定版`uv.lock`一致，`pip check`通过。这是该转换器所需的最小依赖环境，不是上游所有科研/网页功能的完整`uv sync`环境。可在独立环境复现，不要安装进模型服务环境：
@@ -57,6 +57,10 @@ python3.12 -m venv /tmp/tracelab-csv-env
 
 独立文本资产按固定版官方README推荐选择enwik9，已从[原发布地址](https://mattmahoney.net/dc/enwik9.zip)直接取得至服务器，未改写文本。原解压文件10亿字节、MD5和SHA1与[发布方校验页](https://mattmahoney.net/dc/textdata.html)一致，并核验完整UTF8解码与ZIP
 CRC；本机另记SHA256，见[辅助文本资产回执](validation/tracelab-independent-text-pool-20261024.json)。它仅为官方合成会话回放的独立文本池，不是TraceLab原私有prompt，不增加本项目的数据集清单条目；原文件仍不公开分发，使用者应遵守Wikipedia派生文本的适用许可。取得文本不等于已创建token池，更不证明默认1亿token池容量满足实际分词结果。
+
+随后以独立CPU诊断程序直接引用未修改的上游`tokens.rs`及原锁构建的Rust依赖，加载当前Qwen3.5的原tokenizer.json并调用上游`load_tokenizer/build_token_pool`，完整得到默认100000000个token，未降低池容量；原源码与tokenizer的SHA不变。该默认值也与全量/固定三会话的上游自动容量公式一致。见[CPU诊断回执](validation/tracelab-original-token-pool-cpu-20261024.json)。此项不是原`session_runner`的执行，更不是服务缓存探测、NPU回放或性能结果；诊断没有网络模型客户端，也没有模型请求。
+
+诊断返回完整结构化成功输出后，取回文件时SSH连接拒绝，因此公开诊断回执由此前已经捕获的完整stdout恢复，并明确注明未完成SCP传输核验；不推断服务器被回收或其当前进程状态。原构建、CSV及dry-run历史回执不回写。
 
 满足上述条件后，在固定版上游目录按原入口构建和预检：
 

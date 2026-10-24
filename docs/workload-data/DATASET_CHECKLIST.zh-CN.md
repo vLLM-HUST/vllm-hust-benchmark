@@ -197,6 +197,7 @@ TB；服务器/data约1.42TB可用，未缩小语料。ChartQA当前两卡主机
 
 ### 不占卡准备进展
 
+- [x] LONGBENCH_V2：移除原生公共入口固定三题的数量硬编码，显式绑定1..503题的软件校验通过，保留原题顺序、身份与原预算；负token数/超限整批拒绝，不过滤成容易子集。服务器相关回归已通过，模型调用0；原三题NPU历史证据不变，修改后入口未作NPU复验。
 - [x] LONGBENCH_V2：补齐本地原生入口的 `/v1` 基地址校验；服务器 CPU
   参数/历史回执回归15项通过，模型调用0。历史三题执行结果保持不变，本项不代表全503题或修改后入口已完成NPU复验。
 - [x] SCIENCEAGENTBENCH：原verified版102题的全部输入、参考及环境字段、全量索引和102条回查核验通过；30份官方执行/评分及依赖源码已固定并核对Git
@@ -214,7 +215,9 @@ TB；服务器/data约1.42TB可用，未缩小语料。ChartQA当前两卡主机
   CRC核验通过；不增加数据集清单条目，不把它冒充原轨迹prompt。[辅助资产回执](validation/tracelab-independent-text-pool-20261024.json)。
 - [x] TRACELAB：隔离Rust1.90.0、原Cargo.lock构建通过，绑定现有OpenSSL3.6.4、不改源码/锁；全8058会话/665453轮及固定字典序前三会话完整20轮的官方CPU
   dry-run通过，模型调用0。[构建回执](validation/tracelab-original-locked-build-20261024.json)、[dry-run回执](validation/tracelab-original-dry-run-20261024.json)。
-- [ ] TRACELAB：原分词器与token池容量、服务缓存明细探测、真实NPU回放未完成。全量336898轮的完整输入+原输出预算超当前131072，保留阻塞，不跳题；固定三会话20轮容量可容纳但尚未调用模型。官方工具是合成文本会话驱动，不是原私有请求重放；来源继续未勾，运行边界见[服务轨迹说明](ORIGINAL_SERVING_TRACES.zh-CN.md)。
+- [x] TRACELAB：独立CPU诊断程序直接引用未改的上游Rust分词器/token池函数，当前Qwen3.5
+  tokenizer加载及默认1亿token池构建通过，未降低池容量、模型调用0。[诊断回执](validation/tracelab-original-token-pool-cpu-20261024.json)。回执依据SSH失败前完整采到的结构化stdout恢复，未冒充SCP成功；这不是原回放器或NPU运行。
+- [ ] TRACELAB：服务缓存明细探测、真实NPU回放未完成。全量336898轮的完整输入+原输出预算超当前131072，保留阻塞，不跳题；固定三会话20轮容量可容纳但尚未调用模型。当前SSH连接拒绝，服务/实例最新状态未知；来源继续未勾，运行边界见[服务轨迹说明](ORIGINAL_SERVING_TRACES.zh-CN.md)。
 - [x] TOOLACE：原11300条system/历史对话、原轮次与工具描述、全量索引及首尾6条回查完成，保持历史对话资产身份。[CPU回执](validation/toolace-corpus-cpu-audit-20261024.json)。
 - [ ] TOOLACE：服务器新取固定版数据卡网络不可达，不能将目录中的预期SHA当下载验证；没有附带可执行工具环境/任务oracle，不编prompt冒充Agent原生评测，来源级继续未勾。
 - [x] JSONSCHEMABENCH：固定CI包与登记的三个原schema

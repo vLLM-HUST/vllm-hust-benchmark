@@ -175,6 +175,38 @@ def test_tracelab_locked_build_and_cpu_dry_run_are_not_npu_replay():
     assert not dry["source_completion_checked"]
 
 
+def test_tracelab_default_token_pool_cpu_diagnostic_is_not_original_runner():
+    receipt = json.loads(
+        (DOCS / "validation/tracelab-original-token-pool-cpu-20261024.json").read_text(
+            "utf-8"
+        )
+    )
+    assert receipt["status"] == "ORIGINAL_TOKEN_POOL_CPU_DIAGNOSTIC_PASSED"
+    assert receipt["process_returncode"] == 0
+    assert receipt["original_source_and_tokenizer_unchanged"]
+    assert "Standalone CPU wrapper" in receipt["scope"]
+    assert receipt["requested_default_pool_tokens"] == 100000000
+    assert receipt["actual_pool_tokens"] == 100000000
+    assert receipt["native_auto_pool_limit_matches_full_and_fixed_sample"]
+    dry = json.loads(
+        (DOCS / "validation/tracelab-original-dry-run-20261024.json").read_text("utf-8")
+    )
+    assert (
+        max(
+            2 * dry["full_capacity"]["max_full_prompt_plus_original_output"],
+            dry["full_sessions"],
+            100000000,
+        )
+        == receipt["requested_default_pool_tokens"]
+    )
+    assert not receipt["pool_parameters_reduced"]
+    assert len(receipt["original_lock_built_dependency_rlib_sha256"]) == 6
+    assert receipt["model_calls"] == 0
+    assert not receipt["native_replay_executed"]
+    assert not receipt["mandatory_server_cache_probe_verified"]
+    assert not receipt["source_completion_checked"]
+
+
 def test_tracelab_official_replay_sources_are_not_build_or_runtime_evidence():
     receipt = json.loads(
         (
