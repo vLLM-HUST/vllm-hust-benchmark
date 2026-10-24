@@ -1,8 +1,14 @@
 # Targeted MOD original custody
 
+- [vSpec additional legacy narratives](vspec-legacy-narratives/manifest.json): three complete
+  historical default-adaptive, Qwen3.5 MTP2 GSM8K and online-adaptive reports plus LICENSE. Original
+  quality differences, negative results, execution modes and legacy paths remain unchanged; their
+  raw inputs remain in the existing vSpec regression/browser capsules, not duplicated here.
+
 - [Manager paper source binding and derived projections](manager-projections/manifest.json): three
   unchanged historical outputs, including finite nonformal R4 scope. Recalculation and new build
   output must remain separate from these immutable inputs.
+
 - [PyramidKV mixed historical narratives](pyramid-mixed/manifest.json): two complete original
   documents plus LICENSE and NOTICE. Operator improvement is not serving acceleration; historical
   smoke and paired observations remain distinct from current baseline admission.
