@@ -81,6 +81,27 @@ def test_complete_extraction_coverage_is_disjoint_and_not_entire_ni():
     assert receipt["audit_new_generation_calls"] == 0
 
 
+def test_registered_ni_delivery_counts_distinct_tasks_and_limits():
+    docs = PATH.parents[1] / "docs/workload-data"
+    ledger = json.loads((docs / "dataset-validation-status.json").read_text("utf-8"))
+    item = ledger["delivery_inventory"]["NATURAL_INSTRUCTIONS"]
+    receipt = json.loads(
+        (PATH.parents[1] / item["delivery_receipt"]).read_text("utf-8")
+    )
+    assert item["checked"] and item["status"] == "AVAILABLE"
+    complete = sum(task["tasks"] for task in receipt["complete_original_task_files"])
+    sampled = sum(
+        len(task["original_indices"]) for task in receipt["sampled_original_task_files"]
+    )
+    assert complete + sampled == receipt["verified_unique_original_instances"] == 1797
+    assert receipt["registered_original_instances"] == 8284
+    assert not receipt["full_ni_suite_validated"]
+    assert not receipt["all_registered_instances_executed"]
+    assert not receipt["underlying_dataset_benchmark_equivalence"]
+    for name in receipt["native_execution_receipts"]:
+        assert (docs / "validation" / name).is_file()
+
+
 def test_help_without_optional_original_runtime():
     result = subprocess.run(
         [sys.executable, str(PATH), "--help"], capture_output=True, text=True

@@ -1,5 +1,7 @@
 # Natural Instructions 原始任务输入（下一批候选）
 
+当前登记五任务交付已收口，见[来源级回执](validation/ni-native-delivery-20261024.json)：分类102题、翻译250题、抽取261题、改写1178题全部原题覆盖，摘要只执行原首尾六题，共1797唯一实例。改写[1178题去重审计](validation/ni-rewriting-complete-audit-20261024.json)及[旧352题完整任务复核](validation/ni-reused-small-tasks-audit-20261024.json)均用原collator重建完整请求、原scorer重算分数并核验保存响应，无新答案生成。此状态覆盖下文阶段性“待补”表述；不是整个NI套件、全部8284实例或底层数据集原协议的全量结论。当前模型/服务固定配置见[双NPU环境](BBH_ORIGINAL_INPUTS.zh-CN.md#%E6%9C%AC%E8%BD%AE%E5%B7%B2%E9%AA%8C%E8%AF%81%E7%9A%84%E5%8F%8Cnpu%E6%A8%A1%E5%9E%8B%E6%9C%8D%E5%8A%A1%E9%85%8D%E7%BD%AE)。
+
 task1453实体抽取已完成[全261题去重覆盖审计](validation/ni-extraction-complete-audit-20261024.json)：复用原0–2与258–260，仅新增3–257共255题，所有原题号恰好覆盖一次。三个批次的完整prompt经原collator重建、响应包SHA及终态核对、原评分器重算均一致；审计0新增生成调用，261次tokenizer请求只作原拼接器长度校验。分批分数保留，不以题号覆盖宣称全NI或跨环境统一准确率。
 
 ## 2026-10-24固定工件复核
