@@ -1,5 +1,10 @@
 # Targeted MOD original custody
 
+- [vSpec B16, EAGLE dynamic and Frontier mixed narratives](vspec-b16-frontier/manifest.json): six
+  complete historical documents and LICENSE, retaining rejected experiments, quality changes,
+  graph/eager distinctions and legacy local paths. Available raw inputs reuse existing capsules; a
+  narrative is not recovery of its missing local logs, profiles or datasets.
+
 - [KVCompress historical release narratives](compress-release/manifest.json): unchanged bilingual
   0.9 release guides and LICENSE. Historical release observations, compiled-start failure and
   installation recipes are preserved; this does not authorize publishing an old package.
