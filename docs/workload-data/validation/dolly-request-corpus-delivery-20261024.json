@@ -1,0 +1,45 @@
+{
+  "schema_version": "native-workload-delivery-receipt/v1",
+  "source_id": "DOLLY",
+  "date": "2026-10-24",
+  "status": "ORIGINAL_REQUEST_CORPUS_SAMPLED_DELIVERY_AVAILABLE",
+  "delivery_kind": "request_corpus",
+  "source_commit": "8c4c62e03ad310850c7dc9b2aebc4327aed6c7e0",
+  "scope": "First three original rows of each of eight publisher categories; 24 unique requests, including three reused. Not all 15011 rows and not an official quality benchmark.",
+  "native_request_receipts": [
+    "dolly-original-npu-20261022.json",
+    "dolly-original-categories-20261024.json"
+  ],
+  "data_provider_commit": "3f397e69abd0263913d10c4e243b6d29a9a6bf8a",
+  "data_ci_wheel_sha256": "9f19b742fcc74df5c48122707ccd93f938e816ad948d377816ceebefe245a2b5",
+  "fixed_ci_provider_public_entry_recheck": {
+    "new_saved_original_requests_verified": 21,
+    "historical_original_requests_reused": 3,
+    "model_calls": 0,
+    "result": "ORIGINAL_CATEGORY_INPUTS_AND_RESPONSES_VERIFIED"
+  },
+  "documentation": "docs/workload-data/DOLLY_ORIGINAL_INSTRUCTIONS.zh-CN.md",
+  "public_runner": "scripts/run_dolly_original_categories.py",
+  "public_runner_sha256": "d14e5fb642492c0ccb9f7da2775e67f7cf48ea1dc6b7f5759411473a5d7c374d",
+  "full_file_supported": "Explicit --full; no full-file inference claim. Default selects first three original rows per original category.",
+  "quality_evaluator": "NO_PUBLISHER_SEMANTIC_EVALUATOR_FOR_THIS_REQUEST_CORPUS_INTEGRATION",
+  "ci": {
+    "cpu_correctness_run": 40073377567,
+    "main_run": 40073377565,
+    "cpu_correctness": "success",
+    "lint": "success",
+    "tests": "success"
+  },
+  "source_checkbox_eligible": true,
+  "quality_claim": false,
+  "full_dataset_validated": false,
+  "performance_claim": false,
+  "new_research_consumer_test_claim": false,
+  "raw_data_published": false,
+  "model_outputs_published": false,
+  "limits": [
+    "Original publisher training prefix and fields were used with the documented substitute Qwen3.5-27B NPU service and chat transport, not the Dolly paper model configuration.",
+    "Response integrity does not establish semantic correctness or production representativeness.",
+    "Dataset files are obtained separately under the publisher license; no raw source or generated output is distributed."
+  ]
+}

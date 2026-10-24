@@ -909,21 +909,23 @@
     "DOLLY": {
       "scope": "public",
       "delivery_kind": "review_original_source_protocol",
-      "status": "REVIEWED_GAPS_RECORDED",
-      "checked": false,
+      "status": "AVAILABLE",
+      "checked": true,
       "legacy_checked": true,
       "existing_receipt": "docs/workload-data/validation/dolly-original-npu-20261022.json",
       "category_execution_receipt": "docs/workload-data/validation/dolly-original-categories-20261024.json",
-      "active_run": {
+      "last_native_run": {
         "name": "dolly-original-categories-001",
+        "status": "COMPLETED_AND_PUBLIC_ENTRY_AUDITED",
         "selection": "first three original rows per original category; reuse already verified original indices 0,1,2 when selected",
         "categories": 8,
         "new_original_requests_planned": 21,
+        "new_original_requests_completed": 21,
         "prior_original_requests_reused": 3,
         "quality_scorer": "not applicable to this request corpus; original publisher template and response integrity only"
       },
-      "delivery_receipt": null,
-      "blocker": "八类原请求各三条共24条已核验，复用旧三条、新增21条正常stop；公开类别入口对保存请求/响应离线复核通过，0新增模型调用。12项软件测试通过，固定提交CI及用法交付尚待收口；无官方语义评分器，不造准确率，保持未完成。"
+      "delivery_receipt": "docs/workload-data/validation/dolly-request-corpus-delivery-20261024.json",
+      "blocker": null
     },
     "GSM8K": {
       "scope": "public",
@@ -1347,10 +1349,12 @@
       "existing_receipt": "docs/workload-data/validation/bbh-boolean-original-npu-20261023.json",
       "preparation_receipt": "docs/workload-data/validation/bbh-all-original-assets-server-20261024.json",
       "native_execution_receipt": "docs/workload-data/validation/bbh-all-task-variants-original-npu-20261024.json",
-      "active_run": {
+      "last_native_run": {
         "name": "bbh-native-remaining-001",
+        "status": "COMPLETED_AND_FIXED_HARNESS_RESCORED",
         "task_files": 26,
         "planned_original_samples": 78,
+        "completed_original_samples": 78,
         "indices_per_task": [0, 1, 2],
         "selection_frozen_before_outcomes": true,
         "boolean_prior_samples_reused": 3

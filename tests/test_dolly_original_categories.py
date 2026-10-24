@@ -115,3 +115,16 @@ def test_redacted_category_receipt_preserves_request_corpus_boundaries():
         hashlib.sha256(PATH.read_bytes().replace(b"\r\n", b"\n")).hexdigest()
         == receipt["public_runner_sha256"]
     )
+    ledger = json.loads(
+        (runner.ROOT / "docs/workload-data/dataset-validation-status.json").read_text(
+            "utf-8"
+        )
+    )
+    item = ledger["delivery_inventory"]["DOLLY"]
+    assert item["status"] == "AVAILABLE" and item["checked"]
+    delivery = json.loads((runner.ROOT / item["delivery_receipt"]).read_text("utf-8"))
+    assert delivery["delivery_kind"] == "request_corpus"
+    assert delivery["source_checkbox_eligible"] is True
+    assert delivery["fixed_ci_provider_public_entry_recheck"]["model_calls"] == 0
+    assert not delivery["full_dataset_validated"]
+    assert not delivery["quality_claim"]
