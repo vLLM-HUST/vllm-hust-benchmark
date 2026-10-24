@@ -9,7 +9,7 @@
     "source_docx_available_in_this_repository": false,
     "scope": "Exact Project 4 extract; source DOCX digest supplied by document owner"
   },
-  "status": "compute-measured-reference-pending",
+  "status": "compute-measured-reference-supplement-complete-applicability-unresolved",
   "effective_compute_formula": "C = F / (k * T * 10^12)",
   "effective_compute_unit": "TFLOPS per participating chip",
   "reference_effective_compute_formula": "C_reference = F / (k * T_reference * 10^12)",
@@ -77,8 +77,11 @@
     "quality_and_performance_bind_actual_configuration": true
   },
   "pending_evidence": [
-    "Complete independent whole-model reference, actual dependencies and applicability",
-    "Quantify reference-model uncertainty without fitting B0/B1 time or selecting faster samples"
+    "A必要元数据程序18个固定wave已测且字段/页表正确；其他wave缺少合格的几何推广，不能把同requests/rows视为相同页表增量工作。",
+    "固定计时协议仍有60个未过稳定性的rank/part组，原始值保留。其中rank0索引加0已证明可省，其他实际必要小算子失败不能填0或挑更快批次。",
+    "26个新域留出组的预测误差未通过；原始数值与计时成功仍成立。旧capacity/padding、inactive slots和计时协议差异已列出，未将相关性冒称单一因果。",
+    "采样回传与解析已有源格式测量；N×3无效项及双rank复制是否属于必要参考工作仍有语义适用性限制。",
+    "路由分布条件区间及三组工作分配不是全模型保证界；阶段通过不等于完整效率或50%达标结论。"
   ],
   "existing_audit_path": "reports/vllm-hust-midterm-20261019/m01-recovery/method-v526-20261023/README.md",
   "historical_instrumented": {
@@ -115,5 +118,43 @@
     "device_journals": false,
     "model_profiler": false,
     "replaces_prior_best_b1_performance": false
+  },
+  "reference_supplement": {
+    "path": "reports/vllm-hust-midterm-20261019/m01-recovery/storage-reference-supplement-20261024/summary.json",
+    "sha256": "eafd20b91d5b8d2571e28604a8931ed4596e88c810fb551a7fe80b20f0020861",
+    "unique_cases": 281,
+    "numerical_checks": 1402,
+    "stable_graph_groups": 478,
+    "unstable_graph_groups": 60,
+    "validation": {
+      "fit_count": 1,
+      "source_rank_heldout_groups": 32,
+      "passed": 6,
+      "failed": 26,
+      "old_training_anchors_reused": true,
+      "heldout_not_used_for_training": true,
+      "k_and_thresholds_unchanged": true,
+      "evidence": "minimum-reference-model-mismatch-audit-r1.json"
+    },
+    "scenario_coverage": [
+      {
+        "seed": 0,
+        "missing_duration": 18111,
+        "measured_or_modeled_but_unqualified": 317712,
+        "qualified_duration": 25273
+      },
+      {
+        "seed": 1,
+        "missing_duration": 18081,
+        "measured_or_modeled_but_unqualified": 314176,
+        "qualified_duration": 28839
+      },
+      {
+        "seed": 2,
+        "missing_duration": 18051,
+        "measured_or_modeled_but_unqualified": 315536,
+        "qualified_duration": 27509
+      }
+    ]
   }
 }
