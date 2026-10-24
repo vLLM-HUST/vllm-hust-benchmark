@@ -1,0 +1,38 @@
+{
+  "schema": "ecpa-pre-admission-real-smoke/v1",
+  "classification": "pre-admission-real-smoke",
+  "formal_real_result": false,
+  "registration_authority": false,
+  "candidate_id": "partial-worker-coverage-ascend-910b2-112-v2",
+  "observed_at": "2026-09-21T12:06:26+08:00",
+  "identities": {
+    "runtime_commit": "c9b6bbff27fc8241ba37abf037560cf2875317a2",
+    "runtime_tree": "f00d6c0ffef2afd94548a3cfaecf61f65593d0a7",
+    "accelerator_plugin_commit": "d0d5a38fdc77a4639e58fcd3190740a0f862e0fd",
+    "accelerator_plugin_tree": "b3eadf4b2716e8391556c49653eda7d736ac9ca8",
+    "container_image_id": "sha256:c037d56b32ebbfaab0deb00fdc632222266ff9d31e536648b1a6daebb7a40efa",
+    "cann_version": "9.1.0",
+    "hardware": "Ascend 910B2",
+    "model_repository": "Qwen/Qwen2.5-0.5B-Instruct",
+    "model_revision": "7ae557604adf67be50417f59c2c2f167def9a775"
+  },
+  "execution": {
+    "status": "succeeded",
+    "exit_code": 0,
+    "device_count": 1,
+    "source_overrides": true,
+    "batch_invariant": true,
+    "custom_ops": false,
+    "completed_phases": ["platform-activation", "model-load", "kv-cache-initialization", "kernel-warmup", "request-execution", "shutdown"],
+    "prompt_sha256": "sha256:bbaff4d2ecd5892d4a442b0f53131641bf6e6f284761dd20fc0664bc97145762",
+    "output_sha256": "sha256:9ea4b902b0095411a5dafe7c7f371667038b22a1947ef96ff20c9808dca98ebf",
+    "diagnostic_log_sha256": "sha256:2bb10ffe3a9c846306dd221a4a694de45ffd38afbcad447beb3e01346ddd7421"
+  },
+  "limitations": [
+    "The container binary was built from older runtime and accelerator-plugin commits than the mounted source trees.",
+    "VLLM_BATCH_INVARIANT=1 disabled custom operators, so the optimized binary path was not exercised.",
+    "The smoke used one NPU and one request; it does not establish multi-worker coverage or cross-arm equivalence.",
+    "The diagnostic stream was SUT-owned and is not independent observer or host-owned formal evidence.",
+    "This record cannot populate verified-adapters.json or any paper aggregate."
+  ]
+}

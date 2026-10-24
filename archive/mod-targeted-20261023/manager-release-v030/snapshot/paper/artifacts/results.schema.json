@@ -1,0 +1,85 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://vllm-hust.example/schemas/ecpa-result-v1.json",
+  "title": "ECPA formal experiment result",
+  "type": "object",
+  "required": ["schema", "status", "cell_id", "hypothesis", "arm", "identity", "protocol", "outcome", "artifacts"],
+  "properties": {
+    "schema": {"const": "ecpa-result/v1"},
+    "status": {"enum": ["planned", "complete", "failed", "excluded-with-preregistered-reason"]},
+    "cell_id": {"type": "string", "minLength": 1},
+    "hypothesis": {"enum": ["H1", "H2", "H3", "H4"]},
+    "arm": {"enum": ["vanilla-vllm-entry-points", "manual-integration", "ecpa"]},
+    "identity": {
+      "type": "object",
+      "required": ["manager_commit", "host_runtime", "host_version", "plugins", "providers", "hardware", "process_topology"],
+      "properties": {
+        "manager_commit": {"type": ["string", "null"]},
+        "host_runtime": {"type": "string"},
+        "host_version": {"type": "string"},
+        "plugins": {"type": "array", "items": {"type": "object", "required": ["name", "version", "commit"]}},
+        "providers": {"type": "array", "items": {"type": "object", "required": ["name", "version"]}},
+        "hardware": {"type": "string"},
+        "process_topology": {"type": "string"},
+        "container_digest": {"type": ["string", "null"]}
+      },
+      "additionalProperties": true
+    },
+    "protocol": {
+      "type": "object",
+      "required": ["repetition", "independent_service_start", "arm_order", "warm_state", "workload", "fault"],
+      "properties": {
+        "repetition": {"type": "integer", "minimum": 1},
+        "independent_service_start": {"type": "boolean"},
+        "arm_order": {"type": "integer", "minimum": 1},
+        "warm_state": {"enum": ["cold", "warm", "controlled-mixed"]},
+        "workload": {"type": "string"},
+        "fault": {"type": ["string", "null"]},
+        "model_calls": {"type": "integer", "minimum": 0},
+        "api_calls": {"type": "integer", "minimum": 0}
+      },
+      "additionalProperties": true
+    },
+    "outcome": {
+      "type": "object",
+      "required": ["activation_event_coverage", "false_effective", "conflict_truth", "conflict_decision", "rollback_success", "startup_ms", "throughput", "latency_p99_ms", "failure_phase"],
+      "properties": {
+        "activation_event_coverage": {"type": ["number", "null"], "minimum": 0, "maximum": 1},
+        "false_effective": {"type": ["boolean", "null"]},
+        "conflict_truth": {"enum": ["compatible", "conflict", "conditional", "not-applicable", null]},
+        "conflict_decision": {"enum": ["accept", "reject", "conditional", "not-applicable", null]},
+        "rollback_success": {"type": ["boolean", "null"]},
+        "recovery_ms": {"type": ["number", "null"], "minimum": 0},
+        "startup_ms": {"type": ["number", "null"], "minimum": 0},
+        "throughput": {"type": ["number", "null"], "minimum": 0},
+        "latency_p99_ms": {"type": ["number", "null"], "minimum": 0},
+        "cpu_ms": {"type": ["number", "null"], "minimum": 0},
+        "evidence_bytes": {"type": ["integer", "null"], "minimum": 0},
+        "failure_phase": {"type": ["string", "null"]}
+      },
+      "additionalProperties": true
+    },
+    "artifacts": {
+      "type": "object",
+      "required": ["raw_log", "manifest", "plan", "evidence"],
+      "properties": {
+        "raw_log": {"type": ["string", "null"]},
+        "manifest": {"type": ["string", "null"]},
+        "plan": {"type": ["string", "null"]},
+        "evidence": {"type": ["string", "null"]}
+      },
+      "additionalProperties": true
+    }
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"status": {"const": "complete"}}},
+      "then": {"properties": {"artifacts": {"properties": {"raw_log": {"type": "string"}, "manifest": {"type": "string"}}}}}
+    },
+    {
+      "if": {"properties": {"status": {"const": "planned"}}},
+      "then": {"properties": {"outcome": {"properties": {"activation_event_coverage": {"const": null}, "false_effective": {"const": null}, "rollback_success": {"const": null}, "startup_ms": {"const": null}, "throughput": {"const": null}, "latency_p99_ms": {"const": null}}}}}
+    }
+  ],
+  "additionalProperties": false
+}

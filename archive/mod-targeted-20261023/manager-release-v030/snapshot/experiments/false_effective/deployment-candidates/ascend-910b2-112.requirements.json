@@ -1,0 +1,51 @@
+{
+  "schema": "ecpa-formal-real-stack-requirements/v1",
+  "candidate_id": "partial-worker-coverage-ascend-910b2-112-v2",
+  "runtime": {
+    "repository": "vLLM-HUST/vllm-hust",
+    "commit": "c9b6bbff27fc8241ba37abf037560cf2875317a2",
+    "tree": "f00d6c0ffef2afd94548a3cfaecf61f65593d0a7",
+    "upstream_commit": "01f1f58f10c616850a5f5ade129a7b58d62075fb"
+  },
+  "accelerator_plugin": {
+    "repository": "vLLM-HUST/vllm-ascend-hust",
+    "commit": "d0d5a38fdc77a4639e58fcd3190740a0f862e0fd",
+    "tree": "b3eadf4b2716e8391556c49653eda7d736ac9ca8",
+    "verified_runtime_commit": "a97dacb7106ee49f39f3d1fc6ae1800ff724e01d",
+    "required_cann_version": "9.1.0"
+  },
+  "hardware": {
+    "device_family": "Ascend 910B2",
+    "minimum_devices": 2
+  },
+  "model": {
+    "repository": "Qwen/Qwen2.5-0.5B-Instruct",
+    "revision": "7ae557604adf67be50417f59c2c2f167def9a775",
+    "required_files": ["config.json", "model.safetensors", "tokenizer.json", "tokenizer_config.json"],
+    "weight_patterns": ["*.safetensors", "pytorch_model*.bin"],
+    "file_sha256": {
+      "config.json": "18e18afcaccafade98daf13a54092927904649e1dd4eba8299ab717d5d94ff45",
+      "model.safetensors": "fdf756fa7fcbe7404d5c60e26bff1a0c8b8aa1f72ced49e7dd0210fe288fb7fe",
+      "tokenizer.json": "c0382117ea329cdf097041132f6d735924b697924d6f6fc3945713e96ce87539",
+      "tokenizer_config.json": "5b5d4f65d0acd3b2d56a35b56d374a36cbc1c8fa5cf3b3febbbfabf22f359583"
+    }
+  },
+  "execution": {
+    "container_required": true,
+    "image_digest": "sha256:c037d56b32ebbfaab0deb00fdc632222266ff9d31e536648b1a6daebb7a40efa",
+    "image_source_commits": {
+      "runtime": "c9b6bbff27fc8241ba37abf037560cf2875317a2",
+      "accelerator_plugin": "d0d5a38fdc77a4639e58fcd3190740a0f862e0fd"
+    },
+    "runtime_mode": {
+      "batch_invariant": false,
+      "custom_ops": true
+    }
+  },
+  "sources": {
+    "runtime_pr": "https://github.com/vLLM-HUST/vllm-hust/pull/27",
+    "accelerator_plugin_pr": "https://github.com/vLLM-HUST/vllm-ascend-hust/pull/33",
+    "accelerator_plugin_verified_runtime_file": ".github/vllm-main-verified.commit",
+    "accelerator_plugin_version_file": "mkdocs.yml"
+  }
+}

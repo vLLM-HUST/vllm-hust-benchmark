@@ -1,0 +1,59 @@
+{
+  "schema": "ecpa-formal-real-stack-observation/v1",
+  "observed_at": "2026-09-21T12:06:26+08:00",
+  "runtime": {
+    "commit": "c9b6bbff27fc8241ba37abf037560cf2875317a2",
+    "tree": "f00d6c0ffef2afd94548a3cfaecf61f65593d0a7"
+  },
+  "accelerator_plugin": {
+    "commit": "d0d5a38fdc77a4639e58fcd3190740a0f862e0fd",
+    "tree": "b3eadf4b2716e8391556c49653eda7d736ac9ca8"
+  },
+  "cann_version": "9.1.0",
+  "driver_version": "26.0.rc1",
+  "hardware": {
+    "device_family": "Ascend 910B2",
+    "device_count": 8
+  },
+  "execution": {
+    "container_client_present": true,
+    "container_server_accessible": true,
+    "image_digest": "sha256:c037d56b32ebbfaab0deb00fdc632222266ff9d31e536648b1a6daebb7a40efa",
+    "image_source_commits": {
+      "runtime": "f18cf803c5",
+      "accelerator_plugin": "74f0c0a27"
+    },
+    "runtime_mode": {
+      "batch_invariant": true,
+      "custom_ops": false
+    }
+  },
+  "model": {
+    "repository": "Qwen/Qwen2.5-0.5B-Instruct",
+    "revision": "7ae557604adf67be50417f59c2c2f167def9a775",
+    "files": [
+      "config.json",
+      "generation_config.json",
+      "merges.txt",
+      "model.safetensors",
+      "tokenizer.json",
+      "tokenizer_config.json",
+      "vocab.json"
+    ],
+    "file_sha256": {
+      "config.json": "18e18afcaccafade98daf13a54092927904649e1dd4eba8299ab717d5d94ff45",
+      "model.safetensors": "fdf756fa7fcbe7404d5c60e26bff1a0c8b8aa1f72ced49e7dd0210fe288fb7fe",
+      "tokenizer.json": "c0382117ea329cdf097041132f6d735924b697924d6f6fc3945713e96ce87539",
+      "tokenizer_config.json": "5b5d4f65d0acd3b2d56a35b56d374a36cbc1c8fa5cf3b3febbbfabf22f359583"
+    }
+  },
+  "collection": {
+    "runtime_source": "read-only checkout of vLLM-HUST/vllm-hust PR 27",
+    "accelerator_plugin_source": "read-only checkout of vLLM-HUST/vllm-ascend-hust PR 33 tree",
+    "cann_source": "/usr/local/Ascend/cann-9.1.0",
+    "driver_source": "/usr/local/Ascend/driver/version.info",
+    "hardware_command": "npu-smi info -l",
+    "container_command": "sudo docker image inspect vllm-hust-verification:latest",
+    "model_source": "huggingface snapshot metadata and local file digests"
+  }
+}
