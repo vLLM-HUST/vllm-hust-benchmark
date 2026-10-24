@@ -1588,14 +1588,19 @@
     "LOCOMO": {
       "scope": "public",
       "delivery_kind": "review_original_source_protocol",
-      "status": "REVIEWED_GAPS_RECORDED",
+      "status": "IN_PROGRESS",
       "checked": false,
       "legacy_checked": true,
       "existing_receipt": "docs/workload-data/validation/locomo-original-qa-sampled-20261023.json",
       "category4_receipt": "docs/workload-data/validation/locomo-category4-native-20261024.json",
       "category5_original_preflight": "docs/workload-data/validation/locomo-category5-original-preflight-20261024.json",
+      "missing_key_compatibility_audit": "docs/workload-data/validation/locomo-missing-key-compatibility-20261025.json",
+      "research_exact_artifact_handoff_receipt": "docs/workload-data/validation/locomo-research-handoff-20261025.json",
+      "native_public_runner": "scripts/run_locomo_original_qa.py",
+      "native_client_dependencies": "configs/workload-native/locomo-text-qa-py312-dependencies.txt",
+      "native_queue_state": "RUNNING_PRESELECTED_NEW99_ORIGINAL_QA_TASKS",
       "delivery_receipt": null,
-      "blocker": "已覆盖类别1–4共9个唯一原题。原版第5类共有446题，其中444题无answer；直接调用固定作者生成及评分函数均在模型前触发KeyError:answer，已0模型调用复现。发布方PR11/41均未合并；兼容修复须显式留痕并保持原数据/MC任务/评分规则，当前尚未实施或验证；完整公共入口亦待补，不勾来源。"
+      "blocker": "复用已审计9个原题。新增公共入口提供显式缺键兼容开关：原1542个answer读取保留，仅缺键的444个cat5回退原adversarial_answer；原数据/源码文件不改，保留两题既有冲突字段的原answer。CPU回归1540个cat1–4评分分支及旧9题真实分数相等，非新模型证据。原5类已事前固定验证选择，新99题正在原生成/评分函数执行（cat3按预估30分钟规则全96，复用旧1题）；未完成原生审计及最终研究端交接前不勾来源。"
     },
     "NATUREBENCH": {
       "scope": "public",
