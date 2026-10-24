@@ -6,6 +6,7 @@ from pathlib import Path
 def test_targeted_original_bytes():
     root = Path(__file__).resolve().parents[1] / "archive/mod-targeted-20261023"
     for name, count in (
+        ("profiler-protocols", 5),
         ("compress", 3),
         ("manager", 2),
         ("pyramid-current", 100),
