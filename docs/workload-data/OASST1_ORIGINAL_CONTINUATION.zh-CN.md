@@ -1,5 +1,7 @@
 # OASST1 原始历史续接视图
 
+当前来源级交付已收口，见[交付回执](validation/oasst-corpus-delivery-20261024.json)。训练集[prepare/resolve回查](validation/oasst-train-pipeline-20261024.json)三条完整历史与实际模型请求一致、参考回复未进入SQLite，0新增模型调用。下文保留分阶段历史证据，较早的“待核验”表述不代表当前状态；完成范围仅为原始语料和已声明的六点历史续接，不是官方质量评分或全量推理。
+
 ## 当前原始成员取得状态
 
 2026-10-24服务器已取得同一固定revision的两个原始Parquet成员：train 84437行、validation

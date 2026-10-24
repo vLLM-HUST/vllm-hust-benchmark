@@ -1,6 +1,7 @@
 """Runner contract checks only, no real requests or publisher payloads."""
 
 import importlib.util
+import json
 from pathlib import Path
 import subprocess
 import sys
@@ -14,6 +15,23 @@ PATH = (
 SPEC = importlib.util.spec_from_file_location("oasst_original_runner", PATH)
 RUNNER = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(RUNNER)
+
+
+def test_corpus_delivery_is_not_quality_or_live_episode_claim():
+    root = PATH.parents[1]
+    docs = root / "docs/workload-data"
+    ledger = json.loads((docs / "dataset-validation-status.json").read_text("utf-8"))
+    item = ledger["delivery_inventory"]["OASST1"]
+    receipt = json.loads((root / item["delivery_receipt"]).read_text("utf-8"))
+    assert item["checked"] and item["status"] == "AVAILABLE"
+    assert receipt["available_original_rows"] == 84437 + 4401
+    assert receipt["verified_unique_continuation_points"] == 6
+    assert not receipt["quality_scored"]
+    assert not receipt["live_episode_validated"]
+    assert not receipt["full_source_inference_validated"]
+    for name in receipt["installed_ci_handoff_receipts"]:
+        evidence = json.loads((docs / "validation" / name).read_text("utf-8"))
+        assert evidence["new_model_calls"] == 0
 
 
 @pytest.mark.parametrize(
