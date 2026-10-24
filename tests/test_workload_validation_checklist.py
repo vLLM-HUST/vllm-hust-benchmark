@@ -8,6 +8,37 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def test_longwriter_delivery_preserves_corpus_and_non_scoring_boundary():
+    directory = ROOT / "docs/workload-data"
+    ledger = json.loads(
+        (directory / "dataset-validation-status.json").read_text("utf-8")
+    )
+    row = ledger["delivery_inventory"]["LONGWRITER"]
+    assert row["checked"] and row["status"] == "AVAILABLE"
+    delivery = json.loads((ROOT / row["delivery_receipt"]).read_text("utf-8"))
+    native = json.loads((ROOT / row["range_runner_native_audit"]).read_text("utf-8"))
+    handoff = json.loads(
+        (ROOT / row["research_exact_artifact_handoff_receipt"]).read_text("utf-8")
+    )
+    assert delivery["fixed_original_indices"] == [0, 1, 2, 5997, 5998, 5999]
+    assert native["verified_unique_original_tasks"] == 6
+    assert native["previous_unique_original_tasks_reused"] == 3
+    assert [sample["original_row_index"] for sample in native["samples"]] == [
+        5997,
+        5998,
+        5999,
+    ]
+    assert native["generation_config"] == {"temperature": 0.5, "max_tokens": 32768}
+    assert native["new_range_runner_native_validated"]
+    assert handoff["complete_inputs_and_independent_references_equal"]
+    assert handoff["research_source_index_import_rows"] == 3
+    assert handoff["research_direct_prepare_resolve_rows"] == 3
+    assert not delivery["semantic_or_length_quality_claim"]
+    assert not delivery["is_longbench_write_evaluation"]
+    assert not delivery["full_corpus_native_completed"]
+    assert not native["request_wire_capture_claim"]
+
+
 def test_structeval_checkpoint_counts_only_audited_terminal_protocols():
     directory = ROOT / "docs/workload-data"
     ledger = json.loads(
