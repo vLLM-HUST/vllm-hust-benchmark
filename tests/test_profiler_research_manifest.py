@@ -9,7 +9,9 @@ def test_profiler_research_custody_manifest():
             root / "archive/mod-targeted-20261023/profiler-research/manifest.json"
         ).read_text()
     )
-    assert manifest["source_commit"] == "3861e7caa276d6696b9354c1850a7c8ebf9b3ba3"
+    # Public source commit, not a credential.
+    source = "3861e7caa276d6696b9354c1850a7c8ebf9b3ba3"  # pragma: allowlist secret
+    assert manifest["source_commit"] == source
     assert manifest["source_visibility"] == "public"
     rows = manifest["files"]
     assert len(rows) == len({row["path"] for row in rows}) == 48
@@ -17,7 +19,7 @@ def test_profiler_research_custody_manifest():
     assert all(len(row["sha256"]) == 64 for row in rows)
     assert (
         manifest["archive"]["sha256"]
-        == "ce5d45f2f8b30bbcdcd1de03d9cf79f81c9830efcf498fc6ae5db098e0f15bad"
+        == "ce5d45f2f8b30bbcdcd1de03d9cf79f81c9830efcf498fc6ae5db098e0f15bad"  # pragma: allowlist secret
     )
     assert manifest["archive"]["bytes"] == 140199
     paths = {row["path"] for row in rows}
