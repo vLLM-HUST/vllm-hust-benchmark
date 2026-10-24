@@ -48,6 +48,16 @@ def test_explicit_original_targets_are_not_replaced_filtered_or_deduplicated():
             RUNNER.selected_targets(targets)
 
 
+def test_train_never_silently_uses_validation_ids():
+    with pytest.raises(ValueError, match="explicit"):
+        RUNNER.selected_targets(None, "train")
+    assert RUNNER.selected_targets(["train-original-id"], "train") == [
+        "train-original-id"
+    ]
+    assert RUNNER.SPLITS["train"][1] == 84437
+    assert RUNNER.SPLITS["validation"] == (RUNNER.DATA_SHA, 4401)
+
+
 def test_help_needs_no_optional_data_sdk():
     result = subprocess.run(
         [sys.executable, "-I", str(PATH), "--help"], capture_output=True, text=True
