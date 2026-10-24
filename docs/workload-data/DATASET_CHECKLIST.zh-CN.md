@@ -195,6 +195,11 @@ TB；服务器/data约1.42TB可用，未缩小语料。ChartQA当前两卡主机
 | PAIO-REUSE-CONV-5000       | [x] 私有原请求可用    | 复用原前三条NPU回放；固定CI读取/原响应束/原声明格式回核通过。[交付复核](validation/enterprise-fixed-ci-handoff-20261024.json)；无语义gold，正文不公开                                                                            |
 | PAIO-SEMANTIC-SIMILAR-5000 | [x] 私有原请求可用    | 复用原前三条NPU回放；固定CI读取/原响应束/原声明格式回核通过。[交付复核](validation/enterprise-fixed-ci-handoff-20261024.json)；无语义gold，正文不公开                                                                            |
 
+### 不占卡准备进展
+
+- [x] LONGBENCH/Qasper：固定CI数据包、200条原始数据/参考、全量准备索引及首尾6条回查完成；旧三题原生请求和官方评分已离线复核；补齐原始区间/全量入口及依赖说明。[CPU回执](validation/longbench-qasper-cpu-audit-20261024.json)。
+- [ ] LONGBENCH/Qasper：修改后入口的新原生任务验证、剩余197题执行及研究端精确工件接通尚未完成。准备项打勾不增加来源完成总数，等待研究线程归还NPU窗口。
+
 ## 历史抽样记录（非本轮完成总数）
 
 更新时间：2026-10-23。清单覆盖现有 **89 个公开候选来源、8 份企业数据**；“候选”不等于已取得、已适配或已跑通。新推荐的 17 个来源另列，尚不计入已接入范围。

@@ -2,9 +2,12 @@
 
 import json
 import hashlib
+import importlib.util
 from pathlib import Path
 import subprocess
 import sys
+
+import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -48,12 +51,49 @@ def test_qasper_public_handoff_is_original_three_not_full_suite_or_raw_diagnosti
     assert all(s["finish_reason"] == "length" for s in raw["samples"])
     assert (
         receipt["helper_sha256"]
-        == hashlib.sha256(
-            (ROOT / "scripts/run_longbench_v1_qasper_original.py")
-            .read_bytes()
-            .replace(b"\r\n", b"\n")
-        ).hexdigest()
+        == (
+            "333174542868a42ac1eaed7ad180cc0db8bac2deaab5cb013ea5e67ab6c49ee2"  # pragma: allowlist secret - historical executed helper checksum
+        )
     )
+
+
+def test_qasper_range_full_keep_original_positions_and_fail_closed():
+    spec = importlib.util.spec_from_file_location(
+        "longbench_qasper_runner", ROOT / "scripts/run_longbench_v1_qasper_original.py"
+    )
+    runner = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(runner)
+    rows = [
+        {"id": index, "context": "PRIVATE_SOFTWARE_FIXTURE"} for index in range(200)
+    ]
+    selected = runner.select_original_records(rows, start=197, count=3)
+    assert [index for index, _ in selected] == [197, 198, 199]
+    assert all(row is rows[index] for index, row in selected)
+    assert runner.select_original_records(rows) == list(enumerate(rows[:3]))
+    assert runner.select_original_records(rows, full=True) == list(enumerate(rows))
+    for start, count in [(-1, 3), (0, 0), (199, 2)]:
+        with pytest.raises(ValueError, match="range"):
+            runner.select_original_records(rows, start=start, count=count)
+    with pytest.raises(ValueError, match="full"):
+        runner.select_original_records(rows, start=3, full=True)
+
+
+def test_qasper_cpu_audit_does_not_claim_new_native_execution():
+    receipt = json.loads(
+        (
+            ROOT
+            / "docs/workload-data/validation/longbench-qasper-cpu-audit-20261024.json"
+        ).read_text("utf-8")
+    )
+    assert receipt["original_rows_and_reference_fields_equal"] == 200
+    assert receipt["prepared_original_rows"] == 200
+    assert receipt["prepare_resolve_roundtrips"] == 6
+    assert receipt["saved_native_tasks_reused"] == 3
+    assert receipt["original_prompts_and_budget_equal"]
+    assert receipt["official_saved_prediction_rescore_equal"]
+    assert receipt["audit_model_calls"] == receipt["new_native_tasks"] == 0
+    assert not receipt["new_range_runner_native_validated"]
+    assert not receipt["full_qasper_native_completed"]
 
 
 def test_external_endpoint_rejected_before_loading_original_data(tmp_path):
