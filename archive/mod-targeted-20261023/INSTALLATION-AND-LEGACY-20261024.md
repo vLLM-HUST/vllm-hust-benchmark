@@ -28,7 +28,9 @@ wheel; this is not a general binary security or runtime qualification claim.
 The v0.3.0 sdist contains 25 selected evidence/output/context members:
 10 match already archived benchmark bytes; 15 differ from or are absent in the
 currently examined Manager snapshots and are preserved under
-[manager-release-v030](manager-release-v030/snapshot/), with its original LICENSE.
+[manager-release-v030](manager-release-v030/snapshot/). The release tag has no
+standalone LICENSE file; its [pyproject license declaration](https://github.com/vLLM-HUST/extension-manager/blob/v0.3.0/pyproject.toml)
+is `Apache-2.0`. No missing license file is invented or claimed to be archived.
 `evidence_bindings` in the review supplies every member path, size, SHA and either
 an existing fixed URL or the new repository path. These include historical
 qualification/blocker documents, deployment preflight/observation records,
