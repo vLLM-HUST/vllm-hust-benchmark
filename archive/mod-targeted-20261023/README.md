@@ -132,3 +132,9 @@ boundaries.
 Skill review: E04/E31/E37/E42/E43/E47. No new measurement, host-volume write, raw-byte rewrite,
 installation-asset deletion or gate bypass is authorized by the index. This batch uses the existing
 persistent root volume with sparse checkout, not the ephemeral host workspace.
+
+# Profiler entry documentation custody
+
+`profiler-entry-docs/manifest.json` binds five unchanged README, changelog and research/roadmap
+originals. Numeric observations and historical consumer instructions remain historical; this does
+not establish current device readiness.
