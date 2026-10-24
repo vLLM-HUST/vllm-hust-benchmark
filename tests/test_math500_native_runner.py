@@ -93,16 +93,31 @@ def test_requires_the_pinned_inspect_release(monkeypatch):
         require_inspect_version("inspect")
 
 
-def test_delivery_ledger_keeps_math500_unchecked_until_native_inspect_run():
+def test_delivery_requires_native_inspect_and_fixed_artifact_receipts():
     docs = REPOSITORY_ROOT / "docs/workload-data"
     ledger = json.loads((docs / "dataset-validation-status.json").read_text("utf-8"))
     item = ledger["delivery_inventory"]["MATH500"]
     guide = (docs / "MATH500_ORIGINAL_TASK.zh-CN.md").read_text("utf-8")
     checklist = (docs / "DATASET_CHECKLIST.zh-CN.md").read_text("utf-8")
 
-    assert item["status"] == "REVIEWED_GAPS_RECORDED"
-    assert item["checked"] is False
-    assert item["delivery_receipt"] is None
+    assert item["status"] == "AVAILABLE"
+    assert item["checked"] is True
+    delivery = json.loads(
+        (REPOSITORY_ROOT / item["delivery_receipt"]).read_text("utf-8")
+    )
+    assert delivery["source_checkbox_eligible"] is True
+    assert delivery["verified_sample_epochs"] == 12
+    assert not delivery["full_suite_validated"]
+    assert delivery["scoring"].startswith("Original model_graded_fact")
+    artifact = json.loads(
+        (docs / "validation" / delivery["installed_ci_reader_receipt"]).read_text(
+            "utf-8"
+        )
+    )
+    assert artifact["source_commit"] == delivery["source_commit"]
+    assert artifact["original_rows_field_checked"] == 500
+    assert artifact["original_sample_roundtrips"] == 3
+    assert artifact["model_calls"] == 0
     assert INSPECT_TASK in guide
     assert "model_graded_fact" in guide
     assert "不冒充H4官方分数" in checklist
