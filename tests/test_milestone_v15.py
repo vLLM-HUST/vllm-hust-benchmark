@@ -60,7 +60,7 @@ def test_v15_exact_extract_and_offline_reuse():
         )
     )
     report = (REPORT / "中期测试报告.md").read_text()
-    assert "报告版本：V0.77" in report
+    assert "报告版本：V0.78" in report
     assert "V1.5第3.4.4节按测量区间分摊费用" in report
     assert "M06全流程验收未通过" not in report
     assert "已完成75种通信图参考" in report
