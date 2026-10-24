@@ -2,7 +2,8 @@
 
 ## 测试对象与配置
 
-Qwen3.5-35B-A3B，BF16，TP2；同一 MMLU-Pro 200 请求工况，每请求输出 256 token。候选由 BetterScale、Prefill Microflow、KV materialization 及位置快照、草稿因果读取范围修正组成。实际运行版本与完整参数见原始 execution-plan.json 和 launch-command.json。
+Qwen3.5-35B-A3B，BF16，TP2；同一 MMLU-Pro 200 请求工况，每请求输出 256 token。候选由 BetterScale、Prefill Microflow、KV
+materialization 及位置快照、草稿因果读取范围修正组成。实际运行版本与完整参数见原始 execution-plan.json 和 launch-command.json。
 
 ## 测试方法
 
@@ -22,7 +23,8 @@ Qwen3.5-35B-A3B，BF16，TP2；同一 MMLU-Pro 200 请求工况，每请求输�
 | 原始文件校验       | 23 项 SHA256 通过                                |
 | 退出与资源释放     | 客户端 0；服务受控退出 130；会话排空、设备释放   |
 
-原始 receipt 的 retained_count_complete 为 false。派生核算将 132 条未更新事件分为首次输出前 13 条及输出预算完成后 119 条，未覆盖原记录。逐请求接纳序列重建的必要草稿依赖与两 rank 物理缓存记录一致。
+原始 receipt 的 retained_count_complete 为 false。派生核算将 132 条未更新事件分为首次输出前 13 条及输出预算完成后 119
+条，未覆盖原记录。逐请求接纳序列重建的必要草稿依赖与两 rank 物理缓存记录一致。
 
 ## 结论
 
