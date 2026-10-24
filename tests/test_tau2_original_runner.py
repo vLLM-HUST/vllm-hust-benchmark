@@ -13,6 +13,54 @@ import pytest
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def test_telecom_delivery_uses_new_native_branch_and_fresh_client_evidence():
+    ledger = json.loads(
+        (ROOT / "docs/workload-data/dataset-validation-status.json").read_text("utf-8")
+    )
+    row = ledger["delivery_inventory"]["TAUBENCH"]
+    assert row["checked"] and row["status"] == "AVAILABLE"
+    native = json.loads((ROOT / row["action_branch_native_audit"]).read_text("utf-8"))
+    clean = json.loads((ROOT / row["clean_installation_audit"]).read_text("utf-8"))
+    delivery = json.loads((ROOT / row["delivery_receipt"]).read_text("utf-8"))
+    assert native["verified_unique_original_tasks"] == 6
+    assert native["historical_unique_original_tasks_reused"] == 3
+    assert native["new_unique_original_tasks"] == 3
+    assert all(
+        task["official_full_reward_info_equal"] and task["original_task_equal"]
+        for task in native["tasks"]
+    )
+    assert native["original_max_steps"] == 200 and native["original_max_errors"] == 10
+    assert native["evaluation_type"] == "ALL" and native["both_native_roles_retained"]
+    assert clean["installed_dependency_packages_equal"] == 125
+    assert clean["original_python_files_equal"] == 89
+    assert clean["new_clean_environment_install_verified"] and clean["pip_check_passed"]
+    assert clean["fresh_client_saved_native_full_reward_info_rescore_equal"]
+    assert clean["fresh_client_rescored_original_episodes"] == 3
+    assert clean["fresh_client_rescore_model_calls"] == 0
+    assert not clean["native_generation_rerun_in_fresh_client"]
+    assert not delivery["full2285_native_execution_claim"]
+    assert not delivery["other_tau2_domains_verified"]
+    assert not delivery["model_quality_or_performance_claim"]
+
+
+def test_all_native_reference_handoff_is_not_full_task_execution():
+    ledger = json.loads(
+        (ROOT / "docs/workload-data/dataset-validation-status.json").read_text("utf-8")
+    )
+    row = ledger["delivery_inventory"]["TAUBENCH"]
+    receipt = json.loads(
+        (ROOT / row["research_exact_artifact_handoff_receipt"]).read_text("utf-8")
+    )
+    assert receipt["original_native_references"] == 2285
+    assert receipt["installed_provider_payload_files_equal"] == 32
+    assert receipt["research_prepare_and_verify_both_used"]
+    assert receipt["original_task_ids_order_positions_and_source_digests_equal"]
+    assert receipt["new_native_tasks_or_model_calls"] == 0
+    assert not receipt["full_telecom_native_execution_claim"]
+    assert not receipt["research_observation_runtime_accepted"]
+    assert not receipt["other_domains_verified"]
+
+
 def test_full_source_preflight_and_snapshot_are_not_new_native_tasks():
     receipt = json.loads(
         (
