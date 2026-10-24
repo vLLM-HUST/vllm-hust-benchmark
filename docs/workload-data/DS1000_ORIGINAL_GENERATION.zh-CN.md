@@ -50,6 +50,9 @@ python scripts/run_ds1000_original_generation.py \
 
 ## 清单
 
+2026-10-24[当前服务器隔离预检](validation/code-execution-isolation-preflight-20261024.json)仍不能建立可验证的文件系统隔离，功能执行受阻。user/network
+namespace成功不等于代码沙箱可用；未裸执行原code_context或生成代码，也未改预算和结束标记。待具备隔离环境后复用原补全，接发布方test_execution/test_string评分。
+
 - [x] 原始固定文件服务器读取/prepare/resolve三条输入与参考分离回查。
 - [x] 原始前三题NPU补全及真实终止记录；原始预算和后处理顺序保留。
 - [x] 可复用公开入口、CPU协议测试和服务器同三题交接复跑；仍为stop/length/stop，未增预算或改停止方式。

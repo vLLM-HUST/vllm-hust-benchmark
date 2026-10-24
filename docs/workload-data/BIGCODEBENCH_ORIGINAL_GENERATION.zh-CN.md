@@ -52,6 +52,8 @@ python scripts/run_bigcodebench_original_generation.py \
 
 ## 检查清单
 
+当前服务器已重做[隔离预检](validation/code-execution-isolation-preflight-20261024.json)：网络namespace可创建，但mount/PID隔离和私有bubblewrap无害探测失败，且无Docker/Podman/socket。不能据此安全执行生成代码；原功能评分仍未运行。保存的生成结果继续复用，待可验证的隔离环境就绪后接原sanitize/功能测试及评分，不裸执行、不重生成刷分。
+
 - [x] 三个原始任务读取、prepare、resolve输入/参考独立往返。
 - [x] 原版提示/请求函数驱动NPU生成；三条完整输入预检匹配、正常stop。
 - [x] 可复用公开生成入口、CPU协议测试及服务器同三题交接复跑；结果一致，不累计独立任务数。

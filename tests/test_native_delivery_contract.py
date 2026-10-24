@@ -8,6 +8,24 @@ ROOT = Path(__file__).resolve().parents[1]
 DOCS = ROOT / "docs/workload-data"
 
 
+def test_code_generation_is_not_functional_execution_without_isolation():
+    receipt = json.loads(
+        (
+            DOCS / "validation/code-execution-isolation-preflight-20261024.json"
+        ).read_text("utf-8")
+    )
+    assert receipt["network_user_namespace_noop"]["returncode"] == 0
+    assert receipt["mount_network_pid_namespace_noop"]["returncode"] != 0
+    assert receipt["private_bubblewrap_trusted_noop"]["returncode"] != 0
+    assert not receipt["generated_code_executed"]
+    assert not receipt["functional_scores_computed"]
+    assert not receipt["source_checkbox_eligible"]
+    ledger = json.loads((DOCS / "dataset-validation-status.json").read_text("utf-8"))
+    for sid in receipt["affected_sources"]:
+        assert not ledger["delivery_inventory"][sid]["checked"]
+        assert ledger["delivery_inventory"][sid]["isolation_preflight"]
+
+
 def test_new_installed_research_handoff_is_not_published_lock_or_native_run():
     ledger = json.loads((DOCS / "dataset-validation-status.json").read_text("utf-8"))
     status = ledger["research_consumer_latest"]

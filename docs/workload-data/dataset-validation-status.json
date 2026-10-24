@@ -1069,7 +1069,8 @@
       "legacy_checked": false,
       "existing_receipt": "docs/workload-data/validation/bigcodebench-original-generation-npu-20261023.json",
       "delivery_receipt": null,
-      "blocker": null
+      "isolation_preflight": "docs/workload-data/validation/code-execution-isolation-preflight-20261024.json",
+      "blocker": "Current server has no verified isolated execution environment; original functional tests/scorer not run. Reuse existing completions when isolation is available; no unsafe host execution."
     },
     "SWE_BENCH": {
       "scope": "public",
@@ -1209,7 +1210,8 @@
       "legacy_checked": false,
       "existing_receipt": "docs/workload-data/validation/ds1000-original-generation-handoff-20261023.json",
       "delivery_receipt": null,
-      "blocker": null
+      "isolation_preflight": "docs/workload-data/validation/code-execution-isolation-preflight-20261024.json",
+      "blocker": "Verified isolated execution unavailable; original test_execution/test_string not run. Preserve original budget termination and stored code; do not increase budget or replace functional scoring."
     },
     "MIND2WEB": {
       "scope": "public",
@@ -1454,7 +1456,8 @@
       "legacy_checked": false,
       "existing_receipt": "docs/workload-data/validation/humaneval-original-generation-npu-20261023.json",
       "delivery_receipt": null,
-      "blocker": "Generation exists; official functional execution/scoring requires a verified isolated environment. Shared NPU profiling service is active; do not interrupt or mix requests."
+      "isolation_preflight": "docs/workload-data/validation/code-execution-isolation-preflight-20261024.json",
+      "blocker": "Current server: user/network namespace works, mount/PID isolation and private bubblewrap noop fail with permission denied; no Docker/Podman/socket. Existing completions retained; official functional evaluation not executed, no unsafe host-code fallback."
     },
     "MBPP": {
       "scope": "public",
