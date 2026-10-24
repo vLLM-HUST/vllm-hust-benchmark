@@ -1,5 +1,11 @@
 # Targeted MOD original custody
 
+- [KVCompress historical installation narratives](compress-host/manifest.json): unchanged bilingual
+  host installation records and LICENSE. Device smoke, operator correctness and serving protocol
+  observations remain historical, not current acceptance. Legacy local wheel paths and its recorded
+  digest identify a past consumer, not a recovered installation asset; no wheel is deleted or
+  republished.
+
 - [vSpec B16, EAGLE dynamic and Frontier mixed narratives](vspec-b16-frontier/manifest.json): six
   complete historical documents and LICENSE, retaining rejected experiments, quality changes,
   graph/eager distinctions and legacy local paths. Available raw inputs reuse existing capsules; a
