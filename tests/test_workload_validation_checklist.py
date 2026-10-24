@@ -8,6 +8,41 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def test_structeval_checkpoint_counts_only_audited_terminal_protocols():
+    directory = ROOT / "docs/workload-data"
+    ledger = json.loads(
+        (directory / "dataset-validation-status.json").read_text("utf-8")
+    )
+    row = ledger["delivery_inventory"]["STRUCTEVAL"]
+    checkpoint = json.loads(
+        (ROOT / row["latest_completed_protocols_checkpoint"]).read_text("utf-8")
+    )
+    assert not row["checked"]
+    assert (
+        row["verified_unique_native_tasks"]
+        == checkpoint["verified_unique_native_tasks"]
+        == 480
+    )
+    assert checkpoint["previous_unique_original_tasks_reused"] == 339
+    assert checkpoint["new_unique_original_tasks_audited"] == 141
+    assert {item["protocol"] for item in checkpoint["protocols"]} == {
+        "JSON-to-YAML",
+        "TOML-to-JSON",
+        "TOML-to-YAML",
+    }
+    assert all(
+        item["new_original_tasks"] == 47
+        and item["previous_original_tasks_reused"] == 3
+        and item["all_original_protocol_tasks"] == 50
+        and item["official_saved_output_rescore_equal"]
+        for item in checkpoint["protocols"]
+    )
+    assert checkpoint["running_sibling_jobs_excluded"]
+    assert checkpoint["audit_model_calls"] == 0
+    assert not checkpoint["full_source_completed"]
+    assert not checkpoint["original_prompts_output_budget_and_scoring_changed"]
+
+
 def test_qasper_delivery_separates_full_native_run_and_sampled_research_handoff():
     directory = ROOT / "docs/workload-data"
     ledger = json.loads(
