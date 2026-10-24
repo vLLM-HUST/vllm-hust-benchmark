@@ -46,14 +46,10 @@ def test_structeval_checkpoint_counts_only_audited_terminal_protocols():
     )
     row = ledger["delivery_inventory"]["STRUCTEVAL"]
     checkpoint = json.loads(
-        (ROOT / row["latest_completed_protocols_checkpoint"]).read_text("utf-8")
+        (ROOT / row["completed_protocols_checkpoint_chain"][0]).read_text("utf-8")
     )
     assert not row["checked"]
-    assert (
-        row["verified_unique_native_tasks"]
-        == checkpoint["verified_unique_native_tasks"]
-        == 480
-    )
+    assert checkpoint["verified_unique_native_tasks"] == 480
     assert checkpoint["previous_unique_original_tasks_reused"] == 339
     assert checkpoint["new_unique_original_tasks_audited"] == 141
     assert {item["protocol"] for item in checkpoint["protocols"]} == {

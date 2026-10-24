@@ -511,6 +511,28 @@ def test_current_delivery_inventory_and_checklist_are_aligned():
             assert (ROOT / item["delivery_receipt"]).is_file()
 
 
+def test_runtime_prerequisite_rechecks_never_upgrade_blocked_sources():
+    ledger = json.loads((DOCS / "dataset-validation-status.json").read_text("utf-8"))
+    receipt = json.loads(
+        (ROOT / ledger["runtime_prerequisite_latest"]).read_text("utf-8")
+    )
+    assert receipt["new_model_calls"] == receipt["new_source_completion_checks"] == 0
+    assert receipt["code_execution_isolation"]["returncode"] == 1
+    assert not receipt["code_execution_isolation"]["generated_code_executed"]
+    assert not receipt["code_execution_isolation"]["host_security_policy_changed"]
+    assert receipt["paws_official_archive_head"]["http_status"] == 403
+    assert not receipt["paws_official_archive_head"]["dataset_acquired"]
+    assert not receipt["tracelab_cache_gate"]["actual_cache_probe_executed"]
+    assert not receipt["tracelab_cache_gate"]["future_probe_failure_or_fix_claimed"]
+    # Later real runs may legitimately complete a source; this read-only receipt
+    # must never itself become its execution/delivery evidence.
+    assert all(
+        ledger["delivery_inventory"][source].get("delivery_receipt")
+        != ledger["runtime_prerequisite_latest"]
+        for source in receipt["source_ids"]
+    )
+
+
 def test_existing_37_audit_checkmarks_do_not_mean_native_delivery():
     ledger = json.loads((DOCS / "dataset-validation-status.json").read_text("utf-8"))
     review = ledger["existing_37_review"]
