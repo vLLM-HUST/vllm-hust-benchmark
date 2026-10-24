@@ -86,7 +86,7 @@ TB；服务器/data约1.42TB可用，未缩小语料。ChartQA当前两卡主机
 | GPQA                       | [ ] 待开展            | 查已有入口，缺失再补原生协议                                                                                                                                                                                                     |
 | MMLU_PRO                   | — 仅分类              | 复用历史回执，核对完整使用链路                                                                                                                                                                                                   |
 | AI2_ARC                    | [x] 原生抽样交付      | 两子集各原前三题及末三题共12题执行、原版似然评分与回查通过；固定CI组件核对六文件。[交付回执](validation/arc-native-delivery-20261024.json)；支持分别全量，未全跑、不合并分数                                                     |
-| LONGBENCH                  | [ ] 缺口已列待补      | 复用历史证据；原生缺口见37项复核表及方案8.5.2                                                                                                                                                                                    |
+| LONGBENCH                  | [ ] 原生完成待交接    | 已复核原Qasper全部200题的原生执行、官方评分及完整输入/参考；前三题不重跑。研究端固定工件交接待复核，不宣称其他LongBench子集。[原生回执](validation/longbench-qasper-all200-native-20261024.json)                                 |
 | LONGBENCH_V2               | [ ] 缺口已列待补      | 复用历史证据；原生缺口见37项复核表及方案8.5.2                                                                                                                                                                                    |
 | LONGMEMEVAL                | [ ] 待开展            | 查已有入口，缺失再补原生协议                                                                                                                                                                                                     |
 | LONGMEMEVAL_V2             | [ ] 待开展            | 查已有入口，缺失再补原生协议                                                                                                                                                                                                     |
@@ -195,8 +195,14 @@ TB；服务器/data约1.42TB可用，未缩小语料。ChartQA当前两卡主机
 | PAIO-REUSE-CONV-5000       | [x] 私有原请求可用    | 复用原前三条NPU回放；固定CI读取/原响应束/原声明格式回核通过。[交付复核](validation/enterprise-fixed-ci-handoff-20261024.json)；无语义gold，正文不公开                                                                            |
 | PAIO-SEMANTIC-SIMILAR-5000 | [x] 私有原请求可用    | 复用原前三条NPU回放；固定CI读取/原响应束/原声明格式回核通过。[交付复核](validation/enterprise-fixed-ci-handoff-20261024.json)；无语义gold，正文不公开                                                                            |
 
+### 真实原生执行进展
+
+- [x] LONGBENCH/Qasper：原200题全量原生执行及官方F1评分已复核。复用前三题，仅新跑3..199共197题；全200题输入/参考/请求token及私有响应SHA、逐题和整体官方评分复算一致，预算不变。[原生回执](validation/longbench-qasper-all200-native-20261024.json)。不代表其它LongBench子集，也未替代尚待复核的研究侧精确工件交接。
+- [ ] AgentBench/ALFWorld：复用已审计的前41题，新冷却29/照明18/双对象21题均返回原生执行与评分终态，累计109个原任务已有结果。新68题保存输出的完整复核、全组汇总及研究交接待补，不提前勾整源完成，不因奖励0或合法轮次上限换题。
+
 ### 不占卡准备进展
 
+- [x] LONGBENCH_V2：新增原题容量绑定准备CLI，直接执行官方提示构造、在推理前停止。服务器独立67包客户端环境`pip check`通过；历史1/4/6三题提示SHA及token数完全一致，反例0/1/2原样保留资源超限并整批拒绝，不截断/换题/评分，模型调用0。[准备回执](validation/longbench-v2-original-capacity-cpu-20261024.json)、[复现命令](LONGBENCH_V2_ORIGINAL_ATTEMPT.zh-CN.md)。
 - [x] LONGBENCH_V2：移除原生公共入口固定三题的数量硬编码，显式绑定1..503题的软件校验通过，保留原题顺序、身份与原预算；负token数/超限整批拒绝，不过滤成容易子集。服务器相关回归已通过，模型调用0；原三题NPU历史证据不变，修改后入口未作NPU复验。
 - [x] LONGBENCH_V2：补齐本地原生入口的 `/v1` 基地址校验；服务器 CPU
   参数/历史回执回归15项通过，模型调用0。历史三题执行结果保持不变，本项不代表全503题或修改后入口已完成NPU复验。
@@ -226,7 +232,7 @@ TB；服务器/data约1.42TB可用，未缩小语料。ChartQA当前两卡主机
 - [x] LONGWRITER：固定CI数据包、6000条原始消息/独立参考、全量索引和首尾6条回查完成，旧三题响应完整性复核；区间/全量入口及环境边界补齐。[CPU回执](validation/longwriter-cpu-audit-20261024.json)。
 - [ ] LONGWRITER：修改后入口新实跑及长度/语义质量评估未完成；本来源是作者训练语料，不冒充LongBench-Write评测。
 - [x] LONGBENCH/Qasper：固定CI数据包、200条原始数据/参考、全量准备索引及首尾6条回查完成；旧三题原生请求和官方评分已离线复核；补齐原始区间/全量入口及依赖说明。[CPU回执](validation/longbench-qasper-cpu-audit-20261024.json)。
-- [ ] LONGBENCH/Qasper：修改后入口的新原生任务验证、剩余197题执行及研究端精确工件接通尚未完成。准备项打勾不增加来源完成总数，等待研究线程归还NPU窗口。
+- [ ] LONGBENCH/Qasper：研究端精确工件交接仍待复核；原197题续跑和官方评分已完成，不再列作原生缺口。来源整体未因此提前打勾，也不扩称其它LongBench子集。
 
 #### ScienceAgentBench verified版原生链路准备
 

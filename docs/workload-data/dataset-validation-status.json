@@ -2,12 +2,13 @@
   "schema_version": "workload-validation-checklist/v1",
   "updated_at": "2026-10-24",
   "native_runtime_latest": {
-    "status": "SSH_CONNECTION_REFUSED_CURRENT_REMOTE_STATE_UNKNOWN",
-    "last_verified_model_runtime_status": "ORIGINAL_PROFILE_RESTORE_FAILED_HOST_PINNED_ALLOCATION",
-    "server_reclaimed_or_connection_refusal_cause_verified": false,
+    "status": "ORIGINAL_PROFILE_READY_NATIVE_BATCHES_AWAITING_AUDIT",
+    "previous_host_model_runtime_status": "ORIGINAL_PROFILE_RESTORE_FAILED_HOST_PINNED_ALLOCATION",
+    "replacement_host_identity_verified": true,
+    "server_reclaimed_or_previous_connection_refusal_cause_verified": false,
     "configuration_changed": false,
     "first_error": "torch.OutOfMemoryError: aclrtMallocHostWithCfg error207001",
-    "task_generation_started": false,
+    "task_generation_started": true,
     "queued_controllers_resumed": false,
     "sampled_cgroup_memory_current_bytes": 64308355072,
     "sampled_cgroup_memory_max_bytes": 68719476736,
@@ -15,7 +16,13 @@
     "cache_causality_proven": false,
     "weights_or_evidence_deleted": false,
     "global_drop_caches_or_device_reset_performed": false,
-    "next_action": "User asked for restored SSH entry. Preserve completed CPU evidence captured before connection refusal; do not infer current remote process or server state. No cache reclaim, reset, or blind model restart performed."
+    "historical_memory_snapshot_is_previous_host_not_current": true,
+    "current_profile_model_alias": "workload-qwen35-27b-128k-nonthinking",
+    "current_profile_context_limit": 131072,
+    "current_profile_tensor_parallel_size": 2,
+    "current_model_metadata_and_nine_runtime_file_digests_match_prior_binding": true,
+    "current_full_weight_hashes_recomputed": false,
+    "next_action": "Qasper remaining197 native tasks finished and saved-output official scoring audited with reused3. ALFWorld original cool29/light18/pick_two21 CLI groups all terminal, no repeated completed41; audit saved outputs before completion claims. Research artifact handoff and other native sources remain pending. Check actual processes/receipts before next job; no cache reclaim or device reset performed."
   },
   "scope": "Per-source integration validation; not performance or full-suite acceptance",
   "completion_rule": {
@@ -1016,8 +1023,10 @@
       "existing_receipt": "docs/workload-data/validation/longbench-v1-qasper-public-handoff-npu-20261023.json",
       "delivery_receipt": null,
       "cpu_readiness_audit": "docs/workload-data/validation/longbench-qasper-cpu-audit-20261024.json",
+      "all200_original_qasper_native_receipt": "docs/workload-data/validation/longbench-qasper-all200-native-20261024.json",
+      "all200_original_qasper_native_checked": true,
       "non_npu_preparation_checked": true,
-      "blocker": "Original Qasper200 rows and references, fixed CI package, all200 prepared records, six resolve roundtrips and three saved native requests/scoring audited without model calls. Public range/full entry software-tested; remaining197 native tasks and exact research-side artifact handoff pending. No claim of other LongBench protocols."
+      "blocker": "Original Qasper200 native tasks fully executed and officially scored: reused0..2, new3..199, all200 full prompts/reference answers/usage/private-response hashes and scores rechecked; original budget unchanged. Fixed CI3f32 payloads verified. Exact research-side artifact handoff remains pending; no claim of other LongBench protocols or source completion."
     },
     "LONGBENCH_V2": {
       "scope": "public",
@@ -1028,6 +1037,9 @@
       "existing_receipt": "docs/workload-data/validation/longbench-v2-original-attempt-npu-20261022.json",
       "delivery_receipt": null,
       "explicit_selection_entry_software_checked": true,
+      "capacity_preparation_entry": "scripts/prepare_longbench_v2_original_capacity.py",
+      "capacity_preparation_original_cpu_receipt": "docs/workload-data/validation/longbench-v2-original-capacity-cpu-20261024.json",
+      "capacity_preparation_original_cpu_checked": true,
       "entry_native_after_update_checked": false,
       "blocker": "Historical Short original rows1/4/6 executed and officially scored0/3; legal128-token length finish is retained, not an executor failure or requirement to rerun for stop. Updated explicit1..503 selection entry has31 CPU software tests and no new NPU run. Whole source not complete: Medium/Long full-input resource coverage and current entry/artifact handoff remain pending; never truncate or replace blocked original tasks."
     },

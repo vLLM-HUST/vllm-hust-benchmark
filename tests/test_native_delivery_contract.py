@@ -8,6 +8,30 @@ ROOT = Path(__file__).resolve().parents[1]
 DOCS = ROOT / "docs/workload-data"
 
 
+def test_qasper_complete_native_tasks_are_not_full_longbench_or_research_handoff():
+    receipt = json.loads(
+        (DOCS / "validation/longbench-qasper-all200-native-20261024.json").read_text(
+            "utf-8"
+        )
+    )
+    assert receipt["original_unique_tasks"] == 200
+    assert receipt["new_native_tasks"] == 197
+    assert receipt["historical_native_tasks_reused"] == 3
+    assert receipt["all_original_inputs_references_and_request_token_counts_verified"]
+    assert receipt["all_saved_response_hashes_and_official_scores_recalculated"]
+    assert receipt["installed_ci_payloads_equal"] == 32
+    assert sum(receipt["terminal_counts"].values()) == 200
+    assert receipt["official_qa_f1_percent"] == 50.7
+    assert receipt["full_original_qasper_claim"]
+    assert not receipt["full_longbench_other_subsuites_claim"]
+    assert not receipt["single_uninterrupted_run_claim"]
+    assert not receipt["research_side_exact_artifact_handoff_verified_by_this_audit"]
+    assert not receipt["original_output_budget_or_inputs_changed"]
+    assert not receipt["original_questions_replaced"]
+    assert receipt["audit_model_calls"] == 0
+    assert not receipt["performance_or_engine_speedup_claim"]
+
+
 def test_science_verified_task_metadata_and_source_are_not_native_execution():
     receipt = json.loads(
         (DOCS / "validation/scienceagentbench-cpu-preparation-20261024.json").read_text(

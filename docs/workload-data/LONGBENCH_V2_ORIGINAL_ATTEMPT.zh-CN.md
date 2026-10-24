@@ -52,6 +52,38 @@ tokens加原128输出预算均可容纳于绑定的131072窗口。原公开预�
 路径、凭据和查询参数；参数错误在加载数据和发起模型请求前退出。2026-10-24 的这一参数校验修复仅做服务器 CPU 软件回归，未新增原生题目验证。上述历史交接回执中的 helper SHA
 保持为当时实际执行的版本，不回写为当前脚本的 SHA。
 
+### 容量绑定准备：不需要运行模型
+
+`scripts/prepare_longbench_v2_original_capacity.py`直接调用固定版官方`get_pred`构造原始non-CoT提示，在进入`query_llm`之前以内部信号退出；不返回假答案，不进入截断、生成或评分逻辑。再用本地模型的原chat
+template计算完整输入token数。选定的原行号在容量检查前固定，必须递增且不重复；没有“自动挑能放下的题”。
+
+在**独立的Python3.12客户端环境**安装，勿混入正在运行的NPU引擎环境：
+
+```sh
+python3.12 -m venv /private/longbench-v2-client
+/private/longbench-v2-client/bin/python -m pip install \
+  --index-url https://download.pytorch.org/whl/cpu torch==2.10.0+cpu
+/private/longbench-v2-client/bin/python -m pip install \
+  -r configs/workload-native/longbench-v2-qwen35-client-py312.txt
+/private/longbench-v2-client/bin/python -m pip check
+/private/longbench-v2-client/bin/python scripts/prepare_longbench_v2_original_capacity.py \
+  --data-file /authorized/LongBench-v2/data.json \
+  --official-archive /authorized/longbench-official.zip \
+  --tokenizer /authorized/Qwen3.5-27B \
+  --row-index 1 --row-index 4 --row-index 6 \
+  --output /private/fresh-capacity
+```
+
+这里复用历史三题固定行号，不重新选择样本；命令只做CPU准备，不部署或运行CPU模型。需要全部原题的预检时，用`--full`替代`--row-index`参数；它保留所有503题的容量状态，不等于全套原生验证完成。输出目录须不存在，结果为其中的`capacity-selection.private.json`。即使准备进程退出0，也必须查看`ready_for_execution`：超限题仍在`selected`内且标为资源限制，原生执行入口会整批拒绝，不静默裁剪或换题。
+
+服务器已用原文件完成两组CPU预检：原行1/4/6的完整提示SHA及38444/24590/46971
+token与历史执行记录完全一致；反例原行0/1/2中0及2超限，三题均保留，原生执行器校验明确拒绝。见[原题容量准备回执](validation/longbench-v2-original-capacity-cpu-20261024.json)。该步骤模型调用和评分均为0，不升级历史三题或完整套件的NPU状态。
+
+已验证客户端为Linux
+ARM64、Python3.12.13、PyTorch2.10.0+cpu、Transformers5.5.4、Tokenizers0.22.2、OpenAI3.1.0、Datasets4.3.0、PyArrow22.0.0、NumPy1.26.4；完整67包版本见上述生成快照，独立环境`pip check`通过。该栈用于兼容现有Qwen3.5部署，不宣称复现[上游旧软件栈](https://github.com/THUDM/LongBench/blob/2e00731f8d0bff23dc4325161044d0ed8af94c1e/requirements.txt)或原作者模型基线。准备过程修复了两处环境兼容问题：显式固定PyArrow22以兼容NumPy1.26；显式`return_dict=False`仅固定tokenizer返回表示，不改输入。宿主环境已有的无关OpenCV/Prometheus依赖冲突没有被隐藏为“全局环境干净”，也未为本客户端去修改引擎环境。
+
+### 原生执行和官方评分
+
 ```sh
 python scripts/run_longbench_v2_original_samples.py \
   --data-file /authorized/LongBench-v2/data.json \
@@ -60,6 +92,8 @@ python scripts/run_longbench_v2_original_samples.py \
   --tokenizer /authorized/Qwen3.5-27B \
   --output /private/fresh-run --endpoint http://127.0.0.1:19466/v1
 ```
+
+上例可直接复用公开的历史三题绑定；使用新准备结果时，将`--capacity-selection`替换为`/private/fresh-capacity/capacity-selection.private.json`。此步骤才会向已部署的本地NPU模型发起真实请求。
 
 公开回执不含问题、答案、上下文或模型回答。上游私有预测文件会截短其保存的context，但不代表模型输入被截断；完整原输入仍由固定文件与SHA引用。此处是执行接入与来源边界，不迁科研观测/机制分析。CI只验证软件参数和事实口径，不跑模型或性能。
 
