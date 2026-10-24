@@ -8,6 +8,25 @@ ROOT = Path(__file__).resolve().parents[1]
 DOCS = ROOT / "docs/workload-data"
 
 
+def test_burstgpt_official_simulation_not_claimed_as_original_request_replay():
+    receipt = json.loads(
+        (DOCS / "validation/burstgpt-official-demo-review-20261024.json").read_text(
+            "utf-8"
+        )
+    )
+    assert receipt["external_prompt_pool_required"]
+    assert not receipt["original_prompt_replay"]
+    assert not receipt["source_checkbox_eligible"]
+    assert (
+        receipt["official_demo_execution"]
+        == "NOT_EXECUTED_TRANSPORT_INCOMPATIBLE_WITH_CURRENT_SERVICE"
+    )
+    assert (
+        receipt["current_service_openapi_probe"]["generate_endpoint_present"] is False
+    )
+    assert receipt["new_model_calls"] == 0
+
+
 def test_locomo_supplement_does_not_close_unverified_category5_or_full_delivery():
     ledger = json.loads((DOCS / "dataset-validation-status.json").read_text("utf-8"))
     item = ledger["delivery_inventory"]["LOCOMO"]
