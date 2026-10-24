@@ -56,6 +56,8 @@ def test_standalone_without_controller_or_deployment(tmp_path):
         ("batch", "client_concurrency_limit", 1),
         ("agent", "step_limit", 0),
         ("agent", "automatic_retries", 1),
+        ("agent", "task_instructions", "  "),
+        ("agent", "task_instructions", ["run tests"]),
         ("batch", "program_instances", 2),
         ("model", "api_base", "local"),
     ],
@@ -63,6 +65,66 @@ def test_standalone_without_controller_or_deployment(tmp_path):
 def test_invalid_protocol(section, key, value):
     c = configuration()
     c[section][key] = value
+    with pytest.raises(ValueError):
+        runner.validate(c)
+
+
+def test_initial_repository_checks_real_git_state(tmp_path):
+    subprocess.run(["git", "init", "-q", str(tmp_path)], check=True)
+    tracked = tmp_path / "source.txt"
+    tracked.write_text("original\n")
+    subprocess.run(["git", "add", "source.txt"], cwd=tmp_path, check=True)
+    subprocess.run(
+        [
+            "git",
+            "-c",
+            "user.name=Test",
+            "-c",
+            "user.email=test@example.invalid",
+            "commit",
+            "-qm",
+            "fixture",
+        ],
+        cwd=tmp_path,
+        check=True,
+    )
+    commit = subprocess.check_output(
+        ["git", "rev-parse", "HEAD"], cwd=tmp_path, text=True
+    ).strip()
+
+    def actual_state():
+        result = subprocess.run(
+            ["sh", "-c", "git rev-parse HEAD && git status --porcelain"],
+            cwd=tmp_path,
+            capture_output=True,
+            text=True,
+        )
+        return {"returncode": result.returncode, "output": result.stdout}
+
+    runner.validate_initial_repository(actual_state(), commit)
+    (tmp_path / "appendonly.aof").write_text("runtime data\n")
+    with pytest.raises(ValueError):
+        runner.validate_initial_repository(actual_state(), commit)
+    runner.validate_initial_repository(actual_state(), commit, ["appendonly.aof"])
+    tracked.write_text("changed source\n")
+    with pytest.raises(ValueError):
+        runner.validate_initial_repository(actual_state(), commit, ["appendonly.aof"])
+    tracked.write_text("original\n")
+    (tmp_path / "unexpected.txt").write_text("unexpected\n")
+    with pytest.raises(ValueError):
+        runner.validate_initial_repository(actual_state(), commit, ["appendonly.aof"])
+    with pytest.raises(ValueError):
+        runner.validate_initial_repository(
+            actual_state(), "wrong", ["appendonly.aof", "unexpected.txt"]
+        )
+
+
+@pytest.mark.parametrize(
+    "allowed", [["*"], ["../data"], ["/tmp/data"], [".git/config"], "data"]
+)
+def test_initial_untracked_allowlist_rejects_broad_or_unsafe_paths(allowed):
+    c = configuration()
+    c["container"]["allowed_initial_untracked"] = allowed
     with pytest.raises(ValueError):
         runner.validate(c)
 
@@ -215,3 +277,103 @@ def test_verified_inputs_fail_closed(tmp_path, monkeypatch, mutation):
             runner.verify_inputs(c, tmp_path)
     else:
         assert runner.verify_inputs(c, tmp_path)["official_sources"] == "PASS"
+
+
+@pytest.mark.parametrize("phase", ["query", "tool"])
+def test_real_wall_alarm_bypasses_agent_error_recovery_and_closes_event(
+    tmp_path, phase
+):
+    """A real timer must abort rather than become a recoverable tool/HTTP error."""
+    code = """
+import json, signal, time, sys
+from pathlib import Path
+from types import SimpleNamespace
+from vllm_hust_benchmark.swe_bench_pro import AgentWallBudgetExceeded, _wall_budget_expired
+from vllm_hust_benchmark.swe_bench_pro_timing import instrument
+folder, phase = Path(sys.argv[1]), sys.argv[2]
+def blocked(*args, **kwargs):
+    time.sleep(5)
+model = SimpleNamespace(config=SimpleNamespace(model_kwargs={}), query=blocked)
+env = SimpleNamespace(execute=blocked)
+instrument(model, env, folder, 'budget-program')
+signal.signal(signal.SIGALRM, _wall_budget_expired)
+signal.setitimer(signal.ITIMER_REAL, 0.05)
+try:
+    try:
+        model.query([]) if phase == 'query' else env.execute('blocked tool')
+    except Exception:
+        print('RECOVERED_AND_CONTINUED')
+except AgentWallBudgetExceeded as exc:
+    print(type(exc).__name__, str(exc))
+finally:
+    signal.setitimer(signal.ITIMER_REAL, 0)
+    (folder / 'cleanup-ran').write_text('yes')
+"""
+    result = subprocess.run(
+        [sys.executable, "-c", code, str(tmp_path), phase],
+        env={**os.environ, "PYTHONPATH": str(ROOT / "src")},
+        capture_output=True,
+        text=True,
+        timeout=10,
+        check=True,
+    )
+    assert "AgentWallBudgetExceeded Frozen Agent wall budget reached" in result.stdout
+    assert "RECOVERED_AND_CONTINUED" not in result.stdout
+    assert (tmp_path / "cleanup-ran").read_text() == "yes"
+    events = [
+        json.loads(line)
+        for line in (tmp_path / "agent-events-private.jsonl").read_text().splitlines()
+    ]
+    assert len(events) == 2
+    assert events[-1]["event"] == (
+        "agent_query_exception" if phase == "query" else "tool_exception"
+    )
+    assert events[-1]["error"] == "AgentWallBudgetExceeded"
+
+
+@pytest.mark.parametrize("wall,expected", [(1200, 2400), (3600, 4200), (7200, 7800)])
+def test_sandbox_outlives_agent_and_preserves_tool_contract(wall, expected):
+    c = configuration()
+    c["agent"]["wall_budget_seconds"] = wall
+    captured = []
+    marker = object()
+
+    def actual_constructor(**kwargs):
+        captured.append(kwargs)
+        return marker
+
+    assert (
+        runner.create_task_environment(
+            c, {"image_id": "immutable-image"}, actual_constructor
+        )
+        is marker
+    )
+    options = captured[0]
+    assert options["container_timeout"] == str(expected) + "s"
+    assert expected >= wall + 600
+    assert options["timeout"] == c["agent"]["tool_timeout_seconds"]
+    assert options["image"] == "immutable-image"
+    assert options["run_args"] == [
+        "--rm",
+        "--entrypoint",
+        "",
+        "--network",
+        c["container"]["network"],
+        "--cpus",
+        str(c["container"]["cpus"]),
+        "--memory",
+        c["container"]["memory"],
+    ]
+    assert c["agent"]["wall_budget_seconds"] == wall
+
+
+@pytest.mark.parametrize("wall", [True, 0, -1, None])
+def test_invalid_sandbox_budget_rejected_before_creation(wall):
+    c = configuration()
+    c["agent"]["wall_budget_seconds"] = wall
+
+    def forbidden(**kwargs):
+        raise AssertionError("No container may be created")
+
+    with pytest.raises(ValueError):
+        runner.create_task_environment(c, {"image_id": "image"}, forbidden)

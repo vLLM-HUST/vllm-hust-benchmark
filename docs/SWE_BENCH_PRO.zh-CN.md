@@ -3,6 +3,85 @@
 通用环境、任务与镜像校验、官方 Agent 运行入口和用户指南由 **vllm-hust-benchmark** 维护。 `request-throttling-controller` 只提供可选的
 Controller 接入与验证；运行本指南不需要克隆或安装它。 这是独立诊断工作负载，不会自动成为网站榜单成绩。
 
+## 新用户推荐入口
+
+**模型服务与任务执行工作区是两个不同的东西。** 模型服务负责回答模型请求；本指南的 CPU 工作区负责运行 Agent、启动 Docker 任务容器、修改代码与测试。 有模型的 Ray
+地址，不代表已经有可运行任务的 Docker 环境。不要给模型工作区挂宿主机 Docker socket，也不要把客户端依赖装入模型环境。
+
+在 Coder 中选择管理员发布的 `swe-bench-pro-cpu` 模板，新建自己的 **CPU 工作区**。该模板提供独立 Docker 服务、客户端和 socket；Docker
+镜像、容器数据与 `/root` 共用所选持久卷额度。建议单任务选择 40 GiB，实际准入仍受平台可用额度约束。普通 `ascend-devbox` 和模型 Ray 模板不能替代这个模板。
+
+模板不存在时，由管理员先按私有云仓库的
+[`scripts/create_swe_bench_workspace.py`](https://github.com/yancanmao/npu-private-cloud/blob/main/scripts/create_swe_bench_workspace.py)
+发布；**不是让每位使用者寻找某个已手工搭好的共享工作区**。管理员一次性准备的内容见下表。
+
+| 管理员负责一次性准备                        | 新工作区入口负责自动完成                                   | 使用者只需提供                                 |
+| ------------------------------------------- | ---------------------------------------------------------- | ---------------------------------------------- |
+| Linux ARM64 CPU 模板、独立 Docker、存储额度 | 检查真实 Docker daemon 的架构与可用性                      | 自己的工作目录                                 |
+| 把固定 ARM 任务镜像放入可达镜像仓库         | 下载固定官方源码、创建独立客户端、安装依赖                 | 已有模型 API `/v1` 地址与服务模型名            |
+| 在模板配置数据下载源和镜像仓库地址          | 下载并校验 V1 数据、固定镜像摘要和代码起点                 | 模型需要鉴权时，提供密钥环境变量名             |
+| 验证仓库制品可拉取，不依赖节点缓存          | 启动一个真实 Agent，保存状态、轨迹与补丁，清理本次任务容器 | 不需要知道旧工作区名称、Docker 路径或手填 JSON |
+
+在新工作区的终端运行下列入口。通过 GitHub 官方 API 获取安装脚本，不要求预先安装 Git，也不下载仓库内的历史图表和实验归档：
+
+```bash
+curl --fail --location \
+  -H 'Accept: application/vnd.github.raw+json' \
+  'https://api.github.com/repos/vLLM-HUST/vllm-hust-benchmark/contents/scripts/bootstrap_swe_bench_pro.py?ref=main' \
+  --output /root/bootstrap_swe_bench_pro.py
+
+python3 /root/bootstrap_swe_bench_pro.py \
+  --work /root/swe-pro-first \
+  --model-api http://MODEL_HOST:MODEL_PORT/v1 \
+  --model-name openai/SERVED_MODEL_NAME \
+  --run
+```
+
+`MODEL_HOST:MODEL_PORT` 和 `SERVED_MODEL_NAME` 换成已有模型服务信息；脚本先检查 `/v1/models` 是否确实包含该模型。 需要认证时追加
+`--api-key-env MODEL_API_KEY`，密钥值只放工作区环境变量，不能写进 URL、命令参数或配置文件。 不加 `--run` 只准备环境，不发模型推理请求。
+
+安装脚本先将源码版本解析为一个固定 Git commit，下载小型运行文件，随后复用本仓库现有的 `check → prepare → verify-inputs → run`，没有第二套 Agent
+实现。 固定官方 Agent、V1 数据 SHA256 和社区 ARM 镜像来源仍以原锁定清单为准；入门任务的不可变 manifest/config 与工具下载摘要另见
+[`swe_bench_pro_bootstrap_lock.json`](../src/vllm_hust_benchmark/data/swe_bench_pro_bootstrap_lock.json)。
+镜像仓库返回不同摘要时，拒绝启动 Agent。现有客户端源码安装方式仍保留在后续章节。
+
+平台模板为安装入口提供 `SWE_BENCH_PRO_DATASET_BASE`、`SWE_BENCH_PRO_IMAGE_MIRROR` 和
+`SWE_BENCH_PRO_IMAGE_REGISTRY_INSECURE`。可用 `--dataset-base`、`--image-mirror-prefix` 显式覆盖；只有管理员明确使用
+HTTP 私有仓库时才启用 `--insecure-image-registry`，默认继续使用 HTTPS。 普通 ARM Linux 环境已有自己获授权的 Docker
+时，也可使用此入口，相关下载源由操作者配置；脚本不会安装系统 Docker、申请卡、扩大磁盘额度或重启模型。
+
+失败时查看 `--work` 下的 `bootstrap-state.json` 与对应步骤日志。环境准备失败后，修正明确的下载源等配置，再为同一命令加
+`--resume`；已完成步骤复用，失败的镜像准备目录另存，不删除证据。 **已有 Agent 运行目录时不会自动再跑一次**。退出码与状态必须一起看：`READY`
+仅表示环境准备完成；`RUN_RECORDED` 还要求这个真实 Agent 主动提交。修题是否正确另由官方评分验证，不能把提交等同于修题成功。
+
+管理员在可访问上游的机器上一次性镜像入门任务：
+
+```bash
+python3 scripts/mirror_swe_bench_pro_image.py \
+  --crane /absolute/path/to/crane \
+  --source-prefix registry-1.docker.io/ \
+  --destination-prefix PRIVATE_REGISTRY \
+  --output /private/path/image-publication.json
+```
+
+该入口直接从固定上游摘要复制，不读取任何旧工作区或 Docker 数据目录。发布完成后重新读取目标摘要验证一致；私有仓库凭据使用正常 Docker 凭据机制，不写入源码。HTTP 仓库需显式追加
+`--insecure`。 网络限制应在管理员准备阶段解决，不能把“镜像在某台机器的缓存里”当成可交付制品。
+
+慢链路先下载为 OCI 制品；上传超过仓库请求时限时，把完整制品传到仓库节点，在节点本机发布。 zot 接收该上游 Docker Schema 2 镜像时，需要官方支持的
+[`http.compat: ["docker2s2"]`](https://zotregistry.dev/v2.1.18/admin-guide/admin-configuration/#compatibility-with-other-image-schema-types)。
+平台仓库提供 `configure_registry_compat.py`，按实际运行版本验证配置并备份；不能为绕过 415 错误转换清单后仍宣称摘要相同。
+
+### 干净工作区的实际验收
+
+2026-10-24，使用新建 CPU 工作区、新建 40 GiB 持久卷、初始 Docker 镜像数量 0， 从 GitHub 固定版本
+`820f6af85434367973c1131ea5e608845e328252` 下载安装入口， 自动建立客户端、下载校验数据与镜像，并复用既有模型 API 跑了一道真实 V1 任务。 结果为
+`RUN_RECORDED` / `Submitted`：99 次模型返回，270.78 秒，补丁 66,725 字节；任务容器已清理。 准备阶段的镜像发布失败记录保留，修正仓库后显式
+`--resume`，实际 Agent 仅提交运行一次。
+
+这是部署链路验收，官方评分仍为 `DEFERRED`、`quality_score: null`，不代表补丁正确、项目测试通过或性能提升。
+原始题目、轨迹、补丁和运行日志保存在私有目录，不上传到本仓库。两平台均发布独立 CPU 模板与固定摘要镜像； 上述真实 Agent 运行只发生在其中一个平台，不能据此声称两个平台都完成了 Agent
+评测。
+
 ## 运行链路与前提
 
 ```text
