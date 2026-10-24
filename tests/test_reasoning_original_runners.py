@@ -3,10 +3,71 @@
 from pathlib import Path
 import subprocess
 import sys
+import importlib.util
+import json
 
 import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+def test_arc_native_tail_receipt_covers_both_suites_and_actual_ids():
+    receipt = json.loads(
+        (
+            ROOT / "docs/workload-data/validation/arc-tail-native-audit-20261024.json"
+        ).read_text("utf-8")
+    )
+    assert receipt["status"] == "ORIGINAL_NATIVE_EXECUTION_AND_SCORING_AUDITED"
+    assert receipt["audit_new_model_calls"] == 0
+    assert receipt["full_test_execution"] is False
+    checks = {item["suite"]: item for item in receipt["checks"]}
+    for suite, ids in [
+        ("ARC-Challenge", [1169, 1170, 1171]),
+        ("ARC-Easy", [2373, 2374, 2375]),
+    ]:
+        item = checks[suite]
+        assert item["original_doc_ids"] == ids
+        assert item["actual_samples"] == 3
+        assert item["candidate_likelihood_requests"] == 12
+        assert item["inputs_choices_references_equal_original"] is True
+        assert "acc,none" in item["metrics"]
+        assert "acc_norm,none" in item["metrics"]
+        assert (
+            item["runner_sha256"]
+            == __import__("hashlib")
+            .sha256((ROOT / "scripts/run_arc_original_samples.py").read_bytes())
+            .hexdigest()
+        )
+
+
+def test_arc_native_selection_supports_defaults_tail_and_full_without_rewriting():
+    spec = importlib.util.spec_from_file_location(
+        "arc_native", ROOT / "scripts/run_arc_original_samples.py"
+    )
+    arc = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(arc)
+    assert arc.selected_indices("ARC-Easy") == [0, 1, 2]
+    assert arc.selected_indices("ARC-Easy", 2373, 3) == [2373, 2374, 2375]
+    assert arc.selected_indices("ARC-Challenge", full=True) == list(range(1172))
+    assert len(arc.selected_indices("ARC-Easy", full=True)) == 2376
+    for start, count in [(-1, 3), (1171, 2), (0, 0)]:
+        with pytest.raises(ValueError, match="range"):
+            arc.selected_indices("ARC-Challenge", start, count)
+    with pytest.raises(ValueError, match="full"):
+        arc.selected_indices("ARC-Easy", 1, 3, True)
+    receipt = json.loads(
+        (
+            ROOT / "docs/workload-data/validation/reasoning-ci-assets-20261024.json"
+        ).read_text("utf-8")
+    )
+    for suite, count in arc.TEST_COUNTS.items():
+        file = next(
+            item
+            for item in receipt["files"]
+            if item["source_id"] == "AI2_ARC"
+            and item["file"] == f"{suite}/test-00000-of-00001.parquet"
+        )
+        assert file["original_rows_field_checked"] == count
 
 
 @pytest.mark.parametrize(

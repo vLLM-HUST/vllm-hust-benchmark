@@ -1,4 +1,4 @@
-"""Validate three original AI2-ARC tasks with upstream likelihood scoring.
+"""Run fixed original AI2-ARC ranges or the full split with upstream likelihood scoring.
 
 Separate environment: lm-eval[api]==0.4.11 datasets==3.6.0 pyarrow==19.0.1
 huggingface-hub==1.31.0. Output includes private tasks/answers: never publish it.
@@ -11,6 +11,20 @@ import json
 from pathlib import Path
 
 REVISION = "210d026faf9955653af8916fad021475a3f00453"  # pragma: allowlist secret - public dataset revision
+TEST_COUNTS = {"ARC-Challenge": 1172, "ARC-Easy": 2376}
+
+
+def selected_indices(suite, start=0, count=3, full=False):
+    total = TEST_COUNTS[suite]
+    if full:
+        if start != 0 or count != 3:
+            raise ValueError("--full cannot be combined with an explicit range")
+        return list(range(total))
+    if start < 0 or count < 1 or start + count > total:
+        raise ValueError("sample range must be within the original test split")
+    return list(range(start, start + count))
+
+
 SUITE_HASHES = {
     "ARC-Challenge": {
         "train": "e488c1587ffdcfc8443f916c53488a95cd471c5790e0746c6bfe4cecf20962cb",  # pragma: allowlist secret - original parquet SHA
@@ -43,7 +57,14 @@ def main():
     )
     parser.add_argument("--max-length", type=int, default=16384)
     parser.add_argument("--output", required=True, type=Path)
+    parser.add_argument("--start", type=int, default=0)
+    parser.add_argument("--count", type=int, default=3)
+    parser.add_argument("--full", action="store_true")
     args = parser.parse_args()
+    try:
+        selected = selected_indices(args.suite, args.start, args.count, args.full)
+    except ValueError as error:
+        parser.error(str(error))
     from vllm_hust_workload_data.bindings import bind_source
     from vllm_hust_workload_data.consumer import resolve_input
     from vllm_hust_workload_data.pipeline import prepared_rows, run
@@ -79,16 +100,17 @@ def main():
                     "source_id": "AI2_ARC",
                     "data_root": str(args.data_root.resolve()),
                     "manifest": str(manifest.resolve()),
-                    "limit": 3,
+                    "limit": selected[-1] + 1,
                 }
             ]
         },
         output=args.output / "prepared",
     )
     database = args.output / "prepared/workload.sqlite"
-    rows = list(prepared_rows(database))
-    if len(rows) != 3:
-        raise ValueError("exactly three original inputs required")
+    all_rows = list(prepared_rows(database))
+    rows = [all_rows[index] for index in selected]
+    if len(rows) != len(selected):
+        raise ValueError("selected original inputs are missing")
     for row in rows:
         record = resolve_input(database, row["record_id"], data_root=args.data_root)
         if "answerKey" in record.input_record()["task"]["input"]:
@@ -111,16 +133,17 @@ def main():
         "source_id": "AI2_ARC",
         "subsuite": args.suite,
         "revision": REVISION,
-        "selected_samples": ["test:0", "test:1", "test:2"],
-        "selection": f"first three original {args.suite} test rows, fixed before execution",
+        "selected_samples": [f"test:{index}" for index in selected],
+        "selection": f"original {args.suite} test indices, fixed before execution",
         "runner": "lm-eval==0.4.11",
         "served_model": args.model,
         "protocol": "original multiple-choice loglikelihood; no chat conversion",
         "changes_from_upstream_task": [
             "local byte-identical parquet paths",
-            "three test rows only",
+            f"{len(selected)} preselected original test rows",
         ],
-        "claim_boundary": f"{args.suite} sample integration only; not full-suite accuracy or performance",
+        "claim_boundary": f"Only the requested original {args.suite} indices under the declared model; no performance claim",
+        "full_test_split_selected": args.full,
         "status": "STARTED",
         "max_length": args.max_length,
         "task_config_sha256": hashlib.sha256(task_config.read_bytes()).hexdigest(),
@@ -129,7 +152,8 @@ def main():
             for name in ("config.json", "tokenizer.json", "tokenizer_config.json")
         },
         "reader_validation": {
-            "prepared_records": len(rows),
+            "prepared_records": len(all_rows),
+            "selected_records": len(rows),
             "resolved_records": len(rows),
             "code_sha256": preparation["code_sha256"],
         },
@@ -153,14 +177,14 @@ def main():
                 "timeout": 120,
             },
             tasks=[config],
-            limit=3,
+            samples={task_name: selected},
             batch_size=1,
             bootstrap_iters=0,
             log_samples=True,
         )
-        if result is None or result["n-samples"][task_name]["effective"] != 3:
-            raise RuntimeError("expected three evaluated original tasks")
-        if {s["doc_id"] for s in result["samples"][task_name]} != {0, 1, 2}:
+        if result is None:
+            raise RuntimeError("evaluation returned no result")
+        if {s["doc_id"] for s in result["samples"][task_name]} != set(selected):
             raise RuntimeError("sample IDs differ from preselection")
         private = args.output / "private-results.json"
         private.write_text(json.dumps(result, default=str, indent=2), encoding="utf-8")
