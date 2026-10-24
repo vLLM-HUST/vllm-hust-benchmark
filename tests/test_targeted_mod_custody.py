@@ -19,6 +19,7 @@ def test_targeted_original_bytes():
         ("vspec-mixed", 5),
         ("manager-projections", 3),
         ("pyramid-mixed", 4),
+        ("vspec-legacy-narratives", 4),
     ):
         capsule = root / name
         manifest = json.loads((capsule / "manifest.json").read_text())
