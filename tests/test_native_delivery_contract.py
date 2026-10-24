@@ -8,6 +8,47 @@ ROOT = Path(__file__).resolve().parents[1]
 DOCS = ROOT / "docs/workload-data"
 
 
+def test_tracelab_original_metadata_is_not_parent_tasks_or_full_index():
+    receipt = json.loads(
+        (DOCS / "validation/tracelab-cpu-audit-20261024.json").read_text("utf-8")
+    )
+    assert receipt["original_rows_fields_and_order_equal"] == 665453
+    assert receipt["prepared_rows"] == receipt["prepare_resolve_roundtrips"] == 3
+    assert not receipt["full_source_index_prepared"]
+    assert receipt["all_session_round_timing_tool_metadata_preserved"]
+    assert receipt["model_request_rendering_refused"]
+    assert receipt["model_calls"] == receipt["native_parent_tasks_executed"] == 0
+    assert not receipt["source_row_count_is_parent_task_count"]
+    assert not receipt["source_completion_checked"]
+
+
+def test_tracelab_official_replay_sources_are_not_build_or_runtime_evidence():
+    receipt = json.loads(
+        (
+            DOCS / "validation/tracelab-official-replay-preparation-20261024.json"
+        ).read_text("utf-8")
+    )
+    assert receipt["source_files_original_git_blob_verified"]
+    assert len(receipt["files"]) == 20
+    assert all(
+        row["path"].startswith("replay/")
+        or row["path"] in {"README.md", "LICENSE", "LICENSE-DATASET.md"}
+        for row in receipt["files"]
+    )
+    assert not receipt["research_analysis_modules_copied"]
+    assert receipt["cargo_path"] is receipt["rustc_path"] is None
+    assert not receipt["native_build_executed"]
+    assert not receipt["native_dry_run_executed"]
+    assert not receipt["native_replay_executed"]
+    assert not receipt["official_duckdb_runtime_asset"]["acquired_or_hash_verified"]
+    assert receipt["official_replay_is_synthetic_session_driver"]
+    assert receipt["dry_run_zero_exit_does_not_prove_context_fit"]
+    assert (
+        receipt["upstream_skip_flag_not_permitted_for_fixed_task_validation"]
+        == "--fail-on-context-overflow"
+    )
+
+
 def test_toolace_full_dialogue_preparation_is_not_agent_execution():
     receipt = json.loads(
         (DOCS / "validation/toolace-corpus-cpu-audit-20261024.json").read_text("utf-8")

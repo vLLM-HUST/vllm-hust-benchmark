@@ -197,6 +197,9 @@ TB；服务器/data约1.42TB可用，未缩小语料。ChartQA当前两卡主机
 
 ### 不占卡准备进展
 
+- [x] TRACELAB：原压缩文件SHA、665453条调用元数据全字段/顺序核查及前三条索引回查完成；20份官方回放源码/示例/许可文件已在服务器取得并逐文件核对Git
+  blob。[数据回执](validation/tracelab-cpu-audit-20261024.json)、[官方入口准备](validation/tracelab-official-replay-preparation-20261024.json)。
+- [ ] TRACELAB：全量索引、Rust工具链与锁定构建、官方DuckDB→CSV、独立文本池及真实回放未完成。官方工具是合成文本会话驱动，不是原私有请求重放；来源继续未勾，运行边界见[服务轨迹说明](ORIGINAL_SERVING_TRACES.zh-CN.md)。
 - [x] TOOLACE：原11300条system/历史对话、原轮次与工具描述、全量索引及首尾6条回查完成，保持历史对话资产身份。[CPU回执](validation/toolace-corpus-cpu-audit-20261024.json)。
 - [ ] TOOLACE：服务器新取固定版数据卡网络不可达，不能将目录中的预期SHA当下载验证；没有附带可执行工具环境/任务oracle，不编prompt冒充Agent原生评测，来源级继续未勾。
 - [x] JSONSCHEMABENCH：固定CI包与登记的三个原schema

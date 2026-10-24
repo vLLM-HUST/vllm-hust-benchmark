@@ -1,9 +1,38 @@
-# 原始服务轨迹：Azure 2023、Mooncake FAST25 与 BurstGPT
+# 原始服务轨迹：Azure 2023、Mooncake FAST25、BurstGPT 与 TraceLab
 
 ## 范围与用途
 
 本批提供原始到达时间、请求尺寸和发布方匿名前缀块标识的读取及准备能力。 Azure 的代码/会话轨迹和 Mooncake 的会话/工具代理轨迹均不包含原始 prompt。
 因此不得伪造正文后称为原始任务回放，也不具有语义正确率或官方任务评分。 研究侧可以消费这些元数据，但分析器、缓存模拟器、观测和机制干预不随本批迁移。
+
+## TraceLab：原调用元数据与官方合成会话回放
+
+固定发布`uw-syfi/TraceLab@v0.0.2`的`syfi_coding_trace.jsonl.gz`共100939722字节，SHA256为`11ce51ec0a25e3d1d95b025bca2f7d1647e47571eb7cc968acd5fc64d4b4fb65`。现已在服务器逐条对比665453条原记录的全部字段与顺序，包括session/round标识、可选turn标识、tokens、timing_events和tools。它们原样位于`record.replay["annotations"]`；task.input为空、outcome为None，request_body拒绝伪造请求。665453是原文件行数，不是独立父任务或成功任务数。仅前三条prepare→resolve已核查，全量SQLite索引未建；未运行科研分析或模型。
+
+[固定发布源码](https://github.com/uw-syfi/TraceLab/tree/61fea8f97277d0aa247cc2e4c7e31f90ed2bea1c)中的20份replay、示例及许可文件已在服务器取得，逐文件Git
+blob身份一致，不在本仓重新分发源码、原数据或研究分析模块。[数据审计](validation/tracelab-cpu-audit-20261024.json)与[源码准备回执](validation/tracelab-official-replay-preparation-20261024.json)分别记录，构建/dry-run/回放均未运行。原数据按发布方[数据许可](https://github.com/uw-syfi/TraceLab/blob/61fea8f97277d0aa247cc2e4c7e31f90ed2bea1c/LICENSE-DATASET.md)标为CC-BY-4.0，代码为Apache-2.0，二者不能混用；使用时保留来源与归属，不公开本地原始载荷。
+
+### 官方入口与尚缺的运行条件
+
+官方[session_runner](https://github.com/uw-syfi/TraceLab/blob/61fea8f97277d0aa247cc2e4c7e31f90ed2bea1c/replay/README.md)按会话顺序提交token-id
+completions，用独立文本池模拟输入；每轮等响应及工具等待后推进。它不是原私有prompt或真实工具执行。官方[CSV准备器](https://github.com/uw-syfi/TraceLab/blob/61fea8f97277d0aa247cc2e4c7e31f90ed2bea1c/artifacts/trace_facts/csv_export/README.md)还会做发布方定义的会话分组、排序、长度下限处理和带种子的合成到达；这些转换参数必须记录，不能称原始请求时间。本仓不复制图表、特征或缓存研究分析。
+
+当前服务器未找到cargo/rustc。官方转换器依赖的`syfi_coding_trace.duckdb`也尚未取得（发布方v0.0.2资产160182272字节、预期SHA256
+`a7bab286bc640844560850965ccf47975cf66407154132abaab90f27ec9be744`；此值是发布方摘要，不是本机下载校验）。另需独立取得文本池和模型tokenizer；Rust锁定依赖、文本池及模型服务兼容性均未验证，不写成环境已就绪。
+
+满足上述条件后，在固定版上游目录按原入口构建和预检：
+
+```sh
+cargo build --locked --release --manifest-path replay/Cargo.toml --bin session_runner
+replay/target/release/session_runner \
+  --trace /private/publisher-export.csv --text-file /private/text-corpus \
+  --tokenizer /private/model/tokenizer.json --model LOCAL_MODEL_ALIAS \
+  --dry-run --max-model-len 131072 --summary-path /private/replay-dry-run.json
+```
+
+dry-run不联系模型，也不加载文本池/tokenizer，成功退出不证明这些资产已存在或上下文适配。须检查summary的overflow记录，并逐轮确认完整输入加原请求输出预算可容纳；超限记阻塞，不截断、不换题。特别注意原版`--fail-on-context-overflow`实际会跳过轮次，本项目固定任务验证不能启用它来凑通过。真实运行时移除dry-run并提供批准的本地`--base-url .../v1`，仍需先验证完整所选会话和原等待/输出设置。
+
+官方回放器启动时会用两次模型请求检查prefix-cache和cached-token明细；服务不支持则终止，不能绕过该检查冒充通过。作者示例CSV只能验证示例链路，不是全部发布轨迹。以上命令尚未实跑，原生构建、数据转换和NPU回放均保持未勾；研究线程占卡期间不启动模型或探测请求。
 
 ## 原始来源与已验证范围
 
