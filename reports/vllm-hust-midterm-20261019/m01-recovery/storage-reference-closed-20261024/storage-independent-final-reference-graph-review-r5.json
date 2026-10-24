@@ -1,0 +1,72 @@
+{
+  "status": "complete_independent_graph_query_and_formula_review_passed",
+  "reviewer": "storage Codex independent semantic reviewer; not profiling",
+  "closure_sha256": "72d9b8e94959a845dba1b911b732b8d336906afae0977228066ff84ab66f8d78",
+  "query_sha256": "6944f9603bfc6a88ed51a634b7e2242d97f55f540892c232bc856d9c99a884f8",
+  "review_script_sha256": "f7dc9cf47bd6c6bfe5f6908e02326d152a51ca3e42317f0ec7a0ca85be9b258f",
+  "scenarios": [
+    {
+      "seed": 0,
+      "structural": {
+        "nodes": 359368,
+        "edges": 1014421,
+        "collective_pairs": 81204,
+        "acyclic": true
+      },
+      "independent_reference_seconds": 47.503348961177785,
+      "efficiency_percent": 37.23021889660151,
+      "reference_tflops_per_chip": 19.081866760274465,
+      "route_nodes": 72572,
+      "metadata_nodes": 1728,
+      "dag_sha256": "c3a17dcaa2e32b001e82a4d6da62ee1ae6b4f39486eb83835a360563b8166235"
+    },
+    {
+      "seed": 1,
+      "structural": {
+        "nodes": 359368,
+        "edges": 1014437,
+        "collective_pairs": 81204,
+        "acyclic": true
+      },
+      "independent_reference_seconds": 47.53014786550325,
+      "efficiency_percent": 37.25122223838782,
+      "reference_tflops_per_chip": 19.071107838945064,
+      "route_nodes": 72572,
+      "metadata_nodes": 1728,
+      "dag_sha256": "363e3ac3092dd7ebd1145cc3364c2daedc22100d7d6226f25b827aed6ef194a9"
+    },
+    {
+      "seed": 2,
+      "structural": {
+        "nodes": 359368,
+        "edges": 1014437,
+        "collective_pairs": 81204,
+        "acyclic": true
+      },
+      "independent_reference_seconds": 47.557189519622206,
+      "efficiency_percent": 37.27241583261204,
+      "reference_tflops_per_chip": 19.060263751919415,
+      "route_nodes": 72572,
+      "metadata_nodes": 1728,
+      "dag_sha256": "68428aa5db1a24c025aa9c2e28b115a763000c397fb8ece40451a19c3e0545f2"
+    }
+  ],
+  "total_queries": 950636,
+  "used_queries": 942210,
+  "query_leaf_uses": 5394622,
+  "route_queries": 870864,
+  "formula": "Tref=longest source-dependency/resource critical path; eta=100*Tref/T; Cref=F/(chips*Tref*1e12)",
+  "formal_identity": {
+    "F": 1812905151088034,
+    "T_seconds": 127.59352582134306,
+    "C_TFLOPS_per_chip": 7.1042207644080255,
+    "chips": 2,
+    "identity": "Formal B1 development stack same r1; not official0.18 B0"
+  },
+  "qualification": "All used queries and every necessary duration node qualified; all prior r4 structural fields retained; 3 complete scenarios independently recomputed.",
+  "limitations": [
+    "Independent semantic/statistical reference, not measured end-to-end reference execution or formal expert-state recovery.",
+    "Three seed range is scenario sensitivity, not an uncertainty interval; seed0 is predeclared display convention."
+  ],
+  "source_main_artifacts_unmodified": true
+}

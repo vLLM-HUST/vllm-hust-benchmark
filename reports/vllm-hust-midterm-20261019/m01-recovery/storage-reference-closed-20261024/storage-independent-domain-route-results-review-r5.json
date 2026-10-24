@@ -1,0 +1,123 @@
+{
+  "reviewer": "storage Codex independent semantic reviewer; not profiling",
+  "status": "qualified_scope_accepted_with_one_original_failure_preserved",
+  "sources_sha256": {
+    "reference-necessary-domain-audit-r5.json": "67b940fc08118d2e1aac6e3aa19908a58a7b0ab20c23774ad6da4786c15141ca",
+    "moe-real-routes-primitives-audit-r5.json": "b8f7aa7c62569f273a91982fd9bd895add6f76d1ecf9b43ede5adc8002c55a5f",
+    "reference-necessary-domain-models-r5.json": "56b11a7681ad03428cd87478e23c6e5decef1c1328c52431c917b3c1af24f498"
+  },
+  "raw": {
+    "domains": {
+      "manifest_entries": 10,
+      "timing_records": 3636,
+      "rankcases": 202,
+      "recomputed_batch_medians": 404,
+      "manifest_sha256": "aeb5b4eee79e1974a1be26844d4a52f7cec692fb7d13ae289f0f5b4bb4988bdf"
+    },
+    "routeprimitives": {
+      "manifest_entries": 10,
+      "timing_records": 1728,
+      "rankcases": 96,
+      "recomputed_batch_medians": 192,
+      "manifest_sha256": "b541e512e7da9121d88fa82ced7189afaeba477db53c4cb50dc6857a0e655556"
+    }
+  },
+  "models": [
+    {
+      "group": "fia:decode",
+      "rank": 0,
+      "validation_count": 10,
+      "p95": 0.1591628427724995,
+      "p99": 0.17362031642381143
+    },
+    {
+      "group": "fia:decode",
+      "rank": 1,
+      "validation_count": 10,
+      "p95": 0.14280140433092067,
+      "p99": 0.14792924855151962
+    },
+    {
+      "group": "fia:prefill_or_verify",
+      "rank": 0,
+      "validation_count": 10,
+      "p95": 0.13836407454533584,
+      "p99": 0.1502255221551354
+    },
+    {
+      "group": "fia:prefill_or_verify",
+      "rank": 1,
+      "validation_count": 10,
+      "p95": 0.13876268718000984,
+      "p99": 0.14886224801216313
+    },
+    {
+      "group": "conv:1",
+      "rank": 0,
+      "validation_count": 10,
+      "p95": 0.13455644472718484,
+      "p99": 0.13720941875681822
+    },
+    {
+      "group": "conv:1",
+      "rank": 1,
+      "validation_count": 10,
+      "p95": 0.13027357660373748,
+      "p99": 0.1415727967149433
+    },
+    {
+      "group": "dense:(512, 2048)",
+      "rank": 1,
+      "validation_count": 10,
+      "p95": 0.09598679030173914,
+      "p99": 0.1188472057673764
+    },
+    {
+      "group": "primitive:kv_scatter",
+      "rank": 0,
+      "validation_count": 10,
+      "p95": 0.2793500215468942,
+      "p99": 0.32819586967829223
+    },
+    {
+      "group": "primitive:kv_scatter",
+      "rank": 1,
+      "validation_count": 10,
+      "p95": 0.1907883115327283,
+      "p99": 0.22156675763021783
+    },
+    {
+      "group": "primitive:key_norm_rope",
+      "rank": 0,
+      "validation_count": 10,
+      "p95": 0.13017838471529308,
+      "p99": 0.14549252761420006
+    },
+    {
+      "group": "primitive:key_norm_rope",
+      "rank": 1,
+      "validation_count": 10,
+      "p95": 0.14034190607061373,
+      "p99": 0.16343162014506507
+    }
+  ],
+  "failed_original_case": {
+    "rank": 0,
+    "case": 81,
+    "stability_ratio": 1.1947405430500615,
+    "excluded_from_exact": true,
+    "concat_model_blocked": true
+  },
+  "K_dispatch_checked": [
+    1,
+    2,
+    4095,
+    4096
+  ],
+  "route_transport": "All four fixed scalar transport groups independently recomputed, no refit.",
+  "limitations": [
+    "This review does not claim complete DAG/Tref; follow-on concat precision evidence remains a distinct version.",
+    "Model heldout error is not an overall Tref confidence interval."
+  ],
+  "skill_review": "E16/E17/E18/E21/E47: bounded completed runs, actual-source wrappers retained, both ranks and raw repetitions audited, no new timing, /root-only output."
+}

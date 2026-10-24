@@ -26,13 +26,17 @@ def test_v15_exact_extract_and_offline_reuse():
     assert current["matched_uninstrumented_seconds"] is None
     assert current["matched_synchronized_seconds"] == 127.59352582134306
     assert current["effective_tflops_per_chip"] == 7.1042207644080255
-    for key in (
-        "reference_seconds",
-        "reference_effective_tflops_per_chip",
-        "efficiency_percent",
-        "passed",
-    ):
-        assert current[key] is None
+    assert current["reference_seconds"] is None
+    assert current["reference_effective_tflops_per_chip"] is None
+    assert current["efficiency_percent"] is None
+    assert current["passed"] is None
+    prior = actual["method"]["reference_closure"]
+    assert prior["efficiency_percent"] == 37.2302188966015
+    assert prior["attainment"] is False
+    pair = actual["method"]["paired_own_compute"]
+    assert pair["rows"]["B0"]["F"] == 1829161955258989
+    assert 84.97 < pair["C_gain_percent"] < 84.98
+    assert pair["eta_percent"] is None
     assert actual["method"]["current_measurement"]["strict_uninstrumented"] is False
     assert actual["method"]["fair_comparison"]["fixed_b0"] == {
         "vllm": "0.18",
@@ -60,10 +64,10 @@ def test_v15_exact_extract_and_offline_reuse():
         )
     )
     report = (REPORT / "中期测试报告.md").read_text()
-    assert "报告版本：V0.78" in report
+    assert "报告版本：V0.79" in report
     assert "V1.5第3.4.4节按测量区间分摊费用" in report
     assert "M06全流程验收未通过" not in report
-    assert "已完成75种通信图参考" in report
+    assert "官方0.18/0.18 B0与vLLM-HUST B1的同轮F、T、C已闭合" in report
 
 
 def test_v074_publication_identity_and_bilingual_current_scope(monkeypatch):

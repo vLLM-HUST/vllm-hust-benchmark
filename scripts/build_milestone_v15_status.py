@@ -102,6 +102,59 @@ def build():
         ],
     }
     method["pending_evidence"] = supplement["remaining_reasons_zh"]
+    closed_path = REPORT / "m01-recovery/storage-reference-closed-20261024/summary.json"
+    closed = json.loads(closed_path.read_text())
+    assert all(s["all_duration_nodes_qualified"] for s in closed["scenarios"])
+    assert closed["formal_result_unchanged"]["F"] == timing["basic_operation_flops"]
+    assert (
+        closed["formal_result_unchanged"]["T_seconds"] == timing["synchronized_seconds"]
+    )
+    paired_path = (
+        REPORT / "m01-recovery/official018-paired-compute-20261024/summary.json"
+    )
+    paired = json.loads(paired_path.read_text())
+    method["status"] = "own-compute-pair-closed-whole-chain-reference-pending"
+    method["current"].update(
+        reference_seconds=None,
+        reference_effective_tflops_per_chip=None,
+        efficiency_percent=None,
+        passed=None,
+    )
+    method["paired_own_compute"] = paired
+    method["paired_own_compute_source"] = {
+        "path": paired_path.relative_to(ROOT).as_posix(),
+        "sha256": hashlib.sha256(paired_path.read_bytes()).hexdigest(),
+    }
+    method["reference_closure"] = {
+        "path": closed_path.relative_to(ROOT).as_posix(),
+        "sha256": hashlib.sha256(closed_path.read_bytes()).hexdigest(),
+        "primary_display_seed": closed["primary_display_seed"],
+        "scenario_sensitivity_range": closed["scenario_sensitivity_range"],
+        "reference_identity": closed["reference_identity"],
+        "limitations": closed["limitations"],
+        "classification": "Prior operator-DAG method; not current whole-chain reference acceptance",
+        "reference_seconds": closed["reference_seconds"],
+        "reference_tflops_per_chip": closed["reference_tflops_per_chip"],
+        "efficiency_percent": closed["efficiency_percent"],
+        "threshold_percent": 50,
+        "attainment": closed["attainment"],
+    }
+    method["pending_evidence"] = [
+        "Freeze executable whole-chain reference identity, calibration/validation samples and applicability checks",
+        "Independent whole-chain reference evidence; official 0.18 is B0, not an automatic reference ceiling",
+    ]
+    method["whole_chain_method_revision"] = {
+        "status": "principles_recorded_execution_protocol_not_frozen",
+        "requested_threshold_percent": 90,
+        "external_acceptance_approval_record": None,
+        "baseline_normalization_is_reference_attainment": False,
+    }
+    method["requirements"]["timing_refinement"] = (
+        "Same-run basic-operation F and synchronized T retain all native statistics "
+        "and host-counting costs. Official B0/B1 own F/T/C pairing is closed. "
+        "Prior operator-DAG eta remains attached to its own method. "
+        "New whole-chain reference and acceptance remain unresolved. Not strictly uninstrumented."
+    )
     c16 = module(ROOT / "reports/c16-baseline018-reuse-20261022/audit.py").audit()
     pair = module(REPORT / "render_m06_pair.py").load(REPORT / "m06-paired-20261021")
     arms = pair["arms"]

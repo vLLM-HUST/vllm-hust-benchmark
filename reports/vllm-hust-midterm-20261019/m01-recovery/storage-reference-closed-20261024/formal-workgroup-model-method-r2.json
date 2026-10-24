@@ -1,0 +1,31 @@
+{
+  "protocol": "formal-aggregate-constrained-workgroups/v2",
+  "frozen_at": "2026-10-24T03:33:13.132398+00:00",
+  "prior_result": "formal-workgroup-model-r1-chunk-audit.json",
+  "workload": "formal-request-workload-geometry-r1.json",
+  "constraints": [
+    "200requestpromptlengths; initialfalse64chunk perrequest",
+    "Exactformal4514(length,has_state)chunkhistogram",
+    "Exactformal220prefillsegments",
+    "Exactformal target/draft necessarywork and GDNWY/HO/convF expressions"
+  ],
+  "allocation_model": "Test feasibility of200basepromptsegments plus20 distinctrequestsplits. Integer variables by original prompt remainder r and firstsegment remainder a. Histogram difference exactly equals tails(a)+tails((r-a)%64)-tail(r), sum splitvariables20 and per-r availability. Firstsegment64+a (a0=>64), secondremainingprompt. Same-rem requests selected by declared admission order. This is a concrete feasible semantic allocation, not claimed original boundaries.",
+  "variants": "Three predeclared hash-cost objectives seed0,1,2, independent of all timing data. Keep every feasible variant; range is scenario sensitivity, not guaranteed feasible-set bounds or95%CI.",
+  "schedule": "Treat allocated prefill segments as atomic, retain perrequest stage order; budget4096/max24 active, iterate active thenadmit pending in originalorder. Skip segment that cannot fit remaining wavebudget. Decoder requires3scheduled rows, counts only canonical necessaryrows. Never introduce new split or tail.",
+  "source_mapping": "Preserve request causal state and finalprefill draftfull roots. DraftKVstage0 intersects allocatedsegments; targetprefill chunks rechecked exactly. Source operator templates unchanged.",
+  "checks": [
+    "Exactglobal length/state histogram",
+    "220segments and200initialfalse chunks",
+    "Same-F totals and perrequest target/draft conservation",
+    "Perwave budget and requestlimits",
+    "Everyrequeststage monotonic and completes"
+  ],
+  "stopping": "At most3 MILPs, each30CPUwallseconds, oneconstructioneach. If two-segmentallocation infeasible, preserve failure and identify unresolvedaggregateallocation rather than silentlyrelaxconstraints. No NPU work, no fullmodel rerun.",
+  "reference_seconds": null,
+  "eta": null,
+  "source_sha256": {
+    "/root/m01-storage-accounting-20261024/formal-request-workload-geometry-r1.json": "1b496427732448e99c1ce341fc4fd00de60b3c5a78874eea5bb529a37881c68f",
+    "/root/m01-storage-accounting-20261024/formal-reference-stage-coverage-r3.json": "ba037c2d3c39007b4c4f0cf0ff21b52338fe1d36d1fa9fc41e52268fb1351df2",
+    "/root/m01-storage-accounting-20261024/timing-r1-arithmetic.json": "2b171bd99225ee21f692aa3c3d4a804b2fdc788efbedf7d50303dc4f0449629f"
+  }
+}
