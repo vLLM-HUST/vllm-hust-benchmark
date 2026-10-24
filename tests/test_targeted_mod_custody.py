@@ -17,6 +17,8 @@ def test_targeted_original_bytes():
         ("manager-formal", 77),
         ("compress-mixed", 5),
         ("vspec-mixed", 5),
+        ("manager-projections", 3),
+        ("pyramid-mixed", 4),
     ):
         capsule = root / name
         manifest = json.loads((capsule / "manifest.json").read_text())
