@@ -10,7 +10,10 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 EVIDENCE = (
     ROOT
-    / "reports/vllm-hust-midterm-20261019/m01-recovery/storage-qualification-20261024"
+    / "reports"
+    / "vllm-hust-midterm-20261019"
+    / "m01-recovery"
+    / "storage-qualification-20261024"
 )
 
 
