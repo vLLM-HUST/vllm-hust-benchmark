@@ -81,3 +81,54 @@ def test_downloaded_release_matches_frozen_index_and_asset_digests():
     verification = read(REPORT / "evidence-release-member-verification.json")
     assert verification == receipt["downloaded_archive_member_verification"]
     assert verification["verified"] is True and verification["files"] == 347
+
+
+def test_live_publication_facts_refer_to_exact_archived_sources():
+    index = read(REPORT / "website-publication-archive-index.json")
+    members = {row["member"]: row for row in index["files"]}
+    assert len(members) == len(index["files"])
+    facts = read(REPORT / "website-publication-facts.json")
+    for source in facts["sources"]:
+        archived = members[source["member"]]
+        assert (source["bytes"], source["sha256"]) == (
+            archived["bytes"],
+            archived["sha256"],
+        )
+    verification = read(REPORT / "website-publication-archive-verification.json")
+    assert verification["verified"] and verification["files"] == len(members)
+    assert facts["readback"]["passed"] is True
+    assert facts["readback"]["all_manifest_files_fetched"] is False
+    assert facts["readback"]["commands_executed"] is False
+    assert facts["readback"]["full_tooltip_viewport_containment_claim"] is False
+    assert facts["qualification_commit"] == EVIDENCE_COMMIT
+    download = read(REPORT / "publication-release-download-verification.json")
+    assert download["passed"] is True
+    assert download["release_target"] == EVIDENCE_COMMIT
+    assert download["all_member_hashes_verified"] == len(members)
+    assert (
+        hashlib.sha256(
+            (REPORT / "publication-release-api.json").read_bytes()
+        ).hexdigest()
+        == download["api_snapshot_sha256"]
+    )
+    api = read(REPORT / "publication-release-api.json")
+    assets = {row["name"]: row for row in api["assets"]}
+    assert len(download["new_assets"]) == 4
+    for row in download["new_assets"]:
+        assert row["passed"] and row["api_state"] == "uploaded"
+        assert row["api_digest"] == "sha256:" + row["sha256"]
+        assert assets[row["name"]]["digest"] == row["api_digest"]
+        assert assets[row["name"]]["size"] == row["bytes"]
+        assert assets[row["name"]]["id"] == row["asset_id"]
+        assert assets[row["name"]]["state"] == row["api_state"]
+        if row["name"].endswith(".json"):
+            raw = (REPORT / row["name"]).read_bytes()
+            assert len(raw) == row["bytes"]
+            assert hashlib.sha256(raw).hexdigest() == row["sha256"]
+    original = {
+        row["name"]: row["sha256"]
+        for row in read(REPORT / "evidence-release-download-verification.json")["files"]
+    }
+    assert download["original_four_assets_api_digests_unchanged"] == original
+    for name, sha in original.items():
+        assert assets[name]["digest"] == "sha256:" + sha
