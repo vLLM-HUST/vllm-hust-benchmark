@@ -10,7 +10,7 @@
 
 ## 零、需求对齐后的最终执行要求（2026-10-24）
 
-STSB既定来源增量：原SBERT分发8628句对、原dev1500/test1379的完整NPU编码和原Pearson/Spearman评价已完成，保存向量交回同一原评估器重算一致；完整原字段和三个split的公共回查、研究消费候选验证通过。见[原生评价证据](validation/stsb-original-native-and-rescore-20261025.json)、[候选消费证据](validation/stsb-candidate-consumer-20261025.json)。固定CI安装工件尚待核验，当前保持未勾；仍属于W39原句对相似度，不新增第41类、不冒充检索流量或KV复用证据。
+STSB既定来源增量已闭环：原dev1500/test1379全量NPU编码、原Pearson/Spearman及保存向量重算通过；固定CI安装包37个payload逐字节一致，8628原句对保真、三split公共回查和研究消费均核验，安装后的公开评分命令也已复核。见[最终交付证据](validation/stsb-native-delivery-20261025.json)、[固定工件消费证据](validation/stsb-fixed-ci-research-handoff-20261025.json)。在当前交付表打勾；仍属于W39句对连续相似度，不新增第41类、不冒充训练复现、生产检索或KV复用证据，研究默认依赖锁未自动更新。
 
 目标是按40类workload补齐可复用的原生benchmark接入能力，解决使用者寻找来源、准备环境和跑通原任务的问题；不是数据托管仓库，不是研究实验平台，也不是只做读取适配。
 

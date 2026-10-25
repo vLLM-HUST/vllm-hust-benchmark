@@ -3,9 +3,9 @@
 ## 本轮完整交付清单（2026-10-24）
 
 40 类共登记 110 个公开来源、8 份企业资产，合计 118 项；五个指定来源只分类，本轮推进 113 项。下方历史 19
-个勾保留，不自动提升为本轮完成，也不要求已验证项目重复跑。当前交付可用26/113项：1项服务轨迹资产、14项原任务/固定评测协议交付（BBH、MATH500、GSM8K、AI2-ARC、NI登记任务、BFCL登记类别、QuALITY原NYU多选集成、LongBench登记Qasper200、tau2登记telecom_full、LoCoMo完整上下文文本QA、RULER原13种任务集成、GPQA原三split
+个勾保留，不自动提升为本轮完成，也不要求已验证项目重复跑。当前交付可用27/113项：1项服务轨迹资产、15项原任务/固定评测协议交付（BBH、MATH500、GSM8K、AI2-ARC、NI登记任务、BFCL登记类别、QuALITY原NYU多选集成、LongBench登记Qasper200、tau2登记telecom_full、LoCoMo完整上下文文本QA、RULER原13种任务集成、GPQA原三split
 zero-shot集成、BEIR
-SciFact/NFCorpus原检索与重排）、Dolly、OASST1与LongWriter三项语料及8份私有企业请求语料。并非26个带官方质量评分的完整benchmark，边界见逐项回执。
+SciFact/NFCorpus原检索与重排、STSB原句对相似度）、Dolly、OASST1与LongWriter三项语料及8份私有企业请求语料。并非27个带官方质量评分的完整benchmark，边界见逐项回执。
 
 完成要求以主方案第零节及机器清单 delivery_contract 为准：原题、完整原生流程与适用评分必须跑通；每个独立协议预计执行和评分不超过 30
 分钟则全跑，否则事前固定至少三条，不足则全跑。不得改题、删工具、截断或缩减原生预算，失败不得换题。资源不足保留未勾并记阻塞；模型答错不等于链路失败。服务轨迹无原始请求回放入口时，只能交付数据资产，不能编
@@ -179,7 +179,7 @@ TB；服务器/data约1.42TB可用，未缩小语料。ChartQA当前两卡主机
 | BEIR_SCIFACT               | [x] 已完成            | 原test全量检索/top100重排、原评分、最终公开NPU命令及固定CI组件/研究消费均通过。范围仅为登记集合与协议，不是BM25或全部BEIR基线。                                                                                                                                                     |
 | BEIR_NFCORPUS              | [x] 已完成            | 原test全量检索/top100重排、原评分、最终公开NPU命令及固定CI组件/研究消费均通过。范围仅为登记集合与协议，不是BM25或全部BEIR基线。                                                                                                                                                     |
 | MSMARCO_PASSAGE            | [ ] 待开展            | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                        |
-| STSB                       | [ ] 进行中            | 原dev1500/test1379全量NPU编码、原Pearson/Spearman与缓存重算通过；8628原句对保真及候选两端消费已核验。固定CI安装工件待闭环，不勾选。                                                                                                                                                 |
+| STSB                       | [x] 已完成            | 原dev1500/test1379全量NPU编码与原评分通过；8628行保真、固定CI组件、三split公共回查/研究消费及安装后缓存重算通过。不含训练复现或生产检索流量。                                                                                                                                       |
 | DOCVQA                     | [ ] 待开展            | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                        |
 | CODEJUDGE_EVAL             | [ ] 待开展            | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                        |
 | DRAGON_PUBLIC              | [ ] 待开展            | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                        |

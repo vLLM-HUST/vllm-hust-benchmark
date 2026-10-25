@@ -22,7 +22,7 @@
     "current_profile_tensor_parallel_size": 2,
     "current_model_metadata_and_nine_runtime_file_digests_match_prior_binding": true,
     "current_full_weight_hashes_recomputed": false,
-    "next_action": "26/113 source integrations delivered, including both original BEIR collections' full retrieval and dense-top100 reranking. Reuse existing native results; repeat only required public-command compatibility handoff, never count duplicate coverage. XL-Sum ten-small-variant full run remains live and unchecked until audited. Continue other original protocols with research NPU priority; keep all PRs unmerged."
+    "next_action": "27/113 source integrations delivered, including BEIR original retrieval/reranking and STSB full dev/test sentence similarity. Reuse all valid native results and cached original scoring. XL-Sum ten-small-variant full run remains live and unchecked until audited. Continue remaining original protocols with research NPU priority; keep all PRs unmerged."
   },
   "scope": "Per-source integration validation; not performance or full-suite acceptance",
   "runtime_prerequisite_latest": "docs/workload-data/validation/runtime-prerequisite-recheck-20261025.json",
@@ -2050,14 +2050,15 @@
     "STSB": {
       "scope": "public",
       "delivery_kind": "review_original_source_protocol",
-      "status": "IN_PROGRESS",
-      "checked": false,
+      "status": "AVAILABLE",
+      "checked": true,
       "legacy_checked": false,
       "existing_receipt": null,
-      "delivery_receipt": null,
+      "delivery_receipt": "docs/workload-data/validation/stsb-native-delivery-20261025.json",
+      "fixed_ci_research_handoff_receipt": "docs/workload-data/validation/stsb-fixed-ci-research-handoff-20261025.json",
       "native_execution_receipt": "docs/workload-data/validation/stsb-original-native-and-rescore-20261025.json",
       "candidate_consumer_receipt": "docs/workload-data/validation/stsb-candidate-consumer-20261025.json",
-      "blocker": "Original full dev/test NPU encoding, official scoring and cached rescoring complete; all8628 raw rows and candidate consumer verified. Fixed CI software-artifact consumption remains pending."
+      "blocker": null
     },
     "DOCVQA": {
       "scope": "public",

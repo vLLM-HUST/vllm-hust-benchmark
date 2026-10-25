@@ -8,6 +8,38 @@ ROOT = Path(__file__).resolve().parents[1]
 DOCS = ROOT / "docs/workload-data"
 
 
+def test_stsb_delivery_closes_fixed_installation_and_native_evaluation():
+    receipt = json.loads(
+        (DOCS / "validation/stsb-native-delivery-20261025.json").read_text("utf-8")
+    )
+    fixed = json.loads(
+        (ROOT / receipt["fixed_ci_research_handoff_receipt"]).read_text("utf-8")
+    )
+    native = json.loads(
+        (ROOT / receipt["native_execution_and_rescore_receipt"]).read_text("utf-8")
+    )
+    assert receipt["source_checkbox_eligible"]
+    assert receipt["full_native_evaluation_pairs"] == {"dev": 1500, "test": 1379}
+    assert receipt["original_train_rows_retained_not_evaluated"] == 5749
+    assert fixed["data_commit"] == receipt["data_commit"]
+    assert fixed["root_ci_conclusion"] == fixed["cpu_ci_conclusion"] == "success"
+    assert fixed["installed_payload_files_equal"] == 37
+    assert (
+        fixed["fixed_provider_original_rows"]
+        == fixed["research_direct_prepare_rows"]
+        == 8628
+    )
+    assert fixed["public_roundtrips_per_split"] == {"train": 6, "dev": 6, "test": 6}
+    assert fixed["research_index_import_per_split"] == {"train": 3, "dev": 3, "test": 3}
+    assert fixed["installed_provider_original_scoring_reverified_without_model_calls"]
+    assert fixed["model_calls"] == fixed["new_scoring_runs"] == 0
+    assert receipt["public_runner_sha256"] == native["public_runner_sha256"]
+    assert not receipt["continuous_reference_labels_exposed_to_model"]
+    assert not receipt["research_observation_or_analysis_migrated"]
+    ledger = json.loads((DOCS / "dataset-validation-status.json").read_text("utf-8"))
+    assert ledger["delivery_inventory"]["STSB"]["checked"]
+
+
 def test_stsb_native_original_pairs_and_candidate_consumption_do_not_claim_fixed_artifact():
     native = json.loads(
         (DOCS / "validation/stsb-original-native-and-rescore-20261025.json").read_text(

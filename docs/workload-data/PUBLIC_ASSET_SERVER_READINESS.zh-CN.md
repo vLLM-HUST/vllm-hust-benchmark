@@ -338,7 +338,7 @@ python -I scripts/run_stsb_original.py --data-root /private/stsb --mode score \
   --reuse /private/prior-stsb-native --output /private/fresh-stsb-score-audit
 ```
 
-入口核对原文件、模型与协议身份、编码文本序列摘要、参数及向量文件摘要；score模式不是新NPU运行。原句对、完整向量和索引不公开。当前原dev/test全量NPU评价及离线原指标重算已通过，固定CI工件消费尚待闭环，来源保持未勾完成。公开来源定位不代表已取得任意商业使用或再分发授权，原始数据始终外部存放。
+入口核对原文件、模型与协议身份、编码文本序列摘要、参数及向量文件摘要；score模式不是新NPU运行。原句对、完整向量和索引不公开。原dev/test全量NPU评价、固定CI组件和研究消费、安装后的原指标重算均已通过，见[最终交付证据](validation/stsb-native-delivery-20261025.json)。当前只对上述原数据和具名协议勾选，不延伸到训练或其它句对数据集。公开来源定位不代表已取得任意商业使用或再分发授权，原始数据始终外部存放。
 
 ### BEIR 原始检索集合与重排协议
 

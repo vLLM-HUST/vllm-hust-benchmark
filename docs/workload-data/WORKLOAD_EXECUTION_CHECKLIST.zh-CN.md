@@ -6,6 +6,8 @@
 
 ### 向量编码与检索 · embedding-retrieval
 
+- [x] STSB：原dev1500/test1379全量NPU句对编码、原连续相似度评分、固定CI组件及三个split研究消费均通过；不代表生产检索流量或KV复用。
+
 - [x] BEIR_SCIFACT、BEIR_NFCORPUS：原全量test检索、最终公开NPU命令及固定CI组件/研究消费通过。
 
 ### 候选文档重排 · reranking
