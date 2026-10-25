@@ -8,6 +8,28 @@ ROOT = Path(__file__).resolve().parents[1]
 DOCS = ROOT / "docs/workload-data"
 
 
+def test_burstgpt_scaled_tool_audit_does_not_claim_original_timing_or_private_prompts():
+    receipt = json.loads(
+        (DOCS / "validation/burstgpt-scaled-tool-progress-20261025.json").read_text(
+            "utf-8"
+        )
+    )
+    assert not receipt["source_checkbox_eligible"]
+    assert not receipt["release1_rerun"]
+    audit = receipt["release2_audit"]
+    assert audit["scale"] == 1000000 and audit["original_indices"] == list(range(20))
+    assert audit["original_output_budget"] == 1024
+    assert (
+        audit["native_model_calls_reused"] == 20 and audit["model_calls_by_audit"] == 0
+    )
+    assert audit["source_original_trace_and_external_pool_unchanged"]
+    assert audit["all_native_requests_equal_original_publisher_query_generator"]
+    assert audit["official_detail_events_and_final_summary_verified"]
+    assert not audit["original_timing_performance_claim"]
+    assert not audit["external_pool_is_original_private_burstgpt_prompt"]
+    assert not receipt["whole_source_delivery_claim"]
+
+
 def test_flores_original_archive_is_not_native_delivery_or_publisher_checksum():
     ledger = json.loads((DOCS / "dataset-validation-status.json").read_text("utf-8"))
     row = ledger["delivery_inventory"]["FLORES200"]
