@@ -103,5 +103,14 @@ if __name__ == "__main__":
     p.add_argument("--revision", required=True)
     a = p.parse_args()
     OUTPUT.write_text(
-        json.dumps(build(a.revision), ensure_ascii=False, indent=2) + "\n"
+        json.dumps(
+            build(
+                subprocess.check_output(
+                    ["git", "rev-parse", a.revision], cwd=ROOT, text=True
+                ).strip()
+            ),
+            ensure_ascii=False,
+            indent=2,
+        )
+        + "\n"
     )

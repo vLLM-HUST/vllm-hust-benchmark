@@ -57,3 +57,9 @@ def test_outline_bytes_and_original_v15_are_bound():
         hashlib.sha256((d / "milestone-v15/project4-v1.5.txt").read_bytes()).hexdigest()
         == "7f9352a85ec8025731b37b57362d80bfc48f8204ae9d1877eba521377267fa24"  # pragma: allowlist secret
     )
+
+
+def test_published_source_has_full_commit_identity():
+    data = json.loads((ROOT / "website-publication/data/midterm-v083.json").read_text())
+    assert len(data["source_commit"]) == 40
+    assert f"/blob/{data['source_commit']}/" in data["report_url"]
