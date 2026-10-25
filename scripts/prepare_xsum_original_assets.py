@@ -57,7 +57,7 @@ def fetch(path, spec, url):
     temporary.rename(path)
 
 
-def main():
+def main(*, pins_path=PINS, source_id="XSUM"):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument(
@@ -82,7 +82,10 @@ def main():
         help="resume only a matching preparer's private output",
     )
     args = parser.parse_args()
-    pins = json.loads(PINS.read_text(encoding="utf-8"))
+    pins_path = Path(pins_path)
+    pins = json.loads(pins_path.read_text(encoding="utf-8"))
+    if pins.get("source_id") != source_id:
+        raise ValueError("asset source identity differs from selected profile")
     jobs = []
     for part in dict.fromkeys(args.parts):
         files = (
@@ -110,7 +113,7 @@ def main():
         print(
             json.dumps(
                 {
-                    "source_id": "XSUM",
+                    "source_id": source_id,
                     "status": "ORIGINAL_ASSETS_VERIFIED_READ_ONLY",
                     "files": len(jobs),
                     "model_calls": 0,
@@ -123,13 +126,15 @@ def main():
         if not args.resume or not previous.is_file():
             raise ValueError("fresh output or explicit matching resume required")
         prior = json.loads(previous.read_text(encoding="utf-8"))
-        if prior.get("source_id") != "XSUM" or prior.get("pins_sha256") != sha(PINS):
+        if prior.get("source_id") != source_id or prior.get("pins_sha256") != sha(
+            pins_path
+        ):
             raise ValueError("resume source binding differs")
     else:
         args.output.mkdir(parents=True, mode=0o700)
     receipt = {
-        "source_id": "XSUM",
-        "pins_sha256": sha(PINS),
+        "source_id": source_id,
+        "pins_sha256": sha(pins_path),
         "status": "PREPARING_ORIGINAL_ASSETS",
         "files": [],
         "model_calls": 0,

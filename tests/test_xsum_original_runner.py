@@ -7,6 +7,7 @@ import importlib.util
 import io
 import json
 from pathlib import Path
+import sys
 
 import pytest
 
@@ -130,3 +131,40 @@ def test_asset_fetch_preserves_bytes_and_checks_publisher_identity(
     assets.verify(path, spec)
     with pytest.raises(ValueError, match="contained"):
         assets.bound_path(tmp_path, "scoring", {"path": "../../escape"})
+
+
+def test_shared_asset_entry_keeps_profile_identity_separate(
+    tmp_path, monkeypatch, capsys
+):
+    raw = tmp_path / "data" / "fixture"
+    raw.parent.mkdir()
+    raw.write_bytes(b"software-fixture")
+    pins = tmp_path / "profile.json"
+    pins.write_text(
+        json.dumps(
+            {
+                "source_id": "MULTINEWS",
+                "dataset": {
+                    "files": [
+                        {
+                            "path": "fixture",
+                            "bytes": raw.stat().st_size,
+                            "sha256": assets.sha(raw),
+                        }
+                    ],
+                    "repo_id": "publisher/source",
+                    "revision": "fixture",
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        ["prepare", "--output", str(tmp_path), "--parts", "data", "--verify-only"],
+    )
+    assets.main(pins_path=pins, source_id="MULTINEWS")
+    assert json.loads(capsys.readouterr().out)["source_id"] == "MULTINEWS"
+    with pytest.raises(ValueError, match="source identity"):
+        assets.main(pins_path=pins, source_id="XSUM")

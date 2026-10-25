@@ -2,6 +2,17 @@
   "version": "adapter-extensions/v1",
   "boundary": "Field contracts from publisher metadata/docs. No real source payload downloaded or full adapter validation claimed.",
   "adapters": {
+    "MULTINEWS": {
+      "kind": "task_dataset",
+      "mapping": "multinews_original_pairs",
+      "input_fields": ["document"],
+      "required_fields": ["document", "summary", "source_line_index", "target_file", "target_sha256"],
+      "outcome_fields": ["summary"],
+      "annotation_fields": ["source_line_index", "target_file", "target_sha256"],
+      "id_field": "",
+      "requirements": ["Original source/target line pairing and publisher loader NEWLINE_CHAR restoration; native Google Pegasus generation and HF ROUGE; not a chat request or arrival trace"],
+      "status": "ORIGINAL_PARALLEL_FIELDS_MAPPED_NATIVE_DELIVERY_PENDING"
+    },
     "XSUM": {
       "kind": "task_dataset",
       "mapping": "native_fields",

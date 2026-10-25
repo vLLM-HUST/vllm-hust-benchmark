@@ -1,5 +1,42 @@
 # 公开原始资产：服务器准备与任务验证缺口
 
+## Multi-News 原成对多文档摘要（原生抽样通过，固定交付核验中）
+
+使用[作者发布的 Multi-News](https://huggingface.co/datasets/alexfabbri/multi_news)，保留原六个成对文件及作者 loader。
+train44972、validation5622、test5622 共56216条；每个原 source 行与同位置 target 行绑定，不把目标摘要拼进输入。 按作者 loader
+原语义去除行边缘空白并仅在文档中还原 `NEWLINE_CHAR`，`|||||` 文档分隔符保持原样；原文件字节留在外部目录。
+模型为[官方任务专用 PEGASUS-Multi-News](https://huggingface.co/google/pegasus-multi_news)，不是原论文训练复现。
+固定数据、模型、原配置和评分源码见 `configs/workload-native/multinews-author-pins.json`。
+
+```bash
+# 原文件、权重和评分资源均下载到服务器外部目录，不提交到Git。
+python scripts/prepare_multinews_original_assets.py --output /private/multinews-assets
+# 必要时加 --hf-endpoint https://hf-mirror.com；中断后显式加 --resume。
+```
+
+获取器复用已验证的原文件下载和摘要校验组件，数据与模型身份单独绑定。 `--parts data model --verify-only` 可只读核验已有原文件，不重下数据和权重。
+先在生成与评分客户端安装同一固定 `vllm-hust-workload-data` 工件；源码使用者可安装 `./workload-preparation`。 匹配硬件平台的
+PyTorch/torch_npu/CANN 应事先配置；独立NPU客户端依赖见
+`configs/workload-native/multinews-native-npu-client-dependencies.txt`。 独立CPU评分客户端沿用
+`xsum-original-score-client-dependencies.txt` 中的通用HF评分依赖， 只复用评分组件，不载入XSum数据或BART模型，也不改共享服务环境。
+
+```bash
+# NPU客户端：默认固定原test物理行0、1、2。
+python scripts/run_multinews_original.py --mode generate \
+  --data-root /private/multinews-assets/data --model-root /private/multinews-assets/model \
+  --output /private/multinews-original-generation --device npu:1
+# CPU评分客户端：复用上述原生响应，不调用模型。
+python scripts/run_multinews_original.py --mode score \
+  --data-root /private/multinews-assets/data --source-root /private/multinews-assets/scoring \
+  --reuse /private/multinews-original-generation --output /private/multinews-original-score
+```
+
+原配置为encoder1024、decoder max256/min32、beam8、length-penalty0.8、no-repeat-ngram0，未为当前机器缩减。
+原1024窗口不等于原始多文档束全文长上下文评测；完整文档与原关系仍可由公共读取入口取得。 `--full` 执行所选split全部原题，`--indices 3,4,5`
+是输出前固定的其他原位置，不能按失败结果换题。 本次原test全量执行保守预测约48971秒，超过30分钟，冻结前三条为主要抽样。
+其原生NPU生成、未修改的官方HF后处理/ROUGE及额外公共入口未见样本已验证；候选读取已逐条对照作者loader全部56216条。
+固定CI工件及研究侧最终消费仍在核验，来源不提前打勾。不宣称全5622题test推理、全文长上下文覆盖或论文分数复现。 数据使用遵守作者发布条件；原始文档、参考、详细响应及完整索引不公开提交。
+
 ## XSum 原文章摘要（原生抽样交付已验证）
 
 数据使用[发布方原始 XSum parquet](https://huggingface.co/datasets/EdinburghNLP/xsum)，保留原

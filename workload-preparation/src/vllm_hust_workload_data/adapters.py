@@ -13,6 +13,11 @@ from .registry import adapter_spec, source_spec
 
 def iter_source_rows(path, spec):
     """Use one source view for reading, binding and index resolution."""
+    if spec["mapping"] == "multinews_original_pairs":
+        from .multinews import original_rows
+
+        yield from original_rows(path)
+        return
     if spec.get("native_format") == "openslr_archives_or_hf_rows" and Path(
         path
     ).name.endswith(".tar.gz"):
