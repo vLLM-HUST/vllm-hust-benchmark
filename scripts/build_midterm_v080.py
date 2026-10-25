@@ -104,7 +104,8 @@ def build(revision, read=None):
         0,
         {
             "id": "corrected-quality",
-            "title": "当前纠正实现质量",
+            "title": "当前纠正实现质量 / Corrected implementation quality",
+            "source_heading": "5.12 当前纠正实现质量",
             "title_en": "Corrected implementation quality",
             "scope": zh,
             "scope_en": en,
