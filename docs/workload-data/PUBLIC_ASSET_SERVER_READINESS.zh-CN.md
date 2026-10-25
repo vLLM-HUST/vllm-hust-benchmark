@@ -904,6 +904,20 @@ completions，不套聊天模板、不删除Markdown围栏或修补语法，以�
 `--full`为完整500题；sanitized变体目前仅准备资产，不能宣称其原生验证完成。
 完整提示分词超容量直接失败，不截断；空输出、语法错误、预算耗尽的原始结果保留，不换题凑通过。预测与完整原任务仅保存在服务器私有目录。
 这里只生成，不执行代码或计分；功能评分仍必须在受验证的独立沙箱中，不能在宿主或推理服务环境直接exec预测。
+
+准备后续沙箱评分的私有输入，不重新生成、不抽取代码围栏或修补语法：
+
+```bash
+python scripts/prepare_mbpp_scoring_inputs.py \
+  --assets /private/fresh-mbpp-assets \
+  --generation /private/fresh-mbpp-generation \
+  --output /private/fresh-mbpp-scoring-inputs
+```
+
+核验原始题号/行号、资产版本、完整请求、参考代码、终态与保存结果；空输出和length终止仍保留。 输出只留在服务器私有目录，包含完整原任务与预测，不能提交到公开仓。准备成功不等于执行测试成功。
+固定的后续执行器元数据见 `configs/workload-native/mbpp-scoring-pins.json`：复用BigCode CodeEval执行/计分函数，
+不复用其不同的InCoder提示；原始三测试和setup保持独立，增强challenge测试不混入主结果。
+当前只核验执行器源码身份与准备软件夹具，独立隔离worker及实际功能评分尚未完成，不能在宿主设置代码执行授权后直接调用。
 替换为EvalPlus增强测试需另列协议，不得当作原三测试同配置。当前只有发布元数据和无数据的软件夹具，来源仍不勾选。
 
 InfiniteBench 作者代码身份与静态前检命令：

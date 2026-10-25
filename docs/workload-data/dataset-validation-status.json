@@ -1,6 +1,6 @@
 {
   "schema_version": "workload-validation-checklist/v1",
-  "updated_at": "2026-10-25",
+  "updated_at": "2026-10-26",
   "latest_frozen_software_ci_receipt": "docs/workload-data/validation/software-ci-regression-20261025.json",
   "native_runtime_latest": {
     "status": "SSH_UNREACHABLE_LAST_NATIVE_RUN_EVIDENCE_PRESERVED",
@@ -1743,6 +1743,8 @@
       "public_asset_preparer": "scripts/prepare_mbpp_original_assets.py",
       "official_asset_manifest": "configs/workload-native/mbpp-original-assets.json",
       "native_generation_entrypoint": "scripts/run_mbpp_original_generation.py",
+      "scoring_input_preparer": "scripts/prepare_mbpp_scoring_inputs.py",
+      "scoring_preparation_scope": "Software fixtures only: exact original saved request/task identity, raw completions including empty/syntax failures/length retained, no re-generation or code execution. Fixed CodeEval source metadata recorded; isolated worker and real functional scoring pending.",
       "native_generation_validation_scope": "Inert software fixtures only: original full test ID range, publisher README three-shot template with IDs2/3/4 and all3 tests, raw completions, fixed original range/full, no host code execution. Real NPU generation and functional scoring not yet verified; sanitized execution pending.",
       "preparation_scope": "Official Google Research HF metadata frozen: full/sanitized, all four original splits, 9 files including README; inert acquisition/resume/verify fixtures only. Zero local dataset downloads; server preparation, original GitHub field parity, generation, isolated code evaluation and consumer handoff pending.",
       "checked": false,

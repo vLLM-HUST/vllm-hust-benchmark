@@ -44,6 +44,17 @@ def original_prompt(task, examples):
     return "\n\n".join([*(block(item, True) for item in examples), block(task, False)])
 
 
+def completion_request(task, examples, model, max_tokens):
+    return {
+        "model": model,
+        "prompt": original_prompt(task, examples),
+        "temperature": 0,
+        "max_tokens": max_tokens,
+        "n": 1,
+        "stop": ["[DONE]"],
+    }
+
+
 def selected_tasks(rows, *, start=0, count=3, full=False):
     ids = [row.get("task_id") for row in rows]
     if (
@@ -118,15 +129,8 @@ def generate(
             name = f"task-{task['task_id']}.private.json"
             save(name, saved)
             try:
-                prompt = original_prompt(task, examples)
-                request = {
-                    "model": model,
-                    "prompt": prompt,
-                    "temperature": 0,
-                    "max_tokens": max_tokens,
-                    "n": 1,
-                    "stop": ["[DONE]"],
-                }
+                request = completion_request(task, examples, model, max_tokens)
+                prompt = request["prompt"]
                 saved["request"] = request
                 save(name, saved)
                 tokens = transport(
