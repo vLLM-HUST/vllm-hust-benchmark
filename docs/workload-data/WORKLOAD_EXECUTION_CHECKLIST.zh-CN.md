@@ -6,11 +6,11 @@
 
 ### 向量编码与检索 · embedding-retrieval
 
-- [ ] BEIR_SCIFACT、BEIR_NFCORPUS：原全量test检索已运行并评分，公共工件和研究接入核验仍在收口。
+- [x] BEIR_SCIFACT、BEIR_NFCORPUS：原全量test检索、最终公开NPU命令及固定CI组件/研究消费通过。
 
 ### 候选文档重排 · reranking
 
-- [ ] 同两原集合的dense top100重排已运行并评分；qrels只作参考，不制造正例候选。公共交付闭环仍未勾选。
+- [x] 同两原集合的dense top100重排及原评分完成，最终公开入口和固定工件两端消费已核验；qrels只作参考，不制造正例候选。
 
 ## 增量验证快照
 

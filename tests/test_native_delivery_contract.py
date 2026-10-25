@@ -8,6 +8,51 @@ ROOT = Path(__file__).resolve().parents[1]
 DOCS = ROOT / "docs/workload-data"
 
 
+def test_beir_delivery_closes_original_execution_fixed_artifact_and_consumer():
+    receipt = json.loads(
+        (DOCS / "validation/beir-native-delivery-20261025.json").read_text("utf-8")
+    )
+    fixed = json.loads((ROOT / receipt["fixed_ci_research_handoff"]).read_text("utf-8"))
+    assert receipt["source_checkbox_eligible"]
+    assert fixed["status"] == "FIXED_CI_PROVIDER_AND_RESEARCH_CONSUMPTION_VERIFIED"
+    assert fixed["data_commit"] == receipt["data_commit"]
+    assert fixed["installed_payload_files_equal"] == 36
+    assert fixed["research_source_files_equal_installed"] == 40
+    assert len(fixed["checks"]) == 9
+    assert sum(c["public_first_tail_roundtrip"] for c in fixed["checks"]) == 54
+    assert sum(c["research_index_import"] for c in fixed["checks"]) == 27
+    assert sum(c["research_direct_prepare_resolve"] for c in fixed["checks"]) == 27
+    assert fixed["model_calls"] == fixed["new_scoring_runs"] == 0
+    assert receipt["unique_original_test_query_positions"] == 623
+    assert receipt["rerank_candidate_pairs"] == 62300
+    assert (
+        receipt["newly_covered_unique_query_positions_relative_to_prior_native_run"]
+        == 0
+    )
+    assert receipt["environment"]["backend"] == "torch_npu"
+    assert not receipt["environment"]["serving_environment_modified"]
+    import hashlib
+
+    actual = hashlib.sha256(
+        (ROOT / receipt["public_runner"]).read_bytes().replace(b"\r\n", b"\n")
+    ).hexdigest()
+    assert actual == receipt["public_runner_sha256"]
+    ledger = json.loads((DOCS / "dataset-validation-status.json").read_text("utf-8"))
+    for run in receipt["final_public_entry_native_protocols"]:
+        assert run["mode"] == "run" and run["generation_performed_this_run"]
+        assert run["status"] == "ORIGINAL_FULL_TEST_EXECUTED_AND_SCORED"
+        assert run["device"] == "npu:1"
+        assert run["model_parameters_and_embeddings_verified_on_npu"]
+        assert len(run["protocols"]) == 2
+        assert (
+            run["original_test_queries"]
+            == {"BEIR_SCIFACT": 300, "BEIR_NFCORPUS": 323}[run["source_id"]]
+        )
+        assert ledger["delivery_inventory"][run["source_id"]]["checked"]
+    assert not receipt["research_observation_or_analysis_migrated"]
+    assert not receipt["engine_performance_or_scientific_conclusion_claim"]
+
+
 def test_beir_full_native_and_candidate_consumer_are_not_fixed_ci_completion():
     native = json.loads(
         (DOCS / "validation/beir-original-full-native-20261025.json").read_text("utf-8")

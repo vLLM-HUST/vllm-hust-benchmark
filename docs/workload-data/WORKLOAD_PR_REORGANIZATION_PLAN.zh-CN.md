@@ -4,7 +4,7 @@
 
 ### 2026-10-25既定W39/W40接入进展
 
-不新增来源或改变113项范围：BEIR_SCIFACT与BEIR_NFCORPUS两个既定来源补齐原corpus/query/qrels映射和原zip准备入口，分别完成原test全量dense检索与top100交叉编码重排的NPU执行及官方评分。公共入口离线重算四项指标与原结果一致；完整原字段/关系、全量参考索引以及研究索引导入和直接prepare/resolve均通过候选代码核验。见[原生执行及重算证据](validation/beir-original-full-native-20261025.json)、[候选消费证据](validation/beir-candidate-consumer-20261025.json)。固定CI安装工件仍待核验，尚未打完成勾。
+不新增来源或改变113项范围：BEIR_SCIFACT与BEIR_NFCORPUS两个既定来源已完成原corpus/query/qrels准备与保真映射、原test全量dense检索和top100交叉编码重排、原评分，以及最终公开入口的NPU交接。固定CI安装包36个payload与原工件逐字节一致，9个原资产文件的公共回查、研究索引导入及直接prepare/resolve均通过。见[最终交付证据](validation/beir-native-delivery-20261025.json)和[固定工件消费证据](validation/beir-fixed-ci-research-handoff-20261025.json)，这两项在当前交付表打勾；历史快照不升级，重复交接不新增唯一任务覆盖数。
 
 对应程序分类新增`embedding-retrieval`与`reranking`两个定义及原协议规则，活跃定义从36增至38。40类总目标不变，W26约束规划和W38语音合成仍未因此补齐；qrels行不会被当作重排请求，也不会用gold正例制造候选。完整原文、排名、模型、研究观测与特征不提交到公共仓。后文旧表中的“待接入/未验证”是此前快照，本段及机器台账记录上述增量。
 
