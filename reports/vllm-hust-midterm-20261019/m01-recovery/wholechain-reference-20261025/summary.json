@@ -1,0 +1,176 @@
+{
+  "schema": "m01-wholechain-reference-public/v1",
+  "status": "reference_qualified",
+  "reference_qualified": true,
+  "model": "Qwen3.5-35B-A3B",
+  "dtype": "BF16",
+  "participating_chips": 2,
+  "device": "Ascend 910B2",
+  "dataset": "MMLU-Pro",
+  "reference_C_TFLOPS_per_chip": 7.108506511466548,
+  "B0": {
+    "ownF": 1829161955258989,
+    "own_T_seconds": 238.12670116312802,
+    "own_C": 3.840732572879189,
+    "T_reference_seconds": 128.660074539456,
+    "eta_percent": 54.03009150633544,
+    "eta_target_percent": 90,
+    "eta_target_met": false
+  },
+  "B1": {
+    "ownF": 1812905151088034,
+    "own_T_seconds": 127.59352582134306,
+    "own_C": 7.1042207644080255,
+    "T_reference_seconds": 127.51659917337653,
+    "eta_percent": 99.93970959931444,
+    "eta_target_percent": 90,
+    "eta_target_met": true
+  },
+  "windows": [
+    {
+      "label": "C1",
+      "ownF": 1812879106716099,
+      "synchronized_seconds": 123.58018648251891,
+      "own_C": 7.334829143394037,
+      "actual_output": 51200,
+      "prefill_F": 1449445097137045,
+      "decode_F": 363434009579054,
+      "plan_sha256": "e6126b0f3cf67e21e612e6001d173f8d30a7a714638d7a20e59ed831f8886365",
+      "receipt_sha256": "6be3ab6c78c2943ee657b589dbe13417bbe47b0a1165a89182a2dcb91f440ba0",
+      "seal_sha256": "f447f7d91927a6a15fb2852e47e9c28ecca54bb8afe5abb3c2cc4410dbb53670"
+    },
+    {
+      "label": "C2",
+      "ownF": 1812914711403082,
+      "synchronized_seconds": 128.39263179153204,
+      "own_C": 7.060041865746109,
+      "actual_output": 51200,
+      "prefill_F": 1449441656446165,
+      "decode_F": 363473054956917,
+      "plan_sha256": "4e76ab26c36b8e565894d9d41d7cfcc7f68a71f8f55b680f1ef774b8363882c1",
+      "receipt_sha256": "250179169757e9545668225017c172dc423903f00f4234298d444c664d942ba3",
+      "seal_sha256": "0f2b587428bf17a1c5f91571f9c38a502428c27126d654a11d576dfa83015af6"
+    },
+    {
+      "label": "C3",
+      "ownF": 1812898098830529,
+      "synchronized_seconds": 127.51610312983394,
+      "own_C": 7.108506511466548,
+      "actual_output": 51200,
+      "prefill_F": 1449442955549845,
+      "decode_F": 363455143280684,
+      "plan_sha256": "cf6d751403e055add5f347ff6f336140abdd6d9f25fd01d0018ba3c6a7250eeb",
+      "receipt_sha256": "9c6c5c8fd6ebaffcb93d9631fa4f24e94f04ede336724b2469b477c44b65fce0",
+      "seal_sha256": "5830aededba35cb60556b1170fe69bf2fdf7dfce441794af819b4d8013077041"
+    },
+    {
+      "label": "H",
+      "ownF": 1812705760255459,
+      "synchronized_seconds": 126.11558162793517,
+      "own_C": 7.18668437657166,
+      "actual_output": 51200,
+      "prefill_F": 1449310271747587,
+      "decode_F": 363395488507872,
+      "plan_sha256": "5db3a5523df14bcdaa84207ac0cabf59c47efa07b902f6b729f840ba1cba4db9",
+      "receipt_sha256": "58bbecbe089a8b8d9ded1b482006223b60a129cba06b23032792b8bd14d96463",
+      "seal_sha256": "cd77f45cf87f9758725bc09286c147541b654a4dd16d4dc5d914ecd1d2b25c56"
+    }
+  ],
+  "quality": {
+    "B0_correct": 151,
+    "B1_correct": 156,
+    "total": 200,
+    "failed": 0,
+    "scope": "Fixed C200 max8192 quality reused; performance windows max256"
+  },
+  "method": {
+    "kind": "Independently executed empirical whole-chain reference, not theoretical peak or a global optimum",
+    "shared_code_with_B1": true,
+    "selection": "Prospectively selected executable source-qualified full corrected combination with same-identity quality pass from bounded known candidates; not selected using old B1 time or desired eta",
+    "C_ref": "median(own_F/(2*own_T*1e12) for C1,C2,C3)",
+    "T_ref": "own_F/(2*C_ref*1e12)",
+    "eta_percent": "100*own_C/C_ref",
+    "old_B1_time_used_as_denominator": false,
+    "overhead_subtracted": false,
+    "all_valid_slow_windows_retained": true,
+    "fresh_service_and_six_caches_each_window": true,
+    "H_scope": "200 matched nonoverlapping target samples, not previously unseen corpus",
+    "freeze_sha256": "c1139dbfe50d0a97de05c14835e5ac278c8af62ab2f22c497fe9deb2ad4c2960"
+  },
+  "capacity_checks": {
+    "status": "evaluated",
+    "C_ref": 7.108506511466548,
+    "C_values": [
+      7.334829143394037,
+      7.060041865746109,
+      7.108506511466548
+    ],
+    "H_own_C": 7.18668437657166,
+    "range_over_median": 0.03865611956670163,
+    "H_C_relative_deviation": 0.010997790461189746,
+    "maximum_range_over_median": 0.05,
+    "maximum_H_C_relative_deviation": 0.1,
+    "repeatability_pass": true,
+    "H_capacity_pass": true
+  },
+  "composition_checks": [
+    {
+      "subject": "H",
+      "baseline": "pooled_C1_C2_C3",
+      "prefill_share_difference_percentage_points": 0.0011132130419253075,
+      "decode_share_difference_percentage_points": 0.0011132130419253075,
+      "F_per_actual_output_token_relative_deviation": 0.00010565705726815367,
+      "maximum_share_difference_percentage_points": 5,
+      "maximum_F_per_output_relative_deviation": 0.05,
+      "shares_pass": true,
+      "F_per_output_pass": true,
+      "passed": true,
+      "arithmetic": "Exact integer/rational comparisons, inclusive <=; no threshold tolerance",
+      "scope": "Two work-composition gates only; not quality, repeatability, capability H/C, or eta admission"
+    },
+    {
+      "subject": "B0",
+      "baseline": "pooled_C1_C2_C3",
+      "prefill_share_difference_percentage_points": 0.7112152592001125,
+      "decode_share_difference_percentage_points": 0.7112152592001125,
+      "F_per_actual_output_token_relative_deviation": 0.008971633174365038,
+      "maximum_share_difference_percentage_points": 5,
+      "maximum_F_per_output_relative_deviation": 0.05,
+      "shares_pass": true,
+      "F_per_output_pass": true,
+      "passed": true,
+      "arithmetic": "Exact integer/rational comparisons, inclusive <=; no threshold tolerance",
+      "scope": "Two work-composition gates only; not quality, repeatability, capability H/C, or eta admission"
+    },
+    {
+      "subject": "B1",
+      "baseline": "pooled_C1_C2_C3",
+      "prefill_share_difference_percentage_points": 0.0005533968576046324,
+      "decode_share_difference_percentage_points": 0.0005533968576046324,
+      "F_per_actual_output_token_relative_deviation": 4.327568972724666e-06,
+      "maximum_share_difference_percentage_points": 5,
+      "maximum_F_per_output_relative_deviation": 0.05,
+      "shares_pass": true,
+      "F_per_output_pass": true,
+      "passed": true,
+      "arithmetic": "Exact integer/rational comparisons, inclusive <=; no threshold tolerance",
+      "scope": "Two work-composition gates only; not quality, repeatability, capability H/C, or eta admission"
+    }
+  ],
+  "all_frozen_applicability_checks_pass": true,
+  "evidence": {
+    "final_result_sha256": "1773105314e83ac74e112383048e301ee4c71693b1613c7df3227b26f044708c",
+    "independent_result_sha256": "1773105314e83ac74e112383048e301ee4c71693b1613c7df3227b26f044708c",
+    "source_sha256": {
+      "finalize_reference_r1.py": "23c17b6da33e8e1b631838b16c0c9d66eb5bc2c39257b9aa1d7b3e7efa52c074",
+      "reference_window_r1.py": "e1a235381fbdee54eb133fc02f1e41881706f0c2ffefd522a6ec080974c8b918",
+      "work_composition_api.py": "23b24362d4586f42d9a93b0ee993c74af186d9669bf49fc3c3f2326d37a536b1",
+      "work_composition_applicability.py": "671c3b0e6d620fd95462e638ece4ab0f0c806dfb9a76cbb31eaaf262db795f6a",
+      "profiling-acceptance-freeze-r1.json": "172f87ed7848d052c34f951d6bf8e08a2856efd6c7180a1c58e89b94494f541b",
+      "reference-selection-and-acceptance-r1.json": "c1139dbfe50d0a97de05c14835e5ac278c8af62ab2f22c497fe9deb2ad4c2960",
+      "existing-B0-B1-work-composition-r1.json": "4e9211840226d5e5368a5833a0ca72e29452e78e589a7e4e71f1ec80d25d39fa",
+      "paired-own-metrics-closed-r2.json": "2b73f3c8a79a80a4fce4e4d3f26fbb6070992659f5057d1a2ad0b49e4710d503"
+    }
+  },
+  "original_failed_receipts_preserved": true
+}

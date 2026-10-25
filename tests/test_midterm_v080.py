@@ -10,7 +10,13 @@ def test_corrected_quality_preserves_failure_and_missing_reference(monkeypatch):
 
     data = json.loads(builder.OUTPUT.read_text())
     assert data == builder.build(
-        data["source_commit"], lambda path: (ROOT / path).read_bytes()
+        data["source_commit"],
+        lambda path: (
+            ROOT
+            / "reports/vllm-hust-midterm-20261019/m01-recovery/wholechain-reference-20261025/report-v080.md"
+            if path == builder.REPORT
+            else ROOT / path
+        ).read_bytes(),
     )
     quality = data["corrected_quality"]
     assert quality["quality"]["current_corrected_B1"]["correct"] == 156
