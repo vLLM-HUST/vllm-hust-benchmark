@@ -917,7 +917,29 @@ python scripts/prepare_mbpp_scoring_inputs.py \
 核验原始题号/行号、资产版本、完整请求、参考代码、终态与保存结果；空输出和length终止仍保留。 输出只留在服务器私有目录，包含完整原任务与预测，不能提交到公开仓。准备成功不等于执行测试成功。
 固定的后续执行器元数据见 `configs/workload-native/mbpp-scoring-pins.json`：复用BigCode CodeEval执行/计分函数，
 不复用其不同的InCoder提示；原始三测试和setup保持独立，增强challenge测试不混入主结果。
-当前只核验执行器源码身份与准备软件夹具，独立隔离worker及实际功能评分尚未完成，不能在宿主设置代码执行授权后直接调用。
+独立隔离入口如下，当前只有软件控制流验证，真实Linux命名空间与功能评分尚未验证，不能在宿主设置代码执行授权后直接调用：
+
+```bash
+python scripts/run_mbpp_isolated_scoring.py \
+  --assets /private/fresh-mbpp-assets \
+  --generation /private/fresh-mbpp-generation \
+  --prepared-dir /private/fresh-mbpp-scoring-inputs \
+  --author-root /private/bigcode-evaluation-harness \
+  --package-root /private/mbpp-client310/lib/python3.10/site-packages \
+  --python-runtime /private/python310-standalone \
+  --work-root /private/fresh-mbpp-isolated-score \
+  --sandbox-uid "$MBPP_APPROVED_SANDBOX_UID" --deadline 600
+```
+
+`author-root`需检出固定执行器提交`8fc5bae6479c4fbbb28c3f8b644f6a15b3f3b5bd`；
+使用独立Python3.10运行时，评分依赖固定numpy1.26.4、tqdm4.70.1，启动器的数据读取环境另需PyArrow。
+这是待服务器核验的候选环境，不是已验证安装记录，不能改动模型服务全局Torch/NPU环境。
+`MBPP_APPROVED_SANDBOX_UID`需操作者设置为专用、非零且无其他任务使用的主机UID；启动器需操作者授权root，
+降权后进入独立user/mount/net/pid命名空间与chroot，只读输入和运行时、无NPU设备、无外网、能力清空及no_new_privs检查通过后才导入执行器。
+隔离设置复用现有HumanEval命名空间代码，不改变其原有评分路径；这是有界本地隔离，不是安全认证。
+原参考解先按原setup与三个测试自检，未通过直接保留失败，不改测试。随后原预测按每题3秒、单worker、pass@1计分。
+500题完整范围外围deadline至少4060秒，示例600秒只适合固定小样本，不缩短题内时间。
+无隔离条件不回退，异常保留目录和日志，不自动清理或重试。来源完成仍需真实NPU生成、独立评分及固定工件消费闭环。
 替换为EvalPlus增强测试需另列协议，不得当作原三测试同配置。当前只有发布元数据和无数据的软件夹具，来源仍不勾选。
 
 InfiniteBench 作者代码身份与静态前检命令：

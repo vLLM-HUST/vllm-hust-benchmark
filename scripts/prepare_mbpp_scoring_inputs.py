@@ -14,11 +14,9 @@ def digest(path):
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 
 
-def prepare(generation, *, rows, examples, source_identity, output, final_verify=None):
+def validate_saved_generation(generation, *, rows, examples, source_identity):
     selected_tasks(rows, full=True)
-    generation, output = Path(generation).resolve(), Path(output).resolve()
-    if output.is_relative_to(generation) or generation.is_relative_to(output):
-        raise ValueError("fresh output must be separate from frozen generation")
+    generation = Path(generation).resolve()
     receipt_file = generation / "receipt-private.json"
     receipt_bytes = receipt_file.read_bytes()
     receipt = json.loads(receipt_bytes)
@@ -116,6 +114,19 @@ def prepare(generation, *, rows, examples, source_identity, output, final_verify
         digest(generation / item["path"]) != item["sha256"] for item in identities
     ):
         raise ValueError("saved generation changed during preparation")
+    return tasks, {
+        "generation_receipt_sha256": hashlib.sha256(receipt_bytes).hexdigest(),
+        "generation_files": identities,
+    }
+
+
+def prepare(generation, *, rows, examples, source_identity, output, final_verify=None):
+    generation, output = Path(generation).resolve(), Path(output).resolve()
+    if output.is_relative_to(generation) or generation.is_relative_to(output):
+        raise ValueError("fresh output must be separate from frozen generation")
+    tasks, provenance = validate_saved_generation(
+        generation, rows=rows, examples=examples, source_identity=source_identity
+    )
     if final_verify is not None:
         final_verify()
     output.mkdir(mode=0o700, parents=True, exist_ok=False)
@@ -125,8 +136,7 @@ def prepare(generation, *, rows, examples, source_identity, output, final_verify
     result = {
         "source_id": "MBPP",
         "status": "ORIGINAL_TASK_SCORING_INPUTS_PREPARED_NOT_EXECUTED",
-        "generation_receipt_sha256": hashlib.sha256(receipt_bytes).hexdigest(),
-        "generation_files": identities,
+        **provenance,
         "source_identity": source_identity,
         "tasks_sha256": digest(task_file),
         "task_ids": [item["task_id"] for item in tasks],
