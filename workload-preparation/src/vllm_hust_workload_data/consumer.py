@@ -23,6 +23,9 @@ def resolve_input(database: Path, record_id: str, *, data_root: Path):
         raise KeyError("unknown prepared record")
     source, task, spec = map(json.loads, row)
     reference = task["input_ref"]
+    if source["source_id"] == "FLORES200" and spec["mapping"] == "source-mapping/v1":
+        if reference.get("mapping_sha256") != spec["contract_sha256"]:
+            raise ValueError("original translation direction/profile binding mismatch")
     verify_file(data_root, {"path": reference["file"], "sha256": reference["sha256"]})
     rows = iter_source_rows(asset_path(data_root, reference["file"]), spec)
     try:

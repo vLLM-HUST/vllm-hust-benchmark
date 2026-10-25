@@ -2972,9 +2972,9 @@
     },
     "FLORES200": {
       "source_id": "FLORES200",
-      "platform": "hf",
-      "repo_id": "facebook/flores",
-      "source_url": "https://huggingface.co/datasets/facebook/flores",
+      "platform": "https",
+      "repo_id": "facebookresearch/flores",
+      "source_url": "https://github.com/facebookresearch/flores/tree/a6c830c6e1051fb4ac1a44b32358f00463f332bd/flores200",
       "asset_kind": "translation_corpus",
       "independent_source_id": "FLORES",
       "workload_tags": [
@@ -2982,20 +2982,24 @@
         "multilingual"
       ],
       "provenance": "author_release",
-      "fitness_status": "VARIABLES_REQUIRE_ASSET_INSPECTION",
-      "discovery_status": "ENTRY_IDENTIFIED",
-      "revision": "71abf77d8b7beb5cfef59898d6b24d92ab7654fc",
-      "files": [],
-      "unit": "source_rows",
+      "fitness_status": "EXPLICIT_ORIGINAL_TRANSLATION_DIRECTION_REQUIRED",
+      "discovery_status": "OFFICIAL_META_ARCHIVE_VERIFIED_HISTORICAL_NATIVE_RESULTS_AVAILABLE",
+      "revision": "official-meta-archive-sha256:b8b0b76783024b85797e5cc75064eb83fc5288b41e9654dabc7be6ae944011f6", "revision_note": "pragma: allowlist secret - observed official archive identity, not a separately published checksum",
+      "files": [
+        {"path": "flores200_dataset.tar.gz", "role": "data", "bytes": 25585843, "rows": 2009, "sha256": "b8b0b76783024b85797e5cc75064eb83fc5288b41e9654dabc7be6ae944011f6", "sha256_note": "pragma: allowlist secret - observed official HTTPS archive identity", "url": "https://dl.fbaipublicfiles.com/nllb/flores200_dataset.tar.gz"}
+      ],
+      "archive_layout": {"language_code_count": 204, "split_rows": {"dev": 997, "devtest": 1012}},
+      "data_profile": "vllm_hust_workload_data.flores200.translation_mapping; explicit original source and target codes",
+      "unit": "original_parallel_row",
       "provenance_kind": "translation_corpus",
       "access": {
         "license": [
           "cc-by-sa-4.0"
         ],
-        "gated": "auto",
-        "note": "Verify publisher terms before acquisition or redistribution"
+        "gated": false,
+        "note": "Original archive was obtained directly from the public official Meta HTTPS host; this is not a claim of access to the separately gated HF mirror. NLLB model has separate noncommercial terms. Raw data stays external."
       },
-      "metadata_snapshot": "public-source-metadata-v0.5; not a fresh web check"
+      "metadata_snapshot": "Original official archive inspected20261025; decoded paired profiles and native consumer qualification tracked separately, not implied by this registry"
     },
     "BURSTGPT": {
       "source_id": "BURSTGPT",

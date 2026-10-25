@@ -13,6 +13,14 @@ from .registry import adapter_spec, source_spec
 
 def iter_source_rows(path, spec):
     """Use one source view for reading, binding and index resolution."""
+    if (
+        spec["mapping"] == "source-mapping/v1"
+        and spec["contract"]["source"]["source_id"] == "FLORES200"
+    ):
+        from .flores200 import parallel_rows
+
+        yield from parallel_rows(path)
+        return
     if spec["mapping"] == "multinews_original_pairs":
         from .multinews import original_rows
 

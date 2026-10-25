@@ -821,7 +821,7 @@ python scripts/run_humaneval_isolated_scoring.py \
 FLORES另已补充英语→德语devtest原3/4/5行NPU生成及原chrF++复核，累计三方向9次生成、6个不同平行行号；见[第三方向回执](validation/flores200-third-direction-native-audit-20261025.json)。这是新增方向验证，不要求把全部语言组合跑完才可交付；当前仍缺公共数据组件/研究消费和环境可复现收口。
 本入口只验证安全的数据准备；尚未核验真实保存结果，也不证明功能测试完成。输出包含生成代码，保留私有，不提交Git。恢复服务器后先复用已有生成物，不重跑模型来替代缺失评分。
 
-FLORES-200 原生入口代码（仅软件夹具验证，真实 NPU 运行待补）：
+FLORES-200 原生入口代码（已有三方向、9次保存的NPU生成；不等于公共交付已收口）：
 
 ```bash
 python scripts/run_flores200_original.py \
@@ -838,7 +838,20 @@ chrF++（sacrebleu CHRF(word_order=2)）；spBLEU 尚未集成，不宣称全部
 保留原始平行行号与空句，不换题；默认原始0/1/2行，`--full`为指定方向指定公开split全部原句。检查完整归档的语言数量与行数，但不把归档检查称为全部语言已推理。 模型使用固定
 NLLB-600M 工件，NPU执行且无CPU/CUDA降级，不修改其生成配置，只指定目标语言token；完整输入超出模型容量直接失败。arb_Latn、min_Arab、sat_Olck
 缺少对应模型token，拒绝执行而不替换文字体系。 模型限非商业研究使用，不能直接视为企业部署授权。输出含原句、参考译文和预测，留在服务器私有目录。需服务器安装并核实
-transformers、torch/torch-npu、sentencepiece、sacrebleu 的实际兼容版本；环境准备终态、真实推理及评分尚未验证，来源不得打勾。
+transformers、torch/torch-npu、sentencepiece、sacrebleu
+的实际兼容版本；已有原生生成与chrF++证据可复用，但固定软件工件消费、研究侧回查及spBLEU尚待收口，来源暂不打勾。
+
+原始平行语料公共准备入口（必须显式指定原始语向，不把参考译文拼入模型输入）：
+
+```bash
+python scripts/prepare_flores200_original_records.py \
+  --data-root /path/to/original-archive-parent \
+  --output /path/to/fresh-private-flores-direction \
+  --source-language eng_Latn --target-language fra_Latn
+```
+
+原始归档留在外部数据目录；准备入口只生成私有引用索引，不下载数据或调用模型。保留204个原始语言代码、dev的997行与devtest的1012行及五列对齐元数据；每个方向分别准备，记录身份绑定方向映射。输入与参考译文、元数据分离，未获模型支持的原始代码不替换。
+2026-10-26服务器候选代码已完整索引英→法2009行，并在两个split边界及首尾共8处回查成功，调用模型0次。此项是候选源码的数据关系验证，尚非固定wheel与研究侧闭环证明，不能替代原生生成和评分。
 
 WildChat、UltraChat、LMSYS-Chat 使用同一准备入口，分别指定 `WILDCHAT`、`ULTRACHAT`、`LMSYS_CHAT`。 复用现有
 historical_dialogue 适配定义，不新造第二套对话映射。原始 conversation/messages 的全部角色、轮次及顺序保留，包括历史 assistant

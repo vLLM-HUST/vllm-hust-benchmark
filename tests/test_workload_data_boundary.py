@@ -5,6 +5,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1] / "workload-preparation"
 DATA_MODULES = {
+    "flores200",  # Original parallel text and metadata bindings, no scoring.
     "narrativeqa",  # Pinned original table relations only, no observation/scoring.
     "multinews",  # Original paired documents/references, no research analysis.
     "librispeech",  # Original audio/transcript bindings only, no observations.

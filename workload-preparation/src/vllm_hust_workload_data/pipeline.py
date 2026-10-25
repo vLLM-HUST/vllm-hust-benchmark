@@ -166,6 +166,10 @@ def run(config, *, output, allow_partial=False, catalog_root=None):
                             "sha256": record.source["file_sha256"],
                             "row_index": record.replay["source_row_index"],
                         }
+                        if sid == "FLORES200" and mapping:
+                            # One original parallel row has distinct directed
+                            # task views. Do not collide their record identities.
+                            reference["mapping_sha256"] = spec["contract_sha256"]
                         if entry.get("history_targets") is not None:
                             reference["view"] = "original-parent-history/v1"
                         task = {
