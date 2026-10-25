@@ -8,6 +8,50 @@ ROOT = Path(__file__).resolve().parents[1]
 DOCS = ROOT / "docs/workload-data"
 
 
+def test_xsum_original_samples_preserve_blank_articles_and_native_scoring():
+    receipt = json.loads(
+        (DOCS / "validation/xsum-original-native-and-rescore-20261025.json").read_text(
+            "utf-8"
+        )
+    )
+    original = receipt["original_hf_recipe_scoring"]
+    assert receipt["primary_frozen_original_indices"] == [0, 1, 2]
+    assert original["model_calls"] == 0 and original["native_responses_reused"] == 3
+    assert original["estimated_full_native_test_seconds"] > 1800
+    assert (
+        original["original_postprocess_text_executed"]
+        and original["metric_source_unmodified"]
+    )
+    assert receipt["public_primary_rescore"]["rouge"] == original["rouge"]
+    assert receipt["original_blank_document_rows_per_split"] == {
+        "train": 28,
+        "validation": 5,
+        "test": 1,
+    }
+    assert receipt["original_blank_document_edge_score"]["original_indices"] == [11155]
+    assert receipt["original_blank_document_edge_score"]["scoring_complete"]
+    assert not receipt["full11334_test_inference_claim"]
+    ledger = json.loads((DOCS / "dataset-validation-status.json").read_text("utf-8"))
+    row = ledger["delivery_inventory"]["XSUM"]
+    if row["checked"]:
+        delivery = json.loads((ROOT / row["delivery_receipt"]).read_text("utf-8"))
+        handoff = json.loads(
+            (ROOT / row["fixed_ci_research_handoff_receipt"]).read_text("utf-8")
+        )
+        assert delivery["source_checkbox_eligible"]
+        assert not delivery["full11334_test_inference_claim"]
+        assert (
+            handoff["original_rows_preserved"]
+            == handoff["public_index_rows"]
+            == handoff["research_direct_prepare_rows"]
+            == 226711
+        )
+        assert handoff["installed_payload_files_equal"] == 38
+        assert (
+            handoff["cpu_ci_conclusion"] == handoff["root_ci_conclusion"] == "success"
+        )
+
+
 def test_validation_receipts_have_no_duplicate_json_keys():
     def unique_object(pairs):
         result = {}
