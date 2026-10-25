@@ -508,6 +508,41 @@ python -I scripts/run_beir_original.py --source-id BEIR_SCIFACT \
 score模式会核验完整查询覆盖、文档标识、有限得分以及重排候选恰好来自dense
 top100；它只证明这些排名可被原评分器评价，不能独立证明排名由某模型生成。真实NPU生成、原始排名SHA、固定数据组件及研究消费核验须分别取证。完整排名、原文和索引始终留在用户私有目录。原全量NPU执行、最终公开命令交接与固定CI工件/研究消费核验均已完成，见[最终交付证据](validation/beir-native-delivery-20261025.json)；只对这两个登记来源和上述协议勾选，不延伸到全部BEIR集合。
 
+### BurstGPT 官方缩放工具验证（获准，待空闲窗口执行）
+
+第1份轨迹的原速20条结果保留，不重复运行。第2、3份使用官方 `--scale 1000000`，仅用于工具可用性验证；官方源码将时间戳除以 scale，原 CSV
+不改、不归零，选定的原物理行0—19全部保留，1024-token预算不变。原始首时间戳对应约61/225天，缩放后初始等待约5.27/19.44秒。这个配置压缩了到达间隔，不能用于原始流量性能、稳态能力或突发可靠性结论。
+
+公共入口仍为 `scripts/run_burstgpt_original_example.py`，在原第1份命令上指定对应 `--trace /private/BurstGPT_2.csv` 或
+`BurstGPT_3.csv`、`--count 20 --scale 1000000`
+和全新私有输出目录。保留官方原始代码校验、原外部提示池校验及全部请求/响应日志。它是官方外部提示池模拟，不是企业私有原始请求回放。每份必须完成工具执行及保存响应审计后才更新进度；获准缩放或脚本准备好不算跑通。研究线程优先用卡，等待期间不发模型请求。
+
+### BillSum 发布方 HF 原始账单文本与 Pegasus 协议（接入中）
+
+来源为 `FiscalNote/billsum` 固定发布版本，保留 `text`、`summary`、`title`
+全部原字段；train18949、test3269、ca_test1237，共23455条。这里接入的是发布方 HF 三字段版本，不是原论文的 `clean_text`/BERT
+清洗流程，也不声称保留原归档的 bill_id/external_id。原归档公开下载尝试未成功，这个版本差异须保留说明，不以自行构造补齐。原始数据、生成摘要及全量索引均不入 Git。
+
+运行环境依赖见 `configs/workload-native/billsum-native-npu-client-dependencies.txt`；仅原平台匹配的 NPU Torch
+栈执行模型，CPU 可评分，不使用 CPU 代替 NPU 推理。采用 Google 发布的 `google/pegasus-billsum`，不是把其他摘要模型改名；保持原 checkpoint
+generation_config、1024原生编码窗口、beam8、max256、min32、length_penalty0.6。长原文按该模型原生窗口处理，不据此声称全长上下文验证。
+
+```sh
+python scripts/prepare_billsum_original_assets.py \
+  --output /private/billsum-assets --parts data model scoring
+python scripts/run_billsum_original.py --mode generate \
+  --data-root /private/billsum-assets/data --model-root /private/billsum-assets/model \
+  --split test --device npu:1 --output /private/fresh-billsum-test
+python scripts/run_billsum_original.py --mode score \
+  --data-root /private/billsum-assets/data --source-root /private/billsum-assets/scoring \
+  --split test --reuse /private/fresh-billsum-test --output /private/fresh-billsum-score
+```
+
+`--split ca_test` 为原加州测试集。默认固定物理行0、1、2；`--full` 可跑原 split 全量，`--indices`
+在运行前明确原行号，不能失败后换题。原两测试集全量估时分别约9.16和2.75小时，超过30分钟规则，因此首批验证固定各前三条；不是全量成绩复现。模型输入仅原
+`text`，标题留元数据侧、摘要留参考侧。评分复用保存响应，执行固定 HF 原后处理与
+ROUGE，不新增模型调用，也不是原论文全部实验流程。下载、字段读取、临时推理、公共入口、固定工件和研究消费须分别验收；当前来源主勾仍不勾选。
+
 ### GPQA 作者原发布包与原zero-shot协议
 
 使用作者公开GitHub的`dataset.zip`，固定代码版本见[原资产回执](validation/gpqa-original-acquisition-20261025.json)。按该版本README公开提供的密码解压；不需要绕过HF门槛，也不把题目下载到本地工作站或提交进Git。main448、diamond198、extended546是有重叠的原split，不能相加称为1192个独立问题；`gpqa_experts.csv`是专家元数据，不是第四个benchmark。

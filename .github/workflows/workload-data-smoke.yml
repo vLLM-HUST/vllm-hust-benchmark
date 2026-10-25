@@ -53,12 +53,15 @@ on:
       - 'scripts/prepare_xsum_original_assets.py'
       - 'scripts/prepare_multinews_original_assets.py'
       - 'scripts/run_multinews_original.py'
+      - 'scripts/run_billsum_original.py'
+      - 'scripts/prepare_billsum_original_assets.py'
       - 'tests/test_xlsum_original_runner.py'
       - 'tests/test_beir_original_runner.py'
       - 'tests/test_stsb_original_runner.py'
       - 'tests/test_librispeech_original_runner.py'
       - 'tests/test_xsum_original_runner.py'
       - 'tests/test_multinews_original_runner.py'
+      - 'tests/test_billsum_original_runner.py'
       - 'configs/workload-native/gpqa-original-client-py312-dependencies.txt'
       - 'configs/workload-native/gpqa-publisher-py39-loader-dependencies.txt'
       - 'tests/test_longmemeval_original_runner.py'
@@ -144,7 +147,7 @@ jobs:
       - name: LongMemEval publisher prompt transport CPU contracts only
         run: python -m pytest -q tests/test_longmemeval_original_runner.py
       - name: Original model and metric CPU contracts only
-        run: python -m pytest -q tests/test_gpqa_original_runner.py tests/test_xlsum_original_runner.py tests/test_beir_original_runner.py tests/test_stsb_original_runner.py tests/test_librispeech_original_runner.py tests/test_xsum_original_runner.py tests/test_multinews_original_runner.py
+        run: python -m pytest -q tests/test_gpqa_original_runner.py tests/test_xlsum_original_runner.py tests/test_beir_original_runner.py tests/test_stsb_original_runner.py tests/test_librispeech_original_runner.py tests/test_xsum_original_runner.py tests/test_multinews_original_runner.py tests/test_billsum_original_runner.py
       - name: Installed CLI and packaged catalogs
         working-directory: ${{ runner.temp }}
         run: |

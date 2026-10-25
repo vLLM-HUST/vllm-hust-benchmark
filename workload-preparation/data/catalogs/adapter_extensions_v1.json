@@ -2,6 +2,17 @@
   "version": "adapter-extensions/v1",
   "boundary": "Field contracts from publisher metadata/docs. No real source payload downloaded or full adapter validation claimed.",
   "adapters": {
+    "BILLSUM": {
+      "kind": "task_dataset",
+      "mapping": "native_fields",
+      "input_fields": ["text"],
+      "required_fields": ["text", "summary", "title"],
+      "outcome_fields": ["summary"],
+      "annotation_fields": ["title"],
+      "id_field": "",
+      "requirements": ["Publisher HF three-field original bill view; title/reference not in model input; native Pegasus and HF ROUGE, not original paper clean_text pipeline"],
+      "status": "ORIGINAL_FIELDS_MAPPED_NATIVE_DELIVERY_PENDING"
+    },
     "MULTINEWS": {
       "kind": "task_dataset",
       "mapping": "multinews_original_pairs",
