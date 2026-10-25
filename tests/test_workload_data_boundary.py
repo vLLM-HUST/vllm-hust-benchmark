@@ -50,14 +50,14 @@ def test_no_observation_dependencies_or_hooks():
 
 def test_new_native_entry_software_contracts_are_watched_and_cpu_smoked():
     import fnmatch
-    import yaml
+    import re
 
     repo = ROOT.parent
-    workflow = yaml.load(
-        (repo / ".github/workflows/workload-data-smoke.yml").read_text("utf-8"),
-        Loader=yaml.BaseLoader,
-    )
-    watched = workflow["on"]["pull_request"]["paths"]
+    text = (repo / ".github/workflows/workload-data-smoke.yml").read_text("utf-8")
+    # Check this controlled workflow's text contracts without a YAML dependency.
+    # General YAML syntax remains covered by the repository's lint hooks.
+    paths = text.split("    paths:\n", 1)[1].split("  workflow_dispatch:", 1)[0]
+    watched = re.findall(r"""^\s+- ['"]([^'"]+)['"]\s*$""", paths, re.MULTILINE)
     scripts = [
         "run_historical_dialogue_original.py",
         "score_qrecc_original_qa.py",
@@ -89,21 +89,26 @@ def test_new_native_entry_software_contracts_are_watched_and_cpu_smoked():
     ]:
         assert (repo / path).is_file()
         assert any(fnmatch.fnmatchcase(path, pattern) for pattern in watched), path
-    job = workflow["jobs"]["cpu-correctness"]
-    assert job["runs-on"] == "ubuntu-latest"
-    commands = [step.get("run", "") for step in job["steps"]]
+    assert "    runs-on: ubuntu-latest\n" in text
+    commands = [
+        line.strip().removeprefix("run: ")
+        for line in text.splitlines()
+        if line.strip().startswith(("run: python", "python "))
+    ]
     for name in fixtures:
         assert any(
             "python -m pytest" in command and "tests/" + name in command
             for command in commands
         ), name
     assert not any(command.startswith("python scripts/run_") for command in commands)
-    installed = [
-        step for step in job["steps"] if "installed_wheel_audit" in step.get("run", "")
-    ]
-    assert len(installed) == 1
-    assert installed[0]["working-directory"] == "${{ runner.temp }}"
-    assert "INSTALLED_PAYLOAD_AUDIT.json" in installed[0]["run"]
+    marker = (
+        "      - name: Verify installed wheel payload outside checkout, no datasets\n"
+    )
+    assert text.count(marker) == 1
+    installed = text.split(marker, 1)[1].split("      - name:", 1)[0]
+    assert "working-directory: ${{ runner.temp }}" in installed
+    assert "installed_wheel_audit" in installed
+    assert "INSTALLED_PAYLOAD_AUDIT.json" in installed
 
 
 def test_narrativeqa_relations_remain_data_only():
