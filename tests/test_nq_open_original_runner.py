@@ -162,3 +162,24 @@ def test_chat_option_only_binds_native_model_parameter_not_task_text():
         runner.bind_prompt_options(
             model, apply_chat_template=True, disable_thinking=True
         )
+
+
+def test_frozen_delivery_does_not_turn_low_scores_into_quality_acceptance():
+    """Evidence linkage/schema check, not fresh native execution."""
+    path = ROOT / "docs/workload-data/validation/nq-open-native-delivery-20261026.json"
+    proof = json.loads(path.read_text("utf-8"))
+    ledger = json.loads(
+        (ROOT / "docs/workload-data/dataset-validation-status.json").read_text("utf-8")
+    )
+    assert ledger["delivery_inventory"]["NATURALQUESTIONS"]["checked"]
+    assert proof["source_checkbox_eligible"] and not proof["quality_acceptance_passed"]
+    assert proof["plain_profile"]["unique_original_dev_positions"] == 3610
+    assert proof["plain_profile"]["empty_outputs_retained"] == 3127
+    assert proof["native_chat_profile"]["actual_native_model_calls"] == 3
+    assert proof["native_chat_profile"]["correct"] == 0
+    assert proof["total_native_model_calls_across_distinct_profiles"] == 3613
+    assert proof["clean_client"]["pip_check"] == "No broken requirements found."
+    assert proof["clean_client"][
+        "all3610_saved_outputs_refiltered_and_rescored_without_generation"
+    ]
+    assert not proof["raw_dataset_questions_predictions_or_weights_published"]

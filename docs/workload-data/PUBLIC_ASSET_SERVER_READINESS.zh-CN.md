@@ -533,8 +533,8 @@ Questions当前为NQ-open；DuReader为demo；WildChat为原1M固定14分片，�
 
 NQ-open原生生成/评分入口已补（此处是执行方法，完成状态仍看机器清单与原生回执）：
 
-本次可复现客户端为Linux Python3.12：只读绑定已有厂商CPU
-torch软件包，不继承整套系统site-packages、不加载模型权重。生成仍调用独立Ascend服务，客户端CPU仅负责分词/评分。安装和只读复核入口如下（替换私有目标目录；安装目标必须不存在）：
+本次可复现客户端为Linux Python3.12：选择性符号链接复用已有厂商CPU
+torch软件包，不继承整套系统site-packages、不加载模型权重。符号链接不是操作系统只读挂载，禁止通过该客户端升级或卸载厂商Torch；安装脚本不重装它。生成仍调用独立Ascend服务，客户端CPU仅负责分词/评分。安装和只读复核入口如下（替换私有目标目录；安装目标必须不存在）：
 
 ```sh
 python scripts/prepare_lmeval_api_client.py \
@@ -558,6 +558,9 @@ python scripts/run_nq_open_original.py \
 默认固定原dev0/1/2，`--start/--count`选择事前固定的连续原行号（至少3条），`--full`选择全部3610条；不把获取的87925条训练题当test，训练文件仅保留给原框架读取。使用固定lm-eval0.4.11原nq_open配置和官方过滤/Exact
 Match；完整答案别名保留。唯一数据配置变化为本地原JSON路径，明确零样本、闭卷、模型替换及原API默认256生成上限，不修改原停止串。未加模板开关时为原纯文本profile；上例为模型原生聊天profile，框架按自身规则包装相同任务文本，原Jinja/词表保持绑定，以模型原生参数enable_thinking=False设置非思考格式，不能用它改写任务内容或缩预算。该参数用法见[Qwen官方说明](https://huggingface.co/Qwen/Qwen3.5-27B#instruct-or-non-thinking-mode)。两种profile分开记录，不择优混分。先检查全部所选原提示容量再调用模型，拒绝截断、换题或自动重试。输出及框架缓存含原题/回答，只放私有服务器；答错/空输出交原评分器，不人为排除。环境约束见[nq-open客户端](../../configs/workload-native/nq-open-lmeval-client-constraints.txt)。不是DPR/REALM检索、EfficientQA或原Natural
 Questions文档标注任务，也不冒充发布方TensorFlow评分CLI/论文模型复现。
+
+2026-10-26实际验证：纯文本profile已完整跑完原dev3610题，152题EM正确、3127个空输出原样保留；原生聊天/非思考profile固定原0/1/2三题全部非空、EM0/3，也未换题或修答案。前者不作为Qwen指令模型质量推荐，后者只是模型格式接通验证，不能称质量通过或与前者混分。干净隔离客户端pip
+check通过，全部3610份保存结果按原过滤/评分重核一致，公共安装工件及12个研究回查点均核验；见[交付证据](validation/nq-open-native-delivery-20261026.json)。旧客户端两项未使用依赖冲突及非致命Git-discovery提示保留，新客户端未改原环境或模型服务；全量训练题未拿来当测试题，原始数据和回答不公开。
 
 原始GitHub数据文件如遇raw主机连接失败，可显式使用发布方API传输；不会跳过来源固定版本、大小和SHA256校验：
 

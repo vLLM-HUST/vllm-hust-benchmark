@@ -5,10 +5,10 @@
 2026-10-25补充复核：原37项复核与研究人员七批23项成果去重为46个有历史获取/准备/验证记录的来源（含本轮仅分类项及受限子集，不是46个完整benchmark）。其中此前遗漏的8项已有48份原文件身份，本轮已复用固定版本、URL与校验和，并提供统一离线计划/原文件校验入口；没有重新下载9.51GB原数据，也未复制研究特征、观测或分析。详见[复用审计](validation/research-acquisition-reuse-audit-20261025.json)。这些来源改标“历史资产已复用、原生待补”，不再用“未开始”掩盖已有成果；准备映射、原生执行和固定工件消费未收口前，完成勾保持不勾。
 
 40 类共登记 110 个公开来源、8 份企业资产，合计 118 项；五个指定来源只分类，本轮推进 113 项。下方历史 19
-个勾保留，不自动提升为本轮完成，也不要求已验证项目重复跑。当前交付可用40/113项、73项待补：2项服务轨迹资产、24项原任务/固定评测协议交付（BBH、MATH500、GSM8K、AI2-ARC、NI登记任务、BFCL登记类别、QuALITY原NYU多选集成、LongBench登记Qasper200、tau2登记telecom_full、LoCoMo完整上下文文本QA、RULER原13种任务集成、GPQA原三split
+个勾保留，不自动提升为本轮完成，也不要求已验证项目重复跑。当前交付可用41/113项、72项待补：2项服务轨迹资产、25项原任务/固定评测协议交付（BBH、MATH500、GSM8K、AI2-ARC、NI登记任务、BFCL登记类别、QuALITY原NYU多选集成、LongBench登记Qasper200、tau2登记telecom_full、LoCoMo完整上下文文本QA、RULER原13种任务集成、GPQA原三split
 zero-shot集成、BEIR
 SciFact/NFCorpus原检索与重排、STSB原句对相似度、XLSUM原45变体摘要、LibriSpeech原完整波形抽样ASR、XSum原BART抽样摘要、Multi-News原PEGASUS多文档抽样摘要、BillSum发布方HF原法案抽样摘要、HumanEval原三题功能评分、DS1000七库24题评分、MBPP
-full原三题CodeEval评分、FLORES原三语向抽样翻译与原指标评分）、Dolly、OASST1、LongWriter、UltraChat、WildChat及ToolACE六项语料及8份私有企业请求语料。并非40个全量带官方质量评分的benchmark，边界见逐项回执。
+full原三题CodeEval评分、FLORES原三语向抽样翻译与原指标评分、NQ-open原dev3610纯文本及原生聊天3题集成）、Dolly、OASST1、LongWriter、UltraChat、WildChat及ToolACE六项语料及8份私有企业请求语料。并非41个全量带官方质量评分的benchmark，也不代表这些模型质量达标，边界见逐项回执。
 
 完成要求以主方案第零节及机器清单 delivery_contract 为准：原题、完整原生流程与适用评分必须跑通；每个独立协议预计执行和评分不超过 30
 分钟则全跑，否则事前固定至少三条，不足则全跑。不得改题、删工具、截断或缩减原生预算，失败不得换题。资源不足保留未勾并记阻塞；模型答错不等于链路失败。服务轨迹无原始请求回放入口时，只能交付数据资产，不能编
@@ -171,7 +171,7 @@ TB；服务器/data约1.42TB可用，未缩小语料。ChartQA当前两卡主机
 | TOOLACE                    | [x] 有界原始历史续写可用 | 全11300条原system/对话字段及索引、首尾6条固定工件公共/研究回查；原三会话全部15处NPU续写正常stop。[证据](validation/toolace-original-continuation-20261026.json)；原历史tool返回保留、不造工具/ID；无在线Agent/BFCL/ToolACE-8B复现或全量模型推理承诺。                                          |
 | DUREADER                   | [ ] 原demo数据与消费已核 | 原search demo train/dev各100题已取得，200题/916文档全部原字段与原始关系保真，遗漏标注已补且不进入模型输入，12处固定工件公共/研究回查通过；[准备证据](validation/dureader-original-demo-preparation-20261026.json)。原生生成/评分待补，不称完整DuReader或Zhidao，不打完成勾。                   |
 | SPIDER                     | [ ] 待开展               | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                   |
-| NATURALQUESTIONS           | [ ] 原文件与全量准备已核 | 发布方nq_open原dev3610/train87925已在服务器核验原字段、固定SHA/大小并索引91535条；[准备证据](validation/nq-open-original-preparation-20261026.json)。原生生成/评分与研究消费待补，不是完整NQ文档任务，未打完成勾。                                                                             |
+| NATURALQUESTIONS           | [x] NQ-open原任务已交付  | 原dev3610题纯文本全量NPU生成/评分，原生聊天模式另3题；91535条索引、12处固定工件公共/研究回查及干净客户端重评分通过；[交付证据](validation/nq-open-native-delivery-20261026.json)。低分与空输出保留，两profile不混分，不是完整NQ文档、RAG或质量通过。                                           |
 | MULTIAGENTBENCH            | [ ] 待开展               | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                   |
 | DEEPPLANNING               | [ ] 待开展               | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                   |
 | STREAMINGBENCH             | [ ] 待开展               | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                   |

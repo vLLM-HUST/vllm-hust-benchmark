@@ -1,6 +1,8 @@
 """Prepare/verify the pinned Python3.12 HTTP client, never a model deployment.
 
-Vendor CPU torch software is bound read-only, not whole system site-packages.
+Vendor CPU torch software is selectively linked, not whole system site-packages.
+These symbolic links are not OS-enforced read-only mounts. Do not upgrade or
+uninstall the vendor torch distribution through this client.
 Inference remains on the separately deployed server; no model weights installed.
 """
 
