@@ -99,6 +99,50 @@ def test_empty_or_unregistered_selections_never_fall_back_to_new_data():
         runner.selection("not-an-audited-source")
 
 
+@pytest.mark.parametrize("failure", [None, "host", "revision", "path", "size", "type"])
+def test_explicit_github_transport_preserves_pinned_file(failure):
+    source, files = runner.selection("NATURALQUESTIONS")
+    item = dict(files[1])
+    info = {
+        "type": "file",
+        "path": item["path"],
+        "size": item["bytes"],
+        "sha": "a" * 40,
+    }
+    calls = []
+    if failure == "host":
+        item["url"] = item["url"].replace(
+            "raw.githubusercontent.com", "example.invalid"
+        )
+    elif failure == "revision":
+        item["url"] = item["url"].replace(source["revision"], "main")
+    elif failure in {"path", "size", "type"}:
+        info[failure] = {
+            "path": "different.jsonl",
+            "size": item["bytes"] + 1,
+            "type": "dir",
+        }[failure]
+
+    def loader(url):
+        calls.append(url)
+        return info
+
+    if failure:
+        with pytest.raises(ValueError, match="original GitHub"):
+            runner.github_blob_transport(source, item, metadata_loader=loader)
+    else:
+        spec, url = runner.github_blob_transport(source, item, metadata_loader=loader)
+        assert spec["sha256"] == item["sha256"] and spec["bytes"] == item["bytes"]
+        assert spec["git_blob"] == "a" * 40
+        assert (
+            url
+            == f"https://api.github.com/repos/{source['repo_id']}/git/blobs/" + "a" * 40
+        )
+        assert calls == [
+            f"https://api.github.com/repos/{source['repo_id']}/contents/{item['path']}?ref={source['revision']}"
+        ]
+
+
 def fixture(tmp_path, monkeypatch, gated=False):
     raw = b'{"software_fixture":true}\n'
     source = {

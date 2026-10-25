@@ -533,6 +533,17 @@ Questions当前为NQ-open；DuReader为demo；WildChat为原1M固定14分片，�
 
 2026-10-26补充：原生三语向抽样、原指标评分、固定软件包与研究侧消费已收口，见[交付回执](validation/flores200-native-delivery-20261026.json)。下面的准备中/待核描述保留历史截面，不再代表当前交付状态；隐藏test、未支持的原始语言代码和非商业模型许可限制仍有效。
 
+原始GitHub数据文件如遇raw主机连接失败，可显式使用发布方API传输；不会跳过来源固定版本、大小和SHA256校验：
+
+```sh
+python scripts/prepare_reused_research_assets.py NATURALQUESTIONS \
+  --mode download --github-api --max-bytes 10000000 \
+  --data-root /private/fresh-nq-open-original-assets
+```
+
+仅接受已登记的`raw.githubusercontent.com/原仓库/固定40位提交/原文件路径`，先核对同一提交的发布方文件元数据与Git对象身份，再校验完整原始字节；不访问第三方镜像、不登录、不绕过gated授权。原目录失败后只允许匹配配置的显式`--resume`；已有完整文件用`--mode verify`。获取成功不等于NQ-open原生生成/评分已完成，更不等于完整Natural
+Questions文档任务。
+
 公开资产入口已补充，以下命令应在有空间的服务器执行，数据与模型不放进代码仓：
 
 ```sh

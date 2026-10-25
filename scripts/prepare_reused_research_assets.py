@@ -9,6 +9,9 @@ import hashlib
 import importlib.util
 import json
 from pathlib import Path
+import re
+from urllib.parse import quote, urlparse
+from urllib.request import Request, urlopen
 
 CATALOG = (
     Path(__file__).resolve().parents[1]
@@ -19,6 +22,51 @@ spec = importlib.util.spec_from_file_location(
 )
 IO = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(IO)
+
+
+def github_json(url):
+    request = Request(
+        url,
+        headers={
+            "Accept": "application/vnd.github+json",
+            "User-Agent": "original-workload-asset-preparer",
+        },
+    )
+    with urlopen(request, timeout=30) as response:
+        raw = response.read(2 * 1024**2 + 1)
+    if len(raw) > 2 * 1024**2:
+        raise ValueError("original GitHub file metadata exceeds bound")
+    return json.loads(raw)
+
+
+def github_blob_transport(source, item, *, metadata_loader=github_json):
+    """Same pinned GitHub file through its author's API, not a dataset mirror."""
+    url = urlparse(item["url"])
+    revision, repo = source["revision"], source["repo_id"]
+    expected = f"/{repo}/{revision}/{item['path']}"
+    if (
+        url.scheme != "https"
+        or url.hostname != "raw.githubusercontent.com"
+        or url.path != expected
+        or url.query
+        or url.fragment
+        or not re.fullmatch(r"[0-9a-f]{40}", revision)
+    ):
+        raise ValueError("explicit unchanged pinned original GitHub URL required")
+    metadata_url = f"https://api.github.com/repos/{repo}/contents/{quote(item['path'], safe='/')}?ref={revision}"
+    info = metadata_loader(metadata_url)
+    if (
+        not isinstance(info, dict)
+        or info.get("type") != "file"
+        or info.get("path") != item["path"]
+        or info.get("size") != item["bytes"]
+        or not re.fullmatch(r"[0-9a-f]{40}", info.get("sha", ""))
+    ):
+        raise ValueError("pinned original GitHub file/blob metadata mismatch")
+    return {
+        **item,
+        "git_blob": info["sha"],
+    }, f"https://api.github.com/repos/{repo}/git/blobs/{info['sha']}"
 
 
 def selection(source_id, files=None):
@@ -49,6 +97,11 @@ def main():
     parser.add_argument("--max-bytes", type=int, default=550_000_000)
     parser.add_argument("--resume", action="store_true")
     parser.add_argument(
+        "--github-api",
+        action="store_true",
+        help="Use publisher GitHub blob API for unchanged pinned raw.githubusercontent.com files; SHA256/size still required",
+    )
+    parser.add_argument(
         "--hf-endpoint",
         choices=["https://huggingface.co", "https://hf-mirror.com"],
         default="https://huggingface.co",
@@ -68,6 +121,7 @@ def main():
         "native_execution_complete": False,
         "research_analysis_migrated": False,
         "raw_payloads_published": False,
+        "github_api_transport_requested": args.github_api,
     }
     if args.mode == "plan":
         print(json.dumps(receipt, indent=2))
@@ -122,7 +176,10 @@ def main():
                 url = item["url"].replace(
                     "https://huggingface.co/", args.hf_endpoint + "/"
                 )
-                IO.fetch(path, item, url)
+                fetch_spec = item
+                if args.github_api:
+                    fetch_spec, url = github_blob_transport(source, item)
+                IO.fetch(path, fetch_spec, url)
             receipt["verified_files"].append({"path": item["path"], "reused": reused})
             progress.write_text(json.dumps(receipt, indent=2) + "\n", encoding="utf-8")
         receipt["status"] = "PINNED_ORIGINAL_RAW_ASSETS_ACQUIRED_NOT_NATIVE_DELIVERY"
