@@ -5,7 +5,7 @@
 2026-10-25补充复核：原37项复核与研究人员七批23项成果去重为46个有历史获取/准备/验证记录的来源（含本轮仅分类项及受限子集，不是46个完整benchmark）。其中此前遗漏的8项已有48份原文件身份，本轮已复用固定版本、URL与校验和，并提供统一离线计划/原文件校验入口；没有重新下载9.51GB原数据，也未复制研究特征、观测或分析。详见[复用审计](validation/research-acquisition-reuse-audit-20261025.json)。这些来源改标“历史资产已复用、原生待补”，不再用“未开始”掩盖已有成果；准备映射、原生执行和固定工件消费未收口前，完成勾保持不勾。
 
 40 类共登记 110 个公开来源、8 份企业资产，合计 118 项；五个指定来源只分类，本轮推进 113 项。下方历史 19
-个勾保留，不自动提升为本轮完成，也不要求已验证项目重复跑。当前交付可用32/113项：1项服务轨迹资产、20项原任务/固定评测协议交付（BBH、MATH500、GSM8K、AI2-ARC、NI登记任务、BFCL登记类别、QuALITY原NYU多选集成、LongBench登记Qasper200、tau2登记telecom_full、LoCoMo完整上下文文本QA、RULER原13种任务集成、GPQA原三split
+个勾保留，不自动提升为本轮完成，也不要求已验证项目重复跑。当前交付可用33/113项：2项服务轨迹资产、20项原任务/固定评测协议交付（BBH、MATH500、GSM8K、AI2-ARC、NI登记任务、BFCL登记类别、QuALITY原NYU多选集成、LongBench登记Qasper200、tau2登记telecom_full、LoCoMo完整上下文文本QA、RULER原13种任务集成、GPQA原三split
 zero-shot集成、BEIR
 SciFact/NFCorpus原检索与重排、STSB原句对相似度、XLSUM原45变体摘要、LibriSpeech原完整波形抽样ASR、XSum原BART抽样摘要、Multi-News原PEGASUS多文档抽样摘要、BillSum发布方HF原法案抽样摘要）、Dolly、OASST1与LongWriter三项语料及8份私有企业请求语料。并非32个带官方质量评分的完整benchmark，边界见逐项回执。
 
@@ -120,7 +120,7 @@ TB；服务器/data约1.42TB可用，未缩小语料。ChartQA当前两卡主机
 | PAWS                       | [ ] 原始资产访问阻塞  | 新实例对官方原归档的限时IPv4 HEAD仍返回403；没有取得原数据，不用重构题或未验证镜像替代。[前提复核](validation/runtime-prerequisite-recheck-20261025.json)                                                                                                                           |
 | XLSUM                      | [x] 已完成            | 原45变体6173个固定位置均核验原输入/编码/解码及作者ROUGE；10变体全6068、其余35各3。固定CI/研究消费与独立环境通过，不代表全114198条NPU推理；限非商业研究。                                                                                                                            |
 | FLORES200                  | [ ] 原资产已取得      | 官方Meta归档已在服务器检查：204个语言/文字代码，各dev997/devtest1012；原适配/评分/原生入口待补。NLLB模型获取中，语言标记缺arb_Latn/min_Arab/sat_Olck，不替换或删除。当前不勾。[获取进度](validation/flores200-original-acquisition-progress-20261025.json)                          |
-| BURSTGPT                   | [ ] 第3份状态待核     | 第1份原速20条保留，第2份官方scale1000000的20条已执行并审计；第3份断联前在运行，当前终态未知。新入口指纹待核验，恢复后先查结果/进程，不重跑已完成项。原CSV与1024预算保留，不作原时序性能结论，不提前勾。                                                                             |
+| BURSTGPT                   | [x] 已交付            | 三份各原20条官方模拟已核；固定CI提供者及研究消费端三份各原3行消费相等。无新模型调用；第2/3份仅授权官方缩放，不作原时序性能结论。见[回执](validation/burstgpt-native-delivery-20261025.json)。                                                                                       |
 | TRACELAB                   | [ ] 缺口已列待补      | 复用历史证据；原生缺口见37项复核表及方案8.5.2                                                                                                                                                                                                                                       |
 | AZURE_LLM                  | [x] 数据资产可用      | Azure 本轮脱敏回执；非模型 benchmark                                                                                                                                                                                                                                                |
 | MOONCAKE                   | [ ] 缺口已列待补      | 官方工具未运行；全局无冲突需9.37 TiB；容量受限profile及SSH恢复待办                                                                                                                                                                                                                  |

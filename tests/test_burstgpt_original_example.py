@@ -155,3 +155,39 @@ def test_preparation_is_external_prompt_asset_not_native_completion():
     assert receipt["model_calls"] == 0
     assert not receipt["official_demo_executed"]
     assert not receipt["source_completion_checked"]
+
+
+def test_delivery_combines_native_results_and_fixed_consumer_without_relabeling_trace():
+    docs = ROOT / "docs/workload-data"
+    ledger = json.loads((docs / "dataset-validation-status.json").read_text("utf-8"))
+    row = ledger["delivery_inventory"]["BURSTGPT"]
+    receipt = json.loads((ROOT / row["delivery_receipt"]).read_text("utf-8"))
+    assert row["checked"] and row["status"] == "AVAILABLE"
+    assert receipt["source_checkbox_eligible"]
+    native = [
+        json.loads((ROOT / path).read_text("utf-8"))
+        for path in receipt["native_receipts"]
+    ]
+    # Release 2 is embedded in the frozen intermediate progress snapshot.
+    native[1] = native[1]["release2_audit"]
+    assert [item["scale"] for item in native] == [1, 1000000, 1000000]
+    assert sum(item["native_model_calls_reused"] for item in native) == 60
+    assert all(item["original_indices"] == list(range(20)) for item in native)
+    assert all(item["original_output_budget"] == 1024 for item in native)
+    fixed = receipt["fixed_consumer_audit"]
+    assert fixed["provider_installed_payload_files_record_hash_equal"] == 33
+    assert fixed["research_installed_python_files_record_hash_equal"] == 40
+    assert (
+        fixed["public_direct_rows"]
+        == fixed["public_index_resolved_rows"]
+        == fixed["research_index_resolved_rows"]
+        == 9
+    )
+    assert (
+        fixed["inputs_and_outcomes_equal"] and fixed["metadata_request_body_rejected"]
+    )
+    assert not fixed["research_default_lock_updated"]
+    assert receipt["new_model_calls"] == 0
+    assert not receipt["original_timing_performance_claim"]
+    assert not receipt["external_prompt_pool_is_original_private_user_requests"]
+    assert not receipt["raw_payloads_published"]

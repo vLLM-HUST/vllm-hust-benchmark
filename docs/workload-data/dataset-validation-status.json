@@ -1390,22 +1390,23 @@
     "BURSTGPT": {
       "scope": "public",
       "delivery_kind": "serving_trace",
-      "status": "REVIEWED_GAPS_RECORDED",
-      "checked": false,
+      "status": "AVAILABLE",
+      "checked": true,
       "legacy_checked": false,
       "existing_receipt": "docs/workload-data/validation/burstgpt-original-metadata-reader-20261023.json",
       "preparation_receipt": "docs/workload-data/validation/burstgpt-original-release-assets-20261024.json",
       "roundtrip_receipt": "docs/workload-data/validation/burstgpt-original-roundtrips-20261024.json",
-      "delivery_receipt": null,
+      "delivery_receipt": "docs/workload-data/validation/burstgpt-native-delivery-20261025.json",
       "official_tool_review": "docs/workload-data/validation/burstgpt-official-demo-review-20261024.json",
       "official_example_preparation_receipt": "docs/workload-data/validation/burstgpt-official-example-preparation-20261025.json",
       "native_public_runner": "scripts/run_burstgpt_original_example.py",
       "native_client_dependencies": "configs/workload-native/burstgpt-original-demo-py312-dependencies.txt",
-      "native_queue_state": "ALL_THREE_RELEASE_PROFILES_AUDITED_FIXED_CONSUMER_PENDING",
+      "native_queue_state": "ALL_THREE_RELEASE_PROFILES_AND_FIXED_CONSUMER_VERIFIED",
       "release3_native_audit_receipt": "docs/workload-data/validation/burstgpt-release3-scaled-native-audit-20261025.json",
       "scaled_tool_progress_receipt": "docs/workload-data/validation/burstgpt-scaled-tool-progress-20261025.json",
       "release1_native_audit_receipt": "docs/workload-data/validation/burstgpt-release1-native-audit-20261025.json",
-      "blocker": "已恢复第3份保存终态并完成原20条审计，无新模型调用，1024预算，15次length/5次stop保留；三份各原20条均已核。第1份scale1，第2/3份按授权官方scale1000000，不作原时序性能结论。固定工件及研究消费待补，来源不勾；外部池不是原私有提示。"
+      "blocker": null,
+      "scope_limits": "三份原轨迹各20条官方外部池模拟已核验；原预算1024，第1份scale1，第2/3份授权官方scale1000000。固定CI提供者33文件及研究侧40个Python文件安装哈希核验，三份各原0/1/2行直接读取、公共索引和研究侧索引消费相等。无新模型调用。不是原私有prompt回放，不作完整轨迹推理或原时序性能结论，研究默认依赖锁未更新。"
     },
     "TRACELAB": {
       "scope": "public",
