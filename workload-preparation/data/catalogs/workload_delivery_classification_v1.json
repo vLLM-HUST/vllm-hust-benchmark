@@ -20,6 +20,341 @@
     {"source_id": "PAIO-REUSE-CONV-5000", "asset_group": "enterprise-private-requests", "related_workload_ids": [], "boundary": "Conversation/reuse-oriented asset; do not infer a task class or measured reuse from its filename alone."},
     {"source_id": "PAIO-SEMANTIC-SIMILAR-5000", "asset_group": "enterprise-private-requests", "related_workload_ids": [], "boundary": "Semantic similarity is not exact-prefix or KV reuse; preserve original private requests without rewriting."}
   ],
+  "source_entrypoints": {
+    "OASST1": [
+      {
+        "role": "original_profile",
+        "path": "scripts/run_oasst_original_continuation.py"
+      }
+    ],
+    "DOLLY": [
+      {
+        "role": "original_profile",
+        "path": "scripts/run_dolly_original_categories.py",
+        "scope": "Original Dolly category request profile, not an official quality benchmark."
+      }
+    ],
+    "GSM8K": [
+      {
+        "role": "original_profile",
+        "path": "scripts/run_gsm8k_original_samples.py"
+      }
+    ],
+    "MATH500": [
+      {
+        "role": "original_profile",
+        "path": "scripts/run_math500_native.py"
+      }
+    ],
+    "GPQA": [
+      {
+        "role": "original_profile",
+        "path": "scripts/run_gpqa_original.py"
+      }
+    ],
+    "AI2_ARC": [
+      {
+        "role": "original_profile",
+        "path": "scripts/run_arc_original_samples.py"
+      }
+    ],
+    "LONGBENCH": [
+      {
+        "role": "original_profile",
+        "path": "scripts/run_longbench_v1_qasper_original.py",
+        "scope": "Original LongBench v1 qasper protocol only."
+      }
+    ],
+    "LIBRISPEECH": [
+      {
+        "role": "original_profile",
+        "path": "scripts/run_librispeech_original.py"
+      }
+    ],
+    "XLSUM": [
+      {
+        "role": "original_profile",
+        "path": "scripts/run_xlsum_original.py"
+      }
+    ],
+    "BURSTGPT": [
+      {
+        "role": "original_profile",
+        "path": "scripts/run_burstgpt_original_example.py"
+      }
+    ],
+    "RULER": [
+      {
+        "role": "original_profile",
+        "path": "scripts/run_ruler_original_profile.py"
+      }
+    ],
+    "QUALITY": [
+      {
+        "role": "original_profile",
+        "path": "scripts/run_quality_original_mc.py"
+      }
+    ],
+    "BBH": [
+      {
+        "role": "original_profile",
+        "path": "scripts/run_bbh_original_tasks.py"
+      }
+    ],
+    "BFCL": [
+      {
+        "role": "original_profile",
+        "path": "scripts/run_bfcl_v4_simple_python_original.py",
+        "scope": "Original BFCL v4 simple_python protocol only."
+      }
+    ],
+    "TAUBENCH": [
+      {
+        "role": "original_profile",
+        "path": "scripts/run_tau2_original_telecom.py",
+        "scope": "Original tau2 telecom Agent protocol only."
+      }
+    ],
+    "LOCOMO": [
+      {
+        "role": "original_profile",
+        "path": "scripts/run_locomo_original_qa.py"
+      }
+    ],
+    "XSUM": [
+      {
+        "role": "original_profile",
+        "path": "scripts/run_xsum_original.py"
+      },
+      {
+        "role": "prepare_assets",
+        "path": "scripts/prepare_xsum_original_assets.py"
+      }
+    ],
+    "MULTINEWS": [
+      {
+        "role": "original_profile",
+        "path": "scripts/run_multinews_original.py"
+      },
+      {
+        "role": "prepare_assets",
+        "path": "scripts/prepare_multinews_original_assets.py"
+      }
+    ],
+    "BILLSUM": [
+      {
+        "role": "original_profile",
+        "path": "scripts/run_billsum_original.py"
+      },
+      {
+        "role": "prepare_assets",
+        "path": "scripts/prepare_billsum_original_assets.py"
+      }
+    ],
+    "NATURAL_INSTRUCTIONS": [
+      {
+        "role": "original_profile",
+        "path": "scripts/run_natural_instructions_original.py"
+      },
+      {
+        "role": "original_profile",
+        "path": "scripts/run_ni_editing_extraction_original.py"
+      }
+    ],
+    "LONGWRITER": [
+      {
+        "role": "original_profile",
+        "path": "scripts/run_longwriter_original_samples.py"
+      }
+    ],
+    "BEIR_SCIFACT": [
+      {
+        "role": "original_profile",
+        "path": "scripts/run_beir_original.py"
+      }
+    ],
+    "BEIR_NFCORPUS": [
+      {
+        "role": "original_profile",
+        "path": "scripts/run_beir_original.py"
+      }
+    ],
+    "STSB": [
+      {
+        "role": "original_profile",
+        "path": "scripts/run_stsb_original.py"
+      }
+    ],
+    "AGENTBENCH": [
+      {
+        "role": "original_profile",
+        "path": "scripts/run_agentbench_alfworld_original.py",
+        "scope": "Original AgentBench ALFWorld branch only; not other domains."
+      }
+    ],
+    "STRUCTEVAL": [
+      {
+        "role": "original_profile",
+        "path": "scripts/run_structeval_original_json.py"
+      },
+      {
+        "role": "saved_output_reuse_audit",
+        "path": "scripts/audit_structeval_saved_nonrender.py"
+      }
+    ],
+    "LONGBENCH_V2": [
+      {
+        "role": "original_profile",
+        "path": "scripts/run_longbench_v2_original_samples.py"
+      }
+    ],
+    "INFINITEBENCH": [
+      {
+        "role": "original_profile",
+        "path": "scripts/run_infinitebench_original.py"
+      }
+    ],
+    "FLORES200": [
+      {
+        "role": "original_profile",
+        "path": "scripts/run_flores200_original.py"
+      },
+      {
+        "role": "prepare_assets",
+        "path": "scripts/prepare_flores200_original_assets.py"
+      }
+    ],
+    "JSONSCHEMABENCH": [
+      {
+        "role": "original_profile",
+        "path": "scripts/run_jsonschemabench_official.py"
+      },
+      {
+        "role": "prepare_assets",
+        "path": "scripts/prepare_jsonschemabench_original_assets.py"
+      }
+    ],
+    "PAIO-CHAT-1000": [
+      {
+        "role": "original_request_replay",
+        "path": "scripts/run_source_request_samples.py"
+      }
+    ],
+    "PAIO-CODE-EVAL-1000": [
+      {
+        "role": "original_request_replay",
+        "path": "scripts/run_source_request_samples.py"
+      }
+    ],
+    "PAIO-JSON-500": [
+      {
+        "role": "original_request_replay",
+        "path": "scripts/run_source_request_samples.py"
+      }
+    ],
+    "PAIO-LONG-PREFILL-5000": [
+      {
+        "role": "original_request_replay",
+        "path": "scripts/run_source_request_samples.py"
+      }
+    ],
+    "PAIO-LONGTEXT-4000": [
+      {
+        "role": "original_request_replay",
+        "path": "scripts/run_source_request_samples.py"
+      }
+    ],
+    "PAIO-PREFIX-SHARED-5000": [
+      {
+        "role": "original_request_replay",
+        "path": "scripts/run_source_request_samples.py"
+      }
+    ],
+    "PAIO-REUSE-CONV-5000": [
+      {
+        "role": "original_request_replay",
+        "path": "scripts/run_source_request_samples.py"
+      }
+    ],
+    "PAIO-SEMANTIC-SIMILAR-5000": [
+      {
+        "role": "original_request_replay",
+        "path": "scripts/run_source_request_samples.py"
+      }
+    ],
+    "AZURE_LLM": [
+      {
+        "role": "data_reading_only",
+        "path": "workload-preparation/src/vllm_hust_workload_data/provider.py"
+      }
+    ],
+    "AZURE_LMM_2025": [
+      {
+        "role": "data_reading_only",
+        "path": "workload-preparation/src/vllm_hust_workload_data/provider.py"
+      }
+    ],
+    "MOONCAKE": [
+      {
+        "role": "data_reading_only",
+        "path": "workload-preparation/src/vllm_hust_workload_data/provider.py"
+      }
+    ],
+    "TRACELAB": [
+      {
+        "role": "data_reading_only",
+        "path": "workload-preparation/src/vllm_hust_workload_data/provider.py"
+      }
+    ],
+    "DS1000": [
+      {
+        "role": "generation",
+        "path": "scripts/run_ds1000_original_generation.py"
+      },
+      {
+        "role": "prepare_scoring_inputs",
+        "path": "scripts/prepare_ds1000_official_samples.py"
+      },
+      {
+        "role": "isolated_scoring",
+        "path": "scripts/run_ds1000_isolated_scoring.py"
+      }
+    ],
+    "HUMANEVAL": [
+      {
+        "role": "generation",
+        "path": "scripts/run_humaneval_original_generation.py"
+      },
+      {
+        "role": "prepare_scoring_inputs",
+        "path": "scripts/prepare_humaneval_official_samples.py"
+      },
+      {
+        "role": "isolated_scoring",
+        "path": "scripts/run_humaneval_isolated_scoring.py"
+      }
+    ],
+    "BIGCODEBENCH": [
+      {
+        "role": "generation",
+        "path": "scripts/run_bigcodebench_original_generation.py"
+      },
+      {
+        "role": "prepare_scoring_inputs",
+        "path": "scripts/prepare_bigcodebench_official_samples.py"
+      },
+      {
+        "role": "isolated_scoring",
+        "path": "scripts/run_bigcodebench_container_scoring.py"
+      }
+    ],
+    "QASPER": [
+      {
+        "role": "prepare_assets",
+        "path": "scripts/prepare_qasper_original_assets.py"
+      }
+    ]
+  },
   "classes": [
     {
       "workload_id": "W01",

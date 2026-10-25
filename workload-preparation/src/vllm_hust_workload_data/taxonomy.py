@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from pathlib import PurePosixPath
+
 from .registry import read_catalog
 
 EVIDENCE_KINDS = frozenset(
@@ -167,12 +169,46 @@ def delivery_assets(root=None):
         }
     if len(result) != 118:
         raise ValueError("complete fixed 118-source delivery classification required")
+    entrypoints = plan.get("source_entrypoints", {})
+    if not set(entrypoints) <= set(result):
+        raise ValueError("entrypoint index refers to unknown plan source")
+    roles = {
+        "original_profile",
+        "original_request_replay",
+        "data_reading_only",
+        "generation",
+        "prepare_scoring_inputs",
+        "isolated_scoring",
+        "prepare_assets",
+        "saved_output_reuse_audit",
+    }
+    for entries in entrypoints.values():
+        seen = set()
+        for entry in entries:
+            path = PurePosixPath(entry["path"])
+            key = (entry["role"], entry["path"])
+            if (
+                entry["role"] not in roles
+                or path.is_absolute()
+                or ".." in path.parts
+                or "\\" in entry["path"]
+                or ":" in entry["path"]
+                or key in seen
+            ):
+                raise ValueError(
+                    "distinct repository-relative execution metadata required"
+                )
+            seen.add(key)
     return [
         {
             **result[source_id],
             "data_provider_source_registered": source_id in registered,
             "native_validation": "NOT_ESTABLISHED_BY_CLASSIFICATION",
             "local_availability": "NOT_CHECKED_ON_THIS_MACHINE",
+            "entrypoints": entrypoints.get(source_id, []),
+            "entrypoint_distribution": "BENCHMARK_REPOSITORY_PATHS_NOT_EXECUTORS_IN_DATA_WHEEL",
+            "entrypoint_scope": "DECLARED_SCRIPT_SCOPE_ONLY_NOT_FULL_SOURCE_COVERAGE; consult protocol/environment docs and the separate delivery ledger",
+            "entrypoint_validation": "NOT_ESTABLISHED_BY_INDEX; empty list is not proof of missing implementation",
         }
         for source_id in sorted(result)
     ]

@@ -10,6 +10,10 @@
 
 ## 零、需求对齐后的最终执行要求（2026-10-24）
 
+使用导航补齐：`source-plan SOURCE_ID`现可返回已索引的准备、生成、原生profile、隔离评分、
+已保存结果复核或纯数据读取路径，均相对于benchmark源码根目录。当前35项完成来源均有 对应路径，另含部分尚未完成来源的已实现入口；脚本存在不代表原生验证通过，空列表也
+不表示已审计为“无实现”。新wheel的路径元数据及源文件身份已检查，但不把wheel导入 当成服务器实跑或研究侧升级。具体完成勾仍只取机器台账，不新增另一套进度状态。
+
 2026-10-25分类入口补齐：程序新增显式40类交付视图，研究默认38类不变。使用
 `python -m vllm_hust_benchmark.workload_data classes --scheme delivery-plan` 和
 `class-plan W11 --scheme delivery-plan` 查看分类；`delivery-assets`列出全部118个登记来源，

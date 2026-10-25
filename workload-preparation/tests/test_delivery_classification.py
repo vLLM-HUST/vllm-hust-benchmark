@@ -1,6 +1,7 @@
 """Metadata classification only; no datasets, native execution or readiness claim."""
 
 import json
+from copy import deepcopy
 from pathlib import Path
 
 import pytest
@@ -74,3 +75,50 @@ def test_five_classification_only_sources_are_present_not_claimed_ready():
         row = provider.delivery_source_plan(sid)
         assert row["related_workload_ids"]
         assert row["native_validation"] == "NOT_ESTABLISHED_BY_CLASSIFICATION"
+
+
+def test_existing_deliveries_have_real_indexed_paths_without_runtime_claim():
+    root = Path(__file__).resolve().parents[2]
+    ledger = json.loads(
+        (root / "docs/workload-data/dataset-validation-status.json").read_text("utf-8")
+    )["delivery_inventory"]
+    assets = {row["source_id"]: row for row in taxonomy.delivery_assets()}
+    for source_id, status in ledger.items():
+        if status["checked"]:
+            assert assets[source_id]["entrypoints"], source_id
+    for row in assets.values():
+        for entry in row["entrypoints"]:
+            assert (root / entry["path"]).is_file()
+        assert row["entrypoint_validation"].startswith("NOT_ESTABLISHED_BY_INDEX")
+    assert {r["role"] for r in assets["DS1000"]["entrypoints"]} == {
+        "generation",
+        "prepare_scoring_inputs",
+        "isolated_scoring",
+    }
+    assert assets["AZURE_LLM"]["entrypoints"][0]["role"] == "data_reading_only"
+    assert assets["JSONSCHEMABENCH"]["entrypoints"]
+    assert ledger["JSONSCHEMABENCH"]["checked"] is False
+
+
+@pytest.mark.parametrize("failure", ["unknown", "path", "role", "duplicate"])
+def test_invalid_entrypoint_metadata_rejected(monkeypatch, failure):
+    original = taxonomy.read_catalog
+    plan = deepcopy(original("workload_delivery_classification_v1.json"))
+    entries = plan["source_entrypoints"]
+    if failure == "unknown":
+        entries["UNKNOWN_SOURCE"] = entries["DS1000"]
+    elif failure == "path":
+        entries["DS1000"][0]["path"] = "../outside.py"
+    elif failure == "role":
+        entries["DS1000"][0]["role"] = "native_verified"
+    else:
+        entries["DS1000"].append(deepcopy(entries["DS1000"][0]))
+    monkeypatch.setattr(
+        taxonomy,
+        "read_catalog",
+        lambda name, root=None: plan
+        if name == "workload_delivery_classification_v1.json"
+        else original(name, root),
+    )
+    with pytest.raises(ValueError):
+        taxonomy.delivery_assets()
