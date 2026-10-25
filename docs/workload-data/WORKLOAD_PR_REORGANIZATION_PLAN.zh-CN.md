@@ -5,7 +5,7 @@
 2026-10-26服务器已恢复：MBPP固定原始前3题完成双NPU生成和真实命名空间CodeEval评分，参考解全部通过，预测2通过/1失败，失败原样保留。
 官方full/sanitized全部9个资产已在服务器核对摘要；原生执行只覆盖full前三题，不称全500题或sanitized已跑。
 full字段适配、评分运行时预检及固定CI工件真实消费均已完成：四个full分片974条原记录全量映射/建索引，14个跨分片位置由公共入口和研究消费者回查一致。
-当前清单为**38/113完成、75待完成，另5项仅分类**；MBPP、UltraChat与WildChat本次新增勾选。研究默认依赖未改，仅核验精确候选工件。
+当前清单为**39/113完成、74待完成，另5项仅分类**；MBPP、UltraChat、WildChat与ToolACE新增勾选。研究默认依赖未改，仅核验精确候选工件。
 见[MBPP原生抽样证据](validation/mbpp-original-native-sample-20261026.json)。PR保持未合并。
 
 UltraChat复用已有原始语料适配和历史续写入口：完整test_gen原文件28304条字段及索引核验，固定前三条会话全部7个原assistant位置完成双NPU续写，全部正常stop。
@@ -17,6 +17,11 @@ WildChat原首分片59857条完成原文件绑定/索引，固定前三会话全
 3条stop、1条达到声明2048输出预算，预算终止原样保留，不算质量通过；不改题、不换题，不截断输入。
 原Parquet日期类型保留在读取器，私有JSON保存沿用既有ISO可移植表示，日期/其他非API标注不进入请求。
 这是有界历史语料续写可用性，不是原始API预算复现、在线Agent或全14分片推理；见[WildChat证据](validation/wildchat-original-continuation-20261026.json)。
+
+ToolACE已有11300条原始语料全部字段/索引及首尾6处固定工件公共/研究消费通过；原前三会话全部15个assistant位置完成双NPU续写，全部stop。
+复用原system、调用文本及历史tool返回；不补造工具、call ID或动态观测，不称在线Agent/BFCL成绩。
+现有模型为Qwen3.5-27B，明确声明回退而不是ToolACE-8B复现；外部Jinja/词表等6个分词运行文件均与既有可部署工件一致，全部15个保存prompt重新渲染一致，未重跑NPU。
+见[ToolACE交付证据](validation/toolace-original-continuation-20261026.json)。
 
 ### 2026-10-25既定W39/W40接入进展
 
@@ -61,7 +66,7 @@ GBK读取以及一项冻结证据的CRLF字节差异，未声称诊断穷尽全�
 该软件核验阶段的SSH32048失联记录保留；当前替换服务器状态和新增原生结果以上方2026-10-26更新及机器台账为准，不据旧失联推断回收原因。
 
 使用导航补齐：`source-plan SOURCE_ID`现可返回已索引的准备、生成、原生profile、隔离评分、
-已保存结果复核或纯数据读取路径，均相对于benchmark源码根目录。当前38项完成来源均有对应路径，另含部分尚未完成来源的已实现入口；脚本存在不代表原生验证通过，空列表也
+已保存结果复核或纯数据读取路径，均相对于benchmark源码根目录。当前39项完成来源均有对应路径，另含部分尚未完成来源的已实现入口；脚本存在不代表原生验证通过，空列表也
 不表示已审计为“无实现”。新wheel的路径元数据及源文件身份已检查，但不把wheel导入 当成服务器实跑或研究侧升级。具体完成勾仍只取机器台账，不新增另一套进度状态。
 
 2026-10-25分类入口补齐：程序新增显式40类交付视图，研究默认38类不变。使用
@@ -116,7 +121,7 @@ STSB既定来源增量已闭环：原dev1500/test1379全量NPU编码、原Pearso
 **目标仓已有能力及提交去重看8.6**：主线另有37个场景、44条矩阵登记及五指定来源的既有代码/报告，不在迁移台账37项中统一计数。先查既有入口和相关开放PR，再决定只补哪些缺口；“迁移目录只登记”不能再表述为“整个目标仓没有实现”。
 
 **当前结论**：若干固定数据包与研究消费者已完成软件及具名原生样本闭环，但不能据此宣布既有能力已经逐项迁全、或113项使用链路全部交付。
-当前38项交付、75项待补，以下历史统计不替代唯一机器清单。交付机器视图为40类，研究默认38类；分类登记本身不增加原生完成数。两端原Draft
+当前39项交付、74项待补，以下历史统计不替代唯一机器清单。交付机器视图为40类，研究默认38类；分类登记本身不增加原生完成数。两端原Draft
 PR状态以实时核查为准：研究侧#37已于2026-10-24合并为`da48172b57f14d0f7762201e08bbf026a808476b`，消费源码树与原固定提交一致；benchmark
 #432仍为Draft，本任务不合并。历史章节中的“双方未合并”保留为当时状态，不作为当前结论。
 
@@ -348,7 +353,7 @@ W26、W38、W39、W40为新增建议类；其余36类保留原稳定family ID，
 | <a id="src-swe-verified"></a>[SWE_VERIFIED](https://huggingface.co/datasets/princeton-nlp/SWE-bench_Verified)                          | 原生任务／数据资产       | W15                          | 已迁：数据读取适配；非完整执行承诺           | [x] 原选定文件3任务读取/索引/研究消费；未执行；[记录](validation/public-original-assets-server-reader-20261023.json)                                                          | 仓库初始化、Agent修复、测试环境与官方评分。                                                                            |
 | <a id="src-swesmith"></a>[SWESMITH](https://github.com/SWE-bench/SWE-smith)                                                            | 发布方构造／合成语料     | W15                          | 仅登记；需补接入                             | [ ] 当前固定迁移版本未有取得/原生运行验证；不推断历史全无                                                                                                                     | 发布方生成仓库任务/轨迹；固定实例、仓库、测试与许可，非自然生产请求。                                                  |
 | <a id="src-taubench"></a>[TAUBENCH](https://github.com/sierra-research/tau2-bench)                                                     | 原生任务／数据资产       | W23                          | 已迁：原生任务引用/执行；注册注释待同步      | [x] 官方tau2 telecom_full前3任务交互/评分，奖励1/1/0；[记录](validation/tau2-reference-handoff-npu-20261022.json)                                                             | 其他任务/domain、最终固定版本消费锁；不是原tau-bench全套。                                                             |
-| <a id="src-toolace"></a>[TOOLACE](https://huggingface.co/datasets/Team-ACE/ToolACE)                                                    | 发布方构造／合成语料     | W24                          | 已迁：数据读取适配；非完整执行承诺           | [x] 发布方合成历史工具对话3条读取/消费；[记录](validation/public-original-assets-server-reader-20261023.json)                                                                 | 原对话结构与其他数据；不虚构在线episode、执行环境或任务评分。                                                          |
+| <a id="src-toolace"></a>[TOOLACE](https://huggingface.co/datasets/Team-ACE/ToolACE)                                                    | 发布方构造／合成语料     | W24                          | 原始历史续写、完整字段与固定消费可用         | [x] 全11300条字段/索引、首尾6处公共/研究回查；原三会话全部15处NPU续写正常stop，原始工具返回保留；[证据](validation/toolace-original-continuation-20261026.json)               | Qwen具名回退；不是在线工具执行、BFCL评分、ToolACE-8B复现或全量模型推理。                                               |
 | <a id="src-toolbench"></a>[TOOLBENCH](https://github.com/OpenBMB/ToolBench)                                                            | 发布方构造／合成语料     | W22                          | 仅登记；需补接入                             | [ ] 当前固定迁移版本未有取得/原生运行验证；不推断历史全无                                                                                                                     | 固定原工具任务、API/环境可用性与原评分；外部服务失效不能改题隐瞒。                                                     |
 | <a id="src-tracelab"></a>[TRACELAB](https://github.com/uw-syfi/TraceLab)                                                               | 历史轨迹／元数据         | W14                          | 已迁：数据读取适配；非完整执行承诺           | [x] 选定文件3条调用元数据读取/消费；[记录](validation/public-original-assets-server-reader-20261023.json)                                                                     | 未含已核正文/补丁/工具结果；不等于真实代码编辑闭环。                                                                   |
 | <a id="src-tulu3"></a>[TULU3](https://huggingface.co/datasets/allenai/tulu-3-sft-mixture)                                              | 对话／训练语料           | W01、W09、W10                | 已有字段映射可复用；原数据适配待复核         | [ ] 当前固定迁移版本未有取得/原生运行验证；不推断历史全无                                                                                                                     | 取得并校验原发布文件/所选子集；复核现有字段映射并补原生准备、适用执行/评分和固定包/消费验证；本类细项见W01、W09、W10。 |

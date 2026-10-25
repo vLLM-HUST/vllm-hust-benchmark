@@ -1,4 +1,4 @@
-"""Inert ToolACE-shape fixtures and mocked transport; no real model/tool calls."""
+"""Inert fixtures and frozen receipts; no live model or tool calls in tests."""
 
 import importlib
 import json
@@ -242,3 +242,56 @@ def test_adding_a_new_external_template_does_not_evade_identity_check(tmp_path):
     )
     with pytest.raises(ValueError, match="template changed"):
         runner.verify_tokenizer_files(tmp_path, expected)
+
+
+def test_frozen_native_receipt_retains_original_tool_history_not_online_claim():
+    path = "docs/workload-data/validation/toolace-original-continuation-20261026.json"
+    receipt = json.loads((ROOT / path).read_text("utf-8"))
+    native, consumer = receipt["native_profile"], receipt["fixed_consumer"]
+    assert receipt["source_checkbox_eligible"] is True
+    assert native["selected_original_rows"] == [0, 1, 2]
+    assert native["every_original_assistant_position_requested"] == 15
+    assert native["original_assistant_turn_indices"] == [1, 3, 5, 7, 9] * 3
+    assert native["prefixes_with_original_tool_return_context"] == 12
+    assert native["finish_reasons"] == {"stop": 15}
+    assert (
+        native["local_prompts_independently_reproduced_and_api_token_counts_equal"]
+        == 15
+    )
+    assert (
+        native["tools_executed"]
+        == native["invented_tool_call_ids"]
+        == native["dynamic_observations"]
+        == 0
+    )
+    assert not native["quality_scored"] and not native["online_agent_episode"]
+    assert consumer["original_rows_and_index"] == 11300
+    assert consumer["exact_installed_payload_files"] == 41
+    assert consumer["public_research_roundtrip_indices"] == [
+        0,
+        1,
+        2,
+        11297,
+        11298,
+        11299,
+    ]
+    assert not consumer["research_default_lock_changed"]
+    assert not consumer["research_observations_or_features_executed"]
+    binding = receipt["latest_tokenizer_binding_recheck"]
+    assert binding["runtime_files_match_prior_deployable_artifact"] == 6
+    assert "chat_template.jinja" in binding["files"]
+    assert binding["saved_prompts_reproduced"] == 15 and binding["new_model_calls"] == 0
+    for key in (
+        "quality_or_function_correctness_claim",
+        "publisher_model_or_bfcl_replication_claim",
+        "full11300_model_execution_claim",
+        "original_api_request_capture_claim",
+        "raw_dataset_or_prediction_published",
+    ):
+        assert receipt[key] is False
+    ledger = json.loads(
+        (ROOT / "docs/workload-data/dataset-validation-status.json").read_text("utf-8")
+    )
+    source = ledger["delivery_inventory"]["TOOLACE"]
+    assert source["status"] == "AVAILABLE" and source["checked"] is True
+    assert source["delivery_receipt"] == path

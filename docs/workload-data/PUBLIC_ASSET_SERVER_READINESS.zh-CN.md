@@ -903,7 +903,7 @@ python scripts/run_historical_dialogue_original.py ULTRACHAT \
 
 ToolACE原始语料准备与核验（仅在服务器执行）：
 
-原始历史续写入口（新入口目前仅软件夹具通过，真实NPU验证待补）：
+原始历史续写入口（原前三会话全部15处续写、固定工件公共/研究消费已在服务器验证）：
 
 ```bash
 python scripts/run_toolace_original_continuation.py \
@@ -916,9 +916,15 @@ python scripts/run_toolace_original_continuation.py \
 采用所选本地模型自己的`apply_chat_template`生成原始文本补全，不给历史tool返回伪造`tool_call_id`，不补造`tools`字段或可执行工具。
 请求不是原始API捕获，也不是在线Agent；tool消息是既有历史数据，不随本次预测动态执行。512为具名续写预算，可显式配置；不是原API预算复原。
 本地tokenizer只读、禁止下载/remote-code；逐次与真实服务token计数一致性及完整上下文检查，前后核对原文件与tokenizer身份。
+绑定包括外部`chat_template.jinja`、词表与merges等实际分词文件，不只核对tokenizer配置JSON。
 空输出、预算终止和模型错误原样保留；没有该训练语料专属的官方质量评分，不将BFCL成绩或工具学习模型论文结论套用到本接通测试。
 [发布方模型用例](https://huggingface.co/Team-ACE/ToolACE-8B)展示ToolACE-8B的聊天模板函数生成；优先用合适的发布方模型，资源/权重不具备时可声明具名本地模型回退，不称论文或模型效果复现。
 运行客户端需兼容该本地模型的Transformers/Tokenizer；这里只做CPU分词，实际模型生成必须由获授权NPU服务完成，不能在CPU或宿主执行工具。
+
+已验证环境为Python3.12.13/Transformers5.5.4，实际Qwen3.5-27B
+BF16双Ascend910B2，声明512输出预算、131072上下文；15条均stop，无空输出。
+11300条原system/对话字段与索引均核验，首尾6处精确安装工件公共/研究回查一致；6个分词运行文件与既有可部署工件一致，15个原保存prompt重新渲染一致，未重复NPU生成。
+见[交付证据](validation/toolace-original-continuation-20261026.json)。这不是全11300条模型推理、独立质量评分、ToolACE-8B或BFCL复现；研究默认依赖未升级。
 
 新增入口的CI只运行CPU软件夹具、模拟传输/进程和数据包安装检查，不执行下述真实数据或模型命令。 历史对话、QReCC、MBPP、Mooncake与ToolACE测试在data
 extra环境覆盖格式路径；源码目录之外的安装核验会拒绝editable/egg伪装。 CI工件仅含软件wheel及校验元数据，不包含原始数据、权重、预测或研究观测；不能以CI通过代替服务器原生运行。
@@ -933,8 +939,9 @@ python scripts/audit_toolace_original_corpus.py \
 ```
 
 复用已有`data.json`，不重新下载37MB原始语料。默认不联网；仅显式开启`--fetch-missing-card`才取得缺少的1873字节固定README，
-已有错误文件或残留`.partial`拒绝覆盖。当前客户端已经核对固定说明的长度、摘要、许可和仓库文件列表；不代表服务器网络或副本已验证。
-固定库只有数据和说明，没有在线工具环境，模型效果另由BFCL等任务评价。 入口复用原适配、索引与resolve，全量核对原始system及所有conversations字段和顺序，固定首尾各三条回查。
+已有错误文件或残留`.partial`拒绝覆盖。固定说明的长度、摘要、许可和仓库文件列表已核对；现已在服务器核验1873字节说明的副本。
+原始37MB语料复用，不重新下载；服务器镜像说明请求403后仅转移已核对的官方说明文件，不转移原数据或凭据，历史失败保留。 固定库只有数据和说明，没有在线工具环境，模型效果另由BFCL等任务评价。
+入口复用原适配、索引与resolve，全量核对原始system及所有conversations字段和顺序，固定首尾各三条回查。
 已知角色与消息布局计数只用于后续渲染合同核验，不是研究特征挖掘；未知角色不转换，历史返回不执行，不补造API调用ID或函数实现。
 可加`--provider-wheel /path/to/exact-data.whl`核对真实安装包；无该参数只标当前导入，不宣称固定工件安装通过；editable或egg源码元数据拒绝冒充安装。
 这只是把已有数据准备能力公开化，不是新的NPU运行或原生Agent评分；来源仍不打勾。
