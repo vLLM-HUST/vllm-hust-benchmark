@@ -8,6 +8,43 @@ ROOT = Path(__file__).resolve().parents[1]
 DOCS = ROOT / "docs/workload-data"
 
 
+def test_billsum_delivery_binds_native_model_original_fields_and_fixed_consumer():
+    ledger = json.loads((DOCS / "dataset-validation-status.json").read_text("utf-8"))
+    row = ledger["delivery_inventory"]["BILLSUM"]
+    assert row["checked"] and row["status"] == "AVAILABLE"
+    receipt = json.loads((ROOT / row["delivery_receipt"]).read_text("utf-8"))
+    assert receipt["source_checkbox_eligible"]
+    assert receipt["model"] == "google/pegasus-billsum"
+    assert receipt["model_input_fields"] == ["text"]
+    assert receipt["original_fields_preserved"] == ["text", "summary", "title"]
+    assert not receipt["reference_summary_or_title_in_model_input"]
+    assert receipt["primary_original_indices_per_evaluation_split"] == {
+        "test": [0, 1, 2],
+        "ca_test": [0, 1, 2],
+    }
+    assert receipt["cpu_ci_conclusion"] == receipt["root_ci_conclusion"] == "success"
+    assert receipt["public_generation_main_ast_identical_to_fixed_entry"]
+    assert receipt["fixed_rescore_new_model_calls"] == 0
+    assert all(
+        item["original_indices"] == [3, 4, 5] and item["model_calls"] == 0
+        for item in receipt["fixed_entry_rescore"]
+    )
+    fixed = receipt["fixed_consumer"]
+    assert (
+        fixed["fixed_ci_wheel_claim"] and fixed["installed_payload_files_equal"] == 39
+    )
+    assert fixed["public_index_rows"] == fixed["research_direct_prepare_rows"] == 23455
+    assert (
+        fixed["research_import_rows"] == fixed["public_and_research_roundtrips"] == 18
+    )
+    assert fixed["research_source_files_unchanged"] == 40
+    assert not fixed["research_observation_or_analysis_migrated"]
+    assert not receipt["research_default_dependency_lock_updated"]
+    assert not receipt["full_evaluation_suites_inference_claim"]
+    assert not receipt["full_raw_archive_field_preservation_claim"]
+    assert not receipt["original_paper_preprocessing_or_training_reproduction_claim"]
+
+
 def test_multinews_delivery_preserves_native_pairs_and_fixed_consumer():
     ledger = json.loads((DOCS / "dataset-validation-status.json").read_text("utf-8"))
     row = ledger["delivery_inventory"]["MULTINEWS"]

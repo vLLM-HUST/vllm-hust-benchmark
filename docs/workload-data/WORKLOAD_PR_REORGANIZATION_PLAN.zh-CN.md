@@ -10,6 +10,9 @@
 
 ## 零、需求对齐后的最终执行要求（2026-10-24）
 
+BILLSUM既定来源已闭环：发布方HF原始text/summary/title三个split共23455条，原两测试集各冻结前三条NPU Pegasus与HF
+ROUGE评分、公共入口未见原位置3/4/5、固定CI39文件工件和研究消费均已核验。研究源码40文件保持不变，公共索引及研究全量prepare通过，原首尾18条回查和18条研究导入通过。见[最终交付回执](validation/billsum-native-delivery-20261025.json)。不是原论文clean_text处理/训练复现、完整原始归档ID保留或全量推理；原题、标题与参考均保留，模型仅接收原正文。
+
 MULTINEWS既定来源已闭环：原三split共56216条与作者loader逐条对照一致，原文档/摘要配对、换行还原和文档束分隔符保留。原PEGASUS固定test抽样、公开入口未见原位置及原空正文边界的NPU生成与官方HF
 ROUGE通过；固定CI39文件工件、公共索引和研究直接消费通过。见[最终交付回执](validation/multinews-native-delivery-20261025.json)。不冒充全5622题test推理、全文长上下文覆盖或论文训练复现；原10条空正文保留，不删题、不填正文。
 

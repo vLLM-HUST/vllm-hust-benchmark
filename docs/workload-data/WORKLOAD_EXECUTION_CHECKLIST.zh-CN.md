@@ -16,6 +16,9 @@
 
 ## 增量验证快照
 
+- [x] BILLSUM：发布方HF原法案text/summary/title共23455条保真，两测试集各冻结前三条及公共入口未见原题3/4/5完成NPU Pegasus/HF
+  ROUGE；固定CI39文件工件、公共与研究全量prepare、首尾18条回查及18条研究导入通过。不是全量推理或原论文clean_text/完整归档复现，见[最终回执](validation/billsum-native-delivery-20261025.json)。
+
 - [x] MULTINEWS：原三split56216条与作者loader逐条一致，原换行还原和文档束分隔符保留；原PEGASUS固定test抽样、公共入口未见原题和空正文原test4736均完成NPU生成/原HF评分。固定CI39文件工件及研究消费通过，不代表全5622题test推理或多文档束全文长上下文验证。
 
 - [x] XSUM：原三split226711条保真、原BART固定test抽样及官方HF
