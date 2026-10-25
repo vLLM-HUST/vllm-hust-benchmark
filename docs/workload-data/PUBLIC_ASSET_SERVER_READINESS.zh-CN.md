@@ -617,6 +617,13 @@ manifest执行pipeline/resolve。输入只包含原`Question`与按作者seed0�
 
 # 历史准备能力补迁：LongAlpaca、NQ-open 与 DuReader demo
 
+JSONSchemaBench 作者Engine扩展（尚非完整运行入口）：`scripts/jsonschemabench_local_engine.py` 的 `create_engine`。
+遵循[作者自定义后端接口](https://github.com/epfl-dlab/JSONSchemaBench/blob/8003e8405c4d8d8b327b1eb472c9856297d75493/docs/custom_engine.md)，接收固定版本
+core.engine/core.types、显式本地模型配置、已禁用自动重试的loopback客户端及真实消息分词计数器。
+不重写原始formatter、Dataset、bench或evaluator；adapt_schema只深拷贝，不补type、不改required、不强制additionalProperties=false。完整消息和schema原样进入后端，上下文不足不截断，必须收到原生终态及服务usage才设置成功状态。
+固定作者OpenAI后端会为其供应商限制改写schema，且其本地base_url路径的分词器和max_context_length有模型名限制，因此不能直接把本地Qwen模型名填进去就宣称原生运行成功。该扩展按明确的“原schema、本地传输”配置处理，不宣称与作者OpenAI供应商配置完全相同。
+当前只通过模拟接口/流式软件测试。epfl-dlab/JSONSchemaBench数据工件及revision尚未核验，原始core.bench→evaluator完整链路与真实NPU仍待接通；旧guidance-ai三份schema的validator结果不能替代这一流程。旧原资产及回执保留，不覆盖成新数据身份，不打完成勾。
+
 安装工件核验：`python scripts/audit_workload_data_wheel.py --wheel /path/to/provider.whl`。
 该检查将包内数据提供者模块、目录和schema资源逐字节与当前源码核对，并拒绝额外包载荷、重复成员及伪装在dist-info中的数据文件。 CI构建后生成 `PAYLOAD_AUDIT.json`
 并随软件工件发布。它不执行安装、不校验真实数据或模型，也不证明研究仓已切换依赖；历史固定wheel回执保持冻结，新工件必须重新记录身份并核验消费链路。
