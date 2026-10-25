@@ -118,6 +118,25 @@ MLA布局按512-token页计算，每个逻辑页56,229,888 bytes；若保持全�
 TB的`/data`可用空间。官方默认2000页配置最多约104.74
 GiB，但会把超出容量的ID按槽位映射，不能把所得命中率解释为无冲突的真实前缀复用率。此次未启动写入；后续若采用容量受限官方profile，只报告明确配置下的存储I/O与映射边界。
 
+2026-10-26补充：9.37TiB不是官方工具接通验证的唯一门槛。官方2000页默认profile保持原始hash ID和全部选中请求，按作者映射规则运行，
+可单独验证工具能否使用，但不声称无冲突KV复用。两个场景各自保留独立数据文件时，容量上限合计224,919,552,000字节；这是静态配置计算，不是当前服务器可用空间。
+
+不写KV页的公开预检入口如下；原始文件留在外部服务器，工具目录必须是固定提交的`benchmarks/storage_benchmark_v1`子目录：
+
+```bash
+python scripts/prepare_mooncake_storage_plan.py \
+  --author-tool /private/Mooncake/benchmarks/storage_benchmark_v1 \
+  --trace-root /private/original-traces \
+  --storage-root /private/fresh-mooncake-storage \
+  --output /private/fresh-mooncake-plan --count 3
+```
+
+校验九个作者模块及两份原始轨迹的字节身份与完整字段/行数，固定原顺序前三请求，生成两个原生CLI命令；`--full`不设置作者max-requests限制。 计划保留原始时间戳、长度和hash
+IDs，默认`replay-scales=0`仅为作者未配速profile，不冒充真实到达速率。
+预检只解析原模型配置字典推导容量，不导入执行作者代码，不创建未来storage目录，不执行命令、不写data.bin。
+生成的`plan-private.json`包含路径、配置和容量边界；空间观察只用于后续资源核验，执行前仍须确认独立目录、足够余量及研究任务释放磁盘窗口。
+软件夹具验证不证明原文件在当前服务器存在或官方回放通过，来源继续不勾选。`glm5`在此仅为KV布局预设，不是部署了GLM-5模型。
+
 ## 安装与准备
 
 按[安装说明](INSTALLATION.zh-CN.md)取得指定成功 CI 的数据组件 wheel，核对提交和 SHA256 后安装。CSV/JSONL 读取不需要

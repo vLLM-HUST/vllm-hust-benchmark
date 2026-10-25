@@ -1536,12 +1536,14 @@
     "MOONCAKE": {
       "scope": "public",
       "delivery_kind": "serving_trace",
+      "official_storage_plan_preparer": "scripts/prepare_mooncake_storage_plan.py",
+      "official_storage_plan_scope": "Software fixtures and fixed source identity audit only; original two trace files and nine official Python modules, default GLM5 KV layout/512 tokens/2000 pages/one thread/unpaced/single/none. Produces commands and capacity bounds, never executes storage writes or model calls. Modulo profile is not collision-free KV or engine performance evidence.",
       "status": "REVIEWED_GAPS_RECORDED",
       "checked": false,
       "legacy_checked": false,
       "existing_receipt": "docs/workload-data/validation/original-serving-traces-reader-20261023.json",
       "delivery_receipt": null,
-      "blocker": "上游固定版本的官方Storage Benchmark会向指定storage-dir写入KV页；须使用独立目录并等当前研究任务完成后再安排磁盘I/O窗口。该工具不运行模型服务，也不能替代引擎请求回放。"
+      "blocker": "须恢复可信SSH、核验当前空间并安排专用磁盘I/O窗口；官方默认2000页容量受限profile可作为工具接通验证，不以9.37TiB无冲突映射作为唯一运行门槛。两独立场景保留文件上限约224.92GB，实际资源须重核。该工具不部署GLM5、不运行模型服务，不证明真实KV命中或引擎性能；原始回放仍未执行。"
     },
     "QRECC": {
       "scope": "public",
