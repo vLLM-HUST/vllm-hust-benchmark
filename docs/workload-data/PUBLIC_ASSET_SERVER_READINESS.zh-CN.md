@@ -195,6 +195,29 @@ ETag误称全文件MD5。见[原图归档获取](validation/qasper-original-medi
 
 原任务同时评价答案与证据，归档中的发布方评分器已保留，但本轮尚未进行模型生成或官方评分。后续须采用适配模型的完整原任务执行与原评分；不能用LongBench派生提示及QA-F1替代原QASPER证据评价，也不能用诊断预测或读取通过充当原生执行。本来源保持未勾，企业数据及科研观测/分析均不在本增量中。
 
+### 原版QASPER答案/证据执行入口（2026-10-26补充）
+
+上述“未生成/未评分”是2026-10-25准备阶段截面。现已增加原版入口，实际完成状态以当前交付清单及对应回执为准：
+
+```bash
+# 使用现有隔离Python3.12 API客户端和已有NPU服务；不安装旧AllenNLP到推理环境。
+python scripts/run_qasper_original.py \
+  --data-root /private/fresh-qasper-v03 \
+  --tokenizer /workspace/models/Qwen3.5-27B \
+  --evaluator /private/fresh-qasper-v03/publisher-assets/qasper_evaluator.py \
+  --output /private/fresh-qasper-dev-results
+
+# 只复用保存的原生提交和原始所选题参考，执行作者未修改的独立CLI，无新模型调用。
+python /private/fresh-qasper-v03/publisher-assets/qasper_evaluator.py \
+  --predictions /private/fresh-qasper-dev-results/native-predictions.private.jsonl \
+  --gold /private/fresh-qasper-dev-results/selected-gold.private.json
+```
+
+默认固定原dev行0..2；`--start/--count`指定至少3条固定原位置，`--full`为原dev1005题，`--split test`为原test1451题。test按作者说明用于最终模型评价，不以test结果反复调整smoke配置。保留全部原答案和证据标注；只按预先所选原问题形成评估子集，不删除难题、标注或原paper/QA关系。原title、abstract、full_text及图表caption/file元数据和问题完整进入Qwen原生非思考模板，兄弟问题/答案及金证据不进入输入。8192预算是明确的答案与证据生成式替代配置，不是作者LED模型或训练协议；900秒为socket读取超时，不是性能SLO。不截断、不修补预测、不重试或换题；无效预测交给原评分器按missing计分。
+
+原[LED基线](https://github.com/allenai/qasper-led-baseline/tree/afd0fb96bf78ce8cd8157639c6f6a6995e4f9089)使用AllenNLP2.2；当前验证用已有Qwen3.5-27B
+BF16双NPU服务，独立CPU客户端只做分词及官方独立评分。此处是文本/图表说明的替代模型配置，不是LED模型复现或图像像素推理。原图资产继续保留，不冒充模型已消费像素；主评分使用作者默认完整参考，未开启`--text_evidence_only`来移除图表证据或提高分数。
+
 ## RULER 原生成任务与完成式服务接入（2026-10-25，进行中）
 
 使用 NVIDIA/RULER 官方固定提交
