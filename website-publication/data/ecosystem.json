@@ -2190,6 +2190,88 @@
       },
       "evidence_level": "hardware_verified"
     }
-
+,
+    {
+      "id": "muxpd",
+      "public_surface": true,
+      "name": "MuxPD",
+      "name_en": "MuxPD",
+      "name_zh": "MuxPD 分离预填充与解码",
+      "artifact_type": "runtime_component",
+      "system_role": "graph_execution_policy",
+      "delivery_model": "plugin_bundle",
+      "deployment_topology": "in_process",
+      "ownership": "organization_maintained",
+      "maintainers": [
+        "vLLM-HUST"
+      ],
+      "maintainer_profiles": [
+        {
+          "login": "vLLM-HUST",
+          "name": "vLLM-HUST"
+        }
+      ],
+      "advisors": [],
+      "repository_relationship": "organization_native",
+      "maturity": "experimental",
+      "canonical_repository": "https://github.com/vLLM-HUST/vllm-ascend-MuxPD-hust",
+      "upstream_repository": null,
+      "integration_contracts": [
+        "vllm_hust.extension_manifest.v0.3-experimental",
+        "vllm.scheduler-class.v1",
+        "vllm.worker-class.v1",
+        "vllm.batch-admission-policy.v1"
+      ],
+      "integration_surfaces": [
+        "Pinned V1 scheduler_cls / worker_cls projection",
+        "--batch-admission-policy / --batch-admission-policy-config",
+        "Manager-bound module output evidence"
+      ],
+      "execution_planes": [
+        "scheduler",
+        "worker",
+        "native",
+        "device"
+      ],
+      "runtime_state_dimensions": [
+        "installed",
+        "configured",
+        "enabled",
+        "runtimeEffective"
+      ],
+      "summary_en": "Experimental alpha for full-prompt prefill sliced across model layers while a separate decode runner advances. Installs as a default-off ECPA bundle with scheduler, worker and admission-policy class carriers; requires the pinned Ascend stack.",
+      "summary_zh": "实验性 alpha：完整 prompt 的 prefill 按模型层推进，独立 decode runner 持续生成。以默认关闭的 ECPA 包安装，包含 scheduler、worker 与准入策略三个类载体；要求固定 Ascend 软件栈。",
+      "public_effect_status": "validated",
+      "public_effect_en": "Installed-wheel TP4 functional qualification covers successful output receipts, 12K full-prefill progress, cancellation and fresh native rollback. The final hardware run matched 6/8 natural texts; exact token/text equivalence is not established. No current-package performance gain is claimed; historical Goodput evidence is separately scoped.",
+      "public_effect_zh": "安装 wheel 后的 TP4 功能验收覆盖成功输出回执、12K 完整 prefill 进度、取消及新进程原生回滚。最终硬件轮自然语言文本仅 6/8 一致，未证明逐 token/文本精确等价。不声明当前包性能收益；历史 Goodput 证据另行限定。",
+      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/19081ff39a25c3c8ac821ae7885688ea24a03e90/reports/muxpd-ecpa-20261025/RELEASE-QUALIFICATION.md",
+      "qualification_report": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/19081ff39a25c3c8ac821ae7885688ea24a03e90/reports/muxpd-ecpa-20261025/RELEASE-QUALIFICATION.md",
+      "historical_evidence_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/releases/tag/evidence-tp4-goodput-20261011",
+      "historical_evidence_scope": "Historical scoped TP4 Goodput study only; different software identity, not current-wheel qualification or performance.",
+      "support_url": "https://github.com/vLLM-HUST/vllm-ascend-MuxPD-hust/issues",
+      "compatibility": {
+        "status": "verified",
+        "host": "ECPA 0.3 class-carrier projection on pinned HUST V1 scheduler / Ascend NPUModelRunner; functional scope only",
+        "versions": [
+          "MuxPD 0.2.0a1 / 658b4d0b4e8982bd281499005500ac4c3e0100f5",
+          "Core d0f22d2bda562156e4dbf433ce645e1769b4f804 / Ascend 03766ac696fde5ab1980d80ca0b8543d3580c989",
+          "Manager 0.3.1.dev1: 894c109/ac0fb620 directly tested; b7dc139/b78dd617 linked by all 42 runtime-package file bytes",
+          "Torch 2.10.0+cpu / torch-npu 2.10.0.post4"
+        ],
+        "platforms": [
+          "Single-node Ascend 910B2, TP4+EP; DP1/PP1; raw-P q4 + isolated P/D groups + decode FULL graph"
+        ],
+        "models": [
+          "Qwen3.5-35B-A3B BF16 only; weight sizes/mtimes recorded, full weights not hashed"
+        ],
+        "python": [
+          "3.12"
+        ],
+        "requirements_en": "Use the documented wheel hashes and exact native source/import checks. Explicit enablement and serve are separate; effective requires all three modules to report successful outputs. Disable applies to a drained, stopped service and a fresh native launch. BF16 greedy outputs vary (Issue #23); HTTP/nonempty checks are not a semantic oracle. The final Manager archive differs from the hardware archive only in verified distribution metadata, not runtime files. No universal compatibility, all-CI-pass or performance claim.",
+        "requirements_zh": "使用文档指定的 wheel 校验和及精确 native 源码/import 检查。显式 enable 与 serve 分离，effective 要求三个模块均产生成功输出回执；disable 后须排空、停止旧服务并启动新原生进程。BF16 greedy 输出存在变化（Issue #23），HTTP/非空检查不是语义 oracle。最终 Manager 包与实机包通过全部运行时文件字节建立关联，分发元数据不同；不声明通用兼容、全套 CI 全过或性能收益。",
+        "followup_url": "https://github.com/vLLM-HUST/vllm-ascend-MuxPD-hust/issues/23"
+      },
+      "evidence_level": "hardware_verified"
+    }
   ]
 }
