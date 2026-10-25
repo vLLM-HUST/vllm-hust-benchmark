@@ -32,10 +32,12 @@ token 回执，但只有 rank zero 保存完整词表向量，不能扩展成四
 1,882 个外层原件成员、1,792,926,073 bytes 原始内容，压缩包共 725,675,722 bytes。 七份源码由固定 commit 的 `git archive`
 导出，各自还有嵌套成员 SHA 清单，不包含完整 Git 历史或模型权重。 完整 `.npy`、日志和编译缓存图在 Release 包内，未复制到 Git。
 
-[资产清单](release-assets-v2.json)给出各包文件名、大小、SHA、计划下载 URL、逐文件清单和本地复验回执； [v1 索引](archive-index-v1.json)及
-[v1 校验和](SHA256SUMS-v1)继续保留。 资产位置预定为
+[准备阶段资产清单](release-assets-v2.json)给出各包文件名、大小、SHA、计划下载 URL、逐文件清单和本地复验回执；
+[v1 索引](archive-index-v1.json)及 [v1 校验和](SHA256SUMS-v1)继续保留。 资产已上传至
 [evidence-muxpd-followup-20261025](https://github.com/vLLM-HUST/vllm-hust-benchmark/releases/tag/evidence-muxpd-followup-20261025)。
-**本提交状态为准备发布，尚未宣称上传或远端下载复验。** 不把计划 URL 当作可用性证据。
+**2026-10-25 23:13 UTC 的独立匿名公开下载复验已通过：21 个附件的大小与 SHA256 一致，13 个包的 1,882 个成员全部核验。**
+[公开复验报告](PUBLIC-READBACK-v2.md)链接下载前后 API 快照、逐附件及逐成员验证回执。 旧准备清单和原报告保持原字节，其历史 `prepared_not_uploaded`
+状态由新回执补充，不倒改历史记录。
 
 这里的清单只接纳已结束并完成清理的显式运行；当前质量实验及后续压力、性能实验不在 v2 中。 新增结果必须追加新 capsule/index/report 版本，不能覆盖 v1/v2
 或将后续结果改标为本轮结果。
@@ -44,6 +46,7 @@ token 回执，但只有 rank zero 保存完整词表向量，不能扩展成四
 
 ```sh
 python reports/muxpd-followup-20261025/verify_report.py
+python reports/muxpd-followup-20261025/verify_public_readback.py
 python reports/muxpd-followup-20261025/tools/build_capsule.py verify \
   --archive /downloaded/capsule.tar.gz \
   --manifest reports/muxpd-followup-20261025/custody/CAPSULE.manifest.json \
