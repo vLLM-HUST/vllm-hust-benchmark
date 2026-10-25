@@ -8,6 +8,19 @@ ROOT = Path(__file__).resolve().parents[1]
 DOCS = ROOT / "docs/workload-data"
 
 
+def test_validation_receipts_have_no_duplicate_json_keys():
+    def unique_object(pairs):
+        result = {}
+        for key, value in pairs:
+            if key in result:
+                raise ValueError(f"duplicate receipt key: {key}")
+            result[key] = value
+        return result
+
+    for path in (DOCS / "validation").glob("*.json"):
+        json.loads(path.read_text("utf-8"), object_pairs_hook=unique_object)
+
+
 def test_xlsum_delivery_closes_all_frozen_language_scopes_without_reruns():
     delivery = json.loads(
         (DOCS / "validation/xlsum-native-delivery-20261025.json").read_text("utf-8")
