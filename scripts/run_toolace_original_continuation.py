@@ -6,11 +6,47 @@ no tool_call_id, synthetic tools, dynamic observations or function score is made
 """
 
 import argparse
+import hashlib
 import json
 from pathlib import Path
 
 from audit_toolace_original_corpus import DATA_SHA, REVISION, sha
 from run_oasst_original_continuation import post, validate_endpoint
+
+
+def local_tokenizer_files(root):
+    root = Path(root).resolve()
+    names = {"tokenizer_config.json", "tokenizer.json", "config.json"}
+    for name in (
+        "chat_template.jinja",
+        "vocab.json",
+        "merges.txt",
+        "tokenizer.model",
+        "spiece.model",
+        "sentencepiece.bpe.model",
+        "special_tokens_map.json",
+        "added_tokens.json",
+    ):
+        if (root / name).exists():
+            names.add(name)
+    templates = root / "chat_templates"
+    if templates.is_dir():
+        names.update(
+            str(path.relative_to(root)).replace("\\", "/")
+            for path in templates.rglob("*.jinja")
+        )
+    result = {}
+    for name in sorted(names):
+        path = root / name
+        if not path.is_file() or not path.resolve().is_relative_to(root):
+            raise ValueError("contained complete local tokenizer files required")
+        result[name] = sha(path)
+    return result
+
+
+def verify_tokenizer_files(root, expected):
+    if local_tokenizer_files(root) != expected:
+        raise ValueError("local tokenizer configuration/template changed")
 
 
 def original_prefixes(row):
@@ -244,27 +280,28 @@ def main():
     def verify():
         if sha(data) != DATA_SHA:
             raise ValueError("original ToolACE asset identity mismatch")
-        if identity and any(
-            sha(tokenizer_path / name) != digest
-            for name, digest in identity["configuration_files"].items()
-        ):
-            raise ValueError("local tokenizer configuration changed")
+        if identity:
+            verify_tokenizer_files(tokenizer_path, identity["configuration_files"])
 
     verify()
     rows = json.loads(data.read_text("utf-8"))
     selected = select(rows, start=args.start, count=args.count, full=args.full)
     from transformers import AutoTokenizer
 
+    token_files = local_tokenizer_files(tokenizer_path)
     tokenizer = AutoTokenizer.from_pretrained(
         tokenizer_path, local_files_only=True, trust_remote_code=False
     )
+    verify_tokenizer_files(tokenizer_path, token_files)
     identity = {
         "directory": str(tokenizer_path),
         "tokenizer_class": type(tokenizer).__name__,
-        "configuration_files": {
-            name: sha(tokenizer_path / name)
-            for name in ("tokenizer_config.json", "tokenizer.json", "config.json")
-        },
+        "configuration_files": token_files,
+        "effective_chat_template_sha256": hashlib.sha256(
+            json.dumps(
+                tokenizer.chat_template, ensure_ascii=False, sort_keys=True
+            ).encode("utf-8")
+        ).hexdigest(),
     }
 
     def render(messages):

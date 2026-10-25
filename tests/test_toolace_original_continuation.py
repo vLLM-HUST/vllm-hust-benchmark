@@ -203,3 +203,42 @@ def test_remote_endpoint_refused_without_creating_results(tmp_path):
             context=128,
         )
     assert not (tmp_path / "never").exists()
+
+
+def test_external_jinja_and_vocabulary_are_part_of_tokenizer_binding(tmp_path):
+    for name in (
+        "tokenizer_config.json",
+        "tokenizer.json",
+        "config.json",
+        "chat_template.jinja",
+        "vocab.json",
+        "merges.txt",
+    ):
+        (tmp_path / name).write_text("inert fixture " + name, encoding="utf-8")
+    expected = runner.local_tokenizer_files(tmp_path)
+    assert set(expected) == {
+        "tokenizer_config.json",
+        "tokenizer.json",
+        "config.json",
+        "chat_template.jinja",
+        "vocab.json",
+        "merges.txt",
+    }
+    runner.verify_tokenizer_files(tmp_path, expected)
+    (tmp_path / "chat_template.jinja").write_text(
+        "changed external template", encoding="utf-8"
+    )
+    with pytest.raises(ValueError, match="template changed"):
+        runner.verify_tokenizer_files(tmp_path, expected)
+
+
+def test_adding_a_new_external_template_does_not_evade_identity_check(tmp_path):
+    for name in ("tokenizer_config.json", "tokenizer.json", "config.json"):
+        (tmp_path / name).write_text("inert fixture", encoding="utf-8")
+    expected = runner.local_tokenizer_files(tmp_path)
+    (tmp_path / "chat_templates").mkdir()
+    (tmp_path / "chat_templates/tool.jinja").write_text(
+        "new template", encoding="utf-8"
+    )
+    with pytest.raises(ValueError, match="template changed"):
+        runner.verify_tokenizer_files(tmp_path, expected)
