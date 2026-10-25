@@ -6,7 +6,7 @@ import json
 import pytest
 
 from vllm_hust_workload_data.adapters import adapt_row
-from vllm_hust_workload_data.registry import adapter_spec
+from vllm_hust_workload_data.registry import adapter_spec, source_spec
 
 
 def original_fixture():
@@ -71,3 +71,16 @@ def test_sanitized_and_extra_fields_are_not_silently_dropped():
     for invalid in (sanitized, {**row, "unreviewed": "extra"}):
         with pytest.raises(ValueError):
             adapt(invalid)
+
+
+def test_all_full_splits_registered_as_readable_data_not_native_completion():
+    source = source_spec("MBPP")
+    assert source["platform"] == "hf"
+    assert source["revision"] == "4bb6404fdc6cacfda99d4ac4205087b89d32030c"
+    assert len(source["files"]) == 4
+    assert sum(item["rows"] for item in source["files"]) == 974
+    assert all(
+        item["role"] == "data" and item["path"].startswith("full/")
+        for item in source["files"]
+    )
+    assert source.get("native_execution_complete") is not True
