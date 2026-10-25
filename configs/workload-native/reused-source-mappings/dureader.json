@@ -66,6 +66,10 @@
   },
   "features": {},
   "outcome": {
+    "question_type": {"path": ["question_type"], "type": "string", "required": false},
+    "fact_or_opinion": {"path": ["fact_or_opinion"], "type": "string", "required": false},
+    "segmented_question": {"path": ["segmented_question"], "type": "array", "required": false, "items": {"path": [], "type": "string", "required": true}},
+    "segmented_answers": {"path": ["segmented_answers"], "type": "array", "required": false, "items": {"path": [], "type": "array", "required": true, "items": {"path": [], "type": "string", "required": true}}},
     "answers": {
       "path": [
         "answers"
@@ -142,6 +146,9 @@
         "type": "object",
         "required": true,
         "fields": {
+          "bs_rank_pos": {"path": ["bs_rank_pos"], "type": "number", "required": false},
+          "segmented_title": {"path": ["segmented_title"], "type": "array", "required": false, "items": {"path": [], "type": "string", "required": true}},
+          "segmented_paragraphs": {"path": ["segmented_paragraphs"], "type": "array", "required": false, "items": {"path": [], "type": "array", "required": true, "items": {"path": [], "type": "string", "required": true}}},
           "is_selected": {
             "path": [
               "is_selected"

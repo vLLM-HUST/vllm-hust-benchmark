@@ -65,15 +65,18 @@ def test_local_data_transport_preserves_original_native_protocol():
         assert result[key] == frozen[key]
 
 
-def test_original_file_fidelity_and_answer_aliases(tmp_path, monkeypatch):
+@pytest.mark.parametrize(
+    "question", [" unmodified fixture question? ", "original\u2028embedded-separator"]
+)
+def test_original_file_fidelity_and_answer_aliases(tmp_path, monkeypatch, question):
     rows = [
         {
-            "question": " unmodified fixture question? ",
+            "question": question,
             "answer": ["alias one", "alias two"],
         }
     ]
     path = tmp_path / "inert.jsonl"
-    path.write_text(json.dumps(rows[0]) + "\n", encoding="utf-8")
+    path.write_text(json.dumps(rows[0], ensure_ascii=False) + "\n", encoding="utf-8")
     monkeypatch.setattr(
         runner,
         "FILES",

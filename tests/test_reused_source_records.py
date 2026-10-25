@@ -32,12 +32,19 @@ def original_fixture(request, tmp_path):
         row = {
             "question_id": 7,
             "question": "fixture question",
+            "question_type": "DESCRIPTION",
+            "fact_or_opinion": "FACT",
+            "segmented_question": ["fixture", "question"],
+            "segmented_answers": [["fixture", "answer"]],
             "documents": [
                 {
                     "title": "fixture title",
-                    "paragraphs": ["fixture context"],
+                    "paragraphs": ["fixture context\u2028same physical JSONL record"],
                     "is_selected": True,
                     "most_related_para": 0,
+                    "bs_rank_pos": 2,
+                    "segmented_title": ["fixture", "title"],
+                    "segmented_paragraphs": [["fixture", "context"]],
                 }
             ],
             "answers": ["fixture answer"],
@@ -45,7 +52,10 @@ def original_fixture(request, tmp_path):
             "answer_spans": [[0, 1]],
         }
     name = "fixture.json" if sid == "LONGALPACA" else "fixture.jsonl"
-    raw = json.dumps([row] if sid == "LONGALPACA" else row).encode() + b"\n"
+    raw = (
+        json.dumps([row] if sid == "LONGALPACA" else row, ensure_ascii=False).encode()
+        + b"\n"
+    )
     data = tmp_path / "data"
     data.mkdir()
     (data / name).write_bytes(raw)
@@ -98,14 +108,31 @@ def test_prepare_and_resolve_preserve_fields_without_copying_data(
         assert record.outcome["answers"] == row["answer"]
     else:
         assert record.task["input"]["documents"] == [
-            {"title": "fixture title", "paragraphs": ["fixture context"]}
+            {
+                "title": "fixture title",
+                "paragraphs": ["fixture context\u2028same physical JSONL record"],
+            }
         ]
         assert record.outcome["document_annotations"] == [
-            {"is_selected": True, "most_related_para": 0}
+            {
+                "is_selected": True,
+                "most_related_para": 0,
+                "bs_rank_pos": 2,
+                "segmented_title": ["fixture", "title"],
+                "segmented_paragraphs": [["fixture", "context"]],
+            }
         ]
         assert record.outcome["answer_docs"] == [0]
         assert record.outcome["answer_spans"] == [[0, 1]]
         assert record.outcome["answers"] == row["answers"]
+        for name in (
+            "question_type",
+            "fact_or_opinion",
+            "segmented_question",
+            "segmented_answers",
+        ):
+            assert record.outcome[name] == row[name]
+            assert name not in record.task["input"]
     assert (
         "answers" not in record.task["input"]
         and "reference_output" not in record.task["input"]

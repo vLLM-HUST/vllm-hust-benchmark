@@ -67,7 +67,8 @@ def originals(root):
             or sha(path) != expected_sha
         ):
             raise ValueError("unchanged pinned original NQ-open file required")
-        rows = [json.loads(line) for line in path.read_text("utf-8").splitlines()]
+        with path.open(encoding="utf-8") as stream:
+            rows = [json.loads(line) for line in stream]
         if len(rows) != count or any(
             not isinstance(row, dict)
             or set(row) != {"question", "answer"}
