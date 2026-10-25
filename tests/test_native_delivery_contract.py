@@ -14,7 +14,7 @@ def test_ds1000_real_pandas_scoring_is_not_all_library_or_delivery_completion():
     receipt = json.loads(
         (ROOT / row["native_functional_scoring_receipt"]).read_text("utf-8")
     )
-    assert row["status"] == "IN_PROGRESS" and not row["checked"]
+    assert row["status"] == "AVAILABLE" and row["checked"]
     assert receipt["original_problem_ids"] == [0, 1, 2]
     assert (
         receipt["original_data_rows_equal_between_existing_hf_asset_and_author_archive"]
@@ -29,6 +29,27 @@ def test_ds1000_real_pandas_scoring_is_not_all_library_or_delivery_completion():
     assert not receipt["candidate_repaired_or_replaced"]
     assert not receipt["full1000_functional_execution_claim"]
     assert not receipt["source_checkbox_eligible"]
+    delivery = json.loads((ROOT / row["delivery_receipt"]).read_text("utf-8"))
+    assert delivery["source_checkbox_eligible"]
+    assert set(delivery["fixed_sample_per_library"]) == {
+        "Pandas",
+        "Numpy",
+        "Matplotlib",
+        "Tensorflow",
+        "Scipy",
+        "Sklearn",
+        "Pytorch",
+    }
+    assert delivery["unique_original_tasks_generated_and_functionally_scored"] == 24
+    assert delivery["new_original_model_calls"] == 21
+    assert delivery["prior_original_model_calls_reused"] == 3
+    assert (
+        delivery["fixed_consumer"][
+            "all_original_records_public_and_research_direct_equal"
+        ]
+        == 1000
+    )
+    assert not delivery["full1000_native_execution_claim"]
 
 
 def test_humaneval_real_official_scoring_retains_failure_and_delivery_gap():
@@ -1019,6 +1040,14 @@ def test_code_generation_is_not_functional_execution_without_isolation():
             )
             assert native["generated_code_executed"]
             assert native["isolation_probe"]["status"] == "PASSED_ON_REPLACEMENT_SERVER"
+        elif sid == "DS1000":
+            delivery = json.loads(
+                (ROOT / current["delivery_receipt"]).read_text("utf-8")
+            )
+            assert delivery["source_checkbox_eligible"]
+            assert delivery["six_other_libraries"][
+                "author_16_worker_concurrency_preflight_passed"
+            ]
         else:
             assert not current["checked"]
         assert ledger["delivery_inventory"][sid]["isolation_preflight"]

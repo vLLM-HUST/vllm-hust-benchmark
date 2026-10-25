@@ -1,7 +1,6 @@
 """CPU-only invented fixtures: never import/execute publisher or generated code."""
 
 from copy import deepcopy
-import hashlib
 import importlib.util
 import json
 from pathlib import Path
@@ -138,13 +137,37 @@ def test_handoff_keeps_original_budget_limit_and_no_score():
         "stop",
     ]
     assert receipt["profile_exit_code"] == 2 and receipt["max_new_tokens"] == 1024
+    # Frozen historical runner identity is not the hash of later range support.
     assert (
         receipt["public_runner_sha256"]
-        == hashlib.sha256((root / receipt["public_runner"]).read_bytes()).hexdigest()
-    )
+        == "3b4bcfd07d9c7fa288d3ccdc3d88287ce92d7bb7a9e573e6f84bf6a52d282675"
+    )  # pragma: allowlist secret - historical public runner checksum
     assert receipt["postprocess_only_after_full_generation"] is True
     assert (
         receipt["generated_code_executed"] is False
         and receipt["code_context_executed"] is False
     )
     assert receipt["scorer_runs"] == 0 and receipt["source_checkbox_eligible"] is False
+
+
+def test_original_selection_supports_sparse_ids_ranges_and_full():
+    assert runner.select_indices(1000) == [0, 1, 2]
+    assert runner.select_indices(1000, indices=[291, 511, 932]) == [291, 511, 932]
+    assert runner.select_indices(1000, start=291, count=3) == [291, 292, 293]
+    assert runner.select_indices(1000, full=True) == list(range(1000))
+
+
+@pytest.mark.parametrize(
+    "options",
+    [
+        {"indices": [2, 1, 0]},
+        {"indices": [0, 1, 1]},
+        {"indices": [0, 1, 1000]},
+        {"indices": [0, 1]},
+        {"indices": [0, 1, 2], "start": 0},
+        {"start": 999, "count": 3},
+    ],
+)
+def test_bad_or_conflicting_selection_rejected(options):
+    with pytest.raises(ValueError):
+        runner.select_indices(1000, **options)

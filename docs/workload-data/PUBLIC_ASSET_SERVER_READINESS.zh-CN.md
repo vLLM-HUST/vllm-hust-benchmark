@@ -672,7 +672,36 @@ python scripts/run_ds1000_isolated_scoring.py \
 
 先按本节准备命令取得私有`prepared-dir`；作者源码固定`b39aab71da6d23ef8d3cac59a7c5f834516ab334`，原Python文件、environment.yml及完整gzip由`configs/workload-native/ds1000-author-scoring-pins.json`核验。需获授权root启动器、专用非0宿主UID及可供该UID遍历的父目录；不要改变共享目录权限。入口复制指定评分环境到私有任务目录并只读挂载为`/opt/python`，不暴露宿主`/data`、模型文件或NPU设备；需要相应服务器磁盘空间，不下载到开发机。公共输出不含候选和错误原文，日志及作者完整汇总留在私有目录。NumPy/Pandas可能来自conda的egg-info，元数据检查兼容标准egg-info/dist-info，不导入候选代码。
 
-**当前仅原前三题Pandas profile可复用。**
+**当前DS1000已完成通用原题范围入口及七库抽样交付**，见[最终回执](validation/ds1000-native-delivery-20261025.json)。前述Pandas三题和环境阻塞为历史截面：现复用原0/1/2题，新增其余六库各原前三题18题，并增加原3/4/5连续范围回归，共24个不同原题已生成并完成作者评分。新增模型调用21次，评分只复用保存结果；失败、length终态及原1024预算保留，不合成全量正确率或性能结论。
+
+生成入口保留默认前三题，同时支持互斥的`--indices`、`--start/--count`、`--full`。准备入口默认复用该次生成的完整选择，也可用`--indices`取预先规定的库分组，必须包含在父生成选择中，父选择一并留在回执，不以失败为由换题。评分通过原始ID字典及原任务视图对齐作者索引，未修改作者postprocess、eval_ds1000、code_context、test_execution或适用test_string；保持16
+worker和120秒测试超时。全1000选择仅通过软件检查，未运行全套推理／评分；大规模评分应显式增大外围`--deadline`，该参数不改作者每题120秒。
+
+原作者归档内`data/ds1000.jsonl.gz`逐字节解压后的SHA256正是生成入口要求的`test.jsonl`身份，已实测相等；不需要改题、重构prompt或另造数据。使用新的外部数据目录：
+
+```bash
+set -e
+mkdir /private/new-ds1000-data
+gzip -dc /private/DS-1000-b39a/data/ds1000.jsonl.gz > /private/new-ds1000-data/test.jsonl
+conda env create -p /private/ds1000-full-arm64 \
+  -f configs/workload-native/ds1000-author-arm64-port.yml
+python scripts/run_ds1000_original_generation.py \
+  --data-root /private/new-ds1000-data \
+  --publisher-inference /private/DS-1000-b39a/run_inference.py \
+  --output /private/new-ds1000-generation \
+  --model workload-qwen35-27b-128k-nonthinking --context-capacity 131072 \
+  --indices 0 1 2 291 292 293 511 512 513 666 667 668 711 712 713 817 818 819 932 933 934
+```
+
+若生成返回码2，表示原预算length终态已保存，不代表请求流程损坏；检查私有回执后按原准备入口继续，不增预算或重跑凑分。准备时指定该生成目录及新的外部输出目录；评分沿用上述`run_ds1000_isolated_scoring.py`，将`--prepared-dir`指向准备结果、`--python-runtime`指向独立评分环境。推理仍由独立NPU服务完成；CPU
+PyTorch/TensorFlow只运行作者原数据科学代码评分，不能替换模型服务的Torch/NPU环境。
+
+ARM环境是作者版本对齐移植，不是原环境字节级复现：原conda渠道无ARM的PyTorch2.2.0，故在独立评分客户端用同版官方PyPI
+wheel；`tensorflow-cpu2.16.1`无目标ARM包，按[TensorFlow官方安装路线](https://www.tensorflow.org/install/pip)使用同版`tensorflow2.16.1`。新YAML整理自实测分步安装的前缀，非另行声称全新一次性clean-build通过。XGBoost2.0.3的conda包残留x86_64
+wheel标签，隔离`pip check`因此返回1；原元数据未改，ARM导入和隔离预检已通过，不能称全部包元数据无告警。
+
+隔离运行时只放行null/zero/random/urandom标准字符设备、只读CPU拓扑与cpuinfo，并提供明确标注的命名空间入口exe/cmdline兼容文件；不挂宿主进程树、宿主数据或NPU设备，不将兼容文件当观测数据。只读根、输入、作者源码及运行库，私有tmp/output可写。进程／线程上限256，并在候选代码前验证原16-worker的Manager/子进程结构；不因早期64上限耗尽而把环境错误计成模型答错。TF
+intra/inter-op及OMP为1；保留所有失败环境尝试，不作隔离安全认证声明。
 其他任务范围、其余库上下文及作者完整七库环境尚未接通，不把硬编码三题入口当成整个DS1000来源已完成。CI只跑无害准备/错误拒绝夹具，不跑生成代码。
 代码库功能测试按作者环境在CPU上执行，与模型生成使用NPU是两个环节；不得为了运行测试改动模型服务的torch/torch-npu栈。当前只完成软件夹具验证，真实文件复核与官方功能评分均未完成，来源不打勾。
 

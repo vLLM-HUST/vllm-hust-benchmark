@@ -68,10 +68,9 @@ def inputs(tmp_path):
 
 def test_original1000_and_fixed_answers_verified_without_execution(tmp_path):
     author, prepared, pins = inputs(tmp_path)
-    assert (
-        runner.validate_inputs(author, prepared, pins)
-        == prepared / "answers-private.jsonl"
-    )
+    samples, selected, libraries = runner.validate_inputs(author, prepared, pins)
+    assert samples == prepared / "answers-private.jsonl"
+    assert selected == [0, 1, 2] and libraries == ["Pandas"]
     assert "invalid code retained" in (prepared / "answers-private.jsonl").read_text()
 
 
@@ -133,7 +132,15 @@ def test_worker_retains_official_driver_and_checks_isolation_before_import():
     )
     assert "author.postprocess(r[" in code and "author.eval_ds1000(answers)" in code
     assert "author.ds1000 = selected" in code
-    assert "timeout=3" not in code
+    import ast
+
+    for node in ast.walk(ast.parse(code)):
+        if (
+            isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Attribute)
+            and node.func.attr == "eval_ds1000"
+        ):
+            assert not node.keywords  # retain unchanged author's default120 seconds
     pins = json.loads(
         (ROOT / "configs/workload-native/ds1000-author-scoring-pins.json").read_text()
     )
@@ -148,7 +155,7 @@ def test_real_profile_receipt_does_not_claim_complete_dataset_capability():
     receipt = json.loads(
         (ROOT / source["public_profile_and_consumer_receipt"]).read_text("utf-8")
     )
-    assert receipt["profile_available"] and not source["checked"]
+    assert receipt["profile_available"]
     assert not receipt["source_checkbox_eligible"]
     assert (
         receipt["consumer"][
@@ -160,3 +167,45 @@ def test_real_profile_receipt_does_not_claim_complete_dataset_capability():
     assert receipt["official_summary_mean_rounded"] == 0.667
     assert receipt["official_timeout_seconds"] == 120
     assert receipt["new_model_calls"] == 0
+    assert source["checked"]  # later seven-library proof, not this old profile alone
+    delivery = json.loads((ROOT / source["delivery_receipt"]).read_text("utf-8"))
+    assert len(delivery["fixed_sample_per_library"]) == 7
+
+
+def test_author_selection_iterates_subset_but_indexes_original_metadata():
+    spec = importlib.util.spec_from_file_location(
+        "ds1000_worker_fixture", ROOT / "scripts/ds1000_isolated_worker.py"
+    )
+    worker = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(worker)
+    original = [
+        {"metadata": {"problem_id": i}, "reference": f"reference-{i}"}
+        for i in range(1000)
+    ]
+    selection = worker.OriginalTaskSelection(original, [291, 511, 932])
+    assert [r["metadata"]["problem_id"] for r in selection] == [291, 511, 932]
+    assert selection[932] == original[932]
+    assert selection[291] == original[291]
+    assert len(selection) == 3
+    answers = {i: f"candidate-{i}" for i in [291, 511, 932]}
+    # Same data-access pattern as the unchanged author's loop/result formatter.
+    for row in selection:
+        native_id = row["metadata"]["problem_id"]
+        assert answers[native_id] == f"candidate-{native_id}"
+        assert selection[native_id]["reference"] == f"reference-{native_id}"
+
+
+def test_only_standard_character_devices_are_allowed_not_host_dev_tree():
+    spec = importlib.util.spec_from_file_location(
+        "namespace_fixture", ROOT / "scripts/native_python_namespace.py"
+    )
+    helper = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(helper)
+    assert helper.SAFE_CHAR_DEVICES == {
+        "null": (1, 3),
+        "zero": (1, 5),
+        "random": (1, 8),
+        "urandom": (1, 9),
+    }
+    code = (ROOT / "scripts/native_python_namespace.py").read_text()
+    assert 'bind("/dev"' not in code

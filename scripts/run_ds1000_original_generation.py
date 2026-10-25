@@ -1,4 +1,4 @@
-"""Three original DS-1000 raw completions on a local service; no code execution.
+"""Selected original DS-1000 raw completions on a local service; no code execution.
 
 Publisher CUDA runner is parsed as data, never imported. Generation keeps its
 1024-token greedy budget and only splits end markers after decoding finishes.
@@ -138,8 +138,38 @@ def response_summary(response, expected_tokens, words):
     }, candidate
 
 
-def profile_exit_code(samples):
-    if len(samples) != 3 or any(
+def select_indices(total, *, indices=None, start=None, count=None, full=False):
+    """Freeze original positions before any model call; never replace failures."""
+    if indices is not None or full:
+        require(
+            start is None and count is None, "explicit selection conflicts with range"
+        )
+        require(
+            not (indices is not None and full), "full and explicit selection conflict"
+        )
+        selected = list(range(total)) if full else list(indices)
+    else:
+        first, size = (0 if start is None else start), (3 if count is None else count)
+        require(
+            type(first) is int
+            and type(size) is int
+            and first >= 0
+            and size >= 3
+            and first + size <= total,
+            "valid original range of at least3 required",
+        )
+        selected = list(range(first, first + size))
+    require(
+        len(selected) >= 3
+        and all(type(i) is int and 0 <= i < total for i in selected)
+        and selected == sorted(set(selected)),
+        "sorted unique original positions, at least3, required",
+    )
+    return selected
+
+
+def profile_exit_code(samples, expected_count=3):
+    if len(samples) != expected_count or any(
         row.get("status") != "GENERATED_NOT_FUNCTIONALLY_SCORED" for row in samples
     ):
         return 1
@@ -166,6 +196,11 @@ def main():
     parser.add_argument("--model", required=True)
     parser.add_argument("--origin", type=origin, default="http://127.0.0.1:19466")
     parser.add_argument("--context-capacity", type=int, required=True)
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument("--indices", type=int, nargs="+")
+    group.add_argument("--full", action="store_true")
+    parser.add_argument("--start", type=int)
+    parser.add_argument("--count", type=int)
     args = parser.parse_args()
     os.umask(0o077)
     root, out, publisher = (
@@ -189,13 +224,20 @@ def main():
         and [row["metadata"]["problem_id"] for row in rows[:3]] == [0, 1, 2],
         "original test task order/count mismatch",
     )
+    selected = select_indices(
+        len(rows),
+        indices=args.indices,
+        start=args.start,
+        count=args.count,
+        full=args.full,
+    )
     out.mkdir(mode=0o700, parents=True, exist_ok=False)
     receipt = {
         "source_id": "DS1000",
         "status": "STARTED",
         "samples": [],
         "code_revision": CODE_REVISION,
-        "selected_original_row_indices": [0, 1, 2],
+        "selected_original_row_indices": selected,
         "model": args.model,
         "publisher_literal_config": profile,
         "api_stop_parameter_omitted": True,
@@ -211,7 +253,8 @@ def main():
     }
     receipt_path = out / "receipt.json"
     receipt_path.write_text(json.dumps(receipt, indent=2), encoding="utf-8")
-    for index, row in enumerate(rows[:3]):
+    for index in selected:
+        row = rows[index]
         sample = {
             "row_index": index,
             "original_problem_id": row["metadata"]["problem_id"],
@@ -260,7 +303,7 @@ def main():
         digest(path) == DATA_SHA and digest(publisher) == SOURCE_SHA,
         "original inputs changed",
     )
-    exit_code = profile_exit_code(receipt["samples"])
+    exit_code = profile_exit_code(receipt["samples"], expected_count=len(selected))
     receipt["status"] = "ORIGINAL_COMPLETION_PROFILE_NOT_FUNCTIONALLY_SCORED"
     receipt["exit_code"] = exit_code
     receipt_path.write_text(json.dumps(receipt, indent=2), encoding="utf-8")

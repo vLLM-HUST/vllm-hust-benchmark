@@ -114,3 +114,46 @@ def test_changed_original_request_is_rejected(tmp_path, monkeypatch):
     path.write_text(json.dumps(saved), encoding="utf-8")
     with pytest.raises(ValueError, match="configuration mismatch"):
         runner.prepare(generation, rows=rows, profile=profile, output=tmp_path / "out")
+
+
+def test_sparse_original_ids_are_not_densified_or_padded(tmp_path, monkeypatch):
+    from copy import deepcopy
+
+    generation, initial, profile = fixture(tmp_path, monkeypatch)
+    rows = [deepcopy(initial[0]) for _ in range(15)]
+    for i, row in enumerate(rows):
+        row["metadata"]["problem_id"] = i
+    receipt = json.loads((generation / "receipt.json").read_text())
+    selected = [5, 8, 11]
+    for old_id, new_id in enumerate(selected):
+        rows[new_id] = deepcopy(initial[old_id])
+        rows[new_id]["metadata"]["problem_id"] = new_id
+        raw = (generation / f"{old_id}.private.json").read_bytes()
+        (generation / f"{new_id}.private.json").write_bytes(raw)
+        processed = json.loads(
+            (generation / f"{old_id}.postprocessed.private.json").read_text()
+        )
+        processed.update(id=new_id, metadata=rows[new_id]["metadata"])
+        (generation / f"{new_id}.postprocessed.private.json").write_text(
+            json.dumps(processed)
+        )
+        receipt["samples"][old_id].update(row_index=new_id, original_problem_id=new_id)
+    receipt["selected_original_row_indices"] = selected
+    (generation / "receipt.json").write_text(json.dumps(receipt))
+    monkeypatch.setattr(runner, "TASK_COUNT", 15)
+    out = tmp_path / "sparse"
+    result = runner.prepare(generation, rows=rows, profile=profile, output=out)
+    assert result["selected_problem_ids"] == selected
+    assert [
+        json.loads(line)["id"]
+        for line in (out / "answers-private.jsonl").read_text().splitlines()
+    ] == selected
+    assert result["all_original_rows_preserved"] == 15
+    with pytest.raises(ValueError, match="contained"):
+        runner.prepare(
+            generation,
+            rows=rows,
+            profile=profile,
+            output=tmp_path / "invalid",
+            indices=[0, 1, 2],
+        )

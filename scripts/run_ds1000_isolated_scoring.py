@@ -1,8 +1,9 @@
-"""Run the original DS1000 first3 Pandas profile in private Linux namespaces.
+"""Run selected original DS1000 tasks in private Linux namespaces.
 
 Inputs come from prepare_ds1000_official_samples.py. No inference, downloads,
-prompt construction or host-execution fallback. Other library profiles are not
-qualified by this entry. Requires an authorized root launcher and nonzero UID.
+prompt construction or host-execution fallback. Other library selections require
+full author-pinned versions. Real qualification is separate from software support.
+Requires an authorized root launcher and nonzero UID.
 """
 
 import argparse
@@ -15,7 +16,7 @@ import shutil
 import subprocess
 import sys
 
-from run_ds1000_original_generation import DATA_SHA
+from run_ds1000_original_generation import DATA_SHA, select_indices
 from run_humaneval_isolated_scoring import checked_file, digest, validate_runtime
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -27,13 +28,13 @@ def validate_inputs(author, prepared, pins):
     for relative, expected in pins["files"].items():
         checked_file(author, relative, expected)
     receipt = json.loads((prepared / "receipt-private.json").read_text("utf-8"))
+    selected = select_indices(1000, indices=receipt.get("selected_problem_ids", []))
     if (
         receipt.get("status")
         != "AUTHOR_FUNCTIONAL_EVALUATOR_INPUT_PREPARED_NOT_EXECUTED"
         or receipt.get("source_id") != "DS1000"
         or receipt.get("code_revision") != pins["revision"]
         or receipt.get("original_dataset_sha256_required_by_cli") != DATA_SHA
-        or receipt.get("selected_problem_ids") != [0, 1, 2]
         or receipt.get("all_original_rows_preserved") != 1000
     ):
         raise ValueError("original fixed preparation receipt required")
@@ -56,26 +57,34 @@ def validate_inputs(author, prepared, pins):
     if (
         len(original) != 1000
         or retained != original
-        or [r.get("id") for r in answers] != [0, 1, 2]
+        or [r.get("id") for r in answers] != selected
         or any(not isinstance(r.get("code"), str) for r in answers)
-        or [int(r["metadata"]["problem_id"]) for r in original[:3]] != [0, 1, 2]
-        or any(r["metadata"]["library"] != "Pandas" for r in original[:3])
+        or [int(r["metadata"]["problem_id"]) for r in original] != list(range(1000))
     ):
-        raise ValueError("original full data or fixed Pandas selection mismatch")
-    return prepared / "answers-private.jsonl"
+        raise ValueError("original full data or fixed task selection mismatch")
+    libraries = sorted({original[i]["metadata"]["library"] for i in selected})
+    return prepared / "answers-private.jsonl", selected, libraries
 
 
-def validate_environment(runtime, pins):
+def validate_environment(runtime, pins, libraries=("Pandas",)):
     runtime = validate_runtime(runtime)
     site = runtime / "lib/python3.10/site-packages"
     installed = list(metadata.distributions(path=[str(site)]))
-    for name, version in pins["package_versions"].items():
+    required = dict(pins["package_versions"])
+    if set(libraries) - {"Pandas", "Numpy"}:
+        required.update(pins["full_package_versions"])
+    for name, version in required.items():
+        aliases = (
+            {name} if name != "tensorflow-cpu" else {"tensorflow-cpu", "tensorflow"}
+        )
         matches = [
             dist
             for dist in installed
-            if dist.metadata.get("Name", "").lower().replace("_", "-") == name
+            if dist.metadata.get("Name", "").lower().replace("_", "-") in aliases
         ]
-        if len(matches) != 1 or matches[0].version != version:
+        if not matches or any(
+            dist.version.split("+")[0] != version for dist in matches
+        ):
             raise ValueError("qualified author-profile environment required")
     return runtime
 
@@ -91,8 +100,10 @@ def launch(args):
         if not shutil.which(executable):
             raise RuntimeError("namespace utilities unavailable; no host fallback")
     pins = json.loads(PINS.read_text("utf-8"))
-    samples = validate_inputs(args.author_root, args.prepared_dir, pins)
-    runtime = validate_environment(args.python_runtime, pins)
+    samples, selected, libraries = validate_inputs(
+        args.author_root, args.prepared_dir, pins
+    )
+    runtime = validate_environment(args.python_runtime, pins, libraries)
     work = args.work_root.resolve()
     for source in (args.author_root, args.prepared_dir, runtime):
         source = source.resolve()
@@ -109,6 +120,9 @@ def launch(args):
     for relative in pins["files"]:
         shutil.copyfile(args.author_root / relative, assets / "author" / relative)
     shutil.copyfile(samples, assets / "inputs/answers-private.jsonl")
+    (assets / "inputs/selection.json").write_text(
+        json.dumps({"problem_ids": selected, "libraries": libraries}), encoding="utf-8"
+    )
     worker = Path(__file__).with_name("ds1000_isolated_worker.py")
     common = Path(__file__).with_name("native_python_namespace.py")
     shutil.copyfile(worker, assets / "inputs/worker.py")
@@ -162,12 +176,18 @@ def launch(args):
             )
         if process.returncode:
             raise RuntimeError("isolated scorer failed; inspect private log")
+        if "can't start new thread" in (work / "scorer-private.log").read_text(
+            "utf-8", errors="replace"
+        ):
+            raise RuntimeError(
+                "environment thread exhaustion; reject apparent task scores"
+            )
         receipt = json.loads((assets / "output/receipt-public.json").read_text("utf-8"))
         if (
-            receipt.get("status") != "ORIGINAL_FIRST3_PANDAS_OFFICIALLY_SCORED"
+            receipt.get("status") != "SELECTED_ORIGINAL_DS1000_TASKS_OFFICIALLY_SCORED"
             or receipt.get("samples_sha256") != digest(samples)
-            or receipt.get("original_problem_ids") != [0, 1, 2]
-            or receipt.get("official_summary_count") != 3
+            or receipt.get("original_problem_ids") != selected
+            or receipt.get("official_summary_count") != len(selected)
             or not receipt.get("isolation_checks_passed_before_author_import")
         ):
             raise RuntimeError("native receipt/input binding mismatch")
@@ -175,7 +195,7 @@ def launch(args):
             author_revision=pins["revision"],
             public_worker_sha256=digest(worker),
             public_namespace_helper_sha256=digest(common),
-            profile=pins["profile"],
+            profile="original-task-selection",
         )
         (work / "receipt-public.json").write_text(
             json.dumps(receipt, indent=2) + "\n", encoding="utf-8"

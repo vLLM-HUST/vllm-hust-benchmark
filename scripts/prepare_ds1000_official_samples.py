@@ -17,12 +17,13 @@ from run_ds1000_original_generation import (
     parse_publisher_profile,
     request_body,
     response_summary,
+    select_indices,
 )
 
 TASK_COUNT = 1000
 
 
-def prepare(generation_dir, *, rows, profile, output):
+def prepare(generation_dir, *, rows, profile, output, indices=None):
     generation_dir, output = Path(generation_dir).resolve(), Path(output).resolve()
     if (
         output.exists()
@@ -31,25 +32,39 @@ def prepare(generation_dir, *, rows, profile, output):
     ):
         raise ValueError("fresh output separate from historical generation required")
     if len(rows) != TASK_COUNT or [
-        row["metadata"]["problem_id"] for row in rows[:3]
-    ] != [0, 1, 2]:
-        raise ValueError("full original dataset and fixed first three tasks required")
+        row["metadata"]["problem_id"] for row in rows
+    ] != list(range(TASK_COUNT)):
+        raise ValueError(
+            "full original dataset and original first-task identities required"
+        )
     receipt_raw = (generation_dir / "receipt.json").read_bytes()
     receipt = json.loads(receipt_raw)
+    generated = select_indices(
+        len(rows), indices=receipt.get("selected_original_row_indices", [])
+    )
+    selected = (
+        generated if indices is None else select_indices(len(rows), indices=indices)
+    )
+    if set(selected) - set(generated):
+        raise ValueError(
+            "prepared task selection must be contained in original generation"
+        )
     if (
         receipt.get("source_id") != "DS1000"
         or receipt.get("code_revision") != CODE_REVISION
-        or receipt.get("selected_original_row_indices") != [0, 1, 2]
         or receipt.get("publisher_literal_config") != profile
         or receipt.get("status")
         != "ORIGINAL_COMPLETION_PROFILE_NOT_FUNCTIONALLY_SCORED"
     ):
         raise ValueError("original raw completion profile receipt required")
     samples = receipt.get("samples", [])
-    if [item.get("original_problem_id") for item in samples] != [0, 1, 2]:
+    if [item.get("original_problem_id") for item in samples] != generated:
         raise ValueError("historical task selection mismatch")
+    by_id = {item["original_problem_id"]: item for item in samples}
     answers, identities = [], []
-    for i, (row, prior) in enumerate(zip(rows[:3], samples)):
+    for i in selected:
+        prior = by_id[i]
+        row = rows[i]
         raw_path = (generation_dir / f"{i}.private.json").resolve()
         processed_path = (generation_dir / f"{i}.postprocessed.private.json").resolve()
         if any(
@@ -99,7 +114,8 @@ def prepare(generation_dir, *, rows, profile, output):
         "code_revision": CODE_REVISION,
         "original_dataset_sha256_required_by_cli": DATA_SHA,
         "all_original_rows_preserved": len(rows),
-        "selected_problem_ids": [0, 1, 2],
+        "selected_problem_ids": selected,
+        "parent_generation_selected_problem_ids": generated,
         "new_model_calls": 0,
         "generated_code_executed": False,
         "code_context_executed": False,
@@ -122,6 +138,12 @@ def main():
     parser.add_argument("--data-root", type=Path, required=True)
     parser.add_argument("--publisher-inference", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument(
+        "--indices",
+        type=int,
+        nargs="+",
+        help="Explicit subset of saved original selection; parent selection stays recorded",
+    )
     args = parser.parse_args()
     source = args.data_root / "test.jsonl"
     if digest(source) != DATA_SHA or digest(args.publisher_inference) != SOURCE_SHA:
@@ -137,7 +159,13 @@ def main():
     rows = [json.loads(line) for line in source.read_text("utf-8").splitlines()]
     if digest(source) != DATA_SHA:
         raise ValueError("original data changed during reading")
-    prepare(args.generation_dir, rows=rows, profile=profile, output=out)
+    prepare(
+        args.generation_dir,
+        rows=rows,
+        profile=profile,
+        output=out,
+        indices=args.indices,
+    )
 
 
 if __name__ == "__main__":
