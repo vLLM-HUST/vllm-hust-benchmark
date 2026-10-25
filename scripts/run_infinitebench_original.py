@@ -187,7 +187,10 @@ def main():
     from openai import OpenAI
 
     client = OpenAI(
-        base_url=args.endpoint, api_key="local-only", max_retries=0, timeout=600
+        base_url=args.endpoint,
+        api_key="local-only",  # pragma: allowlist secret - dummy for loopback-only service, not a credential
+        max_retries=0,
+        timeout=600,
     )
 
     def token_count(messages):
