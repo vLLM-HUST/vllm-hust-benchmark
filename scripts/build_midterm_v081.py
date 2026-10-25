@@ -137,6 +137,37 @@ def build(revision, read=None):
         current_result_path=RESULT,
         scalar_reference_fields_arm="B1",
     )
+    method = data["m01_method"]
+    data["m01_method_at_v080"] = json.loads(json.dumps(method))
+    method.update(
+        status="independent_wholechain_reference_qualified",
+        threshold_percent=90,
+        equivalent_threshold="C >= 0.9 * C_reference",
+        pending_evidence=[],
+        paired_own_compute=data["paired_own_compute"],
+    )
+    method["current"].update(
+        reference_seconds=b1["T_reference_seconds"],
+        reference_effective_tflops_per_chip=cref,
+        efficiency_percent=b1["eta_percent"],
+        passed=b1["eta_target_met"],
+    )
+    method["requirements"]["timing"] = (
+        "Same-run effective F and synchronized T retain all accounting costs; no estimated overhead subtraction."
+    )
+    method["requirements"]["timing_refinement"] = (
+        "Official B0/B1 own F/T/C and independently calibrated whole-chain reference are closed. Not strictly uninstrumented."
+    )
+    method["requirements"]["reference"] = result["method"]
+    method["whole_chain_method_revision"].update(
+        status="execution_and_independent_verification_complete",
+        freeze_sha256=result["method"]["freeze_sha256"],
+    )
+    method["wholechain_reference"] = result
+    for key, text in (("tables", zh), ("tables_en", en)):
+        for row in sections["v15-remaining"][key][0]["rows"]:
+            if "M01" in str(row[0]) or "有效算力" in str(row[0]):
+                row[-1] = text
     return data
 
 
