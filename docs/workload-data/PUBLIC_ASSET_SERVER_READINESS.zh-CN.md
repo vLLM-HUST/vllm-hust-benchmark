@@ -875,7 +875,25 @@ OASST/准备恢复回归测试，服务器真实原始记录验证尚未完成�
 本轮验证小型 JSONL 与嵌套 Parquet 软件夹具的绑定、准备和恢复，使用已安装的可选数据依赖。CI 安装数据包的 data extra
 同样覆盖此格式测试。实际作者文件、服务器依赖及原生续写仍待验证，不能以格式夹具测试冒充真实数据验证。
 
-MBPP 的固定发布资产准备入口（仅在服务器执行）：
+ToolACE原始语料准备与核验（仅在服务器执行）：
+
+ToolACE现有原始语料审计已迁成可复用入口，不再依赖作者本机目录或旧临时脚本：
+
+```bash
+python scripts/audit_toolace_original_corpus.py \
+  --data-root /private/original-TOOLACE \
+  --output /private/fresh-toolace-corpus-audit \
+  --fetch-missing-card
+```
+
+复用已有`data.json`，不重新下载37MB原始语料。默认不联网；仅显式开启`--fetch-missing-card`才取得缺少的1873字节固定README，
+已有错误文件或残留`.partial`拒绝覆盖。当前客户端已经核对固定说明的长度、摘要、许可和仓库文件列表；不代表服务器网络或副本已验证。
+固定库只有数据和说明，没有在线工具环境，模型效果另由BFCL等任务评价。 入口复用原适配、索引与resolve，全量核对原始system及所有conversations字段和顺序，固定首尾各三条回查。
+已知角色与消息布局计数只用于后续渲染合同核验，不是研究特征挖掘；未知角色不转换，历史返回不执行，不补造API调用ID或函数实现。
+可加`--provider-wheel /path/to/exact-data.whl`核对真实安装包；无该参数只标当前导入，不宣称固定工件安装通过；editable或egg源码元数据拒绝冒充安装。
+这只是把已有数据准备能力公开化，不是新的NPU运行或原生Agent评分；来源仍不打勾。
+
+MBPP固定发布资产准备命令：
 
 ```bash
 python scripts/prepare_mbpp_original_assets.py --output /private/fresh-mbpp-assets

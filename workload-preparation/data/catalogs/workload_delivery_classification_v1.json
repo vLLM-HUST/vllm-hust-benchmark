@@ -21,6 +21,7 @@
     {"source_id": "PAIO-SEMANTIC-SIMILAR-5000", "asset_group": "enterprise-private-requests", "related_workload_ids": [], "boundary": "Semantic similarity is not exact-prefix or KV reuse; preserve original private requests without rewriting."}
   ],
   "source_entrypoints": {
+    "TOOLACE": [{"role": "prepare_assets", "path": "scripts/audit_toolace_original_corpus.py", "scope": "Portable full original corpus/index/resolve audit only; no model request renderer, online tools or native task scoring."}],
     "MBPP": [
       {"role": "prepare_assets", "path": "scripts/prepare_mbpp_original_assets.py", "scope": "Pinned publisher full/sanitized assets only; no native generation, code execution or scoring verified."},
       {"role": "generation", "path": "scripts/run_mbpp_original_generation.py", "scope": "Publisher README three-shot text template on full original test tasks; software fixtures only, no real NPU or functional scoring verification."},
