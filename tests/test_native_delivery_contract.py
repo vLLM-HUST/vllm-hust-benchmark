@@ -8,6 +8,32 @@ ROOT = Path(__file__).resolve().parents[1]
 DOCS = ROOT / "docs/workload-data"
 
 
+def test_longalpaca_original_corpus_delivery_is_not_fake_quality_benchmark():
+    ledger = json.loads((DOCS / "dataset-validation-status.json").read_text("utf-8"))
+    row = ledger["delivery_inventory"]["LONGALPACA"]
+    receipt = json.loads((ROOT / row["delivery_receipt"]).read_text("utf-8"))
+    assert row["status"] == "AVAILABLE" and row["checked"]
+    assert receipt["source_checkbox_eligible"]
+    preparation = receipt["full_preparation_and_fidelity"]
+    assert preparation["original_rows_and_index"] == 12000
+    assert preparation["original_source_file_preserved"] == 3231
+    assert not preparation["new_feature_or_relationship_inference"]
+    native = receipt["native_execution"]
+    assert native["original_ranges"] == [[0, 2], [7324, 7326]]
+    assert (
+        native["model_calls"] == native["unique_original_cases"] == native["stop"] == 6
+    )
+    assert native["nonempty_input_branch_native_cases"] == 2
+    assert not native["input_truncated"]
+    assert not native["reference_or_provenance_injected_into_input"]
+    assert not native["retry_or_failed_case_replacement"]
+    assert not native["full12000_generation_claim"] and not native["quality_scored"]
+    consumer = receipt["fixed_provider_and_research_consumer"]
+    assert consumer["actual_installed_noneditable_payloads_verified"] == 42
+    assert len(consumer["public_research_resolved_positions"]) == 12
+    assert not consumer["research_default_dependency_changed"]
+
+
 def test_dureader_full_original_demo_delivery_keeps_failure_and_model_scope():
     ledger = json.loads((DOCS / "dataset-validation-status.json").read_text("utf-8"))
     row = ledger["delivery_inventory"]["DUREADER"]

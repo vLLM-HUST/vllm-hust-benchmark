@@ -5,7 +5,9 @@
 2026-10-26服务器已恢复：MBPP固定原始前3题完成双NPU生成和真实命名空间CodeEval评分，参考解全部通过，预测2通过/1失败，失败原样保留。
 官方full/sanitized全部9个资产已在服务器核对摘要；原生执行只覆盖full前三题，不称全500题或sanitized已跑。
 full字段适配、评分运行时预检及固定CI工件真实消费均已完成：四个full分片974条原记录全量映射/建索引，14个跨分片位置由公共入口和研究消费者回查一致。
-当前清单为**42/113完成、71待完成，另5项仅分类**；MBPP、UltraChat、WildChat、ToolACE、FLORES、NQ-open与DuReader新增勾选。研究默认依赖未改，仅核验精确候选工件。
+当前清单为**43/113完成、70待完成，另5项仅分类**；MBPP、UltraChat、WildChat、ToolACE、FLORES、NQ-open、DuReader与LongAlpaca新增勾选。研究默认依赖未改，仅核验精确候选工件。
+
+LongAlpaca原12000条全部字段/索引核验，补回原3231条file来源标识至非输入侧；12处固定工件公共/研究消费一致。固定原行0..2与7324..7326共6题完成双NPU执行与保存结果核验，6条stop，包含2条原非空input，未改题/截断/换题。见[交付证据](validation/longalpaca-native-delivery-20261026.json)。这是发布方构造的长短指令训练语料原生使用能力，不是独立官方质量benchmark、LongLoRA训练复现或12000题全量推理，不新增训练答案匹配率作成绩；数据非商业许可仍适用。
 
 DuReader原search demo
 dev100题已全部完成双NPU生成，100条stop，94条原生预测格式有效、6条格式错误原样保留；全部原输入/响应、作者提交文件读取及五种官方评分分支已CPU复核。复用200题/916文档全部原字段保真及12处固定工件公共/研究消费证据，打完成勾。采用明确的Qwen生成式替代配置，不是旧作者Paddle/TF基线复现；不称完整DuReader或Zhidao。Python3字典快照/键顺序兼容不改评分公式；无有效参考的Depends/ROUGE-L保留为不可用，不填0。见[交付证据](validation/dureader-native-delivery-20261026.json)。
@@ -321,7 +323,7 @@ W26、W38、W39、W40为新增建议类；其余36类保留原稳定family ID，
 | <a id="src-livecodebench"></a>[LIVECODEBENCH](https://github.com/LiveCodeBench/LiveCodeBench)                                             | 原生任务／数据资产       | W11                          | 仅登记；需补接入                             | [ ] 当前固定迁移版本未有取得/原生运行验证；不推断历史全无                                                                                                                                      | 取得并校验原发布文件/所选子集；补原生准备、适用执行/评分和固定包/消费验证；本类细项见W11。                             |
 | <a id="src-lmsys-chat"></a>[LMSYS_CHAT](https://huggingface.co/datasets/lmsys/lmsys-chat-1m)                                              | 对话／训练语料           | W01、W02                     | 已有字段映射可复用；原数据适配待复核         | [ ] 当前固定迁移版本未有取得/原生运行验证；不推断历史全无                                                                                                                                      | 取得并校验原发布文件/所选子集；复核现有字段映射并补原生准备、适用执行/评分和固定包/消费验证；本类细项见W01、W02。      |
 | <a id="src-locomo"></a>[LOCOMO](https://github.com/snap-research/locomo)                                                                  | 发布方构造／合成语料     | W31                          | 已迁：数据读取适配；非完整执行承诺           | [x] 原0–5六题执行＋发布方F1；固定数据/消费已核；[记录](validation/locomo-original-qa-sampled-20261023.json)                                                                                    | 其余1980题、第5类与视觉兼容；历史500/引擎退出保留，未证根因修复。                                                      |
-| <a id="src-longalpaca"></a>[LONGALPACA](https://huggingface.co/datasets/Yukang/LongAlpaca-12k)                                            | 发布方构造／合成语料     | W04                          | 仅登记；需补接入                             | [ ] 当前固定迁移版本未有取得/原生运行验证；不推断历史全无                                                                                                                                      | 发布方构造长问答训练语料；固定原上下文与参考，不能当自然在线流量。                                                     |
+| <a id="src-longalpaca"></a>[LONGALPACA](https://huggingface.co/datasets/Yukang/LongAlpaca-12k)                                            | 发布方构造／指令语料     | W04候选                      | 原始语料使用交付完成                         | [x] 12000条全字段/索引、12处固定工件公共/研究消费及6个原始请求NPU执行/保存结果核验；3231条file原标识保留；[证据](validation/longalpaca-native-delivery-20261026.json)                          | 长短指令混合，不代表每条均为文档分析；不是独立官方质量benchmark、训练复现、全量生成或自然流量。数据CC-BY-NC-4.0。      |
 | <a id="src-longbench"></a>[LONGBENCH](https://huggingface.co/datasets/THUDM/LongBench)                                                    | 原生任务／数据资产       | W03、W04                     | 已迁：数据读取适配；非完整执行承诺           | [x] v1 Qasper原3/200题＋官方F1（22.52%）；[记录](validation/longbench-v1-qasper-public-handoff-npu-20261023.json)                                                                              | 其他子集和全量；F1不等于正确率或质量达标。                                                                             |
 | <a id="src-longbench-v2"></a>[LONGBENCH_V2](https://huggingface.co/datasets/THUDM/LongBench-v2)                                           | 原生任务／数据资产       | W04                          | 已迁：数据读取适配；非完整执行承诺           | [ ] 原3题执行评分0/3，其中1题触及原预算；[记录](validation/longbench-v2-original-attempt-npu-20261022.json)                                                                                    | Medium/Long资源与终止状态、其他子集；不把模型错误等同执行故障。                                                        |
 | <a id="src-longmemeval"></a>[LONGMEMEVAL](https://huggingface.co/datasets/xiaowu0162/longmemeval-cleaned)                                 | 发布方构造／合成语料     | W31                          | 已有字段映射可复用；原数据适配待复核         | [ ] 当前固定迁移版本未有取得/原生运行验证；不推断历史全无                                                                                                                                      | 取得并校验原发布文件/所选子集；复核现有字段映射并补原生准备、适用执行/评分和固定包/消费验证；本类细项见W31。           |
@@ -693,7 +695,7 @@ smoke工作流执行全部17个单行pytest命令，并单独执行多行构建�
 python scripts/workload_delivery_progress.py
 ```
 
-下表保留2026-10-25的35项历史截面，不代表当前进度；当前42项以顶部及机器清单实时复核为准。
+下表保留2026-10-25的35项历史截面，不代表当前进度；当前统计以顶部及机器清单实时复核为准。
 
 | 范围           | 登记 | 仅分类 | 本轮应交付 | 已交付 | 待完成 |
 | -------------- | ---: | -----: | ---------: | -----: | -----: |
