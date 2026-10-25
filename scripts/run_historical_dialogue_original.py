@@ -52,6 +52,11 @@ def run_records(
     save("receipt-private.json", receipt)
     try:
         for record in records:
+            # Preserve rejected original rows too, before any view validation.
+            save(
+                f"conversation-{receipt['conversations']:06d}.private.json",
+                record.input_record(),
+            )
             views = historical_dialogue_views(record)
             for view in views:
                 attempt = {

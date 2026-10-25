@@ -1,6 +1,7 @@
 """Mock local transport only; not native NPU or publisher data evidence."""
 
 import importlib.util
+import hashlib
 import json
 from pathlib import Path
 import sys
@@ -55,6 +56,27 @@ def response():
         "choices": [{"finish_reason": "stop", "message": {"content": "new"}}],
         "usage": {"prompt_tokens": 10, "completion_tokens": 1},
     }
+
+
+def test_rejected_original_row_is_saved_before_any_model_call(tmp_path):
+    item = original()
+    item.task["input"]["conversation"][-1]["role"] = "tool"
+    calls = []
+    with pytest.raises(ValueError, match="unsupported"):
+        RUNNER.run_records(
+            [item],
+            output=tmp_path / "output",
+            endpoint="http://127.0.0.1:19466/v1",
+            model="fixture",
+            max_tokens=32,
+            context=128,
+            transport=lambda *args: calls.append(args),
+        )
+    assert calls == []
+    saved = json.loads(
+        (tmp_path / "output/conversation-000000.private.json").read_text("utf-8")
+    )
+    assert saved["task"]["input"]["conversation"][-1]["role"] == "tool"
 
 
 def test_all_original_requests_without_target_leakage(tmp_path):
@@ -113,3 +135,91 @@ def test_failure_is_retained_without_retry_or_replacement(tmp_path, failure):
         )
         assert saved["response"]["choices"] == []
         assert saved["status"] == "FAILED_NOT_REPLACED"
+
+
+@pytest.mark.parametrize(
+    "sid,field,id_field",
+    [
+        ("WILDCHAT", "conversation", "conversation_hash"),
+        ("ULTRACHAT", "messages", "prompt_id"),
+        ("LMSYS_CHAT", "conversation", "conversation_id"),
+    ],
+)
+@pytest.mark.parametrize("mode", ["sample", "full", "changed-file", "changed-revision"])
+def test_cli_uses_actual_original_adapter_and_identity_gate(
+    tmp_path, monkeypatch, capsys, sid, field, id_field, mode
+):
+    from copy import deepcopy
+    from vllm_hust_workload_data import registry
+
+    data = tmp_path / "data"
+    data.mkdir()
+    rows = [
+        {field: original().task["input"]["conversation"], id_field: str(i)}
+        for i in range(4)
+    ]
+    raw = "".join(json.dumps(row) + "\n" for row in rows).encode()
+    (data / "fixture.jsonl").write_bytes(raw)
+    upstream = deepcopy(registry.source_spec(sid))
+    upstream["files"] = [
+        {
+            "path": "fixture.jsonl",
+            "role": "raw_source",
+            "sha256": hashlib.sha256(raw).hexdigest(),
+            "bytes": len(raw),
+        }
+    ]
+    manifest = deepcopy(upstream)
+    manifest.update(source_id=sid, upstream_revision_verified=True)
+    manifest["files"][0].update(role="data", rows=4)
+    if mode == "changed-revision":
+        manifest["revision"] = "unreviewed revision"
+    prepared = tmp_path / "prepared"
+    prepared.mkdir()
+    (prepared / "source-manifest.private.json").write_text(
+        json.dumps(manifest), encoding="utf-8"
+    )
+    if mode == "changed-file":
+        (data / "fixture.jsonl").write_bytes(raw + b"\n")
+    monkeypatch.setattr(registry, "source_spec", lambda source_id: upstream)
+    actual_run = RUNNER.run_records
+    calls = []
+
+    def transport(url, body):
+        calls.append(url)
+        return {"count": 10} if url.endswith("/tokenize") else response()
+
+    def with_transport(*args, **kwargs):
+        return actual_run(*args, **kwargs, transport=transport)
+
+    monkeypatch.setattr(RUNNER, "run_records", with_transport)
+    argv = [
+        "runner",
+        sid,
+        "--prepared",
+        str(prepared),
+        "--data-root",
+        str(data),
+        "--output",
+        str(tmp_path / "out"),
+        "--model",
+        "fixture-local",
+        "--max-tokens",
+        "32",
+        "--context-capacity",
+        "128",
+    ]
+    if mode == "full":
+        argv.append("--full")
+    monkeypatch.setattr(sys, "argv", argv)
+    if mode.startswith("changed"):
+        with pytest.raises(ValueError, match="identity|manifest"):
+            RUNNER.main()
+        assert calls == []
+        return
+    RUNNER.main()
+    result = json.loads(capsys.readouterr().out)
+    expected = 4 if mode == "full" else 3
+    assert result["conversations"] == expected
+    assert result["requests"] == expected * 2
+    assert not result["source_checkbox_eligible"]
