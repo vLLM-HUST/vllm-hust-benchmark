@@ -29,7 +29,7 @@
       "changes": "Remove feature selector; label document-grounded-analysis instead of rag-followup; preserve reviewed nested documents and separate answer/document annotations. No multi-turn history is supplied."
     },
     "remaining_mapping_review": {
-      "NARRATIVEQA": "Historical mapping selects question/document_id and two answers only. It does not resolve documents or summaries by document_id and is not a complete original task input. Preserve this gap; implement reviewed relationship resolution before delivery."
+      "NARRATIVEQA": "Historical mapping selects question/document_id and two answers only. Added data-only original_summary_tasks resolver in vllm_hust_workload_data.narrativeqa for three pinned tables, document IDs and matching splits; tested with software fixtures only. Explicit publisher-summary setting, not full-story substitution. Real assets, native execution/scoring and consumer closure still pending."
     },
     "research_mapping_paths": ["workload-preparation/research/wang-mingqi/batch-003/mappings/longalpaca.json", "workload-preparation/research/wang-mingqi/batch-004/mappings/naturalquestions.json"],
     "research_revision": "dd4103140d358cf211b88f24296b7419d170a54f",

@@ -617,6 +617,13 @@ manifest执行pipeline/resolve。输入只包含原`Question`与按作者seed0�
 
 # 历史准备能力补迁：LongAlpaca、NQ-open 与 DuReader demo
 
+NarrativeQA 另提供数据关系解析接口
+`vllm_hust_workload_data.narrativeqa.original_summary_tasks(data_root, catalog_root=None)`。 它校验原始
+documents.csv、qaps.csv、third_party/wikipedia/summaries.csv，按作者 QA 顺序关联 document_id 并核对 split。 返回的
+input 仅含原始问题、document_id 和原始摘要；两份答案留在 outcome，三表原始行留在 original_relations 供核查，后者不得整体发送给模型。
+此接口只支持明确标识的作者摘要设置，不代表长篇原文设置；缺失原文不能以摘要替换后宣称原文任务完成。 重复文档 ID、关联缺失、split
+不一致或文件身份变化均拒绝，不自动改题或联网补料。目前仅通过小型软件夹具验证，尚未完成真实数据及原生执行验证。
+
 以下入口复用已审查的原始字段映射，只准备可解析的原始记录引用；不执行模型、评分、观测或研究特征提取。原始数据留在服务器外部目录，不进入 Git。
 
 安装本仓 `workload-preparation` 数据包后，在仓库根目录运行：
