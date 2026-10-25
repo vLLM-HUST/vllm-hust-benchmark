@@ -8,6 +8,41 @@ ROOT = Path(__file__).resolve().parents[1]
 DOCS = ROOT / "docs/workload-data"
 
 
+def test_multinews_delivery_preserves_native_pairs_and_fixed_consumer():
+    ledger = json.loads((DOCS / "dataset-validation-status.json").read_text("utf-8"))
+    row = ledger["delivery_inventory"]["MULTINEWS"]
+    assert row["checked"] and row["status"] == "AVAILABLE"
+    delivery = json.loads((ROOT / row["delivery_receipt"]).read_text("utf-8"))
+    handoff = json.loads(
+        (ROOT / row["fixed_ci_research_handoff_receipt"]).read_text("utf-8")
+    )
+    native = json.loads(
+        (ROOT / row["public_native_and_rescore_receipt"]).read_text("utf-8")
+    )
+    original = json.loads((ROOT / row["native_sample_receipt"]).read_text("utf-8"))
+    assert delivery["source_checkbox_eligible"]
+    assert delivery["original_author_loader_fields_equal_for_all_rows"]
+    assert delivery["original_NEWLINE_CHAR_restoration_preserved"]
+    assert not delivery["full5622_test_inference_claim"]
+    assert not delivery["full_document_long_context_inference_claim"]
+    assert (
+        native["public_primary_rescore"]["rouge"]
+        == original["original_hf_score"]["rouge"]
+    )
+    assert native["original_blank_document_edge_score"]["original_indices"] == [4736]
+    assert native["original_blank_document_edge_score"]["scoring_complete"]
+    assert handoff["installed_payload_files_equal"] == 39
+    assert (
+        handoff["original_rows_preserved"]
+        == handoff["public_index_rows"]
+        == handoff["research_direct_prepare_rows"]
+        == 56216
+    )
+    assert handoff["research_source_files_equal_installed"] == 40
+    assert handoff["cpu_ci_conclusion"] == handoff["root_ci_conclusion"] == "success"
+    assert not handoff["research_observation_or_analysis_migrated"]
+
+
 def test_xsum_original_samples_preserve_blank_articles_and_native_scoring():
     receipt = json.loads(
         (DOCS / "validation/xsum-original-native-and-rescore-20261025.json").read_text(

@@ -3,9 +3,9 @@
 ## 本轮完整交付清单（2026-10-24）
 
 40 类共登记 110 个公开来源、8 份企业资产，合计 118 项；五个指定来源只分类，本轮推进 113 项。下方历史 19
-个勾保留，不自动提升为本轮完成，也不要求已验证项目重复跑。当前交付可用30/113项：1项服务轨迹资产、18项原任务/固定评测协议交付（BBH、MATH500、GSM8K、AI2-ARC、NI登记任务、BFCL登记类别、QuALITY原NYU多选集成、LongBench登记Qasper200、tau2登记telecom_full、LoCoMo完整上下文文本QA、RULER原13种任务集成、GPQA原三split
+个勾保留，不自动提升为本轮完成，也不要求已验证项目重复跑。当前交付可用31/113项：1项服务轨迹资产、19项原任务/固定评测协议交付（BBH、MATH500、GSM8K、AI2-ARC、NI登记任务、BFCL登记类别、QuALITY原NYU多选集成、LongBench登记Qasper200、tau2登记telecom_full、LoCoMo完整上下文文本QA、RULER原13种任务集成、GPQA原三split
 zero-shot集成、BEIR
-SciFact/NFCorpus原检索与重排、STSB原句对相似度、XLSUM原45变体摘要、LibriSpeech原完整波形抽样ASR、XSum原BART抽样摘要）、Dolly、OASST1与LongWriter三项语料及8份私有企业请求语料。并非30个带官方质量评分的完整benchmark，边界见逐项回执。
+SciFact/NFCorpus原检索与重排、STSB原句对相似度、XLSUM原45变体摘要、LibriSpeech原完整波形抽样ASR、XSum原BART抽样摘要、Multi-News原PEGASUS多文档抽样摘要）、Dolly、OASST1与LongWriter三项语料及8份私有企业请求语料。并非31个带官方质量评分的完整benchmark，边界见逐项回执。
 
 完成要求以主方案第零节及机器清单 delivery_contract 为准：原题、完整原生流程与适用评分必须跑通；每个独立协议预计执行和评分不超过 30
 分钟则全跑，否则事前固定至少三条，不足则全跑。不得改题、删工具、截断或缩减原生预算，失败不得换题。资源不足保留未勾并记阻塞；模型答错不等于链路失败。服务轨迹无原始请求回放入口时，只能交付数据资产，不能编
@@ -147,7 +147,7 @@ TB；服务器/data约1.42TB可用，未缩小语料。ChartQA当前两卡主机
 | VISUALWEBARENA             | [ ] 待开展            | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                        |
 | OSWORLD                    | [ ] 待开展            | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                        |
 | XSUM                       | [x] 已完成            | 原BART固定test抽样、官方HF ROUGE与公开入口未见原题/空正文边界验证通过；三split226711条保真、CI38文件工件和研究消费已核验。不是全11334条test推理或2018论文复现；34条原空正文保留。                                                                                                   |
-| MULTINEWS                  | [ ] 进行中            | 原15文件身份、三split56216成对行数已核；原test0、1、2按未改动作者loader完成NPU PEGASUS生成与官方HF ROUGE，保留原换行还原及文档分隔符。公开成对读取/原生入口及固定组件/研究消费待收口，不是全5622题test推理。                                                                        |
+| MULTINEWS                  | [x] 已完成            | 原PEGASUS固定test抽样/原HF评分、公共入口未见原题及空正文边界通过；56216条与作者loader逐条一致，原配对/换行/分隔符保留。CI39文件工件和研究消费已核，不是全5622题test或全文长上下文验证。                                                                                             |
 | BILLSUM                    | [ ] 待开展            | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                        |
 | TULU3                      | [ ] 待开展            | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                        |
 | NATURAL_INSTRUCTIONS       | [x] 登记原生任务可用  | 五文件/8284实例字段及固定CI回查通过；分类102、翻译250、抽取261、改写1178全覆盖，摘要首尾6题，合计1797唯一实例。[交付回执](validation/ni-native-delivery-20261024.json)；非整个NI，不替代底层数据集原benchmark协议                                                                   |
