@@ -28,6 +28,13 @@ def test_wholechain_reference_and_projection(monkeypatch):
         assert r["eta_percent"] == 100 * r["own_C"] / cref
         assert r["eta_target_met"] == (r["eta_percent"] >= 90)
     assert result["B1"]["eta_target_met"] and not result["B0"]["eta_target_met"]
+    pair = data["paired_own_compute"]
+    assert pair["status"] == "own_F_T_C_and_independent_reference_closed"
+    assert pair["attainment"] is True
+    assert pair["reference_seconds"] == result["B1"]["T_reference_seconds"]
+    assert pair["reference_tflops_per_chip"] == cref
+    assert pair["rows"]["B0"]["attainment"] is False
+    assert data["corrected_quality"]["reference"]["attainment"] is True
     assert result["method"]["shared_code_with_B1"]
     assert not result["method"]["old_B1_time_used_as_denominator"]
     assert not result["method"]["overhead_subtracted"]

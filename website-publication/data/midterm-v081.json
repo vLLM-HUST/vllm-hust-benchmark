@@ -610,9 +610,9 @@
       "original_failed_receipts_preserved": true
     }
   },
-  "report_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/059cf32f0b1d77ee9b1280a39b8aca1042651828/reports/vllm-hust-midterm-20261019/中期测试报告.md",
-  "report_sha256": "6907af79cae8c977dae7940d43ed478c73ad3b6547718bb9f0cc1bed3d388a85",
-  "source_commit": "059cf32f0b1d77ee9b1280a39b8aca1042651828",
+  "report_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/dcb5a3e022382dd25977d01492e56ac904ad182c/reports/vllm-hust-midterm-20261019/中期测试报告.md",
+  "report_sha256": "8bbd392b185add74f9870514e18388f76be816117cfadc304a8affee2a02b4d8",
+  "source_commit": "dcb5a3e022382dd25977d01492e56ac904ad182c",
   "sections": [
     {
       "id": "corrected-quality",
@@ -4444,27 +4444,35 @@
   },
   "paired_own_compute": {
     "schema": "m01-own-compute-pair/v1",
-    "status": "own_F_T_C_closed_reference_method_pending",
+    "status": "own_F_T_C_and_independent_reference_closed",
     "rows": {
       "B0": {
         "F": 1829161955258989,
         "T_seconds": 238.12670116312802,
         "chips": 2,
-        "C_TFLOPS_per_chip": 3.840732572879189
+        "C_TFLOPS_per_chip": 3.840732572879189,
+        "reference_seconds": 128.660074539456,
+        "reference_tflops_per_chip": 7.108506511466548,
+        "eta_percent": 54.03009150633544,
+        "attainment": false
       },
       "B1": {
         "F": 1812905151088034,
         "T_seconds": 127.59352582134306,
         "chips": 2,
-        "C_TFLOPS_per_chip": 7.1042207644080255
+        "C_TFLOPS_per_chip": 7.1042207644080255,
+        "reference_seconds": 127.51659917337653,
+        "reference_tflops_per_chip": 7.108506511466548,
+        "eta_percent": 99.93970959931444,
+        "attainment": true
       }
     },
     "C_gain_percent": 84.97046148366367,
-    "reference_seconds": null,
-    "reference_tflops_per_chip": null,
+    "reference_seconds": 127.51659917337653,
+    "reference_tflops_per_chip": 7.108506511466548,
     "eta_percent": 99.93970959931444,
-    "attainment": null,
-    "reference_method_status": "whole_chain_execution_protocol_not_frozen",
+    "attainment": true,
+    "reference_method_status": "independent_wholechain_reference_qualified",
     "baseline_is_reference_ceiling": false,
     "identities": {
       "B0": "vLLM 0.18.0 / vLLM-Ascend 0.18.0 with disclosed text-only compatibility patches",
@@ -4488,7 +4496,7 @@
       "strict_uninstrumented": false,
       "fresh_per_run_cache": true
     },
-    "scope": "Effective-compute gain, not independent reference attainment or a task-quality score. Actual implementation differences and necessary arithmetic differ.",
+    "scope": "Own-run compute and independent empirical whole-chain reference attainment; shared code disclosed. Not nominal chip peak or a task-quality score.",
     "supersedes": {
       "B0_r1_F": 1829506984194363,
       "reason": "Native Mamba aligned-block publication dependencies corrected; original timing and raw requests unchanged."
@@ -4676,7 +4684,8 @@
         }
       },
       "original_failed_receipts_preserved": true
-    }
+    },
+    "scalar_reference_fields_arm": "B1"
   },
   "prior_operator_reference": {
     "status": "reference_closed_independently_reviewed",
@@ -5133,13 +5142,15 @@
       "reference_eta_admitted": false
     },
     "reference": {
-      "C_ref_TFLOPS_per_chip": null,
-      "T_ref_seconds": null,
-      "eta_percent": null,
-      "attainment": null,
-      "status": "independent_calibration_and_applicability_pending",
+      "C_ref_TFLOPS_per_chip": 7.108506511466548,
+      "T_ref_seconds": 127.51659917337653,
+      "eta_percent": 99.93970959931444,
+      "attainment": true,
+      "status": "independent_wholechain_reference_qualified",
       "shared_implementation_allowed": true,
-      "existing_B1_timing_used_as_denominator": false
+      "existing_B1_timing_used_as_denominator": false,
+      "current_result_path": "reports/vllm-hust-midterm-20261019/m01-recovery/wholechain-reference-20261025/summary.json",
+      "scalar_reference_fields_arm": "B1"
     },
     "quality_output_limit": 8192,
     "own_compute_output_limit": 256,
@@ -5158,7 +5169,16 @@
     },
     "scope": "Fixed C200 point estimate, not full-corpus quality or statistical noninferiority. Original failed receipts preserved; derived control correction does not change scores. Raw questions and answers are private.",
     "method_revision": "V2 permits shared implementation, independently calibrated. The earlier additional requirement for independent implementation or proven capability upper bound is not retained.",
-    "source_status_sha256": "9bf1803b9b3102b808c95c9c4f2f80b88835613d9519943890de70726aac69fa"
+    "source_status_sha256": "9bf1803b9b3102b808c95c9c4f2f80b88835613d9519943890de70726aac69fa",
+    "reference_at_quality_audit": {
+      "C_ref_TFLOPS_per_chip": null,
+      "T_ref_seconds": null,
+      "eta_percent": null,
+      "attainment": null,
+      "status": "independent_calibration_and_applicability_pending",
+      "shared_implementation_allowed": true,
+      "existing_B1_timing_used_as_denominator": false
+    }
   },
   "wholechain_reference": {
     "schema": "m01-wholechain-reference-public/v1",

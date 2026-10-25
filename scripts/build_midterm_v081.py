@@ -108,8 +108,35 @@ def build(revision, read=None):
     sections["milestone-v15"]["tables_en"][0]["rows"][0][2] = en
     sections["m01-verdict"]["source_heading"] = "6.1 独立整链参考与配对验收"
     data["current_summary"]["reference"] = result
-    data["paired_own_compute"]["wholechain_reference"] = result
-    data["paired_own_compute"]["eta_percent"] = b1["eta_percent"]
+    data["paired_own_compute"].update(
+        wholechain_reference=result,
+        status="own_F_T_C_and_independent_reference_closed",
+        reference_method_status="independent_wholechain_reference_qualified",
+        reference_seconds=b1["T_reference_seconds"],
+        reference_tflops_per_chip=cref,
+        eta_percent=b1["eta_percent"],
+        attainment=b1["eta_target_met"],
+        scalar_reference_fields_arm="B1",
+        scope="Own-run compute and independent empirical whole-chain reference attainment; shared code disclosed. Not nominal chip peak or a task-quality score.",
+    )
+    for arm in ("B0", "B1"):
+        data["paired_own_compute"]["rows"][arm].update(
+            reference_seconds=result[arm]["T_reference_seconds"],
+            reference_tflops_per_chip=cref,
+            eta_percent=result[arm]["eta_percent"],
+            attainment=result[arm]["eta_target_met"],
+        )
+    quality_reference = data["corrected_quality"]["reference"]
+    data["corrected_quality"]["reference_at_quality_audit"] = quality_reference.copy()
+    quality_reference.update(
+        status="independent_wholechain_reference_qualified",
+        eta_percent=b1["eta_percent"],
+        C_ref_TFLOPS_per_chip=cref,
+        T_ref_seconds=b1["T_reference_seconds"],
+        attainment=b1["eta_target_met"],
+        current_result_path=RESULT,
+        scalar_reference_fields_arm="B1",
+    )
     return data
 
 
