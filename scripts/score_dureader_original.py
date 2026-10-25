@@ -11,6 +11,7 @@ from contextlib import contextmanager
 import hashlib
 import importlib
 import json
+import math
 from pathlib import Path
 import sys
 
@@ -70,6 +71,25 @@ def score(module, predictions, references):
         }
 
 
+def metric_report(scores):
+    """Encode upstream undefined values as null, never as an invented zero."""
+    undefined = []
+
+    def clean(value, path):
+        if isinstance(value, dict):
+            return {key: clean(item, path + [key]) for key, item in value.items()}
+        if isinstance(value, float) and not math.isfinite(value):
+            undefined.append("/".join(path))
+            return None
+        return value
+
+    return {
+        "scores": clean(scores, []),
+        "undefined_metrics": undefined,
+        "undefined_metric_encoding": "null means upstream non-finite/undefined, not zero; original native raw scores remain in historical private receipts",
+    }
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--scorer-root", required=True, type=Path)
@@ -84,11 +104,13 @@ def main():
     references = module.read_file(str(args.references), "all", is_ref=True)
     result = {
         "metric_key_alignment": "prediction insertion order aligned to original reference key order, no content or formula change",
-        "scores": score(module, predictions, references),
+        **metric_report(score(module, predictions, references)),
         "model_calls": 0,
     }
-    args.output.write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
-    print(json.dumps(result))
+    args.output.write_text(
+        json.dumps(result, indent=2, allow_nan=False) + "\n", encoding="utf-8"
+    )
+    print(json.dumps(result, allow_nan=False))
 
 
 if __name__ == "__main__":

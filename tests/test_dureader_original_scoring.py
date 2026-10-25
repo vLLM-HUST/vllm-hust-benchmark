@@ -61,3 +61,18 @@ def test_score_calls_all_publisher_branches_and_retains_empty_predictions():
     result = scorer.score(module, predictions, references)
     assert calls == ["main", "all", "description", "entity", "yesno"]
     assert result["all"] == {"retained_bad_score": 0}
+
+
+def test_undefined_native_metric_is_null_not_fake_zero():
+    import json
+
+    original = {
+        "yesno": {"Depends|Rouge-L": float("nan"), "Bleu-4": 0.0},
+        "main": {"Rouge-L": 0.25},
+    }
+    report = scorer.metric_report(original)
+    assert report["scores"]["yesno"]["Depends|Rouge-L"] is None
+    assert report["scores"]["yesno"]["Bleu-4"] == 0.0
+    assert report["scores"]["main"]["Rouge-L"] == 0.25
+    assert report["undefined_metrics"] == ["yesno/Depends|Rouge-L"]
+    assert "NaN" not in json.dumps(report, allow_nan=False)

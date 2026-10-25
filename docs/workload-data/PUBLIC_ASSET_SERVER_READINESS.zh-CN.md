@@ -573,7 +573,7 @@ python scripts/prepare_reused_research_assets.py NATURALQUESTIONS \
 仅接受已登记的`raw.githubusercontent.com/原仓库/固定40位提交/原文件路径`，先核对同一提交的发布方文件元数据与Git对象身份，再校验完整原始字节；不访问第三方镜像、不登录、不绕过gated授权。原目录失败后只允许匹配配置的显式`--resume`；已有完整文件用`--mode verify`。获取成功不等于NQ-open原生生成/评分已完成，更不等于完整Natural
 Questions文档任务。
 
-### DuReader 原始 search demo 数据准备（未完成原生生成/评分）
+### DuReader 原始 search demo 原生生成与评分
 
 评分软件准备入口（Python3.12，CPU，不下载数据或模型）：
 
@@ -582,7 +582,7 @@ python scripts/prepare_dureader_official_scorer.py \
   --github-api --output /private/fresh-dureader-official-scorer
 ```
 
-固定作者仓库及其推荐的coco-caption依赖版本，按作者流程对两个BLEU模块进行标准2to3转换，逐文件保留转换前后哈希。服务器已执行五种评分分支的合成夹具检查；发现旧依赖对字典键顺序的断言在不同进程存在兼容性风险，尚需稳定化验证。合成夹具不是原题结果，不据此打勾。见[软件准备证据](validation/dureader-official-scorer-preparation-20261026.json)。官方Paddle1.2/Python2.7或TensorFlow1基线未在当前NPU环境复现；不能将Qwen替代配置称为作者基线复现。
+固定作者仓库及其推荐的coco-caption依赖版本，按作者流程对两个BLEU模块进行标准2to3转换；另以标准fix_dict恢复原评估模块删除空参考时的Python2字典快照语义，逐文件记录转换前后哈希。运行时仅对齐相同键集合的插入顺序，不改评分公式/内容。16个不同哈希种子的进程验证中，原依赖10个出现顺序断言，适配后均通过，原先成功的分支数值不变；原空参考遍历异常亦已复现并验证修复。历史问题见[软件准备证据](validation/dureader-official-scorer-preparation-20261026.json)，实际完整dev100运行及评分见[交付证据](validation/dureader-native-delivery-20261026.json)。官方Paddle1.2/Python2.7或TensorFlow1基线未在当前NPU环境复现；不能将Qwen替代配置称为作者基线复现。
 
 补充执行入口：采用[明确的生成式替代配置](../../configs/workload-native/dureader-original-demo-qwen-profile.json)，不是作者原始提示词或旧模型复现。完整原question与每份原文档title/paragraphs进入模型；金答案、证据选择、分词标注不进入输入。预测沿用作者JSON字段，错误/空输出不修复、不重试、不换题。评分仅增加Python3字典快照及键顺序兼容，不改变评分公式、字符串归一化或内容。
 
@@ -612,7 +612,7 @@ python scripts/prepare_reused_source_records.py DUREADER \
 ```
 
 发布方原文件后缀为`.json`、内容是物理行JSON；沿用历史接入本地`.jsonl`命名，不改任何字节。现已在服务器核验两个文件各100题，完整比较200题/916文档全部原字段，并完成12处固定工件公共/研究回查。原question/title/paragraphs保留作输入，答案、证据选择、原文分词及类别/排序等发布方标注保存在非输入侧；它们不是本仓新算的研究特征。原train包含U+2028，不可用`str.splitlines()`拆成记录；公共读取器保留物理JSONL行。见[准备与保真证据](validation/dureader-original-demo-preparation-20261026.json)。这里只覆盖发布方search
-demo，不是完整DuReader或Zhidao；原生模型生成、原评分与执行环境尚待验证，不打完成勾。
+demo，不是完整DuReader或Zhidao。原dev100题均已完成NPU推理且正常stop，94条预测字段格式有效、6条格式错误原样保留；保存的完整请求/响应、作者原生提交读取及五种评分分支重评分通过，因此在约定demo范围打完成勾，不是模型质量通过。原参考为空的1题仍执行、按作者原规则评分；Depends/ROUGE-L无有效参考返回NaN，历史原值保留，严格JSON重评分仅将其表示为null并列入undefined_metrics，不假填0、不重跑模型。
 
 ### FLORES-200 原始翻译资产（历史获取截面；当前交付结论见下文）
 

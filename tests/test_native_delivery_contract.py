@@ -8,6 +8,45 @@ ROOT = Path(__file__).resolve().parents[1]
 DOCS = ROOT / "docs/workload-data"
 
 
+def test_dureader_full_original_demo_delivery_keeps_failure_and_model_scope():
+    ledger = json.loads((DOCS / "dataset-validation-status.json").read_text("utf-8"))
+    row = ledger["delivery_inventory"]["DUREADER"]
+    receipt = json.loads((ROOT / row["delivery_receipt"]).read_text("utf-8"))
+    assert row["status"] == "AVAILABLE" and row["checked"]
+    assert receipt["source_checkbox_eligible"]
+    profile = receipt["native_profile"]
+    assert profile["model_calls"] == profile["stop"] == 100
+    assert (
+        profile["valid_native_predictions"] + profile["invalid_predictions_retained"]
+        == 100
+    )
+    assert profile["invalid_predictions_retained"] == 6
+    assert not profile["invalid_output_repaired_retried_or_swapped"]
+    assert not profile["input_truncated"]
+    assert profile["original_documents"] == 453
+    assert not receipt["model"]["publisher_baseline_replication"]
+    assert not receipt["grading"]["quality_acceptance_claim"]
+    assert receipt["grading"]["undefined_metric_value"] is None
+    assert not receipt["grading"]["scoring_formula_normalization_and_answers_changed"]
+    assert (
+        receipt["fixed_provider_and_research_consumer"][
+            "all_original_rows_and_index_verified"
+        ]
+        == 200
+    )
+    assert (
+        len(
+            receipt["fixed_provider_and_research_consumer"][
+                "public_research_resolved_positions"
+            ]
+        )
+        == 12
+    )
+    assert not receipt["fixed_provider_and_research_consumer"][
+        "research_default_dependency_changed"
+    ]
+
+
 def test_ds1000_real_pandas_scoring_is_not_all_library_or_delivery_completion():
     ledger = json.loads((DOCS / "dataset-validation-status.json").read_text("utf-8"))
     row = ledger["delivery_inventory"]["DS1000"]
