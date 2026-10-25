@@ -8,6 +8,26 @@ ROOT = Path(__file__).resolve().parents[1]
 DOCS = ROOT / "docs/workload-data"
 
 
+def test_flores_original_archive_is_not_native_delivery_or_publisher_checksum():
+    ledger = json.loads((DOCS / "dataset-validation-status.json").read_text("utf-8"))
+    row = ledger["delivery_inventory"]["FLORES200"]
+    receipt = json.loads(
+        (ROOT / row["acquisition_progress_receipt"]).read_text("utf-8")
+    )
+    assert not row["checked"] and row["delivery_receipt"] is None
+    assert not receipt["source_checkbox_eligible"] and receipt["model_calls"] == 0
+    assert not receipt["publisher_checksum_available"]
+    assert not receipt["observed_sha256_is_publisher_checksum"]
+    assert not receipt["public_native_entry_complete"]
+    assert receipt["splits"]["dev"] == {"files": 204, "row_counts": [997]}
+    assert receipt["splits"]["devtest"] == {"files": 204, "row_counts": [1012]}
+    assert receipt["splits"]["test"]["files"] == 0
+    assert receipt["model_preparation"][
+        "original_language_codes_without_model_language_token"
+    ] == ["arb_Latn", "min_Arab", "sat_Olck"]
+    assert not receipt["model_preparation"]["unsupported_language_codes_substituted"]
+
+
 def test_billsum_delivery_binds_native_model_original_fields_and_fixed_consumer():
     ledger = json.loads((DOCS / "dataset-validation-status.json").read_text("utf-8"))
     row = ledger["delivery_inventory"]["BILLSUM"]
