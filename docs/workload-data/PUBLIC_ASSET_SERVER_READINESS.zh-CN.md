@@ -617,6 +617,24 @@ manifest执行pipeline/resolve。输入只包含原`Question`与按作者seed0�
 
 # 历史准备能力补迁：LongAlpaca、NQ-open 与 DuReader demo
 
+BigCodeBench 历史生成结果复用（不执行生成代码）：
+
+```bash
+python scripts/prepare_bigcodebench_official_samples.py \
+  --generation-dir /path/to/existing-bigcodebench-generation \
+  --data-root /path/to/original-bigcodebench-assets \
+  --official-code /path/to/fixed-bigcodebench-source \
+  --output /path/to/fresh-private-bigcodebench-score-input
+```
+
+输出 raw-solutions-private.jsonl
+使用作者`solution`字段保存原始完整脚本回应，而不是`completion`，后者会让作者评分器另行拼接complete_prompt。 所有1140条原数据的全部字段保留到
+original-dataset-private.jsonl；原Parquet校验身份，逻辑字段不改写。可将该文件设为作者支持的
+`BIGCODEBENCH_OVERRIDE_PATH`，供固定版本的原loader读取，避免评分时漂移到另一个数据版本。
+固定原始位置0/1/2、原提示格式化器、终止与usage元数据均核对，不自行剥离围栏或修代码。此前回执没有逐私有文件哈希；本入口记录的是本次观察摘要，不追溯宣称历史字节已被密码学绑定。
+下一步为固定作者版本`09dd993f46c3fbf3a799465bb96d524edcb0b199`的官方sanitize，再在已核验沙箱里执行官方evaluate（instruct/full，固定三个task_id，pass@1，local执行backend）。保留raw与sanitize派生产物及摘要；官方sanitize是公开协议步骤，不是任意修补输出。
+禁止直接采用作者evaluate默认的远端Gradio服务发送产物，亦不能在宿主进程执行`--execution local`。完整隔离、依赖、官方sanitize与功能评分均尚未验证；当前仅软件夹具测试，不打交付勾。
+
 JSONSchemaBench
 环境前检：`python scripts/probe_jsonschemabench_environment.py`。只读已安装分发版本，与固定作者requirements分别列出“缺失”“版本不同”“版本一致”，不安装、不给版本不同直接下不兼容结论，也不执行可选后端或调用模型。
 当前本地核对缺少核心路径需要的dacite、prettytable，另缺工作流依赖stopit；因此此前模拟Engine测试不能升级为实际作者模块调用链通过。此结论仅针对本地软件环境，不代表服务器环境现状。
