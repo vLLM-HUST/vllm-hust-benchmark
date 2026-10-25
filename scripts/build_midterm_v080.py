@@ -62,17 +62,20 @@ def build(revision, read=None):
             },
         ]
     )
+    rows = data["paired_own_compute"]["rows"]
+    c0, c1 = (rows[arm]["C_TFLOPS_per_chip"] for arm in ("B0", "B1"))
+    gain = (c1 / c0 - 1) * 100
     zh = (
         "当前纠正B1质量156/200、失败0，原控制器failed保留；FULL图重放判据独立派生更正后质量及控制通过。"
         "纠正KV参考候选143/200未通过151/200门槛。官方B0质量151/200复用。"
-        "C提升84.9705%不是η；独立整链校准和适用性验证尚未完成，T参/C参/η及90%判定不提供。"
+        f"B0/B1的C分别为{c0:.4f}/{c1:.4f} TFLOPS/芯片，提升{gain:.4f}%。C提升不是参考达成率；独立整链校准和适用性验证尚未完成，T参/C参/η及90%判定不提供。"
         "参考可与候选共享代码，不能以已有B1耗时确定分母。"
     )
     en = (
         "Current corrected B1 scored 156/200 with zero failures. The failed original controller receipt is preserved; "
         "quality and controls passed an independent derived correction of the FULL-graph replay predicate. "
         "Corrected KV scored 143/200 and failed the 151/200 gate; official B0 quality 151/200 is reused. "
-        "The 84.9705% compute gain is not eta. Independent whole-chain calibration and applicability validation remain incomplete: "
+        f"B0/B1 C is {c0:.4f}/{c1:.4f} TFLOPS/chip, a {gain:.4f}% gain. Compute gain is not reference attainment. Independent whole-chain calibration and applicability validation remain incomplete: "
         "reference time/compute, eta and 90% attainment are unavailable. Shared implementation is allowed, but existing B1 timing cannot set the denominator."
     )
     evidence = {
