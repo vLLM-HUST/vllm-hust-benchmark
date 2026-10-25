@@ -6,6 +6,8 @@
 官方full/sanitized全部9个资产已在服务器核对摘要；原生执行只覆盖full前三题，不称全500题或sanitized已跑。
 full字段适配、评分运行时预检及固定CI工件真实消费均已完成：四个full分片974条原记录全量映射/建索引，14个跨分片位置由公共入口和研究消费者回查一致。
 当前清单为**41/113完成、72待完成，另5项仅分类**；MBPP、UltraChat、WildChat、ToolACE、FLORES与NQ-open新增勾选。研究默认依赖未改，仅核验精确候选工件。
+
+DuReader继续补齐官方评分软件：服务器已取得固定作者代码与评分依赖、执行无模型合成夹具；旧依赖字典键顺序兼容性仍需处理，原题生成/评分尚未完成，保持未勾选。详见[软件准备证据](validation/dureader-official-scorer-preparation-20261026.json)，不得将它计作新增完成项。
 见[MBPP原生抽样证据](validation/mbpp-original-native-sample-20261026.json)。PR保持未合并。
 
 NQ-open原dev3610题已按固定lm-eval0.4.11纯文本协议完成全部NPU生成与评分，三批原行号不重叠。所有原始问题/答案别名及91535条索引、12处固定工件公共/研究回查通过；干净客户端重跑全部过滤/评分，无新增生成。纯文本profile为152/3610、3127个空输出，负面结果保留，不作为Qwen指令模型质量推荐。另按框架原生聊天模板及模型非思考格式验证同三题，3个非空输出、EM0/3，也原样保留，不与全量纯文本分数混合、不声称质量通过。见[交付证据](validation/nq-open-native-delivery-20261026.json)。这里只交付NQ-open原任务，不称完整Natural

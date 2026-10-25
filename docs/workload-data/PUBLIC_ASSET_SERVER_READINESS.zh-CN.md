@@ -575,6 +575,15 @@ Questions文档任务。
 
 ### DuReader 原始 search demo 数据准备（未完成原生生成/评分）
 
+评分软件准备入口（Python3.12，CPU，不下载数据或模型）：
+
+```bash
+python scripts/prepare_dureader_official_scorer.py \
+  --github-api --output /private/fresh-dureader-official-scorer
+```
+
+固定作者仓库及其推荐的coco-caption依赖版本，按作者流程对两个BLEU模块进行标准2to3转换，逐文件保留转换前后哈希。服务器已执行五种评分分支的合成夹具检查；发现旧依赖对字典键顺序的断言在不同进程存在兼容性风险，尚需稳定化验证。合成夹具不是原题结果，不据此打勾。见[软件准备证据](validation/dureader-official-scorer-preparation-20261026.json)。官方Paddle1.2/Python2.7或TensorFlow1基线未在当前NPU环境复现；不能将Qwen替代配置称为作者基线复现。
+
 ```sh
 python scripts/prepare_reused_research_assets.py DUREADER \
   --mode download --github-api --max-bytes 6000000 \
