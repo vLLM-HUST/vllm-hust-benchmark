@@ -52,6 +52,18 @@ python scripts/run_bigcodebench_original_generation.py \
 
 ## 检查清单
 
+### 2026-10-25 后续评分准备（尚未完成）
+
+已在服务器获取上述固定 `09dd993f` 版本的完整官方源码归档，并解包至独立私有目录；
+未重新生成已有三题，也未执行其候选代码。官方 `Docker/Evaluate.Dockerfile` 使用
+Python 3.10，并安装独立的 `Requirements/requirements-eval.txt`。其构建步骤还引用动态
+main 分支的依赖文件，复现时应使用本次固定源码中的文件，记录最终实际依赖，不能声称
+仅下载源码即已复现官方环境。
+
+当前待办：核验官方 sanitize、原始测试和本地评分入口，准备隔离环境及其依赖，复用
+已保存三题输出执行原生功能评分，再核验公共入口及研究侧消费。此前 HumanEval、
+DS1000 的隔离验证不能替代 BigCodeBench 的依赖和运行验证；本项仍不打勾。
+
 当前服务器已重做[隔离预检](validation/code-execution-isolation-preflight-20261024.json)：网络namespace可创建，但mount/PID隔离和私有bubblewrap无害探测失败，且无Docker/Podman/socket。不能据此安全执行生成代码；原功能评分仍未运行。保存的生成结果继续复用，待可验证的隔离环境就绪后接原sanitize/功能测试及评分，不裸执行、不重生成刷分。
 
 - [x] 三个原始任务读取、prepare、resolve输入/参考独立往返。
