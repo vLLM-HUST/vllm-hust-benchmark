@@ -617,6 +617,21 @@ manifest执行pipeline/resolve。输入只包含原`Question`与按作者seed0�
 
 # 历史准备能力补迁：LongAlpaca、NQ-open 与 DuReader demo
 
+HumanEval 历史生成结果复用入口（不执行代码）：
+
+```bash
+python scripts/prepare_humaneval_official_samples.py \
+  --generation-dir /path/to/existing-humaneval-generation \
+  --data-root /path/to/original-humaneval-assets \
+  --output /path/to/fresh-private-official-score-input
+```
+
+核对固定原始HumanEval/0、/1、/2及历史生成回执、prompt哈希、完整请求配置和结果哈希；输出作者评分器需要的 task_id/completion
+JSONL。completion逐字符保留，不去代码围栏、不修复、不替换失败样本，不重新调用模型。 后续需在独立核验的代码执行沙箱中使用作者固定版本的
+evaluate_functional_correctness
+和原始问题文件评分。不能在模型服务宿主进程、本机或未验证隔离的环境中执行生成代码。现有机器曾缺少可用Docker/Podman且PID/mount隔离失败，此历史阻塞不能视为新实例当前检查结果。
+本入口只验证安全的数据准备；尚未核验真实保存结果，也不证明功能测试完成。输出包含生成代码，保留私有，不提交Git。恢复服务器后先复用已有生成物，不重跑模型来替代缺失评分。
+
 FLORES-200 原生入口代码（仅软件夹具验证，真实 NPU 运行待补）：
 
 ```bash
