@@ -76,7 +76,7 @@ def trace_summary(root, spec, count):
         or sha(path) != spec["sha256"]
     ):
         raise ValueError("unchanged registered original trace required")
-    total, maximum, selected_max = 0, 0, 0
+    total, maximum, selected_max, selected_ops, selected_tokens = 0, 0, 0, 0, 0
     with path.open(encoding="utf-8") as stream:
         for line in stream:
             row = json.loads(line)
@@ -97,6 +97,8 @@ def trace_summary(root, spec, count):
             maximum = max(maximum, current)
             if count is None or total < count:
                 selected_max = max(selected_max, current)
+                selected_ops += len(row["hash_ids"])
+                selected_tokens += row["input_length"] + row["output_length"]
             total += 1
     if (
         total != spec["rows"]
@@ -111,6 +113,8 @@ def trace_summary(root, spec, count):
         "selected_original_rows": total if count is None else count,
         "full_trace_max_hash_id": maximum,
         "selected_max_hash_id": selected_max,
+        "expected_selected_page_operations": selected_ops,
+        "expected_selected_total_tokens": selected_tokens,
     }
 
 

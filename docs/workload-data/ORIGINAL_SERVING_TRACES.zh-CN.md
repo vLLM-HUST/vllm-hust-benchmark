@@ -137,6 +137,25 @@ IDs，默认`replay-scales=0`仅为作者未配速profile，不冒充真实到�
 生成的`plan-private.json`包含路径、配置和容量边界；空间观察只用于后续资源核验，执行前仍须确认独立目录、足够余量及研究任务释放磁盘窗口。
 软件夹具验证不证明原文件在当前服务器存在或官方回放通过，来源继续不勾选。`glm5`在此仅为KV布局预设，不是部署了GLM-5模型。
 
+确认研究任务已释放专用磁盘窗口，并复核服务器容量后，实际回放入口如下（目前只有软件与模拟进程验证，没有真实回放通过证据）：
+
+```bash
+python scripts/run_mooncake_storage_original.py \
+  --author-tool /private/Mooncake/benchmarks/storage_benchmark_v1 \
+  --trace-root /private/original-traces \
+  --storage-root /private/fresh-mooncake-storage \
+  --output /private/fresh-mooncake-run \
+  --storage-budget-bytes 250000000000 --io-window-confirmed --count 3
+```
+
+仅允许Linux服务器执行，预算是对两个场景最大保留文件容量的显式上限，不是实际I/O流量；另需至少2GiB空闲余量。
+目录均须新建且与原始资产分离。九个原模块逐字节复制到私有干净目录后运行，不修改作者实现，也不把原始轨迹复制或改写成另一份请求。
+`--io-window-confirmed`是操作者确认，不是程序自动证明研究任务已结束；不能因为旧线程交接或状态文件存在就勾选。
+每个命令的退出码及最终请求数、token总数、读写页操作总数均须与固定原任务一致，部分结果或跳过的I/O不会因退出码为0而通过。
+这些是执行完整性计数，不是研究观测、特征分析或引擎性能结论。失败和超时保留原日志、目录及数据文件，不回退、重试或自动删除。
+如conversation已有效通过，可在新的私有目录下加`--scenarios toolagent`只补该场景，不重跑已有成果；单场景默认容量112,459,776,000字节，预算可相应具名设置。
+完整文件选用`--full`，不改变题内页操作；仍需记录明确外围deadline和资源窗口。两种场景与研究侧固定工件消费齐全前，来源不打勾。
+
 ## 安装与准备
 
 按[安装说明](INSTALLATION.zh-CN.md)取得指定成功 CI 的数据组件 wheel，核对提交和 SHA256 后安装。CSV/JSONL 读取不需要
