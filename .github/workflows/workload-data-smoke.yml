@@ -22,6 +22,8 @@ on:
       - 'scripts/run_agentbench_alfworld_original.py'
       - 'scripts/run_humaneval_original_generation.py'
       - 'scripts/prepare_humaneval_official_samples.py'
+      - 'scripts/audit_workload_data_wheel.py'
+      - 'tests/test_workload_wheel_audit.py'
       - 'tests/test_humaneval_official_samples.py'
       - 'scripts/run_longbench_v1_qasper_original.py'
       - 'scripts/run_bfcl_v4_simple_python_original.py'
@@ -178,6 +180,10 @@ jobs:
         run: python -m pytest -q tests/test_flores200_original_runner.py
       - name: HumanEval historical completion reuse fixtures, no code execution
         run: python -m pytest -q tests/test_humaneval_official_samples.py
+      - name: Verify exact current-source wheel payload
+        run: |
+          python -m pytest -q tests/test_workload_wheel_audit.py
+          python scripts/audit_workload_data_wheel.py --wheel workload-data-dist/vllm_hust_workload_data-0.1.0-py3-none-any.whl > workload-data-dist/PAYLOAD_AUDIT.json
       - name: Publish validated software wheel, never datasets
         uses: actions/upload-artifact@v4
         with:

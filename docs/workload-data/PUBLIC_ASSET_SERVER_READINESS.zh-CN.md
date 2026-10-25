@@ -617,6 +617,10 @@ manifest执行pipeline/resolve。输入只包含原`Question`与按作者seed0�
 
 # 历史准备能力补迁：LongAlpaca、NQ-open 与 DuReader demo
 
+安装工件核验：`python scripts/audit_workload_data_wheel.py --wheel /path/to/provider.whl`。
+该检查将包内数据提供者模块、目录和schema资源逐字节与当前源码核对，并拒绝额外包载荷、重复成员及伪装在dist-info中的数据文件。 CI构建后生成 `PAYLOAD_AUDIT.json`
+并随软件工件发布。它不执行安装、不校验真实数据或模型，也不证明研究仓已切换依赖；历史固定wheel回执保持冻结，新工件必须重新记录身份并核验消费链路。
+
 HumanEval 历史生成结果复用入口（不执行代码）：
 
 ```bash
