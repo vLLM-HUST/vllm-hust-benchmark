@@ -1,0 +1,794 @@
+{
+  "schema": "muxpd-numerical-summary-v1",
+  "scope": "Derived counts only; source bindings reverified. No acceptance tolerance, quality, throughput or cause inferred.",
+  "producer": {
+    "path": "/root/workspace/muxpd-followup-20261025/numerics/summarize_numerical_analyses.py",
+    "bytes": 7621,
+    "sha256": "cf88c5208f6b6af127e4bfa7ee22c0bfd25a92e7b3d9d5d570b4a1abbc69f96c"
+  },
+  "verified_source_identities": 1124,
+  "analyses": [
+    {
+      "analysis": {
+        "path": "/root/workspace/muxpd-followup-20261025/numerics/native02-vs-native03-derived.json",
+        "bytes": 518427,
+        "sha256": "13d24cf6a687f25153b34138df072ddd782203a954c84871e9dc5800eca2c40d"
+      },
+      "scope": "Offline derived facts from captured vectors. No numerical acceptance threshold, semantic quality, performance or causal attribution is established.",
+      "left_collection_passed": true,
+      "right_collection_passed": true,
+      "left_consistency": {
+        "observed_ranks": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "rank_zero_decisions": 120,
+        "all_four_ranks_agree": true,
+        "complete_api_sequences_bound_to_sampler": 15
+      },
+      "right_consistency": {
+        "observed_ranks": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "rank_zero_decisions": 120,
+        "all_four_ranks_agree": true,
+        "complete_api_sequences_bound_to_sampler": 15
+      },
+      "same_driver_source": true,
+      "engine_argument_differences": {},
+      "left_warm_pairs": {
+        "request_pairs": 15,
+        "exact_token_sequence_pairs": 13,
+        "paired_token_positions": 120,
+        "shared_request_prefix_positions": 112,
+        "shared_request_and_peer_context_positions": 88,
+        "compared_logit_vectors": 88,
+        "strict_batch_descriptor_positions": 88,
+        "exact_logit_value_equal_vectors": 0,
+        "byte_identical_npy_files_on_compared_positions": 0,
+        "max_abs_delta_on_compared_positions": 3.91015625,
+        "all_compared_native_argmax_agree_with_cpu": true,
+        "first_divergences": [
+          {
+            "left_phase": 3,
+            "right_phase": 4,
+            "lane": 0,
+            "decision": {
+              "output_token_index": 3,
+              "left_sampled_ids": [
+                223
+              ],
+              "right_sampled_ids": [
+                224
+              ],
+              "tokens_equal": false,
+              "same_request_history": true,
+              "same_semantic_batch": true,
+              "left_batch_descriptor": {
+                "num_tokens": 4,
+                "num_reqs": 4,
+                "uniform": true,
+                "has_lora": false,
+                "num_active_loras": 0
+              },
+              "right_batch_descriptor": {
+                "num_tokens": 4,
+                "num_reqs": 4,
+                "uniform": true,
+                "has_lora": false,
+                "num_active_loras": 0
+              },
+              "strict_context_match": true,
+              "logits_compared": true,
+              "vocabulary_size": 248320,
+              "nonfinite_masks_equal": true,
+              "left_nan_count": 0,
+              "right_nan_count": 0,
+              "shared_finite_entries": 248320,
+              "logits_byte_equal": false,
+              "max_abs_delta": 0.2265625,
+              "rms_delta": 0.04677864201300809,
+              "left_cpu_argmax": 223,
+              "right_cpu_argmax": 224,
+              "left_native_argmax_agrees": true,
+              "right_native_argmax_agrees": true,
+              "left_top1_top2_margin": 0.0,
+              "infinity_bound_guarantees_same_argmax": false
+            }
+          },
+          {
+            "left_phase": 3,
+            "right_phase": 5,
+            "lane": 0,
+            "decision": {
+              "output_token_index": 3,
+              "left_sampled_ids": [
+                223
+              ],
+              "right_sampled_ids": [
+                224
+              ],
+              "tokens_equal": false,
+              "same_request_history": true,
+              "same_semantic_batch": true,
+              "left_batch_descriptor": {
+                "num_tokens": 4,
+                "num_reqs": 4,
+                "uniform": true,
+                "has_lora": false,
+                "num_active_loras": 0
+              },
+              "right_batch_descriptor": {
+                "num_tokens": 4,
+                "num_reqs": 4,
+                "uniform": true,
+                "has_lora": false,
+                "num_active_loras": 0
+              },
+              "strict_context_match": true,
+              "logits_compared": true,
+              "vocabulary_size": 248320,
+              "nonfinite_masks_equal": true,
+              "left_nan_count": 0,
+              "right_nan_count": 0,
+              "shared_finite_entries": 248320,
+              "logits_byte_equal": false,
+              "max_abs_delta": 0.5,
+              "rms_delta": 0.09880073939544981,
+              "left_cpu_argmax": 223,
+              "right_cpu_argmax": 224,
+              "left_native_argmax_agrees": true,
+              "right_native_argmax_agrees": true,
+              "left_top1_top2_margin": 0.0,
+              "infinity_bound_guarantees_same_argmax": false
+            }
+          }
+        ]
+      },
+      "right_warm_pairs": {
+        "request_pairs": 15,
+        "exact_token_sequence_pairs": 13,
+        "paired_token_positions": 120,
+        "shared_request_prefix_positions": 114,
+        "shared_request_and_peer_context_positions": 114,
+        "compared_logit_vectors": 114,
+        "strict_batch_descriptor_positions": 114,
+        "exact_logit_value_equal_vectors": 0,
+        "byte_identical_npy_files_on_compared_positions": 0,
+        "max_abs_delta_on_compared_positions": 4.125,
+        "all_compared_native_argmax_agree_with_cpu": true,
+        "first_divergences": [
+          {
+            "left_phase": 0,
+            "right_phase": 1,
+            "lane": 0,
+            "decision": {
+              "output_token_index": 4,
+              "left_sampled_ids": [
+                74455
+              ],
+              "right_sampled_ids": [
+                248068
+              ],
+              "tokens_equal": false,
+              "same_request_history": true,
+              "same_semantic_batch": true,
+              "left_batch_descriptor": {
+                "num_tokens": 1,
+                "num_reqs": 1,
+                "uniform": true,
+                "has_lora": false,
+                "num_active_loras": 0
+              },
+              "right_batch_descriptor": {
+                "num_tokens": 1,
+                "num_reqs": 1,
+                "uniform": true,
+                "has_lora": false,
+                "num_active_loras": 0
+              },
+              "strict_context_match": true,
+              "logits_compared": true,
+              "vocabulary_size": 248320,
+              "nonfinite_masks_equal": true,
+              "left_nan_count": 0,
+              "right_nan_count": 0,
+              "shared_finite_entries": 248320,
+              "logits_byte_equal": false,
+              "max_abs_delta": 1.0,
+              "rms_delta": 0.17221877609389458,
+              "left_cpu_argmax": 74455,
+              "right_cpu_argmax": 248068,
+              "left_native_argmax_agrees": true,
+              "right_native_argmax_agrees": true,
+              "left_top1_top2_margin": 0.125,
+              "infinity_bound_guarantees_same_argmax": false
+            }
+          },
+          {
+            "left_phase": 0,
+            "right_phase": 2,
+            "lane": 0,
+            "decision": {
+              "output_token_index": 4,
+              "left_sampled_ids": [
+                74455
+              ],
+              "right_sampled_ids": [
+                248068
+              ],
+              "tokens_equal": false,
+              "same_request_history": true,
+              "same_semantic_batch": true,
+              "left_batch_descriptor": {
+                "num_tokens": 1,
+                "num_reqs": 1,
+                "uniform": true,
+                "has_lora": false,
+                "num_active_loras": 0
+              },
+              "right_batch_descriptor": {
+                "num_tokens": 1,
+                "num_reqs": 1,
+                "uniform": true,
+                "has_lora": false,
+                "num_active_loras": 0
+              },
+              "strict_context_match": true,
+              "logits_compared": true,
+              "vocabulary_size": 248320,
+              "nonfinite_masks_equal": true,
+              "left_nan_count": 0,
+              "right_nan_count": 0,
+              "shared_finite_entries": 248320,
+              "logits_byte_equal": false,
+              "max_abs_delta": 2.0078125,
+              "rms_delta": 0.3161747822130108,
+              "left_cpu_argmax": 74455,
+              "right_cpu_argmax": 248068,
+              "left_native_argmax_agrees": true,
+              "right_native_argmax_agrees": true,
+              "left_top1_top2_margin": 0.125,
+              "infinity_bound_guarantees_same_argmax": false
+            }
+          }
+        ]
+      },
+      "cross_pairs": {
+        "request_pairs": 15,
+        "exact_token_sequence_pairs": 11,
+        "paired_token_positions": 120,
+        "shared_request_prefix_positions": 102,
+        "shared_request_and_peer_context_positions": 57,
+        "compared_logit_vectors": 57,
+        "strict_batch_descriptor_positions": 57,
+        "exact_logit_value_equal_vectors": 0,
+        "byte_identical_npy_files_on_compared_positions": 0,
+        "max_abs_delta_on_compared_positions": 1.7578125,
+        "all_compared_native_argmax_agree_with_cpu": true,
+        "first_divergences": [
+          {
+            "left_phase": 0,
+            "right_phase": 0,
+            "lane": 0,
+            "decision": {
+              "output_token_index": 4,
+              "left_sampled_ids": [
+                248068
+              ],
+              "right_sampled_ids": [
+                74455
+              ],
+              "tokens_equal": false,
+              "same_request_history": true,
+              "same_semantic_batch": true,
+              "left_batch_descriptor": {
+                "num_tokens": 1,
+                "num_reqs": 1,
+                "uniform": true,
+                "has_lora": false,
+                "num_active_loras": 0
+              },
+              "right_batch_descriptor": {
+                "num_tokens": 1,
+                "num_reqs": 1,
+                "uniform": true,
+                "has_lora": false,
+                "num_active_loras": 0
+              },
+              "strict_context_match": true,
+              "logits_compared": true,
+              "vocabulary_size": 248320,
+              "nonfinite_masks_equal": true,
+              "left_nan_count": 0,
+              "right_nan_count": 0,
+              "shared_finite_entries": 248320,
+              "logits_byte_equal": false,
+              "max_abs_delta": 1.28125,
+              "rms_delta": 0.2506137954350095,
+              "left_cpu_argmax": 248068,
+              "right_cpu_argmax": 74455,
+              "left_native_argmax_agrees": true,
+              "right_native_argmax_agrees": true,
+              "left_top1_top2_margin": 0.625,
+              "infinity_bound_guarantees_same_argmax": false
+            }
+          },
+          {
+            "left_phase": 3,
+            "right_phase": 3,
+            "lane": 0,
+            "decision": {
+              "output_token_index": 2,
+              "left_sampled_ids": [
+                131
+              ],
+              "right_sampled_ids": [
+                16
+              ],
+              "tokens_equal": false,
+              "same_request_history": true,
+              "same_semantic_batch": true,
+              "left_batch_descriptor": {
+                "num_tokens": 4,
+                "num_reqs": 4,
+                "uniform": true,
+                "has_lora": false,
+                "num_active_loras": 0
+              },
+              "right_batch_descriptor": {
+                "num_tokens": 4,
+                "num_reqs": 4,
+                "uniform": true,
+                "has_lora": false,
+                "num_active_loras": 0
+              },
+              "strict_context_match": true,
+              "logits_compared": true,
+              "vocabulary_size": 248320,
+              "nonfinite_masks_equal": true,
+              "left_nan_count": 0,
+              "right_nan_count": 0,
+              "shared_finite_entries": 248320,
+              "logits_byte_equal": false,
+              "max_abs_delta": 0.875,
+              "rms_delta": 0.1948223446166534,
+              "left_cpu_argmax": 131,
+              "right_cpu_argmax": 16,
+              "left_native_argmax_agrees": true,
+              "right_native_argmax_agrees": true,
+              "left_top1_top2_margin": 0.125,
+              "infinity_bound_guarantees_same_argmax": false
+            }
+          },
+          {
+            "left_phase": 4,
+            "right_phase": 4,
+            "lane": 0,
+            "decision": {
+              "output_token_index": 2,
+              "left_sampled_ids": [
+                131
+              ],
+              "right_sampled_ids": [
+                16
+              ],
+              "tokens_equal": false,
+              "same_request_history": true,
+              "same_semantic_batch": true,
+              "left_batch_descriptor": {
+                "num_tokens": 4,
+                "num_reqs": 4,
+                "uniform": true,
+                "has_lora": false,
+                "num_active_loras": 0
+              },
+              "right_batch_descriptor": {
+                "num_tokens": 4,
+                "num_reqs": 4,
+                "uniform": true,
+                "has_lora": false,
+                "num_active_loras": 0
+              },
+              "strict_context_match": true,
+              "logits_compared": true,
+              "vocabulary_size": 248320,
+              "nonfinite_masks_equal": true,
+              "left_nan_count": 0,
+              "right_nan_count": 0,
+              "shared_finite_entries": 248320,
+              "logits_byte_equal": false,
+              "max_abs_delta": 0.296875,
+              "rms_delta": 0.05619541656929851,
+              "left_cpu_argmax": 131,
+              "right_cpu_argmax": 16,
+              "left_native_argmax_agrees": true,
+              "right_native_argmax_agrees": true,
+              "left_top1_top2_margin": 0.125,
+              "infinity_bound_guarantees_same_argmax": false
+            }
+          },
+          {
+            "left_phase": 5,
+            "right_phase": 5,
+            "lane": 0,
+            "decision": {
+              "output_token_index": 2,
+              "left_sampled_ids": [
+                131
+              ],
+              "right_sampled_ids": [
+                16
+              ],
+              "tokens_equal": false,
+              "same_request_history": true,
+              "same_semantic_batch": true,
+              "left_batch_descriptor": {
+                "num_tokens": 4,
+                "num_reqs": 4,
+                "uniform": true,
+                "has_lora": false,
+                "num_active_loras": 0
+              },
+              "right_batch_descriptor": {
+                "num_tokens": 4,
+                "num_reqs": 4,
+                "uniform": true,
+                "has_lora": false,
+                "num_active_loras": 0
+              },
+              "strict_context_match": true,
+              "logits_compared": true,
+              "vocabulary_size": 248320,
+              "nonfinite_masks_equal": true,
+              "left_nan_count": 0,
+              "right_nan_count": 0,
+              "shared_finite_entries": 248320,
+              "logits_byte_equal": false,
+              "max_abs_delta": 0.5625,
+              "rms_delta": 0.12921751149339877,
+              "left_cpu_argmax": 131,
+              "right_cpu_argmax": 16,
+              "left_native_argmax_agrees": true,
+              "right_native_argmax_agrees": true,
+              "left_top1_top2_margin": 0.0625,
+              "infinity_bound_guarantees_same_argmax": false
+            }
+          }
+        ]
+      }
+    },
+    {
+      "analysis": {
+        "path": "/root/workspace/muxpd-followup-20261025/numerics/native-hccl-true01-vs02-derived.json",
+        "bytes": 548299,
+        "sha256": "4b7a0c53879bafa5154d86252000b7bf97cff9664c62f2c8708f26b2b8c11108"
+      },
+      "scope": "Offline derived facts from captured vectors. No numerical acceptance threshold, semantic quality, performance or causal attribution is established.",
+      "left_collection_passed": true,
+      "right_collection_passed": true,
+      "left_consistency": {
+        "observed_ranks": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "rank_zero_decisions": 120,
+        "all_four_ranks_agree": true,
+        "complete_api_sequences_bound_to_sampler": 15
+      },
+      "right_consistency": {
+        "observed_ranks": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "rank_zero_decisions": 120,
+        "all_four_ranks_agree": true,
+        "complete_api_sequences_bound_to_sampler": 15
+      },
+      "same_driver_source": true,
+      "engine_argument_differences": {},
+      "left_warm_pairs": {
+        "request_pairs": 15,
+        "exact_token_sequence_pairs": 15,
+        "paired_token_positions": 120,
+        "shared_request_prefix_positions": 120,
+        "shared_request_and_peer_context_positions": 120,
+        "compared_logit_vectors": 120,
+        "strict_batch_descriptor_positions": 120,
+        "exact_logit_value_equal_vectors": 120,
+        "byte_identical_npy_files_on_compared_positions": 120,
+        "max_abs_delta_on_compared_positions": 0.0,
+        "all_compared_native_argmax_agree_with_cpu": true,
+        "first_divergences": []
+      },
+      "right_warm_pairs": {
+        "request_pairs": 15,
+        "exact_token_sequence_pairs": 15,
+        "paired_token_positions": 120,
+        "shared_request_prefix_positions": 120,
+        "shared_request_and_peer_context_positions": 120,
+        "compared_logit_vectors": 120,
+        "strict_batch_descriptor_positions": 120,
+        "exact_logit_value_equal_vectors": 120,
+        "byte_identical_npy_files_on_compared_positions": 120,
+        "max_abs_delta_on_compared_positions": 0.0,
+        "all_compared_native_argmax_agree_with_cpu": true,
+        "first_divergences": []
+      },
+      "cross_pairs": {
+        "request_pairs": 15,
+        "exact_token_sequence_pairs": 15,
+        "paired_token_positions": 120,
+        "shared_request_prefix_positions": 120,
+        "shared_request_and_peer_context_positions": 120,
+        "compared_logit_vectors": 120,
+        "strict_batch_descriptor_positions": 120,
+        "exact_logit_value_equal_vectors": 120,
+        "byte_identical_npy_files_on_compared_positions": 120,
+        "max_abs_delta_on_compared_positions": 0.0,
+        "all_compared_native_argmax_agree_with_cpu": true,
+        "first_divergences": []
+      }
+    },
+    {
+      "analysis": {
+        "path": "/root/workspace/muxpd-followup-20261025/numerics/raw-hccl-true-extension-01-warm-derived.json",
+        "bytes": 196001,
+        "sha256": "924c211d2966ddae3bbf1f5bc09824dcce5b5efbe3c90ab2850122fa95d23e16"
+      },
+      "scope": "Offline derived facts from captured vectors. No numerical acceptance threshold, semantic quality, performance or causal attribution is established.",
+      "left_collection_passed": true,
+      "left_consistency": {
+        "observed_ranks": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "rank_zero_decisions": 120,
+        "all_four_ranks_agree": true,
+        "complete_api_sequences_bound_to_sampler": 15
+      },
+      "left_warm_pairs": {
+        "request_pairs": 15,
+        "exact_token_sequence_pairs": 15,
+        "paired_token_positions": 120,
+        "shared_request_prefix_positions": 120,
+        "shared_request_and_peer_context_positions": 120,
+        "compared_logit_vectors": 120,
+        "strict_batch_descriptor_positions": 120,
+        "exact_logit_value_equal_vectors": 120,
+        "byte_identical_npy_files_on_compared_positions": 120,
+        "max_abs_delta_on_compared_positions": 0.0,
+        "all_compared_native_argmax_agree_with_cpu": true,
+        "first_divergences": []
+      }
+    },
+    {
+      "analysis": {
+        "path": "/root/workspace/muxpd-followup-20261025/numerics/native-v2-vs-raw-extension-hccl-true-derived.json",
+        "bytes": 551104,
+        "sha256": "d158af54d34499d8321975a432087bdbaa6f580d770f0859d4e52547ffd9a673"
+      },
+      "scope": "Offline derived facts from captured vectors. No numerical acceptance threshold, semantic quality, performance or causal attribution is established.",
+      "left_collection_passed": true,
+      "right_collection_passed": true,
+      "left_consistency": {
+        "observed_ranks": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "rank_zero_decisions": 120,
+        "all_four_ranks_agree": true,
+        "complete_api_sequences_bound_to_sampler": 15
+      },
+      "right_consistency": {
+        "observed_ranks": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "rank_zero_decisions": 120,
+        "all_four_ranks_agree": true,
+        "complete_api_sequences_bound_to_sampler": 15
+      },
+      "same_driver_source": false,
+      "engine_argument_differences": {
+        "batch_admission_policy": [
+          null,
+          "vllm_muxpd.policy.MuxPDPolicy"
+        ],
+        "batch_admission_policy_config": [
+          null,
+          {
+            "execution": "decoupled",
+            "stream_mode": "overlap",
+            "layers_per_slice": 4,
+            "adaptive_layers": false,
+            "prefill_first": false,
+            "decode_graph": true,
+            "compile_full_prefill": false,
+            "prefill_layer_token_budget": 0,
+            "decode_budget_guard": false,
+            "overlap_communication": "isolated"
+          }
+        ],
+        "scheduler_cls": [
+          null,
+          "vllm_muxpd.decoupled_scheduler.DecoupledMuxPDScheduler"
+        ],
+        "worker_cls": [
+          "vllm_muxpd.numerical_workers.NumericalNativeNPUWorker",
+          "vllm_muxpd.decoupled_worker.DecoupledMuxPDNPUWorker"
+        ],
+        "worker_extension_cls": [
+          null,
+          "vllm_muxpd.numerical_workers.NumericalObserverExtension"
+        ]
+      },
+      "left_warm_pairs": {
+        "request_pairs": 15,
+        "exact_token_sequence_pairs": 15,
+        "paired_token_positions": 120,
+        "shared_request_prefix_positions": 120,
+        "shared_request_and_peer_context_positions": 120,
+        "compared_logit_vectors": 120,
+        "strict_batch_descriptor_positions": 120,
+        "exact_logit_value_equal_vectors": 120,
+        "byte_identical_npy_files_on_compared_positions": 120,
+        "max_abs_delta_on_compared_positions": 0.0,
+        "all_compared_native_argmax_agree_with_cpu": true,
+        "first_divergences": []
+      },
+      "right_warm_pairs": {
+        "request_pairs": 15,
+        "exact_token_sequence_pairs": 15,
+        "paired_token_positions": 120,
+        "shared_request_prefix_positions": 120,
+        "shared_request_and_peer_context_positions": 120,
+        "compared_logit_vectors": 120,
+        "strict_batch_descriptor_positions": 120,
+        "exact_logit_value_equal_vectors": 120,
+        "byte_identical_npy_files_on_compared_positions": 120,
+        "max_abs_delta_on_compared_positions": 0.0,
+        "all_compared_native_argmax_agree_with_cpu": true,
+        "first_divergences": []
+      },
+      "cross_pairs": {
+        "request_pairs": 15,
+        "exact_token_sequence_pairs": 15,
+        "paired_token_positions": 120,
+        "shared_request_prefix_positions": 120,
+        "shared_request_and_peer_context_positions": 120,
+        "compared_logit_vectors": 120,
+        "strict_batch_descriptor_positions": 120,
+        "exact_logit_value_equal_vectors": 120,
+        "byte_identical_npy_files_on_compared_positions": 120,
+        "max_abs_delta_on_compared_positions": 0.0,
+        "all_compared_native_argmax_agree_with_cpu": true,
+        "first_divergences": []
+      }
+    },
+    {
+      "analysis": {
+        "path": "/root/workspace/muxpd-followup-20261025/numerics/native-vs-raw-fusion-composite-hccl-true-derived.json",
+        "bytes": 1061542,
+        "sha256": "471cbd427e0fc91993c39f8780112e1d95843ef764b127e4e8c560d6c53d97a2"
+      },
+      "scope": "Offline derived facts from captured vectors. No numerical acceptance threshold, semantic quality, performance or causal attribution is established.",
+      "left_collection_passed": true,
+      "right_collection_passed": true,
+      "left_consistency": {
+        "observed_ranks": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "rank_zero_decisions": 240,
+        "all_four_ranks_agree": true,
+        "complete_api_sequences_bound_to_sampler": 30
+      },
+      "right_consistency": {
+        "observed_ranks": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "rank_zero_decisions": 240,
+        "all_four_ranks_agree": true,
+        "complete_api_sequences_bound_to_sampler": 30
+      },
+      "same_driver_source": true,
+      "engine_argument_differences": {
+        "batch_admission_policy": [
+          null,
+          "vllm_muxpd.policy.MuxPDPolicy"
+        ],
+        "batch_admission_policy_config": [
+          null,
+          {
+            "execution": "decoupled",
+            "stream_mode": "overlap",
+            "layers_per_slice": 4,
+            "adaptive_layers": false,
+            "prefill_first": false,
+            "decode_graph": true,
+            "compile_full_prefill": false,
+            "prefill_layer_token_budget": 0,
+            "decode_budget_guard": false,
+            "overlap_communication": "isolated",
+            "compile_prefill_groups": false
+          }
+        ],
+        "enable_chunked_prefill": [
+          true,
+          false
+        ],
+        "scheduler_cls": [
+          null,
+          "vllm_muxpd.decoupled_scheduler.DecoupledMuxPDScheduler"
+        ],
+        "worker_cls": [
+          "vllm_ascend.worker.worker.NPUWorker",
+          "vllm_muxpd.decoupled_worker.DecoupledMuxPDNPUWorker"
+        ]
+      },
+      "left_warm_pairs": {
+        "request_pairs": 30,
+        "exact_token_sequence_pairs": 30,
+        "paired_token_positions": 240,
+        "shared_request_prefix_positions": 240,
+        "shared_request_and_peer_context_positions": 240,
+        "compared_logit_vectors": 240,
+        "strict_batch_descriptor_positions": 240,
+        "exact_logit_value_equal_vectors": 240,
+        "byte_identical_npy_files_on_compared_positions": 240,
+        "max_abs_delta_on_compared_positions": 0.0,
+        "all_compared_native_argmax_agree_with_cpu": true,
+        "first_divergences": []
+      },
+      "right_warm_pairs": {
+        "request_pairs": 30,
+        "exact_token_sequence_pairs": 30,
+        "paired_token_positions": 240,
+        "shared_request_prefix_positions": 240,
+        "shared_request_and_peer_context_positions": 240,
+        "compared_logit_vectors": 240,
+        "strict_batch_descriptor_positions": 240,
+        "exact_logit_value_equal_vectors": 240,
+        "byte_identical_npy_files_on_compared_positions": 240,
+        "max_abs_delta_on_compared_positions": 0.0,
+        "all_compared_native_argmax_agree_with_cpu": true,
+        "first_divergences": []
+      },
+      "cross_pairs": {
+        "request_pairs": 30,
+        "exact_token_sequence_pairs": 30,
+        "paired_token_positions": 240,
+        "shared_request_prefix_positions": 240,
+        "shared_request_and_peer_context_positions": 147,
+        "compared_logit_vectors": 147,
+        "strict_batch_descriptor_positions": 147,
+        "exact_logit_value_equal_vectors": 147,
+        "byte_identical_npy_files_on_compared_positions": 147,
+        "max_abs_delta_on_compared_positions": 0.0,
+        "all_compared_native_argmax_agree_with_cpu": true,
+        "first_divergences": []
+      }
+    }
+  ]
+}
