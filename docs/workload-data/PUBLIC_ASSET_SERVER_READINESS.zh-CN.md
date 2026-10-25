@@ -845,6 +845,29 @@ historical_dialogue 适配定义，不新造第二套对话映射。原始 conve
 输出；它们不是新模型的生成结果，也不是可直接发送的完整 API 请求。 准备输出只是原始记录引用，消费端通过 resolve_input
 恢复；需要模型运行的后续步骤必须明确历史前缀与待生成位置，不能将最后一条 assistant 当作用户问题或拿历史答案冒充新预测。
 
+数据包中的 `vllm_hust_workload_data.conversations.historical_dialogue_views(record)` 提供显式历史续写视图：按原始顺序枚举全部
+assistant 位置，若最后一轮为未回答的 user 则额外返回无参考答案的续写位置。 每次请求只含目标之前的完整原始历史，不含当前参考回答和未来轮次；前面轮次的 assistant
+仍为原始历史回答，不能替换为新生成结果后宣称原协议未变。 保留原始行号、消息位置和非 API 注释，只有 role/content/name 进入请求视图。工具调用、非文本内容、非交替角色或中途
+system 消息直接拒绝，不能静默跳过或自动转换。调用者需要另行选择适用的原生协议，不得用该视图覆盖不支持的记录。 这是语料历史续写，不是在线多轮 Agent、原始 API
+抓包或官方质量评测；返回的历史回答不是质量金标准。
+
+执行入口复用上述准备结果，不重新生成数据，也不重新下载：
+
+```bash
+python scripts/run_historical_dialogue_original.py WILDCHAT \
+  --prepared /private/prepared-WILDCHAT \
+  --data-root /private/WILDCHAT/pinned-revision \
+  --output /private/fresh-WILDCHAT-original-continuation \
+  --model workload-qwen35-27b-128k-nonthinking \
+  --max-tokens 2048 --context-capacity 131072 --count 3
+```
+
+模型别名必须与现有本地 NPU 服务一致，容量必须与真实部署一致；命令不负责部署模型或判定设备归属。 服务器执行前先确认研究线程释放资源。仅连接本机 `/v1`
+接口；先完整分词再生成，不截断、重试或换题。 默认按准备清单中的文件顺序取前三条原始会话，对每条执行全部原始续写位置；`--full` 为准备清单选定文件的全部会话，
+不是整个来源所有分片。未准备的分片、其他协议不纳入通过范围。完整数据文件身份在执行前后复核，失败保留私有记录。 `length`
+终止单独标为预算耗尽，不作为质量通过。原始历史、参考回答、预测只进入服务器私有输出；公开汇报只提取必要计数与身份摘要。 当前仅完成软件夹具及
+OASST/准备恢复回归测试，服务器真实原始记录验证尚未完成，三个来源均不新增完成勾选。
+
 本轮验证小型 JSONL 与嵌套 Parquet 软件夹具的绑定、准备和恢复，使用已安装的可选数据依赖。CI 安装数据包的 data extra
 同样覆盖此格式测试。实际作者文件、服务器依赖及原生续写仍待验证，不能以格式夹具测试冒充真实数据验证。
 

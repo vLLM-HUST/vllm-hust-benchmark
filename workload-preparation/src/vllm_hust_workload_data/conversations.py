@@ -1,10 +1,153 @@
-"""Explicit original OASST tree projection; no sampling, model, or research analysis."""
+"""Explicit original dialogue views; no model, sampling or research analysis."""
 
 from __future__ import annotations
 
 from copy import deepcopy
 
 from .records import WorkloadRecord
+
+HISTORICAL_DIALOGUE_FIELDS = {
+    "WILDCHAT": "conversation",
+    "ULTRACHAT": "messages",
+    "LMSYS_CHAT": "conversation",
+}
+
+
+def historical_dialogue_views(record: WorkloadRecord) -> list[dict]:
+    """Select all original assistant positions and an unanswered final user.
+
+    Validate the entire conversation before returning any view: malformed later
+    turns must not silently disappear after an earlier request succeeds.
+    """
+    source_id = record.source.get("source_id")
+    if source_id not in HISTORICAL_DIALOGUE_FIELDS:
+        raise ValueError("explicit supported historical dialogue record required")
+    messages = record.task["input"].get(HISTORICAL_DIALOGUE_FIELDS[source_id])
+    if not isinstance(messages, list) or not messages:
+        raise ValueError("nonempty original conversation required")
+    # Validate every turn, including annotations on the final original reply.
+    previous = None
+    positions = []
+    for index, message in enumerate(messages):
+        if (
+            not isinstance(message, dict)
+            or message.get("role") not in {"system", "user", "assistant"}
+            or not isinstance(message.get("content"), str)
+            or ("name" in message and not isinstance(message["name"], str))
+            or set(message) & {"tool_calls", "function_call", "tool_call_id"}
+        ):
+            raise ValueError("unsupported original text dialogue turn")
+        role = message["role"]
+        if role == "system":
+            if index != 0:
+                raise ValueError("noninitial system turn needs an explicit protocol")
+        elif role == "user":
+            if previous not in {None, "system", "assistant"}:
+                raise ValueError("nonalternating original dialogue")
+        elif previous != "user":
+            raise ValueError("original assistant must follow user")
+        else:
+            positions.append(index)
+        previous = role
+    if previous == "user":
+        positions.append(len(messages))
+    if not positions:
+        raise ValueError("original conversation has no continuation requests")
+    return [
+        historical_dialogue_prefix(record, index, allow_unanswered_tail=True)
+        for index in positions
+    ]
+
+
+def historical_dialogue_prefix(
+    record: WorkloadRecord,
+    target_message_index: int,
+    *,
+    allow_unanswered_tail: bool = False,
+) -> dict:
+    """One original assistant turn's full teacher-forced history, not a live episode.
+
+    These corpora are not original API request captures. Only role/content/name
+    are transported; original annotations stay separate. No added system prompt,
+    target answer, future turn, tool emulation, schema or budget inference.
+    An unanswered final user turn requires explicit opt-in and has no reference.
+    """
+    source_id = record.source.get("source_id")
+    if (
+        source_id not in HISTORICAL_DIALOGUE_FIELDS
+        or record.runtime.get("kind") != "historical_dialogue"
+    ):
+        raise ValueError("explicit supported historical dialogue record required")
+    messages = record.task["input"].get(HISTORICAL_DIALOGUE_FIELDS[source_id])
+    if (
+        not isinstance(messages, list)
+        or type(target_message_index) is not int
+        or not 1 <= target_message_index <= len(messages)
+        or (target_message_index == len(messages) and not allow_unanswered_tail)
+    ):
+        raise ValueError("explicit original assistant turn position required")
+    prefix = messages[:target_message_index]
+    target = (
+        messages[target_message_index] if target_message_index < len(messages) else None
+    )
+    if target is not None and (
+        not isinstance(target, dict)
+        or target.get("role") != "assistant"
+        or not isinstance(target.get("content"), str)
+    ):
+        raise ValueError("original target must be an assistant text turn")
+    if any(
+        not isinstance(m, dict)
+        or m.get("role") not in {"system", "user", "assistant"}
+        or not isinstance(m.get("content"), str)
+        for m in prefix
+    ):
+        raise ValueError(
+            "original text dialogue contract required; no coercion or flattening"
+        )
+    if prefix[-1]["role"] != "user":
+        raise ValueError(
+            "original assistant target must follow a user turn in this profile"
+        )
+    if any(
+        set(m) & {"tool_calls", "function_call", "tool_call_id"}
+        for m in [*prefix, *([target] if target is not None else [])]
+    ):
+        raise ValueError("tool-bearing histories require an explicit tool protocol")
+    if any("name" in m and not isinstance(m["name"], str) for m in prefix):
+        raise ValueError("invalid original message name")
+    api_keys = {"role", "content", "name"}
+    return deepcopy(
+        {
+            "source_id": source_id,
+            "view": "original-historical-assistant-prefix/v1"
+            if target is not None
+            else "original-final-user-prefix/v1",
+            "source": record.source,
+            "conversation_id": record.task["task_id"],
+            "source_row_index": record.replay["source_row_index"],
+            "target_message_index": target_message_index
+            if target is not None
+            else None,
+            "request_after_original_prefix_length": target_message_index,
+            "prefix_message_indices": list(range(target_message_index)),
+            "messages": [{k: v for k, v in m.items() if k in api_keys} for m in prefix],
+            "non_api_prefix_metadata": [
+                {k: v for k, v in m.items() if k not in api_keys} for m in prefix
+            ],
+            "reference": (
+                {
+                    "kind": "historical_reply_not_quality_gold",
+                    "native_message": target,
+                }
+                if target is not None
+                else None
+            ),
+            "teacher_forced_original_history": True,
+            "live_episode": False,
+            "original_api_request_capture": False,
+        }
+    )
 
 
 def validate_history_targets(source_id, targets, mapping=None):
