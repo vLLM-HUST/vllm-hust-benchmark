@@ -1,0 +1,60 @@
+{
+  "mapping_version": "source-mapping/v1",
+  "source": {
+    "source_id": "NATURALQUESTIONS",
+    "revision": "fb26a3073b1fe636c97302890a27b491d6530130",
+    "unit": "published_question",
+    "publisher": "Google Research",
+    "locator": "https://raw.githubusercontent.com/google-research-datasets/natural-questions/fb26a3073b1fe636c97302890a27b491d6530130/nq_open/NQ-open.train.jsonl",
+    "license": "CC-BY-SA-3.0",
+    "provenance_kind": "published_static_dataset"
+  },
+  "families": [
+    "general-single-turn-assistant"
+  ],
+  "records_path": [],
+  "identity": {
+    "task_id": null
+  },
+  "input": {
+    "question": {
+      "path": [
+        "question"
+      ],
+      "type": "string",
+      "required": true
+    }
+  },
+  "features": {},
+  "outcome": {
+    "answers": {
+      "path": [
+        "answer"
+      ],
+      "type": "array",
+      "required": true,
+      "items": {
+        "path": [],
+        "type": "string",
+        "required": true
+      }
+    }
+  },
+  "runtime": {
+    "kind": "task_dataset",
+    "requirements": [
+      "Static published dataset only; no model, scorer, runtime or synthetic fallback"
+    ],
+    "environment_ref": null,
+    "termination_ref": null,
+    "scorer_ref": null
+  },
+  "replay": {
+    "order": "source_file_order_not_assumed_arrival_order",
+    "artificial_load": false
+  },
+  "evidence": {
+    "field_reference": "https://raw.githubusercontent.com/google-research-datasets/natural-questions/fb26a3073b1fe636c97302890a27b491d6530130/nq_open/NQ-open.train.jsonl",
+    "review_status": "field_contract_reviewed"
+  }
+}

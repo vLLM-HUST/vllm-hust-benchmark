@@ -19,6 +19,17 @@
   "research_observation_or_analysis_migrated": false,
   "all_existing_capabilities_migrated_claim": false,
   "public_entry": "scripts/prepare_reused_research_assets.py",
+  "preparation_entry_partial": {
+    "entry": "scripts/prepare_reused_source_records.py",
+    "supported_sources": ["LONGALPACA", "NATURALQUESTIONS"],
+    "research_mapping_paths": ["workload-preparation/research/wang-mingqi/batch-003/mappings/longalpaca.json", "workload-preparation/research/wang-mingqi/batch-004/mappings/naturalquestions.json"],
+    "research_revision": "dd4103140d358cf211b88f24296b7419d170a54f",
+    "change_from_research_mapping": "Retain input/outcome selectors; remove all feature selectors. Correct NQ-open family from rag-followup to general-single-turn-assistant because no retrieval or conversation history is supplied.",
+    "validation_scope": "Tiny software fixtures only; bind/prepare/resolve, pinned-identity and revision-drift rejection, answer isolation and output no-clobber",
+    "real_source_validation_complete": false,
+    "native_execution_complete": false,
+    "checkbox_increment": 0
+  },
   "sources": [
     {
       "source_id": "LONGALPACA",
