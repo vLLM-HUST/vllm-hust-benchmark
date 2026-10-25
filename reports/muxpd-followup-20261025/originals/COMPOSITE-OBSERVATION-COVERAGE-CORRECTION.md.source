@@ -1,0 +1,21 @@
+# Composite group-observer coverage correction
+
+This note supersedes the arithmetic expectation in frozen source6c606f7's diagnostic documentation and source handoff. Neither source6c, its 128-event cap, nor any recorded run is modified.
+
+The composite has **15 actual P cohorts**, not12: normal phases create6, seed-first single phases create3, and each of3 seed-first four-lane phases creates one seed cohort plus one three-peer cohort (6 more). Twelve driver phases therefore do not imply twelve P cohorts. At10 returns/cohort, complete coverage would require150 callbacks per rank.
+
+The terminal `group-fusion-composite-hccl-true-01` run retained exactly128 callbacks on each of4ranks:
+
+- Cohorts/runner sequences1–12: all10groups observed.
+- Cohort13: second mixed repeat's three-peer P384 cohort; groups0–7 observed. Groups8–9 are outside the observation cap.
+- Cohorts14/15: third mixed repeat's seed P128 and three-peer P384; no group-return callbacks observed.
+
+All15 serving P execute entries are present and mapped to authoritative admitted request IDs, so the omitted coverage is explicit. Captured callbacks satisfy post-group MoE index4*(index+1), pre-checkpoint completed layers4*index, prefill lane/task, final flag atgroup9, and the full native ordered40-layer registry. This does not establish unobserved callbacks or KV contents. The run nevertheless completed all30requests/240sampled outputs; full-vocabulary collection has a different bound and was not truncated by the callback cap.
+
+A separate fresh standalone staggered plan on the same6csource would create9Pcohorts/90callbacks, within the128cap. Only the device-owning root may schedule that run. Its separate process history must be preserved rather than relabeled as missing composite observations.
+
+The first host audit `composite-fusion-host-audit-v1.json` is also retained. Its validator expected MoE names ending `.mlp`, producing false-positive name failures. Pinned Qwen3.5 constructs the MoE module with `.mlp` and Qwen3NextSparseMoeBlock registers FusedMoE at `.experts`; actual names are `language_model.model.layers.{0..39}.mlp.experts`. V2 validates that exact qualified namespace and records zero event-check failures. Relevant pinned source: qwen3_5.py:150/152/633/634, qwen3_next.py:185, forward_context.py:225. No device behavior or log contents changed.
+
+Updated host artifact: `composite-fusion-host-audit-v2.json`, produced by separate `audit_numerical_host_metadata_v2.py` with file/SHA bindings. V1 remains for audit history.
+
+Independent source rehashing in `raw-vs-group-composite-summary-v2.json` verifies literal complete `.npy` file identity for all240raw-vs-group pairs and240pairs in each warm comparison. This is stronger than the original analyzer's `logits_byte_equal` field, which uses elementwise NumPy equality. It is limited to the frozen matched contexts/source/backend/HCCL profile and is not a universal quality or performance claim.
