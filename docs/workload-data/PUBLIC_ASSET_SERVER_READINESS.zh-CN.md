@@ -916,7 +916,7 @@ python scripts/run_mbpp_original_generation.py \
   --assets /private/fresh-mbpp-assets \
   --output /private/fresh-mbpp-generation \
   --model workload-qwen35-27b-128k-nonthinking \
-  --max-tokens 2048 --context-capacity 131072 --count 3
+  --max-tokens 4096 --context-capacity 131072 --count 3
 ```
 
 这是作者README三示例文本模板的具名实现：原2/3/4号题完整解答作示例，每个示例与目标题都含三个原测试，块间两个换行； 目标参考代码不入提示。使用原始
@@ -938,7 +938,7 @@ python scripts/prepare_mbpp_scoring_inputs.py \
 核验原始题号/行号、资产版本、完整请求、参考代码、终态与保存结果；空输出和length终止仍保留。 输出只留在服务器私有目录，包含完整原任务与预测，不能提交到公开仓。准备成功不等于执行测试成功。
 固定的后续执行器元数据见 `configs/workload-native/mbpp-scoring-pins.json`：复用BigCode CodeEval执行/计分函数，
 不复用其不同的InCoder提示；原始三测试和setup保持独立，增强challenge测试不混入主结果。
-独立隔离入口如下，当前只有软件控制流验证，真实Linux命名空间与功能评分尚未验证，不能在宿主设置代码执行授权后直接调用：
+独立隔离入口如下，已在服务器固定前三题验证真实Linux命名空间及功能评分；仍不能在宿主设置代码执行授权后直接调用：
 
 ```bash
 python scripts/run_mbpp_isolated_scoring.py \
@@ -947,21 +947,27 @@ python scripts/run_mbpp_isolated_scoring.py \
   --prepared-dir /private/fresh-mbpp-scoring-inputs \
   --author-root /private/bigcode-evaluation-harness \
   --package-root /private/mbpp-client310/lib/python3.10/site-packages \
-  --python-runtime /private/python310-standalone \
+  --python-runtime /opt/mbpp-python310-standalone \
   --work-root /private/fresh-mbpp-isolated-score \
   --sandbox-uid "$MBPP_APPROVED_SANDBOX_UID" --deadline 600
 ```
 
 `author-root`需检出固定执行器提交`8fc5bae6479c4fbbb28c3f8b644f6a15b3f3b5bd`；
 使用独立Python3.10运行时，评分依赖固定numpy1.26.4、tqdm4.70.1，启动器的数据读取环境另需PyArrow。
-这是待服务器核验的候选环境，不是已验证安装记录，不能改动模型服务全局Torch/NPU环境。
+已验证服务器aarch64/Python3.10.22、numpy1.26.4、tqdm4.70.1；读取客户端为独立Python3.12.13/PyArrow23.0.1。
+模型服务为Qwen3.5-27B/bfloat16、Ascend910B2双卡，输出预算4096、上下文131072；不改服务全局Torch/NPU环境。
+独立评分运行时必须位于沙箱UID可遍历的专用前缀，例如`/opt/mbpp-python310-standalone`；不要放在私有0700父目录下，
+也不要放在`/data`、`/root`、`/proc`下，否则绑定该路径会与隔离检查冲突。不得通过放宽原私有目录权限或取消检查绕过。
 `MBPP_APPROVED_SANDBOX_UID`需操作者设置为专用、非零且无其他任务使用的主机UID；启动器需操作者授权root，
 降权后进入独立user/mount/net/pid命名空间与chroot，只读输入和运行时、无NPU设备、无外网、能力清空及no_new_privs检查通过后才导入执行器。
 隔离设置复用现有HumanEval命名空间代码，不改变其原有评分路径；这是有界本地隔离，不是安全认证。
 原参考解先按原setup与三个测试自检，未通过直接保留失败，不改测试。随后原预测按每题3秒、单worker、pass@1计分。
 500题完整范围外围deadline至少4060秒，示例600秒只适合固定小样本，不缩短题内时间。
-无隔离条件不回退，异常保留目录和日志，不自动清理或重试。来源完成仍需真实NPU生成、独立评分及固定工件消费闭环。
-替换为EvalPlus增强测试需另列协议，不得当作原三测试同配置。当前只有发布元数据和无数据的软件夹具，来源仍不勾选。
+无隔离条件不回退，异常保留目录和日志，不自动清理或重试。来源完成仍需真实NPU生成、独立评分及固定工件消费闭环。 替换为EvalPlus增强测试需另列协议，不得当作原三测试同配置。
+当前原题11/12/13生成、参考解自检及CodeEval评分已完成，预测2通过/1失败；原结果保留，不重试改答案。
+见[原生抽样回执](validation/mbpp-original-native-sample-20261026.json)。统一full配置适配已补，固定安装工件与研究消费尚待核验，来源暂不勾选。
+完整full配置可从已准备资产的`data/`根目录读取四个原Parquet；输入仅含`text`和三个`test_list`，
+参考`code`、`test_setup_code`、`challenge_test_list`分离到outcome；题号单独保留。sanitized格式不走该适配，不能静默当full读取。
 
 InfiniteBench 作者代码身份与静态前检命令：
 

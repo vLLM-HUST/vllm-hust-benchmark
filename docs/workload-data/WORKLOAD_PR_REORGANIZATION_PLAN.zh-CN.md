@@ -2,6 +2,11 @@
 
 更新日期：2026-10-26。沿用原文件更新；本节最终约定覆盖下文旧阶段安排，不新增平行总清单，不删除历史回执。
 
+2026-10-26服务器已恢复：MBPP固定原始前3题完成双NPU生成和真实命名空间CodeEval评分，参考解全部通过，预测2通过/1失败，失败原样保留。
+官方full/sanitized全部9个资产已在服务器核对摘要；原生执行只覆盖full前三题，不称全500题或sanitized已跑。
+新增full字段适配与评分运行时预检，尚需固定安装工件和真实研究消费核验，因此清单仍35/113、不提前打勾。
+见[MBPP原生抽样证据](validation/mbpp-original-native-sample-20261026.json)。PR保持未合并。
+
 ### 2026-10-25既定W39/W40接入进展
 
 不新增来源或改变113项范围：BEIR_SCIFACT与BEIR_NFCORPUS两个既定来源已完成原corpus/query/qrels准备与保真映射、原test全量dense检索和top100交叉编码重排、原评分，以及最终公开入口的NPU交接。固定CI安装包36个payload与原工件逐字节一致，9个原资产文件的公共回查、研究索引导入及直接prepare/resolve均通过。见[最终交付证据](validation/beir-native-delivery-20261025.json)和[固定工件消费证据](validation/beir-fixed-ci-research-handoff-20261025.json)，这两项在当前交付表打勾；历史快照不升级，重复交接不新增唯一任务覆盖数。

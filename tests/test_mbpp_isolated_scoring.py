@@ -69,6 +69,22 @@ def test_launcher_never_falls_back_to_host_on_unsupported_platform(monkeypatch):
         runner.launch(SimpleNamespace())
 
 
+@pytest.mark.parametrize(
+    "root", ["/data/private/python310", "/root/python310", "/proc/runtime"]
+)
+def test_runtime_prefix_never_creates_forbidden_namespace_root(monkeypatch, root):
+    monkeypatch.setattr(runner, "validate_runtime", lambda value: Path(value))
+    with pytest.raises(ValueError, match="forbidden namespace root"):
+        runner.namespace_runtime(root)
+
+
+def test_accessible_dedicated_runtime_prefix_is_allowed(monkeypatch):
+    monkeypatch.setattr(runner, "validate_runtime", lambda value: Path(value))
+    assert runner.namespace_runtime("/opt/mbpp-python310") == Path(
+        "/opt/mbpp-python310"
+    )
+
+
 def test_worker_refuses_before_scorer_import_when_isolation_guard_fails(monkeypatch):
     def reject(helper):
         raise RuntimeError("fixture isolation not established")

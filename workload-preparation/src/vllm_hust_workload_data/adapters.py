@@ -219,6 +219,31 @@ def adapt_row(
             or len(choices["text"]) != len(choices["label"])
         ):
             raise ValueError("AI2_ARC requires aligned source choice text and labels")
+    if source_id == "MBPP" and (
+        set(row)
+        != {
+            "task_id",
+            "text",
+            "code",
+            "test_list",
+            "test_setup_code",
+            "challenge_test_list",
+        }
+        or type(row["task_id"]) is not int
+        or row["task_id"] <= 0
+        or any(
+            not isinstance(row[key], str) for key in ("text", "code", "test_setup_code")
+        )
+        or any(
+            not isinstance(row[key], list)
+            or any(not isinstance(test, str) for test in row[key])
+            for key in ("test_list", "challenge_test_list")
+        )
+        or len(row["test_list"]) != 3
+    ):
+        raise ValueError(
+            "MBPP requires unchanged full-configuration fields and three tests"
+        )
     if source_id == "BILLSUM" and (
         set(row) != {"text", "summary", "title"}
         or any(not isinstance(row[key], str) for key in row)

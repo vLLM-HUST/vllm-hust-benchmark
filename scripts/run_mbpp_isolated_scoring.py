@@ -72,6 +72,15 @@ def author_modules(author_root, pins):
     return result
 
 
+def namespace_runtime(prefix):
+    runtime = validate_runtime(prefix)
+    if any(runtime.is_relative_to(Path(root)) for root in ("/data", "/root", "/proc")):
+        raise ValueError(
+            "runtime bind path would expose a forbidden namespace root; use a dedicated accessible prefix such as /opt"
+        )
+    return runtime
+
+
 def launch(args):
     if sys.platform != "linux" or os.geteuid() != 0:
         raise RuntimeError(
@@ -115,7 +124,7 @@ def launch(args):
             "outer deadline must allow unchanged reference and prediction timeouts"
         )
     modules = author_modules(args.author_root, pins)
-    runtime = validate_runtime(args.python_runtime)
+    runtime = namespace_runtime(args.python_runtime)
     work = args.work_root.resolve()
     for source in (
         args.assets,

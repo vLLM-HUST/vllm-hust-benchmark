@@ -2,6 +2,17 @@
   "version": "adapter-extensions/v1",
   "boundary": "Field contracts from publisher metadata/docs. No real source payload downloaded or full adapter validation claimed.",
   "adapters": {
+    "MBPP": {
+      "kind": "task_dataset",
+      "mapping": "native_fields",
+      "input_fields": ["text", "test_list"],
+      "required_fields": ["task_id", "text", "code", "test_list", "test_setup_code", "challenge_test_list"],
+      "outcome_fields": ["code", "test_setup_code", "challenge_test_list"],
+      "annotation_fields": ["task_id"],
+      "id_field": "task_id",
+      "requirements": ["Original publisher full configuration only; task text and all three public tests are task inputs, reference code/setup/challenge tests are scorer-only. Sanitized configuration is acquired separately but requires its own explicit adapter and protocol."],
+      "status": "ORIGINAL_FULL_FIELDS_MAPPED_NATIVE_SAMPLE_SCORED_CONSUMER_PENDING"
+    },
     "BILLSUM": {
       "kind": "task_dataset",
       "mapping": "native_fields",
