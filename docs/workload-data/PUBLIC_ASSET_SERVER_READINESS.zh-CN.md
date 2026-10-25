@@ -886,3 +886,40 @@ inference.json、evaluation.json，并声明原始预算未覆盖、原生流程
 
 重复或重叠run、尚未结束的run、渲染/VQA任务、原始字段/输出变化及评分不一致均拒绝； 不改题、不换失败任务、不调用模型。新入口目前只有软件夹具验证，未据此重报950题为新增实跑。
 剩余1085道渲染/VQA及最终原生交付、研究消费仍待完成，StructEval来源总勾不变。
+
+## ScienceAgentBench verified：复用官方评测，不替换科学任务
+
+当前已取得102条verified元数据及固定源码的历史证据，不代表已取得完整科学数据。 官方固定版本`c26e151ed601ba109dc4d35e057ff8e73fec469d`的
+`evaluation.harness.run_evaluation`已支持`--split verified`和`--dataset_name`； 无需为选择verified
+split另写评测器。`run_infer.py`和旧`run_eval.py`是不同入口， 不能把它们的validation默认值误当成Docker harness不支持verified。
+
+准备好兼容环境、私有原始科学资产和原生Agent输出后，官方评测入口形态为：
+
+```bash
+python -m evaluation.harness.run_evaluation \
+  --dataset_name /private/pinned-ScienceAgentBench-dataset \
+  --split verified \
+  --benchmark_path /private/benchmark-verified \
+  --pred_program_path /private/original-agent-programs \
+  --log_fname /private/fresh-evaluation.jsonl \
+  --run_id unique-private-run \
+  --cache_level base --max_workers 4 --force_rebuild False
+```
+
+以上仅展示官方参数，不是已验证环境或可直接照抄的完成记录。dataset目录须事先取得并
+固定到登记的`9c6e96c9e74572e979b0930ee735041cef528cb7`版本，并确认本地HF加载确实
+返回verified原102条。上例省略instance_ids，表示官方全量流程；抽样验证时须追加
+`--instance_ids`及固定原行对应的真实ID，不因失败改选，不能假设行号等于instance_id。 预测程序必须由完整原生Agent流程产生，不能拿参考程序冒充模型输出。
+任务科学数据、gold和评测脚本只进私有执行环境，不进Agent输入。
+
+还须处理以下真实缺口，未解决前不执行、不打勾：
+
+- 按[固定官方README](https://github.com/OSU-NLP-Group/ScienceAgentBench/blob/c26e151ed601ba109dc4d35e057ff8e73fec469d/README.md)
+  取得`benchmark_verified.zip`，核验解包后的科学数据/gold/评测器版本；该发布方明确要求 不在线重新分发解包资产，因此公共仓只提供索引、获取说明及执行代码。
+- 旧`run_infer.py`硬编码validation；其模型工厂把非gpt/non-o1名称路由至Bedrock，
+  并依赖LiteLLM模型成本/上下文登记。不能直接填Qwen名称、伪装成GPT或借别的模型tokenizer绕过。
+  优先采用官方README推荐的OpenHands集成，核验其固定版本是否支持verified与本地NPU服务； 否则必须显式记录适配，保持原题、工具反馈、预算及评分，不把旧裸宿主代码执行作为后备。
+- 官方科学评分涉及CodeBERT及适用任务的视觉裁判；未验证其模型、NPU路径和依赖， 不得改成字符串相似度或省略裁判来凑“跑通”。官方Python科学程序/CPU指标本身与LLM推理区分。
+- Docker评测会构建任务环境、安装任务依赖，并按cache_level清理镜像；应在独立执行根、 新run_id及明确空间预算下使用，不共用其他任务目录。官方硬件下的参考耗时不是本服务器实测。
+
+本轮只核实固定官方源码参数和模型路由，不下载科学数据、不调用模型、不启动容器； 102条原字段准备、真正Agent执行、科学评分与研究消费的证明仍分开保留。
