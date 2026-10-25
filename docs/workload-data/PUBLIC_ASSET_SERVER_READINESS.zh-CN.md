@@ -617,6 +617,19 @@ manifest执行pipeline/resolve。输入只包含原`Question`与按作者seed0�
 
 # 历史准备能力补迁：LongAlpaca、NQ-open 与 DuReader demo
 
+InfiniteBench 的作者代码身份及静态前检：
+
+```bash
+git clone https://github.com/OpenBMB/InfiniteBench.git /path/to/official-infinitebench
+git -C /path/to/official-infinitebench checkout --detach 51d9b37b0f1790ead936df2243abbf7f0420e439
+python scripts/verify_infinitebench_original_code.py --official-checkout /path/to/official-infinitebench
+```
+
+上述克隆及后续依赖安装只在服务器执行。固定配置为
+`configs/workload-native/infinitebench-author-code-pins.json`，核对六份作者代码/说明文件的 Git blob 及字节数，不导入作者模块。
+前检从作者代码静态读取各任务文件名与生成预算；不是依赖安装成功、原生推理或评分成功证据。作者评分模块导入时会加载 ROUGE，须在服务器另行固定指标资产；不能用静态前检替代评分验证。 作者历史
+GPT-4 消息构造分支包含中间截断；本轮不以截断适配当前模型。不满足完整上下文要求时保留资源阻塞。历史数字型/字符串型字段映射亦不能直接覆盖全部子任务及评分。
+
 NarrativeQA 另提供数据关系解析接口
 `vllm_hust_workload_data.narrativeqa.original_summary_tasks(data_root, catalog_root=None)`。 它校验原始
 documents.csv、qaps.csv、third_party/wikipedia/summaries.csv，按作者 QA 顺序关联 document_id 并核对 split。 返回的

@@ -1,0 +1,48 @@
+{
+  "schema_version": "official-native-code-pins/v1",
+  "source_id": "INFINITEBENCH",
+  "repository": "OpenBMB/InfiniteBench",
+  "revision": "51d9b37b0f1790ead936df2243abbf7f0420e439",
+  "data_revision": "90f0394333616266d9fe85824ceaf505093cbaa5",
+  "files": [
+    {
+      "path": "README.md",
+      "git_blob": "790a7b20ec78651923e09324a542a5231badfb0a",
+      "bytes": 11852
+    },
+    {
+      "path": "requirements.txt",
+      "git_blob": "7cfa9399b303648d86bc48c2f0dd9799e798e09e",
+      "bytes": 80
+    },
+    {
+      "path": "src/eval_utils.py",
+      "git_blob": "9d1bfe285ae61dc2e6d5b9ef9bd72c09e87ab065",
+      "bytes": 26946
+    },
+    {
+      "path": "src/prompt.py",
+      "git_blob": "05d43528988a5bc323fcb106e4dca190659c63eb",
+      "bytes": 10561
+    },
+    {
+      "path": "src/compute_scores.py",
+      "git_blob": "9a398822f30d6e2ab5eb636619b35a7c5f568c74",
+      "bytes": 13369
+    },
+    {
+      "path": "src/args.py",
+      "git_blob": "8346281fa09f11c2ab1b3698f5c14e47d003a313",
+      "bytes": 1779
+    }
+  ],
+  "execution_status": "NOT_RUN",
+  "native_delivery_complete": false,
+  "protocol_notes": [
+    "Use original prompt/create_msgs/get_answer and official compute_scores, with task-specific token budgets.",
+    "No task/context trimming to fit the available model. Official historical truncation branches must be explicitly labeled and are not the unmodified full-context profile.",
+    "Do not assume numeric/string historical field mappings cover every task's answer shape.",
+    "Scorer imports evaluate.load(rouge); metric artifact must be prepared and pinned on server before running.",
+    "Author multi-API entry has provider configuration assumptions; no validated local-NPU route claimed."
+  ]
+}

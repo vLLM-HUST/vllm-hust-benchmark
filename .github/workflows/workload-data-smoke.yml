@@ -58,6 +58,9 @@ on:
       - 'scripts/prepare_flores200_original_assets.py'
       - 'scripts/prepare_reused_research_assets.py'
       - 'scripts/prepare_reused_source_records.py'
+      - 'scripts/verify_infinitebench_original_code.py'
+      - 'configs/workload-native/infinitebench-author-code-pins.json'
+      - 'tests/test_infinitebench_code_preflight.py'
       - 'configs/workload-native/reused-source-mappings/**'
       - 'tests/test_reused_source_records.py'
       - 'configs/workload-native/flores200-author-pins.json'
@@ -133,7 +136,7 @@ jobs:
       - name: CPU fixtures and data-only boundary
         run: python -m pytest -q workload-preparation/tests tests/test_workload_data_boundary.py tests/test_workload_gap_catalog.py tests/test_workload_validation_checklist.py tests/test_workload_category_checklist.py tests/test_tau2_original_runner.py tests/test_reasoning_original_runners.py workload-preparation/tests/test_math500_original_adapter.py tests/test_math500_original_runner.py tests/test_structeval_original_runner.py tests/test_longbench_original_runner.py tests/test_dolly_original_runner.py tests/test_longwriter_original_runner.py tests/test_agentbench_original_runner.py tests/test_bfcl_original_runner.py tests/test_workload_response_validation.py
       - name: OASST runner CPU contract only
-        run: python -m pytest -q tests/test_oasst_original_runner.py tests/test_reused_source_records.py
+        run: python -m pytest -q tests/test_oasst_original_runner.py tests/test_reused_source_records.py tests/test_infinitebench_code_preflight.py
       - name: Natural Instructions runner CPU contract only
         run: python -m pytest -q tests/test_natural_instructions_original_runner.py tests/test_natural_instructions_validation_receipt.py tests/test_ni_editing_extraction_original.py tests/test_ni_original_range.py
       - name: BBH runner CPU contract only
