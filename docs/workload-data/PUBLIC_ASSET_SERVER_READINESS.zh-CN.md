@@ -625,6 +625,23 @@ git -C /path/to/official-infinitebench checkout --detach 51d9b37b0f1790ead936df2
 python scripts/verify_infinitebench_original_code.py --official-checkout /path/to/official-infinitebench
 ```
 
+后续服务器原生验证入口（当前只有软件夹具测试，尚未完成真实环境验证）：
+
+```bash
+python scripts/run_infinitebench_original.py \
+  --official-checkout /path/to/official-infinitebench \
+  --data-root /path/to/original-infinitebench \
+  --output /path/to/fresh-private-results \
+  --task passkey --model YOUR_LOCAL_MODEL --template gpt4 \
+  --context-limit VERIFIED_SERVICE_CONTEXT_LIMIT --start 0 --count 3
+```
+
+这是作者 gpt4 提示模板加本地模型传输的显式配置，不是 GPT-4 论文复现。直接调用固定作者版本 create_msgs（tokenizer=None，禁用其中的截断分支）、get_answer
+和 get_score，不重写评分规则。 通过服务 `/tokenize`
+对完整消息计数；完整输入加作者生成预算超限则失败，不改题、不截断、不缩预算。默认固定原始位置0/1/2；`--full`执行所选任务全部原题，不能与其他范围组合。
+OpenAI客户端禁用自动重试，失败保留已写结果，不换题凑通过。输出私有目录中包含答案和预测，禁止提交；即使抽样与评分成功，也不自动将整个来源打勾。 需要服务器隔离环境安装作者
+requirements及其实际导入依赖、OpenAI SDK和数据包，准备固定ROUGE指标资产，并记录版本；本入口尚无已验证的完整依赖锁，因此不能据此宣称开箱即用交付完成。
+
 上述克隆及后续依赖安装只在服务器执行。固定配置为
 `configs/workload-native/infinitebench-author-code-pins.json`，核对六份作者代码/说明文件的 Git blob 及字节数，不导入作者模块。
 前检从作者代码静态读取各任务文件名与生成预算；不是依赖安装成功、原生推理或评分成功证据。作者评分模块导入时会加载 ROUGE，须在服务器另行固定指标资产；不能用静态前检替代评分验证。 作者历史
