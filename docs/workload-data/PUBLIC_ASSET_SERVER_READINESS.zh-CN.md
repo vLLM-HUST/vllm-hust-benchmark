@@ -615,7 +615,7 @@ manifest执行pipeline/resolve。输入只包含原`Question`与按作者seed0�
 
 `--split main`、`--split extended`分别选原split；不带`--full`为固定物理行0、1、2，不能在看到失败后换题。新输出目录拒绝覆盖，保存请求/响应和原解析结果；缺失答案按原逻辑记错，不重试凑分。`--reuse /private/completed-original-run`只复用已完成同协议、同服务模型且私有记录摘要一致、实际请求完全等价的保存响应；题目相同但选项不同不会误复用，不能只按题目ID命中。复用后仍重新执行原解析与评分，不再调用模型。来源主勾不因下载、CPU测试或运行中的文件提前勾选。
 
-# 历史准备能力补迁：LongAlpaca 与 NQ-open
+# 历史准备能力补迁：LongAlpaca、NQ-open 与 DuReader demo
 
 以下入口复用已审查的原始字段映射，只准备可解析的原始记录引用；不执行模型、评分、观测或研究特征提取。原始数据留在服务器外部目录，不进入 Git。
 
@@ -626,13 +626,18 @@ python scripts/prepare_reused_source_records.py LONGALPACA \
   --data-root /path/to/original-assets --output /path/to/fresh-preparation --limit 3
 python scripts/prepare_reused_source_records.py NATURALQUESTIONS \
   --data-root /path/to/original-nq-open --output /path/to/fresh-nq-preparation --limit 3
+python scripts/prepare_reused_source_records.py DUREADER \
+  --data-root /path/to/original-dureader-demo --output /path/to/fresh-dureader-preparation --limit 3
 ```
 
 文件路径须与登记的原始资产相对路径一致；先使用 `prepare_reused_research_assets.py` 获取或校验资产。输出目录必须全新且与数据目录分离。省略 `--limit`
 会准备全部记录引用；绑定阶段始终校验全部选定文件的身份和字段，不因 limit 跳过文件校验。
 
 LongAlpaca 保留 instruction/input 与独立参考 output；NQ-open 保留 question 与独立 answer 列表。NQ-open
-是开放域单轮问答，不具有原始检索轨迹或多轮关系，因此不沿用历史映射中的 rag-followup 标签。两份映射均不带研究 feature 选择器。
+是开放域单轮问答，不具有原始检索轨迹或多轮关系，因此不沿用历史映射中的 rag-followup 标签。三份映射均不带研究 feature 选择器。
+
+DuReader 当前范围仅为作者 demo，不等于完整数据集。保留嵌套文档标题及段落；答案、答案位置、相关文档标注分别留在 outcome，不进入模型输入。未构造多轮关系，因此归为文档问答而不是
+rag-followup。
 
 本轮仅通过小型软件夹具验证绑定、准备、消费恢复、答案隔离、文件篡改拒绝及输出防覆盖；尚未在恢复后的服务器核验真实资产。此入口不是原生 benchmark
 执行入口，不增加交付打勾数，原生执行及适用评分仍是独立待补项。

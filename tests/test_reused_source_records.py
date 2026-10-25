@@ -16,7 +16,7 @@ runner = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(runner)
 
 
-@pytest.fixture(params=["LONGALPACA", "NATURALQUESTIONS"])
+@pytest.fixture(params=["LONGALPACA", "NATURALQUESTIONS", "DUREADER"])
 def original_fixture(request, tmp_path):
     sid = request.param
     row = (
@@ -28,6 +28,22 @@ def original_fixture(request, tmp_path):
         if sid == "LONGALPACA"
         else {"question": "fixture question", "answer": ["fixture answer", "alternate"]}
     )
+    if sid == "DUREADER":
+        row = {
+            "question_id": 7,
+            "question": "fixture question",
+            "documents": [
+                {
+                    "title": "fixture title",
+                    "paragraphs": ["fixture context"],
+                    "is_selected": True,
+                    "most_related_para": 0,
+                }
+            ],
+            "answers": ["fixture answer"],
+            "answer_docs": [0],
+            "answer_spans": [[0, 1]],
+        }
     name = "fixture.json" if sid == "LONGALPACA" else "fixture.jsonl"
     raw = json.dumps([row] if sid == "LONGALPACA" else row).encode() + b"\n"
     data = tmp_path / "data"
@@ -77,9 +93,19 @@ def test_prepare_and_resolve_preserve_fields_without_copying_data(
     if sid == "LONGALPACA":
         assert record.task["input"]["instruction"] == row["instruction"]
         assert record.outcome["reference_output"] == row["output"]
-    else:
+    elif sid == "NATURALQUESTIONS":
         assert record.task["input"]["question"] == row["question"]
         assert record.outcome["answers"] == row["answer"]
+    else:
+        assert record.task["input"]["documents"] == [
+            {"title": "fixture title", "paragraphs": ["fixture context"]}
+        ]
+        assert record.outcome["document_annotations"] == [
+            {"is_selected": True, "most_related_para": 0}
+        ]
+        assert record.outcome["answer_docs"] == [0]
+        assert record.outcome["answer_spans"] == [[0, 1]]
+        assert record.outcome["answers"] == row["answers"]
     assert (
         "answers" not in record.task["input"]
         and "reference_output" not in record.task["input"]

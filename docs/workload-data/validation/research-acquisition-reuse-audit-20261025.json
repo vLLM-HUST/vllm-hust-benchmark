@@ -21,7 +21,16 @@
   "public_entry": "scripts/prepare_reused_research_assets.py",
   "preparation_entry_partial": {
     "entry": "scripts/prepare_reused_source_records.py",
-    "supported_sources": ["LONGALPACA", "NATURALQUESTIONS"],
+    "supported_sources": ["LONGALPACA", "NATURALQUESTIONS", "DUREADER"],
+    "additional_mapping_provenance": {
+      "source": "DUREADER",
+      "research_path": "workload-preparation/research/wang-mingqi/batch-004/mappings/dureader.json",
+      "research_git_blob": "3ff937ca8b4d12d00afd84dc45a8d164fa2b69ba",
+      "changes": "Remove feature selector; label document-grounded-analysis instead of rag-followup; preserve reviewed nested documents and separate answer/document annotations. No multi-turn history is supplied."
+    },
+    "remaining_mapping_review": {
+      "NARRATIVEQA": "Historical mapping selects question/document_id and two answers only. It does not resolve documents or summaries by document_id and is not a complete original task input. Preserve this gap; implement reviewed relationship resolution before delivery."
+    },
     "research_mapping_paths": ["workload-preparation/research/wang-mingqi/batch-003/mappings/longalpaca.json", "workload-preparation/research/wang-mingqi/batch-004/mappings/naturalquestions.json"],
     "research_revision": "dd4103140d358cf211b88f24296b7419d170a54f",
     "change_from_research_mapping": "Retain input/outcome selectors; remove all feature selectors. Correct NQ-open family from rag-followup to general-single-turn-assistant because no retrieval or conversation history is supplied.",

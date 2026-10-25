@@ -10,6 +10,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 MAPPINGS = {
+    "DUREADER": ROOT / "configs/workload-native/reused-source-mappings/dureader.json",
     "LONGALPACA": ROOT
     / "configs/workload-native/reused-source-mappings/longalpaca.json",
     "NATURALQUESTIONS": ROOT
