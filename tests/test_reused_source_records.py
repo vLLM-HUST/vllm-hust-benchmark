@@ -141,6 +141,65 @@ def test_data_only_profiles_do_not_imply_nq_retrieval():
     assert profiles["NATURALQUESTIONS"]["families"] == ["general-single-turn-assistant"]
 
 
+@pytest.mark.parametrize(
+    "sid,field,id_field",
+    [
+        ("WILDCHAT", "conversation", "conversation_hash"),
+        ("ULTRACHAT", "messages", "prompt_id"),
+        ("LMSYS_CHAT", "conversation", "conversation_id"),
+    ],
+)
+def test_existing_dialogue_adapters_preserve_original_history(
+    tmp_path, sid, field, id_field
+):
+    from vllm_hust_workload_data.consumer import resolve_input
+
+    messages = [
+        {"role": "user", "content": "first fixture"},
+        {"role": "assistant", "content": "historical fixture"},
+        {"role": "user", "content": "second fixture"},
+        {"role": "assistant", "content": "final historical fixture"},
+    ]
+    row = {field: messages, id_field: "fixture-id"}
+    raw = (json.dumps(row) + "\n").encode()
+    data = tmp_path / "data"
+    data.mkdir()
+    (data / "fixture.jsonl").write_bytes(raw)
+    catalog = tmp_path / "catalog"
+    (catalog / "data/catalogs").mkdir(parents=True)
+    for name in (
+        "source_manifests_v1.json",
+        "adapter_registry_v1.json",
+        "adapter_extensions_v1.json",
+    ):
+        payload = json.loads(
+            (ROOT / "workload-preparation/data/catalogs" / name).read_text("utf-8")
+        )
+        if name == "source_manifests_v1.json":
+            payload["sources"][sid]["files"] = [
+                {
+                    "path": "fixture.jsonl",
+                    "sha256": hashlib.sha256(raw).hexdigest(),
+                    "bytes": len(raw),
+                    "role": "raw_source",
+                }
+            ]
+        (catalog / "data/catalogs" / name).write_text(
+            json.dumps(payload), encoding="utf-8"
+        )
+    output = tmp_path / "output"
+    receipt = runner.prepare(sid, data_root=data, output=output, catalog_root=catalog)
+    with sqlite3.connect(output / "prepared/workload.sqlite") as connection:
+        rid = connection.execute("SELECT record_id FROM records").fetchone()[0]
+    record = resolve_input(output / "prepared/workload.sqlite", rid, data_root=data)
+    assert record.task["input"][field] == messages
+    assert record.runtime["kind"] == "historical_dialogue"
+    assert not receipt["native_execution_complete"]
+    assert not (output / "source-mapping.private.json").exists()
+    with pytest.raises(ValueError, match="not a ready model request"):
+        record.request_body()
+
+
 def test_revision_drift_never_downgrades_to_unpinned_local_snapshot(
     original_fixture, tmp_path
 ):

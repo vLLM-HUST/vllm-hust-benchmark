@@ -22,6 +22,8 @@
   "preparation_entry_partial": {
     "entry": "scripts/prepare_reused_source_records.py",
     "supported_sources": ["LONGALPACA", "NATURALQUESTIONS", "DUREADER"],
+    "existing_dialogue_adapter_sources": ["WILDCHAT", "ULTRACHAT", "LMSYS_CHAT"],
+    "dialogue_reuse_scope": "Reuse existing adapter_extensions_v1 definitions unchanged. Bind pinned raw files and prepare original history references; preserve every role/turn/order. Historical assistant messages remain historical, not newly generated completions. Software fixtures are JSONL, not real Parquet validation. No native request or source delivery claim.",
     "additional_mapping_provenance": {
       "source": "DUREADER",
       "research_path": "workload-preparation/research/wang-mingqi/batch-004/mappings/dureader.json",

@@ -16,6 +16,7 @@ MAPPINGS = {
     "NATURALQUESTIONS": ROOT
     / "configs/workload-native/reused-source-mappings/naturalquestions.json",
 }
+DIALOGUE_SOURCES = {"WILDCHAT", "ULTRACHAT", "LMSYS_CHAT"}
 
 
 def prepare(source_id, *, data_root, output, files=None, limit=None, catalog_root=None):
@@ -24,7 +25,7 @@ def prepare(source_id, *, data_root, output, files=None, limit=None, catalog_roo
     from vllm_hust_workload_data.pipeline import run
     from vllm_hust_workload_data.registry import source_spec
 
-    if source_id not in MAPPINGS:
+    if source_id not in MAPPINGS and source_id not in DIALOGUE_SOURCES:
         raise ValueError("source preparation not implemented; no generic fallback")
     if limit is not None and (type(limit) is not int or limit <= 0):
         raise ValueError("explicit positive preparation limit required")
@@ -40,11 +41,13 @@ def prepare(source_id, *, data_root, output, files=None, limit=None, catalog_roo
     catalog_root = (
         ROOT / "workload-preparation" if catalog_root is None else Path(catalog_root)
     )
-    mapping = load_mapping(MAPPINGS[source_id])
-    if mapping["source"]["source_id"] != source_id or mapping["features"]:
+    mapping = load_mapping(MAPPINGS[source_id]) if source_id in MAPPINGS else None
+    if mapping is not None and (
+        mapping["source"]["source_id"] != source_id or mapping["features"]
+    ):
         raise ValueError("matching data-only source mapping required")
     source = source_spec(source_id, catalog_root)
-    if source["revision"] != mapping["source"]["revision"]:
+    if mapping is not None and source["revision"] != mapping["source"]["revision"]:
         raise ValueError(
             "catalog revision differs from reviewed mapping; re-review required"
         )
@@ -66,7 +69,7 @@ def prepare(source_id, *, data_root, output, files=None, limit=None, catalog_roo
         source_id,
         data_root=data_root,
         files=selected,
-        revision=mapping["source"]["revision"],
+        revision=source["revision"],
         mapping=mapping,
         catalog_root=catalog_root,
     )
@@ -94,14 +97,16 @@ def prepare(source_id, *, data_root, output, files=None, limit=None, catalog_roo
         manifest = output / "source-manifest.private.json"
         profile = output / "source-mapping.private.json"
         manifest.write_text(json.dumps(bound, indent=2) + "\n", encoding="utf-8")
-        profile.write_text(json.dumps(mapping, indent=2) + "\n", encoding="utf-8")
+        if mapping is not None:
+            profile.write_text(json.dumps(mapping, indent=2) + "\n", encoding="utf-8")
         entry = {
             "source_id": source_id,
             "data_root": str(data_root),
             "files": selected,
             "manifest": str(manifest),
-            "mapping": str(profile),
         }
+        if mapping is not None:
+            entry["mapping"] = str(profile)
         if limit is not None:
             entry["limit"] = limit
         config = {"sources": [entry]}
@@ -125,7 +130,7 @@ def prepare(source_id, *, data_root, output, files=None, limit=None, catalog_roo
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("source_id", choices=sorted(MAPPINGS))
+    parser.add_argument("source_id", choices=sorted(set(MAPPINGS) | DIALOGUE_SOURCES))
     parser.add_argument("--data-root", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--files", nargs="+")
