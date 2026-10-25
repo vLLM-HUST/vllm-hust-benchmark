@@ -1,6 +1,35 @@
 {
   "version": "source-manifests/v1",
   "sources": {
+    "STSB": {
+      "source_id": "STSB",
+      "platform": "https",
+      "repo_id": "sentence-transformers/stsbenchmark",
+      "source_url": "https://sbert.net/datasets/stsbenchmark.tsv.gz",
+      "revision": "sha256:aa3ae9b0060fdab8a7239df4bed7668086b4181e7cf6e921d086a70f9e42c17e", "revision_note": "pragma: allowlist secret - public original dataset identity",
+      "framework_revision": "dfcbbd93056c6292ee6a245c0740683a270df0b1", "framework_revision_note": "pragma: allowlist secret - public publisher revision",
+      "provenance_kind": "official_framework_dataset_distribution",
+      "unit": "original_sentence_pair",
+      "workload_tags": ["embedding", "sentence_similarity"],
+      "status": "ORIGINAL_PAIRS_MAPPED_NATIVE_VALIDATION_PENDING",
+      "native_reference_command": "python scripts/run_stsb_original.py --data-root /private/stsb --model-root /private/all-mpnet-base-v2 --output /private/fresh-stsb",
+      "access": {
+        "license": null,
+        "gated": false,
+        "note": "Publisher publicly hosts the original task distribution; no blanket redistribution or commercial license is established. Original data stays external."
+      },
+      "files": [
+        {
+          "path": "stsbenchmark.tsv.gz",
+          "url": "https://sbert.net/datasets/stsbenchmark.tsv.gz",
+          "sha256": "aa3ae9b0060fdab8a7239df4bed7668086b4181e7cf6e921d086a70f9e42c17e", "sha256_note": "pragma: allowlist secret - public original dataset identity",
+          "bytes": 392336,
+          "rows": 8628,
+          "split_rows": {"train": 5749, "dev": 1500, "test": 1379},
+          "role": "data"
+        }
+      ]
+    },
     "WILDCHAT": {
       "source_id": "WILDCHAT",
       "platform": "hf",

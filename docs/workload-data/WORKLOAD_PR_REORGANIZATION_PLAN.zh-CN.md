@@ -10,6 +10,8 @@
 
 ## 零、需求对齐后的最终执行要求（2026-10-24）
 
+STSB既定来源增量：原SBERT分发8628句对、原dev1500/test1379的完整NPU编码和原Pearson/Spearman评价已完成，保存向量交回同一原评估器重算一致；完整原字段和三个split的公共回查、研究消费候选验证通过。见[原生评价证据](validation/stsb-original-native-and-rescore-20261025.json)、[候选消费证据](validation/stsb-candidate-consumer-20261025.json)。固定CI安装工件尚待核验，当前保持未勾；仍属于W39原句对相似度，不新增第41类、不冒充检索流量或KV复用证据。
+
 目标是按40类workload补齐可复用的原生benchmark接入能力，解决使用者寻找来源、准备环境和跑通原任务的问题；不是数据托管仓库，不是研究实验平台，也不是只做读取适配。
 
 - **范围**：总清单仍为110公开来源＋8企业资产＝118项。MMLU-Pro、HLE-Verified、SWE-bench Pro、FrontierScience、Terminal-Bench

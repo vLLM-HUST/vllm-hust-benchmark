@@ -8,6 +8,60 @@ ROOT = Path(__file__).resolve().parents[1]
 DOCS = ROOT / "docs/workload-data"
 
 
+def test_stsb_native_original_pairs_and_candidate_consumption_do_not_claim_fixed_artifact():
+    native = json.loads(
+        (DOCS / "validation/stsb-original-native-and-rescore-20261025.json").read_text(
+            "utf-8"
+        )
+    )
+    run = native["original_native_run"]
+    assert run["status"] == "ORIGINAL_FULL_SPLITS_EXECUTED_AND_SCORED"
+    assert (
+        run["model_parameters_verified_on_npu"]
+        and run["model_forward_embeddings_verified_on_npu"]
+    )
+    assert run["encoder_native_max_length"] == 384
+    assert [(row["split"], row["original_pairs"]) for row in run["splits"]] == [
+        ("dev", 1500),
+        ("test", 1379),
+    ]
+    assert len(run["encoding_calls"]) == 4
+    assert native["original_metrics_equal_cached_rescore"]
+    assert not native["cached_rescore_model_execution"]
+    wheel = native["publisher_wheel_source_audit"]
+    assert len(wheel["installed_source_files"]) == 6
+    assert not wheel["installed_source_modified"] and wheel["model_calls"] == 0
+    assert all(
+        row["normalized_only_line_endings_equals_git_source"]
+        for row in wheel["installed_source_files"]
+    )
+    consumer = json.loads(
+        (DOCS / "validation/stsb-candidate-consumer-20261025.json").read_text("utf-8")
+    )
+    assert (
+        consumer["all_original_rows_preserved"]
+        == consumer["public_index_rows"]
+        == consumer["research_direct_prepare_rows"]
+        == 8628
+    )
+    assert consumer["public_first_tail_roundtrips_per_split"] == {
+        "train": 6,
+        "dev": 6,
+        "test": 6,
+    }
+    assert consumer["research_index_import_per_split"] == {
+        "train": 3,
+        "dev": 3,
+        "test": 3,
+    }
+    for evidence in [native, consumer]:
+        assert (
+            not evidence["source_checkbox_eligible"]
+            and not evidence["fixed_ci_artifact_verified"]
+        )
+        assert not evidence["research_observation_or_analysis_migrated"]
+
+
 def test_beir_delivery_closes_original_execution_fixed_artifact_and_consumer():
     receipt = json.loads(
         (DOCS / "validation/beir-native-delivery-20261025.json").read_text("utf-8")

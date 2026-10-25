@@ -307,6 +307,39 @@ Torch、模型推理或网络服务；已通过该环境 `pip check`。旧Python
 输入差异的显式选项：只有同一原文件、同一行、同一模型和预算且私有证据摘要完整，但原编码输入不同的旧结果才失效并重跑原题。默认遇此差异报错；文件损坏、改题、配置不符仍报错，不被此选项忽略。保存生成
 token 可用原解码器重解码，不需要再请求模型。
 
+### STS-B原始句对连续相似度评价
+
+官方依据：[EmbeddingSimilarityEvaluator说明与模型示例](https://www.sbert.net/docs/package_reference/sentence_transformer/evaluation.html#embeddingsimilarityevaluator)、[v5.1.2原STSBenchmark加载/评价示例](https://github.com/huggingface/sentence-transformers/blob/v5.1.2/examples/sentence_transformer/training/sts/training_stsbenchmark.py)。本接入只使用其原数据加载约定和原评价，不执行训练示例的微调。
+
+`STSB`采用Sentence
+Transformers官方提供的`stsbenchmark.tsv.gz`原分发，保留全部8628行及原8列，train5749、dev1500、test1379不混用。它是原STSBenchmark任务的框架分发格式，不声称与最初SemEval压缩容器逐字节相同；没有自行改题、生成替代句子或改成二分类。原句对只作为两个文本输入，原0到5分的连续标签在参考侧保留原字符串；仅在原评估器入口按作者示例除以5，不改写存储资产。
+
+数据URL、SHA和体积见`workload-data catalog download-plan STSB`。模型绑定为官方评估文档示例采用的`sentence-transformers/all-mpnet-base-v2`；模型与Sentence
+Transformers5.1.2源码和PyPI
+wheel均固定在`configs/workload-native/stsb-author-pins.json`。model目录按pins保存全部13个列出文件；可用HF下载工具指定相同revision和文件列表取得，不下载到工作站或提交进Git。
+
+```sh
+python -I scripts/run_stsb_original.py --data-root /private/stsb \
+  --model-root /private/all-mpnet-base-v2 --device npu:0 \
+  --output /private/fresh-stsb-native
+```
+
+默认分别全跑原dev1500对和test1379对，用原`EmbeddingSimilarityEvaluator`计算模型默认cosine相似度的Pearson及Spearman；允许`--split test`或`--split dev`明确选择一个完整split，不支持改题、缩小原句或把train冒充测试。模型FP32/eager，batch16；384为原模型配置，不是人为容量截断策略，不构成长上下文验证。不是训练/微调复现，也不是生产检索流量或KV可复用证据。
+
+服务器已验证的客户端复用本文件BEIR节的隔离环境和`beir-npu-client-dependencies.txt`完整依赖超集，Python3.12.13、Torch2.10.0+cpu、torch_npu2.10.0.post4、CANN9.1.0；其中BEIR与pytrec是该客户端现有额外依赖，不参与STS评分，不声称已验证一个另建的最小化依赖环境。不要替换服务环境的Torch。固定数据组件安装后用`-I`运行，避免全局PYTHONPATH污染；候选源码测试使用明确的数据组件路径，不能把源码测试冒充固定wheel交付。
+
+官方PyPI5.1.2
+wheel的6个相关运行文件是CRLF，tag源码为LF；已核验其原wheel整体SHA、安装字节及只转换换行后与Git原文件一致。入口验证PyPI原安装文件摘要，不修改已安装文件、不仅凭版本号放行。模型必须通过原`SentenceTransformer`类加载，验证代理不继承它以免触发其按具体类名判断模型类型的自动fallback；模型参数、原图最终向量均核验在NPU，不能回退到临时mean-pooling图。
+
+保存的私有向量可通过同一原评估器复核，不重新跑模型：
+
+```sh
+python -I scripts/run_stsb_original.py --data-root /private/stsb --mode score \
+  --reuse /private/prior-stsb-native --output /private/fresh-stsb-score-audit
+```
+
+入口核对原文件、模型与协议身份、编码文本序列摘要、参数及向量文件摘要；score模式不是新NPU运行。原句对、完整向量和索引不公开。当前原dev/test全量NPU评价及离线原指标重算已通过，固定CI工件消费尚待闭环，来源保持未勾完成。公开来源定位不代表已取得任意商业使用或再分发授权，原始数据始终外部存放。
+
 ### BEIR 原始检索集合与重排协议
 
 `BEIR_SCIFACT`和`BEIR_NFCORPUS`共享原集合，但有两个不同执行协议：原查询/全文档的dense检索，以及用该检索结果产生候选的top100交叉编码重排。qrels是原相关性评分参考，不是模型输入，更不能只用正例构造重排候选。数据组件完整保留corpus、queries和各split的qrels；不是将这些行转换为chat请求。

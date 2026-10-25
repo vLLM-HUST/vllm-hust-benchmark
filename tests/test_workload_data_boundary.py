@@ -5,6 +5,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1] / "workload-preparation"
 DATA_MODULES = {
+    "stsb",  # Publisher sentence pairs and labels only; no research analysis.
     "beir",  # Original retrieval assets and relations, no research analysis.
     "__init__",
     "adapters",

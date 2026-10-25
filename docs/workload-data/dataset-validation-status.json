@@ -2050,12 +2050,14 @@
     "STSB": {
       "scope": "public",
       "delivery_kind": "review_original_source_protocol",
-      "status": "NOT_STARTED",
+      "status": "IN_PROGRESS",
       "checked": false,
       "legacy_checked": false,
       "existing_receipt": null,
       "delivery_receipt": null,
-      "blocker": null
+      "native_execution_receipt": "docs/workload-data/validation/stsb-original-native-and-rescore-20261025.json",
+      "candidate_consumer_receipt": "docs/workload-data/validation/stsb-candidate-consumer-20261025.json",
+      "blocker": "Original full dev/test NPU encoding, official scoring and cached rescoring complete; all8628 raw rows and candidate consumer verified. Fixed CI software-artifact consumption remains pending."
     },
     "DOCVQA": {
       "scope": "public",
@@ -2239,6 +2241,20 @@
     }
   },
   "sources": [
+    {
+      "source_id": "STSB",
+      "scope": "public",
+      "workload_class_ids": ["embedding-retrieval"],
+      "acquisition": "VERIFIED_ORIGINAL_DATA_MODEL_ACQUISITION_IN_PROGRESS",
+      "read_adapter": "CPU_FIXTURES_ONLY",
+      "server_execution": "NOT_RUN",
+      "scoring": "NOT_RUN",
+      "selected_samples": [],
+      "completed_samples": [],
+      "checked": false,
+      "receipt": null,
+      "blocker": "Original STSBenchmark gzip acquired; pinned model assets, native evaluation and fixed-artifact consumer closure pending."
+    },
     {
       "source_id": "BEIR_SCIFACT",
       "scope": "public",

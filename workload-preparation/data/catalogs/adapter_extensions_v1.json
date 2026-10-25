@@ -2,6 +2,17 @@
   "version": "adapter-extensions/v1",
   "boundary": "Field contracts from publisher metadata/docs. No real source payload downloaded or full adapter validation claimed.",
   "adapters": {
+    "STSB": {
+      "kind": "task_dataset",
+      "mapping": "stsb_original_pairs",
+      "input_fields": ["sentence1", "sentence2"],
+      "required_fields": ["split", "genre", "dataset", "year", "sid", "score", "sentence1", "sentence2"],
+      "outcome_fields": ["score"],
+      "annotation_fields": ["split", "genre", "dataset", "year", "sid"],
+      "id_field": "",
+      "requirements": ["Original Sentence Transformers EmbeddingSimilarityEvaluator; never a chat request"],
+      "status": "ORIGINAL_SENTENCE_PAIR_CONTRACT_NATIVE_VALIDATION_PENDING"
+    },
     "BEIR_SCIFACT": {
       "kind": "task_dataset", "mapping": "beir_original_assets",
       "input_fields": [], "required_fields": ["native_asset_type", "original_row"],
