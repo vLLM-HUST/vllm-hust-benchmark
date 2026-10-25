@@ -8,6 +8,14 @@ DATA = ROOT / "reports/frontierscience-native018-paired-20261025"
 
 
 def test_packet_hashes_and_full_denominators():
+    runtime_raw = (DATA / "b0-runtime-identity.json").read_bytes()
+    assert (
+        hashlib.sha256(runtime_raw).hexdigest()
+        == "1bce4f4e86ff2a8fc0cef361bffd2e01872d1d58d4ddffacaf7fc1441b2ed2d9"  # pragma: allowlist secret
+    )
+    runtime = json.loads(runtime_raw)
+    assert runtime["vllm_version"] == runtime["ascend_version"] == "0.18.0"
+    assert runtime["argv"][runtime["argv"].index("--max-model-len") + 1] == "32768"
     for line in (DATA / "SHA256SUMS").read_text().splitlines():
         sha, name = line.split(maxsplit=1)
         assert (
