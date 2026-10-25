@@ -281,6 +281,14 @@ def test_frozen_native_receipt_retains_original_tool_history_not_online_claim():
     assert binding["runtime_files_match_prior_deployable_artifact"] == 6
     assert "chat_template.jinja" in binding["files"]
     assert binding["saved_prompts_reproduced"] == 15 and binding["new_model_calls"] == 0
+    additional = receipt["additional_latest_entry_native_validation"]
+    assert additional["selected_original_rows"] == [3, 4, 5]
+    assert additional["native_requests"] == 15
+    assert additional["finish_reasons"] == {"stop": 14, "length": 1}
+    assert additional["actual_tokenizer_files_guarded_before_and_after"] == 6
+    assert additional["original_rows0to2_not_rerun"] is True
+    assert additional["budget_terminated_output_retained_without_retry"] is True
+    assert additional["source_count_increment"] == 0
     for key in (
         "quality_or_function_correctness_claim",
         "publisher_model_or_bfcl_replication_claim",
