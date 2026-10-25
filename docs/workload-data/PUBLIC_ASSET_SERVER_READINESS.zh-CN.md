@@ -903,6 +903,23 @@ python scripts/run_historical_dialogue_original.py ULTRACHAT \
 
 ToolACE原始语料准备与核验（仅在服务器执行）：
 
+原始历史续写入口（新入口目前仅软件夹具通过，真实NPU验证待补）：
+
+```bash
+python scripts/run_toolace_original_continuation.py \
+  --data-root /private/original-TOOLACE --tokenizer /private/existing-model-tokenizer \
+  --output /private/fresh-toolace-original-continuation \
+  --model YOUR_DEPLOYED_LOCAL_MODEL --context-capacity YOUR_VERIFIED_CONTEXT --count 3
+```
+
+默认固定原前三条会话、全部原assistant位置；每次保留完整原system及已有user/assistant/tool文本，目标及后续不入输入。
+采用所选本地模型自己的`apply_chat_template`生成原始文本补全，不给历史tool返回伪造`tool_call_id`，不补造`tools`字段或可执行工具。
+请求不是原始API捕获，也不是在线Agent；tool消息是既有历史数据，不随本次预测动态执行。512为具名续写预算，可显式配置；不是原API预算复原。
+本地tokenizer只读、禁止下载/remote-code；逐次与真实服务token计数一致性及完整上下文检查，前后核对原文件与tokenizer身份。
+空输出、预算终止和模型错误原样保留；没有该训练语料专属的官方质量评分，不将BFCL成绩或工具学习模型论文结论套用到本接通测试。
+[发布方模型用例](https://huggingface.co/Team-ACE/ToolACE-8B)展示ToolACE-8B的聊天模板函数生成；优先用合适的发布方模型，资源/权重不具备时可声明具名本地模型回退，不称论文或模型效果复现。
+运行客户端需兼容该本地模型的Transformers/Tokenizer；这里只做CPU分词，实际模型生成必须由获授权NPU服务完成，不能在CPU或宿主执行工具。
+
 新增入口的CI只运行CPU软件夹具、模拟传输/进程和数据包安装检查，不执行下述真实数据或模型命令。 历史对话、QReCC、MBPP、Mooncake与ToolACE测试在data
 extra环境覆盖格式路径；源码目录之外的安装核验会拒绝editable/egg伪装。 CI工件仅含软件wheel及校验元数据，不包含原始数据、权重、预测或研究观测；不能以CI通过代替服务器原生运行。
 
