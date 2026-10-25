@@ -1,0 +1,68 @@
+{
+  "schema": "m01-corrected-quality-public/v1",
+  "quality": {
+    "B0": {
+      "correct": 151,
+      "total": 200,
+      "reused": true,
+      "runtime": "official vLLM0.18 + Ascend0.18"
+    },
+    "corrected_KV_reference": {
+      "correct": 143,
+      "total": 200,
+      "failed_requests": 0,
+      "quality_gate_passed": false,
+      "valid_scored_result": true
+    },
+    "current_corrected_B1": {
+      "correct": 156,
+      "total": 200,
+      "failed_requests": 0,
+      "quality_gate_passed": true,
+      "actual_controls_passed": true,
+      "original_controller_receipt": "failed; preserved",
+      "derived_adjudication": "Python capture-event predicate corrected for actual FULL graph replay; independently replayed byte-identical result"
+    }
+  },
+  "own_metrics": {
+    "B0": {
+      "F": 1829161955258989,
+      "T_seconds": 238.12670116312802,
+      "C_TFLOPS_per_chip": 3.840732572879189
+    },
+    "B1": {
+      "F": 1812905151088034,
+      "T_seconds": 127.59352582134306,
+      "C_TFLOPS_per_chip": 7.1042207644080255
+    },
+    "C_gain_percent": 84.97046148366367,
+    "reference_eta_admitted": false
+  },
+  "reference": {
+    "C_ref_TFLOPS_per_chip": null,
+    "T_ref_seconds": null,
+    "eta_percent": null,
+    "attainment": null,
+    "status": "independent_calibration_and_applicability_pending",
+    "shared_implementation_allowed": true,
+    "existing_B1_timing_used_as_denominator": false
+  },
+  "quality_output_limit": 8192,
+  "own_compute_output_limit": 256,
+  "evidence": {
+    "profiling-quality-and-reference-disposition-r1.json": "71566b42985566fc7cb572712b17e004bb37fffbc1c76ddd48036432e2e2e43c",
+    "standalone-b1-quality-derived-adjudication-r1.json": "a0789db3dfff2bda0bf0570daf53dcfbffb80698edd47b1a4dffba6ca944cf21",
+    "profiling-independent-b1-quality-adjudication-r1.json": "a0789db3dfff2bda0bf0570daf53dcfbffb80698edd47b1a4dffba6ca944cf21",
+    "profiling-qkv-r4-quality-audit.json": "d5f32d99c7189f34c96f555ec8aa4e5005e08a77325b280dc61fbdb18b49f803",
+    "current-b1-quality-graph-binding-source-review-r1.json": "c7a0926ebf656ba0b8830a293e039fc3e0018f3a15482ca93d213a09dc7c882c",
+    "paired-own-metrics-closed-r2.json": "2b73f3c8a79a80a4fce4e4d3f26fbb6070992659f5057d1a2ad0b49e4710d503",
+    "receipt.json": "eb3511b809ff1c702f8f655efe415580ff575fe04de89c403f63c53b9a9102b4",
+    "B1_summary": "80135f9b72ea444e83dd908b8839f362ee802baf426d8046482374ab963a5003",
+    "B1_original_failed_receipt": "133cb7d68ab30f487215afbf930e5b86f22bc4c3f6b5c081d04f0f84f3648c7c",
+    "KV_summary": "2327178385199453ec1073ae143fa2c9b60a4b3cbe406ff95f3e266a27075bd8",
+    "KV_original_failed_receipt": "a3d074785e6259e1c3490a74bbe3417c2bedac57d1c099bbaf11b562716f4e32"
+  },
+  "scope": "Fixed C200 point estimate, not full-corpus quality or statistical noninferiority. Original failed receipts preserved; derived control correction does not change scores. Raw questions and answers are private.",
+  "method_revision": "V2 permits shared implementation, independently calibrated. The earlier additional requirement for independent implementation or proven capability upper bound is not retained.",
+  "source_status_sha256": "9bf1803b9b3102b808c95c9c4f2f80b88835613d9519943890de70726aac69fa"
+}
