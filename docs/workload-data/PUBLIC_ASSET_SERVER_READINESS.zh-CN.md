@@ -875,7 +875,23 @@ OASST/准备恢复回归测试，服务器真实原始记录验证尚未完成�
 本轮验证小型 JSONL 与嵌套 Parquet 软件夹具的绑定、准备和恢复，使用已安装的可选数据依赖。CI 安装数据包的 data extra
 同样覆盖此格式测试。实际作者文件、服务器依赖及原生续写仍待验证，不能以格式夹具测试冒充真实数据验证。
 
-InfiniteBench 的作者代码身份及静态前检：
+MBPP 的固定发布资产准备入口（仅在服务器执行）：
+
+```bash
+python scripts/prepare_mbpp_original_assets.py --output /private/fresh-mbpp-assets
+python scripts/prepare_mbpp_original_assets.py --output /private/fresh-mbpp-assets --resume
+python scripts/prepare_mbpp_original_assets.py --output /private/fresh-mbpp-assets --verify-only
+```
+
+固定 Google Research 发布的 HF 版本 `4bb6404fdc6cacfda99d4ac4205087b89d32030c`，完整保留 full/sanitized 两个配置各自
+train/test/validation/prompt 及 README，9文件360549字节；不下载模型或运行代码。
+[作者协议](https://github.com/google-research/google-research/blob/f46ca8374b4cddef97ca4208ad986049d74d296a/mbpp/README.md)
+指定原任务ID 11–510用于测试、1–10作为提示候选，论文使用2/3/4作三示例。不能把 few-shot 任务并入测试，不能把 full的500题与sanitized的257题混报，
+也不能因预测失败改换版本或任务。HF字段与GitHub原JSONL的逐项保真仍待服务器核验。
+后续生成必须明确采用的配置、作者提示协议与预算，当前尚未实现生成入口；执行代码必须在受验证的独立沙箱中，不能在宿主或推理服务环境直接exec预测。
+替换为EvalPlus增强测试需另列协议，不得当作原三测试同配置。当前只有发布元数据和无数据的软件夹具，来源仍不勾选。
+
+InfiniteBench 作者代码身份与静态前检命令：
 
 ```bash
 git clone https://github.com/OpenBMB/InfiniteBench.git /path/to/official-infinitebench
