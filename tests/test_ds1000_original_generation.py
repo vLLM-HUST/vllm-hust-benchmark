@@ -140,8 +140,8 @@ def test_handoff_keeps_original_budget_limit_and_no_score():
     # Frozen historical runner identity is not the hash of later range support.
     assert (
         receipt["public_runner_sha256"]
-        == "3b4bcfd07d9c7fa288d3ccdc3d88287ce92d7bb7a9e573e6f84bf6a52d282675"
-    )  # pragma: allowlist secret - historical public runner checksum
+        == "3b4bcfd07d9c7fa288d3ccdc3d88287ce92d7bb7a9e573e6f84bf6a52d282675"  # pragma: allowlist secret - historical public runner checksum
+    )
     assert receipt["postprocess_only_after_full_generation"] is True
     assert (
         receipt["generated_code_executed"] is False
