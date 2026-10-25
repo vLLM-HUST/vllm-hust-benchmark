@@ -704,6 +704,10 @@ python scripts/prepare_humaneval_official_samples.py \
 JSONL。completion逐字符保留，不去代码围栏、不修复、不替换失败样本，不重新调用模型。 后续需在独立核验的代码执行沙箱中使用作者固定版本的
 evaluate_functional_correctness
 和原始问题文件评分。不能在模型服务宿主进程、本机或未验证隔离的环境中执行生成代码。现有机器曾缺少可用Docker/Podman且PID/mount隔离失败，此历史阻塞不能视为新实例当前检查结果。
+
+2026-10-25补充：替换实例已通过低权限宿主UID65534、独立user/mount/net/PID命名空间、chroot、只读运行库和清空capability探针；不暴露宿主数据、root、proc或NPU设备。使用`unshare --propagation unchanged`避免其默认传播处理失败，不再以缺少Docker/Podman判定不能隔离执行。已复用原HumanEval/0、/1、/2完整生成文本，按原作者`evaluate_functional_correctness`、3秒、单worker评分：前两题通过，第三题原样保留语法错误，样本pass@1为2/3；无新模型调用，不是164题全套成绩。见[实测回执](validation/humaneval-official-namespace-scoring-20261025.json)。一次性launcher误沿用了探针标签，实测回执已明确更正，不据错误标签否认实际代码执行；可复用公共评分启动器和消费闭环尚未交付，因此仍不勾选。
+
+FLORES另已补充英语→德语devtest原3/4/5行NPU生成及原chrF++复核，累计三方向9次生成、6个不同平行行号；见[第三方向回执](validation/flores200-third-direction-native-audit-20261025.json)。这是新增方向验证，不要求把全部语言组合跑完才可交付；当前仍缺公共数据组件/研究消费和环境可复现收口。
 本入口只验证安全的数据准备；尚未核验真实保存结果，也不证明功能测试完成。输出包含生成代码，保留私有，不提交Git。恢复服务器后先复用已有生成物，不重跑模型来替代缺失评分。
 
 FLORES-200 原生入口代码（仅软件夹具验证，真实 NPU 运行待补）：

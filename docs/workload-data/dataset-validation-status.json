@@ -1372,7 +1372,8 @@
     },
     "FLORES200": {
       "native_public_runner": "scripts/run_flores200_original.py",
-      "native_runner_validation_scope": "English-to-French and English-to-Simplified-Chinese original devtest positions0/1/2 completed on NPU and author primary chrF++ re-scored; source/target rows equal. Not all languages, spBLEU or fixed-artifact consumer closure; three unsupported language codes not substituted.",
+      "native_runner_validation_scope": "English-to-French/Chinese original devtest0/1/2 plus English-to-German original3/4/5: nine NPU translations, six unique parallel positions, primary chrF++ re-scored. All-language coverage not claimed; three unsupported codes not substituted. Consumer/client closure pending.",
+      "additional_native_direction_audit": "docs/workload-data/validation/flores200-third-direction-native-audit-20261025.json",
       "native_profile_audit": "docs/workload-data/validation/flores200-two-profile-native-audit-20261025.json",
       "runtime_pip_check_exit_code": 1,
       "runtime_pip_check_boundary": "Native profiles succeeded but global pip metadata reports missing visible CANN compiler/profiler tool dependencies; no clean-environment claim or blind bulk installation",
@@ -1635,16 +1636,17 @@
     },
     "HUMANEVAL": {
       "historical_generation_reuse_preparer": "scripts/prepare_humaneval_official_samples.py",
-      "historical_generation_reuse_validation_scope": "software fixtures only; original completion text and identities preserved, no new model calls; official functional scoring still blocked on verified isolation",
+      "historical_generation_reuse_validation_scope": "Real server reused exact original completions and executed unchanged author functional evaluator in verified user/mount/network/PID namespace plus chroot. Original0/1 passed, original2 syntax failure retained; no new model calls. Public reusable scorer/consumer closure pending.",
       "scope": "public",
       "delivery_kind": "review_original_source_protocol",
-      "status": "BLOCKED",
+      "status": "IN_PROGRESS",
       "checked": false,
       "legacy_checked": false,
       "existing_receipt": "docs/workload-data/validation/humaneval-original-generation-npu-20261023.json",
       "delivery_receipt": null,
       "isolation_preflight": "docs/workload-data/validation/code-execution-isolation-preflight-20261024.json",
-      "blocker": "Current server: user/network namespace works, mount/PID isolation and private bubblewrap noop fail with permission denied; no Docker/Podman/socket. Existing completions retained; official functional evaluation not executed, no unsafe host-code fallback."
+      "native_functional_scoring_receipt": "docs/workload-data/validation/humaneval-official-namespace-scoring-20261025.json",
+      "blocker": "Historical namespace failure is superseded: replacement server passes private namespace/chroot negative probes after disabling unshare default propagation and using low host UID65534. Three original tasks officially scored, including unchanged syntax failure. Reusable public isolated scorer, dependency contract and fixed-artifact/research handoff pending; keep unchecked."
     },
     "MBPP": {
       "scope": "public",

@@ -8,6 +8,38 @@ ROOT = Path(__file__).resolve().parents[1]
 DOCS = ROOT / "docs/workload-data"
 
 
+def test_humaneval_real_official_scoring_retains_failure_and_delivery_gap():
+    ledger = json.loads((DOCS / "dataset-validation-status.json").read_text("utf-8"))
+    row = ledger["delivery_inventory"]["HUMANEVAL"]
+    receipt = json.loads(
+        (ROOT / row["native_functional_scoring_receipt"]).read_text("utf-8")
+    )
+    assert row["status"] == "IN_PROGRESS" and not row["checked"]
+    assert receipt["generated_code_executed"]
+    assert receipt["passed_by_original_task_order"] == [True, True, False]
+    assert receipt["official_pass_at_1"] == 2 / 3
+    assert receipt["new_model_calls"] == 0
+    assert not receipt["failure_replaced_or_repaired"]
+    assert not receipt["official_evaluator_modified"]
+    assert receipt["isolation_probe"]["host_uid"] == 65534
+    assert receipt["isolation_probe"]["no_new_privs"]
+    assert not receipt["source_checkbox_eligible"]
+
+
+def test_flores_third_direction_is_new_positions_not_duplicate_sample_count():
+    receipt = json.loads(
+        (
+            DOCS / "validation/flores200-third-direction-native-audit-20261025.json"
+        ).read_text("utf-8")
+    )
+    assert receipt["original_indices"] == [3, 4, 5]
+    assert receipt["total_completed_model_calls_across_three_directions"] == 9
+    assert receipt["unique_parallel_sentence_positions_across_three_directions"] == 6
+    assert receipt["original_inputs_and_references_equal"]
+    assert receipt["new_model_calls_by_audit"] == 0
+    assert not receipt["source_checkbox_eligible"]
+
+
 def test_burstgpt_scaled_tool_audit_does_not_claim_original_timing_or_private_prompts():
     receipt = json.loads(
         (DOCS / "validation/burstgpt-scaled-tool-progress-20261025.json").read_text(
@@ -1207,7 +1239,8 @@ def test_existing_37_audit_checkmarks_do_not_mean_native_delivery():
     snapshot = ledger["existing_37_review"]["comparison_snapshot"]
     assert (
         # pragma: allowlist nextline secret - public source revision
-        snapshot["benchmark_main_sha"] == "140a046d34ecf50bb8de3d8b19a7d70a6b0490e0"
+        snapshot["benchmark_main_sha"]
+        == "140a046d34ecf50bb8de3d8b19a7d70a6b0490e0"
     )
     assert snapshot["benchmark_pr_stack_state"] == "All six PRs open Draft and unmerged"
     assert (
