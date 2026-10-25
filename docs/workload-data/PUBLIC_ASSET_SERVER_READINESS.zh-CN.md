@@ -617,6 +617,12 @@ manifest执行pipeline/resolve。输入只包含原`Question`与按作者seed0�
 
 # 历史准备能力补迁：LongAlpaca、NQ-open 与 DuReader demo
 
+JSONSchemaBench
+环境前检：`python scripts/probe_jsonschemabench_environment.py`。只读已安装分发版本，与固定作者requirements分别列出“缺失”“版本不同”“版本一致”，不安装、不给版本不同直接下不兼容结论，也不执行可选后端或调用模型。
+当前本地核对缺少核心路径需要的dacite、prettytable，另缺工作流依赖stopit；因此此前模拟Engine测试不能升级为实际作者模块调用链通过。此结论仅针对本地软件环境，不代表服务器环境现状。
+作者core初始化会自动导入其他后端，完整环境还须按原安装方式核验可选引擎依赖，不能只装几项核心包就宣称bench可跑。需在服务器独立客户端环境处理，禁止为匹配作者CPU客户端torch版本而替换正在服务的Ascend
+torch/torch-npu栈。
+
 JSONSchemaBench 作者Engine扩展（尚非完整运行入口）：`scripts/jsonschemabench_local_engine.py` 的 `create_engine`。
 遵循[作者自定义后端接口](https://github.com/epfl-dlab/JSONSchemaBench/blob/8003e8405c4d8d8b327b1eb472c9856297d75493/docs/custom_engine.md)，接收固定版本
 core.engine/core.types、显式本地模型配置、已禁用自动重试的loopback客户端及真实消息分词计数器。
