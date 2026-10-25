@@ -3,6 +3,7 @@ name: Workload data CPU correctness smoke
 on:
   pull_request:
     paths:
+      - '.gitignore'
       - 'workload-preparation/**'
       - 'src/vllm_hust_benchmark/workload_data.py'
       - 'src/vllm_hust_benchmark/workload_response_validation.py'
@@ -197,7 +198,7 @@ jobs:
           python -m pytest -q tests/test_workload_wheel_audit.py
           python scripts/audit_workload_data_wheel.py --wheel workload-data-dist/vllm_hust_workload_data-0.1.0-py3-none-any.whl > workload-data-dist/PAYLOAD_AUDIT.json
       - name: Single-ledger delivery progress invariants
-        run: python -m pytest -q tests/test_workload_delivery_progress.py
+        run: python -m pytest -q tests/test_workload_delivery_progress.py tests/test_workload_private_artifacts.py
       - name: Publish validated software wheel, never datasets
         uses: actions/upload-artifact@v4
         with:

@@ -1,6 +1,7 @@
 """Software transport fixtures only, not original dataset/model/scorer runs."""
 
 import importlib.util
+import hashlib
 import json
 from pathlib import Path
 import sys
@@ -31,7 +32,18 @@ def fixture(tmp_path, *, tokens=10, fail=False):
         if fail:
             raise RuntimeError("fixture transport failure")
         return NS(
-            choices=[NS(finish_reason="stop", message=NS(content="fixture prediction"))]
+            choices=[
+                NS(finish_reason="stop", message=NS(content="fixture prediction"))
+            ],
+            model_dump=lambda **_: {
+                "choices": [
+                    {
+                        "finish_reason": "stop",
+                        "message": {"content": "fixture prediction"},
+                    }
+                ],
+                "usage": {"prompt_tokens": 10, "completion_tokens": 5},
+            },
         )
 
     utils = NS(
@@ -72,6 +84,20 @@ def test_original_positions_budget_prompt_and_scorer_preserved(tmp_path):
         row["context"] for row in rows[:3]
     ]
     assert all("private reference" not in json.dumps(call) for call in calls)
+    assert result["attempted_original_positions"] == [0, 1, 2]
+    assert len(result["private_protocol_records"]) == 3
+    for item in result["private_protocol_records"]:
+        index = item["row_index"]
+        request = kwargs["output"] / f"row-{index}.request-private.json"
+        response = kwargs["output"] / f"row-{index}.response-private.json"
+        assert (
+            hashlib.sha256(request.read_bytes()).hexdigest() == item["request_sha256"]
+        )
+        assert (
+            hashlib.sha256(response.read_bytes()).hexdigest() == item["response_sha256"]
+        )
+        assert json.loads(request.read_text()) == calls[index]
+        assert json.loads(response.read_text())["usage"]["completion_tokens"] == 5
 
 
 def test_oversized_context_is_not_trimmed_or_replaced(tmp_path):
@@ -145,6 +171,9 @@ def test_failure_on_second_row_preserves_first_and_never_skips(tmp_path):
     receipt = json.loads((kwargs["output"] / "receipt-private.json").read_text())
     assert receipt["selected_original_positions"] == [0, 1, 2]
     assert receipt["completed_original_positions"] == [0]
+    assert receipt["attempted_original_positions"] == [0, 1]
+    assert receipt["private_protocol_records"][1]["response_sha256"] is None
+    assert (kwargs["output"] / "row-1.request-private.json").is_file()
     assert not receipt["native_execution_complete"]
 
 
@@ -152,7 +181,10 @@ def test_failure_on_second_row_preserves_first_and_never_skips(tmp_path):
 def test_invalid_model_response_is_not_success(tmp_path, reason, content):
     rows, kwargs, _ = fixture(tmp_path)
     kwargs["client"].chat.completions.create = lambda **_: NS(
-        choices=[NS(finish_reason=reason, message=NS(content=content))]
+        choices=[NS(finish_reason=reason, message=NS(content=content))],
+        model_dump=lambda **_: {
+            "choices": [{"finish_reason": reason, "message": {"content": content}}]
+        },
     )
     with pytest.raises(ValueError, match="unsuccessful"):
         runner.execute(rows, **kwargs)

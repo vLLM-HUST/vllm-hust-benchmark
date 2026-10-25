@@ -6,6 +6,7 @@ No context truncation, task substitution, automatic retry or performance claim.
 """
 
 import argparse
+import hashlib
 import importlib
 import json
 import math
@@ -62,6 +63,8 @@ def execute(
         "full_selection": full,
         "max_new_tokens": budget,
         "completed_original_positions": [],
+        "attempted_original_positions": [],
+        "private_protocol_records": [],
         "native_execution_complete": False,
         "source_checkbox_eligible": False,
         "task_truncation": False,
@@ -94,9 +97,37 @@ def execute(
                         "complete original context plus author budget does not fit; no trimming"
                     )
                 label = utils.get_answer(row, task)
-                response = client.chat.completions.create(
+                body = dict(
                     model=model, messages=messages, max_tokens=budget, temperature=0
                 )
+                request_path = output / f"row-{index}.request-private.json"
+                request_path.write_text(
+                    json.dumps(body, ensure_ascii=False) + "\n", encoding="utf-8"
+                )
+                protocol = {
+                    "row_index": index,
+                    "preflight_input_tokens": tokens,
+                    "request_sha256": hashlib.sha256(
+                        request_path.read_bytes()
+                    ).hexdigest(),
+                    "response_sha256": None,
+                }
+                receipt["private_protocol_records"].append(protocol)
+                receipt["attempted_original_positions"].append(index)
+                save()
+                response = client.chat.completions.create(**body)
+                response_path = output / f"row-{index}.response-private.json"
+                response_path.write_text(
+                    json.dumps(response.model_dump(mode="json"), ensure_ascii=False)
+                    + "\n",
+                    encoding="utf-8",
+                )
+                protocol["response_sha256"] = hashlib.sha256(
+                    response_path.read_bytes()
+                ).hexdigest()
+                save()
+                if len(response.choices) != 1:
+                    raise ValueError("one original completion choice required")
                 choice = response.choices[0]
                 if choice.finish_reason not in {"stop", "length"} or not isinstance(
                     choice.message.content, str

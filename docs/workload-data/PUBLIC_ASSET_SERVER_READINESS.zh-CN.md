@@ -617,6 +617,9 @@ manifest执行pipeline/resolve。输入只包含原`Question`与按作者seed0�
 
 # 历史准备能力补迁：LongAlpaca、NQ-open 与 DuReader demo
 
+私有产物防误提交：`.private.json`、`.private.jsonl`、`-private.json`、`-private.jsonl`及`.private-error.txt`后缀已加入Git忽略规则；现有`workload-runs/`仍整体忽略。此规则不清理、不取消跟踪已有文件，也不替代权限审查；原始数据仍须外置，禁止强制提交私有产物。
+InfiniteBench运行入口逐原始位置先保存完整请求及预检token数，再保存完整响应和两者摘要；尝试与完成位置分开记录，API失败时保留请求且响应摘要为null。文件名为`row-N.request-private.json`、`row-N.response-private.json`，仅供服务器私有复核，不代表新增原生运行证据。
+
 DS-1000历史结果复用（不执行code_context或生成代码）：
 
 ```bash
