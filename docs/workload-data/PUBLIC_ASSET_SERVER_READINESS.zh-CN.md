@@ -865,15 +865,38 @@ python scripts/run_historical_dialogue_original.py WILDCHAT \
 模型别名必须与现有本地 NPU 服务一致，容量必须与真实部署一致；命令不负责部署模型或判定设备归属。 服务器执行前先确认研究线程释放资源。仅连接本机 `/v1`
 接口；先完整分词再生成，不截断、重试或换题。 默认按准备清单中的文件顺序取前三条原始会话，对每条执行全部原始续写位置；`--full` 为准备清单选定文件的全部会话，
 不是整个来源所有分片。未准备的分片、其他协议不纳入通过范围。完整数据文件身份在执行前后复核，失败保留私有记录。 `length`
-终止单独标为预算耗尽，不作为质量通过。原始历史、参考回答、预测只进入服务器私有输出；公开汇报只提取必要计数与身份摘要。 当前仅完成软件夹具及
-OASST/准备恢复回归测试，服务器真实原始记录验证尚未完成，三个来源均不新增完成勾选。
+终止单独标为预算耗尽，不作为质量通过。原始历史、参考回答、预测只进入服务器私有输出；公开汇报只提取必要计数与身份摘要。
+UltraChat已完成真实test_gen文件全28304条字段/索引核验，固定前三会话全部7个原assistant位置完成双NPU续写，全部stop； 精确44e24f46 CI
+wheel安装载荷核对及首尾6条公共/研究回查通过。见[原生续写及消费证据](validation/ultrachat-original-continuation-20261026.json)。
+这是历史语料续写，无质量评分，不是在线Agent或原始API捕获；不覆盖其他7个UltraChat分片、全量模型生成或另外两个来源。
+
+UltraChat可使用相同入口，明确选择原发布文件，不转换对话内容：
+
+```bash
+python scripts/prepare_reused_research_assets.py ULTRACHAT --mode download \
+  --data-root /private/original-ultrachat \
+  --files data/test_gen-00000-of-00001-3d4cd8309148a71f.parquet \
+  --max-bytes 100000000
+python scripts/prepare_reused_source_records.py ULTRACHAT \
+  --data-root /private/original-ultrachat --output /private/fresh-ultrachat-prepared \
+  --files data/test_gen-00000-of-00001-3d4cd8309148a71f.parquet
+python scripts/run_historical_dialogue_original.py ULTRACHAT \
+  --prepared /private/fresh-ultrachat-prepared \
+  --data-root /private/original-ultrachat --output /private/fresh-ultrachat-continuation \
+  --model workload-qwen35-27b-128k-nonthinking \
+  --max-tokens 2048 --context-capacity 131072 --count 3
+```
+
+服务器已验证独立Python3.12.13/PyArrow23.0.1读取客户端和Qwen3.5-27B BF16双Ascend910B2服务。
+获取默认使用发布方官方站；若网络不可达，允许显式`--hf-endpoint https://hf-mirror.com`，仍核验同一原文件版本/长度/摘要。
+已有原文件先`--mode verify`，不要重复下载；本仓和CI均不附带原始数据。换模型需核验真实上下文和端点配置，不改原会话。
 
 新增历史视图后的数据包已与研究仓现有十组消费夹具检查兼容：87通过、5跳过。 使用精确新 wheel 的 ZIP 导入，核对实际导入路径并确认研究仓依赖锁未改；5项正式安装验收跳过，不能算安装完成。
 具体工件、研究提交及验证摘要见
 [新版数据包兼容性回执](validation/research-dialogue-candidate-fixture-20261025.json)。这不代替服务器原始数据或原生执行验证。
 
 本轮验证小型 JSONL 与嵌套 Parquet 软件夹具的绑定、准备和恢复，使用已安装的可选数据依赖。CI 安装数据包的 data extra
-同样覆盖此格式测试。实际作者文件、服务器依赖及原生续写仍待验证，不能以格式夹具测试冒充真实数据验证。
+同样覆盖此格式测试。UltraChat上述具名协议已有真实证据；WildChat/LMSYS原始文件与原生续写仍待验证，不能用UltraChat或格式夹具代替。
 
 ToolACE原始语料准备与核验（仅在服务器执行）：
 

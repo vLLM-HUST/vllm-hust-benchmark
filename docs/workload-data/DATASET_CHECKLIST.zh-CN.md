@@ -5,10 +5,10 @@
 2026-10-25补充复核：原37项复核与研究人员七批23项成果去重为46个有历史获取/准备/验证记录的来源（含本轮仅分类项及受限子集，不是46个完整benchmark）。其中此前遗漏的8项已有48份原文件身份，本轮已复用固定版本、URL与校验和，并提供统一离线计划/原文件校验入口；没有重新下载9.51GB原数据，也未复制研究特征、观测或分析。详见[复用审计](validation/research-acquisition-reuse-audit-20261025.json)。这些来源改标“历史资产已复用、原生待补”，不再用“未开始”掩盖已有成果；准备映射、原生执行和固定工件消费未收口前，完成勾保持不勾。
 
 40 类共登记 110 个公开来源、8 份企业资产，合计 118 项；五个指定来源只分类，本轮推进 113 项。下方历史 19
-个勾保留，不自动提升为本轮完成，也不要求已验证项目重复跑。当前交付可用36/113项、77项待补：2项服务轨迹资产、23项原任务/固定评测协议交付（BBH、MATH500、GSM8K、AI2-ARC、NI登记任务、BFCL登记类别、QuALITY原NYU多选集成、LongBench登记Qasper200、tau2登记telecom_full、LoCoMo完整上下文文本QA、RULER原13种任务集成、GPQA原三split
+个勾保留，不自动提升为本轮完成，也不要求已验证项目重复跑。当前交付可用37/113项、76项待补：2项服务轨迹资产、23项原任务/固定评测协议交付（BBH、MATH500、GSM8K、AI2-ARC、NI登记任务、BFCL登记类别、QuALITY原NYU多选集成、LongBench登记Qasper200、tau2登记telecom_full、LoCoMo完整上下文文本QA、RULER原13种任务集成、GPQA原三split
 zero-shot集成、BEIR
 SciFact/NFCorpus原检索与重排、STSB原句对相似度、XLSUM原45变体摘要、LibriSpeech原完整波形抽样ASR、XSum原BART抽样摘要、Multi-News原PEGASUS多文档抽样摘要、BillSum发布方HF原法案抽样摘要、HumanEval原三题功能评分、DS1000七库24题评分、MBPP
-full原三题CodeEval评分）、Dolly、OASST1与LongWriter三项语料及8份私有企业请求语料。并非36个带官方质量评分的完整benchmark，边界见逐项回执。
+full原三题CodeEval评分）、Dolly、OASST1、LongWriter及UltraChat四项语料及8份私有企业请求语料。并非37个带官方质量评分的完整benchmark，边界见逐项回执。
 
 完成要求以主方案第零节及机器清单 delivery_contract 为准：原题、完整原生流程与适用评分必须跑通；每个独立协议预计执行和评分不超过 30
 分钟则全跑，否则事前固定至少三条，不足则全跑。不得改题、删工具、截断或缩减原生预算，失败不得换题。资源不足保留未勾并记阻塞；模型答错不等于链路失败。服务轨迹无原始请求回放入口时，只能交付数据资产，不能编
@@ -86,7 +86,7 @@ TB；服务器/data约1.42TB可用，未缩小语料。ChartQA当前两卡主机
 | WILDCHAT                   | [ ] 历史资产已复用    | 已复用研究原14文件的版本/URL/校验和，支持离线计划与原文件只读校验；服务器路径、准备映射、原生执行/评分和固定消费待补。不是重新取数，不提前勾选。                                                                                                                                    |
 | LMSYS_CHAT                 | [ ] 历史资产已复用    | 已复用研究原6文件的版本/URL/校验和，支持离线计划与原文件只读校验；服务器路径、准备映射、原生执行/评分和固定消费待补。不是重新取数，不提前勾选。                                                                                                                                     |
 | OASST1                     | [x] 原始会话语料可用  | 两split原资产、88838行字段核对及各三点历史续接/安装包prepare→resolve通过。[交付回执](validation/oasst-corpus-delivery-20261024.json)；无官方质量评分、非实时会话、非全量生成                                                                                                        |
-| ULTRACHAT                  | [ ] 历史资产已复用    | 已复用研究原8文件的版本/URL/校验和，支持离线计划与原文件只读校验；服务器路径、准备映射、原生执行/评分和固定消费待补。不是重新取数，不提前勾选。                                                                                                                                     |
+| ULTRACHAT                  | [x] 原始历史续写可用  | 复用原适配/准备入口；原test_gen28304条完整字段/索引核验，前三会话全部7处NPU续写正常stop，首尾6处固定工件公共/研究回查一致；[证据](validation/ultrachat-original-continuation-20261026.json)。发布方合成历史语料，无质量评分；不是在线Agent，其他7分片/全量模型推理未验证。          |
 | DOLLY                      | [x] 原请求语料可用    | 八原类别各三条共24条生成/完整性及固定版本CI、安装回核通过。[交付回执](validation/dolly-request-corpus-delivery-20261024.json)；非15011条全量，无官方语义评分                                                                                                                        |
 | GSM8K                      | [x] 原生抽样交付      | 复用204/1319唯一原题执行评分；固定CI组件核对完整原资产及输入/参考隔离、保存原生结果回查。[交付回执](validation/gsm8k-native-delivery-20261024.json)；支持原生全量，未全跑、跨配置不汇总分数                                                                                         |
 | MATH500                    | [x] 原生抽样交付      | H4原前三题完整4轮及评分完成；固定CI wheel全500条字段、3条往返及三项CI通过。[交付回执](validation/math500-native-delivery-20261024.json)；非全500题，不冒充独立裁判质量认证                                                                                                          |
