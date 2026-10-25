@@ -869,6 +869,9 @@ python scripts/run_historical_dialogue_original.py WILDCHAT \
 UltraChat已完成真实test_gen文件全28304条字段/索引核验，固定前三会话全部7个原assistant位置完成双NPU续写，全部stop； 精确44e24f46 CI
 wheel安装载荷核对及首尾6条公共/研究回查通过。见[原生续写及消费证据](validation/ultrachat-original-continuation-20261026.json)。
 这是历史语料续写，无质量评分，不是在线Agent或原始API捕获；不覆盖其他7个UltraChat分片、全量模型生成或另外两个来源。
+WildChat现也完成原首分片59857条绑定/索引，原前三会话全部4处NPU续写及3条原字段公共/研究回查；3条stop、1条达到声明2048输出预算，原length响应保留，不称质量通过。
+见[WildChat证据](validation/wildchat-original-continuation-20261026.json)。原日期类型在读取器保留，私有JSON快照沿用既有ISO可移植表示；日期/其他非API标注不作为模型参数。
+其他13个WildChat分片、全量生成及LMSYS原生续写仍未验证。声明预算不是对原API调用参数的复原。
 
 UltraChat可使用相同入口，明确选择原发布文件，不转换对话内容：
 
@@ -896,7 +899,7 @@ python scripts/run_historical_dialogue_original.py ULTRACHAT \
 [新版数据包兼容性回执](validation/research-dialogue-candidate-fixture-20261025.json)。这不代替服务器原始数据或原生执行验证。
 
 本轮验证小型 JSONL 与嵌套 Parquet 软件夹具的绑定、准备和恢复，使用已安装的可选数据依赖。CI 安装数据包的 data extra
-同样覆盖此格式测试。UltraChat上述具名协议已有真实证据；WildChat/LMSYS原始文件与原生续写仍待验证，不能用UltraChat或格式夹具代替。
+同样覆盖此格式测试。UltraChat和WildChat上述具名范围已有真实证据；其他分片与LMSYS原始文件/续写仍待验证，不能以格式夹具代替。
 
 ToolACE原始语料准备与核验（仅在服务器执行）：
 
