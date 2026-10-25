@@ -58,6 +58,26 @@ def build(revision, read=None):
     method_section["tables_en"][0]["rows"][0][1] = (
         "Current round: median of three calibrated wholechain capacities; eta>=90%. Original V1.5 50% remains historical."
     )
+    method_section["source_heading"] = (
+        "原V1.5依据与本轮实施方法 / Original V1.5 and current round method"
+    )
+    method_section["tables"][0]["headers"][1] = "依据及本轮方法"
+    method_section["tables_en"][0]["headers"][1] = "Basis and current round method"
+    method_section["evidence"].insert(
+        0,
+        {
+            "path": METHOD,
+            "kind": "blob",
+            "label": "本轮方法状态 / Current round method",
+        },
+    )
+    method_section["evidence"].append(
+        {
+            "path": REPORT_DIR + "/method-history-index.json",
+            "kind": "blob",
+            "label": "历史方法身份索引 / Historical method identities",
+        }
+    )
     historical = {
         "reference-closure",
         "worker-model",
@@ -86,6 +106,10 @@ def build(revision, read=None):
                 + " These stage-local statuses do not describe current wholechain attainment."
             )
         for e in s.get("evidence", []):
+            if e.get("path", "").endswith("milestone-v15/reuse-audit.json"):
+                e["label"] = (
+                    "整链方法完成前的历史复用快照 / Historical pre-wholechain reuse snapshot"
+                )
             if e.get("path", "").endswith("milestone-v15/method-status.json"):
                 e.update(path=METHOD, label="本轮方法状态 / Current round method")
     resources = sections["resources"]
