@@ -656,6 +656,24 @@ python scripts/prepare_ds1000_official_samples.py \
 作者`test_ds1000.py`还有独立postprocess及test_execution/test_string步骤，须在核验的隔离环境里按原顺序执行，每题独立进程。作者默认驱动遍历1000题，不能将三条answers直接放进去或给其余题填占位答案；固定原始前三题的抽样绑定仍需补齐并验证，不得因此宣布整条执行链完成。
 
 2026-10-25实测补充：原1000题逐条与作者归档相等，原前三题上下文仅需copy/NumPy/Pandas。已在Python3.10.22、NumPy1.26.4、Pandas1.5.3的私有命名空间/chroot中，使用作者原postprocess与eval_ds1000完成评分；原120秒超时、16worker未改，汇总3题均值0.667，失败保留，无新模型调用。抽样通过将作者模块原ds1000全局列表显式绑定为原前三题，未修改作者源文件、code_context、test_execution或适用test_string，未为其他997题填答案。见[实测回执](validation/ds1000-original-pandas-namespace-scoring-20261025.json)。这不是七类库环境或1000题完整运行；公共复用启动器和消费收口仍待补，来源不勾。依赖求解中tqdm4.70.1不支持Python3.10，故仅将作者未固定的tqdm选为4.67.1，不更改作者Python/NumPy/Pandas版本。
+
+随后已将该流程整理为公共入口并完成服务器验证，固定数据组件与研究侧全部1000条原prompt、reference_code、code_context和metadata直接读取相等，原0/1/2行索引解析相等；见[公共Pandas抽样回执](validation/ds1000-public-pandas-profile-20261025.json)。上段消费/入口待补是先前截面，不再作为当前缺口。
+
+```bash
+conda create -y -p /private/ds1000-py310 --override-channels -c conda-forge \
+  python=3.10.22 numpy=1.26.4 pandas=1.5.3 tqdm=4.67.1 pip
+python scripts/run_ds1000_isolated_scoring.py \
+  --author-root /private/DS-1000-b39a \
+  --prepared-dir /private/ds1000-official-prepared \
+  --python-runtime /private/ds1000-py310 \
+  --work-root /private-accessible-parent/new-ds1000-scoring \
+  --sandbox-uid 65534
+```
+
+先按本节准备命令取得私有`prepared-dir`；作者源码固定`b39aab71da6d23ef8d3cac59a7c5f834516ab334`，原Python文件、environment.yml及完整gzip由`configs/workload-native/ds1000-author-scoring-pins.json`核验。需获授权root启动器、专用非0宿主UID及可供该UID遍历的父目录；不要改变共享目录权限。入口复制指定评分环境到私有任务目录并只读挂载为`/opt/python`，不暴露宿主`/data`、模型文件或NPU设备；需要相应服务器磁盘空间，不下载到开发机。公共输出不含候选和错误原文，日志及作者完整汇总留在私有目录。NumPy/Pandas可能来自conda的egg-info，元数据检查兼容标准egg-info/dist-info，不导入候选代码。
+
+**当前仅原前三题Pandas profile可复用。**
+其他任务范围、其余库上下文及作者完整七库环境尚未接通，不把硬编码三题入口当成整个DS1000来源已完成。CI只跑无害准备/错误拒绝夹具，不跑生成代码。
 代码库功能测试按作者环境在CPU上执行，与模型生成使用NPU是两个环节；不得为了运行测试改动模型服务的torch/torch-npu栈。当前只完成软件夹具验证，真实文件复核与官方功能评分均未完成，来源不打勾。
 
 BigCodeBench 历史生成结果复用（不执行生成代码）：

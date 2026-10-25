@@ -2,10 +2,10 @@
   "schema_version": "workload-validation-checklist/v1",
   "updated_at": "2026-10-25",
   "native_runtime_latest": {
-    "status": "REPLACEMENT_HOST_VERIFIED_SAVED_RESULTS_RECOVERED_AND_SMALL_MODEL_NPU_PROFILES_AUDITED",
+    "status": "REPLACEMENT_HOST_VERIFIED_NATIVE_PROFILES_PROGRESS_MODEL_RESTORE_LOADING",
     "last_confirmed_profile_is_not_current_server_health": true,
-    "latest_access_note": "Replacement host fingerprint matched user verification. Shared assets/results preserved; no existing model service or NPU task found at initial check. BurstGPT release3 saved successful results recovered/audited without rerun. Existing NLLB600M environment/weights reused for two original FLORES profiles on NPU. Original Qwen service/old queue not restarted. Remaining historical profile fields are not current service health.",
-    "current_language_model_service": "NOT_RUNNING_AT_REPLACEMENT_INSTANCE_CHECK",
+    "latest_access_note": "Initial replacement-host check found no service/tasks. Three original FLORES NPU profiles, HumanEval and DS1000 isolated functional profiles now audited. Qwen original-profile restoration attempted: first failed on long TMPDIR IPC path; second failed on physical-vs-logical NPU mask. With verified logical0/1 and short TMPDIR, third process183185 is live and loading5/11 weight shards at latest check. Not yet healthy API or successful inference; old queue not resumed. Remaining historical profile fields are not current service health.",
+    "current_language_model_service": "ORIGINAL_PROFILE_PROCESS183185_LOADING_NOT_YET_API_READY",
     "replacement_instance_npu_chip": "Ascend910B2",
     "replacement_instance_visible_npu_count": 2,
     "new_flores_native_model_calls": 9,
@@ -1349,7 +1349,7 @@
     },
     "DS1000": {
       "historical_generation_reuse_preparer": "scripts/prepare_ds1000_official_samples.py",
-      "historical_generation_reuse_validation_scope": "Real saved original first3 completions prepared and author postprocess/eval_ds1000 executed in private namespace/chroot; 3 Pandas tasks, publisher mean0.667, failures and original length termination retained. Zero new model calls. Full1000 source rows match author archive; public reusable scorer and consumer closure pending.",
+      "historical_generation_reuse_validation_scope": "Public original first3 Pandas isolated author scorer verified, mean0.667 and original failures/length termination retained. Full1000 public/research direct records equal, selected3 index resolutions equal through fixed CI provider. Zero new model calls. General task selection and other library environment pending, keep source unchecked.",
       "scope": "public",
       "delivery_kind": "review_original_source_protocol",
       "status": "IN_PROGRESS",
@@ -1359,7 +1359,9 @@
       "delivery_receipt": null,
       "isolation_preflight": "docs/workload-data/validation/code-execution-isolation-preflight-20261024.json",
       "native_functional_scoring_receipt": "docs/workload-data/validation/ds1000-original-pandas-namespace-scoring-20261025.json",
-      "blocker": "Original Pandas first3 official functional workflow executed under verified namespace/chroot. Public reusable sampled scorer and fixed-artifact/research consumption pending. Selected Python3.10/Pandas/NumPy environment does not qualify all7 libraries. Keep unchecked."
+      "public_profile_and_consumer_receipt": "docs/workload-data/validation/ds1000-public-pandas-profile-20261025.json",
+      "native_public_scorer": "scripts/run_ds1000_isolated_scoring.py",
+      "blocker": "Fixed original first3 Pandas public native profile and fixed-provider/research consumption verified. Generalized task/range selection and full author library environment pending. Only a hardcoded profile is available; keep source unchecked."
     },
     "MIND2WEB": {
       "scope": "public",
