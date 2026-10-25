@@ -2,6 +2,20 @@
   "version": "adapter-extensions/v1",
   "boundary": "Field contracts from publisher metadata/docs. No real source payload downloaded or full adapter validation claimed.",
   "adapters": {
+    "BEIR_SCIFACT": {
+      "kind": "task_dataset", "mapping": "beir_original_assets",
+      "input_fields": [], "required_fields": ["native_asset_type", "original_row"],
+      "outcome_fields": [], "annotation_fields": [], "id_field": "",
+      "requirements": ["Original BEIR corpus/query/qrels assets; native dense retrieval and fixed-candidate reranking; asset rows are not chat requests"],
+      "status": "ORIGINAL_ASSETS_MAPPED_NATIVE_INTEGRATION_PENDING"
+    },
+    "BEIR_NFCORPUS": {
+      "kind": "task_dataset", "mapping": "beir_original_assets",
+      "input_fields": [], "required_fields": ["native_asset_type", "original_row"],
+      "outcome_fields": [], "annotation_fields": [], "id_field": "",
+      "requirements": ["Original BEIR corpus/query/qrels assets; native dense retrieval and fixed-candidate reranking; asset rows are not chat requests"],
+      "status": "ORIGINAL_ASSETS_MAPPED_NATIVE_INTEGRATION_PENDING"
+    },
     "XLSUM": {
       "kind": "task_dataset",
       "mapping": "xlsum_original_summary",

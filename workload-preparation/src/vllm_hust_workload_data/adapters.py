@@ -13,6 +13,11 @@ from .registry import adapter_spec, source_spec
 
 def iter_source_rows(path, spec):
     """Use one source view for reading, binding and index resolution."""
+    if spec["mapping"] == "beir_original_assets":
+        from .beir import original_asset_rows
+
+        yield from original_asset_rows(path)
+        return
     if spec["mapping"] == "xlsum_original_summary":
         from .xlsum import original_rows
 
@@ -61,6 +66,10 @@ def adapt_row(
     source_id: str, row: dict, *, source: dict, spec: dict, index: int
 ) -> WorkloadRecord:
     """Projection is explicit/allowlisted; outcome fields never become task inputs."""
+    if spec["mapping"] == "beir_original_assets":
+        from .beir import adapt_asset
+
+        return adapt_asset(row, source=source, index=index)
     if spec["kind"] in {"official_task_suite", "external_runtime_reference"}:
         raise NotImplementedError(
             "official native runner required; no QBI fallback or prompt flattening"

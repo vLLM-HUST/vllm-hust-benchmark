@@ -8,6 +8,47 @@ ROOT = Path(__file__).resolve().parents[1]
 DOCS = ROOT / "docs/workload-data"
 
 
+def test_beir_full_native_and_candidate_consumer_are_not_fixed_ci_completion():
+    native = json.loads(
+        (DOCS / "validation/beir-original-full-native-20261025.json").read_text("utf-8")
+    )
+    assert (
+        len(native["actual_native_protocols"])
+        == len(native["public_rescore_protocols"])
+        == 4
+    )
+    assert native["device"] == "npu:1"
+    for protocol in native["actual_native_protocols"]:
+        assert protocol["status"] == "ORIGINAL_FULL_TEST_EXECUTED_AND_SCORED"
+        match = next(
+            row
+            for row in native["public_rescore_protocols"]
+            if row["source_id"] == protocol["source_id"]
+            and row["protocol"] == protocol["protocol"]
+        )
+        assert (
+            match["metrics"] == protocol["metrics"] and match["mrr"] == protocol["mrr"]
+        )
+        assert not match["generation_performed_this_run"]
+    consumer = json.loads(
+        (DOCS / "validation/beir-candidate-consumer-20261025.json").read_text("utf-8")
+    )
+    assert len(consumer["sources"]) == 2 and consumer["model_calls"] == 0
+    assert sum(len(row["assets"]) for row in consumer["sources"]) == 9
+    for source in consumer["sources"]:
+        for asset in source["assets"]:
+            assert asset["all_original_rows_preserved"] == asset["public_index_rows"]
+            assert (
+                asset["research_index_import_rows"]
+                == asset["research_direct_prepare_resolve_rows"]
+                == 3
+            )
+    for evidence in [native, consumer]:
+        assert not evidence["source_checkbox_eligible"]
+        assert not evidence["fixed_ci_artifact_verified"]
+        assert not evidence["research_observation_or_analysis_migrated"]
+
+
 def test_xlsum_fixed_ci_consumer_and_clean_environment_are_separate_from_full_delivery():
     fixed = json.loads(
         (DOCS / "validation/xlsum-fixed-ci-research-handoff-20261025.json").read_text(

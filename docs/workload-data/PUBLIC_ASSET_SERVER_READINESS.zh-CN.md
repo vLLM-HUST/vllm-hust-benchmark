@@ -307,6 +307,45 @@ Torch、模型推理或网络服务；已通过该环境 `pip check`。旧Python
 输入差异的显式选项：只有同一原文件、同一行、同一模型和预算且私有证据摘要完整，但原编码输入不同的旧结果才失效并重跑原题。默认遇此差异报错；文件损坏、改题、配置不符仍报错，不被此选项忽略。保存生成
 token 可用原解码器重解码，不需要再请求模型。
 
+### BEIR 原始检索集合与重排协议
+
+`BEIR_SCIFACT`和`BEIR_NFCORPUS`共享原集合，但有两个不同执行协议：原查询/全文档的dense检索，以及用该检索结果产生候选的top100交叉编码重排。qrels是原相关性评分参考，不是模型输入，更不能只用正例构造重排候选。数据组件完整保留corpus、queries和各split的qrels；不是将这些行转换为chat请求。
+
+框架固定为`beir-cellar/beir`的v2.2.0，具体提交和运行文件摘要见`configs/workload-native/beir-author-pins.json`。模型选用其官方示例列出的TAS-B与MiniLM组合，分别固定为`sentence-transformers/msmarco-distilbert-base-tas-b`和`cross-encoder/ms-marco-MiniLM-L6-v2`的已校验revision。不是作者当前Stella示例或BM25第一阶段的基线复现，不使用聊天模型替代编码器。本次部署为FP32/eager、NPU后端；512为原编码器策略，不是为容量临时截短原任务，也不能据此宣称长上下文能力。
+
+数据获取信息与逐文件SHA通过`workload-data catalog download-plan BEIR_SCIFACT`或对应NFCorpus命令查看。模型按pins中的revision下载其全部列出文件，放在外部路径，不打包到Git或wheel。HF的BEIR数据卡标注CC-BY-SA-4.0，原始来源的适用条款也须核对；登记不构成商业使用或再分发授权。
+
+```sh
+workload-data prepare-beir-original --source-id BEIR_SCIFACT \
+  --data-archive /private/scifact.zip --output /private/fresh-scifact
+python -I scripts/run_beir_original.py --source-id BEIR_SCIFACT \
+  --data-root /private/fresh-scifact --encoder-root /private/tas-b \
+  --cross-encoder-root /private/minilm --device npu:0 \
+  --output /private/fresh-scifact-native
+```
+
+两来源均按原test全部查询执行，SciFact为5183文档/300查询、NFCorpus为3633文档/323查询。第一阶段cos_sim、batch16、corpus_chunk_size50000，第二阶段top100、batch128；指标调用原`EvaluateRetrieval`的NDCG/MAP/Recall/Precision/MRR。训练和开发集相关性标签保留为资产，不混入test。使用NFCorpus时替换source
+ID、原zip和数据根即可。此入口当前面向这两个小集合的全量协议，不伪称已支持所有BEIR集合。
+
+先建立独立客户端，安装`configs/workload-native/beir-npu-client-dependencies.txt`和固定数据组件wheel。已验证平台为Python3.12.13/aarch64、Ascend910B2、Torch2.10.0+cpu、torch_npu2.10.0.post4、CANN9.1.0。Torch/NPU采用服务器已经部署的配套二进制，只读复用；包名中的`+cpu`不代表本次模型在CPU上运行。不要让pip替换服务端Torch，更不要在服务环境安装依赖。此客户端依赖组合是已验证的NPU适配，不声称是BEIR作者完整历史环境。运行和`pip check`使用`-I`，避免CANN
+shell中的全局PYTHONPATH混入其他工具依赖；当前隔离检查无冲突。
+
+ARM如需构建`pytrec-eval-terrier==0.5.11`，使用其原sdist和`trec_eval`v9.0.8原源码，把后者放在原setup识别的`trec_eval/`子目录。不要改评分实现或改用简化Python指标；服务器遇到上游构建时下载超时后，已从官方codeload取得同一版本、核验全部111个原Git文件并用原setup构建通过。具体源摘要记录在BEIR核验回执中。可在隔离环境执行`python -I -m pip wheel --no-deps --no-build-isolation /private/pytrec-source`，再安装生成的本机wheel；不同架构不能直接复用ARM
+wheel。
+
+已有原始排名可离线重算，不需再次加载模型：
+
+```sh
+python -I scripts/run_beir_original.py --source-id BEIR_SCIFACT \
+  --data-root /private/fresh-scifact --mode score \
+  --dense-results /private/prior/dense-results.private.json \
+  --rerank-results /private/prior/rerank-results.private.json \
+  --output /private/fresh-scifact-score-audit
+```
+
+score模式会核验完整查询覆盖、文档标识、有限得分以及重排候选恰好来自dense
+top100；它只证明这些排名可被原评分器评价，不能独立证明排名由某模型生成。真实NPU生成、原始排名SHA、固定数据组件及研究消费核验须分别取证。完整排名、原文和索引始终留在用户私有目录。当前已有全量NPU生成和候选公共入口/研究消费核验，固定CI工件核验尚未收口，来源继续不勾完成。
+
 ### GPQA 作者原发布包与原zero-shot协议
 
 使用作者公开GitHub的`dataset.zip`，固定代码版本见[原资产回执](validation/gpqa-original-acquisition-20261025.json)。按该版本README公开提供的密码解压；不需要绕过HF门槛，也不把题目下载到本地工作站或提交进Git。main448、diamond198、extended546是有重叠的原split，不能相加称为1192个独立问题；`gpqa_experts.csv`是专家元数据，不是第四个benchmark。

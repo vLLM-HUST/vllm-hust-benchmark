@@ -74,6 +74,12 @@ def main(argv=None):
     xlsum = commands.add_parser("prepare-xlsum-original")
     xlsum.add_argument("--archive-root", type=Path, required=True)
     xlsum.add_argument("--output", type=Path, required=True)
+    beir = commands.add_parser("prepare-beir-original")
+    beir.add_argument(
+        "--source-id", required=True, choices=["BEIR_SCIFACT", "BEIR_NFCORPUS"]
+    )
+    beir.add_argument("--data-archive", type=Path, required=True)
+    beir.add_argument("--output", type=Path, required=True)
     for name in ("catalog", "pipeline", "replay"):
         passthrough = commands.add_parser(name, add_help=False)
         passthrough.add_argument("arguments", nargs=argparse.REMAINDER)
@@ -144,6 +150,14 @@ def main(argv=None):
                 raise RuntimeError("Install the pinned BBH-capable data component")
             value = provider.prepare_bbh_boolean(
                 data_archive=args.data_archive, output=args.output
+            )
+        elif args.command == "prepare-beir-original":
+            from vllm_hust_workload_data.beir import prepare_original_archive
+
+            value = prepare_original_archive(
+                source_id=args.source_id,
+                data_archive=args.data_archive,
+                output=args.output,
             )
         elif args.command == "prepare-xlsum-original":
             from vllm_hust_workload_data.xlsum import prepare_original_archives

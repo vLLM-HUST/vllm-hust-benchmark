@@ -5,6 +5,28 @@
   "scope": "研究目录的归并与维度重分类；不是互斥单标签分类，不改变旧 generator/API 的行为。此列表不是研究范围上限。",
   "canonical_families": [
     {
+      "family_id": "embedding-retrieval",
+      "canonical_name": "向量编码与检索",
+      "strict_definition": "在原始文档集合中编码原查询和文档并生成检索排序，保留原查询、文档标识及相关性标签。",
+      "outline_categories": ["retrieval"],
+      "candidate_source_ids": ["BEIR_SCIFACT", "BEIR_NFCORPUS"],
+      "evidence_status": "ORIGINAL_TASK_DEFINITION",
+      "source_binding_status": "ORIGINAL_COLLECTION_ASSETS_MAPPED",
+      "exclusion_and_evidence_boundary": "单个文档或qrels行不是生成请求；静态检索不证明动态RAG、KV复用或实际查询到达轨迹。",
+      "data_binding_ref": "data/catalogs/workload_data_bindings_v1.json#embedding-retrieval"
+    },
+    {
+      "family_id": "reranking",
+      "canonical_name": "候选文档重排",
+      "strict_definition": "对原查询及既定第一阶段检索候选进行交叉编码评分并重排；候选来源与top-k须固定。",
+      "outline_categories": ["retrieval"],
+      "candidate_source_ids": ["BEIR_SCIFACT", "BEIR_NFCORPUS"],
+      "evidence_status": "ORIGINAL_TASK_DEFINITION",
+      "source_binding_status": "ORIGINAL_COLLECTION_ASSETS_MAPPED",
+      "exclusion_and_evidence_boundary": "qrels仅为评分参考，不能只抽正例伪造候选；原文档集合是数据资产，不等于已经产生重排请求或生产流量。",
+      "data_binding_ref": "data/catalogs/workload_data_bindings_v1.json#reranking"
+    },
+    {
       "family_id": "general-single-turn-assistant",
       "canonical_name": "通用单次助手请求",
       "strict_definition": "单次问答、写作或开放生成，不宣称跨请求状态。",

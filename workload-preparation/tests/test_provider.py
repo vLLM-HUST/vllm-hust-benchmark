@@ -13,7 +13,7 @@ def test_provider_identity_and_resources():
 
 def test_every_class_has_an_explicit_plan():
     classes = research_classes()
-    assert len(classes) == 36
+    assert len(classes) == 38
     for row in classes:
         plan = provider.class_plan(row["family_id"])
         assert plan["compatibility_family"] == row["parent_family_id"]
@@ -24,7 +24,7 @@ def test_every_class_has_an_explicit_plan():
 
 def test_catalog_registration_does_not_claim_runtime_or_local_data():
     sources = provider.list_sources()
-    assert len(sources) == 97
+    assert len(sources) == 99
     assert sum(row["source_id"].startswith("PAIO-") for row in sources) == 8
     assert all(
         row["runtime_validation"] == "NOT_ESTABLISHED_BY_CATALOG" for row in sources

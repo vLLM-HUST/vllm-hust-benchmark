@@ -143,7 +143,7 @@ def test_category_checklist_preserves_every_class_and_source():
     ledger = json.loads((DOCS / "dataset-validation-status.json").read_text("utf-8"))
     gaps = json.loads((DOCS / "gap-sources-20261021.json").read_text("utf-8"))
     checklist = (DOCS / "WORKLOAD_EXECUTION_CHECKLIST.zh-CN.md").read_text("utf-8")
-    assert len(ids) == 36
+    assert len(ids) == 38
     assert all(checklist.count("· " + identifier + "\n") == 1 for identifier in ids)
     assert all(row["source_id"] in checklist for row in ledger["sources"])
     assert all("- [ ] " + row["id"] + "：" in checklist for row in gaps["sources"])
