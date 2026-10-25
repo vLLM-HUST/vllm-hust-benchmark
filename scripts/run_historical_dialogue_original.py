@@ -21,6 +21,7 @@ def run_records(
     source_identity=None,
 ):
     from vllm_hust_workload_data.conversations import historical_dialogue_views
+    from vllm_hust_workload_data.identity import portable
 
     endpoint = validate_endpoint(endpoint)
     if not model or type(max_tokens) is not int or not 0 < max_tokens < context:
@@ -45,7 +46,7 @@ def run_records(
     def save(name, value):
         path = output / name
         path.write_text(
-            json.dumps(value, ensure_ascii=False, indent=2), encoding="utf-8"
+            json.dumps(portable(value), ensure_ascii=False, indent=2), encoding="utf-8"
         )
         path.chmod(0o600)
 

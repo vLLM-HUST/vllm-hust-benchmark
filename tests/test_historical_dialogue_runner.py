@@ -5,6 +5,7 @@ import hashlib
 import json
 from pathlib import Path
 import sys
+from datetime import datetime, timezone
 
 import pytest
 
@@ -94,6 +95,51 @@ def test_all_original_requests_without_target_leakage(tmp_path):
     assert result["conversations"] == 1
     assert not result["source_checkbox_eligible"]
     assert not result["quality_scored"]
+
+
+def test_arrow_datetime_annotations_use_existing_portable_form_not_api_fields(tmp_path):
+    item = original()
+    stamp = datetime(2026, 1, 2, 3, 4, 5, 123456, timezone.utc)
+    item.replay["annotations"] = {"timestamp": stamp}
+    item.task["input"]["conversation"][0]["timestamp"] = stamp
+    item.task["input"]["conversation"][1]["timestamp"] = stamp
+    calls = []
+
+    def transport(url, body):
+        calls.append((url, body))
+        return {"count": 10} if url.endswith("/tokenize") else response()
+
+    result = RUNNER.run_records(
+        [item],
+        output=tmp_path / "dated",
+        endpoint="http://127.0.0.1:19466/v1",
+        model="fixture",
+        max_tokens=32,
+        context=128,
+        transport=transport,
+        expected_count=1,
+    )
+    assert result["status"] == "ORIGINAL_HISTORY_GENERATED_NO_QUALITY_SCORE"
+    saved = json.loads(
+        (tmp_path / "dated/conversation-000000.private.json").read_text("utf-8")
+    )
+    assert saved["replay"]["annotations"]["timestamp"] == stamp.isoformat()
+    assert saved["task"]["input"]["conversation"][1]["timestamp"] == stamp.isoformat()
+    request = json.loads(
+        (tmp_path / "dated/request-000000.private.json").read_text("utf-8")
+    )
+    assert request["view"]["non_api_prefix_metadata"] == [
+        {"timestamp": stamp.isoformat()}
+    ]
+    assert (
+        request["view"]["reference"]["native_message"]["timestamp"] == stamp.isoformat()
+    )
+    assert all(
+        "timestamp" not in turn
+        for _, body in calls
+        for turn in body.get("messages", [])
+    )
+    assert item.replay["annotations"]["timestamp"] is stamp
 
 
 @pytest.mark.parametrize(
