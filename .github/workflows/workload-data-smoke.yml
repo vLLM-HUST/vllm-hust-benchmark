@@ -33,6 +33,18 @@ on:
       - 'scripts/run_longbench_v1_qasper_original.py'
       - 'scripts/run_bfcl_v4_simple_python_original.py'
       - 'scripts/run_oasst_original_continuation.py'
+      - 'scripts/run_historical_dialogue_original.py'
+      - 'scripts/score_qrecc_original_qa.py'
+      - 'scripts/*mbpp*'
+      - 'scripts/*mooncake*'
+      - 'scripts/*toolace*'
+      - 'scripts/humaneval_isolated_worker.py'
+      - 'scripts/run_humaneval_isolated_scoring.py'
+      - 'tests/test_historical_dialogue*'
+      - 'tests/test_qrecc_original_qa_score.py'
+      - 'tests/test_mbpp*'
+      - 'tests/test_mooncake*'
+      - 'tests/test_toolace*'
       - 'scripts/run_natural_instructions_original.py'
       - 'scripts/run_ni_original_range.py'
       - 'tests/test_ni_original_range.py'
@@ -156,6 +168,12 @@ jobs:
         run: python -m pytest -q workload-preparation/tests tests/test_workload_data_boundary.py tests/test_workload_gap_catalog.py tests/test_workload_validation_checklist.py tests/test_workload_category_checklist.py tests/test_tau2_original_runner.py tests/test_reasoning_original_runners.py workload-preparation/tests/test_math500_original_adapter.py tests/test_math500_original_runner.py tests/test_structeval_original_runner.py tests/test_longbench_original_runner.py tests/test_dolly_original_runner.py tests/test_longwriter_original_runner.py tests/test_agentbench_original_runner.py tests/test_bfcl_original_runner.py tests/test_workload_response_validation.py
       - name: OASST runner CPU contract only
         run: python -m pytest -q tests/test_oasst_original_runner.py tests/test_reused_source_records.py tests/test_infinitebench_code_preflight.py tests/test_infinitebench_original_runner.py
+      - name: Historical dialogue and saved QReCC score software fixtures only
+        run: python -m pytest -q tests/test_historical_dialogue_prefix.py tests/test_historical_dialogue_runner.py tests/test_qrecc_original_qa_score.py
+      - name: MBPP original preparation and mocked execution controls only
+        run: python -m pytest -q tests/test_mbpp_original_assets.py tests/test_mbpp_original_generation.py tests/test_mbpp_scoring_preparation.py tests/test_mbpp_isolated_scoring.py
+      - name: Serving trace and ToolACE preparation software fixtures only
+        run: python -m pytest -q tests/test_mooncake_storage_plan.py tests/test_toolace_original_corpus_audit.py
       - name: Natural Instructions runner CPU contract only
         run: python -m pytest -q tests/test_natural_instructions_original_runner.py tests/test_natural_instructions_validation_receipt.py tests/test_ni_editing_extraction_original.py tests/test_ni_original_range.py
       - name: BBH runner CPU contract only
@@ -199,6 +217,10 @@ jobs:
         run: |
           python -m pytest -q tests/test_workload_wheel_audit.py
           python scripts/audit_workload_data_wheel.py --wheel workload-data-dist/vllm_hust_workload_data-0.1.0-py3-none-any.whl > workload-data-dist/PAYLOAD_AUDIT.json
+      - name: Verify installed wheel payload outside checkout, no datasets
+        working-directory: ${{ runner.temp }}
+        run: |
+          python -c "import json, os, pathlib, sys; p=pathlib.Path(os.environ['GITHUB_WORKSPACE']); sys.path.insert(0,str(p/'scripts')); from audit_toolace_original_corpus import installed_wheel_audit; result=installed_wheel_audit(next((p/'workload-data-dist').glob('*.whl'))); (p/'workload-data-dist/INSTALLED_PAYLOAD_AUDIT.json').write_text(json.dumps(result,indent=2),encoding='utf-8'); print(result['status'])"
       - name: Single-ledger delivery progress invariants
         run: python -m pytest -q tests/test_workload_delivery_progress.py tests/test_workload_private_artifacts.py tests/test_workload_delivery_classification_cli.py
       - name: Publish validated software wheel, never datasets

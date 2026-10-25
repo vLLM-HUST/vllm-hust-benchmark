@@ -48,6 +48,64 @@ def test_no_observation_dependencies_or_hooks():
     assert not (ROOT / "schemas/full_cycle_trace_v1.schema.json").exists()
 
 
+def test_new_native_entry_software_contracts_are_watched_and_cpu_smoked():
+    import fnmatch
+    import yaml
+
+    repo = ROOT.parent
+    workflow = yaml.load(
+        (repo / ".github/workflows/workload-data-smoke.yml").read_text("utf-8"),
+        Loader=yaml.BaseLoader,
+    )
+    watched = workflow["on"]["pull_request"]["paths"]
+    scripts = [
+        "run_historical_dialogue_original.py",
+        "score_qrecc_original_qa.py",
+        "prepare_mbpp_original_assets.py",
+        "run_mbpp_original_generation.py",
+        "prepare_mbpp_scoring_inputs.py",
+        "run_mbpp_isolated_scoring.py",
+        "mbpp_isolated_worker.py",
+        "prepare_mooncake_storage_plan.py",
+        "run_mooncake_storage_original.py",
+        "audit_toolace_original_corpus.py",
+        "humaneval_isolated_worker.py",
+        "run_humaneval_isolated_scoring.py",
+    ]
+    fixtures = [
+        "test_historical_dialogue_prefix.py",
+        "test_historical_dialogue_runner.py",
+        "test_qrecc_original_qa_score.py",
+        "test_mbpp_original_assets.py",
+        "test_mbpp_original_generation.py",
+        "test_mbpp_scoring_preparation.py",
+        "test_mbpp_isolated_scoring.py",
+        "test_mooncake_storage_plan.py",
+        "test_toolace_original_corpus_audit.py",
+    ]
+    for path in [
+        *("scripts/" + name for name in scripts),
+        *("tests/" + name for name in fixtures),
+    ]:
+        assert (repo / path).is_file()
+        assert any(fnmatch.fnmatchcase(path, pattern) for pattern in watched), path
+    job = workflow["jobs"]["cpu-correctness"]
+    assert job["runs-on"] == "ubuntu-latest"
+    commands = [step.get("run", "") for step in job["steps"]]
+    for name in fixtures:
+        assert any(
+            "python -m pytest" in command and "tests/" + name in command
+            for command in commands
+        ), name
+    assert not any(command.startswith("python scripts/run_") for command in commands)
+    installed = [
+        step for step in job["steps"] if "installed_wheel_audit" in step.get("run", "")
+    ]
+    assert len(installed) == 1
+    assert installed[0]["working-directory"] == "${{ runner.temp }}"
+    assert "INSTALLED_PAYLOAD_AUDIT.json" in installed[0]["run"]
+
+
 def test_narrativeqa_relations_remain_data_only():
     import ast
 
