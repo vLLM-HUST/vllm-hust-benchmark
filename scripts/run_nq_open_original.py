@@ -7,6 +7,7 @@ REALM, full Natural Questions document QA, or a paper-model replication.
 
 import argparse
 import hashlib
+from functools import partial
 from importlib import metadata
 import json
 from pathlib import Path
@@ -104,6 +105,18 @@ def verify_native_samples(samples, selected, original_rows, contexts):
             raise ValueError("native request/document changed original context")
 
 
+def bind_prompt_options(model, *, apply_chat_template, disable_thinking):
+    """Model formatting only; never change the task's text/stop/filter/metric."""
+    if disable_thinking and not apply_chat_template:
+        raise ValueError("disable-thinking requires the explicit native chat mode")
+    if disable_thinking:
+        if "enable_thinking" not in str(model.tokenizer.chat_template):
+            raise ValueError("model template has no reviewed enable_thinking option")
+        model.tokenizer.apply_chat_template = partial(
+            model.tokenizer.apply_chat_template, enable_thinking=False
+        )
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--data-root", required=True, type=Path)
@@ -116,7 +129,19 @@ def main():
     parser.add_argument("--count", type=int, default=3)
     parser.add_argument("--full", action="store_true")
     parser.add_argument("--concurrency", type=int, choices=[1, 2], default=1)
+    parser.add_argument(
+        "--apply-chat-template",
+        action="store_true",
+        help="Official harness native-model chat formatting; distinct from the default plain-text profile",
+    )
+    parser.add_argument(
+        "--disable-thinking",
+        action="store_true",
+        help="Bind the model's native enable_thinking=False option; requires chat mode and a supporting template",
+    )
     args = parser.parse_args()
+    if args.disable_thinking and not args.apply_chat_template:
+        parser.error("--disable-thinking requires --apply-chat-template")
     selected = select(start=args.start, count=args.count, full=args.full)
     endpoint = urlparse(args.endpoint)
     if (
@@ -161,7 +186,9 @@ def main():
     output.mkdir(mode=0o700, parents=True)
     receipt = {
         "source_id": "NATURALQUESTIONS",
-        "profile": "nq_open_original_dev_closed_book_zero_shot",
+        "profile": "nq_open_original_dev_closed_book_zero_shot_native_chat"
+        if args.apply_chat_template
+        else "nq_open_original_dev_closed_book_zero_shot_plain",
         "source_revision": REVISION,
         "status": "PREPARING_NATIVE_NOT_COMPLETE",
         "selected_original_dev_positions": selected,
@@ -176,7 +203,10 @@ def main():
         "task_config_sha256": TASK_SHA,
         "tokenizer_files": tokenizer_files,
         "input_truncated": False,
-        "chat_template_applied": False,
+        "chat_template_applied": args.apply_chat_template,
+        "chat_template_parameters": {"enable_thinking": False}
+        if args.disable_thinking
+        else {},
         "num_fewshot": 0,
         "scoring": "Original lm-eval nq_open config Exact Match over complete original answer aliases; not a reproduction of the publisher TensorFlow evaluation CLI",
         "model_or_retrieval_paper_replication": False,
@@ -205,12 +235,23 @@ def main():
                 "timeout": 300,
             }
         )
+        bind_prompt_options(
+            model,
+            apply_chat_template=args.apply_chat_template,
+            disable_thinking=args.disable_thinking,
+        )
         contexts, token_lengths = {}, []
         for i in selected:
             row = data["validation"][i]
             if task.doc_to_target(row) != row["answer"]:
                 raise ValueError("harness lost original answer aliases")
-            context = config["description"] + task.doc_to_text(row)
+            context = task.fewshot_context(
+                row,
+                num_fewshot=0,
+                apply_chat_template=args.apply_chat_template,
+                fewshot_as_multiturn=False,
+                chat_template=model.apply_chat_template,
+            )
             encoded = model.tok_encode(context, add_special_tokens=False)
             if not encoded or len(encoded) + MAX_GEN_TOKS > args.max_length:
                 raise ValueError(
@@ -232,6 +273,8 @@ def main():
             batch_size=1,
             bootstrap_iters=0,
             log_samples=True,
+            apply_chat_template=args.apply_chat_template,
+            fewshot_as_multiturn=False,
             use_cache=str(output / "native-response-cache"),
         )
         if result is None:

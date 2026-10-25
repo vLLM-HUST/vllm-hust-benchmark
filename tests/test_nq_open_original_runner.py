@@ -7,6 +7,7 @@ import json
 from pathlib import Path
 import subprocess
 import sys
+from types import SimpleNamespace
 
 import pytest
 
@@ -137,3 +138,27 @@ def test_help_does_not_require_harness_or_a_model():
     )
     assert result.returncode == 0
     assert "--full" in result.stdout and "--max-length" in result.stdout
+
+
+def test_chat_option_only_binds_native_model_parameter_not_task_text():
+    class Tokenizer:
+        chat_template = "inert fixture enable_thinking flag"
+
+        def apply_chat_template(self, messages, **kwargs):
+            return messages, kwargs
+
+    messages = [{"role": "user", "content": "unchanged official fixture prompt"}]
+    model = SimpleNamespace(tokenizer=Tokenizer())
+    runner.bind_prompt_options(model, apply_chat_template=True, disable_thinking=True)
+    restored, kwargs = model.tokenizer.apply_chat_template(messages, tokenize=False)
+    assert restored == messages
+    assert kwargs == {"tokenize": False, "enable_thinking": False}
+    with pytest.raises(ValueError, match="explicit native chat"):
+        runner.bind_prompt_options(
+            model, apply_chat_template=False, disable_thinking=True
+        )
+    model.tokenizer.chat_template = "inert model without the option"
+    with pytest.raises(ValueError, match="no reviewed"):
+        runner.bind_prompt_options(
+            model, apply_chat_template=True, disable_thinking=True
+        )

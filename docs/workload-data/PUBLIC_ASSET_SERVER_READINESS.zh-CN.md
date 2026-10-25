@@ -533,17 +533,30 @@ Questions当前为NQ-open；DuReader为demo；WildChat为原1M固定14分片，�
 
 NQ-open原生生成/评分入口已补（此处是执行方法，完成状态仍看机器清单与原生回执）：
 
+本次可复现客户端为Linux Python3.12：只读绑定已有厂商CPU
+torch软件包，不继承整套系统site-packages、不加载模型权重。生成仍调用独立Ascend服务，客户端CPU仅负责分词/评分。安装和只读复核入口如下（替换私有目标目录；安装目标必须不存在）：
+
+```sh
+python scripts/prepare_lmeval_api_client.py \
+  --client /private/fresh-nq-client \
+  --vendor-site /usr/local/python3.12.13/lib/python3.12/site-packages
+python scripts/prepare_lmeval_api_client.py \
+  --client /private/fresh-nq-client \
+  --vendor-site /usr/local/python3.12.13/lib/python3.12/site-packages --verify-only
+```
+
 ```sh
 python scripts/run_nq_open_original.py \
   --data-root /private/nq-open-original-assets \
   --endpoint http://127.0.0.1:19466/v1/completions \
   --model workload-qwen35-27b-128k-nonthinking \
   --tokenizer /workspace/models/Qwen3.5-27B --max-length 131072 \
-  --output /private/fresh-nq-open-native --concurrency 2
+  --output /private/fresh-nq-open-native --concurrency 2 \
+  --apply-chat-template --disable-thinking
 ```
 
 默认固定原dev0/1/2，`--start/--count`选择事前固定的连续原行号（至少3条），`--full`选择全部3610条；不把获取的87925条训练题当test，训练文件仅保留给原框架读取。使用固定lm-eval0.4.11原nq_open配置和官方过滤/Exact
-Match；完整答案别名保留。唯一数据配置变化为本地原JSON路径，明确零样本、闭卷、模型替换及原API默认256生成上限，不添加聊天模板或修改原停止串。先检查全部所选原提示容量再调用模型，拒绝截断、换题或自动重试。输出及框架缓存含原题/回答，只放私有服务器；答错/空输出交原评分器，不人为排除。环境约束见[nq-open客户端](../../configs/workload-native/nq-open-lmeval-client-constraints.txt)。不是DPR/REALM检索、EfficientQA或原Natural
+Match；完整答案别名保留。唯一数据配置变化为本地原JSON路径，明确零样本、闭卷、模型替换及原API默认256生成上限，不修改原停止串。未加模板开关时为原纯文本profile；上例为模型原生聊天profile，框架按自身规则包装相同任务文本，原Jinja/词表保持绑定，以模型原生参数enable_thinking=False设置非思考格式，不能用它改写任务内容或缩预算。该参数用法见[Qwen官方说明](https://huggingface.co/Qwen/Qwen3.5-27B#instruct-or-non-thinking-mode)。两种profile分开记录，不择优混分。先检查全部所选原提示容量再调用模型，拒绝截断、换题或自动重试。输出及框架缓存含原题/回答，只放私有服务器；答错/空输出交原评分器，不人为排除。环境约束见[nq-open客户端](../../configs/workload-native/nq-open-lmeval-client-constraints.txt)。不是DPR/REALM检索、EfficientQA或原Natural
 Questions文档标注任务，也不冒充发布方TensorFlow评分CLI/论文模型复现。
 
 原始GitHub数据文件如遇raw主机连接失败，可显式使用发布方API传输；不会跳过来源固定版本、大小和SHA256校验：
