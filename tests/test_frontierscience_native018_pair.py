@@ -52,7 +52,12 @@ def test_v082_preserves_m01_and_reports_negative_quality(monkeypatch):
     monkeypatch.syspath_prepend(str(ROOT / "scripts"))
     import build_midterm_v082 as builder
 
-    data = builder.build("test", lambda p: (ROOT / p).read_bytes())
+    data = builder.build(
+        "test",
+        lambda p: (
+            ROOT / (p.replace("中期测试报告.md", "中期测试报告-v082.md"))
+        ).read_bytes(),
+    )
     old = json.loads((ROOT / "website-publication/data/midterm-v081.json").read_text())
     for key in (
         "wholechain_reference",
