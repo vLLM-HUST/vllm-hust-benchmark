@@ -64,7 +64,20 @@ main 分支的依赖文件，复现时应使用本次固定源码中的文件，
 已保存三题输出执行原生功能评分，再核验公共入口及研究侧消费。此前 HumanEval、
 DS1000 的隔离验证不能替代 BigCodeBench 的依赖和运行验证；本项仍不打勾。
 
-当前服务器已重做[隔离预检](validation/code-execution-isolation-preflight-20261024.json)：网络namespace可创建，但mount/PID隔离和私有bubblewrap无害探测失败，且无Docker/Podman/socket。不能据此安全执行生成代码；原功能评分仍未运行。保存的生成结果继续复用，待可验证的隔离环境就绪后接原sanitize/功能测试及评分，不裸执行、不重生成刷分。
+可先运行静态预检（只读取原始数据和源码，绝不导入官方模块或执行候选代码）：
+
+```bash
+python scripts/audit_bigcodebench_scoring_assets.py \
+  --official-code /private/bigcodebench-code \
+  --data-root /private/bigcodebench
+```
+
+该入口复用生成阶段的 PyArrow 数据读取依赖，核对固定源码摘要、原始 Parquet 摘要和
+完整1140条原始ID顺序，列出固定前三题参考实现及测试的静态导入。动态导入、运行时资源、
+sanitize、参考实现检查和候选代码评分均不在其证明范围内。当前只通过软件夹具测试；
+上传执行时 SSH 32048 返回连接拒绝，尚无服务器执行本入口的回执，不能计为原生验证。
+
+2026-10-24历史服务器的[隔离预检](validation/code-execution-isolation-preflight-20261024.json)：网络namespace可创建，但mount/PID隔离和私有bubblewrap无害探测失败，且无Docker/Podman/socket。该历史结论不代表2026-10-25已验证的其他来源隔离环境；BigCodeBench自身功能评分仍未运行。保存的生成结果继续复用，待其隔离环境与依赖验证后接原sanitize/功能测试及评分，不裸执行、不重生成刷分。
 
 - [x] 三个原始任务读取、prepare、resolve输入/参考独立往返。
 - [x] 原版提示/请求函数驱动NPU生成；三条完整输入预检匹配、正常stop。
