@@ -30,11 +30,12 @@ execute clients, install packages, or run NPU workloads.
 
 Final Manager remote CI passed on Python 3.10 and 3.12: each recorded 2483 passed, 36 skipped and 6
 subtests passed. The local final-source full run recorded 1 failed, 2482 passed, 36 skipped and 6
-subtests passed; its unchanged H3 500 ms dispatch gate failed. An isolated same-threshold passing
-test does not erase this retained full-suite failure. Manager dev release policy remains no-go; this
-is restricted MuxPD functional qualification, not a general production release approval. Historical
-MuxPD Goodput evidence uses a different software identity and is not promoted to a result for this
-release.
+subtests passed; its unchanged H3 500 ms dispatch gate failed. A targeted pass used the same H3 test
+source and threshold on source 894 in an earlier window, while another pytest CPU process was still
+running. It was not an isolated causal experiment and does not erase the full-suite failure. Manager
+dev release policy remains no-go; this is restricted MuxPD functional qualification, not a general
+production release approval. Historical MuxPD Goodput evidence uses a different software identity
+and is not promoted to a result for this release.
 
 The separately published
 [software prerelease v0.2.0a1](https://github.com/vLLM-HUST/vllm-ascend-MuxPD-hust/releases/tag/v0.2.0a1)

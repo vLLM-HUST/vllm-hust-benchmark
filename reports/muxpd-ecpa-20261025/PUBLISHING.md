@@ -9,7 +9,7 @@ raw-evidence release.
 ## Freeze the evidence-only benchmark change
 
 1. The Manager local full suite and final inventory are terminal. The final v4 archive is locally
-   verified (347 members); remote CI success, local failure, preserved failed attempts, and isolated
+   verified (347 members); remote CI success, local failure, preserved failed attempts, and targeted
    follow-up outcomes remain separate. The packer rejects live inputs or missing digests.
 
 1. The v4 output is `/tmp/muxpd-qualification-archive-v4`; v1/v2 plans and the v3 draft were not
