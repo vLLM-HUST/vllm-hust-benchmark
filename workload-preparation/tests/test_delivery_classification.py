@@ -116,9 +116,11 @@ def test_invalid_entrypoint_metadata_rejected(monkeypatch, failure):
     monkeypatch.setattr(
         taxonomy,
         "read_catalog",
-        lambda name, root=None: plan
-        if name == "workload_delivery_classification_v1.json"
-        else original(name, root),
+        lambda name, root=None: (
+            plan
+            if name == "workload_delivery_classification_v1.json"
+            else original(name, root)
+        ),
     )
     with pytest.raises(ValueError):
         taxonomy.delivery_assets()
