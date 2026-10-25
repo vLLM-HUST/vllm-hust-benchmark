@@ -27,12 +27,22 @@ def test_own_pair_is_not_reference_attainment(monkeypatch):
     ):
         assert data == builder.build(revision)
     else:
+        snapshot = (
+            ROOT
+            / "reports/vllm-hust-midterm-20261019/m01-recovery/corrected-quality-20261025/report-v079.md"
+        )
         assert (
-            hashlib.sha256((ROOT / builder.REPORT).read_bytes()).hexdigest()
-            == data["report_sha256"]
+            hashlib.sha256(snapshot.read_bytes()).hexdigest() == data["report_sha256"]
         ), "Shallow checkout does not contain the pinned report bytes"
         # Shallow CI still checks complete regeneration from the exact report bytes.
-        assert data == builder.build(revision, lambda path: (ROOT / path).read_bytes())
+        assert data == builder.build(
+            revision,
+            lambda path: (
+                snapshot.read_bytes()
+                if path == builder.REPORT
+                else (ROOT / path).read_bytes()
+            ),
+        )
     previous = json.loads(
         (ROOT / "website-publication/data/midterm-v078.json").read_text()
     )
