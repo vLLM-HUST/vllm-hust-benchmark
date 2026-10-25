@@ -57,14 +57,14 @@ def fetch(path, spec, url):
     temporary.rename(path)
 
 
-def main(*, pins_path=PINS, source_id="XSUM"):
+def main(*, pins_path=PINS, source_id="XSUM", parts=("data", "model", "scoring")):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument(
         "--parts",
         nargs="+",
-        choices=["data", "model", "scoring"],
-        default=["data", "model", "scoring"],
+        choices=list(parts),
+        default=list(parts),
     )
     parser.add_argument(
         "--hf-endpoint",

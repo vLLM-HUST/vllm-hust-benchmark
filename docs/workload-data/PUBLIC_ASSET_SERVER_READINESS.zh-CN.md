@@ -734,7 +734,26 @@ JSONSchemaBench 作者Engine扩展（尚非完整运行入口）：`scripts/json
 core.engine/core.types、显式本地模型配置、已禁用自动重试的loopback客户端及真实消息分词计数器。
 不重写原始formatter、Dataset、bench或evaluator；adapt_schema只深拷贝，不补type、不改required、不强制additionalProperties=false。完整消息和schema原样进入后端，上下文不足不截断，必须收到原生终态及服务usage才设置成功状态。
 固定作者OpenAI后端会为其供应商限制改写schema，且其本地base_url路径的分词器和max_context_length有模型名限制，因此不能直接把本地Qwen模型名填进去就宣称原生运行成功。该扩展按明确的“原schema、本地传输”配置处理，不宣称与作者OpenAI供应商配置完全相同。
-当前只通过模拟接口/流式软件测试。epfl-dlab/JSONSchemaBench数据工件及revision尚未核验，原始core.bench→evaluator完整链路与真实NPU仍待接通；旧guidance-ai三份schema的validator结果不能替代这一流程。旧原资产及回执保留，不覆盖成新数据身份，不打完成勾。
+Engine扩展当前只通过模拟接口/流式软件测试；原始core.bench→evaluator完整链路与真实NPU仍待接通。
+旧guidance-ai三份schema的validator结果不能替代这一流程，原资产及回执不覆盖成新数据身份。
+
+2026-10-25已通过官方HF元数据固定`epfl-dlab/JSONSchemaBench`版本 `5bd0f4640badc6f3f02df796421d21cb0ca0b141`，清单见
+`configs/workload-native/jsonschemabench-official-assets.json`：10个具名配置及default汇总，
+覆盖配置引用的train/val/test共33个原始Parquet及原README，共34文件、40827041字节。
+default是汇总，不将其与具名分区重复累计成独立题目；仓库内未被这些配置引用的旧合并文件 不冒充官方test分区。清单的字节数/SHA256来自固定HF元数据，尚不表示服务器已取得文件。
+
+在服务器外置私有目录准备，不在本地下载：
+
+```bash
+python scripts/prepare_jsonschemabench_original_assets.py --output /private/jsonschemabench-official
+python scripts/prepare_jsonschemabench_original_assets.py --output /private/jsonschemabench-official --verify-only
+```
+
+入口复用既有固定资产获取/校验逻辑，默认只取data，不安装或下载模型；支持明确的 `--resume`及同摘要镜像，不覆盖不匹配文件。原始HF snapshot根为输出目录下的`data/`。
+新入口仅有小型软件夹具证据，未在当前服务器运行。下一步须把原版`core.dataset.Dataset`
+显式绑定到这个固定本地snapshot，核验`json_schema`字段与原test行，再运行官方bench与
+evaluator；上游默认`load_dataset`没有revision参数，不能放任其重新拉取变化的main。
+本轮未改schema、未换历史失败任务、未声称结构化输出后端或完整原生流程已跑通，不打完成勾。
 
 安装工件核验：`python scripts/audit_workload_data_wheel.py --wheel /path/to/provider.whl`。
 该检查将包内数据提供者模块、目录和schema资源逐字节与当前源码核对，并拒绝额外包载荷、重复成员及伪装在dist-info中的数据文件。 CI构建后生成 `PAYLOAD_AUDIT.json`

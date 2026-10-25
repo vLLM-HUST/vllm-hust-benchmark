@@ -1676,6 +1676,10 @@
     "JSONSCHEMABENCH": {
       "official_backend_extension_software_only": "scripts/jsonschemabench_local_engine.py",
       "official_environment_probe": "scripts/probe_jsonschemabench_environment.py",
+      "official_dataset_assets_preparer": "scripts/prepare_jsonschemabench_original_assets.py",
+      "official_dataset_assets_manifest": "configs/workload-native/jsonschemabench-official-assets.json",
+      "official_dataset_revision_metadata_verified": "5bd0f4640badc6f3f02df796421d21cb0ca0b141",
+      "official_dataset_revision_evidence_scope": "Live official HF revision metadata verified on20261025: ten named configs plus default aggregate, all referenced train/val/test files and README pinned by size/SHA256; 34files/40827041bytes. Metadata only, zero local dataset files; server acquisition/loader/native bench still pending.",
       "official_environment_probe_boundary": "metadata only, no installation/import/runtime validation; local missing packages do not establish server state",
       "official_backend_extension_validation_scope": "fake author Engine interface and streaming client only; original schema/messages preserved; pinned dataset loader, full original bench/evaluator and real NPU not yet verified",
       "scope": "public",
@@ -1689,7 +1693,7 @@
       "research_exact_artifact_handoff_receipt": "docs/workload-data/validation/jsonschemabench-research-handoff-20261024.json",
       "official_workflow_readiness_receipt": "docs/workload-data/validation/jsonschemabench-official-workflow-readiness-20261024.json",
       "non_npu_preparation_checked": true,
-      "blocker": "All3 registered original schema assets and exact installed research dual-path handoff verified, two historical conformance failures preserved. Existing formatter/validator-only integration is not original core.bench workflow. Original official custom Engine interface identified; pinned epfl-dlab/JSONSchemaBench dataset acquisition remains blocked by server metadata ConnectError Errno101, revision not verified. Full native workflow and partition coverage remain incomplete; no source completion claim."
+      "blocker": "All3 legacy schemas and exact installed research handoff retained, including two conformance failures. Official HF revision metadata and 34 required original assets are now pinned; this resolves revision identification, not server acquisition. New asset preparer has fixtures only. Server SSH unavailable; exact snapshot/local loader binding, core.bench/evaluator, real NPU structured-output backend and all partition coverage remain pending. No source completion claim."
     },
     "LIVECODEBENCH": {
       "scope": "public",
