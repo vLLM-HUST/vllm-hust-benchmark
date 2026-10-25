@@ -573,6 +573,40 @@ python scripts/prepare_reused_research_assets.py NATURALQUESTIONS \
 仅接受已登记的`raw.githubusercontent.com/原仓库/固定40位提交/原文件路径`，先核对同一提交的发布方文件元数据与Git对象身份，再校验完整原始字节；不访问第三方镜像、不登录、不绕过gated授权。原目录失败后只允许匹配配置的显式`--resume`；已有完整文件用`--mode verify`。获取成功不等于NQ-open原生生成/评分已完成，更不等于完整Natural
 Questions文档任务。
 
+### LongAlpaca 原始指令语料执行
+
+[发布方说明](https://huggingface.co/datasets/Yukang/LongAlpaca-12k/blob/46dce924ed8786979556018e191c0f557d8f4aa2/README.md)将其定义为长短指令混合的构造训练语料，不是独立官方质量评测集。数据许可为CC-BY-NC-4.0，不能将代码许可当作数据商业使用授权；原数据留在外部服务器，不随仓库分发。
+
+```bash
+python scripts/prepare_reused_research_assets.py LONGALPACA \
+  --mode download --max-bytes 550000000 \
+  --data-root /private/fresh-longalpaca-original
+
+# 官方站点不可达时，可显式指定现有镜像入口，仍按原发布版本、大小和SHA256验证。
+# 使用同一准备器创建的目录恢复时加 --resume；不能覆盖身份不匹配的既有数据。
+# python scripts/prepare_reused_research_assets.py LONGALPACA --mode download \
+#   --resume --hf-endpoint https://hf-mirror.com --max-bytes 550000000 \
+#   --data-root /private/fresh-longalpaca-original
+
+python scripts/prepare_reused_source_records.py LONGALPACA \
+  --data-root /private/fresh-longalpaca-original \
+  --output /private/fresh-longalpaca-references
+
+# 使用已验证的隔离Python3.12 API客户端与现有NPU模型服务。
+python scripts/run_longalpaca_original.py \
+  --data-file /private/fresh-longalpaca-original/LongAlpaca-12k.json \
+  --tokenizer /workspace/models/Qwen3.5-27B \
+  --output /private/fresh-longalpaca-first3
+
+# 固定补充原始行号，覆盖第一个非空input及后续两题；不重复0..2。
+python scripts/run_longalpaca_original.py \
+  --data-file /private/fresh-longalpaca-original/LongAlpaca-12k.json \
+  --tokenizer /workspace/models/Qwen3.5-27B \
+  --output /private/fresh-longalpaca-context3 --start 7324 --count 3
+```
+
+原instruction及非空input完整进入模型原生非思考聊天模板，output参考与原file来源标识不进入请求。8192输出预算是明确的推理续写配置，不是作者训练或官方benchmark预算；不改原题、不截断输入、不重试或替换失败。固定首三题及补充三题的实际验证范围需以交付回执为准，不代表12000题全量推理、LongLoRA训练或作者Llama2模型复现。不新增训练答案匹配率作为质量成绩；原source-file信息仅保真，未据此计算研究特征、构造共享关系或推断每条记录的语义类别。
+
 ### DuReader 原始 search demo 原生生成与评分
 
 评分软件准备入口（Python3.12，CPU，不下载数据或模型）：

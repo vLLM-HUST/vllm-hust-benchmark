@@ -24,6 +24,7 @@ def original_fixture(request, tmp_path):
             "instruction": "fixture instruction",
             "input": "fixture context",
             "output": "fixture answer",
+            "file": "original-document-identity-fixture.pdf",
         }
         if sid == "LONGALPACA"
         else {"question": "fixture question", "answer": ["fixture answer", "alternate"]}
@@ -103,6 +104,10 @@ def test_prepare_and_resolve_preserve_fields_without_copying_data(
     if sid == "LONGALPACA":
         assert record.task["input"]["instruction"] == row["instruction"]
         assert record.outcome["reference_output"] == row["output"]
+        assert record.outcome["original_source_file"] == row["file"]
+        assert "original-document-identity-fixture.pdf" not in json.dumps(
+            record.task["input"]
+        )
     elif sid == "NATURALQUESTIONS":
         assert record.task["input"]["question"] == row["question"]
         assert record.outcome["answers"] == row["answer"]

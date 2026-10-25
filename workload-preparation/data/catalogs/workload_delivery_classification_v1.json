@@ -21,6 +21,11 @@
     {"source_id": "PAIO-SEMANTIC-SIMILAR-5000", "asset_group": "enterprise-private-requests", "related_workload_ids": [], "boundary": "Semantic similarity is not exact-prefix or KV reuse; preserve original private requests without rewriting."}
   ],
   "source_entrypoints": {
+    "LONGALPACA": [
+      {"role": "original_profile", "path": "scripts/run_longalpaca_original.py", "scope": "Published constructed instruction corpus, not an independent quality benchmark. Preserve complete original instruction/optional input using existing model native chat formatting; no gold output or provenance in requests, no LongLoRA SFT/model reproduction claim."},
+      {"role": "prepare_assets", "path": "scripts/prepare_reused_research_assets.py"},
+      {"role": "data_reading_only", "path": "scripts/prepare_reused_source_records.py", "scope": "Original instruction/input/output and optional source-file identity retained; source-file/reference annotations outside model input. Full source preparation and native execution are separate evidence gates."}
+    ],
     "DUREADER": [
       {"role": "prepare_assets", "path": "scripts/prepare_reused_research_assets.py", "scope": "Publisher search demo train/dev100 each acquired through original pinned GitHub file identities, no payload publication."},
       {"role": "data_reading_only", "path": "scripts/prepare_reused_source_records.py", "scope": "All200 demo question/916 document fields and twelve fixed-provider/research roundtrips verified; reference/publisher annotation fields remain outside model inputs. Actual native completion tracked separately in delivery ledger."},
