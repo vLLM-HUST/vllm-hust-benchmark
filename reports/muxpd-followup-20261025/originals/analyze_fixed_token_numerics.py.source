@@ -1,0 +1,237 @@
+"""Offline identity-checked logit comparisons, never comparing divergent histories."""
+from __future__ import annotations
+
+import argparse
+import hashlib
+import itertools
+import json
+from pathlib import Path
+
+import numpy as np
+
+
+def source(path):
+    raw = path.read_bytes()
+    return {"path": str(path), "bytes": len(raw),
+            "sha256": hashlib.sha256(raw).hexdigest()}
+
+
+def load(directory):
+    report = json.loads((directory / "run.json").read_text())
+    metadata = {}
+    phases = report["phases"]
+    for phase_index, phase in enumerate(phases):
+        for lane, request_id in enumerate(phase["request_ids"]):
+            if request_id in metadata:
+                raise ValueError("Duplicate internal request ID")
+            metadata[request_id] = {"phase": phase_index, "lane": lane,
+                "name": phase["name"], "repeat": phase["warm_repeat"],
+                "prompt": phase["prompts"][lane]}
+    records, inputs, ranks = {}, [source(directory / "run.json")], {}
+    for path in sorted((directory / "worker-observations").glob("rank-*-*.jsonl")):
+        inputs.append(source(path))
+        for text in path.read_text().splitlines():
+            event = json.loads(text)
+            if event["event"] != "native-sample-observed":
+                continue
+            rank = int(event["rank"])
+            rank_rows = ranks.setdefault(rank, {})
+            for row in event["rows"]:
+                key = (row["request_id"], row["output_token_index"])
+                if key in rank_rows:
+                    raise ValueError("Duplicate per-rank sampling decision")
+                rank_rows[key] = {name: row[name] for name in (
+                    "prompt_token_ids", "output_prefix_token_ids",
+                    "sampled_token_ids", "num_computed_tokens", "kv_block_ids",
+                )}
+            if rank != 0:
+                continue
+            semantic_batch = []
+            for row in event["rows"]:
+                meta = metadata[row["request_id"]]
+                semantic_batch.append({
+                    "lane": meta["lane"], "prompt": row["prompt_token_ids"],
+                    "prefix": row["output_prefix_token_ids"],
+                    "computed": row["num_computed_tokens"],
+                    "num_tokens_no_spec": row["num_tokens_no_spec"],
+                    "scheduled_tokens": event["schedule"]["num_scheduled_tokens"].get(row["request_id"]),
+                    "input_token_ids": row["input_token_ids"],
+                })
+            for row in event["rows"]:
+                meta = metadata[row["request_id"]]
+                if row["prompt_token_ids"] != meta["prompt"]:
+                    raise ValueError("Observed prompt differs from admitted phase")
+                key = (meta["phase"], meta["lane"], row["output_token_index"])
+                if key in records:
+                    raise ValueError(f"Duplicate sampling decision {key}")
+                item = {"row": row, "meta": meta, "semantic_batch": semantic_batch,
+                        "batch_descriptor": event.get("batch_descriptor"),
+                        "lane": event["lane"], "runner_sequence": event["sequence"]}
+                receipt = row.get("logits")
+                if receipt:
+                    path = directory / "worker-observations" / receipt["file"]
+                    if Path(receipt["file"]).name != receipt["file"]:
+                        raise ValueError("Unsafe logit filename")
+                    identity = source(path)
+                    if any(identity[key] != receipt[key] for key in ("bytes", "sha256")):
+                        raise ValueError("Logit bytes differ from observer receipt")
+                    values = np.load(path, allow_pickle=False)
+                    if list(values.shape) != receipt["shape"] or str(values.dtype) != receipt["dtype"]:
+                        raise ValueError("Logit shape/dtype differs from observer")
+                    item["values"] = values
+                    inputs.append(identity)
+                records[key] = item
+    api_bound = 0
+    for phase_index, phase in enumerate(phases):
+        mapping = phase.get("internal_to_external")
+        if mapping is None:
+            continue
+        if set(mapping) != set(phase["request_ids"]):
+            raise ValueError("Internal/external map does not cover phase")
+        outputs = {row["request_id"]: row for row in phase["outputs"]}
+        for lane, request_id in enumerate(phase["request_ids"]):
+            if mapping[request_id] not in outputs:
+                continue
+            row = outputs[mapping[request_id]]
+            observed = [records[(phase_index, lane, i)]["row"]["sampled_token_ids"]
+                        for i in range(8) if (phase_index, lane, i) in records]
+            if len(observed) == 8:
+                if [v for token in observed for v in token] != row["outputs"][0]["token_ids"]:
+                    raise ValueError("Sampler token IDs differ from mapped API output")
+                api_bound += 1
+    consistency = {"observed_ranks": sorted(ranks),
+                   "rank_zero_decisions": len(ranks.get(0, {})),
+                   "all_four_ranks_agree": set(ranks) == {0, 1, 2, 3} and
+                   all(rows == ranks[0] for rows in ranks.values()),
+                   "complete_api_sequences_bound_to_sampler": api_bound}
+    return {"directory": str(directory), "report": report, "records": records,
+            "sources": inputs, "metadata": metadata, "consistency": consistency}
+
+
+def compare_decision(left, right):
+    a, b = left["row"], right["row"]
+    same_history = (a["prompt_token_ids"] == b["prompt_token_ids"] and
+                    a["output_prefix_token_ids"] == b["output_prefix_token_ids"])
+    same_batch = left["semantic_batch"] == right["semantic_batch"]
+    da, db = left["batch_descriptor"], right["batch_descriptor"]
+    result = {"output_token_index": a["output_token_index"],
+              "left_sampled_ids": a["sampled_token_ids"],
+              "right_sampled_ids": b["sampled_token_ids"],
+              "tokens_equal": a["sampled_token_ids"] == b["sampled_token_ids"],
+              "same_request_history": same_history, "same_semantic_batch": same_batch,
+              "left_batch_descriptor": da, "right_batch_descriptor": db,
+              "strict_context_match": same_history and same_batch and da is not None and da == db,
+              "logits_compared": False}
+    if not same_history:
+        result["reason"] = "Request histories diverged; no numeric distances computed."
+        return result
+    if not same_batch:
+        result["reason"] = "Other batch content/order/shape differs; no numeric distances computed."
+        return result
+    if "values" not in left or "values" not in right:
+        result["reason"] = "One full logit vector was not captured."
+        return result
+    x, y = left["values"].astype(np.float64), right["values"].astype(np.float64)
+    if x.shape != y.shape:
+        result["reason"] = "Captured vocabulary shapes differ."
+        return result
+    finite = np.isfinite(x) & np.isfinite(y)
+    masks_equal = all(np.array_equal(fn(x), fn(y)) for fn in (np.isnan, np.isposinf, np.isneginf))
+    diff = x[finite] - y[finite]
+    top = np.sort(x[np.isfinite(x)])[-2:]
+    margin = float(top[-1] - top[-2]) if len(top) == 2 else None
+    max_error = float(np.max(np.abs(diff))) if len(diff) else None
+    arg_x, arg_y = int(np.argmax(x)), int(np.argmax(y))
+    result.update(logits_compared=True,
+                  vocabulary_size=int(x.size), nonfinite_masks_equal=masks_equal,
+                  left_nan_count=int(np.isnan(x).sum()), right_nan_count=int(np.isnan(y).sum()),
+                  shared_finite_entries=int(finite.sum()),
+                  logits_byte_equal=np.array_equal(left["values"], right["values"], equal_nan=True),
+                  max_abs_delta=max_error,
+                  rms_delta=float(np.sqrt(np.mean(diff * diff))) if len(diff) else None,
+                  left_cpu_argmax=arg_x, right_cpu_argmax=arg_y,
+                  left_native_argmax_agrees=a["sampled_token_ids"] == [arg_x],
+                  right_native_argmax_agrees=b["sampled_token_ids"] == [arg_y],
+                  left_top1_top2_margin=margin,
+                  infinity_bound_guarantees_same_argmax=bool(masks_equal and margin is not None and max_error is not None and margin > 2 * max_error))
+    if da is None or db is None:
+        result["scope_note"] = "Semantic inputs match but at least one padded graph descriptor was not observed."
+    elif da != db:
+        result["scope_note"] = "Semantic inputs match but padded graph descriptors differ."
+    return result
+
+
+def compare_request(left, right, left_phase, right_phase, lane):
+    pairs = []
+    indices = sorted({key[2] for key in left["records"] if key[:2] == (left_phase, lane)} &
+                     {key[2] for key in right["records"] if key[:2] == (right_phase, lane)})
+    for index in indices:
+        pairs.append(compare_decision(left["records"][(left_phase, lane, index)],
+                                      right["records"][(right_phase, lane, index)]))
+    first = next((row for row in pairs if not row["tokens_equal"]), None)
+    return {"left_phase": left_phase, "right_phase": right_phase, "lane": lane,
+            "compared_sampled_positions": len(pairs),
+            "exact_sequence_match": len(pairs) == 8 and all(row["tokens_equal"] for row in pairs),
+            "first_observed_token_difference": first,
+            "decisions": pairs}
+
+
+def warm_pairs(collection):
+    groups = {}
+    for index, phase in enumerate(collection["report"]["phases"]):
+        groups.setdefault(phase["name"], []).append(index)
+    results = []
+    for indices in groups.values():
+        for left, right in itertools.combinations(indices, 2):
+            for lane in range(len(collection["report"]["phases"][left]["request_ids"])):
+                results.append(compare_request(collection, collection, left, right, lane))
+    return results
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--left", type=Path, required=True)
+    parser.add_argument("--right", type=Path)
+    parser.add_argument("--output", type=Path, required=True)
+    args = parser.parse_args()
+    if args.output.exists():
+        raise FileExistsError(args.output)
+    left = load(args.left)
+    result = {"schema": "muxpd-fixed-numerics-comparison-v1",
+              "scope": "Offline derived facts from captured vectors. No numerical acceptance threshold, semantic quality, performance or causal attribution is established.",
+              "producer": source(Path(__file__)),
+              "left_collection_passed": left["report"]["passed"],
+              "left_consistency": left["consistency"],
+              "left_sources": left["sources"], "left_warm_pairs": warm_pairs(left)}
+    if args.right:
+        right = load(args.right)
+        cross = []
+        for index, phase in enumerate(left["report"]["phases"]):
+            if index >= len(right["report"]["phases"]):
+                break
+            other = right["report"]["phases"][index]
+            if (phase["name"], phase["warm_repeat"], phase["prompts"]) != (other["name"], other["warm_repeat"], other["prompts"]):
+                raise ValueError("Cross-run phase workloads do not match")
+            for lane in range(len(phase["prompts"])):
+                cross.append(compare_request(left, right, index, index, lane))
+        result.update(right_collection_passed=right["report"]["passed"],
+                      right_consistency=right["consistency"],
+                      right_sources=right["sources"], right_warm_pairs=warm_pairs(right),
+                      cross_pairs=cross,
+                      same_driver_source=(left["report"]["producer_sha256"] ==
+                                          right["report"]["producer_sha256"]),
+                      engine_argument_differences={
+                          key: [left["report"]["engine_args"].get(key),
+                                right["report"]["engine_args"].get(key)]
+                          for key in sorted(set(left["report"]["engine_args"]) |
+                                            set(right["report"]["engine_args"]))
+                          if left["report"]["engine_args"].get(key) !=
+                          right["report"]["engine_args"].get(key)
+                      })
+    args.output.write_text(json.dumps(result, indent=2, allow_nan=False) + "\n")
+    print(json.dumps({"output": str(args.output), "left_warm_pairs": len(result["left_warm_pairs"]),
+                      "cross_pairs": len(result.get("cross_pairs", []))}))
+
+
+if __name__ == "__main__":
+    main()

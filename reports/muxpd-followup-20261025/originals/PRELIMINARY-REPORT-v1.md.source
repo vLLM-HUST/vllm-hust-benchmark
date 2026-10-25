@@ -1,0 +1,137 @@
+# MuxPD TP4 numerical follow-up — preliminary evidence v1
+
+This is a bounded correctness diagnostic on four measured Ascend 910B2 devices,
+Qwen3.5-35B-A3B, BF16, TP4/EP4. It is not a throughput, goodput or semantic-quality
+result and does not qualify PR #10 for merging. The ten explicitly selected
+terminal runs are listed in `terminal-selection-v1.json`; failed attempts remain
+included. Pending quality, pressure/cancellation and clean performance experiments
+are not inferred from these captures.
+
+## Findings from terminal captures
+
+Normal controls use three repeats of one P128 request and three repeats of four
+P128 requests, each with eight greedy output tokens. Full-vocabulary vectors are
+saved on rank zero; all four ranks have sampling receipts. The counts below are
+paired request sequences and comparable captured rank-zero vectors.
+
+| Comparison | Exact output sequences | Elementwise-equal vectors | Literal equal `.npy` SHA256 |
+|---|---:|---:|---:|
+| Native default-02 warm pairs | 13/15 | 0/88 comparable | 0/88 |
+| Native default-03 warm pairs | 13/15 | 0/114 comparable | 0/114 |
+| Native default-02 vs default-03 fresh processes | 11/15 | 0/57 comparable | 0/57 |
+| Native HCCL=true-01 warm pairs | 15/15 | 120/120 | 120/120 |
+| Native HCCL=true-02 warm pairs | 15/15 | 120/120 | 120/120 |
+| Native HCCL=true-01 vs true-02 fresh processes | 15/15 | 120/120 | 120/120 |
+| Raw HCCL=true extension-01 warm pairs | 15/15 | 120/120 | 120/120 |
+| Native HCCL=true-02 vs raw extension-01 | 15/15 | 120/120 | 120/120 |
+
+The last row crosses observer/source revisions and is a descriptive comparison.
+Native source `46db71a3e1772c667cc3e235c05eeaf8381f0d43` selects a diagnostic native
+worker subclass whose instrumentation is present before native warmup. Raw source
+`9f016ff6278c6ca0a6b4d66f08ccff01873c9446` selects the exact production worker plus
+a supported extension and installs its observer after warmup. This is not a
+single-variable raw/native equivalence experiment. The normal controls use the
+default compiler backend; they must not be mixed with the explicit fusion-backend
+composite comparison below.
+
+The native-only controls associate the sole explicit
+`HCCL_DETERMINISTIC=true` environment change with exact warm/fresh repetition on
+this workload. They do not isolate the responsible collective or prove universal
+determinism. Native default variability is not a waiver for plugin errors.
+
+The terminal composite native/raw pair uses the same source
+`6c606f789450a45ef35afee398b0a3e516caa1a1`, the same post-warmup observer extension,
+`HCCL_DETERMINISTIC=true`, and explicit
+`enable_npugraph_ex=false, enable_static_kernel=false`. Both use their exact
+ordinary worker selectors. Native chunked prefill is enabled; raw complete
+prefill uses the plugin and disables chunking, so the algorithm and resulting
+batch composition intentionally differ. Each process contains the normal family
+followed by a seed-first family; in the staggered four-lane phases the remaining
+three P128 requests are admitted when the scheduler records the seed's first
+output token.
+
+| Composite comparison | Exact output sequences | Elementwise-equal vectors | Literal equal `.npy` SHA256 |
+|---|---:|---:|---:|
+| Native warm pairs | 30/30 | 240/240 | 240/240 |
+| Raw warm pairs | 30/30 | 240/240 | 240/240 |
+| Native vs raw | 30/30 | 147/147 comparable | 147/147 |
+
+All 240 output positions agree in this native/raw pair, and all four ranks agree
+on sampled token receipts. Only 147 positions pass the analyzer's observed
+request-prefix, peer-input and batch matching checks; 93 are not assigned a
+same-batch logit-distance claim. Identical current inputs do not prove identical
+hidden state or entire process history. The seed-first family shares process
+history with the earlier normal family. No group-FX candidate is included in
+this v1 selection.
+
+`numerical-summary-v1.json` re-verifies every original analysis input identity and
+binds paired vector SHA256 to the sampler receipts. It distinguishes the original
+analyzer's historically named `logits_byte_equal` field (elementwise array equality)
+from a separate literal `.npy` file-hash comparison. They coincide in the exact
+rows above, but their meanings remain separate. Logit distances stop when the
+observed request or peer context diverges. The full raw vectors and observations
+are retained regardless of whether a comparison is admitted.
+
+## Failures and other bounded evidence
+
+- `native-default-01` failed the original internal/external request-ID verifier
+  after one eight-token request; available captures remain archived, with no
+  promotion to a complete run.
+- `raw-default-01` failed worker-selector contract validation during startup.
+  The subsequent extension implementation does not erase this attempt.
+- `raw-pressure-geometry-01` completed discovery without requests. It measured
+  3,325 native blocks, one full-attention group with 1,024-token blocks and three
+  Mamba groups with 16,384-token blocks. Native startup requires 19 blocks and
+  the explicit null-block guard requires 20. This is geometry evidence, not
+  pressure, preemption, cancellation or reuse evidence.
+
+## Provenance and archive boundaries
+
+Pinned Core is `d0f22d2bda562156e4dbf433ce645e1769b4f804`; pinned Ascend is
+`03766ac696fde5ab1980d80ca0b8543d3580c989`. The captured environment reports
+torch-npu 2.10.0.post4, and CANN paths identify the 9.1.0 installation. Initial
+hardware inventory explicitly names 910B2; the controller records the visible
+device selection for each run. Initial model metadata and a subsequent complete
+SHA256 inventory of all fourteen safetensors shards are included. Model weights
+themselves are not included in these evidence capsules.
+
+Every run directory is archived in full, including failures, process/controller
+logs, pre/post device inventories, `.npy` files, all observed ranks, compiler
+constants, compiler cache graphs, engine arguments, plans and any locally copied
+producer files. Exact source commits are additionally exported with `git archive`,
+without Git history; every source-tar file member is independently hashed. These
+committed source trees do not reconstruct installed native binary artifacts.
+
+The initial Ascend checkout had an existing `csrc/build_aclnn.sh` modification.
+The initial identity records that dirty path. A separately labelled packaging-time
+patch/file snapshot is included, but its later hash is not asserted to prove the
+exact historical dirty bytes or the compiled binary identity at every earlier
+launch. The original evidence is preserved with that provenance limit.
+
+Each capsule embeds its frozen original-member manifest. The builder rechecks
+terminal process and process-group status, controller/config/plan identities and
+the complete run inventory; verifies compressed output by rereading every member;
+and rehashes original inputs afterward. Per-capsule receipts and the versioned
+index hash archives and manifests. No active run is inferred from a directory
+name, and a missing terminal timestamp/exit code is rejected. Later terminal
+runs require new capsules and a new index/report version.
+
+This v1 is local preparation outside the benchmark Git tree. Root still owns
+Release upload and subsequent remote download/SHA verification. Local custody
+checks are not evidence of remote availability or benchmark acceptance.
+
+## Remaining acceptance work
+
+The same-revision, same-backend raw/group comparison must establish candidate
+numerical behavior and group/MoE metadata invariants. The frozen 200-case
+MMLU-Pro quality plan still requires two native controls and candidate runs, no
+new wrong answers on the native-stable subset, and real mixed execution coverage.
+Actual pressure must show the intended D allocation failure and pinned-P
+preemption/recovery. Partial/full cancellation must show matching ACK, held-block
+ownership, release and reuse. Installed plugin configuration/cleanup checks and
+ordinary-worker runs without diagnostic observation must follow. Clean latency,
+throughput and goodput measurements are needed before claiming a new benefit.
+
+These observations improve the experimental controls and establish a narrow
+native/raw agreement result; they do not yet establish a new throughput/goodput
+gain or the value of group-FX compilation.

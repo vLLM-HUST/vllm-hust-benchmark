@@ -1,0 +1,117 @@
+{
+  "schema": "muxpd-numerical-summary-v1",
+  "scope": "Derived counts only; source bindings reverified. No acceptance tolerance, quality, throughput or cause inferred.",
+  "producer": {
+    "path": "/root/workspace/muxpd-followup-20261025/numerics/summarize_numerical_analyses.py",
+    "bytes": 7621,
+    "sha256": "cf88c5208f6b6af127e4bfa7ee22c0bfd25a92e7b3d9d5d570b4a1abbc69f96c"
+  },
+  "verified_source_identities": 499,
+  "analyses": [
+    {
+      "analysis": {
+        "path": "/root/workspace/muxpd-followup-20261025/numerics/raw-vs-group-fusion-composite-hccl-true-derived.json",
+        "bytes": 1103546,
+        "sha256": "2cdbf12416b2b03795dc038a510e4a775a29a363ab66e019af374cfcc175e2cd"
+      },
+      "scope": "Offline derived facts from captured vectors. No numerical acceptance threshold, semantic quality, performance or causal attribution is established.",
+      "left_collection_passed": true,
+      "right_collection_passed": true,
+      "left_consistency": {
+        "observed_ranks": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "rank_zero_decisions": 240,
+        "all_four_ranks_agree": true,
+        "complete_api_sequences_bound_to_sampler": 30
+      },
+      "right_consistency": {
+        "observed_ranks": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "rank_zero_decisions": 240,
+        "all_four_ranks_agree": true,
+        "complete_api_sequences_bound_to_sampler": 30
+      },
+      "same_driver_source": true,
+      "engine_argument_differences": {
+        "batch_admission_policy_config": [
+          {
+            "execution": "decoupled",
+            "stream_mode": "overlap",
+            "layers_per_slice": 4,
+            "adaptive_layers": false,
+            "prefill_first": false,
+            "decode_graph": true,
+            "compile_full_prefill": false,
+            "prefill_layer_token_budget": 0,
+            "decode_budget_guard": false,
+            "overlap_communication": "isolated",
+            "compile_prefill_groups": false
+          },
+          {
+            "execution": "decoupled",
+            "stream_mode": "overlap",
+            "layers_per_slice": 4,
+            "adaptive_layers": false,
+            "prefill_first": false,
+            "decode_graph": true,
+            "compile_full_prefill": false,
+            "prefill_layer_token_budget": 0,
+            "decode_budget_guard": false,
+            "overlap_communication": "isolated",
+            "compile_prefill_groups": true
+          }
+        ]
+      },
+      "left_warm_pairs": {
+        "request_pairs": 30,
+        "exact_token_sequence_pairs": 30,
+        "paired_token_positions": 240,
+        "shared_request_prefix_positions": 240,
+        "shared_request_and_peer_context_positions": 240,
+        "compared_logit_vectors": 240,
+        "strict_batch_descriptor_positions": 240,
+        "exact_logit_value_equal_vectors": 240,
+        "byte_identical_npy_files_on_compared_positions": 240,
+        "max_abs_delta_on_compared_positions": 0.0,
+        "all_compared_native_argmax_agree_with_cpu": true,
+        "first_divergences": []
+      },
+      "right_warm_pairs": {
+        "request_pairs": 30,
+        "exact_token_sequence_pairs": 30,
+        "paired_token_positions": 240,
+        "shared_request_prefix_positions": 240,
+        "shared_request_and_peer_context_positions": 240,
+        "compared_logit_vectors": 240,
+        "strict_batch_descriptor_positions": 240,
+        "exact_logit_value_equal_vectors": 240,
+        "byte_identical_npy_files_on_compared_positions": 240,
+        "max_abs_delta_on_compared_positions": 0.0,
+        "all_compared_native_argmax_agree_with_cpu": true,
+        "first_divergences": []
+      },
+      "cross_pairs": {
+        "request_pairs": 30,
+        "exact_token_sequence_pairs": 30,
+        "paired_token_positions": 240,
+        "shared_request_prefix_positions": 240,
+        "shared_request_and_peer_context_positions": 240,
+        "compared_logit_vectors": 240,
+        "strict_batch_descriptor_positions": 240,
+        "exact_logit_value_equal_vectors": 240,
+        "byte_identical_npy_files_on_compared_positions": 240,
+        "max_abs_delta_on_compared_positions": 0.0,
+        "all_compared_native_argmax_agree_with_cpu": true,
+        "first_divergences": []
+      }
+    }
+  ]
+}
