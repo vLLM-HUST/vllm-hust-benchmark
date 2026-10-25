@@ -21,6 +21,11 @@
     {"source_id": "PAIO-SEMANTIC-SIMILAR-5000", "asset_group": "enterprise-private-requests", "related_workload_ids": [], "boundary": "Semantic similarity is not exact-prefix or KV reuse; preserve original private requests without rewriting."}
   ],
   "source_entrypoints": {
+    "NATURALQUESTIONS": [
+      {"role": "original_profile", "path": "scripts/run_nq_open_original.py", "scope": "Pinned lm-eval0.4.11 original nq_open generation/filter/Exact Match over unchanged original question/answer files. Explicit zero-shot closed-book local-model transport; native run pending, no DPR/REALM retrieval or full Natural Questions document claim."},
+      {"role": "prepare_assets", "path": "scripts/prepare_reused_research_assets.py"},
+      {"role": "data_reading_only", "path": "scripts/prepare_reused_source_records.py"}
+    ],
     "TOOLACE": [
       {"role": "prepare_assets", "path": "scripts/audit_toolace_original_corpus.py", "scope": "Portable full original corpus/index/resolve audit only; no model request renderer, online tools or native task scoring."},
       {"role": "original_profile", "path": "scripts/run_toolace_original_continuation.py", "scope": "All11300 original corpus fields/index and six fixed-provider public/research resolutions verified. First3 original histories/all15 assistant positions return stop on two Ascend NPUs with declared Qwen fallback; original tool context and native template preserved. External Jinja/vocabulary identity and all saved prompts reverified without model rerun. No live tools, invented IDs, dynamic observations, BFCL quality or full-corpus inference claim."}

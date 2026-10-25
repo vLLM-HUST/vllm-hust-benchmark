@@ -531,6 +531,21 @@ Questions当前为NQ-open；DuReader为demo；WildChat为原1M固定14分片，�
 
 ### FLORES-200 原始翻译资产（历史获取截面；当前交付结论见下文）
 
+NQ-open原生生成/评分入口已补（此处是执行方法，完成状态仍看机器清单与原生回执）：
+
+```sh
+python scripts/run_nq_open_original.py \
+  --data-root /private/nq-open-original-assets \
+  --endpoint http://127.0.0.1:19466/v1/completions \
+  --model workload-qwen35-27b-128k-nonthinking \
+  --tokenizer /workspace/models/Qwen3.5-27B --max-length 131072 \
+  --output /private/fresh-nq-open-native --concurrency 2
+```
+
+默认固定原dev0/1/2，`--start/--count`选择事前固定的连续原行号（至少3条），`--full`选择全部3610条；不把获取的87925条训练题当test，训练文件仅保留给原框架读取。使用固定lm-eval0.4.11原nq_open配置和官方过滤/Exact
+Match；完整答案别名保留。唯一数据配置变化为本地原JSON路径，明确零样本、闭卷、模型替换及原API默认256生成上限，不添加聊天模板或修改原停止串。先检查全部所选原提示容量再调用模型，拒绝截断、换题或自动重试。输出及框架缓存含原题/回答，只放私有服务器；答错/空输出交原评分器，不人为排除。环境约束见[nq-open客户端](../../configs/workload-native/nq-open-lmeval-client-constraints.txt)。不是DPR/REALM检索、EfficientQA或原Natural
+Questions文档标注任务，也不冒充发布方TensorFlow评分CLI/论文模型复现。
+
 2026-10-26补充：原生三语向抽样、原指标评分、固定软件包与研究侧消费已收口，见[交付回执](validation/flores200-native-delivery-20261026.json)。下面的准备中/待核描述保留历史截面，不再代表当前交付状态；隐藏test、未支持的原始语言代码和非商业模型许可限制仍有效。
 
 原始GitHub数据文件如遇raw主机连接失败，可显式使用发布方API传输；不会跳过来源固定版本、大小和SHA256校验：
