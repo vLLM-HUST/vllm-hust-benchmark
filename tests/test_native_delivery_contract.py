@@ -8,6 +8,43 @@ ROOT = Path(__file__).resolve().parents[1]
 DOCS = ROOT / "docs/workload-data"
 
 
+def test_original_qasper_native_delivery_retains_zero_evidence_and_consumer_scope():
+    ledger = json.loads((DOCS / "dataset-validation-status.json").read_text("utf-8"))
+    row = ledger["delivery_inventory"]["QASPER"]
+    receipt = json.loads((ROOT / row["delivery_receipt"]).read_text("utf-8"))
+    assert row["status"] == "AVAILABLE" and row["checked"]
+    assert (
+        receipt["source_checkbox_eligible"] and receipt["not_longbench_derived_qasper"]
+    )
+    assert receipt["original_population"]["questions"] == 5049
+    native = receipt["native_profile"]
+    assert native["original_split"] == "dev" and native["original_positions"] == [
+        0,
+        1,
+        2,
+    ]
+    assert (
+        native["model_calls"]
+        == native["stop"]
+        == native["valid_native_predictions"]
+        == 3
+    )
+    assert not native["input_truncated"]
+    assert not native["sibling_question_or_gold_annotations_in_input"]
+    assert not native["predictions_repaired_retried_or_replaced"]
+    grading = receipt["publisher_grading"]
+    assert not grading["evaluator_modified"] and not grading["text_evidence_only"]
+    assert grading["standalone_original_cli_exit_code"] == 0
+    assert grading["inprocess_and_standalone_cli_scores_identical"]
+    assert grading["scores"]["Evidence F1"] == 0
+    assert not grading["quality_acceptance_or_paper_baseline_claim"]
+    consumer = receipt["fixed_provider_current_research_consumer"]
+    assert consumer["installed_noneditable_payloads_byte_verified"] == 42
+    assert consumer["current_public_research_roundtrips"] == 9
+    assert consumer["existing_full5049_field_index_and_media_checks_not_rerun"]
+    assert not consumer["research_default_dependency_changed"]
+
+
 def test_longalpaca_original_corpus_delivery_is_not_fake_quality_benchmark():
     ledger = json.loads((DOCS / "dataset-validation-status.json").read_text("utf-8"))
     row = ledger["delivery_inventory"]["LONGALPACA"]

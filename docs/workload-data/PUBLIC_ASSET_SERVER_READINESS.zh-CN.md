@@ -218,6 +218,10 @@ python /private/fresh-qasper-v03/publisher-assets/qasper_evaluator.py \
 原[LED基线](https://github.com/allenai/qasper-led-baseline/tree/afd0fb96bf78ce8cd8157639c6f6a6995e4f9089)使用AllenNLP2.2；当前验证用已有Qwen3.5-27B
 BF16双NPU服务，独立CPU客户端只做分词及官方独立评分。此处是文本/图表说明的替代模型配置，不是LED模型复现或图像像素推理。原图资产继续保留，不冒充模型已消费像素；主评分使用作者默认完整参考，未开启`--text_evidence_only`来移除图表证据或提高分数。
 
+现已完成[原版QASPER抽样交付](validation/qasper-native-delivery-20261026.json)：原dev前三题3次NPU推理均stop，3条原生预测字段有效，保存的完整输入、原问题/参考关系、分词配置、usage和终态独立CPU复核；作者未修改CLI评分与内存调用一致，Answer
+F1=0.4996101364522418、Evidence
+F1=0、missing=0，不修补或过滤低分。复用原5049条与图像准备证据，当前精确A9工件42个payload及研究dd消费者在三split共9处原索引回查通过，未重建索引或升级研究默认依赖。上文准备阶段“保持未勾”不再代表当前状态；约定抽样范围现已勾选，不是质量、全量或视觉模型通过。
+
 ## RULER 原生成任务与完成式服务接入（2026-10-25，进行中）
 
 使用 NVIDIA/RULER 官方固定提交
