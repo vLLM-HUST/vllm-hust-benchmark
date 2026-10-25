@@ -39,11 +39,20 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     commands = parser.add_subparsers(dest="command", required=True)
     commands.add_parser("identity")
-    commands.add_parser("classes")
+    commands.add_parser("delivery-assets")
+    source_plan = commands.add_parser("source-plan")
+    source_plan.add_argument("source_id")
+    classes = commands.add_parser("classes")
+    classes.add_argument(
+        "--scheme", choices=["research", "delivery-plan"], default="research"
+    )
     sources = commands.add_parser("sources")
     sources.add_argument("--class", dest="class_id")
     plan = commands.add_parser("class-plan")
     plan.add_argument("class_id")
+    plan.add_argument(
+        "--scheme", choices=["research", "delivery-plan"], default="research"
+    )
     native = commands.add_parser("native-tasks")
     native.add_argument("--official-archive", type=Path, required=True)
     native.add_argument("--data-root", type=Path, required=True)
@@ -106,12 +115,43 @@ def main(argv=None):
         provider = load_provider()
         if args.command == "identity":
             value = provider.provider_identity()
+        elif args.command == "delivery-assets":
+            if not hasattr(provider, "delivery_assets"):
+                raise RuntimeError(
+                    "install the exact provider containing the 118-source plan"
+                )
+            value = provider.delivery_assets()
+        elif args.command == "source-plan":
+            if not hasattr(provider, "delivery_source_plan"):
+                raise RuntimeError(
+                    "install the exact provider containing the 118-source plan"
+                )
+            value = provider.delivery_source_plan(args.source_id)
         elif args.command == "classes":
-            value = importlib.import_module(
-                "vllm_hust_workload_data.taxonomy"
-            ).research_classes()
+            taxonomy = importlib.import_module("vllm_hust_workload_data.taxonomy")
+            if args.scheme == "delivery-plan" and not hasattr(
+                taxonomy, "delivery_classes"
+            ):
+                raise RuntimeError(
+                    "install the exact provider containing the 40-class plan; no silent research-view fallback"
+                )
+            value = (
+                taxonomy.delivery_classes()
+                if args.scheme == "delivery-plan"
+                else taxonomy.research_classes()
+            )
         elif args.command == "class-plan":
-            value = provider.class_plan(args.class_id)
+            if args.scheme == "delivery-plan" and not hasattr(
+                provider, "delivery_class_plan"
+            ):
+                raise RuntimeError(
+                    "install the exact provider containing the 40-class plan"
+                )
+            value = (
+                provider.delivery_class_plan(args.class_id)
+                if args.scheme == "delivery-plan"
+                else provider.class_plan(args.class_id)
+            )
         elif args.command == "native-tasks":
             value = provider.tau2_task_references(
                 official_archive=args.official_archive,

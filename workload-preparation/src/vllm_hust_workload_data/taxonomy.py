@@ -66,6 +66,118 @@ def research_classes(root=None):
     return rows
 
 
+def delivery_classes(root=None):
+    """Explicit 40-class plan, not a replacement for the research default."""
+    plan = read_catalog("workload_delivery_classification_v1.json", root)
+    rows = plan["classes"]
+    legacy = {row["family_id"] for row in research_classes(root)}
+    additions = {"constraint-planning", "text-to-speech-generation"}
+    if (
+        plan["schema_version"] != "workload-delivery-classification/v1"
+        or plan["selection_scope"] != "CANDIDATE_SOURCES_NOT_RECORD_MEMBERSHIP"
+        or len(rows) != 40
+        or [row["workload_id"] for row in rows] != [f"W{i:02}" for i in range(1, 41)]
+        or {row["family_id"] for row in rows} != legacy | additions
+    ):
+        raise ValueError(
+            "40-class plan must preserve existing IDs and only declared additions"
+        )
+    registered = set(read_catalog("source_manifests_v1.json", root)["sources"])
+    result = []
+    for row in rows:
+        candidates = row["candidate_source_ids"]
+        if (
+            not candidates
+            or len(set(candidates)) != len(candidates)
+            or any(not isinstance(sid, str) or not sid for sid in candidates)
+            or row["native_validation"] != "NOT_ESTABLISHED_BY_CLASSIFICATION"
+        ):
+            raise ValueError(
+                "explicit candidates without native readiness claims required"
+            )
+        expected = (
+            "PLANNED_ADDITIONAL_CLASS_ONLY"
+            if row["family_id"] in additions
+            else "EXISTING_RESEARCH_CLASS_DEFINITION"
+        )
+        if row["definition_status"] != expected:
+            raise ValueError(
+                "planned additions cannot impersonate existing research classes"
+            )
+        result.append(
+            {
+                **row,
+                "selection_scope": plan["selection_scope"],
+                "candidate_provider_registration": [
+                    {
+                        "source_id": sid,
+                        "data_provider_source_registered": sid in registered,
+                        "other_benchmark_entrypoints_checked": False,
+                    }
+                    for sid in candidates
+                ],
+            }
+        )
+    return result
+
+
+def delivery_assets(root=None):
+    """All plan sources, including traces and private request assets, no raw data."""
+    classes = delivery_classes(root)
+    plan = read_catalog("workload_delivery_classification_v1.json", root)
+    registered = set(read_catalog("source_manifests_v1.json", root)["sources"])
+    result = {}
+    for row in classes:
+        for source_id in row["candidate_source_ids"]:
+            item = result.setdefault(
+                source_id,
+                {
+                    "source_id": source_id,
+                    "asset_group": "task-class-candidates",
+                    "related_workload_ids": [],
+                    "selection_scope": plan["selection_scope"],
+                },
+            )
+            item["related_workload_ids"].append(row["workload_id"])
+    class_ids = {r["workload_id"] for r in classes}
+    groups = {
+        "serving-traces",
+        "cross-task-relationships",
+        "controlled-long-context-probes",
+        "enterprise-private-requests",
+    }
+    for row in plan["supplemental_assets"]:
+        source_id = row["source_id"]
+        if (
+            not isinstance(source_id, str)
+            or not source_id
+            or source_id in result
+            or row["asset_group"] not in groups
+            or not set(row["related_workload_ids"]) <= class_ids
+            or len(row["related_workload_ids"]) != len(set(row["related_workload_ids"]))
+            or not isinstance(row["boundary"], str)
+            or not row["boundary"].strip()
+        ):
+            raise ValueError(
+                "unique supplemental asset with explicit boundary required"
+            )
+        result[source_id] = {
+            **row,
+            "selection_scope": "ASSET_RELATION_NOT_RECORD_MEMBERSHIP",
+        }
+    if len(result) != 118:
+        raise ValueError("complete fixed 118-source delivery classification required")
+    return [
+        {
+            **result[source_id],
+            "data_provider_source_registered": source_id in registered,
+            "native_validation": "NOT_ESTABLISHED_BY_CLASSIFICATION",
+            "local_availability": "NOT_CHECKED_ON_THIS_MACHINE",
+        }
+        for source_id in sorted(result)
+    ]
+
+
 def classify_record(source_id, native_subtype, *, evidence_kind, root=None):
     """Match an explicitly reviewed native subtype; never infer from source alone.
 

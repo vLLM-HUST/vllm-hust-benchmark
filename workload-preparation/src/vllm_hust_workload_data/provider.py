@@ -10,7 +10,7 @@ import zipfile
 
 from . import PROVIDER_CONTRACT_VERSION, __version__
 from .registry import all_adapters, read_catalog, source_spec
-from .taxonomy import research_classes
+from .taxonomy import delivery_assets, delivery_classes, research_classes
 
 TAU2_ORIGINAL_REVISION = "f8de30c298689cbe0117d76a378e7315a17e5bd8"  # pragma: allowlist secret - public upstream revision
 TAU2_ORIGINAL_ARCHIVE_SHA256 = "65f1d59b3783bfb38664142fb166aa40b369e4b4083170723059d8f1883ccd64"  # pragma: allowlist secret - official archive checksum
@@ -505,6 +505,22 @@ def class_plan(class_id: str) -> dict:
         "selection_scope": "CANDIDATE_SOURCES_NOT_RECORD_MEMBERSHIP",
         "instruction": "Select an explicit source and its reviewed native subtype; do not run the whole source as this class.",
     }
+
+
+def delivery_class_plan(class_id: str) -> dict:
+    """Lookup a plan ID or stable family ID, never claim dataset readiness."""
+    for row in delivery_classes():
+        if class_id in {row["workload_id"], row["family_id"]}:
+            return row
+    raise ValueError("unknown delivery-plan workload class")
+
+
+def delivery_source_plan(source_id: str) -> dict:
+    """Exact source lookup in the 118-source plan; no reader or readiness inference."""
+    for row in delivery_assets():
+        if row["source_id"] == source_id:
+            return row
+    raise ValueError("unknown delivery-plan source")
 
 
 def list_sources(*, class_id: str | None = None) -> list[dict]:

@@ -10,6 +10,15 @@
 
 ## 零、需求对齐后的最终执行要求（2026-10-24）
 
+2026-10-25分类入口补齐：程序新增显式40类交付视图，研究默认38类不变。使用
+`python -m vllm_hust_benchmark.workload_data classes --scheme delivery-plan` 和
+`class-plan W11 --scheme delivery-plan` 查看分类；`delivery-assets`列出全部118个登记来源，
+`source-plan SOURCE_ID`查看单来源关联和边界。40类候选表之外的15项作为辅助资产登记：
+企业8份、服务轨迹5份、RULER受控探针及MultiAgentBench跨任务关系。服务轨迹不编造prompt，
+共享前缀/语义相似不冒充实测KV命中，企业原始数据不打包。全部118项与机器清单集合一致，
+无遗漏或额外来源；这只是分类导航，不增加适配、实跑、评分或完成数。新wheel的40类、
+118来源、原研究38类视图已在独立zip导入中核验，未据此宣称研究服务器已升级或消费验证通过。
+
 2026-10-25复核纠偏：原37项复核不等于已穷尽研究仓全部成果。补查研究七批23项后，历史获取/准备/验证记录去重为46来源；新增发现的9项中QASPER此前已有单独准备接入，其余LongAlpaca、NarrativeQA、NQ-open、DuReader
 demo、WildChat、UltraChat、InfiniteBench、LMSYS-Chat共8项的48份原文件身份现已复用，并补统一离线计划/获取/校验入口。不重新下载9.51GB原数据，不复制研究特征、观测或分析。详见[本轮复用审计](validation/research-acquisition-reuse-audit-20261025.json)。这不是8项原生benchmark完成：原准备映射、原生执行/评分和固定工件研究消费仍待补，来源主勾维持未完成；113项原生交付目标及5项仅分类范围不变。
 

@@ -2,6 +2,20 @@
 
 ## 按来源找到准备与执行入口
 
+分类导航（只查元数据，不下载数据或宣称可运行）：
+
+```bash
+python -m vllm_hust_benchmark.workload_data classes --scheme delivery-plan
+python -m vllm_hust_benchmark.workload_data class-plan W11 --scheme delivery-plan
+python -m vllm_hust_benchmark.workload_data delivery-assets
+python -m vllm_hust_benchmark.workload_data source-plan BURSTGPT
+```
+
+`delivery-plan`覆盖本次40类任务及118个登记来源；其中15项作为服务轨迹、受控探针、
+跨任务关系或企业私有请求资产单列，不硬造语义任务分类。企业仅提供索引和边界，
+不包含原始请求。类下来源是候选关联，不表示该来源全部记录属于该类，也不表示已适配、
+取得数据或原生跑通。研究默认38类入口保持不变；当前交付状态以机器清单为准。
+
 检索/重排新增入口：`BEIR_SCIFACT`、`BEIR_NFCORPUS`的原zip准备、原文档/查询/qrels读取，以及`scripts/run_beir_original.py`的全量test检索和dense
 top100重排，见[原生协议与环境](../docs/workload-data/PUBLIC_ASSET_SERVER_READINESS.zh-CN.md#beir-%E5%8E%9F%E5%A7%8B%E6%A3%80%E7%B4%A2%E9%9B%86%E5%90%88%E4%B8%8E%E9%87%8D%E6%8E%92%E5%8D%8F%E8%AE%AE)。原集合不是chat请求，qrels只作评分参考。原全量NPU运行、最终公开入口交接和固定CI工件/研究消费均已验证，范围限定为上述两集合的原test检索及dense
 top100重排。
