@@ -864,3 +864,25 @@ rag-followup。
 
 本轮仅通过小型软件夹具验证绑定、准备、消费恢复、答案隔离、文件篡改拒绝及输出防覆盖；尚未在恢复后的服务器核验真实资产。此入口不是原生 benchmark
 执行入口，不增加交付打勾数，原生执行及适用评分仍是独立待补项。
+
+## StructEval 已保存非渲染结果的复用与官方重评分
+
+历史回执已记录19个非渲染协议、共950道原题；这些结果应复用，而非重新请求模型。
+`scripts/audit_structeval_saved_nonrender.py`把历史私有复核流程整理为可复用CPU入口：
+
+```bash
+python scripts/audit_structeval_saved_nonrender.py \
+  --data-file /private/structeval/data/train-00000-of-00001.parquet \
+  --official-archive /private/structeval-litellm-official.zip \
+  --run-dir /private/completed-run-1 /private/completed-run-2 \
+  --work-root /private/fresh-structeval-rescore
+```
+
+沿用原StructEval评分客户端环境，依赖PyArrow及已安装的固定官方StructEval源码；
+入口核对原始2035条Parquet摘要、固定源码zip和已安装全部27个Python模块，再导入评分函数。
+每个run须保留receipt.json、original-selected.private.json及official-workflow内的
+inference.json、evaluation.json，并声明原始预算未覆盖、原生流程已结束。输入、输出、 原始位置/ID及字段逐项对应后，调用未修改的官方非渲染评分器和最终分数计算；
+重新评分必须与保存结果一致。只输出计数及文件摘要，格式文件和详细日志留在私有目录。
+
+重复或重叠run、尚未结束的run、渲染/VQA任务、原始字段/输出变化及评分不一致均拒绝； 不改题、不换失败任务、不调用模型。新入口目前只有软件夹具验证，未据此重报950题为新增实跑。
+剩余1085道渲染/VQA及最终原生交付、研究消费仍待完成，StructEval来源总勾不变。

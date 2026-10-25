@@ -189,6 +189,8 @@ jobs:
           workload-data replay --help
       - name: FLORES original pair and metric transport fixtures
         run: python -m pytest -q tests/test_flores200_original_runner.py
+      - name: StructEval saved-output reuse fixtures, no model execution
+        run: python -m pytest -q tests/test_structeval_saved_nonrender.py tests/test_structeval_original_runner.py
       - name: HumanEval historical completion reuse fixtures, no code execution
         run: python -m pytest -q tests/test_humaneval_official_samples.py tests/test_humaneval_isolated_scoring.py tests/test_bigcodebench_official_samples.py tests/test_bigcodebench_scoring_assets.py tests/test_bigcodebench_scoring_plan.py tests/test_bigcodebench_container_scoring.py tests/test_ds1000_official_samples.py tests/test_ds1000_isolated_scoring.py
       - name: Author JSONSchemaBench local Engine interface fixtures
