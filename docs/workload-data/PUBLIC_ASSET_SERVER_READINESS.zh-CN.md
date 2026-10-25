@@ -834,7 +834,7 @@ python scripts/run_flores200_original.py \
 
 只在服务器运行，事先确认研究线程释放该 NPU。资产身份沿用固定配置，不重新下载已校验资产。
 按照[作者评测说明](https://github.com/facebookresearch/flores/blob/a6c830c6e1051fb4ac1a44b32358f00463f332bd/flores200/README.md)，使用主要指标
-chrF++（sacrebleu CHRF(word_order=2)）；spBLEU 尚未集成，不宣称全部指标完成。
+chrF++（sacrebleu CHRF(word_order=2)）；已有保存结果的离线spBLEU入口如下，实际运行证据另行记录，不据入口存在宣称评分完成。
 保留原始平行行号与空句，不换题；默认原始0/1/2行，`--full`为指定方向指定公开split全部原句。检查完整归档的语言数量与行数，但不把归档检查称为全部语言已推理。 模型使用固定
 NLLB-600M 工件，NPU执行且无CPU/CUDA降级，不修改其生成配置，只指定目标语言token；完整输入超出模型容量直接失败。arb_Latn、min_Arab、sat_Olck
 缺少对应模型token，拒绝执行而不替换文字体系。 模型限非商业研究使用，不能直接视为企业部署授权。输出含原句、参考译文和预测，留在服务器私有目录。需服务器安装并核实
@@ -851,7 +851,23 @@ python scripts/prepare_flores200_original_records.py \
 ```
 
 原始归档留在外部数据目录；准备入口只生成私有引用索引，不下载数据或调用模型。保留204个原始语言代码、dev的997行与devtest的1012行及五列对齐元数据；每个方向分别准备，记录身份绑定方向映射。输入与参考译文、元数据分离，未获模型支持的原始代码不替换。
-2026-10-26服务器候选代码已完整索引英→法2009行，并在两个split边界及首尾共8处回查成功，调用模型0次。此项是候选源码的数据关系验证，尚非固定wheel与研究侧闭环证明，不能替代原生生成和评分。
+2026-10-26服务器候选代码已完整索引英→法2009行，并在两个split边界及首尾共8处回查成功。随后固定a9bcfe6d软件包实际安装，42个payload逐字节核验；英→法、英→简中、英→德各自完整索引2009行，原生9次保存生成对应的输入与参考及每方向6处边界回查均与研究dd410314消费者一致，未改研究默认依赖，模型调用0次。此项不替代原生生成和评分。
+
+复用历史预测补算作者指标，不调用模型：
+
+```bash
+PYTHONPATH= /path/to/isolated-nllb-client/bin/python scripts/score_flores200_original_results.py \
+  --predictions /private/native-result/predictions-private.jsonl \
+  --archive /data/original/flores200_dataset.tar.gz \
+  --spm /data/original-nllb/sentencepiece.bpe.model \
+  --source-language eng_Latn --target-language fra_Latn --split devtest \
+  --output /private/fresh-flores-metrics.json
+```
+
+评分入口先核对保存的原文、参考、行号和次序，拒绝改题与换参考。作者链接的FLORES200评分SPM与固定NLLB模型的sentencepiece.bpe.model字节一致，须通过固定SHA/大小校验，不能用任意分词器替换；两侧均按原SPM编码后以sacrebleu
+tokenize=none评分，记录外部分词与指标签名，不伪称内部tok:flores200。原chrF++保留，不因补算重跑模型。
+客户端固定版本见[兼容约束](../../configs/workload-native/flores200-nllb-client-py312-constraints.txt)。实际为Python3.12.13、Ascend910B2、CANN9.1.0、torch2.10.0+cpu及torch-npu2.10.0.post4；CPU字样是发行包版本标签，历史生成实际由torch_npu执行。对隔离venv显式设置空PYTHONPATH后，pip
+check无损坏依赖；不清除CANN共享库路径、不改服务栈。原环境注入CANN编译/分析工具路径时的pip check失败仍保留，不能把它当成推理客户端包冲突，也不宣称整套CANN工具依赖已补齐。
 
 WildChat、UltraChat、LMSYS-Chat 使用同一准备入口，分别指定 `WILDCHAT`、`ULTRACHAT`、`LMSYS_CHAT`。 复用现有
 historical_dialogue 适配定义，不新造第二套对话映射。原始 conversation/messages 的全部角色、轮次及顺序保留，包括历史 assistant

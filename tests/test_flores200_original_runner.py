@@ -13,6 +13,8 @@ import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
+import score_flores200_original_results as scorer  # noqa: E402
+
 spec = importlib.util.spec_from_file_location(
     "flores_runner", ROOT / "scripts/run_flores200_original.py"
 )
@@ -46,6 +48,54 @@ def pairs(tmp_path):
     return runner.original_pairs(
         archive, dataset, source="eng_Latn", target="fra_Latn", split="devtest"
     )
+
+
+@pytest.mark.parametrize("corruption", [None, "reference", "order", "prediction"])
+def test_saved_native_scoring_keeps_original_pairs(tmp_path, corruption):
+    archive, dataset = fixture(tmp_path)
+    original = runner.original_pairs(
+        archive, dataset, source="eng_Latn", target="fra_Latn", split="devtest"
+    )
+    rows = [{**row, "prediction": "fixture prediction"} for row in original]
+    if corruption == "reference":
+        rows[0]["reference"] = "changed reference"
+    elif corruption == "order":
+        rows[0], rows[1] = rows[1], rows[0]
+    elif corruption == "prediction":
+        rows[0]["prediction"] = None
+    path = tmp_path / "saved.jsonl"
+    path.write_text("\n".join(json.dumps(row) for row in rows), encoding="utf-8")
+    kwargs = dict(
+        source="eng_Latn", target="fra_Latn", split="devtest", dataset=dataset
+    )
+    if corruption:
+        with pytest.raises(ValueError):
+            scorer.load_saved(path, archive, **kwargs)
+    else:
+        assert scorer.load_saved(path, archive, **kwargs) == rows
+
+
+def test_secondary_metric_encodes_both_sides_without_extra_tokenization():
+    class Metric:
+        def __init__(self):
+            self.calls = []
+
+        def corpus_score(self, hypotheses, references):
+            self.calls.append((hypotheses, references))
+            return NS(score=12.0)
+
+        def get_signature(self):
+            return "inert-fixture-not-a-real-metric"
+
+    primary, secondary = Metric(), Metric()
+    rows = [{"prediction": "pred", "reference": "ref"}]
+    proof = scorer.calculate(
+        rows, chrf=primary, bleu=secondary, pieces=lambda text: ["piece", text]
+    )
+    assert primary.calls == [(["pred"], [["ref"]])]
+    assert secondary.calls == [(["piece pred"], [["piece ref"]])]
+    assert proof["spbleu"] == 12.0
+    assert "tokenize=none" in proof["spbleu_tokenization"]
 
 
 def test_original_blank_row_alignment_and_order_preserved(tmp_path):
