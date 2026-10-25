@@ -10,6 +10,11 @@
 
 ## 零、需求对齐后的最终执行要求（2026-10-24）
 
+整体软件回归：固定代码`1b1f3ece`的Ubuntu/Python3.11主CI为2916通过、7跳过，lint及 独立CPU
+smoke通过，见[精确CI回执](validation/software-ci-regression-20261025.json)。 7项中3项PyArrow夹具已在安装data依赖的CPU
+smoke另行通过；4项真实cgroup测试因CI 无可写cgroup而跳过，不作内核隔离证明。本地Windows完整回归未通过：已定位缺失测试依赖、
+GBK读取以及一项冻结证据的CRLF字节差异，未声称诊断穷尽全部本地失败；不修改历史证据 或全局Git设置来凑通过。以上都不是原生数据集/NPU验证，113项交付完成数不因此增加。
+
 当前候选wheel的研究消费软件核验：已在研究`dd410314`源码上用精确wheel导入运行10组 消费夹具，87通过、5跳过；已核对两边实际模块导入路径和研究锁与其tracked HEAD一致。
 见[候选工件兼容回执](validation/research-candidate-wheel-fixture-compat-20261025.json)。
 5项跳过是正式固定安装验收，不得省略或当成通过；研究默认锁仍为1a977686，未切换为新wheel。 这是无模型、无真实数据的兼容性检查，不替代服务器原始资产、原生任务、评分或正式研究消费。

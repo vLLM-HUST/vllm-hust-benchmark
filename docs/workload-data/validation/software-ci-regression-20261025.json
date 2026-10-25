@@ -1,0 +1,80 @@
+{
+  "kind": "FROZEN_SOFTWARE_CI_RESULTS_NOT_NATIVE_VALIDATION",
+  "producer_commit": "1b1f3ecedb0048392634650e4f5b31f7f816bd32",
+  "environment": "GitHub Actions ubuntu-latest, Python3.11",
+  "main_ci": {
+    "run_id": 40203873503,
+    "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/actions/runs/40203873503",
+    "conclusion": "success",
+    "jobs": {
+      "tests": "success",
+      "lint": "success"
+    },
+    "junit_artifact_id": 12603500042,
+    "tests": 2923,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 7,
+    "passed": 2916,
+    "artifact_sha256": "149d7f5a33ee73942f35e99e28ab4f7f40c24ebedf1e7aaa728e347f1f0e4604",
+    "junit_sha256": "f822d9852f9f1b62cc0e48a1db8e6e7e41b5dc94b9b99d111e16ff73d1c74f8a",
+    "artifact_member": "pytest-results.xml",
+    "skipped_cases": [
+      {
+        "test": "tests.test_process_identity.TestCgroupFunctions.test_create_add_snapshot_remove_cgroup",
+        "reason": "Could not create cgroup (no writable parent)"
+      },
+      {
+        "test": "tests.test_process_identity.TestRealCgroupSetsidCleanup.test_cgroup_catches_setsid_descendant",
+        "reason": "No writable cgroup parent (requires root or delegation)"
+      },
+      {
+        "test": "tests.test_process_identity.TestRealCgroupSetsidCleanup.test_cgroup_cleanup_kills_setsid_after_launcher_exit",
+        "reason": "No writable cgroup parent (requires root or delegation)"
+      },
+      {
+        "test": "tests.test_process_identity.TestRealCgroupSetsidCleanup.test_cgroup_cleanup_pid_reuse_not_killed",
+        "reason": "No writable cgroup parent"
+      },
+      {
+        "test": "tests.test_reused_source_records.test_existing_dialogue_adapters_preserve_original_history[parquet-WILDCHAT-conversation-conversation_hash]",
+        "reason": "could not import 'pyarrow': No module named 'pyarrow'"
+      },
+      {
+        "test": "tests.test_reused_source_records.test_existing_dialogue_adapters_preserve_original_history[parquet-ULTRACHAT-messages-prompt_id]",
+        "reason": "could not import 'pyarrow': No module named 'pyarrow'"
+      },
+      {
+        "test": "tests.test_reused_source_records.test_existing_dialogue_adapters_preserve_original_history[parquet-LMSYS_CHAT-conversation-conversation_id]",
+        "reason": "could not import 'pyarrow': No module named 'pyarrow'"
+      }
+    ]
+  },
+  "data_cpu_smoke": {
+    "run_id": 40203873502,
+    "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/actions/runs/40203873502",
+    "conclusion": "success",
+    "installed_data_extra": true,
+    "parquet_adapter_fixture_batch_passed": 49,
+    "parquet_adapter_fixture_batch_skipped": 0,
+    "boundary": "Includes three PyArrow cases skipped in root CI; duplicated software tests are not additional datasets or native runs."
+  },
+  "local_windows": {
+    "full_suite_completed": false,
+    "initial_collection_missing_mdformat": true,
+    "formatter_reused_from_cache": true,
+    "invalid_GBK_run_explicitly_stopped": true,
+    "utf8_targeted_passed": 5,
+    "utf8_targeted_failed": 1,
+    "diagnosed_failure": "Historical publication SHA256 differs only due to checkout CRLF; Git blob matches expected published hash.",
+    "only_CRLF_difference_verified": true,
+    "published_hash_matches_git_blob": true,
+    "frozen_evidence_or_global_git_configuration_modified": false,
+    "all_observed_local_failures_exhaustively_diagnosed": false
+  },
+  "model_calls": 0,
+  "dataset_downloads": 0,
+  "native_delivery_count_changed": false,
+  "source_checkbox_eligible": false,
+  "scientific_conclusion": false
+}
