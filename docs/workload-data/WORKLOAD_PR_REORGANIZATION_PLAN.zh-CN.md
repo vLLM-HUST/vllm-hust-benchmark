@@ -10,6 +10,9 @@
 
 ## 零、需求对齐后的最终执行要求（2026-10-24）
 
+2026-10-25复核纠偏：原37项复核不等于已穷尽研究仓全部成果。补查研究七批23项后，历史获取/准备/验证记录去重为46来源；新增发现的9项中QASPER此前已有单独准备接入，其余LongAlpaca、NarrativeQA、NQ-open、DuReader
+demo、WildChat、UltraChat、InfiniteBench、LMSYS-Chat共8项的48份原文件身份现已复用，并补统一离线计划/获取/校验入口。不重新下载9.51GB原数据，不复制研究特征、观测或分析。详见[本轮复用审计](validation/research-acquisition-reuse-audit-20261025.json)。这不是8项原生benchmark完成：原准备映射、原生执行/评分和固定工件研究消费仍待补，来源主勾维持未完成；113项原生交付目标及5项仅分类范围不变。
+
 BILLSUM既定来源已闭环：发布方HF原始text/summary/title三个split共23455条，原两测试集各冻结前三条NPU Pegasus与HF
 ROUGE评分、公共入口未见原位置3/4/5、固定CI39文件工件和研究消费均已核验。研究源码40文件保持不变，公共索引及研究全量prepare通过，原首尾18条回查和18条研究导入通过。见[最终交付回执](validation/billsum-native-delivery-20261025.json)。不是原论文clean_text处理/训练复现、完整原始归档ID保留或全量推理；原题、标题与参考均保留，模型仅接收原正文。
 

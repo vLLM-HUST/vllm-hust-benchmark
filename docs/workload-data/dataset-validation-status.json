@@ -2,7 +2,9 @@
   "schema_version": "workload-validation-checklist/v1",
   "updated_at": "2026-10-25",
   "native_runtime_latest": {
-    "status": "ORIGINAL_PROFILE_READY_AUDITED_BATCHES_OTHER_PROTOCOLS_PENDING",
+    "status": "NEW_ENDPOINT_FINGERPRINT_PENDING_REMOTE_EXECUTION_STATE_UNKNOWN",
+    "last_confirmed_profile_is_not_current_server_health": true,
+    "latest_access_note": "Previous SSH connection refused after the successful release2 audit. User provided a replacement endpoint; trusted host fingerprint verification pending. No login, native controller restart, service reconfiguration or terminal-state inference performed. Reconcile saved results and actual process identity on restoration.",
     "previous_host_model_runtime_status": "ORIGINAL_PROFILE_RESTORE_FAILED_HOST_PINNED_ALLOCATION",
     "replacement_host_identity_verified": true,
     "server_reclaimed_or_previous_connection_refusal_cause_verified": false,
@@ -906,22 +908,28 @@
     "WILDCHAT": {
       "scope": "public",
       "delivery_kind": "review_original_source_protocol",
-      "status": "NOT_STARTED",
+      "status": "HISTORICAL_ACQUISITION_REUSED_NATIVE_PENDING",
       "checked": false,
       "legacy_checked": false,
       "existing_receipt": null,
       "delivery_receipt": null,
-      "blocker": null
+      "blocker": "Historical original acquisition metadata reused; verify preserved external files rather than re-download. Source-specific preparation/mapping, native execution/scoring and exact-artifact consumer verification pending. Raw-source registration is not native delivery.",
+      "acquisition_reuse_receipt": "docs/workload-data/validation/research-acquisition-reuse-audit-20261025.json",
+      "historical_raw_file_specs": 14,
+      "public_asset_preparer": "scripts/prepare_reused_research_assets.py"
     },
     "LMSYS_CHAT": {
       "scope": "public",
       "delivery_kind": "review_original_source_protocol",
-      "status": "NOT_STARTED",
+      "status": "HISTORICAL_ACQUISITION_REUSED_NATIVE_PENDING",
       "checked": false,
       "legacy_checked": false,
       "existing_receipt": null,
       "delivery_receipt": null,
-      "blocker": null
+      "blocker": "Historical original acquisition metadata reused; verify preserved external files rather than re-download. Source-specific preparation/mapping, native execution/scoring and exact-artifact consumer verification pending. Raw-source registration is not native delivery.",
+      "acquisition_reuse_receipt": "docs/workload-data/validation/research-acquisition-reuse-audit-20261025.json",
+      "historical_raw_file_specs": 6,
+      "public_asset_preparer": "scripts/prepare_reused_research_assets.py"
     },
     "OASST1": {
       "scope": "public",
@@ -936,12 +944,15 @@
     "ULTRACHAT": {
       "scope": "public",
       "delivery_kind": "review_original_source_protocol",
-      "status": "NOT_STARTED",
+      "status": "HISTORICAL_ACQUISITION_REUSED_NATIVE_PENDING",
       "checked": false,
       "legacy_checked": false,
       "existing_receipt": null,
       "delivery_receipt": null,
-      "blocker": null
+      "blocker": "Historical original acquisition metadata reused; verify preserved external files rather than re-download. Source-specific preparation/mapping, native execution/scoring and exact-artifact consumer verification pending. Raw-source registration is not native delivery.",
+      "acquisition_reuse_receipt": "docs/workload-data/validation/research-acquisition-reuse-audit-20261025.json",
+      "historical_raw_file_specs": 8,
+      "public_asset_preparer": "scripts/prepare_reused_research_assets.py"
     },
     "DOLLY": {
       "scope": "public",
@@ -1098,12 +1109,15 @@
     "NARRATIVEQA": {
       "scope": "public",
       "delivery_kind": "review_original_source_protocol",
-      "status": "NOT_STARTED",
+      "status": "HISTORICAL_ACQUISITION_REUSED_NATIVE_PENDING",
       "checked": false,
       "legacy_checked": false,
       "existing_receipt": null,
       "delivery_receipt": null,
-      "blocker": null
+      "blocker": "Historical original acquisition metadata reused; verify preserved external files rather than re-download. Source-specific preparation/mapping, native execution/scoring and exact-artifact consumer verification pending. Raw-source registration is not native delivery.",
+      "acquisition_reuse_receipt": "docs/workload-data/validation/research-acquisition-reuse-audit-20261025.json",
+      "historical_raw_file_specs": 3,
+      "public_asset_preparer": "scripts/prepare_reused_research_assets.py"
     },
     "XLAM_TOOL": {
       "scope": "public",
@@ -1347,7 +1361,8 @@
       "existing_receipt": null,
       "delivery_receipt": null,
       "acquisition_progress_receipt": "docs/workload-data/validation/flores200-original-acquisition-progress-20261025.json",
-      "blocker": "Official Meta raw archive acquired and inspected on server:204 codes with dev997/devtest1012 each; observed hash is not a separately published checksum. Public adapter/native entry/scoring pending; NLLB600M preparation ongoing and model special-token table lacks arb_Latn/min_Arab/sat_Olck. Do not substitute/drop codes or mark delivered."
+      "blocker": "Official Meta archive acquired/inspected:204 codes with dev997/devtest1012 each; observed hash is not a published checksum. All8 NLLB files were verified before connection loss. Public asset preparer has model-free fixture tests only, not server verification. Raw adapter/native/scoring pending; arb_Latn/min_Arab/sat_Olck language tokens missing. Never substitute/drop codes or mark delivered.",
+      "public_asset_preparer_pending_server_verification": "scripts/prepare_flores200_original_assets.py"
     },
     "BURSTGPT": {
       "scope": "public",
@@ -1363,10 +1378,10 @@
       "official_example_preparation_receipt": "docs/workload-data/validation/burstgpt-official-example-preparation-20261025.json",
       "native_public_runner": "scripts/run_burstgpt_original_example.py",
       "native_client_dependencies": "configs/workload-native/burstgpt-original-demo-py312-dependencies.txt",
-      "native_queue_state": "RELEASE1_AND_RELEASE2_AUDITED_RELEASE3_OFFICIAL_SCALE_RUNNING",
+      "native_queue_state": "RELEASE1_AND_RELEASE2_AUDITED_RELEASE3_REMOTE_STATE_UNKNOWN",
       "scaled_tool_progress_receipt": "docs/workload-data/validation/burstgpt-scaled-tool-progress-20261025.json",
       "release1_native_audit_receipt": "docs/workload-data/validation/burstgpt-release1-native-audit-20261025.json",
-      "blocker": "三文件10632194行资产/绑定及9条往返复用。第1份scale1前20条官方CLI及审计保留。第2/3份官方scale1000000工具验证已在研究线程空闲后启动，原CSV、前20条与1024预算不变，不作原始时序性能结论。当前仅证明队列及首个运行进程存活，全部执行/审计/固定消费未闭环前不勾。外部提示池模拟不是原私有请求回放。"
+      "blocker": "第1份scale1原20条、以及第2份scale1000000原20条均完成并审计通过；第3份最后确认运行中，随后SSH拒绝连接，当前终态未知。新入口指纹待核验。恢复后先核对保存结果和实际进程，不按断联推断失败或重启。原CSV/前20条/1024预算保留，不作原始时序性能结论；全来源及固定消费未收口，不勾。外部提示池不是原私有请求。"
     },
     "TRACELAB": {
       "scope": "public",
@@ -1437,12 +1452,15 @@
     "INFINITEBENCH": {
       "scope": "public",
       "delivery_kind": "review_original_source_protocol",
-      "status": "NOT_STARTED",
+      "status": "HISTORICAL_ACQUISITION_REUSED_NATIVE_PENDING",
       "checked": false,
       "legacy_checked": false,
       "existing_receipt": null,
       "delivery_receipt": null,
-      "blocker": null
+      "blocker": "Historical original acquisition metadata reused; verify preserved external files rather than re-download. Source-specific preparation/mapping, native execution/scoring and exact-artifact consumer verification pending. Raw-source registration is not native delivery.",
+      "acquisition_reuse_receipt": "docs/workload-data/validation/research-acquisition-reuse-audit-20261025.json",
+      "historical_raw_file_specs": 12,
+      "public_asset_preparer": "scripts/prepare_reused_research_assets.py"
     },
     "RULER": {
       "scope": "public",
@@ -1914,12 +1932,15 @@
     "LONGALPACA": {
       "scope": "public",
       "delivery_kind": "review_original_source_protocol",
-      "status": "NOT_STARTED",
+      "status": "HISTORICAL_ACQUISITION_REUSED_NATIVE_PENDING",
       "checked": false,
       "legacy_checked": false,
       "existing_receipt": null,
       "delivery_receipt": null,
-      "blocker": null
+      "blocker": "Historical original acquisition metadata reused; verify preserved external files rather than re-download. Source-specific preparation/mapping, native execution/scoring and exact-artifact consumer verification pending. Raw-source registration is not native delivery.",
+      "acquisition_reuse_receipt": "docs/workload-data/validation/research-acquisition-reuse-audit-20261025.json",
+      "historical_raw_file_specs": 1,
+      "public_asset_preparer": "scripts/prepare_reused_research_assets.py"
     },
     "TOOLACE": {
       "scope": "public",
@@ -1937,12 +1958,15 @@
     "DUREADER": {
       "scope": "public",
       "delivery_kind": "review_original_source_protocol",
-      "status": "NOT_STARTED",
+      "status": "HISTORICAL_ACQUISITION_REUSED_NATIVE_PENDING",
       "checked": false,
       "legacy_checked": false,
       "existing_receipt": null,
       "delivery_receipt": null,
-      "blocker": null
+      "blocker": "Historical original acquisition metadata reused; verify preserved external files rather than re-download. Source-specific preparation/mapping, native execution/scoring and exact-artifact consumer verification pending. Raw-source registration is not native delivery.",
+      "acquisition_reuse_receipt": "docs/workload-data/validation/research-acquisition-reuse-audit-20261025.json",
+      "historical_raw_file_specs": 2,
+      "public_asset_preparer": "scripts/prepare_reused_research_assets.py"
     },
     "SPIDER": {
       "scope": "public",
@@ -1957,12 +1981,15 @@
     "NATURALQUESTIONS": {
       "scope": "public",
       "delivery_kind": "review_original_source_protocol",
-      "status": "NOT_STARTED",
+      "status": "HISTORICAL_ACQUISITION_REUSED_NATIVE_PENDING",
       "checked": false,
       "legacy_checked": false,
       "existing_receipt": null,
       "delivery_receipt": null,
-      "blocker": null
+      "blocker": "Historical original acquisition metadata reused; verify preserved external files rather than re-download. Source-specific preparation/mapping, native execution/scoring and exact-artifact consumer verification pending. Raw-source registration is not native delivery.",
+      "acquisition_reuse_receipt": "docs/workload-data/validation/research-acquisition-reuse-audit-20261025.json",
+      "historical_raw_file_specs": 2,
+      "public_asset_preparer": "scripts/prepare_reused_research_assets.py"
     },
     "MULTIAGENTBENCH": {
       "scope": "public",

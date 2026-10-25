@@ -508,13 +508,48 @@ python -I scripts/run_beir_original.py --source-id BEIR_SCIFACT \
 score模式会核验完整查询覆盖、文档标识、有限得分以及重排候选恰好来自dense
 top100；它只证明这些排名可被原评分器评价，不能独立证明排名由某模型生成。真实NPU生成、原始排名SHA、固定数据组件及研究消费核验须分别取证。完整排名、原文和索引始终留在用户私有目录。原全量NPU执行、最终公开命令交接与固定CI工件/研究消费核验均已完成，见[最终交付证据](validation/beir-native-delivery-20261025.json)；只对这两个登记来源和上述协议勾选，不延伸到全部BEIR集合。
 
+### 既有研究原资产复用（8来源、48文件；原生交付待补）
+
+已按研究回执固定LongAlpaca、NarrativeQA、NQ-open、DuReader
+demo、WildChat-1M、UltraChat、InfiniteBench、LMSYS-Chat的原始文件。仅迁原资产版本/URL/摘要及获取校验入口，不迁分析、观测、研究数据库或原文。总计48文件、9,509,254,890字节；这是历史取数记录，不表示这些字节已在新服务器重新核验，也不是全量原生任务执行证明。
+
+```sh
+# 默认仅输出离线计划，不创建目录、不联网。
+python scripts/prepare_reused_research_assets.py WILDCHAT
+# 在服务器已有原始目录上只读校验，不重新下载。
+python scripts/prepare_reused_research_assets.py WILDCHAT \
+  --mode verify --data-root /private/WILDCHAT/pinned-revision
+# 确实缺失且权限允许时才下载；显式字节预算不足会在创建目录前拒绝。
+python scripts/prepare_reused_research_assets.py WILDCHAT --mode download \
+  --data-root /private/fresh-WILDCHAT --max-bytes 3400000000
+```
+
+其他七个来源使用同一入口替换ID；`--files`只允许显式原文件路径，不生成替代内容。`--resume`只重用同来源/同配置的完整已校验文件，不覆盖损坏文件。LMSYS等访问受限来源不自动登录或接受条款，应使用发布方已获授权客户端取得后执行verify；没有复制历史凭据。文件角色暂标`raw_source`，不会因为已下载就被当作可直接输入模型的请求。
+
+范围须保持：NarrativeQA当前为公开QA/文档/摘要表，不是完整书籍；Natural
+Questions当前为NQ-open；DuReader为demo；WildChat为原1M固定14分片，不是4.8M；UltraChat为发布方合成语料；InfiniteBench保留12原文件，答案类型和任务模板/评分需继续适配。来源级原生交付仍不勾选。当前只有无模型夹具测试，服务器复核待可信入口恢复后进行。
+
 ### FLORES-200 原始翻译资产（准备中，未完成原生接入）
+
+公开资产入口已补充，以下命令应在有空间的服务器执行，数据与模型不放进代码仓：
+
+```sh
+python scripts/prepare_flores200_original_assets.py \
+  --output /private/fresh-flores200-assets --parts data model
+python scripts/prepare_flores200_original_assets.py \
+  --output /private/fresh-flores200-assets --parts data model --verify-only
+```
+
+服务器无法直连HF时可显式加
+`--hf-endpoint https://hf-mirror.com`，模型仍按原发布方固定版本及LFS/Git对象校验；原数据始终取Meta原地址，不用第三方改题版本。`--verify-only`只读、不联网、不写回执；`--resume`只允许匹配本入口来源及配置摘要的目录，复用完整已校验文件，不声称HTTP断点续传，也不覆盖已有错误文件。该公开入口目前仅有无模型软件测试，待恢复服务器后实测；不是原生翻译运行入口，不计来源交付。
 
 官方短链连接重置后，已直接从Meta官方公开主机取得原归档，服务器检查411个普通文件：dev和devtest各204份语言/文字文件，每份分别997和1012条；隐藏test未取得，不能声称拥有隐藏集。原字节及观察SHA256保留，但尚未找到单独发布的校验和，不能把本次观察值冒称作者发布值。原文件仍只在服务器，见[获取回执](validation/flores200-original-acquisition-progress-20261025.json)。
 
-正在准备发布方NLLB-600M工件，其语言特殊标记表缺少原归档的arb_Latn、min_Arab、sat_Olck；sat_Beng不是sat_Olck的同义代码，不得自行替换。该模型许可为CC-BY-NC-4.0，仅列非商业科研验证。原始语言关系、适配、原生执行和评分均待逐项补齐，当前不计交付。原[发布方说明](https://github.com/facebookresearch/flores/blob/main/flores200/README.md)主要评价chrF++，后续原评分协议需独立核验，不能拿文件检查代替。
+发布方NLLB-600M的8个工件在断联前已取得并核验，独立环境准备终态待核。其语言特殊标记表缺少原归档的arb_Latn、min_Arab、sat_Olck；sat_Beng不是sat_Olck的同义代码，不得自行替换。该模型许可为CC-BY-NC-4.0，仅列非商业科研验证。原始语言关系、适配、原生执行和评分均待逐项补齐，当前不计交付。原[发布方说明](https://github.com/facebookresearch/flores/blob/main/flores200/README.md)主要评价chrF++，后续原评分协议需独立核验，不能拿文件检查代替。
 
-### BurstGPT 官方缩放工具验证（执行中，尚未计交付）
+### BurstGPT 官方缩放工具验证（断联后第3份状态待核，尚未计交付）
+
+第2份原20条已完成并通过保存响应/官方日志审计；第3份最后确认在运行，随后SSH拒绝连接，新入口指纹待核验。这里不能按断联推断进程终止、服务器回收或执行失败。恢复后核查原输出与进程身份，完成结果优先复用，不重复启动队列。
 
 第1份轨迹的原速20条结果保留，不重复运行。第2、3份使用官方 `--scale 1000000`，仅用于工具可用性验证；官方源码将时间戳除以 scale，原 CSV
 不改、不归零，选定的原物理行0—19全部保留，1024-token预算不变。原始首时间戳对应约61/225天，缩放后初始等待约5.27/19.44秒。这个配置压缩了到达间隔，不能用于原始流量性能、稳态能力或突发可靠性结论。
