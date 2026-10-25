@@ -755,6 +755,32 @@ python scripts/prepare_jsonschemabench_original_assets.py --output /private/json
 evaluator；上游默认`load_dataset`没有revision参数，不能放任其重新拉取变化的main。
 本轮未改schema、未换历史失败任务、未声称结构化输出后端或完整原生流程已跑通，不打完成勾。
 
+官方bench桥接入口（软件实现，尚未实跑）：
+
+```bash
+python scripts/run_jsonschemabench_official.py \
+  --official-source /private/JSONSchemaBench-clean-checkout \
+  --snapshot-root /private/jsonschemabench-official/data \
+  --output /private/fresh-jsonschemabench-native \
+  --origin http://127.0.0.1:19466 \
+  --model workload-qwen35-27b-128k-nonthinking \
+  --max-tokens 1024 --context-capacity 131072 --limit 3
+```
+
+源checkout须为上述固定8003e840版本且Git干净，数据34文件须匹配固定摘要。 在独立官方客户端环境中安装原requirements和OpenAI
+SDK；上游core会急切导入可选后端， 因此缺依赖必须先修复，不能替换成简化的假core，也不能为客户端匹配torch版本而改共享NPU服务。
+模型ID、1024输出预算和上下文容量是示例本地profile，须与实际NPU部署核对，不冒充官方推荐模型配置。
+
+入口只把官方Dataset的数据位置绑定到原始本地snapshot，保留原test顺序、原json_schema、
+默认few-shot消息构造和原bench/evaluator；不shuffle、不改schema或补required字段。
+默认10个具名分区各原前三条；`--tasks`可明确选分区，`--full`替代`--limit`运行全分区。
+default汇总需用`--tasks default`单独运行，不与具名分区混算唯一任务覆盖。
+各分区预期数量由官方Dataset读取，再核对实际返回数；每次原始输入和返回结果即时存到私有attempt文件。 中断/服务异常不自动重试、换题或重开，先复核已保存结果，不把失败条目从覆盖分母删除。
+
+本地后端遵循作者custom Engine接口，原样发送schema。只有HTTP400且服务结构化错误码 明确为invalid/unsupported
+schema时，才记录官方UNSUPPORTED_SCHEMA状态；断连、500、 限流、未知模型或不明400继续报错，不伪装成模型/数据质量失败。该分类比上游OpenAI后端的
+catch-all更严格，属于明确的本地适配；原型性能字段不证明引擎独占耗时或性能提升。 新入口现有夹具联调证据，未在服务器完成真实HF加载、结构化后端、官方评分及研究消费验证， 来源总勾保持未完成。
+
 安装工件核验：`python scripts/audit_workload_data_wheel.py --wheel /path/to/provider.whl`。
 该检查将包内数据提供者模块、目录和schema资源逐字节与当前源码核对，并拒绝额外包载荷、重复成员及伪装在dist-info中的数据文件。 CI构建后生成 `PAYLOAD_AUDIT.json`
 并随软件工件发布。它不执行安装、不校验真实数据或模型，也不证明研究仓已切换依赖；历史固定wheel回执保持冻结，新工件必须重新记录身份并核验消费链路。

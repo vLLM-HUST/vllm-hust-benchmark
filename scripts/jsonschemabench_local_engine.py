@@ -11,6 +11,20 @@ from time import time
 from urllib.parse import urlparse
 
 
+def explicit_schema_rejection(error):
+    if getattr(error, "status_code", None) != 400:
+        return False
+    body = getattr(error, "body", None)
+    if not isinstance(body, dict):
+        return False
+    detail = body.get("error", body)
+    return isinstance(detail, dict) and detail.get("code") in {
+        "invalid_json_schema",
+        "unsupported_json_schema",
+        "unsupported_schema",
+    }
+
+
 def create_engine(
     *,
     engine_module,
@@ -72,18 +86,27 @@ def create_engine(
                 raise ValueError(
                     "original messages plus generation budget exceed context; no trimming"
                 )
-            response = client.chat.completions.create(
-                model=model,
-                messages=messages,
-                response_format={
-                    "type": "json_schema",
-                    "json_schema": {"schema": schema, "name": "json_schema"},
-                },
-                stream=True,
-                temperature=temperature,
-                max_tokens=max_tokens,
-                stream_options={"include_usage": True},
-            )
+            try:
+                response = client.chat.completions.create(
+                    model=model,
+                    messages=messages,
+                    response_format={
+                        "type": "json_schema",
+                        "json_schema": {"schema": schema, "name": "json_schema"},
+                    },
+                    stream=True,
+                    temperature=temperature,
+                    max_tokens=max_tokens,
+                    stream_options={"include_usage": True},
+                )
+            except Exception as error:
+                if not explicit_schema_rejection(error):
+                    raise
+                output.metadata.compile_status = types_module.CompileStatus(
+                    code=types_module.CompileStatusCode.UNSUPPORTED_SCHEMA,
+                    message="Server explicitly rejected the unchanged original schema; no replacement.",
+                )
+                return
             chunks, terminal, usage, first = [], None, None, None
             for event in response:
                 if event.usage is not None:

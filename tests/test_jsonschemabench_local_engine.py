@@ -16,7 +16,12 @@ spec.loader.exec_module(runner)
 
 
 def fixture(
-    *, overflow=False, terminal="stop", usage=True, endpoint="http://127.0.0.1:19466/v1"
+    *,
+    overflow=False,
+    terminal="stop",
+    usage=True,
+    endpoint="http://127.0.0.1:19466/v1",
+    failure=None,
 ):
     class Base:
         def __init__(self, config):
@@ -29,13 +34,15 @@ def fixture(
         Token=lambda **kw: NS(**kw),
         CompileStatus=lambda **kw: NS(**kw),
         DecodingStatus=lambda **kw: NS(**kw),
-        CompileStatusCode=NS(OK=0),
+        CompileStatusCode=NS(OK=0, UNSUPPORTED_SCHEMA=1),
         DecodingStatusCode=NS(OK=0),
     )
     calls = []
 
     def complete(**body):
         calls.append(body)
+        if failure is not None:
+            raise failure
         return [
             NS(
                 usage=None,
@@ -116,3 +123,35 @@ def test_incomplete_stream_never_marked_ok(kwargs):
 def test_external_client_rejected_before_requests():
     with pytest.raises(ValueError, match="loopback-only"):
         fixture(endpoint="https://example.invalid/v1")
+
+
+class FakeAPIError(Exception):
+    def __init__(self, status_code, code):
+        self.status_code = status_code
+        self.body = {"error": {"code": code}}
+
+
+def test_explicit_original_schema_rejection_is_not_rewritten_or_retried():
+    engine, calls = fixture(failure=FakeAPIError(400, "unsupported_json_schema"))
+    result = output()
+    before = deepcopy(result.schema)
+    engine._generate(result)
+    assert result.metadata.compile_status.code == 1
+    assert result.schema == before
+    assert len(calls) == 1
+    assert result.token_usage.output_tokens == 0
+
+
+@pytest.mark.parametrize(
+    "status,code",
+    [
+        (500, "unsupported_json_schema"),
+        (400, "model_not_found"),
+        (429, "rate_limit_exceeded"),
+    ],
+)
+def test_infrastructure_or_configuration_errors_are_not_schema_failures(status, code):
+    engine, calls = fixture(failure=FakeAPIError(status, code))
+    with pytest.raises(FakeAPIError):
+        engine._generate(output())
+    assert len(calls) == 1
