@@ -617,6 +617,22 @@ manifest执行pipeline/resolve。输入只包含原`Question`与按作者seed0�
 
 # 历史准备能力补迁：LongAlpaca、NQ-open 与 DuReader demo
 
+DS-1000历史结果复用（不执行code_context或生成代码）：
+
+```bash
+python scripts/prepare_ds1000_official_samples.py \
+  --generation-dir /path/to/existing-ds1000-generation \
+  --data-root /path/to/original-ds1000-assets \
+  --publisher-inference /path/to/fixed-ds1000/run_inference.py \
+  --output /path/to/fresh-private-ds1000-score-input
+```
+
+固定作者版本`b39aab71da6d23ef8d3cac59a7c5f834516ab334`，CLI校验原始数据和推理源码，核对原0/1/2问题的原始completion请求、终态、usage及已保存后处理结果。`length`保留，不能更换题目或增加原1024预算。
+输出 answers-private.jsonl
+保留作者推理marker后处理结果，original-dataset-private.jsonl保留全部原始行和code_context；不额外修代码。旧回执缺少逐文件历史哈希时只记录本次观察摘要，不追溯补造原有证明。
+作者`test_ds1000.py`还有独立postprocess及test_execution/test_string步骤，须在核验的隔离环境里按原顺序执行，每题独立进程。作者默认驱动遍历1000题，不能将三条answers直接放进去或给其余题填占位答案；固定原始前三题的抽样绑定仍需补齐并验证，不得因此宣布整条执行链完成。
+代码库功能测试按作者环境在CPU上执行，与模型生成使用NPU是两个环节；不得为了运行测试改动模型服务的torch/torch-npu栈。当前只完成软件夹具验证，真实文件复核与官方功能评分均未完成，来源不打勾。
+
 BigCodeBench 历史生成结果复用（不执行生成代码）：
 
 ```bash

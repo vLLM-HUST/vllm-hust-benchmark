@@ -48,6 +48,8 @@ on:
       - 'tests/test_jsonschemabench_local_engine.py'
       - 'scripts/run_bigcodebench_original_generation.py'
       - 'scripts/run_ds1000_original_generation.py'
+      - 'scripts/prepare_ds1000_official_samples.py'
+      - 'tests/test_ds1000_official_samples.py'
       - 'scripts/run_locomo_original_qa.py'
       - 'tests/test_locomo_original_qa_runner.py'
       - 'scripts/run_burstgpt_original_example.py'
@@ -187,7 +189,7 @@ jobs:
       - name: FLORES original pair and metric transport fixtures
         run: python -m pytest -q tests/test_flores200_original_runner.py
       - name: HumanEval historical completion reuse fixtures, no code execution
-        run: python -m pytest -q tests/test_humaneval_official_samples.py tests/test_bigcodebench_official_samples.py
+        run: python -m pytest -q tests/test_humaneval_official_samples.py tests/test_bigcodebench_official_samples.py tests/test_ds1000_official_samples.py
       - name: Author JSONSchemaBench local Engine interface fixtures
         run: python -m pytest -q tests/test_jsonschemabench_local_engine.py tests/test_jsonschemabench_environment_probe.py
       - name: Verify exact current-source wheel payload
