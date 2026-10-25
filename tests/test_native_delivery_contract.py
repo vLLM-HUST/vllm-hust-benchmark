@@ -8,6 +8,104 @@ ROOT = Path(__file__).resolve().parents[1]
 DOCS = ROOT / "docs/workload-data"
 
 
+def test_xlsum_delivery_closes_all_frozen_language_scopes_without_reruns():
+    delivery = json.loads(
+        (DOCS / "validation/xlsum-native-delivery-20261025.json").read_text("utf-8")
+    )
+    audit = json.loads(
+        (ROOT / delivery["final_frozen_selection_audit"]).read_text("utf-8")
+    )
+    fixed = json.loads(
+        (ROOT / delivery["fixed_ci_research_handoff"]).read_text("utf-8")
+    )
+    assert delivery["source_checkbox_eligible"]
+    assert (
+        audit["status"]
+        == "ALL45_FROZEN_PRIMARY_SELECTION_NATIVE_RESULTS_AND_AUTHOR_SCORING_AUDITED"
+    )
+    assert audit["language_variants"] == len(audit["checks"]) == 45
+    assert (
+        audit["primary_original_positions"]
+        == delivery["native_primary_original_positions"]
+        == 6173
+    )
+    assert audit["full_variant_positions"] == 6068 and audit["full_variants"] == 10
+    assert audit["other_fixed3_variants"] == 35
+    assert (
+        sum(
+            row[
+                "all_selected_positions_original_fields_encoder_ids_generated_tokens_decoding_verified"
+            ]
+            for row in audit["checks"]
+        )
+        == 6173
+    )
+    assert all(
+        row["scoring_verified"] and row["author_rouge_reused"]
+        for row in audit["checks"]
+    )
+    assert audit["model_calls"] == audit["new_scoring_runs"] == 0
+    assert fixed["data_commit"] == delivery["data_commit"]
+    assert fixed["installed_payload_files_equal"] == 35
+    assert (
+        fixed["prior_full_original_rows_audit_reused"]
+        == delivery["original_data_rows_preserved"]
+        == 114198
+    )
+    assert not delivery["all_original_rows_model_inference_claim"]
+    assert delivery["not_long_context_serving_validation"]
+    ledger = json.loads((DOCS / "dataset-validation-status.json").read_text("utf-8"))
+    assert ledger["delivery_inventory"]["XLSUM"]["checked"]
+
+
+def test_librispeech_native_samples_and_raw_binding_are_not_public_delivery():
+    receipt = json.loads(
+        (
+            DOCS
+            / "validation/librispeech-native-samples-and-candidate-binding-20261025.json"
+        ).read_text("utf-8")
+    )
+    assert receipt["model_calls"] == 8 and receipt["device"] == "npu:1"
+    assert receipt["model_parameters_verified_on_npu"]
+    assert receipt["native_encoder_decoder_outputs_verified_on_npu"]
+    assert not receipt["notebook_30_second_clipping_used"]
+    assert receipt["client_isolated_pip_check"] == "No broken requirements found."
+    for split in receipt["splits"]:
+        assert split["selection_mode"] == "PRESELECTED_ORIGINAL_FIRST3_PLUS_LONGEST"
+        assert split["estimated_full_warm_execution_seconds"] > 1800
+        assert split["selected_original_positions"] == sorted(
+            split["preselected_original_indices_before_model_outputs"]
+        )
+        assert (
+            split["completed_original_positions"]
+            == split["selected_original_positions"]
+        )
+        assert split["longest_audio_seconds"] > 30
+        assert split["longest_original_audio_complete_input_verified"]
+    raw = receipt["raw_asset_binding_audit"]
+    assert (
+        sum(
+            row["all_original_utterances_and_transcripts_preserved"]
+            for row in raw["checks"]
+        )
+        == 5559
+    )
+    assert (
+        sum(
+            row["native_selected_audio_bindings_byte_identical"]
+            for row in raw["checks"]
+        )
+        == 8
+    )
+    assert raw["model_calls"] == raw["new_scoring_runs"] == 0
+    assert not receipt["source_checkbox_eligible"]
+    assert not receipt["public_native_entry_complete"]
+    assert not receipt["fixed_ci_artifact_verified"]
+    assert not receipt["research_consumption_verified"]
+    ledger = json.loads((DOCS / "dataset-validation-status.json").read_text("utf-8"))
+    assert not ledger["delivery_inventory"]["LIBRISPEECH"]["checked"]
+
+
 def test_stsb_delivery_closes_fixed_installation_and_native_evaluation():
     receipt = json.loads(
         (DOCS / "validation/stsb-native-delivery-20261025.json").read_text("utf-8")
