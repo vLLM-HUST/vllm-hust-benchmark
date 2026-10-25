@@ -3637,9 +3637,9 @@
     },
     "XSUM": {
       "source_id": "XSUM",
-      "platform": "github",
-      "repo_id": "EdinburghNLP/XSum",
-      "source_url": "https://github.com/EdinburghNLP/XSum",
+      "platform": "huggingface",
+      "repo_id": "EdinburghNLP/xsum",
+      "source_url": "https://huggingface.co/datasets/EdinburghNLP/xsum",
       "asset_kind": "summarization_corpus",
       "independent_source_id": "XSUM",
       "workload_tags": [
@@ -3648,16 +3648,44 @@
       "provenance": "author_release",
       "fitness_status": "VARIABLES_REQUIRE_ASSET_INSPECTION",
       "discovery_status": "ENTRY_IDENTIFIED",
-      "revision": null,
-      "files": [],
-      "unit": "source_rows",
+      "revision": "7d4d486c2f8ef850b1a11aead99b894ff3dd7da9", "revision_note": "pragma: allowlist secret - public publisher snapshot identity",
+      "files": [
+        {
+          "path": "data/test-00000-of-00001.parquet",
+          "url": "https://huggingface.co/datasets/EdinburghNLP/xsum/resolve/7d4d486c2f8ef850b1a11aead99b894ff3dd7da9/data/test-00000-of-00001.parquet",
+          "sha256": "224e9dbc6fed987759c1954603b43cb280b8d475d78893779130aa707d967ed7", "sha256_note": "pragma: allowlist secret - public original parquet identity",
+          "bytes": 16731226,
+          "rows": 11334,
+          "split": "test",
+          "role": "data"
+        },
+        {
+          "path": "data/train-00000-of-00001.parquet",
+          "url": "https://huggingface.co/datasets/EdinburghNLP/xsum/resolve/7d4d486c2f8ef850b1a11aead99b894ff3dd7da9/data/train-00000-of-00001.parquet",
+          "sha256": "0bba72d330f2a35ba20321444e54724e487b49f2eab6b26625b5f282d1c797c9", "sha256_note": "pragma: allowlist secret - public original parquet identity",
+          "bytes": 299612457,
+          "rows": 204045,
+          "split": "train",
+          "role": "data"
+        },
+        {
+          "path": "data/validation-00000-of-00001.parquet",
+          "url": "https://huggingface.co/datasets/EdinburghNLP/xsum/resolve/7d4d486c2f8ef850b1a11aead99b894ff3dd7da9/data/validation-00000-of-00001.parquet",
+          "sha256": "b7fc808c2dd3d1340349481aeef489e6eb8c22ff5739d8bce6d0f99e5ef8044d", "sha256_note": "pragma: allowlist secret - public original parquet identity",
+          "bytes": 16447668,
+          "rows": 11332,
+          "split": "validation",
+          "role": "data"
+        }
+      ],
+      "unit": "original_article",
       "provenance_kind": "summarization_corpus",
       "access": {
         "license": null,
-        "gated": null,
-        "note": "Verify publisher terms before acquisition or redistribution"
+        "gated": false,
+        "note": "Publisher dataset card states unknown license; keep data external and verify original BBC/publisher use conditions before redistribution"
       },
-      "metadata_snapshot": "public-source-metadata-v0.5; not a fresh web check"
+      "metadata_snapshot": "Original publisher HF metadata and all3 parquet schemas/counts verified on server20261025; native delivery still pending"
     },
     "MULTINEWS": {
       "source_id": "MULTINEWS",

@@ -214,6 +214,12 @@ def adapt_row(
             or len(choices["text"]) != len(choices["label"])
         ):
             raise ValueError("AI2_ARC requires aligned source choice text and labels")
+    if source_id == "XSUM" and (
+        set(row) != {"document", "summary", "id"}
+        or any(not isinstance(row[key], str) for key in row)
+        or not row["id"].strip()
+    ):
+        raise ValueError("XSUM requires original document, summary and ID strings")
     if source_id == "TOOLACE" and (
         not isinstance(row["conversations"], list) or not row["conversations"]
     ):

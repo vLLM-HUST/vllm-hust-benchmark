@@ -1,5 +1,45 @@
 # 公开原始资产：服务器准备与任务验证缺口
 
+## XSum 原文章摘要（原生抽样通过，固定交付核验中）
+
+数据使用[发布方原始 XSum parquet](https://huggingface.co/datasets/EdinburghNLP/xsum)，保留原
+`document`、`summary`、 `id` 和 train204045、validation11332、test11334 三个 split。参考摘要不进入模型输入。
+模型为[官方任务专用 BART-large-XSum](https://huggingface.co/facebook/bart-large-xsum)，不是原论文 ConvS2S 的训练复现。
+固定版本、文件摘要、原生成配置和评分源码见 `configs/workload-native/xsum-author-pins.json`。
+
+所有数据、权重和原评分资源在服务器外部目录准备，仓库不托管这些资产：
+
+```bash
+python scripts/prepare_xsum_original_assets.py --output /private/xsum-assets
+# 网络需要时可指定 --hf-endpoint https://hf-mirror.com；仍核对原发布方摘要。
+# 中断后使用同一目录加 --resume，只复用已经通过校验的原文件。
+```
+
+准备器支持 `--parts data model --verify-only` 对已有原文件只读核验；不能把准备成功当作原生任务完成。 匹配硬件平台的 PyTorch/torch_npu/CANN
+应事先配置，独立 NPU 客户端依赖见 `configs/workload-native/xsum-generation-npu-client-dependencies.txt`；独立 CPU
+评分客户端依赖见 `configs/workload-native/xsum-original-score-client-dependencies.txt`，不修改共享推理服务环境。
+
+```bash
+# 使用独立 NPU 生成客户端；默认固定原始物理行0、1、2。
+python scripts/run_xsum_original.py --mode generate \
+  --data-root /private/xsum-assets/data --model-root /private/xsum-assets/model \
+  --output /private/xsum-original-generation --device npu:1
+# 切换到独立 CPU 评分客户端，复用刚才的原生响应，不调用模型。
+python scripts/run_xsum_original.py --mode score \
+  --data-root /private/xsum-assets/data --source-root /private/xsum-assets/scoring \
+  --reuse /private/xsum-original-generation --output /private/xsum-original-score
+```
+
+生成使用原 checkpoint 配置：encoder1024、decoder max62/min11、beam6、no-repeat-ngram3、原 pipeline 前缀。 1024 是该原
+BART 评测协议的窗口，并非为当前服务器临时裁题；完整原文仍保留，不将此协议冒充全文长上下文服务验证。 `--full` 执行整个所选 split，`--indices 3,4,5`
+是生成前固定的其他原位置；不能看结果后换题。 评分核对保存响应的原模型/配置及原文章/摘要身份，使用未修改的官方 Transformers 后处理函数、HF ROUGE、原英文 Punkt 和
+stemming。 两阶段均拒绝覆盖已有输出目录。
+
+当前原 test0、1、2 的 NPU 生成和原评分通过；公共入口另验证未见原位置并独立重算评分。 依据冻结规则估算原 test
+全量推理约11870秒，超过30分钟，故原前三条保持为主要抽样，不宣称11334题全量推理。
+原数据含34条空正文（train28、validation5、test1），适配器保留原样，不删除、不填充、不替换参考； 原 test11155 为空正文的补充边界验证，不替代主要三条抽样。
+固定CI工件和研究侧消费闭环尚在核验，来源保持未勾选。 HF 数据卡未明确许可，使用与再分发前须确认原发布方及 BBC 条款；原文、参考、详细响应与完整索引不公开提交。
+
 ## LibriSpeech 原始音频原生入口（抽样原生交付已验证）
 
 原始资产为 OpenSLR 12 的 `test-clean.tar.gz`（2620 条）和 `test-other.tar.gz`（2939 条）。 使用发布方 Whisper

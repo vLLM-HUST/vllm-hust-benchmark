@@ -2,6 +2,17 @@
   "version": "adapter-extensions/v1",
   "boundary": "Field contracts from publisher metadata/docs. No real source payload downloaded or full adapter validation claimed.",
   "adapters": {
+    "XSUM": {
+      "kind": "task_dataset",
+      "mapping": "native_fields",
+      "input_fields": ["document"],
+      "required_fields": ["document", "summary", "id"],
+      "outcome_fields": ["summary"],
+      "annotation_fields": ["id"],
+      "id_field": "id",
+      "requirements": ["Original publisher parquet and original article/summary ID binding; official task-specific BART protocol and ROUGE; no chat prompt or reference in model input"],
+      "status": "ORIGINAL_FIELDS_MAPPED_NATIVE_DELIVERY_PENDING"
+    },
     "STSB": {
       "kind": "task_dataset",
       "mapping": "stsb_original_pairs",
