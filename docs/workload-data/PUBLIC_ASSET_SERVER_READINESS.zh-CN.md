@@ -617,6 +617,25 @@ manifest执行pipeline/resolve。输入只包含原`Question`与按作者seed0�
 
 # 历史准备能力补迁：LongAlpaca、NQ-open 与 DuReader demo
 
+FLORES-200 原生入口代码（仅软件夹具验证，真实 NPU 运行待补）：
+
+```bash
+python scripts/run_flores200_original.py \
+  --archive /path/to/flores200_dataset.tar.gz \
+  --model-root /path/to/original-nllb-600m \
+  --output /path/to/fresh-private-flores-results \
+  --source-language eng_Latn --target-language fra_Latn \
+  --split devtest --start 0 --count 3 --npu-device 0
+```
+
+只在服务器运行，事先确认研究线程释放该 NPU。资产身份沿用固定配置，不重新下载已校验资产。
+按照[作者评测说明](https://github.com/facebookresearch/flores/blob/a6c830c6e1051fb4ac1a44b32358f00463f332bd/flores200/README.md)，使用主要指标
+chrF++（sacrebleu CHRF(word_order=2)）；spBLEU 尚未集成，不宣称全部指标完成。
+保留原始平行行号与空句，不换题；默认原始0/1/2行，`--full`为指定方向指定公开split全部原句。检查完整归档的语言数量与行数，但不把归档检查称为全部语言已推理。 模型使用固定
+NLLB-600M 工件，NPU执行且无CPU/CUDA降级，不修改其生成配置，只指定目标语言token；完整输入超出模型容量直接失败。arb_Latn、min_Arab、sat_Olck
+缺少对应模型token，拒绝执行而不替换文字体系。 模型限非商业研究使用，不能直接视为企业部署授权。输出含原句、参考译文和预测，留在服务器私有目录。需服务器安装并核实
+transformers、torch/torch-npu、sentencepiece、sacrebleu 的实际兼容版本；环境准备终态、真实推理及评分尚未验证，来源不得打勾。
+
 WildChat、UltraChat、LMSYS-Chat 使用同一准备入口，分别指定 `WILDCHAT`、`ULTRACHAT`、`LMSYS_CHAT`。 复用现有
 historical_dialogue 适配定义，不新造第二套对话映射。原始 conversation/messages 的全部角色、轮次及顺序保留，包括历史 assistant
 输出；它们不是新模型的生成结果，也不是可直接发送的完整 API 请求。 准备输出只是原始记录引用，消费端通过 resolve_input
