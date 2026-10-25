@@ -98,6 +98,42 @@ def test_secondary_metric_encodes_both_sides_without_extra_tokenization():
     assert "tokenize=none" in proof["spbleu_tokenization"]
 
 
+def test_frozen_delivery_links_native_scoring_installation_and_consumer_evidence():
+    """Receipt integrity only; this fixture does not repeat model execution."""
+    receipt_path = (
+        ROOT / "docs/workload-data/validation/flores200-native-delivery-20261026.json"
+    )
+    proof = json.loads(receipt_path.read_text("utf-8"))
+    ledger = json.loads(
+        (ROOT / "docs/workload-data/dataset-validation-status.json").read_text("utf-8")
+    )
+    entry = ledger["delivery_inventory"]["FLORES200"]
+    assert (
+        entry["checked"]
+        and entry["delivery_receipt"] == receipt_path.relative_to(ROOT).as_posix()
+    )
+    assert proof["source_checkbox_eligible"]
+    assert proof["native"]["translations_reused"] == 9
+    assert (
+        sum(
+            len(profile["original_positions"])
+            for profile in proof["native"]["profiles"]
+        )
+        == 9
+    )
+    assert proof["fixed_consumer"]["noneditable_installed_payload_files_equal"] == 42
+    assert proof["fixed_consumer"]["native_results_public_and_research_roundtrip"] == 9
+    assert not proof["fixed_consumer"]["research_default_dependency_updated"]
+    assert (
+        proof["client"]["isolated_pip_check_with_empty_pythonpath"]
+        == "No broken requirements found."
+    )
+    assert proof["model_calls_for_closure"] == 0
+    assert not proof["raw_dataset_predictions_or_model_published"]
+    for path in proof["native"]["historical_receipts_reused"]:
+        assert (ROOT / path).is_file()
+
+
 def test_original_blank_row_alignment_and_order_preserved(tmp_path):
     selected = pairs(tmp_path)
     assert [pair["row_index"] for pair in selected] == [0, 1, 2]

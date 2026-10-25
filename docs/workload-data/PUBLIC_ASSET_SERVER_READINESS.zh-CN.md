@@ -529,7 +529,9 @@ python scripts/prepare_reused_research_assets.py WILDCHAT --mode download \
 范围须保持：NarrativeQA当前为公开QA/文档/摘要表，不是完整书籍；Natural
 Questions当前为NQ-open；DuReader为demo；WildChat为原1M固定14分片，不是4.8M；UltraChat为发布方合成语料；InfiniteBench保留12原文件，答案类型和任务模板/评分需继续适配。来源级原生交付仍不勾选。当前只有无模型夹具测试，服务器复核待可信入口恢复后进行。
 
-### FLORES-200 原始翻译资产（准备中，未完成原生接入）
+### FLORES-200 原始翻译资产（历史获取截面；当前交付结论见下文）
+
+2026-10-26补充：原生三语向抽样、原指标评分、固定软件包与研究侧消费已收口，见[交付回执](validation/flores200-native-delivery-20261026.json)。下面的准备中/待核描述保留历史截面，不再代表当前交付状态；隐藏test、未支持的原始语言代码和非商业模型许可限制仍有效。
 
 公开资产入口已补充，以下命令应在有空间的服务器执行，数据与模型不放进代码仓：
 
@@ -620,7 +622,7 @@ manifest执行pipeline/resolve。输入只包含原`Question`与按作者seed0�
 2026-10-25恢复后的实测补充：BurstGPT第3份原20条保存终态已找回并逐条审计，未新增模型调用；三份各20条均已核。随后固定CI提供者33份安装文件与研究消费端40个Python文件安装哈希通过，三份各原0/1/2行的公共直接读取、公共索引解析、研究索引解析全部相等，且均拒绝把元数据变成模型请求。该来源现可勾选，见[交付回执](validation/burstgpt-native-delivery-20261025.json)。授权scale缩放工具验证不是原始时序性能复现；外部池不是原私有用户prompt，研究默认依赖锁未更新。
 FLORES英→法、英→简中各原devtest:0/1/2已在NPU完成生成，原始句对及chrF++复算一致；是3个平行行号、2个方向、6次生成，不是6个独立句子或全语言覆盖。
 首次读取因原tar成员带`./`前缀而在模型导入前失败，日志保留；修复只规范成员路径查找，不改归档/题目，回归覆盖原前缀形式。真实运行回执见[双方向审计](validation/flores200-two-profile-native-audit-20261025.json)。
-当前客户端整体`pip check`仍非零，报告可见CANN编译/分析工具的依赖缺失。已完成的生成/评分保留，但不能宣称整个环境合格；不为清零盲装全部工具或替换服务栈。原模型非商业许可、3个不支持语言代码、spBLEU和数据提供者/研究消费缺口均保留。
+当时客户端整体`pip check`非零，报告可见CANN编译/分析工具的依赖缺失。该历史失败保留；现已核实为注入PYTHONPATH带入的工具包元数据，隔离客户端依赖检查通过，不为清零盲装工具或替换服务栈。原模型非商业许可及3个不支持语言代码保留；spBLEU和数据提供者/研究消费已在2026-10-26补齐。
 
 InfiniteBench 的历史准备映射已分数字答案和字符串答案补迁，均去除研究feature选择器。数字组仅
 code_run.jsonl、math_calc.jsonl、math_find.jsonl；另9份为字符串组。按原记录保留数字类型和字符串前导零，不拼造新题。
@@ -818,10 +820,10 @@ python scripts/run_humaneval_isolated_scoring.py \
 
 由获授权操作员启动root入口；`--sandbox-uid`应使用专用、非0的低权限宿主UID，65534仅为已验证实例示例，不能盲目与其他任务共享。`work-root`必须不存在且不与输入/运行库重叠；它的父目录必须允许该UID遍历，不修改现有共享目录权限。`python-runtime`是包含`bin/python3`和`lib/`的专用基础Python前缀，不是整个`/usr`或`/`。挂载、网络、PID、capability或只读检查失败即停止；运行日志、全部题目、候选、测试结果保存在私有工作目录，公共回执只给任务ID、通过布尔值及分类结果。原作者测试超时仍为3秒、单worker；`--deadline`只控制外围总运行时间，默认600秒，不改变原题预算。此入口没有下载、没有模型调用，CI只运行无害软件夹具，不运行候选代码。
 
-FLORES另已补充英语→德语devtest原3/4/5行NPU生成及原chrF++复核，累计三方向9次生成、6个不同平行行号；见[第三方向回执](validation/flores200-third-direction-native-audit-20261025.json)。这是新增方向验证，不要求把全部语言组合跑完才可交付；当前仍缺公共数据组件/研究消费和环境可复现收口。
+FLORES另已补充英语→德语devtest原3/4/5行NPU生成及原chrF++复核，累计三方向9次生成、6个不同平行行号；见[第三方向回执](validation/flores200-third-direction-native-audit-20261025.json)。这是新增方向验证，不要求把全部语言组合跑完才可交付；后续公共数据组件/研究消费和隔离客户端资格已收口，原回执不改写。
 本入口只验证安全的数据准备；尚未核验真实保存结果，也不证明功能测试完成。输出包含生成代码，保留私有，不提交Git。恢复服务器后先复用已有生成物，不重跑模型来替代缺失评分。
 
-FLORES-200 原生入口代码（已有三方向、9次保存的NPU生成；不等于公共交付已收口）：
+FLORES-200 原生入口代码（三方向9次保存的NPU生成及抽样交付闭环已核验）：
 
 ```bash
 python scripts/run_flores200_original.py \
@@ -839,7 +841,7 @@ chrF++（sacrebleu CHRF(word_order=2)）；已有保存结果的离线spBLEU入�
 NLLB-600M 工件，NPU执行且无CPU/CUDA降级，不修改其生成配置，只指定目标语言token；完整输入超出模型容量直接失败。arb_Latn、min_Arab、sat_Olck
 缺少对应模型token，拒绝执行而不替换文字体系。 模型限非商业研究使用，不能直接视为企业部署授权。输出含原句、参考译文和预测，留在服务器私有目录。需服务器安装并核实
 transformers、torch/torch-npu、sentencepiece、sacrebleu
-的实际兼容版本；已有原生生成与chrF++证据可复用，但固定软件工件消费、研究侧回查及spBLEU尚待收口，来源暂不打勾。
+的实际兼容版本；三方向已有原生生成、chrF++/spBLEU、固定软件工件及研究回查证据，来源已按声明抽样范围勾选，不声称完整split或全部语言组合执行。
 
 原始平行语料公共准备入口（必须显式指定原始语向，不把参考译文拼入模型输入）：
 
