@@ -965,7 +965,8 @@ python scripts/run_mbpp_isolated_scoring.py \
 500题完整范围外围deadline至少4060秒，示例600秒只适合固定小样本，不缩短题内时间。
 无隔离条件不回退，异常保留目录和日志，不自动清理或重试。来源完成仍需真实NPU生成、独立评分及固定工件消费闭环。 替换为EvalPlus增强测试需另列协议，不得当作原三测试同配置。
 当前原题11/12/13生成、参考解自检及CodeEval评分已完成，预测2通过/1失败；原结果保留，不重试改答案。
-见[原生抽样回执](validation/mbpp-original-native-sample-20261026.json)。统一full配置适配已补，固定安装工件与研究消费尚待核验，来源暂不勾选。
+见[原生抽样及消费回执](validation/mbpp-original-native-sample-20261026.json)。统一full配置适配、精确CI安装工件及研究消费均已核验，来源按full原生抽样协议勾选。
+四个full分片共974条原记录全量映射/建索引，14个跨分片位置公共与研究回查一致；研究默认依赖未升级，不声称全500题模型评价。
 完整full配置可从已准备资产的`data/`根目录读取四个原Parquet；输入仅含`text`和三个`test_list`，
 参考`code`、`test_setup_code`、`challenge_test_list`分离到outcome；题号单独保留。sanitized格式不走该适配，不能静默当full读取。
 
