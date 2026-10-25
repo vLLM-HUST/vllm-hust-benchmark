@@ -67,11 +67,22 @@ def test_original_research_assets_are_registered_without_native_completion_claim
         assert evidence["research_repository"] == "intellistream/llm-workload-suite"
         assert not evidence["current_source_delivery_complete"]
         assert evidence["receipt_paths"]
-        assert not ledger["delivery_inventory"][source_id]["checked"]
-        assert (
-            ledger["delivery_inventory"][source_id]["status"]
-            == "HISTORICAL_ACQUISITION_REUSED_NATIVE_PENDING"
-        )
+        current = ledger["delivery_inventory"][source_id]
+        # The frozen acquisition-only phase cannot promote a source. Later
+        # independently evidenced native delivery must not be forbidden forever.
+        if current["checked"]:
+            assert current["status"] == "AVAILABLE"
+            path = current["delivery_receipt"]
+            assert (
+                path
+                != "docs/workload-data/validation/research-acquisition-reuse-audit-20261025.json"
+            )
+            delivery = json.loads((ROOT / path).read_text("utf-8"))
+            assert delivery["source_id"] == source_id
+            assert delivery["source_checkbox_eligible"] is True
+        else:
+            assert current["status"] != "AVAILABLE"
+            assert current["delivery_receipt"] is None
     assert sources["NARRATIVEQA"]["repo_id"] == "google-deepmind/narrativeqa"
     assert (
         sources["NATURALQUESTIONS"]["repo_id"]
