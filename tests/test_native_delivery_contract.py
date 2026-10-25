@@ -125,7 +125,19 @@ def test_flores_original_archive_is_not_native_delivery_or_publisher_checksum():
     receipt = json.loads(
         (ROOT / row["acquisition_progress_receipt"]).read_text("utf-8")
     )
-    assert not row["checked"] and row["delivery_receipt"] is None
+    if row["checked"]:
+        # Acquisition evidence stays frozen. Later native completion requires
+        # a separate receipt; downloading the archive alone is never enough.
+        assert row["delivery_receipt"] != row["acquisition_progress_receipt"]
+        delivery = json.loads((ROOT / row["delivery_receipt"]).read_text("utf-8"))
+        assert delivery["source_checkbox_eligible"]
+        assert delivery["native"]["translations_reused"] >= 3
+        assert (
+            delivery["fixed_consumer"]["native_results_public_and_research_roundtrip"]
+            >= 3
+        )
+    else:
+        assert row["delivery_receipt"] is None
     assert not receipt["source_checkbox_eligible"] and receipt["model_calls"] == 0
     assert not receipt["publisher_checksum_available"]
     assert not receipt["observed_sha256_is_publisher_checksum"]
