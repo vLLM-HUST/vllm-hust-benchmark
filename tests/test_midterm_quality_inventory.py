@@ -11,7 +11,7 @@ def test_quality_inventory_matches_original_tracks_and_preserves_limits():
     )
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
-    text = (ROOT / module.REPORT).read_text()
+    text = (ROOT / module.REPORT).with_name("中期测试报告-v081.md").read_text()
     selected = module.section(text, "### 5.11 既有任务质量与配置配对")
     rows = module.tables(selected)[0]["rows"]
     hle = json.loads(
