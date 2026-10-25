@@ -93,6 +93,7 @@ def build(revision, read=None):
     }
     for s in data["sections"]:
         if s["id"] in historical:
+            original_scope = s.get("scope", "")
             s["historical"] = True
             s["as_of"] = "2026-10-24"
             s["scope"] = (
@@ -102,7 +103,7 @@ def build(revision, read=None):
             )
             s["scope_en"] = (
                 "Historical record through 2026-10-24 (component or prior-reference method): "
-                + s.get("scope_en", "")
+                + s.get("scope_en", original_scope)
                 + " These stage-local statuses do not describe current wholechain attainment."
             )
         for e in s.get("evidence", []):
