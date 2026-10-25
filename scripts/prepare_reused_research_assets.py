@@ -8,7 +8,7 @@ import argparse
 import hashlib
 import importlib.util
 import json
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 import re
 from urllib.parse import quote, urlparse
 from urllib.request import Request, urlopen
@@ -43,28 +43,33 @@ def github_blob_transport(source, item, *, metadata_loader=github_json):
     """Same pinned GitHub file through its author's API, not a dataset mirror."""
     url = urlparse(item["url"])
     revision, repo = source["revision"], source["repo_id"]
-    expected = f"/{repo}/{revision}/{item['path']}"
+    prefix = f"/{repo}/{revision}/"
+    publisher_path = url.path.removeprefix(prefix)
     if (
         url.scheme != "https"
         or url.hostname != "raw.githubusercontent.com"
-        or url.path != expected
+        or not url.path.startswith(prefix)
+        or not publisher_path
+        or PurePosixPath(publisher_path).is_absolute()
+        or ".." in PurePosixPath(publisher_path).parts
         or url.query
         or url.fragment
         or not re.fullmatch(r"[0-9a-f]{40}", revision)
     ):
         raise ValueError("explicit unchanged pinned original GitHub URL required")
-    metadata_url = f"https://api.github.com/repos/{repo}/contents/{quote(item['path'], safe='/')}?ref={revision}"
+    metadata_url = f"https://api.github.com/repos/{repo}/contents/{quote(publisher_path, safe='/')}?ref={revision}"
     info = metadata_loader(metadata_url)
     if (
         not isinstance(info, dict)
         or info.get("type") != "file"
-        or info.get("path") != item["path"]
+        or info.get("path") != publisher_path
         or info.get("size") != item["bytes"]
         or not re.fullmatch(r"[0-9a-f]{40}", info.get("sha", ""))
     ):
         raise ValueError("pinned original GitHub file/blob metadata mismatch")
     return {
         **item,
+        "publisher_path": publisher_path,
         "git_blob": info["sha"],
     }, f"https://api.github.com/repos/{repo}/git/blobs/{info['sha']}"
 

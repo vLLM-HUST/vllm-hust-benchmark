@@ -143,6 +143,29 @@ def test_explicit_github_transport_preserves_pinned_file(failure):
         ]
 
 
+def test_original_publisher_path_may_differ_from_local_jsonl_name():
+    source, files = runner.selection("DUREADER")
+    item = files[0]
+    publisher_path = item["path"].removesuffix("l")
+    calls = []
+
+    def loader(url):
+        calls.append(url)
+        return {
+            "type": "file",
+            "path": publisher_path,
+            "size": item["bytes"],
+            "sha": "b" * 40,
+        }
+
+    spec, url = runner.github_blob_transport(source, item, metadata_loader=loader)
+    assert spec["path"] == item["path"]
+    assert spec["publisher_path"] == publisher_path
+    assert spec["sha256"] == item["sha256"]
+    assert publisher_path in calls[0] and item["path"] not in calls[0]
+    assert url.endswith("b" * 40)
+
+
 def fixture(tmp_path, monkeypatch, gated=False):
     raw = b'{"software_fixture":true}\n'
     source = {
