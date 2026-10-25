@@ -5,6 +5,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1] / "workload-preparation"
 DATA_MODULES = {
+    "narrativeqa",  # Pinned original table relations only, no observation/scoring.
     "multinews",  # Original paired documents/references, no research analysis.
     "librispeech",  # Original audio/transcript bindings only, no observations.
     "stsb",  # Publisher sentence pairs and labels only; no research analysis.
@@ -45,6 +46,19 @@ def test_no_observation_dependencies_or_hooks():
     )
     assert not list((ROOT / "tools").rglob("*.py"))
     assert not (ROOT / "schemas/full_cycle_trace_v1.schema.json").exists()
+
+
+def test_narrativeqa_relations_remain_data_only():
+    import ast
+
+    tree = ast.parse(
+        (ROOT / "src/vllm_hust_workload_data/narrativeqa.py").read_text("utf-8")
+    )
+    assert not any(isinstance(node, ast.Import) for node in ast.walk(tree))
+    imports = {
+        node.module for node in ast.walk(tree) if isinstance(node, ast.ImportFrom)
+    }
+    assert imports == {"copy", "assets", "registry"}
 
 
 def test_gpqa_helper_contains_only_original_data_preparation_dependencies():
