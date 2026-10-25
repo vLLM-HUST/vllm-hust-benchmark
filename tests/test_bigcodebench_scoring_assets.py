@@ -52,6 +52,19 @@ def test_source_checksum_required(tmp_path):
         module.verify_source(tmp_path, pins)
 
 
+def test_default_manifest_covers_imported_scoring_modules_and_rejects_extra(tmp_path):
+    assert len([name for name in module.PINS if name.endswith(".py")]) == 29
+    assert "bigcodebench/eval/utils.py" in module.PINS
+    assert "bigcodebench/syncheck.py" in module.PINS
+    assert "bigcodebench/provider/__init__.py" in module.PINS
+    (tmp_path / "bigcodebench").mkdir()
+    (tmp_path / "bigcodebench/unexpected.py").write_text(
+        "raise RuntimeError('never import')"
+    )
+    with pytest.raises(ValueError, match="source tree required"):
+        module.verify_source(tmp_path)
+
+
 def test_static_report_cannot_complete_source(tmp_path, monkeypatch):
     monkeypatch.setattr(module, "verify_source", lambda root: {})
     rows = [
