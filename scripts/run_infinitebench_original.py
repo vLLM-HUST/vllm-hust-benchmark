@@ -8,6 +8,7 @@ No context truncation, task substitution, automatic retry or performance claim.
 import argparse
 import importlib
 import json
+import math
 from pathlib import Path
 import sys
 from urllib.parse import urlparse
@@ -119,9 +120,16 @@ def execute(
                 stream.flush()
                 receipt["completed_original_positions"].append(index)
                 save()
+        score = scorer.get_score(labels, predictions, task, model)
+        if (
+            type(score) not in {int, float}
+            or not math.isfinite(score)
+            or not 0 <= score <= 1
+        ):
+            raise ValueError("official scorer returned invalid aggregate")
         receipt.update(
             status="SELECTED_ORIGINAL_TASKS_AND_AUTHOR_SCORE_COMPLETE",
-            score=scorer.get_score(labels, predictions, task, model),
+            score=score,
             native_execution_complete=True,
         )
     except Exception as exc:

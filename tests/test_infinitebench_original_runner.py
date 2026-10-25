@@ -98,3 +98,61 @@ def test_full_and_minimum_selection_rules(tmp_path):
         runner.select(rows, count=2)
     with pytest.raises(ValueError):
         runner.select(rows, full=True, start=1)
+
+
+def test_scorer_failure_preserves_predictions_without_completion(tmp_path):
+    rows, kwargs, calls = fixture(tmp_path)
+
+    def failed_score(*_):
+        raise RuntimeError("fixture scoring failure")
+
+    kwargs["scorer"] = NS(get_score=failed_score)
+    with pytest.raises(RuntimeError):
+        runner.execute(rows, **kwargs)
+    assert len(calls) == 3
+    receipt = json.loads((kwargs["output"] / "receipt-private.json").read_text())
+    assert receipt["completed_original_positions"] == [0, 1, 2]
+    assert receipt["status"] == "FAILED_NOT_COMPLETE"
+    assert not receipt["native_execution_complete"]
+    assert (
+        len((kwargs["output"] / "predictions-private.jsonl").read_text().splitlines())
+        == 3
+    )
+
+
+@pytest.mark.parametrize("score", [float("nan"), float("inf"), -0.1, 1.1, True, "0.5"])
+def test_invalid_aggregate_never_counts_as_complete(tmp_path, score):
+    rows, kwargs, _ = fixture(tmp_path)
+    kwargs["scorer"] = NS(get_score=lambda *_: score)
+    with pytest.raises(ValueError, match="invalid aggregate"):
+        runner.execute(rows, **kwargs)
+    receipt = json.loads((kwargs["output"] / "receipt-private.json").read_text())
+    assert not receipt["native_execution_complete"]
+
+
+def test_failure_on_second_row_preserves_first_and_never_skips(tmp_path):
+    rows, kwargs, calls = fixture(tmp_path)
+    original = kwargs["client"].chat.completions.create
+
+    def second_fails(**body):
+        if calls:
+            raise RuntimeError("fixture second row failure")
+        return original(**body)
+
+    kwargs["client"].chat.completions.create = second_fails
+    with pytest.raises(RuntimeError):
+        runner.execute(rows, **kwargs)
+    receipt = json.loads((kwargs["output"] / "receipt-private.json").read_text())
+    assert receipt["selected_original_positions"] == [0, 1, 2]
+    assert receipt["completed_original_positions"] == [0]
+    assert not receipt["native_execution_complete"]
+
+
+@pytest.mark.parametrize("reason,content", [("tool_calls", "text"), ("stop", None)])
+def test_invalid_model_response_is_not_success(tmp_path, reason, content):
+    rows, kwargs, _ = fixture(tmp_path)
+    kwargs["client"].chat.completions.create = lambda **_: NS(
+        choices=[NS(finish_reason=reason, message=NS(content=content))]
+    )
+    with pytest.raises(ValueError, match="unsuccessful"):
+        runner.execute(rows, **kwargs)
