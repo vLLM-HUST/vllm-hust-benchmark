@@ -193,3 +193,34 @@ def test_ci_inventory_rejects_live_and_changed_sources(tmp_path):
     raw.write_bytes(b"replacement success\n")
     with pytest.raises(ValueError, match="Frozen CPU/CI source differs"):
         archive.ci_sources(inventory)
+
+
+def test_publication_archive_preserves_terminal_bytes_without_overwrite(tmp_path):
+    archive = module("archive_publication")
+    source = tmp_path / "readback.json"
+    source.write_bytes(b'{"passed":false}\n')
+    row = {
+        "member": "readback/failed.json",
+        "source": str(source),
+        "bytes": source.stat().st_size,
+        "sha256": archive.digest(source.read_bytes()),
+    }
+    inventory = tmp_path / "inventory.json"
+    inventory.write_text(
+        json.dumps({"status": "terminal", "scope": "synthetic", "files": [row]})
+    )
+    first, second = tmp_path / "first", tmp_path / "second"
+    archive.pack(inventory, first)
+    archive.pack(inventory, second)
+    name = "muxpd-website-publication-20261025.tar.gz"
+    assert (first / name).read_bytes() == (second / name).read_bytes()
+    with pytest.raises(FileExistsError):
+        archive.pack(inventory, first)
+    source.write_bytes(b"changed")
+    with pytest.raises(ValueError, match="Frozen source changed"):
+        archive.pack(inventory, tmp_path / "changed")
+    index = json.loads((first / "website-publication-archive-index.json").read_text())
+    assert archive.verify(first / name, index)["files"] == 2
+    index["files"][0]["sha256"] = "0" * 64
+    with pytest.raises(ValueError, match="Changed member"):
+        archive.verify(first / name, index)
