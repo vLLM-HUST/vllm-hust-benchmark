@@ -106,7 +106,38 @@ sanitize和本地evaluate命令。保留calibrated、参考实现检查、pass@1
 worker选择；使用独立输出缓存，避免沿用其他选题的groundtruth缓存。选定参考实现必须
 全部通过，才能接受候选评分；缺依赖、运行环境失败不能当成模型答错。官方默认地址空间/
 数据限制为30GiB、栈限制10MiB，不能照搬DS1000隔离器的2GiB硬限制。仍须另行完成
-隔离launcher、依赖及并发预检、实际sanitize/参考实现/候选评分和完整结果覆盖检查。
+隔离launcher的实际验证、依赖及并发预检、实际sanitize/参考实现/候选评分和完整结果覆盖检查。
+
+### 隔离容器执行入口（软件实现，尚未实跑）
+
+`scripts/run_bigcodebench_container_scoring.py`可在Linux上调用本机Docker/Podman，
+复用准备后的原始输出，不再请求模型。操作者须先取得并核验本机评分镜像的不可变
+`sha256:`镜像ID，设置`SCORING_IMAGE_ID`；本入口不拉取或构建镜像，不用可变tag。
+镜像须提供官方Docker约定的Python3.10及`/usr/local/bin/python3`、完整官方评分依赖
+和CLI导入依赖；容器内逐项核验固定requirements版本及`pip check`，不满足就失败。
+
+```bash
+python scripts/run_bigcodebench_container_scoring.py \
+  --engine docker --image "$SCORING_IMAGE_ID" \
+  --prepared-dir /private/bigcodebench-score-input \
+  --official-code /private/bigcodebench-code \
+  --work-root /private/fresh-bigcodebench-container-run \
+  --sandbox-uid 65534
+```
+
+启动器要求已授权Linux root进行私有目录分配；候选代码只在非root容器中执行。
+禁网、只读根文件系统/输入/官方源码、清空capabilities、no-new-privileges，不映射NPU、
+宿主PID或Docker socket；只允许新建输出目录可写。总内存32GiB、禁止swap、进程数1024，
+并保留作者30GiB地址空间/数据和10MiB栈限制，不覆盖官方worker选择；资源不足不能算完成。
+执行前比较宿主与容器mount/net/PID namespace身份，并再次核对暂存原始文件和源码摘要。
+官方sanitize、reference检查及candidate评分按原流程运行，reference必须全部通过，
+且结果覆盖全部选定ID、每题一个原始输出、pass@1与逐题状态一致，才产生原生评分回执。
+
+原代码、评分细节、日志及容器句柄均保留于私有工作目录；失败不自动重启、删除容器或
+回退宿主执行。`launch-private.json`记录容器名称和终态；未结束时应按该名称inspect，
+不能因观察超时重开。该隔离是受限本地评测环境，不是对任意恶意代码的安全认证。
+当前仅有命令、拒绝条件和结果验收的软件夹具证据；服务器不可达，尚无真实容器运行、
+依赖兼容、并发容量或研究侧消费证明。原生评分回执本身仍不自动勾选最终交付。
 
 2026-10-24历史服务器的[隔离预检](validation/code-execution-isolation-preflight-20261024.json)：网络namespace可创建，但mount/PID隔离和私有bubblewrap无害探测失败，且无Docker/Podman/socket。该历史结论不代表2026-10-25已验证的其他来源隔离环境；BigCodeBench自身功能评分仍未运行。保存的生成结果继续复用，待其隔离环境与依赖验证后接原sanitize/功能测试及评分，不裸执行、不重生成刷分。
 

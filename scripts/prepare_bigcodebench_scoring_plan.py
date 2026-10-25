@@ -75,6 +75,9 @@ def build_plan(prepared, author):
         "status": "OFFICIAL_SANDBOX_COMMAND_PLAN_PREPARED_NOT_EXECUTED",
         "code_revision": CODE_REVISION,
         "publisher_source_checksums": verified_source,
+        "prepared_file_sha256": {
+            name: receipt["prepared_file_sha256"][name] for name in paths
+        },
         "selected_original_row_indices": indices,
         "selected_task_ids": selected_ids,
         "required_environment": {
