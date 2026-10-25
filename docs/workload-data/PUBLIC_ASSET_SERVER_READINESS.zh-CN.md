@@ -887,8 +887,23 @@ python scripts/prepare_mbpp_original_assets.py --output /private/fresh-mbpp-asse
 train/test/validation/prompt 及 README，9文件360549字节；不下载模型或运行代码。
 [作者协议](https://github.com/google-research/google-research/blob/f46ca8374b4cddef97ca4208ad986049d74d296a/mbpp/README.md)
 指定原任务ID 11–510用于测试、1–10作为提示候选，论文使用2/3/4作三示例。不能把 few-shot 任务并入测试，不能把 full的500题与sanitized的257题混报，
-也不能因预测失败改换版本或任务。HF字段与GitHub原JSONL的逐项保真仍待服务器核验。
-后续生成必须明确采用的配置、作者提示协议与预算，当前尚未实现生成入口；执行代码必须在受验证的独立沙箱中，不能在宿主或推理服务环境直接exec预测。
+也不能因预测失败改换版本或任务。HF字段与GitHub原JSONL的逐项保真仍待服务器核验。 原始 full 测试集的生成入口如下，客户端需数据读取依赖
+PyArrow，模型使用已确认空闲的本机NPU服务：
+
+```bash
+python scripts/run_mbpp_original_generation.py \
+  --assets /private/fresh-mbpp-assets \
+  --output /private/fresh-mbpp-generation \
+  --model workload-qwen35-27b-128k-nonthinking \
+  --max-tokens 2048 --context-capacity 131072 --count 3
+```
+
+这是作者README三示例文本模板的具名实现：原2/3/4号题完整解答作示例，每个示例与目标题都含三个原测试，块间两个换行； 目标参考代码不入提示。使用原始
+completions，不套聊天模板、不删除Markdown围栏或修补语法，以原 `[DONE]` 标记停止。
+温度0、具名输出预算用于接通验证，不声称复现论文模型、抽样参数或成绩。默认原test前三题，`--start`/`--count`为固定原顺序范围，
+`--full`为完整500题；sanitized变体目前仅准备资产，不能宣称其原生验证完成。
+完整提示分词超容量直接失败，不截断；空输出、语法错误、预算耗尽的原始结果保留，不换题凑通过。预测与完整原任务仅保存在服务器私有目录。
+这里只生成，不执行代码或计分；功能评分仍必须在受验证的独立沙箱中，不能在宿主或推理服务环境直接exec预测。
 替换为EvalPlus增强测试需另列协议，不得当作原三测试同配置。当前只有发布元数据和无数据的软件夹具，来源仍不勾选。
 
 InfiniteBench 作者代码身份与静态前检命令：

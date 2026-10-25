@@ -21,7 +21,10 @@
     {"source_id": "PAIO-SEMANTIC-SIMILAR-5000", "asset_group": "enterprise-private-requests", "related_workload_ids": [], "boundary": "Semantic similarity is not exact-prefix or KV reuse; preserve original private requests without rewriting."}
   ],
   "source_entrypoints": {
-    "MBPP": [{"role": "prepare_assets", "path": "scripts/prepare_mbpp_original_assets.py", "scope": "Pinned publisher full/sanitized assets only; no native generation, code execution or scoring verified."}],
+    "MBPP": [
+      {"role": "prepare_assets", "path": "scripts/prepare_mbpp_original_assets.py", "scope": "Pinned publisher full/sanitized assets only; no native generation, code execution or scoring verified."},
+      {"role": "generation", "path": "scripts/run_mbpp_original_generation.py", "scope": "Publisher README three-shot text template on full original test tasks; software fixtures only, no real NPU or functional scoring verification."}
+    ],
     "WILDCHAT": [{"role": "original_profile", "path": "scripts/run_historical_dialogue_original.py", "scope": "Original historical text continuation only; software fixtures, real execution pending."}],
     "ULTRACHAT": [{"role": "original_profile", "path": "scripts/run_historical_dialogue_original.py", "scope": "Original historical text continuation only; not an online agent episode or quality benchmark."}],
     "LMSYS_CHAT": [{"role": "original_profile", "path": "scripts/run_historical_dialogue_original.py", "scope": "Original historical text continuation only; full publisher records and NPU validation pending."}],
