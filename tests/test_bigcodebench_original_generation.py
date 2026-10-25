@@ -1,7 +1,6 @@
 """CPU protocol fixtures only; no dataset, network, generation, or code execution."""
 
 from copy import deepcopy
-import hashlib
 import importlib.util
 import json
 from pathlib import Path
@@ -116,10 +115,38 @@ def test_generation_receipt_does_not_claim_functional_score():
         r["finish_reason"] == "stop" and r["full_prompt_token_count_matches"]
         for r in receipt["samples"]
     )
+    # Frozen historical generation, not a claim that later generic selectors ran.
     assert (
         receipt["public_runner_sha256"]
-        == hashlib.sha256((root / receipt["public_runner"]).read_bytes()).hexdigest()
+        == "4d5a6d4850395a17c0c1831e8dbee0f363172f397b804058138fb4e886bad519"  # pragma: allowlist secret - frozen public runner checksum
     )
     assert receipt["generated_code_executed"] is False
     assert receipt["pass_at_1_claim"] is False and receipt["scorer_runs"] == 0
     assert receipt["source_checkbox_eligible"] is False
+
+
+def test_original_selection_keeps_positions_and_full_suite_available():
+    assert runner.select_indices(1140) == [0, 1, 2]
+    assert runner.select_indices(1140, indices=[5, 8, 11]) == [5, 8, 11]
+    assert runner.select_indices(1140, start=3, count=3) == [3, 4, 5]
+    assert runner.select_indices(1140, full=True) == list(range(1140))
+
+
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {"indices": [2, 1, 0]},
+        {"indices": [0, 0, 1]},
+        {"indices": [0, 1]},
+        {"indices": [False, 1, 2]},
+        {"indices": [0, 1, 1140]},
+        {"full": True, "count": 3},
+        {"indices": [0, 1, 2], "start": 0},
+        {"start": -1},
+        {"start": 1139},
+        {"count": 2},
+    ],
+)
+def test_invalid_or_conflicting_selections_rejected(kwargs):
+    with pytest.raises(ValueError):
+        runner.select_indices(1140, **kwargs)

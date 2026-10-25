@@ -27,6 +27,34 @@ def require(condition, message):
         raise ValueError(message)
 
 
+def select_indices(total, *, indices=None, start=None, count=None, full=False):
+    require(type(total) is int and total >= 3, "at least three original tasks required")
+    if indices is not None:
+        require(
+            not full and start is None and count is None, "conflicting selection modes"
+        )
+        chosen = list(indices)
+    elif full:
+        require(start is None and count is None, "conflicting selection modes")
+        chosen = list(range(total))
+    else:
+        start = 0 if start is None else start
+        count = 3 if count is None else count
+        require(type(start) is int and type(count) is int, "integer range required")
+        require(
+            start >= 0 and 3 <= count <= total and start + count <= total,
+            "invalid task range",
+        )
+        chosen = list(range(start, start + count))
+    require(
+        len(chosen) >= 3
+        and all(type(i) is int and 0 <= i < total for i in chosen)
+        and chosen == sorted(set(chosen)),
+        "selection must contain at least three sorted unique original indices",
+    )
+    return chosen
+
+
 def digest(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
@@ -114,6 +142,11 @@ def main():
     parser.add_argument("--model", required=True)
     parser.add_argument("--origin", default="http://127.0.0.1:19466", type=origin)
     parser.add_argument("--context-capacity", required=True, type=int)
+    selection = parser.add_mutually_exclusive_group()
+    selection.add_argument("--indices", type=int, nargs="+")
+    selection.add_argument("--full", action="store_true")
+    parser.add_argument("--start", type=int)
+    parser.add_argument("--count", type=int)
     args = parser.parse_args()
     os.umask(0o077)
     out = args.output.resolve()
@@ -135,9 +168,16 @@ def main():
 
     rows = pq.read_table(path).to_pylist()
     require(len(rows) == 1140, "original v0.1.4 task count mismatch")
-    selected = rows[:3]
+    indices = select_indices(
+        len(rows),
+        indices=args.indices,
+        start=args.start,
+        count=args.count,
+        full=args.full,
+    )
+    selected = [rows[i] for i in indices]
     require(
-        [row["task_id"] for row in selected] == [f"BigCodeBench/{i}" for i in range(3)],
+        [row["task_id"] for row in rows] == [f"BigCodeBench/{i}" for i in range(1140)],
         "original release-order task selection mismatch",
     )
     formatter = load_original("bcb_original_formatter", utility_path, UTILITY_SHA)
@@ -150,7 +190,7 @@ def main():
         "code_revision": CODE_REVISION,
         "split": "instruct",
         "original_task_count": 1140,
-        "selected_original_row_indices": [0, 1, 2],
+        "selected_original_row_indices": indices,
         "model": args.model,
         "software": {
             p: metadata.version(p) for p in ["openai", "transformers", "pyarrow"]
@@ -177,7 +217,7 @@ def main():
         max_retries=0,
     )
     try:
-        for index, row in enumerate(selected):
+        for index, row in zip(indices, selected):
             sample = {"row_index": index, "task_id": row["task_id"]}
             try:
                 message = format_prompt(formatter, row["instruct_prompt"])

@@ -17,6 +17,7 @@ from run_bigcodebench_original_generation import (
     format_prompt,
     load_original,
     response_summary,
+    select_indices,
 )
 
 TASK_COUNT = 1140
@@ -31,21 +32,22 @@ def prepare(generation_dir, *, rows, formatter, output):
     ):
         raise ValueError("fresh output separate from historical generation required")
     ids = [row["task_id"] for row in rows]
-    if (
-        len(rows) != TASK_COUNT
-        or set(ids) != {f"BigCodeBench/{i}" for i in range(TASK_COUNT)}
-        or ids[:3] != [f"BigCodeBench/{i}" for i in range(3)]
-    ):
-        raise ValueError(
-            "complete original task set and first three positions required"
-        )
+    if len(rows) != TASK_COUNT or ids != [
+        f"BigCodeBench/{i}" for i in range(TASK_COUNT)
+    ]:
+        raise ValueError("complete original ordered task set required")
     receipt_raw = (generation_dir / "receipt.json").read_bytes()
     receipt = json.loads(receipt_raw)
+    selected_indices = receipt.get("selected_original_row_indices")
+    if not isinstance(selected_indices, list):
+        raise ValueError("original selection list required")
+    selected_indices = select_indices(TASK_COUNT, indices=selected_indices)
+    selected_rows = [rows[i] for i in selected_indices]
+    selected_ids = [ids[i] for i in selected_indices]
     if (
         receipt.get("source_id") != "BIGCODEBENCH"
         or receipt.get("code_revision") != CODE_REVISION
         or receipt.get("split") != "instruct"
-        or receipt.get("selected_original_row_indices") != [0, 1, 2]
         or receipt.get("status")
         != "ORIGINAL_GENERATION_PROFILE_ATTEMPTED_NOT_FUNCTIONALLY_SCORED"
         or receipt.get("max_completion_tokens") != 1280
@@ -54,10 +56,12 @@ def prepare(generation_dir, *, rows, formatter, output):
     ):
         raise ValueError("original Instruct generation profile receipt required")
     prior = receipt.get("samples", [])
-    if [item.get("task_id") for item in prior] != ids[:3]:
+    if [item.get("task_id") for item in prior] != selected_ids or [
+        item.get("row_index") for item in prior
+    ] != selected_indices:
         raise ValueError("historical task selection mismatch")
     solutions, identities = [], []
-    for i, (row, item) in enumerate(zip(rows[:3], prior)):
+    for i, row, item in zip(selected_indices, selected_rows, prior):
         path = (generation_dir / f"{i}.private.json").resolve()
         if not path.is_relative_to(generation_dir):
             raise ValueError("escaped private generation path")
@@ -108,7 +112,8 @@ def prepare(generation_dir, *, rows, formatter, output):
         "code_revision": CODE_REVISION,
         "original_parquet_sha256_required_by_cli": DATA_SHA,
         "original_dataset_rows_preserved": len(rows),
-        "selected_task_ids": ids[:3],
+        "selected_task_ids": selected_ids,
+        "selected_original_row_indices": selected_indices,
         "new_model_calls": 0,
         "generated_code_executed": False,
         "official_sanitizer_executed": False,

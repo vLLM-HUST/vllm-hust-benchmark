@@ -102,6 +102,38 @@ def test_raw_full_solutions_not_mislabeled_as_completions(tmp_path, monkeypatch)
     assert not receipt["source_checkbox_eligible"]
 
 
+def test_sparse_original_ids_and_filenames_preserved(tmp_path, monkeypatch):
+    generation, rows, formatter = fixture(tmp_path, monkeypatch)
+    monkeypatch.setattr(runner, "TASK_COUNT", 12)
+    rows = [dict(rows[0], task_id=f"BigCodeBench/{i}") for i in range(12)]
+    receipt = json.loads((generation / "receipt.json").read_text())
+    receipt["selected_original_row_indices"] = [5, 8, 11]
+    for previous, selected, sample in zip(range(3), [5, 8, 11], receipt["samples"]):
+        saved = json.loads((generation / f"{previous}.private.json").read_text())
+        saved["task_id"] = f"BigCodeBench/{selected}"
+        saved["messages"] = [
+            {
+                "role": "user",
+                "content": runner.format_prompt(
+                    formatter, rows[selected]["instruct_prompt"]
+                ),
+            }
+        ]
+        (generation / f"{selected}.private.json").write_text(json.dumps(saved))
+        sample.update(row_index=selected, task_id=saved["task_id"])
+    (generation / "receipt.json").write_text(json.dumps(receipt))
+    out = tmp_path / "out"
+    result = runner.prepare(generation, rows=rows, formatter=formatter, output=out)
+    assert result["selected_task_ids"] == [
+        "BigCodeBench/5",
+        "BigCodeBench/8",
+        "BigCodeBench/11",
+    ]
+    assert result["selected_original_row_indices"] == [5, 8, 11]
+    assert result["original_dataset_rows_preserved"] == 12
+    assert result["source_checkbox_eligible"] is False
+
+
 def test_changed_original_prompt_cannot_be_reused(tmp_path, monkeypatch):
     generation, rows, formatter = fixture(tmp_path, monkeypatch)
     rows[0]["instruct_prompt"] += "changed"
