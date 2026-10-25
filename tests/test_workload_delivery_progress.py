@@ -42,6 +42,21 @@ def test_frozen_source_flags_never_drive_current_progress():
     assert runner.summarize(original) == runner.summarize(changed)
 
 
+def test_historical_46_is_evidence_coverage_not_a_second_completion_counter():
+    current = ledger()
+    result = runner.summarize(current)
+    historical = result["historical_evidence_union_46"]
+    outside = result["outside_historical_evidence_union_46"]
+    assert historical["registered"] == 46
+    for key in result["all_sources"]:
+        assert historical[key] + outside[key] == result["all_sources"][key]
+    assert historical["pending"] == len(result["historical_evidence_union_pending_ids"])
+    changed = deepcopy(current)
+    changed["historical_evidence_union_review"]["source_ids"].pop()
+    with pytest.raises(ValueError, match="46-source"):
+        runner.summarize(changed)
+
+
 def test_missing_delivery_receipt_prevents_completion_count():
     changed = ledger()
     row = next(

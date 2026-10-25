@@ -36,6 +36,16 @@ def summarize(ledger):
     historical = ledger["existing_37_review"]["sources"]
     if len(historical) != 37 or set(historical) - set(inventory):
         raise ValueError("historical review identities must match current inventory")
+    union = ledger["historical_evidence_union_review"]
+    union_ids = union["source_ids"]
+    if (
+        len(union_ids) != 46
+        or len(set(union_ids)) != 46
+        or union["historical_source_count"] != 46
+        or set(historical) - set(union_ids)
+        or set(union_ids) - set(inventory)
+    ):
+        raise ValueError("historical 46-source evidence union identity drift")
 
     def group(selected):
         return {
@@ -60,6 +70,19 @@ def summarize(ledger):
         "outside_existing_37": group(
             [row for row in rows if row["source_id"] not in historical]
         ),
+        "historical_evidence_union_46": group(
+            [row for row in rows if row["source_id"] in union_ids]
+        ),
+        "outside_historical_evidence_union_46": group(
+            [row for row in rows if row["source_id"] not in union_ids]
+        ),
+        "historical_evidence_union_pending_ids": [
+            row["source_id"]
+            for row in rows
+            if row["source_id"] in union_ids
+            and not row["checked"]
+            and not row["classification_only"]
+        ],
         "status_counts": dict(Counter(row["status"] for row in rows)),
         "existing_37_pending": [
             row

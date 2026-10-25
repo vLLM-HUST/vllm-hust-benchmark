@@ -5,7 +5,7 @@
 2026-10-25补充复核：原37项复核与研究人员七批23项成果去重为46个有历史获取/准备/验证记录的来源（含本轮仅分类项及受限子集，不是46个完整benchmark）。其中此前遗漏的8项已有48份原文件身份，本轮已复用固定版本、URL与校验和，并提供统一离线计划/原文件校验入口；没有重新下载9.51GB原数据，也未复制研究特征、观测或分析。详见[复用审计](validation/research-acquisition-reuse-audit-20261025.json)。这些来源改标“历史资产已复用、原生待补”，不再用“未开始”掩盖已有成果；准备映射、原生执行和固定工件消费未收口前，完成勾保持不勾。
 
 40 类共登记 110 个公开来源、8 份企业资产，合计 118 项；五个指定来源只分类，本轮推进 113 项。下方历史 19
-个勾保留，不自动提升为本轮完成，也不要求已验证项目重复跑。当前交付可用33/113项：2项服务轨迹资产、20项原任务/固定评测协议交付（BBH、MATH500、GSM8K、AI2-ARC、NI登记任务、BFCL登记类别、QuALITY原NYU多选集成、LongBench登记Qasper200、tau2登记telecom_full、LoCoMo完整上下文文本QA、RULER原13种任务集成、GPQA原三split
+个勾保留，不自动提升为本轮完成，也不要求已验证项目重复跑。当前交付可用34/113项：2项服务轨迹资产、21项原任务/固定评测协议交付（BBH、MATH500、GSM8K、AI2-ARC、NI登记任务、BFCL登记类别、QuALITY原NYU多选集成、LongBench登记Qasper200、tau2登记telecom_full、LoCoMo完整上下文文本QA、RULER原13种任务集成、GPQA原三split
 zero-shot集成、BEIR
 SciFact/NFCorpus原检索与重排、STSB原句对相似度、XLSUM原45变体摘要、LibriSpeech原完整波形抽样ASR、XSum原BART抽样摘要、Multi-News原PEGASUS多文档抽样摘要、BillSum发布方HF原法案抽样摘要）、Dolly、OASST1与LongWriter三项语料及8份私有企业请求语料。并非32个带官方质量评分的完整benchmark，边界见逐项回执。
 
@@ -136,7 +136,7 @@ TB；服务器/data约1.42TB可用，未缩小语料。ChartQA当前两卡主机
 | SCHEMASTORE                | [ ] 待开展            | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                        |
 | JSONSCHEMABENCH            | [ ] 缺口已列待补      | 复用历史证据；原生缺口见37项复核表及方案8.5.2                                                                                                                                                                                                                                       |
 | LIVECODEBENCH              | [ ] 待开展            | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                        |
-| HUMANEVAL                  | [ ] 阻塞              | 独立验证窗口及隔离评分待就绪                                                                                                                                                                                                                                                        |
+| HUMANEVAL                  | [x] 已交付            | 原前三题NPU生成结果复用，公共隔离入口官方评分2/3，失败保留；164题原字段公共/研究消费相等，原3题索引消费相等。不是全164题模型成绩。见[回执](validation/humaneval-native-delivery-20261025.json)。                                                                                    |
 | MBPP                       | [ ] 待开展            | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                        |
 | REPOBENCH                  | [ ] 待开展            | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                        |
 | CROSSCODEEVAL              | [ ] 待开展            | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                        |

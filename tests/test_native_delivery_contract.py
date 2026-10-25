@@ -14,7 +14,7 @@ def test_humaneval_real_official_scoring_retains_failure_and_delivery_gap():
     receipt = json.loads(
         (ROOT / row["native_functional_scoring_receipt"]).read_text("utf-8")
     )
-    assert row["status"] == "IN_PROGRESS" and not row["checked"]
+    assert row["status"] == "AVAILABLE" and row["checked"]
     assert receipt["generated_code_executed"]
     assert receipt["passed_by_original_task_order"] == [True, True, False]
     assert receipt["official_pass_at_1"] == 2 / 3
@@ -24,6 +24,19 @@ def test_humaneval_real_official_scoring_retains_failure_and_delivery_gap():
     assert receipt["isolation_probe"]["host_uid"] == 65534
     assert receipt["isolation_probe"]["no_new_privs"]
     assert not receipt["source_checkbox_eligible"]
+    delivery = json.loads((ROOT / row["delivery_receipt"]).read_text("utf-8"))
+    assert delivery["source_checkbox_eligible"]
+    assert delivery["public_scorer_server_validation"]["passed"] == [True, True, False]
+    assert (
+        delivery["fixed_consumer_validation"]["full_original_records_prepared"] == 164
+    )
+    assert (
+        delivery["fixed_consumer_validation"][
+            "full_original_records_public_and_research_direct_equal"
+        ]
+        == 164
+    )
+    assert not delivery["model_quality_pass_claim"]
 
 
 def test_flores_third_direction_is_new_positions_not_duplicate_sample_count():
@@ -976,7 +989,15 @@ def test_code_generation_is_not_functional_execution_without_isolation():
     assert not receipt["source_checkbox_eligible"]
     ledger = json.loads((DOCS / "dataset-validation-status.json").read_text("utf-8"))
     for sid in receipt["affected_sources"]:
-        assert not ledger["delivery_inventory"][sid]["checked"]
+        current = ledger["delivery_inventory"][sid]
+        if sid == "HUMANEVAL":
+            native = json.loads(
+                (ROOT / current["native_functional_scoring_receipt"]).read_text("utf-8")
+            )
+            assert native["generated_code_executed"]
+            assert native["isolation_probe"]["status"] == "PASSED_ON_REPLACEMENT_SERVER"
+        else:
+            assert not current["checked"]
         assert ledger["delivery_inventory"][sid]["isolation_preflight"]
 
 

@@ -707,6 +707,23 @@ evaluate_functional_correctness
 
 2026-10-25补充：替换实例已通过低权限宿主UID65534、独立user/mount/net/PID命名空间、chroot、只读运行库和清空capability探针；不暴露宿主数据、root、proc或NPU设备。使用`unshare --propagation unchanged`避免其默认传播处理失败，不再以缺少Docker/Podman判定不能隔离执行。已复用原HumanEval/0、/1、/2完整生成文本，按原作者`evaluate_functional_correctness`、3秒、单worker评分：前两题通过，第三题原样保留语法错误，样本pass@1为2/3；无新模型调用，不是164题全套成绩。见[实测回执](validation/humaneval-official-namespace-scoring-20261025.json)。一次性launcher误沿用了探针标签，实测回执已明确更正，不据错误标签否认实际代码执行；可复用公共评分启动器和消费闭环尚未交付，因此仍不勾选。
 
+HumanEval随后已完成公共入口与固定消费收口，当前状态以[交付回执](validation/humaneval-native-delivery-20261025.json)为准，可勾选；上段“尚未交付”是先前一次性验证的历史截面。完整164题原字段已逐题比较，公共与研究侧直接读取一致；原前三题公共/研究索引解析一致。完整164题准备不等于完整164题推理评分。
+
+公共隔离评分入口（仅Linux，不占NPU）：先使用上面的`prepare_humaneval_official_samples.py`生成私有准备目录；取得固定作者源码`b9453e8f1865df0a0057a1383767caa400acfbcf`，模块及原始gzip身份由`configs/workload-native/humaneval-author-scoring-pins.json`核验。另建Python3.12.13客户端，按`configs/workload-native/humaneval-isolated-scoring-dependencies.txt`安装NumPy/tqdm，不修改模型服务环境。已验证Linux
+aarch64；其他发行版先验证隔离能力，失败不允许宿主执行回退。
+
+```bash
+python scripts/run_humaneval_isolated_scoring.py \
+  --author-root /private/human-eval-b945 \
+  --prepared-dir /private/humaneval-prepared \
+  --package-root /private/scoring-client/lib/python3.12/site-packages \
+  --python-runtime /usr/local/python3.12.13 \
+  --work-root /private-accessible-parent/new-humaneval-scoring \
+  --sandbox-uid 65534
+```
+
+由获授权操作员启动root入口；`--sandbox-uid`应使用专用、非0的低权限宿主UID，65534仅为已验证实例示例，不能盲目与其他任务共享。`work-root`必须不存在且不与输入/运行库重叠；它的父目录必须允许该UID遍历，不修改现有共享目录权限。`python-runtime`是包含`bin/python3`和`lib/`的专用基础Python前缀，不是整个`/usr`或`/`。挂载、网络、PID、capability或只读检查失败即停止；运行日志、全部题目、候选、测试结果保存在私有工作目录，公共回执只给任务ID、通过布尔值及分类结果。原作者测试超时仍为3秒、单worker；`--deadline`只控制外围总运行时间，默认600秒，不改变原题预算。此入口没有下载、没有模型调用，CI只运行无害软件夹具，不运行候选代码。
+
 FLORES另已补充英语→德语devtest原3/4/5行NPU生成及原chrF++复核，累计三方向9次生成、6个不同平行行号；见[第三方向回执](validation/flores200-third-direction-native-audit-20261025.json)。这是新增方向验证，不要求把全部语言组合跑完才可交付；当前仍缺公共数据组件/研究消费和环境可复现收口。
 本入口只验证安全的数据准备；尚未核验真实保存结果，也不证明功能测试完成。输出包含生成代码，保留私有，不提交Git。恢复服务器后先复用已有生成物，不重跑模型来替代缺失评分。
 
