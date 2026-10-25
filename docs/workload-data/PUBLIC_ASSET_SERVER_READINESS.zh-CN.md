@@ -654,6 +654,8 @@ python scripts/prepare_ds1000_official_samples.py \
 输出 answers-private.jsonl
 保留作者推理marker后处理结果，original-dataset-private.jsonl保留全部原始行和code_context；不额外修代码。旧回执缺少逐文件历史哈希时只记录本次观察摘要，不追溯补造原有证明。
 作者`test_ds1000.py`还有独立postprocess及test_execution/test_string步骤，须在核验的隔离环境里按原顺序执行，每题独立进程。作者默认驱动遍历1000题，不能将三条answers直接放进去或给其余题填占位答案；固定原始前三题的抽样绑定仍需补齐并验证，不得因此宣布整条执行链完成。
+
+2026-10-25实测补充：原1000题逐条与作者归档相等，原前三题上下文仅需copy/NumPy/Pandas。已在Python3.10.22、NumPy1.26.4、Pandas1.5.3的私有命名空间/chroot中，使用作者原postprocess与eval_ds1000完成评分；原120秒超时、16worker未改，汇总3题均值0.667，失败保留，无新模型调用。抽样通过将作者模块原ds1000全局列表显式绑定为原前三题，未修改作者源文件、code_context、test_execution或适用test_string，未为其他997题填答案。见[实测回执](validation/ds1000-original-pandas-namespace-scoring-20261025.json)。这不是七类库环境或1000题完整运行；公共复用启动器和消费收口仍待补，来源不勾。依赖求解中tqdm4.70.1不支持Python3.10，故仅将作者未固定的tqdm选为4.67.1，不更改作者Python/NumPy/Pandas版本。
 代码库功能测试按作者环境在CPU上执行，与模型生成使用NPU是两个环节；不得为了运行测试改动模型服务的torch/torch-npu栈。当前只完成软件夹具验证，真实文件复核与官方功能评分均未完成，来源不打勾。
 
 BigCodeBench 历史生成结果复用（不执行生成代码）：

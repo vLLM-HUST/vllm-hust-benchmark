@@ -8,6 +8,29 @@ ROOT = Path(__file__).resolve().parents[1]
 DOCS = ROOT / "docs/workload-data"
 
 
+def test_ds1000_real_pandas_scoring_is_not_all_library_or_delivery_completion():
+    ledger = json.loads((DOCS / "dataset-validation-status.json").read_text("utf-8"))
+    row = ledger["delivery_inventory"]["DS1000"]
+    receipt = json.loads(
+        (ROOT / row["native_functional_scoring_receipt"]).read_text("utf-8")
+    )
+    assert row["status"] == "IN_PROGRESS" and not row["checked"]
+    assert receipt["original_problem_ids"] == [0, 1, 2]
+    assert (
+        receipt["original_data_rows_equal_between_existing_hf_asset_and_author_archive"]
+        == 1000
+    )
+    assert receipt["official_timeout_seconds"] == 120
+    assert receipt["official_max_workers"] == 16
+    assert receipt["author_summary"]["count"] == 3
+    assert receipt["author_summary"]["mean_as_publisher_formatted"] == 0.667
+    assert receipt["runtime"]["pandas"] == "1.5.3"
+    assert receipt["new_model_calls"] == 0
+    assert not receipt["candidate_repaired_or_replaced"]
+    assert not receipt["full1000_functional_execution_claim"]
+    assert not receipt["source_checkbox_eligible"]
+
+
 def test_humaneval_real_official_scoring_retains_failure_and_delivery_gap():
     ledger = json.loads((DOCS / "dataset-validation-status.json").read_text("utf-8"))
     row = ledger["delivery_inventory"]["HUMANEVAL"]
