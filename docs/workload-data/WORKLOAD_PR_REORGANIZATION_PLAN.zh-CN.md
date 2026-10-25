@@ -604,6 +604,9 @@ SHA256为`251018b09cce181d4e14f00b005f3e373afe96e648836c261e7f14992546c9ae`。�
 
 #### 8.5.4 当前交付与37项历史成果的对应（2026-10-25）
 
+累积软件回归：在固定提交`0d0df67e8156807cd69a95c8ad880496c74823db`上，按当前CPU
+smoke工作流执行全部17个单行pytest命令，并单独执行多行构建步骤内的wheel测试，均通过；有1项Windows目录符号链接条件跳过。当前数据包40份提供者文件再次与源码逐字节一致。环境为本地Python3.12.10，不等同CI的Python3.11或服务器原生环境。没有下载数据/模型、没有新推理，不增加下面交付勾数；见[软件审计记录](validation/research-acquisition-reuse-audit-20261025.json)。
+
 当前统计只读取 `dataset-validation-status.json` 的
 `delivery_inventory`；`sources`数组和上文历史阶段表是冻结截面，不用于计算当前完成数。复核命令：
 
