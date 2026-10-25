@@ -10,9 +10,13 @@ def test_wholechain_reference_and_projection(monkeypatch):
     import build_midterm_v081 as builder
 
     data = json.loads(builder.OUTPUT.read_text())
-    assert data == builder.build(
-        data["source_commit"], lambda p: (ROOT / p).read_bytes()
-    )
+
+    def read(path):
+        if path == builder.REPORT:
+            path = builder.REPORT_DIR + "/中期测试报告-v081.md"
+        return (ROOT / path).read_bytes()
+
+    assert data == builder.build(data["source_commit"], read)
     result = data["wholechain_reference"]
     cref = statistics.median(
         w["ownF"] / (2 * w["synchronized_seconds"] * 1e12)
