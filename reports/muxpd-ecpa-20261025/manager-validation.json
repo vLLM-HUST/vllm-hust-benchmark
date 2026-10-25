@@ -1,0 +1,155 @@
+{
+  "schema": "muxpd-manager-cpu-validation/0.1",
+  "status": "terminal",
+  "created_at_utc": "2026-10-25T20:31:46.942060+00:00",
+  "source": {
+    "commit": "b7dc1393069e2699f0bd3149347ef7e32a758379",
+    "clean": true,
+    "branch": "feat/muxpd-scheduler-carrier",
+    "merge_commit_parent_reported": "a78c9681ee428589dc7666c0c159cb24c3f0c58a"
+  },
+  "package_version": "0.3.1.dev1",
+  "release_policy": {
+    "decision": "no-go",
+    "passed_gates": 0,
+    "blocked_gates": 10,
+    "organization_inventory": "not newly assessed; all counts zero",
+    "published_0_3_0_receipt_sha256": "c2cd4f5b0f71b4421f4e5f2fd00a8acc9d08ecfec5088670633226a24c9e3930"
+  },
+  "final_wheel": {
+    "path": "/tmp/muxpd-manager-policy-final-dist/vllm_hust_ext-0.3.1.dev1-py3-none-any.whl",
+    "bytes": 155820,
+    "sha256": "b78dd61775e2959adf111e0b531a80e3d5e1bbc10c9df62f5f0e644a640b436e",
+    "live": false
+  },
+  "final_sdist": {
+    "path": "/tmp/muxpd-manager-policy-final-dist/vllm_hust_ext-0.3.1.dev1.tar.gz",
+    "bytes": 129937,
+    "sha256": "69e7346c454191cc8bdad89c5faabd95f209ff0aefafce6fa87ae1614818169d",
+    "live": false
+  },
+  "local_full": {
+    "command": "NO_PROXY=127.0.0.1,localhost no_proxy=127.0.0.1,localhost VLLM_HUST_BENCHMARK_ORIGINALS=/tmp/muxpd-manager-benchmark-originals /tmp/muxpd-ecpa-manager-tests/bin/python -m pytest -q",
+    "exit_code": 1,
+    "status": "failed",
+    "counts": {
+      "passed": 2482,
+      "failed": 1,
+      "skipped": 36
+    },
+    "footer": "1 failed, 2482 passed, 36 skipped, 1 warning, 6 subtests passed in 1160.35s (0:19:20)",
+    "failure_summaries": [
+      "FAILED tests/test_h3_dynamic_client.py::test_original_full_cpu_window_new_epoch_and_rebinding_negatives"
+    ],
+    "log": {
+      "path": "/tmp/muxpd-manager-full-policy-final.log",
+      "bytes": 7908,
+      "sha256": "7ec3842d91d45ddbdb72ac67eb2848e8fce0524a8afa1a1cf7705e6dea9ba0e4",
+      "live": false
+    },
+    "h3_raw_retained_index": {
+      "path": "/tmp/muxpd-manager-h3-final-retained/index.json",
+      "bytes": 737,
+      "sha256": "6ca82654424841a692557cf626b4f6f442ee30a39f0344ebbb21bb161c0dd532",
+      "live": false
+    },
+    "h3_dispatch_audit": {
+      "path": "/tmp/muxpd-manager-h3-final-retained/dispatch-audit.json",
+      "bytes": 4770,
+      "sha256": "fc8d2408fcee40430b5e2c6e765ac6c3a5227735949a7d6377a22e5f8f6a4430",
+      "live": false
+    }
+  },
+  "remote_full": {
+    "status": "passed",
+    "run_id": 40229694768,
+    "url": "https://github.com/vLLM-HUST/extension-manager/actions/runs/40229694768",
+    "head_sha": "b7dc1393069e2699f0bd3149347ef7e32a758379",
+    "job_names": [
+      "test (3.12)",
+      "test (3.10)",
+      "wheel"
+    ],
+    "pytest_summaries": [
+      "test (3.12)\tRun python -m pytest -q\t2026-10-25T20:25:34.9293944Z 2483 passed, 36 skipped, 1 warning, 6 subtests passed in 726.57s (0:12:06)",
+      "test (3.10)\tRun python -m pytest -q\t2026-10-25T20:26:30.8282202Z 2483 passed, 36 skipped, 467 warnings, 6 subtests passed in 775.88s (0:12:55)"
+    ],
+    "metadata": {
+      "path": "/tmp/muxpd-manager-ci-b7-final.json",
+      "bytes": 7954,
+      "sha256": "6eb9c455eba4ff753d21c5644f19516495b03c4920078f6fe030c8120e02e8ae",
+      "live": false
+    },
+    "log": {
+      "path": "/tmp/muxpd-manager-ci-b7-final.log",
+      "bytes": 152258,
+      "sha256": "c0506c080e0640798b49015ab8c1ebad14b46b623ac7dd2e4086df5f1c95b24d",
+      "live": false
+    }
+  },
+  "installed_pair": {
+    "receipt": {
+      "path": "/tmp/muxpd-release-wheel-cpu-pL1etCtS/validation.json",
+      "bytes": 41916,
+      "sha256": "a1496f2174fc871c10ceff888b653be4110b172221b059510333feff2ee9eaa7",
+      "live": false
+    },
+    "manager_passed": 175,
+    "plugin_passed": 219,
+    "plugin_skipped": 4,
+    "manager_runtime_files_byte_identical": 42,
+    "hardware_used_runtime_wheel": {
+      "path": "/tmp/muxpd-manager-handoff-fixed-dist/vllm_hust_ext-0.3.1.dev1-py3-none-any.whl",
+      "bytes": 155805,
+      "sha256": "ac0fb620a862314cd6f8510e1d498f61dceff39de9eb94bfba8bc330f8030781",
+      "live": false
+    },
+    "final_wheel_difference": [
+      "METADATA",
+      "RECORD"
+    ],
+    "hardware_scope": "Hardware run retains its ac0 package identity; final b78 is linked by runtime-byte equivalence, not relabeled as directly device tested."
+  },
+  "retained_attempts": [
+    {
+      "log": "/tmp/muxpd-manager-full-initial.log",
+      "scope": "Collection failed before canonical benchmark inputs fetched."
+    },
+    {
+      "log": "/tmp/muxpd-manager-full-final.log",
+      "scope": "Invalid environment inventory, interrupted: 42 failed/1832 passed/36 skipped/86 errors; inherited proxy intercepted loopback. Reproduced on untouched parent. Not final-source qualification."
+    },
+    {
+      "log": "/tmp/muxpd-manager-full-clean.log",
+      "scope": "Interrupted after confirming real module-environment/legacy handoff regression; narrow fix preserved old five-field protocol."
+    },
+    {
+      "log": "/tmp/muxpd-manager-full-verified.log",
+      "scope": "Interrupted after deterministic published-paper input regression: 15 failed/1966 passed/36 skipped. Fixed by separating dev policy and restoring original published receipt."
+    },
+    {
+      "log": "/tmp/muxpd-manager-ci-894-failed.log",
+      "scope": "Remote prior source 894: each Python matrix 20 paper-summary failures/2463 passed/36 skipped; H3 and model-audit passed."
+    },
+    {
+      "log": "/tmp/muxpd-manager-h3-dynamic-failure.log",
+      "scope": "Targeted original H3 dispatch gate failed; no gate edits."
+    },
+    {
+      "log": "/tmp/muxpd-manager-h3-idle-target.log",
+      "scope": "Same targeted H3 source and threshold passed; older raw temporary trace expired, derived diagnosis discloses limitation."
+    },
+    {
+      "log": "/tmp/muxpd-manager-model-audit-failure.log",
+      "scope": "Despite filename, untouched model-audit target rerun passed. No cause attributed to prior full-only failure."
+    }
+  ],
+  "limits": [
+    "Local full failure is not overridden by remote success.",
+    "No runtime or timing threshold was changed to make H3 pass.",
+    "This CPU receipt does not establish native private ABI stability, NPU correctness, all-rank runtime evidence, or performance.",
+    "No canonical benchmark corpus is recopied; fetch receipt and pin/hash inventory are retained.",
+    "Older expired H3 temporary raw traces are not claimed as retained; current full-run raw traces are preserved."
+  ],
+  "all_local_cpu_tasks_terminal": true
+}
