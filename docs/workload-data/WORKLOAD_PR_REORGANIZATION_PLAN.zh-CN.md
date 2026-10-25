@@ -10,6 +10,10 @@
 
 ## 零、需求对齐后的最终执行要求（2026-10-24）
 
+2026-10-25执行入口补齐：WildChat、UltraChat、LMSYS的原始历史续写与QReCC已保存答案的原作者QA评分入口已登记到统一来源导航。
+前三者保留原始轮次、全部历史前缀和待生成位置，后者仅调用固定作者评分函数，不证明检索或生成已完成。
+这四项仍不打勾；具体命令及边界见[公共入口说明](PUBLIC_ASSET_SERVER_READINESS.zh-CN.md)和[QReCC说明](QRECC_ORIGINAL_PREPARATION.zh-CN.md)。
+
 整体软件回归：固定代码`1b1f3ece`的Ubuntu/Python3.11主CI为2916通过、7跳过，lint及 独立CPU
 smoke通过，见[精确CI回执](validation/software-ci-regression-20261025.json)。 7项中3项PyArrow夹具已在安装data依赖的CPU
 smoke另行通过；4项真实cgroup测试因CI 无可写cgroup而跳过，不作内核隔离证明。本地Windows完整回归未通过：已定位缺失测试依赖、

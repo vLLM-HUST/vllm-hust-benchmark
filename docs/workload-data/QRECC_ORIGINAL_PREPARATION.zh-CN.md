@@ -38,6 +38,27 @@ for record in records:
 
 ## 当前证据与缺项
 
+### 已保存答案的原作者评分入口（不是端到端运行）
+
+固定版本的 `utils/evaluate_qa.py` 是函数库，没有命令行主程序。新增入口直接调用其原始 `compute_exact` 和 `compute_f1`，不重写指标；要求该文件
+SHA-256 为 `f8fe4c1c163004953791983fe141363566b741851f42d7f3fa473646ed672165`。
+
+```bash
+python scripts/score_qrecc_original_qa.py \
+  --data-file /data/qrecc-original-test/qrecc_test.json \
+  --scorer-file /path/to/pinned-ml-qrecc/utils/evaluate_qa.py \
+  --predictions-file /private/qrecc-original-predictions.json \
+  --output /private/fresh-qrecc-qa-score
+```
+
+预测文件是 JSON 数组，每项只能含 `original_row_index`、`Conversation_no`、`Turn_no`、`prediction`； 行号为原 test
+中从零开始的位置，其他任务身份必须与原行一致，预测为模型原始文本，不能填入原参考答案充数。 原题在运行前固定抽样，评分入口要求至少三项、原始顺序、无重复，不丢弃错误答案；空预测允许按作者指标计分。
+该工具不验证预测生成过程，因此不能凭评分成功宣称原始检索或模型执行完成。原题、作者函数及预测文件身份在评分前后校验；已有输出目录拒绝覆盖。
+输出仅含身份、哈希和指标，不复制正文与参考答案。原始检索资产不足仍是端到端阻塞，不使用 Context 或答案URL临时拼接替代检索库。
+当前封装与准备回归11项通过；另核验原作者固定函数的三个人工评分夹具（完全匹配、部分匹配、空答案），均不是原始QReCC任务验证。
+
+### 原有数据准备与运行证据
+
 - 原始归档已由官方 Git blob API 取得，并复制至授权服务器，双方归档SHA一致。
 - 本地真实test前三行已完成原样读取、参考字段隔离、准备索引及输入回查；没有模型调用。
 - 单元测试覆盖未知归档拒绝、成员原样复制、其他成员不输出和已有输出目录拒绝覆盖；这些是人工夹具，不是原始任务执行。

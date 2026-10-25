@@ -21,6 +21,10 @@
     {"source_id": "PAIO-SEMANTIC-SIMILAR-5000", "asset_group": "enterprise-private-requests", "related_workload_ids": [], "boundary": "Semantic similarity is not exact-prefix or KV reuse; preserve original private requests without rewriting."}
   ],
   "source_entrypoints": {
+    "WILDCHAT": [{"role": "original_profile", "path": "scripts/run_historical_dialogue_original.py", "scope": "Original historical text continuation only; software fixtures, real execution pending."}],
+    "ULTRACHAT": [{"role": "original_profile", "path": "scripts/run_historical_dialogue_original.py", "scope": "Original historical text continuation only; not an online agent episode or quality benchmark."}],
+    "LMSYS_CHAT": [{"role": "original_profile", "path": "scripts/run_historical_dialogue_original.py", "scope": "Original historical text continuation only; full publisher records and NPU validation pending."}],
+    "QRECC": [{"role": "original_profile", "path": "scripts/score_qrecc_original_qa.py", "scope": "Saved-answer scoring with original author QA functions only; no retrieval or generation execution."}],
     "OASST1": [
       {
         "role": "original_profile",
