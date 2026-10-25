@@ -1,0 +1,85 @@
+{
+  "mapping_version": "source-mapping/v1",
+  "source": {
+    "source_id": "INFINITEBENCH",
+    "revision": "90f0394333616266d9fe85824ceaf505093cbaa5",
+    "unit": "published_task_row",
+    "publisher": "InfiniteBench authors",
+    "locator": "https://huggingface.co/datasets/xinrongzhang2022/InfiniteBench",
+    "license": "Apache-2.0 stated in publisher README; constituent data terms retained",
+    "provenance_kind": "published_mixture_of_constructed_tasks_and_adapted_texts"
+  },
+  "families": [
+    "document-grounded-analysis"
+  ],
+  "records_path": [],
+  "identity": {
+    "task_id": {
+      "path": [
+        "id"
+      ],
+      "type": "number",
+      "required": true
+    }
+  },
+  "input": {
+    "context": {
+      "path": [
+        "context"
+      ],
+      "type": "string",
+      "required": true
+    },
+    "input": {
+      "path": [
+        "input"
+      ],
+      "type": "string",
+      "required": true
+    },
+    "options": {
+      "path": [
+        "options"
+      ],
+      "type": "array",
+      "required": false,
+      "items": {
+        "path": [],
+        "type": "string",
+        "required": true
+      }
+    }
+  },
+  "features": {},
+  "outcome": {
+    "references": {
+      "path": [
+        "answer"
+      ],
+      "type": "array",
+      "required": true,
+      "items": {
+        "path": [],
+        "type": "string",
+        "required": true
+      }
+    }
+  },
+  "runtime": {
+    "kind": "task_dataset",
+    "requirements": [
+      "Static published dataset only; no model, scorer, runtime or synthetic fallback"
+    ],
+    "environment_ref": null,
+    "termination_ref": null,
+    "scorer_ref": null
+  },
+  "replay": {
+    "order": "source_file_order_not_assumed_arrival_order",
+    "artificial_load": false
+  },
+  "evidence": {
+    "field_reference": "https://huggingface.co/datasets/xinrongzhang2022/InfiniteBench/blob/90f0394333616266d9fe85824ceaf505093cbaa5/README.md",
+    "review_status": "field_contract_reviewed"
+  }
+}

@@ -49,6 +49,18 @@
     "entry": "scripts/prepare_reused_source_records.py",
     "supported_sources": ["LONGALPACA", "NATURALQUESTIONS", "DUREADER"],
     "existing_dialogue_adapter_sources": ["WILDCHAT", "ULTRACHAT", "LMSYS_CHAT"],
+    "infinitebench_typed_mapping_reuse": {
+      "source_id": "INFINITEBENCH",
+      "original_number_mapping_git_blob": "33f3ff8f15cf5c4ee4abbbef1d2130c79593668a",
+      "original_string_mapping_git_blob": "fd85b369fad612d97c34160573261c28acd5bac2",
+      "research_path_prefix": "workload-preparation/research/wang-mingqi/batch-005/mappings/",
+      "historical_file_selection_receipt": "workload-preparation/research/wang-mingqi/batch-005/evidence/infinitebench-result.json",
+      "numeric_files": ["code_run.jsonl", "math_calc.jsonl", "math_find.jsonl"],
+      "string_files_count": 9,
+      "change": "Remove research feature selector only; retain original typed input/outcome rules and legacy compatibility family. Explicit file-to-type groups reuse historical full-file mapping evidence instead of guessing from first row.",
+      "validation": "software bind/prepare/resolve fixtures preserve string/int/float values; real source and research installed-client checks still pending",
+      "native_delivery_complete": false
+    },
     "dialogue_reuse_scope": "Reuse existing adapter_extensions_v1 definitions unchanged. Bind pinned raw files and prepare original history references; preserve every role/turn/order. Historical assistant messages remain historical, not newly generated completions. JSONL and nested Parquet software fixtures passed binding/preparation/consumer roundtrip; no real publisher asset validation, native request or source delivery claim.",
     "additional_mapping_provenance": {
       "source": "DUREADER",

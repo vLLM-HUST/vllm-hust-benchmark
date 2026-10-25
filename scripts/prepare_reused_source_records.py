@@ -17,6 +17,40 @@ MAPPINGS = {
     / "configs/workload-native/reused-source-mappings/naturalquestions.json",
 }
 DIALOGUE_SOURCES = {"WILDCHAT", "ULTRACHAT", "LMSYS_CHAT"}
+INFINITE_MAPPINGS = {
+    kind: ROOT
+    / f"configs/workload-native/reused-source-mappings/infinitebench-{kind}.json"
+    for kind in ("number", "string")
+}
+INFINITE_NUMERIC_FILES = {"code_run.jsonl", "math_calc.jsonl", "math_find.jsonl"}
+INFINITE_STRING_FILES = {
+    "code_debug.jsonl",
+    "kv_retrieval.jsonl",
+    "longbook_choice_eng.jsonl",
+    "longbook_qa_chn.jsonl",
+    "longbook_qa_eng.jsonl",
+    "longbook_sum_eng.jsonl",
+    "longdialogue_qa_eng.jsonl",
+    "number_string.jsonl",
+    "passkey.jsonl",
+}
+
+
+def mapping_path(source_id, files):
+    if source_id != "INFINITEBENCH":
+        return MAPPINGS.get(source_id)
+    if (
+        not files
+        or not isinstance(files, list)
+        or not set(files) <= INFINITE_NUMERIC_FILES | INFINITE_STRING_FILES
+    ):
+        raise ValueError("select explicit original InfiniteBench task files")
+    kinds = {"number" if name in INFINITE_NUMERIC_FILES else "string" for name in files}
+    if len(kinds) != 1:
+        raise ValueError(
+            "prepare numeric and string answer groups separately; no coercion"
+        )
+    return INFINITE_MAPPINGS[kinds.pop()]
 
 
 def prepare(source_id, *, data_root, output, files=None, limit=None, catalog_root=None):
@@ -25,7 +59,11 @@ def prepare(source_id, *, data_root, output, files=None, limit=None, catalog_roo
     from vllm_hust_workload_data.pipeline import run
     from vllm_hust_workload_data.registry import source_spec
 
-    if source_id not in MAPPINGS and source_id not in DIALOGUE_SOURCES:
+    if (
+        source_id not in MAPPINGS
+        and source_id not in DIALOGUE_SOURCES
+        and source_id != "INFINITEBENCH"
+    ):
         raise ValueError("source preparation not implemented; no generic fallback")
     if limit is not None and (type(limit) is not int or limit <= 0):
         raise ValueError("explicit positive preparation limit required")
@@ -41,7 +79,8 @@ def prepare(source_id, *, data_root, output, files=None, limit=None, catalog_roo
     catalog_root = (
         ROOT / "workload-preparation" if catalog_root is None else Path(catalog_root)
     )
-    mapping = load_mapping(MAPPINGS[source_id]) if source_id in MAPPINGS else None
+    path = mapping_path(source_id, files)
+    mapping = load_mapping(path) if path is not None else None
     if mapping is not None and (
         mapping["source"]["source_id"] != source_id or mapping["features"]
     ):
@@ -130,7 +169,10 @@ def prepare(source_id, *, data_root, output, files=None, limit=None, catalog_roo
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("source_id", choices=sorted(set(MAPPINGS) | DIALOGUE_SOURCES))
+    parser.add_argument(
+        "source_id",
+        choices=sorted(set(MAPPINGS) | DIALOGUE_SOURCES | {"INFINITEBENCH"}),
+    )
     parser.add_argument("--data-root", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--files", nargs="+")

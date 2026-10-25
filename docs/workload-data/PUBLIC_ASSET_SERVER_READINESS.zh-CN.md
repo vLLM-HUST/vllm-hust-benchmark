@@ -617,6 +617,21 @@ manifest执行pipeline/resolve。输入只包含原`Question`与按作者seed0�
 
 # 历史准备能力补迁：LongAlpaca、NQ-open 与 DuReader demo
 
+InfiniteBench 的历史准备映射已分数字答案和字符串答案补迁，均去除研究feature选择器。数字组仅
+code_run.jsonl、math_calc.jsonl、math_find.jsonl；另9份为字符串组。按原记录保留数字类型和字符串前导零，不拼造新题。
+
+```bash
+python scripts/prepare_reused_source_records.py INFINITEBENCH \
+  --data-root /path/to/original-infinitebench --files math_calc.jsonl \
+  --output /path/to/fresh-math-calc-preparation --limit 3
+python scripts/prepare_reused_source_records.py INFINITEBENCH \
+  --data-root /path/to/original-infinitebench --files number_string.jsonl \
+  --output /path/to/fresh-number-string-preparation --limit 3
+```
+
+必须显式选择登记文件；不允许混合两类答案的文件共用一份类型映射。跨多文件时limit是准备入口的总记录上限，不是每文件上限，因此逐任务验证应各建独立输出目录，不据此宣称12任务已消费。
+历史按首行猜类型的逻辑不迁入；文件范围依据历史全文件映射回执固定，绑定时仍检查完整文件哈希和每行字段类型。当前只有软件夹具通过，真实原数据、固定工件研究消费和原生评分仍待完成。
+
 私有产物防误提交：`.private.json`、`.private.jsonl`、`-private.json`、`-private.jsonl`及`.private-error.txt`后缀已加入Git忽略规则；现有`workload-runs/`仍整体忽略。此规则不清理、不取消跟踪已有文件，也不替代权限审查；原始数据仍须外置，禁止强制提交私有产物。
 InfiniteBench运行入口逐原始位置先保存完整请求及预检token数，再保存完整响应和两者摘要；尝试与完成位置分开记录，API失败时保留请求且响应摘要为null。文件名为`row-N.request-private.json`、`row-N.response-private.json`，仅供服务器私有复核，不代表新增原生运行证据。
 

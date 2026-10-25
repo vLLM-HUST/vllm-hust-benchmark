@@ -220,3 +220,83 @@ def test_revision_drift_never_downgrades_to_unpinned_local_snapshot(
             sid, data_root=data, output=tmp_path / "out", catalog_root=catalog
         )
     assert not (tmp_path / "out").exists()
+
+
+def test_infinitebench_file_groups_are_explicit_complete_and_disjoint():
+    assert len(runner.INFINITE_NUMERIC_FILES) == 3
+    assert len(runner.INFINITE_STRING_FILES) == 9
+    assert not runner.INFINITE_NUMERIC_FILES & runner.INFINITE_STRING_FILES
+    catalog = json.loads(
+        (
+            ROOT / "workload-preparation/data/catalogs/source_manifests_v1.json"
+        ).read_text("utf-8")
+    )
+    assert {
+        item["path"] for item in catalog["sources"]["INFINITEBENCH"]["files"]
+    } == runner.INFINITE_NUMERIC_FILES | runner.INFINITE_STRING_FILES
+    for files in (None, [], ["unknown.jsonl"], ["math_calc.jsonl", "passkey.jsonl"]):
+        with pytest.raises(ValueError):
+            runner.mapping_path("INFINITEBENCH", files)
+
+
+@pytest.mark.parametrize(
+    "filename,references",
+    [
+        ("math_calc.jsonl", [1, 2.5]),
+        ("code_debug.jsonl", ["fixture answer", "A"]),
+        ("number_string.jsonl", ["0007"]),
+    ],
+)
+def test_infinitebench_original_reference_types_survive_prepare_resolve(
+    tmp_path, filename, references
+):
+    from vllm_hust_workload_data.consumer import resolve_input
+
+    row = {
+        "id": 0,
+        "context": "fixture complete context",
+        "input": "fixture question",
+        "options": ["fixture answer", "other"],
+        "answer": references,
+    }
+    raw = (json.dumps(row) + "\n").encode()
+    data = tmp_path / "data"
+    data.mkdir()
+    (data / filename).write_bytes(raw)
+    catalog = tmp_path / "catalog"
+    (catalog / "data/catalogs").mkdir(parents=True)
+    source = json.loads(
+        (
+            ROOT / "workload-preparation/data/catalogs/source_manifests_v1.json"
+        ).read_text("utf-8")
+    )
+    source["sources"]["INFINITEBENCH"]["files"] = [
+        {
+            "path": filename,
+            "sha256": hashlib.sha256(raw).hexdigest(),
+            "bytes": len(raw),
+            "role": "raw_source",
+        }
+    ]
+    (catalog / "data/catalogs/source_manifests_v1.json").write_text(
+        json.dumps(source), encoding="utf-8"
+    )
+    out = tmp_path / "out"
+    result = runner.prepare(
+        "INFINITEBENCH",
+        data_root=data,
+        output=out,
+        files=[filename],
+        catalog_root=catalog,
+    )
+    with sqlite3.connect(out / "prepared/workload.sqlite") as connection:
+        rid = connection.execute("SELECT record_id FROM records").fetchone()[0]
+    record = resolve_input(out / "prepared/workload.sqlite", rid, data_root=data)
+    assert record.outcome["references"] == references
+    assert [type(value) for value in record.outcome["references"]] == [
+        type(value) for value in references
+    ]
+    assert record.task["input"]["context"] == row["context"]
+    assert record.task["input"]["feature_inputs"] == {}
+    assert "answer" not in record.task["input"]
+    assert not result["native_execution_complete"]
