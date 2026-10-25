@@ -20,13 +20,15 @@ runner = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(runner)
 
 
-def fixture(tmp_path):
+def fixture(tmp_path, prefix=""):
     archive = tmp_path / "fixture.tar.gz"
     with tarfile.open(archive, "w:gz") as bundle:
         for split in ("dev", "devtest"):
             for code in ("eng_Latn", "fra_Latn"):
                 raw = ("first fixture\n\nthird fixture\nfourth fixture\n").encode()
-                info = tarfile.TarInfo(f"flores200_dataset/{split}/{code}.{split}")
+                info = tarfile.TarInfo(
+                    f"{prefix}flores200_dataset/{split}/{code}.{split}"
+                )
                 info.size = len(raw)
                 bundle.addfile(info, io.BytesIO(raw))
     raw = archive.read_bytes()
@@ -66,6 +68,27 @@ def test_original_blank_row_alignment_and_order_preserved(tmp_path):
     )
 
 
+def test_real_audit_does_not_claim_full_source_or_extra_unique_rows():
+    audit = json.loads(
+        (
+            ROOT
+            / "docs/workload-data/validation/flores200-two-profile-native-audit-20261025.json"
+        ).read_text("utf-8")
+    )
+    assert audit["native_model_calls"] == 6
+    assert audit["unique_original_parallel_row_positions"] == 3
+    assert audit["translation_direction_profiles"] == 2
+    assert audit["model_calls_by_audit"] == 0
+    assert all(
+        row["original_indices"] == [0, 1, 2]
+        and row["all_original_source_and_reference_rows_equal"]
+        for row in audit["profiles"]
+    )
+    assert not audit["all_languages_or_directions_native_validated"]
+    assert not audit["source_checkbox_eligible"]
+    assert len(audit["unsupported_model_language_codes"]) == 3
+
+
 def test_original_archive_identity_required(tmp_path):
     archive, dataset = fixture(tmp_path)
     dataset["sha256"] = "0" * 64
@@ -73,6 +96,15 @@ def test_original_archive_identity_required(tmp_path):
         runner.original_pairs(
             archive, dataset, source="eng_Latn", target="fra_Latn", split="devtest"
         )
+
+
+def test_original_dot_prefixed_tar_names_resolve_without_rewriting(tmp_path):
+    archive, dataset = fixture(tmp_path, prefix="./")
+    selected = runner.original_pairs(
+        archive, dataset, source="eng_Latn", target="fra_Latn", split="devtest"
+    )
+    assert [row["row_index"] for row in selected] == [0, 1, 2]
+    assert selected[0]["source"] == "first fixture"
 
 
 def test_unmodified_sentences_reach_translator_and_references_only_scorer(tmp_path):

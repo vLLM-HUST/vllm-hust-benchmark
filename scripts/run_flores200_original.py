@@ -8,7 +8,7 @@ import argparse
 from importlib import metadata
 import json
 import math
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 import re
 import tarfile
 
@@ -36,8 +36,13 @@ def original_pairs(
     inspect_archive(Path(archive), dataset)
     values = []
     with tarfile.open(archive) as bundle:
+        members = {
+            str(PurePosixPath(member.name)): member
+            for member in bundle.getmembers()
+            if member.isfile()
+        }
         for code in (source, target):
-            member = bundle.getmember(f"flores200_dataset/{split}/{code}.{split}")
+            member = members[f"flores200_dataset/{split}/{code}.{split}"]
             lines = bundle.extractfile(member).read().decode("utf-8").split("\n")
             if lines[-1] == "":
                 lines.pop()

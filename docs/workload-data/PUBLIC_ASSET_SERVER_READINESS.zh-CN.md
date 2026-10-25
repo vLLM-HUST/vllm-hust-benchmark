@@ -617,6 +617,11 @@ manifest执行pipeline/resolve。输入只包含原`Question`与按作者seed0�
 
 # 历史准备能力补迁：LongAlpaca、NQ-open 与 DuReader demo
 
+2026-10-25恢复后的实测补充：BurstGPT第3份原20条保存终态已找回并逐条审计，未新增模型调用；现三份各20条具名记录均已核，固定工件/研究消费收口仍待补。授权scale缩放工具验证不是原始时序性能复现。
+FLORES英→法、英→简中各原devtest:0/1/2已在NPU完成生成，原始句对及chrF++复算一致；是3个平行行号、2个方向、6次生成，不是6个独立句子或全语言覆盖。
+首次读取因原tar成员带`./`前缀而在模型导入前失败，日志保留；修复只规范成员路径查找，不改归档/题目，回归覆盖原前缀形式。真实运行回执见[双方向审计](validation/flores200-two-profile-native-audit-20261025.json)。
+当前客户端整体`pip check`仍非零，报告可见CANN编译/分析工具的依赖缺失。已完成的生成/评分保留，但不能宣称整个环境合格；不为清零盲装全部工具或替换服务栈。原模型非商业许可、3个不支持语言代码、spBLEU和数据提供者/研究消费缺口均保留。
+
 InfiniteBench 的历史准备映射已分数字答案和字符串答案补迁，均去除研究feature选择器。数字组仅
 code_run.jsonl、math_calc.jsonl、math_find.jsonl；另9份为字符串组。按原记录保留数字类型和字符串前导零，不拼造新题。
 

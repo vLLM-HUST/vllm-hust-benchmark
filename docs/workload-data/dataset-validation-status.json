@@ -2,9 +2,15 @@
   "schema_version": "workload-validation-checklist/v1",
   "updated_at": "2026-10-25",
   "native_runtime_latest": {
-    "status": "NEW_ENDPOINT_FINGERPRINT_PENDING_REMOTE_EXECUTION_STATE_UNKNOWN",
+    "status": "REPLACEMENT_HOST_VERIFIED_SAVED_RESULTS_RECOVERED_AND_SMALL_MODEL_NPU_PROFILES_AUDITED",
     "last_confirmed_profile_is_not_current_server_health": true,
-    "latest_access_note": "Previous SSH connection refused after the successful release2 audit. User provided a replacement endpoint; trusted host fingerprint verification pending. No login, native controller restart, service reconfiguration or terminal-state inference performed. Reconcile saved results and actual process identity on restoration.",
+    "latest_access_note": "Replacement host fingerprint matched user verification. Shared assets/results preserved; no existing model service or NPU task found at initial check. BurstGPT release3 saved successful results recovered/audited without rerun. Existing NLLB600M environment/weights reused for two original FLORES profiles on NPU. Original Qwen service/old queue not restarted. Remaining historical profile fields are not current service health.",
+    "current_language_model_service": "NOT_RUNNING_AT_REPLACEMENT_INSTANCE_CHECK",
+    "replacement_instance_npu_chip": "Ascend910B2",
+    "replacement_instance_visible_npu_count": 2,
+    "new_flores_native_model_calls": 6,
+    "current_flores_client_global_pip_check_exit_code": 1,
+    "current_flores_environment_full_qualification": "NOT_COMPLETE; visible CANN compiler/profiler package dependencies missing, no bulk installs or serving-stack changes",
     "previous_host_model_runtime_status": "ORIGINAL_PROFILE_RESTORE_FAILED_HOST_PINNED_ALLOCATION",
     "replacement_host_identity_verified": true,
     "server_reclaimed_or_previous_connection_refusal_cause_verified": false,
@@ -1365,17 +1371,20 @@
       "blocker": null
     },
     "FLORES200": {
-      "native_runner_software_only": "scripts/run_flores200_original.py",
-      "native_runner_validation_scope": "tiny software archive and transport fixtures only; real NPU generation, author primary chrF++ and consumer closure pending; three unsupported language codes not substituted",
+      "native_public_runner": "scripts/run_flores200_original.py",
+      "native_runner_validation_scope": "English-to-French and English-to-Simplified-Chinese original devtest positions0/1/2 completed on NPU and author primary chrF++ re-scored; source/target rows equal. Not all languages, spBLEU or fixed-artifact consumer closure; three unsupported language codes not substituted.",
+      "native_profile_audit": "docs/workload-data/validation/flores200-two-profile-native-audit-20261025.json",
+      "runtime_pip_check_exit_code": 1,
+      "runtime_pip_check_boundary": "Native profiles succeeded but global pip metadata reports missing visible CANN compiler/profiler tool dependencies; no clean-environment claim or blind bulk installation",
       "scope": "public",
       "delivery_kind": "review_original_source_protocol",
-      "status": "AUTHOR_ARCHIVE_INSPECTED_NATIVE_INTEGRATION_PENDING",
+      "status": "IN_PROGRESS",
       "checked": false,
       "legacy_checked": false,
       "existing_receipt": null,
       "delivery_receipt": null,
       "acquisition_progress_receipt": "docs/workload-data/validation/flores200-original-acquisition-progress-20261025.json",
-      "blocker": "Official Meta archive acquired/inspected:204 codes with dev997/devtest1012 each; observed hash is not a published checksum. All8 NLLB files were verified before connection loss. Public asset preparer has model-free fixture tests only, not server verification. Raw adapter/native/scoring pending; arb_Latn/min_Arab/sat_Olck language tokens missing. Never substitute/drop codes or mark delivered.",
+      "blocker": "Two original directions, six NPU translations and primary chrF++ audited after fixing original ./ tar lookup; pre-model failure log retained. Three parallel row positions, not six distinct sentence IDs. Full language/direction coverage, spBLEU, data-provider/research consumption and environment qualification pending. arb_Latn/min_Arab/sat_Olck tokens missing, not substituted. Keep unchecked.",
       "public_asset_preparer_pending_server_verification": "scripts/prepare_flores200_original_assets.py"
     },
     "BURSTGPT": {
@@ -1392,10 +1401,11 @@
       "official_example_preparation_receipt": "docs/workload-data/validation/burstgpt-official-example-preparation-20261025.json",
       "native_public_runner": "scripts/run_burstgpt_original_example.py",
       "native_client_dependencies": "configs/workload-native/burstgpt-original-demo-py312-dependencies.txt",
-      "native_queue_state": "RELEASE1_AND_RELEASE2_AUDITED_RELEASE3_REMOTE_STATE_UNKNOWN",
+      "native_queue_state": "ALL_THREE_RELEASE_PROFILES_AUDITED_FIXED_CONSUMER_PENDING",
+      "release3_native_audit_receipt": "docs/workload-data/validation/burstgpt-release3-scaled-native-audit-20261025.json",
       "scaled_tool_progress_receipt": "docs/workload-data/validation/burstgpt-scaled-tool-progress-20261025.json",
       "release1_native_audit_receipt": "docs/workload-data/validation/burstgpt-release1-native-audit-20261025.json",
-      "blocker": "第1份scale1原20条、以及第2份scale1000000原20条均完成并审计通过；第3份最后确认运行中，随后SSH拒绝连接，当前终态未知。新入口指纹待核验。恢复后先核对保存结果和实际进程，不按断联推断失败或重启。原CSV/前20条/1024预算保留，不作原始时序性能结论；全来源及固定消费未收口，不勾。外部提示池不是原私有请求。"
+      "blocker": "已恢复第3份保存终态并完成原20条审计，无新模型调用，1024预算，15次length/5次stop保留；三份各原20条均已核。第1份scale1，第2/3份按授权官方scale1000000，不作原时序性能结论。固定工件及研究消费待补，来源不勾；外部池不是原私有提示。"
     },
     "TRACELAB": {
       "scope": "public",
