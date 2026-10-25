@@ -1,13 +1,29 @@
 # 公开原始资产：服务器准备与任务验证缺口
 
-## LibriSpeech 原始音频原生入口（候选，尚未计入完成）
+## LibriSpeech 原始音频原生入口（抽样原生交付已验证）
 
 原始资产为 OpenSLR 12 的 `test-clean.tar.gz`（2620 条）和 `test-other.tar.gz`（2939 条）。 使用发布方 Whisper
 LibriSpeech 示例选用的 `base.en` 模型，固定 `openai-whisper==20250625`； 这是一项英语语音识别原生链路验证，不是通用对话或顶尖识别质量的宣称。 依赖见
 `configs/workload-native/librispeech-whisper-npu-client-dependencies.txt`。 模型参数及推理使用 NPU，FLAC
 解码和原始英文规范化/WER 评分使用 CPU。
 
-候选入口 `scripts/run_librispeech_original.py` 接受原始归档目录、独立准备目录、模型目录和新的私有输出目录：
+先按硬件平台提供匹配的 PyTorch、torch_npu 和 CANN，再在独立客户端安装上述依赖，不覆盖共享推理服务环境。 原始归档下载地址、字节数与 SHA256 在 `LIBRISPEECH`
+source manifest 中；当前验证使用发布方列出的 EU 镜像。 模型发布地址与 SHA256 在
+`configs/workload-native/librispeech-whisper-author-pins.json` 中。
+使用者在服务器执行以下获取命令，仓库不内置数据或权重；入口会再次核验摘要：
+
+```bash
+mkdir -p /private/librispeech-archives /private/whisper-models
+curl --fail --location https://openslr.trmal.net/resources/12/test-clean.tar.gz \
+  --output /private/librispeech-archives/test-clean.tar.gz
+curl --fail --location https://openslr.trmal.net/resources/12/test-other.tar.gz \
+  --output /private/librispeech-archives/test-other.tar.gz
+curl --fail --location \
+  https://openaipublic.azureedge.net/main/whisper/models/25a8566e1d0c1e2231d1c762132cd20e0f96a85d16145c3a00adf5d1ac670ead/base.en.pt \
+  --output /private/whisper-models/base.en.pt
+```
+
+入口 `scripts/run_librispeech_original.py` 接受原始归档目录、独立准备目录、模型目录和新的私有输出目录：
 
 ```bash
 PYTHONPATH=workload-preparation/src python scripts/run_librispeech_original.py \
@@ -22,7 +38,10 @@ PYTHONPATH=workload-preparation/src python scripts/run_librispeech_original.py \
 单声道输入官方 `transcribe`，仅指定英文、转写任务，其他使用原默认值； 不做 30 秒裁剪、补造提示词、重采样或缩短原生流程。 输出保留原始参考和模型响应，必须留在私有目录，不提交到
 Git。
 
-既有原生 8 条和后续未见样本验证不等于 5559 条全量推理。 公共固定工件及研究侧消费闭环尚未完成，因此总清单中的该来源保持未勾选； 准备流程和单元测试通过也不能替代这两项交付核验。
+已完成[固定工件与研究消费核验](validation/librispeech-fixed-ci-research-handoff-20261025.json)： CI 安装包 38
+个文件逐字节一致，全部 5559 条原关系保留，两个 split 各 6 次公共回查、各 3 条研究索引导入、 全部原关系的研究直接准备及各 6 次直接回查通过。原始音频字节、参考和采样数均保真。
+[最终交付回执](validation/librispeech-native-delivery-20261025.json)同时记录冻结原生 8 条及固定公开入口另 6 条未见原位置的 NPU
+转写/评分。 研究消费使用该固定公共工件，不代表研究默认依赖锁已更新；观测与分析未迁移。 该来源现已计入完成，但不代表全 5559 条模型推理、流式 ASR、音频问答或全部音频类别完成。
 
 ## 已验证的数据链路
 

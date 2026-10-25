@@ -103,7 +103,25 @@ def test_librispeech_native_samples_and_raw_binding_are_not_public_delivery():
     assert not receipt["fixed_ci_artifact_verified"]
     assert not receipt["research_consumption_verified"]
     ledger = json.loads((DOCS / "dataset-validation-status.json").read_text("utf-8"))
-    assert not ledger["delivery_inventory"]["LIBRISPEECH"]["checked"]
+    row = ledger["delivery_inventory"]["LIBRISPEECH"]
+    if row["checked"]:
+        delivery = json.loads((ROOT / row["delivery_receipt"]).read_text("utf-8"))
+        handoff = json.loads(
+            (ROOT / row["fixed_ci_research_handoff_receipt"]).read_text("utf-8")
+        )
+        assert delivery["source_checkbox_eligible"]
+        assert not delivery["full_5559_utterance_inference_claim"]
+        assert not delivery["streaming_asr_or_live_conversation_claim"]
+        assert handoff["original_rows_preserved"] == 5559
+        assert handoff["installed_payload_files_equal"] == 38
+        assert handoff["research_source_files_equal_installed"] == 40
+        assert (
+            handoff["cpu_ci_conclusion"] == handoff["root_ci_conclusion"] == "success"
+        )
+        assert delivery["primary_frozen_native_selection"] == {
+            scope["split"]: scope["selected_original_positions"]
+            for scope in receipt["splits"]
+        }
 
 
 def test_stsb_delivery_closes_fixed_installation_and_native_evaluation():

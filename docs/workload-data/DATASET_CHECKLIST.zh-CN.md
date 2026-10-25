@@ -3,9 +3,9 @@
 ## 本轮完整交付清单（2026-10-24）
 
 40 类共登记 110 个公开来源、8 份企业资产，合计 118 项；五个指定来源只分类，本轮推进 113 项。下方历史 19
-个勾保留，不自动提升为本轮完成，也不要求已验证项目重复跑。当前交付可用28/113项：1项服务轨迹资产、16项原任务/固定评测协议交付（BBH、MATH500、GSM8K、AI2-ARC、NI登记任务、BFCL登记类别、QuALITY原NYU多选集成、LongBench登记Qasper200、tau2登记telecom_full、LoCoMo完整上下文文本QA、RULER原13种任务集成、GPQA原三split
+个勾保留，不自动提升为本轮完成，也不要求已验证项目重复跑。当前交付可用29/113项：1项服务轨迹资产、17项原任务/固定评测协议交付（BBH、MATH500、GSM8K、AI2-ARC、NI登记任务、BFCL登记类别、QuALITY原NYU多选集成、LongBench登记Qasper200、tau2登记telecom_full、LoCoMo完整上下文文本QA、RULER原13种任务集成、GPQA原三split
 zero-shot集成、BEIR
-SciFact/NFCorpus原检索与重排、STSB原句对相似度、XLSUM原45变体摘要）、Dolly、OASST1与LongWriter三项语料及8份私有企业请求语料。并非28个带官方质量评分的完整benchmark，边界见逐项回执。
+SciFact/NFCorpus原检索与重排、STSB原句对相似度、XLSUM原45变体摘要、LibriSpeech原完整波形抽样ASR）、Dolly、OASST1与LongWriter三项语料及8份私有企业请求语料。并非29个带官方质量评分的完整benchmark，边界见逐项回执。
 
 完成要求以主方案第零节及机器清单 delivery_contract 为准：原题、完整原生流程与适用评分必须跑通；每个独立协议预计执行和评分不超过 30
 分钟则全跑，否则事前固定至少三条，不足则全跑。不得改题、删工具、截断或缩减原生预算，失败不得换题。资源不足保留未勾并记阻塞；模型答错不等于链路失败。服务轨迹无原始请求回放入口时，只能交付数据资产，不能编
@@ -107,7 +107,7 @@ TB；服务器/data约1.42TB可用，未缩小语料。ChartQA当前两卡主机
 | VIDEOMME_V2                | [ ] 待开展            | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                        |
 | MVBENCH                    | [ ] 待开展            | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                        |
 | LONGVIDEOBENCH             | [ ] 待开展            | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                        |
-| LIBRISPEECH                | [ ] 进行中            | 两split冻结原前三+最长共8条完整波形NPU转写及原规范WER通过；5559原关系及8条音频字节/采样数保真已核。公共入口、固定组件和研究消费待收口，保持未勾。                                                                                                                                   |
+| LIBRISPEECH                | [x] 已完成            | 原两split前三+最长共8条完整音频NPU转写和原规范WER通过；固定公开入口另跑未见原位置，5559条保真、CI38文件工件及两split公共/研究消费已核验。不是全5559推理或流式ASR。                                                                                                                  |
 | FLEURS                     | [ ] 待开展            | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                        |
 | WAVCAPS                    | [ ] 待开展            | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                        |
 | SCIENCEAGENTBENCH          | [ ] 缺口已列待补      | 复用历史证据；原生缺口见37项复核表及方案8.5.2                                                                                                                                                                                                                                       |
