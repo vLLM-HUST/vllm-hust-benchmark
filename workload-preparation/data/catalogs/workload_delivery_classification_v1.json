@@ -21,8 +21,12 @@
     {"source_id": "PAIO-SEMANTIC-SIMILAR-5000", "asset_group": "enterprise-private-requests", "related_workload_ids": [], "boundary": "Semantic similarity is not exact-prefix or KV reuse; preserve original private requests without rewriting."}
   ],
   "source_entrypoints": {
+    "DUREADER": [
+      {"role": "prepare_assets", "path": "scripts/prepare_reused_research_assets.py", "scope": "Publisher search demo train/dev100 each acquired through original pinned GitHub file identities, no payload publication."},
+      {"role": "data_reading_only", "path": "scripts/prepare_reused_source_records.py", "scope": "All200 demo question/916 document fields and twelve fixed-provider/research roundtrips verified; reference/publisher annotation fields remain outside model inputs. Native generation and scoring pending."}
+    ],
     "NATURALQUESTIONS": [
-      {"role": "original_profile", "path": "scripts/run_nq_open_original.py", "scope": "Pinned lm-eval0.4.11 original nq_open generation/filter/Exact Match over unchanged original question/answer files. Explicit zero-shot closed-book local-model transport; native run pending, no DPR/REALM retrieval or full Natural Questions document claim."},
+      {"role": "original_profile", "path": "scripts/run_nq_open_original.py", "scope": "Pinned lm-eval0.4.11 original nq_open generation/filter/Exact Match over unchanged original question/answer files. Explicit zero-shot closed-book local-model transport; completion scope requires separate delivery ledger/evidence, no DPR/REALM retrieval or full Natural Questions document claim."},
       {"role": "prepare_assets", "path": "scripts/prepare_reused_research_assets.py"},
       {"role": "data_reading_only", "path": "scripts/prepare_reused_source_records.py"}
     ],

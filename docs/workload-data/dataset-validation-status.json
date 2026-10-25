@@ -2131,18 +2131,19 @@
     "DUREADER": {
       "scope": "public",
       "delivery_kind": "review_original_source_protocol",
-      "status": "HISTORICAL_ACQUISITION_REUSED_NATIVE_PENDING",
+      "status": "IN_PROGRESS",
       "checked": false,
       "legacy_checked": false,
       "existing_receipt": null,
       "delivery_receipt": null,
-      "blocker": "Historical original acquisition metadata reused; verify preserved external files rather than re-download. Source-specific preparation/mapping, native execution/scoring and exact-artifact consumer verification pending. Raw-source registration is not native delivery.",
+      "blocker": "Original publisher search demo files100+100 fully verified/prepared with all200 question and916 document fields preserved, twelve fixed-provider/research roundtrips passed. Native generation/scoring and environment recipe still pending; not full DuReader or Zhidao.",
       "acquisition_reuse_receipt": "docs/workload-data/validation/research-acquisition-reuse-audit-20261025.json",
       "historical_raw_file_specs": 2,
       "public_asset_preparer": "scripts/prepare_reused_research_assets.py",
       "source_record_preparer": "scripts/prepare_reused_source_records.py",
       "preparation_mapping": "configs/workload-native/reused-source-mappings/dureader.json",
-      "preparation_validation_scope": "software fixtures only; demo original assets, native execution and fixed-artifact consumer pending"
+      "preparation_validation_scope": "Actual original200 demo questions and916 documents fully compared against native fields after restoring omitted publisher annotations outside input. Twelve public/research resolutions equal, no model calls or new research features.",
+      "original_preparation_receipt": "docs/workload-data/validation/dureader-original-demo-preparation-20261026.json"
     },
     "SPIDER": {
       "scope": "public",
@@ -2162,14 +2163,26 @@
       "legacy_checked": false,
       "existing_receipt": null,
       "delivery_receipt": null,
-      "blocker": "Original nq_open two files and91535 full reference rows now verified/prepared on server. Native generation/scoring and public/research roundtrip still pending; preparation does not qualify for delivery.",
+      "blocker": "Original103 disjoint dev cases generated/scored; remaining original103..3609 running. All91535 rows prepared and12 fixed-provider/research resolutions verified. Full declared dev terminal/result audit and separate clean-client qualification pending; running cases not counted as complete.",
       "acquisition_reuse_receipt": "docs/workload-data/validation/research-acquisition-reuse-audit-20261025.json",
       "historical_raw_file_specs": 2,
       "public_asset_preparer": "scripts/prepare_reused_research_assets.py",
       "source_record_preparer": "scripts/prepare_reused_source_records.py",
       "preparation_mapping": "configs/workload-native/reused-source-mappings/naturalquestions.json",
       "preparation_validation_scope": "Actual publisher nq_open dev3610/train87925 complete original question/answer fields, SHA256/size and91535 full index verified on server with installed a9bcfe6d provider. No model calls or native scoring; research source roundtrip pending.",
-      "original_preparation_receipt": "docs/workload-data/validation/nq-open-original-preparation-20261026.json"
+      "original_preparation_receipt": "docs/workload-data/validation/nq-open-original-preparation-20261026.json",
+      "native_entrypoint": "scripts/run_nq_open_original.py",
+      "partial_native_validation": {
+        "execution_source_commit": "f1c218b32a8756ccee80db32c688550b068b6a7d",
+        "completed_disjoint_original_dev_ranges": [[0, 2], [3, 102]],
+        "completed_native_samples_and_scoring": 103,
+        "remaining_full_dev_run": "nq-open-original-dev-range103to3609-32063-001",
+        "planned_remaining_original_positions": 3507,
+        "full_dev_terminal_state_audited": false,
+        "wrong_and_empty_answers_retained": true,
+        "scope": "Original lm-eval nq_open zero-shot closed-book protocol, not retrieval/paper-model reproduction. Running remainder not counted as complete."
+      },
+      "fixed_consumer_validation": "All91535 original rows indexed;12 fixed installed a9bcfe6d provider/research dd410314 original field roundtrips equal; research default lock unchanged. Native full dev completion and final audit still pending."
     },
     "MULTIAGENTBENCH": {
       "scope": "public",

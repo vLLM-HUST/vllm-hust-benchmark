@@ -557,6 +557,20 @@ python scripts/prepare_reused_research_assets.py NATURALQUESTIONS \
 仅接受已登记的`raw.githubusercontent.com/原仓库/固定40位提交/原文件路径`，先核对同一提交的发布方文件元数据与Git对象身份，再校验完整原始字节；不访问第三方镜像、不登录、不绕过gated授权。原目录失败后只允许匹配配置的显式`--resume`；已有完整文件用`--mode verify`。获取成功不等于NQ-open原生生成/评分已完成，更不等于完整Natural
 Questions文档任务。
 
+### DuReader 原始 search demo 数据准备（未完成原生生成/评分）
+
+```sh
+python scripts/prepare_reused_research_assets.py DUREADER \
+  --mode download --github-api --max-bytes 6000000 \
+  --data-root /private/fresh-dureader-demo-original
+python scripts/prepare_reused_source_records.py DUREADER \
+  --data-root /private/fresh-dureader-demo-original \
+  --output /private/fresh-dureader-demo-references
+```
+
+发布方原文件后缀为`.json`、内容是物理行JSON；沿用历史接入本地`.jsonl`命名，不改任何字节。现已在服务器核验两个文件各100题，完整比较200题/916文档全部原字段，并完成12处固定工件公共/研究回查。原question/title/paragraphs保留作输入，答案、证据选择、原文分词及类别/排序等发布方标注保存在非输入侧；它们不是本仓新算的研究特征。原train包含U+2028，不可用`str.splitlines()`拆成记录；公共读取器保留物理JSONL行。见[准备与保真证据](validation/dureader-original-demo-preparation-20261026.json)。这里只覆盖发布方search
+demo，不是完整DuReader或Zhidao；原生模型生成、原评分与执行环境尚待验证，不打完成勾。
+
 ### FLORES-200 原始翻译资产（历史获取截面；当前交付结论见下文）
 
 2026-10-26补充：原生三语向抽样、原指标评分、固定软件包与研究侧消费已收口，见[交付回执](validation/flores200-native-delivery-20261026.json)。下面的准备中/待核描述保留历史截面，不再代表当前交付状态；隐藏test、未支持的原始语言代码和非商业模型许可限制仍有效。
