@@ -113,10 +113,10 @@ def build(revision, read=None):
             if e.get("path", "").endswith("milestone-v15/method-status.json"):
                 e.update(path=METHOD, label="本轮方法状态 / Current round method")
     resources = sections["resources"]
-    resources["scope"] = (
+    resources["scope"] += (
         "开发栈内部资源系数与同期利用率观测；不构成固定0.18/0.18 B0的M06货币成本通过。综合月费、同一成功请求集合及同期时长加权利用率适用证据仍待核验；生命周期结果保留为历史补充。"
     )
-    resources["scope_en"] = (
+    resources["scope_en"] += (
         "Development-stack resource coefficients and same-window utilization only; not M06 monetary-cost acceptance against fixed 0.18/0.18 B0. All-in monthly fees, matched successful requests and time-weighted same-window utilization evidence remain to be verified. Lifecycle observations remain historical supplements."
     )
     return data
