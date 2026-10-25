@@ -103,7 +103,8 @@ def test_m01_limited_verdict_matches_retained_model_evidence():
     assert "不是V1.5当前C、η或达标判定" in report
     assert "3.840732572879189" in report
     assert "7.1042207644080255" in report
-    assert "不作90%达标判定" in report
+    assert "B1 η=99.9397%，达到90%" in report
+    assert "不是理论峰值或全局最优上界" in report
     method = json.loads((report_dir / "milestone-v15/method-status.json").read_text())
     assert method["current"]["effective_tflops_per_chip"] == 7.1042207644080255
     assert method["current"]["efficiency_percent"] is None
