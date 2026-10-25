@@ -8,6 +8,15 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def test_infinitebench_does_not_inherit_unrelated_qrecc_storage_blocker():
+    ledger = json.loads(
+        (ROOT / "docs/workload-data/dataset-validation-status.json").read_text("utf-8")
+    )
+    inventory = ledger["delivery_inventory"]
+    assert "QReCC" not in (inventory["INFINITEBENCH"]["blocker"] or "")
+    assert inventory["QRECC"]["checked"] is False
+
+
 def test_gpqa_fixed_artifact_and_native_main_do_not_hide_skipped_task():
     directory = ROOT / "docs/workload-data"
     ledger = json.loads(
