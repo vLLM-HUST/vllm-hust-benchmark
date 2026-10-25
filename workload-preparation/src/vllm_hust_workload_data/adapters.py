@@ -13,6 +13,13 @@ from .registry import adapter_spec, source_spec
 
 def iter_source_rows(path, spec):
     """Use one source view for reading, binding and index resolution."""
+    if spec.get("native_format") == "openslr_archives_or_hf_rows" and Path(
+        path
+    ).name.endswith(".tar.gz"):
+        from .librispeech import original_archive_rows
+
+        yield from original_archive_rows(path)
+        return
     if spec["mapping"] == "stsb_original_pairs":
         from .stsb import original_rows
 
@@ -400,6 +407,14 @@ def adapt_row(
         task["session_id"] = row.get("message_tree_id")
         replay["order"] = (
             "message_tree_edges; source_file_order_is_not_conversation_order"
+        )
+    if (
+        source_id == "LIBRISPEECH"
+        and isinstance(row.get("audio"), dict)
+        and "archive_member" in row["audio"]
+    ):
+        replay["order"] = (
+            "original_sorted_utterance_ids_within_archive_not_request_arrival"
         )
     return WorkloadRecord(
         source=deepcopy(source),

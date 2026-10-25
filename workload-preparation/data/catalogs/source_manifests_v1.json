@@ -1294,9 +1294,9 @@
     },
     "LIBRISPEECH": {
       "source_id": "LIBRISPEECH",
-      "platform": "hf",
+      "platform": "https",
       "repo_id": "openslr/librispeech_asr",
-      "source_url": "https://huggingface.co/datasets/openslr/librispeech_asr",
+      "source_url": "https://www.openslr.org/12/",
       "asset_kind": "speech_corpus",
       "independent_source_id": "LIBRISPEECH",
       "workload_tags": [
@@ -1306,9 +1306,14 @@
       "provenance": "official_project",
       "fitness_status": "VARIABLES_REQUIRE_ASSET_INSPECTION",
       "discovery_status": "ENTRY_IDENTIFIED",
-      "revision": "71cacbfb7e2354c4226d01e70d77d5fca3d04ba1",
-      "files": [],
-      "unit": "source_rows",
+      "revision": "openslr-original-test-archives-20261025",
+      "upstream_hf_reference": {"repo_id": "openslr/librispeech_asr", "revision": "71cacbfb7e2354c4226d01e70d77d5fca3d04ba1", "revision_note": "pragma: allowlist secret - historical public HF metadata reference, not the archive revision"},
+      "original_archive_contract": "Original publisher test FLAC/transcript archives; HF native-field adapter remains supported for explicitly bound HF snapshots",
+      "files": [
+        {"path":"test-clean.tar.gz","url":"https://openslr.trmal.net/resources/12/test-clean.tar.gz","sha256":"39fde525e59672dc6d1551919b1478f724438a95aa55f874b576be21967e6c23","sha256_note":"pragma: allowlist secret - public original archive identity","bytes":346663984,"rows":2620,"role":"data","split":"test-clean"},
+        {"path":"test-other.tar.gz","url":"https://openslr.trmal.net/resources/12/test-other.tar.gz","sha256":"d09c181bba5cf717b3dee7d4d592af11a3ee3a09e08ae025c5506f6ebe961c29","sha256_note":"pragma: allowlist secret - public original archive identity","bytes":328757843,"rows":2939,"role":"data","split":"test-other"}
+      ],
+      "unit": "original_utterance",
       "provenance_kind": "speech_corpus",
       "access": {
         "license": [

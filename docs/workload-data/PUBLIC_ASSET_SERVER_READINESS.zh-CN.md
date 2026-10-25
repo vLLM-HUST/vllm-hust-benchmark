@@ -1,5 +1,29 @@
 # 公开原始资产：服务器准备与任务验证缺口
 
+## LibriSpeech 原始音频原生入口（候选，尚未计入完成）
+
+原始资产为 OpenSLR 12 的 `test-clean.tar.gz`（2620 条）和 `test-other.tar.gz`（2939 条）。 使用发布方 Whisper
+LibriSpeech 示例选用的 `base.en` 模型，固定 `openai-whisper==20250625`； 这是一项英语语音识别原生链路验证，不是通用对话或顶尖识别质量的宣称。 依赖见
+`configs/workload-native/librispeech-whisper-npu-client-dependencies.txt`。 模型参数及推理使用 NPU，FLAC
+解码和原始英文规范化/WER 评分使用 CPU。
+
+候选入口 `scripts/run_librispeech_original.py` 接受原始归档目录、独立准备目录、模型目录和新的私有输出目录：
+
+```bash
+PYTHONPATH=workload-preparation/src python scripts/run_librispeech_original.py \
+  --data-root /private/librispeech-archives \
+  --prepared-root /private/librispeech-prepared \
+  --model-root /private/whisper-models \
+  --output /private/fresh-librispeech-run --device npu:1
+```
+
+原始归档和模型按固定 SHA256 核对，音频按字节解包并保留原文与原 utterance ID 的对应关系。 默认在模型输出前固定每个 split 的原 ID 排序前 3
+条及最长音频；`--full` 执行所选 split 的全部任务， `--indices 6,7,8` 为输出前指定的原始位置，不能根据失败结果换题。 每条完整 FLAC 以原 16kHz
+单声道输入官方 `transcribe`，仅指定英文、转写任务，其他使用原默认值； 不做 30 秒裁剪、补造提示词、重采样或缩短原生流程。 输出保留原始参考和模型响应，必须留在私有目录，不提交到
+Git。
+
+既有原生 8 条和后续未见样本验证不等于 5559 条全量推理。 公共固定工件及研究侧消费闭环尚未完成，因此总清单中的该来源保持未勾选； 准备流程和单元测试通过也不能替代这两项交付核验。
+
 ## 已验证的数据链路
 
 2026-10-23 将此前仅本地验证的七个来源的选定原始文件传到当前授权服务器。 传输前对照固定来源目录核验原始摘要；服务器读取时再次核验文件摘要。 使用 #431 固定提交
