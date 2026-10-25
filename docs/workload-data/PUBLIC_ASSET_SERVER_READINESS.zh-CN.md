@@ -584,6 +584,24 @@ python scripts/prepare_dureader_official_scorer.py \
 
 固定作者仓库及其推荐的coco-caption依赖版本，按作者流程对两个BLEU模块进行标准2to3转换，逐文件保留转换前后哈希。服务器已执行五种评分分支的合成夹具检查；发现旧依赖对字典键顺序的断言在不同进程存在兼容性风险，尚需稳定化验证。合成夹具不是原题结果，不据此打勾。见[软件准备证据](validation/dureader-official-scorer-preparation-20261026.json)。官方Paddle1.2/Python2.7或TensorFlow1基线未在当前NPU环境复现；不能将Qwen替代配置称为作者基线复现。
 
+补充执行入口：采用[明确的生成式替代配置](../../configs/workload-native/dureader-original-demo-qwen-profile.json)，不是作者原始提示词或旧模型复现。完整原question与每份原文档title/paragraphs进入模型；金答案、证据选择、分词标注不进入输入。预测沿用作者JSON字段，错误/空输出不修复、不重试、不换题。评分仅增加Python3字典快照及键顺序兼容，不改变评分公式、字符串归一化或内容。
+
+```bash
+# 使用前文隔离的Python3.12 API客户端；推理在已有NPU服务，不在客户端部署模型。
+python scripts/run_dureader_original.py \
+  --data-file /private/fresh-dureader-demo-original/DuReader-2.0/data/demo/devset/search.dev.jsonl \
+  --tokenizer /workspace/models/Qwen3.5-27B \
+  --scorer-root /private/fresh-dureader-official-scorer \
+  --output /private/fresh-dureader-full-results --full
+
+# 复用已保存的原生预测/参考文件，只运行CPU评分，不重复调用模型。
+python scripts/score_dureader_original.py \
+  --scorer-root /private/fresh-dureader-official-scorer \
+  --predictions /private/fresh-dureader-full-results/native-predictions.private.jsonl \
+  --references /private/fresh-dureader-full-results/native-references.private.jsonl \
+  --output /private/fresh-dureader-regrade.json
+```
+
 ```sh
 python scripts/prepare_reused_research_assets.py DUREADER \
   --mode download --github-api --max-bytes 6000000 \

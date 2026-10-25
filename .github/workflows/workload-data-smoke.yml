@@ -18,6 +18,10 @@ on:
       - 'scripts/prepare_lmeval_api_client.py'
       - 'scripts/prepare_dureader_official_scorer.py'
       - 'tests/test_dureader_official_scorer_preparation.py'
+      - 'scripts/score_dureader_original.py'
+      - 'scripts/run_dureader_original.py'
+      - 'tests/test_dureader_original_scoring.py'
+      - 'tests/test_dureader_original_runner.py'
       - 'tests/test_lmeval_api_client_preparation.py'
       - 'tests/test_nq_open_original_runner.py'
       - 'scripts/run_mmlu_pro_original_samples.py'
@@ -218,7 +222,7 @@ jobs:
       - name: NQ-open original generation and scoring transport fixtures
         run: python -m pytest -q tests/test_nq_open_original_runner.py tests/test_lmeval_api_client_preparation.py
       - name: DuReader official scorer software transport fixtures, no datasets
-        run: python -m pytest -q tests/test_dureader_official_scorer_preparation.py
+        run: python -m pytest -q tests/test_dureader_official_scorer_preparation.py tests/test_dureader_original_scoring.py tests/test_dureader_original_runner.py
       - name: StructEval saved-output reuse fixtures, no model execution
         run: python -m pytest -q tests/test_structeval_saved_nonrender.py tests/test_structeval_original_runner.py
       - name: HumanEval historical completion reuse fixtures, no code execution

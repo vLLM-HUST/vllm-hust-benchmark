@@ -2,6 +2,8 @@
 
 The publisher downloader uses coco-caption master and 2to3 for BLEU. This
 entrypoint pins both repositories and records that same explicit conversion.
+The evaluation module additionally needs Python2 dict snapshot semantics when
+deleting empty references during iteration; only standard fix_dict is applied.
 No prediction, raw dataset or model is downloaded. Use a fresh private output.
 """
 
@@ -117,6 +119,11 @@ def prepare(output, *, fetch=None):
             converted = str(
                 converter.refactor_string(original.decode("utf-8"), str(path))
             ).encode("utf-8")
+        elif relative.endswith("/dureader_eval.py"):
+            snapshot = RefactoringTool(["lib2to3.fixes.fix_dict"])
+            converted = str(
+                snapshot.refactor_string(original.decode("utf-8"), str(path))
+            ).encode("utf-8")
         path.write_bytes(converted)
         records.append(
             {
@@ -124,7 +131,11 @@ def prepare(output, *, fetch=None):
                 "publisher_url": url,
                 "original_sha256": digest(original),
                 "installed_sha256": digest(converted),
-                "conversion": "publisher-recommended standard 2to3 compatibility"
+                "conversion": (
+                    "Python2 dictionary snapshot compatibility via standard 2to3 fix_dict"
+                    if relative.endswith("/dureader_eval.py")
+                    else "publisher-recommended standard 2to3 compatibility"
+                )
                 if converted != original
                 else "none",
             }
