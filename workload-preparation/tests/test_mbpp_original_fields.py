@@ -76,7 +76,9 @@ def test_sanitized_and_extra_fields_are_not_silently_dropped():
 def test_all_full_splits_registered_as_readable_data_not_native_completion():
     source = source_spec("MBPP")
     assert source["platform"] == "hf"
-    assert source["revision"] == "4bb6404fdc6cacfda99d4ac4205087b89d32030c"
+    assert (
+        source["revision"] == "4bb6404fdc6cacfda99d4ac4205087b89d32030c"
+    )  # pragma: allowlist secret - public dataset revision
     assert len(source["files"]) == 4
     assert sum(item["rows"] for item in source["files"]) == 974
     assert all(
