@@ -620,8 +620,10 @@ manifest执行pipeline/resolve。输入只包含原`Question`与按作者seed0�
 WildChat、UltraChat、LMSYS-Chat 使用同一准备入口，分别指定 `WILDCHAT`、`ULTRACHAT`、`LMSYS_CHAT`。 复用现有
 historical_dialogue 适配定义，不新造第二套对话映射。原始 conversation/messages 的全部角色、轮次及顺序保留，包括历史 assistant
 输出；它们不是新模型的生成结果，也不是可直接发送的完整 API 请求。 准备输出只是原始记录引用，消费端通过 resolve_input
-恢复；需要模型运行的后续步骤必须明确历史前缀与待生成位置，不能将最后一条 assistant 当作用户问题或拿历史答案冒充新预测。 本轮仅验证小型 JSONL 软件夹具的准备和恢复，实际原始
-Parquet 文件校验、依赖及原生续写验证仍待服务器恢复后完成。
+恢复；需要模型运行的后续步骤必须明确历史前缀与待生成位置，不能将最后一条 assistant 当作用户问题或拿历史答案冒充新预测。
+
+本轮验证小型 JSONL 与嵌套 Parquet 软件夹具的绑定、准备和恢复，使用已安装的可选数据依赖。CI 安装数据包的 data extra
+同样覆盖此格式测试。实际作者文件、服务器依赖及原生续写仍待验证，不能以格式夹具测试冒充真实数据验证。
 
 InfiniteBench 的作者代码身份及静态前检：
 

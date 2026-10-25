@@ -149,8 +149,9 @@ def test_data_only_profiles_do_not_imply_nq_retrieval():
         ("LMSYS_CHAT", "conversation", "conversation_id"),
     ],
 )
+@pytest.mark.parametrize("file_format", ["jsonl", "parquet"])
 def test_existing_dialogue_adapters_preserve_original_history(
-    tmp_path, sid, field, id_field
+    tmp_path, sid, field, id_field, file_format
 ):
     from vllm_hust_workload_data.consumer import resolve_input
 
@@ -161,10 +162,16 @@ def test_existing_dialogue_adapters_preserve_original_history(
         {"role": "assistant", "content": "final historical fixture"},
     ]
     row = {field: messages, id_field: "fixture-id"}
-    raw = (json.dumps(row) + "\n").encode()
     data = tmp_path / "data"
     data.mkdir()
-    (data / "fixture.jsonl").write_bytes(raw)
+    filename = "fixture." + file_format
+    if file_format == "parquet":
+        pa = pytest.importorskip("pyarrow")
+        pq = pytest.importorskip("pyarrow.parquet")
+        pq.write_table(pa.Table.from_pylist([row]), data / filename)
+    else:
+        (data / filename).write_text(json.dumps(row) + "\n", encoding="utf-8")
+    raw = (data / filename).read_bytes()
     catalog = tmp_path / "catalog"
     (catalog / "data/catalogs").mkdir(parents=True)
     for name in (
@@ -178,7 +185,7 @@ def test_existing_dialogue_adapters_preserve_original_history(
         if name == "source_manifests_v1.json":
             payload["sources"][sid]["files"] = [
                 {
-                    "path": "fixture.jsonl",
+                    "path": filename,
                     "sha256": hashlib.sha256(raw).hexdigest(),
                     "bytes": len(raw),
                     "role": "raw_source",
