@@ -190,7 +190,7 @@ jobs:
       - name: FLORES original pair and metric transport fixtures
         run: python -m pytest -q tests/test_flores200_original_runner.py
       - name: HumanEval historical completion reuse fixtures, no code execution
-        run: python -m pytest -q tests/test_humaneval_official_samples.py tests/test_humaneval_isolated_scoring.py tests/test_bigcodebench_official_samples.py tests/test_bigcodebench_scoring_assets.py tests/test_ds1000_official_samples.py tests/test_ds1000_isolated_scoring.py
+        run: python -m pytest -q tests/test_humaneval_official_samples.py tests/test_humaneval_isolated_scoring.py tests/test_bigcodebench_official_samples.py tests/test_bigcodebench_scoring_assets.py tests/test_bigcodebench_scoring_plan.py tests/test_ds1000_official_samples.py tests/test_ds1000_isolated_scoring.py
       - name: Author JSONSchemaBench local Engine interface fixtures
         run: python -m pytest -q tests/test_jsonschemabench_local_engine.py tests/test_jsonschemabench_environment_probe.py
       - name: Verify exact current-source wheel payload

@@ -1198,6 +1198,9 @@
     },
     "BIGCODEBENCH": {
       "historical_generation_reuse_preparer": "scripts/prepare_bigcodebench_official_samples.py",
+      "scoring_asset_static_preflight": "scripts/audit_bigcodebench_scoring_assets.py",
+      "official_sandbox_command_plan": "scripts/prepare_bigcodebench_scoring_plan.py",
+      "generic_selection_software_scope": "Original ID list, range and full1140 generation/preparation supported; fixtures passed, new selections not server-validated. Historical first3 generations remain reusable.",
       "historical_generation_reuse_validation_scope": "software fixtures only; raw full solution text and original data fields preserved; author sanitizer and isolated functional evaluation pending; old per-file digest binding unavailable",
       "scope": "public",
       "delivery_kind": "review_original_source_protocol",
@@ -1207,7 +1210,7 @@
       "existing_receipt": "docs/workload-data/validation/bigcodebench-original-generation-npu-20261023.json",
       "delivery_receipt": null,
       "isolation_preflight": "docs/workload-data/validation/code-execution-isolation-preflight-20261024.json",
-      "blocker": "Current server has no verified isolated execution environment; original functional tests/scorer not run. Reuse existing completions when isolation is available; no unsafe host execution."
+      "blocker": "BigCodeBench-specific sandbox/dependencies remain unqualified; author 30GiB address/data limits are incompatible with the DS1000 namespace's 2GiB hard address limit. Official full source acquired on server; SSH32048 then refused connection. Static preflight/command plan have fixture evidence only. Original sanitize/reference/candidate scoring not run; preserve prior completions, no host fallback."
     },
     "SWE_BENCH": {
       "scope": "public",

@@ -88,6 +88,21 @@ python scripts/audit_bigcodebench_scoring_assets.py \
 sanitize、参考实现检查和候选代码评分均不在其证明范围内。当前只通过软件夹具测试；
 上传执行时 SSH 32048 返回连接拒绝，尚无服务器执行本入口的回执，不能计为原生验证。
 
+已准备原始答案后，可生成官方隔离内命令计划：
+
+```bash
+python scripts/prepare_bigcodebench_scoring_plan.py \
+  --prepared-dir /private/bigcodebench-score-input \
+  --official-code /private/bigcodebench-code
+```
+
+此入口不执行命令。它先核验准备回执、完整原始ID顺序及答案文件摘要，再列出官方
+sanitize和本地evaluate命令。保留calibrated、参考实现检查、pass@1、原始选题与作者默认
+worker选择；使用独立输出缓存，避免沿用其他选题的groundtruth缓存。选定参考实现必须
+全部通过，才能接受候选评分；缺依赖、运行环境失败不能当成模型答错。官方默认地址空间/
+数据限制为30GiB、栈限制10MiB，不能照搬DS1000隔离器的2GiB硬限制。仍须另行完成
+隔离launcher、依赖及并发预检、实际sanitize/参考实现/候选评分和完整结果覆盖检查。
+
 2026-10-24历史服务器的[隔离预检](validation/code-execution-isolation-preflight-20261024.json)：网络namespace可创建，但mount/PID隔离和私有bubblewrap无害探测失败，且无Docker/Podman/socket。该历史结论不代表2026-10-25已验证的其他来源隔离环境；BigCodeBench自身功能评分仍未运行。保存的生成结果继续复用，待其隔离环境与依赖验证后接原sanitize/功能测试及评分，不裸执行、不重生成刷分。
 
 - [x] 三个原始任务读取、prepare、resolve输入/参考独立往返。
