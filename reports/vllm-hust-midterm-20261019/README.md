@@ -112,3 +112,5 @@ python compare_long_runs.py midterm-run-20261019-r4 midterm-b1-20261019 comparis
 - Navidrome增量：[规范结果](../swe-native018-navidrome-20261027/README.md)。
 
 - Terminal部分产物恢复评分：[规范结果](../terminal-cancel-async-partial-recovery-20261027/README.md)。
+
+- SWE增量与评分依赖：[规范结果](../swe-native018-protonmail-qutebrowser-20261027/README.md)；[Terminal Cython控制](../terminal-build-cython-controls-20261027/README.md)。
