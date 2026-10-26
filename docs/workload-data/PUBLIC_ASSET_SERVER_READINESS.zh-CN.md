@@ -1,6 +1,6 @@
 # 公开原始资产：服务器准备与任务验证缺口
 
-## LongMemEval-V2 官方多模态记忆任务（准备进行中，未完成原生交付）
+## LongMemEval-V2 官方多模态记忆任务（原始准备与负对照已验证，整项未完成）
 
 与旧版LongMemEval分别保留，不复用旧版问题/提示构造冒充V2。 固定[官方源码](https://github.com/xiaowu0162/LongMemEval-V2)提交
 `2cc8c540bdb87fe6761629b585e727e1c4704520`，53文件649178字节；
@@ -35,10 +35,55 @@ python scripts/prepare_longmemeval_v2_reader.py --output /private/lme-v2-reader 
 见[原始准备回执](validation/longmemeval-v2-original-readiness-20261026.json)，未据此勾选来源完成。
 作者的评测环境为Python3.11，论文reader为Qwen3.5-9B；RAG等检索方法另需Qwen3-Embedding-8B，
 `no_retrieval`负对照不因此强制部署embedding。默认judge为gpt-5.2/medium，外部计费调用未授权、未执行。
-当前Qwen3.5-27B服务为language-model-only，不把它声称为官方视觉reader或忽略原图像。
-9B的16个资产固定于`longmemeval-v2-reader-pins.json`，共19329393661字节，正由独立入口在服务器准备。
+历史27B纯文本服务已在空闲窗口停止；9B完整16资产19329393661字节已校验，固定身份见`longmemeval-v2-reader-pins.json`。
+限流恢复时仅从Qwen官方ModelScope补齐与固定HF大小/SHA256相同的7份缺失文件，已有9份全部复用；不将可变master声明为固定模型身份。
 该入口使用标准`?download=true`文件链接，仍逐文件核对同一版本SHA256；已有匹配准备目录可显式加`--resume`，仅复用通过核验的文件，不无限重试限流错误。
-资产准备成功不等于服务健康；研究任务空闲后另行切换服务、记录精确配置并验证视觉原题。 原生方法执行、原评分、统一数据入口的关系保真及固定研究消费均仍待完成；本节的数据准备不替代这些交付要求。
+新服务已HTTP健康：BF16/TP1、原生262144上下文、默认thinking开启、图片容量32、视频禁用，物理NPU3运行；此窗口不声称视频或真实图片题验证。
+服务默认thinking必须开启：原作者入口仅在显式关闭时传`enable_thinking=false`，不能以CLI默认true替代服务配置核验。
+
+本次复用已有Ascend推理环境（vLLM0.23.0+empty、torch_npu2.10.0.post4），不声称作者CUDA环境或固定容器镜像复现。
+对应服务命令如下；启动前先确认设备空闲并完成原模型身份校验，不停止其他人的服务：
+
+```bash
+source /usr/local/Ascend/ascend-toolkit/set_env.sh
+VLLM_PLUGINS=ascend python3 -m vllm.entrypoints.openai.api_server \
+  --model /private/lme-v2-reader/model --served-model-name Qwen/Qwen3.5-9B \
+  --host 127.0.0.1 --port 19466 --dtype bfloat16 --tensor-parallel-size 1 \
+  --gpu-memory-utilization 0.75 --max-model-len 262144 --max-num-seqs 2 \
+  --max-num-batched-tokens 4096 --limit-mm-per-prompt '{"image":32,"video":0}' \
+  --reasoning-parser qwen3 --enable-auto-tool-choice --tool-call-parser qwen3_xml \
+  --default-chat-template-kwargs '{"enable_thinking":true}' \
+  --additional-config '{"enable_cpu_binding":false}' \
+  --structured-outputs-config '{"backend":"xgrammar"}' \
+  --enable-prefix-caching --enable-prompt-tokens-details
+```
+
+独立HTTP客户端的实际Python3.12.13依赖锁为`longmemeval-v2-http-client-py312-lock.txt`，不是作者Python3.11
+conda/CUDA环境复现。 容器HTTP客户端应移除继承的CANN `PYTHONPATH`，不改服务环境；源码显式导入的httpx0.x已单列补齐，隔离pip
+check和原两份CLI导入预检通过。 RAG的原图像处理还需要适配平台的PyTorch及官方embedding8B服务，当前尚未核验；不以纯HTTP客户端成功冒称全部环境就绪。
+
+```bash
+python3.12 -m venv /private/lme-v2-client
+env -u PYTHONPATH /private/lme-v2-client/bin/python -m pip install \
+  -r configs/workload-native/longmemeval-v2-http-client-py312-lock.txt
+# 默认只规划，加入--execute才运行；所有原题/响应/官方详细日志保留在外部私有目录。
+env -u PYTHONPATH /private/lme-v2-client/bin/python scripts/run_longmemeval_v2_original.py \
+  --author-root /private/lme-v2-author --data-root /private/lme-v2-data \
+  --reader-assets /private/lme-v2-reader/model --output /private/lme-v2-enterprise-small \
+  --method no_retrieval --domain enterprise --tier small --count 3
+```
+
+该入口只调用未修改的作者`evaluation/run_eval.py`，保留原20,000生成预算、200,000记忆上下文预算、thinking与采样参数。
+原有200,000-token记忆处理策略不被额外收缩；完整轨迹及100/500有序关系不删减。客户端对原硬编码processor模型ID使用固定版本的离线HF缓存，不伪造模块或下载另一版main。
+对原框架可能吞掉的400空响应/零用量、缺题、参考/图片/有序haystack关系变化及原评分不一致额外报错；正常错误答案保留，不按分数换题。
+
+当前只完成enterprise/small原0/1/2的`no_retrieval`负对照：3次真实NPU生成、原本地评分与保存结果独立复核通过，三个0分保留。
+该方法故意返回空记忆，不代表正向检索或视觉题覆盖；enterprise是公开数据域，不是8份私有企业资产。
+web固定原前三题为211/212/213，其中两题必须调用外部judge；默认阻塞，不换题、删题或自动启用付费调用。
+本线程未授权、未执行外部付费judge。其他使用者取得授权与凭据后，可显式加`--allow-paid-judge --judge-api-key-env OPENAI_API_KEY`运行原gpt-5.2评审；密钥仅通过环境注入，不写命令或日志。
+已保存的随机LLM评审结果只核验结构并保留，不为“独立复核”再次付费调用；不能与本地确定性评分的重算混称。原作者重试策略可能增加API请求次数，应自行控制费用。
+默认本地模式移除继承的云API密钥，并关闭Agents SDK外部trace导出；不会把研究观测迁入此处。
+`rag_query_to_slice`正向路径、剩余协议、统一数据关系适配及固定研究消费仍未完成；来源总勾保持未完成。
 
 ## TULU3 原始混合训练对话（原生抽样交付已验证）
 
