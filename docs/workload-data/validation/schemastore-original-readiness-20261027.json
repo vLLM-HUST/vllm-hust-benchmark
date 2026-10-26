@@ -1,6 +1,6 @@
 {
   "source_id": "SCHEMASTORE",
-  "status": "ORIGINAL_ARCHIVE_ALL_BLOBS_VERIFIED_NOT_NATIVE_VALIDATION",
+  "status": "ORIGINAL_ARCHIVE_VERIFIED_OFFICIAL_CHECK_PASSED_HANDOFF_PENDING",
   "source_checkbox_eligible": false,
   "repository": "SchemaStore/schemastore",
   "revision": "b3c6a70f2a535d14e8ad2bf460b3aa8f5c0efb27", "revision_note": "pragma: allowlist secret - public source identity",
@@ -15,7 +15,7 @@
   "all_tree_entries_independently_match_actual_root_tree": true,
   "transport": "Official GitHub API zipball; original Git clone failed connectivity, no mirror or substituted schemas",
   "model_calls": 0,
-  "native_schema_validation_run": false,
+  "native_schema_validation_run": true,
   "raw_payloads_published": false,
   "server_stage": "schemastore-publisher-verified-32028-001",
   "server_receipts": ["receipt-public.json", "tree-identity-public.json"],
@@ -33,8 +33,22 @@
     "install_flags": ["--ignore-scripts", "--no-audit", "--no-fund"],
     "system_or_inference_service_changed": false,
     "native_check_stage": "schemastore-official-native-check-32028-001",
-    "native_check_terminal_verified": false
+    "native_check_terminal_verified": true,
+    "native_check_exit_code": 0,
+    "native_status": "ORIGINAL_SCHEMASTORE_CHECK_PASSED_HANDOFF_PENDING",
+    "verified_original_files_before_and_after": 4810,
+    "official_report": {
+      "catalog_total_schemas": 2681,
+      "schemastore_urls": 1023,
+      "external_urls": 1658,
+      "tested_schemas": 976,
+      "strict_mode_schemas": 101,
+      "schemas_with_tests": 742,
+      "schemas_with_negative_tests": 289,
+      "draft_counts": {"2020-12": 72, "2019-09": 5, "draft-07": 896, "draft-04": 3}
+    },
+    "author_filters_or_schema_selection_changed": false
   },
-  "remaining": "Official full cli.js check running, terminal unverified; public asset/index and fixed research consumer handoff pending. Original source/lock unchanged before execution; no inference requests fabricated.",
+  "remaining": "Official full cli.js check passed; public asset/index and fixed research consumer handoff pending. Original source/lock unchanged before and after execution; no inference requests fabricated.976 official tested schemas is not a claim to validate every catalog external URL or all1006 repository JSON files independently.",
   "asset_boundary": "Schema collection with original positive/negative validation fixtures, not original LLM requests or a fabricated prompt benchmark"
 }
