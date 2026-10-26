@@ -61,6 +61,7 @@ tree，默认4个CPU编译线程，固定私有安装前缀；不安装系统包
 pip使用隔离模式并显式指定已核验的客户端前缀，忽略继承的Python/PIP安装重定向变量。
 注意：此前已启动的`5a502c70`版本存在解释器符号链接解析缺陷，断线前最后只核实到源码编译阶段；恢复后必须先检查该旧进程、日志及两套解释器的实际安装位置。是否已触发系统安装尚未知，不能假定系统未变更，也不盲目重装或回滚。
 旧回执中初始写入的`system_packages_changed:false`不是安装后的审计证据，不能据此排除影响。修复后的入口还会检查导入的Decord文件确实位于已核验的客户端前缀内，再做`pip check`。
+实例可能更换，恢复时需核对实例身份、完整命令行与工作目录，不能只凭旧PID终止或重启进程；共享目录中的`RUNNING`状态文件也不能单独证明进程仍活着。
 当前直接依赖清单不是原作者全benchmark环境，也不是完整传递依赖锁；纯客户端实际验证和锁定尚未完成。
 
 ```bash
@@ -78,6 +79,22 @@ env -u PYTHONPATH /external/chartqa-client/bin/python scripts/run_chartqa_origin
 实际请求、响应、索引、用量和原评分保存于私有输出；已有三条有效证据不因新增入口而重新生成。
 
 此前“像素相等”核验仅指原数据解码图像与工具prompt缓存图像；原工具HTTP编码默认JPEG，源代码未修改。实际HTTP消息与原编码器一致，不等于收到JPEG后的像素与原PNG逐像素相同，不据此作无损HTTP传输的声明。
+
+已有成功运行可使用`scripts/verify_chartqa_original_saved.py`在不启动模型、不调用模型/judge端点的情况下核对保存结果，并重新调用固定原工具的本地评分器。
+它核对原始位置覆盖、完整问题/参考/类别关系、原图与prompt缓存像素、真实HTTP消息和原编码器一致性、请求/响应摘要、用量、终态与原评分；缺失、失败或被改动的任务不能借复核变成通过。
+输出必须是独立的新审计目录，不能覆盖原运行或缓存目录。数字型预测按字符串读取，避免Excel自动类型推断被误当成预测变化；原始参考答案列表和原评分规则不改。
+
+```bash
+env -u PYTHONPATH /external/chartqa-client/bin/python scripts/verify_chartqa_original_saved.py \
+  --official-checkout /external/chartqa-toolkit --toolkit-archive \
+  --source-file /external/ChartQA/data/test-00000-of-00001-e2cd0b7a0f9eb20d.parquet \
+  --prepared-view /external/chartqa-original-view \
+  --ffmpeg-library-dir /external/chartqa-runtime/install/lib \
+  --run /external/chartqa-existing-private-run --output /external/chartqa-fresh-private-audit
+```
+
+默认仅规划，追加`--execute`才实际复核和本地重评分，始终不发起新的模型请求。
+该公共命令迁自此前已用过的私有复核逻辑；当前只完成CPU合同测试，尚未在恢复后的服务器上以此公共入口重新核验旧结果。不能把这项软件工作记成新样本或整来源交付。
 
 ## LongMemEval-V2 官方多模态记忆任务（原始准备与负对照已验证，整项未完成）
 
