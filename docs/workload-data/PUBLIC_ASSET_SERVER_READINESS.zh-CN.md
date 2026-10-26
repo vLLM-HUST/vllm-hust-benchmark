@@ -1320,7 +1320,7 @@ python -m evaluation.harness.run_evaluation \
 
 本轮只核实固定官方源码参数和模型路由，不下载科学数据、不调用模型、不启动容器； 102条原字段准备、真正Agent执行、科学评分与研究消费的证明仍分开保留。
 
-# 公开来源最新接入进展（进行中，不计新增交付）
+# 公开来源接入与验证进展
 
 ## CrossCodeEval 固定原始资产准备
 
@@ -1382,6 +1382,11 @@ for record in iter_workload("CROSSCODEEVAL", data_root=Path("/external/crosscode
 
 ## FLEURS 多语种原始音频
 
+已完成原生抽样交付，见[最终回执](validation/fleurs-native-delivery-20261026.json)：原102语言
+test文件与检查点全部校验；各语言固定原0、1、2共306条完整波形NPU转写和声明的CER评分完成，
+保存结果独立复核及重评一致。最新成功CI工件44个payload精确安装核对，3语言9条公共/研究消费通过；
+旧有效结果复用，研究默认依赖和PR未合并。不是全77,810条推理、原Conformer论文复现或质量/性能结论。
+
 固定 `google/fleurs` 的原始 Parquet 文件：102种实际语言，共308份 train/validation/test 文件。`all`
 是聚合视图，不重复下载或计为独立语言。原始 test 共77,810条，64,464,134,486字节。 目录元数据不等于已取得音频，更不等于完成原生测试。
 
@@ -1403,11 +1408,11 @@ python scripts/prepare_fleurs_original_assets.py --output /external/fleurs --act
 `--hf-endpoint https://hf-mirror.com`， 仍按固定版本、原始字节数及 SHA256 校验。原文件校验通过即复用，不覆盖不匹配文件； 遇到 `.partial`
 先核对所属进程和终态，本入口不会擅自覆盖。
 
-当前证据见 `validation/fleurs-native-probe-20261026.json`：Whisper large-v3-turbo 在 NPU 完成 af_za
+历史阶段证据见 `validation/fleurs-native-probe-20261026.json`：Whisper large-v3-turbo 在 NPU 完成 af_za
 原始前3条完整波形转写，未强制语言、裁剪或重采样。 CER 为明确声明的集成诊断，不冒充原论文 Conformer 基线成绩。
-完整多语种固定抽样及精确消费验证仍需补齐。上述准备入口不加载模型，也不产生评分。
+后续完整多语种抽样和精确消费的完成证据见最终回执。上述准备入口本身不加载模型，也不产生评分。
 
-原生执行与评分入口已经提供，完整多语种服务器验证尚未完成。使用与 Ascend 驱动/CANN 匹配的既有 `torch`/`torch_npu`，在独立客户端安装
+原生执行与评分入口已完成102语言固定抽样验证。使用与 Ascend 驱动/CANN 匹配的既有 `torch`/`torch_npu`，在独立客户端安装
 `configs/workload-native/fleurs-whisper-requirements.txt`，不要替换已有推理服务的环境。 当前已测环境为 Python
 3.12.13、Torch 2.10.0、torch_npu 2.10.0.post4、CANN 9.1； Whisper 官方固定源文件会在运行前校验。此组合是已验证的 Ascend
 兼容环境，不冒充原作者环境。

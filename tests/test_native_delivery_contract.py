@@ -8,6 +8,32 @@ ROOT = Path(__file__).resolve().parents[1]
 DOCS = ROOT / "docs/workload-data"
 
 
+def test_fleurs_native_delivery_is_all_locale_sampled_asr_not_full_test_or_paper():
+    receipt = json.loads(
+        (DOCS / "validation/fleurs-native-delivery-20261026.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    assert receipt["source_checkbox_eligible"]
+    native = receipt["native_execution"]
+    assert (
+        native["native_locales"] == 102 and native["completed_original_samples"] == 306
+    )
+    assert native["original_positions_per_locale"] == [0, 1, 2]
+    assert native["original_full_waveforms_and_annotations_verified"]
+    assert not native["audio_clipped_resampled_or_rewritten"]
+    assert not native["language_forced_or_failed_cases_replaced"]
+    assert not native["full_77810_native_claim"]
+    assert receipt["scoring"]["independent_saved_output_regrade_cases"] == 306
+    assert receipt["scoring"]["new_model_calls_during_audit"] == 0
+    assert not receipt["scoring"]["conformer_training_or_original_paper_baseline_claim"]
+    consumer = receipt["fixed_ci_consumer"]
+    assert consumer["installed_payloads_verified"] == 44
+    assert consumer["public_and_research_roundtrips"] == 9
+    assert not consumer["research_default_dependency_changed"]
+    assert not receipt["raw_audio_transcripts_or_predictions_published"]
+
+
 def test_original_qasper_native_delivery_retains_zero_evidence_and_consumer_scope():
     ledger = json.loads((DOCS / "dataset-validation-status.json").read_text("utf-8"))
     row = ledger["delivery_inventory"]["QASPER"]

@@ -102,6 +102,15 @@
         "path": "scripts/run_librispeech_original.py"
       }
     ],
+    "FLEURS": [
+      {"role": "prepare_assets", "path": "scripts/prepare_fleurs_original_assets.py", "scope": "Pinned original per-locale Parquet assets and optional multilingual publisher checkpoint; no model execution."},
+      {"role": "original_profile", "path": "scripts/run_fleurs_original.py", "scope": "Native Whisper transcription of complete original test waveforms; fixed original first three per locale or explicit full selection. Not streaming dialogue or Conformer training."},
+      {"role": "isolated_scoring", "path": "scripts/score_fleurs_original.py", "scope": "CPU native jiwer/Whisper-normalizer CER over saved original predictions, exact locale/position coverage required. No new model calls or paper-baseline claim."}
+    ],
+    "CROSSCODEEVAL": [
+      {"role": "prepare_assets", "path": "scripts/prepare_crosscodeeval_original_assets.py", "scope": "Fixed publisher code and original archive acquisition/verification, not native generation or scoring."},
+      {"role": "data_reading_only", "path": "workload-preparation/src/vllm_hust_workload_data/crosscodeeval.py", "scope": "Lossless original task/retrieval-profile archive reading; original IDs/contexts/references retained. Not a native executor or research analyzer."}
+    ],
     "XLSUM": [
       {
         "role": "original_profile",
