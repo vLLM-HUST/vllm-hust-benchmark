@@ -2,7 +2,7 @@
 
 ## ChartQA视觉原生链路准备（未完成）
 
-原测试分片与前三条CPU图像处理证据复用，不能据此声称视觉推理已完成。
+原测试分片与旧CPU处理证据复用。新增原始0/1/2三条已在9B NPU服务完成真实视觉生成、原评分与独立复核；旧CPU证据仍不能替代这次实际运行证据。
 固定[VLMEvalKit源码](https://github.com/open-compass/VLMEvalKit/tree/160e8a7d0cb1d4d739c1757038775cf2720d6895)，
 版本`160e8a7d0cb1d4d739c1757038775cf2720d6895`。服务器Git传输连接超时后，官方codeload归档成功；897个文件的原始内容与模式重建Git tree
 `417350395a289dd88538ac6cc031bf47c6e9f5d4`完全一致，没有改动原提示、评分或运行器。
@@ -14,9 +14,9 @@ python scripts/prepare_chartqa_native_toolkit.py --output /external/chartqa-tool
 ```
 
 默认仅规划；`--execute`只接受新目录，不覆盖失败记录。`--archive`使用官方归档，完整Git tree验证通过才认为源码取得。
-后续导入应设置`PYTHONDONTWRITEBYTECODE=1`，避免在原源码树写入缓存。 当前仅源码完整性已验证；原生模块依赖、数据/协议绑定、NPU视觉生成、原评分与研究侧接通仍未完成。
+后续导入应设置`PYTHONDONTWRITEBYTECODE=1`，避免在原源码树写入缓存。源码完整性、原始测试视图与选定三条原生视觉任务已验证；通用公开原生入口、环境锁/构建说明及最终研究侧交付核验仍未完成。
 模块预检经历缺少`tabulate`、`datasets`及ARM `decord`等依赖；Decord现已按原v0.6.0源码和两个原子模块版本在私有目录编译、安装并导入。
-私有FFmpeg4.1.11的`libavdevice`已补齐；旧链接失败及多余的`libpostproc`断言保留，不因此修改原源码或系统库。完整工具模块导入仍在补依赖，不能冒充原生评测成功。
+私有FFmpeg4.1.11的`libavdevice`已补齐；旧链接失败及多余的`libpostproc`断言保留，不因此修改原源码或系统库。完整工具模块导入现已通过，客户端禁用Torch设备后端自动加载且只发HTTP请求，实际模型推理仍在NPU服务执行。
 
 预设TSV地址在服务器被TLS校验判定证书过期，未关闭校验。复用已固定校验的HF原测试Parquet，使用以下无损存储适配入口：
 
@@ -28,6 +28,11 @@ python scripts/prepare_chartqa_original_view.py --source-file /external/ChartQA/
 
 全部2500条的问题、完整参考答案列表、原顺序、类别及图像原字节已在服务器逐项比对通过。
 `ChartQA_HF_ORIGINAL_TEST`只是工具读取格式视图的名称，不是新数据集，也不声称字节等同于工具发布的预设TSV。生成视图包含原始数据，必须留在外部私有目录，不能提交仓库。
+
+已验证样本为原始位置0/1/2，三条均属于原类别0；Qwen3.5-9B BF16/TP1显式非思考，采用原API封装默认2048生成预算。
+提示token为549/549/547，完成token为3/5/2，均stop，原relaxed
+accuracy为66.67%。独立审计确认原图像像素、原工具编码后的实际HTTP消息、原问题/参考、响应、用量及原评分一致；审计没有模型或付费judge调用。
+这不是完整2500题或其他类别的质量结论，不是性能结果；公开原生执行入口和环境复现说明还需补齐，故来源总勾保持未完成。
 
 ## LongMemEval-V2 官方多模态记忆任务（原始准备与负对照已验证，整项未完成）
 

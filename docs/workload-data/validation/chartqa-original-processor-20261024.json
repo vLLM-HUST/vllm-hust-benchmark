@@ -1,5 +1,27 @@
 {
   "source_id": "CHARTQA",
+  "initial_processor_snapshot_scope": "Original top-level CPU processor fields are frozen historical evidence; native_followup_20261026 records the later actual NPU visual execution",
+  "native_followup_20261026": {
+    "status": "SELECTED_ORIGINAL_VISUAL_TASKS_AND_TOOLKIT_SCORER_INDEPENDENTLY_AUDITED_NOT_SOURCE_DELIVERY",
+    "original_positions": [0, 1, 2],
+    "selected_category_values": [0, 0, 0],
+    "model": "Qwen3.5-9B BF16 TP1",
+    "model_chat_template_kwargs": {"enable_thinking": false},
+    "official_api_wrapper_default_budget": 2048,
+    "prompt_tokens": [549, 549, 547],
+    "completion_tokens": [3, 5, 2],
+    "finish_reasons": ["stop", "stop", "stop"],
+    "original_relaxed_accuracy_percent": 66.66666666666666,
+    "source_images_match_native_input_pixels": true,
+    "saved_wire_payload_matches_original_toolkit_encoder": true,
+    "independent_audit_new_model_calls": 0,
+    "paid_judge_calls": 0,
+    "source_checkbox_eligible": false,
+    "public_native_entry_and_environment_lock_pending": true,
+    "server_native_receipt": "chartqa-native-original-first3-32050-001/receipt-private.json",
+    "server_independent_audit": "chartqa-native-first3-independent-audit-32050-001/receipt-public.json",
+    "raw_payloads_published": false
+  },
   "followup_toolkit_20261026": {
     "status": "FIXED_ORIGINAL_TOOLKIT_TREE_VERIFIED_NOT_NATIVE_EXECUTION",
     "repository": "https://github.com/open-compass/VLMEvalKit",
@@ -11,7 +33,7 @@
     "native_model_calls": 0,
     "source_checkbox_eligible": false,
     "source_preparation_entry": "scripts/prepare_chartqa_native_toolkit.py",
-    "module_import_preflight": "Official decord built/imported; full VLMEvalKit import next stopped at rouge_score. Remaining dependencies being completed; no fake module or source patch. Client-only Torch backend auto-loading disabled, no CPU model inference or serving environment changes.",
+    "module_import_preflight": "Full original toolkit dataset/API imports and selected native visual calls now passed after dependency completion; no fake module or source patch. Client-only Torch backend auto-loading disabled, no CPU model inference or serving environment changes. Dependency lock and reproducible public environment entry still pending.",
     "client_compatibility_constraints": "datasets4.8.5, huggingface_hub1.33.0, pyarrow22.0.0 with inherited numpy1.26.4; initial incompatible candidates removed only from this client environment, serving environment unchanged",
     "decord_source": {
       "revision": "6a3617cef035535193f390f86399dde139fa2a53",
