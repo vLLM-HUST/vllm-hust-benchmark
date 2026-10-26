@@ -1,0 +1,152 @@
+# Prespecified bounded MCQ quality gate for Issue #23
+
+No quality candidate outputs were consulted when selecting questions, inputs,
+packing, answer parser or acceptance conditions. This package is CPU preparation
+only; hardware collection belongs to root and has not been performed here.
+
+The frozen plan digest is
+`32b9464fb1f332263932db3b4e5a5278ee267a77d100f5ca0d6be4158b589282`.
+The canonical benchmark checkout is `55181feb086af61c1cb953225ebe7e70167f77bb`.
+Navigation followed its `DATA_INDEX.md`, generated collection index and
+`reports/vllm-hust-midterm-20261019/README.md` to the existing aligned MMLU
+archive and its original 200-ID selection. No historical result metrics are
+substituted for fresh native/raw/group controls.
+
+## Exact public task and gold provenance
+
+The dataset is [MMLU-Pro at fixed revision b189ec7](https://huggingface.co/datasets/TIGER-Lab/MMLU-Pro/tree/b189ec765aa7ed75c8acfea42df31fdae71f97be).
+The test/validation parquet SHA-256 values match the canonical adapter:
+`0e24a191921c2f453518a537a8b2117bd137e7714d4ef1565e9ba06c1ecb9ad8` and
+`139423c23722e480c807ac4a191409a710cfce4eba744c1d641cf88e730e2078`.
+The selection-ID bytes have SHA-256
+`798ca7c0c70b98eacc45800a8679cf2283c2ae2ceade5b778d77b60a9ad138fe`;
+the unchanged 200 materialized prompts have SHA-256
+`fb79b6fa98f232282a948e4a17f404f80c03dc2bae05af57b95b9cc0651b3506`.
+
+For each selected ID, preparation looked up the actual public question row,
+verified gold letter/index/options, then reconstructed the entire original
+five-shot prompt from its five validation examples and target question.
+Every reconstructed prompt matches the archived bytes exactly. The upstream
+instruction was recovered from the existing prompt and its known original
+digest verified before use. `gold-source-rows.jsonl` and per-case source-row
+hashes retain the exact gold mapping. Questions and answers were not generated
+or chosen after inspecting outputs. Existing source license/attribution remains
+with the canonical adapter; these local raw question artifacts are not an
+authorization to republish an unrelated corpus wholesale.
+
+The fixed subset contains 200 questions across all 14 subjects. It uses real
+ground-truth multiple-choice correctness, not output text equality, apparent
+fluency or a model judging its own answers. It is a named subset, not the full
+MMLU-Pro leaderboard protocol.
+
+## Frozen inputs and admission
+
+Canonical Hugging Face `AutoTokenizer.apply_chat_template` rendered the local
+Qwen3.5 template with `enable_thinking=False`, `add_generation_prompt=True`;
+encoding used `add_special_tokens=False`. Result: 280,865 prompt tokens total,
+exactly the canonical historical total; individual lengths 918–2,495. The
+tokenizer/template files and package versions are hashed/recorded in plan.json.
+Preparation imported torch/torch_npu incidentally through this environment's
+tokenizer dependencies, but called no device, tensor or model operation.
+The initial Arrow import failed because of NumPy1/2 mismatch; that failed log
+is retained. Successful preparation used the existing separate CPU Arrow
+reader process and the existing inference tokenizer environment.
+
+Packing preserves original selection order: 25 batches of eight cases, with
+maximum total prompt tokens 15,931. Every prompt plus the 2,048 output-token cap
+fits max-model-len 16,384. No prompt or output is silently shortened.
+
+Each fresh runtime uses an actual `InprocClient`. For every batch, admit its
+first case alone. Step the coordinator until that request has exactly one
+output token; then enqueue the other seven frozen cases before the next step.
+The trigger reads real scheduler state because `LLM.enqueue` uses FINAL_ONLY
+client output. If the seed finishes at its first token, retain that fact and
+release peers; that batch may fail the separate mixed-P/D coverage gate. No
+case substitution, retry or HTTP timing decision is allowed. Fully drain each
+batch before the next. Internal IDs bind to external IDs through real output
+processor state, never string parsing. Returned prompt IDs are verified.
+
+All arms use temperature 0, seed 42, max_tokens 2048, EOS enabled, ordinary
+worker classes and no full-vocabulary numerical capture. The existing CoT
+prompts require the original output budget; replacing it with 8 or 16 tokens
+would change the quality task. Native controls retain standard chunked prefill;
+raw/group MuxPD disable it by design. Other common runtime settings match.
+Group-compatible `enable_npugraph_ex=False` and `enable_static_kernel=False`
+are explicit in **all** three configurations, so this is a separately recorded
+common compiler configuration rather than a claim about all compiler modes.
+
+## Acceptance fixed before collection
+
+Run two fresh native controls, raw MuxPD and grouped MuxPD, each on the same
+200 cases and fixed packing. Ordinary native runtime sources, plugin source,
+producer digest, interpreter/package versions and recorded worker environment
+must match. Existing dirty trees are bound by exact git-diff bytes/digest and
+modified/untracked file digests; unrelated changes are not reverted. Native
+control launch settings must be identical; differences
+between native and candidate are restricted to the declared scheduler/worker
+and chunked-prefill selection. The supplied scorer rejects unmanifested or
+differing dirty state rather than assuming a commit identifies executed bytes.
+
+The deterministic answer parser is the copied, hashed canonical adapter's
+three-stage A–J extraction, with no random guessing. Only an in-range letter
+matching the public gold answer is correct. Missing requests, runtime/API
+errors, invalid/out-of-range answers and output-cap truncations score wrong.
+All 200 cases must finish without runtime error or truncation in both controls
+and the candidate; a truncated final output fails completion even if it
+contains an earlier parsable answer.
+
+The quality veto is strict: **one candidate wrong answer on any case both
+native controls answered correctly fails**. Improvements on other cases cannot
+compensate. Candidate total correct must additionally be at least the lower
+native control total. A vacuous empty both-native-correct set is rejected.
+
+`bounded_answer_quality_gate_passed` applies only to these answer/completion
+checks. `full_frozen_plan_passed` additionally requires a hashed actual
+schedule/retirement receipt showing P layer progress and D token retirement in
+the same transaction in **each of the 25 mixed batches**. This stricter coverage
+interpretation is frozen here before device collection. It does not claim
+physical simultaneous kernels. All uncovered batches are reported and cannot
+be hidden by successful answer scores.
+
+The report includes all four correctness transitions for candidate versus each
+native control, native versus native, and grouped versus raw. It retains case
+IDs, invalid extractions, incomplete cases, all answers and token IDs. Native
+variability is disclosed; it does not relax the stable-correct veto after the
+fact.
+
+## Confidence and limited power
+
+Report exact binomial 95% intervals for each accuracy and a conservative paired
+difference interval obtained from simultaneous exact bounds on the two
+discordant probabilities. Report a one-sided 95% upper bound on the candidate
+new-error proportion among both-native-correct cases. Even zero new errors
+among 200 such cases would only bound that proportion near 1.49% under the
+binomial assumptions; the actual stable-correct denominator may be smaller.
+
+This deterministic selected subset does not by itself supply random-sampling
+coverage for all MMLU-Pro or arbitrary text. These intervals are descriptive
+under their stated exchangeability assumptions. The exact McNemar p-value is
+diagnostic only: nonsignificance cannot establish equivalence. Passing this
+gate does not establish arbitrary-text semantic equivalence, token/logit
+identity or eliminate rare numerical errors. Report the bounded result with
+that limitation intact; retain the numerical diagnostics separately.
+
+## CPU verification and root-owned execution
+
+`run_quality.py dry-run` validates input hashes and launch arguments without
+importing vLLM. `run_quality.py run` is the explicit device-owning action; this
+agent has not invoked it. Root's controlled supervisor should copy the frozen
+directory, scripts, execution identity manifest and engine arguments into each
+attempt and preserve failure/cleanup receipts. Do not use these observed runs
+as latency or throughput benchmarks.
+
+```bash
+python run_quality.py dry-run --frozen frozen --plan-sha256 32b9464fb1f332263932db3b4e5a5278ee267a77d100f5ca0d6be4158b589282 --role native --engine-args native-engine-args.json
+python score_quality.py --frozen frozen --native1 /N1/run.json --native2 /N2/run.json --candidate /RAW/run.json --output /NEW/raw-quality.json
+python score_quality.py --frozen frozen --native1 /N1/run.json --native2 /N2/run.json --candidate /GROUP/run.json --raw-reference /RAW/run.json --output /NEW/group-quality.json
+```
+
+Synthetic tests exercise the veto despite offsetting improvements, native
+variability/floor, invalid/error/truncation scoring, frozen gold/token packing,
+real receipt gating, provenance rejection, and FINAL_ONLY seed admission with
+live and immediately finished seeds. These tests are not measured model data.

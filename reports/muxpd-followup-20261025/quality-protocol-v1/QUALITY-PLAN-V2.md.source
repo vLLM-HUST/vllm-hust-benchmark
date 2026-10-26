@@ -1,0 +1,39 @@
+# Uniform 8192-token capacity revision before candidate quality collection
+
+This version supersedes input-plan digest
+`32b9464fb1f332263932db3b4e5a5278ee267a77d100f5ca0d6be4158b589282` solely for
+new quality collection. The old frozen directory, execution identity, producer
+bytes and native attempt remain intact.
+
+Root observed two `finish_reason=length` outputs among the first 24 finished
+cases of `native-quality-hccl-true-01` at the original 2048-token cap. Because
+the prespecified gate requires every control and candidate case to finish
+without truncation, that native-only attempt cannot qualify. Root is preserving
+and terminating that attempt. This is a failed output-capacity design, not a
+measured plugin quality failure. No candidate quality outputs had been
+collected when root authorized this revision.
+
+`frozen-v2` retains exactly the same 200 cases, gold labels, raw prompts,
+thinking-false token IDs, 25 fixed batches, seed-first admission, parser and
+acceptance conditions. All source-file hashes are unchanged. No case is
+selected, removed or replaced because of its native result. Truncated outputs
+remain wrong/incomplete; the scoring rule is not relaxed.
+
+For every arm, uniformly change `max_tokens` from 2048 to 8192. The longest
+prompt is2495 tokens, so maximum prompt+output is10687, below max-model-len16384.
+The coordinator bound becomes215300 steps and collection bound10800 seconds;
+root's outer process bound is11100 seconds. Temperature0, seed42, EOS behavior,
+other runtime settings and all acceptance gates remain unchanged.
+
+Both native controls, raw and grouped candidates must run fresh under the new
+plan. The first24 old outputs cannot be reused as v2 control data. The unchanged
+driver/scorer binds every run to its plan digest and will reject cross-version
+mixing. Core/Ascend/plugin identity, exact existing dirty-build identity,
+environment matching, per-batch mixed-P/D receipts, stable-native-correct veto,
+aggregate floor and confidence limitations remain as documented in
+`QUALITY-PLAN.md`.
+
+This is explicitly an output-budget revision informed by a failed native-only
+pilot, before candidate outcomes. It is not a claim that the original capacity
+choice passed, or that8192 guarantees completion. Further truncations would
+still fail this version's unchanged completion gate.
