@@ -7,6 +7,42 @@ ROOT = Path(__file__).resolve().parents[1]
 RECEIPT = "docs/workload-data/validation/ultrachat-original-continuation-20261026.json"
 
 
+def test_openthoughts_sampled_corpus_delivery_does_not_upgrade_budget_exhaustion_to_quality():
+    path = "docs/workload-data/validation/openthoughts3-native-delivery-20261027.json"
+    receipt = json.loads((ROOT / path).read_text("utf-8"))
+    assert receipt["source_checkbox_eligible"] is True
+    assert (
+        receipt["delivery_kind"]
+        == "original_training_corpus_continuation_not_independent_quality_benchmark"
+    )
+    native = receipt["native_profile"]
+    assert native["saved_generations"] == 9
+    assert native["declared_output_token_budget"] == 32768
+    assert native["all_saved_results_budget_exhausted_not_final_answers"] is True
+    assert native["valid_generations_rerun"] == 0
+    assert native["earlier_client_timeout_attempts_preserved"] == 1
+    assert [
+        (p["domain"], p["shard"], p["original_rows"], p["finish_reasons"])
+        for p in native["profiles"]
+    ] == [
+        ("code", 0, [0, 1, 2], {"length": 3}),
+        ("math", 25, [0, 1, 2], {"length": 3}),
+        ("science", 110, [0, 1, 2], {"length": 3}),
+    ]
+    consumer = receipt["provider_and_research"]
+    assert consumer["full_selected_original_index_rows"] == 30000
+    assert consumer["installed_payloads_byte_equal"] == 46
+    assert consumer["fixed_research_roundtrips"] == 18
+    assert receipt["quality_scored"] is False
+    assert receipt["independent_quality_benchmark_claim"] is False
+    assert receipt["whole_120_shard_or_1point2M_execution_claim"] is False
+    ledger = json.loads(
+        (ROOT / "docs/workload-data/dataset-validation-status.json").read_text("utf-8")
+    )
+    assert ledger["delivery_inventory"]["OPENTHOUGHTS3"]["checked"] is True
+    assert ledger["delivery_inventory"]["OPENTHOUGHTS3"]["delivery_receipt"] == path
+
+
 def test_ultrachat_all_original_positions_not_a_shortened_live_episode():
     receipt = json.loads((ROOT / RECEIPT).read_text("utf-8"))
     native = receipt["native_profile"]

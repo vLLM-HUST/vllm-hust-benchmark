@@ -307,12 +307,24 @@ def test_checklist_covers_registered_sources_once():
         for line in markdown.splitlines()
         if line.startswith("|")
     ]
-    for row in rows:
-        marker = "x" if row["checked"] else " "
-        assert (
-            sum(cells[:2] == [f"[{marker}]", row["source_id"]] for cells in table_rows)
-            == 1
+    # Frozen sources preserves old read/prepare stages. Current delivery boxes
+    # must follow the unique authoritative inventory, not that historical array.
+    inventory = ledger["delivery_inventory"]
+    current_rows = [
+        cells for cells in table_rows if len(cells) == 3 and cells[0] in inventory
+    ]
+    assert len(current_rows) == len(inventory) == 118
+    assert len({cells[0] for cells in current_rows}) == 118
+    for source_id, item in inventory.items():
+        (current,) = [cells for cells in current_rows if cells[0] == source_id]
+        marker = (
+            "—"
+            if item["status"] == "CLASSIFICATION_ONLY"
+            else "[x]"
+            if item["checked"]
+            else "[ ]"
         )
+        assert current[1].startswith(marker)
 
 
 def test_summary_counts_match_actual_checkboxes():
