@@ -905,7 +905,48 @@ python scripts/prepare_jsonschemabench_author_source.py --author-root /private/a
 已有生成内容后的错误仍报错。原失败保留，不改schema，不把不支持的题换成支持的题。
 WashingtonPost全38题已完成作者bench/evaluator；全部原schema、few-shot消息、保存输出和检查点逐条一致。
 30题声明支持、8题明确编译不支持，27条生成符合原validator，负面结果保留。
-独立保存结果重评不调用模型；原打印bootstrap未固定种子，重评固定seed0，不声称置信区间与旧打印逐字一致。 其余配置及default的完整原生验证、官方数据适配和工件/研究消费仍待收口。
+独立保存结果重评不调用模型；原打印bootstrap未固定种子，重评固定seed0，不声称置信区间与旧打印逐字一致。
+其余配置/default原生验证与新准备入口CI收口待补；官方原字段接入及99处研究回查已完成，详见下文。
+
+#### 官方原始schema行准备与研究接入（不代表来源交付）
+
+其余9具名配置已保存20条结果，后一题被服务端单后端保护拒绝：已初始化xgrammar，而auto为该请求选择outlines。
+此为配置冲突，不记作schema不支持；没有改服务配置或重启。20条输出及旧失败均保留，待配置决策和兼容性核查后继续原位置。
+
+官方数据准备及固定研究消费者回查已完成：33文件的19,100个原始配置/split视图行全字段、原ID及原顺序逐一比较，
+公共/研究侧99处原位置回查一致。复用已成功CI的283f19c4精确44文件工件；不等于新准备入口已由新CI发布，更不等于原生验证完成。
+无默认研究依赖升级、原数据入Git或研究特征迁入。19,100为视图行，不是独立题或已推理题数。
+
+安装本仓数据包的可选data依赖后，在服务器运行：
+
+```bash
+python scripts/prepare_jsonschemabench_original_records.py \
+  --data-root /private/jsonschemabench-official/data \
+  --output /private/fresh-jsonschemabench-reference-index
+```
+
+默认准备全部33个Parquet文件；可用 `--files Github_easy/test-00000-of-00001.parquet` 显式选原文件。 输出包含
+`prepared/workload.sqlite`、固定文件/映射清单及 `config.private.json`，均与外置原文件配合使用。
+
+```python
+from pathlib import Path
+from vllm_hust_workload_data.pipeline import prepared_rows
+from vllm_hust_workload_data.consumer import resolve_input
+
+database = Path("/private/fresh-jsonschemabench-reference-index/prepared/workload.sqlite")
+reference = next(prepared_rows(database))
+record = resolve_input(database, reference["record_id"],
+                       data_root=Path("/private/jsonschemabench-official/data"))
+original_schema_text = record.task["input"]["json_schema"]
+original_unique_id = record.task["task_id"]
+```
+
+保留原序列化json_schema字符串及unique_id；原文件路径区分配置/split，行号区分位置。
+相同unique_id不跨视图或行去重，也不新造原任务ID。没有参考目标JSON，不把schema改成prompt； 执行仍使用作者Dataset解析、原few-shot
+formatter及bench/evaluator。旧3schema默认入口不变，官方Parquet视图显式准备。
+
+已核实的另一种 `Grammar error:` 同样要求结构化BadRequestError400且在任何内容/usage之前出现，
+按作者Outlines编译异常处理规则记录UNSUPPORTED_SCHEMA，保留完整私有原因；未知错误和单后端配置冲突不能混入。
 
 断点复用要求先独立核实原请求/进程已经终止，不能仅凭回执或观察超时推断。原源版本、数据摘要、分区/选样、 模型、预算和本地地址必须一致；只接受“全部已返回输出构成连续前缀、最后一题明确失败”的旧运行。
 在新的同配置命令上添加以下参数，并使用全新输出目录：

@@ -123,11 +123,18 @@ class APIError(Exception):
         super().__init__("inert structured compiler error")
 
 
-def test_streamed_explicit_compiler_rejection_is_not_an_arbitrary_api_failure():
+@pytest.mark.parametrize(
+    "message",
+    [
+        "Unsupported JSON Schema structure INERT\nMake sure it is valid to the JSON Schema specification and check if it's supported by Outlines.",
+        "Grammar error: inert compiler fixture, no dataset payload",
+    ],
+)
+def test_streamed_explicit_compiler_rejection_is_not_an_arbitrary_api_failure(message):
     body = {
         "type": "BadRequestError",
         "code": 400,
-        "message": "Unsupported JSON Schema structure INERT\nMake sure it is valid to the JSON Schema specification and check if it's supported by Outlines.",
+        "message": message,
     }
     engine, _ = fixture(failure=APIError(body), stream_failure=True)
     result = output()
@@ -139,6 +146,10 @@ def test_streamed_explicit_compiler_rejection_is_not_an_arbitrary_api_failure():
         {**body, "code": "400"},
         {**body, "type": "InternalServerError"},
         {**body, "message": "unrelated failure"},
+        {
+            **body,
+            "message": "V1 structured outputs only supports one backend per engine.",
+        },
     ]:
         engine, _ = fixture(failure=APIError(changed), stream_failure=True)
         with pytest.raises(APIError):

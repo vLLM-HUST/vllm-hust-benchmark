@@ -34,9 +34,16 @@ def explicit_schema_rejection(error):
         and type(detail.get("code")) is int
         and detail["code"] == 400
         and isinstance(message, str)
-        and message.startswith("Unsupported JSON Schema structure ")
-        and "\nMake sure it is valid to the JSON Schema specification and check if it's supported by Outlines."
-        in message
+        and (
+            (
+                message.startswith("Unsupported JSON Schema structure ")
+                and "\nMake sure it is valid to the JSON Schema specification and check if it's supported by Outlines."
+                in message
+            )
+            # Publisher Outlines compilation likewise records compiler
+            # exceptions as UNSUPPORTED_SCHEMA, not a successful generation.
+            or message.startswith("Grammar error:")
+        )
     )
 
 
