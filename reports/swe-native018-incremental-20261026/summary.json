@@ -1,0 +1,73 @@
+{
+  "schema": "swe-incremental-task-observation/v1",
+  "run_id": "swe018-first-missing-r3",
+  "dataset": "SWE-bench-Pro V1",
+  "total_dataset_tasks": 731,
+  "new_task_attempts": 1,
+  "recorded_official_resolved": 0,
+  "recorded_official_denominator": 1,
+  "official_unresolved_grading": 0,
+  "full_dataset_acceptance": false,
+  "model": "Qwen3.5-35B-A3B",
+  "vllm": "0.18.0",
+  "vllm_ascend": "0.18.0",
+  "qualification": {
+    "new_calls": 0,
+    "reused_calls": 5,
+    "source_run": "swe018-single-agent-r1"
+  },
+  "agent": {
+    "status": "Submitted",
+    "agent_submitted": true,
+    "elapsed_seconds": 316.40756527893245,
+    "model_calls": 36,
+    "patch_bytes": 160235,
+    "patch_sha256": "3d516039d17a5bc20218bfdeab92688213a33ca719e59348ea4a3a263e669898",
+    "container_cleanup_exit_code": 0
+  },
+  "budget": {
+    "step_limit": 100,
+    "wall_seconds": 1200,
+    "max_tokens": 4096,
+    "temperature": 0,
+    "seed": 0,
+    "thinking": false,
+    "automatic_retries": 0
+  },
+  "grading": {
+    "official_result": false,
+    "process_exit_code": 0,
+    "model_calls": 0,
+    "source_files": 10,
+    "parsed_test_counts": {
+      "FAILED": 1
+    },
+    "patch_application_attested": false,
+    "failure_stage": "before-all hook",
+    "limitation": "Submission adds two text fixtures already present in the immutable grading image. Original git-apply status and stderr were not retained; official false does not independently prove testing of the applied patch.",
+    "patch_modified": false,
+    "grading_reexecuted": false
+  },
+  "prior_infrastructure_failure": {
+    "run_id": "swe018-first-missing-r2",
+    "model_calls": 0,
+    "cause": "Initial upstream fixture rejection before model construction; not another scored task"
+  },
+  "images": [
+    "sha256:88620382594f6e8532a3ce3d6078a57b5a0f7f1df21d8c945f9225180b198002"
+  ],
+  "evidence_sha256": {
+    "execution-binding.json": "b6a6f12e6819b987581f50c04e09d5f2a2bd9198eb82d2a6a2ceb274e21cd00d",
+    "settings.json": "98d78ecb61ffaeb0a33613c93b6eeab0ecfa2d8222bd0d2d97ca7c138bd376a0",
+    "run-exit.json": "46318d5ddb0be9d76903a66150535e160e6082da9d47c27e0ad2cf2e945deba5",
+    "grade-exit.json": "cb06b3dc3e9adccb6c154ce103492ee1139b826eaaf216fc8860199ea64c8724",
+    "agent/batch-report.json": "46f52ed9482a8bf7b8173e1e7b9f509e6c2099a6c4a5ec3f2b807ca342520d15",
+    "agent/task-000/report-private.json": "6f38ad6545c59c357d07316f2ba37cc3c4e5be234d84501d02d8d6b256a2b733",
+    "agent/task-000/trajectory-private.json": "b7c03def9b570aa95f935d8c6e3eac4ce41bfe740b64a6273cd5f77700b2eee8",
+    "agent/task-000/patch-private.diff": "3d516039d17a5bc20218bfdeab92688213a33ca719e59348ea4a3a263e669898",
+    "grade/grading-status.json": "a4a370efa97aaff1a3d540742714b86cbb80cfe51d0c0ce610f9779dcc0d7cf8",
+    "grade/eval_results.json": "43e6628221cb5c25abe533cfcabaf52340e9d0f2ad8106ed422abc4bfb2471b6",
+    "grade/source-and-patch-bindings.json": "459af53566bcaff96bc15a901f624689df74be5837879f09e754c2751f9f29d3"
+  },
+  "private_task_answers_patch_or_trajectory_included": false
+}

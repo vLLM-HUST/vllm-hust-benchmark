@@ -1,0 +1,113 @@
+{
+  "status": "independent_review_complete_with_patch_application_limitation",
+  "source_review_sha256": "57b27f0d74ba5a0bdd97906b4514e44714dda23e5de94d34e4c601ea557ef9ab",
+  "agent": {
+    "submitted": true,
+    "model_calls": 36,
+    "elapsed_seconds": 316.40756527893245,
+    "finish_reasons": {
+      "stop": 36
+    },
+    "actual_models": {
+      "qwen3.5-35b": 36
+    },
+    "patch_bytes": 160235,
+    "patch_sha256": "3d516039d17a5bc20218bfdeab92688213a33ca719e59348ea4a3a263e669898",
+    "changed_source_paths": [
+      "src/controllers/admin/cache.js",
+      "src/meta/index.js",
+      "src/posts/cache.js",
+      "src/posts/parse.js",
+      "src/socket.io/admin/cache.js",
+      "src/socket.io/admin/plugins.js",
+      "src/user/index.js",
+      "src/webserver.js"
+    ],
+    "container_cleanup_exit_code": 0
+  },
+  "official_grading": {
+    "run_exit_code": 0,
+    "grade_exit_code": 0,
+    "recorded_resolved": false,
+    "recorded_unresolved": [],
+    "model_calls": 0,
+    "parsed_test_counts": {
+      "FAILED": 1
+    },
+    "failure_scope": "root before-all hook, no individual tests completed",
+    "error": "TypeError: require(...).getOrCreate is not a function",
+    "location": "test/mocks/databasemock.js:197:35",
+    "unchanged_immutable_image": "sha256:88620382594f6e8532a3ce3d6078a57b5a0f7f1df21d8c945f9225180b198002"
+  },
+  "patch_chain": {
+    "saved_patch_equals_official_input_snapshot": true,
+    "official_source_hashes_match": true,
+    "official_binary_strip_exactly_reproduced": true,
+    "stripped_bytes": 221,
+    "effective_patch_bytes": 160014,
+    "effective_patch_sha256": "28b6f288642c23cef444fef4a2b78528568f8a6451c4750c91bcc3eee9339096",
+    "fixture_sections": [
+      {
+        "path": "appendonlydir/appendonly.aof.1.base.rdb",
+        "section_bytes": 221,
+        "new_file": true,
+        "binary_no_payload": true,
+        "added_text_bytes": 0,
+        "added_text_sha256": null
+      },
+      {
+        "path": "appendonlydir/appendonly.aof.1.incr.aof",
+        "section_bytes": 150135,
+        "new_file": true,
+        "binary_no_payload": false,
+        "added_text_bytes": 134202,
+        "added_text_sha256": "a20cff8d984d82dd155773d94c0346280502916dcb0c9a94c2c51b98f234b817"
+      },
+      {
+        "path": "appendonlydir/appendonly.aof.manifest",
+        "section_bytes": 305,
+        "new_file": true,
+        "binary_no_payload": false,
+        "added_text_bytes": 88,
+        "added_text_sha256": "ca465c5845ad4d4c0a2b4cda8853efeb9423cb4242a4eaaa5ecbaa00a4e75492"
+      }
+    ],
+    "fixture_inclusion_origin": "Agent submission at step36 explicitly ran git add -A && git diff --cached; runner saved the submitted result unchanged. Runner did not independently add the files.",
+    "upstream_fixture_effect": "Binary RDB section removed by original official strip_binary_hunks. Two text fixtures remain as new-file additions; same immutable grading image already contains these untracked paths. git reset --hard and checkout do not remove these unrelated untracked files.",
+    "application_conflict_inference": "Source and fixed image imply git apply will reject the already-existing new-file paths. Plain git apply without --reject does not apply the remaining source hunks on failure. Original entryscript has no errexit or apply-status check and proceeds to tests.",
+    "actual_application_exit_or_stderr_retained": false,
+    "missing_evidence_scope": "Official Docker evaluator removes the container and only preserves test stdout/stderr; git apply stdout/stderr are outside redirected test logs. No original apply exit code or final graded source snapshot found.",
+    "do_not_claim": "The observed getOrCreate error alone cannot prove Agent patch was applied; original base export also lacks that method."
+  },
+  "classification": "Preserve immutable official false/unresolved[] and known source-level export defect. Do not assert that the official test failure independently validates the applied Agent patch; application is not attested and source implies fixture collision. This is a grading-chain limitation attached to the recorded negative, not a new score or selective regrade.",
+  "recommendation": "No mutation or rerun of this saved patch. Retain r2 zero-call failure and r3 admission addendum. Before later tasks using fixture allowlists, freeze an explicit prospective treatment of unchanged upstream artifacts and capture patch-application exit/log so this ambiguity is not repeated.",
+  "raw_evidence_sha256": {
+    "agent/task-000/trajectory-private.json": "b7c03def9b570aa95f935d8c6e3eac4ce41bfe740b64a6273cd5f77700b2eee8",
+    "agent/task-000/report-private.json": "6f38ad6545c59c357d07316f2ba37cc3c4e5be234d84501d02d8d6b256a2b733",
+    "agent/task-000/patch-private.diff": "3d516039d17a5bc20218bfdeab92688213a33ca719e59348ea4a3a263e669898",
+    "grade/instance_NodeBB__NodeBB-00c70ce7b0541cfc94afe567921d7668cdc8f4ac-vnan/agent_patch.diff": "3d516039d17a5bc20218bfdeab92688213a33ca719e59348ea4a3a263e669898",
+    "grade/instance_NodeBB__NodeBB-00c70ce7b0541cfc94afe567921d7668cdc8f4ac-vnan/workspace/patch.diff": "28b6f288642c23cef444fef4a2b78528568f8a6451c4750c91bcc3eee9339096",
+    "grade/instance_NodeBB__NodeBB-00c70ce7b0541cfc94afe567921d7668cdc8f4ac-vnan/workspace/entryscript.sh": "a9d811aa3ca4442c043461b118f722b5b8f3d66c7bc8c3ce05331d9df812cc79",
+    "grade/instance_NodeBB__NodeBB-00c70ce7b0541cfc94afe567921d7668cdc8f4ac-vnan/workspace/output.json": "73947d6cc749bb7ca08f487998295e130d7dd897fed24c973558f463ccbed8c4",
+    "grade/instance_NodeBB__NodeBB-00c70ce7b0541cfc94afe567921d7668cdc8f4ac-vnan/workspace/stdout.log": "78991d25bfc79f12ffd8934ed4c7c5d9e170e8e4b6945b7c27894aa6a434a1ee",
+    "grade/instance_NodeBB__NodeBB-00c70ce7b0541cfc94afe567921d7668cdc8f4ac-vnan/workspace/stderr.log": "4d0649680f1530d06caec3c0b5cc9f70a8cd064af50a47a906455c136c218c20",
+    "grade/source-and-patch-bindings.json": "459af53566bcaff96bc15a901f624689df74be5837879f09e754c2751f9f29d3",
+    "grade/command-private.json": "68048256dc42261349dd161d2246f702c0c785406247e0818abec21893b54e9f",
+    "grade/grading-status.json": "a4a370efa97aaff1a3d540742714b86cbb80cfe51d0c0ce610f9779dcc0d7cf8",
+    "grade/eval_results.json": "43e6628221cb5c25abe533cfcabaf52340e9d0f2ad8106ed422abc4bfb2471b6",
+    "execution-binding.json": "b6a6f12e6819b987581f50c04e09d5f2a2bd9198eb82d2a6a2ceb274e21cd00d",
+    "settings.json": "98d78ecb61ffaeb0a33613c93b6eeab0ecfa2d8222bd0d2d97ca7c138bd376a0"
+  },
+  "service_finalization": {
+    "status": "completed",
+    "sessions_drained": true,
+    "all_devices_released": true,
+    "service_exit_code": 0,
+    "sealed_files_verified": 12,
+    "receipt": "/root/swe018-first-missing-window-r1/receipt.json"
+  },
+  "model_calls_by_review": 0,
+  "grading_reexecutions": 0,
+  "patch_changed_by_review": false,
+  "private_task_patch_or_trajectory_exported": false
+}
