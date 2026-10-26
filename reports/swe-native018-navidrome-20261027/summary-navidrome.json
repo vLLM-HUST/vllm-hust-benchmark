@@ -1,0 +1,133 @@
+{
+  "schema": "swe-incremental-task-observation/v2",
+  "run_id": "swe018-repo-07-r1",
+  "task_identity_sha256": "950264e1659b10eb4a0149b6012713cf06d9d79784d9ce254b24b3fa49117ab4",
+  "dataset": "SWE-bench-Pro V1",
+  "total_dataset_tasks": 731,
+  "new_task_attempts": 1,
+  "recorded_official_resolved": 0,
+  "recorded_official_denominator": 1,
+  "official_unresolved_grading": 0,
+  "full_dataset_acceptance": false,
+  "model": "Qwen3.5-35B-A3B",
+  "vllm": "0.18.0",
+  "vllm_ascend": "0.18.0",
+  "benchmark_source_commit": "48c64d73fecccf0cfa9bf41086728dc5fed5904a",
+  "qualification": {
+    "new_calls": 0,
+    "reused_calls": 5,
+    "source_run": "swe018-single-agent-r1"
+  },
+  "agent": {
+    "status": "Submitted",
+    "agent_submitted": true,
+    "elapsed_seconds": 511.436102706939,
+    "model_calls": 53,
+    "patch_bytes": 9941,
+    "patch_sha256": "aaad074ebc0963d6728841f07d0c26e9f866f28a653d0994b556b43ff481d3b5",
+    "container_cleanup_exit_code": 0
+  },
+  "budget": {
+    "step_limit": 100,
+    "wall_budget_seconds": 1200,
+    "tool_timeout_seconds": 60,
+    "max_tokens": 4096,
+    "temperature": 0,
+    "seed": 0,
+    "thinking": false,
+    "http_timeouts": {
+      "connect": 180,
+      "read": null,
+      "write": 180,
+      "pool": 180
+    },
+    "automatic_retries": 0
+  },
+  "grading": {
+    "official_result": false,
+    "independently_recomputed_official_rule": false,
+    "process_exit_code": 0,
+    "model_calls": 0,
+    "source_files": 14,
+    "parsed_test_counts": {
+      "FAILED": 1
+    },
+    "test_count_scope": "Raw parser entries before official name-set scoring",
+    "unique_test_names": 1,
+    "official_test_coverage": {
+      "fail_to_pass": {
+        "expected": 1,
+        "passed": 0,
+        "not_passed": 1,
+        "missing": 0
+      },
+      "pass_to_pass": {
+        "expected": 0,
+        "passed": 0,
+        "not_passed": 0,
+        "missing": 0
+      }
+    },
+    "patch_application_attested": true,
+    "patch_applied": true,
+    "apply_exit_code": 0,
+    "state_capture": "complete",
+    "affected_paths": 7,
+    "pre_post_file_states_equal": false,
+    "after_graded_file_states_equal": true,
+    "patch_modified": false,
+    "grading_reexecuted": false,
+    "effective_patch_sha256": "aaad074ebc0963d6728841f07d0c26e9f866f28a653d0994b556b43ff481d3b5",
+    "original_official_binary_filter_preserved": true
+  },
+  "release": {
+    "status": "completed",
+    "sessions_drained": true,
+    "all_devices_released": true,
+    "service_exit_code": 0,
+    "seal_allowed": true
+  },
+  "window_plan_sha256": "bc22bbba5a7dec74c5d6d542ad0a34e74d7c324b60e12a054d9633e2b01ad6af",
+  "runtime_identity_sha256": "871ef0179ffc69dcc85c760b774f72509a302238475f5bde158828078358d768",
+  "task_container": {
+    "cpus": 2,
+    "memory": "4g",
+    "network": "swe-pro-mtu1400",
+    "allowed_initial_tracked": {
+      "image_id": "sha256:413024ddbfb9b1dd15c601e6ba3f87aa96056b0eedba2e3c137f018fde13d0e5",
+      "base_commit": "2f90fc9bd40e24afd900b5ee85426f32684b960b",
+      "files": {
+        "go.mod": {
+          "file_sha256": "ede973efecc610d19aa0a4715911b4e65d15e4b88623a3b9894a57a63d2dbad0",
+          "diff_sha256": "c707ff7a6cc87fc73bcc3deb7feca5a188a3f21b5809f3e49252476a14b81cdc"
+        }
+      }
+    }
+  },
+  "images": [
+    "sha256:413024ddbfb9b1dd15c601e6ba3f87aa96056b0eedba2e3c137f018fde13d0e5"
+  ],
+  "evidence_sha256": {
+    "execution_binding": "b6692f888aac7e7abf7fe0b211941f37b20c03e033ba90f163eaebee19dff74b",
+    "settings": "8c506e43a3c91477d6254c52cf2b11e00f7ab08da7d56383257af3684eee42b6",
+    "run_exit": "46318d5ddb0be9d76903a66150535e160e6082da9d47c27e0ad2cf2e945deba5",
+    "grade_exit": "cb06b3dc3e9adccb6c154ce103492ee1139b826eaaf216fc8860199ea64c8724",
+    "agent_report": "4c1b7c5c927afca0154e3770533c640e49c85fa9795656eb09949ac49c270520",
+    "trajectory": "715149a265b8b1ac93ec0c34479b60b1e12b7839df837cfe04a8d4f248c0c5e7",
+    "submitted_patch": "aaad074ebc0963d6728841f07d0c26e9f866f28a653d0994b556b43ff481d3b5",
+    "grading_status": "a9896f4d99a46fc36d90cc872d91e82892372d7c8fb01837901e1cc8edf61a0e",
+    "source_patch_bindings": "5f14d00b450dc139232ecf90ec57b8ffa469fc46b9b2e7e2d19bedd97e7de4d9",
+    "official_scores": "b933e19d97905bde52813d71e5e7d76f642368d4f62756cf47e171ab4e14e7e3",
+    "parsed_tests": "d3f8f2a3769fe4dea4a212424adb8b52a01faae7c222dcf9441fd3300665e00e",
+    "effective_patch": "aaad074ebc0963d6728841f07d0c26e9f866f28a653d0994b556b43ff481d3b5",
+    "service_release": "aa9799b39de5009ce2b39d150f2a003c9b477fea415947b647b7670330c9518c",
+    "derivation_source": "118d708a51cbeebdff49688a13ee3d87e48e723783a710d61b70ee9e6c28b5cc",
+    "hust-patch-apply.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "hust-patch-apply.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "hust-patch-apply.stderr": "9436ab00384d430f97c3adf37c95f24a413100d89a6b1868d765f68c8797d9b3",
+    "hust-patch-before.json": "2b856b9443974220c795a7b27f455631debfc6cb95016bd81f17fbe7f5715c6c",
+    "hust-patch-after.json": "3145d23f867e0897fe00e4ea61ef0ad6ecb91ff6c2561e98b2cf525be32452f0",
+    "hust-patch-graded.json": "b75e5900be5426a0145cf60f95c1dc7910c561ed00bb7e870f605690cbca9e0b"
+  },
+  "private_task_answers_patch_or_trajectory_included": false
+}
