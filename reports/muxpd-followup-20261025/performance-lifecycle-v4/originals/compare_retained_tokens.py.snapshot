@@ -1,0 +1,47 @@
+"""Compare saved arrays only; no rerun, scoring, runtime import or acceptance."""
+import hashlib
+import itertools
+import json
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[2]
+OUT = Path(__file__).resolve().parent
+LABELS = [('N1','perf-f7-native-sync-01'),('R1','perf-f7-raw-01'),('G1','perf-f7-group-01'),('G2','perf-f7-group-02'),('R2','perf-f7-raw-02'),('N2','perf-f7-native-sync-02')]
+
+def identity(path):
+    data=path.read_bytes()
+    return {'path':str(path),'bytes':len(data),'sha256':hashlib.sha256(data).hexdigest()}
+
+def compare_requests(left,right):
+    assert len(left)==len(right)
+    rows=[]
+    for index,(a,b) in enumerate(zip(left,right)):
+        assert (a['prompt'],a['stage'],a['requested_outputs'])==(b['prompt'],b['stage'],b['requested_outputs'])
+        x,y=a['token_ids'],b['token_ids'];assert len(x)==len(y)==a['requested_outputs']
+        diffs=[i for i,(u,v) in enumerate(zip(x,y)) if u!=v]
+        rows.append({'request_index':index,'stage':a['stage'],'prompt':a['prompt'],'outputs':len(x),'equal':not diffs,'differing_positions':len(diffs),'first_difference':None if not diffs else {'generated_token_index_zero_based':diffs[0],'generated_token_number_one_based':diffs[0]+1,'left_token_id':x[diffs[0]],'right_token_id':y[diffs[0]]}})
+    return rows
+
+def main():
+    runs={role:json.loads((ROOT/'runs'/label/'results/run.json').read_text()) for role,label in LABELS}
+    result={'schema':'muxpd-retained-performance-token-comparison-v1','scope':'All saved windows and corresponding request arrays. No new execution, task-quality, arbitrary-text correctness or numerical-causality claim. Mixed tokens that differ limit pure scheduling-cost attribution.','producer':identity(Path(__file__)),'inputs':{role:identity(ROOT/'runs'/label/'results/run.json') for role,label in LABELS},'all_role_pairs':[],'within_run_measured_repetitions':[]}
+    for (ra,_),(rb,_) in itertools.combinations(LABELS,2):
+        windows=[]
+        for a,b in zip(runs[ra]['windows'],runs[rb]['windows']):
+            assert (a['label'],a['workload'],a['warmup'])==(b['label'],b['workload'],b['warmup'])
+            rows=compare_requests(a['requests'],b['requests'])
+            windows.append({'label':a['label'],'workload':a['workload'],'warmup':a['warmup'],'all_requests_equal':all(r['equal']for r in rows),'requests':rows})
+        result['all_role_pairs'].append({'left':ra,'right':rb,'windows':windows})
+    for role,_ in LABELS:
+        windows=runs[role]['windows']; comparisons=[]
+        for i,j in [(2,4),(3,5)]:
+            rows=compare_requests(windows[i]['requests'],windows[j]['requests'])
+            comparisons.append({'left_window':f'w{i}','right_window':f'w{j}','workload':windows[i]['workload'],'all_requests_equal':all(r['equal']for r in rows),'requests':rows})
+        result['within_run_measured_repetitions'].append({'role':role,'comparisons':comparisons})
+    with (OUT/'retained-token-comparisons.json').open('x') as f:json.dump(result,f,indent=2);f.write('\n')
+    for pair in result['all_role_pairs']:
+        if pair['left'] in ('N1','R1','G1'):
+            print(pair['left'],pair['right'],[(w['label'],[(r['request_index'],r['first_difference'],r['differing_positions'])for r in w['requests']if not r['equal']])for w in pair['windows']if not w['all_requests_equal']])
+    print('within role repetition differences',[(r['role'],[(x['left_window'],x['right_window'])for x in r['comparisons']if not x['all_requests_equal']])for r in result['within_run_measured_repetitions']])
+
+if __name__=='__main__':main()

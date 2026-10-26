@@ -1,0 +1,28 @@
+{
+  "schema": "muxpd-offline-stall-supplement-v1",
+  "frozen_at": "2026-10-26T00:54:41.726709+00:00",
+  "status": "baseline-calibrated, frozen before candidate performance execution",
+  "baseline_seen": {
+    "path": "/root/workspace/muxpd-followup-20261025/runs/perf-f7-native-sync-01/results/run.json",
+    "sha256": "3617fae173f0f58ca4cc74bea17cecc31a9d0715e857756af5879bc94e16cce4"
+  },
+  "fixed_primary_plan": {
+    "path": "/root/workspace/muxpd-followup-20261025/performance/group-prefill-v1/group-plan-v1.json",
+    "sha256": "c5c7d4950148e5ab9574b260e9864ab5514ef008e24b1ee912a0bc99c05757cb"
+  },
+  "workload_change": false,
+  "original_metrics_retained": true,
+  "definitions": {
+    "scope": "All complete non-warmup long-P-ingress windows of every prescribed primary and separately named native-reference run; no window or stream selection by result.",
+    "streams": "All four stage=seed requests, each with all512 observed actor-delivered token arrivals.",
+    "full_window_max_gap_ms": "max(arrival_ns[i+1]-arrival_ns[i])/1e6 for every individual seed stream, i=0..510.",
+    "ingress_interval": "actual long-P request admit_ns through its first arrival_ns; verify four seed counts=32 at admission.",
+    "ingress_intersecting_gaps": "Consecutive seed arrival intervals [a,b] with b>longP.admit_ns and a<longP.first_arrival_ns. Retain each intersecting gap and report its maximum.",
+    "count_gt_100ms": "Count all individual seed gaps strictly greater than100000000ns; threshold reused from historical MuxPD every-token-gap SLO, not fitted to candidate output.",
+    "reporting": "Preserve all individual gaps/stream summaries and each process/window; descriptive ratios only. No primary metric replacement, acceptance gate, selected retries, pooled-token significance test, or HTTP/sustainable-capacity Goodput claim."
+  },
+  "motivation": "A single ingress affects about1/511 gaps per seed; P99 alone can omit its largest observed interruption. Native-sync control1 is already observed, so this is explicitly supplementary/calibration-informed rather than an untouched primary endpoint.",
+  "candidate_performance_seen": false,
+  "runtime_source_changes": false,
+  "protocol_sha256": "bb8b80a7eb01243016a637ebee8b459fc9c9c2ede5d3a237d5977d2bf6222ba2"
+}
