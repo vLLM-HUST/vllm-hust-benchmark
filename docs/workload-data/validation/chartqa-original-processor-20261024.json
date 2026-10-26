@@ -15,6 +15,14 @@
     "last_verified_runtime_process": {"pid": 905470, "step": "build_ffmpeg", "cpu_jobs": 4},
     "ssh_transport": "Port32050 connection refused after connection reset; remote final state unknown, not evidence of build failure",
     "public_runtime_final_exit": null,
+    "runtime_interpreter_safety_fix": {
+      "affected_last_launched_commit": "5a502c70",
+      "defect": "Resolving a virtualenv python symlink can select the base/system executable for the later installer",
+      "fix": "Preserve invoked interpreter path; probe actual prefix/base_prefix and pyvenv.cfg; reject base Python and inherited system packages before output/download/build; isolated pip installation explicitly targets verified client prefix",
+      "old_server_build_reached_install_stage": null,
+      "system_package_mutation_observed": null,
+      "recovery_gate": "Inspect old process/receipt/log and package locations for both interpreters before any resume, reinstall or rollback; remote installation impact is unknown, not asserted absent"
+    },
     "pure_client_pip_check_passed": null,
     "new_category_public_native_cases_executed": 0,
     "existing_three_valid_native_cases_rerun": false,

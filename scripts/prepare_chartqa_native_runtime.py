@@ -39,14 +39,74 @@ PINS = {
 }
 
 
+def client_environment():
+    env = dict(os.environ)
+    for key in (
+        "PYTHONPATH",
+        "PYTHONHOME",
+        "PIP_TARGET",
+        "PIP_PREFIX",
+        "PIP_USER",
+        "PIP_CONFIG_FILE",
+    ):
+        env.pop(key, None)
+    env["PYTHONNOUSERSITE"] = "1"
+    return env
+
+
+def qualify_client_python(path):
+    # Do not resolve interpreter symlinks: CPython finds pyvenv.cfg from the
+    # invoked venv entry, not the resolved base executable.
+    python = Path(os.path.abspath(path.expanduser()))
+    if not python.is_file():
+        raise FileNotFoundError("Client interpreter does not exist")
+    result = subprocess.run(
+        [
+            str(python),
+            "-c",
+            "import json,sys; print(json.dumps({'prefix':sys.prefix,'base_prefix':sys.base_prefix,'executable':sys.executable}))",
+        ],
+        check=True,
+        capture_output=True,
+        text=True,
+        timeout=30,
+        env=client_environment(),
+    )
+    identity = json.loads(result.stdout)
+    prefix = Path(identity["prefix"]).resolve(strict=True)
+    if prefix == Path(identity["base_prefix"]).resolve(strict=True):
+        raise ValueError(
+            "A pure client virtualenv is required; system Python installation is forbidden"
+        )
+    cfg = prefix / "pyvenv.cfg"
+    values = {}
+    if cfg.is_file():
+        for line in cfg.read_text(encoding="utf-8").splitlines():
+            if "=" in line:
+                key, value = line.split("=", 1)
+                values[key.strip().lower()] = value.strip().lower()
+    if values.get("include-system-site-packages") != "false":
+        raise ValueError("Client virtualenv must not inherit system site-packages")
+    return python, prefix
+
+
 def run(root, python, jobs):
     if not 1 <= jobs <= 16:
         raise ValueError("CPU build jobs must be between 1 and 16")
-    root, python = root.resolve(), python.resolve(strict=True)
+    root, python = root.resolve(), Path(os.path.abspath(python.expanduser()))
     if root.exists() or python.is_relative_to(root):
         raise ValueError(
             "Fresh private output separate from the client interpreter required"
         )
+    python, client_prefix = qualify_client_python(python)
+    subprocess.run(
+        [str(python), "-m", "pip", "--isolated", "--version"],
+        check=True,
+        capture_output=True,
+        text=True,
+        timeout=30,
+        env=client_environment(),
+    )
     if any(
         shutil.which(command) is None
         for command in ("git", "gcc", "g++", "make", "cmake", "pkg-config")
@@ -62,6 +122,8 @@ def run(root, python, jobs):
         "started": time.time(),
         "model_calls": 0,
         "system_packages_changed": False,
+        "client_interpreter_entry": str(python),
+        "client_prefix": str(client_prefix),
         "pins": PINS,
     }
 
@@ -106,8 +168,7 @@ def run(root, python, jobs):
         )
         ff_build.mkdir()
         dec_build.mkdir()
-        env = dict(os.environ)
-        env.pop("PYTHONPATH", None)
+        env = client_environment()
         env.update(
             TORCH_DEVICE_BACKEND_AUTOLOAD="0", DECORD_LIBRARY_PATH=str(dec_build)
         )
@@ -168,7 +229,10 @@ def run(root, python, jobs):
                 str(python),
                 "-m",
                 "pip",
+                "--isolated",
                 "install",
+                "--prefix",
+                str(client_prefix),
                 "--no-cache-dir",
                 "--no-deps",
                 "--no-build-isolation",
@@ -181,12 +245,15 @@ def run(root, python, jobs):
             [
                 str(python),
                 "-c",
-                "import decord; assert decord.__version__ == '0.6.0'; print(decord.__version__)",
+                "import decord,sys; from pathlib import Path; "
+                "assert decord.__version__ == '0.6.0'; "
+                "assert Path(decord.__file__).resolve().is_relative_to(Path(sys.prefix).resolve()); "
+                "print(decord.__version__, decord.__file__)",
             ],
             dec_build,
             60,
         )
-        command([str(python), "-m", "pip", "check"], dec_build, 60)
+        command([str(python), "-m", "pip", "--isolated", "check"], dec_build, 60)
         receipt.update(
             status="ORIGINAL_RUNTIME_BUILT_IMPORTED_AND_PIP_CHECKED_NOT_BENCHMARK",
             exit_code=0,

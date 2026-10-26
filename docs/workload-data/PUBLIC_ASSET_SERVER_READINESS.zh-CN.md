@@ -57,6 +57,10 @@ env -u PYTHONPATH /external/chartqa-client/bin/python scripts/prepare_chartqa_na
 运行环境构建器核对FFmpeg4.1.11、Decord0.6.0及其两个原子模块的完整Git
 tree，默认4个CPU编译线程，固定私有安装前缀；不安装系统包、不修改原源码、不启用CUDA或GPL构建选项。需预先具备Git、C/C++、Make、CMake和pkg-config。
 构建、安装、真实Decord导入与`pip check`都通过才返回成功；失败目录保留、不覆盖。构建后的私有前缀不能随意移动，原库链接依赖该位置。
+安装前会保留虚拟环境解释器入口（不解析其符号链接到系统Python），实际探测`sys.prefix`/`sys.base_prefix`及`pyvenv.cfg`，拒绝系统Python和继承系统包的环境。
+pip使用隔离模式并显式指定已核验的客户端前缀，忽略继承的Python/PIP安装重定向变量。
+注意：此前已启动的`5a502c70`版本存在解释器符号链接解析缺陷，断线前最后只核实到源码编译阶段；恢复后必须先检查该旧进程、日志及两套解释器的实际安装位置。是否已触发系统安装尚未知，不能假定系统未变更，也不盲目重装或回滚。
+旧回执中初始写入的`system_packages_changed:false`不是安装后的审计证据，不能据此排除影响。修复后的入口还会检查导入的Decord文件确实位于已核验的客户端前缀内，再做`pip check`。
 当前直接依赖清单不是原作者全benchmark环境，也不是完整传递依赖锁；纯客户端实际验证和锁定尚未完成。
 
 ```bash

@@ -57,3 +57,73 @@ def test_no_unbounded_build_parallelism(tmp_path, jobs):
     with pytest.raises(ValueError, match="CPU build jobs"):
         runtime.run(target, Path(sys.executable), jobs)
     assert not target.exists()
+
+
+@pytest.fixture(scope="module")
+def real_client_venv(tmp_path_factory):
+    prefix = tmp_path_factory.mktemp("chartqa-client-entry") / "client"
+    subprocess.run(
+        [sys.executable, "-m", "venv", "--without-pip", str(prefix)],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    python = prefix / (
+        "Scripts/python.exe" if sys.platform == "win32" else "bin/python"
+    )
+    return prefix, python
+
+
+def test_real_venv_entry_is_preserved_not_resolved_to_base(real_client_venv):
+    prefix, python = real_client_venv
+    selected, actual_prefix = runtime.qualify_client_python(python)
+    assert selected == python.absolute()
+    assert actual_prefix == prefix.resolve()
+    if python.is_symlink():
+        assert selected != python.resolve()
+
+
+def test_base_python_rejected_before_output_or_install(tmp_path):
+    target = tmp_path / "must-not-exist"
+    base_python = Path(getattr(sys, "_base_executable", sys.executable))
+    with pytest.raises(ValueError, match="system Python installation is forbidden"):
+        runtime.run(target, base_python, 4)
+    assert not target.exists()
+
+
+def test_inherited_system_packages_rejected(real_client_venv):
+    prefix, python = real_client_venv
+    cfg = prefix / "pyvenv.cfg"
+    original = cfg.read_text(encoding="utf-8")
+    try:
+        cfg.write_text(
+            original.replace(
+                "include-system-site-packages = false",
+                "include-system-site-packages = true",
+            ),
+            encoding="utf-8",
+        )
+        with pytest.raises(ValueError, match="must not inherit"):
+            runtime.qualify_client_python(python)
+    finally:
+        cfg.write_text(original, encoding="utf-8")
+
+
+def test_client_probe_ignores_inherited_python_and_pip_redirects(
+    real_client_venv, monkeypatch
+):
+    prefix, python = real_client_venv
+    for key in (
+        "PYTHONPATH",
+        "PYTHONHOME",
+        "PIP_TARGET",
+        "PIP_PREFIX",
+        "PIP_USER",
+        "PIP_CONFIG_FILE",
+    ):
+        monkeypatch.setenv(key, "must-not-inherit")
+    selected, actual_prefix = runtime.qualify_client_python(python)
+    assert selected == python.absolute() and actual_prefix == prefix.resolve()
+    env = runtime.client_environment()
+    assert env["PYTHONNOUSERSITE"] == "1"
+    assert "PYTHONHOME" not in env and "PIP_TARGET" not in env
