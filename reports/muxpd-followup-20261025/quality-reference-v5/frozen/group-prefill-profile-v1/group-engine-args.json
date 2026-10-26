@@ -1,0 +1,56 @@
+{
+  "model": "/root/workspace/models/Qwen3.5-35B-A3B",
+  "tensor_parallel_size": 4,
+  "data_parallel_size": 1,
+  "pipeline_parallel_size": 1,
+  "enable_expert_parallel": true,
+  "dtype": "bfloat16",
+  "max_model_len": 16384,
+  "max_num_batched_tokens": 16384,
+  "max_num_seqs": 8,
+  "gpu_memory_utilization": 0.85,
+  "language_model_only": true,
+  "enable_chunked_prefill": false,
+  "async_scheduling": false,
+  "enable_prefix_caching": false,
+  "mamba_cache_mode": "none",
+  "enforce_eager": false,
+  "numa_bind": false,
+  "additional_config": {
+    "enable_cpu_binding": false,
+    "ascend_compilation_config": {
+      "enable_npugraph_ex": false,
+      "enable_static_kernel": false
+    }
+  },
+  "compilation_config": {
+    "mode": 3,
+    "cudagraph_mode": "FULL_DECODE_ONLY",
+    "cudagraph_capture_sizes": [
+      1,
+      2,
+      4,
+      8
+    ],
+    "max_cudagraph_capture_size": 8
+  },
+  "distributed_executor_backend": "mp",
+  "seed": 42,
+  "disable_log_stats": true,
+  "scheduler_cls": "vllm_muxpd.decoupled_scheduler.DecoupledMuxPDScheduler",
+  "batch_admission_policy": "vllm_muxpd.policy.MuxPDPolicy",
+  "batch_admission_policy_config": {
+    "execution": "decoupled",
+    "stream_mode": "overlap",
+    "layers_per_slice": 4,
+    "adaptive_layers": false,
+    "prefill_first": false,
+    "decode_graph": true,
+    "compile_full_prefill": false,
+    "prefill_layer_token_budget": 0,
+    "decode_budget_guard": false,
+    "overlap_communication": "isolated",
+    "compile_prefill_groups": true
+  },
+  "stream_interval": 1
+}

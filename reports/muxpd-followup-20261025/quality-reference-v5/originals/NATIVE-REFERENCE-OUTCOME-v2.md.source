@@ -1,0 +1,35 @@
+# 默认 native 参考：吞吐明显更高，MuxPD 的收益仍是缩短最坏停顿
+
+两个默认 async/npugraphEx native 参考均完成，两项进程的全部六个窗口保留。与它们比较，group 的混合吞吐低 **38.254%**，长 P 首 token 延迟高 **35.297%**，seed gap P99 高 **86.157%**。因此不能以这组数据宣称插件吞吐更高或普遍延迟更低。
+
+| 指标 | 默认 native 均值 | raw 均值 | group 均值 | group / 默认 native 变化 |
+| --- | --- | --- | --- | --- |
+| Decode 输出吞吐，token/s | 368.844 | 217.889 | 218.525 | −40.754% |
+| Mixed 输出吞吐，token/s | 194.555 | 116.105 | 120.129 | −38.254% |
+| 长 P TTFT，ms | 455.777 | 621.827 | 616.651 | +35.297% |
+| Mixed seed gap P99，ms | 32.575 | 63.483 | 60.640 | +86.157% |
+
+与此同时，冻结的 baseline-calibrated 补充分析显示，group 四个测量 mixed 窗口的最大 seed 间隔为 **75.486–86.950 ms**；默认 native 为 **423.349–445.610 ms**。Group 所有保留 seed 流均无大于 100 ms 的间隔；默认 native 每个测量窗口每个 seed 恰有一次。它说明本负载的长 P 到达会令 native 出现更长的偶发停顿，而 group 用更长 P 完成时间和吞吐损失换取更短的最坏停顿。P99 没有因此变好，原指标和代价必须同时保留。
+
+这两个参考不是新加入主 ABBA 的样本：它们同时采用 async=true 与 npugraphEx=true，原匹配主矩阵采用 async=false、fusion backend。所有模式仍为固定 TP4/EP4、BF16、HCCL=true 及原工作负载；这是实践配置的描述性比较，不是单因素效应或全部默认/最佳 native 配置。ND2/ND1 混合吞吐下降 4.068%，decode 吞吐下降 1.431%；不能把两个 fresh 进程当作总体显著性证明。
+
+原 group/raw ABBA 的混合吞吐增量 **+3.466%**、两对 **+5.913%/+1.047%** 不变。它仍是 group 相对 raw 的增量证据；本次更快的 native 参考不能被省略，也不能倒改原 ABBA。
+
+## Token 与有效后端边界
+
+ND1 与 ND2 的全部六窗口 token 数组完全相同；八个进程的 decode 数组均相同。Mixed 中，默认 native、同步 native、raw/group 三种轨迹不同；所有进程的两次测量重复各自一致。下表为 w3 的首次不同输出 token 序号（1起），其他窗口和每个请求的全部差异数量均保存在 [完整比较](retained-token-comparisons.json)：
+
+| 对比 | seed0 | seed1 | seed2 | seed3 | ingress P |
+| --- | --- | --- | --- | --- | --- |
+| 同步 native N1 → 默认 native ND1 | 107 | 127 | 44 | 118 | 全部相同 |
+| raw R1 / group G1 → 默认 native ND1 | 107 | 53 | 49 | 163 | 98 |
+
+因此 mixed 总耗时差异不能全部解释成调度/后端开销，输出后的 MoE 路由也可能不同；这里没有据此判断答案正确性或测得路由因果。独立的任务质量 FAIL 不会被性能结果改变。
+
+两个参考的四个 rank 在初始化后、计时前、计时后三个时点均记录实际 `NPUWorker`（RPC 外层是原生 `WorkerWrapperBase`）、npugraphEx=true、static=false、async=true、插件 D controller/P executor 不存在、HCCL literal true、batch invariance 未设置。实际 scheduler 为 `AsyncScheduler`、队列2、`step_with_batch_queue`、stream interval1；每窗口均完成队列/client drain。完整读回保存在 [原字段记录](all-backend-counter-readbacks.json)。缺少原生持久 graph replay 计数不表示计数为0。
+
+原冻结 offline analyzer 因 native 初始化补入三个默认 True 的配置键而拒绝，失败保留在 `../native-default-terminal-analysis-v1`。本结果使用[单独版本的只读默认展开适配](../native-default-analysis-preparation-v2/README.md)，验证精确默认赋值源码、原启动文件、两项相同展开及其余原冻结检查。它不是“原 analyzer 无修改通过”，也不是运行失败后的硬件重跑。
+
+两个参考和两个 mixed profile 的原 native 日志均保留四个 worker 的 SIGTERM fallback；终态 controller/进程组/NPU 清空通过不等于内部无信号 graceful drain。四个终态 capsule 包含全部原始文件，profile 离线解析仅发生在另外的副本目录。
+
+[全指标报告](REFERENCE-REPORT.md)、[48窗口CSV](all-window-metrics.csv)、[原分析输出与适配回执](native-default-analysis.json)、[描述性对比](descriptive-comparisons.json)、[补充的所有间隔](stalls-native-default.json)及[分析清单](analysis-receipt.json)保留完整数字。未改原矩阵、运行、工作负载、指标、补充阈值或质量门槛；没有 HTTP Goodput、容量、一般质量或物理 overlap 结论。

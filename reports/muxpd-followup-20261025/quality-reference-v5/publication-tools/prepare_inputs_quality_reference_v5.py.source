@@ -1,0 +1,94 @@
+"""Create a final explicit v5 selection from completed producer handoffs."""
+import hashlib
+import json
+from pathlib import Path
+R = Path('/root/workspace/muxpd-followup-20261025')
+P = R / 'publication'
+C = Path('/root/workspace/references/benchmark-muxpd-quality-v5/reports/muxpd-followup-20261025/quality-reference-v5')
+def read(p): return json.loads(p.read_text())
+def sha(p): return hashlib.sha256(p.read_bytes()).hexdigest()
+files = {}
+def add(p):
+    p = Path(p)
+    files[str(p)] = {'path':str(p), 'member':'support/'+str(p.relative_to(R)), 'sha256':sha(p)}
+for row in read(P/'native-reference-profile-support-handoff-v1.json')['files']:
+    p = Path(row['path']); assert sha(p) == row['sha256']; add(p)
+for rel in [
+    'publication/native-reference-profile-support-handoff-v1.json',
+    'publication/native-reference-profile-capsules-v1/handoff.json',
+    'publication/native-quality-terminal-capsules-v1/native02-handoff-v1.json',
+    'publication/raw-quality-terminal-capsules-v1/raw01-handoff-v1.json',
+    'publication/group-quality-terminal-capsules-v1/group01-handoff-v1.json',
+    'publication/build_capsule.py', 'publication/finalize_quality_reference_v5.py',
+    'publication/prepare_inputs_quality_reference_v5.py', 'publication/QUALITY-REFERENCE-v5.md',
+    'publication/prior57-release-api-v5.json',
+    'root/parse_mixed_profiles_offline_v1.py','root/audit_mixed_profiles_v1.py',
+    'root/parse-mixed-profiles-offline-v1.log',
+    'root/RAW-QUALITY-FAILURE-SCOPE-REVIEW-v1.md',
+    'root/RAW-QUALITY-FAILURE-SCOPE-REVIEW-v1.receipt.json',
+    'root/ISSUE23-RAW-FAILURE-FOLLOWUP-DRAFT-v1.md',
+    'root/RESOURCE-PARTITION-SCOPE-RECONFIRMATION-v1.md',
+    'quality/raw-quality-v2-strict-result-v1.json',
+    'quality/raw-quality-v2-supplementary-result-v1.json',
+    'quality/group-quality-v2-strict-result-v1.json',
+    'quality/group-quality-v2-supplementary-result-v1.json',
+]: add(R/rel)
+for p in sorted((R/'root').glob('*terminal-device-check-v1.json')): add(p)
+trees = [
+    'quality/native-controls-paired-description-v1','quality/raw-quality-review-v1',
+    'quality/group-quality-review-v1','groupfx/batch-invariant-audit-v1',
+    'performance/mixed-profile-analysis-v1','performance/mixed-profile-offline-v1',
+    'performance/native-default-backend-v2','performance/group-prefill-profile-v1',
+]
+required = [
+    'quality/native-controls-paired-description-v1/README-v2.md',
+    'quality/raw-quality-review-v1/README.md','quality/group-quality-review-v1/README.md',
+    'performance/native-default-terminal-analysis-v2/OUTCOME.md',
+    'performance/native-default-terminal-analysis-v2/REFERENCE-REPORT.md',
+    'performance/mixed-profile-analysis-v1/README.md',
+]
+copies = []
+def cp(rel,target):
+    assert not (C/target).exists(), target
+    copies.append({'source':str(R/rel),'target':target})
+for name in ['review.json','SHA256SUMS','root-scoring-provenance-v1.json']:
+    cp('quality/group-quality-review-v1/'+name,'analysis/group/'+name)
+cp('quality/group-quality-review-v1/README.md','originals/GROUP-QUALITY-README-v1.md.source')
+for kind in ['strict','supplementary']:
+    cp('quality/group-quality-v2-'+kind+'-result-v1.json','analysis/group/'+kind+'-result-v1.json')
+for name in ['OUTCOME.md','REFERENCE-REPORT.md']:
+    cp('performance/native-default-terminal-analysis-v2/'+name,'originals/NATIVE-'+('REFERENCE-OUTCOME-v2.md.source' if name=='OUTCOME.md' else 'REFERENCE-REPORT-v2.md.source'))
+for p in sorted((R/'performance/native-default-terminal-analysis-v2').iterdir()):
+    if p.is_file() and p.stat().st_size < 1000000 and p.suffix != '.md':
+        cp(str(p.relative_to(R)),'analysis/native-reference/'+p.name+('.source' if p.suffix=='.csv' else ''))
+for rel in ['performance/native-default-analysis-preparation-v2/native_defaults_analysis.py',
+            'performance/native-default-analysis-preparation-v2/README.md',
+            'performance/native-default-analysis-preparation-v2/validation-receipt-v1.json']:
+    cp(rel, 'originals/native-default-offline-adapter/'+Path(rel).name+'.source')
+for p in sorted((R/'performance/native-default-terminal-analysis-v1').iterdir()):
+    if p.is_file(): cp(str(p.relative_to(R)),'analysis/native-reference-original-failure/'+p.name)
+cp('performance/mixed-profile-analysis-v1/README.md','originals/MIXED-PROFILE-README-v1.md.source')
+for p in sorted((R/'performance/mixed-profile-analysis-v1').iterdir()):
+    if p.is_file() and p.suffix != '.md':
+        cp(str(p.relative_to(R)),'analysis/mixed-profile/'+p.name+('.source' if p.suffix=='.csv' else ''))
+for rel in ['root/RAW-QUALITY-FAILURE-SCOPE-REVIEW-v1.md','root/RAW-QUALITY-FAILURE-SCOPE-REVIEW-v1.receipt.json','root/ISSUE23-RAW-FAILURE-FOLLOWUP-DRAFT-v1.md','root/RESOURCE-PARTITION-SCOPE-RECONFIRMATION-v1.md']:
+    cp(rel,'originals/final-scope/'+Path(rel).name+'.source')
+cp('publication/prior57-release-api-v5.json','analysis/prior57-release-api-v5.json')
+for p in sorted((R/'root').glob('*terminal-device-check-v1.json')):
+    cp(str(p.relative_to(R)),'analysis/terminal-device-checks/'+p.name)
+caps = [P/'native-quality-terminal-capsules-v1/muxpd-native-quality-v2-hccl-true-02-capsule',
+P/'raw-quality-terminal-capsules-v1/muxpd-raw-quality-v2-hccl-true-01-capsule',
+P/'group-quality-terminal-capsules-v1/muxpd-group-quality-v2-hccl-true-01-capsule']
+for row in read(P/'native-reference-profile-capsules-v1/handoff.json')['capsules']:
+    caps.append(Path(row['receipt']['path']).parent)
+d = {'schema':'muxpd-final-input-descriptor-v5','all_reports_final_for_this_cutoff':True,
+     'capsule_directories':[str(p) for p in caps],
+     'required_final_reports':[{'path':str(R/x),'sha256':sha(R/x)} for x in required],
+     'support_files':[files[x] for x in sorted(files)],
+     'complete_support_trees':[{'path':str(R/x),'member_prefix':'support/'+x} for x in trees],
+     'support_scope':'Complete fixed quality reviews (including failures), native analysis first offline failure and exactly bounded default expansion, complete copied offline profile tree and audits, frozen producer plans/configs, source-only support audit, terminal cleanup receipts. Original strict and supplementary quality FAIL remain FAIL. Draft issue text is not a published comment.',
+     'claims':{'paired_quality_accepted':False,'strict_quality_gate_passed':False,'supplementary_quality_gate_passed':False,'raw_group_all_200_token_text_termination_equal':True,'native_correct_counts':[165,165],'raw_group_correct_counts':[166,166],'native_stable_new_wrong':3,'group_native_full_token_equal':11,'practical_native_reference_measured':True,'reference_primary_abba_pooled':False,'native_original_offline_analyzer_passed':False,'bounded_offline_default_adapter_passed':True,'mixed_profile_capture_audits_passed':True,'native_kernel_launch_reduction':False,'http_goodput_measured':False,'physical_overlap_proven':False},
+     'canonical_copies':copies}
+p=P/'v5-preparation/final-inputs-v5.json'
+with p.open('x') as f: json.dump(d,f,indent=2);f.write('\n')
+print(json.dumps({'inputs':str(p),'explicit_support_files':len(files),'complete_trees':len(trees),'canonical_copies':len(copies)},indent=2))

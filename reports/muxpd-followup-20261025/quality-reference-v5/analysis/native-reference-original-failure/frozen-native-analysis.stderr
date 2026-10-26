@@ -1,0 +1,19 @@
+Traceback (most recent call last):
+  File "/root/workspace/muxpd-followup-20261025/performance/native-default-backend-v2/native_default_reference.py", line 166, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/root/workspace/muxpd-followup-20261025/performance/native-default-backend-v2/native_default_reference.py", line 155, in main
+    perf.save(args.output, analyze(args.runs, plan)); return 0
+                           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/workspace/muxpd-followup-20261025/performance/native-default-backend-v2/native_default_reference.py", line 131, in analyze
+    result = perf.analyze_native_async(paths, plan)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/workspace/muxpd-followup-20261025/performance/native-default-backend-v2/perf_group_prefill.py", line 598, in analyze_native_async
+    result["per_run_metrics"] = [run_metrics(validate_completed_run(row, plan)) for row in runs]
+                                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/workspace/muxpd-followup-20261025/performance/native-default-backend-v2/perf_group_prefill.py", line 466, in validate_completed_run
+    if validate(args, original) != run["engine_args"] or run["resolved_runtime"]["async_scheduling"] is not (run["variant"] == "native-async"):
+       ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/workspace/muxpd-followup-20261025/performance/native-default-backend-v2/native_default_reference.py", line 78, in validate
+    raise ValueError('Only the exact native-default reference configuration is permitted')
+ValueError: Only the exact native-default reference configuration is permitted

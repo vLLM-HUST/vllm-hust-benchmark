@@ -1,0 +1,22 @@
+# Draft update for Issue #23 — no GitHub action performed
+
+The completed f7 raw candidate fails the frozen supplementary answer-nonregression criterion. It scores **166/200**, against **165/200** in each fresh native control, but introduces **three errors on the 165 cases both controls answered correctly**. Four gains elsewhere cannot cancel those errors under the original rule. Two losses are naturally stopped wrong answers (chemistry 03766, B→A; computer science 10672, A→G); the third is a new 8,192-token truncation (law 01741, native E), scored wrong. No case, parser, budget, threshold or control was changed.
+
+All 200 terminal responses were collected. Supplementary collection and actual mixed-work coverage pass (25/25 batches; 250 P-progress/D-retirement transactions), while both the original strict gate and supplementary answer gate remain **FAIL**. Collection success and a higher total score do not qualify native-relative answer preservation. The grouped candidate is still being collected; partial outputs are not an acceptance result.
+
+This issue remains open for the demonstrated raw/native quality limitation. Closing the earlier bounded numerical investigation in #11 did not establish arbitrary-input quality or resolve these losses. The source audit also finds no supported quick fix from enabling `VLLM_BATCH_INVARIANT`: that switch changes multiple operator/communication settings, the present environment lacks its optional AscendC attention/normalization module, and the Qwen3.5 GDN/MoE/required full-decode graph path has unresolved coverage. `HCCL_DETERMINISTIC=strict` alone has not been shown to repair the result. The tested source98 HCCL-true profile must not be silently redefined.
+
+The finite follow-up is:
+
+- [x] Complete both fresh native controls and the raw arm; retain the original scorers, all losses/gains, terminal statuses and observed mixed work.
+- [ ] Complete the current grouped arm; apply both unchanged scorers and report all group/native and group/raw transitions, finish statuses and saved-token comparisons.
+- [ ] Publish the terminal paired-quality evidence and source audit as a new canonical append, preserving the prior strict failures and all existing v4 assets.
+- [ ] Record a product disposition for the optional grouped-P increment after the already planned native reference and mixed profile in #3. If the full group output matches raw, that supports preserving the measured raw behavior; it does not turn this native-relative quality failure into a pass.
+
+A small post-hoc localization probe of the original eight-request batch 6, near case 10672's first divergent generated token (17), is a possible separate diagnostic. It would retain the original settings and capture logits/context around that boundary; it is not a new acceptance experiment, a selected retry that replaces the score, or a requirement to prove universal equality. No new broad strict/batch-invariant campaign is proposed.
+
+PR #10 can ultimately be assessed as a default-off incremental optimization with explicit inherited limitations, while this substantive quality issue remains open. Merging such an experiment would not mean quality acceptance. Current scene-specific throughput/stall tradeoffs and lifecycle evidence remain available in the [fixed v4 report](https://github.com/vLLM-HUST/vllm-hust-benchmark/tree/ef849ef49577c491fee68317ffc96d52796cd379/reports/muxpd-followup-20261025/performance-lifecycle-v4); they do not substitute for answer-quality evidence. The strict/native task-quality result, grouped comparison and implementation disposition will be stated separately.
+
+---
+
+Posting notes for the coordinator: this is a local draft, not a posted comment. At drafting time raw-quality artifacts are newer than v4 and pending their own canonical publication. Add the new immutable quality/report link after that append exists; do not link v4 as the source of these new quality counts. The source records are `quality/raw-quality-review-v1/{README.md,review.json}`, `root/RAW-QUALITY-FAILURE-SCOPE-REVIEW-v1.md` and `groupfx/batch-invariant-audit-v1/SOURCE-AUDIT.md`. Keep the issue open as a known limitation rather than describing these follow-up checkboxes as a claim that the three errors have been fixed.

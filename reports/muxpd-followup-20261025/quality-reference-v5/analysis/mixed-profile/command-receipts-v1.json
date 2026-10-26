@@ -1,0 +1,73 @@
+{
+  "started_at": "2026-10-26T04:33:59.676834+00:00",
+  "wrapper_sha256": "df276eb5c8ab44561ec54338cb7b8c2c3f6cd11c19bdc792dedf6c1b70a33aa1",
+  "auditor_sha256": "51de3ad620dc4f81fe0245e78ee76b1c153801cb7e64b47c59c1ac073c6383b6",
+  "parse_receipt_sha256": "b1c676c10c408893f802d57739ab8ace50d609fb04c2ab5ec439418147f8075f",
+  "commands": [
+    {
+      "argv": [
+        "/root/workspace/.venv/bin/python",
+        "-B",
+        "/root/workspace/muxpd-followup-20261025/performance/group-prefill-profile-v1/audit_mixed_profile.py",
+        "capture",
+        "--run",
+        "/root/workspace/muxpd-followup-20261025/runs/profile-f7-raw-mixed-01/results/run.json",
+        "--trace",
+        "0=/root/workspace/muxpd-followup-20261025/performance/mixed-profile-offline-v1/raw/profile/mixed-p12000-ingress_dp0_pp0_tp0_dcp0_ep0_rank0_993485_20261026042621959_ascend_pt/ASCEND_PROFILER_OUTPUT/trace_view.json",
+        "--trace",
+        "1=/root/workspace/muxpd-followup-20261025/performance/mixed-profile-offline-v1/raw/profile/mixed-p12000-ingress_dp0_pp0_tp1_dcp0_ep1_rank1_993486_20261026042621959_ascend_pt/ASCEND_PROFILER_OUTPUT/trace_view.json",
+        "--trace",
+        "2=/root/workspace/muxpd-followup-20261025/performance/mixed-profile-offline-v1/raw/profile/mixed-p12000-ingress_dp0_pp0_tp2_dcp0_ep2_rank2_993487_20261026042621959_ascend_pt/ASCEND_PROFILER_OUTPUT/trace_view.json",
+        "--trace",
+        "3=/root/workspace/muxpd-followup-20261025/performance/mixed-profile-offline-v1/raw/profile/mixed-p12000-ingress_dp0_pp0_tp3_dcp0_ep3_rank3_993488_20261026042621959_ascend_pt/ASCEND_PROFILER_OUTPUT/trace_view.json",
+        "--output",
+        "/root/workspace/muxpd-followup-20261025/performance/mixed-profile-analysis-v1/raw-capture-audit-v1.json"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/root/workspace/.venv/bin/python",
+        "-B",
+        "/root/workspace/muxpd-followup-20261025/performance/group-prefill-profile-v1/audit_mixed_profile.py",
+        "capture",
+        "--run",
+        "/root/workspace/muxpd-followup-20261025/runs/profile-f7-group-mixed-01/results/run.json",
+        "--trace",
+        "0=/root/workspace/muxpd-followup-20261025/performance/mixed-profile-offline-v1/group/profile/mixed-p12000-ingress_dp0_pp0_tp0_dcp0_ep0_rank0_1004044_20261026043128000_ascend_pt/ASCEND_PROFILER_OUTPUT/trace_view.json",
+        "--trace",
+        "1=/root/workspace/muxpd-followup-20261025/performance/mixed-profile-offline-v1/group/profile/mixed-p12000-ingress_dp0_pp0_tp1_dcp0_ep1_rank1_1004045_20261026043128000_ascend_pt/ASCEND_PROFILER_OUTPUT/trace_view.json",
+        "--trace",
+        "2=/root/workspace/muxpd-followup-20261025/performance/mixed-profile-offline-v1/group/profile/mixed-p12000-ingress_dp0_pp0_tp2_dcp0_ep2_rank2_1004046_20261026043128000_ascend_pt/ASCEND_PROFILER_OUTPUT/trace_view.json",
+        "--trace",
+        "3=/root/workspace/muxpd-followup-20261025/performance/mixed-profile-offline-v1/group/profile/mixed-p12000-ingress_dp0_pp0_tp3_dcp0_ep3_rank3_1004047_20261026043128000_ascend_pt/ASCEND_PROFILER_OUTPUT/trace_view.json",
+        "--output",
+        "/root/workspace/muxpd-followup-20261025/performance/mixed-profile-analysis-v1/group-capture-audit-v1.json"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/root/workspace/.venv/bin/python",
+        "-B",
+        "/root/workspace/muxpd-followup-20261025/performance/group-prefill-profile-v1/audit_mixed_profile.py",
+        "compare",
+        "--raw",
+        "/root/workspace/muxpd-followup-20261025/performance/mixed-profile-analysis-v1/raw-capture-audit-v1.json",
+        "--group",
+        "/root/workspace/muxpd-followup-20261025/performance/mixed-profile-analysis-v1/group-capture-audit-v1.json",
+        "--output",
+        "/root/workspace/muxpd-followup-20261025/performance/mixed-profile-analysis-v1/comparison-v1.json"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "passed": true,
+  "finished_at": "2026-10-26T04:34:12.749088+00:00"
+}

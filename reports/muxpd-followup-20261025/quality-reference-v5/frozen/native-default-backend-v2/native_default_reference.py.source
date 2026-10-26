@@ -1,0 +1,166 @@
+"""Separate two-run native default-async/default-graph reference; no ABBA pooling.
+
+Reuses frozen collection, windows, DELTA arrival semantics, drain and provenance.
+Only native backend selection changes from the unused fusion-async reference.
+Additional backend readbacks use the existing outside-window counter RPCs.
+"""
+
+import argparse
+import copy
+import hashlib
+import json
+from pathlib import Path
+from types import SimpleNamespace
+
+import perf_group_prefill as perf
+from native_reference_metadata import NATIVE_WORKER_CLASS, WRAPPER_CLASS, native_worker_counters
+
+ROOT = Path(__file__).resolve().parent
+FAMILY = 'native-default-backend-async-reference-v1'
+PLAN_SCHEMA = 'muxpd-native-default-backend-async-plan-v1'
+EXPERIMENT = 'reference-native-default-backend-async'
+OBSERVER_REVISION = 'native-default-worker-unwrapping-v2'
+PARENT_IDENTITY_SHA = '202a41db1ad5d71e875abb5cae4364efd2cc7945fe779d4c864fb01042e87d98'
+SCOPE = ('Two fresh descriptive native references with async None resolvingTrue and '
+         'npugraphExTrue/staticFalse. Native worker and scheduler, plugin scheduling disabled. '
+         'Same fixed workload, HCCLtrue and remaining matched controls. Not pooled into '
+         'synchronous ABBA and not a claim of vendor-best or all-settings-default performance.')
+_VALIDATE = perf.validate
+_SAVE = perf.save
+_REQUIRE = perf.require_worker_controls
+
+
+def file_sha(path):
+    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+
+
+def verify_dependencies():
+    manifest_path = ROOT / 'parent-execution-identity-v1.json'
+    if file_sha(manifest_path) != PARENT_IDENTITY_SHA:
+        raise ValueError('Parent frozen execution identity changed')
+    manifest = json.loads(manifest_path.read_text())
+    names = {'perf_group_prefill.py': 'perf_group_prefill.py', 'perf_provenance.py': 'perf_provenance.py',
+             'fusion-native-async-plan-v1.json': 'native-async-plan-v1.json',
+             'fusion-native-async-engine-args.json': 'native-async-engine-args.json',
+             'primary-group-plan-v1.json': 'group-plan-v1.json'}
+    for name, parent in names.items():
+        if file_sha(ROOT / name) != manifest['files'][parent]['sha256']:
+            raise ValueError(f'Frozen parent dependency changed: {name}')
+
+
+def derived_plan():
+    verify_dependencies()
+    parent = perf.load_plan(ROOT / 'fusion-native-async-plan-v1.json')
+    result = copy.deepcopy({key: value for key, value in parent.items() if key != 'plan_sha256'})
+    result.update(schema=PLAN_SCHEMA, reference_family=FAMILY,
+                  parent_native_async_plan_sha256=parent['plan_sha256'],
+                  backend={'enable_npugraph_ex': True, 'enable_static_kernel': False},
+                  baseline_scope='Native current async and npugraphEx defaults on the specified fixed TP4/EP4 recipe; remaining explicit controls are unchanged',
+                  treatment='Only enable_npugraph_ex False->True versus preserved optional fusion-native-async family; two fresh native runs',
+                  scope=SCOPE)
+    return {**result, 'plan_sha256': perf.digest(result)}
+
+
+def validate_role_plan(variant, plan):
+    if variant != 'native-async' or plan != derived_plan():
+        raise ValueError('Separate exact native-default backend plan required; cannot pool primary ABBA')
+
+
+def expected_engine():
+    verify_dependencies()
+    value = json.loads((ROOT / 'fusion-native-async-engine-args.json').read_text())
+    value['additional_config']['ascend_compilation_config']['enable_npugraph_ex'] = True
+    return value
+
+
+def validate(args, engine):
+    if args.variant != 'native-async' or args.experiment != EXPERIMENT or args.hccl != 'true' or engine != expected_engine():
+        raise ValueError('Only the exact native-default reference configuration is permitted')
+    fusion = copy.deepcopy(engine)
+    fusion['additional_config']['ascend_compilation_config']['enable_npugraph_ex'] = False
+    launched = _VALIDATE(SimpleNamespace(variant='native-async', experiment='reference-async', hccl='true'), fusion)
+    launched['additional_config']['ascend_compilation_config']['enable_npugraph_ex'] = True
+    return launched
+
+
+def require_worker_controls(rows, hccl):
+    _REQUIRE(rows, hccl)
+    expected = {'worker_class': 'vllm_ascend.worker.worker.NPUWorker',
+                'enable_npugraph_ex': True, 'enable_static_kernel': False, 'async_scheduling': True,
+                'plugin_decode_controller_absent': True, 'plugin_prefill_executor_absent': True}
+    for row in rows:
+        metadata = row.get('native_default_reference', {})
+        actual = {key: value for key, value in metadata.items() if key not in ('rpc_argument_class', 'wrapper_class')}
+        wrapper = metadata.get('wrapper_class')
+        expected_argument = NATIVE_WORKER_CLASS if wrapper is None else WRAPPER_CLASS
+        if (actual != expected or set(metadata) != set(expected) | {'rpc_argument_class', 'wrapper_class'}
+                or wrapper not in (None, WRAPPER_CLASS) or metadata.get('rpc_argument_class') != expected_argument):
+            raise ValueError('Actual native worker/default backend readback differs')
+
+
+def save_receipt(path, value):
+    if isinstance(value, dict) and value.get('schema') == 'muxpd-group-prefill-performance-run-v1':
+        value.update(reference_family=FAMILY, reference_wrapper_sha256=file_sha(__file__),
+                     backend_observer_sha256=file_sha(ROOT / 'native_reference_metadata.py'),
+                     reference_observer_revision=OBSERVER_REVISION, scope=SCOPE)
+    return _SAVE(path, value)
+
+
+def install_adapters():
+    # Collection/window/drain/provenance functions and their source file stay byte-identical.
+    # These are parent-process protocol adapters and the existing RPC metadata callback only.
+    perf.validate_role_plan = validate_role_plan
+    perf.validate = validate
+    perf.require_worker_controls = require_worker_controls
+    perf.worker_counters = native_worker_counters
+    perf.save = save_receipt
+
+
+def analyze(paths, plan):
+    if paths is None or len(paths) != 2:
+        raise ValueError('Exactly two fresh native runs required')
+    validate_role_plan('native-async', plan)
+    for path in paths:
+        run = json.loads(path.read_text())
+        if (run.get('reference_family') != FAMILY or run.get('experiment') != EXPERIMENT
+                or run.get('reference_observer_revision') != OBSERVER_REVISION
+                or run.get('reference_wrapper_sha256') != file_sha(__file__)
+                or run.get('backend_observer_sha256') != file_sha(ROOT / 'native_reference_metadata.py')
+                or run.get('producer_sha256') != file_sha(ROOT / 'perf_group_prefill.py')):
+            raise ValueError('Run does not bind this separate native reference producer')
+    result = perf.analyze_native_async(paths, plan)
+    result.update(schema='muxpd-native-default-backend-async-analysis-v1', reference_family=FAMILY,
+                  reference_observer_revision=OBSERVER_REVISION, scope=SCOPE)
+    return result
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('command', choices=('dry-run', 'run', 'analyze'))
+    parser.add_argument('--plan', type=Path, required=True)
+    parser.add_argument('--engine-args', type=Path)
+    parser.add_argument('--variant', choices=('native-async',), default='native-async')
+    parser.add_argument('--experiment', choices=(EXPERIMENT,), default=EXPERIMENT)
+    parser.add_argument('--hccl', choices=('true',), default='true')
+    parser.add_argument('--runs', type=Path, nargs='*')
+    parser.add_argument('--output', type=Path, required=True)
+    args = parser.parse_args()
+    if args.output.exists():
+        parser.error('Fresh output path required')
+    verify_dependencies()
+    plan = perf.load_plan(args.plan)
+    validate_role_plan(args.variant, plan)
+    install_adapters()
+    if args.command == 'analyze':
+        perf.save(args.output, analyze(args.runs, plan)); return 0
+    engine = validate(args, json.loads(args.engine_args.read_text()))
+    if args.command == 'dry-run':
+        perf.save(args.output, {'validated': True, 'hardware_started': False, 'reference_family': FAMILY,
+                               'reference_observer_revision': OBSERVER_REVISION,
+                               'plan_sha256': plan['plan_sha256'], 'engine_sha256': perf.digest(engine),
+                               'scope': SCOPE}); return 0
+    return perf.run(args, plan, engine)
+
+
+if __name__ == '__main__':
+    raise SystemExit(main())

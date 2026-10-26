@@ -1,0 +1,56 @@
+"""Outside-window native backend metadata; original worker counters copied by AST."""
+import os
+
+from perf_group_prefill import control_environment
+
+NATIVE_WORKER_CLASS = "vllm_ascend.worker.worker.NPUWorker"
+WRAPPER_CLASS = "vllm.v1.worker.worker_base.WorkerWrapperBase"
+
+
+def class_name(value):
+    return type(value).__module__ + "." + type(value).__name__
+
+
+def actual_native_worker(argument):
+    """Core MP callable RPC receives WorkerWrapperBase, not its inner worker."""
+    argument_class = class_name(argument)
+    wrapper_class = None
+    if argument_class == WRAPPER_CLASS:
+        # Bypass __getattr__ forwarding: require the wrapper's actual own slot.
+        worker = object.__getattribute__(argument, "worker")
+        wrapper_class = argument_class
+    else:
+        worker = argument
+    if class_name(worker) != NATIVE_WORKER_CLASS:
+        raise ValueError("Expected the actual ordinary native NPUWorker")
+    if argument_class not in (NATIVE_WORKER_CLASS, WRAPPER_CLASS):
+        raise ValueError("Unexpected callable RPC argument wrapper")
+    return worker, argument_class, wrapper_class
+
+
+def _frozen_worker_counters(worker):
+    controller = getattr(worker, '_decode_graph_controller', None)
+    groups = getattr(worker, '_prefill_group_executor', None)
+    stats = getattr(worker, 'muxpd_stats', {})
+    device_index = getattr(getattr(worker, 'device', None), 'index', None)
+    visible = os.environ.get('ASCEND_RT_VISIBLE_DEVICES', '').split(',')
+    physical = visible[device_index].strip() if type(device_index) is int and 0 <= device_index < len(visible) else None
+    return {'rank': worker.rank, 'pid': os.getpid(), 'device_index': device_index, 'visible_device_map': visible, 'expected_physical_device': physical, 'control_environment': control_environment(), 'prefill_groups': groups.snapshot() if groups is not None else None, 'decode_preparation_queries': stats.get('decode_preparation_queries', 0), 'decode_preparation_ready_skips': stats.get('decode_preparation_ready_skips', 0), 'decode_preparation_fences_skipped': stats.get('decode_preparation_fences_skipped', 0), 'native_decode_graph': controller.snapshot() if controller is not None else {'counter_available': False, 'reason': 'Ordinary native worker exposes no persistent replay counter; use actual CANN profile API counts'}}
+
+
+def native_worker_counters(argument):
+    from vllm_ascend.ascend_config import get_ascend_config
+    worker, argument_class, wrapper_class = actual_native_worker(argument)
+    result = _frozen_worker_counters(worker)
+    backend = get_ascend_config().ascend_compilation_config
+    result["native_default_reference"] = {
+        "worker_class": class_name(worker),
+        "rpc_argument_class": argument_class,
+        "wrapper_class": wrapper_class,
+        "enable_npugraph_ex": backend.enable_npugraph_ex,
+        "enable_static_kernel": backend.enable_static_kernel,
+        "async_scheduling": worker.vllm_config.scheduler_config.async_scheduling,
+        "plugin_decode_controller_absent": getattr(worker, "_decode_graph_controller", None) is None,
+        "plugin_prefill_executor_absent": getattr(worker, "_prefill_group_executor", None) is None,
+    }
+    return result

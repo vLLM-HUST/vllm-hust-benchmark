@@ -1,0 +1,190 @@
+{
+  "schema": "muxpd-native-default-backend-async-analysis-v1",
+  "complete": true,
+  "plan_sha256": "1da268b7b40cc4c8e83bb01daf17130e35c9f61e73796b94a071afeeb480e82b",
+  "errors": [
+    [],
+    []
+  ],
+  "inputs": [
+    {
+      "path": "/root/workspace/muxpd-followup-20261025/runs/perf-native-default-backend-v2-01/results/run.json",
+      "sha256": "9ece412d8f88a053cd117403195aa6da167f9918ce8edc54672bc9101c07f1c2"
+    },
+    {
+      "path": "/root/workspace/muxpd-followup-20261025/runs/perf-native-default-backend-v2-02/results/run.json",
+      "sha256": "60215aa2bcd348dbcbfd0fec26eb53b05888d5ad73ab3a903deebf60da08e339"
+    }
+  ],
+  "scope": "Two fresh descriptive native references with async None resolvingTrue and npugraphExTrue/staticFalse. Native worker and scheduler, plugin scheduling disabled. Same fixed workload, HCCLtrue and remaining matched controls. Not pooled into synchronous ABBA and not a claim of vendor-best or all-settings-default performance.",
+  "per_run_metrics": [
+    {
+      "decode-heavy": {
+        "output_tokens_per_second": 371.5017648182804,
+        "step_ms_mean": 21.47512189766082,
+        "step_ms_p99": 32.775081799999995,
+        "token_gap_ms_p99": 32.5166675,
+        "steady_decode_tokens_per_second": 383.4978904749678
+      },
+      "long-P-ingress": {
+        "output_tokens_per_second": 198.59447087626836,
+        "step_ms_mean": 21.34407662865497,
+        "step_ms_p99": 32.2810547,
+        "token_gap_ms_p99": 32.07063025000002,
+        "long_p_ttft_ms": 455.447274,
+        "seed_gap_ms_p99": 32.0275105
+      }
+    },
+    {
+      "decode-heavy": {
+        "output_tokens_per_second": 366.18592548878553,
+        "step_ms_mean": 21.785596373294347,
+        "step_ms_p99": 33.417490599999994,
+        "token_gap_ms_p99": 33.0134685,
+        "steady_decode_tokens_per_second": 377.93030847822706
+      },
+      "long-P-ingress": {
+        "output_tokens_per_second": 190.51474877114208,
+        "step_ms_mean": 22.248217630604287,
+        "step_ms_p99": 33.285072459999995,
+        "token_gap_ms_p99": 33.1216355,
+        "long_p_ttft_ms": 456.1060625,
+        "seed_gap_ms_p99": 33.1216355
+      }
+    }
+  ],
+  "reference_family": "native-default-backend-async-reference-v1",
+  "reference_observer_revision": "native-default-worker-unwrapping-v2",
+  "offline_default_expansion_adapter": {
+    "source": "/root/workspace/muxpd-followup-20261025/performance/native-default-analysis-preparation-v2/native_defaults_analysis.py",
+    "sha256": "777996cbadbd7c1242505502e6a80f4b40f713d930e20633a8322dcc1d31cebc",
+    "pinned_native_source_sha256": {
+      "/root/workspace/vllm-ascend-hust/vllm_ascend/platform.py": "8d34c4a8f1bebedf00c8bec91079e2c27fb43b3b447221a93b5a2ec74e3c3b47",
+      "/root/workspace/vllm-ascend-hust/vllm_ascend/ascend_config.py": "bb1b5b3cbfdb36eb170c8f6835c60553cc5b9092364f61afcb168348abc78c93"
+    },
+    "source_lines": {
+      "platform.py": "431 initialize;450\u2013456 vars(config) update of shared additional_config",
+      "ascend_config.py": "506\u2013507 bool True defaults;544\u2013548 object assignment"
+    },
+    "exact_three_keys_only": {
+      "fuse_muls_add": true,
+      "fuse_norm_quant": true,
+      "fuse_qknorm_rope": true
+    },
+    "input_checks": [
+      {
+        "run": "/root/workspace/muxpd-followup-20261025/runs/perf-native-default-backend-v2-01/results/run.json",
+        "run_sha256": "9ece412d8f88a053cd117403195aa6da167f9918ce8edc54672bc9101c07f1c2",
+        "explicit_config_sha256": "27e04de05fec939c856c6f4dafcc28493038b676dde7c26734e04d367007df8d",
+        "observed_expansion": {
+          "fuse_muls_add": true,
+          "fuse_norm_quant": true,
+          "fuse_qknorm_rope": true
+        },
+        "raw_engine_args": {
+          "model": "/root/workspace/models/Qwen3.5-35B-A3B",
+          "tensor_parallel_size": 4,
+          "data_parallel_size": 1,
+          "pipeline_parallel_size": 1,
+          "enable_expert_parallel": true,
+          "dtype": "bfloat16",
+          "max_model_len": 16384,
+          "max_num_batched_tokens": 16384,
+          "max_num_seqs": 8,
+          "gpu_memory_utilization": 0.85,
+          "language_model_only": true,
+          "enable_chunked_prefill": true,
+          "async_scheduling": null,
+          "enable_prefix_caching": false,
+          "mamba_cache_mode": "none",
+          "enforce_eager": false,
+          "numa_bind": false,
+          "additional_config": {
+            "enable_cpu_binding": false,
+            "ascend_compilation_config": {
+              "enable_npugraph_ex": true,
+              "enable_static_kernel": false,
+              "fuse_norm_quant": true,
+              "fuse_qknorm_rope": true,
+              "fuse_muls_add": true
+            }
+          },
+          "compilation_config": {
+            "mode": 3,
+            "cudagraph_mode": "FULL_DECODE_ONLY",
+            "cudagraph_capture_sizes": [
+              1,
+              2,
+              4,
+              8
+            ],
+            "max_cudagraph_capture_size": 8
+          },
+          "distributed_executor_backend": "mp",
+          "seed": 42,
+          "disable_log_stats": true,
+          "stream_interval": 1,
+          "worker_cls": "vllm_ascend.worker.worker.NPUWorker"
+        }
+      },
+      {
+        "run": "/root/workspace/muxpd-followup-20261025/runs/perf-native-default-backend-v2-02/results/run.json",
+        "run_sha256": "60215aa2bcd348dbcbfd0fec26eb53b05888d5ad73ab3a903deebf60da08e339",
+        "explicit_config_sha256": "27e04de05fec939c856c6f4dafcc28493038b676dde7c26734e04d367007df8d",
+        "observed_expansion": {
+          "fuse_muls_add": true,
+          "fuse_norm_quant": true,
+          "fuse_qknorm_rope": true
+        },
+        "raw_engine_args": {
+          "model": "/root/workspace/models/Qwen3.5-35B-A3B",
+          "tensor_parallel_size": 4,
+          "data_parallel_size": 1,
+          "pipeline_parallel_size": 1,
+          "enable_expert_parallel": true,
+          "dtype": "bfloat16",
+          "max_model_len": 16384,
+          "max_num_batched_tokens": 16384,
+          "max_num_seqs": 8,
+          "gpu_memory_utilization": 0.85,
+          "language_model_only": true,
+          "enable_chunked_prefill": true,
+          "async_scheduling": null,
+          "enable_prefix_caching": false,
+          "mamba_cache_mode": "none",
+          "enforce_eager": false,
+          "numa_bind": false,
+          "additional_config": {
+            "enable_cpu_binding": false,
+            "ascend_compilation_config": {
+              "enable_npugraph_ex": true,
+              "enable_static_kernel": false,
+              "fuse_norm_quant": true,
+              "fuse_qknorm_rope": true,
+              "fuse_muls_add": true
+            }
+          },
+          "compilation_config": {
+            "mode": 3,
+            "cudagraph_mode": "FULL_DECODE_ONLY",
+            "cudagraph_capture_sizes": [
+              1,
+              2,
+              4,
+              8
+            ],
+            "max_cudagraph_capture_size": 8
+          },
+          "distributed_executor_backend": "mp",
+          "seed": 42,
+          "disable_log_stats": true,
+          "stream_interval": 1,
+          "worker_cls": "vllm_ascend.worker.worker.NPUWorker"
+        }
+      }
+    ],
+    "original_rejection": "/root/workspace/muxpd-followup-20261025/performance/native-default-terminal-analysis-v1/frozen-native-analysis.stderr",
+    "runtime_originals_producer_and_frozen_criteria_changed": false,
+    "scope": "Offline canonicalization of documented native default insertion only; all frozen worker/backend/runtime/environment/output/chronology checks still run. Original saved dictionaries and failed CLI remain intact."
+  }
+}

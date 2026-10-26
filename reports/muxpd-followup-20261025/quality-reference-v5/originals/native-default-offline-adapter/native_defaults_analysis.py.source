@@ -1,0 +1,93 @@
+"""Read-only offline adapter for exactly three pinned native default expansions.
+
+No runtime/scorer changes. The original v2 analyzer's rejection is preserved.
+Only the saved expanded config validation is adapted; raw run bytes stay intact.
+"""
+
+import argparse
+import copy
+import hashlib
+import json
+from pathlib import Path
+import sys
+
+ROOT = Path(__file__).resolve().parents[2]
+BUNDLE = ROOT / "performance/native-default-backend-v2"
+sys.path.insert(0, str(BUNDLE))
+import native_default_reference as native  # noqa: E402
+
+DEFAULTS = {"fuse_muls_add": True, "fuse_norm_quant": True, "fuse_qknorm_rope": True}
+SOURCES = {
+    "/root/workspace/vllm-ascend-hust/vllm_ascend/platform.py": "8d34c4a8f1bebedf00c8bec91079e2c27fb43b3b447221a93b5a2ec74e3c3b47",
+    "/root/workspace/vllm-ascend-hust/vllm_ascend/ascend_config.py": "bb1b5b3cbfdb36eb170c8f6835c60553cc5b9092364f61afcb168348abc78c93",
+}
+CONFIG_SHA = "27e04de05fec939c856c6f4dafcc28493038b676dde7c26734e04d367007df8d"
+
+
+def require(condition, message):
+    if not condition:
+        raise ValueError(message)
+
+
+def normalize_expansion(engine):
+    projected = copy.deepcopy(engine)
+    observed = projected["additional_config"]["ascend_compilation_config"]
+    expected = native.expected_engine()["additional_config"]["ascend_compilation_config"]
+    require(set(observed) == set(expected) | set(DEFAULTS), "Expected exactly the three native expansions")
+    for key in DEFAULTS:
+        require(observed[key] is True, f"Native expansion is not strict bool True: {key}")
+        del observed[key]
+    return projected
+
+
+def validate_expanded(args, engine):
+    validated = native.validate(args, normalize_expansion(engine))
+    validated["additional_config"]["ascend_compilation_config"].update(DEFAULTS)
+    return validated
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("command", choices=("analyze",))
+    parser.add_argument("--plan", type=Path, required=True)
+    parser.add_argument("--runs", type=Path, nargs=2, required=True)
+    parser.add_argument("--output", type=Path, required=True)
+    args = parser.parse_args()
+    require(not args.output.exists(), "Fresh output required")
+    for name, sha in SOURCES.items():
+        require(native.file_sha(name) == sha, "Pinned native default-assignment source changed")
+    native.verify_dependencies()
+    plan = native.perf.load_plan(args.plan)
+    native.validate_role_plan("native-async", plan)
+    input_checks = []
+    for path in args.runs:
+        directory = path.parent.parent
+        explicit = directory / "engine-args.json"
+        require(native.file_sha(explicit) == CONFIG_SHA, "Original explicit launch config differs")
+        require(json.loads(explicit.read_text()) == native.expected_engine(), "Explicit config differs from frozen plan")
+        controller = json.loads((directory / "controller.json").read_text())
+        require(controller["config_sha256"] == CONFIG_SHA, "Controller explicit-config binding differs")
+        run = json.loads(path.read_text())
+        normalized = normalize_expansion(run["engine_args"])
+        expected = native.expected_engine() | {"worker_cls": native.NATIVE_WORKER_CLASS}
+        require(normalized == expected, "Saved config differs beyond exact native expansion")
+        input_checks.append({"run": str(path), "run_sha256": native.file_sha(path),
+                             "explicit_config_sha256": CONFIG_SHA, "observed_expansion": DEFAULTS,
+                             "raw_engine_args": run["engine_args"]})
+    native.install_adapters()
+    native.perf.validate = validate_expanded
+    result = native.analyze(args.runs, plan)
+    result["offline_default_expansion_adapter"] = {
+        "source": str(Path(__file__).resolve()), "sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+        "pinned_native_source_sha256": SOURCES, "source_lines": {
+            "platform.py": "431 initialize;450–456 vars(config) update of shared additional_config",
+            "ascend_config.py": "506–507 bool True defaults;544–548 object assignment"},
+        "exact_three_keys_only": DEFAULTS, "input_checks": input_checks,
+        "original_rejection": str(ROOT / "performance/native-default-terminal-analysis-v1/frozen-native-analysis.stderr"),
+        "runtime_originals_producer_and_frozen_criteria_changed": False,
+        "scope": "Offline canonicalization of documented native default insertion only; all frozen worker/backend/runtime/environment/output/chronology checks still run. Original saved dictionaries and failed CLI remain intact."}
+    native.perf.save(args.output, result)
+
+
+if __name__ == "__main__":
+    main()
