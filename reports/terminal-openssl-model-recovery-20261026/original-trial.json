@@ -1,0 +1,44 @@
+{
+  "status": "completed_Agent_verifier_environment_timeout_not_scored",
+  "task": "openssl-selfsigned-cert",
+  "model": "Qwen3.5-35B-A3B",
+  "runtime": {
+    "vllm": "0.18.0",
+    "vllm_ascend": "0.18.0"
+  },
+  "agent_turns": 5,
+  "agent_seconds": 86.812555,
+  "verifier_seconds": 900.100474,
+  "model_usage": {
+    "total_prompt_tokens": 12104,
+    "total_completion_tokens": 1717,
+    "total_cached_tokens": 0
+  },
+  "reward": null,
+  "official_test_count": null,
+  "exception_type": "VerifierTimeoutError",
+  "dependency_stage": "uv0.9.5 download; no pytest/CTRF/reward produced",
+  "whole_trial_retries": 0,
+  "additional_model_qualification": 0,
+  "nested_retry_policy": "Original Harbor/Terminus each3 attempts; SDK0; not SWE zero-call-retry contract",
+  "CPU_sealed_files_verified": 30,
+  "CPU_released": true,
+  "source_hashes": {
+    "CPU_seal": "2bb757cd0a965668fef5366923676cd26ee1ae15a79f447fbf1c2993a6628782",
+    "receipt": "ebc1c5e2d2eada487095ccc0c7961c70d99a245f2c077cfed6a72b0025c413dd",
+    "trial_result": "5f3759f15f3eab954eac2151b5b01d69d784e45e179699f654e1f33acbf976ff",
+    "trajectory": "e97bbb89218652dee4b3e361e61033e115b05f3fceda566a062583ccb9d528b1",
+    "verifier_stdout": "61e88312e29bb7e201397b0eebaf1cb42a90ec4e31c66e1f2d07c5c3a411587b",
+    "job": "32ae72e0a6de81e3bea1aa3aeea3d3243b102531070e7172e23d134ca1aa1aa2",
+    "exact_CPU_request": "82e43810b1c0f89a721e0388b95f771b2e9ec206e06a2ca5b35c5d5f3a2a9ea6"
+  },
+  "output_preservation": {
+    "snapshot_files": 4,
+    "snapshot_receipt_sha256": "bb0ff22f72e72cbf7bf5cbe415a2a9731480c41dbb95ecfa3294217841143455",
+    "scope": "/app/ssl only; /app/check_cert.py was not snapshotted",
+    "script_reconstruction_status": "requires independent original command/transcript review; not assumed identical"
+  },
+  "service_release": "separate_storage_receipt",
+  "scope": "One model task attempted, zero completed official model-task scores; not0/1 or89-task acceptance",
+  "raw_questions_answers_or_keys_included": false
+}
