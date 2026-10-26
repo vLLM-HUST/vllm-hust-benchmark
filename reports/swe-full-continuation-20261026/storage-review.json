@@ -1,0 +1,71 @@
+{
+  "status": "reviewed",
+  "trajectory_sha256": "c21e6e189787704d86a42c1d372612655f8f381c9daae8db1e4f3723bc4c4644",
+  "source_seal_sha256": "35e391377b985d6f476a60e139d77307633a0991cb83d8249f7df5a0d791561a",
+  "report_sha256": "dd754390b1a51d51c3f8e66d52bdd9423a82aa4d8eca1aed8e63dc161bae0254",
+  "termination": "100 model-call step limit; elapsed435.975943<wall1200",
+  "model_responses": 100,
+  "actual_models": {
+    "qwen3.5-35b": 100
+  },
+  "finish_reasons": {
+    "stop": 100
+  },
+  "max_output_tokens": 1281,
+  "max_input_tokens": 43571,
+  "response_output_tokens_total": 10254,
+  "shell_returncodes": {
+    "0": 98,
+    "2": 1,
+    "1": 1
+  },
+  "format_rejections": 0,
+  "tool_timeouts": 0,
+  "verified_failure_observations": [
+    {
+      "steps": [
+        82,
+        83,
+        94,
+        95
+      ],
+      "finding": "unescaped ampersands in model-generated sed replacement duplicated matched source text; subsequent observations exposed corruption"
+    },
+    {
+      "steps": [
+        87,
+        96
+      ],
+      "finding": "model reset the modified source to index and attempted reconstruction"
+    },
+    {
+      "steps": [
+        80,
+        93
+      ],
+      "finding": "model-created mocked logic tests reported guest-case failure; these did not execute actual application integration tests"
+    },
+    {
+      "steps": [
+        100
+      ],
+      "finding": "last command only inspected code; no submission command before step limit"
+    }
+  ],
+  "official_test_status_counts": {
+    "PASSED": 117,
+    "FAILED": 4
+  },
+  "official_failure_user_not_defined_observed": true,
+  "official_grade_unresolved": 0,
+  "official_resolved": false,
+  "reuse_decision": "reuse this immutable negative B0 result under identical frozen input/model/runtime/Agent budget in full-dataset coverage; no reason found to rerun this task or raise steps solely for failure",
+  "scope_limit": "single trajectory analysis; no assertion that this budget or model is optimal for all731 tasks",
+  "private_task_text_patch_or_full_trajectory_exported": false,
+  "evidence_sha256": {
+    "official_agent_output": "ae74918bed8e9aeeca77d8d955dde37b0c20e7d3dee10c9bf9c55dc2cb68983f",
+    "official_stdout": "99e1e4ca091b1d7e230094c4603995426e43836ec9bbbfa888eef6148697703e",
+    "patch": "f83e612dcdd18e2755a9f2ccaf1591a290273f3b0767fac97f93609388e68a30"
+  },
+  "reviewed_utc": "2026-10-26T04:21:47.802522+00:00"
+}
