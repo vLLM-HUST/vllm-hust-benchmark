@@ -1,0 +1,105 @@
+{
+  "status": "passed_verifier_only_recovery_accepted_for_aggregation",
+  "observed_epoch": 1793040910.178781,
+  "recovery_plan_sha256": "46b1477c8fc813f7ff86fe7bb541685c4d6bd2d0dba7640b7a16fe2854bd53da",
+  "recovery_seal_sha256": "38bcad7965bab6264af6cd4d728f3e46f79d302f394d224ced6d7325511f2c87",
+  "recovery_sealed_files_verified": 17,
+  "CPU_bindings_verified": 30,
+  "source_and_interface_review": "r2 diff limited to original _harbor_log_bind_mount, actual bind check, compose/helper binding, new output identity; original DockerEnvironment and Verifier.verify unchanged; one verifier call",
+  "original_test_results": {
+    "tests": 6,
+    "passed": 6,
+    "failed": 0,
+    "skipped": 0,
+    "pending": 0,
+    "reward": 1.0,
+    "original_test_name_set_exact": true,
+    "test_retries": 0,
+    "names": [
+      "test_certificate_file",
+      "test_combined_pem_file",
+      "test_directory_structure",
+      "test_key_file",
+      "test_python_verification_script",
+      "test_verification_file"
+    ]
+  },
+  "verifier_elapsed_seconds": 11.784143209457397,
+  "verifier_budget_seconds": 900,
+  "resource_identity": {
+    "NanoCpus": 1000000000,
+    "Memory": 2147483648,
+    "MemorySwap": 2147483648,
+    "CpusetCpus": "24-31"
+  },
+  "network": "swe-pro-mtu1400",
+  "verifier_mount": {
+    "Type": "bind",
+    "Source": "/swe-persist/swe-pro-shuhao-20261025/terminal-openssl-verifier-recovery-r2/trial/verifier",
+    "Destination": "/logs/verifier",
+    "Mode": "",
+    "RW": true,
+    "Propagation": "rprivate"
+  },
+  "preserved_answer": {
+    "four_original_ssl_files": true,
+    "five_before_after_sha_and_mode_equal": true,
+    "derived_check_cert": {
+      "bytes": 1366,
+      "derived_sha256": "ce3727ca377e9d2e29a9851858d9c2af03d533b0f4ad7c0a44849d0865414c02",
+      "original_filesystem_sha256": null,
+      "original_mode": null,
+      "recovery_mode": "0755",
+      "identity": "deterministic reconstruction from original quoted heredoc, all_messages and terminal echo; not an original file snapshot"
+    }
+  },
+  "original_trial": {
+    "sealed_files_unchanged": 30,
+    "receipt_sha256": "ebc1c5e2d2eada487095ccc0c7961c70d99a245f2c077cfed6a72b0025c413dd",
+    "original_exception": "VerifierTimeoutError900s",
+    "original_reward": null,
+    "original_CTRF": false,
+    "original_records_overwritten": false,
+    "original_model_HTTP_responses": 5,
+    "additional_Agent_attempts": 0,
+    "additional_model_requests": 0,
+    "additional_controls": 0,
+    "r1_preparation_never_dispatched": true
+  },
+  "transport": {
+    "exact_fixed_installer_URL_cache_hits": 1,
+    "pre_verifier_SHA_bound": {
+      "/opt/verified-uv/uv-installer.sh": "8402ab80d2ef54d7044a71ea4e4e1e8db3b20c87c7bffbc30bff59f1e80ebbd5",
+      "/opt/verified-uv/uv-aarch64-unknown-linux-gnu.tar.gz": "9db0c2f6683099f86bfeea47f4134e915f382512278de95b2a0e625957594ff3",
+      "/opt/verified-uv/bin/curl": "be10e4bdd96689f7d391f85cf7d7144dffac5be2f608244af771a388692cdff7"
+    },
+    "post_verifier_SHA_claimed": false,
+    "upstream_release_identity_previously_verified": true,
+    "original_test_and_Harbor_sources_unchanged": true,
+    "stdout_warning_retained": "/tests/test.sh: line 10: /root/.local/bin/env: No such file or directory",
+    "warning_interpretation": "Original shell lacks set -e and PATH explicitly includes /root/.local/bin. Log retains source-env missing error, then uvx executes original pytest8.4.1/json-ctrf0.3.5 on Python3.13.17; all six original tests and CTRF pass. No log suppression, replacement result or retry."
+  },
+  "release": {
+    "process_exit_code": 0,
+    "controller_and_child_absent": true,
+    "all_Docker_containers_absent": true,
+    "recovery_seal_after_child_exit_and_release": true,
+    "original_model_service_sealed_files_unchanged": 17,
+    "model_service_already_released": true
+  },
+  "aggregation": {
+    "task": "openssl-selfsigned-cert",
+    "scored_status": "passed_after_verifier_only_dependency_transport_recovery",
+    "effective_recovered_reward": 1.0,
+    "original_raw_reward": null,
+    "unique_Agent_trials": 1,
+    "new_Agent_trials_during_recovery": 0,
+    "not_a_new_model_trial": true,
+    "scope": "One original Terminal task answer, with disclosed derived script and verifier-only recovery; not full89 coverage",
+    "suggested_public_wording": "OpenSSL 原任务的同一次 Agent 答案经依赖传输修复后，仅恢复原评分，6/6 测试通过、reward=1；原 VerifierTimeoutError/null 保留。四个 SSL 文件复用原快照，check_cert.py 为原命令确定性派生重建，非现场原文件哈希，原模式未知。新增 Agent/模型调用均为0。"
+  },
+  "detailed_CPU_readback": "/root/four-primary-datasets-20261025/terminal-openssl-verifier-recovery-final-review-r2/CPU-final-readback.json",
+  "detailed_CPU_readback_sha256": "f336ea6ad3a35cbe85b2a0d3f356026f197a54774664e5f75ce360b0ba4479ec",
+  "review_executed_model_container_verifier_controls": false,
+  "skill_recheck": "E44/E54/E55/E56; source/result/release identity audited, original failure preserved, no repeated model or controls."
+}

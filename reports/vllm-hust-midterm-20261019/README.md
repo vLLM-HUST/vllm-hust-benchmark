@@ -106,3 +106,5 @@ python compare_long_runs.py midterm-run-20261019-r4 midterm-b1-20261019 comparis
 ```
 
 原始运行脚本中的绝对路径用于追溯本机环境，不应直接在其他机器执行。 主报告列出的既有来源依赖原报告仓库或保留的私有证据，未声称全部包含在本归档中。
+
+- Terminal原答案恢复评分：[规范结果](../terminal-openssl-model-recovery-20261026/README.md)。

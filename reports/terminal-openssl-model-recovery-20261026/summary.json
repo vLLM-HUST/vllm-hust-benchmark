@@ -1,0 +1,87 @@
+{
+  "schema": "terminal-original-answer-verifier-recovery/v1",
+  "task": "openssl-selfsigned-cert",
+  "dataset": "TerminalBench2.1",
+  "model": "Qwen3.5-35B-A3B",
+  "runtime": {
+    "vllm": "0.18.0",
+    "vllm_ascend": "0.18.0"
+  },
+  "platform": "linux/arm64",
+  "derived_image": "sha256:940a014b319f79b1f83bd91912bea97ba2035b4333fd19a5dd49a83a5b89ec53",
+  "Harbor": "0.24.0",
+  "Agent": "Terminus2",
+  "dataset_tasks": 89,
+  "model_task_attempts": 1,
+  "scored_model_tasks": 1,
+  "passed_model_tasks": 1,
+  "unattempted_tasks": 88,
+  "agent_turns": 5,
+  "agent_seconds": 86.812555,
+  "model_usage": {
+    "total_prompt_tokens": 12104,
+    "total_completion_tokens": 1717,
+    "total_cached_tokens": 0
+  },
+  "original_verifier": {
+    "reward": null,
+    "exception": "VerifierTimeoutError",
+    "seconds": 900.100474,
+    "tests_started": false
+  },
+  "recovery": {
+    "reward": 1.0,
+    "tests": 6,
+    "passed": 6,
+    "failed": 0,
+    "seconds": 11.784143209457397,
+    "timeout_seconds": 900,
+    "additional_Agent_attempts": 0,
+    "additional_model_calls": 0,
+    "automatic_retries": 0,
+    "process_exit_code": 0,
+    "all_owned_containers_released": true,
+    "answer_file_hashes_unchanged": true,
+    "answer_files_checked": 5,
+    "cpus": 1,
+    "memory_bytes": 2147483648,
+    "cpuset": "24-31",
+    "mtu": 1400,
+    "original_tests_unchanged": true,
+    "actual_verifier_log_bind_verified": true
+  },
+  "script_provenance": {
+    "bytes": 1366,
+    "sha256": "ce3727ca377e9d2e29a9851858d9c2af03d533b0f4ad7c0a44849d0865414c02",
+    "source": "Exact quoted heredoc and terminal echo, independently reconciled; no subsequent rewriting observed.",
+    "original_filesystem_sha_captured": false,
+    "original_mode": null,
+    "recovery_mode": "0755",
+    "complete_original_answer_snapshot": false
+  },
+  "transport": {
+    "installer_sha256": "8402ab80d2ef54d7044a71ea4e4e1e8db3b20c87c7bffbc30bff59f1e80ebbd5",
+    "archive_sha256": "9db0c2f6683099f86bfeea47f4134e915f382512278de95b2a0e625957594ff3",
+    "archive_bytes": 20199463,
+    "uv_version": "0.9.5",
+    "method": "Pinned official installer cache and UV_DOWNLOAD_URL=file transport; all other curl requests unchanged.",
+    "verified_before_execution": true,
+    "verified_after_execution": false,
+    "remaining_dependencies": "Original uvx pytest==8.4.1 and pytest-json-ctrf==0.3.5; no claim of historical transitive wheel identity."
+  },
+  "retained_warning": "Original test.sh line 10 could not source /root/.local/bin/env; uvx then executed and all six original tests passed.",
+  "nested_retry_policy": "Original Harbor/Terminus each3 attempts; SDK0; not SWE zero-call-retry contract",
+  "full_dataset_acceptance": false,
+  "paired_B0_B1": false,
+  "amd64_image_equivalence_claimed": false,
+  "raw_questions_answers_or_keys_included": false,
+  "evidence": {
+    "recovery_plan_sha256": "46b1477c8fc813f7ff86fe7bb541685c4d6bd2d0dba7640b7a16fe2854bd53da",
+    "recovery_seal_sha256": "38bcad7965bab6264af6cd4d728f3e46f79d302f394d224ced6d7325511f2c87",
+    "recovery_receipt_sha256": "f4ec138939a3430b7f8788dafa5b3ce6d7dc1b60675735d17ebb648e75fe481d",
+    "original_receipt_sha256": "ebc1c5e2d2eada487095ccc0c7961c70d99a245f2c077cfed6a72b0025c413dd",
+    "CTRF_sha256": "138f2d43e345a265ec0fd79bcd1c2788b678f606b0479ed2d59fc324d621057b",
+    "original_trajectory_sha256": "e97bbb89218652dee4b3e361e61033e115b05f3fceda566a062583ccb9d528b1",
+    "recovery_source_sha256": "1ee4b16411eea39fbdbbae129288d59460715b79fa9d7a1d0e2bb95f220d448a"
+  }
+}

@@ -49,7 +49,11 @@ def test_v090_current_projection_preserves_history(monkeypatch):
     monkeypatch.syspath_prepend(str(ROOT / "scripts"))
     import build_midterm_v090 as b
 
-    data = b.build("fixture", lambda path: (ROOT / path).read_bytes())
+    snapshot = "reports/vllm-hust-midterm-20261019/中期测试报告-v090.md"
+    data = b.build(
+        "fixture",
+        lambda path: (ROOT / (snapshot if path == b.REPORT else path)).read_bytes(),
+    )
     old = json.loads((ROOT / "website-publication/data/midterm-v089.json").read_text())
     for key in (
         "wholechain_reference",
@@ -72,7 +76,7 @@ def test_v090_current_projection_preserves_history(monkeypatch):
         catalog,
         json.loads((ROOT / b.previous.SOURCE).read_text()),
     )
-    actual = (ROOT / b.REPORT).read_text()
+    actual = (ROOT / snapshot).read_text()
     assert "报告版本：V0.90" in actual
     assert f"{catalog['attempted_unique_tasks']}/731" in actual
     assert "目标包编译失败" in report and "模型任务覆盖仍为0/89" in report

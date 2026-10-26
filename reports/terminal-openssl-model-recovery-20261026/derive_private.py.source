@@ -1,0 +1,121 @@
+"""Derive public aggregates from private first-trial and recovery evidence."""
+import hashlib
+import json
+import subprocess
+from pathlib import Path
+
+W = Path("/swe-persist/swe-pro-shuhao-20261025")
+R = W / "terminal-openssl-verifier-recovery-r2"
+OLD = W / "terminal-openssl-b0-model-r1"
+OUT = W / "evidence/terminal-openssl-recovery-public-r1"
+
+def sha(p):
+    return hashlib.sha256(p.read_bytes()).hexdigest()
+
+def read(p):
+    return json.loads(p.read_text())
+
+def save(name, value):
+    with (OUT / name).open("x") as stream:
+        json.dump(value, stream, ensure_ascii=False, indent=2)
+        stream.write("\n")
+
+def main():
+    OUT.mkdir(mode=0o700)
+    seal = []
+    for line in (R / "SHA256SUMS").read_text().splitlines():
+        digest, name = line.split("  ", 1)
+        p = R / name
+        assert p.resolve().is_relative_to(R.resolve())
+        assert sha(p) == digest
+        seal.append({"evidence": name, "sha256": digest, "bytes": p.stat().st_size})
+    plan = read(R / "plan.json")
+    for item in plan["bindings"]:
+        assert sha(Path(item["path"])) == item["sha256"]
+    receipt = read(R / "receipt.json")
+    assert receipt["status"] == "scored_verifier_only_recovery"
+    assert receipt["model_calls"] == receipt["Agent_attempts"] == 0
+    assert receipt["all_owned_containers_released"]
+    assert read(R / "process-exit.json")["exit_code"] == 0
+    assert not subprocess.check_output(
+        ["/run/swe-pro-docker/docker", "-H", "unix:///run/swe-pro-docker/docker.sock", "ps", "-q"],
+        text=True).strip()
+    original = read(W / "evidence/terminal-openssl-first-trial-audit-r1.json")
+    assert original["reward"] is None and original["agent_turns"] == 5
+    assert read(OLD / "receipt.json")["reward"] is None
+    before, after = read(R / "restored-before.json"), read(R / "restored-after.json")
+    assert before == after and len(before) == 5
+    ctrf = read(R / "trial/verifier/ctrf.json")
+    tests = [{"name": t["name"], "status": t["status"]} for t in ctrf["results"]["tests"]]
+    assert len(tests) == len({t["name"] for t in tests}) == 6
+    assert all(t["status"] == "passed" for t in tests)
+    assert receipt["recovered_reward"] == 1
+    mount = read(R / "verifier-mount-actual.json")
+    assert mount["Source"] == str(R / "trial/verifier")
+    assert mount["Destination"] == "/logs/verifier" and mount["RW"] is True
+    image = read(R / "container.json")
+    hc = image["HostConfig"]
+    assert hc["NanoCpus"] == 1000000000 and hc["Memory"] == 2147483648
+    stdout = (R / "trial/verifier/test-stdout.txt").read_text()
+    assert "6 passed" in stdout and "No such file or directory" in stdout
+    summary = {
+        "schema": "terminal-original-answer-verifier-recovery/v1",
+        "task": "openssl-selfsigned-cert", "dataset": "TerminalBench2.1",
+        "model": "Qwen3.5-35B-A3B",
+        "runtime": original["runtime"], "platform": "linux/arm64",
+        "derived_image": image["Image"], "Harbor": "0.24.0", "Agent": "Terminus2",
+        "dataset_tasks": 89, "model_task_attempts": 1,
+        "scored_model_tasks": 1, "passed_model_tasks": 1, "unattempted_tasks": 88,
+        "agent_turns": 5, "agent_seconds": original["agent_seconds"],
+        "model_usage": original["model_usage"],
+        "original_verifier": {"reward": None, "exception": "VerifierTimeoutError",
+            "seconds": original["verifier_seconds"], "tests_started": False},
+        "recovery": {"reward": receipt["recovered_reward"], "tests": 6, "passed": 6,
+            "failed": 0, "seconds": receipt["verifier_ended_epoch"] - receipt["verifier_started_epoch"],
+            "timeout_seconds": 900, "additional_Agent_attempts": 0, "additional_model_calls": 0,
+            "automatic_retries": 0, "process_exit_code": 0,
+            "all_owned_containers_released": True,
+            "answer_file_hashes_unchanged": True, "answer_files_checked": 5,
+            "cpus": 1, "memory_bytes": 2147483648, "cpuset": "24-31", "mtu": 1400,
+            "original_tests_unchanged": True, "actual_verifier_log_bind_verified": True},
+        "script_provenance": {"bytes": 1366,
+            "sha256": "ce3727ca377e9d2e29a9851858d9c2af03d533b0f4ad7c0a44849d0865414c02",
+            "source": "Exact quoted heredoc and terminal echo, independently reconciled; no subsequent rewriting observed.",
+            "original_filesystem_sha_captured": False, "original_mode": None,
+            "recovery_mode": "0755", "complete_original_answer_snapshot": False},
+        "transport": {"installer_sha256": "8402ab80d2ef54d7044a71ea4e4e1e8db3b20c87c7bffbc30bff59f1e80ebbd5",
+            "archive_sha256": "9db0c2f6683099f86bfeea47f4134e915f382512278de95b2a0e625957594ff3",
+            "archive_bytes": 20199463, "uv_version": "0.9.5",
+            "method": "Pinned official installer cache and UV_DOWNLOAD_URL=file transport; all other curl requests unchanged.",
+            "verified_before_execution": True, "verified_after_execution": False,
+            "remaining_dependencies": "Original uvx pytest==8.4.1 and pytest-json-ctrf==0.3.5; no claim of historical transitive wheel identity."},
+        "retained_warning": "Original test.sh line 10 could not source /root/.local/bin/env; uvx then executed and all six original tests passed.",
+        "nested_retry_policy": original["nested_retry_policy"],
+        "full_dataset_acceptance": False, "paired_B0_B1": False,
+        "amd64_image_equivalence_claimed": False,
+        "raw_questions_answers_or_keys_included": False,
+        "evidence": {"recovery_plan_sha256": sha(R / "plan.json"),
+            "recovery_seal_sha256": sha(R / "SHA256SUMS"),
+            "recovery_receipt_sha256": sha(R / "receipt.json"),
+            "original_receipt_sha256": sha(OLD / "receipt.json"),
+            "CTRF_sha256": sha(R / "trial/verifier/ctrf.json"),
+            "original_trajectory_sha256": original["source_hashes"]["trajectory"],
+            "recovery_source_sha256": sha(W / "terminal-openssl-verifier-recovery-code-r2/recover.py")}
+    }
+    save("summary.json", summary)
+    save("tests.json", {"summary": ctrf["results"]["summary"], "tests": tests})
+    save("recovery-receipt.json", receipt)
+    save("original-trial.json", original)
+    save("restricted-evidence-index.json", {"location": "Controlled CPU persistent evidence; not public raw task/answer content",
+        "recovery_directory": str(R), "files": seal,
+        "source_bindings": plan["bindings"], "public_content": "Only aggregates, identities and hashes."})
+    save("profiling-review.json", {"status": "passed", "summary_sha256": sha(OUT / "summary.json"),
+        "sealed_files": len(seal), "source_bindings": len(plan["bindings"]),
+        "all_six_original_test_names_verified": True, "original_null_preserved": True,
+        "five_restored_answer_files_unchanged": True, "actual_log_bind_verified": True,
+        "all_owned_containers_released": True})
+    print(json.dumps({"public_directory": str(OUT), "summary_sha256": sha(OUT / "summary.json"),
+        "reward": summary["recovery"]["reward"], "tests_passed": 6, "sealed_files": len(seal)}))
+if __name__ == "__main__":
+    main()
+

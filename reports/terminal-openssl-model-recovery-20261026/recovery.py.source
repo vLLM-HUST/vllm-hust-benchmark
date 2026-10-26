@@ -1,0 +1,218 @@
+"""One verifier-only recovery of preserved outputs; no Agent or model entry point."""
+import argparse
+import asyncio
+import datetime
+import hashlib
+import inspect
+import json
+import os
+from pathlib import Path
+import shlex
+import subprocess
+import time
+
+from harbor.environments.docker.docker import DockerEnvironment
+from harbor.models.task.task import Task
+from harbor.models.trial.config import ResourceMode
+from harbor.models.trial.paths import EnvironmentPaths, TrialPaths
+from harbor.trial.trial import _harbor_log_bind_mount
+from harbor.verifier.verifier import Verifier
+
+W = Path('/swe-persist/swe-pro-shuhao-20261025')
+T = W / 'terminal-openssl-arm64-r1'
+OLD = W / 'terminal-openssl-b0-model-r1'
+INPUT = W / 'evidence/terminal-openssl-storage-recovery-inputs-r1'
+SNAP = W / 'evidence/terminal-openssl-output-snapshot-r1'
+HERE = Path(__file__).resolve().parent
+R = W / 'terminal-openssl-verifier-recovery-r2'
+IMAGE = 'sha256:940a014b319f79b1f83bd91912bea97ba2035b4333fd19a5dd49a83a5b89ec53'
+DOCKER = ['/run/swe-pro-docker/docker', '-H', 'unix:///run/swe-pro-docker/docker.sock']
+
+def sha(path):
+    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+
+def read(path):
+    return json.loads(Path(path).read_text())
+
+def save(path, value):
+    with Path(path).open('x') as stream:
+        json.dump(value, stream, indent=2)
+        stream.write('\n')
+
+def docker(*args):
+    return subprocess.check_output(DOCKER + list(args), text=True, timeout=40)
+
+def bindings():
+    manifest = read(INPUT / 'recovery-inputs-manifest.json')
+    for entry in manifest['files']:
+        assert sha(INPUT/entry['path']) == entry['sha256']
+        assert (INPUT/entry['path']).stat().st_size == entry['bytes']
+    assert sha(INPUT/'derived-check_cert.py') == 'ce3727ca377e9d2e29a9851858d9c2af03d533b0f4ad7c0a44849d0865414c02'
+    assert sha(INPUT/'uv-installer.sh') == '8402ab80d2ef54d7044a71ea4e4e1e8db3b20c87c7bffbc30bff59f1e80ebbd5'
+    assert sha(INPUT/'uv-aarch64-unknown-linux-gnu.tar.gz') == '9db0c2f6683099f86bfeea47f4134e915f382512278de95b2a0e625957594ff3'
+    snapshot = read(SNAP/'receipt.json')
+    for entry in snapshot['files']:
+        assert sha(SNAP/entry['path']) == entry['sha256']
+    old = read(OLD/'receipt.json')
+    assert old['reward'] is None and old['ctrf_paths'] == []
+    assert old['client_exited'] and old['all_owned_containers_released']
+    assert old['remaining_client_session_members'] == []
+    files = [HERE/'recover.py', HERE/'curl', HERE/'launch.py', INPUT/'recovery-inputs-manifest.json',
+             SNAP/'receipt.json', OLD/'receipt.json', OLD/'cpu-final-seal.json', T/'transport-compose.json']
+    files += [INPUT/e['path'] for e in manifest['files']]
+    files += [SNAP/e['path'] for e in snapshot['files']]
+    files += sorted(p for p in (T/'task-arm64').rglob('*') if p.is_file())
+    files += [Path(inspect.getfile(c)) for c in (Task, TrialPaths, Verifier, DockerEnvironment, _harbor_log_bind_mount)]
+    return [{'path':str(p), 'sha256':sha(p)} for p in sorted(set(files))]
+
+def plan():
+    task = Task(T/'task-arm64')
+    assert task.config.verifier.timeout_sec == 900
+    assert task.config.environment.cpus == 1 and task.config.environment.memory_mb == 2048
+    assert sha(T/'task-arm64/tests/test.sh') == '4770437ea96c3cc84684b4f99d55fb148fcac09f9ea1e8ef49de487716e6c334'
+    assert sha(T/'task-arm64/tests/test_outputs.py') == '90970bb3c372e8e7fb6bb9ac5f649ba73eb38e1a5ea2e922a9057a72b6b4192d'
+    return {'kind':'verifier_only_recovery_of_same_Agent_answer', 'image':IMAGE,
+        'bindings':bindings(), 'model_calls':0, 'Agent_attempts':0, 'control_repeats':0,
+        'verifier_timeout_seconds':900, 'cpus':1, 'memory_bytes':2147483648,
+        'cpuset':'24-31', 'mtu':1400, 'automatic_retry':False,
+        'original_score':None, 'original_trial_preserved':True,
+        'script_provenance':'1366 bytes reconstructed from exact quoted heredoc and terminal echo; not original filesystem SHA',
+        'script_original_mode':None, 'script_recovery_mode':'0755; Python test reads file, no claim of original exact mode',
+        'transport':'Exact curl installer URL served from pinned official release installer cache; UV_DOWNLOAD_URL=file:///opt/verified-uv; all other curl delegated unchanged',
+        'tests':'Unmodified original test.sh/test_outputs.py via original Harbor Verifier.verify; one call',
+        'output':str(R)}
+
+def freeze():
+    value = plan()
+    R.mkdir(mode=0o700)
+    for name in ('home','tmp','cache'):
+        (R/name).mkdir(mode=0o700)
+    save(R/'plan.json', value)
+    save(R/'transport-compose.json', read(T/'transport-compose.json'))
+    return {'status':'frozen_not_executed','plan_sha256':sha(R/'plan.json')}
+
+async def execute():
+    frozen = read(R/'plan.json')
+    assert frozen == plan(), 'frozen source/input changed'
+    assert sha(R/'transport-compose.json') == sha(T/'transport-compose.json')
+    assert not (R/'started.json').exists()
+    assert set(os.sched_getaffinity(0)) == set(range(24,32))
+    assert not docker('ps','-q').strip(), 'another container is active'
+    image = json.loads(docker('image','inspect',IMAGE))[0]
+    assert image['Id'] == IMAGE and image['Architecture'] == 'arm64'
+    network = json.loads(docker('network','inspect','swe-pro-mtu1400'))[0]
+    assert network['Options']['com.docker.network.driver.mtu'] == '1400'
+    save(R/'started.json', {'epoch':time.time(),'pid':os.getpid(),'plan_sha256':sha(R/'plan.json')})
+    paths = TrialPaths(trial_dir=R/'trial')
+    paths.mkdir()
+    task = Task(T/'task-arm64')
+    verifier_mount = _harbor_log_bind_mount(
+        source=paths.verifier_dir.resolve().absolute().as_posix(),
+        target=str(EnvironmentPaths.for_os(task.config.environment.os).verifier_dir),
+        os=task.config.environment.os)
+    environment = DockerEnvironment(environment_dir=task.paths.environment_dir,
+        environment_name='terminal-openssl-verifier-recovery-r2',
+        session_id='terminal-openssl-verifier-recovery-r2', trial_paths=paths,
+        task_env_config=task.config.environment, cpu_enforcement_policy=ResourceMode.LIMIT,
+        memory_enforcement_policy=ResourceMode.LIMIT,
+        extra_docker_compose=[R/'transport-compose.json'], mounts=[verifier_mount])
+    result = {'status':'starting','model_calls':0,'Agent_attempts':0,'original_reward':None,
+              'recovered_reward':None,'automatic_retry':False,'plan_sha256':sha(R/'plan.json')}
+    cid = None
+    expected = {}
+    async def command(value):
+        output = await environment.exec(command=value, user='root')
+        assert output.return_code == 0, 'setup or identity command failed'
+        return output.stdout
+    async def identities():
+        code = 'import hashlib,json,os;paths='+repr(list(expected))+';print(json.dumps({p:{"sha256":hashlib.sha256(open(p,"rb").read()).hexdigest(),"mode":oct(os.stat(p).st_mode&0o777)} for p in paths}))'
+        return json.loads(await command('python3 -c '+shlex.quote(code)))
+    try:
+        await asyncio.wait_for(environment.start(force_build=False), timeout=600)
+        ids = docker('ps','-q','--filter','ancestor='+IMAGE).split()
+        assert len(ids)==1
+        cid=ids[0]
+        item=json.loads(docker('inspect',cid))[0]
+        hc=item['HostConfig']
+        assert item['Image']==IMAGE and hc['NanoCpus']==1000000000
+        assert hc['Memory']==2147483648 and hc['CpusetCpus']=='24-31'
+        assert 'swe-pro-mtu1400' in item['NetworkSettings']['Networks']
+        mounts = [m for m in item['Mounts'] if m['Destination'] == verifier_mount['target']]
+        assert len(mounts) == 1
+        assert mounts[0]['Type'] == 'bind' and mounts[0]['RW'] is True
+        assert mounts[0]['Source'] == verifier_mount['source']
+        save(R/'verifier-mount-actual.json', mounts[0])
+        save(R/'container.json', item)
+        await command('mkdir -p /app/ssl /opt/verified-uv/bin')
+        for entry in read(SNAP/'receipt.json')['files']:
+            target='/app/'+entry['path']
+            await environment.upload_file(SNAP/entry['path'], target)
+            await command('chmod '+entry['mode'][2:]+' '+shlex.quote(target))
+            expected[target]={'sha256':entry['sha256'],'mode':entry['mode']}
+        await environment.upload_file(INPUT/'derived-check_cert.py','/app/check_cert.py')
+        await command('chmod 755 /app/check_cert.py')
+        expected['/app/check_cert.py']={'sha256':sha(INPUT/'derived-check_cert.py'),'mode':'0o755'}
+        for name in ('uv-installer.sh','uv-aarch64-unknown-linux-gnu.tar.gz'):
+            await environment.upload_file(INPUT/name, '/opt/verified-uv/'+name)
+        await environment.upload_file(HERE/'curl', '/opt/verified-uv/bin/curl')
+        await command('chmod 755 /opt/verified-uv/bin/curl')
+        transport = {'/opt/verified-uv/'+name:sha(INPUT/name) for name in ('uv-installer.sh','uv-aarch64-unknown-linux-gnu.tar.gz')}
+        transport['/opt/verified-uv/bin/curl']=sha(HERE/'curl')
+        code='import hashlib,json;paths='+repr(list(transport))+';print(json.dumps({p:hashlib.sha256(open(p,"rb").read()).hexdigest() for p in paths}))'
+        actual_transport=json.loads(await command('python3 -c '+shlex.quote(code)))
+        assert actual_transport==transport
+        save(R/'transport-actual.json',actual_transport)
+        before=await identities()
+        assert before==expected
+        save(R/'restored-before.json', before)
+        verifier=Verifier(task=task, trial_paths=paths, environment=environment,
+            override_env={'UV_DOWNLOAD_URL':'file:///opt/verified-uv',
+                          'PATH':'/opt/verified-uv/bin:/root/.local/bin:/usr/local/bin:/usr/bin:/bin'})
+        result['verifier_started_epoch']=time.time()
+        outcome=await asyncio.wait_for(verifier.verify(),timeout=900)
+        result['verifier_ended_epoch']=time.time()
+        result['verifier_result']=outcome.model_dump(mode='json')
+        result['recovered_reward']=outcome.rewards['reward']
+        ctrf=read(paths.verifier_dir/'ctrf.json')
+        summary=ctrf['results']['summary']
+        assert summary['tests']==6 and result['recovered_reward'] in (0,1)
+        result['ctrf_summary']=summary
+        after=await identities()
+        save(R/'restored-after.json',after)
+        assert before==after, 'original answer changed during grading'
+        result['status']='scored_verifier_only_recovery'
+    except BaseException as exc:
+        result['status']='recovery_failed_or_incomplete'
+        result['error_type']=type(exc).__name__
+        result['error']=str(exc)
+    finally:
+        try:
+            await asyncio.wait_for(environment.stop(delete=True),timeout=120)
+        except BaseException as exc:
+            result['release_error_type']=type(exc).__name__
+        result['remaining_owned_containers']=docker('ps','-aq','--filter','ancestor='+IMAGE).split()
+        result['all_owned_containers_released']=not result['remaining_owned_containers']
+        result['ended_epoch']=time.time()
+        save(R/'receipt.json',result)
+    return result
+
+def main():
+    os.umask(0o077)
+    parser=argparse.ArgumentParser()
+    parser.add_argument('action',choices=('check','freeze','run'),default='check',nargs='?')
+    args=parser.parse_args()
+    if args.action=='check':
+        value=plan();print(json.dumps({'status':'CPU_static_check_passed','bindings':len(value['bindings'])}));return
+    if args.action=='freeze':
+        print(json.dumps(freeze()));return
+    os.environ.clear()
+    os.environ.update(PATH=str(T/'harbor-env/bin')+':/usr/local/bin:/usr/bin:/bin',
+        HOME=str(R/'home'),TMPDIR=str(R/'tmp'),XDG_CACHE_HOME=str(R/'cache'),
+        DOCKER_HOST='unix:///run/swe-pro-docker/docker.sock',DOCKER_CONFIG=str(T/'docker-config'),
+        PYTHONDONTWRITEBYTECODE='1',NO_COLOR='1')
+    result=asyncio.run(execute())
+    print(json.dumps(result),flush=True)
+    raise SystemExit(0 if result['status']=='scored_verifier_only_recovery' and result['all_owned_containers_released'] else 1)
+
+if __name__=='__main__':
+    main()
