@@ -1,0 +1,169 @@
+"""Read sealed task evidence; export no private questions, answers or patches."""
+import argparse
+import ast
+import collections
+import hashlib
+import json
+from pathlib import Path
+
+W = Path("/swe-persist/swe-pro-shuhao-20261025")
+N = W / "continuation-20261026-ad558013-r1"
+CODES = ("openlibrary",)
+
+
+def read(path):
+    return json.loads(Path(path).read_text())
+
+
+def sha(path):
+    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+
+
+def names(value):
+    return set(ast.literal_eval(value) if isinstance(value, str) else value)
+
+
+def derive(code):
+    assert code in CODES
+    run = W / "runs/swe018-repo-06-r1"
+    prep = W / "continuation-20261026-repo-06-prepared-r3"
+    binding = read(run / "execution-binding.json")
+    for path, digest in binding["files"].items():
+        assert sha(path) == digest, path
+    config = read(run / "settings.json")
+    agent = read(run / "agent/task-000/report-private.json")
+    grade = read(run / "grade/grading-status.json")
+    scores = read(run / "grade/eval_results.json")
+    case = json.loads((prep / "inputs/cases-private.jsonl").read_text().strip())
+    assert agent["instance_id"] == case["instance_id"] == binding["task_ids"][0]
+    assert len(scores) == 1 and set(scores) == {case["instance_id"]}
+    assert grade["official_scores"] == scores
+    assert grade["unresolved_grading"] == []
+    assert grade["model_calls_in_this_grading"] == 0
+    assert read(run / "run-exit.json")["exit_code"] == 0
+    assert read(run / "grade-exit.json")["exit_code"] == 0
+    assert agent["container_cleanup_exit_code"] == 0
+    assert 0 < agent["model_calls"] <= config["agent"]["step_limit"] == 100
+    assert config["agent"]["wall_budget_seconds"] == 1200
+    assert config["agent"]["max_tokens"] == 4096
+    assert config["agent"]["automatic_retries"] == 0
+    patch = run / "agent/task-000/patch-private.diff"
+    assert sha(patch) == agent["patch_sha256"]
+    assert patch.stat().st_size == agent["patch_bytes"]
+    trajectory = read(run / "agent/task-000/trajectory-private.json")
+    assert trajectory["info"]["model_stats"]["api_calls"] == agent["model_calls"]
+    source = read(run / "grade/source-and-patch-bindings.json")
+    for path, digest in source["official_sources"].items():
+        assert sha(Path(config["paths"]["official_v1_source"]) / path) == digest
+    for path, digest in source["application_evidence_sources"].items():
+        assert sha(W / "sources/benchmark-main-a7912af8/src/vllm_hust_benchmark" / path) == digest
+    assert source["patches"][0]["patch_sha256"] == sha(patch)
+    snapshots = list((run / "grade").glob("*/agent_patch.diff"))
+    assert len(snapshots) == 1 and sha(snapshots[0]) == sha(patch)
+    assert read(run / "grade/before-image-ids.json") == read(run / "grade/after-image-ids.json")
+    workspace = snapshots[0].parent / "workspace"
+    app = grade["patch_application"][case["instance_id"]]
+    for name, item in app["evidence"].items():
+        assert sha(workspace / name) == item["sha256"]
+        assert (workspace / name).stat().st_size == item["bytes"]
+    assert sha(workspace / "patch.diff") == app["effective_patch_sha256"]
+    actual_exit = int((workspace / "hust-patch-apply.exit").read_text())
+    assert actual_exit == app["apply_exit_code"]
+    states = {stage: read(workspace / ("hust-patch-" + stage + ".json"))
+              for stage in ("before", "after", "graded")}
+    complete = app["state_capture"] == "complete"
+    if complete:
+        assert all(value["status"] == "captured" and value["stage"] == stage
+                   for stage, value in states.items())
+    tests = read(workspace / "output.json")["tests"]
+    passed = {item["name"] for item in tests if item["status"] == "PASSED"}
+    f2p, p2p = names(case["fail_to_pass"]), names(case["pass_to_pass"])
+    result = (f2p | p2p) <= passed
+    assert type(scores[case["instance_id"]]) is bool
+    assert result == scores[case["instance_id"]]
+    all_names = {item["name"] for item in tests}
+    coverage = {}
+    for label, expected in (("fail_to_pass", f2p), ("pass_to_pass", p2p)):
+        coverage[label] = dict(expected=len(expected), passed=len(expected & passed),
+                               not_passed=len(expected - passed), missing=len(expected - all_names))
+    release_path = W / "evidence/swe018-repo-06-service-released-r1.json"
+    release = read(release_path)
+    assert release["status"] == "completed" and release["service_exit_code"] == 0
+    assert all(release[key] for key in ("sessions_drained", "all_devices_released", "seal_allowed"))
+    assert release["plan_sha256"] == binding["window_plan_sha256"]
+    ready = read(W / "evidence/swe018-repo-06-ready-r1.json")
+    assert ready["plan_sha256"] == binding["window_plan_sha256"]
+    assert ready["vllm"] == ready["vllm_ascend"] == "0.18.0"
+    assert ready["served_model"] == "qwen3.5-35b"
+    evidence = {
+        "execution_binding": run / "execution-binding.json", "settings": run / "settings.json",
+        "run_exit": run / "run-exit.json", "grade_exit": run / "grade-exit.json",
+        "agent_report": run / "agent/task-000/report-private.json",
+        "trajectory": run / "agent/task-000/trajectory-private.json", "submitted_patch": patch,
+        "grading_status": run / "grade/grading-status.json",
+        "source_patch_bindings": run / "grade/source-and-patch-bindings.json",
+        "official_scores": run / "grade/eval_results.json", "parsed_tests": workspace / "output.json",
+        "effective_patch": workspace / "patch.diff", "service_release": release_path,
+        "derivation_source": Path(__file__),
+
+    }
+    evidence.update({name: workspace / name for name in app["evidence"]})
+    return dict(
+        schema="swe-incremental-task-observation/v2", run_id=run.name,
+        task_identity_sha256=hashlib.sha256(case["instance_id"].encode()).hexdigest(),
+        dataset="SWE-bench-Pro V1", total_dataset_tasks=731, new_task_attempts=1,
+        recorded_official_resolved=int(result), recorded_official_denominator=1,
+        official_unresolved_grading=0, full_dataset_acceptance=False,
+        model="Qwen3.5-35B-A3B", vllm="0.18.0", vllm_ascend="0.18.0",
+        benchmark_source_commit="a7912af8b1d2387ad4cfb6fcec83f722772c2a56",
+        qualification=dict(new_calls=0, reused_calls=5, source_run="swe018-single-agent-r1"),
+        agent={key: agent[key] for key in ("status", "agent_submitted", "elapsed_seconds",
+               "model_calls", "patch_bytes", "patch_sha256", "container_cleanup_exit_code")},
+        budget=config["agent"],
+        grading=dict(
+            official_result=result, independently_recomputed_official_rule=result,
+            process_exit_code=0, model_calls=0, source_files=len(source["official_sources"]),
+            parsed_test_counts=dict(collections.Counter(item["status"] for item in tests)),
+            test_count_scope="Raw parser entries before official name-set scoring",
+            unique_test_names=len(all_names), official_test_coverage=coverage,
+            patch_application_attested=True, patch_applied=(actual_exit == 0),
+            apply_exit_code=actual_exit, state_capture=app["state_capture"],
+            affected_paths=len(states["before"].get("files", {})),
+            pre_post_file_states_equal=(states["before"].get("files") == states["after"].get("files")) if complete else None,
+            after_graded_file_states_equal=(states["after"].get("files") == states["graded"].get("files")) if complete else None,
+            patch_modified=False, grading_reexecuted=False,
+            effective_patch_sha256=app["effective_patch_sha256"],
+            original_official_binary_filter_preserved=True,
+        ),
+        release={key: release[key] for key in ("status", "sessions_drained", "all_devices_released", "service_exit_code", "seal_allowed")},
+        window_plan_sha256=binding["window_plan_sha256"],
+        runtime_identity_sha256=ready["runtime_identity_sha256"],
+        task_container=config["container"],
+        images=list(read(run / "grade/before-image-ids.json").values()),
+        evidence_sha256={key: sha(path) for key, path in evidence.items()},
+        private_task_answers_patch_or_trajectory_included=False,
+    )
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("code", choices=CODES)
+    args = parser.parse_args()
+    value = derive(args.code)
+    run = W / "runs" / value["run_id"]
+    output = run / "public-batch-summary-r1.json"
+    with output.open("x") as stream:
+        json.dump(value, stream, indent=2)
+        stream.write("\n")
+    # Do not replace earlier seals or include rebuildable caches.
+    files = sorted(path for path in run.rglob("*") if path.is_file()
+                   and not path.name.startswith("SHA256SUMS")
+                   and not (set(path.relative_to(run).parts) & {"cache-run", "cache-grade"}))
+    assert all(not path.is_symlink() for path in files)
+    seal = run / "SHA256SUMS-batch-r1"
+    with seal.open("x") as stream:
+        stream.writelines(sha(path) + "  " + str(path.relative_to(run)) + "\n" for path in files)
+    print(json.dumps(dict(run_id=value["run_id"], summary_sha256=sha(output),
+                          seal_sha256=sha(seal), sealed_files=len(files),
+                          official_result=value["grading"]["official_result"],
+                          apply_exit_code=value["grading"]["apply_exit_code"])))

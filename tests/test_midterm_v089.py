@@ -65,7 +65,11 @@ def test_v089_preserves_completed_metrics_and_historical_report(monkeypatch):
     monkeypatch.syspath_prepend(str(ROOT / "scripts"))
     import build_midterm_v089 as b
 
-    data = b.build("fixture", lambda path: (ROOT / path).read_bytes())
+    snapshot = "reports/vllm-hust-midterm-20261019/中期测试报告-v089.md"
+    data = b.build(
+        "fixture",
+        lambda path: (ROOT / (snapshot if path == b.REPORT else path)).read_bytes(),
+    )
     old = json.loads((ROOT / "website-publication/data/midterm-v088.json").read_text())
     for key in (
         "wholechain_reference",
@@ -95,7 +99,7 @@ def test_v089_preserves_completed_metrics_and_historical_report(monkeypatch):
         value,
         json.loads((ROOT / b.previous.SOURCE).read_text()),
     )
-    current = (ROOT / b.REPORT).read_text()
+    current = (ROOT / snapshot).read_text()
     assert b.previous.summary(value) in current
     assert "319.777575" in current
     assert "99.9397%" in generated and "319.777575" in generated

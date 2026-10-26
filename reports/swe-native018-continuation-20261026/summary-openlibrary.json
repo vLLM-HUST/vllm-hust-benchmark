@@ -1,0 +1,141 @@
+{
+  "schema": "swe-incremental-task-observation/v2",
+  "run_id": "swe018-repo-06-r1",
+  "task_identity_sha256": "bb8d4e7b1f39b34f85a3d5f0e442dc281b4b073b4da229d5833b118301dbbfa6",
+  "dataset": "SWE-bench-Pro V1",
+  "total_dataset_tasks": 731,
+  "new_task_attempts": 1,
+  "recorded_official_resolved": 1,
+  "recorded_official_denominator": 1,
+  "official_unresolved_grading": 0,
+  "full_dataset_acceptance": false,
+  "model": "Qwen3.5-35B-A3B",
+  "vllm": "0.18.0",
+  "vllm_ascend": "0.18.0",
+  "benchmark_source_commit": "a7912af8b1d2387ad4cfb6fcec83f722772c2a56",
+  "qualification": {
+    "new_calls": 0,
+    "reused_calls": 5,
+    "source_run": "swe018-single-agent-r1"
+  },
+  "agent": {
+    "status": "Submitted",
+    "agent_submitted": true,
+    "elapsed_seconds": 394.15448629669845,
+    "model_calls": 42,
+    "patch_bytes": 6589,
+    "patch_sha256": "2a4ce7da547e5f19e865dff0bd776984c1527515eb15029973434ec2e1167f46",
+    "container_cleanup_exit_code": 0
+  },
+  "budget": {
+    "step_limit": 100,
+    "wall_budget_seconds": 1200,
+    "tool_timeout_seconds": 60,
+    "max_tokens": 4096,
+    "temperature": 0,
+    "seed": 0,
+    "thinking": false,
+    "http_timeouts": {
+      "connect": 180,
+      "read": null,
+      "write": 180,
+      "pool": 180
+    },
+    "automatic_retries": 0
+  },
+  "grading": {
+    "official_result": true,
+    "independently_recomputed_official_rule": true,
+    "process_exit_code": 0,
+    "model_calls": 0,
+    "source_files": 14,
+    "parsed_test_counts": {
+      "PASSED": 18
+    },
+    "test_count_scope": "Raw parser entries before official name-set scoring",
+    "unique_test_names": 18,
+    "official_test_coverage": {
+      "fail_to_pass": {
+        "expected": 3,
+        "passed": 3,
+        "not_passed": 0,
+        "missing": 0
+      },
+      "pass_to_pass": {
+        "expected": 15,
+        "passed": 15,
+        "not_passed": 0,
+        "missing": 0
+      }
+    },
+    "patch_application_attested": true,
+    "patch_applied": true,
+    "apply_exit_code": 0,
+    "state_capture": "complete",
+    "affected_paths": 1,
+    "pre_post_file_states_equal": false,
+    "after_graded_file_states_equal": true,
+    "patch_modified": false,
+    "grading_reexecuted": false,
+    "effective_patch_sha256": "2a4ce7da547e5f19e865dff0bd776984c1527515eb15029973434ec2e1167f46",
+    "original_official_binary_filter_preserved": true
+  },
+  "release": {
+    "status": "completed",
+    "sessions_drained": true,
+    "all_devices_released": true,
+    "service_exit_code": 0,
+    "seal_allowed": true
+  },
+  "window_plan_sha256": "a8529973cb9ba24750938d567e8de63037a94e190781ab7bcd57fa2b78391e09",
+  "runtime_identity_sha256": "a944a55ca6ba42aab3ffc96013e53bd885b479ba29e987904094af480f657570",
+  "task_container": {
+    "cpus": 2,
+    "memory": "4g",
+    "network": "swe-pro-mtu1400",
+    "allowed_initial_submodule": {
+      "image_id": "sha256:03a31369c1af08afd4590e79842089861190ccab5045b850b3413722f6b2a943",
+      "base_commit": "02f647f7d525286b6e3a661133c3772649e585cd",
+      "path": "vendor/infogami",
+      "gitlink_mode": "160000",
+      "gitlink_commit": "d918e184ca1b0de7e8d3b02ec7b7dc4a08453cea",
+      "submodule_head": "d918e184ca1b0de7e8d3b02ec7b7dc4a08453cea",
+      "parent_status_sha256": "1a41a5546fbc40f695c059a62d8c3e50f55678af53a81569ca6191b4c8df27f2",
+      "parent_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "submodule_status_sha256": "1311ff0c0aed63bd5ac0a5a00e026e18f5d496721dbf940bbc6949892234e535",
+      "submodule_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "submodule_cached_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "untracked_symlink": {
+        "path": "infogami/infogami",
+        "type": "symlink",
+        "target": "vendor/infogami/infogami"
+      }
+    }
+  },
+  "images": [
+    "sha256:03a31369c1af08afd4590e79842089861190ccab5045b850b3413722f6b2a943"
+  ],
+  "evidence_sha256": {
+    "execution_binding": "74a21fe54e8d755673e49593761a6c4522e27ac66d95c045db6380d89575962c",
+    "settings": "3ba6db99e73694b482905989e84b9a02a6897b6e8e313d7ff7b2b1439ac17b8c",
+    "run_exit": "46318d5ddb0be9d76903a66150535e160e6082da9d47c27e0ad2cf2e945deba5",
+    "grade_exit": "cb06b3dc3e9adccb6c154ce103492ee1139b826eaaf216fc8860199ea64c8724",
+    "agent_report": "ed6ab2063f2186e7e32d9d0f6d78728e6b540d6e6a94560f64ef2b0906d0173a",
+    "trajectory": "a6c000b799b1c23b5b15cad0604cac30b592e1fc7ff9453f68e02566c06e5fea",
+    "submitted_patch": "2a4ce7da547e5f19e865dff0bd776984c1527515eb15029973434ec2e1167f46",
+    "grading_status": "5450c4312e56b76ea8a9c2f35ca2e945e1015f1f662e8348105260db9586343a",
+    "source_patch_bindings": "f1c0f88b25a3db6ab130cc9cdbbe8ea4cdd31fc2a9fecf9d9b5b09497ffc044f",
+    "official_scores": "4f3fded56d6f58d4b20aed3af54781b2fd6ea793ab96ac456f1bec9901b18df6",
+    "parsed_tests": "3fdbe3eb310960d85b839a136d84ab5d09acc6aa5c9c1982972edc34d9372792",
+    "effective_patch": "2a4ce7da547e5f19e865dff0bd776984c1527515eb15029973434ec2e1167f46",
+    "service_release": "a4b30591160602c2e0df482f77a315fe12cbae478d0f14bb7c533c800a8c62ea",
+    "derivation_source": "8c4ead1dcbeeb9a96f8f9e6951d0cb69eaf9626753a058e273f6d2a85c0aceb1",
+    "hust-patch-apply.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "hust-patch-apply.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "hust-patch-apply.stderr": "4d70334d3030c7128a3260b1857be67efd17037c373846ed00670f805079373d",
+    "hust-patch-before.json": "05049f8dbbac758059631d122c930bce70058d54b01bb880be020a03ebaf2af2",
+    "hust-patch-after.json": "3f05008ecefc072beb31dc1a4c54155237beb7fc7d553920a4e7349a50e73c58",
+    "hust-patch-graded.json": "87d6d17ed926f040abeb9e999d370d6b3fcdccf8cb77104baab29325ff713f63"
+  },
+  "private_task_answers_patch_or_trajectory_included": false
+}

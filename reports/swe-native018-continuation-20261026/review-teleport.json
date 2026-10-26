@@ -1,0 +1,109 @@
+{
+  "status": "reviewed_official_negative_target_compilation_failed_functional_coverage_limited",
+  "observed_epoch": 1793030919.2780735,
+  "request_calls": 70,
+  "agent_seconds": 583.9302533194423,
+  "agent_submitted": true,
+  "official_result": false,
+  "unresolved": 0,
+  "fail_to_pass": {
+    "expected": 2,
+    "passed": 0,
+    "failed_in_official_output": 0,
+    "missing": 2,
+    "test_bodies_executed": 0,
+    "target_package_compilation_failed": true
+  },
+  "pass_to_pass": {
+    "expected": 0,
+    "passed": 0,
+    "failed": 0,
+    "missing": 0
+  },
+  "test_coverage": {
+    "raw_json_records": 1381,
+    "records_with_Test": 0,
+    "package_actions": {
+      "start": 287,
+      "output": 807,
+      "pass": 188,
+      "fail": 95,
+      "skip": 4
+    },
+    "official_parser_records": 0,
+    "target_tests_executed": false,
+    "target_test_assertions_failed": false,
+    "target_test_build_failed": true,
+    "parser_explanation": "Original parser correctly requires Test+Action for test-level JSON. Raw JSON contains package events only; fallback has no matching test statuses. Empty output is not a JSON/text format mismatch. Targets were selected but package compilation failed before test bodies ran.",
+    "source_mechanism": {
+      "Bytea": {
+        "official_test_patch_uses_method": true,
+        "submitted_new_file_declares_method": false,
+        "actual_compiler_reports_undefined": true
+      },
+      "Timestamptz": {
+        "official_test_patch_uses_method": true,
+        "submitted_new_file_declares_method": false,
+        "actual_compiler_reports_undefined": true
+      },
+      "UUID": {
+        "official_test_patch_uses_method": true,
+        "submitted_new_file_declares_method": false,
+        "actual_compiler_reports_undefined": true
+      }
+    },
+    "submitted_new_file_sha256": "df84023aa2f4b91d46d8efd935e5ee4cfd99d9a89e3572539b6b669eda1a31db",
+    "other_build_errors": {
+      "missing_linux_hidraw_h": true,
+      "missing_gnu_libc_version_h": true,
+      "sqlite_pread64_off64_t": true,
+      "compiler_killed": true
+    },
+    "grade_container_oom_event": true,
+    "grade_container_die_exit_code": 0,
+    "wrapper_exit0_not_test_success": "Original entryscript continues to parser after run_script failure; parser success determines final shell exit. No independent go-test numeric exit recorded."
+  },
+  "original_fixture": {
+    "initial_repository_clean": true,
+    "extra_allowances_used": false
+  },
+  "patch_application": {
+    "exit_code": 0,
+    "state_capture": "complete",
+    "patch_sha256": "3d9262946911da90cc5303ec260d8d3066474709c00b0fbe3cce2cf188563ff5",
+    "bytes": 16541,
+    "after_graded_identity_equal": true,
+    "affected_paths": 2,
+    "patch_modified": false
+  },
+  "seal": {
+    "cpu_files_verified": 59,
+    "cpu_seal_sha256": "a994ae7299f4c4685281cc610c586aefa7a79651c7d1056d29050e60c69d26f5",
+    "service_files_verified": 14
+  },
+  "resources": {
+    "service_completed_drained_released": true,
+    "NPU3_6_empty_observed": true,
+    "owned_grade_container_absent": true,
+    "CPU_active_container_count_at_readback": 0,
+    "grading_container_oom_event_observed": true,
+    "grading_container_eventual_die_exit": 0,
+    "other_CPU_preparation_owner": "profiling",
+    "new_resource_operations": false
+  },
+  "evidence": {
+    "swe-repo-05-result-storage-review-r1.json": "ce32f712f0c488f3b3d963259fbd1e3eca4ada87300da2eaffddae67d0a6fa03",
+    "swe-repo-05-release-storage-review-r1.json": "1bae2e4e358cfdc2a40774e358d5d6085077afbb7fbf2ce4f6e2ce2d2d0a7448",
+    "swe-repo-05-cpu-release-readback-r1.json": "2bc1cd534e8c0524aba5ff55611d8e18d0b9912e8ea095c4ca468e4be15b8130",
+    "swe-repo-05-cpu-release-readback-r2.json": "5abc0dbab3ae9bf5911041a5c9a310a007ad90f2392b51ce6aca479c37020d63",
+    "swe-repo-05-release-npu-readback-r1.txt": "bf0ed8b667f84e8ba4a4a1fe1b502572e7ec4d3b2970719a3ab6371947412405",
+    "audit_swe_repo05_result_cpu_r1.py": "49147f30408936f3d978dee3c3705fbf491304c3044b879254447c06da1a2e0d",
+    "teleport-public-summary-r1.json": "735ce0c6814d6c3b52ae8803f0b90ed0b490e4132357fe02ecfcb36d98e06f5e"
+  },
+  "no_reruns": true,
+  "new_model_calls": 0,
+  "original_public_summary_unchanged": true,
+  "interpretation": "Keep original official false/unresolved0. The submitted new wal2json.go lacks methods required by the original test and compiler confirms undefined methods in target package. This is an attested target compilation defect, not two executed functional assertion failures. All 1381 raw JSON records are package-level, zero Test fields; frozen parser empty output is consistent with raw data. Additional missing-header/sqlite build errors and grade-container OOM remain separate limitations. Grade process exit0 reflects final parser completion, not successful go tests. No score replacement or parser modification.",
+  "private_original_review_sha256": "9539f47a83ab9a4ebdca856d16d6ba75f01e95d82130c4297b21465f81be462e",
+  "projection": "Private CPU path, container identifier and raw package events omitted; source hashes and aggregate interpretation preserved."
+}
