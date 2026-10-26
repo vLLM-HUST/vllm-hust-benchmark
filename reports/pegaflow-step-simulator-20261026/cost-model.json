@@ -1,0 +1,66 @@
+{
+  "schema": "pegaflow-step-cost/v1",
+  "metadata": {
+    "model": "Qwen2.5-7B-Instruct",
+    "dtype": "bfloat16",
+    "hardware": "Ascend 910B2",
+    "vllm": "0.23.0",
+    "vllm_ascend": "0.23.0",
+    "token_budget": 2048,
+    "max_sequences": 8,
+    "max_model_tokens": 32768,
+    "KV_GiB": 16,
+    "graph_mode": true,
+    "training_tasks": [
+      "adaptive-rejection-sampler",
+      "code-from-image"
+    ],
+    "training_cases": [
+      "train-32-private",
+      "train-32-shared"
+    ],
+    "training_input_count": 32,
+    "response_delay_s": 0.008324019123284288,
+    "trajectory_repository": "openguardrails/terminal-bench-2.1-deepseek-v4-flash-trajectories",
+    "trajectory_revision": "3f5b93ff1c5ea84b2c94cf479d0c942227191b4a",
+    "source_pegaflow_commit": "4bfa9351273efc710bceb296ae6f8cbdc31584e6",
+    "scope": "Single-engine diagnostic calibration; derived prefix identities and token counts"
+  },
+  "fit": "nonnegative linear cost with Huber reweighting; calibration tasks only",
+  "models": {
+    "decode": {
+      "coefficients": [
+        0.01757145916285004,
+        0.0032538596756991646,
+        0.004629602318147548
+      ],
+      "training_steps": 1083,
+      "training_MAPE_percent": 3.1732943964045983,
+      "training_absolute_error_s": {
+        "mean": 0.0008285741953695775,
+        "p50": 0.0005187436273810311,
+        "p95": 0.002465027785708014,
+        "max": 0.011596651767143255
+      }
+    },
+    "prefill": {
+      "coefficients": [
+        0.03392098694039103,
+        0.08674924839824281,
+        0.04163042497568766,
+        0.006081865631242845,
+        0.0
+      ],
+      "training_steps": 243,
+      "training_MAPE_percent": 2.300583640045986,
+      "training_absolute_error_s": {
+        "mean": 0.0024054318557328604,
+        "p50": 0.0016127634881719921,
+        "p95": 0.007490197096089141,
+        "max": 0.018410708335535333
+      }
+    }
+  },
+  "dispatch_gap_s": 0.000342965,
+  "response_delay_s": 0.008324019123284288
+}

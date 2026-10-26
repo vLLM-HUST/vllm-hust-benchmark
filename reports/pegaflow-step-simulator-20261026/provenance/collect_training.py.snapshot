@@ -1,0 +1,138 @@
+"""Collect fixed-prompt admission, prefill/decode overlap and KV-pressure traces."""
+import argparse
+from dataclasses import asdict,is_dataclass
+import json
+import os
+from pathlib import Path
+import signal
+import statistics
+import threading
+import time
+import traceback
+
+
+def append(path,value):
+    with path.open("a") as stream:stream.write(json.dumps(value)+"\n")
+
+
+def main():
+    parser=argparse.ArgumentParser()
+    parser.add_argument("--device",required=True)
+    parser.add_argument("--mode",choices=["eager128-kv2","graph2048-kv16"],required=True)
+    parser.add_argument("--output",type=Path,required=True)
+    parser.add_argument("--shared-only",action="store_true")
+    args=parser.parse_args();out=args.output;out.mkdir(exist_ok=False)
+    os.environ.update(ASCEND_RT_VISIBLE_DEVICES=args.device,OMP_NUM_THREADS="2",MKL_NUM_THREADS="2",
+                      TOKENIZERS_PARALLELISM="false",VLLM_WORKER_MULTIPROC_METHOD="spawn",
+                      SCHEDULING_TRACE_DIR=str(out/"scheduler-trace"))
+    started=time.monotonic();finished=threading.Event()
+    def watchdog():
+        if not finished.wait(900):
+            append(out/"timeout.jsonl",{"epoch_ns":time.time_ns(),"elapsed_s":time.monotonic()-started})
+            os.killpg(os.getpgrp(),signal.SIGTERM)
+    threading.Thread(target=watchdog,daemon=True).start()
+    try:
+        import torch,torch_npu
+        from vllm import LLM,SamplingParams
+        torch.set_num_threads(2)
+        graph=args.mode.startswith("graph")
+        config=dict(model="/data/shared_models/Qwen2.5-7B-Instruct",dtype="bfloat16",
+                    tensor_parallel_size=1,distributed_executor_backend="mp",max_model_len=32768,
+                    max_num_seqs=8,max_num_batched_tokens=2048 if graph else 128,
+                    enforce_eager=not graph,async_scheduling=False,gpu_memory_utilization=.75,
+                    kv_cache_memory_bytes=(16 if graph else 2)*2**30,enable_chunked_prefill=True,
+                    enable_prefix_caching=True,block_size=128,seed=20261026,
+                    scheduler_cls="scheduling_telemetry.TraceScheduler",
+                    worker_cls="scheduling_telemetry.TraceNPUWorker",disable_log_stats=False)
+        (out/"config.json").write_text(json.dumps(config,indent=2))
+        llm=LLM(**config);engine=llm.llm_engine
+        source=[json.loads(l) for l in (Path(__file__).parent/"requests.jsonl").read_text().splitlines()]
+        test=sorted((r for r in source if r["split"]=="calibration"),key=lambda r:r["prompt_tokens"])
+        near8=min(test,key=lambda r:abs(r["prompt_tokens"]-8192))
+
+        def generate(name,rows,offsets,outputs,reset=True,salts=None):
+            if reset:engine.reset_prefix_cache()
+            begin=time.monotonic();epoch=time.time_ns()
+            append(out/"events.jsonl",{"event":"case_start","case":name,"epoch_ns":epoch})
+            manifest=[]
+            for i,(r,at,count) in enumerate(zip(rows,offsets,outputs)):
+                manifest.append({"request_id":f"{name}:{i}","source_id":r["id"],
+                                 "prompt_tokens":r["prompt_tokens"],"arrival_offset_s":at,
+                                 "output_tokens":count,"priority":0,
+                                 "cache_salt":salts[i] if salts is not None else f"{name}:{i}"})
+            append(out/"workloads.jsonl",{"case":name,"epoch_ns":epoch,"requests":manifest,
+                "scope":"Fixed prompt engine calibration; input histories independent of generated answers"})
+            cursor=0;records={};steps=[];done=set();first={};seen={};tokens={}
+            while cursor<len(rows) or engine.has_unfinished_requests():
+                elapsed=time.monotonic()-begin
+                while cursor<len(rows) and offsets[cursor]<=elapsed:
+                    row=rows[cursor];m=manifest[cursor];key=m["request_id"]
+                    parameters=SamplingParams(temperature=0.,max_tokens=outputs[cursor],ignore_eos=True)
+                    submit=time.monotonic()-begin
+                    engine.add_request(key,{"prompt_token_ids":row["prompt_token_ids"],"cache_salt":m["cache_salt"]},parameters)
+                    records[key]={**m,"submitted_s":submit};seen[key]=0;tokens[key]=[]
+                    append(out/"events.jsonl",{"event":"request_submit","request_id":key,"case":name,
+                                              "epoch_ns":time.time_ns(),"actual_offset_s":submit})
+                    cursor+=1
+                if not engine.has_unfinished_requests():
+                    time.sleep(min(.005,max(0,offsets[cursor]-(time.monotonic()-begin))))
+                    continue
+                at=time.monotonic();updates=engine.step();end=time.monotonic()
+                steps.append({"start_s":at-begin,"wall_s":end-at,"pending":len(records)-len(done)})
+                for update in updates:
+                    if not update.outputs:continue
+                    key=update.request_id;ids=update.outputs[0].token_ids;delta=len(ids)-seen[key]
+                    if delta:
+                        first.setdefault(key,end-begin);tokens[key].extend([end-begin]*delta)
+                    seen[key]=len(ids)
+                    if update.finished:
+                        done.add(key)
+                        records[key].update(first_s=first.get(key),finish_s=end-begin,
+                                            cached_tokens=int(update.num_cached_tokens or 0),
+                                            generated_token_ids=list(ids),token_times=tokens[key],
+                                            metrics=asdict(update.metrics) if is_dataclass(update.metrics) else None)
+                if end-begin>420:raise TimeoutError(f"Bounded scheduling case timeout: {name}")
+            result={"case":name,"epoch_ns":time.time_ns(),"elapsed_s":time.monotonic()-begin,
+                    "n":len(records),"records":records,"steps":steps,
+                    "TTFT_mean_s":statistics.mean(r["first_s"]-r["submitted_s"] for r in records.values())}
+            append(out/"scheduling-cases.jsonl",result)
+            append(out/"events.jsonl",{"event":"case_done","case":name,"epoch_ns":time.time_ns()})
+            print(json.dumps({k:result[k] for k in ("case","n","elapsed_s","TTFT_mean_s")}),flush=True)
+
+        if args.shared_only:
+            near8 = min(test, key=lambda r: abs(r["prompt_tokens"] - 8192))
+            generate("warmup", [near8] * 4, [0] * 4, [4] * 4)
+            interleaved = sorted(test, key=lambda r: (int(r["step_id"]), r["task"]))
+            count = len(interleaved)
+            outputs = [32, 64, 128, 256] * ((count + 3) // 4)
+            generate("train-32-private", interleaved, [i * .08 for i in range(count)],
+                     outputs[:count], salts=[f"training-private-{i}" for i in range(count)])
+            generate("train-32-shared", interleaved, [i * .08 for i in range(count)],
+                     outputs[:count], salts=["training-shared"] * count)
+            (out / "done.json").write_text(json.dumps({"epoch_ns":time.time_ns(), "elapsed_s":time.monotonic()-started}))
+            finished.set()
+            return
+        salts=[f"overhead-control-{i}" for i in range(4)]
+        generate("trace-warm-seed",[near8]*4,[0]*4,[1]*4,salts=salts)
+        generate("trace-warm-B4",[near8]*4,[0]*4,[128]*4,reset=False,salts=salts)
+        generate("trace-warm-B4-repeat",[near8]*4,[0]*4,[128]*4,reset=False,salts=salts)
+        mixed=[test[round(i*(len(test)-1)/15)] for i in range(16)]
+        mixed=mixed[::2]+mixed[1::2]
+        generate("mixed-arrivals-16",mixed,[0]*4+[.4]*4+[1.]*4+[2.]*4,
+                 [32,64,128,256]*4)
+        # Alternate short and long inputs; later requests compete with ongoing decode.
+        overlap=[test[-3],test[-7],test[2],test[len(test)//2],test[6],test[-2]]
+        generate("decode-prefill-overlap",overlap,[0,0,1,1,2,2],[256,256,64,128,64,128])
+        if graph:
+            interleaved=sorted(test,key=lambda r:(int(r["step_id"]),r["task"]))
+            generate("full-95-fixed-arrivals",interleaved,[i*.08 for i in range(95)],
+                     [32,64,128,256]*23+[32,64,128])
+        (out/"done.json").write_text(json.dumps({"epoch_ns":time.time_ns(),"elapsed_s":time.monotonic()-started}))
+        finished.set()
+    except BaseException as error:
+        (out/"failure.json").write_text(json.dumps({"type":type(error).__name__,"error":str(error),
+                                                   "traceback":traceback.format_exc()}))
+        finished.set();raise
+
+
+if __name__=="__main__":main()
