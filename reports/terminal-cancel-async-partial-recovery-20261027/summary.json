@@ -1,0 +1,131 @@
+{
+  "schema": "terminal-partial-artifact-verifier-recovery/v1",
+  "task": "cancel-async-tasks",
+  "dataset": "TerminalBench2.1",
+  "model": "Qwen3.5-35B-A3B",
+  "runtime": {
+    "vllm": "0.18.0",
+    "vllm_ascend": "0.18.0"
+  },
+  "platform": "linux/arm64",
+  "Harbor": "0.24.0",
+  "Agent": "Terminus2",
+  "derived_image": "sha256:5011b5c105e46b2ca856715a1ffbb756a3864697460faf9f52266392811c7620",
+  "original_attempt": {
+    "unique_Agent_attempts": 1,
+    "agent_seconds": 332.567032,
+    "successful_steps": 17,
+    "episode_counter": 18,
+    "HTTP_requests": 18,
+    "HTTP200": 17,
+    "HTTP400": 1,
+    "model_usage": {
+      "total_prompt_tokens": 223132,
+      "total_completion_tokens": 13450,
+      "total_cached_tokens": 0
+    },
+    "budget": {
+      "turns": 100,
+      "max_tokens": 4096,
+      "seed": 17,
+      "agent_timeout_sec": 900,
+      "verifier_timeout_sec": 900,
+      "whole_trial_retries": 0,
+      "litellm_sdk_retries": 0,
+      "harbor_llm_layer_attempts": 3,
+      "terminus_query_layer_attempts": 3
+    },
+    "exception": "ContextLengthExceededError",
+    "context_window": 32768,
+    "rejected_input_tokens_lower_bound": 28673,
+    "requested_output_tokens": 4096,
+    "exact_rejected_input_tokens": null,
+    "task_complete": false,
+    "verifier_started": false,
+    "reward": null,
+    "client_exit_code": 0,
+    "original_records_preserved": true,
+    "resources_released": true
+  },
+  "recovery": {
+    "kind": "verifier_only_unsubmitted_partial_artifact",
+    "reward": 0,
+    "tests": 6,
+    "passed": 1,
+    "failed": 5,
+    "missing": 0,
+    "seconds": 13.483107805252075,
+    "timeout_seconds": 900,
+    "additional_Agent_attempts": 0,
+    "additional_model_calls": 0,
+    "control_repeats": 0,
+    "automatic_retries": 0,
+    "answer_before_after_equal": true,
+    "transport_before_after_equal": true,
+    "source_bindings_verified": 37,
+    "recovery_files_verified": 22,
+    "cpus": 1,
+    "memory_bytes": 2147483648,
+    "cpuset": "24-31",
+    "mtu": 1400,
+    "process_exit_code": 0,
+    "all_owned_resources_released": true,
+    "original_tests_unchanged": true,
+    "actual_readonly_transport_and_RW_verifier_mount_checked": true
+  },
+  "artifact_provenance": {
+    "derived_bytes": 1103,
+    "derived_sha256": "d75ef65e33c55661f7ecca52cfb87426235f7075a27e079b81678028ff6bbbfd",
+    "original_filesystem_sha256": null,
+    "original_mode": null,
+    "chosen_mode": "0644",
+    "answer_repaired": false
+  },
+  "failure_scope": "File-existence test passed; five task tests failed. Original test.py imports run_tasks but unchanged partial artifact defines only async_run_tasks. No alias repair or Agent rerun.",
+  "coverage": {
+    "dataset_tasks": 89,
+    "attempted_unique_tasks": 2,
+    "unattempted_tasks": 87,
+    "completed_answer_scored_tasks": 1,
+    "completed_answer_passed_tasks": 1,
+    "partial_artifact_scored_tasks": 1,
+    "partial_artifact_reward": 0,
+    "completed_Agent_score_for_this_task": null
+  },
+  "full_dataset_acceptance": false,
+  "paired_B0_B1": false,
+  "amd64_image_equivalence_claimed": false,
+  "raw_questions_answers_or_request_ids_included": false,
+  "evidence": {
+    "original_profiling_audit_sha256": "7ccdd6467ddfd08477802f76280900767396e371f0e386b3a712803c2decb273",
+    "recovery_profiling_audit_sha256": "3779a9d5f86a0da30662844604f6e516c93e28bf004c3fbc732ba60b04d62fc8",
+    "original_trial_hashes": {
+      "CPU_seal": "8dacfac1bf7c67f6b5fad1662733533dc208c4c410855af4e8781e0be84394bb",
+      "receipt": "c651221389321d9db388a4bf0f31dee7622cba3b114350504f35f29fb8358bfa",
+      "trial_result": "53acaffc2eb4d719d5b957822c8d2506726ecb222aabbc47cf450fdfebedec05",
+      "trajectory": "ca82317188995f9cd94fcf60084f9af275f68ffc2f38a4f4da426a30810341a8",
+      "job": "c1cd152d3230f8bd102bc7ded10ec6a29d325b53aa3e1b547b7c0c50bc1ed0c5",
+      "exact_CPU_request": "434f90ed64d717223779194b1c347766ed92dc9723b1925b12674d05f1e263b2"
+    },
+    "service": {
+      "sealed_files": 17,
+      "service_exit_code": 0,
+      "resources_released": true,
+      "receipt_sha256": "d6b94f0760456e771a98ffe7cf3ac07128fac8694f6070c38467de5ad5e3fa8e",
+      "seal_sha256": "c18b41ce265eac71b6158f62d1e64fb56942733800c38ca0abe1210915ad4597"
+    },
+    "recovery": {
+      "receipt.json": "5f09985544ab143940b660b935c4c147c416d51d9808d02816f1bb466752c074",
+      "plan.json": "b2664867bcc10a78712cf643fc0f1083f8fdbf731d47b994325cf2dde6872487",
+      "SHA256SUMS": "68c34bf5659e2fb6e2b8f865b899ced0b4d645120e9840b1d9aeff8df4af3ab4",
+      "container.json": "b9c7139f345642c886f196c385c7e1d1a1beb3da38537323a3d3eb7de4fe69b4",
+      "restored-before.json": "1eb0da9284893799770b67e258bff5612801e6d4f6bab1898606492baab6e108",
+      "restored-after.json": "1eb0da9284893799770b67e258bff5612801e6d4f6bab1898606492baab6e108",
+      "transport-before.json": "f3a502ac39b557b6581a277f6a27793d7878147459df00b5783e740213fc1a08",
+      "transport-after.json": "f3a502ac39b557b6581a277f6a27793d7878147459df00b5783e740213fc1a08",
+      "trial/verifier/ctrf.json": "2d43e2a400ce7f975cd3ec20545cb385ddc83d9e13219d520d6052665a5006ea",
+      "trial/verifier/test-stdout.txt": "d406a8c6af0d8e25b71351d6c879ebf2381b41f71d80d4c77fafbfd1f0a7e29d",
+      "trial/verifier/reward.txt": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    }
+  }
+}
