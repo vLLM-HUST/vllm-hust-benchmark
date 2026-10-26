@@ -1,0 +1,44 @@
+{
+  "source_id": "PAWS",
+  "status": "ORIGINAL_CLASSIFICATION_AND_PROVIDER_RESEARCH_DELIVERY_VERIFIED",
+  "source_checkbox_eligible": true,
+  "native_execution_receipt": "docs/workload-data/validation/paws-native-checkpoint-20261027.json",
+  "asset_receipt": "docs/workload-data/validation/paws-publisher-readiness-20261027.json",
+  "source_revision": "161ece9501cf0a11f3e48bd356eaa82de46d6a09",
+  "original_files": 6,
+  "all_original_rows_and_index_verified": 751450,
+  "original_fields_verified": 4,
+  "human_and_noisy_reference_provenance_preserved": true,
+  "native_tasks_executed_and_saved_audited": 8015,
+  "canonical_test_tasks": 8000,
+  "canonical_test_correct": 6774,
+  "canonical_test_accuracy": 0.84675,
+  "all_selected_finish_counts": {"stop": 8015},
+  "invalid_outputs": 0,
+  "provider_and_research": {
+    "ci_commit": "c79fb6fc73b663cb49a760c00454c9f8da23e50d",
+    "successful_cpu_ci_run": 40380024678,
+    "ci_artifact": 12677248482,
+    "wheel_sha256": "83da3113db69d8c046e131a6c1dc36291e025b05cfdcc05947be1d54d22c2cc4",
+    "installed_payloads_byte_equal": 44,
+    "public_and_fixed_research_roundtrips": 21,
+    "roundtrip_selection": "First3 of all6files plus last3 of canonical8000-test file",
+    "research_consumer_snapshot": "dd410314",
+    "research_default_dependency_changed": false,
+    "new_model_calls": 0
+  },
+  "server_receipts": [
+    "paws-native-saved-audit-32028-001/receipt-public.json",
+    "paws-ci-provider-research-audit-32028-001/receipt-public.json"
+  ],
+  "observations_or_research_analysis_migrated": false,
+  "raw_payloads_published": false,
+  "limitations": [
+    "Declared zero-shot chat-model adapter; publisher provides no chat runner, not author BERT-paper reproduction",
+    "Operator budget16 with nonthinking Qwen3.5-9B, not publisher budget",
+    "All8000 canonical test plus15 auxiliary model tasks, not all751450 inference",
+    "Noisy auxiliary agreement is not human test accuracy; no pooled quality metric",
+    "21 fixed research roundtrips, not all8015 inference samples individually research-resolved",
+    "No quality-pass, performance or scientific conclusion"
+  ]
+}
