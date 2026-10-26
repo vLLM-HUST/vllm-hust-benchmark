@@ -41,7 +41,10 @@ def test_public_registry_registers_every_acquired_data_file():
     assert source["revision"] == pins["revision"]
     assert len(source["files"]) == 92
     assert all(item["role"] == "data" for item in source["files"])
-    fields = lambda rows: {(row["path"], row["bytes"], row["sha256"]) for row in rows}
+
+    def fields(rows):
+        return {(row["path"], row["bytes"], row["sha256"]) for row in rows}
+
     assert fields(source["files"]) == fields(pins["files"])
 
 
