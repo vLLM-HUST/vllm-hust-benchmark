@@ -1,0 +1,40 @@
+{
+  "schema": "muxpd-native-default-v2-independent-review-v1",
+  "reviewed_at": "2026-10-26T01:35:25.351877+00:00",
+  "result": "No concrete readiness blocker found in the targeted wrapper correction.",
+  "source_sha256": {
+    "native_default_reference.py": "78c3bf916a05796a38c67f5c2b5c35b01c594d963bdf7cab777e25f6c556b021",
+    "native_reference_metadata.py": "914adf5241355d8e8183c3d6a4673937a27a2a48e0056aaa07e09feb0cebb9a7",
+    "run_controlled_native_default.py": "a3d7814fe8b1557f7f3b8b998f3665891707f18271ca20a55e2ead050e8dab5c"
+  },
+  "unchanged_v1_bytes": [
+    "perf_group_prefill.py",
+    "perf_provenance.py",
+    "native-async-plan-v1.json",
+    "native-async-engine-args.json",
+    "fusion-native-async-plan-v1.json",
+    "fusion-native-async-engine-args.json",
+    "primary-group-plan-v1.json",
+    "parent-execution-identity-v1.json"
+  ],
+  "cpu_test_log": "native-default-v2-independent-wrapper-tests.log",
+  "cpu_tests": {
+    "invocation": "python -B -m unittest test_worker_wrapper -v",
+    "passed": 6,
+    "exit_code": 0
+  },
+  "findings": [
+    "Exact pinned MP worker_busy_loop binds deserialized callable to its WorkerWrapperBase; wrapper owns the actual worker. The v2 correction unwraps only that named wrapper via object.__getattribute__, then requires exact native NPUWorker class.",
+    "Direct native worker remains accepted. Unknown wrappers, absent inner worker and plugin subclass are rejected; wrapper name alone cannot become a valid ordinary-native receipt.",
+    "RPC argument class and optional wrapper class are stored beside actual worker identity. All previous native backend, actual async, HCCL/batch controls and plugin-absence requirements remain.",
+    "Observer revision and actual wrapper/helper source hashes bind run and analysis; old failed v1 cannot be silently relabeled v2.",
+    "Controller points to a separate v2 execution identity and copies/revalidates that identity in producer layout. Existing lexical venv, cleanup, timeout and custody rules remain unchanged.",
+    "No timed collection, prompt, sampling, workload, plan, native config or primary estimator changed."
+  ],
+  "limits": [
+    "Hardware verification remains required after root launches the new separate attempt.",
+    "Final frozen bundle and copied-layout dry-run receipts are owned by author and not yet independently claimed here.",
+    "v1 pre-window failure remains retained, not rewritten; no performance metric came from that attempt."
+  ],
+  "model_device_or_github_actions": false
+}

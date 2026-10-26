@@ -1,0 +1,108 @@
+# Producer v2: inspect the actual native worker behind the RPC wrapper
+
+The preserved v1 device attempt `runs/perf-native-default-backend-01` ended with exit 1 and **zero windows**, before any warmup or measured input. It correctly retained all four metadata rows and shutdown evidence. Its class-name observation was `WorkerWrapperBase`, although native backend/async/plugin-absence fields matched. This was a diagnostic implementation error; it is not a measured performance regression. The v1 bundle, failed run and frozen workload/plan/config bytes remain unchanged.
+
+This v2 producer only corrects outside-window worker identity observation and its producer/bundle bindings. The experimental family, semantic plan `1da268b7b40cc4c8e83bb01daf17130e35c9f61e73796b94a071afeeb480e82b`, native-async plan file SHA `3095dcca711b1d636e19e500bb22dda5bc07cbe173a3e443aa77c4851d24114e`, engine config SHA `27e04de05fec939c856c6f4dafcc28493038b676dde7c26734e04d367007df8d`, complete `perf_group_prefill.py` SHA `3f3a67d7737f56537d7d6843cbf4e5ab670bc12eb7034a66f0e55749a44fa9c2`, provenance helper and acceptance conditions remain byte-identical. The existing stall supplement accepts the same plan; its protocol/threshold/analyzer is not changed.
+
+On pinned Core d0f22d2, the MP path instantiates `WorkerWrapperBase` and saves it as `WorkerProc.worker` (`multiproc_executor.py:605–620`). `collective_rpc` cloudpickles a callable (`:370–374`), then `worker_busy_loop` partially binds that callable to `self.worker` (`:983–996`). The wrapper forwards ordinary attributes through `__getattr__` (`worker_base.py:333–334`); Python `type(argument)` observes the wrapper. The actual native worker was instantiated into `wrapper.worker` at `worker_base.py:319`. Source terminology matters: this pinned **MP** route does not call a `WorkerWrapperBase.execute_method`; the named `execute_method` exists in the Ray wrapper (`ray_utils.py:79–90`) and delegates to `serial_utils.run_method`. The configured executor here is MP.
+
+`actual_native_worker` recognizes only the known Core wrapper class or a direct native worker. For the known wrapper it reads its real `worker` attribute using `object.__getattribute__`, avoiding forwarded fallback. It then requires the actual inner class to be exactly `vllm_ascend.worker.worker.NPUWorker`. A wrapper name alone, missing/None inner worker, plugin worker or unknown wrapper cannot pass. Readbacks retain `rpc_argument_class`, `wrapper_class` and actual `worker_class`, plus the unchanged actual backend/async/plugin-absence requirements. Worker counters also read that same inner object. The direct-worker path remains supported for CPU testing and direct callbacks; real MP is expected to report the known wrapper.
+
+Saved reports and the controller carry `reference_observer_revision=native-default-worker-unwrapping-v2`. The analyzer requires this revision and the new exact wrapper/helper hashes, so v1 reports cannot be silently reclassified. The controller uses `execution-identity-v2.json`, verifies/copies every new bundle dependency and keeps its original process, cleanup and inventory requirements. No timing-window code, RPC count, config, runtime worker, model source or experimental acceptance rule changes.
+
+Six new CPU cases cover wrapped/direct native workers, incorrect direct/inner workers, missing inner worker, rejection of wrapper-only success receipts, and execution of the exact AST-extracted pinned MP `worker_busy_loop` with a serialized callback and the exact extracted wrapper `__getattr__`. Together with the original ten contract checks, 16 tests pass. These fixtures import no model/native runtime and do not launch devices. Device success is still unmeasured for v2. The two new root-selected fresh runs must remain separately named and the original pre-window failure must remain published; they are never pooled with synchronous ABBA.
+
+Root commands (from any working directory; run sequentially only under root's exclusive device lease):
+
+```bash
+/root/workspace/.muxpd-ecpa-runtime/bin/python /root/workspace/muxpd-followup-20261025/performance/native-default-backend-v2/run_controlled_native_default.py run --role native-async --label perf-native-default-backend-v2-01
+/root/workspace/.muxpd-ecpa-runtime/bin/python /root/workspace/muxpd-followup-20261025/performance/native-default-backend-v2/run_controlled_native_default.py run --role native-async --label perf-native-default-backend-v2-02
+/root/workspace/.venv/bin/python /root/workspace/muxpd-followup-20261025/performance/native-default-backend-v2/native_default_reference.py analyze --plan /root/workspace/muxpd-followup-20261025/performance/native-default-backend-v2/native-async-plan-v1.json --runs /root/workspace/muxpd-followup-20261025/runs/perf-native-default-backend-v2-01/results/run.json /root/workspace/muxpd-followup-20261025/runs/perf-native-default-backend-v2-02/results/run.json --output /root/workspace/muxpd-followup-20261025/performance/native-default-backend-v2-analysis-v1.json
+```
+
+The following inherited design description retains the unchanged experimental scope:
+
+# Separate practical native default-backend / default-async reference
+
+This new family adds **two fresh native-only runs**. It reuses the frozen workload, exact prompt
+tokens, sampling, DELTA arrival gate, warmups, two measured repetitions per workload, engine-step
+and wall bounds, queue drain and provenance functions from `group-prefill-v1`. All old families
+and plans remain unchanged. The previously prepared fusion-backend async option remains unused.
+
+The original primary order remains matched synchronous native, raw, group, group, raw, matched
+synchronous native. The two new asynchronous native runs are a separate descriptive reference;
+they are never pooled into that ABBA estimator. Their actual source schema/plan hash and report
+`reference_family`/`experiment` distinguish them from the unused fusion-async plan.
+
+## Exact configuration and native defaults
+
+Core is `d0f22d2bda562156e4dbf433ce645e1769b4f804`; Ascend is
+`03766ac696fde5ab1980d80ca0b8543d3580c989`. The clean public f7 plugin source is retained only for
+consistent source/provenance checks; plugin scheduling, policy, worker and grouped-P execution
+are absent from this arm. The ordinary worker must be `vllm_ascend.worker.worker.NPUWorker`.
+
+Relative to the preserved optional native-async configuration, exactly one nested engine value
+changes: `additional_config.ascend_compilation_config.enable_npugraph_ex: false -> true`.
+`enable_static_kernel=false` remains identical. `async_scheduling=null` already requests the
+native default and must resolve true. Native chunked prefill stays true. All other dictionary
+keys/values must match the frozen parent exactly, including TP4/EP4, PP1/DP1, bf16, max16K,
+maxbatch16K/maxseq8, graph mode FULL_DECODE_ONLY, captures1/2/4/8, maxcapture8, mp executor,
+Mamba-none, prefix cache off, CPU binding/NUMA off, HCCLtrue, and stream interval1.
+
+Pinned source evidence:
+
+- `vllm_ascend/ascend_config.py:35–41` uses an empty dict for absent compilation options and
+  initializes `AscendCompilationConfig`; its constructor at493–550 defaults npugraphExTrue and
+  staticFalse. Its310P guard forces both false; this server's retained geometry/inventory is910B2.
+- `vllm_ascend/platform.py:548–598` disables both for graph NONE, piecewise requirements, or
+  unsupported graph modes. FULL_DECODE_ONLY takes the full-graph branch, which clears splitting
+  ops and preserves the selected backend. The four-worker readback gate rejects any actual
+  initialization fallback to false.
+- `vllm_ascend/compilation/compiler_interface.py:282–303` selects `npugraph_ex_compile` when the
+  runtime flag is true and `fusion_pass_compile` when false. These are different native math/
+  compilation paths; this is why the extra reference is kept separate from the fusion comparison.
+- The copied `NATIVE-ASYNC-SOURCE-AUDIT.md` and its exact AST CPU receipt explain why generation,
+  no speculation, mp executor, PP1 and Ascend resolve asyncNone toTrue. The native scheduler must
+  therefore use queue depth2 and `step_with_batch_queue`; the unchanged collector enforces these.
+
+This is a practical native reference using the current scheduler/backend defaults **within the
+fixed recipe**, not a vendor-best or every-setting-default claim. HCCLtrue and the other explicit
+benchmark controls remain fixed. Source support does not establish hardware success or benefit.
+
+## Measurement boundary
+
+The unchanged `window`, `run`, `drain_engine`, summaries, timing and provenance source file is
+copied byte-for-byte. The wrapper changes plan/config validation, adds explicit family hashes to
+outside-window saved reports, and supplies additional fields in the existing outside-window
+worker-counter RPCs. No RPC, device query or JSON write is added inside a measured window.
+
+The original worker-counter function body is copied exactly by AST into the metadata helper;
+CPU tests compare both ASTs. Each of the same three rank snapshots must show the exact ordinary
+native worker, actual npugraphExTrue/staticFalse, asyncTrue, and absent plugin decode controller
+and P-group executor. Native queue2/step_with_batch_queue and one-token DELTA/stream interval1 are
+checked by the reused collector. Cleanup remains bounded32 steps/30 seconds after each window,
+outside reported arrivals. Actor-observed ingress after each seed's32nd returned token can coexist
+with future native D work already queued, so this arm does not estimate a single scheduler or
+backend factor against synchronous MuxPD.
+
+The separate analyzer requires exactly two fresh, serial native runs, unchanged full config,
+producer/dependency hashes, actual rank/backend controls, complete fixed outputs, valid arrival
+history and recalculated summaries. It emits descriptive per-run metrics only. Primary/raw/group
+plans or missing backend readbacks are rejected.
+
+## Root-owned commands
+
+Run only under the root agent's exclusive device lease. Controller timeout is3000 seconds, with
+bounded owned-process cleanup; forced cleanup, survivors, or mismatched/nonempty physical inventory
+fail the receipt. It preserves the inference venv executable symlink and all copied dependencies.
+
+```bash
+/root/workspace/.muxpd-ecpa-runtime/bin/python run_controlled_native_default.py dry-run --role native-async --label check-native-default-backend-v2-01
+/root/workspace/.muxpd-ecpa-runtime/bin/python run_controlled_native_default.py run --role native-async --label perf-native-default-backend-v2-01
+/root/workspace/.muxpd-ecpa-runtime/bin/python run_controlled_native_default.py run --role native-async --label perf-native-default-backend-v2-02
+python native_default_reference.py analyze --plan native-async-plan-v1.json --runs RUN01/results/run.json RUN02/results/run.json --output NEW-native-default-reference-analysis.json
+```
+
+The first three commands use this directory as the default bundle. Reports appear at
+`runs/LABEL/controller.json` and `runs/LABEL/results/run.json`. Every path must be fresh. No model,
+NPU, service or GitHub action was run while preparing this family.

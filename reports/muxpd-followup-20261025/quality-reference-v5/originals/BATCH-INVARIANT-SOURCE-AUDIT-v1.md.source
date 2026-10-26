@@ -1,0 +1,261 @@
+# Pinned Qwen3.5 / Ascend batch-invariance and HCCL strict audit
+
+This is a source audit, not a device experiment or a repair qualification. It
+does not change the frozen quality protocol or reinterpret its failed raw answer
+gate. No model, NPU, communicator, server, installation, GitHub mutation, or
+torch/Triton import was performed for this audit.
+
+The present source does **not** justify offering `VLLM_BATCH_INVARIANT=1` as a
+supported, complete Qwen3.5 numerical fix. It changes several independent
+mechanisms, has backend-dependent coverage, and leaves relevant GDN, MoE and
+attention operations outside its explicit replacements. `HCCL_DETERMINISTIC=strict`
+alone changes reduction communication, not those local operations. Neither
+setting has been shown to fix the current candidate's answer regressions.
+
+## Exact scope and source identities
+
+- Core: `/root/workspace/vllm-hust`,
+  `d0f22d2bda562156e4dbf433ce645e1769b4f804`.
+- Ascend: `/root/workspace/vllm-ascend-hust`,
+  `03766ac696fde5ab1980d80ca0b8543d3580c989`; the campaign's existing
+  `csrc/build_aclnn.sh` modification remains present and unchanged by this audit.
+- MuxPD f7: `/root/workspace/muxpd-groupfx-followup`,
+  `f7ed21e183b27d2141176f3e7a5c8a5ff4ede07d`.
+- MuxPD source98: `/root/workspace/muxpd-deterministic-profile-v2`,
+  `98eac12dc2595a8742a81b58e96b899fed905194`.
+- Earlier exact torch_npu source audit:
+  `../DETERMINISM-AND-CHUNK-CONTROLS.md`, with downloaded source bindings under
+  `../determinism-sources/source-identities.json`. torch_npu is 2.10.0.post4,
+  source `5dd8ef3f9b375b5ae4a83538d5785754148c3302`; installed CANN is 9.1.0.
+
+`source-identities.json` alongside this document hashes the files actually used
+and records repository status. Line numbers below refer to those pinned local
+files. `package-discovery.json` records a **non-importing** `PathFinder` lookup in
+the inference venv. It finds `triton`, but neither `batch_invariant_ops` nor
+`flash_attn_npu_v3`. It does not prove that a Triton driver can initialize:
+Core `vllm/triton_utils/importing.py:14–86` performs additional runtime checks,
+which were intentionally not executed here.
+
+## What the environment switch actually changes
+
+Ascend `vllm_ascend/worker/worker.py:969–981` calls
+`init_batch_invariance()` **before** native distributed initialization. It is
+not a late `load_model()` hook. Native TP/EP initialization therefore sees the
+override, assuming the initialization branch succeeds.
+
+Ascend `vllm_ascend/batch_invariant.py:76–161` implements these changes:
+
+| Condition | Actual source action | Boundary |
+|---|---|---|
+| Flag enabled and either backend available | Set weight NZ mode to 0, HCCL to `strict`, LCCL to `1`; enable torch deterministic algorithms with `warn_only=True` | This is a bundled treatment, not a strict-only comparison. Warn-only does not turn unsupported operations into a hard failure or prove custom-kernel invariance. |
+| Triton available | Replace NPU aten `addmm`, `bmm`, `softmax`, `_softmax` | Different kernels from the current default path. |
+| AscendC `batch_invariant_ops` import succeeds | Replace aten `mm`, `matmul`, `sum`; patch `torch.sum`, `torch_npu.npu_fused_infer_attention_score`, and `torch_npu.npu_add_rms_norm` | This optional module is not discoverable in the audited environment. Its own compiled implementation is not audited here. |
+| AscendC absent, Triton available | Replace aten `mm`, `matmul`, `linear` with Triton implementations | **No** FIA, add-RMSNorm or sum replacement in this branch. |
+| Both unavailable | Warn and skip batch-invariance initialization | The environment flag alone is not evidence of installed operator coverage; other flag-sensitive code can still change behavior. |
+
+The flag also:
+
+- Sets `disable_custom_all_reduce=True` in Core
+  `vllm/config/parallel.py:962–964`, and disables cascade attention in
+  `vllm/config/vllm.py:1451–1459`. Those global settings are not proof of a
+  changed NPU HCCL kernel; Ascend's communicator already uses its NPU route.
+- Makes Ascend `utils.enable_custom_op()` return false
+  (`vllm_ascend/utils.py:401–420`). This controls the guarded callers, not every
+  custom operator or every previously loaded extension.
+- Makes Ascend top-k/top-p sampling fall back to Core's implementation
+  (`sample/sampler.py:121–130`). This branch concerns top-k/top-p handling;
+  it does not establish a change to every greedy argmax call.
+
+Core's CUDA-alike-specific linear and vocabulary implementations
+(`model_executor/layers/linear.py:226`, `vocab_parallel_embedding.py:73`) and
+Core modular MoE batch-invariance support filtering
+(`layers/fused_moe/modular_kernel.py:578,665`) cannot be treated as coverage for
+Ascend's replacement layers. The Ascend registration path must be followed.
+
+## Concrete operator coverage for this hybrid model
+
+### Dense projection and normalization
+
+Ascend unquantized dense projection goes through
+`ops/linear.py:53–75,100–106`: `torch.ops.vllm.unquantized_gemm` eventually calls
+`torch.nn.functional.linear`. Thus its implementation can reach the replaced
+aten linear/matmul path. Weight loading also uses `maybe_trans_nz`
+(`ops/linear.py:86–98`), so NZ=0 changes the representation selection.
+
+The Triton implementation is a concrete alternate kernel, not merely a flag on
+the original GEMM. `ops/triton/batch_invariant/matmul.py:113–154` uses fixed
+128/128/64 tiles for `matmul_persistent`; the separate linear kernel chooses
+tiles from M/N and device properties (`:260–339`). The public wrapper supports
+specified 2D/3D/4D combinations and otherwise raises (`:378–432`). This source
+does not prove equivalence of every compiled shape, graph, or grouping.
+
+Ascend ordinary RMSNorm uses `torch_npu.npu_rms_norm`; residual RMSNorm uses the
+custom bias operation when enabled, otherwise `torch_npu.npu_add_rms_norm`
+(`ops/layernorm.py:63–86`). Crucially, `batch_invariant.py:50–61` explicitly
+documents the fused add-RMSNorm's lack of batch-invariance assurance and supplies
+an add-then-RMSNorm replacement, **but registers that patch only in the optional
+AscendC branch** (`:124`). With the currently discoverable Triton-only branch,
+disabling guarded custom ops leads residual norm to the unpatched fused operator.
+The existence of a Triton `batch_invariant/rmsnorm.py` file does not establish
+registration; it is not imported or registered by this initializer.
+
+GDN's gated norm uses a separate `LayerNormFn` → `layer_norm_fwd_npu` path
+(`ops/layernorm.py:141–150,197–199`), also not replaced by the initializer.
+
+### GDN / Mamba state kernels
+
+Core's generic Mamba selector rejects a backend that does not advertise
+`supports_batch_invariance()` (`v1/attention/selector.py:154–166`); the base
+capability returns false (`v1/attention/backend.py:272–274`). This is **not a
+demonstrated rejection of this Ascend Qwen path**:
+
+- `patch/worker/patch_qwen3_5.py:22,63,219–230` replaces the actual Qwen GDN
+  methods with Ascend methods.
+- Ascend `ops/gdn.py:69–70` directly returns `AscendGDNAttentionBackend`, bypassing
+  that generic selector. `ops/gdn_attn_builder.py:804–807` only replaces the
+  metadata builder; neither it nor Core `GDNAttentionBackend` advertises
+  batch-invariance support.
+
+The resulting P/D computation still uses:
+
+- Custom `_C_ascend.npu_causal_conv1d_custom` for convolution/state handling
+  (`ops/gdn.py:254,277,298`).
+- Triton `chunk_gated_delta_rule` for P and explicit state gather/clear/writeback
+  (`:391–422`); its kernel body is not an aten matmul call intercepted by this
+  switch.
+- Core Triton `l2norm_fwd` plus Ascend custom
+  `_C_ascend.npu_recurrent_gated_delta_rule` for D (`:372–386,428–444`).
+
+No `VLLM_BATCH_INVARIANT` alternative is selected by these GDN methods, and the
+batch initializer registers no replacement for these custom operations. Their
+bindings are in Ascend `csrc/torch_binding.cpp:2113–2125,2320–2332`.
+
+There is an important import-order qualification: `utils.py:418` does **not**
+prove that the custom symbols will be missing. Native worker module import
+also imports `device_allocator.camem` (`worker.py:62`), whose `:56–67` attempts
+to import `vllm_ascend_C` without consulting the flag. Consequently the library
+may already be registered even when `enable_custom_op()` later returns false.
+The justified finding is **incomplete/unguarded operator coverage**, not a
+claim of inevitable startup failure. Forcing the custom library on would not
+make these operations batch invariant either.
+
+### MoE
+
+The BF16 unquantized expert computation calls `torch_npu.npu_grouped_matmul`
+twice (`ops/fused_moe/moe_mlp.py:467–497,557–575`). It is not replaced by aten
+`mm`/`matmul` registration. Routing and unpermutation also have their own NPU
+operations; changing communication does not freeze their local floating-point
+arithmetic or expert selection.
+
+Ascend's fused routing suitability check has no batch-invariance/custom-op
+availability condition (`ops/fused_moe/experts_selector.py:134–163`), and its
+standard fused path calls `DeviceOperator.moe_gating_top_k` (`:287–302`). For A2,
+`device/device_op.py:138–164` selects `_C_ascend.moe_gating_top_k`; the device
+adaptor selection at the end of the file returns the base adaptor for A2.
+Thus “custom ops disabled” cannot be interpreted as “all MoE is now implemented
+with batch-invariant aten operations.” No batch-invariance promise for this
+whole Ascend MoE path was found in the audited branch.
+
+### Standard attention and D graphs
+
+Default non-MLA Ascend selection stays `AscendAttentionBackend`
+(`platform.py:809–836`). Setting the environment flag does **not** automatically
+select FA3: that requires an explicit `FLASH_ATTN` backend and the separately
+installed `flash_attn_npu_v3` package (`:814–815,839–864`). That package is absent
+from the non-importing lookup, and requesting it would be another changed factor.
+
+Ascend standard attention has distinct FIA, FIA-v2, graph `.out`, and paged
+attention paths (`attention/attention_v1.py:514–526,620,819,990,1119,1193,
+1281–1288,1311–1388`). The optional AscendC patch names FIA, but not FIA-v2 or
+paged attention. The current Triton-only branch patches none of these. Graph
+out-overload compatibility of an uninstalled optional implementation is not
+established by this audit. `attention/utils.py:162–178` selects paged attention
+using actual capture mode/shape, not this flag.
+
+No flag-specific replacement was found in Ascend's compilation/graph code.
+That negative source search is not a proof that all substituted aten kernels
+work under capture. An existing graph must not be treated as a fresh graph
+compiled under a new operator registry.
+
+## HCCL strict: scope, route and limitations
+
+The official CANN9.0 documentation describes `true` as deterministic reduction
+communication and `strict` as additionally preserving reduction order. For A2,
+the strict list is AllReduce/ReduceScatter/ReduceScatterV; it documents
+symmetric multi-server distribution and INF/NaN-mode restrictions and a possible
+performance cost. This does not establish applicability to every single-server
+910B2 topology or prove loaded CANN9.1 behavior. AllGather is not a floating-point
+reduction. These statements concern a communication operation with the same
+hardware/input, not equal model answers across different batches.
+[HCCL_DETERMINISTIC](https://www.hiascend.com/doc_center/source/zh/canncommercial/900/API/hcclug/hcclenvref_07_0010.html).
+
+Communicator-specific deterministic configuration has higher priority than the
+environment. The exact torch_npu source uses the unset sentinel `0xffffffff`
+for CANN >=8.2.RC1 (`ProcessGroupHCCL.cpp:306–325`). Its older helper only
+recognizes `true`, but that older branch is not grounds for rejecting `strict`
+on this modern path. The options parser (`:3907` onward) does not set a
+`hcclDeterministic` override from a Python `hccl_deterministic` key. The inspected
+Ascend options only set buffer/name (`utils.py:1026–1057`).
+[HcclCommConfig priorities and constraints](https://www.hiascend.com/doc_center/source/en/CANNCommunityEdition/900/API/hcclug/hcclcpp_07_0047.html).
+
+MuxPD's sibling P groups use the same constructor, with distinct names/ranks
+(`source98 src/vllm_muxpd/worker.py:475–515`); D retains native groups. Both
+inherit process environment established before group construction. There is no
+observed source override forcing these groups back to nondeterministic mode.
+Ascend `distributed/device_communicators/npu_communicator.py:40–56` inherits the
+native distributed implementation, with PyHccl integration still a TODO. A2 TP4
+selects the AllGather MoE method, not MC2
+(`ascend_forward_context.py:289–301`). `LCCL_DETERMINISTIC=1` is not evidence
+that this selected HCCL path is controlled by LCCL.
+
+An HCCL-only intervention leaves local dense/GDN/MoE/attention kernels and their
+input shapes unchanged in source; the shapes can still differ across native,
+raw and group scheduling. It therefore cannot promise batch invariance or
+correct an identified answer regression without a separate observation.
+
+## Why source98 rejects mixing the profiles
+
+`src/vllm_muxpd/determinism.py:26–39` checks the optional
+`require_hccl_deterministic` policy: it requires the exact value `true` and
+requires `VLLM_BATCH_INVARIANT` absent or `0`. `launch_environment(:43–68)` rejects
+an existing `strict` value instead of silently replacing it. Worker
+`init_device(:338–342)` validates before native initialization, and its
+post-group readback validates again (`:392–404`, determinism `:71–105`).
+
+This is a deliberate boundary for the tested **experimental HCCL-true profile**,
+not a general assertion that strict can never work. Batch-invariance initialization
+would overwrite HCCL=true to strict and change operators/NZ/global settings, so
+accepting it under the same profile would misidentify the experiment. When the
+policy is false, this particular guard returns false; that is not a support
+endorsement. The frozen f7 raw quality run has no new source98 profile guard;
+its answer failure is not caused by this validation.
+
+MuxPD raw and grouped P share loaded model/state with the native D runner
+(`worker.py:566–598`). Group P additionally requires fusion FX, npugraphEx=false,
+static=false (`:346–353`). The replacement operator registry/environment is
+process-wide, so it would affect D as well as P, including newly captured D
+graphs; it cannot be advertised as a P-only numerical correction. None of the
+current f7/source98 bridge results qualifies a new batch-invariant profile.
+
+## Smallest useful follow-up, if separately authorized
+
+The most informative next bounded diagnostic is to use the already recorded
+regression cases as **diagnostic selection**, retain their original scores, and
+locate the first divergence at an identical token prefix and known P/D shapes.
+Compare native versus raw layer outputs around GDN state update, MoE routing and
+expert output before changing multiple operators. This is fault localization,
+not a replacement 200-case acceptance test or a claim about unseen cases.
+
+If a communication-only treatment is desired, test `true` versus `strict` in
+fresh processes **only after resolving strict's actual platform applicability**,
+with batch-invariance absent and all math/backend/config/inputs otherwise fixed.
+Use a separate diagnostic label, not the source98 HCCL-true profile or frozen
+quality receipt. Success would show sensitivity to that intervention, not a
+unique root cause or automatically repair the failed quality gate.
+
+A full batch-invariant experiment is less minimal: first establish the actual
+operator backend and GDN/MoE/attention coverage above, then name it as a different
+profile with new source/config receipts. The current source audit does not
+justify enabling it as the quick fix, adding a blind `strict` default, or
+relaxing any existing quality criterion. No additional universal equivalence
+requirement is proposed.

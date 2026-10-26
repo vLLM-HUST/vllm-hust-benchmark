@@ -1,0 +1,253 @@
+"""Describe two terminal native controls with the unchanged frozen scorers.
+
+No candidate is supplied, synthesized, or evaluated. No acceptance gate changes.
+"""
+import datetime
+import hashlib
+import importlib.util
+import json
+import re
+import sys
+from collections import Counter
+from pathlib import Path
+
+sys.dont_write_bytecode = True
+ROOT = Path("/root/workspace/muxpd-followup-20261025")
+QUALITY = ROOT / "quality"
+OUTPUT = Path(__file__).resolve().parent
+SUPPLEMENT_SHA = "1a28cd97265f8c3b50442b76df4ced70f7acdf9ba1b87771e7cda80c473f16f4"
+INPUTS = {}
+
+
+def identity(path):
+    path = Path(path)
+    digest = hashlib.sha256()
+    before = path.stat()
+    with path.open("rb") as stream:
+        while block := stream.read(1024 * 1024):
+            digest.update(block)
+    after = path.stat()
+    assert (before.st_size, before.st_mtime_ns, before.st_ino) == (after.st_size, after.st_mtime_ns, after.st_ino)
+    value = {"path": str(path), "bytes": after.st_size, "sha256": digest.hexdigest()}
+    INPUTS[str(path)] = value
+    return value
+
+
+def load_json(path):
+    identity(path)
+    return json.loads(Path(path).read_bytes())
+
+
+def native_protocol(run, protocol, strict):
+    """Native-only checks from frozen verify_runtime, without its candidate API."""
+    assert run["role"] == "native"
+    assert run["plan_sha256"] == protocol["plan_sha256"]
+    assert run["producer_sha256"] == protocol["bound_quality_files"]["run_quality.py"]
+    assert run["sources"] == protocol["expected_sources"]
+    assert run["runtime_environment"] == protocol["expected_runtime_environment"]
+    assert run["engine_coordinator"] == "InprocClient"
+    args = run["engine_args"]
+    assert args == protocol["expected_native_engine_args"]
+    role_keys = {"worker_cls", "enable_chunked_prefill", "scheduler_cls", "batch_admission_policy", "batch_admission_policy_config"}
+    assert {k: v for k, v in args.items() if k in role_keys} == protocol["expected_role_options"]["native"]
+    assert args["worker_cls"] == "vllm_ascend.worker.worker.NPUWorker" and args["enable_chunked_prefill"] is True
+    effective = {"max_model_len", "max_num_seqs", "max_num_batched_tokens", "enable_chunked_prefill", "tensor_parallel_size"}
+    assert set(run["effective"]) == effective and run["effective"] == {k: args[k] for k in effective}
+    strict.compare_provenance([run])
+    return {"passed": True, "sources_environment_config_role_effective_plan_producer_bound": True,
+            "recorded_scheduler_class": run["scheduler_class"],
+            "recorded_worker_selector": args["worker_cls"],
+            "recorded_async_scheduling": args.get("async_scheduling"),
+            "scope": "Native-only projection of frozen runtime requirements; candidate-requiring verify_runtime and acceptance gates are not called."}
+
+
+def process_groups_absent(controllers):
+    groups = {c["process_group"] for c in controllers}
+    live = []
+    for path in Path("/proc").glob("[0-9]*/stat"):
+        try:
+            value = path.read_text()
+        except (FileNotFoundError, ProcessLookupError):
+            continue
+        fields = value[value.rfind(")") + 2:].split()
+        if int(fields[2]) in groups and fields[0] != "Z":
+            live.append({"pid": int(path.parent.name), "process_group": int(fields[2]), "state": fields[0]})
+    assert not live
+    assert all(not Path(f"/proc/{c['pid']}").exists() for c in controllers)
+    return {"checked_at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+            "recorded_pids": [c["pid"] for c in controllers], "recorded_groups": sorted(groups),
+            "recorded_pids_absent": True, "live_group_members": live,
+            "scope": "Read-only /proc observation; no new device query or process signal."}
+
+
+def trace_summary(path, run, plan, supplement):
+    bound = supplement.receipt_binding(path, run, plan)
+    assert bound["passed"], bound
+    file_identity = identity(path)
+    assert file_identity["sha256"] == run["scheduler_receipts_sha256"]
+    mapping = {entry["internal"]: entry["case_id"] for admission in run["admissions"] for entry in admission["bindings"]}
+
+    def normalize(value):
+        if isinstance(value, dict):
+            return {mapping.get(k, k): normalize(v) for k, v in value.items()}
+        if isinstance(value, list):
+            return [normalize(v) for v in value]
+        return mapping.get(value, value) if isinstance(value, str) else value
+
+    normalized = hashlib.sha256()
+    pending = None
+    steps = 0
+    lines = 0
+    native_mixed = Counter()
+    by_batch = Counter()
+    preemptions = []
+    with path.open() as stream:
+        for line in stream:
+            lines += 1
+            row = json.loads(line)
+            normalized.update(supplement.canonical(normalize(row)) + b"\n")
+            if row["event"] == "schedule":
+                assert pending is None and row["global_step"] == steps + 1
+                pending = row
+                preemptions.extend(row["preempted_req_ids"])
+            else:
+                assert row["event"] == "retirement" and pending is not None
+                assert (row["global_step"], row["batch_id"]) == (pending["global_step"], pending["batch_id"])
+                mixed = bool(not pending["pending_prefill_ids"] and any(
+                    pending["phases_before"].get(rid) == "P" for rid in pending["scheduled_tokens"])
+                    and row["decode_retired_ids"])
+                assert row["native_mixed_scheduled_and_decode_retired"] is mixed
+                assert row["prefill_layers_completed"] is None
+                assert row["actual_prefill_progress"] is False
+                assert row["mixed_pd_progress_and_retirement"] is False
+                if mixed:
+                    native_mixed[row["batch_id"]] += 1
+                by_batch[row["batch_id"]] += 1
+                steps += 1
+                pending = None
+    assert pending is None and lines == 2 * steps and 0 < steps <= plan["maximum_engine_steps"]
+    assert set(by_batch) == {b["batch_id"] for b in plan["batches"]}
+    assert run["mixed_coverage"]["steps_per_batch"] == {} and run["mixed_coverage"]["covered_batches"] == []
+    return {"receipt": file_identity, "admission_phase_retirement_binding": bound,
+            "transaction_count": steps, "receipt_lines": lines, "steps_per_batch": dict(by_batch),
+            "native_mixed_transactions_per_batch": dict(native_mixed),
+            "preempted_internal_ids": preemptions,
+            "normalized_case_id_schedule_sha256": normalized.hexdigest(),
+            "normalization": "Replace admitted internal request IDs with case IDs recursively; retain every field, list order, batch and global step; hash canonical JSON lines.",
+            "scope": "Native scheduler metadata consistency; plugin-specific P-layer mixed coverage is not a native-control acceptance requirement; no physical-overlap inference."}
+
+
+def main():
+    from tokenizers import Tokenizer
+
+    module_path = QUALITY / "supplementary/score_supplementary.py"
+    assert identity(module_path)["sha256"] == SUPPLEMENT_SHA
+    spec = importlib.util.spec_from_file_location("unchanged_supplement", module_path)
+    supplement = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(supplement)
+    protocol_path = QUALITY / "supplementary/protocol.json"
+    identity(protocol_path)
+    protocol = supplement.load_protocol(protocol_path, QUALITY)
+    for relative in protocol["bound_quality_files"]:
+        identity(QUALITY / relative)
+    for name in ("adopted-review.md", "native-only-calibration-receipt.json"):
+        identity(protocol_path.parent / name)
+    identity(ROOT / "root/model-weight-sha256.json")
+    identity(QUALITY / "score_quality.py")
+    strict = supplement.load_strict(QUALITY / "score_quality.py")
+    plan, cases, extract = strict.load_frozen(QUALITY / "frozen-v2")
+    assert len(cases) == 200
+    for case in cases:
+        assert supplement.sha(case["prompt"].encode()) == case["prompt_utf8_sha256"]
+        assert supplement.sha(supplement.canonical(case["prompt_token_ids"])) == case["prompt_token_ids_sha256"]
+        assert len(case["prompt_token_ids"]) == case["prompt_tokens"]
+    for item in plan["tokenizer_files"].values():
+        assert identity(Path(item["path"]))["sha256"] == item["sha256"]
+    decoder = Tokenizer.from_file(plan["tokenizer_files"]["tokenizer.json"]["path"])
+    labels = ["native-quality-v2-hccl-true-01", "native-quality-v2-hccl-true-02"]
+    paths = [ROOT / "runs" / label / "results/run.json" for label in labels]
+    runs = [load_json(p) for p in paths]
+    controllers = [load_json(p.parent.parent / "controller.json") for p in paths]
+    strict.compare_provenance(runs)
+    assert runs[0]["scheduler_class"] == runs[1]["scheduler_class"]
+    assert len({r["process_id"] for r in runs}) == 2 and len({r["started_at"] for r in runs}) == 2
+    assert datetime.datetime.fromisoformat(runs[0]["finished_at"]) < datetime.datetime.fromisoformat(runs[1]["started_at"])
+    absence = process_groups_absent(controllers)
+    descriptions = []
+    for label, path, run in zip(labels, paths, runs, strict=True):
+        runtime = native_protocol(run, protocol, strict)
+        collection = supplement.collection(run, plan, cases)
+        admissions = supplement.verify_admissions(run, plan)
+        terminal = supplement.terminal_receipt(path, run, protocol)
+        assert collection["passed"] and admissions and terminal["passed"], (collection, admissions, terminal)
+        for row in terminal["snapshots"].values():
+            identity(Path(row["path"]))
+        identity(path.parent.parent / "npu-after.txt")
+        token_text = [row["case_id"] for row in run["outputs"]
+                      if decoder.decode(row["token_ids"], skip_special_tokens=True) != row["text"]]
+        assert token_text == []
+        score = supplement.annotate_score(strict.score(run, plan, cases, extract), run, strict)
+        trace = trace_summary(path.parent / "scheduler-receipts.jsonl", run, plan, supplement)
+        log = path.parent.parent / "process.log"
+        identity(log)
+        warnings = [line for line in log.read_text().splitlines() if re.search(
+            r"SIGTERM|SIGKILL|force terminating|resource_tracker|abort.*timeout|Fatal Python error", line, re.I)]
+        descriptions.append({"label": label, "run": INPUTS[str(path)], "runtime_protocol": runtime,
+            "collection": collection, "admission_binding": admissions, "terminal_receipt": terminal,
+            "output_text_token_binding": {"passed": True, "checked": 200, "mismatch_case_ids": []},
+            "score": score, "scheduler_metadata": trace, "native_shutdown_log_caveats": warnings})
+    scores = [d["score"] for d in descriptions]
+    paired = strict.paired(scores[0], scores[1])
+    common_correct = sorted(set(r["case_id"] for r in scores[0]["rows"] if r["correct"]) &
+                            set(r["case_id"] for r in scores[1]["rows"] if r["correct"]))
+    output_maps = [{r["case_id"]: r for r in run["outputs"]} for run in runs]
+    comparisons = []
+    for case in cases:
+        a, b = [m[case["case_id"]] for m in output_maps]
+        comparisons.append({"case_id": case["case_id"], "token_ids_equal": a["token_ids"] == b["token_ids"],
+            "text_equal": a["text"] == b["text"], "termination_equal": all(a.get(k) == b.get(k) for k in ("finished", "finish_reason", "stop_reason")),
+            "native1_token_ids_sha256": supplement.sha(supplement.canonical(a["token_ids"])),
+            "native2_token_ids_sha256": supplement.sha(supplement.canonical(b["token_ids"]))})
+    old_description_path = QUALITY / "native-control-01-description-v1.json"
+    old = load_json(old_description_path)
+    rescored_first = strict.score(runs[0], plan, cases, extract)
+    assert old["score"] == rescored_first and old["run"]["sha256"] == INPUTS[str(paths[0])]["sha256"]
+    assert old["collection"] == descriptions[0]["collection"] and old["token_text_binding"] is True
+    original_inputs = dict(INPUTS)
+    for path, expected in original_inputs.items():
+        assert identity(Path(path)) == expected
+    result = {
+        "schema": "muxpd-paired-native-quality-description-v1", "created_at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+        "reviewer": "/root/numerical_probe", "producer": identity(Path(__file__)),
+        "scope": "Two fresh native controls only; no candidate or supplementary acceptance gate computed.",
+        "audit_passed": True, "inputs": list(original_inputs.values()), "protocol_sha256": protocol["protocol_sha256"],
+        "plan_sha256": plan["plan_sha256"], "fresh_processes_nonoverlapping": True,
+        "process_group_readback": absence, "controls": descriptions,
+        "native2_vs_native1_descriptive": paired, "both_native_correct_case_ids": common_correct,
+        "both_native_correct_count": len(common_correct), "lower_native_correct_count": min(s["correct"] for s in scores),
+        "output_comparisons": comparisons,
+        "all_200_token_ids_equal": all(r["token_ids_equal"] for r in comparisons),
+        "all_200_text_and_termination_equal": all(r["text_equal"] and r["termination_equal"] for r in comparisons),
+        "normalized_scheduler_metadata_equal": descriptions[0]["scheduler_metadata"]["normalized_case_id_schedule_sha256"] == descriptions[1]["scheduler_metadata"]["normalized_case_id_schedule_sha256"],
+        "original_strict_native_completeness_requirement": {"both_native_controls_complete": all(s["all_complete"] for s in scores),
+            "reason": "Frozen strict scoring requires natural stop for every case; length termination remains incomplete and wrong."},
+        "candidate_evaluated": False, "supplementary_gate_evaluated": False,
+        "prior_native1_description_unchanged_and_reproduced": True, "all_reviewed_input_bytes_unchanged": True,
+        "limits": ["No candidate quality acceptance or Issue23 resolution follows from repeatable native controls.",
+                  "Length outputs always receive no extracted answer and zero credit under the frozen scorer.",
+                  "Confidence intervals concern the fixed selected cases under stated assumptions; nonsignificance is not equivalence.",
+                  "Model weights use the existing full-hash manifest plus unchanged size/mtime checks; full weights were not rehashed.",
+                  "Prompt forwarding/returned-prompt equality is enforced by the pinned producer; this review checks frozen inputs and producer identity, not model input tensors.",
+                  "Native scheduler metadata does not provide plugin P-layer coverage or physical overlap proof."]}
+    with (OUTPUT / "paired-description.json").open("x") as stream:
+        json.dump(result, stream, indent=2, ensure_ascii=False, allow_nan=False)
+        stream.write("\n")
+    print(json.dumps({"audit_passed": True, "correct": [s["correct"] for s in scores],
+        "strict_complete": [s["all_complete"] for s in scores], "status_counts": [s["status_counts"] for s in scores],
+        "both_native_correct": len(common_correct), "tokens_equal": result["all_200_token_ids_equal"],
+        "normalized_schedule_equal": result["normalized_scheduler_metadata_equal"],
+        "output": str(OUTPUT / "paired-description.json")}))
+
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,91 @@
+# TP4 mixed P/D profile: matched work, no kernel-launch-count reduction
+
+Both frozen v1 capture audits and the raw/group matched-work comparison passed.
+Grouping P did **not** reduce the exported native kernel-launch count in this
+capture: each rank recorded 2,854 raw versus 2,924 group
+`AscendCL@aclrtLaunchKernelWithHostArgs` calls. The separately measured +3.466%
+group/raw mixed-work throughput increment therefore cannot be attributed to
+fewer such launches. This profile is a diagnostic, not another throughput test.
+
+The runs are `profile-f7-raw-mixed-01` and `profile-f7-group-mixed-01`, with the
+frozen f7/Core/Ascend sources, BF16 Qwen3.5-35B-A3B, TP4/EP4, HCCL=true and the
+matching fusion backend. Raw/group differ only in the grouped-P option and the
+profiler destination. Both controllers exited zero, completed collection and
+returned from shutdown. Root separately confirmed each owned PID/process group
+absent and the four physical NPUs 1/2/3/6 empty. Native internal cleanup still
+used SIGTERM for four workers in each run; this is not a claim of signal-free
+graceful shutdown.
+
+## Actual observed capture
+
+After one complete unprofiled mixed warmup, four P128/D512 seeds each returned
+32 tokens. Profiling then covered P12000 admission through its first token.
+Both roles observed the same ten steps, 33–42: P advanced and each seed returned
+one D token at every step. Each rank's D-controller replay delta and exported
+`AscendCL@aclmdlRIExecuteAsync` count were both exactly ten. Group recorded one
+successful call to each of ten P groups on every rank; raw had no grouped-P
+executor. There were no capture/fallback/uncaptured/forward-failure deltas.
+
+Each of the eight traces has one profiling-enable and one profiling-disable
+marker, no graph-capture API, a native profiler rank/PID binding, and a distinct
+observed hardware label. The workers reported profilers stopped before the
+remaining unprofiled output completion. These checks passed in the original,
+unchanged auditor. Visible ordinals are not substituted for host physical IDs.
+
+The five complete output sequences in both warmup and capture completion match
+between raw and group, including finish states: all ten retained comparisons
+pass in [the token-array comparison](retained-profile-token-comparison-v1.json).
+This does not establish native-relative answer quality.
+
+## Runtime calls
+
+Counts below hold separately on **each** of the four ranks, except the explicitly
+listed query rows. They describe the entire captured mixed window, not isolated
+P kernel work. All 364 rank/API rows, including unchanged calls and inclusive
+host durations, are retained in [the complete table](all-runtime-api-comparisons-v1.csv)
+and [the frozen comparison output](comparison-v1.json).
+
+| Exported API | Raw count/rank | Group count/rank | Change/rank |
+| --- | ---: | ---: | ---: |
+| `aclmdlRIExecuteAsync` | 10 | 10 | 0 |
+| `aclrtLaunchKernelWithHostArgs` | 2854 | 2924 | +70 |
+| `aclnnInplaceCopy` | 909 | 1039 | +130 |
+| `aclnnInplaceCopyGetWorkspaceSize` | 115 | 175 | +60 |
+| `aclrtMemcpyAsync` | 303 | 363 | +60 |
+| `aclrtRecordEvent` | 462 | 462 | 0 |
+| `aclrtStreamWaitEvent` | 346 | 346 | 0 |
+| `Event::record` | 183 | 183 | 0 |
+| `Event::wait` | 162 | 162 | 0 |
+| `Event::synchronize` | 11 | 11 | 0 |
+
+`aclrtQueryEventStatus` counts vary by rank: raw [85,85,3,3] and group
+[26,27,27,27]. The full inventory retains these differences. Readiness-sensitive
+query and destroy counts are not a controlled, universal reduction. Inclusive
+API durations include waiting and can overlap; summing them across ranks is not
+end-to-end time. Profiling perturbs execution, and these single captures do not
+estimate the significance or cause of the separate timing result. No P-only
+device-time, physical P/D overlap or Cube/Vector partition claim follows.
+
+## Parsing and evidence preservation
+
+Both native worker logs report that the profiler cannot parse data inside a
+daemon process. Collection nevertheless completed with raw profiling data on
+all ranks. Root used the installed torch-npu 2.10.0.post4 offline `analyse`
+interface with `max_process_number=1`, after all model processes stopped.
+The script copied the profiler directories into a new analysis tree, verified
+copy identities before parsing, and verified every original member unchanged
+afterward. It produced four complete traces per role. The original error logs,
+raw directories, complete copied/parsed tree, parser script/log/receipt and
+terminal device checks are preserved; no original capture was rewritten.
+
+`root/audit_mixed_profiles_v1.py` maps each copied trace by the native
+`profiler_info_*.json` rank ID and invokes the unchanged frozen auditor. All
+three CLI calls exited zero; [command receipts](command-receipts-v1.json) bind
+the wrapper, auditor and parser receipt. [Raw](raw-capture-audit-v1.json) and
+[group](group-capture-audit-v1.json) audits retain every trace hash and observed
+counter. No API alias or acceptance condition was revised after seeing data.
+
+The no-profiler performance matrix and its limitations remain in the separate
+[canonical v4 report](https://github.com/vLLM-HUST/vllm-hust-benchmark/tree/ef849ef49577c491fee68317ffc96d52796cd379/reports/muxpd-followup-20261025/performance-lifecycle-v4).
+The current quality failure remains separate: group preserves the measured raw
+behavior but neither candidate passed the frozen native-relative answer gate.

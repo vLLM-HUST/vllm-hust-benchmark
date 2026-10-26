@@ -1,0 +1,195 @@
+"""CPU-only actual CANN mixed-capture audit; no model imports."""
+
+import argparse
+import gc
+import hashlib
+import json
+from collections import defaultdict
+from decimal import Decimal
+from pathlib import Path
+
+import perf_group_prefill as perf
+import profile_group_ingress as producer
+from perf_group_prefill import percentile
+
+REPLAY = "AscendCL@aclmdlRIExecuteAsync"
+FIXED_APIS = (REPLAY, "AscendCL@aclrtRecordEvent", "AscendCL@aclrtStreamWaitEvent", "AscendCL@aclrtQueryStream", "AscendCL@aclrtQueryStreamStatus", "Event::record", "Event::wait", "Event::synchronize")
+
+
+def api_stats(durations, replay_count):
+    values = [float(item) for item in durations]
+    return {"count": len(values), "inclusive_sum_us": float(sum(durations, Decimal(0))),
+            "mean_us": sum(values) / len(values) if values else None,
+            "p50_us": percentile(values, .5), "p95_us": percentile(values, .95),
+            "max_us": max(values) if values else None,
+            "count_per_observed_graph_replay": len(values) / replay_count if replay_count else None,
+            "inclusive_us_per_observed_graph_replay": float(sum(durations, Decimal(0))) / replay_count if replay_count else None}
+
+
+def audit(path, expected_steps):
+    with path.open() as stream:
+        data = json.load(stream)
+    events = data["traceEvents"] if isinstance(data, dict) else data
+    names, labels, counts, markers = {}, {}, defaultdict(list), defaultdict(int)
+    cpu_pids = set()
+    for event in events:
+        if event.get("ph") == "M":
+            if event.get("name") == "process_name":
+                names[event["pid"]] = event.get("args", {}).get("name", "")
+            elif event.get("name") == "process_labels":
+                labels[event["pid"]] = event.get("args", {}).get("labels", "")
+    hardware = {pid for pid, name in names.items() if name in ("Ascend Hardware", "Task Scheduler")}
+    for event in events:
+        if event.get("ph") != "X":
+            continue
+        if event.get("cat") == "cpu_op":
+            cpu_pids.add(str(event["pid"]))
+        name = event.get("name", "")
+        if event.get("pid") in hardware and name in ("PROFILING_ENABLE", "PROFILING_DISABLE"):
+            markers[name] += 1
+        if name.startswith("AscendCL@") or name in FIXED_APIS:
+            duration = Decimal(str(event.get("dur", 0)))
+            if not duration.is_finite() or duration < 0:
+                raise ValueError("Invalid runtime API duration")
+            counts[name].append(duration)  # zero-duration exported calls still count
+    replays = len(counts[REPLAY])
+    queries = sorted(name for name in counts if name.startswith("AscendCL@") and "QueryStream" in name)
+    capture_calls = sum(len(items) for name, items in counts.items() if "CaptureBegin" in name or "CaptureEnd" in name)
+    selected = sorted(set(FIXED_APIS) | set(queries))
+    with path.open("rb") as stream:
+        source_sha = hashlib.file_digest(stream, "sha256").hexdigest()
+    return {"source": str(path), "source_sha256": source_sha,
+            "hardware_process_labels": {str(pid): labels.get(pid) for pid in hardware},
+            "cpu_operation_pids": sorted(cpu_pids),
+            "expected_coordinator_D_steps": expected_steps, "observed_graph_replays": replays,
+            "exact_replay_count_matches": replays == expected_steps,
+            "profiler_markers": dict(markers), "graph_capture_api_count": capture_calls,
+            "complete_window_indicators": replays == expected_steps and capture_calls == 0
+                and markers["PROFILING_ENABLE"] == markers["PROFILING_DISABLE"] == 1,
+            "query_api_names_observed": queries, "runtime_api_inventory": {name: len(items) for name, items in sorted(counts.items())},
+            "apis": {name: api_stats(counts[name], replays) for name in selected},
+            "all_runtime_api_stats": {name: api_stats(items, replays) for name, items in sorted(counts.items())},
+            "scope": "Exported actual calls with inclusive host API duration; neither physical kernel time nor end-to-end performance. Missing query exports cannot prove zero execution."}
+
+
+def capture_audit(run_path, traces):
+    run = json.loads(run_path.read_text())
+    if run["schema"] != "muxpd-group-ingress-profile-run-v1" or not run["collection_complete"] or not run["shutdown_returned"] or run["errors"]:
+        raise ValueError("A completed separate mixed profile is required")
+    if set(traces) != {0, 1, 2, 3} or len({path.resolve() for path in traces.values()}) != 4:
+        raise ValueError("Four unique rank trace files required")
+    capture = run["capture"]
+    if producer.coverage(capture) != capture["capture_coverage"] or not capture["capture_coverage"]["passed"] or capture["errors"]:
+        raise ValueError("Actual mixed P/D coverage is missing")
+    before, after = [perf.rank_rows(capture[key]) for key in ("worker_before", "worker_after")]
+    stopped = perf.rank_rows(capture["worker_after_stop"])
+    perf.require_worker_controls(list(stopped.values()), "true")
+    if any(stopped[rank]["running"] or stopped[rank]["pid"] != after[rank]["pid"]
+           or stopped[rank]["device_index"] != after[rank]["device_index"] for rank in stopped):
+        raise ValueError("Worker profiler shutdown or rank/device binding failed")
+    for snapshot in (before, after):
+        perf.require_worker_controls(list(snapshot.values()), "true")
+        if len({row["pid"] for row in snapshot.values()}) != 4 or {row["device_index"] for row in snapshot.values()} != {0, 1, 2, 3} or not all(row["running"] for row in snapshot.values()):
+            raise ValueError("Incomplete active worker/rank/device receipts")
+    deltas = perf.counter_deltas(capture["worker_before"], capture["worker_after"])
+    if perf.digest(deltas) != perf.digest(capture["counter_deltas"]):
+        raise ValueError("Recorded profile counter deltas differ")
+    rows = []
+    for rank, path in sorted(traces.items()):
+        expected = deltas[rank]["native_decode_graph"]["decode_replay_calls"]
+        native = deltas[rank]["native_decode_graph"]
+        if expected <= 0 or any(native.get(key, 0) for key in ("decode_capture_forward_calls", "decode_eager_fallback_calls", "decode_uncaptured_full_calls", "decode_forward_failures")):
+            raise ValueError("Capture did not retain exclusive native D graph replay")
+        calls = deltas[rank]["prefill_group_calls"]
+        if (run["variant"] == "group" and (calls != [1] * 10 or not after[rank]["prefill_groups"]["ready"] or after[rank]["prefill_groups"]["failed"])) or (run["variant"] == "raw" and calls is not None):
+            raise ValueError("Actual captured group calls differ from one full P cohort")
+        info_path = path.parent.parent / f"profiler_info_{rank}.json"
+        info = json.loads(info_path.read_text())
+        item = {"rank": rank, **audit(path, expected)}
+        labels = sorted({value for value in item["hardware_process_labels"].values() if value})
+        item["worker_binding"] = {"worker_pid": before[rank]["pid"], "visible_device_index": before[rank]["device_index"],
+            "hardware_labels_observed": labels, "profiler_info_sha256": hashlib.sha256(info_path.read_bytes()).hexdigest(),
+            "passed": info.get("rank_id") == rank and before[rank]["pid"] == after[rank]["pid"]
+                and before[rank]["device_index"] == after[rank]["device_index"]
+                and str(before[rank]["pid"]) in item["cpu_operation_pids"] and len(labels) == 1,
+            "scope": "Native profiler rank/PID binds observed hardware label to worker visible ordinal; do not equate visible ordinal with host npu-smi physical ID"}
+        rows.append(item)
+        gc.collect()
+    if len({row["source_sha256"] for row in rows}) != 4:
+        raise ValueError("Duplicate trace bytes assigned to different ranks")
+    distinct_devices = len({tuple(row["worker_binding"]["hardware_labels_observed"]) for row in rows}) == 4
+    signature = []
+    for event in capture["steps"]:
+        if event["profile_active"]:
+            signature.append({"P_before_layers": event["P_before"]["completed_layers"] if event["P_before"] else None,
+                "P_after_layers": event["P_after"]["completed_layers"] if event["P_after"] else None,
+                "seed_returns": [b - a for a, b in zip(event["seed_counts_before"], event["seed_counts_after"], strict=True)],
+                "P_output_count": event["P_output_count"]})
+    return {"schema": "muxpd-mixed-profile-capture-audit-v1", "variant": run["variant"], "plan_sha256": run["plan_sha256"],
+        "run_source": str(run_path), "run_sha256": hashlib.sha256(run_path.read_bytes()).hexdigest(),
+        "producer_sha256": run["producer_sha256"], "timing_dependency_sha256": run["timing_dependency_sha256"],
+        "environment": run["environment"], "sources": run["sources"], "engine_args": run["engine_args"],
+        "capture_start_seed_counts": capture["capture_start_seed_counts"],
+        "capture_stop_seed_counts": capture["capture_stop_seed_counts"], "capture_stop_P_output_count": capture["capture_stop_P_output_count"],
+        "actual_progress_signature": signature, "counter_deltas": deltas, "captures": rows,
+        "passed": distinct_devices and all(row["complete_window_indicators"] and row["worker_binding"]["passed"] for row in rows),
+        "scope": "Actual mixed-capture runtime call counts and inclusive host API durations; no timing benefit, physical P/D device attribution or kernel speedup inferred"}
+
+
+def compare(left_path, right_path):
+    left, right = [json.loads(path.read_text()) for path in (left_path, right_path)]
+    if [left["variant"], right["variant"]] != ["raw", "group"] or not left["passed"] or not right["passed"]:
+        raise ValueError("Need passing raw and group actual mixed trace audits")
+    for key in ("plan_sha256", "producer_sha256", "timing_dependency_sha256", "environment", "sources", "capture_start_seed_counts", "capture_stop_seed_counts", "capture_stop_P_output_count", "actual_progress_signature"):
+        if left[key] != right[key]:
+            raise ValueError(f"Captured workload or runtime differs: {key}")
+    engines = [json.loads(json.dumps(row["engine_args"])) for row in (left, right)]
+    for engine in engines:
+        engine["batch_admission_policy_config"]["compile_prefill_groups"] = False
+        engine["profiler_config"].pop("torch_profiler_dir")
+    if engines[0] != engines[1]:
+        raise ValueError("Capture configs differ beyond group flag/output directory")
+    comparisons = []
+    for raw, group in zip(left["captures"], right["captures"], strict=True):
+        if raw["rank"] != group["rank"] or raw["observed_graph_replays"] != group["observed_graph_replays"] or raw["worker_binding"]["hardware_labels_observed"] != group["worker_binding"]["hardware_labels_observed"]:
+            raise ValueError("Per-rank actual D replay count or device label differs")
+        names = sorted(set(raw["all_runtime_api_stats"]) | set(group["all_runtime_api_stats"]))
+        entries = {}
+        for name in names:
+            raw_api, group_api = raw["all_runtime_api_stats"].get(name), group["all_runtime_api_stats"].get(name)
+            entries[name] = {"raw": raw_api, "group": group_api,
+                "group_minus_raw_exported_count": (group_api["count"] if group_api else 0) - (raw_api["count"] if raw_api else 0),
+                "group_minus_raw_inclusive_host_us": (group_api["inclusive_sum_us"] if group_api else 0) - (raw_api["inclusive_sum_us"] if raw_api else 0)}
+        comparisons.append({"rank": raw["rank"], "actual_D_graph_replays_each": raw["observed_graph_replays"], "apis": entries})
+    return {"schema": "muxpd-mixed-profile-comparison-v1", "matched_capture": True, "comparisons": comparisons,
+        "inputs": [{"path": str(path), "sha256": hashlib.sha256(path.read_bytes()).hexdigest()} for path in (left_path, right_path)],
+        "scope": "Equal observed P/D work and D replays, actual inclusive host runtime API counts/durations only. Profiling changes execution; use separate no-profiler ABBA for performance. No pure-D extrapolation or physical P-only attribution."}
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("command", choices=("capture", "compare"))
+    parser.add_argument("--run", type=Path)
+    parser.add_argument("--trace", action="append", default=[])
+    parser.add_argument("--raw", type=Path)
+    parser.add_argument("--group", type=Path)
+    parser.add_argument("--output", type=Path, required=True)
+    args = parser.parse_args()
+    if args.output.exists():
+        raise FileExistsError(args.output)
+    if args.command == "compare":
+        result = compare(args.raw, args.group)
+    else:
+        traces = {}
+        for item in args.trace:
+            rank, path = item.split("=", 1)
+            if int(rank) in traces:
+                raise ValueError("Duplicate rank argument")
+            traces[int(rank)] = Path(path)
+        result = capture_audit(args.run, traces)
+    perf.save(args.output, result)
+    return 0 if result.get("passed", result.get("matched_capture", False)) else 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

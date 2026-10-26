@@ -1,0 +1,148 @@
+"""Summarize unchanged raw scoring artifacts and saved per-case token arrays."""
+import datetime
+import hashlib
+import json
+import re
+from collections import Counter
+from pathlib import Path
+
+BASE = Path("/root/workspace/muxpd-followup-20261025")
+QUALITY = BASE / "quality"
+HERE = Path(__file__).resolve().parent
+INPUTS = {}
+
+
+def identity(path):
+    data = path.read_bytes()
+    value = {"path": str(path), "bytes": len(data), "sha256": hashlib.sha256(data).hexdigest()}
+    INPUTS[str(path)] = value
+    return value
+
+
+def load(path):
+    identity(path)
+    return json.loads(path.read_bytes())
+
+
+def first_difference(reference, candidate):
+    common = 0
+    for first, second in zip(reference, candidate):
+        if first != second:
+            break
+        common += 1
+    equal = reference == candidate
+    return {"arrays_equal": equal, "shared_generated_prefix_tokens": common,
+        "first_difference_index_zero_based": None if equal else common,
+        "first_difference_token_number_one_based": None if equal else common + 1,
+        "native_token_id": reference[common] if common < len(reference) else None,
+        "raw_token_id": candidate[common] if common < len(candidate) else None,
+        "scope": "Saved generated token IDs only; no logits, numerical-cause or semantic-equivalence inference."}
+
+
+def main():
+    strict_path = QUALITY / "raw-quality-v2-strict-result-v1.json"
+    supplementary_path = QUALITY / "raw-quality-v2-supplementary-result-v1.json"
+    strict, supplement = load(strict_path), load(supplementary_path)
+    assert supplement["original_strict_gate"] == {k: strict[k] for k in supplement["original_strict_gate"]}
+    for first, second in zip(strict["scores"], supplement["scores"], strict=True):
+        assert first == {k: second[k] for k in first}
+    paths = [BASE / "runs" / label / "results/run.json" for label in (
+        "native-quality-v2-hccl-true-01", "native-quality-v2-hccl-true-02", "raw-quality-v2-hccl-true-01")]
+    runs = [load(p) for p in paths]
+    for p, item in zip(paths, supplement["run_sources"], strict=True):
+        assert str(p) == item["path"] and INPUTS[str(p)]["sha256"] == item["sha256"]
+    cases_path = QUALITY / "frozen-v2/cases.jsonl"
+    identity(cases_path)
+    cases = {row["case_id"]: row for row in map(json.loads, cases_path.read_text().splitlines())}
+    plan = load(QUALITY / "frozen-v2/plan.json")
+    assert plan["plan_sha256"] == runs[2]["plan_sha256"]
+    batch_role = {cid: {"batch_id": b["batch_id"], "stage": "seed" if cid == b["seed_case_id"] else "peer",
+                       "case_index_in_batch_zero_based": index}
+                  for b in plan["batches"] for index, cid in enumerate(b["case_ids"])}
+    output_maps = [{r["case_id"]: r for r in run["outputs"]} for run in runs]
+    score_maps = [{r["case_id"]: r for r in score["rows"]} for score in supplement["scores"]]
+    pairs = strict["candidate_vs_native1"]
+    assert pairs == strict["candidate_vs_native2"]
+    losses, gains = pairs["transitions"]["correct_wrong"], pairs["transitions"]["wrong_correct"]
+    details = []
+    for direction, ids in (("loss_on_both_native_correct", losses), ("gain_on_both_native_wrong", gains)):
+        for cid in ids:
+            case = cases[cid]
+            outputs = [m[cid] for m in output_maps]
+            assert outputs[0]["token_ids"] == outputs[1]["token_ids"]
+            observations = []
+            for role, output, scores in zip(("native1", "native2", "raw"), outputs, score_maps, strict=True):
+                row = scores[cid]
+                assert row["output_tokens"] == len(output["token_ids"])
+                observations.append({"role": role, "answer": row["answer"], "correct": row["correct"],
+                    "valid_answer": row["valid_answer"], "finish_reason": output["finish_reason"],
+                    "stop_reason": output.get("stop_reason"), "output_tokens": len(output["token_ids"]),
+                    "token_ids_sha256": hashlib.sha256(json.dumps(output["token_ids"], separators=(",", ":")).encode()).hexdigest()})
+            details.append({"case_id": cid, "direction": direction, "gold": case["answer"],
+                "category": case["category"], "option_count": case["option_count"],
+                "prompt_tokens": case["prompt_tokens"], **batch_role[cid], "observations": observations,
+                "first_difference_to_native1": first_difference(outputs[0]["token_ids"], outputs[2]["token_ids"]),
+                "first_difference_to_native2": first_difference(outputs[1]["token_ids"], outputs[2]["token_ids"])})
+    terminal = load(HERE / "terminal-observation.json")
+    assert terminal["ready_for_scoring"]
+    identity(HERE / "monitor.jsonl")
+    strict_stdout = load(HERE / "strict-cli-attempt-01.log")
+    supplementary_stdout = load(HERE / "supplement-cli-attempt-01.log")
+    assert strict_stdout["full_frozen_plan_passed"] == strict["full_frozen_plan_passed"]
+    assert supplementary_stdout["supplementary_gate"] == supplement["supplementary_gate"]
+    strict_scorer = identity(QUALITY / "score_quality.py")
+    supplement_scorer = identity(QUALITY / "supplementary/score_supplementary.py")
+    assert strict_scorer["sha256"] == strict["scorer_sha256"]
+    assert supplement_scorer["sha256"] == supplement["scorer"]["sha256"]
+    identity(QUALITY / "supplementary/protocol.json")
+    identity(BASE / "root/QUALITY-REMAINING-HANDOFF-v1.md")
+    raw_root = paths[2].parent.parent
+    control = load(raw_root / "controller.json")
+    identity(raw_root / "npu-after.txt")
+    identity(raw_root / "process.log")
+    warnings = [line for line in (raw_root / "process.log").read_text().splitlines()
+                if re.search(r"SIGTERM|SIGKILL|force terminating|resource_tracker|abort.*timeout|Fatal Python error", line, re.I)]
+    common = ["--native1", str(paths[0]), "--native2", str(paths[1]), "--candidate", str(paths[2])]
+    commands = [
+        ["/root/workspace/.venv/bin/python", str(QUALITY / "score_quality.py"), "--frozen", str(QUALITY / "frozen-v2"), *common, "--output", str(strict_path)],
+        ["/root/workspace/.venv/bin/python", str(QUALITY / "supplementary/score_supplementary.py"),
+         "--protocol", str(QUALITY / "supplementary/protocol.json"), "--quality-root", str(QUALITY), *common, "--output", str(supplementary_path)],
+    ]
+    coverage = supplement["candidate_mixed_coverage"]
+    assert all(c["passed"] for c in supplement["collection_audits"])
+    assert strict["full_frozen_plan_passed"] is False
+    assert len(strict["stable_native_correct_cases"]) == 165 and len(losses) == 3 and len(gains) == 4
+    assert coverage["passed"] and len(coverage["steps_per_batch"]) == 25
+    assert set(coverage["steps_per_batch"].values()) == {10}
+    for recorded in list(INPUTS.values()):
+        assert identity(Path(recorded["path"])) == recorded
+    result = {"schema": "muxpd-raw-quality-review-v1", "created_at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+        "producer": identity(Path(__file__)), "inputs": list(INPUTS.values()),
+        "cli_executions": [{"argv": cmd, "exit_code": 0, "environment_override": {"PYTHONDONTWRITEBYTECODE": "1"}}
+                           for cmd in commands],
+        "original_strict_gate": supplement["original_strict_gate"], "supplementary_gate": supplement["supplementary_gate"],
+        "per_run_counts": [{"role": role, "correct": score["correct"], "total": score["total"],
+            "accuracy": score["accuracy"], "termination_counts": dict(Counter(o["finish_reason"] for o in run["outputs"])),
+            "invalid_answers_including_length": score["invalid_answers"], "status_counts": score["status_counts"],
+            "status_case_ids": score["status_case_ids"], "strict_all_complete": score["all_complete"],
+            "accuracy_exact_binomial_95_ci": score["accuracy_exact_binomial_95_ci"]}
+            for role, run, score in zip(("native1", "native2", "raw"), runs, supplement["scores"], strict=True)],
+        "stable_both_native_correct_count": 165, "new_wrong_case_ids": losses, "new_correct_case_ids": gains,
+        "all_seven_discordant_case_details": details, "paired_with_native1": pairs,
+        "paired_with_native2_identical": True, "observed_mixed_coverage": coverage,
+        "controller_passed": control["passed"], "controller_exit_code": control["exit_code"],
+        "native_shutdown_log_caveats": warnings, "all_explicitly_inventoried_files_unchanged": True,
+        "scope": "Original frozen CLI results and seven saved-token case comparisons only; no new sampling, parser, threshold or acceptance condition. Collection passes but strict and supplementary answer gates fail. Raw is not qualified by its higher aggregate score. Future v5 material, excluded from fixed v4.",
+        "limits": ["Output token differences alone do not identify a numerical mechanism or implementation defect.",
+                  "Observed P progress and D retirement are transaction metadata, not proof of physical overlap.",
+                  "Current devices belong to the later group run; raw cleanup uses its retained terminal receipt and prior owner verification.",
+                  "Original strict and supplementary failure artifacts remain unchanged; confidence intervals or gains do not override the stable-case veto."]}
+    with (HERE / "review.json").open("x") as stream:
+        json.dump(result, stream, indent=2, ensure_ascii=False, allow_nan=False)
+        stream.write("\n")
+    print(json.dumps({"scores": [r["correct"] for r in result["per_run_counts"]], "losses": losses,
+        "gains": gains, "mixed_batches": len(coverage["steps_per_batch"]), "output": str(HERE / "review.json")}))
+
+
+if __name__ == "__main__":
+    main()

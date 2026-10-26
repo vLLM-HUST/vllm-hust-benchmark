@@ -1,0 +1,101 @@
+# Separate native default-backend reference and unchanged primary comparison
+
+The preserved original offline v2 analyzer rejected three native-inserted default config keys. This versioned read-only adapter validates exactly those defaults against pinned source and explicit launch config, then runs the unchanged remaining checks. Neither terminal run failed and no raw dictionary or frozen producer changed. Two fresh async/backend-default native processes are descriptive references only. They are not added to the synchronous raw/group ABBA estimator. Both async scheduling and graph backend differ from the matched synchronous native recipe; this is not a single-factor cost comparison or a vendor-best/default-all-settings claim.
+
+All 48 original windows are retained, including 16 warmups excluded from estimates. The failed v1 observer attempt remains a pre-window failure in v4, not a third performance sample. All metrics, per-request TTFTs, all-rank backend/environment snapshots and token comparisons accompany this report.
+
+## decode-heavy: all original primary metrics
+
+| metric | N1 | R1 | G1 | G2 | R2 | N2 | ND1 | ND2 |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| output_tokens_per_second | 227.614 | 217.001 | 217.538 | 219.511 | 218.777 | 223.146 | 371.502 | 366.186 |
+| step_ms_mean | 35.134 | 36.857 | 36.774 | 36.442 | 36.544 | 35.848 | 21.475 | 21.786 |
+| step_ms_p99 | 45.980 | 47.781 | 47.400 | 46.832 | 54.440 | 46.871 | 32.775 | 33.417 |
+| token_gap_ms_p99 | 45.969 | 47.539 | 47.224 | 46.634 | 53.149 | 46.603 | 32.517 | 33.013 |
+| steady_decode_tokens_per_second | 232.048 | 220.868 | 222.353 | 224.255 | 221.881 | 227.055 | 383.498 | 377.930 |
+
+| metric | ND mean | ND2/ND1 | raw/ND | group/ND | sync-native/ND |
+| --- | --- | --- | --- | --- | --- |
+| output_tokens_per_second | 368.844 | -1.431% | -40.926% | -40.754% | -38.896% |
+| step_ms_mean | 21.630 | +1.446% | +69.671% | +69.243% | +64.079% |
+| step_ms_p99 | 33.096 | +1.960% | +54.429% | +42.360% | +40.273% |
+| token_gap_ms_p99 | 32.765 | +1.528% | +53.650% | +43.228% | +41.268% |
+| steady_decode_tokens_per_second | 380.714 | -1.452% | -41.853% | -41.346% | -39.705% |
+
+## long-P-ingress: all original primary metrics
+
+| metric | N1 | R1 | G1 | G2 | R2 | N2 | ND1 | ND2 |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| output_tokens_per_second | 127.339 | 115.433 | 122.260 | 117.999 | 116.776 | 118.638 | 198.594 | 190.515 |
+| step_ms_mean | 33.364 | 36.827 | 34.749 | 36.029 | 36.380 | 35.809 | 21.344 | 22.248 |
+| step_ms_p99 | 45.514 | 61.044 | 61.885 | 61.594 | 67.601 | 48.948 | 32.281 | 33.285 |
+| token_gap_ms_p99 | 45.579 | 60.306 | 59.885 | 61.395 | 66.944 | 48.626 | 32.071 | 33.122 |
+| long_p_ttft_ms | 447.465 | 632.965 | 616.575 | 616.727 | 610.690 | 459.651 | 455.447 | 456.106 |
+| seed_gap_ms_p99 | 45.066 | 60.306 | 59.885 | 61.395 | 66.660 | 48.562 | 32.028 | 33.122 |
+
+| metric | ND mean | ND2/ND1 | raw/ND | group/ND | sync-native/ND |
+| --- | --- | --- | --- | --- | --- |
+| output_tokens_per_second | 194.555 | -4.068% | -40.323% | -38.254% | -36.784% |
+| step_ms_mean | 21.796 | +4.236% | +67.934% | +62.363% | +58.682% |
+| step_ms_p99 | 32.783 | +3.110% | +96.207% | +88.327% | +44.072% |
+| token_gap_ms_p99 | 32.596 | +3.277% | +95.192% | +86.034% | +44.503% |
+| long_p_ttft_ms | 455.777 | +0.145% | +36.432% | +35.297% | -0.487% |
+| seed_gap_ms_p99 | 32.575 | +3.416% | +94.885% | +86.157% | +43.714% |
+
+## Baseline-calibrated stall supplement: every measured mixed window
+
+| role | window | P interval ms | full max gaps ms ×4 | >100ms counts ×4 | ingress max gaps ms ×4 | ingress >100ms counts ×4 |
+| --- | --- | --- | --- | --- | --- | --- |
+| N1 | w3 | 451.152 | 451.215, 451.215, 451.215, 451.215 | 1, 1, 1, 1 | 451.215, 451.215, 451.215, 451.215 | 1, 1, 1, 1 |
+| N1 | w5 | 443.778 | 443.888, 443.888, 443.888, 443.888 | 1, 1, 1, 1 | 443.888, 443.888, 443.888, 443.888 | 1, 1, 1, 1 |
+| R1 | w3 | 623.696 | 95.796, 95.796, 95.796, 95.796 | 0, 0, 0, 0 | 95.796, 95.796, 95.796, 95.796 | 0, 0, 0, 0 |
+| R1 | w5 | 642.233 | 111.142, 111.142, 111.142, 111.142 | 1, 1, 1, 1 | 111.142, 111.142, 111.142, 111.142 | 1, 1, 1, 1 |
+| G1 | w3 | 630.849 | 86.950, 86.950, 86.950, 86.950 | 0, 0, 0, 0 | 86.950, 86.950, 86.950, 86.950 | 0, 0, 0, 0 |
+| G1 | w5 | 602.300 | 75.486, 75.486, 75.486, 75.486 | 0, 0, 0, 0 | 75.486, 75.486, 75.486, 75.486 | 0, 0, 0, 0 |
+| G2 | w3 | 614.954 | 84.132, 84.132, 84.132, 84.132 | 0, 0, 0, 0 | 84.132, 84.132, 84.132, 84.132 | 0, 0, 0, 0 |
+| G2 | w5 | 618.500 | 77.600, 77.600, 77.600, 77.600 | 0, 0, 0, 0 | 77.600, 77.600, 77.600, 77.600 | 0, 0, 0, 0 |
+| R2 | w3 | 567.280 | 89.836, 89.836, 89.836, 89.836 | 0, 0, 0, 0 | 84.549, 84.549, 84.549, 84.549 | 0, 0, 0, 0 |
+| R2 | w5 | 654.100 | 96.614, 96.614, 96.614, 96.614 | 0, 0, 0, 0 | 85.192, 85.192, 85.192, 85.192 | 0, 0, 0, 0 |
+| N2 | w3 | 474.836 | 474.893, 474.893, 474.893, 474.893 | 1, 1, 1, 1 | 474.893, 474.893, 474.893, 474.893 | 1, 1, 1, 1 |
+| N2 | w5 | 444.466 | 444.524, 444.524, 444.524, 444.524 | 1, 1, 1, 1 | 444.524, 444.524, 444.524, 444.524 | 1, 1, 1, 1 |
+| ND1 | w3 | 451.487 | 423.349, 423.349, 423.349, 423.349 | 1, 1, 1, 1 | 423.349, 423.349, 423.349, 423.349 | 1, 1, 1, 1 |
+| ND1 | w5 | 459.408 | 445.610, 445.610, 445.610, 445.610 | 1, 1, 1, 1 | 445.610, 445.610, 445.610, 445.610 | 1, 1, 1, 1 |
+| ND2 | w3 | 458.966 | 430.659, 430.659, 430.659, 430.659 | 1, 1, 1, 1 | 430.659, 430.659, 430.659, 430.659 | 1, 1, 1, 1 |
+| ND2 | w5 | 453.246 | 439.469, 439.469, 439.469, 439.469 | 1, 1, 1, 1 | 439.469, 439.469, 439.469, 439.469 | 1, 1, 1, 1 |
+
+## Saved token trajectories and interpretation
+
+| pair | equal windows /6 | different window labels |
+| --- | --- | --- |
+| N1/R1 | 3 | w1, w3, w5 |
+| N1/G1 | 3 | w1, w3, w5 |
+| N1/G2 | 3 | w1, w3, w5 |
+| N1/R2 | 3 | w1, w3, w5 |
+| N1/N2 | 6 | none |
+| N1/ND1 | 3 | w1, w3, w5 |
+| N1/ND2 | 3 | w1, w3, w5 |
+| R1/G1 | 6 | none |
+| R1/G2 | 6 | none |
+| R1/R2 | 6 | none |
+| R1/N2 | 3 | w1, w3, w5 |
+| R1/ND1 | 3 | w1, w3, w5 |
+| R1/ND2 | 3 | w1, w3, w5 |
+| G1/G2 | 6 | none |
+| G1/R2 | 6 | none |
+| G1/N2 | 3 | w1, w3, w5 |
+| G1/ND1 | 3 | w1, w3, w5 |
+| G1/ND2 | 3 | w1, w3, w5 |
+| G2/R2 | 6 | none |
+| G2/N2 | 3 | w1, w3, w5 |
+| G2/ND1 | 3 | w1, w3, w5 |
+| G2/ND2 | 3 | w1, w3, w5 |
+| R2/N2 | 3 | w1, w3, w5 |
+| R2/ND1 | 3 | w1, w3, w5 |
+| R2/ND2 | 3 | w1, w3, w5 |
+| N2/ND1 | 3 | w1, w3, w5 |
+| N2/ND2 | 3 | w1, w3, w5 |
+| ND1/ND2 | 6 | none |
+
+All request-level first differences and differing-position counts are retained, including warmups and within-process repetitions. Differing generated trajectories limit attribution of whole-window timing solely to scheduling or backend costs; they are not task-quality verdicts. Async queue2 can already hold future D work at the actor's 32-token ingress boundary. Empty post-window queue/client receipts are outside timing, and native absence of persistent plugin graph counters is not a measured zero.
+
+The frozen supplement was calibrated after N1, before candidate timing. Its >100ms and maximum-gap observations do not replace primary P99, establish HTTP Goodput/capacity, or provide pooled-token significance. Quality is assessed by the separate fixed task-quality protocol; native-relative failures remain unchanged. No profile or physical-overlap conclusion is supplied here.

@@ -1,0 +1,1997 @@
+{
+  "windows": [
+    {
+      "role": "N1",
+      "window": "w0",
+      "workload": "decode-heavy",
+      "warmup": true,
+      "complete": true,
+      "error": null,
+      "original_summary": {
+        "output_tokens": 4096,
+        "window_seconds": 18.927134788,
+        "output_tokens_per_second": 216.40887782956491,
+        "step_ms_mean": 36.86660611914063,
+        "step_ms_p99": 46.43884729,
+        "token_gap_ms_p50": 38.099635,
+        "token_gap_ms_p99": 46.393558,
+        "ttft_ms": {
+          "w0-0": 560.55504,
+          "w0-1": 517.562288,
+          "w0-2": 517.17402,
+          "w0-3": 516.861464,
+          "w0-4": 516.493967,
+          "w0-5": 516.17013,
+          "w0-6": 515.870495,
+          "w0-7": 515.566189
+        },
+        "steady_decode_tokens_per_second": 222.32147503298802
+      },
+      "actual_steps": 512,
+      "request_count": 8,
+      "ingress": null,
+      "drain_after": {
+        "steps": 1,
+        "seconds": 0.0018235761672258377,
+        "scheduler_and_batch_queue_empty": true,
+        "client_empty": true,
+        "scope": "After final token; excluded from arrival/window metrics"
+      }
+    },
+    {
+      "role": "N1",
+      "window": "w1",
+      "workload": "long-P-ingress",
+      "warmup": true,
+      "complete": true,
+      "error": null,
+      "original_summary": {
+        "output_tokens": 2176,
+        "window_seconds": 18.512237259,
+        "output_tokens_per_second": 117.54386947164397,
+        "step_ms_mean": 36.140715712890625,
+        "step_ms_p99": 45.28977133,
+        "token_gap_ms_p50": 37.196854,
+        "token_gap_ms_p99": 45.346615,
+        "ttft_ms": {
+          "w1-0": 390.109946,
+          "w1-1": 389.030545,
+          "w1-2": 388.681878,
+          "w1-3": 388.366972,
+          "w1-4": 524.004676
+        },
+        "long_p_ttft_ms": 524.004676,
+        "seed_gap_ms_p99": 44.944107
+      },
+      "actual_steps": 512,
+      "request_count": 5,
+      "ingress": {
+        "before_step": 32,
+        "after_ns": 8674506328051123,
+        "seed_counts": [
+          32,
+          32,
+          32,
+          32
+        ]
+      },
+      "drain_after": {
+        "steps": 1,
+        "seconds": 0.001561000943183899,
+        "scheduler_and_batch_queue_empty": true,
+        "client_empty": true,
+        "scope": "After final token; excluded from arrival/window metrics"
+      }
+    },
+    {
+      "role": "N1",
+      "window": "w2",
+      "workload": "decode-heavy",
+      "warmup": false,
+      "complete": true,
+      "error": null,
+      "original_summary": {
+        "output_tokens": 4096,
+        "window_seconds": 17.80216367,
+        "output_tokens_per_second": 230.0843917586564,
+        "step_ms_mean": 34.752243962890624,
+        "step_ms_p99": 45.09512038,
+        "token_gap_ms_p50": 36.912996,
+        "token_gap_ms_p99": 45.073176,
+        "ttft_ms": {
+          "w2-0": 365.320489,
+          "w2-1": 364.418431,
+          "w2-2": 364.074484,
+          "w2-3": 363.701587,
+          "w2-4": 363.388021,
+          "w2-5": 363.076905,
+          "w2-6": 362.772149,
+          "w2-7": 362.470843
+        },
+        "steady_decode_tokens_per_second": 234.97492288848605
+      },
+      "actual_steps": 512,
+      "request_count": 8,
+      "ingress": null,
+      "drain_after": {
+        "steps": 1,
+        "seconds": 0.0017662327736616135,
+        "scheduler_and_batch_queue_empty": true,
+        "client_empty": true,
+        "scope": "After final token; excluded from arrival/window metrics"
+      }
+    },
+    {
+      "role": "N1",
+      "window": "w3",
+      "workload": "long-P-ingress",
+      "warmup": false,
+      "complete": true,
+      "error": null,
+      "original_summary": {
+        "output_tokens": 2176,
+        "window_seconds": 16.921935317,
+        "output_tokens_per_second": 128.5904927088311,
+        "step_ms_mean": 33.036529265625,
+        "step_ms_p99": 45.90150640999999,
+        "token_gap_ms_p50": 32.947569,
+        "token_gap_ms_p99": 46.014142,
+        "ttft_ms": {
+          "w3-0": 377.837461,
+          "w3-1": 376.891933,
+          "w3-2": 376.541186,
+          "w3-3": 376.2339,
+          "w3-4": 451.151951
+        },
+        "long_p_ttft_ms": 451.151951,
+        "seed_gap_ms_p99": 45.059253
+      },
+      "actual_steps": 512,
+      "request_count": 5,
+      "ingress": {
+        "before_step": 32,
+        "after_ns": 8674542607722120,
+        "seed_counts": [
+          32,
+          32,
+          32,
+          32
+        ]
+      },
+      "drain_after": {
+        "steps": 1,
+        "seconds": 0.0014807097613811493,
+        "scheduler_and_batch_queue_empty": true,
+        "client_empty": true,
+        "scope": "After final token; excluded from arrival/window metrics"
+      }
+    },
+    {
+      "role": "N1",
+      "window": "w4",
+      "workload": "decode-heavy",
+      "warmup": false,
+      "complete": true,
+      "error": null,
+      "original_summary": {
+        "output_tokens": 4096,
+        "window_seconds": 18.192850745,
+        "output_tokens_per_second": 225.14338502588532,
+        "step_ms_mean": 35.51482487890625,
+        "step_ms_p99": 46.86437671,
+        "token_gap_ms_p50": 36.477573,
+        "token_gap_ms_p99": 46.865776,
+        "ttft_ms": {
+          "w4-0": 361.842281,
+          "w4-1": 360.883842,
+          "w4-2": 360.535756,
+          "w4-3": 360.22177,
+          "w4-4": 359.920674,
+          "w4-5": 359.612668,
+          "w4-6": 359.310092,
+          "w4-7": 359.001326
+        },
+        "steady_decode_tokens_per_second": 229.12087777040747
+      },
+      "actual_steps": 512,
+      "request_count": 8,
+      "ingress": null,
+      "drain_after": {
+        "steps": 1,
+        "seconds": 0.0015974100679159164,
+        "scheduler_and_batch_queue_empty": true,
+        "client_empty": true,
+        "scope": "After final token; excluded from arrival/window metrics"
+      }
+    },
+    {
+      "role": "N1",
+      "window": "w5",
+      "workload": "long-P-ingress",
+      "warmup": false,
+      "complete": true,
+      "error": null,
+      "original_summary": {
+        "output_tokens": 2176,
+        "window_seconds": 17.257790645,
+        "output_tokens_per_second": 126.08798221981212,
+        "step_ms_mean": 33.691504640625,
+        "step_ms_p99": 45.12736419,
+        "token_gap_ms_p50": 33.196379,
+        "token_gap_ms_p99": 45.14321,
+        "ttft_ms": {
+          "w5-0": 374.940363,
+          "w5-1": 374.003925,
+          "w5-2": 373.653768,
+          "w5-3": 373.325382,
+          "w5-4": 443.777991
+        },
+        "long_p_ttft_ms": 443.777991,
+        "seed_gap_ms_p99": 45.072249
+      },
+      "actual_steps": 512,
+      "request_count": 5,
+      "ingress": {
+        "before_step": 32,
+        "after_ns": 8674578042467122,
+        "seed_counts": [
+          32,
+          32,
+          32,
+          32
+        ]
+      },
+      "drain_after": {
+        "steps": 1,
+        "seconds": 0.0012785028666257858,
+        "scheduler_and_batch_queue_empty": true,
+        "client_empty": true,
+        "scope": "After final token; excluded from arrival/window metrics"
+      }
+    },
+    {
+      "role": "R1",
+      "window": "w0",
+      "workload": "decode-heavy",
+      "warmup": true,
+      "complete": true,
+      "error": null,
+      "original_summary": {
+        "output_tokens": 4096,
+        "window_seconds": 19.370704702,
+        "output_tokens_per_second": 211.45332929354362,
+        "step_ms_mean": 37.73771595117187,
+        "step_ms_p99": 48.55868547999998,
+        "token_gap_ms_p50": 38.659298,
+        "token_gap_ms_p99": 47.470289,
+        "ttft_ms": {
+          "w0-0": 580.607644,
+          "w0-1": 540.151133,
+          "w0-2": 539.762866,
+          "w0-3": 539.4514,
+          "w0-4": 539.135184,
+          "w0-5": 538.821949,
+          "w0-6": 538.519653,
+          "w0-7": 538.219338
+        },
+        "steady_decode_tokens_per_second": 217.42389939557552
+      },
+      "actual_steps": 512,
+      "request_count": 8,
+      "ingress": null,
+      "drain_after": {
+        "steps": 1,
+        "seconds": 0.0025351475924253464,
+        "scheduler_and_batch_queue_empty": true,
+        "client_empty": true,
+        "scope": "After final token; excluded from arrival/window metrics"
+      }
+    },
+    {
+      "role": "R1",
+      "window": "w1",
+      "workload": "long-P-ingress",
+      "warmup": true,
+      "complete": true,
+      "error": null,
+      "original_summary": {
+        "output_tokens": 2176,
+        "window_seconds": 18.298162677,
+        "output_tokens_per_second": 118.91904331658051,
+        "step_ms_mean": 35.72342701367187,
+        "step_ms_p99": 61.96825728999997,
+        "token_gap_ms_p50": 38.008715,
+        "token_gap_ms_p99": 60.016508,
+        "ttft_ms": {
+          "w1-0": 340.620432,
+          "w1-1": 339.712496,
+          "w1-2": 339.339099,
+          "w1-3": 339.029883,
+          "w1-4": 683.345521
+        },
+        "long_p_ttft_ms": 683.345521,
+        "seed_gap_ms_p99": 60.016508
+      },
+      "actual_steps": 512,
+      "request_count": 5,
+      "ingress": {
+        "before_step": 32,
+        "after_ns": 8675125930092784,
+        "seed_counts": [
+          32,
+          32,
+          32,
+          32
+        ]
+      },
+      "drain_after": {
+        "steps": 1,
+        "seconds": 0.0024757664650678635,
+        "scheduler_and_batch_queue_empty": true,
+        "client_empty": true,
+        "scope": "After final token; excluded from arrival/window metrics"
+      }
+    },
+    {
+      "role": "R1",
+      "window": "w2",
+      "workload": "decode-heavy",
+      "warmup": false,
+      "complete": true,
+      "error": null,
+      "original_summary": {
+        "output_tokens": 4096,
+        "window_seconds": 18.527114247,
+        "output_tokens_per_second": 221.08138080182908,
+        "step_ms_mean": 36.16133782226562,
+        "step_ms_p99": 46.82214229,
+        "token_gap_ms_p50": 37.816941,
+        "token_gap_ms_p99": 46.652601,
+        "ttft_ms": {
+          "w2-0": 348.50672,
+          "w2-1": 345.526945,
+          "w2-2": 345.024706,
+          "w2-3": 344.69181,
+          "w2-4": 344.370404,
+          "w2-5": 344.026008,
+          "w2-6": 343.708592,
+          "w2-7": 343.393936
+        },
+        "steady_decode_tokens_per_second": 224.73870199988312
+      },
+      "actual_steps": 512,
+      "request_count": 8,
+      "ingress": null,
+      "drain_after": {
+        "steps": 1,
+        "seconds": 0.002524459734559059,
+        "scheduler_and_batch_queue_empty": true,
+        "client_empty": true,
+        "scope": "After final token; excluded from arrival/window metrics"
+      }
+    },
+    {
+      "role": "R1",
+      "window": "w3",
+      "workload": "long-P-ingress",
+      "warmup": false,
+      "complete": true,
+      "error": null,
+      "original_summary": {
+        "output_tokens": 2176,
+        "window_seconds": 19.380412349,
+        "output_tokens_per_second": 112.27831280443722,
+        "step_ms_mean": 37.83584849609375,
+        "step_ms_p99": 61.928313149999994,
+        "token_gap_ms_p50": 38.492194,
+        "token_gap_ms_p99": 61.347387,
+        "ttft_ms": {
+          "w3-0": 363.848469,
+          "w3-1": 362.919666,
+          "w3-2": 362.573813,
+          "w3-3": 362.273813,
+          "w3-4": 623.696347
+        },
+        "long_p_ttft_ms": 623.696347,
+        "seed_gap_ms_p99": 61.347387
+      },
+      "actual_steps": 512,
+      "request_count": 5,
+      "ingress": {
+        "before_step": 32,
+        "after_ns": 8675162985955606,
+        "seed_counts": [
+          32,
+          32,
+          32,
+          32
+        ]
+      },
+      "drain_after": {
+        "steps": 1,
+        "seconds": 0.001960279420018196,
+        "scheduler_and_batch_queue_empty": true,
+        "client_empty": true,
+        "scope": "After final token; excluded from arrival/window metrics"
+      }
+    },
+    {
+      "role": "R1",
+      "window": "w4",
+      "workload": "decode-heavy",
+      "warmup": false,
+      "complete": true,
+      "error": null,
+      "original_summary": {
+        "output_tokens": 4096,
+        "window_seconds": 19.237197115,
+        "output_tokens_per_second": 212.92083121642432,
+        "step_ms_mean": 37.55194778710938,
+        "step_ms_p99": 48.74017976999999,
+        "token_gap_ms_p50": 39.656762,
+        "token_gap_ms_p99": 48.424687,
+        "ttft_ms": {
+          "w4-0": 333.580573,
+          "w4-1": 332.345161,
+          "w4-2": 331.969246,
+          "w4-3": 331.601732,
+          "w4-4": 331.26434,
+          "w4-5": 330.927418,
+          "w4-6": 330.599436,
+          "w4-7": 330.273404
+        },
+        "steady_decode_tokens_per_second": 216.9978649096347
+      },
+      "actual_steps": 512,
+      "request_count": 8,
+      "ingress": null,
+      "drain_after": {
+        "steps": 1,
+        "seconds": 0.0025119222700595856,
+        "scheduler_and_batch_queue_empty": true,
+        "client_empty": true,
+        "scope": "After final token; excluded from arrival/window metrics"
+      }
+    },
+    {
+      "role": "R1",
+      "window": "w5",
+      "workload": "long-P-ingress",
+      "warmup": false,
+      "complete": true,
+      "error": null,
+      "original_summary": {
+        "output_tokens": 2176,
+        "window_seconds": 18.349153571,
+        "output_tokens_per_second": 118.5885763929225,
+        "step_ms_mean": 35.81755250390625,
+        "step_ms_p99": 60.15941643999999,
+        "token_gap_ms_p50": 37.152632,
+        "token_gap_ms_p99": 59.264301,
+        "ttft_ms": {
+          "w5-0": 350.968662,
+          "w5-1": 347.433944,
+          "w5-2": 347.017677,
+          "w5-3": 346.685686,
+          "w5-4": 642.233109
+        },
+        "long_p_ttft_ms": 642.233109,
+        "seed_gap_ms_p99": 59.264301
+      },
+      "actual_steps": 512,
+      "request_count": 5,
+      "ingress": {
+        "before_step": 32,
+        "after_ns": 8675201818699873,
+        "seed_counts": [
+          32,
+          32,
+          32,
+          32
+        ]
+      },
+      "drain_after": {
+        "steps": 1,
+        "seconds": 0.0017917733639478683,
+        "scheduler_and_batch_queue_empty": true,
+        "client_empty": true,
+        "scope": "After final token; excluded from arrival/window metrics"
+      }
+    },
+    {
+      "role": "G1",
+      "window": "w0",
+      "workload": "decode-heavy",
+      "warmup": true,
+      "complete": true,
+      "error": null,
+      "original_summary": {
+        "output_tokens": 4096,
+        "window_seconds": 20.002513371,
+        "output_tokens_per_second": 204.7742663148749,
+        "step_ms_mean": 38.94844087304688,
+        "step_ms_p99": 47.570617909999996,
+        "token_gap_ms_p50": 40.131526,
+        "token_gap_ms_p99": 47.194764,
+        "ttft_ms": {
+          "w0-0": 587.751928,
+          "w0-1": 535.750285,
+          "w0-2": 535.307574,
+          "w0-3": 534.975918,
+          "w0-4": 534.653432,
+          "w0-5": 534.335827,
+          "w0-6": 534.028173,
+          "w0-7": 533.719388
+        },
+        "steady_decode_tokens_per_second": 211.61865609205628
+      },
+      "actual_steps": 512,
+      "request_count": 8,
+      "ingress": null,
+      "drain_after": {
+        "steps": 1,
+        "seconds": 0.00215965136885643,
+        "scheduler_and_batch_queue_empty": true,
+        "client_empty": true,
+        "scope": "After final token; excluded from arrival/window metrics"
+      }
+    },
+    {
+      "role": "G1",
+      "window": "w1",
+      "workload": "long-P-ingress",
+      "warmup": true,
+      "complete": true,
+      "error": null,
+      "original_summary": {
+        "output_tokens": 2176,
+        "window_seconds": 18.345157659,
+        "output_tokens_per_second": 118.6144071611437,
+        "step_ms_mean": 35.81489573828125,
+        "step_ms_p99": 61.28949547,
+        "token_gap_ms_p50": 37.077274,
+        "token_gap_ms_p99": 61.030902,
+        "ttft_ms": {
+          "w1-0": 392.600241,
+          "w1-1": 391.623876,
+          "w1-2": 391.278519,
+          "w1-3": 390.966295,
+          "w1-4": 652.410198
+        },
+        "long_p_ttft_ms": 652.410198,
+        "seed_gap_ms_p99": 61.030902
+      },
+      "actual_steps": 512,
+      "request_count": 5,
+      "ingress": {
+        "before_step": 32,
+        "after_ns": 8675488409081199,
+        "seed_counts": [
+          32,
+          32,
+          32,
+          32
+        ]
+      },
+      "drain_after": {
+        "steps": 1,
+        "seconds": 0.001764882355928421,
+        "scheduler_and_batch_queue_empty": true,
+        "client_empty": true,
+        "scope": "After final token; excluded from arrival/window metrics"
+      }
+    },
+    {
+      "role": "G1",
+      "window": "w2",
+      "workload": "decode-heavy",
+      "warmup": false,
+      "complete": true,
+      "error": null,
+      "original_summary": {
+        "output_tokens": 4096,
+        "window_seconds": 18.436261309,
+        "output_tokens_per_second": 222.17085836163878,
+        "step_ms_mean": 35.990501474609374,
+        "step_ms_p99": 47.689269949999996,
+        "token_gap_ms_p50": 37.48919,
+        "token_gap_ms_p99": 47.499426,
+        "ttft_ms": {
+          "w2-0": 385.419434,
+          "w2-1": 384.528313,
+          "w2-2": 384.183037,
+          "w2-3": 383.866462,
+          "w2-4": 383.558858,
+          "w2-5": 383.251804,
+          "w2-6": 382.9526,
+          "w2-7": 382.628426
+        },
+        "steady_decode_tokens_per_second": 227.62685609701552
+      },
+      "actual_steps": 512,
+      "request_count": 8,
+      "ingress": null,
+      "drain_after": {
+        "steps": 1,
+        "seconds": 0.0023556165397167206,
+        "scheduler_and_batch_queue_empty": true,
+        "client_empty": true,
+        "scope": "After final token; excluded from arrival/window metrics"
+      }
+    },
+    {
+      "role": "G1",
+      "window": "w3",
+      "workload": "long-P-ingress",
+      "warmup": false,
+      "complete": true,
+      "error": null,
+      "original_summary": {
+        "output_tokens": 2176,
+        "window_seconds": 17.696108724,
+        "output_tokens_per_second": 122.96488645827786,
+        "step_ms_mean": 34.548143388671875,
+        "step_ms_p99": 61.62637121999996,
+        "token_gap_ms_p50": 35.697519,
+        "token_gap_ms_p99": 59.113778,
+        "ttft_ms": {
+          "w3-0": 379.626463,
+          "w3-1": 378.704031,
+          "w3-2": 378.326394,
+          "w3-3": 378.01242,
+          "w3-4": 630.849128
+        },
+        "long_p_ttft_ms": 630.849128,
+        "seed_gap_ms_p99": 59.113778
+      },
+      "actual_steps": 512,
+      "request_count": 5,
+      "ingress": {
+        "before_step": 32,
+        "after_ns": 8675525066098867,
+        "seed_counts": [
+          32,
+          32,
+          32,
+          32
+        ]
+      },
+      "drain_after": {
+        "steps": 1,
+        "seconds": 0.001725766807794571,
+        "scheduler_and_batch_queue_empty": true,
+        "client_empty": true,
+        "scope": "After final token; excluded from arrival/window metrics"
+      }
+    },
+    {
+      "role": "G1",
+      "window": "w4",
+      "workload": "decode-heavy",
+      "warmup": false,
+      "complete": true,
+      "error": null,
+      "original_summary": {
+        "output_tokens": 4096,
+        "window_seconds": 19.23856997,
+        "output_tokens_per_second": 212.9056372894227,
+        "step_ms_mean": 37.557581578125,
+        "step_ms_p99": 47.11076719,
+        "token_gap_ms_p50": 39.842545,
+        "token_gap_ms_p99": 46.947629,
+        "ttft_ms": {
+          "w4-0": 374.817863,
+          "w4-1": 373.870781,
+          "w4-2": 373.524696,
+          "w4-3": 373.216202,
+          "w4-4": 372.909859,
+          "w4-5": 372.600865,
+          "w4-6": 372.295851,
+          "w4-7": 371.990048
+        },
+        "steady_decode_tokens_per_second": 217.07961768694798
+      },
+      "actual_steps": 512,
+      "request_count": 8,
+      "ingress": null,
+      "drain_after": {
+        "steps": 1,
+        "seconds": 0.0023466721177101135,
+        "scheduler_and_batch_queue_empty": true,
+        "client_empty": true,
+        "scope": "After final token; excluded from arrival/window metrics"
+      }
+    },
+    {
+      "role": "G1",
+      "window": "w5",
+      "workload": "long-P-ingress",
+      "warmup": false,
+      "complete": true,
+      "error": null,
+      "original_summary": {
+        "output_tokens": 2176,
+        "window_seconds": 17.901464149,
+        "output_tokens_per_second": 121.55430315020095,
+        "step_ms_mean": 34.949030546875,
+        "step_ms_p99": 62.14300265999998,
+        "token_gap_ms_p50": 37.460086,
+        "token_gap_ms_p99": 60.655713,
+        "ttft_ms": {
+          "w5-0": 390.427467,
+          "w5-1": 389.497227,
+          "w5-2": 389.152152,
+          "w5-3": 388.841058,
+          "w5-4": 602.299903
+        },
+        "long_p_ttft_ms": 602.299903,
+        "seed_gap_ms_p99": 60.655713
+      },
+      "actual_steps": 512,
+      "request_count": 5,
+      "ingress": {
+        "before_step": 32,
+        "after_ns": 8675562395855963,
+        "seed_counts": [
+          32,
+          32,
+          32,
+          32
+        ]
+      },
+      "drain_after": {
+        "steps": 1,
+        "seconds": 0.0016756728291511536,
+        "scheduler_and_batch_queue_empty": true,
+        "client_empty": true,
+        "scope": "After final token; excluded from arrival/window metrics"
+      }
+    },
+    {
+      "role": "G2",
+      "window": "w0",
+      "workload": "decode-heavy",
+      "warmup": true,
+      "complete": true,
+      "error": null,
+      "original_summary": {
+        "output_tokens": 4096,
+        "window_seconds": 18.915032131,
+        "output_tokens_per_second": 216.54734560492932,
+        "step_ms_mean": 36.84801664257812,
+        "step_ms_p99": 47.19682245,
+        "token_gap_ms_p50": 38.511475,
+        "token_gap_ms_p99": 47.109963,
+        "ttft_ms": {
+          "w0-0": 585.384946,
+          "w0-1": 544.705002,
+          "w0-2": 544.284647,
+          "w0-3": 543.967186,
+          "w0-4": 543.653085,
+          "w0-5": 543.337844,
+          "w0-6": 543.037433,
+          "w0-7": 542.734703
+        },
+        "steady_decode_tokens_per_second": 224.33646671242695
+      },
+      "actual_steps": 512,
+      "request_count": 8,
+      "ingress": null,
+      "drain_after": {
+        "steps": 1,
+        "seconds": 0.0025419481098651886,
+        "scheduler_and_batch_queue_empty": true,
+        "client_empty": true,
+        "scope": "After final token; excluded from arrival/window metrics"
+      }
+    },
+    {
+      "role": "G2",
+      "window": "w1",
+      "workload": "long-P-ingress",
+      "warmup": true,
+      "complete": true,
+      "error": null,
+      "original_summary": {
+        "output_tokens": 2176,
+        "window_seconds": 17.074484647,
+        "output_tokens_per_second": 127.44162093245521,
+        "step_ms_mean": 33.332892791015624,
+        "step_ms_p99": 59.29384697,
+        "token_gap_ms_p50": 33.029882,
+        "token_gap_ms_p99": 59.237917,
+        "ttft_ms": {
+          "w1-0": 380.846035,
+          "w1-1": 379.695425,
+          "w1-2": 379.323132,
+          "w1-3": 378.9876,
+          "w1-4": 632.335551
+        },
+        "long_p_ttft_ms": 632.335551,
+        "seed_gap_ms_p99": 59.237917
+      },
+      "actual_steps": 512,
+      "request_count": 5,
+      "ingress": {
+        "before_step": 32,
+        "after_ns": 8675865295148265,
+        "seed_counts": [
+          32,
+          32,
+          32,
+          32
+        ]
+      },
+      "drain_after": {
+        "steps": 1,
+        "seconds": 0.00190032459795475,
+        "scheduler_and_batch_queue_empty": true,
+        "client_empty": true,
+        "scope": "After final token; excluded from arrival/window metrics"
+      }
+    },
+    {
+      "role": "G2",
+      "window": "w2",
+      "workload": "decode-heavy",
+      "warmup": false,
+      "complete": true,
+      "error": null,
+      "original_summary": {
+        "output_tokens": 4096,
+        "window_seconds": 18.254585534,
+        "output_tokens_per_second": 224.38197746922341,
+        "step_ms_mean": 35.62951569921875,
+        "step_ms_p99": 46.66296105999999,
+        "token_gap_ms_p50": 36.237908,
+        "token_gap_ms_p99": 46.554003,
+        "ttft_ms": {
+          "w2-0": 386.326883,
+          "w2-1": 382.787702,
+          "w2-2": 382.317386,
+          "w2-3": 381.962313,
+          "w2-4": 381.596201,
+          "w2-5": 381.200087,
+          "w2-6": 380.862406,
+          "w2-7": 380.528564
+        },
+        "steady_decode_tokens_per_second": 230.2112856062244
+      },
+      "actual_steps": 512,
+      "request_count": 8,
+      "ingress": null,
+      "drain_after": {
+        "steps": 1,
+        "seconds": 0.0020984113216400146,
+        "scheduler_and_batch_queue_empty": true,
+        "client_empty": true,
+        "scope": "After final token; excluded from arrival/window metrics"
+      }
+    },
+    {
+      "role": "G2",
+      "window": "w3",
+      "workload": "long-P-ingress",
+      "warmup": false,
+      "complete": true,
+      "error": null,
+      "original_summary": {
+        "output_tokens": 2176,
+        "window_seconds": 17.944236563,
+        "output_tokens_per_second": 121.2645627112824,
+        "step_ms_mean": 35.031735078125,
+        "step_ms_p99": 61.10894519,
+        "token_gap_ms_p50": 36.48785,
+        "token_gap_ms_p99": 61.087205,
+        "ttft_ms": {
+          "w3-0": 362.101281,
+          "w3-1": 361.108477,
+          "w3-2": 360.746745,
+          "w3-3": 360.426544,
+          "w3-4": 614.954002
+        },
+        "long_p_ttft_ms": 614.954002,
+        "seed_gap_ms_p99": 61.087205
+      },
+      "actual_steps": 512,
+      "request_count": 5,
+      "ingress": {
+        "before_step": 32,
+        "after_ns": 8675900800771741,
+        "seed_counts": [
+          32,
+          32,
+          32,
+          32
+        ]
+      },
+      "drain_after": {
+        "steps": 1,
+        "seconds": 0.0016186945140361786,
+        "scheduler_and_batch_queue_empty": true,
+        "client_empty": true,
+        "scope": "After final token; excluded from arrival/window metrics"
+      }
+    },
+    {
+      "role": "G2",
+      "window": "w4",
+      "workload": "decode-heavy",
+      "warmup": false,
+      "complete": true,
+      "error": null,
+      "original_summary": {
+        "output_tokens": 4096,
+        "window_seconds": 19.083127008,
+        "output_tokens_per_second": 214.63987523024295,
+        "step_ms_mean": 37.25350746875,
+        "step_ms_p99": 47.00093439,
+        "token_gap_ms_p50": 38.146934,
+        "token_gap_ms_p99": 46.713481,
+        "ttft_ms": {
+          "w4-0": 376.791411,
+          "w4-1": 375.781307,
+          "w4-2": 375.431045,
+          "w4-3": 375.113745,
+          "w4-4": 374.773373,
+          "w4-5": 374.444012,
+          "w4-6": 374.125322,
+          "w4-7": 373.807771
+        },
+        "steady_decode_tokens_per_second": 218.29934421061816
+      },
+      "actual_steps": 512,
+      "request_count": 8,
+      "ingress": null,
+      "drain_after": {
+        "steps": 1,
+        "seconds": 0.0020887982100248337,
+        "scheduler_and_batch_queue_empty": true,
+        "client_empty": true,
+        "scope": "After final token; excluded from arrival/window metrics"
+      }
+    },
+    {
+      "role": "G2",
+      "window": "w5",
+      "workload": "long-P-ingress",
+      "warmup": false,
+      "complete": true,
+      "error": null,
+      "original_summary": {
+        "output_tokens": 2176,
+        "window_seconds": 18.965597504,
+        "output_tokens_per_second": 114.73405989666624,
+        "step_ms_mean": 37.02671290039063,
+        "step_ms_p99": 62.07855084999999,
+        "token_gap_ms_p50": 38.829918,
+        "token_gap_ms_p99": 61.70259,
+        "ttft_ms": {
+          "w5-0": 358.808837,
+          "w5-1": 357.738062,
+          "w5-2": 357.38858,
+          "w5-3": 357.07505,
+          "w5-4": 618.499926
+        },
+        "long_p_ttft_ms": 618.499926,
+        "seed_gap_ms_p99": 61.70259
+      },
+      "actual_steps": 512,
+      "request_count": 5,
+      "ingress": {
+        "before_step": 32,
+        "after_ns": 8675938113297459,
+        "seed_counts": [
+          32,
+          32,
+          32,
+          32
+        ]
+      },
+      "drain_after": {
+        "steps": 1,
+        "seconds": 0.0016065631061792374,
+        "scheduler_and_batch_queue_empty": true,
+        "client_empty": true,
+        "scope": "After final token; excluded from arrival/window metrics"
+      }
+    },
+    {
+      "role": "R2",
+      "window": "w0",
+      "workload": "decode-heavy",
+      "warmup": true,
+      "complete": true,
+      "error": null,
+      "original_summary": {
+        "output_tokens": 4096,
+        "window_seconds": 20.024747934,
+        "output_tokens_per_second": 204.5468943479386,
+        "step_ms_mean": 39.0145668125,
+        "step_ms_p99": 61.92869060999996,
+        "token_gap_ms_p50": 39.799093,
+        "token_gap_ms_p99": 59.603679,
+        "ttft_ms": {
+          "w0-0": 584.394201,
+          "w0-1": 543.596054,
+          "w0-2": 543.203022,
+          "w0-3": 542.889913,
+          "w0-4": 542.576463,
+          "w0-5": 542.257194,
+          "w0-6": 541.953095,
+          "w0-7": 541.649055
+        },
+        "steady_decode_tokens_per_second": 211.16014517175958
+      },
+      "actual_steps": 512,
+      "request_count": 8,
+      "ingress": null,
+      "drain_after": {
+        "steps": 1,
+        "seconds": 0.0023638997226953506,
+        "scheduler_and_batch_queue_empty": true,
+        "client_empty": true,
+        "scope": "After final token; excluded from arrival/window metrics"
+      }
+    },
+    {
+      "role": "R2",
+      "window": "w1",
+      "workload": "long-P-ingress",
+      "warmup": true,
+      "complete": true,
+      "error": null,
+      "original_summary": {
+        "output_tokens": 2176,
+        "window_seconds": 19.14777448,
+        "output_tokens_per_second": 113.6424497934655,
+        "step_ms_mean": 37.38338328515625,
+        "step_ms_p99": 79.91395271999995,
+        "token_gap_ms_p50": 37.541668,
+        "token_gap_ms_p99": 77.97239930000063,
+        "ttft_ms": {
+          "w1-0": 375.255547,
+          "w1-1": 374.322099,
+          "w1-2": 373.984279,
+          "w1-3": 373.6775,
+          "w1-4": 707.246799
+        },
+        "long_p_ttft_ms": 707.246799,
+        "seed_gap_ms_p99": 76.936856
+      },
+      "actual_steps": 512,
+      "request_count": 5,
+      "ingress": {
+        "before_step": 32,
+        "after_ns": 8676166769118563,
+        "seed_counts": [
+          32,
+          32,
+          32,
+          32
+        ]
+      },
+      "drain_after": {
+        "steps": 1,
+        "seconds": 0.001953277736902237,
+        "scheduler_and_batch_queue_empty": true,
+        "client_empty": true,
+        "scope": "After final token; excluded from arrival/window metrics"
+      }
+    },
+    {
+      "role": "R2",
+      "window": "w2",
+      "workload": "decode-heavy",
+      "warmup": false,
+      "complete": true,
+      "error": null,
+      "original_summary": {
+        "output_tokens": 4096,
+        "window_seconds": 18.811746152,
+        "output_tokens_per_second": 217.73629980460518,
+        "step_ms_mean": 36.716278806640624,
+        "step_ms_p99": 50.71166074,
+        "token_gap_ms_p50": 38.305301,
+        "token_gap_ms_p99": 50.356906,
+        "ttft_ms": {
+          "w2-0": 357.449877,
+          "w2-1": 353.702427,
+          "w2-2": 353.205152,
+          "w2-3": 352.849032,
+          "w2-4": 352.503451,
+          "w2-5": 352.12514,
+          "w2-6": 351.751169,
+          "w2-7": 351.42398
+        },
+        "steady_decode_tokens_per_second": 219.80836764317613
+      },
+      "actual_steps": 512,
+      "request_count": 8,
+      "ingress": null,
+      "drain_after": {
+        "steps": 1,
+        "seconds": 0.002048298716545105,
+        "scheduler_and_batch_queue_empty": true,
+        "client_empty": true,
+        "scope": "After final token; excluded from arrival/window metrics"
+      }
+    },
+    {
+      "role": "R2",
+      "window": "w3",
+      "workload": "long-P-ingress",
+      "warmup": false,
+      "complete": true,
+      "error": null,
+      "original_summary": {
+        "output_tokens": 2176,
+        "window_seconds": 18.529679262,
+        "output_tokens_per_second": 117.4332253263802,
+        "step_ms_mean": 36.1744911484375,
+        "step_ms_p99": 57.71654272999999,
+        "token_gap_ms_p50": 37.86771,
+        "token_gap_ms_p99": 57.513455,
+        "ttft_ms": {
+          "w3-0": 330.900856,
+          "w3-1": 329.836205,
+          "w3-2": 329.456234,
+          "w3-3": 329.129465,
+          "w3-4": 567.279987
+        },
+        "long_p_ttft_ms": 567.279987,
+        "seed_gap_ms_p99": 57.513455
+      },
+      "actual_steps": 512,
+      "request_count": 5,
+      "ingress": {
+        "before_step": 32,
+        "after_ns": 8676204671173773,
+        "seed_counts": [
+          32,
+          32,
+          32,
+          32
+        ]
+      },
+      "drain_after": {
+        "steps": 1,
+        "seconds": 0.00192161463201046,
+        "scheduler_and_batch_queue_empty": true,
+        "client_empty": true,
+        "scope": "After final token; excluded from arrival/window metrics"
+      }
+    },
+    {
+      "role": "R2",
+      "window": "w4",
+      "workload": "decode-heavy",
+      "warmup": false,
+      "complete": true,
+      "error": null,
+      "original_summary": {
+        "output_tokens": 4096,
+        "window_seconds": 18.63360578,
+        "output_tokens_per_second": 219.81789506335687,
+        "step_ms_mean": 36.37201980859375,
+        "step_ms_p99": 58.16743484999997,
+        "token_gap_ms_p50": 37.747842,
+        "token_gap_ms_p99": 55.940401,
+        "ttft_ms": {
+          "w4-0": 340.754334,
+          "w4-1": 338.158409,
+          "w4-2": 337.772357,
+          "w4-3": 337.444048,
+          "w4-4": 337.104878,
+          "w4-5": 336.676826,
+          "w4-6": 336.338836,
+          "w4-7": 336.016587
+        },
+        "steady_decode_tokens_per_second": 223.95408951056336
+      },
+      "actual_steps": 512,
+      "request_count": 8,
+      "ingress": null,
+      "drain_after": {
+        "steps": 1,
+        "seconds": 0.0027028173208236694,
+        "scheduler_and_batch_queue_empty": true,
+        "client_empty": true,
+        "scope": "After final token; excluded from arrival/window metrics"
+      }
+    },
+    {
+      "role": "R2",
+      "window": "w5",
+      "workload": "long-P-ingress",
+      "warmup": false,
+      "complete": true,
+      "error": null,
+      "original_summary": {
+        "output_tokens": 2176,
+        "window_seconds": 18.739382809,
+        "output_tokens_per_second": 116.11908578733599,
+        "step_ms_mean": 36.58466362890625,
+        "step_ms_p99": 77.48612406999997,
+        "token_gap_ms_p50": 37.689498,
+        "token_gap_ms_p99": 76.37547990000034,
+        "ttft_ms": {
+          "w5-0": 330.021876,
+          "w5-1": 328.800451,
+          "w5-2": 328.439261,
+          "w5-3": 328.114661,
+          "w5-4": 654.09962
+        },
+        "long_p_ttft_ms": 654.09962,
+        "seed_gap_ms_p99": 75.806346
+      },
+      "actual_steps": 512,
+      "request_count": 5,
+      "ingress": {
+        "before_step": 32,
+        "after_ns": 8676242164172307,
+        "seed_counts": [
+          32,
+          32,
+          32,
+          32
+        ]
+      },
+      "drain_after": {
+        "steps": 1,
+        "seconds": 0.0017244592308998108,
+        "scheduler_and_batch_queue_empty": true,
+        "client_empty": true,
+        "scope": "After final token; excluded from arrival/window metrics"
+      }
+    },
+    {
+      "role": "N2",
+      "window": "w0",
+      "workload": "decode-heavy",
+      "warmup": true,
+      "complete": true,
+      "error": null,
+      "original_summary": {
+        "output_tokens": 4096,
+        "window_seconds": 18.991703979,
+        "output_tokens_per_second": 215.67311730054004,
+        "step_ms_mean": 36.99708311328125,
+        "step_ms_p99": 46.73437541,
+        "token_gap_ms_p50": 38.29321,
+        "token_gap_ms_p99": 46.71568,
+        "ttft_ms": {
+          "w0-0": 555.004556,
+          "w0-1": 514.227424,
+          "w0-2": 513.845844,
+          "w0-3": 513.542216,
+          "w0-4": 513.250508,
+          "w0-5": 512.9455,
+          "w0-6": 512.624021,
+          "w0-7": 512.326963
+        },
+        "steady_decode_tokens_per_second": 221.97098545420704
+      },
+      "actual_steps": 512,
+      "request_count": 8,
+      "ingress": null,
+      "drain_after": {
+        "steps": 1,
+        "seconds": 0.0018091406673192978,
+        "scheduler_and_batch_queue_empty": true,
+        "client_empty": true,
+        "scope": "After final token; excluded from arrival/window metrics"
+      }
+    },
+    {
+      "role": "N2",
+      "window": "w1",
+      "workload": "long-P-ingress",
+      "warmup": true,
+      "complete": true,
+      "error": null,
+      "original_summary": {
+        "output_tokens": 2176,
+        "window_seconds": 17.992704497,
+        "output_tokens_per_second": 120.9379057141084,
+        "step_ms_mean": 35.127627908203124,
+        "step_ms_p99": 45.979943799999994,
+        "token_gap_ms_p50": 35.80945,
+        "token_gap_ms_p99": 46.025907,
+        "ttft_ms": {
+          "w1-0": 377.043937,
+          "w1-1": 376.002509,
+          "w1-2": 375.65609,
+          "w1-3": 375.348271,
+          "w1-4": 506.103923
+        },
+        "long_p_ttft_ms": 506.103923,
+        "seed_gap_ms_p99": 45.678927
+      },
+      "actual_steps": 512,
+      "request_count": 5,
+      "ingress": {
+        "before_step": 32,
+        "after_ns": 8676458903880997,
+        "seed_counts": [
+          32,
+          32,
+          32,
+          32
+        ]
+      },
+      "drain_after": {
+        "steps": 1,
+        "seconds": 0.001270713284611702,
+        "scheduler_and_batch_queue_empty": true,
+        "client_empty": true,
+        "scope": "After final token; excluded from arrival/window metrics"
+      }
+    },
+    {
+      "role": "N2",
+      "window": "w2",
+      "workload": "decode-heavy",
+      "warmup": false,
+      "complete": true,
+      "error": null,
+      "original_summary": {
+        "output_tokens": 4096,
+        "window_seconds": 18.735707782,
+        "output_tokens_per_second": 218.61997676624526,
+        "step_ms_mean": 36.5758328203125,
+        "step_ms_p99": 46.82308181,
+        "token_gap_ms_p50": 38.713825,
+        "token_gap_ms_p99": 46.639613,
+        "ttft_ms": {
+          "w2-0": 364.588418,
+          "w2-1": 363.644933,
+          "w2-2": 363.303663,
+          "w2-3": 363.002215,
+          "w2-4": 362.710248,
+          "w2-5": 362.41647,
+          "w2-6": 362.129352,
+          "w2-7": 361.843154
+        },
+        "steady_decode_tokens_per_second": 222.07292078552476
+      },
+      "actual_steps": 512,
+      "request_count": 8,
+      "ingress": null,
+      "drain_after": {
+        "steps": 1,
+        "seconds": 0.002143288031220436,
+        "scheduler_and_batch_queue_empty": true,
+        "client_empty": true,
+        "scope": "After final token; excluded from arrival/window metrics"
+      }
+    },
+    {
+      "role": "N2",
+      "window": "w3",
+      "workload": "long-P-ingress",
+      "warmup": false,
+      "complete": true,
+      "error": null,
+      "original_summary": {
+        "output_tokens": 2176,
+        "window_seconds": 18.330736564,
+        "output_tokens_per_second": 118.70772308590578,
+        "step_ms_mean": 35.78828971875,
+        "step_ms_p99": 44.77059745,
+        "token_gap_ms_p50": 36.40556,
+        "token_gap_ms_p99": 44.528138500000075,
+        "ttft_ms": {
+          "w3-0": 369.400022,
+          "w3-1": 368.382164,
+          "w3-2": 368.043375,
+          "w3-3": 367.745847,
+          "w3-4": 474.835518
+        },
+        "long_p_ttft_ms": 474.835518,
+        "seed_gap_ms_p99": 44.401168
+      },
+      "actual_steps": 512,
+      "request_count": 5,
+      "ingress": {
+        "before_step": 32,
+        "after_ns": 8676495800852333,
+        "seed_counts": [
+          32,
+          32,
+          32,
+          32
+        ]
+      },
+      "drain_after": {
+        "steps": 1,
+        "seconds": 0.002222919836640358,
+        "scheduler_and_batch_queue_empty": true,
+        "client_empty": true,
+        "scope": "After final token; excluded from arrival/window metrics"
+      }
+    },
+    {
+      "role": "N2",
+      "window": "w4",
+      "workload": "decode-heavy",
+      "warmup": false,
+      "complete": true,
+      "error": null,
+      "original_summary": {
+        "output_tokens": 4096,
+        "window_seconds": 17.990764409,
+        "output_tokens_per_second": 227.67237160589733,
+        "step_ms_mean": 35.120817052734374,
+        "step_ms_p99": 46.91850879,
+        "token_gap_ms_p50": 36.656732,
+        "token_gap_ms_p99": 46.567294,
+        "ttft_ms": {
+          "w4-0": 382.669541,
+          "w4-1": 381.744127,
+          "w4-2": 381.404078,
+          "w4-3": 381.070599,
+          "w4-4": 380.773671,
+          "w4-5": 380.478003,
+          "w4-6": 380.187886,
+          "w4-7": 379.890188
+        },
+        "steady_decode_tokens_per_second": 232.03689799945573
+      },
+      "actual_steps": 512,
+      "request_count": 8,
+      "ingress": null,
+      "drain_after": {
+        "steps": 1,
+        "seconds": 0.00179261714220047,
+        "scheduler_and_batch_queue_empty": true,
+        "client_empty": true,
+        "scope": "After final token; excluded from arrival/window metrics"
+      }
+    },
+    {
+      "role": "N2",
+      "window": "w5",
+      "workload": "long-P-ingress",
+      "warmup": false,
+      "complete": true,
+      "error": null,
+      "original_summary": {
+        "output_tokens": 2176,
+        "window_seconds": 18.35221637,
+        "output_tokens_per_second": 118.56878516085193,
+        "step_ms_mean": 35.8302250859375,
+        "step_ms_p99": 53.125776099999996,
+        "token_gap_ms_p50": 36.682617,
+        "token_gap_ms_p99": 52.723812,
+        "ttft_ms": {
+          "w5-0": 362.257411,
+          "w5-1": 361.330497,
+          "w5-2": 360.993768,
+          "w5-3": 360.676939,
+          "w5-4": 444.465627
+        },
+        "long_p_ttft_ms": 444.465627,
+        "seed_gap_ms_p99": 52.723812
+      },
+      "actual_steps": 512,
+      "request_count": 5,
+      "ingress": {
+        "before_step": 32,
+        "after_ns": 8676532398895618,
+        "seed_counts": [
+          32,
+          32,
+          32,
+          32
+        ]
+      },
+      "drain_after": {
+        "steps": 1,
+        "seconds": 0.001443447545170784,
+        "scheduler_and_batch_queue_empty": true,
+        "client_empty": true,
+        "scope": "After final token; excluded from arrival/window metrics"
+      }
+    },
+    {
+      "role": "ND1",
+      "window": "w0",
+      "workload": "decode-heavy",
+      "warmup": true,
+      "complete": true,
+      "error": null,
+      "original_summary": {
+        "output_tokens": 4096,
+        "window_seconds": 11.308886128,
+        "output_tokens_per_second": 362.19305364288664,
+        "step_ms_mean": 21.934982124756335,
+        "step_ms_p99": 32.26092148,
+        "token_gap_ms_p50": 19.604947,
+        "token_gap_ms_p99": 32.190845,
+        "ttft_ms": {
+          "w0-0": 514.878653,
+          "w0-1": 474.044243,
+          "w0-2": 473.658267,
+          "w0-3": 473.340952,
+          "w0-4": 473.041577,
+          "w0-5": 472.743013,
+          "w0-6": 472.444578,
+          "w0-7": 472.153374
+        },
+        "steady_decode_tokens_per_second": 378.7469209861526
+      },
+      "actual_steps": 513,
+      "request_count": 8,
+      "ingress": null,
+      "drain_after": {
+        "steps": 2,
+        "seconds": 0.0010758265852928162,
+        "scheduler_and_batch_queue_empty": true,
+        "client_empty": true,
+        "scope": "After final token; excluded from arrival/window metrics"
+      }
+    },
+    {
+      "role": "ND1",
+      "window": "w1",
+      "workload": "long-P-ingress",
+      "warmup": true,
+      "complete": true,
+      "error": null,
+      "original_summary": {
+        "output_tokens": 2176,
+        "window_seconds": 11.180686584,
+        "output_tokens_per_second": 194.62132165603686,
+        "step_ms_mean": 21.77866464717349,
+        "step_ms_p99": 31.94830312,
+        "token_gap_ms_p50": 18.47644,
+        "token_gap_ms_p99": 31.93463970000001,
+        "ttft_ms": {
+          "w1-0": 341.318655,
+          "w1-1": 340.40391,
+          "w1-2": 340.061705,
+          "w1-3": 339.698489,
+          "w1-4": 511.229642
+        },
+        "long_p_ttft_ms": 511.229642,
+        "seed_gap_ms_p99": 31.923342
+      },
+      "actual_steps": 513,
+      "request_count": 5,
+      "ingress": {
+        "before_step": 33,
+        "after_ns": 8686908525541972,
+        "seed_counts": [
+          32,
+          32,
+          32,
+          32
+        ]
+      },
+      "drain_after": {
+        "steps": 2,
+        "seconds": 0.0010606162250041962,
+        "scheduler_and_batch_queue_empty": true,
+        "client_empty": true,
+        "scope": "After final token; excluded from arrival/window metrics"
+      }
+    },
+    {
+      "role": "ND1",
+      "window": "w2",
+      "workload": "decode-heavy",
+      "warmup": false,
+      "complete": true,
+      "error": null,
+      "original_summary": {
+        "output_tokens": 4096,
+        "window_seconds": 11.082599845,
+        "output_tokens_per_second": 369.58836891038175,
+        "step_ms_mean": 21.58538250097466,
+        "step_ms_p99": 33.08941276,
+        "token_gap_ms_p50": 19.001869,
+        "token_gap_ms_p99": 33.000199,
+        "ttft_ms": {
+          "w2-0": 341.842653,
+          "w2-1": 340.922929,
+          "w2-2": 340.582443,
+          "w2-3": 340.272788,
+          "w2-4": 339.966113,
+          "w2-5": 339.668329,
+          "w2-6": 339.368834,
+          "w2-7": 339.08062
+        },
+        "steady_decode_tokens_per_second": 382.5396365754706
+      },
+      "actual_steps": 513,
+      "request_count": 8,
+      "ingress": null,
+      "drain_after": {
+        "steps": 2,
+        "seconds": 0.0010449755936861038,
+        "scheduler_and_batch_queue_empty": true,
+        "client_empty": true,
+        "scope": "After final token; excluded from arrival/window metrics"
+      }
+    },
+    {
+      "role": "ND1",
+      "window": "w3",
+      "workload": "long-P-ingress",
+      "warmup": false,
+      "complete": true,
+      "error": null,
+      "original_summary": {
+        "output_tokens": 2176,
+        "window_seconds": 11.085921092,
+        "output_tokens_per_second": 196.28499805670455,
+        "step_ms_mean": 21.595215610136453,
+        "step_ms_p99": 33.143941999999996,
+        "token_gap_ms_p50": 19.302574,
+        "token_gap_ms_p99": 32.872658,
+        "ttft_ms": {
+          "w3-0": 344.797078,
+          "w3-1": 343.839513,
+          "w3-2": 343.449257,
+          "w3-3": 343.139932,
+          "w3-4": 451.486599
+        },
+        "long_p_ttft_ms": 451.486599,
+        "seed_gap_ms_p99": 32.872658
+      },
+      "actual_steps": 513,
+      "request_count": 5,
+      "ingress": {
+        "before_step": 33,
+        "after_ns": 8686930842040412,
+        "seed_counts": [
+          32,
+          32,
+          32,
+          32
+        ]
+      },
+      "drain_after": {
+        "steps": 2,
+        "seconds": 0.0011721979826688766,
+        "scheduler_and_batch_queue_empty": true,
+        "client_empty": true,
+        "scope": "After final token; excluded from arrival/window metrics"
+      }
+    },
+    {
+      "role": "ND1",
+      "window": "w4",
+      "workload": "decode-heavy",
+      "warmup": false,
+      "complete": true,
+      "error": null,
+      "original_summary": {
+        "output_tokens": 4096,
+        "window_seconds": 10.969024375,
+        "output_tokens_per_second": 373.415160726179,
+        "step_ms_mean": 21.36486129434698,
+        "step_ms_p99": 32.460750839999996,
+        "token_gap_ms_p50": 19.378866,
+        "token_gap_ms_p99": 32.033136,
+        "ttft_ms": {
+          "w4-0": 339.981212,
+          "w4-1": 338.967826,
+          "w4-2": 338.6286,
+          "w4-3": 338.329266,
+          "w4-4": 338.032061,
+          "w4-5": 337.739296,
+          "w4-6": 337.445292,
+          "w4-7": 337.158707
+        },
+        "steady_decode_tokens_per_second": 384.45614437446505
+      },
+      "actual_steps": 513,
+      "request_count": 8,
+      "ingress": null,
+      "drain_after": {
+        "steps": 2,
+        "seconds": 0.001619504764676094,
+        "scheduler_and_batch_queue_empty": true,
+        "client_empty": true,
+        "scope": "After final token; excluded from arrival/window metrics"
+      }
+    },
+    {
+      "role": "ND1",
+      "window": "w5",
+      "workload": "long-P-ingress",
+      "warmup": false,
+      "complete": true,
+      "error": null,
+      "original_summary": {
+        "output_tokens": 2176,
+        "window_seconds": 10.831046718,
+        "output_tokens_per_second": 200.9039436958322,
+        "step_ms_mean": 21.09293764717349,
+        "step_ms_p99": 31.418167399999998,
+        "token_gap_ms_p50": 18.256619,
+        "token_gap_ms_p99": 31.26860250000005,
+        "ttft_ms": {
+          "w5-0": 355.040259,
+          "w5-1": 351.911009,
+          "w5-2": 351.496993,
+          "w5-3": 351.171758,
+          "w5-4": 459.407949
+        },
+        "long_p_ttft_ms": 459.407949,
+        "seed_gap_ms_p99": 31.182363
+      },
+      "actual_steps": 513,
+      "request_count": 5,
+      "ingress": {
+        "before_step": 33,
+        "after_ns": 8686953203828551,
+        "seed_counts": [
+          32,
+          32,
+          32,
+          32
+        ]
+      },
+      "drain_after": {
+        "steps": 2,
+        "seconds": 0.0011979881674051285,
+        "scheduler_and_batch_queue_empty": true,
+        "client_empty": true,
+        "scope": "After final token; excluded from arrival/window metrics"
+      }
+    },
+    {
+      "role": "ND2",
+      "window": "w0",
+      "workload": "decode-heavy",
+      "warmup": true,
+      "complete": true,
+      "error": null,
+      "original_summary": {
+        "output_tokens": 4096,
+        "window_seconds": 11.224925981,
+        "output_tokens_per_second": 364.9021834917345,
+        "step_ms_mean": 21.7727669122807,
+        "step_ms_p99": 32.54325808,
+        "token_gap_ms_p50": 19.228302,
+        "token_gap_ms_p99": 32.525298,
+        "ttft_ms": {
+          "w0-0": 519.67874,
+          "w0-1": 473.138954,
+          "w0-2": 472.738738,
+          "w0-3": 472.386932,
+          "w0-4": 472.081947,
+          "w0-5": 471.776062,
+          "w0-6": 471.465657,
+          "w0-7": 471.165102
+        },
+        "steady_decode_tokens_per_second": 382.33146328483144
+      },
+      "actual_steps": 513,
+      "request_count": 8,
+      "ingress": null,
+      "drain_after": {
+        "steps": 2,
+        "seconds": 0.0010151974856853485,
+        "scheduler_and_batch_queue_empty": true,
+        "client_empty": true,
+        "scope": "After final token; excluded from arrival/window metrics"
+      }
+    },
+    {
+      "role": "ND2",
+      "window": "w1",
+      "workload": "long-P-ingress",
+      "warmup": true,
+      "complete": true,
+      "error": null,
+      "original_summary": {
+        "output_tokens": 2176,
+        "window_seconds": 11.36905496,
+        "output_tokens_per_second": 191.3967350545731,
+        "step_ms_mean": 22.147370884990252,
+        "step_ms_p99": 32.82886496,
+        "token_gap_ms_p50": 19.346685,
+        "token_gap_ms_p99": 32.498548,
+        "ttft_ms": {
+          "w1-0": 345.134431,
+          "w1-1": 344.224586,
+          "w1-2": 343.85807,
+          "w1-3": 343.547675,
+          "w1-4": 524.681831
+        },
+        "long_p_ttft_ms": 524.681831,
+        "seed_gap_ms_p99": 32.498548
+      },
+      "actual_steps": 513,
+      "request_count": 5,
+      "ingress": {
+        "before_step": 33,
+        "after_ns": 8687199209694147,
+        "seed_counts": [
+          32,
+          32,
+          32,
+          32
+        ]
+      },
+      "drain_after": {
+        "steps": 2,
+        "seconds": 0.001019967719912529,
+        "scheduler_and_batch_queue_empty": true,
+        "client_empty": true,
+        "scope": "After final token; excluded from arrival/window metrics"
+      }
+    },
+    {
+      "role": "ND2",
+      "window": "w2",
+      "workload": "decode-heavy",
+      "warmup": false,
+      "complete": true,
+      "error": null,
+      "original_summary": {
+        "output_tokens": 4096,
+        "window_seconds": 11.188698738,
+        "output_tokens_per_second": 366.08367924759835,
+        "step_ms_mean": 21.7921438460039,
+        "step_ms_p99": 33.6615858,
+        "token_gap_ms_p50": 19.443126,
+        "token_gap_ms_p99": 33.077309,
+        "ttft_ms": {
+          "w2-0": 341.687641,
+          "w2-1": 340.786517,
+          "w2-2": 340.414831,
+          "w2-3": 340.115166,
+          "w2-4": 339.814851,
+          "w2-5": 339.487316,
+          "w2-6": 339.191181,
+          "w2-7": 338.904146
+        },
+        "steady_decode_tokens_per_second": 377.9002200383865
+      },
+      "actual_steps": 513,
+      "request_count": 8,
+      "ingress": null,
+      "drain_after": {
+        "steps": 2,
+        "seconds": 0.001027476042509079,
+        "scheduler_and_batch_queue_empty": true,
+        "client_empty": true,
+        "scope": "After final token; excluded from arrival/window metrics"
+      }
+    },
+    {
+      "role": "ND2",
+      "window": "w3",
+      "workload": "long-P-ingress",
+      "warmup": false,
+      "complete": true,
+      "error": null,
+      "original_summary": {
+        "output_tokens": 2176,
+        "window_seconds": 11.406645478,
+        "output_tokens_per_second": 190.76598849301067,
+        "step_ms_mean": 22.218749986354776,
+        "step_ms_p99": 34.2893544,
+        "token_gap_ms_p50": 19.182402,
+        "token_gap_ms_p99": 33.969864,
+        "ttft_ms": {
+          "w3-0": 335.241982,
+          "w3-1": 333.94048,
+          "w3-2": 333.563234,
+          "w3-3": 333.208069,
+          "w3-4": 458.965987
+        },
+        "long_p_ttft_ms": 458.965987,
+        "seed_gap_ms_p99": 33.969864
+      },
+      "actual_steps": 513,
+      "request_count": 5,
+      "ingress": {
+        "before_step": 33,
+        "after_ns": 8687221893002561,
+        "seed_counts": [
+          32,
+          32,
+          32,
+          32
+        ]
+      },
+      "drain_after": {
+        "steps": 2,
+        "seconds": 0.0009597260504961014,
+        "scheduler_and_batch_queue_empty": true,
+        "client_empty": true,
+        "scope": "After final token; excluded from arrival/window metrics"
+      }
+    },
+    {
+      "role": "ND2",
+      "window": "w4",
+      "workload": "decode-heavy",
+      "warmup": false,
+      "complete": true,
+      "error": null,
+      "original_summary": {
+        "output_tokens": 4096,
+        "window_seconds": 11.182452277,
+        "output_tokens_per_second": 366.2881717299727,
+        "step_ms_mean": 21.779048900584794,
+        "step_ms_p99": 33.1733954,
+        "token_gap_ms_p50": 19.775213,
+        "token_gap_ms_p99": 32.949628,
+        "ttft_ms": {
+          "w4-0": 345.033007,
+          "w4-1": 343.766506,
+          "w4-2": 343.3995,
+          "w4-3": 343.074935,
+          "w4-4": 342.750309,
+          "w4-5": 342.426314,
+          "w4-6": 342.104579,
+          "w4-7": 341.789714
+        },
+        "steady_decode_tokens_per_second": 377.9603969180676
+      },
+      "actual_steps": 513,
+      "request_count": 8,
+      "ingress": null,
+      "drain_after": {
+        "steps": 2,
+        "seconds": 0.0009485147893428802,
+        "scheduler_and_batch_queue_empty": true,
+        "client_empty": true,
+        "scope": "After final token; excluded from arrival/window metrics"
+      }
+    },
+    {
+      "role": "ND2",
+      "window": "w5",
+      "workload": "long-P-ingress",
+      "warmup": false,
+      "complete": true,
+      "error": null,
+      "original_summary": {
+        "output_tokens": 2176,
+        "window_seconds": 11.43677004,
+        "output_tokens_per_second": 190.2635090492735,
+        "step_ms_mean": 22.277685274853802,
+        "step_ms_p99": 32.28079052,
+        "token_gap_ms_p50": 20.159739,
+        "token_gap_ms_p99": 32.273407,
+        "ttft_ms": {
+          "w5-0": 328.988129,
+          "w5-1": 327.679288,
+          "w5-2": 327.306342,
+          "w5-3": 326.967636,
+          "w5-4": 453.246138
+        },
+        "long_p_ttft_ms": 453.246138,
+        "seed_gap_ms_p99": 32.273407
+      },
+      "actual_steps": 513,
+      "request_count": 5,
+      "ingress": {
+        "before_step": 33,
+        "after_ns": 8687244679814491,
+        "seed_counts": [
+          32,
+          32,
+          32,
+          32
+        ]
+      },
+      "drain_after": {
+        "steps": 2,
+        "seconds": 0.0009459257125854492,
+        "scheduler_and_batch_queue_empty": true,
+        "client_empty": true,
+        "scope": "After final token; excluded from arrival/window metrics"
+      }
+    }
+  ],
+  "warmups_excluded_from_estimates": true
+}

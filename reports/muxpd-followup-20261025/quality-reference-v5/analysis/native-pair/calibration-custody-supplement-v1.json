@@ -1,0 +1,56 @@
+{
+  "schema": "muxpd-native-pair-calibration-custody-supplement-v1",
+  "checked_at": "2026-10-26T02:54:18.266597+00:00",
+  "passed": true,
+  "original_producer": {
+    "path": "/root/workspace/muxpd-followup-20261025/quality/native-controls-paired-description-v1/describe_native_controls.py",
+    "bytes": 15302,
+    "sha256": "4d4b20055a0a914c70a2033d4da378a31912186e02b3073ef6046b2fef33a74b"
+  },
+  "original_paired_description": {
+    "path": "/root/workspace/muxpd-followup-20261025/quality/native-controls-paired-description-v1/paired-description.json",
+    "bytes": 220968,
+    "sha256": "4f2686e99ad676ae5316b52932b5bc7c312c389f2a9a0ebaba769afe0e59029b"
+  },
+  "original_readme_preserved": {
+    "path": "/root/workspace/muxpd-followup-20261025/quality/native-controls-paired-description-v1/README.md",
+    "bytes": 4107,
+    "sha256": "0ea368c86a41b565e98608fde7df1d4975ce8d2714c5de254fef4f04f7f4943b"
+  },
+  "protocol": {
+    "path": "/root/workspace/muxpd-followup-20261025/quality/supplementary/protocol.json",
+    "bytes": 12545,
+    "sha256": "24827a9261f9f84ceff86c00fc45985a9a7e4fdae63bf52cb028bc2a1caefc93"
+  },
+  "protocol_bound_calibration_receipt": {
+    "path": "/root/workspace/muxpd-followup-20261025/quality/supplementary/native-only-calibration-receipt.json",
+    "bytes": 1425,
+    "sha256": "63992a7b8561ce33596395f1b22eeb2bb55e246fd9d667a76a67c33541e3ec53"
+  },
+  "calibration_snapshots_checked_now": [
+    {
+      "path": "/root/workspace/muxpd-followup-20261025/quality/supplementary/native-calibration-snapshot.json",
+      "bytes": 1065877,
+      "sha256": "0c7d1c4bc30aeab7b2a8ae45b33eacbb62893838971c3bceabfbfbab3d10718b",
+      "expected_protocol_bound_sha256": "0c7d1c4bc30aeab7b2a8ae45b33eacbb62893838971c3bceabfbfbab3d10718b",
+      "current_match": true,
+      "in_original_final_inventory": false
+    },
+    {
+      "path": "/root/workspace/muxpd-followup-20261025/quality/supplementary/native-calibration-controller-snapshot.json",
+      "bytes": 2291,
+      "sha256": "1788a6236d94858230dd2a1cada1e050952bf137374147cbc90a04649c4c81be",
+      "expected_protocol_bound_sha256": "1788a6236d94858230dd2a1cada1e050952bf137374147cbc90a04649c4c81be",
+      "current_match": true,
+      "in_original_final_inventory": false
+    }
+  ],
+  "source_only_review": {
+    "path": "/root/workspace/muxpd-followup-20261025/quality/native-controls-paired-source-review-v1.json",
+    "bytes": 2776,
+    "sha256": "206c6a3566961c63a1437f4574907bd3714823771ac5f9b2b09a56341225bd8c"
+  },
+  "scope_correction": "The v1 all_reviewed_input_bytes_unchanged flag and original README wording apply only to the explicit inputs inventory in paired-description.json. Frozen load_protocol verified these two calibration snapshots at original audit entry, but they were not included in that audit final-inventory rehash loop. This separate later receipt verifies their current bytes against the same protocol-bound hashes; it does not retroactively expand the checks performed by v1.",
+  "original_producer_result_preserved": true,
+  "new_model_device_test_or_candidate_evaluation": false
+}

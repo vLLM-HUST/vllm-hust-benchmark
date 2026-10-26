@@ -1,0 +1,61 @@
+# Raw MuxPD quality: strict and supplementary gates fail
+
+The frozen raw candidate scores **166/200 (83.0%)**, compared with **165/200 (82.5%)** for each native control. It gains four answers but loses **three of the 165 cases both native controls answered correctly**. The frozen stable-case veto therefore fails despite the higher aggregate score. No parser, case, output budget, control, threshold, or scorer was changed.
+
+Both exact frozen scorer CLIs completed with exit 0. Process success means scoring completed; it does not mean their reported quality gates passed.
+
+| Result | Outcome |
+| --- | --- |
+| Original strict full frozen plan | **FAIL** |
+| Supplementary collection | PASS |
+| Supplementary answer nonregression | **FAIL**: 3 new wrong answers on the stable native set |
+| Actual P-progress/D-retirement coverage | PASS: 25/25 batches, 10 transactions each, 250 total |
+| Supplementary combined mixed-scope gate | **FAIL** because answer nonregression fails |
+
+The original strict result also retains incomplete length responses in both native controls and the candidate. Earlier 2048/8192 strict failure history remains unchanged. These results do not qualify arbitrary text, a source98 wheel, numerical identity, performance, or Issue23 resolution.
+
+| Arm | Correct / 200 | Natural stop | Length | Invalid answer including length | Invalid natural stop | Missing/error/nonterminal |
+| --- | --- | --- | --- | --- | --- | --- |
+| Native1 | 165 | 191 | 9 | 9 | 0 | 0/0/0 |
+| Native2 | 165 | 191 | 9 | 9 | 0 | 0/0/0 |
+| Raw | 166 | 193 | 7 | 7 | 0 | 0/0/0 |
+
+All seven raw length responses are wrong, with no extracted answer. The native lower-count floor of 165 is met, but it does not override the three stable-case losses. Correctness transitions against either native are 162 correct/correct, 3 correct/wrong, 4 wrong/correct, and 31 wrong/wrong. The paired difference is +0.5 percentage points; the original conservative 95% interval is −4.346 to +5.300 percentage points. Raw's exact binomial 95% interval is 77.063%–87.930%. These diagnostic intervals and the McNemar result do not establish equivalence or override the frozen veto.
+
+## All seven correctness-discordant cases
+
+The table includes every loss and gain from the frozen scorer. Batch IDs are zero-based. Each arm cell shows **extracted option / finish reason / generated token count**. A dash means the frozen scorer extracts no answer from a length response. Categories, gold options and batch roles come from the original cases and plan. The two native controls have identical saved token arrays for these cases.
+
+| Direction | Case ID | Category | Batch / role | Gold | Native1 | Native2 | Raw |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Loss | mmlu-pro-03766 | chemistry | 3 / peer | B | B / stop / 1018 | B / stop / 1018 | A / stop / 6396 |
+| Loss | mmlu-pro-10672 | computer science | 6 / peer | A | A / stop / 1198 | A / stop / 1198 | G / stop / 1046 |
+| Loss | mmlu-pro-01741 | law | 14 / peer | E | E / stop / 377 | E / stop / 377 | — / length / 8192 |
+| Gain | mmlu-pro-06074 | health | 10 / peer | E | — / length / 8192 | — / length / 8192 | E / stop / 2013 |
+| Gain | mmlu-pro-06741 | health | 11 / peer | E | — / length / 8192 | — / length / 8192 | E / stop / 1869 |
+| Gain | mmlu-pro-00882 | law | 12 / peer | G | C / stop / 1351 | C / stop / 1351 | G / stop / 732 |
+| Gain | mmlu-pro-08107 | math | 15 / peer | C | — / length / 8192 | — / length / 8192 | C / stop / 708 |
+
+All seven correctness changes occur on peer requests in this fixed plan. This does not establish that all token differences are confined to peers, nor identify a causal mechanism. Three gains replace native truncations with correct natural stops; the fourth changes a naturally stopped wrong option. The losses comprise two naturally stopped wrong options and one new truncation. Every original case-level score remains in the scorer outputs.
+
+The following first divergences are computed **only from saved generated token arrays**, independently against both identical native references. Token positions are one-based; `review.json` also preserves zero-based indices, matched-prefix lengths and hashes of each complete array. There are no logits in this comparison, and subsequent histories differ after the first divergence.
+
+| Case ID | First differing generated token | Native token ID | Raw token ID | Equal generated prefix length |
+| --- | --- | --- | --- | --- |
+| mmlu-pro-03766 | 66 | 77 | 16 | 65 |
+| mmlu-pro-10672 | 17 | 19987 | 2663 | 16 |
+| mmlu-pro-01741 | 14 | 1865 | 3234 | 13 |
+| mmlu-pro-06074 | 18 | 2519 | 8242 | 17 |
+| mmlu-pro-06741 | 29 | 369 | 318 | 28 |
+| mmlu-pro-00882 | 81 | 369 | 628 | 80 |
+| mmlu-pro-08107 | 22 | 579 | 62634 | 21 |
+
+## Custody, observed mixed work, and cleanup
+
+Scoring began only after the raw controller finished at **2026-10-26 03:16:23 UTC**, exit 0, with 200 outputs, complete collection, returned shutdown, and no recorded errors. The unchanged supplementary scorer passed exact protocol/source/runtime/config/input, token-to-text, admission and terminal receipt checks for all three runs. Quality uses the original f7/Core/Ascend deterministic/fusion recipe and all 200 frozen cases. Existing model manifest/stat checks were used; weights were not rehashed during this scoring.
+
+The actual raw scheduler receipt matches SHA256 `1293b0f511c0a044f2c84ab5e3b4b3e561c9c707db3cfe35457a6c2ea07ff465`. Every batch has ten recorded P-progress/D-retirement transactions. The frozen supplement independently binds those receipts to admitted request IDs, actual scheduled phases, retirement and batch chronology. This is observed transaction progress, not physical kernel-overlap proof.
+
+Cleanup uses raw's retained terminal/NPU-after records and the owner's prior cleanup verification. The later group run owns the devices; their current occupancy is not evidence against raw cleanup. The raw native log retains **SIGTERM fallback for four workers** after its shutdown grace period. No globally graceful or signal-free shutdown is claimed. The old capsule builder additionally verified the raw producer PID/process group absent and preserved the complete terminal run in a new local capsule for a later explicitly selected batch, excluded from v4.
+
+The unchanged result files are [strict](../raw-quality-v2-strict-result-v1.json) and [supplementary](../raw-quality-v2-supplementary-result-v1.json). [review.json](review.json) binds their identities, exact CLI argv, the retained logs, all seven detailed comparisons, original gates, per-case status sets and mixed coverage. `PYTHONDONTWRITEBYTECODE=1` prevented imports from writing cache files into frozen inputs; scorer argv remained exactly as prescribed. No new sampling, model/device operation, source edit or GitHub mutation was performed for this review.

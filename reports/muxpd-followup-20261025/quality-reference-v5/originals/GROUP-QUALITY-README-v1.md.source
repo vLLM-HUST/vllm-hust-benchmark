@@ -1,0 +1,44 @@
+# Grouped P preserves raw outputs and the failed native-relative quality gate
+
+**Grouped P and raw have identical saved token arrays, decoded text and termination records for all 200 cases.** Group scores **166/200 (83.0%)**, matching raw, versus **165/200 (82.5%)** for each native control. Group retains the same three new errors on the 165 both-native-correct cases. Its original strict gate and supplementary answer/combined mixed-scope gates therefore remain **FAIL**. Equality with raw does not repair the raw/native difference or establish native equivalence.
+
+Root executed the exact frozen strict and supplementary scorer CLIs with exit 0. Their stdout is retained in the tool transcript only; this review did **not** execute the scorers and did **not** fabricate local CLI logs. The existing result files and scorer identities are bound by [root-scoring-provenance-v1.json](root-scoring-provenance-v1.json). This report was prepared only after root explicitly ended the CPU quiet interval following all planned device runs.
+
+| Arm | Correct / 200 | Natural stop | Length | Invalid answer including length | Invalid natural stop | Missing/error/nonterminal |
+| --- | --- | --- | --- | --- | --- | --- |
+| Native1 | 165 | 191 | 9 | 9 | 0 | 0/0/0 |
+| Native2 | 165 | 191 | 9 | 9 | 0 | 0/0/0 |
+| Raw | 166 | 193 | 7 | 7 | 0 | 0/0/0 |
+| Group | 166 | 193 | 7 | 7 | 0 | 0/0/0 |
+
+Every length response receives no extracted answer and zero credit. The original strict no-truncation failure remains unchanged. The candidate correct-count floor is met, but the frozen stable-case veto fails; no offsetting gain or interval changes that condition. Collection, the required terminal raw reference, and actual mixed coverage pass independently of answer nonregression.
+
+## Complete raw/group comparison and native distinctions
+
+All 200 cases are compared by frozen case ID in [review.json](review.json), including category, gold, batch/seed-or-peer role, each arm's answer, finish/stop reason, output length, token/text hashes, and first generated-token divergences. Raw/group have 166 correct/correct and 34 wrong/wrong cases, with zero correctness changes and zero token, text or termination differences. The original raw result is rechecked as the same terminal reference; it is not replaced or reclassified.
+
+Only **11/200** complete group token arrays equal either native control's saved array; **189 differ**. The two native controls themselves agree. Thus equal final correctness on most cases is not token equality. First divergences use saved token IDs only, not logits, and do not identify a numerical mechanism. The fixed-subset equality with raw is not an arbitrary-text guarantee.
+
+Against either native, group has 162 correct/correct, 3 correct/wrong, 4 wrong/correct and 31 wrong/wrong cases. The following table contains all seven correctness changes. Batch IDs are zero-based. Each arm cell is **extracted option / finish reason / generated token count**; a dash means no extracted answer because the response reached the length cap. Native1 and native2 are shown together because their answer, termination and token arrays agree for these cases; raw and group likewise agree exactly.
+
+| Direction versus native | Case ID | Category | Batch / role | Gold | Native1 = Native2 | Raw = Group |
+| --- | --- | --- | --- | --- | --- | --- |
+| Loss | mmlu-pro-03766 | chemistry | 3 / peer | B | B / stop / 1018 | A / stop / 6396 |
+| Loss | mmlu-pro-10672 | computer science | 6 / peer | A | A / stop / 1198 | G / stop / 1046 |
+| Loss | mmlu-pro-01741 | law | 14 / peer | E | E / stop / 377 | — / length / 8192 |
+| Gain | mmlu-pro-06074 | health | 10 / peer | E | — / length / 8192 | E / stop / 2013 |
+| Gain | mmlu-pro-06741 | health | 11 / peer | E | — / length / 8192 | E / stop / 1869 |
+| Gain | mmlu-pro-00882 | law | 12 / peer | G | C / stop / 1351 | G / stop / 732 |
+| Gain | mmlu-pro-08107 | math | 15 / peer | C | — / length / 8192 | C / stop / 708 |
+
+All seven correctness changes are peer requests in this plan; this does not mean all 189 token differences occur on peers or establish causality. Three gains replace native truncations, while one loss is a new truncation. The first group/native token differences for these seven rows occur at one-based generated positions **66, 17, 14, 18, 29, 81, 22**, respectively; the exact token IDs and both native comparisons are preserved in the JSON.
+
+The frozen group/raw paired accuracy difference is zero, with conservative 95% interval −2.167 to +2.167 percentage points. Group/native is +0.5 points, with interval −4.346 to +5.300 points. Group's exact binomial interval is 77.063%–87.930%. These diagnostics do not establish population equivalence, override the stable-case veto, or replace the predeclared gates.
+
+## Mixed-work evidence and terminal custody
+
+The frozen supplementary auditor passes all **25/25 group batches**, each with ten bound P-progress/D-retirement transactions (**250 total**). The same terminal raw reference independently passes 25/25 and 250 transactions. Actual request IDs, scheduled phases, retirement and batch chronology are bound to the frozen admissions. Group scheduler-receipt SHA256 is `60893a7e2408e9f028dee66814210b27f286824448337a094b4a7fc9b1edf54c`. These are scheduler transaction observations, not physical kernel-overlap proof. The combined supplementary gate remains FAIL because its answer condition fails.
+
+Group completed at **2026-10-26 04:08:30 UTC**, controller exit 0, with complete collection, returned shutdown, and no recorded errors. The review binds root's terminal cleanup receipt `root/group-quality-terminal-device-check-v1.json` (SHA256 `bd348106fd259db4c30631a23e256b328ff21cf77bf879a1cf42abe8f0325a3c`) and the retained NPU-after record. The original native log retains **SIGTERM fallback for four workers** after the grace period; this is bounded cleanup, not signal-free or globally graceful shutdown.
+
+The original [strict result](../group-quality-v2-strict-result-v1.json) and [supplementary result](../group-quality-v2-supplementary-result-v1.json) remain unchanged. The staged `summarize_results.py` was not executed; `summarize_results_v2.py` records root's actual scoring ownership and uses no invented stdout files. Its executed review log is separately named. No new model run, sampling, parser, threshold, source change or GitHub mutation occurred. The new group terminal capsule is reserved for a later explicitly selected publication batch; v4 remains unchanged.

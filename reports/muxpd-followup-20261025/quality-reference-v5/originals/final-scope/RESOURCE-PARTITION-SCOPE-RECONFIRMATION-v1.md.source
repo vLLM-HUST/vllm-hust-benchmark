@@ -1,0 +1,11 @@
+# Current resource-partition scope, source-only reconfirmation
+
+The existing `performance/PERFORMANCE-AUDIT.md` already records why the current recipe is ineligible for stream quotas. This follow-up does not add a hardware experiment or acceptance gate.
+
+Pinned Ascend `03766ac696fde5ab1980d80ca0b8543d3580c989`, `vllm_ascend/worker/model_runner_v1.py:207`, explicitly sets `torch.npu.config.allow_internal_format = True`. The qualified runs use that V1 runner. This is a source/configuration finding; no new live-worker RPC or device-format measurement was performed during the frozen quality run.
+
+The official [TorchNPU stream-limit contract](https://www.hiascend.com/document/detail/en/Pytorch/2610/apiref/customapi/docs/en/custom_APIs/torch_npu/torch_npu-set_stream_limit.md) requires internal formats to be disabled and restricts supported operators. Its current official search-index entry was rechecked on 2026-10-26; direct page retrieval timed out. The older 7.3 documentation URL currently returned the website shell in this read, so the 26.1 official link is a useful additional navigation target. The installed Python API is present at `/usr/local/python3.12.13/lib/python3.12/site-packages/torch_npu/npu/npu_config.py:259`; it invokes the native stream-resource setter, which does not itself establish compatibility of model operators.
+
+Therefore stream quotas remain disabled for this unchanged recipe. The current implementation's separate P/D execution and latency observations are not a claim of the paper's Cube/Vector spatial partitioning. This does not rule out a future distinct configuration with private formats disabled and the necessary operator/graph validation. No quota, format, model, source or running process was changed by this check.
+
+For final documentation, retain this bounded limitation and link the existing audit. Update historical pending language separately from the original audit snapshot; do not require an exhaustive operator qualification for a recipe already excluded by the documented format precondition.

@@ -1,0 +1,4854 @@
+{
+  "schema": "muxpd-mixed-profile-capture-audit-v1",
+  "variant": "group",
+  "plan_sha256": "c3414ca10344ec3e3121ddcc01a21403ff968a986b0615ccca68b16f83e69a4b",
+  "run_source": "/root/workspace/muxpd-followup-20261025/runs/profile-f7-group-mixed-01/results/run.json",
+  "run_sha256": "110bc9bafe95f6ec24b690547a5c2015ec2269926c0ed6f6ab3af3e3b444f8df",
+  "producer_sha256": "64bbad30085de7e27987986b0744cca1ae1632231ab4d16e7c2eea3626687db0",
+  "timing_dependency_sha256": "3f3a67d7737f56537d7d6843cbf4e5ab670bc12eb7034a66f0e55749a44fa9c2",
+  "environment": {
+    "python": "3.12.13 (main, Aug  3 2026, 03:58:42) [GCC 12.3.1 (openEuler 12.3.1-105.oe2403sp3)]",
+    "executable": "/root/workspace/.muxpd-ecpa-runtime/bin/python",
+    "packages": {
+      "vllm": "0.1.dev1+gd0f22d2bd.empty",
+      "vllm-ascend": "0.1.dev1+g03766ac69.d20261010",
+      "torch": "2.10.0+cpu",
+      "torch-npu": "2.10.0.post4",
+      "transformers": "5.14.1",
+      "tokenizers": "0.22.2"
+    },
+    "environment": {
+      "ASCEND_RT_VISIBLE_DEVICES": "0,1,2,3",
+      "ASCEND_VISIBLE_DEVICES": null,
+      "OMP_NUM_THREADS": "1",
+      "VLLM_WORKER_MULTIPROC_METHOD": "spawn",
+      "VLLM_ENABLE_V1_MULTIPROCESSING": "0",
+      "VLLM_PLUGINS": "ascend,ascend_kv_connector,ascend_model,ascend_model_loader",
+      "VLLM_VERSION": "0.25.1",
+      "HCCL_DETERMINISTIC": "true",
+      "VLLM_USE_V2_MODEL_RUNNER": "0",
+      "VLLM_BATCH_INVARIANT": null,
+      "TASK_QUEUE_ENABLE": null,
+      "PYTORCH_NPU_ALLOC_CONF": null,
+      "VLLM_ASCEND_ENABLE_FLASHCOMM": null,
+      "VLLM_ASCEND_ENABLE_MLAPO": null,
+      "ASCEND_LAUNCH_BLOCKING": null,
+      "LD_LIBRARY_PATH": "/usr/local/Ascend/nnal/atb/latest/atb/cxx_abi_1/lib:/usr/local/Ascend/nnal/atb/latest/atb/cxx_abi_1/examples:/usr/local/Ascend/nnal/atb/latest/atb/cxx_abi_1/tests/atbopstest:/usr/local/Ascend/cann-9.1.0/lib64:/usr/local/Ascend/cann-9.1.0/lib64/plugin/opskernel:/usr/local/Ascend/cann-9.1.0/lib64/plugin/nnengine:/usr/local/Ascend/cann-9.1.0/opp/built-in/op_impl/ai_core/tbe/op_tiling/lib/linux/aarch64:/usr/local/Ascend/driver/lib64:/usr/local/Ascend/driver/lib64/common:/usr/local/Ascend/driver/lib64/driver:/usr/local/Ascend/driver/lib64:/usr/local/Ascend/driver/lib64/common:/usr/local/Ascend/driver/lib64/driver:/usr/local/Ascend/nnal/atb/latest/atb/cxx_abi_1/lib:/usr/local/Ascend/nnal/atb/latest/atb/cxx_abi_1/examples:/usr/local/Ascend/nnal/atb/latest/atb/cxx_abi_1/tests/atbopstest:/usr/local/Ascend/ascend-toolkit/latest/tools/aml/lib64:/usr/local/Ascend/ascend-toolkit/latest/tools/aml/lib64/plugin:/usr/local/Ascend/ascend-toolkit/latest/lib64:/usr/local/Ascend/ascend-toolkit/latest/lib64/plugin/opskernel:/usr/local/Ascend/ascend-toolkit/latest/lib64/plugin/nnengine:/usr/local/Ascend/ascend-toolkit/latest/opp/built-in/op_impl/ai_core/tbe/op_tiling::/usr/local/lib"
+    }
+  },
+  "sources": {
+    "vllm": {
+      "path": "/root/workspace/vllm-hust/vllm/__init__.py",
+      "sha256": "fd3708e5a13abe98c566afd79a6b1987cef70c0548bb19c1218ff6a7f9d43346",
+      "commit": "d0f22d2bda562156e4dbf433ce645e1769b4f804",
+      "status": "",
+      "diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "diff_bytes_utf8": "",
+      "changed_files": []
+    },
+    "vllm_ascend": {
+      "path": "/root/workspace/vllm-ascend-hust/vllm_ascend/__init__.py",
+      "sha256": "cfe116148053fcb120d766d99ca5bca2c37afac8822e72c6b1fce20af8a0e6d7",
+      "commit": "03766ac696fde5ab1980d80ca0b8543d3580c989",
+      "status": "M ../csrc/build_aclnn.sh",
+      "diff_sha256": "a03524d1d8a4b84c6da6c782b5f8b77b7c473c8d414cc9f17831869027f9922f",
+      "diff_bytes_utf8": "diff --git a/csrc/build_aclnn.sh b/csrc/build_aclnn.sh\nindex e0476e1..19fea47 100755\n--- a/csrc/build_aclnn.sh\n+++ b/csrc/build_aclnn.sh\n@@ -109,7 +109,7 @@ elif [[ \"$SOC_VERSION\" =~ ^ascend910b ]]; then\n         \"copy_and_expand_eagle_inputs\"\n         \"causal_conv1d\"\n         \"lightning_indexer_quant\"\n-        \"compressor\"\n+        # Local Qwen3.5 build: Compressor is not used by this model.\n         \"compressor_metadata\"\n         \"vllm_quant_lightning_indexer\"\n         \"vllm_quant_lightning_indexer_metadata\"\n",
+      "changed_files": [
+        {
+          "path": "csrc/build_aclnn.sh",
+          "exists": true,
+          "sha256": "b089d52475c6cb36fffd733bb5be3fbe4158b6845074751268938e98a1d0042c"
+        }
+      ]
+    },
+    "vllm_muxpd": {
+      "path": "/root/workspace/muxpd-groupfx-followup/src/vllm_muxpd/__init__.py",
+      "sha256": "1cc95de2a19c51dd5406899daf19c1a0e8c8be80175ece841bbdcb1dd71bd549",
+      "commit": "f7ed21e183b27d2141176f3e7a5c8a5ff4ede07d",
+      "status": "",
+      "diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "diff_bytes_utf8": "",
+      "changed_files": []
+    }
+  },
+  "engine_args": {
+    "model": "/root/workspace/models/Qwen3.5-35B-A3B",
+    "tensor_parallel_size": 4,
+    "data_parallel_size": 1,
+    "pipeline_parallel_size": 1,
+    "enable_expert_parallel": true,
+    "dtype": "bfloat16",
+    "max_model_len": 16384,
+    "max_num_batched_tokens": 16384,
+    "max_num_seqs": 8,
+    "gpu_memory_utilization": 0.85,
+    "language_model_only": true,
+    "enable_chunked_prefill": false,
+    "async_scheduling": false,
+    "enable_prefix_caching": false,
+    "mamba_cache_mode": "none",
+    "enforce_eager": false,
+    "numa_bind": false,
+    "additional_config": {
+      "enable_cpu_binding": false,
+      "ascend_compilation_config": {
+        "enable_npugraph_ex": false,
+        "enable_static_kernel": false,
+        "fuse_norm_quant": true,
+        "fuse_qknorm_rope": true,
+        "fuse_muls_add": true
+      }
+    },
+    "compilation_config": {
+      "mode": 3,
+      "cudagraph_mode": "FULL_DECODE_ONLY",
+      "cudagraph_capture_sizes": [
+        1,
+        2,
+        4,
+        8
+      ],
+      "max_cudagraph_capture_size": 8
+    },
+    "distributed_executor_backend": "mp",
+    "seed": 42,
+    "disable_log_stats": true,
+    "scheduler_cls": "vllm_muxpd.decoupled_scheduler.DecoupledMuxPDScheduler",
+    "batch_admission_policy": "vllm_muxpd.policy.MuxPDPolicy",
+    "batch_admission_policy_config": {
+      "execution": "decoupled",
+      "stream_mode": "overlap",
+      "layers_per_slice": 4,
+      "adaptive_layers": false,
+      "prefill_first": false,
+      "decode_graph": true,
+      "compile_full_prefill": false,
+      "prefill_layer_token_budget": 0,
+      "decode_budget_guard": false,
+      "overlap_communication": "isolated",
+      "compile_prefill_groups": true
+    },
+    "stream_interval": 1,
+    "worker_cls": "vllm_muxpd.decoupled_worker.DecoupledMuxPDNPUWorker",
+    "profiler_config": {
+      "profiler": "torch",
+      "torch_profiler_dir": "/root/workspace/muxpd-followup-20261025/runs/profile-f7-group-mixed-01/results/profile",
+      "torch_profiler_with_stack": false,
+      "torch_profiler_with_memory": false,
+      "ignore_frontend": true,
+      "delay_iterations": 0,
+      "max_iterations": 0
+    }
+  },
+  "capture_start_seed_counts": [
+    32,
+    32,
+    32,
+    32
+  ],
+  "capture_stop_seed_counts": [
+    42,
+    42,
+    42,
+    42
+  ],
+  "capture_stop_P_output_count": 1,
+  "actual_progress_signature": [
+    {
+      "P_before_layers": null,
+      "P_after_layers": 4,
+      "seed_returns": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "P_output_count": 0
+    },
+    {
+      "P_before_layers": 4,
+      "P_after_layers": 8,
+      "seed_returns": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "P_output_count": 0
+    },
+    {
+      "P_before_layers": 8,
+      "P_after_layers": 12,
+      "seed_returns": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "P_output_count": 0
+    },
+    {
+      "P_before_layers": 12,
+      "P_after_layers": 16,
+      "seed_returns": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "P_output_count": 0
+    },
+    {
+      "P_before_layers": 16,
+      "P_after_layers": 20,
+      "seed_returns": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "P_output_count": 0
+    },
+    {
+      "P_before_layers": 20,
+      "P_after_layers": 24,
+      "seed_returns": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "P_output_count": 0
+    },
+    {
+      "P_before_layers": 24,
+      "P_after_layers": 28,
+      "seed_returns": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "P_output_count": 0
+    },
+    {
+      "P_before_layers": 28,
+      "P_after_layers": 32,
+      "seed_returns": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "P_output_count": 0
+    },
+    {
+      "P_before_layers": 32,
+      "P_after_layers": 36,
+      "seed_returns": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "P_output_count": 0
+    },
+    {
+      "P_before_layers": 36,
+      "P_after_layers": null,
+      "seed_returns": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "P_output_count": 1
+    }
+  ],
+  "counter_deltas": {
+    "0": {
+      "decode_preparation_queries": 0,
+      "decode_preparation_ready_skips": 0,
+      "decode_preparation_fences_skipped": 0,
+      "native_decode_graph": {
+        "decode_replay_calls": 10,
+        "decode_capture_forward_calls": 0,
+        "decode_eager_fallback_calls": 0,
+        "decode_uncaptured_full_calls": 0,
+        "decode_forward_failures": 0,
+        "prefill_forced_eager_calls": 1,
+        "prefill_compiled_calls": 0,
+        "prefill_compile_profile_failures": 0,
+        "capture_failures": 0
+      },
+      "prefill_group_calls": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    "1": {
+      "decode_preparation_queries": 0,
+      "decode_preparation_ready_skips": 0,
+      "decode_preparation_fences_skipped": 0,
+      "native_decode_graph": {
+        "decode_replay_calls": 10,
+        "decode_capture_forward_calls": 0,
+        "decode_eager_fallback_calls": 0,
+        "decode_uncaptured_full_calls": 0,
+        "decode_forward_failures": 0,
+        "prefill_forced_eager_calls": 1,
+        "prefill_compiled_calls": 0,
+        "prefill_compile_profile_failures": 0,
+        "capture_failures": 0
+      },
+      "prefill_group_calls": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    "2": {
+      "decode_preparation_queries": 0,
+      "decode_preparation_ready_skips": 0,
+      "decode_preparation_fences_skipped": 0,
+      "native_decode_graph": {
+        "decode_replay_calls": 10,
+        "decode_capture_forward_calls": 0,
+        "decode_eager_fallback_calls": 0,
+        "decode_uncaptured_full_calls": 0,
+        "decode_forward_failures": 0,
+        "prefill_forced_eager_calls": 1,
+        "prefill_compiled_calls": 0,
+        "prefill_compile_profile_failures": 0,
+        "capture_failures": 0
+      },
+      "prefill_group_calls": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    "3": {
+      "decode_preparation_queries": 0,
+      "decode_preparation_ready_skips": 0,
+      "decode_preparation_fences_skipped": 0,
+      "native_decode_graph": {
+        "decode_replay_calls": 10,
+        "decode_capture_forward_calls": 0,
+        "decode_eager_fallback_calls": 0,
+        "decode_uncaptured_full_calls": 0,
+        "decode_forward_failures": 0,
+        "prefill_forced_eager_calls": 1,
+        "prefill_compiled_calls": 0,
+        "prefill_compile_profile_failures": 0,
+        "capture_failures": 0
+      },
+      "prefill_group_calls": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ]
+    }
+  },
+  "captures": [
+    {
+      "rank": 0,
+      "source": "/root/workspace/muxpd-followup-20261025/performance/mixed-profile-offline-v1/group/profile/mixed-p12000-ingress_dp0_pp0_tp0_dcp0_ep0_rank0_1004044_20261026043128000_ascend_pt/ASCEND_PROFILER_OUTPUT/trace_view.json",
+      "source_sha256": "f4a6e085cb958bdf779e6bb0a724b362721900b4936e93c804f07103a1b2bb11",
+      "hardware_process_labels": {
+        "1028141504": "NPU 0"
+      },
+      "cpu_operation_pids": [
+        "1004044"
+      ],
+      "expected_coordinator_D_steps": 10,
+      "observed_graph_replays": 10,
+      "exact_replay_count_matches": true,
+      "profiler_markers": {
+        "PROFILING_ENABLE": 1,
+        "PROFILING_DISABLE": 1
+      },
+      "graph_capture_api_count": 0,
+      "complete_window_indicators": true,
+      "query_api_names_observed": [],
+      "runtime_api_inventory": {
+        "AscendCL@BroadcastTo_Tiling": 30,
+        "AscendCL@ChunkFwdO_Tiling": 60,
+        "AscendCL@ChunkGatedDeltaRuleFwdH_Tiling": 60,
+        "AscendCL@IndexCheck_Tiling": 60,
+        "AscendCL@IndexPutV2_Tiling": 30,
+        "AscendCL@ScatterPaKvCache_Tiling": 20,
+        "AscendCL@Slice_Tiling": 30,
+        "AscendCL@Transpose_Tiling": 60,
+        "AscendCL@aclmdlRICaptureGetInfo": 5664,
+        "AscendCL@aclmdlRICaptureTaskUpdateBegin": 100,
+        "AscendCL@aclmdlRICaptureTaskUpdateEnd": 100,
+        "AscendCL@aclmdlRIExecuteAsync": 10,
+        "AscendCL@aclnnAbs": 40,
+        "AscendCL@aclnnAdd": 62,
+        "AscendCL@aclnnAddRmsNormBias": 80,
+        "AscendCL@aclnnAddRmsNormBiasGetWorkspaceSize": 80,
+        "AscendCL@aclnnAdds": 100,
+        "AscendCL@aclnnArgMax": 11,
+        "AscendCL@aclnnBitwiseAndTensor": 1,
+        "AscendCL@aclnnBitwiseNot": 1,
+        "AscendCL@aclnnCat": 30,
+        "AscendCL@aclnnCausalConv1d": 30,
+        "AscendCL@aclnnCausalConv1dGetWorkspaceSize": 30,
+        "AscendCL@aclnnChunkFwdO": 30,
+        "AscendCL@aclnnChunkFwdOGetWorkspaceSize": 30,
+        "AscendCL@aclnnChunkGatedDeltaRuleFwdH": 30,
+        "AscendCL@aclnnChunkGatedDeltaRuleFwdHGetWorkspaceSize": 30,
+        "AscendCL@aclnnContiguous": 30,
+        "AscendCL@aclnnContiguousGetWorkspaceSize": 30,
+        "AscendCL@aclnnEmbedding": 1,
+        "AscendCL@aclnnGeScalar": 1,
+        "AscendCL@aclnnGemmaRmsNorm": 1,
+        "AscendCL@aclnnGemmaRmsNormGetWorkspaceSize": 1,
+        "AscendCL@aclnnGroupedMatmulV5": 80,
+        "AscendCL@aclnnGtScalar": 3,
+        "AscendCL@aclnnIndex": 102,
+        "AscendCL@aclnnIndexPutImpl": 30,
+        "AscendCL@aclnnIndexPutImplGetWorkspaceSize": 30,
+        "AscendCL@aclnnInnerFusedInferAttentionScore": 110,
+        "AscendCL@aclnnInnerFusedInferAttentionScoreGetWorkspaceSize": 110,
+        "AscendCL@aclnnInnerMoeTokenUnpermute": 40,
+        "AscendCL@aclnnInnerMoeTokenUnpermuteGetWorkspaceSize": 40,
+        "AscendCL@aclnnInplaceCopy": 1039,
+        "AscendCL@aclnnInplaceCopyGetWorkspaceSize": 175,
+        "AscendCL@aclnnInplaceFillScalar": 209,
+        "AscendCL@aclnnInplaceFillTensor": 30,
+        "AscendCL@aclnnInplaceMaskedFillScalar": 1,
+        "AscendCL@aclnnInplaceZero": 120,
+        "AscendCL@aclnnLtScalar": 1,
+        "AscendCL@aclnnMatmul": 281,
+        "AscendCL@aclnnMoeGatingTopK": 40,
+        "AscendCL@aclnnMoeGatingTopKGetWorkspaceSize": 40,
+        "AscendCL@aclnnMoeInitRoutingV3": 40,
+        "AscendCL@aclnnMoeTokenUnpermuteGetWorkspaceSize": 40,
+        "AscendCL@aclnnMul": 91,
+        "AscendCL@aclnnMuls": 1,
+        "AscendCL@aclnnNeScalar": 40,
+        "AscendCL@aclnnScatterPaKvCache": 10,
+        "AscendCL@aclnnScatterPaKvCacheGetWorkspaceSize": 10,
+        "AscendCL@aclnnSigmoid": 50,
+        "AscendCL@aclnnSub": 100,
+        "AscendCL@aclnnSubs": 11,
+        "AscendCL@aclnnSwiGlu": 80,
+        "AscendCL@aclnnSwiGluGetWorkspaceSize": 80,
+        "AscendCL@aclrtCreateEventExWithFlag": 345,
+        "AscendCL@aclrtCtxGetSysParamOpt": 381,
+        "AscendCL@aclrtDestroyEvent": 276,
+        "AscendCL@aclrtGetCurrentContext": 92,
+        "AscendCL@aclrtGetDeviceCount": 2,
+        "AscendCL@aclrtGetHardwareSyncAddr": 320,
+        "AscendCL@aclrtGetResInCurrentThread": 1452,
+        "AscendCL@aclrtGetStreamAttribute": 2957,
+        "AscendCL@aclrtLaunchKernelWithHostArgs": 2924,
+        "AscendCL@aclrtMemcpyAsync": 363,
+        "AscendCL@aclrtMemcpyAsyncWithCondition": 11,
+        "AscendCL@aclrtPointerGetAttributes": 1687,
+        "AscendCL@aclrtQueryEventStatus": 26,
+        "AscendCL@aclrtRecordEvent": 462,
+        "AscendCL@aclrtStreamGetId": 5102,
+        "AscendCL@aclrtStreamWaitEvent": 346,
+        "AscendCL@aclrtSynchronizeDeviceWithTimeout": 1,
+        "AscendCL@aclrtSynchronizeEvent": 11,
+        "AscendCL@aclrtSynchronizeStreamWithTimeout": 31,
+        "AscendCL@aclrtValueWrite": 100,
+        "AscendCL@hcom_allGather_": 11,
+        "AscendCL@hcom_allReduce_": 81,
+        "Event::record": 183,
+        "Event::synchronize": 11,
+        "Event::wait": 162
+      },
+      "apis": {
+        "AscendCL@aclmdlRIExecuteAsync": {
+          "count": 10,
+          "inclusive_sum_us": 3154.82,
+          "mean_us": 315.482,
+          "p50_us": 23.415,
+          "p95_us": 1632.6329999999969,
+          "max_us": 2945.04,
+          "count_per_observed_graph_replay": 1.0,
+          "inclusive_us_per_observed_graph_replay": 315.482
+        },
+        "AscendCL@aclrtQueryStream": {
+          "count": 0,
+          "inclusive_sum_us": 0.0,
+          "mean_us": null,
+          "p50_us": null,
+          "p95_us": null,
+          "max_us": null,
+          "count_per_observed_graph_replay": 0.0,
+          "inclusive_us_per_observed_graph_replay": 0.0
+        },
+        "AscendCL@aclrtQueryStreamStatus": {
+          "count": 0,
+          "inclusive_sum_us": 0.0,
+          "mean_us": null,
+          "p50_us": null,
+          "p95_us": null,
+          "max_us": null,
+          "count_per_observed_graph_replay": 0.0,
+          "inclusive_us_per_observed_graph_replay": 0.0
+        },
+        "AscendCL@aclrtRecordEvent": {
+          "count": 462,
+          "inclusive_sum_us": 4962.09,
+          "mean_us": 10.740454545454545,
+          "p50_us": 10.155000000000001,
+          "p95_us": 15.83,
+          "max_us": 46.07,
+          "count_per_observed_graph_replay": 46.2,
+          "inclusive_us_per_observed_graph_replay": 496.209
+        },
+        "AscendCL@aclrtStreamWaitEvent": {
+          "count": 346,
+          "inclusive_sum_us": 1993.28,
+          "mean_us": 5.7609248554913295,
+          "p50_us": 6.785,
+          "p95_us": 12.25,
+          "max_us": 29.75,
+          "count_per_observed_graph_replay": 34.6,
+          "inclusive_us_per_observed_graph_replay": 199.328
+        },
+        "Event::record": {
+          "count": 183,
+          "inclusive_sum_us": 16647.38,
+          "mean_us": 90.96928961748634,
+          "p50_us": 86.26,
+          "p95_us": 130.48700000000002,
+          "max_us": 202.53,
+          "count_per_observed_graph_replay": 18.3,
+          "inclusive_us_per_observed_graph_replay": 1664.738
+        },
+        "Event::synchronize": {
+          "count": 11,
+          "inclusive_sum_us": 41400.86,
+          "mean_us": 3763.7145454545457,
+          "p50_us": 684.23,
+          "p95_us": 15571.74,
+          "max_us": 16369.13,
+          "count_per_observed_graph_replay": 1.1,
+          "inclusive_us_per_observed_graph_replay": 4140.086
+        },
+        "Event::wait": {
+          "count": 162,
+          "inclusive_sum_us": 11264.17,
+          "mean_us": 69.53191358024691,
+          "p50_us": 67.97,
+          "p95_us": 78.8955,
+          "max_us": 119.72,
+          "count_per_observed_graph_replay": 16.2,
+          "inclusive_us_per_observed_graph_replay": 1126.417
+        }
+      },
+      "all_runtime_api_stats": {
+        "AscendCL@BroadcastTo_Tiling": {
+          "count": 30,
+          "inclusive_sum_us": 662.46,
+          "mean_us": 22.082,
+          "p50_us": 19.585,
+          "p95_us": 32.52799999999999,
+          "max_us": 44.25,
+          "count_per_observed_graph_replay": 3.0,
+          "inclusive_us_per_observed_graph_replay": 66.24600000000001
+        },
+        "AscendCL@ChunkFwdO_Tiling": {
+          "count": 60,
+          "inclusive_sum_us": 453.72,
+          "mean_us": 7.562,
+          "p50_us": 7.135000000000001,
+          "p95_us": 15.1455,
+          "max_us": 15.85,
+          "count_per_observed_graph_replay": 6.0,
+          "inclusive_us_per_observed_graph_replay": 45.372
+        },
+        "AscendCL@ChunkGatedDeltaRuleFwdH_Tiling": {
+          "count": 60,
+          "inclusive_sum_us": 607.88,
+          "mean_us": 10.131333333333334,
+          "p50_us": 8.75,
+          "p95_us": 21.586999999999996,
+          "max_us": 25.06,
+          "count_per_observed_graph_replay": 6.0,
+          "inclusive_us_per_observed_graph_replay": 60.788
+        },
+        "AscendCL@IndexCheck_Tiling": {
+          "count": 60,
+          "inclusive_sum_us": 424.83,
+          "mean_us": 7.0805,
+          "p50_us": 6.1450000000000005,
+          "p95_us": 15.390999999999996,
+          "max_us": 16.91,
+          "count_per_observed_graph_replay": 6.0,
+          "inclusive_us_per_observed_graph_replay": 42.483
+        },
+        "AscendCL@IndexPutV2_Tiling": {
+          "count": 30,
+          "inclusive_sum_us": 368.69,
+          "mean_us": 12.289666666666667,
+          "p50_us": 11.645,
+          "p95_us": 16.92899999999999,
+          "max_us": 24.89,
+          "count_per_observed_graph_replay": 3.0,
+          "inclusive_us_per_observed_graph_replay": 36.869
+        },
+        "AscendCL@ScatterPaKvCache_Tiling": {
+          "count": 20,
+          "inclusive_sum_us": 485.79,
+          "mean_us": 24.2895,
+          "p50_us": 20.195,
+          "p95_us": 60.5845,
+          "max_us": 62.57,
+          "count_per_observed_graph_replay": 2.0,
+          "inclusive_us_per_observed_graph_replay": 48.579
+        },
+        "AscendCL@Slice_Tiling": {
+          "count": 30,
+          "inclusive_sum_us": 500.68,
+          "mean_us": 16.689333333333334,
+          "p50_us": 14.745,
+          "p95_us": 23.47849999999999,
+          "max_us": 33.33,
+          "count_per_observed_graph_replay": 3.0,
+          "inclusive_us_per_observed_graph_replay": 50.068
+        },
+        "AscendCL@Transpose_Tiling": {
+          "count": 60,
+          "inclusive_sum_us": 346.08,
+          "mean_us": 5.768,
+          "p50_us": 4.76,
+          "p95_us": 14.411,
+          "max_us": 16.81,
+          "count_per_observed_graph_replay": 6.0,
+          "inclusive_us_per_observed_graph_replay": 34.608
+        },
+        "AscendCL@aclmdlRICaptureGetInfo": {
+          "count": 5664,
+          "inclusive_sum_us": 3185.36,
+          "mean_us": 0.5623870056497176,
+          "p50_us": 0.51,
+          "p95_us": 0.81,
+          "max_us": 3.39,
+          "count_per_observed_graph_replay": 566.4,
+          "inclusive_us_per_observed_graph_replay": 318.536
+        },
+        "AscendCL@aclmdlRICaptureTaskUpdateBegin": {
+          "count": 100,
+          "inclusive_sum_us": 238.72,
+          "mean_us": 2.3872,
+          "p50_us": 2.13,
+          "p95_us": 4.409499999999999,
+          "max_us": 6.24,
+          "count_per_observed_graph_replay": 10.0,
+          "inclusive_us_per_observed_graph_replay": 23.872
+        },
+        "AscendCL@aclmdlRICaptureTaskUpdateEnd": {
+          "count": 100,
+          "inclusive_sum_us": 254.5,
+          "mean_us": 2.545,
+          "p50_us": 2.4,
+          "p95_us": 4.103999999999999,
+          "max_us": 4.61,
+          "count_per_observed_graph_replay": 10.0,
+          "inclusive_us_per_observed_graph_replay": 25.45
+        },
+        "AscendCL@aclmdlRIExecuteAsync": {
+          "count": 10,
+          "inclusive_sum_us": 3154.82,
+          "mean_us": 315.482,
+          "p50_us": 23.415,
+          "p95_us": 1632.6329999999969,
+          "max_us": 2945.04,
+          "count_per_observed_graph_replay": 1.0,
+          "inclusive_us_per_observed_graph_replay": 315.482
+        },
+        "AscendCL@aclnnAbs": {
+          "count": 40,
+          "inclusive_sum_us": 516.74,
+          "mean_us": 12.9185,
+          "p50_us": 12.49,
+          "p95_us": 15.642499999999988,
+          "max_us": 19.72,
+          "count_per_observed_graph_replay": 4.0,
+          "inclusive_us_per_observed_graph_replay": 51.674
+        },
+        "AscendCL@aclnnAdd": {
+          "count": 62,
+          "inclusive_sum_us": 780.61,
+          "mean_us": 12.590483870967741,
+          "p50_us": 11.675,
+          "p95_us": 19.607999999999997,
+          "max_us": 22.15,
+          "count_per_observed_graph_replay": 6.2,
+          "inclusive_us_per_observed_graph_replay": 78.061
+        },
+        "AscendCL@aclnnAddRmsNormBias": {
+          "count": 80,
+          "inclusive_sum_us": 2118.41,
+          "mean_us": 26.480124999999997,
+          "p50_us": 25.555,
+          "p95_us": 30.6485,
+          "max_us": 54.78,
+          "count_per_observed_graph_replay": 8.0,
+          "inclusive_us_per_observed_graph_replay": 211.84099999999998
+        },
+        "AscendCL@aclnnAddRmsNormBiasGetWorkspaceSize": {
+          "count": 80,
+          "inclusive_sum_us": 1691.18,
+          "mean_us": 21.13975,
+          "p50_us": 20.560000000000002,
+          "p95_us": 23.293,
+          "max_us": 44.87,
+          "count_per_observed_graph_replay": 8.0,
+          "inclusive_us_per_observed_graph_replay": 169.118
+        },
+        "AscendCL@aclnnAdds": {
+          "count": 100,
+          "inclusive_sum_us": 1821.45,
+          "mean_us": 18.2145,
+          "p50_us": 19.705,
+          "p95_us": 21.658499999999997,
+          "max_us": 31.62,
+          "count_per_observed_graph_replay": 10.0,
+          "inclusive_us_per_observed_graph_replay": 182.145
+        },
+        "AscendCL@aclnnArgMax": {
+          "count": 11,
+          "inclusive_sum_us": 242.95,
+          "mean_us": 22.086363636363636,
+          "p50_us": 20.95,
+          "p95_us": 28.34,
+          "max_us": 29.02,
+          "count_per_observed_graph_replay": 1.1,
+          "inclusive_us_per_observed_graph_replay": 24.294999999999998
+        },
+        "AscendCL@aclnnBitwiseAndTensor": {
+          "count": 1,
+          "inclusive_sum_us": 12.65,
+          "mean_us": 12.65,
+          "p50_us": 12.65,
+          "p95_us": 12.65,
+          "max_us": 12.65,
+          "count_per_observed_graph_replay": 0.1,
+          "inclusive_us_per_observed_graph_replay": 1.2650000000000001
+        },
+        "AscendCL@aclnnBitwiseNot": {
+          "count": 1,
+          "inclusive_sum_us": 13.2,
+          "mean_us": 13.2,
+          "p50_us": 13.2,
+          "p95_us": 13.2,
+          "max_us": 13.2,
+          "count_per_observed_graph_replay": 0.1,
+          "inclusive_us_per_observed_graph_replay": 1.3199999999999998
+        },
+        "AscendCL@aclnnCat": {
+          "count": 30,
+          "inclusive_sum_us": 348.07,
+          "mean_us": 11.602333333333332,
+          "p50_us": 11.235,
+          "p95_us": 15.489499999999996,
+          "max_us": 17.74,
+          "count_per_observed_graph_replay": 3.0,
+          "inclusive_us_per_observed_graph_replay": 34.807
+        },
+        "AscendCL@aclnnCausalConv1d": {
+          "count": 30,
+          "inclusive_sum_us": 3885.08,
+          "mean_us": 129.50266666666667,
+          "p50_us": 124.60499999999999,
+          "p95_us": 161.07499999999993,
+          "max_us": 177.63,
+          "count_per_observed_graph_replay": 3.0,
+          "inclusive_us_per_observed_graph_replay": 388.508
+        },
+        "AscendCL@aclnnCausalConv1dGetWorkspaceSize": {
+          "count": 30,
+          "inclusive_sum_us": 3266.01,
+          "mean_us": 108.86699999999999,
+          "p50_us": 102.725,
+          "p95_us": 129.0785,
+          "max_us": 149.58,
+          "count_per_observed_graph_replay": 3.0,
+          "inclusive_us_per_observed_graph_replay": 326.601
+        },
+        "AscendCL@aclnnChunkFwdO": {
+          "count": 30,
+          "inclusive_sum_us": 1548.27,
+          "mean_us": 51.609,
+          "p50_us": 48.025000000000006,
+          "p95_us": 72.74599999999997,
+          "max_us": 87.52,
+          "count_per_observed_graph_replay": 3.0,
+          "inclusive_us_per_observed_graph_replay": 154.827
+        },
+        "AscendCL@aclnnChunkFwdOGetWorkspaceSize": {
+          "count": 30,
+          "inclusive_sum_us": 1565.41,
+          "mean_us": 52.18033333333334,
+          "p50_us": 51.655,
+          "p95_us": 55.12349999999999,
+          "max_us": 64.45,
+          "count_per_observed_graph_replay": 3.0,
+          "inclusive_us_per_observed_graph_replay": 156.541
+        },
+        "AscendCL@aclnnChunkGatedDeltaRuleFwdH": {
+          "count": 30,
+          "inclusive_sum_us": 1876.35,
+          "mean_us": 62.544999999999995,
+          "p50_us": 60.025000000000006,
+          "p95_us": 70.30449999999999,
+          "max_us": 104.02,
+          "count_per_observed_graph_replay": 3.0,
+          "inclusive_us_per_observed_graph_replay": 187.635
+        },
+        "AscendCL@aclnnChunkGatedDeltaRuleFwdHGetWorkspaceSize": {
+          "count": 30,
+          "inclusive_sum_us": 2010.59,
+          "mean_us": 67.01966666666667,
+          "p50_us": 65.905,
+          "p95_us": 71.70750000000001,
+          "max_us": 97.16,
+          "count_per_observed_graph_replay": 3.0,
+          "inclusive_us_per_observed_graph_replay": 201.059
+        },
+        "AscendCL@aclnnContiguous": {
+          "count": 30,
+          "inclusive_sum_us": 2821.59,
+          "mean_us": 94.05300000000001,
+          "p50_us": 91.035,
+          "p95_us": 113.79099999999998,
+          "max_us": 122.99,
+          "count_per_observed_graph_replay": 3.0,
+          "inclusive_us_per_observed_graph_replay": 282.159
+        },
+        "AscendCL@aclnnContiguousGetWorkspaceSize": {
+          "count": 30,
+          "inclusive_sum_us": 2237.65,
+          "mean_us": 74.58833333333334,
+          "p50_us": 69.61500000000001,
+          "p95_us": 92.716,
+          "max_us": 98.67,
+          "count_per_observed_graph_replay": 3.0,
+          "inclusive_us_per_observed_graph_replay": 223.76500000000001
+        },
+        "AscendCL@aclnnEmbedding": {
+          "count": 1,
+          "inclusive_sum_us": 15.01,
+          "mean_us": 15.01,
+          "p50_us": 15.01,
+          "p95_us": 15.01,
+          "max_us": 15.01,
+          "count_per_observed_graph_replay": 0.1,
+          "inclusive_us_per_observed_graph_replay": 1.501
+        },
+        "AscendCL@aclnnGeScalar": {
+          "count": 1,
+          "inclusive_sum_us": 19.37,
+          "mean_us": 19.37,
+          "p50_us": 19.37,
+          "p95_us": 19.37,
+          "max_us": 19.37,
+          "count_per_observed_graph_replay": 0.1,
+          "inclusive_us_per_observed_graph_replay": 1.937
+        },
+        "AscendCL@aclnnGemmaRmsNorm": {
+          "count": 1,
+          "inclusive_sum_us": 44.87,
+          "mean_us": 44.87,
+          "p50_us": 44.87,
+          "p95_us": 44.87,
+          "max_us": 44.87,
+          "count_per_observed_graph_replay": 0.1,
+          "inclusive_us_per_observed_graph_replay": 4.487
+        },
+        "AscendCL@aclnnGemmaRmsNormGetWorkspaceSize": {
+          "count": 1,
+          "inclusive_sum_us": 48.31,
+          "mean_us": 48.31,
+          "p50_us": 48.31,
+          "p95_us": 48.31,
+          "max_us": 48.31,
+          "count_per_observed_graph_replay": 0.1,
+          "inclusive_us_per_observed_graph_replay": 4.831
+        },
+        "AscendCL@aclnnGroupedMatmulV5": {
+          "count": 80,
+          "inclusive_sum_us": 1369.96,
+          "mean_us": 17.1245,
+          "p50_us": 16.645,
+          "p95_us": 20.467999999999996,
+          "max_us": 29.7,
+          "count_per_observed_graph_replay": 8.0,
+          "inclusive_us_per_observed_graph_replay": 136.996
+        },
+        "AscendCL@aclnnGtScalar": {
+          "count": 3,
+          "inclusive_sum_us": 106.57,
+          "mean_us": 35.52333333333333,
+          "p50_us": 26.47,
+          "p95_us": 52.3,
+          "max_us": 55.17,
+          "count_per_observed_graph_replay": 0.3,
+          "inclusive_us_per_observed_graph_replay": 10.657
+        },
+        "AscendCL@aclnnIndex": {
+          "count": 102,
+          "inclusive_sum_us": 2429.97,
+          "mean_us": 23.823235294117644,
+          "p50_us": 20.805,
+          "p95_us": 36.842999999999996,
+          "max_us": 63.11,
+          "count_per_observed_graph_replay": 10.2,
+          "inclusive_us_per_observed_graph_replay": 242.99699999999999
+        },
+        "AscendCL@aclnnIndexPutImpl": {
+          "count": 30,
+          "inclusive_sum_us": 3796.52,
+          "mean_us": 126.55066666666667,
+          "p50_us": 123.855,
+          "p95_us": 141.641,
+          "max_us": 202.49,
+          "count_per_observed_graph_replay": 3.0,
+          "inclusive_us_per_observed_graph_replay": 379.652
+        },
+        "AscendCL@aclnnIndexPutImplGetWorkspaceSize": {
+          "count": 30,
+          "inclusive_sum_us": 2761.31,
+          "mean_us": 92.04366666666667,
+          "p50_us": 88.675,
+          "p95_us": 105.24499999999999,
+          "max_us": 142.65,
+          "count_per_observed_graph_replay": 3.0,
+          "inclusive_us_per_observed_graph_replay": 276.131
+        },
+        "AscendCL@aclnnInnerFusedInferAttentionScore": {
+          "count": 110,
+          "inclusive_sum_us": 5126.04,
+          "mean_us": 46.60036363636364,
+          "p50_us": 40.724999999999994,
+          "p95_us": 86.3015,
+          "max_us": 110.54,
+          "count_per_observed_graph_replay": 11.0,
+          "inclusive_us_per_observed_graph_replay": 512.604
+        },
+        "AscendCL@aclnnInnerFusedInferAttentionScoreGetWorkspaceSize": {
+          "count": 110,
+          "inclusive_sum_us": 2717.38,
+          "mean_us": 24.703454545454548,
+          "p50_us": 21.4,
+          "p95_us": 48.8405,
+          "max_us": 55.13,
+          "count_per_observed_graph_replay": 11.0,
+          "inclusive_us_per_observed_graph_replay": 271.738
+        },
+        "AscendCL@aclnnInnerMoeTokenUnpermute": {
+          "count": 40,
+          "inclusive_sum_us": 822.08,
+          "mean_us": 20.552,
+          "p50_us": 19.63,
+          "p95_us": 24.201999999999988,
+          "max_us": 42.52,
+          "count_per_observed_graph_replay": 4.0,
+          "inclusive_us_per_observed_graph_replay": 82.208
+        },
+        "AscendCL@aclnnInnerMoeTokenUnpermuteGetWorkspaceSize": {
+          "count": 40,
+          "inclusive_sum_us": 578.03,
+          "mean_us": 14.45075,
+          "p50_us": 14.02,
+          "p95_us": 15.5125,
+          "max_us": 26.83,
+          "count_per_observed_graph_replay": 4.0,
+          "inclusive_us_per_observed_graph_replay": 57.803
+        },
+        "AscendCL@aclnnInplaceCopy": {
+          "count": 1039,
+          "inclusive_sum_us": 14497.01,
+          "mean_us": 13.952848893166507,
+          "p50_us": 12.78,
+          "p95_us": 22.50199999999999,
+          "max_us": 55.24,
+          "count_per_observed_graph_replay": 103.9,
+          "inclusive_us_per_observed_graph_replay": 1449.701
+        },
+        "AscendCL@aclnnInplaceCopyGetWorkspaceSize": {
+          "count": 175,
+          "inclusive_sum_us": 3582.25,
+          "mean_us": 20.47,
+          "p50_us": 20.38,
+          "p95_us": 26.378999999999973,
+          "max_us": 40.55,
+          "count_per_observed_graph_replay": 17.5,
+          "inclusive_us_per_observed_graph_replay": 358.225
+        },
+        "AscendCL@aclnnInplaceFillScalar": {
+          "count": 209,
+          "inclusive_sum_us": 1577.65,
+          "mean_us": 7.548564593301436,
+          "p50_us": 2.68,
+          "p95_us": 19.208,
+          "max_us": 61.55,
+          "count_per_observed_graph_replay": 20.9,
+          "inclusive_us_per_observed_graph_replay": 157.76500000000001
+        },
+        "AscendCL@aclnnInplaceFillTensor": {
+          "count": 30,
+          "inclusive_sum_us": 73.26,
+          "mean_us": 2.442,
+          "p50_us": 2.175,
+          "p95_us": 2.881999999999999,
+          "max_us": 8.74,
+          "count_per_observed_graph_replay": 3.0,
+          "inclusive_us_per_observed_graph_replay": 7.3260000000000005
+        },
+        "AscendCL@aclnnInplaceMaskedFillScalar": {
+          "count": 1,
+          "inclusive_sum_us": 26.57,
+          "mean_us": 26.57,
+          "p50_us": 26.57,
+          "p95_us": 26.57,
+          "max_us": 26.57,
+          "count_per_observed_graph_replay": 0.1,
+          "inclusive_us_per_observed_graph_replay": 2.657
+        },
+        "AscendCL@aclnnInplaceZero": {
+          "count": 120,
+          "inclusive_sum_us": 1436.46,
+          "mean_us": 11.9705,
+          "p50_us": 11.115,
+          "p95_us": 17.2185,
+          "max_us": 22.04,
+          "count_per_observed_graph_replay": 12.0,
+          "inclusive_us_per_observed_graph_replay": 143.64600000000002
+        },
+        "AscendCL@aclnnLtScalar": {
+          "count": 1,
+          "inclusive_sum_us": 21.64,
+          "mean_us": 21.64,
+          "p50_us": 21.64,
+          "p95_us": 21.64,
+          "max_us": 21.64,
+          "count_per_observed_graph_replay": 0.1,
+          "inclusive_us_per_observed_graph_replay": 2.164
+        },
+        "AscendCL@aclnnMatmul": {
+          "count": 281,
+          "inclusive_sum_us": 3815.66,
+          "mean_us": 13.578861209964412,
+          "p50_us": 13.14,
+          "p95_us": 18.28,
+          "max_us": 30.96,
+          "count_per_observed_graph_replay": 28.1,
+          "inclusive_us_per_observed_graph_replay": 381.566
+        },
+        "AscendCL@aclnnMoeGatingTopK": {
+          "count": 40,
+          "inclusive_sum_us": 761.14,
+          "mean_us": 19.0285,
+          "p50_us": 18.28,
+          "p95_us": 23.827499999999993,
+          "max_us": 27.25,
+          "count_per_observed_graph_replay": 4.0,
+          "inclusive_us_per_observed_graph_replay": 76.114
+        },
+        "AscendCL@aclnnMoeGatingTopKGetWorkspaceSize": {
+          "count": 40,
+          "inclusive_sum_us": 868.09,
+          "mean_us": 21.70225,
+          "p50_us": 21.23,
+          "p95_us": 22.442,
+          "max_us": 43.01,
+          "count_per_observed_graph_replay": 4.0,
+          "inclusive_us_per_observed_graph_replay": 86.809
+        },
+        "AscendCL@aclnnMoeInitRoutingV3": {
+          "count": 40,
+          "inclusive_sum_us": 744.89,
+          "mean_us": 18.62225,
+          "p50_us": 17.939999999999998,
+          "p95_us": 23.816499999999998,
+          "max_us": 27.49,
+          "count_per_observed_graph_replay": 4.0,
+          "inclusive_us_per_observed_graph_replay": 74.489
+        },
+        "AscendCL@aclnnMoeTokenUnpermuteGetWorkspaceSize": {
+          "count": 40,
+          "inclusive_sum_us": 1013.18,
+          "mean_us": 25.3295,
+          "p50_us": 24.61,
+          "p95_us": 28.420999999999996,
+          "max_us": 38.07,
+          "count_per_observed_graph_replay": 4.0,
+          "inclusive_us_per_observed_graph_replay": 101.318
+        },
+        "AscendCL@aclnnMul": {
+          "count": 91,
+          "inclusive_sum_us": 1330.54,
+          "mean_us": 14.62131868131868,
+          "p50_us": 14.27,
+          "p95_us": 19.91,
+          "max_us": 38.34,
+          "count_per_observed_graph_replay": 9.1,
+          "inclusive_us_per_observed_graph_replay": 133.054
+        },
+        "AscendCL@aclnnMuls": {
+          "count": 1,
+          "inclusive_sum_us": 18.72,
+          "mean_us": 18.72,
+          "p50_us": 18.72,
+          "p95_us": 18.72,
+          "max_us": 18.72,
+          "count_per_observed_graph_replay": 0.1,
+          "inclusive_us_per_observed_graph_replay": 1.8719999999999999
+        },
+        "AscendCL@aclnnNeScalar": {
+          "count": 40,
+          "inclusive_sum_us": 488.87,
+          "mean_us": 12.22175,
+          "p50_us": 12.215,
+          "p95_us": 13.307499999999997,
+          "max_us": 14.44,
+          "count_per_observed_graph_replay": 4.0,
+          "inclusive_us_per_observed_graph_replay": 48.887
+        },
+        "AscendCL@aclnnScatterPaKvCache": {
+          "count": 10,
+          "inclusive_sum_us": 534.81,
+          "mean_us": 53.480999999999995,
+          "p50_us": 52.215,
+          "p95_us": 60.774499999999996,
+          "max_us": 63.29,
+          "count_per_observed_graph_replay": 1.0,
+          "inclusive_us_per_observed_graph_replay": 53.480999999999995
+        },
+        "AscendCL@aclnnScatterPaKvCacheGetWorkspaceSize": {
+          "count": 10,
+          "inclusive_sum_us": 1020.71,
+          "mean_us": 102.071,
+          "p50_us": 98.41999999999999,
+          "p95_us": 118.96449999999999,
+          "max_us": 122.56,
+          "count_per_observed_graph_replay": 1.0,
+          "inclusive_us_per_observed_graph_replay": 102.071
+        },
+        "AscendCL@aclnnSigmoid": {
+          "count": 50,
+          "inclusive_sum_us": 589.76,
+          "mean_us": 11.7952,
+          "p50_us": 11.54,
+          "p95_us": 13.520999999999999,
+          "max_us": 19.31,
+          "count_per_observed_graph_replay": 5.0,
+          "inclusive_us_per_observed_graph_replay": 58.976
+        },
+        "AscendCL@aclnnSub": {
+          "count": 100,
+          "inclusive_sum_us": 1192.27,
+          "mean_us": 11.922699999999999,
+          "p50_us": 11.469999999999999,
+          "p95_us": 17.1345,
+          "max_us": 29.96,
+          "count_per_observed_graph_replay": 10.0,
+          "inclusive_us_per_observed_graph_replay": 119.227
+        },
+        "AscendCL@aclnnSubs": {
+          "count": 11,
+          "inclusive_sum_us": 171.29,
+          "mean_us": 15.57181818181818,
+          "p50_us": 13.95,
+          "p95_us": 22.795,
+          "max_us": 24.75,
+          "count_per_observed_graph_replay": 1.1,
+          "inclusive_us_per_observed_graph_replay": 17.128999999999998
+        },
+        "AscendCL@aclnnSwiGlu": {
+          "count": 80,
+          "inclusive_sum_us": 1562.06,
+          "mean_us": 19.52575,
+          "p50_us": 19.3,
+          "p95_us": 21.792999999999996,
+          "max_us": 37.21,
+          "count_per_observed_graph_replay": 8.0,
+          "inclusive_us_per_observed_graph_replay": 156.206
+        },
+        "AscendCL@aclnnSwiGluGetWorkspaceSize": {
+          "count": 80,
+          "inclusive_sum_us": 1590.73,
+          "mean_us": 19.884125,
+          "p50_us": 19.34,
+          "p95_us": 20.74649999999999,
+          "max_us": 41.75,
+          "count_per_observed_graph_replay": 8.0,
+          "inclusive_us_per_observed_graph_replay": 159.073
+        },
+        "AscendCL@aclrtCreateEventExWithFlag": {
+          "count": 345,
+          "inclusive_sum_us": 1570.45,
+          "mean_us": 4.552028985507246,
+          "p50_us": 4.76,
+          "p95_us": 8.856000000000002,
+          "max_us": 23.49,
+          "count_per_observed_graph_replay": 34.5,
+          "inclusive_us_per_observed_graph_replay": 157.04500000000002
+        },
+        "AscendCL@aclrtCtxGetSysParamOpt": {
+          "count": 381,
+          "inclusive_sum_us": 703.06,
+          "mean_us": 1.8453018372703411,
+          "p50_us": 1.9,
+          "p95_us": 2.17,
+          "max_us": 28.11,
+          "count_per_observed_graph_replay": 38.1,
+          "inclusive_us_per_observed_graph_replay": 70.306
+        },
+        "AscendCL@aclrtDestroyEvent": {
+          "count": 276,
+          "inclusive_sum_us": 388.78,
+          "mean_us": 1.408623188405797,
+          "p50_us": 1.36,
+          "p95_us": 2.6725000000000003,
+          "max_us": 8.31,
+          "count_per_observed_graph_replay": 27.6,
+          "inclusive_us_per_observed_graph_replay": 38.878
+        },
+        "AscendCL@aclrtGetCurrentContext": {
+          "count": 92,
+          "inclusive_sum_us": 87.41,
+          "mean_us": 0.9501086956521739,
+          "p50_us": 0.91,
+          "p95_us": 1.197,
+          "max_us": 1.49,
+          "count_per_observed_graph_replay": 9.2,
+          "inclusive_us_per_observed_graph_replay": 8.741
+        },
+        "AscendCL@aclrtGetDeviceCount": {
+          "count": 2,
+          "inclusive_sum_us": 5.57,
+          "mean_us": 2.785,
+          "p50_us": 2.785,
+          "p95_us": 3.2125,
+          "max_us": 3.26,
+          "count_per_observed_graph_replay": 0.2,
+          "inclusive_us_per_observed_graph_replay": 0.557
+        },
+        "AscendCL@aclrtGetHardwareSyncAddr": {
+          "count": 320,
+          "inclusive_sum_us": 328.14,
+          "mean_us": 1.0254375,
+          "p50_us": 0.98,
+          "p95_us": 1.3510000000000004,
+          "max_us": 2.36,
+          "count_per_observed_graph_replay": 32.0,
+          "inclusive_us_per_observed_graph_replay": 32.814
+        },
+        "AscendCL@aclrtGetResInCurrentThread": {
+          "count": 1452,
+          "inclusive_sum_us": 1645.8,
+          "mean_us": 1.1334710743801653,
+          "p50_us": 0.5,
+          "p95_us": 2.57,
+          "max_us": 3.65,
+          "count_per_observed_graph_replay": 145.2,
+          "inclusive_us_per_observed_graph_replay": 164.57999999999998
+        },
+        "AscendCL@aclrtGetStreamAttribute": {
+          "count": 2957,
+          "inclusive_sum_us": 2076.99,
+          "mean_us": 0.7023977003719986,
+          "p50_us": 0.68,
+          "p95_us": 0.92,
+          "max_us": 14.22,
+          "count_per_observed_graph_replay": 295.7,
+          "inclusive_us_per_observed_graph_replay": 207.69899999999998
+        },
+        "AscendCL@aclrtLaunchKernelWithHostArgs": {
+          "count": 2924,
+          "inclusive_sum_us": 20034.38,
+          "mean_us": 6.851703146374829,
+          "p50_us": 5.91,
+          "p95_us": 13.4785,
+          "max_us": 48.68,
+          "count_per_observed_graph_replay": 292.4,
+          "inclusive_us_per_observed_graph_replay": 2003.438
+        },
+        "AscendCL@aclrtMemcpyAsync": {
+          "count": 363,
+          "inclusive_sum_us": 13471.11,
+          "mean_us": 37.11049586776859,
+          "p50_us": 7.5,
+          "p95_us": 26.334999999999987,
+          "max_us": 9917.39,
+          "count_per_observed_graph_replay": 36.3,
+          "inclusive_us_per_observed_graph_replay": 1347.111
+        },
+        "AscendCL@aclrtMemcpyAsyncWithCondition": {
+          "count": 11,
+          "inclusive_sum_us": 152.89,
+          "mean_us": 13.899090909090908,
+          "p50_us": 14.42,
+          "p95_us": 15.65,
+          "max_us": 15.8,
+          "count_per_observed_graph_replay": 1.1,
+          "inclusive_us_per_observed_graph_replay": 15.288999999999998
+        },
+        "AscendCL@aclrtPointerGetAttributes": {
+          "count": 1687,
+          "inclusive_sum_us": 3411.5,
+          "mean_us": 2.0222288085358624,
+          "p50_us": 0.91,
+          "p95_us": 6.106999999999998,
+          "max_us": 7.89,
+          "count_per_observed_graph_replay": 168.7,
+          "inclusive_us_per_observed_graph_replay": 341.15
+        },
+        "AscendCL@aclrtQueryEventStatus": {
+          "count": 26,
+          "inclusive_sum_us": 26.96,
+          "mean_us": 1.036923076923077,
+          "p50_us": 0.845,
+          "p95_us": 2.0749999999999997,
+          "max_us": 3.81,
+          "count_per_observed_graph_replay": 2.6,
+          "inclusive_us_per_observed_graph_replay": 2.696
+        },
+        "AscendCL@aclrtQueryStream": {
+          "count": 0,
+          "inclusive_sum_us": 0.0,
+          "mean_us": null,
+          "p50_us": null,
+          "p95_us": null,
+          "max_us": null,
+          "count_per_observed_graph_replay": 0.0,
+          "inclusive_us_per_observed_graph_replay": 0.0
+        },
+        "AscendCL@aclrtQueryStreamStatus": {
+          "count": 0,
+          "inclusive_sum_us": 0.0,
+          "mean_us": null,
+          "p50_us": null,
+          "p95_us": null,
+          "max_us": null,
+          "count_per_observed_graph_replay": 0.0,
+          "inclusive_us_per_observed_graph_replay": 0.0
+        },
+        "AscendCL@aclrtRecordEvent": {
+          "count": 462,
+          "inclusive_sum_us": 4962.09,
+          "mean_us": 10.740454545454545,
+          "p50_us": 10.155000000000001,
+          "p95_us": 15.83,
+          "max_us": 46.07,
+          "count_per_observed_graph_replay": 46.2,
+          "inclusive_us_per_observed_graph_replay": 496.209
+        },
+        "AscendCL@aclrtStreamGetId": {
+          "count": 5102,
+          "inclusive_sum_us": 2379.28,
+          "mean_us": 0.46634261074088595,
+          "p50_us": 0.44,
+          "p95_us": 0.55,
+          "max_us": 28.21,
+          "count_per_observed_graph_replay": 510.2,
+          "inclusive_us_per_observed_graph_replay": 237.92800000000003
+        },
+        "AscendCL@aclrtStreamWaitEvent": {
+          "count": 346,
+          "inclusive_sum_us": 1993.28,
+          "mean_us": 5.7609248554913295,
+          "p50_us": 6.785,
+          "p95_us": 12.25,
+          "max_us": 29.75,
+          "count_per_observed_graph_replay": 34.6,
+          "inclusive_us_per_observed_graph_replay": 199.328
+        },
+        "AscendCL@aclrtSynchronizeDeviceWithTimeout": {
+          "count": 1,
+          "inclusive_sum_us": 38.35,
+          "mean_us": 38.35,
+          "p50_us": 38.35,
+          "p95_us": 38.35,
+          "max_us": 38.35,
+          "count_per_observed_graph_replay": 0.1,
+          "inclusive_us_per_observed_graph_replay": 3.835
+        },
+        "AscendCL@aclrtSynchronizeEvent": {
+          "count": 11,
+          "inclusive_sum_us": 40816.85,
+          "mean_us": 3710.622727272727,
+          "p50_us": 628.85,
+          "p95_us": 15515.27,
+          "max_us": 16313.95,
+          "count_per_observed_graph_replay": 1.1,
+          "inclusive_us_per_observed_graph_replay": 4081.685
+        },
+        "AscendCL@aclrtSynchronizeStreamWithTimeout": {
+          "count": 31,
+          "inclusive_sum_us": 59705.67,
+          "mean_us": 1925.9893548387097,
+          "p50_us": 3.61,
+          "p95_us": 16286.884999999998,
+          "max_us": 19049.66,
+          "count_per_observed_graph_replay": 3.1,
+          "inclusive_us_per_observed_graph_replay": 5970.567
+        },
+        "AscendCL@aclrtValueWrite": {
+          "count": 100,
+          "inclusive_sum_us": 634.88,
+          "mean_us": 6.3488,
+          "p50_us": 5.93,
+          "p95_us": 9.43,
+          "max_us": 13.76,
+          "count_per_observed_graph_replay": 10.0,
+          "inclusive_us_per_observed_graph_replay": 63.488
+        },
+        "AscendCL@hcom_allGather_": {
+          "count": 11,
+          "inclusive_sum_us": 4329.88,
+          "mean_us": 393.62545454545455,
+          "p50_us": 385.91,
+          "p95_us": 445.83,
+          "max_us": 454.88,
+          "count_per_observed_graph_replay": 1.1,
+          "inclusive_us_per_observed_graph_replay": 432.988
+        },
+        "AscendCL@hcom_allReduce_": {
+          "count": 81,
+          "inclusive_sum_us": 56569.67,
+          "mean_us": 698.390987654321,
+          "p50_us": 689.0,
+          "p95_us": 760.15,
+          "max_us": 857.0,
+          "count_per_observed_graph_replay": 8.1,
+          "inclusive_us_per_observed_graph_replay": 5656.967
+        },
+        "Event::record": {
+          "count": 183,
+          "inclusive_sum_us": 16647.38,
+          "mean_us": 90.96928961748634,
+          "p50_us": 86.26,
+          "p95_us": 130.48700000000002,
+          "max_us": 202.53,
+          "count_per_observed_graph_replay": 18.3,
+          "inclusive_us_per_observed_graph_replay": 1664.738
+        },
+        "Event::synchronize": {
+          "count": 11,
+          "inclusive_sum_us": 41400.86,
+          "mean_us": 3763.7145454545457,
+          "p50_us": 684.23,
+          "p95_us": 15571.74,
+          "max_us": 16369.13,
+          "count_per_observed_graph_replay": 1.1,
+          "inclusive_us_per_observed_graph_replay": 4140.086
+        },
+        "Event::wait": {
+          "count": 162,
+          "inclusive_sum_us": 11264.17,
+          "mean_us": 69.53191358024691,
+          "p50_us": 67.97,
+          "p95_us": 78.8955,
+          "max_us": 119.72,
+          "count_per_observed_graph_replay": 16.2,
+          "inclusive_us_per_observed_graph_replay": 1126.417
+        }
+      },
+      "scope": "Exported actual calls with inclusive host API duration; neither physical kernel time nor end-to-end performance. Missing query exports cannot prove zero execution.",
+      "worker_binding": {
+        "worker_pid": 1004044,
+        "visible_device_index": 0,
+        "hardware_labels_observed": [
+          "NPU 0"
+        ],
+        "profiler_info_sha256": "189efa606fd40e317b0ef541307fa52742f804a680eef84f4587ee021136f1ac",
+        "passed": true,
+        "scope": "Native profiler rank/PID binds observed hardware label to worker visible ordinal; do not equate visible ordinal with host npu-smi physical ID"
+      }
+    },
+    {
+      "rank": 1,
+      "source": "/root/workspace/muxpd-followup-20261025/performance/mixed-profile-offline-v1/group/profile/mixed-p12000-ingress_dp0_pp0_tp1_dcp0_ep1_rank1_1004045_20261026043128000_ascend_pt/ASCEND_PROFILER_OUTPUT/trace_view.json",
+      "source_sha256": "7e6cf5ac58940dfbf5692fbad7d3213b99b34f46b57442c1e97f8a3f8a7bde53",
+      "hardware_process_labels": {
+        "1028142529": "NPU 1"
+      },
+      "cpu_operation_pids": [
+        "1004045"
+      ],
+      "expected_coordinator_D_steps": 10,
+      "observed_graph_replays": 10,
+      "exact_replay_count_matches": true,
+      "profiler_markers": {
+        "PROFILING_ENABLE": 1,
+        "PROFILING_DISABLE": 1
+      },
+      "graph_capture_api_count": 0,
+      "complete_window_indicators": true,
+      "query_api_names_observed": [],
+      "runtime_api_inventory": {
+        "AscendCL@BroadcastTo_Tiling": 30,
+        "AscendCL@ChunkFwdO_Tiling": 60,
+        "AscendCL@ChunkGatedDeltaRuleFwdH_Tiling": 60,
+        "AscendCL@IndexCheck_Tiling": 60,
+        "AscendCL@IndexPutV2_Tiling": 30,
+        "AscendCL@ScatterPaKvCache_Tiling": 20,
+        "AscendCL@Slice_Tiling": 30,
+        "AscendCL@Transpose_Tiling": 60,
+        "AscendCL@aclmdlRICaptureGetInfo": 5664,
+        "AscendCL@aclmdlRICaptureTaskUpdateBegin": 100,
+        "AscendCL@aclmdlRICaptureTaskUpdateEnd": 100,
+        "AscendCL@aclmdlRIExecuteAsync": 10,
+        "AscendCL@aclnnAbs": 40,
+        "AscendCL@aclnnAdd": 62,
+        "AscendCL@aclnnAddRmsNormBias": 80,
+        "AscendCL@aclnnAddRmsNormBiasGetWorkspaceSize": 80,
+        "AscendCL@aclnnAdds": 100,
+        "AscendCL@aclnnArgMax": 11,
+        "AscendCL@aclnnBitwiseAndTensor": 1,
+        "AscendCL@aclnnBitwiseNot": 1,
+        "AscendCL@aclnnCat": 30,
+        "AscendCL@aclnnCausalConv1d": 30,
+        "AscendCL@aclnnCausalConv1dGetWorkspaceSize": 30,
+        "AscendCL@aclnnChunkFwdO": 30,
+        "AscendCL@aclnnChunkFwdOGetWorkspaceSize": 30,
+        "AscendCL@aclnnChunkGatedDeltaRuleFwdH": 30,
+        "AscendCL@aclnnChunkGatedDeltaRuleFwdHGetWorkspaceSize": 30,
+        "AscendCL@aclnnContiguous": 30,
+        "AscendCL@aclnnContiguousGetWorkspaceSize": 30,
+        "AscendCL@aclnnEmbedding": 1,
+        "AscendCL@aclnnGeScalar": 1,
+        "AscendCL@aclnnGemmaRmsNorm": 1,
+        "AscendCL@aclnnGemmaRmsNormGetWorkspaceSize": 1,
+        "AscendCL@aclnnGroupedMatmulV5": 80,
+        "AscendCL@aclnnGtScalar": 3,
+        "AscendCL@aclnnIndex": 102,
+        "AscendCL@aclnnIndexPutImpl": 30,
+        "AscendCL@aclnnIndexPutImplGetWorkspaceSize": 30,
+        "AscendCL@aclnnInnerFusedInferAttentionScore": 110,
+        "AscendCL@aclnnInnerFusedInferAttentionScoreGetWorkspaceSize": 110,
+        "AscendCL@aclnnInnerMoeTokenUnpermute": 40,
+        "AscendCL@aclnnInnerMoeTokenUnpermuteGetWorkspaceSize": 40,
+        "AscendCL@aclnnInplaceCopy": 1039,
+        "AscendCL@aclnnInplaceCopyGetWorkspaceSize": 175,
+        "AscendCL@aclnnInplaceFillScalar": 209,
+        "AscendCL@aclnnInplaceFillTensor": 30,
+        "AscendCL@aclnnInplaceMaskedFillScalar": 1,
+        "AscendCL@aclnnInplaceZero": 120,
+        "AscendCL@aclnnLtScalar": 1,
+        "AscendCL@aclnnMatmul": 281,
+        "AscendCL@aclnnMoeGatingTopK": 40,
+        "AscendCL@aclnnMoeGatingTopKGetWorkspaceSize": 40,
+        "AscendCL@aclnnMoeInitRoutingV3": 40,
+        "AscendCL@aclnnMoeTokenUnpermuteGetWorkspaceSize": 40,
+        "AscendCL@aclnnMul": 91,
+        "AscendCL@aclnnMuls": 1,
+        "AscendCL@aclnnNeScalar": 40,
+        "AscendCL@aclnnScatterPaKvCache": 10,
+        "AscendCL@aclnnScatterPaKvCacheGetWorkspaceSize": 10,
+        "AscendCL@aclnnSigmoid": 50,
+        "AscendCL@aclnnSub": 100,
+        "AscendCL@aclnnSubs": 11,
+        "AscendCL@aclnnSwiGlu": 80,
+        "AscendCL@aclnnSwiGluGetWorkspaceSize": 80,
+        "AscendCL@aclrtCreateEventExWithFlag": 345,
+        "AscendCL@aclrtCtxGetSysParamOpt": 381,
+        "AscendCL@aclrtDestroyEvent": 276,
+        "AscendCL@aclrtGetCurrentContext": 92,
+        "AscendCL@aclrtGetDeviceCount": 2,
+        "AscendCL@aclrtGetHardwareSyncAddr": 320,
+        "AscendCL@aclrtGetResInCurrentThread": 1452,
+        "AscendCL@aclrtGetStreamAttribute": 2957,
+        "AscendCL@aclrtLaunchKernelWithHostArgs": 2924,
+        "AscendCL@aclrtMemcpyAsync": 363,
+        "AscendCL@aclrtMemcpyAsyncWithCondition": 11,
+        "AscendCL@aclrtPointerGetAttributes": 1687,
+        "AscendCL@aclrtQueryEventStatus": 27,
+        "AscendCL@aclrtRecordEvent": 462,
+        "AscendCL@aclrtStreamGetId": 5102,
+        "AscendCL@aclrtStreamWaitEvent": 346,
+        "AscendCL@aclrtSynchronizeDeviceWithTimeout": 1,
+        "AscendCL@aclrtSynchronizeEvent": 11,
+        "AscendCL@aclrtSynchronizeStreamWithTimeout": 31,
+        "AscendCL@aclrtValueWrite": 100,
+        "AscendCL@hcom_allGather_": 11,
+        "AscendCL@hcom_allReduce_": 81,
+        "Event::record": 183,
+        "Event::synchronize": 11,
+        "Event::wait": 162
+      },
+      "apis": {
+        "AscendCL@aclmdlRIExecuteAsync": {
+          "count": 10,
+          "inclusive_sum_us": 3421.94,
+          "mean_us": 342.194,
+          "p50_us": 25.965,
+          "p95_us": 1763.6369999999968,
+          "max_us": 3181.11,
+          "count_per_observed_graph_replay": 1.0,
+          "inclusive_us_per_observed_graph_replay": 342.194
+        },
+        "AscendCL@aclrtQueryStream": {
+          "count": 0,
+          "inclusive_sum_us": 0.0,
+          "mean_us": null,
+          "p50_us": null,
+          "p95_us": null,
+          "max_us": null,
+          "count_per_observed_graph_replay": 0.0,
+          "inclusive_us_per_observed_graph_replay": 0.0
+        },
+        "AscendCL@aclrtQueryStreamStatus": {
+          "count": 0,
+          "inclusive_sum_us": 0.0,
+          "mean_us": null,
+          "p50_us": null,
+          "p95_us": null,
+          "max_us": null,
+          "count_per_observed_graph_replay": 0.0,
+          "inclusive_us_per_observed_graph_replay": 0.0
+        },
+        "AscendCL@aclrtRecordEvent": {
+          "count": 462,
+          "inclusive_sum_us": 5784.97,
+          "mean_us": 12.521580086580087,
+          "p50_us": 10.715,
+          "p95_us": 21.273499999999995,
+          "max_us": 50.72,
+          "count_per_observed_graph_replay": 46.2,
+          "inclusive_us_per_observed_graph_replay": 578.4970000000001
+        },
+        "AscendCL@aclrtStreamWaitEvent": {
+          "count": 346,
+          "inclusive_sum_us": 2365.56,
+          "mean_us": 6.836878612716763,
+          "p50_us": 7.53,
+          "p95_us": 12.3825,
+          "max_us": 57.07,
+          "count_per_observed_graph_replay": 34.6,
+          "inclusive_us_per_observed_graph_replay": 236.55599999999998
+        },
+        "Event::record": {
+          "count": 183,
+          "inclusive_sum_us": 17727.4,
+          "mean_us": 96.87103825136613,
+          "p50_us": 92.08,
+          "p95_us": 135.086,
+          "max_us": 317.48,
+          "count_per_observed_graph_replay": 18.3,
+          "inclusive_us_per_observed_graph_replay": 1772.7400000000002
+        },
+        "Event::synchronize": {
+          "count": 11,
+          "inclusive_sum_us": 16785.44,
+          "mean_us": 1525.9490909090912,
+          "p50_us": 73.76,
+          "p95_us": 7685.660000000001,
+          "max_us": 12039.12,
+          "count_per_observed_graph_replay": 1.1,
+          "inclusive_us_per_observed_graph_replay": 1678.5439999999999
+        },
+        "Event::wait": {
+          "count": 162,
+          "inclusive_sum_us": 11991.34,
+          "mean_us": 74.02061728395061,
+          "p50_us": 72.975,
+          "p95_us": 84.7765,
+          "max_us": 102.18,
+          "count_per_observed_graph_replay": 16.2,
+          "inclusive_us_per_observed_graph_replay": 1199.134
+        }
+      },
+      "all_runtime_api_stats": {
+        "AscendCL@BroadcastTo_Tiling": {
+          "count": 30,
+          "inclusive_sum_us": 615.59,
+          "mean_us": 20.51966666666667,
+          "p50_us": 18.48,
+          "p95_us": 28.201499999999985,
+          "max_us": 48.39,
+          "count_per_observed_graph_replay": 3.0,
+          "inclusive_us_per_observed_graph_replay": 61.559000000000005
+        },
+        "AscendCL@ChunkFwdO_Tiling": {
+          "count": 60,
+          "inclusive_sum_us": 474.77,
+          "mean_us": 7.912833333333333,
+          "p50_us": 7.435,
+          "p95_us": 16.1615,
+          "max_us": 17.48,
+          "count_per_observed_graph_replay": 6.0,
+          "inclusive_us_per_observed_graph_replay": 47.477
+        },
+        "AscendCL@ChunkGatedDeltaRuleFwdH_Tiling": {
+          "count": 60,
+          "inclusive_sum_us": 613.94,
+          "mean_us": 10.232333333333333,
+          "p50_us": 8.780000000000001,
+          "p95_us": 22.671499999999998,
+          "max_us": 42.6,
+          "count_per_observed_graph_replay": 6.0,
+          "inclusive_us_per_observed_graph_replay": 61.394000000000005
+        },
+        "AscendCL@IndexCheck_Tiling": {
+          "count": 60,
+          "inclusive_sum_us": 431.4,
+          "mean_us": 7.1899999999999995,
+          "p50_us": 6.324999999999999,
+          "p95_us": 16.0335,
+          "max_us": 23.54,
+          "count_per_observed_graph_replay": 6.0,
+          "inclusive_us_per_observed_graph_replay": 43.14
+        },
+        "AscendCL@IndexPutV2_Tiling": {
+          "count": 30,
+          "inclusive_sum_us": 312.58,
+          "mean_us": 10.419333333333332,
+          "p50_us": 9.89,
+          "p95_us": 13.5575,
+          "max_us": 17.8,
+          "count_per_observed_graph_replay": 3.0,
+          "inclusive_us_per_observed_graph_replay": 31.258
+        },
+        "AscendCL@ScatterPaKvCache_Tiling": {
+          "count": 20,
+          "inclusive_sum_us": 593.11,
+          "mean_us": 29.6555,
+          "p50_us": 26.115,
+          "p95_us": 65.8245,
+          "max_us": 67.24,
+          "count_per_observed_graph_replay": 2.0,
+          "inclusive_us_per_observed_graph_replay": 59.311
+        },
+        "AscendCL@Slice_Tiling": {
+          "count": 30,
+          "inclusive_sum_us": 457.74,
+          "mean_us": 15.258000000000001,
+          "p50_us": 14.21,
+          "p95_us": 22.9665,
+          "max_us": 30.77,
+          "count_per_observed_graph_replay": 3.0,
+          "inclusive_us_per_observed_graph_replay": 45.774
+        },
+        "AscendCL@Transpose_Tiling": {
+          "count": 60,
+          "inclusive_sum_us": 326.57,
+          "mean_us": 5.442833333333334,
+          "p50_us": 4.42,
+          "p95_us": 12.176999999999998,
+          "max_us": 30.75,
+          "count_per_observed_graph_replay": 6.0,
+          "inclusive_us_per_observed_graph_replay": 32.657
+        },
+        "AscendCL@aclmdlRICaptureGetInfo": {
+          "count": 5664,
+          "inclusive_sum_us": 3284.36,
+          "mean_us": 0.5798658192090396,
+          "p50_us": 0.53,
+          "p95_us": 0.86,
+          "max_us": 15.71,
+          "count_per_observed_graph_replay": 566.4,
+          "inclusive_us_per_observed_graph_replay": 328.43600000000004
+        },
+        "AscendCL@aclmdlRICaptureTaskUpdateBegin": {
+          "count": 100,
+          "inclusive_sum_us": 260.36,
+          "mean_us": 2.6036,
+          "p50_us": 2.315,
+          "p95_us": 5.0355,
+          "max_us": 7.22,
+          "count_per_observed_graph_replay": 10.0,
+          "inclusive_us_per_observed_graph_replay": 26.036
+        },
+        "AscendCL@aclmdlRICaptureTaskUpdateEnd": {
+          "count": 100,
+          "inclusive_sum_us": 309.03,
+          "mean_us": 3.0902999999999996,
+          "p50_us": 2.93,
+          "p95_us": 4.8715,
+          "max_us": 5.88,
+          "count_per_observed_graph_replay": 10.0,
+          "inclusive_us_per_observed_graph_replay": 30.903
+        },
+        "AscendCL@aclmdlRIExecuteAsync": {
+          "count": 10,
+          "inclusive_sum_us": 3421.94,
+          "mean_us": 342.194,
+          "p50_us": 25.965,
+          "p95_us": 1763.6369999999968,
+          "max_us": 3181.11,
+          "count_per_observed_graph_replay": 1.0,
+          "inclusive_us_per_observed_graph_replay": 342.194
+        },
+        "AscendCL@aclnnAbs": {
+          "count": 40,
+          "inclusive_sum_us": 528.32,
+          "mean_us": 13.208000000000002,
+          "p50_us": 12.89,
+          "p95_us": 16.01049999999999,
+          "max_us": 19.67,
+          "count_per_observed_graph_replay": 4.0,
+          "inclusive_us_per_observed_graph_replay": 52.83200000000001
+        },
+        "AscendCL@aclnnAdd": {
+          "count": 62,
+          "inclusive_sum_us": 769.62,
+          "mean_us": 12.413225806451614,
+          "p50_us": 11.9,
+          "p95_us": 18.76699999999999,
+          "max_us": 24.04,
+          "count_per_observed_graph_replay": 6.2,
+          "inclusive_us_per_observed_graph_replay": 76.962
+        },
+        "AscendCL@aclnnAddRmsNormBias": {
+          "count": 80,
+          "inclusive_sum_us": 2180.73,
+          "mean_us": 27.259125,
+          "p50_us": 26.325000000000003,
+          "p95_us": 31.117999999999995,
+          "max_us": 48.12,
+          "count_per_observed_graph_replay": 8.0,
+          "inclusive_us_per_observed_graph_replay": 218.073
+        },
+        "AscendCL@aclnnAddRmsNormBiasGetWorkspaceSize": {
+          "count": 80,
+          "inclusive_sum_us": 1699.5,
+          "mean_us": 21.24375,
+          "p50_us": 20.825,
+          "p95_us": 22.502,
+          "max_us": 43.98,
+          "count_per_observed_graph_replay": 8.0,
+          "inclusive_us_per_observed_graph_replay": 169.95
+        },
+        "AscendCL@aclnnAdds": {
+          "count": 100,
+          "inclusive_sum_us": 1975.99,
+          "mean_us": 19.759900000000002,
+          "p50_us": 21.835,
+          "p95_us": 24.2175,
+          "max_us": 39.32,
+          "count_per_observed_graph_replay": 10.0,
+          "inclusive_us_per_observed_graph_replay": 197.599
+        },
+        "AscendCL@aclnnArgMax": {
+          "count": 11,
+          "inclusive_sum_us": 246.73,
+          "mean_us": 22.43,
+          "p50_us": 23.45,
+          "p95_us": 26.45,
+          "max_us": 28.09,
+          "count_per_observed_graph_replay": 1.1,
+          "inclusive_us_per_observed_graph_replay": 24.673
+        },
+        "AscendCL@aclnnBitwiseAndTensor": {
+          "count": 1,
+          "inclusive_sum_us": 12.19,
+          "mean_us": 12.19,
+          "p50_us": 12.19,
+          "p95_us": 12.19,
+          "max_us": 12.19,
+          "count_per_observed_graph_replay": 0.1,
+          "inclusive_us_per_observed_graph_replay": 1.2189999999999999
+        },
+        "AscendCL@aclnnBitwiseNot": {
+          "count": 1,
+          "inclusive_sum_us": 11.86,
+          "mean_us": 11.86,
+          "p50_us": 11.86,
+          "p95_us": 11.86,
+          "max_us": 11.86,
+          "count_per_observed_graph_replay": 0.1,
+          "inclusive_us_per_observed_graph_replay": 1.186
+        },
+        "AscendCL@aclnnCat": {
+          "count": 30,
+          "inclusive_sum_us": 343.68,
+          "mean_us": 11.456,
+          "p50_us": 11.155000000000001,
+          "p95_us": 13.941499999999996,
+          "max_us": 15.7,
+          "count_per_observed_graph_replay": 3.0,
+          "inclusive_us_per_observed_graph_replay": 34.368
+        },
+        "AscendCL@aclnnCausalConv1d": {
+          "count": 30,
+          "inclusive_sum_us": 3653.07,
+          "mean_us": 121.769,
+          "p50_us": 117.89500000000001,
+          "p95_us": 141.884,
+          "max_us": 192.07,
+          "count_per_observed_graph_replay": 3.0,
+          "inclusive_us_per_observed_graph_replay": 365.307
+        },
+        "AscendCL@aclnnCausalConv1dGetWorkspaceSize": {
+          "count": 30,
+          "inclusive_sum_us": 3199.82,
+          "mean_us": 106.66066666666667,
+          "p50_us": 97.92,
+          "p95_us": 131.00999999999993,
+          "max_us": 224.61,
+          "count_per_observed_graph_replay": 3.0,
+          "inclusive_us_per_observed_graph_replay": 319.982
+        },
+        "AscendCL@aclnnChunkFwdO": {
+          "count": 30,
+          "inclusive_sum_us": 1401.94,
+          "mean_us": 46.73133333333333,
+          "p50_us": 46.195,
+          "p95_us": 52.266,
+          "max_us": 54.01,
+          "count_per_observed_graph_replay": 3.0,
+          "inclusive_us_per_observed_graph_replay": 140.19400000000002
+        },
+        "AscendCL@aclnnChunkFwdOGetWorkspaceSize": {
+          "count": 30,
+          "inclusive_sum_us": 1553.01,
+          "mean_us": 51.767,
+          "p50_us": 51.144999999999996,
+          "p95_us": 55.226,
+          "max_us": 69.46,
+          "count_per_observed_graph_replay": 3.0,
+          "inclusive_us_per_observed_graph_replay": 155.301
+        },
+        "AscendCL@aclnnChunkGatedDeltaRuleFwdH": {
+          "count": 30,
+          "inclusive_sum_us": 1884.9,
+          "mean_us": 62.830000000000005,
+          "p50_us": 59.260000000000005,
+          "p95_us": 91.37449999999998,
+          "max_us": 95.52,
+          "count_per_observed_graph_replay": 3.0,
+          "inclusive_us_per_observed_graph_replay": 188.49
+        },
+        "AscendCL@aclnnChunkGatedDeltaRuleFwdHGetWorkspaceSize": {
+          "count": 30,
+          "inclusive_sum_us": 1930.86,
+          "mean_us": 64.362,
+          "p50_us": 62.42,
+          "p95_us": 72.31449999999998,
+          "max_us": 110.81,
+          "count_per_observed_graph_replay": 3.0,
+          "inclusive_us_per_observed_graph_replay": 193.08599999999998
+        },
+        "AscendCL@aclnnContiguous": {
+          "count": 30,
+          "inclusive_sum_us": 2632.14,
+          "mean_us": 87.738,
+          "p50_us": 84.36500000000001,
+          "p95_us": 107.64049999999999,
+          "max_us": 135.74,
+          "count_per_observed_graph_replay": 3.0,
+          "inclusive_us_per_observed_graph_replay": 263.214
+        },
+        "AscendCL@aclnnContiguousGetWorkspaceSize": {
+          "count": 30,
+          "inclusive_sum_us": 2181.39,
+          "mean_us": 72.713,
+          "p50_us": 65.33,
+          "p95_us": 94.39599999999994,
+          "max_us": 163.31,
+          "count_per_observed_graph_replay": 3.0,
+          "inclusive_us_per_observed_graph_replay": 218.13899999999998
+        },
+        "AscendCL@aclnnEmbedding": {
+          "count": 1,
+          "inclusive_sum_us": 11.85,
+          "mean_us": 11.85,
+          "p50_us": 11.85,
+          "p95_us": 11.85,
+          "max_us": 11.85,
+          "count_per_observed_graph_replay": 0.1,
+          "inclusive_us_per_observed_graph_replay": 1.185
+        },
+        "AscendCL@aclnnGeScalar": {
+          "count": 1,
+          "inclusive_sum_us": 19.11,
+          "mean_us": 19.11,
+          "p50_us": 19.11,
+          "p95_us": 19.11,
+          "max_us": 19.11,
+          "count_per_observed_graph_replay": 0.1,
+          "inclusive_us_per_observed_graph_replay": 1.911
+        },
+        "AscendCL@aclnnGemmaRmsNorm": {
+          "count": 1,
+          "inclusive_sum_us": 48.45,
+          "mean_us": 48.45,
+          "p50_us": 48.45,
+          "p95_us": 48.45,
+          "max_us": 48.45,
+          "count_per_observed_graph_replay": 0.1,
+          "inclusive_us_per_observed_graph_replay": 4.845000000000001
+        },
+        "AscendCL@aclnnGemmaRmsNormGetWorkspaceSize": {
+          "count": 1,
+          "inclusive_sum_us": 52.56,
+          "mean_us": 52.56,
+          "p50_us": 52.56,
+          "p95_us": 52.56,
+          "max_us": 52.56,
+          "count_per_observed_graph_replay": 0.1,
+          "inclusive_us_per_observed_graph_replay": 5.256
+        },
+        "AscendCL@aclnnGroupedMatmulV5": {
+          "count": 80,
+          "inclusive_sum_us": 1375.96,
+          "mean_us": 17.1995,
+          "p50_us": 16.94,
+          "p95_us": 21.009999999999998,
+          "max_us": 24.47,
+          "count_per_observed_graph_replay": 8.0,
+          "inclusive_us_per_observed_graph_replay": 137.596
+        },
+        "AscendCL@aclnnGtScalar": {
+          "count": 3,
+          "inclusive_sum_us": 92.11,
+          "mean_us": 30.703333333333333,
+          "p50_us": 26.82,
+          "p95_us": 38.132999999999996,
+          "max_us": 39.39,
+          "count_per_observed_graph_replay": 0.3,
+          "inclusive_us_per_observed_graph_replay": 9.211
+        },
+        "AscendCL@aclnnIndex": {
+          "count": 102,
+          "inclusive_sum_us": 2254.7,
+          "mean_us": 22.10490196078431,
+          "p50_us": 19.91,
+          "p95_us": 30.55149999999999,
+          "max_us": 66.86,
+          "count_per_observed_graph_replay": 10.2,
+          "inclusive_us_per_observed_graph_replay": 225.46999999999997
+        },
+        "AscendCL@aclnnIndexPutImpl": {
+          "count": 30,
+          "inclusive_sum_us": 3429.39,
+          "mean_us": 114.313,
+          "p50_us": 110.61,
+          "p95_us": 135.16299999999995,
+          "max_us": 201.72,
+          "count_per_observed_graph_replay": 3.0,
+          "inclusive_us_per_observed_graph_replay": 342.93899999999996
+        },
+        "AscendCL@aclnnIndexPutImplGetWorkspaceSize": {
+          "count": 30,
+          "inclusive_sum_us": 2673.09,
+          "mean_us": 89.10300000000001,
+          "p50_us": 84.55,
+          "p95_us": 107.66549999999995,
+          "max_us": 147.83,
+          "count_per_observed_graph_replay": 3.0,
+          "inclusive_us_per_observed_graph_replay": 267.309
+        },
+        "AscendCL@aclnnInnerFusedInferAttentionScore": {
+          "count": 110,
+          "inclusive_sum_us": 4822.99,
+          "mean_us": 43.845363636363636,
+          "p50_us": 39.665,
+          "p95_us": 74.602,
+          "max_us": 119.33,
+          "count_per_observed_graph_replay": 11.0,
+          "inclusive_us_per_observed_graph_replay": 482.299
+        },
+        "AscendCL@aclnnInnerFusedInferAttentionScoreGetWorkspaceSize": {
+          "count": 110,
+          "inclusive_sum_us": 2506.21,
+          "mean_us": 22.783727272727273,
+          "p50_us": 19.605,
+          "p95_us": 41.4795,
+          "max_us": 66.34,
+          "count_per_observed_graph_replay": 11.0,
+          "inclusive_us_per_observed_graph_replay": 250.621
+        },
+        "AscendCL@aclnnInnerMoeTokenUnpermute": {
+          "count": 40,
+          "inclusive_sum_us": 833.55,
+          "mean_us": 20.838749999999997,
+          "p50_us": 19.9,
+          "p95_us": 27.6675,
+          "max_us": 28.67,
+          "count_per_observed_graph_replay": 4.0,
+          "inclusive_us_per_observed_graph_replay": 83.35499999999999
+        },
+        "AscendCL@aclnnInnerMoeTokenUnpermuteGetWorkspaceSize": {
+          "count": 40,
+          "inclusive_sum_us": 574.91,
+          "mean_us": 14.37275,
+          "p50_us": 13.975000000000001,
+          "p95_us": 14.8615,
+          "max_us": 28.13,
+          "count_per_observed_graph_replay": 4.0,
+          "inclusive_us_per_observed_graph_replay": 57.491
+        },
+        "AscendCL@aclnnInplaceCopy": {
+          "count": 1039,
+          "inclusive_sum_us": 14402.08,
+          "mean_us": 13.86148219441771,
+          "p50_us": 12.64,
+          "p95_us": 22.153999999999996,
+          "max_us": 62.28,
+          "count_per_observed_graph_replay": 103.9,
+          "inclusive_us_per_observed_graph_replay": 1440.208
+        },
+        "AscendCL@aclnnInplaceCopyGetWorkspaceSize": {
+          "count": 175,
+          "inclusive_sum_us": 3516.42,
+          "mean_us": 20.09382857142857,
+          "p50_us": 20.67,
+          "p95_us": 23.346999999999998,
+          "max_us": 56.67,
+          "count_per_observed_graph_replay": 17.5,
+          "inclusive_us_per_observed_graph_replay": 351.642
+        },
+        "AscendCL@aclnnInplaceFillScalar": {
+          "count": 209,
+          "inclusive_sum_us": 1539.02,
+          "mean_us": 7.363732057416268,
+          "p50_us": 2.57,
+          "p95_us": 18.606,
+          "max_us": 97.95,
+          "count_per_observed_graph_replay": 20.9,
+          "inclusive_us_per_observed_graph_replay": 153.902
+        },
+        "AscendCL@aclnnInplaceFillTensor": {
+          "count": 30,
+          "inclusive_sum_us": 63.24,
+          "mean_us": 2.108,
+          "p50_us": 2.0999999999999996,
+          "p95_us": 2.5404999999999993,
+          "max_us": 2.85,
+          "count_per_observed_graph_replay": 3.0,
+          "inclusive_us_per_observed_graph_replay": 6.324
+        },
+        "AscendCL@aclnnInplaceMaskedFillScalar": {
+          "count": 1,
+          "inclusive_sum_us": 21.85,
+          "mean_us": 21.85,
+          "p50_us": 21.85,
+          "p95_us": 21.85,
+          "max_us": 21.85,
+          "count_per_observed_graph_replay": 0.1,
+          "inclusive_us_per_observed_graph_replay": 2.185
+        },
+        "AscendCL@aclnnInplaceZero": {
+          "count": 120,
+          "inclusive_sum_us": 1425.44,
+          "mean_us": 11.878666666666668,
+          "p50_us": 10.8,
+          "p95_us": 16.379499999999993,
+          "max_us": 54.68,
+          "count_per_observed_graph_replay": 12.0,
+          "inclusive_us_per_observed_graph_replay": 142.544
+        },
+        "AscendCL@aclnnLtScalar": {
+          "count": 1,
+          "inclusive_sum_us": 22.77,
+          "mean_us": 22.77,
+          "p50_us": 22.77,
+          "p95_us": 22.77,
+          "max_us": 22.77,
+          "count_per_observed_graph_replay": 0.1,
+          "inclusive_us_per_observed_graph_replay": 2.277
+        },
+        "AscendCL@aclnnMatmul": {
+          "count": 281,
+          "inclusive_sum_us": 3814.28,
+          "mean_us": 13.573950177935943,
+          "p50_us": 13.27,
+          "p95_us": 17.26,
+          "max_us": 50.88,
+          "count_per_observed_graph_replay": 28.1,
+          "inclusive_us_per_observed_graph_replay": 381.428
+        },
+        "AscendCL@aclnnMoeGatingTopK": {
+          "count": 40,
+          "inclusive_sum_us": 743.8,
+          "mean_us": 18.595,
+          "p50_us": 18.365000000000002,
+          "p95_us": 19.993999999999996,
+          "max_us": 28.31,
+          "count_per_observed_graph_replay": 4.0,
+          "inclusive_us_per_observed_graph_replay": 74.38
+        },
+        "AscendCL@aclnnMoeGatingTopKGetWorkspaceSize": {
+          "count": 40,
+          "inclusive_sum_us": 896.12,
+          "mean_us": 22.403,
+          "p50_us": 21.185000000000002,
+          "p95_us": 23.357499999999945,
+          "max_us": 47.47,
+          "count_per_observed_graph_replay": 4.0,
+          "inclusive_us_per_observed_graph_replay": 89.612
+        },
+        "AscendCL@aclnnMoeInitRoutingV3": {
+          "count": 40,
+          "inclusive_sum_us": 751.09,
+          "mean_us": 18.777250000000002,
+          "p50_us": 18.22,
+          "p95_us": 23.305999999999994,
+          "max_us": 27.05,
+          "count_per_observed_graph_replay": 4.0,
+          "inclusive_us_per_observed_graph_replay": 75.10900000000001
+        },
+        "AscendCL@aclnnMoeTokenUnpermuteGetWorkspaceSize": {
+          "count": 40,
+          "inclusive_sum_us": 1032.71,
+          "mean_us": 25.81775,
+          "p50_us": 25.075000000000003,
+          "p95_us": 27.75249999999998,
+          "max_us": 40.75,
+          "count_per_observed_graph_replay": 4.0,
+          "inclusive_us_per_observed_graph_replay": 103.271
+        },
+        "AscendCL@aclnnMul": {
+          "count": 91,
+          "inclusive_sum_us": 1276.32,
+          "mean_us": 14.025494505494505,
+          "p50_us": 14.79,
+          "p95_us": 17.715,
+          "max_us": 23.16,
+          "count_per_observed_graph_replay": 9.1,
+          "inclusive_us_per_observed_graph_replay": 127.63199999999999
+        },
+        "AscendCL@aclnnMuls": {
+          "count": 1,
+          "inclusive_sum_us": 17.06,
+          "mean_us": 17.06,
+          "p50_us": 17.06,
+          "p95_us": 17.06,
+          "max_us": 17.06,
+          "count_per_observed_graph_replay": 0.1,
+          "inclusive_us_per_observed_graph_replay": 1.706
+        },
+        "AscendCL@aclnnNeScalar": {
+          "count": 40,
+          "inclusive_sum_us": 488.37,
+          "mean_us": 12.20925,
+          "p50_us": 12.105,
+          "p95_us": 15.737999999999998,
+          "max_us": 17.42,
+          "count_per_observed_graph_replay": 4.0,
+          "inclusive_us_per_observed_graph_replay": 48.837
+        },
+        "AscendCL@aclnnScatterPaKvCache": {
+          "count": 10,
+          "inclusive_sum_us": 509.53,
+          "mean_us": 50.952999999999996,
+          "p50_us": 49.735,
+          "p95_us": 57.413999999999994,
+          "max_us": 60.15,
+          "count_per_observed_graph_replay": 1.0,
+          "inclusive_us_per_observed_graph_replay": 50.952999999999996
+        },
+        "AscendCL@aclnnScatterPaKvCacheGetWorkspaceSize": {
+          "count": 10,
+          "inclusive_sum_us": 1131.3,
+          "mean_us": 113.13,
+          "p50_us": 109.56,
+          "p95_us": 128.01749999999998,
+          "max_us": 130.2,
+          "count_per_observed_graph_replay": 1.0,
+          "inclusive_us_per_observed_graph_replay": 113.13
+        },
+        "AscendCL@aclnnSigmoid": {
+          "count": 50,
+          "inclusive_sum_us": 573.17,
+          "mean_us": 11.4634,
+          "p50_us": 11.135,
+          "p95_us": 12.402999999999999,
+          "max_us": 18.94,
+          "count_per_observed_graph_replay": 5.0,
+          "inclusive_us_per_observed_graph_replay": 57.31699999999999
+        },
+        "AscendCL@aclnnSub": {
+          "count": 100,
+          "inclusive_sum_us": 1273.45,
+          "mean_us": 12.7345,
+          "p50_us": 11.865,
+          "p95_us": 18.355999999999995,
+          "max_us": 47.67,
+          "count_per_observed_graph_replay": 10.0,
+          "inclusive_us_per_observed_graph_replay": 127.345
+        },
+        "AscendCL@aclnnSubs": {
+          "count": 11,
+          "inclusive_sum_us": 168.45,
+          "mean_us": 15.313636363636363,
+          "p50_us": 13.76,
+          "p95_us": 20.275,
+          "max_us": 22.72,
+          "count_per_observed_graph_replay": 1.1,
+          "inclusive_us_per_observed_graph_replay": 16.845
+        },
+        "AscendCL@aclnnSwiGlu": {
+          "count": 80,
+          "inclusive_sum_us": 1613.7,
+          "mean_us": 20.17125,
+          "p50_us": 20.125,
+          "p95_us": 23.235999999999997,
+          "max_us": 28.41,
+          "count_per_observed_graph_replay": 8.0,
+          "inclusive_us_per_observed_graph_replay": 161.37
+        },
+        "AscendCL@aclnnSwiGluGetWorkspaceSize": {
+          "count": 80,
+          "inclusive_sum_us": 1674.01,
+          "mean_us": 20.925125,
+          "p50_us": 19.92,
+          "p95_us": 22.275499999999965,
+          "max_us": 49.79,
+          "count_per_observed_graph_replay": 8.0,
+          "inclusive_us_per_observed_graph_replay": 167.401
+        },
+        "AscendCL@aclrtCreateEventExWithFlag": {
+          "count": 345,
+          "inclusive_sum_us": 1595.06,
+          "mean_us": 4.62336231884058,
+          "p50_us": 5.43,
+          "p95_us": 6.204000000000001,
+          "max_us": 14.54,
+          "count_per_observed_graph_replay": 34.5,
+          "inclusive_us_per_observed_graph_replay": 159.506
+        },
+        "AscendCL@aclrtCtxGetSysParamOpt": {
+          "count": 381,
+          "inclusive_sum_us": 740.43,
+          "mean_us": 1.9433858267716535,
+          "p50_us": 2.18,
+          "p95_us": 2.4,
+          "max_us": 2.95,
+          "count_per_observed_graph_replay": 38.1,
+          "inclusive_us_per_observed_graph_replay": 74.04299999999999
+        },
+        "AscendCL@aclrtDestroyEvent": {
+          "count": 276,
+          "inclusive_sum_us": 368.52,
+          "mean_us": 1.3352173913043477,
+          "p50_us": 1.39,
+          "p95_us": 2.3600000000000003,
+          "max_us": 5.02,
+          "count_per_observed_graph_replay": 27.6,
+          "inclusive_us_per_observed_graph_replay": 36.852
+        },
+        "AscendCL@aclrtGetCurrentContext": {
+          "count": 92,
+          "inclusive_sum_us": 83.75,
+          "mean_us": 0.9103260869565217,
+          "p50_us": 0.89,
+          "p95_us": 1.0980000000000003,
+          "max_us": 1.96,
+          "count_per_observed_graph_replay": 9.2,
+          "inclusive_us_per_observed_graph_replay": 8.375
+        },
+        "AscendCL@aclrtGetDeviceCount": {
+          "count": 2,
+          "inclusive_sum_us": 7.28,
+          "mean_us": 3.6399999999999997,
+          "p50_us": 3.6399999999999997,
+          "p95_us": 3.667,
+          "max_us": 3.67,
+          "count_per_observed_graph_replay": 0.2,
+          "inclusive_us_per_observed_graph_replay": 0.728
+        },
+        "AscendCL@aclrtGetHardwareSyncAddr": {
+          "count": 320,
+          "inclusive_sum_us": 365.04,
+          "mean_us": 1.1407500000000002,
+          "p50_us": 1.02,
+          "p95_us": 1.3105000000000002,
+          "max_us": 30.7,
+          "count_per_observed_graph_replay": 32.0,
+          "inclusive_us_per_observed_graph_replay": 36.504000000000005
+        },
+        "AscendCL@aclrtGetResInCurrentThread": {
+          "count": 1452,
+          "inclusive_sum_us": 1647.18,
+          "mean_us": 1.1344214876033059,
+          "p50_us": 0.51,
+          "p95_us": 2.44,
+          "max_us": 2.83,
+          "count_per_observed_graph_replay": 145.2,
+          "inclusive_us_per_observed_graph_replay": 164.71800000000002
+        },
+        "AscendCL@aclrtGetStreamAttribute": {
+          "count": 2957,
+          "inclusive_sum_us": 2167.13,
+          "mean_us": 0.7328812986134596,
+          "p50_us": 0.69,
+          "p95_us": 1.02,
+          "max_us": 25.05,
+          "count_per_observed_graph_replay": 295.7,
+          "inclusive_us_per_observed_graph_replay": 216.71300000000002
+        },
+        "AscendCL@aclrtLaunchKernelWithHostArgs": {
+          "count": 2924,
+          "inclusive_sum_us": 20916.87,
+          "mean_us": 7.153512311901505,
+          "p50_us": 6.19,
+          "p95_us": 13.1685,
+          "max_us": 63.04,
+          "count_per_observed_graph_replay": 292.4,
+          "inclusive_us_per_observed_graph_replay": 2091.687
+        },
+        "AscendCL@aclrtMemcpyAsync": {
+          "count": 363,
+          "inclusive_sum_us": 7165.25,
+          "mean_us": 19.738980716253444,
+          "p50_us": 8.02,
+          "p95_us": 22.605999999999987,
+          "max_us": 3652.4,
+          "count_per_observed_graph_replay": 36.3,
+          "inclusive_us_per_observed_graph_replay": 716.525
+        },
+        "AscendCL@aclrtMemcpyAsyncWithCondition": {
+          "count": 11,
+          "inclusive_sum_us": 139.53,
+          "mean_us": 12.684545454545455,
+          "p50_us": 12.71,
+          "p95_us": 14.065000000000001,
+          "max_us": 14.24,
+          "count_per_observed_graph_replay": 1.1,
+          "inclusive_us_per_observed_graph_replay": 13.953
+        },
+        "AscendCL@aclrtPointerGetAttributes": {
+          "count": 1687,
+          "inclusive_sum_us": 3491.55,
+          "mean_us": 2.0696799051570838,
+          "p50_us": 0.91,
+          "p95_us": 6.0,
+          "max_us": 30.69,
+          "count_per_observed_graph_replay": 168.7,
+          "inclusive_us_per_observed_graph_replay": 349.15500000000003
+        },
+        "AscendCL@aclrtQueryEventStatus": {
+          "count": 27,
+          "inclusive_sum_us": 39.4,
+          "mean_us": 1.4592592592592593,
+          "p50_us": 1.08,
+          "p95_us": 4.316999999999998,
+          "max_us": 5.52,
+          "count_per_observed_graph_replay": 2.7,
+          "inclusive_us_per_observed_graph_replay": 3.94
+        },
+        "AscendCL@aclrtQueryStream": {
+          "count": 0,
+          "inclusive_sum_us": 0.0,
+          "mean_us": null,
+          "p50_us": null,
+          "p95_us": null,
+          "max_us": null,
+          "count_per_observed_graph_replay": 0.0,
+          "inclusive_us_per_observed_graph_replay": 0.0
+        },
+        "AscendCL@aclrtQueryStreamStatus": {
+          "count": 0,
+          "inclusive_sum_us": 0.0,
+          "mean_us": null,
+          "p50_us": null,
+          "p95_us": null,
+          "max_us": null,
+          "count_per_observed_graph_replay": 0.0,
+          "inclusive_us_per_observed_graph_replay": 0.0
+        },
+        "AscendCL@aclrtRecordEvent": {
+          "count": 462,
+          "inclusive_sum_us": 5784.97,
+          "mean_us": 12.521580086580087,
+          "p50_us": 10.715,
+          "p95_us": 21.273499999999995,
+          "max_us": 50.72,
+          "count_per_observed_graph_replay": 46.2,
+          "inclusive_us_per_observed_graph_replay": 578.4970000000001
+        },
+        "AscendCL@aclrtStreamGetId": {
+          "count": 5102,
+          "inclusive_sum_us": 2411.86,
+          "mean_us": 0.4727283418267346,
+          "p50_us": 0.46,
+          "p95_us": 0.54,
+          "max_us": 19.89,
+          "count_per_observed_graph_replay": 510.2,
+          "inclusive_us_per_observed_graph_replay": 241.186
+        },
+        "AscendCL@aclrtStreamWaitEvent": {
+          "count": 346,
+          "inclusive_sum_us": 2365.56,
+          "mean_us": 6.836878612716763,
+          "p50_us": 7.53,
+          "p95_us": 12.3825,
+          "max_us": 57.07,
+          "count_per_observed_graph_replay": 34.6,
+          "inclusive_us_per_observed_graph_replay": 236.55599999999998
+        },
+        "AscendCL@aclrtSynchronizeDeviceWithTimeout": {
+          "count": 1,
+          "inclusive_sum_us": 40.73,
+          "mean_us": 40.73,
+          "p50_us": 40.73,
+          "p95_us": 40.73,
+          "max_us": 40.73,
+          "count_per_observed_graph_replay": 0.1,
+          "inclusive_us_per_observed_graph_replay": 4.0729999999999995
+        },
+        "AscendCL@aclrtSynchronizeEvent": {
+          "count": 11,
+          "inclusive_sum_us": 16202.68,
+          "mean_us": 1472.9709090909091,
+          "p50_us": 21.51,
+          "p95_us": 7627.35,
+          "max_us": 11978.37,
+          "count_per_observed_graph_replay": 1.1,
+          "inclusive_us_per_observed_graph_replay": 1620.268
+        },
+        "AscendCL@aclrtSynchronizeStreamWithTimeout": {
+          "count": 31,
+          "inclusive_sum_us": 49609.84,
+          "mean_us": 1600.3174193548389,
+          "p50_us": 4.52,
+          "p95_us": 11534.46,
+          "max_us": 12790.78,
+          "count_per_observed_graph_replay": 3.1,
+          "inclusive_us_per_observed_graph_replay": 4960.9839999999995
+        },
+        "AscendCL@aclrtValueWrite": {
+          "count": 100,
+          "inclusive_sum_us": 702.66,
+          "mean_us": 7.026599999999999,
+          "p50_us": 6.395,
+          "p95_us": 9.351999999999999,
+          "max_us": 35.82,
+          "count_per_observed_graph_replay": 10.0,
+          "inclusive_us_per_observed_graph_replay": 70.26599999999999
+        },
+        "AscendCL@hcom_allGather_": {
+          "count": 11,
+          "inclusive_sum_us": 4244.78,
+          "mean_us": 385.8890909090909,
+          "p50_us": 356.94,
+          "p95_us": 518.415,
+          "max_us": 616.22,
+          "count_per_observed_graph_replay": 1.1,
+          "inclusive_us_per_observed_graph_replay": 424.47799999999995
+        },
+        "AscendCL@hcom_allReduce_": {
+          "count": 81,
+          "inclusive_sum_us": 57824.87,
+          "mean_us": 713.8872839506173,
+          "p50_us": 704.08,
+          "p95_us": 770.07,
+          "max_us": 941.83,
+          "count_per_observed_graph_replay": 8.1,
+          "inclusive_us_per_observed_graph_replay": 5782.487
+        },
+        "Event::record": {
+          "count": 183,
+          "inclusive_sum_us": 17727.4,
+          "mean_us": 96.87103825136613,
+          "p50_us": 92.08,
+          "p95_us": 135.086,
+          "max_us": 317.48,
+          "count_per_observed_graph_replay": 18.3,
+          "inclusive_us_per_observed_graph_replay": 1772.7400000000002
+        },
+        "Event::synchronize": {
+          "count": 11,
+          "inclusive_sum_us": 16785.44,
+          "mean_us": 1525.9490909090912,
+          "p50_us": 73.76,
+          "p95_us": 7685.660000000001,
+          "max_us": 12039.12,
+          "count_per_observed_graph_replay": 1.1,
+          "inclusive_us_per_observed_graph_replay": 1678.5439999999999
+        },
+        "Event::wait": {
+          "count": 162,
+          "inclusive_sum_us": 11991.34,
+          "mean_us": 74.02061728395061,
+          "p50_us": 72.975,
+          "p95_us": 84.7765,
+          "max_us": 102.18,
+          "count_per_observed_graph_replay": 16.2,
+          "inclusive_us_per_observed_graph_replay": 1199.134
+        }
+      },
+      "scope": "Exported actual calls with inclusive host API duration; neither physical kernel time nor end-to-end performance. Missing query exports cannot prove zero execution.",
+      "worker_binding": {
+        "worker_pid": 1004045,
+        "visible_device_index": 1,
+        "hardware_labels_observed": [
+          "NPU 1"
+        ],
+        "profiler_info_sha256": "a8f2aae6c0341ed09b50b54ff14e322d6670823e114f586273cd0b94a585a657",
+        "passed": true,
+        "scope": "Native profiler rank/PID binds observed hardware label to worker visible ordinal; do not equate visible ordinal with host npu-smi physical ID"
+      }
+    },
+    {
+      "rank": 2,
+      "source": "/root/workspace/muxpd-followup-20261025/performance/mixed-profile-offline-v1/group/profile/mixed-p12000-ingress_dp0_pp0_tp2_dcp0_ep2_rank2_1004046_20261026043128000_ascend_pt/ASCEND_PROFILER_OUTPUT/trace_view.json",
+      "source_sha256": "dc8f55ab60f1fd0432dd4a7d0b74cabf11f5e417ea1d110aeb526abc2e950426",
+      "hardware_process_labels": {
+        "1028143554": "NPU 2"
+      },
+      "cpu_operation_pids": [
+        "1004046"
+      ],
+      "expected_coordinator_D_steps": 10,
+      "observed_graph_replays": 10,
+      "exact_replay_count_matches": true,
+      "profiler_markers": {
+        "PROFILING_ENABLE": 1,
+        "PROFILING_DISABLE": 1
+      },
+      "graph_capture_api_count": 0,
+      "complete_window_indicators": true,
+      "query_api_names_observed": [],
+      "runtime_api_inventory": {
+        "AscendCL@BroadcastTo_Tiling": 30,
+        "AscendCL@ChunkFwdO_Tiling": 60,
+        "AscendCL@ChunkGatedDeltaRuleFwdH_Tiling": 60,
+        "AscendCL@IndexCheck_Tiling": 60,
+        "AscendCL@IndexPutV2_Tiling": 30,
+        "AscendCL@ScatterPaKvCache_Tiling": 20,
+        "AscendCL@Slice_Tiling": 30,
+        "AscendCL@Transpose_Tiling": 60,
+        "AscendCL@aclmdlRICaptureGetInfo": 5664,
+        "AscendCL@aclmdlRICaptureTaskUpdateBegin": 100,
+        "AscendCL@aclmdlRICaptureTaskUpdateEnd": 100,
+        "AscendCL@aclmdlRIExecuteAsync": 10,
+        "AscendCL@aclnnAbs": 40,
+        "AscendCL@aclnnAdd": 62,
+        "AscendCL@aclnnAddRmsNormBias": 80,
+        "AscendCL@aclnnAddRmsNormBiasGetWorkspaceSize": 80,
+        "AscendCL@aclnnAdds": 100,
+        "AscendCL@aclnnArgMax": 11,
+        "AscendCL@aclnnBitwiseAndTensor": 1,
+        "AscendCL@aclnnBitwiseNot": 1,
+        "AscendCL@aclnnCat": 30,
+        "AscendCL@aclnnCausalConv1d": 30,
+        "AscendCL@aclnnCausalConv1dGetWorkspaceSize": 30,
+        "AscendCL@aclnnChunkFwdO": 30,
+        "AscendCL@aclnnChunkFwdOGetWorkspaceSize": 30,
+        "AscendCL@aclnnChunkGatedDeltaRuleFwdH": 30,
+        "AscendCL@aclnnChunkGatedDeltaRuleFwdHGetWorkspaceSize": 30,
+        "AscendCL@aclnnContiguous": 30,
+        "AscendCL@aclnnContiguousGetWorkspaceSize": 30,
+        "AscendCL@aclnnEmbedding": 1,
+        "AscendCL@aclnnGeScalar": 1,
+        "AscendCL@aclnnGemmaRmsNorm": 1,
+        "AscendCL@aclnnGemmaRmsNormGetWorkspaceSize": 1,
+        "AscendCL@aclnnGroupedMatmulV5": 80,
+        "AscendCL@aclnnGtScalar": 3,
+        "AscendCL@aclnnIndex": 102,
+        "AscendCL@aclnnIndexPutImpl": 30,
+        "AscendCL@aclnnIndexPutImplGetWorkspaceSize": 30,
+        "AscendCL@aclnnInnerFusedInferAttentionScore": 110,
+        "AscendCL@aclnnInnerFusedInferAttentionScoreGetWorkspaceSize": 110,
+        "AscendCL@aclnnInnerMoeTokenUnpermute": 40,
+        "AscendCL@aclnnInnerMoeTokenUnpermuteGetWorkspaceSize": 40,
+        "AscendCL@aclnnInplaceCopy": 1039,
+        "AscendCL@aclnnInplaceCopyGetWorkspaceSize": 175,
+        "AscendCL@aclnnInplaceFillScalar": 209,
+        "AscendCL@aclnnInplaceFillTensor": 30,
+        "AscendCL@aclnnInplaceMaskedFillScalar": 1,
+        "AscendCL@aclnnInplaceZero": 120,
+        "AscendCL@aclnnLtScalar": 1,
+        "AscendCL@aclnnMatmul": 281,
+        "AscendCL@aclnnMoeGatingTopK": 40,
+        "AscendCL@aclnnMoeGatingTopKGetWorkspaceSize": 40,
+        "AscendCL@aclnnMoeInitRoutingV3": 40,
+        "AscendCL@aclnnMoeTokenUnpermuteGetWorkspaceSize": 40,
+        "AscendCL@aclnnMul": 91,
+        "AscendCL@aclnnMuls": 1,
+        "AscendCL@aclnnNeScalar": 40,
+        "AscendCL@aclnnScatterPaKvCache": 10,
+        "AscendCL@aclnnScatterPaKvCacheGetWorkspaceSize": 10,
+        "AscendCL@aclnnSigmoid": 50,
+        "AscendCL@aclnnSub": 100,
+        "AscendCL@aclnnSubs": 11,
+        "AscendCL@aclnnSwiGlu": 80,
+        "AscendCL@aclnnSwiGluGetWorkspaceSize": 80,
+        "AscendCL@aclrtCreateEventExWithFlag": 345,
+        "AscendCL@aclrtCtxGetSysParamOpt": 381,
+        "AscendCL@aclrtDestroyEvent": 276,
+        "AscendCL@aclrtGetCurrentContext": 92,
+        "AscendCL@aclrtGetDeviceCount": 2,
+        "AscendCL@aclrtGetHardwareSyncAddr": 320,
+        "AscendCL@aclrtGetResInCurrentThread": 1452,
+        "AscendCL@aclrtGetStreamAttribute": 2957,
+        "AscendCL@aclrtLaunchKernelWithHostArgs": 2924,
+        "AscendCL@aclrtMemcpyAsync": 363,
+        "AscendCL@aclrtMemcpyAsyncWithCondition": 11,
+        "AscendCL@aclrtPointerGetAttributes": 1687,
+        "AscendCL@aclrtQueryEventStatus": 27,
+        "AscendCL@aclrtRecordEvent": 462,
+        "AscendCL@aclrtStreamGetId": 5102,
+        "AscendCL@aclrtStreamWaitEvent": 346,
+        "AscendCL@aclrtSynchronizeDeviceWithTimeout": 1,
+        "AscendCL@aclrtSynchronizeEvent": 11,
+        "AscendCL@aclrtSynchronizeStreamWithTimeout": 31,
+        "AscendCL@aclrtValueWrite": 100,
+        "AscendCL@hcom_allGather_": 11,
+        "AscendCL@hcom_allReduce_": 81,
+        "Event::record": 183,
+        "Event::synchronize": 11,
+        "Event::wait": 162
+      },
+      "apis": {
+        "AscendCL@aclmdlRIExecuteAsync": {
+          "count": 10,
+          "inclusive_sum_us": 3444.29,
+          "mean_us": 344.429,
+          "p50_us": 27.34,
+          "p95_us": 1771.9499999999969,
+          "max_us": 3192.69,
+          "count_per_observed_graph_replay": 1.0,
+          "inclusive_us_per_observed_graph_replay": 344.429
+        },
+        "AscendCL@aclrtQueryStream": {
+          "count": 0,
+          "inclusive_sum_us": 0.0,
+          "mean_us": null,
+          "p50_us": null,
+          "p95_us": null,
+          "max_us": null,
+          "count_per_observed_graph_replay": 0.0,
+          "inclusive_us_per_observed_graph_replay": 0.0
+        },
+        "AscendCL@aclrtQueryStreamStatus": {
+          "count": 0,
+          "inclusive_sum_us": 0.0,
+          "mean_us": null,
+          "p50_us": null,
+          "p95_us": null,
+          "max_us": null,
+          "count_per_observed_graph_replay": 0.0,
+          "inclusive_us_per_observed_graph_replay": 0.0
+        },
+        "AscendCL@aclrtRecordEvent": {
+          "count": 462,
+          "inclusive_sum_us": 4854.42,
+          "mean_us": 10.507402597402598,
+          "p50_us": 9.54,
+          "p95_us": 16.436999999999998,
+          "max_us": 107.17,
+          "count_per_observed_graph_replay": 46.2,
+          "inclusive_us_per_observed_graph_replay": 485.442
+        },
+        "AscendCL@aclrtStreamWaitEvent": {
+          "count": 346,
+          "inclusive_sum_us": 1847.66,
+          "mean_us": 5.340057803468208,
+          "p50_us": 6.52,
+          "p95_us": 9.850000000000001,
+          "max_us": 16.56,
+          "count_per_observed_graph_replay": 34.6,
+          "inclusive_us_per_observed_graph_replay": 184.76600000000002
+        },
+        "Event::record": {
+          "count": 183,
+          "inclusive_sum_us": 16548.49,
+          "mean_us": 90.42890710382514,
+          "p50_us": 85.55,
+          "p95_us": 127.435,
+          "max_us": 275.87,
+          "count_per_observed_graph_replay": 18.3,
+          "inclusive_us_per_observed_graph_replay": 1654.8490000000002
+        },
+        "Event::synchronize": {
+          "count": 11,
+          "inclusive_sum_us": 18746.37,
+          "mean_us": 1704.2154545454543,
+          "p50_us": 73.8,
+          "p95_us": 8560.48,
+          "max_us": 16319.61,
+          "count_per_observed_graph_replay": 1.1,
+          "inclusive_us_per_observed_graph_replay": 1874.637
+        },
+        "Event::wait": {
+          "count": 162,
+          "inclusive_sum_us": 11052.55,
+          "mean_us": 68.22561728395061,
+          "p50_us": 68.535,
+          "p95_us": 76.559,
+          "max_us": 80.51,
+          "count_per_observed_graph_replay": 16.2,
+          "inclusive_us_per_observed_graph_replay": 1105.2549999999999
+        }
+      },
+      "all_runtime_api_stats": {
+        "AscendCL@BroadcastTo_Tiling": {
+          "count": 30,
+          "inclusive_sum_us": 716.01,
+          "mean_us": 23.867,
+          "p50_us": 20.92,
+          "p95_us": 40.94749999999998,
+          "max_us": 51.31,
+          "count_per_observed_graph_replay": 3.0,
+          "inclusive_us_per_observed_graph_replay": 71.601
+        },
+        "AscendCL@ChunkFwdO_Tiling": {
+          "count": 60,
+          "inclusive_sum_us": 448.2,
+          "mean_us": 7.47,
+          "p50_us": 6.930000000000001,
+          "p95_us": 15.0675,
+          "max_us": 15.44,
+          "count_per_observed_graph_replay": 6.0,
+          "inclusive_us_per_observed_graph_replay": 44.82
+        },
+        "AscendCL@ChunkGatedDeltaRuleFwdH_Tiling": {
+          "count": 60,
+          "inclusive_sum_us": 639.6,
+          "mean_us": 10.66,
+          "p50_us": 8.219999999999999,
+          "p95_us": 26.02499999999999,
+          "max_us": 40.01,
+          "count_per_observed_graph_replay": 6.0,
+          "inclusive_us_per_observed_graph_replay": 63.96
+        },
+        "AscendCL@IndexCheck_Tiling": {
+          "count": 60,
+          "inclusive_sum_us": 436.69,
+          "mean_us": 7.2781666666666665,
+          "p50_us": 6.1899999999999995,
+          "p95_us": 15.965999999999998,
+          "max_us": 20.77,
+          "count_per_observed_graph_replay": 6.0,
+          "inclusive_us_per_observed_graph_replay": 43.669
+        },
+        "AscendCL@IndexPutV2_Tiling": {
+          "count": 30,
+          "inclusive_sum_us": 335.59,
+          "mean_us": 11.186333333333332,
+          "p50_us": 10.875,
+          "p95_us": 15.333499999999999,
+          "max_us": 17.58,
+          "count_per_observed_graph_replay": 3.0,
+          "inclusive_us_per_observed_graph_replay": 33.559
+        },
+        "AscendCL@ScatterPaKvCache_Tiling": {
+          "count": 20,
+          "inclusive_sum_us": 588.19,
+          "mean_us": 29.4095,
+          "p50_us": 23.67,
+          "p95_us": 65.832,
+          "max_us": 68.53,
+          "count_per_observed_graph_replay": 2.0,
+          "inclusive_us_per_observed_graph_replay": 58.819
+        },
+        "AscendCL@Slice_Tiling": {
+          "count": 30,
+          "inclusive_sum_us": 508.2,
+          "mean_us": 16.94,
+          "p50_us": 15.89,
+          "p95_us": 24.937999999999995,
+          "max_us": 29.5,
+          "count_per_observed_graph_replay": 3.0,
+          "inclusive_us_per_observed_graph_replay": 50.82
+        },
+        "AscendCL@Transpose_Tiling": {
+          "count": 60,
+          "inclusive_sum_us": 369.85,
+          "mean_us": 6.1641666666666675,
+          "p50_us": 4.5649999999999995,
+          "p95_us": 14.639499999999993,
+          "max_us": 28.36,
+          "count_per_observed_graph_replay": 6.0,
+          "inclusive_us_per_observed_graph_replay": 36.985
+        },
+        "AscendCL@aclmdlRICaptureGetInfo": {
+          "count": 5664,
+          "inclusive_sum_us": 3316.82,
+          "mean_us": 0.5855967514124294,
+          "p50_us": 0.55,
+          "p95_us": 0.81,
+          "max_us": 19.78,
+          "count_per_observed_graph_replay": 566.4,
+          "inclusive_us_per_observed_graph_replay": 331.682
+        },
+        "AscendCL@aclmdlRICaptureTaskUpdateBegin": {
+          "count": 100,
+          "inclusive_sum_us": 251.4,
+          "mean_us": 2.5140000000000002,
+          "p50_us": 2.24,
+          "p95_us": 4.694499999999999,
+          "max_us": 7.78,
+          "count_per_observed_graph_replay": 10.0,
+          "inclusive_us_per_observed_graph_replay": 25.14
+        },
+        "AscendCL@aclmdlRICaptureTaskUpdateEnd": {
+          "count": 100,
+          "inclusive_sum_us": 306.49,
+          "mean_us": 3.0649,
+          "p50_us": 2.69,
+          "p95_us": 4.331,
+          "max_us": 27.04,
+          "count_per_observed_graph_replay": 10.0,
+          "inclusive_us_per_observed_graph_replay": 30.649
+        },
+        "AscendCL@aclmdlRIExecuteAsync": {
+          "count": 10,
+          "inclusive_sum_us": 3444.29,
+          "mean_us": 344.429,
+          "p50_us": 27.34,
+          "p95_us": 1771.9499999999969,
+          "max_us": 3192.69,
+          "count_per_observed_graph_replay": 1.0,
+          "inclusive_us_per_observed_graph_replay": 344.429
+        },
+        "AscendCL@aclnnAbs": {
+          "count": 40,
+          "inclusive_sum_us": 493.15,
+          "mean_us": 12.32875,
+          "p50_us": 11.825,
+          "p95_us": 16.941999999999997,
+          "max_us": 18.86,
+          "count_per_observed_graph_replay": 4.0,
+          "inclusive_us_per_observed_graph_replay": 49.315
+        },
+        "AscendCL@aclnnAdd": {
+          "count": 62,
+          "inclusive_sum_us": 726.18,
+          "mean_us": 11.712580645161289,
+          "p50_us": 11.3,
+          "p95_us": 15.524499999999998,
+          "max_us": 19.77,
+          "count_per_observed_graph_replay": 6.2,
+          "inclusive_us_per_observed_graph_replay": 72.618
+        },
+        "AscendCL@aclnnAddRmsNormBias": {
+          "count": 80,
+          "inclusive_sum_us": 2022.68,
+          "mean_us": 25.2835,
+          "p50_us": 24.965,
+          "p95_us": 27.4365,
+          "max_us": 36.16,
+          "count_per_observed_graph_replay": 8.0,
+          "inclusive_us_per_observed_graph_replay": 202.268
+        },
+        "AscendCL@aclnnAddRmsNormBiasGetWorkspaceSize": {
+          "count": 80,
+          "inclusive_sum_us": 1647.09,
+          "mean_us": 20.588625,
+          "p50_us": 20.04,
+          "p95_us": 23.22,
+          "max_us": 40.7,
+          "count_per_observed_graph_replay": 8.0,
+          "inclusive_us_per_observed_graph_replay": 164.709
+        },
+        "AscendCL@aclnnAdds": {
+          "count": 100,
+          "inclusive_sum_us": 1795.43,
+          "mean_us": 17.9543,
+          "p50_us": 19.455,
+          "p95_us": 21.044,
+          "max_us": 48.01,
+          "count_per_observed_graph_replay": 10.0,
+          "inclusive_us_per_observed_graph_replay": 179.543
+        },
+        "AscendCL@aclnnArgMax": {
+          "count": 11,
+          "inclusive_sum_us": 228.17,
+          "mean_us": 20.742727272727272,
+          "p50_us": 19.54,
+          "p95_us": 26.445,
+          "max_us": 27.51,
+          "count_per_observed_graph_replay": 1.1,
+          "inclusive_us_per_observed_graph_replay": 22.817
+        },
+        "AscendCL@aclnnBitwiseAndTensor": {
+          "count": 1,
+          "inclusive_sum_us": 11.03,
+          "mean_us": 11.03,
+          "p50_us": 11.03,
+          "p95_us": 11.03,
+          "max_us": 11.03,
+          "count_per_observed_graph_replay": 0.1,
+          "inclusive_us_per_observed_graph_replay": 1.103
+        },
+        "AscendCL@aclnnBitwiseNot": {
+          "count": 1,
+          "inclusive_sum_us": 11.53,
+          "mean_us": 11.53,
+          "p50_us": 11.53,
+          "p95_us": 11.53,
+          "max_us": 11.53,
+          "count_per_observed_graph_replay": 0.1,
+          "inclusive_us_per_observed_graph_replay": 1.153
+        },
+        "AscendCL@aclnnCat": {
+          "count": 30,
+          "inclusive_sum_us": 338.32,
+          "mean_us": 11.277333333333333,
+          "p50_us": 10.965,
+          "p95_us": 14.8515,
+          "max_us": 16.06,
+          "count_per_observed_graph_replay": 3.0,
+          "inclusive_us_per_observed_graph_replay": 33.832
+        },
+        "AscendCL@aclnnCausalConv1d": {
+          "count": 30,
+          "inclusive_sum_us": 3685.51,
+          "mean_us": 122.85033333333334,
+          "p50_us": 120.875,
+          "p95_us": 154.2,
+          "max_us": 190.75,
+          "count_per_observed_graph_replay": 3.0,
+          "inclusive_us_per_observed_graph_replay": 368.55100000000004
+        },
+        "AscendCL@aclnnCausalConv1dGetWorkspaceSize": {
+          "count": 30,
+          "inclusive_sum_us": 3329.64,
+          "mean_us": 110.988,
+          "p50_us": 105.65,
+          "p95_us": 145.29949999999994,
+          "max_us": 207.8,
+          "count_per_observed_graph_replay": 3.0,
+          "inclusive_us_per_observed_graph_replay": 332.964
+        },
+        "AscendCL@aclnnChunkFwdO": {
+          "count": 30,
+          "inclusive_sum_us": 1346.23,
+          "mean_us": 44.87433333333333,
+          "p50_us": 43.74,
+          "p95_us": 50.402499999999996,
+          "max_us": 56.17,
+          "count_per_observed_graph_replay": 3.0,
+          "inclusive_us_per_observed_graph_replay": 134.623
+        },
+        "AscendCL@aclnnChunkFwdOGetWorkspaceSize": {
+          "count": 30,
+          "inclusive_sum_us": 1568.9,
+          "mean_us": 52.29666666666667,
+          "p50_us": 51.25,
+          "p95_us": 58.67749999999998,
+          "max_us": 78.05,
+          "count_per_observed_graph_replay": 3.0,
+          "inclusive_us_per_observed_graph_replay": 156.89000000000001
+        },
+        "AscendCL@aclnnChunkGatedDeltaRuleFwdH": {
+          "count": 30,
+          "inclusive_sum_us": 1790.26,
+          "mean_us": 59.675333333333334,
+          "p50_us": 57.78,
+          "p95_us": 77.16249999999995,
+          "max_us": 84.52,
+          "count_per_observed_graph_replay": 3.0,
+          "inclusive_us_per_observed_graph_replay": 179.026
+        },
+        "AscendCL@aclnnChunkGatedDeltaRuleFwdHGetWorkspaceSize": {
+          "count": 30,
+          "inclusive_sum_us": 2031.5,
+          "mean_us": 67.71666666666667,
+          "p50_us": 66.235,
+          "p95_us": 85.21149999999999,
+          "max_us": 98.41,
+          "count_per_observed_graph_replay": 3.0,
+          "inclusive_us_per_observed_graph_replay": 203.15
+        },
+        "AscendCL@aclnnContiguous": {
+          "count": 30,
+          "inclusive_sum_us": 2674.74,
+          "mean_us": 89.15799999999999,
+          "p50_us": 87.83,
+          "p95_us": 110.11749999999996,
+          "max_us": 137.75,
+          "count_per_observed_graph_replay": 3.0,
+          "inclusive_us_per_observed_graph_replay": 267.474
+        },
+        "AscendCL@aclnnContiguousGetWorkspaceSize": {
+          "count": 30,
+          "inclusive_sum_us": 2314.93,
+          "mean_us": 77.16433333333333,
+          "p50_us": 72.065,
+          "p95_us": 107.87299999999995,
+          "max_us": 151.19,
+          "count_per_observed_graph_replay": 3.0,
+          "inclusive_us_per_observed_graph_replay": 231.493
+        },
+        "AscendCL@aclnnEmbedding": {
+          "count": 1,
+          "inclusive_sum_us": 12.7,
+          "mean_us": 12.7,
+          "p50_us": 12.7,
+          "p95_us": 12.7,
+          "max_us": 12.7,
+          "count_per_observed_graph_replay": 0.1,
+          "inclusive_us_per_observed_graph_replay": 1.27
+        },
+        "AscendCL@aclnnGeScalar": {
+          "count": 1,
+          "inclusive_sum_us": 16.93,
+          "mean_us": 16.93,
+          "p50_us": 16.93,
+          "p95_us": 16.93,
+          "max_us": 16.93,
+          "count_per_observed_graph_replay": 0.1,
+          "inclusive_us_per_observed_graph_replay": 1.693
+        },
+        "AscendCL@aclnnGemmaRmsNorm": {
+          "count": 1,
+          "inclusive_sum_us": 44.49,
+          "mean_us": 44.49,
+          "p50_us": 44.49,
+          "p95_us": 44.49,
+          "max_us": 44.49,
+          "count_per_observed_graph_replay": 0.1,
+          "inclusive_us_per_observed_graph_replay": 4.449
+        },
+        "AscendCL@aclnnGemmaRmsNormGetWorkspaceSize": {
+          "count": 1,
+          "inclusive_sum_us": 42.92,
+          "mean_us": 42.92,
+          "p50_us": 42.92,
+          "p95_us": 42.92,
+          "max_us": 42.92,
+          "count_per_observed_graph_replay": 0.1,
+          "inclusive_us_per_observed_graph_replay": 4.292
+        },
+        "AscendCL@aclnnGroupedMatmulV5": {
+          "count": 80,
+          "inclusive_sum_us": 1328.18,
+          "mean_us": 16.60225,
+          "p50_us": 15.715,
+          "p95_us": 19.194999999999993,
+          "max_us": 54.19,
+          "count_per_observed_graph_replay": 8.0,
+          "inclusive_us_per_observed_graph_replay": 132.818
+        },
+        "AscendCL@aclnnGtScalar": {
+          "count": 3,
+          "inclusive_sum_us": 86.21,
+          "mean_us": 28.736666666666665,
+          "p50_us": 24.5,
+          "p95_us": 37.333999999999996,
+          "max_us": 38.76,
+          "count_per_observed_graph_replay": 0.3,
+          "inclusive_us_per_observed_graph_replay": 8.620999999999999
+        },
+        "AscendCL@aclnnIndex": {
+          "count": 102,
+          "inclusive_sum_us": 2245.26,
+          "mean_us": 22.012352941176474,
+          "p50_us": 19.265,
+          "p95_us": 33.37399999999999,
+          "max_us": 43.55,
+          "count_per_observed_graph_replay": 10.2,
+          "inclusive_us_per_observed_graph_replay": 224.526
+        },
+        "AscendCL@aclnnIndexPutImpl": {
+          "count": 30,
+          "inclusive_sum_us": 3541.9,
+          "mean_us": 118.06333333333333,
+          "p50_us": 113.58,
+          "p95_us": 145.91649999999996,
+          "max_us": 188.62,
+          "count_per_observed_graph_replay": 3.0,
+          "inclusive_us_per_observed_graph_replay": 354.19
+        },
+        "AscendCL@aclnnIndexPutImplGetWorkspaceSize": {
+          "count": 30,
+          "inclusive_sum_us": 2732.92,
+          "mean_us": 91.09733333333334,
+          "p50_us": 88.63499999999999,
+          "p95_us": 108.74549999999996,
+          "max_us": 140.89,
+          "count_per_observed_graph_replay": 3.0,
+          "inclusive_us_per_observed_graph_replay": 273.29200000000003
+        },
+        "AscendCL@aclnnInnerFusedInferAttentionScore": {
+          "count": 110,
+          "inclusive_sum_us": 4820.72,
+          "mean_us": 43.82472727272727,
+          "p50_us": 39.385,
+          "p95_us": 76.64699999999998,
+          "max_us": 126.01,
+          "count_per_observed_graph_replay": 11.0,
+          "inclusive_us_per_observed_graph_replay": 482.072
+        },
+        "AscendCL@aclnnInnerFusedInferAttentionScoreGetWorkspaceSize": {
+          "count": 110,
+          "inclusive_sum_us": 2384.55,
+          "mean_us": 21.677727272727275,
+          "p50_us": 19.05,
+          "p95_us": 37.671499999999995,
+          "max_us": 54.34,
+          "count_per_observed_graph_replay": 11.0,
+          "inclusive_us_per_observed_graph_replay": 238.455
+        },
+        "AscendCL@aclnnInnerMoeTokenUnpermute": {
+          "count": 40,
+          "inclusive_sum_us": 797.1,
+          "mean_us": 19.927500000000002,
+          "p50_us": 19.355,
+          "p95_us": 23.6325,
+          "max_us": 31.38,
+          "count_per_observed_graph_replay": 4.0,
+          "inclusive_us_per_observed_graph_replay": 79.71000000000001
+        },
+        "AscendCL@aclnnInnerMoeTokenUnpermuteGetWorkspaceSize": {
+          "count": 40,
+          "inclusive_sum_us": 538.42,
+          "mean_us": 13.4605,
+          "p50_us": 13.155,
+          "p95_us": 14.793499999999998,
+          "max_us": 22.34,
+          "count_per_observed_graph_replay": 4.0,
+          "inclusive_us_per_observed_graph_replay": 53.842
+        },
+        "AscendCL@aclnnInplaceCopy": {
+          "count": 1039,
+          "inclusive_sum_us": 13777.05,
+          "mean_us": 13.259913378248315,
+          "p50_us": 12.06,
+          "p95_us": 21.430999999999997,
+          "max_us": 54.81,
+          "count_per_observed_graph_replay": 103.9,
+          "inclusive_us_per_observed_graph_replay": 1377.705
+        },
+        "AscendCL@aclnnInplaceCopyGetWorkspaceSize": {
+          "count": 175,
+          "inclusive_sum_us": 3567.22,
+          "mean_us": 20.384114285714286,
+          "p50_us": 20.6,
+          "p95_us": 25.38099999999999,
+          "max_us": 51.39,
+          "count_per_observed_graph_replay": 17.5,
+          "inclusive_us_per_observed_graph_replay": 356.722
+        },
+        "AscendCL@aclnnInplaceFillScalar": {
+          "count": 209,
+          "inclusive_sum_us": 1466.88,
+          "mean_us": 7.018564593301436,
+          "p50_us": 2.55,
+          "p95_us": 16.458,
+          "max_us": 60.93,
+          "count_per_observed_graph_replay": 20.9,
+          "inclusive_us_per_observed_graph_replay": 146.68800000000002
+        },
+        "AscendCL@aclnnInplaceFillTensor": {
+          "count": 30,
+          "inclusive_sum_us": 61.89,
+          "mean_us": 2.063,
+          "p50_us": 2.04,
+          "p95_us": 2.3529999999999998,
+          "max_us": 2.51,
+          "count_per_observed_graph_replay": 3.0,
+          "inclusive_us_per_observed_graph_replay": 6.189
+        },
+        "AscendCL@aclnnInplaceMaskedFillScalar": {
+          "count": 1,
+          "inclusive_sum_us": 20.93,
+          "mean_us": 20.93,
+          "p50_us": 20.93,
+          "p95_us": 20.93,
+          "max_us": 20.93,
+          "count_per_observed_graph_replay": 0.1,
+          "inclusive_us_per_observed_graph_replay": 2.093
+        },
+        "AscendCL@aclnnInplaceZero": {
+          "count": 120,
+          "inclusive_sum_us": 1347.8,
+          "mean_us": 11.231666666666666,
+          "p50_us": 10.615,
+          "p95_us": 15.901,
+          "max_us": 21.49,
+          "count_per_observed_graph_replay": 12.0,
+          "inclusive_us_per_observed_graph_replay": 134.78
+        },
+        "AscendCL@aclnnLtScalar": {
+          "count": 1,
+          "inclusive_sum_us": 17.63,
+          "mean_us": 17.63,
+          "p50_us": 17.63,
+          "p95_us": 17.63,
+          "max_us": 17.63,
+          "count_per_observed_graph_replay": 0.1,
+          "inclusive_us_per_observed_graph_replay": 1.763
+        },
+        "AscendCL@aclnnMatmul": {
+          "count": 281,
+          "inclusive_sum_us": 3572.87,
+          "mean_us": 12.714839857651246,
+          "p50_us": 12.61,
+          "p95_us": 16.34,
+          "max_us": 25.97,
+          "count_per_observed_graph_replay": 28.1,
+          "inclusive_us_per_observed_graph_replay": 357.287
+        },
+        "AscendCL@aclnnMoeGatingTopK": {
+          "count": 40,
+          "inclusive_sum_us": 747.42,
+          "mean_us": 18.685499999999998,
+          "p50_us": 17.66,
+          "p95_us": 22.578999999999994,
+          "max_us": 42.98,
+          "count_per_observed_graph_replay": 4.0,
+          "inclusive_us_per_observed_graph_replay": 74.74199999999999
+        },
+        "AscendCL@aclnnMoeGatingTopKGetWorkspaceSize": {
+          "count": 40,
+          "inclusive_sum_us": 820.23,
+          "mean_us": 20.50575,
+          "p50_us": 20.175,
+          "p95_us": 21.053,
+          "max_us": 32.05,
+          "count_per_observed_graph_replay": 4.0,
+          "inclusive_us_per_observed_graph_replay": 82.023
+        },
+        "AscendCL@aclnnMoeInitRoutingV3": {
+          "count": 40,
+          "inclusive_sum_us": 717.83,
+          "mean_us": 17.94575,
+          "p50_us": 17.53,
+          "p95_us": 21.7115,
+          "max_us": 24.41,
+          "count_per_observed_graph_replay": 4.0,
+          "inclusive_us_per_observed_graph_replay": 71.783
+        },
+        "AscendCL@aclnnMoeTokenUnpermuteGetWorkspaceSize": {
+          "count": 40,
+          "inclusive_sum_us": 976.77,
+          "mean_us": 24.419249999999998,
+          "p50_us": 23.975,
+          "p95_us": 26.476499999999998,
+          "max_us": 35.01,
+          "count_per_observed_graph_replay": 4.0,
+          "inclusive_us_per_observed_graph_replay": 97.67699999999999
+        },
+        "AscendCL@aclnnMul": {
+          "count": 91,
+          "inclusive_sum_us": 1249.0,
+          "mean_us": 13.725274725274724,
+          "p50_us": 12.27,
+          "p95_us": 18.475,
+          "max_us": 23.68,
+          "count_per_observed_graph_replay": 9.1,
+          "inclusive_us_per_observed_graph_replay": 124.9
+        },
+        "AscendCL@aclnnMuls": {
+          "count": 1,
+          "inclusive_sum_us": 18.69,
+          "mean_us": 18.69,
+          "p50_us": 18.69,
+          "p95_us": 18.69,
+          "max_us": 18.69,
+          "count_per_observed_graph_replay": 0.1,
+          "inclusive_us_per_observed_graph_replay": 1.8690000000000002
+        },
+        "AscendCL@aclnnNeScalar": {
+          "count": 40,
+          "inclusive_sum_us": 475.41,
+          "mean_us": 11.88525,
+          "p50_us": 11.77,
+          "p95_us": 12.686499999999999,
+          "max_us": 15.04,
+          "count_per_observed_graph_replay": 4.0,
+          "inclusive_us_per_observed_graph_replay": 47.541000000000004
+        },
+        "AscendCL@aclnnScatterPaKvCache": {
+          "count": 10,
+          "inclusive_sum_us": 514.59,
+          "mean_us": 51.459,
+          "p50_us": 49.69,
+          "p95_us": 63.34749999999998,
+          "max_us": 68.41,
+          "count_per_observed_graph_replay": 1.0,
+          "inclusive_us_per_observed_graph_replay": 51.459
+        },
+        "AscendCL@aclnnScatterPaKvCacheGetWorkspaceSize": {
+          "count": 10,
+          "inclusive_sum_us": 1140.12,
+          "mean_us": 114.01200000000001,
+          "p50_us": 113.71000000000001,
+          "p95_us": 130.8665,
+          "max_us": 131.06,
+          "count_per_observed_graph_replay": 1.0,
+          "inclusive_us_per_observed_graph_replay": 114.01199999999999
+        },
+        "AscendCL@aclnnSigmoid": {
+          "count": 50,
+          "inclusive_sum_us": 571.86,
+          "mean_us": 11.4372,
+          "p50_us": 11.14,
+          "p95_us": 13.665999999999999,
+          "max_us": 18.65,
+          "count_per_observed_graph_replay": 5.0,
+          "inclusive_us_per_observed_graph_replay": 57.186
+        },
+        "AscendCL@aclnnSub": {
+          "count": 100,
+          "inclusive_sum_us": 1203.59,
+          "mean_us": 12.0359,
+          "p50_us": 11.205,
+          "p95_us": 20.61149999999999,
+          "max_us": 34.59,
+          "count_per_observed_graph_replay": 10.0,
+          "inclusive_us_per_observed_graph_replay": 120.359
+        },
+        "AscendCL@aclnnSubs": {
+          "count": 11,
+          "inclusive_sum_us": 157.69,
+          "mean_us": 14.335454545454546,
+          "p50_us": 13.07,
+          "p95_us": 19.14,
+          "max_us": 21.62,
+          "count_per_observed_graph_replay": 1.1,
+          "inclusive_us_per_observed_graph_replay": 15.769
+        },
+        "AscendCL@aclnnSwiGlu": {
+          "count": 80,
+          "inclusive_sum_us": 1507.46,
+          "mean_us": 18.84325,
+          "p50_us": 18.810000000000002,
+          "p95_us": 22.884,
+          "max_us": 26.11,
+          "count_per_observed_graph_replay": 8.0,
+          "inclusive_us_per_observed_graph_replay": 150.746
+        },
+        "AscendCL@aclnnSwiGluGetWorkspaceSize": {
+          "count": 80,
+          "inclusive_sum_us": 1572.94,
+          "mean_us": 19.66175,
+          "p50_us": 18.895,
+          "p95_us": 20.525999999999986,
+          "max_us": 43.59,
+          "count_per_observed_graph_replay": 8.0,
+          "inclusive_us_per_observed_graph_replay": 157.294
+        },
+        "AscendCL@aclrtCreateEventExWithFlag": {
+          "count": 345,
+          "inclusive_sum_us": 1386.42,
+          "mean_us": 4.0186086956521745,
+          "p50_us": 4.54,
+          "p95_us": 5.418,
+          "max_us": 20.23,
+          "count_per_observed_graph_replay": 34.5,
+          "inclusive_us_per_observed_graph_replay": 138.642
+        },
+        "AscendCL@aclrtCtxGetSysParamOpt": {
+          "count": 381,
+          "inclusive_sum_us": 677.19,
+          "mean_us": 1.7774015748031495,
+          "p50_us": 1.92,
+          "p95_us": 2.18,
+          "max_us": 2.71,
+          "count_per_observed_graph_replay": 38.1,
+          "inclusive_us_per_observed_graph_replay": 67.71900000000001
+        },
+        "AscendCL@aclrtDestroyEvent": {
+          "count": 276,
+          "inclusive_sum_us": 373.6,
+          "mean_us": 1.3536231884057972,
+          "p50_us": 1.29,
+          "p95_us": 2.565,
+          "max_us": 5.0,
+          "count_per_observed_graph_replay": 27.6,
+          "inclusive_us_per_observed_graph_replay": 37.36
+        },
+        "AscendCL@aclrtGetCurrentContext": {
+          "count": 92,
+          "inclusive_sum_us": 98.37,
+          "mean_us": 1.0692391304347826,
+          "p50_us": 0.995,
+          "p95_us": 1.47,
+          "max_us": 1.81,
+          "count_per_observed_graph_replay": 9.2,
+          "inclusive_us_per_observed_graph_replay": 9.837
+        },
+        "AscendCL@aclrtGetDeviceCount": {
+          "count": 2,
+          "inclusive_sum_us": 7.12,
+          "mean_us": 3.56,
+          "p50_us": 3.56,
+          "p95_us": 3.839,
+          "max_us": 3.87,
+          "count_per_observed_graph_replay": 0.2,
+          "inclusive_us_per_observed_graph_replay": 0.712
+        },
+        "AscendCL@aclrtGetHardwareSyncAddr": {
+          "count": 320,
+          "inclusive_sum_us": 335.24,
+          "mean_us": 1.047625,
+          "p50_us": 0.99,
+          "p95_us": 1.34,
+          "max_us": 2.84,
+          "count_per_observed_graph_replay": 32.0,
+          "inclusive_us_per_observed_graph_replay": 33.524
+        },
+        "AscendCL@aclrtGetResInCurrentThread": {
+          "count": 1452,
+          "inclusive_sum_us": 1602.62,
+          "mean_us": 1.1037327823691458,
+          "p50_us": 0.5,
+          "p95_us": 2.29,
+          "max_us": 2.81,
+          "count_per_observed_graph_replay": 145.2,
+          "inclusive_us_per_observed_graph_replay": 160.262
+        },
+        "AscendCL@aclrtGetStreamAttribute": {
+          "count": 2957,
+          "inclusive_sum_us": 2004.64,
+          "mean_us": 0.6779303347987826,
+          "p50_us": 0.66,
+          "p95_us": 0.87,
+          "max_us": 6.03,
+          "count_per_observed_graph_replay": 295.7,
+          "inclusive_us_per_observed_graph_replay": 200.464
+        },
+        "AscendCL@aclrtLaunchKernelWithHostArgs": {
+          "count": 2924,
+          "inclusive_sum_us": 19543.06,
+          "mean_us": 6.683673050615596,
+          "p50_us": 5.77,
+          "p95_us": 12.962499999999997,
+          "max_us": 60.23,
+          "count_per_observed_graph_replay": 292.4,
+          "inclusive_us_per_observed_graph_replay": 1954.306
+        },
+        "AscendCL@aclrtMemcpyAsync": {
+          "count": 363,
+          "inclusive_sum_us": 20651.26,
+          "mean_us": 56.89052341597796,
+          "p50_us": 7.42,
+          "p95_us": 24.504999999999992,
+          "max_us": 17282.92,
+          "count_per_observed_graph_replay": 36.3,
+          "inclusive_us_per_observed_graph_replay": 2065.1259999999997
+        },
+        "AscendCL@aclrtMemcpyAsyncWithCondition": {
+          "count": 11,
+          "inclusive_sum_us": 148.92,
+          "mean_us": 13.538181818181817,
+          "p50_us": 13.34,
+          "p95_us": 15.47,
+          "max_us": 15.89,
+          "count_per_observed_graph_replay": 1.1,
+          "inclusive_us_per_observed_graph_replay": 14.892
+        },
+        "AscendCL@aclrtPointerGetAttributes": {
+          "count": 1687,
+          "inclusive_sum_us": 3432.12,
+          "mean_us": 2.034451689389449,
+          "p50_us": 0.94,
+          "p95_us": 5.79,
+          "max_us": 33.89,
+          "count_per_observed_graph_replay": 168.7,
+          "inclusive_us_per_observed_graph_replay": 343.212
+        },
+        "AscendCL@aclrtQueryEventStatus": {
+          "count": 27,
+          "inclusive_sum_us": 34.89,
+          "mean_us": 1.2922222222222222,
+          "p50_us": 0.87,
+          "p95_us": 4.385999999999998,
+          "max_us": 5.87,
+          "count_per_observed_graph_replay": 2.7,
+          "inclusive_us_per_observed_graph_replay": 3.489
+        },
+        "AscendCL@aclrtQueryStream": {
+          "count": 0,
+          "inclusive_sum_us": 0.0,
+          "mean_us": null,
+          "p50_us": null,
+          "p95_us": null,
+          "max_us": null,
+          "count_per_observed_graph_replay": 0.0,
+          "inclusive_us_per_observed_graph_replay": 0.0
+        },
+        "AscendCL@aclrtQueryStreamStatus": {
+          "count": 0,
+          "inclusive_sum_us": 0.0,
+          "mean_us": null,
+          "p50_us": null,
+          "p95_us": null,
+          "max_us": null,
+          "count_per_observed_graph_replay": 0.0,
+          "inclusive_us_per_observed_graph_replay": 0.0
+        },
+        "AscendCL@aclrtRecordEvent": {
+          "count": 462,
+          "inclusive_sum_us": 4854.42,
+          "mean_us": 10.507402597402598,
+          "p50_us": 9.54,
+          "p95_us": 16.436999999999998,
+          "max_us": 107.17,
+          "count_per_observed_graph_replay": 46.2,
+          "inclusive_us_per_observed_graph_replay": 485.442
+        },
+        "AscendCL@aclrtStreamGetId": {
+          "count": 5102,
+          "inclusive_sum_us": 2435.83,
+          "mean_us": 0.4774264994119953,
+          "p50_us": 0.47,
+          "p95_us": 0.55,
+          "max_us": 1.32,
+          "count_per_observed_graph_replay": 510.2,
+          "inclusive_us_per_observed_graph_replay": 243.583
+        },
+        "AscendCL@aclrtStreamWaitEvent": {
+          "count": 346,
+          "inclusive_sum_us": 1847.66,
+          "mean_us": 5.340057803468208,
+          "p50_us": 6.52,
+          "p95_us": 9.850000000000001,
+          "max_us": 16.56,
+          "count_per_observed_graph_replay": 34.6,
+          "inclusive_us_per_observed_graph_replay": 184.76600000000002
+        },
+        "AscendCL@aclrtSynchronizeDeviceWithTimeout": {
+          "count": 1,
+          "inclusive_sum_us": 38.27,
+          "mean_us": 38.27,
+          "p50_us": 38.27,
+          "p95_us": 38.27,
+          "max_us": 38.27,
+          "count_per_observed_graph_replay": 0.1,
+          "inclusive_us_per_observed_graph_replay": 3.8270000000000004
+        },
+        "AscendCL@aclrtSynchronizeEvent": {
+          "count": 11,
+          "inclusive_sum_us": 18185.55,
+          "mean_us": 1653.2318181818182,
+          "p50_us": 23.36,
+          "p95_us": 8508.395,
+          "max_us": 16265.62,
+          "count_per_observed_graph_replay": 1.1,
+          "inclusive_us_per_observed_graph_replay": 1818.5549999999998
+        },
+        "AscendCL@aclrtSynchronizeStreamWithTimeout": {
+          "count": 31,
+          "inclusive_sum_us": 73446.94,
+          "mean_us": 2369.2561290322583,
+          "p50_us": 3.43,
+          "p95_us": 19537.67,
+          "max_us": 21012.81,
+          "count_per_observed_graph_replay": 3.1,
+          "inclusive_us_per_observed_graph_replay": 7344.694
+        },
+        "AscendCL@aclrtValueWrite": {
+          "count": 100,
+          "inclusive_sum_us": 619.1,
+          "mean_us": 6.191,
+          "p50_us": 5.78,
+          "p95_us": 9.2745,
+          "max_us": 10.56,
+          "count_per_observed_graph_replay": 10.0,
+          "inclusive_us_per_observed_graph_replay": 61.910000000000004
+        },
+        "AscendCL@hcom_allGather_": {
+          "count": 11,
+          "inclusive_sum_us": 4315.85,
+          "mean_us": 392.35,
+          "p50_us": 370.71,
+          "p95_us": 508.13,
+          "max_us": 519.98,
+          "count_per_observed_graph_replay": 1.1,
+          "inclusive_us_per_observed_graph_replay": 431.58500000000004
+        },
+        "AscendCL@hcom_allReduce_": {
+          "count": 81,
+          "inclusive_sum_us": 58615.26,
+          "mean_us": 723.6451851851853,
+          "p50_us": 710.73,
+          "p95_us": 782.0,
+          "max_us": 911.55,
+          "count_per_observed_graph_replay": 8.1,
+          "inclusive_us_per_observed_graph_replay": 5861.526
+        },
+        "Event::record": {
+          "count": 183,
+          "inclusive_sum_us": 16548.49,
+          "mean_us": 90.42890710382514,
+          "p50_us": 85.55,
+          "p95_us": 127.435,
+          "max_us": 275.87,
+          "count_per_observed_graph_replay": 18.3,
+          "inclusive_us_per_observed_graph_replay": 1654.8490000000002
+        },
+        "Event::synchronize": {
+          "count": 11,
+          "inclusive_sum_us": 18746.37,
+          "mean_us": 1704.2154545454543,
+          "p50_us": 73.8,
+          "p95_us": 8560.48,
+          "max_us": 16319.61,
+          "count_per_observed_graph_replay": 1.1,
+          "inclusive_us_per_observed_graph_replay": 1874.637
+        },
+        "Event::wait": {
+          "count": 162,
+          "inclusive_sum_us": 11052.55,
+          "mean_us": 68.22561728395061,
+          "p50_us": 68.535,
+          "p95_us": 76.559,
+          "max_us": 80.51,
+          "count_per_observed_graph_replay": 16.2,
+          "inclusive_us_per_observed_graph_replay": 1105.2549999999999
+        }
+      },
+      "scope": "Exported actual calls with inclusive host API duration; neither physical kernel time nor end-to-end performance. Missing query exports cannot prove zero execution.",
+      "worker_binding": {
+        "worker_pid": 1004046,
+        "visible_device_index": 2,
+        "hardware_labels_observed": [
+          "NPU 2"
+        ],
+        "profiler_info_sha256": "51cbef19a852d1c53b0203513076e554ef8be0f1c8d2fc842e86272fa24f9289",
+        "passed": true,
+        "scope": "Native profiler rank/PID binds observed hardware label to worker visible ordinal; do not equate visible ordinal with host npu-smi physical ID"
+      }
+    },
+    {
+      "rank": 3,
+      "source": "/root/workspace/muxpd-followup-20261025/performance/mixed-profile-offline-v1/group/profile/mixed-p12000-ingress_dp0_pp0_tp3_dcp0_ep3_rank3_1004047_20261026043128000_ascend_pt/ASCEND_PROFILER_OUTPUT/trace_view.json",
+      "source_sha256": "d3b05cfb32e53d56178abe6fe4a370dc8de0412941c9aa14bf6c23c679269074",
+      "hardware_process_labels": {
+        "1028144579": "NPU 3"
+      },
+      "cpu_operation_pids": [
+        "1004047"
+      ],
+      "expected_coordinator_D_steps": 10,
+      "observed_graph_replays": 10,
+      "exact_replay_count_matches": true,
+      "profiler_markers": {
+        "PROFILING_ENABLE": 1,
+        "PROFILING_DISABLE": 1
+      },
+      "graph_capture_api_count": 0,
+      "complete_window_indicators": true,
+      "query_api_names_observed": [],
+      "runtime_api_inventory": {
+        "AscendCL@BroadcastTo_Tiling": 30,
+        "AscendCL@ChunkFwdO_Tiling": 60,
+        "AscendCL@ChunkGatedDeltaRuleFwdH_Tiling": 60,
+        "AscendCL@IndexCheck_Tiling": 60,
+        "AscendCL@IndexPutV2_Tiling": 30,
+        "AscendCL@ScatterPaKvCache_Tiling": 20,
+        "AscendCL@Slice_Tiling": 30,
+        "AscendCL@Transpose_Tiling": 60,
+        "AscendCL@aclmdlRICaptureGetInfo": 5664,
+        "AscendCL@aclmdlRICaptureTaskUpdateBegin": 100,
+        "AscendCL@aclmdlRICaptureTaskUpdateEnd": 100,
+        "AscendCL@aclmdlRIExecuteAsync": 10,
+        "AscendCL@aclnnAbs": 40,
+        "AscendCL@aclnnAdd": 62,
+        "AscendCL@aclnnAddRmsNormBias": 80,
+        "AscendCL@aclnnAddRmsNormBiasGetWorkspaceSize": 80,
+        "AscendCL@aclnnAdds": 100,
+        "AscendCL@aclnnArgMax": 11,
+        "AscendCL@aclnnBitwiseAndTensor": 1,
+        "AscendCL@aclnnBitwiseNot": 1,
+        "AscendCL@aclnnCat": 30,
+        "AscendCL@aclnnCausalConv1d": 30,
+        "AscendCL@aclnnCausalConv1dGetWorkspaceSize": 30,
+        "AscendCL@aclnnChunkFwdO": 30,
+        "AscendCL@aclnnChunkFwdOGetWorkspaceSize": 30,
+        "AscendCL@aclnnChunkGatedDeltaRuleFwdH": 30,
+        "AscendCL@aclnnChunkGatedDeltaRuleFwdHGetWorkspaceSize": 30,
+        "AscendCL@aclnnContiguous": 30,
+        "AscendCL@aclnnContiguousGetWorkspaceSize": 30,
+        "AscendCL@aclnnEmbedding": 1,
+        "AscendCL@aclnnGeScalar": 1,
+        "AscendCL@aclnnGemmaRmsNorm": 1,
+        "AscendCL@aclnnGemmaRmsNormGetWorkspaceSize": 1,
+        "AscendCL@aclnnGroupedMatmulV5": 80,
+        "AscendCL@aclnnGtScalar": 3,
+        "AscendCL@aclnnIndex": 102,
+        "AscendCL@aclnnIndexPutImpl": 30,
+        "AscendCL@aclnnIndexPutImplGetWorkspaceSize": 30,
+        "AscendCL@aclnnInnerFusedInferAttentionScore": 110,
+        "AscendCL@aclnnInnerFusedInferAttentionScoreGetWorkspaceSize": 110,
+        "AscendCL@aclnnInnerMoeTokenUnpermute": 40,
+        "AscendCL@aclnnInnerMoeTokenUnpermuteGetWorkspaceSize": 40,
+        "AscendCL@aclnnInplaceCopy": 1039,
+        "AscendCL@aclnnInplaceCopyGetWorkspaceSize": 175,
+        "AscendCL@aclnnInplaceFillScalar": 209,
+        "AscendCL@aclnnInplaceFillTensor": 30,
+        "AscendCL@aclnnInplaceMaskedFillScalar": 1,
+        "AscendCL@aclnnInplaceZero": 120,
+        "AscendCL@aclnnLtScalar": 1,
+        "AscendCL@aclnnMatmul": 281,
+        "AscendCL@aclnnMoeGatingTopK": 40,
+        "AscendCL@aclnnMoeGatingTopKGetWorkspaceSize": 40,
+        "AscendCL@aclnnMoeInitRoutingV3": 40,
+        "AscendCL@aclnnMoeTokenUnpermuteGetWorkspaceSize": 40,
+        "AscendCL@aclnnMul": 91,
+        "AscendCL@aclnnMuls": 1,
+        "AscendCL@aclnnNeScalar": 40,
+        "AscendCL@aclnnScatterPaKvCache": 10,
+        "AscendCL@aclnnScatterPaKvCacheGetWorkspaceSize": 10,
+        "AscendCL@aclnnSigmoid": 50,
+        "AscendCL@aclnnSub": 100,
+        "AscendCL@aclnnSubs": 11,
+        "AscendCL@aclnnSwiGlu": 80,
+        "AscendCL@aclnnSwiGluGetWorkspaceSize": 80,
+        "AscendCL@aclrtCreateEventExWithFlag": 345,
+        "AscendCL@aclrtCtxGetSysParamOpt": 381,
+        "AscendCL@aclrtDestroyEvent": 276,
+        "AscendCL@aclrtGetCurrentContext": 92,
+        "AscendCL@aclrtGetDeviceCount": 2,
+        "AscendCL@aclrtGetHardwareSyncAddr": 320,
+        "AscendCL@aclrtGetResInCurrentThread": 1452,
+        "AscendCL@aclrtGetStreamAttribute": 2957,
+        "AscendCL@aclrtLaunchKernelWithHostArgs": 2924,
+        "AscendCL@aclrtMemcpyAsync": 363,
+        "AscendCL@aclrtMemcpyAsyncWithCondition": 11,
+        "AscendCL@aclrtPointerGetAttributes": 1687,
+        "AscendCL@aclrtQueryEventStatus": 27,
+        "AscendCL@aclrtRecordEvent": 462,
+        "AscendCL@aclrtStreamGetId": 5102,
+        "AscendCL@aclrtStreamWaitEvent": 346,
+        "AscendCL@aclrtSynchronizeDeviceWithTimeout": 1,
+        "AscendCL@aclrtSynchronizeEvent": 11,
+        "AscendCL@aclrtSynchronizeStreamWithTimeout": 31,
+        "AscendCL@aclrtValueWrite": 100,
+        "AscendCL@hcom_allGather_": 11,
+        "AscendCL@hcom_allReduce_": 81,
+        "Event::record": 183,
+        "Event::synchronize": 11,
+        "Event::wait": 162
+      },
+      "apis": {
+        "AscendCL@aclmdlRIExecuteAsync": {
+          "count": 10,
+          "inclusive_sum_us": 3334.71,
+          "mean_us": 333.471,
+          "p50_us": 22.08,
+          "p95_us": 1740.7249999999967,
+          "max_us": 3145.58,
+          "count_per_observed_graph_replay": 1.0,
+          "inclusive_us_per_observed_graph_replay": 333.471
+        },
+        "AscendCL@aclrtQueryStream": {
+          "count": 0,
+          "inclusive_sum_us": 0.0,
+          "mean_us": null,
+          "p50_us": null,
+          "p95_us": null,
+          "max_us": null,
+          "count_per_observed_graph_replay": 0.0,
+          "inclusive_us_per_observed_graph_replay": 0.0
+        },
+        "AscendCL@aclrtQueryStreamStatus": {
+          "count": 0,
+          "inclusive_sum_us": 0.0,
+          "mean_us": null,
+          "p50_us": null,
+          "p95_us": null,
+          "max_us": null,
+          "count_per_observed_graph_replay": 0.0,
+          "inclusive_us_per_observed_graph_replay": 0.0
+        },
+        "AscendCL@aclrtRecordEvent": {
+          "count": 462,
+          "inclusive_sum_us": 4911.83,
+          "mean_us": 10.631666666666666,
+          "p50_us": 9.870000000000001,
+          "p95_us": 15.881999999999998,
+          "max_us": 56.63,
+          "count_per_observed_graph_replay": 46.2,
+          "inclusive_us_per_observed_graph_replay": 491.183
+        },
+        "AscendCL@aclrtStreamWaitEvent": {
+          "count": 346,
+          "inclusive_sum_us": 1996.4,
+          "mean_us": 5.769942196531792,
+          "p50_us": 6.98,
+          "p95_us": 11.23,
+          "max_us": 16.74,
+          "count_per_observed_graph_replay": 34.6,
+          "inclusive_us_per_observed_graph_replay": 199.64000000000001
+        },
+        "Event::record": {
+          "count": 183,
+          "inclusive_sum_us": 16687.29,
+          "mean_us": 91.18737704918033,
+          "p50_us": 87.12,
+          "p95_us": 131.845,
+          "max_us": 211.62,
+          "count_per_observed_graph_replay": 18.3,
+          "inclusive_us_per_observed_graph_replay": 1668.729
+        },
+        "Event::synchronize": {
+          "count": 11,
+          "inclusive_sum_us": 16907.83,
+          "mean_us": 1537.0754545454547,
+          "p50_us": 69.58,
+          "p95_us": 6661.965,
+          "max_us": 9418.43,
+          "count_per_observed_graph_replay": 1.1,
+          "inclusive_us_per_observed_graph_replay": 1690.7830000000001
+        },
+        "Event::wait": {
+          "count": 162,
+          "inclusive_sum_us": 11378.56,
+          "mean_us": 70.23802469135802,
+          "p50_us": 69.5,
+          "p95_us": 80.599,
+          "max_us": 112.47,
+          "count_per_observed_graph_replay": 16.2,
+          "inclusive_us_per_observed_graph_replay": 1137.856
+        }
+      },
+      "all_runtime_api_stats": {
+        "AscendCL@BroadcastTo_Tiling": {
+          "count": 30,
+          "inclusive_sum_us": 691.19,
+          "mean_us": 23.03966666666667,
+          "p50_us": 19.66,
+          "p95_us": 36.77049999999999,
+          "max_us": 48.03,
+          "count_per_observed_graph_replay": 3.0,
+          "inclusive_us_per_observed_graph_replay": 69.119
+        },
+        "AscendCL@ChunkFwdO_Tiling": {
+          "count": 60,
+          "inclusive_sum_us": 441.26,
+          "mean_us": 7.354333333333333,
+          "p50_us": 6.805,
+          "p95_us": 14.9725,
+          "max_us": 15.52,
+          "count_per_observed_graph_replay": 6.0,
+          "inclusive_us_per_observed_graph_replay": 44.126
+        },
+        "AscendCL@ChunkGatedDeltaRuleFwdH_Tiling": {
+          "count": 60,
+          "inclusive_sum_us": 603.28,
+          "mean_us": 10.054666666666666,
+          "p50_us": 8.58,
+          "p95_us": 21.7595,
+          "max_us": 27.92,
+          "count_per_observed_graph_replay": 6.0,
+          "inclusive_us_per_observed_graph_replay": 60.327999999999996
+        },
+        "AscendCL@IndexCheck_Tiling": {
+          "count": 60,
+          "inclusive_sum_us": 435.55,
+          "mean_us": 7.259166666666667,
+          "p50_us": 6.175000000000001,
+          "p95_us": 16.8535,
+          "max_us": 21.14,
+          "count_per_observed_graph_replay": 6.0,
+          "inclusive_us_per_observed_graph_replay": 43.555
+        },
+        "AscendCL@IndexPutV2_Tiling": {
+          "count": 30,
+          "inclusive_sum_us": 362.33,
+          "mean_us": 12.077666666666666,
+          "p50_us": 10.52,
+          "p95_us": 17.11849999999999,
+          "max_us": 28.25,
+          "count_per_observed_graph_replay": 3.0,
+          "inclusive_us_per_observed_graph_replay": 36.233
+        },
+        "AscendCL@ScatterPaKvCache_Tiling": {
+          "count": 20,
+          "inclusive_sum_us": 579.01,
+          "mean_us": 28.950499999999998,
+          "p50_us": 21.795,
+          "p95_us": 66.1355,
+          "max_us": 66.62,
+          "count_per_observed_graph_replay": 2.0,
+          "inclusive_us_per_observed_graph_replay": 57.900999999999996
+        },
+        "AscendCL@Slice_Tiling": {
+          "count": 30,
+          "inclusive_sum_us": 496.47,
+          "mean_us": 16.549,
+          "p50_us": 14.445,
+          "p95_us": 23.94849999999999,
+          "max_us": 32.17,
+          "count_per_observed_graph_replay": 3.0,
+          "inclusive_us_per_observed_graph_replay": 49.647000000000006
+        },
+        "AscendCL@Transpose_Tiling": {
+          "count": 60,
+          "inclusive_sum_us": 353.57,
+          "mean_us": 5.892833333333333,
+          "p50_us": 4.445,
+          "p95_us": 15.463999999999999,
+          "max_us": 21.81,
+          "count_per_observed_graph_replay": 6.0,
+          "inclusive_us_per_observed_graph_replay": 35.357
+        },
+        "AscendCL@aclmdlRICaptureGetInfo": {
+          "count": 5664,
+          "inclusive_sum_us": 3379.36,
+          "mean_us": 0.5966384180790961,
+          "p50_us": 0.56,
+          "p95_us": 0.82,
+          "max_us": 21.28,
+          "count_per_observed_graph_replay": 566.4,
+          "inclusive_us_per_observed_graph_replay": 337.93600000000004
+        },
+        "AscendCL@aclmdlRICaptureTaskUpdateBegin": {
+          "count": 100,
+          "inclusive_sum_us": 244.0,
+          "mean_us": 2.44,
+          "p50_us": 2.21,
+          "p95_us": 4.513999999999999,
+          "max_us": 6.4,
+          "count_per_observed_graph_replay": 10.0,
+          "inclusive_us_per_observed_graph_replay": 24.4
+        },
+        "AscendCL@aclmdlRICaptureTaskUpdateEnd": {
+          "count": 100,
+          "inclusive_sum_us": 256.58,
+          "mean_us": 2.5658,
+          "p50_us": 2.42,
+          "p95_us": 3.8474999999999993,
+          "max_us": 4.78,
+          "count_per_observed_graph_replay": 10.0,
+          "inclusive_us_per_observed_graph_replay": 25.657999999999998
+        },
+        "AscendCL@aclmdlRIExecuteAsync": {
+          "count": 10,
+          "inclusive_sum_us": 3334.71,
+          "mean_us": 333.471,
+          "p50_us": 22.08,
+          "p95_us": 1740.7249999999967,
+          "max_us": 3145.58,
+          "count_per_observed_graph_replay": 1.0,
+          "inclusive_us_per_observed_graph_replay": 333.471
+        },
+        "AscendCL@aclnnAbs": {
+          "count": 40,
+          "inclusive_sum_us": 516.01,
+          "mean_us": 12.90025,
+          "p50_us": 12.465,
+          "p95_us": 15.862999999999989,
+          "max_us": 20.61,
+          "count_per_observed_graph_replay": 4.0,
+          "inclusive_us_per_observed_graph_replay": 51.601
+        },
+        "AscendCL@aclnnAdd": {
+          "count": 62,
+          "inclusive_sum_us": 733.38,
+          "mean_us": 11.828709677419354,
+          "p50_us": 11.41,
+          "p95_us": 18.525999999999986,
+          "max_us": 19.51,
+          "count_per_observed_graph_replay": 6.2,
+          "inclusive_us_per_observed_graph_replay": 73.338
+        },
+        "AscendCL@aclnnAddRmsNormBias": {
+          "count": 80,
+          "inclusive_sum_us": 2054.04,
+          "mean_us": 25.6755,
+          "p50_us": 24.985,
+          "p95_us": 29.370999999999995,
+          "max_us": 38.23,
+          "count_per_observed_graph_replay": 8.0,
+          "inclusive_us_per_observed_graph_replay": 205.404
+        },
+        "AscendCL@aclnnAddRmsNormBiasGetWorkspaceSize": {
+          "count": 80,
+          "inclusive_sum_us": 1607.49,
+          "mean_us": 20.093625,
+          "p50_us": 19.494999999999997,
+          "p95_us": 21.7645,
+          "max_us": 45.87,
+          "count_per_observed_graph_replay": 8.0,
+          "inclusive_us_per_observed_graph_replay": 160.749
+        },
+        "AscendCL@aclnnAdds": {
+          "count": 100,
+          "inclusive_sum_us": 1748.51,
+          "mean_us": 17.4851,
+          "p50_us": 19.135,
+          "p95_us": 21.177,
+          "max_us": 26.98,
+          "count_per_observed_graph_replay": 10.0,
+          "inclusive_us_per_observed_graph_replay": 174.851
+        },
+        "AscendCL@aclnnArgMax": {
+          "count": 11,
+          "inclusive_sum_us": 234.6,
+          "mean_us": 21.327272727272728,
+          "p50_us": 20.57,
+          "p95_us": 25.32,
+          "max_us": 26.43,
+          "count_per_observed_graph_replay": 1.1,
+          "inclusive_us_per_observed_graph_replay": 23.46
+        },
+        "AscendCL@aclnnBitwiseAndTensor": {
+          "count": 1,
+          "inclusive_sum_us": 10.84,
+          "mean_us": 10.84,
+          "p50_us": 10.84,
+          "p95_us": 10.84,
+          "max_us": 10.84,
+          "count_per_observed_graph_replay": 0.1,
+          "inclusive_us_per_observed_graph_replay": 1.084
+        },
+        "AscendCL@aclnnBitwiseNot": {
+          "count": 1,
+          "inclusive_sum_us": 11.22,
+          "mean_us": 11.22,
+          "p50_us": 11.22,
+          "p95_us": 11.22,
+          "max_us": 11.22,
+          "count_per_observed_graph_replay": 0.1,
+          "inclusive_us_per_observed_graph_replay": 1.122
+        },
+        "AscendCL@aclnnCat": {
+          "count": 30,
+          "inclusive_sum_us": 320.4,
+          "mean_us": 10.68,
+          "p50_us": 10.365,
+          "p95_us": 12.877499999999992,
+          "max_us": 17.14,
+          "count_per_observed_graph_replay": 3.0,
+          "inclusive_us_per_observed_graph_replay": 32.04
+        },
+        "AscendCL@aclnnCausalConv1d": {
+          "count": 30,
+          "inclusive_sum_us": 3667.46,
+          "mean_us": 122.24866666666667,
+          "p50_us": 118.015,
+          "p95_us": 150.00099999999998,
+          "max_us": 175.31,
+          "count_per_observed_graph_replay": 3.0,
+          "inclusive_us_per_observed_graph_replay": 366.746
+        },
+        "AscendCL@aclnnCausalConv1dGetWorkspaceSize": {
+          "count": 30,
+          "inclusive_sum_us": 3170.01,
+          "mean_us": 105.66699999999999,
+          "p50_us": 98.345,
+          "p95_us": 128.63,
+          "max_us": 174.47,
+          "count_per_observed_graph_replay": 3.0,
+          "inclusive_us_per_observed_graph_replay": 317.00100000000003
+        },
+        "AscendCL@aclnnChunkFwdO": {
+          "count": 30,
+          "inclusive_sum_us": 1334.25,
+          "mean_us": 44.475,
+          "p50_us": 43.269999999999996,
+          "p95_us": 50.277999999999984,
+          "max_us": 55.2,
+          "count_per_observed_graph_replay": 3.0,
+          "inclusive_us_per_observed_graph_replay": 133.425
+        },
+        "AscendCL@aclnnChunkFwdOGetWorkspaceSize": {
+          "count": 30,
+          "inclusive_sum_us": 1489.0,
+          "mean_us": 49.63333333333333,
+          "p50_us": 49.31,
+          "p95_us": 52.90249999999999,
+          "max_us": 60.21,
+          "count_per_observed_graph_replay": 3.0,
+          "inclusive_us_per_observed_graph_replay": 148.9
+        },
+        "AscendCL@aclnnChunkGatedDeltaRuleFwdH": {
+          "count": 30,
+          "inclusive_sum_us": 1730.74,
+          "mean_us": 57.69133333333333,
+          "p50_us": 57.145,
+          "p95_us": 62.646499999999996,
+          "max_us": 87.28,
+          "count_per_observed_graph_replay": 3.0,
+          "inclusive_us_per_observed_graph_replay": 173.074
+        },
+        "AscendCL@aclnnChunkGatedDeltaRuleFwdHGetWorkspaceSize": {
+          "count": 30,
+          "inclusive_sum_us": 1925.4,
+          "mean_us": 64.18,
+          "p50_us": 61.785,
+          "p95_us": 73.47999999999999,
+          "max_us": 93.94,
+          "count_per_observed_graph_replay": 3.0,
+          "inclusive_us_per_observed_graph_replay": 192.54000000000002
+        },
+        "AscendCL@aclnnContiguous": {
+          "count": 30,
+          "inclusive_sum_us": 2665.16,
+          "mean_us": 88.83866666666667,
+          "p50_us": 85.975,
+          "p95_us": 115.44849999999995,
+          "max_us": 123.54,
+          "count_per_observed_graph_replay": 3.0,
+          "inclusive_us_per_observed_graph_replay": 266.51599999999996
+        },
+        "AscendCL@aclnnContiguousGetWorkspaceSize": {
+          "count": 30,
+          "inclusive_sum_us": 2217.85,
+          "mean_us": 73.92833333333333,
+          "p50_us": 67.72,
+          "p95_us": 93.85999999999999,
+          "max_us": 120.24,
+          "count_per_observed_graph_replay": 3.0,
+          "inclusive_us_per_observed_graph_replay": 221.785
+        },
+        "AscendCL@aclnnEmbedding": {
+          "count": 1,
+          "inclusive_sum_us": 12.31,
+          "mean_us": 12.31,
+          "p50_us": 12.31,
+          "p95_us": 12.31,
+          "max_us": 12.31,
+          "count_per_observed_graph_replay": 0.1,
+          "inclusive_us_per_observed_graph_replay": 1.231
+        },
+        "AscendCL@aclnnGeScalar": {
+          "count": 1,
+          "inclusive_sum_us": 17.36,
+          "mean_us": 17.36,
+          "p50_us": 17.36,
+          "p95_us": 17.36,
+          "max_us": 17.36,
+          "count_per_observed_graph_replay": 0.1,
+          "inclusive_us_per_observed_graph_replay": 1.736
+        },
+        "AscendCL@aclnnGemmaRmsNorm": {
+          "count": 1,
+          "inclusive_sum_us": 45.93,
+          "mean_us": 45.93,
+          "p50_us": 45.93,
+          "p95_us": 45.93,
+          "max_us": 45.93,
+          "count_per_observed_graph_replay": 0.1,
+          "inclusive_us_per_observed_graph_replay": 4.593
+        },
+        "AscendCL@aclnnGemmaRmsNormGetWorkspaceSize": {
+          "count": 1,
+          "inclusive_sum_us": 43.15,
+          "mean_us": 43.15,
+          "p50_us": 43.15,
+          "p95_us": 43.15,
+          "max_us": 43.15,
+          "count_per_observed_graph_replay": 0.1,
+          "inclusive_us_per_observed_graph_replay": 4.3149999999999995
+        },
+        "AscendCL@aclnnGroupedMatmulV5": {
+          "count": 80,
+          "inclusive_sum_us": 1309.64,
+          "mean_us": 16.3705,
+          "p50_us": 15.995000000000001,
+          "p95_us": 20.093,
+          "max_us": 24.25,
+          "count_per_observed_graph_replay": 8.0,
+          "inclusive_us_per_observed_graph_replay": 130.964
+        },
+        "AscendCL@aclnnGtScalar": {
+          "count": 3,
+          "inclusive_sum_us": 84.37,
+          "mean_us": 28.123333333333335,
+          "p50_us": 22.62,
+          "p95_us": 37.721999999999994,
+          "max_us": 39.4,
+          "count_per_observed_graph_replay": 0.3,
+          "inclusive_us_per_observed_graph_replay": 8.437000000000001
+        },
+        "AscendCL@aclnnIndex": {
+          "count": 102,
+          "inclusive_sum_us": 2245.2,
+          "mean_us": 22.011764705882353,
+          "p50_us": 19.369999999999997,
+          "p95_us": 35.55199999999994,
+          "max_us": 42.46,
+          "count_per_observed_graph_replay": 10.2,
+          "inclusive_us_per_observed_graph_replay": 224.51999999999998
+        },
+        "AscendCL@aclnnIndexPutImpl": {
+          "count": 30,
+          "inclusive_sum_us": 3502.53,
+          "mean_us": 116.751,
+          "p50_us": 110.955,
+          "p95_us": 140.58449999999996,
+          "max_us": 197.91,
+          "count_per_observed_graph_replay": 3.0,
+          "inclusive_us_per_observed_graph_replay": 350.25300000000004
+        },
+        "AscendCL@aclnnIndexPutImplGetWorkspaceSize": {
+          "count": 30,
+          "inclusive_sum_us": 2680.53,
+          "mean_us": 89.35100000000001,
+          "p50_us": 84.64,
+          "p95_us": 103.4915,
+          "max_us": 142.12,
+          "count_per_observed_graph_replay": 3.0,
+          "inclusive_us_per_observed_graph_replay": 268.053
+        },
+        "AscendCL@aclnnInnerFusedInferAttentionScore": {
+          "count": 110,
+          "inclusive_sum_us": 4827.32,
+          "mean_us": 43.88472727272727,
+          "p50_us": 39.08,
+          "p95_us": 78.07350000000001,
+          "max_us": 123.47,
+          "count_per_observed_graph_replay": 11.0,
+          "inclusive_us_per_observed_graph_replay": 482.73199999999997
+        },
+        "AscendCL@aclnnInnerFusedInferAttentionScoreGetWorkspaceSize": {
+          "count": 110,
+          "inclusive_sum_us": 2404.37,
+          "mean_us": 21.85790909090909,
+          "p50_us": 18.22,
+          "p95_us": 43.036,
+          "max_us": 70.87,
+          "count_per_observed_graph_replay": 11.0,
+          "inclusive_us_per_observed_graph_replay": 240.43699999999998
+        },
+        "AscendCL@aclnnInnerMoeTokenUnpermute": {
+          "count": 40,
+          "inclusive_sum_us": 753.57,
+          "mean_us": 18.83925,
+          "p50_us": 18.57,
+          "p95_us": 23.5815,
+          "max_us": 23.99,
+          "count_per_observed_graph_replay": 4.0,
+          "inclusive_us_per_observed_graph_replay": 75.357
+        },
+        "AscendCL@aclnnInnerMoeTokenUnpermuteGetWorkspaceSize": {
+          "count": 40,
+          "inclusive_sum_us": 534.5,
+          "mean_us": 13.3625,
+          "p50_us": 12.94,
+          "p95_us": 13.944999999999999,
+          "max_us": 27.09,
+          "count_per_observed_graph_replay": 4.0,
+          "inclusive_us_per_observed_graph_replay": 53.45
+        },
+        "AscendCL@aclnnInplaceCopy": {
+          "count": 1039,
+          "inclusive_sum_us": 14023.6,
+          "mean_us": 13.497208854667951,
+          "p50_us": 11.97,
+          "p95_us": 22.192,
+          "max_us": 57.09,
+          "count_per_observed_graph_replay": 103.9,
+          "inclusive_us_per_observed_graph_replay": 1402.3600000000001
+        },
+        "AscendCL@aclnnInplaceCopyGetWorkspaceSize": {
+          "count": 175,
+          "inclusive_sum_us": 3322.9,
+          "mean_us": 18.988,
+          "p50_us": 18.93,
+          "p95_us": 23.41199999999999,
+          "max_us": 52.32,
+          "count_per_observed_graph_replay": 17.5,
+          "inclusive_us_per_observed_graph_replay": 332.29
+        },
+        "AscendCL@aclnnInplaceFillScalar": {
+          "count": 209,
+          "inclusive_sum_us": 1430.8,
+          "mean_us": 6.845933014354067,
+          "p50_us": 2.33,
+          "p95_us": 17.456,
+          "max_us": 64.89,
+          "count_per_observed_graph_replay": 20.9,
+          "inclusive_us_per_observed_graph_replay": 143.07999999999998
+        },
+        "AscendCL@aclnnInplaceFillTensor": {
+          "count": 30,
+          "inclusive_sum_us": 80.03,
+          "mean_us": 2.667666666666667,
+          "p50_us": 2.0300000000000002,
+          "p95_us": 5.811499999999998,
+          "max_us": 11.73,
+          "count_per_observed_graph_replay": 3.0,
+          "inclusive_us_per_observed_graph_replay": 8.003
+        },
+        "AscendCL@aclnnInplaceMaskedFillScalar": {
+          "count": 1,
+          "inclusive_sum_us": 20.59,
+          "mean_us": 20.59,
+          "p50_us": 20.59,
+          "p95_us": 20.59,
+          "max_us": 20.59,
+          "count_per_observed_graph_replay": 0.1,
+          "inclusive_us_per_observed_graph_replay": 2.059
+        },
+        "AscendCL@aclnnInplaceZero": {
+          "count": 120,
+          "inclusive_sum_us": 1354.87,
+          "mean_us": 11.290583333333334,
+          "p50_us": 10.26,
+          "p95_us": 15.907,
+          "max_us": 21.16,
+          "count_per_observed_graph_replay": 12.0,
+          "inclusive_us_per_observed_graph_replay": 135.487
+        },
+        "AscendCL@aclnnLtScalar": {
+          "count": 1,
+          "inclusive_sum_us": 20.21,
+          "mean_us": 20.21,
+          "p50_us": 20.21,
+          "p95_us": 20.21,
+          "max_us": 20.21,
+          "count_per_observed_graph_replay": 0.1,
+          "inclusive_us_per_observed_graph_replay": 2.021
+        },
+        "AscendCL@aclnnMatmul": {
+          "count": 281,
+          "inclusive_sum_us": 3708.28,
+          "mean_us": 13.196725978647688,
+          "p50_us": 12.84,
+          "p95_us": 17.66,
+          "max_us": 49.54,
+          "count_per_observed_graph_replay": 28.1,
+          "inclusive_us_per_observed_graph_replay": 370.82800000000003
+        },
+        "AscendCL@aclnnMoeGatingTopK": {
+          "count": 40,
+          "inclusive_sum_us": 710.52,
+          "mean_us": 17.762999999999998,
+          "p50_us": 17.34,
+          "p95_us": 20.813499999999994,
+          "max_us": 24.56,
+          "count_per_observed_graph_replay": 4.0,
+          "inclusive_us_per_observed_graph_replay": 71.05199999999999
+        },
+        "AscendCL@aclnnMoeGatingTopKGetWorkspaceSize": {
+          "count": 40,
+          "inclusive_sum_us": 801.75,
+          "mean_us": 20.04375,
+          "p50_us": 19.395,
+          "p95_us": 22.046,
+          "max_us": 37.44,
+          "count_per_observed_graph_replay": 4.0,
+          "inclusive_us_per_observed_graph_replay": 80.175
+        },
+        "AscendCL@aclnnMoeInitRoutingV3": {
+          "count": 40,
+          "inclusive_sum_us": 751.76,
+          "mean_us": 18.794,
+          "p50_us": 17.595,
+          "p95_us": 26.1475,
+          "max_us": 31.22,
+          "count_per_observed_graph_replay": 4.0,
+          "inclusive_us_per_observed_graph_replay": 75.176
+        },
+        "AscendCL@aclnnMoeTokenUnpermuteGetWorkspaceSize": {
+          "count": 40,
+          "inclusive_sum_us": 946.37,
+          "mean_us": 23.65925,
+          "p50_us": 23.155,
+          "p95_us": 25.1775,
+          "max_us": 38.85,
+          "count_per_observed_graph_replay": 4.0,
+          "inclusive_us_per_observed_graph_replay": 94.637
+        },
+        "AscendCL@aclnnMul": {
+          "count": 91,
+          "inclusive_sum_us": 1222.02,
+          "mean_us": 13.428791208791209,
+          "p50_us": 13.27,
+          "p95_us": 17.325,
+          "max_us": 24.24,
+          "count_per_observed_graph_replay": 9.1,
+          "inclusive_us_per_observed_graph_replay": 122.202
+        },
+        "AscendCL@aclnnMuls": {
+          "count": 1,
+          "inclusive_sum_us": 17.24,
+          "mean_us": 17.24,
+          "p50_us": 17.24,
+          "p95_us": 17.24,
+          "max_us": 17.24,
+          "count_per_observed_graph_replay": 0.1,
+          "inclusive_us_per_observed_graph_replay": 1.7239999999999998
+        },
+        "AscendCL@aclnnNeScalar": {
+          "count": 40,
+          "inclusive_sum_us": 448.26,
+          "mean_us": 11.2065,
+          "p50_us": 11.195,
+          "p95_us": 11.9505,
+          "max_us": 12.91,
+          "count_per_observed_graph_replay": 4.0,
+          "inclusive_us_per_observed_graph_replay": 44.826
+        },
+        "AscendCL@aclnnScatterPaKvCache": {
+          "count": 10,
+          "inclusive_sum_us": 500.31,
+          "mean_us": 50.031,
+          "p50_us": 49.834999999999994,
+          "p95_us": 55.8365,
+          "max_us": 56.21,
+          "count_per_observed_graph_replay": 1.0,
+          "inclusive_us_per_observed_graph_replay": 50.031
+        },
+        "AscendCL@aclnnScatterPaKvCacheGetWorkspaceSize": {
+          "count": 10,
+          "inclusive_sum_us": 1104.81,
+          "mean_us": 110.481,
+          "p50_us": 109.33,
+          "p95_us": 122.3455,
+          "max_us": 123.43,
+          "count_per_observed_graph_replay": 1.0,
+          "inclusive_us_per_observed_graph_replay": 110.481
+        },
+        "AscendCL@aclnnSigmoid": {
+          "count": 50,
+          "inclusive_sum_us": 612.65,
+          "mean_us": 12.253,
+          "p50_us": 11.44,
+          "p95_us": 16.743499999999994,
+          "max_us": 34.71,
+          "count_per_observed_graph_replay": 5.0,
+          "inclusive_us_per_observed_graph_replay": 61.265
+        },
+        "AscendCL@aclnnSub": {
+          "count": 100,
+          "inclusive_sum_us": 1128.38,
+          "mean_us": 11.283800000000001,
+          "p50_us": 10.86,
+          "p95_us": 14.329499999999996,
+          "max_us": 31.32,
+          "count_per_observed_graph_replay": 10.0,
+          "inclusive_us_per_observed_graph_replay": 112.83800000000001
+        },
+        "AscendCL@aclnnSubs": {
+          "count": 11,
+          "inclusive_sum_us": 169.86,
+          "mean_us": 15.441818181818183,
+          "p50_us": 12.94,
+          "p95_us": 25.54,
+          "max_us": 33.96,
+          "count_per_observed_graph_replay": 1.1,
+          "inclusive_us_per_observed_graph_replay": 16.986
+        },
+        "AscendCL@aclnnSwiGlu": {
+          "count": 80,
+          "inclusive_sum_us": 1482.08,
+          "mean_us": 18.526,
+          "p50_us": 18.07,
+          "p95_us": 21.899,
+          "max_us": 24.76,
+          "count_per_observed_graph_replay": 8.0,
+          "inclusive_us_per_observed_graph_replay": 148.208
+        },
+        "AscendCL@aclnnSwiGluGetWorkspaceSize": {
+          "count": 80,
+          "inclusive_sum_us": 1441.37,
+          "mean_us": 18.017125,
+          "p50_us": 17.82,
+          "p95_us": 19.600499999999997,
+          "max_us": 32.19,
+          "count_per_observed_graph_replay": 8.0,
+          "inclusive_us_per_observed_graph_replay": 144.137
+        },
+        "AscendCL@aclrtCreateEventExWithFlag": {
+          "count": 345,
+          "inclusive_sum_us": 1334.42,
+          "mean_us": 3.8678840579710148,
+          "p50_us": 4.42,
+          "p95_us": 5.308,
+          "max_us": 11.06,
+          "count_per_observed_graph_replay": 34.5,
+          "inclusive_us_per_observed_graph_replay": 133.442
+        },
+        "AscendCL@aclrtCtxGetSysParamOpt": {
+          "count": 381,
+          "inclusive_sum_us": 638.18,
+          "mean_us": 1.67501312335958,
+          "p50_us": 1.8,
+          "p95_us": 2.13,
+          "max_us": 2.79,
+          "count_per_observed_graph_replay": 38.1,
+          "inclusive_us_per_observed_graph_replay": 63.818
+        },
+        "AscendCL@aclrtDestroyEvent": {
+          "count": 276,
+          "inclusive_sum_us": 379.5,
+          "mean_us": 1.375,
+          "p50_us": 1.39,
+          "p95_us": 2.4625,
+          "max_us": 5.72,
+          "count_per_observed_graph_replay": 27.6,
+          "inclusive_us_per_observed_graph_replay": 37.95
+        },
+        "AscendCL@aclrtGetCurrentContext": {
+          "count": 92,
+          "inclusive_sum_us": 84.0,
+          "mean_us": 0.9130434782608695,
+          "p50_us": 0.885,
+          "p95_us": 1.15,
+          "max_us": 1.74,
+          "count_per_observed_graph_replay": 9.2,
+          "inclusive_us_per_observed_graph_replay": 8.4
+        },
+        "AscendCL@aclrtGetDeviceCount": {
+          "count": 2,
+          "inclusive_sum_us": 6.17,
+          "mean_us": 3.085,
+          "p50_us": 3.085,
+          "p95_us": 3.5305,
+          "max_us": 3.58,
+          "count_per_observed_graph_replay": 0.2,
+          "inclusive_us_per_observed_graph_replay": 0.617
+        },
+        "AscendCL@aclrtGetHardwareSyncAddr": {
+          "count": 320,
+          "inclusive_sum_us": 337.82,
+          "mean_us": 1.0556875,
+          "p50_us": 1.01,
+          "p95_us": 1.4110000000000003,
+          "max_us": 2.49,
+          "count_per_observed_graph_replay": 32.0,
+          "inclusive_us_per_observed_graph_replay": 33.782
+        },
+        "AscendCL@aclrtGetResInCurrentThread": {
+          "count": 1452,
+          "inclusive_sum_us": 1642.14,
+          "mean_us": 1.1309504132231405,
+          "p50_us": 0.49,
+          "p95_us": 2.4945000000000004,
+          "max_us": 8.17,
+          "count_per_observed_graph_replay": 145.2,
+          "inclusive_us_per_observed_graph_replay": 164.214
+        },
+        "AscendCL@aclrtGetStreamAttribute": {
+          "count": 2957,
+          "inclusive_sum_us": 2076.91,
+          "mean_us": 0.7023706459249238,
+          "p50_us": 0.68,
+          "p95_us": 0.89,
+          "max_us": 3.37,
+          "count_per_observed_graph_replay": 295.7,
+          "inclusive_us_per_observed_graph_replay": 207.69099999999997
+        },
+        "AscendCL@aclrtLaunchKernelWithHostArgs": {
+          "count": 2924,
+          "inclusive_sum_us": 20024.85,
+          "mean_us": 6.8484439124487,
+          "p50_us": 5.91,
+          "p95_us": 13.25499999999999,
+          "max_us": 62.28,
+          "count_per_observed_graph_replay": 292.4,
+          "inclusive_us_per_observed_graph_replay": 2002.485
+        },
+        "AscendCL@aclrtMemcpyAsync": {
+          "count": 363,
+          "inclusive_sum_us": 15072.04,
+          "mean_us": 41.52077134986226,
+          "p50_us": 7.39,
+          "p95_us": 23.169,
+          "max_us": 11592.4,
+          "count_per_observed_graph_replay": 36.3,
+          "inclusive_us_per_observed_graph_replay": 1507.2040000000002
+        },
+        "AscendCL@aclrtMemcpyAsyncWithCondition": {
+          "count": 11,
+          "inclusive_sum_us": 151.39,
+          "mean_us": 13.762727272727272,
+          "p50_us": 13.86,
+          "p95_us": 16.02,
+          "max_us": 16.26,
+          "count_per_observed_graph_replay": 1.1,
+          "inclusive_us_per_observed_graph_replay": 15.139
+        },
+        "AscendCL@aclrtPointerGetAttributes": {
+          "count": 1687,
+          "inclusive_sum_us": 3300.9,
+          "mean_us": 1.956668642560759,
+          "p50_us": 0.91,
+          "p95_us": 5.766999999999998,
+          "max_us": 26.48,
+          "count_per_observed_graph_replay": 168.7,
+          "inclusive_us_per_observed_graph_replay": 330.09000000000003
+        },
+        "AscendCL@aclrtQueryEventStatus": {
+          "count": 27,
+          "inclusive_sum_us": 37.98,
+          "mean_us": 1.4066666666666667,
+          "p50_us": 1.0,
+          "p95_us": 4.313999999999998,
+          "max_us": 5.74,
+          "count_per_observed_graph_replay": 2.7,
+          "inclusive_us_per_observed_graph_replay": 3.7979999999999996
+        },
+        "AscendCL@aclrtQueryStream": {
+          "count": 0,
+          "inclusive_sum_us": 0.0,
+          "mean_us": null,
+          "p50_us": null,
+          "p95_us": null,
+          "max_us": null,
+          "count_per_observed_graph_replay": 0.0,
+          "inclusive_us_per_observed_graph_replay": 0.0
+        },
+        "AscendCL@aclrtQueryStreamStatus": {
+          "count": 0,
+          "inclusive_sum_us": 0.0,
+          "mean_us": null,
+          "p50_us": null,
+          "p95_us": null,
+          "max_us": null,
+          "count_per_observed_graph_replay": 0.0,
+          "inclusive_us_per_observed_graph_replay": 0.0
+        },
+        "AscendCL@aclrtRecordEvent": {
+          "count": 462,
+          "inclusive_sum_us": 4911.83,
+          "mean_us": 10.631666666666666,
+          "p50_us": 9.870000000000001,
+          "p95_us": 15.881999999999998,
+          "max_us": 56.63,
+          "count_per_observed_graph_replay": 46.2,
+          "inclusive_us_per_observed_graph_replay": 491.183
+        },
+        "AscendCL@aclrtStreamGetId": {
+          "count": 5102,
+          "inclusive_sum_us": 2438.32,
+          "mean_us": 0.4779145433163466,
+          "p50_us": 0.47,
+          "p95_us": 0.54,
+          "max_us": 1.2,
+          "count_per_observed_graph_replay": 510.2,
+          "inclusive_us_per_observed_graph_replay": 243.83200000000002
+        },
+        "AscendCL@aclrtStreamWaitEvent": {
+          "count": 346,
+          "inclusive_sum_us": 1996.4,
+          "mean_us": 5.769942196531792,
+          "p50_us": 6.98,
+          "p95_us": 11.23,
+          "max_us": 16.74,
+          "count_per_observed_graph_replay": 34.6,
+          "inclusive_us_per_observed_graph_replay": 199.64000000000001
+        },
+        "AscendCL@aclrtSynchronizeDeviceWithTimeout": {
+          "count": 1,
+          "inclusive_sum_us": 41.58,
+          "mean_us": 41.58,
+          "p50_us": 41.58,
+          "p95_us": 41.58,
+          "max_us": 41.58,
+          "count_per_observed_graph_replay": 0.1,
+          "inclusive_us_per_observed_graph_replay": 4.1579999999999995
+        },
+        "AscendCL@aclrtSynchronizeEvent": {
+          "count": 11,
+          "inclusive_sum_us": 16296.24,
+          "mean_us": 1481.4763636363637,
+          "p50_us": 20.18,
+          "p95_us": 6593.62,
+          "max_us": 9361.99,
+          "count_per_observed_graph_replay": 1.1,
+          "inclusive_us_per_observed_graph_replay": 1629.624
+        },
+        "AscendCL@aclrtSynchronizeStreamWithTimeout": {
+          "count": 31,
+          "inclusive_sum_us": 51159.61,
+          "mean_us": 1650.31,
+          "p50_us": 3.07,
+          "p95_us": 13242.92,
+          "max_us": 17688.76,
+          "count_per_observed_graph_replay": 3.1,
+          "inclusive_us_per_observed_graph_replay": 5115.961
+        },
+        "AscendCL@aclrtValueWrite": {
+          "count": 100,
+          "inclusive_sum_us": 617.3,
+          "mean_us": 6.172999999999999,
+          "p50_us": 5.84,
+          "p95_us": 8.8285,
+          "max_us": 11.22,
+          "count_per_observed_graph_replay": 10.0,
+          "inclusive_us_per_observed_graph_replay": 61.73
+        },
+        "AscendCL@hcom_allGather_": {
+          "count": 11,
+          "inclusive_sum_us": 4414.77,
+          "mean_us": 401.34272727272725,
+          "p50_us": 401.19,
+          "p95_us": 472.465,
+          "max_us": 522.06,
+          "count_per_observed_graph_replay": 1.1,
+          "inclusive_us_per_observed_graph_replay": 441.47700000000003
+        },
+        "AscendCL@hcom_allReduce_": {
+          "count": 81,
+          "inclusive_sum_us": 59484.72,
+          "mean_us": 734.3792592592592,
+          "p50_us": 723.83,
+          "p95_us": 797.89,
+          "max_us": 885.86,
+          "count_per_observed_graph_replay": 8.1,
+          "inclusive_us_per_observed_graph_replay": 5948.472
+        },
+        "Event::record": {
+          "count": 183,
+          "inclusive_sum_us": 16687.29,
+          "mean_us": 91.18737704918033,
+          "p50_us": 87.12,
+          "p95_us": 131.845,
+          "max_us": 211.62,
+          "count_per_observed_graph_replay": 18.3,
+          "inclusive_us_per_observed_graph_replay": 1668.729
+        },
+        "Event::synchronize": {
+          "count": 11,
+          "inclusive_sum_us": 16907.83,
+          "mean_us": 1537.0754545454547,
+          "p50_us": 69.58,
+          "p95_us": 6661.965,
+          "max_us": 9418.43,
+          "count_per_observed_graph_replay": 1.1,
+          "inclusive_us_per_observed_graph_replay": 1690.7830000000001
+        },
+        "Event::wait": {
+          "count": 162,
+          "inclusive_sum_us": 11378.56,
+          "mean_us": 70.23802469135802,
+          "p50_us": 69.5,
+          "p95_us": 80.599,
+          "max_us": 112.47,
+          "count_per_observed_graph_replay": 16.2,
+          "inclusive_us_per_observed_graph_replay": 1137.856
+        }
+      },
+      "scope": "Exported actual calls with inclusive host API duration; neither physical kernel time nor end-to-end performance. Missing query exports cannot prove zero execution.",
+      "worker_binding": {
+        "worker_pid": 1004047,
+        "visible_device_index": 3,
+        "hardware_labels_observed": [
+          "NPU 3"
+        ],
+        "profiler_info_sha256": "8cdaa16a6d60ec5f9dd080d2bc490561019bc466de0b6e2305abbf7f3ee75b61",
+        "passed": true,
+        "scope": "Native profiler rank/PID binds observed hardware label to worker visible ordinal; do not equate visible ordinal with host npu-smi physical ID"
+      }
+    }
+  ],
+  "passed": true,
+  "scope": "Actual mixed-capture runtime call counts and inclusive host API durations; no timing benefit, physical P/D device attribution or kernel speedup inferred"
+}
