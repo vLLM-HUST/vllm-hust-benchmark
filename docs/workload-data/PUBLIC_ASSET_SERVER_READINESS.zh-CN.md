@@ -15,7 +15,19 @@ python scripts/prepare_chartqa_native_toolkit.py --output /external/chartqa-tool
 
 默认仅规划；`--execute`只接受新目录，不覆盖失败记录。`--archive`使用官方归档，完整Git tree验证通过才认为源码取得。
 后续导入应设置`PYTHONDONTWRITEBYTECODE=1`，避免在原源码树写入缓存。 当前仅源码完整性已验证；原生模块依赖、数据/协议绑定、NPU视觉生成、原评分与研究侧接通仍未完成。
-根Python模块预检在缺少`tabulate`处退出，正在独立客户端环境补依赖；不能以源码取得冒充环境安装或原生评测成功。
+模块预检经历缺少`tabulate`、`datasets`及ARM `decord`等依赖；Decord现已按原v0.6.0源码和两个原子模块版本在私有目录编译、安装并导入。
+私有FFmpeg4.1.11的`libavdevice`已补齐；旧链接失败及多余的`libpostproc`断言保留，不因此修改原源码或系统库。完整工具模块导入仍在补依赖，不能冒充原生评测成功。
+
+预设TSV地址在服务器被TLS校验判定证书过期，未关闭校验。复用已固定校验的HF原测试Parquet，使用以下无损存储适配入口：
+
+```bash
+python scripts/prepare_chartqa_original_view.py --source-file /external/ChartQA/data/test-00000-of-00001-e2cd0b7a0f9eb20d.parquet --output /external/chartqa-original-view
+python scripts/prepare_chartqa_original_view.py --source-file /external/ChartQA/data/test-00000-of-00001-e2cd0b7a0f9eb20d.parquet --output /external/chartqa-original-view --execute
+python scripts/prepare_chartqa_original_view.py --source-file /external/ChartQA/data/test-00000-of-00001-e2cd0b7a0f9eb20d.parquet --output /external/chartqa-original-view --verify-only
+```
+
+全部2500条的问题、完整参考答案列表、原顺序、类别及图像原字节已在服务器逐项比对通过。
+`ChartQA_HF_ORIGINAL_TEST`只是工具读取格式视图的名称，不是新数据集，也不声称字节等同于工具发布的预设TSV。生成视图包含原始数据，必须留在外部私有目录，不能提交仓库。
 
 ## LongMemEval-V2 官方多模态记忆任务（原始准备与负对照已验证，整项未完成）
 
@@ -1460,7 +1472,8 @@ requirements及其实际导入依赖、OpenAI SDK和数据包，准备固定ROUG
 2026-10-26新增`kv_retrieval`原始0/1/2验证：Qwen3.5-9B BF16/TP1、服务上下文262144，完整输入分别169100、169118、169254
 token，原预算50，三条stop，作者评分1.0；保存请求、参考、响应、摘要及用量均已独立回查。
 适用模型可显式增加`--disable-thinking`：同时作用于预检分词与实际请求，只设置模型的`chat_template_kwargs.enable_thinking=false`，不改作者提示、角色或预算。默认不增加这个选项，旧结果不重跑。
-该9B配置与旧27B六协议证据分别保留，不合成为统一模型的总体质量或性能结果。其他四个上下文协议及`math_calc`原消息模板兼容问题仍未完成；详见原清单与复用审计。
+同一9B配置还完成`code_debug`原始0/1/2：完整214956/214962/214964 token，原预算5，三条length、作者评分0，独立回查通过；不延长预算重跑。
+该9B配置与旧27B六协议证据分别保留，不合成为统一模型的总体质量或性能结果。其他三个上下文协议及`math_calc`原消息模板兼容问题仍未完成；详见原清单与复用审计。
 
 上述克隆及后续依赖安装只在服务器执行。固定配置为
 `configs/workload-native/infinitebench-author-code-pins.json`，核对六份作者代码/说明文件的 Git blob 及字节数，不导入作者模块。

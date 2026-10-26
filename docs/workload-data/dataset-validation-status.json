@@ -1295,7 +1295,7 @@
       "delivery_receipt": null,
       "model_asset_preflight": "docs/workload-data/validation/multimodal-existing-model-preflight-20261024.json",
       "original_processor_preflight": "docs/workload-data/validation/chartqa-original-processor-20261024.json",
-      "blocker": "Existing Qwen3.5-27B CPU processor successfully encoded the original first three ChartQA images/questions with unchanged local processor files; no weights loaded or model calls. Current service remains language-model-only; vision-enabled Ascend inference and official scoring remain unvalidated. No service changed or additional weights downloaded."
+      "blocker": "New9B multimodal service ready but no ChartQA native inference/scoring yet. Fixed VLMEvalKit897-file tree and official ARM decord build/import verified. All2500 original HF test rows converted to toolkit-compatible storage view and independently compared for question/reference/order/category/image-byte equality; not claimed byte-identical to published toolkit TSV, whose preset URL TLS certificate is expired. Remaining full module imports, native visual calls/scoring and final delivery closure pending; initial CPU-only processor evidence retained."
     },
     "VIDEOMME": {
       "scope": "public",
@@ -1591,7 +1591,7 @@
       "legacy_checked": false,
       "existing_receipt": null,
       "delivery_receipt": null,
-      "blocker": "All12 originals/all3946 raw-field and index rows plus36 exact-provider/fixed-research readbacks verified. Old27B six protocols first3 each independently audited; new9B BF16/TP1/262144 context kv_retrieval first3 now executed and independently audited with original169100/169118/169254-token inputs, budget50, explicit per-request nonthinking, author score1.0. Four other context protocols and math_calc role compatibility remain unverified. No truncation/role rewriting, mixed-model quality/performance aggregate or full-source completion.",
+      "blocker": "All12 originals/all3946 raw-field and index rows plus36 exact-provider/fixed-research readbacks verified. Old27B six protocols first3 each audited; new9B BF16/TP1/262144 context kv_retrieval and code_debug first3 each executed and independently audited. kv_retrieval original169100/169118/169254-token inputs, budget50, score1.0; code_debug214956/214962/214964-token inputs, budget5, three length termini and score0 retained. Three other context protocols and math_calc role compatibility remain unverified. No truncation/role rewriting, mixed-model quality/performance aggregate or full-source completion.",
       "acquisition_reuse_receipt": "docs/workload-data/validation/research-acquisition-reuse-audit-20261025.json",
       "historical_raw_file_specs": 12,
       "public_asset_preparer": "scripts/prepare_reused_research_assets.py",
@@ -1601,8 +1601,8 @@
       "preparation_mapping_validation_scope": "All12 real original files full3946 rows independently checked against both public typed mappings:800 numeric-answer-array and3146 string-answer-array rows, all inputs/answer types/file/row relationships and indices equal;36 public/fixed-dd research readbacks passed. No coercion or research features, no default dependency upgrade; original numeric IDs represented by declared canonical string identifiers including0.",
       "official_code_preflight": "scripts/verify_infinitebench_original_code.py",
       "native_runner_software_only": "scripts/run_infinitebench_original.py",
-      "native_runner_protocol_retention": "Old27B six protocols first3 each retain18 audited tasks including11 length termini. New9B kv_retrieval first3 separately audited, original inputs/budget50 and explicit model thinking=false preserved, three stop and author score1.0. No existing valid cases rerun; audits0 model calls. Four other context protocols plus math_calc remain; source checkbox unchanged.",
-      "official_code_validation_scope": "Fixed6 author files and all12 original data files/2,499,838,795bytes verified; seven distinct selected native protocols across two explicit model profiles audited, not one uniform quality/performance result. All3946 original rows/index and36 exactCI283-provider/dd-research readbacks verified. Historical429/context/role failures retained. Not full-source native delivery."
+      "native_runner_protocol_retention": "Old27B six protocols first3 each retain18 audited tasks including11 length termini. New9B kv_retrieval and code_debug first3 each separately audited, original prompts/inputs/budgets50 and5 and explicit model thinking=false preserved; scores1.0 and0, stop and length termini retained. No existing valid cases rerun; audits0 model calls. Three other context protocols plus math_calc remain; source checkbox unchanged.",
+      "official_code_validation_scope": "Fixed6 author files and all12 original data files/2,499,838,795bytes verified; eight distinct selected native protocols across two explicit model profiles audited, not one uniform quality/performance result. All3946 original rows/index and36 exactCI283-provider/dd-research readbacks verified. Historical429/context/role failures retained. Not full-source native delivery."
     },
     "RULER": {
       "scope": "public",

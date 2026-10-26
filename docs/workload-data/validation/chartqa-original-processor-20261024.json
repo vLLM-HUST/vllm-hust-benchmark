@@ -11,13 +11,14 @@
     "native_model_calls": 0,
     "source_checkbox_eligible": false,
     "source_preparation_entry": "scripts/prepare_chartqa_native_toolkit.py",
-    "module_import_preflight": "Isolated client import progressed past tabulate/datasets and stopped at missing ARM decord. Official PyPI binary-only install has no matching distribution; no fake module used. Not an environment pass.",
+    "module_import_preflight": "Official decord built/imported; full VLMEvalKit import next stopped at rouge_score. Remaining dependencies being completed; no fake module or source patch. Client-only Torch backend auto-loading disabled, no CPU model inference or serving environment changes.",
     "client_compatibility_constraints": "datasets4.8.5, huggingface_hub1.33.0, pyarrow22.0.0 with inherited numpy1.26.4; initial incompatible candidates removed only from this client environment, serving environment unchanged",
     "decord_source": {
       "revision": "6a3617cef035535193f390f86399dde139fa2a53",
       "git_tree": "603de81af7126164f2933dd289a3d7544b134228",
       "both_original_gitlink_source_trees_verified": true,
-      "build_status": "Initial link failed because FFmpeg libavdevice was disabled; original source unchanged, private FFmpeg library configuration repair in progress",
+      "build_status": "Official decord0.6.0 compiled, installed and imported after private FFmpeg avdevice build; original source unchanged, original failures retained",
+      "success_receipt": "chartqa-decord-link-resume-32050-001/process-private.json",
       "original_build_failure_receipt": "chartqa-decord-official-build-32050-001/process-private.json"
     },
     "ffmpeg_source": {
@@ -25,11 +26,23 @@
       "revision": "76ee3e41df5157317ee209d3e6cc0829af5f963f",
       "git_tree": "778fd46ac63eb7d931125c0ded37d07f73ce68aa",
       "initial_private_prefix_build_exit": 0,
-      "additional_original_link_libraries": "libavdevice and libpostproc being rebuilt at private prefix; not installed into system paths",
+      "additional_original_link_libraries": "libavdevice built at private prefix; original decord linker does not require libpostproc. Earlier postproc assertion was unnecessary and is retained as a failed check; no GPL switch or system installation",
       "repair_state": "chartqa-ffmpeg-avdevice-repair-32050-001/process-private.json",
       "cpu_jobs": 4
     },
     "remaining": "Native module dependencies, original evaluation protocol binding, visual inference, original scoring and research handoff"
+  },
+  "original_test_toolkit_view_20261026": {
+    "source_revision": "b605b6e08b57faf4359aeb2fe6a3ca595f99b6c5",
+    "rows": 2500,
+    "view_name": "ChartQA_HF_ORIGINAL_TEST",
+    "view_sha256": "604c0b196c29c5fb0c40870b1e9a034efd1577aa37e0d5b8a48ee11cdb4b8d5a",
+    "all_original_question_reference_order_category_and_image_bytes_verified": true,
+    "published_toolkit_tsv_identity_claim": false,
+    "original_preset_url_issue": "Server TLS rejected expired certificate; TLS verification not disabled to download data",
+    "server_preparation_receipt": "chartqa-original-toolkit-view-32050-001/preparation-public.json",
+    "native_model_calls": 0,
+    "source_checkbox_eligible": false
   },
   "status": "CPU_ORIGINAL_IMAGES_PROCESSOR_PASSED_NOT_INFERENCE",
   "model_calls": 0,
