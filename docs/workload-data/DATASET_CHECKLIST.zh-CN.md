@@ -1,5 +1,13 @@
 # 数据集逐项验证清单
 
+### RepoBench原生仓库级代码补全（准备中，未交付）
+
+- [x] 固定[作者v1.1源码](https://github.com/Leolty/repobench/tree/e0cfd34c9e7cd8f057efd32b9280b9719ae12a91)，12文件逐文件大小/Git
+  blob核验；原生入口为`run.py`和`eval.py`，保留EM/Edit Similarity/CodeBLEU评分，不改为聊天问答。
+- [x] Python/Java固定版本10份原始Parquet全部在服务器取得并核验大小/SHA256；完整检查49684行、11原字段及context的path/snippet关系。覆盖2语言×3设置×9长度档共54层；HF主站不可达时使用同发布方固定版本镜像，不改任务。不在本地或Git保存原始数据。
+- [ ] 公开获取/统一适配、原生模型环境与执行、官方评分和实际CI/研究接入。作者示例推荐DeepSeek-Coder-1.3B-Base，但`run.py`硬编码CUDA，依赖列表还包含stdlib
+  `difflib`，不能盲目照装后宣称NPU可用。须保留作者prompt构造/日期与长度过滤/下一行提取；不得将完整`all_code`、`next_line`或`gold_snippet_index`泄漏进请求。尚未下载模型或执行推理，不打总勾。
+
 ### StructEval剩余渲染/VQA环境（未交付）
 
 - [x] 公开只读入口`scripts/prepare_structeval_rendering_plan.py --data-file <原parquet> --official-archive <固定官方zip> --package-root <原structeval包目录> --output <新元数据json>`已在服务器执行；2035原行、27官方模块身份通过，明确950非渲染/1085渲染行。只输出原协议计数与固定位置，不调用模型或渲染器。
