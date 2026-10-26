@@ -184,6 +184,12 @@ def build(revision, read=None):
                         if english
                         else "三组各3600秒真实Agent记录保留；"
                     ) + summary(value, english)
+                elif row[0] == "TerminalBench 2.1":
+                    row[1] = (
+                        "89 tasks and 1,035 source files verified; derived images are being prepared for domestic ARM64. No build qualification or task pass rate yet."
+                        if english
+                        else "原89题1035份任务文件核验通过；按国产ARM64准备派生镜像，尚无构建或任务通过率结果"
+                    )
     return data
 
 
