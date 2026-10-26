@@ -113,6 +113,28 @@ def validate_results(evaluation, metrics, ids):
     return {"selected_count": len(ids), "official_pass_at_1": value}
 
 
+def validate_sanitized_selection(path, selected_ids):
+    """Reject changed selection before executing official functional tests."""
+    records = [
+        json.loads(line) for line in Path(path).read_text().splitlines() if line.strip()
+    ]
+    require(
+        all(isinstance(record, dict) for record in records),
+        "official sanitizer returned non-object records",
+    )
+    require(
+        [record.get("task_id") for record in records] == selected_ids,
+        "official sanitizer dropped/reordered original tasks",
+    )
+
+
+def run_official_steps(commands, selected_ids, sanitized):
+    require(len(commands) == 2, "exact author sanitize/evaluate steps required")
+    subprocess.run([sys.executable, *commands[0][1:]], check=True)
+    validate_sanitized_selection(sanitized, selected_ids)
+    subprocess.run([sys.executable, *commands[1][1:]], check=True)
+
+
 def evaluate():
     control = json.loads(Path("/inputs/control-private.json").read_text())
     assert_isolation(control["host_namespaces"])
@@ -137,17 +159,9 @@ def evaluate():
     require(
         not Path("/output/fresh-cache").exists(), "fresh groundtruth cache required"
     )
-    for original in plan["commands"]:
-        command = [sys.executable, *original[1:]]
-        subprocess.run(command, check=True)
     sanitized = Path("/output/raw-solutions-private-sanitized.jsonl")
     selected_ids = plan["selected_task_ids"]
-    ids = [
-        json.loads(line)["task_id"]
-        for line in sanitized.read_text().splitlines()
-        if line.strip()
-    ]
-    require(ids == selected_ids, "official sanitizer dropped/reordered original tasks")
+    run_official_steps(plan["commands"], selected_ids, sanitized)
     base = "/output/raw-solutions-private-sanitized"
     evaluation = json.loads(Path(base + "_eval_results.json").read_text())
     metrics = json.loads(Path(base + "_pass_at_k.json").read_text())

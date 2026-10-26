@@ -117,6 +117,7 @@ python scripts/run_bigcodebench_container_scoring.py \
 socket；只允许新建输出目录可写。总内存32GiB、禁止swap、进程数1024， 并保留作者30GiB地址空间/数据和10MiB栈限制，不覆盖官方worker选择；资源不足不能算完成。
 执行前比较宿主与容器mount/net/PID namespace身份，并再次核对暂存原始文件和源码摘要。
 官方sanitize、reference检查及candidate评分按原流程运行，reference必须全部通过，
+sanitize结束后、调用evaluate之前先核对原选题ID和顺序；丢题、重排、重复或非对象记录立即失败，不继续执行功能测试。合法空答案不替换，仍交官方评分。
 且结果覆盖全部选定ID、每题一个原始输出、pass@1与逐题状态一致，才产生原生评分回执。
 
 原代码、评分细节、日志及容器句柄均保留于私有工作目录；失败不自动重启、删除容器或 回退宿主执行。`launch-private.json`记录容器名称和终态；未结束时应按该名称inspect，

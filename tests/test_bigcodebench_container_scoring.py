@@ -1,6 +1,7 @@
 """Inert software fixtures; no container or generated-code execution."""
 
 from copy import deepcopy
+import json
 import importlib.util
 from pathlib import Path
 import sys
@@ -98,6 +99,52 @@ def test_environment_or_coverage_failure_cannot_be_accepted(failure):
 def test_worker_refuses_current_unqualified_host_before_import():
     with pytest.raises(RuntimeError, match="private nonroot PID1"):
         worker.assert_isolation({})
+
+
+@pytest.mark.parametrize("failure", ["missing", "reordered", "duplicate", "nonobject"])
+def test_sanitize_selection_checked_before_evaluation(tmp_path, monkeypatch, failure):
+    ids = ["BigCodeBench/0", "BigCodeBench/1", "BigCodeBench/2"]
+    records = [{"task_id": task, "solution": ""} for task in ids]
+    if failure == "missing":
+        records.pop()
+    elif failure == "reordered":
+        records.reverse()
+    elif failure == "duplicate":
+        records.append(records[0])
+    else:
+        records[0] = None
+    sanitized = tmp_path / "sanitized.jsonl"
+    calls = []
+
+    def fake_run(command, **kwargs):
+        calls.append(command)
+        sanitized.write_text("\n".join(json.dumps(record) for record in records))
+
+    monkeypatch.setattr(worker.subprocess, "run", fake_run)
+    commands = [
+        ["python", "-m", "bigcodebench.sanitize"],
+        ["python", "-m", "bigcodebench.evaluate"],
+    ]
+    with pytest.raises(RuntimeError, match="sanitizer"):
+        worker.run_official_steps(commands, ids, sanitized)
+    assert len(calls) == 1
+    assert calls[0][2] == "bigcodebench.sanitize"
+
+
+def test_empty_sanitized_solution_is_not_replaced_or_rejected(tmp_path, monkeypatch):
+    sanitized = tmp_path / "sanitized.jsonl"
+    sanitized.write_text(json.dumps({"task_id": "BigCodeBench/0", "solution": ""}))
+    calls = []
+    monkeypatch.setattr(
+        worker.subprocess, "run", lambda command, **kwargs: calls.append(command)
+    )
+    commands = [
+        ["python", "-m", "bigcodebench.sanitize"],
+        ["python", "-m", "bigcodebench.evaluate"],
+    ]
+    worker.run_official_steps(commands, ["BigCodeBench/0"], sanitized)
+    assert len(calls) == 2
+    assert calls[1][2] == "bigcodebench.evaluate"
 
 
 def test_dependency_probe_keeps_pins_and_pip_check(tmp_path, monkeypatch):
