@@ -157,7 +157,8 @@ def run_records(
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
-        "source_id", choices=["WILDCHAT", "ULTRACHAT", "LMSYS_CHAT", "TULU3"]
+        "source_id",
+        choices=["WILDCHAT", "ULTRACHAT", "LMSYS_CHAT", "TULU3", "OPENTHOUGHTS3"],
     )
     parser.add_argument("--prepared", type=Path, required=True)
     parser.add_argument("--data-root", type=Path, required=True)

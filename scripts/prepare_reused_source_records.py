@@ -16,7 +16,7 @@ MAPPINGS = {
     "NATURALQUESTIONS": ROOT
     / "configs/workload-native/reused-source-mappings/naturalquestions.json",
 }
-DIALOGUE_SOURCES = {"WILDCHAT", "ULTRACHAT", "LMSYS_CHAT", "TULU3"}
+DIALOGUE_SOURCES = {"WILDCHAT", "ULTRACHAT", "LMSYS_CHAT", "TULU3", "OPENTHOUGHTS3"}
 INFINITE_MAPPINGS = {
     kind: ROOT
     / f"configs/workload-native/reused-source-mappings/infinitebench-{kind}.json"

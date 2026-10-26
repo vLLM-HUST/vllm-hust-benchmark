@@ -1,5 +1,14 @@
 # 数据集逐项验证清单
 
+### OpenThoughts3原对话语料（尚未交付）
+
+- [x] 沿用已登记发布方固定版本，120原分片/28188197544字节的身份全部登记。它是作者发布的合成推理训练语料，不冒称真实用户请求、独立质量评测集或作者训练复现。
+- [x] 生成前固定原分片0/25/110，均取得并二次校验；完整检查30000原行及4字段，实际code/math/science各10000行，均为原human/gpt两轮。首分片用NFS硬链接复用，未重复下载/复制286MB。[准备回执](validation/openthoughts3-original-readiness-20261027.json)
+- [x] 复用已有原资产获取、绑定/索引及历史对话续写入口；原`conversations/from/value`保留，只在API传输视图明确映射human→user、gpt→assistant，原问题不改，原teacher回答不进入对应目标请求，也不当质量金标准。
+- [ ] 对固定原样本做NPU续写、保存审计、公共字段/索引及固定研究消费闭环；其余117分片仅登记，不宣称已取数或全120万条验证。来源总勾保持未完成。
+
+获取先用`scripts/prepare_reused_research_assets.py OPENTHOUGHTS3 --mode plan --files <原分片路径>`查看；显式`--mode download --data-root <外部目录> --files ... --max-bytes <预算>`执行，`--mode verify`只读核验。默认550MB保护不允许意外全下28GB；同一固定版本需要镜像时显式`--hf-endpoint https://hf-mirror.com`，原SHA256仍必验。绑定沿用`scripts/prepare_reused_source_records.py OPENTHOUGHTS3 --data-root ... --output <独立目录> --files ...`。原始数据/长推理回答不进入Git、wheel或本地PC。
+
 ### SchemaStore原始schema资产（交付完成）
 
 - [x] 核查官方定位与原生校验方式：这是schema集合及原正/负例，不是用户请求/模型质量benchmark，不造prompt冒充原请求。官方流程为`npm clean-install`后`node ./cli.js check`，保留原schema、引用和正负例。[官方说明](https://github.com/SchemaStore/schemastore/blob/b3c6a70f2a535d14e8ad2bf460b3aa8f5c0efb27/CONTRIBUTING.md)

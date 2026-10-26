@@ -111,6 +111,21 @@ def test_new_publisher_pinned_source_is_not_fake_historical_acquisition():
     )
 
 
+def test_openthoughts_all_original_shards_registered_but_selection_is_explicit():
+    source, all_files = runner.selection("OPENTHOUGHTS3")
+    assert source["provenance_kind"] == "synthetic_reasoning_corpus"
+    assert not source.get("historical_acquisition_reuse")
+    assert len(all_files) == 120
+    assert sum(item["bytes"] for item in all_files) == 28188197544
+    assert all(
+        item["role"] == "raw_source" and len(item["sha256"]) == 64 for item in all_files
+    )
+    names = [f"data/train-{index:05d}-of-00120.parquet" for index in [0, 25, 110]]
+    _, selected = runner.selection("OPENTHOUGHTS3", names)
+    assert [item["path"] for item in selected] == names
+    assert len(selected) == 3  # Not a claim that all120 originals are downloaded.
+
+
 @pytest.mark.parametrize("failure", [None, "host", "revision", "path", "size", "type"])
 def test_explicit_github_transport_preserves_pinned_file(failure):
     source, files = runner.selection("NATURALQUESTIONS")

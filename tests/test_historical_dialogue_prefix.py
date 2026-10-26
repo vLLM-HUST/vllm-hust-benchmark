@@ -64,6 +64,30 @@ def test_unanswered_tail_is_explicit_and_has_no_invented_reference():
     assert view["request_after_original_prefix_length"] == 1
 
 
+def test_openthoughts_original_sharegpt_roles_are_only_transported_not_rewritten():
+    original = [
+        {"from": "human", "value": " full original question\n"},
+        {"from": "gpt", "value": "teacher annotation, not evaluation gold"},
+    ]
+    snapshot = deepcopy(original)
+    item = WorkloadRecord(
+        source={"source_id": "OPENTHOUGHTS3"},
+        task={"task_id": "fixture", "input": {"conversations": original}},
+        runtime={"kind": "historical_dialogue"},
+        replay={"source_row_index": 0},
+    )
+    (view,) = historical_dialogue_views(item)
+    assert view["messages"] == [{"role": "user", "content": original[0]["value"]}]
+    assert view["original_prefix_messages"] == original[:1]
+    assert view["reference"]["native_message"] == original[1]
+    assert view["reference"]["kind"] == "historical_reply_not_quality_gold"
+    assert "teacher annotation" not in str(view["messages"])
+    assert original == snapshot
+    original.append({"from": "tool", "value": "unsupported later turn"})
+    with pytest.raises(ValueError, match="from/value"):
+        historical_dialogue_views(item)
+
+
 def test_all_turns_keep_original_positions_and_teacher_forced_history():
     messages = [
         {"role": "user", "content": "first"},

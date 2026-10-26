@@ -11,7 +11,29 @@ HISTORICAL_DIALOGUE_FIELDS = {
     "ULTRACHAT": "messages",
     "LMSYS_CHAT": "conversation",
     "TULU3": "messages",
+    "OPENTHOUGHTS3": "conversations",
 }
+
+
+def _historical_messages(record):
+    source_id = record.source.get("source_id")
+    messages = record.task["input"].get(HISTORICAL_DIALOGUE_FIELDS[source_id])
+    if source_id != "OPENTHOUGHTS3":
+        return messages
+    if not isinstance(messages, list) or not messages:
+        raise ValueError("nonempty original OpenThoughts conversation required")
+    roles = {"human": "user", "gpt": "assistant", "system": "system"}
+    result = []
+    for turn in messages:
+        if (
+            not isinstance(turn, dict)
+            or set(turn) != {"from", "value"}
+            or turn["from"] not in roles
+            or not isinstance(turn["value"], str)
+        ):
+            raise ValueError("explicit original OpenThoughts from/value turns required")
+        result.append({"role": roles[turn["from"]], "content": turn["value"]})
+    return result
 
 
 def historical_dialogue_views(record: WorkloadRecord) -> list[dict]:
@@ -23,7 +45,7 @@ def historical_dialogue_views(record: WorkloadRecord) -> list[dict]:
     source_id = record.source.get("source_id")
     if source_id not in HISTORICAL_DIALOGUE_FIELDS:
         raise ValueError("explicit supported historical dialogue record required")
-    messages = record.task["input"].get(HISTORICAL_DIALOGUE_FIELDS[source_id])
+    messages = _historical_messages(record)
     if not isinstance(messages, list) or not messages:
         raise ValueError("nonempty original conversation required")
     # Validate every turn, including annotations on the final original reply.
@@ -79,7 +101,7 @@ def historical_dialogue_prefix(
         or record.runtime.get("kind") != "historical_dialogue"
     ):
         raise ValueError("explicit supported historical dialogue record required")
-    messages = record.task["input"].get(HISTORICAL_DIALOGUE_FIELDS[source_id])
+    messages = _historical_messages(record)
     if (
         not isinstance(messages, list)
         or type(target_message_index) is not int
@@ -118,6 +140,11 @@ def historical_dialogue_prefix(
     if any("name" in m and not isinstance(m["name"], str) for m in prefix):
         raise ValueError("invalid original message name")
     api_keys = {"role", "content", "name"}
+    native_messages = (
+        record.task["input"]["conversations"]
+        if source_id == "OPENTHOUGHTS3"
+        else messages
+    )
     return deepcopy(
         {
             "source_id": source_id,
@@ -139,7 +166,7 @@ def historical_dialogue_prefix(
             "reference": (
                 {
                     "kind": "historical_reply_not_quality_gold",
-                    "native_message": target,
+                    "native_message": native_messages[target_message_index],
                 }
                 if target is not None
                 else None
@@ -147,6 +174,18 @@ def historical_dialogue_prefix(
             "teacher_forced_original_history": True,
             "live_episode": False,
             "original_api_request_capture": False,
+            **(
+                {
+                    "original_prefix_messages": native_messages[:target_message_index],
+                    "transport_role_mapping": {
+                        "human": "user",
+                        "gpt": "assistant",
+                        "system": "system",
+                    },
+                }
+                if source_id == "OPENTHOUGHTS3"
+                else {}
+            ),
         }
     )
 
