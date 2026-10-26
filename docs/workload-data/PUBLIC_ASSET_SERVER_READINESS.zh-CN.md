@@ -4,7 +4,7 @@
 
 原始任务为句对释义二分类，发布方未提供聊天API提示/执行器；本仓新增的`scripts/run_paws_original.py`是**明确声明的零样本生成式模型适配**，不是作者官方API运行器或BERT论文模型复现。只把原`sentence1`/`sentence2`送入模型，原ID和参考标签不进入输入；原0/1语义不改，不改写、筛选或替换句子对。默认16输出token为本模型接入配置，不冒称发布方原预算；Qwen3.5-9B显式非思考。
 
-本次实际选择全8000条`labeled_final/test`，其余5文件各原前三条，共8015次分类调用，当前正在服务器运行；没有以读取/下载成功增加完成数。人工标注按原0/1标签计算正确率，非法输出计错、length/空输出原样保留；带噪声辅助集单独报告标签一致率，不能当人工测试准确率。新增公共适配源元数据`dataset_configuration`和`label_reference_kind`，不改原4数据字段，避免研究消费端误把噪声标签当人工gold。
+本次实际选择全8000条`labeled_final/test`，其余5文件各原前三条，共8015次分类调用，已全部执行并保存，离线逐题复核通过；全部stop、无非法输出，正式test正确6774/8000（84.675%）。该分数不是质量验收通过结论；没有以读取/下载成功增加完成数。带噪声辅助集单独报告标签一致率，不能当人工测试准确率。新增公共适配源元数据`dataset_configuration`和`label_reference_kind`，不改原4数据字段，避免研究消费端误把噪声标签当人工gold。[阶段回执](validation/paws-native-checkpoint-20261027.json)与公共提供者/固定研究消费最终闭环分开，后者未完成前来源不打总勾。
 
 ```bash
 python scripts/run_paws_original.py --data-root /external/paws-original/data --output /external/paws-run --full-test --disable-thinking --execute
