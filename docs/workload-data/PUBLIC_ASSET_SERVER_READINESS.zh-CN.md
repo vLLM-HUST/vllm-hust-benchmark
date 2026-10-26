@@ -906,7 +906,8 @@ python scripts/prepare_jsonschemabench_author_source.py --author-root /private/a
 WashingtonPost全38题已完成作者bench/evaluator；全部原schema、few-shot消息、保存输出和检查点逐条一致。
 30题声明支持、8题明确编译不支持，27条生成符合原validator，负面结果保留。
 独立保存结果重评不调用模型；原打印bootstrap未固定种子，重评固定seed0，不声称置信区间与旧打印逐字一致。
-其余配置/default原生验证与新准备入口CI收口待补；官方原字段接入及99处研究回查已完成，详见下文。
+单独default原始前三题已完成作者bench/evaluator及保存结果审计，3条符合原validator，不是全2867题。
+其余具名配置的原生验证与新准备入口CI收口待补；官方原字段接入及99处研究回查已完成，详见下文。
 
 #### 官方原始schema行准备与研究接入（不代表来源交付）
 
