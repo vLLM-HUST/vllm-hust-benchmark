@@ -80,6 +80,18 @@ def build_plan(prepared, author):
         },
         "selected_original_row_indices": indices,
         "selected_task_ids": selected_ids,
+        "validation_scope": {
+            "original_dataset_rows_preserved": 1140,
+            "selected_unique_tasks": len(selected_ids),
+            "all_original_tasks_selected": len(selected_ids) == 1140,
+            "sampling_does_not_remove_native_steps": True,
+            "required_per_selected_task": [
+                "author sanitize",
+                "author canonical solution/environment checks",
+                "author candidate functional evaluation",
+            ],
+            "boundary": "A complete sampled native workflow is not a full-suite quality result. Dataset preservation does not imply all tasks executed.",
+        },
         "required_environment": {
             "BIGCODEBENCH_OVERRIDE_PATH": "/inputs/original-dataset-private.jsonl",
             "XDG_CACHE_HOME": "/output/fresh-cache",

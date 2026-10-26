@@ -70,6 +70,12 @@ def test_plan_preserves_author_protocol_without_execution(tmp_path, monkeypatch)
     assert result["required_environment"]["XDG_CACHE_HOME"] == "/output/fresh-cache"
     assert result["source_checkbox_eligible"] is False
     assert result["functional_scoring_executed"] is False
+    scope = result["validation_scope"]
+    assert scope["original_dataset_rows_preserved"] == 1140
+    assert scope["selected_unique_tasks"] == 3
+    assert scope["all_original_tasks_selected"] is False
+    assert scope["sampling_does_not_remove_native_steps"] is True
+    assert len(scope["required_per_selected_task"]) == 3
     assert "private fixture" not in json.dumps(result)
 
 
