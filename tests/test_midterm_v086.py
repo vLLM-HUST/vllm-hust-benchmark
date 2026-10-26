@@ -9,7 +9,12 @@ def test_incremental_projection_preserves_completed_metrics(monkeypatch):
     monkeypatch.syspath_prepend(str(ROOT / "scripts"))
     import build_midterm_v086 as builder
 
-    data = builder.build("fixture", lambda path: (ROOT / path).read_bytes())
+    def read(path):
+        if path == builder.REPORT:
+            path = "reports/vllm-hust-midterm-20261019/中期测试报告-v086.md"
+        return (ROOT / path).read_bytes()
+
+    data = builder.build("fixture", read)
     old = json.loads((ROOT / "website-publication/data/midterm-v085.json").read_text())
     for key in (
         "wholechain_reference",
@@ -60,7 +65,9 @@ def test_v085_snapshot_and_formal_report(monkeypatch):
     old = json.loads((ROOT / "website-publication/data/midterm-v085.json").read_text())
     raw = (ROOT / builder.OLD_REPORT).read_bytes()
     assert hashlib.sha256(raw).hexdigest() == old["report_sha256"]
-    report = (ROOT / builder.REPORT).read_text()
+    report = (
+        ROOT / "reports/vllm-hust-midterm-20261019/中期测试报告-v086.md"
+    ).read_text()
     assert "报告版本：V0.86" in report
     assert "git apply退出码" in " ".join(report.split())
     assert "99.9397%" in report and "同轮计数" in report
