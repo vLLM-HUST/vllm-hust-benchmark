@@ -1465,7 +1465,21 @@
       ],
       "verified_unique_native_tasks": 950,
       "native_queue_state": "ALL_950_NONRENDER_TASKS_EXECUTED_AND_OFFICIALLY_RESCORED",
-      "blocker": "All19 nonrendering protocols each all50 original tasks audited: immutable339→480→621→950 checkpoints, no repeated original tasks. All1085 rendered/VQA tasks and final full-source handoff remain pending; full2035 source is not completed."
+      "blocker": "All19 nonrendering protocols/all950 original tasks retained without rerun. Fixed2035-row source and27 official modules reverified; remaining1085 rendering/VQA tasks require isolated generated-code execution and the complete original VQA evaluator. Current host lacks Docker/Podman/bwrap and full mount/PID/network namespace setup failed with Permission denied. Do not execute generated code on the host or count render-only as VQA completion. No full-source completion.",
+      "rendering_preparation": {
+        "entry": "scripts/prepare_structeval_rendering_plan.py",
+        "server_stage": "structeval-render-readiness-32028-001",
+        "original_rows": 2035,
+        "original_rendering_rows": 1085,
+        "official_modules_verified": 27,
+        "private_verified_node_available_but_not_on_default_path": true,
+        "full_isolation_probe_exit_code": 1,
+        "full_isolation_probe_error": "unshare: cannot change root filesystem propagation: Permission denied",
+        "sandbox_qualified": false,
+        "nonrendering_results_rerun": 0,
+        "generated_code_executed": false,
+        "model_calls": 0
+      }
     },
     "PAWS": {
       "scope": "public",

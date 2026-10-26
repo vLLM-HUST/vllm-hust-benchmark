@@ -1,5 +1,12 @@
 # 数据集逐项验证清单
 
+### StructEval剩余渲染/VQA环境（未交付）
+
+- [x] 公开只读入口`scripts/prepare_structeval_rendering_plan.py --data-file <原parquet> --official-archive <固定官方zip> --package-root <原structeval包目录> --output <新元数据json>`已在服务器执行；2035原行、27官方模块身份通过，明确950非渲染/1085渲染行。只输出原协议计数与固定位置，不调用模型或渲染器。
+- [x] 现有950条非渲染结果保留不重跑；当前PATH没有Docker/Podman/bwrap，完整隔离namespace探测失败（挂载传播Permission
+  denied）。私有Node可复用但不代表沙箱可用；二进制存在本身也不算环境合格。
+- [ ] 提供合格隔离worker后执行原渲染及完整VQA评测。Python/JavaScript/TeX生成代码不能直接在宿主机执行；worker应无网络、凭据或NPU设备，原输入只读、输出限额且有CPU/RAM/PID/时间边界。VQA可用明确配置的本地NPU视觉模型，不默认授权付费judge；渲染成功不能代替VQA完成。
+
 ### Mooncake官方存储回放（准备恢复，未交付）
 
 - [x] 实际CI工件`32e2e975`的46份安装载荷逐字节一致；35639条原始轨迹元数据逐字段保留并建立索引，固定研究消费者对每份首3/末3条共12条回读一致。所有记录均拒绝`request_body()`，不把长度/哈希元数据编成prompt；0模型调用、0存储回放。
