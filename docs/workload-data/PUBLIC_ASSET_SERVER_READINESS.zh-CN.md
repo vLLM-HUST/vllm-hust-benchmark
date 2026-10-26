@@ -1,5 +1,48 @@
 # 公开原始资产：服务器准备与任务验证缺口
 
+## TraceLab官方轨迹回放（原生交付尚未完成）
+
+最新终态：原100M默认文本池构建后到达两请求缓存资格探测，但原512-token探测未报告命中，原程序exit1，20轮轨迹尚未开始；见[原生失败回执](validation/tracelab-original-dry-run-20261024.json)。当前9B服务已启用两项缓存配置，但Ascend日志给出的Mamba
+align attention
+block为1024tokens，短于一个块的512-token探测不能保证命中；不是据此判断缓存全部失效。未改原探测、调整服务或换题，仍不勾来源完成。下文“已启动”指本次被探测拦截的尝试，不代表后台仍在回放。
+
+复用v0.0.2的665453轮原调用元数据、完整索引、官方DuckDB→CSV转换和原源码。**该来源没有公开用户prompt正文**；官方回放器用独立enwik9构造token池，并按原prefix/input/output长度、session/轮次和工具等待回放。它是作者定义的元数据驱动token-ID回放，不冒充原始文本请求或代码编辑环境；不迁入本项目自制的研究观测/特征分析。
+
+旧锁定构建成功，但二进制位于已失效容器的`/tmp`。现已用官方Rust1.90.0归档及发布方SHA256恢复到外部持久化目录，`cargo build --locked --release --jobs2`实际exit0，原源码和锁不变；新二进制SHA256为`00799a207367b119fb7b055517f1235894a0a37c6bea9851a5379a9c675e8e27`。这是编译完成，不是回放完成。当前固定前三个原session、全部20轮现场回放已启动，官方100M
+token池下限与缓存资格探测保留；未取得终态前不增加来源总勾。
+
+源码固定`uw-syfi/TraceLab@61fea8f97277d0aa247cc2e4c7e31f90ed2bea1c`，构建前后逐文件核对[原源码回执](validation/tracelab-official-replay-preparation-20261024.json)。在独立外部目录检出该版本，准备Rust/Cargo1.90、C编译工具链和OpenSSL头文件/运行库；不向系统环境安装包。本轮服务器使用只读现有Miniforge
+OpenSSL前缀，未修改其包。构建入口默认只规划：
+
+```bash
+python scripts/build_tracelab_original.py --official-source /external/TraceLab --cargo /external/rust/bin/cargo --output /external/tracelab-build
+python scripts/build_tracelab_original.py --official-source /external/TraceLab --cargo /external/rust/bin/cargo --output /external/tracelab-build --execute
+python scripts/build_tracelab_original.py --official-source /external/TraceLab --cargo /external/rust/bin/cargo --output /external/tracelab-build --verify-only
+```
+
+Cargo依赖按原锁获取到外部私有cache/target。自定义OpenSSL前缀时加`--openssl-prefix /external/openssl`；运行时对应加`--runtime-library-dir /external/openssl/lib`，不修改系统库搜索配置。上述路径均需由使用者按实际环境替换。
+
+原JSONL元数据获取可复用`workload-preparation/source_tools/acquire_release_datasets.py --source TRACELAB`（显式设置外部`--data-root`和新报告`--output`）。官方原生CSV另使用同一release的`syfi_coding_trace.duckdb`：160182272字节，SHA256
+`a7bab286bc640844560850965ccf47975cf66407154132abaab90f27ec9be744`，不得把DuckDB另计一个数据集。在原源码独立Python3.12环境安装匹配原锁的DuckDB1.5.3、NumPy2.4.6，调用原转换器：
+
+```bash
+python artifacts/trace_facts/csv_export/convert.py --db /external/syfi_coding_trace.duckdb -o /external/tracelab-full.csv --provider all --session-order shuffle --arrival-pattern poisson --arrival-rate 1 --seed 0 --tool-latency-source wall
+```
+
+在原源码根运行，保留全部session，不能设置转换器的session上限；固定CSV SHA256
+`9f077ff969a2d839e6753d4e58e7796fcfdf62fd8bc6f28873b3b6acdc3c7e65`。独立enwik9原文本身份见[文本池回执](validation/tracelab-independent-text-pool-20261024.json)，不是原轨迹prompt。所有数据留外部服务器目录。实际回放入口：
+
+```bash
+python scripts/run_tracelab_original.py --official-source /external/TraceLab --build /external/tracelab-build --trace /external/tracelab-full.csv --text-file /external/enwik9 --tokenizer /external/model/tokenizer.json --model MODEL_ALIAS --max-model-len 262144 --output /external/tracelab-run --execute
+```
+
+默认只规划；`--execute`才请求本机服务。模型服务须支持OpenAI `/v1/completions`的原token-ID输入/输出和streaming usage，并启用prefix
+caching及prompt-token details；官方两请求资格探测失败就保留失败，不跳过。默认原session
+ID字典序前三个、全部20轮；原模型请求预算、工具等待和100M默认token池不缩减，单session活跃并发只限定资源不改轮次。`--full`选择全轨迹，先按完整输入加原输出预算核对上下文，超限在模型调用前停止，不能截断或启用作者的跳过超限开关。完整轨迹最高1006780
+tokens，当前262144服务不足以全量跑。
+
+原生JSONL日志、原summary与失败仅留私有新目录；wrapper核验全部选定session/轮次、原长度和等待不变，不增加研究采集器，也不据本轮接通验证发表性能结论。原生日志自带的时延/cache字段属于作者工具输出，并不表示本项目已做研究观测或系统归因。
+
 ## MMMU（固定原validation抽样交付完成）
 
 2026-10-27[最终交付回执](validation/mmmu-native-delivery-20261027.json)：精确成功CPU CI

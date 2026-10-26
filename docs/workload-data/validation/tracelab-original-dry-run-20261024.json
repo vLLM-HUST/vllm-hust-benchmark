@@ -32,5 +32,30 @@
   "native_replay_executed": false,
   "performance_claim": false,
   "source_completion_checked": false,
-  "raw_payloads_public": false
+  "raw_payloads_public": false,
+  "native_attempt_20261027": {
+    "status": "ORIGINAL_CACHE_QUALIFICATION_FAILED_BEFORE_TRACE_ROUNDS",
+    "stage": "tracelab-native-replay-32028-001",
+    "public_entry": "scripts/run_tracelab_original.py",
+    "model": "Qwen/Qwen3.5-9B BF16 TP1 Ascend910B2, context262144",
+    "same_tokenizer_as_original_cpu_pool_audit": true,
+    "tokenizer_sha256": "5f9e4d4901a92b997e463c1f46055088b6cca5ca61a6522d1b9f64c4bb81cb42",
+    "pool_limit_override": false,
+    "native_control_flow_reached_cache_probe": true,
+    "official_probe_prompt_tokens": 512,
+    "official_probe_http_calls": 2,
+    "official_probe_second_cached_tokens": null,
+    "probe_exit_code": 1,
+    "selected_trace_rounds": 20,
+    "actual_trace_rounds_started": 0,
+    "prefix_caching_enabled_in_current_engine": true,
+    "prompt_token_details_enabled_in_current_service": true,
+    "engine_log_attention_block_size": 1024,
+    "engine_log_mamba_cache_mode": "align",
+    "diagnosis": "Official512-token probe is below the current1024-token aligned cache block. This explains why the probe cannot guarantee a hit on this profile; not evidence that caching flags were disabled or that all longer-prefix caching is broken.",
+    "native_probe_or_original_tasks_modified": false,
+    "service_restarted_or_configuration_changed": false,
+    "source_completion_checked": false,
+    "remaining": "Qualify an appropriate original-protocol-compatible model/service profile without changing the probe or replacing selected sessions; then run all20rounds and complete saved-output/provider/research audits"
+  }
 }
