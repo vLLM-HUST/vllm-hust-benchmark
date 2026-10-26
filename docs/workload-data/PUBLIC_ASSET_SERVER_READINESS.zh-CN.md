@@ -20,6 +20,14 @@ python scripts/prepare_chartqa_native_toolkit.py --output /external/chartqa-tool
 
 预设TSV地址在服务器被TLS校验判定证书过期，未关闭校验。复用已固定校验的HF原测试Parquet，使用以下无损存储适配入口：
 
+已有相同SHA256原文件时直接复用，不重新下载。首次获取只需该固定版本的测试分片，无须为此下载训练集；先创建所选外部数据目录，再显式获取：
+
+```bash
+curl --fail --location https://huggingface.co/datasets/HuggingFaceM4/ChartQA/resolve/b605b6e08b57faf4359aeb2fe6a3ca595f99b6c5/data/test-00000-of-00001-e2cd0b7a0f9eb20d.parquet --output /external/ChartQA/data/test-00000-of-00001-e2cd0b7a0f9eb20d.parquet
+```
+
+准备器会核对68898419字节和固定SHA256，失败时不会构造替代图像或请求。
+
 ```bash
 python scripts/prepare_chartqa_original_view.py --source-file /external/ChartQA/data/test-00000-of-00001-e2cd0b7a0f9eb20d.parquet --output /external/chartqa-original-view
 python scripts/prepare_chartqa_original_view.py --source-file /external/ChartQA/data/test-00000-of-00001-e2cd0b7a0f9eb20d.parquet --output /external/chartqa-original-view --execute
@@ -33,6 +41,39 @@ python scripts/prepare_chartqa_original_view.py --source-file /external/ChartQA/
 提示token为549/549/547，完成token为3/5/2，均stop，原relaxed
 accuracy为66.67%。独立审计确认原图像像素、原工具编码后的实际HTTP消息、原问题/参考、响应、用量及原评分一致；审计没有模型或付费judge调用。
 这不是完整2500题或其他类别的质量结论，不是性能结果；公开原生执行入口和环境复现说明还需补齐，故来源总勾保持未完成。
+
+公共运行入口现已补为`scripts/run_chartqa_original.py`，环境构建正在服务器重新验证，不能先算交付完成。
+本轮服务器SSH32050在公开环境构建过程中中断，最后已核实的是四份原源码树通过校验、真实CPU编译进程仍在；最终构建、`pip check`和公开入口新增类别任务均尚未取得终态。恢复后先核查同一任务，不因SSH断线推断编译失败或重复执行。
+客户端必须使用不继承系统site-packages的Python3.12虚拟环境；底座vLLM和Triton-Ascend的NumPy约束互斥，不能通过继承整个服务环境来宣称依赖检查通过。
+以下CPU版Torch仅供原工具导入和图像工具使用，脚本不加载模型权重；模型推理仍通过独立NPU服务完成，模型服务环境不作修改。
+
+```bash
+python3.12 -m venv /external/chartqa-client
+env -u PYTHONPATH /external/chartqa-client/bin/python -m pip install --index-url https://download.pytorch.org/whl/cpu torch==2.10.0 torchvision==0.25.0
+env -u PYTHONPATH /external/chartqa-client/bin/python -m pip install -r configs/workload-native/chartqa-native-client-py312-direct-requirements.txt
+env -u PYTHONPATH /external/chartqa-client/bin/python scripts/prepare_chartqa_native_runtime.py --output /external/chartqa-runtime --python /external/chartqa-client/bin/python --execute
+```
+
+运行环境构建器核对FFmpeg4.1.11、Decord0.6.0及其两个原子模块的完整Git
+tree，默认4个CPU编译线程，固定私有安装前缀；不安装系统包、不修改原源码、不启用CUDA或GPL构建选项。需预先具备Git、C/C++、Make、CMake和pkg-config。
+构建、安装、真实Decord导入与`pip check`都通过才返回成功；失败目录保留、不覆盖。构建后的私有前缀不能随意移动，原库链接依赖该位置。
+当前直接依赖清单不是原作者全benchmark环境，也不是完整传递依赖锁；纯客户端实际验证和锁定尚未完成。
+
+```bash
+env -u PYTHONPATH /external/chartqa-client/bin/python scripts/run_chartqa_original.py \
+  --official-checkout /external/chartqa-toolkit --toolkit-archive \
+  --source-file /external/ChartQA/data/test-00000-of-00001-e2cd0b7a0f9eb20d.parquet \
+  --prepared-view /external/chartqa-original-view \
+  --ffmpeg-library-dir /external/chartqa-runtime/install/lib \
+  --output /external/chartqa-fresh-private-run \
+  --model Qwen/Qwen3.5-9B --disable-thinking --indices 0,1,2
+```
+
+默认只输出计划；明确追加`--execute`才调用模型。`--full`替换`--indices`执行全部2500题。
+抽样至少三个不重复、保持原顺序的原始位置，必须在输出前预先指定；不按答题成败换题。API封装保持原默认2048预算和temperature0，逐请求非思考是显式模型配置，不改变题目或原评分。
+实际请求、响应、索引、用量和原评分保存于私有输出；已有三条有效证据不因新增入口而重新生成。
+
+此前“像素相等”核验仅指原数据解码图像与工具prompt缓存图像；原工具HTTP编码默认JPEG，源代码未修改。实际HTTP消息与原编码器一致，不等于收到JPEG后的像素与原PNG逐像素相同，不据此作无损HTTP传输的声明。
 
 ## LongMemEval-V2 官方多模态记忆任务（原始准备与负对照已验证，整项未完成）
 

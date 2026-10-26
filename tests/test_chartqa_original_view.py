@@ -54,3 +54,18 @@ def test_missing_and_extra_rows_rejected(tmp_path):
         view.verify_view(rows()[:2], target)
     with pytest.raises(ValueError, match="count lost"):
         view.verify_view(rows() + rows()[:1], target)
+
+
+def test_original_view_pins_match_shared_public_source_catalog():
+    from vllm_hust_workload_data.registry import source_spec
+
+    source = source_spec("CHARTQA")
+    original = next(
+        item
+        for item in source["files"]
+        if item["path"] == "data/test-00000-of-00001-e2cd0b7a0f9eb20d.parquet"
+    )
+    assert source["revision"] == view.REVISION
+    assert original["sha256"] == view.SHA256
+    assert original["bytes"] == view.BYTES
+    assert original["rows"] == view.ROWS

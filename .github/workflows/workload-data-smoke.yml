@@ -118,10 +118,14 @@ on:
       - 'tests/test_infinitebench_original_runner.py'
       - 'tests/test_chartqa_native_toolkit.py'
       - 'tests/test_chartqa_original_view.py'
+      - 'tests/test_chartqa_original_runner.py'
+      - 'tests/test_chartqa_native_runtime.py'
       - 'tests/test_longmemeval_v2_preparation.py'
       - 'tests/test_longmemeval_v2_original_runner.py'
       - 'scripts/prepare_chartqa_native_toolkit.py'
       - 'scripts/prepare_chartqa_original_view.py'
+      - 'scripts/run_chartqa_original.py'
+      - 'scripts/prepare_chartqa_native_runtime.py'
       - 'scripts/prepare_longmemeval_v2_original.py'
       - 'scripts/run_longmemeval_v2_original.py'
       - 'configs/workload-native/infinitebench-author-code-pins.json'
@@ -229,7 +233,7 @@ jobs:
       - name: LongMemEval publisher prompt transport CPU contracts only
         run: python -m pytest -q tests/test_longmemeval_original_runner.py
       - name: Original visual and memory preparation CPU contracts only
-        run: python -m pytest -q tests/test_chartqa_native_toolkit.py tests/test_chartqa_original_view.py tests/test_longmemeval_v2_preparation.py tests/test_longmemeval_v2_original_runner.py
+        run: python -m pytest -q tests/test_chartqa_native_toolkit.py tests/test_chartqa_original_view.py tests/test_chartqa_original_runner.py tests/test_chartqa_native_runtime.py tests/test_longmemeval_v2_preparation.py tests/test_longmemeval_v2_original_runner.py
       - name: Original model and metric CPU contracts only
         run: python -m pytest -q tests/test_gpqa_original_runner.py tests/test_xlsum_original_runner.py tests/test_beir_original_runner.py tests/test_stsb_original_runner.py tests/test_librispeech_original_runner.py tests/test_xsum_original_runner.py tests/test_multinews_original_runner.py tests/test_billsum_original_runner.py tests/test_flores200_original_assets.py tests/test_research_acquisition_reuse.py
       - name: Installed CLI and packaged catalogs
