@@ -1322,6 +1322,33 @@ python -m evaluation.harness.run_evaluation \
 
 # 公开来源最新接入进展（进行中，不计新增交付）
 
+## CrossCodeEval 固定原始资产准备
+
+原始压缩包及25份作者代码/说明已在服务器按 Git blob、字节数及 SHA256 核验， 公开准备入口实际复核26份资产通过；不包含原生生成、评分或数据适配完成声明。
+完整包含四种语言的28份原始任务文件和许可证文件，保留各种配置，不重新生成题目。 仅下载已发布的检索上下文，不声称重新运行作者的索引或检索模型。
+
+```bash
+python scripts/prepare_crosscodeeval_original_assets.py \
+  --author-root /external/crosscodeeval/source \
+  --data-archive /external/crosscodeeval/crosscodeeval_data.tar.xz --action plan
+python scripts/prepare_crosscodeeval_original_assets.py \
+  --author-root /external/crosscodeeval/source \
+  --data-archive /external/crosscodeeval/crosscodeeval_data.tar.xz \
+  --action prepare --max-bytes 42135888
+python scripts/prepare_crosscodeeval_original_assets.py \
+  --author-root /external/crosscodeeval/source \
+  --data-archive /external/crosscodeeval/crosscodeeval_data.tar.xz --action verify
+```
+
+入口使用发布方固定 Git blob API 获取原字节，以应对 raw GitHub 连接失败， 不接受第三方重构题集；网络/访问限额错误保留，不覆盖已有不匹配文件或 `.partial`。
+原始数据中的许可证须保留；作者代码的 Apache-2.0 不能替代各仓库数据自己的许可。
+
+后续按作者默认 UniXCoder 检索设置、四种语言各原始前3条开展原生验证； 保留原 prompt、crossfile_context、groundtruth、right_context 和
+metadata， 原答案不能进入模型输入。使用作者 API 提示构造与评分代码；作者 OpenAI 协议默认
+16,384上下文预算、12,800跨文件预算、50生成token、temperature=0.2、top_p=0.95。 这里描述原配置，不承诺替换模型后可不经检查直接运行：原 API
+入口按模型名选择 tiktoken， 本地模型路由/分词兼容与原树解析器环境仍需实测；不能伪装成 GPT 模型或自行改掉评分。 作者完整依赖同时涉及
+CUDA/vLLM/DeepSpeed，不能无审查地安装到现有 Ascend 服务环境。 当前仍缺逐行适配、独立原生环境、生成/作者评分及公共/研究消费；清单不打勾。
+
 ## XLAM_TOOL 获取前置条件核查
 
 2026-10-26核查[发布方数据卡](https://huggingface.co/datasets/Salesforce/xlam-function-calling-60k)： 原文件
