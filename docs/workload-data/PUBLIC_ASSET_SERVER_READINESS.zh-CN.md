@@ -1,5 +1,22 @@
 # 公开原始资产：服务器准备与任务验证缺口
 
+## ChartQA视觉原生链路准备（未完成）
+
+原测试分片与前三条CPU图像处理证据复用，不能据此声称视觉推理已完成。
+固定[VLMEvalKit源码](https://github.com/open-compass/VLMEvalKit/tree/160e8a7d0cb1d4d739c1757038775cf2720d6895)，
+版本`160e8a7d0cb1d4d739c1757038775cf2720d6895`。服务器Git传输连接超时后，官方codeload归档成功；897个文件的原始内容与模式重建Git tree
+`417350395a289dd88538ac6cc031bf47c6e9f5d4`完全一致，没有改动原提示、评分或运行器。
+
+```bash
+python scripts/prepare_chartqa_native_toolkit.py --output /external/chartqa-toolkit
+python scripts/prepare_chartqa_native_toolkit.py --output /external/chartqa-toolkit --execute --archive
+python scripts/prepare_chartqa_native_toolkit.py --output /external/chartqa-toolkit --verify-only --archive
+```
+
+默认仅规划；`--execute`只接受新目录，不覆盖失败记录。`--archive`使用官方归档，完整Git tree验证通过才认为源码取得。
+后续导入应设置`PYTHONDONTWRITEBYTECODE=1`，避免在原源码树写入缓存。 当前仅源码完整性已验证；原生模块依赖、数据/协议绑定、NPU视觉生成、原评分与研究侧接通仍未完成。
+根Python模块预检在缺少`tabulate`处退出，正在独立客户端环境补依赖；不能以源码取得冒充环境安装或原生评测成功。
+
 ## LongMemEval-V2 官方多模态记忆任务（原始准备与负对照已验证，整项未完成）
 
 与旧版LongMemEval分别保留，不复用旧版问题/提示构造冒充V2。 固定[官方源码](https://github.com/xiaowu0162/LongMemEval-V2)提交
