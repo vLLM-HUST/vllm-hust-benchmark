@@ -96,7 +96,13 @@ def main():
         language = item["language"]
         root = args.run_root / language
         prediction = root / "prediction.jsonl"
-        subset = root / "original-first3.private.jsonl"
+        subset_name = item.get("subset_file", "original-first3.private.jsonl")
+        if subset_name not in (
+            "original-first3.private.jsonl",
+            "original.private.jsonl",
+        ):
+            raise ValueError("unknown original subset layout")
+        subset = root / subset_name
         if (
             sha256(prediction) != item["predictions_sha256"]
             or sha256(subset) != item["original_subset_sha256"]

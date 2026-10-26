@@ -1372,7 +1372,7 @@ for record in iter_workload("CROSSCODEEVAL", data_root=Path("/external/crosscode
 或论文环境。 客户端选择性链接既有 vendor Torch，链接并非操作系统只读；禁止在此升级 vendor Torch。
 推荐模型8份原始权重/分词文件（约12.1GB存储）已校验，StarCoder2-3B 已在单 NPU 上以 BF16、TP=1
 完成四种语言各原始前3条生成及完整作者评分。保留原生滑动窗口和作者预算，不把低分或空输出换题。 官方站点网络失败保留，显式镜像仍核对固定发布版本和原始文件身份。
-尚缺可复用的公共生成入口、完整环境交接和成功 CI 工件终审，清单不打勾；私人验证脚本不能替代公共交付。
+公共生成入口已在原第3–5行、四语言12条完成NPU执行，依赖和模型获取说明已补齐。 本次公共入口的独立评分及成功 CI 工件终审尚待核验，清单不打勾；私人验证脚本不能替代公共交付。
 
 已有原生结果可单独复核评分，无需重跑模型。隔离评分环境的依赖见 `configs/workload-native/crosscodeeval-score-requirements.txt`；须保留兼容
 Torch，执行 `pip check`， 不能把完整作者 requirements 无审查地装入现有 Ascend 服务环境。ARM64 验证使用 Python 3.12.13、 Torch
@@ -1390,6 +1390,46 @@ python scripts/score_crosscodeeval_original.py \
 入口核对全部固定作者源码和原始归档，以及原生运行回执、预测文件摘要、原始行位置和完整原字段。 仅限制作者 CPU pool
 的工作进程数，不改指标公式。输出目录必须全新，原始预测、原始评分和回执不覆盖； 输出含原任务及预测，须留在服务器私有位置，不能提交仓库。当前入口接受已审计的四语言原生运行回执布局，
 不是任意第三方预测格式的转换器，也不会调用模型补齐缺失样本。
+
+### CrossCodeEval 公共原生生成与模型环境
+
+`scripts/run_crosscodeeval_original.py` 默认仅输出计划，不下载数据、不加载模型。 原模型固定为
+`bigcode/starcoder2-3b@733247c55e3f73af49ce8e9c7949bf14af205928`， 8份文件及字节数/SHA256见
+`configs/workload-native/crosscodeeval-starcoder2-model.json`。 可在服务器用 Hugging Face
+官方客户端取得原模型，不能在本地下载权重：
+
+```bash
+hf download bigcode/starcoder2-3b \
+  --revision 733247c55e3f73af49ce8e9c7949bf14af205928 \
+  --local-dir /external/crosscodeeval/model \
+  --include config.json merges.txt README.md special_tokens_map.json \
+    tokenizer.json tokenizer_config.json vocab.json model.safetensors
+python scripts/run_crosscodeeval_original.py \
+  --author-root /external/crosscodeeval/source \
+  --data-archive /external/crosscodeeval/crosscodeeval_data.tar.xz \
+  --model-root /external/crosscodeeval/model \
+  --output /external/crosscodeeval/native-run
+```
+
+默认四语言各原始前3行，保留全部原字段和原行字节；`--start 3 --count 3` 表示预先选定原第3–5行， 不能用于失败后换题；`--full`
+从原0行运行默认检索配置全部题目（未宣称本次全量执行过）。 实际运行须先获空闲 NPU 窗口，再显式追加 `--action run`。仅暴露一张逻辑 NPU； 本实例
+`ASCEND_RT_VISIBLE_DEVICES=1` 对应物理6，其他实例不能照抄映射，须自行核实。 不停止或重配已有服务。原始检查点约12.1GB磁盘，BF16推理另需工作内存。
+
+已验证现有软件栈：Python 3.12.13、vLLM 0.23.0+empty、vllm-ascend 0.23.0、 Torch 2.10.0+cpu、torch-npu
+2.10.0.post4、Transformers 5.5.4、CANN 9.1、Ascend 910B2。 这不表示任意同版本 pip 包或其他硬件组合均已验证；禁止在运行中的服务环境升级。
+生成采用 BF16/TP1，保留4096滑动窗口；资源参数为单批1、batched tokens 2048、eager及显存比例0.16。 资源设置不改变作者16,384/12,800/50
+token及采样参数。 内存不足须记录阻塞，不禁用滑动窗口、改题或降低原生预算凑通过。
+
+```bash
+ASCEND_RT_VISIBLE_DEVICES=1 VLLM_WORKER_MULTIPROC_METHOD=spawn OMP_NUM_THREADS=4 \
+python scripts/run_crosscodeeval_original.py \
+  --author-root /external/crosscodeeval/source \
+  --data-archive /external/crosscodeeval/crosscodeeval_data.tar.xz \
+  --model-root /external/crosscodeeval/model \
+  --output /external/crosscodeeval/native-run --action run
+```
+
+随后使用独立评分命令；不得以计划输出、数据读取或启动进程代替真实原生完成。 失败不自动重试、不覆盖输出；已有有效运行可直接评分，不再生成。
 
 ## XLAM_TOOL 获取前置条件核查
 

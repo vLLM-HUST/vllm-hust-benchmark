@@ -108,6 +108,8 @@
       {"role": "isolated_scoring", "path": "scripts/score_fleurs_original.py", "scope": "CPU native jiwer/Whisper-normalizer CER over saved original predictions, exact locale/position coverage required. No new model calls or paper-baseline claim."}
     ],
     "CROSSCODEEVAL": [
+      {"role": "original_profile", "path": "scripts/run_crosscodeeval_original.py", "scope": "Pinned original four-language author generation on one NPU. Plan by default; fixed original selection or full default retrieval profile, no task rewriting or research observation."},
+      {"role": "isolated_scoring", "path": "scripts/score_crosscodeeval_original.py", "scope": "Unchanged publisher scoring over saved native outputs with original archive/position/reference checks. Bounded CPU pool, no new model calls."},
       {"role": "prepare_assets", "path": "scripts/prepare_crosscodeeval_original_assets.py", "scope": "Fixed publisher code and original archive acquisition/verification, not native generation or scoring."},
       {"role": "data_reading_only", "path": "workload-preparation/src/vllm_hust_workload_data/crosscodeeval.py", "scope": "Lossless original task/retrieval-profile archive reading; original IDs/contexts/references retained. Not a native executor or research analyzer."}
     ],
