@@ -1,0 +1,128 @@
+{
+  "status": "PASS_bounded_evidence_review",
+  "scope": "partial-artifact verifier-only recovery; not a completed Agent trial",
+  "reviewed_utc": "2026-10-26T21:19:51.651412+00:00",
+  "CPU_audit_sha256": "c6624446136836e04d511276a6da94ed37389e9e1dbdb6529b9a2625132f786a",
+  "CPU_audit_source_sha256": "6f11bb4cf14fbe6e6429c42c99c24f6f14d1ecd7d5b93bdc07c607ef40608fe5",
+  "checks_passed": 142,
+  "recovery_sealed_files": 22,
+  "original_sealed_files": 31,
+  "result": {
+    "reward": 0,
+    "tests": 6,
+    "passed": 1,
+    "failed": 5,
+    "missing": 0,
+    "process_exit_code": 0
+  },
+  "original_result": {
+    "exception": "ContextLengthExceededError",
+    "reward": null,
+    "verifier_executed": false,
+    "task_complete": false
+  },
+  "answer_provenance": {
+    "kind": "deterministically reconstructed unsubmitted partial artifact",
+    "bytes": 1103,
+    "derived_sha256": "d75ef65e33c55661f7ecca52cfb87426235f7075a27e079b81678028ff6bbbfd",
+    "original_filesystem_sha256": null,
+    "original_mode": null,
+    "recovery_mode": "0644",
+    "interface_repaired": false
+  },
+  "failure_mechanism": [
+    {
+      "name": "test_outputs.py::test_run_py_file_exists",
+      "status": "passed",
+      "evidence_kind": "artifact_exists"
+    },
+    {
+      "name": "test_outputs.py::test_tasks_run_concurrently",
+      "status": "failed",
+      "evidence_kind": "subprocess_import_error_missing_run_tasks"
+    },
+    {
+      "name": "test_outputs.py::test_tasks_obey_max_concurrent",
+      "status": "failed",
+      "evidence_kind": "subprocess_import_error_missing_run_tasks"
+    },
+    {
+      "name": "test_outputs.py::test_tasks_cancel_below_max_concurrent",
+      "status": "failed",
+      "evidence_kind": "zero_task_start_assertion; common import cause inferred from unchanged test harness, stderr not printed in this row"
+    },
+    {
+      "name": "test_outputs.py::test_tasks_cancel_at_max_concurrent",
+      "status": "failed",
+      "evidence_kind": "zero_task_start_assertion; common import cause inferred from unchanged test harness, stderr not printed in this row"
+    },
+    {
+      "name": "test_outputs.py::test_tasks_cancel_above_max_concurrent",
+      "status": "failed",
+      "evidence_kind": "zero_task_start_assertion; common import cause inferred from unchanged test harness, stderr not printed in this row"
+    }
+  ],
+  "limitations": [
+    "not a submitted complete answer",
+    "original file mode and filesystem hash were not observed",
+    "no new Agent or model execution",
+    "does not establish performance of a repaired interface"
+  ],
+  "release": {
+    "observed_utc": "2026-10-26T21:19:10.713387+00:00",
+    "processes": [
+      {
+        "role": "controller-started",
+        "exited": true
+      },
+      {
+        "role": "started",
+        "exited": true
+      }
+    ],
+    "docker_ps_a_empty": true
+  },
+  "stdout_review": {
+    "summary_agrees": true,
+    "collection_completed": true,
+    "import_error_observed": true,
+    "dependency_warning_env_missing": true,
+    "transport_log_sha256": "f2c32e6544412c1f16eedf25cc7b28b3e3ed9e34934c0ca9ed432d441ed151fa"
+  },
+  "public_directory": "/root/four-primary-datasets-20261025/terminal-cancel-async-recovery-final-review-r1/public",
+  "public_projection_files": {
+    "ctrf-name-status.json": "f12ebbf82ab3464bdd2040e06bb940908c61072d546c57041905ddb5512326e1",
+    "original-receipt-projection.json": "2e18de7f756a8c2c6950153227540c16a0d998967d03d65f288e1122c5d0aec8",
+    "recovery-receipt-projection.json": "80c12f129fe06f6619713432f0e581212a79a23056e3766f894c01a3ddf7e6e2",
+    "restricted-original-sha-index.json": "f18e3a87e5c68252c47c93d09accbfe8e921ad97000e6b1e6f83c647be887210",
+    "summary.json": "cd11882feab327dfb412fcf75bf3da90591b03f11c30636b7b1287d420ea218e"
+  },
+  "public_archive": {
+    "path": "/root/four-primary-datasets-20261025/terminal-cancel-async-recovery-final-review-r1/terminal-cancel-async-partial-verifier-recovery-public-r1.tar.gz",
+    "sha256": "13d60b0baa1b269a825344bb493aecbc48ed885241885391314d63f30501cb44",
+    "bytes": 4573,
+    "members": 6,
+    "local_archive_readback": "PASS"
+  },
+  "publication_screen": {
+    "method": "explicit field allowlists, forbidden key/content screen, cross-file counts and original source SHA checks, archive readback",
+    "raw_private_artifacts_exported": false,
+    "request_identifiers_exported": false,
+    "original_source_hashes_retained": true
+  },
+  "new_executions": {
+    "Agent": 0,
+    "model": 0,
+    "verifier": 0,
+    "controls": 0
+  },
+  "skill_review": {
+    "errors": [
+      "E44",
+      "E54",
+      "E55",
+      "E56"
+    ],
+    "decision": "original context/null remains; derived partial file identity disclosed; hashes checked before projection; actual mounted resources/release/seal verified; no repair or retry"
+  }
+}

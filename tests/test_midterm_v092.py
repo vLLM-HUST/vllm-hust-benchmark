@@ -67,7 +67,10 @@ def test_v092_projection_keeps_previous_scope(monkeypatch):
     monkeypatch.syspath_prepend(str(ROOT / "scripts"))
     import build_midterm_v092 as b
 
-    data = b.build("fixture", lambda p: (ROOT / p).read_bytes())
+    snapshot = "reports/vllm-hust-midterm-20261019/中期测试报告-v092.md"
+    data = b.build(
+        "fixture", lambda p: (ROOT / (snapshot if p == b.REPORT else p)).read_bytes()
+    )
     old = json.loads((ROOT / "website-publication/data/midterm-v091.json").read_text())
     for key in (
         "wholechain_reference",
