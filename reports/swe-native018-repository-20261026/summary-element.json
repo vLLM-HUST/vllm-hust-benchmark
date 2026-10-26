@@ -1,0 +1,136 @@
+{
+  "schema": "swe-incremental-task-observation/v2",
+  "run_id": "swe018-repo-02-r1",
+  "task_identity_sha256": "bb130bed1f3b25208e2b182a1105ea9927cb307c7e9075cb0e2ff3dbf987090c",
+  "dataset": "SWE-bench-Pro V1",
+  "total_dataset_tasks": 731,
+  "new_task_attempts": 1,
+  "recorded_official_resolved": 0,
+  "recorded_official_denominator": 1,
+  "official_unresolved_grading": 0,
+  "full_dataset_acceptance": false,
+  "model": "Qwen3.5-35B-A3B",
+  "vllm": "0.18.0",
+  "vllm_ascend": "0.18.0",
+  "benchmark_source_commit": "ad55801335099839769d457fa1900c13669c34a8",
+  "qualification": {
+    "new_calls": 0,
+    "reused_calls": 5,
+    "source_run": "swe018-single-agent-r1"
+  },
+  "agent": {
+    "status": "Submitted",
+    "agent_submitted": true,
+    "elapsed_seconds": 225.54492508992553,
+    "model_calls": 28,
+    "patch_bytes": 5878,
+    "patch_sha256": "4fb90351150ee7f8db2ec044fadf146ce3b2ce6defe618cebf09b4bc8f8c5dc7",
+    "container_cleanup_exit_code": 0
+  },
+  "budget": {
+    "step_limit": 100,
+    "wall_budget_seconds": 1200,
+    "tool_timeout_seconds": 60,
+    "max_tokens": 4096,
+    "temperature": 0,
+    "seed": 0,
+    "thinking": false,
+    "http_timeouts": {
+      "connect": 180,
+      "read": null,
+      "write": 180,
+      "pool": 180
+    },
+    "automatic_retries": 0
+  },
+  "grading_environment_recovery": {
+    "first_exit_code": 1,
+    "first_official_adapter_launched": false,
+    "cause": "Official grader tag absent while immutable image ID existed",
+    "repaired": "Register original tag to same frozen image ID; original failed invocation retained",
+    "new_agent_calls": 0,
+    "official_scoring_attempts": 1,
+    "original_patch_and_rules_unchanged": true
+  },
+  "grading": {
+    "official_result": false,
+    "independently_recomputed_official_rule": false,
+    "process_exit_code": 0,
+    "model_calls": 0,
+    "source_files": 14,
+    "parsed_test_counts": {
+      "PASSED": 437
+    },
+    "test_count_scope": "Raw parser entries before official name-set scoring",
+    "unique_test_names": 418,
+    "official_test_coverage": {
+      "fail_to_pass": {
+        "expected": 1,
+        "passed": 0,
+        "not_passed": 1,
+        "missing": 1
+      },
+      "pass_to_pass": {
+        "expected": 385,
+        "passed": 385,
+        "not_passed": 0,
+        "missing": 0
+      }
+    },
+    "patch_application_attested": true,
+    "patch_applied": true,
+    "apply_exit_code": 0,
+    "state_capture": "complete",
+    "affected_paths": 2,
+    "pre_post_file_states_equal": false,
+    "patch_modified": false,
+    "grading_reexecuted": false,
+    "effective_patch_sha256": "4fb90351150ee7f8db2ec044fadf146ce3b2ce6defe618cebf09b4bc8f8c5dc7",
+    "original_official_binary_filter_preserved": true
+  },
+  "release": {
+    "status": "completed",
+    "sessions_drained": true,
+    "all_devices_released": true,
+    "service_exit_code": 0,
+    "seal_allowed": true
+  },
+  "window_plan_sha256": "100464a94b38f0b73275fa1e1927661f2d9a0e3c7b7d50a04deb9d9686994051",
+  "runtime_identity_sha256": "83f0ca461ef76d8f93a43c94ee3d519798275f7cad9fcd700a40c970d0d4a8f9",
+  "task_container": {
+    "cpus": 2,
+    "memory": "4g",
+    "network": "swe-pro-mtu1400"
+  },
+  "images": [
+    "sha256:d201f29c4c02a9577b95c561e85090157b6c3a9121d2b9c26a5655dd51ec4a49"
+  ],
+  "evidence_sha256": {
+    "execution_binding": "4820210db8bc345c599e8410e217ba3572e688ef487fdc11eb3df20cb474bff2",
+    "settings": "9d39779411b1edd4b8d0a26543f3c8552b42c3e05e58d9b5a4fe3f8799a230ee",
+    "run_exit": "46318d5ddb0be9d76903a66150535e160e6082da9d47c27e0ad2cf2e945deba5",
+    "grade_exit": "f718c90b27aeb3f5c3d604a6d28a5939c91b4cd90baca31f0403545d971e3b09",
+    "agent_report": "f66ed263a693479229aa9d0351ae16c82e3e676575c23dbc6c1470cb2e09d793",
+    "trajectory": "6882de84c58858677de0febff7f29a8b60bb82df2cf09380fbe32fa36fb98343",
+    "submitted_patch": "4fb90351150ee7f8db2ec044fadf146ce3b2ce6defe618cebf09b4bc8f8c5dc7",
+    "grading_status": "3bb0a5e47289351e7b12fc918ce2c020b284b7887d7813ddfd5e2e163afa0cf7",
+    "source_patch_bindings": "e6d6be9b0d48fb77cf1419d052977cca8ae95c5560362b28a1f98746c655835d",
+    "official_scores": "b78193e91df2baac796355136c3f950ef1bf73a8cb3e8410e12a96d511282904",
+    "parsed_tests": "b6e60e02b31a6e3e209d5af30d9b2164b8e64d6fa2d93325c1d3b98fd50a17df",
+    "effective_patch": "4fb90351150ee7f8db2ec044fadf146ce3b2ce6defe618cebf09b4bc8f8c5dc7",
+    "service_release": "a3adaec1cc67a132b0d4eeb08ed8a81892ef9ed59473d4ca74e1f54000628dbe",
+    "derivation_source": "74a40df54cbdd8db4fde289788706cc2f064604aefca6e7d4702edeedcb30ed7",
+    "original_grading_exit": "f7c4f48f6a784ed2ac4ca28afdb9681d9d9e786e9db8ff0d0725189b0f94682a",
+    "original_grading_precheck": "ab8a5d429f5fb1dc9f687d0806193a5395013de4f747e347e7e7f7aa1214d386",
+    "grading_continuation_admission": "8d1a51e39a9e47652243bf8f85f409e5563beeb38f06da76f805e34f857f6d7d",
+    "grading_continuation_source": "502fe4f83d431b4aa502cc7e17fc36166f4e64a0dc18fc916d9cd0e3c72256bd",
+    "image_alias_binding": "d942632bc14bc882641b1951bf37605fe327149131af9587b71d2cea19388c64",
+    "hust-patch-apply.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "hust-patch-apply.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "hust-patch-apply.stderr": "1b34db5fb8d61e102c54e42653872b45470c6b157392e84ceec2a264be292947",
+    "hust-patch-before.json": "44c2ce7d5df0b5aad2e1d8474a868e4323eddc7132019fce6908291feab42451",
+    "hust-patch-after.json": "c8ca413ecf969b98eb9a6efea2d1255d17bf84a6310d28c63349ac9988843d20",
+    "hust-patch-graded.json": "4b7c9c48b9f0b7df8c10a6f2e7ef2ac98b346f36c2796e36e4b743a360e35b08"
+  },
+  "private_task_answers_patch_or_trajectory_included": false
+}
