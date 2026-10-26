@@ -41,7 +41,12 @@ def test_projection_preserves_non_swe_metrics_and_updates_both_languages(monkeyp
     monkeypatch.syspath_prepend(str(ROOT / "scripts"))
     import build_midterm_v087 as builder
 
-    data = builder.build("fixture", lambda path: (ROOT / path).read_bytes())
+    def read(path):
+        if path == builder.REPORT:
+            path = "reports/vllm-hust-midterm-20261019/中期测试报告-v087.md"
+        return (ROOT / path).read_bytes()
+
+    data = builder.build("fixture", read)
     old = json.loads((ROOT / "website-publication/data/midterm-v086.json").read_text())
     for key in (
         "wholechain_reference",
@@ -79,7 +84,9 @@ def test_original_v086_snapshot_and_report_generation(monkeypatch):
     snapshot = (ROOT / builder.OLD_REPORT).read_bytes()
     assert hashlib.sha256(snapshot).hexdigest() == old["report_sha256"]
     value = json.loads((ROOT / builder.SOURCE).read_text())
-    report = (ROOT / builder.REPORT).read_text()
+    report = (
+        ROOT / "reports/vllm-hust-midterm-20261019/中期测试报告-v087.md"
+    ).read_text()
     generated = builder.render_report(snapshot.decode(), value)
     assert "报告版本：V0.87" in generated
     assert "报告版本：V0.87" in report
