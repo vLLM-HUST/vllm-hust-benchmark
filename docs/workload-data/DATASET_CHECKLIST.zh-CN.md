@@ -19,6 +19,14 @@ prompt。
 仅使用获授权 NPU，优先让现有研究任务完成，不向观测服务混入请求。原始数据、企业载荷及完整索引不公开；CI 仅 CPU 正确性 smoke。PR 不合并。以下逐项状态与同目录
 dataset-validation-status.json 的 delivery_inventory 对齐。
 
+### JSONSchemaBench 子流程进度（不增加来源完成数）
+
+- [x] 固定官方34资产、44作者文件、真实11配置loader/33处原formatter和隔离客户端依赖核验。
+- [x] WashingtonPost原38题完整作者bench/evaluator及逐题保存结果审计；复用6题，32次新请求尝试，30支持/8不支持，27条符合原validator；未改题或换题。
+- [x] 严格流式编译拒绝分类及真实断点复用，保留失败与原输出；独立重评0新增模型调用，不作连续性能结论。
+- [ ] 其他9个具名配置及单独default的原生执行和评分。
+- [ ] 官方原数据读取/准备适配及精确工件、研究侧消费收口；整来源仍未勾选。
+
 ### 先行复核：已有37项证据与能力（与完成交付分开）
 
 本表勾选只表示**已核对历史证据、代码登记、研究消费记录及后续缺口**，不表示该来源的原生 benchmark 已完成。本轮静态复核没有重跑原数据或占用
@@ -137,7 +145,7 @@ TB；服务器/data约1.42TB可用，未缩小语料。ChartQA当前两卡主机
 | TOOLBENCH                  | [ ] 待开展                   | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                |
 | AGENTBENCH                 | [ ] 等研究窗口后续跑         | 官方FC ALFWorld前三组全41题已审计：复用0–2、新执行3–40，保留失败及原评分；剩68题待验证，不启动下一组、不冒充AgentBench整套完成。[回执](validation/agentbench-original-complete-groups-audit-20261024.json)                                                                                                  |
 | SCHEMASTORE                | [ ] 待开展                   | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                |
-| JSONSCHEMABENCH            | [ ] 原生流程进行中           | 34原资产/44作者源码及11配置原loader/formatter已实测；WashingtonPost原38题全量协议前6条生成保存，第7条流式schema拒绝中止。须补错误分类/断点复用、各具名分区及不等同具名test的default、评分及官方数据/工件消费；旧3schema保留，不计交付。                                                                     |
+| JSONSCHEMABENCH            | [ ] 原生流程进行中           | 34原资产/44作者源码及11配置原loader/formatter已实测；WashingtonPost原38题作者执行/评分和审计完成，复用6条，严格编译拒绝分类已核；其余9具名配置及default、官方数据/工件消费仍待补；旧3schema保留，不计交付。                                                                                                 |
 | LIVECODEBENCH              | [ ] 待开展                   | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                |
 | HUMANEVAL                  | [x] 已交付                   | 原前三题NPU生成结果复用，公共隔离入口官方评分2/3，失败保留；164题原字段公共/研究消费相等，原3题索引消费相等。不是全164题模型成绩。见[回执](validation/humaneval-native-delivery-20261025.json)。                                                                                                            |
 | MBPP                       | [x] full原生抽样可用         | 原题11/12/13双NPU生成、原始三测试与setup隔离CodeEval：参考解均通过，预测2通过/1失败原样保留；974原记录完整映射/索引，14处公共/研究回查一致，精确CI安装工件已核。[证据](validation/mbpp-original-native-sample-20261026.json)；非全500题，sanitized仅取得资产。                                              |

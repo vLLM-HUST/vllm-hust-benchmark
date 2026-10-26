@@ -130,8 +130,89 @@ def test_checkpoint_keeps_failed_attempt_without_replacement(tmp_path):
         )
     record = json.loads((tmp_path / "attempt-000000.private.json").read_text())
     assert record["status"] == "GENERATION_FAILED_NOT_REPLACED"
-    assert receipt == {"attempted_samples": 1, "returned_samples": 0}
-    assert len(saved) == 2
+    assert receipt == {
+        "attempted_samples": 1,
+        "returned_samples": 0,
+        "new_generation_attempts": 1,
+    }
+    assert len(saved) == 3
+
+
+def test_saved_output_reuse_has_no_model_fallback(tmp_path):
+    class Engine:
+        def generate(self, *args):
+            raise AssertionError("must not regenerate a valid saved output")
+
+    prior = [
+        {
+            "path": "inert-prior",
+            "sha256": "inert-digest",
+            "record": {
+                "task": "A",
+                "original_messages": [],
+                "original_schema": {"type": "object"},
+                "output": {"generation": "saved fixture"},
+            },
+        }
+    ]
+    receipt = {"attempted_samples": 0, "returned_samples": 0}
+    engine = runner.checkpoint_engine(
+        Engine(),
+        tmp_path,
+        receipt,
+        lambda: None,
+        prior=prior,
+        restore=lambda value: FakeOutput(**value),
+    )
+    result = engine.generate("A", [], {"type": "object"})
+    assert result.generation == "saved fixture"
+    assert receipt["reused_samples"] == receipt["returned_samples"] == 1
+    assert receipt.get("new_generation_attempts", 0) == 0
+    with pytest.raises(ValueError, match="differ"):
+        other = tmp_path / "other"
+        other.mkdir()
+        runner.checkpoint_engine(
+            Engine(),
+            other,
+            {"attempted_samples": 0},
+            lambda: None,
+            prior=prior,
+            restore=lambda value: FakeOutput(**value),
+        ).generate("B", [], {})
+
+
+def test_reuse_failed_prefix_requires_terminal_profile_and_complete_inputs(tmp_path):
+    expected = {"source_id": "fixture", "origin": "http://127.0.0.1:19466"}
+    receipt = {
+        **expected,
+        "status": "FAILED_NATIVE_FLOW_NOT_COMPLETE",
+        "attempted_samples": 2,
+        "returned_samples": 1,
+    }
+    (tmp_path / "receipt-public.json").write_text(json.dumps(receipt))
+    saved = {
+        "task": "A",
+        "original_messages": [],
+        "original_schema": {},
+        "status": "GENERATION_RETURNED_NOT_YET_OFFICIALLY_EVALUATED",
+        "output": {"task": "A", "messages": [], "schema": {}},
+    }
+    (tmp_path / "attempt-000000.private.json").write_text(json.dumps(saved))
+    tail = tmp_path / "attempt-000001.private.json"
+    tail.write_text(json.dumps({"status": "GENERATION_FAILED_NOT_REPLACED"}))
+    with pytest.raises(ValueError, match="independently confirm"):
+        runner.reusable_prefix(tmp_path, expected)
+    prefix, digest = runner.reusable_prefix(
+        tmp_path, expected, failed_tail_terminal=True
+    )
+    assert len(prefix) == 1 and len(digest) == 64
+    with pytest.raises(ValueError, match="profile differs"):
+        runner.reusable_prefix(
+            tmp_path, {**expected, "model": "different"}, failed_tail_terminal=True
+        )
+    tail.write_text(json.dumps({"status": "STARTED"}))
+    with pytest.raises(ValueError, match="unresolved"):
+        runner.reusable_prefix(tmp_path, expected, failed_tail_terminal=True)
 
 
 def test_official_bench_bridge_preserves_location_and_defaults(tmp_path, monkeypatch):

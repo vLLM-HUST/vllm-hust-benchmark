@@ -22,6 +22,9 @@ def fixture(
     usage=True,
     endpoint="http://127.0.0.1:19466/v1",
     failure=None,
+    stream_failure=False,
+    partial_stream=False,
+    empty=False,
 ):
     class Base:
         def __init__(self, config):
@@ -41,21 +44,46 @@ def fixture(
 
     def complete(**body):
         calls.append(body)
-        if failure is not None:
+        if failure is not None and not stream_failure:
             raise failure
+        if stream_failure:
+
+            def broken():
+                if partial_stream:
+                    yield NS(
+                        usage=None,
+                        choices=[
+                            NS(index=0, finish_reason=None, delta=NS(content="partial"))
+                        ],
+                    )
+                raise failure
+
+            return broken()
         return [
             NS(
                 usage=None,
                 choices=[
-                    NS(index=0, finish_reason=None, delta=NS(content='{"fixture":'))
+                    NS(
+                        index=0,
+                        finish_reason=None,
+                        delta=NS(content="" if empty else '{"fixture":'),
+                    )
                 ],
             ),
             NS(
                 usage=None,
-                choices=[NS(index=0, finish_reason=terminal, delta=NS(content="1}"))],
+                choices=[
+                    NS(
+                        index=0,
+                        finish_reason=terminal,
+                        delta=NS(content="" if empty else "1}"),
+                    )
+                ],
             ),
             NS(
-                usage=NS(prompt_tokens=10, completion_tokens=5) if usage else None,
+                usage=NS(prompt_tokens=10, completion_tokens=0 if empty else 5)
+                if usage
+                else None,
                 choices=[],
             ),
         ]
@@ -87,6 +115,41 @@ def output():
     )
 
 
+class APIError(Exception):
+    status_code = None
+
+    def __init__(self, body):
+        self.body = body
+        super().__init__("inert structured compiler error")
+
+
+def test_streamed_explicit_compiler_rejection_is_not_an_arbitrary_api_failure():
+    body = {
+        "type": "BadRequestError",
+        "code": 400,
+        "message": "Unsupported JSON Schema structure INERT\nMake sure it is valid to the JSON Schema specification and check if it's supported by Outlines.",
+    }
+    engine, _ = fixture(failure=APIError(body), stream_failure=True)
+    result = output()
+    engine._generate(result)
+    assert result.metadata.compile_status.code == 1
+    assert result.token_usage.output_tokens == 0
+    for changed in [
+        {**body, "code": 500},
+        {**body, "code": "400"},
+        {**body, "type": "InternalServerError"},
+        {**body, "message": "unrelated failure"},
+    ]:
+        engine, _ = fixture(failure=APIError(changed), stream_failure=True)
+        with pytest.raises(APIError):
+            engine._generate(output())
+    engine, _ = fixture(
+        failure=APIError(body), stream_failure=True, partial_stream=True
+    )
+    with pytest.raises(APIError):
+        engine._generate(output())
+
+
 def test_schema_and_author_messages_are_unchanged():
     engine, calls = fixture()
     result = output()
@@ -109,6 +172,17 @@ def test_overflow_never_trims_or_sends_request():
     with pytest.raises(ValueError, match="no trimming"):
         engine._generate(output())
     assert calls == []
+
+
+def test_terminal_empty_output_is_kept_for_official_quality_evaluation():
+    engine, calls = fixture(empty=True)
+    result = output()
+    engine._generate(result)
+    assert len(calls) == 1
+    assert result.generation == "" and result.generated_tokens == []
+    assert result.token_usage.output_tokens == 0
+    assert result.metadata.first_token_arrival_time is None
+    assert result.metadata.compile_status.code == 0
 
 
 @pytest.mark.parametrize(

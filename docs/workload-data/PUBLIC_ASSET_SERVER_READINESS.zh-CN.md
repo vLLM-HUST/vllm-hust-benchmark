@@ -898,11 +898,30 @@ python scripts/prepare_jsonschemabench_author_source.py --author-root /private/a
 完全重复而跳过，须单独验证；不能仅按名称假定切分相同，也不能把视图行数相加当独立任务数。
 
 已选WashingtonPost原38题全量协议，保持原schema、few-shot消息和原bench/evaluator，
-采用声明的本地Qwen3.5-27B双NPU/4096生成预算。前6题原生生成已保存，第7题在流中返回schema不支持错误，
-尚未完成整组官方评分。服务仍可用；保留原失败及六份成功结果，不换题、不重跑有效生成、不将任意API错误包装为编译拒绝。
-后续须补错误证据分类、精确断点复用，其余配置及default的完整原生验证、官方数据适配和工件/研究消费收口。
-来源仍未勾选。见[当前准备与失败证据](validation/jsonschemabench-official-workflow-readiness-20261024.json) 中的
-`current_server_readiness_20261026`；下文保留此前准备阶段说明，不表示当前仍未取得资产。
+采用声明的本地Qwen3.5-27B双NPU/4096生成预算。首次在第7题遇流式schema不支持错误， 原失败及前六份成功结果均保留；随后已完成本分区整组作者评分，不换题、不重跑有效生成。
+已补精确断点复用：真实作者GenerationOutput数据类恢复6条旧结果逐字段一致，新模型请求数为0。
+第7题原流式错误体已私下保存，证实为BadRequestError/code400及固定schema编译拒绝说明；仅这种
+尚未产生任何内容/usage的流式拒绝可记为作者UNSUPPORTED_SCHEMA。任意500、连接错误、未知400或
+已有生成内容后的错误仍报错。原失败保留，不改schema，不把不支持的题换成支持的题。
+WashingtonPost全38题已完成作者bench/evaluator；全部原schema、few-shot消息、保存输出和检查点逐条一致。
+30题声明支持、8题明确编译不支持，27条生成符合原validator，负面结果保留。
+独立保存结果重评不调用模型；原打印bootstrap未固定种子，重评固定seed0，不声称置信区间与旧打印逐字一致。 其余配置及default的完整原生验证、官方数据适配和工件/研究消费仍待收口。
+
+断点复用要求先独立核实原请求/进程已经终止，不能仅凭回执或观察超时推断。原源版本、数据摘要、分区/选样、 模型、预算和本地地址必须一致；只接受“全部已返回输出构成连续前缀、最后一题明确失败”的旧运行。
+在新的同配置命令上添加以下参数，并使用全新输出目录：
+
+```bash
+--reuse-failed-run /private/previous-failed-native-run --confirm-failed-tail-terminal
+```
+
+作者原bench仍按全部原题顺序运行及评分，复用时只恢复原输出，不调用模型；当前题目、完整消息或schema
+有任何差异立即拒绝，不自动重新生成。新私有记录保留旧文件路径/本次观察摘要、原输出ID及全部字段，
+不追溯宣称旧文件早已签名。回执区分reused_samples和new_generation_attempts，后者包含编译拒绝的请求尝试，
+不能等同于实际模型计算次数。复用输出的混合历史计时不得用于连续运行性能结论。
+本地HTTP传输timeout为300秒，不等同作者其他后端独立编译10秒/解码60秒时限；这是声明的本地API可用性配置，
+不是作者全部后端性能成绩复现。合法终态及usage均完整的空输出也保留给作者评分，不作为链路未跑通删除。
+来源仍未勾选。见[当前证据](validation/jsonschemabench-official-workflow-readiness-20261024.json) 中的
+`washingtonpost_native_completion_20261026`；旧准备和失败记录保留，不表示当前仍未取得资产或本分区尚未跑完。
 
 JSONSchemaBench 历史准备截面
 环境前检：`python scripts/probe_jsonschemabench_environment.py`。只读已安装分发版本，与固定作者requirements分别列出“缺失”“版本不同”“版本一致”，不安装、不给版本不同直接下不兼容结论，也不执行可选后端或调用模型。

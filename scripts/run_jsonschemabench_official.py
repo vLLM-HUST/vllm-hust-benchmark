@@ -7,6 +7,7 @@ rewrites, remote model fallback, task replacement or model deployment.
 
 import argparse
 from dataclasses import asdict
+from enum import Enum
 import hashlib
 import importlib
 import json
@@ -81,7 +82,82 @@ def origin(value):
     return value.rstrip("/")
 
 
-def checkpoint_engine(engine, output_root, receipt, save):
+def reusable_prefix(root, expected, *, failed_tail_terminal=False):
+    """Reuse only a terminal failed run's complete, matching successful prefix."""
+    if not failed_tail_terminal:
+        raise ValueError(
+            "independently confirm failed request terminal; a receipt alone is insufficient"
+        )
+    root = Path(root).resolve(strict=True)
+    receipt_path = root / "receipt-public.json"
+    previous = json.loads(receipt_path.read_text(encoding="utf-8"))
+    if previous.get("status") != "FAILED_NATIVE_FLOW_NOT_COMPLETE":
+        raise ValueError("only a confirmed failed native flow can be resumed")
+    for key in (
+        "source_id",
+        "source_revision",
+        "dataset_revision",
+        "dataset_pins_sha256",
+        "tasks",
+        "limit_per_task",
+        "model",
+        "max_tokens",
+        "context_capacity",
+    ):
+        if previous.get(key) != expected.get(key):
+            raise ValueError(f"resume original profile differs: {key}")
+    if previous.get("origin", "http://127.0.0.1:19466") != expected.get("origin"):
+        raise ValueError("resume local origin differs")
+    if previous.get("client_http_timeout_seconds", 300) != expected.get(
+        "client_http_timeout_seconds", 300
+    ):
+        raise ValueError("resume transport timeout differs")
+    paths = sorted(root.glob("attempt-*.private.json"))
+    attempted = previous["attempted_samples"]
+    if [path.name for path in paths] != [
+        f"attempt-{index:06d}.private.json" for index in range(attempted)
+    ]:
+        raise ValueError("resume attempt coverage differs")
+    successful = []
+    for index, path in enumerate(paths):
+        raw = path.read_bytes()
+        record = json.loads(raw)
+        if record.get("status") == "GENERATION_RETURNED_NOT_YET_OFFICIALLY_EVALUATED":
+            if len(successful) != index or not isinstance(record.get("output"), dict):
+                raise ValueError(
+                    "resume requires one contiguous complete output prefix"
+                )
+            if (
+                record["output"].get("task") != record["task"]
+                or record["output"].get("messages") != record["original_messages"]
+                or record["output"].get("schema") != record["original_schema"]
+            ):
+                raise ValueError(
+                    "saved output original input/reference relationship differs"
+                )
+            successful.append(
+                {
+                    "record": record,
+                    "path": str(path),
+                    "sha256": hashlib.sha256(raw).hexdigest(),
+                }
+            )
+        elif (
+            record.get("status") != "GENERATION_FAILED_NOT_REPLACED"
+            or index != len(paths) - 1
+        ):
+            raise ValueError("unresolved or nonterminal prior attempt, do not retry")
+    if (
+        len(successful) != previous["returned_samples"]
+        or len(successful) != attempted - 1
+    ):
+        raise ValueError(
+            "resume must preserve every prior returned output and one failed tail"
+        )
+    return successful, hashlib.sha256(receipt_path.read_bytes()).hexdigest()
+
+
+def checkpoint_engine(engine, output_root, receipt, save, *, prior=(), restore=None):
     generate = engine.generate
 
     def wrapped(task, messages, schema):
@@ -97,7 +173,36 @@ def checkpoint_engine(engine, output_root, receipt, save):
         path = output_root / f"attempt-{index:06d}.private.json"
         path.write_text(json.dumps(record), encoding="utf-8")
         try:
-            result = generate(task, messages, schema)
+            if index < len(prior):
+                saved = prior[index]
+                previous = saved["record"]
+                if (
+                    previous["task"] != task
+                    or previous["original_messages"] != messages
+                    or previous["original_schema"] != schema
+                    or restore is None
+                ):
+                    raise ValueError(
+                        "saved original task/messages/schema differ; no model fallback"
+                    )
+                result = restore(previous["output"])
+                if asdict(result) != previous["output"]:
+                    raise ValueError(
+                        "author dataclass restoration changed saved output"
+                    )
+                if hasattr(engine, "total_usage") and hasattr(result, "token_usage"):
+                    engine.total_usage += result.token_usage
+                record["reused_from"] = {
+                    "path": saved["path"],
+                    "sha256": saved["sha256"],
+                }
+                receipt["reused_samples"] = receipt.get("reused_samples", 0) + 1
+            else:
+                receipt["new_generation_attempts"] = (
+                    receipt.get("new_generation_attempts", 0) + 1
+                )
+                save()
+                result = generate(task, messages, schema)
             record.update(
                 status="GENERATION_RETURNED_NOT_YET_OFFICIALLY_EVALUATED",
                 output=asdict(result),
@@ -106,8 +211,14 @@ def checkpoint_engine(engine, output_root, receipt, save):
             return result
         except Exception as exc:
             record.update(
-                status="GENERATION_FAILED_NOT_REPLACED", error_type=type(exc).__name__
+                status="GENERATION_FAILED_NOT_REPLACED",
+                error_type=type(exc).__name__,
+                error_message=str(exc),
+                error_status_code=getattr(exc, "status_code", None),
             )
+            body = getattr(exc, "body", None)
+            if isinstance(body, (dict, list, str, int, float, bool)) or body is None:
+                record["error_body"] = body
             raise
         finally:
             path.write_text(json.dumps(record), encoding="utf-8")
@@ -147,13 +258,31 @@ def run(args):
         "attempted_samples": 0,
         "returned_samples": 0,
         "model": args.model,
+        "origin": args.origin,
         "model_backend": "OPERATOR_DECLARED_NPU_NOT_MEASURED_BY_CLIENT",
         "max_tokens": args.max_tokens,
         "context_capacity": args.context_capacity,
+        "client_http_timeout_seconds": 300,
+        "timing_profile_boundary": "Local HTTP stream transport timeout, not separate author compiler/decoder timing limits; no paper/backend-performance equivalence claim.",
         "source_checkbox_eligible": False,
         "performance_claim": False,
         "source_completion_note": "Actual native profile and research consumer require separate review; no completion from software support.",
     }
+    prior = []
+    resume_root = getattr(args, "reuse_failed_run", None)
+    if resume_root is not None:
+        prior, prior_receipt_sha = reusable_prefix(
+            resume_root,
+            receipt,
+            failed_tail_terminal=getattr(args, "confirm_failed_tail_terminal", False),
+        )
+        receipt.update(
+            reused_samples=0,
+            reusable_prefix_samples=len(prior),
+            previous_receipt_sha256=prior_receipt_sha,
+            new_generation_attempts=0,
+            reuse_boundary="Observed saved-file hashes, not retroactive historical signatures. Original output IDs, references and metadata retained; not continuous-run performance evidence.",
+        )
     path = out / "receipt-public.json"
 
     def save():
@@ -237,7 +366,19 @@ def run(args):
             context_limit=args.context_capacity,
             temperature=0,
         )
-        engine = checkpoint_engine(engine, out, receipt, save)
+
+        def restore(saved):
+            from dacite import Config, from_dict
+
+            return from_dict(
+                data_class=types_module.GenerationOutput,
+                data=saved,
+                config=Config(cast=[Enum], strict=True),
+            )
+
+        engine = checkpoint_engine(
+            engine, out, receipt, save, prior=prior, restore=restore
+        )
         os.chdir(out)
         outputs = bench(
             engine=engine,
@@ -288,6 +429,12 @@ def main():
     )
     parser.add_argument("--snapshot-root", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--reuse-failed-run", type=Path)
+    parser.add_argument(
+        "--confirm-failed-tail-terminal",
+        action="store_true",
+        help="Operator verified prior request/process terminal independently; not inferred from receipt or timeout.",
+    )
     parser.add_argument("--origin", type=origin, default="http://127.0.0.1:19466")
     parser.add_argument("--model", required=True)
     parser.add_argument("--max-tokens", type=int, required=True)

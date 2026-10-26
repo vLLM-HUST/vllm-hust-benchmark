@@ -12,17 +12,32 @@ from urllib.parse import urlparse
 
 
 def explicit_schema_rejection(error):
-    if getattr(error, "status_code", None) != 400:
-        return False
     body = getattr(error, "body", None)
     if not isinstance(body, dict):
         return False
     detail = body.get("error", body)
-    return isinstance(detail, dict) and detail.get("code") in {
+    if not isinstance(detail, dict):
+        return False
+    if getattr(error, "status_code", None) == 400 and detail.get("code") in {
         "invalid_json_schema",
         "unsupported_json_schema",
         "unsupported_schema",
-    }
+    }:
+        return True
+    # OpenAI SDK raises APIError during SSE with no status_code; preserve the
+    # server's structured 400 compiler verdict, never infer it from arbitrary text.
+    message = detail.get("message")
+    return (
+        type(error).__name__ == "APIError"
+        and getattr(error, "status_code", None) is None
+        and detail.get("type") == "BadRequestError"
+        and type(detail.get("code")) is int
+        and detail["code"] == 400
+        and isinstance(message, str)
+        and message.startswith("Unsupported JSON Schema structure ")
+        and "\nMake sure it is valid to the JSON Schema specification and check if it's supported by Outlines."
+        in message
+    )
 
 
 def create_engine(
@@ -108,22 +123,42 @@ def create_engine(
                 )
                 return
             chunks, terminal, usage, first = [], None, None, None
-            for event in response:
-                if event.usage is not None:
-                    usage = event.usage
-                for choice in event.choices:
-                    if choice.index != 0:
-                        raise ValueError("single original completion stream required")
-                    if choice.finish_reason is not None:
-                        terminal = choice.finish_reason
-                    text = choice.delta.content
-                    if text is not None:
-                        if not isinstance(text, str):
-                            raise ValueError("invalid original streaming content")
-                        if first is None and text:
-                            first = time()
-                        chunks.append(text)
-            if terminal not in {"stop", "length"} or usage is None or first is None:
+            try:
+                for event in response:
+                    if event.usage is not None:
+                        usage = event.usage
+                    for choice in event.choices:
+                        if choice.index != 0:
+                            raise ValueError(
+                                "single original completion stream required"
+                            )
+                        if choice.finish_reason is not None:
+                            terminal = choice.finish_reason
+                        text = choice.delta.content
+                        if text is not None:
+                            if not isinstance(text, str):
+                                raise ValueError("invalid original streaming content")
+                            if first is None and text:
+                                first = time()
+                            chunks.append(text)
+            except Exception as error:
+                if (
+                    chunks
+                    or terminal is not None
+                    or usage is not None
+                    or not explicit_schema_rejection(error)
+                ):
+                    raise
+                output.metadata.compile_status = types_module.CompileStatus(
+                    code=types_module.CompileStatusCode.UNSUPPORTED_SCHEMA,
+                    message=str(error),
+                )
+                return
+            finally:
+                close = getattr(response, "close", None)
+                if callable(close):
+                    close()
+            if terminal not in {"stop", "length"} or usage is None:
                 raise ValueError(
                     "original terminal completion and measured usage required"
                 )
@@ -131,9 +166,11 @@ def create_engine(
                 type(usage.prompt_tokens) is not int
                 or type(usage.completion_tokens) is not int
                 or usage.prompt_tokens < 1
-                or usage.completion_tokens < 1
+                or usage.completion_tokens < 0
             ):
                 raise ValueError("invalid service token usage")
+            if usage.completion_tokens == 0 and any(chunks):
+                raise ValueError("nonempty text contradicts zero completion tokens")
             if (
                 usage.completion_tokens > max_tokens
                 or usage.prompt_tokens + max_tokens > context_limit
