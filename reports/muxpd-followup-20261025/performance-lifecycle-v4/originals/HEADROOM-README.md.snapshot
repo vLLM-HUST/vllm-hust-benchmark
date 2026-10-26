@@ -1,0 +1,47 @@
+# Explicit pool22 cancellation treatment
+
+Original pool20 suite FAIL is preserved. These are fresh-process, separate partial/full tests; they do not resume the failed shared-model suite. Only total block override changes20→22. P128/D96 seed, two P4080/D16 peers, P8 abort, four reuse pairs and all original gates remain unchanged. No hardware result exists yet.
+
+CPU: four valid derivations/check-only calls;20 tampered-plan rejection checks; copied controller-layout import; exact original execute/audit hash; Ruff passed. `validation.json` and `copied-controller-layout-check/check.json` preserve receipts.
+
+Run sequentially under root-owned exclusive device custody in the existing inference environment. Explicit version selection matches the pinned old Core call interface. Root should retain its usual before/after empty-device and owned-process checks; the existing single-run controller is unchanged.
+
+```bash
+HCCL_DETERMINISTIC=true VLLM_VERSION=0.25.1 /root/workspace/.muxpd-ecpa-runtime/bin/python /root/workspace/muxpd-followup-20261025/root/run_pressure_controlled_v1.py \
+  --label raw-cancel-partial-block22-hccl-true-01 --role raw \
+  --source /root/workspace/muxpd-groupfx-followup \
+  --config /root/workspace/muxpd-followup-20261025/root/raw-fusion-engine-args.json \
+  --program /root/workspace/muxpd-followup-20261025/performance/pressure_headroom.py \
+  --plan /root/workspace/muxpd-followup-20261025/performance/cancellation-headroom-v1/raw-partial-plan.json --timeout 2400
+```
+
+```bash
+HCCL_DETERMINISTIC=true VLLM_VERSION=0.25.1 /root/workspace/.muxpd-ecpa-runtime/bin/python /root/workspace/muxpd-followup-20261025/root/run_pressure_controlled_v1.py \
+  --label raw-cancel-full-block22-hccl-true-01 --role raw \
+  --source /root/workspace/muxpd-groupfx-followup \
+  --config /root/workspace/muxpd-followup-20261025/root/raw-fusion-engine-args.json \
+  --program /root/workspace/muxpd-followup-20261025/performance/pressure_headroom.py \
+  --plan /root/workspace/muxpd-followup-20261025/performance/cancellation-headroom-v1/raw-full-plan.json --timeout 2400
+```
+
+```bash
+HCCL_DETERMINISTIC=true VLLM_VERSION=0.25.1 /root/workspace/.muxpd-ecpa-runtime/bin/python /root/workspace/muxpd-followup-20261025/root/run_pressure_controlled_v1.py \
+  --label group-cancel-partial-block22-hccl-true-01 --role group \
+  --source /root/workspace/muxpd-groupfx-followup \
+  --config /root/workspace/muxpd-followup-20261025/root/group-fusion-engine-args.json \
+  --program /root/workspace/muxpd-followup-20261025/performance/pressure_headroom.py \
+  --plan /root/workspace/muxpd-followup-20261025/performance/cancellation-headroom-v1/group-partial-plan.json --timeout 2400
+```
+
+```bash
+HCCL_DETERMINISTIC=true VLLM_VERSION=0.25.1 /root/workspace/.muxpd-ecpa-runtime/bin/python /root/workspace/muxpd-followup-20261025/root/run_pressure_controlled_v1.py \
+  --label group-cancel-full-block22-hccl-true-01 --role group \
+  --source /root/workspace/muxpd-groupfx-followup \
+  --config /root/workspace/muxpd-followup-20261025/root/group-fusion-engine-args.json \
+  --program /root/workspace/muxpd-followup-20261025/performance/pressure_headroom.py \
+  --plan /root/workspace/muxpd-followup-20261025/performance/cancellation-headroom-v1/group-full-plan.json --timeout 2400
+```
+
+Expected controller receipt: `runs/LABEL/controller.json`; original acceptance report: `runs/LABEL/results/run.json`. The wrapper is copied as `producer/pressure_probe.py`; it byte-copies the original into `producer/frozen_pressure_probe.py` and executes that exact original. Both original helper files are copied by the controller. No old source/plan/result file is rewritten.
+
+A valid result requires actual two-original-peer P8, native abort, cancelled held-block ownership until matching worker ACK, release and physical reuse, exact uncancelled original outputs, final drained pool, no errors, returned shutdown, and clean controller/device custody. Any unmet event remains FAIL.

@@ -1,0 +1,83 @@
+"""Render unchanged analyzer outputs and every original window; no model imports."""
+import csv
+import hashlib
+import json
+from datetime import datetime, timezone
+from pathlib import Path
+
+HERE = Path(__file__).resolve().parent
+ROOT = HERE.parents[1]
+ROLES = [('N1','perf-f7-native-sync-01'),('R1','perf-f7-raw-01'),('G1','perf-f7-group-01'),('G2','perf-f7-group-02'),('R2','perf-f7-raw-02'),('N2','perf-f7-native-sync-02')]
+
+def load(path): return json.loads(path.read_text())
+def identity(path):
+    data=path.read_bytes();return {'path':str(path),'bytes':len(data),'sha256':hashlib.sha256(data).hexdigest()}
+def write_json(path,value):
+    with path.open('x')as f:json.dump(value,f,indent=2);f.write('\n')
+def fmt(value): return '—' if value is None else f'{value:.3f}'
+def pct(value): return f'{100*(value-1):+.3f}%'
+def table(headers,rows):
+    return '\n'.join(['| '+' | '.join(headers)+' |','| '+' | '.join(['---']*len(headers))+' |']+['| '+' | '.join(map(str,row))+' |'for row in rows])+'\n'
+
+def main():
+    analysis=load(HERE/'group-abba-with-native.json');assert analysis['complete']
+    supplement=load(HERE/'stalls-all-primary.json');assert supplement['all_supplied_inputs_analyzed'] and len(supplement['runs'])==6
+    runs=[(role,label,load(ROOT/'runs'/label/'results/run.json'),load(ROOT/'runs'/label/'controller.json'))for role,label in ROLES]
+    windows=[];counter=[]
+    for role,label,run,controller in runs:
+        assert controller['passed']and controller['exit_code']==0
+        counter.append({'role':role,'label':label,'worker_counters_after_init':run['worker_counters_after_init'],'worker_counters_before_timing':run['worker_counters_before_timing'],'worker_counters_after_timing':run['worker_counters_after_timing'],'worker_counter_deltas':run['worker_counter_deltas']})
+        for w in run['windows']:
+            windows.append({'role':role,'label':label,'run':identity(ROOT/'runs'/label/'results/run.json'),'window':w['label'],'workload':w['workload'],'warmup':w['warmup'],'complete':w['complete'],'error':w['error'],'actual_steps':len(w['steps']),'request_count':len(w['requests']),'original_summary':w['summary'],'ingress':w['ingress'],'drain_after':w['drain_after']})
+    write_json(HERE/'all-window-summaries.json',{'scope':'All36 original windows including12 excluded warmups; original summary dictionaries copied unchanged, every per-request TTFT retained.','windows':windows})
+    write_json(HERE/'all-rank-counter-receipts.json',{'scope':'Original post-init/before/after timing RPC receipts and their frozen derived counters; not physical operator timing.','runs':counter})
+    keys=['output_tokens','window_seconds','output_tokens_per_second','steady_decode_tokens_per_second','long_p_ttft_ms','step_ms_mean','step_ms_p99','token_gap_ms_p50','token_gap_ms_p99','seed_gap_ms_p99']
+    with (HERE/'all-window-metrics.csv').open('x')as f:
+        writer=csv.DictWriter(f,fieldnames=['role','label','window','workload','warmup','complete','error',*keys,'ttft_ms_json']);writer.writeheader()
+        for w in windows:
+            writer.writerow({**{k:w[k]for k in ['role','label','window','workload','warmup','complete','error']},**{k:w['original_summary'].get(k)for k in keys},'ttft_ms_json':json.dumps(w['original_summary']['ttft_ms'],sort_keys=True)})
+    text=['# TP4 grouped-P 主矩阵：六项完整结果，默认原生参考待完成\n',
+        '六项 N1/R1/G1/G2/R2/N2 均完成并通过原冻结分析器。分组 P 相对 raw 的混合负载吞吐提高 **3.466%**；相对匹配的同步原生参考仍低 **2.325%**。分组 P 的长 P TTFT 和 seed gap P99 分别比该同步原生参考高 **35.959%**、**29.533%**。补充分析中的最大 seed 中断较短，须同时披露这些代价。两个实用默认 backend/async 原生参考尚未纳入，暂不形成总体价值结论。\n',
+        '这是 Qwen3.5-35B-A3B、BF16、TP4/EP4、四张910B2（留存硬件快照中的物理1/2/3/6）、HCCL=true 的有限离线 actor 到达实验。所有主臂 async=false、npugraphEx=false/static=false；原生标准 chunked-prefill=true，插件false，raw/group仅 compile_prefill_groups 不同。源码 f7ed21e、Core d0f22d2、Ascend03766ac及其既有构建文件差异由原分析器核对一致。不是HTTP goodput、可持续容量或最佳原生配置比较。\n',
+        '## 完整身份、顺序和保留范围\n']
+    text.append(table(['角色','原运行目录','开始UTC','结束UTC','controller'],[(role,f'../../runs/{label}',c['started_at'],c['finished_at'],'PASS / exit0')for role,label,r,c in runs]))
+    text+=['原始 [ABBA](group-abba.json) 和 [带同步原生参考的 ABBA](group-abba-with-native.json) 均为原冻结脚本直接输出；未改计算口径。每项两次测量前各保留一次 decode/mixed warmup：w0/w1不计入估计，w2/w4 decode及w3/w5 mixed全部计入。共36窗口、其中24测量窗口，无挑选或重试替换。\n',
+           '[全部窗口表](all-window-metrics.csv)与[原summary字典](all-window-summaries.json)保留每个原指标、P50/P99、每请求TTFT、输出数量、窗口时长和drain；不以进程均值覆盖原窗口。\n',
+           '## 原 primary：全部指标及配对\n',
+           '每项数值先取同一进程两测量窗口均值。Group/raw总比值为两个group进程均值除以两个raw进程均值；相邻配对为G1/R1、G2/R2。百分比均为比值减1：吞吐正值较高，延迟负值较低。ms与tokens/s按指标名区分。\n']
+    for workload,metrics in analysis['comparisons'].items():
+        text.append(f'### {workload}\n')
+        rows=[];comparisons=[];native=[]
+        for name,m in metrics.items():
+            if not isinstance(m,dict):continue
+            vals=m['run_values_raw_group_group_raw'];n=m['matched_native_reference'];process=[n['before_after'][0],*vals,n['before_after'][1]]
+            rows.append([name,*map(fmt,process)])
+            comparisons.append([name,fmt(m['raw_mean']),fmt(m['group_mean']),pct(m['group_over_raw']),*map(pct,m['adjacent_pair_ratios']),pct(m['raw_drift_ratio'])])
+            native.append([name,fmt(n['mean']),pct(n['drift_ratio']),pct(n['raw_over_native']),pct(n['group_over_native'])])
+        text.append(table(['原指标','N1','R1','G1','G2','R2','N2'],rows))
+        text.append(table(['原指标','raw均值','group均值','group/raw变化','G1/R1','G2/R2','R2/R1漂移'],comparisons))
+        text.append(table(['原指标','同步native均值','N2/N1漂移','raw/native变化','group/native变化'],native))
+    text+=['混合吞吐的两对提升为5.913%与1.047%，并非稳定相同幅度；同步原生N2/N1吞吐下降6.833%。decode吞吐group/raw仅+0.292%，不能包装成明显吞吐突破。这里只有两个fresh raw与两个fresh group进程；共享step/token与同进程窗口相关，不作独立token显著性或总体等价推断。\n',
+            '## 保存的token数组：同角色可重复，跨模式mixed不同\n',
+            '[全部15角色对/所有窗口及同进程重复](retained-token-comparisons.json)只读取保存的token数组。N1=N2、R1=R2、G1=G2、所有raw/group两两完全一致；每个进程w2=w4、w3=w5。decode所有六臂一致。mixed的native与任意raw/group不同，且两次native、所有raw/group及warmup/测量重复的差异位置相同：\n']
+    token=load(HERE/'retained-token-comparisons.json');pair=next(p for p in token['all_role_pairs']if (p['left'],p['right'])==('N1','R1'));w=next(w for w in pair['windows']if w['label']=='w3')
+    text.append(table(['请求index','stage','首差异输出token序号（1起）','native ID','raw/group ID','不同位置数'],[(r['request_index'],r['stage'],r['first_difference']['generated_token_number_one_based'],r['first_difference']['left_token_id'],r['first_difference']['right_token_id'],r['differing_positions'])for r in w['requests']]))
+    text+=['因此，native与插件的完整mixed计时不能纯归因于调度开销；生成内容及Qwen MoE后续路由可能随token轨迹不同。这里没有路由/算子因果测量，也不能据这些token差异判定插件正确或错误。任务质量、任意文本语义和此前短序列数值证据仍有各自范围。raw/group自身保持相同输出轨迹，为分组P配对提供了更窄的比较边界。\n',
+           '## 在N1后冻结的 stall 补充分析\n',
+           '协议3cd48138在看到N1后、candidate计时前冻结，属于baseline-calibrated补充，不替换上面的P99。保留每个进程两mixed窗口、每窗口四seed，每seed512到达/511间隔；共48流、24528个间隔。严格>100ms，交集严格b>admit且a<firstP。下面四元组按seed0..3列出；它们同step相关，不算四个独立实验。所有间隔在[原补充输出](stalls-all-primary.json)中，零输入错误。\n']
+    rows=[]
+    for (role,label),run in zip(ROLES,supplement['runs']):
+        for w in run['windows']:
+            streams=w['streams'];arr=lambda key:', '.join(fmt(s[key])for s in streams);cnt=lambda key:', '.join(str(s[key])for s in streams)
+            rows.append([role,w['label'],fmt(w['ingress_interval']['duration_ms']),arr('full_window_max_gap_ms'),cnt('count_gt_100ms'),arr('ingress_intersecting_max_gap_ms'),cnt('ingress_intersecting_count_gt_100ms')])
+    text.append(table(['角色','窗口','P admission→first ms','全流最大gap ms×4','全流>100ms数×4','P交集最大gap ms×4','交集>100ms数×4'],rows))
+    text+=['这批同步原生四mixed窗口的最大seed中断443.888–474.893ms；group四窗口75.486–86.950ms；raw四窗口89.836–111.142ms。group所有保留seed无>100ms间隔；raw仅R1/w5的四seed各一次；native四窗口每seed各一次。该现象表明本负载中更长的P完成时间换取较短的最坏stream暂停，但不是HTTP SLO goodput或质量验收。原primary seed P99仍比同步native差，必须同时阅读。\n',
+           '## 运行计数与待完成边界\n',
+           '[所有rank原始RPC与差值](all-rank-counter-receipts.json)保留三个时点。每个插件进程、每rank测量期D replay=2044；group每rank十组的serving return增量均为6，失败/回退计数为0。原生worker无同类持久D replay计数，不能将缺失当零。f7的query/ready-skips/fences-skipped字段均返回0，不是候选4fb优化证据。这些返回计数不证明少发算子或物理重叠。\n',
+           '实际mixed profiler、HCCL代价因素与实用native-default-backend两fresh参考均不在本主矩阵估计中。后者async=true、npugraphEx=true，须独立呈现，不混入同步ABBA；完成前不作总体native比较。所有数值由已留存文件生成，不启动模型，不运行归档，不修改原件。\n']
+    with (HERE/'PRIMARY-REPORT.md').open('x')as f:f.write('\n'.join(text))
+    files=['group-abba.json','group-abba-with-native.json','stalls-all-primary.json','retained-token-comparisons.json','all-window-summaries.json','all-rank-counter-receipts.json','all-window-metrics.csv','PRIMARY-REPORT.md','compare_retained_tokens.py','render_primary_report.py']
+    write_json(HERE/'analysis-receipt.json',{'schema':'muxpd-primary-matrix-offline-analysis-v1','created_at':datetime.now(timezone.utc).isoformat(),'all_six_terminal':True,'original_primary_analyzers_complete':True,'stall_inputs_complete':True,'no_device_model_test_or_archive_work':True,'canonical_changed':False,'native_default_reference_included':False,'files':[identity(HERE/name)for name in files],'producer_inputs':[identity(ROOT/'performance/group-prefill-v1/perf_group_prefill.py'),identity(ROOT/'performance/group-prefill-v1/group-plan-v1.json'),identity(ROOT/'performance/stall-supplement-v1/analyze_stalls.py'),identity(ROOT/'performance/stall-supplement-v1/protocol.json')],'runs':[{'role':role,'run':identity(ROOT/'runs'/label/'results/run.json'),'controller':identity(ROOT/'runs'/label/'controller.json')}for role,label in ROLES]})
+    print('Rendered all36 windows, all6 roles and all original metrics; no default-native overall conclusion.')
+
+if __name__=='__main__':main()

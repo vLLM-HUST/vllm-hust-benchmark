@@ -1,0 +1,271 @@
+"""Read-only arithmetic and reporting review of the frozen primary analysis."""
+import csv
+import datetime
+import hashlib
+import itertools
+import json
+import math
+from pathlib import Path
+
+HERE = Path(__file__).resolve().parent
+SOURCE = HERE.parent / "group-matrix-analysis-v1"
+ROLES = ["N1", "R1", "G1", "G2", "R2", "N2"]
+COMMON = ["output_tokens_per_second", "step_ms_mean", "step_ms_p99", "token_gap_ms_p99"]
+METRICS = {
+    "decode-heavy": COMMON + ["steady_decode_tokens_per_second"],
+    "long-P-ingress": COMMON + ["long_p_ttft_ms", "seed_gap_ms_p99"],
+}
+inputs = {}
+checks = {}
+
+
+def read(path):
+    path = Path(path)
+    data = path.read_bytes()
+    inputs[str(path)] = {"bytes": len(data), "sha256": hashlib.sha256(data).hexdigest()}
+    return data.decode()
+
+
+def js(name):
+    return json.loads(read(SOURCE / name))
+
+
+def close(left, right):
+    assert math.isclose(left, right, rel_tol=1e-13, abs_tol=1e-13), (left, right)
+
+
+report = read(SOURCE / "PRIMARY-REPORT.md")
+receipt = js("analysis-receipt.json")
+rows = list(csv.DictReader(read(SOURCE / "all-window-metrics.csv").splitlines()))
+summaries = js("all-window-summaries.json")["windows"]
+abba = js("group-abba.json")
+native = js("group-abba-with-native.json")
+tokens = js("retained-token-comparisons.json")
+counters = js("all-rank-counter-receipts.json")["runs"]
+stalls = js("stalls-all-primary.json")
+assert len(rows) == len(summaries) == 36
+assert len({(r["role"], r["window"]) for r in rows}) == 36
+assert set(r["role"] for r in rows) == set(ROLES)
+assert sum(r["warmup"] == "True" for r in rows) == 12
+for role in ROLES:
+    selected = [r for r in rows if r["role"] == role]
+    assert {r["window"] for r in selected} == {f"w{i}" for i in range(6)}
+    for row in selected:
+        number = int(row["window"][1:])
+        assert row["warmup"] == str(number < 2)
+        assert row["workload"] == ("decode-heavy" if number % 2 == 0 else "long-P-ingress")
+        assert row["complete"] == "True" and row["error"] == ""
+        summary = next(s for s in summaries if (s["role"], s["window"]) == (role, row["window"]))
+        assert summary["complete"] and summary["error"] is None
+        assert summary["drain_after"]["scheduler_and_batch_queue_empty"]
+        assert summary["drain_after"]["client_empty"]
+        for key, value in summary["original_summary"].items():
+            if key == "ttft_ms":
+                assert json.loads(row["ttft_ms_json"]) == value
+            else:
+                close(float(row[key]), value)
+checks["windows"] = {"roles": ROLES, "total": 36, "warmup": 12, "measured": 24,
+                      "csv_equals_all_preserved_summary_fields": True}
+
+derived = {}
+pct = lambda value: f"{(value - 1) * 100:+.3f}%"
+for workload, names in METRICS.items():
+    assert set(abba["comparisons"][workload]) == set(names) | {"all_generated_tokens_identical_across_arms"}
+    derived[workload] = {}
+    for metric in names:
+        means = {}
+        for role in ROLES:
+            values = [float(r[metric]) for r in rows if r["role"] == role and
+                      r["workload"] == workload and r["warmup"] == "False"]
+            assert len(values) == 2
+            means[role] = sum(values) / 2
+        raw_mean = (means["R1"] + means["R2"]) / 2
+        group_mean = (means["G1"] + means["G2"]) / 2
+        native_mean = (means["N1"] + means["N2"]) / 2
+        expected = {
+            "run_values_raw_group_group_raw": [means[x] for x in ("R1", "G1", "G2", "R2")],
+            "raw_mean": raw_mean, "group_mean": group_mean,
+            "group_over_raw": group_mean / raw_mean,
+            "adjacent_pair_ratios": [means["G1"] / means["R1"], means["G2"] / means["R2"]],
+            "raw_drift_ratio": means["R2"] / means["R1"],
+        }
+        for key, value in expected.items():
+            actual = abba["comparisons"][workload][metric][key]
+            for a, b in zip(actual, value) if isinstance(value, list) else [(actual, value)]:
+                close(a, b)
+            assert native["comparisons"][workload][metric][key] == actual
+        expected_native = {
+            "before_after": [means["N1"], means["N2"]], "mean": native_mean,
+            "drift_ratio": means["N2"] / means["N1"],
+            "group_over_native": group_mean / native_mean, "raw_over_native": raw_mean / native_mean,
+        }
+        for key, value in expected_native.items():
+            actual = native["comparisons"][workload][metric]["matched_native_reference"][key]
+            for a, b in zip(actual, value) if isinstance(value, list) else [(actual, value)]:
+                close(a, b)
+        display_rows = [
+            [metric] + [f"{means[r]:.3f}" for r in ROLES],
+            [metric, f"{raw_mean:.3f}", f"{group_mean:.3f}", pct(group_mean / raw_mean),
+             *[pct(x) for x in expected["adjacent_pair_ratios"]], pct(expected["raw_drift_ratio"])],
+            [metric, f"{native_mean:.3f}", pct(expected_native["drift_ratio"]),
+             pct(raw_mean / native_mean), pct(group_mean / native_mean)],
+        ]
+        for cells in display_rows:
+            assert "| " + " | ".join(cells) + " |" in report
+        derived[workload][metric] = {"process_means": means, **expected,
+                                    "matched_native_reference": expected_native}
+checks["primary_arithmetic"] = {"metric_rows": 11, "report_numeric_cells": 176,
+                                 "all_csv_process_means_ratios_drifts_and_rounding_match": True}
+
+assert len(tokens["all_role_pairs"]) == 15
+assert {frozenset((p["left"], p["right"])) for p in tokens["all_role_pairs"]} == {
+    frozenset(x) for x in itertools.combinations(ROLES, 2)}
+differences = [(129, 57491, 13453, 381), (53, 1619, 4993, 450),
+               (44, 2250, 2972, 450), (118, 3387, 26847, 383), (98, 303, 2261, 31)]
+for pair in tokens["all_role_pairs"]:
+    cross = pair["left"].startswith("N") != pair["right"].startswith("N")
+    assert len(pair["windows"]) == 6
+    assert {w["label"] for w in pair["windows"]} == {f"w{i}" for i in range(6)}
+    for window in pair["windows"]:
+        mixed = window["workload"] == "long-P-ingress"
+        expected_equal = not (cross and mixed)
+        assert window["all_requests_equal"] == expected_equal
+        assert len(window["requests"]) == (5 if mixed else 8)
+        for index, request in enumerate(window["requests"]):
+            assert request["request_index"] == index and request["equal"] == expected_equal
+            assert request["outputs"] == (128 if mixed and index == 4 else 512)
+            if expected_equal:
+                assert request["first_difference"] is None and request["differing_positions"] == 0
+            else:
+                number, n, plugin, count = differences[index]
+                first = request["first_difference"]
+                assert first["generated_token_number_one_based"] == number
+                assert first["generated_token_index_zero_based"] == number - 1
+                assert request["differing_positions"] == count
+                expected_ids = (n, plugin) if pair["left"].startswith("N") else (plugin, n)
+                assert (first["left_token_id"], first["right_token_id"]) == expected_ids
+assert {r["role"] for r in tokens["within_run_measured_repetitions"]} == set(ROLES)
+for run in tokens["within_run_measured_repetitions"]:
+    assert {(c["left_window"], c["right_window"]) for c in run["comparisons"]} == {("w2", "w4"), ("w3", "w5")}
+    assert all(c["all_requests_equal"] and all(r["equal"] for r in c["requests"])
+               for c in run["comparisons"])
+checks["token_comparison_reporting"] = {"role_pairs": 15, "paired_windows": 90,
+    "within_process_pairs": 12, "all_retained_comparison_details_support_report": True,
+    "scope": "Reviewed retained comparison output; did not independently reread raw run token arrays."}
+
+protocol = json.loads(read(stalls["protocol"]["path"]))
+assert stalls["input_errors"] == [] and stalls["all_supplied_inputs_analyzed"]
+assert stalls["threshold_ns_strictly_greater_than"] == 100000000
+assert len(stalls["runs"]) == 6
+stream_count = gap_count = 0
+stall_rows = []
+for role, run in zip(ROLES, stalls["runs"]):
+    assert run["input"] == tokens["inputs"][role]
+    assert run["actual_windows"] == 6 and run["analyzed_mixed_windows"] == 2
+    assert [w["label"] for w in run["windows"]] == ["w3", "w5"]
+    for window in run["windows"]:
+        interval = window["ingress_interval"]
+        assert window["ingress_receipt"]["seed_counts"] == [32] * 4
+        assert len(window["streams"]) == 4
+        close(interval["duration_ms"], (interval["first_arrival_ns"] - interval["admit_ns"]) / 1e6)
+        assert window["original_primary_summary"] == next(s["original_summary"] for s in summaries
+            if s["role"] == role and s["window"] == window["label"])
+        for stream in window["streams"]:
+            stream_count += 1
+            arrivals = stream["arrival_ns"]
+            assert len(arrivals) == 512 and stream["gap_count"] == len(stream["gaps"]) == 511
+            expected_gaps = []
+            for index, (start, end) in enumerate(zip(arrivals, arrivals[1:])):
+                duration = end - start
+                assert duration > 0
+                expected_gaps.append({"gap_index": index, "start_ns": start, "end_ns": end,
+                    "duration_ns": duration, "duration_ms": duration / 1e6,
+                    "gt_100ms": duration > 100000000,
+                    "intersects_ingress": end > interval["admit_ns"] and start < interval["first_arrival_ns"]})
+            assert expected_gaps == stream["gaps"]
+            intersect = [g for g in expected_gaps if g["intersects_ingress"]]
+            assert intersect == stream["ingress_intersecting_gaps"]
+            assert stream["ingress_intersecting_gap_count"] == len(intersect)
+            assert stream["count_gt_100ms"] == sum(g["gt_100ms"] for g in expected_gaps)
+            assert stream["ingress_intersecting_count_gt_100ms"] == sum(g["gt_100ms"] for g in intersect)
+            assert stream["full_window_max_gap_ns"] == max(g["duration_ns"] for g in expected_gaps)
+            assert stream["ingress_intersecting_max_gap_ns"] == max(g["duration_ns"] for g in intersect)
+            close(stream["full_window_max_gap_ms"], stream["full_window_max_gap_ns"] / 1e6)
+            close(stream["ingress_intersecting_max_gap_ms"], stream["ingress_intersecting_max_gap_ns"] / 1e6)
+            gap_count += 511
+        cells = [role, window["label"], f"{interval['duration_ms']:.3f}"]
+        for key in ("full_window_max_gap_ms", "count_gt_100ms", "ingress_intersecting_max_gap_ms", "ingress_intersecting_count_gt_100ms"):
+            cells.append(", ".join(f"{s[key]:.3f}" if key.endswith("_ms") else str(s[key]) for s in window["streams"]))
+        assert "| " + " | ".join(cells) + " |" in report
+        stall_rows.append(cells)
+assert (stream_count, gap_count) == (48, 24528)
+assert stalls["protocol"]["sha256"] == inputs[stalls["protocol"]["path"]]["sha256"]
+assert protocol["candidate_performance_seen"] is False
+assert stalls["runs"][0]["finished_at"] < protocol["frozen_at"] < stalls["runs"][1]["started_at"]
+checks["stall_supplement"] = {"streams": 48, "gaps_recomputed_from_retained_arrivals": 24528,
+    "all_gap_intersection_threshold_summaries_and_report_rows_match": True,
+    "frozen_after_N1_before_R1": True, "primary_not_replaced": True,
+    "scope": "Actor-delivered arrivals; no HTTP goodput or physical device-overlap inference."}
+
+assert len(counters) == 6
+for run in counters:
+    stage_names = ["worker_counters_after_init", "worker_counters_before_timing", "worker_counters_after_timing"]
+    for stage in stage_names:
+        assert sorted(r["rank"] for r in run[stage]) == [0, 1, 2, 3]
+        assert all(r["control_environment"] == {"HCCL_DETERMINISTIC": "true", "VLLM_BATCH_INVARIANT": None} for r in run[stage])
+    for rank in range(4):
+        before, after = [next(r for r in run[stage] if r["rank"] == rank) for stage in stage_names[1:]]
+        assert before["pid"] == after["pid"]
+        for key in ("decode_preparation_queries", "decode_preparation_ready_skips", "decode_preparation_fences_skipped"):
+            assert before[key] == after[key] == 0
+        if run["role"].startswith("N"):
+            assert before["native_decode_graph"]["counter_available"] is False
+            assert after["native_decode_graph"]["counter_available"] is False
+            continue
+        delta = run["worker_counter_deltas"][str(rank)]
+        for key, value in delta["native_decode_graph"].items():
+            assert after["native_decode_graph"][key] - before["native_decode_graph"][key] == value
+        assert delta["native_decode_graph"]["decode_replay_calls"] == 2044
+        for key in ("decode_eager_fallback_calls", "decode_uncaptured_full_calls", "decode_forward_failures", "prefill_compile_profile_failures", "capture_failures"):
+            assert delta["native_decode_graph"][key] == 0
+        if run["role"].startswith("G"):
+            assert [a-b for a,b in zip(after["prefill_groups"]["calls"], before["prefill_groups"]["calls"])] == [6] * 10
+            assert delta["prefill_group_calls"] == [6] * 10
+checks["counters"] = {"runs": 6, "ranks_each": 4, "snapshot_stages": 3,
+    "all_reported_deltas_recomputed": True, "native_unavailable_not_zero": True}
+
+controllers = []
+for run in receipt["runs"]:
+    text = read(run["controller"]["path"])
+    assert inputs[run["controller"]["path"]] == {k: run["controller"][k] for k in ("bytes", "sha256")}
+    controller = json.loads(text)
+    assert controller["passed"] and controller["exit_code"] == 0
+    controllers.append(controller)
+assert all(left["finished_at"] <= right["started_at"] for left, right in zip(controllers, controllers[1:]))
+checks["chronology"] = {"order": ROLES, "terminal_exit_zero": True, "nonoverlapping": True}
+for f in receipt["files"]:
+    if f["path"] in inputs:
+        assert inputs[f["path"]] == {k: f[k] for k in ("bytes", "sha256")}
+assert receipt["native_default_reference_included"] is False
+assert not any("default" in r["label"] for r in rows)
+checks["scope"] = {"default_native_excluded": True, "no_overall_native_advantage_claim": True,
+    "mixed_native_plugin_token_divergence_disclosed": True,
+    "no_new_quality_gate_or_physical_overlap_claim": True,
+    "no_archive_hardware_source_deployment_or_raw_token_revalidation": True}
+for path, before in inputs.items():
+    data = Path(path).read_bytes()
+    assert len(data) == before["bytes"] and hashlib.sha256(data).hexdigest() == before["sha256"]
+output = {"schema": "muxpd-primary-report-independent-review-v1",
+    "reviewed_at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+    "reviewer": "/root/numerical_probe", "passed": True, "concrete_blockers": [],
+    "producer": {"path": str(Path(__file__).resolve()), "sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest()},
+    "inputs": inputs, "checks": checks, "derived_primary": derived,
+    "all_reviewed_input_bytes_unchanged": True,
+    "limitations": ["Review of frozen reporting and analysis output, not a new experiment or validation of raw token arrays.",
+                    "Only two fresh processes per role; no pooled-token statistical or general performance conclusion.",
+                    "Native mixed generated content differs from plugin content; native comparison is not pure scheduler overhead.",
+                    "Practical default-native references, quality, HCCL cost, profiler and archive validation are outside this review."]}
+with (HERE / "review.json").open("x") as f:
+    json.dump(output, f, indent=2, ensure_ascii=False)
+    f.write("\n")
+print(json.dumps({"passed": True, "checks": checks, "review": str(HERE / "review.json")}, ensure_ascii=False))

@@ -1,0 +1,189 @@
+{
+  "schema": "muxpd-cancellation-headroom-plan-v1",
+  "role": "raw",
+  "scenario": "partial",
+  "base_engine_sha256": "0d49f3541ade6542d5db8a0178b2c726694d4309fe7cf158495bc3e5e7048e61",
+  "geometry_receipt": {
+    "path": "/root/workspace/muxpd-followup-20261025/runs/raw-pressure-geometry-01/results/pressure/pressure-208386.jsonl",
+    "bytes": 4843,
+    "sha256": "c09d1e88c2ed308e0d35519ef5f565f8fbf135a284654e4d2dbe449fb2ed998b"
+  },
+  "geometry": {
+    "basis": "scheduler_global_groups",
+    "groups": [
+      {
+        "block_size": 1024,
+        "index": 0,
+        "layers": [
+          "language_model.model.layers.3.self_attn.attn",
+          "language_model.model.layers.7.self_attn.attn",
+          "language_model.model.layers.11.self_attn.attn",
+          "language_model.model.layers.15.self_attn.attn",
+          "language_model.model.layers.19.self_attn.attn",
+          "language_model.model.layers.23.self_attn.attn",
+          "language_model.model.layers.27.self_attn.attn",
+          "language_model.model.layers.31.self_attn.attn",
+          "language_model.model.layers.35.self_attn.attn",
+          "language_model.model.layers.39.self_attn.attn"
+        ],
+        "max_memory_usage_bytes": 16973824,
+        "page_size_bytes": 1060864,
+        "spec_repr": "FullAttentionSpec(block_size=1024, num_kv_heads=1, head_size=256, dtype=torch.bfloat16, kv_quant_mode=<KVQuantMode.NONE: 0>, page_size_padded=1060864, indexes_kv_by_block_stride=False, head_size_v=256, sliding_window=None, attention_chunk_size=None, non_causal=False)",
+        "spec_type": "FullAttentionSpec"
+      },
+      {
+        "block_size": 16384,
+        "index": 1,
+        "layers": [
+          "language_model.model.layers.0.linear_attn",
+          "language_model.model.layers.4.linear_attn",
+          "language_model.model.layers.8.linear_attn",
+          "language_model.model.layers.12.linear_attn",
+          "language_model.model.layers.16.linear_attn",
+          "language_model.model.layers.20.linear_attn",
+          "language_model.model.layers.24.linear_attn",
+          "language_model.model.layers.28.linear_attn",
+          "language_model.model.layers.32.linear_attn",
+          "language_model.model.layers.36.linear_attn"
+        ],
+        "max_memory_usage_bytes": 1060864,
+        "page_size_bytes": 1060864,
+        "spec_repr": "MambaSpec(block_size=16384, shapes=((3, 2048), (8, 128, 128)), dtypes=(torch.bfloat16, torch.float32), page_size_padded=1060864, mamba_type=<MambaAttentionBackendEnum.GDN_ATTN: 'vllm.v1.attention.backends.gdn_attn.GDNAttentionBackend'>, mamba_cache_mode='none', num_speculative_blocks=0)",
+        "spec_type": "MambaSpec"
+      },
+      {
+        "block_size": 16384,
+        "index": 2,
+        "layers": [
+          "language_model.model.layers.1.linear_attn",
+          "language_model.model.layers.5.linear_attn",
+          "language_model.model.layers.9.linear_attn",
+          "language_model.model.layers.13.linear_attn",
+          "language_model.model.layers.17.linear_attn",
+          "language_model.model.layers.21.linear_attn",
+          "language_model.model.layers.25.linear_attn",
+          "language_model.model.layers.29.linear_attn",
+          "language_model.model.layers.33.linear_attn",
+          "language_model.model.layers.37.linear_attn"
+        ],
+        "max_memory_usage_bytes": 1060864,
+        "page_size_bytes": 1060864,
+        "spec_repr": "MambaSpec(block_size=16384, shapes=((3, 2048), (8, 128, 128)), dtypes=(torch.bfloat16, torch.float32), page_size_padded=1060864, mamba_type=<MambaAttentionBackendEnum.GDN_ATTN: 'vllm.v1.attention.backends.gdn_attn.GDNAttentionBackend'>, mamba_cache_mode='none', num_speculative_blocks=0)",
+        "spec_type": "MambaSpec"
+      },
+      {
+        "block_size": 16384,
+        "index": 3,
+        "layers": [
+          "language_model.model.layers.2.linear_attn",
+          "language_model.model.layers.6.linear_attn",
+          "language_model.model.layers.10.linear_attn",
+          "language_model.model.layers.14.linear_attn",
+          "language_model.model.layers.18.linear_attn",
+          "language_model.model.layers.22.linear_attn",
+          "language_model.model.layers.26.linear_attn",
+          "language_model.model.layers.30.linear_attn",
+          "language_model.model.layers.34.linear_attn",
+          "language_model.model.layers.38.linear_attn"
+        ],
+        "max_memory_usage_bytes": 1060864,
+        "page_size_bytes": 1060864,
+        "spec_repr": "MambaSpec(block_size=16384, shapes=((3, 2048), (8, 128, 128)), dtypes=(torch.bfloat16, torch.float32), page_size_padded=1060864, mamba_type=<MambaAttentionBackendEnum.GDN_ATTN: 'vllm.v1.attention.backends.gdn_attn.GDNAttentionBackend'>, mamba_cache_mode='none', num_speculative_blocks=0)",
+        "spec_type": "MambaSpec"
+      }
+    ],
+    "max_model_len": 16384,
+    "minimum_plus_null_block": 20,
+    "minimum_startup_bytes": 201564160,
+    "minimum_startup_override": 19,
+    "native_source": {
+      "path": "/root/workspace/vllm-hust/vllm/v1/core/kv_cache_utils.py",
+      "sha256": "3ca561818019cef84c43c6d3839627145fd049f9479d40fc733ae142d6d71df3"
+    },
+    "num_blocks": 3325,
+    "override": null,
+    "passes_startup_byte_gate": true,
+    "pipeline_parallel_size": 1,
+    "pool_bytes_per_block": 10608640,
+    "runtime_admission_guaranteed": false,
+    "worker_exact_for_this_recipe": true
+  },
+  "override_guard": {
+    "proposed_override": 22,
+    "max_model_len": 16384,
+    "minimum_startup_override": 19,
+    "minimum_with_null_block": 20,
+    "passes_native_startup_bytes": true,
+    "passes_null_headroom_guard": true,
+    "runtime_admission_guaranteed": false,
+    "qualification_length": true,
+    "note": "Output-budget admission and simultaneous requests still need actual allocation receipts.",
+    "native_sources": [
+      {
+        "path": "/root/workspace/vllm-hust/vllm/v1/core/kv_cache_utils.py",
+        "sha256": "3ca561818019cef84c43c6d3839627145fd049f9479d40fc733ae142d6d71df3"
+      }
+    ]
+  },
+  "num_gpu_blocks_override": 22,
+  "seed_prompt_tokens": 128,
+  "seed_output_tokens": 96,
+  "peer_prompt_tokens": 4080,
+  "peer_count": 2,
+  "peer_output_tokens": 16,
+  "reuse_rounds": 4,
+  "cancel_at_completed_layers": 8,
+  "maximum_preemptions_per_request": 4,
+  "maximum_engine_steps": 870,
+  "maximum_wall_seconds": 1800,
+  "max_submitted_requests": 11,
+  "prompt_recipe": "100 + ((index*31 + ordinal*17) % 900)",
+  "admission": "seed first; peer pair immediately after actual seed output count=1; drain before each reuse pair",
+  "cost_estimate": {
+    "group_block_sizes": [
+      1024,
+      16384,
+      16384,
+      16384
+    ],
+    "usable_blocks": 21,
+    "seed_current_blocks": 4,
+    "peer_blocks": 7,
+    "seed_next_blocks": 4
+  },
+  "scope": "Cost estimates choose workload only. Actual allocationNone/preemption, ACK ownership and physical reuse must be observed.",
+  "derivation": {
+    "original_plan_file": {
+      "path": "/root/workspace/muxpd-followup-20261025/performance/plans-geometry01-block20/raw-partial-plan.json",
+      "bytes": 7003,
+      "sha256": "b02870051cbfed8d5e2f60a5f956a6cbd22611a43649a7699a0eeb2caed4b5ae"
+    },
+    "original_plan_sha256": "cfbf301217fdbcd163382c32649a7b5d51278fdecc6ad8058c2f84c7310de148",
+    "changed_runtime_parameter": "num_gpu_blocks_override: 20 -> 22",
+    "original_inputs_admission_bounds_cancel_ack_reuse_auditor_unchanged": true,
+    "frozen_execute_and_audit": {
+      "pressure_probe.py": "2585b8d236c6065b9de780a67735c092296b2c3490991bbf69413993fe33a8f6",
+      "pressure_observer.py": "9d04856f5a8c638cbb3bc6772cef9786d0774663b40719fe5d310d233319c884",
+      "pressure_override_guard.py": "9951e51d0a17756b95df27366548c59f484749b4bcd8f774d19a0e0d42ef20b7"
+    },
+    "predictor": {
+      "path": "/root/workspace/vllm-ascend-hust/vllm_ascend/patch/platform/patch_mamba_manager.py",
+      "bytes": 4916,
+      "sha256": "f8880004d6d6cb8e1a83d134528b3e9d37f405752df14c0ef7d2f7258ebed812"
+    },
+    "headroom": {
+      "null_blocks": 1,
+      "live_seed_blocks": 4,
+      "live_peer_blocks_each": 7,
+      "peer_count": 2,
+      "remaining_free_blocks": 3,
+      "ascend_decode_estimated_need": 3,
+      "native_core_actual_new_block_need_at_129_to_130": 0,
+      "capacity_check": "3 <= 22 - 1 - 4 - 2*7",
+      "not_a_transient_allocation_claim": true,
+      "hardware_p8_cancel_ack_reuse_still_required": true
+    },
+    "prior_pool20_failure_is_preserved": true
+  },
+  "plan_sha256": "320f2fe0735736e9f6c896a1b9ab057d10b41a0ab0ebe49da6df669aa7c384fd"
+}

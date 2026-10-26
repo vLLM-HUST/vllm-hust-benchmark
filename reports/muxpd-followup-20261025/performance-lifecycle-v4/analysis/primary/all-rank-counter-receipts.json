@@ -1,0 +1,4213 @@
+{
+  "scope": "Original post-init/before/after timing RPC receipts and their frozen derived counters; not physical operator timing.",
+  "runs": [
+    {
+      "role": "N1",
+      "label": "perf-f7-native-sync-01",
+      "worker_counters_after_init": [
+        {
+          "rank": 0,
+          "pid": 526992,
+          "device_index": 0,
+          "visible_device_map": [
+            "0",
+            "1",
+            "2",
+            "3"
+          ],
+          "expected_physical_device": "0",
+          "control_environment": {
+            "HCCL_DETERMINISTIC": "true",
+            "VLLM_BATCH_INVARIANT": null
+          },
+          "prefill_groups": null,
+          "decode_preparation_queries": 0,
+          "decode_preparation_ready_skips": 0,
+          "decode_preparation_fences_skipped": 0,
+          "native_decode_graph": {
+            "counter_available": false,
+            "reason": "Ordinary native worker exposes no persistent replay counter; use actual CANN profile API counts"
+          }
+        },
+        {
+          "rank": 1,
+          "pid": 526993,
+          "device_index": 1,
+          "visible_device_map": [
+            "0",
+            "1",
+            "2",
+            "3"
+          ],
+          "expected_physical_device": "1",
+          "control_environment": {
+            "HCCL_DETERMINISTIC": "true",
+            "VLLM_BATCH_INVARIANT": null
+          },
+          "prefill_groups": null,
+          "decode_preparation_queries": 0,
+          "decode_preparation_ready_skips": 0,
+          "decode_preparation_fences_skipped": 0,
+          "native_decode_graph": {
+            "counter_available": false,
+            "reason": "Ordinary native worker exposes no persistent replay counter; use actual CANN profile API counts"
+          }
+        },
+        {
+          "rank": 2,
+          "pid": 526994,
+          "device_index": 2,
+          "visible_device_map": [
+            "0",
+            "1",
+            "2",
+            "3"
+          ],
+          "expected_physical_device": "2",
+          "control_environment": {
+            "HCCL_DETERMINISTIC": "true",
+            "VLLM_BATCH_INVARIANT": null
+          },
+          "prefill_groups": null,
+          "decode_preparation_queries": 0,
+          "decode_preparation_ready_skips": 0,
+          "decode_preparation_fences_skipped": 0,
+          "native_decode_graph": {
+            "counter_available": false,
+            "reason": "Ordinary native worker exposes no persistent replay counter; use actual CANN profile API counts"
+          }
+        },
+        {
+          "rank": 3,
+          "pid": 526995,
+          "device_index": 3,
+          "visible_device_map": [
+            "0",
+            "1",
+            "2",
+            "3"
+          ],
+          "expected_physical_device": "3",
+          "control_environment": {
+            "HCCL_DETERMINISTIC": "true",
+            "VLLM_BATCH_INVARIANT": null
+          },
+          "prefill_groups": null,
+          "decode_preparation_queries": 0,
+          "decode_preparation_ready_skips": 0,
+          "decode_preparation_fences_skipped": 0,
+          "native_decode_graph": {
+            "counter_available": false,
+            "reason": "Ordinary native worker exposes no persistent replay counter; use actual CANN profile API counts"
+          }
+        }
+      ],
+      "worker_counters_before_timing": [
+        {
+          "rank": 0,
+          "pid": 526992,
+          "device_index": 0,
+          "visible_device_map": [
+            "0",
+            "1",
+            "2",
+            "3"
+          ],
+          "expected_physical_device": "0",
+          "control_environment": {
+            "HCCL_DETERMINISTIC": "true",
+            "VLLM_BATCH_INVARIANT": null
+          },
+          "prefill_groups": null,
+          "decode_preparation_queries": 0,
+          "decode_preparation_ready_skips": 0,
+          "decode_preparation_fences_skipped": 0,
+          "native_decode_graph": {
+            "counter_available": false,
+            "reason": "Ordinary native worker exposes no persistent replay counter; use actual CANN profile API counts"
+          }
+        },
+        {
+          "rank": 1,
+          "pid": 526993,
+          "device_index": 1,
+          "visible_device_map": [
+            "0",
+            "1",
+            "2",
+            "3"
+          ],
+          "expected_physical_device": "1",
+          "control_environment": {
+            "HCCL_DETERMINISTIC": "true",
+            "VLLM_BATCH_INVARIANT": null
+          },
+          "prefill_groups": null,
+          "decode_preparation_queries": 0,
+          "decode_preparation_ready_skips": 0,
+          "decode_preparation_fences_skipped": 0,
+          "native_decode_graph": {
+            "counter_available": false,
+            "reason": "Ordinary native worker exposes no persistent replay counter; use actual CANN profile API counts"
+          }
+        },
+        {
+          "rank": 2,
+          "pid": 526994,
+          "device_index": 2,
+          "visible_device_map": [
+            "0",
+            "1",
+            "2",
+            "3"
+          ],
+          "expected_physical_device": "2",
+          "control_environment": {
+            "HCCL_DETERMINISTIC": "true",
+            "VLLM_BATCH_INVARIANT": null
+          },
+          "prefill_groups": null,
+          "decode_preparation_queries": 0,
+          "decode_preparation_ready_skips": 0,
+          "decode_preparation_fences_skipped": 0,
+          "native_decode_graph": {
+            "counter_available": false,
+            "reason": "Ordinary native worker exposes no persistent replay counter; use actual CANN profile API counts"
+          }
+        },
+        {
+          "rank": 3,
+          "pid": 526995,
+          "device_index": 3,
+          "visible_device_map": [
+            "0",
+            "1",
+            "2",
+            "3"
+          ],
+          "expected_physical_device": "3",
+          "control_environment": {
+            "HCCL_DETERMINISTIC": "true",
+            "VLLM_BATCH_INVARIANT": null
+          },
+          "prefill_groups": null,
+          "decode_preparation_queries": 0,
+          "decode_preparation_ready_skips": 0,
+          "decode_preparation_fences_skipped": 0,
+          "native_decode_graph": {
+            "counter_available": false,
+            "reason": "Ordinary native worker exposes no persistent replay counter; use actual CANN profile API counts"
+          }
+        }
+      ],
+      "worker_counters_after_timing": [
+        {
+          "rank": 0,
+          "pid": 526992,
+          "device_index": 0,
+          "visible_device_map": [
+            "0",
+            "1",
+            "2",
+            "3"
+          ],
+          "expected_physical_device": "0",
+          "control_environment": {
+            "HCCL_DETERMINISTIC": "true",
+            "VLLM_BATCH_INVARIANT": null
+          },
+          "prefill_groups": null,
+          "decode_preparation_queries": 0,
+          "decode_preparation_ready_skips": 0,
+          "decode_preparation_fences_skipped": 0,
+          "native_decode_graph": {
+            "counter_available": false,
+            "reason": "Ordinary native worker exposes no persistent replay counter; use actual CANN profile API counts"
+          }
+        },
+        {
+          "rank": 1,
+          "pid": 526993,
+          "device_index": 1,
+          "visible_device_map": [
+            "0",
+            "1",
+            "2",
+            "3"
+          ],
+          "expected_physical_device": "1",
+          "control_environment": {
+            "HCCL_DETERMINISTIC": "true",
+            "VLLM_BATCH_INVARIANT": null
+          },
+          "prefill_groups": null,
+          "decode_preparation_queries": 0,
+          "decode_preparation_ready_skips": 0,
+          "decode_preparation_fences_skipped": 0,
+          "native_decode_graph": {
+            "counter_available": false,
+            "reason": "Ordinary native worker exposes no persistent replay counter; use actual CANN profile API counts"
+          }
+        },
+        {
+          "rank": 2,
+          "pid": 526994,
+          "device_index": 2,
+          "visible_device_map": [
+            "0",
+            "1",
+            "2",
+            "3"
+          ],
+          "expected_physical_device": "2",
+          "control_environment": {
+            "HCCL_DETERMINISTIC": "true",
+            "VLLM_BATCH_INVARIANT": null
+          },
+          "prefill_groups": null,
+          "decode_preparation_queries": 0,
+          "decode_preparation_ready_skips": 0,
+          "decode_preparation_fences_skipped": 0,
+          "native_decode_graph": {
+            "counter_available": false,
+            "reason": "Ordinary native worker exposes no persistent replay counter; use actual CANN profile API counts"
+          }
+        },
+        {
+          "rank": 3,
+          "pid": 526995,
+          "device_index": 3,
+          "visible_device_map": [
+            "0",
+            "1",
+            "2",
+            "3"
+          ],
+          "expected_physical_device": "3",
+          "control_environment": {
+            "HCCL_DETERMINISTIC": "true",
+            "VLLM_BATCH_INVARIANT": null
+          },
+          "prefill_groups": null,
+          "decode_preparation_queries": 0,
+          "decode_preparation_ready_skips": 0,
+          "decode_preparation_fences_skipped": 0,
+          "native_decode_graph": {
+            "counter_available": false,
+            "reason": "Ordinary native worker exposes no persistent replay counter; use actual CANN profile API counts"
+          }
+        }
+      ],
+      "worker_counter_deltas": {
+        "0": {
+          "decode_preparation_queries": 0,
+          "decode_preparation_ready_skips": 0,
+          "decode_preparation_fences_skipped": 0,
+          "native_decode_graph": {},
+          "prefill_group_calls": null
+        },
+        "1": {
+          "decode_preparation_queries": 0,
+          "decode_preparation_ready_skips": 0,
+          "decode_preparation_fences_skipped": 0,
+          "native_decode_graph": {},
+          "prefill_group_calls": null
+        },
+        "2": {
+          "decode_preparation_queries": 0,
+          "decode_preparation_ready_skips": 0,
+          "decode_preparation_fences_skipped": 0,
+          "native_decode_graph": {},
+          "prefill_group_calls": null
+        },
+        "3": {
+          "decode_preparation_queries": 0,
+          "decode_preparation_ready_skips": 0,
+          "decode_preparation_fences_skipped": 0,
+          "native_decode_graph": {},
+          "prefill_group_calls": null
+        }
+      }
+    },
+    {
+      "role": "R1",
+      "label": "perf-f7-raw-01",
+      "worker_counters_after_init": [
+        {
+          "rank": 0,
+          "pid": 552987,
+          "device_index": 0,
+          "visible_device_map": [
+            "0",
+            "1",
+            "2",
+            "3"
+          ],
+          "expected_physical_device": "0",
+          "control_environment": {
+            "HCCL_DETERMINISTIC": "true",
+            "VLLM_BATCH_INVARIANT": null
+          },
+          "prefill_groups": null,
+          "decode_preparation_queries": 0,
+          "decode_preparation_ready_skips": 0,
+          "decode_preparation_fences_skipped": 0,
+          "native_decode_graph": {
+            "enabled": true,
+            "attached": true,
+            "capture_started": true,
+            "captured": true,
+            "failed": false,
+            "closed": false,
+            "compile_full_prefill": false,
+            "prefill_compile_profiled": false,
+            "includes_startup_warmups": true,
+            "captured_graph_entries": 4,
+            "decode_replay_calls": 0,
+            "decode_capture_forward_calls": 4,
+            "decode_eager_fallback_calls": 4,
+            "decode_uncaptured_full_calls": 0,
+            "decode_forward_failures": 0,
+            "prefill_forced_eager_calls": 1,
+            "prefill_compiled_calls": 0,
+            "prefill_compile_profile_runs": 0,
+            "prefill_compile_profile_failures": 0,
+            "capture_attempts": 1,
+            "capture_successes": 1,
+            "capture_failures": 0
+          }
+        },
+        {
+          "rank": 1,
+          "pid": 552988,
+          "device_index": 1,
+          "visible_device_map": [
+            "0",
+            "1",
+            "2",
+            "3"
+          ],
+          "expected_physical_device": "1",
+          "control_environment": {
+            "HCCL_DETERMINISTIC": "true",
+            "VLLM_BATCH_INVARIANT": null
+          },
+          "prefill_groups": null,
+          "decode_preparation_queries": 0,
+          "decode_preparation_ready_skips": 0,
+          "decode_preparation_fences_skipped": 0,
+          "native_decode_graph": {
+            "enabled": true,
+            "attached": true,
+            "capture_started": true,
+            "captured": true,
+            "failed": false,
+            "closed": false,
+            "compile_full_prefill": false,
+            "prefill_compile_profiled": false,
+            "includes_startup_warmups": true,
+            "captured_graph_entries": 4,
+            "decode_replay_calls": 0,
+            "decode_capture_forward_calls": 4,
+            "decode_eager_fallback_calls": 4,
+            "decode_uncaptured_full_calls": 0,
+            "decode_forward_failures": 0,
+            "prefill_forced_eager_calls": 1,
+            "prefill_compiled_calls": 0,
+            "prefill_compile_profile_runs": 0,
+            "prefill_compile_profile_failures": 0,
+            "capture_attempts": 1,
+            "capture_successes": 1,
+            "capture_failures": 0
+          }
+        },
+        {
+          "rank": 2,
+          "pid": 552989,
+          "device_index": 2,
+          "visible_device_map": [
+            "0",
+            "1",
+            "2",
+            "3"
+          ],
+          "expected_physical_device": "2",
+          "control_environment": {
+            "HCCL_DETERMINISTIC": "true",
+            "VLLM_BATCH_INVARIANT": null
+          },
+          "prefill_groups": null,
+          "decode_preparation_queries": 0,
+          "decode_preparation_ready_skips": 0,
+          "decode_preparation_fences_skipped": 0,
+          "native_decode_graph": {
+            "enabled": true,
+            "attached": true,
+            "capture_started": true,
+            "captured": true,
+            "failed": false,
+            "closed": false,
+            "compile_full_prefill": false,
+            "prefill_compile_profiled": false,
+            "includes_startup_warmups": true,
+            "captured_graph_entries": 4,
+            "decode_replay_calls": 0,
+            "decode_capture_forward_calls": 4,
+            "decode_eager_fallback_calls": 4,
+            "decode_uncaptured_full_calls": 0,
+            "decode_forward_failures": 0,
+            "prefill_forced_eager_calls": 1,
+            "prefill_compiled_calls": 0,
+            "prefill_compile_profile_runs": 0,
+            "prefill_compile_profile_failures": 0,
+            "capture_attempts": 1,
+            "capture_successes": 1,
+            "capture_failures": 0
+          }
+        },
+        {
+          "rank": 3,
+          "pid": 552990,
+          "device_index": 3,
+          "visible_device_map": [
+            "0",
+            "1",
+            "2",
+            "3"
+          ],
+          "expected_physical_device": "3",
+          "control_environment": {
+            "HCCL_DETERMINISTIC": "true",
+            "VLLM_BATCH_INVARIANT": null
+          },
+          "prefill_groups": null,
+          "decode_preparation_queries": 0,
+          "decode_preparation_ready_skips": 0,
+          "decode_preparation_fences_skipped": 0,
+          "native_decode_graph": {
+            "enabled": true,
+            "attached": true,
+            "capture_started": true,
+            "captured": true,
+            "failed": false,
+            "closed": false,
+            "compile_full_prefill": false,
+            "prefill_compile_profiled": false,
+            "includes_startup_warmups": true,
+            "captured_graph_entries": 4,
+            "decode_replay_calls": 0,
+            "decode_capture_forward_calls": 4,
+            "decode_eager_fallback_calls": 4,
+            "decode_uncaptured_full_calls": 0,
+            "decode_forward_failures": 0,
+            "prefill_forced_eager_calls": 1,
+            "prefill_compiled_calls": 0,
+            "prefill_compile_profile_runs": 0,
+            "prefill_compile_profile_failures": 0,
+            "capture_attempts": 1,
+            "capture_successes": 1,
+            "capture_failures": 0
+          }
+        }
+      ],
+      "worker_counters_before_timing": [
+        {
+          "rank": 0,
+          "pid": 552987,
+          "device_index": 0,
+          "visible_device_map": [
+            "0",
+            "1",
+            "2",
+            "3"
+          ],
+          "expected_physical_device": "0",
+          "control_environment": {
+            "HCCL_DETERMINISTIC": "true",
+            "VLLM_BATCH_INVARIANT": null
+          },
+          "prefill_groups": null,
+          "decode_preparation_queries": 0,
+          "decode_preparation_ready_skips": 0,
+          "decode_preparation_fences_skipped": 0,
+          "native_decode_graph": {
+            "enabled": true,
+            "attached": true,
+            "capture_started": true,
+            "captured": true,
+            "failed": false,
+            "closed": false,
+            "compile_full_prefill": false,
+            "prefill_compile_profiled": false,
+            "includes_startup_warmups": true,
+            "captured_graph_entries": 4,
+            "decode_replay_calls": 1022,
+            "decode_capture_forward_calls": 4,
+            "decode_eager_fallback_calls": 4,
+            "decode_uncaptured_full_calls": 0,
+            "decode_forward_failures": 0,
+            "prefill_forced_eager_calls": 4,
+            "prefill_compiled_calls": 0,
+            "prefill_compile_profile_runs": 0,
+            "prefill_compile_profile_failures": 0,
+            "capture_attempts": 1,
+            "capture_successes": 1,
+            "capture_failures": 0
+          }
+        },
+        {
+          "rank": 1,
+          "pid": 552988,
+          "device_index": 1,
+          "visible_device_map": [
+            "0",
+            "1",
+            "2",
+            "3"
+          ],
+          "expected_physical_device": "1",
+          "control_environment": {
+            "HCCL_DETERMINISTIC": "true",
+            "VLLM_BATCH_INVARIANT": null
+          },
+          "prefill_groups": null,
+          "decode_preparation_queries": 0,
+          "decode_preparation_ready_skips": 0,
+          "decode_preparation_fences_skipped": 0,
+          "native_decode_graph": {
+            "enabled": true,
+            "attached": true,
+            "capture_started": true,
+            "captured": true,
+            "failed": false,
+            "closed": false,
+            "compile_full_prefill": false,
+            "prefill_compile_profiled": false,
+            "includes_startup_warmups": true,
+            "captured_graph_entries": 4,
+            "decode_replay_calls": 1022,
+            "decode_capture_forward_calls": 4,
+            "decode_eager_fallback_calls": 4,
+            "decode_uncaptured_full_calls": 0,
+            "decode_forward_failures": 0,
+            "prefill_forced_eager_calls": 4,
+            "prefill_compiled_calls": 0,
+            "prefill_compile_profile_runs": 0,
+            "prefill_compile_profile_failures": 0,
+            "capture_attempts": 1,
+            "capture_successes": 1,
+            "capture_failures": 0
+          }
+        },
+        {
+          "rank": 2,
+          "pid": 552989,
+          "device_index": 2,
+          "visible_device_map": [
+            "0",
+            "1",
+            "2",
+            "3"
+          ],
+          "expected_physical_device": "2",
+          "control_environment": {
+            "HCCL_DETERMINISTIC": "true",
+            "VLLM_BATCH_INVARIANT": null
+          },
+          "prefill_groups": null,
+          "decode_preparation_queries": 0,
+          "decode_preparation_ready_skips": 0,
+          "decode_preparation_fences_skipped": 0,
+          "native_decode_graph": {
+            "enabled": true,
+            "attached": true,
+            "capture_started": true,
+            "captured": true,
+            "failed": false,
+            "closed": false,
+            "compile_full_prefill": false,
+            "prefill_compile_profiled": false,
+            "includes_startup_warmups": true,
+            "captured_graph_entries": 4,
+            "decode_replay_calls": 1022,
+            "decode_capture_forward_calls": 4,
+            "decode_eager_fallback_calls": 4,
+            "decode_uncaptured_full_calls": 0,
+            "decode_forward_failures": 0,
+            "prefill_forced_eager_calls": 4,
+            "prefill_compiled_calls": 0,
+            "prefill_compile_profile_runs": 0,
+            "prefill_compile_profile_failures": 0,
+            "capture_attempts": 1,
+            "capture_successes": 1,
+            "capture_failures": 0
+          }
+        },
+        {
+          "rank": 3,
+          "pid": 552990,
+          "device_index": 3,
+          "visible_device_map": [
+            "0",
+            "1",
+            "2",
+            "3"
+          ],
+          "expected_physical_device": "3",
+          "control_environment": {
+            "HCCL_DETERMINISTIC": "true",
+            "VLLM_BATCH_INVARIANT": null
+          },
+          "prefill_groups": null,
+          "decode_preparation_queries": 0,
+          "decode_preparation_ready_skips": 0,
+          "decode_preparation_fences_skipped": 0,
+          "native_decode_graph": {
+            "enabled": true,
+            "attached": true,
+            "capture_started": true,
+            "captured": true,
+            "failed": false,
+            "closed": false,
+            "compile_full_prefill": false,
+            "prefill_compile_profiled": false,
+            "includes_startup_warmups": true,
+            "captured_graph_entries": 4,
+            "decode_replay_calls": 1022,
+            "decode_capture_forward_calls": 4,
+            "decode_eager_fallback_calls": 4,
+            "decode_uncaptured_full_calls": 0,
+            "decode_forward_failures": 0,
+            "prefill_forced_eager_calls": 4,
+            "prefill_compiled_calls": 0,
+            "prefill_compile_profile_runs": 0,
+            "prefill_compile_profile_failures": 0,
+            "capture_attempts": 1,
+            "capture_successes": 1,
+            "capture_failures": 0
+          }
+        }
+      ],
+      "worker_counters_after_timing": [
+        {
+          "rank": 0,
+          "pid": 552987,
+          "device_index": 0,
+          "visible_device_map": [
+            "0",
+            "1",
+            "2",
+            "3"
+          ],
+          "expected_physical_device": "0",
+          "control_environment": {
+            "HCCL_DETERMINISTIC": "true",
+            "VLLM_BATCH_INVARIANT": null
+          },
+          "prefill_groups": null,
+          "decode_preparation_queries": 0,
+          "decode_preparation_ready_skips": 0,
+          "decode_preparation_fences_skipped": 0,
+          "native_decode_graph": {
+            "enabled": true,
+            "attached": true,
+            "capture_started": true,
+            "captured": true,
+            "failed": false,
+            "closed": false,
+            "compile_full_prefill": false,
+            "prefill_compile_profiled": false,
+            "includes_startup_warmups": true,
+            "captured_graph_entries": 4,
+            "decode_replay_calls": 3066,
+            "decode_capture_forward_calls": 4,
+            "decode_eager_fallback_calls": 4,
+            "decode_uncaptured_full_calls": 0,
+            "decode_forward_failures": 0,
+            "prefill_forced_eager_calls": 10,
+            "prefill_compiled_calls": 0,
+            "prefill_compile_profile_runs": 0,
+            "prefill_compile_profile_failures": 0,
+            "capture_attempts": 1,
+            "capture_successes": 1,
+            "capture_failures": 0
+          }
+        },
+        {
+          "rank": 1,
+          "pid": 552988,
+          "device_index": 1,
+          "visible_device_map": [
+            "0",
+            "1",
+            "2",
+            "3"
+          ],
+          "expected_physical_device": "1",
+          "control_environment": {
+            "HCCL_DETERMINISTIC": "true",
+            "VLLM_BATCH_INVARIANT": null
+          },
+          "prefill_groups": null,
+          "decode_preparation_queries": 0,
+          "decode_preparation_ready_skips": 0,
+          "decode_preparation_fences_skipped": 0,
+          "native_decode_graph": {
+            "enabled": true,
+            "attached": true,
+            "capture_started": true,
+            "captured": true,
+            "failed": false,
+            "closed": false,
+            "compile_full_prefill": false,
+            "prefill_compile_profiled": false,
+            "includes_startup_warmups": true,
+            "captured_graph_entries": 4,
+            "decode_replay_calls": 3066,
+            "decode_capture_forward_calls": 4,
+            "decode_eager_fallback_calls": 4,
+            "decode_uncaptured_full_calls": 0,
+            "decode_forward_failures": 0,
+            "prefill_forced_eager_calls": 10,
+            "prefill_compiled_calls": 0,
+            "prefill_compile_profile_runs": 0,
+            "prefill_compile_profile_failures": 0,
+            "capture_attempts": 1,
+            "capture_successes": 1,
+            "capture_failures": 0
+          }
+        },
+        {
+          "rank": 2,
+          "pid": 552989,
+          "device_index": 2,
+          "visible_device_map": [
+            "0",
+            "1",
+            "2",
+            "3"
+          ],
+          "expected_physical_device": "2",
+          "control_environment": {
+            "HCCL_DETERMINISTIC": "true",
+            "VLLM_BATCH_INVARIANT": null
+          },
+          "prefill_groups": null,
+          "decode_preparation_queries": 0,
+          "decode_preparation_ready_skips": 0,
+          "decode_preparation_fences_skipped": 0,
+          "native_decode_graph": {
+            "enabled": true,
+            "attached": true,
+            "capture_started": true,
+            "captured": true,
+            "failed": false,
+            "closed": false,
+            "compile_full_prefill": false,
+            "prefill_compile_profiled": false,
+            "includes_startup_warmups": true,
+            "captured_graph_entries": 4,
+            "decode_replay_calls": 3066,
+            "decode_capture_forward_calls": 4,
+            "decode_eager_fallback_calls": 4,
+            "decode_uncaptured_full_calls": 0,
+            "decode_forward_failures": 0,
+            "prefill_forced_eager_calls": 10,
+            "prefill_compiled_calls": 0,
+            "prefill_compile_profile_runs": 0,
+            "prefill_compile_profile_failures": 0,
+            "capture_attempts": 1,
+            "capture_successes": 1,
+            "capture_failures": 0
+          }
+        },
+        {
+          "rank": 3,
+          "pid": 552990,
+          "device_index": 3,
+          "visible_device_map": [
+            "0",
+            "1",
+            "2",
+            "3"
+          ],
+          "expected_physical_device": "3",
+          "control_environment": {
+            "HCCL_DETERMINISTIC": "true",
+            "VLLM_BATCH_INVARIANT": null
+          },
+          "prefill_groups": null,
+          "decode_preparation_queries": 0,
+          "decode_preparation_ready_skips": 0,
+          "decode_preparation_fences_skipped": 0,
+          "native_decode_graph": {
+            "enabled": true,
+            "attached": true,
+            "capture_started": true,
+            "captured": true,
+            "failed": false,
+            "closed": false,
+            "compile_full_prefill": false,
+            "prefill_compile_profiled": false,
+            "includes_startup_warmups": true,
+            "captured_graph_entries": 4,
+            "decode_replay_calls": 3066,
+            "decode_capture_forward_calls": 4,
+            "decode_eager_fallback_calls": 4,
+            "decode_uncaptured_full_calls": 0,
+            "decode_forward_failures": 0,
+            "prefill_forced_eager_calls": 10,
+            "prefill_compiled_calls": 0,
+            "prefill_compile_profile_runs": 0,
+            "prefill_compile_profile_failures": 0,
+            "capture_attempts": 1,
+            "capture_successes": 1,
+            "capture_failures": 0
+          }
+        }
+      ],
+      "worker_counter_deltas": {
+        "0": {
+          "decode_preparation_queries": 0,
+          "decode_preparation_ready_skips": 0,
+          "decode_preparation_fences_skipped": 0,
+          "native_decode_graph": {
+            "decode_replay_calls": 2044,
+            "decode_capture_forward_calls": 0,
+            "decode_eager_fallback_calls": 0,
+            "decode_uncaptured_full_calls": 0,
+            "decode_forward_failures": 0,
+            "prefill_forced_eager_calls": 6,
+            "prefill_compiled_calls": 0,
+            "prefill_compile_profile_failures": 0,
+            "capture_failures": 0
+          },
+          "prefill_group_calls": null
+        },
+        "1": {
+          "decode_preparation_queries": 0,
+          "decode_preparation_ready_skips": 0,
+          "decode_preparation_fences_skipped": 0,
+          "native_decode_graph": {
+            "decode_replay_calls": 2044,
+            "decode_capture_forward_calls": 0,
+            "decode_eager_fallback_calls": 0,
+            "decode_uncaptured_full_calls": 0,
+            "decode_forward_failures": 0,
+            "prefill_forced_eager_calls": 6,
+            "prefill_compiled_calls": 0,
+            "prefill_compile_profile_failures": 0,
+            "capture_failures": 0
+          },
+          "prefill_group_calls": null
+        },
+        "2": {
+          "decode_preparation_queries": 0,
+          "decode_preparation_ready_skips": 0,
+          "decode_preparation_fences_skipped": 0,
+          "native_decode_graph": {
+            "decode_replay_calls": 2044,
+            "decode_capture_forward_calls": 0,
+            "decode_eager_fallback_calls": 0,
+            "decode_uncaptured_full_calls": 0,
+            "decode_forward_failures": 0,
+            "prefill_forced_eager_calls": 6,
+            "prefill_compiled_calls": 0,
+            "prefill_compile_profile_failures": 0,
+            "capture_failures": 0
+          },
+          "prefill_group_calls": null
+        },
+        "3": {
+          "decode_preparation_queries": 0,
+          "decode_preparation_ready_skips": 0,
+          "decode_preparation_fences_skipped": 0,
+          "native_decode_graph": {
+            "decode_replay_calls": 2044,
+            "decode_capture_forward_calls": 0,
+            "decode_eager_fallback_calls": 0,
+            "decode_uncaptured_full_calls": 0,
+            "decode_forward_failures": 0,
+            "prefill_forced_eager_calls": 6,
+            "prefill_compiled_calls": 0,
+            "prefill_compile_profile_failures": 0,
+            "capture_failures": 0
+          },
+          "prefill_group_calls": null
+        }
+      }
+    },
+    {
+      "role": "G1",
+      "label": "perf-f7-group-01",
+      "worker_counters_after_init": [
+        {
+          "rank": 0,
+          "pid": 567152,
+          "device_index": 0,
+          "visible_device_map": [
+            "0",
+            "1",
+            "2",
+            "3"
+          ],
+          "expected_physical_device": "0",
+          "control_environment": {
+            "HCCL_DETERMINISTIC": "true",
+            "VLLM_BATCH_INVARIANT": null
+          },
+          "prefill_groups": {
+            "ready": true,
+            "failed": false,
+            "closed": false,
+            "group_size": 4,
+            "groups": 10,
+            "calls": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            "entry_qualnames": [
+              "PrefillGroup00.forward",
+              "PrefillGroup01.forward",
+              "PrefillGroup02.forward",
+              "PrefillGroup03.forward",
+              "PrefillGroup04.forward",
+              "PrefillGroup05.forward",
+              "PrefillGroup06.forward",
+              "PrefillGroup07.forward",
+              "PrefillGroup08.forward",
+              "PrefillGroup09.forward"
+            ],
+            "cache_directories": [
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-00",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-01",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-02",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-03",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-04",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-05",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-06",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-07",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-08",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-09"
+            ],
+            "evidence": "successful AOT group returns; not device completion"
+          },
+          "decode_preparation_queries": 0,
+          "decode_preparation_ready_skips": 0,
+          "decode_preparation_fences_skipped": 0,
+          "native_decode_graph": {
+            "enabled": true,
+            "attached": true,
+            "capture_started": true,
+            "captured": true,
+            "failed": false,
+            "closed": false,
+            "compile_full_prefill": false,
+            "prefill_compile_profiled": false,
+            "includes_startup_warmups": true,
+            "captured_graph_entries": 4,
+            "decode_replay_calls": 0,
+            "decode_capture_forward_calls": 4,
+            "decode_eager_fallback_calls": 4,
+            "decode_uncaptured_full_calls": 0,
+            "decode_forward_failures": 0,
+            "prefill_forced_eager_calls": 1,
+            "prefill_compiled_calls": 0,
+            "prefill_compile_profile_runs": 0,
+            "prefill_compile_profile_failures": 0,
+            "capture_attempts": 1,
+            "capture_successes": 1,
+            "capture_failures": 0
+          }
+        },
+        {
+          "rank": 1,
+          "pid": 567153,
+          "device_index": 1,
+          "visible_device_map": [
+            "0",
+            "1",
+            "2",
+            "3"
+          ],
+          "expected_physical_device": "1",
+          "control_environment": {
+            "HCCL_DETERMINISTIC": "true",
+            "VLLM_BATCH_INVARIANT": null
+          },
+          "prefill_groups": {
+            "ready": true,
+            "failed": false,
+            "closed": false,
+            "group_size": 4,
+            "groups": 10,
+            "calls": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            "entry_qualnames": [
+              "PrefillGroup00.forward",
+              "PrefillGroup01.forward",
+              "PrefillGroup02.forward",
+              "PrefillGroup03.forward",
+              "PrefillGroup04.forward",
+              "PrefillGroup05.forward",
+              "PrefillGroup06.forward",
+              "PrefillGroup07.forward",
+              "PrefillGroup08.forward",
+              "PrefillGroup09.forward"
+            ],
+            "cache_directories": [
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-00",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-01",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-02",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-03",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-04",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-05",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-06",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-07",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-08",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-09"
+            ],
+            "evidence": "successful AOT group returns; not device completion"
+          },
+          "decode_preparation_queries": 0,
+          "decode_preparation_ready_skips": 0,
+          "decode_preparation_fences_skipped": 0,
+          "native_decode_graph": {
+            "enabled": true,
+            "attached": true,
+            "capture_started": true,
+            "captured": true,
+            "failed": false,
+            "closed": false,
+            "compile_full_prefill": false,
+            "prefill_compile_profiled": false,
+            "includes_startup_warmups": true,
+            "captured_graph_entries": 4,
+            "decode_replay_calls": 0,
+            "decode_capture_forward_calls": 4,
+            "decode_eager_fallback_calls": 4,
+            "decode_uncaptured_full_calls": 0,
+            "decode_forward_failures": 0,
+            "prefill_forced_eager_calls": 1,
+            "prefill_compiled_calls": 0,
+            "prefill_compile_profile_runs": 0,
+            "prefill_compile_profile_failures": 0,
+            "capture_attempts": 1,
+            "capture_successes": 1,
+            "capture_failures": 0
+          }
+        },
+        {
+          "rank": 2,
+          "pid": 567154,
+          "device_index": 2,
+          "visible_device_map": [
+            "0",
+            "1",
+            "2",
+            "3"
+          ],
+          "expected_physical_device": "2",
+          "control_environment": {
+            "HCCL_DETERMINISTIC": "true",
+            "VLLM_BATCH_INVARIANT": null
+          },
+          "prefill_groups": {
+            "ready": true,
+            "failed": false,
+            "closed": false,
+            "group_size": 4,
+            "groups": 10,
+            "calls": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            "entry_qualnames": [
+              "PrefillGroup00.forward",
+              "PrefillGroup01.forward",
+              "PrefillGroup02.forward",
+              "PrefillGroup03.forward",
+              "PrefillGroup04.forward",
+              "PrefillGroup05.forward",
+              "PrefillGroup06.forward",
+              "PrefillGroup07.forward",
+              "PrefillGroup08.forward",
+              "PrefillGroup09.forward"
+            ],
+            "cache_directories": [
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-00",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-01",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-02",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-03",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-04",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-05",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-06",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-07",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-08",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-09"
+            ],
+            "evidence": "successful AOT group returns; not device completion"
+          },
+          "decode_preparation_queries": 0,
+          "decode_preparation_ready_skips": 0,
+          "decode_preparation_fences_skipped": 0,
+          "native_decode_graph": {
+            "enabled": true,
+            "attached": true,
+            "capture_started": true,
+            "captured": true,
+            "failed": false,
+            "closed": false,
+            "compile_full_prefill": false,
+            "prefill_compile_profiled": false,
+            "includes_startup_warmups": true,
+            "captured_graph_entries": 4,
+            "decode_replay_calls": 0,
+            "decode_capture_forward_calls": 4,
+            "decode_eager_fallback_calls": 4,
+            "decode_uncaptured_full_calls": 0,
+            "decode_forward_failures": 0,
+            "prefill_forced_eager_calls": 1,
+            "prefill_compiled_calls": 0,
+            "prefill_compile_profile_runs": 0,
+            "prefill_compile_profile_failures": 0,
+            "capture_attempts": 1,
+            "capture_successes": 1,
+            "capture_failures": 0
+          }
+        },
+        {
+          "rank": 3,
+          "pid": 567155,
+          "device_index": 3,
+          "visible_device_map": [
+            "0",
+            "1",
+            "2",
+            "3"
+          ],
+          "expected_physical_device": "3",
+          "control_environment": {
+            "HCCL_DETERMINISTIC": "true",
+            "VLLM_BATCH_INVARIANT": null
+          },
+          "prefill_groups": {
+            "ready": true,
+            "failed": false,
+            "closed": false,
+            "group_size": 4,
+            "groups": 10,
+            "calls": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            "entry_qualnames": [
+              "PrefillGroup00.forward",
+              "PrefillGroup01.forward",
+              "PrefillGroup02.forward",
+              "PrefillGroup03.forward",
+              "PrefillGroup04.forward",
+              "PrefillGroup05.forward",
+              "PrefillGroup06.forward",
+              "PrefillGroup07.forward",
+              "PrefillGroup08.forward",
+              "PrefillGroup09.forward"
+            ],
+            "cache_directories": [
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-00",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-01",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-02",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-03",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-04",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-05",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-06",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-07",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-08",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-09"
+            ],
+            "evidence": "successful AOT group returns; not device completion"
+          },
+          "decode_preparation_queries": 0,
+          "decode_preparation_ready_skips": 0,
+          "decode_preparation_fences_skipped": 0,
+          "native_decode_graph": {
+            "enabled": true,
+            "attached": true,
+            "capture_started": true,
+            "captured": true,
+            "failed": false,
+            "closed": false,
+            "compile_full_prefill": false,
+            "prefill_compile_profiled": false,
+            "includes_startup_warmups": true,
+            "captured_graph_entries": 4,
+            "decode_replay_calls": 0,
+            "decode_capture_forward_calls": 4,
+            "decode_eager_fallback_calls": 4,
+            "decode_uncaptured_full_calls": 0,
+            "decode_forward_failures": 0,
+            "prefill_forced_eager_calls": 1,
+            "prefill_compiled_calls": 0,
+            "prefill_compile_profile_runs": 0,
+            "prefill_compile_profile_failures": 0,
+            "capture_attempts": 1,
+            "capture_successes": 1,
+            "capture_failures": 0
+          }
+        }
+      ],
+      "worker_counters_before_timing": [
+        {
+          "rank": 0,
+          "pid": 567152,
+          "device_index": 0,
+          "visible_device_map": [
+            "0",
+            "1",
+            "2",
+            "3"
+          ],
+          "expected_physical_device": "0",
+          "control_environment": {
+            "HCCL_DETERMINISTIC": "true",
+            "VLLM_BATCH_INVARIANT": null
+          },
+          "prefill_groups": {
+            "ready": true,
+            "failed": false,
+            "closed": false,
+            "group_size": 4,
+            "groups": 10,
+            "calls": [
+              4,
+              4,
+              4,
+              4,
+              4,
+              4,
+              4,
+              4,
+              4,
+              4
+            ],
+            "entry_qualnames": [
+              "PrefillGroup00.forward",
+              "PrefillGroup01.forward",
+              "PrefillGroup02.forward",
+              "PrefillGroup03.forward",
+              "PrefillGroup04.forward",
+              "PrefillGroup05.forward",
+              "PrefillGroup06.forward",
+              "PrefillGroup07.forward",
+              "PrefillGroup08.forward",
+              "PrefillGroup09.forward"
+            ],
+            "cache_directories": [
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-00",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-01",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-02",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-03",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-04",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-05",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-06",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-07",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-08",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-09"
+            ],
+            "evidence": "successful AOT group returns; not device completion"
+          },
+          "decode_preparation_queries": 0,
+          "decode_preparation_ready_skips": 0,
+          "decode_preparation_fences_skipped": 0,
+          "native_decode_graph": {
+            "enabled": true,
+            "attached": true,
+            "capture_started": true,
+            "captured": true,
+            "failed": false,
+            "closed": false,
+            "compile_full_prefill": false,
+            "prefill_compile_profiled": false,
+            "includes_startup_warmups": true,
+            "captured_graph_entries": 4,
+            "decode_replay_calls": 1022,
+            "decode_capture_forward_calls": 4,
+            "decode_eager_fallback_calls": 4,
+            "decode_uncaptured_full_calls": 0,
+            "decode_forward_failures": 0,
+            "prefill_forced_eager_calls": 4,
+            "prefill_compiled_calls": 0,
+            "prefill_compile_profile_runs": 0,
+            "prefill_compile_profile_failures": 0,
+            "capture_attempts": 1,
+            "capture_successes": 1,
+            "capture_failures": 0
+          }
+        },
+        {
+          "rank": 1,
+          "pid": 567153,
+          "device_index": 1,
+          "visible_device_map": [
+            "0",
+            "1",
+            "2",
+            "3"
+          ],
+          "expected_physical_device": "1",
+          "control_environment": {
+            "HCCL_DETERMINISTIC": "true",
+            "VLLM_BATCH_INVARIANT": null
+          },
+          "prefill_groups": {
+            "ready": true,
+            "failed": false,
+            "closed": false,
+            "group_size": 4,
+            "groups": 10,
+            "calls": [
+              4,
+              4,
+              4,
+              4,
+              4,
+              4,
+              4,
+              4,
+              4,
+              4
+            ],
+            "entry_qualnames": [
+              "PrefillGroup00.forward",
+              "PrefillGroup01.forward",
+              "PrefillGroup02.forward",
+              "PrefillGroup03.forward",
+              "PrefillGroup04.forward",
+              "PrefillGroup05.forward",
+              "PrefillGroup06.forward",
+              "PrefillGroup07.forward",
+              "PrefillGroup08.forward",
+              "PrefillGroup09.forward"
+            ],
+            "cache_directories": [
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-00",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-01",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-02",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-03",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-04",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-05",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-06",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-07",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-08",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-09"
+            ],
+            "evidence": "successful AOT group returns; not device completion"
+          },
+          "decode_preparation_queries": 0,
+          "decode_preparation_ready_skips": 0,
+          "decode_preparation_fences_skipped": 0,
+          "native_decode_graph": {
+            "enabled": true,
+            "attached": true,
+            "capture_started": true,
+            "captured": true,
+            "failed": false,
+            "closed": false,
+            "compile_full_prefill": false,
+            "prefill_compile_profiled": false,
+            "includes_startup_warmups": true,
+            "captured_graph_entries": 4,
+            "decode_replay_calls": 1022,
+            "decode_capture_forward_calls": 4,
+            "decode_eager_fallback_calls": 4,
+            "decode_uncaptured_full_calls": 0,
+            "decode_forward_failures": 0,
+            "prefill_forced_eager_calls": 4,
+            "prefill_compiled_calls": 0,
+            "prefill_compile_profile_runs": 0,
+            "prefill_compile_profile_failures": 0,
+            "capture_attempts": 1,
+            "capture_successes": 1,
+            "capture_failures": 0
+          }
+        },
+        {
+          "rank": 2,
+          "pid": 567154,
+          "device_index": 2,
+          "visible_device_map": [
+            "0",
+            "1",
+            "2",
+            "3"
+          ],
+          "expected_physical_device": "2",
+          "control_environment": {
+            "HCCL_DETERMINISTIC": "true",
+            "VLLM_BATCH_INVARIANT": null
+          },
+          "prefill_groups": {
+            "ready": true,
+            "failed": false,
+            "closed": false,
+            "group_size": 4,
+            "groups": 10,
+            "calls": [
+              4,
+              4,
+              4,
+              4,
+              4,
+              4,
+              4,
+              4,
+              4,
+              4
+            ],
+            "entry_qualnames": [
+              "PrefillGroup00.forward",
+              "PrefillGroup01.forward",
+              "PrefillGroup02.forward",
+              "PrefillGroup03.forward",
+              "PrefillGroup04.forward",
+              "PrefillGroup05.forward",
+              "PrefillGroup06.forward",
+              "PrefillGroup07.forward",
+              "PrefillGroup08.forward",
+              "PrefillGroup09.forward"
+            ],
+            "cache_directories": [
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-00",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-01",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-02",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-03",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-04",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-05",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-06",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-07",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-08",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-09"
+            ],
+            "evidence": "successful AOT group returns; not device completion"
+          },
+          "decode_preparation_queries": 0,
+          "decode_preparation_ready_skips": 0,
+          "decode_preparation_fences_skipped": 0,
+          "native_decode_graph": {
+            "enabled": true,
+            "attached": true,
+            "capture_started": true,
+            "captured": true,
+            "failed": false,
+            "closed": false,
+            "compile_full_prefill": false,
+            "prefill_compile_profiled": false,
+            "includes_startup_warmups": true,
+            "captured_graph_entries": 4,
+            "decode_replay_calls": 1022,
+            "decode_capture_forward_calls": 4,
+            "decode_eager_fallback_calls": 4,
+            "decode_uncaptured_full_calls": 0,
+            "decode_forward_failures": 0,
+            "prefill_forced_eager_calls": 4,
+            "prefill_compiled_calls": 0,
+            "prefill_compile_profile_runs": 0,
+            "prefill_compile_profile_failures": 0,
+            "capture_attempts": 1,
+            "capture_successes": 1,
+            "capture_failures": 0
+          }
+        },
+        {
+          "rank": 3,
+          "pid": 567155,
+          "device_index": 3,
+          "visible_device_map": [
+            "0",
+            "1",
+            "2",
+            "3"
+          ],
+          "expected_physical_device": "3",
+          "control_environment": {
+            "HCCL_DETERMINISTIC": "true",
+            "VLLM_BATCH_INVARIANT": null
+          },
+          "prefill_groups": {
+            "ready": true,
+            "failed": false,
+            "closed": false,
+            "group_size": 4,
+            "groups": 10,
+            "calls": [
+              4,
+              4,
+              4,
+              4,
+              4,
+              4,
+              4,
+              4,
+              4,
+              4
+            ],
+            "entry_qualnames": [
+              "PrefillGroup00.forward",
+              "PrefillGroup01.forward",
+              "PrefillGroup02.forward",
+              "PrefillGroup03.forward",
+              "PrefillGroup04.forward",
+              "PrefillGroup05.forward",
+              "PrefillGroup06.forward",
+              "PrefillGroup07.forward",
+              "PrefillGroup08.forward",
+              "PrefillGroup09.forward"
+            ],
+            "cache_directories": [
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-00",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-01",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-02",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-03",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-04",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-05",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-06",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-07",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-08",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-09"
+            ],
+            "evidence": "successful AOT group returns; not device completion"
+          },
+          "decode_preparation_queries": 0,
+          "decode_preparation_ready_skips": 0,
+          "decode_preparation_fences_skipped": 0,
+          "native_decode_graph": {
+            "enabled": true,
+            "attached": true,
+            "capture_started": true,
+            "captured": true,
+            "failed": false,
+            "closed": false,
+            "compile_full_prefill": false,
+            "prefill_compile_profiled": false,
+            "includes_startup_warmups": true,
+            "captured_graph_entries": 4,
+            "decode_replay_calls": 1022,
+            "decode_capture_forward_calls": 4,
+            "decode_eager_fallback_calls": 4,
+            "decode_uncaptured_full_calls": 0,
+            "decode_forward_failures": 0,
+            "prefill_forced_eager_calls": 4,
+            "prefill_compiled_calls": 0,
+            "prefill_compile_profile_runs": 0,
+            "prefill_compile_profile_failures": 0,
+            "capture_attempts": 1,
+            "capture_successes": 1,
+            "capture_failures": 0
+          }
+        }
+      ],
+      "worker_counters_after_timing": [
+        {
+          "rank": 0,
+          "pid": 567152,
+          "device_index": 0,
+          "visible_device_map": [
+            "0",
+            "1",
+            "2",
+            "3"
+          ],
+          "expected_physical_device": "0",
+          "control_environment": {
+            "HCCL_DETERMINISTIC": "true",
+            "VLLM_BATCH_INVARIANT": null
+          },
+          "prefill_groups": {
+            "ready": true,
+            "failed": false,
+            "closed": false,
+            "group_size": 4,
+            "groups": 10,
+            "calls": [
+              10,
+              10,
+              10,
+              10,
+              10,
+              10,
+              10,
+              10,
+              10,
+              10
+            ],
+            "entry_qualnames": [
+              "PrefillGroup00.forward",
+              "PrefillGroup01.forward",
+              "PrefillGroup02.forward",
+              "PrefillGroup03.forward",
+              "PrefillGroup04.forward",
+              "PrefillGroup05.forward",
+              "PrefillGroup06.forward",
+              "PrefillGroup07.forward",
+              "PrefillGroup08.forward",
+              "PrefillGroup09.forward"
+            ],
+            "cache_directories": [
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-00",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-01",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-02",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-03",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-04",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-05",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-06",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-07",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-08",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-09"
+            ],
+            "evidence": "successful AOT group returns; not device completion"
+          },
+          "decode_preparation_queries": 0,
+          "decode_preparation_ready_skips": 0,
+          "decode_preparation_fences_skipped": 0,
+          "native_decode_graph": {
+            "enabled": true,
+            "attached": true,
+            "capture_started": true,
+            "captured": true,
+            "failed": false,
+            "closed": false,
+            "compile_full_prefill": false,
+            "prefill_compile_profiled": false,
+            "includes_startup_warmups": true,
+            "captured_graph_entries": 4,
+            "decode_replay_calls": 3066,
+            "decode_capture_forward_calls": 4,
+            "decode_eager_fallback_calls": 4,
+            "decode_uncaptured_full_calls": 0,
+            "decode_forward_failures": 0,
+            "prefill_forced_eager_calls": 10,
+            "prefill_compiled_calls": 0,
+            "prefill_compile_profile_runs": 0,
+            "prefill_compile_profile_failures": 0,
+            "capture_attempts": 1,
+            "capture_successes": 1,
+            "capture_failures": 0
+          }
+        },
+        {
+          "rank": 1,
+          "pid": 567153,
+          "device_index": 1,
+          "visible_device_map": [
+            "0",
+            "1",
+            "2",
+            "3"
+          ],
+          "expected_physical_device": "1",
+          "control_environment": {
+            "HCCL_DETERMINISTIC": "true",
+            "VLLM_BATCH_INVARIANT": null
+          },
+          "prefill_groups": {
+            "ready": true,
+            "failed": false,
+            "closed": false,
+            "group_size": 4,
+            "groups": 10,
+            "calls": [
+              10,
+              10,
+              10,
+              10,
+              10,
+              10,
+              10,
+              10,
+              10,
+              10
+            ],
+            "entry_qualnames": [
+              "PrefillGroup00.forward",
+              "PrefillGroup01.forward",
+              "PrefillGroup02.forward",
+              "PrefillGroup03.forward",
+              "PrefillGroup04.forward",
+              "PrefillGroup05.forward",
+              "PrefillGroup06.forward",
+              "PrefillGroup07.forward",
+              "PrefillGroup08.forward",
+              "PrefillGroup09.forward"
+            ],
+            "cache_directories": [
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-00",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-01",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-02",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-03",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-04",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-05",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-06",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-07",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-08",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-09"
+            ],
+            "evidence": "successful AOT group returns; not device completion"
+          },
+          "decode_preparation_queries": 0,
+          "decode_preparation_ready_skips": 0,
+          "decode_preparation_fences_skipped": 0,
+          "native_decode_graph": {
+            "enabled": true,
+            "attached": true,
+            "capture_started": true,
+            "captured": true,
+            "failed": false,
+            "closed": false,
+            "compile_full_prefill": false,
+            "prefill_compile_profiled": false,
+            "includes_startup_warmups": true,
+            "captured_graph_entries": 4,
+            "decode_replay_calls": 3066,
+            "decode_capture_forward_calls": 4,
+            "decode_eager_fallback_calls": 4,
+            "decode_uncaptured_full_calls": 0,
+            "decode_forward_failures": 0,
+            "prefill_forced_eager_calls": 10,
+            "prefill_compiled_calls": 0,
+            "prefill_compile_profile_runs": 0,
+            "prefill_compile_profile_failures": 0,
+            "capture_attempts": 1,
+            "capture_successes": 1,
+            "capture_failures": 0
+          }
+        },
+        {
+          "rank": 2,
+          "pid": 567154,
+          "device_index": 2,
+          "visible_device_map": [
+            "0",
+            "1",
+            "2",
+            "3"
+          ],
+          "expected_physical_device": "2",
+          "control_environment": {
+            "HCCL_DETERMINISTIC": "true",
+            "VLLM_BATCH_INVARIANT": null
+          },
+          "prefill_groups": {
+            "ready": true,
+            "failed": false,
+            "closed": false,
+            "group_size": 4,
+            "groups": 10,
+            "calls": [
+              10,
+              10,
+              10,
+              10,
+              10,
+              10,
+              10,
+              10,
+              10,
+              10
+            ],
+            "entry_qualnames": [
+              "PrefillGroup00.forward",
+              "PrefillGroup01.forward",
+              "PrefillGroup02.forward",
+              "PrefillGroup03.forward",
+              "PrefillGroup04.forward",
+              "PrefillGroup05.forward",
+              "PrefillGroup06.forward",
+              "PrefillGroup07.forward",
+              "PrefillGroup08.forward",
+              "PrefillGroup09.forward"
+            ],
+            "cache_directories": [
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-00",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-01",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-02",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-03",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-04",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-05",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-06",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-07",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-08",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-09"
+            ],
+            "evidence": "successful AOT group returns; not device completion"
+          },
+          "decode_preparation_queries": 0,
+          "decode_preparation_ready_skips": 0,
+          "decode_preparation_fences_skipped": 0,
+          "native_decode_graph": {
+            "enabled": true,
+            "attached": true,
+            "capture_started": true,
+            "captured": true,
+            "failed": false,
+            "closed": false,
+            "compile_full_prefill": false,
+            "prefill_compile_profiled": false,
+            "includes_startup_warmups": true,
+            "captured_graph_entries": 4,
+            "decode_replay_calls": 3066,
+            "decode_capture_forward_calls": 4,
+            "decode_eager_fallback_calls": 4,
+            "decode_uncaptured_full_calls": 0,
+            "decode_forward_failures": 0,
+            "prefill_forced_eager_calls": 10,
+            "prefill_compiled_calls": 0,
+            "prefill_compile_profile_runs": 0,
+            "prefill_compile_profile_failures": 0,
+            "capture_attempts": 1,
+            "capture_successes": 1,
+            "capture_failures": 0
+          }
+        },
+        {
+          "rank": 3,
+          "pid": 567155,
+          "device_index": 3,
+          "visible_device_map": [
+            "0",
+            "1",
+            "2",
+            "3"
+          ],
+          "expected_physical_device": "3",
+          "control_environment": {
+            "HCCL_DETERMINISTIC": "true",
+            "VLLM_BATCH_INVARIANT": null
+          },
+          "prefill_groups": {
+            "ready": true,
+            "failed": false,
+            "closed": false,
+            "group_size": 4,
+            "groups": 10,
+            "calls": [
+              10,
+              10,
+              10,
+              10,
+              10,
+              10,
+              10,
+              10,
+              10,
+              10
+            ],
+            "entry_qualnames": [
+              "PrefillGroup00.forward",
+              "PrefillGroup01.forward",
+              "PrefillGroup02.forward",
+              "PrefillGroup03.forward",
+              "PrefillGroup04.forward",
+              "PrefillGroup05.forward",
+              "PrefillGroup06.forward",
+              "PrefillGroup07.forward",
+              "PrefillGroup08.forward",
+              "PrefillGroup09.forward"
+            ],
+            "cache_directories": [
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-00",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-01",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-02",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-03",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-04",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-05",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-06",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-07",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-08",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/compiler-cache/muxpd-prefill-groups-v1/prefill-group-09"
+            ],
+            "evidence": "successful AOT group returns; not device completion"
+          },
+          "decode_preparation_queries": 0,
+          "decode_preparation_ready_skips": 0,
+          "decode_preparation_fences_skipped": 0,
+          "native_decode_graph": {
+            "enabled": true,
+            "attached": true,
+            "capture_started": true,
+            "captured": true,
+            "failed": false,
+            "closed": false,
+            "compile_full_prefill": false,
+            "prefill_compile_profiled": false,
+            "includes_startup_warmups": true,
+            "captured_graph_entries": 4,
+            "decode_replay_calls": 3066,
+            "decode_capture_forward_calls": 4,
+            "decode_eager_fallback_calls": 4,
+            "decode_uncaptured_full_calls": 0,
+            "decode_forward_failures": 0,
+            "prefill_forced_eager_calls": 10,
+            "prefill_compiled_calls": 0,
+            "prefill_compile_profile_runs": 0,
+            "prefill_compile_profile_failures": 0,
+            "capture_attempts": 1,
+            "capture_successes": 1,
+            "capture_failures": 0
+          }
+        }
+      ],
+      "worker_counter_deltas": {
+        "0": {
+          "decode_preparation_queries": 0,
+          "decode_preparation_ready_skips": 0,
+          "decode_preparation_fences_skipped": 0,
+          "native_decode_graph": {
+            "decode_replay_calls": 2044,
+            "decode_capture_forward_calls": 0,
+            "decode_eager_fallback_calls": 0,
+            "decode_uncaptured_full_calls": 0,
+            "decode_forward_failures": 0,
+            "prefill_forced_eager_calls": 6,
+            "prefill_compiled_calls": 0,
+            "prefill_compile_profile_failures": 0,
+            "capture_failures": 0
+          },
+          "prefill_group_calls": [
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6
+          ]
+        },
+        "1": {
+          "decode_preparation_queries": 0,
+          "decode_preparation_ready_skips": 0,
+          "decode_preparation_fences_skipped": 0,
+          "native_decode_graph": {
+            "decode_replay_calls": 2044,
+            "decode_capture_forward_calls": 0,
+            "decode_eager_fallback_calls": 0,
+            "decode_uncaptured_full_calls": 0,
+            "decode_forward_failures": 0,
+            "prefill_forced_eager_calls": 6,
+            "prefill_compiled_calls": 0,
+            "prefill_compile_profile_failures": 0,
+            "capture_failures": 0
+          },
+          "prefill_group_calls": [
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6
+          ]
+        },
+        "2": {
+          "decode_preparation_queries": 0,
+          "decode_preparation_ready_skips": 0,
+          "decode_preparation_fences_skipped": 0,
+          "native_decode_graph": {
+            "decode_replay_calls": 2044,
+            "decode_capture_forward_calls": 0,
+            "decode_eager_fallback_calls": 0,
+            "decode_uncaptured_full_calls": 0,
+            "decode_forward_failures": 0,
+            "prefill_forced_eager_calls": 6,
+            "prefill_compiled_calls": 0,
+            "prefill_compile_profile_failures": 0,
+            "capture_failures": 0
+          },
+          "prefill_group_calls": [
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6
+          ]
+        },
+        "3": {
+          "decode_preparation_queries": 0,
+          "decode_preparation_ready_skips": 0,
+          "decode_preparation_fences_skipped": 0,
+          "native_decode_graph": {
+            "decode_replay_calls": 2044,
+            "decode_capture_forward_calls": 0,
+            "decode_eager_fallback_calls": 0,
+            "decode_uncaptured_full_calls": 0,
+            "decode_forward_failures": 0,
+            "prefill_forced_eager_calls": 6,
+            "prefill_compiled_calls": 0,
+            "prefill_compile_profile_failures": 0,
+            "capture_failures": 0
+          },
+          "prefill_group_calls": [
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6
+          ]
+        }
+      }
+    },
+    {
+      "role": "G2",
+      "label": "perf-f7-group-02",
+      "worker_counters_after_init": [
+        {
+          "rank": 0,
+          "pid": 583980,
+          "device_index": 0,
+          "visible_device_map": [
+            "0",
+            "1",
+            "2",
+            "3"
+          ],
+          "expected_physical_device": "0",
+          "control_environment": {
+            "HCCL_DETERMINISTIC": "true",
+            "VLLM_BATCH_INVARIANT": null
+          },
+          "prefill_groups": {
+            "ready": true,
+            "failed": false,
+            "closed": false,
+            "group_size": 4,
+            "groups": 10,
+            "calls": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            "entry_qualnames": [
+              "PrefillGroup00.forward",
+              "PrefillGroup01.forward",
+              "PrefillGroup02.forward",
+              "PrefillGroup03.forward",
+              "PrefillGroup04.forward",
+              "PrefillGroup05.forward",
+              "PrefillGroup06.forward",
+              "PrefillGroup07.forward",
+              "PrefillGroup08.forward",
+              "PrefillGroup09.forward"
+            ],
+            "cache_directories": [
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-00",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-01",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-02",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-03",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-04",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-05",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-06",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-07",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-08",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-09"
+            ],
+            "evidence": "successful AOT group returns; not device completion"
+          },
+          "decode_preparation_queries": 0,
+          "decode_preparation_ready_skips": 0,
+          "decode_preparation_fences_skipped": 0,
+          "native_decode_graph": {
+            "enabled": true,
+            "attached": true,
+            "capture_started": true,
+            "captured": true,
+            "failed": false,
+            "closed": false,
+            "compile_full_prefill": false,
+            "prefill_compile_profiled": false,
+            "includes_startup_warmups": true,
+            "captured_graph_entries": 4,
+            "decode_replay_calls": 0,
+            "decode_capture_forward_calls": 4,
+            "decode_eager_fallback_calls": 4,
+            "decode_uncaptured_full_calls": 0,
+            "decode_forward_failures": 0,
+            "prefill_forced_eager_calls": 1,
+            "prefill_compiled_calls": 0,
+            "prefill_compile_profile_runs": 0,
+            "prefill_compile_profile_failures": 0,
+            "capture_attempts": 1,
+            "capture_successes": 1,
+            "capture_failures": 0
+          }
+        },
+        {
+          "rank": 1,
+          "pid": 583981,
+          "device_index": 1,
+          "visible_device_map": [
+            "0",
+            "1",
+            "2",
+            "3"
+          ],
+          "expected_physical_device": "1",
+          "control_environment": {
+            "HCCL_DETERMINISTIC": "true",
+            "VLLM_BATCH_INVARIANT": null
+          },
+          "prefill_groups": {
+            "ready": true,
+            "failed": false,
+            "closed": false,
+            "group_size": 4,
+            "groups": 10,
+            "calls": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            "entry_qualnames": [
+              "PrefillGroup00.forward",
+              "PrefillGroup01.forward",
+              "PrefillGroup02.forward",
+              "PrefillGroup03.forward",
+              "PrefillGroup04.forward",
+              "PrefillGroup05.forward",
+              "PrefillGroup06.forward",
+              "PrefillGroup07.forward",
+              "PrefillGroup08.forward",
+              "PrefillGroup09.forward"
+            ],
+            "cache_directories": [
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-00",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-01",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-02",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-03",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-04",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-05",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-06",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-07",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-08",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-09"
+            ],
+            "evidence": "successful AOT group returns; not device completion"
+          },
+          "decode_preparation_queries": 0,
+          "decode_preparation_ready_skips": 0,
+          "decode_preparation_fences_skipped": 0,
+          "native_decode_graph": {
+            "enabled": true,
+            "attached": true,
+            "capture_started": true,
+            "captured": true,
+            "failed": false,
+            "closed": false,
+            "compile_full_prefill": false,
+            "prefill_compile_profiled": false,
+            "includes_startup_warmups": true,
+            "captured_graph_entries": 4,
+            "decode_replay_calls": 0,
+            "decode_capture_forward_calls": 4,
+            "decode_eager_fallback_calls": 4,
+            "decode_uncaptured_full_calls": 0,
+            "decode_forward_failures": 0,
+            "prefill_forced_eager_calls": 1,
+            "prefill_compiled_calls": 0,
+            "prefill_compile_profile_runs": 0,
+            "prefill_compile_profile_failures": 0,
+            "capture_attempts": 1,
+            "capture_successes": 1,
+            "capture_failures": 0
+          }
+        },
+        {
+          "rank": 2,
+          "pid": 583982,
+          "device_index": 2,
+          "visible_device_map": [
+            "0",
+            "1",
+            "2",
+            "3"
+          ],
+          "expected_physical_device": "2",
+          "control_environment": {
+            "HCCL_DETERMINISTIC": "true",
+            "VLLM_BATCH_INVARIANT": null
+          },
+          "prefill_groups": {
+            "ready": true,
+            "failed": false,
+            "closed": false,
+            "group_size": 4,
+            "groups": 10,
+            "calls": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            "entry_qualnames": [
+              "PrefillGroup00.forward",
+              "PrefillGroup01.forward",
+              "PrefillGroup02.forward",
+              "PrefillGroup03.forward",
+              "PrefillGroup04.forward",
+              "PrefillGroup05.forward",
+              "PrefillGroup06.forward",
+              "PrefillGroup07.forward",
+              "PrefillGroup08.forward",
+              "PrefillGroup09.forward"
+            ],
+            "cache_directories": [
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-00",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-01",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-02",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-03",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-04",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-05",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-06",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-07",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-08",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-09"
+            ],
+            "evidence": "successful AOT group returns; not device completion"
+          },
+          "decode_preparation_queries": 0,
+          "decode_preparation_ready_skips": 0,
+          "decode_preparation_fences_skipped": 0,
+          "native_decode_graph": {
+            "enabled": true,
+            "attached": true,
+            "capture_started": true,
+            "captured": true,
+            "failed": false,
+            "closed": false,
+            "compile_full_prefill": false,
+            "prefill_compile_profiled": false,
+            "includes_startup_warmups": true,
+            "captured_graph_entries": 4,
+            "decode_replay_calls": 0,
+            "decode_capture_forward_calls": 4,
+            "decode_eager_fallback_calls": 4,
+            "decode_uncaptured_full_calls": 0,
+            "decode_forward_failures": 0,
+            "prefill_forced_eager_calls": 1,
+            "prefill_compiled_calls": 0,
+            "prefill_compile_profile_runs": 0,
+            "prefill_compile_profile_failures": 0,
+            "capture_attempts": 1,
+            "capture_successes": 1,
+            "capture_failures": 0
+          }
+        },
+        {
+          "rank": 3,
+          "pid": 583983,
+          "device_index": 3,
+          "visible_device_map": [
+            "0",
+            "1",
+            "2",
+            "3"
+          ],
+          "expected_physical_device": "3",
+          "control_environment": {
+            "HCCL_DETERMINISTIC": "true",
+            "VLLM_BATCH_INVARIANT": null
+          },
+          "prefill_groups": {
+            "ready": true,
+            "failed": false,
+            "closed": false,
+            "group_size": 4,
+            "groups": 10,
+            "calls": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            "entry_qualnames": [
+              "PrefillGroup00.forward",
+              "PrefillGroup01.forward",
+              "PrefillGroup02.forward",
+              "PrefillGroup03.forward",
+              "PrefillGroup04.forward",
+              "PrefillGroup05.forward",
+              "PrefillGroup06.forward",
+              "PrefillGroup07.forward",
+              "PrefillGroup08.forward",
+              "PrefillGroup09.forward"
+            ],
+            "cache_directories": [
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-00",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-01",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-02",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-03",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-04",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-05",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-06",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-07",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-08",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-09"
+            ],
+            "evidence": "successful AOT group returns; not device completion"
+          },
+          "decode_preparation_queries": 0,
+          "decode_preparation_ready_skips": 0,
+          "decode_preparation_fences_skipped": 0,
+          "native_decode_graph": {
+            "enabled": true,
+            "attached": true,
+            "capture_started": true,
+            "captured": true,
+            "failed": false,
+            "closed": false,
+            "compile_full_prefill": false,
+            "prefill_compile_profiled": false,
+            "includes_startup_warmups": true,
+            "captured_graph_entries": 4,
+            "decode_replay_calls": 0,
+            "decode_capture_forward_calls": 4,
+            "decode_eager_fallback_calls": 4,
+            "decode_uncaptured_full_calls": 0,
+            "decode_forward_failures": 0,
+            "prefill_forced_eager_calls": 1,
+            "prefill_compiled_calls": 0,
+            "prefill_compile_profile_runs": 0,
+            "prefill_compile_profile_failures": 0,
+            "capture_attempts": 1,
+            "capture_successes": 1,
+            "capture_failures": 0
+          }
+        }
+      ],
+      "worker_counters_before_timing": [
+        {
+          "rank": 0,
+          "pid": 583980,
+          "device_index": 0,
+          "visible_device_map": [
+            "0",
+            "1",
+            "2",
+            "3"
+          ],
+          "expected_physical_device": "0",
+          "control_environment": {
+            "HCCL_DETERMINISTIC": "true",
+            "VLLM_BATCH_INVARIANT": null
+          },
+          "prefill_groups": {
+            "ready": true,
+            "failed": false,
+            "closed": false,
+            "group_size": 4,
+            "groups": 10,
+            "calls": [
+              4,
+              4,
+              4,
+              4,
+              4,
+              4,
+              4,
+              4,
+              4,
+              4
+            ],
+            "entry_qualnames": [
+              "PrefillGroup00.forward",
+              "PrefillGroup01.forward",
+              "PrefillGroup02.forward",
+              "PrefillGroup03.forward",
+              "PrefillGroup04.forward",
+              "PrefillGroup05.forward",
+              "PrefillGroup06.forward",
+              "PrefillGroup07.forward",
+              "PrefillGroup08.forward",
+              "PrefillGroup09.forward"
+            ],
+            "cache_directories": [
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-00",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-01",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-02",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-03",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-04",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-05",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-06",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-07",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-08",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-09"
+            ],
+            "evidence": "successful AOT group returns; not device completion"
+          },
+          "decode_preparation_queries": 0,
+          "decode_preparation_ready_skips": 0,
+          "decode_preparation_fences_skipped": 0,
+          "native_decode_graph": {
+            "enabled": true,
+            "attached": true,
+            "capture_started": true,
+            "captured": true,
+            "failed": false,
+            "closed": false,
+            "compile_full_prefill": false,
+            "prefill_compile_profiled": false,
+            "includes_startup_warmups": true,
+            "captured_graph_entries": 4,
+            "decode_replay_calls": 1022,
+            "decode_capture_forward_calls": 4,
+            "decode_eager_fallback_calls": 4,
+            "decode_uncaptured_full_calls": 0,
+            "decode_forward_failures": 0,
+            "prefill_forced_eager_calls": 4,
+            "prefill_compiled_calls": 0,
+            "prefill_compile_profile_runs": 0,
+            "prefill_compile_profile_failures": 0,
+            "capture_attempts": 1,
+            "capture_successes": 1,
+            "capture_failures": 0
+          }
+        },
+        {
+          "rank": 1,
+          "pid": 583981,
+          "device_index": 1,
+          "visible_device_map": [
+            "0",
+            "1",
+            "2",
+            "3"
+          ],
+          "expected_physical_device": "1",
+          "control_environment": {
+            "HCCL_DETERMINISTIC": "true",
+            "VLLM_BATCH_INVARIANT": null
+          },
+          "prefill_groups": {
+            "ready": true,
+            "failed": false,
+            "closed": false,
+            "group_size": 4,
+            "groups": 10,
+            "calls": [
+              4,
+              4,
+              4,
+              4,
+              4,
+              4,
+              4,
+              4,
+              4,
+              4
+            ],
+            "entry_qualnames": [
+              "PrefillGroup00.forward",
+              "PrefillGroup01.forward",
+              "PrefillGroup02.forward",
+              "PrefillGroup03.forward",
+              "PrefillGroup04.forward",
+              "PrefillGroup05.forward",
+              "PrefillGroup06.forward",
+              "PrefillGroup07.forward",
+              "PrefillGroup08.forward",
+              "PrefillGroup09.forward"
+            ],
+            "cache_directories": [
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-00",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-01",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-02",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-03",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-04",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-05",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-06",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-07",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-08",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-09"
+            ],
+            "evidence": "successful AOT group returns; not device completion"
+          },
+          "decode_preparation_queries": 0,
+          "decode_preparation_ready_skips": 0,
+          "decode_preparation_fences_skipped": 0,
+          "native_decode_graph": {
+            "enabled": true,
+            "attached": true,
+            "capture_started": true,
+            "captured": true,
+            "failed": false,
+            "closed": false,
+            "compile_full_prefill": false,
+            "prefill_compile_profiled": false,
+            "includes_startup_warmups": true,
+            "captured_graph_entries": 4,
+            "decode_replay_calls": 1022,
+            "decode_capture_forward_calls": 4,
+            "decode_eager_fallback_calls": 4,
+            "decode_uncaptured_full_calls": 0,
+            "decode_forward_failures": 0,
+            "prefill_forced_eager_calls": 4,
+            "prefill_compiled_calls": 0,
+            "prefill_compile_profile_runs": 0,
+            "prefill_compile_profile_failures": 0,
+            "capture_attempts": 1,
+            "capture_successes": 1,
+            "capture_failures": 0
+          }
+        },
+        {
+          "rank": 2,
+          "pid": 583982,
+          "device_index": 2,
+          "visible_device_map": [
+            "0",
+            "1",
+            "2",
+            "3"
+          ],
+          "expected_physical_device": "2",
+          "control_environment": {
+            "HCCL_DETERMINISTIC": "true",
+            "VLLM_BATCH_INVARIANT": null
+          },
+          "prefill_groups": {
+            "ready": true,
+            "failed": false,
+            "closed": false,
+            "group_size": 4,
+            "groups": 10,
+            "calls": [
+              4,
+              4,
+              4,
+              4,
+              4,
+              4,
+              4,
+              4,
+              4,
+              4
+            ],
+            "entry_qualnames": [
+              "PrefillGroup00.forward",
+              "PrefillGroup01.forward",
+              "PrefillGroup02.forward",
+              "PrefillGroup03.forward",
+              "PrefillGroup04.forward",
+              "PrefillGroup05.forward",
+              "PrefillGroup06.forward",
+              "PrefillGroup07.forward",
+              "PrefillGroup08.forward",
+              "PrefillGroup09.forward"
+            ],
+            "cache_directories": [
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-00",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-01",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-02",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-03",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-04",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-05",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-06",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-07",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-08",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-09"
+            ],
+            "evidence": "successful AOT group returns; not device completion"
+          },
+          "decode_preparation_queries": 0,
+          "decode_preparation_ready_skips": 0,
+          "decode_preparation_fences_skipped": 0,
+          "native_decode_graph": {
+            "enabled": true,
+            "attached": true,
+            "capture_started": true,
+            "captured": true,
+            "failed": false,
+            "closed": false,
+            "compile_full_prefill": false,
+            "prefill_compile_profiled": false,
+            "includes_startup_warmups": true,
+            "captured_graph_entries": 4,
+            "decode_replay_calls": 1022,
+            "decode_capture_forward_calls": 4,
+            "decode_eager_fallback_calls": 4,
+            "decode_uncaptured_full_calls": 0,
+            "decode_forward_failures": 0,
+            "prefill_forced_eager_calls": 4,
+            "prefill_compiled_calls": 0,
+            "prefill_compile_profile_runs": 0,
+            "prefill_compile_profile_failures": 0,
+            "capture_attempts": 1,
+            "capture_successes": 1,
+            "capture_failures": 0
+          }
+        },
+        {
+          "rank": 3,
+          "pid": 583983,
+          "device_index": 3,
+          "visible_device_map": [
+            "0",
+            "1",
+            "2",
+            "3"
+          ],
+          "expected_physical_device": "3",
+          "control_environment": {
+            "HCCL_DETERMINISTIC": "true",
+            "VLLM_BATCH_INVARIANT": null
+          },
+          "prefill_groups": {
+            "ready": true,
+            "failed": false,
+            "closed": false,
+            "group_size": 4,
+            "groups": 10,
+            "calls": [
+              4,
+              4,
+              4,
+              4,
+              4,
+              4,
+              4,
+              4,
+              4,
+              4
+            ],
+            "entry_qualnames": [
+              "PrefillGroup00.forward",
+              "PrefillGroup01.forward",
+              "PrefillGroup02.forward",
+              "PrefillGroup03.forward",
+              "PrefillGroup04.forward",
+              "PrefillGroup05.forward",
+              "PrefillGroup06.forward",
+              "PrefillGroup07.forward",
+              "PrefillGroup08.forward",
+              "PrefillGroup09.forward"
+            ],
+            "cache_directories": [
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-00",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-01",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-02",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-03",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-04",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-05",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-06",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-07",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-08",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-09"
+            ],
+            "evidence": "successful AOT group returns; not device completion"
+          },
+          "decode_preparation_queries": 0,
+          "decode_preparation_ready_skips": 0,
+          "decode_preparation_fences_skipped": 0,
+          "native_decode_graph": {
+            "enabled": true,
+            "attached": true,
+            "capture_started": true,
+            "captured": true,
+            "failed": false,
+            "closed": false,
+            "compile_full_prefill": false,
+            "prefill_compile_profiled": false,
+            "includes_startup_warmups": true,
+            "captured_graph_entries": 4,
+            "decode_replay_calls": 1022,
+            "decode_capture_forward_calls": 4,
+            "decode_eager_fallback_calls": 4,
+            "decode_uncaptured_full_calls": 0,
+            "decode_forward_failures": 0,
+            "prefill_forced_eager_calls": 4,
+            "prefill_compiled_calls": 0,
+            "prefill_compile_profile_runs": 0,
+            "prefill_compile_profile_failures": 0,
+            "capture_attempts": 1,
+            "capture_successes": 1,
+            "capture_failures": 0
+          }
+        }
+      ],
+      "worker_counters_after_timing": [
+        {
+          "rank": 0,
+          "pid": 583980,
+          "device_index": 0,
+          "visible_device_map": [
+            "0",
+            "1",
+            "2",
+            "3"
+          ],
+          "expected_physical_device": "0",
+          "control_environment": {
+            "HCCL_DETERMINISTIC": "true",
+            "VLLM_BATCH_INVARIANT": null
+          },
+          "prefill_groups": {
+            "ready": true,
+            "failed": false,
+            "closed": false,
+            "group_size": 4,
+            "groups": 10,
+            "calls": [
+              10,
+              10,
+              10,
+              10,
+              10,
+              10,
+              10,
+              10,
+              10,
+              10
+            ],
+            "entry_qualnames": [
+              "PrefillGroup00.forward",
+              "PrefillGroup01.forward",
+              "PrefillGroup02.forward",
+              "PrefillGroup03.forward",
+              "PrefillGroup04.forward",
+              "PrefillGroup05.forward",
+              "PrefillGroup06.forward",
+              "PrefillGroup07.forward",
+              "PrefillGroup08.forward",
+              "PrefillGroup09.forward"
+            ],
+            "cache_directories": [
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-00",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-01",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-02",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-03",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-04",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-05",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-06",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-07",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-08",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-09"
+            ],
+            "evidence": "successful AOT group returns; not device completion"
+          },
+          "decode_preparation_queries": 0,
+          "decode_preparation_ready_skips": 0,
+          "decode_preparation_fences_skipped": 0,
+          "native_decode_graph": {
+            "enabled": true,
+            "attached": true,
+            "capture_started": true,
+            "captured": true,
+            "failed": false,
+            "closed": false,
+            "compile_full_prefill": false,
+            "prefill_compile_profiled": false,
+            "includes_startup_warmups": true,
+            "captured_graph_entries": 4,
+            "decode_replay_calls": 3066,
+            "decode_capture_forward_calls": 4,
+            "decode_eager_fallback_calls": 4,
+            "decode_uncaptured_full_calls": 0,
+            "decode_forward_failures": 0,
+            "prefill_forced_eager_calls": 10,
+            "prefill_compiled_calls": 0,
+            "prefill_compile_profile_runs": 0,
+            "prefill_compile_profile_failures": 0,
+            "capture_attempts": 1,
+            "capture_successes": 1,
+            "capture_failures": 0
+          }
+        },
+        {
+          "rank": 1,
+          "pid": 583981,
+          "device_index": 1,
+          "visible_device_map": [
+            "0",
+            "1",
+            "2",
+            "3"
+          ],
+          "expected_physical_device": "1",
+          "control_environment": {
+            "HCCL_DETERMINISTIC": "true",
+            "VLLM_BATCH_INVARIANT": null
+          },
+          "prefill_groups": {
+            "ready": true,
+            "failed": false,
+            "closed": false,
+            "group_size": 4,
+            "groups": 10,
+            "calls": [
+              10,
+              10,
+              10,
+              10,
+              10,
+              10,
+              10,
+              10,
+              10,
+              10
+            ],
+            "entry_qualnames": [
+              "PrefillGroup00.forward",
+              "PrefillGroup01.forward",
+              "PrefillGroup02.forward",
+              "PrefillGroup03.forward",
+              "PrefillGroup04.forward",
+              "PrefillGroup05.forward",
+              "PrefillGroup06.forward",
+              "PrefillGroup07.forward",
+              "PrefillGroup08.forward",
+              "PrefillGroup09.forward"
+            ],
+            "cache_directories": [
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-00",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-01",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-02",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-03",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-04",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-05",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-06",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-07",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-08",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-09"
+            ],
+            "evidence": "successful AOT group returns; not device completion"
+          },
+          "decode_preparation_queries": 0,
+          "decode_preparation_ready_skips": 0,
+          "decode_preparation_fences_skipped": 0,
+          "native_decode_graph": {
+            "enabled": true,
+            "attached": true,
+            "capture_started": true,
+            "captured": true,
+            "failed": false,
+            "closed": false,
+            "compile_full_prefill": false,
+            "prefill_compile_profiled": false,
+            "includes_startup_warmups": true,
+            "captured_graph_entries": 4,
+            "decode_replay_calls": 3066,
+            "decode_capture_forward_calls": 4,
+            "decode_eager_fallback_calls": 4,
+            "decode_uncaptured_full_calls": 0,
+            "decode_forward_failures": 0,
+            "prefill_forced_eager_calls": 10,
+            "prefill_compiled_calls": 0,
+            "prefill_compile_profile_runs": 0,
+            "prefill_compile_profile_failures": 0,
+            "capture_attempts": 1,
+            "capture_successes": 1,
+            "capture_failures": 0
+          }
+        },
+        {
+          "rank": 2,
+          "pid": 583982,
+          "device_index": 2,
+          "visible_device_map": [
+            "0",
+            "1",
+            "2",
+            "3"
+          ],
+          "expected_physical_device": "2",
+          "control_environment": {
+            "HCCL_DETERMINISTIC": "true",
+            "VLLM_BATCH_INVARIANT": null
+          },
+          "prefill_groups": {
+            "ready": true,
+            "failed": false,
+            "closed": false,
+            "group_size": 4,
+            "groups": 10,
+            "calls": [
+              10,
+              10,
+              10,
+              10,
+              10,
+              10,
+              10,
+              10,
+              10,
+              10
+            ],
+            "entry_qualnames": [
+              "PrefillGroup00.forward",
+              "PrefillGroup01.forward",
+              "PrefillGroup02.forward",
+              "PrefillGroup03.forward",
+              "PrefillGroup04.forward",
+              "PrefillGroup05.forward",
+              "PrefillGroup06.forward",
+              "PrefillGroup07.forward",
+              "PrefillGroup08.forward",
+              "PrefillGroup09.forward"
+            ],
+            "cache_directories": [
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-00",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-01",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-02",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-03",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-04",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-05",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-06",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-07",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-08",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-09"
+            ],
+            "evidence": "successful AOT group returns; not device completion"
+          },
+          "decode_preparation_queries": 0,
+          "decode_preparation_ready_skips": 0,
+          "decode_preparation_fences_skipped": 0,
+          "native_decode_graph": {
+            "enabled": true,
+            "attached": true,
+            "capture_started": true,
+            "captured": true,
+            "failed": false,
+            "closed": false,
+            "compile_full_prefill": false,
+            "prefill_compile_profiled": false,
+            "includes_startup_warmups": true,
+            "captured_graph_entries": 4,
+            "decode_replay_calls": 3066,
+            "decode_capture_forward_calls": 4,
+            "decode_eager_fallback_calls": 4,
+            "decode_uncaptured_full_calls": 0,
+            "decode_forward_failures": 0,
+            "prefill_forced_eager_calls": 10,
+            "prefill_compiled_calls": 0,
+            "prefill_compile_profile_runs": 0,
+            "prefill_compile_profile_failures": 0,
+            "capture_attempts": 1,
+            "capture_successes": 1,
+            "capture_failures": 0
+          }
+        },
+        {
+          "rank": 3,
+          "pid": 583983,
+          "device_index": 3,
+          "visible_device_map": [
+            "0",
+            "1",
+            "2",
+            "3"
+          ],
+          "expected_physical_device": "3",
+          "control_environment": {
+            "HCCL_DETERMINISTIC": "true",
+            "VLLM_BATCH_INVARIANT": null
+          },
+          "prefill_groups": {
+            "ready": true,
+            "failed": false,
+            "closed": false,
+            "group_size": 4,
+            "groups": 10,
+            "calls": [
+              10,
+              10,
+              10,
+              10,
+              10,
+              10,
+              10,
+              10,
+              10,
+              10
+            ],
+            "entry_qualnames": [
+              "PrefillGroup00.forward",
+              "PrefillGroup01.forward",
+              "PrefillGroup02.forward",
+              "PrefillGroup03.forward",
+              "PrefillGroup04.forward",
+              "PrefillGroup05.forward",
+              "PrefillGroup06.forward",
+              "PrefillGroup07.forward",
+              "PrefillGroup08.forward",
+              "PrefillGroup09.forward"
+            ],
+            "cache_directories": [
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-00",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-01",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-02",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-03",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-04",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-05",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-06",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-07",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-08",
+              "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/compiler-cache/muxpd-prefill-groups-v1/prefill-group-09"
+            ],
+            "evidence": "successful AOT group returns; not device completion"
+          },
+          "decode_preparation_queries": 0,
+          "decode_preparation_ready_skips": 0,
+          "decode_preparation_fences_skipped": 0,
+          "native_decode_graph": {
+            "enabled": true,
+            "attached": true,
+            "capture_started": true,
+            "captured": true,
+            "failed": false,
+            "closed": false,
+            "compile_full_prefill": false,
+            "prefill_compile_profiled": false,
+            "includes_startup_warmups": true,
+            "captured_graph_entries": 4,
+            "decode_replay_calls": 3066,
+            "decode_capture_forward_calls": 4,
+            "decode_eager_fallback_calls": 4,
+            "decode_uncaptured_full_calls": 0,
+            "decode_forward_failures": 0,
+            "prefill_forced_eager_calls": 10,
+            "prefill_compiled_calls": 0,
+            "prefill_compile_profile_runs": 0,
+            "prefill_compile_profile_failures": 0,
+            "capture_attempts": 1,
+            "capture_successes": 1,
+            "capture_failures": 0
+          }
+        }
+      ],
+      "worker_counter_deltas": {
+        "0": {
+          "decode_preparation_queries": 0,
+          "decode_preparation_ready_skips": 0,
+          "decode_preparation_fences_skipped": 0,
+          "native_decode_graph": {
+            "decode_replay_calls": 2044,
+            "decode_capture_forward_calls": 0,
+            "decode_eager_fallback_calls": 0,
+            "decode_uncaptured_full_calls": 0,
+            "decode_forward_failures": 0,
+            "prefill_forced_eager_calls": 6,
+            "prefill_compiled_calls": 0,
+            "prefill_compile_profile_failures": 0,
+            "capture_failures": 0
+          },
+          "prefill_group_calls": [
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6
+          ]
+        },
+        "1": {
+          "decode_preparation_queries": 0,
+          "decode_preparation_ready_skips": 0,
+          "decode_preparation_fences_skipped": 0,
+          "native_decode_graph": {
+            "decode_replay_calls": 2044,
+            "decode_capture_forward_calls": 0,
+            "decode_eager_fallback_calls": 0,
+            "decode_uncaptured_full_calls": 0,
+            "decode_forward_failures": 0,
+            "prefill_forced_eager_calls": 6,
+            "prefill_compiled_calls": 0,
+            "prefill_compile_profile_failures": 0,
+            "capture_failures": 0
+          },
+          "prefill_group_calls": [
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6
+          ]
+        },
+        "2": {
+          "decode_preparation_queries": 0,
+          "decode_preparation_ready_skips": 0,
+          "decode_preparation_fences_skipped": 0,
+          "native_decode_graph": {
+            "decode_replay_calls": 2044,
+            "decode_capture_forward_calls": 0,
+            "decode_eager_fallback_calls": 0,
+            "decode_uncaptured_full_calls": 0,
+            "decode_forward_failures": 0,
+            "prefill_forced_eager_calls": 6,
+            "prefill_compiled_calls": 0,
+            "prefill_compile_profile_failures": 0,
+            "capture_failures": 0
+          },
+          "prefill_group_calls": [
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6
+          ]
+        },
+        "3": {
+          "decode_preparation_queries": 0,
+          "decode_preparation_ready_skips": 0,
+          "decode_preparation_fences_skipped": 0,
+          "native_decode_graph": {
+            "decode_replay_calls": 2044,
+            "decode_capture_forward_calls": 0,
+            "decode_eager_fallback_calls": 0,
+            "decode_uncaptured_full_calls": 0,
+            "decode_forward_failures": 0,
+            "prefill_forced_eager_calls": 6,
+            "prefill_compiled_calls": 0,
+            "prefill_compile_profile_failures": 0,
+            "capture_failures": 0
+          },
+          "prefill_group_calls": [
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6
+          ]
+        }
+      }
+    },
+    {
+      "role": "R2",
+      "label": "perf-f7-raw-02",
+      "worker_counters_after_init": [
+        {
+          "rank": 0,
+          "pid": 598878,
+          "device_index": 0,
+          "visible_device_map": [
+            "0",
+            "1",
+            "2",
+            "3"
+          ],
+          "expected_physical_device": "0",
+          "control_environment": {
+            "HCCL_DETERMINISTIC": "true",
+            "VLLM_BATCH_INVARIANT": null
+          },
+          "prefill_groups": null,
+          "decode_preparation_queries": 0,
+          "decode_preparation_ready_skips": 0,
+          "decode_preparation_fences_skipped": 0,
+          "native_decode_graph": {
+            "enabled": true,
+            "attached": true,
+            "capture_started": true,
+            "captured": true,
+            "failed": false,
+            "closed": false,
+            "compile_full_prefill": false,
+            "prefill_compile_profiled": false,
+            "includes_startup_warmups": true,
+            "captured_graph_entries": 4,
+            "decode_replay_calls": 0,
+            "decode_capture_forward_calls": 4,
+            "decode_eager_fallback_calls": 4,
+            "decode_uncaptured_full_calls": 0,
+            "decode_forward_failures": 0,
+            "prefill_forced_eager_calls": 1,
+            "prefill_compiled_calls": 0,
+            "prefill_compile_profile_runs": 0,
+            "prefill_compile_profile_failures": 0,
+            "capture_attempts": 1,
+            "capture_successes": 1,
+            "capture_failures": 0
+          }
+        },
+        {
+          "rank": 1,
+          "pid": 598879,
+          "device_index": 1,
+          "visible_device_map": [
+            "0",
+            "1",
+            "2",
+            "3"
+          ],
+          "expected_physical_device": "1",
+          "control_environment": {
+            "HCCL_DETERMINISTIC": "true",
+            "VLLM_BATCH_INVARIANT": null
+          },
+          "prefill_groups": null,
+          "decode_preparation_queries": 0,
+          "decode_preparation_ready_skips": 0,
+          "decode_preparation_fences_skipped": 0,
+          "native_decode_graph": {
+            "enabled": true,
+            "attached": true,
+            "capture_started": true,
+            "captured": true,
+            "failed": false,
+            "closed": false,
+            "compile_full_prefill": false,
+            "prefill_compile_profiled": false,
+            "includes_startup_warmups": true,
+            "captured_graph_entries": 4,
+            "decode_replay_calls": 0,
+            "decode_capture_forward_calls": 4,
+            "decode_eager_fallback_calls": 4,
+            "decode_uncaptured_full_calls": 0,
+            "decode_forward_failures": 0,
+            "prefill_forced_eager_calls": 1,
+            "prefill_compiled_calls": 0,
+            "prefill_compile_profile_runs": 0,
+            "prefill_compile_profile_failures": 0,
+            "capture_attempts": 1,
+            "capture_successes": 1,
+            "capture_failures": 0
+          }
+        },
+        {
+          "rank": 2,
+          "pid": 598880,
+          "device_index": 2,
+          "visible_device_map": [
+            "0",
+            "1",
+            "2",
+            "3"
+          ],
+          "expected_physical_device": "2",
+          "control_environment": {
+            "HCCL_DETERMINISTIC": "true",
+            "VLLM_BATCH_INVARIANT": null
+          },
+          "prefill_groups": null,
+          "decode_preparation_queries": 0,
+          "decode_preparation_ready_skips": 0,
+          "decode_preparation_fences_skipped": 0,
+          "native_decode_graph": {
+            "enabled": true,
+            "attached": true,
+            "capture_started": true,
+            "captured": true,
+            "failed": false,
+            "closed": false,
+            "compile_full_prefill": false,
+            "prefill_compile_profiled": false,
+            "includes_startup_warmups": true,
+            "captured_graph_entries": 4,
+            "decode_replay_calls": 0,
+            "decode_capture_forward_calls": 4,
+            "decode_eager_fallback_calls": 4,
+            "decode_uncaptured_full_calls": 0,
+            "decode_forward_failures": 0,
+            "prefill_forced_eager_calls": 1,
+            "prefill_compiled_calls": 0,
+            "prefill_compile_profile_runs": 0,
+            "prefill_compile_profile_failures": 0,
+            "capture_attempts": 1,
+            "capture_successes": 1,
+            "capture_failures": 0
+          }
+        },
+        {
+          "rank": 3,
+          "pid": 598881,
+          "device_index": 3,
+          "visible_device_map": [
+            "0",
+            "1",
+            "2",
+            "3"
+          ],
+          "expected_physical_device": "3",
+          "control_environment": {
+            "HCCL_DETERMINISTIC": "true",
+            "VLLM_BATCH_INVARIANT": null
+          },
+          "prefill_groups": null,
+          "decode_preparation_queries": 0,
+          "decode_preparation_ready_skips": 0,
+          "decode_preparation_fences_skipped": 0,
+          "native_decode_graph": {
+            "enabled": true,
+            "attached": true,
+            "capture_started": true,
+            "captured": true,
+            "failed": false,
+            "closed": false,
+            "compile_full_prefill": false,
+            "prefill_compile_profiled": false,
+            "includes_startup_warmups": true,
+            "captured_graph_entries": 4,
+            "decode_replay_calls": 0,
+            "decode_capture_forward_calls": 4,
+            "decode_eager_fallback_calls": 4,
+            "decode_uncaptured_full_calls": 0,
+            "decode_forward_failures": 0,
+            "prefill_forced_eager_calls": 1,
+            "prefill_compiled_calls": 0,
+            "prefill_compile_profile_runs": 0,
+            "prefill_compile_profile_failures": 0,
+            "capture_attempts": 1,
+            "capture_successes": 1,
+            "capture_failures": 0
+          }
+        }
+      ],
+      "worker_counters_before_timing": [
+        {
+          "rank": 0,
+          "pid": 598878,
+          "device_index": 0,
+          "visible_device_map": [
+            "0",
+            "1",
+            "2",
+            "3"
+          ],
+          "expected_physical_device": "0",
+          "control_environment": {
+            "HCCL_DETERMINISTIC": "true",
+            "VLLM_BATCH_INVARIANT": null
+          },
+          "prefill_groups": null,
+          "decode_preparation_queries": 0,
+          "decode_preparation_ready_skips": 0,
+          "decode_preparation_fences_skipped": 0,
+          "native_decode_graph": {
+            "enabled": true,
+            "attached": true,
+            "capture_started": true,
+            "captured": true,
+            "failed": false,
+            "closed": false,
+            "compile_full_prefill": false,
+            "prefill_compile_profiled": false,
+            "includes_startup_warmups": true,
+            "captured_graph_entries": 4,
+            "decode_replay_calls": 1022,
+            "decode_capture_forward_calls": 4,
+            "decode_eager_fallback_calls": 4,
+            "decode_uncaptured_full_calls": 0,
+            "decode_forward_failures": 0,
+            "prefill_forced_eager_calls": 4,
+            "prefill_compiled_calls": 0,
+            "prefill_compile_profile_runs": 0,
+            "prefill_compile_profile_failures": 0,
+            "capture_attempts": 1,
+            "capture_successes": 1,
+            "capture_failures": 0
+          }
+        },
+        {
+          "rank": 1,
+          "pid": 598879,
+          "device_index": 1,
+          "visible_device_map": [
+            "0",
+            "1",
+            "2",
+            "3"
+          ],
+          "expected_physical_device": "1",
+          "control_environment": {
+            "HCCL_DETERMINISTIC": "true",
+            "VLLM_BATCH_INVARIANT": null
+          },
+          "prefill_groups": null,
+          "decode_preparation_queries": 0,
+          "decode_preparation_ready_skips": 0,
+          "decode_preparation_fences_skipped": 0,
+          "native_decode_graph": {
+            "enabled": true,
+            "attached": true,
+            "capture_started": true,
+            "captured": true,
+            "failed": false,
+            "closed": false,
+            "compile_full_prefill": false,
+            "prefill_compile_profiled": false,
+            "includes_startup_warmups": true,
+            "captured_graph_entries": 4,
+            "decode_replay_calls": 1022,
+            "decode_capture_forward_calls": 4,
+            "decode_eager_fallback_calls": 4,
+            "decode_uncaptured_full_calls": 0,
+            "decode_forward_failures": 0,
+            "prefill_forced_eager_calls": 4,
+            "prefill_compiled_calls": 0,
+            "prefill_compile_profile_runs": 0,
+            "prefill_compile_profile_failures": 0,
+            "capture_attempts": 1,
+            "capture_successes": 1,
+            "capture_failures": 0
+          }
+        },
+        {
+          "rank": 2,
+          "pid": 598880,
+          "device_index": 2,
+          "visible_device_map": [
+            "0",
+            "1",
+            "2",
+            "3"
+          ],
+          "expected_physical_device": "2",
+          "control_environment": {
+            "HCCL_DETERMINISTIC": "true",
+            "VLLM_BATCH_INVARIANT": null
+          },
+          "prefill_groups": null,
+          "decode_preparation_queries": 0,
+          "decode_preparation_ready_skips": 0,
+          "decode_preparation_fences_skipped": 0,
+          "native_decode_graph": {
+            "enabled": true,
+            "attached": true,
+            "capture_started": true,
+            "captured": true,
+            "failed": false,
+            "closed": false,
+            "compile_full_prefill": false,
+            "prefill_compile_profiled": false,
+            "includes_startup_warmups": true,
+            "captured_graph_entries": 4,
+            "decode_replay_calls": 1022,
+            "decode_capture_forward_calls": 4,
+            "decode_eager_fallback_calls": 4,
+            "decode_uncaptured_full_calls": 0,
+            "decode_forward_failures": 0,
+            "prefill_forced_eager_calls": 4,
+            "prefill_compiled_calls": 0,
+            "prefill_compile_profile_runs": 0,
+            "prefill_compile_profile_failures": 0,
+            "capture_attempts": 1,
+            "capture_successes": 1,
+            "capture_failures": 0
+          }
+        },
+        {
+          "rank": 3,
+          "pid": 598881,
+          "device_index": 3,
+          "visible_device_map": [
+            "0",
+            "1",
+            "2",
+            "3"
+          ],
+          "expected_physical_device": "3",
+          "control_environment": {
+            "HCCL_DETERMINISTIC": "true",
+            "VLLM_BATCH_INVARIANT": null
+          },
+          "prefill_groups": null,
+          "decode_preparation_queries": 0,
+          "decode_preparation_ready_skips": 0,
+          "decode_preparation_fences_skipped": 0,
+          "native_decode_graph": {
+            "enabled": true,
+            "attached": true,
+            "capture_started": true,
+            "captured": true,
+            "failed": false,
+            "closed": false,
+            "compile_full_prefill": false,
+            "prefill_compile_profiled": false,
+            "includes_startup_warmups": true,
+            "captured_graph_entries": 4,
+            "decode_replay_calls": 1022,
+            "decode_capture_forward_calls": 4,
+            "decode_eager_fallback_calls": 4,
+            "decode_uncaptured_full_calls": 0,
+            "decode_forward_failures": 0,
+            "prefill_forced_eager_calls": 4,
+            "prefill_compiled_calls": 0,
+            "prefill_compile_profile_runs": 0,
+            "prefill_compile_profile_failures": 0,
+            "capture_attempts": 1,
+            "capture_successes": 1,
+            "capture_failures": 0
+          }
+        }
+      ],
+      "worker_counters_after_timing": [
+        {
+          "rank": 0,
+          "pid": 598878,
+          "device_index": 0,
+          "visible_device_map": [
+            "0",
+            "1",
+            "2",
+            "3"
+          ],
+          "expected_physical_device": "0",
+          "control_environment": {
+            "HCCL_DETERMINISTIC": "true",
+            "VLLM_BATCH_INVARIANT": null
+          },
+          "prefill_groups": null,
+          "decode_preparation_queries": 0,
+          "decode_preparation_ready_skips": 0,
+          "decode_preparation_fences_skipped": 0,
+          "native_decode_graph": {
+            "enabled": true,
+            "attached": true,
+            "capture_started": true,
+            "captured": true,
+            "failed": false,
+            "closed": false,
+            "compile_full_prefill": false,
+            "prefill_compile_profiled": false,
+            "includes_startup_warmups": true,
+            "captured_graph_entries": 4,
+            "decode_replay_calls": 3066,
+            "decode_capture_forward_calls": 4,
+            "decode_eager_fallback_calls": 4,
+            "decode_uncaptured_full_calls": 0,
+            "decode_forward_failures": 0,
+            "prefill_forced_eager_calls": 10,
+            "prefill_compiled_calls": 0,
+            "prefill_compile_profile_runs": 0,
+            "prefill_compile_profile_failures": 0,
+            "capture_attempts": 1,
+            "capture_successes": 1,
+            "capture_failures": 0
+          }
+        },
+        {
+          "rank": 1,
+          "pid": 598879,
+          "device_index": 1,
+          "visible_device_map": [
+            "0",
+            "1",
+            "2",
+            "3"
+          ],
+          "expected_physical_device": "1",
+          "control_environment": {
+            "HCCL_DETERMINISTIC": "true",
+            "VLLM_BATCH_INVARIANT": null
+          },
+          "prefill_groups": null,
+          "decode_preparation_queries": 0,
+          "decode_preparation_ready_skips": 0,
+          "decode_preparation_fences_skipped": 0,
+          "native_decode_graph": {
+            "enabled": true,
+            "attached": true,
+            "capture_started": true,
+            "captured": true,
+            "failed": false,
+            "closed": false,
+            "compile_full_prefill": false,
+            "prefill_compile_profiled": false,
+            "includes_startup_warmups": true,
+            "captured_graph_entries": 4,
+            "decode_replay_calls": 3066,
+            "decode_capture_forward_calls": 4,
+            "decode_eager_fallback_calls": 4,
+            "decode_uncaptured_full_calls": 0,
+            "decode_forward_failures": 0,
+            "prefill_forced_eager_calls": 10,
+            "prefill_compiled_calls": 0,
+            "prefill_compile_profile_runs": 0,
+            "prefill_compile_profile_failures": 0,
+            "capture_attempts": 1,
+            "capture_successes": 1,
+            "capture_failures": 0
+          }
+        },
+        {
+          "rank": 2,
+          "pid": 598880,
+          "device_index": 2,
+          "visible_device_map": [
+            "0",
+            "1",
+            "2",
+            "3"
+          ],
+          "expected_physical_device": "2",
+          "control_environment": {
+            "HCCL_DETERMINISTIC": "true",
+            "VLLM_BATCH_INVARIANT": null
+          },
+          "prefill_groups": null,
+          "decode_preparation_queries": 0,
+          "decode_preparation_ready_skips": 0,
+          "decode_preparation_fences_skipped": 0,
+          "native_decode_graph": {
+            "enabled": true,
+            "attached": true,
+            "capture_started": true,
+            "captured": true,
+            "failed": false,
+            "closed": false,
+            "compile_full_prefill": false,
+            "prefill_compile_profiled": false,
+            "includes_startup_warmups": true,
+            "captured_graph_entries": 4,
+            "decode_replay_calls": 3066,
+            "decode_capture_forward_calls": 4,
+            "decode_eager_fallback_calls": 4,
+            "decode_uncaptured_full_calls": 0,
+            "decode_forward_failures": 0,
+            "prefill_forced_eager_calls": 10,
+            "prefill_compiled_calls": 0,
+            "prefill_compile_profile_runs": 0,
+            "prefill_compile_profile_failures": 0,
+            "capture_attempts": 1,
+            "capture_successes": 1,
+            "capture_failures": 0
+          }
+        },
+        {
+          "rank": 3,
+          "pid": 598881,
+          "device_index": 3,
+          "visible_device_map": [
+            "0",
+            "1",
+            "2",
+            "3"
+          ],
+          "expected_physical_device": "3",
+          "control_environment": {
+            "HCCL_DETERMINISTIC": "true",
+            "VLLM_BATCH_INVARIANT": null
+          },
+          "prefill_groups": null,
+          "decode_preparation_queries": 0,
+          "decode_preparation_ready_skips": 0,
+          "decode_preparation_fences_skipped": 0,
+          "native_decode_graph": {
+            "enabled": true,
+            "attached": true,
+            "capture_started": true,
+            "captured": true,
+            "failed": false,
+            "closed": false,
+            "compile_full_prefill": false,
+            "prefill_compile_profiled": false,
+            "includes_startup_warmups": true,
+            "captured_graph_entries": 4,
+            "decode_replay_calls": 3066,
+            "decode_capture_forward_calls": 4,
+            "decode_eager_fallback_calls": 4,
+            "decode_uncaptured_full_calls": 0,
+            "decode_forward_failures": 0,
+            "prefill_forced_eager_calls": 10,
+            "prefill_compiled_calls": 0,
+            "prefill_compile_profile_runs": 0,
+            "prefill_compile_profile_failures": 0,
+            "capture_attempts": 1,
+            "capture_successes": 1,
+            "capture_failures": 0
+          }
+        }
+      ],
+      "worker_counter_deltas": {
+        "0": {
+          "decode_preparation_queries": 0,
+          "decode_preparation_ready_skips": 0,
+          "decode_preparation_fences_skipped": 0,
+          "native_decode_graph": {
+            "decode_replay_calls": 2044,
+            "decode_capture_forward_calls": 0,
+            "decode_eager_fallback_calls": 0,
+            "decode_uncaptured_full_calls": 0,
+            "decode_forward_failures": 0,
+            "prefill_forced_eager_calls": 6,
+            "prefill_compiled_calls": 0,
+            "prefill_compile_profile_failures": 0,
+            "capture_failures": 0
+          },
+          "prefill_group_calls": null
+        },
+        "1": {
+          "decode_preparation_queries": 0,
+          "decode_preparation_ready_skips": 0,
+          "decode_preparation_fences_skipped": 0,
+          "native_decode_graph": {
+            "decode_replay_calls": 2044,
+            "decode_capture_forward_calls": 0,
+            "decode_eager_fallback_calls": 0,
+            "decode_uncaptured_full_calls": 0,
+            "decode_forward_failures": 0,
+            "prefill_forced_eager_calls": 6,
+            "prefill_compiled_calls": 0,
+            "prefill_compile_profile_failures": 0,
+            "capture_failures": 0
+          },
+          "prefill_group_calls": null
+        },
+        "2": {
+          "decode_preparation_queries": 0,
+          "decode_preparation_ready_skips": 0,
+          "decode_preparation_fences_skipped": 0,
+          "native_decode_graph": {
+            "decode_replay_calls": 2044,
+            "decode_capture_forward_calls": 0,
+            "decode_eager_fallback_calls": 0,
+            "decode_uncaptured_full_calls": 0,
+            "decode_forward_failures": 0,
+            "prefill_forced_eager_calls": 6,
+            "prefill_compiled_calls": 0,
+            "prefill_compile_profile_failures": 0,
+            "capture_failures": 0
+          },
+          "prefill_group_calls": null
+        },
+        "3": {
+          "decode_preparation_queries": 0,
+          "decode_preparation_ready_skips": 0,
+          "decode_preparation_fences_skipped": 0,
+          "native_decode_graph": {
+            "decode_replay_calls": 2044,
+            "decode_capture_forward_calls": 0,
+            "decode_eager_fallback_calls": 0,
+            "decode_uncaptured_full_calls": 0,
+            "decode_forward_failures": 0,
+            "prefill_forced_eager_calls": 6,
+            "prefill_compiled_calls": 0,
+            "prefill_compile_profile_failures": 0,
+            "capture_failures": 0
+          },
+          "prefill_group_calls": null
+        }
+      }
+    },
+    {
+      "role": "N2",
+      "label": "perf-f7-native-sync-02",
+      "worker_counters_after_init": [
+        {
+          "rank": 0,
+          "pid": 611884,
+          "device_index": 0,
+          "visible_device_map": [
+            "0",
+            "1",
+            "2",
+            "3"
+          ],
+          "expected_physical_device": "0",
+          "control_environment": {
+            "HCCL_DETERMINISTIC": "true",
+            "VLLM_BATCH_INVARIANT": null
+          },
+          "prefill_groups": null,
+          "decode_preparation_queries": 0,
+          "decode_preparation_ready_skips": 0,
+          "decode_preparation_fences_skipped": 0,
+          "native_decode_graph": {
+            "counter_available": false,
+            "reason": "Ordinary native worker exposes no persistent replay counter; use actual CANN profile API counts"
+          }
+        },
+        {
+          "rank": 1,
+          "pid": 611885,
+          "device_index": 1,
+          "visible_device_map": [
+            "0",
+            "1",
+            "2",
+            "3"
+          ],
+          "expected_physical_device": "1",
+          "control_environment": {
+            "HCCL_DETERMINISTIC": "true",
+            "VLLM_BATCH_INVARIANT": null
+          },
+          "prefill_groups": null,
+          "decode_preparation_queries": 0,
+          "decode_preparation_ready_skips": 0,
+          "decode_preparation_fences_skipped": 0,
+          "native_decode_graph": {
+            "counter_available": false,
+            "reason": "Ordinary native worker exposes no persistent replay counter; use actual CANN profile API counts"
+          }
+        },
+        {
+          "rank": 2,
+          "pid": 611886,
+          "device_index": 2,
+          "visible_device_map": [
+            "0",
+            "1",
+            "2",
+            "3"
+          ],
+          "expected_physical_device": "2",
+          "control_environment": {
+            "HCCL_DETERMINISTIC": "true",
+            "VLLM_BATCH_INVARIANT": null
+          },
+          "prefill_groups": null,
+          "decode_preparation_queries": 0,
+          "decode_preparation_ready_skips": 0,
+          "decode_preparation_fences_skipped": 0,
+          "native_decode_graph": {
+            "counter_available": false,
+            "reason": "Ordinary native worker exposes no persistent replay counter; use actual CANN profile API counts"
+          }
+        },
+        {
+          "rank": 3,
+          "pid": 611887,
+          "device_index": 3,
+          "visible_device_map": [
+            "0",
+            "1",
+            "2",
+            "3"
+          ],
+          "expected_physical_device": "3",
+          "control_environment": {
+            "HCCL_DETERMINISTIC": "true",
+            "VLLM_BATCH_INVARIANT": null
+          },
+          "prefill_groups": null,
+          "decode_preparation_queries": 0,
+          "decode_preparation_ready_skips": 0,
+          "decode_preparation_fences_skipped": 0,
+          "native_decode_graph": {
+            "counter_available": false,
+            "reason": "Ordinary native worker exposes no persistent replay counter; use actual CANN profile API counts"
+          }
+        }
+      ],
+      "worker_counters_before_timing": [
+        {
+          "rank": 0,
+          "pid": 611884,
+          "device_index": 0,
+          "visible_device_map": [
+            "0",
+            "1",
+            "2",
+            "3"
+          ],
+          "expected_physical_device": "0",
+          "control_environment": {
+            "HCCL_DETERMINISTIC": "true",
+            "VLLM_BATCH_INVARIANT": null
+          },
+          "prefill_groups": null,
+          "decode_preparation_queries": 0,
+          "decode_preparation_ready_skips": 0,
+          "decode_preparation_fences_skipped": 0,
+          "native_decode_graph": {
+            "counter_available": false,
+            "reason": "Ordinary native worker exposes no persistent replay counter; use actual CANN profile API counts"
+          }
+        },
+        {
+          "rank": 1,
+          "pid": 611885,
+          "device_index": 1,
+          "visible_device_map": [
+            "0",
+            "1",
+            "2",
+            "3"
+          ],
+          "expected_physical_device": "1",
+          "control_environment": {
+            "HCCL_DETERMINISTIC": "true",
+            "VLLM_BATCH_INVARIANT": null
+          },
+          "prefill_groups": null,
+          "decode_preparation_queries": 0,
+          "decode_preparation_ready_skips": 0,
+          "decode_preparation_fences_skipped": 0,
+          "native_decode_graph": {
+            "counter_available": false,
+            "reason": "Ordinary native worker exposes no persistent replay counter; use actual CANN profile API counts"
+          }
+        },
+        {
+          "rank": 2,
+          "pid": 611886,
+          "device_index": 2,
+          "visible_device_map": [
+            "0",
+            "1",
+            "2",
+            "3"
+          ],
+          "expected_physical_device": "2",
+          "control_environment": {
+            "HCCL_DETERMINISTIC": "true",
+            "VLLM_BATCH_INVARIANT": null
+          },
+          "prefill_groups": null,
+          "decode_preparation_queries": 0,
+          "decode_preparation_ready_skips": 0,
+          "decode_preparation_fences_skipped": 0,
+          "native_decode_graph": {
+            "counter_available": false,
+            "reason": "Ordinary native worker exposes no persistent replay counter; use actual CANN profile API counts"
+          }
+        },
+        {
+          "rank": 3,
+          "pid": 611887,
+          "device_index": 3,
+          "visible_device_map": [
+            "0",
+            "1",
+            "2",
+            "3"
+          ],
+          "expected_physical_device": "3",
+          "control_environment": {
+            "HCCL_DETERMINISTIC": "true",
+            "VLLM_BATCH_INVARIANT": null
+          },
+          "prefill_groups": null,
+          "decode_preparation_queries": 0,
+          "decode_preparation_ready_skips": 0,
+          "decode_preparation_fences_skipped": 0,
+          "native_decode_graph": {
+            "counter_available": false,
+            "reason": "Ordinary native worker exposes no persistent replay counter; use actual CANN profile API counts"
+          }
+        }
+      ],
+      "worker_counters_after_timing": [
+        {
+          "rank": 0,
+          "pid": 611884,
+          "device_index": 0,
+          "visible_device_map": [
+            "0",
+            "1",
+            "2",
+            "3"
+          ],
+          "expected_physical_device": "0",
+          "control_environment": {
+            "HCCL_DETERMINISTIC": "true",
+            "VLLM_BATCH_INVARIANT": null
+          },
+          "prefill_groups": null,
+          "decode_preparation_queries": 0,
+          "decode_preparation_ready_skips": 0,
+          "decode_preparation_fences_skipped": 0,
+          "native_decode_graph": {
+            "counter_available": false,
+            "reason": "Ordinary native worker exposes no persistent replay counter; use actual CANN profile API counts"
+          }
+        },
+        {
+          "rank": 1,
+          "pid": 611885,
+          "device_index": 1,
+          "visible_device_map": [
+            "0",
+            "1",
+            "2",
+            "3"
+          ],
+          "expected_physical_device": "1",
+          "control_environment": {
+            "HCCL_DETERMINISTIC": "true",
+            "VLLM_BATCH_INVARIANT": null
+          },
+          "prefill_groups": null,
+          "decode_preparation_queries": 0,
+          "decode_preparation_ready_skips": 0,
+          "decode_preparation_fences_skipped": 0,
+          "native_decode_graph": {
+            "counter_available": false,
+            "reason": "Ordinary native worker exposes no persistent replay counter; use actual CANN profile API counts"
+          }
+        },
+        {
+          "rank": 2,
+          "pid": 611886,
+          "device_index": 2,
+          "visible_device_map": [
+            "0",
+            "1",
+            "2",
+            "3"
+          ],
+          "expected_physical_device": "2",
+          "control_environment": {
+            "HCCL_DETERMINISTIC": "true",
+            "VLLM_BATCH_INVARIANT": null
+          },
+          "prefill_groups": null,
+          "decode_preparation_queries": 0,
+          "decode_preparation_ready_skips": 0,
+          "decode_preparation_fences_skipped": 0,
+          "native_decode_graph": {
+            "counter_available": false,
+            "reason": "Ordinary native worker exposes no persistent replay counter; use actual CANN profile API counts"
+          }
+        },
+        {
+          "rank": 3,
+          "pid": 611887,
+          "device_index": 3,
+          "visible_device_map": [
+            "0",
+            "1",
+            "2",
+            "3"
+          ],
+          "expected_physical_device": "3",
+          "control_environment": {
+            "HCCL_DETERMINISTIC": "true",
+            "VLLM_BATCH_INVARIANT": null
+          },
+          "prefill_groups": null,
+          "decode_preparation_queries": 0,
+          "decode_preparation_ready_skips": 0,
+          "decode_preparation_fences_skipped": 0,
+          "native_decode_graph": {
+            "counter_available": false,
+            "reason": "Ordinary native worker exposes no persistent replay counter; use actual CANN profile API counts"
+          }
+        }
+      ],
+      "worker_counter_deltas": {
+        "0": {
+          "decode_preparation_queries": 0,
+          "decode_preparation_ready_skips": 0,
+          "decode_preparation_fences_skipped": 0,
+          "native_decode_graph": {},
+          "prefill_group_calls": null
+        },
+        "1": {
+          "decode_preparation_queries": 0,
+          "decode_preparation_ready_skips": 0,
+          "decode_preparation_fences_skipped": 0,
+          "native_decode_graph": {},
+          "prefill_group_calls": null
+        },
+        "2": {
+          "decode_preparation_queries": 0,
+          "decode_preparation_ready_skips": 0,
+          "decode_preparation_fences_skipped": 0,
+          "native_decode_graph": {},
+          "prefill_group_calls": null
+        },
+        "3": {
+          "decode_preparation_queries": 0,
+          "decode_preparation_ready_skips": 0,
+          "decode_preparation_fences_skipped": 0,
+          "native_decode_graph": {},
+          "prefill_group_calls": null
+        }
+      }
+    }
+  ]
+}

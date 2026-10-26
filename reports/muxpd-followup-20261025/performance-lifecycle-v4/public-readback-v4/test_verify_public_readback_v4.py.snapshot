@@ -1,0 +1,74 @@
+"""Small in-memory verifier fixtures; no network or archive extraction."""
+import hashlib
+import io
+from pathlib import Path
+import tarfile
+import unittest
+
+SOURCE = Path(__file__).with_name("verify_public_readback_v4.py")
+module = {"__name__": "readback_fixture", "__file__": str(SOURCE)}
+exec(compile(SOURCE.read_bytes(), str(SOURCE), "exec"), module)
+
+
+def archive(entries):
+    output = io.BytesIO()
+    with tarfile.open(fileobj=output, mode="w:gz") as tar:
+        for name, value in entries:
+            member = tarfile.TarInfo(name)
+            member.size = len(value)
+            tar.addfile(member, io.BytesIO(value))
+    return output.getvalue()
+
+
+class TarChecks(unittest.TestCase):
+    def setUp(self):
+        self.members = [{"member": "support/a.txt", "type": "file", "bytes": 3,
+                         "sha256": hashlib.sha256(b"abc").hexdigest()}]
+        self.good = [("support/a.txt", b"abc"), ("capsule-manifest.json", b"exact")]
+
+    def verify(self, entries):
+        return module["verify_tar"](archive(entries), self.members, b"exact")[0]
+
+    def test_complete_files_and_embedded_manifest(self):
+        self.assertTrue(self.verify(self.good)["complete_member_set"])
+
+    def test_missing_member(self):
+        with self.assertRaises(ValueError):
+            self.verify(self.good[1:])
+
+    def test_unexpected_member(self):
+        with self.assertRaises(ValueError):
+            self.verify(self.good + [("extra", b"x")])
+
+    def test_duplicate_member(self):
+        with self.assertRaises(ValueError):
+            self.verify(self.good + self.good[:1])
+
+    def test_same_size_tampered_bytes(self):
+        with self.assertRaises(ValueError):
+            self.verify([("support/a.txt", b"bad"), self.good[1]])
+
+    def test_tampered_embedded_manifest(self):
+        with self.assertRaises(ValueError):
+            self.verify([self.good[0], ("capsule-manifest.json", b"other")])
+
+    def test_unsafe_and_noncanonical_names(self):
+        for name in ("../support/a.txt", "/support/a.txt", "support//a.txt", "support/./a.txt", "support\\a.txt"):
+            with self.subTest(name=name), self.assertRaises(ValueError):
+                self.verify([(name, b"abc"), self.good[1]])
+
+    def test_missing_embedded_manifest(self):
+        with self.assertRaises(ValueError):
+            self.verify(self.good[:1])
+
+    def test_duplicate_expected_member(self):
+        with self.assertRaises(ValueError):
+            module["verify_tar"](archive(self.good), self.members * 2, b"exact")
+
+    def test_duplicate_api_asset_name(self):
+        with self.assertRaises(ValueError):
+            module["stable_inventory"]({"assets": [{"name": "same"}, {"name": "same"}]})
+
+
+if __name__ == "__main__":
+    unittest.main(verbosity=2)

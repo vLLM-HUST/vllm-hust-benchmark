@@ -1,0 +1,494 @@
+"""Append fixed twelve terminal capsules and explicit support; never upload or mutate old evidence."""
+
+import json
+from pathlib import Path
+
+import build_capsule as b
+
+ROOT = Path("/root/workspace/muxpd-followup-20261025")
+PUB = ROOT / "publication"
+PREP = PUB / "v4-preparation"
+REPO = Path("/root/workspace/references/benchmark-muxpd-performance-v4")
+CANON = REPO / "reports/muxpd-followup-20261025/performance-lifecycle-v4"
+RELEASE = "https://github.com/vLLM-HUST/vllm-hust-benchmark/releases/download/evidence-muxpd-followup-20261025/"
+LIFECYCLE = [
+    "raw-cancel-partial-block22-hccl-true-01",
+    "raw-cancel-full-block22-hccl-true-01",
+    "group-cancel-partial-block22-hccl-true-01",
+    "group-cancel-full-block22-hccl-true-01",
+    "group-pressure-block20-hccl-true-01",
+]
+PERFORMANCE = [
+    "perf-f7-native-sync-01",
+    "perf-f7-raw-01",
+    "perf-f7-group-01",
+    "perf-f7-group-02",
+    "perf-f7-raw-02",
+    "perf-f7-native-sync-02",
+    "perf-native-default-backend-01",
+]
+
+
+def read(path):
+    return json.loads(path.read_text())
+
+
+def capsule_row(directory):
+    receipt = read(directory / "receipt.json")
+    manifest = read(directory / "manifest.json")
+    assert receipt["verified"] and receipt["members_verified"] == len(
+        manifest["members"]
+    )
+    check = b.verify_archive(
+        Path(receipt["archive"]["path"]), manifest, receipt["archive"]["sha256"]
+    )
+    assert check["members_verified"] == receipt["members_verified"]
+    if manifest["kind"] == "terminal-run":
+        current = b.validate_terminal(manifest["terminal"]["run_path"])
+        assert current == manifest["terminal"]
+        assert (
+            b.walk_members(Path(current["run_path"]), f"runs/{current['label']}")
+            == manifest["members"]
+        )
+    return {
+        "capsule_id": manifest["capsule_id"],
+        "kind": manifest["kind"],
+        "archive": receipt["archive"],
+        "manifest": b.identity(directory / "manifest.json"),
+        "receipt": b.identity(directory / "receipt.json"),
+        "original_members": receipt["members_verified"],
+        "original_bytes": receipt["original_bytes"],
+        "terminal": manifest.get("terminal"),
+        "remote_download_verified": False,
+    }
+
+
+def main():
+    assert not CANON.exists()
+    rows = [capsule_row(PUB / f"muxpd-{label}-capsule-v1") for label in LIFECYCLE]
+    rows += [
+        capsule_row(PUB / "primary-terminal-capsules-v1" / f"muxpd-{label}-capsule")
+        for label in PERFORMANCE
+    ]
+    assert {row["terminal"]["label"] for row in rows} == set(LIFECYCLE + PERFORMANCE)
+    assert sum(row["terminal"]["controller_passed"] for row in rows) == 11
+    review = read(ROOT / "performance/group-matrix-review-v1/review.json")
+    assert (
+        review["passed"]
+        and not review["concrete_blockers"]
+        and review["all_reviewed_input_bytes_unchanged"]
+    )
+    b.write_new(
+        PREP / "input-capsule-reverification.json",
+        {
+            "schema": "muxpd-v4-input-reverification",
+            "created_at": b.now(),
+            "producer": b.identity(__file__),
+            "builder": b.identity(PUB / "build_capsule.py"),
+            "capsules": rows,
+            "independent_primary_review": b.identity(
+                ROOT / "performance/group-matrix-review-v1/review.json"
+            ),
+            "scope": "All twelve original terminal member inventories and archive hashes reverified without rebuilding; current quality/default-v2/profile runs excluded.",
+        },
+    )
+    b.write_new(
+        PUB / "terminal-selection-v4.json",
+        {
+            "schema": "muxpd-explicit-terminal-selection-v4",
+            "created_at": b.now(),
+            "fixed_cutoff": "Five declared lifecycle runs plus six primary matrix runs and the first default-native pre-window failure; twelve explicit labels only.",
+            "runs": [row["terminal"] for row in rows],
+            "excluded": [
+                "Any current or later native-default-v2 run",
+                "Actual mixed profiler runs",
+                "Second native or any candidate MCQ quality run",
+                "Any unlisted attempt",
+            ],
+            "scope": "Previous raw20 suite failure remains in v3; no old evidence is replaced.",
+        },
+    )
+    names = [
+        "publication/PERFORMANCE-LIFECYCLE-v4.md",
+        "publication/terminal-selection-v4.json",
+        "publication/prepare_performance_publication_v4.py",
+        "publication/verify_performance_v4.py",
+        "publication/build_capsule.py",
+        "publication/v4-preparation/canonical-originals.json",
+        "publication/v4-preparation/input-capsule-reverification.json",
+        "publication/primary-terminal-capsules-v1/handoff.json",
+        "publication/primary-terminal-capsules-v1/build_selected.py",
+        "publication/source-selection-v1.json",
+        "publication/source-selection-v3.json",
+        "performance/cancellation-headroom-review-v1/RAW22-REVIEW.md",
+        "performance/cancellation-headroom-review-v1/raw22-review.json",
+        "performance/cancellation-headroom-review-v1/SHA256SUMS",
+        "performance/cancellation-headroom-review-v1/GROUP-LIFECYCLE-REVIEW.md",
+        "performance/cancellation-headroom-review-v1/group-lifecycle-review.json",
+        "performance/cancellation-headroom-review-v1/SHA256SUMS-group-lifecycle",
+        "performance/pressure-suite-failure-01/DIAGNOSIS.md",
+        "performance/pressure-suite-failure-01/phase-2-compact-trace.json",
+        "performance/pressure-suite-failure-01/predictor-results.json",
+        "performance/pressure-suite-failure-01/replay_allocation_predictor.py",
+        "performance/pressure-suite-failure-01/source-identities.json",
+        "performance/pressure_headroom.py",
+        "performance/pressure_probe.py",
+        "performance/pressure_observer.py",
+        "performance/pressure_override_guard.py",
+        "root/run_pressure_controlled_v1.py",
+        "performance/cancellation-headroom-v1/README.md",
+        "performance/cancellation-headroom-v1/source-receipt-v1.json",
+        "performance/cancellation-headroom-v1/validation.json",
+        "performance/cancellation-headroom-v1/copied-controller-layout-check/check.json",
+        "performance/cancellation-headroom-v1/raw-partial-plan.json",
+        "performance/cancellation-headroom-v1/raw-full-plan.json",
+        "performance/cancellation-headroom-v1/group-partial-plan.json",
+        "performance/cancellation-headroom-v1/group-full-plan.json",
+        "performance/HEADROOM-INDEPENDENT-CHECK.json",
+        "performance/plans-geometry01-block20/raw-pressure-plan.json",
+        "performance/plans-geometry01-block20/group-pressure-plan.json",
+        "performance/NATIVE-DEFAULT-V2-INDEPENDENT-REVIEW.json",
+        "performance/native-default-v2-independent-wrapper-tests.log",
+        "performance/native-default-v2-controller-dry-run-v1.json",
+        "performance/native-default-v2-copied-layout-check-v1/receipt.json",
+        "performance/native-default-v2-copied-layout-check-v1/command-0.stdout",
+        "performance/native-default-v2-copied-layout-check-v1/command-0.stderr",
+        "performance/native-default-v2-copied-layout-check-v1/command-1.stdout",
+        "performance/native-default-v2-copied-layout-check-v1/command-1.stderr",
+        "performance/native-default-v2-copied-layout-check-v1/producer-dry-run.json",
+        "performance/native-default-v2-copied-layout-check-v1/plan.json",
+        "performance/native-default-v2-copied-layout-check-v1/engine-args.json",
+        "performance/STALL-SUPPLEMENT-INDEPENDENT-REVIEW-v1.json",
+    ]
+    for folder, manifest_name in [
+        ("performance/group-prefill-v1", "execution-identity-v1.json"),
+        ("performance/native-default-backend-v2", "execution-identity-v2.json"),
+    ]:
+        manifest = read(ROOT / folder / manifest_name)
+        names.append(folder + "/" + manifest_name)
+        for name, expected in manifest["files"].items():
+            identity = b.identity(ROOT / folder / name)
+            assert (
+                identity["sha256"] == expected["sha256"]
+                and identity["bytes"] == expected["size_bytes"]
+            )
+            names.append(folder + "/" + name)
+    for folder, files in [
+        (
+            "performance/group-matrix-analysis-v1",
+            [
+                "PRIMARY-REPORT.md",
+                "all-rank-counter-receipts.json",
+                "all-window-metrics.csv",
+                "all-window-summaries.json",
+                "analysis-receipt.json",
+                "compare_retained_tokens.py",
+                "group-abba-with-native.json",
+                "group-abba.json",
+                "render_primary_report.py",
+                "retained-token-comparisons.json",
+                "stalls-all-primary.json",
+            ],
+        ),
+        (
+            "performance/group-matrix-review-v1",
+            ["REVIEW.md", "review.json", "review_primary.py", "SHA256SUMS"],
+        ),
+        (
+            "performance/stall-supplement-v1",
+            [
+                "README.md",
+                "protocol.json",
+                "analyze_stalls.py",
+                "test_analyze_stalls.py",
+                "cpu-check-v1-failure.txt",
+                "cpu-check-v2.log",
+                "producer-receipt-v1.json",
+                "native-sync-01-stalls-v1.json",
+            ],
+        ),
+    ]:
+        names += [folder + "/" + name for name in files]
+    names = sorted(set(names))
+    selection = {
+        "schema": "muxpd-support-selection-v4",
+        "extends": b.identity(PUB / "support-selection-v3.json"),
+        "files": [
+            {
+                "path": str(ROOT / name),
+                "member": "support/" + name,
+                "sha256": b.identity(ROOT / name)["sha256"],
+            }
+            for name in names
+        ],
+        "scope": "Exact primary analysis/full gaps/reviews/frozen producer and supplement, lifecycle review/diagnosis/derivation, and default-native-v2 CPU preparation only. Existing source exports referenced; no new source/model/profile/quality execution selected.",
+    }
+    b.write_new(PUB / "support-selection-v4.json", selection)
+    manifest = PUB / "muxpd-20261026-support-v4-manifest.json"
+    b.freeze_support(
+        PUB / "support-selection-v4.json", "muxpd-20261026-support-v4", manifest
+    )
+    output = PUB / "muxpd-20261026-support-v4-capsule"
+    b.build(manifest, output)
+    rows.append(capsule_row(output))
+    counts = {
+        "terminal_runs": 12,
+        "capsules": 13,
+        "passed_terminal_runs": 11,
+        "failed_terminal_runs": 1,
+        "original_members": sum(r["original_members"] for r in rows),
+        "original_bytes": sum(r["original_bytes"] for r in rows),
+        "archive_bytes": sum(r["archive"]["bytes"] for r in rows),
+    }
+    index = {
+        "schema": "muxpd-terminal-publication-index-v4",
+        "created_at": b.now(),
+        "status": "local_verified_not_uploaded",
+        "extends": b.identity(PUB / "publication-index-v3.json"),
+        "terminal_selection": b.identity(PUB / "terminal-selection-v4.json"),
+        "support_selection": b.identity(PUB / "support-selection-v4.json"),
+        "report": b.identity(PUB / "PERFORMANCE-LIFECYCLE-v4.md"),
+        "input_reverification": b.identity(PREP / "input-capsule-reverification.json"),
+        "capsules": rows,
+        "counts": counts,
+        "bounded_primary_performance_observed": True,
+        "paired_quality_accepted": False,
+        "default_native_v2_measured": False,
+        "actual_mixed_profile_accepted": False,
+        "scope": "Fixed v4 delta only; synchronous primary comparisons and explicitly calibrated supplement, not best-native/HTTP Goodput/quality or physical overlap qualification.",
+    }
+    b.write_new(PUB / "publication-index-v4.json", index)
+    uploads = [Path(r["archive"]["path"]) for r in rows] + [
+        PUB / name
+        for name in [
+            "publication-index-v4.json",
+            "terminal-selection-v4.json",
+            "support-selection-v4.json",
+            "PERFORMANCE-LIFECYCLE-v4.md",
+        ]
+    ]
+    with (PUB / "SHA256SUMS-v4").open("x") as f:
+        for path in uploads:
+            f.write(f"{b.identity(path)['sha256']}  {path.name}\n")
+    uploads.append(PUB / "SHA256SUMS-v4")
+    b.write_new(
+        PUB / "upload-selection-v4.json",
+        {
+            "schema": "muxpd-release-upload-selection-v4",
+            "status": "prepared_not_uploaded",
+            "extends": b.identity(PUB / "upload-selection-v3.json"),
+            "planned_release_base": RELEASE,
+            "files": [
+                {**b.identity(path), "planned_url": RELEASE + path.name}
+                for path in uploads
+            ],
+            "scope": "Eighteen NEW assets only; old v1/v2/v3/protocol assets are neither replaced nor uploaded again.",
+        },
+    )
+    CANON.mkdir(parents=True, exist_ok=False)
+    copies = []
+
+    def copy(source, relative):
+        dest = CANON / relative
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        with dest.open("xb") as f:
+            f.write(source.read_bytes())
+        ident = b.identity(source)
+        copies.append(
+            {
+                "canonical_path": relative,
+                "source": ident,
+                "bytes": ident["bytes"],
+                "sha256": ident["sha256"],
+            }
+        )
+
+    for source, target in [
+        ("publication-index-v4.json", "archive-index-v4.json"),
+        ("terminal-selection-v4.json", "terminal-selection-v4.json"),
+        ("support-selection-v4.json", "support-selection-v4.json"),
+        ("upload-selection-v4.json", "upload-selection-v4.json"),
+        ("SHA256SUMS-v4", "SHA256SUMS-v4"),
+        ("PERFORMANCE-LIFECYCLE-v4.md", "REPORT-v4.md"),
+        (
+            "PERFORMANCE-LIFECYCLE-v4.md",
+            "originals/PERFORMANCE-LIFECYCLE-v4.md.snapshot",
+        ),
+        ("v4-preparation/canonical-originals.json", "preserved-originals-v4.json"),
+        (
+            "v4-preparation/input-capsule-reverification.json",
+            "analysis/input-capsule-reverification.json",
+        ),
+    ]:
+        copy(PUB / source, target)
+    for folder, target, files in [
+        (
+            "performance/group-matrix-analysis-v1",
+            "analysis/primary",
+            [
+                "all-rank-counter-receipts.json",
+                "all-window-metrics.csv",
+                "all-window-summaries.json",
+                "analysis-receipt.json",
+                "group-abba-with-native.json",
+                "group-abba.json",
+                "retained-token-comparisons.json",
+            ],
+        ),
+        (
+            "performance/group-matrix-review-v1",
+            "analysis/primary-review",
+            ["review.json", "SHA256SUMS"],
+        ),
+        (
+            "performance/cancellation-headroom-review-v1",
+            "analysis/lifecycle",
+            [
+                "raw22-review.json",
+                "group-lifecycle-review.json",
+                "SHA256SUMS",
+                "SHA256SUMS-group-lifecycle",
+            ],
+        ),
+        (
+            "performance/cancellation-headroom-v1",
+            "analysis/headroom",
+            [
+                "source-receipt-v1.json",
+                "validation.json",
+                "raw-partial-plan.json",
+                "raw-full-plan.json",
+                "group-partial-plan.json",
+                "group-full-plan.json",
+            ],
+        ),
+        (
+            "performance/native-default-backend-v2",
+            "analysis/native-default-v2",
+            [
+                "execution-identity-v2.json",
+                "independent-review-v2.json",
+                "worker-wrapper-source-audit-v2.json",
+                "original-input-custody-v1.json",
+                "producer-dry-run-v2.json",
+            ],
+        ),
+        (
+            "performance/stall-supplement-v1",
+            "analysis/stall-protocol",
+            ["protocol.json", "producer-receipt-v1.json"],
+        ),
+    ]:
+        for name in files:
+            copy(ROOT / folder / name, target + "/" + name)
+    for source, target in [
+        (
+            "performance/cancellation-headroom-review-v1/RAW22-REVIEW.md",
+            "RAW22-REVIEW.md.snapshot",
+        ),
+        (
+            "performance/cancellation-headroom-review-v1/GROUP-LIFECYCLE-REVIEW.md",
+            "GROUP-LIFECYCLE-REVIEW.md.snapshot",
+        ),
+        ("performance/pressure-suite-failure-01/DIAGNOSIS.md", "DIAGNOSIS.md.snapshot"),
+        (
+            "performance/cancellation-headroom-v1/README.md",
+            "HEADROOM-README.md.snapshot",
+        ),
+        ("performance/group-matrix-review-v1/REVIEW.md", "PRIMARY-REVIEW.md.snapshot"),
+        (
+            "performance/group-matrix-analysis-v1/PRIMARY-REPORT.md",
+            "PRIMARY-REPORT.md.snapshot",
+        ),
+        (
+            "performance/group-matrix-analysis-v1/compare_retained_tokens.py",
+            "compare_retained_tokens.py.snapshot",
+        ),
+        (
+            "performance/group-matrix-analysis-v1/render_primary_report.py",
+            "render_primary_report.py.snapshot",
+        ),
+        (
+            "performance/group-matrix-review-v1/review_primary.py",
+            "review_primary.py.snapshot",
+        ),
+        (
+            "performance/stall-supplement-v1/analyze_stalls.py",
+            "analyze_stalls.py.snapshot",
+        ),
+        (
+            "performance/group-prefill-v1/perf_group_prefill.py",
+            "perf_group_prefill.py.snapshot",
+        ),
+        (
+            "publication/prepare_performance_publication_v4.py",
+            "prepare_performance_publication_v4.py.snapshot",
+        ),
+    ]:
+        copy(ROOT / source, "originals/" + target)
+    copy(PUB / "verify_performance_v4.py", "verify_v4.py")
+    assets = []
+    for row in rows:
+        mid = f"custody/{row['capsule_id']}.manifest.json"
+        rid = f"custody/{row['capsule_id']}.receipt.json"
+        copy(Path(row["manifest"]["path"]), mid)
+        copy(Path(row["receipt"]["path"]), rid)
+        assets.append(
+            {
+                "capsule_id": row["capsule_id"],
+                "name": Path(row["archive"]["path"]).name,
+                "sha256": row["archive"]["sha256"],
+                "bytes": row["archive"]["bytes"],
+                "manifest": mid,
+                "receipt": rid,
+                "planned_download_url": RELEASE + Path(row["archive"]["path"]).name,
+                "publication_state": "prepared_not_uploaded",
+                "remote_verified": False,
+            }
+        )
+    b.write_new(
+        CANON / "release-assets-v4.json",
+        {
+            "schema": "muxpd-canonical-release-assets-v4",
+            "publication_state": "prepared_not_uploaded",
+            "release_base": RELEASE,
+            "assets": assets,
+        },
+    )
+    b.write_new(
+        CANON / "analysis/primary/stalls-release-location.json",
+        {
+            "in_git": False,
+            "original": b.identity(
+                ROOT / "performance/group-matrix-analysis-v1/stalls-all-primary.json"
+            ),
+            "member": "support/performance/group-matrix-analysis-v1/stalls-all-primary.json",
+            "archive": rows[-1]["archive"],
+            "planned_download_url": RELEASE + Path(rows[-1]["archive"]["path"]).name,
+            "remote_verified": False,
+        },
+    )
+    b.write_new(
+        CANON / "canonical-copy-map.json",
+        {
+            "schema": "muxpd-canonical-copy-map-v4",
+            "copies": copies,
+            "scope": "Exact small metadata/report/source copies; no archive payload or full gap arrays in Git.",
+        },
+    )
+    print(
+        json.dumps(
+            {
+                "counts": counts,
+                "assets": len(uploads),
+                "support_files": len(names),
+                "canonical_copies": len(copies),
+                "canonical": str(CANON),
+            },
+            indent=2,
+        )
+    )
+
+
+if __name__ == "__main__":
+    main()

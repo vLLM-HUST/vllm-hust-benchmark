@@ -1,0 +1,526 @@
+{
+  "schema": "muxpd-primary-report-independent-review-v1",
+  "reviewed_at": "2026-10-26T01:42:43.756192+00:00",
+  "reviewer": "/root/numerical_probe",
+  "passed": true,
+  "concrete_blockers": [],
+  "producer": {
+    "path": "/root/workspace/muxpd-followup-20261025/performance/group-matrix-review-v1/review_primary.py",
+    "sha256": "a6330cdafd5c9ff779fc23adf0a99c4bb113f9c5d670ac50a0c2b2f2a0b21bd9"
+  },
+  "inputs": {
+    "/root/workspace/muxpd-followup-20261025/performance/group-matrix-analysis-v1/PRIMARY-REPORT.md": {
+      "bytes": 10717,
+      "sha256": "b2be6f5876060bd85b1df828625bf1b0b88646c128d5bfcc0dcae7287587d52e"
+    },
+    "/root/workspace/muxpd-followup-20261025/performance/group-matrix-analysis-v1/analysis-receipt.json": {
+      "bytes": 6692,
+      "sha256": "92f006b80a29981c53440c3f4b1d85fbab070a504681ea234920a24376b3a173"
+    },
+    "/root/workspace/muxpd-followup-20261025/performance/group-matrix-analysis-v1/all-window-metrics.csv": {
+      "bytes": 11310,
+      "sha256": "a1605cd257adf020f4381d2591f01ccd6ad531f149e2aae6d601ac86323c685b"
+    },
+    "/root/workspace/muxpd-followup-20261025/performance/group-matrix-analysis-v1/all-window-summaries.json": {
+      "bytes": 52310,
+      "sha256": "b0c4899bb8fed837130027e70d034af8d52c3f714524aca4aac9308650796b6e"
+    },
+    "/root/workspace/muxpd-followup-20261025/performance/group-matrix-analysis-v1/group-abba.json": {
+      "bytes": 6424,
+      "sha256": "7f887a3adc1b69d31cff6119c1ef3b8d0d02e6fe9d763207869d96341755739a"
+    },
+    "/root/workspace/muxpd-followup-20261025/performance/group-matrix-analysis-v1/group-abba-with-native.json": {
+      "bytes": 10330,
+      "sha256": "682aa8a27e7d220baf7c07cacf4779abeefa5d9e9418078465b8cf7bd471c6c4"
+    },
+    "/root/workspace/muxpd-followup-20261025/performance/group-matrix-analysis-v1/retained-token-comparisons.json": {
+      "bytes": 223826,
+      "sha256": "23b2e6a3de3139a710c3dffbff74f8895bc071d24378fa7a41c965ddc78c41d9"
+    },
+    "/root/workspace/muxpd-followup-20261025/performance/group-matrix-analysis-v1/all-rank-counter-receipts.json": {
+      "bytes": 159264,
+      "sha256": "e325dfc2ed52398a83c10c391602d51ea062da75a2ed674da41c717354238199"
+    },
+    "/root/workspace/muxpd-followup-20261025/performance/group-matrix-analysis-v1/stalls-all-primary.json": {
+      "bytes": 9273438,
+      "sha256": "2505aff80c02ad9bce220910cedfe9db3e166fdc71a4a35356aadebb62269e75"
+    },
+    "/root/workspace/muxpd-followup-20261025/performance/stall-supplement-v1/protocol.json": {
+      "bytes": 2272,
+      "sha256": "3cd4813823c80a9983ec410110f4b301b0d6b5cf48b4d9530b49ebfabaf0e731"
+    },
+    "/root/workspace/muxpd-followup-20261025/runs/perf-f7-native-sync-01/controller.json": {
+      "bytes": 6263,
+      "sha256": "0b4128c08b1d564341d26e1403d5c336a796cc047c5df583df7c63dc9b0b8852"
+    },
+    "/root/workspace/muxpd-followup-20261025/runs/perf-f7-raw-01/controller.json": {
+      "bytes": 6194,
+      "sha256": "6d77f49b9e7989526c159f56d645b617df9e48e92915c883c3a5db7e16f78541"
+    },
+    "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-01/controller.json": {
+      "bytes": 6214,
+      "sha256": "a685918b91a559937023d8c044cb906e9a1f829e558b49a98e502ff95c52b3e6"
+    },
+    "/root/workspace/muxpd-followup-20261025/runs/perf-f7-group-02/controller.json": {
+      "bytes": 6214,
+      "sha256": "dbc3b580caca444668a4b84d604c4cbf3f31831e04d9641efd3168eaf154e4b3"
+    },
+    "/root/workspace/muxpd-followup-20261025/runs/perf-f7-raw-02/controller.json": {
+      "bytes": 6194,
+      "sha256": "511c77eefc5f47e6184273398320846469d8607556d0b1fb1970c12eb470d39f"
+    },
+    "/root/workspace/muxpd-followup-20261025/runs/perf-f7-native-sync-02/controller.json": {
+      "bytes": 6263,
+      "sha256": "07261b41871f603fb6c0c1f826faece13d19b5e85fbf621f8740f65a3a3cd279"
+    }
+  },
+  "checks": {
+    "windows": {
+      "roles": [
+        "N1",
+        "R1",
+        "G1",
+        "G2",
+        "R2",
+        "N2"
+      ],
+      "total": 36,
+      "warmup": 12,
+      "measured": 24,
+      "csv_equals_all_preserved_summary_fields": true
+    },
+    "primary_arithmetic": {
+      "metric_rows": 11,
+      "report_numeric_cells": 176,
+      "all_csv_process_means_ratios_drifts_and_rounding_match": true
+    },
+    "token_comparison_reporting": {
+      "role_pairs": 15,
+      "paired_windows": 90,
+      "within_process_pairs": 12,
+      "all_retained_comparison_details_support_report": true,
+      "scope": "Reviewed retained comparison output; did not independently reread raw run token arrays."
+    },
+    "stall_supplement": {
+      "streams": 48,
+      "gaps_recomputed_from_retained_arrivals": 24528,
+      "all_gap_intersection_threshold_summaries_and_report_rows_match": true,
+      "frozen_after_N1_before_R1": true,
+      "primary_not_replaced": true,
+      "scope": "Actor-delivered arrivals; no HTTP goodput or physical device-overlap inference."
+    },
+    "counters": {
+      "runs": 6,
+      "ranks_each": 4,
+      "snapshot_stages": 3,
+      "all_reported_deltas_recomputed": true,
+      "native_unavailable_not_zero": true
+    },
+    "chronology": {
+      "order": [
+        "N1",
+        "R1",
+        "G1",
+        "G2",
+        "R2",
+        "N2"
+      ],
+      "terminal_exit_zero": true,
+      "nonoverlapping": true
+    },
+    "scope": {
+      "default_native_excluded": true,
+      "no_overall_native_advantage_claim": true,
+      "mixed_native_plugin_token_divergence_disclosed": true,
+      "no_new_quality_gate_or_physical_overlap_claim": true,
+      "no_archive_hardware_source_deployment_or_raw_token_revalidation": true
+    }
+  },
+  "derived_primary": {
+    "decode-heavy": {
+      "output_tokens_per_second": {
+        "process_means": {
+          "N1": 227.61388839227087,
+          "R1": 217.00110600912672,
+          "G1": 217.53824782553073,
+          "G2": 219.51092634973318,
+          "R2": 218.77709743398103,
+          "N2": 223.14617418607128
+        },
+        "run_values_raw_group_group_raw": [
+          217.00110600912672,
+          217.53824782553073,
+          219.51092634973318,
+          218.77709743398103
+        ],
+        "raw_mean": 217.88910172155386,
+        "group_mean": 218.52458708763197,
+        "group_over_raw": 1.0029165541601535,
+        "adjacent_pair_ratios": [
+          1.0024752952935707,
+          1.0033542309700567
+        ],
+        "raw_drift_ratio": 1.0081842505668133,
+        "matched_native_reference": {
+          "before_after": [
+            227.61388839227087,
+            223.14617418607128
+          ],
+          "mean": 225.3800312891711,
+          "drift_ratio": 0.9803715219762869,
+          "group_over_native": 0.9695827347155556,
+          "raw_over_native": 0.9667631177226784
+        }
+      },
+      "step_ms_mean": {
+        "process_means": {
+          "N1": 35.13353442089844,
+          "R1": 36.856642804687496,
+          "G1": 36.774041526367185,
+          "G2": 36.44151158398438,
+          "R2": 36.54414930761719,
+          "N2": 35.84832493652344
+        },
+        "run_values_raw_group_group_raw": [
+          36.856642804687496,
+          36.774041526367185,
+          36.44151158398438,
+          36.54414930761719
+        ],
+        "raw_mean": 36.70039605615234,
+        "group_mean": 36.60777655517578,
+        "group_over_raw": 0.9974763351099849,
+        "adjacent_pair_ratios": [
+          0.9977588496391807,
+          0.9971914047644442
+        ],
+        "raw_drift_ratio": 0.9915213792334183,
+        "matched_native_reference": {
+          "before_after": [
+            35.13353442089844,
+            35.84832493652344
+          ],
+          "mean": 35.49092967871094,
+          "drift_ratio": 1.0203449646443719,
+          "group_over_native": 1.031468515662321,
+          "raw_over_native": 1.034078182464938
+        }
+      },
+      "step_ms_p99": {
+        "process_means": {
+          "N1": 45.979748545,
+          "R1": 47.78116102999999,
+          "G1": 47.40001857,
+          "G2": 46.83194772499999,
+          "R2": 54.43954779499998,
+          "N2": 46.8707953
+        },
+        "run_values_raw_group_group_raw": [
+          47.78116102999999,
+          47.40001857,
+          46.83194772499999,
+          54.43954779499998
+        ],
+        "raw_mean": 51.11035441249999,
+        "group_mean": 47.115983147499996,
+        "group_over_raw": 0.9218481008219521,
+        "adjacent_pair_ratios": [
+          0.9920231645321325,
+          0.8602560017829775
+        ],
+        "raw_drift_ratio": 1.139351715644152,
+        "matched_native_reference": {
+          "before_after": [
+            45.979748545,
+            46.8707953
+          ],
+          "mean": 46.4252719225,
+          "drift_ratio": 1.0193791132660923,
+          "group_over_native": 1.0148779144719504,
+          "raw_over_native": 1.1009166407861009
+        }
+      },
+      "token_gap_ms_p99": {
+        "process_means": {
+          "N1": 45.969476,
+          "R1": 47.538644,
+          "G1": 47.2235275,
+          "G2": 46.633742,
+          "R2": 53.1486535,
+          "N2": 46.6034535
+        },
+        "run_values_raw_group_group_raw": [
+          47.538644,
+          47.2235275,
+          46.633742,
+          53.1486535
+        ],
+        "raw_mean": 50.34364875,
+        "group_mean": 46.92863475,
+        "group_over_raw": 0.9321659417862517,
+        "adjacent_pair_ratios": [
+          0.9933713612024778,
+          0.8774209491497277
+        ],
+        "raw_drift_ratio": 1.1180094556336104,
+        "matched_native_reference": {
+          "before_after": [
+            45.969476,
+            46.6034535
+          ],
+          "mean": 46.28646475,
+          "drift_ratio": 1.0137912709729386,
+          "group_over_native": 1.0138738182634697,
+          "raw_over_native": 1.0876537886812796
+        }
+      },
+      "steady_decode_tokens_per_second": {
+        "process_means": {
+          "N1": 232.04790032944675,
+          "R1": 220.8682834547589,
+          "G1": 222.35323689198174,
+          "G2": 224.25531490842127,
+          "R2": 221.88122857686974,
+          "N2": 227.05490939249023
+        },
+        "run_values_raw_group_group_raw": [
+          220.8682834547589,
+          222.35323689198174,
+          224.25531490842127,
+          221.88122857686974
+        ],
+        "raw_mean": 221.37475601581434,
+        "group_mean": 223.3042759002015,
+        "group_over_raw": 1.008716079100949,
+        "adjacent_pair_ratios": [
+          1.0067232533978876,
+          1.0106998070399138
+        ],
+        "raw_drift_ratio": 1.0045861954748172,
+        "matched_native_reference": {
+          "before_after": [
+            232.04790032944675,
+            227.05490939249023
+          ],
+          "mean": 229.5514048609685,
+          "drift_ratio": 0.9784829299042663,
+          "group_over_native": 0.9727854901844288,
+          "raw_over_native": 0.964379878876775
+        }
+      }
+    },
+    "long-P-ingress": {
+      "output_tokens_per_second": {
+        "process_means": {
+          "N1": 127.33923746432161,
+          "R1": 115.43344459867987,
+          "G1": 122.25959480423941,
+          "G2": 117.99931130397431,
+          "R2": 116.7761555568581,
+          "N2": 118.63825412337886
+        },
+        "run_values_raw_group_group_raw": [
+          115.43344459867987,
+          122.25959480423941,
+          117.99931130397431,
+          116.7761555568581
+        ],
+        "raw_mean": 116.10480007776899,
+        "group_mean": 120.12945305410686,
+        "group_over_raw": 1.0346639671541753,
+        "adjacent_pair_ratios": [
+          1.0591349433371895,
+          1.010474362178507
+        ],
+        "raw_drift_ratio": 1.0116319058384367,
+        "matched_native_reference": {
+          "before_after": [
+            127.33923746432161,
+            118.63825412337886
+          ],
+          "mean": 122.98874579385023,
+          "drift_ratio": 0.9316708383511356,
+          "group_over_native": 0.9767515903891237,
+          "raw_over_native": 0.944027840338986
+        }
+      },
+      "step_ms_mean": {
+        "process_means": {
+          "N1": 33.364016953125,
+          "R1": 36.8267005,
+          "G1": 34.748586967773434,
+          "G2": 36.029223989257815,
+          "R2": 36.379577388671876,
+          "N2": 35.809257402343746
+        },
+        "run_values_raw_group_group_raw": [
+          36.8267005,
+          34.748586967773434,
+          36.029223989257815,
+          36.379577388671876
+        ],
+        "raw_mean": 36.60313894433594,
+        "group_mean": 35.388905478515625,
+        "group_over_raw": 0.9668270672723764,
+        "adjacent_pair_ratios": [
+          0.9435704664275703,
+          0.9903695033158039
+        ],
+        "raw_drift_ratio": 0.9878587246411574,
+        "matched_native_reference": {
+          "before_after": [
+            33.364016953125,
+            35.809257402343746
+          ],
+          "mean": 34.586637177734374,
+          "drift_ratio": 1.073289749632192,
+          "group_over_native": 1.0231959035698828,
+          "raw_over_native": 1.058302914973755
+        }
+      },
+      "step_ms_p99": {
+        "process_means": {
+          "N1": 45.514435299999995,
+          "R1": 61.04386479499999,
+          "G1": 61.884686939999966,
+          "G2": 61.59374801999999,
+          "R2": 67.60133339999999,
+          "N2": 48.948186774999996
+        },
+        "run_values_raw_group_group_raw": [
+          61.04386479499999,
+          61.884686939999966,
+          61.59374801999999,
+          67.60133339999999
+        ],
+        "raw_mean": 64.32259909749999,
+        "group_mean": 61.73921747999998,
+        "group_over_raw": 0.9598371077390059,
+        "adjacent_pair_ratios": [
+          1.0137740647290872,
+          0.9111321466922426
+        ],
+        "raw_drift_ratio": 1.1074222385332508,
+        "matched_native_reference": {
+          "before_after": [
+            45.514435299999995,
+            48.948186774999996
+          ],
+          "mean": 47.23131103749999,
+          "drift_ratio": 1.0754431303468244,
+          "group_over_native": 1.3071671339163382,
+          "raw_over_native": 1.3618635113988287
+        }
+      },
+      "token_gap_ms_p99": {
+        "process_means": {
+          "N1": 45.578676,
+          "R1": 60.305844,
+          "G1": 59.8847455,
+          "G2": 61.3948975,
+          "R2": 66.94446745000018,
+          "N2": 48.62597525000004
+        },
+        "run_values_raw_group_group_raw": [
+          60.305844,
+          59.8847455,
+          61.3948975,
+          66.94446745000018
+        ],
+        "raw_mean": 63.625155725000084,
+        "group_mean": 60.6398215,
+        "group_over_raw": 0.9530793411665149,
+        "adjacent_pair_ratios": [
+          0.9930172853562915,
+          0.9171018881561039
+        ],
+        "raw_drift_ratio": 1.1100825891766009,
+        "matched_native_reference": {
+          "before_after": [
+            45.578676,
+            48.62597525000004
+          ],
+          "mean": 47.10232562500002,
+          "drift_ratio": 1.0668580028520362,
+          "group_over_native": 1.2874061035282474,
+          "raw_over_native": 1.3507858663188896
+        }
+      },
+      "long_p_ttft_ms": {
+        "process_means": {
+          "N1": 447.464971,
+          "R1": 632.9647279999999,
+          "G1": 616.5745155,
+          "G2": 616.726964,
+          "R2": 610.6898034999999,
+          "N2": 459.65057249999995
+        },
+        "run_values_raw_group_group_raw": [
+          632.9647279999999,
+          616.5745155,
+          616.726964,
+          610.6898034999999
+        ],
+        "raw_mean": 621.8272657499999,
+        "group_mean": 616.65073975,
+        "group_over_raw": 0.9916752990981242,
+        "adjacent_pair_ratios": [
+          0.9741056463733948,
+          1.0098858053063924
+        ],
+        "raw_drift_ratio": 0.9648085848789982,
+        "matched_native_reference": {
+          "before_after": [
+            447.464971,
+            459.65057249999995
+          ],
+          "mean": 453.55777175,
+          "drift_ratio": 1.0272325260964392,
+          "group_over_native": 1.359585874519854,
+          "raw_over_native": 1.3709990313929616
+        }
+      },
+      "seed_gap_ms_p99": {
+        "process_means": {
+          "N1": 45.065751,
+          "R1": 60.305844,
+          "G1": 59.8847455,
+          "G2": 61.3948975,
+          "R2": 66.6599005,
+          "N2": 48.56249
+        },
+        "run_values_raw_group_group_raw": [
+          60.305844,
+          59.8847455,
+          61.3948975,
+          66.6599005
+        ],
+        "raw_mean": 63.48287225,
+        "group_mean": 60.6398215,
+        "group_over_raw": 0.9552154675862197,
+        "adjacent_pair_ratios": [
+          0.9930172853562915,
+          0.9210169388116622
+        ],
+        "raw_drift_ratio": 1.1053638599270745,
+        "matched_native_reference": {
+          "before_after": [
+            45.065751,
+            48.56249
+          ],
+          "mean": 46.8141205,
+          "drift_ratio": 1.077591938942724,
+          "group_over_native": 1.2953318539862346,
+          "raw_over_native": 1.3560624779867434
+        }
+      }
+    }
+  },
+  "all_reviewed_input_bytes_unchanged": true,
+  "limitations": [
+    "Review of frozen reporting and analysis output, not a new experiment or validation of raw token arrays.",
+    "Only two fresh processes per role; no pooled-token statistical or general performance conclusion.",
+    "Native mixed generated content differs from plugin content; native comparison is not pure scheduler overhead.",
+    "Practical default-native references, quality, HCCL cost, profiler and archive validation are outside this review."
+  ]
+}

@@ -1,0 +1,181 @@
+#!/usr/bin/env python3
+"""Offline descriptive supplement; never runs a model or changes primary metrics."""
+
+import argparse
+from datetime import datetime, timezone
+import hashlib
+import json
+from pathlib import Path
+
+
+PROTOCOL_FILE_SHA256 = "3cd4813823c80a9983ec410110f4b301b0d6b5cf48b4d9530b49ebfabaf0e731"
+PLAN_FILES = {
+    "c5c7d4950148e5ab9574b260e9864ab5514ef008e24b1ee912a0bc99c05757cb": "primary",
+    "e32d62a737f2280589df311d7c5b46c3b8392d382158c2ed0ad38295dc7657f2": "native-async-fusion-reference",
+    "3095dcca711b1d636e19e500bb22dda5bc07cbe173a3e443aa77c4851d24114e": "native-default-backend-async-reference",
+}
+THRESHOLD_NS = 100_000_000
+
+
+def require(condition, message):
+    if not condition:
+        raise ValueError(message)
+
+
+def sha256(data):
+    return hashlib.sha256(data).hexdigest()
+
+
+def load(path):
+    data = path.read_bytes()
+    return json.loads(data), {"path": str(path.resolve()), "bytes": len(data), "sha256": sha256(data)}
+
+
+def timestamp(value):
+    return type(value) is int and value >= 0
+
+
+def stream_metrics(arrivals, ingress_start, ingress_end):
+    """Exact frozen strict interval/threshold definitions, using integer ns."""
+    require(len(arrivals) == 512 and all(timestamp(t) for t in arrivals), "Expected 512 integer seed arrivals")
+    require(all(a < b for a, b in zip(arrivals, arrivals[1:])), "Seed arrivals must increase strictly")
+    require(timestamp(ingress_start) and timestamp(ingress_end) and ingress_start < ingress_end, "Invalid ingress interval")
+    gaps = []
+    for index, (a, b) in enumerate(zip(arrivals, arrivals[1:])):
+        duration = b - a
+        gaps.append({"gap_index": index, "start_ns": a, "end_ns": b,
+                     "duration_ns": duration, "duration_ms": duration / 1e6,
+                     "gt_100ms": duration > THRESHOLD_NS,
+                     "intersects_ingress": b > ingress_start and a < ingress_end})
+    intersecting = [gap for gap in gaps if gap["intersects_ingress"]]
+    maximum = max(gap["duration_ns"] for gap in gaps)
+    ingress_maximum = max((gap["duration_ns"] for gap in intersecting), default=None)
+    return {"arrival_ns": arrivals, "gap_count": len(gaps), "gaps": gaps,
+            "full_window_max_gap_ns": maximum, "full_window_max_gap_ms": maximum / 1e6,
+            "count_gt_100ms": sum(gap["gt_100ms"] for gap in gaps),
+            "ingress_intersecting_gaps": intersecting,
+            "ingress_intersecting_gap_count": len(intersecting),
+            "ingress_intersecting_max_gap_ns": ingress_maximum,
+            "ingress_intersecting_max_gap_ms": None if ingress_maximum is None else ingress_maximum / 1e6,
+            "ingress_intersecting_count_gt_100ms": sum(gap["gt_100ms"] for gap in intersecting)}
+
+
+def validate_requests(window, definition):
+    expected = [(r["prompt"], r["outputs"], "seed") for r in definition["initial"]]
+    expected += [(r["prompt"], r["outputs"], "ingress") for r in definition["ingress"]]
+    rows = window["requests"]
+    require([(r["prompt"], r["requested_outputs"], r["stage"]) for r in rows] == expected, "Missing, reordered or extra request stream")
+    require(len({r["external_id"] for r in rows}) == len(rows), "Duplicate external request IDs")
+    require(len({r["internal_id"] for r in rows}) == len(rows), "Duplicate internal request IDs")
+    start, end = window["start_ns"], window["end_ns"]
+    require(timestamp(start) and timestamp(end) and start < end, "Invalid window bounds")
+    steps = window["steps"]
+    require(bool(steps), "Missing actual engine steps")
+    prior = start
+    for before, after in steps:
+        require(timestamp(before) and timestamp(after) and prior <= before <= after <= end, "Invalid or overlapping engine steps")
+        prior = after
+    actual_arrivals = {after for _, after in steps}
+    for row in rows:
+        times = row["arrival_ns"]
+        require(row["finished"] is True and row["finish_reason"] == "length", "Incomplete fixed-output request")
+        require(len(times) == len(row["token_ids"]) == row["requested_outputs"], "Missing token arrivals")
+        require(all(timestamp(t) for t in times) and all(a < b for a, b in zip(times, times[1:])), "Invalid arrival timestamps")
+        require(set(times) <= actual_arrivals, "Arrivals are not bound to recorded engine steps")
+        require(timestamp(row["admit_ns"]) and start <= row["admit_ns"] <= times[0] <= times[-1] <= end, "Arrival/admission outside window")
+    if definition["ingress"]:
+        seed = [r for r in rows if r["stage"] == "seed"]
+        peers = [r for r in rows if r["stage"] == "ingress"]
+        require(len(seed) == 4 and len(peers) == 1, "Expected all four seed streams and one long P")
+        receipt = window["ingress"]
+        require(receipt and receipt["seed_counts"] == [32] * 4, "Ingress receipt must report four counts of 32")
+        step_index = receipt["before_step"]
+        require(type(step_index) is int and 1 <= step_index <= len(steps), "Invalid ingress step index")
+        require(receipt["after_ns"] == steps[step_index - 1][1] <= peers[0]["admit_ns"], "Ingress receipt not bound to preceding step")
+        for row in seed:
+            require(sum(t <= receipt["after_ns"] for t in row["arrival_ns"]) == 32, "Actual seed receipt count differs from 32")
+            require(sum(t <= peers[0]["admit_ns"] for t in row["arrival_ns"]) == 32, "Actual seed admission count differs from 32")
+
+
+def analyze_run(run, plan):
+    require(run["schema"] == "muxpd-group-prefill-performance-run-v1" and run["mode"] == "run", "Expected timing run, not profile")
+    require(run["plan_sha256"] == plan["plan_sha256"], "Run is not bound to supplied frozen plan")
+    require(run["collection_complete"] is True and run["shutdown_returned"] is True and run["errors"] == [], "Run collection is incomplete")
+    schedule = [(True, row) for row in plan["workloads"]]
+    schedule += [(False, row) for _ in range(plan["measured_repetitions"]) for row in plan["workloads"]]
+    require(len(run["windows"]) == len(schedule), "Missing or extra real window")
+    selected = []
+    previous_end = None
+    for index, (window, (warmup, definition)) in enumerate(zip(run["windows"], schedule)):
+        require(window["label"] == f"w{index}" and window["warmup"] is warmup and window["workload"] == definition["name"], "Actual window schedule differs")
+        require(window["complete"] is True and window["error"] is None and window["profile_diagnostic"] is False, "Incomplete or diagnostic window")
+        require(window["drain_after"]["scheduler_and_batch_queue_empty"] is True and window["drain_after"]["client_empty"] is True, "Missing post-window drain receipt")
+        validate_requests(window, definition)
+        require(previous_end is None or previous_end <= window["start_ns"], "Windows overlap")
+        previous_end = window["end_ns"]
+        if warmup or window["workload"] != "long-P-ingress":
+            continue
+        peer = next(r for r in window["requests"] if r["stage"] == "ingress")
+        begin, end = peer["admit_ns"], peer["arrival_ns"][0]
+        streams = []
+        for row in window["requests"]:
+            if row["stage"] == "seed":
+                streams.append({"external_id": row["external_id"], "internal_id": row["internal_id"],
+                                "prompt": row["prompt"], "admit_ns": row["admit_ns"],
+                                **stream_metrics(row["arrival_ns"], begin, end)})
+        selected.append({"label": window["label"], "window_index": index, "start_ns": window["start_ns"],
+                         "end_ns": window["end_ns"], "original_primary_summary": window["summary"],
+                         "ingress_receipt": window["ingress"],
+                         "ingress_interval": {"request_id": peer["external_id"], "admit_ns": begin,
+                                              "first_arrival_ns": end, "duration_ms": (end - begin) / 1e6},
+                         "streams": streams})
+    require(len(selected) == plan["measured_repetitions"] == 2, "Expected both measured mixed windows")
+    return {"pid": run["pid"], "variant": run["variant"], "experiment": run["experiment"],
+            "reference_family": run.get("reference_family"), "started_at": run["started_at"],
+            "finished_at": run["finished_at"], "producer_sha256": run["producer_sha256"],
+            "plan_sha256": run["plan_sha256"], "engine_args": run["engine_args"],
+            "actual_windows": len(run["windows"]), "analyzed_mixed_windows": len(selected),
+            "analyzed_streams": sum(len(w["streams"]) for w in selected), "windows": selected}
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--plan", type=Path, required=True)
+    parser.add_argument("--runs", type=Path, nargs="+", required=True)
+    parser.add_argument("--output", type=Path, required=True)
+    args = parser.parse_args()
+    require(not args.output.exists(), "Output exists; choose a new append-only report path")
+    protocol, protocol_identity = load(Path(__file__).with_name("protocol.json"))
+    require(protocol_identity["sha256"] == PROTOCOL_FILE_SHA256, "Frozen protocol bytes changed")
+    plan, plan_identity = load(args.plan)
+    require(plan_identity["sha256"] in PLAN_FILES, "Plan is not one of the unchanged frozen timing families")
+    report = {"schema": "muxpd-offline-stall-analysis-v1", "created_at": datetime.now(timezone.utc).isoformat(),
+              "protocol": protocol_identity, "protocol_semantic_sha256": protocol["protocol_sha256"],
+              "analyzer_sha256": sha256(Path(__file__).read_bytes()), "plan": plan_identity,
+              "family": PLAN_FILES[plan_identity["sha256"]],
+              "scope": "All provided run files and every prescribed nonwarmup mixed window/seed stream; incremental reports do not certify the entire experimental matrix.",
+              "interpretation": "Calibration-informed descriptive supplement; primary metrics unchanged; no acceptance gate, HTTP Goodput, sustainable-capacity or pooled-token significance claim.",
+              "threshold_ns_strictly_greater_than": THRESHOLD_NS, "runs": [], "input_errors": []}
+    seen = set()
+    for path in args.runs:
+        identity = {"path": str(path.resolve())}
+        try:
+            run, identity = load(path)
+            require(identity["path"] not in seen, "Duplicate input run path")
+            seen.add(identity["path"])
+            result = analyze_run(run, plan)
+            report["runs"].append({"input": identity, **result})
+        except (ValueError, KeyError, TypeError, IndexError, OSError) as error:
+            report["input_errors"].append({"input": identity, "error": f"{type(error).__name__}: {error}"})
+    report["all_supplied_inputs_analyzed"] = not report["input_errors"]
+    args.output.parent.mkdir(parents=True, exist_ok=True)
+    with args.output.open("x") as stream:
+        json.dump(report, stream, ensure_ascii=False, indent=2)
+        stream.write("\n")
+    print(json.dumps({"output": str(args.output), "runs_analyzed": len(report["runs"]),
+                      "input_errors": report["input_errors"]}))
+    return 0 if report["all_supplied_inputs_analyzed"] else 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

@@ -1,0 +1,18 @@
+Raw22 cancellation: independent original-trace review
+
+Both terminal raw partial/full22-block runs pass the original bounded cancellation gate. This is a separate headroom treatment; the original20-block suite remains failed. No source/kernel changes or broader acceptance criteria were introduced.
+
+Verified the frozen wrapper/original producer/observer/guard hashes, exact derived plans and controller commands, original trace identity and sequence, authoritative request IDs, all11 prompt/admission recipes, and all noncancelled fixed-length outputs. Recomputed each original auditor result exactly. Each run has165steps, no allocation-None/preemption events, and returns all21 usable blocks. These are cancellation/ownership observations, not evidence of preemption coverage or performance.
+
+| Scenario | Cancelled blocks | ACK trace before→after | Free blocks | Released physical IDs reacquired by fresh requests |
+|---|---|---|---|---|
+| partial | 7 | 72→73 | 3→10 | [9, 10, 11] |
+| full | 14 | 30→31 | 3→17 | [9, 10, 11, 12, 13, 14, 15, 16, 17, 18] |
+
+Both cancellations follow actual cohort2/P8 in trace23, with abort trace24→25. All recorded ownership snapshots retain positive victim block references through the matching ACK; no other request owns those blocks before release. Independent allocate-before/after comparisons prove fresh requests subsequently acquire the reported released IDs. This is host receipt/ownership evidence, not direct device-memory race instrumentation.
+
+The22-block pool leaves3free blocks after one null block, seed4 and two peers7each, satisfying the pinned Ascend decode allocation estimate. The old20-block pool left1free and missed the originaltwo-peerP8 gate. The distinction and oldfailure are retained.
+
+Both native Executors log SIGTERM fallback after grace; controllers exit0, child shutdown returns, and archived physicaldevices1/2/3/6 are empty. No globally signal-free shutdown is claimed. No hardware tools were used in review, and complete run inventories remained unchanged. Other group runs are excluded.
+
+Exact artifact identities and request/block/ACK/reuse evidence: raw22-review.json SHA256 `ca6f36e698645e31a2b2ae6217e5154f0637eba88bc145bbd77da365cca07bed`.
