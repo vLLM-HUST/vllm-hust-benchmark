@@ -18,26 +18,28 @@ def sha(path):
 
 
 def affected_paths(patch, root):
-    result = subprocess.run(
-        ["git", "apply", "--numstat", "-z", str(patch)],
-        cwd=root,
-        capture_output=True,
-        check=True,
-    )
-    fields = iter(result.stdout.split(b"\0"))
     paths = set()
-    for field in fields:
-        if not field:
-            continue
-        name = field.split(b"\t", 2)[2]
-        # Git's -z format emits separate old/new names for renames.
-        names = (name,) if name else (next(fields), next(fields))
-        for raw in names:
-            name = os.fsdecode(raw)
-            path = Path(name)
-            if path.is_absolute() or ".." in path.parts or ".git" in path.parts:
-                raise ValueError("Unsafe patch path")
-            paths.add(name)
+    # apply --numstat reports the destination of a rename; reverse parsing
+    # includes its source. Neither invocation applies the patch.
+    for flags in ([], ["--reverse"]):
+        result = subprocess.run(
+            ["git", "apply", "--numstat", "-z", *flags, str(patch)],
+            cwd=root,
+            capture_output=True,
+            check=True,
+        )
+        fields = iter(result.stdout.split(b"\0"))
+        for field in fields:
+            if not field:
+                continue
+            name = field.split(b"\t", 2)[2]
+            names = (name,) if name else (next(fields), next(fields))
+            for raw in names:
+                name = os.fsdecode(raw)
+                path = Path(name)
+                if path.is_absolute() or ".." in path.parts or ".git" in path.parts:
+                    raise ValueError("Unsafe patch path")
+                paths.add(name)
     return sorted(paths)
 
 

@@ -97,6 +97,35 @@ def test_empty_patch_retains_known_apply_failure_even_if_snapshot_fails(repo, tm
     assert (work / "tests-ran").read_text() == "ran"
 
 
+def test_real_git_rename_records_both_names_before_and_after(repo, tmp_path):
+    old_name, new_name = "old name.txt", "new name.txt"
+    (repo / old_name).write_text("original content\\n")
+    git(repo, "add", old_name)
+    git(
+        repo,
+        "-c",
+        "user.name=Test",
+        "-c",
+        "user.email=test@example.invalid",
+        "commit",
+        "-qm",
+        "source",
+    )
+    git(repo, "mv", old_name, new_name)
+    patch = git(repo, "diff", "--cached", "--binary", "--find-renames").decode()
+    git(repo, "reset", "--hard", "HEAD")
+    work = execute(repo, tmp_path, patch)
+    value = grading.summarize_application(work)
+    assert value["status"] == "applied"
+    before = json.loads((work / "hust-patch-before.json").read_text())["files"]
+    after = json.loads((work / "hust-patch-after.json").read_text())["files"]
+    assert set(before) == set(after) == {old_name, new_name}
+    assert before[old_name]["kind"] == "file"
+    assert before[new_name]["kind"] == "missing"
+    assert after[old_name]["kind"] == "missing"
+    assert after[new_name]["sha256"] == before[old_name]["sha256"]
+
+
 @pytest.mark.parametrize(
     "script",
     [
