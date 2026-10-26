@@ -101,3 +101,62 @@ def test_table_mutation_is_rejected_before_reading(tmp_path):
     (data / "qaps.csv").write_text("changed", encoding="utf-8")
     with pytest.raises(ValueError, match="identity mismatch"):
         list(original_summary_tasks(data, catalog_root=catalog))
+
+
+def test_original_tables_use_shared_index_and_consumer_without_answer_leak(tmp_path):
+    from vllm_hust_workload_data import iter_workload
+    from vllm_hust_workload_data.consumer import resolve_input
+    from vllm_hust_workload_data.pipeline import run
+    import sqlite3
+
+    data, catalog = fixture(tmp_path)
+    manifest_path = catalog / "data/catalogs/source_manifests_v1.json"
+    manifests = json.loads(manifest_path.read_text("utf-8"))
+    source = manifests["sources"]["NARRATIVEQA"]
+    source.update(
+        source_id="NARRATIVEQA", unit="source_rows", provenance_kind="task_corpus"
+    )
+    for item in source["files"]:
+        item["role"] = "raw_source"
+    manifest_path.write_text(json.dumps(manifests), "utf-8")
+    adapter = {
+        "kind": "task_dataset",
+        "mapping": "native_fields",
+        "input_fields": ["document", "question"],
+        "required_fields": ["document", "question"],
+        "outcome_fields": ["answers"],
+        "requirements": ["original relations"],
+    }
+    (catalog / "data/catalogs/adapter_registry_v1.json").write_text(
+        json.dumps({"adapters": {"NARRATIVEQA": adapter}}), "utf-8"
+    )
+    records = list(iter_workload("NARRATIVEQA", data_root=data, catalog_root=catalog))
+    assert len(records) == 1
+    record = records[0]
+    assert record.task["input"] == {
+        "document_id": "doc",
+        "summary": "fixture summary",
+        "question": "fixture question",
+    }
+    assert "fixture answer" not in json.dumps(record.input_record())
+    assert "second answer" not in json.dumps(record.input_record())
+    assert record.outcome_record() == {
+        "answer1": "fixture answer",
+        "answer2": "second answer",
+    }
+    output = tmp_path / "prepared"
+    report = run(
+        {"sources": [{"source_id": "NARRATIVEQA", "data_root": str(data)}]},
+        output=output,
+        catalog_root=catalog,
+    )
+    assert report["sources"][0]["records"] == 1
+    with sqlite3.connect(output / "workload.sqlite") as connection:
+        identity = connection.execute("SELECT record_id FROM records").fetchone()[0]
+    restored = resolve_input(output / "workload.sqlite", identity, data_root=data)
+    assert restored.input_record() == record.input_record()
+    assert restored.outcome_record() == record.outcome_record()
+    # Every relation is hash-bound, not only the question file.
+    (data / "documents.csv").write_text("tampered", "utf-8")
+    with pytest.raises(ValueError, match="identity mismatch"):
+        resolve_input(output / "workload.sqlite", identity, data_root=data)

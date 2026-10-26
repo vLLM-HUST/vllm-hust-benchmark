@@ -50,6 +50,10 @@ def _binding(entry, catalog_root=None):
         else source_spec(sid, catalog_root)
     )
     spec = mapping_spec(mapping) if mapping else adapter_spec(sid, catalog_root)
+    if sid == "NARRATIVEQA" and mapping is None:
+        from .narrativeqa import relation_spec
+
+        spec = relation_spec(manifest, spec)
     from .conversations import validate_history_targets
 
     validate_history_targets(sid, entry.get("history_targets"), mapping)
@@ -93,7 +97,9 @@ def plan(config, *, catalog_root=None):
                 reason = "OFFICIAL_RUNNER_ADAPTER_REQUIRED_NO_QBI_FALLBACK"
             elif not entry.get("data_root") or not Path(entry["data_root"]).is_dir():
                 reason = "DATA_ROOT_NOT_AVAILABLE"
-            elif not any(f.get("role") == "data" for f in manifest["files"]):
+            elif not spec.get("original_relation_source") and not any(
+                f.get("role") == "data" for f in manifest["files"]
+            ):
                 reason = "LOCAL_FILE_BINDING_REQUIRED"
             elif (
                 mapping

@@ -13,6 +13,13 @@ from .registry import adapter_spec, source_spec
 
 def iter_source_rows(path, spec):
     """Use one source view for reading, binding and index resolution."""
+    if spec.get("original_relation_source") is not None:
+        from .narrativeqa import joined_rows
+
+        if Path(path).name != "qaps.csv":
+            raise ValueError("original NarrativeQA view requires qaps.csv")
+        yield from joined_rows(Path(path).parent, spec["original_relation_source"])
+        return
     if spec["mapping"] == "crosscodeeval_original_archive":
         from .crosscodeeval import original_rows
 
@@ -530,8 +537,18 @@ def iter_workload(
         "revision"
     ):
         raise ValueError("explicit manifest requires matching source ID and revision")
+    if source_id == "NARRATIVEQA" and mapping is None:
+        from .narrativeqa import relation_spec
+
+        spec = relation_spec(manifest, spec)
     available = {
-        file["path"]: file for file in manifest["files"] if file.get("role") == "data"
+        file["path"]: file
+        for file in manifest["files"]
+        if (
+            file["path"] == "qaps.csv"
+            if spec.get("original_relation_source") is not None
+            else file.get("role") == "data"
+        )
     }
     selected = list(available) if files is None else files
     if (
