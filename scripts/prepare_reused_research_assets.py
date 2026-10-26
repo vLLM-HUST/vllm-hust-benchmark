@@ -83,6 +83,24 @@ def selection(source_id, files=None):
         raise ValueError(
             "source requires an audited historical or pinned publisher acquisition profile"
         )
+    if source.get("files_resource") and not source["files"]:
+        resource = source["files_resource"]
+        if Path(resource).name != resource or not resource.endswith(".json"):
+            raise ValueError("source file resource must be a JSON basename")
+        manifest = json.loads((CATALOG.parent / resource).read_text("utf-8"))
+        if (
+            manifest.get("schema_version") != "source-file-manifest/v1"
+            or any(
+                manifest.get(key) != source.get(key)
+                for key in ("source_id", "repo_id", "revision")
+            )
+            or not isinstance(manifest.get("files"), list)
+            or not manifest["files"]
+            or len({item["path"] for item in manifest["files"]})
+            != len(manifest["files"])
+        ):
+            raise ValueError("source file resource identity or inventory mismatch")
+        source = {**source, "files": manifest["files"]}
     registered = {
         item["path"]: item for item in source["files"] if item["role"] == "raw_source"
     }

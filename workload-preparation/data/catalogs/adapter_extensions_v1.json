@@ -823,6 +823,19 @@
       "normalization": {},
       "requirements": ["All original source fields preserved separately; ideal is the original answer field, not an API prompt", "Original image paths are relative to the parent directory of source.file; do not replace original figures with text descriptions", "Use original Evaluator and get_input_output to construct randomized choices, extra context and image inputs; this reader alone is not a runnable prompt or scoring protocol", "Public MCQ release only; open-answer variants and private held-out tasks are not claimed"],
       "status": "ORIGINAL_PUBLIC_MCQ_FIELDS_MAPPED_NATIVE_AND_RESEARCH_CLOSURE_PENDING"
+    },
+    "REPOBENCH": {
+      "kind": "task_dataset",
+      "mapping": "native_fields",
+      "input_fields": ["repo_name", "file_path", "context", "import_statement", "cropped_code"],
+      "required_fields": ["repo_name", "file_path", "context", "import_statement", "cropped_code", "next_line", "all_code", "gold_snippet_index", "created_at", "level", "token_num"],
+      "nullable_fields": ["gold_snippet_index"],
+      "outcome_fields": ["next_line", "all_code", "gold_snippet_index"],
+      "annotation_fields": ["created_at", "level", "token_num"],
+      "id_field": null,
+      "normalization": {},
+      "requirements": ["Original v1.1 Python and Java next-line completion records, preserving nested context path/snippet order and values", "Full all_code, next_line and gold_snippet_index stay reference-side, not blind model inputs", "Reuse author construct_prompt, date/length selection, tokenizer-dependent window handling, next-line extraction and scoring; raw records are not chat requests", "Physical file and row references are original release positions, not timestamps or server arrival order"],
+      "status": "ORIGINAL_FIELDS_MAPPED_NATIVE_AND_RESEARCH_CLOSURE_PENDING"
     }
   }
 }

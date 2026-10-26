@@ -573,6 +573,12 @@ def iter_workload(
         raise ValueError(
             "historical continuation requires one complete original tree file"
         )
+    original_repo_files = None
+    if source_id == "REPOBENCH":
+        original_repo = source_spec(source_id, catalog_root)
+        if manifest["revision"] != original_repo["revision"]:
+            raise ValueError("RepoBench author protocol revision mismatch")
+        original_repo_files = {item["path"]: item for item in original_repo["files"]}
     for name in selected:
         file_spec = available[name]
         receipt = verify_file(Path(data_root), file_spec)
@@ -584,6 +590,20 @@ def iter_workload(
             "unit": manifest["unit"],
             "provenance_kind": manifest["provenance_kind"],
         }
+        if source_id == "REPOBENCH":
+            expected = original_repo_files.get(name, {})
+            keys = ("language", "dataset_repo", "dataset_revision")
+            if (
+                any(
+                    not isinstance(file_spec.get(key), str)
+                    or file_spec[key] != expected.get(key)
+                    for key in keys
+                )
+                or expected.get("sha256") != file_spec["sha256"]
+                or name.split("/")[0] != file_spec["language"]
+            ):
+                raise ValueError("RepoBench language/dataset provenance mismatch")
+            source.update({key: file_spec[key] for key in keys})
         if source_id == "PAWS":
             configuration = file_spec.get("configuration", "unspecified")
             reference_kind = file_spec.get("reference_kind", "unspecified")

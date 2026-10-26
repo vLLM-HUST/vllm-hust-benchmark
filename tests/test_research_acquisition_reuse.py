@@ -36,6 +36,42 @@ def unique_object(pairs):
     return result
 
 
+def test_repobench_uses_fixed_original_resource_files():
+    source, selected = runner.selection("REPOBENCH")
+    assert source["source_id"] == "REPOBENCH"
+    assert len(selected) == 10
+    assert sum(item["rows"] for item in selected) == 49684
+    assert {item["language"] for item in selected} == {"python", "java"}
+    assert all(item["dataset_revision"] in item["url"] for item in selected)
+
+
+def test_resource_identity_mismatch_rejected(tmp_path, monkeypatch):
+    source = {
+        "source_id": "fixture",
+        "repo_id": "publisher/fixture",
+        "revision": "fixed",
+        "publisher_metadata_acquisition": True,
+        "files": [],
+        "files_resource": "files.json",
+    }
+    catalog = tmp_path / "catalog.json"
+    catalog.write_text(json.dumps({"sources": {"fixture": source}}))
+    (tmp_path / "files.json").write_text(
+        json.dumps(
+            {
+                "schema_version": "source-file-manifest/v1",
+                "source_id": "wrong-source",
+                "repo_id": "publisher/fixture",
+                "revision": "fixed",
+                "files": [{"path": "fixture.jsonl", "role": "raw_source"}],
+            }
+        )
+    )
+    monkeypatch.setattr(runner, "CATALOG", catalog)
+    with pytest.raises(ValueError, match="identity"):
+        runner.selection("fixture")
+
+
 def test_original_research_assets_are_registered_without_native_completion_claim():
     sources = json.loads(
         runner.CATALOG.read_text("utf-8"), object_pairs_hook=unique_object

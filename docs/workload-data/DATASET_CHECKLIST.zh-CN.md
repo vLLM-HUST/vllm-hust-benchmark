@@ -2,6 +2,8 @@
 
 ### RepoBench原生仓库级代码补全（准备中，未交付）
 
+公开资产入口复用`python scripts/prepare_reused_research_assets.py REPOBENCH --mode plan`，取得原数据用`--mode download --data-root <外部目录> --max-bytes 1200000000`，已有数据用`--mode verify --data-root <外部目录>`只读核验。默认550MB预算会拒绝意外全下约1.05GB；必要时显式选择同固定版本`--hf-endpoint https://hf-mirror.com`，仍逐文件校验原SHA256。准备统一索引用`python scripts/prepare_reused_source_records.py REPOBENCH --data-root <同原目录> --output <新外部索引目录>`，不下载模型、不执行推理。新适配仍待实际CI工件和服务器完整数据复核；软件测试不代表已跑通原生benchmark。
+
 - [x] 固定[作者v1.1源码](https://github.com/Leolty/repobench/tree/e0cfd34c9e7cd8f057efd32b9280b9719ae12a91)，12文件逐文件大小/Git
   blob核验；原生入口为`run.py`和`eval.py`，保留EM/Edit Similarity/CodeBLEU评分，不改为聊天问答。
 - [x] Python/Java固定版本10份原始Parquet全部在服务器取得并核验大小/SHA256；完整检查49684行、11原字段及context的path/snippet关系。覆盖2语言×3设置×9长度档共54层；HF主站不可达时使用同发布方固定版本镜像，不改任务。不在本地或Git保存原始数据。

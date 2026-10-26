@@ -64,6 +64,8 @@ def bind_source(
             raise ValueError(
                 "file differs from pinned publisher/previous identity; do not overwrite its revision"
             )
+        if source_id == "REPOBENCH" and relative not in known:
+            raise ValueError("RepoBench requires registered original language assets")
         if source_id == "RULER" and (
             relative not in known or not known[relative].get("generation")
         ):
@@ -99,6 +101,14 @@ def bind_source(
                 **(
                     {"generation": deepcopy(known[relative]["generation"])}
                     if source_id == "RULER"
+                    else {}
+                ),
+                **(
+                    {
+                        key: deepcopy(known[relative][key])
+                        for key in ("language", "dataset_repo", "dataset_revision")
+                    }
+                    if source_id == "REPOBENCH"
                     else {}
                 ),
                 "identity_assurance": "matches_recorded_identity"
