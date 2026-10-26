@@ -5,7 +5,14 @@
 - [x] 核查官方定位与原生校验方式：这是schema集合及原正/负例，不是用户请求/模型质量benchmark，不造prompt冒充原请求。官方流程为`npm clean-install`后`node ./cli.js check`，保留原schema、引用和正负例。[官方说明](https://github.com/SchemaStore/schemastore/blob/b3c6a70f2a535d14e8ad2bf460b3aa8f5c0efb27/CONTRIBUTING.md)
 - [x] 固定版本原归档通过官方API取得；4810文件逐文件大小/Git blob校验及实际根tree独立一致性核验通过，含1006
   schemas、2286正例文件、1402负例文件。Git连接失败历史保留；只有资产取得，不是原生校验完成。[准备回执](validation/schemastore-original-readiness-20261027.json)
-- [ ] 隔离Node/npm环境、原锁依赖、官方完整校验、公共资产读取/索引与固定研究端消费；当前服务器PATH未找到node/npm。原生资源校验只证明资产可用，不产生推理性能/质量结论。
+- [x] 独立Node22.14.0
+  ARM64归档与官方发布校验和一致，公开`scripts/prepare_schemastore_runtime.py`实际执行exit0，npm10.9.2；原锁`clean-install`190包成功，没有系统安装或更改推理服务。锁中安装hook为0，显式禁用hook执行。
+- [ ] 官方完整校验已由`scripts/run_schemastore_original_validation.py`启动，等待终态；前置4810原文件及重建Git根tree核验通过，未改原CLI/schema/例子。不以pre-checks完成冒称全部校验完成。
+- [ ] 公共资产读取/索引与固定研究端消费；原生资源校验只证明schema资产可用，不产生推理性能/质量结论。
+
+准备运行时：从`https://nodejs.org/dist/v22.14.0/node-v22.14.0-linux-arm64.tar.xz`取得原归档，再用`python scripts/prepare_schemastore_runtime.py --archive /external/node-v22.14.0-linux-arm64.tar.xz --output /external/private-node --execute`校验并解包。需要Python3.12+的tarfile数据过滤器及lzma模块，不依赖系统xz程序；本服务器初次系统tar解包因缺xz失败，改用标准库解包，原归档不变。校验入口默认只规划，显式提供`--source`原源码、`--original-tree`官方完整recursive
+Git
+tree元数据、`--node`私有node路径、`--output`独立日志目录和`--execute`才运行`node cli.js check`；源码/例子全保留，不以自定义JSON校验替代官方流程。
 
 ### NarrativeQA原始summary-QA（来源交付完成）
 
