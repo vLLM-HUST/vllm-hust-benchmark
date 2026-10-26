@@ -26,7 +26,7 @@
   "model_calls": 0,
   "model_calls_scope": "Acquisition snapshot only; subsequent native attempts are recorded separately below",
   "native_followup": {
-    "status": "RETRY_RUNNING_NOT_DELIVERED",
+    "status": "CODE_MATH_FINISHED_SCIENCE_SEPARATELY_RUNNING_NOT_DELIVERED",
     "first_attempt": "Original code shard0 row0 hit the 300-second client read timeout; no saved response, zero completed conversations; failure preserved",
     "retry_queue": "openthoughts3-fixed-original-native-queue-32028-002",
     "selection": "Original rows0,1,2 per fixed shard0,25,110; no replacement",
@@ -38,6 +38,17 @@
     "code_preparation_reused": true,
     "source_checkbox_eligible": false
   },
+  "queue_followup": {
+    "original_queue_parent_no_longer_present": true,
+    "termination_cause_established": false,
+    "code_and_math_original_generations_retained": 6,
+    "science_previously_started": false,
+    "science_only_continuation_stage": "openthoughts3-science-standalone-32028-001",
+    "science_only_native_stage": "openthoughts3-science-native-32028-002",
+    "science_status": "NATIVE_RUNNING_NOT_COMPLETE",
+    "previous_valid_generations_rerun": 0,
+    "model_service_restarted": false
+  },
   "code_saved_audit_followup": {
     "status": "SAVED_ORIGINAL_REQUEST_RESPONSE_INTEGRITY_VERIFIED_NOT_SOURCE_DELIVERY",
     "original_rows": [0, 1, 2],
@@ -47,6 +58,18 @@
     "generation_budget": 32768,
     "quality_scored": false,
     "receipt": "openthoughts3-code-native-32028-002/saved-audit-public.json",
+    "new_model_calls": 0,
+    "source_checkbox_eligible": false
+  },
+  "math_saved_audit_followup": {
+    "status": "SAVED_ORIGINAL_REQUEST_RESPONSE_INTEGRITY_VERIFIED_NOT_SOURCE_DELIVERY",
+    "original_rows": [0, 1, 2],
+    "saved_generations": 3,
+    "finish_reasons": {"length": 3},
+    "original_input_and_teacher_separation_verified": true,
+    "generation_budget": 32768,
+    "quality_scored": false,
+    "receipt": "openthoughts3-math-native-32028-002/saved-audit-public.json",
     "new_model_calls": 0,
     "source_checkbox_eligible": false
   },
