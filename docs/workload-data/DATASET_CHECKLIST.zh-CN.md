@@ -1,5 +1,14 @@
 # 数据集逐项验证清单
 
+### NarrativeQA评分准备（来源仍未完成）
+
+- [x] 复用原3表/46765问答关系，不重新获取数据；明确summary-QA与full-story不同，不拿summary替代缺失全文。
+- [x] 固定AllenAI评分源码/许可证并在服务器获取、二次只读核验；原BLEU-1/4、METEOR、ROUGE-L接口在隔离py-rouge1.1及固定WordNet下通过合成夹具预检。[评分身份与差异](../../configs/workload-native/narrativeqa-metric-pins.json)。不是作者官方聊天运行器或论文数值复现；该实现的BLEU-4权重及逐参考取最大/两位舍入明确保留。
+- [ ] 原始summary-QA模型执行、原两参考评分、保存审计与公共/研究消费最终闭环；预检没有模型调用，不增加总勾。初次预检因WordNet缺失失败保留，已用官方固定Git
+  blob恢复，不降级METEOR。
+
+评分源准备：`python scripts/prepare_narrativeqa_original_metric.py --output /external/narrativeqa-metric`默认只规划，显式`--execute`获取，`--verify-only`只读校验。`py-rouge==1.1`必须安装在独立target/环境，用`PYTHONPATH`选择；不要覆盖其他任务正在使用的`rouge==1.0.1`。`NLTK_DATA`显式包含已有punkt/punkt_tab及固定WordNet目录；运行评分禁止隐式联网下载。现已验证环境为Python3.12.13、NLTK3.10.4、py-rouge1.1；这不是原2018模型环境复现。
+
 ### LongBench V2容量更新（来源仍未完成）
 
 - [x] 既定Medium原第3/5/8行，用当前9B原tokenizer和256K部署窗口重新核验，完整输入149662/138653/68762
