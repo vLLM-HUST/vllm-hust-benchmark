@@ -1002,9 +1002,9 @@
       "original_failed_receipts_preserved": true
     }
   },
-  "report_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/7131091c51e6b0a72a97c640087ecfb23655e16d/reports/vllm-hust-midterm-20261019/中期测试报告.md",
+  "report_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/b3b389a3ee7e4a0f2ae62b10f984d1ff879a52a7/reports/vllm-hust-midterm-20261019/中期测试报告.md",
   "report_sha256": "c34d8c103effcef0bd87c6e2e9904935fcc5dff8fac028bf3750dc469be47ae7",
-  "source_commit": "7131091c51e6b0a72a97c640087ecfb23655e16d",
+  "source_commit": "b3b389a3ee7e4a0f2ae62b10f984d1ff879a52a7",
   "sections": [
     {
       "id": "corrected-quality",
@@ -4081,7 +4081,7 @@
     {
       "id": "terminal-model-recovery",
       "title": "Terminal原答案恢复评分 / Recovered grading",
-      "scope": "TerminalBench2.1 OpenSSL采用Qwen3.5-35B-A3B官方0.18/0.18，同一次Agent共5次模型调用、86.812555秒。原评分因uv下载在900秒超时，原reward=null保留。固定uv0.9.5传输缓存后仅恢复评分，原6项测试全部通过、reward=1，耗时11.784143秒，仍使用原900秒预算；新增Agent、模型调用及控制实验均为0。四个SSL文件复用原快照；check_cert.py由原命令及终端回显确定性重建，非现场原文件快照，原模式未知。已执行1/89题，该题恢复评分通过，当前共2/89题已尝试、87题未执行；独立ARM64派生镜像，不构成全量或B0/B1配对验收。 TerminalBench2.1已尝试2/89题，87题未执行。OpenSSL完整答案恢复评分6/6通过、reward=1；cancel-async-tasks在提交和评分前因ContextLengthExceededError终止，原reward=null。未提交的原部分代码单独恢复评分，1/6通过、reward=0，不计第二次Agent或完整提交评分；不构成全量或B0/B1配对验收。",
+      "scope": "TerminalBench2.1 OpenSSL采用Qwen3.5-35B-A3B官方0.18/0.18，同一次Agent共5次模型调用、86.812555秒。原评分因uv下载在900秒超时，原reward=null保留。固定uv0.9.5传输缓存后仅恢复评分，原6项测试全部通过、reward=1，耗时11.784143秒，仍使用原900秒预算；新增Agent、模型调用及控制实验均为0。四个SSL文件复用原快照；check_cert.py由原命令及终端回显确定性重建，非现场原文件快照，原模式未知。OpenSSL本题恢复评分通过；当前共2/89题已尝试、87题未执行；独立ARM64派生镜像，不构成全量或B0/B1配对验收。 TerminalBench2.1已尝试2/89题，87题未执行。OpenSSL完整答案恢复评分6/6通过、reward=1；cancel-async-tasks在提交和评分前因ContextLengthExceededError终止，原reward=null。未提交的原部分代码单独恢复评分，1/6通过、reward=0，不计第二次Agent或完整提交评分；不构成全量或B0/B1配对验收。",
       "scope_en": "TerminalBench2.1 OpenSSL: one original Qwen3.5-35B-A3B native 0.18/0.18 Agent trial, 5 model calls in 86.812555 seconds. Its original verifier timed out downloading uv after 900 seconds, reward null. Verifier-only recovery using pinned uv 0.9.5 transport caches passed all 6 original tests, reward 1, in 11.784143 seconds within the unchanged 900-second budget. No new Agent, model calls or controls. Four SSL files retain original snapshots; check_cert.py is deterministically reconstructed from the original command and echo, not an original file snapshot; its original mode is unknown. One task scored and passed out of one attempted; Current total: 2/89 tasks attempted, 87 unattempted. ARM64 derived image, not full-dataset or B0/B1 paired acceptance. TerminalBench2.1: 2/89 unique tasks attempted; 87 unattempted. OpenSSL completed-answer recovery passed 6/6 tests, reward 1. cancel-async-tasks ended with ContextLengthExceededError before submission or grading; its original reward remains null. Separate verifier-only recovery of the unchanged unsubmitted partial artifact passed 1/6 tests, reward 0. This is not a second Agent attempt or a completed-submission score; no full-dataset or B0/B1 paired acceptance.",
       "source_heading": "TerminalBench2.1模型实测及恢复评分",
       "tables": [
@@ -4149,8 +4149,8 @@
     {
       "id": "terminal-cancel-async-controls",
       "title": "Terminal异步评分控制 / Async verifier controls",
-      "scope": "cancel-async-tasks的ARM64环境控制：原nop为0/6、reward=0，原oracle为6/6、reward=1；各一次、独立全新容器、模型调用0，均已释放。原测试、时间阈值及900秒预算不变，1CPU、2GiB、MTU1400，仅缓存固定uv0.9.5传输依赖。此前Compose插件缺失发生于容器及测试启动前，原null保留，不计任务失败。这两项控制不增加模型覆盖，既有OpenSSL模型结果仍为1/89。 TerminalBench2.1已尝试2/89题，87题未执行。OpenSSL完整答案恢复评分6/6通过、reward=1；cancel-async-tasks在提交和评分前因ContextLengthExceededError终止，原reward=null。未提交的原部分代码单独恢复评分，1/6通过、reward=0，不计第二次Agent或完整提交评分；不构成全量或B0/B1配对验收。",
-      "scope_en": "cancel-async-tasks ARM64 environment controls: original nop 0/6, reward 0; original oracle 6/6, reward 1. Fresh containers, one attempt each, zero model calls; both released. Original tests, timing thresholds and 900-second budget unchanged; 1 CPU, 2 GiB, MTU1400. Pinned uv0.9.5 transport cache only. The earlier missing-Compose failure occurred before any container or test, reward null retained. These controls add no model coverage: the existing OpenSSL result remains 1/89. TerminalBench2.1: 2/89 unique tasks attempted; 87 unattempted. OpenSSL completed-answer recovery passed 6/6 tests, reward 1. cancel-async-tasks ended with ContextLengthExceededError before submission or grading; its original reward remains null. Separate verifier-only recovery of the unchanged unsubmitted partial artifact passed 1/6 tests, reward 0. This is not a second Agent attempt or a completed-submission score; no full-dataset or B0/B1 paired acceptance.",
+      "scope": "cancel-async-tasks的ARM64环境控制：原nop为0/6、reward=0，原oracle为6/6、reward=1；各一次、独立全新容器、模型调用0，均已释放。原测试、时间阈值及900秒预算不变，1CPU、2GiB、MTU1400，仅缓存固定uv0.9.5传输依赖。此前Compose插件缺失发生于容器及测试启动前，原null保留，不计任务失败。这两项控制不增加模型覆盖，既有OpenSSL本题结果保留。 TerminalBench2.1已尝试2/89题，87题未执行。OpenSSL完整答案恢复评分6/6通过、reward=1；cancel-async-tasks在提交和评分前因ContextLengthExceededError终止，原reward=null。未提交的原部分代码单独恢复评分，1/6通过、reward=0，不计第二次Agent或完整提交评分；不构成全量或B0/B1配对验收。",
+      "scope_en": "cancel-async-tasks ARM64 environment controls: original nop 0/6, reward 0; original oracle 6/6, reward 1. Fresh containers, one attempt each, zero model calls; both released. Original tests, timing thresholds and 900-second budget unchanged; 1 CPU, 2 GiB, MTU1400. Pinned uv0.9.5 transport cache only. The earlier missing-Compose failure occurred before any container or test, reward null retained. These controls add no model coverage: the existing OpenSSL task result is retained. TerminalBench2.1: 2/89 unique tasks attempted; 87 unattempted. OpenSSL completed-answer recovery passed 6/6 tests, reward 1. cancel-async-tasks ended with ContextLengthExceededError before submission or grading; its original reward remains null. Separate verifier-only recovery of the unchanged unsubmitted partial artifact passed 1/6 tests, reward 0. This is not a second Agent attempt or a completed-submission score; no full-dataset or B0/B1 paired acceptance.",
       "source_heading": "Terminal异步任务ARM64评分控制",
       "evidence": [
         {
