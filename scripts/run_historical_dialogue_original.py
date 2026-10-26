@@ -7,6 +7,23 @@ from pathlib import Path
 from run_oasst_original_continuation import post, validate_endpoint
 
 
+def has_generated_content(choice):
+    message = choice.get("message", {})
+    if not isinstance(message, dict):
+        return False
+    content = message.get("content")
+    if isinstance(content, str) and content:
+        return True
+    return (
+        choice.get("finish_reason") == "length"
+        and content in (None, "")
+        and any(
+            isinstance(message.get(key), str) and message[key]
+            for key in ("reasoning", "reasoning_content")
+        )
+    )
+
+
 def run_records(
     records,
     *,
@@ -19,11 +36,25 @@ def run_records(
     final_verify=None,
     expected_count=None,
     source_identity=None,
+    request_timeout_seconds=300,
 ):
     from vllm_hust_workload_data.conversations import historical_dialogue_views
     from vllm_hust_workload_data.identity import portable
 
     endpoint = validate_endpoint(endpoint)
+    if (
+        type(request_timeout_seconds) is not int
+        or not 1 <= request_timeout_seconds <= 3600
+    ):
+        raise ValueError("explicit client timeout must be1..3600 seconds")
+
+    def send(url, payload):
+        return (
+            post(url, payload, timeout=request_timeout_seconds)
+            if transport is post
+            else transport(url, payload)
+        )
+
     if not model or type(max_tokens) is not int or not 0 < max_tokens < context:
         raise ValueError("explicit model, positive output budget and context required")
     output = Path(output)
@@ -41,6 +72,7 @@ def run_records(
         "performance_claim": False,
         "source_checkbox_eligible": False,
         "source_identity": source_identity,
+        "client_timeout_seconds": request_timeout_seconds,
     }
 
     def save(name, value):
@@ -74,7 +106,7 @@ def run_records(
                 name = f"request-{len(receipt['requests']):06d}.private.json"
                 save(name, attempt)
                 try:
-                    tokenized = transport(
+                    tokenized = send(
                         endpoint.removesuffix("/v1") + "/tokenize",
                         {
                             "model": model,
@@ -93,9 +125,7 @@ def run_records(
                         raise ValueError(
                             "complete original history exceeds declared context"
                         )
-                    result = transport(
-                        endpoint + "/chat/completions", attempt["request"]
-                    )
+                    result = send(endpoint + "/chat/completions", attempt["request"])
                     attempt["response"] = result
                     save(name, attempt)
                     choices = result.get("choices")
@@ -104,10 +134,7 @@ def run_records(
                         not isinstance(choices, list)
                         or len(choices) != 1
                         or choices[0].get("finish_reason") not in {"stop", "length"}
-                        or not isinstance(
-                            choices[0].get("message", {}).get("content"), str
-                        )
-                        or not choices[0]["message"]["content"]
+                        or not has_generated_content(choices[0])
                         or usage.get("prompt_tokens") != count
                         or type(usage.get("completion_tokens")) is not int
                         or not 0 < usage["completion_tokens"] <= max_tokens
@@ -167,6 +194,12 @@ def main():
     parser.add_argument("--model", required=True)
     parser.add_argument("--max-tokens", type=int, required=True)
     parser.add_argument("--context-capacity", type=int, required=True)
+    parser.add_argument(
+        "--request-timeout-seconds",
+        type=int,
+        default=300,
+        help="Explicit client wait only; original prompts and output budget unchanged",
+    )
     selection = parser.add_mutually_exclusive_group()
     selection.add_argument("--count", type=int, default=3)
     selection.add_argument("--full", action="store_true")
@@ -224,6 +257,7 @@ def main():
         model=args.model,
         max_tokens=args.max_tokens,
         context=args.context_capacity,
+        request_timeout_seconds=args.request_timeout_seconds,
         final_verify=verify,
         expected_count=sum(f["rows"] for f in files) if args.full else args.count,
         source_identity={

@@ -48,13 +48,13 @@ def validate_endpoint(endpoint):
     return endpoint
 
 
-def post(url, payload):
+def post(url, payload, *, timeout=300):
     request = Request(
         url,
         data=json.dumps(payload).encode(),
         headers={"Content-Type": "application/json"},
     )
-    with urlopen(request, timeout=300) as response:
+    with urlopen(request, timeout=timeout) as response:
         return json.load(response)
 
 

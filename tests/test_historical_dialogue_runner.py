@@ -59,6 +59,65 @@ def response():
     }
 
 
+def test_reasoning_only_length_is_preserved_but_empty_final_stop_is_not_success():
+    choice = {
+        "finish_reason": "length",
+        "message": {
+            "content": None,
+            "reasoning_content": "unfinished synthetic reasoning",
+        },
+    }
+    assert RUNNER.has_generated_content(choice)
+    choice["finish_reason"] = "stop"
+    assert not RUNNER.has_generated_content(choice)
+    choice["finish_reason"] = "length"
+    choice["message"]["reasoning_content"] = ""
+    assert not RUNNER.has_generated_content(choice)
+
+
+def test_explicit_timeout_does_not_change_native_requests_or_budget(tmp_path):
+    calls = []
+
+    def transport(url, payload):
+        calls.append(payload)
+        return {"count": 10} if url.endswith("/tokenize") else response()
+
+    receipt = invoke(tmp_path, transport, request_timeout_seconds=1200)
+    assert receipt["client_timeout_seconds"] == 1200
+    assert receipt["max_tokens"] == 32
+    assert all(payload.get("max_tokens", 32) == 32 for payload in calls)
+    assert receipt["quality_scored"] is False
+
+
+@pytest.mark.parametrize("key", ["reasoning", "reasoning_content"])
+def test_legal_reasoning_budget_end_keeps_raw_response_and_quality_unverified(
+    tmp_path, key
+):
+    raw = {
+        "choices": [
+            {
+                "finish_reason": "length",
+                "message": {"content": None, key: "synthetic incomplete reasoning"},
+            }
+        ],
+        "usage": {"prompt_tokens": 10, "completion_tokens": 32},
+    }
+
+    def transport(url, payload):
+        return {"count": 10} if url.endswith("/tokenize") else raw
+
+    receipt = invoke(tmp_path, transport)
+    assert all(
+        item["status"] == "BUDGET_EXHAUSTED_QUALITY_UNVERIFIED"
+        for item in receipt["requests"]
+    )
+    saved = json.loads(
+        (tmp_path / "output/request-000000.private.json").read_text("utf-8")
+    )
+    assert saved["response"] == raw
+    assert receipt["quality_scored"] is False
+
+
 def test_rejected_original_row_is_saved_before_any_model_call(tmp_path):
     item = original()
     item.task["input"]["conversation"][-1]["role"] = "tool"
