@@ -1,0 +1,16 @@
+{
+  "source_id": "FLEURS",
+  "framework_pins_resource": "librispeech-whisper-author-pins.json",
+  "framework_version": "20250625",
+  "model": "large-v3-turbo",
+  "checkpoint": "large-v3-turbo.pt",
+  "checkpoint_bytes": 1617941637,
+  "checkpoint_sha256": "aff26ae408abcba5fbf8813c21e62b0941638c5f6eebfb145be0c9839262a19a", "public_identity_note": "pragma: allowlist secret - publisher checkpoint identity, not a credential",
+  "checkpoint_url": "https://openaipublic.azureedge.net/main/whisper/models/aff26ae408abcba5fbf8813c21e62b0941638c5f6eebfb145be0c9839262a19a/large-v3-turbo.pt",
+  "task": "transcribe",
+  "language": null,
+  "other_decoding_options": "unchanged native transcribe defaults",
+  "sample_rule": "first three original Parquet rows per selected locale, without replacement; explicit full option available",
+  "model_boundary": "Publisher multilingual ASR model; not the FLEURS author Conformer training baseline, translation model, or paper score reproduction.",
+  "metric_boundary": "Per-locale raw CER and Whisper BasicTextNormalizer CER via pinned jiwer, then macro average over completed locales. Declared integration scoring, not the FLEURS paper baseline protocol. All languages and failures remain visible."
+}

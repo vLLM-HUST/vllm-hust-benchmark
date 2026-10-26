@@ -1319,3 +1319,49 @@ python -m evaluation.harness.run_evaluation \
 - Docker评测会构建任务环境、安装任务依赖，并按cache_level清理镜像；应在独立执行根、 新run_id及明确空间预算下使用，不共用其他任务目录。官方硬件下的参考耗时不是本服务器实测。
 
 本轮只核实固定官方源码参数和模型路由，不下载科学数据、不调用模型、不启动容器； 102条原字段准备、真正Agent执行、科学评分与研究消费的证明仍分开保留。
+
+# FLEURS 原始资产准备（进行中，不计交付）
+
+固定 `google/fleurs` 的原始 Parquet 文件：102种实际语言，共308份 train/validation/test 文件。`all`
+是聚合视图，不重复下载或计为独立语言。原始 test 共77,810条，64,464,134,486字节。 目录元数据不等于已取得音频，更不等于完成原生测试。
+
+在服务器安装本仓数据包后，先执行不联网、不创建数据文件的计划：
+
+```bash
+python scripts/prepare_fleurs_original_assets.py --output /external/fleurs --action plan
+```
+
+按需获取原始 test（所有102种语言），显式批准下载字节预算：
+
+```bash
+python scripts/prepare_fleurs_original_assets.py --output /external/fleurs \
+  --action download --max-bytes 64464134486
+python scripts/prepare_fleurs_original_assets.py --output /external/fleurs --action verify
+```
+
+可使用 `--locales af_za am_et ar_eg` 显式选择语言；这不表示整个多语种来源已完成。 默认官方站点；官方站点不可达时可显式使用
+`--hf-endpoint https://hf-mirror.com`， 仍按固定版本、原始字节数及 SHA256 校验。原文件校验通过即复用，不覆盖不匹配文件； 遇到 `.partial`
+先核对所属进程和终态，本入口不会擅自覆盖。
+
+当前证据见 `validation/fleurs-native-probe-20261026.json`：Whisper large-v3-turbo 在 NPU 完成 af_za
+原始前3条完整波形转写，未强制语言、裁剪或重采样。 CER 为明确声明的集成诊断，不冒充原论文 Conformer 基线成绩。
+完整多语种固定抽样及精确消费验证仍需补齐。上述准备入口不加载模型，也不产生评分。
+
+原生执行与评分入口已经提供，完整多语种服务器验证尚未完成。使用与 Ascend 驱动/CANN 匹配的既有 `torch`/`torch_npu`，在独立客户端安装
+`configs/workload-native/fleurs-whisper-requirements.txt`，不要替换已有推理服务的环境。 当前已测环境为 Python
+3.12.13、Torch 2.10.0、torch_npu 2.10.0.post4、CANN 9.1； Whisper 官方固定源文件会在运行前校验。此组合是已验证的 Ascend
+兼容环境，不冒充原作者环境。
+
+使用准备入口的 `--include-model` 同时获取固定多语种检查点；全部 test 加模型的容量预算为 66,082,076,123字节。模型放在
+`/external/fleurs/models`，无须部署额外 HTTP 服务。 只有确认研究任务已释放 NPU 或允许验证窗口后再执行：
+
+```bash
+python scripts/run_fleurs_original.py --data-root /external/fleurs \
+  --model-root /external/fleurs/models --output /external/fleurs-native-private --device npu:1
+python scripts/score_fleurs_original.py --run /external/fleurs-native-private \
+  --output /external/fleurs-native-private/score.json
+```
+
+默认固定取每种语言原始前3条，不因失败改换请求；`--full` 才是全 test。 可用 `--locales` 声明局部验证，但不能据此声称102种语言全部完成。 执行器读取 Parquet
+中完整原始音频和原始参考转写，不把音频编成文本 prompt； 模型输入不含参考答案。保留自动识别语言、原生解码默认参数及空预测。 评分器校验输出身份及每个原始位置是否完整，分别给出逐语言原始
+CER、Whisper BasicTextNormalizer CER 和已完成语言的宏平均；不丢弃表现差的语言，不称为原论文复现。 运行输出含原始标注和预测，必须留在服务器私有目录，不提交仓库。

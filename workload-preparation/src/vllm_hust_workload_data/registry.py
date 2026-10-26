@@ -28,7 +28,22 @@ def source_spec(source_id: str, root: Path | None = None) -> dict:
     specs = read_catalog("source_manifests_v1.json", root)["sources"]
     if source_id not in specs:
         raise KeyError(f"unknown source: {source_id}; no generator fallback")
-    return specs[source_id]
+    source = specs[source_id]
+    if source.get("files_resource") and not source["files"]:
+        manifest = read_catalog(source["files_resource"], root)
+        if (
+            manifest.get("schema_version") != "source-file-manifest/v1"
+            or manifest.get("source_id") != source_id
+            or manifest.get("revision") != source.get("revision")
+            or manifest.get("repo_id") != source.get("repo_id")
+            or not isinstance(manifest.get("files"), list)
+            or not manifest["files"]
+            or len({item["path"] for item in manifest["files"]})
+            != len(manifest["files"])
+        ):
+            raise ValueError("source file resource identity or file set differs")
+        return {**source, "files": manifest["files"]}
+    return source
 
 
 def adapter_spec(source_id: str, root: Path | None = None) -> dict:

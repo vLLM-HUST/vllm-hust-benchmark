@@ -69,6 +69,8 @@ def download_plan(source_id, root=None):
                 "bytes",
                 "rows",
                 "role",
+                "locale",
+                "split",
                 "archive_member",
                 "generation",
             )
