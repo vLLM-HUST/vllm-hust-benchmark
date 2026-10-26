@@ -1,6 +1,6 @@
 {
   "schema_version": "workload-validation-checklist/v1",
-  "updated_at": "2026-10-26",
+  "updated_at": "2026-10-27",
   "latest_frozen_software_ci_receipt": "docs/workload-data/validation/software-ci-regression-20261025.json",
   "latest_native_entry_software_smoke_receipt": "docs/workload-data/validation/native-entry-software-ci-20261026.json",
   "native_runtime_latest": {
@@ -1278,11 +1278,11 @@
     "MMMU": {
       "scope": "public",
       "delivery_kind": "review_original_source_protocol",
-      "status": "IN_PROGRESS",
-      "checked": false,
+      "status": "AVAILABLE",
+      "checked": true,
       "legacy_checked": false,
       "existing_receipt": null,
-      "delivery_receipt": null,
+      "delivery_receipt": "docs/workload-data/validation/mmmu-native-delivery-20261027.json",
       "public_asset_preparer": "scripts/prepare_mmmu_original_assets.py",
       "public_asset_manifest": "configs/workload-native/mmmu-original-assets.json",
       "asset_preparation_receipt": "docs/workload-data/validation/mmmu-original-readiness-20261026.json",
@@ -1290,7 +1290,8 @@
       "public_saved_run_verifier": "scripts/verify_mmmu_original_saved.py",
       "public_native_entry_server_verified": true,
       "public_saved_run_verifier_server_verified": true,
-      "blocker": "All92 original Parquet shards verified,11550rows/16fields. All30subjects validation first3 original tasks completed90 NPU calls including4multi-image, original author scoring and independent saved audit exit0. Original128 budget retained:59length/31stop, no quality or full-validation claim. Current original file identities bound while preserving prior revision. Full provider/index and fixed research consumption still pending; no source checkbox."
+      "blocker": null,
+      "validation_scope": "All92 original files/11550rows/16fields and index verified. Original validation first3 per all30subjects:90native NPU tasks including4multi-image, original scoring and saved audit passed. Exact CI44payloads,152public/fixed-research roundtrips including all90native IDs passed.59length/31stop retained under original128budget; no full-validation quality or performance claim."
     },
     "CHARTQA": {
       "scope": "public",

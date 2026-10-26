@@ -2,6 +2,7 @@
 
 import base64
 import importlib
+import json
 from pathlib import Path
 import sys
 
@@ -117,3 +118,39 @@ def test_source_plan_no_download(monkeypatch, tmp_path, capsys):
     source.main()
     assert not output.exists()
     assert "PLAN_ONLY_NO_DOWNLOAD" in capsys.readouterr().out
+
+
+def test_current_delivery_requires_native_and_provider_evidence():
+    root = Path(__file__).resolve().parents[1]
+    ledger = json.loads(
+        (root / "docs/workload-data/dataset-validation-status.json").read_text(
+            encoding="utf-8"
+        )
+    )["delivery_inventory"]["MMMU"]
+    receipt = json.loads(
+        (root / ledger["delivery_receipt"]).read_text(encoding="utf-8")
+    )
+    assert ledger["checked"] and receipt["source_checkbox_eligible"]
+    assert receipt["source"]["original_files"] == 92
+    assert receipt["source"]["original_rows"] == 11550
+    native = receipt["native_validation"]
+    assert native["tasks"] == 90 and native["multi_image_tasks"] == 4
+    assert sum(native["finish_counts"].values()) == 90
+    assert native["finish_counts"]["length"] == 59
+    assert (
+        native["native_entry_exit_code"]
+        == native["saved_result_public_audit_exit_code"]
+        == 0
+    )
+    assert native["author_prompt_and_scorer_unmodified"]
+    assert not native["full_validation_or_quality_pass_claim"]
+    provider = receipt["provider_and_research"]
+    assert (
+        provider["all_original_rows_compared"]
+        == provider["all_original_index_rows_verified"]
+        == 11550
+    )
+    assert provider["public_and_fixed_research_roundtrips"] == 152
+    assert provider["all90_native_task_ids_in_roundtrips"]
+    assert provider["installed_payloads_byte_equal"] == 44
+    assert not provider["observations_or_research_analysis_migrated"]
