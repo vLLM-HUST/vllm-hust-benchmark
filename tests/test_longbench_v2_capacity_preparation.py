@@ -169,6 +169,30 @@ def test_invalid_tokenizer_output_is_not_capacity_evidence(tokens):
         )
 
 
+@pytest.mark.parametrize(
+    "count,status",
+    [(262016, "FULL_INPUT_FITS"), (262017, "RESOURCE_LIMIT_FULL_CONTEXT")],
+)
+def test_explicit_larger_deployment_keeps_original_output_budget(count, status):
+    row = runner_module().capacity_row(
+        {"_id": "software-fixture", "length": "medium"},
+        3,
+        "SOFTWARE FIXTURE",
+        SimpleNamespace(apply_chat_template=lambda *a, **k: [1] * count),
+        model_max_length=262144,
+    )
+    assert row["full_prompt_tokens"] == count
+    assert row["status"] == status
+
+
+@pytest.mark.parametrize("window", [True, 128, 0, 2097153, 262144.0])
+def test_invalid_deployment_window_rejected_before_tokenization(window):
+    with pytest.raises(ValueError, match="deployment window"):
+        runner_module().capacity_row(
+            {}, 0, "SOFTWARE FIXTURE", None, model_max_length=window
+        )
+
+
 def test_help_needs_no_optional_model_environment():
     result = subprocess.run(
         [

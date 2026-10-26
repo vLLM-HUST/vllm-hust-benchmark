@@ -1,5 +1,11 @@
 # 数据集逐项验证清单
 
+### LongBench V2容量更新（来源仍未完成）
+
+- [x] 既定Medium原第3/5/8行，用当前9B原tokenizer和256K部署窗口重新核验，完整输入149662/138653/68762
+  tokens均容纳原128输出预算；未截断、未换题、无模型调用。[容量回执](validation/longbench-v2-medium-9b-capacity-20261027.json)
+- [ ] 原生执行器目前绑定旧128K，待显式绑定当前窗口和非思考请求后执行同三题；原Short有效结果不重跑，Long组仍超当前窗口，来源不增加总勾。
+
 ### PAWS分步骤（来源交付完成）
 
 原生运行及保存结果复核见[阶段回执](validation/paws-native-checkpoint-20261027.json)；不以阶段完成替代来源交付完成。

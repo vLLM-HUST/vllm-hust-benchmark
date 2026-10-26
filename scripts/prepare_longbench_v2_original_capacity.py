@@ -92,7 +92,9 @@ def capture_original_prompt(module, item, model, model_path, tokenizer):
         module.AutoTokenizer = original_loader
 
 
-def capacity_row(item, index, prompt, tokenizer):
+def capacity_row(item, index, prompt, tokenizer, *, model_max_length=131072):
+    if type(model_max_length) is not int or not 128 < model_max_length <= 2097152:
+        raise ValueError("explicit deployment window must be 129..2097152 tokens")
     tokens = tokenizer.apply_chat_template(
         [{"role": "user", "content": prompt}],
         tokenize=True,
@@ -114,7 +116,7 @@ def capacity_row(item, index, prompt, tokenizer):
         "full_prompt_tokens": len(tokens),
         "status": (
             "FULL_INPUT_FITS"
-            if len(tokens) + 128 <= 131072
+            if len(tokens) + 128 <= model_max_length
             else "RESOURCE_LIMIT_FULL_CONTEXT"
         ),
     }
@@ -127,10 +129,13 @@ def main():
     parser.add_argument("--tokenizer", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--model", default="workload-qwen35-27b-128k-nonthinking")
+    parser.add_argument("--model-max-length", type=int, default=131072)
     selection = parser.add_mutually_exclusive_group(required=True)
     selection.add_argument("--row-index", action="append", type=int)
     selection.add_argument("--full", action="store_true")
     args = parser.parse_args()
+    if not 128 < args.model_max_length <= 2097152:
+        parser.error("deployment window must be 129..2097152 tokens")
     args.output = args.output.resolve()
     indices = original_indices(args.row_index, full=args.full)
     if "gpt" in args.model or "o1" in args.model:
@@ -173,13 +178,21 @@ def main():
         prompt = capture_original_prompt(
             module, rows[index], args.model, model_path, tokenizer
         )
-        selected.append(capacity_row(rows[index], index, prompt, tokenizer))
+        selected.append(
+            capacity_row(
+                rows[index],
+                index,
+                prompt,
+                tokenizer,
+                model_max_length=args.model_max_length,
+            )
+        )
     if hashlib.sha256(tokenizer_file.read_bytes()).hexdigest() != tokenizer_sha:
         raise ValueError("local tokenizer changed during preparation")
     receipt = {
         "source_id": "LONGBENCH_V2",
         "model": args.model,
-        "model_max_length": 131072,
+        "model_max_length": args.model_max_length,
         "rule": "explicit original indices frozen before capacity checks; no filtering, replacement, truncation or model outcome selection",
         "selected": selected,
         "ready_for_execution": all(
