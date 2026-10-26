@@ -133,6 +133,17 @@ def build(revision, read=None):
                     )
                     .replace("另88题未执行", "当前共2/89题已尝试、87题未执行")
                 )
+                section[key] = (
+                    section[key]
+                    .replace(
+                        "已执行1/89题，该题恢复评分通过，", "OpenSSL本题恢复评分通过；"
+                    )
+                    .replace("既有OpenSSL模型结果仍为1/89", "既有OpenSSL本题结果保留")
+                    .replace(
+                        "the existing OpenSSL result remains 1/89",
+                        "the existing OpenSSL task result is retained",
+                    )
+                )
                 section[key] += " " + scope(english)
         if section["id"] == "v15-remaining":
             section["evidence"].append(evidence.copy())
