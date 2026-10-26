@@ -237,6 +237,17 @@ Qwen3.5-35B-A3B 已在保留的两张 Ascend 910B2、BF16 TP2、每卡16GiB KV�
 此步骤在模型计时之外调用固定版本官方评分器，用独立容器复验保存的补丁，不发送模型请求。 评分器另有自己的 Python 依赖，按固定源码的 requirements 安装到专用 CPU 环境后执行。
 保存 `grading-status.json` 及评分原件；只有官方输出完整才能判定 resolved，缺失输出保留未决。
 
+新评分入口在固定官方脚本外增加补丁应用取证，不改官方补丁过滤、测试、解析器或计分规则：
+
+- 保存 `git apply -v` 的退出码、标准输出和错误输出；应用失败仍保留官方后续测试及原分。
+- 保存应用前、应用后和官方测试文件恢复后、测试启动前的受影响文件类型、大小、模式及 SHA256。
+- `grading-status.json.patch_application` 分别标记 `applied`、`apply_failed`、 `unattested`；这与
+  `official_scores`、缺失评分输出分别记录，不能把应用失败后的测试当作完整补丁验证。
+- 入口与取证模块 SHA 进入 `source-and-patch-bindings.json`。原始补丁和官方实际过滤后的补丁各自保留身份。
+
+工作区内 `hust-patch-*` 文件属于受控原始证据，可能包含任务路径或补丁错误文本，不直接公开。
+这些记录仅适用于新评分执行；不补造历史日志，不因此重跑旧任务、重判旧分数或更改历史证据适用结论。
+
 ## Controller 接入与迁移边界
 
 Controller 可选实现 `integration.hook = "module:factory"`：`before_run`、`before_program`、

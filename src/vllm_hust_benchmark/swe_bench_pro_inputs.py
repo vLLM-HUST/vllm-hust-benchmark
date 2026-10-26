@@ -243,6 +243,8 @@ def prepare(configuration, output):
 
 def grade_saved_batch(c, inputs, batch_directory, output, task_offset=0):
     """Grade saved patches only, without a model call or modifying old evidence."""
+    from .swe_bench_pro_grading import summarize_application
+
     inputs, batch_directory, output = [
         Path(x).resolve() for x in (inputs, batch_directory, output)
     ]
@@ -257,7 +259,7 @@ def grade_saved_batch(c, inputs, batch_directory, output, task_offset=0):
         # independent patches for the same task from overwriting each other.
         single = json.loads(json.dumps(c))
         single["batch"]["independent_agents_per_task"] = 1
-        scores, unresolved = {}, []
+        scores, unresolved, application = {}, [], {}
         for replica in range(copies):
             label = f"replica-{replica:03d}"
             graded = grade_saved_batch(
@@ -271,8 +273,12 @@ def grade_saved_batch(c, inputs, batch_directory, output, task_offset=0):
                 {label + ":" + k: v for k, v in graded["official_scores"].items()}
             )
             unresolved.extend(label + ":" + k for k in graded["unresolved_grading"])
+            application.update(
+                {label + ":" + k: v for k, v in graded["patch_application"].items()}
+            )
         result = {
             "official_scores": scores,
+            "patch_application": application,
             "unresolved_grading": unresolved,
             "grading_status": "OUTPUTS_PRESENT"
             if not unresolved
@@ -286,6 +292,8 @@ def grade_saved_batch(c, inputs, batch_directory, output, task_offset=0):
     lock = read(LOCK_PATH)
     official = Path(c["paths"]["official_v1_source"])
     sources = validate_grading_sources(official, rows, lock)
+    adapter = Path(__file__).with_name("swe_bench_pro_grading.py")
+    helper = Path(__file__).with_name("swe_patch_state.py")
     patches, bindings = [], []
     for index, row in enumerate(rows):
         patch = batch_directory / f"task-{index + task_offset:03d}/patch-private.diff"
@@ -301,7 +309,13 @@ def grade_saved_batch(c, inputs, batch_directory, output, task_offset=0):
         )
     save(
         output / "source-and-patch-bindings.json",
-        {"official_sources": sources, "patches": bindings},
+        {
+            "official_sources": sources,
+            "patches": bindings,
+            "application_evidence_sources": {
+                path.name: digest(path) for path in (adapter, helper)
+            },
+        },
     )
     save(output / "patches-private.json", patches)
     task_images = read(inputs / "input-selection.json")["tasks"]
@@ -325,7 +339,11 @@ def grade_saved_batch(c, inputs, batch_directory, output, task_offset=0):
     check_images("before")
     arguments = [
         sys.executable,
+        str(adapter),
+        "--official-script",
         str(official / "swe_bench_pro_eval.py"),
+        "--official-sha256",
+        digest(official / "swe_bench_pro_eval.py"),
         "--raw_sample_path",
         str(inputs / "cases-private.jsonl"),
         "--patch_path",
@@ -373,6 +391,12 @@ def grade_saved_batch(c, inputs, batch_directory, output, task_offset=0):
     ]
     result = {
         "official_scores": scores,
+        "patch_application": {
+            row["instance_id"]: summarize_application(
+                output / row["instance_id"] / "workspace"
+            )
+            for row in rows
+        },
         "unresolved_grading": unresolved,
         "grading_status": "OUTPUTS_PRESENT" if not unresolved else "UNRESOLVED_OUTPUTS",
         "model_calls_in_this_grading": 0,
