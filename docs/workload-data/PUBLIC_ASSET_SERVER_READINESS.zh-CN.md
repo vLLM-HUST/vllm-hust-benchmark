@@ -1,5 +1,22 @@
 # 公开原始资产：服务器准备与任务验证缺口
 
+## PAWS发布方原分发准备（原生交付尚未完成）
+
+旧GCS归档403不再代表所有发布方路径均不可用：沿用已登记的`google-research-datasets/paws@161ece9501cf0a11f3e48bd356eaa82de46d6a09`，其完整6个HF
+Parquet、129285432字节已在服务器取得并二次只读校验，751450行与4原字段已检查。固定内容身份不变，镜像仅作传输；不构造句子对、不把Parquet冒称原tar同一文件。旧403保留在历史回执中。
+
+按[发布方说明](https://github.com/google-research-datasets/paws)，`labeled_final`为人工标注train49401/dev8000/test8000，`labeled_swap`为人工标注辅助训练30397，`unlabeled_final`为带噪声辅助训练645652/dev10000。后两者不是可混入final
+test的独立人工测试集；本次不含另受QQP许可限制的重建数据或PAWS-X。原文句子、原ID和标签需完整保留，参考不进模型输入。[准备证据](validation/paws-publisher-readiness-20261027.json)仅证明数据取得与结构，不代表原生分类、评分或研究侧已接通。
+
+```bash
+python scripts/prepare_paws_original_assets.py --output /external/paws-original
+python scripts/prepare_paws_original_assets.py --output /external/paws-original --execute
+python scripts/prepare_paws_original_assets.py --output /external/paws-original --execute --resume
+python scripts/prepare_paws_original_assets.py --output /external/paws-original --verify-only
+```
+
+默认不联网或创建目录。服务器如需要同内容镜像，显式指定`--hf-endpoint https://hf-mirror.com`；所有文件仍按发布方固定SHA256校验。输出`data/<原配置>/<原分片>`，不进入仓库或本地PC。后续原生分类/适用评分与提供者/固定研究消费验证仍待补，不打来源总勾。
+
 ## TraceLab官方轨迹回放（原生交付尚未完成）
 
 最新终态：原100M默认文本池构建后到达两请求缓存资格探测，但原512-token探测未报告命中，原程序exit1，20轮轨迹尚未开始；见[原生失败回执](validation/tracelab-original-dry-run-20261024.json)。当前9B服务已启用两项缓存配置，但Ascend日志给出的Mamba

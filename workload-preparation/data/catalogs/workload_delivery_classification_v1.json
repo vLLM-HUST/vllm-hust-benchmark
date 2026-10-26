@@ -21,6 +21,9 @@
     {"source_id": "PAIO-SEMANTIC-SIMILAR-5000", "asset_group": "enterprise-private-requests", "related_workload_ids": [], "boundary": "Semantic similarity is not exact-prefix or KV reuse; preserve original private requests without rewriting."}
   ],
   "source_entrypoints": {
+    "PAWS": [
+      {"role": "prepare_assets", "path": "scripts/prepare_paws_original_assets.py"}
+    ],
     "CHARTQA": [
       {"role": "prepare_assets", "path": "scripts/prepare_chartqa_native_toolkit.py"},
       {"role": "prepare_assets", "path": "scripts/prepare_chartqa_original_view.py"},
