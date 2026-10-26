@@ -1,0 +1,244 @@
+{
+  "schema": "terminal-native-arm64-control-observation/v1",
+  "task": "build-cython-ext",
+  "source_revision": "7131e4375048a0e408a8fb404b5f499d726b695b",
+  "architecture": "arm64",
+  "original_amd64_image_equivalence_claimed": false,
+  "base_manifest": "sha256:608b27b2db85abf38d81685085cd1166a5ed7ada66549f0dfe53a75bb830cd5d",
+  "base_config": "sha256:18d58f4e045f133283c50016a09285439cbe765877e1a93760888b85fd2ce905",
+  "derived_image_id": "sha256:c92ee6803e077b3396ee73a536cc49ebf6d632115dd37ce95e2265a1ac5d7be0",
+  "build_exit_code": 0,
+  "task_files_sha256": {
+    "instruction.md": "7e52874e45f88505bd21540229719de6639a401477557d814489981d472f0e34",
+    "task.toml": "c472f0e7522c128fb7f03e00b50c8cdf2e5e6474daa1e094e7441f4b54e770b2",
+    ".gitignore": "9a8dd8d9b6c3adb8e9e56328df27deef859a3e98fffc9b8133c8b22207c25953",
+    "README.md": "d5f5113941c3963292bae396baa9369571026f46e59437f98ddcc93475dd7729",
+    "environment/Dockerfile": "cb6cf421cb9b69d43bd25cd491e49bda982fbb865d47515178d017eda727194e",
+    "solution/solve.sh": "41bbdde88617070366a70e518eedca466a4ea1acd7e96899b2fb7da988e40abc",
+    "tests/test_outputs.py": "6549f1a8e04b6163ec08877e6f6b9868bf94563f3a3c72ac1fba9c512c31689e",
+    "tests/test.sh": "0156c9c4085258b696ce424cf1ce96cba44d1263c5d73bdf54083fd80237f915"
+  },
+  "derived_task_files_sha256": {
+    "instruction.md": "7e52874e45f88505bd21540229719de6639a401477557d814489981d472f0e34",
+    "task.toml": "482b0cfc3cc0268d2d0ce6de97a21f2421620cae8e968dda36097a2a5acd4974",
+    ".gitignore": "9a8dd8d9b6c3adb8e9e56328df27deef859a3e98fffc9b8133c8b22207c25953",
+    "README.md": "d5f5113941c3963292bae396baa9369571026f46e59437f98ddcc93475dd7729",
+    "environment/Dockerfile": "f6a865d21cad70083d7994000a82d7465e0dabaa8269248da8e91029f3ec754b",
+    "solution/solve.sh": "41bbdde88617070366a70e518eedca466a4ea1acd7e96899b2fb7da988e40abc",
+    "tests/test_outputs.py": "6549f1a8e04b6163ec08877e6f6b9868bf94563f3a3c72ac1fba9c512c31689e",
+    "tests/test.sh": "0156c9c4085258b696ce424cf1ce96cba44d1263c5d73bdf54083fd80237f915"
+  },
+  "original_tests_and_oracle_unchanged": true,
+  "resources": {
+    "cpus": 1,
+    "memory_bytes": 2147483648,
+    "cpuset": "24-31",
+    "MTU": 1400
+  },
+  "budget": {
+    "build_seconds": 600,
+    "agent_seconds": 900,
+    "verifier_seconds": 900
+  },
+  "controls": {
+    "nop": {
+      "process_exit_code": 0,
+      "control_status": "passed",
+      "reward": 0.0,
+      "elapsed_seconds": 29.482885831966996,
+      "tests": [
+        {
+          "name": "test_numpy_version",
+          "status": "passed"
+        },
+        {
+          "name": "test_repo_cloned",
+          "status": "failed"
+        },
+        {
+          "name": "test_pyknotid_core_import",
+          "status": "failed"
+        },
+        {
+          "name": "test_chelpers_cython_extension",
+          "status": "failed"
+        },
+        {
+          "name": "test_ccomplexity_cython_extension",
+          "status": "failed"
+        },
+        {
+          "name": "test_cinvariants_cython_extension",
+          "status": "failed"
+        },
+        {
+          "name": "test_chelpers",
+          "status": "failed"
+        },
+        {
+          "name": "test_ccomplexity",
+          "status": "failed"
+        },
+        {
+          "name": "test_cinvariants_python_vs_cython",
+          "status": "failed"
+        },
+        {
+          "name": "test_example_usage",
+          "status": "failed"
+        },
+        {
+          "name": "test_pyknotid_repository_tests",
+          "status": "failed"
+        }
+      ],
+      "counts": {
+        "passed": 1,
+        "failed": 10
+      },
+      "all_owned_containers_released": true,
+      "receipt_sha256": "791eb790ee3fed3f950f3584e8d31bd84d22937bb3c5135744fe9cce9c80578b",
+      "ctrf_sha256": "7ab5192db49ff79f821e661eeba58136970697f829099d667981d86838abeff2"
+    },
+    "oracle": {
+      "process_exit_code": 0,
+      "control_status": "failed",
+      "reward": 0.0,
+      "elapsed_seconds": 175.81925579160452,
+      "tests": [
+        {
+          "name": "test_numpy_version",
+          "status": "passed"
+        },
+        {
+          "name": "test_repo_cloned",
+          "status": "passed"
+        },
+        {
+          "name": "test_pyknotid_core_import",
+          "status": "passed"
+        },
+        {
+          "name": "test_chelpers_cython_extension",
+          "status": "passed"
+        },
+        {
+          "name": "test_ccomplexity_cython_extension",
+          "status": "passed"
+        },
+        {
+          "name": "test_cinvariants_cython_extension",
+          "status": "passed"
+        },
+        {
+          "name": "test_chelpers",
+          "status": "passed"
+        },
+        {
+          "name": "test_ccomplexity",
+          "status": "passed"
+        },
+        {
+          "name": "test_cinvariants_python_vs_cython",
+          "status": "passed"
+        },
+        {
+          "name": "test_example_usage",
+          "status": "passed"
+        },
+        {
+          "name": "test_pyknotid_repository_tests",
+          "status": "failed"
+        }
+      ],
+      "counts": {
+        "passed": 10,
+        "failed": 1
+      },
+      "all_owned_containers_released": true,
+      "receipt_sha256": "1440ab8902b350a61605df264502b566fcc1f8ad3a6d5db5e11b6d5f5d2182b1",
+      "ctrf_sha256": "1361883400c9172b254a22846cefab5d86abf6029b52f0d96a9b54172489504e"
+    }
+  },
+  "pipeline_status": "failed_or_incomplete",
+  "control_qualification_passed": false,
+  "model_calls": 0,
+  "new_model_task_attempts": 0,
+  "all_containers_absent_at_completion": true,
+  "private_task_or_oracle_bodies_included": false,
+  "restricted_originals": {
+    "controlled_location": "Authorized CPU persistent workspace; terminal-build-cython-arm64-r1",
+    "seal_sha256": "77b8f6b33c4829e2d2f38c90f7e02188c3eb8d1221ef9ffad9a8a8f6d319364a",
+    "files_verified": 66,
+    "files": {
+      "build-exit.json": "cad8f88d6545a093f4494ef34aff3c479193fab240cd425e3475751b07691207",
+      "build-plan.json": "6a7bbd4f3e19b43da83f9322db21b85cae50f40e970a3119ed0b4666ad609bde",
+      "build-started.json": "29becadf0a5e7a75754142af62f9c2af1e720ff2c883b2498c6fa689a40aaeb1",
+      "build.log": "1d28c2219fdea9d66329b8be055455bd58074a8eb7429cd3908d917db09d5421",
+      "built-image.json": "1dc99a4584855bfe39952d00222f7a1692415fe32ea2ca2ec9d65db80e82f4ba",
+      "compose-preflight.json": "006299d1481a0cd44cb8be53df6468d57861dfbef60d5e3fc134d91f4647123a",
+      "control-compose.json": "e39b98b2bae81d7c6393dfe447c9500a6f1a497021ae6734dcc61f85177ff020",
+      "control-nop-child.json": "1634eb9772c3e602c5316985207374884c9309776b6f5e69f1659751a9fa0346",
+      "control-nop-container-225cfe1e9b34.json": "a2991237484fd0861a9d92f49295f65d7cabfe9bca5cd4258bf014f27bc84164",
+      "control-nop-receipt.json": "791eb790ee3fed3f950f3584e8d31bd84d22937bb3c5135744fe9cce9c80578b",
+      "control-nop-started.json": "972f6d97d628d3aa0d79d7b9f18282900575512a0d55e7e971eebc0dc5bbb6b0",
+      "control-nop.log": "5388fb4bc50c23364ba2c5c9060c9af04165393b6cdda2e787276ac6088c1d0a",
+      "control-oracle-child.json": "a9e8f01776aa40bd7c9d15d3bdfe7ae91155bec9074847f0c280c59afd2329bf",
+      "control-oracle-container-927b2a0777d2.json": "3cb9376bc3bf9a03a439b23d086402f5d170c554fb6aeeff247c6f1ac5b76db7",
+      "control-oracle-receipt.json": "1440ab8902b350a61605df264502b566fcc1f8ad3a6d5db5e11b6d5f5d2182b1",
+      "control-oracle-started.json": "a78e6a63e6d691c26e1fd4ad2cc48eb05fb23062e3973eb264115faa8e7d017d",
+      "control-oracle.log": "9350e93e94735372cb4327fa89cc83492015ecb48fb4417e8afe039e24c4b117",
+      "controls-plan.json": "288dc2cd044acd13aff3e80d406f3a1c8dd464667caefdd7941af9c76f66896d",
+      "docker-config/cli-plugins/docker-compose": "49082844b87f03cdcd5f5bbef1ba8c9c897b7a2dfb80cea18d61ec8ca6117e0c",
+      "job-nop.json": "204ff2c5c092db34ec5efda0a65b58f8ddb6b72598c3c37577a5e3a10daf1c84",
+      "job-oracle.json": "d35951f82c3bdc234aa9457d79dcbd0f6a7002abcad068d6585ed0730d0105c7",
+      "jobs/terminal-build-cython-nop-arm64-r1/config.json": "5658c8f23fa49bcdd898ec3f37db71985667bd95d7f987e2df2a7c8a1ba1fc15",
+      "jobs/terminal-build-cython-nop-arm64-r1/job.log": "27645709b8dfe2c26fbdc8bfca9f0aa3dcf77d84005fb1db61a290fb23dd4259",
+      "jobs/terminal-build-cython-nop-arm64-r1/lock.json": "b70524f59e7e805607f4d1a7eadc1f446bf26e0d890b7104182df37628d3abdd",
+      "jobs/terminal-build-cython-nop-arm64-r1/result.json": "819318b3199b7be5830e70a7b32f0b77eb8a1d9119b70a001050f8779bc78da0",
+      "jobs/terminal-build-cython-nop-arm64-r1/task-arm64__oGkb7JB/artifacts/manifest.json": "ded0d7ce10852ffc713c14edac13664f70953cf5e271de31db9e1c64229411d8",
+      "jobs/terminal-build-cython-nop-arm64-r1/task-arm64__oGkb7JB/config.json": "29f22849b58ea6568098e01c050723ac215986c7dd0d14a4f6f6af5580bf0602",
+      "jobs/terminal-build-cython-nop-arm64-r1/task-arm64__oGkb7JB/lock.json": "2c131857ebf3708d090d87a8a4638e5f8afd9d2e5133fc19aecd21467b3d1236",
+      "jobs/terminal-build-cython-nop-arm64-r1/task-arm64__oGkb7JB/result.json": "da2dec996548b73a369d80b3eda8aba586a802a4d10069862d6357b322dbc8e0",
+      "jobs/terminal-build-cython-nop-arm64-r1/task-arm64__oGkb7JB/trial.log": "5868e519b78e4f2f267470e411fb5e62ab85729eb3642ffbddd64e569930f993",
+      "jobs/terminal-build-cython-nop-arm64-r1/task-arm64__oGkb7JB/verifier/ctrf.json": "7ab5192db49ff79f821e661eeba58136970697f829099d667981d86838abeff2",
+      "jobs/terminal-build-cython-nop-arm64-r1/task-arm64__oGkb7JB/verifier/reward.txt": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "jobs/terminal-build-cython-nop-arm64-r1/task-arm64__oGkb7JB/verifier/test-stdout.txt": "754fb60b988b39532bc3362df1eaa7922ce76f092b5f1c28126d7267c1b3e40a",
+      "jobs/terminal-build-cython-oracle-arm64-r1/config.json": "c41ba854e20adea35bc75a8f850f0e77ef45c8b87cb1ef0bc97d77ac5a0bc58e",
+      "jobs/terminal-build-cython-oracle-arm64-r1/job.log": "bf29af3c977c2ccf0d3abae6e48b65e526c76e6174a82392398ca22f0599fed5",
+      "jobs/terminal-build-cython-oracle-arm64-r1/lock.json": "8c485f7fff35a2fec3b472552995dcff7ae66a616290a22f070912360c8ef046",
+      "jobs/terminal-build-cython-oracle-arm64-r1/result.json": "03dd49b629d067b14b1d987db80016c8d639b61b76cce2b8ab49e8b1313b5f2f",
+      "jobs/terminal-build-cython-oracle-arm64-r1/task-arm64__RLgzG55/agent/oracle.txt": "fe7324819a3f0cafb63bbc46a5ba15b3c53e5585249dbc3ab89454b2ff49dcbb",
+      "jobs/terminal-build-cython-oracle-arm64-r1/task-arm64__RLgzG55/artifacts/manifest.json": "ded0d7ce10852ffc713c14edac13664f70953cf5e271de31db9e1c64229411d8",
+      "jobs/terminal-build-cython-oracle-arm64-r1/task-arm64__RLgzG55/config.json": "c17377968e8bb04da223e0dd319b8acaadffc122ad71ac7c0aa96406ad3138c0",
+      "jobs/terminal-build-cython-oracle-arm64-r1/task-arm64__RLgzG55/lock.json": "fb2039b0df793fb0faf6c72cd345e913fe9344d25c70ef3c7b73a41a9adaf5f2",
+      "jobs/terminal-build-cython-oracle-arm64-r1/task-arm64__RLgzG55/result.json": "ccc5204cbfea0578aac068c6e92205d293bb32538cb757dad3736be4419b07ef",
+      "jobs/terminal-build-cython-oracle-arm64-r1/task-arm64__RLgzG55/trial.log": "5868e519b78e4f2f267470e411fb5e62ab85729eb3642ffbddd64e569930f993",
+      "jobs/terminal-build-cython-oracle-arm64-r1/task-arm64__RLgzG55/verifier/ctrf.json": "1361883400c9172b254a22846cefab5d86abf6029b52f0d96a9b54172489504e",
+      "jobs/terminal-build-cython-oracle-arm64-r1/task-arm64__RLgzG55/verifier/reward.txt": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "jobs/terminal-build-cython-oracle-arm64-r1/task-arm64__RLgzG55/verifier/test-stdout.txt": "66c6e9d453b482741113f1276f0f44dc8f3338f95a114b092510f92725ee1e09",
+      "original/.gitignore": "9a8dd8d9b6c3adb8e9e56328df27deef859a3e98fffc9b8133c8b22207c25953",
+      "original/README.md": "d5f5113941c3963292bae396baa9369571026f46e59437f98ddcc93475dd7729",
+      "original/environment/Dockerfile": "cb6cf421cb9b69d43bd25cd491e49bda982fbb865d47515178d017eda727194e",
+      "original/instruction.md": "7e52874e45f88505bd21540229719de6639a401477557d814489981d472f0e34",
+      "original/solution/solve.sh": "41bbdde88617070366a70e518eedca466a4ea1acd7e96899b2fb7da988e40abc",
+      "original/task.toml": "c472f0e7522c128fb7f03e00b50c8cdf2e5e6474daa1e094e7441f4b54e770b2",
+      "original/tests/test.sh": "0156c9c4085258b696ce424cf1ce96cba44d1263c5d73bdf54083fd80237f915",
+      "original/tests/test_outputs.py": "6549f1a8e04b6163ec08877e6f6b9868bf94563f3a3c72ac1fba9c512c31689e",
+      "pipeline-dispatch.json": "7b129a8b8bde8fdaf02a2b0c9af59d22b869bdcad4c1e548cfea1cfce84b0fb7",
+      "pipeline-receipt.json": "fc375ae7b4eddd4a955d937012fc7cb0105caebb65b535f0b2e1143285cf3d9d",
+      "pipeline-started.json": "93539da6e3622f84380d4107e54020ac20058af89dd0a431befb12a3a4ebe418",
+      "pipeline.log": "2fa9c1df67ce76b3c4ec5b1fae6130a380b1e1055e09cdc8956d20434e71abe6",
+      "task-arm64/.gitignore": "9a8dd8d9b6c3adb8e9e56328df27deef859a3e98fffc9b8133c8b22207c25953",
+      "task-arm64/README.md": "d5f5113941c3963292bae396baa9369571026f46e59437f98ddcc93475dd7729",
+      "task-arm64/environment/Dockerfile": "f6a865d21cad70083d7994000a82d7465e0dabaa8269248da8e91029f3ec754b",
+      "task-arm64/instruction.md": "7e52874e45f88505bd21540229719de6639a401477557d814489981d472f0e34",
+      "task-arm64/solution/solve.sh": "41bbdde88617070366a70e518eedca466a4ea1acd7e96899b2fb7da988e40abc",
+      "task-arm64/task.toml": "482b0cfc3cc0268d2d0ce6de97a21f2421620cae8e968dda36097a2a5acd4974",
+      "task-arm64/tests/test.sh": "0156c9c4085258b696ce424cf1ce96cba44d1263c5d73bdf54083fd80237f915",
+      "task-arm64/tests/test_outputs.py": "6549f1a8e04b6163ec08877e6f6b9868bf94563f3a3c72ac1fba9c512c31689e"
+    }
+  },
+  "derivation_source_sha256": "64722ce2b6772f5b68d58bcb87f2e8bb63dd423a2f6ed88176d888a1fbb783cf",
+  "interpretation": "ARM64 image build passed; nop control behaved as expected. Original oracle failed one outer repository-suite test. This is not a model failure or added model coverage. Internal traceback/root cause not established by the truncated original log; original failures are retained."
+}

@@ -1,0 +1,85 @@
+{
+  "schema": "swe-original-test-source-recovery/v1",
+  "run_id": "swe018-repo-08-r1",
+  "model": "Qwen3.5-35B-A3B",
+  "vllm": "0.18.0",
+  "vllm_ascend": "0.18.0",
+  "status": "test_source_restored_dependency_failure_before_test_body",
+  "new_Agent_attempts": 0,
+  "new_model_calls": 0,
+  "test_source_restored": true,
+  "tests_executed": 0,
+  "parsed_tests": 0,
+  "accepted_functional_score": null,
+  "original_result": {
+    "official": false,
+    "parsed_tests": 0
+  },
+  "recovery_result": {
+    "official": false,
+    "parsed_tests": 0,
+    "raw_test_suites_failed": 1,
+    "raw_tests_executed": 0,
+    "F2P": {
+      "expected": 1,
+      "passed": 0,
+      "failed": 0,
+      "missing": 1
+    },
+    "P2P": {
+      "expected": 1,
+      "passed": 0,
+      "failed": 0,
+      "missing": 1
+    }
+  },
+  "test_source": {
+    "bytes": 1033,
+    "sha256": "e4de5749a0da6f4473831b7168ffa181f9796005dce57b382f3fdf51e55ab455",
+    "mode": "0644",
+    "mode_basis": "original dataset test_patch new-file mode100644",
+    "source": "unchanged frozen dataset test_patch; missing commit blob equivalence not claimed",
+    "before_and_after_equal": true,
+    "original_checkout_exit": 128
+  },
+  "patch": {
+    "bytes": 131723,
+    "sha256": "e7bf2eb1b6daac6b865dd7ed07bef399ded566172b931f5dd141369235764e87",
+    "apply_exit": 0,
+    "after_equals_graded": true,
+    "all_three_affected_file_snapshots_equal_original": true
+  },
+  "source_review": {
+    "actual_Series_and_dict_entry_equal": true,
+    "entry_equal_frozen_candidate": true,
+    "original_run_script_and_parser_byte_identical": true,
+    "original_parser_pure_replay_equal": true
+  },
+  "failure": {
+    "classification": "original native dependency loading failure before test body",
+    "module": "../build/Release/canvas.node",
+    "chain": "canvas -> jsdom -> jest-environment-jsdom -> applications/drive/jest.env.js",
+    "first_test_path_selected": true,
+    "second_original_selection_not_reached": true,
+    "not_Agent_assertion_failure": true
+  },
+  "pretest_failures_preserved": {
+    "r1": "task-key image map misread; no dispatch or grade",
+    "r2": "actual pandas Series compared with dict; before Docker create, output tests unavailable"
+  },
+  "released": true,
+  "controller_exited": true,
+  "resources_scope": "Original official entryscript and original fixed Docker host policy retained; no separate recovery container inspect saved, do not invent a fresh measured resource record.",
+  "original_files_unchanged": true,
+  "new_grading_executions_by_independent_review": 0,
+  "evidence": {
+    "plan_sha256": "6f3ee740bab177172966c9d1f6a2975874263636c10152639cd04c9cf2dd0e0e",
+    "candidate_sha256": "d1070937956a50d2dae114d5d4c7232930679d1da7b4290b12963b4b556c7bc6",
+    "helper_sha256": "92e2bad37be6213936265808547a71b5ea9425f1327b59b4a02e8e2c88c528f2",
+    "receipt_sha256": "fe9bc4b4e53050bf5d4a34b3c6116c1e7755a71ad98176a103682335a3133a67",
+    "seal_sha256": "1ea7e77bdc12796e8ec2e581fb9fcd78f35bcbbeb2081c637d551059c8b96cbf",
+    "sealed_files": 32,
+    "independent_review_sha256": "8984b750e85ece32adbecf345704d3e7b0a49fe14194def8bcc8aa045b453110"
+  },
+  "private_task_answer_patch_or_request_contents_included": false
+}

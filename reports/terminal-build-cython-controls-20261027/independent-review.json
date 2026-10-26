@@ -1,0 +1,39 @@
+{
+  "status": "reviewed_build_pass_oracle_control_failed_root_cause_trace_missing",
+  "build_image": "sha256:c92ee6803e077b3396ee73a536cc49ebf6d632115dd37ce95e2265a1ac5d7be0",
+  "build_exit_code": 0,
+  "seal_files_verified": 66,
+  "seal_sha256": "77b8f6b33c4829e2d2f38c90f7e02188c3eb8d1221ef9ffad9a8a8f6d319364a",
+  "original_task_test_oracle_unchanged": true,
+  "resources": {
+    "cpus": 1,
+    "memory_bytes": 2147483648,
+    "cpuset": "24-31",
+    "MTU": 1400,
+    "verifier_seconds": 900,
+    "build_seconds": 600,
+    "actual_RW_logs_verified": true,
+    "different_fresh_control_containers": true,
+    "all_owned_containers_released": true
+  },
+  "proven_failure": "Original outer test_pyknotid_repository_tests ran nested pytest; return1 and17passed/1failed. Outer10passed/1failed, reward0. No evidence of build failure, verifier timeout, pip download failure or missing Cython extensions.",
+  "root_cause": "Not determined: original subprocess.run(capture_output=True) hides nested stdout except truncated CompletedProcess representation. Full internal traceback/assertion and post-oracle environment were not sealed.",
+  "no_new_models_Agents_builds_controls_tests": true,
+  "original_review_sha256": "d438198183dd9b57fc452691e031a34920262e08a0e377336e3a813eada17c68",
+  "nested_observation": {
+    "passed": 17,
+    "failed": 1,
+    "exit_code": 1,
+    "full_internal_trace_preserved": false
+  },
+  "actual_versions_observed": {
+    "python": "3.13.17",
+    "numpy": "2.3.0",
+    "cython": "3.1.3",
+    "setuptools": "80.9.0",
+    "pytest": "8.4.1",
+    "sympy": "1.14.0",
+    "networkx": "3.7"
+  },
+  "private_task_or_oracle_bodies_included": false
+}

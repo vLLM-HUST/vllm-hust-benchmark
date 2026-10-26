@@ -80,7 +80,10 @@ def test_v093_projection_preserves_all_previous_results(monkeypatch):
     monkeypatch.syspath_prepend(str(ROOT / "scripts"))
     import build_midterm_v093 as b
 
-    data = b.build("fixture", lambda p: (ROOT / p).read_bytes())
+    archived = "reports/vllm-hust-midterm-20261019/中期测试报告-v093.md"
+    data = b.build(
+        "fixture", lambda p: (ROOT / (archived if p == b.REPORT else p)).read_bytes()
+    )
     old = json.loads((ROOT / "website-publication/data/midterm-v092.json").read_text())
     for key in (
         "wholechain_reference",
@@ -113,6 +116,6 @@ def test_v093_projection_preserves_all_previous_results(monkeypatch):
         )
         assert "87" in row[1] and "2/89" in row[1]
         assert "null" in row[1]
-    report = (ROOT / b.REPORT).read_text()
+    report = (ROOT / archived).read_text()
     assert "另88题未执行" not in report
     assert "99.9397%" in report and "原reward=null" in report
