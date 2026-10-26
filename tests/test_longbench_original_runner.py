@@ -59,6 +59,33 @@ def test_v2_historical_three_selection_is_accepted_without_changes():
     assert [row["row_index"] for row in selected] == [1, 4, 6]
 
 
+def test_v2_explicit_256k_binding_preserves_full_input_and_original_budget():
+    runner = load_v2_runner()
+    capacity = capacity_software_fixture()
+    capacity["model_max_length"] = 262144
+    capacity["selected"][0]["full_prompt_tokens"] = 262016
+    assert runner.validate_capacity_selection(capacity, capacity["model"], 262144)
+    capacity["selected"][0]["full_prompt_tokens"] += 1
+    with pytest.raises(ValueError, match="complete original inputs"):
+        runner.validate_capacity_selection(capacity, capacity["model"], 262144)
+    with pytest.raises(ValueError, match="model/window"):
+        runner.validate_capacity_selection(capacity, capacity["model"])
+
+
+def test_v2_live_deployment_binding_rejects_missing_wrong_or_duplicate_model():
+    runner = load_v2_runner()
+    valid = {"id": "software-fixture", "max_model_len": 262144}
+    runner.validate_deployment([valid], "software-fixture", 262144)
+    for models in [
+        [],
+        [valid, valid],
+        [{"id": "other", "max_model_len": 262144}],
+        [{"id": "software-fixture", "max_model_len": 131072}],
+    ]:
+        with pytest.raises(ValueError, match="live model/window"):
+            runner.validate_deployment(models, "software-fixture", 262144)
+
+
 def test_v2_updated_entry_does_not_relabel_historical_npu_evidence():
     ledger = json.loads(
         (ROOT / "docs/workload-data/dataset-validation-status.json").read_text("utf-8")

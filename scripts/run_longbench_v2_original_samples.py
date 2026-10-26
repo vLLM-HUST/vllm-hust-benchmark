@@ -14,13 +14,15 @@ import zipfile
 from urllib.parse import urlparse
 
 
-def validate_capacity_selection(capacity, model):
+def validate_capacity_selection(capacity, model, model_max_length=131072):
     """Keep every explicitly selected original task; reject, never filter, overflow."""
     if (
         not isinstance(capacity, dict)
         or capacity.get("model") != model
         or type(capacity.get("model_max_length")) is not int
-        or capacity.get("model_max_length") != 131072
+        or type(model_max_length) is not int
+        or not 128 < model_max_length <= 2097152
+        or capacity.get("model_max_length") != model_max_length
     ):
         raise ValueError("capacity profile differs from model/window binding")
     selected = capacity.get("selected")
@@ -51,7 +53,7 @@ def validate_capacity_selection(capacity, model):
         if (
             row.get("status") != "FULL_INPUT_FITS"
             or type(row.get("full_prompt_tokens")) is not int
-            or not 0 < row["full_prompt_tokens"] <= 131072 - 128
+            or not 0 < row["full_prompt_tokens"] <= model_max_length - 128
         ):
             raise ValueError("complete original inputs do not fit deployment window")
     if len({row["id"] for row in selected}) != len(selected) or len(
@@ -59,6 +61,12 @@ def validate_capacity_selection(capacity, model):
     ) != len(selected):
         raise ValueError("duplicate task IDs or ambiguous prompt identities")
     return selected
+
+
+def validate_deployment(models, model, model_max_length):
+    matches = [item for item in models if item.get("id") == model]
+    if len(matches) != 1 or matches[0].get("max_model_len") != model_max_length:
+        raise ValueError("live model/window differs from explicit deployment binding")
 
 
 def main():
@@ -70,6 +78,7 @@ def main():
     parser.add_argument("--tokenizer", type=Path, required=True)
     parser.add_argument("--endpoint", default="http://127.0.0.1:19466/v1")
     parser.add_argument("--model", default="workload-qwen35-27b-128k-nonthinking")
+    parser.add_argument("--model-max-length", type=int, default=131072)
     args = parser.parse_args()
     url = urlparse(args.endpoint)
     if (
@@ -95,7 +104,7 @@ def main():
     ):  # pragma: allowlist secret - official archive checksum
         raise ValueError("official LongBench archive identity mismatch")
     capacity = json.loads(args.capacity_selection.read_text(encoding="utf-8"))
-    selected = validate_capacity_selection(capacity, args.model)
+    selected = validate_capacity_selection(capacity, args.model, args.model_max_length)
     rows = json.loads(args.data_file.read_text())
     items = [copy.deepcopy(rows[r["row_index"]]) for r in selected]
     if [r["_id"] for r in items] != [r["id"] for r in selected]:
@@ -125,7 +134,7 @@ def main():
     model_path = str(args.tokenizer.resolve())
     endpoint = args.endpoint
     module.model_map = {alias: model_path}
-    module.maxlen_map = {alias: 131072}
+    module.maxlen_map = {alias: args.model_max_length}
     module.URL = endpoint
     expected = {r["prompt_sha256"]: r for r in selected}
     client = OpenAI(
@@ -133,6 +142,11 @@ def main():
         api_key="local-unused",  # pragma: allowlist secret - dummy loopback key
         max_retries=0,
         timeout=300,  # pragma: allowlist secret - dummy loopback key
+    )
+    validate_deployment(
+        [item.model_dump() for item in client.models.list().data],
+        alias,
+        args.model_max_length,
     )
     requests = []
     attempts = []
@@ -153,8 +167,14 @@ def main():
         if kwargs["temperature"] != 0.1 or kwargs["max_tokens"] != 128:
             raise ValueError("original decoding budget/configuration changed")
         kwargs["model"] = alias
+        kwargs["extra_body"] = {"chat_template_kwargs": {"enable_thinking": False}}
         attempts.append({"id": expected[digest]["id"], "prompt_sha256": digest})
+        request_number = len(attempts)
+        (run / f"request-{request_number}.private.json").write_text(json.dumps(kwargs))
         response = client.chat.completions.create(**kwargs)
+        (run / f"response-{request_number}.private.json").write_text(
+            response.model_dump_json()
+        )
         usage = response.usage
         if usage.prompt_tokens != expected[digest]["full_prompt_tokens"]:
             raise ValueError(
@@ -190,6 +210,8 @@ def main():
         "status": "STARTED",
         "started_at_unix": time.time(),
         "model": alias,
+        "model_max_length": args.model_max_length,
+        "chat_template_kwargs": {"enable_thinking": False},
         "temperature": 0.1,
         "max_new_tokens": 128,
         "execution": "official get_pred/extract_answer; only deployment map and client model route bound",
