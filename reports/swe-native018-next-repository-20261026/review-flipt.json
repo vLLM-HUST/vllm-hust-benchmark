@@ -1,0 +1,82 @@
+{
+  "status": "reviewed_valid_negative",
+  "observed_epoch": 1793027683.787805,
+  "request_calls": 51,
+  "agent_seconds": 262.0626379288733,
+  "agent_submitted": true,
+  "official_result": false,
+  "unresolved": 0,
+  "fail_to_pass": {
+    "passed": 3,
+    "expected": 4,
+    "failed_in_official_output": 0,
+    "missing": 1,
+    "missing_item_raw_executed_and_failed": true
+  },
+  "pass_to_pass": {
+    "passed": 0,
+    "expected": 0,
+    "failed": 0,
+    "missing": 0
+  },
+  "test_coverage": {
+    "raw_top_level": {
+      "PASSED": 14,
+      "FAILED": 2
+    },
+    "official_parser_records": 14,
+    "missing_expected_F2P_raw_failed": true,
+    "parser_explanation": "Frozen parser matches only top-level PASS lines, omits FAIL lines; expected missing1 was actually executed and failed. No parser or score change.",
+    "raw_package_setup_failures": 2,
+    "scope": "Top-level test statuses only, not total nested subtests. Package setup failures also retained."
+  },
+  "original_fixture": {
+    "before_first_model_matches_frozen_policy": true,
+    "policy": {
+      "image_id": "sha256:19d910832605bbc61e796593190107d989e95443b167dc9151e45b4f2a5cbde4",
+      "base_commit": "85bb23a3571794c7ba01e61904bac6913c3d9729",
+      "files": {
+        "go.work.sum": {
+          "file_sha256": "0669f9f72e355eef492eb2f943b1fc2b87b7e4b5a96a200b4befdddd0aae7f10",
+          "diff_sha256": "6a92bec4fd792e0b5fb99c612b80bba8a61b5a1094f75af06cf036959bacb7ff"
+        }
+      }
+    },
+    "receipt_sha256": "36064130df77c452b3839e74b11ffd4844abffbecc16fe755c38df980119bb71",
+    "no_removal_from_submitted_or_effective_patch": true
+  },
+  "patch_application": {
+    "exit_code": 0,
+    "state_capture": "complete",
+    "patch_sha256": "14ca77b3744caf2a7cd66703b8d7d2b2f0d6c1aa57cabd8f07fa1a83443a0d07",
+    "bytes": 173258,
+    "after_graded_identity_equal": true,
+    "affected_paths": 4,
+    "patch_modified": false
+  },
+  "seal": {
+    "cpu_files_verified": 60,
+    "cpu_seal_sha256": "8db9605392453aa73f14201c8d985110142d1abd49d2db80d32dc224d8f7db1b",
+    "service_files_verified": 14
+  },
+  "resources": {
+    "service_completed_drained_released": true,
+    "NPU3_6_empty_observed": true,
+    "grade_container_69090e7f7cf0_absent": true,
+    "CPU_active_container_count_at_readback": 0,
+    "other_CPU_preparation_owner": "profiling",
+    "new_resource_operations": false
+  },
+  "evidence": {
+    "swe-repo-03-result-storage-review-r1.json": "fb44f9a9a732fb836c1942e5b3b0a8c04c95eb2bba29ea0d2ae08d5047701a56",
+    "swe-repo-03-release-storage-review-r1.json": "afcf863c17b36a84713fb41311491e57ad3c530ac3577b136cb1f7ca9219efcb",
+    "swe-repo-03-cpu-release-readback-r1.json": "5aaaa849737bb92257fc88a13439c82c0d8874d2d4b1e19d445ff22687504265",
+    "swe-repo-03-public-summary-readback-r1.json": "4e524d2e077bf573d8249f15203851c055ece28792294c00ec0578ea7da9d64c",
+    "audit_swe_repo03_result_cpu_r1.py": "b4247c72b0a767106a1e9955214be49a79c3b7a7344799b89914df1f3db6e483"
+  },
+  "no_reruns": true,
+  "new_model_calls": 0,
+  "interpretation": "Original official false retained as valid negative. Frozen parser reports F2P3/4 missing1; raw log confirms missing target failed. Raw top-level14pass/2fail and two package setup failures preserved separately; not all tests passed. Original go.work.sum fixture and full submitted/effective patch retained. Ready for V0.89 aggregation, not yet publication acceptance.",
+  "private_original_review_sha256": "d57863368e7903d94698f498699e90e9b496f426bef53b1f74abb6473b214a4f",
+  "projection": "private CPU path removed; source evidence paths reduced to basenames; original hashes retained"
+}

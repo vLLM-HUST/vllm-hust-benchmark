@@ -37,7 +37,13 @@ def test_v088_report_and_projection_keep_completed_metrics(monkeypatch):
     monkeypatch.syspath_prepend(str(ROOT / "scripts"))
     import build_midterm_v088 as b
 
-    data = b.build("fixture", lambda p: (ROOT / p).read_bytes())
+    snapshot_v088 = ROOT / "reports/vllm-hust-midterm-20261019/中期测试报告-v088.md"
+    data = b.build(
+        "fixture",
+        lambda p: (
+            snapshot_v088.read_bytes() if p == b.REPORT else (ROOT / p).read_bytes()
+        ),
+    )
     old = json.loads((ROOT / "website-publication/data/midterm-v087.json").read_text())
     for key in (
         "wholechain_reference",
@@ -59,7 +65,7 @@ def test_v088_report_and_projection_keep_completed_metrics(monkeypatch):
     snapshot = (ROOT / b.OLD_REPORT).read_bytes()
     assert hashlib.sha256(snapshot).hexdigest() == old["report_sha256"]
     generated = b.render_report(snapshot.decode(), value)
-    current = (ROOT / b.REPORT).read_text()
+    current = snapshot_v088.read_text()
     assert "报告版本：V0.88" in generated and "报告版本：V0.88" in current
     for text in (
         "99.9397%",
