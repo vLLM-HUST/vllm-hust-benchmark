@@ -248,6 +248,19 @@ Qwen3.5-35B-A3B 已在保留的两张 Ascend 910B2、BF16 TP2、每卡16GiB KV�
 工作区内 `hust-patch-*` 文件属于受控原始证据，可能包含任务路径或补丁错误文本，不直接公开。
 这些记录仅适用于新评分执行；不补造历史日志，不因此重跑旧任务、重判旧分数或更改历史证据适用结论。
 
+## 原镜像自带的已跟踪文件
+
+默认仍要求任务容器位于干净的官方 base。少数固定镜像在构建阶段生成了已跟踪的依赖校验文件； 只有在模型请求前确认它们来自该原镜像并冻结身份后，才能配置
+`container.allowed_initial_tracked`。不能用 `allowed_initial_untracked` 冒充已跟踪状态。
+
+此可选对象必须同时包含 `image_id`、`base_commit` 和非空 `files` 映射。 每个精确相对路径都绑定完整文件的 `file_sha256` 及
+`git diff --binary --no-ext-diff --no-textconv HEAD -- <path>` 输出的 `diff_sha256`。
+不接受通配符、路径逃逸、额外路径、已暂存修改、缺失预期修改或不同镜像/base。 首次模型调用前实际读取文件及差异，保留
+`initial-tracked-fixtures-private.json`； 任一测量失败或身份不一致立即拒绝，不清理、重置、修复或改写文件。
+
+这一准入只保留原始镜像状态，不改变 Agent、输入、预算或官方评分。 最终补丁仍按原流程完整保存和提交，不事后删除初始文件差异；官方原 reset/apply/test
+顺序不变。旧镜像、旧入口、失败记录和既有评分不被覆盖，也不会触发重跑。 具体任务是否可执行仍由其事前冻结配置与真实容器回执决定。
+
 ## Controller 接入与迁移边界
 
 Controller 可选实现 `integration.hook = "module:factory"`：`before_run`、`before_program`、

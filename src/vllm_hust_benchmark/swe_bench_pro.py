@@ -9,6 +9,7 @@ from __future__ import annotations
 import argparse
 import copy
 import dataclasses
+import hashlib
 import importlib
 import importlib.metadata
 import json
@@ -16,6 +17,8 @@ import multiprocessing
 import os
 from pathlib import Path
 import runpy
+import re
+import shlex
 import signal
 import subprocess
 import sys
@@ -102,6 +105,9 @@ def validate(configuration):
     for name in ("dataset_parquet", "agent_source", "official_v1_source", "docker"):
         if not Path(c["paths"][name]).is_absolute():
             raise ValueError("Absolute runtime path required: " + name)
+    validate_initial_tracked_policy(
+        c.get("container", {}).get("allowed_initial_tracked")
+    )
     return c
 
 
@@ -119,16 +125,95 @@ def call_hook(hook, method, *args):
     return None
 
 
-def validate_initial_repository(before, base_commit, allowed_untracked=()):
+def validate_initial_tracked_policy(policy):
+    if policy is None:
+        return
+    if not isinstance(policy, dict) or set(policy) != {
+        "image_id",
+        "base_commit",
+        "files",
+    }:
+        raise ValueError("Tracked fixture policy requires exact image, base and files")
+    if not isinstance(policy["image_id"], str) or not re.fullmatch(
+        r"sha256:[0-9a-f]{64}", policy["image_id"]
+    ):
+        raise ValueError("Tracked fixture requires a content-addressed image")
+    if not isinstance(policy["base_commit"], str) or not re.fullmatch(
+        r"[0-9a-f]{40}", policy["base_commit"]
+    ):
+        raise ValueError("Tracked fixture requires an exact Git base")
+    files = policy["files"]
+    if not isinstance(files, dict) or not files:
+        raise ValueError("Tracked fixture files must be a nonempty mapping")
+    for name, entry in files.items():
+        if (
+            not isinstance(name, str)
+            or not name
+            or name.startswith("/")
+            or any(part in ("", ".", "..", ".git") for part in name.split("/"))
+            or any(ord(char) < 32 or char in "\\*?[" for char in name)
+        ):
+            raise ValueError("Tracked fixture requires exact relative file paths")
+        if not isinstance(entry, dict) or set(entry) != {"file_sha256", "diff_sha256"}:
+            raise ValueError("Bind both original file and original Git diff")
+        if any(
+            not isinstance(value, str) or not re.fullmatch(r"[0-9a-f]{64}", value)
+            for value in entry.values()
+        ):
+            raise ValueError("Invalid tracked fixture SHA256")
+
+
+def observe_initial_tracked(env, policy):
+    validate_initial_tracked_policy(policy)
+    records, observations = {}, {}
+    for name in policy["files"]:
+        path = shlex.quote(name)
+        file_result = env.execute("sha256sum -- " + path)
+        diff_result = env.execute(
+            "git diff --binary --no-ext-diff --no-textconv HEAD -- " + path
+        )
+        records[name] = {"file": file_result, "diff": diff_result}
+        if file_result["returncode"] or diff_result["returncode"]:
+            continue
+        expected_suffix = "  " + name + "\n"
+        raw = file_result["output"]
+        if len(raw) != 64 + len(expected_suffix) or not raw.endswith(expected_suffix):
+            continue
+        observations[name] = {
+            "file_sha256": raw[:64],
+            "diff_sha256": hashlib.sha256(diff_result["output"].encode()).hexdigest(),
+        }
+    return {"records": records, "observations": observations}
+
+
+def validate_initial_repository(
+    before,
+    base_commit,
+    allowed_untracked=(),
+    *,
+    tracked_policy=None,
+    tracked_observations=None,
+    image_id=None,
+):
+    validate_initial_tracked_policy(tracked_policy)
+    allowed_status = {"?? " + name for name in allowed_untracked}
+    required_status = set()
+    if tracked_policy is not None:
+        if (
+            tracked_policy["base_commit"] != base_commit
+            or tracked_policy["image_id"] != image_id
+            or tracked_observations != tracked_policy["files"]
+        ):
+            raise ValueError("Original tracked fixture identity mismatch")
+        required_status = {" M " + name for name in tracked_policy["files"]}
+        allowed_status |= required_status
     lines = before["output"].splitlines()
     if (
         before["returncode"]
         or not lines
         or lines[0] != base_commit
-        or any(
-            line not in {"?? " + name for name in allowed_untracked}
-            for line in lines[1:]
-        )
+        or any(line not in allowed_status for line in lines[1:])
+        or not required_status <= set(lines[1:])
     ):
         raise ValueError("Task container must start at the clean official base commit")
 
@@ -280,10 +365,19 @@ def _agent_task(c, row, image, folder, barrier):
         (folder / "container-id.txt").write_text(env.container_id)
         before = env.execute("git rev-parse HEAD && git status --porcelain")
         save(folder / "code-before.json", before)
+        fixture_policy = c["container"].get("allowed_initial_tracked")
+        fixture_observations = None
+        if fixture_policy is not None:
+            fixture_receipt = observe_initial_tracked(env, fixture_policy)
+            save(folder / "initial-tracked-fixtures-private.json", fixture_receipt)
+            fixture_observations = fixture_receipt["observations"]
         validate_initial_repository(
             before,
             row["base_commit"],
             c["container"].get("allowed_initial_untracked", []),
+            tracked_policy=fixture_policy,
+            tracked_observations=fixture_observations,
+            image_id=image["image_id"],
         )
         inspected = json.loads(
             subprocess.check_output([c["paths"]["docker"], "inspect", env.container_id])
