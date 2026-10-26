@@ -69,9 +69,12 @@ def install(module):
 def summarize_application(workspace):
     """Keep application evidence separate from the unmodified official score."""
     workspace = Path(workspace)
-    value = {"status": "unattested"}
+    value = {"status": "unattested", "state_capture": "incomplete"}
     try:
         exit_code = int((workspace / "hust-patch-apply.exit").read_text().strip())
+        value["apply_exit_code"] = exit_code
+        if exit_code != 0:
+            value["status"] = "apply_failed"
         states = {
             stage: json.loads((workspace / f"hust-patch-{stage}.json").read_text())
             for stage in ("before", "after", "graded")
@@ -102,6 +105,7 @@ def summarize_application(workspace):
             }
         value.update(
             status="applied" if exit_code == 0 else "apply_failed",
+            state_capture="complete",
             apply_exit_code=exit_code,
             effective_patch_sha256=patch_sha,
             evidence=evidence,

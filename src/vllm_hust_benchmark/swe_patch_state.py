@@ -43,7 +43,9 @@ def affected_paths(patch, root):
 
 def file_state(root, name):
     path = root / name
-    if not path.parent.resolve().is_relative_to(root.resolve()):
+    try:
+        path.parent.resolve().relative_to(root.resolve())
+    except ValueError:
         raise ValueError("Patch parent escapes repository")
     try:
         metadata = path.lstat()

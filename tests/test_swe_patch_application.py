@@ -88,6 +88,15 @@ def test_existing_file_conflict_retained_not_cleaned(repo, tmp_path):
     assert "already exists" in (work / "hust-patch-apply.stderr").read_text()
 
 
+def test_empty_patch_retains_known_apply_failure_even_if_snapshot_fails(repo, tmp_path):
+    work = execute(repo, tmp_path, "")
+    value = grading.summarize_application(work)
+    assert value["status"] == "apply_failed"
+    assert value["apply_exit_code"] != 0
+    assert value["state_capture"] == "incomplete"
+    assert (work / "tests-ran").read_text() == "ran"
+
+
 @pytest.mark.parametrize(
     "script",
     [
