@@ -1,0 +1,203 @@
+# Independent review: supplementary fixed-budget MCQ nonregression
+
+Review prepared on 2026-10-25 UTC, before any candidate quality output according to the coordinator.
+This is a proposed, separately named supplementary protocol, informed by observed native
+calibration. It is not the original preregistered endpoint and does not replace either strict
+completion gate. Adoption and any new offline scorer must be frozen and hashed before the first raw
+or grouped candidate quality output. Existing producer, scorer, plans and attempts remain unchanged.
+
+## Decision and preserved failures
+
+The existing strict v1 and v2 condition requires every selected request to finish without output-cap
+truncation. Both conditions have already failed in native controls. In particular, v2 cannot regain
+a strict pass by collecting the remaining questions. Continue the frozen 8192-token v2 collection to
+measure the separate fixed-budget outcome; do not raise the cap again, remove cases, retry selected
+answers, change prompts/parser, or label a supplementary pass `full_frozen_plan_passed`.
+
+A scientifically useful supplementary estimand is: **the proportion of the same 200 questions for
+which this exact runtime returns a valid gold-matching final answer before its fixed 8192-token
+limit**. A length-limited response is an observed unsuccessful answer under this definition. That
+allows complete fixed-budget response collection despite some unsuccessful answers. The original
+scorer already applies precisely this conservative per-question correctness rule; no answer
+previously marked wrong becomes correct under this proposal.
+
+Recommended name: `supplementary_budgeted_mcq_nonregression_v1`. Report its answer nonregression
+result and mixed-work coverage separately, and retain the strict gate results alongside them. A
+supplementary pass cannot by itself mark Issue #23 resolved, numerically qualify PR10, or establish
+general model quality.
+
+## Calibration chronology and source observations
+
+- At `2026-10-25T22:58:24.612561+00:00`, the coordinator recorded a stop decision for the original
+  2048-token native-only pilot after 32 returned outputs, including three `length` responses:
+  `mmlu-pro-03290`, `mmlu-pro-00621`, and `mmlu-pro-00864`. The SIGINT targeted the owned driver and
+  allowed shutdown. `runs/native-quality-hccl-true-01/stop-decision.json` has SHA-256
+  `cbc92bb0369b9ba2498f937b6f93750939ec4cd21c0ebfafead60c35588456a0`. The original record of 32 is
+  the stop-decision observation, not the eventual total.
+- The preserved terminal pilot report finished at `22:58:31.475073+00:00`, with 39 returned outputs,
+  those same three truncations, incomplete collection, one recorded interruption error, and
+  successful engine shutdown. Its report SHA-256 is
+  `1ed04c9079d36d7956429da3a195941f75ae630297537f3bb9a07a7098021705`; controller terminal time is
+  `22:58:34.971018+00:00`, exit code 1, controller SHA-256
+  `6d789f334d08ba42a69b61f7e76130bdb01e1d8a69cde07d39da7e3eb6564096`. It is failed/partial v1
+  evidence, never a v2 control or a plugin quality failure.
+- The uniform v2 budget revision was frozen at `23:00:04.985026+00:00`, and its execution identity
+  at `23:00:40.824094+00:00`, before any candidate quality output. It retained all 200 questions,
+  gold, token IDs, batching, parser, settings and strict acceptance conditions, changing only the
+  output cap and corresponding resource bounds. `QUALITY-PLAN-V2.md` explicitly says another
+  truncation would fail its unchanged gate.
+- The coordinator requested this supplementary review after observing one 8192-token truncation
+  among the first 32 v2 outputs, before any candidate output. Review began by `23:19:46 UTC`. An
+  independent read at `2026-10-25T23:20:44.951528+00:00` saw **56** returned v2 outputs and two
+  8192-token truncations, `mmlu-pro-03290` and `mmlu-pro-04497`. That exact partial
+  `results/run.json` read had SHA-256
+  `2423dfcd54c3e96d1d5a54bcbc1f1fce2d8429861f53be5ea5059b9fbb004fc9`. The controller had neither
+  terminal time nor exit code; its read had SHA-256
+  `1788a6236d94858230dd2a1cada1e050952bf137374147cbc90a04649c4c81be`. This is an observation of a
+  changing active file, not an immutable terminal archive or final score. Later totals may differ.
+- At that read, the quality run directory inventory contained only `native-quality-hccl-true-01` and
+  `native-quality-v2-hccl-true-01`. This corroborates, but cannot independently prove beyond this
+  workspace, the coordinator's statement that no raw/group quality outputs have run. No candidate
+  outcomes informed the proposal. Baseline truncations did inform it; this is explicitly a
+  calibration-informed supplementary endpoint rather than a prospectively untouched primary
+  endpoint.
+
+The review consulted finish statuses, token counts, frozen code and provenance; it did not select
+cases or tune thresholds using answer correctness. The active v2 outputs must not enter a terminal
+evidence capsule until the coordinator records terminal collection and cleanup.
+
+## Frozen task and exact interpretation
+
+Use the existing v2 plan without modification:
+
+| Identity                             | Value                                                              |
+| ------------------------------------ | ------------------------------------------------------------------ |
+| Semantic plan SHA-256                | `dd3e1f305475ec556dc824947f26d5fb5743242e82b5099155c95b8954bb2e65` |
+| Plan file SHA-256                    | `4d00042b237825e6c6d246013276fcf8025be55e6d8f7a16841d4069f9898e5b` |
+| Cases file SHA-256                   | `e00beeb8a4a548f184054d4feb45e3ca92cfa541b5ba59643380929c4faeac53` |
+| Original 200-ID selection SHA-256    | `798ca7c0c70b98eacc45800a8679cf2283c2ae2ceade5b778d77b60a9ad138fe` |
+| Driver SHA-256                       | `389ab14e591130d2bc44a31b93f31ecde6a44112fb8d36662d15505abe7359cf` |
+| Original strict scorer SHA-256       | `157b52ffdbae6d7f0f990bb27379c463df1807daeebf7298fd396968e96b17fd` |
+| Canonical adapter SHA-256            | `c2237c69f848e2358abe71c68f54143b5c090a81bd4f7915088b19b8ae157801` |
+| v2 execution identity file SHA-256   | `f44879c8d88c8cd3d0bdc35383c01504508f08687d85cd7232ff8e04215cfb01` |
+| v2 environment decision file SHA-256 | `af0ae5fcc8aef29640337186e9f3ed0a092c723760dd92b9cffdd0e056b3e549` |
+
+The fixed selection covers 14 subjects and 25 batches of eight, with unchanged historical five-shot
+CoT prompts, thinking disabled in the chat template, greedy decoding, seed 42, EOS enabled, maximum
+8192 output tokens, model length 16384, and existing collection bounds of 215300 coordinator
+steps/10800 seconds. The longest prompt plus cap is 10687 tokens. Preserve seed-first admission
+after the first actual scheduler output token, then seven peers; drain between batches. There are no
+answer retries or output-based scheduling substitutions.
+
+These are **in-process engine API terminal responses** from ordinary `LLM`/`InprocClient`, not HTTP
+responses. The frozen driver stores each real `RequestOutput.finished` response once, verifies
+prompt IDs and single-sample output, and records `stop` or `length`. `finished=True` means the API
+request ended; it does not mean a correct or untruncated answer.
+
+Two fresh native v2 controls and each candidate must use the same pinned Core/Ascend/plugin executed
+sources, exact existing dirty-state hashes, driver bytes, model/tokenizer identity, recorded
+environment, and all common engine arguments. Explicit shared settings are
+`HCCL_DETERMINISTIC=true`, `enable_npugraph_ex=false`, `enable_static_kernel=false`, with
+`VLLM_BATCH_INVARIANT` unset. Plugin commit is `f7ed21e183b27d2141176f3e7a5c8a5ff4ede07d`. Declared
+worker/scheduler and native-chunked versus raw/group unchunked behavior differ by design; all other
+existing provenance checks remain mandatory. The two controls require distinct fresh process
+identities/times. Do not use v1 answers, an old compiler configuration, or a different plugin
+revision as a v2 control. Group also requires a complete, comparable raw reference on the same
+source/runtime/plan.
+
+## Proposed supplement: checks fixed before candidate collection
+
+1. **Complete response collection is a separate prerequisite.** Each native control and candidate
+   must have exactly one terminal result for every one of the 200 frozen IDs, no extra or duplicate
+   IDs, no runtime/API errors, `collection_complete=true`, `shutdown_returned=true`, and a
+   successful terminal controller/cleanup receipt. Each stored response must be finished and have an
+   allowed terminal reason (`stop` or `length`), comply with the frozen budget, and pass
+   source/input/output bindings. A length response is allowed to satisfy this collection
+   prerequisite only; it still scores wrong. Pending requests, missing answers, unexpected
+   termination reasons, invalid provenance, or incomplete shutdown cannot yield a supplementary
+   pass. Missing cases count wrong in any partial descriptive score with denominator 200, **and
+   additionally fail collection**. Do not infer successful collection from an accuracy number.
+1. **Keep per-case correctness identical to the original strict scorer.** Set `correct_i=1` only
+   when the frozen original scorer reports a finished, error-free `stop` response, an in-range
+   letter from the unchanged canonical extraction function, and equality to the frozen public gold.
+   Otherwise set `correct_i=0`. All `length` responses are wrong even if text contains a
+   gold-matching letter. Invalid extraction, out-of-range letter, error, missing and nonterminal
+   responses are wrong. Do not extract a previously ignored answer from a truncated response to gain
+   credit. Denominator is always 200, never the number of valid, returned, natural-stop or
+   stable-native cases.
+1. **Keep the native-stable veto unchanged.** Let `S` be the frozen selected IDs with `correct_i=1`
+   in both fresh native controls, using exactly the above per-case rule. Require `S` nonempty and no
+   candidate error on any member of `S`. One new wrong answer fails; gains elsewhere do not
+   compensate this veto.
+1. **Keep the aggregate floor unchanged.** Require candidate total correct to be at least the lower
+   of the two native correct counts. This floor allows compensation only outside the native-stable
+   veto; it is not a claim that every individual case outside `S` is protected.
+1. **Retain actual mixed-work coverage separately.** Replay hashed scheduler/retirement receipts
+   with the existing validator: each of the 25 candidate batches must contain actual P layer
+   progress and D retirement in one transaction. Missing batches fail the supplementary combined
+   workload claim even if answer checks pass. Preserve the separate raw-versus-group paired
+   transitions and raw-source receipt; report them even when either native-based candidate check
+   fails. This proposal does not silently add a new raw-stable veto, and does not silently drop the
+   existing coverage requirement.
+1. **Report strict and supplementary results with distinct field names.** Preserve original scorer
+   outputs byte for byte. Suggested new fields are
+   `supplementary_budgeted_mcq_v1_collection_passed`,
+   `supplementary_budgeted_mcq_v1_answer_nonregression_passed`, and
+   `supplementary_budgeted_mcq_v1_mixed_scope_passed`. The last requires collection, veto, floor,
+   nonempty `S`, provenance and mixed coverage. Never write a true value to the existing
+   `bounded_answer_quality_gate_passed` or `full_frozen_plan_passed` on the strength of the
+   supplement. The original v2 no-truncation condition remains false even if the supplement passes.
+
+Implementation should reuse the original scorer's verified `rows`, per-case flags and
+paired-statistics functions without modifying its `score`/`evaluate` behavior. Put the new
+collection predicate and names in a new, separately hashed offline scorer. Before any candidate
+results, CPU tests should demonstrate: a `length` response with a gold letter is still wrong; 199
+valid responses plus one missing cannot pass collection; duplicate/unknown/error responses cannot
+pass; strict gate remains false while the separate supplement can pass a synthetic fully collected
+equal-score example; a single new wrong within `S` vetoes offsetting gains; the lower-native floor
+and nonempty-set guard remain; source/plan mismatches reject; missing mixed receipts prevent the
+workload-scoped pass. This review changes no producer or frozen file.
+
+## Canonical adapter context and reporting limitations
+
+Primary local scoring evidence is `frozen-v2/canonical-adapter.py`, copied and hashed from canonical
+benchmark checkout `55181feb086af61c1cb953225ebe7e70167f77bb`. Its header attributes prompt
+formatting and extraction to `TIGER-AI-Lab/MMLU-Pro`, Apache-2.0, `evaluate_from_local.py` at
+revision `f418b116db00b065c2aea046518d8fcf74d39872`; the dataset is pinned to revision
+`b189ec765aa7ed75c8acfea42df31fdae71f97be`. `QUALITY-PLAN.md` and the frozen source-row/gold hashes
+document reconstruction of the same materialized prompts and 200-ID selection. This review uses that
+local source, not an unverified current upstream evaluator.
+
+The extraction function tries the `answer is` pattern, then `Answer:`/`answer:`, then the last
+standalone A–J letter. Invalid/out-of-range results have no random-guess fallback. The **canonical
+adapter's aggregate `score_results` does not itself reject every length-limited successful
+response**: it can parse that text and records `length_limited` separately. Our existing strict
+scorer and this supplement deliberately apply the stricter rule that every length output is wrong.
+Thus describe this as a bounded protocol using the canonical prompt/gold/parser with conservative
+budget-failure scoring, not an unmodified canonical aggregate score or full MMLU-Pro leaderboard
+result. The canonical adapter's `MAX_OUTPUT=2048` also does not redefine the separately frozen v2
+request budget.
+
+Publish all 200 case statuses, correct counts/accuracy, length/invalid/error/missing counts and IDs,
+total returned responses, all four paired transitions versus each native control, native/native
+transitions, group/raw transitions, `S` size and new-wrong IDs, plus actual mixed-work coverage.
+Separate length-limited failures from natural-stop invalid answers; do not hide length cases only
+inside a combined invalid count. Retain answer/token outputs and exact source bindings. Any partial
+report must identify pending cases and must not call the supplement passed.
+
+Reuse the original descriptive exact accuracy intervals, paired difference intervals and stable-set
+new-error upper bound with their assumptions disclosed. The selected subset is fixed rather than a
+random population sample; a nonsignificant McNemar test does not prove equivalence. Zero observed
+regressions on `S` is limited by the size and selection of `S`, and excludes cases where either
+control was already wrong. Budgeted answer accuracy can measure a useful task outcome, but it cannot
+establish numerical identity, universal semantic correctness, tail reliability, throughput, or the
+reason native output looped/truncated. Truncation count/latency distributions remain important
+adverse observations even when native and candidate are equally wrong.
+
+The conclusion, if all separate checks later pass, should be limited to: “Under the frozen
+8192-token budget and common deterministic/fusion configuration, the candidate returned all 200
+selected responses, introduced no wrong answer among cases both native controls answered correctly,
+and met the lower-native correct-count floor; original no-truncation acceptance failed.” This is
+supplementary bounded evidence. Numerical/state invariants, pending-ACK/KV cancellation and reuse,
+same-source raw/group controls, and uninstrumented performance/value evidence remain separate
+outstanding PR10/Issue #11/#23 obligations.

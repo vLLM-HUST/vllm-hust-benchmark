@@ -1,0 +1,77 @@
+# Supplementary fixed-budget MCQ assessment
+
+`supplementary_budgeted_mcq_nonregression_v1` is a separately adopted endpoint.
+The original strict v1/v2 no-truncation requirements remain failed in native
+calibration. This supplement cannot replace those results or establish PR10,
+Issue23, numerical identity, population quality, or performance qualification.
+
+The protocol reuses all 200 original selected cases, original prompt/token IDs,
+gold/parser, ordinary workers, 8192-token budget and v2 collector. Its only new
+distinction is between collecting a terminal response and answering correctly.
+A `length` response can satisfy collection, but always scores wrong, even if its
+text contains the gold letter. Missing responses also score wrong with denominator
+200 and additionally fail collection. Invalid answers never receive guessed credit.
+
+Adoption and the native-only snapshot were recorded at
+`2026-10-25T23:25:18.535441+00:00`. That partial native snapshot contained 64
+returned responses and two length cases. Candidate quality runs were absent from
+the workspace inventory; root additionally attested no candidate quality execution.
+This is a baseline-calibrated supplement, not an untouched primary endpoint.
+The snapshot is deliberately preserved as a partial observation, not final evidence.
+
+The new scorer loads the original strict scorer only after verifying its frozen
+SHA. It reuses `score`, `evaluate`, `paired`, `cp`, provenance and mixed-receipt
+checks. It does not change those functions or any old result file. The output
+contains distinct `original_strict_gate` and `supplementary_gate` objects. Strict
+acceptance never changes because of a supplementary pass.
+
+Each required run must return exactly one terminal stop/length response for every
+case, with no runtime/API errors, full collection and shutdown. The scorer also
+checks exact copied producers, inputs and launch configuration, successful terminal
+controller/PID/chronology and exact executed argv/input/output paths, four empty
+physical-device process tables, all 25
+seed-first admissions, internal/external request bindings, tokenizer bytes, and
+the correspondence between returned token IDs and stored text. It requires two
+fresh native controls, pinned f7/Core/Ascend sources including existing dirty-state
+hashes, the current v2 plan and the calibration's common deterministic/fusion
+environment. Recorded full model-weight SHA metadata is bound and current file
+sizes/mtimes checked; the scorer does not rehash all model weights or prove which
+bytes reached device memory.
+
+The answer gate retains both existing conditions: a nonempty set answered
+correctly by both native controls with zero new candidate errors on that set,
+and candidate correct count at least the lower native count. The mixed-scope gate
+also independently replays hashed scheduler/retirement evidence for all 25
+candidate batches. Receipt IDs must bind to admitted same-batch requests at valid
+steps; retired D IDs must have been scheduled as D, with distinct pending P IDs.
+This is observed transaction progress, not a claim of physical kernel overlap.
+Group assessment requires a complete comparable raw reference;
+raw/group transitions and raw coverage are reported separately. No new raw-stable
+veto is introduced.
+
+Run only after the required control/candidate processes are terminal:
+
+```bash
+quality=/root/workspace/muxpd-followup-20261025/quality
+/root/workspace/.venv/bin/python "$quality/supplementary/score_supplementary.py" \
+  --protocol "$quality/supplementary/protocol.json" --quality-root "$quality" \
+  --native1 /absolute/path/to/native1/results/run.json \
+  --native2 /absolute/path/to/native2/results/run.json \
+  --candidate /absolute/path/to/raw/results/run.json \
+  --output /absolute/path/to/new-raw-supplementary-result.json
+```
+
+For group, select its run as candidate and add `--raw-reference` with the terminal
+raw run. Output paths must be new. Missing/incomplete collection cannot pass;
+structurally invalid or mismatched provenance is rejected. All 200 case scores,
+truncations, natural-stop invalids, missing/errors, paired transitions and existing
+descriptive intervals remain visible. A fixed selected subset is not a random
+population sample, and a nonsignificant McNemar test does not prove equivalence.
+
+The original producer/scorer, frozen-v2 directory, earlier attempts and strict
+results remain unchanged. New CPU fixtures include gold-letter truncation, missing
+response, duplicate/unknown/error/nonterminal output, budget violation, stable-set
+veto despite offsetting gain, empty stable set, lower-native floor, missing mixed
+coverage, mismatched source/plan, admission/receipt identity and chronology, unrelated launch paths, and terminal
+cleanup failures. Thirty CPU fixtures passed; runtime scorer and tests pass Ruff.
+The earlier failed intermediate fixture run is retained in cpu-tests-v4.log.
