@@ -75,10 +75,17 @@ def verify(root: Path, *, archive: bool = False) -> dict:
     }
 
 
-def acquire_archive(root: Path) -> None:
+def acquire_archive(
+    root: Path,
+    *,
+    repository: str = "open-compass/VLMEvalKit",
+    revision: str = REVISION,
+    tree: str = TREE,
+    gitlinks: tuple[tuple[str, str], ...] = (),
+) -> None:
     """Alternative official transport; verify every byte/mode via the original Git tree."""
-    url = f"https://codeload.github.com/open-compass/VLMEvalKit/tar.gz/{REVISION}"
-    prefix = f"VLMEvalKit-{REVISION}/"
+    url = f"https://codeload.github.com/{repository}/tar.gz/{revision}"
+    prefix = f"{repository.split('/')[-1]}-{revision}/"
     with tempfile.TemporaryFile(dir=root.parent) as payload:
         with urllib.request.urlopen(url, timeout=120) as response:
             size = 0
@@ -126,7 +133,9 @@ def acquire_archive(root: Path) -> None:
                     target.chmod(0o755 if item.mode & 0o111 else 0o644)
     git(root, "init")
     git(root, "-c", "core.autocrlf=false", "add", "--force", "--all")
-    if git(root, "write-tree") != TREE:
+    for path, commit in gitlinks:
+        git(root, "update-index", "--add", "--cacheinfo", f"160000,{commit},{path}")
+    if git(root, "write-tree") != tree:
         raise ValueError(
             "Downloaded archive does not reproduce the fixed original Git tree"
         )

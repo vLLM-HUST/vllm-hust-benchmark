@@ -110,6 +110,20 @@ def test_oversized_context_is_not_trimmed_or_replaced(tmp_path):
     assert not receipt["native_execution_complete"]
 
 
+def test_explicit_nonthinking_transport_keeps_original_task(tmp_path):
+    rows, kwargs, calls = fixture(tmp_path)
+    result = runner.execute(rows, **kwargs, disable_thinking=True)
+    assert result["model_chat_template_kwargs"] == {"enable_thinking": False}
+    assert all(
+        call["extra_body"] == {"chat_template_kwargs": {"enable_thinking": False}}
+        for call in calls
+    )
+    assert all(call["max_tokens"] == 50 for call in calls)
+    assert [call["messages"][0]["content"] for call in calls] == [
+        row["context"] for row in rows[:3]
+    ]
+
+
 def test_transport_failure_does_not_retry_or_switch_question(tmp_path):
     rows, kwargs, calls = fixture(tmp_path, fail=True)
     with pytest.raises(RuntimeError):

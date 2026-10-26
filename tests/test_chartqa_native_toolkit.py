@@ -1,6 +1,8 @@
 import importlib.util
 import io
+import hashlib
 from pathlib import Path
+import shutil
 import tarfile
 
 import pytest
@@ -66,3 +68,38 @@ def test_archive_rejects_unsafe_member(tmp_path, monkeypatch, name):
     with pytest.raises(ValueError):
         tool.acquire_archive(output)
     assert not (output / ".git").exists()
+
+
+@pytest.mark.skipif(
+    shutil.which("git") is None, reason="Real Git required for tree-identity fixture"
+)
+@pytest.mark.parametrize("wrong_tree", [False, True])
+def test_archive_checks_actual_file_tree_without_git_fetch(
+    tmp_path, monkeypatch, wrong_tree
+):
+    revision = "b" * 40
+    contents = b"fixed original\n"
+    blob = hashlib.sha1(f"blob {len(contents)}\0".encode() + contents).digest()
+    tree_body = b"100644 hello.txt\0" + blob
+    expected = hashlib.sha1(f"tree {len(tree_body)}\0".encode() + tree_body).hexdigest()
+    payload = io.BytesIO()
+    with tarfile.open(fileobj=payload, mode="w:gz") as archive:
+        item = tarfile.TarInfo(f"upstream-{revision}/hello.txt")
+        item.mode = 0o644
+        item.size = len(contents)
+        archive.addfile(item, io.BytesIO(contents))
+    payload.seek(0)
+    monkeypatch.setattr(tool.urllib.request, "urlopen", lambda *a, **kw: payload)
+    output = tmp_path / "source"
+    output.mkdir()
+    arguments = dict(
+        repository="fixture/upstream",
+        revision=revision,
+        tree="0" * 40 if wrong_tree else expected,
+    )
+    if wrong_tree:
+        with pytest.raises(ValueError, match="original Git tree"):
+            tool.acquire_archive(output, **arguments)
+    else:
+        tool.acquire_archive(output, **arguments)
+    assert (output / "hello.txt").read_bytes() == contents

@@ -44,6 +44,7 @@ def execute(
     start=0,
     count=3,
     full=False,
+    disable_thinking=False,
 ):
     selected = select(rows, start=start, count=count, full=full)
     if template not in utils.MODEL_TO_PROMPT_TEMPLATE:
@@ -70,6 +71,9 @@ def execute(
         "task_truncation": False,
         "paper_model_replication": False,
         "performance_claim": False,
+        "model_chat_template_kwargs": {"enable_thinking": False}
+        if disable_thinking
+        else {},
     }
 
     def save():
@@ -100,6 +104,10 @@ def execute(
                 body = dict(
                     model=model, messages=messages, max_tokens=budget, temperature=0
                 )
+                if disable_thinking:
+                    body["extra_body"] = {
+                        "chat_template_kwargs": {"enable_thinking": False}
+                    }
                 request_path = output / f"row-{index}.request-private.json"
                 request_path.write_text(
                     json.dumps(body, ensure_ascii=False) + "\n", encoding="utf-8"
@@ -184,6 +192,11 @@ def main():
     parser.add_argument("--start", type=int, default=0)
     parser.add_argument("--count", type=int, default=3)
     parser.add_argument("--full", action="store_true")
+    parser.add_argument(
+        "--disable-thinking",
+        action="store_true",
+        help="Explicit compatible model transport option; original task prompt and budget unchanged",
+    )
     args = parser.parse_args()
     route = urlparse(args.endpoint)
     if (
@@ -233,9 +246,14 @@ def main():
     )
 
     def token_count(messages):
-        body = json.dumps(
-            {"model": args.model, "messages": messages, "add_generation_prompt": True}
-        ).encode()
+        payload = {
+            "model": args.model,
+            "messages": messages,
+            "add_generation_prompt": True,
+        }
+        if args.disable_thinking:
+            payload["chat_template_kwargs"] = {"enable_thinking": False}
+        body = json.dumps(payload).encode()
         request = Request(
             args.endpoint.rstrip("/")[:-3] + "/tokenize",
             data=body,
@@ -260,6 +278,7 @@ def main():
         start=args.start,
         count=args.count,
         full=args.full,
+        disable_thinking=args.disable_thinking,
     )
     try:
         verify_file(args.data_root, spec)

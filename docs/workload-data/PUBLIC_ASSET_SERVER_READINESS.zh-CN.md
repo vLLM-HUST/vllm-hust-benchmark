@@ -1440,7 +1440,7 @@ git -C /path/to/official-infinitebench checkout --detach 51d9b37b0f1790ead936df2
 python scripts/verify_infinitebench_original_code.py --official-checkout /path/to/official-infinitebench
 ```
 
-后续服务器原生验证入口（当前只有软件夹具测试，尚未完成真实环境验证）：
+服务器原生验证入口（已有分协议真实验证，整来源未完成）：
 
 ```bash
 python scripts/run_infinitebench_original.py \
@@ -1456,6 +1456,11 @@ python scripts/run_infinitebench_original.py \
 对完整消息计数；完整输入加作者生成预算超限则失败，不改题、不截断、不缩预算。默认固定原始位置0/1/2；`--full`执行所选任务全部原题，不能与其他范围组合。
 OpenAI客户端禁用自动重试，失败保留已写结果，不换题凑通过。输出私有目录中包含答案和预测，禁止提交；即使抽样与评分成功，也不自动将整个来源打勾。 需要服务器隔离环境安装作者
 requirements及其实际导入依赖、OpenAI SDK和数据包，准备固定ROUGE指标资产，并记录版本；本入口尚无已验证的完整依赖锁，因此不能据此宣称开箱即用交付完成。
+
+2026-10-26新增`kv_retrieval`原始0/1/2验证：Qwen3.5-9B BF16/TP1、服务上下文262144，完整输入分别169100、169118、169254
+token，原预算50，三条stop，作者评分1.0；保存请求、参考、响应、摘要及用量均已独立回查。
+适用模型可显式增加`--disable-thinking`：同时作用于预检分词与实际请求，只设置模型的`chat_template_kwargs.enable_thinking=false`，不改作者提示、角色或预算。默认不增加这个选项，旧结果不重跑。
+该9B配置与旧27B六协议证据分别保留，不合成为统一模型的总体质量或性能结果。其他四个上下文协议及`math_calc`原消息模板兼容问题仍未完成；详见原清单与复用审计。
 
 上述克隆及后续依赖安装只在服务器执行。固定配置为
 `configs/workload-native/infinitebench-author-code-pins.json`，核对六份作者代码/说明文件的 Git blob 及字节数，不导入作者模块。

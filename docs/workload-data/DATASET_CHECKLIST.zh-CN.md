@@ -32,10 +32,12 @@
 - [x] `math_find`额外固定原题3–5与6–8：完整原输入约11.6–11.7万token、原预算3，六次生成及作者评分独立复核通过；未重跑0–2，不扩大整来源完成结论。
 - [x] `math_find`额外固定原题9–11：三条原输入分别116865、116700、116762
   token，原预算3；已保存生成与作者评分1.0，独立回查请求、答案、用量及摘要一致。此次回查未调用模型，不扩大整来源完成结论。
-- [ ] `kv_retrieval`、`longbook_sum_eng`、`longbook_choice_eng`、`longbook_qa_chn`、`code_debug`：原前三题至少一题超131072上下文，最高402028输入token；不截断或改选题。
+- [x] `kv_retrieval`原始0/1/2：新9B服务262144上下文、BF16/TP1，逐请求显式非思考；完整输入169100/169118/169254
+  token，原预算50，三条stop、作者评分1.0，独立回查通过。旧27B/131072阻塞记录保留，不混作同一模型的性能结果。
+- [ ] `longbook_sum_eng`、`longbook_choice_eng`、`longbook_qa_chn`、`code_debug`：旧27B服务原前三题至少一题超131072上下文，最高402028输入token；新9B服务尚未逐协议验证，不截断或改选题。
 - [ ] `math_calc`：原后置system轮被当前Qwen原生模板拒绝400；不改消息角色，尚未完成原生验证。
 
-以上18次原生任务执行不是18个数据集完成；11次length终态及原低分保留，不增预算重跑凑分。阶段证据统一在[原复用审计](validation/research-acquisition-reuse-audit-20261025.json)。
+旧27B六协议18次任务与新9B一个协议3次任务分开保留，不能当作统一模型的总体质量或性能结果；旧11次length终态及低分不删除，不增预算重跑凑分。阶段证据统一在[原复用审计](validation/research-acquisition-reuse-audit-20261025.json)。
 
 ### StructEval分步骤核验（2026-10-26；不增加来源完成数）
 
