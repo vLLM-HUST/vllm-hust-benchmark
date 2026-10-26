@@ -70,8 +70,9 @@ def test_unregistered_executable_rejected(tmp_path):
 
 
 @pytest.mark.parametrize("fail", [False, True])
+@pytest.mark.parametrize("disable_thinking", [False, True])
 def test_native_wrapper_retains_attempts_and_only_marks_scored_after_completion(
-    tmp_path, monkeypatch, fail
+    tmp_path, monkeypatch, fail, disable_thinking
 ):
     """Fake harness/transport: protocol plumbing only, never official run evidence."""
     source = tmp_path / "source"
@@ -145,6 +146,7 @@ def test_native_wrapper_retains_attempts_and_only_marks_scored_after_completion(
         per_subset=1,
         categories=["TableQA"],
         timeout=60,
+        disable_thinking=disable_thinking,
     )
     if fail:
         with pytest.raises(RuntimeError):
@@ -157,6 +159,13 @@ def test_native_wrapper_retains_attempts_and_only_marks_scored_after_completion(
     )
     assert attempt["request"] == original_calls[0]
     assert attempt["request"]["max_tokens"] == 42
+    assert receipt["thinking_override"] is (False if disable_thinking else None)
+    if disable_thinking:
+        assert attempt["request"]["extra_body"] == {
+            "chat_template_kwargs": {"enable_thinking": False}
+        }
+    else:
+        assert "extra_body" not in attempt["request"]
     assert receipt["categories"][0]["selected_ids"] == ["fixture-id"]
     assert receipt["categories"][0]["model_calls"] == 1
     assert receipt["source_checkbox_eligible"] is False

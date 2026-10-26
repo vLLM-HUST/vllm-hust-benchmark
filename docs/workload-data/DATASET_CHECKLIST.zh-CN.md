@@ -2,12 +2,14 @@
 
 ### RepoBench原生仓库级代码补全（准备中，未交付）
 
-公开资产入口复用`python scripts/prepare_reused_research_assets.py REPOBENCH --mode plan`，取得原数据用`--mode download --data-root <外部目录> --max-bytes 1200000000`，已有数据用`--mode verify --data-root <外部目录>`只读核验。默认550MB预算会拒绝意外全下约1.05GB；必要时显式选择同固定版本`--hf-endpoint https://hf-mirror.com`，仍逐文件校验原SHA256。准备统一索引用`python scripts/prepare_reused_source_records.py REPOBENCH --data-root <同原目录> --output <新外部索引目录>`，不下载模型、不执行推理。新适配仍待实际CI工件和服务器完整数据复核；软件测试不代表已跑通原生benchmark。
+公开资产入口复用`python scripts/prepare_reused_research_assets.py REPOBENCH --mode plan`，取得原数据用`--mode download --data-root <外部目录> --max-bytes 1200000000`，已有数据用`--mode verify --data-root <外部目录>`只读核验。默认550MB预算会拒绝意外全下约1.05GB；必要时显式选择同固定版本`--hf-endpoint https://hf-mirror.com`，仍逐文件校验原SHA256。准备统一索引用`python scripts/prepare_reused_source_records.py REPOBENCH --data-root <同原目录> --output <新外部索引目录>`，不下载模型、不执行推理。公开核验/准备命令已在服务器用实际CI工件执行，原生benchmark仍未执行。
 
 - [x] 固定[作者v1.1源码](https://github.com/Leolty/repobench/tree/e0cfd34c9e7cd8f057efd32b9280b9719ae12a91)，12文件逐文件大小/Git
   blob核验；原生入口为`run.py`和`eval.py`，保留EM/Edit Similarity/CodeBLEU评分，不改为聊天问答。
 - [x] Python/Java固定版本10份原始Parquet全部在服务器取得并核验大小/SHA256；完整检查49684行、11原字段及context的path/snippet关系。覆盖2语言×3设置×9长度档共54层；HF主站不可达时使用同发布方固定版本镜像，不改任务。不在本地或Git保存原始数据。
-- [ ] 公开获取/统一适配、原生模型环境与执行、官方评分和实际CI/研究接入。作者示例推荐DeepSeek-Coder-1.3B-Base，但`run.py`硬编码CUDA，依赖列表还包含stdlib
+- [x] 实际CI
+  `e241accd`的47份安装载荷逐字节一致，全部49684原行字段重建和索引、固定研究消费者60条回读一致；语言及其独立数据版本不丢失，next_line/all_code/gold_snippet_index不混入模型输入。新增模型调用0，不等同原生benchmark跑通。
+- [ ] 原生模型环境与执行、官方评分。作者示例推荐DeepSeek-Coder-1.3B-Base，但`run.py`硬编码CUDA，依赖列表还包含stdlib
   `difflib`，不能盲目照装后宣称NPU可用。须保留作者prompt构造/日期与长度过滤/下一行提取；不得将完整`all_code`、`next_line`或`gold_snippet_index`泄漏进请求。尚未下载模型或执行推理，不打总勾。
 
 ### StructEval剩余渲染/VQA环境（未交付）
@@ -28,6 +30,8 @@
 - [ ] 独立磁盘I/O窗口确认后执行官方存储回放；两场景文件容量上限224919552000字节。当前只准备，尚未写KV测试页、未执行模型，不报告引擎性能。仍须原始回放、计数审计及固定CI工件/研究消费闭环。
 
 ### LAB-Bench官方执行环境（准备中，未交付）
+
+原生进展：固定31子集各首3条共93题已启动，Qwen3.5-9B/BF16/TP1，16384输出预算。显式`--disable-thinking`只覆盖本地vLLM模型模板的隐藏thinking，作者CoT提示/图像编码/选项及评分保持不变，不改服务全局设置。首个TableQA三题官方评分0/3，原结果保留；其他类别继续，不换题。每题前等待服务空闲和无其他NPU占用；完整执行及保存审计前不打总勾。这不是作者GPT-4o质量复现。
 
 - [x] 实际CPU CI工件换锁复核：commit `32e2e975`、run
   `40411348417`成功，安装46份载荷与wheel逐字节一致；不依赖候选目录覆盖，全部1967条保留及索引、124条固定研究消费者回读一致重新核验通过。模型调用0，仍须原生推理/官方评分及保存审计，总勾未完成。
@@ -51,7 +55,7 @@ ARM64/Python3.12，无CUDA推理；模型仅通过另一个NPU服务入口执行
 
 公共原生入口：`scripts/run_labbench_original.py --source-root <原仓库解包目录> --archive <固定官方zip> --output <新外部结果目录> --endpoint http://127.0.0.1:19466/v1 --model <本地NPU模型别名> --max-tokens <明确预算> --per-subset 3`；全量改为`--full`，可用`--categories`分批运行，不覆盖已有结果。运行于作者`uv.lock`的独立环境，程序先核验固定归档和全部553原文件，再复用作者OpenAI
 agent、CoT模板、图片编码、选择解析及Evaluator评分。固定随机种子只保证选项排列可复现，不改原题；调用请求/响应、作者task
-buffer和评分结果只保存在外部私有目录。当前仅完成夹具测试和服务器帮助入口检查，尚不宣称该运行入口已完成真实推理。
+buffer和评分结果只保存在外部私有目录。声明的Qwen9B原生配置已开始执行及官方评分，完整93题和保存审计尚未完成；不把运行中状态或首个类别成绩升级为来源交付。
 
 ### OpenThoughts3原对话语料（固定范围交付完成）
 

@@ -126,6 +126,9 @@ async def execute(args):
         "verified_publisher_files": verified,
         "model": args.model,
         "declared_output_budget": args.max_tokens,
+        "thinking_override": False
+        if getattr(args, "disable_thinking", False)
+        else None,
         "publisher_model_baseline_reproduced": False,
         "original_cot_template": True,
         "sample_seed": args.seed,
@@ -153,10 +156,15 @@ async def execute(args):
             receipt["categories"].append(profile)
             save()
             random.seed(args.seed)
+            model_options = {"model": args.model, "max_tokens": args.max_tokens}
+            if getattr(args, "disable_thinking", False):
+                model_options["extra_body"] = {
+                    "chat_template_kwargs": {"enable_thinking": False}
+                }
             agent = labbench.OpenAIZeroShotAgent(
                 use_cot=True,
                 open_answer=False,
-                model_kwargs={"model": args.model, "max_tokens": args.max_tokens},
+                model_kwargs=model_options,
             )
             agent.client = agent.client.with_options(
                 timeout=args.timeout, max_retries=0
@@ -217,6 +225,11 @@ def main():
     parser.add_argument("--endpoint", type=local_endpoint, required=True)
     parser.add_argument("--model", required=True)
     parser.add_argument("--max-tokens", type=int, required=True)
+    parser.add_argument(
+        "--disable-thinking",
+        action="store_true",
+        help="Explicit local vLLM model-template profile only; original publisher CoT prompt remains unchanged",
+    )
     parser.add_argument("--timeout", type=int, default=1200)
     parser.add_argument("--seed", type=int, default=20261027)
     parser.add_argument(
