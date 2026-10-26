@@ -141,6 +141,38 @@ def test_completed_protocol_audit_adds_only_previously_unexecuted_rows():
         assert held["protocol"] in {p["protocol"] for p in protocols}
 
 
+def test_saved_output_handoff_and_readback_do_not_claim_rendered_delivery():
+    checkpoint = json.loads(
+        (
+            ROOT
+            / "docs/workload-data/validation/structeval-nonrender-checkpoint3-20261025.json"
+        ).read_text("utf-8")
+    )
+    saved = checkpoint["public_saved_output_handoff_20261026"]
+    readback = checkpoint["full_original_provider_readback_20261026"]
+    preflight = checkpoint["render_environment_preflight_20261026"]
+    assert saved["unique_original_tasks"] == 950
+    assert saved["complete_protocols"] == 19
+    assert saved["official_scores_equal_saved"]
+    assert saved["new_model_calls"] == 0
+    assert not saved["source_checkbox_eligible"]
+    assert readback["original_rows_and_index_rows"] == 2035
+    assert readback["original_fields_per_row"] == 10
+    assert (
+        readback["public_and_research_roundtrips"]
+        == 3 * readback["protocol_groups_including_rendering_flag"]
+    )
+    assert (
+        readback["remaining_rendered_vqa_tasks"] + saved["unique_original_tasks"]
+        == 2035
+    )
+    assert not readback["full_native_source_delivery_claim"]
+    assert not preflight["generated_code_executed"]
+    assert not preflight["filesystem_process_memory_isolation_qualified"]
+    assert preflight["model_calls"] == 0
+    assert not checkpoint["full_source_completed"]
+
+
 def test_external_endpoint_refused_before_inputs(tmp_path):
     result = subprocess.run(
         [

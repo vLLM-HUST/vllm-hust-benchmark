@@ -1378,6 +1378,12 @@ inference.json、evaluation.json，并声明原始预算未覆盖、原生流程
 使用固定CI283数据包（44个安装载荷核验一致）和dd410314研究消费者，未升级研究侧默认依赖。证据补充在[原阶段回执](validation/structeval-nonrender-checkpoint3-20261025.json)。
 剩余1085道渲染/VQA及完整原生交付仍待完成；读取回查不替代渲染和视觉评分，StructEval来源总勾不变。
 
+同日使用现有独立评分环境运行作者`python -I -m structeval.cli doctor --render`：litellm、typer、playwright
+Python包存在，但Node/npm、TeX、Typst、ImageMagick缺失。Python Playwright包存在不证明Chromium浏览器已安装。
+`unshare --user --map-root-user --net true`最小探测成功；未发现bwrap、Docker或Podman。此探测只证明该次命名空间创建成功，不证明文件系统、进程、内存或完整渲染隔离已合格。
+作者警告渲染会执行模型生成代码，因此不得在共享宿主直接运行；应先补齐独立隔离环境与各渲染器依赖，再原样执行官方渲染流程及视觉评分。现有服务为language-model-only，尚不能承担视觉评分。
+前检提示未设置外部API key，不应据此申请无关外部凭据或把数据发往外部；后续优先采用本地兼容视觉服务。以上均未触发模型调用，不增加完成勾。
+
 ## ScienceAgentBench verified：复用官方评测，不替换科学任务
 
 当前已取得102条verified元数据及固定源码的历史证据，不代表已取得完整科学数据。 官方固定版本`c26e151ed601ba109dc4d35e057ff8e73fec469d`的
