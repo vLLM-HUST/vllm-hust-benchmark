@@ -1,8 +1,48 @@
 {
   "source_id": "CROSSCODEEVAL",
-  "status": "ORIGINAL_AUTHOR_ASSETS_ACQUIRED_NATIVE_DELIVERY_PENDING",
+  "status": "ORIGINAL_FOUR_LANGUAGE_AUTHOR_NATIVE_DELIVERY_VERIFIED",
   "date": "2026-10-26",
-  "source_checkbox_eligible": false,
+  "source_checkbox_eligible": true,
+  "fixed_ci_consumer_closure": {
+    "producer_commit": "283f19c4f4b39ae15c8f7b072408ed40cae5bfd3",
+    "cpu_ci_run": 40260433215,
+    "root_ci_run": 40260433220,
+    "both_ci_conclusions": "success",
+    "wheel_sha256": "1d6b9c162496c45be5a8b1bab75120a9060a9acf510ece59b4adae8583cb4e75",
+    "installed_payloads_verified": 44,
+    "unchanged_previously_full_audited_payloads": 43,
+    "only_changed_payload": "vllm_hust_workload_data/resources/workload_delivery_classification_v1.json",
+    "reused_full_index_rows": 69494,
+    "public_and_research_roundtrips": 12,
+    "original_positions_per_language": [0, 1, 2],
+    "research_default_dependency_changed": false,
+    "new_model_calls": 0,
+    "server_receipt": "/data/shared_upload/hust-phr/workload-benchmark-native-delivery-20261024/crosscodeeval-ci283-public-research-cpu-audit-32063-001/receipt-public.json",
+    "server_receipt_sha256": "ae7bfb61b9c5c78ea9f1e95d1e97a866de46fcda9446991337c6ea5ffe6dc95b"
+  },
+  "public_native_entry_validation": {
+    "entry": "scripts/run_crosscodeeval_original.py",
+    "scorer": "scripts/score_crosscodeeval_original.py",
+    "code_commit": "283f19c4f4b39ae15c8f7b072408ed40cae5bfd3",
+    "original_positions_per_language": [3, 4, 5],
+    "languages": ["python", "java", "csharp", "typescript"],
+    "original_cases_generated": 12,
+    "original_cases_scored_by_public_entry": 12,
+    "previous_zero_through_two_repeated": false,
+    "generation_receipt_sha256": "91bf58a299b7fbdba87354cea9821c20f8c93f16353589cf3a155c32c95f0917",
+    "generation_server_root": "/data/shared_upload/hust-phr/workload-benchmark-native-delivery-20261024/crosscodeeval-public-native-next3-32063-001",
+    "scoring_server_receipt": "/data/shared_upload/hust-phr/workload-benchmark-native-delivery-20261024/crosscodeeval-public-next3-score-32063-001/receipt-public.json",
+    "score_totals": [3, 3, 3, 3],
+    "model": "bigcode/starcoder2-3b",
+    "dtype": "bfloat16",
+    "tensor_parallel_size": 1,
+    "physical_npu_observed": 6,
+    "publisher_generation_and_scoring_python_unchanged": true,
+    "empty_and_low_scoring_predictions_retained": true,
+    "full_corpus_native_or_quality_acceptance_claim": false,
+    "environment_guide": "docs/workload-data/PUBLIC_ASSET_SERVER_READINESS.zh-CN.md",
+    "remaining": "None within declared four-language default retrieval-profile fixed sampling. Full corpus inference and alternate retrieval/oracle profiles are not claimed."
+  },
   "native_generation_and_public_rescoring": {
     "model_repo": "bigcode/starcoder2-3b",
     "model_revision": "733247c55e3f73af49ce8e9c7949bf14af205928",
@@ -21,7 +61,7 @@
     "public_score_exactly_matches_prior_author_scores": true,
     "quality_or_performance_acceptance_claim": false,
     "server_receipt": "/data/shared_upload/hust-phr/workload-benchmark-native-delivery-20261024/crosscodeeval-public-original-rescore-32063-001/receipt-public.json",
-    "remaining": "Reusable public native generation entry, complete environment handoff and exact successful CI artifact closure; source remains unchecked."
+    "remaining": "Historical first-three stage; public generation and scoring of original positions 3..5 are recorded separately above. Exact CI artifact consumer closure pending."
   },
   "repository": "amazon-science/cceval",
   "revision": "40c68d2b7ca2a8eae95d901ac80e6a540a84a53d",
@@ -86,8 +126,9 @@
   "languages": ["python", "java", "csharp", "typescript"],
   "license_boundary": "Author code Apache-2.0; original repository data retains bundled LICENSES and THIRD_PARTY_LICENSES. No raw data redistributed.",
   "transport_boundary": "raw.githubusercontent.com connection reset retained; exact publisher Git blob API used and original Git SHA1 plus byte count and SHA256 verified. No third-party task copy.",
-  "model_calls": 0,
+  "asset_acquisition_model_calls": 0,
   "original_assets_server_root": "/data/shared_upload/hust-phr/workload-benchmark-native-delivery-20261024/crosscodeeval-original-data-32063-001",
   "author_source_server_root": "/data/shared_upload/hust-phr/workload-benchmark-native-delivery-20261024/crosscodeeval-publisher-source-discovery-32063-001/source",
-  "pending": ["native NPU deployment/generation through author protocol", "original sampled tasks through full author grading", "exact successful CI artifact and final native/consumer closure audit"]
+  "pending": [],
+  "unclaimed_scopes": ["Full corpus native inference", "All alternate retrieval/oracle profiles native inference", "Publisher grammar clone/build or paper reproduction", "Model quality or performance acceptance", "Research default dependency or PR merge"]
 }

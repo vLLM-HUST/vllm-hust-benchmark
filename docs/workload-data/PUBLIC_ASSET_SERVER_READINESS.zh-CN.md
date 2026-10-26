@@ -1372,7 +1372,9 @@ for record in iter_workload("CROSSCODEEVAL", data_root=Path("/external/crosscode
 或论文环境。 客户端选择性链接既有 vendor Torch，链接并非操作系统只读；禁止在此升级 vendor Torch。
 推荐模型8份原始权重/分词文件（约12.1GB存储）已校验，StarCoder2-3B 已在单 NPU 上以 BF16、TP=1
 完成四种语言各原始前3条生成及完整作者评分。保留原生滑动窗口和作者预算，不把低分或空输出换题。 官方站点网络失败保留，显式镜像仍核对固定发布版本和原始文件身份。
-公共生成入口已在原第3–5行、四语言12条完成NPU执行，依赖和模型获取说明已补齐。 本次公共入口的独立评分及成功 CI 工件终审尚待核验，清单不打勾；私人验证脚本不能替代公共交付。
+公共生成入口已在原第3–5行、四语言12条完成NPU执行和独立作者评分，依赖和模型获取说明已补齐。 成功 CI 工件44个文件精确安装核对、12处公共/固定研究消费终审已完成，来源打勾。
+复用先前69,494行全字段/索引审计：43个代码/资源文件完全相同，仅入口分类目录更新；未重跑有效推理。
+见[交付证据](validation/crosscodeeval-original-acquisition-20261026.json)。不是全语料、所有检索配置或论文成绩复现。
 
 已有原生结果可单独复核评分，无需重跑模型。隔离评分环境的依赖见 `configs/workload-native/crosscodeeval-score-requirements.txt`；须保留兼容
 Torch，执行 `pip check`， 不能把完整作者 requirements 无审查地装入现有 Ascend 服务环境。ARM64 验证使用 Python 3.12.13、 Torch

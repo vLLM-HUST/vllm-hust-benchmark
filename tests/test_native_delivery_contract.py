@@ -8,6 +8,33 @@ ROOT = Path(__file__).resolve().parents[1]
 DOCS = ROOT / "docs/workload-data"
 
 
+def test_crosscodeeval_native_delivery_keeps_original_profiles_and_ci_consumer_scope():
+    receipt = json.loads(
+        (
+            DOCS / "validation/crosscodeeval-original-acquisition-20261026.json"
+        ).read_text(encoding="utf-8")
+    )
+    assert receipt["source_checkbox_eligible"] is True
+    native = receipt["public_native_entry_validation"]
+    assert native["original_positions_per_language"] == [3, 4, 5]
+    assert (
+        native["original_cases_generated"]
+        == native["original_cases_scored_by_public_entry"]
+        == 12
+    )
+    assert native["previous_zero_through_two_repeated"] is False
+    assert native["publisher_generation_and_scoring_python_unchanged"] is True
+    assert native["full_corpus_native_or_quality_acceptance_claim"] is False
+    consumer = receipt["fixed_ci_consumer_closure"]
+    assert consumer["both_ci_conclusions"] == "success"
+    assert consumer["installed_payloads_verified"] == 44
+    assert consumer["unchanged_previously_full_audited_payloads"] == 43
+    assert consumer["reused_full_index_rows"] == 69494
+    assert consumer["public_and_research_roundtrips"] == 12
+    assert consumer["new_model_calls"] == 0
+    assert consumer["research_default_dependency_changed"] is False
+
+
 def test_fleurs_native_delivery_is_all_locale_sampled_asr_not_full_test_or_paper():
     receipt = json.loads(
         (DOCS / "validation/fleurs-native-delivery-20261026.json").read_text(
