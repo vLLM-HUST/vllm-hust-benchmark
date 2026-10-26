@@ -169,6 +169,9 @@ def build(revision, read=None):
         " The second task retains its recorded negative; git-apply status was not captured, so testing of the applied patch is unproven."
     )
     remaining = next(s for s in data["sections"] if s["id"] == "v15-remaining")
+    remaining["evidence"].append(
+        dict(path=SOURCE, kind="blob", label="SWE增量任务 / SWE incremental tasks")
+    )
     for key, english in [("tables", False), ("tables_en", True)]:
         for table in remaining[key]:
             for row in table["rows"]:
