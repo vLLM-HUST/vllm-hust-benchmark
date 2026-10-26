@@ -1,8 +1,18 @@
 import csv
+import hashlib
 import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+def test_frozen_hle_packet_bytes():
+    folder = ROOT / "reports/hle-native018-completed-20261026"
+    lines = (folder / "SHA256SUMS").read_text().splitlines()
+    assert len(lines) == 12
+    for line in lines:
+        digest, name = line.split(maxsplit=1)
+        assert hashlib.sha256((folder / name).read_bytes()).hexdigest() == digest
 
 
 def test_hle_and_single_agent_projection(monkeypatch):
