@@ -53,6 +53,45 @@ def test_publisher_archive_source_checks_bytes_and_rejects_extra_python(
         runner.validate_source(root, "publisher-files")
 
 
+def test_all11_native_delivery_closure_preserves_scope_and_research_evidence():
+    receipt = json.loads(
+        (
+            ROOT
+            / "docs/workload-data/validation/jsonschemabench-official-workflow-readiness-20261024.json"
+        ).read_text("utf-8")
+    )["native_delivery_closure_20261026"]
+    pins = json.loads(runner.PINS.read_text("utf-8"))
+    protocols = receipt["protocols"]
+    assert {row["task"] for row in protocols} == set(pins["config_names"])
+    assert len(protocols) == 11
+    assert sum(row["selected_original_test_prefix"] for row in protocols) == 68
+    assert (
+        next(row for row in protocols if row["task"] == "WashingtonPost")[
+            "selected_original_test_prefix"
+        ]
+        == 38
+    )
+    assert all(
+        row["selected_original_test_prefix"] == 3
+        for row in protocols
+        if row["task"] != "WashingtonPost"
+    )
+    assert receipt["source_checkbox_eligible"]
+    assert receipt["original_messages_schemas_and_saved_outputs_equal"]
+    assert (
+        receipt["full_original_data_provider_audit"][
+            "public_and_fixed_research_readbacks"
+        ]
+        == 99
+    )
+    assert not receipt["full_original_data_provider_audit"][
+        "research_default_dependency_changed"
+    ]
+    assert not receipt["full_all_schema_inference_claim"]
+    assert not receipt["performance_claim"]
+    assert not receipt["model_quality_pass_claim"]
+
+
 def test_task_selection_does_not_double_count_default():
     assert runner.select_tasks(["A", "B", "default"]) == ["A", "B"]
     assert runner.select_tasks(["A", "default"], ["default"]) == ["default"]

@@ -875,6 +875,8 @@ original-dataset-private.jsonl；原Parquet校验身份，逻辑字段不改写�
 
 ### JSONSchemaBench 当前服务器核验（2026-10-26）
 
+最新交付已勾选：WashingtonPost全38条，其余9具名配置及default各原始前3条，11配置共68个视图任务全部通过原bench/evaluator及逐原题CPU重评核验。最新9配置27条返回复用19条旧生成、8次新尝试（含1条旧空编译拒绝重新核验）。33原文件19100配置/split视图行及99处固定CI提供者/研究回查证据复用，提供者载荷相对成功283f19c4未变。完整边界见[原readiness回执中的native_delivery_closure](validation/jsonschemabench-official-workflow-readiness-20261024.json)；下文未完成描述为此前阶段记录，不覆盖此最新结论。不是全量原题推理、统一后端性能或质量达标结论。
+
 32050实例经授权将原模型服务的结构化输出后端固定为xgrammar，其余原参数不变。旧20条中19条已有生成保留；旧auto下无生成的编译拒绝不得直接冒充固定后端结论。新增显式参数`--revalidate-prior-compile-rejection-indices 12`仅允许重新核验保存的空生成、空token且原compile_status=UNSUPPORTED_SCHEMA的指定原位置；已生成答案、输入不一致或无效位置均拒绝，不做自动重生成回退。旧回执不覆盖，重新核验次数与复用次数分别记录。
 该次固定xgrammar对原位置12返回结构化BadRequestError400，消息为`The provided JSON schema contains features not supported by xgrammar.`；已核对服务端`backend_xgrammar.py`的特性检查源码，只把此精确消息、匹配错误结构且没有任何内容/usage时记作原协议编译不支持。其他服务、网络或部分输出错误仍报失败；不改schema、不换题。历史生成复用后的组合结果不是同一连续运行性能报告，也不声称旧auto下所有编译统计已在新后端重新测量。
 

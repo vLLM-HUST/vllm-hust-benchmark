@@ -27,7 +27,14 @@ def test_research_asset_handoff_does_not_complete_original_official_bench():
     workflow = json.loads(
         (root / row["official_workflow_readiness_receipt"]).read_text("utf-8")
     )
-    assert not row["checked"]
+    # Old three-schema handoff remains insufficient; the later native closure
+    # is independent evidence and must not rewrite the frozen old receipt.
+    closure = workflow.get("native_delivery_closure_20261026")
+    assert row["checked"] == bool(closure and closure["source_checkbox_eligible"])
+    if row["checked"]:
+        assert len(closure["protocols"]) == 11
+        assert closure["official_formatter_bench_and_evaluator_used"]
+        assert closure["original_messages_schemas_and_saved_outputs_equal"]
     assert handoff["public_prepare_resolve_rows"] == 3
     assert handoff["research_source_index_import_rows"] == 3
     assert handoff["research_direct_prepare_resolve_rows"] == 3
