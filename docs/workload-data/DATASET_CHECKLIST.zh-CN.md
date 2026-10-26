@@ -5,7 +5,7 @@
 - [x] 固定官方53文件源码身份，服务器只读verify成功；不套用旧LongMemEval协议。
 - [x] 公共数据准备入口、原41文件身份与容量预算已补，调用未修改作者脚本；软件夹具通过。
 - [x] 原41文件完整下载与发布方内容身份校验通过，7120369667字节全部留服务器。
-- [ ] 截图展开及small/medium官方完整性校验（服务器进行中）。
+- [x] 截图展开及small/medium官方完整性校验均exit0：每档451问题、1870轨迹、451问题映射，未关闭截图检查；见[原始准备回执](validation/longmemeval-v2-original-readiness-20261026.json)。
 - [ ] 官方9B视觉reader的16个固定资产准备、服务切换与健康验证（准备中，未启动新服务）。
 - [ ] 原生记忆方法执行与原评分；视觉reader、RAG embedding及judge条件仍未齐备。
 - [ ] 公共数据关系适配与固定研究消费闭环；准备成功不等于原生benchmark交付。
@@ -21,6 +21,7 @@
 - [x] `longbook_qa_eng`原始0/1/2：原预算40，同上。
 - [x] `longdialogue_qa_eng`原始0/1/2：原预算40，同上。
 - [x] `math_find`原始0/1/2：原预算3，同上。
+- [x] `math_find`额外固定原题3–5与6–8：完整原输入约11.6–11.7万token、原预算3，六次生成及作者评分独立复核通过；未重跑0–2，不扩大整来源完成结论。
 - [ ] `kv_retrieval`、`longbook_sum_eng`、`longbook_choice_eng`、`longbook_qa_chn`、`code_debug`：原前三题至少一题超131072上下文，最高402028输入token；不截断或改选题。
 - [ ] `math_calc`：原后置system轮被当前Qwen原生模板拒绝400；不改消息角色，尚未完成原生验证。
 

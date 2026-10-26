@@ -31,7 +31,8 @@ python scripts/prepare_longmemeval_v2_reader.py --output /private/lme-v2-reader 
 下载前要求压缩资产三倍可用空间，展开前按原tar头检查容量并拒绝越界路径、链接和特殊成员。
 现有数据仅可用`--action verify`核验；不提供`--force`删除或自动覆盖。失败保留原日志/部分文件，先核查再恢复。
 
-当前服务器已验证53个官方源码文件，原41文件全部下载并通过大小/原发布方内容身份核验；截图展开与两档官方校验进行中，未据此勾选来源完成。
+当前服务器已验证53个官方源码文件，原41文件全部下载并通过大小/原发布方内容身份核验；截图展开与两档官方校验均已exit0，每档451问题、1870轨迹、451问题映射，截图检查开启。
+见[原始准备回执](validation/longmemeval-v2-original-readiness-20261026.json)，未据此勾选来源完成。
 作者的评测环境为Python3.11，论文reader为Qwen3.5-9B；RAG等检索方法另需Qwen3-Embedding-8B，
 `no_retrieval`负对照不因此强制部署embedding。默认judge为gpt-5.2/medium，外部计费调用未授权、未执行。
 当前Qwen3.5-27B服务为language-model-only，不把它声称为官方视觉reader或忽略原图像。

@@ -88,6 +88,22 @@ def test_plan_does_not_create_directories_or_claim_native_completion(runner, tmp
     )
 
 
+def test_original_preparation_receipt_is_not_native_or_consumer_completion():
+    receipt = json.loads(
+        (
+            ROOT
+            / "docs/workload-data/validation/longmemeval-v2-original-readiness-20261026.json"
+        ).read_text("utf-8")
+    )
+    assert receipt["original_data"]["files"] == 41
+    assert receipt["unchanged_author_commands"]["check_screenshots_both_tiers"] is True
+    assert receipt["unchanged_author_commands"]["validate_small_exit"] == 0
+    assert receipt["unchanged_author_commands"]["validate_medium_exit"] == 0
+    assert receipt["runtime"]["native_methods_executed"] is False
+    assert receipt["runtime"]["public_provider_and_research_handoff_verified"] is False
+    assert receipt["source_checkbox_eligible"] is False
+
+
 @pytest.mark.parametrize("kind", ["sha256", "git_blob"])
 def test_original_file_identity_and_same_size_corruption(runner, tmp_path, kind):
     raw = b"original fixture only"
