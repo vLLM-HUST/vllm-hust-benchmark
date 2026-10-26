@@ -117,7 +117,7 @@ def build(revision, read=None):
             "path": SOURCE,
             "kind": "blob",
             "label": "跨仓库增量结果 / Additional repository results",
-        }
+        },
     )
     remaining = next(s for s in data["sections"] if s["id"] == "v15-remaining")
     remaining["evidence"].append(section["evidence"][0].copy())
