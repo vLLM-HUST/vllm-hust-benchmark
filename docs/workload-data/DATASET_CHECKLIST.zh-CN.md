@@ -7,6 +7,8 @@
 - [x] 复用已有原资产获取、绑定/索引及历史对话续写入口；原`conversations/from/value`保留，只在API传输视图明确映射human→user、gpt→assistant，原问题不改，原teacher回答不进入对应目标请求，也不当质量金标准。
 - [ ] 对固定原样本做NPU续写、保存审计、公共字段/索引及固定研究消费闭环；其余117分片仅登记，不宣称已取数或全120万条验证。来源总勾保持未完成。
 
+原生执行跟进：首个code原题遇到300秒客户端读超时，没有保存有效回答，旧失败保留。现在以1200秒客户端等待重试同一原题并继续固定样本；模型、原题、32768生成预算不变，不换题。复用已完成的code索引和实际CI包45个逐字节一致的provider文件；运行中不计交付，尚待结果与研究消费核验。
+
 获取先用`scripts/prepare_reused_research_assets.py OPENTHOUGHTS3 --mode plan --files <原分片路径>`查看；显式`--mode download --data-root <外部目录> --files ... --max-bytes <预算>`执行，`--mode verify`只读核验。默认550MB保护不允许意外全下28GB；同一固定版本需要镜像时显式`--hf-endpoint https://hf-mirror.com`，原SHA256仍必验。绑定沿用`scripts/prepare_reused_source_records.py OPENTHOUGHTS3 --data-root ... --output <独立目录> --files ...`。原始数据/长推理回答不进入Git、wheel或本地PC。
 
 ### SchemaStore原始schema资产（交付完成）
