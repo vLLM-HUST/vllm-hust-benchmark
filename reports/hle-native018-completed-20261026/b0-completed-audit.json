@@ -1,0 +1,233 @@
+{
+  "status": "passed",
+  "runtime": {
+    "modules": {
+      "vllm": {
+        "path": "/root/m01-b0-accounting-20261024/runtime/unpacked/rootfs/vllm-workspace/vllm/vllm/__init__.py",
+        "sha256": "fd3708e5a13abe98c566afd79a6b1987cef70c0548bb19c1218ff6a7f9d43346"
+      },
+      "vllm_ascend": {
+        "path": "/root/m01-b0-accounting-20261024/runtime/unpacked/rootfs/vllm-workspace/vllm-ascend/vllm_ascend/__init__.py",
+        "sha256": "5f986228b7d273c71cba73cea91bc61dc443e01c39cd9985ea04bc3358e8bf65"
+      },
+      "torch": {
+        "path": "/root/m01-b0-accounting-20261024/runtime/unpacked/rootfs/usr/local/python3.11.14/lib/python3.11/site-packages/torch/__init__.py",
+        "sha256": "3caf7f40140ede2465bde40b9003af10cbbc8f7bcf436fa1de026471daa1b288"
+      },
+      "torch_npu": {
+        "path": "/root/m01-b0-accounting-20261024/runtime/unpacked/rootfs/usr/local/python3.11.14/lib/python3.11/site-packages/torch_npu/__init__.py",
+        "sha256": "967690b75576c1dfb76ed3cef3bd8a876fe94ec3195e4afa3116ef7d31e9b160"
+      },
+      "acl": {
+        "path": "/root/m01-b0-accounting-20261024/runtime/unpacked/rootfs/usr/local/Ascend/cann-8.5.1/python/site-packages/acl.so",
+        "sha256": "603b42753dd878faa90d6b3b81b5ddb791375fb9b3fcd8c39799ee58a3182617"
+      },
+      "vllm.model_executor.models.qwen3_5": {
+        "path": "/root/m01-b0-accounting-20261024/runtime/unpacked/rootfs/vllm-workspace/vllm/vllm/model_executor/models/qwen3_5.py",
+        "sha256": "76eeda13ad5d104b74ce8352e4a9766a0a93f29230ba359e9f7727aef4173f1d"
+      },
+      "vllm_ascend.patch.worker.patch_qwen3vl": {
+        "path": "/root/m01-b0-accounting-20261024/runtime/unpacked/rootfs/vllm-workspace/vllm-ascend/vllm_ascend/patch/worker/patch_qwen3vl.py",
+        "sha256": "6bf8b3b89948ff40c38dfe9b15ea8d9f01d9d237453fa729e3f9dd50cf5b77d7"
+      }
+    },
+    "architecture": "Qwen3_5MoeForConditionalGeneration",
+    "text_only_overlay": false,
+    "command": [
+      "vllm",
+      "serve",
+      "/models/modelscope_cache/Qwen/Qwen3___5-35B-A3B",
+      "--served-model-name",
+      "qwen3.5-35b",
+      "--host",
+      "127.0.0.1",
+      "--port",
+      "18180",
+      "--dtype",
+      "bfloat16",
+      "--kv-cache-dtype",
+      "auto",
+      "--block-size",
+      "128",
+      "--tensor-parallel-size",
+      "2",
+      "--enable-expert-parallel",
+      "--pipeline-parallel-size",
+      "1",
+      "--data-parallel-size",
+      "1",
+      "--max-model-len",
+      "65536",
+      "--gpu-memory-utilization",
+      "0.85",
+      "--max-num-seqs",
+      "16",
+      "--max-num-batched-tokens",
+      "8192",
+      "--no-enable-prefix-caching",
+      "--enable-chunked-prefill",
+      "--no-enforce-eager",
+      "--seed",
+      "0",
+      "--scheduling-policy",
+      "fcfs",
+      "--distributed-executor-backend",
+      "mp",
+      "--disable-custom-all-reduce",
+      "--no-trust-remote-code",
+      "--load-format",
+      "auto",
+      "--no-enable-log-requests",
+      "--uvicorn-log-level",
+      "info",
+      "--compilation-config",
+      "{\"mode\":3,\"cudagraph_mode\":\"FULL_DECODE_ONLY\"}",
+      "--cudagraph-capture-sizes",
+      "1",
+      "2",
+      "4",
+      "8",
+      "16",
+      "--structured-outputs-config",
+      "{\"backend\": \"xgrammar\", \"disable_any_whitespace\": true}"
+    ],
+    "plan_sha256": "ae485476566104d5f183f4b82f6582f27381279a6ae8a99d132555bb4833c5e1",
+    "vllm_version": "0.18.0",
+    "ascend_version": "0.18.0"
+  },
+  "tracks": {
+    "gold": {
+      "stats": {
+        "total": 668,
+        "graded": 645,
+        "successes": 157,
+        "accuracy": 0.23502994011976047,
+        "unresolved": 23,
+        "complete_grading": false,
+        "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+        "wald_95_half_width": 0.032155232484988076,
+        "solver_failures": 0,
+        "judge_invalid": 23,
+        "judge_transport_failures": 0,
+        "solver_truncated": 379,
+        "judge_truncated": 23
+      },
+      "modality": {
+        "image": {
+          "total": 93,
+          "graded": 92,
+          "successes": 17,
+          "accuracy": 0.1827956989247312,
+          "unresolved": 1,
+          "complete_grading": false,
+          "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+          "wald_95_half_width": 0.07855302344488328,
+          "solver_failures": 0,
+          "judge_invalid": 1,
+          "judge_transport_failures": 0,
+          "solver_truncated": 7,
+          "judge_truncated": 1
+        },
+        "text": {
+          "total": 575,
+          "graded": 553,
+          "successes": 140,
+          "accuracy": 0.24347826086956523,
+          "unresolved": 22,
+          "complete_grading": false,
+          "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+          "wald_95_half_width": 0.03508027188415771,
+          "solver_failures": 0,
+          "judge_invalid": 22,
+          "judge_transport_failures": 0,
+          "solver_truncated": 372,
+          "judge_truncated": 22
+        }
+      },
+      "solver_statuses": {
+        "ok": 668
+      },
+      "judge_statuses": {
+        "ok": 645,
+        "invalid_judge": 23
+      },
+      "contract_sha256": "85441f156934988a490bdad059196d9108d78afd4dc106d088183382b7419e23",
+      "solver_index_sha256": "418d08070d42242971bd940167e60965a17ef160da6f072a0c9954c9536355b9",
+      "judge_index_sha256": "7dc04f9c7bce9e5d36fc66338865a7425100ec9efc9cdf7e6b41772543c3ef5e",
+      "summary_sha256": "3123ead1489e62ab9a51c022eff15f2b5eff25ee75ca207e681c6248ed1366c2"
+    },
+    "revision": {
+      "stats": {
+        "total": 1143,
+        "graded": 1112,
+        "successes": 316,
+        "accuracy": 0.2764654418197725,
+        "unresolved": 31,
+        "complete_grading": false,
+        "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+        "wald_95_half_width": 0.025928836061797907,
+        "solver_failures": 0,
+        "judge_invalid": 31,
+        "judge_transport_failures": 0,
+        "solver_truncated": 704,
+        "judge_truncated": 30
+      },
+      "modality": {
+        "image": {
+          "total": 118,
+          "graded": 116,
+          "successes": 17,
+          "accuracy": 0.1440677966101695,
+          "unresolved": 2,
+          "complete_grading": false,
+          "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+          "wald_95_half_width": 0.06336044342452424,
+          "solver_failures": 0,
+          "judge_invalid": 2,
+          "judge_transport_failures": 0,
+          "solver_truncated": 18,
+          "judge_truncated": 2
+        },
+        "text": {
+          "total": 1025,
+          "graded": 996,
+          "successes": 299,
+          "accuracy": 0.2917073170731707,
+          "unresolved": 29,
+          "complete_grading": false,
+          "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+          "wald_95_half_width": 0.027827499125890862,
+          "solver_failures": 0,
+          "judge_invalid": 29,
+          "judge_transport_failures": 0,
+          "solver_truncated": 686,
+          "judge_truncated": 28
+        }
+      },
+      "solver_statuses": {
+        "ok": 1143
+      },
+      "judge_statuses": {
+        "ok": 1112,
+        "invalid_judge": 31
+      },
+      "contract_sha256": "6e867d2a2f162f23616ca89143ec4e8e7c50a2259a0f968db9636b5d0fb87276",
+      "solver_index_sha256": "57badb0fef621f779044f15dce60ef83ab8254386f333557f626c9b3913c150b",
+      "judge_index_sha256": "5703e7da47638f5a92385440458709cbe9dc974e283ff9fbae1d99fc90240640",
+      "summary_sha256": "aac0560b15e80ffd772a3f41ca84be6bcc61387199043e3dfd6d4a3661e7caa4"
+    }
+  },
+  "receipt_sha256": "670a8e93c6e78507f639187259515fc19550bf4e870c119e93c05451c5fb0518",
+  "finalization_receipt": "/root/hle018-revision-continuation-r2/receipt.json",
+  "original_receipt_sha256": "24311fa559f9cd5a515852670b185e1b4cc020eb30f176bd9e699d8add0049f2",
+  "unknown_original_exit_codes_preserved": true,
+  "seal_sha256": "5f82f2ae485d944552732d4301e574e08b3057e2fd6a555199c82ffdc68a2084",
+  "plan_sha256": "ae485476566104d5f183f4b82f6582f27381279a6ae8a99d132555bb4833c5e1",
+  "retained_answer_byte_identical": true,
+  "scope": "Full Gold668 and Revision1143, original image+text inputs, strict_json, failures and unresolved retained in denominators",
+  "limitations": [
+    "Qwen substitute judge; not official leaderboard replication",
+    "One Gold answer served in separate qualification; no combined full-task solver throughput claim",
+    "Existing best Gold and Revision B1 results are from distinct measured deployments; do not combine as a universal B1"
+  ]
+}

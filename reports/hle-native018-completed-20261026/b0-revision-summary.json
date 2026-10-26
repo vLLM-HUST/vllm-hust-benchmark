@@ -1,0 +1,145 @@
+{
+  "protocol": "HLE original evaluation prompts/schema on HLE-Verified; Qwen substitute; single trial; not official leaderboard replication",
+  "scoring_policy": "strict_json",
+  "selection": {
+    "subsets": [
+      "revision"
+    ],
+    "modality": "all",
+    "excluded": 0
+  },
+  "scope": "complete_selected_plan",
+  "judge_model": "qwen3.5-35b",
+  "solver_model": "qwen3.5-35b",
+  "contract_sha256": "6e867d2a2f162f23616ca89143ec4e8e7c50a2259a0f968db9636b5d0fb87276",
+  "solver_index_sha256": "57badb0fef621f779044f15dce60ef83ab8254386f333557f626c9b3913c150b",
+  "judge_index_sha256": "5703e7da47638f5a92385440458709cbe9dc974e283ff9fbae1d99fc90240640",
+  "tracks": {
+    "revision": {
+      "total": 1143,
+      "graded": 1112,
+      "successes": 316,
+      "accuracy": 0.2764654418197725,
+      "unresolved": 31,
+      "complete_grading": false,
+      "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+      "wald_95_half_width": 0.025928836061797907,
+      "solver_failures": 0,
+      "judge_invalid": 31,
+      "judge_transport_failures": 0,
+      "solver_truncated": 704,
+      "judge_truncated": 30
+    }
+  },
+  "groups": {
+    "revision/text": {
+      "total": 1025,
+      "graded": 996,
+      "successes": 299,
+      "accuracy": 0.2917073170731707,
+      "unresolved": 29,
+      "complete_grading": false,
+      "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+      "wald_95_half_width": 0.027827499125890862,
+      "solver_failures": 0,
+      "judge_invalid": 29,
+      "judge_transport_failures": 0,
+      "solver_truncated": 686,
+      "judge_truncated": 28
+    },
+    "revision/image": {
+      "total": 118,
+      "graded": 116,
+      "successes": 17,
+      "accuracy": 0.1440677966101695,
+      "unresolved": 2,
+      "complete_grading": false,
+      "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+      "wald_95_half_width": 0.06336044342452424,
+      "solver_failures": 0,
+      "judge_invalid": 2,
+      "judge_transport_failures": 0,
+      "solver_truncated": 18,
+      "judge_truncated": 2
+    }
+  },
+  "subjects": {
+    "revision/Biology/Medicine": {
+      "total": 174,
+      "graded": 174,
+      "successes": 72,
+      "accuracy": 0.41379310344827586,
+      "unresolved": 0,
+      "complete_grading": true,
+      "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+      "wald_95_half_width": 0.07318103257429455,
+      "solver_failures": 0,
+      "judge_invalid": 0,
+      "judge_transport_failures": 0,
+      "solver_truncated": 44,
+      "judge_truncated": 0
+    },
+    "revision/Chemistry": {
+      "total": 126,
+      "graded": 125,
+      "successes": 18,
+      "accuracy": 0.14285714285714285,
+      "unresolved": 1,
+      "complete_grading": false,
+      "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+      "wald_95_half_width": 0.061101009266077866,
+      "solver_failures": 0,
+      "judge_invalid": 1,
+      "judge_transport_failures": 0,
+      "solver_truncated": 42,
+      "judge_truncated": 1
+    },
+    "revision/Computer Science/AI": {
+      "total": 103,
+      "graded": 102,
+      "successes": 15,
+      "accuracy": 0.14563106796116504,
+      "unresolved": 1,
+      "complete_grading": false,
+      "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+      "wald_95_half_width": 0.06812197018667215,
+      "solver_failures": 0,
+      "judge_invalid": 1,
+      "judge_transport_failures": 0,
+      "solver_truncated": 69,
+      "judge_truncated": 1
+    },
+    "revision/Math": {
+      "total": 714,
+      "graded": 685,
+      "successes": 202,
+      "accuracy": 0.28291316526610644,
+      "unresolved": 29,
+      "complete_grading": false,
+      "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+      "wald_95_half_width": 0.03303843134042183,
+      "solver_failures": 0,
+      "judge_invalid": 29,
+      "judge_transport_failures": 0,
+      "solver_truncated": 538,
+      "judge_truncated": 28
+    },
+    "revision/Physics": {
+      "total": 26,
+      "graded": 26,
+      "successes": 9,
+      "accuracy": 0.34615384615384615,
+      "unresolved": 0,
+      "complete_grading": true,
+      "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+      "wald_95_half_width": 0.18286970521416626,
+      "solver_failures": 0,
+      "judge_invalid": 0,
+      "judge_transport_failures": 0,
+      "solver_truncated": 11,
+      "judge_truncated": 0
+    }
+  },
+  "calibration_error": null,
+  "calibration_note": "not implemented: pinned upstream binning omits final bin and crashes below 100 grades; raw confidence preserved; no silent replacement metric"
+}

@@ -1,0 +1,95 @@
+{
+  "modules": {
+    "vllm": {
+      "path": "/root/m01-b0-accounting-20261024/runtime/unpacked/rootfs/vllm-workspace/vllm/vllm/__init__.py",
+      "sha256": "fd3708e5a13abe98c566afd79a6b1987cef70c0548bb19c1218ff6a7f9d43346"
+    },
+    "vllm_ascend": {
+      "path": "/root/m01-b0-accounting-20261024/runtime/unpacked/rootfs/vllm-workspace/vllm-ascend/vllm_ascend/__init__.py",
+      "sha256": "5f986228b7d273c71cba73cea91bc61dc443e01c39cd9985ea04bc3358e8bf65"
+    },
+    "torch": {
+      "path": "/root/m01-b0-accounting-20261024/runtime/unpacked/rootfs/usr/local/python3.11.14/lib/python3.11/site-packages/torch/__init__.py",
+      "sha256": "3caf7f40140ede2465bde40b9003af10cbbc8f7bcf436fa1de026471daa1b288"
+    },
+    "torch_npu": {
+      "path": "/root/m01-b0-accounting-20261024/runtime/unpacked/rootfs/usr/local/python3.11.14/lib/python3.11/site-packages/torch_npu/__init__.py",
+      "sha256": "967690b75576c1dfb76ed3cef3bd8a876fe94ec3195e4afa3116ef7d31e9b160"
+    },
+    "acl": {
+      "path": "/root/m01-b0-accounting-20261024/runtime/unpacked/rootfs/usr/local/Ascend/cann-8.5.1/python/site-packages/acl.so",
+      "sha256": "603b42753dd878faa90d6b3b81b5ddb791375fb9b3fcd8c39799ee58a3182617"
+    },
+    "vllm.model_executor.models.qwen3_5": {
+      "path": "/root/m01-b0-accounting-20261024/runtime/unpacked/rootfs/vllm-workspace/vllm/vllm/model_executor/models/qwen3_5.py",
+      "sha256": "76eeda13ad5d104b74ce8352e4a9766a0a93f29230ba359e9f7727aef4173f1d"
+    },
+    "vllm_ascend.patch.worker.patch_qwen3vl": {
+      "path": "/root/m01-b0-accounting-20261024/runtime/unpacked/rootfs/vllm-workspace/vllm-ascend/vllm_ascend/patch/worker/patch_qwen3vl.py",
+      "sha256": "6bf8b3b89948ff40c38dfe9b15ea8d9f01d9d237453fa729e3f9dd50cf5b77d7"
+    }
+  },
+  "architecture": "Qwen3_5MoeForConditionalGeneration",
+  "text_only_overlay": false,
+  "command": [
+    "vllm",
+    "serve",
+    "/models/modelscope_cache/Qwen/Qwen3___5-35B-A3B",
+    "--served-model-name",
+    "qwen3.5-35b",
+    "--host",
+    "127.0.0.1",
+    "--port",
+    "18180",
+    "--dtype",
+    "bfloat16",
+    "--kv-cache-dtype",
+    "auto",
+    "--block-size",
+    "128",
+    "--tensor-parallel-size",
+    "2",
+    "--enable-expert-parallel",
+    "--pipeline-parallel-size",
+    "1",
+    "--data-parallel-size",
+    "1",
+    "--max-model-len",
+    "65536",
+    "--gpu-memory-utilization",
+    "0.85",
+    "--max-num-seqs",
+    "16",
+    "--max-num-batched-tokens",
+    "8192",
+    "--no-enable-prefix-caching",
+    "--enable-chunked-prefill",
+    "--no-enforce-eager",
+    "--seed",
+    "0",
+    "--scheduling-policy",
+    "fcfs",
+    "--distributed-executor-backend",
+    "mp",
+    "--disable-custom-all-reduce",
+    "--no-trust-remote-code",
+    "--load-format",
+    "auto",
+    "--no-enable-log-requests",
+    "--uvicorn-log-level",
+    "info",
+    "--compilation-config",
+    "{\"mode\":3,\"cudagraph_mode\":\"FULL_DECODE_ONLY\"}",
+    "--cudagraph-capture-sizes",
+    "1",
+    "2",
+    "4",
+    "8",
+    "16",
+    "--structured-outputs-config",
+    "{\"backend\": \"xgrammar\", \"disable_any_whitespace\": true}"
+  ],
+  "plan_sha256": "ae485476566104d5f183f4b82f6582f27381279a6ae8a99d132555bb4833c5e1",
+  "vllm_version": "0.18.0",
+  "ascend_version": "0.18.0"
+}

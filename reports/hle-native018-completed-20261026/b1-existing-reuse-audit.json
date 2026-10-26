@@ -1,0 +1,1570 @@
+{
+  "status": "canonical_projection_reuse_audited; private_per_request_regrading_not_claimed",
+  "sources": {
+    "/root/m01-final-benchmark-20261024/website-publication/data/dataset-matrix-v1.json": "7ffae7c27f01de964d377cdf9420e02233cee1ee7a786fc8380119437e89b47c",
+    "/root/m01-final-benchmark-20261024/website-publication/data/betterscale-hle-20261015/report.json": "7acc1ef79a759bd58656e0674fefee22d79918352de24bd0ee5471e9aa7ae57f",
+    "/root/m01-final-benchmark-20261024/website-publication/data/betterscale-school-runtime-20261016/report.json": "63acbf2f8efd2d4c3488d7a4738f2f9e0c811d8211a528a9f27e04b63f35a07d",
+    "/root/m01-final-benchmark-20261024/website-publication/data/dataset-matrix-campaign-20261016/report.json": "b0a9743ea92e912828891164fa8b67560aee47615b7797df8ee5a35a9a3675c2",
+    "/root/m01-final-benchmark-20261024/website-publication/data/hle-verified-20261015/report.json": "eece0c0f2c2d7759dfe6d5629139ce24b272a259d9936533477b229957186d9b",
+    "/root/m01-final-benchmark-20261024/website-publication/data/request-throttling-dataset-matrix-20261018/hle-gold.json": "126dcfeb5b9b382f9ecac3e42695a53430d8c98e647d86f7af0da5e8a59d5a44",
+    "/root/m01-final-benchmark-20261024/website-publication/data/request-throttling-dataset-matrix-20261018/hle-revision.json": "5bbccd0b26d8ca248596d5eb2a43dca9e3a9abced7521f938071b266f2a156e4"
+  },
+  "canonical_records": [
+    {
+      "id": "hle-verified-native-gold-text",
+      "solution": "native",
+      "scope": "gold-text",
+      "quality": [
+        {
+          "label": "Gold · text",
+          "correct": 137,
+          "total": 575,
+          "value": 0.2382608695652174,
+          "audit": {
+            "total": 575,
+            "graded": 546,
+            "successes": 137,
+            "accuracy": 0.2382608695652174,
+            "unresolved": 29,
+            "complete_grading": false,
+            "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+            "wald_95_half_width": 0.03482183418452217,
+            "solver_failures": 0,
+            "judge_invalid": 29,
+            "judge_transport_failures": 0,
+            "solver_truncated": 374,
+            "judge_truncated": 29
+          }
+        }
+      ],
+      "configuration": {
+        "fields": {
+          "dtype": {
+            "value": "bfloat16",
+            "status": "verified"
+          },
+          "tensor_parallel_size": {
+            "value": 2,
+            "status": "verified"
+          },
+          "pipeline_parallel_size": {
+            "value": 1,
+            "status": "verified"
+          },
+          "data_parallel_size": {
+            "value": 1,
+            "status": "verified"
+          },
+          "enable_expert_parallel": {
+            "value": true,
+            "status": "verified"
+          },
+          "decode_context_parallel_size": {
+            "value": 1,
+            "status": "verified"
+          },
+          "disable_custom_all_reduce": {
+            "value": true,
+            "status": "verified"
+          },
+          "gpu_memory_utilization": {
+            "value": 0.85,
+            "status": "verified"
+          },
+          "max_model_len": {
+            "value": 65536,
+            "status": "verified"
+          },
+          "max_num_seqs": {
+            "value": 16,
+            "status": "verified"
+          },
+          "max_num_batched_tokens": {
+            "value": 8192,
+            "status": "verified"
+          },
+          "enable_prefix_caching": {
+            "value": false,
+            "status": "verified"
+          },
+          "enable_chunked_prefill": {
+            "value": true,
+            "status": "verified"
+          },
+          "speculative_config": {
+            "value": null,
+            "status": "verified"
+          },
+          "enforce_eager": {
+            "value": false,
+            "status": "verified"
+          },
+          "compilation_mode": {
+            "value": 3,
+            "status": "verified"
+          },
+          "cudagraph_mode": {
+            "value": "FULL_DECODE_ONLY",
+            "status": "verified"
+          },
+          "cudagraph_capture_sizes": {
+            "value": [
+              1,
+              2,
+              4,
+              8,
+              16
+            ],
+            "status": "verified"
+          },
+          "structured_outputs_backend": {
+            "value": "xgrammar",
+            "status": "verified"
+          },
+          "structured_outputs_disable_any_whitespace": {
+            "value": true,
+            "status": "verified"
+          }
+        },
+        "effective_sha256": "a8e9f014d3a089298e618acea723482b55d46747d8f11f76db97b118935bf3f6",
+        "startup_log_sha256": "bec0e3d7cea0047538b4782f251a8139988ac3d80ccf47fc002de67ee10b0a90"
+      },
+      "report": "data/hle-verified-20261015/report.json"
+    },
+    {
+      "id": "hle-verified-native-revision-text",
+      "solution": "native",
+      "scope": "revision-text",
+      "quality": [
+        {
+          "label": "Revision · text",
+          "correct": 292,
+          "total": 1025,
+          "value": 0.2848780487804878,
+          "audit": {
+            "total": 1025,
+            "graded": 986,
+            "successes": 292,
+            "accuracy": 0.2848780487804878,
+            "unresolved": 39,
+            "complete_grading": false,
+            "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+            "wald_95_half_width": 0.027632086917668795,
+            "solver_failures": 0,
+            "judge_invalid": 39,
+            "judge_transport_failures": 0,
+            "solver_truncated": 674,
+            "judge_truncated": 39
+          }
+        }
+      ],
+      "configuration": {
+        "fields": {
+          "dtype": {
+            "value": "bfloat16",
+            "status": "verified"
+          },
+          "tensor_parallel_size": {
+            "value": 2,
+            "status": "verified"
+          },
+          "pipeline_parallel_size": {
+            "value": 1,
+            "status": "verified"
+          },
+          "data_parallel_size": {
+            "value": 1,
+            "status": "verified"
+          },
+          "enable_expert_parallel": {
+            "value": true,
+            "status": "verified"
+          },
+          "decode_context_parallel_size": {
+            "value": 1,
+            "status": "verified"
+          },
+          "disable_custom_all_reduce": {
+            "value": true,
+            "status": "verified"
+          },
+          "gpu_memory_utilization": {
+            "value": 0.85,
+            "status": "verified"
+          },
+          "max_model_len": {
+            "value": 65536,
+            "status": "verified"
+          },
+          "max_num_seqs": {
+            "value": 16,
+            "status": "verified"
+          },
+          "max_num_batched_tokens": {
+            "value": 8192,
+            "status": "verified"
+          },
+          "enable_prefix_caching": {
+            "value": false,
+            "status": "verified"
+          },
+          "enable_chunked_prefill": {
+            "value": true,
+            "status": "verified"
+          },
+          "speculative_config": {
+            "value": null,
+            "status": "verified"
+          },
+          "enforce_eager": {
+            "value": false,
+            "status": "verified"
+          },
+          "compilation_mode": {
+            "value": 3,
+            "status": "verified"
+          },
+          "cudagraph_mode": {
+            "value": "FULL_DECODE_ONLY",
+            "status": "verified"
+          },
+          "cudagraph_capture_sizes": {
+            "value": [
+              1,
+              2,
+              4,
+              8,
+              16
+            ],
+            "status": "verified"
+          },
+          "structured_outputs_backend": {
+            "value": "xgrammar",
+            "status": "verified"
+          },
+          "structured_outputs_disable_any_whitespace": {
+            "value": true,
+            "status": "verified"
+          }
+        },
+        "effective_sha256": "a8e9f014d3a089298e618acea723482b55d46747d8f11f76db97b118935bf3f6",
+        "startup_log_sha256": "bec0e3d7cea0047538b4782f251a8139988ac3d80ccf47fc002de67ee10b0a90"
+      },
+      "report": "data/hle-verified-20261015/report.json"
+    },
+    {
+      "id": "hle-verified-native-gold-image",
+      "solution": "native",
+      "scope": "gold-image",
+      "quality": [
+        {
+          "label": "Gold · image",
+          "correct": 19,
+          "total": 93,
+          "value": 0.20430107526881722,
+          "audit": {
+            "total": 93,
+            "graded": 90,
+            "successes": 19,
+            "accuracy": 0.20430107526881722,
+            "unresolved": 3,
+            "complete_grading": false,
+            "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+            "wald_95_half_width": 0.08194534893600774,
+            "solver_failures": 0,
+            "judge_invalid": 3,
+            "judge_transport_failures": 0,
+            "solver_truncated": 9,
+            "judge_truncated": 3
+          }
+        }
+      ],
+      "configuration": {
+        "fields": {
+          "dtype": {
+            "value": "bfloat16",
+            "status": "verified"
+          },
+          "tensor_parallel_size": {
+            "value": 2,
+            "status": "verified"
+          },
+          "pipeline_parallel_size": {
+            "value": 1,
+            "status": "verified"
+          },
+          "data_parallel_size": {
+            "value": 1,
+            "status": "verified"
+          },
+          "enable_expert_parallel": {
+            "value": true,
+            "status": "verified"
+          },
+          "decode_context_parallel_size": {
+            "value": 1,
+            "status": "verified"
+          },
+          "disable_custom_all_reduce": {
+            "value": true,
+            "status": "verified"
+          },
+          "gpu_memory_utilization": {
+            "value": 0.85,
+            "status": "verified"
+          },
+          "max_model_len": {
+            "value": 65536,
+            "status": "verified"
+          },
+          "max_num_seqs": {
+            "value": 16,
+            "status": "verified"
+          },
+          "max_num_batched_tokens": {
+            "value": 8192,
+            "status": "verified"
+          },
+          "enable_prefix_caching": {
+            "value": false,
+            "status": "verified"
+          },
+          "enable_chunked_prefill": {
+            "value": true,
+            "status": "verified"
+          },
+          "speculative_config": {
+            "value": null,
+            "status": "verified"
+          },
+          "enforce_eager": {
+            "value": false,
+            "status": "verified"
+          },
+          "compilation_mode": {
+            "value": 3,
+            "status": "verified"
+          },
+          "cudagraph_mode": {
+            "value": "FULL_DECODE_ONLY",
+            "status": "verified"
+          },
+          "cudagraph_capture_sizes": {
+            "value": [
+              1,
+              2,
+              4,
+              8,
+              16
+            ],
+            "status": "verified"
+          },
+          "structured_outputs_backend": {
+            "value": "xgrammar",
+            "status": "verified"
+          },
+          "structured_outputs_disable_any_whitespace": {
+            "value": true,
+            "status": "verified"
+          }
+        },
+        "effective_sha256": "a8e9f014d3a089298e618acea723482b55d46747d8f11f76db97b118935bf3f6",
+        "startup_log_sha256": "bec0e3d7cea0047538b4782f251a8139988ac3d80ccf47fc002de67ee10b0a90"
+      },
+      "report": "data/hle-verified-20261015/report.json"
+    },
+    {
+      "id": "hle-verified-native-revision-image",
+      "solution": "native",
+      "scope": "revision-image",
+      "quality": [
+        {
+          "label": "Revision · image",
+          "correct": 21,
+          "total": 118,
+          "value": 0.17796610169491525,
+          "audit": {
+            "total": 118,
+            "graded": 117,
+            "successes": 21,
+            "accuracy": 0.17796610169491525,
+            "unresolved": 1,
+            "complete_grading": false,
+            "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+            "wald_95_half_width": 0.0690126294695939,
+            "solver_failures": 0,
+            "judge_invalid": 1,
+            "judge_transport_failures": 0,
+            "solver_truncated": 14,
+            "judge_truncated": 1
+          }
+        }
+      ],
+      "configuration": {
+        "fields": {
+          "dtype": {
+            "value": "bfloat16",
+            "status": "verified"
+          },
+          "tensor_parallel_size": {
+            "value": 2,
+            "status": "verified"
+          },
+          "pipeline_parallel_size": {
+            "value": 1,
+            "status": "verified"
+          },
+          "data_parallel_size": {
+            "value": 1,
+            "status": "verified"
+          },
+          "enable_expert_parallel": {
+            "value": true,
+            "status": "verified"
+          },
+          "decode_context_parallel_size": {
+            "value": 1,
+            "status": "verified"
+          },
+          "disable_custom_all_reduce": {
+            "value": true,
+            "status": "verified"
+          },
+          "gpu_memory_utilization": {
+            "value": 0.85,
+            "status": "verified"
+          },
+          "max_model_len": {
+            "value": 65536,
+            "status": "verified"
+          },
+          "max_num_seqs": {
+            "value": 16,
+            "status": "verified"
+          },
+          "max_num_batched_tokens": {
+            "value": 8192,
+            "status": "verified"
+          },
+          "enable_prefix_caching": {
+            "value": false,
+            "status": "verified"
+          },
+          "enable_chunked_prefill": {
+            "value": true,
+            "status": "verified"
+          },
+          "speculative_config": {
+            "value": null,
+            "status": "verified"
+          },
+          "enforce_eager": {
+            "value": false,
+            "status": "verified"
+          },
+          "compilation_mode": {
+            "value": 3,
+            "status": "verified"
+          },
+          "cudagraph_mode": {
+            "value": "FULL_DECODE_ONLY",
+            "status": "verified"
+          },
+          "cudagraph_capture_sizes": {
+            "value": [
+              1,
+              2,
+              4,
+              8,
+              16
+            ],
+            "status": "verified"
+          },
+          "structured_outputs_backend": {
+            "value": "xgrammar",
+            "status": "verified"
+          },
+          "structured_outputs_disable_any_whitespace": {
+            "value": true,
+            "status": "verified"
+          }
+        },
+        "effective_sha256": "a8e9f014d3a089298e618acea723482b55d46747d8f11f76db97b118935bf3f6",
+        "startup_log_sha256": "bec0e3d7cea0047538b4782f251a8139988ac3d80ccf47fc002de67ee10b0a90"
+      },
+      "report": "data/hle-verified-20261015/report.json"
+    },
+    {
+      "id": "hle-verified-core-attention-boundary-gold-text",
+      "solution": "core-attention-boundary",
+      "scope": "gold-text",
+      "quality": [
+        {
+          "label": "Gold · text",
+          "correct": 70,
+          "total": 575,
+          "value": 0.12173913043478261,
+          "audit": {
+            "total": 575,
+            "graded": 278,
+            "successes": 70,
+            "accuracy": 0.12173913043478261,
+            "unresolved": 297,
+            "complete_grading": false,
+            "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+            "wald_95_half_width": 0.02672692613427203,
+            "solver_failures": 0,
+            "judge_invalid": 297,
+            "judge_transport_failures": 0,
+            "solver_truncated": 379,
+            "judge_truncated": 297
+          }
+        }
+      ],
+      "configuration": {
+        "source_commit": "8b5ebb1382bc3624b5250ccec53d5554b6c86003",
+        "model": "Qwen3.5-35B-A3B",
+        "dtype": "BF16",
+        "hardware": "2 x Ascend 910B2",
+        "tensor_parallel_size": 2,
+        "expert_parallel": true,
+        "mtp": 0,
+        "prefix_caching": false,
+        "graph_mode": "FULL_DECODE_ONLY",
+        "max_model_len": 65536,
+        "max_num_seqs": 16,
+        "max_num_batched_tokens": 8192,
+        "gpu_memory_utilization": 0.85,
+        "block_size": 128,
+        "vllm": "0.23.0+empty",
+        "vllm_ascend": "0.23.0",
+        "vllm_commit": "0fc695fc6d1d82e9a5ac6835ac8e4e1c83703665",
+        "ascend_commit": "5cb98caaadeff42b5b62b996e34bb2aaa29d20fd",
+        "cann": "9.1",
+        "activation": "installed and runtime_effective observed",
+        "co_location": "Gold solver/judge overlapped Frontier TP2 on the same host; modality load tests ran after Frontier had released its pair."
+      },
+      "report": "data/dataset-matrix-campaign-20261016/report.json"
+    },
+    {
+      "id": "hle-verified-core-attention-boundary-gold-image",
+      "solution": "core-attention-boundary",
+      "scope": "gold-image",
+      "quality": [
+        {
+          "label": "Gold · image",
+          "correct": 7,
+          "total": 93,
+          "value": 0.07526881720430108,
+          "audit": {
+            "total": 93,
+            "graded": 57,
+            "successes": 7,
+            "accuracy": 0.07526881720430108,
+            "unresolved": 36,
+            "complete_grading": false,
+            "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+            "wald_95_half_width": 0.053620380828891624,
+            "solver_failures": 0,
+            "judge_invalid": 36,
+            "judge_transport_failures": 0,
+            "solver_truncated": 9,
+            "judge_truncated": 36
+          }
+        }
+      ],
+      "configuration": {
+        "source_commit": "8b5ebb1382bc3624b5250ccec53d5554b6c86003",
+        "model": "Qwen3.5-35B-A3B",
+        "dtype": "BF16",
+        "hardware": "2 x Ascend 910B2",
+        "tensor_parallel_size": 2,
+        "expert_parallel": true,
+        "mtp": 0,
+        "prefix_caching": false,
+        "graph_mode": "FULL_DECODE_ONLY",
+        "max_model_len": 65536,
+        "max_num_seqs": 16,
+        "max_num_batched_tokens": 8192,
+        "gpu_memory_utilization": 0.85,
+        "block_size": 128,
+        "vllm": "0.23.0+empty",
+        "vllm_ascend": "0.23.0",
+        "vllm_commit": "0fc695fc6d1d82e9a5ac6835ac8e4e1c83703665",
+        "ascend_commit": "5cb98caaadeff42b5b62b996e34bb2aaa29d20fd",
+        "cann": "9.1",
+        "activation": "installed and runtime_effective observed",
+        "co_location": "Gold solver/judge overlapped Frontier TP2 on the same host; modality load tests ran after Frontier had released its pair."
+      },
+      "report": "data/dataset-matrix-campaign-20261016/report.json"
+    },
+    {
+      "id": "hle-verified-betterscale-gold-text",
+      "solution": "betterscale",
+      "scope": "gold-text",
+      "quality": [
+        {
+          "label": "Gold · text",
+          "correct": 150,
+          "total": 575,
+          "value": 0.2608695652173913,
+          "audit": {
+            "total": 575,
+            "graded": 559,
+            "successes": 150,
+            "accuracy": 0.2608695652173913,
+            "unresolved": 16,
+            "complete_grading": false,
+            "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+            "wald_95_half_width": 0.03589173056346642,
+            "solver_failures": 0,
+            "judge_invalid": 16,
+            "judge_transport_failures": 0,
+            "solver_truncated": 370,
+            "judge_truncated": 16
+          }
+        }
+      ],
+      "configuration": {
+        "source_commit": "2c07ddd5eb04f2afeb77123ce066a3a70662a94c",
+        "source_tag": "v1",
+        "tested_base_commit": "7740df9ab5670e1dc26067efca7d61a51f566783",
+        "release_delta": "Documentation, version and qualification metadata only",
+        "model": "Qwen3.5-35B-A3B",
+        "hardware": "Ascend 910B2; two concurrent TP2 lanes on four devices",
+        "packages": {
+          "vllm": "0.28.1.post1.dev143+gf18cf803c.empty",
+          "vllm-ascend": "0.25.1rc2.dev125+hust.20260903.4.g74f0c0a27.d20260909",
+          "torch": "2.13.0+cpu",
+          "torch-npu": "2.13.0rc1",
+          "transformers": "5.14.1"
+        },
+        "python": "3.12.13",
+        "precision": "BF16",
+        "tp": 2,
+        "mtp": 2,
+        "graph": "FULL",
+        "state_bytes_per_rank": 21474836480,
+        "host_cache_bytes_per_rank": 8589934592,
+        "cann": "9.1.0",
+        "max_model_len": 65536,
+        "max_num_batched_tokens": 4096,
+        "lanes": {
+          "hle": {
+            "execution_seats": 16,
+            "resident_seats": 20,
+            "images": 4
+          },
+          "text": {
+            "execution_seats": 16,
+            "resident_seats": 36,
+            "images": 0
+          }
+        },
+        "validation": "23/23 basic smoke; full dataset scopes and six separate load tests completed"
+      },
+      "report": "data/betterscale-school-runtime-20261016/report.json"
+    },
+    {
+      "id": "hle-verified-betterscale-revision-text",
+      "solution": "betterscale",
+      "scope": "revision-text",
+      "quality": [
+        {
+          "label": "Revision · text",
+          "correct": 299,
+          "total": 1025,
+          "value": 0.2917073170731707,
+          "audit": {
+            "total": 1025,
+            "graded": 1001,
+            "successes": 299,
+            "accuracy": 0.2917073170731707,
+            "unresolved": 24,
+            "complete_grading": false,
+            "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+            "wald_95_half_width": 0.027827499125890862,
+            "solver_failures": 0,
+            "judge_invalid": 24,
+            "judge_transport_failures": 0,
+            "solver_truncated": 654,
+            "judge_truncated": 24
+          }
+        }
+      ],
+      "configuration": {
+        "source_commit": "2c07ddd5eb04f2afeb77123ce066a3a70662a94c",
+        "source_tag": "v1",
+        "tested_base_commit": "7740df9ab5670e1dc26067efca7d61a51f566783",
+        "release_delta": "Documentation, version and qualification metadata only",
+        "model": "Qwen3.5-35B-A3B",
+        "hardware": "Ascend 910B2; two concurrent TP2 lanes on four devices",
+        "packages": {
+          "vllm": "0.28.1.post1.dev143+gf18cf803c.empty",
+          "vllm-ascend": "0.25.1rc2.dev125+hust.20260903.4.g74f0c0a27.d20260909",
+          "torch": "2.13.0+cpu",
+          "torch-npu": "2.13.0rc1",
+          "transformers": "5.14.1"
+        },
+        "python": "3.12.13",
+        "precision": "BF16",
+        "tp": 2,
+        "mtp": 2,
+        "graph": "FULL",
+        "state_bytes_per_rank": 21474836480,
+        "host_cache_bytes_per_rank": 8589934592,
+        "cann": "9.1.0",
+        "max_model_len": 65536,
+        "max_num_batched_tokens": 4096,
+        "lanes": {
+          "hle": {
+            "execution_seats": 16,
+            "resident_seats": 20,
+            "images": 4
+          },
+          "text": {
+            "execution_seats": 16,
+            "resident_seats": 36,
+            "images": 0
+          }
+        },
+        "validation": "23/23 basic smoke; full dataset scopes and six separate load tests completed"
+      },
+      "report": "data/betterscale-school-runtime-20261016/report.json"
+    },
+    {
+      "id": "hle-verified-betterscale-gold-image",
+      "solution": "betterscale",
+      "scope": "gold-image",
+      "quality": [
+        {
+          "label": "Gold · image",
+          "correct": 23,
+          "total": 93,
+          "value": 0.24731182795698925,
+          "audit": {
+            "total": 93,
+            "graded": 91,
+            "successes": 23,
+            "accuracy": 0.24731182795698925,
+            "unresolved": 2,
+            "complete_grading": false,
+            "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+            "wald_95_half_width": 0.08768889280610007,
+            "solver_failures": 0,
+            "judge_invalid": 2,
+            "judge_transport_failures": 0,
+            "solver_truncated": 10,
+            "judge_truncated": 2
+          }
+        }
+      ],
+      "configuration": {
+        "source_commit": "2c07ddd5eb04f2afeb77123ce066a3a70662a94c",
+        "source_tag": "v1",
+        "tested_base_commit": "7740df9ab5670e1dc26067efca7d61a51f566783",
+        "release_delta": "Documentation, version and qualification metadata only",
+        "model": "Qwen3.5-35B-A3B",
+        "hardware": "Ascend 910B2; two concurrent TP2 lanes on four devices",
+        "packages": {
+          "vllm": "0.28.1.post1.dev143+gf18cf803c.empty",
+          "vllm-ascend": "0.25.1rc2.dev125+hust.20260903.4.g74f0c0a27.d20260909",
+          "torch": "2.13.0+cpu",
+          "torch-npu": "2.13.0rc1",
+          "transformers": "5.14.1"
+        },
+        "python": "3.12.13",
+        "precision": "BF16",
+        "tp": 2,
+        "mtp": 2,
+        "graph": "FULL",
+        "state_bytes_per_rank": 21474836480,
+        "host_cache_bytes_per_rank": 8589934592,
+        "cann": "9.1.0",
+        "max_model_len": 65536,
+        "max_num_batched_tokens": 4096,
+        "lanes": {
+          "hle": {
+            "execution_seats": 16,
+            "resident_seats": 20,
+            "images": 4
+          },
+          "text": {
+            "execution_seats": 16,
+            "resident_seats": 36,
+            "images": 0
+          }
+        },
+        "validation": "23/23 basic smoke; full dataset scopes and six separate load tests completed"
+      },
+      "report": "data/betterscale-school-runtime-20261016/report.json"
+    },
+    {
+      "id": "hle-verified-betterscale-revision-image",
+      "solution": "betterscale",
+      "scope": "revision-image",
+      "quality": [
+        {
+          "label": "Revision · image",
+          "correct": 17,
+          "total": 118,
+          "value": 0.1440677966101695,
+          "audit": {
+            "total": 118,
+            "graded": 114,
+            "successes": 17,
+            "accuracy": 0.1440677966101695,
+            "unresolved": 4,
+            "complete_grading": false,
+            "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+            "wald_95_half_width": 0.06336044342452424,
+            "solver_failures": 0,
+            "judge_invalid": 4,
+            "judge_transport_failures": 0,
+            "solver_truncated": 20,
+            "judge_truncated": 4
+          }
+        }
+      ],
+      "configuration": {
+        "source_commit": "2c07ddd5eb04f2afeb77123ce066a3a70662a94c",
+        "source_tag": "v1",
+        "tested_base_commit": "7740df9ab5670e1dc26067efca7d61a51f566783",
+        "release_delta": "Documentation, version and qualification metadata only",
+        "model": "Qwen3.5-35B-A3B",
+        "hardware": "Ascend 910B2; two concurrent TP2 lanes on four devices",
+        "packages": {
+          "vllm": "0.28.1.post1.dev143+gf18cf803c.empty",
+          "vllm-ascend": "0.25.1rc2.dev125+hust.20260903.4.g74f0c0a27.d20260909",
+          "torch": "2.13.0+cpu",
+          "torch-npu": "2.13.0rc1",
+          "transformers": "5.14.1"
+        },
+        "python": "3.12.13",
+        "precision": "BF16",
+        "tp": 2,
+        "mtp": 2,
+        "graph": "FULL",
+        "state_bytes_per_rank": 21474836480,
+        "host_cache_bytes_per_rank": 8589934592,
+        "cann": "9.1.0",
+        "max_model_len": 65536,
+        "max_num_batched_tokens": 4096,
+        "lanes": {
+          "hle": {
+            "execution_seats": 16,
+            "resident_seats": 20,
+            "images": 4
+          },
+          "text": {
+            "execution_seats": 16,
+            "resident_seats": 36,
+            "images": 0
+          }
+        },
+        "validation": "23/23 basic smoke; full dataset scopes and six separate load tests completed"
+      },
+      "report": "data/betterscale-school-runtime-20261016/report.json"
+    },
+    {
+      "id": "hle-gold-controller-20261018-native-text",
+      "solution": "native",
+      "scope": "gold-text",
+      "quality": [
+        {
+          "label": "Gold · text",
+          "correct": 145,
+          "total": 575,
+          "value": 0.25217391304347825,
+          "audit": {
+            "total": 575,
+            "graded": 551,
+            "successes": 145,
+            "accuracy": 0.25217391304347825,
+            "unresolved": 24,
+            "complete_grading": false,
+            "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+            "wald_95_half_width": 0.03549543748181095,
+            "solver_failures": 0,
+            "judge_invalid": 24,
+            "judge_transport_failures": 0,
+            "solver_truncated": 365,
+            "judge_truncated": 24
+          }
+        }
+      ],
+      "configuration": {
+        "model": "Qwen3.5-35B-A3B",
+        "precision": "BF16",
+        "hardware": "Ascend 910B2",
+        "parallel": "TP2",
+        "backend_count": 1,
+        "core_version": "0.23.0",
+        "ascend_version": "0.23.0",
+        "prefix_caching": false,
+        "kv": "full automatic",
+        "max_model_len": 65536,
+        "max_num_seqs": 16,
+        "quality_client_concurrency": 16
+      },
+      "report": "data/request-throttling-dataset-matrix-20261018/hle-gold.json"
+    },
+    {
+      "id": "hle-gold-controller-20261018-native-image",
+      "solution": "native",
+      "scope": "gold-image",
+      "quality": [
+        {
+          "label": "Gold · image",
+          "correct": 19,
+          "total": 93,
+          "value": 0.20430107526881722,
+          "audit": {
+            "total": 93,
+            "graded": 92,
+            "successes": 19,
+            "accuracy": 0.20430107526881722,
+            "unresolved": 1,
+            "complete_grading": false,
+            "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+            "wald_95_half_width": 0.08194534893600774,
+            "solver_failures": 0,
+            "judge_invalid": 1,
+            "judge_transport_failures": 0,
+            "solver_truncated": 7,
+            "judge_truncated": 1
+          }
+        }
+      ],
+      "configuration": {
+        "model": "Qwen3.5-35B-A3B",
+        "precision": "BF16",
+        "hardware": "Ascend 910B2",
+        "parallel": "TP2",
+        "backend_count": 1,
+        "core_version": "0.23.0",
+        "ascend_version": "0.23.0",
+        "prefix_caching": false,
+        "kv": "full automatic",
+        "max_model_len": 65536,
+        "max_num_seqs": 16,
+        "quality_client_concurrency": 16
+      },
+      "report": "data/request-throttling-dataset-matrix-20261018/hle-gold.json"
+    },
+    {
+      "id": "hle-gold-controller-20261018-request-throttling-controller-text",
+      "solution": "request-throttling-controller",
+      "scope": "gold-text",
+      "quality": [
+        {
+          "label": "Gold · text",
+          "correct": 140,
+          "total": 575,
+          "value": 0.24347826086956523,
+          "audit": {
+            "total": 575,
+            "graded": 554,
+            "successes": 140,
+            "accuracy": 0.24347826086956523,
+            "unresolved": 21,
+            "complete_grading": false,
+            "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+            "wald_95_half_width": 0.03508027188415771,
+            "solver_failures": 0,
+            "judge_invalid": 21,
+            "judge_transport_failures": 0,
+            "solver_truncated": 369,
+            "judge_truncated": 21
+          }
+        }
+      ],
+      "configuration": {
+        "model": "Qwen3.5-35B-A3B",
+        "precision": "BF16",
+        "hardware": "Ascend 910B2",
+        "parallel": "TP2",
+        "backend_count": 1,
+        "core_version": "0.23.0",
+        "ascend_version": "0.23.0",
+        "prefix_caching": false,
+        "kv": "full automatic",
+        "max_model_len": 65536,
+        "max_num_seqs": 16,
+        "quality_client_concurrency": 16
+      },
+      "report": "data/request-throttling-dataset-matrix-20261018/hle-gold.json"
+    },
+    {
+      "id": "hle-gold-controller-20261018-request-throttling-controller-image",
+      "solution": "request-throttling-controller",
+      "scope": "gold-image",
+      "quality": [
+        {
+          "label": "Gold · image",
+          "correct": 19,
+          "total": 93,
+          "value": 0.20430107526881722,
+          "audit": {
+            "total": 93,
+            "graded": 89,
+            "successes": 19,
+            "accuracy": 0.20430107526881722,
+            "unresolved": 4,
+            "complete_grading": false,
+            "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+            "wald_95_half_width": 0.08194534893600774,
+            "solver_failures": 0,
+            "judge_invalid": 4,
+            "judge_transport_failures": 0,
+            "solver_truncated": 8,
+            "judge_truncated": 4
+          }
+        }
+      ],
+      "configuration": {
+        "model": "Qwen3.5-35B-A3B",
+        "precision": "BF16",
+        "hardware": "Ascend 910B2",
+        "parallel": "TP2",
+        "backend_count": 1,
+        "core_version": "0.23.0",
+        "ascend_version": "0.23.0",
+        "prefix_caching": false,
+        "kv": "full automatic",
+        "max_model_len": 65536,
+        "max_num_seqs": 16,
+        "quality_client_concurrency": 16
+      },
+      "report": "data/request-throttling-dataset-matrix-20261018/hle-gold.json"
+    },
+    {
+      "id": "hle-revision-controller-20261018-native-text",
+      "solution": "native",
+      "scope": "revision-text",
+      "quality": [
+        {
+          "label": "Revision · text",
+          "correct": 285,
+          "total": 1025,
+          "value": 0.2780487804878049,
+          "audit": {
+            "total": 1025,
+            "graded": 986,
+            "successes": 285,
+            "accuracy": 0.2780487804878049,
+            "unresolved": 39,
+            "complete_grading": false,
+            "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+            "wald_95_half_width": 0.0274289108627201,
+            "solver_failures": 0,
+            "judge_invalid": 39,
+            "judge_transport_failures": 0,
+            "solver_truncated": 685,
+            "judge_truncated": 39
+          }
+        }
+      ],
+      "configuration": {
+        "model": "Qwen3.5-35B-A3B",
+        "precision": "BF16",
+        "hardware": "Ascend 910B2",
+        "parallel": "TP2",
+        "backend_count": 1,
+        "core_version": "0.23.0",
+        "ascend_version": "0.23.0",
+        "prefix_caching": false,
+        "kv": "full automatic",
+        "max_model_len": 65536,
+        "max_num_seqs": 16,
+        "quality_client_concurrency": 16
+      },
+      "report": "data/request-throttling-dataset-matrix-20261018/hle-revision.json"
+    },
+    {
+      "id": "hle-revision-controller-20261018-native-image",
+      "solution": "native",
+      "scope": "revision-image",
+      "quality": [
+        {
+          "label": "Revision · image",
+          "correct": 18,
+          "total": 118,
+          "value": 0.15254237288135594,
+          "audit": {
+            "total": 118,
+            "graded": 118,
+            "successes": 18,
+            "accuracy": 0.15254237288135594,
+            "unresolved": 0,
+            "complete_grading": true,
+            "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+            "wald_95_half_width": 0.06487379631925799,
+            "solver_failures": 0,
+            "judge_invalid": 0,
+            "judge_transport_failures": 0,
+            "solver_truncated": 18,
+            "judge_truncated": 0
+          }
+        }
+      ],
+      "configuration": {
+        "model": "Qwen3.5-35B-A3B",
+        "precision": "BF16",
+        "hardware": "Ascend 910B2",
+        "parallel": "TP2",
+        "backend_count": 1,
+        "core_version": "0.23.0",
+        "ascend_version": "0.23.0",
+        "prefix_caching": false,
+        "kv": "full automatic",
+        "max_model_len": 65536,
+        "max_num_seqs": 16,
+        "quality_client_concurrency": 16
+      },
+      "report": "data/request-throttling-dataset-matrix-20261018/hle-revision.json"
+    },
+    {
+      "id": "hle-revision-controller-20261018-request-throttling-controller-text",
+      "solution": "request-throttling-controller",
+      "scope": "revision-text",
+      "quality": [
+        {
+          "label": "Revision · text",
+          "correct": 287,
+          "total": 1025,
+          "value": 0.28,
+          "audit": {
+            "total": 1025,
+            "graded": 995,
+            "successes": 287,
+            "accuracy": 0.28,
+            "unresolved": 30,
+            "complete_grading": false,
+            "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+            "wald_95_half_width": 0.027487763308558174,
+            "solver_failures": 0,
+            "judge_invalid": 30,
+            "judge_transport_failures": 0,
+            "solver_truncated": 680,
+            "judge_truncated": 30
+          }
+        }
+      ],
+      "configuration": {
+        "model": "Qwen3.5-35B-A3B",
+        "precision": "BF16",
+        "hardware": "Ascend 910B2",
+        "parallel": "TP2",
+        "backend_count": 1,
+        "core_version": "0.23.0",
+        "ascend_version": "0.23.0",
+        "prefix_caching": false,
+        "kv": "full automatic",
+        "max_model_len": 65536,
+        "max_num_seqs": 16,
+        "quality_client_concurrency": 16
+      },
+      "report": "data/request-throttling-dataset-matrix-20261018/hle-revision.json"
+    },
+    {
+      "id": "hle-revision-controller-20261018-request-throttling-controller-image",
+      "solution": "request-throttling-controller",
+      "scope": "revision-image",
+      "quality": [
+        {
+          "label": "Revision · image",
+          "correct": 21,
+          "total": 118,
+          "value": 0.17796610169491525,
+          "audit": {
+            "total": 118,
+            "graded": 116,
+            "successes": 21,
+            "accuracy": 0.17796610169491525,
+            "unresolved": 2,
+            "complete_grading": false,
+            "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+            "wald_95_half_width": 0.0690126294695939,
+            "solver_failures": 0,
+            "judge_invalid": 2,
+            "judge_transport_failures": 0,
+            "solver_truncated": 11,
+            "judge_truncated": 2
+          }
+        }
+      ],
+      "configuration": {
+        "model": "Qwen3.5-35B-A3B",
+        "precision": "BF16",
+        "hardware": "Ascend 910B2",
+        "parallel": "TP2",
+        "backend_count": 1,
+        "core_version": "0.23.0",
+        "ascend_version": "0.23.0",
+        "prefix_caching": false,
+        "kv": "full automatic",
+        "max_model_len": 65536,
+        "max_num_seqs": 16,
+        "quality_client_concurrency": 16
+      },
+      "report": "data/request-throttling-dataset-matrix-20261018/hle-revision.json"
+    }
+  ],
+  "optimized_complete_candidates": [
+    {
+      "candidate": "optimized-20261015",
+      "track": "gold",
+      "score": {
+        "total": 668,
+        "graded": 648,
+        "successes": 168,
+        "accuracy": 0.25149700598802394,
+        "unresolved": 20,
+        "complete_grading": false,
+        "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+        "wald_95_half_width": 0.03290266083130002,
+        "solver_failures": 0,
+        "judge_invalid": 20,
+        "judge_transport_failures": 0,
+        "solver_truncated": 371,
+        "judge_truncated": 20
+      },
+      "groups": {
+        "gold/text": {
+          "total": 575,
+          "graded": 555,
+          "successes": 152,
+          "accuracy": 0.2643478260869565,
+          "unresolved": 20,
+          "complete_grading": false,
+          "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+          "wald_95_half_width": 0.03604510392214794,
+          "solver_failures": 0,
+          "judge_invalid": 20,
+          "judge_transport_failures": 0,
+          "solver_truncated": 361,
+          "judge_truncated": 20
+        },
+        "gold/image": {
+          "total": 93,
+          "graded": 93,
+          "successes": 16,
+          "accuracy": 0.17204301075268819,
+          "unresolved": 0,
+          "complete_grading": true,
+          "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+          "wald_95_half_width": 0.07670735405463468,
+          "solver_failures": 0,
+          "judge_invalid": 0,
+          "judge_transport_failures": 0,
+          "solver_truncated": 10,
+          "judge_truncated": 0
+        }
+      },
+      "contract_sha256": "481d5528fe8945d6480a3e57278b288a72f28fe73cefe801f988230b658363ad",
+      "solver_index_sha256": "dfce0ee2065e7ffcc1efed01cd393db95ea81daf664d347e1f2727cc8b34799b",
+      "judge_index_sha256": "896e13b16f4c800cdde7637921269e69fe5ab125ccb1999e99934303b7055ab1",
+      "runtime": {
+        "source_commit": "33ccc94da6ed5035aafaebb1d0a982a4de6b3c2f",
+        "model": "Qwen3.5-35B-A3B",
+        "dtype": "BF16",
+        "hardware": "2 x Ascend 910B2",
+        "vllm": "0.25.1",
+        "cann": "9.1",
+        "engine": "BetterScale main TP2 MTP2 FULL E16/R20",
+        "max_model_len": 65536,
+        "max_num_seqs": 16,
+        "max_num_batched_tokens": 4096,
+        "state_bytes_per_rank": 21474836480,
+        "prefix_caching": true,
+        "async_scheduling": true,
+        "image_limit": 4,
+        "host_memory_bytes": 68719476736,
+        "cpu_quota_cores": 8
+      }
+    },
+    {
+      "candidate": "optimized-20261015",
+      "track": "revision",
+      "score": {
+        "total": 1143,
+        "graded": 1116,
+        "successes": 320,
+        "accuracy": 0.2799650043744532,
+        "unresolved": 27,
+        "complete_grading": false,
+        "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+        "wald_95_half_width": 0.026029248674709748,
+        "solver_failures": 0,
+        "judge_invalid": 27,
+        "judge_transport_failures": 0,
+        "solver_truncated": 680,
+        "judge_truncated": 27
+      },
+      "groups": {
+        "revision/text": {
+          "total": 1025,
+          "graded": 998,
+          "successes": 300,
+          "accuracy": 0.2926829268292683,
+          "unresolved": 27,
+          "complete_grading": false,
+          "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+          "wald_95_half_width": 0.027854790980999553,
+          "solver_failures": 0,
+          "judge_invalid": 27,
+          "judge_transport_failures": 0,
+          "solver_truncated": 667,
+          "judge_truncated": 27
+        },
+        "revision/image": {
+          "total": 118,
+          "graded": 118,
+          "successes": 20,
+          "accuracy": 0.1694915254237288,
+          "unresolved": 0,
+          "complete_grading": true,
+          "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+          "wald_95_half_width": 0.06769570197989037,
+          "solver_failures": 0,
+          "judge_invalid": 0,
+          "judge_transport_failures": 0,
+          "solver_truncated": 13,
+          "judge_truncated": 0
+        }
+      },
+      "contract_sha256": "8f98d671320835ff8685271266656c60f279124570f94308d8e646745d0826db",
+      "solver_index_sha256": "a85c8e28c3c6c4b87023dc579faf19c6d8f377034eef62e373ca6b08eda2407a",
+      "judge_index_sha256": "316ec1c00c42dff9ea57775943ad29d928712f6c4573ee6915eb88eae3a6f928",
+      "runtime": {
+        "source_commit": "33ccc94da6ed5035aafaebb1d0a982a4de6b3c2f",
+        "model": "Qwen3.5-35B-A3B",
+        "dtype": "BF16",
+        "hardware": "2 x Ascend 910B2",
+        "vllm": "0.25.1",
+        "cann": "9.1",
+        "engine": "BetterScale main TP2 MTP2 FULL E16/R20",
+        "max_model_len": 65536,
+        "max_num_seqs": 16,
+        "max_num_batched_tokens": 4096,
+        "state_bytes_per_rank": 21474836480,
+        "prefix_caching": true,
+        "async_scheduling": true,
+        "image_limit": 4,
+        "host_memory_bytes": 68719476736,
+        "cpu_quota_cores": 8
+      }
+    },
+    {
+      "candidate": "optimized-school-20261016",
+      "track": "gold",
+      "score": {
+        "total": 668,
+        "graded": 650,
+        "successes": 173,
+        "accuracy": 0.25898203592814373,
+        "unresolved": 18,
+        "complete_grading": false,
+        "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+        "wald_95_half_width": 0.03322133102807682,
+        "solver_failures": 0,
+        "judge_invalid": 18,
+        "judge_transport_failures": 0,
+        "solver_truncated": 380,
+        "judge_truncated": 18
+      },
+      "groups": {
+        "gold/text": {
+          "total": 575,
+          "graded": 559,
+          "successes": 150,
+          "accuracy": 0.2608695652173913,
+          "unresolved": 16,
+          "complete_grading": false,
+          "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+          "wald_95_half_width": 0.03589173056346642,
+          "solver_failures": 0,
+          "judge_invalid": 16,
+          "judge_transport_failures": 0,
+          "solver_truncated": 370,
+          "judge_truncated": 16
+        },
+        "gold/image": {
+          "total": 93,
+          "graded": 91,
+          "successes": 23,
+          "accuracy": 0.24731182795698925,
+          "unresolved": 2,
+          "complete_grading": false,
+          "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+          "wald_95_half_width": 0.08768889280610007,
+          "solver_failures": 0,
+          "judge_invalid": 2,
+          "judge_transport_failures": 0,
+          "solver_truncated": 10,
+          "judge_truncated": 2
+        }
+      },
+      "contract_sha256": "5b6d34cb369f25e1c6c22f341963adce08b5de2f5247e71ee9dee4259c87ce91",
+      "solver_index_sha256": "1804d953d8154febd5fc1382d444413421f50b71567b262f7ad9ae19488bc58c",
+      "judge_index_sha256": "6ca50107a2fba4c6811f74fe011b0f0c9d280f7e44226ca047b4a244f928569c",
+      "runtime": {
+        "source_commit": "2c07ddd5eb04f2afeb77123ce066a3a70662a94c",
+        "source_tag": "v1",
+        "tested_base_commit": "7740df9ab5670e1dc26067efca7d61a51f566783",
+        "release_delta": "Documentation, version and qualification metadata only",
+        "model": "Qwen3.5-35B-A3B",
+        "hardware": "Ascend 910B2; two concurrent TP2 lanes on four devices",
+        "packages": {
+          "vllm": "0.28.1.post1.dev143+gf18cf803c.empty",
+          "vllm-ascend": "0.25.1rc2.dev125+hust.20260903.4.g74f0c0a27.d20260909",
+          "torch": "2.13.0+cpu",
+          "torch-npu": "2.13.0rc1",
+          "transformers": "5.14.1"
+        },
+        "python": "3.12.13",
+        "precision": "BF16",
+        "tp": 2,
+        "mtp": 2,
+        "graph": "FULL",
+        "state_bytes_per_rank": 21474836480,
+        "host_cache_bytes_per_rank": 8589934592,
+        "cann": "9.1.0",
+        "max_model_len": 65536,
+        "max_num_batched_tokens": 4096,
+        "lanes": {
+          "hle": {
+            "execution_seats": 16,
+            "resident_seats": 20,
+            "images": 4
+          },
+          "text": {
+            "execution_seats": 16,
+            "resident_seats": 36,
+            "images": 0
+          }
+        },
+        "validation": "23/23 basic smoke; full dataset scopes and six separate load tests completed"
+      }
+    },
+    {
+      "candidate": "optimized-school-20261016",
+      "track": "revision",
+      "score": {
+        "total": 1143,
+        "graded": 1115,
+        "successes": 316,
+        "accuracy": 0.2764654418197725,
+        "unresolved": 28,
+        "complete_grading": false,
+        "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+        "wald_95_half_width": 0.025928836061797907,
+        "solver_failures": 0,
+        "judge_invalid": 28,
+        "judge_transport_failures": 0,
+        "solver_truncated": 674,
+        "judge_truncated": 28
+      },
+      "groups": {
+        "revision/text": {
+          "total": 1025,
+          "graded": 1001,
+          "successes": 299,
+          "accuracy": 0.2917073170731707,
+          "unresolved": 24,
+          "complete_grading": false,
+          "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+          "wald_95_half_width": 0.027827499125890862,
+          "solver_failures": 0,
+          "judge_invalid": 24,
+          "judge_transport_failures": 0,
+          "solver_truncated": 654,
+          "judge_truncated": 24
+        },
+        "revision/image": {
+          "total": 118,
+          "graded": 114,
+          "successes": 17,
+          "accuracy": 0.1440677966101695,
+          "unresolved": 4,
+          "complete_grading": false,
+          "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+          "wald_95_half_width": 0.06336044342452424,
+          "solver_failures": 0,
+          "judge_invalid": 4,
+          "judge_transport_failures": 0,
+          "solver_truncated": 20,
+          "judge_truncated": 4
+        }
+      },
+      "contract_sha256": "5afea107bf3d7710f89b9c4689f5cd4a84d0eaec658fecaffb53d586fae09ded",
+      "solver_index_sha256": "b3772b31076f6c9cbfd045e7c1bd0c9cbd0a5fddd0251f74bd22367d30d0b1ce",
+      "judge_index_sha256": "0dec942f08544fa40ac60c1bccec2ac918d661c941ece4e53f3af909933ea4ea",
+      "runtime": {
+        "source_commit": "2c07ddd5eb04f2afeb77123ce066a3a70662a94c",
+        "source_tag": "v1",
+        "tested_base_commit": "7740df9ab5670e1dc26067efca7d61a51f566783",
+        "release_delta": "Documentation, version and qualification metadata only",
+        "model": "Qwen3.5-35B-A3B",
+        "hardware": "Ascend 910B2; two concurrent TP2 lanes on four devices",
+        "packages": {
+          "vllm": "0.28.1.post1.dev143+gf18cf803c.empty",
+          "vllm-ascend": "0.25.1rc2.dev125+hust.20260903.4.g74f0c0a27.d20260909",
+          "torch": "2.13.0+cpu",
+          "torch-npu": "2.13.0rc1",
+          "transformers": "5.14.1"
+        },
+        "python": "3.12.13",
+        "precision": "BF16",
+        "tp": 2,
+        "mtp": 2,
+        "graph": "FULL",
+        "state_bytes_per_rank": 21474836480,
+        "host_cache_bytes_per_rank": 8589934592,
+        "cann": "9.1.0",
+        "max_model_len": 65536,
+        "max_num_batched_tokens": 4096,
+        "lanes": {
+          "hle": {
+            "execution_seats": 16,
+            "resident_seats": 20,
+            "images": 4
+          },
+          "text": {
+            "execution_seats": 16,
+            "resident_seats": 36,
+            "images": 0
+          }
+        },
+        "validation": "23/23 basic smoke; full dataset scopes and six separate load tests completed"
+      }
+    }
+  ],
+  "best_observed_full_quality": {
+    "gold": "optimized-school-20261016",
+    "revision": "optimized-20261015"
+  },
+  "recommendation": "Reuse complete optimized results by exact deployed configuration; Gold173/668 school and Revision320/1143 previous deployment are distinct candidates, not one combined B1. Keep both deployments and their corresponding performance evidence.",
+  "new_measurement_minimum": {
+    "B1_quality_cases": 0,
+    "baseline_solver_cases": {
+      "gold": 668,
+      "revision": 1143
+    },
+    "baseline_images": {
+      "gold": 93,
+      "revision": 118
+    },
+    "baseline_judge_cases": "New answers only, at most1811, using original strict_json policy; no retry of existing unresolved grades",
+    "qualification": "One original image case only after original0.18 CPU/config/processor feasibility succeeds; prove visual data reaches model. Not full quality acceptance."
+  },
+  "basis": "No designated0.18 HLE full quality row exists in the audited canonical matrix; available Native rows are separate0.23/runtime evidence. Input identity restored including images. The current text-only compatibility overlay does not establish image support.",
+  "boundaries": [
+    "Existing grade failures/truncations stay in full denominators",
+    "All performance rows are separate capped256 burst tests, not quality run throughput or full-task runtime",
+    "No repeat of school or previous full optimized answers solely due to baseline version difference",
+    "No claim that aggregate integrity audit independently regraded private raw answers",
+    "No new acceptance condition or M01 work"
+  ]
+}
