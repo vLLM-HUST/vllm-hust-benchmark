@@ -1,0 +1,496 @@
+{
+  "schema": "c16-request-latency-storage-independent-review/v1",
+  "status": "PASS",
+  "created_at": "2026-10-26T06:25:31.733449+00:00",
+  "base_commit": "9a208d60aa8ec6bfc8b4ea6e4eee3dec6b81587e",
+  "scope": "one bounded independent arithmetic audit of original archived records and reviewed publication wording",
+  "independent_implementation": "Did not import or run derive.py. Read original tar members in memory; used per-request intervals, math.fsum/n means and independently interpolated order statistics.",
+  "reviewed_input_sha256": {
+    "derive.py": "63cde86d1da8c00367ae12584a57f2afca16a37b7861c979dd9c08f939c852a4",
+    "summary.json": "9f62be56df977051487a6fc335f4bfdd2135f8faf7dd41bdac600e6ff191c3d1",
+    "README.md": "18a03b39517893532c9c4e2e010f5524202ad3ede89f26e4f18f064ebedca031"
+  },
+  "V085_report_sha256": "5aa7bf4ca3fe35428ad604e301d5cfa0b944d4fe2ae12da40111b98b87a7c887",
+  "arms": [
+    {
+      "arm": "B0",
+      "archive_sha256": "b73003daf983bb40632cc19023b2ece6e6315085e68d4fc89d926ee1e5a4f66e",
+      "config_sha256": "8a53865dba2edb8f12e3c7ef0baa240e37178f0544a6519dfb5c88ea6a3901c3",
+      "requests_sha256": "6e39de8d231316229bbaa7c357018c43a1a765ca66db8f476ff1d810fbfa6a09",
+      "recorded_client_tool_version": "0.1.2",
+      "recorded_tool_revision": null,
+      "declared_chips": 2,
+      "import_attestation_performed": false,
+      "records": 408,
+      "cohort_exclusions": {
+        "unsuccessful": 0,
+        "out_of_window_starts": 0,
+        "post_window_completions": 16
+      },
+      "window": {
+        "requests": 392,
+        "ttft": {
+          "n": 392,
+          "mean_seconds": 1.685444190803611,
+          "p95_seconds": 3.3409653300419437,
+          "p99_seconds": 9.152650579037145
+        },
+        "tpot": {
+          "n": 392,
+          "mean_seconds": 0.071246185139161,
+          "p95_seconds": 0.12617072135940485,
+          "p99_seconds": 0.14160230805332594
+        },
+        "undefined_tpot": 0,
+        "single_chunk_requests": 0,
+        "input_tokens_min": 1430,
+        "input_tokens_max": 40244,
+        "actual_ge16k_requests": 153,
+        "token_interval_weighted_tpot_diagnostic_not_reported": 0.06220772747969964
+      },
+      "including_drain": {
+        "requests": 408,
+        "ttft": {
+          "n": 408,
+          "mean_seconds": 1.7204418433852968,
+          "p95_seconds": 3.3996749782934783,
+          "p99_seconds": 9.152718728492037
+        },
+        "tpot": {
+          "n": 408,
+          "mean_seconds": 0.07071521610758681,
+          "p95_seconds": 0.12626645029256678,
+          "p99_seconds": 0.14115932947966703
+        },
+        "undefined_tpot": 0,
+        "single_chunk_requests": 0,
+        "input_tokens_min": 1430,
+        "input_tokens_max": 49750,
+        "actual_ge16k_requests": 168,
+        "token_interval_weighted_tpot_diagnostic_not_reported": 0.06032923086819312
+      }
+    },
+    {
+      "arm": "B1",
+      "archive_sha256": "943fd515298b0618d3f17ef268ad2c82f1211f7fb66bbc12f8a3274157259b50",
+      "config_sha256": "b099be0ea7eb451ee247e11fc879adf0453d7197632701e943f4eb6b58d28695",
+      "requests_sha256": "fe9c805aca67e4c9c04fd49af577e9d789f1e3b426db631f2e9b61e49202ad87",
+      "recorded_client_tool_version": "0.1.1",
+      "recorded_tool_revision": "29136f1f481ebab8566014a05b7ed53bcf79dc84",
+      "declared_chips": 2,
+      "import_attestation_performed": false,
+      "records": 1296,
+      "cohort_exclusions": {
+        "unsuccessful": 0,
+        "out_of_window_starts": 0,
+        "post_window_completions": 16
+      },
+      "window": {
+        "requests": 1280,
+        "ttft": {
+          "n": 1280,
+          "mean_seconds": 0.3650110735480666,
+          "p95_seconds": 0.5886589169880608,
+          "p99_seconds": 0.8122166538162863
+        },
+        "tpot": {
+          "n": 1280,
+          "mean_seconds": 0.017941780835099376,
+          "p95_seconds": 0.022827096292141677,
+          "p99_seconds": 0.030016469674407794
+        },
+        "undefined_tpot": 0,
+        "single_chunk_requests": 0,
+        "input_tokens_min": 1430,
+        "input_tokens_max": 101561,
+        "actual_ge16k_requests": 847,
+        "token_interval_weighted_tpot_diagnostic_not_reported": 0.017462169402636906
+      },
+      "including_drain": {
+        "requests": 1296,
+        "ttft": {
+          "n": 1296,
+          "mean_seconds": 0.3663794781037543,
+          "p95_seconds": 0.5893698002473684,
+          "p99_seconds": 0.830164350668201
+        },
+        "tpot": {
+          "n": 1296,
+          "mean_seconds": 0.017917862622092755,
+          "p95_seconds": 0.02281470748855867,
+          "p99_seconds": 0.030015702404241687
+        },
+        "undefined_tpot": 0,
+        "single_chunk_requests": 0,
+        "input_tokens_min": 1430,
+        "input_tokens_max": 106308,
+        "actual_ge16k_requests": 862,
+        "token_interval_weighted_tpot_diagnostic_not_reported": 0.01737361863050717
+      }
+    }
+  ],
+  "descriptive_reduction_percent": {
+    "ttft": 78.3433307646911,
+    "tpot": 74.81720487903353
+  },
+  "checks": [
+    {
+      "check": "B1 archive part fa0e01a32eef456bab4bebe51e4aa7dd.tar.gz.part000",
+      "passed": true
+    },
+    {
+      "check": "B1 archive part fa0e01a32eef456bab4bebe51e4aa7dd.tar.gz.part001",
+      "passed": true
+    },
+    {
+      "check": "B1 archive part fa0e01a32eef456bab4bebe51e4aa7dd.tar.gz.part002",
+      "passed": true
+    },
+    {
+      "check": "B1 archive part fa0e01a32eef456bab4bebe51e4aa7dd.tar.gz.part003",
+      "passed": true
+    },
+    {
+      "check": "B0 full archive SHA",
+      "passed": true
+    },
+    {
+      "check": "B0 actual original config identity/window/C16",
+      "passed": true
+    },
+    {
+      "check": "B0 recorded client metadata",
+      "passed": true
+    },
+    {
+      "check": "B0 output count equals chunk token counts",
+      "passed": true
+    },
+    {
+      "check": "B0 finite ordered times and recorded TTFT agrees",
+      "passed": true
+    },
+    {
+      "check": "B0 first/last timestamps equal first/last nonempty client chunks",
+      "passed": true
+    },
+    {
+      "check": "B0/window/requests",
+      "passed": true
+    },
+    {
+      "check": "B0/window/ttft/n",
+      "passed": true
+    },
+    {
+      "check": "B0/window/ttft/mean_seconds",
+      "passed": true
+    },
+    {
+      "check": "B0/window/ttft/p95_seconds",
+      "passed": true
+    },
+    {
+      "check": "B0/window/ttft/p99_seconds",
+      "passed": true
+    },
+    {
+      "check": "B0/window/tpot/n",
+      "passed": true
+    },
+    {
+      "check": "B0/window/tpot/mean_seconds",
+      "passed": true
+    },
+    {
+      "check": "B0/window/tpot/p95_seconds",
+      "passed": true
+    },
+    {
+      "check": "B0/window/tpot/p99_seconds",
+      "passed": true
+    },
+    {
+      "check": "B0/window/undefined_tpot",
+      "passed": true
+    },
+    {
+      "check": "B0/window/single_chunk_requests",
+      "passed": true
+    },
+    {
+      "check": "B0/window/input_tokens_min",
+      "passed": true
+    },
+    {
+      "check": "B0/window/input_tokens_max",
+      "passed": true
+    },
+    {
+      "check": "B0/window/actual_ge16k_requests",
+      "passed": true
+    },
+    {
+      "check": "B0/including_drain/requests",
+      "passed": true
+    },
+    {
+      "check": "B0/including_drain/ttft/n",
+      "passed": true
+    },
+    {
+      "check": "B0/including_drain/ttft/mean_seconds",
+      "passed": true
+    },
+    {
+      "check": "B0/including_drain/ttft/p95_seconds",
+      "passed": true
+    },
+    {
+      "check": "B0/including_drain/ttft/p99_seconds",
+      "passed": true
+    },
+    {
+      "check": "B0/including_drain/tpot/n",
+      "passed": true
+    },
+    {
+      "check": "B0/including_drain/tpot/mean_seconds",
+      "passed": true
+    },
+    {
+      "check": "B0/including_drain/tpot/p95_seconds",
+      "passed": true
+    },
+    {
+      "check": "B0/including_drain/tpot/p99_seconds",
+      "passed": true
+    },
+    {
+      "check": "B0/including_drain/undefined_tpot",
+      "passed": true
+    },
+    {
+      "check": "B0/including_drain/single_chunk_requests",
+      "passed": true
+    },
+    {
+      "check": "B0/including_drain/input_tokens_min",
+      "passed": true
+    },
+    {
+      "check": "B0/including_drain/input_tokens_max",
+      "passed": true
+    },
+    {
+      "check": "B0/including_drain/actual_ge16k_requests",
+      "passed": true
+    },
+    {
+      "check": "B0 total and failures",
+      "passed": true
+    },
+    {
+      "check": "B1 full archive SHA",
+      "passed": true
+    },
+    {
+      "check": "B1 original member SHA config.json",
+      "passed": true
+    },
+    {
+      "check": "B1 original member SHA requests.jsonl",
+      "passed": true
+    },
+    {
+      "check": "B1 actual original config identity/window/C16",
+      "passed": true
+    },
+    {
+      "check": "B1 recorded client metadata",
+      "passed": true
+    },
+    {
+      "check": "B1 output count equals chunk token counts",
+      "passed": true
+    },
+    {
+      "check": "B1 finite ordered times and recorded TTFT agrees",
+      "passed": true
+    },
+    {
+      "check": "B1 first/last timestamps equal first/last nonempty client chunks",
+      "passed": true
+    },
+    {
+      "check": "B1/window/requests",
+      "passed": true
+    },
+    {
+      "check": "B1/window/ttft/n",
+      "passed": true
+    },
+    {
+      "check": "B1/window/ttft/mean_seconds",
+      "passed": true
+    },
+    {
+      "check": "B1/window/ttft/p95_seconds",
+      "passed": true
+    },
+    {
+      "check": "B1/window/ttft/p99_seconds",
+      "passed": true
+    },
+    {
+      "check": "B1/window/tpot/n",
+      "passed": true
+    },
+    {
+      "check": "B1/window/tpot/mean_seconds",
+      "passed": true
+    },
+    {
+      "check": "B1/window/tpot/p95_seconds",
+      "passed": true
+    },
+    {
+      "check": "B1/window/tpot/p99_seconds",
+      "passed": true
+    },
+    {
+      "check": "B1/window/undefined_tpot",
+      "passed": true
+    },
+    {
+      "check": "B1/window/single_chunk_requests",
+      "passed": true
+    },
+    {
+      "check": "B1/window/input_tokens_min",
+      "passed": true
+    },
+    {
+      "check": "B1/window/input_tokens_max",
+      "passed": true
+    },
+    {
+      "check": "B1/window/actual_ge16k_requests",
+      "passed": true
+    },
+    {
+      "check": "B1/including_drain/requests",
+      "passed": true
+    },
+    {
+      "check": "B1/including_drain/ttft/n",
+      "passed": true
+    },
+    {
+      "check": "B1/including_drain/ttft/mean_seconds",
+      "passed": true
+    },
+    {
+      "check": "B1/including_drain/ttft/p95_seconds",
+      "passed": true
+    },
+    {
+      "check": "B1/including_drain/ttft/p99_seconds",
+      "passed": true
+    },
+    {
+      "check": "B1/including_drain/tpot/n",
+      "passed": true
+    },
+    {
+      "check": "B1/including_drain/tpot/mean_seconds",
+      "passed": true
+    },
+    {
+      "check": "B1/including_drain/tpot/p95_seconds",
+      "passed": true
+    },
+    {
+      "check": "B1/including_drain/tpot/p99_seconds",
+      "passed": true
+    },
+    {
+      "check": "B1/including_drain/undefined_tpot",
+      "passed": true
+    },
+    {
+      "check": "B1/including_drain/single_chunk_requests",
+      "passed": true
+    },
+    {
+      "check": "B1/including_drain/input_tokens_min",
+      "passed": true
+    },
+    {
+      "check": "B1/including_drain/input_tokens_max",
+      "passed": true
+    },
+    {
+      "check": "B1/including_drain/actual_ge16k_requests",
+      "passed": true
+    },
+    {
+      "check": "B1 total and failures",
+      "passed": true
+    },
+    {
+      "check": "descriptive reduction ttft",
+      "passed": true
+    },
+    {
+      "check": "descriptive reduction tpot",
+      "passed": true
+    },
+    {
+      "check": "reviewed file stable derive.py",
+      "passed": true
+    },
+    {
+      "check": "reviewed file stable summary.json",
+      "passed": true
+    },
+    {
+      "check": "reviewed file stable README.md",
+      "passed": true
+    },
+    {
+      "check": "README boundary: 不是运行时import证明",
+      "passed": true
+    },
+    {
+      "check": "README boundary: 不据此宣布完整吞吐时延验收通过",
+      "passed": true
+    },
+    {
+      "check": "README boundary: 混合长输入也不替代连续4K/16K稳定性配对",
+      "passed": true
+    },
+    {
+      "check": "V085 numerical threshold distinguished from complete acceptance",
+      "passed": true
+    },
+    {
+      "check": "V085 metadata not import attestation",
+      "passed": true
+    }
+  ],
+  "findings": [],
+  "conclusion": {
+    "equal_request_weighting_confirmed": true,
+    "primary_drains_excluded": true,
+    "client_receive_time_not_device_token_time": true,
+    "client_versions_are_recorded_metadata_only": true,
+    "numeric_reduction_is_not_full_quality_SLO_resource_acceptance": true,
+    "model_runtime_identity": "Carried from existing baseline reuse audit; no new runtime import or device check performed.",
+    "quality_results": "This audit reuses latency records only; does not recalculate or alter M01/HLE/FrontierScience/SWE task scores."
+  },
+  "new_model_requests": 0,
+  "device_probes": 0,
+  "publication_worktree_modified": false,
+  "raw_task_or_token_content_exported": false
+}

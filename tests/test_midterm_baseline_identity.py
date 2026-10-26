@@ -47,5 +47,9 @@ def test_report_distinguishes_development_comparison_and_designated_baseline():
     assert "开发栈对照收益不作为相对B0的收益" in text
     assert "原生基线证据，10月12日至15日" not in text
     assert "不替代MMLU-Pro质量测量或M01运算计数" in text
-    assert text.count("0.18对应工况判定待完成") == 1
-    assert "C16数值门槛已达到；客户端版本、B1设备占用及正式验收适用性待核" in text
+    assert "0.18对应工况判定待完成" not in text
+    assert text.count("C16时延数值门槛达到；全部占用资源及适用质量/SLO仍待核验") == 2
+    assert (
+        "C16数值门槛已达到；客户端记录版本已恢复；B1设备占用及质量/SLO适用性待核"
+        in text
+    )
