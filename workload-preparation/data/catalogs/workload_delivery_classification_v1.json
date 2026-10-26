@@ -447,6 +447,12 @@
         "role": "prepare_assets",
         "path": "scripts/prepare_qasper_original_assets.py"
       }
+    ],
+    "NARRATIVEQA": [
+      {"role": "prepare_assets", "path": "scripts/prepare_reused_research_assets.py", "scope": "Pinned original three CSV tables; external server data only, not derived HF single-table prompts."},
+      {"role": "prepare_assets", "path": "scripts/prepare_narrativeqa_original_metric.py", "scope": "Pinned AllenAI metric source/license; isolated py-rouge and declared WordNet/NLTK resources, not dataset-author code."},
+      {"role": "original_profile", "path": "scripts/run_narrativeqa_original_summary.py", "scope": "Original complete summary/question, both original references; declared9B chat adapter and256-token budget, pinned AllenAI scoring. Fixed3 test tasks verified, not full-test/full-story or author-model reproduction."},
+      {"role": "saved_output_reuse_audit", "path": "scripts/run_narrativeqa_original_summary.py", "scope": "Use --reuse with separate fresh output for offline original prompt/reference/response/scoring verification; no new model calls."}
     ]
   },
   "classes": [
