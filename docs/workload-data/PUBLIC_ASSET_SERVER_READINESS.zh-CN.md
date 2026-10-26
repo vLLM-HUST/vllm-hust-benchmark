@@ -37,6 +37,7 @@ python scripts/prepare_longmemeval_v2_reader.py --output /private/lme-v2-reader 
 `no_retrieval`负对照不因此强制部署embedding。默认judge为gpt-5.2/medium，外部计费调用未授权、未执行。
 当前Qwen3.5-27B服务为language-model-only，不把它声称为官方视觉reader或忽略原图像。
 9B的16个资产固定于`longmemeval-v2-reader-pins.json`，共19329393661字节，正由独立入口在服务器准备。
+该入口使用标准`?download=true`文件链接，仍逐文件核对同一版本SHA256；已有匹配准备目录可显式加`--resume`，仅复用通过核验的文件，不无限重试限流错误。
 资产准备成功不等于服务健康；研究任务空闲后另行切换服务、记录精确配置并验证视觉原题。 原生方法执行、原评分、统一数据入口的关系保真及固定研究消费均仍待完成；本节的数据准备不替代这些交付要求。
 
 ## TULU3 原始混合训练对话（原生抽样交付已验证）

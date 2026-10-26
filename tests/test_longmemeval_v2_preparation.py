@@ -200,3 +200,56 @@ def test_download_refuses_inadequate_budget_before_subprocess(
         )
     receipt = json.loads((output / "receipt-public.json").read_text("utf-8"))
     assert receipt["status"] == "FAILED_NOT_COMPLETE" and receipt["commands"] == []
+
+
+@pytest.mark.parametrize("download_query", [False, True])
+def test_model_transport_download_query_is_opt_in_and_preserves_identity(
+    tmp_path, monkeypatch, download_query
+):
+    spec = importlib.util.spec_from_file_location(
+        "lme_v2_asset_transport", ROOT / "scripts/prepare_xsum_original_assets.py"
+    )
+    helper = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(helper)
+    pins = tmp_path / "pins.json"
+    raw = b"software fixture only"
+    pins.write_text(
+        json.dumps(
+            {
+                "source_id": "SOFTWARE_FIXTURE",
+                "model": {
+                    "repo_id": "fixture/model",
+                    "revision": "fixed-fixture",
+                    "files": [
+                        {
+                            "path": "weights.fixture",
+                            "bytes": len(raw),
+                            "sha256": hashlib.sha256(raw).hexdigest(),
+                        }
+                    ],
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+    output = tmp_path / "external"
+    monkeypatch.setattr("sys.argv", ["preparer", "--output", str(output)])
+    seen = []
+
+    def fetch(path, asset, url):
+        seen.append(url)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(raw)
+        helper.verify(path, asset)
+
+    monkeypatch.setattr(helper, "fetch", fetch)
+    helper.main(
+        pins_path=pins,
+        source_id="SOFTWARE_FIXTURE",
+        parts=("model",),
+        hf_download_query=download_query,
+    )
+    assert seen == [
+        "https://huggingface.co/fixture/model/resolve/fixed-fixture/weights.fixture"
+        + ("?download=true" if download_query else "")
+    ]

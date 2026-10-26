@@ -57,7 +57,13 @@ def fetch(path, spec, url):
     temporary.rename(path)
 
 
-def main(*, pins_path=PINS, source_id="XSUM", parts=("data", "model", "scoring")):
+def main(
+    *,
+    pins_path=PINS,
+    source_id="XSUM",
+    parts=("data", "model", "scoring"),
+    hf_download_query=False,
+):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument(
@@ -106,6 +112,8 @@ def main(*, pins_path=PINS, source_id="XSUM", parts=("data", "model", "scoring")
                 source = pins["dataset"] if part == "data" else pins["model"]
                 prefix = "datasets/" if part == "data" else ""
                 url = f"{args.hf_endpoint}/{prefix}{source['repo_id']}/resolve/{source['revision']}/{spec['path']}"
+                if hf_download_query:
+                    url += "?download=true"
             jobs.append((part, spec, url))
     if args.verify_only:
         for part, spec, _ in jobs:

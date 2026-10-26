@@ -11,4 +11,5 @@ if __name__ == "__main__":
         / "configs/workload-native/longmemeval-v2-reader-pins.json",
         source_id="LONGMEMEVAL_V2_READER",
         parts=("model",),
+        hf_download_query=True,
     )
