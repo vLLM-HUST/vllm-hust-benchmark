@@ -2,6 +2,11 @@
 
 ### LAB-Bench官方执行环境（准备中，未交付）
 
+ARM兼容补充：作者冻结锁安装后，`uv pip check`发现torch缺少setuptools；用同一环境命令的`--install-compat`显式安装`setuptools==75.1.0 --no-deps`，不改作者源码/锁及其他依赖。实际复核123个已安装包、锁内版本不符0项、依赖检查通过；此补充不是作者原锁的一部分。重复`uv sync`可能移除补充，之后须重新核验。先前版本检查脚本误把作者锁内多版本分支压成单值的问题也已修正，环境核验不代表模型推理完成。
+
+环境入口：`python scripts/prepare_labbench_runtime.py --source-root <原目录/source> --archive <原目录/publisher-original.zip> --environment <独立venv目录> --uv <uv可执行文件> --python <Python3.12可执行文件>`默认展示计划，加`--execute`执行作者`uv sync --frozen --no-dev`，不更新锁；已有环境用`--verify-only`。核验隔离venv、原始源码、作者包导入、已安装包与锁的版本和`uv pip check`。已测试的平台为Linux
+ARM64/Python3.12，无CUDA推理；模型仅通过另一个NPU服务入口执行，不在客户端加载权重。
+
 资产入口：`python scripts/prepare_labbench_original_assets.py --output <仓库外目录>`默认只展示计划；加`--execute`按固定官方API归档下载并安全解包，或加`--reuse-archive <已有zip>`复用校验一致的归档，避免重复下载。已有目录使用`--verify-only`只读核验，服务器已实际验证553文件通过、0模型调用；不覆盖既有目录。原归档245275217字节，解包原文件283413040字节，均仅放外部目录。固定归档身份若变化应重新审计，不能跳过校验。
 
 - [x] [官方固定版本](https://github.com/Future-House/LAB-Bench/tree/998a8e0a40cf116c80e1b0e7a805ebb5fb9fa838)的11份运行代码/说明/依赖文件在服务器按大小和Git
