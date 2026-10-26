@@ -1298,6 +1298,13 @@ python scripts/run_mbpp_isolated_scoring.py \
 
 InfiniteBench 作者代码身份与静态前检命令：
 
+最新阶段收口：当前6个可容纳协议各原前3题，共18次原生执行已完成，并在不调用模型的独立审计中核对原题/请求/输出/哈希、完整prompt
+usage和作者重评分一致。11次length终态及所有低分原样保留，未增预算、换题或宣称质量达标。全12文件3946条原字段/引用索引、数值/字符串答案数组类型及每文件前3条共36处公共与固定研究消费者回查通过；固定CI283提供者44份载荷一致，研究默认依赖未改。剩余5类上下文超限及math_calc消息模板阻塞，因此整来源保持未勾。分协议勾选见[同一清单](DATASET_CHECKLIST.zh-CN.md)，完整阶段事实见[原复用审计](validation/research-acquisition-reuse-audit-20261025.json)。
+
+后续有间隔核查恢复200后，匹配resume已取得并校验全部12原文件（2499838795字节），已有`code_run`原文件直接复用，没有重下。原始前三题完整预检显示：passkey、number_string、longbook_qa_eng、longdialogue_qa_eng、math_find及code_run能容纳；kv_retrieval、longbook_sum_eng、longbook_choice_eng、longbook_qa_chn、code_debug至少一题超过131072，最高402028输入token，保留原题并标资源阻塞。math_calc因作者消息中后置system轮被当前Qwen原生模板拒绝400，不归为长度阻塞，不重写角色。当前适配环境边界与逐任务数值见[原复用审计的完整获取与预检块](validation/research-acquisition-reuse-audit-20261025.json)。原始文件齐备不是12协议全部已执行，来源总勾仍待完成。
+
+同批NarrativeQA在固定CI283数据提供者中完成46765原问题与1572文档/摘要的全关系回查，三个原split和所有原字段/顺序保持，两份答案隔离在outcome。仅证明原summary设置的数据可用；不是全文故事读取、原生模型任务或官方评分。原始表保留服务器，不公开数据或重复下载。
+
 2026-10-26服务器32050阶段运行：固定6份作者文件与原`code_run.jsonl`（83354486字节）核验后，公共入口以原gpt4模板、声明的Qwen3.5-27B替代模型完成原0/1/2三题完整上下文推理与作者评分，输入分别89456/89530/89491
 token，保留作者5-token输出预算，进程exit0，分数0.0原样保留。既有XSum独立评分客户端加私有依赖overlay；原`evaluate.load("rouge")`在私有工作目录解析到已核SHA的原HF
 ROUGE模块，无作者代码改动或mock。其余原文件获取遇HTTP429，停止连续重试，来源总勾仍不勾。阶段证据补入[原复用审计](validation/research-acquisition-reuse-audit-20261025.json)。原请求/响应只留服务器，不复制研究观测。
