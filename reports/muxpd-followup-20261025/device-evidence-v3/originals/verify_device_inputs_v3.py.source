@@ -1,0 +1,107 @@
+"""Recheck explicit terminal archives and derived inputs; CPU-only, append-only."""
+
+import collections
+import importlib.util
+import json
+import subprocess
+from pathlib import Path
+
+import build_capsule as capsule
+
+ROOT = Path('/root/workspace/muxpd-followup-20261025')
+PUB = ROOT / 'publication'
+LABELS = (
+    'raw-fusion-composite-plain-hccl-true-01',
+    'group-fusion-composite-plain-hccl-true-01',
+    'source98-plain-raw-bridge-01',
+    'source98-plain-group-bridge-01',
+    'native-quality-hccl-true-01',
+    'native-quality-v2-hccl-true-01',
+    'raw-pressure-suite-hccl-true-01',
+)
+COMPARISONS = (
+    'raw-observed-vs-plain-composite-v1.json',
+    'group-observed-vs-plain-composite-v1.json',
+    'raw-vs-group-plain-composite-v1.json',
+    'raw-f7-vs-source98-plain-composite-v1.json',
+    'group-f7-vs-source98-plain-composite-v1.json',
+    'raw-vs-group-source98-plain-composite-v1.json',
+)
+
+
+def load_module(name, path):
+    spec = importlib.util.spec_from_file_location(name, path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def main():
+    out = PUB / 'device-input-reverification-v3'
+    out.mkdir(exist_ok=False)
+    terminal = []
+    for label in LABELS:
+        directory = PUB / f'muxpd-{label}-capsule-v1'
+        manifest_path = directory / 'manifest.json'
+        manifest = json.loads(manifest_path.read_text())
+        receipt = json.loads((directory / 'receipt.json').read_text())
+        current = capsule.validate_terminal(ROOT / 'runs' / label)
+        assert current == manifest['terminal'], label
+        assert capsule.walk_members(ROOT / 'runs' / label, f'runs/{label}') == manifest['members'], label
+        verified = capsule.verify_archive(Path(receipt['archive']['path']), manifest, receipt['archive']['sha256'])
+        assert verified['members_verified'] == receipt['members_verified'], label
+        terminal.append({'label': label, 'terminal': current, 'manifest': capsule.identity(manifest_path),
+                         'receipt': capsule.identity(directory / 'receipt.json'), 'verification': verified})
+    compared = []
+    for name in COMPARISONS:
+        source = ROOT / 'numerics' / name
+        previous = json.loads(source.read_text())
+        destination = out / name
+        subprocess.run(['python', str(ROOT / 'numerics/compare_composite_token_replay.py'),
+                        '--left', previous['left_source']['path'], '--right', previous['right_source']['path'],
+                        '--output', str(destination)], check=True, capture_output=True)
+        assert source.read_bytes() == destination.read_bytes(), name
+        compared.append({'name': name, 'original': capsule.identity(source), 'reproduced': capsule.identity(destination),
+                         'cross': {k: v for k, v in previous['cross'].items() if k != 'details'},
+                         'exact_reproduction': True})
+    strict = load_module('device_v3_strict_scorer', ROOT / 'quality/score_quality.py')
+    plan, cases, extract = strict.load_frozen(ROOT / 'quality/frozen-v2')
+    quality_run = ROOT / 'runs/native-quality-v2-hccl-true-01/results/run.json'
+    native = json.loads(quality_run.read_text())
+    description_path = ROOT / 'quality/native-control-01-description-v1.json'
+    description = json.loads(description_path.read_text())
+    assert strict.score(native, plan, cases, extract) == description['score']
+    assert description['run']['sha256'] == capsule.identity(quality_run)['sha256']
+    assert len(native['outputs']) == 200 and description['score']['correct'] == 165
+    assert not description['score']['all_complete']
+    finishes = collections.Counter(row['finish_reason'] for row in native['outputs'])
+    assert finishes == {'stop': 191, 'length': 9}
+    first = json.loads((ROOT / 'runs/native-quality-hccl-true-01/results/run.json').read_text())
+    first_finishes = collections.Counter(row['finish_reason'] for row in first['outputs'])
+    assert len(first['outputs']) == 39 and first_finishes == {'stop': 36, 'length': 3}
+    suite = json.loads((ROOT / 'runs/raw-pressure-suite-hccl-true-01/results/run.json').read_text())
+    assert suite['passed'] is False and suite['shutdown_returned'] is True and len(suite['phases']) == 2
+    pressure, partial = suite['phases']
+    assert pressure['audit']['passed'] and pressure['steps'] == 129
+    assert pressure['audit']['allocation_none_count'] == 64 and pressure['audit']['pinned_seed_preemption_count'] == 1
+    assert partial['audit']['passed'] is False and partial['steps'] == 6 and not partial['cancellations']
+    summary = {
+        'schema': 'muxpd-device-input-reverification-v3', 'created_at': capsule.now(),
+        'producer': capsule.identity(__file__), 'builder': capsule.identity(capsule.__file__),
+        'terminals': terminal, 'comparisons': compared,
+        'single_native_quality': {'description': capsule.identity(description_path), 'score_exact_reproduction': True,
+                                 'correct': 165, 'total': 200, 'stop': 191, 'length': 9,
+                                 'strict_all_complete': False, 'paired_acceptance_computed': False},
+        'failed_native_2048': {'terminal_outputs': 39, 'stop': 36, 'length': 3, 'complete': False},
+        'pressure_suite': {'overall_passed': False, 'pressure_phase_passed': True, 'pressure_steps': 129,
+                           'allocation_none_count': 64, 'seed_preemptions_with_P_pinned': 1,
+                           'partial_phase_passed': False, 'partial_steps': 6, 'abort_issued': False,
+                           'full_phase_admitted': False},
+        'scope': 'Read-only local archive/input verification. No performance, paired quality acceptance, remote availability or Manager bridge acceptance is inferred.',
+    }
+    capsule.write_new(out / 'summary.json', summary)
+    print(json.dumps({'terminals': len(terminal), 'comparisons': len(compared), 'output': str(out / 'summary.json')}))
+
+
+if __name__ == '__main__':
+    main()

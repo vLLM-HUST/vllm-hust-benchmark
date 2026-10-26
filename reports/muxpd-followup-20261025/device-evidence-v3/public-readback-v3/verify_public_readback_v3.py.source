@@ -1,0 +1,228 @@
+"""Anonymous v3 GET readback; tar contents are hashed, never extracted/executed."""
+
+import concurrent.futures
+import hashlib
+import io
+import json
+import tarfile
+import traceback
+import urllib.parse
+import urllib.request
+from datetime import datetime, timezone
+from pathlib import Path, PurePosixPath
+
+ROOT = Path(__file__).resolve().parent
+PUBLICATION = ROOT.parent
+SELECTION_SHA = "02a8ab16b9ca96b725730415efe0077359dc7254e1baba06aeda87d7e081be41"
+INDEX_SHA = "faedc008eb46d2ba925b08a5cf970ddd060b409de4e3553d70ba48f962bbeb3e"
+API = "https://api.github.com/repos/vLLM-HUST/vllm-hust-benchmark/releases/tags/evidence-muxpd-followup-20261025"
+OLD_API = PUBLICATION / "quality-protocol-canonical-review-v1/release-api.json"
+STABLE_FIELDS = ("id", "node_id", "name", "label", "content_type", "state", "size", "digest", "created_at", "updated_at", "browser_download_url")
+
+
+def now():
+    return datetime.now(timezone.utc).isoformat()
+
+
+def require(value, message):
+    if not value:
+        raise ValueError(message)
+
+
+def sha_bytes(value):
+    return hashlib.sha256(value).hexdigest()
+
+
+def identity(path):
+    data = Path(path).read_bytes()
+    return {"path": str(path), "bytes": len(data), "sha256": sha_bytes(data)}
+
+
+def write_new(path, value):
+    with path.open("x") as stream:
+        json.dump(value, stream, indent=2, allow_nan=False)
+        stream.write("\n")
+
+
+def fetch(url, target, receipt_path, expected=None):
+    receipt = {"requested_url": url, "authentication": "none", "method": "GET", "started_at": now(), "verified": False}
+    total, digest = 0, hashlib.sha256()
+    try:
+        # No authentication, netrc, gh CLI, custom auth handler, or environment proxy.
+        opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
+        request = urllib.request.Request(url, headers={"User-Agent": "MuxPD-independent-anonymous-readback/3", "Accept": "application/vnd.github+json" if url.startswith("https://api.github.com/") else "application/octet-stream"})
+        with opener.open(request, timeout=30) as response, target.open("xb") as output:
+            final = urllib.parse.urlsplit(response.url)
+            receipt.update(http_status=response.status, final_host=final.hostname, final_path=final.path, headers={k: response.headers.get(k) for k in ("Date", "ETag", "Last-Modified", "Content-Length", "Content-Type", "X-GitHub-Request-Id")})
+            require(response.status == 200, "Expected HTTP200")
+            while block := response.read(1024 * 1024):
+                output.write(block)
+                total += len(block)
+                digest.update(block)
+        receipt.update(bytes=total, sha256=digest.hexdigest())
+        if expected is not None:
+            receipt["expected"] = {k: expected[k] for k in ("bytes", "sha256")}
+            require(total == expected["bytes"] and digest.hexdigest() == expected["sha256"], "Downloaded bytes differ from pinned selection")
+        receipt["verified"] = True
+    except Exception:
+        receipt.update(bytes=total, sha256=digest.hexdigest(), error=traceback.format_exc())
+    receipt["finished_at"] = now()
+    write_new(receipt_path, receipt)
+    return receipt
+
+
+def stable_inventory(api):
+    rows = api["assets"]
+    require(len({r["name"] for r in rows}) == len(rows), "Duplicate public asset name")
+    return {r["name"]: {k: r.get(k) for k in STABLE_FIELDS} for r in rows}
+
+
+def safe_name(value):
+    path = PurePosixPath(value)
+    require(value and not path.is_absolute() and ".." not in path.parts and "\\" not in value, "Unsafe archive member")
+    return value.rstrip("/")
+
+
+def verify_tar(archive, members, manifest_bytes=None, capture=(), allow_dirs=False):
+    expected = {r["member"]: r for r in members}
+    require(len(expected) == len(members), "Duplicate expected member")
+    seen, directory_seen, retained, details = set(), set(), {}, []
+    allowed_dirs = set()
+    if allow_dirs:
+        for name in expected:
+            allowed_dirs.update(str(p) for p in PurePosixPath(name).parents if str(p) != ".")
+    source = io.BytesIO(archive) if isinstance(archive, bytes) else None
+    with tarfile.open(fileobj=source, name=None if source else str(archive), mode="r:*") as tar:
+        for member in tar:
+            name = safe_name(member.name)
+            require(name not in seen and name not in directory_seen, "Duplicate tar member")
+            if member.isdir():
+                require(allow_dirs and name in allowed_dirs, "Unexpected directory")
+                directory_seen.add(name)
+                continue
+            seen.add(name)
+            if name == "capsule-manifest.json" and manifest_bytes is not None:
+                require(member.isfile(), "Embedded manifest is not regular")
+                data = tar.extractfile(member).read()
+                require(data == manifest_bytes, "Embedded manifest differs from public-index pin")
+                continue
+            require(name in expected, "Unexpected archive member: " + name)
+            row = expected[name]
+            if row["type"] == "symlink":
+                require(member.issym() and member.linkname == row["link_target"], "Symlink mismatch")
+                details.append({"member": name, "type": "symlink", "link_target": member.linkname})
+                continue
+            require(row["type"] == "file" and member.isfile() and member.size == row["bytes"], "Member type/size mismatch")
+            count, digest, chunks = 0, hashlib.sha256(), []
+            stream = tar.extractfile(member)
+            while block := stream.read(1024 * 1024):
+                count += len(block)
+                digest.update(block)
+                if name in capture:
+                    chunks.append(block)
+            require(count == row["bytes"] and digest.hexdigest() == row["sha256"], "Member bytes mismatch: " + name)
+            details.append({"member": name, "type": "file", "bytes": count, "sha256": digest.hexdigest()})
+            if name in capture:
+                retained[name] = b"".join(chunks)
+    require(seen == set(expected) | ({"capsule-manifest.json"} if manifest_bytes is not None else set()), "Incomplete archive member set")
+    require(not allow_dirs or directory_seen == allowed_dirs, "Incomplete nested directory set")
+    return {"verified": True, "members_verified": len(expected), "directories_verified": len(directory_seen), "complete_member_set": True, "member_results": details}, retained
+
+
+def main():
+    attempt = ROOT / "attempt-01"
+    attempt.mkdir(exist_ok=False)
+    for name in ("assets", "receipts", "archives"):
+        (attempt / name).mkdir()
+    started = now()
+    result = {"schema": "muxpd-anonymous-public-readback-v3", "started_at": started, "authentication": "none", "passed": False, "producer": identity(Path(__file__)), "scope": "Anonymous public-byte and complete archive-member custody only. No extraction/execution, GitHub mutation, device action, or experimental acceptance."}
+    try:
+        selection_path = PUBLICATION / "upload-selection-v3.json"
+        require(identity(selection_path)["sha256"] == SELECTION_SHA, "Selection pin differs")
+        selection = json.loads(selection_path.read_bytes())
+        require(len(selection["files"]) == 16, "Expected16 new assets")
+        with (attempt / "upload-selection-v3.json").open("xb") as stream:
+            stream.write(selection_path.read_bytes())
+        result["selection"] = identity(attempt / "upload-selection-v3.json")
+        before_receipt = fetch(API, attempt / "release-api-before.json", attempt / "release-api-before-receipt.json")
+        require(before_receipt["verified"], "Anonymous before-API request failed; receipt retained")
+        before = json.loads((attempt / "release-api-before.json").read_bytes())
+        old = json.loads(OLD_API.read_bytes())
+        inventory = stable_inventory(before)
+        old_inventory = stable_inventory(old)
+        require(before["id"] == old["id"] and len(inventory) == 39 and len(old_inventory) == 23, "Release/count mismatch")
+        require(all(inventory.get(name) == row for name, row in old_inventory.items()), "Old23 point-in-time identity metadata changed")
+        selected_names = {Path(row["path"]).name for row in selection["files"]}
+        require(len(selected_names) == 16 and set(inventory) - set(old_inventory) == selected_names, "Expected exactly16 additions to old23")
+        for row in selection["files"]:
+            name = Path(row["path"]).name
+            asset = inventory[name]
+            require(asset["size"] == row["bytes"] and asset["digest"] == "sha256:" + row["sha256"] and asset["browser_download_url"] == row["planned_url"] and asset["state"] == "uploaded", "Public API selection mismatch")
+        def download(row):
+            name = Path(row["path"]).name
+            receipt = fetch(row["planned_url"], attempt / "assets" / name, attempt / "receipts" / (name + ".json"), row)
+            print(json.dumps({"asset": name, "verified": receipt["verified"], "bytes": receipt.get("bytes")}), flush=True)
+            return {"name": name, **receipt}
+        with concurrent.futures.ThreadPoolExecutor(max_workers=3) as pool:
+            downloads = list(pool.map(download, selection["files"]))
+        write_new(attempt / "download-summary.json", {"all_verified": all(v["verified"] for v in downloads), "assets": downloads})
+        require(all(v["verified"] for v in downloads), "Download failure retained; no retry/overwrite")
+        index_path = attempt / "assets/publication-index-v3.json"
+        require(identity(index_path)["sha256"] == INDEX_SHA, "Downloaded index pin differs")
+        index = json.loads(index_path.read_bytes())
+        require(len(index["capsules"]) == 10 and index["counts"]["original_members"] == 786, "Index counts differ")
+        source_selection = json.loads((attempt / "assets/source-selection-v3.json").read_bytes())
+        require(len(source_selection["exports"]) == 1, "Expected exact source98 export")
+        source = source_selection["exports"][0]
+        require(source["commit"] == "98eac12dc2595a8742a81b58e96b899fed905194" and source["members"] == 99, "Nested source identity differs")
+        capsule_results, nested = [], None
+        for capsule in index["capsules"]:
+            archive = attempt / "assets" / Path(capsule["archive"]["path"]).name
+            manifest_path = Path(capsule["manifest"]["path"])
+            manifest_bytes = manifest_path.read_bytes()
+            require(len(manifest_bytes) == capsule["manifest"]["bytes"] and sha_bytes(manifest_bytes) == capsule["manifest"]["sha256"], "Local manifest differs from downloaded public index")
+            manifest = json.loads(manifest_bytes)
+            require(manifest["capsule_id"] == capsule["capsule_id"] and len(manifest["members"]) == capsule["original_members"], "Capsule identity/member count mismatch")
+            by_path = {v["path"]: v["member"] for v in manifest["members"]}
+            capture = [by_path[source[k]["path"]] for k in ("archive", "manifest") if source[k]["path"] in by_path]
+            verified, retained = verify_tar(archive, manifest["members"], manifest_bytes, capture)
+            require(sum(v.get("bytes", 0) for v in verified["member_results"]) == capsule["original_bytes"], "Uncompressed member byte total differs")
+            verified.update(capsule_id=capsule["capsule_id"], archive=identity(archive), embedded_manifest_sha256=sha_bytes(manifest_bytes))
+            write_new(attempt / "archives" / (capsule["capsule_id"] + ".json"), verified)
+            capsule_results.append({k: v for k, v in verified.items() if k != "member_results"})
+            if capture:
+                require(len(capture) == 2 and nested is None, "Nested source export incomplete/duplicated")
+                data, description = [retained[by_path[source[k]["path"]]] for k in ("archive", "manifest")]
+                for raw, key in ((data, "archive"), (description, "manifest")):
+                    require(len(raw) == source[key]["bytes"] and sha_bytes(raw) == source[key]["sha256"], "Indexed nested source bytes differ")
+                sm = json.loads(description)
+                require(sm["commit"] == source["commit"] and sm["tree"] == source["tree"] and sm["archive"] == source["archive"], "Nested source manifest identity mismatch")
+                nested, _ = verify_tar(data, sm["members"], allow_dirs=True)
+                require(nested["members_verified"] == 99, "Nested source file count mismatch")
+                nested.update(commit=sm["commit"], tree=sm["tree"], archive_sha256=sha_bytes(data), manifest_sha256=sha_bytes(description), containing_capsule=capsule["capsule_id"])
+                write_new(attempt / "nested-source98-verification.json", nested)
+            print(json.dumps({"capsule": capsule["capsule_id"], "members": verified["members_verified"], "verified": True}), flush=True)
+        require(sum(v["members_verified"] for v in capsule_results) == 786 and nested is not None, "Incomplete outer/nested verification")
+        result.update(asset_count=16, asset_bytes=sum(v["bytes"] for v in downloads), all_asset_sizes_sha256_verified=True, assets=[{k: v[k] for k in ("name", "requested_url", "bytes", "sha256", "verified")} for v in downloads], public_index=identity(index_path), capsule_count=10, original_members_verified=786, capsules=capsule_results, nested_source={k: v for k, v in nested.items() if k != "member_results"}, old_api_snapshot=identity(OLD_API), old23_identity_comparison="Stable public API identity fields match the earlier23-asset snapshot. Old asset bytes were not downloaded again; no claim of continuous immutability between snapshots.", immutable_api_fields=list(STABLE_FIELDS), all_checks_before_after_api=True)
+    except Exception:
+        result["error"] = traceback.format_exc()
+    finally:
+        after_receipt = fetch(API, attempt / "release-api-after.json", attempt / "release-api-after-receipt.json")
+        result["after_api_request_verified"] = after_receipt["verified"]
+        try:
+            require(after_receipt["verified"], "After-API request failed")
+            before = json.loads((attempt / "release-api-before.json").read_bytes())
+            after = json.loads((attempt / "release-api-after.json").read_bytes())
+            require(before["id"] == after["id"] and len(after["assets"]) == 39 and stable_inventory(before) == stable_inventory(after), "Public inventory stable identity drift")
+            result.update(api_before=identity(attempt / "release-api-before.json"), api_after=identity(attempt / "release-api-after.json"), public_inventory_count_before=39, public_inventory_count_after=39, stable_public_inventory=True, dynamic_fields_excluded=["download_count", "uploader"])
+            result["passed"] = "error" not in result and result.get("all_checks_before_after_api", False)
+        except Exception:
+            result["after_api_error"] = traceback.format_exc()
+        result["finished_at"] = now()
+        write_new(attempt / "public-readback-receipt-v3.json", result)
+    print(json.dumps({"passed": result["passed"], "receipt": str(attempt / "public-readback-receipt-v3.json")}), flush=True)
+    return 0 if result["passed"] else 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

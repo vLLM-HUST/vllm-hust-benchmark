@@ -1,0 +1,103 @@
+{
+  "schema": "muxpd-deterministic-profile-cpu-validation-v2",
+  "source": "/root/workspace/muxpd-deterministic-profile-v2",
+  "head": "98eac12dc2595a8742a81b58e96b899fed905194",
+  "base": "f7ed21e183b27d2141176f3e7a5c8a5ff4ede07d",
+  "status": "",
+  "runtime_changed_files": [
+    "src/vllm_muxpd/config.py",
+    "src/vllm_muxpd/deployment.py",
+    "src/vllm_muxpd/determinism.py",
+    "src/vllm_muxpd/worker.py"
+  ],
+  "files": [
+    {
+      "path": "/root/workspace/muxpd-deterministic-profile-v2/src/vllm_muxpd/config.py",
+      "bytes": 11071,
+      "sha256": "689d45961aa41acf8d4f91f603af365f671ec7e0d18361adf69a9aec9221fd4e"
+    },
+    {
+      "path": "/root/workspace/muxpd-deterministic-profile-v2/src/vllm_muxpd/deployment.py",
+      "bytes": 16115,
+      "sha256": "f2040ab2205f1cedcb18dcd4d5220344b86a5807fdf408e936697659ed0a1c61"
+    },
+    {
+      "path": "/root/workspace/muxpd-deterministic-profile-v2/src/vllm_muxpd/determinism.py",
+      "bytes": 3849,
+      "sha256": "4ec0336848450127b9ecdc1bc0dea5df4bae4ff4e195fb0c2b7af9d3397938e5"
+    },
+    {
+      "path": "/root/workspace/muxpd-deterministic-profile-v2/src/vllm_muxpd/worker.py",
+      "bytes": 41058,
+      "sha256": "2ab952aa014b0fe10d4ff8801005ab27c239d600e747ecdc4ccd1be2adb87e1b"
+    },
+    {
+      "path": "/root/workspace/muxpd-deterministic-profile-v2/tests/test_deployment.py",
+      "bytes": 12397,
+      "sha256": "90c223f787006690fde5bbcdf987313f9f93f151fec33ffb0c798a400a1fdfc8"
+    },
+    {
+      "path": "/root/workspace/muxpd-deterministic-profile-v2/tests/test_deterministic_collectives.py",
+      "bytes": 10867,
+      "sha256": "9940f0373b497de046ea4d9cca5a8a1bb2f64582afd9b8ebf517584ef5a407ec"
+    },
+    {
+      "path": "/root/workspace/muxpd-deterministic-profile-v2/docs/ecpa-deployment.md",
+      "bytes": 9092,
+      "sha256": "51505a203fdff1c1da22b1cd95cca4ccf533094db937002fd41e1c2426035eaf"
+    }
+  ],
+  "full_cpu": {
+    "command": [
+      "/root/workspace/.venv/bin/python",
+      "-m",
+      "pytest",
+      "tests",
+      "-m",
+      "not npu",
+      "-q"
+    ],
+    "passed": 835,
+    "skipped": 6,
+    "seconds": 81.87,
+    "exit_code": 0,
+    "environment": {
+      "sourced": "/root/workspace/runtime/env.sh",
+      "OMP_NUM_THREADS": "1",
+      "BENCHMARK_COLLECTION_ROOT": "/root/workspace/muxpd-followup-20261025/benchmark-collection",
+      "PYTHONPATH_prepend": [
+        "/root/workspace/muxpd-deterministic-profile-v2/src",
+        "/root/workspace/.muxpd-ecpa-runtime/lib/python3.12/site-packages"
+      ]
+    },
+    "log": {
+      "path": "/root/workspace/muxpd-followup-20261025/numerics/deterministic-profile-v2-full-cpu.log",
+      "bytes": 1002,
+      "sha256": "5e128ebf46f8358077a0dbcd340dfa7547c66e5e939c1c3c9f064c2a45da5f9c"
+    }
+  },
+  "targeted_cpu": {
+    "passed": 154,
+    "warnings": 14,
+    "warning_scope": "upstream torch.jit.script_method deprecation",
+    "seconds": 22.9
+  },
+  "lint": {
+    "whole_tree_ruff": "pass",
+    "git_diff_check": "pass"
+  },
+  "superseded_attempts": [
+    {
+      "path": "/root/workspace/muxpd-followup-20261025/numerics/deterministic-profile-3237096-full-cpu-attempt1.json",
+      "bytes": 792,
+      "sha256": "83c21fbed5061173be853fe2a8149997711cbe8540fc2f3b599159e583d2bf93"
+    },
+    {
+      "path": "/root/workspace/muxpd-followup-20261025/numerics/deterministic-profile-3237096-full-cpu-final.log",
+      "bytes": 2836,
+      "sha256": "dc62b96d6c25b770d0da450af400035bed44e3895930c15297c63de52d714b35"
+    }
+  ],
+  "qualification": "Experimental; no device, quality or performance run of this source revision by numerical agent. Do not relabel f7 or6c results.",
+  "manager_environment_capability": "Installed adapter has no conditional environment declaration. Existing policy projection binds requirement; normal CLI process env setup reaches Manager child, worker checks before native distributed initialization. Manifest unchanged."
+}

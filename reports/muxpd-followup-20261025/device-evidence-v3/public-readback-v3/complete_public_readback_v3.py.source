@@ -1,0 +1,87 @@
+"""Close v3 readback after proxy API rate limit; preserve both failed attempts."""
+
+import hashlib
+import json
+import traceback
+from datetime import datetime, timezone
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent
+FIRST_SHA = "6a04e233b1ac83611e2cb2ce4d0c9fd7f6e6a20c811870ca8726db39d63a5f8d"
+PROXY_SHA = "f2849b5c598770e772dbf8f8c61773379f7bdba1f588c41105b462eef0b26a2c"
+
+
+def main():
+    original = ROOT / "verify_public_readback_v3.py"
+    if hashlib.sha256(original.read_bytes()).hexdigest() != FIRST_SHA:
+        raise ValueError("Original verifier changed")
+    # Execute only our exact pinned local verifier definitions, never downloaded code.
+    helper = {"__name__": "pinned_local_readback_helpers", "__file__": str(original)}
+    exec(compile(original.read_bytes(), str(original), "exec"), helper)
+    identity, require, write_new = [helper[k] for k in ("identity", "require", "write_new")]
+    attempt = ROOT / "attempt-03"
+    attempt.mkdir(exist_ok=False)
+    result = {"schema": "muxpd-anonymous-public-readback-completion-v3", "started_at": helper["now"](), "passed": False, "authentication": "none", "producer": identity(Path(__file__)), "scope": "Complete anonymous public-byte/member readback using attempt02 verified downloads and a later direct anonymous API closure. Earlier failed attempts remain failed and unchanged. No archive extraction/execution or GitHub mutation."}
+    prior_path = ROOT / "attempt-02/public-readback-receipt-v3.json"
+    prior = json.loads(prior_path.read_bytes())
+    try:
+        require(prior["passed"] is False and "error" not in prior and prior["after_api_request_verified"] is False and "after_api_error" in prior, "Unexpected prior failure, cannot close")
+        require(prior["producer"] == identity(ROOT / "verify_public_readback_v3_proxy.py") and prior["producer"]["sha256"] == PROXY_SHA, "Proxy verifier identity changed")
+        require(prior["all_asset_sizes_sha256_verified"] and prior["asset_count"] == 16 and prior["capsule_count"] == 10 and prior["original_members_verified"] == 786, "Prior content verification incomplete")
+        selection_path = ROOT / "attempt-02/upload-selection-v3.json"
+        require(identity(selection_path)["sha256"] == helper["SELECTION_SHA"], "Pinned selection differs")
+        selection = json.loads(selection_path.read_bytes())
+        before_path = ROOT / "attempt-02/release-api-before.json"
+        before = json.loads(before_path.read_bytes())
+        require(json.loads((ROOT / "attempt-02/release-api-before-receipt.json").read_bytes())["sha256"] == identity(before_path)["sha256"], "Before API snapshot differs")
+        downloads = []
+        for row in selection["files"]:
+            path = ROOT / "attempt-02/assets" / Path(row["path"]).name
+            actual = identity(path)
+            require(actual["bytes"] == row["bytes"] and actual["sha256"] == row["sha256"], "Prior public downloaded file changed")
+            saved = json.loads((ROOT / "attempt-02/receipts" / (path.name + ".json")).read_bytes())
+            require(saved["verified"] is True and saved["authentication"] == "none" and saved["bytes"] == row["bytes"] and saved["sha256"] == row["sha256"] and saved["requested_url"] == row["planned_url"], "Anonymous download receipt mismatch")
+            downloads.append({"name": path.name, "url": row["planned_url"], "bytes": row["bytes"], "sha256": row["sha256"], "verified": True})
+        index_path = ROOT / "attempt-02/assets/publication-index-v3.json"
+        require(identity(index_path)["sha256"] == helper["INDEX_SHA"], "Public index differs")
+        index = json.loads(index_path.read_bytes())
+        capsule_receipts = []
+        for capsule in index["capsules"]:
+            path = ROOT / "attempt-02/archives" / (capsule["capsule_id"] + ".json")
+            verified = json.loads(path.read_bytes())
+            manifest_raw = Path(capsule["manifest"]["path"]).read_bytes()
+            require(hashlib.sha256(manifest_raw).hexdigest() == capsule["manifest"]["sha256"], "Indexed manifest differs")
+            members = json.loads(manifest_raw)["members"]
+            expected = [{k: r[k] for k in ("member", "type", "bytes", "sha256")} if r["type"] == "file" else {k: r[k] for k in ("member", "type", "link_target")} for r in members]
+            require(verified["verified"] and verified["complete_member_set"] and verified["member_results"] == expected and verified["members_verified"] == capsule["original_members"], "Retained complete member audit differs from indexed manifest")
+            require(verified["archive"] == identity(ROOT / "attempt-02/assets" / Path(capsule["archive"]["path"]).name) and verified["embedded_manifest_sha256"] == capsule["manifest"]["sha256"], "Capsule audit archive/embedded manifest mismatch")
+            capsule_receipts.append(identity(path))
+        nested_path = ROOT / "attempt-02/nested-source98-verification.json"
+        nested = json.loads(nested_path.read_bytes())
+        source = json.loads((ROOT / "attempt-02/assets/source-selection-v3.json").read_bytes())["exports"][0]
+        source_manifest_raw = Path(source["manifest"]["path"]).read_bytes()
+        require(hashlib.sha256(source_manifest_raw).hexdigest() == source["manifest"]["sha256"], "Indexed nested manifest differs")
+        source_manifest = json.loads(source_manifest_raw)
+        require(nested["verified"] and nested["members_verified"] == 99 and nested["directories_verified"] == 9 and nested["complete_member_set"] and nested["member_results"] == source_manifest["members"], "Nested complete member audit differs")
+        require(nested["archive_sha256"] == source["archive"]["sha256"] and nested["manifest_sha256"] == source["manifest"]["sha256"] and nested["commit"] == source["commit"] and nested["tree"] == source["tree"], "Nested indexed source identity differs")
+        # Direct API transport avoids the shared proxy's anonymous API rate limit.
+        after_receipt = helper["fetch"](helper["API"], attempt / "release-api-after.json", attempt / "release-api-after-receipt.json")
+        require(after_receipt["verified"], "Direct API closure failed; new failure receipt retained")
+        after = json.loads((attempt / "release-api-after.json").read_bytes())
+        old_path = helper["OLD_API"]
+        old = json.loads(old_path.read_bytes())
+        stable = helper["stable_inventory"]
+        a, z, old_rows = stable(before), stable(after), stable(old)
+        require(before["id"] == after["id"] == old["id"] and len(a) == len(z) == 39 and len(old_rows) == 23 and a == z, "Public inventory identity drift")
+        require(all(a.get(n) == row for n, row in old_rows.items()) and set(a) - set(old_rows) == {v["name"] for v in downloads}, "Old23/new16 inventory mismatch")
+        result.update(passed=True, asset_count=16, asset_bytes=sum(v["bytes"] for v in downloads), assets=downloads, all_asset_sizes_sha256_verified=True, capsule_count=10, original_members_verified=786, all_capsule_member_sets_and_hashes_verified=True, nested_source98={k: v for k, v in nested.items() if k != "member_results"}, nested_verification=identity(nested_path), capsule_verification_receipts=capsule_receipts, before_api=identity(before_path), before_api_http_receipt=identity(ROOT / "attempt-02/release-api-before-receipt.json"), after_api=identity(attempt / "release-api-after.json"), after_api_http_receipt=identity(attempt / "release-api-after-receipt.json"), public_inventory_count_before=39, public_inventory_count_after=39, public_inventory_stable_fields=helper["STABLE_FIELDS"], old23_public_api_snapshot=identity(old_path), old23_comparison="Earlier23 and current39 stable API identities match; old asset bytes were not redownloaded. Point-in-time evidence only.", public_index=identity(index_path), selection=identity(selection_path), downloaded_content_attempt=identity(prior_path), failed_attempts_preserved=[identity(ROOT / "attempt-01/public-readback-receipt-v3.json"), identity(prior_path)], failure_summary=["Attempt01: direct asset connections timed out; public API snapshots succeeded", "Attempt02: all16 assets/786outermembers/99sourcefiles verified; final shared-proxy API request returned403 rate-limit", "Attempt03: preserves failed attempts and closes the same content with later direct anonymous API inventory"])
+    except Exception:
+        result["error"] = traceback.format_exc()
+    result["finished_at"] = datetime.now(timezone.utc).isoformat()
+    write_new(attempt / "public-readback-completion-v3.json", result)
+    print(json.dumps({"passed": result["passed"], "receipt": str(attempt / "public-readback-completion-v3.json")}), flush=True)
+    return 0 if result["passed"] else 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

@@ -1,0 +1,72 @@
+{
+  "schema": "muxpd-source98-bridge-cpu-freeze-v1",
+  "plugin_commit": "98eac12dc2595a8742a81b58e96b899fed905194",
+  "qualification": "SOURCE deployment bridge; no wheel/release or device qualification",
+  "source_path": "/root/workspace/muxpd-deterministic-profile-v2",
+  "composite_plan_sha256": "7552eaad4ed489caee8c3f369d08d08a9859af2e6e8134a33e85f2af924eda65",
+  "tests": "11 passed in 0.50s",
+  "manager_cpu_projections": {
+    "raw": {
+      "plan_receipt": "manager-raw-v3/plan-source.json",
+      "actual_policy": {
+        "adaptive_layers": false,
+        "compile_full_prefill": false,
+        "decode_budget_guard": false,
+        "decode_graph": true,
+        "execution": "decoupled",
+        "layers_per_slice": 4,
+        "overlap_communication": "isolated",
+        "prefill_first": false,
+        "prefill_layer_token_budget": 0,
+        "require_hccl_deterministic": true,
+        "stream_mode": "overlap"
+      },
+      "installed_manifest_equal_source": true,
+      "hccL_initially_unset": true,
+      "actual_child_not_launched": true
+    },
+    "group": {
+      "plan_receipt": "manager-group-v3/plan-source.json",
+      "actual_policy": {
+        "adaptive_layers": false,
+        "compile_full_prefill": false,
+        "compile_prefill_groups": true,
+        "decode_budget_guard": false,
+        "decode_graph": true,
+        "execution": "decoupled",
+        "layers_per_slice": 4,
+        "overlap_communication": "isolated",
+        "prefill_first": false,
+        "prefill_layer_token_budget": 0,
+        "require_hccl_deterministic": true,
+        "stream_mode": "overlap"
+      },
+      "installed_manifest_equal_source": true,
+      "hccL_initially_unset": true,
+      "actual_child_not_launched": true
+    }
+  },
+  "files": {
+    "probe_composite_plain98.py": "5d8b238c695173fc23e3b8065e879b0ff09a63cf148aaff110431061b287e972",
+    "manager_source_bridge98_v3.py": "7cd515d0d55ec9f50ee0381af98f3d84de1ec1feee618d0e7d52e14f0a26b01d",
+    "verify_startup_readbacks98.py": "269271f9b418ed36ef4430f87b1bb1e9819c075b6c9b994ccc0db0ced23dafa1",
+    "test_bridge98.py": "c47f3811ee2ad639720528c8c06ff48199bfb737c65279e444f308fc793fa216",
+    "source-manifest.json": "3283dcee98254cfc6eac5a7eab3b2e135a1906ccda6dc70b5e2aeb578eaf31a2",
+    "raw-fusion-engine-args98.json": "f6576257ab80d7c925c8312c0cc6623967ee06c184f7f4e6a9d9f8ddae14283d",
+    "group-fusion-engine-args98.json": "177c23350b84564bc5e60339497c7368bb08e53b941bcd0b79518f1192b59cd1",
+    "README.md": "a81b93d37be728f13ba3b37dec461804dae9ccaff7afab8590757570b6e2fa2c",
+    "cpu-tests-v3.log": "d5295754ac68f65672cab1f040f5594272c8e8a9ed1922436f6059efdaa21caf",
+    "plain-ruff.log": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+    "ruff-v3.log": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+    "manager-raw-v3/prepare-source.json": "5b32d73090c1abb115d34b4978de1bd308bec55aa0c19d7099ee211b7be6a803",
+    "manager-raw-v3/plan-source.json": "250c7c1bb353101449e90608a06597b51e1f00b1b7a97f8d273ccb24643ae5b9",
+    "manager-raw-v3/configuration.json": "485b6a208279b4b34e3deed2e60e88cfc2c19e1e538f992ca4cfdcd5d9b8bb3c",
+    "manager-raw-v3/config.json": "8c88eaff88f05db939874313050b538994838cfb030e707b2b113c281b598642",
+    "manager-raw-v3/dry-run.stdout": "a475e837bb44dcf5a78385b3adab63a2c0ce38398284f7da6a61223bee184939",
+    "manager-group-v3/prepare-source.json": "71caede15b60d69fbcd0f5da6c5f16d36342b721e3d47cb718a3ac29da6a5790",
+    "manager-group-v3/plan-source.json": "0eef001e35415d45941bfc44b79a038e78e36868d0fa7fcce9ff62075fedb5ad",
+    "manager-group-v3/configuration.json": "2d187b27107bf7a14a90f7e733306544d196721afbde30b0d3e7a4c0ecae3f71",
+    "manager-group-v3/config.json": "df5e281cd37f57efcd86c76a17c66fc4af5906cdc4a64e146f0bbb7d12b9a69a",
+    "manager-group-v3/dry-run.stdout": "854c1725b8a303a27afc2083ac3d09a488f631ee62c5bcb3df330299bf330e95"
+  }
+}
