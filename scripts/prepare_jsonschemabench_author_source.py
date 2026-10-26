@@ -17,8 +17,8 @@ PINS = (
 )
 
 
-def verify_source(root):
-    pins = json.loads(PINS.read_text(encoding="utf-8"))
+def verify_source(root, pins_path=None):
+    pins = json.loads((pins_path or PINS).read_text(encoding="utf-8"))
     root = Path(root).resolve(strict=True)
     for item in pins["files"]:
         verify_git_blob(bound_path(root, "", item), item)
@@ -37,11 +37,22 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--author-root", type=Path, required=True)
     parser.add_argument(
+        "--source",
+        choices=["jsonschemabench", "bigcodebench"],
+        default="jsonschemabench",
+        help="Pinned original author source only; historical default unchanged",
+    )
+    parser.add_argument(
         "--action", choices=["plan", "prepare", "verify"], default="plan"
     )
     parser.add_argument("--max-bytes", type=int)
     args = parser.parse_args()
-    pins = json.loads(PINS.read_text(encoding="utf-8"))
+    pins_path = (
+        PINS
+        if args.source == "jsonschemabench"
+        else PINS.with_name("bigcodebench-author-source.json")
+    )
+    pins = json.loads(pins_path.read_text(encoding="utf-8"))
     total = sum(item["bytes"] for item in pins["files"])
     if args.action == "prepare":
         if args.max_bytes is None or args.max_bytes < total:
@@ -57,7 +68,7 @@ def main():
             else:
                 acquire(target, item)
     if args.action != "plan":
-        verify_source(args.author_root)
+        verify_source(args.author_root, pins_path)
     print(
         json.dumps(
             {

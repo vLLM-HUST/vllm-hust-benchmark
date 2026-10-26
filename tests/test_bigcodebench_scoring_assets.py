@@ -2,6 +2,7 @@
 
 import hashlib
 import importlib.util
+import json
 from pathlib import Path
 import sys
 from types import ModuleType, SimpleNamespace
@@ -29,6 +30,20 @@ def test_reference_continuation_is_not_executed():
         "statistics",
         "unittest",
     ]
+
+
+def test_bigcodebench_acquisition_manifest_matches_auditor_identities():
+    pins = json.loads(
+        (
+            SCRIPTS.parent / "configs/workload-native/bigcodebench-author-source.json"
+        ).read_text("utf-8")
+    )
+    assert pins["revision"] == module.CODE_REVISION
+    assert pins["repository"] == "bigcode-project/bigcodebench"
+    assert {item["path"]: item["sha256"] for item in pins["files"]} == module.PINS
+    assert len(pins["files"]) == 32
+    assert sum(item["bytes"] for item in pins["files"]) == 109939
+    assert all(len(item["git_blob"]) == 40 for item in pins["files"])
 
 
 def test_relative_import_requires_review():

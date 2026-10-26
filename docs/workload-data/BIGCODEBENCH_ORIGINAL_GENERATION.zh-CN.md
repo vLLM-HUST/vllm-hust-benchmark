@@ -98,6 +98,22 @@ worker选择；使用独立输出缓存，避免沿用其他选题的groundtruth
 
 ### 隔离容器执行入口（软件实现，尚未实跑）
 
+2026-10-26已实际执行下述源码`prepare`及独立`verify`，32份公开源码文件校验通过；仅约110KB源码保存于忽略目录，无数据集、模型、企业载荷或源码执行。服务器恢复后仍须验证原数据准备、镜像依赖和隔离执行，不能把源码获取验证升级为原生评分。
+
+固定评分源码现在可复用已有发布方文件获取入口，不依赖Git clone，也不下载数据或模型：
+
+```bash
+python scripts/prepare_jsonschemabench_author_source.py --source bigcodebench \
+  --author-root /private/bigcodebench-fixed-source --action plan
+python scripts/prepare_jsonschemabench_author_source.py --source bigcodebench \
+  --author-root /private/bigcodebench-fixed-source --action prepare --max-bytes 109939
+python scripts/prepare_jsonschemabench_author_source.py --source bigcodebench \
+  --author-root /private/bigcodebench-fixed-source --action verify
+```
+
+脚本名称为历史兼容入口；不传`--source`仍准备JSONSchemaBench。BigCodeBench选项固定32份文件共109939字节（29个Python模块、两个依赖文件、官方Dockerfile），逐文件核验发布方Git
+blob、字节数和SHA256。已有正确文件直接复用，错误文件或遗留partial拒绝覆盖；这里只取得评分源码子集，不声称取得整个Git仓库、可构建镜像或完成原生执行。
+
 固定作者版本的`Docker/Evaluate.Dockerfile`仍包含可变的`python:3.10-slim`、最新Git
 clone、main分支评分依赖URL、未固定版本的pip安装及构建时full/hard数据下载；不能直接把该配方构建结果当成本次固定版本环境。静态预检现同时校验官方Dockerfile和CLI依赖文件，并输出`environment_preparation`中的未冻结输入及所需构建记录。
 准备评分环境时，应保留作者Python3.10、系统依赖和评分库要求，但将代码/评分依赖指向本次已核验版本，数据使用本次私有原始工件；记录基础镜像digest/架构、OS与Python包实际版本和最终不可变镜像ID。此处尚无已构建、依赖检查通过的镜像，不提供虚构镜像ID，也不将固定配方校验算成运行成功。
