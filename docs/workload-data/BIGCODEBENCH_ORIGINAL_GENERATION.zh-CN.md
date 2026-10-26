@@ -98,6 +98,10 @@ worker选择；使用独立输出缓存，避免沿用其他选题的groundtruth
 
 ### 隔离容器执行入口（软件实现，尚未实跑）
 
+固定作者版本的`Docker/Evaluate.Dockerfile`仍包含可变的`python:3.10-slim`、最新Git
+clone、main分支评分依赖URL、未固定版本的pip安装及构建时full/hard数据下载；不能直接把该配方构建结果当成本次固定版本环境。静态预检现同时校验官方Dockerfile和CLI依赖文件，并输出`environment_preparation`中的未冻结输入及所需构建记录。
+准备评分环境时，应保留作者Python3.10、系统依赖和评分库要求，但将代码/评分依赖指向本次已核验版本，数据使用本次私有原始工件；记录基础镜像digest/架构、OS与Python包实际版本和最终不可变镜像ID。此处尚无已构建、依赖检查通过的镜像，不提供虚构镜像ID，也不将固定配方校验算成运行成功。
+
 `scripts/run_bigcodebench_container_scoring.py`可在Linux上调用本机Docker/Podman，
 复用准备后的原始输出，不再请求模型。操作者须先取得并核验本机评分镜像的不可变 `sha256:`镜像ID，设置`SCORING_IMAGE_ID`；本入口不拉取或构建镜像，不用可变tag。
 镜像须提供官方Docker约定的Python3.10及`/usr/local/bin/python3`、完整官方评分依赖

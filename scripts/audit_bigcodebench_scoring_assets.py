@@ -10,6 +10,8 @@ from run_bigcodebench_original_generation import CODE_REVISION, DATA_SHA, digest
 
 # Observed checksums of the fixed public source, not publisher signatures.
 PINS = {
+    "Docker/Evaluate.Dockerfile": "a0d56d681c9eeaf0c6d780309aab31b6df422bad21ad1a3de2c3da0598e05b12",  # pragma: allowlist secret - fixed public source checksum
+    "Requirements/requirements.txt": "ac7c40cd926e1e949ebe241e4ba2f4ed1928f634d2dce32ac363e14c04cef807",  # pragma: allowlist secret - fixed public source checksum
     "bigcodebench/__init__.py": "da556cf4bc44f5922a7b610aaa9e875111f4bb670a7ce8d2755b45fad532c9e0",  # pragma: allowlist secret - fixed public source checksum
     "bigcodebench/data/__init__.py": "9359915bef845f7e2b1569f030a3f4acfe890e9da3744a38c1ea3cfec5e15a96",  # pragma: allowlist secret - fixed public source checksum
     "bigcodebench/data/utils.py": "1d7d43e4dbfbbb8ca0dde4da73bfe3660c823e0ecad26d9d6707cc475bb2cb4f",  # pragma: allowlist secret - fixed public source checksum
@@ -94,6 +96,28 @@ def audit(root, rows):
         "status": "STATIC_SCORING_ASSETS_VERIFIED_NOT_EXECUTED",
         "code_revision": CODE_REVISION,
         "publisher_source_checksums": checksums,
+        "environment_preparation": {
+            "publisher_recipe": "Docker/Evaluate.Dockerfile",
+            "publisher_cli_dependencies": "Requirements/requirements.txt",
+            "publisher_scoring_dependencies": "Requirements/requirements-eval.txt",
+            "recipe_is_fully_pinned": False,
+            "floating_inputs_requiring_freeze": [
+                "python:3.10-slim base image",
+                "apt repositories and packages",
+                "latest upstream git clone",
+                "main branch requirements-eval URL",
+                "unversioned pip dependency installs",
+                "build-time full/hard dataset downloads",
+            ],
+            "required_build_record": [
+                "resolved base-image digest and architecture",
+                "fixed publisher source and requirements checksums",
+                "resolved OS and Python package versions",
+                "immutable final image ID",
+            ],
+            "image_built_or_qualified": False,
+            "boundary": "Pinned recipe identity is not reproducible image qualification. Do not execute its floating clone/dependency/data acquisition unchanged.",
+        },
         "selected_original_indices": [0, 1, 2],
         "selected_task_static_imports": [
             {"task_id": row["task_id"], "imports": original_imports(row)}

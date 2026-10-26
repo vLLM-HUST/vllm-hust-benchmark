@@ -57,6 +57,8 @@ def test_default_manifest_covers_imported_scoring_modules_and_rejects_extra(tmp_
     assert "bigcodebench/eval/utils.py" in module.PINS
     assert "bigcodebench/syncheck.py" in module.PINS
     assert "bigcodebench/provider/__init__.py" in module.PINS
+    assert "Docker/Evaluate.Dockerfile" in module.PINS
+    assert "Requirements/requirements.txt" in module.PINS
     (tmp_path / "bigcodebench").mkdir()
     (tmp_path / "bigcodebench/unexpected.py").write_text(
         "raise RuntimeError('never import')"
@@ -80,6 +82,11 @@ def test_static_report_cannot_complete_source(tmp_path, monkeypatch):
     assert result["source_checkbox_eligible"] is False
     assert result["environment_qualified"] is False
     assert result["official_functional_scoring_executed"] is False
+    environment = result["environment_preparation"]
+    assert not environment["recipe_is_fully_pinned"]
+    assert not environment["image_built_or_qualified"]
+    assert len(environment["floating_inputs_requiring_freeze"]) == 6
+    assert "immutable final image ID" in environment["required_build_record"]
     rows.reverse()
     with pytest.raises(ValueError, match="ordered"):
         module.audit(tmp_path, rows)
