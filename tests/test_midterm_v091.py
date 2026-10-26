@@ -3,6 +3,7 @@ import importlib.util
 import json
 import shutil
 from pathlib import Path
+
 import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -67,7 +68,10 @@ def test_v091_projection_preserves_prior_results(monkeypatch):
     monkeypatch.syspath_prepend(str(ROOT / "scripts"))
     import build_midterm_v091 as b
 
-    data = b.build("fixture", lambda p: (ROOT / p).read_bytes())
+    snapshot = "reports/vllm-hust-midterm-20261019/中期测试报告-v091.md"
+    data = b.build(
+        "fixture", lambda p: (ROOT / (snapshot if p == b.REPORT else p)).read_bytes()
+    )
     old = json.loads((ROOT / "website-publication/data/midterm-v090.json").read_text())
     for key in (
         "wholechain_reference",

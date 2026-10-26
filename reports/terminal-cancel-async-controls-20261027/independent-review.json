@@ -1,0 +1,56 @@
+{
+  "schema": "terminal-controls-independent-review/v1",
+  "status": "reviewed_original_controls_passed_no_model",
+  "task": "cancel-async-tasks",
+  "task_revision": "7131e4375048a0e408a8fb404b5f499d726b695b",
+  "platform": "linux/arm64",
+  "harbor_version": "0.24.0",
+  "controls": [
+    {
+      "role": "nop",
+      "tests": 6,
+      "passed": 0,
+      "failed": 6,
+      "missing": 0,
+      "reward": 0.0,
+      "model_calls": 0,
+      "released": true
+    },
+    {
+      "role": "oracle",
+      "tests": 6,
+      "passed": 6,
+      "failed": 0,
+      "missing": 0,
+      "reward": 1.0,
+      "model_calls": 0,
+      "released": true
+    }
+  ],
+  "original_timing_thresholds_unchanged": true,
+  "cpu_limit": 1,
+  "memory_bytes": 2147483648,
+  "cpuset": "24-31",
+  "network_mtu": 1400,
+  "distinct_serial_containers": true,
+  "readonly_transport_and_writable_verifier_logs_verified": true,
+  "sealed_files_verified": 68,
+  "public_summary_sha256": "362f7dfd267a4ac3448abe90ccd6032c994ac37971d3ad879755a36e37de1401",
+  "seal_sha256": "2896d0c7343ced0803e794d0bf936426b3d20aaad4a177feff84b82b46eff6e9",
+  "independent_review_sha256": "4a5039a948109b5a0a7200d13c2486b5b59a0af4c137afb8d0675649c1ab2164",
+  "model_task_attempts": 0,
+  "model_calls": 0,
+  "full_dataset_acceptance": false,
+  "original_startup_failure": {
+    "reward": null,
+    "agent_execution": null,
+    "verifier": null,
+    "retained": true
+  },
+  "sealer_change": "Exact test_outputs.py:: prefix mapping only; original results unchanged.",
+  "notes": [
+    "Original test.sh line9 missing /root/.local/bin/env warning retained; PATH still locates uvx and original six tests executed.",
+    "Only this task control qualification; model contract/exact window remains separate."
+  ],
+  "no_reruns": true
+}
