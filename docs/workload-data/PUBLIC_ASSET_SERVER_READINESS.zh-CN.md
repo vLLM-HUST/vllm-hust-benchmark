@@ -1343,7 +1343,7 @@ python scripts/prepare_crosscodeeval_original_assets.py \
 入口使用发布方固定 Git blob API 获取原字节，以应对 raw GitHub 连接失败， 不接受第三方重构题集；网络/访问限额错误保留，不覆盖已有不匹配文件或 `.partial`。
 原始数据中的许可证须保留；作者代码的 Apache-2.0 不能替代各仓库数据自己的许可。
 
-后续按作者默认 UniXCoder 检索设置、四种语言各原始前3条开展原生验证；保留原 prompt、crossfile_context、groundtruth、right_context 和
+已按作者默认 UniXCoder 检索设置、四种语言各原始前3条开展原生验证；保留原 prompt、crossfile_context、groundtruth、right_context 和
 metadata，原答案不进入模型输入。 优先采用作者 vLLM 入口及推荐 StarCoder2-3B，而非为聊天模型重构代码补全任务。
 原生默认预算为16,384上下文、12,800跨文件、50生成token、temperature=0.2、top_p=0.95。 另有作者 OpenAI API 入口，但其按模型名选择
 tiktoken，不能伪装 GPT 名称以绕过检查。 完整依赖同时涉及 CUDA/vLLM/DeepSpeed，不能无审查地安装到现有 Ascend 服务环境。
@@ -1369,8 +1369,27 @@ for record in iter_workload("CROSSCODEEVAL", data_root=Path("/external/crosscode
 
 作者评分 Python 原字节不变；隔离 CPU 客户端通过 `pip check`，四种语言自参考夹具检查通过， 不等于原题评分通过。当前使用
 `tree-sitter==0.21.3`、`tree-sitter-languages==1.10.2` 的兼容打包解析库，不声称复现作者未固定版本的 grammar clone/build
-或论文环境。 客户端选择性链接既有 vendor Torch，链接并非操作系统只读；禁止在此升级 vendor Torch。 推荐模型8份原始权重/分词文件（约12.1GB存储）已校验，但未做 NPU
-部署/生成验证；官方站点 网络失败保留，显式镜像仍核对固定发布版本和原始文件身份。尚缺原题 NPU 生成、完整作者评分 和成功 CI 工件终审，清单不打勾。
+或论文环境。 客户端选择性链接既有 vendor Torch，链接并非操作系统只读；禁止在此升级 vendor Torch。
+推荐模型8份原始权重/分词文件（约12.1GB存储）已校验，StarCoder2-3B 已在单 NPU 上以 BF16、TP=1
+完成四种语言各原始前3条生成及完整作者评分。保留原生滑动窗口和作者预算，不把低分或空输出换题。 官方站点网络失败保留，显式镜像仍核对固定发布版本和原始文件身份。
+尚缺可复用的公共生成入口、完整环境交接和成功 CI 工件终审，清单不打勾；私人验证脚本不能替代公共交付。
+
+已有原生结果可单独复核评分，无需重跑模型。隔离评分环境的依赖见 `configs/workload-native/crosscodeeval-score-requirements.txt`；须保留兼容
+Torch，执行 `pip check`， 不能把完整作者 requirements 无审查地装入现有 Ascend 服务环境。ARM64 验证使用 Python 3.12.13、 Torch
+2.10.0+cpu 和打包的解析库；该 Torch 标签不意味着先前原生推理使用 CPU。
+
+```bash
+python scripts/score_crosscodeeval_original.py \
+  --author-root /external/crosscodeeval/source \
+  --data-archive /external/crosscodeeval/crosscodeeval_data.tar.xz \
+  --run-root /external/crosscodeeval/native-run \
+  --ts-lib /external/scoring-env/lib/python3.12/site-packages/tree_sitter_languages/languages.so \
+  --output /external/crosscodeeval/fresh-score-output --workers 2
+```
+
+入口核对全部固定作者源码和原始归档，以及原生运行回执、预测文件摘要、原始行位置和完整原字段。 仅限制作者 CPU pool
+的工作进程数，不改指标公式。输出目录必须全新，原始预测、原始评分和回执不覆盖； 输出含原任务及预测，须留在服务器私有位置，不能提交仓库。当前入口接受已审计的四语言原生运行回执布局，
+不是任意第三方预测格式的转换器，也不会调用模型补齐缺失样本。
 
 ## XLAM_TOOL 获取前置条件核查
 
