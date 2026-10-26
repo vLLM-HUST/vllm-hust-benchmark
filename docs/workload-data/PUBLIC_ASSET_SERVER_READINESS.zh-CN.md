@@ -1,5 +1,18 @@
 # 公开原始资产：服务器准备与任务验证缺口
 
+## MMMU原始数据准备（原生交付未完成）
+
+新增固定官方`MMMU/MMMU`版本`876ce5cb130f7f7e290ce4d9984357737d4db5cf`的完整92个Parquet分片清单，30学科、3655862232字节；Agriculture与Art_Theory各有两个test分片，不漏第二片。仓库仅存路径、容量与发布方SHA256，不存原题/图像/答案。此版本与旧登记版本不同，尚不覆盖旧适配身份或冒充消费验证。
+
+```bash
+python scripts/prepare_mmmu_original_assets.py --output /external/mmmu-original
+python scripts/prepare_mmmu_original_assets.py --output /external/mmmu-original --execute
+python scripts/prepare_mmmu_original_assets.py --output /external/mmmu-original --execute --resume
+python scripts/prepare_mmmu_original_assets.py --output /external/mmmu-original --verify-only
+```
+
+默认只规划、不创建目录；显式执行才获取官方原文件，逐文件核对字节数与SHA256。已有匹配准备记录可显式恢复；同名异内容报错、不覆盖，失败保留。输出位于`data/<原学科>/<原分片>`。准备不是模型推理或评分，仍不打来源总勾。后续必须保留多图、原题/选项及答案隔离，并接官方评分；不照搬旧LLaVA示例对多图随机猜答案的路径，不为现有模型删图或改题。
+
 ## ChartQA视觉原生链路（固定原测试抽样交付完成）
 
 2026-10-26恢复核验：[最终回执](validation/chartqa-native-delivery-20261026.json)。已复用原0/1/2并新增原1250/1251/1252，两个类别共6道原题完成NPU视觉推理、未修改的原评分及公共离线复核；分批评分66.67%和100%，不作为完整2500题准确率或性能结论。CI轮子44个安装文件逐字节核验、2500条原字段/图像字节与索引、公共入口到固定研究消费6条往返均通过；观测和科研分析没有迁入。
