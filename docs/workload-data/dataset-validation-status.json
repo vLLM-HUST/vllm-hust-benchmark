@@ -1220,6 +1220,9 @@
     },
     "BIGCODEBENCH": {
       "historical_generation_reuse_preparer": "scripts/prepare_bigcodebench_official_samples.py",
+      "official_source_preparer": "scripts/prepare_jsonschemabench_author_source.py --source bigcodebench",
+      "official_source_identity_manifest": "configs/workload-native/bigcodebench-author-source.json",
+      "official_source_preparer_validation": "20261026 public prepare and independent verify completed for32 original publisher files/109939bytes, Git blob/size/SHA256 all equal; no dataset/model acquisition or author code execution. Static auditor independently accepted the same32files. Not native scoring or image qualification.",
       "scoring_asset_static_preflight": "scripts/audit_bigcodebench_scoring_assets.py",
       "official_sandbox_command_plan": "scripts/prepare_bigcodebench_scoring_plan.py",
       "native_container_scoring_entry": "scripts/run_bigcodebench_container_scoring.py",

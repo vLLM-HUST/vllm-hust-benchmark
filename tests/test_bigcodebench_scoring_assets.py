@@ -3,6 +3,7 @@
 import hashlib
 import importlib.util
 import json
+import subprocess
 from pathlib import Path
 import sys
 from types import ModuleType, SimpleNamespace
@@ -44,6 +45,54 @@ def test_bigcodebench_acquisition_manifest_matches_auditor_identities():
     assert len(pins["files"]) == 32
     assert sum(item["bytes"] for item in pins["files"]) == 109939
     assert all(len(item["git_blob"]) == 40 for item in pins["files"])
+
+
+def test_public_bigcodebench_source_plan_needs_no_runtime_dependencies(tmp_path):
+    output = tmp_path / "not-created"
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(SCRIPTS / "prepare_jsonschemabench_author_source.py"),
+            "--source",
+            "bigcodebench",
+            "--author-root",
+            str(output),
+            "--action",
+            "plan",
+        ],
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    receipt = json.loads(result.stdout)
+    assert receipt["source_id"] == "BIGCODEBENCH"
+    assert receipt["files"] == 32 and receipt["bytes"] == 109939
+    assert receipt["status"] == "PLAN_ONLY_NO_DOWNLOAD"
+    assert not receipt["source_checkbox_eligible"]
+    assert not output.exists()
+
+
+def test_public_bigcodebench_source_rejects_insufficient_budget_before_write(tmp_path):
+    output = tmp_path / "not-created"
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(SCRIPTS / "prepare_jsonschemabench_author_source.py"),
+            "--source",
+            "bigcodebench",
+            "--author-root",
+            str(output),
+            "--action",
+            "prepare",
+            "--max-bytes",
+            "1",
+        ],
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 2
+    assert "109939" in result.stderr
+    assert not output.exists()
 
 
 def test_relative_import_requires_review():
