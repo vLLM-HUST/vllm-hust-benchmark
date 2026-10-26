@@ -21,6 +21,16 @@
     {"source_id": "PAIO-SEMANTIC-SIMILAR-5000", "asset_group": "enterprise-private-requests", "related_workload_ids": [], "boundary": "Semantic similarity is not exact-prefix or KV reuse; preserve original private requests without rewriting."}
   ],
   "source_entrypoints": {
+    "CHARTQA": [
+      {"role": "prepare_assets", "path": "scripts/prepare_chartqa_native_toolkit.py"},
+      {"role": "prepare_assets", "path": "scripts/prepare_chartqa_original_view.py"},
+      {"role": "prepare_assets", "path": "scripts/prepare_chartqa_native_runtime.py"},
+      {"role": "original_profile", "path": "scripts/run_chartqa_original.py"},
+      {"role": "saved_output_reuse_audit", "path": "scripts/verify_chartqa_original_saved.py"}
+    ],
+    "MMMU": [
+      {"role": "prepare_assets", "path": "scripts/prepare_mmmu_original_assets.py"}
+    ],
     "TULU3": [
       {"role":"prepare_assets","path":"scripts/prepare_reused_research_assets.py","scope":"Pinned six publisher Parquet files; explicit mirror, checksum verification and component licensing boundaries. Acquisition is not native delivery."},
       {"role":"data_reading_only","path":"scripts/prepare_reused_source_records.py","scope":"Original messages/ID/per-row mixture source, no synthesized prompts or research features; full original-file references and index."},

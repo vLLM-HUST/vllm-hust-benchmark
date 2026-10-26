@@ -1237,8 +1237,27 @@ def test_original_image_processing_is_not_native_multimodal_execution():
         assert task["tensor_shapes"]["pixel_values"][0] > 0
         assert task["tensor_shapes"]["image_grid_thw"] == [1, 3]
     ledger = json.loads((DOCS / "dataset-validation-status.json").read_text("utf-8"))
-    assert not ledger["delivery_inventory"]["CHARTQA"]["checked"]
-    assert ledger["delivery_inventory"]["CHARTQA"]["original_processor_preflight"]
+    current = ledger["delivery_inventory"]["CHARTQA"]
+    assert current["original_processor_preflight"]
+    # Frozen CPU preparation is not runtime proof. Current delivery must have
+    # independent real native generation, original scoring and consumer evidence.
+    assert current["checked"]
+    delivery = json.loads((ROOT / current["delivery_receipt"]).read_text("utf-8"))
+    assert delivery["source_checkbox_eligible"]
+    native = delivery["native_validation"]
+    assert [batch["positions"] for batch in native["batches"]] == [
+        [0, 1, 2],
+        [1250, 1251, 1252],
+    ]
+    assert all(batch["stop"] == 3 for batch in native["batches"])
+    assert native["both_saved_batches_public_verifier_passed"]
+    assert native["original_encoder_and_scorer_unmodified"]
+    assert native["verification_new_model_calls"] == native["paid_judge_calls"] == 0
+    assert not native["full_test_inference_or_performance_claim"]
+    assert (
+        delivery["provider_and_research"]["public_and_fixed_research_roundtrips"] == 6
+    )
+    assert delivery["provider_and_research"]["full_original_index_rows"] == 2500
 
 
 def test_new_installed_research_handoff_is_not_published_lock_or_native_run():
