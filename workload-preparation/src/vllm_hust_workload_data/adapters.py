@@ -13,6 +13,11 @@ from .registry import adapter_spec, source_spec
 
 def iter_source_rows(path, spec):
     """Use one source view for reading, binding and index resolution."""
+    if spec["mapping"] == "crosscodeeval_original_archive":
+        from .crosscodeeval import original_rows
+
+        yield from original_rows(path)
+        return
     if (
         spec["mapping"] == "source-mapping/v1"
         and spec["contract"]["source"]["source_id"] == "FLORES200"

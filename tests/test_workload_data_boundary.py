@@ -5,6 +5,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1] / "workload-preparation"
 DATA_MODULES = {
+    "crosscodeeval",  # Original archive/profile/task relations only; no analysis.
     "flores200",  # Original parallel text and metadata bindings, no scoring.
     "narrativeqa",  # Pinned original table relations only, no observation/scoring.
     "multinews",  # Original paired documents/references, no research analysis.
@@ -38,6 +39,25 @@ DATA_MODULES = {
 def test_only_data_modules_are_included():
     actual = {path.stem for path in (ROOT / "src/vllm_hust_workload_data").glob("*.py")}
     assert actual == DATA_MODULES
+
+
+def test_crosscodeeval_archive_reader_remains_data_only():
+    import ast
+
+    tree = ast.parse(
+        (ROOT / "src/vllm_hust_workload_data/crosscodeeval.py").read_text("utf-8")
+    )
+    imports = set()
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            imports.update(item.name for item in node.names)
+        elif isinstance(node, ast.ImportFrom):
+            imports.add(node.module)
+    assert imports == {"copy", "json", "pathlib", "tarfile"}
+    assert not any(
+        isinstance(node, ast.Attribute) and node.attr in {"extract", "extractall"}
+        for node in ast.walk(tree)
+    )
 
 
 def test_no_observation_dependencies_or_hooks():

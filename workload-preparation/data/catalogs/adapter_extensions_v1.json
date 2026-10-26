@@ -2,6 +2,17 @@
   "version": "adapter-extensions/v1",
   "boundary": "Field contracts from publisher metadata/docs. No real source payload downloaded or full adapter validation claimed.",
   "adapters": {
+    "CROSSCODEEVAL": {
+      "kind": "task_dataset",
+      "mapping": "crosscodeeval_original_archive",
+      "input_fields": ["prompt", "crossfile_context"],
+      "required_fields": ["prompt", "groundtruth", "right_context", "metadata", "source_task_id", "source_archive_member", "source_member_row_index", "source_language", "source_profile"],
+      "outcome_fields": ["groundtruth", "right_context"],
+      "annotation_fields": ["metadata", "source_task_id", "source_archive_member", "source_member_row_index", "source_language", "source_profile"],
+      "id_field": "source_task_id",
+      "requirements": ["Original author archive/member order and all original fields; reference/right context excluded from left-only native generation input", "Original task ID may repeat across retrieval profiles; member/profile and global source row distinguish views, not independent tasks", "Oracle profiles contain publisher reference-assisted retrieval and must not be mixed with blind rg1 evaluation", "Native author prompt construction, model execution and grading are separate; this reader does not fabricate requests or rerun retrieval"],
+      "status": "ORIGINAL_ARCHIVE_READER_IMPLEMENTED_REAL_ROW_AND_NATIVE_CLOSURE_PENDING"
+    },
     "MBPP": {
       "kind": "task_dataset",
       "mapping": "native_fields",

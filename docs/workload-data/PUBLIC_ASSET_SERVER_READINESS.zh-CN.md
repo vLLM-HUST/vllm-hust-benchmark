@@ -1343,11 +1343,34 @@ python scripts/prepare_crosscodeeval_original_assets.py \
 入口使用发布方固定 Git blob API 获取原字节，以应对 raw GitHub 连接失败， 不接受第三方重构题集；网络/访问限额错误保留，不覆盖已有不匹配文件或 `.partial`。
 原始数据中的许可证须保留；作者代码的 Apache-2.0 不能替代各仓库数据自己的许可。
 
-后续按作者默认 UniXCoder 检索设置、四种语言各原始前3条开展原生验证； 保留原 prompt、crossfile_context、groundtruth、right_context 和
-metadata， 原答案不能进入模型输入。使用作者 API 提示构造与评分代码；作者 OpenAI 协议默认
-16,384上下文预算、12,800跨文件预算、50生成token、temperature=0.2、top_p=0.95。 这里描述原配置，不承诺替换模型后可不经检查直接运行：原 API
-入口按模型名选择 tiktoken， 本地模型路由/分词兼容与原树解析器环境仍需实测；不能伪装成 GPT 模型或自行改掉评分。 作者完整依赖同时涉及
-CUDA/vLLM/DeepSpeed，不能无审查地安装到现有 Ascend 服务环境。 当前仍缺逐行适配、独立原生环境、生成/作者评分及公共/研究消费；清单不打勾。
+后续按作者默认 UniXCoder 检索设置、四种语言各原始前3条开展原生验证；保留原 prompt、crossfile_context、groundtruth、right_context 和
+metadata，原答案不进入模型输入。 优先采用作者 vLLM 入口及推荐 StarCoder2-3B，而非为聊天模型重构代码补全任务。
+原生默认预算为16,384上下文、12,800跨文件、50生成token、temperature=0.2、top_p=0.95。 另有作者 OpenAI API 入口，但其按模型名选择
+tiktoken，不能伪装 GPT 名称以绕过检查。 完整依赖同时涉及 CUDA/vLLM/DeepSpeed，不能无审查地安装到现有 Ascend 服务环境。
+
+归档读取适配已实现：保留全28个原配置、69,494配置行及原任务 ID，不把配置视图当独立题。 全部原始输入、参考、metadata、成员和行顺序已逐行比较，完整索引已准备；四种语言默认
+检索配置的原始前3条（共12条）通过候选安装包与固定研究消费者核验。 这不是实际模型生成或原题评分，候选包也尚非这次改动的成功 CI 工件。
+
+```python
+from pathlib import Path
+from vllm_hust_workload_data import iter_workload
+
+for record in iter_workload("CROSSCODEEVAL", data_root=Path("/external/crosscodeeval")):
+    profile = record.replay["annotations"]["source_profile"]
+    if profile != "line_completion_rg1_unixcoder_cosine_sim":
+        continue
+    original_inputs = record.task["input"]
+    references = record.outcome_record()  # Never merge into model inputs.
+```
+
+`data_root` 指压缩包所在目录；读取保持原归档顺序，不把代码重写为问答或伪造聊天请求。 `metadata.task_id`
+在多个检索配置中可能重复，成员路径和配置名负责区分视图；oracle 配置含 参考辅助检索信息，不能混入默认 rg1 的盲测成绩。默认左侧补全不使用原始 `right_context`，
+但它仍在隔离的参考侧完整保留，可供有明确原生需求的其他配置读取。
+
+作者评分 Python 原字节不变；隔离 CPU 客户端通过 `pip check`，四种语言自参考夹具检查通过， 不等于原题评分通过。当前使用
+`tree-sitter==0.21.3`、`tree-sitter-languages==1.10.2` 的兼容打包解析库，不声称复现作者未固定版本的 grammar clone/build
+或论文环境。 客户端选择性链接既有 vendor Torch，链接并非操作系统只读；禁止在此升级 vendor Torch。 推荐模型8份原始权重/分词文件（约12.1GB存储）已校验，但未做 NPU
+部署/生成验证；官方站点 网络失败保留，显式镜像仍核对固定发布版本和原始文件身份。尚缺原题 NPU 生成、完整作者评分 和成功 CI 工件终审，清单不打勾。
 
 ## XLAM_TOOL 获取前置条件核查
 
