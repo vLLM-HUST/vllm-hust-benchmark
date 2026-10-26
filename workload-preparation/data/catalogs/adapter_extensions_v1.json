@@ -800,6 +800,17 @@
         "kind": "publisher_readme_schema",
         "url": "https://github.com/Azure/AzurePublicDataset/blob/207bed67dd10090b28ad4f745b2cfd41a11aace4/AzureLLMInferenceDataset2023.md"
       }
+    },
+    "SCHEMASTORE": {
+      "kind": "task_dataset",
+      "mapping": "schemastore_original_archive",
+      "input_fields": ["schema"],
+      "required_fields": ["schema", "schema_path"],
+      "outcome_fields": ["positive_examples", "negative_examples"],
+      "annotation_fields": ["schema_path"],
+      "id_field": "schema_path",
+      "requirements": ["Original schema asset and original fixture references, not a fabricated prompt benchmark"],
+      "normalization": {}
     }
   }
 }

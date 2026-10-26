@@ -13,6 +13,11 @@ from .registry import adapter_spec, source_spec
 
 def iter_source_rows(path, spec):
     """Use one source view for reading, binding and index resolution."""
+    if spec["mapping"] == "schemastore_original_archive":
+        from .schemastore import original_schema_rows
+
+        yield from original_schema_rows(path)
+        return
     if spec.get("original_relation_source") is not None:
         from .narrativeqa import joined_rows
 
@@ -103,6 +108,10 @@ def adapt_row(
     source_id: str, row: dict, *, source: dict, spec: dict, index: int
 ) -> WorkloadRecord:
     """Projection is explicit/allowlisted; outcome fields never become task inputs."""
+    if source_id == "SCHEMASTORE" and spec["mapping"] == "schemastore_original_archive":
+        from .schemastore import adapt_schema
+
+        return adapt_schema(row, source=source, index=index)
     if spec["mapping"] == "beir_original_assets":
         from .beir import adapt_asset
 

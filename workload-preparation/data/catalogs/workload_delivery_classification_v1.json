@@ -453,6 +453,12 @@
       {"role": "prepare_assets", "path": "scripts/prepare_narrativeqa_original_metric.py", "scope": "Pinned AllenAI metric source/license; isolated py-rouge and declared WordNet/NLTK resources, not dataset-author code."},
       {"role": "original_profile", "path": "scripts/run_narrativeqa_original_summary.py", "scope": "Original complete summary/question, both original references; declared9B chat adapter and256-token budget, pinned AllenAI scoring. Fixed3 test tasks verified, not full-test/full-story or author-model reproduction."},
       {"role": "saved_output_reuse_audit", "path": "scripts/run_narrativeqa_original_summary.py", "scope": "Use --reuse with separate fresh output for offline original prompt/reference/response/scoring verification; no new model calls."}
+    ],
+    "SCHEMASTORE": [
+      {"role": "prepare_assets", "path": "scripts/prepare_schemastore_original_assets.py", "scope": "Pinned original publisher archive, explicit external acquisition or verified existing archive reuse; no fabricated requests."},
+      {"role": "prepare_assets", "path": "scripts/prepare_schemastore_runtime.py", "scope": "Private pinned ARM64 Node runtime, no global installation or model-service changes."},
+      {"role": "original_profile", "path": "scripts/run_schemastore_original_validation.py", "scope": "Unmodified official cli.js check over original schema collection/fixtures; cryptographic source-tree checks. Not an LLM generation or performance benchmark."},
+      {"role": "data_reading_only", "path": "workload-preparation/src/vllm_hust_workload_data/schemastore.py", "scope": "Original schema objects and separately bound positive/negative fixture bytes, original paths and hashes preserved, never a ready chat request."}
     ]
   },
   "classes": [
