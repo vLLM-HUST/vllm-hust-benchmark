@@ -2,11 +2,17 @@
 
 ### LAB-Bench官方执行环境（准备中，未交付）
 
-- [x] [官方固定版本](https://github.com/Future-House/LAB-Bench/tree/998a8e0a40cf116c80e1b0e7a805ebb5fb9fa838)的11份运行代码/说明/依赖文件在服务器按大小和Git blob校验；未下载任务数据，未调用模型。
+- [x] [官方固定版本](https://github.com/Future-House/LAB-Bench/tree/998a8e0a40cf116c80e1b0e7a805ebb5fb9fa838)的11份运行代码/说明/依赖文件在服务器按大小和Git
+  blob校验；未下载任务数据，未调用模型。
 - [x] 确认原生入口为`labbench.Evaluator(Eval.<category>).score_agent(agent_fn)`；按原选项精确比较，保留“不确定”选项，报告accuracy/precision/coverage。八个官方类别须分别保留，不能只做纯文本类别就称全部完成。
-- [x] 官方固定归档已完整取得，553文件/283413040字节逐文件大小及Git blob一致，原任务和图片保持原样；清点公开多选题1967条、31子集（更正此前32的计数）。按原`uv.lock`的独立环境安装exit0，不修改推理服务或作者锁文件。
+- [x] 官方固定归档已完整取得，553文件/283413040字节逐文件大小及Git
+  blob一致，原任务和图片保持原样；清点公开多选题1967条、31子集（更正此前32的计数）。按原`uv.lock`的独立环境安装exit0，不修改推理服务或作者锁文件。
 - [x] 官方环境导入、全部1967条原任务加载和93条固定样本的原生输入构造通过，图表原图可读取；沿用作者对ProtocolQA/SuppQA的上下文拼接和原选项随机化，不把question单字段冒充完整输入。ARM客户端torch无CUDA，推理只走NPU服务。
 - [ ] 各类别固定抽样的官方推理/评分及公共/研究接入核验。输入构造成功不算模型执行；模型及预算仍须明确记录，不宣称复现官方模型质量。
+
+公共原生入口：`scripts/run_labbench_original.py --source-root <原仓库解包目录> --archive <固定官方zip> --output <新外部结果目录> --endpoint http://127.0.0.1:19466/v1 --model <本地NPU模型别名> --max-tokens <明确预算> --per-subset 3`；全量改为`--full`，可用`--categories`分批运行，不覆盖已有结果。运行于作者`uv.lock`的独立环境，程序先核验固定归档和全部553原文件，再复用作者OpenAI
+agent、CoT模板、图片编码、选择解析及Evaluator评分。固定随机种子只保证选项排列可复现，不改原题；调用请求/响应、作者task
+buffer和评分结果只保存在外部私有目录。当前仅完成夹具测试和服务器帮助入口检查，尚不宣称该运行入口已完成真实推理。
 
 ### OpenThoughts3原对话语料（尚未交付）
 

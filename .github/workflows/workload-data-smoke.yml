@@ -35,6 +35,8 @@ on:
       - 'scripts/prepare_schemastore_runtime.py'
       - 'scripts/prepare_schemastore_original_assets.py'
       - 'scripts/run_schemastore_original_validation.py'
+      - 'scripts/run_labbench_original.py'
+      - 'tests/test_labbench_original_runner.py'
       - 'scripts/verify_longbench_v2_original_saved.py'
       - 'scripts/run_dolly_original_samples.py'
       - 'scripts/run_dolly_original_categories.py'
@@ -239,7 +241,7 @@ jobs:
       - name: OASST runner CPU contract only
         run: python -m pytest -q tests/test_oasst_original_runner.py tests/test_reused_source_records.py tests/test_infinitebench_code_preflight.py tests/test_infinitebench_original_runner.py
       - name: Historical dialogue and saved QReCC score software fixtures only
-        run: python -m pytest -q tests/test_historical_dialogue_prefix.py tests/test_historical_dialogue_runner.py tests/test_historical_dialogue_native_receipt.py tests/test_qrecc_original_qa_score.py
+        run: python -m pytest -q tests/test_historical_dialogue_prefix.py tests/test_historical_dialogue_runner.py tests/test_historical_dialogue_native_receipt.py tests/test_qrecc_original_qa_score.py tests/test_labbench_original_runner.py
       - name: MBPP original preparation and mocked execution controls only
         run: python -m pytest -q tests/test_mbpp_original_assets.py tests/test_mbpp_original_generation.py tests/test_mbpp_scoring_preparation.py tests/test_mbpp_isolated_scoring.py tests/test_mbpp_native_delivery_receipt.py
       - name: Serving trace and ToolACE preparation software fixtures only
