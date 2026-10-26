@@ -1,5 +1,25 @@
 # 公开原始资产：服务器准备与任务验证缺口
 
+## TULU3 原始混合训练对话（接入与验证进行中）
+
+固定AI2发布的`allenai/tulu-3-sft-mixture`版本`b14afda60f1bbebe55d5d2fa1e4df5042f97f8be`，6个原Parquet共1412954868字节，SHA256/大小来自该固定版本的发布方LFS元数据，通过显式镜像取得原字节并校验。完整原记录数为939343；发布页正文939344与元数据/原文件实测差1，不构造补行或删行“对齐”。保留每行`id`、`messages`及`source`，不把混合来源视为独立原始采集，也不丢弃成分来源。混合许可为ODC-BY，各成分另有条款、含非商业限制；不提供原数据再分发或统一商业许可承诺。
+
+```bash
+python scripts/prepare_reused_research_assets.py TULU3 --mode plan
+python scripts/prepare_reused_research_assets.py TULU3 --mode download \
+  --max-bytes 1500000000 --hf-endpoint https://hf-mirror.com --data-root /private/tulu3
+python scripts/prepare_reused_source_records.py TULU3 --data-root /private/tulu3 \
+  --output /private/tulu3-full-prepared
+python scripts/run_historical_dialogue_original.py TULU3 --prepared /private/tulu3-full-prepared \
+  --data-root /private/tulu3 --output /private/tulu3-native-first3 \
+  --model workload-qwen35-27b-128k-nonthinking --max-tokens 512 --context-capacity 131072 --count 3
+```
+
+运行依赖已有公共数据包及其Parquet数据可选依赖，使用独立Python客户端访问本地NPU服务；不用在客户端加载权重。以上为训练对话原始历史的teacher-forced续接：每个选定对话中的全部原assistant位置都生成，原目标及未来轮不进入该请求，原历史不替换为新生成回答；不新增system提示。512是声明的操作者生成预算，不声称来源提供了原API预算、任务成功oracle或统一官方质量分。当前选用既有Qwen3.5-27B
+BF16双Ascend NPU验证通用指令续接能力，不是Tulu3训练或论文模型复现。
+
+服务器已完成6文件校验与全939343条引用准备，每原分片前3条、全部assistant位置的原生队列已正常返回。示例命令读取全源前3条；逐分片验证先用准备入口的`--files data/train-00000-of-00006.parquet --limit 3`绑定指定分片，再将其输出传给运行入口，其他分片依次对应，不按答案或结果挑选。独立原生结果核验、成功CI工件和固定研究消费尚未完成，不能以软件夹具替代；来源清单暂不勾选。
+
 ## Multi-News 原成对多文档摘要（原生抽样交付已验证）
 
 使用[作者发布的 Multi-News](https://huggingface.co/datasets/alexfabbri/multi_news)，保留原六个成对文件及作者 loader。

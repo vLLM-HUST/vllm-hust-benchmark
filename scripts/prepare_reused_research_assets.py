@@ -1,4 +1,4 @@
-"""Reuse pinned original research acquisition; never observation or native scoring.
+"""Acquire pinned original research or publisher-profile assets, never scoring.
 
 Default is an offline plan. Use external server storage. Gated sources must be
 obtained with the publisher's authorized client, then verified here; no auto-login.
@@ -76,8 +76,13 @@ def github_blob_transport(source, item, *, metadata_loader=github_json):
 
 def selection(source_id, files=None):
     source = json.loads(CATALOG.read_text("utf-8"))["sources"].get(source_id)
-    if not source or not source.get("historical_acquisition_reuse"):
-        raise ValueError("source requires an audited historical acquisition profile")
+    if not source or not (
+        source.get("historical_acquisition_reuse")
+        or source.get("publisher_metadata_acquisition")
+    ):
+        raise ValueError(
+            "source requires an audited historical or pinned publisher acquisition profile"
+        )
     registered = {
         item["path"]: item for item in source["files"] if item["role"] == "raw_source"
     }
@@ -119,7 +124,8 @@ def main():
         "status": "OFFLINE_ORIGINAL_ASSET_PLAN",
         "files": selected,
         "bytes": sum(item["bytes"] for item in selected),
-        "historical_acquisition_reuse": source["historical_acquisition_reuse"],
+        "historical_acquisition_reuse": source.get("historical_acquisition_reuse"),
+        "publisher_metadata_acquisition": source.get("publisher_metadata_acquisition"),
         "full_registered_selection": len(selected) == len(source["files"]),
         "model_calls": 0,
         "source_checkbox_eligible": False,

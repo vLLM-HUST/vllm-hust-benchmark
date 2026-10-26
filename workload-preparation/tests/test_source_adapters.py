@@ -366,3 +366,26 @@ def test_invalid_limits_rejected_before_asset_access(tmp_path, limit):
 def test_nested_nonfinite_json_request_is_rejected():
     with pytest.raises(ValueError, match="invalid request body"):
         adapt("PAIO-JSON-500", {"request_body": '{"messages": [], "temperature": NaN}'})
+
+
+def test_tulu3_preserves_original_messages_and_component_provenance():
+    row = {
+        "id": "original-fixture-id",
+        "messages": [
+            {"role": "user", "content": "unchanged question"},
+            {"role": "assistant", "content": "original reference"},
+        ],
+        "source": "original-component-fixture",
+    }
+    original = deepcopy(row)
+    record = adapt("TULU3", row)
+    assert row == original
+    assert record.task["input"]["messages"] == original["messages"]
+    assert record.task["task_id"] == row["id"]
+    assert record.replay["annotations"]["source"] == row["source"]
+    assert record.replay["annotations"]["id"] == row["id"]
+    assert record.runtime["kind"] == "historical_dialogue"
+    assert record.outcome is None
+    for missing in ("id", "messages", "source"):
+        with pytest.raises(ValueError):
+            adapt("TULU3", {key: value for key, value in row.items() if key != missing})

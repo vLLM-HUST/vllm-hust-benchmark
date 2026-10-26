@@ -10,6 +10,7 @@ HISTORICAL_DIALOGUE_FIELDS = {
     "WILDCHAT": "conversation",
     "ULTRACHAT": "messages",
     "LMSYS_CHAT": "conversation",
+    "TULU3": "messages",
 }
 
 

@@ -272,6 +272,16 @@ def adapt_row(
         not isinstance(row["conversations"], list) or not row["conversations"]
     ):
         raise ValueError("TOOLACE requires its original dialogue")
+    if source_id == "TULU3" and (
+        set(row) != {"id", "messages", "source"}
+        or not isinstance(row["id"], str)
+        or not isinstance(row["source"], str)
+        or not isinstance(row["messages"], list)
+        or not row["messages"]
+    ):
+        raise ValueError(
+            "TULU3 requires original ID, messages and per-row mixture source"
+        )
     kind = spec["kind"]
     if source_id == "BFCL":
         questions, functions = row["question"], row["function"]

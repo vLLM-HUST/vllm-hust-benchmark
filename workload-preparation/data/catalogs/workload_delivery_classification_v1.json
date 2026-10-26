@@ -21,6 +21,11 @@
     {"source_id": "PAIO-SEMANTIC-SIMILAR-5000", "asset_group": "enterprise-private-requests", "related_workload_ids": [], "boundary": "Semantic similarity is not exact-prefix or KV reuse; preserve original private requests without rewriting."}
   ],
   "source_entrypoints": {
+    "TULU3": [
+      {"role":"prepare_assets","path":"scripts/prepare_reused_research_assets.py","scope":"Pinned six publisher Parquet files; explicit mirror, checksum verification and component licensing boundaries. Acquisition is not native delivery."},
+      {"role":"data_reading_only","path":"scripts/prepare_reused_source_records.py","scope":"Original messages/ID/per-row mixture source, no synthesized prompts or research features; full original-file references and index."},
+      {"role":"original_profile","path":"scripts/run_historical_dialogue_original.py","scope":"All original assistant positions of fixed original conversations; target/future replies excluded. Historical training corpus continuation, not a live task or official quality score; runtime validation is recorded separately, not established by this index."}
+    ],
     "LONGALPACA": [
       {"role": "original_profile", "path": "scripts/run_longalpaca_original.py", "scope": "Published constructed instruction corpus, not an independent quality benchmark. Preserve complete original instruction/optional input using existing model native chat formatting; no gold output or provenance in requests, no LongLoRA SFT/model reproduction claim."},
       {"role": "prepare_assets", "path": "scripts/prepare_reused_research_assets.py"},

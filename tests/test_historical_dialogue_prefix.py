@@ -18,7 +18,7 @@ from vllm_hust_workload_data.records import WorkloadRecord
 
 
 def record(source="WILDCHAT", messages=None):
-    field = "messages" if source == "ULTRACHAT" else "conversation"
+    field = "messages" if source in {"ULTRACHAT", "TULU3"} else "conversation"
     return WorkloadRecord(
         source={"source_id": source},
         task={"task_id": "fixture", "input": {field: messages}},
@@ -27,7 +27,7 @@ def record(source="WILDCHAT", messages=None):
     )
 
 
-@pytest.mark.parametrize("source", ["WILDCHAT", "ULTRACHAT", "LMSYS_CHAT"])
+@pytest.mark.parametrize("source", ["WILDCHAT", "ULTRACHAT", "LMSYS_CHAT", "TULU3"])
 def test_original_prefix_keeps_history_but_excludes_target_and_future(source):
     messages = [
         {"role": "system", "content": " original system "},

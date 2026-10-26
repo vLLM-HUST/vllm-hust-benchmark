@@ -99,6 +99,18 @@ def test_empty_or_unregistered_selections_never_fall_back_to_new_data():
         runner.selection("not-an-audited-source")
 
 
+def test_new_publisher_pinned_source_is_not_fake_historical_acquisition():
+    source, files = runner.selection("TULU3")
+    assert not source.get("historical_acquisition_reuse")
+    assert source["publisher_metadata_acquisition"]["date"] == "2026-10-26"
+    assert source["access"]["gated"] is False
+    assert len(files) == 6
+    assert sum(item["bytes"] for item in files) == 1412954868
+    assert all(
+        len(item["sha256"]) == 64 and item["role"] == "raw_source" for item in files
+    )
+
+
 @pytest.mark.parametrize("failure", [None, "host", "revision", "path", "size", "type"])
 def test_explicit_github_transport_preserves_pinned_file(failure):
     source, files = runner.selection("NATURALQUESTIONS")
