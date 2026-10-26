@@ -1298,6 +1298,10 @@ python scripts/run_mbpp_isolated_scoring.py \
 
 InfiniteBench 作者代码身份与静态前检命令：
 
+2026-10-26服务器32050阶段运行：固定6份作者文件与原`code_run.jsonl`（83354486字节）核验后，公共入口以原gpt4模板、声明的Qwen3.5-27B替代模型完成原0/1/2三题完整上下文推理与作者评分，输入分别89456/89530/89491
+token，保留作者5-token输出预算，进程exit0，分数0.0原样保留。既有XSum独立评分客户端加私有依赖overlay；原`evaluate.load("rouge")`在私有工作目录解析到已核SHA的原HF
+ROUGE模块，无作者代码改动或mock。其余原文件获取遇HTTP429，停止连续重试，来源总勾仍不勾。阶段证据补入[原复用审计](validation/research-acquisition-reuse-audit-20261025.json)。原请求/响应只留服务器，不复制研究观测。
+
 ```bash
 git clone https://github.com/OpenBMB/InfiniteBench.git /path/to/official-infinitebench
 git -C /path/to/official-infinitebench checkout --detach 51d9b37b0f1790ead936df2243abbf7f0420e439

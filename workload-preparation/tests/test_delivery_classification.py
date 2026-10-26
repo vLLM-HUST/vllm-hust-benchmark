@@ -97,7 +97,17 @@ def test_existing_deliveries_have_real_indexed_paths_without_runtime_claim():
     }
     assert assets["AZURE_LLM"]["entrypoints"][0]["role"] == "data_reading_only"
     assert assets["JSONSCHEMABENCH"]["entrypoints"]
-    assert ledger["JSONSCHEMABENCH"]["checked"] is False
+    # Index presence must stay non-evidentiary even after a source is actually
+    # delivered. Only the separate native receipt may establish that status.
+    schema_status = ledger["JSONSCHEMABENCH"]
+    if schema_status["checked"]:
+        receipt = json.loads(
+            (root / schema_status["delivery_receipt"]).read_text("utf-8")
+        )
+        closure = receipt["native_delivery_closure_20261026"]
+        assert closure["source_checkbox_eligible"]
+        assert closure["official_formatter_bench_and_evaluator_used"]
+        assert len(closure["protocols"]) == 11
 
 
 @pytest.mark.parametrize("failure", ["unknown", "path", "role", "duplicate"])
