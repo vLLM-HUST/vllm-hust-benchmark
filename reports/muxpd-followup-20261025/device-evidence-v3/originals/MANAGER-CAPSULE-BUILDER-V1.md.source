@@ -1,0 +1,86 @@
+# Typed Manager terminal evidence capsules
+
+`build_manager_capsule.py` is an offline, narrowly typed validator/builder for source98 Manager
+bridge success records. It requires the actual intentional SIGINT exit **130**. It never converts
+that exit to zero and never modifies the run. The frozen `build_capsule.py` remains unchanged at
+SHA-256 `e1c63334e87118c06e4ef5f75c2aa1dee3b4c8cda3a6a0602ce68f0a412e9fbd`; its ordinary successful
+terminal-run validator continues to require exit0. This new type rejects unrecognized schemas,
+failed or incomplete bridge gates, different exit codes, missing status/serving/rank receipts,
+controller escalation, survivors, and inventory changes. It does not reinterpret failed runs.
+
+The accepted controller schema is `muxpd-source98-controller-execution-v1`, mode `manager`, role
+`raw` or `group`, clean source `98eac12dc2595a8742a81b58e96b899fed905194`. The actual controller field
+is **`manager_runtime_binding`**, containing journal identity, plan ID, launch ID and Manager
+process identity. There is no assumed `actual_manager_binding` field.
+
+Validation checks the retained preparation and every original snapshot; actual root aliases
+`plan.json` = `manager-state/plan-source.json` and `engine-args.json` = saved Manager configuration;
+exact common helper CLI; identical prepared/launched source tables and Manager projection;
+launch-source `reviewed_plan`; and retained dry-run stdout. Manager journal `plan_id` hashes bundle
+registration in this installed implementation, so it is **not** treated as a hash of launch
+arguments/configuration. Configuration is bound by the separate chain above.
+
+The validator independently recomputes the journal binding digest and bundle-only plan ID, binds
+all effective component events to the exact launch and captured descendant PID/start identities,
+and requires all four worker startup readbacks to agree with the journal. The pinned existing
+startup parser is re-executed from SHA-pinned source using compile/exec, only on retained log
+bytes; it imports only stdlib, writes no bytecode cache and starts no service. Runtime-effectiveness must be false before, true live, and false stopped. Serving must
+retain the original P128 prompt and HTTP200, one length-finished choice, eight completion tokens.
+
+Cleanup requires exactly the controller's intentional SIGINT, no controller escalation, no
+recorded survivors, and no still-live captured PID/start identity or captured process group,
+including the separate API session. Both archived `npu-smi` snapshots must identify exactly four
+empty physical 910B2 devices1,2,3,6. No new `npu-smi`, service, network, or NPU operation is made.
+
+These are **bounded-shutdown/source-bridge** receipts. The source98 raw log contains native API
+abort shutdown, force-killing of one remaining process, EngineCore SIGTERM, and resource-tracker
+warnings for four semaphore and six shared-memory objects. Relevant lines are explicitly retained
+in `terminal.native_shutdown_log_caveats`, as well as the complete original process log. The
+Manager's recorded ten-second grace heuristic cannot establish internal worker signal choices.
+Every terminal and capsule receipt sets `graceful_internal_drain_proven=false`. No wheel/release,
+quality, universal determinism, or performance qualification is inferred.
+
+## Archive contract
+
+Manifest kind: `terminal-source98-manager-sigint-bridge`.
+Manifest schema: `muxpd-manager-evidence-capsule-manifest-v1`.
+Receipt schema: `muxpd-manager-evidence-capsule-receipt-v1`.
+Member entries retain the existing `member`, original absolute `path`, `type`, `bytes`, `sha256`,
+and symlink-target conventions. Existing terminal common fields remain available:
+`run_path`, `label`, `controller`, `started_at`, `finished_at`, `exit_code=130`,
+`controller_passed=true`, `source_repository`, `source_commit`, `source_status`.
+
+All original files, logs, compiler cache artifacts and producer bytes under the explicit run are
+hashed. The builder validates terminal state and the **complete** inventory before and after
+compression, verifies compressed archive SHA and every archived member, and writes a successful
+receipt only after those checks. Added files are rejected as well as deleted/changed files.
+Directories are append-only; build failures retain `BUILD-FAILED.json` and do not produce a success
+receipt. Original absolute-path custody checks are local; relocation needs an explicit mapping.
+
+```bash
+python build_manager_capsule.py validate --run RUN
+python build_manager_capsule.py freeze --run RUN --capsule-id SAFE-ID --output NEW-MANIFEST.json
+python build_manager_capsule.py build --manifest NEW-MANIFEST.json --output NEW-CAPSULE-DIRECTORY
+```
+
+Focused CPU validation: `test_manager_capsule.py`,14 tests; current log
+`manager-capsule-cpu-tests-v3.log`; Ruff log `manager-capsule-ruff-v2.log`. Fixtures preserve
+actual130 and demonstrate the original builder still rejects passing130; reject alternate exits,
+missing terminal gates, false/live/stopped status errors, escalation/survivors, still-live separate
+session, incomplete startup/serving, physical inventory changes, and added files before/after build.
+The initial test run's malformed-timestamp exception is preserved in
+`manager-capsule-cpu-tests-v1.log`; the validator now rejects that case explicitly with ValueError.
+
+The initial validator importlib attempt generated one new startup-helper bytecode cache in each
+terminal run. Those two generated files were preserved outside the runs with their original paths,
+hashes and timestamps, then only those new files were removed to restore the original inventories.
+See `manager-validator-bytecode-side-effect-v1/receipt.json`. No existing result, producer or
+preexisting bytecode was changed. A full inventory-before/after validation fixture now prevents
+this side effect. This restoration is disclosed; it is not a claim that no post-run tool touched
+the directories. No capsule was frozen before the correction.
+
+Final validation additionally pins both Manager/helper producer files and the frozen21-file
+source manifest, and binds the prepared/controller environment to the actual launch pre-CLI
+environment. Parent HCCL/BATCH settings are absent; the explicit profile is required to select
+HCCLtrue in the post-initialization worker readbacks. Source PYTHONPATH and isolated Manager state
+path must agree with the actual run.

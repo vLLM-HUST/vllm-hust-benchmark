@@ -1,0 +1,94 @@
+# Raw pressure suite 01: genuine uncovered cancellation gate, with source cause
+
+The overall suite remains **FAIL**. Phase 1 (pressure) passed; phase 2 (partial cancellation) was
+admitted and failed because the required two-peer pending-P8 boundary never occurred. No abort was
+issued, no cancellation/ACK/reuse result exists, and phase 3 was not admitted. The failure is not a
+model exception, corrupt observer sequence, or an auditor false negative. It exposes insufficient
+headroom in the original cancellation workload under the pinned Ascend allocation predictor.
+
+Run: `runs/raw-pressure-suite-hccl-true-01`. All original files remain unchanged. Controller exit 1,
+shutdown returned, owned processes absent, and four physical NPUs empty. The full observer trace
+SHA-256 is `ce24363d20b230703238efcbe148a8d1794eb9277507747c2dbdbbc0ade58895`.
+
+## What actually happened
+
+Phase 1 completed all three original outputs in 129 steps, observed 64 allocation-None events,
+and observed the seed D being preempted while the pending P retained its 15 physical blocks. Its
+post-phase boundary returned all 19 usable blocks with no request, held ownership, cohort or ACK.
+The provisional pre-shared-shutdown audit is false only because shutdown had intentionally not yet
+occurred; its final phase audit is true.
+
+Phase 2 began with that clean 19-block baseline. Derived trace sequence numbers below retain the
+original global sequence in `phase-2-compact-trace.json` (global sequence = derived + 906):
+
+| Sequence | Observation |
+| --- | --- |
+| 3 | Seed P128 allocated four blocks: attention 1 plus three Mamba groups 1 each. |
+| 9 | First seed D allocation succeeded without allocating any new physical block. |
+| 11, 13 | Each peer P4080 allocated seven blocks; both peers admitted; one free block remained. |
+| 16 | Both peers pending at P4; seed computed 129 tokens and had two sampled outputs. |
+| 18–19 | Next seed D (one token) allocation returned None with one free block; held groups remained `[1,1,1,1]`. |
+| 20–21 | Seed preempted, releasing its four blocks; peer ownership stayed intact. |
+| 22–24 | No decode was scheduled. The pending peers advanced from P4 directly to P40 and each produced its first token. |
+| 32–50 | Seed recomputation later formed a different cohort. Its P8 is not the required two-peer boundary. The bounded driver stopped when that cohort reached P12. |
+
+The exact driver guard is `pressure_phase.py:99–116`. It correctly requires both original peer IDs
+at P8 and does not accept an unrelated cohort's progress. The observer preserved 51 contiguous,
+error-free rows for this phase. Both requests really left pending P before an abort was attempted.
+
+## Source explanation and CPU reproduction
+
+Pinned Core `d0f22d2b...`, Ascend `03766ac...`, plugin `f7ed21e...` were not modified.
+`source-identities.json` hashes the audited files. The extra three blocks are an **allocation
+estimate**, not evidence of actual temporary Mamba allocation or copy-on-write.
+
+1. Core `kv_cache_manager.py:366–413` supplies `total_computed_tokens=129` and
+   `num_tokens_main_model=130` for a normal running decode. No external KV is supplied.
+2. Core `single_type_kv_cache_manager.py:102–186` needs zero new blocks for the held Mamba page.
+   The `none` Mamba path delegates to this implementation at lines 1206–1219.
+3. Ascend `patch_mamba_manager.py:67–114`, in its 0.25.1 compatibility branch, computes
+   `local_hit_tokens = len(new_computed_blocks) * block_size = 0`. It then treats
+   `129 > 0` as external tokens and `130 > 129` as synchronous new work, adding one block **after**
+   the Core result. It does so even for an already-running request. Three Mamba managers yield an
+   estimated need of three blocks, so Core's `required_blocks > available_blocks` gate rejects
+   `3 > 1` before allocation. The native coordinator calls with its older five-positional-argument
+   interface; successful calls also imply this compatibility branch (the other branch asserts a
+   missing `num_tokens_main_model`). The historical controller did not record `VLLM_VERSION`
+   explicitly; branch attribution is supported by this call signature, not a new runtime hook.
+4. Plugin `decoupled_scheduler.py:368–376` finishes a pending prefill when no decode survives.
+   `decoupled_worker.py:335–339` removes the layer quota for that instruction. This accounts for
+   the observed P4→P40 receipt and the unavailable P8 boundary.
+
+`replay_allocation_predictor.py` contains exact AST-extracted predictor method bodies and synthetic
+objects populated from observed occupancy. It imports no vLLM, Torch, model, or device module.
+`predictor-results.json` records five assertions: native zero vs Ascend one for the ordinary
+running request (with and without a cached-block marker), equal fresh-prefill estimates, and the
+separate new-external synchronous/asynchronous adjustment branches. The external cases show the
+condition's intended separate input category; they do not certify the whole external-KV allocator
+or claim that its extra page is physically allocated in this model configuration.
+
+An independent source review by the performance agent agreed with the cause. The original
+planner's physical occupancy arithmetic `4 + 7 + 7 = 18` was accurate, but failed to account for
+this conservative Ascend predictor. It was insufficient to guarantee P8 coverage.
+
+## Smallest bounded follow-up
+
+Keep native/plugin sources and every old result frozen. The new explicit cancellation treatment
+uses **22 total blocks**: one null +18 held +three free. At seed129→130 the exact predictor need3
+then meets free3. Request prompts/output budgets, seed-first admission, two-peer P8 abort,
+partial/full selection, ACK ownership, physical reuse, 870-step/1800-second bounds, and original
+execute/audit functions remain unchanged. The four reuse pairs peak at14 held blocks, leaving7
+free. Peer outputs remain within4096 and seed within224, so this workload does not cross another
+attention allocation boundary. These are CPU feasibility findings; actual P8/ACK/reuse must still
+pass on hardware.
+
+The old planner greedily chooses P4096 with pool22, so merely invoking it again would change the
+workload. `../pressure_headroom.py` instead validates the original pool20 plan and makes a narrowly
+specified pool22 derivation while delegating to the unchanged original execute/audit. New plans,
+CPU validation and commands are in `../cancellation-headroom-v1/`. They are separate experiments,
+not repairs to the old failed result. The original pool20 pressure-only plan remains a meaningful
+allocation/preemption test; it need not be inflated.
+
+An isolated native fix may later preserve the already-running request fast path before the
+external-KV adjustment, with true external-KV and cache-hit regression coverage. No native fix is
+included in this campaign, and all quality/performance source identities remain unchanged.
