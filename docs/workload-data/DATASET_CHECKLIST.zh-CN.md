@@ -2,6 +2,8 @@
 
 ### LAB-Bench官方执行环境（准备中，未交付）
 
+资产入口：`python scripts/prepare_labbench_original_assets.py --output <仓库外目录>`默认只展示计划；加`--execute`按固定官方API归档下载并安全解包，或加`--reuse-archive <已有zip>`复用校验一致的归档，避免重复下载。已有目录使用`--verify-only`只读核验，服务器已实际验证553文件通过、0模型调用；不覆盖既有目录。原归档245275217字节，解包原文件283413040字节，均仅放外部目录。固定归档身份若变化应重新审计，不能跳过校验。
+
 - [x] [官方固定版本](https://github.com/Future-House/LAB-Bench/tree/998a8e0a40cf116c80e1b0e7a805ebb5fb9fa838)的11份运行代码/说明/依赖文件在服务器按大小和Git
   blob校验；未下载任务数据，未调用模型。
 - [x] 确认原生入口为`labbench.Evaluator(Eval.<category>).score_agent(agent_fn)`；按原选项精确比较，保留“不确定”选项，报告accuracy/precision/coverage。八个官方类别须分别保留，不能只做纯文本类别就称全部完成。
