@@ -101,6 +101,22 @@ def test_worker_refuses_current_unqualified_host_before_import():
         worker.assert_isolation({})
 
 
+def test_cli_import_probe_is_separate_from_candidate_execution(monkeypatch):
+    calls = []
+    monkeypatch.setattr(
+        worker.subprocess,
+        "run",
+        lambda command, **kwargs: calls.append((command, kwargs)),
+    )
+    worker.qualify_author_entrypoints()
+    command, options = calls[0]
+    assert command[:2] == [sys.executable, "-c"]
+    assert "bigcodebench.sanitize" in command[2]
+    assert "bigcodebench.evaluate" in command[2]
+    assert "--samples" not in command and "--execution" not in command
+    assert options == {"check": True, "timeout": 120}
+
+
 @pytest.mark.parametrize("failure", ["missing", "reordered", "duplicate", "nonobject"])
 def test_sanitize_selection_checked_before_evaluation(tmp_path, monkeypatch, failure):
     ids = ["BigCodeBench/0", "BigCodeBench/1", "BigCodeBench/2"]

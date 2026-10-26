@@ -86,6 +86,20 @@ def qualify_environment(requirements):
     return versions
 
 
+def qualify_author_entrypoints():
+    """Check real CLI imports inside the qualified container, not on the host."""
+    subprocess.run(
+        [
+            sys.executable,
+            "-c",
+            "import importlib; importlib.import_module('bigcodebench.sanitize'); "
+            "importlib.import_module('bigcodebench.evaluate')",
+        ],
+        check=True,
+        timeout=120,
+    )
+
+
 def validate_results(evaluation, metrics, ids):
     require(
         metrics.get("gt_pass_rate") == 1.0 and metrics.get("failed_tasks") == [],
@@ -156,6 +170,7 @@ def evaluate():
             "staged original input identity changed",
         )
     versions = qualify_environment("/author/Requirements/requirements-eval.txt")
+    qualify_author_entrypoints()
     require(
         not Path("/output/fresh-cache").exists(), "fresh groundtruth cache required"
     )
@@ -174,6 +189,7 @@ def evaluate():
                 "selected_task_ids": selected_ids,
                 "official_sanitize_and_reference_checks_executed": True,
                 "official_evaluation_dependency_versions": versions,
+                "official_cli_imports_qualified_before_task_execution": True,
                 "new_model_calls": 0,
                 "source_checkbox_eligible": False,
                 "delivery_note": "Native scoring only; final public-entry/research-consumer closure remains separate.",
