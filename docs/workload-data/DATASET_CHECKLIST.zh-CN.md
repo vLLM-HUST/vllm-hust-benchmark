@@ -4,8 +4,11 @@
 
 - [x] 复用原3表/46765问答关系，不重新获取数据；明确summary-QA与full-story不同，不拿summary替代缺失全文。
 - [x] 固定AllenAI评分源码/许可证并在服务器获取、二次只读核验；原BLEU-1/4、METEOR、ROUGE-L接口在隔离py-rouge1.1及固定WordNet下通过合成夹具预检。[评分身份与差异](../../configs/workload-native/narrativeqa-metric-pins.json)。不是作者官方聊天运行器或论文数值复现；该实现的BLEU-4权重及逐参考取最大/两位舍入明确保留。
-- [ ] 原始summary-QA模型执行、原两参考评分、保存审计与公共/研究消费最终闭环；预检没有模型调用，不增加总勾。初次预检因WordNet缺失失败保留，已用官方固定Git
-  blob恢复，不降级METEOR。
+- [x] 原始test物理顺序前三题已生成、双参考评分与保存审计exit0；3条stop，完整输入695/698/700
+  tokens。9B非思考/256输出预算为声明式适配，不冒称作者配置；审计零模型调用。[阶段回执](validation/narrativeqa-summary-native-checkpoint-20261027.json)
+- [ ] 原三表关联的统一索引/研究端消费闭环；专用关系解析器已验，但旧document/question/answers单表映射不代表原CSV可用。来源不增加总勾，已跑3题不重跑。初次WordNet缺失失败保留，未降级METEOR。
+
+原任务入口：`python scripts/run_narrativeqa_original_summary.py --data-root /external/narrativeqa-original --metric-source /external/narrativeqa-metric/scoring/narrativeqa.py --output /external/narrativeqa-run --execute`。默认原test前三题，`--full-test`才跑全10557题；保持完整摘要与原问题，不包含参考答案。默认256输出token为适配预算。审计用同参数，另加`--reuse /external/narrativeqa-run`并将输出改成新的`--output /external/narrativeqa-audit`，不调用模型或覆盖旧结果；依赖环境同下段。
 
 评分源准备：`python scripts/prepare_narrativeqa_original_metric.py --output /external/narrativeqa-metric`默认只规划，显式`--execute`获取，`--verify-only`只读校验。`py-rouge==1.1`必须安装在独立target/环境，用`PYTHONPATH`选择；不要覆盖其他任务正在使用的`rouge==1.0.1`。`NLTK_DATA`显式包含已有punkt/punkt_tab及固定WordNet目录；运行评分禁止隐式联网下载。现已验证环境为Python3.12.13、NLTK3.10.4、py-rouge1.1；这不是原2018模型环境复现。
 
