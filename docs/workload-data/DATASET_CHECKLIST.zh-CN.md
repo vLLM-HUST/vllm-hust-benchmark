@@ -1,5 +1,12 @@
 # 数据集逐项验证清单
 
+### SchemaStore原始schema资产（尚未交付）
+
+- [x] 核查官方定位与原生校验方式：这是schema集合及原正/负例，不是用户请求/模型质量benchmark，不造prompt冒充原请求。官方流程为`npm clean-install`后`node ./cli.js check`，保留原schema、引用和正负例。[官方说明](https://github.com/SchemaStore/schemastore/blob/b3c6a70f2a535d14e8ad2bf460b3aa8f5c0efb27/CONTRIBUTING.md)
+- [x] 固定版本原归档通过官方API取得；4810文件逐文件大小/Git blob校验及实际根tree独立一致性核验通过，含1006
+  schemas、2286正例文件、1402负例文件。Git连接失败历史保留；只有资产取得，不是原生校验完成。[准备回执](validation/schemastore-original-readiness-20261027.json)
+- [ ] 隔离Node/npm环境、原锁依赖、官方完整校验、公共资产读取/索引与固定研究端消费；当前服务器PATH未找到node/npm。原生资源校验只证明资产可用，不产生推理性能/质量结论。
+
 ### NarrativeQA原始summary-QA（来源交付完成）
 
 - [x] 原三表关联已接入共享`iter_workload`、准备索引及公共/研究读取协议；保持问题原物理顺序，两个原答案及tokenized参考与输入分离，文档/摘要原字段独立保留。433项组件/合同测试及代码对应两项CI通过；服务器精确工件审计通过。
