@@ -2,6 +2,8 @@
 
 ### LAB-Bench官方执行环境（准备中，未交付）
 
+- [x] 候选统一适配完整保留1967条原字段并建立索引；图片引用能定位原文件，ideal留在参考侧。固定研究消费者对31个原子集的首3/末1条共124条回读，与公共消费者完整记录一致。该项用已审计provider代码及新候选目录元数据核验，尚待新版本实际CI包换锁复核，也不能代替原生推理。
+
 ARM兼容补充：作者冻结锁安装后，`uv pip check`发现torch缺少setuptools；用同一环境命令的`--install-compat`显式安装`setuptools==75.1.0 --no-deps`，不改作者源码/锁及其他依赖。实际复核123个已安装包、锁内版本不符0项、依赖检查通过；此补充不是作者原锁的一部分。重复`uv sync`可能移除补充，之后须重新核验。先前版本检查脚本误把作者锁内多版本分支压成单值的问题也已修正，环境核验不代表模型推理完成。
 
 环境入口：`python scripts/prepare_labbench_runtime.py --source-root <原目录/source> --archive <原目录/publisher-original.zip> --environment <独立venv目录> --uv <uv可执行文件> --python <Python3.12可执行文件>`默认展示计划，加`--execute`执行作者`uv sync --frozen --no-dev`，不更新锁；已有环境用`--verify-only`。核验隔离venv、原始源码、作者包导入、已安装包与锁的版本和`uv pip check`。已测试的平台为Linux

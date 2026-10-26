@@ -811,6 +811,18 @@
       "id_field": "schema_path",
       "requirements": ["Original schema asset and original fixture references, not a fabricated prompt benchmark"],
       "normalization": {}
+    },
+    "LABBENCH": {
+      "kind": "task_dataset",
+      "mapping": "native_fields",
+      "input_fields": ["question", "distractors", "figure-path", "table-path", "protocol", "sources", "source", "paper-title", "key-passage"],
+      "required_fields": ["id", "question", "ideal", "distractors", "canary"],
+      "outcome_fields": ["ideal"],
+      "annotation_fields": ["id", "canary", "is_opensource", "tag", "version"],
+      "id_field": "id",
+      "normalization": {},
+      "requirements": ["All original source fields preserved separately; ideal is the original answer field, not an API prompt", "Original image paths are relative to the parent directory of source.file; do not replace original figures with text descriptions", "Use original Evaluator and get_input_output to construct randomized choices, extra context and image inputs; this reader alone is not a runnable prompt or scoring protocol", "Public MCQ release only; open-answer variants and private held-out tasks are not claimed"],
+      "status": "ORIGINAL_PUBLIC_MCQ_FIELDS_MAPPED_NATIVE_AND_RESEARCH_CLOSURE_PENDING"
     }
   }
 }
