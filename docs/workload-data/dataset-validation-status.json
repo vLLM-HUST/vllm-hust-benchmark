@@ -1211,12 +1211,12 @@
     "XLAM_TOOL": {
       "scope": "public",
       "delivery_kind": "review_original_source_protocol",
-      "status": "NOT_STARTED",
+      "status": "REVIEWED_GAPS_RECORDED",
       "checked": false,
       "legacy_checked": false,
       "existing_receipt": null,
       "delivery_receipt": null,
-      "blocker": null
+      "blocker": "官方数据卡要求登录并接受APIGen使用/引用条件后获取原JSON；尚未取得授权数据、不绕过访问门槛。原query/tools为输入，answers为参考；发布方60k构造训练语料不等同BFCL独立评测。缺原文件身份、适配、原生执行与适用评分/消费闭环。"
     },
     "BIGCODEBENCH": {
       "historical_generation_reuse_preparer": "scripts/prepare_bigcodebench_official_samples.py",
@@ -1349,7 +1349,7 @@
       "legacy_checked": false,
       "existing_receipt": "docs/workload-data/validation/fleurs-native-probe-20261026.json",
       "delivery_receipt": null,
-      "blocker": "102种语言文件身份已固定；af_za、am_et、ar_eg各3条原始音频已在NPU完成转写，am_et/ar_eg已用公开入口完成CER评分，差结果保留。其余语言获取、固定原生抽样及研究侧消费闭环未完成，不计交付。"
+      "blocker": "102种语言文件身份已固定；15种语言共45条原始音频NPU转写，后14种语言公开CER评分完成，差结果保留；3种语言9处精确成功CI工件/研究消费已验证。其余语言获取、固定原生抽样及最终汇总审计未完成，不计交付。"
     },
     "WAVCAPS": {
       "scope": "public",
