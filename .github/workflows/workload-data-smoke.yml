@@ -29,6 +29,8 @@ on:
       - 'scripts/run_mmlu_pro_original_samples.py'
       - 'scripts/run_structeval_original_json.py'
       - 'scripts/run_longbench_v2_original_samples.py'
+      - 'scripts/prepare_longbench_v2_original_capacity.py'
+      - 'scripts/verify_longbench_v2_original_saved.py'
       - 'scripts/run_dolly_original_samples.py'
       - 'scripts/run_dolly_original_categories.py'
       - 'scripts/run_longwriter_original_samples.py'
@@ -180,6 +182,8 @@ on:
       - 'tests/test_native_delivery_contract.py'
       - 'tests/test_structeval_original_runner.py'
       - 'tests/test_longbench_original_runner.py'
+      - 'tests/test_longbench_v2_saved_audit.py'
+      - 'tests/test_longbench_v2_capacity_preparation.py'
       - 'tests/test_dolly_original_runner.py'
       - 'tests/test_dolly_original_categories.py'
       - 'tests/test_longwriter_original_runner.py'
@@ -255,8 +259,8 @@ jobs:
         run: python -m pytest -q tests/test_chartqa_native_toolkit.py tests/test_chartqa_original_view.py tests/test_chartqa_original_runner.py tests/test_chartqa_original_saved.py tests/test_chartqa_native_runtime.py tests/test_mmmu_original_assets.py tests/test_mmmu_original_runner.py tests/test_longmemeval_v2_preparation.py tests/test_longmemeval_v2_original_runner.py
       - name: Original TraceLab build and replay CPU contracts only
         run: python -m pytest -q tests/test_tracelab_original_build.py tests/test_tracelab_original_runner.py
-      - name: Original PAWS asset preparation CPU contracts only
-        run: python -m pytest -q tests/test_paws_original_assets.py tests/test_paws_original_runner.py
+      - name: Original PAWS and LongBench offline CPU contracts only
+        run: python -m pytest -q tests/test_paws_original_assets.py tests/test_paws_original_runner.py tests/test_longbench_v2_saved_audit.py tests/test_longbench_v2_capacity_preparation.py
       - name: Original model and metric CPU contracts only
         run: python -m pytest -q tests/test_gpqa_original_runner.py tests/test_xlsum_original_runner.py tests/test_beir_original_runner.py tests/test_stsb_original_runner.py tests/test_librispeech_original_runner.py tests/test_xsum_original_runner.py tests/test_multinews_original_runner.py tests/test_billsum_original_runner.py tests/test_flores200_original_assets.py tests/test_research_acquisition_reuse.py
       - name: Installed CLI and packaged catalogs

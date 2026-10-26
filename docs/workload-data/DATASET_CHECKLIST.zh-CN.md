@@ -4,8 +4,10 @@
 
 - [x] 既定Medium原第3/5/8行，用当前9B原tokenizer和256K部署窗口重新核验，完整输入149662/138653/68762
   tokens均容纳原128输出预算；未截断、未换题、无模型调用。[容量回执](validation/longbench-v2-medium-9b-capacity-20261027.json)
-- [x] 同三题已原生执行/评分完成exit0：完整输入149662/138653/68762 tokens，原128输出预算保留；length/stop/stop，正确1/3，不换错题或补偿分数。请求/响应保存在服务器。
-- [ ] 独立保存结果审计及精确工件/研究端闭环待补；原Short有效结果不重跑，Long组仍超当前窗口，来源不增加总勾。
+- [x] 同三题已原生执行/评分完成exit0：完整输入149662/138653/68762
+  tokens，原128输出预算保留；length/stop/stop，正确1/3，不换错题或补偿分数。请求/响应保存在服务器。
+- [x] 独立保存结果审计exit0，逐题核对完整作者提示、原参考/字段、响应usage及作者extract_answer评分；未调用模型/网络/judge，未修改原结果。可用`scripts/verify_longbench_v2_original_saved.py --help`查看外部路径参数，默认只规划，显式`--execute`执行。
+- [ ] 精确工件/研究端闭环待补；原Short有效结果不重跑，Long组仍超当前窗口，来源不增加总勾。
 
 ### PAWS分步骤（来源交付完成）
 
