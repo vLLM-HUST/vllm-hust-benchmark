@@ -1,12 +1,17 @@
 # 数据集逐项验证清单
 
-### NarrativeQA评分准备（来源仍未完成）
+### NarrativeQA原始summary-QA（来源交付完成）
+
+- [x] 原三表关联已接入共享`iter_workload`、准备索引及公共/研究读取协议；保持问题原物理顺序，两个原答案及tokenized参考与输入分离，文档/摘要原字段独立保留。433项组件/合同测试及代码对应两项CI通过；服务器精确工件审计通过。
 
 - [x] 复用原3表/46765问答关系，不重新获取数据；明确summary-QA与full-story不同，不拿summary替代缺失全文。
+
 - [x] 固定AllenAI评分源码/许可证并在服务器获取、二次只读核验；原BLEU-1/4、METEOR、ROUGE-L接口在隔离py-rouge1.1及固定WordNet下通过合成夹具预检。[评分身份与差异](../../configs/workload-native/narrativeqa-metric-pins.json)。不是作者官方聊天运行器或论文数值复现；该实现的BLEU-4权重及逐参考取最大/两位舍入明确保留。
+
 - [x] 原始test物理顺序前三题已生成、双参考评分与保存审计exit0；3条stop，完整输入695/698/700
   tokens。9B非思考/256输出预算为声明式适配，不冒称作者配置；审计零模型调用。[阶段回执](validation/narrativeqa-summary-native-checkpoint-20261027.json)
-- [ ] 原三表关联的统一索引/研究端消费闭环；专用关系解析器已验，但旧document/question/answers单表映射不代表原CSV可用。来源不增加总勾，已跑3题不重跑。初次WordNet缺失失败保留，未降级METEOR。
+
+- [x] 全46765条原问答、1572组文档/摘要关系和全部原字段、统一索引核对；精确CI44文件一致，固定研究端18处回查包含已跑3题。旧单表映射不再阻塞原CSV使用，未改默认研究依赖或增加模型调用。[最终回执](validation/narrativeqa-native-delivery-20261027.json)。只验summary-QA，不声称full-story/全文检索或原模型复现；初次WordNet缺失失败保留，未降级METEOR。
 
 原任务入口：`python scripts/run_narrativeqa_original_summary.py --data-root /external/narrativeqa-original --metric-source /external/narrativeqa-metric/scoring/narrativeqa.py --output /external/narrativeqa-run --execute`。默认原test前三题，`--full-test`才跑全10557题；保持完整摘要与原问题，不包含参考答案。默认256输出token为适配预算。审计用同参数，另加`--reuse /external/narrativeqa-run`并将输出改成新的`--output /external/narrativeqa-audit`，不调用模型或覆盖旧结果；依赖环境同下段。
 
@@ -56,7 +61,7 @@
 
 - [x] 复用已有MMMU原生字段适配，更新92文件身份并保留旧登记revision；全16字段/11550行及索引完整，答案/解释与输入分离。精确CI的44载荷逐字节核验、152条公共/研究往返通过，未迁入研究观测或分析。
 
-当前机器清单计算：**51/113项已交付，62项待补**（另5项仅分类，不计入分母）。2026-10-27收口MMMU原validation固定抽样及PAWS分类交付；以下历史统计保留其原时点，不代表当前总数。
+当前机器清单计算：**52/113项已交付，61项待补**（另5项仅分类，不计入分母）。2026-10-27收口MMMU、PAWS及NarrativeQA原summary-QA交付；以下历史统计保留其原时点，不代表当前总数。
 
 ### ChartQA分步骤（来源总勾已完成：固定原测试抽样交付）
 
@@ -247,7 +252,7 @@ TB；服务器/data约1.42TB可用，未缩小语料。ChartQA当前两卡主机
 | LONGMEMEVAL                | [ ] 评分/容量阻塞            | 三份原资产已取得；oracle/S共1000题字段关系已验，原前三题各3条真实生成及请求/响应审计完成（S完整输入113452–116259 tokens，原CoT预算800）。原judge客户端环境已验，但缺官方支持judge；M原首题历史1201716 tokens超预算，未截断/换题/发生成请求。见原生checkpoint，复用已有6条，不重跑。                               |
 | LONGMEMEVAL_V2             | [ ] 待开展                   | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                      |
 | QASPER                     | [x] 原版v0.3抽样原生交付完成 | 复用原5049字段/索引与图像准备；原dev0..2完成3次NPU答案/证据预测和作者原CLI评分，Answer F1约0.4996、Evidence F1=0保留。当前A9精确工件/研究dd三split9处旧索引回查通过。[证据](validation/qasper-native-delivery-20261026.json)。非LongBench200、全dev/test、LED或视觉推理，不筛图表参考，不称质量通过。             |
-| NARRATIVEQA                | [ ] 历史资产已复用           | 已复用研究原3文件的版本/URL/校验和，支持离线计划与原文件只读校验；服务器路径、准备映射、原生执行/评分和固定消费待补。不是重新取数，不提前勾选。                                                                                                                                                                   |
+| NARRATIVEQA                | [x] 原summary-QA已完成       | 原test前三题生成/双参考评分/保存审计完成；全46765问答三表字段关系与索引、精确CI44文件及固定研究端18处回查通过。[回执](validation/narrativeqa-native-delivery-20261027.json)。不是full-story、全test推理或作者模型复现。                                                                                           |
 | XLAM_TOOL                  | [ ] 待开展                   | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                      |
 | BIGCODEBENCH               | [ ] 缺口已列待补             | 复用历史证据；原生缺口见37项复核表及方案8.5.2                                                                                                                                                                                                                                                                     |
 | SWE_BENCH                  | [ ] 待开展                   | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                      |
