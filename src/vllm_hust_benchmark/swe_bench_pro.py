@@ -26,6 +26,8 @@ import threading
 import time
 import traceback
 
+from . import swe_submodule_fixture
+
 from .swe_bench_pro_inputs import (
     LOCK_PATH,
     digest,
@@ -108,6 +110,12 @@ def validate(configuration):
     validate_initial_tracked_policy(
         c.get("container", {}).get("allowed_initial_tracked")
     )
+    submodule_policy = c.get("container", {}).get("allowed_initial_submodule")
+    swe_submodule_fixture.validate_policy(submodule_policy)
+    if submodule_policy is not None and (
+        c["container"].get("allowed_initial_tracked") is not None or allowed
+    ):
+        raise ValueError("Submodule fixture cannot be combined with other allowances")
     return c
 
 
@@ -193,6 +201,8 @@ def validate_initial_repository(
     *,
     tracked_policy=None,
     tracked_observations=None,
+    submodule_policy=None,
+    submodule_observations=None,
     image_id=None,
 ):
     validate_initial_tracked_policy(tracked_policy)
@@ -207,6 +217,19 @@ def validate_initial_repository(
             raise ValueError("Original tracked fixture identity mismatch")
         required_status = {" M " + name for name in tracked_policy["files"]}
         allowed_status |= required_status
+    if submodule_policy is not None:
+        if tracked_policy is not None or allowed_untracked:
+            raise ValueError(
+                "Submodule fixture cannot be combined with other allowances"
+            )
+        status = swe_submodule_fixture.validate_observation(
+            submodule_policy,
+            submodule_observations,
+            base_commit=base_commit,
+            image_id=image_id,
+        )
+        required_status.add(status)
+        allowed_status.add(status)
     lines = before["output"].splitlines()
     if (
         before["returncode"]
@@ -371,12 +394,20 @@ def _agent_task(c, row, image, folder, barrier):
             fixture_receipt = observe_initial_tracked(env, fixture_policy)
             save(folder / "initial-tracked-fixtures-private.json", fixture_receipt)
             fixture_observations = fixture_receipt["observations"]
+        submodule_policy = c["container"].get("allowed_initial_submodule")
+        submodule_observations = None
+        if submodule_policy is not None:
+            submodule_receipt = swe_submodule_fixture.observe(env, submodule_policy)
+            save(folder / "initial-submodule-fixture-private.json", submodule_receipt)
+            submodule_observations = submodule_receipt["observations"]
         validate_initial_repository(
             before,
             row["base_commit"],
             c["container"].get("allowed_initial_untracked", []),
             tracked_policy=fixture_policy,
             tracked_observations=fixture_observations,
+            submodule_policy=submodule_policy,
+            submodule_observations=submodule_observations,
             image_id=image["image_id"],
         )
         inspected = json.loads(
