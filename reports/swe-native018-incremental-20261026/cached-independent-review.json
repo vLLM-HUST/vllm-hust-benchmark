@@ -1,0 +1,94 @@
+{
+  "status": "passed_valid_negative_reusable",
+  "agent": {
+    "model_calls": 45,
+    "elapsed_seconds": 293.6001821886748,
+    "submitted": true,
+    "actual_models": {
+      "qwen3.5-35b": 45
+    },
+    "finish_reasons": {
+      "stop": 45
+    },
+    "patch_bytes": 16835,
+    "patch_sha256": "a443e7e9c41b410aa1b1d335a7c0b8bc32630fac36a2842dde45b666c7229a60",
+    "container_cleanup_exit_code": 0
+  },
+  "initial_state": {
+    "base_commit": "c5ae8a70e1b0305af324ad7b1b0911d4023f1338",
+    "tracked_clean": true,
+    "untracked_clean": true,
+    "fixture_allowlist": []
+  },
+  "patch_and_scoring_chain": {
+    "saved_official_snapshot_and_applied_input_identical": true,
+    "no_binary_filter_difference": true,
+    "patch_paths": [
+      "IMPLEMENTATION_SUMMARY.md",
+      "src/topics/sorted.js",
+      "test_comprehensive.js",
+      "test_old_sort.js",
+      "test_old_sort_implementation.js",
+      "test_simple_sort.js",
+      "verify_implementation.js"
+    ],
+    "original_source_from_step3_matches_git_preimage": "c2bbe8d7ca4f4eee48b979615080316aa4712fa8",
+    "in_memory_hunk_reconstruction_matches_git_postimage": "f5b40e10104f6166e5c9633e756bf63f96f16588",
+    "actual_source_file_modified": "src/topics/sorted.js",
+    "new_files": "six Agent-created self-test/summary files; no preexisting fixture additions found",
+    "official_source_and_input_bindings_match": true,
+    "image_id": "sha256:0bc1ddf582e153cba3d2ae288ef523f4406b6609916b19ead10ee44b701438fc",
+    "application_exit_log": "Not separately retained by original grader; no evidence of the previous fixture collision here. Clean base and all tracked hunk contexts independently matched; missing extra telemetry is not treated as a new failure or rerun requirement."
+  },
+  "official_grading": {
+    "run_exit_code": 0,
+    "grade_exit_code": 0,
+    "resolved": false,
+    "unresolved": [],
+    "model_calls": 0,
+    "mocha_raw_counts": {
+      "tests": 190,
+      "passed": 189,
+      "failed": 1
+    },
+    "official_parser_unique_counts": {
+      "PASSED": 172,
+      "FAILED": 1
+    },
+    "duplicate_names_collapsed": 17,
+    "fail_to_pass": {
+      "expected": 1,
+      "passed": 0,
+      "failed": 1,
+      "missing": 0
+    },
+    "pass_to_pass": {
+      "expected": 172,
+      "passed": 172,
+      "failed": 0,
+      "missing": 0
+    },
+    "independently_recomputed_official_rule": false,
+    "failure": {
+      "test": "Topic's sorted topics should get topics recent replied last",
+      "error": "Cannot read properties of undefined (reading 'title')",
+      "location": "test/topics.js:2673:38"
+    }
+  },
+  "reuse_decision": "Keep original official0/1 as valid negative for this exact designated018 task/protocol. Do not inherit the previous task fixture limitation; no budget increase, patch edit, repeated Agent or selective regrade.",
+  "model_requests_by_review": 0,
+  "grading_reexecutions": 0,
+  "private_raw_material_exported": false,
+  "source_review_sha256": "579713907a9f9d4de8203d8b8006875376904193d7941347116d56bb2e6fd395",
+  "raw_evidence_sha256": {
+    "agent/task-000/trajectory-private.json": "3997c3463b5b1be52406b319f5c78be8da3d5ffb91d5f2b6b065123e5e21ca3e",
+    "agent/task-000/report-private.json": "12471f3bf5d9f7866c74ccb5065221d9764067a4258dbb6841270e6a7b033e7a",
+    "agent/task-000/code-before.json": "62c03e8d4515c57a6b712a4536b7fbeeb8e6a28fce6ca88fa36d65e3c872208d",
+    "agent/task-000/patch-private.diff": "a443e7e9c41b410aa1b1d335a7c0b8bc32630fac36a2842dde45b666c7229a60",
+    "execution-binding.json": "12b3320be298d5ad0811bbdd31d71927fa9d74e443eab10a59706ab1eac5f07c",
+    "grade/source-and-patch-bindings.json": "d5b839f2b5e94cf747678336b8c1433f9e816ee6fbea882b9099bb0f5db89629",
+    "grade/grading-status.json": "d9572e9b7c3e0be6a49de68727357f357edabe20d4d8e8c6fa01a6257cae8ee8",
+    "grade/eval_results.json": "cd56a4460d5428387b60dcd6881398b876880fa387b2972cc68e99ea7b4a14a2",
+    "settings.json": "f9a25aa073bba66fbb94292ff9d500f31a3162c47d21e5738fecc3b3330f4c20"
+  }
+}
