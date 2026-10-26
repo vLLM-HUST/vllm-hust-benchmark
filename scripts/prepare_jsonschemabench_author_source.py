@@ -38,7 +38,7 @@ def main():
     parser.add_argument("--author-root", type=Path, required=True)
     parser.add_argument(
         "--source",
-        choices=["jsonschemabench", "bigcodebench"],
+        choices=["jsonschemabench", "bigcodebench", "longmemeval-v2"],
         default="jsonschemabench",
         help="Pinned original author source only; historical default unchanged",
     )
@@ -47,11 +47,7 @@ def main():
     )
     parser.add_argument("--max-bytes", type=int)
     args = parser.parse_args()
-    pins_path = (
-        PINS
-        if args.source == "jsonschemabench"
-        else PINS.with_name("bigcodebench-author-source.json")
-    )
+    pins_path = PINS.with_name(f"{args.source}-author-source.json")
     pins = json.loads(pins_path.read_text(encoding="utf-8"))
     total = sum(item["bytes"] for item in pins["files"])
     if args.action == "prepare":

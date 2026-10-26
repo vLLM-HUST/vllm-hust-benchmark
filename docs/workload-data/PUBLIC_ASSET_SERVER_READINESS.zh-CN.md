@@ -1,5 +1,39 @@
 # 公开原始资产：服务器准备与任务验证缺口
 
+## LongMemEval-V2 官方多模态记忆任务（准备进行中，未完成原生交付）
+
+与旧版LongMemEval分别保留，不复用旧版问题/提示构造冒充V2。 固定[官方源码](https://github.com/xiaowu0162/LongMemEval-V2)提交
+`2cc8c540bdb87fe6761629b585e727e1c4704520`，53文件649178字节；
+固定[官方数据](https://huggingface.co/datasets/xiaowu0162/longmemeval-v2)版本
+`f152293e235517d504809563c833d7190b8c713b`，41文件7120369667字节。 数据包含原问题、轨迹、small/medium
+haystack关系、问题截图及两份轨迹截图归档，不以HF自动图片视图的29行替代原任务集。
+两份固定身份清单位于`configs/workload-native/longmemeval-v2-*.json`。
+
+```bash
+# 所有数据和源码都放服务器外部目录；不需要在客户端安装CUDA或启动模型。
+python scripts/prepare_jsonschemabench_author_source.py --source longmemeval-v2 \
+  --author-root /private/lme-v2-author --action prepare --max-bytes 1000000
+# 单独的数据客户端需要huggingface_hub；评测环境以原environment.yml/requirements为准。
+# 如显式使用镜像，可设置HF_ENDPOINT=https://hf-mirror.com；仍核验原发布方固定字节身份。
+python scripts/prepare_longmemeval_v2_original.py --action download \
+  --author-root /private/lme-v2-author --data-root /private/lme-v2-data \
+  --output /private/lme-v2-download --max-bytes 7200000000
+python scripts/prepare_longmemeval_v2_original.py --action prepare \
+  --author-root /private/lme-v2-author --data-root /private/lme-v2-data \
+  --output /private/lme-v2-prepare
+```
+
+下载入口调用未修改的作者`data/download_data.py --revision ...`；准备入口调用未修改的
+`prepare_data.py --mode symlink`，再对small、medium分别调用作者`validate_data.py`，不跳过截图。
+下载前要求压缩资产三倍可用空间，展开前按原tar头检查容量并拒绝越界路径、链接和特殊成员。
+现有数据仅可用`--action verify`核验；不提供`--force`删除或自动覆盖。失败保留原日志/部分文件，先核查再恢复。
+
+当前服务器已验证53个官方源码文件，正在取得和校验原41文件；未据此勾选来源完成。
+作者的评测环境为Python3.11，论文reader为Qwen3.5-9B；RAG等检索方法另需Qwen3-Embedding-8B，
+`no_retrieval`负对照不因此强制部署embedding。默认judge为gpt-5.2/medium，外部计费调用未授权、未执行。
+当前Qwen3.5-27B服务为language-model-only，不把它声称为官方视觉reader或忽略原图像。
+原生方法执行、原评分、统一数据入口的关系保真及固定研究消费均仍待完成；本节的数据准备不替代这些交付要求。
+
 ## TULU3 原始混合训练对话（原生抽样交付已验证）
 
 固定AI2发布的`allenai/tulu-3-sft-mixture`版本`b14afda60f1bbebe55d5d2fa1e4df5042f97f8be`，6个原Parquet共1412954868字节，SHA256/大小来自该固定版本的发布方LFS元数据，通过显式镜像取得原字节并校验。完整原记录数为939343；发布页正文939344与元数据/原文件实测差1，不构造补行或删行“对齐”。保留每行`id`、`messages`及`source`，不把混合来源视为独立原始采集，也不丢弃成分来源。混合许可为ODC-BY，各成分另有条款、含非商业限制；不提供原数据再分发或统一商业许可承诺。
