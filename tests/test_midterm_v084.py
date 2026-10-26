@@ -19,7 +19,12 @@ def test_hle_and_single_agent_projection(monkeypatch):
     monkeypatch.syspath_prepend(str(ROOT / "scripts"))
     import build_midterm_v084 as builder
 
-    data = builder.build("fixture", lambda path: (ROOT / path).read_bytes())
+    def read(path):
+        if path == builder.REPORT:
+            path = "reports/vllm-hust-midterm-20261019/中期测试报告-v084.md"
+        return (ROOT / path).read_bytes()
+
+    data = builder.build("fixture", read)
     old = json.loads((ROOT / "website-publication/data/midterm-v083.json").read_text())
     assert data["wholechain_reference"] == old["wholechain_reference"]
     assert data["m01_method"] == old["m01_method"]
