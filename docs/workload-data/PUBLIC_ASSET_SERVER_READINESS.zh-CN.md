@@ -21,6 +21,9 @@ python scripts/prepare_longmemeval_v2_original.py --action download \
 python scripts/prepare_longmemeval_v2_original.py --action prepare \
   --author-root /private/lme-v2-author --data-root /private/lme-v2-data \
   --output /private/lme-v2-prepare
+# 原官方reader资产，包含视觉预处理配置和全部四个权重分片；此命令不启动服务。
+python scripts/prepare_longmemeval_v2_reader.py --output /private/lme-v2-reader \
+  --hf-endpoint https://hf-mirror.com
 ```
 
 下载入口调用未修改的作者`data/download_data.py --revision ...`；准备入口调用未修改的
@@ -28,11 +31,12 @@ python scripts/prepare_longmemeval_v2_original.py --action prepare \
 下载前要求压缩资产三倍可用空间，展开前按原tar头检查容量并拒绝越界路径、链接和特殊成员。
 现有数据仅可用`--action verify`核验；不提供`--force`删除或自动覆盖。失败保留原日志/部分文件，先核查再恢复。
 
-当前服务器已验证53个官方源码文件，正在取得和校验原41文件；未据此勾选来源完成。
+当前服务器已验证53个官方源码文件，原41文件全部下载并通过大小/原发布方内容身份核验；截图展开与两档官方校验进行中，未据此勾选来源完成。
 作者的评测环境为Python3.11，论文reader为Qwen3.5-9B；RAG等检索方法另需Qwen3-Embedding-8B，
 `no_retrieval`负对照不因此强制部署embedding。默认judge为gpt-5.2/medium，外部计费调用未授权、未执行。
 当前Qwen3.5-27B服务为language-model-only，不把它声称为官方视觉reader或忽略原图像。
-原生方法执行、原评分、统一数据入口的关系保真及固定研究消费均仍待完成；本节的数据准备不替代这些交付要求。
+9B的16个资产固定于`longmemeval-v2-reader-pins.json`，共19329393661字节，正由独立入口在服务器准备。
+资产准备成功不等于服务健康；研究任务空闲后另行切换服务、记录精确配置并验证视觉原题。 原生方法执行、原评分、统一数据入口的关系保真及固定研究消费均仍待完成；本节的数据准备不替代这些交付要求。
 
 ## TULU3 原始混合训练对话（原生抽样交付已验证）
 

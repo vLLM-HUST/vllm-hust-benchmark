@@ -49,6 +49,27 @@ def test_distinct_original_protocol_and_complete_author_source(runner):
     )
 
 
+def test_official_reader_model_is_complete_not_text_only_weight_subset():
+    pins = json.loads(
+        (ROOT / "configs/workload-native/longmemeval-v2-reader-pins.json").read_text(
+            "utf-8"
+        )
+    )
+    assert pins["source_id"] == "LONGMEMEVAL_V2_READER"
+    assert pins["model"]["repo_id"] == "Qwen/Qwen3.5-9B"
+    files = pins["model"]["files"]
+    assert len(files) == 16
+    assert sum(f["bytes"] for f in files) == 19329393661
+    assert len([f for f in files if f["path"].endswith(".safetensors")]) == 4
+    assert {
+        "preprocessor_config.json",
+        "video_preprocessor_config.json",
+        "chat_template.jinja",
+        "config.json",
+    } <= {f["path"] for f in files}
+    assert all(len(f["sha256"]) == 64 for f in files)
+
+
 def test_plan_does_not_create_directories_or_claim_native_completion(runner, tmp_path):
     args = argparse.Namespace(
         action="plan",
