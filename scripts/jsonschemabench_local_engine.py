@@ -43,6 +43,8 @@ def explicit_schema_rejection(error):
             # Publisher Outlines compilation likewise records compiler
             # exceptions as UNSUPPORTED_SCHEMA, not a successful generation.
             or message.startswith("Grammar error:")
+            or message
+            == "The provided JSON schema contains features not supported by xgrammar."
         )
     )
 

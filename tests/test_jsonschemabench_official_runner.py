@@ -181,6 +181,68 @@ def test_saved_output_reuse_has_no_model_fallback(tmp_path):
         ).generate("B", [], {})
 
 
+def test_revalidate_only_empty_compiler_rejection_and_never_valid_generation(tmp_path):
+    @dataclass
+    class Output:
+        generation: str
+        metadata: dict
+        generated_tokens: list
+
+    calls = []
+
+    class Engine:
+        def generate(self, *args):
+            calls.append(args)
+            return Output("new", {"compile_status": {"code": 0}}, ["new"])
+
+    old = {
+        "generation": "",
+        "metadata": {"compile_status": {"code": 1}},
+        "generated_tokens": [],
+    }
+    prior = [
+        {
+            "path": "old",
+            "sha256": "digest",
+            "record": {
+                "task": "A",
+                "original_messages": [],
+                "original_schema": {},
+                "output": old,
+            },
+        }
+    ]
+    receipt = {"attempted_samples": 0, "returned_samples": 0}
+    engine = runner.checkpoint_engine(
+        Engine(),
+        tmp_path,
+        receipt,
+        lambda: None,
+        prior=prior,
+        restore=lambda value: Output(**value),
+        revalidate_rejections=[0],
+    )
+    assert engine.generate("A", [], {}).generation == "new"
+    assert len(calls) == 1 and receipt["revalidated_prior_compile_rejections"] == 1
+    assert receipt.get("reused_samples", 0) == 0
+    assert old["generation"] == ""
+    old["generation"] = "already generated"
+    other = tmp_path / "other"
+    other.mkdir()
+    engine = runner.checkpoint_engine(
+        Engine(),
+        other,
+        {"attempted_samples": 0},
+        lambda: None,
+        prior=prior,
+        restore=lambda value: Output(**value),
+        revalidate_rejections=[0],
+    )
+    with pytest.raises(ValueError, match="only empty"):
+        engine.generate("A", [], {})
+    assert len(calls) == 1
+
+
 def test_reuse_failed_prefix_requires_terminal_profile_and_complete_inputs(tmp_path):
     expected = {"source_id": "fixture", "origin": "http://127.0.0.1:19466"}
     receipt = {

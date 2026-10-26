@@ -875,6 +875,9 @@ original-dataset-private.jsonl；原Parquet校验身份，逻辑字段不改写�
 
 ### JSONSchemaBench 当前服务器核验（2026-10-26）
 
+32050实例经授权将原模型服务的结构化输出后端固定为xgrammar，其余原参数不变。旧20条中19条已有生成保留；旧auto下无生成的编译拒绝不得直接冒充固定后端结论。新增显式参数`--revalidate-prior-compile-rejection-indices 12`仅允许重新核验保存的空生成、空token且原compile_status=UNSUPPORTED_SCHEMA的指定原位置；已生成答案、输入不一致或无效位置均拒绝，不做自动重生成回退。旧回执不覆盖，重新核验次数与复用次数分别记录。
+该次固定xgrammar对原位置12返回结构化BadRequestError400，消息为`The provided JSON schema contains features not supported by xgrammar.`；已核对服务端`backend_xgrammar.py`的特性检查源码，只把此精确消息、匹配错误结构且没有任何内容/usage时记作原协议编译不支持。其他服务、网络或部分输出错误仍报失败；不改schema、不换题。历史生成复用后的组合结果不是同一连续运行性能报告，也不声称旧auto下所有编译统计已在新后端重新测量。
+
 原34资产已在服务器取得并核对40827041字节及固定摘要，44份作者源码/资源已与固定提交的官方Git tree 逐文件核对。Git传输和官方HF直连失败均保留，使用官方Git
 blob身份校验和显式镜像原字节，未修改作者代码。 在独立Python 3.12客户端实际导入作者core/全部注册后端、Dataset、bench、Engine，并完成11配置33处
 原few-shot格式化检查，无假模块。清除仅客户端继承的PYTHONPATH后pip check通过；旧CANN元数据污染导致的失败记录保留。 依赖见

@@ -128,6 +128,7 @@ class APIError(Exception):
     [
         "Unsupported JSON Schema structure INERT\nMake sure it is valid to the JSON Schema specification and check if it's supported by Outlines.",
         "Grammar error: inert compiler fixture, no dataset payload",
+        "The provided JSON schema contains features not supported by xgrammar.",
     ],
 )
 def test_streamed_explicit_compiler_rejection_is_not_an_arbitrary_api_failure(message):

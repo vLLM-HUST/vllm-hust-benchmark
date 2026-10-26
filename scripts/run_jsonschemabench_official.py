@@ -157,7 +157,20 @@ def reusable_prefix(root, expected, *, failed_tail_terminal=False):
     return successful, hashlib.sha256(receipt_path.read_bytes()).hexdigest()
 
 
-def checkpoint_engine(engine, output_root, receipt, save, *, prior=(), restore=None):
+def checkpoint_engine(
+    engine,
+    output_root,
+    receipt,
+    save,
+    *,
+    prior=(),
+    restore=None,
+    revalidate_rejections=(),
+):
+    if len(set(revalidate_rejections)) != len(revalidate_rejections) or any(
+        type(i) is not int or i < 0 or i >= len(prior) for i in revalidate_rejections
+    ):
+        raise ValueError("revalidation indices must select unique saved prior attempts")
     generate = engine.generate
 
     def wrapped(task, messages, schema):
@@ -190,13 +203,39 @@ def checkpoint_engine(engine, output_root, receipt, save, *, prior=(), restore=N
                     raise ValueError(
                         "author dataclass restoration changed saved output"
                     )
-                if hasattr(engine, "total_usage") and hasattr(result, "token_usage"):
-                    engine.total_usage += result.token_usage
-                record["reused_from"] = {
+                provenance = {
                     "path": saved["path"],
                     "sha256": saved["sha256"],
                 }
-                receipt["reused_samples"] = receipt.get("reused_samples", 0) + 1
+                if index in revalidate_rejections:
+                    old_output = previous["output"]
+                    if (
+                        old_output.get("metadata", {})
+                        .get("compile_status", {})
+                        .get("code")
+                        != 1
+                        or old_output.get("generated_tokens") != []
+                        or old_output.get("generation") not in (None, "")
+                    ):
+                        raise ValueError(
+                            "only empty prior compiler rejection can be revalidated"
+                        )
+                    record["revalidated_prior_compile_rejection"] = provenance
+                    receipt["new_generation_attempts"] = (
+                        receipt.get("new_generation_attempts", 0) + 1
+                    )
+                    receipt["revalidated_prior_compile_rejections"] = (
+                        receipt.get("revalidated_prior_compile_rejections", 0) + 1
+                    )
+                    save()
+                    result = generate(task, messages, schema)
+                else:
+                    if hasattr(engine, "total_usage") and hasattr(
+                        result, "token_usage"
+                    ):
+                        engine.total_usage += result.token_usage
+                    record["reused_from"] = provenance
+                    receipt["reused_samples"] = receipt.get("reused_samples", 0) + 1
             else:
                 receipt["new_generation_attempts"] = (
                     receipt.get("new_generation_attempts", 0) + 1
@@ -377,7 +416,16 @@ def run(args):
             )
 
         engine = checkpoint_engine(
-            engine, out, receipt, save, prior=prior, restore=restore
+            engine,
+            out,
+            receipt,
+            save,
+            prior=prior,
+            restore=restore,
+            revalidate_rejections=getattr(
+                args, "revalidate_prior_compile_rejection_indices", ()
+            )
+            or (),
         )
         os.chdir(out)
         outputs = bench(
@@ -430,6 +478,12 @@ def main():
     parser.add_argument("--snapshot-root", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--reuse-failed-run", type=Path)
+    parser.add_argument(
+        "--revalidate-prior-compile-rejection-indices",
+        type=int,
+        nargs="+",
+        help="Explicit prior empty compiler rejections only, after declared backend change; never regenerate saved model output",
+    )
     parser.add_argument(
         "--confirm-failed-tail-terminal",
         action="store_true",
