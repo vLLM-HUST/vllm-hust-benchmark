@@ -64,7 +64,7 @@ def test_v15_exact_extract_and_offline_reuse():
         )
     )
     report = (REPORT / "中期测试报告.md").read_text()
-    assert "报告版本：V0.89" in report
+    assert "报告编号：HUST-INFERENCE-MIDTERM-20261019" in report
     assert "V1.5第3.4.4节按测量区间分摊费用" in report
     assert "M06全流程验收未通过" not in report
     assert "官方0.18/0.18 B0与vLLM-HUST B1的同轮F、T、C已闭合" in report
