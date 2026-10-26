@@ -1,0 +1,97 @@
+{
+  "schema": "pegaflow-step-development-validation/v1",
+  "scope": "Exposed development workloads, excluded from cost fitting",
+  "calibration": {
+    "unique_inputs": 32,
+    "case_executions": 64,
+    "steps": 1326,
+    "pure_decode_steps": 1083,
+    "mixed_steps": 241,
+    "pure_prefill_steps": 2
+  },
+  "validation": {
+    "private": {
+      "scope": "Exposed workload validation; observation times are not predictor inputs",
+      "measured": {
+        "TTFT_mean_s": 33.19141597265476,
+        "TTFT_p95_s": 87.26582459919155,
+        "finish_span_s": 107.07742813974619,
+        "cache_hit_tokens": 0,
+        "peak_active_KV_blocks": 1131,
+        "peak_running": 8,
+        "peak_waiting": 75
+      },
+      "predicted": {
+        "TTFT_mean_s": 32.467399001769905,
+        "TTFT_p95_s": 85.79553799216163,
+        "finish_span_s": 105.67349303857397,
+        "cache_hit_tokens": 0,
+        "peak_active_KV_blocks": 1131,
+        "peak_running": 8,
+        "peak_waiting": 75
+      },
+      "relative_error_percent": {
+        "TTFT_mean_s": -2.1813380046254918,
+        "TTFT_p95_s": -1.6848366629008402,
+        "finish_span_s": -1.3111401025993592,
+        "peak_active_KV_blocks": 0.0,
+        "peak_running": 0.0,
+        "peak_waiting": 0.0
+      },
+      "request_first_absolute_error_s": {
+        "mean": 0.7273394324724742,
+        "p50": 0.7243545324207261,
+        "p95": 1.4708624348711368,
+        "max": 1.484510284676304
+      },
+      "request_finish_absolute_error_s": {
+        "mean": 0.8491481770404342,
+        "p50": 0.8810325943212689,
+        "p95": 1.4781034988534714,
+        "max": 1.6580582894409446
+      }
+    },
+    "shared": {
+      "scope": "Exposed workload validation; observation times are not predictor inputs",
+      "measured": {
+        "TTFT_mean_s": 17.274121996427052,
+        "TTFT_p95_s": 37.961607842706144,
+        "finish_span_s": 52.607441963627934,
+        "cache_hit_tokens": 798336,
+        "peak_active_KV_blocks": 759,
+        "peak_running": 8,
+        "peak_waiting": 73
+      },
+      "predicted": {
+        "TTFT_mean_s": 16.8225660492075,
+        "TTFT_p95_s": 37.25434753014718,
+        "finish_span_s": 51.655112561302715,
+        "cache_hit_tokens": 798336,
+        "peak_active_KV_blocks": 759,
+        "peak_running": 8,
+        "peak_waiting": 72
+      },
+      "relative_error_percent": {
+        "TTFT_mean_s": -2.614060195435417,
+        "TTFT_p95_s": -1.8630936695028752,
+        "finish_span_s": -1.8102560527152158,
+        "cache_hit_tokens": 0.0,
+        "peak_active_KV_blocks": 0.0,
+        "peak_running": 0.0,
+        "peak_waiting": -1.36986301369863
+      },
+      "request_first_absolute_error_s": {
+        "mean": 0.451590506174978,
+        "p50": 0.46719430875529966,
+        "p95": 0.8487302715634613,
+        "max": 0.9326458198871137
+      },
+      "request_finish_absolute_error_s": {
+        "mean": 0.5104747483379053,
+        "p50": 0.5076472654794912,
+        "p95": 0.8971163611171136,
+        "max": 0.9523294023252191
+      }
+    }
+  }
+}
