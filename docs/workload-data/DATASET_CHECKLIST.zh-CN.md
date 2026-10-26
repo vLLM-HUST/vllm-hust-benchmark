@@ -1,6 +1,6 @@
 # 数据集逐项验证清单
 
-### SchemaStore原始schema资产（尚未交付）
+### SchemaStore原始schema资产（交付完成）
 
 - [x] 核查官方定位与原生校验方式：这是schema集合及原正/负例，不是用户请求/模型质量benchmark，不造prompt冒充原请求。官方流程为`npm clean-install`后`node ./cli.js check`，保留原schema、引用和正负例。[官方说明](https://github.com/SchemaStore/schemastore/blob/b3c6a70f2a535d14e8ad2bf460b3aa8f5c0efb27/CONTRIBUTING.md)
 - [x] 固定版本原归档通过官方API取得；4810文件逐文件大小/Git blob校验及实际根tree独立一致性核验通过，含1006
@@ -9,7 +9,12 @@
   ARM64归档与官方发布校验和一致，公开`scripts/prepare_schemastore_runtime.py`实际执行exit0，npm10.9.2；原锁`clean-install`190包成功，没有系统安装或更改推理服务。锁中安装hook为0，显式禁用hook执行。
 - [x] 官方完整CLI校验exit0，pre-checks和Ajv validation均完成；执行前后4810原文件及重建Git根tree一致。报告实际测试976
   schemas，742有正例、289有负例，未改作者筛选规则，不冒称独立验证全部2681个catalog外链或全部1006原JSON文件。
-- [ ] 公共资产读取/索引与固定研究端消费；原生资源校验只证明schema资产可用，不产生推理性能/质量结论。
+- [x] 公共获取/原归档复用入口和数据组件读取、共享索引、fixture原字节读取已实现，纯数据边界与夹具检查通过。数据包不导入Node、评分器或观测依赖，原schema对象不改，正负例单独作为原验证资产引用。
+- [x] CI实际工件45文件一致；全1006原schema、3688正负例引用及索引核对，固定研究端16处回查和70份原例子字节读取通过。[最终回执](validation/schemastore-native-delivery-20261027.json)。资产可用不等于模型质量/性能结论，原正负例不生成prompt。
+
+数据获取：`python scripts/prepare_schemastore_original_assets.py --output /external/schemastore`默认只规划；`--execute`才获取固定官方归档。已有同一原归档可加`--reuse-archive /external/original.zip`，先验身份再复用；`--verify-only`只读校验。实际数据根为`/external/schemastore/data`，不把原schema/例子复制进仓库。
+
+公共使用：`iter_workload("SCHEMASTORE", data_root=Path("/external/schemastore/data"))`返回1006份按原schema路径排序的资产；`record.task["input"]["schema"]`是原JSON对象/boolean，`record.outcome_record()`的`positive_examples`/`negative_examples`保持官方目录关联规则和原路径/字节数/校验和。用`vllm_hust_workload_data.schemastore.read_original_fixture(data_root, record.source, reference)`读取不改写的JSON/YAML/TOML等原字节；不默认联网解析`$ref`、不生成prompt、不能调用`record.request_body()`冒充原始请求。共享准备入口仍按既有`sources:[{source_id,data_root}]`配置，不需科研专用配置。
 
 准备运行时：从`https://nodejs.org/dist/v22.14.0/node-v22.14.0-linux-arm64.tar.xz`取得原归档，再用`python scripts/prepare_schemastore_runtime.py --archive /external/node-v22.14.0-linux-arm64.tar.xz --output /external/private-node --execute`校验并解包。需要Python3.12+的tarfile数据过滤器及lzma模块，不依赖系统xz程序；本服务器初次系统tar解包因缺xz失败，改用标准库解包，原归档不变。校验入口默认只规划，显式提供`--source`原源码、`--original-tree`官方完整recursive
 Git
@@ -76,7 +81,7 @@ tree元数据、`--node`私有node路径、`--output`独立日志目录和`--exe
 
 - [x] 复用已有MMMU原生字段适配，更新92文件身份并保留旧登记revision；全16字段/11550行及索引完整，答案/解释与输入分离。精确CI的44载荷逐字节核验、152条公共/研究往返通过，未迁入研究观测或分析。
 
-当前机器清单计算：**52/113项已交付，61项待补**（另5项仅分类，不计入分母）。2026-10-27收口MMMU、PAWS及NarrativeQA原summary-QA交付；以下历史统计保留其原时点，不代表当前总数。
+当前机器清单计算：**53/113项已交付，60项待补**（另5项仅分类，不计入分母）。2026-10-27收口MMMU、PAWS、NarrativeQA原summary-QA及SchemaStore资产交付；以下历史统计保留其原时点，不代表当前总数。
 
 ### ChartQA分步骤（来源总勾已完成：固定原测试抽样交付）
 
@@ -303,7 +308,7 @@ TB；服务器/data约1.42TB可用，未缩小语料。ChartQA当前两卡主机
 | TAUBENCH                   | [x] 登记telecom交付          | 复用ENV原三题，新跑ENV＋ACTION原三题并官方重评分一致，双角色/200步/10错误/ALL保留；干净客户端125依赖、89原源码及保存结果重评分核验通过，全部2285原生引用研究侧接通。非其他domain或全2285模型运行完成。[交付回执](validation/tau2-native-delivery-20261024.json)                                                   |
 | TOOLBENCH                  | [ ] 待开展                   | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                      |
 | AGENTBENCH                 | [ ] 等研究窗口后续跑         | 官方FC ALFWorld前三组全41题已审计：复用0–2、新执行3–40，保留失败及原评分；剩68题待验证，不启动下一组、不冒充AgentBench整套完成。[回执](validation/agentbench-original-complete-groups-audit-20261024.json)                                                                                                        |
-| SCHEMASTORE                | [ ] 待开展                   | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                      |
+| SCHEMASTORE                | [x] 原schema资产已完成       | 原4810文件全核验，官方CLI测试976 schemas exit0；全1006 schema/3688正负例引用及索引、精确CI45文件和固定研究端16 schema/70例子字节回查通过。[回执](validation/schemastore-native-delivery-20261027.json)。非LLM请求/质量benchmark。                                                                                 |
 | JSONSCHEMABENCH            | [x] 原生固定协议交付         | 11原配置全部核验：WashingtonPost全38，其余9具名及default各原前3，共68配置视图任务；原bench/evaluator及逐项重评通过。33原文件19100视图行/索引、99处固定提供者/研究回查通过。旧生成复用，不称全量推理、统一后端性能或模型质量达标。[交付回执](validation/jsonschemabench-official-workflow-readiness-20261024.json) |
 | LIVECODEBENCH              | [ ] 待开展                   | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                      |
 | HUMANEVAL                  | [x] 已交付                   | 原前三题NPU生成结果复用，公共隔离入口官方评分2/3，失败保留；164题原字段公共/研究消费相等，原3题索引消费相等。不是全164题模型成绩。见[回执](validation/humaneval-native-delivery-20261025.json)。                                                                                                                  |
