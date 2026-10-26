@@ -558,6 +558,24 @@ def iter_workload(
             "unit": manifest["unit"],
             "provenance_kind": manifest["provenance_kind"],
         }
+        if source_id == "PAWS":
+            configuration = file_spec.get("configuration", "unspecified")
+            reference_kind = file_spec.get("reference_kind", "unspecified")
+            expected_kind = {
+                "labeled_final": "human",
+                "labeled_swap": "human",
+                "unlabeled_final": "noisy_auxiliary",
+            }
+            if configuration != "unspecified" and (
+                configuration not in expected_kind
+                or reference_kind != expected_kind[configuration]
+                or name.split("/")[0] != configuration
+            ):
+                raise ValueError(
+                    "PAWS original configuration/reference provenance mismatch"
+                )
+            source["dataset_configuration"] = configuration
+            source["label_reference_kind"] = reference_kind
         if source_id == "XLSUM":
             language = file_spec.get("language_variant")
             if not isinstance(language, str) or not language:

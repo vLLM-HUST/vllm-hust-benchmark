@@ -2,6 +2,18 @@
 
 ## PAWS发布方原分发准备（原生交付尚未完成）
 
+原始任务为句对释义二分类，发布方未提供聊天API提示/执行器；本仓新增的`scripts/run_paws_original.py`是**明确声明的零样本生成式模型适配**，不是作者官方API运行器或BERT论文模型复现。只把原`sentence1`/`sentence2`送入模型，原ID和参考标签不进入输入；原0/1语义不改，不改写、筛选或替换句子对。默认16输出token为本模型接入配置，不冒称发布方原预算；Qwen3.5-9B显式非思考。
+
+本次实际选择全8000条`labeled_final/test`，其余5文件各原前三条，共8015次分类调用，当前正在服务器运行；没有以读取/下载成功增加完成数。人工标注按原0/1标签计算正确率，非法输出计错、length/空输出原样保留；带噪声辅助集单独报告标签一致率，不能当人工测试准确率。新增公共适配源元数据`dataset_configuration`和`label_reference_kind`，不改原4数据字段，避免研究消费端误把噪声标签当人工gold。
+
+```bash
+python scripts/run_paws_original.py --data-root /external/paws-original/data --output /external/paws-run --full-test --disable-thinking --execute
+python scripts/verify_paws_original_saved.py --data-root /external/paws-original/data --run /external/paws-run --output /external/paws-audit --execute
+```
+
+两个入口均默认只规划；`--execute`才执行，目录必须新建且不覆盖原结果。默认每个原文件前三条；`--full-test`全跑人工final
+test、其他文件仍各前三条；`--full`才运行所有751450行，包括明确标注的辅助训练数据。`--workers`只限定客户端并发，当前实际为2，不据此报告性能。离线审计逐题核对原句对/ID/标签、保存请求/响应/usage、原物理位置及评分，禁止模型/judge调用、不修改旧运行；不是新一轮模型复跑。
+
 旧GCS归档403不再代表所有发布方路径均不可用：沿用已登记的`google-research-datasets/paws@161ece9501cf0a11f3e48bd356eaa82de46d6a09`，其完整6个HF
 Parquet、129285432字节已在服务器取得并二次只读校验，751450行与4原字段已检查。固定内容身份不变，镜像仅作传输；不构造句子对、不把Parquet冒称原tar同一文件。旧403保留在历史回执中。
 

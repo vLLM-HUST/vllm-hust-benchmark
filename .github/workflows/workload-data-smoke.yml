@@ -126,6 +126,9 @@ on:
       - 'tests/test_tracelab_original_build.py'
       - 'tests/test_tracelab_original_runner.py'
       - 'tests/test_paws_original_assets.py'
+      - 'tests/test_paws_original_runner.py'
+      - 'scripts/run_paws_original.py'
+      - 'scripts/verify_paws_original_saved.py'
       - 'scripts/prepare_paws_original_assets.py'
       - 'configs/workload-native/paws-original-assets.json'
       - 'scripts/build_tracelab_original.py'
@@ -253,7 +256,7 @@ jobs:
       - name: Original TraceLab build and replay CPU contracts only
         run: python -m pytest -q tests/test_tracelab_original_build.py tests/test_tracelab_original_runner.py
       - name: Original PAWS asset preparation CPU contracts only
-        run: python -m pytest -q tests/test_paws_original_assets.py
+        run: python -m pytest -q tests/test_paws_original_assets.py tests/test_paws_original_runner.py
       - name: Original model and metric CPU contracts only
         run: python -m pytest -q tests/test_gpqa_original_runner.py tests/test_xlsum_original_runner.py tests/test_beir_original_runner.py tests/test_stsb_original_runner.py tests/test_librispeech_original_runner.py tests/test_xsum_original_runner.py tests/test_multinews_original_runner.py tests/test_billsum_original_runner.py tests/test_flores200_original_assets.py tests/test_research_acquisition_reuse.py
       - name: Installed CLI and packaged catalogs

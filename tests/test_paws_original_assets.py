@@ -28,6 +28,29 @@ def test_complete_published_configurations():
     assert not result["source_checkbox_eligible"]
 
 
+def test_default_registry_preserves_all_files_and_reference_provenance():
+    source = json.loads(
+        (
+            ROOT / "workload-preparation/data/catalogs/source_manifests_v1.json"
+        ).read_text(encoding="utf-8")
+    )["sources"]["PAWS"]
+    pins = json.loads(module.PINS.read_text())["dataset"]
+    assert source["revision"] == pins["revision"]
+    assert len(source["files"]) == 6
+    assert all(item["role"] == "data" for item in source["files"])
+    assert sum(item["rows"] for item in source["files"]) == 751450
+    assert {
+        (item["path"], item["sha256"], item["bytes"]) for item in source["files"]
+    } == {(item["path"], item["sha256"], item["bytes"]) for item in pins["files"]}
+    assert all(
+        item["reference_kind"]
+        == (
+            "noisy_auxiliary" if item["configuration"] == "unlabeled_final" else "human"
+        )
+        for item in source["files"]
+    )
+
+
 def test_plan_never_creates_output(monkeypatch, tmp_path, capsys):
     output = tmp_path / "absent"
     monkeypatch.setattr(sys, "argv", ["prepare", "--output", str(output)])
