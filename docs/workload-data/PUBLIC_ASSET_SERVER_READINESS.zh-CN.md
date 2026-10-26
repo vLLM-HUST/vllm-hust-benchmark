@@ -2,6 +2,24 @@
 
 ## MMMU原始数据准备（原生交付未完成）
 
+服务器92原文件完整取得、二次只读校验通过，Parquet元数据共11550行（dev150、validation900、test10500）、16原字段。固定作者源码`268471d0`的Git
+tree身份通过；30学科validation各原前三题共90题完成NPU执行和作者原评分，含4道多图；公共保存结果审计重新核验输入、图片字节/位置、参考、真实usage、原解析和评分一致，新增模型调用0。[准备与原生阶段回执](validation/mmmu-original-readiness-20261026.json)。
+
+沿用作者示例128输出预算和温度0，Qwen3.5-9B显式非思考，59次length、31次stop原样保留；不能据此声称完整900题质量、LLaVA
+beam-search复现或性能提升。作者多选解析的随机兜底固定seed42并保留原解析，不用自己写的解析代替。现有数据适配复用原16字段分区，更新92原文件身份时保留旧登记revision；完整提供者与研究接通仍待验证，所以不打来源总勾。
+
+运行使用已验证Python3.12纯HTTP客户端（ChartQA客户端版本快照中的pyarrow、PyYAML、NumPy等依赖），模型仍由独立NPU服务推理；不要在宿主加载LLaVA/CUDA或执行其多图随机答案分支。先在外部目录取得官方源码，再显式执行：
+
+```bash
+python scripts/prepare_mmmu_author_source.py --output /external/mmmu-author
+python scripts/prepare_mmmu_author_source.py --output /external/mmmu-author --execute
+python scripts/prepare_mmmu_author_source.py --output /external/mmmu-author --verify-only
+python scripts/run_mmmu_original.py --official-checkout /external/mmmu-author --data-root /external/mmmu-original/data --output /external/mmmu-validation-run --disable-thinking --execute
+python scripts/verify_mmmu_original_saved.py --official-checkout /external/mmmu-author --data-root /external/mmmu-original/data --run /external/mmmu-validation-run --output /external/mmmu-validation-audit --execute
+```
+
+运行器默认只规划。默认验证原validation的30学科各前三题，`--full`运行完整原split，`--split dev|validation|test`选择原split；保存真实请求/响应和原评分输入于私有新目录，不重试、不换题、不覆盖已有运行。多图按原marker顺序保留原字节，未引用的非空图片/缺图报错，不丢弃图片。离线审计不调用模型或judge，不改旧运行。
+
 新增固定官方`MMMU/MMMU`版本`876ce5cb130f7f7e290ce4d9984357737d4db5cf`的完整92个Parquet分片清单，30学科、3655862232字节；Agriculture与Art_Theory各有两个test分片，不漏第二片。仓库仅存路径、容量与发布方SHA256，不存原题/图像/答案。此版本与旧登记版本不同，尚不覆盖旧适配身份或冒充消费验证。
 
 ```bash
