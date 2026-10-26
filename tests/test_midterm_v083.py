@@ -10,9 +10,13 @@ def test_current_method_is_consistent_and_history_is_preserved(monkeypatch):
     import build_midterm_v083 as builder
 
     data = json.loads(builder.OUTPUT.read_text())
-    assert data == builder.build(
-        data["source_commit"], lambda p: (ROOT / p).read_bytes()
-    )
+
+    def read(path):
+        if path == builder.REPORT:
+            path = path.replace(".md", "-v083.md")
+        return (ROOT / path).read_bytes()
+
+    assert data == builder.build(data["source_commit"], read)
     method = data["m01_method"]
     assert method == data["milestone_contract"]["method"]
     assert method["threshold_percent"] == 90
