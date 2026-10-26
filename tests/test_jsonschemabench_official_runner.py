@@ -1,6 +1,7 @@
 """Fake official-interface integration only; no dataset, network or NPU usage."""
 
 from dataclasses import dataclass
+import hashlib
 import importlib
 import json
 from pathlib import Path
@@ -12,6 +13,44 @@ import pytest
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 runner = importlib.import_module("run_jsonschemabench_official")
+source_preparer = importlib.import_module("prepare_jsonschemabench_author_source")
+
+
+def test_publisher_archive_source_checks_bytes_and_rejects_extra_python(
+    tmp_path, monkeypatch
+):
+    root = tmp_path / "author"
+    root.mkdir()
+    raw = b"# inert software fixture\n"
+    path = root / "example.py"
+    path.write_bytes(raw)
+    pins = tmp_path / "pins.json"
+    pins.write_text(
+        json.dumps(
+            {
+                "files": [
+                    {
+                        "path": "example.py",
+                        "bytes": len(raw),
+                        "sha256": hashlib.sha256(raw).hexdigest(),
+                        "git_blob": hashlib.sha1(
+                            b"blob " + str(len(raw)).encode() + b"\0" + raw
+                        ).hexdigest(),
+                    }
+                ]
+            }
+        )
+    )
+    monkeypatch.setattr(source_preparer, "PINS", pins)
+    assert runner.validate_source(root, "publisher-files") == root.resolve()
+    extra = root / "unexpected.py"
+    extra.write_text("# inert extra")
+    with pytest.raises(ValueError, match="unexpected"):
+        runner.validate_source(root, "publisher-files")
+    extra.unlink()
+    path.write_text("# changed fixture")
+    with pytest.raises(ValueError):
+        runner.validate_source(root, "publisher-files")
 
 
 def test_task_selection_does_not_double_count_default():
@@ -20,6 +59,22 @@ def test_task_selection_does_not_double_count_default():
     for tasks in (["A", "default"], ["A", "A"], ["unknown"], []):
         with pytest.raises(ValueError):
             runner.select_tasks(["A", "B", "default"], tasks)
+
+
+def test_fixed_publisher_source_matches_runner_revision_and_all_import_roots():
+    pins = json.loads(source_preparer.PINS.read_text(encoding="utf-8"))
+    assert pins["revision"] == runner.AUTHOR_REVISION
+    assert len(pins["files"]) == 44
+    assert sum(item["bytes"] for item in pins["files"]) == 1843390
+    paths = {item["path"] for item in pins["files"]}
+    assert {
+        "core/__init__.py",
+        "core/bench.py",
+        "core/evaluator.py",
+        "engines/__init__.py",
+        "requirements.txt",
+        "docs/custom_engine.md",
+    } <= paths
 
 
 @pytest.mark.parametrize(
@@ -85,7 +140,12 @@ def test_official_bench_bridge_preserves_location_and_defaults(tmp_path, monkeyp
     )
     source.mkdir()
     snapshot.mkdir()
-    monkeypatch.setattr(runner, "validate_source", lambda p: Path(p).resolve())
+
+    def verified_source(p, layout="git"):
+        assert layout == "git"
+        return Path(p).resolve()
+
+    monkeypatch.setattr(runner, "validate_source", verified_source)
     monkeypatch.setattr(runner, "validate_snapshot", lambda p, pins: Path(p).resolve())
     dataset = NS(
         DATASET_HUGGINGFACE_PATH="original",

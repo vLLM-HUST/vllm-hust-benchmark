@@ -19,12 +19,17 @@ from urllib.request import Request, urlopen
 
 from jsonschemabench_local_engine import create_engine
 from prepare_jsonschemabench_original_assets import PINS
+from prepare_jsonschemabench_author_source import verify_source
 from prepare_xsum_original_assets import bound_path, verify
 
 AUTHOR_REVISION = "8003e8405c4d8d8b327b1eb472c9856297d75493"  # pragma: allowlist secret - fixed public author revision
 
 
-def validate_source(root):
+def validate_source(root, source_layout="git"):
+    if source_layout == "publisher-files":
+        return verify_source(root)
+    if source_layout != "git":
+        raise ValueError("unknown author source validation layout")
     root = Path(root).resolve(strict=True)
 
     def git(*args):
@@ -114,7 +119,8 @@ def checkpoint_engine(engine, output_root, receipt, save):
 
 def run(args):
     pins = json.loads(PINS.read_text("utf-8"))
-    source = validate_source(args.official_source)
+    source_layout = getattr(args, "source_layout", "git")
+    source = validate_source(args.official_source, source_layout)
     snapshot = validate_snapshot(args.snapshot_root, pins)
     tasks = select_tasks(pins["config_names"], args.tasks)
     if not args.full and (type(args.limit) is not int or args.limit < 3):
@@ -133,6 +139,7 @@ def run(args):
         "source_id": "JSONSCHEMABENCH",
         "status": "STARTED_NOT_NATIVE_COMPLETE",
         "source_revision": AUTHOR_REVISION,
+        "source_layout": source_layout,
         "dataset_revision": pins["dataset"]["revision"],
         "dataset_pins_sha256": hashlib.sha256(PINS.read_bytes()).hexdigest(),
         "tasks": tasks,
@@ -244,7 +251,7 @@ def run(args):
             or sum(len(group) for group in outputs) != receipt["returned_samples"]
         ):
             raise RuntimeError("official output coverage mismatch")
-        validate_source(source)
+        validate_source(source, source_layout)
         validate_snapshot(snapshot, pins)
         receipt.update(
             status="ORIGINAL_BENCH_AND_EVALUATOR_RETURNED",
@@ -276,6 +283,9 @@ def run(args):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--official-source", type=Path, required=True)
+    parser.add_argument(
+        "--source-layout", choices=["git", "publisher-files"], default="git"
+    )
     parser.add_argument("--snapshot-root", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--origin", type=origin, default="http://127.0.0.1:19466")

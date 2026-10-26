@@ -873,7 +873,38 @@ original-dataset-private.jsonl；原Parquet校验身份，逻辑字段不改写�
 下一步为固定作者版本`09dd993f46c3fbf3a799465bb96d524edcb0b199`的官方sanitize，再在已核验沙箱里执行官方evaluate（instruct/full，固定三个task_id，pass@1，local执行backend）。保留raw与sanitize派生产物及摘要；官方sanitize是公开协议步骤，不是任意修补输出。
 禁止直接采用作者evaluate默认的远端Gradio服务发送产物，亦不能在宿主进程执行`--execution local`。完整隔离、依赖、官方sanitize与功能评分均尚未验证；当前仅软件夹具测试，不打交付勾。
 
-JSONSchemaBench
+### JSONSchemaBench 当前服务器核验（2026-10-26）
+
+原34资产已在服务器取得并核对40827041字节及固定摘要，44份作者源码/资源已与固定提交的官方Git tree 逐文件核对。Git传输和官方HF直连失败均保留，使用官方Git
+blob身份校验和显式镜像原字节，未修改作者代码。 在独立Python 3.12客户端实际导入作者core/全部注册后端、Dataset、bench、Engine，并完成11配置33处
+原few-shot格式化检查，无假模块。清除仅客户端继承的PYTHONPATH后pip check通过；旧CANN元数据污染导致的失败记录保留。 依赖见
+`configs/workload-native/jsonschemabench-client-requirements.txt`，现有vendor Torch 2.10.0+cpu
+与作者2.6.0不同，已披露；没有升级或替换服务端Torch/NPU栈，不声称论文环境复现。
+
+源码可复用原发布压缩包，无需因Git网络失败重下已核验文件：
+
+```bash
+python scripts/prepare_jsonschemabench_author_source.py --author-root /private/author-source
+python scripts/prepare_jsonschemabench_author_source.py --author-root /private/author-source \
+  --action prepare --max-bytes 1843390
+python scripts/prepare_jsonschemabench_author_source.py --author-root /private/author-source --action verify
+```
+
+第一条只输出计划；后两条用44份原始文件的Git blob、字节数及SHA256核验，不创建假的Git提交。 已有文件身份一致即复用，不覆盖不匹配文件。此布局运行官方桥接入口时显式指定
+`--source-layout publisher-files`；默认仍为干净固定Git checkout验证。两种布局执行的作者源码相同。
+
+十个具名test合计2855行，default test为2867行；原JSON schema内容比较显示default有1953个
+具名test中没有的schema，具名test有1940个default test中没有的schema。因此default不能直接当作
+完全重复而跳过，须单独验证；不能仅按名称假定切分相同，也不能把视图行数相加当独立任务数。
+
+已选WashingtonPost原38题全量协议，保持原schema、few-shot消息和原bench/evaluator，
+采用声明的本地Qwen3.5-27B双NPU/4096生成预算。前6题原生生成已保存，第7题在流中返回schema不支持错误，
+尚未完成整组官方评分。服务仍可用；保留原失败及六份成功结果，不换题、不重跑有效生成、不将任意API错误包装为编译拒绝。
+后续须补错误证据分类、精确断点复用，其余配置及default的完整原生验证、官方数据适配和工件/研究消费收口。
+来源仍未勾选。见[当前准备与失败证据](validation/jsonschemabench-official-workflow-readiness-20261024.json) 中的
+`current_server_readiness_20261026`；下文保留此前准备阶段说明，不表示当前仍未取得资产。
+
+JSONSchemaBench 历史准备截面
 环境前检：`python scripts/probe_jsonschemabench_environment.py`。只读已安装分发版本，与固定作者requirements分别列出“缺失”“版本不同”“版本一致”，不安装、不给版本不同直接下不兼容结论，也不执行可选后端或调用模型。
 当前本地核对缺少核心路径需要的dacite、prettytable，另缺工作流依赖stopit；因此此前模拟Engine测试不能升级为实际作者模块调用链通过。此结论仅针对本地软件环境，不代表服务器环境现状。
 作者core初始化会自动导入其他后端，完整环境还须按原安装方式核验可选引擎依赖，不能只装几项核心包就宣称bench可跑。需在服务器独立客户端环境处理，禁止为匹配作者CPU客户端torch版本而替换正在服务的Ascend
