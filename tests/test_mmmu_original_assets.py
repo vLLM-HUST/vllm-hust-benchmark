@@ -30,6 +30,21 @@ def test_complete_original_inventory():
         )
 
 
+def test_public_registry_registers_every_acquired_data_file():
+    pins = json.loads(module.PINS.read_text())["dataset"]
+    catalog = json.loads(
+        (
+            ROOT / "workload-preparation/data/catalogs/source_manifests_v1.json"
+        ).read_text(encoding="utf-8")
+    )
+    source = catalog["sources"]["MMMU"]
+    assert source["revision"] == pins["revision"]
+    assert len(source["files"]) == 92
+    assert all(item["role"] == "data" for item in source["files"])
+    fields = lambda rows: {(row["path"], row["bytes"], row["sha256"]) for row in rows}
+    assert fields(source["files"]) == fields(pins["files"])
+
+
 def test_default_no_download_or_directory(monkeypatch, tmp_path, capsys):
     output = tmp_path / "absent"
     monkeypatch.setattr(sys, "argv", ["prepare", "--output", str(output)])
