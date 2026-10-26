@@ -1598,7 +1598,19 @@
       "legacy_checked": false,
       "existing_receipt": "docs/workload-data/validation/original-serving-traces-reader-20261023.json",
       "delivery_receipt": null,
-      "blocker": "须恢复可信SSH、核验当前空间并安排专用磁盘I/O窗口；官方默认2000页容量受限profile可作为工具接通验证，不以9.37TiB无冲突映射作为唯一运行门槛。两独立场景保留文件上限约224.92GB，实际资源须重核。该工具不部署GLM5、不运行模型服务，不证明真实KV命中或引擎性能；原始回放仍未执行。"
+      "blocker": "可信SSH已恢复，NFS当前约1.2TB可用；已复用两份原始轨迹并补齐校验一致的九份固定作者模块。等待独立磁盘I/O窗口确认，尚未执行回放。默认两场景文件容量上限224919552000字节，不以9.37TiB全轨迹无冲突容量作为唯一门槛；不部署GLM5、不运行模型服务、不报告引擎性能。",
+      "current_preparation": {
+        "status": "OFFICIAL_STORAGE_REPLAY_PLAN_ONLY",
+        "server_stage": "mooncake-author-complete-32028-001",
+        "author_modules_verified": 9,
+        "different_old_module_identities_not_reused": 7,
+        "old_modules_preserved": true,
+        "original_trace_rows": [12031, 23608],
+        "fixed_original_requests_per_scenario": 3,
+        "retained_storage_capacity_bytes": 224919552000,
+        "storage_writes_executed": false,
+        "model_calls": 0
+      }
     },
     "QRECC": {
       "scope": "public",
