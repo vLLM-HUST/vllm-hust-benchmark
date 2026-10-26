@@ -8,6 +8,7 @@ DATA_MODULES = {
     "crosscodeeval",  # Original archive/profile/task relations only; no analysis.
     "flores200",  # Original parallel text and metadata bindings, no scoring.
     "narrativeqa",  # Pinned original table relations only, no observation/scoring.
+    "schemastore",  # Original schema/fixture bytes and identities only, no execution.
     "multinews",  # Original paired documents/references, no research analysis.
     "librispeech",  # Original audio/transcript bindings only, no observations.
     "stsb",  # Publisher sentence pairs and labels only; no research analysis.
@@ -67,6 +68,32 @@ def test_no_observation_dependencies_or_hooks():
     )
     assert not list((ROOT / "tools").rglob("*.py"))
     assert not (ROOT / "schemas/full_cycle_trace_v1.schema.json").exists()
+
+
+def test_schemastore_reader_cannot_execute_extract_download_or_observe():
+    import ast
+
+    tree = ast.parse(
+        (ROOT / "src/vllm_hust_workload_data/schemastore.py").read_text("utf-8")
+    )
+    imports = set()
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            imports.update(item.name for item in node.names)
+        elif isinstance(node, ast.ImportFrom):
+            imports.add(node.module)
+    assert imports == {"copy", "hashlib", "pathlib", "zipfile", "records", "assets"}
+    assert not any(
+        isinstance(node, ast.Attribute)
+        and node.attr in {"extract", "extractall", "urlopen", "system", "Popen"}
+        for node in ast.walk(tree)
+    )
+    assert not any(
+        isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Name)
+        and node.func.id in {"eval", "exec", "compile"}
+        for node in ast.walk(tree)
+    )
 
 
 def test_new_native_entry_software_contracts_are_watched_and_cpu_smoked():
