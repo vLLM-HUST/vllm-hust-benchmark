@@ -1,0 +1,87 @@
+{
+  "scope": "Production-oriented architecture scenario; component-calibrated, full P/D unvalidated",
+  "scheduler": "Baseline FCFS continuous batching; fixed session-affinity P/D routing",
+  "TTFT_percentiles": {
+    "p50": 0.2018995976082536,
+    "p90": 0.43129331503504886,
+    "p95": 0.5020952546792543,
+    "p99": 0.9700274509310134,
+    "p100": 0.9700274509310134
+  },
+  "TTFT_mean_parts_seconds": {
+    "P_prepare": 0.0001402278920929683,
+    "P_queue": 0.0012767109786059455,
+    "P_service_and_delivery": 0.143267180385714,
+    "P_CPU_save": 0.025052823176558194,
+    "D_handoff_and_restore": 0.027689196734257047,
+    "D_queue": 0.003122151804701919,
+    "D_first_service_and_delivery": 0.04690389626679118
+  },
+  "decode_tail_mean_seconds": 2.4896316307219175,
+  "engine_time_occupancy": {
+    "0": 0.035544019384460356,
+    "1": 0.02781320229555308,
+    "2": 0.4775971563130682,
+    "3": 0.45016542271719057
+  },
+  "engine_occupancy_definition": "Scheduled compute time / experiment span; distinct from measured AI Core utilization",
+  "peak_running_each": [
+    1,
+    1,
+    3,
+    3
+  ],
+  "peak_live_requests": 6,
+  "last_nominal_arrival_seconds": 197.47455024173806,
+  "finish_span_seconds": 202.33842299267323,
+  "RDMA_total_service_seconds": 0.9235818885461619,
+  "RDMA_max_queue_seconds": 0.0,
+  "CPU_evictions_each": [
+    0,
+    0,
+    0,
+    0
+  ],
+  "GPU_evictions_each": [
+    0,
+    0,
+    0,
+    0
+  ],
+  "worst_TTFT_request": {
+    "id": "feal-differential-cryptanalysis:10",
+    "P": 0,
+    "D": 2,
+    "offered": 137.20505454573188,
+    "ready": 137.20505454573188,
+    "stages": {
+      "P": {
+        "prepare": 137.20505454573188,
+        "node": 0,
+        "NPU_initial_prefix_blocks": 92,
+        "target_prefix_blocks": 92,
+        "restore_bytes": 0,
+        "engine_queued": 137.20505454573188,
+        "engine_start": 137.26782830036478,
+        "cached_tokens": 11776,
+        "engine_end": 137.8801195616414
+      },
+      "D": {
+        "prepare": 137.98564603882718,
+        "node": 2,
+        "NPU_initial_prefix_blocks": 92,
+        "target_prefix_blocks": 147,
+        "restore_bytes": 403701760,
+        "engine_queued": 138.12540953218524,
+        "engine_start": 138.1268764614735,
+        "cached_tokens": 18816,
+        "engine_end": 140.81723602964348
+      }
+    },
+    "first": 138.1750819966629,
+    "end": 140.81723602964348,
+    "TTFT": 0.9700274509310134,
+    "E2E": 3.6121814839115984,
+    "TPOT_ms": 20.804362464414055
+  }
+}

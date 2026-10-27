@@ -1,0 +1,64 @@
+{
+  "status": "PASS_evidence_review_failed_positive_control_preserved",
+  "reviewed_utc": "2026-10-27T06:01:06.239884+00:00",
+  "seal_sha256": "393026a5acba4a0c0f07c457810337029ce917b6bfe97472ae10e84318df35ea",
+  "verified_files": 77,
+  "exact_build_plan_sha256": "58eb637215968932175f99415e515b9458f431d73796541cdc6b674e0089f7ae",
+  "original_r1": {
+    "build_exit": 0,
+    "nop_exit": 130,
+    "reward": null,
+    "CTRF": false,
+    "mount_guard_preverifier_failure_preserved": true
+  },
+  "r2": {
+    "build_reused": true,
+    "new_build": false,
+    "nop": {
+      "Harbor_exit": 0,
+      "test_count": 1,
+      "passed": 0,
+      "failed": 1,
+      "reward": 0,
+      "cause": "original expected file absent"
+    },
+    "oracle": {
+      "Harbor_exit": 0,
+      "control_wrapper_exit": 1,
+      "test_count": 1,
+      "passed": 0,
+      "failed": 1,
+      "reward": 0,
+      "cause": "original assert alert_detected after original 5-second alert wait",
+      "test_body_executed": true
+    },
+    "pipeline": "failed_or_incomplete",
+    "new_Agent": 0,
+    "new_model": 0,
+    "task_coverage_added": 0
+  },
+  "resources": {
+    "cpu": 1,
+    "memory_GiB": 2,
+    "cpuset": "24-31",
+    "exact_four_original_log_and_transport_mounts_verified": true,
+    "containers_distinct": true,
+    "owned_containers_released": true,
+    "controller_exited": true
+  },
+  "no_changes_to_task_oracle_tests_threshold_or_original_scores": true,
+  "no_new_container_control_or_model_by_review": true,
+  "source_review_sha256": "6c903ee9a5b12d5f5dc50688fe6192fb7e169b570e38b85736594026e0fb9f2b",
+  "not_established": [
+    "assertion message claiming JavaScript removal is test prose, not a captured filtered-byte observation",
+    "cannot distinguish parser serialization from Chromium handling or timing solely from existing trace",
+    "cannot attribute to ARM64, browser release, or Python parser version from this evidence"
+  ],
+  "preflight_path_failure": {
+    "sha256": "83e1c20167c688f09bacc766895a1f309e3ee9ec28b2cfcc9233466fdf4fa7f0",
+    "preserved": true,
+    "failed_CPU_path_read_not_PASS": true,
+    "storage_exact_review_sha256": "b2384f6feffc8d452184d44c4bba5426c0821c9eba569b3de8638142cccc309c",
+    "next_execution_wrapper_requirement": "hard gate on successful exact review read and hash match before dispatch; do not chain launch after a failed read"
+  }
+}

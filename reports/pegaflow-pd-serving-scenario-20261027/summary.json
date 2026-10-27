@@ -1,0 +1,432 @@
+{
+  "graph-p8192-d2048": {
+    "requests": 95,
+    "TTFT": {
+      "mean": 0.24745218723872126,
+      "p50": 0.2018995976082536,
+      "p95": 0.5020952546792543,
+      "p99": 0.9700274509310134,
+      "max": 0.9700274509310134
+    },
+    "E2E": {
+      "mean": 2.737083817960639,
+      "p50": 2.705826942028054,
+      "p95": 3.126509059440508,
+      "p99": 3.6121814839115984,
+      "max": 3.6121814839115984
+    },
+    "TPOT_ms": {
+      "mean": 19.603398667101715,
+      "p50": 19.443422073271588,
+      "p95": 21.514397374207373,
+      "p99": 22.61563036255792,
+      "max": 22.61563036255792
+    },
+    "finish_span": 202.33842299267323,
+    "peak_live_requests": 6,
+    "peak_running_each": [
+      1,
+      1,
+      3,
+      3
+    ],
+    "peak_GPU_resident_GiB": [
+      4.087890625,
+      3.240234375,
+      4.4296875,
+      3.541015625
+    ],
+    "GPU_evictions_each": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "peak_CPU_GiB": [
+      4.115234375,
+      3.2470703125,
+      4.197265625,
+      3.3017578125
+    ],
+    "CPU_evictions_each": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "RDMA_GiB": 7.2529296875,
+    "D_uncached_tokens": 5990,
+    "P_uncached_tokens": 141798,
+    "extrapolated_steps": 21,
+    "settings": {
+      "P": 2,
+      "D": 2,
+      "TP": 1,
+      "model": "Qwen2.5-7B-Instruct:BF16",
+      "graph_mode": true,
+      "P_token_budget": 8192,
+      "D_token_budget": 2048,
+      "max_sequences_each": 128,
+      "GPU_APC": true,
+      "copy_compute_overlap": true,
+      "memory_budget": {
+        "HBM_GiB": 64,
+        "utilization": 0.9,
+        "measured_non_KV_GiB": 18.541015625,
+        "extra_margin_GiB": 1.0,
+        "NPU_KV_GiB": 38,
+        "host_memory_GiB_per_node": 64,
+        "CPU_pool_GiB_per_instance": 24,
+        "host_headroom_GiB_per_node": 16
+      },
+      "routing": "session affinity; four sessions per P/D pair",
+      "arrivals": "historical nominal ledger with same-session completion dependency",
+      "handoff": "full completed prefix blocks from P; D computes logits suffix",
+      "transfer_model": "CPU save, P-to-D FIFO service, H2D restore; no background traffic"
+    }
+  },
+  "graph-p2048-d2048": {
+    "requests": 95,
+    "TTFT": {
+      "mean": 0.2577869448187829,
+      "p50": 0.20078511430348556,
+      "p95": 0.5706231585600392,
+      "p99": 1.0858217053332737,
+      "max": 1.0858217053332737
+    },
+    "E2E": {
+      "mean": 2.7477642303735283,
+      "p50": 2.7285518628946335,
+      "p95": 3.1950369633213,
+      "p99": 3.7250127097545374,
+      "max": 3.7250127097545374
+    },
+    "TPOT_ms": {
+      "mean": 19.60612035869878,
+      "p50": 19.443422073271588,
+      "p95": 21.514397374207373,
+      "p99": 22.652499608682543,
+      "max": 22.652499608682543
+    },
+    "finish_span": 202.33842299267323,
+    "peak_live_requests": 6,
+    "peak_running_each": [
+      1,
+      1,
+      3,
+      3
+    ],
+    "peak_GPU_resident_GiB": [
+      4.087890625,
+      3.240234375,
+      4.4296875,
+      3.541015625
+    ],
+    "GPU_evictions_each": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "peak_CPU_GiB": [
+      4.115234375,
+      3.2470703125,
+      4.197265625,
+      3.3017578125
+    ],
+    "CPU_evictions_each": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "RDMA_GiB": 7.2529296875,
+    "D_uncached_tokens": 5990,
+    "P_uncached_tokens": 141798,
+    "extrapolated_steps": 0,
+    "settings": {
+      "P": 2,
+      "D": 2,
+      "TP": 1,
+      "model": "Qwen2.5-7B-Instruct:BF16",
+      "graph_mode": true,
+      "P_token_budget": 2048,
+      "D_token_budget": 2048,
+      "max_sequences_each": 128,
+      "GPU_APC": true,
+      "copy_compute_overlap": true,
+      "memory_budget": {
+        "HBM_GiB": 64,
+        "utilization": 0.9,
+        "measured_non_KV_GiB": 18.541015625,
+        "extra_margin_GiB": 1.0,
+        "NPU_KV_GiB": 38,
+        "host_memory_GiB_per_node": 64,
+        "CPU_pool_GiB_per_instance": 24,
+        "host_headroom_GiB_per_node": 16
+      },
+      "routing": "session affinity; four sessions per P/D pair",
+      "arrivals": "historical nominal ledger with same-session completion dependency",
+      "handoff": "full completed prefix blocks from P; D computes logits suffix",
+      "transfer_model": "CPU save, P-to-D FIFO service, H2D restore; no background traffic"
+    }
+  },
+  "graph-copy-serialized": {
+    "requests": 95,
+    "TTFT": {
+      "mean": 0.2574280042524619,
+      "p50": 0.2018995976082536,
+      "p95": 0.5938878814437771,
+      "p99": 0.9848399452442607,
+      "max": 0.9848399452442607
+    },
+    "E2E": {
+      "mean": 2.756172607206739,
+      "p50": 2.705826942028054,
+      "p95": 3.1391470472498497,
+      "p99": 3.686204786592441,
+      "max": 3.686204786592441
+    },
+    "TPOT_ms": {
+      "mean": 19.675154353970687,
+      "p50": 19.519953487213428,
+      "p95": 21.62596417072091,
+      "p99": 22.90487185176762,
+      "max": 22.90487185176762
+    },
+    "finish_span": 202.33842299267323,
+    "peak_live_requests": 6,
+    "peak_running_each": [
+      1,
+      1,
+      3,
+      3
+    ],
+    "peak_GPU_resident_GiB": [
+      4.087890625,
+      3.240234375,
+      4.4296875,
+      3.541015625
+    ],
+    "GPU_evictions_each": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "peak_CPU_GiB": [
+      4.115234375,
+      3.2470703125,
+      4.197265625,
+      3.3017578125
+    ],
+    "CPU_evictions_each": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "RDMA_GiB": 7.2529296875,
+    "D_uncached_tokens": 5990,
+    "P_uncached_tokens": 141798,
+    "extrapolated_steps": 21,
+    "settings": {
+      "P": 2,
+      "D": 2,
+      "TP": 1,
+      "model": "Qwen2.5-7B-Instruct:BF16",
+      "graph_mode": true,
+      "P_token_budget": 8192,
+      "D_token_budget": 2048,
+      "max_sequences_each": 128,
+      "GPU_APC": true,
+      "copy_compute_overlap": false,
+      "memory_budget": {
+        "HBM_GiB": 64,
+        "utilization": 0.9,
+        "measured_non_KV_GiB": 18.541015625,
+        "extra_margin_GiB": 1.0,
+        "NPU_KV_GiB": 38,
+        "host_memory_GiB_per_node": 64,
+        "CPU_pool_GiB_per_instance": 24,
+        "host_headroom_GiB_per_node": 16
+      },
+      "routing": "session affinity; four sessions per P/D pair",
+      "arrivals": "historical nominal ledger with same-session completion dependency",
+      "handoff": "full completed prefix blocks from P; D computes logits suffix",
+      "transfer_model": "CPU save, P-to-D FIFO service, H2D restore; no background traffic"
+    }
+  },
+  "graph-kv16": {
+    "requests": 95,
+    "TTFT": {
+      "mean": 0.24745218723872126,
+      "p50": 0.2018995976082536,
+      "p95": 0.5020952546792543,
+      "p99": 0.9700274509310134,
+      "max": 0.9700274509310134
+    },
+    "E2E": {
+      "mean": 2.737083817960639,
+      "p50": 2.705826942028054,
+      "p95": 3.126509059440508,
+      "p99": 3.6121814839115984,
+      "max": 3.6121814839115984
+    },
+    "TPOT_ms": {
+      "mean": 19.603398667101715,
+      "p50": 19.443422073271588,
+      "p95": 21.514397374207373,
+      "p99": 22.61563036255792,
+      "max": 22.61563036255792
+    },
+    "finish_span": 202.33842299267323,
+    "peak_live_requests": 6,
+    "peak_running_each": [
+      1,
+      1,
+      3,
+      3
+    ],
+    "peak_GPU_resident_GiB": [
+      4.087890625,
+      3.240234375,
+      4.4296875,
+      3.541015625
+    ],
+    "GPU_evictions_each": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "peak_CPU_GiB": [
+      4.115234375,
+      3.2470703125,
+      4.197265625,
+      3.3017578125
+    ],
+    "CPU_evictions_each": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "RDMA_GiB": 7.2529296875,
+    "D_uncached_tokens": 5990,
+    "P_uncached_tokens": 141798,
+    "extrapolated_steps": 21,
+    "settings": {
+      "P": 2,
+      "D": 2,
+      "TP": 1,
+      "model": "Qwen2.5-7B-Instruct:BF16",
+      "graph_mode": true,
+      "P_token_budget": 8192,
+      "D_token_budget": 2048,
+      "max_sequences_each": 128,
+      "GPU_APC": true,
+      "copy_compute_overlap": true,
+      "memory_budget": {
+        "HBM_GiB": 64,
+        "utilization": 0.9,
+        "measured_non_KV_GiB": 18.541015625,
+        "extra_margin_GiB": 1.0,
+        "NPU_KV_GiB": 16,
+        "host_memory_GiB_per_node": 64,
+        "CPU_pool_GiB_per_instance": 24,
+        "host_headroom_GiB_per_node": 16
+      },
+      "routing": "session affinity; four sessions per P/D pair",
+      "arrivals": "historical nominal ledger with same-session completion dependency",
+      "handoff": "full completed prefix blocks from P; D computes logits suffix",
+      "transfer_model": "CPU save, P-to-D FIFO service, H2D restore; no background traffic"
+    }
+  },
+  "graph-seqs8": {
+    "requests": 95,
+    "TTFT": {
+      "mean": 0.24745218723872126,
+      "p50": 0.2018995976082536,
+      "p95": 0.5020952546792543,
+      "p99": 0.9700274509310134,
+      "max": 0.9700274509310134
+    },
+    "E2E": {
+      "mean": 2.737083817960639,
+      "p50": 2.705826942028054,
+      "p95": 3.126509059440508,
+      "p99": 3.6121814839115984,
+      "max": 3.6121814839115984
+    },
+    "TPOT_ms": {
+      "mean": 19.603398667101715,
+      "p50": 19.443422073271588,
+      "p95": 21.514397374207373,
+      "p99": 22.61563036255792,
+      "max": 22.61563036255792
+    },
+    "finish_span": 202.33842299267323,
+    "peak_live_requests": 6,
+    "peak_running_each": [
+      1,
+      1,
+      3,
+      3
+    ],
+    "peak_GPU_resident_GiB": [
+      4.087890625,
+      3.240234375,
+      4.4296875,
+      3.541015625
+    ],
+    "GPU_evictions_each": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "peak_CPU_GiB": [
+      4.115234375,
+      3.2470703125,
+      4.197265625,
+      3.3017578125
+    ],
+    "CPU_evictions_each": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "RDMA_GiB": 7.2529296875,
+    "D_uncached_tokens": 5990,
+    "P_uncached_tokens": 141798,
+    "extrapolated_steps": 21,
+    "settings": {
+      "P": 2,
+      "D": 2,
+      "TP": 1,
+      "model": "Qwen2.5-7B-Instruct:BF16",
+      "graph_mode": true,
+      "P_token_budget": 8192,
+      "D_token_budget": 2048,
+      "max_sequences_each": 8,
+      "GPU_APC": true,
+      "copy_compute_overlap": true,
+      "memory_budget": {
+        "HBM_GiB": 64,
+        "utilization": 0.9,
+        "measured_non_KV_GiB": 18.541015625,
+        "extra_margin_GiB": 1.0,
+        "NPU_KV_GiB": 38,
+        "host_memory_GiB_per_node": 64,
+        "CPU_pool_GiB_per_instance": 24,
+        "host_headroom_GiB_per_node": 16
+      },
+      "routing": "session affinity; four sessions per P/D pair",
+      "arrivals": "historical nominal ledger with same-session completion dependency",
+      "handoff": "full completed prefix blocks from P; D computes logits suffix",
+      "transfer_model": "CPU save, P-to-D FIFO service, H2D restore; no background traffic"
+    }
+  }
+}

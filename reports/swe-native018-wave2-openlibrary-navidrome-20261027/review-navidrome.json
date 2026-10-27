@@ -1,0 +1,80 @@
+{
+  "status": "PASS_limited_original_result_compile_setup_failure_preserved",
+  "agent": {
+    "status": "Submitted",
+    "model_calls": 62,
+    "elapsed_seconds": 533.3633364606649,
+    "agent_submitted": true,
+    "patch_sha256": "5ae4ecf6da362add4d6ad36d36b3893168f39bd128f5ff1b784086785d337125",
+    "container_cleanup_exit_code": 0
+  },
+  "request_audit": {
+    "attempts": 62,
+    "successful_returns": 62,
+    "rejected": 0,
+    "response_ids_usage_content_hashes_matched": true,
+    "http_retries": 0
+  },
+  "official_grading": {
+    "resolved": false,
+    "unresolved": [],
+    "model_calls": 0,
+    "fail_to_pass": {
+      "expected": 2,
+      "passed": 0,
+      "failed": 0,
+      "missing": 2
+    },
+    "pass_to_pass": {
+      "expected": 0,
+      "passed": 0,
+      "failed": 0,
+      "missing": 0
+    },
+    "test_counts": {}
+  },
+  "patch_application": {
+    "status": "applied",
+    "exit_code": 0,
+    "state_capture": "complete",
+    "raw_patch_bytes": 12813,
+    "raw_patch_sha256": "5ae4ecf6da362add4d6ad36d36b3893168f39bd128f5ff1b784086785d337125",
+    "effective_patch_sha256": "5ae4ecf6da362add4d6ad36d36b3893168f39bd128f5ff1b784086785d337125",
+    "after_graded_equal": true
+  },
+  "affected_paths": 10,
+  "failure_mechanism": "The submitted patch adds imaging.Copy and imaging.DrawAt calls that the original build reports undefined, plus an import of internal/storage/fs for which the original build reports no required module. Setup/build fails before the selected test bodies; no functional assertion failure is established.",
+  "raw_parser_empty_preserved": true,
+  "no_tests_or_parser_changed": true,
+  "no_Agent_or_grading_retry": true,
+  "original_clean_fixture_verified": true,
+  "CPU_seal_sha256": "480623ea7710cba505ebb45038e397ac55db1085568ae7dfcdbe76e2427393dc",
+  "CPU_files_verified": 65,
+  "CPU_summary_sha256": "8c5e150803aeefb7a2a5b35a73252d8fc858acf1ca9f2be69a15c9a1779ca9f3",
+  "service_release_review_sha256": "de80daac87f4f182efe08188b5093404e4e5179de6bf5b395fd1175a721ce335",
+  "service_seal_sha256": "28256930f1d0219ca1243734f8fd6a919cfd6fb4d0f8ab60686d1de939e66149",
+  "service_files_verified": 14,
+  "owned_controllers_exited": true,
+  "owned_Agent_container_absent": true,
+  "actual_Agent_resources_verified": {
+    "CPU": 2,
+    "memory_GiB": 4,
+    "cpuset": "24-31",
+    "network_MTU": 1400
+  },
+  "grading_resource_scope": "Frozen original restricted policy retained; no retrospective live grading-container inspect claimed.",
+  "counts_after_this_unique_attempt": {
+    "attempts": 26,
+    "original_official_positive": 3,
+    "same_answer_recovery_disclosed_positive": 4,
+    "unattempted": 705,
+    "total": 731
+  },
+  "publication_boundary": "V098 remains24-task immutable snapshot; this result belongs next publication",
+  "private_originals_sha256": {
+    "raw_independent_review": "b347d30f154b656c02baf1bfff6b988c9e12d7b049ec917fa6bfac0364e1ca39",
+    "final_CPU_readback": "76c2423460b39219520be1c4323626f1841f8f4a715117fcf3cf18631b3cb619"
+  },
+  "observed_utc": "2026-10-27T08:30:42.919107+00:00",
+  "private_task_answers_patch_trajectory_not_included": true
+}

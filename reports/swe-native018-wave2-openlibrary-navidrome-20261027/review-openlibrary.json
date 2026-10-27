@@ -1,0 +1,113 @@
+{
+  "status": "reviewed_original_official_false_actual_three_target_assertion_failures",
+  "agent": {
+    "status": "Submitted",
+    "model_calls": 37,
+    "elapsed_seconds": 352.83412449620664,
+    "agent_submitted": true,
+    "patch_sha256": "d4b8e61725384a45fa4da10756ce61034ea3dd751d683ca43965edda1b099987",
+    "container_cleanup_exit_code": 0
+  },
+  "request_audit": {
+    "attempts": 37,
+    "successful_returns": 37,
+    "rejected": 0,
+    "response_ids_usage_content_hashes_matched": true,
+    "http_retries": 0
+  },
+  "official_grading": {
+    "resolved": false,
+    "unresolved": [],
+    "model_calls": 0,
+    "fail_to_pass": {
+      "expected": 2,
+      "passed": 0,
+      "failed": 2,
+      "missing": 0
+    },
+    "pass_to_pass": {
+      "expected": 1,
+      "passed": 0,
+      "failed": 1,
+      "missing": 0
+    },
+    "test_counts": {
+      "FAILED": 3
+    }
+  },
+  "raw_test_observation": {
+    "target_tests_executed": true,
+    "raw_final_test_counts": {
+      "passed": 0,
+      "failed": 3
+    },
+    "missing": 0,
+    "mechanism": "The submitted change recursively yields nested key fields from both current and old records. The original three tests observe duplicate and unrelated entries and differing order in the returned list, failing their actual list assertions.",
+    "not_compile_or_collection_failure": true,
+    "original_image_pytest_reruns": {
+      "inherited_max_reruns_per_test": 3,
+      "observed_total_reruns": 9,
+      "source": "frozen original image PYTEST_ADDOPTS; unchanged original official scoring invocation",
+      "additional_Agent_or_scoring_launches": 0
+    },
+    "original_parser_and_score_preserved": true
+  },
+  "application": {
+    "apply_exit_code": 0,
+    "state_capture": "complete",
+    "raw_patch_bytes": 270398,
+    "raw_patch_sha256": "d4b8e61725384a45fa4da10756ce61034ea3dd751d683ca43965edda1b099987",
+    "affected_paths": 3,
+    "after_equals_graded": true,
+    "original_composite_fixture_admitted_exactly": true,
+    "original_tracked_fixture_paths": 2,
+    "two_original_fixture_files_after_apply_match_exact_preAgent_bytes": true,
+    "original_submodule_link_identity_preserved_at_admission": true,
+    "patch_not_filtered_or_modified_by_review": true
+  },
+  "resource_release": {
+    "CPU_Agent_and_grade_exit": 0,
+    "owned_controllers_exited": true,
+    "owned_Agent_container_absent": true,
+    "Agent_actual_CPU": 2,
+    "Agent_actual_memory_GiB": 4,
+    "cpuset": "24-31",
+    "MTU": 1400,
+    "grade_resource_policy": {
+      "CPU": 2,
+      "memory_GiB": 4,
+      "network_MTU": 1400
+    },
+    "grade_live_inspect_captured_by_storage": false,
+    "model_exit": 0,
+    "sessions_drained": true,
+    "all_devices_released": true,
+    "later_other_task_containers_not_misreported_absent": true
+  },
+  "evidence": {
+    "CPU_files": 67,
+    "CPU_seal_sha256": "65395c178cee866fb3a874b7b2269d76289be9a6747198c8e40a68dba24b70dd",
+    "CPU_summary_sha256": "c8be5c452f520e5f21a0b2b57d3b221cf912ca0209c60647bb08bfebf6441492",
+    "storage_raw_review_sha256": "2abb2c7360e6ffc42c778d29d5a8e1c188fcd3d879175e5da920abdcb98687d4",
+    "fixture_lifecycle_sha256": "d8b769916df23ad47606772ed274894f90fb01a6d147fbeb5f239bc65d3afb97",
+    "service_receipt_sha256": "a3fab675c0c88a9e4e16b99d0463af6aee6fe307e7dd0ff8d6f0be5ccc871864",
+    "service_seal_sha256": "3ef316f6f22df6c7ea9b5c91d74fa8f4c6ee450fc460b268c7242e0f677722a7",
+    "service_files": 14,
+    "deriver_sha256": "6cfbc83d18692c9266535fcac445b599a9cd6f20182da0b6fa828438788bc022",
+    "deriver_normalized_AST_same_as_previous": true
+  },
+  "current_counts": {
+    "attempts": 25,
+    "original_official_positive": 3,
+    "same_answer_recovery_positive": 4,
+    "unattempted": 706,
+    "prior_snapshots_unchanged": true
+  },
+  "new_model_or_grader_by_review": 0,
+  "V098_snapshot_unchanged": {
+    "attempts": 24,
+    "original_official_positive": 3,
+    "same_answer_recovery_positive": 4,
+    "unattempted": 707
+  }
+}
