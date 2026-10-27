@@ -33,6 +33,16 @@ JSON解析，80份原文件解析失败，不能以CLI帮助通过声称数据�
 
 入口：`python scripts/prepare_discoverybench_original_assets.py --output <外部新目录>`默认只展示计划；`--execute`从固定官方版本获取并核验，拒绝已有目标；已有原目录用`--verify-only`只读复用，不改原题，不下载替代数据，不执行Agent。保留作者原许可证与归属说明；数据库层面的许可不自动覆盖所有内容权利，不公开原始资产。
 
+原始real任务的只读输入预检入口（不是Agent或评分入口）：
+
+```bash
+python scripts/verify_discoverybench_original_contract.py \
+  --native-assets <publisher-native-real外部目录> \
+  --answer-assets <publisher-answer-keys外部目录>
+```
+
+先核验全部185份固定real资产和原real答案键身份，再按原dataset/metadataid/query_id检查原题及精确文件关系，不按CSV行号配答案，不输出参考答案。发现原始问题时退出码1并列出失败引用，不自动改编码、补文件别名或过滤任务。服务器已用该公开入口检查全部239条引用，复现229条关系通过、5条UTF8失败及5条文件关系失败；这是预检真实结果，不是原生执行或来源交付成功。
+
 DiscoveryBench还提供两个官方HF准备profile：向同一准备入口传`--release publisher-task-index`取得固定数据卡及原默认train/test
 CSV；`--release publisher-answer-keys`取得原real/synth答案键。默认官方HF通道；服务器原通道明确失败后，显式`--hf-endpoint https://hf-mirror.com`可按同一官方版本、Git
 blob和大小校验获取，不带凭据、不用改造数据。`--reuse-assets <已有外部资产目录>`仅复制校验一致的文件到新目录、缺什么取什么，不覆盖旧目录；只读复用仍用`--verify-only`。

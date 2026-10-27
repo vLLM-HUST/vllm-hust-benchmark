@@ -390,7 +390,9 @@ def main():
             args.hf_endpoint != "https://huggingface.co"
             or args.reuse_assets is not None
         ):
-            parser.error("--hf-endpoint and --reuse-assets apply only to publisher releases")
+            parser.error(
+                "--hf-endpoint and --reuse-assets apply only to publisher releases"
+            )
         result = prepare(args.output, args.execute, args.verify_only)
     else:
         result = prepare_publisher_index(
