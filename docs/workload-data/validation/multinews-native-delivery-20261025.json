@@ -1,0 +1,79 @@
+{
+  "schema_version": "native-workload-delivery-receipt/v1",
+  "source_id": "MULTINEWS",
+  "date": "2026-10-25",
+  "status": "ORIGINAL_SAMPLED_PEGASUS_AND_HF_ROUGE_INTEGRATION_AVAILABLE",
+  "data_commit": "2e9fd2c43b233719a996b8cef0f37a516367701b", "data_commit_note": "pragma: allowlist secret - original public software or model identity",
+  "public_runner": "scripts/run_multinews_original.py",
+  "public_runner_sha256": "b9be39fd9d34f858e26df7cdca265f90fe2c24badd1c4732048bded3f72a7d1b", "public_runner_sha256_note": "pragma: allowlist secret - original public software or model identity",
+  "public_asset_preparer": "scripts/prepare_multinews_original_assets.py",
+  "original_asset_receipt": "docs/workload-data/validation/multinews-original-assets-20261025.json",
+  "original_pilot_receipt": "docs/workload-data/validation/multinews-native-pilot-and-score-20261025.json",
+  "native_entry_and_rescore_receipt": "docs/workload-data/validation/multinews-public-native-and-rescore-20261025.json",
+  "candidate_consumer_receipt": "docs/workload-data/validation/multinews-candidate-consumer-20261025.json",
+  "fixed_ci_research_handoff_receipt": "docs/workload-data/validation/multinews-fixed-ci-research-handoff-20261025.json",
+  "original_dataset_rows": {
+    "train": 44972,
+    "validation": 5622,
+    "test": 5622
+  },
+  "primary_frozen_original_test_indices": [
+    0,
+    1,
+    2
+  ],
+  "selection_rule": "First3 original physical test positions fixed before outputs; original single-input Pegasus pipeline forecast48970.84seconds exceeds30minutes",
+  "original_author_loader_fields_equal_for_all_rows": true,
+  "original_NEWLINE_CHAR_restoration_preserved": true,
+  "original_document_bundle_separators_preserved": true,
+  "original_source_target_line_pairing_preserved": true,
+  "original_blank_documents_per_split": {
+    "train": 8,
+    "validation": 1,
+    "test": 1
+  },
+  "original_blank_test4736_native_generation_and_scoring_verified": true,
+  "original_blank_test4736_device": "npu:0",
+  "model": {
+    "repo_id": "google/pegasus-multi_news",
+    "revision": "8c6e3fa59797d3be1420cb024b638cd29c6ab954", "revision_note": "pragma: allowlist secret - original public software or model identity",
+    "framework": "transformers==4.57.3",
+    "device": "npu:1",
+    "native_encoder_maximum_tokens": 1024,
+    "decoder_maximum_length": 256,
+    "decoder_minimum_length": 32,
+    "num_beams": 8,
+    "length_penalty": 0.8,
+    "no_repeat_ngram_size": 0
+  },
+  "fixed_public_entry_native_handoff": {
+    "server_generation_run": "multinews-fixed-entry-unseen-native-32082-001",
+    "server_score_run": "multinews-fixed-entry-unseen-score-32082-001",
+    "original_test_indices": [
+      6,
+      7,
+      8
+    ],
+    "new_model_calls": 3,
+    "previous_validated_positions_rerun": 0,
+    "score_reused_native_responses": 3,
+    "model_calls_during_scoring": 0,
+    "scoring_complete": true,
+    "rouge": {
+      "rouge1": 39.5187,
+      "rouge2": 15.3129,
+      "rougeL": 19.3288,
+      "rougeLsum": 35.4507
+    }
+  },
+  "reference_summary_given_to_model": false,
+  "full5622_test_inference_claim": false,
+  "full_document_long_context_inference_claim": false,
+  "original_paper_or_TF1_training_reproduction_claim": false,
+  "source_checkbox_eligible": true,
+  "research_default_dependency_lock_updated": false,
+  "research_observation_or_analysis_migrated": false,
+  "engine_performance_or_scientific_conclusion_claim": false,
+  "raw_payloads_published": false,
+  "boundary": "Original parallel assets and author loader field semantics; named official HF Pegasus single-input native1024-window protocol and HF ROUGE verified on frozen original samples plus separate public-entry/blank-document cases. Not all5622 test inference or full-bundle long-context evidence. Use original publisher license conditions; raw documents/references, responses, weights and complete indices stay external."
+}

@@ -1,0 +1,896 @@
+{
+  "version": "source-adapters/v1",
+  "status_policy": "Implementation, asset verification and runtime reproduction are independent. All other registered sources remain NOT_IMPLEMENTED.",
+  "adapters": {
+    "DEEPPLANNING": {
+      "kind": "native_environment_dataset",
+      "mapping": "deepplanning_original_tasks",
+      "input_fields": [
+        "id",
+        "query"
+      ],
+      "required_fields": [
+        "id",
+        "query"
+      ],
+      "outcome_fields": [
+        "meta_info",
+        "query_with_constraints"
+      ],
+      "annotation_fields": [
+        "domain",
+        "profile",
+        "database_archive",
+        "original_query_file",
+        "original_query_offset"
+      ],
+      "id_field": "",
+      "status": "ORIGINAL_TASK_READER_IMPLEMENTED_NATIVE_VALIDATION_SEPARATE",
+      "requirements": [
+        "Original author tools/database/Agent/scorer; travel report conversion required",
+        "No task-to-QA conversion or synthetic fallback"
+      ]
+    },
+    "SCIENCEWORLD": {
+      "kind": "native_environment_dataset",
+      "mapping": "scienceworld_original_goldpaths",
+      "input_fields": ["taskIdx", "taskName", "variationIdx", "taskDescription"],
+      "required_fields": ["taskIdx", "taskName", "variationIdx", "taskDescription", "fold", "path"],
+      "outcome_fields": ["path"],
+      "annotation_fields": ["fold", "archive_member", "original_task_key", "original_variation_offset"],
+      "id_field": "",
+      "requirements": ["Original ScienceWorld simulator/agent/scorer required; no task-to-QA conversion", "Publisher reference actions are never model input or research measurements"],
+      "status": "ORIGINAL_VARIATION_READER_IMPLEMENTED_NATIVE_VALIDATION_SEPARATE"
+    },
+    "JSONSCHEMABENCH": {
+      "kind": "task_dataset",
+      "mapping": "whole_json_schema",
+      "input_fields": ["schema"],
+      "required_fields": ["schema"],
+      "outcome_fields": [],
+      "annotation_fields": [],
+      "id_field": "",
+      "requirements": ["One original schema object or boolean per JSON file, not an observed request", "No schema rewriting, added required fields, synthetic prompt or external reference resolution during preparation", "Publisher prompt/validator execution is a separate explicit profile; JSON parsing does not prove conformance"],
+      "status": "SCHEMA_READER_IMPLEMENTED_NATIVE_VALIDATION_SEPARATE"
+    },
+    "QUALITY": {
+      "kind": "task_dataset",
+      "mapping": "quality_questions",
+      "row_format": "jsonl",
+      "input_fields": ["article", "question", "options"],
+      "required_fields": ["article", "article_id", "set_unique_id", "question_unique_id", "question", "options", "gold_label"],
+      "outcome_fields": ["gold_label", "writer_label", "validation", "speed_validation"],
+      "annotation_fields": ["article_id", "set_unique_id", "title", "source", "author", "year", "topic", "url", "license", "difficult", "source_parent_row_index", "source_question_index"],
+      "id_field": "question_unique_id",
+      "requirements": ["Original publisher HTML-stripped dev release; one question per record, not an entire writer question-set", "Release-order flat reference plus original JSONL parent/question positions; repeated article IDs are not separate articles", "Gold/writer/validation labels never enter input; no shortening of the article or options"],
+      "status": "QUESTION_READER_IMPLEMENTED_NATIVE_EXECUTION_NOT_VALIDATED"
+    },
+    "BBH": {
+      "kind": "task_dataset",
+      "mapping": "native_fields",
+      "records_path": ["examples"],
+      "input_fields": ["input"],
+      "required_fields": ["input", "target"],
+      "outcome_fields": ["target"],
+      "annotation_fields": [],
+      "id_field": "",
+      "requirements": ["Preserve all 27 original publisher task JSON files and unchanged task text; target remains reference-only", "Use original file path plus row index as stable task identity; do not invent arrival time", "All 27 publisher CoT prompt files remain separate from evaluation rows and are never scored as task targets", "Task-level runner, fixed harness scorer, and paper equivalence are separate claims"],
+      "status": "ALL_27_TASK_READERS_IMPLEMENTED_NATIVE_EXECUTION_NOT_VALIDATED"
+    },
+    "NATURAL_INSTRUCTIONS": {
+      "kind": "task_dataset",
+      "mapping": "native_instruction_instance",
+      "records_path": ["Instances"],
+      "root_fields": ["Definition", "Categories", "Input_language", "Output_language", "Instance License"],
+      "input_fields": ["Definition", "input"],
+      "required_fields": ["Definition", "id", "input", "output"],
+      "outcome_fields": ["output"],
+      "annotation_fields": ["Categories", "Input_language", "Output_language", "Instance License"],
+      "id_field": "id",
+      "requirements": ["Original per-task JSON Definition and instance input preserved separately; no synthetic prompt", "Instance outputs remain scorer references; examples are not automatically inserted", "Instruction-task variants are not equivalent to underlying original benchmarks; source-specific instance terms apply"],
+      "status": "READER_IMPLEMENTED_NATIVE_EXECUTION_NOT_VALIDATED"
+    },
+    "BFCL": {
+      "kind": "task_dataset",
+      "mapping": "native_function_call",
+      "row_format": "jsonl",
+      "native_structured_fields": ["question", "function"],
+      "input_fields": ["question", "function"],
+      "required_fields": ["id", "question", "function"],
+      "outcome_fields": [],
+      "annotation_fields": [],
+      "id_field": "id",
+      "requirements": ["Original BFCL v4 simple_python only; original .json filename contains JSONL", "Scorer references are separate private assets, never task inputs", "Official AST argument matching does not execute tools or generated code; do not claim other BFCL categories or closed-loop tasks"],
+      "status": "SIMPLE_PYTHON_READER_IMPLEMENTED_NATIVE_VALIDATION_SEPARATE"
+    },
+    "LONGBENCH": {
+      "kind": "task_dataset",
+      "mapping": "native_context_question",
+      "input_fields": ["context", "input"],
+      "required_fields": ["_id", "context", "input", "answers", "all_classes", "dataset", "length", "language"],
+      "nullable_fields": ["all_classes"],
+      "outcome_fields": ["answers", "all_classes"],
+      "annotation_fields": ["dataset", "length", "language"],
+      "id_field": "_id",
+      "requirements": ["Pinned original qasper subset only; no claim for other LongBench tasks", "Use official dataset2prompt, original 128-token budget and unchanged official QA-F1 scorer; disclose model-native chat transport and no context truncation"],
+      "status": "QASPER_READ_ADAPTER_IMPLEMENTED_VALIDATION_RECORDED_SEPARATELY"
+    },
+    "HUMANEVAL": {
+      "kind": "task_dataset",
+      "mapping": "native_code_task",
+      "input_fields": ["prompt"],
+      "required_fields": ["task_id", "prompt", "canonical_solution", "test", "entry_point"],
+      "outcome_fields": ["canonical_solution", "test", "entry_point"],
+      "annotation_fields": [],
+      "id_field": "task_id",
+      "requirements": ["Original raw code completion; no test or canonical solution in model input", "Official functional scorer requires verified isolated execution of model-generated code; generation alone is not task validation"],
+      "status": "READ_ADAPTER_IMPLEMENTED_OFFICIAL_EXECUTION_UNVERIFIED"
+    },
+    "DOLLY": {
+      "kind": "task_dataset",
+      "mapping": "instruction_context",
+      "input_fields": [
+        "instruction",
+        "context"
+      ],
+      "required_fields": [
+        "instruction",
+        "response"
+      ],
+      "outcome_fields": [
+        "response"
+      ],
+      "annotation_fields": [
+        "category"
+      ],
+      "id_field": "",
+      "requirements": [],
+      "status": "IMPLEMENTED_ASSET_VALIDATION_RECORDED_SEPARATELY"
+    },
+    "GSM8K": {
+      "kind": "task_dataset",
+      "mapping": "question_answer",
+      "input_fields": [
+        "question"
+      ],
+      "required_fields": [
+        "question",
+        "answer"
+      ],
+      "outcome_fields": [
+        "answer"
+      ],
+      "annotation_fields": [],
+      "id_field": "",
+      "requirements": [],
+      "status": "IMPLEMENTED_ASSET_VALIDATION_RECORDED_SEPARATELY"
+    },
+    "MATH500": {
+      "kind": "task_dataset",
+      "mapping": "native_math_problem",
+      "input_fields": ["problem"],
+      "required_fields": [
+        "unique_id",
+        "problem",
+        "solution",
+        "answer",
+        "subject",
+        "level"
+      ],
+      "outcome_fields": ["answer", "solution"],
+      "annotation_fields": ["unique_id", "subject", "level"],
+      "id_field": "unique_id",
+      "requirements": [
+        "Preserve each original held-out MATH problem as one task",
+        "Never expose answer or solution to model input",
+        "No prompt rewriting or fallback dataset is permitted"
+      ],
+      "status": "IMPLEMENTED_ASSET_VALIDATION_RECORDED_SEPARATELY"
+    },
+    "MMLU_PRO": {
+      "kind": "task_dataset",
+      "mapping": "question_options",
+      "input_fields": [
+        "question",
+        "options"
+      ],
+      "required_fields": [
+        "question_id",
+        "question",
+        "options",
+        "answer"
+      ],
+      "outcome_fields": [
+        "answer",
+        "answer_index",
+        "cot_content"
+      ],
+      "annotation_fields": [
+        "question_id",
+        "category",
+        "src"
+      ],
+      "id_field": "question_id",
+      "requirements": [],
+      "status": "IMPLEMENTED_ASSET_VALIDATION_RECORDED_SEPARATELY"
+    },
+    "AI2_ARC": {
+      "kind": "task_dataset",
+      "mapping": "question_choices",
+      "input_fields": [
+        "question",
+        "choices"
+      ],
+      "required_fields": [
+        "id",
+        "question",
+        "choices",
+        "answerKey"
+      ],
+      "outcome_fields": [
+        "answerKey"
+      ],
+      "annotation_fields": [
+        "id"
+      ],
+      "id_field": "id",
+      "requirements": [],
+      "status": "IMPLEMENTED_ASSET_VALIDATION_RECORDED_SEPARATELY"
+    },
+    "BIGCODEBENCH": {
+      "kind": "task_dataset",
+      "mapping": "native_code_task",
+      "input_fields": [
+        "complete_prompt",
+        "instruct_prompt",
+        "code_prompt"
+      ],
+      "required_fields": [
+        "task_id",
+        "complete_prompt",
+        "instruct_prompt"
+      ],
+      "outcome_fields": [
+        "canonical_solution",
+        "test"
+      ],
+      "annotation_fields": [
+        "task_id",
+        "entry_point",
+        "doc_struct",
+        "libs"
+      ],
+      "id_field": "task_id",
+      "requirements": [
+        "Select complete/instruct mode explicitly; use upstream harness/test environment; do not execute dataset code during adaptation"
+      ],
+      "status": "IMPLEMENTED_ASSET_VALIDATION_RECORDED_SEPARATELY"
+    },
+    "DS1000": {
+      "kind": "task_dataset",
+      "mapping": "native_code_task",
+      "input_fields": [
+        "prompt"
+      ],
+      "required_fields": [
+        "prompt",
+        "reference_code",
+        "code_context"
+      ],
+      "outcome_fields": [
+        "reference_code",
+        "code_context"
+      ],
+      "annotation_fields": [
+        "metadata"
+      ],
+      "id_field": "",
+      "requirements": [
+        "Upstream DS1000 evaluator/runtime required; code_context is evaluator-side, never executed here"
+      ],
+      "status": "IMPLEMENTED_ASSET_VALIDATION_RECORDED_SEPARATELY"
+    },
+    "SCIENCEAGENTBENCH": {
+      "kind": "task_dataset",
+      "mapping": "native_science_task",
+      "input_fields": [
+        "task_inst",
+        "domain_knowledge",
+        "dataset_folder_tree",
+        "dataset_preview"
+      ],
+      "required_fields": [
+        "instance_id",
+        "task_inst"
+      ],
+      "outcome_fields": [
+        "gold_program_name",
+        "eval_script_name"
+      ],
+      "annotation_fields": [
+        "instance_id",
+        "domain",
+        "subtask_categories",
+        "github_name",
+        "src_file_or_path",
+        "output_fname"
+      ],
+      "id_field": "instance_id",
+      "requirements": [
+        "Native repository/data environment and evaluator are external; task rows alone do not reproduce execution"
+      ],
+      "status": "IMPLEMENTED_ASSET_VALIDATION_RECORDED_SEPARATELY"
+    },
+    "STRUCTEVAL": {
+      "kind": "task_dataset",
+      "mapping": "native_structured_task",
+      "input_fields": [
+        "query",
+        "feature_requirements",
+        "input_type",
+        "output_type",
+        "query_example"
+      ],
+      "required_fields": [
+        "task_id",
+        "query",
+        "feature_requirements"
+      ],
+      "outcome_fields": [
+        "raw_output_metric",
+        "rendering",
+        "VQA"
+      ],
+      "annotation_fields": [
+        "task_id",
+        "task_name"
+      ],
+      "id_field": "task_id",
+      "requirements": [
+        "Source-specific renderer/scorer and any media must be bound before runtime use; not all constraints are API response_format"
+      ],
+      "status": "IMPLEMENTED_ASSET_VALIDATION_RECORDED_SEPARATELY"
+    },
+    "OASST1": {
+      "kind": "historical_message",
+      "mapping": "native_message_tree",
+      "input_fields": [
+        "text",
+        "role"
+      ],
+      "required_fields": [
+        "message_id",
+        "parent_id",
+        "text",
+        "role",
+        "message_tree_id"
+      ],
+      "outcome_fields": [
+        "labels",
+        "rank",
+        "review_count",
+        "review_result",
+        "detoxify"
+      ],
+      "annotation_fields": [
+        "message_id",
+        "parent_id",
+        "message_tree_id",
+        "user_id",
+        "created_date",
+        "lang",
+        "deleted",
+        "synthetic",
+        "model_name",
+        "tree_state",
+        "emojis"
+      ],
+      "id_field": "message_id",
+      "requirements": [
+        "Preserve parent edges across files; do not concatenate file rows as a conversation; creation dates are not serving arrivals"
+      ],
+      "status": "IMPLEMENTED_ASSET_VALIDATION_RECORDED_SEPARATELY"
+    },
+    "LONGBENCH_V2": {
+      "kind": "task_dataset",
+      "mapping": "native_long_question",
+      "input_fields": [
+        "context",
+        "question",
+        "choice_A",
+        "choice_B",
+        "choice_C",
+        "choice_D"
+      ],
+      "required_fields": [
+        "_id",
+        "context",
+        "question",
+        "answer"
+      ],
+      "outcome_fields": [
+        "answer"
+      ],
+      "annotation_fields": [
+        "_id",
+        "domain",
+        "sub_domain",
+        "difficulty",
+        "length"
+      ],
+      "id_field": "_id",
+      "requirements": [],
+      "status": "IMPLEMENTED_ASSET_VALIDATION_RECORDED_SEPARATELY"
+    },
+    "SWE_VERIFIED": {
+      "kind": "task_dataset",
+      "mapping": "native_repository_task",
+      "input_fields": [
+        "problem_statement"
+      ],
+      "required_fields": [
+        "instance_id",
+        "repo",
+        "base_commit",
+        "problem_statement"
+      ],
+      "outcome_fields": [
+        "patch",
+        "test_patch",
+        "FAIL_TO_PASS",
+        "PASS_TO_PASS",
+        "hints_text"
+      ],
+      "annotation_fields": [
+        "instance_id",
+        "repo",
+        "base_commit",
+        "environment_setup_commit",
+        "created_at",
+        "version",
+        "difficulty"
+      ],
+      "id_field": "instance_id",
+      "requirements": [
+        "Use upstream SWE-bench harness and pinned repository environment; do not expose reference patches"
+      ],
+      "status": "IMPLEMENTED_ASSET_VALIDATION_RECORDED_SEPARATELY"
+    },
+    "LONGWRITER": {
+      "kind": "task_dataset",
+      "mapping": "supervised_messages",
+      "input_fields": [
+        "messages"
+      ],
+      "required_fields": [
+        "messages"
+      ],
+      "outcome_fields": [],
+      "annotation_fields": [],
+      "id_field": "",
+      "requirements": [],
+      "status": "IMPLEMENTED_ASSET_VALIDATION_RECORDED_SEPARATELY"
+    },
+    "TOOLACE": {
+      "kind": "historical_dialogue",
+      "mapping": "native_tool_dialogue",
+      "input_fields": [
+        "system",
+        "conversations"
+      ],
+      "required_fields": [
+        "system",
+        "conversations"
+      ],
+      "outcome_fields": [],
+      "annotation_fields": [],
+      "id_field": "",
+      "requirements": [
+        "Published synthetic tool dialogue, not an executable Agent environment; assistant/tool turns remain historical observations"
+      ],
+      "status": "IMPLEMENTED_ASSET_VALIDATION_RECORDED_SEPARATELY"
+    },
+    "CHARTQA": {
+      "kind": "task_dataset",
+      "mapping": "native_chart_question",
+      "input_fields": [
+        "image",
+        "query"
+      ],
+      "required_fields": [
+        "image",
+        "query",
+        "label"
+      ],
+      "outcome_fields": [
+        "label"
+      ],
+      "annotation_fields": [
+        "human_or_machine"
+      ],
+      "id_field": "",
+      "requirements": [
+        "Preserve image bytes or resolve source media path under data root; renderer/tokenizer not chosen here"
+      ],
+      "status": "IMPLEMENTED_ASSET_VALIDATION_RECORDED_SEPARATELY"
+    },
+    "BURSTGPT": {
+      "normalization": {"timestamp_unit": "s", "timestamp_basis": "source_file_relative_start", "evidence_url": "https://github.com/HPMLL/BurstGPT#schema"},
+      "kind": "request_metadata",
+      "mapping": "native_request_metadata",
+      "input_fields": [],
+      "required_fields": [
+        "Timestamp",
+        "Model",
+        "Request tokens",
+        "Response tokens",
+        "Log Type"
+      ],
+      "outcome_fields": [],
+      "annotation_fields": [
+        "Timestamp",
+        "Model",
+        "Request tokens",
+        "Response tokens",
+        "Total tokens",
+        "Log Type",
+        "Session ID",
+        "Elapsed time"
+      ],
+      "id_field": "",
+      "requirements": [
+        "No prompt payload; metadata analysis only; preserve failed requests and publisher timestamp units"
+      ],
+      "status": "IMPLEMENTED_ASSET_VALIDATION_RECORDED_SEPARATELY"
+    },
+    "TRACELAB": {
+      "kind": "invocation_metadata",
+      "mapping": "native_invocation_metadata",
+      "input_fields": [],
+      "required_fields": [
+        "round_id",
+        "session_id",
+        "round_index"
+      ],
+      "outcome_fields": [],
+      "annotation_fields": [
+        "round_id",
+        "session_id",
+        "round_index",
+        "turn_id",
+        "trace_key",
+        "provider",
+        "model",
+        "store",
+        "project",
+        "user",
+        "input_tokens_total",
+        "output_tokens",
+        "prefix_tokens",
+        "newly_append_tokens",
+        "reasoning_output_tokens",
+        "claude_cache_creation_input_tokens",
+        "claude_cache_read_input_tokens",
+        "claude_uncached_input_tokens",
+        "current_input_chars",
+        "current_input_event_count",
+        "current_tool_result_chars",
+        "current_tool_result_count",
+        "current_user_message_chars",
+        "current_user_message_count",
+        "first_input_event_type",
+        "timing_events",
+        "tools"
+      ],
+      "id_field": "round_id",
+      "requirements": [
+        "Published invocation metadata only; do not fabricate prompt/tool results or treat round count as parent-task count"
+      ],
+      "status": "IMPLEMENTED_ASSET_VALIDATION_RECORDED_SEPARATELY"
+    },
+    "PAIO-CHAT-1000": {
+      "kind": "request_replay",
+      "mapping": "wrapped_request",
+      "input_fields": [
+        "request_body"
+      ],
+      "required_fields": [
+        "request_body"
+      ],
+      "outcome_fields": [],
+      "annotation_fields": [
+        "model_name",
+        "request_type"
+      ],
+      "id_field": "",
+      "requirements": [
+        "Enterprise real-derived/mixed data; not original production trace"
+      ],
+      "status": "IMPLEMENTED_ASSET_VALIDATION_RECORDED_SEPARATELY"
+    },
+    "PAIO-CODE-EVAL-1000": {
+      "kind": "request_replay",
+      "mapping": "wrapped_request",
+      "input_fields": [
+        "request_body"
+      ],
+      "required_fields": [
+        "request_body"
+      ],
+      "outcome_fields": [],
+      "annotation_fields": [
+        "model_name",
+        "request_type"
+      ],
+      "id_field": "",
+      "requirements": [
+        "Enterprise real-derived/mixed data; not original production trace"
+      ],
+      "status": "IMPLEMENTED_ASSET_VALIDATION_RECORDED_SEPARATELY"
+    },
+    "PAIO-JSON-500": {
+      "kind": "request_replay",
+      "mapping": "wrapped_request",
+      "input_fields": [
+        "request_body"
+      ],
+      "required_fields": [
+        "request_body"
+      ],
+      "outcome_fields": [],
+      "annotation_fields": [
+        "model_name",
+        "request_type"
+      ],
+      "id_field": "",
+      "requirements": [
+        "Enterprise real-derived/mixed data; not original production trace"
+      ],
+      "status": "IMPLEMENTED_ASSET_VALIDATION_RECORDED_SEPARATELY"
+    },
+    "PAIO-LONG-PREFILL-5000": {
+      "kind": "request_replay",
+      "mapping": "enterprise_messages",
+      "input_fields": [
+        "messages",
+        "model",
+        "max_tokens",
+        "max_completion_tokens",
+        "temperature",
+        "top_p",
+        "stream",
+        "response_format",
+        "tools",
+        "tool_choice",
+        "presence_penalty",
+        "frequency_penalty"
+      ],
+      "required_fields": [
+        "messages",
+        "prompt"
+      ],
+      "outcome_fields": [],
+      "annotation_fields": [
+        "id",
+        "request_id",
+        "workload_type",
+        "group_id",
+        "session_id",
+        "conversation_id",
+        "topic",
+        "prompt_tokens_est",
+        "prompt_hash",
+        "created_at_ms",
+        "metadata"
+      ],
+      "id_field": "id",
+      "requirements": [
+        "Provider construction labels are not measured runtime events; output target estimates are not automatically max_tokens"
+      ],
+      "status": "IMPLEMENTED_ASSET_VALIDATION_RECORDED_SEPARATELY"
+    },
+    "PAIO-PREFIX-SHARED-5000": {
+      "kind": "request_replay",
+      "mapping": "enterprise_messages",
+      "input_fields": [
+        "messages",
+        "model",
+        "max_tokens",
+        "max_completion_tokens",
+        "temperature",
+        "top_p",
+        "stream",
+        "response_format",
+        "tools",
+        "tool_choice",
+        "presence_penalty",
+        "frequency_penalty"
+      ],
+      "required_fields": [
+        "messages",
+        "prompt"
+      ],
+      "outcome_fields": [],
+      "annotation_fields": [
+        "id",
+        "request_id",
+        "workload_type",
+        "group_id",
+        "session_id",
+        "conversation_id",
+        "topic",
+        "prompt_tokens_est",
+        "prompt_hash",
+        "created_at_ms",
+        "metadata"
+      ],
+      "id_field": "id",
+      "requirements": [
+        "Provider construction labels are not measured runtime events; output target estimates are not automatically max_tokens"
+      ],
+      "status": "IMPLEMENTED_ASSET_VALIDATION_RECORDED_SEPARATELY"
+    },
+    "PAIO-REUSE-CONV-5000": {
+      "kind": "request_replay",
+      "mapping": "enterprise_messages",
+      "input_fields": [
+        "messages",
+        "model",
+        "max_tokens",
+        "max_completion_tokens",
+        "temperature",
+        "top_p",
+        "stream",
+        "response_format",
+        "tools",
+        "tool_choice",
+        "presence_penalty",
+        "frequency_penalty"
+      ],
+      "required_fields": [
+        "messages",
+        "prompt"
+      ],
+      "outcome_fields": [],
+      "annotation_fields": [
+        "id",
+        "request_id",
+        "workload_type",
+        "group_id",
+        "session_id",
+        "conversation_id",
+        "topic",
+        "prompt_tokens_est",
+        "prompt_hash",
+        "created_at_ms",
+        "metadata"
+      ],
+      "id_field": "id",
+      "requirements": [
+        "Provider construction labels are not measured runtime events; output target estimates are not automatically max_tokens"
+      ],
+      "status": "IMPLEMENTED_ASSET_VALIDATION_RECORDED_SEPARATELY"
+    },
+    "PAIO-SEMANTIC-SIMILAR-5000": {
+      "kind": "request_replay",
+      "mapping": "enterprise_messages",
+      "input_fields": [
+        "messages",
+        "model",
+        "max_tokens",
+        "max_completion_tokens",
+        "temperature",
+        "top_p",
+        "stream",
+        "response_format",
+        "tools",
+        "tool_choice",
+        "presence_penalty",
+        "frequency_penalty"
+      ],
+      "required_fields": [
+        "messages",
+        "prompt"
+      ],
+      "outcome_fields": [],
+      "annotation_fields": [
+        "id",
+        "request_id",
+        "workload_type",
+        "group_id",
+        "session_id",
+        "conversation_id",
+        "topic",
+        "prompt_tokens_est",
+        "prompt_hash",
+        "created_at_ms",
+        "metadata"
+      ],
+      "id_field": "id",
+      "requirements": [
+        "Provider construction labels are not measured runtime events; output target estimates are not automatically max_tokens"
+      ],
+      "status": "IMPLEMENTED_ASSET_VALIDATION_RECORDED_SEPARATELY"
+    },
+    "PAIO-LONGTEXT-4000": {
+      "kind": "request_replay",
+      "mapping": "enterprise_messages",
+      "input_fields": [
+        "messages",
+        "model",
+        "max_tokens",
+        "max_completion_tokens",
+        "temperature",
+        "top_p",
+        "stream",
+        "response_format",
+        "tools",
+        "tool_choice",
+        "presence_penalty",
+        "frequency_penalty"
+      ],
+      "required_fields": [
+        "messages",
+        "prompt"
+      ],
+      "outcome_fields": [],
+      "annotation_fields": [
+        "id",
+        "request_id",
+        "workload_type",
+        "group_id",
+        "session_id",
+        "conversation_id",
+        "topic",
+        "prompt_tokens_est",
+        "prompt_hash",
+        "created_at_ms",
+        "metadata"
+      ],
+      "id_field": "id",
+      "requirements": [
+        "Provider construction labels are not measured runtime events; output target estimates are not automatically max_tokens"
+      ],
+      "status": "IMPLEMENTED_ASSET_VALIDATION_RECORDED_SEPARATELY"
+    },
+    "AGENTBENCH": {
+      "kind": "official_task_suite",
+      "mapping": "official_runner_required",
+      "input_fields": [],
+      "required_fields": [],
+      "outcome_fields": [],
+      "annotation_fields": [],
+      "id_field": "",
+      "requirements": [
+        "Pin official original tasks, environment and scorer; no QBI variant fallback"
+      ],
+      "status": "NATIVE_REFERENCE_PREPARATION_IMPLEMENTED_ALFWORLD_FC_ONLY"
+    },
+    "GAIA": {
+      "kind": "official_task_suite",
+      "mapping": "official_runner_required",
+      "input_fields": [],
+      "required_fields": [],
+      "outcome_fields": [],
+      "annotation_fields": [],
+      "id_field": "",
+      "requirements": [
+        "Use raw GAIA and attachments with a pinned public agent stack; no curated evidence or annotated-task fallback"
+      ],
+      "status": "NOT_IMPLEMENTED_OFFICIAL_RUNNER_REQUIRED"
+    },
+    "TAUBENCH": {
+      "kind": "official_task_suite",
+      "mapping": "official_runner_required",
+      "input_fields": [],
+      "required_fields": [],
+      "outcome_fields": [],
+      "annotation_fields": [],
+      "id_field": "",
+      "requirements": [
+        "Pin official domain, split, interaction mode and scorer; no QBI solo114 fallback"
+      ],
+      "status": "NOT_IMPLEMENTED_OFFICIAL_RUNNER_REQUIRED"
+    }
+  }
+}

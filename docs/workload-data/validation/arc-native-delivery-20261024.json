@@ -1,0 +1,34 @@
+{
+  "schema_version": "native-workload-delivery-receipt/v1",
+  "source_id": "AI2_ARC",
+  "date": "2026-10-24",
+  "status": "UPSTREAM_NATIVE_SAMPLE_DELIVERY_AVAILABLE",
+  "available_original_tasks": 3548,
+  "verified_unique_original_tasks": 12,
+  "subprotocols": [
+    {"suite": "ARC-Challenge", "available_tasks": 1172, "original_doc_ids": [0, 1, 2, 1169, 1170, 1171]},
+    {"suite": "ARC-Easy", "available_tasks": 2376, "original_doc_ids": [0, 1, 2, 2373, 2374, 2375]}
+  ],
+  "native_execution_receipts": ["arc-challenge-npu-20261022.json", "arc-easy-npu-20261023.json", "arc-tail-native-audit-20261024.json"],
+  "installed_ci_reader_receipt": "reasoning-ci-assets-20261024.json",
+  "documentation": "docs/workload-data/ARC_CHALLENGE.zh-CN.md",
+  "public_runner": "scripts/run_arc_original_samples.py",
+  "framework": "lm-eval[api]==0.4.11",
+  "protocol": "Original zero-shot multiple-choice likelihood and acc/acc_norm, byte-identical original Parquets, completions with matching local tokenizer; no chat conversion or input truncation.",
+  "full_run_command_selection": "--suite ARC-Challenge --full; separately --suite ARC-Easy --full",
+  "sampling_cost_basis": "Three-task jobs took 49.82 and 38.38 seconds including setup; linear end-to-end extrapolation exceeds 30 minutes for each complete split. Planning estimate only, not measured performance.",
+  "source_checkbox_eligible": true,
+  "full_suite_validated": false,
+  "pooled_accuracy_reported": false,
+  "performance_claim": false,
+  "new_research_consumer_test_claim": false,
+  "raw_data_published": false,
+  "model_outputs_published": false,
+  "limits": [
+    "Both subprotocols validated independently on fixed original samples, not the full 3548 tasks.",
+    "Historical model profiles differ; metrics remain separate.",
+    "Framework effective count is not actual executed count; saved doc_ids audited.",
+    "Fixed CI provider and newly executed native script have separate provenance.",
+    "Existing NPU service reused; clean-machine compiler/model recreation not validated."
+  ]
+}

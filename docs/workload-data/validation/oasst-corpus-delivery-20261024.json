@@ -1,0 +1,31 @@
+{
+  "schema_version": "native-workload-delivery-receipt/v1",
+  "source_id": "OASST1",
+  "date": "2026-10-24",
+  "status": "ORIGINAL_CONVERSATION_CORPUS_AND_CONTINUATION_AVAILABLE",
+  "delivery_kind": "conversation_corpus",
+  "available_original_rows": 88838,
+  "verified_unique_continuation_points": 6,
+  "native_execution_receipts": ["oasst1-original-history-npu-20261023.json", "oasst-native-train-audit-20261024.json"],
+  "installed_ci_handoff_receipts": ["oasst-fixed-ci-handoff-20261024.json", "oasst-train-pipeline-20261024.json"],
+  "source_integrity_receipt": "oasst-members-20261024.json",
+  "documentation": "docs/workload-data/OASST1_ORIGINAL_CONTINUATION.zh-CN.md",
+  "public_runner": "scripts/run_oasst_original_continuation.py",
+  "scope": "Both fixed original corpus members, full row text/role/parent/tree/reference-field checks; three validation and three train original history continuations generated; fixed installed provider prepare/resolve inputs equal saved native requests.",
+  "selection_support": "Repeat --target-message-id for explicit original targets; --split train requires explicit IDs. Original full ancestor paths never truncated.",
+  "source_checkbox_eligible": true,
+  "full_source_inference_validated": false,
+  "quality_scored": false,
+  "official_quality_scorer_available": false,
+  "live_episode_validated": false,
+  "performance_claim": false,
+  "research_consumer_new_lock_validated": false,
+  "raw_data_published": false,
+  "model_outputs_published": false,
+  "limits": [
+    "Historical target replies are not semantic gold; no invented quality score.",
+    "History-conditioned generation is not an original API replay or live user interaction.",
+    "Only six original continuation points generated, not all 88838 messages.",
+    "Existing documented double-NPU service reused; clean-machine deployment not validated."
+  ]
+}

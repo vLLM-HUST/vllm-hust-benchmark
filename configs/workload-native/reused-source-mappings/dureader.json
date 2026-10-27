@@ -1,0 +1,223 @@
+{
+  "mapping_version": "source-mapping/v1",
+  "source": {
+    "source_id": "DUREADER",
+    "revision": "c625076b06da8f56d59f19c41c73bd580a98a347",
+    "unit": "published_question",
+    "publisher": "Baidu",
+    "locator": "https://raw.githubusercontent.com/baidu/DuReader/c625076b06da8f56d59f19c41c73bd580a98a347/DuReader-2.0/data/demo/trainset/search.train.json",
+    "license": "Apache-2.0 repository; no new redistribution asserted",
+    "provenance_kind": "published_static_dataset"
+  },
+  "families": [
+    "document-grounded-analysis"
+  ],
+  "records_path": [],
+  "identity": {
+    "task_id": {
+      "path": [
+        "question_id"
+      ],
+      "type": "number",
+      "required": true
+    }
+  },
+  "input": {
+    "question": {
+      "path": [
+        "question"
+      ],
+      "type": "string",
+      "required": true
+    },
+    "documents": {
+      "path": [
+        "documents"
+      ],
+      "type": "array",
+      "required": true,
+      "items": {
+        "path": [],
+        "type": "object",
+        "required": true,
+        "fields": {
+          "title": {
+            "path": [
+              "title"
+            ],
+            "type": "string",
+            "required": true
+          },
+          "paragraphs": {
+            "path": [
+              "paragraphs"
+            ],
+            "type": "array",
+            "required": true,
+            "items": {
+              "path": [],
+              "type": "string",
+              "required": true
+            }
+          }
+        }
+      }
+    }
+  },
+  "features": {},
+  "outcome": {
+    "question_type": {"path": ["question_type"], "type": "string", "required": false},
+    "fact_or_opinion": {"path": ["fact_or_opinion"], "type": "string", "required": false},
+    "segmented_question": {"path": ["segmented_question"], "type": "array", "required": false, "items": {"path": [], "type": "string", "required": true}},
+    "segmented_answers": {"path": ["segmented_answers"], "type": "array", "required": false, "items": {"path": [], "type": "array", "required": true, "items": {"path": [], "type": "string", "required": true}}},
+    "answers": {
+      "path": [
+        "answers"
+      ],
+      "type": "array",
+      "required": false,
+      "items": {
+        "path": [],
+        "type": "string",
+        "required": true
+      }
+    },
+    "answer_spans": {
+      "path": [
+        "answer_spans"
+      ],
+      "type": "array",
+      "required": false,
+      "items": {
+        "path": [],
+        "type": "array",
+        "required": true,
+        "items": {
+          "path": [],
+          "type": "number",
+          "required": true
+        }
+      }
+    },
+    "answer_docs": {
+      "path": [
+        "answer_docs"
+      ],
+      "type": "array",
+      "required": false,
+      "items": {
+        "path": [],
+        "type": "number",
+        "required": true
+      }
+    },
+    "fake_answers": {
+      "path": [
+        "fake_answers"
+      ],
+      "type": "array",
+      "required": false,
+      "items": {
+        "path": [],
+        "type": "string",
+        "required": true
+      }
+    },
+    "match_scores": {
+      "path": [
+        "match_scores"
+      ],
+      "type": "array",
+      "required": false,
+      "items": {
+        "path": [],
+        "type": "number",
+        "required": true
+      }
+    },
+    "document_annotations": {
+      "path": [
+        "documents"
+      ],
+      "type": "array",
+      "required": true,
+      "items": {
+        "path": [],
+        "type": "object",
+        "required": true,
+        "fields": {
+          "bs_rank_pos": {"path": ["bs_rank_pos"], "type": "number", "required": false},
+          "segmented_title": {"path": ["segmented_title"], "type": "array", "required": false, "items": {"path": [], "type": "string", "required": true}},
+          "segmented_paragraphs": {"path": ["segmented_paragraphs"], "type": "array", "required": false, "items": {"path": [], "type": "array", "required": true, "items": {"path": [], "type": "string", "required": true}}},
+          "is_selected": {
+            "path": [
+              "is_selected"
+            ],
+            "type": "boolean",
+            "required": false
+          },
+          "most_related_para": {
+            "path": [
+              "most_related_para"
+            ],
+            "type": "number",
+            "required": false
+          }
+        }
+      }
+    },
+    "yesno_answers": {
+      "path": [
+        "yesno_answers"
+      ],
+      "type": "array",
+      "required": false,
+      "items": {
+        "path": [],
+        "type": "string",
+        "required": true
+      }
+    },
+    "entity_answers": {
+      "path": [
+        "entity_answers"
+      ],
+      "type": "array",
+      "required": false,
+      "items": {
+        "path": [],
+        "type": "array",
+        "required": true,
+        "items": {
+          "path": [],
+          "type": "string",
+          "required": true
+        }
+      }
+    },
+    "yesno_type": {
+      "path": [
+        "yesno_type"
+      ],
+      "type": "string",
+      "required": false
+    }
+  },
+  "runtime": {
+    "kind": "task_dataset",
+    "requirements": [
+      "Static published dataset only; no model, scorer, runtime or synthetic fallback"
+    ],
+    "environment_ref": null,
+    "termination_ref": null,
+    "scorer_ref": null
+  },
+  "replay": {
+    "order": "source_file_order_not_assumed_arrival_order",
+    "artificial_load": false
+  },
+  "evidence": {
+    "field_reference": "https://raw.githubusercontent.com/baidu/DuReader/c625076b06da8f56d59f19c41c73bd580a98a347/DuReader-2.0/data/demo/trainset/search.train.json",
+    "review_status": "field_contract_reviewed"
+  }
+}

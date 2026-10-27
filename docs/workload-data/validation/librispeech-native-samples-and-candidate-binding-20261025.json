@@ -1,0 +1,138 @@
+{
+  "source_id": "LIBRISPEECH",
+  "status": "ORIGINAL_FULL_WAVEFORM_NATIVE_SAMPLES_AND_CANDIDATE_BINDINGS_VERIFIED_NOT_DELIVERY",
+  "model": "base.en",
+  "device": "npu:1",
+  "framework_revision": "31243bad24cc746f07d4c8bfdd2d974872cb1803", "framework_revision_note": "pragma: allowlist secret - public publisher revision",
+  "protocol": "publisher Whisper.transcribe, complete original 16kHz waveform, language=en, task=transcribe, all other native defaults",
+  "notebook_30_second_clipping_used": false,
+  "model_calls": 8,
+  "versions": {
+    "openai-whisper": "20250625",
+    "torch": "2.10.0+cpu",
+    "torch-npu": "2.10.0.post4",
+    "numpy": "1.26.4",
+    "numba": "0.61.2",
+    "tiktoken": "0.11.0",
+    "jiwer": "4.0.0",
+    "soundfile": "0.13.1"
+  },
+  "model_parameters_verified_on_npu": true,
+  "native_encoder_decoder_outputs_verified_on_npu": true,
+  "splits": [
+    {
+      "split": "test-clean",
+      "original_utterances": 2620,
+      "original_total_audio_seconds": 19452.480625,
+      "preselected_original_indices_before_model_outputs": [
+        0,
+        1,
+        2,
+        1268
+      ],
+      "longest_original_index": 1268,
+      "longest_audio_seconds": 34.955,
+      "selection_rule": "original sorted IDs first3 plus longest, unique; forecast warm worst RTF*all audio*1.25+60 seconds <=1800 means full",
+      "status": "ORIGINAL_FULL_WAVEFORM_EXECUTION_AND_NATIVE_NORMALIZED_WER_COMPLETED",
+      "completed_original_positions": [
+        0,
+        1,
+        2,
+        1268
+      ],
+      "selection_mode": "PRESELECTED_ORIGINAL_FIRST3_PLUS_LONGEST",
+      "estimated_full_warm_execution_seconds": 10009.09426690403,
+      "selected_original_positions": [
+        0,
+        1,
+        2,
+        1268
+      ],
+      "normalized_corpus_wer": 0.06870229007633588,
+      "longest_original_audio_complete_input_verified": true
+    },
+    {
+      "split": "test-other",
+      "original_utterances": 2939,
+      "original_total_audio_seconds": 19229.570125,
+      "preselected_original_indices_before_model_outputs": [
+        0,
+        1,
+        2,
+        1280
+      ],
+      "longest_original_index": 1280,
+      "longest_audio_seconds": 34.51,
+      "selection_rule": "original sorted IDs first3 plus longest, unique; forecast warm worst RTF*all audio*1.25+60 seconds <=1800 means full",
+      "status": "ORIGINAL_FULL_WAVEFORM_EXECUTION_AND_NATIVE_NORMALIZED_WER_COMPLETED",
+      "completed_original_positions": [
+        0,
+        1,
+        2,
+        1280
+      ],
+      "selection_mode": "PRESELECTED_ORIGINAL_FIRST3_PLUS_LONGEST",
+      "estimated_full_warm_execution_seconds": 10581.63890552075,
+      "selected_original_positions": [
+        0,
+        1,
+        2,
+        1280
+      ],
+      "normalized_corpus_wer": 0.03571428571428571,
+      "longest_original_audio_complete_input_verified": true
+    }
+  ],
+  "client_isolated_pip_check": "No broken requirements found.",
+  "global_or_existing_client_modified": false,
+  "raw_asset_binding_audit": {
+    "source_id": "LIBRISPEECH",
+    "status": "CANDIDATE_ORIGINAL_ARCHIVE_ROWS_AND_NATIVE_AUDIO_BINDINGS_VERIFIED",
+    "checks": [
+      {
+        "split": "test-clean",
+        "all_original_utterances_and_transcripts_preserved": 2620,
+        "native_selected_audio_bindings_byte_identical": 4,
+        "native_selected_waveforms_complete_samples_verified": true
+      },
+      {
+        "split": "test-other",
+        "all_original_utterances_and_transcripts_preserved": 2939,
+        "native_selected_audio_bindings_byte_identical": 4,
+        "native_selected_waveforms_complete_samples_verified": true
+      }
+    ],
+    "model_calls": 0,
+    "new_scoring_runs": 0,
+    "source_checkbox_eligible": false,
+    "public_native_entry_complete": false,
+    "fixed_ci_artifact_verified": false,
+    "research_consumption_verified": false,
+    "research_observation_or_analysis_migrated": false,
+    "raw_payloads_published": false
+  },
+  "public_native_candidate_additional_validation": {
+    "server_native_run": "librispeech-public-entry-unseen-native-32082-002",
+    "server_model_free_audit": "librispeech-public-entry-model-free-audit-32082-003",
+    "status": "PUBLIC_ENTRY_ORIGINAL_BINDINGS_AND_SCORING_VERIFIED",
+    "new_original_positions_per_split": [6, 7, 8],
+    "new_model_calls": 6,
+    "rerun_previously_verified_positions": 0,
+    "all_original_rows_in_preparation": 5559,
+    "original_waveforms_clipped": false,
+    "selected_audio_bytes_frames_and_references_verified": true,
+    "publisher_normalizer_and_wer_recomputed_equal": true,
+    "installed_publisher_git_blobs_verified": 18,
+    "fixed_ci_artifact_verified": false,
+    "research_consumption_verified": false,
+    "source_checkbox_eligible": false
+  },
+  "full_split_inference_claim": false,
+  "runtime_forecasts_only_for_selection_not_performance": true,
+  "public_native_entry_complete": false,
+  "fixed_ci_artifact_verified": false,
+  "research_consumption_verified": false,
+  "source_checkbox_eligible": false,
+  "research_observation_or_analysis_migrated": false,
+  "raw_payloads_published": false
+}

@@ -1,0 +1,384 @@
+{
+  "schema_version": "research-acquisition-reuse-audit/v1",
+  "date": "2026-10-25",
+  "infinitebench_code_debug_native_audit_32050_20261026": {
+    "server_receipt": "infinitebench-code-debug-9b-original-audit-32050-001/receipt-public.json",
+    "task": "code_debug",
+    "model": "Qwen3.5-9B BF16 TP1",
+    "model_chat_template_kwargs": {"enable_thinking": false},
+    "original_positions": [0, 1, 2],
+    "full_prompt_tokens": [214956, 214962, 214964],
+    "original_budget": 5,
+    "finish_reasons": ["length", "length", "length"],
+    "author_score": 0.0,
+    "new_model_calls_during_audit": 0,
+    "saved_original_requests_labels_responses_usage_hashes_and_scores_equal": true,
+    "low_scores_and_length_termini_retained_without_budget_increase": true,
+    "source_checkbox_eligible": false,
+    "other_pending_protocols_unchanged": true,
+    "raw_payloads_published": false
+  },
+  "infinitebench_kv_retrieval_native_audit_32050_20261026": {
+    "server_receipt": "infinitebench-kv-retrieval-9b-original-audit-32050-001/receipt-public.json",
+    "task": "kv_retrieval",
+    "model": "Qwen3.5-9B BF16 TP1",
+    "model_chat_template_kwargs": {"enable_thinking": false},
+    "original_positions": [0, 1, 2],
+    "full_prompt_tokens": [169100, 169118, 169254],
+    "original_budget": 50,
+    "finish_reasons": ["stop", "stop", "stop"],
+    "author_score": 1.0,
+    "new_model_calls_during_audit": 0,
+    "saved_original_requests_labels_responses_usage_hashes_and_scores_equal": true,
+    "source_checkbox_eligible": false,
+    "other_pending_protocols_unchanged": true,
+    "raw_payloads_published": false
+  },
+  "infinitebench_next3_native_audit_32050_20261026": {
+    "server_receipt": "infinitebench-supplementary-next3-original-audit-32050-001/receipt-public.json",
+    "task": "math_find",
+    "model": "Qwen3.5-27B BF16 TP2",
+    "original_positions": [9, 10, 11],
+    "full_prompt_tokens": [116865, 116700, 116762],
+    "original_budget": 3,
+    "finish_reasons": ["stop", "stop", "stop"],
+    "author_score": 1.0,
+    "new_model_calls_during_audit": 0,
+    "saved_original_requests_labels_responses_usage_hashes_and_scores_equal": true,
+    "source_checkbox_eligible": false,
+    "blocked_protocols_unchanged": true,
+    "raw_payloads_published": false
+  },
+  "infinitebench_supplementary_native_audit_32050_20261026": {
+    "server_receipt": "infinitebench-supplementary-six-original-audit-32050-001/receipt-public.json",
+    "task": "math_find",
+    "model": "Qwen3.5-27B BF16 TP2",
+    "original_budget": 3,
+    "groups": [
+      {"original_positions": [3, 4, 5], "full_prompt_tokens": [116845, 116349, 116908], "finish_reasons": ["stop", "stop", "stop"], "author_score": 1.0},
+      {"original_positions": [6, 7, 8], "full_prompt_tokens": [117072, 116444, 116973], "finish_reasons": ["stop", "stop", "stop"], "author_score": 1.0}
+    ],
+    "new_model_calls_during_audit": 0,
+    "six_saved_original_requests_labels_responses_usage_hashes_and_scores_equal": true,
+    "main_first_three_protocol_evidence_unchanged": true,
+    "blocked_protocols_unchanged": true,
+    "source_checkbox_eligible": false,
+    "performance_or_full_source_claim": false,
+    "raw_payloads_published": false
+  },
+  "infinitebench_six_protocol_native_audit_32050_20261026": {
+    "server_receipt": "infinitebench-six-protocol-results-audit-32050-001/receipt-public.json",
+    "original_positions_per_protocol": [0, 1, 2],
+    "protocols_completed": ["code_run", "passkey", "number_string", "longbook_qa_eng", "longdialogue_qa_eng", "math_find"],
+    "native_selected_tasks": 18,
+    "prior_code_run_results_reused_without_rerun": true,
+    "independent_requests_labels_outputs_hashes_and_usage_equal": true,
+    "official_saved_output_regrade_equal": true,
+    "original_author_budgets": {"code_run": 5, "passkey": 6, "number_string": 12, "longbook_qa_eng": 40, "longdialogue_qa_eng": 40, "math_find": 3},
+    "author_scores": {"code_run": 0.0, "passkey": 0.0, "number_string": 0.0, "longbook_qa_eng": 0.3666666666666667, "longdialogue_qa_eng": 0.6666666666666666, "math_find": 1.0},
+    "length_terminations": 11,
+    "stop_terminations": 7,
+    "quality_pass_or_aggregate_cross_protocol_score_claim": false,
+    "budget_increase_context_trimming_or_failed_task_replacement": false,
+    "new_model_calls_during_audit": 0,
+    "full_source_delivery_complete": false,
+    "raw_payloads_published": false
+  },
+  "infinitebench_full_record_preparation_32050_20261026": {
+    "public_entry": "scripts/prepare_reused_source_records.py",
+    "numeric_array_group_rows": 800,
+    "string_array_group_rows": 3146,
+    "total_original_rows": 3946,
+    "original_files": 12,
+    "numeric_and_string_answer_arrays_not_coerced": true,
+    "public_preparation_exit_codes": [0, 0],
+    "prepared_directories": ["infinitebench-number-full-prepared-32050-001", "infinitebench-string-full-prepared-32050-001"],
+    "raw_data_copied_or_research_features_migrated": false,
+    "model_calls": 0,
+    "full_readback_and_research_handoff_verified": true,
+    "all_original_fields_answers_types_files_and_order_equal": true,
+    "index_rows_verified": 3946,
+    "public_and_fixed_research_roundtrips": 36,
+    "readback_rule": "Original positions0/1/2 in every12 file,9 numeric-group and27 string-group readbacks",
+    "fixed_ci_provider_payloads_verified": 44,
+    "research_default_dependency_changed": false,
+    "server_readback_receipt": "infinitebench-full-provider-research-audit-32050-001/receipt-public.json"
+  },
+  "server_full_acquisition_and_context_check_32050_20261026": {
+    "infinitebench_original_files_verified": 12,
+    "infinitebench_original_bytes_verified": 2499838795,
+    "existing_code_run_file_reused": true,
+    "explicit_original_byte_mirror": "https://hf-mirror.com",
+    "rate_limit_handling": "First429 retained; after an interval HEAD returned200, explicit matching resume completed all12 files with pinned SHA256/size checks. No unbounded immediate retries.",
+    "context_capacity": 131072,
+    "preflight_original_positions": [0, 1, 2],
+    "fitting_original_protocols": ["passkey", "number_string", "longbook_qa_eng", "longdialogue_qa_eng", "math_find", "code_run"],
+    "context_blocked_protocols": {
+      "kv_retrieval": [169100, 169118, 169254],
+      "longbook_sum_eng": [402028, 88408, 240818],
+      "longbook_choice_eng": [268007, 268000, 268007],
+      "longbook_qa_chn": [339312, 339331, 339312],
+      "code_debug": [214956, 214962, 214964]
+    },
+    "native_message_format_blocked": {
+      "task": "math_calc",
+      "tokenize_http_status": 400,
+      "server_message": "System message must be at the beginning.",
+      "explanation": "Author messages include a later system turn; current Qwen native chat template rejects it. No role rewriting, template substitution or false context-length conclusion."
+    },
+    "server_preflight_receipt": "infinitebench-full-context-preflight-32050-002/receipt-public.json",
+    "no_context_trimming_or_replacement": true,
+    "whole_source_checkbox_eligible": false,
+    "narrativeqa_full_original_relations_audit": {
+      "original_questions": 46765,
+      "documents_and_summaries_each": 1572,
+      "split_counts": {"test": 10557, "train": 32747, "valid": 3461},
+      "all_original_fields_ids_order_and_relations_equal": true,
+      "both_reference_answers_isolated_from_input": true,
+      "fixed_ci_provider_payloads_verified": 44,
+      "server_receipt": "narrativeqa-full-original-relations-audit-32050-001/receipt-public.json",
+      "native_benchmark_or_full_story_execution_claim": false
+    },
+    "model_calls_during_preflight_and_relation_audit": 0,
+    "raw_payloads_published": false
+  },
+  "server_followup_32050_20261026": {
+    "infinitebench": {
+      "original_file": "code_run.jsonl",
+      "bytes_verified": 83354486,
+      "author_source_files_verified": 6,
+      "author_revision": "51d9b37b0f1790ead936df2243abbf7f0420e439", "identity_note": "pragma: allowlist secret - fixed public author revision",
+      "native_entry": "scripts/run_infinitebench_original.py",
+      "native_server_directory": "infinitebench-code-run-native-32050-001",
+      "native_process_exit_code": 0,
+      "original_positions": [0, 1, 2],
+      "full_input_tokens": [89456, 89530, 89491],
+      "author_output_budget": 5,
+      "author_score": 0.0,
+      "context_trimmed_or_failed_tasks_replaced": false,
+      "model": "Qwen3.5-27B BF16 TP2 Ascend910B2",
+      "template": "author gpt4 prompt with declared Qwen model substitution, not GPT4 replication",
+      "runtime": "Existing xsum scoring client plus isolated pinned OpenAI1.69/Jieba0.42.1/Rouge1.0.1 overlay and fixed CI283 data provider; no serving environment changes",
+      "rouge_resolution": "Original evaluate.load(rouge) resolves existing SHA-verified original local HF metric; no author patch or mock",
+      "remaining_file_acquisition": "Explicit original-byte mirror returned HTTP429; no immediate repeated retry",
+      "source_checkbox_eligible": false,
+      "remaining": "Other11 original task files/protocols, independent result audit, full preparation and fixed research consumer closure"
+    },
+    "narrativeqa": {
+      "original_files_verified": 3,
+      "bytes": 22638273,
+      "public_preparer": "scripts/prepare_reused_research_assets.py",
+      "transport": "Pinned publisher GitHub blob API, no dataset mirror",
+      "original_server_directory": "narrativeqa-original-32050-001",
+      "native_execution_complete": false
+    },
+    "lmsys_chat": {
+      "preserved_first_raw_file_found_in_scoped_server_search": false,
+      "publisher_head_probe": "HTTP status000 after20s timeout; does not prove403 or authorization failure",
+      "source_catalog_access_gate": "auto; no gate bypass or unauthorized download",
+      "native_execution_complete": false
+    },
+    "raw_payloads_published": false,
+    "research_observation_or_analysis_migrated": false
+  },
+  "research_repository": "intellistream/llm-workload-suite",
+  "research_commit": "dd4103140d358cf211b88f24296b7419d170a54f",
+  "migrated_sources": 8,
+  "migrated_raw_file_specs": 48,
+  "total_historical_raw_bytes": 9509254890,
+  "historical_prior_review_sources": 37,
+  "additional_research_batch_sources": 23,
+  "historical_union_sources": 46,
+  "prior_review_gap_source_ids": ["QASPER", "LONGALPACA", "NARRATIVEQA", "NATURALQUESTIONS", "DUREADER", "WILDCHAT", "ULTRACHAT", "INFINITEBENCH", "LMSYS_CHAT"],
+  "gap_already_separately_prepared_not_in_this_eight": ["QASPER"],
+  "migration_phase": "Original acquisition identities and public acquisition/verify entry only; not complete source-specific preparation or native execution",
+  "source_checkbox_eligible": false,
+  "raw_data_downloaded_this_phase": false,
+  "model_calls": 0,
+  "current_server_file_verification": false,
+  "research_observation_or_analysis_migrated": false,
+  "all_existing_capabilities_migrated_claim": false,
+  "public_entry": "scripts/prepare_reused_research_assets.py",
+  "current_local_wheel_audit": {
+    "provider_source_commit": "44e7e91bf1e85c3a96fd42755c0da1257c8da91a",
+    "wheel_sha256": "120c01dd8398eea2c0a915048b88b09f70a93857451d92a076d1265113a2a9c1",
+    "verified_provider_payloads": 40,
+    "payloads_byte_equal_to_source": true,
+    "includes_narrativeqa_relation_module": true,
+    "new_entry": "scripts/audit_workload_data_wheel.py",
+    "installed_research_consumer_verified": false,
+    "research_default_dependency_updated": false,
+    "native_source_delivery_increment": 0,
+    "scope": "Local software build and ZIP payload comparison, no dataset/model/native run. Local wheel identity is not a substitute for the CI artifact identity. Historical fixed-wheel receipts remain unchanged."
+  },
+  "accumulated_software_regression": {
+    "source_commit": "0d0df67e8156807cd69a95c8ad880496c74823db",
+    "workflow_file": ".github/workflows/workload-data-smoke.yml",
+    "observed_local_workflow_sha256": "a23c995cf20b7d435c489b37b63d60f7878cd8d47ba94df424452c7e5b282186",
+    "python": "3.12.10",
+    "inline_pytest_commands_passed": 17,
+    "additional_multiline_wheel_pytest_command_passed": true,
+    "windows_directory_symlink_condition_skips": 1,
+    "current_provider_wheel_payloads_rechecked_equal": 40,
+    "dataset_or_model_downloads": 0,
+    "new_model_calls": 0,
+    "source_delivery_increment": 0,
+    "scope": "All pytest commands from current CPU smoke workflow executed locally, including the multiline wheel-audit step separately. Not a complete CI workflow replay: install, CI artifact identity and remote environment are separate. No real dataset/native execution or research default-lock update."
+  },
+  "preparation_entry_partial": {
+    "entry": "scripts/prepare_reused_source_records.py",
+    "supported_sources": ["LONGALPACA", "NATURALQUESTIONS", "DUREADER"],
+    "existing_dialogue_adapter_sources": ["WILDCHAT", "ULTRACHAT", "LMSYS_CHAT"],
+    "infinitebench_typed_mapping_reuse": {
+      "source_id": "INFINITEBENCH",
+      "original_number_mapping_git_blob": "33f3ff8f15cf5c4ee4abbbef1d2130c79593668a",
+      "original_string_mapping_git_blob": "fd85b369fad612d97c34160573261c28acd5bac2",
+      "research_path_prefix": "workload-preparation/research/wang-mingqi/batch-005/mappings/",
+      "historical_file_selection_receipt": "workload-preparation/research/wang-mingqi/batch-005/evidence/infinitebench-result.json",
+      "numeric_files": ["code_run.jsonl", "math_calc.jsonl", "math_find.jsonl"],
+      "string_files_count": 9,
+      "change": "Remove research feature selector only; retain original typed input/outcome rules and legacy compatibility family. Explicit file-to-type groups reuse historical full-file mapping evidence instead of guessing from first row.",
+      "validation": "software bind/prepare/resolve fixtures preserve string/int/float values; real source and research installed-client checks still pending",
+      "native_delivery_complete": false
+    },
+    "dialogue_reuse_scope": "Reuse existing adapter_extensions_v1 definitions unchanged. Bind pinned raw files and prepare original history references; preserve every role/turn/order. Historical assistant messages remain historical, not newly generated completions. JSONL and nested Parquet software fixtures passed binding/preparation/consumer roundtrip; no real publisher asset validation, native request or source delivery claim.",
+    "additional_mapping_provenance": {
+      "source": "DUREADER",
+      "research_path": "workload-preparation/research/wang-mingqi/batch-004/mappings/dureader.json",
+      "research_git_blob": "3ff937ca8b4d12d00afd84dc45a8d164fa2b69ba",
+      "changes": "Remove feature selector; label document-grounded-analysis instead of rag-followup; preserve reviewed nested documents and separate answer/document annotations. No multi-turn history is supplied."
+    },
+    "remaining_mapping_review": {
+      "NARRATIVEQA": "Historical mapping selects question/document_id and two answers only. Added data-only original_summary_tasks resolver in vllm_hust_workload_data.narrativeqa for three pinned tables, document IDs and matching splits; tested with software fixtures only. Explicit publisher-summary setting, not full-story substitution. Real assets, native execution/scoring and consumer closure still pending."
+    },
+    "research_mapping_paths": ["workload-preparation/research/wang-mingqi/batch-003/mappings/longalpaca.json", "workload-preparation/research/wang-mingqi/batch-004/mappings/naturalquestions.json"],
+    "research_revision": "dd4103140d358cf211b88f24296b7419d170a54f",
+    "change_from_research_mapping": "Retain input/outcome selectors; remove all feature selectors. Correct NQ-open family from rag-followup to general-single-turn-assistant because no retrieval or conversation history is supplied.",
+    "validation_scope": "Tiny software fixtures only; bind/prepare/resolve, pinned-identity and revision-drift rejection, answer isolation and output no-clobber",
+    "real_source_validation_complete": false,
+    "native_execution_complete": false,
+    "checkbox_increment": 0
+  },
+  "sources": [
+    {
+      "source_id": "LONGALPACA",
+      "revision": "46dce924ed8786979556018e191c0f557d8f4aa2",
+      "raw_files": 1,
+      "bytes": 498315126,
+      "scope": "Original LongAlpaca-12k published file; preparation mapping/native execution remain pending",
+      "historical_receipts": [
+        {
+          "path": "workload-preparation/research/wang-mingqi/batch-003/evidence/longalpaca-transfer.json",
+          "git_blob": "58a143d5110fd191e2aa21ebcda70631a728d187"
+        }
+      ],
+      "native_delivery_complete": false,
+      "preparation_mapping_migration_complete": false
+    },
+    {
+      "source_id": "NARRATIVEQA",
+      "revision": "904246f6d1fe99a99a08a03501fe3e619af2cee5",
+      "raw_files": 3,
+      "bytes": 22638273,
+      "scope": "Published QA/documents/summary tables, not complete source books or full-document task execution",
+      "historical_receipts": [
+        {
+          "path": "workload-preparation/research/wang-mingqi/batch-004/evidence/acquisition-small.json",
+          "git_blob": "22791e84f14b5e64a9187a27a3c97c4efdbd4889"
+        }
+      ],
+      "native_delivery_complete": false,
+      "preparation_mapping_migration_complete": false
+    },
+    {
+      "source_id": "NATURALQUESTIONS",
+      "revision": "fb26a3073b1fe636c97302890a27b491d6530130",
+      "raw_files": 2,
+      "bytes": 8913614,
+      "scope": "NQ-open train/dev, not full original NQ webpage collection",
+      "historical_receipts": [
+        {
+          "path": "workload-preparation/research/wang-mingqi/batch-004/evidence/acquisition-small.json",
+          "git_blob": "22791e84f14b5e64a9187a27a3c97c4efdbd4889"
+        }
+      ],
+      "native_delivery_complete": false,
+      "preparation_mapping_migration_complete": false
+    },
+    {
+      "source_id": "DUREADER",
+      "revision": "c625076b06da8f56d59f19c41c73bd580a98a347",
+      "raw_files": 2,
+      "bytes": 5813089,
+      "scope": "Published DuReader demo train/dev, not full DuReader2.0 release",
+      "historical_receipts": [
+        {
+          "path": "workload-preparation/research/wang-mingqi/batch-004/evidence/acquisition-small.json",
+          "git_blob": "22791e84f14b5e64a9187a27a3c97c4efdbd4889"
+        }
+      ],
+      "native_delivery_complete": false,
+      "preparation_mapping_migration_complete": false
+    },
+    {
+      "source_id": "WILDCHAT",
+      "revision": "7d6490e462285cf85d91eabea0f9a954fbddcd1f",
+      "raw_files": 14,
+      "bytes": 3360836020,
+      "scope": "Historical WildChat-1M14-shard selection, not WildChat4.8M or live user arrivals",
+      "historical_receipts": [
+        {
+          "path": "workload-preparation/research/wang-mingqi/batch-005/evidence/acquisition.json",
+          "git_blob": "718bb842890777ed18fffeb73a91af701f2f50d2"
+        }
+      ],
+      "native_delivery_complete": false,
+      "preparation_mapping_migration_complete": false
+    },
+    {
+      "source_id": "ULTRACHAT",
+      "revision": "8049631c405ae6576f93f445c6b8166f76f5505a",
+      "raw_files": 8,
+      "bytes": 1624049723,
+      "scope": "Published ultrachat_200k8-shard selection; publisher-generated dialogue, not production requests",
+      "historical_receipts": [
+        {
+          "path": "workload-preparation/research/wang-mingqi/batch-005/evidence/acquisition.json",
+          "git_blob": "718bb842890777ed18fffeb73a91af701f2f50d2"
+        }
+      ],
+      "native_delivery_complete": false,
+      "preparation_mapping_migration_complete": false
+    },
+    {
+      "source_id": "INFINITEBENCH",
+      "revision": "90f0394333616266d9fe85824ceaf505093cbaa5",
+      "raw_files": 12,
+      "bytes": 2499838795,
+      "scope": "Original12 source task files; task-specific preparation/answer types/native scoring not yet ported",
+      "historical_receipts": [
+        {
+          "path": "workload-preparation/research/wang-mingqi/batch-005/evidence/acquisition.json",
+          "git_blob": "718bb842890777ed18fffeb73a91af701f2f50d2"
+        }
+      ],
+      "native_delivery_complete": false,
+      "preparation_mapping_migration_complete": false
+    },
+    {
+      "source_id": "LMSYS_CHAT",
+      "revision": "200748d9d3cddcc9d782887541057aca0b18c5da",
+      "raw_files": 6,
+      "bytes": 1488850250,
+      "scope": "Historical6-file selection; publisher authorization still required, no credential copied",
+      "historical_receipts": [
+        {
+          "path": "workload-preparation/research/wang-mingqi/batch-006/evidence/acquisition.json",
+          "git_blob": "b69fd68223808e439c4ef7d2a3b7bbe6fb79ff43"
+        }
+      ],
+      "native_delivery_complete": false,
+      "preparation_mapping_migration_complete": false
+    }
+  ]
+}

@@ -1,0 +1,89 @@
+{
+  "source_id": "LONGBENCH",
+  "subsuite": "qasper",
+  "source_revision": "2e00731f8d0bff23dc4325161044d0ed8af94c1e",
+  "data_revision": "5e628be450b7e67fb7ae6e201bd6d8f7056f7672",
+  "selection": "FIRST_THREE_ORIGINAL_QASPER_ROWS_BEFORE_EXECUTION",
+  "original_qasper_rows": 200,
+  "selected_ids": [
+    "3ac3eef636db11635a21a61804cb28e92c546a5686dd1e12",
+    "db6c4d611b78c840972b57ee0b245003566b982feaff1084",
+    "e419f2bff9d2ab7c3b60b3250caccd2d9ae1285ec3e8e818"
+  ],
+  "original_source_file_sha256": {
+    "LongBench/eval.py": "1a3acfc25d9b053e9bb75c479f7e385d0cb9989f0f7115346b7d632655967721",
+    "LongBench/metrics.py": "e22e2a2662e0f7e683137fa3541f64edb6a801e9138d16d2f3459a6ab9941323",
+    "LongBench/config/dataset2prompt.json": "56d22ad4f382169c2b8a11ff4c982a4a1bea096c8152b0f0b85b64686b157c30",
+    "LongBench/config/dataset2maxlen.json": "72966b3c0933e214591637fb085798c5e687ebff4ddaab5d99bbc31120532022"
+  },
+  "helper_sha256": "6b90b9b9f1a761b67bdf92b645a52a09353ab395f357037c53e98ad64845d9fc",
+  "model": "workload-qwen35-27b-128k-nonthinking",
+  "transport": "RAW_COMPLETIONS_ORIGINAL_TEMPLATE_NO_TRUNCATION",
+  "generation_config": {
+    "temperature": 0,
+    "max_tokens": 128,
+    "n": 1
+  },
+  "declared_context_limit": 131072,
+  "started_at_unix": 1792689011.3405297,
+  "status": "EXECUTED_AND_SCORED_WITH_OUTPUT_BUDGET_EXHAUSTION",
+  "samples": [
+    {
+      "row_index": 0,
+      "id": "3ac3eef636db11635a21a61804cb28e92c546a5686dd1e12",
+      "prompt_sha256": "31f2c87c9fc99a29cee73ab66694c80bc0d96f20bb6d989594cffe712efcf061",
+      "status": "EXECUTED_AND_OFFICIALLY_SCORED",
+      "preflight_prompt_tokens": 4091,
+      "finish_reason": "length",
+      "usage": {
+        "prompt_tokens": 4091,
+        "total_tokens": 4219,
+        "completion_tokens": 128,
+        "prompt_tokens_details": null
+      },
+      "official_score_percent": 0,
+      "private_result_sha256": "16841f95cb6e61a5c037bab9a63bb432148839cebf598d91bd81e25f5d487bdf"
+    },
+    {
+      "row_index": 1,
+      "id": "db6c4d611b78c840972b57ee0b245003566b982feaff1084",
+      "prompt_sha256": "f8bcf1d870bc299ed10e543e21cfcc2a5e7c336cef0d4ec985c5a462fe881329",
+      "status": "EXECUTED_AND_OFFICIALLY_SCORED",
+      "preflight_prompt_tokens": 3428,
+      "finish_reason": "length",
+      "usage": {
+        "prompt_tokens": 3428,
+        "total_tokens": 3556,
+        "completion_tokens": 128,
+        "prompt_tokens_details": null
+      },
+      "official_score_percent": 0,
+      "private_result_sha256": "59c67909cf1749a84c0851617a82c95f5088f23152b1b56b7c55d270773515af"
+    },
+    {
+      "row_index": 2,
+      "id": "e419f2bff9d2ab7c3b60b3250caccd2d9ae1285ec3e8e818",
+      "prompt_sha256": "0742af613c25d0e225acc451d63f696f63a45970fb8c293e1ad753ec208ef395",
+      "status": "EXECUTED_AND_OFFICIALLY_SCORED",
+      "preflight_prompt_tokens": 4449,
+      "finish_reason": "length",
+      "usage": {
+        "prompt_tokens": 4449,
+        "total_tokens": 4577,
+        "completion_tokens": 128,
+        "prompt_tokens_details": null
+      },
+      "official_score_percent": 6.15,
+      "private_result_sha256": "84ad5f739c220bd207a732e842918ea8e8ddb1c3627ee577797a3745200b331a"
+    }
+  ],
+  "full_suite_claim": false,
+  "performance_claim": false,
+  "official_score_percent": 2.05,
+  "finished_at_unix": 1792689026.7408588,
+  "source_checkbox_eligible": false,
+  "private_run": "longbench-v1-qasper-original-001",
+  "diagnostic_only": true,
+  "private_payloads_published": false,
+  "transport_suitability": "Raw continuation diagnostic; old official build_chat has no Qwen3.5 support. Kept separately from explicitly disclosed model-native chat handoff. No prompt/reference/scorer/budget modifications."
+}

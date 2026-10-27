@@ -1,0 +1,1021 @@
+{
+  "schema_version": "workload-delivery-classification/v1",
+  "source_plan": "docs/workload-data/WORKLOAD_PR_REORGANIZATION_PLAN.zh-CN.md",
+  "selection_scope": "CANDIDATE_SOURCES_NOT_RECORD_MEMBERSHIP",
+  "default_research_taxonomy_unchanged": true,
+  "supplemental_assets": [
+    {"source_id": "AZURE_LLM", "asset_group": "serving-traces", "related_workload_ids": [], "boundary": "Original service metadata/timing only; do not invent missing prompts."},
+    {"source_id": "AZURE_LMM_2025", "asset_group": "serving-traces", "related_workload_ids": [], "boundary": "Original multimodal serving metadata; no inference of missing media or request bodies."},
+    {"source_id": "BURSTGPT", "asset_group": "serving-traces", "related_workload_ids": [], "boundary": "Original traffic trace; official simulator may use an external prompt pool, not original private prompts."},
+    {"source_id": "MOONCAKE", "asset_group": "serving-traces", "related_workload_ids": [], "boundary": "Original trace/replay contract must be inspected; no fabricated raw prompts."},
+    {"source_id": "COPILOT_AGENT_2026", "asset_group": "serving-traces", "related_workload_ids": [], "boundary": "Original nested coding-agent session metadata, not raw requests. Full publisher asset and fixed CI/research readbacks qualified separately; this classification alone establishes no runtime evidence."},
+    {"source_id": "MULTIAGENTBENCH", "asset_group": "cross-task-relationships", "related_workload_ids": [], "boundary": "Multi-agent collaboration/competition is a cross-task relation; preserve original environments and scoring, do not invent a 41st task class."},
+    {"source_id": "RULER", "asset_group": "controlled-long-context-probes", "related_workload_ids": [], "boundary": "Publisher-generated controlled probes, not natural user requests; preserve original generator parameters and scoring."},
+    {"source_id": "PAIO-CODE-EVAL-1000", "asset_group": "enterprise-private-requests", "related_workload_ids": ["W12"], "boundary": "Original code-judge requests, not code-generation test gold; private payloads remain external."},
+    {"source_id": "PAIO-JSON-500", "asset_group": "enterprise-private-requests", "related_workload_ids": ["W06"], "boundary": "Original structured-generation requests; format validity is not semantic correctness; private payloads remain external."},
+    {"source_id": "PAIO-CHAT-1000", "asset_group": "enterprise-private-requests", "related_workload_ids": ["W02"], "boundary": "Original support/conversation requests; preserve original turns and boundaries; private payloads remain external."},
+    {"source_id": "PAIO-LONG-PREFILL-5000", "asset_group": "enterprise-private-requests", "related_workload_ids": [], "boundary": "Long-prefill request shape does not establish a semantic task class; preserve original private requests."},
+    {"source_id": "PAIO-LONGTEXT-4000", "asset_group": "enterprise-private-requests", "related_workload_ids": [], "boundary": "Long-text request shape alone is not document-understanding or long-output gold; preserve original private requests."},
+    {"source_id": "PAIO-PREFIX-SHARED-5000", "asset_group": "enterprise-private-requests", "related_workload_ids": [], "boundary": "Shared-prefix input relation is not guaranteed actual KV hit; preserve original private bytes and relations."},
+    {"source_id": "PAIO-REUSE-CONV-5000", "asset_group": "enterprise-private-requests", "related_workload_ids": [], "boundary": "Conversation/reuse-oriented asset; do not infer a task class or measured reuse from its filename alone."},
+    {"source_id": "PAIO-SEMANTIC-SIMILAR-5000", "asset_group": "enterprise-private-requests", "related_workload_ids": [], "boundary": "Semantic similarity is not exact-prefix or KV reuse; preserve original private requests without rewriting."}
+  ],
+  "source_entrypoints": {
+    "DEEPPLANNING": [
+      {
+        "role": "prepare_assets",
+        "path": "scripts/prepare_deepplanning_original_assets.py",
+        "scope": "Pinned original author sources and five database archives; offline verify or reuse existing assets. Preparation only, not original Agent execution or scoring."
+      },
+      {
+        "role": "original_profile",
+        "path": "scripts/run_deepplanning_original_shopping.py",
+        "scope": "Original shopping tool/Agent loops, fixed first3 validation or full tasks, and original cart scoring. Candidate under native validation; not travel workflow or qualified source delivery."
+      },
+      {
+        "role": "original_profile",
+        "path": "scripts/run_deepplanning_original_travel.py",
+        "scope": "Original English/Chinese travel Agent, local-model report conversion and original constraint scorer. Candidate pending native execution; converter fallback is not author qwen-plus score reproduction."
+      }
+    ],
+    "SCIENCEWORLD": [
+      {"role": "prepare_assets", "path": "scripts/prepare_scienceworld_original_assets.py", "scope": "Use author-react profile for pinned original code/prompts/goldpath archive; no model calls or synthetic prompts."},
+      {"role": "data_reading_only", "path": "workload-preparation/src/vllm_hust_workload_data/scienceworld.py", "scope": "Original task/variation/fold/goal relations; publisher gold path stays reference-only, not model input or research observations."},
+      {"role": "original_profile", "path": "scripts/run_scienceworld_original.py", "scope": "Unchanged author ScienceWorld1.1.3 ReAct test_mini episodes and scoring; declared NPU fallback, not GPT4 reproduction."},
+      {"role": "saved_output_reuse_audit", "path": "scripts/verify_scienceworld_original_saved.py", "scope": "Saved author scoring consistency and separate strict replay check; known observation replay differences retained, no new model calls."}
+    ],
+    "COPILOT_AGENT_2026": [
+      {"role": "prepare_assets", "path": "scripts/prepare_copilot_original_assets.py", "scope": "Pinned seven-archive acquisition/reuse, original extraction and independent directory verification; raw assets stay external."},
+      {"role": "prepare_assets", "path": "scripts/prepare_reused_source_records.py", "scope": "Select COPILOT_AGENT_2026: bind original shards and prepare reference index, no generated prompts."},
+      {"role": "data_reading_only", "path": "workload-preparation/src/vllm_hust_workload_data/consumer.py", "scope": "Resolve original nested session metadata from prepared references; not request replay or research analysis."}
+    ],
+    "DOCVQA": [
+      {"role": "prepare_assets", "path": "scripts/prepare_reused_source_records.py", "scope": "Select DOCVQA: original validation field/image references only; answers stay separate."},
+      {"role": "original_profile", "path": "scripts/run_docvqa_original.py", "scope": "Pinned maintained Inspect Evals task, original template/thumbnail1024/ANLS; fixed local NPU fallback model, not publisher model reproduction."},
+      {"role": "saved_output_reuse_audit", "path": "scripts/verify_docvqa_original_saved.py", "scope": "Offline original input/model-attachment/output/native ANLS verification; raw API image redaction explicitly recorded, no new model calls."}
+    ],
+    "PAWS": [
+      {"role": "prepare_assets", "path": "scripts/prepare_paws_original_assets.py"},
+      {"role": "original_profile", "path": "scripts/run_paws_original.py"},
+      {"role": "saved_output_reuse_audit", "path": "scripts/verify_paws_original_saved.py"}
+    ],
+    "CHARTQA": [
+      {"role": "prepare_assets", "path": "scripts/prepare_chartqa_native_toolkit.py"},
+      {"role": "prepare_assets", "path": "scripts/prepare_chartqa_original_view.py"},
+      {"role": "prepare_assets", "path": "scripts/prepare_chartqa_native_runtime.py"},
+      {"role": "original_profile", "path": "scripts/run_chartqa_original.py"},
+      {"role": "saved_output_reuse_audit", "path": "scripts/verify_chartqa_original_saved.py"}
+    ],
+    "MMMU": [
+      {"role": "prepare_assets", "path": "scripts/prepare_mmmu_original_assets.py"},
+      {"role": "prepare_assets", "path": "scripts/prepare_mmmu_author_source.py"},
+      {"role": "original_profile", "path": "scripts/run_mmmu_original.py"},
+      {"role": "saved_output_reuse_audit", "path": "scripts/verify_mmmu_original_saved.py"}
+    ],
+    "TULU3": [
+      {"role":"prepare_assets","path":"scripts/prepare_reused_research_assets.py","scope":"Pinned six publisher Parquet files; explicit mirror, checksum verification and component licensing boundaries. Acquisition is not native delivery."},
+      {"role":"data_reading_only","path":"scripts/prepare_reused_source_records.py","scope":"Original messages/ID/per-row mixture source, no synthesized prompts or research features; full original-file references and index."},
+      {"role":"original_profile","path":"scripts/run_historical_dialogue_original.py","scope":"All original assistant positions of fixed original conversations; target/future replies excluded. Historical training corpus continuation, not a live task or official quality score; runtime validation is recorded separately, not established by this index."}
+    ],
+    "LONGALPACA": [
+      {"role": "original_profile", "path": "scripts/run_longalpaca_original.py", "scope": "Published constructed instruction corpus, not an independent quality benchmark. Preserve complete original instruction/optional input using existing model native chat formatting; no gold output or provenance in requests, no LongLoRA SFT/model reproduction claim."},
+      {"role": "prepare_assets", "path": "scripts/prepare_reused_research_assets.py"},
+      {"role": "data_reading_only", "path": "scripts/prepare_reused_source_records.py", "scope": "Original instruction/input/output and optional source-file identity retained; source-file/reference annotations outside model input. Full source preparation and native execution are separate evidence gates."}
+    ],
+    "DUREADER": [
+      {"role": "prepare_assets", "path": "scripts/prepare_reused_research_assets.py", "scope": "Publisher search demo train/dev100 each acquired through original pinned GitHub file identities, no payload publication."},
+      {"role": "data_reading_only", "path": "scripts/prepare_reused_source_records.py", "scope": "All200 demo question/916 document fields and twelve fixed-provider/research roundtrips verified; reference/publisher annotation fields remain outside model inputs. Actual native completion tracked separately in delivery ledger."},
+      {"role": "original_profile", "path": "scripts/run_dureader_original.py", "scope": "Original search demo questions and complete documents, explicit Qwen generative fallback, native publisher prediction fields and all five scoring branches. Not author Paddle/BiDAF baseline replication or full DuReader corpus."},
+      {"role": "prepare_scoring_inputs", "path": "scripts/prepare_dureader_official_scorer.py", "scope": "Pinned original scoring software only; no model or dataset. Explicit standard Python2-to-3 compatibility recorded."},
+      {"role": "isolated_scoring", "path": "scripts/score_dureader_original.py", "scope": "CPU grading saved original submission JSONL; explicit key-order adapter changes no metric formula or content. No untrusted code execution or model calls."}
+    ],
+    "NATURALQUESTIONS": [
+      {"role": "original_profile", "path": "scripts/run_nq_open_original.py", "scope": "Pinned lm-eval0.4.11 original nq_open generation/filter/Exact Match over unchanged original question/answer files. Explicit zero-shot closed-book local-model transport; completion scope requires separate delivery ledger/evidence, no DPR/REALM retrieval or full Natural Questions document claim."},
+      {"role": "prepare_assets", "path": "scripts/prepare_reused_research_assets.py"},
+      {"role": "data_reading_only", "path": "scripts/prepare_reused_source_records.py"}
+    ],
+    "TOOLACE": [
+      {"role": "prepare_assets", "path": "scripts/audit_toolace_original_corpus.py", "scope": "Portable full original corpus/index/resolve audit only; no model request renderer, online tools or native task scoring."},
+      {"role": "original_profile", "path": "scripts/run_toolace_original_continuation.py", "scope": "All11300 original corpus fields/index and six fixed-provider public/research resolutions verified. First3 original histories/all15 assistant positions return stop on two Ascend NPUs with declared Qwen fallback; original tool context and native template preserved. External Jinja/vocabulary identity and all saved prompts reverified without model rerun. No live tools, invented IDs, dynamic observations, BFCL quality or full-corpus inference claim."}
+    ],
+    "MBPP": [
+      {"role": "prepare_assets", "path": "scripts/prepare_mbpp_original_assets.py", "scope": "All nine pinned publisher full/sanitized assets verified on server; native evaluation covers full configuration only."},
+      {"role": "generation", "path": "scripts/run_mbpp_original_generation.py", "scope": "Publisher README three-shot text template, all three original tests; fixed original full test IDs11/12/13 generated on two Ascend NPUs, no code repair or truncation."},
+      {"role": "prepare_scoring_inputs", "path": "scripts/prepare_mbpp_scoring_inputs.py", "scope": "Exact saved original tasks, prompts and raw completions only; no execution, scoring or new model calls."},
+      {"role": "isolated_scoring", "path": "scripts/run_mbpp_isolated_scoring.py", "scope": "Fixed CodeEval on unchanged original three tests/setup verified in dedicated Linux isolation; reference checks all pass, predictions2/3 pass with failure retained. Exact installed44e24f46 provider exposes all974 full records;14 public/research roundtrips equal. No full500 or sanitized native claim."}
+    ],
+    "WILDCHAT": [{"role": "original_profile", "path": "scripts/run_historical_dialogue_original.py", "scope": "Original first shard59857 rows bound/indexed; fixed first3 conversations/all4 assistant positions on Ascend NPU,3 stop/1 declared-budget length retained. Fixed installed provider/research sample consumption verified. Bounded historical continuation, not live Agent, quality evaluation or original API capture."}],
+    "ULTRACHAT": [{"role": "original_profile", "path": "scripts/run_historical_dialogue_original.py", "scope": "Original test_gen28304 rows fully mapped/indexed; fixed first3 conversations/all7 assistant positions return stop on Ascend NPU. Fixed installed provider and6 public/research resolutions verified. Other7 shards/full-corpus generation, online Agent and quality score not claimed."}],
+    "LMSYS_CHAT": [{"role": "original_profile", "path": "scripts/run_historical_dialogue_original.py", "scope": "Original historical text continuation only; full publisher records and NPU validation pending."}],
+    "QRECC": [{"role": "original_profile", "path": "scripts/score_qrecc_original_qa.py", "scope": "Saved-answer scoring with original author QA functions only; no retrieval or generation execution."}],
+    "OASST1": [
+      {
+        "role": "original_profile",
+        "path": "scripts/run_oasst_original_continuation.py"
+      }
+    ],
+    "DOLLY": [
+      {
+        "role": "original_profile",
+        "path": "scripts/run_dolly_original_categories.py",
+        "scope": "Original Dolly category request profile, not an official quality benchmark."
+      }
+    ],
+    "GSM8K": [
+      {
+        "role": "original_profile",
+        "path": "scripts/run_gsm8k_original_samples.py"
+      }
+    ],
+    "MATH500": [
+      {
+        "role": "original_profile",
+        "path": "scripts/run_math500_native.py"
+      }
+    ],
+    "GPQA": [
+      {
+        "role": "original_profile",
+        "path": "scripts/run_gpqa_original.py"
+      }
+    ],
+    "AI2_ARC": [
+      {
+        "role": "original_profile",
+        "path": "scripts/run_arc_original_samples.py"
+      }
+    ],
+    "LONGBENCH": [
+      {
+        "role": "original_profile",
+        "path": "scripts/run_longbench_v1_qasper_original.py",
+        "scope": "Original LongBench v1 qasper protocol only."
+      }
+    ],
+    "LIBRISPEECH": [
+      {
+        "role": "original_profile",
+        "path": "scripts/run_librispeech_original.py"
+      }
+    ],
+    "FLEURS": [
+      {"role": "prepare_assets", "path": "scripts/prepare_fleurs_original_assets.py", "scope": "Pinned original per-locale Parquet assets and optional multilingual publisher checkpoint; no model execution."},
+      {"role": "original_profile", "path": "scripts/run_fleurs_original.py", "scope": "Native Whisper transcription of complete original test waveforms; fixed original first three per locale or explicit full selection. Not streaming dialogue or Conformer training."},
+      {"role": "isolated_scoring", "path": "scripts/score_fleurs_original.py", "scope": "CPU native jiwer/Whisper-normalizer CER over saved original predictions, exact locale/position coverage required. No new model calls or paper-baseline claim."}
+    ],
+    "CROSSCODEEVAL": [
+      {"role": "original_profile", "path": "scripts/run_crosscodeeval_original.py", "scope": "Pinned original four-language author generation on one NPU. Plan by default; fixed original selection or full default retrieval profile, no task rewriting or research observation."},
+      {"role": "isolated_scoring", "path": "scripts/score_crosscodeeval_original.py", "scope": "Unchanged publisher scoring over saved native outputs with original archive/position/reference checks. Bounded CPU pool, no new model calls."},
+      {"role": "prepare_assets", "path": "scripts/prepare_crosscodeeval_original_assets.py", "scope": "Fixed publisher code and original archive acquisition/verification, not native generation or scoring."},
+      {"role": "data_reading_only", "path": "workload-preparation/src/vllm_hust_workload_data/crosscodeeval.py", "scope": "Lossless original task/retrieval-profile archive reading; original IDs/contexts/references retained. Not a native executor or research analyzer."}
+    ],
+    "XLSUM": [
+      {
+        "role": "original_profile",
+        "path": "scripts/run_xlsum_original.py"
+      }
+    ],
+    "BURSTGPT": [
+      {
+        "role": "original_profile",
+        "path": "scripts/run_burstgpt_original_example.py"
+      }
+    ],
+    "RULER": [
+      {
+        "role": "original_profile",
+        "path": "scripts/run_ruler_original_profile.py"
+      }
+    ],
+    "QUALITY": [
+      {
+        "role": "original_profile",
+        "path": "scripts/run_quality_original_mc.py"
+      }
+    ],
+    "BBH": [
+      {
+        "role": "original_profile",
+        "path": "scripts/run_bbh_original_tasks.py"
+      }
+    ],
+    "BFCL": [
+      {
+        "role": "original_profile",
+        "path": "scripts/run_bfcl_v4_simple_python_original.py",
+        "scope": "Original BFCL v4 simple_python protocol only."
+      }
+    ],
+    "TAUBENCH": [
+      {
+        "role": "original_profile",
+        "path": "scripts/run_tau2_original_telecom.py",
+        "scope": "Original tau2 telecom Agent protocol only."
+      }
+    ],
+    "LOCOMO": [
+      {
+        "role": "original_profile",
+        "path": "scripts/run_locomo_original_qa.py"
+      }
+    ],
+    "XSUM": [
+      {
+        "role": "original_profile",
+        "path": "scripts/run_xsum_original.py"
+      },
+      {
+        "role": "prepare_assets",
+        "path": "scripts/prepare_xsum_original_assets.py"
+      }
+    ],
+    "MULTINEWS": [
+      {
+        "role": "original_profile",
+        "path": "scripts/run_multinews_original.py"
+      },
+      {
+        "role": "prepare_assets",
+        "path": "scripts/prepare_multinews_original_assets.py"
+      }
+    ],
+    "BILLSUM": [
+      {
+        "role": "original_profile",
+        "path": "scripts/run_billsum_original.py"
+      },
+      {
+        "role": "prepare_assets",
+        "path": "scripts/prepare_billsum_original_assets.py"
+      }
+    ],
+    "NATURAL_INSTRUCTIONS": [
+      {
+        "role": "original_profile",
+        "path": "scripts/run_natural_instructions_original.py"
+      },
+      {
+        "role": "original_profile",
+        "path": "scripts/run_ni_editing_extraction_original.py"
+      }
+    ],
+    "LONGWRITER": [
+      {
+        "role": "original_profile",
+        "path": "scripts/run_longwriter_original_samples.py"
+      }
+    ],
+    "BEIR_SCIFACT": [
+      {
+        "role": "original_profile",
+        "path": "scripts/run_beir_original.py"
+      }
+    ],
+    "BEIR_NFCORPUS": [
+      {
+        "role": "original_profile",
+        "path": "scripts/run_beir_original.py"
+      }
+    ],
+    "STSB": [
+      {
+        "role": "original_profile",
+        "path": "scripts/run_stsb_original.py"
+      }
+    ],
+    "AGENTBENCH": [
+      {
+        "role": "original_profile",
+        "path": "scripts/run_agentbench_alfworld_original.py",
+        "scope": "Original AgentBench ALFWorld branch only; not other domains."
+      }
+    ],
+    "STRUCTEVAL": [
+      {
+        "role": "original_profile",
+        "path": "scripts/run_structeval_original_json.py"
+      },
+      {
+        "role": "saved_output_reuse_audit",
+        "path": "scripts/audit_structeval_saved_nonrender.py"
+      }
+    ],
+    "LONGBENCH_V2": [
+      {
+        "role": "original_profile",
+        "path": "scripts/run_longbench_v2_original_samples.py"
+      }
+    ],
+    "INFINITEBENCH": [
+      {
+        "role": "original_profile",
+        "path": "scripts/run_infinitebench_original.py"
+      }
+    ],
+    "FLORES200": [
+      {
+        "role": "original_profile",
+        "path": "scripts/run_flores200_original.py"
+      },
+      {
+        "role": "prepare_assets",
+        "path": "scripts/prepare_flores200_original_assets.py"
+      },
+      {
+        "role": "data_reading_only",
+        "path": "scripts/prepare_flores200_original_records.py",
+        "scope": "Explicit original source/target direction, unchanged aligned dev/devtest lines and separate reference/metadata; each of three profiles2009 rows indexed with exact installed a9bcfe6d CI artifact and research consumption verified. Data-only preparer itself does not generate or score."
+      },
+      {
+        "role": "original_profile",
+        "path": "scripts/score_flores200_original_results.py",
+        "scope": "Offline original-pair and order validation, author primary chrF++ and original FLORES200 SPM spBLEU on saved predictions; no generation or research analysis."
+      }
+    ],
+    "JSONSCHEMABENCH": [
+      {
+        "role": "original_profile",
+        "path": "scripts/run_jsonschemabench_official.py"
+      },
+      {
+        "role": "prepare_assets",
+        "path": "scripts/prepare_jsonschemabench_original_assets.py"
+      }
+    ],
+    "PAIO-CHAT-1000": [
+      {
+        "role": "original_request_replay",
+        "path": "scripts/run_source_request_samples.py"
+      }
+    ],
+    "PAIO-CODE-EVAL-1000": [
+      {
+        "role": "original_request_replay",
+        "path": "scripts/run_source_request_samples.py"
+      }
+    ],
+    "PAIO-JSON-500": [
+      {
+        "role": "original_request_replay",
+        "path": "scripts/run_source_request_samples.py"
+      }
+    ],
+    "PAIO-LONG-PREFILL-5000": [
+      {
+        "role": "original_request_replay",
+        "path": "scripts/run_source_request_samples.py"
+      }
+    ],
+    "PAIO-LONGTEXT-4000": [
+      {
+        "role": "original_request_replay",
+        "path": "scripts/run_source_request_samples.py"
+      }
+    ],
+    "PAIO-PREFIX-SHARED-5000": [
+      {
+        "role": "original_request_replay",
+        "path": "scripts/run_source_request_samples.py"
+      }
+    ],
+    "PAIO-REUSE-CONV-5000": [
+      {
+        "role": "original_request_replay",
+        "path": "scripts/run_source_request_samples.py"
+      }
+    ],
+    "PAIO-SEMANTIC-SIMILAR-5000": [
+      {
+        "role": "original_request_replay",
+        "path": "scripts/run_source_request_samples.py"
+      }
+    ],
+    "AZURE_LLM": [
+      {
+        "role": "data_reading_only",
+        "path": "workload-preparation/src/vllm_hust_workload_data/provider.py"
+      }
+    ],
+    "AZURE_LMM_2025": [
+      {
+        "role": "data_reading_only",
+        "path": "workload-preparation/src/vllm_hust_workload_data/provider.py"
+      }
+    ],
+    "MOONCAKE": [
+      {
+        "role": "original_profile",
+        "path": "scripts/run_mooncake_storage_original.py",
+        "scope": "Official default storage I/O replay only, not engine requests or deployed models. Fixed first3 per two scenarios and saved coverage verified; see explicit delivery receipt, not full trace or performance evidence."
+      },
+      {
+        "role": "prepare_assets",
+        "path": "scripts/prepare_mooncake_storage_plan.py",
+        "scope": "Read-only official source/trace preflight and capacity/command plan only; no storage replay, model calls or performance validation."
+      },
+      {
+        "role": "data_reading_only",
+        "path": "workload-preparation/src/vllm_hust_workload_data/provider.py"
+      }
+    ],
+    "TRACELAB": [
+      {
+        "role": "prepare_assets",
+        "path": "scripts/build_tracelab_original.py"
+      },
+      {
+        "role": "original_profile",
+        "path": "scripts/run_tracelab_original.py"
+      },
+      {
+        "role": "data_reading_only",
+        "path": "workload-preparation/src/vllm_hust_workload_data/provider.py"
+      }
+    ],
+    "DS1000": [
+      {
+        "role": "generation",
+        "path": "scripts/run_ds1000_original_generation.py"
+      },
+      {
+        "role": "prepare_scoring_inputs",
+        "path": "scripts/prepare_ds1000_official_samples.py"
+      },
+      {
+        "role": "isolated_scoring",
+        "path": "scripts/run_ds1000_isolated_scoring.py"
+      }
+    ],
+    "HUMANEVAL": [
+      {
+        "role": "generation",
+        "path": "scripts/run_humaneval_original_generation.py"
+      },
+      {
+        "role": "prepare_scoring_inputs",
+        "path": "scripts/prepare_humaneval_official_samples.py"
+      },
+      {
+        "role": "isolated_scoring",
+        "path": "scripts/run_humaneval_isolated_scoring.py"
+      }
+    ],
+    "BIGCODEBENCH": [
+      {
+        "role": "generation",
+        "path": "scripts/run_bigcodebench_original_generation.py"
+      },
+      {
+        "role": "prepare_scoring_inputs",
+        "path": "scripts/prepare_bigcodebench_official_samples.py"
+      },
+      {
+        "role": "isolated_scoring",
+        "path": "scripts/run_bigcodebench_container_scoring.py"
+      }
+    ],
+    "QASPER": [
+      {"role": "original_profile", "path": "scripts/run_qasper_original.py", "scope": "Original v0.3 questions and complete original paper text/caption metadata, explicit Qwen generative text fallback. Original standalone Answer F1/Evidence F1 over all reference types, no LongBench-derived protocol, oracle input, truncation or LED/model/image-pixel replication claim."},
+      {
+        "role": "prepare_assets",
+        "path": "scripts/prepare_qasper_original_assets.py"
+      }
+    ],
+    "NARRATIVEQA": [
+      {"role": "prepare_assets", "path": "scripts/prepare_reused_research_assets.py", "scope": "Pinned original three CSV tables; external server data only, not derived HF single-table prompts."},
+      {"role": "prepare_assets", "path": "scripts/prepare_narrativeqa_original_metric.py", "scope": "Pinned AllenAI metric source/license; isolated py-rouge and declared WordNet/NLTK resources, not dataset-author code."},
+      {"role": "original_profile", "path": "scripts/run_narrativeqa_original_summary.py", "scope": "Original complete summary/question, both original references; declared9B chat adapter and256-token budget, pinned AllenAI scoring. Fixed3 test tasks verified, not full-test/full-story or author-model reproduction."},
+      {"role": "saved_output_reuse_audit", "path": "scripts/run_narrativeqa_original_summary.py", "scope": "Use --reuse with separate fresh output for offline original prompt/reference/response/scoring verification; no new model calls."}
+    ],
+    "SCHEMASTORE": [
+      {"role": "prepare_assets", "path": "scripts/prepare_schemastore_original_assets.py", "scope": "Pinned original publisher archive, explicit external acquisition or verified existing archive reuse; no fabricated requests."},
+      {"role": "prepare_assets", "path": "scripts/prepare_schemastore_runtime.py", "scope": "Private pinned ARM64 Node runtime, no global installation or model-service changes."},
+      {"role": "original_profile", "path": "scripts/run_schemastore_original_validation.py", "scope": "Unmodified official cli.js check over original schema collection/fixtures; cryptographic source-tree checks. Not an LLM generation or performance benchmark."},
+      {"role": "data_reading_only", "path": "workload-preparation/src/vllm_hust_workload_data/schemastore.py", "scope": "Original schema objects and separately bound positive/negative fixture bytes, original paths and hashes preserved, never a ready chat request."}
+    ],
+    "OPENTHOUGHTS3": [
+      {"role": "prepare_assets", "path": "scripts/prepare_reused_research_assets.py", "scope": "All120 pinned publisher shard identities registered; explicit selected files and byte budget for download/verify, author synthetic training corpus not independent evaluation gold."},
+      {"role": "data_reading_only", "path": "scripts/prepare_reused_source_records.py", "scope": "Bind unchanged selected original shards and prepare common reference index, no research features or model execution."},
+      {"role": "original_profile", "path": "scripts/run_historical_dialogue_original.py", "scope": "Original from/value conversations preserved; human/gpt role names mapped only for API transport, original target reference excluded from model input. Explicit local-model output budget, not QwQ/OpenThinker training or evaluation reproduction."}
+    ],
+    "LABBENCH": [
+      {"role": "prepare_assets", "path": "scripts/prepare_labbench_original_assets.py", "scope": "Fixed unchanged official repository including public task JSONL and original figures; plan/download/reuse/read-only verification, external data only."},
+      {"role": "prepare_assets", "path": "scripts/prepare_labbench_runtime.py", "scope": "Author frozen-lock isolated ARM Python3.12 client; explicit setuptools compatibility supplement; no model inference."},
+      {"role": "original_profile", "path": "scripts/run_labbench_original.py", "scope": "Official MCQ evaluator, randomized choices, extra context, image handling and scoring; fixed per-subset or full public release. Native runtime validation pending, not author-model reproduction."}
+    ],
+    "REPOBENCH": [
+      {"role": "prepare_assets", "path": "scripts/prepare_reused_research_assets.py", "scope": "Original Python/Java v1.1 Parquet files with per-file immutable publisher dataset revisions and checksums; explicit download budget, no model execution."},
+      {"role": "data_reading_only", "path": "scripts/prepare_reused_source_records.py", "scope": "Bind all original fields and dataset language/version provenance, separate next_line/full-code/gold-snippet references, prepare common index. Native completion and author scoring remain separate and pending."}
+    ]
+  },
+  "classes": [
+    {
+      "workload_id": "W01",
+      "family_id": "general-single-turn-assistant",
+      "canonical_name": "通用问答与开放生成",
+      "candidate_source_ids": [
+        "WILDCHAT",
+        "LMSYS_CHAT",
+        "DOLLY",
+        "NATURALQUESTIONS",
+        "DUREADER",
+        "NATURAL_INSTRUCTIONS",
+        "OASST1",
+        "TULU3",
+        "ULTRACHAT",
+        "LONGWRITER"
+      ],
+      "definition_status": "EXISTING_RESEARCH_CLASS_DEFINITION",
+      "native_validation": "NOT_ESTABLISHED_BY_CLASSIFICATION"
+    },
+    {
+      "workload_id": "W02",
+      "family_id": "conversation-continuation",
+      "canonical_name": "对话续接",
+      "candidate_source_ids": [
+        "WILDCHAT",
+        "LMSYS_CHAT",
+        "OASST1",
+        "ULTRACHAT",
+        "SPOKENWOZ",
+        "DAILYTALK"
+      ],
+      "definition_status": "EXISTING_RESEARCH_CLASS_DEFINITION",
+      "native_validation": "NOT_ESTABLISHED_BY_CLASSIFICATION"
+    },
+    {
+      "workload_id": "W03",
+      "family_id": "rag-followup",
+      "canonical_name": "给定检索材料的问答与跟进",
+      "candidate_source_ids": [
+        "QRECC",
+        "QASPER",
+        "NARRATIVEQA",
+        "DUREADER",
+        "NATURALQUESTIONS",
+        "LONGBENCH"
+      ],
+      "definition_status": "EXISTING_RESEARCH_CLASS_DEFINITION",
+      "native_validation": "NOT_ESTABLISHED_BY_CLASSIFICATION"
+    },
+    {
+      "workload_id": "W04",
+      "family_id": "document-grounded-analysis",
+      "canonical_name": "文档分析与理解",
+      "candidate_source_ids": [
+        "LONGBENCH",
+        "LONGBENCH_V2",
+        "INFINITEBENCH",
+        "QUALITY",
+        "QASPER",
+        "NARRATIVEQA",
+        "LONGALPACA"
+      ],
+      "definition_status": "EXISTING_RESEARCH_CLASS_DEFINITION",
+      "native_validation": "NOT_ESTABLISHED_BY_CLASSIFICATION"
+    },
+    {
+      "workload_id": "W05",
+      "family_id": "standalone-reasoning",
+      "canonical_name": "独立知识与推理求解",
+      "candidate_source_ids": [
+        "GSM8K",
+        "MATH500",
+        "BBH",
+        "GPQA",
+        "MMLU_PRO",
+        "AI2_ARC",
+        "OPENMATH2",
+        "OPENTHOUGHTS3",
+        "LABBENCH",
+        "HLE_VERIFIED",
+        "FRONTIERSCIENCE"
+      ],
+      "definition_status": "EXISTING_RESEARCH_CLASS_DEFINITION",
+      "native_validation": "NOT_ESTABLISHED_BY_CLASSIFICATION"
+    },
+    {
+      "workload_id": "W06",
+      "family_id": "structured-generation",
+      "canonical_name": "结构化生成与格式转换",
+      "candidate_source_ids": [
+        "JSONSCHEMABENCH",
+        "STRUCTEVAL",
+        "SPIDER",
+        "SCHEMASTORE",
+        "NATURAL_INSTRUCTIONS"
+      ],
+      "definition_status": "EXISTING_RESEARCH_CLASS_DEFINITION",
+      "native_validation": "NOT_ESTABLISHED_BY_CLASSIFICATION"
+    },
+    {
+      "workload_id": "W07",
+      "family_id": "text-summarization",
+      "canonical_name": "摘要",
+      "candidate_source_ids": [
+        "XSUM",
+        "MULTINEWS",
+        "BILLSUM",
+        "XLSUM",
+        "DOLLY",
+        "NATURAL_INSTRUCTIONS"
+      ],
+      "definition_status": "EXISTING_RESEARCH_CLASS_DEFINITION",
+      "native_validation": "NOT_ESTABLISHED_BY_CLASSIFICATION"
+    },
+    {
+      "workload_id": "W08",
+      "family_id": "text-translation",
+      "canonical_name": "翻译",
+      "candidate_source_ids": [
+        "FLORES200",
+        "NATURAL_INSTRUCTIONS"
+      ],
+      "definition_status": "EXISTING_RESEARCH_CLASS_DEFINITION",
+      "native_validation": "NOT_ESTABLISHED_BY_CLASSIFICATION"
+    },
+    {
+      "workload_id": "W09",
+      "family_id": "text-extraction-classification",
+      "canonical_name": "信息抽取与分类",
+      "candidate_source_ids": [
+        "DOLLY",
+        "NATURAL_INSTRUCTIONS",
+        "TULU3",
+        "PAWS"
+      ],
+      "definition_status": "EXISTING_RESEARCH_CLASS_DEFINITION",
+      "native_validation": "NOT_ESTABLISHED_BY_CLASSIFICATION"
+    },
+    {
+      "workload_id": "W10",
+      "family_id": "text-rewriting",
+      "canonical_name": "改写与编辑",
+      "candidate_source_ids": [
+        "NATURAL_INSTRUCTIONS",
+        "TULU3",
+        "DOLLY"
+      ],
+      "definition_status": "EXISTING_RESEARCH_CLASS_DEFINITION",
+      "native_validation": "NOT_ESTABLISHED_BY_CLASSIFICATION"
+    },
+    {
+      "workload_id": "W11",
+      "family_id": "code-generation-with-tests",
+      "canonical_name": "单题代码生成与测试",
+      "candidate_source_ids": [
+        "HUMANEVAL",
+        "MBPP",
+        "BIGCODEBENCH",
+        "DS1000",
+        "LIVECODEBENCH",
+        "OPENCODE",
+        "OPENTHOUGHTS3"
+      ],
+      "definition_status": "EXISTING_RESEARCH_CLASS_DEFINITION",
+      "native_validation": "NOT_ESTABLISHED_BY_CLASSIFICATION"
+    },
+    {
+      "workload_id": "W12",
+      "family_id": "code-evaluation",
+      "canonical_name": "代码评判",
+      "candidate_source_ids": [
+        "CODEJUDGE_EVAL"
+      ],
+      "definition_status": "EXISTING_RESEARCH_CLASS_DEFINITION",
+      "native_validation": "NOT_ESTABLISHED_BY_CLASSIFICATION"
+    },
+    {
+      "workload_id": "W13",
+      "family_id": "repository-completion",
+      "canonical_name": "仓库上下文代码补全",
+      "candidate_source_ids": [
+        "REPOBENCH",
+        "CROSSCODEEVAL"
+      ],
+      "definition_status": "EXISTING_RESEARCH_CLASS_DEFINITION",
+      "native_validation": "NOT_ESTABLISHED_BY_CLASSIFICATION"
+    },
+    {
+      "workload_id": "W14",
+      "family_id": "interactive-code-editing",
+      "canonical_name": "交互式代码编辑助手",
+      "candidate_source_ids": [
+        "TRACELAB"
+      ],
+      "definition_status": "EXISTING_RESEARCH_CLASS_DEFINITION",
+      "native_validation": "NOT_ESTABLISHED_BY_CLASSIFICATION"
+    },
+    {
+      "workload_id": "W15",
+      "family_id": "repository-agent-loop",
+      "canonical_name": "长程仓库软件工程任务",
+      "candidate_source_ids": [
+        "SWE_BENCH",
+        "SWE_VERIFIED",
+        "SWESMITH",
+        "SWE_BENCH_PRO"
+      ],
+      "definition_status": "EXISTING_RESEARCH_CLASS_DEFINITION",
+      "native_validation": "NOT_ESTABLISHED_BY_CLASSIFICATION"
+    },
+    {
+      "workload_id": "W16",
+      "family_id": "stateful-environment-interaction",
+      "canonical_name": "状态化环境操作",
+      "candidate_source_ids": [
+        "AGENTBENCH",
+        "SCIENCEWORLD"
+      ],
+      "definition_status": "EXISTING_RESEARCH_CLASS_DEFINITION",
+      "native_validation": "NOT_ESTABLISHED_BY_CLASSIFICATION"
+    },
+    {
+      "workload_id": "W17",
+      "family_id": "database-query-update",
+      "canonical_name": "数据库查询与更新执行",
+      "candidate_source_ids": [
+        "AGENTBENCH",
+        "SPIDER"
+      ],
+      "definition_status": "EXISTING_RESEARCH_CLASS_DEFINITION",
+      "native_validation": "NOT_ESTABLISHED_BY_CLASSIFICATION"
+    },
+    {
+      "workload_id": "W18",
+      "family_id": "knowledge-graph-traversal",
+      "canonical_name": "知识图谱查询与遍历",
+      "candidate_source_ids": [
+        "AGENTBENCH"
+      ],
+      "definition_status": "EXISTING_RESEARCH_CLASS_DEFINITION",
+      "native_validation": "NOT_ESTABLISHED_BY_CLASSIFICATION"
+    },
+    {
+      "workload_id": "W19",
+      "family_id": "web-navigation-interaction",
+      "canonical_name": "网页导航与交互",
+      "candidate_source_ids": [
+        "AGENTBENCH",
+        "MIND2WEB",
+        "WEBARENA",
+        "VISUALWEBARENA",
+        "WORKARENA"
+      ],
+      "definition_status": "EXISTING_RESEARCH_CLASS_DEFINITION",
+      "native_validation": "NOT_ESTABLISHED_BY_CLASSIFICATION"
+    },
+    {
+      "workload_id": "W20",
+      "family_id": "os-command-execution",
+      "canonical_name": "操作系统与终端任务",
+      "candidate_source_ids": [
+        "AGENTBENCH",
+        "TERMINAL_BENCH_2_1"
+      ],
+      "definition_status": "EXISTING_RESEARCH_CLASS_DEFINITION",
+      "native_validation": "NOT_ESTABLISHED_BY_CLASSIFICATION"
+    },
+    {
+      "workload_id": "W21",
+      "family_id": "desktop-gui-interaction",
+      "canonical_name": "桌面GUI操作",
+      "candidate_source_ids": [
+        "OSWORLD"
+      ],
+      "definition_status": "EXISTING_RESEARCH_CLASS_DEFINITION",
+      "native_validation": "NOT_ESTABLISHED_BY_CLASSIFICATION"
+    },
+    {
+      "workload_id": "W22",
+      "family_id": "application-api-workflow",
+      "canonical_name": "应用API多步工作流",
+      "candidate_source_ids": [
+        "APPWORLD",
+        "BFCL",
+        "TOOLBENCH",
+        "DEEPPLANNING"
+      ],
+      "definition_status": "EXISTING_RESEARCH_CLASS_DEFINITION",
+      "native_validation": "NOT_ESTABLISHED_BY_CLASSIFICATION"
+    },
+    {
+      "workload_id": "W23",
+      "family_id": "policy-constrained-service",
+      "canonical_name": "规则约束业务办理与排障",
+      "candidate_source_ids": [
+        "TAUBENCH"
+      ],
+      "definition_status": "EXISTING_RESEARCH_CLASS_DEFINITION",
+      "native_validation": "NOT_ESTABLISHED_BY_CLASSIFICATION"
+    },
+    {
+      "workload_id": "W24",
+      "family_id": "tool-call-generation",
+      "canonical_name": "工具选择与参数生成",
+      "candidate_source_ids": [
+        "BFCL",
+        "XLAM_TOOL",
+        "TOOLACE"
+      ],
+      "definition_status": "EXISTING_RESEARCH_CLASS_DEFINITION",
+      "native_validation": "NOT_ESTABLISHED_BY_CLASSIFICATION"
+    },
+    {
+      "workload_id": "W25",
+      "family_id": "evidence-search-synthesis",
+      "canonical_name": "主动证据检索与综合",
+      "candidate_source_ids": [
+        "GAIA",
+        "BFCL"
+      ],
+      "definition_status": "EXISTING_RESEARCH_CLASS_DEFINITION",
+      "native_validation": "NOT_ESTABLISHED_BY_CLASSIFICATION"
+    },
+    {
+      "workload_id": "W26",
+      "family_id": "constraint-planning",
+      "canonical_name": "约束规划与重规划",
+      "candidate_source_ids": [
+        "DEEPPLANNING"
+      ],
+      "definition_status": "PLANNED_ADDITIONAL_CLASS_ONLY",
+      "native_validation": "NOT_ESTABLISHED_BY_CLASSIFICATION"
+    },
+    {
+      "workload_id": "W27",
+      "family_id": "scientific-experiment-planning",
+      "canonical_name": "科学实验规划",
+      "candidate_source_ids": [
+        "DISCOVERYBENCH",
+        "SCIENCEWORLD",
+        "LABBENCH",
+        "MLAGENTBENCH",
+        "SCIENCEAGENTBENCH"
+      ],
+      "definition_status": "EXISTING_RESEARCH_CLASS_DEFINITION",
+      "native_validation": "NOT_ESTABLISHED_BY_CLASSIFICATION"
+    },
+    {
+      "workload_id": "W28",
+      "family_id": "simulation-analysis-verification",
+      "canonical_name": "仿真、分析与验证流水线",
+      "candidate_source_ids": [
+        "SCIENCEWORLD",
+        "DISCOVERYBENCH",
+        "BIXBENCH",
+        "NATUREBENCH",
+        "SCIENCEAGENTBENCH"
+      ],
+      "definition_status": "EXISTING_RESEARCH_CLASS_DEFINITION",
+      "native_validation": "NOT_ESTABLISHED_BY_CLASSIFICATION"
+    },
+    {
+      "workload_id": "W29",
+      "family_id": "scientific-coding-workflow",
+      "canonical_name": "科学代码工作流",
+      "candidate_source_ids": [
+        "SCIENCEAGENTBENCH",
+        "NATUREBENCH",
+        "MLEBENCH",
+        "MLAGENTBENCH",
+        "BIXBENCH",
+        "PAPERBENCH",
+        "DS1000"
+      ],
+      "definition_status": "EXISTING_RESEARCH_CLASS_DEFINITION",
+      "native_validation": "NOT_ESTABLISHED_BY_CLASSIFICATION"
+    },
+    {
+      "workload_id": "W30",
+      "family_id": "evolving-corpus-rag",
+      "canonical_name": "演化语料检索",
+      "candidate_source_ids": [
+        "DRAGON_PUBLIC",
+        "TEMPORALWIKI"
+      ],
+      "definition_status": "EXISTING_RESEARCH_CLASS_DEFINITION",
+      "native_validation": "NOT_ESTABLISHED_BY_CLASSIFICATION"
+    },
+    {
+      "workload_id": "W31",
+      "family_id": "conversation-memory-recall",
+      "canonical_name": "跨会话对话记忆",
+      "candidate_source_ids": [
+        "LONGMEMEVAL",
+        "LOCOMO"
+      ],
+      "definition_status": "EXISTING_RESEARCH_CLASS_DEFINITION",
+      "native_validation": "NOT_ESTABLISHED_BY_CLASSIFICATION"
+    },
+    {
+      "workload_id": "W32",
+      "family_id": "experience-memory-recall",
+      "canonical_name": "任务经历与环境轨迹记忆",
+      "candidate_source_ids": [
+        "LONGMEMEVAL_V2"
+      ],
+      "definition_status": "EXISTING_RESEARCH_CLASS_DEFINITION",
+      "native_validation": "NOT_ESTABLISHED_BY_CLASSIFICATION"
+    },
+    {
+      "workload_id": "W33",
+      "family_id": "image-understanding",
+      "canonical_name": "一般图像理解",
+      "candidate_source_ids": [
+        "VISIONARENA",
+        "MMMU"
+      ],
+      "definition_status": "EXISTING_RESEARCH_CLASS_DEFINITION",
+      "native_validation": "NOT_ESTABLISHED_BY_CLASSIFICATION"
+    },
+    {
+      "workload_id": "W34",
+      "family_id": "visual-document-chart",
+      "canonical_name": "视觉文档与图表理解",
+      "candidate_source_ids": [
+        "CHARTQA",
+        "MMMU",
+        "DOCVQA"
+      ],
+      "definition_status": "EXISTING_RESEARCH_CLASS_DEFINITION",
+      "native_validation": "NOT_ESTABLISHED_BY_CLASSIFICATION"
+    },
+    {
+      "workload_id": "W35",
+      "family_id": "video-understanding",
+      "canonical_name": "视频理解",
+      "candidate_source_ids": [
+        "VIDEOMME",
+        "VIDEOMME_V2",
+        "MVBENCH",
+        "LONGVIDEOBENCH",
+        "STREAMINGBENCH",
+        "OVOBENCH"
+      ],
+      "definition_status": "EXISTING_RESEARCH_CLASS_DEFINITION",
+      "native_validation": "NOT_ESTABLISHED_BY_CLASSIFICATION"
+    },
+    {
+      "workload_id": "W36",
+      "family_id": "offline-audio-understanding",
+      "canonical_name": "离线音频识别与理解",
+      "candidate_source_ids": [
+        "LIBRISPEECH",
+        "FLEURS",
+        "WAVCAPS"
+      ],
+      "definition_status": "EXISTING_RESEARCH_CLASS_DEFINITION",
+      "native_validation": "NOT_ESTABLISHED_BY_CLASSIFICATION"
+    },
+    {
+      "workload_id": "W37",
+      "family_id": "audio-streaming-interaction",
+      "canonical_name": "音频流交互",
+      "candidate_source_ids": [
+        "FULL_DUPLEX_BENCH",
+        "SPOKENWOZ",
+        "DAILYTALK"
+      ],
+      "definition_status": "EXISTING_RESEARCH_CLASS_DEFINITION",
+      "native_validation": "NOT_ESTABLISHED_BY_CLASSIFICATION"
+    },
+    {
+      "workload_id": "W38",
+      "family_id": "text-to-speech-generation",
+      "canonical_name": "文本到语音生成",
+      "candidate_source_ids": [
+        "LIBRITTS",
+        "LJSPEECH"
+      ],
+      "definition_status": "PLANNED_ADDITIONAL_CLASS_ONLY",
+      "native_validation": "NOT_ESTABLISHED_BY_CLASSIFICATION"
+    },
+    {
+      "workload_id": "W39",
+      "family_id": "embedding-retrieval",
+      "canonical_name": "向量表示与相似度／检索任务",
+      "candidate_source_ids": [
+        "BEIR_SCIFACT",
+        "BEIR_NFCORPUS",
+        "MSMARCO_PASSAGE",
+        "STSB",
+        "PAWS"
+      ],
+      "definition_status": "EXISTING_RESEARCH_CLASS_DEFINITION",
+      "native_validation": "NOT_ESTABLISHED_BY_CLASSIFICATION"
+    },
+    {
+      "workload_id": "W40",
+      "family_id": "reranking",
+      "canonical_name": "相关性重排",
+      "candidate_source_ids": [
+        "BEIR_SCIFACT",
+        "BEIR_NFCORPUS",
+        "MSMARCO_PASSAGE"
+      ],
+      "definition_status": "EXISTING_RESEARCH_CLASS_DEFINITION",
+      "native_validation": "NOT_ESTABLISHED_BY_CLASSIFICATION"
+    }
+  ]
+}
