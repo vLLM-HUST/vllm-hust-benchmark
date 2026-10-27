@@ -112,10 +112,9 @@ def validate(configuration):
     )
     submodule_policy = c.get("container", {}).get("allowed_initial_submodule")
     swe_submodule_fixture.validate_policy(submodule_policy)
-    if submodule_policy is not None and (
-        c["container"].get("allowed_initial_tracked") is not None or allowed
-    ):
-        raise ValueError("Submodule fixture cannot be combined with other allowances")
+    _validate_initial_fixture_combination(
+        c.get("container", {}).get("allowed_initial_tracked"), submodule_policy, allowed
+    )
     return c
 
 
@@ -171,6 +170,29 @@ def validate_initial_tracked_policy(policy):
             raise ValueError("Invalid tracked fixture SHA256")
 
 
+def _validate_initial_fixture_combination(tracked_policy, submodule_policy, allowed):
+    """Compose exact disjoint fixtures; never allow an untracked parent directory."""
+    if submodule_policy is None:
+        return
+    swe_submodule_fixture.validate_policy(submodule_policy)
+    if allowed:
+        raise ValueError("Submodule fixture cannot use an untracked allowlist")
+    if tracked_policy is None:
+        return
+    validate_initial_tracked_policy(tracked_policy)
+    if any(
+        tracked_policy[key] != submodule_policy[key]
+        for key in ("base_commit", "image_id")
+    ):
+        raise ValueError("Combined fixtures require the same exact image and base")
+    sub = submodule_policy["path"]
+    if any(
+        name == sub or name.startswith(sub + "/") or sub.startswith(name + "/")
+        for name in tracked_policy["files"]
+    ):
+        raise ValueError("Tracked files must be disjoint from the exact submodule")
+
+
 def observe_initial_tracked(env, policy):
     validate_initial_tracked_policy(policy)
     records, observations = {}, {}
@@ -218,13 +240,34 @@ def validate_initial_repository(
         required_status = {" M " + name for name in tracked_policy["files"]}
         allowed_status |= required_status
     if submodule_policy is not None:
-        if tracked_policy is not None or allowed_untracked:
-            raise ValueError(
-                "Submodule fixture cannot be combined with other allowances"
-            )
+        _validate_initial_fixture_combination(
+            tracked_policy, submodule_policy, allowed_untracked
+        )
+        checked_submodule = submodule_observations
+        if tracked_policy is not None:
+            # The original raw observations remain in the saved receipt.
+            # Validate the complete parent status before partitioning it for
+            # the unchanged strict single-submodule validator.
+            combined = required_status | {" M " + submodule_policy["path"]}
+            if not isinstance(submodule_observations, dict):
+                raise ValueError("Complete submodule observations required")
+            raw = submodule_observations.get("parent_status")
+            if not isinstance(raw, str) or not raw.endswith("\0"):
+                raise ValueError("Complete NUL-delimited parent status required")
+            entries = raw[:-1].split("\0")
+            before_entries = before["output"].splitlines()[1:]
+            if (
+                len(entries) != len(combined)
+                or set(entries) != combined
+                or len(before_entries) != len(combined)
+                or set(before_entries) != combined
+            ):
+                raise ValueError("Combined parent status differs from exact fixtures")
+            checked_submodule = dict(submodule_observations)
+            checked_submodule["parent_status"] = " M " + submodule_policy["path"] + "\0"
         status = swe_submodule_fixture.validate_observation(
             submodule_policy,
-            submodule_observations,
+            checked_submodule,
             base_commit=base_commit,
             image_id=image_id,
         )
