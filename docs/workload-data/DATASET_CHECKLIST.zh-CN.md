@@ -1,5 +1,14 @@
 # 数据集逐项验证清单
 
+### Copilot 2026嵌套会话元数据（原包已取得，未交付）
+
+- [x] 固定[官方release](https://github.com/Azure/AzurePublicDataset/releases/tag/ghcp-coding-agent-2026)身份400522856及七份逐日原包、发布方SHA256/大小，共3218886136字节。数据release标签指向的旧Git提交没有后补文档；官方说明/schema/card/README四文件另固定到文档版本215becda，已逐文件核验，不假称它们同属release标签。
+- [x] 七包均已在服务器取得并与发布方大小/SHA256核对一致，共3.22GB；首包首原始分片原位置0–2已只读检查，保留session/turn/llm_calls/tool_batches和消息/请求关联字段，不造缺失内容。
+- [ ] 正在安全展开原始gzip分片并核查全量结构；尚未完成公共归档准备、统一索引、CI与研究回读，不打来源总勾。官方统计和前三条检查不能替代全量接入证明。
+
+这是已登记的服务轨迹资产，不是新增Agent任务环境。只有匿名模型标签、token/缓存计数、消息片段类型和工具状态等元数据，未发布原prompt、代码、模型响应或工具输出；不编造请求，不将Model
+A等映射成真实模型，不把缓存token计数推成精确KV块身份。作者绘图、特征和研究分析不迁入；实际字段语义仍须原数据核验。
+
 ### Azure LMM 2025服务轨迹元数据资产（已交付，非视觉benchmark）
 
 - [x] [微软固定原发布说明](https://github.com/Azure/AzurePublicDataset/blob/215becdacba1ce682c7368642ce97d5a332de7a6/AzureLMMInferenceDataset2025.md)与gzip身份已核验；服务器取得8524196字节原压缩CSV，完整检查100万行四字段。原文件不解压复制到本地或Git；原timestamp字符串和所有数字字符串保持不变，时区未声明，不推断全局绝对时间。
@@ -472,7 +481,7 @@ TB；服务器/data约1.42TB可用，未缩小语料。ChartQA当前两卡主机
 | CODEJUDGE_EVAL             | [ ] 待开展                   | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                      |
 | DRAGON_PUBLIC              | [ ] 待开展                   | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                      |
 | TEMPORALWIKI               | [ ] 待开展                   | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                      |
-| COPILOT_AGENT_2026         | [ ] 待开展                   | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                      |
+| COPILOT_AGENT_2026         | [ ] 原包已取，接入中         | 官方七日原包共3.22GB全部取得并验SHA，前三原行结构已检查；全量分片/嵌套关系、公共准备及CI/研究回读尚待，不造请求。                                                                                                                                                                                                 |
 | AZURE_LMM_2025             | [x] 服务轨迹元数据资产交付   | 全100万行四字段保真/索引、47实际CI安装载荷、首3/末3研究回读完成；无原prompt/媒体，不造请求，不称视觉benchmark。见[回执](validation/azure-lmm-2025-asset-delivery-20261027.json)。                                                                                                                                 |
 | HLE_VERIFIED               | — 仅分类                     | 本轮不补实现、不重跑                                                                                                                                                                                                                                                                                              |
 | SWE_BENCH_PRO              | — 仅分类                     | 本轮不补实现、不重跑                                                                                                                                                                                                                                                                                              |
