@@ -200,6 +200,8 @@ def revise_reference(reference):
 def revise_method(data, strength):
     data["m01_method_at_v099"] = copy.deepcopy(data["m01_method"])
     data["wholechain_reference_at_v099"] = copy.deepcopy(data["wholechain_reference"])
+    for key in ("paired_own_compute", "milestone_contract", "corrected_quality"):
+        data[key + "_at_v099"] = copy.deepcopy(data[key])
     method = data["m01_method"]
     method["status"] = strength["status"]
     method["reference_scope"] = m01_note(True)
@@ -230,6 +232,20 @@ def revise_method(data, strength):
         "current_strong_reference_acceptance"
     ] = None
     data["m01_reference_strength"] = strength
+    assert (
+        data["paired_own_compute"] == data["m01_method_at_v099"]["paired_own_compute"]
+    )
+    assert data["milestone_contract"]["method"] == data["m01_method_at_v099"]
+    data["paired_own_compute"] = copy.deepcopy(paired)
+    data["milestone_contract"]["method"] = copy.deepcopy(method)
+    quality_reference = data["corrected_quality"]["reference"]
+    quality_reference["historical_empirical_attainment"] = quality_reference[
+        "attainment"
+    ]
+    quality_reference["attainment"] = None
+    quality_reference["status"] = strength["status"]
+    quality_reference["reference_strength"] = "not_established"
+    quality_reference["current_strong_reference_acceptance"] = None
 
 
 def render_report(old, value, prior):
@@ -383,6 +399,16 @@ def build(revision, read=None):
     )
     m01["scope"], m01["scope_en"] = m01_note(), m01_note(True)
     for key, english in (("tables", False), ("tables_en", True)):
+        milestone = next(s for s in data["sections"] if s["id"] == "milestone-v15")
+        for table in milestone[key]:
+            for row in table["rows"]:
+                if row[0].startswith("3.4.1"):
+                    row[1] = (
+                        "Historical shared-implementation empirical reference: median of three C windows; historical 90% criterion. Original V1.5 50% remains separate."
+                        if english
+                        else "历史共享实现经验参考：三次C窗口中位数及历史90%经验判据；原V1.5的50%另列。"
+                    )
+                    row[2] = m01_note(english)
         swe[key][0]["rows"] = rows(value, english)
         for table in m01[key]:
             table["headers"] = [
