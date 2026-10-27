@@ -1,0 +1,414 @@
+"""Fit portable service costs using calibration-only grouped validation.
+
+Each acquisition condition contributes equal total weight. Candidate selection
+leaves out a physical-role phase or a context band, rather than random tokens.
+"""
+
+import argparse
+import copy
+import gzip
+import json
+import statistics
+from collections import Counter, defaultdict
+from pathlib import Path
+
+import numpy as np
+
+from pd_pipeline_simulator import graph_vector
+from pd_serving_simulator import BLOCK_BYTES, interpolate
+from step_simulator import vector
+
+
+def robust_fit(xs, ys, groups):
+    x, y = np.asarray(xs, dtype=float), np.asarray(ys, dtype=float)
+    counts = Counter(groups)
+    base = np.array([1 / counts[g] for g in groups])
+    weights = base.copy()
+    coefficients = np.zeros(x.shape[1])
+    for _ in range(5):
+        a = x.T @ (weights[:, None] * x)
+        b = x.T @ (weights * y)
+        for _ in range(1500):
+            old = coefficients.copy()
+            for column in range(len(coefficients)):
+                coefficients[column] = max(
+                    0,
+                    coefficients[column]
+                    + (b[column] - a[column] @ coefficients)
+                    / max(a[column, column], 1e-12),
+                )
+            if np.max(np.abs(old - coefficients)) < 1e-10:
+                break
+        residual = np.abs(y - x @ coefficients)
+        grouped = defaultdict(list)
+        for group, value in zip(groups, residual, strict=True):
+            grouped[group].append(value)
+        scale = max(
+            1e-4,
+            statistics.median(statistics.median(v) for v in grouped.values()) * 1.4826,
+        )
+        weights = base * np.minimum(1, 1.5 * scale / np.maximum(residual, 1e-12))
+    return coefficients.tolist()
+
+
+def group_error(rows, predictions, actual="duration_s"):
+    errors = defaultdict(list)
+    for r, value in zip(rows, predictions, strict=True):
+        errors[r["case"]].append(abs(value - r[actual]) / max(r[actual], 0.001))
+    return statistics.mean(statistics.mean(v) for v in errors.values())
+
+
+def folds(rows):
+    groups = {r["phase"] for r in rows}
+    if len(groups) > 1:
+        for group in sorted(groups):
+            yield (
+                "phase:" + group,
+                [r for r in rows if r["phase"] != group],
+                [r for r in rows if r["phase"] == group],
+            )
+
+    # Entire context bands are held out, including all repetitions and tokens.
+    def band(row):
+        return min(2, int(row["max_context"] // 8192))
+
+    for group in sorted({band(r) for r in rows}):
+        train, test = (
+            [r for r in rows if band(r) != group],
+            [r for r in rows if band(r) == group],
+        )
+        if train and test:
+            yield "context:" + str(group), train, test
+
+
+def select_compute(rows):
+    records = []
+    for name, function in [("linear", vector), ("graph_shape", graph_vector)]:
+        scores = []
+        for label, train, test in folds(rows):
+            c = robust_fit(
+                [function(r) for r in train],
+                [r["duration_s"] for r in train],
+                [r["case"] for r in train],
+            )
+            score = group_error(test, [np.dot(c, function(r)) for r in test])
+            scores.append({"fold": label, "relative_error": score})
+        records.append(
+            {
+                "name": name,
+                "folds": scores,
+                "score": statistics.mean(s["relative_error"] for s in scores),
+            }
+        )
+    # Prefer the lower-dimensional model unless the gain exceeds five percent.
+    chosen = (
+        records[1] if records[1]["score"] < 0.95 * records[0]["score"] else records[0]
+    )
+    function = graph_vector if chosen["name"] == "graph_shape" else vector
+    c = robust_fit(
+        [function(r) for r in rows],
+        [r["duration_s"] for r in rows],
+        [r["case"] for r in rows],
+    )
+    return {
+        "kind": chosen["name"],
+        "coefficients": c,
+        "training_steps": len(rows),
+    }, records
+
+
+def restore_vector(row, kind="raw"):
+    size = row["capacity_s"] if kind == "capacity" else row["blocks"] / 64
+    return [1, size, max(0, row["request_count"] - 1) / 4]
+
+
+def fit_restore(rows):
+    # Standard 128-block component probes supply a deployment capability input.
+    # Their durations are excluded from coefficient fitting and CV scoring.
+    probes = defaultdict(list)
+    for r in rows:
+        if "geometry-b128-" in r["case"]:
+            probes[r["phase"]].append(r["blocks"] * BLOCK_BYTES / r["seconds"] / 1e9)
+    capacities = {phase: statistics.median(v) for phase, v in probes.items()}
+    selected_rows = [
+        {**r, "capacity_s": r["blocks"] * BLOCK_BYTES / (capacities[r["phase"]] * 1e9)}
+        for r in rows
+        if "geometry-b128-" not in r["case"]
+    ]
+    results = []
+    for kind in ["raw", "capacity"]:
+        for slowdown in [1, 2, 4]:
+            scores = []
+            for phase in sorted(capacities):
+                train = [r for r in selected_rows if r["phase"] != phase]
+                test = [r for r in selected_rows if r["phase"] == phase]
+                if not train:
+                    continue
+                work = [r["idle_s"] + r["busy_s"] / slowdown for r in train]
+                c = robust_fit(
+                    [restore_vector(r, kind) for r in train],
+                    work,
+                    [r["case"] for r in train],
+                )
+                predicted = [
+                    np.dot(c, restore_vector(r, kind))
+                    / (
+                        1
+                        - r["busy_s"] / r["seconds"]
+                        + r["busy_s"] / r["seconds"] / slowdown
+                    )
+                    for r in test
+                ]
+                scores.append(
+                    {
+                        "fold": phase,
+                        "relative_error": group_error(test, predicted, "seconds"),
+                    }
+                )
+            results.append(
+                {
+                    "kind": kind,
+                    "busy_slowdown": slowdown,
+                    "folds": scores,
+                    "score": statistics.mean(r["relative_error"] for r in scores)
+                    if scores
+                    else float("inf"),
+                }
+            )
+    best = min(r["score"] for r in results)
+    selected = next(r for r in results if r["score"] <= best * 1.05)
+    kind, slowdown = selected["kind"], selected["busy_slowdown"]
+    c = robust_fit(
+        [restore_vector(r, kind) for r in selected_rows],
+        [r["idle_s"] + r["busy_s"] / slowdown for r in selected_rows],
+        [r["case"] for r in selected_rows],
+    )
+    return {
+        "kind": kind,
+        "coefficients": c,
+        "busy_slowdown": slowdown,
+        "samples": len(selected_rows),
+        "default_copy_GBps": statistics.median(capacities.values()),
+        "component_probe_GBps": capacities,
+        "capability_scope": "128-block isolated native H2D; two repeats, excluded from coefficient fit and CV score",
+    }, results
+
+
+def fit_discovery(sources, transport):
+    rows = []
+    for source in sources:
+        requests = {r["request_id"]: r for r in source["requests"]}
+        for q in source["queries"]:
+            if "geometry-" not in q["case"]:
+                continue
+            blocks = (requests[q["client_id"]]["prompt_tokens"] - 1) // 128
+            baseline = blocks * BLOCK_BYTES * transport + source["idle_poll_s"]
+            rows.append(
+                {
+                    "case": q["case"],
+                    "phase": source["phase"],
+                    "blocks": blocks,
+                    "duration_s": q["wait_ms"] / 1000,
+                    "baseline": baseline,
+                }
+            )
+    candidates = []
+    for kind, size in [("transport", 0), ("fixed", 1), ("linear", 2)]:
+        scores = []
+        for phase in sorted({r["phase"] for r in rows}):
+            train = [r for r in rows if r["phase"] != phase]
+            test = [r for r in rows if r["phase"] == phase]
+            if not train:
+                continue
+            c = (
+                robust_fit(
+                    [[1, r["blocks"] / 64][:size] for r in train],
+                    [max(0, r["duration_s"] - r["baseline"]) for r in train],
+                    [r["case"] for r in train],
+                )
+                if size
+                else []
+            )
+            predictions = [
+                r["baseline"] + np.dot(c, [1, r["blocks"] / 64][:size]) for r in test
+            ]
+            scores.append(
+                {"fold": phase, "relative_error": group_error(test, predictions)}
+            )
+        candidates.append(
+            {
+                "kind": kind,
+                "size": size,
+                "folds": scores,
+                "score": statistics.mean(s["relative_error"] for s in scores)
+                if scores
+                else float("inf"),
+            }
+        )
+    best = min(r["score"] for r in candidates)
+    chosen = next(r for r in candidates if r["score"] <= best * 1.05)
+    size = chosen["size"]
+    c = (
+        robust_fit(
+            [[1, r["blocks"] / 64][:size] for r in rows],
+            [max(0, r["duration_s"] - r["baseline"]) for r in rows],
+            [r["case"] for r in rows],
+        )
+        if size
+        else []
+    )
+    return {"kind": chosen["kind"], "coefficients": c + [0] * (2 - size)}, candidates
+
+
+def build(sources, reference):
+    profile = copy.deepcopy(reference)
+    steps = [r for source in sources for r in source["steps"]]
+    batches = [r for source in sources for r in source["restore_batches"]]
+    requests = [r for source in sources for r in source["requests"]]
+    if not steps or not batches or any(r["split"] != "calibration" for r in requests):
+        raise ValueError("Supply calibration-only evidence")
+    selection = {}
+    profile["graph_models"] = {}
+    for role in ["P", "D"]:
+        frames = [r for r in steps if r["role"] == role]
+        # Producers emit one token; share decoder measurements across roles.
+        if role == "P":
+            frames += [
+                r for r in steps if r["role"] == "D" and r["prefill_tokens"] == 0
+            ]
+        base = copy.deepcopy(profile["models"][role])
+        graph = copy.deepcopy(base)
+        for kind in ["prefill", "decode"]:
+            selected = [
+                r for r in frames if (r["prefill_tokens"] == 0) == (kind == "decode")
+            ]
+            cost, audit = select_compute(selected)
+            selection[role + ":" + kind] = {
+                "selected": cost["kind"],
+                "candidates": audit,
+            }
+            # Same-data, same weighting legacy baseline.
+            base["models"][kind] = {
+                "coefficients": robust_fit(
+                    [vector(r) for r in selected],
+                    [r["duration_s"] for r in selected],
+                    [r["case"] for r in selected],
+                )
+            }
+            graph["models"][kind] = cost
+        delay = [
+            r[role + "_outbound_s"]
+            for r in requests
+            if 0 <= r[role + "_outbound_s"] < 0.25
+        ]
+        gaps = [
+            r["dispatch_gap_s"] for r in frames if r.get("dispatch_gap_s") is not None
+        ]
+        for target in [base, graph]:
+            target["response_delay_s"] = statistics.median(delay)
+            target["dispatch_gap_s"] = statistics.median(gaps) if gaps else 0
+        profile["models"][role], profile["graph_models"][role] = base, graph
+        # CPU demand is a separate resource; bounded by measured process work.
+        cpu = copy.deepcopy(base)
+        for kind in ["prefill", "decode"]:
+            selected = [
+                r for r in frames if (r["prefill_tokens"] == 0) == (kind == "decode")
+            ]
+            cpu["models"][kind] = {
+                "coefficients": robust_fit(
+                    [vector(r) for r in selected],
+                    [r["CPU_s"] for r in selected],
+                    [r["case"] for r in selected],
+                )
+            }
+        cpu.update(response_delay_s=0, dispatch_gap_s=0)
+        profile["CPU_models"][role] = cpu
+    profile["restore_model"], selection["restore"] = fit_restore(batches)
+    profile["restore_coverage"] = {
+        key: [min(r[key] for r in batches), max(r[key] for r in batches)]
+        for key in ["blocks", "request_count"]
+    }
+    services = defaultdict(list)
+    for row in batches:
+        services[row["blocks"] * 128].append(row["seconds"])
+    query_groups = defaultdict(list)
+    for source in sources:
+        records = {r["request_id"]: r for r in source["requests"]}
+        for q in source["queries"]:
+            if "geometry-" in q["case"]:
+                tokens = (records[q["client_id"]]["prompt_tokens"] - 1) // 128 * 128
+                query_groups[tokens].append(
+                    max(
+                        0,
+                        q["wait_ms"] / 1000
+                        - tokens
+                        / 128
+                        * BLOCK_BYTES
+                        * profile["network_seconds_per_byte"],
+                    )
+                )
+    query_points = [
+        {"tokens": tokens, "query_seconds": statistics.median(values)}
+        for tokens, values in sorted(query_groups.items())
+    ]
+    profile["native"] = [
+        {
+            "tokens": tokens,
+            "load_complete_seconds": statistics.median(values),
+            "query_seconds": interpolate(query_points, tokens, "query_seconds"),
+            "save_RPC_seconds": 0,
+        }
+        for tokens, values in sorted(services.items())
+    ]
+    profile["api_inbound"] = {}
+    for role in ["P", "D"]:
+        selected = [r for r in requests if "geometry-" in r["case"]]
+        profile["api_inbound"][role] = robust_fit(
+            [[1, r["prompt_tokens"] / 8192] for r in selected],
+            [max(0, r[role + "_inbound_s"]) for r in selected],
+            [r["case"] for r in selected],
+        )
+    profile["idle_poll_s"] = statistics.median(s["idle_poll_s"] for s in sources)
+    profile["query_fixed_s"] = 0
+    profile["discovery_model"], selection["discovery"] = fit_discovery(
+        sources, profile["network_seconds_per_byte"]
+    )
+    profile["copy_lanes"] = 1
+    profile["calibration_cases"] = sorted({r["case"] for r in steps})
+    profile["fit_selection"] = selection
+    profile["acquisition_phases"] = [s["phase"] for s in sources]
+    profile["training_coverage"] = {
+        role: {
+            key: [
+                min(r[key] for r in steps if r["role"] == role),
+                max(r[key] for r in steps if r["role"] == role),
+            ]
+            for key in ["sequences", "prefill_tokens", "decode_tokens", "context_sum"]
+        }
+        for role in ["P", "D"]
+    }
+    profile["scope"] = (
+        "Condition-balanced calibration with grouped role-swap and context-band validation"
+    )
+    return profile
+
+
+if __name__ == "__main__":
+    p = argparse.ArgumentParser(description=__doc__)
+    p.add_argument("--evidence", type=Path, nargs="+", required=True)
+    p.add_argument("--reference", type=Path, required=True)
+    p.add_argument("--output", type=Path, required=True)
+    args = p.parse_args()
+    result = build(
+        [json.loads(gzip.decompress(path.read_bytes())) for path in args.evidence],
+        json.loads(args.reference.read_text()),
+    )
+    if args.output.exists():
+        raise FileExistsError(args.output)
+    args.output.write_text(json.dumps(result, indent=2))
+    print(
+        json.dumps(
+            {k: v for k, v in result["fit_selection"].items() if k != "restore"},
+            indent=2,
+        )
+    )

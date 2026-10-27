@@ -1,0 +1,46 @@
+"""Bounded component measurements of decode and incoming cache restoration."""
+
+import asyncio
+import json
+from pathlib import Path
+
+import httpx
+
+from generalization_runner_core import CFG, ROOT, condition
+
+
+async def main():
+    for _ in range(300):
+        if (ROOT/'done.json').exists():break
+        await asyncio.sleep(2)
+    else:raise TimeoutError('Reserved acquisition has not drained')
+    rows=[json.loads(l) for l in (ROOT/'requests.jsonl').read_text().splitlines()]
+    cal=[r for r in rows if r['split']=='calibration']
+    geometry=[r for r in rows if r['split']=='geometry_calibration']
+    metadata={'contexts':[8192,15360],'active_decodes':[1,2,3],'repetitions':2,
+              'incoming_blocks':[1,8,32],'incoming_at_s':[1,1.25,1.5],
+              'source_tasks':sorted({r['task'] for r in cal}),
+              'topology':'81: two producers, 91: one consumer',
+              'D_max_sequences':CFG['D_max_sequences']}
+    (ROOT/'interference-protocol.json').write_text(json.dumps(metadata,indent=2))
+    async with httpx.AsyncClient(limits=httpx.Limits(max_connections=128,max_keepalive_connections=64),timeout=240,trust_env=False) as client:
+        for context in metadata['contexts']:
+            for active in metadata['active_decodes']:
+                for repeat in range(2):
+                    name=f'interference-n{context}-a{active}-r{repeat}'
+                    if (ROOT/'runs'/('gen-'+name)/'summary.json').exists():continue
+                    plans=[]
+                    for i in range(active):
+                        target=context if context==8192 else [8192,15360,24576][i]
+                        row=min(cal,key=lambda r:abs(r['prompt_tokens']-target))
+                        plans.append({'row':row,'P':f'P{i%2}','D':'D0','output':1,'salt':f'{name}-active{i}'})
+                    await condition(client,plans,name+'-seed',split='warmup')
+                    plans=[{**p,'output':256+64*i} for i,p in enumerate(plans)]
+                    for i,blocks in enumerate([1,8,32]):
+                        row=next(r for r in geometry if r['geometry_blocks']==blocks)
+                        plans.append({'row':row,'P':f'P{i%2}','D':'D0','output':64,'at':1+.25*i})
+                    await condition(client,plans,name,clear=False)
+    (ROOT/'interference-done.json').write_text(json.dumps(metadata))
+
+
+if __name__=='__main__':asyncio.run(main())

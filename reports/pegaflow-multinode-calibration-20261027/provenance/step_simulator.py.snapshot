@@ -1,0 +1,617 @@
+"""CPU-only, measured-cost simulation of a single chunked-prefill engine.
+
+Inputs contain arrival times, token counts and prefix identities. Observed
+request latencies are accepted only by the separate validation command.
+"""
+
+from __future__ import annotations
+
+import argparse
+import gzip
+import json
+import math
+import statistics
+from collections import OrderedDict
+from dataclasses import dataclass, field
+from pathlib import Path
+
+
+def read_json(path):
+    path = Path(path)
+    raw = path.read_bytes()
+    return json.loads(gzip.decompress(raw) if str(path).endswith(".gz") else raw)
+
+
+def write_json(path, value):
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    raw = (json.dumps(value, ensure_ascii=False, indent=2) + "\n").encode("utf-8")
+    path.write_bytes(gzip.compress(raw, mtime=0) if str(path).endswith(".gz") else raw)
+
+
+def read_rows(path):
+    opener = gzip.open if str(path).endswith(".gz") else open
+    with opener(path, "rt", encoding="utf-8") as stream:
+        return [json.loads(line) for line in stream if line.strip()]
+
+
+def quantiles(values):
+    values = sorted(values)
+    if not values:
+        return None
+    return {
+        "mean": statistics.mean(values),
+        "p50": statistics.median(values),
+        "p95": values[math.ceil(0.95 * len(values)) - 1],
+        "max": values[-1],
+    }
+
+
+@dataclass(frozen=True)
+class Request:
+    id: str
+    arrival_s: float
+    prompt_tokens: int
+    output_tokens: int
+    prefix_blocks: tuple[str, ...] = ()
+    cache_domain: str = "shared"
+    depends_on: str | None = None
+    task: str = ""
+
+    @classmethod
+    def from_dict(cls, data):
+        allowed = set(cls.__dataclass_fields__)
+        if set(data) - allowed:
+            raise ValueError(f"Unexpected request fields: {sorted(set(data) - allowed)}")
+        value = dict(data)
+        value["prefix_blocks"] = tuple(value.get("prefix_blocks", ()))
+        result = cls(**value)
+        if (
+            not math.isfinite(result.arrival_s)
+            or result.arrival_s < 0
+            or not isinstance(result.prompt_tokens, int)
+            or not isinstance(result.output_tokens, int)
+            or result.prompt_tokens < 1
+            or result.output_tokens < 1
+        ):
+            raise ValueError("Request needs finite nonnegative arrival and positive token counts")
+        return result
+
+
+@dataclass
+class Job:
+    request: Request
+    computed: int = 0
+    generated: int = 0
+    blocks: list[int] = field(default_factory=list)
+    cached_tokens: int = 0
+    first_s: float | None = None
+    finish_s: float | None = None
+    admitted_s: float | None = None
+
+
+@dataclass
+class Block:
+    references: int = 0
+    key: tuple | None = None
+
+
+class KVPool:
+    """Reference-counted pages with an eviction-ordered free list.
+
+    Page zero is reserved, matching the measured vLLM block pool. Unreferenced
+    cached pages remain resident until allocated for another block.
+    """
+
+    def __init__(self, total_blocks, block_size=128, enable_caching=True):
+        if total_blocks < 2 or block_size < 1:
+            raise ValueError("KV pool needs positive pages and at least one usable block")
+        self.block_size = block_size
+        self.enable_caching = enable_caching
+        self.blocks = [Block() for _ in range(total_blocks)]
+        self.free = OrderedDict((index, None) for index in range(1, total_blocks))
+        self.cached = {}
+        self.peak_active = 0
+        self.evictions = 0
+
+    def key(self, job, position):
+        req = job.request
+        if position < len(req.prefix_blocks):
+            return req.cache_domain, req.prefix_blocks[position]
+        return "generated", req.id, position
+
+    def prefix(self, job):
+        if not self.enable_caching:
+            return []
+        maximum = (job.request.prompt_tokens + job.generated - 1) // self.block_size
+        result = []
+        for position in range(maximum):
+            options = self.cached.get(self.key(job, position))
+            if not options:
+                break
+            result.append(next(iter(options)))
+        return result
+
+    def allocate(self, job, tokens, prefix=()):
+        if tokens < 1:
+            raise ValueError("Cannot allocate a zero-token step")
+        if prefix and job.blocks:
+            raise ValueError("Cannot attach a prefix to an already allocated request")
+        computed = len(prefix) * self.block_size if prefix else job.computed
+        wanted = math.ceil((computed + tokens) / self.block_size)
+        new_count = wanted - len(job.blocks) - len(prefix)
+        needed = new_count + sum(self.blocks[b].references == 0 for b in prefix)
+        if needed > len(self.free):
+            return False
+        for index in prefix:
+            block = self.blocks[index]
+            if block.references == 0:
+                del self.free[index]
+            block.references += 1
+            job.blocks.append(index)
+        if prefix:
+            job.computed = computed
+            job.cached_tokens = computed
+        for _ in range(new_count):
+            index, _ = self.free.popitem(last=False)
+            block = self.blocks[index]
+            if block.key is not None:
+                options = self.cached[block.key]
+                del options[index]
+                if not options:
+                    del self.cached[block.key]
+                self.evictions += 1
+            block.key = None
+            block.references = 1
+            job.blocks.append(index)
+        # vLLM publishes finalized full blocks during allocation, so another
+        # request in the same step can reuse an identical prefix.
+        if self.enable_caching:
+            full = min(computed + tokens, job.request.prompt_tokens + job.generated)
+            for position in range(full // self.block_size):
+                index = job.blocks[position]
+                block = self.blocks[index]
+                if block.key is None:
+                    block.key = self.key(job, position)
+                    self.cached.setdefault(block.key, OrderedDict())[index] = None
+        active = len(self.blocks) - 1 - len(self.free)
+        self.peak_active = max(self.peak_active, active)
+        return True
+
+    def release(self, job):
+        for index in reversed(job.blocks):
+            block = self.blocks[index]
+            block.references -= 1
+            if block.references < 0:
+                raise AssertionError("Negative KV reference count")
+            if block.references == 0:
+                self.free[index] = None
+        job.blocks.clear()
+
+
+def features(assignments):
+    result = {
+        "sequences": len(assignments),
+        "prefill_tokens": 0,
+        "decode_tokens": 0,
+        "prefill_attention": 0.0,
+        "decode_context": 0,
+        "context_sum": 0,
+    }
+    for computed, count, prompt in assignments:
+        head = min(count, max(0, prompt - computed))
+        result["prefill_tokens"] += head
+        result["decode_tokens"] += count - head
+        result["prefill_attention"] += head * (computed + (head + 1) / 2)
+        result["decode_context"] += (count - head) * (computed + count)
+        result["context_sum"] += computed + count
+    return result
+
+
+def vector(row):
+    if row["prefill_tokens"] == 0:
+        return [1.0, row["sequences"] / 8, row["decode_context"] / (8 * 8192)]
+    return [
+        1.0,
+        (row["prefill_tokens"] + row["decode_tokens"]) / 2048,
+        row["prefill_attention"] / (2048 * 8192),
+        row["decode_context"] / (8 * 8192),
+        row["sequences"] / 8,
+    ]
+
+
+def nonnegative_fit(xs, ys, weights):
+    coefficients = [0.0] * len(xs[0])
+    predicted = [0.0] * len(ys)
+    for _ in range(500):
+        maximum_change = 0.0
+        for col in range(len(coefficients)):
+            old = coefficients[col]
+            denominator = sum(w * x[col] ** 2 for x, w in zip(xs, weights, strict=True)) + 1e-8
+            numerator = sum(
+                w * x[col] * (y - estimate + old * x[col])
+                for x, y, estimate, w in zip(xs, ys, predicted, weights, strict=True)
+            )
+            new = max(0.0, numerator / denominator)
+            coefficients[col] = new
+            maximum_change = max(maximum_change, abs(new - old))
+            for index, x in enumerate(xs):
+                predicted[index] += (new - old) * x[col]
+        if maximum_change < 1e-10:
+            break
+    return coefficients, predicted
+
+
+def fit_cost_model(rows, metadata):
+    models = {}
+    for kind in ("decode", "prefill"):
+        selected = [r for r in rows if (r["prefill_tokens"] == 0) == (kind == "decode")]
+        if len(selected) < 2:
+            raise ValueError(f"Insufficient {kind} calibration steps")
+        xs = [vector(r) for r in selected]
+        ys = [r["duration_s"] for r in selected]
+        if any(not math.isfinite(y) or y <= 0 for y in ys):
+            raise ValueError("Calibration duration must be finite and positive")
+        weights = [1.0] * len(selected)
+        for _ in range(4):
+            coefficients, predicted = nonnegative_fit(xs, ys, weights)
+            residuals = [abs(y - estimate) for y, estimate in zip(ys, predicted, strict=True)]
+            scale = max(0.001, statistics.median(residuals) * 1.4826)
+            weights = [min(1.0, 1.5 * scale / max(r, 1e-12)) for r in residuals]
+        errors = [100 * abs(a - b) / a for a, b in zip(ys, predicted, strict=True)]
+        models[kind] = {
+            "coefficients": coefficients,
+            "training_steps": len(selected),
+            "training_MAPE_percent": statistics.mean(errors),
+            "training_absolute_error_s": quantiles(
+                [abs(a - b) for a, b in zip(ys, predicted, strict=True)]
+            ),
+        }
+    gaps = [r["dispatch_gap_s"] for r in rows if r.get("dispatch_gap_s") is not None]
+    return {
+        "schema": "pegaflow-step-cost/v1",
+        "metadata": metadata,
+        "fit": "nonnegative linear cost with Huber reweighting; calibration tasks only",
+        "models": models,
+        "dispatch_gap_s": statistics.median(gaps) if gaps else 0.0,
+        "response_delay_s": metadata.get("response_delay_s", 0.0),
+    }
+
+
+class CostModel:
+    def __init__(self, data):
+        if data.get("schema") != "pegaflow-step-cost/v1":
+            raise ValueError("Unsupported cost-model schema")
+        for kind, size in (("decode", 3), ("prefill", 5)):
+            coefficients = data.get("models", {}).get(kind, {}).get("coefficients", [])
+            if len(coefficients) != size or any(
+                not math.isfinite(x) or x < 0 for x in coefficients
+            ):
+                raise ValueError(f"Invalid {kind} cost coefficients")
+        for name in ("dispatch_gap_s", "response_delay_s"):
+            if not math.isfinite(data.get(name, 0.0)) or data.get(name, 0.0) < 0:
+                raise ValueError(f"Invalid {name}")
+        self.data = data
+
+    def duration(self, row):
+        kind = "decode" if row["prefill_tokens"] == 0 else "prefill"
+        coefficients = self.data["models"][kind]["coefficients"]
+        duration = sum(a * b for a, b in zip(coefficients, vector(row), strict=True))
+        return max(1e-6, duration)
+
+
+class UnsupportedCapacity(ValueError):
+    """The workload requires a preemption mechanism without calibrated costs."""
+
+
+class Simulator:
+    def __init__(self, requests, config, cost_model):
+        self.config = config
+        self.cost_model = cost_model
+        self.token_budget = int(config["token_budget"])
+        self.max_sequences = int(config["max_sequences"])
+        if (
+            self.token_budget != config["token_budget"]
+            or self.max_sequences != config["max_sequences"]
+        ):
+            raise ValueError("Integer token and sequence budgets required")
+        self.policy = config.get("policy", "fcfs")
+        if self.token_budget < 1 or self.max_sequences < 1:
+            raise ValueError("Positive token and sequence budgets required")
+        if self.policy not in ("fcfs", "shortest_remaining"):
+            raise ValueError("Unsupported waiting-queue policy")
+        if not requests or len({r.id for r in requests}) != len(requests):
+            raise ValueError("Requests must be nonempty and have unique identities")
+        self.jobs = {r.id: Job(r) for r in requests}
+        metadata = cost_model.data.get("metadata", {})
+        self.extrapolation = [
+            key
+            for key, value in (
+                ("token_budget", self.token_budget),
+                ("max_sequences", self.max_sequences),
+            )
+            if key in metadata and value > metadata[key]
+        ]
+        if self.extrapolation and not config.get("allow_extrapolation", False):
+            raise ValueError(f"Configuration exceeds calibration support: {self.extrapolation}")
+        for r in requests:
+            if r.depends_on is not None and r.depends_on not in self.jobs:
+                raise ValueError("Unknown session predecessor")
+            limit = metadata.get("max_model_tokens")
+            if limit is not None and r.prompt_tokens + r.output_tokens > limit:
+                raise ValueError("Request exceeds the calibrated engine context limit")
+        self.pool = KVPool(
+            int(config["total_blocks"]),
+            int(config.get("block_size", 128)),
+            bool(config.get("enable_prefix_caching", True)),
+        )
+        self.pending = sorted(self.jobs.values(), key=lambda j: j.request.arrival_s)
+        self.waiting = []
+        self.running = []
+        self.steps = []
+        self.now = 0.0
+        self.maximum_waiting = 0
+        self.maximum_running = 0
+
+    def ingest(self):
+        remaining = []
+        for job in self.pending:
+            req = job.request
+            previous = self.jobs[req.depends_on] if req.depends_on is not None else None
+            predecessor_ready = previous is None or (
+                previous.finish_s is not None and previous.finish_s <= self.now + 1e-12
+            )
+            if req.arrival_s <= self.now + 1e-12 and predecessor_ready:
+                self.waiting.append(job)
+            else:
+                remaining.append(job)
+        self.pending = remaining
+        if self.policy == "shortest_remaining":
+            self.waiting.sort(
+                key=lambda j: (
+                    j.request.prompt_tokens + j.request.output_tokens,
+                    j.request.arrival_s,
+                )
+            )
+        self.maximum_waiting = max(self.maximum_waiting, len(self.waiting))
+
+    def next_arrival(self):
+        times = []
+        for job in self.pending:
+            previous = self.jobs.get(job.request.depends_on)
+            if previous is None or previous.finish_s is not None:
+                times.append(max(job.request.arrival_s, previous.finish_s if previous else 0.0))
+        if not times:
+            raise ValueError("Cyclic or unsatisfied request dependencies")
+        return max(self.now, min(times))
+
+    def step(self):
+        self.ingest()
+        budget = self.token_budget
+        scheduled = []
+        for job in self.running:
+            take = min(budget, job.request.prompt_tokens + job.generated - job.computed)
+            if take < 1:
+                continue
+            if not self.pool.allocate(job, take):
+                raise UnsupportedCapacity("Running KV growth requires uncalibrated preemption")
+            scheduled.append((job, take, job.computed))
+            budget -= take
+        while self.waiting and budget > 0 and len(self.running) < self.max_sequences:
+            job = self.waiting[0]
+            prefix = self.pool.prefix(job)
+            computed = len(prefix) * self.pool.block_size
+            take = min(budget, job.request.prompt_tokens + job.generated - computed)
+            if not self.pool.allocate(job, take, prefix):
+                break
+            self.waiting.pop(0)
+            job.admitted_s = self.now
+            self.running.append(job)
+            scheduled.append((job, take, computed))
+            budget -= take
+        if not scheduled:
+            if self.waiting:
+                raise UnsupportedCapacity(
+                    "No KV admission possible within the calibrated memory model"
+                )
+            self.now = self.next_arrival()
+            return
+        self.maximum_running = max(self.maximum_running, len(self.running))
+        row = features(
+            [(before, count, job.request.prompt_tokens) for job, count, before in scheduled]
+        )
+        duration = self.cost_model.duration(row)
+        start = self.now
+        active_during_step = len(self.pool.blocks) - 1 - len(self.pool.free)
+        running_during_step = len(self.running)
+        self.now += duration
+        delay = self.cost_model.data.get("response_delay_s", 0.0)
+        finished = []
+        for job, count, before in scheduled:
+            target = job.request.prompt_tokens + job.generated
+            job.computed = before + count
+            if job.computed >= target:
+                job.generated += 1
+                if job.first_s is None:
+                    job.first_s = self.now + delay
+                if job.generated == job.request.output_tokens:
+                    job.finish_s = self.now + delay
+                    finished.append(job)
+        for job in finished:
+            self.pool.release(job)
+            self.running.remove(job)
+        self.steps.append(
+            {
+                "start_s": start,
+                "end_s": self.now,
+                **row,
+                "scheduled": {j.request.id: n for j, n, _ in scheduled},
+                "waiting": len(self.waiting),
+                "running": running_during_step,
+                "active_KV_blocks": active_during_step,
+                "cached_KV_blocks": sum(len(x) for x in self.pool.cached.values()),
+            }
+        )
+        self.now += self.cost_model.data.get("dispatch_gap_s", 0.0)
+
+    def run(self):
+        for _ in range(1_000_000):
+            if not (self.pending or self.waiting or self.running):
+                break
+            self.step()
+        else:
+            raise RuntimeError("Simulation step limit exceeded")
+        rows = []
+        for job in self.jobs.values():
+            req = job.request
+            if job.finish_s is None or job.first_s is None:
+                raise AssertionError("Incomplete simulated request")
+            previous = self.jobs.get(req.depends_on)
+            ready = max(req.arrival_s, previous.finish_s if previous else 0.0)
+            rows.append(
+                {
+                    "id": req.id,
+                    "arrival_s": req.arrival_s,
+                    "causal_ready_s": ready,
+                    "admitted_s": job.admitted_s,
+                    "first_s": job.first_s,
+                    "finish_s": job.finish_s,
+                    "cached_tokens": job.cached_tokens,
+                    "depends_on": req.depends_on,
+                    "TTFT_s": job.first_s - ready,
+                    "E2E_s": job.finish_s - ready,
+                }
+            )
+        return {
+            "schema": "pegaflow-step-simulation/v1",
+            "scope": "Single-engine prediction using workload metadata and calibrated step costs",
+            "config": self.config,
+            "extrapolation": self.extrapolation,
+            "requests": rows,
+            "steps": self.steps,
+            "summary": {
+                "requests": len(rows),
+                "finish_span_s": max(r["finish_s"] for r in rows),
+                "TTFT_s": quantiles([r["TTFT_s"] for r in rows]),
+                "E2E_s": quantiles([r["E2E_s"] for r in rows]),
+                "cache_hit_tokens": sum(r["cached_tokens"] for r in rows),
+                "peak_active_KV_blocks": self.pool.peak_active,
+                "cache_evictions": self.pool.evictions,
+                "peak_waiting": self.maximum_waiting,
+                "peak_running": self.maximum_running,
+            },
+        }
+
+
+def predict(workload, cost_model):
+    if workload.get("schema") != "pegaflow-step-workload/v1":
+        raise ValueError("Unsupported workload schema")
+    metadata = cost_model.get("metadata", {})
+    for key, value in workload.get("engine", {}).items():
+        if key in metadata and metadata[key] != value:
+            raise ValueError(f"Workload and cost-model engine identity differ: {key}")
+    requests = [Request.from_dict(row) for row in workload["requests"]]
+    return Simulator(requests, workload["config"], CostModel(cost_model)).run()
+
+
+def compare(prediction, observed):
+    expected = {r["id"]: r for r in observed["requests"]}
+    if set(expected) != {r["id"] for r in prediction["requests"]}:
+        raise ValueError("Prediction and observation request sets differ")
+    errors = []
+    for row in prediction["requests"]:
+        real = expected[row["id"]]
+        errors.append(
+            {
+                "id": row["id"],
+                "first_absolute_error_s": abs(row["first_s"] - real["first_s"]),
+                "finish_absolute_error_s": abs(row["finish_s"] - real["finish_s"]),
+            }
+        )
+    dependency = {r["id"]: r.get("depends_on") for r in prediction["requests"]}
+    measured_ttft = quantiles(
+        [
+            r["first_s"]
+            - max(
+                r["arrival_s"],
+                expected[dependency[r["id"]]]["finish_s"]
+                if dependency[r["id"]] is not None
+                else 0.0,
+            )
+            for r in expected.values()
+        ]
+    )
+    actual = {
+        "TTFT_mean_s": measured_ttft["mean"],
+        "TTFT_p95_s": measured_ttft["p95"],
+        "finish_span_s": max(r["finish_s"] for r in expected.values()),
+        "cache_hit_tokens": sum(r["cached_tokens"] for r in expected.values()),
+        **{
+            key: observed[key]
+            for key in ("peak_active_KV_blocks", "peak_running", "peak_waiting")
+            if key in observed
+        },
+    }
+    simulated = {
+        "TTFT_mean_s": prediction["summary"]["TTFT_s"]["mean"],
+        "TTFT_p95_s": prediction["summary"]["TTFT_s"]["p95"],
+        "finish_span_s": prediction["summary"]["finish_span_s"],
+        "cache_hit_tokens": prediction["summary"]["cache_hit_tokens"],
+        **{key: prediction["summary"][key] for key in actual if key.startswith("peak_")},
+    }
+    return {
+        "scope": "Exposed workload validation; observation times are not predictor inputs",
+        "measured": actual,
+        "predicted": simulated,
+        "relative_error_percent": {
+            key: 100 * (simulated[key] - actual[key]) / actual[key]
+            for key in actual
+            if actual[key] != 0
+        },
+        "request_first_absolute_error_s": quantiles([r["first_absolute_error_s"] for r in errors]),
+        "request_finish_absolute_error_s": quantiles(
+            [r["finish_absolute_error_s"] for r in errors]
+        ),
+        "per_request_errors": errors,
+    }
+
+
+def main(argv=None):
+    parser = argparse.ArgumentParser(description=__doc__)
+    sub = parser.add_subparsers(dest="command", required=True)
+    fit = sub.add_parser("fit")
+    fit.add_argument("--steps", type=Path, required=True)
+    fit.add_argument("--metadata", type=Path, required=True)
+    fit.add_argument("--output", type=Path, required=True)
+    for name in ("simulate", "validate"):
+        run = sub.add_parser(name)
+        run.add_argument("--workload", type=Path, required=True)
+        run.add_argument("--model", type=Path, required=True)
+        run.add_argument("--output", type=Path, required=True)
+        if name == "validate":
+            run.add_argument("--observed", type=Path, required=True)
+        else:
+            run.add_argument("--policy", choices=["fcfs", "shortest_remaining"])
+            run.add_argument("--token-budget", type=int)
+            run.add_argument("--max-sequences", type=int)
+            run.add_argument("--allow-extrapolation", action="store_true")
+    args = parser.parse_args(argv)
+    if args.command == "fit":
+        result = fit_cost_model(read_rows(args.steps), read_json(args.metadata))
+    else:
+        workload = read_json(args.workload)
+        if args.command == "simulate":
+            for key in ("policy", "token_budget", "max_sequences"):
+                if getattr(args, key) is not None:
+                    workload["config"][key] = getattr(args, key)
+            if args.allow_extrapolation:
+                workload["config"]["allow_extrapolation"] = True
+        result = predict(workload, read_json(args.model))
+        if args.command == "validate":
+            result = compare(result, read_json(args.observed))
+    write_json(args.output, result)
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
