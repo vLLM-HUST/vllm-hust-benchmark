@@ -17,7 +17,7 @@ MAPPINGS = {
     / "configs/workload-native/reused-source-mappings/naturalquestions.json",
 }
 DIALOGUE_SOURCES = {"WILDCHAT", "ULTRACHAT", "LMSYS_CHAT", "TULU3", "OPENTHOUGHTS3"}
-NATIVE_FIELD_SOURCES = {"REPOBENCH", "DOCVQA"}
+NATIVE_FIELD_SOURCES = {"REPOBENCH", "DOCVQA", "OPENMATH2"}
 TRACE_METADATA_SOURCES = {"AZURE_LMM_2025", "COPILOT_AGENT_2026"}
 INFINITE_MAPPINGS = {
     kind: ROOT
@@ -94,11 +94,12 @@ def prepare(source_id, *, data_root, output, files=None, limit=None, catalog_roo
         raise ValueError(
             "catalog revision differs from reviewed mapping; re-review required"
         )
+    original_role = "data" if source_id == "OPENMATH2" else "raw_source"
     registered = {
-        item["path"] for item in source["files"] if item["role"] == "raw_source"
+        item["path"] for item in source["files"] if item["role"] == original_role
     }
     selected = (
-        [item["path"] for item in source["files"] if item["role"] == "raw_source"]
+        [item["path"] for item in source["files"] if item["role"] == original_role]
         if files is None
         else files
     )

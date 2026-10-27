@@ -7,7 +7,10 @@
 
 - [x] 完整主train32分片的固定版本/URL/LFS摘要/大小已登记，共7,576,089,560字节；不把与主train重叠的1M/2M/5M子集重复计为独立问题来源。
 - [x] 运行前固定的0/15/31原分片已在服务器取得并核验，共710,707,907字节。三份Parquet元数据行数为436650/436650/436649；已检查原schema及各原前3条字段类型，未据此宣称所有行值或索引均验证通过。
-- [ ] 原问题生成、准备索引及实际CI/研究消费仍待完成；复用现有原字段适配，`problem`独立作为输入，`expected_answer`和`generated_solution`留在参考侧，保留`problem_source`及空答案。教师解答不冒充本地生成结果。[准备证据](validation/openmath2-original-readiness-20261028.json)
+- [x] 三个可用分片全部1,309,949条原字段及索引完成核验；实际CI28997404包的56个载荷与工件一致，9条公共/当前研究消费者回读通过。初次私有核验器误比较逐文件与三文件全量选择范围，已明确校验各自范围并恢复只读核验；失败记录保留，未重建索引或重跑模型。
+- [x] 原前3条/分片共9条原问题已在现有Qwen3.5-9B BF16 TP1 NPU3服务生成：3 stop、6
+  length，显式预算8192，未改问题、换题或重试。保存的输入、参考、来源、预算和响应已用公开核验入口复核，0新增模型调用；不独立判断数学正确性，不冒充作者教师模型复现。
+- [ ] 新增公开生成/准备入口的当前CI资格仍待收口，故来源总勾保持未完成。`problem`独立作为输入，`expected_answer`和`generated_solution`留在参考侧，保留`problem_source`及空答案。[准备与阶段证据](validation/openmath2-original-readiness-20261028.json)
 
 ```bash
 python scripts/prepare_reused_research_assets.py OPENMATH2 --mode plan \
@@ -18,6 +21,17 @@ python scripts/prepare_reused_research_assets.py OPENMATH2 --mode download \
 ```
 
 这是发布方公开的合成推理训练语料，不是独立质量benchmark，不能把训练语料续写说成官方独立评测、训练复现或真实线上分布证明。当前只取得主train三个固定分片，其他29份仅登记；原始数据不放入仓库或本地工作站，运行配置须明确模型与预算，不能补造作者未给出的质量评分器。
+
+原问题生成默认只展示计划；运行必须显式给出模型、上下文和输出预算。以下为当前已验证的本地模型回退profile，不是作者官方质量配置：
+
+```bash
+python scripts/run_openmath2_original.py --mode run \
+  --data-root <仓库外原始目录> --output <仓库外私有新结果目录> \
+  --files data/train-00000-of-00032.parquet data/train-00015-of-00032.parquet data/train-00031-of-00032.parquet \
+  --model Qwen/Qwen3.5-9B --max-tokens 8192 --context 262144
+```
+
+默认原前3条/文件，`--count`明确增加固定前缀；`--full`流式遍历所选文件全部原行，不按结果过滤。输入只使用原`problem`作为user内容，模型原生模板由服务处理；不加入教师解答。`verify_openmath2_original_saved.py`使用相同原始目录/文件选择及`--saved`结果目录复核，无模型调用、无独立数学评分。原字段准备复用`prepare_reused_source_records.py OPENMATH2 --data-root ... --output ... --files ...`；全量模式可生成三个所选分片的全部引用索引，不复制原载荷。
 
 ### DRAGOn同版本原始RAG资产（未交付，不打总勾）
 

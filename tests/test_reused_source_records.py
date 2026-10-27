@@ -17,6 +17,76 @@ runner = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(runner)
 
 
+def test_openmath2_public_prepare_data_role_keeps_original_problem_and_references(
+    tmp_path,
+):
+    from vllm_hust_workload_data.consumer import resolve_input
+
+    pa = pytest.importorskip("pyarrow")
+    pq = pytest.importorskip("pyarrow.parquet")
+    sid = "OPENMATH2"
+    filename = "data/train-00000-of-00032.parquet"
+    originals = [
+        {
+            "problem": "fixture problem0",
+            "generated_solution": "fixture teacher0",
+            "expected_answer": "",
+            "problem_source": "math",
+        },
+        {
+            "problem": "fixture problem1",
+            "generated_solution": "fixture teacher1",
+            "expected_answer": "1",
+            "problem_source": "augmented_math",
+        },
+    ]
+    data = tmp_path / "original"
+    path = data / filename
+    path.parent.mkdir(parents=True)
+    pq.write_table(pa.Table.from_pylist(originals), path)
+    raw = path.read_bytes()
+    catalog = tmp_path / "catalog"
+    (catalog / "data/catalogs").mkdir(parents=True)
+    for name in (
+        "source_manifests_v1.json",
+        "adapter_registry_v1.json",
+        "adapter_extensions_v1.json",
+    ):
+        payload = json.loads(
+            (ROOT / "workload-preparation/data/catalogs" / name).read_text("utf-8")
+        )
+        if name == "source_manifests_v1.json":
+            payload["sources"][sid]["files"] = [
+                {
+                    "path": filename,
+                    "sha256": hashlib.sha256(raw).hexdigest(),
+                    "bytes": len(raw),
+                    "rows": 2,
+                    "role": "data",
+                }
+            ]
+        (catalog / "data/catalogs" / name).write_text(
+            json.dumps(payload), encoding="utf-8"
+        )
+    output = tmp_path / "prepared"
+    report = runner.prepare(sid, data_root=data, output=output, catalog_root=catalog)
+    database = output / "prepared/workload.sqlite"
+    with sqlite3.connect(database) as connection:
+        ids = connection.execute(
+            "SELECT record_id FROM records ORDER BY rowid"
+        ).fetchall()
+    assert len(ids) == 2 and report["source_rows_fully_bound"] == 2
+    for index, (record_id,) in enumerate(ids):
+        record = resolve_input(database, record_id, data_root=data)
+        assert record.task["input"] == {"problem": originals[index]["problem"]}
+        assert {
+            **record.task["input"],
+            **record.outcome_record(),
+            **record.replay["annotations"],
+        } == originals[index]
+    assert path.read_bytes() == raw and not report["native_execution_complete"]
+
+
 def test_docvqa_public_prepare_preserves_original_fields_and_media(tmp_path):
     from vllm_hust_workload_data.consumer import resolve_input
 
