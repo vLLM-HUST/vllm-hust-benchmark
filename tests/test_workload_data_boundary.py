@@ -5,6 +5,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1] / "workload-preparation"
 DATA_MODULES = {
+    "deepplanning",  # Original queries/metadata/database references only.
+    "scienceworld",  # Original publisher task/variation/reference relations only.
     "docvqa",  # Original field types and media paths only; no inference or analysis.
     "copilot",  # Original release integrity and nested metadata only, no analysis.
     "crosscodeeval",  # Original archive/profile/task relations only; no analysis.

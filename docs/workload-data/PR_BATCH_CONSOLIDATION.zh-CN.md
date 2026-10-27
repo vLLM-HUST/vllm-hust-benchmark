@@ -1,5 +1,7 @@
 # Workload 合批交付调整
 
+当前状态（2026-10-27）：首批汇总[#432](https://github.com/vLLM-HUST/vllm-hust-benchmark/pull/432)已合入main；#379、#426、#428、#429、#431已关闭为被汇总承接，不另行合并，分支和历史保留。第二批[#538](https://github.com/vLLM-HUST/vllm-hust-benchmark/pull/538)直接面向main重新验证。当前打勾及缺口以[唯一交付清单](DATASET_CHECKLIST.zh-CN.md)和其机器清单为准；下文仅为历史讨论。
+
 > 历史合批讨论与核查快照，不再维护当前PR计划或打勾状态。统一入口为[40类完整迁移清单](WORKLOAD_PR_REORGANIZATION_PLAN.zh-CN.md)，重点见第八节能力/接通清单和第九节批次安排。下文包含不同阶段的状态，不能把旧“开放”“待归并”描述当成现状；保留它们仅为追溯原始决定和验证身份。
 
 更新日期：2026-10-23。

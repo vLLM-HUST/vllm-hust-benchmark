@@ -1,0 +1,221 @@
+{
+  "schema_version": "workload-native-delivery/v1",
+  "source_id": "SCIENCEWORLD",
+  "status": "END_TO_END_EXECUTED_AND_SCORED",
+  "source_checkbox_eligible": true,
+  "delivery_kind": "original_scienceworld_environment_native_benchmark",
+  "selected_samples": [
+    "3:27",
+    "3:28",
+    "3:29",
+    "4:27",
+    "4:28",
+    "4:29",
+    "5:225",
+    "5:226",
+    "5:227"
+  ],
+  "quality_claim": false,
+  "server_inventory": {
+    "backend": "vllm-ascend",
+    "hardware": "Ascend910B2",
+    "model": "Qwen/Qwen3.5-9B",
+    "dtype": "bfloat16",
+    "tensor_parallel_size": 1,
+    "model_profile": "available NPU fallback; not author GPT4 reproduction",
+    "thinking_override": false
+  },
+  "original_assets": {
+    "author_revision": "b8ea624231a6a8d83d78c1c12bea1b44b8ea758b",
+    "original_archive_sha256": "afc1624057432416239f6036e8d217f6011ddef6e848aec566dfc6301145f3fe",
+    "original_rows": 7207,
+    "task_types": 30,
+    "folds": {
+      "train": 3592,
+      "dev": 1796,
+      "test": 1819
+    },
+    "public_preparation_files": 12,
+    "public_preparation_reuse_actual_server_success": true,
+    "original_payloads_publicly_redistributed": false
+  },
+  "native_profile": {
+    "environment": "scienceworld==1.1.3",
+    "author_baseline": "pinned SwiftSage ScienceWorld ReAct",
+    "selected_original_episodes": 9,
+    "original_model_call_attempts": 464,
+    "max_generation_tokens": 50,
+    "environment_step_limit": 100,
+    "max_agent_iterations": 200,
+    "original_task_template_action_handling_and_scoring_unchanged": true,
+    "profile": "author easy / test_mini first3 original test variations for first3 task types in author batch script",
+    "valid_model_outputs_rerun": 0,
+    "public_full_test_entry_available": true,
+    "public_task_indices": "0..29",
+    "full_test_cut_off": false,
+    "latest_wrapper_change": "Only expose all original task indices and original set selection; the nine validated test_mini tasks retain unchanged native loop/template/budget/scorer"
+  },
+  "saved_score_consistency": {
+    "source_id": "SCIENCEWORLD",
+    "status": "NINE_SAVED_NATIVE_EPISODES_AND_AUTHOR_SCORES_VERIFIED_NOT_ENVIRONMENT_REPLAY",
+    "source_checkbox_eligible": false,
+    "model_calls": 0,
+    "environment_replay_performed": false,
+    "original_model_call_attempts": 464,
+    "episodes": [
+      {
+        "task_index": 3,
+        "variation": 27,
+        "author_score": 100,
+        "raw_terminal_environment_score": "1.0",
+        "saved_environment_steps": 4
+      },
+      {
+        "task_index": 3,
+        "variation": 28,
+        "author_score": 10,
+        "raw_terminal_environment_score": "-1.0",
+        "saved_environment_steps": 21
+      },
+      {
+        "task_index": 3,
+        "variation": 29,
+        "author_score": 0,
+        "raw_terminal_environment_score": "0.0",
+        "saved_environment_steps": 102
+      },
+      {
+        "task_index": 4,
+        "variation": 27,
+        "author_score": 0,
+        "raw_terminal_environment_score": "-1.0",
+        "saved_environment_steps": 2
+      },
+      {
+        "task_index": 4,
+        "variation": 28,
+        "author_score": 3,
+        "raw_terminal_environment_score": "0.03333333333333333",
+        "saved_environment_steps": 109
+      },
+      {
+        "task_index": 4,
+        "variation": 29,
+        "author_score": 3,
+        "raw_terminal_environment_score": "-1.0",
+        "saved_environment_steps": 35
+      },
+      {
+        "task_index": 5,
+        "variation": 225,
+        "author_score": 25,
+        "raw_terminal_environment_score": "-1.0",
+        "saved_environment_steps": 86
+      },
+      {
+        "task_index": 5,
+        "variation": 226,
+        "author_score": 83,
+        "raw_terminal_environment_score": "0.8333333333333333",
+        "saved_environment_steps": 105
+      },
+      {
+        "task_index": 5,
+        "variation": 227,
+        "author_score": 25,
+        "raw_terminal_environment_score": "-1.0",
+        "saved_environment_steps": 6
+      }
+    ],
+    "scope": "saved identity/protocol/scoring consistency only; prior strict replay mismatch remains unresolved and is not waived"
+  },
+  "exact_ci_and_research": {
+    "source_id": "SCIENCEWORLD",
+    "status": "FINAL_ACTUAL_CI_INSTALLED_PAYLOADS_VERIFIED_READER_BYTE_IDENTICAL_AND_PRIOR_PROOFS_REUSED",
+    "source_checkbox_eligible": false,
+    "model_calls": 0,
+    "ci_run_id": 40473692551,
+    "ci_artifact_id": 12719388335,
+    "source_commit": "53db414cdea9c206f29fb55732f368d987cd7edd",
+    "wheel_sha256": "4c9803617235e26f85bba349d7cf65404094f1c5ad2cea3a17f7b697bead14e9",
+    "installed_payloads": 51,
+    "reader_and_existing_payloads_byte_equal_previous_actual_ci": 50,
+    "only_publication_metadata_added": {
+      "source_id": "SCIENCEWORLD",
+      "entrypoints": [
+        {
+          "role": "prepare_assets",
+          "path": "scripts/prepare_scienceworld_original_assets.py",
+          "scope": "Use author-react profile for pinned original code/prompts/goldpath archive; no model calls or synthetic prompts."
+        },
+        {
+          "role": "data_reading_only",
+          "path": "workload-preparation/src/vllm_hust_workload_data/scienceworld.py",
+          "scope": "Original task/variation/fold/goal relations; publisher gold path stays reference-only, not model input or research observations."
+        },
+        {
+          "role": "original_profile",
+          "path": "scripts/run_scienceworld_original.py",
+          "scope": "Unchanged author ScienceWorld1.1.3 ReAct test_mini episodes and scoring; declared NPU fallback, not GPT4 reproduction."
+        },
+        {
+          "role": "saved_output_reuse_audit",
+          "path": "scripts/verify_scienceworld_original_saved.py",
+          "scope": "Saved author scoring consistency and separate strict replay check; known observation replay differences retained, no new model calls."
+        }
+      ]
+    },
+    "reused_original_full_fields_and_index": 7207,
+    "reused_actual_ci_research_readbacks": 9,
+    "new_native_inference_calls": 0,
+    "full_earlier_audit_retained": true
+  },
+  "software_ci": {
+    "latest_native_entry_commit": "0423b1834c28061432fa92538addb2efb7da417b",
+    "main_run": 40475053016,
+    "cpu_run": 40475057760,
+    "tests": "success",
+    "lint": "success",
+    "cpu_correctness": "success",
+    "data_component_source_unchanged_since_actual_ci": "53db414cdea9c206f29fb55732f368d987cd7edd",
+    "actual_data_ci_commit": "53db414cdea9c206f29fb55732f368d987cd7edd",
+    "actual_data_ci_main_run": 40473687207,
+    "actual_data_ci_cpu_run": 40473692551
+  },
+  "candidate_full_data_proof": {
+    "source_id": "SCIENCEWORLD",
+    "model_calls": 0,
+    "source_checkbox_eligible": false,
+    "candidate_not_ci": true,
+    "wheel_sha256": "1ee1ed701e9b8f334fedfddab22b3b2e96193666147ebeca3c7d82f2177cf517",
+    "status": "ALL7207_ORIGINAL_FIELDS_AND_INDEX_PLUS9_FIXED_RESEARCH_READBACKS_VERIFIED_CANDIDATE_ONLY",
+    "original_rows": 7207,
+    "folds": {
+      "train": 3592,
+      "dev": 1796,
+      "test": 1819
+    },
+    "research_readbacks": 9,
+    "task_types": 30
+  },
+  "strict_environment_replay": {
+    "status": "FAILED_NOT_WAIVED",
+    "first_mismatch": "task3 variation28 step5",
+    "diagnostic": "scienceworld-saved-replay-diagnostic-32028-002.json",
+    "scope": "fresh environment observations/freelook differ; auditor initial-credit rule bug fixed without changing native outputs; no deterministic replay claim"
+  },
+  "preliminary_new_environment_smoke": {
+    "revision": "e8216d6044e8e39be9fcb185e3b2dfb602584b52",
+    "environment": "scienceworld1.3.0",
+    "task_types_loaded_reset_stepped": 30,
+    "model_calls": 0,
+    "scope": "separate author environment preparation only; not substituted into the1.1.3 native benchmark"
+  },
+  "limitations": [
+    "Only nine fixed original episodes were model-executed; not all7207 or all30 task types",
+    "No author GPT4 model reproduction, full-suite quality acceptance, performance or optimization attribution claim",
+    "Strict fresh-environment byte-exact action/observation replay failed and remains unpassed; saved native scores were independently checked without rewriting outputs",
+    "Publisher gold paths remain scorer/reference-only and never enter model input",
+    "No research observation or feature-analysis capability migrated"
+  ]
+}

@@ -24,7 +24,7 @@ def test_every_class_has_an_explicit_plan():
 
 def test_catalog_registration_does_not_claim_runtime_or_local_data():
     sources = provider.list_sources()
-    assert len(sources) == 103  # frozen100 plus three already-planned sources
+    assert len(sources) == 104  # frozen100 plus four already-planned sources
     assert sum(row["source_id"].startswith("PAIO-") for row in sources) == 8
     assert all(
         row["runtime_validation"] == "NOT_ESTABLISHED_BY_CATALOG" for row in sources
