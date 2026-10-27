@@ -13,7 +13,7 @@
 
 边界：只有匿名模型标签、token/缓存计数、消息片段类型和工具状态等元数据，没有原prompt、代码、模型响应或工具输出。`request_body()`明确拒绝，不造prompt，不映射真实模型，不将缓存计数推成精确KV块；作者绘图、特征和研究分析不迁入。研究侧固定消费者回读已验证，不表示其默认依赖已自动更新。
 
-### DocVQA原始文档视觉问答（运行来源核查，未交付）
+### DocVQA原始文档视觉问答（固定原生抽样交付完成）
 
 - [x] 核查仓库现有入口后，取得并按Git blob/大小/SHA256核验维护方Inspect
   Evals固定版本的五份任务/依赖声明文件；固定版本`46e05d2efb7046553a9489329ecdff22f21c6788`，服务器目录`docvqa-original-runtime-discovery-32028-001`。这是原DocVQA验证集路线，不以不同任务的DocVQA2026竞赛替换。
@@ -28,7 +28,10 @@
 - [x] 原生固定首三题已完成，仅使用现有NPU
   Qwen3.5-9B/BF16/TP1及16384输出预算，无thinking覆盖。三次原始请求、三条原生评分、样本错误0；ANLS依题ID49153/24580/57349分别为0.75/1/1。这只是固定可用性抽样，不外推全量或模型质量。
 - [x] 三条保存结果独立复核完成：由原PNG重建原框架1024缩略图，完整原生model-input图像附件、原模板、原API输出和原ANLS重算一致，新增模型调用0，不清洗答案。官方API日志会把图像base64替换为固定标记；不声称由该脱敏日志证明线上图像字节，只核验日志中完整保留的原生模型输入附件。
-- [ ] 实际CI工件研究回读待完成，来源总勾保持未完成，不重跑上述模型请求。保存复核入口为`python scripts/verify_docvqa_original_saved.py --run-root <原运行目录> --data-root <原六片目录> --framework-source-root <固定原source> --output <新外部审计目录>`，只核查保存结果，不调用模型。
+- [x] 实际CI提交10b219f6的50份安装载荷与wheel逐字节一致，完整5349条原字段再次比对、公共准备及36条固定实际CI研究回读完成。主CI和CPU
+  smoke均成功；复用三条原生推理和保存复核，不重跑模型，按固定原生抽样范围打总勾。[交付回执](validation/docvqa-original-native-delivery-20261027.json)
+
+保存复核入口为`python scripts/verify_docvqa_original_saved.py --run-root <原运行目录> --data-root <原六片目录> --framework-source-root <固定原source> --output <新外部审计目录>`，只核查保存结果，不调用模型。该来源完成不表示全5349题模型评测、作者模型质量复现或控制界面通过。
 
 环境补充：冻结基础环境缺少可选API
 SDK，按同一未修改uv.lock中五个版本及制品哈希补齐，执行`uv pip install --python <独立venv/bin/python> --no-deps --require-hashes -r configs/workload-native/docvqa-api-client-requirements.txt`后再`uv pip check --python <独立venv/bin/python>`。服务器检查106个环境包兼容；不修改模型服务环境。运行时将固定Inspect
@@ -520,7 +523,7 @@ TB；服务器/data约1.42TB可用，未缩小语料。ChartQA当前两卡主机
 | BEIR_NFCORPUS              | [x] 已完成                   | 原test全量检索/top100重排、原评分、最终公开NPU命令及固定CI组件/研究消费均通过。范围仅为登记集合与协议，不是BM25或全部BEIR基线。                                                                                                                                                                                   |
 | MSMARCO_PASSAGE            | [ ] 待开展                   | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                      |
 | STSB                       | [x] 已完成                   | 原dev1500/test1379全量NPU编码与原评分通过；8628行保真、固定CI组件、三split公共回查/研究消费及安装后缓存重算通过。不含训练复现或生产检索流量。                                                                                                                                                                     |
-| DOCVQA                     | [ ] 待开展                   | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                      |
+| DOCVQA                     | [x] 固定原生视觉问答可用     | 六原文件5349题全字段/原图及引用索引、36实际CI研究回读；固定首3题NPU原生模板/图像处理/ANLS及独立保存复核完成，分数0.75/1/1。非全量模型评测或作者模型质量复现。[证据](validation/docvqa-original-native-delivery-20261027.json)                                                                                     |
 | CODEJUDGE_EVAL             | [ ] 待开展                   | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                      |
 | DRAGON_PUBLIC              | [ ] 待开展                   | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                      |
 | TEMPORALWIKI               | [ ] 待开展                   | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                      |
