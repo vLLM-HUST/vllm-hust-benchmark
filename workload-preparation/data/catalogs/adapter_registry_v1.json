@@ -2,6 +2,35 @@
   "version": "source-adapters/v1",
   "status_policy": "Implementation, asset verification and runtime reproduction are independent. All other registered sources remain NOT_IMPLEMENTED.",
   "adapters": {
+    "DEEPPLANNING": {
+      "kind": "native_environment_dataset",
+      "mapping": "deepplanning_original_tasks",
+      "input_fields": [
+        "id",
+        "query"
+      ],
+      "required_fields": [
+        "id",
+        "query"
+      ],
+      "outcome_fields": [
+        "meta_info",
+        "query_with_constraints"
+      ],
+      "annotation_fields": [
+        "domain",
+        "profile",
+        "database_archive",
+        "original_query_file",
+        "original_query_offset"
+      ],
+      "id_field": "",
+      "status": "ORIGINAL_TASK_READER_IMPLEMENTED_NATIVE_VALIDATION_SEPARATE",
+      "requirements": [
+        "Original author tools/database/Agent/scorer; travel report conversion required",
+        "No task-to-QA conversion or synthetic fallback"
+      ]
+    },
     "SCIENCEWORLD": {
       "kind": "native_environment_dataset",
       "mapping": "scienceworld_original_goldpaths",

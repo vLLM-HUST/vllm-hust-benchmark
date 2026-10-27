@@ -515,7 +515,7 @@ TB；服务器/data约1.42TB可用，未缩小语料。ChartQA当前两卡主机
 | SPIDER                     | [ ] 原数据库获取阻塞         | 已核验Spider及官方test-suite-sql-eval的12份原文件；两个官方GoogleDrive下载入口在当前实例网络不可达，原题/数据库尚未取得。按Test Suite Accuracy准备，不换成字符串或旧单库评分；0模型调用，不计完成。                                                                                                               |
 | NATURALQUESTIONS           | [x] NQ-open原任务已交付      | 原dev3610题纯文本全量NPU生成/评分，原生聊天模式另3题；91535条索引、12处固定工件公共/研究回查及干净客户端重评分通过；[交付证据](validation/nq-open-native-delivery-20261026.json)。低分与空输出保留，两profile不混分，不是完整NQ文档、RAG或质量通过。                                                              |
 | MULTIAGENTBENCH            | [ ] 待开展                   | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                      |
-| DEEPPLANNING               | [ ] 原资产已取得                   | 服务器已取得固定作者版本63份原源码/题目文件及全部5份原数据库归档（约104MB，逐份LFS SHA256核验）；公开准备入口已通过68文件只读核验及独立目录复用；仍缺原生环境、执行入口、研究消费与原题工具调用/评分，0模型调用，不计完成。购物保留原购物车评分，旅行保留原报告转换及约束评分。                                                                                                                                                                                                                                                                                      |
+| DEEPPLANNING               | [ ] 原资产已取得                   | 服务器已取得固定作者版本63份原源码/题目文件及全部5份原数据库归档（约104MB，逐份LFS SHA256核验）；公开准备入口已通过68文件只读核验及独立目录复用；独立客户端导入通过，候选包360行核验/索引及15条研究回读通过；购物一级原题运行中，其他难度/旅行、实际CI与原生评分仍待完成，0模型调用，不计完成。购物保留原购物车评分，旅行保留原报告转换及约束评分。                                                                                                                                                                                                                                                                                      |
 | STREAMINGBENCH             | [ ] 待开展                   | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                      |
 | OVOBENCH                   | [ ] 待开展                   | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                      |
 | FULL_DUPLEX_BENCH          | [ ] 待开展                   | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                      |
@@ -866,6 +866,18 @@ ID、数据版本、模型、执行器、评分器、终态、失败原因和脱
 
 17 个新增候选及适用边界见
 [缺口来源目录](gap-sources-20261021.json)。97项是历史盘点口径；当前交付统一按机器清单的113项统计，另5项仅分类，不用历史数字重新计算完成率。
+
+## 第二批：DeepPlanning 原资产、消费与原生运行（未交付）
+
+公开准备：`python scripts/prepare_deepplanning_original_assets.py --output <仓库外新目录>`默认仅展示计划；加`--execute`取得固定作者版本，或加`--reuse-root <已核验资产目录>`复用原始文件。`--verify-only`只读核验68份原文件；服务器下载、离线核验和独立目录复用均已验证。原始任务和数据库不进入Git或本地客户端。
+
+独立API客户端使用Python3.10，实际验证的依赖记录见`configs/workload-native/deepplanning-client-requirements.txt`。这是作者未锁版本依赖的实测解析与导入兼容配置，不冒称作者官方锁文件；初次缺soundfile/tomli/tqdm的失败保留。
+
+购物入口为`python scripts/run_deepplanning_original_shopping.py --assets <原资产目录> --output <独立新运行目录> --endpoint <本地模型API/v1> --model <真实模型ID> --api-server-pid <PID> --npu-engine-pid <PID>`，默认只展示计划，加`--execute`执行。默认每个难度原顺序前三题，可选`--levels 1 2 3`或`--full`；使用作者rerun_ids选择原题，保留原Agent两阶段工具流程、每阶段400调用参数和购物车评分，不缩减输出预算或换题。
+
+旅行入口`scripts/run_deepplanning_original_travel.py`使用相同基础参数并要求`--language en`或`zh`，保留原Agent、报告转换和约束评分三个阶段。报告转换的作者qwen-plus配置显式路由到已声明本地模型；这是模型回退，不是作者转换器分数复现，不启用外部付费API。当前仅完成入口夹具，原题未验证，不计完成。
+
+安装后的候选数据包已在服务器重建全部360条原记录并建立索引，五个子集各前三题经公开入口和固定研究消费者回读，共15条逐字段一致。旅行meta_info/query_with_constraints保留为参考，不送入原生Agent输入；工具库与原ID关系保留。此证据不是实际CI工件验证，更不是模型任务闭环。购物一级固定前三题已启动，同一原生进程仍在运行；取得原评分、保存结果审计及实际CI证据前不打勾。
 
 ## 第二批：ScienceWorld 固定原生抽样交付完成
 
