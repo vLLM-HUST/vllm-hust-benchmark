@@ -59,6 +59,13 @@ def test_all_thirty_original_task_indices_available(runner):
             runner.task_indices(value)
 
 
+def test_full_native_test_split_is_available_without_cutoff(runner, tmp_path):
+    config = runner.native_args(tmp_path / "out", tmp_path / "source", "test")
+    assert config["set"] == "test"
+    assert config["cut_off"] is False
+    assert config["env_step_limit"] == 100
+
+
 def test_prompt_and_native_dependencies_pinned(runner):
     assert len(runner.PINNED_FILES) == 6
     assert any(

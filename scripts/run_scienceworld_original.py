@@ -63,13 +63,14 @@ def verify_source(root):
     return root
 
 
-def native_args(output, source):
+def native_args(output, source, dataset_set="test_mini"):
     return {
         "jar_path": "",
         "env_step_limit": 100,
         "simplification_str": "easy",
         "max_episode_per_file": 9999,
-        "set": "test_mini",
+        "set": dataset_set,
+        "cut_off": False,
         "output_path": str(output),
         "no_stop": True,
         "prompt_file": str(source / "baselines/ReAct_baseline/prompt.jsonl"),
@@ -133,6 +134,7 @@ def execute(args):
         "disable_thinking": args.disable_thinking,
         "model_calls": 0,
         "task_indices": tasks,
+        "author_set": args.dataset_set,
         "completed_task_indices": [],
         "scope": "original first3 test variations per selected author task; not full corpus or author GPT4 reproduction",
     }
@@ -159,7 +161,7 @@ def execute(args):
     save()
     try:
         for task in tasks:
-            config = native_args(output / f"task-{task}", source)
+            config = native_args(output / f"task-{task}", source, args.dataset_set)
             logger = native.init_logger(config, str(task))
             native.eval(config, task, logger)
             result["completed_task_indices"].append(task)
@@ -182,6 +184,13 @@ def main():
     parser.add_argument("--endpoint", required=True)
     parser.add_argument("--model", required=True)
     parser.add_argument("--task-nums", default="3,4,5")
+    parser.add_argument(
+        "--set",
+        dest="dataset_set",
+        choices=["train", "dev", "test", "test_mini", "test_mini_2", "test_mini_mini"],
+        default="test_mini",
+        help="Original author split/profile. Use test for the full original test split, with cut_off=False; test_mini is only the validation sample profile.",
+    )
     parser.add_argument("--api-server-pid", type=int, required=True)
     parser.add_argument("--npu-engine-pid", type=int, required=True)
     parser.add_argument("--tokenizer-cache", required=True)
