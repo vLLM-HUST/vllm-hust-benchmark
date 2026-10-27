@@ -74,6 +74,12 @@ def test_appworld_protocol_files_are_not_task_or_execution_completion():
     assert preparation["task_data_acquired"] is False
     assert preparation["benchmark_executed"] is False
     assert preparation["execution_environment_installed"] is False
+    assert preparation["core_client_environment_installed"] is True
+    assert preparation["protected_bundles_unpacked"] is True
+    receipt = json.loads((ROOT / preparation["core_client_receipt"]).read_text("utf-8"))
+    assert receipt["source_checkbox_eligible"] is False
+    assert receipt["model_calls"] == 0
+    assert receipt["task_data_acquired"] is False
 
 
 def test_scienceworld_delivery_requires_native_scores_and_actual_ci_consumer():
