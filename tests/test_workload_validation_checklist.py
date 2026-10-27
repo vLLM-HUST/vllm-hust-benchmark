@@ -61,6 +61,20 @@ def test_deepplanning_shopping_audit_is_partial_not_full_source_completion():
     )
 
 
+def test_discoverybench_original_assets_are_not_native_completion():
+    ledger = json.loads(
+        (ROOT / "docs/workload-data/dataset-validation-status.json").read_text("utf-8")
+    )
+    row = ledger["delivery_inventory"]["DISCOVERYBENCH"]
+    preparation = row["preparation_evidence"]
+    receipt = json.loads((ROOT / preparation["receipt"]).read_text("utf-8"))
+    assert preparation["original_files_verified"] == receipt["files_verified"] == 1499
+    assert receipt["original_bytes"] == 54085184
+    assert row["checked"] is False and row["delivery_receipt"] is None
+    assert receipt["model_calls"] == 0 and receipt["benchmark_executed"] is False
+    assert receipt["source_checkbox_eligible"] is False
+
+
 def test_appworld_protocol_files_are_not_task_or_execution_completion():
     ledger = json.loads(
         (ROOT / "docs/workload-data/dataset-validation-status.json").read_text("utf-8")
