@@ -3,6 +3,14 @@
 当前交付
 **63/113项**，待完成50项，另5项仅分类。首批#432的60项和第二批#538的ScienceWorld已合入main；早期五个草稿已关闭为被汇总承接，历史和分支保留。第三批新增CodeJudge-Eval及DeepPlanning的固定原生样本、评分及实际CI消费交付，尚未合入。打勾不代表全量模型评测、高分或性能保证。
 
+### VisionArena-Chat原始多模态会话资产（未交付，不打总勾）
+
+- [x] 固定官方版本完整文件元数据已登记：43份原Parquet分片，共84,565,530,886字节（约84.6GB），每份记录发布方LFS摘要、大小和原始URL，见`visionarena_original_files_v1.json`。仅元数据，不含图片或会话正文。
+- [x] 官方自定义协议边界已补充：获取/使用须接受协议，禁止向第三方转移原数据；未代用户或机构接受协议，未启用自动下载profile。非gated不等于无限制开放再分发；授权使用者从发布方直接取得原始数据。
+- [ ] 原图像与会话绑定、完整历史的多模态续写、声明生成预算及实际CI/研究消费尚未验证。保留现有原生字段适配，不用文本代理替代图片，不把历史模型回复当标准答案，不另造官方质量评分。
+
+该来源是已发布历史会话语料，不是自带完整任务评分器的benchmark。现有适配状态仍为`CONTRACT_MAPPED_ASSET_VALIDATION_PENDING`；43分片的登记不等于取得数据或原生运行成功。[固定版本官方协议](https://huggingface.co/datasets/lmarena-ai/VisionArena-Chat/blob/1394b4f59ab6f1f2e5aff6bc15b448e15960e170/README.md)
+
 ### AppWorld原生环境准备（未交付，不打总勾）
 
 - [x] 官方0.1.3.post1核心客户端已在服务器Linux
