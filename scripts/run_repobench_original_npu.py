@@ -246,6 +246,8 @@ def execute(args):
             raise ValueError("model parameters are not on NPU")
         receipt["verified_parameter_device_type"] = "npu"
         receipt["npu_device_name"] = torch.npu.get_device_name(args.npu_device)
+        receipt["status"] = "NPU_ORIGINAL_GENERATION_IN_PROGRESS_NOT_DELIVERED"
+        path.write_text(json.dumps(receipt, indent=2))
         for index, task in enumerate(tasks):
             attempt = {
                 "task_index": index,
