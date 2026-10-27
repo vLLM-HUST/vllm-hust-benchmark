@@ -14,6 +14,81 @@ from vllm_hust_workload_data.copilot import (
     qualify_day_manifest,
     verify_session,
 )
+from vllm_hust_workload_data.adapters import adapt_row
+
+
+def metadata_spec():
+    return {
+        "kind": "request_metadata",
+        "mapping": "copilot_original_session_metadata",
+        "required_fields": ["session_id", "date", "turns"],
+        "input_fields": [],
+        "outcome_fields": [],
+        "annotation_fields": ["session_id", "date", "turns"],
+        "id_field": "",
+        "requirements": ["Original session metadata only; no prompt or replay"],
+    }
+
+
+def test_adapter_preserves_nested_relations_without_requests_or_dedup():
+    row = {
+        "session_id": "same-session-label",
+        "date": "2026-06-01",
+        "turns": [
+            {
+                "turn_id": "t1",
+                "llm_calls": [
+                    {"message_id": "m1", "model": "Model A", "tokens": {"cached": 4}}
+                ],
+                "tool_batches": [
+                    {
+                        "request_id": "m1",
+                        "function_calls": [{"name": "edit", "status": 2}],
+                    }
+                ],
+            }
+        ],
+    }
+    original = deepcopy(row)
+    records = [
+        adapt_row(
+            "COPILOT_AGENT_2026",
+            row,
+            source={"source_id": "COPILOT_AGENT_2026", "file_sha256": "fixture-only"},
+            spec=metadata_spec(),
+            index=index,
+        )
+        for index in (0, 1)
+    ]
+    assert records[0].task["task_id"] != records[1].task["task_id"]
+    assert records[0].task["identity_kind"] == "file_sha256_row_index"
+    assert records[0].replay["annotations"] == original
+    assert records[0].replay["unmapped_field_names"] == []
+    assert records[0].task["input"] == {}
+    assert records[0].outcome_record() is None
+    with pytest.raises(ValueError, match="not a ready model request"):
+        records[0].request_body()
+    records[0].replay["annotations"]["turns"].clear()
+    assert row == original
+    assert records[1].replay["annotations"] == original
+
+
+@pytest.mark.parametrize("change", ["kind", "input", "outcome", "annotation", "id"])
+def test_adapter_rejects_task_projection_or_session_only_identity(change):
+    row = {"session_id": "fixture", "date": "2026-06-01", "turns": []}
+    spec = metadata_spec()
+    if change == "kind":
+        spec["kind"] = "request_replay"
+    elif change == "input":
+        spec["input_fields"] = ["turns"]
+    elif change == "outcome":
+        spec["outcome_fields"] = ["turns"]
+    elif change == "annotation":
+        spec["annotation_fields"] = ["session_id"]
+    else:
+        spec["id_field"] = "session_id"
+    with pytest.raises(ValueError, match="unchanged nested metadata"):
+        adapt_row("COPILOT_AGENT_2026", row, source={}, spec=spec, index=0)
 
 
 def archive_fixture(tmp_path, *, unsafe=None, manifest_first=False):

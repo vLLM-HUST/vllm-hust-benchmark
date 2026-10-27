@@ -108,6 +108,20 @@ def adapt_row(
     source_id: str, row: dict, *, source: dict, spec: dict, index: int
 ) -> WorkloadRecord:
     """Projection is explicit/allowlisted; outcome fields never become task inputs."""
+    if source_id == "COPILOT_AGENT_2026":
+        from .copilot import verify_session
+
+        verify_session(row)
+        if (
+            spec["kind"] != "request_metadata"
+            or spec["input_fields"]
+            or spec.get("outcome_fields", [])
+            or set(spec.get("annotation_fields", [])) != set(row)
+            or spec.get("id_field")
+        ):
+            raise ValueError(
+                "Copilot requires unchanged nested metadata and file/row identity, not requests"
+            )
     if source_id == "SCHEMASTORE" and spec["mapping"] == "schemastore_original_archive":
         from .schemastore import adapt_schema
 
