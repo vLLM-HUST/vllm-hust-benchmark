@@ -108,6 +108,30 @@ def test_official_index_plan_and_exact_readonly_reuse(tmp_path, monkeypatch, end
         MODULE.prepare_publisher_index(target, verify_only=True)
 
 
+def test_native_contract_failure_categories_are_not_conflated():
+    root = Path(__file__).resolve().parents[1]
+    receipt = json.loads(
+        (
+            root
+            / "docs/workload-data/validation/discoverybench-original-assets-20261028.json"
+        ).read_text("utf-8")
+    )
+    native = receipt["official_native_real_preparation"]
+    assert native["same_release_test_key_rows"] == 239
+    assert native["native_json_key_file_and_original_prompt_rows_verified"] == 229
+    assert native["native_task_references_failing_original_utf8_metadata_parse"] == 5
+    assert native["native_task_references_failing_original_file_relations"] == 5
+    assert (
+        "temporal-trends-contingency-table.csv"
+        in native["missing_original_file_references"]
+    )
+    assert (
+        "temporal_trends_contingency_table.csv"
+        in native["observed_different_existing_filenames"]
+    )
+    assert receipt["source_checkbox_eligible"] is False
+
+
 def test_official_index_rejects_existing_destination(tmp_path):
     with pytest.raises(ValueError, match="fresh external"):
         MODULE.prepare_publisher_index(tmp_path, execute=True)
