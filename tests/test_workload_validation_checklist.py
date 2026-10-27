@@ -8,6 +8,39 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def test_codejudge_delivery_requires_original_native_and_actual_ci_evidence():
+    ledger = json.loads(
+        (ROOT / "docs/workload-data/dataset-validation-status.json").read_text("utf-8")
+    )
+    row = ledger["delivery_inventory"]["CODEJUDGE_EVAL"]
+    evidence = row["actual_ci_data_consumer_evidence"]
+    assert evidence["both_ci_runs_success"] is True
+    assert evidence["original_configuration_rows_verified_and_indexed"] == 6 * 1860
+    assert evidence["fixed_research_readbacks"] == 18
+    assert evidence["new_model_calls"] == 0
+    assert evidence["ci_artifact"] == 12735679183
+    assert row["native_sample_and_saved_audit"]["finish_reasons"] == {"stop": 18}
+    assert row["checked"] and row["status"] == "AVAILABLE"
+    receipt = json.loads((ROOT / row["delivery_receipt"]).read_text("utf-8"))
+    assert receipt["source_id"] == "CODEJUDGE_EVAL"
+    assert receipt["source_checkbox_eligible"] is True
+    assert receipt["assets"]["prompt_field_sent_verbatim"] == "input"
+    assert receipt["assets"]["reference_field_not_sent"] == "answer"
+    assert receipt["native_execution"]["requests"] == 18
+    assert len(receipt["native_execution"]["per_configuration"]) == 6
+    assert receipt["native_execution"]["extractor"].startswith("independent-")
+    assert receipt["saved_audit"]["new_model_calls"] == 0
+    assert receipt["actual_ci_consumer"]["fixed_research_readbacks"] == 18
+    assert receipt["actual_ci_consumer"]["wheel_sha256"] == evidence["wheel_sha256"]
+    for field, filename in (
+        ("native_runner_sha256", "run_codejudge_original.py"),
+        ("saved_verifier_sha256", "verify_codejudge_saved.py"),
+    ):
+        assert receipt["saved_audit"][field] in _script_hashes_for_line_endings(
+            (ROOT / "scripts" / filename).read_bytes()
+        )
+
+
 def test_scienceworld_delivery_requires_native_scores_and_actual_ci_consumer():
     ledger = json.loads(
         (ROOT / "docs/workload-data/dataset-validation-status.json").read_text("utf-8")
