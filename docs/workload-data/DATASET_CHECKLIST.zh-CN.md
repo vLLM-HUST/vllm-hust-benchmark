@@ -1,16 +1,16 @@
 # 数据集逐项验证清单
 
 当前交付
-**63/113项**，待完成50项，另5项仅分类。首批#432的60项和第二批#538的ScienceWorld已合入main；早期五个草稿已关闭为被汇总承接，历史和分支保留。第三批新增CodeJudge-Eval及DeepPlanning的固定原生样本、评分及实际CI消费交付，尚未合入。打勾不代表全量模型评测、高分或性能保证。
+**64/113项**，待完成49项，另5项仅分类。首批#432的60项和第二批#538的ScienceWorld已合入main；早期五个草稿已关闭为被汇总承接，历史和分支保留。第三批新增CodeJudge-Eval、DeepPlanning及OpenMath固定原生profile的实际CI消费交付，尚未合入。OpenMath是训练语料原问题生成，不是独立质量benchmark。打勾不代表全量模型评测、高分或性能保证。
 
-### OpenMathInstruct-2原始推理训练语料（未交付，不打总勾）
+### OpenMathInstruct-2原始推理训练语料（固定原始profile已交付）
 
 - [x] 完整主train32分片的固定版本/URL/LFS摘要/大小已登记，共7,576,089,560字节；不把与主train重叠的1M/2M/5M子集重复计为独立问题来源。
 - [x] 运行前固定的0/15/31原分片已在服务器取得并核验，共710,707,907字节。三份Parquet元数据行数为436650/436650/436649；已检查原schema及各原前3条字段类型，未据此宣称所有行值或索引均验证通过。
 - [x] 三个可用分片全部1,309,949条原字段及索引完成核验；实际CI28997404包的56个载荷与工件一致，9条公共/当前研究消费者回读通过。初次私有核验器误比较逐文件与三文件全量选择范围，已明确校验各自范围并恢复只读核验；失败记录保留，未重建索引或重跑模型。
 - [x] 原前3条/分片共9条原问题已在现有Qwen3.5-9B BF16 TP1 NPU3服务生成：3 stop、6
   length，显式预算8192，未改问题、换题或重试。保存的输入、参考、来源、预算和响应已用公开核验入口复核，0新增模型调用；不独立判断数学正确性，不冒充作者教师模型复现。
-- [ ] 新增公开生成/准备入口的当前CI资格仍待收口，故来源总勾保持未完成。`problem`独立作为输入，`expected_answer`和`generated_solution`留在参考侧，保留`problem_source`及空答案。[准备与阶段证据](validation/openmath2-original-readiness-20261028.json)
+- [x] 当前a70da63a的tests、lint及CPU smoke全部通过；独立安装实际CI工件并核验56个包载荷，复用全量索引后9条公共/当前研究侧回读通过，未重建索引或重跑模型。`problem`独立作为输入，教师解答、参考及空答案均保留在参考侧。[最终范围与证据](validation/openmath2-native-delivery-20261028.json)；[历史阶段证据](validation/openmath2-original-readiness-20261028.json)。
 
 ```bash
 python scripts/prepare_reused_research_assets.py OPENMATH2 --mode plan \
@@ -625,7 +625,7 @@ TB；服务器/data约1.42TB可用，未缩小语料。ChartQA当前两卡主机
 | BILLSUM                    | [x] 原生协议已交付                         | 发布方HF原23455条三字段、两测试集冻结前三条及公共入口3/4/5的NPU推理/HF评分、固定CI39文件工件与研究消费均通过。不代表全量推理、原论文clean_text或完整原始归档。[交付回执](validation/billsum-native-delivery-20261025.json)                                                                                        |
 | TULU3                      | [x] 原始历史续接交付                       | 原6文件、全939343条字段与索引、18处固定研究回查；6分片前3条共18对话21次NPU续接，精确CPU CI工件复核通过。见原生交付回执；非官方评分/全量推理。                                                                                                                                                                     |
 | NATURAL_INSTRUCTIONS       | [x] 登记原生任务可用                       | 五文件/8284实例字段及固定CI回查通过；分类102、翻译250、抽取261、改写1178全覆盖，摘要首尾6题，合计1797唯一实例。[交付回执](validation/ni-native-delivery-20261024.json)；非整个NI，不替代底层数据集原benchmark协议                                                                                                 |
-| OPENMATH2                  | [ ] 待开展                                 | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                      |
+| OPENMATH2                  | [x] 固定原始语料profile已交付              | 3个固定原分片全部1309949条字段/索引、9条原问题生成与保存核验、实际CI包及研究回读通过；其余29分片未验证，不宣称数学质量评测。                                                                                                                                                                                      |
 | OPENTHOUGHTS3              | [x] 原语料续写交付                         | 固定三分片30000行/索引保真，三域各3条NPU续写及保存审计、实际CI46载荷/18研究回读通过；九条均预算耗尽无最终答案，不作质量或全120万条执行结论。[回执](validation/openthoughts3-native-delivery-20261027.json)                                                                                                        |
 | OPENCODE                   | [ ] 待开展                                 | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                      |
 | SWESMITH                   | [ ] 待开展                                 | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                      |
