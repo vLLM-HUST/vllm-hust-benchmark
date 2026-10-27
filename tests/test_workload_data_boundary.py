@@ -5,6 +5,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1] / "workload-preparation"
 DATA_MODULES = {
+    "docvqa",  # Original field types and media paths only; no inference or analysis.
     "copilot",  # Original release integrity and nested metadata only, no analysis.
     "crosscodeeval",  # Original archive/profile/task relations only; no analysis.
     "flores200",  # Original parallel text and metadata bindings, no scoring.
@@ -41,6 +42,19 @@ DATA_MODULES = {
 def test_only_data_modules_are_included():
     actual = {path.stem for path in (ROOT / "src/vllm_hust_workload_data").glob("*.py")}
     assert actual == DATA_MODULES
+
+
+def test_docvqa_adapter_remains_data_only():
+    import ast
+
+    tree = ast.parse(
+        (ROOT / "src/vllm_hust_workload_data/docvqa.py").read_text("utf-8")
+    )
+    imports = {
+        node.module for node in ast.walk(tree) if isinstance(node, ast.ImportFrom)
+    }
+    assert imports == {"pathlib"}
+    assert not any(isinstance(node, ast.Import) for node in ast.walk(tree))
 
 
 def test_crosscodeeval_archive_reader_remains_data_only():
