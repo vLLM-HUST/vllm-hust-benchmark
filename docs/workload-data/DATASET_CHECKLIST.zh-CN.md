@@ -10,6 +10,8 @@
 - [x] 原作者16份协议/核心库文件、44366字节已从固定Git
   blob取得并核验；复用现有作者源码获取入口，不复制作者代码入仓库。原始Git连接失败、HF主通道失败及改用原始同摘要传输的过程保留。
 - [x] 原始四文件关联适配已实现；服务器独立安装候选wheel，55个包载荷与wheel一致。全部600条原问题/参考字段及索引通过，原前3条公共/当前研究消费者回读逐字段一致，0模型调用。当前研究main版本已在线核对；未更改研究线程默认依赖。
+- [x] 原作者核心库环境已在Linux aarch64/Python3.12.13独立安装112项依赖；清除客户端继承的CANN
+  PYTHONPATH后，pip一致性检查、四个原模块导入及原评分器软件夹具通过。实测约束与原lib requirements的dry-run无变更；初次旧环境缺依赖与继承路径污染记录保留。
 - [ ] 实际CI工件消费及官方检索/生成与评分尚未完成；需要适配NPU的embedding和reader环境。候选包读取/回读不替代benchmark运行。[准备与候选消费证据](validation/dragon-original-preparation-20261028.json)
 
 ```bash
@@ -30,6 +32,8 @@ records = iter_workload("DRAGON_PUBLIC", data_root=Path("/external/dragon-origin
 ```
 
 保持发布方600个问题的原始顺序；`task.input`只含原id/question，`outcome.original_reference_qa`保留完整原始8字段参考，`runtime.corpus_file`指向完整原语料。四份文件逐一检查版本/摘要及完整关联，不能按参考文件行号拼答案；协议版本与各数据仓库版本分别保留。读取前后均核验原文件，参考变更会失败，不从gold生成输入。
+
+核心库准备可使用外部Python3.12环境，以`configs/workload-native/dragon-core-client-py312-observed.txt`作为约束安装不修改的原`lib/requirements.txt`。这是实测兼容版本，不是作者冻结锁；原示例的embedding/reader模型依赖尚待准备，不能只安装核心库就宣称可以运行完整基线。客户端须清除继承的`PYTHONPATH`，不要修改在用NPU服务的环境。
 
 仅登记既定113项中的`DRAGON_PUBLIC`，不新增交付范围；参考仓库虽名含private，已通过官方无凭据元数据实查同版本非gated且Apache-2.0，不能仅凭名字推断公开/私有。四份资产保持独立版本身份，均固定同一发布标签。其月度新闻快照不是生产文档增删事件或逐请求版本轨迹，不补造不存在的在线事件。
 

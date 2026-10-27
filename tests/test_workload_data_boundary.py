@@ -6,6 +6,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1] / "workload-preparation"
 DATA_MODULES = {
     "deepplanning",  # Original queries/metadata/database references only.
+    "dragon",  # Original four-file task/corpus/reference identities only.
     "scienceworld",  # Original publisher task/variation/reference relations only.
     "docvqa",  # Original field types and media paths only; no inference or analysis.
     "copilot",  # Original release integrity and nested metadata only, no analysis.
@@ -44,6 +45,27 @@ DATA_MODULES = {
 def test_only_data_modules_are_included():
     actual = {path.stem for path in (ROOT / "src/vllm_hust_workload_data").glob("*.py")}
     assert actual == DATA_MODULES
+
+
+def test_dragon_reader_has_no_models_network_scoring_or_research_imports():
+    import ast
+
+    tree = ast.parse(
+        (ROOT / "src/vllm_hust_workload_data/dragon.py").read_text("utf-8")
+    )
+    imports = set()
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            imports.update(item.name for item in node.names)
+        elif isinstance(node, ast.ImportFrom):
+            imports.add(node.module)
+    assert imports == {"ast", "copy", "pathlib", "assets", "records", "registry"}
+    assert not any(
+        isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Name)
+        and node.func.id in {"eval", "exec", "compile"}
+        for node in ast.walk(tree)
+    )
 
 
 def test_docvqa_adapter_remains_data_only():
