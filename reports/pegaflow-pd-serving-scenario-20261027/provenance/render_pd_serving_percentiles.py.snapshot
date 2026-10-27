@@ -1,0 +1,179 @@
+"""Render TTFT percentiles and derive stage costs from saved serving predictions."""
+
+from __future__ import annotations
+
+import argparse
+import csv
+import math
+import statistics
+from pathlib import Path
+
+from pd_serial_simulator import read, write
+
+
+def percentile(values, percent):
+    ordered = sorted(values)
+    return ordered[max(0, math.ceil(percent / 100 * len(ordered)) - 1)]
+
+
+def analyze(result):
+    parts = {
+        key: []
+        for key in (
+            "P_prepare",
+            "P_queue",
+            "P_service_and_delivery",
+            "P_CPU_save",
+            "D_handoff_and_restore",
+            "D_queue",
+            "D_first_service_and_delivery",
+        )
+    }
+    for row in result["per_request"]:
+        p, d = row["stages"]["P"], row["stages"]["D"]
+        values = (
+            p["engine_queued"] - row["ready"],
+            p["engine_start"] - p["engine_queued"],
+            p["engine_end"] - p["engine_start"],
+            d["prepare"] - p["engine_end"],
+            d["engine_queued"] - d["prepare"],
+            d["engine_start"] - d["engine_queued"],
+            row["first"] - d["engine_start"],
+        )
+        assert math.isclose(sum(values), row["TTFT"], abs_tol=1e-8)
+        for key, value in zip(parts, values, strict=True):
+            parts[key].append(value)
+    summary = result["summary"]
+    net = [t for t in result["transfers"] if t["resource"].startswith("RDMA")]
+    return {
+        "scope": result["scope"],
+        "scheduler": "Baseline FCFS continuous batching; fixed session-affinity P/D routing",
+        "TTFT_percentiles": {
+            f"p{p}": percentile([r["TTFT"] for r in result["per_request"]], p)
+            for p in (50, 90, 95, 99, 100)
+        },
+        "TTFT_mean_parts_seconds": {key: statistics.mean(values) for key, values in parts.items()},
+        "decode_tail_mean_seconds": statistics.mean(
+            r["end"] - r["first"] for r in result["per_request"]
+        ),
+        "engine_time_occupancy": {
+            str(node): sum(s["end"] - s["start"] for s in result["steps"] if s["node"] == node)
+            / summary["finish_span"]
+            for node in range(4)
+        },
+        "engine_occupancy_definition": "Scheduled compute time / experiment span; distinct from measured AI Core utilization",
+        "peak_running_each": summary["peak_running_each"],
+        "peak_live_requests": summary["peak_live_requests"],
+        "last_nominal_arrival_seconds": max(r["offered"] for r in result["per_request"]),
+        "finish_span_seconds": summary["finish_span"],
+        "RDMA_total_service_seconds": sum(t["end"] - t["start"] for t in net),
+        "RDMA_max_queue_seconds": max(t["start"] - t["queued"] for t in net),
+        "CPU_evictions_each": summary["CPU_evictions_each"],
+        "GPU_evictions_each": summary["GPU_evictions_each"],
+        "worst_TTFT_request": max(result["per_request"], key=lambda r: r["TTFT"]),
+    }
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--root", type=Path, required=True)
+    args = parser.parse_args()
+    names = ("graph-p8192-d2048", "graph-p2048-d2048")
+    cases = {name: read(args.root / (name + ".json.gz")) for name in names}
+    values = {name: [r["TTFT"] for r in result["per_request"]] for name, result in cases.items()}
+    assert all(len(v) == 95 for v in values.values())
+    outputs = [args.root / ("ttft-percentiles." + suffix) for suffix in ("png", "svg", "csv")]
+    outputs.append(args.root / "bottleneck-analysis.json")
+    if any(path.exists() for path in outputs):
+        raise FileExistsError("Percentile analysis already exists")
+    rows = [
+        {"percentile": p, **{name: percentile(v, p) for name, v in values.items()}}
+        for p in range(101)
+    ]
+    for name, result in cases.items():
+        for percent in (50, 95, 99):
+            assert rows[percent][name] == result["summary"]["TTFT"][f"p{percent}"]
+    with outputs[2].open("w", encoding="utf-8", newline="") as stream:
+        writer = csv.DictWriter(stream, fieldnames=list(rows[0]))
+        writer.writeheader()
+        writer.writerows(rows)
+    analysis = analyze(cases[names[0]])
+    write(outputs[3], analysis)
+
+    import matplotlib
+
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    from matplotlib.ticker import PercentFormatter
+
+    plt.rcParams.update(
+        {
+            "font.sans-serif": ["Microsoft YaHei"],
+            "axes.unicode_minus": False,
+            "svg.fonttype": "none",
+        }
+    )
+    fig, ax = plt.subplots(figsize=(10, 5.7))
+    fig.subplots_adjust(left=0.09, right=0.97, top=0.80, bottom=0.20)
+    fig.suptitle("TTFT 百分位曲线｜95 请求 · 基线调度（模拟）", fontsize=16, y=0.965)
+    fig.text(
+        0.5,
+        0.875,
+        "图执行 · 每实例 CPU 池 24 GiB / NPU KV 38 GiB · 并发上限 128",
+        ha="center",
+        color="#555555",
+        fontsize=10,
+    )
+    x = [r["percentile"] for r in rows]
+    for name, label, color, style in (
+        (names[1], "P 预算 2048 / D 预算 2048（标定范围内）", "#cf8a39", "--"),
+        (names[0], "P 预算 8192 / D 预算 2048（P 含成本外推）", "#167a80", "-"),
+    ):
+        ax.step(
+            x, [r[name] for r in rows], where="post", color=color, lw=2.1, ls=style, label=label
+        )
+    for percent, position in ((50, (37, 0.33)), (95, (75, 0.65)), (99, (73, 1.02))):
+        value = rows[percent][names[0]]
+        ax.scatter([percent], [value], color="#167a80", zorder=5, s=30)
+        ax.annotate(
+            f"p{percent} = {value:.3f} s",
+            xy=(percent, value),
+            xytext=position,
+            arrowprops={"arrowstyle": "-", "color": "#6f8587", "lw": 0.8},
+            fontsize=10,
+            color="#12636a",
+        )
+    ax.set(xlim=(0, 100), ylim=(0, 1.2), xlabel="请求百分位（%）", ylabel="TTFT（秒）")
+    ax.set_xticks(range(0, 101, 10))
+    ax.xaxis.set_major_formatter(PercentFormatter(100, decimals=0))
+    ax.grid(axis="both", color="#e3e8eb", lw=0.7)
+    ax.set_axisbelow(True)
+    ax.spines[["top", "right"]].set_visible(False)
+    ax.legend(loc="upper left", frameon=False, fontsize=10)
+    fig.text(
+        0.09,
+        0.09,
+        "读法：p95 表示 95% 的请求，其 TTFT 不超过该时间。两条曲线使用相同基线策略。",
+        fontsize=9,
+        color="#555555",
+    )
+    fig.text(
+        0.09,
+        0.045,
+        "95 个样本按 nearest-rank 统计，p99 等于最大值；完整 P/D 流程仍待实测验收。",
+        fontsize=9,
+        color="#555555",
+    )
+    for path in outputs[:2]:
+        fig.savefig(path, dpi=180)
+    plt.close(fig)
+    print(
+        {
+            key: analysis[key]
+            for key in ("TTFT_percentiles", "TTFT_mean_parts_seconds", "RDMA_max_queue_seconds")
+        }
+    )
+
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,99 @@
+"""Archive component-calibrated P/D serving scenarios and their inputs."""
+
+from __future__ import annotations
+
+import argparse
+import csv
+import shutil
+from pathlib import Path
+
+from pd_serial_simulator import input_path, read, write
+
+
+def validate(result):
+    rows = result["per_request"]
+    assert len(rows) == len({r["id"] for r in rows}) == 95
+    previous = {}
+    for row in sorted(rows, key=lambda r: r["ready"]):
+        task = row["id"].rsplit(":", 1)[0]
+        assert row["ready"] >= previous.get(task, 0.0) - 1e-8
+        previous[task] = row["end"]
+        p, d = row["stages"]["P"], row["stages"]["D"]
+        assert p["engine_end"] <= d["prepare"] <= d["engine_start"] <= row["first"] <= row["end"]
+        assert d["cached_tokens"] == d["target_prefix_blocks"] * 128
+    for node in range(4):
+        end = 0.0
+        for step in (s for s in result["steps"] if s["node"] == node):
+            assert step["start"] >= end - 1e-8
+            budget = result["settings"]["P_token_budget" if node < 2 else "D_token_budget"]
+            assert step["prefill_tokens"] + step["decode_tokens"] <= budget
+            assert step["sequences"] <= result["settings"]["max_sequences_each"]
+            end = step["end"]
+    for resource in {t["resource"] for t in result["transfers"]}:
+        end = 0.0
+        for transfer in (t for t in result["transfers"] if t["resource"] == resource):
+            assert transfer["start"] >= end - 1e-8
+            end = transfer["end"]
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    for name in ("run", "inputs", "step-model", "components", "output"):
+        parser.add_argument("--" + name, type=Path, required=True)
+    args = parser.parse_args()
+    if args.output.exists():
+        raise FileExistsError(args.output)
+    args.output.mkdir(parents=True)
+    names = [
+        "graph-p8192-d2048",
+        "graph-p2048-d2048",
+        "graph-copy-serialized",
+        "graph-kv16",
+        "graph-seqs8",
+    ]
+    summaries, requests = {}, []
+    for name in names:
+        path = args.run / (name + ".json.gz")
+        result = read(path)
+        validate(result)
+        summaries[name] = result["summary"]
+        summaries[name]["settings"] = result["settings"]
+        shutil.copyfile(path, args.output / path.name)
+        for row in result["per_request"]:
+            requests.append(
+                {
+                    "case": name,
+                    **{k: row[k] for k in ("id", "TTFT", "E2E", "TPOT_ms", "P", "D")},
+                    "P_cached": row["stages"]["P"]["cached_tokens"],
+                    "D_cached": row["stages"]["D"]["cached_tokens"],
+                }
+            )
+    write(args.output / "summary.json", summaries)
+    for name in ("simulation-inputs.json", "protocol.json"):
+        write(args.output / "inputs" / (name + ".gz"), read(input_path(args.inputs, name)))
+    write(args.output / "inputs/step-cost-model.json", read(args.step_model))
+    comp = read(args.components)
+    write(args.output / "inputs/components.json", {"native": comp["native"]})
+    for name in (
+        "pd_serving_simulator.py",
+        "pd_serial_simulator.py",
+        "step_simulator.py",
+        "report_pd_serving.py",
+    ):
+        target = args.output / "provenance" / (name + ".snapshot")
+        target.parent.mkdir(exist_ok=True)
+        shutil.copyfile(Path(__file__).with_name(name), target)
+    with (args.output / "per-request.csv").open("w", newline="", encoding="utf-8") as stream:
+        writer = csv.DictWriter(stream, fieldnames=list(requests[0]))
+        writer.writeheader()
+        writer.writerows(requests)
+    print(
+        {
+            name: {key: row[key] for key in ("TTFT", "finish_span", "extrapolated_steps")}
+            for name, row in summaries.items()
+        }
+    )
+
+
+if __name__ == "__main__":
+    main()

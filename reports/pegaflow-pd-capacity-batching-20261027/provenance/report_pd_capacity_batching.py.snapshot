@@ -1,0 +1,199 @@
+"""Archive and visualize the host-capacity/D-batching counterfactual."""
+
+from __future__ import annotations
+
+import argparse
+import csv
+import math
+import shutil
+import statistics
+from pathlib import Path
+
+from pd_serial_simulator import read, write
+
+
+def summarize(result):
+    rows = result["per_request"]
+    d_apis = [r for r in result["apis"] if r["node"] >= 2]
+    parts = {
+        k: [] for k in ("P_queue_control", "P_setup", "P_compute", "D_queue", "D_setup", "D_head")
+    }
+    for row in rows:
+        p, d = row["stages"]["P"], row["stages"]["D"]
+        values = (
+            p["start"] - row["ready"],
+            p["api_start"] - p["start"],
+            p["end"] - p["api_start"],
+            d["start"] - p["end"],
+            d["api_start"] - d["start"],
+            row["first"] - d["api_start"],
+        )
+        for key, value in zip(parts, values, strict=True):
+            parts[key].append(value)
+        assert math.isclose(sum(values), row["TTFT"], abs_tol=1e-7)
+    uncached = sum(r["tokens"] - r["cached_tokens"] for r in d_apis)
+    prompt = sum(r["tokens"] for r in d_apis)
+    return {
+        "TTFT": result["TTFT"],
+        "E2E": result["E2E"],
+        "finish_span": result["finish_span"],
+        "D_prompt_tokens": prompt,
+        "D_uncached_tokens": uncached,
+        "D_cached_fraction": 1 - uncached / prompt,
+        "full_D_block_prefix_requests": sum(
+            r["cached_tokens"] == ((r["tokens"] - 1) // 128) * 128 for r in d_apis
+        ),
+        "native_reclaims": sum(r["kind"] == "native_reclaim" for r in result["cache_events"]),
+        "peak_host_GiB": [v / 2**30 for v in result["peak_host_bytes"]],
+        "peak_NPU_KV_GiB": [v / 2**30 for v in result.get("peak_npu_kv_reservation_bytes", [])],
+        "mean_TTFT_parts": {k: statistics.mean(v) for k, v in parts.items()},
+        "PD_payload_GiB": sum(
+            r["payload"]
+            for r in result["cache_events"]
+            if r["kind"] == "copy" and r["source"] < 2 <= r["destination"]
+        )
+        / 2**30,
+        "worst_request": {
+            k: v for k, v in max(rows, key=lambda r: r["TTFT"]).items() if k != "boundary"
+        },
+    }
+
+
+def validate(result):
+    rows = result["per_request"]
+    assert len(rows) == len({r["id"] for r in rows}) == 95
+    by_task = {}
+    for row in sorted(rows, key=lambda r: r["ready"]):
+        task = row["id"].rsplit(":", 1)[0]
+        assert row["ready"] >= by_task.get(task, 0) - 1e-7
+        by_task[task] = row["end"]
+        assert row["stages"]["P"]["end"] <= row["stages"]["D"]["start"] + 1e-7
+        assert row["ready"] <= row["first"] <= row["end"]
+    if "engine_steps" in result:
+        settings = result["settings"]
+        for node in (2, 3):
+            end = 0.0
+            for step in (s for s in result["engine_steps"] if s["node"] == node):
+                assert step["start"] >= end - 1e-7
+                assert len(step["active"]) <= settings["D_max_sequences"]
+                assert len(step["decoding"]) + sum(n for _, n in step["heads"]) <= 128
+                end = step["end"]
+        assert max(result["peak_npu_kv_reservation_bytes"]) <= settings["npu_kv_bytes_each"]
+        assert max(result["peak_host_bytes"]) <= settings["host_bytes_each"]
+
+
+def plot(summaries, output):
+    import matplotlib
+
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    import numpy as np
+
+    plt.rcParams.update({"font.sans-serif": ["Microsoft YaHei"], "axes.unicode_minus": False})
+    fig, axes = plt.subplots(1, 2, figsize=(12, 4.3), layout="constrained")
+    keys = ["serial2", "serial16", "batch16"]
+    labels = ["2 GiB · D 串行", "16 GiB · D 串行", "16 GiB · D 并发 4"]
+    x = np.arange(3)
+    for j, (metric, title, color) in enumerate(
+        [
+            ("mean", "平均 TTFT", "#187c80"),
+            ("p95", "TTFT p95", "#5894bb"),
+            ("p99", "TTFT p99 / 最大值", "#e58c3b"),
+        ]
+    ):
+        values = [summaries[k]["TTFT"][metric] for k in keys]
+        bars = axes[0].bar(x + (j - 1) * 0.25, values, width=0.25, label=title, color=color)
+        axes[0].bar_label(bars, fmt="%.1f", fontsize=9, padding=3)
+    axes[0].set(
+        xticks=x,
+        xticklabels=labels,
+        ylabel="秒",
+        ylim=(0, 87),
+        title="首 token 等待：平均下降，长尾仍存在",
+    )
+    axes[0].legend(frameon=False, fontsize=9)
+    bottoms = np.zeros(3)
+    for part, title, color in [
+        ("P_queue_control", "P 排队与路由", "#8fbcb7"),
+        ("P_setup", "P 缓存准备", "#c0d7d0"),
+        ("P_compute", "P 计算", "#187c80"),
+        ("D_queue", "D 入场排队", "#e58c3b"),
+        ("D_setup", "D 边界检查与交接等待", "#c48ca4"),
+        ("D_head", "D 恢复、计算及批内等待", "#5894bb"),
+    ]:
+        values = np.array([summaries[k]["mean_TTFT_parts"][part] for k in keys])
+        axes[1].bar(x, values, bottom=bottoms, color=color, label=title, width=0.65)
+        bottoms += values
+    axes[1].set(
+        xticks=x, xticklabels=labels, ylabel="平均秒数", ylim=(0, 57), title="平均 TTFT 分解"
+    )
+    axes[1].legend(frameon=False, fontsize=8, ncol=2, loc="upper center")
+    fig.suptitle(
+        "95 请求的模拟对照｜CPU 池与 NPU KV 均按每实例设置｜eager · 128-token 预算", fontsize=12
+    )
+    fig.savefig(output, dpi=180)
+    plt.close(fig)
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--run", type=Path, required=True)
+    parser.add_argument("--serial-run", type=Path, required=True)
+    parser.add_argument("--component-profile", type=Path, required=True)
+    parser.add_argument("--output", type=Path, required=True)
+    args = parser.parse_args()
+    if args.output.exists():
+        raise FileExistsError(args.output)
+    args.output.mkdir(parents=True)
+    paths = {
+        "serial2": args.serial_run / "prediction-serial-deterministic.json.gz",
+        "serial16": args.run / "batch16-cap1.json.gz",
+        "batch16": args.run / "batch16-f25.json.gz",
+        "batch16_f0": args.run / "batch16-f00.json.gz",
+        "batch16_f50": args.run / "batch16-f50.json.gz",
+        "batch32": args.run / "batch32-f25.json.gz",
+    }
+    results, summaries = {}, {}
+    for name, path in paths.items():
+        result = read(path)
+        validate(result)
+        summaries[name] = summarize(result)
+        results[name] = result
+        shutil.copyfile(path, args.output / (name + ".json.gz"))
+    assert results["batch16"]["TTFT"] == results["batch32"]["TTFT"]
+    for name in ("simulation-inputs.json", "protocol.json"):
+        write(args.output / "inputs" / (name + ".gz"), read(args.serial_run / "inputs" / name))
+    profile = read(args.component_profile)
+    write(
+        args.output / "inputs/component-profile.json.gz",
+        {"profiles": {"eager128": profile["profiles"]["eager128"]}},
+    )
+    for name in (
+        "pd_serial_simulator.py",
+        "pd_capacity_batch_simulator.py",
+        "report_pd_capacity_batching.py",
+    ):
+        dest = args.output / "provenance" / (name + ".snapshot")
+        dest.parent.mkdir(exist_ok=True)
+        shutil.copyfile(Path(__file__).with_name(name), dest)
+    write(args.output / "summary.json", summaries)
+    with (args.output / "per-request.csv").open("w", newline="", encoding="utf-8") as stream:
+        writer = csv.DictWriter(
+            stream, fieldnames=["case", "id", "TTFT", "E2E", "P", "D", "D_cached_tokens"]
+        )
+        writer.writeheader()
+        for name, result in results.items():
+            for row in result["per_request"]:
+                writer.writerow(
+                    {
+                        "case": name,
+                        **{k: row[k] for k in ("id", "TTFT", "E2E", "P", "D")},
+                        "D_cached_tokens": row["stages"]["D"]["cached_tokens"],
+                    }
+                )
+    plot(summaries, args.output / "capacity-batching.png")
+    print({name: row["TTFT"] for name, row in summaries.items()})
+
+
+if __name__ == "__main__":
+    main()
