@@ -2,6 +2,13 @@
 
 ### RepoBench原生仓库级代码补全（准备中，未交付）
 
+原生入口：`python scripts/run_repobench_original_npu.py --source-root <原source> --archive <固定zip> --data-root <10原parquet所在目录> --model-root <固定DeepSeek-Coder-1.3B-Base目录> --output <新外部结果目录> --per-stratum 3`默认只展示计划；加`--prepare-only`仅检查资产并构造固定原题，确认研究/NPU窗口后加`--execute --resource-window-confirmed --npu-device npu:1`实际生成和运行作者`eval.py`。原题、prompt、生成token和完整响应只落外部私有目录，已有目录拒绝覆盖，失败不自动重跑。显式BF16/eager是NPU适配配置，不冒称作者CUDA质量复现；原prompt构造、下一行提取、128-token/temperature0.2/top_p0.95采样与EM/ES/CodeBLEU评分不改。
+
+- [x] 官方默认日期区间2023-12-01至2023-12-31（沿用作者UTC端点语义）、五长度档2k/4k/8k/12k/16k，2语言×3设置×5长度共30层各首3题、90原题已在服务器构造并独立复核。去参考字段后prompt与作者完整原行构造完全一致，623至14420
+  tokens，加128输出均未超16384窗口；新增模型调用0。`--full`表示此**官方默认过滤配置**下不抽样，不代表覆盖原发布版全部九长度档或复现旧v0论文分支。
+
+- [ ] 90题原生生成及作者评分已在确认空闲的第二张NPU上启动，保存审计与最终交付核验尚未完成。每题前有其他研究NPU进程则等待，不停止研究服务；不得将上述环境/输入证据替代原生执行。
+
 公开源码入口：`python scripts/prepare_repobench_original_assets.py --output <新外部目录>`默认只展示计划，加`--execute`取得固定作者归档并校验；已有同版本原zip可加`--reuse-archive <zip>`避免重复下载。已有目录用`--verify-only`只读核验，服务器实际12原文件通过；不会修改作者CUDA代码或在此步骤执行模型。
 
 环境入口：`python scripts/prepare_repobench_runtime.py --source-root <原source> --archive <固定zip> --environment <新外部venv> --uv <uv> --platform-python <已有NPU平台Python> --grammar-source-dir <外部语法源码目录>`默认只展示计划，加`--execute`安装；已创建但依赖未完成的venv可显式`--install-dependencies`续装，已有环境用`--verify-only`。此配置显式继承平台torch/torch-npu/Transformers，不修改平台包；作者没有锁文件，不能称官方环境复现。Python/Java语法包0.21.0的官方固定源码通过API取得、按固定大小/SHA256校验后在ARM构建，未换评分器。服务器已实际通过原生模块导入、两语言EM/Edit
