@@ -1,0 +1,39 @@
+"""Prepare isolated 2P1D services from the preserved model-compatible runtime."""
+
+import json
+import shutil
+import time
+from pathlib import Path
+
+
+ROOT = Path('/data/shared_upload/hust-zsx/issue23-multinode-calibration-20261027')
+OLD = Path('/data/shared_upload/hust-zsx/issue23-concurrent-2p2d-20261026')
+ROOT.mkdir(exist_ok=False)
+for part in ['python', 'scripts']:
+    shutil.copytree(OLD/'source'/part, ROOT/'source'/part, ignore=shutil.ignore_patterns('__pycache__', '.venv'))
+for name in ['services', 'runs', 'resources', 'scheduler-traces', 'telemetry', 'visibility', 'network']:
+    (ROOT/name).mkdir()
+for name in ['P0','P1','D0']:
+    (ROOT/'visibility'/name).mkdir()
+for name in ['scheduling_telemetry.py','observe_resources.py','requests.jsonl']:
+    shutil.copyfile(OLD/name, ROOT/name)
+config = json.loads((OLD/'config.json').read_text())
+config.update(root=str(ROOT), max_num_seqs=128, max_num_batched_tokens=2048,
+              P_batched_tokens=8192, D_batched_tokens=2048,
+              meta_host='192.168.0.4',meta_port=33056,meta_http_port=33092,
+              P_inflight_per_card=16, D_inflight_comparison=[1,4,16],
+              prepared_epoch_ns=time.time_ns(),instances=[])
+for index, name in enumerate(['P0','P1','D0']):
+    role=name[0]
+    config['instances'].append({'id':name,'role':role,'node':role,
+        'device':index if role=='P' else 0,'host':'192.168.0.4' if role=='P' else '192.168.0.2',
+        'model_port':33080+index,'engine_port':33150+index,'engine_http_port':33190+index,
+        'host_pool_bytes':(8 if role=='P' else 16)*2**30})
+(ROOT/'config.json').write_text(json.dumps(config,indent=2))
+text=(OLD/'deploy.py').read_text().replace(str(OLD),str(ROOT))
+text=text.replace("else '192.168.0.5'", "else '192.168.0.2'")
+text=text.replace("str(cfg['max_num_batched_tokens'])", "str(cfg['P_batched_tokens'] if role=='P' else cfg['D_batched_tokens'])")
+text=text.replace("'--kv-cache-memory-bytes',str(cfg['kv_cache_bytes'])", "'--gpu-memory-utilization','0.9'")
+text=text.replace("'cudagraph_capture_sizes':[1,2,4,8]", "'cudagraph_capture_sizes':[1,2,4,8,16,32]")
+(ROOT/'deploy.py').write_text(text)
+print(json.dumps(config,indent=2))

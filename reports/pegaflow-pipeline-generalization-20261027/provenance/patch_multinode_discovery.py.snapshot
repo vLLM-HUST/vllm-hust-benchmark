@@ -1,0 +1,50 @@
+"""Give the D endpoint a bounded, measured full-prefix discovery window."""
+
+import json
+import time
+from pathlib import Path
+
+
+ROOT = Path('/data/shared_upload/hust-zsx/issue23-multinode-calibration-20261027')
+target = ROOT/'source/python/pegaflow/connector/scheduler.py'
+original = target.read_text()
+archive = ROOT/'runtime-patches'
+archive.mkdir(exist_ok=True)
+(archive/'scheduler.before-discovery.py').write_text(original)
+anchor = '        if self._issue23_parallel_groups:\n            ready = self._reconcile_issue23_bundle(block_hash_list, ready, req_id)'
+replacement = '''        # The producer's local save ACK can precede metaserver publication.
+        # Preserve full-prefix handoff while that publication is discovered.
+        if (
+            self._ctx.wait_for_full_prefix
+            and not self._cache_groups.has_recurrent_state
+            and block_hash_list
+        ):
+            discovery = getattr(self, "_calibration_discovery_started", None)
+            if discovery is None:
+                discovery = self._calibration_discovery_started = {}
+            started = discovery.setdefault(req_id, time.perf_counter())
+            if ready is not None and ready.num_hit_blocks < len(block_hash_list):
+                elapsed = time.perf_counter() - started
+                if elapsed < 5.0:
+                    self._tp_shard_client.release(ready.leases, req_id)
+                    ready = None
+                else:
+                    telemetry_event("discovery_deadline", request_id=req_id,
+                                    elapsed_ms=elapsed * 1000,
+                                    hit_blocks=ready.num_hit_blocks,
+                                    expected_blocks=len(block_hash_list))
+            if ready is not None:
+                discovery.pop(req_id, None)
+        if self._issue23_parallel_groups:
+            ready = self._reconcile_issue23_bundle(block_hash_list, ready, req_id)'''
+if original.count(anchor) != 1:
+    raise RuntimeError('Discovery patch anchor differs')
+modified = original.replace(anchor, replacement)
+compile(modified, str(target), 'exec')
+target.write_text(modified)
+(archive/'scheduler.with-discovery.py').write_text(modified)
+(archive/'discovery-patch.json').write_text(json.dumps({
+    'epoch_ns':time.time_ns(), 'window_s':5,
+    'scope':'D full-prefix discovery before scheduling; deadline is emitted; partial fallback is audited from scheduler trace',
+},indent=2))
+print('Bounded discovery patch installed')
