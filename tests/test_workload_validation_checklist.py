@@ -8,6 +8,46 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def test_repobench_completion_requires_native_and_fixed_original_scoring():
+    ledger = json.loads(
+        (ROOT / "docs/workload-data/dataset-validation-status.json").read_text("utf-8")
+    )
+    row = ledger["delivery_inventory"]["REPOBENCH"]
+    if not row["checked"]:
+        return
+    delivery = json.loads((ROOT / row["delivery_receipt"]).read_text("utf-8"))
+    assert delivery["source_checkbox_eligible"]
+    profile = delivery["native_profile"]
+    assert (
+        profile["selected_tasks"]
+        == profile["saved_and_independently_audited_tasks"]
+        == 90
+    )
+    assert profile["fixed_strata"] == 30 and profile["per_stratum"] == 3
+    assert (
+        profile["valid_generations_rerun"] == profile["new_model_calls_in_audit"] == 0
+    )
+    assert profile["saved_token_decoding_original_next_line_and_ground_truth_verified"]
+    assert (
+        delivery["public_and_research"]["full_prior_fields_and_index_rows_reused"]
+        == 49684
+    )
+    assert delivery["public_and_research"]["fixed_research_roundtrips_reused"] == 60
+    scoring = delivery["scoring"]
+    assert (
+        scoring["python_hash_seed"] == 0 and scoring["two_repeat_frozen_reports_equal"]
+    )
+    assert (
+        scoring["legacy_unseeded_reports_retained"]
+        and not scoring["quality_acceptance_claim"]
+    )
+    assert (
+        scoring["python"]["exact_match_percent"]
+        == scoring["java"]["exact_match_percent"]
+        == 0.0
+    )
+
+
 def test_infinitebench_does_not_inherit_unrelated_qrecc_storage_blocker():
     ledger = json.loads(
         (ROOT / "docs/workload-data/dataset-validation-status.json").read_text("utf-8")

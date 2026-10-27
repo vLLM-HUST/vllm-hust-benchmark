@@ -1,10 +1,10 @@
 # 数据集逐项验证清单
 
-### RepoBench原生仓库级代码补全（准备中，未交付）
+### RepoBench原生仓库级代码补全（固定原生抽样交付完成）
 
 评分可复现性：本次实测CodeBLEU0.7的Python结果受Python哈希种子影响，同一批保存输出总CodeBLEU出现19.93/20.13两值，EM/ES及Java分数不变。原生入口现以新评分子进程固定`PYTHONHASHSEED=0`，不修改作者评分代码；旧无种子报告必须显式加`--freeze-scoring-output <新外部评分目录>`由保存审计生成独立评分文件并重复核验两次，原报告保留，不能反复重算挑高分。已完成90题的固定种子评分审计，新增模型调用0；样本Python/Java的EM均为0，负面结果保留，不代表质量达标或作者CUDA基线复现。
 
-- [x] 运行中部分保存审计：90题固定选择从原Parquet重建一致，前43题的token解码、作者下一行提取、原参考及结果关系核验通过，新增模型调用0；当时索引43仍在执行，保留未知而不计完成。整套原生生成、官方评分及最终审计前不打总勾。旧运行进程的receipt沿用初始“输入已准备”标签至终态，实际执行以保存attempt、NPU参数证明及活进程核实；公共入口已修正后续运行的状态标签，不为改标签重跑有效结果。
+- [x] 历史运行中部分保存审计：前43题核验通过、当时索引43仍未知；这一快照保留，其后90题已全部审计完成。旧进程曾沿用初始“输入已准备”标签至终态，公共入口已修正后续状态标签；未为改标签重跑有效结果。
 
 作者模型取得方式：在服务器已有授权的HF客户端环境运行`hf download deepseek-ai/deepseek-coder-1.3b-base --revision c919139c3a9b4070729c8b2cca4847ab29ca8d94 --include LICENSE config.json generation_config.json pytorch_model.bin special_tokens_map.json tokenizer.json tokenizer_config.json --local-dir <外部模型目录>`。固定版本七文件会在原生入口再次核对大小/SHA256；不依赖浮动main，不下载自定义Python代码，不把模型放进Git。主站网络不可用时可显式设置同发布方镜像`HF_ENDPOINT=https://hf-mirror.com`，仍核对同一固定身份。已有模型直接复用，不重下。
 
@@ -15,22 +15,21 @@
 - [x] 官方默认日期区间2023-12-01至2023-12-31（沿用作者UTC端点语义）、五长度档2k/4k/8k/12k/16k，2语言×3设置×5长度共30层各首3题、90原题已在服务器构造并独立复核。去参考字段后prompt与作者完整原行构造完全一致，623至14420
   tokens，加128输出均未超16384窗口；新增模型调用0。`--full`表示此**官方默认过滤配置**下不抽样，不代表覆盖原发布版全部九长度档或复现旧v0论文分支。
 
-- [ ] 90题原生生成及作者评分已在确认空闲的第二张NPU上启动，保存审计与最终交付核验尚未完成。每题前有其他研究NPU进程则等待，不停止研究服务；不得将上述环境/输入证据替代原生执行。
+- [x] 90题原生NPU生成、token/原prompt/参考关系保存审计及固定种子的作者评分均完成；复用49684原行/60研究回读的实际CI证据并重新核对47安装载荷一致，不重跑原生有效结果。Python/Java的EM均0，原报告及评分不稳定失败保留；不是质量验收通过。[交付回执](validation/repobench-native-delivery-20261027.json)
 
 公开源码入口：`python scripts/prepare_repobench_original_assets.py --output <新外部目录>`默认只展示计划，加`--execute`取得固定作者归档并校验；已有同版本原zip可加`--reuse-archive <zip>`避免重复下载。已有目录用`--verify-only`只读核验，服务器实际12原文件通过；不会修改作者CUDA代码或在此步骤执行模型。
 
 环境入口：`python scripts/prepare_repobench_runtime.py --source-root <原source> --archive <固定zip> --environment <新外部venv> --uv <uv> --platform-python <已有NPU平台Python> --grammar-source-dir <外部语法源码目录>`默认只展示计划，加`--execute`安装；已创建但依赖未完成的venv可显式`--install-dependencies`续装，已有环境用`--verify-only`。此配置显式继承平台torch/torch-npu/Transformers，不修改平台包；作者没有锁文件，不能称官方环境复现。Python/Java语法包0.21.0的官方固定源码通过API取得、按固定大小/SHA256校验后在ARM构建，未换评分器。服务器已实际通过原生模块导入、两语言EM/Edit
 Similarity/CodeBLEU小型自一致夹具及venv依赖检查；这些是环境检查，不是原题NPU执行。
 
-公开资产入口复用`python scripts/prepare_reused_research_assets.py REPOBENCH --mode plan`，取得原数据用`--mode download --data-root <外部目录> --max-bytes 1200000000`，已有数据用`--mode verify --data-root <外部目录>`只读核验。默认550MB预算会拒绝意外全下约1.05GB；必要时显式选择同固定版本`--hf-endpoint https://hf-mirror.com`，仍逐文件校验原SHA256。准备统一索引用`python scripts/prepare_reused_source_records.py REPOBENCH --data-root <同原目录> --output <新外部索引目录>`，不下载模型、不执行推理。公开核验/准备命令已在服务器用实际CI工件执行，原生benchmark仍未执行。
+公开资产入口复用`python scripts/prepare_reused_research_assets.py REPOBENCH --mode plan`，取得原数据用`--mode download --data-root <外部目录> --max-bytes 1200000000`，已有数据用`--mode verify --data-root <外部目录>`只读核验。默认550MB预算会拒绝意外全下约1.05GB；必要时显式选择同固定版本`--hf-endpoint https://hf-mirror.com`，仍逐文件校验原SHA256。准备统一索引用`python scripts/prepare_reused_source_records.py REPOBENCH --data-root <同原目录> --output <新外部索引目录>`。这两个准备命令本身不下载模型、不执行推理；已在服务器用实际CI工件核验，原生生成/评分另见上述入口与交付回执。
 
 - [x] 固定[作者v1.1源码](https://github.com/Leolty/repobench/tree/e0cfd34c9e7cd8f057efd32b9280b9719ae12a91)，12文件逐文件大小/Git
   blob核验；原生入口为`run.py`和`eval.py`，保留EM/Edit Similarity/CodeBLEU评分，不改为聊天问答。
 - [x] Python/Java固定版本10份原始Parquet全部在服务器取得并核验大小/SHA256；完整检查49684行、11原字段及context的path/snippet关系。覆盖2语言×3设置×9长度档共54层；HF主站不可达时使用同发布方固定版本镜像，不改任务。不在本地或Git保存原始数据。
 - [x] 实际CI
   `e241accd`的47份安装载荷逐字节一致，全部49684原行字段重建和索引、固定研究消费者60条回读一致；语言及其独立数据版本不丢失，next_line/all_code/gold_snippet_index不混入模型输入。新增模型调用0，不等同原生benchmark跑通。
-- [ ] 原生模型环境与执行、官方评分。作者示例推荐DeepSeek-Coder-1.3B-Base，但`run.py`硬编码CUDA，依赖列表还包含stdlib
-  `difflib`，不能盲目照装后宣称NPU可用。须保留作者prompt构造/日期与长度过滤/下一行提取；不得将完整`all_code`、`next_line`或`gold_snippet_index`泄漏进请求。作者模型固定版本七份所需文件已在服务器取得并逐文件验证，约2.69GB权重SHA256一致；独立venv的原生导入与评分夹具已通过，尚未加载模型或执行原题推理，不打总勾、不改当前服务环境。
+- [x] 作者示例DeepSeek-Coder-1.3B-Base七个固定文件已核验，约2.69GB权重身份一致；独立venv与ARM语法构建、NPU原生生成及作者评分均完成。作者`run.py`的CUDA绑定由公开NPU入口适配，作者prompt/日期和长度过滤/下一行提取不改；`all_code`、`next_line`和`gold_snippet_index`不进入请求，不改变现有服务环境。
 
 ### StructEval剩余渲染/VQA环境（未交付）
 
@@ -182,7 +181,7 @@ tree元数据、`--node`私有node路径、`--output`独立日志目录和`--exe
 
 - [x] 复用已有MMMU原生字段适配，更新92文件身份并保留旧登记revision；全16字段/11550行及索引完整，答案/解释与输入分离。精确CI的44载荷逐字节核验、152条公共/研究往返通过，未迁入研究观测或分析。
 
-当前机器清单计算：**54/113项已交付，59项待补**（另5项仅分类，不计入分母）。新增OpenThoughts3固定原语料续写/研究消费闭环；九条均预算耗尽，不代表质量通过。以下历史统计保留其原时点，不代表当前总数。
+当前机器清单计算：**55/113项已交付，58项待补**（另5项仅分类，不计入分母）。新增RepoBench官方默认配置90原题的NPU生成、固定评分与保存审计；样本EM均0，不代表质量通过。OpenThoughts3九条原语料续写预算耗尽的边界不变。以下历史统计保留其原时点，不代表当前总数。
 
 ### ChartQA分步骤（来源总勾已完成：固定原测试抽样交付）
 
@@ -414,7 +413,7 @@ TB；服务器/data约1.42TB可用，未缩小语料。ChartQA当前两卡主机
 | LIVECODEBENCH              | [ ] 待开展                   | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                      |
 | HUMANEVAL                  | [x] 已交付                   | 原前三题NPU生成结果复用，公共隔离入口官方评分2/3，失败保留；164题原字段公共/研究消费相等，原3题索引消费相等。不是全164题模型成绩。见[回执](validation/humaneval-native-delivery-20261025.json)。                                                                                                                  |
 | MBPP                       | [x] full原生抽样可用         | 原题11/12/13双NPU生成、原始三测试与setup隔离CodeEval：参考解均通过，预测2通过/1失败原样保留；974原记录完整映射/索引，14处公共/研究回查一致，精确CI安装工件已核。[证据](validation/mbpp-original-native-sample-20261026.json)；非全500题，sanitized仅取得资产。                                                    |
-| REPOBENCH                  | [ ] 原生准备中               | 原数据/固定源码及实际CI公共与研究接入核验通过；作者模型七文件取得并校验，NPU执行与官方评分待完成                                                                                                                                                                                                                  |
+| REPOBENCH                  | [x] 固定原生抽样交付完成     | 官方默认30层各3题共90原题NPU生成/原评分及保存审计完成；49684原行与60研究回读复用，47实际CI安装载荷重新核对。固定评分哈希种子0，EM均0保留，不是质量验收。见[交付回执](validation/repobench-native-delivery-20261027.json)。                                                                                        |
 | CROSSCODEEVAL              | [x] 原生协议已交付           | 69,494配置行全字段/索引核验复用；四语言原0..2生成/评分保留，公共入口原3..5共12条NPU生成及作者评分通过。精确成功CI44文件及12处公共/研究回查完成；非全语料或所有检索配置推理。[证据](validation/crosscodeeval-original-acquisition-20261026.json)。                                                                 |
 | LOCOMO                     | [x] 原生抽样交付             | 原9题复用、新99题执行及原提示/官方评分复核完成，合计108条；第3类全96题，其他四类各原前三题。原数据不改，第5类显式缺键兼容非上游已合并补丁；研究端接通。不称全1986题、图像或RAG完成。[交付回执](validation/locomo-native-delivery-20261025.json)                                                                   |
 | NATUREBENCH                | [ ] 待开展                   | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                      |
