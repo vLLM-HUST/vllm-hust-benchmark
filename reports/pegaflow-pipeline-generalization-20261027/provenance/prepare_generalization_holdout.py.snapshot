@@ -1,0 +1,40 @@
+"""Freeze unseen session histories using input-only eligibility criteria."""
+
+import json
+import sys
+from pathlib import Path
+
+from transformers import AutoTokenizer
+
+
+BASE=Path(__file__).resolve().parents[1]
+sys.path.insert(0,str(BASE/'worktrees/pegaflow-issue23-simulator/scripts/issue23'))
+from prepare_trajectories import visible_messages
+
+
+def main():
+    root=BASE/'experiment-results/issue23-generalization-20261027'
+    tokenizer=AutoTokenizer.from_pretrained(BASE/'handoff/issue23-2p2d-terminal-plan-20261016/tokenizer',local_files_only=True)
+    records=[];selection=[]
+    for folder in ['bn-fit-modify','break-filter-js','build-cython-ext','build-pmars']:
+        trajectory=json.loads((root/'holdout-source'/folder/'trajectory.json').read_text(encoding='utf-8'))
+        chosen=[]
+        for step in trajectory['steps']:
+            if step['source']!='agent':continue
+            try:messages=visible_messages(trajectory['steps'],step['step_id'])
+            except (ValueError,TypeError):continue
+            tokens=tokenizer.apply_chat_template(messages,add_generation_prompt=True,tokenize=True)
+            if not 256<=len(tokens)<=32000:continue
+            chosen.append(step['step_id'])
+            records.append({'id':f'fresh:{folder}:{step["step_id"]}','task':folder,'step_id':step['step_id'],
+                'split':'new_holdout','prompt_tokens':len(tokens),'prompt_token_ids':tokens,
+                'source_kind':'full_visible_history','trajectory_revision':'3f5b93ff1c5ea84b2c94cf479d0c942227191b4a'})
+            if len(chosen)==16:break
+        selection.append({'task':folder,'steps':chosen})
+    if len(records)<32:raise RuntimeError('Too few eligible unseen histories')
+    (root/'holdout-requests.jsonl').write_text(''.join(json.dumps(r,separators=(',',':'))+'\n' for r in records),encoding='utf-8')
+    (root/'holdout-selection.json').write_text(json.dumps({'selection':selection,'requests':len(records),'criteria':'four new alphabetically selected sessions, first up to 16 text agent histories each, 256..32000 tokens; no runtime outcomes used'},indent=2),encoding='utf-8')
+    print(json.dumps({'requests':len(records),'selection':selection,'tokens':[min(r['prompt_tokens'] for r in records),max(r['prompt_tokens'] for r in records)]}))
+
+
+if __name__=='__main__':main()

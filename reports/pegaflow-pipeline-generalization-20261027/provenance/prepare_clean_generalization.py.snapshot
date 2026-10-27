@@ -1,0 +1,49 @@
+"""Prepare low-perturbation observers and source-disjoint final measurements."""
+
+import json
+import shutil
+import time
+from pathlib import Path
+
+
+BASE=Path('/data/shared_upload/hust-zsx/issue23-generalization-20261027')
+OLD=Path('/data/shared_upload/hust-zsx/issue23-multinode-calibration-20261027')
+trace=(OLD/'scheduling_telemetry.py').read_text()
+trace=trace.replace('if name=="execute_model" and step%8==0:', 'if name=="execute_model" and scheduled and step%8==0:')
+trace=trace.replace('        emit("schedule",step=self.trace_step,',
+    '        self._trace_current = bool(result.num_scheduled_tokens or result.scheduled_new_reqs or result.finished_req_ids or changes or self.trace_step%16==0)\n        if self._trace_current:emit("schedule",step=self.trace_step,')
+trace=trace.replace('        emit("scheduler_update",step=self.trace_step,',
+    '        if getattr(self,"_trace_current",True):emit("scheduler_update",step=self.trace_step,')
+trace=trace.replace('                emit("worker_call",component=name,worker_step=step,',
+    '                if scheduled or name!="execute_model" or step%16==0:emit("worker_call",component=name,worker_step=step,')
+compile(trace,'scheduling_telemetry.py','exec')
+for phase,parent,offset in [('A2','A',3000),('B2','B',4000)]:
+ root=BASE/phase;root.mkdir(exist_ok=False)
+ (root/'source').symlink_to(BASE/'source',target_is_directory=True)
+ for folder in ['services','runs','resources','scheduler-traces','telemetry','visibility','network','holdout']:(root/folder).mkdir()
+ cfg=json.loads((BASE/parent/'config.json').read_text())
+ cfg.update(root=str(root),phase=phase,meta_port=34056+offset,meta_http_port=34092+offset,
+            training_contexts=[8192,15360,24576],measurement_version='buffered-no-empty-NPU-events-v2')
+ for index,item in enumerate(cfg['instances']):
+  item.update(model_port=34080+offset+index,engine_port=34150+offset+index,engine_http_port=34190+offset+index)
+  item['host_pool_bytes']=(12 if phase=='A2' and item['role']=='P' else 16)*2**30
+  for folder in ['visibility','scheduler-traces','telemetry']:(root/folder/item['id']).mkdir()
+ (root/'config.json').write_text(json.dumps(cfg,indent=2))
+ for name in ['deploy.py','observe_resources.py']:
+  text=(BASE/parent/name).read_text().replace(str(BASE/parent),str(root))
+  if name=='observe_resources.py':text=text.replace('index%2==0','index%10==0')
+  (root/name).write_text(text)
+ (root/'scheduling_telemetry.py').write_text(trace)
+ shutil.copyfile(BASE/parent/'requests.jsonl',root/'requests.jsonl')
+for phase in ['C']:
+ root=BASE/phase;(root/'scheduling_telemetry.py').write_text(trace)
+ p=root/'observe_resources.py';p.write_text(p.read_text().replace('index%2==0','index%10==0'))
+ cfg=json.loads((root/'config.json').read_text());cfg['measurement_version']='buffered-no-empty-NPU-events-v2';(root/'config.json').write_text(json.dumps(cfg,indent=2))
+p=BASE/'protocol.json';d=json.loads(p.read_text())
+d['measurement_amendment']={'epoch_ns':time.time_ns(),'reason':'avoid GPU timing tasks in no-work polling and synchronous shared-filesystem writes in foreground latency; isolate clean acquisition before unblinding',
+ 'final_training_phases':['A2','B2'],'diagnostic_only_phases':['A','B'],
+ 'final_holdouts':['A2','B2','C'],'native_kernel_identity':'unchanged f2d3856a3e14a65e4267e58e26224298da733f8f18d08d51e7f8ff8dcae771a8',
+ 'decode_contexts':[8192,15360,24576],'high_context_batch_limit':8,'reason_capacity':'keep private seed working sets within CPU cache capacity; includes 16-way decode at about15k context',
+ 'model_candidates':['iteration-based batch restore with smooth copy work','graph-shape cost with shared resource contention'],
+ 'cost_feature_exclusions':['request identity','task identity','machine identity','measured holdout latency','offered request rate as a cost coefficient']}
+p.write_text(json.dumps(d,indent=2));print('Prepared A2, B2 and C low-perturbation acquisition')

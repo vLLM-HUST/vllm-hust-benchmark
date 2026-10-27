@@ -1,0 +1,70 @@
+{
+  "A": {
+    "done.json": {
+      "epoch_ns": 1793104533802370799,
+      "conditions": 51
+    },
+    "training-done.json": {
+      "epoch_ns": 1793104385934450870,
+      "conditions": 50
+    },
+    "phase.json": {
+      "label": "gen-holdout-A",
+      "split": "holdout",
+      "epoch_ns": 1793104385991080510
+    }
+  },
+  "B": {
+    "failure.json": {
+      "epoch_ns": 1793105660383491982,
+      "error": "",
+      "traceback": "Traceback (most recent call last):\n  File \"/usr/local/python3.12.13/lib/python3.12/site-packages/httpx/_transports/default.py\", line 101, in map_httpcore_exceptions\n    yield\n  File \"/usr/local/python3.12.13/lib/python3.12/site-packages/httpx/_transports/default.py\", line 394, in handle_async_request\n    resp = await self._pool.handle_async_request(req)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/python3.12.13/lib/python3.12/site-packages/httpcore/_async/connection_pool.py\", line 256, in handle_async_request\n    raise exc from None\n  File \"/usr/local/python3.12.13/lib/python3.12/site-packages/httpcore/_async/connection_pool.py\", line 236, in handle_async_request\n    response = await connection.handle_async_request(\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/python3.12.13/lib/python3.12/site-packages/httpcore/_async/connection.py\", line 103, in handle_async_request\n    return await self._connection.handle_async_request(request)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/python3.12.13/lib/python3.12/site-packages/httpcore/_async/http11.py\", line 136, in handle_async_request\n    raise exc\n  File \"/usr/local/python3.12.13/lib/python3.12/site-packages/httpcore/_async/http11.py\", line 106, in handle_async_request\n    ) = await self._receive_response_headers(**kwargs)\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/python3.12.13/lib/python3.12/site-packages/httpcore/_async/http11.py\", line 177, in _receive_response_headers\n    event = await self._receive_event(timeout=timeout)\n            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/python3.12.13/lib/python3.12/site-packages/httpcore/_async/http11.py\", line 217, in _receive_event\n    data = await self._network_stream.read(\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/python3.12.13/lib/python3.12/site-packages/httpcore/_backends/anyio.py\", line 32, in read\n    with map_exceptions(exc_map):\n         ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/python3.12.13/lib/python3.12/contextlib.py\", line 158, in __exit__\n    self.gen.throw(value)\n  File \"/usr/local/python3.12.13/lib/python3.12/site-packages/httpcore/_exceptions.py\", line 14, in map_exceptions\n    raise to_exc(exc) from exc\nhttpcore.ReadTimeout\n\nThe above exception was the direct cause of the following exception:\n\nTraceback (most recent call last):\n  File \"/data/shared_upload/hust-zsx/issue23-generalization-20261027/B/run_campaign.py\", line 97, in <module>\n    try:asyncio.run(main())\n        ^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/python3.12.13/lib/python3.12/asyncio/runners.py\", line 195, in run\n    return runner.run(main)\n           ^^^^^^^^^^^^^^^^\n  File \"/usr/local/python3.12.13/lib/python3.12/asyncio/runners.py\", line 118, in run\n    return self._loop.run_until_complete(task)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/python3.12.13/lib/python3.12/asyncio/base_events.py\", line 691, in run_until_complete\n    return future.result()\n           ^^^^^^^^^^^^^^^\n  File \"/data/shared_upload/hust-zsx/issue23-generalization-20261027/B/run_campaign.py\", line 57, in main\n    await run(plans,f'mixed-arrivals16-r{repeat}')\n  File \"/data/shared_upload/hust-zsx/issue23-generalization-20261027/B/run_campaign.py\", line 34, in run\n    value=await condition(client,plans,label,**kw);results[label]=value\n          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/data/shared_upload/hust-zsx/issue23-generalization-20261027/B/generalization_runner_core.py\", line 74, in condition\n    if clear:await reset(client)\n             ^^^^^^^^^^^^^^^^^^^\n  File \"/data/shared_upload/hust-zsx/issue23-generalization-20261027/B/generalization_runner_core.py\", line 67, in reset\n    (await client.post(url(name)+'/reset_prefix_cache',timeout=30)).raise_for_status()\n     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/python3.12.13/lib/python3.12/site-packages/httpx/_client.py\", line 1859, in post\n    return await self.request(\n           ^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/python3.12.13/lib/python3.12/site-packages/httpx/_client.py\", line 1540, in request\n    return await self.send(request, auth=auth, follow_redirects=follow_redirects)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/python3.12.13/lib/python3.12/site-packages/httpx/_client.py\", line 1629, in send\n    response = await self._send_handling_auth(\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/python3.12.13/lib/python3.12/site-packages/httpx/_client.py\", line 1657, in _send_handling_auth\n    response = await self._send_handling_redirects(\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/python3.12.13/lib/python3.12/site-packages/httpx/_client.py\", line 1694, in _send_handling_redirects\n    response = await self._send_single_request(request)\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/python3.12.13/lib/python3.12/site-packages/httpx/_client.py\", line 1730, in _send_single_request\n    response = await transport.handle_async_request(request)\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/python3.12.13/lib/python3.12/site-packages/httpx/_transports/default.py\", line 393, in handle_async_request\n    with map_httpcore_exceptions():\n         ^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/python3.12.13/lib/python3.12/contextlib.py\", line 158, in __exit__\n    self.gen.throw(value)\n  File \"/usr/local/python3.12.13/lib/python3.12/site-packages/httpx/_transports/default.py\", line 118, in map_httpcore_exceptions\n    raise mapped_exc(message) from exc\nhttpx.ReadTimeout\n"
+    },
+    "phase.json": {
+      "label": "gen-curve-n24576-b16-r1",
+      "split": "calibration",
+      "epoch_ns": 1793105552773234551
+    }
+  },
+  "A2": {
+    "done.json": {
+      "epoch_ns": 1793107718093832601,
+      "conditions": 61
+    },
+    "training-done.json": {
+      "epoch_ns": 1793107646044014591,
+      "conditions": 60
+    },
+    "phase.json": {
+      "label": "gen-holdout-A2",
+      "split": "holdout",
+      "epoch_ns": 1793107646098066329
+    }
+  },
+  "B2": {
+    "done.json": {
+      "epoch_ns": 1793107253760845364,
+      "conditions": 61
+    },
+    "training-done.json": {
+      "epoch_ns": 1793107203866367585,
+      "conditions": 60
+    },
+    "phase.json": {
+      "label": "gen-holdout-B2",
+      "split": "holdout",
+      "epoch_ns": 1793107203921004991
+    }
+  },
+  "C": {
+    "done.json": {
+      "epoch_ns": 1793108392063022539,
+      "conditions": 1
+    },
+    "phase.json": {
+      "label": "gen-holdout-C",
+      "split": "holdout",
+      "epoch_ns": 1793108273236986073
+    }
+  }
+}

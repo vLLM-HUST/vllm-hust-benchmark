@@ -1,0 +1,145 @@
+"""Render measured calibration, held-out predictions and reproducible receipts."""
+
+import collections
+import json
+import math
+import re
+import statistics
+from pathlib import Path
+
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+
+
+ROOT=Path(__file__).resolve().parent.parent
+RAW=ROOT/'snapshot-shared32'
+PROFILE=ROOT/'profile-final'
+plt.rcParams.update({'font.family':'Microsoft YaHei','axes.unicode_minus':False,'figure.dpi':150})
+
+
+def read(path):return json.loads(path.read_text(encoding='utf-8'))
+def rows(path):return [json.loads(l) for l in path.read_text(encoding='utf-8').splitlines() if l]
+
+
+def main():
+    validation=read(PROFILE/'validation.json');profile=read(PROFILE/'profile.json')
+    audits=read(PROFILE/'handoff-audit.json')
+    assert len(audits)==509 and all(r['complete'] for r in audits)
+    compact={k:{f:v for f,v in case.items() if f!='per_request'} for k,case in validation.items()}
+    profile['validation']=compact
+    profile['execution_mode']='graph'
+    profile['validation_scope']='Qwen2.5-7B BF16, Ascend 910B2, TP1, 2P1D, 8 causal sessions, nominal .5/2 rps, output 128'
+    (PROFILE/'profile.json').write_text(json.dumps(profile,indent=2),encoding='utf-8')
+    fig,axes=plt.subplots(1,2,figsize=(11,4.5),sharey=True)
+    for ax,(name,case) in zip(axes,validation.items()):
+        for field,label,color in [('actual_TTFT','实测','#2376b7'),('predicted_TTFT','模拟','#de8635')]:
+            x=sorted(r[field] for r in case['per_request']);y=[(i+1)/len(x)*100 for i in range(len(x))]
+            ax.step(x,y,where='post',label=label,color=color,linewidth=2)
+        ax.set(title='名义 '+name.split('rps')[-1]+' 请求/秒',xlabel='TTFT（秒）')
+        ax.grid(alpha=.2);ax.legend();ax.set_ylim(0,101)
+    axes[0].set_ylabel('请求百分比（%）');fig.suptitle('2P1D：独立会话的实测与模拟，95 请求/组')
+    fig.tight_layout();fig.savefig(ROOT/'ttft-validation.png');plt.close(fig)
+
+    curves=collections.defaultdict(list)
+    for folder in (RAW/'runs').glob('gated-v3-curve-n*'):
+        summary=read(folder/'summary.json');match=re.search(r'-n(\d+)-b(\d+)-r',folder.name)
+        if not match:continue
+        ctx,batch=map(int,match.groups())
+        requests=rows(folder/'audited-requests.jsonl')
+        start=max(r['first_s'] for r in requests);end=min(r['last_token_s'] for r in requests)
+        if end<=start:raise ValueError('No common decode window: '+folder.name)
+        summary['common_decode_tokens_s']=sum(len(chunk['token_ids']) for r in requests for chunk in r['stream_chunks'] if start<chunk['at_s']<=end)/(end-start)
+        summary['client_tokens_s']=batch*64/(max(r['finish_s'] for r in requests)-min(r['P_submit_s'] for r in requests))
+        curves[ctx,batch].append(summary)
+    table=[]
+    for (context,batch),group in sorted(curves.items()):
+        table.append({'context_target':context,'batch':batch,
+            'TPOT_ms':statistics.mean(g['TPOT_ms']['mean'] for g in group),
+            'common_decode_tokens_s':statistics.mean(g['common_decode_tokens_s'] for g in group),
+            'client_completion_tokens_s':statistics.mean(g['client_tokens_s'] for g in group),
+            'TTFT_s':statistics.mean(g['TTFT_s']['mean'] for g in group),'repeats':len(group)})
+    (ROOT/'batch-scaling.json').write_text(json.dumps(table,indent=2),encoding='utf-8')
+    fig,axes=plt.subplots(1,2,figsize=(11,4.5))
+    for context in [8192,24576]:
+        selected=[r for r in table if r['context_target']==context]
+        axes[0].plot([r['batch'] for r in selected],[r['common_decode_tokens_s'] for r in selected],'o-',label=f'约 {context//1024}k 上下文')
+        axes[1].plot([r['batch'] for r in selected],[r['TPOT_ms'] for r in selected],'o-',label=f'约 {context//1024}k 上下文')
+    for ax in axes:ax.set_xlabel('同时提交的请求数');ax.set_xticks([1,2,4,8,16]);ax.grid(alpha=.2);ax.legend()
+    axes[0].set_ylabel('公共解码窗口合计 token/秒');axes[1].set_ylabel('平均 TPOT（毫秒）')
+    fig.suptitle('D 卡已有完整前缀：批处理计算曲线（每组两次）')
+    fig.tight_layout();fig.savefig(ROOT/'decode-batch-scaling.png');plt.close(fig)
+
+    stats={}
+    for node in ['P','D']:
+        groups=collections.defaultdict(list);prior=None
+        for row in rows(ROOT/f'snapshot-final/resources/{node}.jsonl'):
+            phase=row.get('phase')
+            if isinstance(phase,str):
+                try:phase=json.loads(phase)
+                except ValueError:phase={}
+            label=(phase or {}).get('label')
+            state={k:int(v) for k,v in re.findall(r'(\w+)\s+(\d+)',row['cgroup']['cpu.stat'].replace('\\n','\n'))}
+            sample={'epoch_ns':row['epoch_ns'],'memory':int(row['cgroup']['memory.current']),'aic':[]}
+            for line in row.get('npu_smi','').replace('\\n','\n').splitlines():
+                cols=line.split('|')
+                if len(cols)>3 and re.fullmatch(r'\s*[0-9a-fA-F]{4}:[0-9a-fA-F]{2}:[0-9a-fA-F]{2}\.\d\s*',cols[2]):
+                    sample['aic'].append(int(cols[3].split()[0]))
+            if prior:
+                dt=(row['monotonic_ns']-prior[0])/1e9
+                sample['cores']=(state['usage_usec']-prior[1]['usage_usec'])/dt/1e6
+                sample['throttle_s_per_s']=(state['throttled_usec']-prior[1]['throttled_usec'])/dt/1e6
+            prior=row['monotonic_ns'],state
+            if label and label.startswith('gated-v3-'):groups[label].append(sample)
+        stats[node]={}
+        for label,group in groups.items():
+            values=[a for s in group for a in s['aic']]
+            stats[node][label]={'samples':len(group),'CPU_cores_mean':statistics.mean(s['cores'] for s in group if 'cores' in s),
+                'CPU_cores_peak':max(s['cores'] for s in group if 'cores' in s),'memory_peak_GiB':max(s['memory'] for s in group)/2**30,
+                'AICore_mean':statistics.mean(values) if values else None,'AICore_peak':max(values) if values else None}
+    (ROOT/'resource-summary.json').write_text(json.dumps(stats,indent=2),encoding='utf-8')
+    sweep=read(ROOT/'rdma-capacity-sweep.json');capacity=[]
+    for entry in sweep:
+        result=json.loads(entry['client']['stdout'])
+        line=next(l for l in result['stdout'].splitlines() if re.match(r'\s*'+str(entry['size'])+r'\s+\d+\s',l))
+        capacity.append({'bytes':entry['size'],'QP':entry['queues'],'Gbps':float(line.split()[3])})
+    (ROOT/'network-capacity.json').write_text(json.dumps(capacity,indent=2),encoding='utf-8')
+    lines=['# 多节点模拟器标定：2026-10-27','',
+        '本轮实测使用 ascend81 两卡作 P0/P1，ascend91 单卡作 D0，即 2P1D。模型为 Qwen2.5-7B-Instruct BF16、TP1；图执行、连续批处理、并发上限 128；P/D token budget 为 8192/2048。CPU 池为每 P 8 GiB、D 16 GiB；实际 NPU KV 页数为 P 每卡 5804、D 5905，约 39.68/40.37 GiB。', '',
+        '完成 71 个有效条件、509 个请求。包含冷热对照、4/8/16 请求汇入 D、恢复与解码交叠、D 已驻留缓存的 1/2/4/8/16 并发，以及全部 32 个标定输入的共享前缀重放。95 个测试输入来自另外 8 个会话，分别按名义 0.5/2 请求每秒重放；保留会话内完成依赖。', '',
+        '逐步计算记录确认 509/509 请求在 D 的首次实际计算前具备完整的可复用块前缀。P 本地保存 ACK 与跨节点发现之间存在发布窗口，本轮增加有界发现等待并记录截止事件；最初诊断批次单独保留。', '',
+        '## 验证误差','',
+        '|名义请求/秒|实测平均 TTFT|模拟平均 TTFT|均值偏差|逐请求 MAE|逐请求 MAPE|实测/模拟 p95|实测/模拟 p99|',
+        '|---:|---:|---:|---:|---:|---:|---:|---:|']
+    for label,c in validation.items():
+        a=c['actual_TTFT'];p=c['predicted_TTFT']
+        lines.append(f"|{label.split('rps')[-1]}|{a['mean']:.3f}s|{p['mean']:.3f}s|{(p['mean']/a['mean']-1)*100:+.1f}%|{c['TTFT_MAE_s']:.3f}s|{c['TTFT_MAPE_percent']:.1f}%|{a['p95']:.3f}/{p['p95']:.3f}s|{a['p99']:.3f}/{p['p99']:.3f}s|")
+    lines.extend(['','平均端到端耗时：',''])
+    for label,c in validation.items():
+        a=c['actual_E2E']['mean'];p=c['predicted_E2E']['mean']
+        lines.append(f"- {label.split('rps')[-1]} 请求/秒：实测 {a:.3f}s，模拟 {p:.3f}s，偏差 {(p/a-1)*100:+.2f}%。")
+    lines.extend(['','![TTFT 分布](ttft-validation.png)','','## 观察与模型边界','',
+        '链路容量微基准的四 QP 持续吞吐为 90.95–91.63 Gb/s。完整运行中的 RDMA 获取与 CPU→NPU 恢复分别计时；大量碎片缓存恢复可达秒级，而远端获取通常短得多。网络、缓存恢复排队和计算必须分别建模。', '',
+        '高负载验证中平均端到端耗时吻合，但 TTFT 仍偏高，说明恢复、计算及其交叠的请求级时序仍有近似。后续应同时报告分段耗时、误差与敏感性，不能只用平均端到端耗时判断精度。每组 95 请求的 p99 等于最大值，尾部统计仍需更多独立重复。', '',
+        '误差抵消需要特别区分：2 请求每秒时，模拟平均 TTFT 高估约 109 ms，首 token 之后的生成阶段低估约 112 ms，两者抵消后才得到近乎相同的平均 E2E。当前模型更适合带误差范围的趋势比较，尚不足以宣称请求级时序已经精确。', '',
+        '运行资源观测：0.5/2 请求每秒的验证窗口内，D 的 AICore 采样平均约 61%/72%，峰值 81%/92%；P 在 16 请求汇入条件下峰值达到 100%。P 在共享前缀重放中只计算较短增量，低频采样下平均占用很低；不能据此判断整条推理路径未使用 NPU。两端无 OOM。', '',
+        '![已驻留缓存的批处理曲线](decode-batch-scaling.png)', '',
+        '模拟代码支持调整工作负载、固定/泊松/自定义到达轨迹、输出长度、会话依赖、P/D 数量、路由、FCFS/短请求优先、并发、token budget、CPU/NPU 缓存、共享 NIC、模型进程 CPU 预算及指定的主机内存带宽。工作负载只包含时间、长度及前缀身份；观测延迟只用于单独比较。', '',
+        '改变 P/D 数量、图执行方式、模型、设备、TP 或进入显存抢占区域时，需要匹配标定或明确记录外推。本轮直接验证的是 2P1D，图执行 Qwen2.5-7B BF16；当前计算特征越界会在输出 coverage 中列明。CPU 预算尚未完整覆盖 native copy worker 的 CPU 时间；主机内存 memcpy 只是共享带宽的容量代理。RDMA 采用容量与队列模型，未刻画交换机分组、ECN/PFC 或重传机制。', '',
+        '## 文件','',
+        '- `profile-final/profile.json`：组件成本、CPU 成本、覆盖范围与验证误差。',
+        '- `profile-final/validation.json`：逐请求实测与预测。',
+        '- `profile-final/handoff-audit.json`：509 请求的 D 首次计算位置。',
+        '- `snapshot-shared32/`：完整条件记录、服务日志及调度/连接器轨迹。',
+        '- `snapshot-final/resources/`：原始 CPU、内存、NPU、RDMA 计数器观测。',
+        '- `environment-81.json`、`environment-91.json`：实际启动命令、版本和关键文件身份。',
+        '- `network-capacity.json`、`host-memory-*.json`：独立链路及主机内存容量微基准。',
+        '- `snapshot-campaign/`：发现窗口修正前的诊断数据。',
+        '- `runtime-bundle.tar.gz`：实际连接器、遥测、运行器、native 扩展及服务二进制快照。',
+        '- 源码：PegaFlow `scripts/issue23/pd_multinode_simulator.py`、`prepare_multinode_profile.py`、`prepare_pd_workload.py`。',
+        '', '实验专用模型和 native 服务已停止；工作区容器未执行关闭。'])
+    (ROOT/'README.md').write_text('\n'.join(lines)+'\n',encoding='utf-8')
+    print(json.dumps({'effective_requests':len(audits),'conditions':71,'capacity_Gbps':capacity,'batch_curves':table},ensure_ascii=False))
+
+
+if __name__=='__main__':main()

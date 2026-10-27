@@ -1,0 +1,296 @@
+{
+  "schema": "pegaflow-multinode-profile/v1",
+  "models": {
+    "P": {
+      "schema": "pegaflow-step-cost/v1",
+      "metadata": {
+        "model": "Qwen2.5-7B-Instruct",
+        "dtype": "bfloat16",
+        "hardware": "Ascend 910B2",
+        "vllm": "0.23.0",
+        "vllm_ascend": "0.23.0",
+        "role": "P",
+        "max_model_tokens": 32768,
+        "training_tasks": [
+          "adaptive-rejection-sampler",
+          "code-from-image"
+        ],
+        "response_delay_s": 0.014338039,
+        "step_scope": "schedule-to-update wall time including synchronous connector work",
+        "P_decode_scope": "D decode coefficients supplied for schema completeness; P output budget is one token"
+      },
+      "fit": "nonnegative linear cost with Huber reweighting; calibration tasks only",
+      "models": {
+        "decode": {
+          "coefficients": [
+            0.018501856256120754,
+            0.0033180215381530434,
+            0.0027300858021884686
+          ],
+          "training_steps": 8034,
+          "training_MAPE_percent": 6.776393291407966,
+          "training_absolute_error_s": {
+            "mean": 0.00407317885465225,
+            "p50": 0.0004479558868570842,
+            "p95": 0.012355509511842194,
+            "max": 0.2474989046422718
+          }
+        },
+        "prefill": {
+          "coefficients": [
+            0.049383589482125026,
+            0.09141231259470312,
+            0.04371826366823239,
+            0.0,
+            0.0
+          ],
+          "training_steps": 166,
+          "training_MAPE_percent": 6.824127318714233,
+          "training_absolute_error_s": {
+            "mean": 0.011042166485924779,
+            "p50": 0.00896856681079047,
+            "p95": 0.023082581379184952,
+            "max": 0.11691560140581947
+          }
+        }
+      },
+      "dispatch_gap_s": 0.000165584,
+      "response_delay_s": 0.014338039
+    },
+    "D": {
+      "schema": "pegaflow-step-cost/v1",
+      "metadata": {
+        "model": "Qwen2.5-7B-Instruct",
+        "dtype": "bfloat16",
+        "hardware": "Ascend 910B2",
+        "vllm": "0.23.0",
+        "vllm_ascend": "0.23.0",
+        "role": "D",
+        "max_model_tokens": 32768,
+        "training_tasks": [
+          "adaptive-rejection-sampler",
+          "code-from-image"
+        ],
+        "response_delay_s": 0.028162417,
+        "step_scope": "schedule-to-update wall time including synchronous connector work",
+        "P_decode_scope": "D decode coefficients supplied for schema completeness; P output budget is one token"
+      },
+      "fit": "nonnegative linear cost with Huber reweighting; calibration tasks only",
+      "models": {
+        "decode": {
+          "coefficients": [
+            0.018501856256120754,
+            0.0033180215381530434,
+            0.0027300858021884686
+          ],
+          "training_steps": 8034,
+          "training_MAPE_percent": 6.776393291407966,
+          "training_absolute_error_s": {
+            "mean": 0.00407317885465225,
+            "p50": 0.0004479558868570842,
+            "p95": 0.012355509511842194,
+            "max": 0.2474989046422718
+          }
+        },
+        "prefill": {
+          "coefficients": [
+            0.056475517325919225,
+            0.0,
+            0.04434975483637748,
+            0.0,
+            0.016217559615495564
+          ],
+          "training_steps": 119,
+          "training_MAPE_percent": 6.7478873091993306,
+          "training_absolute_error_s": {
+            "mean": 0.004601106197352125,
+            "p50": 0.0031057628036027657,
+            "p95": 0.014447927400249042,
+            "max": 0.05590105052404442
+          }
+        }
+      },
+      "dispatch_gap_s": 0.000165284,
+      "response_delay_s": 0.028162417
+    }
+  },
+  "native": [
+    {
+      "tokens": 1152,
+      "load_complete_seconds": 0.234535,
+      "query_seconds": 0.0017314380265114337,
+      "save_RPC_seconds": 0,
+      "repeats": 3,
+      "restore_range_s": [
+        0.22087225783616304,
+        0.2984806001186371
+      ]
+    },
+    {
+      "tokens": 2944,
+      "load_complete_seconds": 0.62785,
+      "query_seconds": 0.020767254362592524,
+      "save_RPC_seconds": 0,
+      "repeats": 3,
+      "restore_range_s": [
+        0.47156998701393604,
+        0.7957860361784697
+      ]
+    },
+    {
+      "tokens": 8192,
+      "load_complete_seconds": 1.877205,
+      "query_seconds": 0.019131237988378125,
+      "save_RPC_seconds": 0,
+      "repeats": 3,
+      "restore_range_s": [
+        1.7398683819919825,
+        2.6397216198965907
+      ]
+    },
+    {
+      "tokens": 15232,
+      "load_complete_seconds": 2.71202,
+      "query_seconds": 0.007919481860469979,
+      "save_RPC_seconds": 0,
+      "repeats": 3,
+      "restore_range_s": [
+        2.2484866911545396,
+        6.644368723034859
+      ]
+    },
+    {
+      "tokens": 24704,
+      "load_complete_seconds": 4.27867,
+      "query_seconds": 0.0026854886808305167,
+      "save_RPC_seconds": 0,
+      "repeats": 3,
+      "restore_range_s": [
+        4.980553936678916,
+        8.024163153022528
+      ]
+    }
+  ],
+  "network_seconds_per_byte": 9.551015877882526e-11,
+  "P_blocks": [
+    5804,
+    5804
+  ],
+  "D_blocks": 5905,
+  "P_CPU_bytes": [
+    8589934592,
+    8589934592
+  ],
+  "D_CPU_bytes": 17179869184,
+  "scope": "calibration sessions only; full connector; default FCFS, graph decode, 2P1D",
+  "calibration_cases": [
+    "gated-v3-curve-n8192-b1-r0",
+    "gated-v3-curve-n8192-b1-r1",
+    "gated-v3-curve-n8192-b16-r0",
+    "gated-v3-curve-n8192-b16-r1",
+    "gated-v3-curve-n8192-b2-r0",
+    "gated-v3-curve-n8192-b2-r1",
+    "gated-v3-curve-n8192-b4-r0",
+    "gated-v3-curve-n8192-b4-r1",
+    "gated-v3-curve-n8192-b8-r0",
+    "gated-v3-curve-n8192-b8-r1",
+    "gated-v3-decode-restore-overlap-r0",
+    "gated-v3-decode-restore-overlap-r1",
+    "gated-v3-fanin-b16-r0",
+    "gated-v3-fanin-b16-r1",
+    "gated-v3-fanin-b4-r0",
+    "gated-v3-fanin-b4-r1",
+    "gated-v3-fanin-b8-r0",
+    "gated-v3-fanin-b8-r1",
+    "gated-v3-single-r0-n1167",
+    "gated-v3-single-r0-n1167-warm",
+    "gated-v3-single-r0-n15274",
+    "gated-v3-single-r0-n15274-warm",
+    "gated-v3-single-r0-n24724",
+    "gated-v3-single-r0-n24724-warm",
+    "gated-v3-single-r0-n2948",
+    "gated-v3-single-r0-n2948-warm",
+    "gated-v3-single-r0-n8263",
+    "gated-v3-single-r0-n8263-warm",
+    "gated-v3-single-r1-n1167",
+    "gated-v3-single-r1-n1167-warm",
+    "gated-v3-single-r1-n15274",
+    "gated-v3-single-r1-n15274-warm",
+    "gated-v3-single-r1-n24724",
+    "gated-v3-single-r1-n24724-warm",
+    "gated-v3-single-r1-n2948",
+    "gated-v3-single-r1-n2948-warm",
+    "gated-v3-single-r1-n8263",
+    "gated-v3-single-r1-n8263-warm",
+    "gated-v3-single-r2-n1167",
+    "gated-v3-single-r2-n1167-warm",
+    "gated-v3-single-r2-n15274",
+    "gated-v3-single-r2-n15274-warm",
+    "gated-v3-single-r2-n24724",
+    "gated-v3-single-r2-n24724-warm",
+    "gated-v3-single-r2-n2948",
+    "gated-v3-single-r2-n2948-warm",
+    "gated-v3-single-r2-n8263",
+    "gated-v3-single-r2-n8263-warm"
+  ],
+  "observed_configs": {
+    "D0": {
+      "max_num_seqs": 128,
+      "max_num_batched_tokens": 2048,
+      "num_gpu_blocks": 5905,
+      "block_size": 128
+    },
+    "P0": {
+      "max_num_seqs": 128,
+      "max_num_batched_tokens": 8192,
+      "num_gpu_blocks": 5804,
+      "block_size": 128
+    },
+    "P1": {
+      "max_num_seqs": 128,
+      "max_num_batched_tokens": 8192,
+      "num_gpu_blocks": 5804,
+      "block_size": 128
+    }
+  },
+  "copy_lanes": 1,
+  "copy_compute_overlap": true,
+  "training_coverage": {
+    "P": {
+      "sequences": [
+        1,
+        7
+      ],
+      "prefill_tokens": [
+        4,
+        8192
+      ],
+      "decode_tokens": [
+        0,
+        0
+      ],
+      "context_sum": [
+        1167,
+        57841
+      ]
+    },
+    "D": {
+      "sequences": [
+        1,
+        16
+      ],
+      "prefill_tokens": [
+        0,
+        994
+      ],
+      "decode_tokens": [
+        0,
+        16
+      ],
+      "context_sum": [
+        1167,
+        133103
+      ]
+    }
+  }
+}

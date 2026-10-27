@@ -1,0 +1,131 @@
+"""Topology, cache-handoff and shared-resource contracts for scenario replay."""
+
+import pytest
+
+from pd_multinode_simulator import CalibratedPD
+
+
+def fixture():
+    model = {
+        "schema": "pegaflow-step-cost/v1",
+        "models": {
+            "decode": {"coefficients": [0.01, 0, 0]},
+            "prefill": {"coefficients": [0.01, 0.01, 0, 0, 0]},
+        },
+        "dispatch_gap_s": 0.0001,
+        "response_delay_s": 0.001,
+    }
+    profile = {
+        "models": {"P": model, "D": model},
+        "P_blocks": [64, 64],
+        "D_blocks": 64,
+        "P_CPU_bytes": [2**30] * 2,
+        "D_CPU_bytes": 2**30,
+        "network_seconds_per_byte": 1e-8,
+        "native": [
+            {
+                "tokens": 128,
+                "load_complete_seconds": 0.001,
+                "query_seconds": 0.001,
+                "save_RPC_seconds": 0,
+            }
+        ],
+        "copy_lanes": 1,
+        "training_coverage": {},
+    }
+    workload = {
+        "requests": [
+            {
+                "id": f"r{i}",
+                "task": f"s{i % 4}",
+                "prompt_tokens": 257,
+                "output_tokens": 8 + i % 3,
+                "arrival_s": 0,
+                "hashes": [f"p{i % 4}:0", f"p{i % 4}:1"],
+            }
+            for i in range(12)
+        ]
+    }
+    return workload, profile
+
+
+@pytest.mark.parametrize("producers,consumers", [(1, 1), (2, 1), (1, 3), (4, 2)])
+def test_counts_route_and_drain_with_complete_handoff(producers, consumers):
+    workload, profile = fixture()
+    result = CalibratedPD(
+        workload,
+        profile,
+        {
+            "P": producers,
+            "D": consumers,
+            "P_routing": "round_robin",
+            "D_routing": "round_robin",
+        },
+    ).run()
+    assert result["summary"]["requests"] == 12
+    assert len(result["summary"]["peak_running_each"]) == producers + consumers
+    previous = {}
+    for row in result["per_request"]:
+        assert 0 <= row["P"] < producers
+        assert producers <= row["D"] < producers + consumers
+        assert row["stages"]["D"]["cached_tokens"] == 256
+        task = int(row["id"][1:]) % 4
+        assert row["ready"] >= previous.get(task, 0)
+        previous[task] = row["end"]
+
+
+def test_disabling_gpu_apc_keeps_external_handoff_valid():
+    workload, profile = fixture()
+    result = CalibratedPD(workload, profile, {"GPU_APC": False}).run()
+    assert result["summary"]["D_uncached_tokens"] == 12
+    assert all(
+        r["stages"]["D"]["NPU_initial_prefix_blocks"] == 0
+        for r in result["per_request"]
+    )
+
+
+def test_session_dependency_survives_reordered_custom_arrivals():
+    workload, profile = fixture()
+    first, second = workload["requests"][:2]
+    first.update(task="session", arrival_s=1)
+    second.update(task="session", arrival_s=0)
+    workload["requests"] = [first, second]
+    result = CalibratedPD(workload, profile).run()
+    records = {r["id"]: r for r in result["per_request"]}
+    assert records[second["id"]]["ready"] >= records[first["id"]]["end"]
+
+
+def test_distinct_engine_routes_share_the_physical_nic():
+    workload, profile = fixture()
+    workload["requests"] = workload["requests"][:2]
+    config = {"P": 2, "D": 2, "P_routing": "round_robin", "D_routing": "round_robin"}
+    shared = CalibratedPD(workload, profile, config).run()
+    transfers = [r for r in shared["transfers"] if r["resource"].startswith("RDMA")]
+    assert transfers[1]["start"] >= transfers[0]["end"]
+    separate = CalibratedPD(
+        workload, profile, {**config, "engine_hosts": ["p0", "p1", "d0", "d1"]}
+    ).run()
+    transfers = [r for r in separate["transfers"] if r["resource"].startswith("RDMA")]
+    assert transfers[1]["start"] < transfers[0]["end"]
+
+
+def test_shared_cpu_budget_delays_work_instead_of_cloning_capacity():
+    workload, profile = fixture()
+    cpu = {
+        "schema": "pegaflow-step-cost/v1",
+        "models": {
+            "decode": {"coefficients": [0.03, 0, 0]},
+            "prefill": {"coefficients": [0.03, 0, 0, 0, 0]},
+        },
+        "dispatch_gap_s": 0,
+        "response_delay_s": 0,
+    }
+    profile["CPU_models"] = {"P": cpu, "D": cpu}
+    slow = CalibratedPD(
+        workload, profile, {"host_CPU_cores": {"P-host": 1, "D-host": 1}}
+    ).run()
+    fast = CalibratedPD(
+        workload, profile, {"host_CPU_cores": {"P-host": 8, "D-host": 8}}
+    ).run()
+    assert slow["summary"]["host_CPU_wait_s"] > fast["summary"]["host_CPU_wait_s"]
+    assert slow["summary"]["finish_span"] > fast["summary"]["finish_span"]

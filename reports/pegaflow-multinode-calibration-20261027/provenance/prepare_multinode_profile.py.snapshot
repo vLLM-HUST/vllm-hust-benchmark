@@ -1,0 +1,487 @@
+"""Fit calibration-only P/D costs and score independently held-out sessions."""
+
+import argparse
+import bisect
+import collections
+import datetime
+import hashlib
+import json
+import math
+import re
+import statistics
+from pathlib import Path
+
+from pd_multinode_simulator import CalibratedPD
+from step_simulator import features, fit_cost_model, write_json
+
+
+def rows(path):
+    with Path(path).open(encoding="utf-8") as stream:
+        for line in stream:
+            if line.endswith("\n"):
+                yield json.loads(line)
+
+
+def quantiles(values):
+    values = sorted(values)
+    return {
+        "mean": statistics.mean(values),
+        "p50": statistics.median(values),
+        **{f"p{n}": values[math.ceil(len(values) * n / 100) - 1] for n in [95, 99]},
+        "max": values[-1],
+    }
+
+
+def metric(path):
+    return {
+        line.split(" ", 1)[0]: float(line.split(" ", 1)[1])
+        for line in path.read_text().splitlines()
+        if line and not line.startswith("#")
+    }
+
+
+def delta(folder, fragment):
+    a = metric(folder / "before-D0-engine.prom")
+    b = metric(folder / "after-D0-engine.prom")
+    return sum(v - a.get(k, 0) for k, v in b.items() if k.startswith(fragment + "{"))
+
+
+def hashes(tokens, salt):
+    parent = hashlib.sha256(salt.encode()).digest()
+    result = []
+    for start in range(0, len(tokens) - 128, 128):
+        block = b"".join(t.to_bytes(4, "little") for t in tokens[start : start + 128])
+        parent = hashlib.sha256(parent + block).digest()
+        result.append(parent.hex())
+    return result
+
+
+def build(root, out):
+    out.mkdir(exist_ok=False)
+    source = {r["id"]: r for r in rows(root / "requests.jsonl")}
+    observed = {}
+    cases = {}
+    ids = {}
+    events = {}
+    for folder in sorted((root / "runs").glob("gated-v3-*")):
+        if not (folder / "summary.json").exists():
+            continue
+        case = json.loads((folder / "summary.json").read_text())
+        records = list(rows(folder / "audited-requests.jsonl"))
+        cases[folder.name] = case
+        observed[folder.name] = records
+        for record in records:
+            ids[record["request_id"]] = (folder.name, record)
+        events.update(
+            {
+                (r["request_id"], r["event"]): r["epoch_ns"]
+                for r in rows(folder / "events.jsonl")
+                if "request_id" in r
+            }
+        )
+
+    def client_id(key):
+        if not key.startswith("cmpl-"):
+            return None
+        candidate = key[5:].rsplit("-", 2)[0]
+        return candidate if candidate in ids else None
+
+    frames = {"P": [], "D": []}
+    all_frames = []
+    first_compute = {}
+    first_token = {}
+    last_update = {}
+    configs = {}
+    for path in (root / "scheduler-traces").rglob("*.jsonl"):
+        role = path.parent.name[0]
+        node = path.parent.name
+        schedules = {}
+        updates = {}
+        config = None
+        worker_calls = []
+        for item in rows(path):
+            if item["event"] == "scheduler_config":
+                config = item
+            elif item["event"] == "schedule":
+                schedules[item["step"]] = item
+            elif item["event"] == "scheduler_update":
+                updates[item["step"]] = item
+            elif item["event"] == "worker_call":
+                worker_calls.append(item)
+        if not config:
+            continue
+        worker_calls.sort(key=lambda r: r["monotonic_ns"])
+        call_times = [r["monotonic_ns"] for r in worker_calls]
+        matched = False
+        previous = None
+        for step, s in schedules.items():
+            assigned = s["scheduled_tokens"]
+            keys = {k: client_id(k) for k in assigned}
+            if not assigned or not all(keys.values()):
+                continue
+            u = updates.get(step)
+            if u is None:
+                continue
+            matched = True
+            assignments = []
+            labels = {ids[k][0] for k in keys.values()}
+            if len(labels) != 1:
+                raise ValueError("Conditions overlapped")
+            label = labels.pop()
+            for key, count in assigned.items():
+                after = s["requests_after"][key]
+                computed = after["computed_tokens"] - count
+                assignments.append((computed, count, after["prompt_tokens"]))
+                external = keys[key]
+                first_compute.setdefault((node, external), computed)
+                last_update[node, external] = u["epoch_ns"]
+                if computed + count >= after["prompt_tokens"]:
+                    first_token.setdefault((node, external), u["epoch_ns"])
+            frame = features(assignments)
+            begin = s["monotonic_ns"] - s["schedule_wall_ns"]
+            end = u["monotonic_ns"]
+            cpu_calls = worker_calls[
+                bisect.bisect_left(call_times, begin) : bisect.bisect_right(
+                    call_times, end
+                )
+            ]
+            frame.update(
+                case=label,
+                node=node,
+                step=step,
+                duration_s=(
+                    u["monotonic_ns"] - s["monotonic_ns"] + s["schedule_wall_ns"]
+                )
+                / 1e9,
+                CPU_s=(
+                    s["schedule_CPU_ns"]
+                    + u["CPU_ns"]
+                    + sum(c["CPU_ns"] for c in cpu_calls)
+                )
+                / 1e9,
+                dispatch_gap_s=None,
+            )
+            if previous is not None and previous["requests"]:
+                gap = (
+                    s["monotonic_ns"] - s["schedule_wall_ns"] - previous["monotonic_ns"]
+                ) / 1e9
+                if 0 <= gap < 0.1:
+                    frame["dispatch_gap_s"] = gap
+            previous = u
+            all_frames.append(frame)
+            if cases[label]["split"] == "calibration":
+                frames[role].append(frame)
+        if matched:
+            configs[node] = {
+                k: config[k]
+                for k in [
+                    "max_num_seqs",
+                    "max_num_batched_tokens",
+                    "num_gpu_blocks",
+                    "block_size",
+                ]
+            }
+
+    audits = []
+    for label, records in observed.items():
+        for r in records:
+            initial = first_compute.get(("D0", r["request_id"]))
+            if initial is None:
+                raise ValueError("No first compute trace: " + r["request_id"])
+            audits.append(
+                {
+                    "case": label,
+                    "id": r["request_id"],
+                    "expected": r["expected_full_block_prefix"],
+                    "D_initial_computed": initial,
+                    "complete": initial >= r["expected_full_block_prefix"],
+                }
+            )
+    write_json(out / "handoff-audit.json", audits)
+    if not all(a["complete"] for a in audits):
+        raise ValueError("Full-prefix handoff failed")
+
+    models = {}
+    cpu_models = {}
+    for role in ["P", "D"]:
+        selected = list(frames[role])
+        if role == "P":
+            selected.extend(r for r in frames["D"] if r["prefill_tokens"] == 0)
+        delay = []
+        for label, records in observed.items():
+            if cases[label]["split"] != "calibration":
+                continue
+            for r in records:
+                node = r["P"] if role == "P" else "D0"
+                stamp = (
+                    last_update.get((node, r["request_id"]))
+                    if role == "P"
+                    else first_token.get((node, r["request_id"]))
+                )
+                end = events.get(
+                    (r["request_id"], "P_response_s" if role == "P" else "first_s")
+                )
+                if stamp and end and 0 <= (end - stamp) / 1e9 < 0.25:
+                    delay.append((end - stamp) / 1e9)
+        metadata = {
+            "model": "Qwen2.5-7B-Instruct",
+            "dtype": "bfloat16",
+            "hardware": "Ascend 910B2",
+            "vllm": "0.23.0",
+            "vllm_ascend": "0.23.0",
+            "role": role,
+            "max_model_tokens": 32768,
+            "training_tasks": sorted(
+                {
+                    source[r["source_id"]]["task"]
+                    for label, records in observed.items()
+                    if cases[label]["split"] == "calibration"
+                    for r in records
+                }
+            ),
+            "response_delay_s": statistics.median(delay) if delay else 0.005,
+            "step_scope": "schedule-to-update wall time including synchronous connector work",
+            "P_decode_scope": "D decode coefficients supplied for schema completeness; P output budget is one token",
+        }
+        models[role] = fit_cost_model(selected, metadata)
+        cpu_models[role] = fit_cost_model(
+            [{**r, "duration_s": max(1e-6, r["CPU_s"])} for r in selected],
+            {
+                **metadata,
+                "response_delay_s": 0,
+                "scope": "model-process CPU time; native copy worker CPU demand is separate",
+            },
+        )
+        write_json(out / f"{role}-step-model.json", models[role])
+
+    telemetry = collections.defaultdict(list)
+    for path in (root / "telemetry/D0").glob("*.jsonl"):
+        for t in rows(path):
+            keys = [t["request_id"]] if "request_id" in t else t.get("request_ids", [])
+            for key in keys:
+                external = client_id(key)
+                if external:
+                    telemetry[external].append(t)
+    windows = []
+    for label, records in observed.items():
+        if cases[label]["split"] != "calibration":
+            continue
+        origins = [
+            events[r["request_id"], "ready_s"] - r["ready_s"] * 1e9 for r in records
+        ]
+        origin = statistics.median(origins)
+        windows.append(
+            (
+                min(events[r["request_id"], "P_submit_s"] for r in records),
+                origin + max(r["finish_s"] for r in records) * 1e9,
+                label,
+            )
+        )
+    services = []
+    pattern = re.compile(
+        r"^(\S+)\s+.*Load task completed: layers=(\d+) blocks=(\d+) copies=(\d+) bytes=(\d+) elapsed_ms=([\d.]+)"
+    )
+    for line in (root / "services/D0-engine.log").read_text().splitlines():
+        match = pattern.search(line)
+        if not match:
+            continue
+        stamp = datetime.datetime.fromisoformat(match[1]).timestamp() * 1e9
+        label = next((label for a, b, label in windows if a <= stamp <= b), None)
+        if label is None:
+            continue
+        seconds = float(match[6]) / 1000
+        services.append(
+            {
+                "case": label,
+                "end_epoch_ns": stamp,
+                "start_epoch_ns": stamp - seconds * 1e9,
+                "blocks": int(match[3]),
+                "copies": int(match[4]),
+                "bytes": int(match[5]),
+                "seconds": seconds,
+            }
+        )
+    write_json(out / "native-restore-services.json", services)
+    points = collections.defaultdict(list)
+    network = []
+    components = []
+    for label, records in observed.items():
+        if (
+            cases[label]["split"] != "calibration"
+            or "-single-" not in label
+            or label.endswith("-warm")
+        ):
+            continue
+        r = records[0]
+        ev = telemetry[r["request_id"]]
+        load = [t for t in ev if t["event"] == "load_completed"]
+        ready = [t for t in ev if t["event"] == "cache_query_ready"]
+        if len(load) != 1 or len(ready) != 1:
+            raise ValueError("Isolated load missing: " + label)
+        folder = root / "runs" / label
+        payload = delta(folder, "pegaflow_rdma_fetch_bytes_total")
+        network_s = delta(folder, "pegaflow_rdma_fetch_duration_seconds_sum")
+        if payload:
+            network.append(network_s / payload)
+        point = {
+            "tokens": load[0]["blocks"] * 128,
+            "load_complete_seconds": load[0]["duration_ms"] / 1000,
+            "query_wait_seconds": ready[0]["wait_ms"] / 1000,
+            "rdma_fetch_seconds": network_s,
+            "rdma_bytes": payload,
+            "case": label,
+        }
+        points[point["tokens"]].append(point)
+        components.append(point)
+    if not points or not network:
+        raise ValueError("No isolated full-connector calibration")
+    network_cost = statistics.median(network)
+    native = []
+    query_points = []
+    for tokens, group in sorted(points.items()):
+        query_points.append(
+            {
+                "tokens": tokens,
+                "load_complete_seconds": statistics.median(
+                    g["load_complete_seconds"] for g in group
+                ),
+                "query_seconds": max(
+                    0,
+                    statistics.median(
+                        g["query_wait_seconds"] - g["rdma_fetch_seconds"] for g in group
+                    ),
+                ),
+                "save_RPC_seconds": 0,
+                "repeats": len(group),
+                "restore_range_s": [
+                    min(g["load_complete_seconds"] for g in group),
+                    max(g["load_complete_seconds"] for g in group),
+                ],
+            }
+        )
+    from pd_serving_simulator import interpolate
+
+    service_groups = collections.defaultdict(list)
+    for s in services:
+        service_groups[s["blocks"] * 128].append(s["seconds"])
+    for tokens, values in sorted(service_groups.items()):
+        native.append(
+            {
+                "tokens": tokens,
+                "load_complete_seconds": statistics.median(values),
+                "query_seconds": interpolate(query_points, tokens, "query_seconds"),
+                "save_RPC_seconds": 0,
+                "samples": len(values),
+                "service_range_s": [min(values), max(values)],
+            }
+        )
+    service_events = sorted(
+        [(s["start_epoch_ns"], 1) for s in services]
+        + [(s["end_epoch_ns"], -1) for s in services]
+    )
+    active = peak = 0
+    for stamp, change in service_events:
+        active += change
+        peak = max(peak, active)
+    profile = {
+        "schema": "pegaflow-multinode-profile/v1",
+        "models": models,
+        "CPU_models": cpu_models,
+        "native": native,
+        "network_seconds_per_byte": network_cost,
+        "P_blocks": [configs[n]["num_gpu_blocks"] for n in ["P0", "P1"]],
+        "D_blocks": configs["D0"]["num_gpu_blocks"],
+        "P_CPU_bytes": [8 * 2**30] * 2,
+        "D_CPU_bytes": 16 * 2**30,
+        "scope": "calibration sessions only; full connector; default FCFS, graph decode, 2P1D",
+        "calibration_cases": [
+            k for k, v in cases.items() if v["split"] == "calibration"
+        ],
+        "observed_configs": configs,
+        "copy_lanes": max(1, peak),
+        "copy_compute_overlap": True,
+        "training_coverage": {
+            role: {
+                k: [min(r[k] for r in selected), max(r[k] for r in selected)]
+                for k in ["sequences", "prefill_tokens", "decode_tokens", "context_sum"]
+            }
+            for role, selected in frames.items()
+        },
+    }
+    write_json(out / "profile.json", profile)
+    write_json(out / "isolated-components.json", components)
+    write_json(out / "steps.json.gz", all_frames)
+    comparisons = {}
+    for label, records in observed.items():
+        if cases[label]["split"] != "validation":
+            continue
+        specs = []
+        for r in sorted(records, key=lambda r: r["request_id"]):
+            src = source[r["source_id"]]
+            specs.append(
+                {
+                    "id": r["request_id"],
+                    "task": src["task"],
+                    "prompt_tokens": r["prompt_tokens"],
+                    "output_tokens": r["output_budget"],
+                    "P": int(r["P"][1]),
+                    "arrival_s": r["nominal_s"],
+                    "hashes": hashes(src["prompt_token_ids"], r["cache_salt"]),
+                }
+            )
+        workload = {"requests": specs}
+        write_json(out / f"{label}-workload.json", workload)
+        prediction = CalibratedPD(workload, profile).run()
+        write_json(out / f"{label}-prediction.json.gz", prediction)
+        pred = {r["id"]: r for r in prediction["per_request"]}
+        by_request = []
+        for r in records:
+            p = pred[r["request_id"]]
+            by_request.append(
+                {
+                    "id": r["request_id"],
+                    "actual_TTFT": r["TTFT_s"],
+                    "predicted_TTFT": p["TTFT"],
+                    "actual_E2E": r["E2E_s"],
+                    "predicted_E2E": p["E2E"],
+                }
+            )
+        result = {
+            "requests": len(records),
+            "actual_TTFT": quantiles([r["TTFT_s"] for r in records]),
+            "predicted_TTFT": quantiles([r["TTFT"] for r in pred.values()]),
+            "TTFT_MAE_s": statistics.mean(
+                abs(r["actual_TTFT"] - r["predicted_TTFT"]) for r in by_request
+            ),
+            "TTFT_MAPE_percent": statistics.mean(
+                abs(r["actual_TTFT"] - r["predicted_TTFT"]) / r["actual_TTFT"] * 100
+                for r in by_request
+            ),
+            "actual_E2E": quantiles([r["E2E_s"] for r in records]),
+            "predicted_E2E": quantiles([r["E2E"] for r in pred.values()]),
+            "per_request": by_request,
+        }
+        comparisons[label] = result
+    write_json(out / "validation.json", comparisons)
+    print(
+        json.dumps(
+            {
+                "cases": len(cases),
+                "audited_requests": len(audits),
+                "training_steps": {k: len(v) for k, v in frames.items()},
+                "validation": {
+                    k: {a: b for a, b in v.items() if a != "per_request"}
+                    for k, v in comparisons.items()
+                },
+            },
+            indent=2,
+        )
+    )
+
+
+if __name__ == "__main__":
+    p = argparse.ArgumentParser()
+    p.add_argument("--snapshot", type=Path, required=True)
+    p.add_argument("--output", type=Path, required=True)
+    args = p.parse_args()
+    build(args.snapshot, args.output)

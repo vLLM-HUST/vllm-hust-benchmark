@@ -1,0 +1,56 @@
+{
+  "schema": "pegaflow-step-cost/v1",
+  "metadata": {
+    "model": "Qwen2.5-7B-Instruct",
+    "dtype": "bfloat16",
+    "hardware": "Ascend 910B2",
+    "vllm": "0.23.0",
+    "vllm_ascend": "0.23.0",
+    "role": "P",
+    "max_model_tokens": 32768,
+    "training_tasks": [
+      "adaptive-rejection-sampler",
+      "code-from-image"
+    ],
+    "response_delay_s": 0.011282149,
+    "step_scope": "schedule-to-update wall time including synchronous connector work",
+    "P_decode_scope": "D decode coefficients supplied for schema completeness; P output budget is one token"
+  },
+  "fit": "nonnegative linear cost with Huber reweighting; calibration tasks only",
+  "models": {
+    "decode": {
+      "coefficients": [
+        0.01798385308332552,
+        0.005920436060028652,
+        0.0035107062285111845
+      ],
+      "training_steps": 5242,
+      "training_MAPE_percent": 8.77632979067654,
+      "training_absolute_error_s": {
+        "mean": 0.0058475739182281,
+        "p50": 0.0005015048129694728,
+        "p95": 0.045697940284678766,
+        "max": 0.24725393276885826
+      }
+    },
+    "prefill": {
+      "coefficients": [
+        0.04213780494826235,
+        0.0913704234351124,
+        0.044001325062390434,
+        0.0,
+        0.036787331973794135
+      ],
+      "training_steps": 99,
+      "training_MAPE_percent": 7.5385548663086785,
+      "training_absolute_error_s": {
+        "mean": 0.012257242637865472,
+        "p50": 0.010075993750778757,
+        "p95": 0.02724032532295796,
+        "max": 0.1145246369130355
+      }
+    }
+  },
+  "dispatch_gap_s": 0.000156224,
+  "response_delay_s": 0.011282149
+}

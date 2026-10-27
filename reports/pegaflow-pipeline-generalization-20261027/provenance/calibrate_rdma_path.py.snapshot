@@ -1,0 +1,28 @@
+"""Measure the allocated RDMA path after the model campaign has drained."""
+
+import json
+import time
+from concurrent.futures import ThreadPoolExecutor
+
+from multinode_calibration_control import OUT, REMOTE, run
+
+
+results = []
+for index, (size, queues) in enumerate((s, q) for s in [2**20, 8*2**20, 64*2**20] for q in [1, 4]):
+    command = ["ib_read_bw", "-d", "mlx5_2", "-x", "5", "-s", str(size),
+               "-D", "3", "-q", str(queues), "-t", "16", "--report_gbits", "-p", str(32830+index)]
+    def code(client):
+        argv = command + (["192.168.0.4"] if client else [])
+        return ("import subprocess,json,time\n"
+                "begin=time.time_ns()\n"
+                f"p=subprocess.run({argv!r},capture_output=True,text=True,timeout=25)\n"
+                "print(json.dumps({'command':p.args,'code':p.returncode,'start_ns':begin,'end_ns':time.time_ns(),'stdout':p.stdout,'stderr':p.stderr}))")
+    with ThreadPoolExecutor(2) as pool:
+        server = pool.submit(run, "81", code(False), 40)
+        time.sleep(1)
+        client = pool.submit(run, "91", code(True), 40)
+        result = {"size": size, "queues": queues, "server": server.result(), "client": client.result()}
+    results.append(result)
+    (OUT / "rdma-capacity-sweep.json").write_text(json.dumps(results, indent=2), encoding="utf-8")
+    payload = json.loads(result["client"]["stdout"])
+    print(json.dumps({"size": size,"queues": queues,"code":payload['code'],"result":payload['stdout'].splitlines()[-3:]}),flush=True)

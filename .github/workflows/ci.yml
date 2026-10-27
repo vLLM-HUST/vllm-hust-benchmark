@@ -53,6 +53,9 @@ jobs:
           python scripts/data_entrypoints.py --check
           python scripts/build_website_evidence_links.py --check
 
+      - name: Verify frozen PegaFlow calibration capsules
+        run: python scripts/verify_pegaflow_calibration_capsules.py
+
       - name: Validate independent optimization repo result card registry
         run: python scripts/validate_independent_repo_result_cards.py
 

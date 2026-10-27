@@ -1,0 +1,58 @@
+"""Freeze calibration/holdout conditions and prepare role-rotated native services."""
+
+import json
+import shutil
+import time
+from pathlib import Path
+
+
+BASE=Path('/data/shared_upload/hust-zsx/issue23-generalization-20261027')
+OLD=Path('/data/shared_upload/hust-zsx/issue23-multinode-calibration-20261027')
+BASE.mkdir(exist_ok=False)
+shutil.copytree(OLD/'source',BASE/'source',ignore=shutil.ignore_patterns('__pycache__','.venv'))
+protocol={
+ 'created_epoch_ns':time.time_ns(),
+ 'training_tasks':['adaptive-rejection-sampler','code-from-image'],
+ 'training_components':{'restore_blocks':[1,2,4,8,16,32,64,128,192],'repeats':2,
+                        'decode_batches':[1,4,8,16],'decode_contexts':[8192,24576]},
+ 'training_arrivals':{'fixed_rps':1,'poisson_rps':3,'seeds':[101,203]},
+ 'phase_A':{'P':2,'D':1,'producer_node':'81','consumer_node':'91'},
+ 'phase_B':{'P':1,'D':2,'producer_node':'91','consumer_node':'81'},
+ 'holdout_selection':'two alphabetically selected new ATIF sessions outside previous ten tasks; select histories by length only, before observing runtime outcomes',
+ 'holdout_conditions':[
+   {'phase':'A','topology':'2P1D','arrival':'poisson','rps':1.3,'seed':907,'output_tokens':[96,160]},
+   {'phase':'B','topology':'1P1D','arrival':'poisson','rps':2.7,'seed':1103,'output_tokens':[64,192]},
+   {'phase':'C','topology':'2P1D','P_token_budget':4096,'D_token_budget':1024,
+    'D_max_sequences':4,'arrival':'fixed','rps':3,'output_tokens':192}],
+ 'model_selection':'grouped cross-validation on calibration conditions and source contexts; no per-request ID, task, machine or run label cost coefficients',
+ 'final_evaluation':'freeze model/profile before reading holdout latency outputs; audit health and full-prefix semantics during collection',
+ 'candidate_models':['legacy interpolation baseline','nonnegative restore service plus measured cache geometry and coupled scheduling/compute timing'],
+ 'scope':'Qwen2.5-7B-Instruct BF16 TP1 graph execution on Ascend 910B2; no unrelated competing traffic',
+}
+(BASE/'protocol.json').write_text(json.dumps(protocol,indent=2))
+oldconfig=json.loads((OLD/'config.json').read_text())
+for phase,offset in [('A',0),('B',1000),('C',2000)]:
+ root=BASE/phase;root.mkdir()
+ (root/'source').symlink_to(BASE/'source',target_is_directory=True)
+ for folder in ['services','runs','resources','scheduler-traces','telemetry','visibility','network']:(root/folder).mkdir()
+ cfg=dict(oldconfig)
+ cfg.update(root=str(root),meta_host='192.168.0.4',meta_port=34056+offset,meta_http_port=34092+offset,
+            max_num_seqs=128,P_batched_tokens=4096 if phase=='C' else 8192,
+            D_batched_tokens=1024 if phase=='C' else 2048,D_max_sequences=4 if phase=='C' else 128,
+            phase=phase,instances=[])
+ assignments=[('P0','P','P',0),('P1','P','P',1),('D0','D','D',0)] if phase!='B' else [('D0','D','P',0),('D1','D','P',1),('P0','P','D',0)]
+ for index,(name,role,node,device) in enumerate(assignments):
+  cfg['instances'].append({'id':name,'role':role,'node':node,'device':device,
+      'host':'192.168.0.4' if node=='P' else '192.168.0.2',
+      'model_port':34080+offset+index,'engine_port':34150+offset+index,'engine_http_port':34190+offset+index,
+      'host_pool_bytes':(8 if (phase!='B' and role=='P') or (phase=='B' and role=='D') else 16)*2**30})
+  for folder in ['visibility','scheduler-traces','telemetry']:(root/folder/name).mkdir()
+ (root/'config.json').write_text(json.dumps(cfg,indent=2))
+ shutil.copyfile(OLD/'requests.jsonl',root/'requests.jsonl')
+ for name in ['scheduling_telemetry.py','observe_resources.py']:
+  text=(OLD/name).read_text().replace(str(OLD),str(root))
+  (root/name).write_text(text)
+ text=(OLD/'deploy.py').read_text().replace(str(OLD),str(root))
+ text=text.replace("str(cfg['max_num_seqs'])","str(cfg['D_max_sequences'] if role=='D' else cfg['max_num_seqs'])")
+ (root/'deploy.py').write_text(text)
+print(json.dumps({'root':str(BASE),'protocol':protocol},indent=2))

@@ -1,0 +1,108 @@
+"""Collect source-disjoint calibration and physically separated holdout runs."""
+
+import asyncio
+import json
+import random
+import time
+
+import httpx
+
+from generalization_runner_core import ROOT, CFG, INST, condition, url
+
+
+async def main():
+    source=[json.loads(l) for l in (ROOT/'requests.jsonl').read_text().splitlines()]
+    cal=[r for r in source if r['split']=='calibration'];geometry=[r for r in source if r['split']=='geometry_calibration']
+    producers=[k for k,v in INST.items() if v['role']=='P'];consumers=[k for k,v in INST.items() if v['role']=='D']
+    phase=CFG['phase'];results={}
+    async with httpx.AsyncClient(limits=httpx.Limits(max_connections=128,max_keepalive_connections=64),timeout=240,trust_env=False) as client:
+        for attempt in range(300):
+            ready=[]
+            for name in INST:
+                try:ready.append((await client.get(url(name)+'/health',timeout=1)).status_code==200)
+                except Exception:ready.append(False)
+            if all(ready):break
+            await asyncio.sleep(2)
+        else:raise RuntimeError('Phase endpoints did not become ready')
+        async def run(plans,label,**kw):
+            directory=ROOT/('holdout' if kw.get('split')=='holdout' else 'runs')/('gen-'+label)
+            if (directory/'summary.json').exists():
+                value=json.loads((directory/'summary.json').read_text())
+                if value['statuses']!={'ok':len(plans)}:raise RuntimeError('Cannot resume failed requests')
+                if value['partial_D_restore'] and kw.get('split')!='warmup':raise RuntimeError('Cannot resume incomplete handoff')
+                results[label]=value;return value
+            value=await condition(client,plans,label,**kw);results[label]=value
+            if kw.get('split')!='holdout':(ROOT/'training-summary.json').write_text(json.dumps(results,indent=2))
+            return value
+        if phase!='C':
+            # Transfer sizes and repetitions are shuffled before any observations.
+            for repeat in range(2):
+                selected=list(geometry);random.Random(101+repeat).shuffle(selected)
+                for index,row in enumerate(selected):
+                    await run([{'row':row,'P':producers[repeat%len(producers)],'D':consumers[(index+repeat)%len(consumers)],'output':16}],f'geometry-b{row["geometry_blocks"]}-r{repeat}')
+            # Component-only fan-in: source preparation is explicitly synchronized.
+            for batch in [4,8]:
+                row=next(r for r in geometry if r['geometry_blocks']==8)
+                plans=[{'row':row,'P':producers[i%len(producers)],'D':'D0','output':64,'handoff_barrier':True} for i in range(batch)]
+                await run(plans,f'copy-cohort-b{batch}')
+            for context_index,context in enumerate(CFG.get('training_contexts',[8192,24576])):
+                row=min(cal,key=lambda r:abs(r['prompt_tokens']-context))
+                target=consumers[context_index%len(consumers)]
+                count=8 if context>=24576 else 16
+                plans=[{'row':row,'P':producers[i%len(producers)],'D':target,'output':1,'salt':f'curve-{context}-{i}'} for i in range(count)]
+                for group in range(count//4):
+                    await run(plans[group*4:group*4+4],f'curve-seed-n{context}-g{group}',clear=group==0,split='warmup')
+                for batch in [1,4,8,16]:
+                    if batch>count:continue
+                    for repeat in range(2):
+                        await run([{**p,'output':64} for p in plans[:batch]],f'curve-n{context}-b{batch}-r{repeat}',clear=False)
+            for repeat in range(2):
+                selected=sorted((r for r in cal if r['prompt_tokens']<=16384),key=lambda r:r['prompt_tokens'])
+                rows=[selected[round(i*(len(selected)-1)/15)] for i in range(16)]
+                plans=[{'row':r,'P':producers[i%len(producers)],'D':consumers[(i+repeat)%len(consumers)],
+                        'output':[32,64,128,192][i%4],'at':0 if i<4 else .15*(i-3)} for i,r in enumerate(rows)]
+                await run(plans,f'mixed-arrivals16-r{repeat}')
+            near8=min(cal,key=lambda r:abs(r['prompt_tokens']-8192))
+            for repeat in range(2):
+                long=[{'row':near8,'P':producers[i%len(producers)],'D':consumers[i%len(consumers)],
+                       'output':1,'salt':f'overlap-{repeat}-{i}'} for i in range(2)]
+                await run(long,f'overlap-seed-r{repeat}',split='warmup')
+                plans=[{**p,'output':512} for p in long]
+                for i,blocks in enumerate([1,8,32,128]):
+                    row=next(r for r in geometry if r['geometry_blocks']==blocks)
+                    plans.append({'row':row,'P':producers[i%len(producers)],'D':consumers[i%len(consumers)],'output':96,'at':.8+repeat*.2+i*.17})
+                await run(plans,f'decode-restore-overlap-r{repeat}',clear=False)
+            ordered=sorted(cal,key=lambda r:(r['step_id'],r['task']));tasks=sorted({r['task'] for r in ordered})
+            for repeat in range(2):
+                previous={};plans=[];at=0;rng=random.Random(203+repeat)
+                for index,row in enumerate(ordered):
+                    if repeat==0:at=index
+                    elif index:at+=rng.expovariate(3)
+                    lane=tasks.index(row['task'])
+                    plans.append({'row':row,'P':producers[lane%len(producers)],'D':consumers[lane%len(consumers)],
+                                  'output':[32,96,192][index%3],'at':at,'salt':f'shared32-{repeat}','previous':previous.get(row['task'])})
+                    previous[row['task']]=index
+                await run(plans,f'shared32-r{repeat}')
+            (ROOT/'training-done.json').write_text(json.dumps({'epoch_ns':time.time_ns(),'conditions':len(results)}))
+        # Outcomes from these source-disjoint requests are never printed here.
+        hold=[r for r in source if r['split']==('test' if phase=='C' else 'new_holdout')]
+        hold.sort(key=lambda r:(r['step_id'],r['task']));tasks=sorted({r['task'] for r in hold})
+        previous={};plans=[];at=0;rng=random.Random(907 if phase.startswith('A') else 1103)
+        rate=1.3 if phase.startswith('A') else 2.7
+        for index,row in enumerate(hold):
+            if phase=='C':at=index/3
+            elif index:at+=rng.expovariate(rate)
+            lane=tasks.index(row['task']);output=192 if phase=='C' else [96,160][index%2] if phase.startswith('A') else [64,192][index%2]
+            plans.append({'row':row,'P':producers[lane%len(producers)],'D':'D0',
+                          'output':output,'at':at,'salt':f'holdout-{phase}','previous':previous.get(row['task'])})
+            previous[row['task']]=index
+        await run(plans,f'holdout-{phase}',split='holdout')
+    (ROOT/'done.json').write_text(json.dumps({'epoch_ns':time.time_ns(),'conditions':len(results)}))
+
+
+if __name__=='__main__':
+    try:asyncio.run(main())
+    except BaseException as error:
+        import traceback
+        (ROOT/'failure.json').write_text(json.dumps({'epoch_ns':time.time_ns(),'error':str(error),'traceback':traceback.format_exc()},indent=2))
+        raise

@@ -1,0 +1,148 @@
+"""Normalize calibration steps and native copy batches without opening holdouts."""
+
+import argparse
+import bisect
+import datetime
+import gzip
+import json
+import re
+import statistics
+import sys
+from collections import defaultdict
+from pathlib import Path
+
+
+SOURCE=Path(__file__).resolve().parents[1]/'worktrees/pegaflow-issue23-simulator/scripts/issue23'
+sys.path.insert(0,str(SOURCE))
+from step_simulator import features
+
+
+def rows(path):
+    for line in path.open(encoding='utf-8'):
+        if line.endswith('\n'):yield json.loads(line)
+
+
+def client(raw):return raw[5:].rsplit('-',2)[0] if raw.startswith('cmpl-') else raw
+
+
+def extract(root, split="calibration"):
+    cfg=json.loads((root/'config.json').read_text());phase=cfg['phase']
+    sources={r['id']:r for r in rows(root/'requests.jsonl')}
+    cases={};requests={};events={}
+    for folder in sorted((root/('holdout' if split=='holdout' else 'runs')).glob('gen-*')):
+        if not (folder/'summary.json').exists():continue
+        summary=json.loads((folder/'summary.json').read_text())
+        if summary['split']!=split:continue
+        records=list(rows(folder/'audited-requests.jsonl'))
+        label=phase+'/'+folder.name
+        cases[label]={'label':label,'phase':phase,'requests':[r['request_id'] for r in records]}
+        for row in records:requests[row['request_id']]={**row,'case':label,'phase':phase,'source':sources[row['source_id']]}
+        for row in rows(folder/'events.jsonl'):
+            if row.get('request_id') in requests:events[row['request_id'],row['event']]=row['epoch_ns']
+    steps=[];lookups=defaultdict(list);tables=defaultdict(list);first={};arrivals={};outstamps={};idle_gaps=[];configs={}
+    for path in (root/'scheduler-traces').rglob('*.jsonl'):
+        node=path.parent.name;role=node[0];sched={};updates={};calls=[];empty=[]
+        for row in rows(path):
+            kind=row['event']
+            if kind=='scheduler_config':configs[node]={k:row[k] for k in ['max_num_seqs','max_num_batched_tokens','num_gpu_blocks','block_size']}
+            elif kind=='prefix_cache_lookup' and client(row['request_id']) in requests:
+                lookups[node,client(row['request_id'])].append((row['epoch_ns'],row['matched_tokens']))
+            elif kind=='schedule':
+                sched[row['step']]=row
+                for key,table in row['block_table_changes'].items():
+                    external=client(key)
+                    if external in requests:tables[node,external].append((row['epoch_ns'],table))
+                if not row['scheduled_tokens'] and any(client(k) in requests for k in row['requests_after']):empty.append((row['step'],row['epoch_ns']))
+            elif kind=='scheduler_update':updates[row['step']]=row
+            elif kind=='worker_call':calls.append(row)
+        calls.sort(key=lambda r:r['monotonic_ns']);times=[r['monotonic_ns'] for r in calls];prior=None
+        idle_gaps.extend((b[1]-a[1])/1e9/(b[0]-a[0]) for a,b in zip(empty,empty[1:]) if b[0]>a[0] and 0<(b[1]-a[1])/1e9/(b[0]-a[0])<.02)
+        for number,s in sched.items():
+            assigned=s['scheduled_tokens'];keys={k:client(k) for k in assigned}
+            if not assigned or not all(k in requests for k in keys.values()):continue
+            u=updates.get(number)
+            if u is None:continue
+            labels={requests[k]['case'] for k in keys.values()}
+            if len(labels)!=1:raise ValueError('Calibration conditions overlapped')
+            assignments=[]
+            for raw,count in assigned.items():
+                key=keys[raw];after=s['requests_after'][raw];computed=after['computed_tokens']-count
+                assignments.append((computed,count,after['prompt_tokens']))
+                first.setdefault((node,key),computed)
+                arrivals.setdefault((node,key),after['arrival_time']*1e9)
+                if computed+count>=after['prompt_tokens']:outstamps.setdefault((node,key),u['epoch_ns'])
+            begin=s['monotonic_ns']-s['schedule_wall_ns'];end=u['monotonic_ns']
+            selected=calls[bisect.bisect_left(times,begin):bisect.bisect_right(times,end)]
+            frame=features(assignments)
+            frame.update(case=labels.pop(),phase=phase,node=node,role=role,
+                start_ns=s['epoch_ns']-s['schedule_wall_ns'],end_ns=u['epoch_ns'],
+                duration_s=(end-begin)/1e9,CPU_s=(s['schedule_CPU_ns']+u['CPU_ns']+sum(r['CPU_ns'] for r in selected))/1e9,
+                dispatch_gap_s=None)
+            if prior is not None:
+                gap=(s['epoch_ns']-s['schedule_wall_ns']-prior['epoch_ns'])/1e9
+                if prior['requests'] and 0<=gap<.05:frame['dispatch_gap_s']=gap
+            prior=u;steps.append(frame)
+    batches=[];queries=[]
+    native_re=re.compile(r'^(\S+)\s+.*Load task completed: layers=(\d+) blocks=(\d+) copies=(\d+) bytes=(\d+) elapsed_ms=([\d.]+)')
+    for node in [r['id'] for r in cfg['instances'] if r['role']=='D']:
+        native=[]
+        for line in (root/'services'/f'{node}-engine.log').read_text().splitlines():
+            match=native_re.search(line)
+            if match:
+                end=datetime.datetime.fromisoformat(match[1]).timestamp()*1e9
+                duration=float(match[6])/1000
+                native.append({'end_ns':end,'start_ns':end-duration*1e9,'blocks':int(match[3]),'copies':int(match[4]),'bytes':int(match[5]),'seconds':duration})
+        load={};begin=None
+        for p in (root/'telemetry'/node).glob('*.jsonl'):
+            for item in rows(p):
+                keys=[client(k) for k in item.get('request_ids',[item.get('request_id','')])]
+                if not keys or not all(k in requests for k in keys):continue
+                if item['event']=='cache_query_ready':queries.append({**item,'client_id':keys[0],'case':requests[keys[0]]['case'],'phase':phase,'node':node})
+                if item['event']=='load_start':begin=item
+                elif item['event']=='load_submitted':load[item['load_state']]={'submitted':item,'begin':begin,'keys':keys}
+                elif item['event']=='load_completed' and item['load_state'] in load:
+                    load[item['load_state']]['completed']=item
+        for entry in sorted(load.values(),key=lambda e:e['submitted']['unix_ns']):
+            if 'completed' not in entry:continue
+            item=entry['completed'];submit=entry['submitted'];keys=entry['keys']
+            matches=[(i,n) for i,n in enumerate(native) if n['blocks']==submit['blocks'] and n['end_ns']<=item['unix_ns']+1e6 and n['end_ns']>=submit['unix_ns']-submit.get('rpc_and_schedule_us',0)*1000-1e6 and item['unix_ns']-n['end_ns']<2e9]
+            if not matches:raise ValueError('Native restore service match missing: '+item['load_state'])
+            index,service=min(matches,key=lambda x:x[1]['end_ns']);native.pop(index)
+            grouped=defaultdict(float);per_request=[]
+            for key in keys:
+                record=requests[key];target=(record['prompt_tokens']-1)//128
+                lookup=max((v for t,v in lookups[node,key] if t<=submit['unix_ns']),default=0)//128
+                count=max(0,target-lookup);deltas=[tab for t,tab in tables[node,key] if t<=submit['unix_ns']]
+                physical=(deltas[-1][0] if deltas else [])[lookup:lookup+count]
+                runs=0 if not physical else 1+sum(b!=a+1 for a,b in zip(physical,physical[1:]))
+                per_request.append({'id':key,'blocks':count,'GPU_prefix_blocks':lookup,'destination_runs':runs})
+            for step in steps:
+                if step['node']!=node:continue
+                overlap=max(0,min(service['end_ns'],step['end_ns'])-max(service['start_ns'],step['start_ns']))/1e9
+                grouped['busy_s']+=overlap
+            busy=min(service['seconds'],grouped['busy_s'])
+            batches.append({**service,'phase':phase,'node':node,'case':requests[keys[0]]['case'],
+                'load_state':item['load_state'],'requests':keys,'request_count':len(keys),'per_request':per_request,
+                'attributed_blocks':sum(r['blocks'] for r in per_request),'destination_runs':sum(r['destination_runs'] for r in per_request),
+                'submitted_ns':submit['unix_ns'],'completed_ns':item['unix_ns'],'busy_s':busy,'idle_s':service['seconds']-busy})
+    request_stats=[]
+    for key,r in requests.items():
+        row={k:v for k,v in r.items() if k not in ['stream_chunks','output_token_ids','source_marker','source']}
+        for role,node in [('P',r['P']),('D',r['D'])]:
+            expected=(r['prompt_tokens']-1)//128*128
+            if role=='D' and first.get((node,key),-1)<expected:raise ValueError('Incomplete handoff: '+key)
+            row[role+'_arrival_ns']=arrivals.get((node,key))
+            row[role+'_inbound_s']=(arrivals[node,key]-events[key,role+'_submit_s'])/1e9
+            endpoint='P_response_s' if role=='P' else 'first_s'
+            row[role+'_outbound_s']=(events[key,endpoint]-outstamps[node,key])/1e9
+        request_stats.append(row)
+    return {'phase':phase,'config':cfg,'engine_configs':configs,'steps':steps,'restore_batches':batches,'queries':queries,
+            'requests':request_stats,'idle_poll_s':statistics.median(idle_gaps) if idle_gaps else .001}
+
+
+if __name__=='__main__':
+    p=argparse.ArgumentParser();p.add_argument('--root',type=Path,required=True);p.add_argument('--output',type=Path,required=True);p.add_argument('--split',choices=['calibration','holdout'],default='calibration');a=p.parse_args()
+    result=extract(a.root,a.split);a.output.write_bytes(gzip.compress(json.dumps(result,separators=(',',':')).encode(),mtime=0))
+    print(json.dumps({'phase':result['phase'],'steps':len(result['steps']),'restore_batches':len(result['restore_batches']),
+        'requests':len(result['requests']),'batch_attribution_mismatches':sum(b['blocks']!=b['attributed_blocks'] for b in result['restore_batches']),
+        'idle_poll_s':result['idle_poll_s']}))

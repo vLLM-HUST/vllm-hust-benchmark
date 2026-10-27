@@ -1,0 +1,100 @@
+"""Finite A/B/C calibration workflow; starts each phase after the prior drains."""
+
+import json
+import sys
+import time
+from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
+
+from multinode_calibration_control import run
+
+
+REMOTE='/data/shared_upload/hust-zsx/issue23-generalization-20261027'
+OUT=Path(__file__).resolve().parents[1]/'experiment-results/issue23-generalization-20261027'
+
+
+def stop(phase,node):
+    return run(node,f'''from pathlib import Path
+import os,signal,json,time
+r=Path({REMOTE!r})/{phase!r};cfg=json.loads((r/'config.json').read_text());names=[]
+physical={'P' if node=='81' else 'D'!r};(r/'resources'/('stop-'+physical)).write_text(str(time.time_ns()))
+for item in cfg['instances']:
+ if item['node']==physical:names.extend([item['id']+'-model',item['id']+'-engine'])
+if physical=='P':names.append('P-meta')
+stopped=[]
+for name in names:
+ p=r/'services'/(name+'.process.json')
+ if not p.exists():continue
+ pid=json.loads(p.read_text())['pid']
+ try:
+  if Path(f'/proc/{{pid}}/cwd').resolve()!=r or os.getpgid(pid)!=pid:raise RuntimeError('Owned identity differs: '+name)
+  os.killpg(pid,signal.SIGTERM);stopped.append((name,pid))
+ except (FileNotFoundError,ProcessLookupError):pass
+time.sleep(3)
+for name,pid in stopped:
+ try:os.killpg(pid,signal.SIGKILL)
+ except ProcessLookupError:pass
+(r/('stopped-'+physical+'.json')).write_text(json.dumps({{'epoch_ns':time.time_ns(),'processes':stopped}}));print('stopped',len(stopped))
+''',40)
+
+
+def launch(phase,node):
+    return run(node,f'''from pathlib import Path
+import subprocess,json,time
+b=Path({REMOTE!r});r=b/{phase!r};physical={'P' if node=='81' else 'D'!r}
+with (r/('bootstrap-'+physical+'.log')).open('x') as log:
+ p=subprocess.Popen(['/usr/local/python3.12.13/bin/python3.12',str(b/'bootstrap.py'),'--phase',{phase!r},'--node',physical],stdout=log,stderr=subprocess.STDOUT,start_new_session=True,cwd=r)
+print(p.pid)
+''',30)
+
+
+def start_runner(phase):
+    return run('81',f'''from pathlib import Path
+import subprocess,json,time
+r=Path({REMOTE!r})/{phase!r}
+with (r/'campaign.log').open('x') as log:
+ p=subprocess.Popen(['/usr/local/python3.12.13/bin/python3.12',str(r/'run_campaign.py')],stdout=log,stderr=subprocess.STDOUT,start_new_session=True,cwd=r)
+(r/'campaign.process.json').write_text(json.dumps({{'pid':p.pid,'epoch_ns':time.time_ns()}}));print(p.pid)
+''',30)
+
+
+def snapshot():
+    result=run('81',f'''from pathlib import Path
+import json
+b=Path({REMOTE!r});status={{}}
+for phase in ['A','B','A2','B2','C']:
+ r=b/phase;item={{}}
+ for name in ['done.json','failure.json','training-done.json','phase.json']:
+  p=r/name
+  if p.exists():item[name]=json.loads(p.read_text())
+ status[phase]=item
+print(json.dumps(status))
+''',25)
+    if result['returncode']:raise RuntimeError(result['stderr'])
+    return json.loads(result['stdout'])
+
+
+def main():
+    sequence=sys.argv[1:] or ['A','B','C']
+    started=time.monotonic();phase=sequence[0]
+    while True:
+        state=snapshot();(OUT/'workflow-status.json').write_text(json.dumps(state,indent=2))
+        if state[phase].get('failure.json'):raise RuntimeError(json.dumps(state[phase]['failure.json']))
+        if state[phase].get('done.json'):
+            print(json.dumps({'phase_completed':phase}),flush=True)
+            if phase==sequence[-1]:return
+            with ThreadPoolExecutor(2) as pool:
+                stopped=list(pool.map(lambda node:stop(phase,node),['81','91']))
+            if any(r['returncode'] for r in stopped):raise RuntimeError(str(stopped))
+            phase=sequence[sequence.index(phase)+1]
+            with ThreadPoolExecutor(2) as pool:
+                launched=list(pool.map(lambda node:launch(phase,node),['81','91']))
+            if any(r['returncode'] for r in launched):raise RuntimeError(str(launched))
+            result=start_runner(phase)
+            if result['returncode']:raise RuntimeError(str(result))
+            print(json.dumps({'phase_started':phase}),flush=True)
+        if time.monotonic()-started>2400:raise TimeoutError('Finite calibration workflow timeout')
+        time.sleep(10)
+
+
+if __name__=='__main__':main()

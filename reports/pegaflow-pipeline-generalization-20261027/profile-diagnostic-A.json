@@ -1,0 +1,704 @@
+{
+  "schema": "pegaflow-multinode-profile/v1",
+  "models": {
+    "P": {
+      "schema": "pegaflow-step-cost/v1",
+      "metadata": {
+        "model": "Qwen2.5-7B-Instruct",
+        "dtype": "bfloat16",
+        "hardware": "Ascend 910B2",
+        "vllm": "0.23.0",
+        "vllm_ascend": "0.23.0",
+        "role": "P",
+        "max_model_tokens": 32768,
+        "training_tasks": [
+          "adaptive-rejection-sampler",
+          "code-from-image"
+        ],
+        "response_delay_s": 0.0165719815,
+        "step_scope": "schedule-to-update wall time including synchronous connector work",
+        "P_decode_scope": "D decode coefficients supplied for schema completeness; P output budget is one token"
+      },
+      "fit": "nonnegative linear cost with Huber reweighting; calibration tasks only",
+      "models": {
+        "decode": {
+          "coefficients": [
+            0.01941385397486971,
+            0.0011980824042069978,
+            0.004491333960638115
+          ]
+        },
+        "prefill": {
+          "coefficients": [
+            0.026091345333924057,
+            0.08837819908510802,
+            0.04550674277188396,
+            0.0,
+            0.18793351519592824
+          ]
+        }
+      },
+      "dispatch_gap_s": 0.0001566235,
+      "response_delay_s": 0.016699317499999998
+    },
+    "D": {
+      "schema": "pegaflow-step-cost/v1",
+      "metadata": {
+        "model": "Qwen2.5-7B-Instruct",
+        "dtype": "bfloat16",
+        "hardware": "Ascend 910B2",
+        "vllm": "0.23.0",
+        "vllm_ascend": "0.23.0",
+        "role": "D",
+        "max_model_tokens": 32768,
+        "training_tasks": [
+          "adaptive-rejection-sampler",
+          "code-from-image"
+        ],
+        "response_delay_s": 0.025855738,
+        "step_scope": "schedule-to-update wall time including synchronous connector work",
+        "P_decode_scope": "D decode coefficients supplied for schema completeness; P output budget is one token"
+      },
+      "fit": "nonnegative linear cost with Huber reweighting; calibration tasks only",
+      "models": {
+        "decode": {
+          "coefficients": [
+            0.01941385397486971,
+            0.0011980824042069978,
+            0.004491333960638115
+          ]
+        },
+        "prefill": {
+          "coefficients": [
+            0.03836098091473204,
+            0.06969826644912887,
+            0.1246329182744642,
+            0.021700404912936417,
+            0.0
+          ]
+        }
+      },
+      "dispatch_gap_s": 0.000156538,
+      "response_delay_s": 0.04468508
+    }
+  },
+  "CPU_models": {
+    "P": {
+      "schema": "pegaflow-step-cost/v1",
+      "metadata": {
+        "model": "Qwen2.5-7B-Instruct",
+        "dtype": "bfloat16",
+        "hardware": "Ascend 910B2",
+        "vllm": "0.23.0",
+        "vllm_ascend": "0.23.0",
+        "role": "P",
+        "max_model_tokens": 32768,
+        "training_tasks": [
+          "adaptive-rejection-sampler",
+          "code-from-image"
+        ],
+        "response_delay_s": 0.0165719815,
+        "step_scope": "schedule-to-update wall time including synchronous connector work",
+        "P_decode_scope": "D decode coefficients supplied for schema completeness; P output budget is one token"
+      },
+      "fit": "nonnegative linear cost with Huber reweighting; calibration tasks only",
+      "models": {
+        "decode": {
+          "coefficients": [
+            0.01875746333478709,
+            0.0004098383454855523,
+            0.0015613548043158123
+          ]
+        },
+        "prefill": {
+          "coefficients": [
+            0.06597346689129271,
+            0.03379313560474169,
+            0.014663235046506684,
+            0.0,
+            0.06020579436874997
+          ]
+        }
+      },
+      "dispatch_gap_s": 0,
+      "response_delay_s": 0
+    },
+    "D": {
+      "schema": "pegaflow-step-cost/v1",
+      "metadata": {
+        "model": "Qwen2.5-7B-Instruct",
+        "dtype": "bfloat16",
+        "hardware": "Ascend 910B2",
+        "vllm": "0.23.0",
+        "vllm_ascend": "0.23.0",
+        "role": "D",
+        "max_model_tokens": 32768,
+        "training_tasks": [
+          "adaptive-rejection-sampler",
+          "code-from-image"
+        ],
+        "response_delay_s": 0.025855738,
+        "step_scope": "schedule-to-update wall time including synchronous connector work",
+        "P_decode_scope": "D decode coefficients supplied for schema completeness; P output budget is one token"
+      },
+      "fit": "nonnegative linear cost with Huber reweighting; calibration tasks only",
+      "models": {
+        "decode": {
+          "coefficients": [
+            0.01875746333478709,
+            0.0004098383454855523,
+            0.0015613548043158123
+          ]
+        },
+        "prefill": {
+          "coefficients": [
+            0.04464445161414297,
+            0.040398009943169784,
+            0.14275566107281634,
+            0.027220784134579772,
+            0.0
+          ]
+        }
+      },
+      "dispatch_gap_s": 0,
+      "response_delay_s": 0
+    }
+  },
+  "native": [
+    {
+      "tokens": 128,
+      "load_complete_seconds": 0.0046,
+      "query_seconds": 0,
+      "save_RPC_seconds": 0
+    },
+    {
+      "tokens": 256,
+      "load_complete_seconds": 0.007915,
+      "query_seconds": 0,
+      "save_RPC_seconds": 0
+    },
+    {
+      "tokens": 512,
+      "load_complete_seconds": 0.01609,
+      "query_seconds": 0,
+      "save_RPC_seconds": 0
+    },
+    {
+      "tokens": 1024,
+      "load_complete_seconds": 0.02942,
+      "query_seconds": 0,
+      "save_RPC_seconds": 0
+    },
+    {
+      "tokens": 2048,
+      "load_complete_seconds": 0.064175,
+      "query_seconds": 0,
+      "save_RPC_seconds": 0
+    },
+    {
+      "tokens": 4096,
+      "load_complete_seconds": 0.140345,
+      "query_seconds": 0,
+      "save_RPC_seconds": 0
+    },
+    {
+      "tokens": 8192,
+      "load_complete_seconds": 0.30018,
+      "query_seconds": 0,
+      "save_RPC_seconds": 0
+    },
+    {
+      "tokens": 16384,
+      "load_complete_seconds": 0.63011,
+      "query_seconds": 0,
+      "save_RPC_seconds": 0
+    },
+    {
+      "tokens": 24576,
+      "load_complete_seconds": 0.79797,
+      "query_seconds": 0,
+      "save_RPC_seconds": 0
+    }
+  ],
+  "network_seconds_per_byte": 9.551015877882526e-11,
+  "P_blocks": [
+    5804,
+    5804
+  ],
+  "D_blocks": 5905,
+  "P_CPU_bytes": [
+    8589934592,
+    8589934592
+  ],
+  "D_CPU_bytes": 17179869184,
+  "scope": "Condition-balanced calibration with grouped role-swap and context-band validation",
+  "calibration_cases": [
+    "A/gen-curve-n24576-b1-r0",
+    "A/gen-curve-n24576-b1-r1",
+    "A/gen-curve-n24576-b16-r0",
+    "A/gen-curve-n24576-b16-r1",
+    "A/gen-curve-n24576-b4-r0",
+    "A/gen-curve-n24576-b4-r1",
+    "A/gen-curve-n24576-b8-r0",
+    "A/gen-curve-n24576-b8-r1",
+    "A/gen-curve-n8192-b1-r0",
+    "A/gen-curve-n8192-b1-r1",
+    "A/gen-curve-n8192-b16-r0",
+    "A/gen-curve-n8192-b16-r1",
+    "A/gen-curve-n8192-b4-r0",
+    "A/gen-curve-n8192-b4-r1",
+    "A/gen-curve-n8192-b8-r0",
+    "A/gen-curve-n8192-b8-r1",
+    "A/gen-decode-restore-overlap-r0",
+    "A/gen-decode-restore-overlap-r1",
+    "A/gen-geometry-b1-r0",
+    "A/gen-geometry-b1-r1",
+    "A/gen-geometry-b128-r0",
+    "A/gen-geometry-b128-r1",
+    "A/gen-geometry-b16-r0",
+    "A/gen-geometry-b16-r1",
+    "A/gen-geometry-b192-r0",
+    "A/gen-geometry-b192-r1",
+    "A/gen-geometry-b2-r0",
+    "A/gen-geometry-b2-r1",
+    "A/gen-geometry-b32-r0",
+    "A/gen-geometry-b32-r1",
+    "A/gen-geometry-b4-r0",
+    "A/gen-geometry-b4-r1",
+    "A/gen-geometry-b64-r0",
+    "A/gen-geometry-b64-r1",
+    "A/gen-geometry-b8-r0",
+    "A/gen-geometry-b8-r1",
+    "A/gen-mixed-arrivals16-r0",
+    "A/gen-mixed-arrivals16-r1",
+    "A/gen-shared32-r0",
+    "A/gen-shared32-r1"
+  ],
+  "observed_configs": {
+    "D0": {
+      "max_num_seqs": 128,
+      "max_num_batched_tokens": 2048,
+      "num_gpu_blocks": 5905,
+      "block_size": 128
+    },
+    "P0": {
+      "max_num_seqs": 128,
+      "max_num_batched_tokens": 8192,
+      "num_gpu_blocks": 5804,
+      "block_size": 128
+    },
+    "P1": {
+      "max_num_seqs": 128,
+      "max_num_batched_tokens": 8192,
+      "num_gpu_blocks": 5804,
+      "block_size": 128
+    }
+  },
+  "copy_lanes": 1,
+  "copy_compute_overlap": true,
+  "training_coverage": {
+    "P": {
+      "sequences": [
+        1,
+        7
+      ],
+      "prefill_tokens": [
+        1,
+        8192
+      ],
+      "decode_tokens": [
+        0,
+        0
+      ],
+      "context_sum": [
+        129,
+        173068
+      ]
+    },
+    "D": {
+      "sequences": [
+        1,
+        16
+      ],
+      "prefill_tokens": [
+        0,
+        994
+      ],
+      "decode_tokens": [
+        0,
+        16
+      ],
+      "context_sum": [
+        129,
+        396353
+      ]
+    }
+  },
+  "validation": {
+    "gated-v3-validation-95-rps0.5": {
+      "requests": 95,
+      "actual_TTFT": {
+        "mean": 0.5196614528172895,
+        "p50": 0.43523885775357485,
+        "p95": 1.1438820660114288,
+        "p99": 2.0790025908499956,
+        "max": 2.0790025908499956
+      },
+      "predicted_TTFT": {
+        "mean": 0.4994931831387882,
+        "p50": 0.3743616660995315,
+        "p95": 1.1505505134731209,
+        "p99": 2.306245377662549,
+        "max": 2.306245377662549
+      },
+      "TTFT_MAE_s": 0.08337251706756343,
+      "TTFT_MAPE_percent": 15.546260914359367,
+      "actual_E2E": {
+        "mean": 3.0598026191521632,
+        "p50": 2.980186174623668,
+        "p95": 3.7039226135239005,
+        "p99": 4.841222511604428,
+        "max": 4.841222511604428
+      },
+      "predicted_E2E": {
+        "mean": 3.0507098936133725,
+        "p50": 2.925516975347449,
+        "p95": 3.709932668686207,
+        "p99": 5.138817120641903,
+        "max": 5.138817120641903
+      }
+    },
+    "gated-v3-validation-95-rps2": {
+      "requests": 95,
+      "actual_TTFT": {
+        "mean": 0.5346334739539184,
+        "p50": 0.4715430550277233,
+        "p95": 1.165859199129045,
+        "p99": 1.9715482033789158,
+        "max": 1.9715482033789158
+      },
+      "predicted_TTFT": {
+        "mean": 0.6439320807760177,
+        "p50": 0.5424049131399897,
+        "p95": 1.5025853512546803,
+        "p99": 2.306245377662563,
+        "max": 2.306245377662563
+      },
+      "TTFT_MAE_s": 0.15830144231603985,
+      "TTFT_MAPE_percent": 28.337190607884352,
+      "actual_E2E": {
+        "mean": 3.870539850614181,
+        "p50": 3.8461112836375833,
+        "p95": 4.647212454117835,
+        "p99": 5.8744824305176735,
+        "max": 5.8744824305176735
+      },
+      "predicted_E2E": {
+        "mean": 3.8675485881879372,
+        "p50": 3.76322718635679,
+        "p95": 4.89080105378352,
+        "p99": 5.903148798642391,
+        "max": 5.903148798642391
+      }
+    }
+  },
+  "execution_mode": "graph",
+  "validation_scope": "Qwen2.5-7B BF16, Ascend 910B2, TP1, 2P1D, 8 causal sessions, nominal .5/2 rps, output 128",
+  "graph_models": {
+    "P": {
+      "schema": "pegaflow-step-cost/v1",
+      "metadata": {
+        "model": "Qwen2.5-7B-Instruct",
+        "dtype": "bfloat16",
+        "hardware": "Ascend 910B2",
+        "vllm": "0.23.0",
+        "vllm_ascend": "0.23.0",
+        "role": "P",
+        "max_model_tokens": 32768,
+        "training_tasks": [
+          "adaptive-rejection-sampler",
+          "code-from-image"
+        ],
+        "response_delay_s": 0.0165719815,
+        "step_scope": "schedule-to-update wall time including synchronous connector work",
+        "P_decode_scope": "D decode coefficients supplied for schema completeness; P output budget is one token"
+      },
+      "fit": "nonnegative linear cost with Huber reweighting; calibration tasks only",
+      "models": {
+        "decode": {
+          "kind": "linear",
+          "coefficients": [
+            0.01941385397486971,
+            0.0011980824042069978,
+            0.004491333960638115
+          ],
+          "training_steps": 7723
+        },
+        "prefill": {
+          "kind": "linear",
+          "coefficients": [
+            0.026091345333924057,
+            0.08837819908510802,
+            0.04550674277188396,
+            0.0,
+            0.18793351519592824
+          ],
+          "training_steps": 222
+        }
+      },
+      "dispatch_gap_s": 0.0001566235,
+      "response_delay_s": 0.016699317499999998
+    },
+    "D": {
+      "schema": "pegaflow-step-cost/v1",
+      "metadata": {
+        "model": "Qwen2.5-7B-Instruct",
+        "dtype": "bfloat16",
+        "hardware": "Ascend 910B2",
+        "vllm": "0.23.0",
+        "vllm_ascend": "0.23.0",
+        "role": "D",
+        "max_model_tokens": 32768,
+        "training_tasks": [
+          "adaptive-rejection-sampler",
+          "code-from-image"
+        ],
+        "response_delay_s": 0.025855738,
+        "step_scope": "schedule-to-update wall time including synchronous connector work",
+        "P_decode_scope": "D decode coefficients supplied for schema completeness; P output budget is one token"
+      },
+      "fit": "nonnegative linear cost with Huber reweighting; calibration tasks only",
+      "models": {
+        "decode": {
+          "kind": "linear",
+          "coefficients": [
+            0.01941385397486971,
+            0.0011980824042069978,
+            0.004491333960638115
+          ],
+          "training_steps": 7723
+        },
+        "prefill": {
+          "kind": "linear",
+          "coefficients": [
+            0.03836098091473204,
+            0.06969826644912887,
+            0.1246329182744642,
+            0.021700404912936417,
+            0.0
+          ],
+          "training_steps": 167
+        }
+      },
+      "dispatch_gap_s": 0.000156538,
+      "response_delay_s": 0.04468508
+    }
+  },
+  "restore_model": {
+    "coefficients": [
+      0.133543240164613,
+      0.2352554793605626,
+      0.0
+    ],
+    "busy_slowdown": 1,
+    "samples": 122
+  },
+  "api_inbound": {
+    "P": [
+      0.0025981247202023954,
+      0.003759524766768416
+    ],
+    "D": [
+      0.0,
+      2.2889369942589038e-05
+    ]
+  },
+  "idle_poll_s": 0.00231148,
+  "query_fixed_s": 0,
+  "fit_selection": {
+    "P:prefill": {
+      "selected": "linear",
+      "candidates": [
+        {
+          "name": "linear",
+          "folds": [
+            {
+              "fold": "context:0",
+              "relative_error": 0.15750907749890936
+            },
+            {
+              "fold": "context:1",
+              "relative_error": 0.2948004286559143
+            },
+            {
+              "fold": "context:2",
+              "relative_error": 0.380679813074614
+            }
+          ],
+          "score": 0.27766310640981257
+        },
+        {
+          "name": "graph_shape",
+          "folds": [
+            {
+              "fold": "context:0",
+              "relative_error": 0.15750907749890936
+            },
+            {
+              "fold": "context:1",
+              "relative_error": 0.2948004286559143
+            },
+            {
+              "fold": "context:2",
+              "relative_error": 0.380679813074614
+            }
+          ],
+          "score": 0.27766310640981257
+        }
+      ]
+    },
+    "P:decode": {
+      "selected": "linear",
+      "candidates": [
+        {
+          "name": "linear",
+          "folds": [
+            {
+              "fold": "context:0",
+              "relative_error": 0.15238040718771573
+            },
+            {
+              "fold": "context:1",
+              "relative_error": 0.16013924464078477
+            },
+            {
+              "fold": "context:2",
+              "relative_error": 0.13326807003575097
+            }
+          ],
+          "score": 0.14859590728808383
+        },
+        {
+          "name": "graph_shape",
+          "folds": [
+            {
+              "fold": "context:0",
+              "relative_error": 0.09777548076670481
+            },
+            {
+              "fold": "context:1",
+              "relative_error": 0.15286974132219203
+            },
+            {
+              "fold": "context:2",
+              "relative_error": 0.2346565947698395
+            }
+          ],
+          "score": 0.16176727228624543
+        }
+      ]
+    },
+    "D:prefill": {
+      "selected": "linear",
+      "candidates": [
+        {
+          "name": "linear",
+          "folds": [
+            {
+              "fold": "context:0",
+              "relative_error": 1.3536132316977383
+            },
+            {
+              "fold": "context:1",
+              "relative_error": 0.35658789010436553
+            },
+            {
+              "fold": "context:2",
+              "relative_error": 0.3840523328696146
+            }
+          ],
+          "score": 0.6980844848905728
+        },
+        {
+          "name": "graph_shape",
+          "folds": [
+            {
+              "fold": "context:0",
+              "relative_error": 1.3536132316977383
+            },
+            {
+              "fold": "context:1",
+              "relative_error": 0.35658789010436553
+            },
+            {
+              "fold": "context:2",
+              "relative_error": 0.3840523328696146
+            }
+          ],
+          "score": 0.6980844848905728
+        }
+      ]
+    },
+    "D:decode": {
+      "selected": "linear",
+      "candidates": [
+        {
+          "name": "linear",
+          "folds": [
+            {
+              "fold": "context:0",
+              "relative_error": 0.15238040718771573
+            },
+            {
+              "fold": "context:1",
+              "relative_error": 0.16013924464078477
+            },
+            {
+              "fold": "context:2",
+              "relative_error": 0.13326807003575097
+            }
+          ],
+          "score": 0.14859590728808383
+        },
+        {
+          "name": "graph_shape",
+          "folds": [
+            {
+              "fold": "context:0",
+              "relative_error": 0.09777548076670481
+            },
+            {
+              "fold": "context:1",
+              "relative_error": 0.15286974132219203
+            },
+            {
+              "fold": "context:2",
+              "relative_error": 0.2346565947698395
+            }
+          ],
+          "score": 0.16176727228624543
+        }
+      ]
+    },
+    "restore": [
+      {
+        "busy_slowdown": 1,
+        "folds": [],
+        "score": Infinity
+      },
+      {
+        "busy_slowdown": 2,
+        "folds": [],
+        "score": Infinity
+      },
+      {
+        "busy_slowdown": 4,
+        "folds": [],
+        "score": Infinity
+      }
+    ]
+  },
+  "acquisition_phases": [
+    "A"
+  ]
+}

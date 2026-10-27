@@ -1,0 +1,25 @@
+"""Payload bandwidth for a shared host-memory budget in topology scenarios."""
+
+import json
+import time
+from concurrent.futures import ThreadPoolExecutor
+
+import numpy as np
+
+
+results=[]
+for threads in [1,2,4]:
+    buffers=[(np.ones(64*2**20,dtype=np.uint8),np.empty(64*2**20,dtype=np.uint8)) for _ in range(threads)]
+    def copy(index):
+        source,target=buffers[index];np.copyto(target,source)
+        begin=time.monotonic();count=0
+        while time.monotonic()-begin<.75:
+            np.copyto(target,source);count+=1
+        return count*source.nbytes,time.monotonic()-begin,int(target[0])
+    begin=time.monotonic();cpu=time.process_time()
+    with ThreadPoolExecutor(threads) as pool:rows=list(pool.map(copy,range(threads)))
+    elapsed=time.monotonic()-begin
+    results.append({'threads':threads,'payload_GBps':sum(r[0] for r in rows)/elapsed/1e9,
+                    'elapsed_s':elapsed,'CPU_s':time.process_time()-cpu,'buffer_bytes_each':64*2**20,
+                    'scope':'numpy memcpy payload rate; host memory admission proxy, separate from NPU DMA'})
+print(json.dumps({'epoch_ns':time.time_ns(),'measurements':results}))
