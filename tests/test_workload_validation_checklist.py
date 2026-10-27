@@ -41,14 +41,14 @@ def test_codejudge_delivery_requires_original_native_and_actual_ci_evidence():
         )
 
 
-def test_deepplanning_shopping_audit_is_partial_not_full_source_completion():
+def test_deepplanning_old_shopping_receipt_remains_partial_after_full_qualification():
     ledger = json.loads(
         (ROOT / "docs/workload-data/dataset-validation-status.json").read_text("utf-8")
     )
     row = ledger["delivery_inventory"]["DEEPPLANNING"]
     partial = row["preparation_evidence"]["remaining_shopping_native_run"]
     receipt = json.loads((ROOT / partial["receipt"]).read_text("utf-8"))
-    assert row["checked"] is False
+    assert row["checked"] is True and row["delivery_receipt"] != partial["receipt"]
     assert receipt["source_checkbox_eligible"] is False
     assert receipt["native_request_attempts"] == 158
     assert receipt["saved_assistant_messages"] == 154
@@ -61,7 +61,7 @@ def test_deepplanning_shopping_audit_is_partial_not_full_source_completion():
     )
 
 
-def test_deepplanning_english_travel_partial_is_not_whole_source_completion():
+def test_deepplanning_english_receipt_remains_partial_after_full_qualification():
     ledger = json.loads(
         (ROOT / "docs/workload-data/dataset-validation-status.json").read_text("utf-8")
     )
@@ -75,7 +75,49 @@ def test_deepplanning_english_travel_partial_is_not_whole_source_completion():
     assert receipt["official_aggregate_recomputed_equal"] is True
     assert all(case["case_acc"] == 0 for case in receipt["saved_case_scores"])
     assert receipt["saved_audit_new_model_calls"] == 0
-    assert row["checked"] is False and receipt["source_checkbox_eligible"] is False
+    assert row["checked"] is True and receipt["source_checkbox_eligible"] is False
+
+
+def test_deepplanning_full_qualification_needs_all_five_profiles_and_actual_ci():
+    ledger = json.loads(
+        (ROOT / "docs/workload-data/dataset-validation-status.json").read_text("utf-8")
+    )
+    row = ledger["delivery_inventory"]["DEEPPLANNING"]
+    receipt = json.loads((ROOT / row["delivery_receipt"]).read_text("utf-8"))
+    assert row["checked"] is True and row["status"] == "AVAILABLE"
+    assert (
+        receipt["source_checkbox_eligible"] is True
+        and receipt["native_original_cases"] == 15
+    )
+    profiles = receipt["native_sample_profiles"]
+    assert {
+        (profile["domain"], profile.get("level"), profile.get("language"))
+        for profile in profiles
+    } == {
+        ("shopping", 1, None),
+        ("shopping", 2, None),
+        ("shopping", 3, None),
+        ("travel", None, "en"),
+        ("travel", None, "zh"),
+    }
+    assert all(profile["cases"] == 3 for profile in profiles)
+    assert (
+        receipt["guarded_sdk_create_attempts"] == 436
+        and receipt["saved_agent_assistant_messages"] == 414
+    )
+    assert receipt["cpu_qualification_model_calls"] == 0
+    ci = receipt["actual_ci_consumer"]
+    assert (
+        ci["artifact"] == 12763808461
+        and ci["installed_package_payloads_verified"] == 52
+    )
+    assert ci["original_rows_verified"] == ci["original_rows_indexed"] == 360
+    assert ci["fixed_research_readbacks"] == 15 and ci["model_calls"] == 0
+    assert ci["provider_runtime_and_source_manifests_unchanged_since_ci"] is True
+    assert receipt["quality_claim"] is False and receipt["performance_claim"] is False
+    assert receipt["chinese_saved_verifier_sha256"] in _script_hashes_for_line_endings(
+        (ROOT / "scripts/verify_deepplanning_travel_saved.py").read_bytes()
+    )
 
 
 def test_discoverybench_original_assets_are_not_native_completion():

@@ -174,6 +174,65 @@ def test_reuse_non_utf8_original_bytes_records_parse_failure_not_fake_readiness(
     )
 
 
+def test_pinned_native_real_manifest_is_complete_metadata_not_task_claim():
+    pins = json.loads(MODULE.HF_NATIVE_REAL_PINS.read_text("utf-8"))
+    assert pins["revision"] == MODULE.HF_REVISION
+    assert len(pins["files"]) == len({row["path"] for row in pins["files"]}) == 185
+    assert sum(row["bytes"] for row in pins["files"]) == 13825701
+
+
+def test_native_real_cache_reuses_only_identical_publisher_bytes(tmp_path, monkeypatch):
+    payload = b"native original\x92data\n"
+    name = "discoverybench/real/test/case/input data.csv"
+    identity = MODULE.hashlib.sha1(
+        f"blob {len(payload)}\0".encode() + payload
+    ).hexdigest()
+    pins = tmp_path / "pins.json"
+    pins.write_text(
+        json.dumps(
+            {
+                "schema_version": "discoverybench-original-native-real/v1",
+                "revision": MODULE.HF_REVISION,
+                "files": [{"path": name, "bytes": len(payload), "git_blob": identity}],
+            }
+        )
+    )
+    monkeypatch.setattr(MODULE, "HF_NATIVE_REAL_PINS", pins)
+    previous = tmp_path / "old-release"
+    old = previous / name
+    old.parent.mkdir(parents=True)
+    old.write_bytes(b"different official release")
+    urls = []
+
+    def response(request, **kwargs):
+        urls.append(request.full_url)
+        return io.BytesIO(payload)
+
+    monkeypatch.setattr(MODULE, "urlopen", response)
+    fresh = tmp_path / "pinned-release"
+    result = MODULE.prepare_publisher_index(
+        fresh, execute=True, native_real=True, reuse_assets=previous
+    )
+    assert result["rejected_reuse_files"] == [name] and result[
+        "downloaded_original_files"
+    ] == [name]
+    assert urls[0].endswith("input%20data.csv")
+    assert old.read_bytes() == b"different official release"
+    assert (fresh / name).read_bytes() == payload
+    assert result["csv_parse_errors"] == [] and result["original_csv_structure"] == {}
+    monkeypatch.setattr(
+        MODULE, "urlopen", lambda *a, **k: pytest.fail("identical asset redownloaded")
+    )
+    reused = MODULE.prepare_publisher_index(
+        tmp_path / "reused", execute=True, native_real=True, reuse_assets=fresh
+    )
+    assert (
+        reused["reused_original_files"] == [name]
+        and reused["downloaded_original_files"] == []
+    )
+    assert reused["source_checkbox_eligible"] is False
+
+
 @pytest.mark.parametrize("wrong_member_size", [False, True])
 def test_download_extract_identity_and_size_guard_with_tiny_fixture(
     tmp_path, monkeypatch, wrong_member_size

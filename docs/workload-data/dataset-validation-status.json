@@ -1,6 +1,7 @@
 {
   "schema_version": "workload-validation-checklist/v1",
-  "updated_at": "2026-10-27",
+  "updated_at": "2026-10-28",
+  "current_scope_note": "delivery_inventory is the current source-delivery ledger. sources/incident_gate and frozen receipts retain their original historical scope, not live service or current progress assertions.",
   "latest_frozen_software_ci_receipt": "docs/workload-data/validation/software-ci-regression-20261025.json",
   "latest_native_entry_software_smoke_receipt": "docs/workload-data/validation/native-entry-software-ci-20261026.json",
   "native_runtime_latest": {
@@ -2025,6 +2026,11 @@
         "official_default_csv_rows": {"train":25, "test":239},
         "official_real_answer_key_rows_utf8_parsed": 239,
         "official_synthetic_answer_key_utf8_parse_failed": true,
+        "official_hf_native_real_files_verified":185,
+        "official_hf_native_real_reused_files":165,
+        "official_hf_native_real_downloaded_different_release_files":20,
+        "official_hf_native_real_test_contract_verified_rows":229,
+        "official_hf_native_real_test_contract_decode_failed_rows":10,
         "model_calls": 0,
         "benchmark_executed": false,
         "source_checkbox_eligible": false
@@ -2033,7 +2039,7 @@
       "legacy_checked": false,
       "existing_receipt": null,
       "delivery_receipt": null,
-      "blocker": "Complete fixed original Git tree verified, and isolated110-package original-requirements core client/pip check/two CLI help entries passed. UTF8 metadata scan records80 original parse failures; one missing data.csv reference belongs to notebook-checkpoint auxiliary metadata, not claimed as missing canonical task data. Canonical task/provider relations, encoding compatibility, qualified code isolation, native Agent execution and evaluator scoring remain pending. Original bytes retained; no guessed decoding, rewritten data or replacement tasks."
+      "blocker": "Git source/code plus isolated110-package core client/CLI verified. Official HF catalog/keys and all185 pinned native-real files verified;165 reused by exact identity,20 differing release files fetched without overwriting old cache. Same-release native metadata/key/file/default-author-prompt contract passed229/239 test references,10 references fail original UTF8 metadata decoding. Old Git metadata scan80 parse failures and synthetic-key decoding failure remain separate; two official releases/CSV export are not assumed equivalent. Provider/research integration, encoding resolution, qualified code isolation, native Agent and scoring remain pending. No runtime decoder guess, rewritten input or replaced task."
     },
     "MLAGENTBENCH": {
       "scope": "public",
@@ -2533,10 +2539,10 @@
     },
     "DEEPPLANNING": {
       "scope": "public",
-      "delivery_kind": "review_original_source_protocol",
-      "status": "IN_PROGRESS",
+      "delivery_kind": "original_deepplanning_shopping_travel_native_benchmark",
+      "status": "AVAILABLE",
       "preparation_evidence": {
-        "kind": "cpu_original_asset_relation_preflight_not_native_execution",
+        "kind": "original_assets_native_fixed_profiles_and_actual_ci_consumer_evidence",
         "server_receipt": "deepplanning-original-assets-32028-001/query-database-relations-preflight-public.json",
         "shopping_queries_checked": 120,
         "shopping_missing_products_or_validation_files": 0,
@@ -2622,16 +2628,25 @@
           "boundary": "English first3 original tasks complete with original report conversion, case scoring and full-test-denominator aggregate independently recomputed. All case_acc0 retained. Chinese travel and whole-source handoff pending; no quality/performance claim."
         },
         "model_calls": 0,
-        "native_execution_and_scoring_complete": false,
+        "native_execution_and_scoring_complete": true,
+        "native_completion_scope": "15 fixed original sampled cases across all5 original profiles; not360 model executions. Asset/CPU-audit model_calls0 does not include separate native counters.",
         "public_preparation_entry": "scripts/prepare_deepplanning_original_assets.py",
         "public_preparation_server_scope": "68 files verified read-only and copied from verified original assets into independent fresh server directory; zero network downloads or model calls in reuse path",
         "public_preparation_server_receipt": "deepplanning-public-prepared-32028-001/preparation-public.json"
       },
-      "checked": false,
+      "checked": true,
       "legacy_checked": false,
       "existing_receipt": null,
-      "delivery_receipt": null,
-"blocker": "20261027 server32028: Qwen-Agent publisher revision31a4d36d123688581a9e9744427272b33ce940e0 acquired63 original source/query files; publisher archive16882337 bytes SHA256 f1f66be2e6df783146d9ab87660b4655c3ce400f25d7de1eff215e681d3d0fec, matching57 prior Git-blob verified files. All5 original database archives from Qwen/DeepPlanning revision213876cce679f993a476d01042e13d111c0e3648 acquired via same-version HF mirror, total104169112 bytes, each publisher LFS SHA256 verified. Original shopping tools/cart evaluation and travel report conversion/constraint evaluation must remain intact. Independent client/native entrypoints and original360-row/public research consumer integration verified; actual CI wheel43098607 readback gate passed. Original shopping level1 task histories complete and scores0/0/1 recovered CPU-only after terminal BrokenPipeError, no model replay; failure receipt retained. Original levels2/3 all6 fixed tasks naturally completed; saved original prompts,321 tool pairs and author scores audited CPU-only with0 new model calls. All6 final case scores0 retained;158 attempts and154 persisted assistant messages recorded separately. English travel first3 original cases completed Agent/report conversion/official scoring and saved input/tool/report/database/per-case/full-test-denominator aggregate audits;49 guarded SDK attempts and41 saved Agent assistant messages remain separate. Chinese travel and full-source qualification still pending; all original English case_acc0 results retained. Asset preparation/readbacks used0 model calls; native task calls are separately recorded. Server receipts under deepplanning-original-assets-32028-001: archive-preparation-public.json and database-preparation-public.json. Initial GitHub API quota failure and HF primary network failure preserved; no paid API enabled or original data stored in Git/local."
+      "delivery_receipt": "docs/workload-data/validation/deepplanning-original-native-delivery-20261028.json",
+      "blocker": null,
+      "qualified_native_delivery": {
+        "original_profiles":5, "fixed_original_cases":15,
+        "guarded_sdk_create_attempts":436, "saved_agent_assistant_messages":414,
+        "original_rows_verified_and_indexed":360, "actual_ci_artifact":12763808461,
+        "installed_package_payloads_verified":52, "fixed_current_research_readbacks":15,
+        "new_model_calls_in_saved_audits_and_qualification":0,
+        "scope":"Shopping levels1/2/3 and English/Chinese travel original fixed samples completed, scored and saved-audited. Actual CI wheel a83 installed and public/current research consumption verified; old partial receipts are not rewritten. Not full360 model run, author-model quality reproduction or performance evidence."
+      }
     },
     "STREAMINGBENCH": {
       "scope": "public",

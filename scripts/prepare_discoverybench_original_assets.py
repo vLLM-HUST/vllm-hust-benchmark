@@ -9,9 +9,11 @@ import csv
 import hashlib
 import json
 from pathlib import Path, PurePosixPath
+import re
 import shutil
 import tarfile
 from urllib.request import Request, urlopen
+from urllib.parse import quote
 
 REPOSITORY = "allenai/discoverybench"
 REVISION = "c31fcf011e070f021a5f5b906896d0821f6880e8"  # pragma: allowlist secret - public publisher revision
@@ -42,6 +44,10 @@ HF_ANSWER_FILES = {
         "2fabeb1557e6aa0d8d07a3206ed70f3ec6179ca0",  # pragma: allowlist secret - original public Git blob
     ),
 }
+HF_NATIVE_REAL_PINS = (
+    Path(__file__).resolve().parents[1]
+    / "configs/workload-native/discoverybench-native-real-pins.json"
+)
 
 
 def safe_path(root, name):
@@ -193,14 +199,41 @@ def prepare_publisher_index(
     hf_endpoint="https://huggingface.co",
     answer_keys=False,
     reuse_assets=None,
+    native_real=False,
 ):
     if hf_endpoint not in ("https://huggingface.co", "https://hf-mirror.com"):
         raise ValueError("only fixed public HF transports are supported")
     root = Path(output).resolve()
     files = HF_ANSWER_FILES if answer_keys else HF_INDEX_FILES
+    if native_real:
+        if answer_keys:
+            raise ValueError("native data and answer-key profiles are separate")
+        pins = json.loads(HF_NATIVE_REAL_PINS.read_text("utf-8"))
+        if pins.get(
+            "schema_version"
+        ) != "discoverybench-original-native-real/v1" or not pins.get("files"):
+            raise ValueError("missing or invalid complete native-data pins")
+        if pins["revision"] != HF_REVISION:
+            raise ValueError(
+                "native data pin revision differs from official reference release"
+            )
+        files = {}
+        for row in pins["files"]:
+            if (
+                not row["path"].startswith("discoverybench/real/")
+                or not isinstance(row["bytes"], int)
+                or row["bytes"] < 0
+                or not re.fullmatch(r"[a-f0-9]{40}", row["git_blob"])
+            ):
+                raise ValueError("invalid pinned native data identity")
+            if row["path"] in files:
+                raise ValueError("duplicate pinned native data path")
+            files[row["path"]] = (row["bytes"], row["git_blob"])
     result = {
         "source_id": "DISCOVERYBENCH",
-        "release": "publisher-answer-keys" if answer_keys else "publisher-task-index",
+        "release": "publisher-native-real"
+        if native_real
+        else ("publisher-answer-keys" if answer_keys else "publisher-task-index"),
         "publisher": "https://huggingface.co/datasets/allenai/discoverybench",
         "revision": HF_REVISION,
         "identity_note": "pragma: allowlist secret - fixed official dataset revision",
@@ -209,7 +242,7 @@ def prepare_publisher_index(
         "model_calls": 0,
         "source_checkbox_eligible": False,
         "benchmark_executed": False,
-        "boundary": "Selected original publisher catalog/card or answer-key files only, not all HF assets, original Agent/scoring or proof of consistency with separately pinned GitHub code/data. No task alterations. Reference answers must not become model input.",
+        "boundary": "Selected pinned original publisher assets only, not native Agent/scoring or proof of task/answer joins. Native-real is a complete pinned real-data subtree, not synthetic data or an assertion that GitHub/CSV exports are interchangeable. Reference answers must not become model input.",
     }
     if not execute and not verify_only:
         return result
@@ -226,12 +259,27 @@ def prepare_publisher_index(
     try:
         counts = {}
         reused = []
+        rejected_reuse = []
         parse_errors = []
         for name, (size, identity) in files.items():
-            path = root / name
+            path = safe_path(root, name)
             if execute:
                 path.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
                 previous = Path(reuse_assets) / name if reuse_assets else None
+                if (
+                    previous is not None
+                    and previous.is_file()
+                    and (
+                        previous.stat().st_size != size
+                        or blob_identity(previous) != identity
+                    )
+                ):
+                    if not native_real:
+                        raise ValueError(
+                            "reused publisher file differs from fixed original"
+                        )
+                    rejected_reuse.append(name)
+                    previous = None
                 if previous is not None and previous.is_file():
                     if (
                         previous.stat().st_size != size
@@ -247,7 +295,7 @@ def prepare_publisher_index(
                     download_publisher_file(path, name, size, hf_endpoint)
             if path.stat().st_size != size or blob_identity(path) != identity:
                 raise ValueError("fixed original publisher index blob/size mismatch")
-            if name.endswith(".csv"):
+            if name.endswith(".csv") and not native_real:
                 try:
                     with path.open(encoding="utf-8", newline="") as stream:
                         reader = csv.DictReader(stream)
@@ -263,13 +311,21 @@ def prepare_publisher_index(
                         }
                     )
         result.update(
-            status="ORIGINAL_PUBLISHER_FILES_VERIFIED_WITH_PARSE_ERRORS_NOT_NATIVE_EXECUTION"
-            if parse_errors
-            else "ORIGINAL_PUBLISHER_INDEX_VERIFIED_NOT_NATIVE_EXECUTION",
+            status="ORIGINAL_PUBLISHER_NATIVE_REAL_FILES_VERIFIED_NOT_EXECUTED"
+            if native_real
+            else (
+                "ORIGINAL_PUBLISHER_FILES_VERIFIED_WITH_PARSE_ERRORS_NOT_NATIVE_EXECUTION"
+                if parse_errors
+                else "ORIGINAL_PUBLISHER_INDEX_VERIFIED_NOT_NATIVE_EXECUTION"
+            ),
             original_csv_structure=counts,
             files_verified=len(files),
             csv_parse_errors=parse_errors,
             reused_original_files=reused,
+            rejected_reuse_files=rejected_reuse,
+            downloaded_original_files=[name for name in files if name not in reused]
+            if execute
+            else [],
         )
     except BaseException as error:
         result.update(
@@ -287,7 +343,7 @@ def prepare_publisher_index(
 
 
 def download_publisher_file(path, name, size, hf_endpoint):
-    url = f"{hf_endpoint}/datasets/allenai/discoverybench/resolve/{HF_REVISION}/{name}"
+    url = f"{hf_endpoint}/datasets/allenai/discoverybench/resolve/{HF_REVISION}/{quote(name, safe='/')}"
     with (
         urlopen(
             Request(url, headers={"User-Agent": "workload-native-preparation"}),
@@ -311,7 +367,12 @@ def main():
     )
     parser.add_argument(
         "--release",
-        choices=("github-tree", "publisher-task-index", "publisher-answer-keys"),
+        choices=(
+            "github-tree",
+            "publisher-task-index",
+            "publisher-answer-keys",
+            "publisher-native-real",
+        ),
         default="github-tree",
     )
     parser.add_argument(
@@ -329,7 +390,7 @@ def main():
             args.hf_endpoint != "https://huggingface.co"
             or args.reuse_assets is not None
         ):
-            parser.error("--hf-endpoint applies only to publisher-task-index")
+            parser.error("--hf-endpoint and --reuse-assets apply only to publisher releases")
         result = prepare(args.output, args.execute, args.verify_only)
     else:
         result = prepare_publisher_index(
@@ -339,6 +400,7 @@ def main():
             args.hf_endpoint,
             args.release == "publisher-answer-keys",
             args.reuse_assets,
+            args.release == "publisher-native-real",
         )
     print(json.dumps(result, indent=2))
 
