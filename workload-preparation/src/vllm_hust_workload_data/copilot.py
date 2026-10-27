@@ -39,6 +39,66 @@ def verify_session(row):
                 raise ValueError("invalid original tool batch; payload suppressed")
 
 
+def verify_original_directory(data_root, *, expected_days):
+    """Read unchanged local publisher shards, with no copies or data writes.
+
+    Expected dates must be explicitly pinned by the release caller. Every
+    session is structurally checked and all shard hashes measured, not trusted
+    from a previous local inspection receipt.
+    """
+    root = Path(data_root).resolve()
+    days = list(expected_days)
+    if not days or len(set(days)) != len(days):
+        raise ValueError("distinct pinned publisher days required")
+    expected_directories = {f"date={day}" for day in days}
+    if (
+        not root.is_dir()
+        or {p.name for p in root.iterdir()} != expected_directories
+        or any(p.is_symlink() or not p.is_dir() for p in root.iterdir())
+    ):
+        raise ValueError("original directory set differs from pinned release days")
+    files, qualifications = [], []
+    for day in days:
+        directory = root / f"date={day}"
+        manifest_path = directory / "manifest.json"
+        if manifest_path.is_symlink():
+            raise ValueError("publisher manifest must be an original regular file")
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        if manifest.get("date") != day:
+            raise ValueError("publisher manifest directory/date mismatch")
+        measured = []
+        for path in sorted(directory.iterdir()):
+            if path.is_symlink() or not path.is_file():
+                raise ValueError("original source contains a non-regular asset")
+            if path.name == "manifest.json":
+                continue
+            if not path.name.endswith(".jsonl.gz"):
+                raise ValueError("unexpected file in original publisher day")
+            with path.open("rb") as stream:
+                digest = hashlib.file_digest(stream, "sha256").hexdigest()
+            rows = 0
+            with gzip.open(path, "rt", encoding="utf-8") as lines:
+                for line in lines:
+                    row = json.loads(line)
+                    verify_session(row)
+                    if row["date"] != day:
+                        raise ValueError(
+                            "original session date differs from publisher day"
+                        )
+                    rows += 1
+            measured.append(
+                {
+                    "path": path.relative_to(root).as_posix(),
+                    "bytes": path.stat().st_size,
+                    "sha256": digest,
+                    "rows": rows,
+                }
+            )
+        qualifications.append(qualify_day_manifest(manifest, measured))
+        files.extend(measured)
+    return {"days": qualifications, "files": files, "model_calls": 0}
+
+
 def extract_verified_archive(archive, output, *, expected_sha256, expected_bytes):
     """Safely expand a pinned publisher archive; never execute or alter sessions.
 

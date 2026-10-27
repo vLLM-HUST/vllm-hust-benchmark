@@ -13,7 +13,10 @@ from pathlib import Path
 import shutil
 import subprocess
 
-from vllm_hust_workload_data.copilot import extract_verified_archive
+from vllm_hust_workload_data.copilot import (
+    extract_verified_archive,
+    verify_original_directory,
+)
 
 RELEASE_TAG = "ghcp-coding-agent-2026"
 RELEASE_ID = 400522856
@@ -154,9 +157,39 @@ def prepare(output, *, execute=False, reuse_archive_dir=None):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, required=True)
-    parser.add_argument("--execute", action="store_true")
+    modes = parser.add_mutually_exclusive_group()
+    modes.add_argument("--execute", action="store_true")
+    modes.add_argument("--verify-data-root", type=Path)
     parser.add_argument("--reuse-archive-dir", type=Path)
     args = parser.parse_args()
+    if args.verify_data_root:
+        if args.reuse_archive_dir:
+            parser.error("read-only source verification does not acquire archives")
+        output = args.output.resolve()
+        repository = Path(__file__).resolve().parents[1]
+        original = args.verify_data_root.resolve()
+        if (
+            output.exists()
+            or output.is_relative_to(repository)
+            or output.is_relative_to(original)
+        ):
+            parser.error("fresh external audit output outside original data required")
+        verified = verify_original_directory(
+            original, expected_days=[item[0] for item in ARCHIVES]
+        )
+        result = {
+            "source_id": "COPILOT_AGENT_2026",
+            "status": "ORIGINAL_DIRECTORY_VERIFIED_NOT_PROVIDER_DELIVERY",
+            "release_tag": RELEASE_TAG,
+            "source_checkbox_eligible": False,
+            **verified,
+        }
+        output.mkdir(parents=True, mode=0o700)
+        (output / "preparation-public.json").write_text(
+            json.dumps(result, indent=2), encoding="utf-8"
+        )
+        print(json.dumps({k: v for k, v in result.items() if k != "files"}, indent=2))
+        return
     result = prepare(
         args.output, execute=args.execute, reuse_archive_dir=args.reuse_archive_dir
     )

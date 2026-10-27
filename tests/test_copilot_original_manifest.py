@@ -14,6 +14,7 @@ import pytest
 from vllm_hust_workload_data.copilot import (
     extract_verified_archive,
     qualify_day_manifest,
+    verify_original_directory,
     verify_session,
 )
 from vllm_hust_workload_data.adapters import adapt_row
@@ -141,6 +142,41 @@ def test_extract_unchanged_gzip_without_order_assumptions(tmp_path, manifest_fir
     assert target.read_bytes() == payload
     with pytest.raises(ValueError, match="fresh"):
         extract(archive, tmp_path / "data")
+
+
+def test_existing_original_directory_verified_without_writes(tmp_path):
+    archive, _ = archive_fixture(tmp_path)
+    initial = extract(archive, tmp_path / "data")
+    before = {p: p.stat().st_mtime_ns for p in (tmp_path / "data").rglob("*")}
+    verified = verify_original_directory(
+        tmp_path / "data", expected_days=["2026-06-01"]
+    )
+    assert verified["files"] == initial["files"]
+    assert verified["days"] == [initial["qualification"]]
+    assert before == {p: p.stat().st_mtime_ns for p in (tmp_path / "data").rglob("*")}
+
+
+@pytest.mark.parametrize(
+    "change", ["missing_day", "extra_file", "wrong_rows", "wrong_date"]
+)
+def test_existing_original_directory_rejects_partial_or_modified_data(tmp_path, change):
+    archive, _ = archive_fixture(tmp_path)
+    extract(archive, tmp_path / "data")
+    day = tmp_path / "data/date=2026-06-01"
+    if change == "extra_file":
+        (day / "analysis.py").write_text("not an original asset")
+    elif change == "wrong_rows":
+        manifest = json.loads((day / "manifest.json").read_text())
+        manifest["shards"][0]["n_sessions"] += 1
+        (day / "manifest.json").write_text(json.dumps(manifest))
+    elif change == "wrong_date":
+        row = {"session_id": "fixture", "date": "2026-06-02", "turns": []}
+        (day / "shard-0000.jsonl.gz").write_bytes(
+            gzip.compress(json.dumps(row).encode())
+        )
+    days = ["2026-06-01", "2026-06-02"] if change == "missing_day" else ["2026-06-01"]
+    with pytest.raises(ValueError):
+        verify_original_directory(tmp_path / "data", expected_days=days)
 
 
 @pytest.mark.parametrize(

@@ -16,6 +16,8 @@
 
 资产准备命令：安装公共数据包后执行`python scripts/prepare_copilot_original_assets.py --output /private/copilot`先看无写入计划；加`--execute`才获取七个固定官方发布包，加`--reuse-archive-dir /private/existing-archives`则先校验并复用七包、不联网重下。输出必须是仓库外全新目录，原始分片位于输出的`data/date=.../`，逐日manifest一并保留；失败现场不覆盖、不删除。七包固定大小及SHA256已再次对服务器原文件核验，总计3218886136字节。当前该命令的整套七包流程尚未完成真实端到端核验，不能以单日展开/小型夹具替代；后续统一索引入口也仍待接通。
 
+已有完整数据目录可用同一命令的`--verify-data-root /private/copilot/data --output /private/fresh-copilot-audit`模式只读核验：严格要求七个固定日期目录，逐片测量SHA256、原始行数、会话结构、日期和官方manifest总数，不复制或改写数据。该模式与`--execute`互斥，审计输出必须是原数据及仓库之外的新目录。服务器已启动公共代码全量审计任务，先等待当前原始检查进程正常结束；实际终态未取得前不宣称全量核验通过。
+
 这是已登记的服务轨迹资产，不是新增Agent任务环境。只有匿名模型标签、token/缓存计数、消息片段类型和工具状态等元数据，未发布原prompt、代码、模型响应或工具输出；不编造请求，不将Model
 A等映射成真实模型，不把缓存token计数推成精确KV块身份。作者绘图、特征和研究分析不迁入；实际字段语义仍须原数据核验。
 
