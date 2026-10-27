@@ -20,7 +20,13 @@
 
 - [x] 固定官方版本的完整原树1499文件、54085184字节已在服务器按Git
   blob身份、大小、文件集合核验，包含原real/synth数据、Agent及评判源码；公共只读核验复用同一目录，无重下。原始数据和作者代码不纳入Git。[证据](validation/discoverybench-original-assets-20261028.json)
+
 - [ ] 原生科学Agent、代码执行环境/隔离、评判模型与官方评分、公共提供方和研究侧消费尚待接通，不能把1499文件当作1499任务或已完成样本。
+
+- [x] Linux
+  aarch64/Python3.11.17独立客户端按作者原`requirements.txt`安装110项依赖，`uv pip check`及原`discovery_agent.py --help`、`discovery_eval.py --help`均通过；之后复核原资产未变化。没有构造或运行Agent，不代表安全代码执行环境或评判模型已就绪。
+
+核心环境准备：用完整Python3.11在外部新目录建venv，再以`uv pip install --python <venv/bin/python> --link-mode copy -r <原source/requirements.txt>`安装，`uv pip check --python <venv/bin/python>`检查；软件缓存和临时目录均设置到外部目录，不改模型服务环境。从原source目录以该venv运行两个CLI的`--help`可检查导入。作者requirements不是完整传递依赖锁，未声称其他平台或未来依赖解析结果已验证。
 
 入口：`python scripts/prepare_discoverybench_original_assets.py --output <外部新目录>`默认只展示计划；`--execute`从固定官方版本获取并核验，拒绝已有目标；已有原目录用`--verify-only`只读复用，不改原题，不下载替代数据，不执行Agent。保留作者原许可证与归属说明；数据库层面的许可不自动覆盖所有内容权利，不公开原始资产。
 
