@@ -2,6 +2,12 @@
 
 ### RepoBench原生仓库级代码补全（准备中，未交付）
 
+- [x] 运行中部分保存审计：90题固定选择从原Parquet重建一致，前43题的token解码、作者下一行提取、原参考及结果关系核验通过，新增模型调用0；当时索引43仍在执行，保留未知而不计完成。整套原生生成、官方评分及最终审计前不打总勾。旧运行进程的receipt沿用初始“输入已准备”标签至终态，实际执行以保存attempt、NPU参数证明及活进程核实；公共入口已修正后续运行的状态标签，不为改标签重跑有效结果。
+
+作者模型取得方式：在服务器已有授权的HF客户端环境运行`hf download deepseek-ai/deepseek-coder-1.3b-base --revision c919139c3a9b4070729c8b2cca4847ab29ca8d94 --include LICENSE config.json generation_config.json pytorch_model.bin special_tokens_map.json tokenizer.json tokenizer_config.json --local-dir <外部模型目录>`。固定版本七文件会在原生入口再次核对大小/SHA256；不依赖浮动main，不下载自定义Python代码，不把模型放进Git。主站网络不可用时可显式设置同发布方镜像`HF_ENDPOINT=https://hf-mirror.com`，仍核对同一固定身份。已有模型直接复用，不重下。
+
+保存审计入口：`python scripts/verify_repobench_original_saved.py --source-root <原source> --archive <固定zip> --data-root <原数据目录> --model-root <固定原模型目录> --run-root <已保存run目录>`只重建原题及重算作者评分，不加载模型或调用推理API。运行中可加`--partial`检查已保存前缀，未知/失败尝试保留且不计完成；整项交付仍须全部固定题、原生评分及公共/研究接入核验。不得仅凭这个工具通过或读取成功就打来源总勾。
+
 原生入口：`python scripts/run_repobench_original_npu.py --source-root <原source> --archive <固定zip> --data-root <10原parquet所在目录> --model-root <固定DeepSeek-Coder-1.3B-Base目录> --output <新外部结果目录> --per-stratum 3`默认只展示计划；加`--prepare-only`仅检查资产并构造固定原题，确认研究/NPU窗口后加`--execute --resource-window-confirmed --npu-device npu:1`实际生成和运行作者`eval.py`。原题、prompt、生成token和完整响应只落外部私有目录，已有目录拒绝覆盖，失败不自动重跑。显式BF16/eager是NPU适配配置，不冒称作者CUDA质量复现；原prompt构造、下一行提取、128-token/temperature0.2/top_p0.95采样与EM/ES/CodeBLEU评分不改。
 
 - [x] 官方默认日期区间2023-12-01至2023-12-31（沿用作者UTC端点语义）、五长度档2k/4k/8k/12k/16k，2语言×3设置×5长度共30层各首3题、90原题已在服务器构造并独立复核。去参考字段后prompt与作者完整原行构造完全一致，623至14420
