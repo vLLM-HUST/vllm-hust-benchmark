@@ -5,6 +5,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1] / "workload-preparation"
 DATA_MODULES = {
+    "copilot",  # Original release integrity and nested metadata only, no analysis.
     "crosscodeeval",  # Original archive/profile/task relations only; no analysis.
     "flores200",  # Original parallel text and metadata bindings, no scoring.
     "narrativeqa",  # Pinned original table relations only, no observation/scoring.
@@ -68,6 +69,25 @@ def test_no_observation_dependencies_or_hooks():
     )
     assert not list((ROOT / "tools").rglob("*.py"))
     assert not (ROOT / "schemas/full_cycle_trace_v1.schema.json").exists()
+
+
+def test_copilot_integrity_reader_cannot_invoke_models_network_or_research():
+    import ast
+
+    tree = ast.parse(
+        (ROOT / "src/vllm_hust_workload_data/copilot.py").read_text("utf-8")
+    )
+    imports = set()
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            imports.update(item.name for item in node.names)
+        elif isinstance(node, ast.ImportFrom):
+            imports.add(node.module)
+    assert imports == {"datetime", "gzip", "hashlib", "json", "pathlib", "tarfile"}
+    assert not any(
+        isinstance(node, ast.Attribute) and node.attr in {"extract", "extractall"}
+        for node in ast.walk(tree)
+    )
 
 
 def test_schemastore_reader_cannot_execute_extract_download_or_observe():
