@@ -19,7 +19,7 @@ def verify():
         raw = (root / relative).read_bytes()
         assert len(raw) == item["bytes"]
         assert hashlib.sha256(raw).hexdigest() == item["sha256"]
-    for prefix in ("controls", "model"):
+    for prefix in ("controls", "model", "recovery"):
         manifest = read(prefix + "-whitelist.json")
         for name, digest in manifest["files"].items():
             assert (
@@ -107,11 +107,44 @@ def verify():
         )
     )
     assert release["service_exit_code"] == 0
+    recovery = read("recovery-summary.json")
+    recovered_tests = read("recovery-tests.json")
+    assert recovery["original_reward"] is None and recovery["reward"] == 0
+    assert recovery["original_exception"] == model["trial_exception"]
+    assert (
+        recovery["test_counts"]
+        == recovered_tests["counts"]
+        == {"passed": 10, "failed": 1, "missing": 0}
+    )
+    tests = recovered_tests["tests"]
+    assert len(tests) == len({t["name"] for t in tests}) == 11
+    assert sum(t["status"] == "passed" for t in tests) == 10
+    assert [t["name"] for t in tests if t["status"] == "failed"] == [
+        "test_outputs.py::test_ccomplexity"
+    ]
+    assert recovery["failure"]["fixed_numpy_version"] == "2.3.0"
+    assert recovery["source_diff_sha256"] == boundary["derived_diff_sha256"]
+    assert recovery["original_native_or_install_snapshot"] is False
+    assert recovery["local_Git_baseline_is_derived"] is True
+    assert recovery["build_commands_all_exit0"] == 9
+    assert recovery["build_seconds"] < 600 and recovery["verifier_seconds"] < 900
+    assert (
+        recovery["tracked_source_unchanged"] and recovery["native_before_after_equal"]
+    )
+    assert recovery["released"] and recovery["process_exit"] == 0
+    assert (
+        recovery["new_Agent_model_controls"]
+        == recovery["additional_model_attempts"]
+        == 0
+    )
+    assert recovery["terminal_model_attempts"] == 3
+    assert recovery["terminal_unattempted"] == 86
     return {
         "status": "passed",
         "model_attempts": 3,
         "unattempted": 86,
         "new_task_reward": None,
+        "reconstructed_artifact_reward": 0,
     }
 
 

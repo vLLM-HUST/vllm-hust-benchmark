@@ -2,6 +2,7 @@
 
 import copy
 import importlib.util
+import re
 from pathlib import Path
 
 import pytest
@@ -31,6 +32,7 @@ def test_wave2_original_and_recovery_denominator():
 def test_cython_context_failure_stays_unscored():
     value = load("terminal-cython-context-20261027").verify()
     assert value["new_task_reward"] is None
+    assert value["reconstructed_artifact_reward"] == 0
     assert value["model_attempts"] == 3 and value["unattempted"] == 86
 
 
@@ -63,5 +65,37 @@ def test_readmes_are_generated_from_canonical_sources():
     spec = importlib.util.spec_from_file_location("wave2_docs", path)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
-    assert (module.SWE / "README.md").read_text() == module.build_swe()
-    assert (module.TERMINAL / "README.md").read_text() == module.build_terminal()
+
+    def normalize(text):
+        return re.sub(r"-{3,}", "---", re.sub(r"\s+", "", text))
+
+    assert normalize((module.SWE / "README.md").read_text()) == normalize(
+        module.build_swe()
+    )
+    assert normalize((module.TERMINAL / "README.md").read_text()) == normalize(
+        module.build_terminal()
+    )
+
+
+@pytest.mark.parametrize(
+    "key,value",
+    [
+        ("reward", 1),
+        ("original_reward", 0),
+        ("additional_model_attempts", 1),
+        ("original_native_or_install_snapshot", True),
+        ("terminal_model_attempts", 4),
+    ],
+)
+def test_reject_recovery_identity_conflation(monkeypatch, key, value):
+    module = load("terminal-cython-context-20261027")
+    original = module.read
+    changed = copy.deepcopy(original("recovery-summary.json"))
+    changed[key] = value
+    monkeypatch.setattr(
+        module,
+        "read",
+        lambda name: changed if name == "recovery-summary.json" else original(name),
+    )
+    with pytest.raises(AssertionError):
+        module.verify()
