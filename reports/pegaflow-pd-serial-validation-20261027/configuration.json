@@ -1,0 +1,33 @@
+{
+  "model": "/data/shared_models/Qwen2.5-7B-Instruct",
+  "tp": 1,
+  "P": 2,
+  "D": 2,
+  "block": 128,
+  "prefill": 128,
+  "context": 32768,
+  "dtype": "bfloat16",
+  "P_output": 1,
+  "D_output": 128,
+  "pool_bytes_per_instance": 2147483648,
+  "npu_kv_bytes": 2147483648,
+  "source_derived_reclaim_batch": 512,
+  "max_num_seqs": 1,
+  "enforce_eager": true,
+  "async_scheduling": false,
+  "routing": "task-affinity; sorted session index mod 2 for both P and D",
+  "nominal_arrivals": "exact frozen arrival ledger",
+  "session_dependency": "previous full completion",
+  "initial_cache_state_exact": true,
+  "control_cost": {
+    "route_RPC_mean": 0.5109609431924153,
+    "boundary_RPC_mean": 0.41992161351259943,
+    "route_CPU_mean": 0.33376970228947395,
+    "boundary_CPU_mean": 0.33175447018421056,
+    "clock": "Frozen aggregate of prior 380 control records; local simulator CPU is telemetry only"
+  },
+  "source_commit": "4bfa9351273efc710bceb296ae6f8cbdc31584e6",
+  "fixed_target_route_or_cache_hits": false,
+  "target_service_labels_as_physics": false,
+  "scope": "Baseline re-decision only; hardware endpoint synchronization and native publication approximated"
+}
