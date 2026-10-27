@@ -1,6 +1,7 @@
 """Tiny software fixtures only: no publisher data or native benchmark claims."""
 
 import hashlib
+import gzip
 import importlib.util
 import json
 from pathlib import Path
@@ -14,6 +15,79 @@ spec = importlib.util.spec_from_file_location(
 )
 runner = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(runner)
+
+
+def test_copilot_public_prepare_index_and_resolve_preserve_original_nested_metadata(
+    tmp_path,
+):
+    from vllm_hust_workload_data.consumer import resolve_input
+
+    sid = "COPILOT_AGENT_2026"
+    rows = [
+        {
+            "session_id": "same-label",
+            "date": "2026-06-01",
+            "turns": [
+                {
+                    "turn_id": "turn",
+                    "llm_calls": [{"message_id": "call", "extension": [index, None]}],
+                    "tool_batches": [
+                        {"request_id": "call", "function_calls": [{"status": 2}]}
+                    ],
+                }
+            ],
+        }
+        for index in range(2)
+    ]
+    filename = "date=2026-06-01/shard-0000.jsonl.gz"
+    data = tmp_path / "original"
+    (data / filename).parent.mkdir(parents=True)
+    raw = gzip.compress(("\n".join(json.dumps(row) for row in rows) + "\n").encode())
+    (data / filename).write_bytes(raw)
+    catalog = tmp_path / "catalog"
+    (catalog / "data/catalogs").mkdir(parents=True)
+    for name in (
+        "source_manifests_v1.json",
+        "adapter_registry_v1.json",
+        "adapter_extensions_v1.json",
+    ):
+        payload = json.loads(
+            (ROOT / "workload-preparation/data/catalogs" / name).read_text("utf-8")
+        )
+        if name == "source_manifests_v1.json":
+            payload["sources"][sid]["files"] = [
+                {
+                    "path": filename,
+                    "sha256": hashlib.sha256(raw).hexdigest(),
+                    "bytes": len(raw),
+                    "rows": 2,
+                    "role": "raw_source",
+                }
+            ]
+        (catalog / "data/catalogs" / name).write_text(
+            json.dumps(payload), encoding="utf-8"
+        )
+    output = tmp_path / "prepared"
+    result = runner.prepare(sid, data_root=data, output=output, catalog_root=catalog)
+    db = output / "prepared/workload.sqlite"
+    with sqlite3.connect(db) as connection:
+        ids = [
+            item[0]
+            for item in connection.execute(
+                "select record_id from records order by rowid"
+            )
+        ]
+    assert len(set(ids)) == 2  # Same session label must not collapse original rows.
+    for record_id, original in zip(ids, rows, strict=True):
+        record = resolve_input(db, record_id, data_root=data)
+        assert record.replay["annotations"] == original
+        assert record.task["input"] == {} and record.outcome_record() is None
+        assert record.replay["unmapped_field_names"] == []
+        with pytest.raises(ValueError, match="not a ready model request"):
+            record.request_body()
+    assert result["source_rows_fully_bound"] == 2
+    assert not result["native_execution_complete"]
+    assert not result["research_observation_or_feature_views_migrated"]
 
 
 @pytest.fixture(params=["LONGALPACA", "NATURALQUESTIONS", "DUREADER"])
