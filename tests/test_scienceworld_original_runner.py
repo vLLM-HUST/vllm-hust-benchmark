@@ -51,6 +51,14 @@ def test_remote_endpoint_rejected(runner):
         runner.local_endpoint("https://example.com/v1")
 
 
+def test_all_thirty_original_task_indices_available(runner):
+    assert runner.task_indices(",".join(str(i) for i in range(30))) == list(range(30))
+    assert runner.task_indices("0,1,2") == [0, 1, 2]
+    for value in ("-1", "30", "0,0"):
+        with pytest.raises(ValueError):
+            runner.task_indices(value)
+
+
 def test_prompt_and_native_dependencies_pinned(runner):
     assert len(runner.PINNED_FILES) == 6
     assert any(

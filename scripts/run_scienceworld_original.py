@@ -77,6 +77,17 @@ def native_args(output, source):
     }
 
 
+def task_indices(value):
+    tasks = [int(item) for item in value.split(",")]
+    if (
+        not tasks
+        or len(set(tasks)) != len(tasks)
+        or any(t not in range(30) for t in tasks)
+    ):
+        raise ValueError("use unique original task indices0..29")
+    return tasks
+
+
 def execute(args):
     endpoint = local_endpoint(args.endpoint)
     source = verify_source(args.author_source_root)
@@ -87,13 +98,7 @@ def execute(args):
         or source.is_relative_to(output)
     ):
         raise ValueError("fresh output separate from author source required")
-    tasks = [int(value) for value in args.task_nums.split(",")]
-    if (
-        not tasks
-        or len(set(tasks)) != len(tasks)
-        or any(t not in range(3, 30) for t in tasks)
-    ):
-        raise ValueError("use unique task indices from author script range3..29")
+    tasks = task_indices(args.task_nums)
     if not idle(endpoint, args.api_server_pid, args.npu_engine_pid):
         raise RuntimeError(
             "research/device priority guard: service not exclusively idle"
