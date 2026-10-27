@@ -905,7 +905,9 @@ NPU上执行，均正常stop。原始请求、参考、响应、独立strict-v1�
 
 购物入口为`python scripts/run_deepplanning_original_shopping.py --assets <原资产目录> --output <独立新运行目录> --endpoint <本地模型API/v1> --model <真实模型ID> --api-server-pid <PID> --npu-engine-pid <PID>`，默认只展示计划，加`--execute`执行。默认每个难度原顺序前三题，可选`--levels 1 2 3`或`--full`；使用作者rerun_ids选择原题，保留原Agent两阶段工具流程、每阶段400调用参数和购物车评分，不缩减输出预算或换题。
 
-旅行入口`scripts/run_deepplanning_original_travel.py`使用相同基础参数并要求`--language en`或`zh`，保留原Agent、报告转换和约束评分三个阶段。报告转换的作者qwen-plus配置显式路由到已声明本地模型；这是模型回退，不是作者转换器分数复现，不启用外部付费API。当前仅完成入口夹具，原题未验证，不计完成。
+旅行入口`scripts/run_deepplanning_original_travel.py`使用相同基础参数并要求`--language en`或`zh`，保留原Agent、报告转换和约束评分三个阶段。报告转换的作者qwen-plus配置显式路由到已声明本地模型；这是模型回退，不是作者转换器分数复现，不启用外部付费API。旅行原生验证尚未收口，不计完成。
+
+原生旅行结束后，使用同一作者客户端运行`python scripts/verify_deepplanning_travel_saved.py --assets <原始资产目录> --native-root <原运行目录> --output <独立新审计目录>`。入口先拒绝未终结任务，再核验作者原源码、原抽样、提示/输入、工具调用关系、报告及原数据库字节，重算作者评分并与保存结果逐项对照；不调用模型，不覆盖旧评分。作者转换器未保存原始转换请求/响应，因此该审计不声称独立重放转换模型，也不是质量或性能复现。入口夹具通过不能替代真实输出核验。
 
 安装后的候选数据包已在服务器重建全部360条原记录并建立索引，五个子集各前三题经公开入口和固定研究消费者回读，共15条逐字段一致。旅行meta_info/query_with_constraints保留为参考，不送入原生Agent输入；工具库与原ID关系保留。候选证据保留；后续实际CPU
 CI（40498636830，工件12730983879）已独立安装并重新通过全部360行及15条研究回读，仍不等于模型任务闭环。购物一级三题已保存完整两阶段记录；原进程BrokenPipeError退出后只在独立副本补作者评分0/0/1，0新增模型调用，失败回执/原输出保留。二三级固定原题已改为独立日志后台运行；旅行及全部子类型评分审计完成前不打勾。
