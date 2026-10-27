@@ -2665,6 +2665,17 @@
       "scope": "public",
       "delivery_kind": "review_original_source_protocol",
       "status": "BLOCKED",
+      "protocol_review": {
+        "paper_url": "https://aclanthology.org/2025.coling-main.7.pdf",
+        "publisher_repository": "https://github.com/CodeLLM-Research/CodeJudge-Eval",
+        "task_contract": "Use publisher input verbatim for code-judging multiple-choice tasks; do not generate replacement prompts from code-generation questions. Preserve0shot/1shot and easy/middle/hard settings independently.",
+        "paper_temperature": 0.0,
+        "paper_metrics": ["accuracy", "macro_f1"],
+        "paper_primary_metric": "macro_f1",
+        "paper_choice_extractor_boundary": "Paper describes several regexes and treats no extraction as failure; exact regex implementation not found in publisher repository, which currently exposes README/license/images only. Do not label an independently implemented extractor as author code or exact score reproduction.",
+        "generation_budget_boundary": "No original max-token value established from inspected publication; any runnable fallback profile must explicitly declare model/service settings, not invent an author default.",
+        "code_execution_boundary": "Model judges supplied original code; this is not code-generation functional execution. Original labels remain separate references, not a need to execute untrusted candidate code on host."
+      },
       "checked": false,
       "legacy_checked": false,
       "existing_receipt": null,
