@@ -1,0 +1,70 @@
+{
+  "status": "original_context_budget_failure_reviewed_unscored_null_preserved",
+  "task": "cobol-modernization",
+  "CPU_exit_code": 0,
+  "agent_seconds": 308.477447,
+  "trajectory_agent_steps": 22,
+  "Harbor_n_episodes": 23,
+  "completed_API_latency_entries": 22,
+  "HTTP_requests": 23,
+  "HTTP_success": 22,
+  "HTTP_rejected": 1,
+  "output_length_fallback": 0,
+  "accounting_boundary": "22 recorded successful responses and one final context rejection. Episodes/turns are not HTTP limit; no output-length fallback observed. Original nested retry caps remain3+3, not a zero-model-retry claim.",
+  "trajectory_usage": {
+    "total_prompt_tokens": 275180,
+    "total_completion_tokens": 13626,
+    "total_cached_tokens": 0
+  },
+  "API_metric_usage": {
+    "prompt_tokens": 275180.0,
+    "completion_tokens": 13626.0
+  },
+  "usage_delta": {
+    "prompt_tokens": 0,
+    "completion_tokens": 0
+  },
+  "verifier": null,
+  "reward": null,
+  "CTRF": null,
+  "official_scored": false,
+  "exception_type": "ContextLengthExceededError",
+  "cause": "Original32768 context exceeded by at least28673 prompt+4096 reserved output=32769; original summarization disabled. Neither100turn nor900s exhaustion. No runner/config defect demonstrated by this bound.",
+  "budget": {
+    "turns": 100,
+    "max_tokens": 4096,
+    "seed": 17,
+    "agent_timeout_sec": 900,
+    "verifier_timeout_sec": 900,
+    "whole_trial_retries": 0,
+    "litellm_sdk_retries": 0,
+    "harbor_llm_layer_attempts": 3,
+    "terminus_query_layer_attempts": 3
+  },
+  "context_tokens": 32768,
+  "answer_boundary": {
+    "status": "bounded_final_script_deterministically_derivable_not_original_snapshot",
+    "derived_script_bytes": 6098,
+    "derived_script_sha256": "471bc92e40151d2c03ff9419d77297688dd797085ebe390e29e223497a9740ea",
+    "original_file_SHA": null,
+    "original_file_mode": null,
+    "requires_original_workdir": "/app",
+    "trajectory_and_original_agent_result_full_command_equal": true,
+    "quoted_heredoc_no_shell_expansion": true,
+    "terminal_pane_and_asciicast_160_nonempty_body_lines_in_order": true,
+    "subsequent_original_commands_do_not_rewrite_script": true,
+    "script_open_targets_limited_to_original_four_data_files": true,
+    "original_test_resets_four_data_contents_before_script_invocation": true,
+    "original_test_sha256": "009180a7092583fc8143bb3ffc3957923aa0d61d0aac3a471f76eeb4aae54a88",
+    "complete_original_filesystem_snapshot": false,
+    "recovery_option": "Optional separately frozen partial-artifact verifier-only reconstruction of this exact final script on original image. Preserve original null; do not alter script, replay Agent, compile COBOL, or claim original file hash/mode. Explicit restoration mode must be disclosed. Original tests create their own four data contents; current native binary, backups and final data bytes are not restored or needed by those test operations. Requires CPU owner exact review before any execution.",
+    "recovery_started": false,
+    "original_null_unchanged": true,
+    "new_execution": 0
+  },
+  "Terminal_attempts": 5,
+  "Terminal_unattempted": 84,
+  "prior4_unchanged": true,
+  "V099_snapshot_unchanged": true,
+  "new_Agent_model_verifier_controls": 0
+}

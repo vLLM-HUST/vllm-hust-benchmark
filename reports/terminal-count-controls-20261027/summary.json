@@ -1,0 +1,54 @@
+{
+  "task": "count-dataset-tokens",
+  "scope": "original ARM64 nop and oracle controls only",
+  "status": "positive_control_failed_dependency_transport",
+  "controls": {
+    "nop": {
+      "reward": 0,
+      "passed": 0,
+      "failed": 1,
+      "test_statuses": {
+        "test_outputs.py::test_command_output_content_example": "failed"
+      },
+      "released": true
+    },
+    "oracle": {
+      "reward": 0,
+      "passed": 0,
+      "failed": 1,
+      "test_statuses": {
+        "test_outputs.py::test_command_output_content_example": "failed"
+      },
+      "released": true
+    }
+  },
+  "cause": {
+    "oracle_agent_exit_code": 1,
+    "oracle_harbor_exit_code": 0,
+    "oracle_wrapper_exit_code": 1,
+    "observed": "HuggingFace tokenizer config retrieval connection reset, then LocalEntryNotFoundError and OSError without cached files; required answer file empty.",
+    "failure_stage": "AutoTokenizer.from_pretrained before dataset loading or token-count calculation",
+    "algorithm_or_ARM64_functional_failure_established": false,
+    "verifier_executed": true,
+    "verifier_environment_file_warning_preserved": true
+  },
+  "original_budgets_seconds": {
+    "build": 600,
+    "agent": 900,
+    "verifier": 900
+  },
+  "resources": {
+    "cpus": 1,
+    "memory_GiB": 2,
+    "cpuset": "24-31",
+    "MTU": 1400,
+    "exact_four_mounts_verified": true
+  },
+  "new_model_requests": 0,
+  "new_Agent_attempts": 0,
+  "Terminal_model_attempts": 6,
+  "Terminal_unattempted": 83,
+  "original_task_tests_oracle_versions_unchanged": true,
+  "automatic_retry": false,
+  "Agent_admission": false
+}
