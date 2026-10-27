@@ -64,8 +64,8 @@ def bind_source(
             raise ValueError(
                 "file differs from pinned publisher/previous identity; do not overwrite its revision"
             )
-        if source_id == "REPOBENCH" and relative not in known:
-            raise ValueError("RepoBench requires registered original language assets")
+        if source_id in {"REPOBENCH", "AZURE_LMM_2025"} and relative not in known:
+            raise ValueError("source requires registered original assets")
         if source_id == "RULER" and (
             relative not in known or not known[relative].get("generation")
         ):

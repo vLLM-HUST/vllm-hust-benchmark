@@ -322,10 +322,17 @@ def adapt_row(
             raise ValueError(
                 "BFCL adapter only supports original single-turn simple_python tasks"
             )
-    if source_id == "AZURE_LLM":
+    if source_id in {"AZURE_LLM", "AZURE_LMM_2025"}:
+        if source_id == "AZURE_LMM_2025" and set(row) != set(spec["required_fields"]):
+            raise ValueError(
+                "Azure LMM original four-field schema required; re-review extra fields"
+            )
         if not isinstance(row["TIMESTAMP"], str) or not row["TIMESTAMP"].strip():
-            raise ValueError("AZURE_LLM requires a source timestamp string")
-        for field in ("ContextTokens", "GeneratedTokens"):
+            raise ValueError("Azure metadata requires a source timestamp string")
+        count_fields = ["ContextTokens", "GeneratedTokens"]
+        if source_id == "AZURE_LMM_2025":
+            count_fields.append("NumImages")
+        for field in count_fields:
             value = row[field]
             if not (
                 type(value) is int
@@ -334,7 +341,7 @@ def adapt_row(
                 and value.isascii()
                 and value.isdecimal()
             ):
-                raise ValueError("AZURE_LLM requires nonnegative integer token counts")
+                raise ValueError("Azure metadata requires nonnegative integer counts")
     if source_id == "MOONCAKE":
         for field in ("timestamp", "input_length", "output_length"):
             if type(row[field]) is not int or row[field] < 0:

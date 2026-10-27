@@ -773,6 +773,19 @@
         "url": "https://github.com/kvcache-ai/Mooncake/blob/9b5adcd4db46849104c3d3d654bc688dfe22d389/FAST25-release/README.md"
       }
     },
+    "AZURE_LMM_2025": {
+      "kind": "request_metadata",
+      "mapping": "native_request_metadata",
+      "input_fields": [],
+      "required_fields": ["TIMESTAMP", "NumImages", "ContextTokens", "GeneratedTokens"],
+      "outcome_fields": [],
+      "annotation_fields": ["TIMESTAMP", "NumImages", "ContextTokens", "GeneratedTokens"],
+      "id_field": "",
+      "normalization": {"timestamp_basis": "unknown"},
+      "requirements": ["Original Azure LMM 2025 compressed CSV, not Azure LLM 2023", "All four original fields retained without numeric/string coercion; timestamp timezone not declared", "No original prompts or media are released; request_body is unsupported and no synthetic prompt/media generator is supplied"],
+      "status": "ORIGINAL_METADATA_FIELDS_MAPPED_PROVIDER_VALIDATION_PENDING",
+      "evidence": {"kind": "publisher_schema_and_all_original_rows", "url": "https://github.com/Azure/AzurePublicDataset/blob/215becdacba1ce682c7368642ce97d5a332de7a6/AzureLMMInferenceDataset2025.md"}
+    },
     "AZURE_LLM": {
       "kind": "request_metadata",
       "mapping": "native_request_metadata",

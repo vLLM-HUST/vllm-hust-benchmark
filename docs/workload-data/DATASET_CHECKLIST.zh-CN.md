@@ -1,5 +1,14 @@
 # 数据集逐项验证清单
 
+### Azure LMM 2025服务轨迹资产（接入中，未交付）
+
+- [x] [微软固定原发布说明](https://github.com/Azure/AzurePublicDataset/blob/215becdacba1ce682c7368642ce97d5a332de7a6/AzureLMMInferenceDataset2025.md)与gzip身份已核验；服务器取得8524196字节原压缩CSV，完整检查100万行四字段。原文件不解压复制到本地或Git；原timestamp字符串和所有数字字符串保持不变，时区未声明，不推断全局绝对时间。
+- [x] 实现原`.csv.gz`流式读取及独立`AZURE_LMM_2025`字段契约，保留TIMESTAMP/NumImages/ContextTokens/GeneratedTokens。元数据没有原prompt或图像内容；`request_body()`拒绝，不造prompt、不把它当视觉任务或模型质量benchmark。官方绘图分析不迁入。
+- [x] 候选包47安装载荷逐字节一致；公开取得/核验/准备命令已实际执行，100万原行四字段全部保真并建索引，固定研究消费者首3/末3共6条回读与公共消费者一致，6条均拒绝`request_body()`。新增模型调用0、无研究观测/分析迁入。
+- [ ] 尚待实际CI工件换锁复核，候选包通过不算正式来源交付，当前不打总勾。
+
+取得/核验入口：`python scripts/prepare_reused_research_assets.py AZURE_LMM_2025 --mode plan`默认离线计划；新外部目录取得原文件用`--mode download --data-root <目录> --github-api`，已有原数据用`--mode verify --data-root <目录>`。准备统一索引用`python scripts/prepare_reused_source_records.py AZURE_LMM_2025 --data-root <原目录> --output <新外部索引目录>`，不下载模型或执行推理。它是服务轨迹资产，不是原始多模态请求回放；发布方描述的按长度/图像数构造流量也不在这里冒称原请求。
+
 ### RepoBench原生仓库级代码补全（固定原生抽样交付完成）
 
 评分可复现性：本次实测CodeBLEU0.7的Python结果受Python哈希种子影响，同一批保存输出总CodeBLEU出现19.93/20.13两值，EM/ES及Java分数不变。原生入口现以新评分子进程固定`PYTHONHASHSEED=0`，不修改作者评分代码；旧无种子报告必须显式加`--freeze-scoring-output <新外部评分目录>`由保存审计生成独立评分文件并重复核验两次，原报告保留，不能反复重算挑高分。已完成90题的固定种子评分审计，新增模型调用0；样本Python/Java的EM均为0，负面结果保留，不代表质量达标或作者CUDA基线复现。
@@ -462,7 +471,7 @@ TB；服务器/data约1.42TB可用，未缩小语料。ChartQA当前两卡主机
 | DRAGON_PUBLIC              | [ ] 待开展                   | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                      |
 | TEMPORALWIKI               | [ ] 待开展                   | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                      |
 | COPILOT_AGENT_2026         | [ ] 待开展                   | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                      |
-| AZURE_LMM_2025             | [ ] 待开展                   | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                      |
+| AZURE_LMM_2025             | [ ] 服务轨迹资产接入中       | 原gzip100万行四字段取得并校验；候选公共准备、索引与研究回读核验中。无原prompt/媒体，不造请求；实际CI闭环前不勾。                                                                                                                                                                                                  |
 | HLE_VERIFIED               | — 仅分类                     | 本轮不补实现、不重跑                                                                                                                                                                                                                                                                                              |
 | SWE_BENCH_PRO              | — 仅分类                     | 本轮不补实现、不重跑                                                                                                                                                                                                                                                                                              |
 | FRONTIERSCIENCE            | — 仅分类                     | 本轮不补实现、不重跑                                                                                                                                                                                                                                                                                              |

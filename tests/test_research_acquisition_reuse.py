@@ -76,7 +76,7 @@ def test_original_research_assets_are_registered_without_native_completion_claim
     sources = json.loads(
         runner.CATALOG.read_text("utf-8"), object_pairs_hook=unique_object
     )["sources"]
-    assert len(sources) == 100
+    assert len(sources) == 101  # frozen100 plus the already-planned Azure LMM asset
     assert sum(EXPECTED.values()) == 48
     ledger = json.loads(
         (ROOT / "docs/workload-data/dataset-validation-status.json").read_text("utf-8")
@@ -125,6 +125,16 @@ def test_original_research_assets_are_registered_without_native_completion_claim
         == "google-research-datasets/natural-questions"
     )
     assert sources["INFINITEBENCH"]["repo_id"] == "xinrongzhang2022/InfiniteBench"
+
+
+def test_azure_lmm_has_explicit_publisher_acquisition_profile():
+    source, files = runner.selection("AZURE_LMM_2025")
+    assert (
+        source["publisher_metadata_acquisition"]["kind"]
+        == "original_publisher_gzip_metadata_profile"
+    )
+    assert len(files) == 1 and files[0]["rows"] == 1000000
+    assert files[0]["path"].endswith(".csv.gz")
 
 
 def test_empty_or_unregistered_selections_never_fall_back_to_new_data():

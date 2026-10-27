@@ -105,8 +105,9 @@ def iter_rows(
                 if set(row) & set(context):
                     raise ValueError("original root and instance fields collide")
                 yield {**deepcopy(context), **row}
-        elif path.suffix == ".csv":
-            with path.open(encoding="utf-8-sig", newline="") as stream:
+        elif path.name.endswith((".csv", ".csv.gz")):
+            opener = gzip.open if path.name.endswith(".gz") else open
+            with opener(path, "rt", encoding="utf-8-sig", newline="") as stream:
                 reader = csv.DictReader(stream)
                 if not reader.fieldnames or len(set(reader.fieldnames)) != len(
                     reader.fieldnames

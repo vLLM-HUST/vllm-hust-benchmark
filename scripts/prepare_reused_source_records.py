@@ -18,6 +18,7 @@ MAPPINGS = {
 }
 DIALOGUE_SOURCES = {"WILDCHAT", "ULTRACHAT", "LMSYS_CHAT", "TULU3", "OPENTHOUGHTS3"}
 NATIVE_FIELD_SOURCES = {"REPOBENCH"}
+TRACE_METADATA_SOURCES = {"AZURE_LMM_2025"}
 INFINITE_MAPPINGS = {
     kind: ROOT
     / f"configs/workload-native/reused-source-mappings/infinitebench-{kind}.json"
@@ -64,6 +65,7 @@ def prepare(source_id, *, data_root, output, files=None, limit=None, catalog_roo
         source_id not in MAPPINGS
         and source_id not in DIALOGUE_SOURCES
         and source_id not in NATIVE_FIELD_SOURCES
+        and source_id not in TRACE_METADATA_SOURCES
         and source_id != "INFINITEBENCH"
     ):
         raise ValueError("source preparation not implemented; no generic fallback")
@@ -174,7 +176,11 @@ def main():
     parser.add_argument(
         "source_id",
         choices=sorted(
-            set(MAPPINGS) | DIALOGUE_SOURCES | NATIVE_FIELD_SOURCES | {"INFINITEBENCH"}
+            set(MAPPINGS)
+            | DIALOGUE_SOURCES
+            | NATIVE_FIELD_SOURCES
+            | TRACE_METADATA_SOURCES
+            | {"INFINITEBENCH"}
         ),
     )
     parser.add_argument("--data-root", type=Path, required=True)
