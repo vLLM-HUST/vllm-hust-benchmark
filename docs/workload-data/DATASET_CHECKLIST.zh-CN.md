@@ -3,6 +3,22 @@
 当前交付
 **63/113项**，待完成50项，另5项仅分类。首批#432的60项和第二批#538的ScienceWorld已合入main；早期五个草稿已关闭为被汇总承接，历史和分支保留。第三批新增CodeJudge-Eval及DeepPlanning的固定原生样本、评分及实际CI消费交付，尚未合入。打勾不代表全量模型评测、高分或性能保证。
 
+### OpenMathInstruct-2原始推理训练语料（未交付，不打总勾）
+
+- [x] 完整主train32分片的固定版本/URL/LFS摘要/大小已登记，共7,576,089,560字节；不把与主train重叠的1M/2M/5M子集重复计为独立问题来源。
+- [x] 运行前固定的0/15/31原分片已在服务器取得并核验，共710,707,907字节。三份Parquet元数据行数为436650/436650/436649；已检查原schema及各原前3条字段类型，未据此宣称所有行值或索引均验证通过。
+- [ ] 原问题生成、准备索引及实际CI/研究消费仍待完成；复用现有原字段适配，`problem`独立作为输入，`expected_answer`和`generated_solution`留在参考侧，保留`problem_source`及空答案。教师解答不冒充本地生成结果。[准备证据](validation/openmath2-original-readiness-20261028.json)
+
+```bash
+python scripts/prepare_reused_research_assets.py OPENMATH2 --mode plan \
+  --files data/train-00000-of-00032.parquet data/train-00015-of-00032.parquet data/train-00031-of-00032.parquet
+python scripts/prepare_reused_research_assets.py OPENMATH2 --mode download \
+  --data-root <仓库外数据目录> --max-bytes 800000000 \
+  --files data/train-00000-of-00032.parquet data/train-00015-of-00032.parquet data/train-00031-of-00032.parquet
+```
+
+这是发布方公开的合成推理训练语料，不是独立质量benchmark，不能把训练语料续写说成官方独立评测、训练复现或真实线上分布证明。当前只取得主train三个固定分片，其他29份仅登记；原始数据不放入仓库或本地工作站，运行配置须明确模型与预算，不能补造作者未给出的质量评分器。
+
 ### DRAGOn同版本原始RAG资产（未交付，不打总勾）
 
 - [x] 复用公共获取入口，服务器取得发布方1.15.0同标签四份原文件并核验SHA256/大小，共2,277,123字节：600个公开问题、542篇公开文本、600条参考QA及542条参考文本映射。
@@ -12,7 +28,8 @@
 - [x] 原始四文件关联适配已实现；服务器独立安装候选wheel，55个包载荷与wheel一致。全部600条原问题/参考字段及索引通过，原前3条公共/当前研究消费者回读逐字段一致，0模型调用。当前研究main版本已在线核对；未更改研究线程默认依赖。
 - [x] 原作者核心库环境已在Linux aarch64/Python3.12.13独立安装112项依赖；清除客户端继承的CANN
   PYTHONPATH后，pip一致性检查、四个原模块导入及原评分器软件夹具通过。实测约束与原lib requirements的dry-run无变更；初次旧环境缺依赖与继承路径污染记录保留。
-- [ ] 实际CI工件消费及官方检索/生成与评分尚未完成；需要适配NPU的embedding和reader环境。候选包读取/回读不替代benchmark运行。[准备与候选消费证据](validation/dragon-original-preparation-20261028.json)
+- [x] 实际CPU CI工件已独立安装复核：55个载荷文件与工件一致，全部600条原字段/索引和原前3条当前研究消费者回读通过，未重跑模型或升级研究默认依赖。旧候选记录保留，不冒充实际CI工件。
+- [ ] 官方检索/生成与原题评分尚未完成；需要适配NPU的embedding和reader环境。实际CI读取/回读也不替代benchmark运行。[准备与CI消费证据](validation/dragon-original-preparation-20261028.json)
 
 ```bash
 python scripts/prepare_reused_research_assets.py DRAGON_PUBLIC --mode plan
