@@ -76,7 +76,7 @@ def test_original_research_assets_are_registered_without_native_completion_claim
     sources = json.loads(
         runner.CATALOG.read_text("utf-8"), object_pairs_hook=unique_object
     )["sources"]
-    assert len(sources) == 103  # frozen100 plus three already-planned sources
+    assert len(sources) == 104  # frozen100 plus four already-planned sources
     assert sum(EXPECTED.values()) == 48
     ledger = json.loads(
         (ROOT / "docs/workload-data/dataset-validation-status.json").read_text("utf-8")
