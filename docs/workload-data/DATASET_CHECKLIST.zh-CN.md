@@ -28,6 +28,9 @@
 
 核心环境准备：用完整Python3.11在外部新目录建venv，再以`uv pip install --python <venv/bin/python> --link-mode copy -r <原source/requirements.txt>`安装，`uv pip check --python <venv/bin/python>`检查；软件缓存和临时目录均设置到外部目录，不改模型服务环境。从原source目录以该venv运行两个CLI的`--help`可检查导入。作者requirements不是完整传递依赖锁，未声称其他平台或未来依赖解析结果已验证。
 
+原metadata扫描仍有缺口：982份可按UTF8
+JSON解析，80份原文件解析失败，不能以CLI帮助通过声称数据可运行。解析成功文件中的1122条数据文件关系有1121条存在；唯一缺链来自`.ipynb_checkpoints`辅助元数据，不作为正式任务数据缺失的结论。正式任务目录及编码兼容还须单独核验；保留原字节，不猜编码、忽略坏字节、替换题目或直接转写原文件。这些是文件检查数，不是任务数。
+
 入口：`python scripts/prepare_discoverybench_original_assets.py --output <外部新目录>`默认只展示计划；`--execute`从固定官方版本获取并核验，拒绝已有目标；已有原目录用`--verify-only`只读复用，不改原题，不下载替代数据，不执行Agent。保留作者原许可证与归属说明；数据库层面的许可不自动覆盖所有内容权利，不公开原始资产。
 
 ### Copilot 2026嵌套会话元数据（已交付，非原始请求回放）
