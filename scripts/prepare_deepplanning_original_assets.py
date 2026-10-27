@@ -20,7 +20,10 @@ def verify(path, entry):
     if path.stat().st_size != entry["bytes"]:
         raise ValueError(f"original size mismatch: {entry['path']}")
     with path.open("rb") as stream:
-        if hashlib.file_digest(stream, "sha256").hexdigest() != entry["sha256"]:
+        digest = hashlib.sha256()
+        while chunk := stream.read(1024**2):
+            digest.update(chunk)
+        if digest.hexdigest() != entry["sha256"]:
             raise ValueError(f"original digest mismatch: {entry['path']}")
 
 

@@ -123,6 +123,13 @@ def test_tampered_original_rejected_before_output_creation(tmp_path):
     assert not output.exists()
 
 
+def test_python310_without_file_digest_supported(tmp_path, monkeypatch):
+    config = fixture_config(tmp_path / "original")
+    monkeypatch.delattr(MODULE.hashlib, "file_digest", raising=False)
+    result = MODULE.prepare(tmp_path / "original", verify_only=True, config=config)
+    assert result["status"] == "READ_ONLY_ORIGINAL_ASSETS_VERIFIED"
+
+
 @pytest.mark.parametrize("name", ["../escape", "/absolute", "bad\\path"])
 def test_unsafe_path_rejected(tmp_path, name):
     with pytest.raises(ValueError):
