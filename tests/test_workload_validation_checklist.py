@@ -71,7 +71,13 @@ def test_appworld_protocol_files_are_not_task_or_execution_completion():
     assert preparation["original_public_files_verified"] == 8
     assert preparation["original_public_source_bytes"] == 175040
     assert preparation["model_calls"] == 0
-    assert preparation["task_data_acquired"] is False
+    assert preparation["task_data_acquired"] is True
+    data_receipt = json.loads(
+        (ROOT / preparation["task_data_preparation_receipt"]).read_text("utf-8")
+    )
+    assert data_receipt["unique_original_tasks"] == 732
+    assert sum(data_receipt["splits"].values()) == 732
+    assert data_receipt["source_checkbox_eligible"] is False
     assert preparation["benchmark_executed"] is False
     assert preparation["execution_environment_installed"] is False
     assert preparation["core_client_environment_installed"] is True
