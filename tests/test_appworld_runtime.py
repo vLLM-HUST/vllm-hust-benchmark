@@ -56,3 +56,22 @@ def test_system_site_inheritance_is_rejected(tmp_path):
     (client / "pyvenv.cfg").write_text("include-system-site-packages = true\n")
     with pytest.raises(ValueError, match="inheritance"):
         MODULE.isolated_python(tmp_path)
+
+
+def test_observed_constraints_are_explicit_and_not_author_lock(tmp_path):
+    constraints = (
+        ROOT / "configs/workload-native/appworld-core-client-py311-observed.txt"
+    )
+    versions = [
+        line
+        for line in constraints.read_text().splitlines()
+        if line and not line.startswith("#")
+    ]
+    assert len(versions) == 83 and "appworld==0.1.3.post1" in versions
+    assert all("==" in line and "://" not in line for line in versions)
+    result = MODULE.prepare(
+        tmp_path / "absent", "/uv", "/python", constraints=constraints
+    )
+    install = result["steps"][1]
+    assert install[install.index("--constraint") + 1] == str(constraints.resolve())
+    assert result["source_checkbox_eligible"] is False

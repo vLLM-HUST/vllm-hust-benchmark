@@ -14,6 +14,8 @@
 
 原始数据入口：`python scripts/prepare_appworld_original_assets.py --output <外部新目录> --client <上步client目录> --cache <上步cache/appworld目录>`默认计划，加`--execute`调用官方CLI；拒绝已有目标，避免作者下载器覆盖旧数据。已有资产用`--verify-only`只读核验，不重下不覆盖。不把这些任务改造成静态prompt，也不把目录关系核验当作原生任务执行。
 
+本次核心客户端的83项实际依赖版本记录在`configs/workload-native/appworld-core-client-py311-observed.txt`。需要约束重建时向环境入口显式传`--constraints <该文件>`；这是本次ARM/Python3.11.17环境的观测版本，不是作者冻结锁，也未证明其他平台兼容。本次已安装环境直接复用，不为增加证据重复安装。
+
 ### Copilot 2026嵌套会话元数据（已交付，非原始请求回放）
 
 - [x] 固定[官方release](https://github.com/Azure/AzurePublicDataset/releases/tag/ghcp-coding-agent-2026)身份400522856及七份原包，共3218886136字节，全部发布方SHA256和大小匹配。后补说明/schema/card另固定文档版本215becda，不假称文档属于旧release标签。

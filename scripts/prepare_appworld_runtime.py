@@ -16,7 +16,7 @@ VERSION = "0.1.3.post1"
 INDEX = "https://pypi.org/simple"
 
 
-def commands(uv, python, output, install_protected_code=False):
+def commands(uv, python, output, install_protected_code=False, constraints=None):
     client = Path(output) / "client"
     executable = client / "bin/python"
     cli = client / "bin/appworld"
@@ -44,6 +44,8 @@ def commands(uv, python, output, install_protected_code=False):
             f"appworld=={VERSION}",
         ],
     ]
+    if constraints is not None:
+        steps[1].extend(["--constraint", str(Path(constraints).resolve())])
     if install_protected_code:
         steps.append([str(cli), "install"])
     steps.extend(
@@ -88,10 +90,16 @@ def check_python_runtime(python):
 
 
 def prepare(
-    output, uv, python, execute=False, install_protected_code=False, uv_cache=None
+    output,
+    uv,
+    python,
+    execute=False,
+    install_protected_code=False,
+    uv_cache=None,
+    constraints=None,
 ):
     output = Path(output).resolve()
-    steps = commands(uv, python, output, install_protected_code)
+    steps = commands(uv, python, output, install_protected_code, constraints)
     result = {
         "source_id": "APPWORLD",
         "status": "PLAN_ONLY",
@@ -102,10 +110,15 @@ def prepare(
         "benchmark_executed": False,
         "source_checkbox_eligible": False,
         "protected_code_unpack_requested": install_protected_code,
+        "dependency_constraints": str(Path(constraints).resolve())
+        if constraints
+        else None,
         "boundary": "Official core package preparation only, not isolation security qualification, Agent execution or author lock reproduction.",
     }
     if not execute:
         return result
+    if constraints is not None and not Path(constraints).is_file():
+        raise ValueError("explicit dependency constraints file does not exist")
     repository = Path(__file__).resolve().parents[1]
     if (
         output.exists()
@@ -216,6 +229,11 @@ def main():
     parser.add_argument("--execute", action="store_true")
     parser.add_argument("--install-protected-code", action="store_true")
     parser.add_argument(
+        "--constraints",
+        type=Path,
+        help="Optional observed dependency constraints, not an author lock",
+    )
+    parser.add_argument(
         "--uv-cache",
         type=Path,
         help="Reuse an explicitly owned external software cache; never use serving-model caches",
@@ -230,6 +248,7 @@ def main():
                 args.execute,
                 args.install_protected_code,
                 args.uv_cache,
+                args.constraints,
             ),
             indent=2,
         )
