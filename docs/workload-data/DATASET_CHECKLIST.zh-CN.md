@@ -3,6 +3,26 @@
 当前交付
 **64/113项**，待完成49项，另5项仅分类。首批#432的60项和第二批#538的ScienceWorld已合入main；早期五个草稿已关闭为被汇总承接，历史和分支保留。第三批新增CodeJudge-Eval、DeepPlanning及OpenMath固定原生profile的实际CI消费交付，尚未合入。OpenMath是训练语料原问题生成，不是独立质量benchmark。打勾不代表全量模型评测、高分或性能保证。
 
+### OpenCodeInstruct原始代码训练语料（进行中，不打总勾）
+
+- [x] 核验官方固定版本元数据：50个原始train分片、6,861,113,102字节，公开CC-BY-4.0。复用已有原字段适配，问题与教师代码、原测试、历史测试状态和判断信息分开保存，不生成替代题目。
+- [x] 公共获取入口支持固定原文件，公共引用准备入口及微型夹具回归已补齐；这些只是软件能力验证，不代表真实数据或模型已跑通。
+- [x] 服务器已取得预先固定的0/24/49原始分片，共422,115,928字节，发布方LFS摘要及大小全部复核通过；每份Parquet元数据100000行，schema及原前3条字段类型已检查。实际`average_test_score`为double/float，不按HF卡片中的string描述强转。[阶段证据](validation/opencode-original-readiness-20261028.json)
+- [ ] 真实原字段及索引、固定原问题生成、保存完整性核验、实际CI工件和当前研究消费者接通仍待完成。原`unit_tests`及生成代码不得在宿主机执行；如需功能评估，必须另行核验隔离环境。
+
+```bash
+python scripts/prepare_reused_research_assets.py OPENCODE --mode plan \
+  --files data/train-00000-of-00050.parquet data/train-00024-of-00050.parquet data/train-00049-of-00050.parquet
+python scripts/prepare_reused_research_assets.py OPENCODE --mode download \
+  --data-root <仓库外原始目录> --max-bytes 450000000 \
+  --files data/train-00000-of-00050.parquet data/train-00024-of-00050.parquet data/train-00049-of-00050.parquet
+python scripts/prepare_reused_source_records.py OPENCODE \
+  --data-root <仓库外原始目录> --output <仓库外新引用目录> \
+  --files data/train-00000-of-00050.parquet data/train-00024-of-00050.parquet data/train-00049-of-00050.parquet
+```
+
+这是合成代码训练语料，不是独立代码质量benchmark。教师答案和原历史测试分数不代表本地模型结果；实际三份文件的`average_test_score`为double，与HF卡片的string描述不同，必须原样保留数值，不能擅自改类型或补造评分器。
+
 ### OpenMathInstruct-2原始推理训练语料（固定原始profile已交付）
 
 - [x] 完整主train32分片的固定版本/URL/LFS摘要/大小已登记，共7,576,089,560字节；不把与主train重叠的1M/2M/5M子集重复计为独立问题来源。
@@ -10,7 +30,8 @@
 - [x] 三个可用分片全部1,309,949条原字段及索引完成核验；实际CI28997404包的56个载荷与工件一致，9条公共/当前研究消费者回读通过。初次私有核验器误比较逐文件与三文件全量选择范围，已明确校验各自范围并恢复只读核验；失败记录保留，未重建索引或重跑模型。
 - [x] 原前3条/分片共9条原问题已在现有Qwen3.5-9B BF16 TP1 NPU3服务生成：3 stop、6
   length，显式预算8192，未改问题、换题或重试。保存的输入、参考、来源、预算和响应已用公开核验入口复核，0新增模型调用；不独立判断数学正确性，不冒充作者教师模型复现。
-- [x] 当前a70da63a的tests、lint及CPU smoke全部通过；独立安装实际CI工件并核验56个包载荷，复用全量索引后9条公共/当前研究侧回读通过，未重建索引或重跑模型。`problem`独立作为输入，教师解答、参考及空答案均保留在参考侧。[最终范围与证据](validation/openmath2-native-delivery-20261028.json)；[历史阶段证据](validation/openmath2-original-readiness-20261028.json)。
+- [x] 当前a70da63a的tests、lint及CPU
+  smoke全部通过；独立安装实际CI工件并核验56个包载荷，复用全量索引后9条公共/当前研究侧回读通过，未重建索引或重跑模型。`problem`独立作为输入，教师解答、参考及空答案均保留在参考侧。[最终范围与证据](validation/openmath2-native-delivery-20261028.json)；[历史阶段证据](validation/openmath2-original-readiness-20261028.json)。
 
 ```bash
 python scripts/prepare_reused_research_assets.py OPENMATH2 --mode plan \
