@@ -4,6 +4,9 @@
 
 公开源码入口：`python scripts/prepare_repobench_original_assets.py --output <新外部目录>`默认只展示计划，加`--execute`取得固定作者归档并校验；已有同版本原zip可加`--reuse-archive <zip>`避免重复下载。已有目录用`--verify-only`只读核验，服务器实际12原文件通过；不会修改作者CUDA代码或在此步骤执行模型。
 
+环境入口：`python scripts/prepare_repobench_runtime.py --source-root <原source> --archive <固定zip> --environment <新外部venv> --uv <uv> --platform-python <已有NPU平台Python> --grammar-source-dir <外部语法源码目录>`默认只展示计划，加`--execute`安装；已创建但依赖未完成的venv可显式`--install-dependencies`续装，已有环境用`--verify-only`。此配置显式继承平台torch/torch-npu/Transformers，不修改平台包；作者没有锁文件，不能称官方环境复现。Python/Java语法包0.21.0的官方固定源码通过API取得、按固定大小/SHA256校验后在ARM构建，未换评分器。服务器已实际通过原生模块导入、两语言EM/Edit
+Similarity/CodeBLEU小型自一致夹具及venv依赖检查；这些是环境检查，不是原题NPU执行。
+
 公开资产入口复用`python scripts/prepare_reused_research_assets.py REPOBENCH --mode plan`，取得原数据用`--mode download --data-root <外部目录> --max-bytes 1200000000`，已有数据用`--mode verify --data-root <外部目录>`只读核验。默认550MB预算会拒绝意外全下约1.05GB；必要时显式选择同固定版本`--hf-endpoint https://hf-mirror.com`，仍逐文件校验原SHA256。准备统一索引用`python scripts/prepare_reused_source_records.py REPOBENCH --data-root <同原目录> --output <新外部索引目录>`，不下载模型、不执行推理。公开核验/准备命令已在服务器用实际CI工件执行，原生benchmark仍未执行。
 
 - [x] 固定[作者v1.1源码](https://github.com/Leolty/repobench/tree/e0cfd34c9e7cd8f057efd32b9280b9719ae12a91)，12文件逐文件大小/Git
@@ -12,7 +15,7 @@
 - [x] 实际CI
   `e241accd`的47份安装载荷逐字节一致，全部49684原行字段重建和索引、固定研究消费者60条回读一致；语言及其独立数据版本不丢失，next_line/all_code/gold_snippet_index不混入模型输入。新增模型调用0，不等同原生benchmark跑通。
 - [ ] 原生模型环境与执行、官方评分。作者示例推荐DeepSeek-Coder-1.3B-Base，但`run.py`硬编码CUDA，依赖列表还包含stdlib
-  `difflib`，不能盲目照装后宣称NPU可用。须保留作者prompt构造/日期与长度过滤/下一行提取；不得将完整`all_code`、`next_line`或`gold_snippet_index`泄漏进请求。作者模型固定版本七份所需文件已在服务器取得并逐文件验证，约2.69GB权重SHA256一致；未加载模型或执行推理，仍缺独立依赖环境及NPU执行，不打总勾、不改当前服务环境。
+  `difflib`，不能盲目照装后宣称NPU可用。须保留作者prompt构造/日期与长度过滤/下一行提取；不得将完整`all_code`、`next_line`或`gold_snippet_index`泄漏进请求。作者模型固定版本七份所需文件已在服务器取得并逐文件验证，约2.69GB权重SHA256一致；独立venv的原生导入与评分夹具已通过，尚未加载模型或执行原题推理，不打总勾、不改当前服务环境。
 
 ### StructEval剩余渲染/VQA环境（未交付）
 
