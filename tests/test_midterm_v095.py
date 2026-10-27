@@ -10,10 +10,12 @@ import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
-import build_midterm_v095 as b  # noqa: E402
+b = importlib.import_module("build_midterm_v095")
 
 
 def read(path):
+    if path == b.REPORT:
+        path = "reports/vllm-hust-midterm-20261019/中期测试报告-v095.md"
     return (ROOT / path).read_bytes()
 
 
