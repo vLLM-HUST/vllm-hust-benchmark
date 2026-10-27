@@ -4,7 +4,9 @@ from copy import deepcopy
 import gzip
 import hashlib
 import io
+import importlib.util
 import json
+from pathlib import Path
 import tarfile
 
 import pytest
@@ -161,6 +163,63 @@ def test_bad_archive_identity_does_not_create_output(tmp_path):
             expected_sha256="0" * 64,
         )
     assert not (tmp_path / "data").exists()
+
+
+def preparer_module():
+    path = (
+        Path(__file__).resolve().parents[1]
+        / "scripts/prepare_copilot_original_assets.py"
+    )
+    spec = importlib.util.spec_from_file_location("copilot_assets_fixture", path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def test_public_preparer_plan_is_non_mutating(tmp_path):
+    preparer = preparer_module()
+    output = tmp_path / "not_created"
+    result = preparer.prepare(output)
+    assert result["status"] == "PLAN_ONLY"
+    assert result["archive_bytes"] == 3218886136
+    assert result["archives"] == 7
+    assert all(len(item[3]) == 64 for item in preparer.ARCHIVES)
+    assert not output.exists()
+
+
+def test_public_preparer_reuses_original_archive_without_network(tmp_path, monkeypatch):
+    preparer = preparer_module()
+    archive, payload = archive_fixture(tmp_path)
+    reuse = tmp_path / "reused"
+    reuse.mkdir()
+    archive.rename(reuse / "date.2026-06-01.tar.gz")
+    original = reuse / "date.2026-06-01.tar.gz"
+    monkeypatch.setattr(
+        preparer,
+        "ARCHIVES",
+        [
+            (
+                "2026-06-01",
+                1,
+                original.stat().st_size,
+                hashlib.sha256(original.read_bytes()).hexdigest(),
+            )
+        ],
+    )
+
+    def no_network(*args, **kwargs):
+        raise AssertionError("must reuse original archive")
+
+    monkeypatch.setattr(preparer.subprocess, "run", no_network)
+    result = preparer.prepare(
+        tmp_path / "prepared", execute=True, reuse_archive_dir=reuse
+    )
+    assert result["status"] == "ORIGINAL_RELEASE_ASSETS_PREPARED_NOT_PROVIDER_DELIVERY"
+    assert not result["source_checkbox_eligible"]
+    assert result["days"][0]["sessions"] == 1
+    target = tmp_path / "prepared/data/date=2026-06-01/shard-0000.jsonl.gz"
+    assert target.read_bytes() == payload
+    assert original.exists()
 
 
 def test_nested_fields_remain_untouched_and_bad_containers_rejected():
