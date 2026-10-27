@@ -1,0 +1,160 @@
+"""Combine preserved prior observations with independently graded new tasks."""
+
+import copy
+import hashlib
+import json
+from pathlib import Path
+
+HERE = Path(__file__).resolve().parent
+ROOT = HERE.parents[1]
+PRIOR = "reports/swe-native018-wave2-followup-20261027/catalog.json"
+
+
+def sha(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def build(root=ROOT, here=HERE):
+    inputs = json.loads((here / "inputs.json").read_text())
+    prior_path = root / PRIOR
+    assert sha(prior_path) == inputs["prior_catalog_sha256"]
+    prior = json.loads(prior_path.read_text())
+    entries = copy.deepcopy(prior["entries"])
+    for entry in entries:
+        assert sha(root / entry["source"]) == entry["source_sha256"]
+    for item in inputs["observations"]:
+        path = here / item["summary"]
+        assert path.parent == here and sha(path) == item["summary_sha256"]
+        value = json.loads(path.read_text())
+        review_path = here / item["review"]
+        assert sha(review_path) == item["review_sha256"]
+        review = json.loads(review_path.read_text())
+        assert value["vllm"] == value["vllm_ascend"] == "0.18.0"
+        assert value["total_dataset_tasks"] == 731
+        assert value["new_task_attempts"] == value["recorded_official_denominator"] == 1
+        assert value["full_dataset_acceptance"] is False
+        assert value["private_task_answers_patch_or_trajectory_included"] is False
+        assert value["official_unresolved_grading"] == 0
+        agent, grade, release = value["agent"], value["grading"], value["release"]
+        assert type(grade["official_result"]) is bool
+        assert (
+            grade["independently_recomputed_official_rule"] == grade["official_result"]
+        )
+        assert grade["model_calls"] == 0
+        assert grade["patch_modified"] is grade["grading_reexecuted"] is False
+        if grade["state_capture"] == "incomplete":
+            assert grade["patch_application_attested"] is False
+            assert grade["apply_exit_code"] == 128 and agent["patch_bytes"] == 0
+            assert agent["agent_submitted"] is False
+            assert agent["patch_sha256"] == hashlib.sha256(b"").hexdigest()
+            assert grade["affected_paths"] is None
+            assert grade["pre_post_file_states_equal"] is None
+            assert grade["after_graded_file_states_equal"] is None
+            assert review["application"]["patch_application_attested"] is False
+        else:
+            assert grade["state_capture"] == "complete"
+            assert grade["patch_application_attested"] is True
+        assert type(grade["apply_exit_code"]) is int
+        assert grade["patch_applied"] == (grade["apply_exit_code"] == 0)
+        assert release["status"] == "completed" and release["service_exit_code"] == 0
+        assert all(
+            release[key] is True
+            for key in ("sessions_drained", "all_devices_released", "seal_allowed")
+        )
+        assert value["recorded_official_resolved"] == int(grade["official_result"])
+        assert agent["patch_sha256"] == value["evidence_sha256"]["submitted_patch"]
+        assert 0 < agent["model_calls"] <= value["budget"]["step_limit"] == 100
+        assert value["budget"]["wall_budget_seconds"] == 1200
+        assert value["budget"]["max_tokens"] == 4096
+        assert value["budget"]["automatic_retries"] == 0
+        audit = review["request_audit"]
+        assert audit["successful_returns"] == agent["model_calls"]
+        assert audit["attempts"] == audit["successful_returns"] + audit["rejected"]
+        assert audit["http_retries"] == 0
+        coverage = review.get("test_coverage")
+        if value["run_id"] == "swe018-wave2-07-r1":
+            assert review["raw_parser_empty_preserved"] is True
+            assert review["official_grading"]["fail_to_pass"]["missing"] == 2
+            raw = {
+                "target_tests_executed": False,
+                "compiler_error": review["failure_mechanism"],
+                "parser_entries": 0,
+                "functional_assertion_failure_established": False,
+            }
+        else:
+            raw = review["raw_test_observation"]
+        if raw.get("compiler_error"):
+            assert raw["target_tests_executed"] is False
+            assert grade["official_result"] is False and grade["patch_applied"] is True
+            assert grade["parsed_test_counts"] == {}
+            coverage = {
+                "target_test_build_failed": True,
+                "target_tests_executed": False,
+                "target_test_assertions_failed": False,
+                "compiler_error": raw["compiler_error"],
+            }
+        entries.append(
+            {
+                "run_id": value["run_id"],
+                "task_identity_sha256": value["task_identity_sha256"],
+                "source": str(path.relative_to(root)),
+                "source_sha256": sha(path),
+                "official_resolved": int(grade["official_result"]),
+                "official_denominator": 1,
+                "official_unresolved_grading": 0,
+                "model_calls": agent["model_calls"],
+                "elapsed_seconds": agent["elapsed_seconds"],
+                "status": agent["status"],
+                "agent_submitted": agent["agent_submitted"],
+                "patch_bytes": agent["patch_bytes"],
+                "patch_sha256": agent["patch_sha256"],
+                "patch_application_evidence_limited": False,
+                "confirmed_patch_application_failure": not grade["patch_applied"],
+                "apply_exit_code": grade["apply_exit_code"],
+                "patch_applied": grade["patch_applied"],
+                "state_capture": grade["state_capture"],
+                "patch_application_attested": grade["patch_application_attested"],
+                "application_state_capture_incomplete": grade["state_capture"]
+                == "incomplete",
+                "request_audit": audit,
+                "parsed_test_counts": grade["parsed_test_counts"],
+                "test_count_scope": grade["test_count_scope"],
+                "official_test_coverage": grade["official_test_coverage"],
+                "raw_test_coverage": coverage,
+                "raw_test_observation": raw,
+            }
+        )
+    assert len(entries) <= 731
+    assert len({entry["task_identity_sha256"] for entry in entries}) == len(entries)
+    assert len({entry["run_id"] for entry in entries}) == len(entries)
+    result = {
+        key: copy.deepcopy(value) for key, value in prior.items() if key != "entries"
+    }
+    result.update(
+        schema="swe-native018-incremental-catalog/v2",
+        prior_catalog=PRIOR,
+        prior_catalog_sha256=sha(prior_path),
+        attempted_unique_tasks=len(entries),
+        recorded_official_denominator=len(entries),
+        recorded_official_resolved=sum(entry["official_resolved"] for entry in entries),
+        application_evidence_limited_tasks=sum(
+            entry["patch_application_evidence_limited"] for entry in entries
+        ),
+        confirmed_patch_application_failure_tasks=sum(
+            entry["confirmed_patch_application_failure"] for entry in entries
+        ),
+        unattempted_tasks=731 - len(entries),
+        confirmed_target_compilation_failure_tasks=sum(
+            bool(entry.get("raw_test_coverage", {}).get("target_test_build_failed"))
+            for entry in entries
+            if entry.get("raw_test_coverage")
+        ),
+        full_dataset_acceptance=False,
+        entries=entries,
+    )
+    return result
+
+
+if __name__ == "__main__":
+    output = HERE / "catalog.json"
+    output.write_text(json.dumps(build(), indent=2) + "\n")
