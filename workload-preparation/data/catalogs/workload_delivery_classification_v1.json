@@ -21,6 +21,13 @@
     {"source_id": "PAIO-SEMANTIC-SIMILAR-5000", "asset_group": "enterprise-private-requests", "related_workload_ids": [], "boundary": "Semantic similarity is not exact-prefix or KV reuse; preserve original private requests without rewriting."}
   ],
   "source_entrypoints": {
+    "DEEPPLANNING": [
+      {
+        "role": "prepare_assets",
+        "path": "scripts/prepare_deepplanning_original_assets.py",
+        "scope": "Pinned original author sources and five database archives; offline verify or reuse existing assets. Preparation only, not original Agent execution or scoring."
+      }
+    ],
     "SCIENCEWORLD": [
       {"role": "prepare_assets", "path": "scripts/prepare_scienceworld_original_assets.py", "scope": "Use author-react profile for pinned original code/prompts/goldpath archive; no model calls or synthetic prompts."},
       {"role": "data_reading_only", "path": "workload-preparation/src/vllm_hust_workload_data/scienceworld.py", "scope": "Original task/variation/fold/goal relations; publisher gold path stays reference-only, not model input or research observations."},
