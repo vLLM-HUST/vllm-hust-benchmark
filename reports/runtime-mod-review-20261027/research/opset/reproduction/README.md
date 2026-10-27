@@ -74,4 +74,4 @@ index失败。主动终止894046，首次所有数据作废并保留日志。Fle
 - 当前实现不是普通ACLNN路径的性能替代品；若确实要求batch-invariant Triton，局部优化仍可能有用。
 - 去多余清零的机制判断不变，本轮没有另外重测其独立贡献。当前native Triton baseline仍含zeros，因此融合对比也不是剥离清零贡献后的纯epilogue消融。
 
-[预注册及映射修正](contract.md) · [探针](probe.py.source) · [资源与映射门禁](launch.py.source) · [原始证据](evidence/)
+[预注册及映射修正](contract.md) · [探针](probe.py) · [资源与映射门禁](launch.py) · [原始证据](evidence/)

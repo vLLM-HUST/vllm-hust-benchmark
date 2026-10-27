@@ -1,8 +1,9 @@
 # 发布前证据审计：35B vSpec、DiffSpec 与 OPset
 
-2026-10-27。审计只读取既有运行原件、回收运行目录源码/输入并离线重算，没有追加设备实验。本文修正此前“性能收益混入graph runtime优化”可能造成的过度因果解读；不改变原始结果。
+2026-10-27。初次发布审计只读取既有运行原件、回收运行目录源码/输入并离线重算，没有追加设备实验。本文修正此前“性能收益混入graph
+runtime优化”可能造成的过度因果解读；不改变原始结果。
 
-## 核心结论：整体配置对照成立，单因素归因不成立
+## 历史MTP2审计：整体配置对照成立，单因素归因不成立
 
 35B比较的是**宿主原生固定MTP2**与**vSpec adaptive + refill +
 动态宽度runtime整套配置**。不是“原生不开graph、插件开graph”：两臂均配置FULL_AND_PIECEWISE、async scheduling、APC、chunked
@@ -54,3 +55,25 @@ vSpec固定源码：`4e17b6bb6f9957dd4427f112da0bfc3d08bf24ae`。回收运行目
 ## 未被本次审计补足的证据
 
 未追加runtime单因素消融、无充分输出预算的质量复测或非确定性根因实验；未补全DiffSpec280题/三轮。目标模型仅有本地路径、config/index及文件大小/mtime身份，不宣称不可变上游权重revision。选题是14学科每科20题的screen，非完整MMLU-Pro。各MOD未独立测量的采用意见仍是评审判断，不是测量事实。不得作为官方榜单或V5.5验收结果。
+
+## 2026-10-27 后续诊断：第一处分叉与 norm 线索
+
+Fletcher进一步授权有界分叉诊断；见
+[divergence/RESULTS.md](divergence/RESULTS.md)。三臂16题×256token同步观测未发现严格greedy接受不匹配，第一处分叉已在相同历史的target
+logits排名中出现。相同B16/8192预算不保证相同实际prefill分块或decode验证宽度。GenNova已知的Qwen
+residual-norm精度偏差在当前宿主单算子上重现；尚未进行修正norm后的整模型因果对照，不能将其直接认定为280题掉分根因。新证据进一步要求把“当前采用意见”与“已证明vSpec有损”分开。此补充尚未纳入先前准备的benchmark发布commit/PDF，不得声称已公开发布或更新该归档。
+
+## 历史发布阻断：正式35B gamma未切换的更正
+
+四份正式日志均gamma_switches0，实际gamma4。见[控制器审计](divergence/gamma-controller.md)。先前准备的benchmark
+commit/PDF必须同步这一更正后才能申请发布，不能继续把2/4/6配置写成已实测动态切换。当前仍未公开发布。
+
+## 原生gamma4性能对照已完成
+
+见[三轮56题结果](gamma4/RESULTS.md)。六轮均完整、无抢占，candidate实际gamma4无切换，两rank gamma4 target FULL键一致。output
+tokens/s中位数原生811.05、candidate795.60，未观察额外吞吐收益。不能把旧gamma2对照的1.17×继续用作相对匹配gamma4的收益，也不能把本次差异单因果归给深度，因为baseline
+buckets同时扩充。待发布commit/PDF必须吸收本次新证据。
+
+## 最新归档版本
+
+总报告已更新为15页精简版，第6页仅保留匹配gamma4的关键实验与结论；正式评语不再使用未归因的质量下降作为算法反证。上述“未纳入PDF/commit”均是当时的发布阻断记录，已在本次归档准备中修正。benchmark归档现纳入分叉、图桶、norm有界诊断与gamma4复测的原始记录、配置和脚本；中止的norm候选实验仍标为未完成。旧MTP2数据不覆盖，不与新gamma4三轮合并统计。
