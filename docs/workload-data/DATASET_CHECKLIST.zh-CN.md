@@ -2,6 +2,8 @@
 
 ### RepoBench原生仓库级代码补全（准备中，未交付）
 
+公开源码入口：`python scripts/prepare_repobench_original_assets.py --output <新外部目录>`默认只展示计划，加`--execute`取得固定作者归档并校验；已有同版本原zip可加`--reuse-archive <zip>`避免重复下载。已有目录用`--verify-only`只读核验，服务器实际12原文件通过；不会修改作者CUDA代码或在此步骤执行模型。
+
 公开资产入口复用`python scripts/prepare_reused_research_assets.py REPOBENCH --mode plan`，取得原数据用`--mode download --data-root <外部目录> --max-bytes 1200000000`，已有数据用`--mode verify --data-root <外部目录>`只读核验。默认550MB预算会拒绝意外全下约1.05GB；必要时显式选择同固定版本`--hf-endpoint https://hf-mirror.com`，仍逐文件校验原SHA256。准备统一索引用`python scripts/prepare_reused_source_records.py REPOBENCH --data-root <同原目录> --output <新外部索引目录>`，不下载模型、不执行推理。公开核验/准备命令已在服务器用实际CI工件执行，原生benchmark仍未执行。
 
 - [x] 固定[作者v1.1源码](https://github.com/Leolty/repobench/tree/e0cfd34c9e7cd8f057efd32b9280b9719ae12a91)，12文件逐文件大小/Git
@@ -10,7 +12,7 @@
 - [x] 实际CI
   `e241accd`的47份安装载荷逐字节一致，全部49684原行字段重建和索引、固定研究消费者60条回读一致；语言及其独立数据版本不丢失，next_line/all_code/gold_snippet_index不混入模型输入。新增模型调用0，不等同原生benchmark跑通。
 - [ ] 原生模型环境与执行、官方评分。作者示例推荐DeepSeek-Coder-1.3B-Base，但`run.py`硬编码CUDA，依赖列表还包含stdlib
-  `difflib`，不能盲目照装后宣称NPU可用。须保留作者prompt构造/日期与长度过滤/下一行提取；不得将完整`all_code`、`next_line`或`gold_snippet_index`泄漏进请求。尚未下载模型或执行推理，不打总勾。
+  `difflib`，不能盲目照装后宣称NPU可用。须保留作者prompt构造/日期与长度过滤/下一行提取；不得将完整`all_code`、`next_line`或`gold_snippet_index`泄漏进请求。作者模型固定版本正在服务器准备，尚未执行推理，不打总勾。
 
 ### StructEval剩余渲染/VQA环境（未交付）
 
@@ -394,7 +396,7 @@ TB；服务器/data约1.42TB可用，未缩小语料。ChartQA当前两卡主机
 | LIVECODEBENCH              | [ ] 待开展                   | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                      |
 | HUMANEVAL                  | [x] 已交付                   | 原前三题NPU生成结果复用，公共隔离入口官方评分2/3，失败保留；164题原字段公共/研究消费相等，原3题索引消费相等。不是全164题模型成绩。见[回执](validation/humaneval-native-delivery-20261025.json)。                                                                                                                  |
 | MBPP                       | [x] full原生抽样可用         | 原题11/12/13双NPU生成、原始三测试与setup隔离CodeEval：参考解均通过，预测2通过/1失败原样保留；974原记录完整映射/索引，14处公共/研究回查一致，精确CI安装工件已核。[证据](validation/mbpp-original-native-sample-20261026.json)；非全500题，sanitized仅取得资产。                                                    |
-| REPOBENCH                  | [ ] 待开展                   | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                      |
+| REPOBENCH                  | [ ] 原生准备中               | 原数据/固定源码及实际CI公共与研究接入核验通过；作者模型准备中，NPU执行与官方评分待完成                                                                                                                                                                                                                            |
 | CROSSCODEEVAL              | [x] 原生协议已交付           | 69,494配置行全字段/索引核验复用；四语言原0..2生成/评分保留，公共入口原3..5共12条NPU生成及作者评分通过。精确成功CI44文件及12处公共/研究回查完成；非全语料或所有检索配置推理。[证据](validation/crosscodeeval-original-acquisition-20261026.json)。                                                                 |
 | LOCOMO                     | [x] 原生抽样交付             | 原9题复用、新99题执行及原提示/官方评分复核完成，合计108条；第3类全96题，其他四类各原前三题。原数据不改，第5类显式缺键兼容非上游已合并补丁；研究端接通。不称全1986题、图像或RAG完成。[交付回执](validation/locomo-native-delivery-20261025.json)                                                                   |
 | NATUREBENCH                | [ ] 待开展                   | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                      |
