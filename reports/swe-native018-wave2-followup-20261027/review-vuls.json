@@ -1,0 +1,115 @@
+{
+  "status": "reviewed_original_context_failure_empty_patch_official_negative_with_application_evidence_limit",
+  "agent": {
+    "status": "ContextWindowExceededError",
+    "model_calls": 19,
+    "elapsed_seconds": 124.8269911762327,
+    "agent_submitted": false,
+    "patch_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "container_cleanup_exit_code": 0
+  },
+  "request_audit": {
+    "attempts": 20,
+    "successful_returns": 19,
+    "rejected": 1,
+    "response_ids_usage_content_hashes_matched": true,
+    "http_retries": 0
+  },
+  "context_boundary": {
+    "fixed_context_tokens": 65536,
+    "requested_output_tokens": 4096,
+    "reported_input_tokens_lower_bound": 61441,
+    "capacity_rejection": true,
+    "configuration_changed": false,
+    "Agent_repeated": false,
+    "successful_returns_are_not_total_HTTP_requests": true
+  },
+  "official_grading": {
+    "resolved": false,
+    "unresolved": [],
+    "model_calls": 0,
+    "fail_to_pass": {
+      "expected": 6,
+      "passed": 0,
+      "failed": 6,
+      "missing": 0
+    },
+    "pass_to_pass": {
+      "expected": 1,
+      "passed": 1,
+      "failed": 0,
+      "missing": 0
+    },
+    "test_counts": {
+      "FAILED": 6,
+      "PASSED": 1
+    }
+  },
+  "raw_test_observation": {
+    "parser_entries": 7,
+    "failed": 6,
+    "passed": 1,
+    "target_test_execution_observed": true,
+    "mechanism": "Retained Go output shows Windows KB-list expectations differing from unchanged baseline results; the error-case subtest passes. No candidate code patch was submitted.",
+    "boundary": "Official false is preserved, but is not evidence that a submitted patch was applied and failed. The original context-limited attempt produced an empty patch; git apply failed128 and file-state capture remains incomplete."
+  },
+  "application": {
+    "status": "apply_failed",
+    "apply_exit_code": 128,
+    "state_capture": "incomplete",
+    "patch_application_attested": false,
+    "raw_patch_bytes": 0,
+    "raw_patch_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "affected_paths": null,
+    "before_after_equal": null,
+    "after_equals_graded": null,
+    "original_capture_failures_preserved": true
+  },
+  "derivation": {
+    "r1_failure_preserved": true,
+    "r1_failure_receipt_sha256": "53e71e0f7ed24d0080d12c87418cac4da41fb12af779f1d7dfbad9a7d4bd5525",
+    "r2_source_sha256": "01adc7565f931eb5fe062e4127ff1373fbd40c581cc51c88982ac996604f086d",
+    "scope": "Exact empty-patch branch independently binds existing raw application files; does not invent complete attestation, change score, patch or scorer."
+  },
+  "resource_release": {
+    "service_exit_code": 0,
+    "sessions_drained": true,
+    "all_devices_released": true,
+    "CPU_agent_cleanup_exit_code": 0,
+    "original_Agent_and_grade_controllers_exited": true,
+    "original_image_containers_absent": true,
+    "live_grade_resources": {
+      "CPUs": 2,
+      "memory_GiB": 4,
+      "cpuset": "24-31",
+      "network": "swe-pro-mtu1400"
+    },
+    "global_CPU_empty_not_claimed_during_subsequent_control": true
+  },
+  "evidence": {
+    "CPU_files": 67,
+    "CPU_seal_sha256": "668e7440a67a5b7a31c7bfbe047d50d8abf167ea48266bdff461d3b65d63855d",
+    "CPU_summary_sha256": "d0feefc0d4a3ca91e3cb63c220e2b1706125bc3384fd00258a94fdb56e980862",
+    "storage_result_review_sha256": "dd40a6b914ddd6f9a4c6b092faed53996abf0fb196f01cff129896e107e97eef",
+    "lifecycle_summary_review_sha256": "904b2bd4a1f4e55e1414df2b63e666c03419cc1aaf2f6ecd705f30dc685c1e37",
+    "live_resource_review_sha256": "227c582cf174ff816126a8363cf23a156166eeb76dc6b34bf39cd8b2ade97278",
+    "service_release_review_sha256": "6486a963fec9ecf2bba10312e5a3d4df4401ee4dbc6c68c3f70a2786845ceb31",
+    "service_receipt_sha256": "c8ecfd4e771f4e97a924ed9c0df040baade3b6018ea285f34ac220172b52ca1c",
+    "service_seal_sha256": "ff148abc167bc52e65ac815567c5a68be3f718c169f52f350c881f7e1e056ade",
+    "service_files": 14
+  },
+  "current_counts": {
+    "attempts": 23,
+    "original_official_positive": 3,
+    "same_answer_recovery_positive": 4,
+    "unattempted": 708,
+    "prior_snapshots_unchanged": true
+  },
+  "V097_snapshot_unchanged": {
+    "attempts": 21,
+    "original_official_positive": 3,
+    "same_answer_recovery_positive": 4,
+    "unattempted": 710
+  },
+  "new_review_model_or_grading_calls": 0
+}

@@ -1,0 +1,98 @@
+"""Export only control outcomes and hashes, never oracle or task contents."""
+import hashlib
+import json
+from pathlib import Path
+
+W = Path("/swe-persist/swe-pro-shuhao-20261025")
+R1 = W / "terminal-break-filter-arm64-r1"
+R2 = W / "terminal-break-filter-arm64-r2"
+OUT = W / "evidence/terminal-break-filter-controls-public-r2"
+
+
+def read(path):
+    return json.loads(path.read_text())
+
+
+def sha(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def verify_seal(root, expected):
+    seal = root / "SHA256SUMS-controls-r1"
+    assert sha(seal) == expected
+    lines = seal.read_text().splitlines()
+    for line in lines:
+        digest, name = line.split("  ", 1)
+        path = root / name
+        assert path.resolve().is_relative_to(root) and not path.is_symlink()
+        assert sha(path) == digest
+    return len(lines)
+
+
+assert verify_seal(R1, "9009140ecc54944917318b312e7de928d101638287e31531777f835b66396e67") == 57
+assert verify_seal(R2, "393026a5acba4a0c0f07c457810337029ce917b6bfe97472ae10e84318df35ea") == 77
+old = read(R1 / "control-nop-receipt.json")
+assert old["reward"] is None and old["exit_code"] == 130 and old["ctrf_present"] is False
+assert old["all_owned_containers_released"] is True
+assert not (R1 / "control-oracle-receipt.json").exists()
+assert read(R2 / "build-exit.json")["source_build_executed_now"] is False
+pipeline = read(R2 / "pipeline-receipt.json")
+assert [s["exit_code"] for s in pipeline["stages"]] == [0, 0, 0, 1]
+assert pipeline["all_containers_absent_at_completion"] is True
+controls = {}
+evidence = {}
+for role in ("nop", "oracle"):
+    path = R2 / f"control-{role}-receipt.json"
+    value = read(path)
+    assert value["exit_code"] == 0 and value["trial_exception"] is None
+    assert value["model_requests"] == 0 and value["all_owned_containers_released"] is True
+    assert value["reward"] == 0 and value["ctrf_present"] is True
+    result = R2 / value["results"][0]
+    ctrf = read(result.parent / "verifier/ctrf.json")
+    tests = [{"name": t["name"], "status": t["status"]} for t in ctrf["results"]["tests"]]
+    assert len(tests) == 1 and tests[0]["status"] == "failed"
+    counts = {k: value["ctrf_summary"][k] for k in ("tests", "passed", "failed", "skipped", "pending", "other")}
+    controls[role] = dict(control_status=value["status"], Harbor_exit_code=0,
+                          reward=value["reward"], counts=counts, tests=tests,
+                          owned_containers_released=True)
+    evidence[f"{role}_receipt"] = sha(path)
+    evidence[f"{role}_ctrf"] = sha(result.parent / "verifier/ctrf.json")
+assert controls["nop"]["control_status"] == "passed"
+assert controls["oracle"]["control_status"] == "failed"
+for label, path in {
+    "r1_seal": R1 / "SHA256SUMS-controls-r1",
+    "r1_pipeline": R1 / "pipeline-receipt.json",
+    "r1_nop": R1 / "control-nop-receipt.json",
+    "r2_seal": R2 / "SHA256SUMS-controls-r1",
+    "r2_pipeline": R2 / "pipeline-receipt.json",
+    "r2_build_plan": R2 / "build-plan.json",
+    "r2_controls_plan": R2 / "controls-plan.json",
+    "r2_image": R2 / "built-image.json",
+    "derivation_source": Path(__file__),
+}.items():
+    evidence[label] = sha(path)
+summary = dict(
+    schema="terminal-original-controls/v1", task="break-filter-js-from-html",
+    architecture="arm64", derived_image_id=read(R2 / "built-image.json")["Id"],
+    original_task_files=12, task_oracle_tests_changed=False,
+    original_budget=dict(build_seconds=600, agent_seconds=1200, verifier_seconds=1200,
+                         browser_alert_wait_seconds=5, CPUs=1, memory_GiB=2, cpuset="24-31", network_MTU=1400),
+    original_r1=dict(build_exit_code=0, nop_exit_code=130, reward=None, CTRF_present=False,
+                     oracle_started=False, failure_phase="mount guard before verifier",
+                     preserved=True, sealed_files=57),
+    r2=dict(reused_original_built_image=True, new_image_build=False, controls=controls,
+            pipeline_status=pipeline["status"], oracle_wrapper_exit_code=1, sealed_files=77),
+    boundary=dict(original_positive_control_passed=False, target_test_body_executed=True,
+                  observed_failure="No alert observed within the original five-second wait",
+                  filtered_HTML_and_browser_DOM_not_captured=True,
+                  specific_parser_browser_version_or_ARM64_cause_not_established=True,
+                  model_task_score=None, new_model_calls=0, new_model_task_attempts=0,
+                  total_model_tasks_attempted=3, total_tasks=89, unattempted_model_tasks=86),
+    all_owned_containers_released=True, evidence_sha256=evidence,
+    private_task_oracle_answers_or_requests_included=False,
+)
+OUT.mkdir(exist_ok=False)
+with (OUT / "summary.json").open("x") as stream:
+    json.dump(summary, stream, indent=2)
+    stream.write("\n")
+print(json.dumps({"status": "public_projection_derived", "summary_sha256": sha(OUT / "summary.json")}))
