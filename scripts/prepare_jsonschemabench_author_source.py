@@ -38,7 +38,7 @@ def main():
     parser.add_argument("--author-root", type=Path, required=True)
     parser.add_argument(
         "--source",
-        choices=["jsonschemabench", "bigcodebench", "longmemeval-v2"],
+        choices=["jsonschemabench", "bigcodebench", "longmemeval-v2", "dragon"],
         default="jsonschemabench",
         help="Pinned original author source only; historical default unchanged",
     )

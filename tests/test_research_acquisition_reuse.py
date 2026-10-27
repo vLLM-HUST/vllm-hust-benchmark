@@ -76,7 +76,7 @@ def test_original_research_assets_are_registered_without_native_completion_claim
     sources = json.loads(
         runner.CATALOG.read_text("utf-8"), object_pairs_hook=unique_object
     )["sources"]
-    assert len(sources) == 105  # frozen100 plus five already-planned sources
+    assert len(sources) == 106  # existing105 plus previously planned DRAGON_PUBLIC manifest
     assert sum(EXPECTED.values()) == 48
 
     ledger = json.loads(

@@ -3,6 +3,24 @@
 当前交付
 **63/113项**，待完成50项，另5项仅分类。首批#432的60项和第二批#538的ScienceWorld已合入main；早期五个草稿已关闭为被汇总承接，历史和分支保留。第三批新增CodeJudge-Eval及DeepPlanning的固定原生样本、评分及实际CI消费交付，尚未合入。打勾不代表全量模型评测、高分或性能保证。
 
+### DRAGOn同版本原始RAG资产（未交付，不打总勾）
+
+- [x] 复用公共获取入口，服务器取得发布方1.15.0同标签四份原文件并核验SHA256/大小，共2,277,123字节：600个公开问题、542篇公开文本、600条参考QA及542条参考文本映射。
+- [x] 全量原关系已核验：问题和参考问题逐字一致、全部公开/参考文本ID映射及正文一致、933条参考文本关联有效。四份原文件均未修改，不把参考答案混入模型输入。
+- [x] 原作者16份协议/核心库文件、44366字节已从固定Git
+  blob取得并核验；复用现有作者源码获取入口，不复制作者代码入仓库。原始Git连接失败、HF主通道失败及改用原始同摘要传输的过程保留。
+- [ ] 原生适配、公共/研究消费、官方检索/生成与评分尚未完成；需要适配NPU的embedding和reader环境，未以只读检查替代benchmark运行。[准备证据](validation/dragon-original-preparation-20261028.json)
+
+```bash
+python scripts/prepare_reused_research_assets.py DRAGON_PUBLIC --mode plan
+python scripts/prepare_reused_research_assets.py DRAGON_PUBLIC --mode download \
+  --data-root <仓库外数据目录> --max-bytes 3000000
+python scripts/prepare_jsonschemabench_author_source.py --source dragon --action prepare \
+  --author-root <仓库外作者源码目录> --max-bytes 100000
+```
+
+仅登记既定113项中的`DRAGON_PUBLIC`，不新增交付范围；参考仓库虽名含private，已通过官方无凭据元数据实查同版本非gated且Apache-2.0，不能仅凭名字推断公开/私有。四份资产保持独立版本身份，均固定同一发布标签。其月度新闻快照不是生产文档增删事件或逐请求版本轨迹，不补造不存在的在线事件。
+
 ### VisionArena-Chat原始多模态会话资产（未交付，不打总勾）
 
 - [x] 固定官方版本完整文件元数据已登记：43份原Parquet分片，共84,565,530,886字节（约84.6GB），每份记录发布方LFS摘要、大小和原始URL，见`visionarena_original_files_v1.json`。仅元数据，不含图片或会话正文。
