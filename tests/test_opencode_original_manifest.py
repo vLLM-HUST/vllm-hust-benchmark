@@ -94,3 +94,34 @@ def test_opencode_prepare_preserves_all_original_fields_without_execution(tmp_pa
     } == original
     assert path.read_bytes() == raw
     assert not report["native_execution_complete"]
+
+
+def test_opencode_delivery_receipt_is_bounded_to_original_corpus_profile():
+    root = Path(__file__).resolve().parents[1]
+    directory = root / "docs/workload-data"
+    item = json.loads(
+        (directory / "dataset-validation-status.json").read_text("utf-8")
+    )["delivery_inventory"]["OPENCODE"]
+    receipt = json.loads((root / item["delivery_receipt"]).read_text("utf-8"))
+    stage = json.loads(
+        (directory / "validation/opencode-original-readiness-20261028.json").read_text(
+            "utf-8"
+        )
+    )
+    assert item["checked"] and receipt["source_checkbox_eligible"]
+    assert not stage["source_checkbox_eligible"]
+    assert receipt["acquired_original_shards"] == [0, 24, 49]
+    assert receipt["original_rows_fully_equal_and_indexed"] == 300000
+    assert receipt["original_fields_preserved"] == 9
+    assert receipt["native_profile"]["original_cases"] == 9
+    assert receipt["native_profile"]["stop_count"] == 7
+    assert receipt["native_profile"]["length_count"] == 2
+    assert receipt["provider_and_research"]["installed_payloads_byte_equal"] == 57
+    assert (
+        receipt["provider_and_research"]["fixed_current_public_and_research_readbacks"]
+        == 9
+    )
+    assert not receipt["host_execution_of_original_tests_or_generated_code"]
+    assert not receipt["quality_scored"]
+    assert not receipt["independent_quality_benchmark_claim"]
+    assert not receipt["whole_50_shard_execution_claim"]

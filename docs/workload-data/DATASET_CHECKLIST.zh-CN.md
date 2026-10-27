@@ -1,15 +1,18 @@
 # 数据集逐项验证清单
 
 当前交付
-**64/113项**，待完成49项，另5项仅分类。首批#432的60项和第二批#538的ScienceWorld已合入main；早期五个草稿已关闭为被汇总承接，历史和分支保留。第三批新增CodeJudge-Eval、DeepPlanning及OpenMath固定原生profile的实际CI消费交付，尚未合入。OpenMath是训练语料原问题生成，不是独立质量benchmark。打勾不代表全量模型评测、高分或性能保证。
+**65/113项**，待完成48项，另5项仅分类。首批#432的60项和第二批#538的ScienceWorld已合入main；早期五个草稿已关闭为被汇总承接，历史和分支保留。第三批新增CodeJudge-Eval、DeepPlanning、OpenMath及OpenCode固定原生profile的实际CI消费交付，尚未合入。OpenMath/OpenCode是训练语料原问题生成，不是独立质量benchmark。打勾不代表全量模型评测、高分或性能保证。
 
-### OpenCodeInstruct原始代码训练语料（进行中，不打总勾）
+### OpenCodeInstruct原始代码训练语料（固定原始profile已交付）
 
 - [x] 核验官方固定版本元数据：50个原始train分片、6,861,113,102字节，公开CC-BY-4.0。复用已有原字段适配，问题与教师代码、原测试、历史测试状态和判断信息分开保存，不生成替代题目。
 - [x] 公共获取入口支持固定原文件，公共引用准备入口及微型夹具回归已补齐；这些只是软件能力验证，不代表真实数据或模型已跑通。
 - [x] 服务器已取得预先固定的0/24/49原始分片，共422,115,928字节，发布方LFS摘要及大小全部复核通过；每份Parquet元数据100000行，schema及原前3条字段类型已检查。实际`average_test_score`为double/float，不按HF卡片中的string描述强转。[阶段证据](validation/opencode-original-readiness-20261028.json)
 - [x] 三份可用原分片全部300000条九字段、引用索引及9条当前研究侧回读通过；使用候选目录和已验证CI适配运行库，不能冒充新目录的实际CI工件验证。
-- [ ] 固定原问题生成、保存完整性核验及实际当前CI工件资格仍待完成。原`unit_tests`及生成代码不得在宿主机执行；如需功能评估，必须另行核验隔离环境。
+- [x] 固定9条原问题在现有9B BF16 TP1 NPU服务生成并保存核验：7 stop、2 length，预算8192，未换题或重跑。实际3bf633eb CPU
+  CI包57载荷核验和9条当前研究回读通过，未重建索引。
+- [x] 3bf633eb的tests、lint及CPU
+  smoke全部通过，[最终交付范围与证据](validation/opencode-native-delivery-20261028.json)。原`unit_tests`及生成代码未执行；如需功能评估，必须另行核验隔离环境，不把生成跑通当代码正确率。
 
 ```bash
 python scripts/prepare_reused_research_assets.py OPENCODE --mode plan \
@@ -24,7 +27,7 @@ python scripts/prepare_reused_source_records.py OPENCODE \
 
 这是合成代码训练语料，不是独立代码质量benchmark。教师答案和原历史测试分数不代表本地模型结果；实际三份文件的`average_test_score`为double，与HF卡片的string描述不同，必须原样保留数值，不能擅自改类型或补造评分器。
 
-原问题生成复用已测的训练语料执行流程，默认只显示计划；`--full`为流式执行所选原文件全部行，默认固定原前3条/文件，不按结果换题。可用模型回退profile如下，不是作者质量评测配置；当前真实生成尚在进行，不提前打勾。
+原问题生成复用已测的训练语料执行流程，默认只显示计划；`--full`为流式执行所选原文件全部行，默认固定原前3条/文件，不按结果换题。可用模型回退profile如下，已完成9条原问题生成与保存核验，但不是作者质量评测配置。
 
 ```bash
 python scripts/run_opencode_original.py --mode run \
@@ -661,7 +664,7 @@ TB；服务器/data约1.42TB可用，未缩小语料。ChartQA当前两卡主机
 | NATURAL_INSTRUCTIONS       | [x] 登记原生任务可用                       | 五文件/8284实例字段及固定CI回查通过；分类102、翻译250、抽取261、改写1178全覆盖，摘要首尾6题，合计1797唯一实例。[交付回执](validation/ni-native-delivery-20261024.json)；非整个NI，不替代底层数据集原benchmark协议                                                                                                 |
 | OPENMATH2                  | [x] 固定原始语料profile已交付              | 3个固定原分片全部1309949条字段/索引、9条原问题生成与保存核验、实际CI包及研究回读通过；其余29分片未验证，不宣称数学质量评测。                                                                                                                                                                                      |
 | OPENTHOUGHTS3              | [x] 原语料续写交付                         | 固定三分片30000行/索引保真，三域各3条NPU续写及保存审计、实际CI46载荷/18研究回读通过；九条均预算耗尽无最终答案，不作质量或全120万条执行结论。[回执](validation/openthoughts3-native-delivery-20261027.json)                                                                                                        |
-| OPENCODE                   | [ ] 待开展                                 | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                      |
+| OPENCODE                   | [x] 固定原始代码语料profile已交付          | 3个固定原分片全部300000条九字段/索引、9条原问题生成及保存核验、实际CI包57载荷和研究侧回读通过；未执行代码或评判正确率，其余47分片未验证。                                                                                                                                                                         |
 | SWESMITH                   | [ ] 待开展                                 | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                      |
 | WORKARENA                  | [ ] 待开展                                 | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                      |
 | APPWORLD                   | [ ] 核心环境及原数据已准备，原生任务未完成 | 官方0.1.3.post1协议源码、Python3.11.17隔离核心客户端及官方数据已取得；公共只读入口复用核验732项原任务划分和目录关系。任务隔离、原Agent执行及官方评分待完成，不打总勾。见本页AppWorld小节及机器清单。                                                                                                              |
