@@ -500,7 +500,7 @@ TB；服务器/data约1.42TB可用，未缩小语料。ChartQA当前两卡主机
 | SWESMITH                   | [ ] 待开展                   | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                      |
 | WORKARENA                  | [ ] 待开展                   | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                      |
 | APPWORLD                   | [ ] 待开展                   | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                      |
-| SCIENCEWORLD               | [ ] 待开展                   | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                      |
+| SCIENCEWORLD               | [ ] 第二批收口中             | 原生9个episode完成（NPU Qwen3.5-9B、464次调用），保存评分已核对；候选安装包7207条原字段/索引及9条研究回读通过。公开获取链路已实测复用原资产；尚待CI工件闭环。严格新环境重放存在文本差异，保留失败，不宣称确定性复现。回执：validation/scienceworld-author-environment-preparation-20261027.json。                 |
 | BIXBENCH                   | [ ] 待开展                   | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                      |
 | LABBENCH                   | [x] 已完成                   | 31原子集各首3条共93题原生NPU运行、原评分及保存复核通过；87 stop/6 length保留，45题被原解析器解析、14题正确。1967条索引/原图像、CI46载荷和124研究回读已核复用；不是全量推理或作者模型质量复现。                                                                                                                    |
 | PAPERBENCH                 | [ ] 待开展                   | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                      |
@@ -771,7 +771,7 @@ ID、数据版本、模型、执行器、评分器、终态、失败原因和脱
 | [ ]  | RULER                | 待分类核对                                                                                                                                           | 待复核                                           | 待复核                                     | 未跑                                                          | 未跑                                                          | 待重新核验                                                                                                                                                                                                                                                                          |
 | [ ]  | SCHEMASTORE          | structured-generation                                                                                                                                | 待复核                                           | 待复核                                     | 未跑                                                          | 未跑                                                          | 待重新核验                                                                                                                                                                                                                                                                          |
 | [ ]  | SCIENCEAGENTBENCH    | scientific-experiment-planning<br>simulation-analysis-verification<br>scientific-coding-workflow                                                     | 服务器已核验选定原文件                           | 原0/1/2三条输入/参考往返                   | 原生任务未跑                                                  | 未评分                                                        | [服务器读取记录](PUBLIC_ASSET_SERVER_READINESS.zh-CN.md)，非任务执行；原生环境/全量/最终交接未完                                                                                                                                                                                    |
-| [ ]  | SCIENCEWORLD         | scientific-experiment-planning<br>simulation-analysis-verification                                                                                   | 待复核                                           | 待复核                                     | 未跑                                                          | 未跑                                                          | 待重新核验                                                                                                                                                                                                                                                                          |
+| [ ]  | SCIENCEWORLD         | scientific-experiment-planning<br>simulation-analysis-verification                                                                                   | 原资产7207条、30类已取得                         | 已适配；参考路径与输入分离                 | 固定9原生episode已跑完                                        | 保存作者评分已核验；严格环境重放未通过                        | 候选包完整读取/索引及9条研究回读通过；待CI闭环，不计完成                                                                                                                                                                                                                            |
 | [ ]  | SPIDER               | structured-generation                                                                                                                                | 待复核                                           | 待复核                                     | 未跑                                                          | 未跑                                                          | 待重新核验                                                                                                                                                                                                                                                                          |
 | [ ]  | SPOKENWOZ            | conversation-continuation<br>audio-streaming-interaction                                                                                             | 待复核                                           | 待复核                                     | 未跑                                                          | 未跑                                                          | 待重新核验                                                                                                                                                                                                                                                                          |
 | [x]  | STRUCTEVAL           | structured-generation                                                                                                                                | 官方文件SHA已核验                                | 修正后组件回查50原题                       | Text→JSON原50条全部完成                                       | 官方语法/路径均分0.9616，3条未满分                            | [完整子集回执](validation/structeval-text-json-full-npu-20261022.json)，其他格式/转换未跑                                                                                                                                                                                           |
@@ -862,4 +862,41 @@ ID、数据版本、模型、执行器、评分器、终态、失败原因和脱
 
 ## 新推荐，待后续补接入
 
-17 个新增候选及适用边界见 [缺口来源目录](gap-sources-20261021.json)。这些来源尚待获取、许可复核、适配和真实执行，不混入上述 97 项完成率。
+17 个新增候选及适用边界见
+[缺口来源目录](gap-sources-20261021.json)。97项是历史盘点口径；当前交付统一按机器清单的113项统计，另5项仅分类，不用历史数字重新计算完成率。
+
+## 第二批：ScienceWorld 原生交付准备（尚未完成）
+
+原始任务资产与作者ReAct代码可统一准备在仓库外：`python scripts/prepare_scienceworld_original_assets.py --profile author-react --execute --output /external/swiftsage-source`。入口固定作者提交，核验12份原文件；`goldpaths-all.zip`保留原字节，原仓库路径`data_utils/goldpaths-all.zip`明确记录。已有原资产可同时传入`--reuse-root`与`--gold-archive`逐文件核验复用，不重复下载。该复用路径已在服务器实测通过。默认不传`--execute`仍只打印计划。
+
+数据组件将作者公开的30类、7207个原生task/variation映射为环境任务：train3592、dev1796、test1819；保留原任务描述、划分、索引关系。作者gold
+path只放参考结果，不进入模型输入，也不作为本次模型观测。用外部配置`{"sources":[{"source_id":"SCIENCEWORLD","data_root":"/external/swiftsage-source"}]}`执行`python -m vllm_hust_workload_data.pipeline run --config /external/input.json --output /external/fresh-prepared`即可建立原生引用索引，研究侧沿既有resolve接口消费。候选安装包完整7207条字段/索引与9条固定研究回读已通过；这不是实际CI工件验证。
+
+当前固定9个原生episode已全部结束，464次模型调用；保存作者评分依次为任务3的100/10/0、任务4的0/3/3、任务5的25/83/25，不据此宣称全量质量或性能。`verify_scienceworld_original_saved.py --saved-scores-only`可无模型、无Java核验保存身份/协议/评分一致性；默认严格CPU环境重放仍保留为额外检查，已有观察文本/freelook差异，未通过、不改写或豁免。评分核验器曾错误计入reset初始分，已按作者last_score初始化为0的原逻辑修正；原输出不变，失败过程保留。
+
+原生运行入口为 `scripts/run_scienceworld_original.py`，客户端依赖快照为
+`configs/workload-native/scienceworld-react-client-requirements.txt`（ARM64
+Python3.10；不是作者完整CUDA训练环境）。从固定SwiftSage提交获取原文件放在仓库外，使用该隔离环境及Java17执行；以下目录均为使用者指定的外部路径，不把数据或模型放进仓库：
+
+```bash
+python -m pip install -r configs/workload-native/scienceworld-react-client-requirements.txt
+python scripts/run_scienceworld_original.py \
+  --author-source-root /external/swiftsage-source \
+  --output /external/fresh-native-output \
+  --endpoint http://127.0.0.1:19466/v1 --model Qwen/Qwen3.5-9B \
+  --api-server-pid <existing-api-pid> --npu-engine-pid <existing-engine-pid> \
+  --tokenizer-cache /external/tokenizer-cache --task-nums 3,4,5 --disable-thinking
+```
+
+`--disable-thinking` 是明确声明的Qwen非思考部署配置，不改变作者提示、采样题目、动作预算或评分。作者GPT-4 tokenizer/context
+profile保留；因此是替代模型的接入验证，不是GPT-4质量复现。入口每次模型调用前核查服务无排队、NPU仅有指定引擎；不启动或停止模型。原生输出保留在外部目录，返回后仍需评分和保存记录独立复核，不能仅凭退出码打勾。当前固定9个episode已结束，保存评分与候选研究回读通过，尚待CI闭环；原预检完成27类任务配置核验，但退出清理调用了旧版本不存在的close方法，异常保留，已确认没有遗留Java进程。
+
+公共准备入口：`python scripts/prepare_scienceworld_original_assets.py --output /outside/repository/scienceworld`
+默认只打印计划；增加 `--execute` 获取固定官方版本的15份原文件，或使用 `--verify-only`
+核验已有目录。下载失败保留现场，不覆盖原目录；该入口不运行模型，不代表原生交付完成。
+
+已验证的1.3.0环境只用于作者环境可用性检查：30类任务各variation 0完成加载、reset和step，无简化。原文件、JAR、Python客户端均放服务器，不纳入Git。回执见
+`validation/scienceworld-author-environment-preparation-20261027.json`。
+
+原生Agent基线拟复用作者[SwiftSage论文分支](https://github.com/SwiftSage/SwiftSage/tree/b8ea624231a6a8d83d78c1c12bea1b44b8ea758b)，而非其已转为通用推理的main。该分支要求
+`scienceworld==1.1.3`，已在服务器另建隔离环境安装，不能与1.3.0检查混算。原ReAct流程使用作者提示、test_mini原test首3个variation、100环境步数、最多200次Agent循环、每次50生成token，以及原动作处理和环境评分。作者脚本的easy配置须明确标为作者基线profile，不宣称无简化ScienceWorld或全量论文复现。原生模型执行、保存评分核验及候选研究侧消费已完成；严格新环境重放差异保留，CI闭环未完成，保持未打勾。
