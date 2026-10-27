@@ -1,0 +1,342 @@
+name: Workload data CPU correctness smoke
+
+on:
+  pull_request:
+    paths:
+      - '.gitignore'
+      - 'workload-preparation/**'
+      - 'src/vllm_hust_benchmark/workload_data.py'
+      - 'src/vllm_hust_benchmark/workload_response_validation.py'
+      - 'tests/test_workload*'
+      - 'docs/workload-data/**'
+      - 'scripts/verify_workload_migration_inputs.py'
+      - 'scripts/run_source_request_samples.py'
+      - 'scripts/run_tau2_original_telecom.py'
+      - 'scripts/run_gsm8k_incremental_samples.py'
+      - 'scripts/run_arc_original_samples.py'
+      - 'scripts/run_nq_open_original.py'
+      - 'scripts/run_longalpaca_original.py'
+      - 'tests/test_longalpaca_original_runner.py'
+      - 'scripts/prepare_lmeval_api_client.py'
+      - 'scripts/prepare_dureader_official_scorer.py'
+      - 'tests/test_dureader_official_scorer_preparation.py'
+      - 'scripts/score_dureader_original.py'
+      - 'scripts/run_dureader_original.py'
+      - 'tests/test_dureader_original_scoring.py'
+      - 'tests/test_dureader_original_runner.py'
+      - 'tests/test_lmeval_api_client_preparation.py'
+      - 'tests/test_nq_open_original_runner.py'
+      - 'scripts/run_mmlu_pro_original_samples.py'
+      - 'scripts/run_structeval_original_json.py'
+      - 'scripts/run_longbench_v2_original_samples.py'
+      - 'scripts/prepare_longbench_v2_original_capacity.py'
+      - 'scripts/prepare_narrativeqa_original_metric.py'
+      - 'scripts/run_narrativeqa_original_summary.py'
+      - 'scripts/prepare_schemastore_runtime.py'
+      - 'scripts/prepare_schemastore_original_assets.py'
+      - 'scripts/run_schemastore_original_validation.py'
+      - 'scripts/run_labbench_original.py'
+      - 'tests/test_labbench_original_runner.py'
+      - 'scripts/verify_labbench_original_saved.py'
+      - 'tests/test_labbench_saved_audit.py'
+      - 'scripts/prepare_labbench_original_assets.py'
+      - 'tests/test_labbench_original_assets.py'
+      - 'scripts/prepare_labbench_runtime.py'
+      - 'tests/test_labbench_runtime.py'
+      - 'scripts/prepare_repobench_original_assets.py'
+      - 'tests/test_repobench_original_assets.py'
+      - 'scripts/prepare_repobench_runtime.py'
+      - 'tests/test_repobench_runtime.py'
+      - 'scripts/run_repobench_original_npu.py'
+      - 'tests/test_repobench_original_npu.py'
+      - 'scripts/verify_repobench_original_saved.py'
+      - 'tests/test_repobench_saved_audit.py'
+      - 'scripts/prepare_structeval_rendering_plan.py'
+      - 'tests/test_structeval_rendering_plan.py'
+      - 'scripts/verify_longbench_v2_original_saved.py'
+      - 'scripts/run_dolly_original_samples.py'
+      - 'scripts/run_dolly_original_categories.py'
+      - 'scripts/run_longwriter_original_samples.py'
+      - 'scripts/run_agentbench_alfworld_original.py'
+      - 'scripts/run_humaneval_original_generation.py'
+      - 'scripts/prepare_humaneval_official_samples.py'
+      - 'scripts/prepare_bigcodebench_official_samples.py'
+      - 'tests/test_bigcodebench_official_samples.py'
+      - 'scripts/audit_workload_data_wheel.py'
+      - 'scripts/workload_delivery_progress.py'
+      - 'tests/test_workload_delivery_progress.py'
+      - 'tests/test_workload_wheel_audit.py'
+      - 'tests/test_humaneval_official_samples.py'
+      - 'scripts/run_longbench_v1_qasper_original.py'
+      - 'scripts/run_qasper_original.py'
+      - 'scripts/*fleurs*'
+      - 'tests/test_fleurs*'
+      - 'scripts/*crosscodeeval*'
+      - 'tests/test_crosscodeeval*'
+      - 'tests/test_qasper_original_runner.py'
+      - 'scripts/run_bfcl_v4_simple_python_original.py'
+      - 'scripts/run_oasst_original_continuation.py'
+      - 'scripts/run_historical_dialogue_original.py'
+      - 'scripts/score_qrecc_original_qa.py'
+      - 'scripts/*mbpp*'
+      - 'scripts/*mooncake*'
+      - 'scripts/*copilot*'
+      - 'tests/test_copilot*'
+      - 'scripts/*toolace*'
+      - 'scripts/humaneval_isolated_worker.py'
+      - 'scripts/run_humaneval_isolated_scoring.py'
+      - 'tests/test_historical_dialogue*'
+      - 'tests/test_qrecc_original_qa_score.py'
+      - 'tests/test_mbpp*'
+      - 'tests/test_mooncake*'
+      - 'tests/test_toolace*'
+      - 'scripts/run_natural_instructions_original.py'
+      - 'scripts/run_ni_original_range.py'
+      - 'tests/test_ni_original_range.py'
+      - 'scripts/run_ni_editing_extraction_original.py'
+      - 'scripts/run_bbh_boolean_original.py'
+      - 'scripts/run_bbh_original_tasks.py'
+      - 'scripts/run_math500_original_samples.py'
+      - 'scripts/run_math500_native.py'
+      - 'scripts/run_quality_original_mc.py'
+      - 'scripts/run_jsonschemabench_original_schema.py'
+      - 'scripts/jsonschemabench_local_engine.py'
+      - 'scripts/prepare_jsonschemabench_author_source.py'
+      - 'configs/workload-native/bigcodebench-author-source.json'
+      - 'scripts/prepare_jsonschemabench_original_records.py'
+      - 'tests/test_jsonschemabench_original_records.py'
+      - 'scripts/run_jsonschemabench_official.py'
+      - 'configs/workload-native/jsonschemabench-*'
+      - 'scripts/probe_jsonschemabench_environment.py'
+      - 'tests/test_jsonschemabench_environment_probe.py'
+      - 'tests/test_jsonschemabench_local_engine.py'
+      - 'scripts/run_bigcodebench_original_generation.py'
+      - 'scripts/run_ds1000_original_generation.py'
+      - 'scripts/prepare_ds1000_official_samples.py'
+      - 'tests/test_ds1000_official_samples.py'
+      - 'scripts/run_locomo_original_qa.py'
+      - 'tests/test_locomo_original_qa_runner.py'
+      - 'scripts/run_burstgpt_original_example.py'
+      - 'scripts/prepare_qasper_original_assets.py'
+      - 'tests/test_burstgpt_original_example.py'
+      - 'scripts/run_ruler_original_profile.py'
+      - 'scripts/run_longmemeval_original.py'
+      - 'scripts/run_gpqa_original.py'
+      - 'tests/test_gpqa_original_runner.py'
+      - 'scripts/run_xlsum_original.py'
+      - 'scripts/run_beir_original.py'
+      - 'scripts/run_stsb_original.py'
+      - 'scripts/run_librispeech_original.py'
+      - 'scripts/run_xsum_original.py'
+      - 'scripts/prepare_xsum_original_assets.py'
+      - 'scripts/prepare_multinews_original_assets.py'
+      - 'scripts/run_multinews_original.py'
+      - 'scripts/run_billsum_original.py'
+      - 'scripts/prepare_billsum_original_assets.py'
+      - 'scripts/prepare_flores200_original_assets.py'
+      - 'scripts/prepare_flores200_original_records.py'
+      - 'scripts/run_flores200_original.py'
+      - 'scripts/score_flores200_original_results.py'
+      - 'tests/test_flores200_original_runner.py'
+      - 'scripts/prepare_reused_research_assets.py'
+      - 'scripts/prepare_reused_source_records.py'
+      - 'scripts/verify_infinitebench_original_code.py'
+      - 'scripts/run_infinitebench_original.py'
+      - 'tests/test_infinitebench_original_runner.py'
+      - 'tests/test_chartqa_native_toolkit.py'
+      - 'tests/test_chartqa_original_view.py'
+      - 'tests/test_chartqa_original_runner.py'
+      - 'tests/test_chartqa_original_saved.py'
+      - 'tests/test_chartqa_native_runtime.py'
+      - 'tests/test_mmmu_original_assets.py'
+      - 'tests/test_mmmu_original_runner.py'
+      - 'tests/test_tracelab_original_build.py'
+      - 'tests/test_tracelab_original_runner.py'
+      - 'tests/test_paws_original_assets.py'
+      - 'tests/test_paws_original_runner.py'
+      - 'scripts/run_paws_original.py'
+      - 'scripts/verify_paws_original_saved.py'
+      - 'scripts/prepare_paws_original_assets.py'
+      - 'configs/workload-native/paws-original-assets.json'
+      - 'scripts/build_tracelab_original.py'
+      - 'scripts/run_tracelab_original.py'
+      - 'scripts/prepare_mmmu_author_source.py'
+      - 'scripts/run_mmmu_original.py'
+      - 'scripts/verify_mmmu_original_saved.py'
+      - 'scripts/prepare_mmmu_original_assets.py'
+      - 'configs/workload-native/mmmu-original-assets.json'
+      - 'tests/test_longmemeval_v2_preparation.py'
+      - 'tests/test_longmemeval_v2_original_runner.py'
+      - 'scripts/prepare_chartqa_native_toolkit.py'
+      - 'scripts/prepare_chartqa_original_view.py'
+      - 'scripts/run_chartqa_original.py'
+      - 'scripts/verify_chartqa_original_saved.py'
+      - 'scripts/prepare_chartqa_native_runtime.py'
+      - 'scripts/prepare_longmemeval_v2_original.py'
+      - 'scripts/run_longmemeval_v2_original.py'
+      - 'configs/workload-native/infinitebench-author-code-pins.json'
+      - 'tests/test_infinitebench_code_preflight.py'
+      - 'configs/workload-native/reused-source-mappings/**'
+      - 'tests/test_reused_source_records.py'
+      - 'configs/workload-native/flores200-author-pins.json'
+      - 'tests/test_xlsum_original_runner.py'
+      - 'tests/test_beir_original_runner.py'
+      - 'tests/test_stsb_original_runner.py'
+      - 'tests/test_librispeech_original_runner.py'
+      - 'tests/test_xsum_original_runner.py'
+      - 'tests/test_multinews_original_runner.py'
+      - 'tests/test_billsum_original_runner.py'
+      - 'tests/test_flores200_original_assets.py'
+      - 'tests/test_research_acquisition_reuse.py'
+      - 'configs/workload-native/gpqa-original-client-py312-dependencies.txt'
+      - 'configs/workload-native/gpqa-publisher-py39-loader-dependencies.txt'
+      - 'tests/test_longmemeval_original_runner.py'
+      - 'configs/workload-native/longmemeval-eval-client-constraints.txt'
+      - 'configs/workload-native/ruler-original-client-py312-dependencies.txt'
+      - 'tests/test_ruler_original_profile.py'
+      - 'scripts/bind_ruler_original_profile.py'
+      - 'scripts/prepare_ruler_qa_required_doc_compat.py'
+      - 'tests/test_ruler_qa_required_doc_compat.py'
+      - 'workload-preparation/tests/test_ruler_profile_binding_cli.py'
+      - 'scripts/build_agentbench_pddl_runtime_wheels.py'
+      - 'configs/workload-native/**'
+      - 'tests/test_tau2_original_runner.py'
+      - 'tests/test_reasoning_original_runners.py'
+      - 'tests/test_math500_original_runner.py'
+      - 'tests/test_math500_native_runner.py'
+      - 'tests/test_native_delivery_contract.py'
+      - 'tests/test_structeval_original_runner.py'
+      - 'tests/test_longbench_original_runner.py'
+      - 'tests/test_longbench_v2_saved_audit.py'
+      - 'tests/test_longbench_v2_capacity_preparation.py'
+      - 'tests/test_narrativeqa_metric_preparation.py'
+      - 'tests/test_narrativeqa_original_summary.py'
+      - 'tests/test_schemastore_runtime.py'
+      - 'tests/test_schemastore_original_validation.py'
+      - 'tests/test_dolly_original_runner.py'
+      - 'tests/test_dolly_original_categories.py'
+      - 'tests/test_longwriter_original_runner.py'
+      - 'tests/test_agentbench_original_runner.py'
+      - 'tests/test_bfcl_original_runner.py'
+      - 'tests/test_oasst_original_runner.py'
+      - 'tests/test_natural_instructions_original_runner.py'
+      - 'tests/test_natural_instructions_validation_receipt.py'
+      - 'tests/test_ni_editing_extraction_original.py'
+      - 'tests/test_bbh_original_runner.py'
+      - 'tests/test_bbh_validation_receipt.py'
+      - 'tests/test_quality_original_mc_runner.py'
+      - 'tests/test_jsonschemabench_original_runner.py'
+      - 'tests/test_bigcodebench_original_generation.py'
+      - 'tests/test_ds1000_original_generation.py'
+      - 'pyproject.toml'
+      - '.github/workflows/workload-data-smoke.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  cpu-correctness:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install software only
+        run: |
+          python -m pip install build pytest
+          python -m build --wheel --outdir workload-data-dist workload-preparation
+          python -m pip install '.[workload-validation]' 'workload-data-dist/vllm_hust_workload_data-0.1.0-py3-none-any.whl[data]'
+          (cd workload-data-dist && sha256sum *.whl > SHA256SUMS)
+          python -c "import json, pathlib, subprocess; p=pathlib.Path('workload-data-dist'); (p/'BUILD_METADATA.json').write_text(json.dumps({'schema_version':'workload-data-build/v1','source_commit':subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),'distribution':'vllm-hust-workload-data','version':'0.1.0'},indent=2)+'\n',encoding='utf-8')"
+      - name: CPU fixtures and data-only boundary
+        run: python -m pytest -q tests/test_copilot_original_manifest.py
+      - name: CPU existing fixtures and data-only boundary
+        run: python -m pytest -q workload-preparation/tests tests/test_workload_data_boundary.py tests/test_workload_gap_catalog.py tests/test_workload_validation_checklist.py tests/test_workload_category_checklist.py tests/test_tau2_original_runner.py tests/test_reasoning_original_runners.py workload-preparation/tests/test_math500_original_adapter.py tests/test_math500_original_runner.py tests/test_structeval_original_runner.py tests/test_longbench_original_runner.py tests/test_dolly_original_runner.py tests/test_longwriter_original_runner.py tests/test_agentbench_original_runner.py tests/test_bfcl_original_runner.py tests/test_workload_response_validation.py tests/test_docvqa_native_runner.py tests/test_reused_source_records.py
+      - name: OASST runner CPU contract only
+        run: python -m pytest -q tests/test_oasst_original_runner.py tests/test_reused_source_records.py tests/test_infinitebench_code_preflight.py tests/test_infinitebench_original_runner.py
+      - name: Historical dialogue and saved QReCC score software fixtures only
+        run: python -m pytest -q tests/test_historical_dialogue_prefix.py tests/test_historical_dialogue_runner.py tests/test_historical_dialogue_native_receipt.py tests/test_qrecc_original_qa_score.py tests/test_labbench_original_runner.py tests/test_labbench_saved_audit.py tests/test_labbench_original_assets.py tests/test_labbench_runtime.py tests/test_repobench_original_assets.py tests/test_repobench_runtime.py tests/test_repobench_original_npu.py tests/test_repobench_saved_audit.py
+      - name: MBPP original preparation and mocked execution controls only
+        run: python -m pytest -q tests/test_mbpp_original_assets.py tests/test_mbpp_original_generation.py tests/test_mbpp_scoring_preparation.py tests/test_mbpp_isolated_scoring.py tests/test_mbpp_native_delivery_receipt.py
+      - name: Serving trace and ToolACE preparation software fixtures only
+        run: python -m pytest -q tests/test_mooncake_storage_plan.py tests/test_toolace_original_corpus_audit.py tests/test_toolace_original_continuation.py
+      - name: Natural Instructions runner CPU contract only
+        run: python -m pytest -q tests/test_natural_instructions_original_runner.py tests/test_natural_instructions_validation_receipt.py tests/test_ni_editing_extraction_original.py tests/test_ni_original_range.py
+      - name: BBH runner CPU contract only
+        run: python -m pytest -q tests/test_bbh_original_runner.py tests/test_bbh_validation_receipt.py
+      - name: Native evaluation delivery contracts, no model calls
+        run: python -m pytest -q tests/test_math500_native_runner.py tests/test_native_delivery_contract.py
+      - name: Dolly original category coverage software contracts
+        run: python -m pytest -q tests/test_dolly_original_categories.py
+      - name: QuALITY runner CPU contract only
+        run: python -m pytest -q tests/test_quality_original_mc_runner.py
+      - name: JSONSchemaBench runner CPU contract only
+        run: python -m pytest -q tests/test_jsonschemabench_original_runner.py
+      - name: BigCodeBench generation CPU contract only
+        run: python -m pytest -q tests/test_bigcodebench_original_generation.py
+      - name: DS1000 generation CPU contract only
+        run: python -m pytest -q tests/test_ds1000_original_generation.py
+      - name: LoCoMo protocol and BurstGPT transport software contracts only
+        run: python -m pytest -q tests/test_locomo_original_qa_runner.py tests/test_burstgpt_original_example.py tests/test_ruler_original_profile.py tests/test_ruler_qa_required_doc_compat.py workload-preparation/tests/test_ruler_profile_binding_cli.py
+      - name: LongMemEval publisher prompt transport CPU contracts only
+        run: python -m pytest -q tests/test_longmemeval_original_runner.py
+      - name: Original visual and memory preparation CPU contracts only
+        run: python -m pytest -q tests/test_chartqa_native_toolkit.py tests/test_chartqa_original_view.py tests/test_chartqa_original_runner.py tests/test_chartqa_original_saved.py tests/test_chartqa_native_runtime.py tests/test_mmmu_original_assets.py tests/test_mmmu_original_runner.py tests/test_longmemeval_v2_preparation.py tests/test_longmemeval_v2_original_runner.py
+      - name: Original TraceLab build and replay CPU contracts only
+        run: python -m pytest -q tests/test_tracelab_original_build.py tests/test_tracelab_original_runner.py
+      - name: Original PAWS and LongBench offline CPU contracts only
+        run: python -m pytest -q tests/test_paws_original_assets.py tests/test_paws_original_runner.py tests/test_longbench_v2_saved_audit.py tests/test_longbench_v2_capacity_preparation.py tests/test_narrativeqa_metric_preparation.py tests/test_narrativeqa_original_summary.py tests/test_schemastore_runtime.py tests/test_schemastore_original_validation.py tests/test_structeval_rendering_plan.py
+      - name: Original model and metric CPU contracts only
+        run: python -m pytest -q tests/test_gpqa_original_runner.py tests/test_xlsum_original_runner.py tests/test_beir_original_runner.py tests/test_stsb_original_runner.py tests/test_librispeech_original_runner.py tests/test_xsum_original_runner.py tests/test_multinews_original_runner.py tests/test_billsum_original_runner.py tests/test_flores200_original_assets.py tests/test_research_acquisition_reuse.py
+      - name: Installed CLI and packaged catalogs
+        working-directory: ${{ runner.temp }}
+        run: |
+          workload-data identity
+          workload-data sources
+          workload-data classes
+          workload-data catalog source GSM8K
+          workload-data pipeline --help
+          workload-data replay --help
+      - name: FLORES original pair and metric transport fixtures
+        run: python -m pytest -q tests/test_flores200_original_runner.py
+      - name: NQ-open original generation and scoring transport fixtures
+        run: python -m pytest -q tests/test_nq_open_original_runner.py tests/test_lmeval_api_client_preparation.py
+      - name: LongAlpaca original instruction transport fixtures, no datasets
+        run: python -m pytest -q tests/test_longalpaca_original_runner.py
+      - name: Original QASPER answer and evidence protocol fixtures, no datasets
+        run: python -m pytest -q tests/test_qasper_original_runner.py
+      - name: FLEURS original asset and ASR protocol fixtures, no audio or model
+        run: python -m pytest -q tests/test_fleurs_asset_preparer.py tests/test_fleurs_native_runner.py
+      - name: CrossCodeEval pinned source preparation fixtures, no original code/data
+        run: python -m pytest -q tests/test_crosscodeeval_asset_preparer.py
+      - name: DuReader official scorer software transport fixtures, no datasets
+        run: python -m pytest -q tests/test_dureader_official_scorer_preparation.py tests/test_dureader_original_scoring.py tests/test_dureader_original_runner.py
+      - name: StructEval saved-output reuse fixtures, no model execution
+        run: python -m pytest -q tests/test_structeval_saved_nonrender.py tests/test_structeval_original_runner.py
+      - name: HumanEval historical completion reuse fixtures, no code execution
+        run: python -m pytest -q tests/test_humaneval_official_samples.py tests/test_humaneval_isolated_scoring.py tests/test_bigcodebench_official_samples.py tests/test_bigcodebench_scoring_assets.py tests/test_bigcodebench_scoring_plan.py tests/test_bigcodebench_container_scoring.py tests/test_ds1000_official_samples.py tests/test_ds1000_isolated_scoring.py
+      - name: Author JSONSchemaBench local Engine interface fixtures
+        run: python -m pytest -q tests/test_jsonschemabench_local_engine.py tests/test_jsonschemabench_environment_probe.py tests/test_jsonschemabench_original_assets.py tests/test_jsonschemabench_official_runner.py tests/test_jsonschemabench_original_records.py tests/test_xsum_original_runner.py
+      - name: Verify exact current-source wheel payload
+        run: |
+          python -m pytest -q tests/test_workload_wheel_audit.py
+          python scripts/audit_workload_data_wheel.py --wheel workload-data-dist/vllm_hust_workload_data-0.1.0-py3-none-any.whl > workload-data-dist/PAYLOAD_AUDIT.json
+      - name: Verify installed wheel payload outside checkout, no datasets
+        working-directory: ${{ runner.temp }}
+        run: |
+          python -c "import json, os, pathlib, sys; p=pathlib.Path(os.environ['GITHUB_WORKSPACE']); sys.path.insert(0,str(p/'scripts')); from audit_toolace_original_corpus import installed_wheel_audit; result=installed_wheel_audit(next((p/'workload-data-dist').glob('*.whl'))); (p/'workload-data-dist/INSTALLED_PAYLOAD_AUDIT.json').write_text(json.dumps(result,indent=2),encoding='utf-8'); print(result['status'])"
+      - name: Single-ledger delivery progress invariants
+        run: python -m pytest -q tests/test_workload_delivery_progress.py tests/test_workload_private_artifacts.py tests/test_workload_delivery_classification_cli.py
+      - name: Publish validated software wheel, never datasets
+        uses: actions/upload-artifact@v4
+        with:
+          name: workload-data-${{ github.event.pull_request.head.sha || github.sha }}
+          path: workload-data-dist/
+          if-no-files-found: error
+          retention-days: 30

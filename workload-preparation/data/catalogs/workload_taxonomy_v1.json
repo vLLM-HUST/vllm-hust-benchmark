@@ -1,0 +1,956 @@
+{
+  "taxonomy_version": "workload-taxonomy/v1",
+  "updated_at": "2026-09-06",
+  "status": "DATA_FIRST_RESEARCH_CATALOG_WITH_LEGACY_COMPATIBILITY",
+  "scope": "研究目录的归并与维度重分类；不是互斥单标签分类，不改变旧 generator/API 的行为。此列表不是研究范围上限。",
+  "canonical_families": [
+    {
+      "family_id": "embedding-retrieval",
+      "canonical_name": "向量编码与检索",
+      "strict_definition": "按具名原生协议对文本向量编码，完成原句对连续相似度评价或查询/文档集合检索，保留原句对、标签或原查询/文档关系。",
+      "outline_categories": ["retrieval"],
+      "candidate_source_ids": ["BEIR_SCIFACT", "BEIR_NFCORPUS", "STSB"],
+      "evidence_status": "ORIGINAL_TASK_DEFINITION",
+      "source_binding_status": "ORIGINAL_COLLECTION_ASSETS_MAPPED",
+      "exclusion_and_evidence_boundary": "单个文档或qrels行不是生成请求；静态检索不证明动态RAG、KV复用或实际查询到达轨迹。",
+      "data_binding_ref": "data/catalogs/workload_data_bindings_v1.json#embedding-retrieval"
+    },
+    {
+      "family_id": "reranking",
+      "canonical_name": "候选文档重排",
+      "strict_definition": "对原查询及既定第一阶段检索候选进行交叉编码评分并重排；候选来源与top-k须固定。",
+      "outline_categories": ["retrieval"],
+      "candidate_source_ids": ["BEIR_SCIFACT", "BEIR_NFCORPUS"],
+      "evidence_status": "ORIGINAL_TASK_DEFINITION",
+      "source_binding_status": "ORIGINAL_COLLECTION_ASSETS_MAPPED",
+      "exclusion_and_evidence_boundary": "qrels仅为评分参考，不能只抽正例伪造候选；原文档集合是数据资产，不等于已经产生重排请求或生产流量。",
+      "data_binding_ref": "data/catalogs/workload_data_bindings_v1.json#reranking"
+    },
+    {
+      "family_id": "general-single-turn-assistant",
+      "canonical_name": "通用单次助手请求",
+      "strict_definition": "单次问答、写作或开放生成，不宣称跨请求状态。",
+      "outline_categories": [
+        "dialogue"
+      ],
+      "candidate_source_ids": [
+        "WILDCHAT",
+        "LMSYS_CHAT",
+        "DOLLY",
+        "NATURALQUESTIONS",
+        "DUREADER",
+        "NATURAL_INSTRUCTIONS",
+        "OASST1",
+        "TULU3",
+        "ULTRACHAT",
+        "LONGWRITER"
+      ],
+      "evidence_status": "CANDIDATE",
+      "source_binding_status": "CANDIDATE_MAPPING_NOT_FULL_FIELD_QUALIFICATION",
+      "exclusion_and_evidence_boundary": "需从混合语料辨认任务子集，不能只按一条 message 判定。",
+      "data_binding_ref": "data/catalogs/workload_data_bindings_v1.json#general-single-turn-assistant"
+    },
+    {
+      "family_id": "conversation-continuation",
+      "canonical_name": "对话续接",
+      "strict_definition": "后续 turn 使用已有会话历史；必须标明历史仅在单次请求内还是可跨请求追踪。",
+      "outline_categories": [
+        "dialogue"
+      ],
+      "candidate_source_ids": [
+        "WILDCHAT",
+        "LMSYS_CHAT",
+        "OASST1",
+        "BURSTGPT",
+        "ULTRACHAT",
+        "SPOKENWOZ",
+        "DAILYTALK"
+      ],
+      "evidence_status": "SUPPORTED",
+      "source_binding_status": "CANDIDATE_MAPPING_NOT_FULL_FIELD_QUALIFICATION",
+      "exclusion_and_evidence_boundary": "客服是应用 profile，burst/maintenance 是流量/生命周期 profile；三者不另造平行 family。",
+      "data_binding_ref": "data/catalogs/workload_data_bindings_v1.json#conversation-continuation"
+    },
+    {
+      "family_id": "rag-followup",
+      "canonical_name": "检索条件下的问答与跟进",
+      "strict_definition": "请求引用可定位的检索材料，跨轮检索集合及问句上下文可变化。",
+      "outline_categories": [
+        "dialogue",
+        "long_context"
+      ],
+      "candidate_source_ids": [
+        "QRECC",
+        "QASPER",
+        "NARRATIVEQA",
+        "DUREADER",
+        "NATURALQUESTIONS",
+        "LONGBENCH",
+        "LONGMEMEVAL"
+      ],
+      "evidence_status": "SUPPORTED",
+      "source_binding_status": "CANDIDATE_MAPPING_NOT_FULL_FIELD_QUALIFICATION",
+      "exclusion_and_evidence_boundary": "静态 passage 任务不等于真实在线检索轨迹。",
+      "data_binding_ref": "data/catalogs/workload_data_bindings_v1.json#rag-followup"
+    },
+    {
+      "family_id": "document-grounded-analysis",
+      "canonical_name": "文档条件下的分析",
+      "strict_definition": "以一个或多个有边界的文档为证据作问答、理解或分析。",
+      "outline_categories": [
+        "long_context"
+      ],
+      "candidate_source_ids": [
+        "LONGBENCH",
+        "LONGBENCH_V2",
+        "INFINITEBENCH",
+        "QUALITY",
+        "QASPER",
+        "NARRATIVEQA",
+        "NATURALQUESTIONS",
+        "DUREADER",
+        "LONGALPACA",
+        "DOLLY"
+      ],
+      "evidence_status": "SUPPORTED",
+      "source_binding_status": "CANDIDATE_MAPPING_NOT_FULL_FIELD_QUALIFICATION",
+      "exclusion_and_evidence_boundary": "长输入是 profile，不要求所有文档任务都很长；无引用身份不推出状态连续性。",
+      "data_binding_ref": "data/catalogs/workload_data_bindings_v1.json#document-grounded-analysis"
+    },
+    {
+      "family_id": "standalone-reasoning",
+      "canonical_name": "独立推理",
+      "strict_definition": "有独立题目和答案/评分规则的推理，不要求外部工具闭环。",
+      "outline_categories": [
+        "reasoning"
+      ],
+      "candidate_source_ids": [
+        "GSM8K",
+        "MATH500",
+        "BBH",
+        "GPQA",
+        "MMLU_PRO",
+        "AI2_ARC",
+        "OPENMATH2",
+        "OPENTHOUGHTS3",
+        "LABBENCH"
+      ],
+      "evidence_status": "CANDIDATE",
+      "source_binding_status": "CANDIDATE_MAPPING_NOT_FULL_FIELD_QUALIFICATION",
+      "exclusion_and_evidence_boundary": "题目集不是生产到达或实际推理 token 轨迹。",
+      "data_binding_ref": "data/catalogs/workload_data_bindings_v1.json#standalone-reasoning"
+    },
+    {
+      "family_id": "structured-generation",
+      "canonical_name": "结构化生成与转换",
+      "strict_definition": "输出受明确的格式、schema 或可验证语法结构约束。",
+      "outline_categories": [
+        "structured_output"
+      ],
+      "candidate_source_ids": [
+        "JSONSCHEMABENCH",
+        "STRUCTEVAL",
+        "SPIDER",
+        "SCHEMASTORE",
+        "BFCL",
+        "TOOLACE",
+        "XLAM_TOOL",
+        "NATURAL_INSTRUCTIONS"
+      ],
+      "evidence_status": "OBSERVED_INPUT_SHAPE",
+      "source_binding_status": "CANDIDATE_MAPPING_NOT_FULL_FIELD_QUALIFICATION",
+      "exclusion_and_evidence_boundary": "JSON 只是格式之一；实际工具调用、格式正确和任务正确分别登记。",
+      "data_binding_ref": "data/catalogs/workload_data_bindings_v1.json#structured-generation"
+    },
+    {
+      "family_id": "code-generation-with-tests",
+      "canonical_name": "单题代码生成与测试",
+      "strict_definition": "生成代码有明确接口与独立测试/验证资产。",
+      "outline_categories": [
+        "code"
+      ],
+      "candidate_source_ids": [
+        "HUMANEVAL",
+        "MBPP",
+        "BIGCODEBENCH",
+        "DS1000",
+        "LIVECODEBENCH",
+        "OPENCODE",
+        "OPENTHOUGHTS3"
+      ],
+      "evidence_status": "CANDIDATE",
+      "source_binding_status": "CANDIDATE_MAPPING_NOT_FULL_FIELD_QUALIFICATION",
+      "exclusion_and_evidence_boundary": "不包括只判断已有代码，也不假设执行器已运行。",
+      "data_binding_ref": "data/catalogs/workload_data_bindings_v1.json#code-generation-with-tests"
+    },
+    {
+      "family_id": "code-evaluation",
+      "canonical_name": "代码评判请求",
+      "strict_definition": "以候选代码/答案和评判要求为输入，生成 verdict、诊断或评语。",
+      "outline_categories": [
+        "code",
+        "reasoning"
+      ],
+      "candidate_source_ids": [
+        "LIVECODEBENCH",
+        "OPENCODE",
+        "BIGCODEBENCH"
+      ],
+      "evidence_status": "OBSERVED_INPUT_SHAPE",
+      "source_binding_status": "CANDIDATE_MAPPING_NOT_FULL_FIELD_QUALIFICATION",
+      "exclusion_and_evidence_boundary": "这些公共任务集仅可构造评判输入/真值对照，不能计作现成 Judge 请求；直接请求证据目前仍偏少。",
+      "data_binding_ref": "data/catalogs/workload_data_bindings_v1.json#code-evaluation"
+    },
+    {
+      "family_id": "interactive-repository-assistance",
+      "canonical_name": "交互式仓库代码助手",
+      "strict_definition": "开发者驱动的跨文件编辑、检索、调试或解释，保留工作区上下文。",
+      "outline_categories": [
+        "code"
+      ],
+      "candidate_source_ids": [
+        "TRACELAB",
+        "REPOBENCH",
+        "CROSSCODEEVAL",
+        "SWE_BENCH",
+        "SWE_VERIFIED",
+        "SWESMITH"
+      ],
+      "evidence_status": "SUPPORTED",
+      "source_binding_status": "CANDIDATE_MAPPING_NOT_FULL_FIELD_QUALIFICATION",
+      "exclusion_and_evidence_boundary": "补全任务、人工交互和自主 issue loop 不混为相同执行轨迹。",
+      "data_binding_ref": "data/catalogs/workload_data_bindings_v1.json#interactive-repository-assistance"
+    },
+    {
+      "family_id": "tool-interaction",
+      "canonical_name": "工具交互与任务执行",
+      "strict_definition": "明确工具协议、调用、结果与后续决策；区分单步调用和闭环工作流。",
+      "outline_categories": [
+        "tool_agent"
+      ],
+      "candidate_source_ids": [
+        "AGENTBENCH",
+        "GAIA",
+        "TAUBENCH",
+        "BFCL",
+        "MIND2WEB",
+        "WEBARENA",
+        "VISUALWEBARENA",
+        "OSWORLD",
+        "WORKARENA",
+        "APPWORLD",
+        "TRACELAB",
+        "TOOLACE",
+        "XLAM_TOOL",
+        "TOOLBENCH"
+      ],
+      "evidence_status": "SUPPORTED",
+      "source_binding_status": "CANDIDATE_MAPPING_NOT_FULL_FIELD_QUALIFICATION",
+      "exclusion_and_evidence_boundary": "原 tool-scaffold 文本仅证明 scaffold；新定义不代表旧生成器已执行真实 tools。",
+      "data_binding_ref": "data/catalogs/workload_data_bindings_v1.json#tool-interaction"
+    },
+    {
+      "family_id": "scientific-experiment-planning",
+      "canonical_name": "科学实验规划",
+      "strict_definition": "实验候选分支及其依赖可辨认，规划与执行结果可以对应。",
+      "outline_categories": [
+        "ai4science",
+        "tool_agent"
+      ],
+      "candidate_source_ids": [
+        "DISCOVERYBENCH",
+        "PAPERBENCH",
+        "MLAGENTBENCH",
+        "SCIENCEWORLD",
+        "SCIENCEAGENTBENCH",
+        "LABBENCH"
+      ],
+      "evidence_status": "CANDIDATE",
+      "source_binding_status": "CANDIDATE_MAPPING_NOT_FULL_FIELD_QUALIFICATION",
+      "exclusion_and_evidence_boundary": "这些是待检查任务/轨迹来源，不保证有真实 branch IDs；不能仅因都属 science 就与流水线合并。",
+      "data_binding_ref": "data/catalogs/workload_data_bindings_v1.json#scientific-experiment-planning"
+    },
+    {
+      "family_id": "simulation-analysis-verification",
+      "canonical_name": "仿真、分析与验证流水线",
+      "strict_definition": "仿真/分析/验证的输入输出及重试因果关系可对应。",
+      "outline_categories": [
+        "ai4science",
+        "tool_agent"
+      ],
+      "candidate_source_ids": [
+        "SCIENCEWORLD",
+        "DISCOVERYBENCH",
+        "BIXBENCH",
+        "NATUREBENCH",
+        "SCIENCEAGENTBENCH"
+      ],
+      "evidence_status": "CANDIDATE",
+      "source_binding_status": "CANDIDATE_MAPPING_NOT_FULL_FIELD_QUALIFICATION",
+      "exclusion_and_evidence_boundary": "实际阶段 receipts 仍缺；不能把任意科学代码任务都计为仿真流水线。",
+      "data_binding_ref": "data/catalogs/workload_data_bindings_v1.json#simulation-analysis-verification"
+    },
+    {
+      "family_id": "scientific-coding-workflow",
+      "canonical_name": "科学代码工作流",
+      "strict_definition": "科学数据任务驱动代码实现、执行和验证，结果绑定任务。",
+      "outline_categories": [
+        "ai4science",
+        "code",
+        "tool_agent"
+      ],
+      "candidate_source_ids": [
+        "SCIENCEAGENTBENCH",
+        "NATUREBENCH",
+        "MLEBENCH",
+        "MLAGENTBENCH",
+        "BIXBENCH",
+        "PAPERBENCH",
+        "DS1000"
+      ],
+      "evidence_status": "SUPPORTED",
+      "source_binding_status": "CANDIDATE_MAPPING_NOT_FULL_FIELD_QUALIFICATION",
+      "exclusion_and_evidence_boundary": "规划分支、仿真链和代码实现保留不同依赖语义，是否进一步合并由实际记录决定。",
+      "data_binding_ref": "data/catalogs/workload_data_bindings_v1.json#scientific-coding-workflow"
+    },
+    {
+      "family_id": "evolving-corpus-rag",
+      "canonical_name": "演化语料检索",
+      "strict_definition": "查询引用文档版本，文档更新/失效和查询之间可建立对应。",
+      "outline_categories": [
+        "long_context",
+        "tool_agent"
+      ],
+      "candidate_source_ids": [
+        "QRECC",
+        "LONGMEMEVAL_V2",
+        "TRACELAB"
+      ],
+      "evidence_status": "CANDIDATE",
+      "source_binding_status": "CANDIDATE_MAPPING_NOT_FULL_FIELD_QUALIFICATION",
+      "exclusion_and_evidence_boundary": "目前均是相邻检索/记忆来源，不是直接 corpus 更新日志；独立事件数据仍缺。",
+      "data_binding_ref": "data/catalogs/workload_data_bindings_v1.json#evolving-corpus-rag"
+    },
+    {
+      "family_id": "memory-write-read",
+      "canonical_name": "记忆写入与再读取",
+      "strict_definition": "记忆条目、版本、写事件和后续读取可关联。",
+      "outline_categories": [
+        "dialogue",
+        "tool_agent"
+      ],
+      "candidate_source_ids": [
+        "LONGMEMEVAL",
+        "LONGMEMEVAL_V2",
+        "LOCOMO",
+        "TRACELAB"
+      ],
+      "evidence_status": "CANDIDATE",
+      "source_binding_status": "CANDIDATE_MAPPING_NOT_FULL_FIELD_QUALIFICATION",
+      "exclusion_and_evidence_boundary": "任务中的记忆目标与系统实际持久化事件要分开；多数来源尚不能直接验证该生命周期。",
+      "data_binding_ref": "data/catalogs/workload_data_bindings_v1.json#memory-write-read"
+    },
+    {
+      "family_id": "repository-agent-loop",
+      "canonical_name": "长程仓库 Agent",
+      "strict_definition": "围绕仓库 issue 自主经过工具循环、测试、重试及工作区状态增长。",
+      "outline_categories": [
+        "code",
+        "tool_agent"
+      ],
+      "candidate_source_ids": [
+        "SWE_BENCH",
+        "SWE_VERIFIED",
+        "TRACELAB",
+        "SWESMITH"
+      ],
+      "evidence_status": "SUPPORTED",
+      "source_binding_status": "CANDIDATE_MAPPING_NOT_FULL_FIELD_QUALIFICATION",
+      "exclusion_and_evidence_boundary": "SWE/补全任务只提供任务输入；只有有执行记录的资产才支持工具等待/状态寿命。",
+      "data_binding_ref": "data/catalogs/workload_data_bindings_v1.json#repository-agent-loop"
+    },
+    {
+      "family_id": "multimodal-understanding",
+      "canonical_name": "多模态内容理解",
+      "strict_definition": "输入包含真实图像、音频或视频及对应文本任务，并保留媒体身份与处理边界。",
+      "outline_categories": [
+        "multimodal"
+      ],
+      "candidate_source_ids": [
+        "VISIONARENA",
+        "MMMU",
+        "CHARTQA",
+        "VIDEOMME",
+        "VIDEOMME_V2",
+        "MVBENCH",
+        "LONGVIDEOBENCH",
+        "LIBRISPEECH",
+        "FLEURS",
+        "WAVCAPS",
+        "VISUALWEBARENA",
+        "OSWORLD",
+        "LABBENCH"
+      ],
+      "evidence_status": "SUPPORTED",
+      "source_binding_status": "CANDIDATE_MAPPING_NOT_FULL_FIELD_QUALIFICATION",
+      "exclusion_and_evidence_boundary": "媒体理解与交互式音频流不是同一协议；原 fixture 标记仍不能算已取得媒体。",
+      "data_binding_ref": "data/catalogs/workload_data_bindings_v1.json#multimodal-understanding"
+    },
+    {
+      "family_id": "text-transformation",
+      "canonical_name": "文本转换",
+      "strict_definition": "从明确输入文本产生摘要、翻译、抽取或分类等派生结果，保留输入与输出对应。",
+      "outline_categories": [
+        "dialogue",
+        "structured_output",
+        "long_context"
+      ],
+      "candidate_source_ids": [
+        "DOLLY",
+        "NATURAL_INSTRUCTIONS",
+        "XSUM",
+        "MULTINEWS",
+        "BILLSUM",
+        "XLSUM",
+        "FLORES200",
+        "STRUCTEVAL",
+        "TULU3"
+      ],
+      "evidence_status": "CANDIDATE",
+      "source_binding_status": "CANDIDATE_MAPPING_NOT_FULL_FIELD_QUALIFICATION",
+      "exclusion_and_evidence_boundary": "任务类型用 subtype 区分；有输出格式约束时可与 structured-generation 交叉标注。",
+      "data_binding_ref": "data/catalogs/workload_data_bindings_v1.json#text-transformation"
+    },
+    {
+      "family_id": "audio-streaming-interaction",
+      "canonical_name": "音频流交互",
+      "strict_definition": "输入/输出音频片段、轮次和打断/重叠时间有明确关系。",
+      "outline_categories": [
+        "multimodal",
+        "dialogue"
+      ],
+      "candidate_source_ids": [
+        "SPOKENWOZ",
+        "DAILYTALK",
+        "LIBRISPEECH",
+        "FLEURS",
+        "WAVCAPS"
+      ],
+      "evidence_status": "CANDIDATE",
+      "source_binding_status": "CANDIDATE_MAPPING_NOT_FULL_FIELD_QUALIFICATION",
+      "exclusion_and_evidence_boundary": "ASR/音频描述只是组件数据，不构成完整双工对话；旧 voice 文本代理不直接升级为真实音频。",
+      "data_binding_ref": "data/catalogs/workload_data_bindings_v1.json#audio-streaming-interaction"
+    }
+  ],
+  "profiles": [
+    {
+      "profile_id": "bursty-arrival",
+      "dimension": "arrival",
+      "definition": "集中回访和短时突发，需独立时间字段"
+    },
+    {
+      "profile_id": "customer-support",
+      "dimension": "application",
+      "definition": "客服领域，不另构造会话核心语义"
+    },
+    {
+      "profile_id": "maintenance-resume",
+      "dimension": "lifecycle",
+      "definition": "维护前后续接，实际恢复另测"
+    },
+    {
+      "profile_id": "async-batch",
+      "dimension": "arrival_dependency",
+      "definition": "批处理/job/queue，保留实际事件或构造意图区别"
+    },
+    {
+      "profile_id": "exact-prefix-sharing",
+      "dimension": "content_state",
+      "definition": "精确 token 前缀共享，与语义相似分开"
+    },
+    {
+      "profile_id": "working-set-revisit",
+      "dimension": "content_state",
+      "definition": "重复访问的身份、距离及工作集"
+    },
+    {
+      "profile_id": "preemption-resume",
+      "dimension": "lifecycle",
+      "definition": "解码中断/恢复意图或实测事件分别登记"
+    },
+    {
+      "profile_id": "prefill-decode-mix",
+      "dimension": "request_pressure",
+      "definition": "输入/输出非对称请求混合"
+    },
+    {
+      "profile_id": "overload-recovery",
+      "dimension": "arrival_pressure",
+      "definition": "相对容量的 offered-load 压力，不内置 backpressure 策略"
+    },
+    {
+      "profile_id": "cancel-timeout-retry",
+      "dimension": "lifecycle",
+      "definition": "客户端动作及重试谱系"
+    },
+    {
+      "profile_id": "multi-tenant-soak",
+      "dimension": "arrival_pressure",
+      "definition": "多租户异质需求与持续负载，不把公平性结果当输入"
+    },
+    {
+      "profile_id": "semantic-near-duplicate",
+      "dimension": "content_state",
+      "definition": "非精确相似候选；routing 是消费方策略，不是 family 本体"
+    },
+    {
+      "profile_id": "pd-disaggregation",
+      "dimension": "execution",
+      "definition": "P/D 拓扑与 KV handoff 需求；不等同普通长度混部"
+    },
+    {
+      "profile_id": "tool-schema-reuse",
+      "dimension": "content_state",
+      "definition": "共享工具 schema/scaffold，与真实执行闭环分离"
+    },
+    {
+      "profile_id": "text-carried-media-proxy",
+      "dimension": "modality_boundary",
+      "definition": "无真实媒体的文本代理；不得计入实际媒体覆盖"
+    },
+    {
+      "profile_id": "long-context",
+      "dimension": "request_pressure",
+      "definition": "长输入、文档边界与 tokenizer 身份"
+    },
+    {
+      "profile_id": "image",
+      "dimension": "modality",
+      "definition": "真实图像资产与处理参数"
+    },
+    {
+      "profile_id": "audio",
+      "dimension": "modality",
+      "definition": "真实音频资产与分段参数"
+    },
+    {
+      "profile_id": "video",
+      "dimension": "modality",
+      "definition": "真实视频/帧/字幕和时序关联"
+    }
+  ],
+  "legacy_mappings": [
+    {
+      "legacy_family_id": "session-affine-multi-turn",
+      "action": "CANONICALIZED",
+      "canonical_family_ids": [
+        "conversation-continuation"
+      ],
+      "profile_ids": [],
+      "reason": "保留核心会话语义，显式记录 history scope。",
+      "legacy_api_status": "REMOVED_IN_0.2_USE_SOURCE_ADAPTERS"
+    },
+    {
+      "legacy_family_id": "session-affine-bursty",
+      "action": "MERGED",
+      "canonical_family_ids": [
+        "conversation-continuation"
+      ],
+      "profile_ids": [
+        "bursty-arrival"
+      ],
+      "reason": "同一会话核心加到达变体，不再作为独立 family。",
+      "legacy_api_status": "REMOVED_IN_0.2_USE_SOURCE_ADAPTERS"
+    },
+    {
+      "legacy_family_id": "rag-followup",
+      "action": "RETAINED",
+      "canonical_family_ids": [
+        "rag-followup"
+      ],
+      "profile_ids": [],
+      "reason": "真实检索条件可与普通文档分析区分。",
+      "legacy_api_status": "REMOVED_IN_0.2_USE_SOURCE_ADAPTERS"
+    },
+    {
+      "legacy_family_id": "long-context-doc-analysis",
+      "action": "CANONICALIZED",
+      "canonical_family_ids": [
+        "document-grounded-analysis"
+      ],
+      "profile_ids": [
+        "long-context"
+      ],
+      "reason": "将任务与长输入压力分开。",
+      "legacy_api_status": "REMOVED_IN_0.2_USE_SOURCE_ADAPTERS"
+    },
+    {
+      "legacy_family_id": "tool-scaffold-agent",
+      "action": "SPLIT_DIMENSIONS",
+      "canonical_family_ids": [
+        "tool-interaction"
+      ],
+      "profile_ids": [
+        "tool-schema-reuse"
+      ],
+      "reason": "工具 scaffold 共享不等于实际工具调用，保留两种独立标签。",
+      "legacy_api_status": "REMOVED_IN_0.2_USE_SOURCE_ADAPTERS"
+    },
+    {
+      "legacy_family_id": "repo-aware-coding-assistant",
+      "action": "CANONICALIZED",
+      "canonical_family_ids": [
+        "interactive-repository-assistance"
+      ],
+      "profile_ids": [],
+      "reason": "人机交互编辑与自主 issue loop 的依赖/等待不同。",
+      "legacy_api_status": "REMOVED_IN_0.2_USE_SOURCE_ADAPTERS"
+    },
+    {
+      "legacy_family_id": "experiment-planning-assistant",
+      "action": "RETAINED_CANDIDATE",
+      "canonical_family_ids": [
+        "scientific-experiment-planning"
+      ],
+      "profile_ids": [],
+      "reason": "源码包含 campaign/branch/sibling 关系，不能仅因 science 名称与流水线合并；需真实数据复核。",
+      "legacy_api_status": "REMOVED_IN_0.2_USE_SOURCE_ADAPTERS"
+    },
+    {
+      "legacy_family_id": "simulation-analysis-verification",
+      "action": "RETAINED_CANDIDATE",
+      "canonical_family_ids": [
+        "simulation-analysis-verification"
+      ],
+      "profile_ids": [],
+      "reason": "源码是 run/template/verifier/revision 链，与 campaign 分支不是同一关系。",
+      "legacy_api_status": "REMOVED_IN_0.2_USE_SOURCE_ADAPTERS"
+    },
+    {
+      "legacy_family_id": "async-document-pipeline",
+      "action": "PROFILE_ONLY",
+      "canonical_family_ids": [
+        "document-grounded-analysis",
+        "structured-generation",
+        "text-transformation"
+      ],
+      "profile_ids": [
+        "async-batch"
+      ],
+      "reason": "移除异步/批处理作为平行任务类别；具体任务按输入内容判定，queue/job 关系作为 profile。",
+      "legacy_api_status": "REMOVED_IN_0.2_USE_SOURCE_ADAPTERS"
+    },
+    {
+      "legacy_family_id": "code-eval-judge",
+      "action": "CANONICALIZED",
+      "canonical_family_ids": [
+        "code-evaluation"
+      ],
+      "profile_ids": [],
+      "reason": "保留输入评判而非代码生成的区别。",
+      "legacy_api_status": "REMOVED_IN_0.2_USE_SOURCE_ADAPTERS"
+    },
+    {
+      "legacy_family_id": "structured-json-generation",
+      "action": "CANONICALIZED",
+      "canonical_family_ids": [
+        "structured-generation"
+      ],
+      "profile_ids": [],
+      "reason": "扩展格式覆盖，JSON 为 subtype；不借名称声明协议已接入。",
+      "legacy_api_status": "REMOVED_IN_0.2_USE_SOURCE_ADAPTERS"
+    },
+    {
+      "legacy_family_id": "multi-turn-support-chat",
+      "action": "MERGED",
+      "canonical_family_ids": [
+        "conversation-continuation"
+      ],
+      "profile_ids": [
+        "customer-support"
+      ],
+      "reason": "客服是应用限定；请求内/跨请求历史仍显式分开。",
+      "legacy_api_status": "REMOVED_IN_0.2_USE_SOURCE_ADAPTERS"
+    },
+    {
+      "legacy_family_id": "realtime-voice-assistant",
+      "action": "RETIRE_PROXY_AS_REAL_FAMILY",
+      "canonical_family_ids": [],
+      "profile_ids": [
+        "text-carried-media-proxy",
+        "audio"
+      ],
+      "reason": "从真实 workload family 目录移除文本 voice 代理，保留兼容探针和限制；真实音频另补定义。",
+      "legacy_api_status": "REMOVED_IN_0.2_USE_SOURCE_ADAPTERS"
+    },
+    {
+      "legacy_family_id": "session-continuation-maintenance",
+      "action": "MERGED",
+      "canonical_family_ids": [
+        "conversation-continuation"
+      ],
+      "profile_ids": [
+        "maintenance-resume"
+      ],
+      "reason": "维护是会话生命周期变体，保留维护变量与旧 ID。",
+      "legacy_api_status": "REMOVED_IN_0.2_USE_SOURCE_ADAPTERS"
+    },
+    {
+      "legacy_family_id": "shared-prefix-multi-tenant-assistant",
+      "action": "PROFILE_ONLY",
+      "canonical_family_ids": [],
+      "profile_ids": [
+        "exact-prefix-sharing",
+        "multi-tenant-soak"
+      ],
+      "reason": "前缀共享和多租户是跨任务特征，不再与任务类别平行重复计数。",
+      "legacy_api_status": "REMOVED_IN_0.2_USE_SOURCE_ADAPTERS"
+    },
+    {
+      "legacy_family_id": "dynamic-rag-corpus-update",
+      "action": "CANONICALIZED_CANDIDATE",
+      "canonical_family_ids": [
+        "evolving-corpus-rag"
+      ],
+      "profile_ids": [],
+      "reason": "显式版本更新依赖有研究意义，数据缺口不构成直接删除理由。",
+      "legacy_api_status": "REMOVED_IN_0.2_USE_SOURCE_ADAPTERS"
+    },
+    {
+      "legacy_family_id": "memory-write-then-reuse",
+      "action": "CANONICALIZED_CANDIDATE",
+      "canonical_family_ids": [
+        "memory-write-read"
+      ],
+      "profile_ids": [],
+      "reason": "写读依赖与仅对话历史不同，继续补直接事件数据。",
+      "legacy_api_status": "REMOVED_IN_0.2_USE_SOURCE_ADAPTERS"
+    },
+    {
+      "legacy_family_id": "preemption-resume-long-decode",
+      "action": "PROFILE_ONLY",
+      "canonical_family_ids": [],
+      "profile_ids": [
+        "preemption-resume"
+      ],
+      "reason": "保留压力/生命周期变量，不宣称独立应用或恢复已实现。",
+      "legacy_api_status": "REMOVED_IN_0.2_USE_SOURCE_ADAPTERS"
+    },
+    {
+      "legacy_family_id": "mixed-prefill-decode-interference",
+      "action": "PROFILE_ONLY",
+      "canonical_family_ids": [],
+      "profile_ids": [
+        "prefill-decode-mix"
+      ],
+      "reason": "输入/输出混合是请求压力，干扰是待测结果。",
+      "legacy_api_status": "REMOVED_IN_0.2_USE_SOURCE_ADAPTERS"
+    },
+    {
+      "legacy_family_id": "overload-backpressure",
+      "action": "PROFILE_ONLY",
+      "canonical_family_ids": [],
+      "profile_ids": [
+        "overload-recovery"
+      ],
+      "reason": "删除 backpressure 策略作为 workload 类别的混淆。",
+      "legacy_api_status": "REMOVED_IN_0.2_USE_SOURCE_ADAPTERS"
+    },
+    {
+      "legacy_family_id": "cancellation-timeout-churn",
+      "action": "PROFILE_ONLY",
+      "canonical_family_ids": [],
+      "profile_ids": [
+        "cancel-timeout-retry"
+      ],
+      "reason": "这是生命周期与重试关系，可附加到多种任务。",
+      "legacy_api_status": "REMOVED_IN_0.2_USE_SOURCE_ADAPTERS"
+    },
+    {
+      "legacy_family_id": "kv-eviction-recompute",
+      "action": "PROFILE_ONLY",
+      "canonical_family_ids": [],
+      "profile_ids": [
+        "working-set-revisit",
+        "exact-prefix-sharing"
+      ],
+      "reason": "eviction/recompute 是运行结果，输入定义改为回访工作集。",
+      "legacy_api_status": "REMOVED_IN_0.2_USE_SOURCE_ADAPTERS"
+    },
+    {
+      "legacy_family_id": "multi-tenant-fairness-soak",
+      "action": "PROFILE_ONLY",
+      "canonical_family_ids": [],
+      "profile_ids": [
+        "multi-tenant-soak"
+      ],
+      "reason": "公平性是结果，保留可观测的租户需求与持续时段。",
+      "legacy_api_status": "REMOVED_IN_0.2_USE_SOURCE_ADAPTERS"
+    },
+    {
+      "legacy_family_id": "multimodal-online-serving",
+      "action": "CANONICALIZED",
+      "canonical_family_ids": [
+        "multimodal-understanding"
+      ],
+      "profile_ids": [
+        "image"
+      ],
+      "reason": "真实媒体是准入条件；载荷来源继续扩展至音频/视频。",
+      "legacy_api_status": "REMOVED_IN_0.2_USE_SOURCE_ADAPTERS"
+    },
+    {
+      "legacy_family_id": "scientific-code-agent",
+      "action": "CANONICALIZED",
+      "canonical_family_ids": [
+        "scientific-coding-workflow"
+      ],
+      "profile_ids": [],
+      "reason": "保留科学代码的执行/验证目标，不以 stage 标签声称已执行。",
+      "legacy_api_status": "REMOVED_IN_0.2_USE_SOURCE_ADAPTERS"
+    },
+    {
+      "legacy_family_id": "semantic-similarity-routing",
+      "action": "PROFILE_ONLY",
+      "canonical_family_ids": [],
+      "profile_ids": [
+        "semantic-near-duplicate"
+      ],
+      "reason": "移除 routing 策略名作为独立 family，保留相似关系。",
+      "legacy_api_status": "REMOVED_IN_0.2_USE_SOURCE_ADAPTERS"
+    },
+    {
+      "legacy_family_id": "prefill-decode-disaggregation",
+      "action": "PROFILE_ONLY",
+      "canonical_family_ids": [],
+      "profile_ids": [
+        "pd-disaggregation"
+      ],
+      "reason": "保留独立拓扑维度，未与普通 P/D 混合合并。",
+      "legacy_api_status": "REMOVED_IN_0.2_USE_SOURCE_ADAPTERS"
+    },
+    {
+      "legacy_family_id": "long-horizon-software-engineering-agent",
+      "action": "CANONICALIZED",
+      "canonical_family_ids": [
+        "repository-agent-loop"
+      ],
+      "profile_ids": [],
+      "reason": "长程自主 loop 与交互式助手保持区分。",
+      "legacy_api_status": "REMOVED_IN_0.2_USE_SOURCE_ADAPTERS"
+    }
+  ],
+  "outline_coverage": [
+    {
+      "category": "dialogue",
+      "canonical_family_ids": [
+        "general-single-turn-assistant",
+        "conversation-continuation",
+        "rag-followup",
+        "memory-write-read",
+        "text-transformation",
+        "audio-streaming-interaction"
+      ],
+      "profile_ids": [],
+      "status": "COVERED_AS_RESEARCH_SCOPE_NOT_ALL_DATA_READY"
+    },
+    {
+      "category": "tool_agent",
+      "canonical_family_ids": [
+        "tool-interaction",
+        "scientific-experiment-planning",
+        "simulation-analysis-verification",
+        "scientific-coding-workflow",
+        "evolving-corpus-rag",
+        "memory-write-read",
+        "repository-agent-loop"
+      ],
+      "profile_ids": [],
+      "status": "COVERED_AS_RESEARCH_SCOPE_NOT_ALL_DATA_READY"
+    },
+    {
+      "category": "reasoning",
+      "canonical_family_ids": [
+        "standalone-reasoning",
+        "code-evaluation"
+      ],
+      "profile_ids": [],
+      "status": "COVERED_AS_RESEARCH_SCOPE_NOT_ALL_DATA_READY"
+    },
+    {
+      "category": "structured_output",
+      "canonical_family_ids": [
+        "structured-generation",
+        "text-transformation"
+      ],
+      "profile_ids": [],
+      "status": "COVERED_AS_RESEARCH_SCOPE_NOT_ALL_DATA_READY"
+    },
+    {
+      "category": "long_context",
+      "canonical_family_ids": [
+        "rag-followup",
+        "document-grounded-analysis",
+        "evolving-corpus-rag",
+        "text-transformation"
+      ],
+      "profile_ids": [
+        "long-context"
+      ],
+      "status": "COVERED_AS_RESEARCH_SCOPE_NOT_ALL_DATA_READY"
+    },
+    {
+      "category": "high_kv_reuse",
+      "canonical_family_ids": [],
+      "profile_ids": [
+        "exact-prefix-sharing",
+        "working-set-revisit"
+      ],
+      "status": "COVERED_AS_RESEARCH_SCOPE_NOT_ALL_DATA_READY"
+    },
+    {
+      "category": "code",
+      "canonical_family_ids": [
+        "code-generation-with-tests",
+        "code-evaluation",
+        "interactive-repository-assistance",
+        "scientific-coding-workflow",
+        "repository-agent-loop"
+      ],
+      "profile_ids": [],
+      "status": "COVERED_AS_RESEARCH_SCOPE_NOT_ALL_DATA_READY"
+    },
+    {
+      "category": "multimodal",
+      "canonical_family_ids": [
+        "multimodal-understanding",
+        "audio-streaming-interaction"
+      ],
+      "profile_ids": [],
+      "status": "COVERED_AS_RESEARCH_SCOPE_NOT_ALL_DATA_READY"
+    },
+    {
+      "category": "ai4science",
+      "canonical_family_ids": [
+        "scientific-experiment-planning",
+        "simulation-analysis-verification",
+        "scientific-coding-workflow"
+      ],
+      "profile_ids": [],
+      "status": "COVERED_AS_RESEARCH_SCOPE_NOT_ALL_DATA_READY"
+    }
+  ],
+  "retained_gaps": [
+    "科学规划/验证的直接执行 DAG",
+    "真实 corpus 更新与 memory 写读事件",
+    "维护/恢复/取消/重试及 P/D handoff 实测",
+    "完整双工音频对话",
+    "代码 Judge 的多个独立真实请求来源"
+  ],
+  "scope_expansion": [
+    "文本摘要/翻译/抽取等子类型",
+    "结构化格式不限 JSON",
+    "图像、音频、视频分别验证",
+    "工具任务不限代码 Agent、补充网页/桌面/数据库等环境"
+  ]
+}

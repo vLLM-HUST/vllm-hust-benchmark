@@ -1,0 +1,18 @@
+{
+  "schema_version": "native-code-evaluator-isolation-preflight/v1",
+  "date": "2026-10-24",
+  "affected_sources": ["HUMANEVAL", "BIGCODEBENCH", "DS1000"],
+  "status": "FUNCTIONAL_EXECUTION_BLOCKED_BY_UNVERIFIED_FILESYSTEM_ISOLATION",
+  "docker_podman_or_socket_available": false,
+  "network_user_namespace_noop": {"returncode": 0},
+  "mount_network_pid_namespace_noop": {"returncode": 1, "error": "unshare: cannot change root filesystem propagation: Permission denied"},
+  "private_bubblewrap_trusted_noop": {"version": "0.8.0", "returncode": 1, "error": "bwrap: Failed to make / slave: Permission denied", "payload": "/bin/true"},
+  "generated_code_executed": false,
+  "reference_code_executed": false,
+  "new_model_calls": 0,
+  "functional_scores_computed": false,
+  "host_security_configuration_changed": false,
+  "raw_payloads_published": false,
+  "source_checkbox_eligible": false,
+  "remaining_requirement": "A verified isolated code execution environment restricting filesystem, network, process and resource access. Reuse stored original completions and unchanged official tests/scorers there; do not regenerate answers or replace functional evaluation with string checks."
+}

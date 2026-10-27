@@ -1,0 +1,33 @@
+# Isolated generation/scoring client, not the vLLM-Ascend serving environment.
+# Retain the server's matching torch / torch-npu / CANN stack; no CPU generation.
+# Transformers 5.5.4 overrides this model's tie_word_embeddings=false.
+transformers==4.57.3
+tokenizers==0.22.2
+huggingface-hub==0.36.0
+setuptools==80.9.0
+filelock==3.32.2
+typing-extensions==4.16.0
+sympy==1.14.0
+networkx==3.6.1
+jinja2==3.1.6
+fsspec==2026.7.0
+decorator==5.1.1
+psutil==6.0.0
+pyyaml==6.0.3
+sentencepiece==0.2.1
+numpy==1.26.4
+pyonmttok==1.38.1
+nltk==3.9.2
+absl-py==2.3.1
+six==1.17.0
+pythainlp==5.1.2
+jieba==0.42.1
+fugashi==1.5.2
+unidic==1.1.0
+# Author-required repositories pinned instead of floating HEAD.
+git+https://github.com/otuncelli/turkish-stemmer-python@5395b556c8ebc350dfc5fc289b38e03fd1ede413
+git+https://github.com/abhik1505040/bengali-stemmer@375186caee8e50e3260dd6bc02d20d50277f3e39
+# Additionally install the exact author's multilingual_rouge_scoring/ source
+# verified by xlsum-author-pins.json; stock PyPI rouge-score is NOT a substitute.
+# Explicit NLTK_DATA directory: stopwords, punkt and punkt_tab required.
+# Japanese requires the author's recommended full UniDic, not unidic-lite.

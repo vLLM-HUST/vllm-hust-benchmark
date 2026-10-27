@@ -1,0 +1,78 @@
+{
+  "schema_version": "server-software-regression/v1",
+  "date": "2026-10-24",
+  "scope": "Current uncommitted candidate source snapshot; reproduces the nine pytest groups of workload-data-smoke. Not a GitHub CI run or native dataset execution.",
+  "base_commit": "fc976208d9f18a65a429e9417ea99b0d5dd08c84",
+  "passed": 418,
+  "skipped": 1,
+  "skip_reason": "Git tracking guard requires a Git checkout; this server copy is an archive snapshot. The same raw-payload git ls-files patterns were separately checked in the actual local checkout and returned no tracked files.",
+  "initial_snapshot_failures": "First copy omitted configs/ and had mismatching bytes in two unchanged runner files. Added the tracked configs and transferred those runners byte-for-byte; existing historical receipt hashes then matched. No test or receipt weakened.",
+  "finished_at_unix": 1792823806.742213,
+  "groups": [
+    {
+      "step": "CPU fixtures and data-only boundary",
+      "returncode": 0,
+      "summary": [
+        "309 passed, 1 skipped in 8.28s"
+      ]
+    },
+    {
+      "step": "OASST runner CPU contract only",
+      "returncode": 0,
+      "summary": [
+        "8 passed in 0.26s"
+      ]
+    },
+    {
+      "step": "Natural Instructions runner CPU contract only",
+      "returncode": 0,
+      "summary": [
+        "15 passed in 0.59s"
+      ]
+    },
+    {
+      "step": "BBH runner CPU contract only",
+      "returncode": 0,
+      "summary": [
+        "18 passed in 0.65s"
+      ]
+    },
+    {
+      "step": "Native evaluation delivery contracts, no model calls",
+      "returncode": 0,
+      "summary": [
+        "16 passed in 0.28s"
+      ]
+    },
+    {
+      "step": "QuALITY runner CPU contract only",
+      "returncode": 0,
+      "summary": [
+        "12 passed in 0.28s"
+      ]
+    },
+    {
+      "step": "JSONSchemaBench runner CPU contract only",
+      "returncode": 0,
+      "summary": [
+        "7 passed in 0.15s"
+      ]
+    },
+    {
+      "step": "BigCodeBench generation CPU contract only",
+      "returncode": 0,
+      "summary": [
+        "15 passed in 0.20s"
+      ]
+    },
+    {
+      "step": "DS1000 generation CPU contract only",
+      "returncode": 0,
+      "summary": [
+        "18 passed in 0.17s"
+      ]
+    }
+  ],
+  "all_passed": true,
+  "model_calls": 0
+}

@@ -1,0 +1,39 @@
+{
+  "schema_version": "native-workload-delivery-receipt/v1",
+  "source_id": "NATURAL_INSTRUCTIONS",
+  "date": "2026-10-24",
+  "status": "REGISTERED_ORIGINAL_NI_TASK_VARIANTS_AVAILABLE",
+  "registered_original_files": 5,
+  "registered_original_instances": 8284,
+  "verified_unique_original_instances": 1797,
+  "complete_original_task_files": [
+    {"task_file": "task1575_amazon_reviews_multi_sentiment_classification.json", "tasks": 102},
+    {"task_file": "task778_pawsx_english_french_translation.json", "tasks": 250},
+    {"task_file": "task1453_person_entity_extraction_btc_corpus.json", "tasks": 261},
+    {"task_file": "task275_enhanced_wsc_paraphrase_generation.json", "tasks": 1178}
+  ],
+  "sampled_original_task_files": [
+    {"task_file": "task1290_xsum_summarization.json", "available_tasks": 6493, "original_indices": [0, 1, 2, 6490, 6491, 6492]}
+  ],
+  "native_execution_receipts": ["natural-instructions-original-npu-20261023.json", "ni-native-range-audit-20261024.json", "ni-extraction-complete-audit-20261024.json", "ni-rewriting-complete-audit-20261024.json", "ni-reused-small-tasks-audit-20261024.json"],
+  "installed_ci_reader_receipt": "ni-fixed-ci-audit-20261024.json",
+  "documentation": "docs/workload-data/NATURAL_INSTRUCTIONS_ORIGINAL_INPUTS.zh-CN.md",
+  "public_runner": "scripts/run_ni_original_range.py",
+  "preserved_core": "scripts/run_natural_instructions_original.py",
+  "environment": "Documented standalone Python3.9 / Transformers4.18 / tokenizers0.12.1 original collator and scorer environment; existing dual-NPU Qwen3.5-27B service, not CPU model inference.",
+  "protocol": "Fixed publisher task files, original instruction-only collator, complete original inputs, 1024 generation budget, unchanged exact-match/ROUGE-L scorer; original GPT2 scoring tokenizer on translation. Model-native chat transport and substitute model disclosed.",
+  "source_checkbox_eligible": true,
+  "full_ni_suite_validated": false,
+  "all_registered_instances_executed": false,
+  "pooled_accuracy_reported": false,
+  "underlying_dataset_benchmark_equivalence": false,
+  "performance_claim": false,
+  "research_pr_new_lock_published": false,
+  "raw_payloads_published": false,
+  "limits": [
+    "Five registered NI release task variants, not the entire NI suite or original underlying Amazon/PAWS/XSum/WSC/BTC benchmark protocols.",
+    "Summary task sampled only; four smaller original task files completely covered with prior results reused rather than repeated.",
+    "Original-input reconstruction and scorer recomputation use saved model outputs; tokenizer audit requests are not new answer generations.",
+    "No homogeneous full-suite model quality or performance claim; task and batch metrics remain separate."
+  ]
+}

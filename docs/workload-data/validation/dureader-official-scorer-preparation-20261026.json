@@ -1,0 +1,22 @@
+{
+  "source_id": "DUREADER",
+  "status": "OFFICIAL_SCORING_SOFTWARE_PREPARED_SYNTHETIC_FIXTURES_ONLY",
+  "source_checkbox_eligible": false,
+  "publisher_revision": "c625076b06da8f56d59f19c41c73bd580a98a347",
+  "metric_dependency_repository": "tylin/coco-caption",
+  "metric_dependency_revision": "3a9afb2682141a03e1cdc02b0df6770d2c884f6f",
+  "publisher_scorer_sha256_unchanged": "15a47b342783448cf69eaf241809b21e3fb134cb97c1d7111b0ef4f6dbc65764",
+  "acquisition": "Explicit publisher GitHub contents API with Git blob identity validation; direct raw host connection reset retained as a failed preparation attempt",
+  "software_files": 10,
+  "conversion": "Publisher-recommended standard 2to3 on the two BLEU Python2 modules only, after all sibling modules exist; original and installed SHA256 recorded individually on server",
+  "runtime": "Isolated Python3.12.13 API client with numpy1.26.4; no model inference",
+  "synthetic_fixture_tasks_executed": ["main", "all", "description", "entity", "yesno"],
+  "synthetic_fixture_checks": "Description ROUGE-L=1 and entity F1=1; incomplete yes/no prediction channels intentionally retain non-perfect scores",
+  "compatibility_caveat": "An earlier process failed the original coco-caption list(gts.keys()) == list(res.keys()) assertion for yes/no expansion; a later process completed unchanged. Hash/insertion ordering compatibility must be stabilized and tested before claiming a reliable native scorer. No upstream metric source patched or compatibility failure discarded.",
+  "server_receipt": "/data/shared_upload/hust-phr/workload-benchmark-native-delivery-20261024/dureader-official-scorer-32063-005/receipt-public.json",
+  "failed_attempt_directories_preserved": ["dureader-official-scorer-32063-001", "dureader-official-scorer-32063-002", "dureader-official-scorer-32063-003", "dureader-official-scorer-32063-004"],
+  "model_calls": 0,
+  "native_generation_or_dataset_grading_completed": false,
+  "raw_payloads_published": false,
+  "remaining": "Reliable original metric compatibility, declared model execution protocol, actual fixed original tasks, scoring and consumer handoff; old Paddle1.2/Python2.7 baseline not reproduced on NPU"
+}

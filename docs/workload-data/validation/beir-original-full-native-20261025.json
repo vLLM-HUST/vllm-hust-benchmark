@@ -1,0 +1,473 @@
+{
+  "source_ids": [
+    "BEIR_SCIFACT",
+    "BEIR_NFCORPUS"
+  ],
+  "status": "ORIGINAL_FULL_NATIVE_RUN_AND_PUBLIC_OFFLINE_RESCORE_VERIFIED",
+  "native_generation_framework_revision": "6ef8c9097ebfb203ad360bd64e0cfb93e64f4a44", "native_generation_framework_revision_note": "pragma: allowlist secret - public evidence identity",
+  "model_bindings": [
+    {
+      "repo_id": "sentence-transformers/msmarco-distilbert-base-tas-b",
+      "revision": "b12d9352e776979147078a8975a4885042984fd1", "revision_note": "pragma: allowlist secret - public evidence identity",
+      "license": "apache-2.0"
+    },
+    {
+      "repo_id": "cross-encoder/ms-marco-MiniLM-L6-v2",
+      "revision": "233902d25c440f23af6f7d6e94d2946bac0bee0a", "revision_note": "pragma: allowlist secret - public evidence identity",
+      "license": "apache-2.0"
+    }
+  ],
+  "protocol": {
+    "split": "test",
+    "selection": "all original test queries",
+    "dense_batch_size": 16,
+    "dense_corpus_chunk_size": 50000,
+    "dense_score_function": "cos_sim",
+    "rerank_top_k": 100,
+    "cross_encoder_batch_size": 128,
+    "dtype": "torch.float32",
+    "attention": "eager",
+    "encoder_native_max_length": 512,
+    "candidate_pool": "top100 from dense retrieval, not gold qrels",
+    "model_backend": "NPU only"
+  },
+  "device": "npu:1",
+  "native_environment": {
+    "beir": "2.2.0",
+    "sentence-transformers": "5.1.2",
+    "transformers": "4.57.3",
+    "torch": "2.10.0+cpu",
+    "torch-npu": "2.10.0.post4",
+    "pytrec-eval-terrier": "0.5.11",
+    "numpy": "1.26.4",
+    "scipy": "1.16.3"
+  },
+  "actual_native_protocols": [
+    {
+      "source_id": "BEIR_SCIFACT",
+      "protocol": "dense_retrieval",
+      "status": "ORIGINAL_FULL_TEST_EXECUTED_AND_SCORED",
+      "original_corpus_documents": 5183,
+      "original_test_queries": 300,
+      "original_qrels_queries": 300,
+      "metrics": {
+        "ndcg": {
+          "NDCG@1": 0.44667,
+          "NDCG@3": 0.50432,
+          "NDCG@5": 0.52778,
+          "NDCG@10": 0.55465,
+          "NDCG@100": 0.58683,
+          "NDCG@1000": 0.60367
+        },
+        "map": {
+          "MAP@1": 0.41594,
+          "MAP@3": 0.47615,
+          "MAP@5": 0.49053,
+          "MAP@10": 0.50377,
+          "MAP@100": 0.51104,
+          "MAP@1000": 0.51163
+        },
+        "recall": {
+          "Recall@1": 0.41594,
+          "Recall@3": 0.55411,
+          "Recall@5": 0.61311,
+          "Recall@10": 0.68917,
+          "Recall@100": 0.836,
+          "Recall@1000": 0.97167
+        },
+        "precision": {
+          "P@1": 0.44667,
+          "P@3": 0.2,
+          "P@5": 0.134,
+          "P@10": 0.077,
+          "P@100": 0.00953,
+          "P@1000": 0.0011
+        }
+      },
+      "mrr": {
+        "MRR@1": 0.44667,
+        "MRR@3": 0.50444,
+        "MRR@5": 0.51794,
+        "MRR@10": 0.52756,
+        "MRR@100": 0.53286,
+        "MRR@1000": 0.5334
+      },
+      "private_results_sha256": "263ea08ccdbc9ae282a92fcb3db8c365b3750b955cad60c3f8b2f7c89208a797", "private_results_sha256_note": "pragma: allowlist secret - public evidence identity",
+      "duration_seconds": 11.13154411315918
+    },
+    {
+      "source_id": "BEIR_SCIFACT",
+      "protocol": "dense_top100_cross_encoder_reranking",
+      "status": "ORIGINAL_FULL_TEST_EXECUTED_AND_SCORED",
+      "original_test_queries": 300,
+      "original_candidate_pairs": 30000,
+      "candidate_set_from_original_dense_results": true,
+      "metrics": {
+        "ndcg": {
+          "NDCG@1": 0.56667,
+          "NDCG@3": 0.62782,
+          "NDCG@5": 0.64701,
+          "NDCG@10": 0.66633,
+          "NDCG@100": 0.68129,
+          "NDCG@1000": 0.68129
+        },
+        "map": {
+          "MAP@1": 0.54194,
+          "MAP@3": 0.60285,
+          "MAP@5": 0.61635,
+          "MAP@10": 0.62624,
+          "MAP@100": 0.63012,
+          "MAP@1000": 0.63012
+        },
+        "recall": {
+          "Recall@1": 0.54194,
+          "Recall@3": 0.67228,
+          "Recall@5": 0.71889,
+          "Recall@10": 0.77389,
+          "Recall@100": 0.836,
+          "Recall@1000": 0.836
+        },
+        "precision": {
+          "P@1": 0.56667,
+          "P@3": 0.24333,
+          "P@5": 0.15933,
+          "P@10": 0.08733,
+          "P@100": 0.00953,
+          "P@1000": 0.00095
+        }
+      },
+      "mrr": {
+        "MRR@1": 0.56667,
+        "MRR@3": 0.62333,
+        "MRR@5": 0.63283,
+        "MRR@10": 0.63913,
+        "MRR@100": 0.6421,
+        "MRR@1000": 0.6421
+      },
+      "private_results_sha256": "82dee5bc165d17b49adea75b026d69daf41a81de75f6b90995881391480536c5", "private_results_sha256_note": "pragma: allowlist secret - public evidence identity",
+      "duration_seconds": 43.49984550476074
+    },
+    {
+      "source_id": "BEIR_NFCORPUS",
+      "protocol": "dense_retrieval",
+      "status": "ORIGINAL_FULL_TEST_EXECUTED_AND_SCORED",
+      "original_corpus_documents": 3633,
+      "original_test_queries": 323,
+      "original_qrels_queries": 323,
+      "metrics": {
+        "ndcg": {
+          "NDCG@1": 0.36997,
+          "NDCG@3": 0.31424,
+          "NDCG@5": 0.29692,
+          "NDCG@10": 0.27334,
+          "NDCG@100": 0.24254,
+          "NDCG@1000": 0.32769
+        },
+        "map": {
+          "MAP@1": 0.04755,
+          "MAP@3": 0.06859,
+          "MAP@5": 0.07996,
+          "MAP@10": 0.09369,
+          "MAP@100": 0.11384,
+          "MAP@1000": 0.12463
+        },
+        "recall": {
+          "Recall@1": 0.04755,
+          "Recall@3": 0.07535,
+          "Recall@5": 0.09907,
+          "Recall@10": 0.13266,
+          "Recall@100": 0.24719,
+          "Recall@1000": 0.54559
+        },
+        "precision": {
+          "P@1": 0.3839,
+          "P@3": 0.28793,
+          "P@5": 0.25325,
+          "P@10": 0.20031,
+          "P@100": 0.06074,
+          "P@1000": 0.01832
+        }
+      },
+      "mrr": {
+        "MRR@1": 0.3839,
+        "MRR@3": 0.44066,
+        "MRR@5": 0.45738,
+        "MRR@10": 0.46721,
+        "MRR@100": 0.47319,
+        "MRR@1000": 0.4738
+      },
+      "private_results_sha256": "8853910fdefcbc0370d09e73ca965f80467556dd6dc920e8d20406019b4ad4df", "private_results_sha256_note": "pragma: allowlist secret - public evidence identity",
+      "duration_seconds": 8.762944459915161
+    },
+    {
+      "source_id": "BEIR_NFCORPUS",
+      "protocol": "dense_top100_cross_encoder_reranking",
+      "status": "ORIGINAL_FULL_TEST_EXECUTED_AND_SCORED",
+      "original_test_queries": 323,
+      "original_candidate_pairs": 32300,
+      "candidate_set_from_original_dense_results": true,
+      "metrics": {
+        "ndcg": {
+          "NDCG@1": 0.47988,
+          "NDCG@3": 0.4118,
+          "NDCG@5": 0.37747,
+          "NDCG@10": 0.33465,
+          "NDCG@100": 0.27787,
+          "NDCG@1000": 0.26532
+        },
+        "map": {
+          "MAP@1": 0.06429,
+          "MAP@3": 0.102,
+          "MAP@5": 0.11398,
+          "MAP@10": 0.12762,
+          "MAP@100": 0.14855,
+          "MAP@1000": 0.14855
+        },
+        "recall": {
+          "Recall@1": 0.06429,
+          "Recall@3": 0.10859,
+          "Recall@5": 0.12794,
+          "Recall@10": 0.15102,
+          "Recall@100": 0.24719,
+          "Recall@1000": 0.24719
+        },
+        "precision": {
+          "P@1": 0.49536,
+          "P@3": 0.37564,
+          "P@5": 0.31146,
+          "P@10": 0.23251,
+          "P@100": 0.06074,
+          "P@1000": 0.00607
+        }
+      },
+      "mrr": {
+        "MRR@1": 0.49536,
+        "MRR@3": 0.54954,
+        "MRR@5": 0.55805,
+        "MRR@10": 0.56239,
+        "MRR@100": 0.56743,
+        "MRR@1000": 0.56743
+      },
+      "private_results_sha256": "d9fa0d93b446f0d61e60978623c1232b31a67dfe90c30dc4b809f8fc39aa1a76", "private_results_sha256_note": "pragma: allowlist secret - public evidence identity",
+      "duration_seconds": 46.680808782577515
+    }
+  ],
+  "public_rescore_protocols": [
+    {
+      "source_id": "BEIR_SCIFACT",
+      "protocol": "dense_retrieval",
+      "metrics": {
+        "ndcg": {
+          "NDCG@1": 0.44667,
+          "NDCG@3": 0.50432,
+          "NDCG@5": 0.52778,
+          "NDCG@10": 0.55465,
+          "NDCG@100": 0.58683,
+          "NDCG@1000": 0.60367
+        },
+        "map": {
+          "MAP@1": 0.41594,
+          "MAP@3": 0.47615,
+          "MAP@5": 0.49053,
+          "MAP@10": 0.50377,
+          "MAP@100": 0.51104,
+          "MAP@1000": 0.51163
+        },
+        "recall": {
+          "Recall@1": 0.41594,
+          "Recall@3": 0.55411,
+          "Recall@5": 0.61311,
+          "Recall@10": 0.68917,
+          "Recall@100": 0.836,
+          "Recall@1000": 0.97167
+        },
+        "precision": {
+          "P@1": 0.44667,
+          "P@3": 0.2,
+          "P@5": 0.134,
+          "P@10": 0.077,
+          "P@100": 0.00953,
+          "P@1000": 0.0011
+        }
+      },
+      "mrr": {
+        "MRR@1": 0.44667,
+        "MRR@3": 0.50444,
+        "MRR@5": 0.51794,
+        "MRR@10": 0.52756,
+        "MRR@100": 0.53286,
+        "MRR@1000": 0.5334
+      },
+      "mode": "score",
+      "generation_performed_this_run": false,
+      "original_ranking_sha256": {
+        "dense": "263ea08ccdbc9ae282a92fcb3db8c365b3750b955cad60c3f8b2f7c89208a797", "dense_note": "pragma: allowlist secret - public ranking identity only",
+        "rerank": "82dee5bc165d17b49adea75b026d69daf41a81de75f6b90995881391480536c5", "rerank_note": "pragma: allowlist secret - public ranking identity only"
+      }
+    },
+    {
+      "source_id": "BEIR_SCIFACT",
+      "protocol": "dense_top100_cross_encoder_reranking",
+      "metrics": {
+        "ndcg": {
+          "NDCG@1": 0.56667,
+          "NDCG@3": 0.62782,
+          "NDCG@5": 0.64701,
+          "NDCG@10": 0.66633,
+          "NDCG@100": 0.68129,
+          "NDCG@1000": 0.68129
+        },
+        "map": {
+          "MAP@1": 0.54194,
+          "MAP@3": 0.60285,
+          "MAP@5": 0.61635,
+          "MAP@10": 0.62624,
+          "MAP@100": 0.63012,
+          "MAP@1000": 0.63012
+        },
+        "recall": {
+          "Recall@1": 0.54194,
+          "Recall@3": 0.67228,
+          "Recall@5": 0.71889,
+          "Recall@10": 0.77389,
+          "Recall@100": 0.836,
+          "Recall@1000": 0.836
+        },
+        "precision": {
+          "P@1": 0.56667,
+          "P@3": 0.24333,
+          "P@5": 0.15933,
+          "P@10": 0.08733,
+          "P@100": 0.00953,
+          "P@1000": 0.00095
+        }
+      },
+      "mrr": {
+        "MRR@1": 0.56667,
+        "MRR@3": 0.62333,
+        "MRR@5": 0.63283,
+        "MRR@10": 0.63913,
+        "MRR@100": 0.6421,
+        "MRR@1000": 0.6421
+      },
+      "mode": "score",
+      "generation_performed_this_run": false,
+      "original_ranking_sha256": {
+        "dense": "263ea08ccdbc9ae282a92fcb3db8c365b3750b955cad60c3f8b2f7c89208a797", "dense_note": "pragma: allowlist secret - public ranking identity only",
+        "rerank": "82dee5bc165d17b49adea75b026d69daf41a81de75f6b90995881391480536c5", "rerank_note": "pragma: allowlist secret - public ranking identity only"
+      }
+    },
+    {
+      "source_id": "BEIR_NFCORPUS",
+      "protocol": "dense_retrieval",
+      "metrics": {
+        "ndcg": {
+          "NDCG@1": 0.36997,
+          "NDCG@3": 0.31424,
+          "NDCG@5": 0.29692,
+          "NDCG@10": 0.27334,
+          "NDCG@100": 0.24254,
+          "NDCG@1000": 0.32769
+        },
+        "map": {
+          "MAP@1": 0.04755,
+          "MAP@3": 0.06859,
+          "MAP@5": 0.07996,
+          "MAP@10": 0.09369,
+          "MAP@100": 0.11384,
+          "MAP@1000": 0.12463
+        },
+        "recall": {
+          "Recall@1": 0.04755,
+          "Recall@3": 0.07535,
+          "Recall@5": 0.09907,
+          "Recall@10": 0.13266,
+          "Recall@100": 0.24719,
+          "Recall@1000": 0.54559
+        },
+        "precision": {
+          "P@1": 0.3839,
+          "P@3": 0.28793,
+          "P@5": 0.25325,
+          "P@10": 0.20031,
+          "P@100": 0.06074,
+          "P@1000": 0.01832
+        }
+      },
+      "mrr": {
+        "MRR@1": 0.3839,
+        "MRR@3": 0.44066,
+        "MRR@5": 0.45738,
+        "MRR@10": 0.46721,
+        "MRR@100": 0.47319,
+        "MRR@1000": 0.4738
+      },
+      "mode": "score",
+      "generation_performed_this_run": false,
+      "original_ranking_sha256": {
+        "dense": "8853910fdefcbc0370d09e73ca965f80467556dd6dc920e8d20406019b4ad4df", "dense_note": "pragma: allowlist secret - public ranking identity only",
+        "rerank": "d9fa0d93b446f0d61e60978623c1232b31a67dfe90c30dc4b809f8fc39aa1a76", "rerank_note": "pragma: allowlist secret - public ranking identity only"
+      }
+    },
+    {
+      "source_id": "BEIR_NFCORPUS",
+      "protocol": "dense_top100_cross_encoder_reranking",
+      "metrics": {
+        "ndcg": {
+          "NDCG@1": 0.47988,
+          "NDCG@3": 0.4118,
+          "NDCG@5": 0.37747,
+          "NDCG@10": 0.33465,
+          "NDCG@100": 0.27787,
+          "NDCG@1000": 0.26532
+        },
+        "map": {
+          "MAP@1": 0.06429,
+          "MAP@3": 0.102,
+          "MAP@5": 0.11398,
+          "MAP@10": 0.12762,
+          "MAP@100": 0.14855,
+          "MAP@1000": 0.14855
+        },
+        "recall": {
+          "Recall@1": 0.06429,
+          "Recall@3": 0.10859,
+          "Recall@5": 0.12794,
+          "Recall@10": 0.15102,
+          "Recall@100": 0.24719,
+          "Recall@1000": 0.24719
+        },
+        "precision": {
+          "P@1": 0.49536,
+          "P@3": 0.37564,
+          "P@5": 0.31146,
+          "P@10": 0.23251,
+          "P@100": 0.06074,
+          "P@1000": 0.00607
+        }
+      },
+      "mrr": {
+        "MRR@1": 0.49536,
+        "MRR@3": 0.54954,
+        "MRR@5": 0.55805,
+        "MRR@10": 0.56239,
+        "MRR@100": 0.56743,
+        "MRR@1000": 0.56743
+      },
+      "mode": "score",
+      "generation_performed_this_run": false,
+      "original_ranking_sha256": {
+        "dense": "8853910fdefcbc0370d09e73ca965f80467556dd6dc920e8d20406019b4ad4df", "dense_note": "pragma: allowlist secret - public ranking identity only",
+        "rerank": "d9fa0d93b446f0d61e60978623c1232b31a67dfe90c30dc4b809f8fc39aa1a76", "rerank_note": "pragma: allowlist secret - public ranking identity only"
+      }
+    }
+  ],
+  "native_receipt_sha256": "ed5bdd58bba11d3e5e627ad11530934809208f4b25e7709c1da36daa5c374fa7", "native_receipt_sha256_note": "pragma: allowlist secret - public evidence identity",
+  "pins_sha256": "eab2008b0e717fbba810ba646ad54cd490b1199ab4a3a64e614822b833b42057", "pins_sha256_note": "pragma: allowlist secret - public evidence identity",
+  "observed_duration_is_not_engine_performance_evidence": true,
+  "source_checkbox_eligible": false,
+  "public_generation_mode_fresh_execution": false,
+  "fixed_ci_artifact_verified": false,
+  "research_observation_or_analysis_migrated": false,
+  "raw_payloads_published": false
+}

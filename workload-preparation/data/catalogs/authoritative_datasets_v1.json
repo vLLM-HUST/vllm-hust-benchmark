@@ -1,0 +1,1141 @@
+{
+  "catalog_version": "authoritative-dataset-discovery/v1",
+  "updated_at": "2026-09-06",
+  "scope": "Broadening pass; source entries, independent lineages and analyzed assets are separate counts. Metadata discovery is not data validation.",
+  "sources": [
+    {
+      "source_id": "STSB",
+      "platform": "https",
+      "repo_id": "sentence-transformers/stsbenchmark",
+      "source_url": "https://sbert.net/datasets/stsbenchmark.tsv.gz",
+      "asset_kind": "semantic_similarity_task",
+      "independent_source_id": "STS_BENCHMARK",
+      "workload_tags": ["embedding", "sentence_similarity"],
+      "provenance": "official_framework_dataset_distribution",
+      "fitness_status": "ORIGINAL_PAIRS_CONTINUOUS_LABELS_NOT_RETRIEVAL_TRAFFIC",
+      "discovery_status": "ORIGINAL_PAIRS_MAPPED_NATIVE_VALIDATION_PENDING"
+    },
+    {
+      "source_id": "BEIR_SCIFACT",
+      "platform": "hf",
+      "repo_id": "BeIR/scifact",
+      "source_url": "https://huggingface.co/datasets/BeIR/scifact",
+      "asset_kind": "retrieval_collection",
+      "independent_source_id": "SCIFACT",
+      "workload_tags": ["embedding", "retrieval", "reranking"],
+      "provenance": "official_benchmark_release",
+      "fitness_status": "ORIGINAL_QUERY_CORPUS_QRELS_REQUIRED",
+      "discovery_status": "ORIGINAL_ASSETS_MAPPED_NATIVE_INTEGRATION_PENDING"
+    },
+    {
+      "source_id": "BEIR_NFCORPUS",
+      "platform": "hf",
+      "repo_id": "BeIR/nfcorpus",
+      "source_url": "https://huggingface.co/datasets/BeIR/nfcorpus",
+      "asset_kind": "retrieval_collection",
+      "independent_source_id": "NFCORPUS",
+      "workload_tags": ["embedding", "retrieval", "reranking"],
+      "provenance": "official_benchmark_release",
+      "fitness_status": "ORIGINAL_QUERY_CORPUS_QRELS_REQUIRED",
+      "discovery_status": "ORIGINAL_ASSETS_MAPPED_NATIVE_INTEGRATION_PENDING"
+    },
+    {
+      "source_id": "WILDCHAT",
+      "platform": "hf",
+      "repo_id": "allenai/WildChat-1M",
+      "source_url": "https://huggingface.co/datasets/allenai/WildChat-1M",
+      "asset_kind": "conversation_corpus",
+      "independent_source_id": "WILDCHAT",
+      "workload_tags": [
+        "dialogue",
+        "single_turn",
+        "shared_content"
+      ],
+      "provenance": "author_release",
+      "fitness_status": "VARIABLES_REQUIRE_ASSET_INSPECTION",
+      "discovery_status": "ENTRY_IDENTIFIED"
+    },
+    {
+      "source_id": "LMSYS_CHAT",
+      "platform": "hf",
+      "repo_id": "lmsys/lmsys-chat-1m",
+      "source_url": "https://huggingface.co/datasets/lmsys/lmsys-chat-1m",
+      "asset_kind": "conversation_corpus",
+      "independent_source_id": "LMSYS_CHAT",
+      "workload_tags": [
+        "dialogue",
+        "single_turn"
+      ],
+      "provenance": "author_release",
+      "fitness_status": "VARIABLES_REQUIRE_ASSET_INSPECTION",
+      "discovery_status": "ENTRY_IDENTIFIED"
+    },
+    {
+      "source_id": "OASST1",
+      "platform": "hf",
+      "repo_id": "OpenAssistant/oasst1",
+      "source_url": "https://huggingface.co/datasets/OpenAssistant/oasst1",
+      "asset_kind": "conversation_corpus",
+      "independent_source_id": "OPENASSISTANT",
+      "workload_tags": [
+        "dialogue",
+        "branching"
+      ],
+      "provenance": "official_project",
+      "fitness_status": "VARIABLES_REQUIRE_ASSET_INSPECTION",
+      "discovery_status": "ENTRY_IDENTIFIED"
+    },
+    {
+      "source_id": "ULTRACHAT",
+      "platform": "hf",
+      "repo_id": "HuggingFaceH4/ultrachat_200k",
+      "source_url": "https://huggingface.co/datasets/HuggingFaceH4/ultrachat_200k",
+      "asset_kind": "synthetic_instruction_corpus",
+      "independent_source_id": "ULTRACHAT",
+      "workload_tags": [
+        "dialogue",
+        "single_turn"
+      ],
+      "provenance": "curated_derivative",
+      "fitness_status": "VARIABLES_REQUIRE_ASSET_INSPECTION",
+      "discovery_status": "ENTRY_IDENTIFIED"
+    },
+    {
+      "source_id": "DOLLY",
+      "platform": "hf",
+      "repo_id": "databricks/databricks-dolly-15k",
+      "source_url": "https://huggingface.co/datasets/databricks/databricks-dolly-15k",
+      "asset_kind": "instruction_corpus",
+      "independent_source_id": "DOLLY",
+      "workload_tags": [
+        "single_turn",
+        "text_transformation"
+      ],
+      "provenance": "author_release",
+      "fitness_status": "VARIABLES_REQUIRE_ASSET_INSPECTION",
+      "discovery_status": "ENTRY_IDENTIFIED"
+    },
+    {
+      "source_id": "GSM8K",
+      "platform": "hf",
+      "repo_id": "openai/gsm8k",
+      "source_url": "https://huggingface.co/datasets/openai/gsm8k",
+      "asset_kind": "task_corpus",
+      "independent_source_id": "GSM8K",
+      "workload_tags": [
+        "reasoning"
+      ],
+      "provenance": "author_release",
+      "fitness_status": "VARIABLES_REQUIRE_ASSET_INSPECTION",
+      "discovery_status": "ENTRY_IDENTIFIED"
+    },
+    {
+      "source_id": "MATH500",
+      "platform": "github",
+      "repo_id": "openai/prm800k",
+      "source_url": "https://github.com/openai/prm800k/tree/7ecc794703b2877f63226f2477a49b34f9b25163/prm800k/math_splits",
+      "asset_kind": "task_corpus",
+      "independent_source_id": "MATH",
+      "workload_tags": [
+        "reasoning"
+      ],
+      "provenance": "author_release",
+      "fitness_status": "FIXED_500_HELD_OUT_MATH_TEST_PROBLEMS",
+      "discovery_status": "SOURCE_ASSET_HASH_VERIFIED"
+    },
+    {
+      "source_id": "GPQA",
+      "platform": "hf",
+      "repo_id": "Idavidrein/gpqa",
+      "source_url": "https://huggingface.co/datasets/Idavidrein/gpqa",
+      "asset_kind": "task_corpus",
+      "independent_source_id": "GPQA",
+      "workload_tags": [
+        "reasoning",
+        "science_qa"
+      ],
+      "provenance": "author_release",
+      "fitness_status": "VARIABLES_REQUIRE_ASSET_INSPECTION",
+      "discovery_status": "ENTRY_IDENTIFIED"
+    },
+    {
+      "source_id": "MMLU_PRO",
+      "platform": "hf",
+      "repo_id": "TIGER-Lab/MMLU-Pro",
+      "source_url": "https://huggingface.co/datasets/TIGER-Lab/MMLU-Pro",
+      "asset_kind": "task_corpus",
+      "independent_source_id": "MMLU_PRO",
+      "workload_tags": [
+        "reasoning",
+        "science_qa"
+      ],
+      "provenance": "author_release",
+      "fitness_status": "VARIABLES_REQUIRE_ASSET_INSPECTION",
+      "discovery_status": "ENTRY_IDENTIFIED"
+    },
+    {
+      "source_id": "AI2_ARC",
+      "platform": "hf",
+      "repo_id": "allenai/ai2_arc",
+      "source_url": "https://huggingface.co/datasets/allenai/ai2_arc",
+      "asset_kind": "task_corpus",
+      "independent_source_id": "AI2_ARC",
+      "workload_tags": [
+        "reasoning",
+        "science_qa"
+      ],
+      "provenance": "author_release",
+      "fitness_status": "VARIABLES_REQUIRE_ASSET_INSPECTION",
+      "discovery_status": "ENTRY_IDENTIFIED"
+    },
+    {
+      "source_id": "LONGBENCH",
+      "platform": "hf",
+      "repo_id": "THUDM/LongBench",
+      "source_url": "https://huggingface.co/datasets/THUDM/LongBench",
+      "asset_kind": "task_corpus",
+      "independent_source_id": "LONGBENCH",
+      "workload_tags": [
+        "long_context",
+        "document_analysis",
+        "retrieval",
+        "code"
+      ],
+      "provenance": "author_release",
+      "fitness_status": "VARIABLES_REQUIRE_ASSET_INSPECTION",
+      "discovery_status": "ENTRY_IDENTIFIED"
+    },
+    {
+      "source_id": "LONGBENCH_V2",
+      "platform": "hf",
+      "repo_id": "THUDM/LongBench-v2",
+      "source_url": "https://huggingface.co/datasets/THUDM/LongBench-v2",
+      "asset_kind": "task_corpus",
+      "independent_source_id": "LONGBENCH",
+      "workload_tags": [
+        "long_context",
+        "document_analysis",
+        "reasoning",
+        "code"
+      ],
+      "provenance": "author_release",
+      "fitness_status": "VARIABLES_REQUIRE_ASSET_INSPECTION",
+      "discovery_status": "ENTRY_IDENTIFIED"
+    },
+    {
+      "source_id": "LONGMEMEVAL",
+      "platform": "hf",
+      "repo_id": "xiaowu0162/longmemeval-cleaned",
+      "source_url": "https://huggingface.co/datasets/xiaowu0162/longmemeval-cleaned",
+      "asset_kind": "constructed_memory_tasks",
+      "independent_source_id": "LONGMEMEVAL",
+      "workload_tags": [
+        "dialogue",
+        "memory",
+        "long_context"
+      ],
+      "provenance": "author_release",
+      "fitness_status": "VARIABLES_REQUIRE_ASSET_INSPECTION",
+      "discovery_status": "ENTRY_IDENTIFIED"
+    },
+    {
+      "source_id": "LONGMEMEVAL_V2",
+      "platform": "hf",
+      "repo_id": "xiaowu0162/longmemeval-v2",
+      "source_url": "https://huggingface.co/datasets/xiaowu0162/longmemeval-v2",
+      "asset_kind": "agent_memory_tasks",
+      "independent_source_id": "LONGMEMEVAL",
+      "workload_tags": [
+        "memory",
+        "tool_interaction",
+        "multimodal"
+      ],
+      "provenance": "author_release",
+      "fitness_status": "VARIABLES_REQUIRE_ASSET_INSPECTION",
+      "discovery_status": "ENTRY_IDENTIFIED"
+    },
+    {
+      "source_id": "QASPER",
+      "platform": "publisher_archive",
+      "repo_id": "allenai/qasper",
+      "source_url": "https://huggingface.co/datasets/allenai/qasper",
+      "asset_kind": "task_corpus",
+      "independent_source_id": "QASPER",
+      "workload_tags": [
+        "document_analysis",
+        "retrieval",
+        "long_context"
+      ],
+      "provenance": "author_release",
+      "fitness_status": "ORIGINAL_V03_ASSETS_ACQUIRED_NATIVE_EXECUTION_PENDING",
+      "discovery_status": "PINNED_PUBLISHER_ARCHIVES"
+    },
+    {
+      "source_id": "NARRATIVEQA",
+      "platform": "hf",
+      "repo_id": "deepmind/narrativeqa",
+      "source_url": "https://huggingface.co/datasets/deepmind/narrativeqa",
+      "asset_kind": "task_corpus",
+      "independent_source_id": "NARRATIVEQA",
+      "workload_tags": [
+        "document_analysis",
+        "retrieval",
+        "long_context"
+      ],
+      "provenance": "author_release",
+      "fitness_status": "VARIABLES_REQUIRE_ASSET_INSPECTION",
+      "discovery_status": "ENTRY_IDENTIFIED"
+    },
+    {
+      "source_id": "XLAM_TOOL",
+      "platform": "hf",
+      "repo_id": "Salesforce/xlam-function-calling-60k",
+      "source_url": "https://huggingface.co/datasets/Salesforce/xlam-function-calling-60k",
+      "asset_kind": "synthetic_tool_tasks",
+      "independent_source_id": "XLAM_TOOL",
+      "workload_tags": [
+        "tool_interaction",
+        "structured"
+      ],
+      "provenance": "author_release",
+      "fitness_status": "VARIABLES_REQUIRE_ASSET_INSPECTION",
+      "discovery_status": "ENTRY_IDENTIFIED"
+    },
+    {
+      "source_id": "BIGCODEBENCH",
+      "platform": "hf",
+      "repo_id": "bigcode/bigcodebench",
+      "source_url": "https://huggingface.co/datasets/bigcode/bigcodebench",
+      "asset_kind": "code_task_corpus",
+      "independent_source_id": "BIGCODEBENCH",
+      "workload_tags": [
+        "code_generation",
+        "tool_interaction"
+      ],
+      "provenance": "author_release",
+      "fitness_status": "VARIABLES_REQUIRE_ASSET_INSPECTION",
+      "discovery_status": "ENTRY_IDENTIFIED"
+    },
+    {
+      "source_id": "SWE_BENCH",
+      "platform": "hf",
+      "repo_id": "princeton-nlp/SWE-bench",
+      "source_url": "https://huggingface.co/datasets/princeton-nlp/SWE-bench",
+      "asset_kind": "repository_task_corpus",
+      "independent_source_id": "SWE_BENCH",
+      "workload_tags": [
+        "repository_assistance",
+        "repository_agent"
+      ],
+      "provenance": "author_release",
+      "fitness_status": "VARIABLES_REQUIRE_ASSET_INSPECTION",
+      "discovery_status": "ENTRY_IDENTIFIED"
+    },
+    {
+      "source_id": "SWE_VERIFIED",
+      "platform": "hf",
+      "repo_id": "princeton-nlp/SWE-bench_Verified",
+      "source_url": "https://huggingface.co/datasets/princeton-nlp/SWE-bench_Verified",
+      "asset_kind": "repository_task_corpus",
+      "independent_source_id": "SWE_BENCH",
+      "workload_tags": [
+        "repository_assistance",
+        "repository_agent"
+      ],
+      "provenance": "curated_derivative",
+      "fitness_status": "VARIABLES_REQUIRE_ASSET_INSPECTION",
+      "discovery_status": "ENTRY_IDENTIFIED"
+    },
+    {
+      "source_id": "VISIONARENA",
+      "platform": "hf",
+      "repo_id": "lmarena-ai/VisionArena-Chat",
+      "source_url": "https://huggingface.co/datasets/lmarena-ai/VisionArena-Chat",
+      "asset_kind": "multimodal_conversation_corpus",
+      "independent_source_id": "VISIONARENA",
+      "workload_tags": [
+        "dialogue",
+        "image",
+        "multimodal"
+      ],
+      "provenance": "author_release",
+      "fitness_status": "VARIABLES_REQUIRE_ASSET_INSPECTION",
+      "discovery_status": "ENTRY_IDENTIFIED"
+    },
+    {
+      "source_id": "MMMU",
+      "platform": "hf",
+      "repo_id": "MMMU/MMMU",
+      "source_url": "https://huggingface.co/datasets/MMMU/MMMU",
+      "asset_kind": "multimodal_task_corpus",
+      "independent_source_id": "MMMU",
+      "workload_tags": [
+        "image",
+        "multimodal",
+        "reasoning",
+        "science_qa"
+      ],
+      "provenance": "author_release",
+      "fitness_status": "VARIABLES_REQUIRE_ASSET_INSPECTION",
+      "discovery_status": "ENTRY_IDENTIFIED"
+    },
+    {
+      "source_id": "CHARTQA",
+      "platform": "hf",
+      "repo_id": "HuggingFaceM4/ChartQA",
+      "source_url": "https://huggingface.co/datasets/HuggingFaceM4/ChartQA",
+      "asset_kind": "multimodal_task_corpus",
+      "independent_source_id": "CHARTQA",
+      "workload_tags": [
+        "image",
+        "document_analysis",
+        "multimodal"
+      ],
+      "provenance": "curated_derivative",
+      "fitness_status": "VARIABLES_REQUIRE_ASSET_INSPECTION",
+      "discovery_status": "ENTRY_IDENTIFIED"
+    },
+    {
+      "source_id": "VIDEOMME",
+      "platform": "hf",
+      "repo_id": "lmms-lab/Video-MME",
+      "source_url": "https://huggingface.co/datasets/lmms-lab/Video-MME",
+      "asset_kind": "multimodal_task_corpus",
+      "independent_source_id": "VIDEOMME",
+      "workload_tags": [
+        "video",
+        "multimodal",
+        "long_context"
+      ],
+      "provenance": "official_project",
+      "fitness_status": "VARIABLES_REQUIRE_ASSET_INSPECTION",
+      "discovery_status": "ENTRY_IDENTIFIED"
+    },
+    {
+      "source_id": "VIDEOMME_V2",
+      "platform": "hf",
+      "repo_id": "MME-Benchmarks/Video-MME-v2",
+      "source_url": "https://huggingface.co/datasets/MME-Benchmarks/Video-MME-v2",
+      "asset_kind": "multimodal_task_corpus",
+      "independent_source_id": "VIDEOMME",
+      "workload_tags": [
+        "video",
+        "multimodal",
+        "reasoning"
+      ],
+      "provenance": "author_release",
+      "fitness_status": "VARIABLES_REQUIRE_ASSET_INSPECTION",
+      "discovery_status": "ENTRY_IDENTIFIED"
+    },
+    {
+      "source_id": "MVBENCH",
+      "platform": "hf",
+      "repo_id": "OpenGVLab/MVBench",
+      "source_url": "https://huggingface.co/datasets/OpenGVLab/MVBench",
+      "asset_kind": "multimodal_task_corpus",
+      "independent_source_id": "MVBENCH",
+      "workload_tags": [
+        "video",
+        "multimodal"
+      ],
+      "provenance": "author_release",
+      "fitness_status": "VARIABLES_REQUIRE_ASSET_INSPECTION",
+      "discovery_status": "ENTRY_IDENTIFIED"
+    },
+    {
+      "source_id": "LONGVIDEOBENCH",
+      "platform": "hf",
+      "repo_id": "longvideobench/LongVideoBench",
+      "source_url": "https://huggingface.co/datasets/longvideobench/LongVideoBench",
+      "asset_kind": "multimodal_task_corpus",
+      "independent_source_id": "LONGVIDEOBENCH",
+      "workload_tags": [
+        "video",
+        "multimodal",
+        "long_context"
+      ],
+      "provenance": "author_release",
+      "fitness_status": "VARIABLES_REQUIRE_ASSET_INSPECTION",
+      "discovery_status": "ENTRY_IDENTIFIED"
+    },
+    {
+      "source_id": "LIBRISPEECH",
+      "platform": "hf",
+      "repo_id": "openslr/librispeech_asr",
+      "source_url": "https://huggingface.co/datasets/openslr/librispeech_asr",
+      "asset_kind": "speech_corpus",
+      "independent_source_id": "LIBRISPEECH",
+      "workload_tags": [
+        "audio",
+        "speech_recognition"
+      ],
+      "provenance": "official_project",
+      "fitness_status": "VARIABLES_REQUIRE_ASSET_INSPECTION",
+      "discovery_status": "ENTRY_IDENTIFIED"
+    },
+    {
+      "source_id": "FLEURS",
+      "platform": "hf",
+      "repo_id": "google/fleurs",
+      "source_url": "https://huggingface.co/datasets/google/fleurs",
+      "asset_kind": "speech_corpus",
+      "independent_source_id": "FLEURS",
+      "workload_tags": [
+        "audio",
+        "speech_recognition",
+        "multilingual"
+      ],
+      "provenance": "author_release",
+      "fitness_status": "VARIABLES_REQUIRE_ASSET_INSPECTION",
+      "discovery_status": "ENTRY_IDENTIFIED"
+    },
+    {
+      "source_id": "WAVCAPS",
+      "platform": "hf",
+      "repo_id": "cvssp/WavCaps",
+      "source_url": "https://huggingface.co/datasets/cvssp/WavCaps",
+      "asset_kind": "audio_caption_corpus",
+      "independent_source_id": "WAVCAPS",
+      "workload_tags": [
+        "audio",
+        "multimodal"
+      ],
+      "provenance": "author_release",
+      "fitness_status": "VARIABLES_REQUIRE_ASSET_INSPECTION",
+      "discovery_status": "ENTRY_IDENTIFIED"
+    },
+    {
+      "source_id": "SCIENCEAGENTBENCH",
+      "platform": "hf",
+      "repo_id": "osunlp/ScienceAgentBench",
+      "source_url": "https://huggingface.co/datasets/osunlp/ScienceAgentBench",
+      "asset_kind": "scientific_code_tasks",
+      "independent_source_id": "SCIENCEAGENTBENCH",
+      "workload_tags": [
+        "science_workflow",
+        "code_generation",
+        "tool_interaction"
+      ],
+      "provenance": "author_release",
+      "fitness_status": "VARIABLES_REQUIRE_ASSET_INSPECTION",
+      "discovery_status": "ENTRY_IDENTIFIED"
+    },
+    {
+      "source_id": "DS1000",
+      "platform": "hf",
+      "repo_id": "xlangai/DS-1000",
+      "source_url": "https://huggingface.co/datasets/xlangai/DS-1000",
+      "asset_kind": "code_task_corpus",
+      "independent_source_id": "DS1000",
+      "workload_tags": [
+        "code_generation",
+        "science_workflow"
+      ],
+      "provenance": "author_release",
+      "fitness_status": "VARIABLES_REQUIRE_ASSET_INSPECTION",
+      "discovery_status": "ENTRY_IDENTIFIED"
+    },
+    {
+      "source_id": "MIND2WEB",
+      "platform": "hf",
+      "repo_id": "osunlp/Mind2Web",
+      "source_url": "https://huggingface.co/datasets/osunlp/Mind2Web",
+      "asset_kind": "web_action_demonstrations",
+      "independent_source_id": "MIND2WEB",
+      "workload_tags": [
+        "tool_interaction",
+        "workflow",
+        "multimodal"
+      ],
+      "provenance": "author_release",
+      "fitness_status": "VARIABLES_REQUIRE_ASSET_INSPECTION",
+      "discovery_status": "ENTRY_IDENTIFIED"
+    },
+    {
+      "source_id": "GAIA",
+      "platform": "hf",
+      "repo_id": "gaia-benchmark/GAIA",
+      "source_url": "https://huggingface.co/datasets/gaia-benchmark/GAIA",
+      "asset_kind": "tool_reasoning_tasks",
+      "independent_source_id": "GAIA",
+      "workload_tags": [
+        "tool_interaction",
+        "reasoning",
+        "multimodal"
+      ],
+      "provenance": "author_release",
+      "fitness_status": "VARIABLES_REQUIRE_ASSET_INSPECTION",
+      "discovery_status": "ENTRY_IDENTIFIED"
+    },
+    {
+      "source_id": "STRUCTEVAL",
+      "platform": "hf",
+      "repo_id": "TIGER-Lab/StructEval",
+      "source_url": "https://huggingface.co/datasets/TIGER-Lab/StructEval",
+      "asset_kind": "structured_generation_tasks",
+      "independent_source_id": "STRUCTEVAL_GENERATION",
+      "workload_tags": [
+        "structured",
+        "text_transformation"
+      ],
+      "provenance": "author_release",
+      "fitness_status": "VARIABLES_REQUIRE_ASSET_INSPECTION",
+      "asset_scope": "Structural-output benchmark (arXiv 2505.20139), not c-box/StructEval (arXiv 2408.03281)",
+      "discovery_status": "ENTRY_IDENTIFIED"
+    },
+    {
+      "source_id": "PAWS",
+      "platform": "hf",
+      "repo_id": "google-research-datasets/paws",
+      "source_url": "https://huggingface.co/datasets/google-research-datasets/paws",
+      "asset_kind": "auxiliary_text_pairs",
+      "independent_source_id": "PAWS",
+      "workload_tags": [
+        "semantic_similarity"
+      ],
+      "provenance": "author_release",
+      "fitness_status": "VARIABLES_REQUIRE_ASSET_INSPECTION",
+      "discovery_status": "ENTRY_IDENTIFIED"
+    },
+    {
+      "source_id": "XLSUM",
+      "platform": "hf",
+      "repo_id": "csebuetnlp/xlsum",
+      "source_url": "https://huggingface.co/datasets/csebuetnlp/xlsum",
+      "asset_kind": "summarization_corpus",
+      "independent_source_id": "XLSUM",
+      "workload_tags": [
+        "text_transformation",
+        "multilingual"
+      ],
+      "provenance": "author_release",
+      "fitness_status": "VARIABLES_REQUIRE_ASSET_INSPECTION",
+      "discovery_status": "ENTRY_IDENTIFIED"
+    },
+    {
+      "source_id": "FLORES200",
+      "platform": "hf",
+      "repo_id": "facebook/flores",
+      "source_url": "https://huggingface.co/datasets/facebook/flores",
+      "asset_kind": "translation_corpus",
+      "independent_source_id": "FLORES",
+      "workload_tags": [
+        "text_transformation",
+        "multilingual"
+      ],
+      "provenance": "author_release",
+      "fitness_status": "VARIABLES_REQUIRE_ASSET_INSPECTION",
+      "discovery_status": "ENTRY_IDENTIFIED"
+    },
+    {
+      "source_id": "BURSTGPT",
+      "platform": "github",
+      "repo_id": "HPMLL/BurstGPT",
+      "source_url": "https://github.com/HPMLL/BurstGPT",
+      "asset_kind": "request_trace",
+      "independent_source_id": "BURSTGPT",
+      "workload_tags": [
+        "arrival",
+        "dialogue",
+        "phase_asymmetry"
+      ],
+      "provenance": "author_release",
+      "fitness_status": "VARIABLES_REQUIRE_ASSET_INSPECTION",
+      "discovery_status": "ENTRY_IDENTIFIED"
+    },
+    {
+      "source_id": "TRACELAB",
+      "platform": "github",
+      "repo_id": "uw-syfi/TraceLab",
+      "source_url": "https://github.com/uw-syfi/TraceLab",
+      "asset_kind": "execution_trace",
+      "independent_source_id": "TRACELAB",
+      "workload_tags": [
+        "repository_agent",
+        "repository_assistance",
+        "tool_interaction",
+        "arrival",
+        "shared_content",
+        "memory"
+      ],
+      "provenance": "author_release",
+      "fitness_status": "VARIABLES_REQUIRE_ASSET_INSPECTION",
+      "discovery_status": "ENTRY_IDENTIFIED"
+    },
+    {
+      "source_id": "AZURE_LLM",
+      "platform": "github",
+      "repo_id": "Azure/AzurePublicDataset",
+      "source_url": "https://github.com/Azure/AzurePublicDataset",
+      "asset_kind": "request_trace",
+      "independent_source_id": "AZURE_LLM",
+      "workload_tags": [
+        "arrival",
+        "phase_asymmetry"
+      ],
+      "provenance": "official_project",
+      "fitness_status": "VARIABLES_REQUIRE_ASSET_INSPECTION",
+      "asset_scope": "AzureLLMInferenceDataset2023 only; exclude VM/Functions/non-LLM traces",
+      "discovery_status": "ENTRY_IDENTIFIED"
+    },
+    {
+      "source_id": "MOONCAKE",
+      "platform": "github",
+      "repo_id": "kvcache-ai/Mooncake",
+      "source_url": "https://github.com/kvcache-ai/Mooncake",
+      "asset_kind": "request_trace",
+      "independent_source_id": "MOONCAKE",
+      "workload_tags": [
+        "arrival",
+        "shared_content",
+        "long_context"
+      ],
+      "provenance": "author_release",
+      "fitness_status": "VARIABLES_REQUIRE_ASSET_INSPECTION",
+      "asset_scope": "Published serving trace assets only, not the runtime implementation",
+      "discovery_status": "ENTRY_IDENTIFIED"
+    },
+    {
+      "source_id": "QRECC",
+      "platform": "github",
+      "repo_id": "apple/ml-qrecc",
+      "source_url": "https://github.com/apple/ml-qrecc",
+      "asset_kind": "conversational_retrieval_tasks",
+      "independent_source_id": "QRECC",
+      "workload_tags": [
+        "retrieval",
+        "dialogue"
+      ],
+      "provenance": "author_release",
+      "fitness_status": "VARIABLES_REQUIRE_ASSET_INSPECTION",
+      "discovery_status": "ENTRY_IDENTIFIED"
+    },
+    {
+      "source_id": "INFINITEBENCH",
+      "platform": "github",
+      "repo_id": "OpenBMB/InfiniteBench",
+      "source_url": "https://github.com/OpenBMB/InfiniteBench",
+      "asset_kind": "task_corpus",
+      "independent_source_id": "INFINITEBENCH",
+      "workload_tags": [
+        "long_context",
+        "retrieval",
+        "document_analysis",
+        "code"
+      ],
+      "provenance": "author_release",
+      "fitness_status": "VARIABLES_REQUIRE_ASSET_INSPECTION",
+      "discovery_status": "ENTRY_IDENTIFIED"
+    },
+    {
+      "source_id": "RULER",
+      "platform": "github",
+      "repo_id": "NVIDIA/RULER",
+      "source_url": "https://github.com/NVIDIA/RULER",
+      "asset_kind": "synthetic_long_context_probe",
+      "independent_source_id": "RULER",
+      "workload_tags": [
+        "long_context",
+        "retrieval"
+      ],
+      "provenance": "author_release",
+      "fitness_status": "VARIABLES_REQUIRE_ASSET_INSPECTION",
+      "discovery_status": "ENTRY_IDENTIFIED"
+    },
+    {
+      "source_id": "QUALITY",
+      "platform": "github",
+      "repo_id": "nyu-mll/quality",
+      "source_url": "https://github.com/nyu-mll/quality",
+      "asset_kind": "task_corpus",
+      "independent_source_id": "QUALITY",
+      "workload_tags": [
+        "long_context",
+        "document_analysis",
+        "reasoning"
+      ],
+      "provenance": "author_release",
+      "fitness_status": "VARIABLES_REQUIRE_ASSET_INSPECTION",
+      "discovery_status": "ENTRY_IDENTIFIED"
+    },
+    {
+      "source_id": "BBH",
+      "platform": "github",
+      "repo_id": "suzgunmirac/BIG-Bench-Hard",
+      "source_url": "https://github.com/suzgunmirac/BIG-Bench-Hard",
+      "asset_kind": "task_corpus",
+      "independent_source_id": "BIGBENCH",
+      "workload_tags": [
+        "reasoning"
+      ],
+      "provenance": "author_release",
+      "fitness_status": "23_PUBLISHED_CATEGORIES_27_ORIGINAL_TASK_FILES",
+      "discovery_status": "PINNED_REVISION_ASSETS_HASHED_AND_SHAPE_CHECKED",
+      "revision": "9ee07bd481feebf959a6b59d61ea57bdcf30964d",
+      "asset_scope": "All 27 task JSON files and matching 27 publisher CoT prompts; object-count variants remain separate source task files."
+    },
+    {
+      "source_id": "BFCL",
+      "platform": "github",
+      "repo_id": "ShishirPatil/gorilla",
+      "source_url": "https://github.com/ShishirPatil/gorilla",
+      "asset_kind": "tool_task_corpus",
+      "independent_source_id": "BFCL",
+      "workload_tags": [
+        "tool_interaction",
+        "structured",
+        "memory"
+      ],
+      "provenance": "author_release",
+      "fitness_status": "VARIABLES_REQUIRE_ASSET_INSPECTION",
+      "asset_scope": "berkeley-function-call-leaderboard data only; freeze the selected BFCL version",
+      "discovery_status": "ENTRY_IDENTIFIED"
+    },
+    {
+      "source_id": "TAUBENCH",
+      "platform": "github",
+      "repo_id": "sierra-research/tau2-bench",
+      "source_url": "https://github.com/sierra-research/tau2-bench",
+      "asset_kind": "interactive_task_environment",
+      "independent_source_id": "TAUBENCH",
+      "workload_tags": [
+        "tool_interaction",
+        "dialogue",
+        "audio",
+        "retrieval"
+      ],
+      "provenance": "author_release",
+      "fitness_status": "VARIABLES_REQUIRE_ASSET_INSPECTION",
+      "discovery_status": "ENTRY_IDENTIFIED"
+    },
+    {
+      "source_id": "TOOLBENCH",
+      "platform": "github",
+      "repo_id": "OpenBMB/ToolBench",
+      "source_url": "https://github.com/OpenBMB/ToolBench",
+      "asset_kind": "synthetic_tool_tasks",
+      "independent_source_id": "TOOLBENCH",
+      "workload_tags": [
+        "tool_interaction",
+        "workflow"
+      ],
+      "provenance": "author_release",
+      "fitness_status": "VARIABLES_REQUIRE_ASSET_INSPECTION",
+      "discovery_status": "ENTRY_IDENTIFIED"
+    },
+    {
+      "source_id": "AGENTBENCH",
+      "platform": "github",
+      "repo_id": "THUDM/AgentBench",
+      "source_url": "https://github.com/THUDM/AgentBench",
+      "asset_kind": "interactive_task_environment",
+      "independent_source_id": "AGENTBENCH",
+      "workload_tags": [
+        "tool_interaction",
+        "workflow"
+      ],
+      "provenance": "author_release",
+      "fitness_status": "VARIABLES_REQUIRE_ASSET_INSPECTION",
+      "discovery_status": "ENTRY_IDENTIFIED"
+    },
+    {
+      "source_id": "SCHEMASTORE",
+      "platform": "github",
+      "repo_id": "SchemaStore/schemastore",
+      "source_url": "https://github.com/SchemaStore/schemastore",
+      "asset_kind": "schema_collection",
+      "independent_source_id": "SCHEMASTORE",
+      "workload_tags": [
+        "structured",
+        "shared_content"
+      ],
+      "provenance": "official_project",
+      "fitness_status": "VARIABLES_REQUIRE_ASSET_INSPECTION",
+      "discovery_status": "ENTRY_IDENTIFIED"
+    },
+    {
+      "source_id": "JSONSCHEMABENCH",
+      "platform": "github",
+      "repo_id": "guidance-ai/jsonschemabench",
+      "source_url": "https://github.com/guidance-ai/jsonschemabench",
+      "asset_kind": "schema_collection",
+      "independent_source_id": "JSONSCHEMABENCH",
+      "workload_tags": [
+        "structured",
+        "shared_content"
+      ],
+      "provenance": "author_release",
+      "fitness_status": "VARIABLES_REQUIRE_ASSET_INSPECTION",
+      "discovery_status": "ENTRY_IDENTIFIED"
+    },
+    {
+      "source_id": "LIVECODEBENCH",
+      "platform": "github",
+      "repo_id": "LiveCodeBench/LiveCodeBench",
+      "source_url": "https://github.com/LiveCodeBench/LiveCodeBench",
+      "asset_kind": "code_task_corpus",
+      "independent_source_id": "LIVECODEBENCH",
+      "workload_tags": [
+        "code_generation",
+        "code_evaluation"
+      ],
+      "provenance": "author_release",
+      "fitness_status": "VARIABLES_REQUIRE_ASSET_INSPECTION",
+      "discovery_status": "ENTRY_IDENTIFIED"
+    },
+    {
+      "source_id": "HUMANEVAL",
+      "platform": "github",
+      "repo_id": "openai/human-eval",
+      "source_url": "https://github.com/openai/human-eval",
+      "asset_kind": "code_task_corpus",
+      "independent_source_id": "HUMANEVAL",
+      "workload_tags": [
+        "code_generation",
+        "code_evaluation"
+      ],
+      "provenance": "author_release",
+      "fitness_status": "VARIABLES_REQUIRE_ASSET_INSPECTION",
+      "discovery_status": "ENTRY_IDENTIFIED"
+    },
+    {
+      "source_id": "MBPP",
+      "platform": "github",
+      "repo_id": "google-research/google-research",
+      "source_url": "https://github.com/google-research/google-research",
+      "asset_kind": "code_task_corpus",
+      "independent_source_id": "MBPP",
+      "workload_tags": [
+        "code_generation",
+        "code_evaluation"
+      ],
+      "provenance": "author_release",
+      "fitness_status": "VARIABLES_REQUIRE_ASSET_INSPECTION",
+      "asset_scope": "mbpp directory only; exclude other google-research datasets",
+      "discovery_status": "ENTRY_IDENTIFIED"
+    },
+    {
+      "source_id": "REPOBENCH",
+      "platform": "github",
+      "repo_id": "Leolty/repobench",
+      "source_url": "https://github.com/Leolty/repobench",
+      "asset_kind": "repository_task_corpus",
+      "independent_source_id": "REPOBENCH",
+      "workload_tags": [
+        "repository_assistance",
+        "code_generation"
+      ],
+      "provenance": "author_release",
+      "fitness_status": "VARIABLES_REQUIRE_ASSET_INSPECTION",
+      "discovery_status": "ENTRY_IDENTIFIED"
+    },
+    {
+      "source_id": "CROSSCODEEVAL",
+      "platform": "github",
+      "repo_id": "amazon-science/cceval",
+      "source_url": "https://github.com/amazon-science/cceval",
+      "asset_kind": "repository_task_corpus",
+      "independent_source_id": "CROSSCODEEVAL",
+      "workload_tags": [
+        "repository_assistance",
+        "code_generation"
+      ],
+      "provenance": "author_release",
+      "fitness_status": "VARIABLES_REQUIRE_ASSET_INSPECTION",
+      "discovery_status": "ENTRY_IDENTIFIED"
+    },
+    {
+      "source_id": "LOCOMO",
+      "platform": "github",
+      "repo_id": "snap-research/locomo",
+      "source_url": "https://github.com/snap-research/locomo",
+      "asset_kind": "constructed_memory_tasks",
+      "independent_source_id": "LOCOMO",
+      "workload_tags": [
+        "dialogue",
+        "memory",
+        "multimodal"
+      ],
+      "provenance": "author_release",
+      "fitness_status": "VARIABLES_REQUIRE_ASSET_INSPECTION",
+      "discovery_status": "ENTRY_IDENTIFIED"
+    },
+    {
+      "source_id": "NATUREBENCH",
+      "platform": "github",
+      "repo_id": "FrontisAI/NatureBench",
+      "source_url": "https://github.com/FrontisAI/NatureBench",
+      "asset_kind": "scientific_task_and_trace_release",
+      "independent_source_id": "NATUREBENCH",
+      "workload_tags": [
+        "science_workflow",
+        "tool_interaction",
+        "code_generation"
+      ],
+      "provenance": "author_release",
+      "fitness_status": "VARIABLES_REQUIRE_ASSET_INSPECTION",
+      "discovery_status": "ENTRY_IDENTIFIED"
+    },
+    {
+      "source_id": "DISCOVERYBENCH",
+      "platform": "github",
+      "repo_id": "allenai/discoverybench",
+      "source_url": "https://github.com/allenai/discoverybench",
+      "asset_kind": "scientific_discovery_tasks",
+      "independent_source_id": "DISCOVERYBENCH",
+      "workload_tags": [
+        "science_workflow",
+        "document_analysis",
+        "reasoning"
+      ],
+      "provenance": "author_release",
+      "fitness_status": "VARIABLES_REQUIRE_ASSET_INSPECTION",
+      "discovery_status": "ENTRY_IDENTIFIED"
+    },
+    {
+      "source_id": "MLAGENTBENCH",
+      "platform": "github",
+      "repo_id": "snap-stanford/MLAgentBench",
+      "source_url": "https://github.com/snap-stanford/MLAgentBench",
+      "asset_kind": "scientific_task_environment",
+      "independent_source_id": "MLAGENTBENCH",
+      "workload_tags": [
+        "science_workflow",
+        "code_generation",
+        "tool_interaction"
+      ],
+      "provenance": "author_release",
+      "fitness_status": "VARIABLES_REQUIRE_ASSET_INSPECTION",
+      "discovery_status": "ENTRY_IDENTIFIED"
+    },
+    {
+      "source_id": "MLEBENCH",
+      "platform": "github",
+      "repo_id": "openai/mle-bench",
+      "source_url": "https://github.com/openai/mle-bench",
+      "asset_kind": "scientific_task_environment",
+      "independent_source_id": "MLEBENCH",
+      "workload_tags": [
+        "science_workflow",
+        "code_generation"
+      ],
+      "provenance": "author_release",
+      "fitness_status": "VARIABLES_REQUIRE_ASSET_INSPECTION",
+      "discovery_status": "ENTRY_IDENTIFIED"
+    },
+    {
+      "source_id": "WEBARENA",
+      "platform": "github",
+      "repo_id": "web-arena-x/webarena",
+      "source_url": "https://github.com/web-arena-x/webarena",
+      "asset_kind": "interactive_task_environment",
+      "independent_source_id": "WEBARENA",
+      "workload_tags": [
+        "tool_interaction",
+        "workflow"
+      ],
+      "provenance": "author_release",
+      "fitness_status": "VARIABLES_REQUIRE_ASSET_INSPECTION",
+      "discovery_status": "ENTRY_IDENTIFIED"
+    },
+    {
+      "source_id": "VISUALWEBARENA",
+      "platform": "github",
+      "repo_id": "web-arena-x/visualwebarena",
+      "source_url": "https://github.com/web-arena-x/visualwebarena",
+      "asset_kind": "interactive_task_environment",
+      "independent_source_id": "VISUALWEBARENA",
+      "workload_tags": [
+        "tool_interaction",
+        "image",
+        "multimodal"
+      ],
+      "provenance": "author_release",
+      "fitness_status": "VARIABLES_REQUIRE_ASSET_INSPECTION",
+      "discovery_status": "ENTRY_IDENTIFIED"
+    },
+    {
+      "source_id": "OSWORLD",
+      "platform": "github",
+      "repo_id": "xlang-ai/OSWorld",
+      "source_url": "https://github.com/xlang-ai/OSWorld",
+      "asset_kind": "interactive_task_environment",
+      "independent_source_id": "OSWORLD",
+      "workload_tags": [
+        "tool_interaction",
+        "image",
+        "multimodal",
+        "workflow"
+      ],
+      "provenance": "author_release",
+      "fitness_status": "VARIABLES_REQUIRE_ASSET_INSPECTION",
+      "discovery_status": "ENTRY_IDENTIFIED"
+    },
+    {
+      "source_id": "XSUM",
+      "platform": "github",
+      "repo_id": "EdinburghNLP/XSum",
+      "source_url": "https://github.com/EdinburghNLP/XSum",
+      "asset_kind": "summarization_corpus",
+      "independent_source_id": "XSUM",
+      "workload_tags": [
+        "text_transformation"
+      ],
+      "provenance": "author_release",
+      "fitness_status": "VARIABLES_REQUIRE_ASSET_INSPECTION",
+      "discovery_status": "ENTRY_IDENTIFIED"
+    },
+    {
+      "source_id": "MULTINEWS",
+      "platform": "github",
+      "repo_id": "Alex-Fabbri/Multi-News",
+      "source_url": "https://github.com/Alex-Fabbri/Multi-News",
+      "asset_kind": "summarization_corpus",
+      "independent_source_id": "MULTINEWS",
+      "workload_tags": [
+        "text_transformation",
+        "long_context"
+      ],
+      "provenance": "author_release",
+      "fitness_status": "VARIABLES_REQUIRE_ASSET_INSPECTION",
+      "discovery_status": "ENTRY_IDENTIFIED"
+    },
+    {
+      "source_id": "BILLSUM",
+      "platform": "github",
+      "repo_id": "FiscalNote/BillSum",
+      "source_url": "https://github.com/FiscalNote/BillSum",
+      "asset_kind": "summarization_corpus",
+      "independent_source_id": "BILLSUM",
+      "workload_tags": [
+        "text_transformation",
+        "long_context"
+      ],
+      "provenance": "author_release",
+      "fitness_status": "VARIABLES_REQUIRE_ASSET_INSPECTION",
+      "discovery_status": "ENTRY_IDENTIFIED"
+    }
+    ,{"source_id":"TULU3","platform":"hf","repo_id":"allenai/tulu-3-sft-mixture","source_url":"https://huggingface.co/datasets/allenai/tulu-3-sft-mixture","asset_kind":"mixed_instruction_corpus","independent_source_id":"TULU3","workload_tags":["dialogue","text_transformation","reasoning"],"provenance":"author_release_mixture","fitness_status":"VARIABLES_REQUIRE_ASSET_INSPECTION","discovery_status":"ENTRY_IDENTIFIED","lineage_note":"Mixture includes existing corpora; retain per-row source; not an independent origin for every row."}
+    ,{"source_id":"NATURAL_INSTRUCTIONS","platform":"github","repo_id":"allenai/natural-instructions","source_url":"https://github.com/allenai/natural-instructions","asset_kind":"multitask_instruction_corpus","independent_source_id":"NATURAL_INSTRUCTIONS","workload_tags":["single_turn","text_transformation","structured"],"provenance":"author_release_mixture","fitness_status":"VARIABLES_REQUIRE_ASSET_INSPECTION","discovery_status":"ENTRY_IDENTIFIED"}
+    ,{"source_id":"OPENMATH2","platform":"hf","repo_id":"nvidia/OpenMathInstruct-2","source_url":"https://huggingface.co/datasets/nvidia/OpenMathInstruct-2","asset_kind":"synthetic_reasoning_corpus","independent_source_id":"OPENMATH2","workload_tags":["reasoning"],"provenance":"author_release","fitness_status":"VARIABLES_REQUIRE_ASSET_INSPECTION","discovery_status":"ENTRY_IDENTIFIED","lineage_note":"Derived from GSM8K/MATH plus generated questions; downsampled 1M/2M/5M overlap full train."}
+    ,{"source_id":"OPENTHOUGHTS3","platform":"hf","repo_id":"open-thoughts/OpenThoughts3-1.2M","source_url":"https://huggingface.co/datasets/open-thoughts/OpenThoughts3-1.2M","asset_kind":"synthetic_reasoning_corpus","independent_source_id":"OPENTHOUGHTS","workload_tags":["reasoning","code_generation"],"provenance":"author_release","fitness_status":"VARIABLES_REQUIRE_ASSET_INSPECTION","discovery_status":"ENTRY_IDENTIFIED"}
+    ,{"source_id":"OPENCODE","platform":"hf","repo_id":"nvidia/OpenCodeInstruct","source_url":"https://huggingface.co/datasets/nvidia/OpenCodeInstruct","asset_kind":"synthetic_code_corpus","independent_source_id":"OPENCODE","workload_tags":["code_generation","code_evaluation"],"provenance":"author_release","fitness_status":"VARIABLES_REQUIRE_ASSET_INSPECTION","discovery_status":"ENTRY_IDENTIFIED"}
+    ,{"source_id":"SWESMITH","platform":"github","repo_id":"SWE-bench/SWE-smith","source_url":"https://github.com/SWE-bench/SWE-smith","asset_kind":"generated_repository_tasks_and_traces","independent_source_id":"SWESMITH","workload_tags":["repository_agent","repository_assistance"],"provenance":"author_release","fitness_status":"VARIABLES_REQUIRE_ASSET_INSPECTION","discovery_status":"ENTRY_IDENTIFIED"}
+    ,{"source_id":"WORKARENA","platform":"github","repo_id":"ServiceNow/WorkArena","source_url":"https://github.com/ServiceNow/WorkArena","asset_kind":"browser_environment_tasks","independent_source_id":"WORKARENA","workload_tags":["tool_interaction"],"provenance":"author_release","fitness_status":"VARIABLES_REQUIRE_ASSET_INSPECTION","discovery_status":"ENTRY_IDENTIFIED"}
+    ,{"source_id":"APPWORLD","platform":"github","repo_id":"StonyBrookNLP/appworld","source_url":"https://github.com/StonyBrookNLP/appworld","asset_kind":"api_environment_tasks","independent_source_id":"APPWORLD","workload_tags":["tool_interaction","code_generation"],"provenance":"author_release","fitness_status":"VARIABLES_REQUIRE_ASSET_INSPECTION","discovery_status":"ENTRY_IDENTIFIED"}
+    ,{"source_id":"SCIENCEWORLD","platform":"github","repo_id":"allenai/ScienceWorld","source_url":"https://github.com/allenai/ScienceWorld","asset_kind":"science_simulation_environment","independent_source_id":"SCIENCEWORLD","workload_tags":["tool_interaction","scientific_planning","verification"],"provenance":"author_release","fitness_status":"VARIABLES_REQUIRE_ASSET_INSPECTION","discovery_status":"ENTRY_IDENTIFIED"}
+    ,{"source_id":"BIXBENCH","platform":"github","repo_id":"Future-House/BixBench","source_url":"https://github.com/Future-House/BixBench","asset_kind":"scientific_analysis_tasks_and_traces","independent_source_id":"BIXBENCH","workload_tags":["scientific_coding","verification"],"provenance":"author_release","fitness_status":"VARIABLES_REQUIRE_ASSET_INSPECTION","discovery_status":"ENTRY_IDENTIFIED"}
+    ,{"source_id":"LABBENCH","platform":"github","repo_id":"Future-House/LAB-Bench","source_url":"https://github.com/Future-House/LAB-Bench","asset_kind":"science_qa_tasks","independent_source_id":"LABBENCH","workload_tags":["science_qa","reasoning","multimodal"],"provenance":"author_release","fitness_status":"VARIABLES_REQUIRE_ASSET_INSPECTION","discovery_status":"ENTRY_IDENTIFIED"}
+    ,{"source_id":"PAPERBENCH","platform":"github","repo_id":"openai/frontier-evals","source_url":"https://github.com/openai/frontier-evals/tree/main/project/paperbench","asset_kind":"research_replication_tasks","independent_source_id":"PAPERBENCH","workload_tags":["scientific_planning","scientific_coding","verification"],"provenance":"author_release","fitness_status":"VARIABLES_REQUIRE_ASSET_INSPECTION","discovery_status":"ENTRY_IDENTIFIED"}
+    ,{"source_id":"SPOKENWOZ","platform":"github","repo_id":"AlibabaResearch/DAMO-ConvAI","source_url":"https://github.com/AlibabaResearch/DAMO-ConvAI/tree/main/spokenwoz","asset_kind":"spoken_dialogue_corpus","independent_source_id":"SPOKENWOZ","workload_tags":["dialogue","audio","multimodal"],"provenance":"author_release","fitness_status":"VARIABLES_REQUIRE_ASSET_INSPECTION","discovery_status":"ENTRY_IDENTIFIED"}
+    ,{"source_id":"DAILYTALK","platform":"github","repo_id":"keonlee9420/DailyTalk","source_url":"https://github.com/keonlee9420/DailyTalk","asset_kind":"recorded_dialogue_corpus","independent_source_id":"DAILYTALK","workload_tags":["dialogue","audio","multimodal"],"provenance":"author_release","fitness_status":"VARIABLES_REQUIRE_ASSET_INSPECTION","discovery_status":"ENTRY_IDENTIFIED","lineage_note":"Recorded adaptation of DailyDialog; dialogue scripts are not a new independent text origin."}
+    ,{"source_id":"LONGWRITER","platform":"hf","repo_id":"zai-org/LongWriter-6k","source_url":"https://huggingface.co/datasets/zai-org/LongWriter-6k","asset_kind":"synthetic_long_output_corpus","independent_source_id":"LONGWRITER","workload_tags":["single_turn","long_output"],"provenance":"author_release","fitness_status":"VARIABLES_REQUIRE_ASSET_INSPECTION","discovery_status":"ENTRY_IDENTIFIED"}
+    ,{"source_id":"LONGALPACA","platform":"hf","repo_id":"Yukang/LongAlpaca-12k","source_url":"https://huggingface.co/datasets/Yukang/LongAlpaca-12k","asset_kind":"constructed_long_qa_corpus","independent_source_id":"LONGALPACA","workload_tags":["long_context","document_analysis"],"provenance":"author_release","fitness_status":"VARIABLES_REQUIRE_ASSET_INSPECTION","discovery_status":"ENTRY_IDENTIFIED","lineage_note":"9k long QA plus 3k short Alpaca; not 12k long inputs."}
+    ,{"source_id":"TOOLACE","platform":"hf","repo_id":"Team-ACE/ToolACE","source_url":"https://huggingface.co/datasets/Team-ACE/ToolACE","asset_kind":"synthetic_tool_tasks","independent_source_id":"TOOLACE","workload_tags":["tool_interaction","structured"],"provenance":"author_release","fitness_status":"VARIABLES_REQUIRE_ASSET_INSPECTION","discovery_status":"ENTRY_IDENTIFIED"}
+    ,{"source_id":"DUREADER","platform":"github","repo_id":"baidu/DuReader","source_url":"https://github.com/baidu/DuReader","asset_kind":"reading_comprehension_corpus","independent_source_id":"DUREADER","workload_tags":["single_turn","retrieval","document_analysis"],"provenance":"author_release","fitness_status":"VARIABLES_REQUIRE_ASSET_INSPECTION","discovery_status":"ENTRY_IDENTIFIED"}
+    ,{"source_id":"SPIDER","platform":"github","repo_id":"taoyds/spider","source_url":"https://github.com/taoyds/spider","asset_kind":"text_to_sql_corpus","independent_source_id":"SPIDER","workload_tags":["structured","code_generation"],"provenance":"author_release","fitness_status":"VARIABLES_REQUIRE_ASSET_INSPECTION","discovery_status":"ENTRY_IDENTIFIED"}
+    ,{"source_id":"NATURALQUESTIONS","platform":"github","repo_id":"google-research-datasets/natural-questions","source_url":"https://github.com/google-research-datasets/natural-questions","asset_kind":"search_question_document_corpus","independent_source_id":"NATURALQUESTIONS","workload_tags":["single_turn","retrieval","document_analysis"],"provenance":"author_release","fitness_status":"VARIABLES_REQUIRE_ASSET_INSPECTION","discovery_status":"ENTRY_IDENTIFIED"}
+  ],
+  "metadata_report": "historical:public-source-metadata-v0.5.json (not bundled; used field evidence is in evidence/publisher-fields-v1.json)",
+  "acquisition_report": "results/public-asset-acquisition-v0.1.json"
+}

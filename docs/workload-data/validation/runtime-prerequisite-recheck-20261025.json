@@ -1,0 +1,44 @@
+{
+  "schema_version": "native-runtime-prerequisite-recheck/v1",
+  "source_ids": ["PAWS", "HUMANEVAL", "BIGCODEBENCH", "DS1000", "TRACELAB", "JSONSCHEMABENCH"],
+  "checked_on": "2026-10-25",
+  "timezone": "Asia/Shanghai",
+  "evidence_basis": "Observed read-only SSH diagnostics on the replacement instance and unchanged stored original response schemas; not native task execution",
+  "code_execution_isolation": {
+    "docker_podman_or_bubblewrap_command_found": false,
+    "unshare_command_found": true,
+    "trusted_noop": "unshare --user --map-root-user --mount --pid --fork --net true",
+    "returncode": 1,
+    "error": "cannot change root filesystem propagation: Permission denied",
+    "generated_code_executed": false,
+    "host_security_policy_changed": false
+  },
+  "paws_official_archive_head": {
+    "url": "https://storage.googleapis.com/paws/english/paws_wiki_labeled_final.tar.gz",
+    "transport": "curl IPv4-only HEAD, normal TLS verification, connect8s and total15s limits",
+    "http_status": 403,
+    "observed_http_date_utc": "2026-10-24T16:13:41Z",
+    "dataset_acquired": false,
+    "credentials_or_unverified_mirror_used": false
+  },
+  "jsonschemabench_public_metadata_ipv4_check": {
+    "url": "https://huggingface.co/api/datasets/epfl-dlab/JSONSchemaBench",
+    "curl_exit_code": 28,
+    "http_status": null,
+    "connect_timeout_seconds": 12,
+    "result": "connection timeout; no metadata or dataset obtained",
+    "persistent_network_configuration_changed": false
+  },
+  "tracelab_cache_gate": {
+    "old_original_and_new_tail_longwriter_saved_responses_read": 2,
+    "prompt_tokens_details_are_objects": false,
+    "cached_tokens_visible_in_saved_usage": false,
+    "official_backend_cache_probe_still_required": true,
+    "actual_cache_probe_executed": false,
+    "inference_server_reconfigured_or_restarted": false,
+    "future_probe_failure_or_fix_claimed": false
+  },
+  "new_model_calls": 0,
+  "new_source_completion_checks": 0,
+  "raw_prompts_responses_or_enterprise_data_published": false
+}

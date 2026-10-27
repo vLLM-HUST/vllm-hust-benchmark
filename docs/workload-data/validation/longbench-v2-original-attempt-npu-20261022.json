@@ -1,0 +1,80 @@
+{
+  "source_id": "LONGBENCH_V2",
+  "source_revision": "2b48e494f2c7a2f0af81aae178e05c7e1dde0fe9",
+  "runner_revision": "2e00731f8d0bff23dc4325161044d0ed8af94c1e",
+  "selection": "first three original-order tasks whose entire official prompt plus128 output fit128K; resource rejects retained",
+  "selected_samples": [
+    "66f36490821e116aacb2cc22",
+    "66ebed525a08c7b9b35e1cb4",
+    "671b3cabbb02136c067d5252"
+  ],
+  "original_row_indices": [
+    1,
+    4,
+    6
+  ],
+  "status": "END_TO_END_EXECUTED_AND_SCORED",
+  "started_at_unix": 1792655458.0203478,
+  "model": "workload-qwen35-27b-128k-nonthinking",
+  "temperature": 0.1,
+  "max_new_tokens": 128,
+  "execution": "official get_pred/extract_answer; only deployment map and client model route bound",
+  "full_suite_claim": false,
+  "input_truncation_permitted": false,
+  "requests": [
+    {
+      "id": "66f36490821e116aacb2cc22",
+      "prompt_sha256": "3ba0cb0309f0efcea8627bcdf312e8d02ff9b9eecd5cfbf512d0c8acab1561c0",
+      "full_prompt_tokens": 38444,
+      "completion_tokens": 8,
+      "finish_reason": "stop",
+      "full_input_verified": true
+    },
+    {
+      "id": "66ebed525a08c7b9b35e1cb4",
+      "prompt_sha256": "9b9a7037ef1480ebba71dc71d6e38b627ea02a6393a4bb23e6f75569f71d1fc5",
+      "full_prompt_tokens": 24590,
+      "completion_tokens": 8,
+      "finish_reason": "stop",
+      "full_input_verified": true
+    },
+    {
+      "id": "671b3cabbb02136c067d5252",
+      "prompt_sha256": "330b29c96aa3cd3bece1cd8d8691ebae32d3e503bdbb949025a382203902d6b7",
+      "full_prompt_tokens": 46971,
+      "completion_tokens": 128,
+      "finish_reason": "length",
+      "full_input_verified": true
+    }
+  ],
+  "tasks": [
+    {
+      "id": "66f36490821e116aacb2cc22",
+      "length_label": "short",
+      "correct": false
+    },
+    {
+      "id": "66ebed525a08c7b9b35e1cb4",
+      "length_label": "short",
+      "correct": false
+    },
+    {
+      "id": "671b3cabbb02136c067d5252",
+      "length_label": "short",
+      "correct": false
+    }
+  ],
+  "correct_tasks": 0,
+  "unique_tasks": 3,
+  "scorer": "unchanged official extract_answer then pred==answer, no compensated score",
+  "finished_at_unix": 1792655493.854959,
+  "claim_boundary": "Three capacity-qualified original tasks, all publisher length-label short; 0/3 correct; one original 128-token budget exhausted. Not full LongBench-v2 coverage or quality qualification.",
+  "source_checkbox_eligible": false,
+  "server_inventory": {
+    "accelerator": "Ascend 910B2",
+    "chips": 2,
+    "backend": "vllm-ascend",
+    "precision": "bfloat16",
+    "mode": "graph"
+  }
+}

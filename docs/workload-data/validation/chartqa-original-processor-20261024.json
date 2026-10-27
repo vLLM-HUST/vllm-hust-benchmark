@@ -1,0 +1,228 @@
+{
+  "source_id": "CHARTQA",
+  "public_entry_followup_20261026": {
+    "status": "PUBLIC_ENTRY_AND_PURE_CLIENT_BUILD_ADDED_FINAL_SERVER_VALIDATION_PENDING",
+    "native_entry": "scripts/run_chartqa_original.py",
+    "runtime_preparer": "scripts/prepare_chartqa_native_runtime.py",
+    "direct_requirements": "configs/workload-native/chartqa-native-client-py312-direct-requirements.txt",
+    "direct_requirements_are_full_transitive_lock": false,
+    "source_checkbox_eligible": false,
+    "old_inherited_client": "Not the delivery environment: inherited vllm/OpenCV and triton-ascend have mutually incompatible NumPy metadata constraints; root serving packages unchanged",
+    "new_client": "Python3.12 pure venv without system site-packages; official CPU Torch supplies toolkit imports only, all model inference remains the independent NPU API",
+    "new_client_server_directory": "chartqa-native-clean-client-32050-002",
+    "public_runtime_server_directory": "chartqa-public-runtime-32050-002",
+    "all_four_original_runtime_source_trees_verified": true,
+    "last_verified_runtime_process": {"pid": 905470, "step": "build_ffmpeg", "cpu_jobs": 4},
+    "ssh_transport": "Port32050 connection refused after connection reset; remote final state unknown, not evidence of build failure",
+    "public_runtime_final_exit": null,
+    "runtime_interpreter_safety_fix": {
+      "affected_last_launched_commit": "5a502c70",
+      "defect": "Resolving a virtualenv python symlink can select the base/system executable for the later installer",
+      "fix": "Preserve invoked interpreter path; probe actual prefix/base_prefix and pyvenv.cfg; reject base Python and inherited system packages before output/download/build; isolated pip installation explicitly targets verified client prefix",
+      "old_server_build_reached_install_stage": null,
+      "system_package_mutation_observed": null,
+      "recovery_gate": "Inspect old process/receipt/log and package locations for both interpreters before any resume, reinstall or rollback; remote installation impact is unknown, not asserted absent"
+    },
+    "pure_client_pip_check_passed": null,
+    "new_category_public_native_cases_executed": 0,
+    "existing_three_valid_native_cases_rerun": false,
+    "remaining": "Recover and inspect original runtime process/receipts, complete pure-client dependency lock/import checks, verify public entry using unseen preselected original cases, close final provider/research/delivery gates"
+  },
+  "initial_processor_snapshot_scope": "Original top-level CPU processor fields are frozen historical evidence; native_followup_20261026 records the later actual NPU visual execution",
+  "native_followup_20261026": {
+    "status": "SELECTED_ORIGINAL_VISUAL_TASKS_AND_TOOLKIT_SCORER_INDEPENDENTLY_AUDITED_NOT_SOURCE_DELIVERY",
+    "original_positions": [0, 1, 2],
+    "selected_category_values": [0, 0, 0],
+    "model": "Qwen3.5-9B BF16 TP1",
+    "model_chat_template_kwargs": {"enable_thinking": false},
+    "official_api_wrapper_default_budget": 2048,
+    "prompt_tokens": [549, 549, 547],
+    "completion_tokens": [3, 5, 2],
+    "finish_reasons": ["stop", "stop", "stop"],
+    "original_relaxed_accuracy_percent": 66.66666666666666,
+    "source_images_match_native_input_pixels": true,
+    "pixel_equality_scope": "Original decoded image pixels equal the toolkit prompt cache image pixels, before the unchanged toolkit HTTP JPEG encoder; not a claim that wire JPEG pixels equal original PNG pixels",
+    "wire_payload_lossless_pixel_identity_claim": false,
+    "saved_wire_payload_matches_original_toolkit_encoder": true,
+    "independent_audit_new_model_calls": 0,
+    "paid_judge_calls": 0,
+    "source_checkbox_eligible": false,
+    "public_native_entry_and_environment_lock_pending": true,
+    "server_native_receipt": "chartqa-native-original-first3-32050-001/receipt-private.json",
+    "server_independent_audit": "chartqa-native-first3-independent-audit-32050-001/receipt-public.json",
+    "raw_payloads_published": false
+  },
+  "followup_toolkit_20261026": {
+    "status": "FIXED_ORIGINAL_TOOLKIT_TREE_VERIFIED_NOT_NATIVE_EXECUTION",
+    "repository": "https://github.com/open-compass/VLMEvalKit",
+    "revision": "160e8a7d0cb1d4d739c1757038775cf2720d6895",
+    "git_tree": "417350395a289dd88538ac6cc031bf47c6e9f5d4",
+    "tracked_files": 897,
+    "transport": "Official codeload archive after Git HTTPS connection timeout; full original file content/mode tree reproduced exactly",
+    "server_source_directory": "vlmevalkit-author-source-archive-32050-002",
+    "native_model_calls": 0,
+    "source_checkbox_eligible": false,
+    "source_preparation_entry": "scripts/prepare_chartqa_native_toolkit.py",
+    "module_import_preflight": "Full original toolkit dataset/API imports and selected native visual calls now passed after dependency completion; no fake module or source patch. Client-only Torch backend auto-loading disabled, no CPU model inference or serving environment changes. Dependency lock and reproducible public environment entry still pending.",
+    "client_compatibility_constraints": "datasets4.8.5, huggingface_hub1.33.0, pyarrow22.0.0 with inherited numpy1.26.4; initial incompatible candidates removed only from this client environment, serving environment unchanged",
+    "decord_source": {
+      "revision": "6a3617cef035535193f390f86399dde139fa2a53",
+      "git_tree": "603de81af7126164f2933dd289a3d7544b134228",
+      "both_original_gitlink_source_trees_verified": true,
+      "build_status": "Official decord0.6.0 compiled, installed and imported after private FFmpeg avdevice build; original source unchanged, original failures retained",
+      "success_receipt": "chartqa-decord-link-resume-32050-001/process-private.json",
+      "original_build_failure_receipt": "chartqa-decord-official-build-32050-001/process-private.json"
+    },
+    "ffmpeg_source": {
+      "release": "4.1.11",
+      "revision": "76ee3e41df5157317ee209d3e6cc0829af5f963f",
+      "git_tree": "778fd46ac63eb7d931125c0ded37d07f73ce68aa",
+      "initial_private_prefix_build_exit": 0,
+      "additional_original_link_libraries": "libavdevice built at private prefix; original decord linker does not require libpostproc. Earlier postproc assertion was unnecessary and is retained as a failed check; no GPL switch or system installation",
+      "repair_state": "chartqa-ffmpeg-avdevice-repair-32050-001/process-private.json",
+      "cpu_jobs": 4
+    },
+    "remaining": "Native module dependencies, original evaluation protocol binding, visual inference, original scoring and research handoff"
+  },
+  "original_test_toolkit_view_20261026": {
+    "source_revision": "b605b6e08b57faf4359aeb2fe6a3ca595f99b6c5",
+    "rows": 2500,
+    "view_name": "ChartQA_HF_ORIGINAL_TEST",
+    "view_sha256": "604c0b196c29c5fb0c40870b1e9a034efd1577aa37e0d5b8a48ee11cdb4b8d5a",
+    "all_original_question_reference_order_category_and_image_bytes_verified": true,
+    "published_toolkit_tsv_identity_claim": false,
+    "original_preset_url_issue": "Server TLS rejected expired certificate; TLS verification not disabled to download data",
+    "server_preparation_receipt": "chartqa-original-toolkit-view-32050-001/preparation-public.json",
+    "native_model_calls": 0,
+    "source_checkbox_eligible": false
+  },
+  "status": "CPU_ORIGINAL_IMAGES_PROCESSOR_PASSED_NOT_INFERENCE",
+  "model_calls": 0,
+  "native_tasks_executed": 0,
+  "weights_loaded": false,
+  "device": "cpu",
+  "source_indices": [
+    0,
+    1,
+    2
+  ],
+  "started_at_unix": 1792837997.1234024,
+  "data_sha256": "efcf31333368c485eb569ec7bd4cc3694bd0e8e1a06c503124b51d27c924491d",
+  "processor_class": "Qwen3VLProcessor",
+  "tasks": [
+    {
+      "original_index": 0,
+      "image_sha256": "b986643f98b6195fa7176bb6591d256daa4dfb906ea706d4f487c123ff3486ad",
+      "image_size": [
+        850,
+        600
+      ],
+      "tensor_shapes": {
+        "input_ids": [
+          1,
+          538
+        ],
+        "attention_mask": [
+          1,
+          538
+        ],
+        "mm_token_type_ids": [
+          1,
+          538
+        ],
+        "pixel_values": [
+          2052,
+          1536
+        ],
+        "image_grid_thw": [
+          1,
+          3
+        ]
+      },
+      "original_question_used": true
+    },
+    {
+      "original_index": 1,
+      "image_sha256": "b986643f98b6195fa7176bb6591d256daa4dfb906ea706d4f487c123ff3486ad",
+      "image_size": [
+        850,
+        600
+      ],
+      "tensor_shapes": {
+        "input_ids": [
+          1,
+          538
+        ],
+        "attention_mask": [
+          1,
+          538
+        ],
+        "mm_token_type_ids": [
+          1,
+          538
+        ],
+        "pixel_values": [
+          2052,
+          1536
+        ],
+        "image_grid_thw": [
+          1,
+          3
+        ]
+      },
+      "original_question_used": true
+    },
+    {
+      "original_index": 2,
+      "image_sha256": "c3d54c82ff54f80abec3472dccc98de941c42bbb621ec38368ad426cea1aef05",
+      "image_size": [
+        850,
+        600
+      ],
+      "tensor_shapes": {
+        "input_ids": [
+          1,
+          536
+        ],
+        "attention_mask": [
+          1,
+          536
+        ],
+        "mm_token_type_ids": [
+          1,
+          536
+        ],
+        "pixel_values": [
+          2052,
+          1536
+        ],
+        "image_grid_thw": [
+          1,
+          3
+        ]
+      },
+      "original_question_used": true
+    }
+  ],
+  "finished_at_unix": 1792838019.2435884,
+  "candidate_model": "Qwen/Qwen3.5-27B",
+  "python": "3.12.13",
+  "packages": {
+    "transformers": "5.5.4",
+    "tokenizers": "0.22.2",
+    "torch": "2.10.0+cpu",
+    "torchvision": "0.25.0+cpu",
+    "Pillow": "12.3.0",
+    "pyarrow": "22.0.0"
+  },
+  "local_processor_file_sha256": {
+    "config.json": "f8d190c5b89c1521220f935d2567a587d6e291ed69066a45a106560b05a2174c",
+    "preprocessor_config.json": "27225450ac9c6529872ee1924fcb0962ff5634834f817040f444118116f4e516",
+    "tokenizer_config.json": "316230d6a809701f4db5ea8f8fc862bc3a6f3229c937c174e674ff3ca0a64ac8",
+    "chat_template.jinja": "a4aee8afcf2e0711942cf848899be66016f8d14a889ff9ede07bca099c28f715"
+  },
+  "raw_source_receipt_sha256": "d6c24a9f154e8a3267ad7370069172534178be3c33575db6ce8fbf64fb48e9af",
+  "model_service_changed": false,
+  "full_benchmark_completed": false,
+  "remaining": "Vision-enabled Ascend serving, original image/question inference and official scoring remain unvalidated."
+}

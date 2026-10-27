@@ -1,0 +1,70 @@
+{
+  "schema_version": "workload-server-validation/v1",
+  "source_id": "MMLU_PRO",
+  "subject": "chemistry",
+  "revision": "b189ec765aa7ed75c8acfea42df31fdae71f97be",
+  "original_test_file_sha256": "0e24a191921c2f453518a537a8b2117bd137e7714d4ef1565e9ba06c1ecb9ad8",
+  "original_test_rows_and_question_ids": [
+    [3405, 3526],
+    [3406, 3527],
+    [3407, 3528]
+  ],
+  "selected_samples": ["chemistry:0", "chemistry:1", "chemistry:2"],
+  "selection": "first three chemistry-filtered original test rows, fixed before model execution",
+  "upstream_task": "lm_eval.tasks.mmlu_pro.mmlu_pro_chemistry",
+  "upstream_task_config_sha256": "0fa839a646acc1f9699d141920a37a270ec8c3febd980aff4bbb2626f13510a2",
+  "runner": "lm-eval==0.4.11",
+  "runner_sha256": "6719876022bdd5dcd0fddb397ae5e861240d0922f2a9e34108fe231995e9b010",
+  "versions": {
+    "datasets": "3.6.0",
+    "pyarrow": "19.0.1",
+    "huggingface-hub": "1.31.0"
+  },
+  "model_artifact": "Qwen/Qwen3.5-27B",
+  "served_model": "workload-qwen35-27b-128k-nonthinking",
+  "hardware": {
+    "accelerator": "Ascend 910B2",
+    "chips": 2,
+    "precision": "bfloat16",
+    "tensor_parallel_size": 2
+  },
+  "runtime_profile": {
+    "backend": "vllm-ascend",
+    "mode": "graph",
+    "max_model_len": 131072,
+    "max_num_seqs": 2,
+    "gpu_memory_utilization": 0.75,
+    "language_model_only": true,
+    "enable_thinking": false
+  },
+  "engine_versions": {
+    "vllm": "0.23.0+empty",
+    "vllm-ascend": "0.23.0"
+  },
+  "changes_from_upstream_task": [
+    "byte-identical local parquet paths",
+    "three preselected original test rows only",
+    "chat API transport",
+    "max_gen_toks=2048",
+    "enable_thinking=false"
+  ],
+  "prompt_fewshot_filter_and_scorer": "unchanged upstream chemistry recipe; five original validation examples; exact_match,custom-extract",
+  "task_counts": {
+    "chemistry_original": 1132,
+    "executed_unique": 3,
+    "entire_test_split": 12032
+  },
+  "metrics": {
+    "mmlu_pro_chemistry": {
+      "exact_match,custom-extract": 1.0
+    }
+  },
+  "status": "END_TO_END_EXECUTED_AND_SCORED",
+  "nonfatal_harness_warnings": [
+    "lm-eval warned it could not infer an EOS stop string for this chat endpoint; the configured upstream chemistry extraction metric completed for all three tasks.",
+    "lm-eval emitted a git-discovery message because the process ran outside a git worktree; the process exited successfully with three scored tasks."
+  ],
+  "claim_boundary": "three-task integration sample only; not a full-subject score, full MMLU-Pro result, publisher-model reproduction, or performance result",
+  "raw_questions_answers_and_model_outputs_published": false,
+  "private_results": "private server directory only"
+}

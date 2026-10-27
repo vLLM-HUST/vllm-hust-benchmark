@@ -1,5 +1,9 @@
 # vllm-hust-benchmark
 
+只安装独立数据组件、避免检出整个历史归档：见 [固定提交 wheel 安装](docs/workload-data/INSTALLATION.zh-CN.md)。
+
+可选的原始数据目录、读取适配与准备入口见 [Workload Data 使用说明](workload-preparation/README.md)；逐来源实际验证进度见
+[数据集清单](docs/workload-data/DATASET_CHECKLIST.zh-CN.md)。目录登记不代表任务或性能已验证，不改变现有测试规范与结果。
 数据检索与维护入口（Agent）：[数据索引与读写指南](DATA_INDEX.md) ·
 [机器可读集合索引](docs/data-index.json)。覆盖原始运行、报告、历史归档、网站来源和契约，明确读取、 追加、订正与验证规则；不移动或覆盖历史证据。
 

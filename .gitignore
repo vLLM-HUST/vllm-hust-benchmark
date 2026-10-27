@@ -11,6 +11,18 @@ coverage.xml
 .benchmarks/
 pytest-results.xml
 
+# Local workload inputs and runtime outputs are never public test fixtures.
+/workload-runs/
+# Private native requests, raw generations, original-row exports and receipts.
+# This prevents accidental staging; it is not permission or disclosure approval.
+*.private.json
+*.private.jsonl
+*-private.json
+*-private.jsonl
+*.private-error.txt
+/workload-preparation/INTERNAL_STAGING.json
+/workload-preparation/PUBLICATION_BLOCKED.md
+
 # Issue #135 readiness SLO matrix: BurstGPT processed CSV is a regenerable
 # derived artifact (see prepare_burstgpt_dataset in run_readiness_slo_matrix.sh);
 # the raw source lives on the NPU machine at /data/shared_datasets.

@@ -1,0 +1,33 @@
+{
+  "schema_version": "native-workload-delivery-receipt/v1",
+  "source_id": "QUALITY",
+  "date": "2026-10-24",
+  "status": "ORIGINAL_NYU_DEV_MC_INTEGRATION_AVAILABLE",
+  "available_original_dev_questions": 2086,
+  "verified_unique_original_questions": 6,
+  "original_flat_question_indices": [0, 6, 15, 2083, 2084, 2085],
+  "native_execution_receipt": "quality-native-audit-20261024.json",
+  "installed_ci_reader_receipt": "quality-fixed-ci-reader-20261024.json",
+  "public_runner": "scripts/run_quality_original_mc.py",
+  "documentation": "docs/workload-data/QUALITY_ORIGINAL_QUESTION_INPUTS.zh-CN.md",
+  "protocol": "Original NYU dev file, complete articles/questions/options, fixed lm-eval0.4.11 SCROLLS QuALITY MC prompt/request/scoring methods; not SCROLLS data, pruning or publisher training protocol. Raw completions, all four original option likelihoods, acc and acc_norm retained.",
+  "one_token_tail": "echo/logprobs/max_tokens1 is the unchanged likelihood protocol, not a generated task answer or truncated answer budget.",
+  "client_versions": {"lm-eval": "0.4.11", "transformers": "5.5.4", "tokenizers": "0.22.2", "numpy": "1.26.4", "datasets": "4.3.0", "pyarrow": "22.0.0", "huggingface-hub": "1.33.0", "tenacity": "9.2.1", "openai": "3.1.0"},
+  "fixed_ci_data_commit": "3f397e69abd0263913d10c4e243b6d29a9a6bf8a",
+  "installed_ci_payload_files_byte_matched": 32,
+  "full_dev_option": "--full",
+  "source_checkbox_eligible": true,
+  "full_dev_validated": false,
+  "official_publisher_scoring_source": false,
+  "publisher_baseline_reproduced": false,
+  "scrolls_dataset_used": false,
+  "performance_claim": false,
+  "research_pr_new_lock_published": false,
+  "raw_payloads_published": false,
+  "limits": [
+    "Six fixed original questions, not full2086 quality or statistical representativity.",
+    "Pinned third-party harness MC integration, not publisher fine-tuned baseline equivalence.",
+    "Gold is used only for scorer; original complete article and options are not truncated or replaced.",
+    "Existing documented NPU service reused, not clean-machine compiler deployment reproduction."
+  ]
+}

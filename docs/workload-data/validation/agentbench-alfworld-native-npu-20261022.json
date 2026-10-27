@@ -1,0 +1,43 @@
+{
+  "source_id": "AGENTBENCH",
+  "revision": "d1e4a10db08c87075c78972e48ecc182be03e2d5",
+  "subsuite": "ALFWorld FC",
+  "split": "new_std",
+  "status": "END_TO_END_EXECUTED_AND_SCORED",
+  "native_runner_status": "ORIGINAL_NATIVE_TASKS_EXECUTED_AND_SCORED",
+  "selected_samples": ["ALFWorld_FC:new_std:0", "ALFWorld_FC:new_std:1", "ALFWorld_FC:new_std:2"],
+  "selected_indices": [0, 1, 2],
+  "original_task_count": 109,
+  "selection": "FIRST_THREE_ORIGINAL_LOADER_INDICES_BEFORE_MODEL_EXECUTION",
+  "private_run": "agentbench-alfworld-native-001",
+  "started_at_unix": 1792684189.004073,
+  "finished_at_unix": 1792684262.2618392,
+  "helper_sha256": "135481c6255fefe95d1f6a3266f8569203896b02de01a6ed4d631182b9a6bdbc",
+  "task_references_sha256": "24caa279c3f45f0f2928bdef808b1833b7d5c841c72b1a13e6553ca1f9478b0a",
+  "runtime_original_source_checks": {
+    "textworld": {"version": "1.3.2", "original_python_files_verified": 76},
+    "alfworld": {"version": "0.2.2", "original_python_files_verified": 74},
+    "agentrl-worker": {"version": "0.4.0", "original_python_files_verified": 37}
+  },
+  "server_inventory": {"backend": "vllm-ascend", "chip_model": "910B2", "chip_count": 2, "physical_device_ids": [3, 4], "precision": "BF16", "graph_mode": true},
+  "model": "workload-qwen35-27b-128k-nonthinking",
+  "official_max_steps": 20,
+  "generation_config": {"temperature": 0, "max_tokens": 2048},
+  "tasks": [
+    {"index": 0, "status": "completed", "reward": true, "native_environment_steps": 4, "model_calls": 4, "private_result_sha256": "55113ed16b83c0af3330b2bcf160b062d231a2666ae40c199f68f4d557c93fc4"},
+    {"index": 1, "status": "completed", "reward": true, "native_environment_steps": 7, "model_calls": 7, "private_result_sha256": "4b32d8e6c7c9dc8bdb355c4082afba0007ef1b55b6fef2c61d30e146a0cc1fc5"},
+    {"index": 2, "status": "completed", "reward": true, "native_environment_steps": 20, "model_calls": 20, "private_result_sha256": "fcfab8f7bb6db861c5e5a265c5c3590e843d2fcd9272bbcf34ddf264b51006db"}
+  ],
+  "official_overall": {"overall": {"total": 3, "pass": 3, "wrong": 0, "success_rate": 1.0}},
+  "original_episode_input_files_unchanged": true,
+  "source_checkbox_eligible": true,
+  "total_model_requests": 31,
+  "deployment_changes": ["local NPU model route", "declared per-call generation configuration", "serial scheduling", "PDDL-only ARM packaging", "headless OpenCV same version", "Python protobuf compatibility codec"],
+  "task_prompt_action_and_scoring_code_changed": false,
+  "official_container_equivalence_claim": false,
+  "other_agentbench_domains_validated": false,
+  "full_suite_claim": false,
+  "performance_claim": false,
+  "statistical_representativeness_claim": false,
+  "private_payloads_published": false
+}

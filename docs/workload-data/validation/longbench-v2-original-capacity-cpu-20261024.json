@@ -1,0 +1,59 @@
+{
+  "source_id": "LONGBENCH_V2",
+  "status": "ORIGINAL_CPU_CAPACITY_PREPARATION_VERIFIED_NOT_NATIVE_EXECUTION",
+  "helper": "scripts/prepare_longbench_v2_original_capacity.py",
+  "helper_sha256": "d4ca6bd413090c6a936b4aac3681c7d4dd3735aa1972db176cf6d3bbdbcb05f2",
+  "fixed_original_indices": [
+    1,
+    4,
+    6
+  ],
+  "prior_original_prompt_identity_and_token_counts_equal": true,
+  "full_prompt_tokens": [
+    38444,
+    24590,
+    46971
+  ],
+  "counterexample_original_indices": [
+    0,
+    1,
+    2
+  ],
+  "counterexample_statuses": [
+    "RESOURCE_LIMIT_FULL_CONTEXT",
+    "FULL_INPUT_FITS",
+    "RESOURCE_LIMIT_FULL_CONTEXT"
+  ],
+  "counterexample_not_filtered_replaced_or_truncated": true,
+  "native_entry_rejects_blocked_selection_before_model": true,
+  "original_data_sha256": "15d61c22d92c96900b3c4948b6aeea218d3214b676a65df48e7b8555604c7fe2",
+  "official_archive_sha256": "2f92f9953e3dd2fd3915a132a0a4cb53acb879af6ef1e98962129a6f3fe262bb",
+  "tokenizer_json_sha256": "5f9e4d4901a92b997e463c1f46055088b6cca5ca61a6522d1b9f64c4bb81cb42",
+  "python_version": "3.12.13",
+  "platform": "Linux aarch64",
+  "isolated_client_without_system_site_packages": true,
+  "packages": {
+    "torch": "2.10.0+cpu",
+    "transformers": "5.5.4",
+    "tokenizers": "0.22.2",
+    "openai": "3.1.0",
+    "tiktoken": "0.13.0",
+    "datasets": "4.3.0",
+    "pyarrow": "22.0.0",
+    "numpy": "1.26.4",
+    "tqdm": "4.70.0"
+  },
+  "pip_check_passed": true,
+  "dependency_snapshot_sha256": "9a61b28516b9491558ccdc2cb7469a68401917c1774a0716340f2f7180494b8e",
+  "original_upstream_software_stack_reproduction_claim": false,
+  "setup_failures_retained": [
+    "First environment inherited NumPy1.26.4 and PyArrow26 import failed; fixed only isolated client dependencies with PyArrow22.",
+    "HF5.5 apply_chat_template defaults to BatchEncoding; explicit return_dict=False fixes only return representation, not prompts.",
+    "System-site inherited unrelated OpenCV/Prometheus requirement conflicts; replaced by a fully isolated CPU client, global engine environment unchanged."
+  ],
+  "model_generation_calls": 0,
+  "official_scoring_executed": false,
+  "native_benchmark_executed": false,
+  "source_completion_checked": false,
+  "raw_inputs_answers_or_model_outputs_public": false
+}

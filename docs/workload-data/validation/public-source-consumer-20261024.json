@@ -1,0 +1,104 @@
+{
+  "schema_version": "research-consumer-source-read-receipt/v1",
+  "date": "2026-10-24",
+  "status": "ORIGINAL_PUBLIC_DATA_SOURCE_CONSUMER_ROUNDTRIP_PASSED_NOT_BENCHMARK_EXECUTION",
+  "scope": "CPU-only source preparation and original-input resolution through the fixed research consumer path; not model inference, native task execution, scoring, or performance evaluation",
+  "research_repository": "https://github.com/intellistream/llm-workload-suite",
+  "research_consumer_commit": "6ca466e9a278ae5b3dfa33ce380cd9a23ee7c772",
+  "benchmark_repository": "https://github.com/vLLM-HUST/vllm-hust-benchmark",
+  "benchmark_data_package_commit": "1a9776865546d85edd667425661b4a5603696e35",
+  "consumer_entrypoints": [
+    "llm_serving_workloads.pipeline.run",
+    "llm_serving_workloads.consumer.resolve_input"
+  ],
+  "selection": {
+    "rule": "Use source-manifest-pinned original files and the first provider-order rows; no prompt changes or outcome-based replacement",
+    "source_revisions": {
+      "AI2_ARC": "210d026faf9955653af8916fad021475a3f00453",
+      "DOLLY": "bdd27f4d94b9c1f951818a7da7fd7aeea5dbff1a",
+      "GSM8K": "740312add88f781978c0658806c59bc2815b9866",
+      "LONGBENCH_V2": "2b48e494f2c7a2f0af81aae178e05c7e1dde0fe9",
+      "LONGWRITER": "0db15c0624f19d63e2efe1021595af933cc5b6cc",
+      "MMLU_PRO": "b189ec765aa7ed75c8acfea42df31fdae71f97be"
+    },
+    "selected_original_files": {
+      "AI2_ARC": {
+        "ARC-Challenge/test-00000-of-00001.parquet": 6,
+        "ARC-Easy/test-00000-of-00001.parquet": 3
+      },
+      "DOLLY": {
+        "databricks-dolly-15k.jsonl": 3
+      },
+      "GSM8K": {
+        "main/test-00000-of-00001.parquet": 3
+      },
+      "LONGBENCH_V2": {
+        "data.json": 3
+      },
+      "LONGWRITER": {
+        "long.jsonl": 3
+      },
+      "MMLU_PRO": {
+        "data/test-00000-of-00001.parquet": 3
+      }
+    },
+    "local_cache_paths_recorded": false,
+    "row_ids_recorded": false,
+    "source_payload_hashes_recorded": false,
+    "request_or_answer_content_recorded": false
+  },
+  "results": [
+    {
+      "source_id": "AI2_ARC",
+      "prepared_rows": 9,
+      "original_input_resolved_rows": 9,
+      "status": "PASS",
+      "scope_note": "Six ARC-Challenge and three ARC-Easy test rows; both original test subsets are covered."
+    },
+    {
+      "source_id": "DOLLY",
+      "prepared_rows": 3,
+      "original_input_resolved_rows": 3,
+      "status": "PASS"
+    },
+    {
+      "source_id": "GSM8K",
+      "prepared_rows": 3,
+      "original_input_resolved_rows": 3,
+      "status": "PASS"
+    },
+    {
+      "source_id": "LONGBENCH_V2",
+      "prepared_rows": 3,
+      "original_input_resolved_rows": 3,
+      "status": "PASS"
+    },
+    {
+      "source_id": "LONGWRITER",
+      "prepared_rows": 3,
+      "original_input_resolved_rows": 3,
+      "status": "PASS"
+    },
+    {
+      "source_id": "MMLU_PRO",
+      "prepared_rows": 3,
+      "original_input_resolved_rows": 3,
+      "status": "PASS"
+    }
+  ],
+  "totals": {
+    "sources": 6,
+    "prepared_rows": 24,
+    "original_input_resolved_rows": 24,
+    "model_calls": 0,
+    "native_task_executions": 0,
+    "scorer_calls": 0,
+    "npu_requests": 0,
+    "raw_datasets_published": false
+  },
+  "limitations": [
+    "Validates source loading, adaptation, index creation, and consumer resolution for the recorded original rows only.",
+    "Does not establish native benchmark completion, task quality, full-source integrity, or runtime/performance behavior.",
+    "This receipt supplements but does not modify or claim to be part of research PR #37's fixed commit or historical CI run."
+  ]
+}

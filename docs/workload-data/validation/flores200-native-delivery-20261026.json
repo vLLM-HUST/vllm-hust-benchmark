@@ -1,0 +1,97 @@
+{
+  "source_id": "FLORES200",
+  "status": "ORIGINAL_TRANSLATION_NATIVE_SCORING_AND_FIXED_PROVIDER_RESEARCH_CONSUMER_VERIFIED",
+  "source_checkbox_eligible": true,
+  "date": "2026-10-26",
+  "asset": {
+    "official_archive_url": "https://dl.fbaipublicfiles.com/nllb/flores200_dataset.tar.gz",
+    "archive_sha256": "b8b0b76783024b85797e5cc75064eb83fc5288b41e9654dabc7be6ae944011f6",
+    "archive_bytes": 25585843,
+    "checksum_assurance": "Observed official HTTPS bytes, not a separately published publisher checksum",
+    "original_language_codes": 204,
+    "dev_rows": 997,
+    "devtest_rows": 1012,
+    "metadata_columns_preserved": ["URL", "domain", "topic", "has_image", "has_hyperlink"],
+    "license": "CC-BY-SA-4.0; original data remains external",
+    "public_asset_preparer_verify_only_real_files": 9,
+    "public_asset_preparer_verify_only_archive_members": 411,
+    "verification_layout": "Fresh private hardlinks to nine existing files; no data or weight payload copied, changed or downloaded. Read-only public CLI verifies publisher model identities and original archive."
+  },
+  "native": {
+    "entrypoint": "scripts/run_flores200_original.py",
+    "historical_receipts_reused": [
+      "docs/workload-data/validation/flores200-two-profile-native-audit-20261025.json",
+      "docs/workload-data/validation/flores200-third-direction-native-audit-20261025.json"
+    ],
+    "model_repo": "facebook/nllb-200-distilled-600M",
+    "model_revision": "f8d333a098d19b4fd9a8b18f94170487ad3f821d",
+    "model_license": "CC-BY-NC-4.0; noncommercial research only",
+    "backend": "torch_npu on Ascend910B2",
+    "weights_and_generation_settings": "Fixed publisher files; FP32 original max_length200, forced original target-language token, no input truncation",
+    "translations_reused": 9,
+    "unique_parallel_sentence_positions": 6,
+    "profiles": [
+      {"source_language": "eng_Latn", "target_language": "fra_Latn", "split": "devtest", "original_positions": [0, 1, 2], "chrf_plus_plus": 70.3164157468028, "spbleu": 52.70019918258373, "predictions_sha256": "c9f27ccdda2df1cf74580e07b176e8e12e62f1a7223d3839bf586b63e099ea2e"},
+      {"source_language": "eng_Latn", "target_language": "zho_Hans", "split": "devtest", "original_positions": [0, 1, 2], "chrf_plus_plus": 22.790844751778256, "spbleu": 24.467562206220098, "predictions_sha256": "a3eb63860540c533a7852afac4749dfd7b9166b359f5286948ebe17e1a51c9ec"},
+      {"source_language": "eng_Latn", "target_language": "deu_Latn", "split": "devtest", "original_positions": [3, 4, 5], "chrf_plus_plus": 56.801784079092556, "spbleu": 36.15767950427263, "predictions_sha256": "ee157290ebbdda01ba777d18568fb82a042c752d054ab3b2eef4e822a73d2e4e"}
+    ],
+    "new_native_model_calls_for_this_closure": 0,
+    "quality_acceptance_or_paper_replication_claim": false,
+    "all_languages_or_directions_executed": false,
+    "unsupported_original_model_codes_not_substituted": ["arb_Latn", "min_Arab", "sat_Olck"]
+  },
+  "scoring": {
+    "entrypoint": "scripts/score_flores200_original_results.py",
+    "public_source_commit": "0d4f12729d51cd92fca6f4b3f9a1e5ca7ee9046e",
+    "all_nine_saved_source_reference_positions_revalidated_before_scoring": true,
+    "primary": "sacrebleu CHRF(word_order=2)",
+    "primary_signature": "nrefs:1|case:mixed|eff:yes|nc:6|nw:2|space:no|version:2.5.1",
+    "secondary": "Original FLORES200 SentencePiece EncodeAsPieces on hypothesis and reference; sacrebleu BLEU(tokenize=none)",
+    "secondary_signature_after_external_spm": "nrefs:1|case:mixed|eff:no|tok:none|smooth:exp|version:2.5.1",
+    "spm_official_url": "https://dl.fbaipublicfiles.com/large_objects/nllb/models/spm_200/flores200_sacrebleu_tokenizer_spm.model",
+    "spm_sha256": "14bb8dfb35c0ffdea7bc01e56cea38b9e3d5efcdcb9c251d6b40538e1aab555a",
+    "spm_bytes": 4852054,
+    "official_scoring_spm_equals_pinned_nllb_sentencepiece_model": true,
+    "sacrebleu": "2.5.1",
+    "sentencepiece": "0.2.1",
+    "short_url_initial_connection_reset_retained": true,
+    "resolved_official_https_asset_fetched_on_server_only": true
+  },
+  "fixed_consumer": {
+    "provider_commit": "a9bcfe6d9cfa64b8083c6eba12fc44c002dc30e1",
+    "cpu_smoke_run": 40228338863,
+    "wheel_sha256": "487572dd6bc320968ab83956004f1e0ee189e91cf1d068484af6d4302c769b4b",
+    "noneditable_installed_payload_files_equal": 42,
+    "per_direction_full_index_rows": 2009,
+    "native_results_public_and_research_roundtrip": 9,
+    "additional_each_direction_split_boundary_positions": [0, 1, 2, 996, 997, 2008],
+    "original_source_reference_metadata_equal": true,
+    "target_reference_and_metadata_excluded_from_model_input": true,
+    "distinct_direction_record_ids": true,
+    "research_commit": "dd4103140d358cf211b88f24296b7419d170a54f",
+    "research_consumer_sha256": "556f2633d4ffef7fb5dd7197ea3772805cf3ec0cbdc5b35ee81aec19649a928d",
+    "research_default_dependency_updated": false,
+    "research_observation_features_or_analysis_executed_or_migrated": false
+  },
+  "client": {
+    "python": "3.12.13",
+    "compatibility_not_original_fairseq_environment": true,
+    "constraints": "configs/workload-native/flores200-nllb-client-py312-constraints.txt",
+    "versions": {"torch": "2.10.0+cpu", "torch-npu": "2.10.0.post4", "transformers": "4.57.3", "tokenizers": "0.22.2", "sentencepiece": "0.2.1", "sacrebleu": "2.5.1", "numpy": "1.26.4", "safetensors": "0.8.0", "huggingface-hub": "0.36.2"},
+    "isolated_pip_check_with_empty_pythonpath": "No broken requirements found.",
+    "imports_verified": ["torch", "torch_npu", "transformers", "sentencepiece", "sacrebleu"],
+    "cann_library_paths_or_serving_stack_changed": false,
+    "historical_cann_tools_metadata_pip_check_failure_preserved": true,
+    "whole_cann_tools_dependency_completion_claim": false
+  },
+  "server_evidence_base": "/data/shared_upload/hust-phr/workload-benchmark-native-delivery-20261024",
+  "server_evidence": {
+    "fixed_consumption": "flores-fixed-provider-research-consumer-32063-001/receipt-public.json",
+    "installed_payload": "provider-a9bcfe6d-ci/server-installed-audit-public.json",
+    "client": "flores-native-client-qualified-32063-001.json",
+    "scores": ["flores-eng-fra-saved-original-metrics-32063-001.json", "flores-eng-zho-saved-original-metrics-32063-001.json", "flores-eng-deu-saved-original-metrics-32063-001.json"]
+  },
+  "scope_limits": "All original 204 language columns and public split relations available through explicit direction mappings; sampled native proof covers only three directions/nine translations, not all 204 languages or full splits. Hidden test not available, unsupported model codes fail rather than substitute. Noncommercial model restriction remains explicit. No performance or scientific conclusion.",
+  "raw_dataset_predictions_or_model_published": false,
+  "model_calls_for_closure": 0
+}

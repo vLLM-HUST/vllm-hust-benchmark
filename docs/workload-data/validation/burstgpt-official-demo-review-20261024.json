@@ -1,0 +1,40 @@
+{
+  "schema_version": "official-trace-tool-applicability/v1",
+  "date": "2026-10-24",
+  "source_id": "BURSTGPT",
+  "repository": "HPMLL/BurstGPT",
+  "source_commit": "7eb2c4f8350f8a6985272386f5c14af1f678b299",
+  "complete_tree_metadata_checked": true,
+  "read_files": [
+    "example/README.md",
+    "example/profile_vllm_server.py",
+    "example/profile_server/server.py",
+    "example/framework_inference_call/framework_vllm.py",
+    "example/profile_server/prompt_set.py",
+    "example/preprocess_data/load_data.py",
+    "example/requirements.txt",
+    "example/profile_vllm_trace.sh"
+  ],
+  "official_tool_kind": "trace_conditioned_external_prompt_pool_simulation",
+  "external_prompt_pool_required": true,
+  "published_example_pool": "example/preprocess_data/shareGPT.json",
+  "original_prompt_replay": false,
+  "upstream_tool_behavior": [
+    "Loads external prompt pool separately from trace CSV.",
+    "Maps trace token lengths onto external pool examples; clamps lengths to the tool's 1024-entry dimensions.",
+    "Reads trace CSV in chunks of 20, not an exact prompt_num row limit.",
+    "Requires /generate transport; this is not the OpenAI /v1/completions route.",
+    "Default surplus_prompts_num 16384 can exceed loaded trace and invoke modeled-arrival branches; do not blindly run defaults."
+  ],
+  "current_service_openapi_probe": {
+    "generate_endpoint_present": false,
+    "completions_endpoint_present": true,
+    "chat_endpoint_present": true,
+    "generation_calls": 0
+  },
+  "official_demo_execution": "NOT_EXECUTED_TRANSPORT_INCOMPATIBLE_WITH_CURRENT_SERVICE",
+  "remaining_work": "Provide an explicitly documented legacy /generate-compatible transport or dedicated supported service, then run the unchanged official simulation separately from original metadata delivery. Do not claim its external prompts are BurstGPT original requests.",
+  "new_model_calls": 0,
+  "raw_payloads_published": false,
+  "source_checkbox_eligible": false
+}

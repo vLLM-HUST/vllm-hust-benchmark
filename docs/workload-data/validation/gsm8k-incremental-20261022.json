@@ -1,0 +1,55 @@
+{
+  "source_id": "GSM8K",
+  "revision": "740312add88f781978c0658806c59bc2815b9866",
+  "selected_samples": [
+    "test:3",
+    "test:4",
+    "test:5",
+    "test:6",
+    "test:7",
+    "test:8"
+  ],
+  "selection": "contiguous original test rows, fixed before model execution",
+  "model": "workload-qwen35-27b-128k-nonthinking",
+  "endpoint": "http://127.0.0.1:19466/v1/chat/completions",
+  "started_at_unix": 1792629667.8762374,
+  "runner": "lm-eval==0.4.11",
+  "task_config_sha256": "82eb1780b263bc040729032b3e076990c7933f42163c91e359f38820dd1d8833",
+  "changes_from_upstream_task": [
+    "local byte-identical parquet paths",
+    "6 preselected test rows only",
+    "chat API transport",
+    "max_gen_toks=2048",
+    "enable_thinking=false"
+  ],
+  "prompt_filters_metric_fewshot": "unchanged upstream gsm8k recipe; five training examples",
+  "claim_boundary": "integration sample, not full benchmark score or performance evaluation",
+  "status": "END_TO_END_EXECUTED_AND_SCORED",
+  "versions": {
+    "lm-eval": "0.4.11",
+    "datasets": "3.6.0",
+    "pyarrow": "19.0.1",
+    "huggingface-hub": "1.31.0"
+  },
+  "metrics": {
+    "gsm8k": {
+      "alias": "gsm8k",
+      "exact_match,strict-match": 1,
+      "exact_match_stderr,strict-match": "N/A",
+      "exact_match,flexible-extract": 1,
+      "exact_match_stderr,flexible-extract": "N/A"
+    }
+  },
+  "sample_counts": {
+    "gsm8k": {
+      "original": 1319,
+      "effective": 1319
+    }
+  },
+  "verified_unique_tasks": 6,
+  "finished_at_unix": 1792629727.8672688,
+  "scope": "INCREMENTAL_SAMPLE_VALIDATION_NOT_FULL_SUITE",
+  "sample_count_caveat": "lm-eval 0.4.11 n-samples.effective reports full split with explicit samples; actual logged doc IDs verified as 3..8, six unique tasks, not 1319",
+  "prior_failed_attempt": "incremental-validation-006: six model calls completed but post-run aggregate-count assertion failed; not counted twice",
+  "private_response_archive": "server only; no questions, reference answers or responses published"
+}
