@@ -101,6 +101,12 @@
       {"role": "original_profile", "path": "scripts/run_mmmu_original.py"},
       {"role": "saved_output_reuse_audit", "path": "scripts/verify_mmmu_original_saved.py"}
     ],
+    "OPENCODE": [
+      {"role":"prepare_assets","path":"scripts/prepare_reused_research_assets.py","scope":"50 pinned original training corpus shards registered; explicit selected-file acquisition and publisher checksums, not execution."},
+      {"role":"data_reading_only","path":"scripts/prepare_reused_source_records.py","scope":"Unchanged original coding question, ID, teacher code, original tests and historical scores; no code execution or quality assertion."},
+      {"role":"original_profile","path":"scripts/run_opencode_original.py","scope":"Original input field only under explicit operator model and budget. No teacher leakage, retry, replacement or execution of original/generated code; training-corpus workload, not independent quality benchmark."},
+      {"role":"saved_output_reuse_audit","path":"scripts/verify_opencode_original_saved.py","scope":"Saved input/reference/response integrity without model calls or code execution; runtime qualification tracked separately."}
+    ],
     "OPENMATH2": [
       {"role":"prepare_assets","path":"scripts/prepare_reused_research_assets.py","scope":"32 canonical train shards registered; selected original files by fixed publisher hashes, not overlapping subset duplication or native generation."},
       {"role":"data_reading_only","path":"scripts/prepare_reused_source_records.py","scope":"Original problem, separate expected_answer/generated_solution and unchanged problem_source. Preparation is not independent math scoring."},

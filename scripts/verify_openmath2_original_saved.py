@@ -1,6 +1,6 @@
 """Verify saved original corpus requests/references/responses without model calls.
 
-This is transport/input integrity, not independent mathematical scoring.
+This is transport/input integrity, not independent task-quality scoring.
 """
 
 import argparse
@@ -9,13 +9,15 @@ import json
 from pathlib import Path
 
 from run_historical_dialogue_original import has_generated_content
+from run_openmath2_original import corpus_input_field
 
 
-def verify(saved, records, *, expected_count=None):
+def verify(saved, records, *, expected_count=None, source_id="OPENMATH2"):
+    input_field = corpus_input_field(source_id)
     saved = Path(saved).resolve(strict=True)
     receipt = json.loads((saved / "receipt-private.json").read_text("utf-8"))
     if (
-        receipt.get("source_id") != "OPENMATH2"
+        receipt.get("source_id") != source_id
         or receipt.get("status")
         != "ORIGINAL_CORPUS_PROBLEMS_GENERATED_NO_INDEPENDENT_SCORE"
         or receipt.get("quality_scored") is not False
@@ -30,14 +32,16 @@ def verify(saved, records, *, expected_count=None):
         case = json.loads(raw)
         request = {
             "model": receipt["model"],
-            "messages": [{"role": "user", "content": record.task["input"]["problem"]}],
+            "messages": [
+                {"role": "user", "content": record.task["input"][input_field]}
+            ],
             "temperature": 0,
             "max_tokens": receipt["max_tokens"],
             "n": 1,
         }
         if (
-            record.source["source_id"] != "OPENMATH2"
-            or set(record.task["input"]) != {"problem"}
+            record.source["source_id"] != source_id
+            or set(record.task["input"]) != {input_field}
             or case["source"] != record.source
             or case["task_id"] != record.task["task_id"]
             or case["row_index"] != record.replay["source_row_index"]
@@ -90,7 +94,7 @@ def verify(saved, records, *, expected_count=None):
     ):
         raise ValueError("original selected cases or completion counters differ")
     return {
-        "source_id": "OPENMATH2",
+        "source_id": source_id,
         "status": "SAVED_ORIGINAL_INPUT_REFERENCE_AND_RESPONSE_INTEGRITY_VERIFIED_NO_MODEL_CALLS",
         "original_cases": count,
         "stop_count": stops,
@@ -103,7 +107,8 @@ def verify(saved, records, *, expected_count=None):
     }
 
 
-def main():
+def main(source_id="OPENMATH2"):
+    corpus_input_field(source_id)
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--saved", type=Path, required=True)
     parser.add_argument("--data-root", type=Path, required=True)
@@ -128,7 +133,7 @@ def main():
     def records():
         for name in args.files:
             yield from iter_workload(
-                "OPENMATH2",
+                source_id,
                 data_root=args.data_root,
                 files=[name],
                 limit=None if args.full else args.count,
@@ -138,6 +143,7 @@ def main():
         args.saved,
         records(),
         expected_count=None if args.full else len(args.files) * args.count,
+        source_id=source_id,
     )
     if args.output:
         args.output.parent.mkdir(parents=True, mode=0o700, exist_ok=True)

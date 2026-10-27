@@ -12,6 +12,13 @@ from run_historical_dialogue_original import has_generated_content
 from run_oasst_original_continuation import post, validate_endpoint
 
 
+def corpus_input_field(source_id):
+    profiles = {"OPENMATH2": "problem", "OPENCODE": "input"}
+    if source_id not in profiles:
+        raise ValueError("explicit reviewed original corpus profile required")
+    return profiles[source_id]
+
+
 def execute(
     records,
     *,
@@ -23,7 +30,9 @@ def execute(
     transport=post,
     expected_count=None,
     final_verify=None,
+    source_id="OPENMATH2",
 ):
+    input_field = corpus_input_field(source_id)
     endpoint = validate_endpoint(endpoint)
     if not model or type(max_tokens) is not int or not 0 < max_tokens < context:
         raise ValueError("explicit model, budget and context required")
@@ -47,17 +56,27 @@ def execute(
                 seen_files.add(name)
                 previous, previous_index = name, -1
             if (
-                record.source["source_id"] != "OPENMATH2"
-                or set(record.task["input"]) != {"problem"}
-                or not isinstance(record.task["input"]["problem"], str)
-                or not record.task["input"]["problem"]
+                record.source["source_id"] != source_id
+                or set(record.task["input"]) != {input_field}
+                or not isinstance(record.task["input"][input_field], str)
+                or not record.task["input"][input_field]
                 or type(index) is not int
                 or index != previous_index + 1
-                or record.task["task_id"] != f"{record.source['file_sha256']}:{index}"
-            ):
-                raise ValueError(
-                    "unique unchanged original OPENMATH2 problems required"
+                or (
+                    source_id == "OPENCODE"
+                    and (
+                        not isinstance(record.task["task_id"], str)
+                        or not record.task["task_id"]
+                    )
                 )
+                or record.task["task_id"]
+                != (
+                    record.replay["annotations"].get("id")
+                    if source_id == "OPENCODE"
+                    else f"{record.source['file_sha256']}:{index}"
+                )
+            ):
+                raise ValueError("unique unchanged original corpus problems required")
             previous_index = index
             yield {
                 "source": record.source,
@@ -66,7 +85,7 @@ def execute(
                 "request": {
                     "model": model,
                     "messages": [
-                        {"role": "user", "content": record.task["input"]["problem"]}
+                        {"role": "user", "content": record.task["input"][input_field]}
                     ],
                     "temperature": 0,
                     "max_tokens": max_tokens,
@@ -80,7 +99,7 @@ def execute(
     output = Path(output)
     output.mkdir(parents=True, mode=0o700, exist_ok=False)
     receipt = {
-        "source_id": "OPENMATH2",
+        "source_id": source_id,
         "status": "STARTED",
         "model": model,
         "max_tokens": max_tokens,
@@ -178,7 +197,8 @@ def execute(
     return receipt
 
 
-def main():
+def main(source_id="OPENMATH2"):
+    corpus_input_field(source_id)
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--mode", choices=["plan", "run"], default="plan")
     parser.add_argument("--data-root", type=Path)
@@ -204,7 +224,7 @@ def main():
     from vllm_hust_workload_data import iter_workload
     from vllm_hust_workload_data.assets import verify_file
 
-    spec = source_spec("OPENMATH2")
+    spec = source_spec(source_id)
     files = {row["path"]: row for row in spec["files"]}
     if (
         len(set(args.files)) != len(args.files)
@@ -216,7 +236,7 @@ def main():
         print(
             json.dumps(
                 {
-                    "source_id": "OPENMATH2",
+                    "source_id": source_id,
                     "status": "PLAN_ONLY",
                     "files": args.files,
                     "original_rows_per_file": None if args.full else args.count,
@@ -249,7 +269,7 @@ def main():
     def records():
         for name in args.files:
             yield from iter_workload(
-                "OPENMATH2",
+                source_id,
                 data_root=data,
                 files=[name],
                 limit=None if args.full else args.count,
@@ -268,6 +288,7 @@ def main():
         context=args.context,
         expected_count=None if args.full else len(args.files) * args.count,
         final_verify=reverify,
+        source_id=source_id,
     )
     print(
         json.dumps(

@@ -8,7 +8,8 @@
 - [x] 核验官方固定版本元数据：50个原始train分片、6,861,113,102字节，公开CC-BY-4.0。复用已有原字段适配，问题与教师代码、原测试、历史测试状态和判断信息分开保存，不生成替代题目。
 - [x] 公共获取入口支持固定原文件，公共引用准备入口及微型夹具回归已补齐；这些只是软件能力验证，不代表真实数据或模型已跑通。
 - [x] 服务器已取得预先固定的0/24/49原始分片，共422,115,928字节，发布方LFS摘要及大小全部复核通过；每份Parquet元数据100000行，schema及原前3条字段类型已检查。实际`average_test_score`为double/float，不按HF卡片中的string描述强转。[阶段证据](validation/opencode-original-readiness-20261028.json)
-- [ ] 真实原字段及索引、固定原问题生成、保存完整性核验、实际CI工件和当前研究消费者接通仍待完成。原`unit_tests`及生成代码不得在宿主机执行；如需功能评估，必须另行核验隔离环境。
+- [x] 三份可用原分片全部300000条九字段、引用索引及9条当前研究侧回读通过；使用候选目录和已验证CI适配运行库，不能冒充新目录的实际CI工件验证。
+- [ ] 固定原问题生成、保存完整性核验及实际当前CI工件资格仍待完成。原`unit_tests`及生成代码不得在宿主机执行；如需功能评估，必须另行核验隔离环境。
 
 ```bash
 python scripts/prepare_reused_research_assets.py OPENCODE --mode plan \
@@ -22,6 +23,18 @@ python scripts/prepare_reused_source_records.py OPENCODE \
 ```
 
 这是合成代码训练语料，不是独立代码质量benchmark。教师答案和原历史测试分数不代表本地模型结果；实际三份文件的`average_test_score`为double，与HF卡片的string描述不同，必须原样保留数值，不能擅自改类型或补造评分器。
+
+原问题生成复用已测的训练语料执行流程，默认只显示计划；`--full`为流式执行所选原文件全部行，默认固定原前3条/文件，不按结果换题。可用模型回退profile如下，不是作者质量评测配置；当前真实生成尚在进行，不提前打勾。
+
+```bash
+python scripts/run_opencode_original.py --mode run \
+  --data-root <仓库外原始目录> --output <仓库外私有新结果目录> \
+  --files data/train-00000-of-00050.parquet data/train-00024-of-00050.parquet data/train-00049-of-00050.parquet \
+  --model Qwen/Qwen3.5-9B --max-tokens 8192 --context 262144
+python scripts/verify_opencode_original_saved.py \
+  --data-root <仓库外原始目录> --saved <上述私有结果目录> \
+  --files data/train-00000-of-00050.parquet data/train-00024-of-00050.parquet data/train-00049-of-00050.parquet
+```
 
 ### OpenMathInstruct-2原始推理训练语料（固定原始profile已交付）
 

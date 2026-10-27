@@ -91,6 +91,40 @@ def test_original_problem_only_no_teacher_leak(tmp_path):
     assert saved["original_reference"]["generated_solution"] == "fixture teacher only"
 
 
+def test_opencode_native_profile_keeps_original_ids_and_never_executes_tests(tmp_path):
+    rows = fixture_rows()
+    for index, row in enumerate(rows):
+        row.source["source_id"] = "OPENCODE"
+        row.task = {
+            "task_id": f"original-id-{index}",
+            "input": {"input": f"original coding question{index}"},
+        }
+        row.outcome = {"output": "teacher code", "unit_tests": "never eval this text"}
+        row.replay["annotations"] = {"id": row.task["task_id"]}
+    calls = []
+
+    def transport(url, payload):
+        calls.append(payload)
+        return good_transport(url, payload)
+
+    receipt = execute(tmp_path, rows, source_id="OPENCODE", transport=transport)
+    assert receipt["source_id"] == "OPENCODE"
+    assert receipt["completed_count"] == 3
+    assert all("teacher code" not in json.dumps(body) for body in calls)
+    assert all("never eval" not in json.dumps(body) for body in calls)
+    audit = saved_verifier.verify(
+        tmp_path / "output", rows, expected_count=3, source_id="OPENCODE"
+    )
+    assert audit["source_id"] == "OPENCODE"
+    assert audit["source_checkbox_eligible"] is False
+
+
+def test_unreviewed_corpus_profile_rejected_before_model_calls(tmp_path):
+    with pytest.raises(ValueError, match="reviewed original corpus"):
+        execute(tmp_path, source_id="UNKNOWN")
+    assert not (tmp_path / "output").exists()
+
+
 def test_full_mode_streams_without_preloading_and_keeps_original_order(tmp_path):
     emitted = []
     calls = []
