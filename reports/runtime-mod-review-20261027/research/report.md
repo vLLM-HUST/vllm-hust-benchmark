@@ -6,27 +6,28 @@ Fletcher · 共同阅读版 · 2026-10-27
 
 本报告汇集本仓库已有评审意见、源码研究与独立实验，不新增实验、不替作者发布结论。目录盘点覆盖24项；不是24项都完成了源码审计或设备验收。BetterScale与BidKV按Fletcher要求跳过。
 
-**vSpec当前状态不合格。** 当前对照同时改变gamma预算、refill调度、capture
-buckets及动态宽度runtime，不能据此认定自适应策略相对宿主原生MTP2的独立收益。整套配置的观测耗时比保留在第3章，不作为策略收益认定；亦未证明额外graph/runtime支持造成提速。280题得分比原生下降3.57个百分点、比MTP2下降3.21个百分点，验收不接受这一准确率下降。下降的因果归因仍受截断与原生重复波动限制；不合格是当前验收判断，不是已证明算法必然损失精度。
+**vSpec在匹配投机长度后未观察到明显性能优势。** 该MOD尝试通过自适应调整投机长度，在接受收益不足时减少草稿计算成本。最新35B/B16三轮56题对照匹配有效gamma4及对应target
+FULL graph buckets，原生MTP与vSpec的输出吞吐中位数分别为811.05、795.60
+tokens/s，当前证据不支持为该负载引入此MOD。被测配置实际没有发生gamma切换，不泛化为自适应思路本身无效。原280题得分下降保留为尚未可靠归因的历史观察，不再作为已证明算法损害精度的结论。
 
 **DiffSpec性能收益不合格，需要重新评估项目可行性。**
 有效数据是统一B16/C04的三臂56题首轮，无抢占；默认检索计数为0。无有效的完整三臂280题结果。Fletcher已决定停止追加实验，不能用坏掉的原生Eagle链路充当算法反证。
 
-| 方向                                 | 当前判断                                        | 证据性质与边界                                    |
-| ------------------------------------ | ----------------------------------------------- | ------------------------------------------------- |
-| vSpec / 35B MTP                      | 当前不合格：收益归因未控制变量，准确率下降      | 280题质量与三轮56题性能；整套配置对照，非策略消融 |
-| DiffSpec / 27B Eagle                 | 性能收益不合格，需重新评估项目可行性            | 我们的56题首轮；检索未生效，完整280题未完成       |
-| OPset                                | 融合不合格：比ACLNN增时延48.37%–82.31%          | 两卡算子实测；去清零另作有用小补丁                |
-| Prefix Router                        | 有需求，值得做；优先联接分布式KV存储            | 方向判断与源码研究，不是生产验收                  |
-| StateAxis异步KV传输                  | 原理正确，需适配35B-A3B及缓存压力验证           | 方向认可；35B适配与新workload尚未验证             |
-| StateAxis自动前缀缓存                | 有潜力；需高效异步recurrent state checkpointing | 特定数据集前缀复用潜力，不能干扰计算              |
-| StateAxis流水权重加载                | 实用，建议进入系统主线并默认启用                | 采用建议；历史收益不全归因于流水                  |
-| 其余有损KV、同步搬运、重算与调度路线 | 按具体实现作不采用或低优先级判断                | 见评审原文；不扩大成所有未来实现的否定            |
+| 方向                                 | 当前判断                                         | 证据性质与边界                                            |
+| ------------------------------------ | ------------------------------------------------ | --------------------------------------------------------- |
+| vSpec / 35B MTP                      | 相同有效投机长度下无明显性能优势，当前不支持引入 | 新增gamma4三轮56题对照；实际无gamma切换，非完整自适应消融 |
+| DiffSpec / 27B Eagle                 | 性能收益不合格，需重新评估项目可行性             | 我们的56题首轮；检索未生效，完整280题未完成               |
+| OPset                                | 融合不合格：比ACLNN增时延48.37%–82.31%           | 两卡算子实测；去清零另作有用小补丁                        |
+| Prefix Router                        | 有需求，值得做；优先联接分布式KV存储             | 方向判断与源码研究，不是生产验收                          |
+| StateAxis异步KV传输                  | 原理正确，需适配35B-A3B及缓存压力验证            | 方向认可；35B适配与新workload尚未验证                     |
+| StateAxis自动前缀缓存                | 有潜力；需高效异步recurrent state checkpointing  | 特定数据集前缀复用潜力，不能干扰计算                      |
+| StateAxis流水权重加载                | 实用，建议进入系统主线并默认启用                 | 采用建议；历史收益不全归因于流水                          |
+| 其余有损KV、同步搬运、重算与调度路线 | 按具体实现作不采用或低优先级判断                 | 见评审原文；不扩大成所有未来实现的否定                    |
 
 ### 阅读顺序
 
 - 第2章以两列表格汇总各MOD的当前正式评价，历史对话记录不收入报告。
-- 第3章仅报告vSpec的35B主实验，以质量下滑、性能比较未控制变量这两项问题作评审。历史近似验收材料不收入本报告，仍保存在仓库。
+- 第3章仅保留vSpec匹配gamma4的关键实验与结论；历史对照、源码差异和排查过程留在仓库研究笔记。
 - 第4章给出DiffSpec有效短对照与失败边界；第5章是OPset独立算子复现。
 - 第6章合并StateAxis三条数据路径；第7章保留24项官网目录索引。
 
@@ -44,124 +45,58 @@ validated”自动解释为收益或生产可用。章节中的原始日期、�
 以下为截至2026-10-27的正式评价，由 Fletcher
 代表。评价针对本轮审阅实现及当前部署需求；实测、历史证据与待验证方向的边界见各专题。BetterScale、BidKV按要求跳过，不作技术评价。
 
-| MOD                                | 正式评价                                                                                                                                                                                                                               |
-| ---------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| SimLLM                             | 匹配规则不足以可靠区分事实性差异，无法保障精确信息的保真性；不适用于要求准确性保证的任务。不将此判断扩展到严格相同前缀缓存。[依据](simllm/principles.md)                                                                               |
-| Pipeline Microbatch                | PP不是本轮目标部署的主流路线，专项微批调度缺乏优先投入依据，不继续研究或复现。DeepInfer的大规模部署采用EP/DP；其“不采用TP”的明确说明仅作架构背景，不等同于对PP的否证。[机制](pipeline-microbatch/principles.md)；见表后引用。          |
-| KV Materialization Arrival Control | 已有可复用缓存且存在在线流量或其他活跃任务时，主动重算的计算机会成本过高。应优先改良缓存容量、分层存储与复用路径，避免通过重算处理缓存问题。[SGLang HiCache说明](https://www.lmsys.org/blog/2025-09-10-sglang-hicache/)                |
-| KV Tiering                         | 当前Ascend同步设备搬运路径不可取。同步复制与device synchronization阻塞执行并干扰计算，不满足生产采用要求；应改为可与计算重叠的异步路径。此处为实现与采用判断，非本轮干扰幅度实测。[依据](kv-tiering/principles.md)                     |
-| Ascend KVCompress                  | 打分及数据搬运引入额外开销，同时牺牲精确full-attention语义；既有结果收益有限，当前投入产出比不足。[依据](kvcompress/principles.md)                                                                                                     |
-| MuxPD                              | 当前吞吐不合格。按层暂停增加中间激活保存及调度开销；优先采用mixed batching、chunked prefill，并在显存与延迟预算允许时扩大batch。[依据](muxpd/principles.md)                                                                            |
-| OPset                              | 融合不合格：相对普通ACLNN分开执行，时延增加48.37%–82.31%。删除多余清零有用，但宜作为主线小补丁，不宜独立作为MOD。[两卡实测](opset/reproduction/README.md)                                                                              |
-| Core Attention Boundary            | 缺少有效benchmark，尚无充分证据证明CPU元数据边界替换带来实质性能收益，优化价值未得到验证。[依据](core-attention-boundary/principles.md)                                                                                                |
-| GDN State Codec                    | 参考BetterScale既有LeapQuant实验，在Ascend上未获得稳定收益；AIC/AIV协作与数据搬运成本是主要限制，不重复投入同类研究。本轮未重新复核既有实验。[依据](gdn-state-codec/principles.md)                                                     |
-| Prefix Router                      | 缓存感知路由有明确需求，值得推进。应结合分布式KV存储，将缓存可达性、传输成本与节点负载纳入决策，优先复用而非重算；当前版本并未完成这一系统能力。[依据](prefix-router/principles.md)                                                    |
-| PyramidKV                          | 当前整体性价比不足。KV容量下降未转化为整体收益，额外打分、搬运及精度代价抵消其价值；已读配置长输入吞吐下降2.6%–10.3%。[依据](pyramidkv/principles.md)                                                                                  |
-| Quantized KV Cache                 | 不推荐依赖独立量化、反量化及稠密中间结果物化的路径，其额外GM往返可能抵消收益。优先考虑产出与消费保持量化状态的实现；融合online antiquant需另证净收益，不与显式还原混同。[依据](quantized-kv/principles.md)                             |
-| vSpec（35B）                       | 当前不合格：准确率相对原生及MTP2分别下降3.57、3.21个百分点；gamma、refill、capture buckets及动态宽度runtime同时不同，未隔离自适应策略相对MTP的独立收益。保留实测速度与精度因果归因边界。[实测](speculative-mmlu-pro/results-qwen35.md) |
-| DiffSpec                           | 性能收益不合格，需要重新评估项目可行性。结论限于B16/C04三臂56题首轮，检索未生效，完整三臂280题未完成；不构成完整方法的否证。[实测](speculative-mmlu-pro/results-diffspec.md)                                                           |
-| StateAxis Async KV Transfer        | 原理正确；需适配Qwen3.5-35B-A3B，并选择合适的缓存压力workload进一步验证。[依据](stateaxis-data-paths/principles.md)                                                                                                                    |
-| StateAxis Automatic Prefix Cache   | 有潜力，主要来自recurrent state checkpointing对特定数据集前缀匹配的支持。需高效异步实现，确保状态保存与搬运不干扰计算；目前为待验证方向。[依据](stateaxis-data-paths/principles.md)                                                    |
-| StateAxis Pipelined Weight Loading | 实用，建议推广到系统默认主线，做成default-in（默认启用）。历史收益包含校验实现等共同优化，不全部归因于传输流水。[依据](stateaxis-data-paths/principles.md)                                                                             |
+| MOD                                | 正式评价                                                                                                                                                                                                                                                                                                              |
+| ---------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| SimLLM                             | 匹配规则不足以可靠区分事实性差异，无法保障精确信息的保真性；不适用于要求准确性保证的任务。不将此判断扩展到严格相同前缀缓存。[依据](simllm/principles.md)                                                                                                                                                              |
+| Pipeline Microbatch                | PP不是本轮目标部署的主流路线，专项微批调度缺乏优先投入依据，不继续研究或复现。DeepInfer的大规模部署采用EP/DP；其“不采用TP”的明确说明仅作架构背景，不等同于对PP的否证。[机制](pipeline-microbatch/principles.md)；见表后引用。                                                                                         |
+| KV Materialization Arrival Control | 已有可复用缓存且存在在线流量或其他活跃任务时，主动重算的计算机会成本过高。应优先改良缓存容量、分层存储与复用路径，避免通过重算处理缓存问题。[SGLang HiCache说明](https://www.lmsys.org/blog/2025-09-10-sglang-hicache/)                                                                                               |
+| KV Tiering                         | 当前Ascend同步设备搬运路径不可取。同步复制与device synchronization阻塞执行并干扰计算，不满足生产采用要求；应改为可与计算重叠的异步路径。此处为实现与采用判断，非本轮干扰幅度实测。[依据](kv-tiering/principles.md)                                                                                                    |
+| Ascend KVCompress                  | 打分及数据搬运引入额外开销，同时牺牲精确full-attention语义；既有结果收益有限，当前投入产出比不足。[依据](kvcompress/principles.md)                                                                                                                                                                                    |
+| MuxPD                              | 当前吞吐不合格。按层暂停增加中间激活保存及调度开销；优先采用mixed batching、chunked prefill，并在显存与延迟预算允许时扩大batch。[依据](muxpd/principles.md)                                                                                                                                                           |
+| OPset                              | 融合不合格：相对普通ACLNN分开执行，时延增加48.37%–82.31%。删除多余清零有用，但宜作为主线小补丁，不宜独立作为MOD。[两卡实测](opset/reproduction/README.md)                                                                                                                                                             |
+| Core Attention Boundary            | 缺少有效benchmark，尚无充分证据证明CPU元数据边界替换带来实质性能收益，优化价值未得到验证。[依据](core-attention-boundary/principles.md)                                                                                                                                                                               |
+| GDN State Codec                    | 参考BetterScale既有LeapQuant实验，在Ascend上未获得稳定收益；AIC/AIV协作与数据搬运成本是主要限制，不重复投入同类研究。本轮未重新复核既有实验。[依据](gdn-state-codec/principles.md)                                                                                                                                    |
+| Prefix Router                      | 缓存感知路由有明确需求，值得推进。应结合分布式KV存储，将缓存可达性、传输成本与节点负载纳入决策，优先复用而非重算；当前版本并未完成这一系统能力。[依据](prefix-router/principles.md)                                                                                                                                   |
+| PyramidKV                          | 当前整体性价比不足。KV容量下降未转化为整体收益，额外打分、搬运及精度代价抵消其价值；已读配置长输入吞吐下降2.6%–10.3%。[依据](pyramidkv/principles.md)                                                                                                                                                                 |
+| Quantized KV Cache                 | 不推荐依赖独立量化、反量化及稠密中间结果物化的路径，其额外GM往返可能抵消收益。优先考虑产出与消费保持量化状态的实现；融合online antiquant需另证净收益，不与显式还原混同。[依据](quantized-kv/principles.md)                                                                                                            |
+| vSpec（35B）                       | 通过自适应调整投机解码长度，尝试在接受收益不足时减少草稿计算成本；但在35B/B16、相同有效投机长度gamma4及匹配target FULL graph buckets的三轮对照中，未观察到相对原生MTP的明显性能优势，当前证据不支持引入该MOD。被测配置未发生gamma切换，结论不泛化为自适应方法本身无效。[实测](speculative-mmlu-pro/gamma4/RESULTS.md) |
+| DiffSpec                           | 性能收益不合格，需要重新评估项目可行性。结论限于B16/C04三臂56题首轮，检索未生效，完整三臂280题未完成；不构成完整方法的否证。[实测](speculative-mmlu-pro/results-diffspec.md)                                                                                                                                          |
+| StateAxis Async KV Transfer        | 原理正确；需适配Qwen3.5-35B-A3B，并选择合适的缓存压力workload进一步验证。[依据](stateaxis-data-paths/principles.md)                                                                                                                                                                                                   |
+| StateAxis Automatic Prefix Cache   | 有潜力，主要来自recurrent state checkpointing对特定数据集前缀匹配的支持。需高效异步实现，确保状态保存与搬运不干扰计算；目前为待验证方向。[依据](stateaxis-data-paths/principles.md)                                                                                                                                   |
+| StateAxis Pipelined Weight Loading | 实用，建议推广到系统默认主线，做成default-in（默认启用）。历史收益包含校验实现等共同优化，不全部归因于传输流水。[依据](stateaxis-data-paths/principles.md)                                                                                                                                                            |
 
 ### DeepInfer部署引用
 
 DeepInfer官方部署Q&A原文：“TP and CP are not used for now.” 其decode配置为EP64–128 /
 DP64–128。此引用说明大规模部署可以采用EP/DP路线，但不直接证明PP在所有推理场景中无价值，也不构成对行业采用比例的统计。[官方原文](https://github.com/deepseek-ai/DeepInfer/blob/main/doc/inference_deployment_qa.md)（核对日期：2026-10-27）
 
-## 3. vSpec：35B主实验
+## 3. vSpec：35B关键实验
 
-来源：[专题原文](speculative-mmlu-pro/results-qwen35.md)。
+**评语：相同投机长度下无明显性能优势，不建议引入。**
 
-2026-10-26 UTC，ascend87。此页是用户要求的35B主实验；此前14B结果仅作补充，不混为同一实验。
+vSpec通过自适应调整投机解码长度，尝试在接受收益不足时减少草稿计算成本。我们用固定相同投机长度的原生MTP作基线，检验它能否带来额外吞吐收益。
+
+### 关键对照：原生MTP4 vs vSpec
+
+同一Qwen3.5-35B-A3B模型，Ascend双卡TP2、BF16、B16；冻结56道MMLU-Pro题目，每臂独立运行三轮，输出上限4000
+tokens。两臂有效投机长度均为gamma4，并匹配对应的target FULL graph buckets；不放宽接受条件。
+
+| 轮次   | 原生MTP4（tokens/s） | vSpec（tokens/s） | vSpec相对原生 |
+| ------ | -------------------: | ----------------: | ------------: |
+| 1      |               825.71 |            797.27 |        -3.44% |
+| 2      |               811.05 |            794.91 |        -1.99% |
+| 3      |               796.26 |            795.60 |        -0.08% |
+| 中位数 |               811.05 |            795.60 |        -1.91% |
 
 ### 结论
 
-**不合格：35B 实测质量下滑；现有整体配置对照未分离自适应策略、refill与graph/runtime支持的独立贡献。**
+**匹配有效投机长度后，三轮均未测到vSpec的额外吞吐收益。** 先前相对较短投机长度基线的优势，不能作为该MOD优于匹配原生MTP的证据。这组35B/B16负载下，引入该MOD缺乏性能依据。
 
-1. **质量下滑。** 280 题准确率相对原生下降 3.57 个百分点、相对 MTP2 下降 3.21 个百分点，当前质量表现不予接受。
-1. **性能比较未控制变量。** 两臂均启用graph，但gamma预算、refill调度、capture
-   buckets、动态宽度runtime及兼容层不同。整体配置虽然测得提速，但未做逐项消融，不能据此认定自适应策略相对宿主原生MTP2的独立收益，也未证明额外graph/runtime支持本身贡献了提速。[发布前证据审计](speculative-mmlu-pro/publication-audit.md)
+本轮vSpec实际未发生gamma切换；结论针对当前实现与该负载，不是否定自适应方法本身。其余runtime差异与共享宿主干扰仍存在，约1.9%的差距不作统计显著减速认定。
 
-保留速度实测与统计边界：准确率下降尚未得到可靠因果归因，不等于已证明算法必然损失精度；但这也不构成精度无损或当前方案合格的证据。
+实验配置、原始结果与复算入口见[完整实验记录](speculative-mmlu-pro/gamma4/RESULTS.md)；历史实验及源码差异保留在[研究笔记](speculative-mmlu-pro/results-qwen35.md)。
 
-这不是全量MMLU-Pro成绩，也不是所有vSpec proposer的泛化结论。未自动扩到12,032题。
-
-### Candidate 与 baseline + MTP 的系统实现差异
-
-此表的baseline指本次宿主原生MTP2，而非未经修改的官方发行版。Core提交为 `0fc695fc6d1d82e9a5ac6835ac8e4e1c83703665`，Ascend提交为
-`5cb98caaadeff42b5b62b996e34bb2aaa29d20fd`；发布审计时两宿主checkout均clean。vSpec固定提交为
-`4e17b6bb6f9957dd4427f112da0bfc3d08bf24ae`。下表vSpec相对路径统一位于
-`src/vllm_hust_vspec/`；“配置开启/源码安装”不等于已测得该项性能贡献。
-
-| 系统项                  | baseline + MTP2                           | vSpec candidate                                                                                          | 原仓库代码路径与定位                                                                                                                                                                                                                                                                                                                                                |
-| ----------------------- | ----------------------------------------- | -------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 模型与proposer接入      | 目标内置MTP权重；仅加载ascend插件         | 同一目标与内置MTP权重；增加vspec插件及宿主proposer钩子                                                   | [__init__.py](https://github.com/vLLM-HUST/vllm-hust-vSpec/blob/4e17b6bb6f9957dd4427f112da0bfc3d08bf24ae/src/vllm_hust_vspec/__init__.py)的register；[patches.py](https://github.com/vLLM-HUST/vllm-hust-vSpec/blob/4e17b6bb6f9957dd4427f112da0bfc3d08bf24ae/src/vllm_hust_vspec/patches.py)的apply_patches；backends/mtp.py的apply_mtp_patches                     |
-| 投机预算与反馈          | 固定gamma=2；无vSpec控制器                | online控制，候选2/4/6；控制间隔4，窗口32                                                                 | [adaptive/runtime.py](https://github.com/vLLM-HUST/vllm-hust-vSpec/blob/4e17b6bb6f9957dd4427f112da0bfc3d08bf24ae/src/vllm_hust_vspec/adaptive/runtime.py)的apply_adaptive_patches、scheduler_init/schedule；[adaptive/online.py](https://github.com/vLLM-HUST/vllm-hust-vSpec/blob/4e17b6bb6f9957dd4427f112da0bfc3d08bf24ae/src/vllm_hust_vspec/adaptive/online.py) |
-| 请求准入/refill         | 宿主原生调度，无vSpec refill钩子          | adaptive_refill_batch=8；MTP_COHORT_REFILL=1                                                             | [backends/mtp.py](https://github.com/vLLM-HUST/vllm-hust-vSpec/blob/4e17b6bb6f9957dd4427f112da0bfc3d08bf24ae/src/vllm_hust_vspec/backends/mtp.py)的_patch_mtp_cohort_refill；[adaptive/refill.py](https://github.com/vLLM-HUST/vllm-hust-vSpec/blob/4e17b6bb6f9957dd4427f112da0bfc3d08bf24ae/src/vllm_hust_vspec/adaptive/refill.py)的install_online_refill_patch   |
-| Graph模式（相同）       | FULL_AND_PIECEWISE，draft非eager          | 同为FULL_AND_PIECEWISE，draft非eager                                                                     | 宿主vllm_ascend/spec_decode/llm_base_proposer.py的load_model已有ACLGraphWrapper。不能将baseline描述为没有graph                                                                                                                                                                                                                                                      |
-| Capture buckets（不同） | 7项：[3,6,9,12,18,24,48]                  | 48项：1至112的多宽度集合，不是连续1..112                                                                 | [cli.py](https://github.com/vLLM-HUST/vllm-hust-vSpec/blob/4e17b6bb6f9957dd4427f112da0bfc3d08bf24ae/src/vllm_hust_vspec/cli.py)的generate_capture_sizes；adaptive/runtime.py的restore_adaptive_capture_sizes；实际列表见q35-engine-configs.json                                                                                                                     |
-| 动态宽度graph与dispatch | 宿主固定gamma路径，不安装vSpec钩子        | 增加多query-width graph keys、按gamma组织draft FULL runnables及dispatch/query-width适配                  | adaptive/runtime.py的_add_adaptive_decode_graph_keys、\_initialize_full_graph_runnables、adaptive_dispatch、\_runner_query_width；无逐hook消融或收益计数                                                                                                                                                                                                            |
-| Graph严格检查           | 无vSpec额外guard                          | mtp_strict_graph=1；检查FULL draft并拒绝特定eager回退                                                    | backends/mtp.py的_patch_mtp_drafter_graph_guard、apply_mtp_patches。此项主要是安全检查，不能单列为提速优化                                                                                                                                                                                                                                                          |
-| Hybrid状态与兼容层      | 使用宿主KV分组与MambaBuffers API          | vSpec增加Qwen MTP分组注解；本次私有适配保留宿主新版逐plane状态搬运，并修复动态draft padding/缓存阈值接口 | backends/mtp.py的_annotate_qwen35_mtp_kv_groups；私有vspec_compat.py与vspec-stats-compat.patch不属于作者原仓库，必须单列披露                                                                                                                                                                                                                                        |
-| 本次未启用的优化        | local argmax reduction=false；无vSpec优化 | local argmax=false、device counts默认0、merged full=0、draft parallel graph updates=0                    | backends/mtp.py的_patch_mtp_local_argmax_reduction、\_patch_async_mtp_device_counts及config.py开关。不可将这些写成本轮提速来源                                                                                                                                                                                                                                      |
-| 接受条件（未放宽）      | 原生MTP接受路径，无synthetic配置          | confidence margin为空并解析为None；无synthetic配置                                                       | [config.py](https://github.com/vLLM-HUST/vllm-hust-vSpec/blob/4e17b6bb6f9957dd4427f112da0bfc3d08bf24ae/src/vllm_hust_vspec/config.py)的_read_optional_float / PluginSettings；cli.py的synthetic配置生成分支未启用                                                                                                                                                   |
-
-两臂共同开启async scheduling、APC、chunked prefill，TP2+EP、BF16、B16及4000输出上限相同。candidate从原仓库
-`configs/qwen35-35b-a3b-frontier-mtp2.toml` 生成；baseline由本次 `prepare35.py`
-保留共同参数并移除vSpec、固定gamma2。逐轮command/config与冻结JSON核验一致。
-
-因此，现有结果支持**两套配置的性能对照**，不支持**自适应策略的单因素收益归因**。亦未证明graph/runtime差异本身导致提速，或全部可独立移植到baseline。详细开关、源文件回收比对及未补足的证据见[发布前审计](speculative-mmlu-pro/publication-audit.md)。
-
-### 质量：固定280题，4000输出token上限
-
-| 配置                                 |    正确 |   得分 | 截断 | 无法解析 |
-| ------------------------------------ | ------: | -----: | ---: | -------: |
-| 原生 target-only                     | 203/280 | 72.50% |   92 |        0 |
-| 原生 MTP，固定深度2                  | 202/280 | 72.14% |   94 |        0 |
-| vSpec adaptive MTP（2/4/6 + refill） | 193/280 | 68.93% |   93 |        0 |
-
-每学科20题，固定哈希排名、排除已查看的14题pilot；分层宏平均，不按全量学科占比加权。全部结果无>90% token0退化。
-
-| 配对（前者相对后者） | 得/失 |    分差 | 配对分层bootstrap 95%区间 |
-| -------------------- | ----: | ------: | ------------------------: |
-| 原生MTP2 / 原生      | 27/28 | -0.36pp |          [-5.36, +4.64]pp |
-| vSpec / 原生         | 19/29 | -3.57pp |          [-8.21, +1.43]pp |
-| vSpec / 原生MTP2     | 27/36 | -3.21pp |          [-8.57, +2.14]pp |
-
-不能把“区间跨0”解释成证明没有精度损失；区间仍允许明显下降。但也不能把点估计当作已证实掉精度：
-
-- 各臂约三分之一题触及输出上限，成绩反映固定预算效用，不是充分推理后的准确率。
-- vSpec与原生MTP2共同未截断的172题中，vSpec有12得10失；总分差主要来自至少一侧被截断的题。这是事后选择的描述，不能作无偏总体推断。
-- 原生自己在三次56题重复中为40、40、37题正确；前两次序列全部相同，第三次56条序列全部与第一次不同。配置、安全环境（除run
-  label）、题序与输入长度一致，权重文件大小/mtime未变；根因未定位，不能把所有差异归因于插件。
-
-### 性能：同一56题，交错次序，独立engine，三轮
-
-| 配置                                 | 三次generation秒数     | 中位秒数 | 输出tokens/s中位数 |
-| ------------------------------------ | ---------------------- | -------: | -----------------: |
-| 原生 target-only                     | 297.89, 293.76, 292.24 |   293.76 |             512.39 |
-| 原生 MTP，固定深度2                  | 227.54, 222.32, 224.86 |   224.86 |             689.11 |
-| vSpec adaptive MTP（2/4/6 + refill） | 191.79, 196.27, 189.97 |   191.79 |             804.52 |
-
-整套adaptive配置相对target-only的观测wall比为 **1.53×**，相对原生MTP2为 **1.17×**；按输出tokens/s中位数分别为 **1.57×** 与
-**1.17×**。输出长度并非完全相同，因此不把wall比叫作等输出kernel加速。
-
-三次MTP2实际接受率约82.0–82.5%；vSpec约66.4–67.2%。深度不同，接受率分母不同；较低比例并不自动意味着较低吞吐。本负载不支持“接受率太低所以无收益”。
-
-计时排除模型加载、编译、graph捕获与预热；包括generate和逐完成请求JSONL保存。物理0,1上串行、trace关闭，未并行本任务的其它NPU实验。不是生产流量SLA：所有56请求集中提交，TTFT与queued-to-last包含离线队列等待。原始逐请求延迟、每请求平均TPOT及汇总保留在JSON中，不把TPOT均值分布冒充逐token抖动分布。
-
-### 合同与实现边界
-
-- Target：本机 `/models/Qwen3.5-35B-A3B`，内置单层MTP权重，运行时展开多个draft
-  token；TP2+EP、BF16、B16、context16384、max_batched_tokens8192、memory0.9。不是14B+0.5B草稿，也不是Eagle3路径。
-- 依据pinned vSpec的35B frontier MTP协议：APC、async、chunked
-  prefill、FULL_AND_PIECEWISE；显式关闭近似confidence接受与synthetic
-  acceptance；adaptive候选2/4/6，refill8。generation_config=vllm，temp0/top_p1/max4000。
-- APC配置开启，但本批任务记录的prefix cache命中均为0；不声称观察到了APC收益。三臂全部质量轮与九次性能轮的 `num_preemptions` 增量均为0，无抢占重算计数。
-- 对照是原生target-only、原生MTP2与vSpec推荐策略整体。vSpec同时含refill、动态宽度graph/runtime支持及私有兼容层；未进行逐项消融，不能把全部增量单归gamma选择，也不能反向认定这些支持本身造成了提速；也未声称原生已穷尽部署调优。
-- 兼容补丁只在任务私有层：新增group-builder生命周期适配，保留宿主新版MambaBuffers逐plane拷贝，沿用此前API/统计/动态padding修正；不改target数学、采样或接受阈值。原生MTP不加载vSpec。
-- 目标权重的证据是本地config、索引、文件大小和mtime；没有声称已确认不可变上游权重revision。其它source/dataset/draft版本见plan与progress。
+来源：[专题原文](speculative-mmlu-pro/report-summary-qwen35.md)。
 
 ## 4. DiffSpec：有效证据与停止边界
 
@@ -306,8 +241,8 @@ index失败。主动终止894046，首次所有数据作废并保留日志。Fle
 - 当前实现不是普通ACLNN路径的性能替代品；若确实要求batch-invariant Triton，局部优化仍可能有用。
 - 去多余清零的机制判断不变，本轮没有另外重测其独立贡献。当前native Triton baseline仍含zeros，因此融合对比也不是剥离清零贡献后的纯epilogue消融。
 
-[预注册及映射修正](opset/reproduction/contract.md) · [探针](opset/reproduction/probe.py.source) ·
-[资源与映射门禁](opset/reproduction/launch.py.source) · [原始证据](opset/reproduction/evidence)
+[预注册及映射修正](opset/reproduction/contract.md) · [探针](opset/reproduction/probe.py) ·
+[资源与映射门禁](opset/reproduction/launch.py) · [原始证据](opset/reproduction/evidence)
 
 ## 6. StateAxis：三条数据路径
 

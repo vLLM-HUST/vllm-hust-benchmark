@@ -18,14 +18,26 @@ all reviewed MODs are production-qualified**. No leaderboard or website metrics 
 
 ## What the evidence supports
 
-The 35B arms scored 203/280, 202/280 and 193/280. The adaptive whole-configuration wall-time ratios
-were 1.53167 versus target-only and 1.17243 versus native MTP2. Both MTP arms used
-FULL_AND_PIECEWISE graphs. Gamma, refill, capture buckets, dynamic-width runtime support and private
-compatibility code differ: this is a whole-configuration comparison, **not a gamma-only ablation or
-proof that additional graph optimization caused the gain**. Confidence-margin acceptance was
-disabled; the unrelated historical 14B 1.518x result is not this measurement. Quality causality is
-unresolved under truncation and native run variability; current adoption is rejected, not the
-measured whole-stack speed difference.
+The latest matched-depth 35B comparison uses native MTP gamma4 versus the original vSpec
+configuration, which actually stayed at gamma4 with zero switches in all three runs. The same 56
+questions were repeated in fresh engines three times per arm. Effective gamma4 target FULL graph
+keys matched on both ranks before and after all six runs. Median output throughput was **811.05
+tokens/s native versus 795.60 tokens/s vSpec** (candidate/native 0.98095). No incremental throughput
+benefit was observed for this 35B/B16 workload. Other runtime paths and shared-host interference
+remain; this is not a claim of statistically significant slowdown or a rejection of adaptive
+speculation in general.
+
+[Matched-gamma4 protocol, results and verifier](research/speculative-mmlu-pro/gamma4/RESULTS.md) are
+the current performance evidence. The concise report contains this experiment only. Historical
+280-question scores (203/202/193) and the old 1.17243 wall ratio against native MTP2 remain in the
+research notes, not as a matched-baseline advantage or causal quality-loss proof. All four original
+35B candidate runs also stayed at gamma4: configured candidates 2/4/6 were not observed dynamic
+switching. Both MTP arms used FULL_AND_PIECEWISE; no extra graph optimization has been isolated as a
+cause of the old gain. Acceptance relaxation was disabled.
+
+[Follow-up diagnostics](research/speculative-mmlu-pro/divergence/RESULTS.md) retain
+first-divergence, norm and bucket observations. Synchronous diagnostic timings are not performance
+evidence; the corrected-norm candidate was stopped, not a completed three-arm quality experiment.
 
 DiffSpec's valid C04/B16 three-arm 56-question first pass had no preemptions and no speed gain:
 232.12 / 95.58 / 91.34 output tokens/s for target-only / Eagle / DiffSpec. Default linear retrieval
@@ -67,6 +79,7 @@ cd reports/runtime-mod-review-20261027
 python verify_archive.py
 python verify_archive.py --restore .materialized
 python verify_results.py .materialized > .materialized/recomputed-results.json
+python .materialized/research/speculative-mmlu-pro/gamma4/analyze.py > .materialized/gamma4-recomputed.json
 ```
 
 The archive is split into ordered parts below 1 MB. `raw/manifest.json` binds each part, complete
@@ -74,7 +87,9 @@ gzip archive and every original member. The restorer verifies digests and regula
 paths, refusing conflicting overwrites. It does not execute archived code. `verify_results.py` then
 runs only the frozen answer parser and analysis functions: it does not load a model or invoke
 accelerator libraries. Compare its JSON structurally with `recomputed-results.json`; JSON key
-ordering/formatting is not measurement identity.
+ordering/formatting is not measurement identity. Compare the gamma4 output structurally with
+`research/speculative-mmlu-pro/gamma4/results.json`; that independent verifier validates the six new
+runs, answer parsing, actual gamma decisions and per-rank graph keys.
 
 Public JSONs outside the raw capsule are readable copies/derived summaries. The capsule, not
 formatting of those copies, owns original byte identity. Readable operator producer copies use
@@ -90,11 +105,11 @@ source snapshot for every historical run.
 ## Rebuild the report
 
 The PDF generator needs ReportLab and the macOS STHeiti fonts. The delivered PDF embeds its CJK
-fonts. Repository-facing links use the public main-branch report location (available after merge),
-not local `file:///` paths:
+fonts. Repository-facing links use the published review-branch report location, not local `file:///`
+paths:
 
 ```sh
-REPORT_LINK_BASE=https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/main/reports/runtime-mod-review-20261027/research/ python research/build_report.py
+REPORT_LINK_BASE=https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/review/runtime-mods-evidence-20261027/reports/runtime-mod-review-20261027/research/ python research/build_report.py
 ```
 
 Research notes retain narrower evidence boundaries and original source citations; they are not all

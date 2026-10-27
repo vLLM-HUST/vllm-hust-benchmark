@@ -2,19 +2,67 @@
 
 2026-10-26 UTC，ascend87。此页是用户要求的35B主实验；此前14B结果仅作补充，不混为同一实验。
 
-## 结论
+## 2026-10-27：新增原生gamma4复测
 
-**不合格：35B 实测质量下滑；现有整体配置对照未分离自适应策略、refill与graph/runtime支持的独立贡献。**
+[原生gamma4对照结果](gamma4/RESULTS.md)：新鲜56题×三轮、匹配有效gamma4与target FULL keys，原生811.05、vSpec795.60 output
+tokens/s中位数；未观察到额外吞吐收益。共享宿主、输出长度变化及非完整质量测试边界见该文。下文保留原MTP2对照的历史原始结果，不将旧1.17×当作相对MTP4收益。
 
-1. **质量下滑。** 280 题准确率相对原生下降 3.57 个百分点、相对 MTP2 下降 3.21 个百分点，当前质量表现不予接受。
-1. **性能比较未控制变量。** 两臂均启用graph，但gamma预算、refill调度、capture
-   buckets、动态宽度runtime及兼容层不同。整体配置虽然测得提速，但未做逐项消融，不能据此认定自适应策略相对宿主原生MTP2的独立收益，也未证明额外graph/runtime支持本身贡献了提速。[发布前证据审计](publication-audit.md)
+## 2026-10-27：gamma执行证据更正
 
-保留速度实测与统计边界：准确率下降尚未得到可靠因果归因，不等于已证明算法必然损失精度；但这也不构成精度无损或当前方案合格的证据。
+四份正式日志（280题及三轮性能）均记录
+`gamma_switches=0`、`initial_gamma=4`、`selection_counts={'4':3}`。因此下文adaptive是配置名称：候选2/4/6，但实际保持gamma4；不得把整套配置收益归为已发生的动态gamma选择。详见[控制器与日志核验](divergence/gamma-controller.md)。
+
+## 当前正式评价
+
+**vSpec通过自适应调整投机解码长度，尝试在接受收益不足时减少草稿计算成本；但本轮35B/B16测试在相同有效投机长度下，未观察到相对原生MTP的明显性能优势。当前证据不支持为该负载引入此MOD。**
+
+最新三轮56题对照中，两臂均实际使用gamma4，且匹配对应target FULL graph buckets；输出吞吐中位数为原生MTP **811.05 tokens/s**、vSpec
+**795.60
+tokens/s**（约低1.9%）。这不是小幅减速的统计显著性认定，也不是全部runtime差异的逐项消融。被测vSpec配置实际未发生gamma切换，因此不把结论扩大为自适应方法本身无效。[完整复测与边界](gamma4/RESULTS.md)
+
+原280题准确率点估计相对原生下降3.57个百分点、相对MTP2下降3.21个百分点，作为历史观察保留；截断、原生重复波动与目标logits差异使其尚不能可靠归因为vSpec算法导致的质量损失。旧MTP2对照同时改变投机长度与runtime配置，不能用旧约1.17×耗时比认定自适应策略的独立收益。
 
 这不是全量MMLU-Pro成绩，也不是所有vSpec proposer的泛化结论。未自动扩到12,032题。
 
-## Candidate 与 baseline + MTP 的系统实现差异
+## 匹配投机长度与目标图桶的控制变量复测
+
+原实验以原生MTP2对比实际gamma4的vSpec，不能隔离投机长度的贡献。为检验收益能否在更匹配的基线上保留，新增固定原生gamma4对照；不放宽接受条件，不开启新的候选运行模式。
+
+### 控制条件与剩余差异
+
+| 控制项         | 本次执行与验证                                                                                                                                        |
+| -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 模型与设备     | 同一Qwen3.5-35B-A3B及内置MTP，TP2+EP、BF16；ascend87物理0/1串行运行                                                                                   |
+| 投机长度       | baseline固定gamma4；vSpec保留原adaptive配置，但三轮实际gamma4、切换次数均为0                                                                          |
+| 目标FULL graph | 两臂传入同一48项capture列表；两rank、六次运行计时前后均核验gamma4目标FULL keys一致：requests=1..16，tokens=5×requests                                 |
+| 调度与生成预算 | B16、context16384、max_batched_tokens8192、memory0.9；APC、async scheduling、chunked prefill及FULL_AND_PIECEWISE均开启；temp0、top_p1、max_tokens4000 |
+| 输入与重复     | 冻结同一56题、同一题序；同一14题×16token预热；每臂三次独立engine，执行次序原生→vSpec、vSpec→原生、原生→vSpec                                          |
+| 数值与接受规则 | 两臂均使用原生norm，未安装GenNova修正；未放宽接受条件，关闭逐步同步诊断探针                                                                           |
+| 未完全控制项   | PIECEWISE候选、其他宽度graph、refill及兼容支持仍有差异；宿主其他卡存在他人负载，CPU/内存/IO干扰未排除                                                 |
+
+这是一组匹配关键混杂因素的对照，不是所有runtime实现完全相同的单因素消融。原生宿主将capture列表规范化为20项PIECEWISE候选，vSpec保留48项；相同的是实际gamma4对应的target
+FULL keys，而不是全部图配置。
+
+### 三轮性能结果
+
+| 轮次   | 原生MTP4输出tokens/s | vSpec输出tokens/s | vSpec相对原生 |
+| ------ | -------------------: | ----------------: | ------------: |
+| 1      |               825.71 |            797.27 |        -3.44% |
+| 2      |               811.05 |            794.91 |        -1.99% |
+| 3      |               796.26 |            795.60 |        -0.08% |
+| 中位数 |               811.05 |            795.60 |        -1.91% |
+
+计时排除加载、编译、capture、预热与前后配置核验，包含generate及逐请求结果落盘。六次运行全部正常退出、完成56题，无法解析答案为0、抢占为0，未见连续token0退化。完整输出、配置、实际graph
+keys、gamma日志与复算脚本均已保存。
+
+原生与vSpec的generation耗时中位数分别为192.175秒、187.615秒，但两臂生成长度不同，不能把较短总耗时直接解释为等工作量加速。三轮正确题数分别为原生40/34/41、vSpec39/35/41；仍有较多截断，不能把同一56题的重复当作168道独立题，也不构成新的280题质量结论。
+
+**结论：匹配有效投机长度与目标FULL图桶后，未观察到vSpec的额外吞吐收益。**
+约1.9%的中位数差距不作为“统计显著更慢”的认定。旧约1.17×耗时比不能继续作为相对匹配MTP基线的优势；但本次同时扩充了baseline图桶，且运行于共享宿主，也不能断言旧收益全部来自gamma变化。
+
+这支持当前35B/B16负载不引入该MOD的工程判断，不支持否定所有模型、负载或实际发生长度切换的自适应策略。[原始结果与复算入口](gamma4/RESULTS.md)
+
+## 历史MTP2对照：系统实现差异
 
 此表的baseline指本次宿主原生MTP2，而非未经修改的官方发行版。Core提交为 `0fc695fc6d1d82e9a5ac6835ac8e4e1c83703665`，Ascend提交为
 `5cb98caaadeff42b5b62b996e34bb2aaa29d20fd`；发布审计时两宿主checkout均clean。vSpec固定提交为
@@ -24,7 +72,7 @@
 | 系统项                  | baseline + MTP2                           | vSpec candidate                                                                                          | 原仓库代码路径与定位                                                                                                                                                                                                                                                                                                                                                |
 | ----------------------- | ----------------------------------------- | -------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 模型与proposer接入      | 目标内置MTP权重；仅加载ascend插件         | 同一目标与内置MTP权重；增加vspec插件及宿主proposer钩子                                                   | [__init__.py](https://github.com/vLLM-HUST/vllm-hust-vSpec/blob/4e17b6bb6f9957dd4427f112da0bfc3d08bf24ae/src/vllm_hust_vspec/__init__.py)的register；[patches.py](https://github.com/vLLM-HUST/vllm-hust-vSpec/blob/4e17b6bb6f9957dd4427f112da0bfc3d08bf24ae/src/vllm_hust_vspec/patches.py)的apply_patches；backends/mtp.py的apply_mtp_patches                     |
-| 投机预算与反馈          | 固定gamma=2；无vSpec控制器                | online控制，候选2/4/6；控制间隔4，窗口32                                                                 | [adaptive/runtime.py](https://github.com/vLLM-HUST/vllm-hust-vSpec/blob/4e17b6bb6f9957dd4427f112da0bfc3d08bf24ae/src/vllm_hust_vspec/adaptive/runtime.py)的apply_adaptive_patches、scheduler_init/schedule；[adaptive/online.py](https://github.com/vLLM-HUST/vllm-hust-vSpec/blob/4e17b6bb6f9957dd4427f112da0bfc3d08bf24ae/src/vllm_hust_vspec/adaptive/online.py) |
+| 投机预算与反馈          | 固定gamma=2；无vSpec控制器                | online配置候选2/4/6；实际gamma4、切换0次；控制间隔4，窗口32                                              | [adaptive/runtime.py](https://github.com/vLLM-HUST/vllm-hust-vSpec/blob/4e17b6bb6f9957dd4427f112da0bfc3d08bf24ae/src/vllm_hust_vspec/adaptive/runtime.py)的apply_adaptive_patches、scheduler_init/schedule；[adaptive/online.py](https://github.com/vLLM-HUST/vllm-hust-vSpec/blob/4e17b6bb6f9957dd4427f112da0bfc3d08bf24ae/src/vllm_hust_vspec/adaptive/online.py) |
 | 请求准入/refill         | 宿主原生调度，无vSpec refill钩子          | adaptive_refill_batch=8；MTP_COHORT_REFILL=1                                                             | [backends/mtp.py](https://github.com/vLLM-HUST/vllm-hust-vSpec/blob/4e17b6bb6f9957dd4427f112da0bfc3d08bf24ae/src/vllm_hust_vspec/backends/mtp.py)的_patch_mtp_cohort_refill；[adaptive/refill.py](https://github.com/vLLM-HUST/vllm-hust-vSpec/blob/4e17b6bb6f9957dd4427f112da0bfc3d08bf24ae/src/vllm_hust_vspec/adaptive/refill.py)的install_online_refill_patch   |
 | Graph模式（相同）       | FULL_AND_PIECEWISE，draft非eager          | 同为FULL_AND_PIECEWISE，draft非eager                                                                     | 宿主vllm_ascend/spec_decode/llm_base_proposer.py的load_model已有ACLGraphWrapper。不能将baseline描述为没有graph                                                                                                                                                                                                                                                      |
 | Capture buckets（不同） | 7项：[3,6,9,12,18,24,48]                  | 48项：1至112的多宽度集合，不是连续1..112                                                                 | [cli.py](https://github.com/vLLM-HUST/vllm-hust-vSpec/blob/4e17b6bb6f9957dd4427f112da0bfc3d08bf24ae/src/vllm_hust_vspec/cli.py)的generate_capture_sizes；adaptive/runtime.py的restore_adaptive_capture_sizes；实际列表见q35-engine-configs.json                                                                                                                     |
@@ -40,13 +88,13 @@
 
 因此，现有结果支持**两套配置的性能对照**，不支持**自适应策略的单因素收益归因**。亦未证明graph/runtime差异本身导致提速，或全部可独立移植到baseline。详细开关、源文件回收比对及未补足的证据见[发布前审计](publication-audit.md)。
 
-## 质量：固定280题，4000输出token上限
+## 历史质量结果：固定280题，4000输出token上限
 
-| 配置                                 |    正确 |   得分 | 截断 | 无法解析 |
-| ------------------------------------ | ------: | -----: | ---: | -------: |
-| 原生 target-only                     | 203/280 | 72.50% |   92 |        0 |
-| 原生 MTP，固定深度2                  | 202/280 | 72.14% |   94 |        0 |
-| vSpec adaptive MTP（2/4/6 + refill） | 193/280 | 68.93% |   93 |        0 |
+| 配置                                      |    正确 |   得分 | 截断 | 无法解析 |
+| ----------------------------------------- | ------: | -----: | ---: | -------: |
+| 原生 target-only                          | 203/280 | 72.50% |   92 |        0 |
+| 原生 MTP，固定深度2                       | 202/280 | 72.14% |   94 |        0 |
+| vSpec adaptive配置（实际gamma4 + refill） | 193/280 | 68.93% |   93 |        0 |
 
 每学科20题，固定哈希排名、排除已查看的14题pilot；分层宏平均，不按全量学科占比加权。全部结果无>90% token0退化。
 
@@ -63,13 +111,13 @@
 - 原生自己在三次56题重复中为40、40、37题正确；前两次序列全部相同，第三次56条序列全部与第一次不同。配置、安全环境（除run
   label）、题序与输入长度一致，权重文件大小/mtime未变；根因未定位，不能把所有差异归因于插件。
 
-## 性能：同一56题，交错次序，独立engine，三轮
+## 历史MTP2性能结果：同一56题，交错次序，独立engine，三轮
 
-| 配置                                 | 三次generation秒数     | 中位秒数 | 输出tokens/s中位数 |
-| ------------------------------------ | ---------------------- | -------: | -----------------: |
-| 原生 target-only                     | 297.89, 293.76, 292.24 |   293.76 |             512.39 |
-| 原生 MTP，固定深度2                  | 227.54, 222.32, 224.86 |   224.86 |             689.11 |
-| vSpec adaptive MTP（2/4/6 + refill） | 191.79, 196.27, 189.97 |   191.79 |             804.52 |
+| 配置                                      | 三次generation秒数     | 中位秒数 | 输出tokens/s中位数 |
+| ----------------------------------------- | ---------------------- | -------: | -----------------: |
+| 原生 target-only                          | 297.89, 293.76, 292.24 |   293.76 |             512.39 |
+| 原生 MTP，固定深度2                       | 227.54, 222.32, 224.86 |   224.86 |             689.11 |
+| vSpec adaptive配置（实际gamma4 + refill） | 191.79, 196.27, 189.97 |   191.79 |             804.52 |
 
 整套adaptive配置相对target-only的观测wall比为 **1.53×**，相对原生MTP2为 **1.17×**；按输出tokens/s中位数分别为 **1.57×** 与
 **1.17×**。输出长度并非完全相同，因此不把wall比叫作等输出kernel加速。

@@ -34,13 +34,13 @@ Fletcher · 共同阅读版 · 2026-10-27
 
 本报告汇集本仓库已有评审意见、源码研究与独立实验，不新增实验、不替作者发布结论。目录盘点覆盖24项；不是24项都完成了源码审计或设备验收。BetterScale与BidKV按Fletcher要求跳过。
 
-**vSpec当前状态不合格。** 当前对照同时改变gamma预算、refill调度、capture buckets及动态宽度runtime，不能据此认定自适应策略相对宿主原生MTP2的独立收益。整套配置的观测耗时比保留在第3章，不作为策略收益认定；亦未证明额外graph/runtime支持造成提速。280题得分比原生下降3.57个百分点、比MTP2下降3.21个百分点，验收不接受这一准确率下降。下降的因果归因仍受截断与原生重复波动限制；不合格是当前验收判断，不是已证明算法必然损失精度。
+**vSpec在匹配投机长度后未观察到明显性能优势。** 该MOD尝试通过自适应调整投机长度，在接受收益不足时减少草稿计算成本。最新35B/B16三轮56题对照匹配有效gamma4及对应target FULL graph buckets，原生MTP与vSpec的输出吞吐中位数分别为811.05、795.60 tokens/s，当前证据不支持为该负载引入此MOD。被测配置实际没有发生gamma切换，不泛化为自适应思路本身无效。原280题得分下降保留为尚未可靠归因的历史观察，不再作为已证明算法损害精度的结论。
 
 **DiffSpec性能收益不合格，需要重新评估项目可行性。** 有效数据是统一B16/C04的三臂56题首轮，无抢占；默认检索计数为0。无有效的完整三臂280题结果。Fletcher已决定停止追加实验，不能用坏掉的原生Eagle链路充当算法反证。
 
 | 方向 | 当前判断 | 证据性质与边界 |
 |---|---|---|
-| vSpec / 35B MTP | 当前不合格：收益归因未控制变量，准确率下降 | 280题质量与三轮56题性能；整套配置对照，非策略消融 |
+| vSpec / 35B MTP | 相同有效投机长度下无明显性能优势，当前不支持引入 | 新增gamma4三轮56题对照；实际无gamma切换，非完整自适应消融 |
 | DiffSpec / 27B Eagle | 性能收益不合格，需重新评估项目可行性 | 我们的56题首轮；检索未生效，完整280题未完成 |
 | OPset | 融合不合格：比ACLNN增时延48.37%–82.31% | 两卡算子实测；去清零另作有用小补丁 |
 | Prefix Router | 有需求，值得做；优先联接分布式KV存储 | 方向判断与源码研究，不是生产验收 |
@@ -52,7 +52,7 @@ Fletcher · 共同阅读版 · 2026-10-27
 ### 阅读顺序
 
 - 第2章以两列表格汇总各MOD的当前正式评价，历史对话记录不收入报告。
-- 第3章仅报告vSpec的35B主实验，以质量下滑、性能比较未控制变量这两项问题作评审。历史近似验收材料不收入本报告，仍保存在仓库。
+- 第3章仅保留vSpec匹配gamma4的关键实验与结论；历史对照、源码差异和排查过程留在仓库研究笔记。
 - 第4章给出DiffSpec有效短对照与失败边界；第5章是OPset独立算子复现。
 - 第6章合并StateAxis三条数据路径；第7章保留24项官网目录索引。
 
@@ -64,7 +64,7 @@ Fletcher · 共同阅读版 · 2026-10-27
 """
 
 
-def include(rel, title, cut=None):
+def include(rel, title, cut=None, source_at_end=False):
     p = ROOT / rel
     s = p.read_text()
     if cut:
@@ -83,9 +83,9 @@ def include(rel, title, cut=None):
         return f"[{label}]({url})"
 
     s = re.sub(r"\[([^\]]+)\]\(([^)]+)\)", link, s)
-    return (
-        f"\n\n## {title}\n\n来源：[专题原文]({rel.removeprefix('research/') if rel.startswith('research/') else '../' + rel})。\n\n"
-        + s
+    source = f"来源：[专题原文]({rel.removeprefix('research/') if rel.startswith('research/') else '../' + rel})。"
+    return f"\n\n## {title}\n\n" + (
+        s + "\n\n" + source if source_at_end else source + "\n\n" + s
     )
 
 
@@ -93,9 +93,9 @@ parts = [
     intro,
     include("research/comments.md", "2. MOD正式评审意见"),
     include(
-        "research/speculative-mmlu-pro/results-qwen35.md",
-        "3. vSpec：35B主实验",
-        cut="## 证据入口",
+        "research/speculative-mmlu-pro/report-summary-qwen35.md",
+        "3. vSpec：35B关键实验",
+        source_at_end=True,
     ),
     include(
         "research/speculative-mmlu-pro/results-diffspec.md",
