@@ -116,3 +116,5 @@ python compare_long_runs.py midterm-run-20261019-r4 midterm-b1-20261019 comparis
 - SWE增量与评分依赖：[规范结果](../swe-native018-protonmail-qutebrowser-20261027/README.md)；[Terminal Cython控制](../terminal-build-cython-controls-20261027/README.md)。
 
 - V0.95：[Protonmail同答案依赖恢复](../swe-protonmail-dependency-recovery-20261027/README.md)；[Cython单项诊断](../terminal-cython-single-trace-20261027/README.md)。
+
+- V0.96：[Tutanota增量及当前18题聚合](../swe-native018-tutanota-20261027/README.md)。

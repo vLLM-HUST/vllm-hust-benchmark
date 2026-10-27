@@ -1,0 +1,776 @@
+{
+  "schema": "swe-native018-incremental-catalog/v2",
+  "dataset": "SWE-bench-Pro V1",
+  "model": "Qwen3.5-35B-A3B",
+  "vllm": "0.18.0",
+  "vllm_ascend": "0.18.0",
+  "dataset_tasks": 731,
+  "attempted_unique_tasks": 18,
+  "recorded_official_resolved": 2,
+  "recorded_official_denominator": 18,
+  "official_unresolved_grading": 0,
+  "application_evidence_limited_tasks": 1,
+  "unattempted_tasks": 713,
+  "full_dataset_acceptance": false,
+  "prior_catalog": "reports/swe-native018-protonmail-qutebrowser-20261027/catalog.json",
+  "prior_catalog_sha256": "8857d4fe0397ce5d02da1e4827318831917a4ac48a06c531ba2fb28cb324d6fa",
+  "confirmed_patch_application_failure_tasks": 2,
+  "confirmed_target_compilation_failure_tasks": 2,
+  "entries": [
+    {
+      "run_id": "swe018-single-agent-r1",
+      "task_identity_sha256": "348c8612266efc316ec2058efdba16147230d1270d283e604f4d2d63bc598a4a",
+      "source": "reports/swe-native018-single-agent-20261026/summary.json",
+      "source_sha256": "c49e0a5acb0f1972cc19505186dda4e79c7a5641de29316ccb0ff0b6b1d09d8e",
+      "official_resolved": 0,
+      "official_denominator": 1,
+      "official_unresolved_grading": 0,
+      "model_calls": 100,
+      "elapsed_seconds": 435.97594330459833,
+      "status": "LimitsExceeded",
+      "agent_submitted": false,
+      "patch_bytes": 5782,
+      "patch_sha256": "f83e612dcdd18e2755a9f2ccaf1591a290273f3b0767fac97f93609388e68a30",
+      "patch_application_evidence_limited": false,
+      "parsed_test_counts": {},
+      "confirmed_patch_application_failure": false,
+      "apply_exit_code": null,
+      "patch_applied": null
+    },
+    {
+      "run_id": "swe018-first-missing-r3",
+      "task_identity_sha256": "03f203cc93b173654c3210d4a4f3a98eb8215fc68db640162e63a8b28f585e9a",
+      "source": "reports/swe-native018-incremental-20261026/summary.json",
+      "source_sha256": "2ffbc5ff20f52b6901d1f7c2cdc486b894da058358387c538895cafccc396527",
+      "official_resolved": 0,
+      "official_denominator": 1,
+      "official_unresolved_grading": 0,
+      "model_calls": 36,
+      "elapsed_seconds": 316.40756527893245,
+      "status": "Submitted",
+      "agent_submitted": true,
+      "patch_bytes": 160235,
+      "patch_sha256": "3d516039d17a5bc20218bfdeab92688213a33ca719e59348ea4a3a263e669898",
+      "patch_application_evidence_limited": true,
+      "parsed_test_counts": {
+        "FAILED": 1
+      },
+      "confirmed_patch_application_failure": false,
+      "apply_exit_code": null,
+      "patch_applied": null
+    },
+    {
+      "run_id": "swe018-cached-missing-r2",
+      "task_identity_sha256": "2c0651e2cab5a1844c15bda09ac9dab68618ac12eda0c5d2967fd1f350f93586",
+      "source": "reports/swe-native018-incremental-20261026/cached-summary.json",
+      "source_sha256": "74a27674838f7b99ff2aacd416fcf705612536f13619cc6571359c47ca803178",
+      "official_resolved": 0,
+      "official_denominator": 1,
+      "official_unresolved_grading": 0,
+      "model_calls": 45,
+      "elapsed_seconds": 293.6001821886748,
+      "status": "Submitted",
+      "agent_submitted": true,
+      "patch_bytes": 16835,
+      "patch_sha256": "a443e7e9c41b410aa1b1d335a7c0b8bc32630fac36a2842dde45b666c7229a60",
+      "patch_application_evidence_limited": false,
+      "parsed_test_counts": {
+        "PASSED": 172,
+        "FAILED": 1
+      },
+      "confirmed_patch_application_failure": false,
+      "apply_exit_code": null,
+      "patch_applied": null
+    },
+    {
+      "run_id": "swe018-next-049-r1",
+      "task_identity_sha256": "8d6fe0f61e2051275215e057e662e43dff2dce9058394e556c479abb6a99ce12",
+      "source": "reports/swe-native018-batch-20261026/summary-049.json",
+      "source_sha256": "e95a0ce6ec6f8d2b7fb89117ed2677535c0e797ca1ff84d58a34af921815819a",
+      "official_resolved": 0,
+      "official_denominator": 1,
+      "official_unresolved_grading": 0,
+      "model_calls": 54,
+      "elapsed_seconds": 465.91972022503614,
+      "status": "Submitted",
+      "agent_submitted": true,
+      "patch_bytes": 145150,
+      "patch_sha256": "60bdc1fde90c5d78d72d4be6391acbc2de18165faed6533440897c9e9771e742",
+      "patch_application_evidence_limited": false,
+      "confirmed_patch_application_failure": true,
+      "apply_exit_code": 1,
+      "patch_applied": false,
+      "state_capture": "complete",
+      "parsed_test_counts": {
+        "PASSED": 297,
+        "FAILED": 3
+      },
+      "test_count_scope": "Raw parser entries before official name-set scoring",
+      "official_test_coverage": {
+        "fail_to_pass": {
+          "expected": 3,
+          "passed": 0,
+          "not_passed": 3,
+          "missing": 0
+        },
+        "pass_to_pass": {
+          "expected": 288,
+          "passed": 288,
+          "not_passed": 0,
+          "missing": 0
+        }
+      }
+    },
+    {
+      "run_id": "swe018-next-087-r1",
+      "task_identity_sha256": "6739671e21539d95f2175078ccf932c200efb158f422835ec971654f5785da99",
+      "source": "reports/swe-native018-batch-20261026/summary-087.json",
+      "source_sha256": "9eef244df1350e0c98d3b045a8976328aa8aad371696e1c134a9aae2478a31c5",
+      "official_resolved": 0,
+      "official_denominator": 1,
+      "official_unresolved_grading": 0,
+      "model_calls": 72,
+      "elapsed_seconds": 695.520517423749,
+      "status": "Submitted",
+      "agent_submitted": true,
+      "patch_bytes": 12331,
+      "patch_sha256": "c6aa39739a5e3b28a8bd5388bc0d4048fab20792f860c33f40a5185fc4975962",
+      "patch_application_evidence_limited": false,
+      "confirmed_patch_application_failure": false,
+      "apply_exit_code": 0,
+      "patch_applied": true,
+      "state_capture": "complete",
+      "parsed_test_counts": {
+        "PASSED": 192,
+        "FAILED": 3
+      },
+      "test_count_scope": "Raw parser entries before official name-set scoring",
+      "official_test_coverage": {
+        "fail_to_pass": {
+          "expected": 3,
+          "passed": 2,
+          "not_passed": 1,
+          "missing": 0
+        },
+        "pass_to_pass": {
+          "expected": 190,
+          "passed": 190,
+          "not_passed": 0,
+          "missing": 0
+        }
+      }
+    },
+    {
+      "run_id": "swe018-next-0c8-r1",
+      "task_identity_sha256": "612cf90ca9350bc41ec578bda1b840d72a9a9ebd1c9ca112136fb716e51db151",
+      "source": "reports/swe-native018-batch-20261026/summary-0c8.json",
+      "source_sha256": "581e949a2b814aac3df3b73a30aa98065bb82aee3abe6638e9d28ed51a4b063d",
+      "official_resolved": 0,
+      "official_denominator": 1,
+      "official_unresolved_grading": 0,
+      "model_calls": 31,
+      "elapsed_seconds": 257.40147628448904,
+      "status": "Submitted",
+      "agent_submitted": true,
+      "patch_bytes": 23102,
+      "patch_sha256": "d46238b67001ce12af4380f9f1118365183ab4f1237d621de4b91eb1d2124b15",
+      "patch_application_evidence_limited": false,
+      "confirmed_patch_application_failure": false,
+      "apply_exit_code": 0,
+      "patch_applied": true,
+      "state_capture": "complete",
+      "parsed_test_counts": {
+        "PASSED": 96,
+        "FAILED": 1
+      },
+      "test_count_scope": "Raw parser entries before official name-set scoring",
+      "official_test_coverage": {
+        "fail_to_pass": {
+          "expected": 1,
+          "passed": 0,
+          "not_passed": 1,
+          "missing": 0
+        },
+        "pass_to_pass": {
+          "expected": 96,
+          "passed": 96,
+          "not_passed": 0,
+          "missing": 0
+        }
+      }
+    },
+    {
+      "run_id": "swe018-next-0f7-r1",
+      "task_identity_sha256": "3f72a99ad2319e7bbe458c883c4e0c6de31ae408372e13848ef9ace6621563e4",
+      "source": "reports/swe-native018-batch-20261026/summary-0f7.json",
+      "source_sha256": "f1fb9e90a493852f6eec959c23ec13e4d46bcb06e84505f26281f93a2891b941",
+      "official_resolved": 0,
+      "official_denominator": 1,
+      "official_unresolved_grading": 0,
+      "model_calls": 49,
+      "elapsed_seconds": 219.04692508466542,
+      "status": "Submitted",
+      "agent_submitted": true,
+      "patch_bytes": 11538,
+      "patch_sha256": "1cc84219175cae68172184ac7feb806d39ed72c7d9ee78b4fecfe06d225ab5cd",
+      "patch_application_evidence_limited": false,
+      "confirmed_patch_application_failure": false,
+      "apply_exit_code": 0,
+      "patch_applied": true,
+      "state_capture": "complete",
+      "parsed_test_counts": {
+        "PASSED": 32,
+        "FAILED": 3
+      },
+      "test_count_scope": "Raw parser entries before official name-set scoring",
+      "official_test_coverage": {
+        "fail_to_pass": {
+          "expected": 8,
+          "passed": 5,
+          "not_passed": 3,
+          "missing": 0
+        },
+        "pass_to_pass": {
+          "expected": 27,
+          "passed": 27,
+          "not_passed": 0,
+          "missing": 0
+        }
+      }
+    },
+    {
+      "run_id": "swe018-next-18c-r1",
+      "task_identity_sha256": "4711ce431f53bfbccb0c61267eb22dc99af3945614172a58c6445b5f3f8a6c88",
+      "source": "reports/swe-native018-batch-20261026/summary-18c.json",
+      "source_sha256": "74c2d0248de7fce8c98a81cc3edb5d954b88d3cf9d98728d64f33d1a62ca0a1d",
+      "official_resolved": 0,
+      "official_denominator": 1,
+      "official_unresolved_grading": 0,
+      "model_calls": 48,
+      "elapsed_seconds": 210.36633714847267,
+      "status": "Submitted",
+      "agent_submitted": true,
+      "patch_bytes": 131581,
+      "patch_sha256": "01412df4c2975d450d3562b8d1f4727603f44ad74bc9b6185ec060b424323a16",
+      "patch_application_evidence_limited": false,
+      "confirmed_patch_application_failure": true,
+      "apply_exit_code": 1,
+      "patch_applied": false,
+      "state_capture": "complete",
+      "parsed_test_counts": {
+        "PASSED": 418,
+        "FAILED": 6
+      },
+      "test_count_scope": "Raw parser entries before official name-set scoring",
+      "official_test_coverage": {
+        "fail_to_pass": {
+          "expected": 7,
+          "passed": 0,
+          "not_passed": 7,
+          "missing": 3
+        },
+        "pass_to_pass": {
+          "expected": 418,
+          "passed": 418,
+          "not_passed": 0,
+          "missing": 0
+        }
+      }
+    },
+    {
+      "run_id": "swe018-next-ans-r1",
+      "task_identity_sha256": "4cffc13d4aeed1725ecdca55be2e92db247a270ff588591157c47ace8fd73e8c",
+      "source": "reports/swe-native018-batch-20261026/summary-ans.json",
+      "source_sha256": "972015006ebe9766a8e163165235cf791aa3728b46a1a4a85ba3e52eb4b1a378",
+      "official_resolved": 1,
+      "official_denominator": 1,
+      "official_unresolved_grading": 0,
+      "model_calls": 27,
+      "elapsed_seconds": 297.3094043638557,
+      "status": "Submitted",
+      "agent_submitted": true,
+      "patch_bytes": 23632,
+      "patch_sha256": "6a2d8492b633afa231cabaf5fe1c6242e43095754a644b1f1bdef1c7727b0f95",
+      "patch_application_evidence_limited": false,
+      "confirmed_patch_application_failure": false,
+      "apply_exit_code": 0,
+      "patch_applied": true,
+      "state_capture": "complete",
+      "parsed_test_counts": {
+        "PASSED": 16
+      },
+      "test_count_scope": "Raw parser entries before official name-set scoring",
+      "official_test_coverage": {
+        "fail_to_pass": {
+          "expected": 1,
+          "passed": 1,
+          "not_passed": 0,
+          "missing": 0
+        },
+        "pass_to_pass": {
+          "expected": 15,
+          "passed": 15,
+          "not_passed": 0,
+          "missing": 0
+        }
+      }
+    },
+    {
+      "run_id": "swe018-repo-02-r1",
+      "task_identity_sha256": "bb130bed1f3b25208e2b182a1105ea9927cb307c7e9075cb0e2ff3dbf987090c",
+      "source": "reports/swe-native018-repository-20261026/summary-element.json",
+      "source_sha256": "938971e6f3fc41e6e08990d5cb6bc8f940fa955b741d90f9aedc4f670f54871d",
+      "official_resolved": 0,
+      "official_denominator": 1,
+      "official_unresolved_grading": 0,
+      "model_calls": 28,
+      "elapsed_seconds": 225.54492508992553,
+      "status": "Submitted",
+      "agent_submitted": true,
+      "patch_bytes": 5878,
+      "patch_sha256": "4fb90351150ee7f8db2ec044fadf146ce3b2ce6defe618cebf09b4bc8f8c5dc7",
+      "patch_application_evidence_limited": false,
+      "confirmed_patch_application_failure": false,
+      "apply_exit_code": 0,
+      "patch_applied": true,
+      "state_capture": "complete",
+      "parsed_test_counts": {
+        "PASSED": 437
+      },
+      "test_count_scope": "Raw parser entries before official name-set scoring",
+      "official_test_coverage": {
+        "fail_to_pass": {
+          "expected": 1,
+          "passed": 0,
+          "not_passed": 1,
+          "missing": 1
+        },
+        "pass_to_pass": {
+          "expected": 385,
+          "passed": 385,
+          "not_passed": 0,
+          "missing": 0
+        }
+      }
+    },
+    {
+      "run_id": "swe018-repo-04-r1",
+      "task_identity_sha256": "ddfa39baeccbfca0584ccdef935b9e5b77d44f491f0777786d1639c8145a48ca",
+      "source": "reports/swe-native018-next-repository-20261026/summary-vuls.json",
+      "source_sha256": "904db19cf5c881fec9d413c004376ab938f8e1460539d1cb458d967eb443a443",
+      "official_resolved": 0,
+      "official_denominator": 1,
+      "official_unresolved_grading": 0,
+      "model_calls": 33,
+      "elapsed_seconds": 319.77757485955954,
+      "status": "Submitted",
+      "agent_submitted": true,
+      "patch_bytes": 3415,
+      "patch_sha256": "ae40f754dbdbdf8f01f628a817c6ab3b5ad0333ebea31b875b9a6b922fc4b960",
+      "patch_application_evidence_limited": false,
+      "confirmed_patch_application_failure": false,
+      "apply_exit_code": 0,
+      "patch_applied": true,
+      "state_capture": "complete",
+      "parsed_test_counts": {
+        "FAILED": 4,
+        "PASSED": 20
+      },
+      "test_count_scope": "Raw parser entries before official name-set scoring",
+      "official_test_coverage": {
+        "fail_to_pass": {
+          "expected": 2,
+          "passed": 0,
+          "not_passed": 2,
+          "missing": 0
+        },
+        "pass_to_pass": {
+          "expected": 22,
+          "passed": 20,
+          "not_passed": 2,
+          "missing": 0
+        }
+      },
+      "raw_test_coverage": null
+    },
+    {
+      "run_id": "swe018-repo-03-r1",
+      "task_identity_sha256": "26bf5cb2f72034b96398c460791747bc0ecbc069c063e327b58ea9dcc97440c7",
+      "source": "reports/swe-native018-next-repository-20261026/summary-flipt.json",
+      "source_sha256": "4e524d2e077bf573d8249f15203851c055ece28792294c00ec0578ea7da9d64c",
+      "official_resolved": 0,
+      "official_denominator": 1,
+      "official_unresolved_grading": 0,
+      "model_calls": 51,
+      "elapsed_seconds": 262.0626379288733,
+      "status": "Submitted",
+      "agent_submitted": true,
+      "patch_bytes": 173258,
+      "patch_sha256": "14ca77b3744caf2a7cd66703b8d7d2b2f0d6c1aa57cabd8f07fa1a83443a0d07",
+      "patch_application_evidence_limited": false,
+      "confirmed_patch_application_failure": false,
+      "apply_exit_code": 0,
+      "patch_applied": true,
+      "state_capture": "complete",
+      "parsed_test_counts": {
+        "PASSED": 14
+      },
+      "test_count_scope": "Raw parser entries before official name-set scoring",
+      "official_test_coverage": {
+        "fail_to_pass": {
+          "expected": 4,
+          "passed": 3,
+          "not_passed": 1,
+          "missing": 1
+        },
+        "pass_to_pass": {
+          "expected": 0,
+          "passed": 0,
+          "not_passed": 0,
+          "missing": 0
+        }
+      },
+      "raw_test_coverage": {
+        "raw_top_level": {
+          "PASSED": 14,
+          "FAILED": 2
+        },
+        "official_parser_records": 14,
+        "missing_expected_F2P_raw_failed": true,
+        "parser_explanation": "Frozen parser matches only top-level PASS lines, omits FAIL lines; expected missing1 was actually executed and failed. No parser or score change.",
+        "raw_package_setup_failures": 2,
+        "scope": "Top-level test statuses only, not total nested subtests. Package setup failures also retained."
+      }
+    },
+    {
+      "run_id": "swe018-repo-05-r1",
+      "task_identity_sha256": "5c167d9b191652665421e65a887ab39dc4d2de57136cb8f56a22455a4df8b028",
+      "source": "reports/swe-native018-continuation-20261026/summary-teleport.json",
+      "source_sha256": "735ce0c6814d6c3b52ae8803f0b90ed0b490e4132357fe02ecfcb36d98e06f5e",
+      "official_resolved": 0,
+      "official_denominator": 1,
+      "official_unresolved_grading": 0,
+      "model_calls": 70,
+      "elapsed_seconds": 583.9302533194423,
+      "status": "Submitted",
+      "agent_submitted": true,
+      "patch_bytes": 16541,
+      "patch_sha256": "3d9262946911da90cc5303ec260d8d3066474709c00b0fbe3cce2cf188563ff5",
+      "patch_application_evidence_limited": false,
+      "confirmed_patch_application_failure": false,
+      "apply_exit_code": 0,
+      "patch_applied": true,
+      "state_capture": "complete",
+      "parsed_test_counts": {},
+      "test_count_scope": "Raw parser entries before official name-set scoring",
+      "official_test_coverage": {
+        "fail_to_pass": {
+          "expected": 2,
+          "passed": 0,
+          "not_passed": 2,
+          "missing": 2
+        },
+        "pass_to_pass": {
+          "expected": 0,
+          "passed": 0,
+          "not_passed": 0,
+          "missing": 0
+        }
+      },
+      "raw_test_coverage": {
+        "raw_json_records": 1381,
+        "records_with_Test": 0,
+        "package_actions": {
+          "start": 287,
+          "output": 807,
+          "pass": 188,
+          "fail": 95,
+          "skip": 4
+        },
+        "official_parser_records": 0,
+        "target_tests_executed": false,
+        "target_test_assertions_failed": false,
+        "target_test_build_failed": true,
+        "parser_explanation": "Original parser correctly requires Test+Action for test-level JSON. Raw JSON contains package events only; fallback has no matching test statuses. Empty output is not a JSON/text format mismatch. Targets were selected but package compilation failed before test bodies ran.",
+        "source_mechanism": {
+          "Bytea": {
+            "official_test_patch_uses_method": true,
+            "submitted_new_file_declares_method": false,
+            "actual_compiler_reports_undefined": true
+          },
+          "Timestamptz": {
+            "official_test_patch_uses_method": true,
+            "submitted_new_file_declares_method": false,
+            "actual_compiler_reports_undefined": true
+          },
+          "UUID": {
+            "official_test_patch_uses_method": true,
+            "submitted_new_file_declares_method": false,
+            "actual_compiler_reports_undefined": true
+          }
+        },
+        "submitted_new_file_sha256": "df84023aa2f4b91d46d8efd935e5ee4cfd99d9a89e3572539b6b669eda1a31db",
+        "other_build_errors": {
+          "missing_linux_hidraw_h": true,
+          "missing_gnu_libc_version_h": true,
+          "sqlite_pread64_off64_t": true,
+          "compiler_killed": true
+        },
+        "grade_container_oom_event": true,
+        "grade_container_die_exit_code": 0,
+        "wrapper_exit0_not_test_success": "Original entryscript continues to parser after run_script failure; parser success determines final shell exit. No independent go-test numeric exit recorded."
+      }
+    },
+    {
+      "run_id": "swe018-repo-06-r1",
+      "task_identity_sha256": "bb8d4e7b1f39b34f85a3d5f0e442dc281b4b073b4da229d5833b118301dbbfa6",
+      "source": "reports/swe-native018-continuation-20261026/summary-openlibrary.json",
+      "source_sha256": "3b66efb479f4aa08ab482058e03a53a5d337e0721f5d4102616fbc981355b497",
+      "official_resolved": 1,
+      "official_denominator": 1,
+      "official_unresolved_grading": 0,
+      "model_calls": 42,
+      "elapsed_seconds": 394.15448629669845,
+      "status": "Submitted",
+      "agent_submitted": true,
+      "patch_bytes": 6589,
+      "patch_sha256": "2a4ce7da547e5f19e865dff0bd776984c1527515eb15029973434ec2e1167f46",
+      "patch_application_evidence_limited": false,
+      "confirmed_patch_application_failure": false,
+      "apply_exit_code": 0,
+      "patch_applied": true,
+      "state_capture": "complete",
+      "parsed_test_counts": {
+        "PASSED": 18
+      },
+      "test_count_scope": "Raw parser entries before official name-set scoring",
+      "official_test_coverage": {
+        "fail_to_pass": {
+          "expected": 3,
+          "passed": 3,
+          "not_passed": 0,
+          "missing": 0
+        },
+        "pass_to_pass": {
+          "expected": 15,
+          "passed": 15,
+          "not_passed": 0,
+          "missing": 0
+        }
+      },
+      "raw_test_coverage": {
+        "raw_test_status_counts": {
+          "PASSED": 18
+        },
+        "official_parser_unique_tests": 18,
+        "raw_statuses_equal_official_parsed": true,
+        "expected_F2P_and_P2P_union_equals_observed_tests": true,
+        "raw_pytest_summary": "18 passed, 4 warnings",
+        "missing_targets": 0,
+        "no_parser_or_score_change": true
+      }
+    },
+    {
+      "run_id": "swe018-repo-07-r1",
+      "task_identity_sha256": "950264e1659b10eb4a0149b6012713cf06d9d79784d9ce254b24b3fa49117ab4",
+      "source": "reports/swe-native018-navidrome-20261027/summary-navidrome.json",
+      "source_sha256": "67fa049c6e80d9a2e95a901861e856ce8581691a7ddc6fc6b11c027494c150b5",
+      "official_resolved": 0,
+      "official_denominator": 1,
+      "official_unresolved_grading": 0,
+      "model_calls": 53,
+      "elapsed_seconds": 511.436102706939,
+      "status": "Submitted",
+      "agent_submitted": true,
+      "patch_bytes": 9941,
+      "patch_sha256": "aaad074ebc0963d6728841f07d0c26e9f866f28a653d0994b556b43ff481d3b5",
+      "patch_application_evidence_limited": false,
+      "confirmed_patch_application_failure": false,
+      "apply_exit_code": 0,
+      "patch_applied": true,
+      "state_capture": "complete",
+      "parsed_test_counts": {
+        "FAILED": 1
+      },
+      "test_count_scope": "Raw parser entries before official name-set scoring",
+      "official_test_coverage": {
+        "fail_to_pass": {
+          "expected": 1,
+          "passed": 0,
+          "not_passed": 1,
+          "missing": 0
+        },
+        "pass_to_pass": {
+          "expected": 0,
+          "passed": 0,
+          "not_passed": 0,
+          "missing": 0
+        }
+      },
+      "raw_test_coverage": null
+    },
+    {
+      "run_id": "swe018-repo-08-r1",
+      "task_identity_sha256": "dea24f508f1f4ff4562eb4fcff7fa03e3a77b5541db77d8ae4bd9b43fddc310c",
+      "source": "reports/swe-native018-protonmail-qutebrowser-20261027/summary-protonmail.json",
+      "source_sha256": "ad4cd780b502bbb30feacdf96e4f21470bd6cebf081e75621e298b45c6b93173",
+      "official_resolved": 0,
+      "official_denominator": 1,
+      "official_unresolved_grading": 0,
+      "model_calls": 37,
+      "elapsed_seconds": 194.6318764258176,
+      "status": "Submitted",
+      "agent_submitted": true,
+      "patch_bytes": 131723,
+      "patch_sha256": "e7bf2eb1b6daac6b865dd7ed07bef399ded566172b931f5dd141369235764e87",
+      "patch_application_evidence_limited": false,
+      "confirmed_patch_application_failure": false,
+      "apply_exit_code": 0,
+      "patch_applied": true,
+      "state_capture": "complete",
+      "parsed_test_counts": {},
+      "test_count_scope": "Raw parser entries before official name-set scoring",
+      "official_test_coverage": {
+        "fail_to_pass": {
+          "expected": 1,
+          "passed": 0,
+          "not_passed": 1,
+          "missing": 1
+        },
+        "pass_to_pass": {
+          "expected": 1,
+          "passed": 0,
+          "not_passed": 1,
+          "missing": 1
+        }
+      },
+      "raw_test_coverage": {
+        "original_test_source_missing": true,
+        "parsed_tests": 0,
+        "functional_tests_executed": false,
+        "original_official_false_preserved": true,
+        "missing_requested_commit": true,
+        "full_original_test_in_frozen_dataset_patch": true,
+        "test_source_recovery_separate": true,
+        "cwd_prefix_alone_not_proven_cause": true
+      }
+    },
+    {
+      "run_id": "swe018-repo-09-r1",
+      "task_identity_sha256": "a0718c4aae5a411c9512031d32c3e4fa9b214fdb99b875fa1f40cd4fcc49133a",
+      "source": "reports/swe-native018-protonmail-qutebrowser-20261027/summary-qutebrowser.json",
+      "source_sha256": "526b1849f34337a532dece09b88b26df13f996b080be0f52162ddbaabdcd712e",
+      "official_resolved": 0,
+      "official_denominator": 1,
+      "official_unresolved_grading": 0,
+      "model_calls": 75,
+      "elapsed_seconds": 744.7083649728447,
+      "status": "ContextWindowExceededError",
+      "agent_submitted": false,
+      "patch_bytes": 740,
+      "patch_sha256": "85f6359e6cd6e58815004051f1e0ef3b78b18081280e8f96002a1ec36ec9bd4e",
+      "patch_application_evidence_limited": false,
+      "confirmed_patch_application_failure": false,
+      "apply_exit_code": 0,
+      "patch_applied": true,
+      "state_capture": "complete",
+      "parsed_test_counts": {
+        "PASSED": 67,
+        "SKIPPED": 5,
+        "FAILED": 2
+      },
+      "test_count_scope": "Raw parser entries before official name-set scoring",
+      "official_test_coverage": {
+        "fail_to_pass": {
+          "expected": 3,
+          "passed": 2,
+          "not_passed": 1,
+          "missing": 0
+        },
+        "pass_to_pass": {
+          "expected": 46,
+          "passed": 46,
+          "not_passed": 0,
+          "missing": 0
+        }
+      },
+      "raw_test_coverage": {
+        "unsubmitted_partial_patch": true,
+        "context_terminated": true,
+        "http_attempts": 76,
+        "successful_responses": 75,
+        "context_rejections": 1,
+        "http_retries": 0,
+        "prompt_token_lower_bound": 61441,
+        "requested_max_output_tokens": 4096,
+        "context_limit": 65536,
+        "raw_test_counts": {
+          "PASSED": 96,
+          "FAILED": 2,
+          "SKIPPED": 5
+        },
+        "original_pytest_internal_rerun_count": 6,
+        "parser_projection": {
+          "raw_unique_tests": 103,
+          "parsed_unique_tests": 74,
+          "omitted_passed_nodeids_with_whitespace": 29,
+          "pure_original_parser_replay_equal": true,
+          "required_F2P_P2P_missing": 0,
+          "parser_modified": false
+        },
+        "required_tests_executed": true,
+        "required_missing": 0
+      }
+    },
+    {
+      "run_id": "swe018-repo-10-r1",
+      "task_identity_sha256": "d1fe717f7a00b807d48c2cca86368f8e8868186dadf74e009d23f2aec0fde64c",
+      "source": "reports/swe-native018-tutanota-20261027/summary-tutanota.json",
+      "source_sha256": "b63849160f9ec9282020982c977576770a27080dc36d6582bdf798e8221c0de2",
+      "official_resolved": 0,
+      "official_denominator": 1,
+      "official_unresolved_grading": 0,
+      "model_calls": 100,
+      "elapsed_seconds": 437.4548026807606,
+      "status": "LimitsExceeded",
+      "agent_submitted": false,
+      "patch_bytes": 7862,
+      "patch_sha256": "7680ba2c4c52db6ed45c5cc6ab487c5011b638a50cdd983b9c324fdec9d2ec0d",
+      "patch_application_evidence_limited": false,
+      "confirmed_patch_application_failure": false,
+      "apply_exit_code": 0,
+      "patch_applied": true,
+      "state_capture": "complete",
+      "parsed_test_counts": {
+        "ERROR": 1
+      },
+      "test_count_scope": "Raw parser entries before official name-set scoring",
+      "official_test_coverage": {
+        "fail_to_pass": {
+          "expected": 1,
+          "passed": 0,
+          "not_passed": 1,
+          "missing": 1
+        },
+        "pass_to_pass": {
+          "expected": 0,
+          "passed": 0,
+          "not_passed": 0,
+          "missing": 0
+        }
+      },
+      "raw_test_coverage": {
+        "target_test_build_failed": true,
+        "target_tests_executed": false,
+        "target_test_assertions_failed": false,
+        "compiler_errors": [
+          "TS2307 missing OperationProgressTracker module imported by partial patch",
+          "TS1361 imported type used as runtime value",
+          "TS2554 existing test supplied8arguments to modified9argumentconstructor"
+        ],
+        "official_parser_records": 1,
+        "source_boundary": "Original parser projected1ERROR; F2P1missing. No required functional test ran; preserve officialfalse without calling it failed assertion."
+      }
+    }
+  ]
+}
