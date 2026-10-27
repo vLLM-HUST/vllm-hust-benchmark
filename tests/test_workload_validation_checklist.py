@@ -61,6 +61,21 @@ def test_deepplanning_shopping_audit_is_partial_not_full_source_completion():
     )
 
 
+def test_appworld_protocol_files_are_not_task_or_execution_completion():
+    ledger = json.loads(
+        (ROOT / "docs/workload-data/dataset-validation-status.json").read_text("utf-8")
+    )
+    row = ledger["delivery_inventory"]["APPWORLD"]
+    preparation = row["preparation_evidence"]
+    assert row["checked"] is False and row["delivery_receipt"] is None
+    assert preparation["original_public_files_verified"] == 8
+    assert preparation["original_public_source_bytes"] == 175040
+    assert preparation["model_calls"] == 0
+    assert preparation["task_data_acquired"] is False
+    assert preparation["benchmark_executed"] is False
+    assert preparation["execution_environment_installed"] is False
+
+
 def test_scienceworld_delivery_requires_native_scores_and_actual_ci_consumer():
     ledger = json.loads(
         (ROOT / "docs/workload-data/dataset-validation-status.json").read_text("utf-8")
