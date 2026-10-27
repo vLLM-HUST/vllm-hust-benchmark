@@ -1,0 +1,42 @@
+[W904 09:19:18.840576509 FunctionLoader.cpp:44] Warning: LD_PRELOAD detected, FunctionLoader prefers RTLD_DEFAULT for symbol resolution. (function operator())
+INFO 09-04 09:19:23 [__init__.py:52] Available plugins for group vllm.platform_plugins:
+INFO 09-04 09:19:23 [__init__.py:54] - ascend -> vllm_ascend:register
+INFO 09-04 09:19:23 [__init__.py:66] Loading plugin ascend
+INFO 09-04 09:19:23 [__init__.py:272] Platform plugin ascend is activated
+INFO 09-04 09:19:23 [platform.py:70] Breakable CUDAGraph on Ascend is opt-in; using VLLM_USE_BREAKABLE_CUDAGRAPH=0.
+VSPEC_BENCH_CONFIG: {"additional_config": {"weight_prefetch_config": {"enabled": true, "prefetch_ratio": {"attn": {"o": 1.0, "qkv": 1.0}, "mlp": {"down": 1.0, "gate_up": 1.0}}}}, "async_scheduling": true, "compilation_config": {"cudagraph_capture_sizes": [1, 2, 3, 4, 5, 6, 8, 10, 12, 16, 20, 24, 32, 40, 48, 56, 64, 72, 80, 88, 96, 104, 112, 120, 128, 144, 160, 168, 176, 192, 200, 208, 216, 224, 240, 256, 264, 280, 288, 312, 320, 336, 352, 360, 384, 400, 416, 440, 448, 480, 512, 520, 560, 600, 640], "cudagraph_mode": "FULL", "mode": 3}, "disable_log_stats": true, "dtype": "bfloat16", "enable_prefix_caching": true, "enforce_eager": false, "gpu_memory_utilization": 0.92, "max_model_len": 1024, "max_num_batched_tokens": 33280, "max_num_seqs": 128, "model": "/data/shared-models/Qwen2.5-14B-Instruct", "seed": 0, "speculative_config": {"draft_tensor_parallel_size": 1, "enforce_eager": false, "method": "draft_model", "model": "/data/shared-models/Qwen2.5-0.5B-Instruct", "num_speculative_tokens": 4, "use_heterogeneous_vocab": true}, "tensor_parallel_size": 1, "trust_remote_code": true}
+INFO 09-04 09:19:36 [api_utils.py:286] non-default args: {'trust_remote_code': True, 'dtype': 'bfloat16', 'max_model_len': 1024, 'enable_prefix_caching': True, 'max_num_batched_tokens': 33280, 'max_num_seqs': 128, 'disable_log_stats': True, 'speculative_config': {'method': 'draft_model', 'model': '/data/shared-models/Qwen2.5-0.5B-Instruct', 'draft_tensor_parallel_size': 1, 'num_speculative_tokens': 4, 'enforce_eager': False, 'use_heterogeneous_vocab': True}, 'compilation_config': {'mode': <CompilationMode.VLLM_COMPILE: 3>, 'debug_dump_path': None, 'cache_dir': '', 'compile_cache_save_format': 'binary', 'backend': 'vllm_ascend.compilation.compiler_interface.AscendCompiler', 'custom_ops': [], 'ir_enable_torch_wrap': None, 'splitting_ops': None, 'compile_mm_encoder': False, 'cudagraph_mm_encoder': False, 'encoder_cudagraph_token_budgets': [], 'encoder_cudagraph_max_vision_items_per_batch': 0, 'encoder_cudagraph_max_frames_per_batch': None, 'compile_sizes': None, 'compile_ranges_endpoints': None, 'inductor_compile_config': {'enable_auto_functionalized_v2': False, 'combo_kernels': True, 'benchmark_combo_kernel': True}, 'inductor_passes': {}, 'cudagraph_mode': <CUDAGraphMode.FULL: 2>, 'cudagraph_num_of_warmups': 0, 'cudagraph_capture_sizes': [1, 2, 3, 4, 5, 6, 8, 10, 12, 16, 20, 24, 32, 40, 48, 56, 64, 72, 80, 88, 96, 104, 112, 120, 128, 144, 160, 168, 176, 192, 200, 208, 216, 224, 240, 256, 264, 280, 288, 312, 320, 336, 352, 360, 384, 400, 416, 440, 448, 480, 512, 520, 560, 600, 640], 'cudagraph_copy_inputs': False, 'cudagraph_specialize_lora': True, 'use_inductor_graph_partition': None, 'pass_config': {}, 'max_cudagraph_capture_size': None, 'dynamic_shapes_config': {'type': <DynamicShapesType.BACKED: 'backed'>, 'evaluate_guards': False, 'assume_32_bit_indexing': False}, 'local_cache_dir': None, 'fast_moe_cold_start': None, 'static_all_moe_layers': []}, 'additional_config': {'weight_prefetch_config': {'enabled': True, 'prefetch_ratio': {'attn': {'qkv': 1.0, 'o': 1.0}, 'mlp': {'gate_up': 1.0, 'down': 1.0}}}}, 'async_scheduling': True, 'model': '/data/shared-models/Qwen2.5-14B-Instruct'}
+INFO 09-04 09:19:58 [model.py:688] Resolved architecture: Qwen2ForCausalLM
+INFO 09-04 09:19:58 [model.py:2025] Using max model len 1024
+INFO 09-04 09:19:58 [model.py:688] Resolved architecture: Qwen2ForCausalLM
+INFO 09-04 09:19:58 [model.py:2025] Using max model len 32768
+INFO 09-04 09:19:58 [speculative.py:1591] Overriding draft model max model len from 32768 to 1024
+INFO 09-04 09:19:58 [scheduler.py:277] Chunked prefill is enabled with max_num_batched_tokens=33280.
+INFO 09-04 09:19:58 [kernel.py:372] Final IR op priority after setting platform defaults: IrOpPriorityConfig(rms_norm=['native'], fused_add_rms_norm=['native'])
+INFO 09-04 09:19:58 [utils.py:224] No quantization signature detected from model files for "/data/shared-models/Qwen2.5-14B-Instruct". The model will be loaded as float. To force a quantization method, pass "--quantization <method>" explicitly.
+WARNING 09-04 09:19:58 [platform.py:622] GPU-specific parameter is not supported on Ascend. parameter=disable_cascade_attn, value=True, action: resetting to False.
+INFO 09-04 09:19:58 [platform.py:834] The timeout interval of the HCCL operator is 1836s. Timeout in seconds for execute_model RPC calls in multiprocessing must be greater than 1836s, Set VLLM_EXECUTE_MODEL_TIMEOUT_SECONDS=3000
+INFO 09-04 09:19:58 [ascend_config.py:161] Dynamic EPLB is False
+INFO 09-04 09:19:58 [ascend_config.py:162] The number of redundant experts is 0
+Traceback (most recent call last):
+  File "/root/data/vllm-hust-vSpec/benchmarks/offline_ab.py", line 769, in <module>
+    main()
+  File "/root/data/vllm-hust-vSpec/benchmarks/offline_ab.py", line 640, in main
+    llm = LLM(**llm_args)
+          ^^^^^^^^^^^^^^^
+  File "/root/data/vllm-hust-latest/vllm/entrypoints/llm.py", line 343, in __init__
+    self.llm_engine = LLMEngine.from_engine_args(
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/data/vllm-hust-latest/vllm/v1/engine/llm_engine.py", line 171, in from_engine_args
+    vllm_config = engine_args.create_engine_config(usage_context)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/data/vllm-hust-latest/vllm/engine/arg_utils.py", line 2554, in create_engine_config
+    config = VllmConfig(
+             ^^^^^^^^^^^
+  File "/opt/vllm-hust-cann91/lib/python3.11/site-packages/pydantic/_internal/_dataclasses.py", line 121, in __init__
+    s.__pydantic_validator__.validate_python(ArgsKwargs(args, kwargs), self_instance=s)
+pydantic_core._pydantic_core.ValidationError: 1 validation error for VllmConfig
+weight_prefetch_config
+  Unexpected keyword argument [type=unexpected_keyword_argument, input_value={'enabled': True, 'prefet...up': 1.0, 'down': 1.0}}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/unexpected_keyword_argument
+[ERROR] 2026-09-04-09:19:58 (PID:1392673, Device:-1, RankID:-1) ERR99999 UNKNOWN applicaiton exception

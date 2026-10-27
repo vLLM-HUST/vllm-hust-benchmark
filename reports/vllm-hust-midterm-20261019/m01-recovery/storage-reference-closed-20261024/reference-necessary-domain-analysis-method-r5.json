@@ -1,0 +1,56 @@
+{
+  "schema": "necessary-domain-fixed-analysis/v5",
+  "source_sha256": {
+    "/root/m01-storage-accounting-20261024/reference-recheck-domains-execution-r5.json": "ee5787d3be430c96c56d2b952bb140046e3abfea6c44fb6e46ad67401be33f41",
+    "/root/m01-storage-accounting-20261024/reference-necessary-domain-plan-r5.json": "d51b74642cc7753dffee9e273322bce829081a10d2c04bc1298ead5e19f2aaeb",
+    "/root/m01-storage-accounting-20261024/reference-necessary-domain-source-dispatch-r5.json": "ac78e060b319f2b88f095b94b2faf6ace21bd8d27b7e91ec2a78f60bee790d4b",
+    "/root/m01-storage-accounting-20261024/reference-source-work-gate-r5a.json": "7e10ef0161759c0030959f719ddefc9c00c6d5f836f7500891b9e5bea7545e30",
+    "/root/m01-storage-accounting-20261024/reference-source-work-method-r5a.json": "65669852ff929d929072ecc7ce64dc7829deb9a17561376cee7cad8a827af6f9",
+    "/root/m01-storage-accounting-20261024/reference-recheck-canonical-gate-r5.json": "e4017759874a88892e0b455ca48f62adf1dadaa9400d5aca2863b2f68b09a3d4",
+    "/root/m01-storage-accounting-20261024/reference-recheck-scalar-validation-r1.json": "c29ac9586f8d93fa99b35008c7b0655e184e7736cb9cf2a9f41b9753a15d40ac",
+    "/root/m01-storage-accounting-20261024/minimum-reference-audit-D-r1.json": "b813dd4af4cd94307932946ba1a9f93276beddbf3c811f01fb7611ece286913b",
+    "/root/m01-storage-accounting-20261024/minimum-reference-audit-D-r3-r1.json": "774637a8a780fbedaa4b9512d9ef556a917f87fdd795bfea3cd696f8db4924ac",
+    "/root/m01-storage-accounting-20261024/audit_reference_necessary_domains_r5.py": "0c0fcbf5b67972d7f60f0f40724dd401d5283bf00b5f72fdce3fa82b27913efe",
+    "/root/m01-storage-accounting-20261024/update_reference_necessary_domains_r5.py": "31f8273cac1cf617385fe38d1b96cb897e4eb8144311b48cc6c80d576cea3c5e",
+    "/root/m01-storage-accounting-20261024/reference_necessary_domain_binding_r5.py": "0aa4ae8e45e8e13f20f67bc61528f1b97817f1f88092701f4810b755d471b40c",
+    "/root/m01-storage-accounting-20261024/test_reference_necessary_domain_analysis_r5.py": "8b83c0964e69a1a53dc38972a96654980f34fb0608166e97acd7d03ba5b0ee99",
+    "/root/m01-storage-accounting-20261024/reference_source_work_features_r5.py": "8722bdcb887cc0882ee33090bb489fa090b30cc465a3a9ffcfb7b84aeb9d5c6a",
+    "/root/m01-storage-accounting-20261024/component_geometry_models.py": "104b84d9489efdea58e68ac82bba7dba2b4d5c5ffa0e6fca9b73fc608b094ecb",
+    "/root/m01-storage-accounting-20261024/reference_necessary_domain_probe_r5.py": "3f1db44704859d726a025966b3ec1fb313c6968487f5bc30f154fc80986de6cd",
+    "/root/m01-storage-accounting-20261024/minimum_source_identity.py": "27cb7f5a5d22d96008bf9eb47ae425e52c4cfee37b72838498310f73949523ec"
+  },
+  "device_raw_read_before_freeze": false,
+  "fit_before_freeze": false,
+  "raw_audit": {
+    "required_identity": "receipt.plan_sha256 == worker.plan_sha256 == sha(execution-plan.json) == frozen execution SHA; sessions drained and devices released before raw read",
+    "raw_groups": "All202 required rank-cases retained. Exactly reps0..8 for each fixed128/512 batch, numerical source oracle and postgraph checks, finite positive device_ms. Median per-call device_ms, primary512, max/min batchmedian<=1.15.",
+    "failure": "Preserve incomplete/duplicate/numerical/stability failures explicitly. Never select fastest samples or delete failed validation cases."
+  },
+  "models": {
+    "fia": "Keep old coefficients/scale exactly fixed. Assess10 predetermined new domain cases perrank. Only if p95<=.30,p99<=.60 expand empirical support to old+new actually measured feature box. Zero refits.",
+    "conv1": "One NNLS using fixed8newcal+oldcanonicalanchor,10newheldout; original sourcework features, column max scaling over training only, nonnegative coefficients. Separate rank/runmode.",
+    "dense_rank1": "Old fixed canonical calibration plus6shape-only midpoint knots; old10heldout remain isolated. Original log1p(rows)/log(ms) interpolation.",
+    "copy_concat": "Plan rank-specific old training/heldout lists fixed; add only listed midpoint calibration cases; all10oldheldout isolated. No composite primitive substitution.",
+    "key_r3": "New r3 timing source only; fixed8cal10heldout, original scalar interpolation. Old r2 values never enter model. Fixedsource dispatch artifact controls qualified override.",
+    "failure": "Any unqualified point in the frozen model input set blocks that model update without selectively dropping points. Every qualified exact point remains reusable. No feature/split/threshold search; preserve failed model diagnostics."
+  },
+  "source_dispatch_path": "/root/m01-storage-accounting-20261024/reference-necessary-domain-source-dispatch-r5.json",
+  "source_dispatch_sha256": "ac78e060b319f2b88f095b94b2faf6ace21bd8d27b7e91ec2a78f60bee790d4b",
+  "cpu_validation": {
+    "affinity": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "tests": 5,
+    "passed": true,
+    "synthetic_only": true
+  },
+  "script_invocations": [
+    "python audit_reference_necessary_domains_r5.py --raw /root/m01-reference-recheck-r5-domains",
+    "python update_reference_necessary_domains_r5.py",
+    "reference_necessary_domain_binding_r5.correct_query(query)"
+  ],
+  "outputs_exclusive_creation": true
+}

@@ -1,0 +1,144 @@
+# Targeted MOD original custody
+
+- [Profiler top-level research and progress notes](profiler-notes/manifest.json): five complete
+  public originals retain historical measurements, test/build claims and old local paths. Old PDF
+  build hashes are not interchangeable with the separately archived paper PDF; preserving a note
+  does not recover its referenced local copy. Current source notes separate methods and navigation
+  from historical results and completed planning checklists.
+
+- [Profiler fault-matrix, next-agent, blind execution and NPU probe originals](profiler-runbooks/manifest.json):
+  four complete historical documents. Measured observations, invalid attempts and legacy command
+  paths remain byte-preserved. Current consumers separate archived inputs from fresh outputs;
+  historical service launch recipes are not current execution authorization.
+
+- [Profiler mixed protocols and implementation context](profiler-protocols/manifest.json): five
+  unchanged documents, including the experiment history, G4/G6 specifications, Issue #19 public
+  export method and pinned call-site map. Protocol parameters and thresholds are not measurements.
+  Original negative results remain unchanged; private G1/G4 captures and withheld logs are not
+  recovered by preserving prose. Maintained consumers retain methods and read historical results
+  from benchmark.
+
+- [Profiler mixed research and paper projections](profiler-research/manifest.json): eight complete
+  research records and the paper workspace at the recorded source commit. PDF, TeX, logs, CSVs,
+  generated tables and figures retain original bytes and historical limitations. Archived helper
+  code is context only; maintained consumers must not execute it. G1/G4 local captures and omitted
+  runtime traces remain unavailable; preserving a narrative is not recovery of its raw inputs.
+
+- [MuxPD mixed design and TP4 goodput narratives](muxpd-documents/manifest.json): unchanged full
+  documents and LICENSE. Serving tradeoffs, profiler limits, failure boundaries and methodology
+  remain historical. Raw inputs reuse the existing benchmark capsules and Release archives;
+  preserving prose is not recovery of omitted full captures or a new performance claim.
+
+- [PyramidKV selected-page mixed narrative](pyramid-selected/manifest.json): the complete original
+  operator/serving diagnostic document with LICENSE and NOTICE. Negative serving results,
+  repeatability limits and implementation instructions remain unchanged. Original timings and
+  serving diagnostics reuse the existing pyramid-current capsule; this is not new qualification.
+
+- [KVCompress historical installation narratives](compress-host/manifest.json): unchanged bilingual
+  host installation records and LICENSE. Device smoke, operator correctness and serving protocol
+  observations remain historical, not current acceptance. Legacy local wheel paths and its recorded
+  digest identify a past consumer, not a recovered installation asset; no wheel is deleted or
+  republished.
+
+- [vSpec B16, EAGLE dynamic and Frontier mixed narratives](vspec-b16-frontier/manifest.json): six
+  complete historical documents and LICENSE, retaining rejected experiments, quality changes,
+  graph/eager distinctions and legacy local paths. Available raw inputs reuse existing capsules; a
+  narrative is not recovery of its missing local logs, profiles or datasets.
+
+- [KVCompress historical release narratives](compress-release/manifest.json): unchanged bilingual
+  0.9 release guides and LICENSE. Historical release observations, compiled-start failure and
+  installation recipes are preserved; this does not authorize publishing an old package.
+
+- [vSpec adaptive narratives](vspec-adaptive-narratives/manifest.json): unchanged adaptive NPU and
+  dynamic-gamma reports plus LICENSE. Quality regressions, gamma-zero diagnostics, negative results
+  and hardware limitations remain in the original text. Existing raw capsules are reused.
+
+- [vSpec additional legacy narratives](vspec-legacy-narratives/manifest.json): three complete
+  historical default-adaptive, Qwen3.5 MTP2 GSM8K and online-adaptive reports plus LICENSE. Original
+  quality differences, negative results, execution modes and legacy paths remain unchanged; their
+  raw inputs remain in the existing vSpec regression/browser capsules, not duplicated here.
+
+- [Manager paper source binding and derived projections](manager-projections/manifest.json): three
+  unchanged historical outputs, including finite nonformal R4 scope. Recalculation and new build
+  output must remain separate from these immutable inputs.
+
+- [PyramidKV mixed historical narratives](pyramid-mixed/manifest.json): two complete original
+  documents plus LICENSE and NOTICE. Operator improvement is not serving acceleration; historical
+  smoke and paired observations remain distinct from current baseline admission.
+
+This collection continues [issue 326](https://github.com/vLLM-HUST/vllm-hust-benchmark/issues/326).
+The [Manager/legacy consumer inventory](MANAGER-CONSUMERS-20261024.md) separates migrated real
+archives, retained synthetic fixtures and still-coupled consumers. It preserves the KVCompress
+bilingual early-version result report and Extension Manager's process-supervision acceptance
+report/companion record. KVCompress's source license is included; Extension Manager has no tracked
+LICENSE file in this source tree (its package declares Apache-2.0). Each manifest binds the public
+source repository, full source commit, Git blob, length and SHA256. Failures, diagnostic/eager
+identity, original version labels and claim limits are unchanged. Custody is not new hardware
+acceptance or a serving-performance claim.
+
+- [KVCompress original manifest](compress/manifest.json)
+
+- [Extension Manager original manifest](manager/manifest.json)
+
+- [KVCompress leaderboard and mixed history](compress-history/manifest.json): original JSON/JS
+  bundles, dated bilingual reports, result navigation and HTML context. The source HTML remains
+  presentation code; only its input location changes. Historic values are not current admission.
+
+- [vSpec remaining regression originals](vspec-regression/manifest.json): all 316 remaining tracked
+  benchmark result files, including logs, failures and eager diagnostics, plus LICENSE.
+
+- [Manager planner and paper inputs](manager-paper/manifest.json): two contract-planner derived
+  results and five H1-r5 paper records. Schemas and executable validators remain implementation;
+  semantic, hash and negative assertions must survive migration. Other large experimental artifacts
+  remain a separate queue, not permission to remove whole experiments directories.
+
+- [Manager additional experimental archives](manager-experiments/manifest.json): exposure-gate,
+  false-effective, real-MOD-composition and bounded-transaction collections, frozen from
+  `00797c39344caa98db10940557f72c3b9cb3d9d6`. Synthetic/reference records remain explicitly
+  synthetic; their source fixtures need not be removed. Original failures, qualification-only
+  boundaries and source snapshots are preserved. Large formal-campaign archives and executable
+  generators remain separate consumer work, not authorized wholesale deletion.
+
+- [PyramidKV remaining current originals](pyramid-current/manifest.json): 98 records plus LICENSE
+  and NOTICE, frozen from source commit `534bcc0` before consumer edits. Together with the existing
+  paired capsule these preserve all 118 current evidence files. Original SHA256SUMS and their
+  covered README files are retained byte-for-byte, rather than re-signed after link edits.
+
+- [PyramidKV legacy originals](pyramid-legacy/manifest.json): five legacy records/navigation
+  documents plus LICENSE and NOTICE; the original EAGER/prefix-caching identity remains
+  archive-only.
+
+- Existing [PyramidKV paired originals](../mod-git-20261022/pyramidkv-website-source/manifest.json)
+  and [vSpec originals](../vspec-browser-raw-20261022/manifest.json) are reused rather than uploaded
+  again.
+
+- [MuxPD TP8 and group-FX mixed originals](muxpd-tp8-groupfx/manifest.json): four complete
+  historical reports and LICENSE. Exploration, negative findings and unpublished local-input
+  boundaries remain unchanged; document custody does not recover missing raw runs or qualify new
+  hardware results.
+
+- [KV Arrival School 0.28 mixed original](kv-school-document/manifest.json): complete historical
+  adapter/screen document. Existing benchmark raw requests and summary are reused, not remeasured;
+  recompute admission does not imply partial reuse or task-accuracy qualification.
+
+Source copies may be removed only after remote fixed-commit readback and per-file length/SHA256
+verification, and after updating their consumers. Other historical collections, missing local inputs
+and installation distributions are separate queues, not declared migrated by these capsules.
+
+[Formal archives and mixed-document consumer inventory](FORMAL-CONSUMERS-20261024.md) adds Manager
+formal/native archives and the frozen KVCompress/vSpec narratives, with identity and failure
+boundaries.
+
+Skill review: E04/E31/E37/E42/E43/E47. No new measurement, host-volume write, raw-byte rewrite,
+installation-asset deletion or gate bypass is authorized by the index. This batch uses the existing
+persistent root volume with sparse checkout, not the ephemeral host workspace.
+
+# Profiler entry documentation custody
+
+`profiler-m0-consumers/manifest.json` preserves the M0 evaluation pipeline, Issue19 preflight
+documentation and historical development driver. Missing private inputs are not recovered by
+archiving this narrative and source.
+
+`profiler-entry-docs/manifest.json` binds five unchanged README, changelog and research/roadmap
+originals. Numeric observations and historical consumer instructions remain historical; this does
+not establish current device readiness.

@@ -1,0 +1,81 @@
+{
+  "status": "synchronous_collective_reference_scope_verified_for_all_three_sources",
+  "verified_sources": [
+    {
+      "summary": "/root/gennova-evidence/20261019-midterm-aligned/collective-grid-control-r1/summary-v2.json",
+      "probe": "collective_grid_probe_v1.py",
+      "probe_receipt_hash_matches": true,
+      "calls_per_rank": 19889,
+      "shapes": 45,
+      "operation_calls": [
+        "dist.all_gather",
+        "dist.all_reduce",
+        "tensor.fill_",
+        "torch.npu.synchronize"
+      ],
+      "scope": "per-operation synchronous dispatch; all_reduce additionally fills input"
+    },
+    {
+      "summary": "/root/gennova-evidence/20261019-midterm-aligned/recovery-logits-collective-control-r1/summary.json",
+      "probe": "recovery_logits_collective_probe_r1.py",
+      "probe_receipt_hash_matches": true,
+      "calls_per_rank": 4285,
+      "shapes": 20,
+      "operation_calls": [
+        "dist.all_gather",
+        "dist.all_reduce",
+        "tensor.fill_",
+        "torch.npu.synchronize"
+      ],
+      "scope": "per-operation synchronous dispatch; all_reduce additionally fills input"
+    },
+    {
+      "summary": "/workspace/m01-collective-reference-worker-r1/control/summary.json",
+      "probe": "worker_collective_probe_r1.py",
+      "probe_receipt_hash_matches": true,
+      "calls_per_rank": 58922,
+      "shapes": 10,
+      "operation_calls": [
+        "dist.all_gather",
+        "dist.all_reduce",
+        "tensor.fill_",
+        "torch.npu.synchronize"
+      ],
+      "scope": "per-operation synchronous dispatch; all_reduce additionally fills input"
+    }
+  ],
+  "remaining_sources": [],
+  "old_total_calls_per_rank": 83096,
+  "old_weighted_synchronous_seconds": [
+    41.85436984862281,
+    41.5047984906123,
+    44.18865944058234
+  ],
+  "decision": "Do not substitute synchronous-call weighted duration for graph-mode necessary communication critical-path time.",
+  "reuse": [
+    "Existing per-shape payload identities and counter qualification remain evidence.",
+    "Original resource-max assessment remains unchanged."
+  ],
+  "minimal_followup": [
+    "First search existing graph-compatible collective calibrations.",
+    "If absent, independently calibrate required shapes with timed graph replay or matched dispatch boundaries, preserving three repeats and numerical checks.",
+    "Separate input preparation and avoid per-collective host synchronization unless required by the model; do not estimate and subtract its cost.",
+    "Use necessary collective counts and dependency overlap, not merely old total physical traffic."
+  ],
+  "new_reference_seconds": null,
+  "new_efficiency_percent": null,
+  "source_sha256": {
+    "/root/vllm-hust-benchmark/reports/vllm-hust-midterm-20261019/m01-recovery/worker-model-20261022/m01-worker-collective-reference-joined.json": "0e2bc62e25cfb272015882d75664057f9c1d74a2950dae42ccdd3b38b14f937d",
+    "/root/gennova-evidence/20261019-midterm-aligned/collective-grid-control-r1/summary-v2.json": "2efc41552458365d111c36d407b32e33e93f309c8569455fb807ceb59d6a3287",
+    "/root/gennova-evidence/20261019-midterm-aligned/collective-grid-control-r1/receipt.json": "1c1071ea219131b0afb13547fbd2c3f0c6ab0fe09159f16acc0a47d6b1b90726",
+    "/root/gennova-evidence/20261019-midterm-aligned/collective_grid_probe_v1.py": "3cd14516badaa721386aeed6cdbd49e615493a5b74111a5707c0845ed95a94b4",
+    "/root/gennova-evidence/20261019-midterm-aligned/recovery-logits-collective-control-r1/summary.json": "ea9af43965c9ac814664cde83a8cf8a06b0e686b2dbe2d0909e8c4b8c37a3ae8",
+    "/root/gennova-evidence/20261019-midterm-aligned/recovery-logits-collective-control-r1/receipt.json": "caefe60037b051eb78806df74c55fa6d2261d5378c6a10940106591371428fdf",
+    "/root/gennova-evidence/20261019-midterm-aligned/recovery_logits_collective_probe_r1.py": "11c706e62e6390f0882b60a5cee620ade312118d99f892b101e776cdc90ce2f6",
+    "/workspace/m01-critical-path-review-20261023/m01-worker-collective-reference-20261022.tar.gz": "e482d8b1067ae33bf1256c3d14aeb99d94ce6279e55059c72312e1b79caa2da3",
+    "/workspace/m01-critical-path-review-20261023/m01-worker-collective-reference-20261022.tar.gz!workspace/m01-collective-reference-worker-r1/control/summary.json": "d45810dd6210122d601c673c0eb347c3f400240ada2b4ff994c199a15d9b3da3",
+    "/workspace/m01-critical-path-review-20261023/m01-worker-collective-reference-20261022.tar.gz!workspace/m01-collective-reference-worker-r1/control/receipt.json": "8452cb55bd17e3418db518eff29672458b88310eb855693515519f1652a96ad4",
+    "/workspace/m01-critical-path-review-20261023/m01-worker-collective-reference-20261022.tar.gz!root/gennova-evidence/20261019-midterm-aligned/worker_collective_probe_r1.py": "3f69e8913849dc15e14f0a7d0964fb790ee8ce537ab569157e6746111bc913d3",
+    "/workspace/m01-critical-path-review-20261023/audit_reference_scope.py": "9bfb4b555c7cc797b9fb5d6663080ec0c036758d9397b48055c9d6a7a665f3bb"
+  }
+}

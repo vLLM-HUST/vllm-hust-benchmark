@@ -2,24 +2,86 @@ import importlib.util
 import hashlib
 import json
 from pathlib import Path
+import subprocess
 
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def test_publication_rebuilds_from_pinned_report_and_verified_archives(monkeypatch):
+def test_publication_rebuilds_from_pinned_report_and_verified_archives():
     spec = importlib.util.spec_from_file_location(
         "midterm", ROOT / "scripts/build_midterm_publication.py"
     )
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     actual = json.loads(module.OUTPUT.read_text())
-    raw = (ROOT / module.REPORT).read_bytes()
-    assert hashlib.sha256(raw).hexdigest() == actual["report_sha256"]
-    monkeypatch.setattr(module, "pinned", lambda path: raw)
-    assert actual == module.build()
-    assert actual["version"] == "V0.68"
+    assert actual["source_commit"] == module.REVISION
+    assert (
+        actual["report_sha256"]
+        == (
+            "b755512e642918346816c3700cc2ab7efa2674efa4b2b77cc888ca5396843efb"  # pragma: allowlist secret
+        )
+    )
+    # PR CI uses a shallow checkout; the frozen V0.72 source commit may be absent.
+    has_pinned_source = (
+        subprocess.run(
+            ["git", "cat-file", "-e", f"{module.REVISION}:{module.REPORT}"],
+            cwd=ROOT,
+            check=False,
+            capture_output=True,
+        ).returncode
+        == 0
+    )
+    if has_pinned_source:
+        raw = module.pinned(module.REPORT)
+        assert hashlib.sha256(raw).hexdigest() == actual["report_sha256"]
+        assert actual == module.build()
+    assert actual["version"] == "V0.72"
+    method = actual["m01_method"]
+    assert method["method_version"] == "V5.27"
+    assert all(value is None for value in method["current"].values())
+    assert method["effective_compute_formula"] == "C = F / (k * T * 10^12)"
+    assert method["efficiency_formula"] == "eta = T_reference / T * 100%"
+    assert method["threshold_percent"] == 50
+    assert (
+        hashlib.sha256((ROOT / method["outline"]["path"]).read_bytes()).hexdigest()
+        == method["outline"]["sha256"]
+    )
+    assert method["fair_comparison"]["b1_base_version_constraint"] is None
+    assert (
+        "KV quantization"
+        in method["fair_comparison"]["allowed_implementation_differences"]
+    )
+    assert actual["comparison_contract"]["b0"] == {
+        "vllm": "0.18",
+        "vllm_ascend": "0.18",
+        "fixed": True,
+    }
+    assert actual["comparison_contract"]["b1"]["base_version_constraint"] is None
+    assert actual["comparison_contract"]["b1"]["require_actual_versions"] is True
+    candidates = next(s for s in actual["sections"] if s["id"] == "candidates")
+    assert "B0" not in json.dumps(candidates["tables"], ensure_ascii=False)
+    assert "开发栈对照" in json.dumps(candidates["tables"], ensure_ascii=False)
+    summary = actual["current_summary"]
+    assert summary["quality"]["b0"]["correct"] == 151
+    assert summary["quality"]["b1"]["candidate_correct"] == 152
+    assert summary["quality"]["b1"]["candidate_run"] == "mmlu-quality-kvmat-r1"
+    assert summary["performance"]["b0"] is None
+    assert all(
+        row["delta_vs_b0"] is None for row in summary["performance"]["b1_metrics"]
+    )
     assert module.REVISION in actual["report_url"]
     sections = {s["id"]: s for s in actual["sections"]}
+    inventory = sections["dataset-quality-inventory"]
+    assert len(inventory["tables"]) == 6
+    assert sum(len(table["rows"]) for table in inventory["tables"]) == 24
+    assert [row[1] for row in inventory["tables"][-1]["rows"]] == [
+        "151 / 200",
+        "152 / 200",
+        "149 / 200",
+        "146 / 200",
+    ]
+    assert "mmlu-quality018-20261022" in inventory["evidence"][-1]["path"]
+    assert "同题同评分器" in inventory["scope"]
     baseline = sections["baseline018"]
     assert len(baseline["tables"][0]["rows"]) == 5
     assert "开发栈对照" in baseline["scope"]
@@ -42,6 +104,11 @@ def test_publication_rebuilds_from_pinned_report_and_verified_archives(monkeypat
         (ROOT / "website-publication/data/midterm-v050.json").read_text()
     )
     for prior in historical["sections"]:
+        # V0.71 corrects presentation identity only; all recorded numbers and
+        # historical payload bytes must survive the explicit label migration.
+        prior = json.loads(
+            json.dumps(prior, ensure_ascii=False).replace("B0", "开发栈对照")
+        )
         if prior["id"] != "m01":
             excluded = {"evidence"}
             if prior["id"] == "long-context":
@@ -83,15 +150,21 @@ def test_publication_rebuilds_from_pinned_report_and_verified_archives(monkeypat
     assert [row[1] for row in communication["tables"][0]["rows"]] == ["55", "21"]
     assert "不是整模型HCCL覆盖" in communication["scope"]
     verdict = sections["m01-verdict"]
-    assert len(verdict["tables"][0]["rows"]) == 3
-    assert "30.2443%–30.2505%" in verdict["scope"]
+    assert len(verdict["tables"][0]["rows"]) == 4
+    assert "30.2443" not in verdict["scope"]
+    assert "复算中 / 未判定" in verdict["scope"]
+    assert "not determined" in verdict["scope_en"]
+    assert len(verdict["tables_en"][0]["rows"]) == 4
+    historical_m01 = sections["m01-historical"]
+    assert len(historical_m01["tables"][0]["rows"]) == 3
+    assert "30.2443%–30.2505%" in historical_m01["scope"]
     assert (
         "E24/R36 + KV materialization请求重计算 + Prefill Microflow FA"
-        in verdict["scope"]
+        in historical_m01["scope"]
     )
-    assert "不是同一轮联合成绩" in verdict["scope"]
-    assert "不外推为未插桩服务结果" in verdict["scope"]
-    assert "21.92%仅为诊断值" in verdict["scope"]
+    assert "不是同一轮联合成绩" in historical_m01["scope"]
+    assert "不外推为未插桩服务结果" in historical_m01["scope"]
+    assert "21.92%仅为诊断" in historical_m01["scope"]
     assert actual["kv_audit"]["runs"] == module.kv_audit()
     assert module.tables("| A | B |\n| --- | ---: |\n| 1 | 2 |\n") == [
         {"headers": ["A", "B"], "rows": [["1", "2"]]}

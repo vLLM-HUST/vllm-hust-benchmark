@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "created_at_utc": "2026-09-20T05:47:00Z",
+  "scope": "supplementary engineering smoke",
+  "formal_acceptance": false,
+  "model": "Qwen/Qwen3.5-35B-A3B",
+  "model_revision": "59d61f3ce65a6d9863b86d2e96597125219dc754",
+  "hardware": "2x Ascend 910B2 per arm, tensor parallel size 2",
+  "runtime_mode": "bfloat16, eager, legacy GDN int[] ABI bridge",
+  "dataset_sha256": "d1cf1cb02561f78255e92c6c916fcec300fdad341600a93d63ebd988530aa3c7",
+  "calibration_sha256": "c09e9ec41c34d876802865a5ef489c1d4514245a90b71d1574663ddcfa2c637b",
+  "profile": {
+    "name": "A2-LONG-FP16-16K smoke shape",
+    "input_tokens": 16384,
+    "forced_output_tokens": 1024,
+    "requests_per_arm": 1
+  },
+  "baseline": {
+    "result_sha256": "8fb786553ad55e3ccdcf0d6a8b703af46289945c0904625bf9c6d3a54fd18270",
+    "completed": 1,
+    "failed": 0,
+    "oracle_accuracy": 1.0,
+    "silent_truncations": 0,
+    "scheduler_commits": 0,
+    "worker_acks": 0,
+    "physical_tokens": 16384
+  },
+  "candidate": {
+    "result_sha256": "2372486d99a7ebc8448396dfb9addb944c5e17e2514b2c61f8f5f010dc07a52f",
+    "completed": 1,
+    "failed": 0,
+    "oracle_accuracy": 1.0,
+    "silent_truncations": 0,
+    "scheduler_commits": 1,
+    "worker_acks": 2,
+    "worker_ack_semantics": "one acknowledgement from each TP rank",
+    "semantic_tokens": 16384,
+    "physical_tokens": 8192,
+    "physical_kv_reduction_percent": 50.0
+  },
+  "quality_gate": {
+    "max_accuracy_drop_percentage_points": 1.0,
+    "observed_accuracy_drop_percentage_points": 0.0,
+    "passed": true
+  },
+  "limitations": [
+    "One request per arm; latency and throughput are not reported as comparative evidence.",
+    "Eager execution and the opt-in legacy GDN ABI bridge make this supplementary evidence, not formal V4.6 acceptance.",
+    "The standard release model remains Qwen2.5-14B-Instruct."
+  ],
+  "versions": {
+    "vllm": "0.28.1.post1.dev260+g6cdc0304a.empty",
+    "vllm_ascend": "0.25.1rc2.dev232+hust.20260903.4.g5901bedbb",
+    "plugin": "0.6.0 working tree",
+    "torch": "2.10.0",
+    "torch_npu": "2.10.0.post2",
+    "triton_ascend": "3.6.0+git8f0a4de8"
+  }
+}

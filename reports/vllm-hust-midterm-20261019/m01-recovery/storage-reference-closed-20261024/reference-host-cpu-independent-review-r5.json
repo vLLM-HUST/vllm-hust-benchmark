@@ -1,0 +1,58 @@
+{
+  "status": "independent_CPU_raw_and_signature_review_passed",
+  "audit_path": "/root/m01-storage-accounting-20261024/reference-recheck-host-cpu-audit-r5.json",
+  "audit_sha256": "748981a8c18019c8bb63cc00b698ffafd829ff57f833de447be18f232305f7a7",
+  "raw_manifest_sha256": "8f313c47758aa5ceb251d24884f911c4110e8cc841961474941c79fe3213e61e",
+  "all_manifest_files": 12,
+  "pinned_sources": 69,
+  "counts": {
+    "sample_records": 60696,
+    "timed_calls": 3884544,
+    "rank0_cases": 4462,
+    "rank1_cases": 2282
+  },
+  "nonanchor_rankcases": 6708,
+  "anchor_rankcases": 36,
+  "query_bindings_verified": 7322,
+  "bindings_by_family": {
+    "metadata:cpu_prepare_ns": 5142,
+    "handoff:cpu_parse_ns": 2180
+  },
+  "all_prior_numeric_values_immutable": true,
+  "anchor_ratio_by_rank": {
+    "0": {
+      "n": 18,
+      "median": 0.7413720357215021,
+      "minimum": 0.5611099042186491,
+      "maximum": 0.8731271815059508
+    },
+    "1": {
+      "n": 18,
+      "median": 0.6869370499951736,
+      "minimum": 0.5093081248796433,
+      "maximum": 0.8501059032796346
+    }
+  },
+  "new_cpu_context": {
+    "source_semantics": "Same pinned fill_active/encode_base source, complete ordered lengths/roles/spans; same8-byte field alignment and dtype/extents. AST parser body hash matches real source; real CPU torch.Tensor, rank0 only parse.",
+    "changed_conditions": "New CPU builder ordinary pre-touched slab, hot consecutive CPU calls without DMA/device transaction between calls. Old anchors pinned-host slab with reset/synchronize/upload/publication transaction between CPU calls. Same timer encloses fill only; context differs even though source and work extents match.",
+    "causal_attribution": "Lower medians are observed; cache residency, page locking, allocator and inter-call device transaction history differ together. Data do not isolate which caused the shift.",
+    "acceptance": "Accept measured missing signatures as intrinsic CPU-only independent reference under the predeclared host method. This context revision is explicit, not measured serving latency. Do not multiply by old/new ratios, subtract overhead, overwrite anchors, or choose faster source. No device-graph15% stability threshold is added to host timing.",
+    "limitation": "Combining old preserved anchors and new intrinsic signatures is a disclosed mixed calibration context, not an assertion of identical cache/page-lock state or a simultaneous end-to-end guarantee."
+  },
+  "blocking_issue": null,
+  "no_new_cpu_timing_or_device_execution": true,
+  "review_cpu_affinity": [
+    0,
+    1,
+    2,
+    3
+  ],
+  "source_sha256": {
+    "/root/m01-storage-accounting-20261024/reference_recheck_host_probe_r5.py": "da95c93cd97caf32779b1d1b1d4983e600e03e71252f0f97163056577840e2b1",
+    "/root/m01-storage-accounting-20261024/reference_recheck_host_binding_r5.py": "0c8a051bbb693718e96aa34429c8f13444e41379ea2f0252b5c2fed5407f7fb8",
+    "/root/m01-storage-accounting-20261024/audit_reference_recheck_host_r5.py": "742a5a00645b6cefba3b7aa7dfff51d430134f95572bb9b1a39d33397c92ae62",
+    "/root/m01-storage-accounting-20261024/reference-recheck-host-method-r5.json": "dd77a3ecd06caf96f487920860ca244400dbdf8d9f96583c2f982d1b96ab30a0",
+    "/root/m01-storage-accounting-20261024/reference_recheck_semantics_r2.py": "5490e0c3c3be8a86ead28426281bb7518c768acab11f7cc60b3f476fb4dccba9"
+  }
+}

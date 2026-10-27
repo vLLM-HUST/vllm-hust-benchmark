@@ -1,0 +1,185 @@
+"""Observe scheduling, physical KV allocation and model work in owned benchmarks."""
+import atexit
+import json
+import os
+from pathlib import Path
+import time
+
+from vllm.v1.core.sched.scheduler import Scheduler
+from vllm_ascend.worker.worker import NPUWorker
+
+_writer = None
+_records = 0
+
+
+def emit(event, **fields):
+    global _writer, _records
+    if _writer is None:
+        root = Path(os.environ["SCHEDULING_TRACE_DIR"])
+        root.mkdir(parents=True, exist_ok=True)
+        _writer = (root/f"process-{os.getpid()}.jsonl").open("a", buffering=65536)
+        atexit.register(_writer.close)
+    _writer.write(json.dumps({"event":event,"epoch_ns":time.time_ns(),
+                              "monotonic_ns":time.monotonic_ns(),"pid":os.getpid(),**fields},
+                             separators=(",",":"),default=str)+"\n")
+    _records += 1
+    if _records % 32 == 0:
+        _writer.flush()
+
+
+class TraceScheduler(Scheduler):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.trace_step = 0
+        self.block_tables = {}
+        pool = self.kv_cache_manager.block_pool
+        emit("scheduler_config",max_num_seqs=self.scheduler_config.max_num_seqs,
+             max_num_batched_tokens=self.scheduler_config.max_num_batched_tokens,
+             policy=self.scheduler_config.policy,block_size=self.block_size,
+             num_gpu_blocks=pool.num_gpu_blocks,
+             config=repr(self.kv_cache_config),scope="Host scheduling and allocation clocks")
+        original_allocate = pool.get_new_blocks
+        original_evict = pool._maybe_evict_cached_block
+
+        def allocate(count):
+            begin=time.perf_counter_ns()
+            blocks=original_allocate(count)
+            emit("block_allocate",step=self.trace_step,count=count,
+                 block_ids=[b.block_id for b in blocks],wall_ns=time.perf_counter_ns()-begin)
+            return blocks
+
+        def evict(block):
+            old_hash=block.block_hash
+            result=original_evict(block)
+            if old_hash is not None:
+                emit("cached_block_evict",step=self.trace_step,block_id=block.block_id,
+                     block_hash=old_hash.hex() if hasattr(old_hash,"hex") else str(old_hash))
+            return result
+
+        pool.get_new_blocks=allocate
+        pool._maybe_evict_cached_block=evict
+        original_cache=pool.cache_full_blocks
+        original_free=pool.free_blocks
+        original_hit=self.kv_cache_manager.get_computed_blocks
+
+        def cache_full(request,blocks,num_cached_blocks,num_full_blocks,block_size,kv_cache_group_id,block_mask=None):
+            result=original_cache(request,blocks,num_cached_blocks,num_full_blocks,block_size,
+                                  kv_cache_group_id,block_mask)
+            if num_full_blocks>num_cached_blocks:
+                emit("cache_blocks_store",step=self.trace_step,request_id=request.request_id,
+                     group=kv_cache_group_id,block_size=block_size,
+                     blocks=[{"id":b.block_id,"references":b.ref_cnt,
+                              "hash":b.block_hash.hex() if hasattr(b.block_hash,"hex") else str(b.block_hash)}
+                             for b in blocks[num_cached_blocks:num_full_blocks]])
+            return result
+
+        def free(ordered_blocks,prepend=False):
+            blocks=list(ordered_blocks)
+            previous=[{"id":b.block_id,"references":b.ref_cnt} for b in blocks]
+            result=original_free(blocks,prepend)
+            if blocks:emit("blocks_free",step=self.trace_step,before=previous,
+                           after=[{"id":b.block_id,"references":b.ref_cnt} for b in blocks])
+            return result
+
+        def computed(request):
+            begin=time.perf_counter_ns();result=original_hit(request)
+            emit("prefix_cache_lookup",step=self.trace_step,request_id=request.request_id,
+                 matched_tokens=result[1],block_ids=result[0].get_block_ids(),
+                 wall_ns=time.perf_counter_ns()-begin)
+            return result
+
+        pool.cache_full_blocks=cache_full
+        pool.free_blocks=free
+        self.kv_cache_manager.get_computed_blocks=computed
+
+    def request_snapshot(self):
+        result={}
+        for key,req in self.requests.items():
+            result[key]={"status":str(req.status),"prompt_tokens":req.num_prompt_tokens,
+                         "computed_tokens":req.num_computed_tokens,
+                         "output_tokens":len(req.output_token_ids),
+                         "cached_tokens":getattr(req,"num_cached_tokens",None),
+                         "max_output_tokens":req.max_tokens,"priority":req.priority,
+                         "arrival_time":req.arrival_time}
+        return result
+
+    def schedule(self):
+        self.trace_step += 1
+        before=self.request_snapshot()
+        waiting_before=[r.request_id for r in self.waiting]
+        running_before=[r.request_id for r in self.running]
+        begin=time.perf_counter_ns();cpu=time.process_time_ns()
+        result=super().schedule()
+        wall=time.perf_counter_ns()-begin;cpu=time.process_time_ns()-cpu
+        pool=self.kv_cache_manager.block_pool
+        changes={}
+        for key in self.requests:
+            blocks=self.kv_cache_manager.get_block_ids(key)
+            if self.block_tables.get(key)!=blocks:
+                changes[key]=blocks;self.block_tables[key]=blocks
+        removed=[k for k in self.block_tables if k not in self.requests]
+        for k in removed:del self.block_tables[k]
+        emit("schedule",step=self.trace_step,schedule_wall_ns=wall,schedule_CPU_ns=cpu,
+             waiting_before=waiting_before,running_before=running_before,
+             waiting_after=[r.request_id for r in self.waiting],
+             running_after=[r.request_id for r in self.running],
+             requests_before=before,requests_after=self.request_snapshot(),
+             scheduled_tokens=result.num_scheduled_tokens,
+             new_requests=[r.req_id for r in result.scheduled_new_reqs],
+             finished_requests=list(result.finished_req_ids),
+             free_blocks=pool.get_num_free_blocks(),total_blocks=pool.num_gpu_blocks,
+             KV_usage=self.kv_cache_manager.usage,block_table_changes=changes,
+             block_tables_removed=removed)
+        return result
+
+    def _preempt_request(self, request, timestamp):
+        emit("preempt",step=self.trace_step,request_id=request.request_id,
+             computed_tokens=request.num_computed_tokens,output_tokens=len(request.output_token_ids))
+        return super()._preempt_request(request,timestamp)
+
+    def update_from_output(self, scheduler_output, model_runner_output):
+        begin=time.perf_counter_ns();cpu=time.process_time_ns()
+        result=super().update_from_output(scheduler_output,model_runner_output)
+        emit("scheduler_update",step=self.trace_step,wall_ns=time.perf_counter_ns()-begin,
+             CPU_ns=time.process_time_ns()-cpu,requests=self.request_snapshot())
+        if not self.requests and _writer is not None:_writer.flush()
+        return result
+
+
+class TraceNPUWorker(NPUWorker):
+    def load_model(self):
+        super().load_model()
+        import torch
+        pending=[]
+        counter={"execute_model":0,"sample_tokens":0}
+
+        def wrap(name, original):
+            def measured(*args, **kwargs):
+                counter[name]+=1
+                step=counter[name]
+                schedule=args[0] if args else kwargs.get("scheduler_output")
+                scheduled=getattr(schedule,"num_scheduled_tokens",{})
+                begin=time.perf_counter_ns();cpu=time.process_time_ns()
+                event_pair=None
+                if name=="execute_model" and step%8==0:
+                    start=torch.npu.Event(enable_timing=True);end=torch.npu.Event(enable_timing=True)
+                    start.record();event_pair=(start,end)
+                result=original(*args,**kwargs)
+                if event_pair:
+                    event_pair[1].record();pending.append((step,*event_pair))
+                emit("worker_call",component=name,worker_step=step,
+                     wall_ns=time.perf_counter_ns()-begin,CPU_ns=time.process_time_ns()-cpu,
+                     scheduled_tokens=scheduled,
+                     npu_allocated_bytes=torch.npu.memory_allocated(),
+                     npu_reserved_bytes=torch.npu.memory_reserved())
+                while pending and pending[0][2].query():
+                    prior,start,end=pending.pop(0)
+                    emit("NPU_stream_span",worker_step=prior,milliseconds=start.elapsed_time(end),
+                         scope="Sampled execute_model current stream; no added synchronization")
+                return result
+            return measured
+
+        for name in ("execute_model","sample_tokens"):
+            original=getattr(self.model_runner,name,None)
+            if original is not None:setattr(self.model_runner,name,wrap(name,original))
+        emit("worker_trace_ready",rank=self.rank,event_sample_every=8)

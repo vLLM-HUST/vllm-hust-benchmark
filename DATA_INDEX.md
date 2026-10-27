@@ -27,6 +27,10 @@ provenance。涉及原件订正时保留旧字节及说明， 不要仅重新计
 - **Frontier 原始并发曲线：** [56-run 索引](reports/frontier-raw-recovery-20261020/README.md)。
 - **迁入 benchmark 的 MOD 数据：** [2026-10-21](archive/mod-git-20261021/)、
   [2026-10-22](archive/mod-git-20261022/)；每个 capsule 的 manifest 记录原仓库、固定提交、路径和 SHA256。
+  [2026-10-23 后续盘点](archive/mod-followup-20261023/README.md)列出尚待分类的 MOD 数据、BiDKV 消费者迁移、
+  旧安装资产保留依据及硬件/审核阻塞；路径命中不等于可删除实测原件。
+  [剩余 MOD 与安装消费者复核](archive/mod-followup-20261023/REMAINING-CONSUMERS.md)补充 SimLLM 消费者迁移、合并后公开盘点、逐
+  Release 附件核对和旧本地输入的有界可用性检查。
 - **大文件/Release：** [Frontier 原件](archive/frontier-recovered-20261021/README.md)、
   [源码和校准附件](archive/frontier-capsules-20261021/README.md)、
   [terminal history](archive/terminal-history-20261021/README.md)。下载固定资产后先核验包摘要，再核验成员； 本索引不联网，不枚举
@@ -59,12 +63,20 @@ python scripts/data_index.py --query 'archive split' --limit 100
 
 ### 网站引用与 Release 附件入口
 
+[V0.75 上线与索引复核回执](docs/data-entrypoints-v075-audit.json)同步当前采集快照、133 份线上文件及 Release
+附件入口；[MOD 与外部门禁复核](archive/mod-followup-20261023/V075-FOLLOWUP.md)列出仍待迁移和受阻项。 V0.75 浏览器回执见其中的公开
+issue 链接，未伪称已经上传为 Release 附件。
+
+[V0.72 上线与索引复核回执](docs/data-entrypoints-v072-audit.json)记录 2026-10-23 的线上字节校验、
+发布身份订正及附件状态；它是带时间的验收快照，不替代下述当前索引，也不代表 M01 已通过。
+
 [关联入口索引](docs/data-entrypoints.json) 补足目录索引不包含的三类信息：
 
 - `publication_bindings`：网站 `data/` 路径到 benchmark 原文件或压缩描述符/分片的映射，包含还原后 SHA256。
 - `references`：固定网站提交的前端 HTML/JS/MJS 字面引用，以及 benchmark 发布数据中的链接、结构化证据路径；保留引用来源，区分已映射、动态模板、未映射和外部链接。
-- `releases`：GitHub 分页 API 返回的全部非 draft Release 及附件名称、下载 URL、大小、资产 ID、API
-  digest。包含历史附件，不将它们自动认定为当前验收证据。
+- `releases`：GitHub 分页 API 返回的全部非 draft Release 及附件名称、下载 URL、大小、资产 ID、API digest、上传状态。附件通过逐 Release
+  分页端点读取，避免列表内嵌清单漏项。仅 `state=uploaded` 表示上传完成； `starter`
+  是未完成上传，保留失败元数据但不可当作可下载证据。包含历史附件，不将它们自动认定为当前验收证据。
 
 [采集快照](docs/data-entrypoints-sources.json) 固定网站 commit、输入文件摘要、Release 元数据和采集时间。
 发布清单优先采自线上；若获取失败，明确记录错误并标明使用的是网站 Git 中的历史副本，不能当作线上当前版本。 网站部署时会重新生成数据，网站代码提交与线上发布数据身份不是同一个概念。
@@ -119,3 +131,7 @@ python -m pytest -q tests/test_data_index.py
 目录索引 `data_index.py` 完全离线、按路径确定性生成，不读取证据正文，只写 `docs/data-index.json`。 关联入口生成器 `data_entrypoints.py`
 另行读取发布数据、核验并还原发布分片；只有显式 `--refresh` 才联网， 从固定网站 Git 对象、线上发布清单及 Release API 更新采集快照。不下载或解包 Release
 附件，不执行网站代码。 不要手改生成索引；CI 检查目录路径和关联入口是否与本地来源及采集快照一致。
+
+## #326 收尾入口
+
+[活跃消费者收尾与历史保留清单](docs/issue326-closeout.md)区分已验证入口、历史保留、缺失和外部阻塞；不再以逐篇迁移旧数字作为开放式任务。

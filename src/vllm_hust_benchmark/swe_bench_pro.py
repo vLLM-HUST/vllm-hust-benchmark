@@ -9,6 +9,7 @@ from __future__ import annotations
 import argparse
 import copy
 import dataclasses
+import hashlib
 import importlib
 import importlib.metadata
 import json
@@ -16,12 +17,16 @@ import multiprocessing
 import os
 from pathlib import Path
 import runpy
+import re
+import shlex
 import signal
 import subprocess
 import sys
 import threading
 import time
 import traceback
+
+from . import swe_submodule_fixture
 
 from .swe_bench_pro_inputs import (
     LOCK_PATH,
@@ -34,12 +39,22 @@ from .swe_bench_pro_inputs import (
 )
 
 
+class AgentWallBudgetExceeded(BaseException):
+    """End the frozen run even if the Agent recovers ordinary tool errors."""
+
+
+def _wall_budget_expired(signum, frame):
+    raise AgentWallBudgetExceeded("Frozen Agent wall budget reached")
+
+
 def validate(configuration):
     c = configuration
     if c.get("schema") != "swe-bench-pro-experiment-v1":
         raise ValueError("Unsupported SWE-bench Pro configuration schema")
     if not c.get("run_id"):
         raise ValueError("Explicit unique run_id required")
+    if type(c.get("image_registry_insecure", False)) is not bool:
+        raise ValueError("image_registry_insecure must be an explicit boolean")
     batch = c["batch"]
     if batch["arrival_time"] != 0 or batch["client_concurrency_limit"] is not None:
         raise ValueError("Finite batch must arrive at zero without client slots")
@@ -62,6 +77,11 @@ def validate(configuration):
         raise ValueError("Explicit task ids must match batch size, without duplicates")
     if c["agent"]["automatic_retries"] != 0:
         raise ValueError("Automatic model retries must be zero")
+    instructions = c["agent"].get("task_instructions")
+    if instructions is not None and (
+        not isinstance(instructions, str) or not instructions.strip()
+    ):
+        raise ValueError("Optional task_instructions must be a nonempty string")
     timeouts = c["agent"]["http_timeouts"]
     if set(timeouts) != {"connect", "read", "write", "pool"}:
         raise ValueError("Record all four HTTP timeout phases explicitly")
@@ -74,9 +94,28 @@ def validate(configuration):
         raise ValueError("Explicit OpenAI-compatible API base required")
     if not c["model"]["model_name"]:
         raise ValueError("Explicit served model name required")
+    allowed = c.get("container", {}).get("allowed_initial_untracked", [])
+    if not isinstance(allowed, list) or any(
+        not isinstance(name, str)
+        or not name.strip("/")
+        or name.startswith("/")
+        or any(part in (".", "..", ".git") for part in name.split("/"))
+        or any(char in name for char in "\n\r*?[")
+        for name in allowed
+    ):
+        raise ValueError("Initial untracked allowlist requires exact relative paths")
     for name in ("dataset_parquet", "agent_source", "official_v1_source", "docker"):
         if not Path(c["paths"][name]).is_absolute():
             raise ValueError("Absolute runtime path required: " + name)
+    validate_initial_tracked_policy(
+        c.get("container", {}).get("allowed_initial_tracked")
+    )
+    submodule_policy = c.get("container", {}).get("allowed_initial_submodule")
+    swe_submodule_fixture.validate_policy(submodule_policy)
+    if submodule_policy is not None and (
+        c["container"].get("allowed_initial_tracked") is not None or allowed
+    ):
+        raise ValueError("Submodule fixture cannot be combined with other allowances")
     return c
 
 
@@ -92,6 +131,114 @@ def call_hook(hook, method, *args):
     if hook is not None and hasattr(hook, method):
         return getattr(hook, method)(*args)
     return None
+
+
+def validate_initial_tracked_policy(policy):
+    if policy is None:
+        return
+    if not isinstance(policy, dict) or set(policy) != {
+        "image_id",
+        "base_commit",
+        "files",
+    }:
+        raise ValueError("Tracked fixture policy requires exact image, base and files")
+    if not isinstance(policy["image_id"], str) or not re.fullmatch(
+        r"sha256:[0-9a-f]{64}", policy["image_id"]
+    ):
+        raise ValueError("Tracked fixture requires a content-addressed image")
+    if not isinstance(policy["base_commit"], str) or not re.fullmatch(
+        r"[0-9a-f]{40}", policy["base_commit"]
+    ):
+        raise ValueError("Tracked fixture requires an exact Git base")
+    files = policy["files"]
+    if not isinstance(files, dict) or not files:
+        raise ValueError("Tracked fixture files must be a nonempty mapping")
+    for name, entry in files.items():
+        if (
+            not isinstance(name, str)
+            or not name
+            or name.startswith("/")
+            or any(part in ("", ".", "..", ".git") for part in name.split("/"))
+            or any(ord(char) < 32 or char in "\\*?[" for char in name)
+        ):
+            raise ValueError("Tracked fixture requires exact relative file paths")
+        if not isinstance(entry, dict) or set(entry) != {"file_sha256", "diff_sha256"}:
+            raise ValueError("Bind both original file and original Git diff")
+        if any(
+            not isinstance(value, str) or not re.fullmatch(r"[0-9a-f]{64}", value)
+            for value in entry.values()
+        ):
+            raise ValueError("Invalid tracked fixture SHA256")
+
+
+def observe_initial_tracked(env, policy):
+    validate_initial_tracked_policy(policy)
+    records, observations = {}, {}
+    for name in policy["files"]:
+        path = shlex.quote(name)
+        file_result = env.execute("sha256sum -- " + path)
+        diff_result = env.execute(
+            "git diff --binary --no-ext-diff --no-textconv HEAD -- " + path
+        )
+        records[name] = {"file": file_result, "diff": diff_result}
+        if file_result["returncode"] or diff_result["returncode"]:
+            continue
+        expected_suffix = "  " + name + "\n"
+        raw = file_result["output"]
+        if len(raw) != 64 + len(expected_suffix) or not raw.endswith(expected_suffix):
+            continue
+        observations[name] = {
+            "file_sha256": raw[:64],
+            "diff_sha256": hashlib.sha256(diff_result["output"].encode()).hexdigest(),
+        }
+    return {"records": records, "observations": observations}
+
+
+def validate_initial_repository(
+    before,
+    base_commit,
+    allowed_untracked=(),
+    *,
+    tracked_policy=None,
+    tracked_observations=None,
+    submodule_policy=None,
+    submodule_observations=None,
+    image_id=None,
+):
+    validate_initial_tracked_policy(tracked_policy)
+    allowed_status = {"?? " + name for name in allowed_untracked}
+    required_status = set()
+    if tracked_policy is not None:
+        if (
+            tracked_policy["base_commit"] != base_commit
+            or tracked_policy["image_id"] != image_id
+            or tracked_observations != tracked_policy["files"]
+        ):
+            raise ValueError("Original tracked fixture identity mismatch")
+        required_status = {" M " + name for name in tracked_policy["files"]}
+        allowed_status |= required_status
+    if submodule_policy is not None:
+        if tracked_policy is not None or allowed_untracked:
+            raise ValueError(
+                "Submodule fixture cannot be combined with other allowances"
+            )
+        status = swe_submodule_fixture.validate_observation(
+            submodule_policy,
+            submodule_observations,
+            base_commit=base_commit,
+            image_id=image_id,
+        )
+        required_status.add(status)
+        allowed_status.add(status)
+    lines = before["output"].splitlines()
+    if (
+        before["returncode"]
+        or not lines
+        or lines[0] != base_commit
+        or any(line not in allowed_status for line in lines[1:])
+        or not required_status <= set(lines[1:])
+    ):
+        raise ValueError("Task container must start at the clean official base commit")
 
 
 def verify_inputs(c, folder):
@@ -158,6 +305,36 @@ def adopt_inputs(c, existing, output):
     return proof
 
 
+def create_task_environment(c, image, factory):
+    """Keep the sandbox alive through Agent budget, preparation and cleanup.
+
+    The 40-minute historical minimum remains for short runs. The extra ten
+    minutes cover the existing preparation barrier and evidence collection;
+    they do not extend the Agent's own wall-clock budget.
+    """
+    wall = c["agent"]["wall_budget_seconds"]
+    if type(wall) is not int or wall <= 0:
+        raise ValueError("Positive Agent wall budget required for container lifetime")
+    return factory(
+        image=image["image_id"],
+        cwd="/app",
+        executable=c["paths"]["docker"],
+        timeout=c["agent"]["tool_timeout_seconds"],
+        container_timeout=f"{max(2400, wall + 600)}s",
+        run_args=[
+            "--rm",
+            "--entrypoint",
+            "",
+            "--network",
+            c["container"]["network"],
+            "--cpus",
+            str(c["container"]["cpus"]),
+            "--memory",
+            c["container"]["memory"],
+        ],
+    )
+
+
 def _agent_task(c, row, image, folder, barrier):
     folder = Path(folder)
     folder.mkdir(exist_ok=False)
@@ -196,6 +373,8 @@ def _agent_task(c, row, image, folder, barrier):
         )
     )
     task = formatter["create_problem_statement"](row)
+    if c["agent"].get("task_instructions"):
+        task += "\n\n" + c["agent"]["task_instructions"]
     (folder / "task-private.txt").write_text(task)
     program = c["run_id"] + ":" + folder.name
     hook = hooks(c)
@@ -205,33 +384,32 @@ def _agent_task(c, row, image, folder, barrier):
     stop = threading.Event()
     observer = None
     try:
-        env = DockerEnvironment(
-            image=image["image_id"],
-            cwd="/app",
-            executable=c["paths"]["docker"],
-            timeout=c["agent"]["tool_timeout_seconds"],
-            container_timeout="40m",
-            run_args=[
-                "--rm",
-                "--entrypoint",
-                "",
-                "--network",
-                c["container"]["network"],
-                "--cpus",
-                str(c["container"]["cpus"]),
-                "--memory",
-                c["container"]["memory"],
-            ],
-        )
+        env = create_task_environment(c, image, DockerEnvironment)
         (folder / "container-id.txt").write_text(env.container_id)
         before = env.execute("git rev-parse HEAD && git status --porcelain")
         save(folder / "code-before.json", before)
-        if before["returncode"] or before["output"].splitlines() != [
-            row["base_commit"]
-        ]:
-            raise ValueError(
-                "Task container must start at the clean official base commit"
-            )
+        fixture_policy = c["container"].get("allowed_initial_tracked")
+        fixture_observations = None
+        if fixture_policy is not None:
+            fixture_receipt = observe_initial_tracked(env, fixture_policy)
+            save(folder / "initial-tracked-fixtures-private.json", fixture_receipt)
+            fixture_observations = fixture_receipt["observations"]
+        submodule_policy = c["container"].get("allowed_initial_submodule")
+        submodule_observations = None
+        if submodule_policy is not None:
+            submodule_receipt = swe_submodule_fixture.observe(env, submodule_policy)
+            save(folder / "initial-submodule-fixture-private.json", submodule_receipt)
+            submodule_observations = submodule_receipt["observations"]
+        validate_initial_repository(
+            before,
+            row["base_commit"],
+            c["container"].get("allowed_initial_untracked", []),
+            tracked_policy=fixture_policy,
+            tracked_observations=fixture_observations,
+            submodule_policy=submodule_policy,
+            submodule_observations=submodule_observations,
+            image_id=image["image_id"],
+        )
         inspected = json.loads(
             subprocess.check_output([c["paths"]["docker"], "inspect", env.container_id])
         )[0]
@@ -299,9 +477,6 @@ def _agent_task(c, row, image, folder, barrier):
             },
         )
 
-        def timeout(signum, frame):
-            raise TimeoutError("Frozen Agent wall budget reached")
-
         def observe():
             previous = -1
             while not stop.wait(2):
@@ -320,13 +495,13 @@ def _agent_task(c, row, image, folder, barrier):
                 except Exception:
                     (folder / "observer-error.txt").write_text(traceback.format_exc())
 
-        signal.signal(signal.SIGALRM, timeout)
+        signal.signal(signal.SIGALRM, _wall_budget_expired)
         signal.alarm(c["agent"]["wall_budget_seconds"])
         observer = threading.Thread(target=observe, daemon=True)
         observer.start()
         try:
             status, result = agent.run(task)
-        except Exception as exc:
+        except (Exception, AgentWallBudgetExceeded) as exc:
             status, error = type(exc).__name__, str(exc)
             (folder / "agent-exception-private.txt").write_text(traceback.format_exc())
         finally:

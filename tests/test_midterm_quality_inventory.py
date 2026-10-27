@@ -11,7 +11,7 @@ def test_quality_inventory_matches_original_tracks_and_preserves_limits():
     )
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
-    text = (ROOT / module.REPORT).read_text()
+    text = (ROOT / module.REPORT).with_name("中期测试报告-v081.md").read_text()
     selected = module.section(text, "### 5.11 既有任务质量与配置配对")
     rows = module.tables(selected)[0]["rows"]
     hle = json.loads(
@@ -45,13 +45,13 @@ def test_quality_inventory_matches_original_tracks_and_preserves_limits():
         s for s in publication["sections"] if s["id"] == "dataset-quality-inventory"
     )
     assert section["tables"][0]["rows"] == rows
-    assert len(section["evidence"]) == 9
+    assert len(section["evidence"]) == 12
     for locator in section["evidence"]:
         assert ".." not in Path(locator["path"]).parts
         assert (ROOT / locator["path"]).is_file()
 
     all_tables = module.tables(selected)
-    assert len(all_tables) == 4
+    assert len(all_tables) == 6
     matrix = json.loads(
         (ROOT / "website-publication/data/dataset-matrix-v1.json").read_text()
     )
@@ -101,3 +101,40 @@ def test_quality_inventory_matches_original_tracks_and_preserves_limits():
                 ]
             )
     assert [row[1:] for row in all_tables[3]["rows"]] == pairs
+    combination = json.loads(
+        (
+            ROOT / "reports/frontierscience-combination-quality-20261022/summary.json"
+        ).read_text()
+    )
+    for row, name in zip(all_tables[4]["rows"], ("olympiad", "research")):
+        result = combination["tracks"][name]
+        assert row[1:] == [
+            f"{result['successes']} / {result['total']}",
+            str(result["graded"]),
+            str(result["judge_unresolved"]),
+            str(result["solver_truncated"]),
+            str(result["judge_truncated"]),
+        ]
+    assert section["tables"][4] == all_tables[4]
+    native018 = json.loads(
+        (
+            ROOT / "reports/mmlu-quality018-20261022/quality018-completed-audit-r1.json"
+        ).read_text()
+    )
+    rows018 = all_tables[5]["rows"]
+    assert rows018[0][1:4] == [
+        f"{native018['counts']['correct']} / {native018['counts']['total']}",
+        str(native018["counts"]["failed"]),
+        str(native018["counts"]["truncated"]),
+    ]
+    comparisons = native018["comparisons"]
+    for row, result in zip(
+        rows018[1:], (comparisons[1], comparisons[2], comparisons[0]), strict=True
+    ):
+        assert row[1:] == [
+            f"{result['candidate_correct']} / 200",
+            str(result["candidate_failed"]),
+            str(result["candidate_truncated"]),
+            f"{result['accuracy_delta_percentage_points']:+.1f}个百分点",
+        ]
+    assert section["tables"][5] == all_tables[5]

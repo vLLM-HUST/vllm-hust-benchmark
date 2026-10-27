@@ -1,0 +1,638 @@
+"""Matched grouped-prefill offline DELTA timing; independent frozen family.
+
+prepare/dry-run/analyze are CPU-only. run/profile explicitly own one LLM and
+must be launched by root. No files are written inside a measured window.
+"""
+
+import argparse
+import hashlib
+import importlib.util
+import json
+import os
+import statistics
+import time
+import traceback
+from datetime import UTC, datetime
+from itertools import pairwise
+from pathlib import Path
+
+SOURCE = "f7ed21e183b27d2141176f3e7a5c8a5ff4ede07d"
+NATIVE_SOURCES = {"vllm": "d0f22d2bda562156e4dbf433ce645e1769b4f804", "vllm_ascend": "03766ac696fde5ab1980d80ca0b8543d3580c989"}
+
+
+def digest(value):
+    return hashlib.sha256(json.dumps(value, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+
+
+def save(path, value):
+    temp = path.with_suffix(".pending")
+    with temp.open("x") as stream:
+        json.dump(value, stream, indent=2, allow_nan=False)
+        stream.write("\n")
+    temp.replace(path)
+
+
+def load_plan(path):
+    result = json.loads(path.read_text())
+    if result["plan_sha256"] != digest({key: value for key, value in result.items() if key != "plan_sha256"}):
+        raise ValueError("Plan identity mismatch")
+    return result
+
+
+def provenance_helpers():
+    path = Path(__file__).with_name("perf_provenance.py")
+    spec = importlib.util.spec_from_file_location("perf_provenance_only", path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module, hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def control_environment():
+    return {key: os.environ.get(key) for key in ("HCCL_DETERMINISTIC", "VLLM_BATCH_INVARIANT")}
+
+
+def require_control_environment(environment, hccl):
+    expected = "true" if hccl == "true" else None
+    if environment["HCCL_DETERMINISTIC"] != expected:
+        raise ValueError("Observed HCCL environment differs from requested experiment arm")
+    raw = environment["VLLM_BATCH_INVARIANT"]
+    try:
+        enabled = bool(int(raw)) if raw is not None else False
+    except ValueError as error:
+        raise ValueError("Invalid VLLM_BATCH_INVARIANT environment") from error
+    if enabled:
+        raise ValueError("VLLM_BATCH_INVARIANT must be disabled; native initialization can rewrite HCCL to strict")
+
+
+def worker_counters(worker):
+    controller = getattr(worker, "_decode_graph_controller", None)
+    groups = getattr(worker, "_prefill_group_executor", None)
+    stats = getattr(worker, "muxpd_stats", {})
+    device_index = getattr(getattr(worker, "device", None), "index", None)
+    visible = os.environ.get("ASCEND_RT_VISIBLE_DEVICES", "").split(",")
+    physical = visible[device_index].strip() if type(device_index) is int and 0 <= device_index < len(visible) else None
+    return {"rank": worker.rank, "pid": os.getpid(), "device_index": device_index,
+            "visible_device_map": visible, "expected_physical_device": physical,
+            "control_environment": control_environment(),
+            "prefill_groups": groups.snapshot() if groups is not None else None,
+            "decode_preparation_queries": stats.get("decode_preparation_queries", 0),
+            "decode_preparation_ready_skips": stats.get("decode_preparation_ready_skips", 0),
+            "decode_preparation_fences_skipped": stats.get("decode_preparation_fences_skipped", 0),
+            "native_decode_graph": controller.snapshot() if controller is not None else {
+                "counter_available": False, "reason": "Ordinary native worker exposes no persistent replay counter; use actual CANN profile API counts"}}
+
+
+def worker_profile_state(worker):
+    profiler = getattr(worker, "profiler", None)
+    return {**worker_counters(worker), "running": bool(profiler and profiler._running)}
+
+
+def rank_rows(rows):
+    if len(rows) != 4 or {row["rank"] for row in rows} != {0, 1, 2, 3}:
+        raise ValueError("Require exactly one real receipt per TP rank0..3")
+    return {row["rank"]: row for row in rows}
+
+
+def require_worker_controls(rows, hccl):
+    for row in rank_rows(rows).values():
+        require_control_environment(row["control_environment"], hccl)
+
+
+def counter_deltas(before, after):
+    first, last = rank_rows(before), rank_rows(after)
+    result = {}
+    for rank in first:
+        keys = ("decode_preparation_queries", "decode_preparation_ready_skips", "decode_preparation_fences_skipped")
+        row = {key: last[rank][key] - first[rank][key] for key in keys}
+        row["native_decode_graph"] = {key: last[rank]["native_decode_graph"][key] - value
+                                     for key, value in first[rank]["native_decode_graph"].items()
+                                     if type(value) is int and key.endswith(("_calls", "_failures"))}
+        old_groups, new_groups = first[rank]["prefill_groups"], last[rank]["prefill_groups"]
+        if (old_groups is None) != (new_groups is None):
+            raise ValueError("Grouped-P executor presence changed during timing")
+        row["prefill_group_calls"] = [b - a for a, b in zip(old_groups["calls"], new_groups["calls"], strict=True)] if old_groups else None
+        result[rank] = row
+    return result
+
+
+def window(engine, workload, plan, params_factory, delta_kind, label, profile=False, clock=time.perf_counter_ns):
+    """The timing loop has no disk/JSON, observer hooks or scheduler snapshots."""
+    result = {"label": label, "workload": workload["name"], "requests": [], "steps": [],
+              "ingress": None, "complete": False, "profile_diagnostic": profile, "error": None}
+    by_external, seed_rows = {}, []
+    profile_started = profile_stopped = False
+    profile_steps = 0
+    start = clock()
+    result["start_ns"] = start
+
+    def admit(definitions, stage):
+        rows = []
+        for definition in definitions:
+            external = f"{label}-{len(result['requests'])}"
+            params = params_factory(max_tokens=definition["outputs"], output_kind=delta_kind, **plan["sampling"])
+            row = {"external_id": external, "prompt": definition["prompt"], "stage": stage,
+                   "requested_outputs": definition["outputs"], "admit_ns": clock(),
+                   "token_ids": [], "arrival_ns": [], "finished": False}
+            internal = engine.add_request(external, {"prompt_token_ids": plan["prompts"][definition["prompt"]]}, params)
+            row["internal_id"] = internal
+            state = engine.output_processor.request_states[internal]
+            if state.external_req_id != external or state.output_kind != delta_kind or state.stream_interval != 1:
+                raise RuntimeError("Actual request binding/output kind differs from direct DELTA contract")
+            result["requests"].append(row)
+            by_external[external] = row
+            rows.append(row)
+        return rows
+
+    try:
+        seed_rows = admit(workload["initial"], "seed")
+        released = not workload["ingress"]
+        while engine.has_unfinished_requests():
+            before = clock()
+            if len(result["steps"]) >= plan["max_window_steps"] or before - start > plan["max_window_seconds"] * 10**9:
+                raise RuntimeError("Frozen window work/time bound exceeded")
+            outputs = engine.step()
+            after = clock()
+            result["steps"].append((before, after))
+            for output in outputs:
+                if output.request_id not in by_external or len(output.outputs) != 1:
+                    raise RuntimeError("Unknown/multiple DELTA output")
+                row, item = by_external[output.request_id], output.outputs[0]
+                if row["finished"]:
+                    raise RuntimeError("Output after request completion")
+                tokens = list(item.token_ids)
+                if len(tokens) != 1:
+                    raise RuntimeError("Expected one true generated-token DELTA per synchronous step")
+                row["token_ids"].extend(tokens)
+                row["arrival_ns"].append(after)
+                if output.finished:
+                    row["finished"] = True
+                    row["finish_reason"] = item.finish_reason
+                    if item.finish_reason != "length" or len(row["token_ids"]) != row["requested_outputs"]:
+                        raise RuntimeError("Fixed output length/EOS contract violated")
+            if not released and all(len(row["token_ids"]) >= workload["ingress_after_each_seed_token"] for row in seed_rows):
+                if any(row["finished"] or len(row["token_ids"]) != workload["ingress_after_each_seed_token"] for row in seed_rows):
+                    raise RuntimeError("Missed controlled ingress boundary")
+                result["ingress"] = {"before_step": len(result["steps"]), "after_ns": after,
+                                     "seed_counts": [len(row["token_ids"]) for row in seed_rows]}
+                admit(workload["ingress"], "ingress")
+                released = True
+            if profile:
+                if profile_started and not profile_stopped:
+                    profile_steps += 1
+                    if profile_steps == workload["decode_steps"]:
+                        result["profile_state_before_stop"] = engine.collective_rpc(worker_profile_state)
+                        rank_rows(result["profile_state_before_stop"])
+                        if not all(row["running"] for row in result["profile_state_before_stop"]):
+                            raise RuntimeError("A worker profiler stopped before the exact window boundary")
+                        engine.stop_profile()
+                        profile_stopped = True
+                elif not profile_started and all(len(row["token_ids"]) == workload["start_after_each_seed_token"] for row in seed_rows):
+                    engine.start_profile(profile_prefix=label)
+                    result["profile_state_after_start"] = engine.collective_rpc(worker_profile_state)
+                    rank_rows(result["profile_state_after_start"])
+                    if not all(row["running"] for row in result["profile_state_after_start"]):
+                        raise RuntimeError("Native NPU profiler did not start on all four ranks")
+                    profile_started = True
+        result["complete"] = released and all(row["finished"] for row in result["requests"])
+        if profile and (not profile_stopped or profile_steps != workload["decode_steps"]):
+            raise RuntimeError("Profile window did not capture exact requested D steps")
+    except BaseException:  # noqa: BLE001 -- preserve every failed window for root cleanup
+        result["error"] = traceback.format_exc()
+    finally:
+        result["end_ns"] = clock()
+        if profile_started and not profile_stopped:
+            engine.stop_profile()
+        if profile:
+            result["profile_decode_steps"] = profile_steps
+    return result
+
+
+def percentile(values, p):
+    values = sorted(values)
+    if not values:
+        return None
+    position = (len(values) - 1) * p
+    lower = int(position)
+    return values[lower] + (values[min(lower + 1, len(values) - 1)] - values[lower]) * (position - lower)
+
+
+def summarize(value):
+    rows = value["requests"]
+    gaps = [(b - a) / 1e6 for row in rows for a, b in zip(row["arrival_ns"], row["arrival_ns"][1:])]
+    last = max(row["arrival_ns"][-1] for row in rows)
+    total = sum(len(row["token_ids"]) for row in rows)
+    result = {"output_tokens": total, "window_seconds": (last - value["start_ns"]) / 1e9,
+              "output_tokens_per_second": total / ((last - value["start_ns"]) / 1e9),
+              "step_ms_mean": statistics.mean((b - a) / 1e6 for a, b in value["steps"]),
+              "step_ms_p99": percentile([(b - a) / 1e6 for a, b in value["steps"]], .99),
+              "token_gap_ms_p50": percentile(gaps, .5), "token_gap_ms_p99": percentile(gaps, .99),
+              "ttft_ms": {row["external_id"]: (row["arrival_ns"][0] - row["admit_ns"]) / 1e6 for row in rows}}
+    if value["workload"] == "decode-heavy":
+        start = max(row["arrival_ns"][31] for row in rows)
+        end = min(row["arrival_ns"][-1] for row in rows)
+        delivered = sum(sum(start < timestamp <= end for timestamp in row["arrival_ns"]) for row in rows)
+        result["steady_decode_tokens_per_second"] = delivered / ((end - start) / 1e9)
+    if value["ingress"]:
+        result["long_p_ttft_ms"] = next((row["arrival_ns"][0] - row["admit_ns"]) / 1e6 for row in rows if row["stage"] == "ingress")
+        result["seed_gap_ms_p99"] = percentile([(b - a) / 1e6 for row in rows if row["stage"] == "seed"
+                                                for a, b in zip(row["arrival_ns"], row["arrival_ns"][1:])], .99)
+    return result
+
+
+def drain_engine(engine):
+    """Finish native queue/finished-ID cleanup outside the arrival measurement."""
+    core = engine.engine_core.engine_core
+    started = time.monotonic()
+    steps = 0
+    while core.scheduler.has_requests() or bool(core.batch_queue):
+        if steps >= 32 or time.monotonic() - started > 30:
+            raise RuntimeError("Post-window native queue drain exceeded its finite bound")
+        if engine.step():
+            raise RuntimeError("Unexpected client output during post-window drain")
+        steps += 1
+    if engine.has_unfinished_requests() or engine.output_processor.request_states:
+        raise RuntimeError("Post-window client state is not empty")
+    return {"steps": steps, "seconds": time.monotonic() - started,
+            "scheduler_and_batch_queue_empty": True, "client_empty": True,
+            "scope": "After final token; excluded from arrival/window metrics"}
+
+
+def run(args, plan, engine_args):
+    args.output.mkdir(parents=True, exist_ok=False)
+    require_control_environment(control_environment(), args.hccl)
+    if any(os.environ.get(key) for key in ("MUXPD_NUMERIC_OUTPUT", "MUXPD_PRESSURE_TRACE_DIR", "VLLM_TORCH_PROFILER_DIR")):
+        raise ValueError("Remove numerical/pressure/profiler observer environments")
+    os.environ["VLLM_ENABLE_V1_MULTIPROCESSING"] = "0"
+    helper, helper_sha = provenance_helpers()
+    if args.command == "profile":
+        engine_args["profiler_config"] = {"profiler": "torch", "torch_profiler_dir": str(args.output / "profile"),
+            "torch_profiler_with_stack": False, "torch_profiler_with_memory": False,
+            "ignore_frontend": True, "delay_iterations": 0, "max_iterations": 0}
+    report = {"schema": "muxpd-group-prefill-performance-run-v1", "variant": args.variant, "experiment": args.experiment,
+              "hccl": args.hccl, "mode": args.command, "plan_sha256": plan["plan_sha256"],
+              "started_at": datetime.now(UTC).isoformat(), "pid": os.getpid(), "engine_args": engine_args,
+              "started_monotonic_ns": time.monotonic_ns(),
+              "producer_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+              "provenance_helper_sha256": helper_sha, "environment": helper.runtime_environment(),
+              "windows": [], "errors": [], "shutdown_returned": False, "collection_complete": False}
+    llm = None
+    save(args.output / "run.json", report)
+    try:
+        from vllm import LLM, SamplingParams
+        from vllm.sampling_params import RequestOutputKind
+        from vllm.v1.engine.core_client import InprocClient
+        report["sources"] = helper.source_identities()
+        if any(report["sources"][name]["commit"] != commit for name, commit in NATIVE_SOURCES.items()):
+            raise ValueError("Native source differs from audited pinned Core/Ascend")
+        if (report["sources"]["vllm_muxpd"]["commit"] != plan["source_pins"][args.variant]
+                                         or report["sources"]["vllm_muxpd"]["status"]):
+            raise ValueError("Plugin source differs from exact clean base/candidate commit")
+        llm = LLM(**engine_args)
+        engine = llm.llm_engine
+        if not isinstance(engine.engine_core, InprocClient):
+            raise TypeError("Coordinator is not directly stepped InprocClient")
+        core = engine.engine_core.engine_core
+        report["resolved_runtime"] = {
+            "async_scheduling": core.vllm_config.scheduler_config.async_scheduling,
+            "batch_queue_size": core.batch_queue_size,
+            "step_function": core.step_fn.__name__,
+            "scheduler_class": type(core.scheduler).__module__ + "." + type(core.scheduler).__name__,
+            "stream_interval": engine.output_processor.stream_interval,
+        }
+        expected_async = args.variant == "native-async"
+        if report["resolved_runtime"]["async_scheduling"] is not expected_async:
+            raise RuntimeError("Resolved async scheduling differs from the selected experiment scope")
+        if report["resolved_runtime"]["batch_queue_size"] != (2 if expected_async else 1) or report["resolved_runtime"]["step_function"] != ("step_with_batch_queue" if expected_async else "step"):
+            raise RuntimeError("Resolved native queue/step mode differs from the selected scope")
+        if report["resolved_runtime"]["stream_interval"] != 1:
+            raise RuntimeError("The actor-arrival contract requires actual stream_interval=1")
+        report["control_environment_after_init"] = control_environment()
+        require_control_environment(report["control_environment_after_init"], args.hccl)
+        report["worker_counters_after_init"] = engine.collective_rpc(worker_counters)
+        require_worker_controls(report["worker_counters_after_init"], args.hccl)
+        save(args.output / "run.json", report)
+        started = time.perf_counter()
+        if args.command == "profile":
+            schedule = [(True, plan["profile"]), (False, plan["profile"])]
+        else:
+            schedule = [(True, item) for item in plan["workloads"]]
+            schedule += [(False, item) for _ in range(plan["measured_repetitions"]) for item in plan["workloads"]]
+        for index, (warmup, workload) in enumerate(schedule):
+            if time.perf_counter() - started > plan["max_run_seconds_after_init"]:
+                raise RuntimeError("Frozen total execution bound exceeded")
+            if not warmup and "worker_counters_before_timing" not in report:
+                report["worker_counters_before_timing"] = engine.collective_rpc(worker_counters)
+                require_worker_controls(report["worker_counters_before_timing"], args.hccl)
+            item = window(engine, workload, plan, SamplingParams, RequestOutputKind.DELTA,
+                          label=f"w{index}", profile=args.command == "profile" and not warmup)
+            item["warmup"] = warmup
+            if item["complete"] and not item["error"]:
+                item["summary"] = summarize(item)
+            report["windows"].append(item)
+            save(args.output / "run.json", report)  # always outside measurement window
+            if item["error"] or not item["complete"]:
+                raise RuntimeError("Incomplete workload; retain failure and stop without retry")
+            item["drain_after"] = drain_engine(engine)
+            save(args.output / "run.json", report)
+        report["worker_counters_after_timing"] = engine.collective_rpc(worker_counters)
+        require_worker_controls(report["worker_counters_after_timing"], args.hccl)
+        report["worker_counter_deltas"] = counter_deltas(report["worker_counters_before_timing"], report["worker_counters_after_timing"])
+        if args.variant == "group" and any(
+            not row["prefill_groups"] or not row["prefill_groups"]["ready"] or row["prefill_groups"]["failed"]
+            or len(report["worker_counter_deltas"][row["rank"]]["prefill_group_calls"]) != 10
+            or not all(count > 0 for count in report["worker_counter_deltas"][row["rank"]]["prefill_group_calls"])
+            for row in report["worker_counters_after_timing"]
+        ):
+            raise RuntimeError("All-rank serving grouped-P returns were not established")
+        report["collection_complete"] = True
+    except BaseException:  # noqa: BLE001 -- retain all failures and perform shutdown
+        report["errors"].append(traceback.format_exc())
+    finally:
+        if llm is not None:
+            try:
+                llm.llm_engine.engine_core.shutdown()
+                report["shutdown_returned"] = True
+            except BaseException:  # noqa: BLE001 -- cleanup receipt cannot mask original failure
+                report["errors"].append(traceback.format_exc())
+        report["finished_at"] = datetime.now(UTC).isoformat()
+        report["finished_monotonic_ns"] = time.monotonic_ns()
+        save(args.output / "run.json", report)
+    print(json.dumps({"complete": report["collection_complete"], "errors": report["errors"]}))
+    return 0 if report["collection_complete"] and report["shutdown_returned"] and not report["errors"] else 1
+
+
+def prepare(original):
+    source = load_plan(original)
+    result = {key: value for key, value in source.items() if key not in (
+        "schema", "plan_sha256", "query_matrix", "hccl_cost_matrix", "source_pins", "profile")}
+    result.update(schema="muxpd-group-prefill-performance-plan-v1",
+        derived_workload={"file_sha256": hashlib.sha256(original.read_bytes()).hexdigest(), "plan_sha256": source["plan_sha256"]},
+        source_pins={role: SOURCE for role in ("raw", "group", "native")},
+        primary_matrix=[{"variant": role, "hccl": "true"} for role in ("raw", "group", "group", "raw")],
+        optional_matched_reference_order=["native", "raw", "group", "group", "raw", "native"],
+        treatment="Only compile_prefill_groups changes between same-source raw/group; native is a separate matched synchronous chunked-prefill reference",
+        backend={"enable_npugraph_ex": False, "enable_static_kernel": False},
+        baseline_scope="Matched async_scheduling=False/native chunked=True; not the best default-async native configuration")
+    return {**result, "plan_sha256": digest(result)}
+
+
+def prepare_async(primary):
+    if primary["schema"] != "muxpd-group-prefill-performance-plan-v1":
+        raise ValueError("Async reference must derive from the independent primary family")
+    result = {key: value for key, value in primary.items() if key not in (
+        "schema", "plan_sha256", "source_pins", "primary_matrix", "optional_matched_reference_order", "treatment", "baseline_scope")}
+    result.update(schema="muxpd-native-default-async-performance-plan-v1",
+        primary_plan_sha256=primary["plan_sha256"], source_pins={"native-async": SOURCE},
+        reference_matrix=["native-async", "native-async"],
+        baseline_scope="Native async_scheduling=None must resolve True, queue depth2; same fusion backendfalse, no claim of whole-runtime best defaults",
+        scope="Separate descriptive native default-async actor-arrival reference; never pooled into synchronous raw/group ABBA")
+    return {**result, "plan_sha256": digest(result)}
+
+
+def validate_role_plan(variant, plan):
+    expected = "muxpd-native-default-async-performance-plan-v1" if variant == "native-async" else "muxpd-group-prefill-performance-plan-v1"
+    if plan["schema"] != expected or variant not in plan["source_pins"]:
+        raise ValueError("Native default-async must use its separate frozen plan")
+
+
+def validate(args, engine_args):
+    native = args.variant in ("native", "native-async")
+    required = {"tensor_parallel_size": 4, "pipeline_parallel_size": 1, "data_parallel_size": 1,
+                "enable_expert_parallel": True, "dtype": "bfloat16", "max_model_len": 16384,
+                "max_num_batched_tokens": 16384, "max_num_seqs": 8, "enable_prefix_caching": False,
+                "async_scheduling": None if args.variant == "native-async" else False, "enforce_eager": False, "language_model_only": True,
+                "enable_chunked_prefill": native, "disable_log_stats": True, "mamba_cache_mode": "none", "stream_interval": 1}
+    if any(engine_args.get(key) != value for key, value in required.items()):
+        raise ValueError("Engine settings differ from matched synchronous TP4/EP4 fusion recipe")
+    expected_experiment = "reference-async" if args.variant == "native-async" else ("reference" if native else "group")
+    if args.hccl != "true" or args.experiment != expected_experiment:
+        raise ValueError("This family requires HCCL=true and the prespecified grouped-P/reference factor")
+    if "worker_cls" in engine_args or any(engine_args.get(key) for key in (
+        "profiler_config", "worker_extension_cls", "speculative_config", "num_gpu_blocks_override")):
+        raise ValueError("Ordinary workers only; no profiler/extensions/speculation/pressure override")
+    backend = engine_args.get("additional_config", {}).get("ascend_compilation_config", {})
+    if backend.get("enable_npugraph_ex") is not False or backend.get("enable_static_kernel") is not False:
+        raise ValueError("All family arms require explicit npugraphEx=false/static_kernel=false")
+    policy = engine_args.get("batch_admission_policy_config", {})
+    if native:
+        if policy or engine_args.get("scheduler_cls") or engine_args.get("batch_admission_policy"):
+            raise ValueError("Native reference cannot install plugin scheduling")
+    else:
+        expected = {"execution": "decoupled", "stream_mode": "overlap", "layers_per_slice": 4,
+                    "adaptive_layers": False, "prefill_first": False, "decode_graph": True,
+                    "compile_full_prefill": False, "decode_budget_guard": False,
+                    "overlap_communication": "isolated", "prefill_layer_token_budget": 0,
+                    "compile_prefill_groups": args.variant == "group"}
+        if policy != expected or engine_args.get("scheduler_cls") != "vllm_muxpd.decoupled_scheduler.DecoupledMuxPDScheduler" or engine_args.get("batch_admission_policy") != "vllm_muxpd.policy.MuxPDPolicy":
+            raise ValueError("Only exact same-source raw/group q4 policy is allowed")
+    return dict(engine_args, worker_cls=("vllm_ascend.worker.worker.NPUWorker" if native
+                else "vllm_muxpd.decoupled_worker.DecoupledMuxPDNPUWorker"))
+
+
+def chronological(runs):
+    if len({row["pid"] for row in runs}) != len(runs):
+        raise ValueError("Every arm must use a fresh process")
+    starts = [datetime.fromisoformat(row["started_at"]) for row in runs]
+    ends = [datetime.fromisoformat(row["finished_at"]) for row in runs]
+    if any(value.tzinfo is None for value in starts + ends) or any(a >= b for a, b in zip(starts, ends, strict=True)) or any(a > b for a, b in zip(ends[:-1], starts[1:], strict=True)):
+        raise ValueError("Actual wall-clock execution is not serial in the requested order")
+    if any(row["started_monotonic_ns"] >= row["finished_monotonic_ns"] for row in runs) or any(a["finished_monotonic_ns"] > b["started_monotonic_ns"] for a, b in pairwise(runs)):
+        raise ValueError("Actual monotonic execution overlaps or is reordered")
+
+
+def matched_identity(runs):
+    for key in ("plan_sha256", "producer_sha256", "provenance_helper_sha256", "environment"):
+        if any(run[key] != runs[0][key] for run in runs[1:]):
+            raise ValueError(f"Unmatched runtime factor: {key}")
+    for name in ("vllm", "vllm_ascend", "vllm_muxpd"):
+        rows = [{key: value for key, value in run["sources"][name].items() if key != "path"} for run in runs]
+        if any(row != rows[0] for row in rows[1:]):
+            raise ValueError(f"Runtime source identity differs: {name}")
+    for run in runs:
+        if run["sources"]["vllm_muxpd"]["commit"] != SOURCE or run["sources"]["vllm_muxpd"]["status"]:
+            raise ValueError("All arms require exact clean public f7 plugin source")
+        if any(run["sources"][name]["commit"] != commit for name, commit in NATIVE_SOURCES.items()):
+            raise ValueError("Native source differs from audited pins")
+
+
+def validate_completed_run(run, plan):
+    from types import SimpleNamespace
+
+    if run["schema"] != "muxpd-group-prefill-performance-run-v1" or run["mode"] != "run" or run["plan_sha256"] != plan["plan_sha256"]:
+        raise ValueError("Wrong experiment family, profiler mode or frozen plan")
+    args = SimpleNamespace(variant=run["variant"], hccl=run["hccl"], experiment=run["experiment"])
+    validate_role_plan(args.variant, plan)
+    original = {key: value for key, value in run["engine_args"].items() if key != "worker_cls"}
+    if validate(args, original) != run["engine_args"] or run["resolved_runtime"]["async_scheduling"] is not (run["variant"] == "native-async"):
+        raise ValueError("Actual worker/runtime differs from matched recipe")
+    expected_queue = 2 if run["variant"] == "native-async" else 1
+    expected_step = "step_with_batch_queue" if expected_queue == 2 else "step"
+    if run["resolved_runtime"]["batch_queue_size"] != expected_queue or run["resolved_runtime"]["step_function"] != expected_step:
+        raise ValueError("Actual native queue/step mode differs from the selected reference")
+    if run["resolved_runtime"]["stream_interval"] != 1:
+        raise ValueError("Recorded actual stream interval differs")
+    require_control_environment(run["environment"]["environment"], "true")
+    require_control_environment(run["control_environment_after_init"], "true")
+    snapshots = [rank_rows(run[key]) for key in ("worker_counters_after_init", "worker_counters_before_timing", "worker_counters_after_timing")]
+    for snapshot in snapshots:
+        require_worker_controls(list(snapshot.values()), "true")
+        if len({row["pid"] for row in snapshot.values()}) != 4:
+            raise ValueError("Four distinct worker receipts required")
+    for rank in range(4):
+        if any(row[rank]["pid"] != snapshots[0][rank]["pid"] or row[rank]["control_environment"] != snapshots[0][rank]["control_environment"] for row in snapshots[1:]):
+            raise ValueError("Worker identity or controls changed")
+        if snapshots[0][rank]["control_environment"]["VLLM_BATCH_INVARIANT"] != run["environment"]["environment"]["VLLM_BATCH_INVARIANT"]:
+            raise ValueError("Worker/coordinator batch-invariance settings differ")
+    delta = counter_deltas(run["worker_counters_before_timing"], run["worker_counters_after_timing"])
+    if digest(delta) != digest(run["worker_counter_deltas"]):
+        raise ValueError("Stored worker deltas differ from raw snapshots")
+    for rank in range(4):
+        group = snapshots[-1][rank]["prefill_groups"]
+        if run["variant"] == "group":
+            if not group or not group["ready"] or group["failed"] or len(delta[rank]["prefill_group_calls"]) != 10 or not all(value > 0 for value in delta[rank]["prefill_group_calls"]):
+                raise ValueError("Missing all-rank serving grouped-P return evidence")
+        elif group is not None:
+            raise ValueError("Grouped-P executor unexpectedly installed in control")
+    schedule = [(True, row) for row in plan["workloads"]]
+    schedule += [(False, row) for _ in range(plan["measured_repetitions"]) for row in plan["workloads"]]
+    if len(run["windows"]) != len(schedule):
+        raise ValueError("Missing warmup or measured window")
+    selected = {row["name"]: [] for row in plan["workloads"]}
+    for item, (warm, definition) in zip(run["windows"], schedule, strict=True):
+        if item["warmup"] != warm or item["workload"] != definition["name"] or not item["complete"] or item["error"] or item["profile_diagnostic"]:
+            raise ValueError("Frozen workload order or completion differs")
+        if not item.get("drain_after", {}).get("scheduler_and_batch_queue_empty") or not item["drain_after"]["client_empty"]:
+            raise ValueError("Missing post-window queue/client drain receipt")
+        expected = [(row["prompt"], row["outputs"], "seed") for row in definition["initial"]]
+        expected += [(row["prompt"], row["outputs"], "ingress") for row in definition["ingress"]]
+        if [(row["prompt"], row["requested_outputs"], row["stage"]) for row in item["requests"]] != expected:
+            raise ValueError("Frozen request set differs")
+        actual_steps = {after for _, after in item["steps"]}
+        for row in item["requests"]:
+            times = row["arrival_ns"]
+            if not row["finished"] or row["finish_reason"] != "length" or len(row["token_ids"]) != row["requested_outputs"] or len(times) != len(row["token_ids"]) or any(a >= b for a, b in pairwise(times)) or not set(times) <= actual_steps:
+                raise ValueError("Token/arrival completion differs from actual DELTA steps")
+        if definition["ingress"] and (not item["ingress"] or item["ingress"]["seed_counts"] != [definition["ingress_after_each_seed_token"]] * len(definition["initial"])):
+            raise ValueError("Missing controlled long-P admission receipt")
+        if summarize(item) != item["summary"]:
+            raise ValueError("Stored summary differs from raw timing arrays")
+        if not warm:
+            selected[item["workload"]].append(item)
+    return selected
+
+
+def run_metrics(selected):
+    result = {}
+    for name, windows in selected.items():
+        metrics = ["output_tokens_per_second", "step_ms_mean", "step_ms_p99", "token_gap_ms_p99"]
+        metrics += ["steady_decode_tokens_per_second"] if name == "decode-heavy" else ["long_p_ttft_ms", "seed_gap_ms_p99"]
+        result[name] = {key: statistics.mean(item["summary"][key] for item in windows) for key in metrics}
+    return result
+
+
+def analyze(paths, plan, with_native=False):
+    runs = [json.loads(path.read_text()) for path in paths]
+    expected = ["raw", "group", "group", "raw"]
+    if with_native:
+        expected = ["native", *expected, "native"]
+    if [row["variant"] for row in runs] != expected:
+        raise ValueError("Require chronological raw/group/group/raw, optionally bracketed by matched native")
+    chronological(runs)
+    complete = all(row["collection_complete"] and row["shutdown_returned"] and not row["errors"] for row in runs)
+    result = {"schema": "muxpd-group-prefill-performance-analysis-v1", "complete": complete,
+        "plan_sha256": plan["plan_sha256"], "input_files": [{"path": str(path), "sha256": hashlib.sha256(path.read_bytes()).hexdigest()} for path in paths],
+        "errors": [row["errors"] for row in runs], "comparisons": {},
+        "scope": "Two-pair warmed offline grouped-P ABBA; matched native is synchronous and descriptive. No HTTP SLO/goodput, best-native, population equivalence or device-overlap claim."}
+    if not complete:
+        return result
+    matched_identity(runs)
+    selected = [validate_completed_run(row, plan) for row in runs]
+    normalized = []
+    for run in runs:
+        engine = json.loads(json.dumps(run["engine_args"]))
+        for key in ("worker_cls", "scheduler_cls", "batch_admission_policy", "enable_chunked_prefill"):
+            engine.pop(key, None)
+        engine.pop("batch_admission_policy_config", None)
+        normalized.append(engine)
+    if any(row != normalized[0] for row in normalized[1:]):
+        raise ValueError("Hardware/model/backend configuration differs")
+    primary = runs[1:-1] if with_native else runs
+    policies = [json.loads(json.dumps(row["engine_args"])) for row in primary]
+    for row in policies:
+        row["batch_admission_policy_config"]["compile_prefill_groups"] = False
+    if any(row != policies[0] for row in policies[1:]):
+        raise ValueError("Raw/group differ beyond compile_prefill_groups")
+    all_metrics = [run_metrics(row) for row in selected]
+    metrics = all_metrics[1:-1] if with_native else all_metrics
+    for workload in metrics[0]:
+        comparison = {}
+        for name in metrics[0][workload]:
+            values = [row[workload][name] for row in metrics]
+            raw, group = statistics.mean([values[0], values[3]]), statistics.mean(values[1:3])
+            comparison[name] = {"run_values_raw_group_group_raw": values, "raw_mean": raw, "group_mean": group,
+                                "group_over_raw": group / raw, "adjacent_pair_ratios": [values[1] / values[0], values[2] / values[3]], "raw_drift_ratio": values[3] / values[0]}
+            if with_native:
+                native = [row[workload][name] for row in (all_metrics[0], all_metrics[-1])]
+                comparison[name]["matched_native_reference"] = {"before_after": native, "mean": statistics.mean(native),
+                    "drift_ratio": native[1] / native[0], "group_over_native": group / statistics.mean(native), "raw_over_native": raw / statistics.mean(native)}
+        streams = [[row["token_ids"] for item in selection[workload] for row in item["requests"]] for selection in selected]
+        comparison["all_generated_tokens_identical_across_arms"] = all(stream == streams[0] for stream in streams[1:])
+        result["comparisons"][workload] = comparison
+    return result
+
+
+def analyze_native_async(paths, plan):
+    runs = [json.loads(path.read_text()) for path in paths]
+    if len(runs) != 2 or any(run["variant"] != "native-async" for run in runs):
+        raise ValueError("Separate default-async reference needs two fresh native-async runs")
+    chronological(runs)
+    complete = all(row["collection_complete"] and row["shutdown_returned"] and not row["errors"] for row in runs)
+    result = {"schema": "muxpd-native-default-async-reference-analysis-v1", "complete": complete,
+              "plan_sha256": plan["plan_sha256"], "errors": [row["errors"] for row in runs],
+              "inputs": [{"path": str(path), "sha256": hashlib.sha256(path.read_bytes()).hexdigest()} for path in paths],
+              "scope": "Separate descriptive async scheduling reference on the same fusion-backendfalse workload; not pooled into primary synchronous ABBA or a best-native claim"}
+    if complete:
+        matched_identity(runs)
+        if runs[0]["engine_args"] != runs[1]["engine_args"]:
+            raise ValueError("Native async reference settings differ")
+        result["per_run_metrics"] = [run_metrics(validate_completed_run(row, plan)) for row in runs]
+    return result
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("command", choices=("prepare", "prepare-async", "dry-run", "run", "analyze", "analyze-with-native", "analyze-native-async"))
+    parser.add_argument("--original-workload", type=Path)
+    parser.add_argument("--plan", type=Path)
+    parser.add_argument("--engine-args", type=Path)
+    parser.add_argument("--variant", choices=("raw", "group", "native", "native-async"), default="raw")
+    parser.add_argument("--hccl", choices=("true",), default="true")
+    parser.add_argument("--experiment", choices=("group", "reference", "reference-async"), default="group")
+    parser.add_argument("--runs", type=Path, nargs="*")
+    parser.add_argument("--output", type=Path, required=True)
+    args = parser.parse_args()
+    if args.output.exists():
+        parser.error("Use a new path; frozen evidence is never overwritten")
+    if args.command == "prepare":
+        save(args.output, prepare(args.original_workload))
+        return 0
+    plan = load_plan(args.plan)
+    if args.command == "prepare-async":
+        save(args.output, prepare_async(plan))
+        return 0
+    if args.command == "analyze-native-async":
+        save(args.output, analyze_native_async(args.runs, plan))
+        return 0
+    if args.command.startswith("analyze"):
+        save(args.output, analyze(args.runs, plan, args.command == "analyze-with-native"))
+        return 0
+    validate_role_plan(args.variant, plan)
+    engine = validate(args, json.loads(args.engine_args.read_text()))
+    if args.command == "dry-run":
+        save(args.output, {"validated": True, "variant": args.variant, "plan_sha256": plan["plan_sha256"], "engine_sha256": digest(engine)})
+        return 0
+    return run(args, plan, engine)
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

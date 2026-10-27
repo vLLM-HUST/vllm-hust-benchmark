@@ -1,0 +1,418 @@
+"""Typed source98 Manager bridge capsules; intentional SIGINT exit130 stays130.
+
+Offline only. This narrow success type requires actual serving, journal/rank
+binding and bounded cleanup. It never certifies graceful internal worker drain.
+The original build_capsule.py and its exit0 success rule are unchanged.
+"""
+
+from __future__ import annotations
+
+import argparse
+import gzip
+import hashlib
+import json
+import math
+import re
+import tarfile
+from datetime import datetime
+from pathlib import Path
+
+import build_capsule as common
+
+COMMON_SHA = 'e1c63334e87118c06e4ef5f75c2aa1dee3b4c8cda3a6a0602ce68f0a412e9fbd'
+SOURCE = '98eac12dc2595a8742a81b58e96b899fed905194'
+CONTROLLER_SHA = '5176c8bd6a36dff144a6c3323881806c08886e3c6341d2a456157bbe6d499ec5'
+READBACK_SHA = '269271f9b418ed36ef4430f87b1bb1e9819c075b6c9b994ccc0db0ced23dafa1'
+EXTENSION = 'org.vllm-hust.muxpd'
+KIND = 'terminal-source98-manager-sigint-bridge'
+SCOPE = ('Source deployment bridge with bounded serving and cleanup; actual exit130. '
+         'No wheel/release, quality, performance, global determinism, or graceful '
+         'internal worker drain qualification. Native abort/force cleanup warnings are retained.')
+
+
+def require(condition, message):
+    if not condition:
+        raise ValueError(message)
+
+
+def load(path):
+    return json.loads(Path(path).read_text())
+
+
+def projection_log(path):
+    text = path.read_text()
+    offset = 0
+    matches = []
+    for line in text.splitlines(keepends=True):
+        if line.startswith('{'):
+            try:
+                value = json.loads(text[offset:])
+            except ValueError:
+                pass
+            else:
+                if isinstance(value, dict) and 'command' in value:
+                    matches.append(value)
+        offset += len(line)
+    require(len(matches) == 1, 'Missing unique complete Manager dry-run JSON')
+    return matches[0]
+
+
+def bind(row, path):
+    actual = common.identity(path)
+    require(row.get('path') == str(Path(path).resolve()), f'Identity path differs: {path}')
+    require(row.get('sha256') == actual['sha256'], f'Identity SHA differs: {path}')
+    if 'bytes' in row:
+        require(row['bytes'] == actual['bytes'], f'Identity size differs: {path}')
+    return actual
+
+
+def inventory(text):
+    physical = re.findall(r'^\|\s*(\d+)\s+910B2\s*\|', text, re.MULTILINE)
+    empty = re.findall(r'No running processes found in NPU (\d+)\b', text)
+    expected = {'1', '2', '3', '6'}
+    require(len(physical) == len(empty) == 4 and set(physical) == set(empty) == expected,
+            'Incomplete/nonempty physical device inventory')
+    process_section = text.split('Process id', 1)
+    require(len(process_section) == 2 and not re.search(r'\|\s*\d+\s+\d+\s*\|\s*\d+', process_section[1]),
+            'Physical device process table is missing or busy')
+    return {'physical_device_ids': sorted(expected, key=int), 'empty': True}
+
+
+def process_snapshot():
+    rows = []
+    for path in Path('/proc').glob('[0-9]*/stat'):
+        try:
+            text = path.read_text()
+            fields = text[text.rfind(')') + 1:].split()
+            if fields[0] not in ('Z', 'X'):
+                rows.append({'pid': int(path.parent.name), 'ppid': int(fields[1]),
+                             'pgid': int(fields[2]), 'sid': int(fields[3]), 'start_ticks': fields[19]})
+        except (OSError, ValueError, IndexError):
+            continue
+    return rows
+
+
+def stopped_owned(record):
+    cleanup = record['cleanup']
+    require(cleanup.get('forced_cleanup') is False and cleanup.get('survivors') == [],
+            'Controller escalation or owned survivors recorded')
+    require(cleanup.get('exit_code') == record['exit_code'] == 130, 'Cleanup exit differs from actual130')
+    seconds = cleanup.get('shutdown_wait_seconds')
+    require(type(seconds) in (int, float) and math.isfinite(seconds) and 0 <= seconds <= 45,
+            'Missing or unbounded owned shutdown duration')
+    owned = cleanup.get('owned_processes')
+    require(isinstance(owned, list) and bool(owned), 'Missing owned descendant inventory')
+    pids = {}
+    for row in owned:
+        require(all(type(row.get(k)) is int and row[k] > 0 for k in ('pid', 'ppid', 'pgid', 'sid'))
+                and isinstance(row.get('start_ticks'), str) and row['start_ticks'].isdigit(),
+                'Malformed owned process identity')
+        require(row['pid'] not in pids, 'Duplicate owned PID')
+        pids[row['pid']] = row
+    leader = pids.get(record['pid'])
+    require(leader is not None and leader['pgid'] == record['process_group'] == record['pid'],
+            'Manager leader/process-group identity mismatch')
+    require(cleanup.get('signals') == [{'pid': record['pid'], 'signal': 2, 'start_ticks': leader['start_ticks']}],
+            'Expected exactly the intentional controller SIGINT to its owned Manager')
+    groups = {row['pgid'] for row in owned}
+    for row in process_snapshot():
+        old = pids.get(row['pid'])
+        require(not (old and old['start_ticks'] == row['start_ticks']), 'An owned PID/start identity remains live')
+        require(row['pgid'] not in groups, 'A recorded owned process group remains live')
+    return pids
+
+
+def statuses(run, record):
+    results = [load(run / f'manager-{name}.json') for name in ('before', 'live', 'stopped')]
+    required = {'installed', 'discovered', 'compatible', 'configured', 'enabled'}
+    for result, active in zip(results, (False, True, False), strict=True):
+        require(result.get('extension_id') == EXTENSION and result.get('provider') == 'vllm'
+                and set(result.get('states', [])) == required | ({'runtime_effective'} if active else set()),
+                'Manager runtime_effective state sequence is not false/true/false')
+    require(record.get('live_status') == results[1], 'Controller live status differs from retained status')
+    return [common.identity(run / f'manager-{name}.json') for name in ('before', 'live', 'stopped')]
+
+
+def readbacks(run, role):
+    receipt = load(run / 'startup-readback-audit.json')
+    require(receipt.get('schema') == 'muxpd-source98-startup-readback-audit-v1', 'Unknown rank audit schema')
+    bind(receipt['log'], run / 'process.log')
+    bind(receipt['source_receipt'], run / 'manager-state/launch-source.json')
+    helper = run / 'producer/verify_startup_readbacks98.py'
+    require(bind(receipt['producer'], helper)['sha256'] == READBACK_SHA, 'Unexpected startup auditor source')
+    # This pinned helper imports only stdlib and parse_log does no runtime calls.
+    namespace = {'__name__': 'manager_capsule_readback', '__file__': str(helper)}
+    exec(compile(helper.read_bytes(), str(helper), 'exec'), namespace)  # noqa: S102 -- exact SHA-pinned stdlib helper; avoids pyc writes.
+    actual = namespace['parse_log'](run / 'process.log', groups=role == 'group', managed=True)
+    require(receipt['readbacks'] == actual, 'Rank audit differs from actual retained log')
+    return actual
+
+
+def journal_binding(run, record, ranks, owned):
+    path = run / 'manager-state/runtime-evidence.jsonl'
+    binding = record.get('manager_runtime_binding')
+    require(isinstance(binding, dict), 'Missing actual manager_runtime_binding')
+    bind(binding['journal'], path)
+    events = [json.loads(line) for line in path.read_text().splitlines()]
+    launches = [row for row in events if row.get('schema') == 'vllm-hust-module-launch/0.1']
+    require(len(launches) == 1, 'Expected one actual Manager launch journal')
+    launch = launches[0]
+    material = {key: value for key, value in launch.items() if key != 'binding_digest'}
+    require(hashlib.sha256(json.dumps(material, sort_keys=True, separators=(',', ':')).encode()).hexdigest() == launch['binding_digest'], 'Manager launch binding digest mismatch')
+    for key in ('plan_id', 'launch_id', 'manager_process'):
+        require(binding[key] == launch[key], f'Manager journal binding differs: {key}')
+    leader = owned[record['pid']]
+    require(launch['manager_process']['pid'] == record['pid']
+            and launch['manager_process']['start_identity'] == f"pid:{record['pid']}:start_ticks:{leader['start_ticks']}",
+            'Launch is not the owned Manager PID/start identity')
+    require(all(row['manager_plan_id'] == launch['plan_id'] and row['manager_launch_id'] == launch['launch_id']
+                and row['pid'] in owned for row in ranks), 'Rank startup identity is not this owned Manager launch')
+    components = {row['component_id']: row for row in launch['components']}
+    require(set(components) == {'admission', 'scheduler', 'worker'} and len(launch['components']) == 3,
+            'Incomplete declared Manager components')
+    expected_refs = {'admission': 'vllm_muxpd.policy:MuxPDPolicy',
+                     'scheduler': 'vllm_muxpd.decoupled_scheduler:DecoupledMuxPDScheduler',
+                     'worker': 'vllm_muxpd.decoupled_worker:DecoupledMuxPDNPUWorker'}
+    for key, component in components.items():
+        require(component['extension_id'] == EXTENSION and component['implementation_ref'] == expected_refs[key],
+                'Unexpected Manager component')
+    source_receipt = load(run / 'manager-state/launch-source.json')
+    selected = source_receipt['selected_manifest']
+    require(all(row['manifest_sha256'] == selected['sha256'] for row in components.values()), 'Journal component/static manifest digest mismatch')
+    plan_material = [[EXTENSION, components['worker']['extension_version'], selected['path']]]
+    require(hashlib.sha256(json.dumps(plan_material, separators=(',', ':')).encode()).hexdigest() == launch['plan_id'], 'Manager bundle-only plan identifier mismatch')
+    observed = set()
+    worker_pids = set()
+    start = datetime.fromisoformat(record['started_at']).timestamp() * 1e9
+    end = datetime.fromisoformat(record['finished_at']).timestamp() * 1e9
+    for row in events:
+        if row is launch:
+            continue
+        require(row.get('schema') == 'vllm-hust-module-evidence/0.1'
+                and row.get('event') == 'effective' and row.get('observation_kind') == 'runtime_effective',
+                'Unexpected Manager evidence record')
+        component = row['component']
+        key = component['component_id']
+        require(component == components.get(key) and all(row.get(k) == launch[k] for k in ('plan_id', 'launch_id', 'binding_digest')),
+                'Runtime evidence is not bound to declared launch/component')
+        process = row['process']; pid = process['pid']
+        require(pid in owned and process['host'] == launch['manager_process']['host']
+                and process['start_identity'] == f"pid:{pid}:start_ticks:{owned[pid]['start_ticks']}",
+                'Runtime module evidence is not an owned descendant')
+        require(type(row.get('observed_at_ns')) is int and start <= row['observed_at_ns'] <= end
+                and row.get('request_count', 0) > 0 and row.get('output_token_count', 0) > 0,
+                'Incomplete or out-of-run effective event')
+        observed.add(key)
+        if key == 'worker':
+            worker_pids.add(pid)
+    require(observed == set(components) and worker_pids == {row['pid'] for row in ranks},
+            'Declared runtime components or rank-worker evidence incomplete')
+    return binding
+
+
+def validate_manager_terminal(run):
+    run = Path(run).resolve()
+    require(common.identity(common.__file__)['sha256'] == COMMON_SHA, 'Frozen archive primitives changed')
+    record = load(run / 'controller.json')
+    require(record.get('schema') == 'muxpd-source98-controller-execution-v1' and record.get('mode') == 'manager'
+            and record.get('role') in ('raw', 'group'), 'Unsupported controller/Manager success type')
+    require(record.get('passed') is True and record.get('errors') == []
+            and type(record.get('exit_code')) is int and record['exit_code'] == 130,
+            'Manager success requires preserved actual intentional exit130')
+    require(all(record.get(k) is True for k in ('serving_completed', 'intentional_manager_stop', 'devices_empty_after',
+                                               'startup_readbacks_passed', 'bounded_shutdown_passed'))
+            and record.get('expected_manager_signal_exit_code') == 130, 'Incomplete Manager terminal gates')
+    require(record.get('source_commit') == SOURCE and record.get('source_status') == '', 'Exact clean source98 required')
+    require(type(record.get('pid')) is int and record['pid'] > 0 and type(record.get('process_group')) is int,
+            'Missing Manager process identity')
+    require(record.get('label') == run.name, 'Run label/directory mismatch')
+    require(all(isinstance(record.get(k), str) and record[k] for k in ('started_at', 'health_ready_at', 'finished_at')), 'Missing terminal timestamp')
+    started, ready, finished = [datetime.fromisoformat(record[k]) for k in ('started_at', 'health_ready_at', 'finished_at')]
+    require(started.tzinfo and ready.tzinfo and finished.tzinfo and started < ready < finished,
+            'Incomplete or inconsistent terminal chronology')
+    for key, name in (('config_sha256', 'engine-args.json'), ('plan_file_sha256', 'plan.json')):
+        require(record.get(key) == common.identity(run / name)['sha256'], f'Controller {key} mismatch')
+    require(common.identity(run / 'producer-controller.py')['sha256'] == CONTROLLER_SHA
+            and record.get('controller_sha256') == record.get('producer_sha256') == CONTROLLER_SHA,
+            'Unexpected frozen Manager controller identity')
+    bind(record['prepared_source'], run / 'preparation.json')
+    prepared = load(run / 'preparation.json')
+    require(prepared.get('schema') == 'muxpd-source98-controller-preparation-v1' and prepared.get('mode') == 'manager'
+            and prepared.get('role') == record['role'] and prepared.get('passed') is True
+            and prepared.get('hardware_or_service_launched') is False
+            and prepared.get('source') == record['source'] and prepared.get('commit') == SOURCE
+            and prepared.get('command') == record['command'], 'Prepared Manager execution identity differs')
+    require(record['environment'] == prepared['environment'], 'Controller/prepared environment differs')
+    environment = record['environment']
+    require(environment.get('HCCL_DETERMINISTIC') is None and environment.get('VLLM_BATCH_INVARIANT') is None
+            and environment.get('ASCEND_RT_VISIBLE_DEVICES') == '0,1,2,3'
+            and environment.get('VLLM_VERSION') == '0.25.1'
+            and environment.get('VLLM_HUST_EXT_CONFIG') == str(run / 'manager-state/config.json')
+            and environment.get('PYTHONPATH', '').split(':')[:3] == [record['source'] + '/src', '/root/workspace/vllm-hust', '/root/workspace/vllm-ascend-hust'],
+            'Parent Manager profile/source/state environment differs')
+    for name, row in prepared['snapshots'].items():
+        common.safe_name(name)
+        bind(row, run / name)
+    plan, launch, config = [load(run / name) for name in ('plan.json', 'manager-state/launch-source.json', 'engine-args.json')]
+    require((run / 'plan.json').read_bytes() == (run / 'manager-state/plan-source.json').read_bytes()
+            and (run / 'engine-args.json').read_bytes() == (run / 'manager-state/configuration.json').read_bytes(),
+            'Root Manager aliases differ from actual saved configuration/plan')
+    source_manifest = run / 'producer/source-manifest.json'
+    manifest_pin = '3283dcee98254cfc6eac5a7eab3b2e135a1906ccda6dc70b5e2aeb578eaf31a2'
+    require(common.identity(source_manifest)['sha256'] == manifest_pin, 'Source98 full file manifest differs')
+    frozen_source = load(source_manifest)
+    require(frozen_source['commit'] == SOURCE and len(frozen_source['files']) == 21, 'Incomplete source98 file map')
+    producer_pins = {'producer': ('manager_source_bridge98_v3.py', '7cd515d0d55ec9f50ee0381af98f3d84de1ec1feee618d0e7d52e14f0a26b01d'),
+                     'plain_source_checker': ('probe_composite_plain98.py', '5d8b238c695173fc23e3b8065e879b0ff09a63cf148aaff110431061b287e972')}
+    for item in (plan, launch):
+        require(item.get('file_sha256') == frozen_source['files'] and item.get('manifest_sha256') == manifest_pin, 'Launch full source map differs')
+        for key, (name, sha) in producer_pins.items():
+            require(bind(item[key], run / 'producer' / name)['sha256'] == sha, 'Manager/checker producer pin differs')
+        require(item.get('environment_before_cli') == {key: environment.get(key) for key in ('HCCL_DETERMINISTIC', 'VLLM_BATCH_INVARIANT', 'ASCEND_RT_VISIBLE_DEVICES', 'VLLM_HUST_EXT_CONFIG', 'PYTHONPATH')}, 'Actual pre-CLI environment differs')
+        require(item.get('schema') == 'muxpd-manager-source-deployment-bridge-v1' and item.get('commit') == SOURCE
+                and item.get('path') == record['source'] and item.get('tracked_status') == ''
+                and item.get('configuration') == config and item.get('requested_environment') == {'HCCL_DETERMINISTIC': 'true'},
+                'Actual launch/plan source or configuration differs')
+    bind(launch['reviewed_plan'], run / 'manager-state/plan-source.json')
+    for key in ('manager_generated_config', 'cli_arguments', 'file_sha256', 'selected_manifest', 'source_manifest', 'installed_plugin_distribution', 'manager', 'plugin_import_origin'):
+        require(plan[key] == launch[key], f'Prepared-vs-launch Manager identity differs: {key}')
+    require(plan['selected_manifest']['sha256'] == plan['source_manifest']['sha256']
+            and plan['selected_manifest']['bytes'] == plan['source_manifest']['bytes'], 'Installed/static source manifest bytes differ')
+    require(projection_log(run / 'manager-state/dry-run.stdout') == plan['actual_manager_dry_run'], 'Actual retained Manager dry-run projection differs')
+    cli = ['--model', '/root/workspace/models/Qwen3.5-35B-A3B', '--tensor-parallel-size', '4', '--port', str(prepared['port'])]
+    cli.append('--deterministic-collectives')
+    if record['role'] == 'group':
+        cli.append('--experimental-prefill-groups')
+    require(plan['cli_arguments'] == cli, 'Bounded Manager CLI differs')
+    require(plan['manifest_sha256'] == launch['manifest_sha256'], 'Static manifest binding changed at launch')
+    for item in (plan, launch):
+        require(item['manager_generated_config']['user_config'] == config, 'Manager generated configuration differs')
+    policy = config['launch_options']['batch_admission_policy_config']
+    require(policy.get('require_hccl_deterministic') is True and policy.get('compile_prefill_groups', False) is (record['role'] == 'group'),
+            'Saved Manager policy does not select expected profile/groups')
+    command = plan['actual_manager_dry_run']['command']
+    for option, value in plan['manager_generated_config']['vllm_options'].items():
+        require(command.count(option) == 1 and command[command.index(option) + 1] == value, 'Projected module option differs')
+    for option, value in plan['manager_generated_config']['vllm_json_options'].items():
+        require(command.count(option) == 1 and json.loads(command[command.index(option) + 1]) == value, 'Projected JSON policy option differs')
+    expected_command = ['/root/workspace/.muxpd-ecpa-runtime/bin/python', str(run / 'producer/manager_source_bridge98_v3.py'),
+                        'serve', '--plugin-source', record['source'], '--state-root', str(run / 'manager-state'),
+                        '--model', '/root/workspace/models/Qwen3.5-35B-A3B', '--port', str(prepared['port'])]
+    if record['role'] == 'group':
+        expected_command.append('--groups')
+    require(record['command'] == expected_command, 'Actual Manager command differs from this run/source')
+    before, after = [inventory((run / name).read_text()) for name in ('npu-before.txt', 'npu-after.txt')]
+    require(before == after, 'Device inventory drift')
+    owned = stopped_owned(record)
+    status_receipts = statuses(run, record)
+    ranks = readbacks(run, record['role'])
+    binding = journal_binding(run, record, ranks, owned)
+    prompt = load(run / 'composite-plan.json')['phases'][0]['prompts'][0]
+    request = load(run / 'serving-request.json')
+    require(request == {'model': 'Qwen3.5-35B-A3B', 'prompt': prompt, 'temperature': 0, 'seed': 42, 'max_tokens': 8, 'ignore_eos': True}
+            and len(prompt) == 128, 'Serving request differs from bounded original prompt')
+    response = load(run / 'serving-response.json'); body = response.get('body', {})
+    require(response.get('status') == 200 and body.get('model') == request['model'] and len(body.get('choices', [])) == 1
+            and body['choices'][0].get('finish_reason') == 'length'
+            and body.get('usage', {}).get('completion_tokens') == 8
+            and body['usage'].get('prompt_tokens') == 128 and body['usage'].get('total_tokens') == 136,
+            'Bounded eight-token serving response incomplete')
+    shutdown_policy = record['manager_shutdown_policy']
+    require(shutdown_policy.get('installed_default_grace_seconds') == 10
+            and shutdown_policy.get('internal_escalation_cannot_be_excluded') is (record['cleanup']['shutdown_wait_seconds'] >= 10),
+            'Manager grace heuristic inconsistent; it is not graceful-drain proof')
+    patterns = ('force killing', 'shutdown mode', 'mode=abort', 'signal=SIGTERM', 'leaked semaphore', 'leaked shared_memory')
+    caveats = [{'line': i, 'text': line} for i, line in enumerate((run / 'process.log').read_text(errors='replace').splitlines(), 1)
+               if any(pattern in line for pattern in patterns)]
+    return {'run_path': str(run), 'label': record['label'], 'controller': common.identity(run / 'controller.json'),
+            'started_at': record['started_at'], 'finished_at': record['finished_at'], 'exit_code': 130,
+            'controller_passed': True, 'source_repository': record['source'], 'source_commit': SOURCE, 'source_status': '',
+            'type': KIND, 'role': record['role'], 'manager_runtime_binding': binding, 'status_receipts': status_receipts,
+            'startup_audit': common.identity(run / 'startup-readback-audit.json'), 'owned_process_count': len(owned),
+            'controller_signals': record['cleanup']['signals'], 'shutdown_wait_seconds': record['cleanup']['shutdown_wait_seconds'],
+            'manager_shutdown_policy': shutdown_policy, 'native_shutdown_log_caveats': caveats,
+            'historical_device_inventory': before, 'graceful_internal_drain_proven': False,
+            'configuration_binding': 'Saved configuration aliases, actual dry-run projection, exact helper CLI, launch-source reviewed-plan hash; journal plan_id itself hashes bundle registration only', 'scope': SCOPE}
+
+
+def current_inventory(terminal):
+    return common.walk_members(Path(terminal['run_path']), f"runs/{terminal['label']}")
+
+
+def assert_unchanged(manifest):
+    require(manifest.get('kind') == KIND and manifest.get('schema') == 'muxpd-manager-evidence-capsule-manifest-v1',
+            'Not the typed Manager manifest')
+    require(validate_manager_terminal(manifest['terminal']['run_path']) == manifest['terminal'], 'Terminal Manager receipt drift')
+    require(current_inventory(manifest['terminal']) == manifest['members'], 'Complete Manager run inventory drift')
+
+
+def freeze(run, capsule_id, output):
+    require(re.fullmatch(r'[a-z0-9][a-z0-9._-]+', capsule_id), 'Unsafe capsule id')
+    terminal = validate_manager_terminal(run)
+    value = {'schema': 'muxpd-manager-evidence-capsule-manifest-v1', 'kind': KIND, 'capsule_id': capsule_id,
+             'frozen_at': common.now(), 'terminal': terminal, 'members': current_inventory(terminal),
+             'producer': common.identity(__file__), 'archive_primitives': common.identity(common.__file__)}
+    assert_unchanged(value)
+    common.write_new(output, value)
+    return value
+
+
+def build(manifest_path, output):
+    manifest_path, output = Path(manifest_path), Path(output)
+    manifest = load(manifest_path)
+    require(re.fullmatch(r'[a-z0-9][a-z0-9._-]+', manifest['capsule_id']), 'Unsafe capsule id')
+    require(manifest.get('producer') == common.identity(__file__) and manifest.get('archive_primitives') == common.identity(common.__file__),
+            'Typed builder/primitives differ from frozen manifest')
+    output.mkdir(parents=False, exist_ok=False)
+    try:
+        assert_unchanged(manifest)
+        raw_manifest = manifest_path.read_bytes()
+        archive = output / f"{manifest['capsule_id']}.tar.gz"
+        with archive.open('xb') as target, gzip.GzipFile(filename='', mode='wb', fileobj=target, mtime=0, compresslevel=1) as zipped, tarfile.open(fileobj=zipped, mode='w|') as tar:
+            info, stream = common.tar_member('capsule-manifest.json', raw_manifest); tar.addfile(info, stream)
+            for row in manifest['members']:
+                info = tarfile.TarInfo(common.safe_name(row['member'])); info.mtime = 0
+                if row['type'] == 'symlink':
+                    info.type = tarfile.SYMTYPE; info.linkname = row['link_target']; tar.addfile(info)
+                else:
+                    path = Path(row['path']); info.size = row['bytes']; info.mode = path.stat().st_mode & 0o777
+                    with path.open('rb') as stream:
+                        tar.addfile(info, stream)
+        receipt = common.verify_archive(archive, manifest)
+        assert_unchanged(manifest)  # All members AND added/removed files and terminal state.
+        require(manifest_path.read_bytes() == raw_manifest, 'Manifest changed during build')
+        (output / 'manifest.json').write_bytes(raw_manifest)
+        receipt.update(schema='muxpd-manager-evidence-capsule-receipt-v1', kind=KIND, capsule_id=manifest['capsule_id'],
+                       manifest=common.identity(output / 'manifest.json'), completed_at=common.now(),
+                       producer=common.identity(__file__), archive_primitives=common.identity(common.__file__),
+                       terminal_exit_code=130, terminal_validation_before_and_after=True, complete_inventory_before_and_after=True,
+                       graceful_internal_drain_proven=False, scope=SCOPE)
+        common.write_new(output / 'receipt.json', receipt)
+        with (output / 'SHA256SUMS').open('x') as stream:
+            for path in (archive, output / 'manifest.json', output / 'receipt.json'):
+                stream.write(f"{common.identity(path)['sha256']}  {path.name}\n")
+        return receipt
+    except Exception as error:
+        common.write_new(output / 'BUILD-FAILED.json', {'failed_at': common.now(), 'error': repr(error), 'manifest': str(manifest_path)})
+        raise
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('command', choices=('validate', 'freeze', 'build'))
+    parser.add_argument('--run', type=Path)
+    parser.add_argument('--capsule-id')
+    parser.add_argument('--manifest', type=Path)
+    parser.add_argument('--output', type=Path)
+    args = parser.parse_args()
+    if args.command == 'validate':
+        result = validate_manager_terminal(args.run)
+    elif args.command == 'freeze':
+        result = freeze(args.run, args.capsule_id, args.output)
+    else:
+        result = build(args.manifest, args.output)
+    print(json.dumps(result, indent=2))
+
+
+if __name__ == '__main__':
+    main()

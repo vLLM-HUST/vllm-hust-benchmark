@@ -1,0 +1,115 @@
+"""Anonymous public release readback; read archives without extracting members."""
+
+import concurrent.futures
+import hashlib
+import json
+import shutil
+import subprocess
+import sys
+import urllib.parse
+import urllib.request
+from datetime import UTC, datetime
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent
+PUBLICATION = ROOT.parent
+
+
+def now():
+    return datetime.now(UTC).isoformat()
+
+
+def write_new(path, value):
+    with path.open("x") as stream:
+        json.dump(value, stream, indent=2, allow_nan=False)
+        stream.write("\n")
+
+
+def sha(path):
+    with path.open("rb") as stream:
+        return hashlib.file_digest(stream, "sha256").hexdigest()
+
+
+def download(row):
+    name = Path(row["path"]).name
+    target = ROOT / "assets" / name
+    receipt = {"name": name, "requested_url": row["planned_url"], "authentication": "none",
+               "started_at": now(), "expected_bytes": row["bytes"], "expected_sha256": row["sha256"]}
+    try:
+        request = urllib.request.Request(row["planned_url"], headers={"User-Agent": "MuxPD-independent-public-readback/2"})
+        digest = hashlib.sha256()
+        count = 0
+        with urllib.request.urlopen(request, timeout=60) as response, target.open("xb") as stream:
+            final = urllib.parse.urlsplit(response.url)
+            receipt.update(http_status=response.status, final_host=final.hostname, final_path=final.path,
+                           headers={key: response.headers.get(key) for key in ("Date", "ETag", "Content-Length", "Content-Type")})
+            while block := response.read(1024 * 1024):
+                stream.write(block)
+                digest.update(block)
+                count += len(block)
+        receipt.update(bytes=count, sha256=digest.hexdigest(),
+                       verified=count == row["bytes"] and digest.hexdigest() == row["sha256"])
+    except Exception as error:
+        receipt.update(verified=False, error=repr(error))
+    receipt["finished_at"] = now()
+    write_new(ROOT / "receipts" / (name + ".json"), receipt)
+    print(json.dumps({"download": name, "verified": receipt["verified"], "bytes": receipt.get("bytes")}), flush=True)
+    return receipt
+
+
+def main():
+    selection_path = PUBLICATION / "upload-selection-v2.json"
+    selection = json.loads(selection_path.read_text())
+    for name in ("assets", "receipts", "archive-verification"):
+        (ROOT / name).mkdir()
+    shutil.copyfile(selection_path, ROOT / "upload-selection-v2.json")
+    started = now()
+    with concurrent.futures.ThreadPoolExecutor(max_workers=3) as pool:
+        receipts = list(pool.map(download, selection["files"]))
+    write_new(ROOT / "download-summary.json", {"started_at": started, "finished_at": now(),
+              "selection_sha256": sha(selection_path), "assets": receipts,
+              "all_verified": all(item["verified"] for item in receipts)})
+    if not all(item["verified"] for item in receipts):
+        raise RuntimeError("Failed download receipt retained; no verification success claimed")
+
+    index_path = ROOT / "assets" / "publication-index-v2.json"
+    index = json.loads(index_path.read_text())
+    builder = PUBLICATION / "build_capsule.py"
+    if sha(builder) != index["builder"]["sha256"] or sha(builder) != sha(ROOT / "assets" / "build_capsule.py"):
+        raise ValueError("Frozen local builder differs from public identity")
+    archive_results = []
+    for capsule in index["capsules"]:
+        archive = ROOT / "assets" / Path(capsule["archive"]["path"]).name
+        manifest = Path(capsule["manifest"]["path"])
+        if sha(manifest) != capsule["manifest"]["sha256"] or manifest.stat().st_size != capsule["manifest"]["bytes"]:
+            raise ValueError("Local frozen manifest differs from downloaded public index")
+        command = [sys.executable, str(builder), "verify", "--archive", str(archive),
+                   "--manifest", str(manifest), "--archive-sha256", capsule["archive"]["sha256"]]
+        result = subprocess.run(command, capture_output=True, text=True, timeout=120)
+        receipt = {"capsule_id": capsule["capsule_id"], "command": command, "returncode": result.returncode,
+                   "stdout": result.stdout, "stderr": result.stderr, "finished_at": now(),
+                   "manifest_sha256": sha(manifest), "builder_sha256": sha(builder)}
+        receipt["verified"] = result.returncode == 0 and json.loads(result.stdout).get("verified") is True
+        write_new(ROOT / "archive-verification" / (capsule["capsule_id"] + ".json"), receipt)
+        archive_results.append(receipt)
+        print(json.dumps({"capsule": capsule["capsule_id"], "verified": receipt["verified"]}), flush=True)
+    value = {"schema": "muxpd-public-readback-v2", "started_at": started, "finished_at": now(),
+             "authentication": "none", "release_api_sha256": sha(ROOT / "release-api.json"),
+             "selection_sha256": sha(selection_path), "public_index_sha256": sha(index_path),
+             "producer_sha256": sha(Path(__file__)), "builder_sha256": sha(builder),
+             "asset_count": len(receipts), "asset_bytes": sum(item["bytes"] for item in receipts),
+             "all_asset_sizes_and_sha256_verified": all(item["verified"] for item in receipts),
+             "capsule_count": len(archive_results),
+             "all_capsule_members_verified": len(archive_results) == 13 and all(item["verified"] for item in archive_results),
+             "assets": [{key: item[key] for key in ("name", "requested_url", "bytes", "sha256", "verified")} for item in receipts],
+             "capsules": [{"capsule_id": item["capsule_id"], "verified": item["verified"],
+                           "members_verified": json.loads(item["stdout"]).get("members_verified") if item["verified"] else None}
+                          for item in archive_results],
+             "scope": "Anonymous public HTTP bytes and every embedded capsule member verified using exact frozen local builder and manifests bound to downloaded public index. No archive member extracted or executed. No model/quality/performance acceptance implied. No GitHub mutation."}
+    write_new(ROOT / "public-readback-receipt-v2.json", value)
+    print(json.dumps({key: value[key] for key in ("asset_count", "asset_bytes", "all_asset_sizes_and_sha256_verified", "capsule_count", "all_capsule_members_verified")}), flush=True)
+    return 0 if value["all_capsule_members_verified"] else 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

@@ -1,0 +1,127 @@
+{
+  "schema": "c16-equal-request-latency/v1",
+  "new_inference_requests": 0,
+  "method": {
+    "ttft": "first_token-start",
+    "tpot": "(last_token-first_token)/(output_tokens-1)",
+    "weighting": "equal weight per successful request",
+    "quantiles": "linear interpolation at (n-1)*q",
+    "primary_cohort": "starts and completes in [0,900]; starts strictly before 900",
+    "drain_cohort": "all in-window starts, including post-window completions",
+    "timestamp_scope": "client stream receive times; not per-token device timestamps"
+  },
+  "arms": [
+    {
+      "arm": "B0",
+      "run_id": "dab8ed7c4ee74f2d958dab5528514294",
+      "archive_sha256": "b73003daf983bb40632cc19023b2ece6e6315085e68d4fc89d926ee1e5a4f66e",
+      "recorded_client_tool_version": "0.1.2",
+      "recorded_tool_revision": null,
+      "measurement_seconds": 900.0,
+      "declared_chips": 2,
+      "records": 408,
+      "failed": 0,
+      "window": {
+        "requests": 392,
+        "ttft": {
+          "n": 392,
+          "mean_seconds": 1.685444190803611,
+          "p95_seconds": 3.3409653300419437,
+          "p99_seconds": 9.152650579037145
+        },
+        "tpot": {
+          "n": 392,
+          "mean_seconds": 0.07124618513916099,
+          "p95_seconds": 0.12617072135940485,
+          "p99_seconds": 0.14160230805332594
+        },
+        "undefined_tpot": 0,
+        "single_chunk_requests": 0,
+        "input_tokens_min": 1430,
+        "input_tokens_max": 40244,
+        "actual_ge16k_requests": 153
+      },
+      "including_drain": {
+        "requests": 408,
+        "ttft": {
+          "n": 408,
+          "mean_seconds": 1.7204418433852968,
+          "p95_seconds": 3.3996749782934783,
+          "p99_seconds": 9.152718728492037
+        },
+        "tpot": {
+          "n": 408,
+          "mean_seconds": 0.07071521610758681,
+          "p95_seconds": 0.12626645029256675,
+          "p99_seconds": 0.141159329479667
+        },
+        "undefined_tpot": 0,
+        "single_chunk_requests": 0,
+        "input_tokens_min": 1430,
+        "input_tokens_max": 49750,
+        "actual_ge16k_requests": 168
+      }
+    },
+    {
+      "arm": "B1",
+      "run_id": "fa0e01a32eef456bab4bebe51e4aa7dd",
+      "archive_sha256": "943fd515298b0618d3f17ef268ad2c82f1211f7fb66bbc12f8a3274157259b50",
+      "recorded_client_tool_version": "0.1.1",
+      "recorded_tool_revision": "29136f1f481ebab8566014a05b7ed53bcf79dc84",
+      "measurement_seconds": 900.0,
+      "declared_chips": 2,
+      "records": 1296,
+      "failed": 0,
+      "window": {
+        "requests": 1280,
+        "ttft": {
+          "n": 1280,
+          "mean_seconds": 0.3650110735480666,
+          "p95_seconds": 0.5886589169880608,
+          "p99_seconds": 0.8122166538162864
+        },
+        "tpot": {
+          "n": 1280,
+          "mean_seconds": 0.017941780835099376,
+          "p95_seconds": 0.022827096292141677,
+          "p99_seconds": 0.030016469674407794
+        },
+        "undefined_tpot": 0,
+        "single_chunk_requests": 0,
+        "input_tokens_min": 1430,
+        "input_tokens_max": 101561,
+        "actual_ge16k_requests": 847
+      },
+      "including_drain": {
+        "requests": 1296,
+        "ttft": {
+          "n": 1296,
+          "mean_seconds": 0.3663794781037543,
+          "p95_seconds": 0.5893698002473684,
+          "p99_seconds": 0.830164350668201
+        },
+        "tpot": {
+          "n": 1296,
+          "mean_seconds": 0.017917862622092755,
+          "p95_seconds": 0.022814707488558666,
+          "p99_seconds": 0.030015702404241684
+        },
+        "undefined_tpot": 0,
+        "single_chunk_requests": 0,
+        "input_tokens_min": 1430,
+        "input_tokens_max": 106308,
+        "actual_ge16k_requests": 862
+      }
+    }
+  ],
+  "descriptive_reduction_percent": {
+    "ttft": 78.3433307646911,
+    "tpot": 74.81720487903353
+  },
+  "limitations": [
+    "Recorded client version is not a fresh import attestation.",
+    "B1 physical occupancy sampling and applicable task quality/SLO still require evidence.",
+    "Mixed long inputs are not a controlled continuous 4K/16K stability pair.",
+    "These are existing deployment observations, not a new run or single-MOD causal effect."
+  ]
+}

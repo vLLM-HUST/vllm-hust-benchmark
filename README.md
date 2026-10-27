@@ -7,8 +7,10 @@
 数据检索与维护入口（Agent）：[数据索引与读写指南](DATA_INDEX.md) ·
 [机器可读集合索引](docs/data-index.json)。覆盖原始运行、报告、历史归档、网站来源和契约，明确读取、 追加、订正与验证规则；不移动或覆盖历史证据。
 
-SWE-bench Pro V1 真实 Agent 的独立环境与运行入口： [用户指南](docs/SWE_BENCH_PRO.zh-CN.md)（从一个 ARM 任务开始，无需
-Controller）。
+SWE-bench Pro
+V1：[从全新 CPU 工作区部署并运行一个真实 Agent](docs/SWE_BENCH_PRO.zh-CN.md#%E6%96%B0%E7%94%A8%E6%88%B7%E6%8E%A8%E8%8D%90%E5%85%A5%E5%8F%A3)。
+安装入口自动准备固定源码、独立客户端依赖、V1 数据和 ARM 任务镜像；只连接已有模型 API，无需 Controller。 平台管理员先提供独立 Docker
+执行模板和固定镜像仓库，不能把模型所在的 Ray 工作区当作任务执行环境。
 
 > The legacy Ascend benchmark, baseline, HF publication, and website-dispatch workflows have been
 > removed. The execution scripts and historical design notes below are retained for reference only;
@@ -27,12 +29,14 @@ Historical Frontier raw measurements and offline recomputation:
 [56-run raw archive](reports/frontier-raw-recovery-20261020/README.md) (BetterScale/Native and six
 additional MOD series; includes complete concurrency curves and SHA-256).
 
-The active delivery test plan is **V5.5**. Its machine-readable authority is
-`src/vllm_hust_benchmark/data/acceptance_v5_5.json`; see `docs/ACCEPTANCE_V5_5.md` for the human
-boundary and semantic-mirror provenance. V4.x material is historical only and cannot generate a
-current target, config ID, measurement queue or verdict.
+The current Project 4 midterm authority is **Project Milestone Test Outline V1.5**, sections 2.4 and
+3.4.1–3.4.4. See the
+[verified extract and current report](reports/vllm-hust-midterm-20261019/README.md). Prior
+standalone V5.5/V5.27 contracts and their validators are retained for historical records, not as
+additional current midterm acceptance requirements. Existing measurements remain immutable; reuse or
+recalculate applicable records before proposing missing measurements.
 
-Validate the contract with:
+Validate the historical V5.5 contract with:
 
 ```bash
 PYTHONPATH=src python scripts/validate_acceptance_v5_5.py

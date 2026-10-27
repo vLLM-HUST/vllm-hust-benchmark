@@ -1,0 +1,105 @@
+{
+  "dataset": "TerminalBench2.1",
+  "task": "cancel-async-tasks",
+  "scope": "partial-artifact verifier-only recovery",
+  "model_trial_result": {
+    "exception": "ContextLengthExceededError",
+    "reward": null,
+    "verifier_executed": false,
+    "task_complete": false
+  },
+  "recovery_result": {
+    "reward": 0,
+    "tests": 6,
+    "passed": 1,
+    "failed": 5,
+    "missing": 0,
+    "process_exit_code": 0
+  },
+  "answer_provenance": {
+    "kind": "deterministically reconstructed unsubmitted partial artifact",
+    "bytes": 1103,
+    "derived_sha256": "d75ef65e33c55661f7ecca52cfb87426235f7075a27e079b81678028ff6bbbfd",
+    "original_filesystem_sha256": null,
+    "original_mode": null,
+    "recovery_mode": "0644",
+    "interface_repaired": false
+  },
+  "resources": {
+    "image": "sha256:5011b5c105e46b2ca856715a1ffbb756a3864697460faf9f52266392811c7620",
+    "architecture": "ARM64",
+    "cpus": 1,
+    "memory_bytes": 2147483648,
+    "cpuset": "24-31",
+    "mtu": 1400,
+    "verifier_budget_seconds": 900
+  },
+  "dependency_transport": {
+    "fixed_bytes_reused": true,
+    "readonly": true,
+    "before_after_equal": true
+  },
+  "verifier_logs_bind": "read-write",
+  "additional_Agent_attempts": 0,
+  "additional_model_calls": 0,
+  "controls_repeated": 0,
+  "automatic_retry": false,
+  "released": true,
+  "interpretation": "One file-existence test passed; five original functional tests failed. Two rows record a subprocess import error for missing run_tasks; three cancellation rows record zero started tasks. The original context-failed unscored trial is unchanged. This is a separate partial-artifact verifier-only result, not a newly completed Agent trial.",
+  "failure_evidence": [
+    {
+      "name": "test_outputs.py::test_run_py_file_exists",
+      "status": "passed",
+      "evidence_kind": "artifact_exists"
+    },
+    {
+      "name": "test_outputs.py::test_tasks_run_concurrently",
+      "status": "failed",
+      "evidence_kind": "subprocess_import_error_missing_run_tasks"
+    },
+    {
+      "name": "test_outputs.py::test_tasks_obey_max_concurrent",
+      "status": "failed",
+      "evidence_kind": "subprocess_import_error_missing_run_tasks"
+    },
+    {
+      "name": "test_outputs.py::test_tasks_cancel_below_max_concurrent",
+      "status": "failed",
+      "evidence_kind": "zero_task_start_assertion; common import cause inferred from unchanged test harness, stderr not printed in this row"
+    },
+    {
+      "name": "test_outputs.py::test_tasks_cancel_at_max_concurrent",
+      "status": "failed",
+      "evidence_kind": "zero_task_start_assertion; common import cause inferred from unchanged test harness, stderr not printed in this row"
+    },
+    {
+      "name": "test_outputs.py::test_tasks_cancel_above_max_concurrent",
+      "status": "failed",
+      "evidence_kind": "zero_task_start_assertion; common import cause inferred from unchanged test harness, stderr not printed in this row"
+    }
+  ],
+  "coverage_limits": [
+    "not a submitted complete answer",
+    "original file mode and filesystem hash were not observed",
+    "no new Agent or model execution",
+    "does not establish performance of a repaired interface"
+  ],
+  "source_hashes": {
+    "original_receipt": "c651221389321d9db388a4bf0f31dee7622cba3b114350504f35f29fb8358bfa",
+    "recovery_receipt": "5f09985544ab143940b660b935c4c147c416d51d9808d02816f1bb466752c074",
+    "CTRF": "2d43e2a400ce7f975cd3ec20545cb385ddc83d9e13219d520d6052665a5006ea",
+    "stdout": "d406a8c6af0d8e25b71351d6c879ebf2381b41f71d80d4c77fafbfd1f0a7e29d",
+    "recovery_seal": "68c34bf5659e2fb6e2b8f865b899ced0b4d645120e9840b1d9aeff8df4af3ab4",
+    "plan": "b2664867bcc10a78712cf643fc0f1083f8fdbf731d47b994325cf2dde6872487"
+  },
+  "stdout_limitations": {
+    "original_missing_shell_env_warning_preserved": true,
+    "dependency_install_and_test_execution_observed": true,
+    "raw_stdout_access": "restricted; hash in index; original warning not deleted"
+  },
+  "seal_verification": {
+    "recovery_files": 22,
+    "original_files": 31,
+    "all_hashes_match": true
+  }
+}

@@ -1,0 +1,445 @@
+{
+  "schema": "swe-native018-incremental-catalog/v2",
+  "dataset": "SWE-bench-Pro V1",
+  "model": "Qwen3.5-35B-A3B",
+  "vllm": "0.18.0",
+  "vllm_ascend": "0.18.0",
+  "dataset_tasks": 731,
+  "attempted_unique_tasks": 12,
+  "recorded_official_resolved": 1,
+  "recorded_official_denominator": 12,
+  "official_unresolved_grading": 0,
+  "application_evidence_limited_tasks": 1,
+  "unattempted_tasks": 719,
+  "full_dataset_acceptance": false,
+  "prior_catalog": "reports/swe-native018-repository-20261026/catalog.json",
+  "prior_catalog_sha256": "b66f26dc992fa79d78f2993a60052b2a39e8071bef732a8980be68ff331cf652",
+  "confirmed_patch_application_failure_tasks": 2,
+  "entries": [
+    {
+      "run_id": "swe018-single-agent-r1",
+      "task_identity_sha256": "348c8612266efc316ec2058efdba16147230d1270d283e604f4d2d63bc598a4a",
+      "source": "reports/swe-native018-single-agent-20261026/summary.json",
+      "source_sha256": "c49e0a5acb0f1972cc19505186dda4e79c7a5641de29316ccb0ff0b6b1d09d8e",
+      "official_resolved": 0,
+      "official_denominator": 1,
+      "official_unresolved_grading": 0,
+      "model_calls": 100,
+      "elapsed_seconds": 435.97594330459833,
+      "status": "LimitsExceeded",
+      "agent_submitted": false,
+      "patch_bytes": 5782,
+      "patch_sha256": "f83e612dcdd18e2755a9f2ccaf1591a290273f3b0767fac97f93609388e68a30",
+      "patch_application_evidence_limited": false,
+      "parsed_test_counts": {},
+      "confirmed_patch_application_failure": false,
+      "apply_exit_code": null,
+      "patch_applied": null
+    },
+    {
+      "run_id": "swe018-first-missing-r3",
+      "task_identity_sha256": "03f203cc93b173654c3210d4a4f3a98eb8215fc68db640162e63a8b28f585e9a",
+      "source": "reports/swe-native018-incremental-20261026/summary.json",
+      "source_sha256": "2ffbc5ff20f52b6901d1f7c2cdc486b894da058358387c538895cafccc396527",
+      "official_resolved": 0,
+      "official_denominator": 1,
+      "official_unresolved_grading": 0,
+      "model_calls": 36,
+      "elapsed_seconds": 316.40756527893245,
+      "status": "Submitted",
+      "agent_submitted": true,
+      "patch_bytes": 160235,
+      "patch_sha256": "3d516039d17a5bc20218bfdeab92688213a33ca719e59348ea4a3a263e669898",
+      "patch_application_evidence_limited": true,
+      "parsed_test_counts": {
+        "FAILED": 1
+      },
+      "confirmed_patch_application_failure": false,
+      "apply_exit_code": null,
+      "patch_applied": null
+    },
+    {
+      "run_id": "swe018-cached-missing-r2",
+      "task_identity_sha256": "2c0651e2cab5a1844c15bda09ac9dab68618ac12eda0c5d2967fd1f350f93586",
+      "source": "reports/swe-native018-incremental-20261026/cached-summary.json",
+      "source_sha256": "74a27674838f7b99ff2aacd416fcf705612536f13619cc6571359c47ca803178",
+      "official_resolved": 0,
+      "official_denominator": 1,
+      "official_unresolved_grading": 0,
+      "model_calls": 45,
+      "elapsed_seconds": 293.6001821886748,
+      "status": "Submitted",
+      "agent_submitted": true,
+      "patch_bytes": 16835,
+      "patch_sha256": "a443e7e9c41b410aa1b1d335a7c0b8bc32630fac36a2842dde45b666c7229a60",
+      "patch_application_evidence_limited": false,
+      "parsed_test_counts": {
+        "PASSED": 172,
+        "FAILED": 1
+      },
+      "confirmed_patch_application_failure": false,
+      "apply_exit_code": null,
+      "patch_applied": null
+    },
+    {
+      "run_id": "swe018-next-049-r1",
+      "task_identity_sha256": "8d6fe0f61e2051275215e057e662e43dff2dce9058394e556c479abb6a99ce12",
+      "source": "reports/swe-native018-batch-20261026/summary-049.json",
+      "source_sha256": "e95a0ce6ec6f8d2b7fb89117ed2677535c0e797ca1ff84d58a34af921815819a",
+      "official_resolved": 0,
+      "official_denominator": 1,
+      "official_unresolved_grading": 0,
+      "model_calls": 54,
+      "elapsed_seconds": 465.91972022503614,
+      "status": "Submitted",
+      "agent_submitted": true,
+      "patch_bytes": 145150,
+      "patch_sha256": "60bdc1fde90c5d78d72d4be6391acbc2de18165faed6533440897c9e9771e742",
+      "patch_application_evidence_limited": false,
+      "confirmed_patch_application_failure": true,
+      "apply_exit_code": 1,
+      "patch_applied": false,
+      "state_capture": "complete",
+      "parsed_test_counts": {
+        "PASSED": 297,
+        "FAILED": 3
+      },
+      "test_count_scope": "Raw parser entries before official name-set scoring",
+      "official_test_coverage": {
+        "fail_to_pass": {
+          "expected": 3,
+          "passed": 0,
+          "not_passed": 3,
+          "missing": 0
+        },
+        "pass_to_pass": {
+          "expected": 288,
+          "passed": 288,
+          "not_passed": 0,
+          "missing": 0
+        }
+      }
+    },
+    {
+      "run_id": "swe018-next-087-r1",
+      "task_identity_sha256": "6739671e21539d95f2175078ccf932c200efb158f422835ec971654f5785da99",
+      "source": "reports/swe-native018-batch-20261026/summary-087.json",
+      "source_sha256": "9eef244df1350e0c98d3b045a8976328aa8aad371696e1c134a9aae2478a31c5",
+      "official_resolved": 0,
+      "official_denominator": 1,
+      "official_unresolved_grading": 0,
+      "model_calls": 72,
+      "elapsed_seconds": 695.520517423749,
+      "status": "Submitted",
+      "agent_submitted": true,
+      "patch_bytes": 12331,
+      "patch_sha256": "c6aa39739a5e3b28a8bd5388bc0d4048fab20792f860c33f40a5185fc4975962",
+      "patch_application_evidence_limited": false,
+      "confirmed_patch_application_failure": false,
+      "apply_exit_code": 0,
+      "patch_applied": true,
+      "state_capture": "complete",
+      "parsed_test_counts": {
+        "PASSED": 192,
+        "FAILED": 3
+      },
+      "test_count_scope": "Raw parser entries before official name-set scoring",
+      "official_test_coverage": {
+        "fail_to_pass": {
+          "expected": 3,
+          "passed": 2,
+          "not_passed": 1,
+          "missing": 0
+        },
+        "pass_to_pass": {
+          "expected": 190,
+          "passed": 190,
+          "not_passed": 0,
+          "missing": 0
+        }
+      }
+    },
+    {
+      "run_id": "swe018-next-0c8-r1",
+      "task_identity_sha256": "612cf90ca9350bc41ec578bda1b840d72a9a9ebd1c9ca112136fb716e51db151",
+      "source": "reports/swe-native018-batch-20261026/summary-0c8.json",
+      "source_sha256": "581e949a2b814aac3df3b73a30aa98065bb82aee3abe6638e9d28ed51a4b063d",
+      "official_resolved": 0,
+      "official_denominator": 1,
+      "official_unresolved_grading": 0,
+      "model_calls": 31,
+      "elapsed_seconds": 257.40147628448904,
+      "status": "Submitted",
+      "agent_submitted": true,
+      "patch_bytes": 23102,
+      "patch_sha256": "d46238b67001ce12af4380f9f1118365183ab4f1237d621de4b91eb1d2124b15",
+      "patch_application_evidence_limited": false,
+      "confirmed_patch_application_failure": false,
+      "apply_exit_code": 0,
+      "patch_applied": true,
+      "state_capture": "complete",
+      "parsed_test_counts": {
+        "PASSED": 96,
+        "FAILED": 1
+      },
+      "test_count_scope": "Raw parser entries before official name-set scoring",
+      "official_test_coverage": {
+        "fail_to_pass": {
+          "expected": 1,
+          "passed": 0,
+          "not_passed": 1,
+          "missing": 0
+        },
+        "pass_to_pass": {
+          "expected": 96,
+          "passed": 96,
+          "not_passed": 0,
+          "missing": 0
+        }
+      }
+    },
+    {
+      "run_id": "swe018-next-0f7-r1",
+      "task_identity_sha256": "3f72a99ad2319e7bbe458c883c4e0c6de31ae408372e13848ef9ace6621563e4",
+      "source": "reports/swe-native018-batch-20261026/summary-0f7.json",
+      "source_sha256": "f1fb9e90a493852f6eec959c23ec13e4d46bcb06e84505f26281f93a2891b941",
+      "official_resolved": 0,
+      "official_denominator": 1,
+      "official_unresolved_grading": 0,
+      "model_calls": 49,
+      "elapsed_seconds": 219.04692508466542,
+      "status": "Submitted",
+      "agent_submitted": true,
+      "patch_bytes": 11538,
+      "patch_sha256": "1cc84219175cae68172184ac7feb806d39ed72c7d9ee78b4fecfe06d225ab5cd",
+      "patch_application_evidence_limited": false,
+      "confirmed_patch_application_failure": false,
+      "apply_exit_code": 0,
+      "patch_applied": true,
+      "state_capture": "complete",
+      "parsed_test_counts": {
+        "PASSED": 32,
+        "FAILED": 3
+      },
+      "test_count_scope": "Raw parser entries before official name-set scoring",
+      "official_test_coverage": {
+        "fail_to_pass": {
+          "expected": 8,
+          "passed": 5,
+          "not_passed": 3,
+          "missing": 0
+        },
+        "pass_to_pass": {
+          "expected": 27,
+          "passed": 27,
+          "not_passed": 0,
+          "missing": 0
+        }
+      }
+    },
+    {
+      "run_id": "swe018-next-18c-r1",
+      "task_identity_sha256": "4711ce431f53bfbccb0c61267eb22dc99af3945614172a58c6445b5f3f8a6c88",
+      "source": "reports/swe-native018-batch-20261026/summary-18c.json",
+      "source_sha256": "74c2d0248de7fce8c98a81cc3edb5d954b88d3cf9d98728d64f33d1a62ca0a1d",
+      "official_resolved": 0,
+      "official_denominator": 1,
+      "official_unresolved_grading": 0,
+      "model_calls": 48,
+      "elapsed_seconds": 210.36633714847267,
+      "status": "Submitted",
+      "agent_submitted": true,
+      "patch_bytes": 131581,
+      "patch_sha256": "01412df4c2975d450d3562b8d1f4727603f44ad74bc9b6185ec060b424323a16",
+      "patch_application_evidence_limited": false,
+      "confirmed_patch_application_failure": true,
+      "apply_exit_code": 1,
+      "patch_applied": false,
+      "state_capture": "complete",
+      "parsed_test_counts": {
+        "PASSED": 418,
+        "FAILED": 6
+      },
+      "test_count_scope": "Raw parser entries before official name-set scoring",
+      "official_test_coverage": {
+        "fail_to_pass": {
+          "expected": 7,
+          "passed": 0,
+          "not_passed": 7,
+          "missing": 3
+        },
+        "pass_to_pass": {
+          "expected": 418,
+          "passed": 418,
+          "not_passed": 0,
+          "missing": 0
+        }
+      }
+    },
+    {
+      "run_id": "swe018-next-ans-r1",
+      "task_identity_sha256": "4cffc13d4aeed1725ecdca55be2e92db247a270ff588591157c47ace8fd73e8c",
+      "source": "reports/swe-native018-batch-20261026/summary-ans.json",
+      "source_sha256": "972015006ebe9766a8e163165235cf791aa3728b46a1a4a85ba3e52eb4b1a378",
+      "official_resolved": 1,
+      "official_denominator": 1,
+      "official_unresolved_grading": 0,
+      "model_calls": 27,
+      "elapsed_seconds": 297.3094043638557,
+      "status": "Submitted",
+      "agent_submitted": true,
+      "patch_bytes": 23632,
+      "patch_sha256": "6a2d8492b633afa231cabaf5fe1c6242e43095754a644b1f1bdef1c7727b0f95",
+      "patch_application_evidence_limited": false,
+      "confirmed_patch_application_failure": false,
+      "apply_exit_code": 0,
+      "patch_applied": true,
+      "state_capture": "complete",
+      "parsed_test_counts": {
+        "PASSED": 16
+      },
+      "test_count_scope": "Raw parser entries before official name-set scoring",
+      "official_test_coverage": {
+        "fail_to_pass": {
+          "expected": 1,
+          "passed": 1,
+          "not_passed": 0,
+          "missing": 0
+        },
+        "pass_to_pass": {
+          "expected": 15,
+          "passed": 15,
+          "not_passed": 0,
+          "missing": 0
+        }
+      }
+    },
+    {
+      "run_id": "swe018-repo-02-r1",
+      "task_identity_sha256": "bb130bed1f3b25208e2b182a1105ea9927cb307c7e9075cb0e2ff3dbf987090c",
+      "source": "reports/swe-native018-repository-20261026/summary-element.json",
+      "source_sha256": "938971e6f3fc41e6e08990d5cb6bc8f940fa955b741d90f9aedc4f670f54871d",
+      "official_resolved": 0,
+      "official_denominator": 1,
+      "official_unresolved_grading": 0,
+      "model_calls": 28,
+      "elapsed_seconds": 225.54492508992553,
+      "status": "Submitted",
+      "agent_submitted": true,
+      "patch_bytes": 5878,
+      "patch_sha256": "4fb90351150ee7f8db2ec044fadf146ce3b2ce6defe618cebf09b4bc8f8c5dc7",
+      "patch_application_evidence_limited": false,
+      "confirmed_patch_application_failure": false,
+      "apply_exit_code": 0,
+      "patch_applied": true,
+      "state_capture": "complete",
+      "parsed_test_counts": {
+        "PASSED": 437
+      },
+      "test_count_scope": "Raw parser entries before official name-set scoring",
+      "official_test_coverage": {
+        "fail_to_pass": {
+          "expected": 1,
+          "passed": 0,
+          "not_passed": 1,
+          "missing": 1
+        },
+        "pass_to_pass": {
+          "expected": 385,
+          "passed": 385,
+          "not_passed": 0,
+          "missing": 0
+        }
+      }
+    },
+    {
+      "run_id": "swe018-repo-04-r1",
+      "task_identity_sha256": "ddfa39baeccbfca0584ccdef935b9e5b77d44f491f0777786d1639c8145a48ca",
+      "source": "reports/swe-native018-next-repository-20261026/summary-vuls.json",
+      "source_sha256": "904db19cf5c881fec9d413c004376ab938f8e1460539d1cb458d967eb443a443",
+      "official_resolved": 0,
+      "official_denominator": 1,
+      "official_unresolved_grading": 0,
+      "model_calls": 33,
+      "elapsed_seconds": 319.77757485955954,
+      "status": "Submitted",
+      "agent_submitted": true,
+      "patch_bytes": 3415,
+      "patch_sha256": "ae40f754dbdbdf8f01f628a817c6ab3b5ad0333ebea31b875b9a6b922fc4b960",
+      "patch_application_evidence_limited": false,
+      "confirmed_patch_application_failure": false,
+      "apply_exit_code": 0,
+      "patch_applied": true,
+      "state_capture": "complete",
+      "parsed_test_counts": {
+        "FAILED": 4,
+        "PASSED": 20
+      },
+      "test_count_scope": "Raw parser entries before official name-set scoring",
+      "official_test_coverage": {
+        "fail_to_pass": {
+          "expected": 2,
+          "passed": 0,
+          "not_passed": 2,
+          "missing": 0
+        },
+        "pass_to_pass": {
+          "expected": 22,
+          "passed": 20,
+          "not_passed": 2,
+          "missing": 0
+        }
+      },
+      "raw_test_coverage": null
+    },
+    {
+      "run_id": "swe018-repo-03-r1",
+      "task_identity_sha256": "26bf5cb2f72034b96398c460791747bc0ecbc069c063e327b58ea9dcc97440c7",
+      "source": "reports/swe-native018-next-repository-20261026/summary-flipt.json",
+      "source_sha256": "4e524d2e077bf573d8249f15203851c055ece28792294c00ec0578ea7da9d64c",
+      "official_resolved": 0,
+      "official_denominator": 1,
+      "official_unresolved_grading": 0,
+      "model_calls": 51,
+      "elapsed_seconds": 262.0626379288733,
+      "status": "Submitted",
+      "agent_submitted": true,
+      "patch_bytes": 173258,
+      "patch_sha256": "14ca77b3744caf2a7cd66703b8d7d2b2f0d6c1aa57cabd8f07fa1a83443a0d07",
+      "patch_application_evidence_limited": false,
+      "confirmed_patch_application_failure": false,
+      "apply_exit_code": 0,
+      "patch_applied": true,
+      "state_capture": "complete",
+      "parsed_test_counts": {
+        "PASSED": 14
+      },
+      "test_count_scope": "Raw parser entries before official name-set scoring",
+      "official_test_coverage": {
+        "fail_to_pass": {
+          "expected": 4,
+          "passed": 3,
+          "not_passed": 1,
+          "missing": 1
+        },
+        "pass_to_pass": {
+          "expected": 0,
+          "passed": 0,
+          "not_passed": 0,
+          "missing": 0
+        }
+      },
+      "raw_test_coverage": {
+        "raw_top_level": {
+          "PASSED": 14,
+          "FAILED": 2
+        },
+        "official_parser_records": 14,
+        "missing_expected_F2P_raw_failed": true,
+        "parser_explanation": "Frozen parser matches only top-level PASS lines, omits FAIL lines; expected missing1 was actually executed and failed. No parser or score change.",
+        "raw_package_setup_failures": 2,
+        "scope": "Top-level test statuses only, not total nested subtests. Package setup failures also retained."
+      }
+    }
+  ]
+}

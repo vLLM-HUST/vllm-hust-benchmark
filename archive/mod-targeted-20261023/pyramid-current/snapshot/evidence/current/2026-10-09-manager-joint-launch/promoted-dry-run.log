@@ -1,0 +1,47 @@
+[W1009 20:47:20.472944329 FunctionLoader.cpp:48] Warning: LD_PRELOAD detected, FunctionLoader prefers RTLD_DEFAULT for symbol resolution. (function operator())
+INFO 10-09 20:47:26 [__init__.py:44] Available plugins for group vllm.platform_plugins:
+INFO 10-09 20:47:26 [__init__.py:46] - ascend -> vllm_ascend:register
+INFO 10-09 20:47:26 [__init__.py:49] All plugins in this group will be loaded. Set `VLLM_PLUGINS` to control which plugins to load.
+INFO 10-09 20:47:26 [__init__.py:237] Platform plugin ascend is activated
+INFO 10-09 20:47:26 [platform.py:61] Breakable cudagraph is force disabled on Ascend because DeepSeek V4 PIECEWISE cudagraph is not supported yet.
+{
+  "command": [
+    "python",
+    "-c",
+    "pass"
+  ],
+  "environment": {
+    "VLLM_ASCEND_KVCOMPRESS_ENABLED": "1",
+    "VLLM_PLUGINS": "ascend,ascend_kvcompress",
+    "VLLMHUST_EXT_ENABLED_BUNDLES": "org.vllm-hust.ascend-kvcompress,org.vllm-hust.ascend-pyramidkv"
+  },
+  "native_extension_manifests": {
+    "org.vllm-hust.ascend-kvcompress": {
+      "schema_version": "1.0",
+      "bundle_id": "org.vllm-hust.ascend-kvcompress",
+      "bundle_version": "0.9.0",
+      "host_api_range": ">=1,<2",
+      "components": [
+        {
+          "component_id": "ascend-kvcompress",
+          "contracts": [
+            "vllm.general_plugins"
+          ],
+          "execution_planes": [
+            "scheduler",
+            "worker",
+            "device"
+          ],
+          "isolation": "trusted_in_process",
+          "implementation_ref": "vllm_ascend_kvcompress.plugin:register",
+          "permissions": [
+            "device_access",
+            "filesystem_read",
+            "filesystem_write",
+            "network_egress"
+          ]
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,65 @@
+{
+  "campaign_sha256": "35790eab29507688888539a89c8e26e7e9d3119a98901548ea2350a2ce663a3b",
+  "case_id": "kvcompress-knorm-vllm-0.23.3",
+  "classification": "isolated-wheel-install-order-preflight-not-host-execution-or-oracle",
+  "orders": [
+    {
+      "entry_points": [
+        {
+          "group": "vllm.general_plugins",
+          "name": "ascend_kvcompress",
+          "value": "vllm_ascend_kvcompress.plugin:register"
+        },
+        {
+          "group": "vllm.general_plugins",
+          "name": "vllm-hust-knorm",
+          "value": "vllm_hust_knorm.bootstrap:register_plugins"
+        }
+      ],
+      "host_started": false,
+      "members": [
+        "kvcompress",
+        "knorm"
+      ],
+      "order_id": "kvcompress-then-knorm",
+      "plugin_imported": false,
+      "versions": {
+        "vllm-ascend-kvcompress-hust": "0.9.0",
+        "vllm-hust-knorm": "0.1.0"
+      }
+    },
+    {
+      "entry_points": [
+        {
+          "group": "vllm.general_plugins",
+          "name": "ascend_kvcompress",
+          "value": "vllm_ascend_kvcompress.plugin:register"
+        },
+        {
+          "group": "vllm.general_plugins",
+          "name": "vllm-hust-knorm",
+          "value": "vllm_hust_knorm.bootstrap:register_plugins"
+        }
+      ],
+      "host_started": false,
+      "members": [
+        "knorm",
+        "kvcompress"
+      ],
+      "order_id": "knorm-then-kvcompress",
+      "plugin_imported": false,
+      "versions": {
+        "vllm-ascend-kvcompress-hust": "0.9.0",
+        "vllm-hust-knorm": "0.1.0"
+      }
+    }
+  ],
+  "performance_benefit": "unmeasured",
+  "runtime_effective": "unmeasured",
+  "schema": "ecpa-h2-install-order-preflight-result/0.1",
+  "score_eligible": false,
+  "wheel_sha256": {
+    "knorm": "a3dc5f84b2a4a7df3a8141c4772d4ac499c9d41b799438a1307fb656c01f2083",
+    "kvcompress": "cad71c30bbf4025bfa53fb8e87b742cd6413f60089c818a3039c502d1738cebe"
+  }
+}

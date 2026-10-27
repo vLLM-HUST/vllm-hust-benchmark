@@ -8,10 +8,10 @@ import tarfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-REVISION = "49eafdd80b48685212e5f4962b02531274c0e2d1"  # pragma: allowlist secret
+REVISION = "5a79f65fe62573175e4e0a3433c4bfd2f896c1b7"  # pragma: allowlist secret
 REPORT_DIR = "reports/vllm-hust-midterm-20261019"
 REPORT = REPORT_DIR + "/中期测试报告.md"
-OUTPUT = ROOT / "website-publication/data/midterm-v068.json"
+OUTPUT = ROOT / "website-publication/data/midterm-v072.json"
 
 # Repository-relative locators are resolved against the website's exact benchmark
 # publication commit, not a moving main branch or a local acquisition path.
@@ -27,6 +27,9 @@ EVIDENCE = {
         "../../website-publication/data/request-throttling-dataset-matrix-20261018/frontierscience.json",
         "../../website-publication/data/request-throttling-dataset-matrix-20261018/hle-gold.json",
         "../../website-publication/data/request-throttling-dataset-matrix-20261018/hle-revision.json",
+        "../frontierscience-combination-quality-20261022/summary.json",
+        "../native-version-recovery-20261022/version-mapping.json",
+        "../mmlu-quality018-20261022/quality018-completed-audit-r1.json",
     ],
     "reference-closure": ["m01-recovery/reference-closure-20261022"],
     "worker-model": ["m01-recovery/worker-model-20261022"],
@@ -73,6 +76,11 @@ EVIDENCE = {
         "m01-recovery/logits-collective-reference-20261021"
     ],
     "m01-verdict": [
+        "m01-method-v527.json",
+        "test-outline-v527.docx",
+        "m01-recovery/method-v526-20261023",
+    ],
+    "m01-historical": [
         "m01-recovery/request-assessment-20261022",
         "m01-recovery/accounting-assessment-20261022",
         "m01-recovery/reference-closure-20261022",
@@ -89,7 +97,7 @@ def evidence_locator(relative):
     return {
         "path": path.relative_to(ROOT).as_posix(),
         "kind": "tree" if path.is_dir() else "blob",
-        "label": "B0 + B1 原始归档 / original archives"
+        "label": "开发栈对照 + B1 原始归档 / original archives"
         if relative == "."
         else relative,
     }
@@ -191,23 +199,66 @@ def kv_audit():
     return results
 
 
+def current_summary():
+    """Separate the fixed B0 from historical control fields without rewriting runs."""
+    quality_path = "reports/mmlu-quality018-20261022/quality018-completed-audit-r1.json"
+    quality = json.loads((ROOT / quality_path).read_text())
+    assert quality["actual_runtime"] == {"vllm": "0.18.0", "ascend": "0.18.0"}
+    best = max(quality["comparisons"], key=lambda item: item["candidate_correct"])
+    assert best["requests_byte_content_equivalent"] and best["scorer_identical"]
+    performance_path = "website-publication/data/dataset_validation_qwen35_mmlu_school028_inf_out256.json"
+    performance = json.loads((ROOT / performance_path).read_text())
+    return {
+        "dataset": "MMLU-Pro",
+        "model": performance["scenario"]["model"],
+        "precision": performance["scenario"]["precision"],
+        "quality": {
+            "b0": quality["counts"],
+            "b0_runtime": quality["actual_runtime"],
+            "b1": best,
+            "candidate_pool": quality["comparisons"],
+            "output_limit": 8192,
+            "evidence_path": quality_path,
+            "scope": "Fixed 200 requests; not a full-corpus or statistical noninferiority claim",
+        },
+        "performance": {
+            "b0": None,
+            "b0_status": "no-matched-0.18-baseline-in-this-publication",
+            "output_limit": performance["scenario"]["output_length"],
+            "requests": performance["scenario"]["num_prompts"],
+            "b1_metrics": [
+                {
+                    "metric_id": row["metric_id"],
+                    "value": row["value"],
+                    "selected_candidate_id": row["selected_candidate_id"],
+                    "provenance": row["provenance"],
+                    "delta_vs_b0": None,
+                }
+                for row in performance["results"]
+            ],
+            "development_control_evidence_path": performance_path,
+        },
+        "b1_runtime": {"vllm": "0.28.1 development", "ascend": "0.25.1rc2 development"},
+    }
+
+
 def build():
     raw = pinned(REPORT)
     text = raw.decode()
-    assert "报告版本：V0.68" in text
+    assert "报告版本：V0.72" in text
     url = f"https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/{REVISION}/{REPORT}"
     specs = [
         (
             "baseline018",
-            "0.18系列基线 / 0.18 baseline evidence",
+            "固定B0 · 0.18/0.18 / Fixed B0 · 0.18/0.18",
             "### 3.3 0.18系列基线证据",
-            "已有Qwen3.5 SWE-prefix-reuse五个900秒正式窗口，零失败，保留0.18/0.18及text-only兼容补丁身份。第五章主要性能及200题配对为0.28.1 / Ascend 0.25.1rc2开发栈对照，5.11节另列0.23/0.23配对；这些收益不代表相对0.18的收益，不同工况不互相代替。",
+            "已有Qwen3.5 SWE-prefix-reuse五个900秒正式窗口，零失败，保留0.18/0.18及text-only兼容补丁身份。第五章主要性能及恢复200题配对为0.28.1 / Ascend 0.25.1rc2开发栈对照；5.11节新增0.18 Native固定200题151/200及已有三方案同题比较，另列0.23/0.23配对。不同工况不互相代替。",
         ),
         (
             "dataset-quality-inventory",
             "既有任务质量与配对缺项 / Existing task quality and pairing gaps",
             "### 5.11 既有任务质量与配置配对",
-            "三项数据集已有多方案质量观测：MMLU-Pro完整12032题与200题回归分列，HLE/FrontierScience含BetterScale评分及Controller 0.23/0.23同工况配对。Qwen替代裁判、单次运行，未决项保留完整分母；不是官方评分复现。指定0.18及本轮具体组合的对应配对仍未完成，不等于所有优化方案缺测。独立限长压测不代替任务质量；公开投影不能独立重评全部私有问答。",
+            "MMLU-Pro完整12032题与200题回归分列。指定0.18 Native固定200题151/200，复用同题同评分器KV物化152/200、Microflow149/200、恢复组合146/200；运行栈与优化配置分列，不宣称统计非劣。HLE/FrontierScience保留既有方案及Controller 0.23/0.23配对；当前组合FrontierScience为Olympiad62/100、Research2/60，未决5/3项。替代裁判及未决评分限制保留，独立压测不代替任务质量，公开投影不含完整私有问答。",
         ),
         (
             "reference-closure",
@@ -261,7 +312,7 @@ def build():
             "recovered-quality",
             "恢复环境质量复核 / Recovered-runtime quality",
             "### 5.8 恢复环境完整回答质量复核",
-            "同一200题、原评分器、out8192，新服务与空编译缓存，计量观察器关闭。保存全部SSE和截断，按固定分母评分；与既有B0及Microflow结果分别比较，不冒充同环境新增性能配对或统计非劣性结论。",
+            "同一200题、原评分器、out8192，新服务与空编译缓存，计量观察器关闭。保存全部SSE和截断，按固定分母评分；与既有开发栈对照及Microflow结果分别比较，不冒充同环境新增性能配对或统计非劣性结论。",
         ),
         (
             "native-paired-quality",
@@ -297,7 +348,7 @@ def build():
             "m01",
             "M01 有效算力进展 / Effective compute progress",
             "#### r21 设备映射与同轮计量",
-            "V0.57：恢复环境投影及词表通信参考已完成；M01本轮结论为证据受限、未通过验收，不等于实测低于50%。具体同窗口、运算量与匹配参考限制见独立判定表。保留既有原始计量与全部失败，不采纳原始证据不可用的r23结果，正式B0/B1性能不变。",
+            "V0.57：恢复环境投影及词表通信参考已完成；M01本轮结论为证据受限、未通过验收，不等于实测低于50%。具体同窗口、运算量与匹配参考限制见独立判定表。保留既有原始计量与全部失败，不采纳原始证据不可用的r23结果，正式开发栈对照/B1性能不变。",
         ),
         (
             "runtime-recovery",
@@ -309,7 +360,7 @@ def build():
             "state-commit",
             "状态提交隔离验证 / Isolated state-commit validation",
             "#### 状态提交内核恢复验证",
-            "锁定state_commit.publish源码；r1/r2导入失败原样保留。r3使用独立虚拟环境、禁用系统site-packages，两卡各24个用例（6空、18非空）及同卡跨流事件检查通过；保存数组独立CPU重算完全相等，变输入产生不同accepted输出。三次尝试均新进程、新输出目录、全新编译缓存，不导入前次缓存或推理状态，四卡释放。恢复候选未证明等同原运行时；仅证明合成用例下eager状态提交和同卡跨流行为，不证明完整模型质量、图执行、跨卡时钟对齐或全模型执行流闭合，不能排除完整模型跨轮状态污染。M01仍未判定，B0/B1数值不变。",
+            "锁定state_commit.publish源码；r1/r2导入失败原样保留。r3使用独立虚拟环境、禁用系统site-packages，两卡各24个用例（6空、18非空）及同卡跨流事件检查通过；保存数组独立CPU重算完全相等，变输入产生不同accepted输出。三次尝试均新进程、新输出目录、全新编译缓存，不导入前次缓存或推理状态，四卡释放。恢复候选未证明等同原运行时；仅证明合成用例下eager状态提交和同卡跨流行为，不证明完整模型质量、图执行、跨卡时钟对齐或全模型执行流闭合，不能排除完整模型跨轮状态污染。M01仍未判定，开发栈对照/B1数值不变。",
         ),
         (
             "model-runtime",
@@ -323,7 +374,7 @@ def build():
             "preprocess-publication",
             "GDN 发布与预处理图验证 / GDN publication and preprocessing graphs",
             "#### GDN 元数据发布与预处理图重放验证",
-            "两卡、两个元数据bank、80/1024/2048/4096容量，64次变元数据图重放及560项独立CPU数值复算通过。前两次探针准入失败保留；成功轮新进程、空编译缓存，四卡释放。仅验证实际MTPFrame发布和preprocess局部路径，未覆盖完整模型并发批次、全执行流依赖或历史设备映射恢复。两轮out256性能记录缺少结束原因与原始生成token，不能据此判完整质量。完整有效F和M01仍未判定，正式B0/B1不变。",
+            "两卡、两个元数据bank、80/1024/2048/4096容量，64次变元数据图重放及560项独立CPU数值复算通过。前两次探针准入失败保留；成功轮新进程、空编译缓存，四卡释放。仅验证实际MTPFrame发布和preprocess局部路径，未覆盖完整模型并发批次、全执行流依赖或历史设备映射恢复。两轮out256性能记录缺少结束原因与原始生成token，不能据此判完整质量。完整有效F和M01仍未判定，正式开发栈对照/B1不变。",
         )
     )
     sections = []
@@ -332,7 +383,7 @@ def build():
             "projection-references",
             "投影算子参考标定 / Projection reference calibration",
             "#### 恢复环境投影算子参考标定",
-            "恢复环境两卡覆盖121种密集形状、36,708个实际专家分布及45种词表形状；按r7调用次数加权，保留全部重复与两卡差异。每组新进程、空编译缓存，四卡释放。独立热重放组件参考不等于整模型关键路径；图填充运算不冒充有效F，M01仍未判定，正式B0/B1不变。",
+            "恢复环境两卡覆盖121种密集形状、36,708个实际专家分布及45种词表形状；按r7调用次数加权，保留全部重复与两卡差异。每组新进程、空编译缓存，四卡释放。独立热重放组件参考不等于整模型关键路径；图填充运算不冒充有效F，M01仍未判定，正式开发栈对照/B1不变。",
         )
     )
     specs.extend(
@@ -347,7 +398,13 @@ def build():
                 "m01-verdict",
                 "M01 本轮判定 / M01 acceptance verdict",
                 "#### M01 本轮验收判定",
-                "测试方案为vLLM-HUST E24/R36 + KV materialization请求重计算 + Prefill Microflow FA；Qwen3.5-35B-A3B BF16/TP2、FULL、MTP2、每卡20 GiB KV。恢复环境worker-r1单独计量，与第五章824.894609 token/s吞吐中位数不是同一轮联合成绩。本次插桩请求窗口135.340126192秒，基础运算口径经验参考达成率30.2443%–30.2505%，低于内部50%阈值。计数范围反映采样边界，不是置信区间。两卡任务边界、同窗口HBM和通信计数已核验；不外推为未插桩服务结果，不替换正式B0/B1。186.80秒设备包络的21.92%仅为诊断值。",
+                "V5.27：C=F/(k×T×10¹²)（TFLOPS/参与芯片），η=T参/T×100%，门槛50%。有效F排除填充、重复计算、未采纳草稿及缓存省略算量；T为匹配工作量的无插桩同步墙钟，不能估算扣减插桩开销。T参由独立标定、实际阶段依赖、资源重叠和必要调度推导，不用资源总时间最大值或反向拟合实测耗时替代。当前F、T、T参、C和η均未核验齐备：复算中 / 未判定。历史插桩经验参考另列，不作为新版当前成绩。",
+            ),
+            (
+                "m01-historical",
+                "历史插桩经验参考 / Historical instrumented empirical reference",
+                "#### 历史插桩请求窗口经验参考",
+                "历史worker-r1为E24/R36 + KV materialization请求重计算 + Prefill Microflow FA，Qwen3.5-35B-A3B BF16/TP2、FULL、MTP2、每卡20 GiB KV。135.340126192秒及30.2443%–30.2505%按原经验资源最大值方法保留，不作为V5.27当前效率或达标判定；186.80秒包络21.92%仅为诊断。与第五章824.894609 token/s不是同一轮联合成绩，不外推为未插桩服务结果。原件和旧公式保留。",
             ),
         ]
     )
@@ -364,9 +421,59 @@ def build():
                 "evidence": [evidence_locator(path) for path in EVIDENCE[ident]],
             }
         )
+    verdict = next(s for s in sections if s["id"] == "m01-verdict")
+    verdict["scope_en"] = (
+        "V5.27: C=F/(k*T*10^12), TFLOPS per participating chip; eta=T_reference/T*100%, threshold 50%. "
+        "Exclude padding, redundant computation, unaccepted drafts and cache-omitted work from F. "
+        "Use matched-workload uninstrumented synchronized wall-clock T; do not subtract estimated instrumentation overhead. "
+        "Derive T_reference independently from calibration, actual stage dependencies, resource overlap and necessary scheduling, "
+        "not a global resource-time maximum or reverse fitting to measured B0/B1 time. "
+        "Current F, T, T_reference, C and eta: recalculation pending / not determined. Historical instrumented estimates are separate."
+    )
+    verdict["tables_en"] = [
+        {
+            "headers": ["Current check", "Existing evidence", "Status / gap"],
+            "rows": [
+                [
+                    "Effective F",
+                    "Model counts and per-run MTP counts",
+                    "Useful-work mapping pending; old counts include all draft work; no acceptance-rate scaling",
+                ],
+                [
+                    "Uninstrumented T and workload",
+                    "Three Microflow client/request time-span audits",
+                    "Full device completion boundary not established; do not divide instrumented F by another run's T",
+                ],
+                [
+                    "Independent reference and dependencies",
+                    "75 communication shapes and reference sources audited",
+                    "Synchronized component sums are not graph-mode critical paths; dependencies and overlap pending",
+                ],
+                [
+                    "C, eta and verdict",
+                    "V5.27 formulas; 50% threshold",
+                    "Recalculation pending / not determined until F, T and reference are valid and scope-matched",
+                ],
+            ],
+        }
+    ]
+    historical = next(s for s in sections if s["id"] == "m01-historical")
+    historical["scope_en"] = (
+        "Historical worker-r1 instrumented window: 135.340126192 seconds and 30.2443%–30.2505% under the old "
+        "maximum-resource-time method. These are not current V5.27 efficiency or acceptance results. "
+        "The 186.80-second envelope and 21.92% are diagnostic only, not uninstrumented performance. "
+        "Not the same run as the 824.894609 token/s performance result. Original files and formulas are preserved."
+    )
     return {
         "schema": "midterm-publication/v1",
-        "version": "V0.68",
+        "version": "V0.72",
+        "m01_method": json.loads(pinned(REPORT_DIR + "/m01-method-v527.json")),
+        "comparison_contract": {
+            "b0": {"vllm": "0.18", "vllm_ascend": "0.18", "fixed": True},
+            "b1": {"base_version_constraint": None, "require_actual_versions": True},
+            "other_native_label": "版本对照 / Version control",
+        },
+        "current_summary": current_summary(),
         "report_url": url,
         "report_sha256": hashlib.sha256(raw).hexdigest(),
         "source_commit": REVISION,

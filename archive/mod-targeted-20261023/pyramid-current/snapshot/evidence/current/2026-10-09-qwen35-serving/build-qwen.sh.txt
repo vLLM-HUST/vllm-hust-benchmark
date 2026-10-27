@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+# Build the pinned host from source for Qwen serving, using upstream's --ops selector.
+set -eo pipefail
+task_root=/root/workspace/pyramidkv-runtime
+host_src="$task_root/src/vllm-ascend"
+source "$task_root/env.sh"
+export MAX_JOBS=8 CMAKE_BUILD_PARALLEL_LEVEL=8 SOC_VERSION=ascend910b2
+export SETUPTOOLS_SCM_PRETEND_VERSION=0.23.0.post1
+export CPATH="$host_src/csrc/third_party/catlass/include:${CPATH:-}"
+cd "$host_src/csrc"
+python - <<'PY'
+from pathlib import Path
+for p in Path('build/binary/ascend910b/gen').glob('kernel_meta_*/kernel_meta.lock'):
+    pid = p.read_text().strip()
+    if pid.isdigit() and not Path('/proc', pid).exists():
+        p.unlink()
+PY
+# Includes Qwen GDN, dense attention/cache, MoE, and speculative decoding kernels.
+# DeepSeek-specific Compressor/indexer/sparse-attention kernels are outside this deployment.
+qwen_ops='scatter_nd_update_v2;moe_grouped_matmul;grouped_matmul_swiglu_quant_weight_nz_tensor_list;moe_gating_top_k;moe_gating_top_k_hash;add_rms_norm_bias;transpose_kv_cache_by_block;copy_and_expand_eagle_inputs;causal_conv1d;inplace_partial_rotary_mul;rms_norm_dynamic_quant;dequant_swiglu_quant;grouped_matmul_swiglu_quant;grouped_matmul_swiglu_quant_v2;recurrent_gated_delta_rule;ngram_spec_decode;chunk_fwd_o;chunk_gated_delta_rule_fwd_h;sparse_attn_sharedkv_metadata;store_kv_block_metadata;vllm_quant_lightning_indexer_metadata'
+bash build.sh --pkg --ops="$qwen_ops" --soc=ascend910b
+installers=(build/cann-ops-transformer*.run)
+[[ ${#installers[@]} -eq 1 ]]
+bash "${installers[0]}" --install-path="$host_src/vllm_ascend/_cann_ops_custom"
+cd "$host_src"
+COMPILE_CUSTOM_KERNELS=0 python -m pip install --no-deps --no-build-isolation -e .
+flock "$task_root/native-build.lock" python "$task_root/build-native.py"

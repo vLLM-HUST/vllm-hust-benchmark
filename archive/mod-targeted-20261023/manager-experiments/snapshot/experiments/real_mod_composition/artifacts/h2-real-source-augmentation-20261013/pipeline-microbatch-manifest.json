@@ -1,0 +1,56 @@
+{
+  "schema_version": "0.2-experimental",
+  "extension_id": "org.vllm-hust.pipeline-microbatch",
+  "extension_version": "0.2.0",
+  "kind": "scheduler_policy",
+  "host": {
+    "provider": "vllm",
+    "name": "vllm",
+    "version_range": ">=0.28.1rc1.dev319,<0.29",
+    "api_range": ">=1,<2"
+  },
+  "runtime": {
+    "type": "python",
+    "process_scope": "scheduler",
+    "isolation": "trusted_in_process"
+  },
+  "lifecycle_owner": "vllm",
+  "protocols": [
+    {"name": "vllm.batch-admission-policy", "version_range": ">=1.1,<2"}
+  ],
+  "components": [
+    {
+      "component_id": "batch-admission-policy",
+      "implementation_ref": "vllm_hust_pipeline_microbatch.policy:PipelineMicrobatchPolicy",
+      "contracts": ["vllm.batch-admission-policy.v1"],
+      "execution_planes": ["scheduler"],
+      "isolation": "trusted_in_process",
+      "permissions": []
+    }
+  ],
+  "implementation": [
+    {
+      "type": "python_module",
+      "module": "vllm_hust_pipeline_microbatch.policy",
+      "object": "PipelineMicrobatchPolicy",
+      "status": "active"
+    }
+  ],
+  "requires_services": [],
+  "activation": {
+    "entry_points": [],
+    "environment": {},
+    "additional_config": {
+      "_manager_runtime_qualification": {
+        "accelerator": "ascend",
+        "execution_mode": "graph",
+        "pipeline_parallel_size": 2,
+        "tensor_parallel_size": 2,
+        "calibration_status": "measured",
+        "functional_status": "passed",
+        "recovery_status": "passed",
+        "performance_status": "not-recommended-for-tested-cell"
+      }
+    }
+  }
+}

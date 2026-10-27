@@ -1,0 +1,28 @@
+{
+  "extensions": {
+    "org.vllm-hust.ascend-kvcompress": {
+      "configuration": {
+        "schema_version": 1,
+        "provider": "ascend_kvcompress",
+        "method": "pyramidkv",
+        "method_config": {
+          "max_capacity_prompt": 1368,
+          "min_compression_prompt_tokens": 4096,
+          "window_size": 8,
+          "kernel_size": 7,
+          "pooling": "maxpool",
+          "beta": 2,
+          "kv_cache_granularity": "kv_head",
+          "gqa_score_aggregation": "mean",
+          "merge": null
+        }
+      },
+      "enabled": true
+    },
+    "org.vllm-hust.ascend-pyramidkv": {
+      "configuration": {},
+      "enabled": true
+    }
+  },
+  "schema_version": 2
+}

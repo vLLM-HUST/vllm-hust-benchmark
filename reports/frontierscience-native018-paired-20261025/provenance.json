@@ -1,0 +1,64 @@
+{
+  "scope": "Complete FrontierScience quality: designated0.18 solver versus original frozen paired optimized candidate. No solver throughput, Tref or efficiency derived from judge timing.",
+  "model": "Qwen3.5-35B-A3B",
+  "revision": "25ed67db7da8f4591484e764008ff585544f5a30",
+  "counts": {
+    "olympiad": 100,
+    "research": 60,
+    "reused_solver": 160,
+    "reused_judge": 128,
+    "new_judge": 32
+  },
+  "contract_sha256": "2de6f779d64850f351217d8d13667b9190296eb74398e1813f66ebd4cf579e92",
+  "solver_runtime": "vLLM0.18.0 / Ascend0.18.0",
+  "judge_runtime": "Original frozen development-stack substitute judge, not B0 solver runtime",
+  "scoring_policy": "mmlu_extract_first; frozen AppendixB prompts; judge max8192; temperature0 seed17 thinkingfalse; all invalid/failed cases remain denominator",
+  "limits": [
+    "Frozen same-model substitute judge, not official FrontierScience leaderboard/expert replication",
+    "Invalid/failed and length outcomes remain in original denominators",
+    "Judge continuation is not a new solver or solver-runtime measurement"
+  ],
+  "sources": {
+    "b0-summary.json": {
+      "path": "/root/frontierscience-native018-judge-storage-r2/report/summary.json",
+      "sha256": "da91b1f0539c8d835a715bdaf4a47c57a30eb428055a580d451233ec7bd5e4be"
+    },
+    "b0-per-case.csv": {
+      "path": "/root/frontierscience-native018-judge-storage-r2/report/per_case.csv",
+      "sha256": "9f2035e1b2f177b0ec3f991c9e8dc2d23032dafc22e087e17758b640c91afbe6"
+    },
+    "b0-solver-receipt.json": {
+      "path": "/root/gennova-evidence/20261019-midterm-aligned/frontierscience-native018-solver-r1/receipt.json",
+      "sha256": "7c138c8d50e139b72980b3f0dd390a4d77f22dc0fc0f9535f5856eb838e3757e"
+    },
+    "b0-judge-receipt.json": {
+      "path": "/root/frontierscience-native018-judge-storage-r2/receipt.json",
+      "sha256": "3aa40fd9689c022ac94a1eea033e8ac2e7a6264d87895b40b8c2dcaeae7bd2d6"
+    },
+    "judge-startup-failed-r1.json": {
+      "path": "/root/frontierscience-native018-judge-storage-r1/receipt.json",
+      "sha256": "7a51af4e64316d7385cae06220ddc936e0fa69d2cf508b160414579a18f22e48"
+    },
+    "b0-completed-audit.json": {
+      "path": "/root/four-primary-datasets-20261025/frontierscience-completed-audit-r1.json",
+      "sha256": "41592e715f344b8d47ba9b67e092cd4802c52074b8acdbd2c40512e5891f678c"
+    },
+    "paired-b1-summary.json": {
+      "path": "/root/gennova-evidence/20261019-midterm-aligned/m01-recovery-model-fs-paired-b1-judge-r3/report/summary.json",
+      "sha256": "169f4e40e9591ab7c2cec341f92fdf2afa52f75b0e76efa4657a28f57fcd4431"
+    },
+    "paired-b1-per-case.csv": {
+      "path": "/root/gennova-evidence/20261019-midterm-aligned/m01-recovery-model-fs-paired-b1-judge-r3/report/per_case.csv",
+      "sha256": "998a50804badd4212ea8e2d0694fe17b608f23ea398aa948aa9a20d1dfe27247"
+    },
+    "paired-b1-reuse-audit.json": {
+      "path": "/root/four-primary-datasets-20261025/frontierscience-paired-B1-reuse-audit-r1.json",
+      "sha256": "7be123e2e20b720f38a3913e4d52a165354b6e6d98566bdabf1870a68fd27de8"
+    },
+    "paired-b1-runtime-imports.json": {
+      "path": "/root/gennova-evidence/20261019-midterm-aligned/m01-recovery-model-fs-paired-b1-solver-r1/runtime-imports.json",
+      "sha256": "d78a40568b83e8e4c5ce765ddb1ae97f7518b4456e232c29a81cc857c003f147"
+    }
+  },
+  "private_originals": "Original prompts, images, full responses and grader reasoning remain outside this public packet."
+}

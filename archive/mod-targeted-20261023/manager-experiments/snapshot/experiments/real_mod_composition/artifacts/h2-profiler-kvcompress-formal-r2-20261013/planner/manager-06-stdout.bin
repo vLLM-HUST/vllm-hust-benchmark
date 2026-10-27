@@ -1,0 +1,77 @@
+{
+  "actions": [
+    {
+      "details": {
+        "enabled": true
+      },
+      "lifecycle_owner": "vllm",
+      "mutating": false,
+      "operation": "configure_launch",
+      "target": "vllm"
+    }
+  ],
+  "config_claims": [
+    {
+      "path": [
+        "environment",
+        "VLLM_ASCEND_KVCOMPRESS_ENABLED"
+      ],
+      "value": "1"
+    },
+    {
+      "path": [
+        "vllm_plugins",
+        "ascend_kvcompress"
+      ],
+      "value": true
+    }
+  ],
+  "extension_id": "org.vllm-hust.ascend-kvcompress",
+  "generated_config": {
+    "additional_config": {},
+    "environment": {
+      "VLLM_ASCEND_KVCOMPRESS_ENABLED": "1"
+    },
+    "native_extension_manifest": {
+      "bundle_id": "org.vllm-hust.ascend-kvcompress",
+      "bundle_version": "0.9.0",
+      "components": [
+        {
+          "component_id": "ascend-kvcompress",
+          "contracts": [
+            "vllm.general_plugins"
+          ],
+          "execution_planes": [
+            "scheduler",
+            "worker",
+            "device"
+          ],
+          "implementation_ref": "vllm_ascend_kvcompress.plugin:register",
+          "isolation": "trusted_in_process",
+          "permissions": [
+            "device_access",
+            "filesystem_read",
+            "filesystem_write",
+            "network_egress"
+          ]
+        }
+      ],
+      "host_api_range": ">=1,<2",
+      "schema_version": "1.0"
+    },
+    "user_config": {},
+    "vllm_json_options": {},
+    "vllm_plugins": [
+      "ascend_kvcompress"
+    ]
+  },
+  "provider": "vllm",
+  "resource_claims": [
+    {
+      "mode": "exclusive",
+      "resource": "vllm-ascend.kv-cache.mutation",
+      "scope": "vllm-process"
+    }
+  ],
+  "warnings": []
+}

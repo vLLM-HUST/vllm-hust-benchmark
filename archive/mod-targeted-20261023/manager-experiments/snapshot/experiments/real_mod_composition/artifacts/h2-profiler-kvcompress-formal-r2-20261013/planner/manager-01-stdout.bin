@@ -1,0 +1,76 @@
+{
+  "activation": {
+    "additional_config": [],
+    "entry_points": [
+      {
+        "group": "vllm.general_plugins",
+        "name": "request_lifecycle_profiler"
+      }
+    ],
+    "environment": []
+  },
+  "activation_blocker": null,
+  "activation_ready": true,
+  "bundle_id": "org.vllm-hust.request-lifecycle-profiler",
+  "bundle_version": "0.1.2",
+  "components": [
+    {
+      "component_id": "request-lifecycle-profiler-native-sink",
+      "contracts": [
+        "vllm.request-lifecycle-events.v1"
+      ],
+      "execution_planes": [
+        "api",
+        "scheduler"
+      ],
+      "implementation_ref": "vllm_request_lifecycle_profiler.plugin:register_plugin",
+      "isolation": "trusted_in_process",
+      "permissions": []
+    }
+  ],
+  "distribution": "vllm-request-lifecycle-profiler-plugin",
+  "distribution_version": "0.1.2",
+  "enabled": false,
+  "experimental": true,
+  "host": {
+    "api_range": ">=1,<2",
+    "name": "vllm",
+    "provider": "vllm",
+    "version_range": ">=0.31.1,<0.32"
+  },
+  "implementation": [
+    {
+      "module": "vllm_request_lifecycle_profiler.plugin",
+      "object": "register_plugin",
+      "status": "active",
+      "type": "python_module"
+    }
+  ],
+  "kind": "in_process_plugin",
+  "lifecycle_owner": "vllm",
+  "manifest_path": "/root/ecpa-h2-formal-profiler-kv-a-v1/lib/python3.12/site-packages/vllm_request_lifecycle_profiler/manifests/vllm-hust-extension-v0.3.json",
+  "protocols": [
+    {
+      "name": "vllm.general_plugins",
+      "version_range": null
+    },
+    {
+      "name": "vllm.request-lifecycle-events",
+      "version_range": ">=1,<2"
+    }
+  ],
+  "requires_extensions": [],
+  "requires_services": [],
+  "resource_claims": [
+    {
+      "mode": "shared",
+      "resource": "vllm.request-lifecycle-events.observer",
+      "scope": "vllm-process"
+    }
+  ],
+  "runtime": {
+    "isolation": "trusted_in_process",
+    "process_scope": "api-and-scheduler",
+    "type": "python"
+  }
+}

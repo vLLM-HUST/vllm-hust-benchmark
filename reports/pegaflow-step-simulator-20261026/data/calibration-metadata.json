@@ -1,0 +1,26 @@
+{
+  "model": "Qwen2.5-7B-Instruct",
+  "dtype": "bfloat16",
+  "hardware": "Ascend 910B2",
+  "vllm": "0.23.0",
+  "vllm_ascend": "0.23.0",
+  "token_budget": 2048,
+  "max_sequences": 8,
+  "max_model_tokens": 32768,
+  "KV_GiB": 16,
+  "graph_mode": true,
+  "training_tasks": [
+    "adaptive-rejection-sampler",
+    "code-from-image"
+  ],
+  "training_cases": [
+    "train-32-private",
+    "train-32-shared"
+  ],
+  "training_input_count": 32,
+  "response_delay_s": 0.008324019123284288,
+  "trajectory_repository": "openguardrails/terminal-bench-2.1-deepseek-v4-flash-trajectories",
+  "trajectory_revision": "3f5b93ff1c5ea84b2c94cf479d0c942227191b4a",
+  "source_pegaflow_commit": "4bfa9351273efc710bceb296ae6f8cbdc31584e6",
+  "scope": "Single-engine diagnostic calibration; derived prefix identities and token counts"
+}

@@ -1,0 +1,55 @@
+{
+  "schema_version": "0.2-experimental",
+  "extension_id": "org.vllm-hust.production-stack-provider",
+  "extension_version": "0.2.0.dev0",
+  "kind": "control_plane_extension",
+  "host": {
+    "provider": "production-stack",
+    "name": "vLLM Production Stack",
+    "version_range": ">=0",
+    "api_range": ">=1,<2"
+  },
+  "runtime": {
+    "type": "kubernetes",
+    "process_scope": "cluster_control_plane",
+    "isolation": "kubernetes"
+  },
+  "lifecycle_owner": "kubernetes",
+  "protocols": [
+    {"name": "helm-values", "version_range": ">=3,<5"},
+    {"name": "kubernetes-api", "version_range": ">=1.28,<2"}
+  ],
+  "implementation": [
+    {"type": "helm_values", "chart": "vllm/vllm-stack"},
+    {"type": "kubernetes_manifest", "resources": ["Deployment", "Service"]},
+    {"type": "crd", "kinds": ["LoraAdapter"]},
+    {
+      "type": "controller",
+      "roles": ["router", "autoscaler"],
+      "replica_ownership": "single-writer-required"
+    },
+    {
+      "type": "oci_image",
+      "source": "chart-values",
+      "source_repository": "https://github.com/vLLM-HUST/production-stack-hust",
+      "upstream_repository": "https://github.com/vllm-project/production-stack",
+      "validated_platform": "linux/arm64"
+    }
+  ],
+  "requires_services": [
+    {
+      "service_id": "kubernetes-api",
+      "protocol": "https",
+      "version_range": ">=1.28,<2",
+      "endpoint_config": "kube_context",
+      "optional": false
+    },
+    {
+      "service_id": "vllm-openai-backend",
+      "protocol": "openai-v1",
+      "version_range": ">=1,<2",
+      "endpoint_config": "router_backend_endpoint",
+      "optional": false
+    }
+  ]
+}

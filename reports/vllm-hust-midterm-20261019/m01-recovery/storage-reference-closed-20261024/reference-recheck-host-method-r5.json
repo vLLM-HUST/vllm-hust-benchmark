@@ -1,0 +1,104 @@
+{
+  "status": "plan_prepared_not_measurement_result",
+  "skill_recheck": "vllm-hust-evidence-delivery: latest user authorization verified by parent; E16 bound scope/deadline/no retry; E17 actual A-r2/B-r3 imports; E18 rank-separated coverage; E21 source-domain and timing context kept explicit; E47 all new files under /root.",
+  "source_proofs": [
+    {
+      "claim": "Common row translation preserves full ordered copy geometry within a persistent allocation.",
+      "sources": [
+        {
+          "path": "/root/m01-storage-accounting-20261024/minimum_reference_probe_a_r2.py",
+          "lines": [
+            27,
+            28,
+            29,
+            38,
+            40,
+            41,
+            42
+          ]
+        }
+      ],
+      "derivation": "table is contiguous int32[24,512]; destination byte offset is2048*row+4*start, length4*(stop-start). Subtracting first row preserves all destination differences; original starts/stops, copy order and cumulative source cursor stay unchanged. Source slab size and field alignments stay unchanged. No per-span independent reordering/translation. Allocation base and absolute physical page identity were never frozen execution signature inputs.",
+      "limit": "No assertion of hardware timing symmetry for arbitrary physical cache/page aliasing. New representative calibration remains subject to original transaction protocol and reviewer acceptance."
+    },
+    {
+      "claim": "Pure decode publication needs N and totalT, not ordered accepted-length vector.",
+      "sources": [
+        {
+          "path": "/root/m01-storage-accounting-20261024/minimum_reference_probe_a_r2.py",
+          "lines": [
+            44,
+            47,
+            48,
+            51
+          ]
+        },
+        {
+          "path": "/root/gennova-evidence/20261019-midterm-aligned/recovery-model-payload-r1/betterscale/models/qwen35/state_slots.py",
+          "lines": [
+            34,
+            37,
+            52,
+            54,
+            65
+          ]
+        }
+      ],
+      "derivation": "DECODE=True removes CU/SEQ/pre branch loads. N fixes masks/ROWS and NV=N. Final input_ids.copy_(resident_decode) copies totalT int64 values. Mixed keeps complete ordered roles/lengths and index maps."
+    },
+    {
+      "claim": "Parser exact domain remains ordered retained counts and ordered discard rows.",
+      "sources": [
+        {
+          "path": "/root/modcost-runtime-028-20261017/vllm-workspace/vllm/vllm/v1/sample/rejection_sampler.py",
+          "lines": [
+            253,
+            271,
+            284,
+            286
+          ]
+        }
+      ],
+      "derivation": "N by3 hosttensor; validmask then ordered per-row boolean filtering/tolist; discards are exactly zero-count rows. Order changes allocation sequence; no multiset timing alias is introduced."
+    }
+  ],
+  "new_vs_old": {
+    "metadata_copy_new_old_evidence_hits": 0,
+    "publication_new_old_evidence_hits": 0,
+    "CPU_prepare_exact": 2264,
+    "CPU_parse_exact": 2180,
+    "copy_common_translation_exact": 809,
+    "publication_source_launch_exact": 503,
+    "combined_device_cases_minimum": 828,
+    "matching": 484,
+    "D2H": "8 missing sizes already completed by parent in r5b; no duplicate cases scheduled"
+  },
+  "CPU_timing_context": {
+    "memory": "8-byte field-aligned ordinary CPU slab, pre-touched; source pinned-host allocation is outside CPU timer. No DMA and no NPU initialization. Both use same contiguous typed numpy views.",
+    "parse": "AST-extracted unmodified pinned RejectionSampler.parse_output body with real CPU torch tensor; logprobs None, discard ordered zero-count rows, N by3 int32.",
+    "qualification": "CPU-only intrinsic host duration context is explicit. Original18 anchors retained and rerun, never replace original timing or fit correction factors. Report anchor deltas; source/numerical mismatch stops. No assumption of matching page-lock/cache/device-transaction history."
+  },
+  "no_model_fitting": "Exact timing inputs only; no holdout regression and no numerical interpolation. 18 original anchors remain immutable, run again only as CPU-context diagnostics. Anchor timing shifts must be reported, not hidden by correction factors.",
+  "protocol": "Nine repetitions of64 timed calls, eight warmups, all raw nanoseconds retained, source numerical oracle before/after every case. Host medians do not inherit graph-only15% batch-size test. CPU worker deadline1800s after import/source checks, single attempt; output/failure retained. Device metadata deadline3600s separately subject to independent approval.",
+  "CPU_execution": {
+    "interpreter": "/root/frontierscience-recovery-20261022/venv/bin/python",
+    "environment_source": "/root/m01-storage-timing-runtime-20261024/runtime_boundary_b1.sh",
+    "mode": "--measure --rank0 and --measure --rank1 in separate processes, outputs distinct fresh directories; use original disjoint affinity lists. Run only after device release, then drain workers before device metadata. TORCH_DEVICE_BACKEND_AUTOLOAD=0 before torch import; reject torch_npu imports, preserve torch version and inference_mode.",
+    "probe": "/root/m01-storage-accounting-20261024/reference_recheck_host_probe_r5.py",
+    "plan": "/root/m01-storage-accounting-20261024/reference-recheck-host-plan-r5.json"
+  },
+  "CPU_only_validation": {
+    "affinity": "24-31 (outside original48-71/96-119)",
+    "all_cases": 4462,
+    "first_pass_receipt": "/root/m01-storage-accounting-20261024/reference-recheck-host-oracles-r5/receipt.json",
+    "final_probe_receipt": "/root/m01-storage-accounting-20261024/reference-recheck-host-oracles-r5-final/receipt.json",
+    "timings_added": 0,
+    "NPU_initializations": 0
+  },
+  "code_identity": {
+    "A_r2_actual_pins": 51,
+    "B_r3_actual_pins": 49,
+    "all_hashes_current_match": true
+  },
+  "plan_sha256": "07aa973050cff53c7faacac43db1bfdbf3d4db8cbd545fab0f37ed1e8a4630dc"
+}

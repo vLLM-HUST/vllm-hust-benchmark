@@ -1,0 +1,85 @@
+{
+  "status": "completed",
+  "started": 1792981473.3359427,
+  "plan_sha256": "ae485476566104d5f183f4b82f6582f27381279a6ae8a99d132555bb4833c5e1",
+  "continuation_plan_sha256": "05c48a9b670bdb064601d5dfbd0e698d1e670fd60b40d54b43c03fcf13c167d2",
+  "original_receipt_sha256": "24311fa559f9cd5a515852670b185e1b4cc020eb30f176bd9e699d8add0049f2",
+  "original_receipt_preserved": true,
+  "original_revision_solver_exit_code": null,
+  "original_revision_solver_exit_note": "Original parent disappeared; completed indexed1143 responses verified. Wait status unavailable, not inferred as zero.",
+  "service_exit_code": null,
+  "service_exit_note": "Adopted non-child process; drain and NPU release observed separately from unavailable wait status.",
+  "service_pid": 3406091,
+  "service_identity": {
+    "start_ticks": "1194537594",
+    "session": 3406091
+  },
+  "retained_solver": 1811,
+  "retained_gold_judge": 668,
+  "client_pid": 525931,
+  "client_identity": {
+    "start_ticks": "1201389673",
+    "session": 525931
+  },
+  "command": [
+    "/usr/local/python3.12.13/bin/python3",
+    "-m",
+    "hust_eval_hle_verified",
+    "summary",
+    "--plan",
+    "/root/four-primary-datasets-20261025/hle-inputs-r1/revision-plan",
+    "--responses",
+    "/root/hle018-full-baseline-r1/revision/solver",
+    "--grades",
+    "/root/hle018-full-baseline-r1/revision/judge",
+    "--output",
+    "/root/hle018-full-baseline-r1/revision/report"
+  ],
+  "client_exit_codes": [
+    {
+      "stage": "revision-judge",
+      "code": 0
+    },
+    {
+      "stage": "revision-summary",
+      "code": 0
+    }
+  ],
+  "tracks": {
+    "gold": {
+      "total": 668,
+      "graded": 645,
+      "successes": 157,
+      "accuracy": 0.23502994011976047,
+      "unresolved": 23,
+      "complete_grading": false,
+      "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+      "wald_95_half_width": 0.032155232484988076,
+      "solver_failures": 0,
+      "judge_invalid": 23,
+      "judge_transport_failures": 0,
+      "solver_truncated": 379,
+      "judge_truncated": 23
+    },
+    "revision": {
+      "total": 1143,
+      "graded": 1112,
+      "successes": 316,
+      "accuracy": 0.2764654418197725,
+      "unresolved": 31,
+      "complete_grading": false,
+      "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+      "wald_95_half_width": 0.025928836061797907,
+      "solver_failures": 0,
+      "judge_invalid": 31,
+      "judge_transport_failures": 0,
+      "solver_truncated": 704,
+      "judge_truncated": 30
+    }
+  },
+  "sessions_drained": true,
+  "service_shutdown_signal": "SIGINT to verified original API PID",
+  "all_devices_released": true,
+  "ended": 1792985222.091993,
+  "seal_allowed": true
+}

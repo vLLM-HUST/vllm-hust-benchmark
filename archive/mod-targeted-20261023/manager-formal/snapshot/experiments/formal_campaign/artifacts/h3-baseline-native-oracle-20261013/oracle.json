@@ -1,0 +1,145 @@
+{
+  "schema": "ecpa-h3-native-support-oracle/v1",
+  "frozen_utc": "2026-10-13T19:49:06.838399+00:00",
+  "basis": "independent-source-reading-before-any-planner-or-runner-output",
+  "evidence_class": "source-bound-nonformal",
+  "sources": [
+    {
+      "repository": "https://github.com/vLLM-HUST/extension-manager",
+      "commit": "e7b8f3c32b91830a851b19e977fbf7e75221a013",
+      "path": "src/vllm_hust_ext/runtime_activation.py",
+      "snapshot": "manager-runtime_activation.py.source",
+      "sha256": "61edba4c3218f2441d8384ea5989093755eb2670872078faa2265992620b0dc3"
+    },
+    {
+      "repository": "https://github.com/vLLM-HUST/extension-manager",
+      "commit": "e7b8f3c32b91830a851b19e977fbf7e75221a013",
+      "path": "src/vllm_hust_ext/exposure_gate.py",
+      "snapshot": "manager-exposure_gate.py.source",
+      "sha256": "2ba0876959fbb43b6fb36c81932f45c0057badb233554834816d02eff8c9fb29"
+    },
+    {
+      "repository": "https://github.com/vLLM-HUST/extension-manager",
+      "commit": "e7b8f3c32b91830a851b19e977fbf7e75221a013",
+      "path": "experiments/formal_campaign/h3_native_prepare.py",
+      "snapshot": "manager-h3_native_prepare.py.source",
+      "sha256": "a28cff3e3f58c78cc16f0619b57179d6e1b5d1463cac26136a8bcc01a02dcb3a"
+    },
+    {
+      "repository": "https://github.com/vLLM-HUST/vllm-hust",
+      "commit": "379a0ad35e9de6928e3481d375692204b0dee6e4",
+      "path": "vllm/v1/executor/multiproc_executor.py",
+      "snapshot": "host-multiproc_executor.py.source",
+      "sha256": "1d8274899c3f141f6345e315012aebd14defffa160a61df0191abda9e87e4caa"
+    },
+    {
+      "repository": "https://github.com/vLLM-HUST/vllm-hust-kv-materialization-arrival-control",
+      "commit": "e343fc5ce6b4c64611a79df5d797b3db12cd6dac",
+      "path": "src/vllm_kv_materialization/plugin.py",
+      "snapshot": "mod-plugin.py.source",
+      "sha256": "70d822c57eb34a5055c8bdb2ed707a2d865f56148eee27d9ab3600a38643cbed"
+    }
+  ],
+  "activation_commands": [
+    {
+      "arm": "manual-integration",
+      "argv": [
+        "/root/ecpa-h1-e583-stock-venv/bin/python",
+        "/root/ecpa-h1-e583-stock-venv/bin/ecpa-host-launch",
+        "serve",
+        "/models/Qwen2.5-7B-Instruct",
+        "--served-model-name",
+        "ecpa-h1",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "8187",
+        "--tensor-parallel-size",
+        "2",
+        "--enforce-eager",
+        "--max-model-len",
+        "2048",
+        "--gpu-memory-utilization",
+        "0.7",
+        "--shutdown-timeout",
+        "20",
+        "--disable-ecpa-manager",
+        "--manual-hooks"
+      ],
+      "historical_command_sha256": "bdef6764d35876c127c6a0f8085c588b2b58d4c0488d4636fdf5de853a58963b",
+      "evidence_class": "historical-activation-source-only",
+      "start_id": "partial-worker-coverage-r1-manual-integration"
+    },
+    {
+      "arm": "vanilla-vllm-entry-points",
+      "argv": [
+        "/root/ecpa-h1-e583-stock-venv/bin/python",
+        "/root/ecpa-h1-e583-stock-venv/bin/ecpa-host-launch",
+        "serve",
+        "/models/Qwen2.5-7B-Instruct",
+        "--served-model-name",
+        "ecpa-h1",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "8187",
+        "--tensor-parallel-size",
+        "2",
+        "--enforce-eager",
+        "--max-model-len",
+        "2048",
+        "--gpu-memory-utilization",
+        "0.7",
+        "--shutdown-timeout",
+        "20",
+        "--disable-ecpa-manager",
+        "--enable-entrypoints"
+      ],
+      "historical_command_sha256": "e57e859e697a58f6124b8b3457ecb7ac056d8a8524105d2bc92e356a4261f253",
+      "evidence_class": "historical-activation-source-only",
+      "start_id": "partial-worker-coverage-r3-vanilla-vllm-entry-points"
+    }
+  ],
+  "arms": [
+    {
+      "arm": "vanilla-vllm-entry-points",
+      "support": "not-applicable",
+      "reason": "Unmanaged entry-point activation enters vLLM CLI without a durable coordinator transaction or manager process."
+    },
+    {
+      "arm": "manual-integration",
+      "support": "not-applicable",
+      "reason": "Explicit callable activation enters vLLM CLI without a durable coordinator transaction or manager process; bootstrap metadata is not a prepare receipt."
+    },
+    {
+      "arm": "ecpa",
+      "support": "supported",
+      "reason": "Native ExposureGate.close commits close-intent and stops at close.before_effect; existing adapter verifies live SQLite and predecessor route before coordinator crash. Full model integration and remote merged Host admission still pending."
+    }
+  ],
+  "original_cell": {
+    "cell_id": "manager-crash-afterprepare",
+    "completion": "incomplete",
+    "baseline_result": "no-comparable-native-phase",
+    "metrics": null,
+    "retain_original_matrix": true
+  },
+  "additive_cell": {
+    "cell_id": "worker-crash-full-relaunch",
+    "status": "proposed-not-run-not-registered",
+    "shared_primitive": "signal one live Host TP worker after independently observed request completion",
+    "native_host_behavior": "worker sentinel death sets is_failed, shuts down executor, invokes failure callback; no hot replacement in cited implementation",
+    "recovery_action": "identical frozen external full launch restart for every arm after observed fault; report as experiment-controlled relaunch, never native baseline recovery",
+    "requirements": [
+      "freeze actual candidate launch argv/env/wheels/Host lineage separately for all arms",
+      "bind worker ordinal/rank, PID/start_ticks/boot_id and parent EngineCore to this start from raw Host evidence",
+      "verify process live immediately before frozen signal and retain delivery/exit evidence",
+      "freeze full relaunch policy, retry and timeout for all arms before first start",
+      "observe fresh EngineCore and TP0/TP1 process epochs after restart",
+      "derive route/fencing availability from independent authority raw chain and real request/response bytes",
+      "retain original manager-crash cell and all failed/unsupported records; additive cell cannot satisfy it",
+      "formal deployment issuer and remote Host merged-source admission remain mandatory"
+    ],
+    "formal_starts": 0
+  }
+}

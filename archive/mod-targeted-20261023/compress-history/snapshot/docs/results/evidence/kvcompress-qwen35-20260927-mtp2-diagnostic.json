@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "date_utc": "2026-09-27",
+  "status": "failed-engineering-diagnostic",
+  "formal_acceptance": false,
+  "model": "Qwen3.5-35B-A3B",
+  "dtype": "bfloat16",
+  "hardware": "Ascend 910B2 devices 2 and 3",
+  "tensor_parallel_size": 2,
+  "max_model_len": 16384,
+  "mamba_cache_mode": "align",
+  "prefix_cache": true,
+  "speculative_config": {
+    "method": "mtp",
+    "num_speculative_tokens": 2
+  },
+  "async_scheduling": true,
+  "graph_mode": "eager",
+  "attempts": [
+    {
+      "phase": "KV binding before plugin bridge",
+      "result": "startup failed",
+      "error": "Multiple attention layers with the same layer index are not supported on the current platform"
+    },
+    {
+      "phase": "KV binding with initial exact-name bridge",
+      "result": "startup failed",
+      "error": "Actual duplicate names were mtp.layers.0.self_attn.attn and language_model.model.layers.0.linear_attn"
+    },
+    {
+      "phase": "KV binding after exact-name correction",
+      "result": "startup failed",
+      "error": "allocated full-attention layer count does not match calibration"
+    },
+    {
+      "phase": "target scoring separated from target plus MTP materialization",
+      "result": "service ready, request failed",
+      "worker_bindings": 2,
+      "bound_full_attention_cache_layers_per_rank": 11,
+      "target_scoring_layers": 10,
+      "request_prompt_tokens": 10012,
+      "request_http_status": 500,
+      "worker_error": "RuntimeError: call aclnnCausalConv1d failed, detail:EZ9999: Inner Error!"
+    }
+  ],
+  "conclusion": "This diagnostic attempt failed. Default startup remains rejected; the incomplete path requires VLLM_ASCEND_KVCOMPRESS_EXPERIMENTAL_MTP2=1 and must not be used for official workloads.",
+  "subsequent_smoke_evidence": "kvcompress-qwen35-20260927-mtp2-apc-align-smoke.json",
+  "limitations": [
+    "At this diagnostic stage, the operator error had not yet been causally isolated",
+    "No correct MTP2 completion or compression transaction was observed in this attempt",
+    "No FULL_AND_PIECEWISE, 262144-token, or official 900-second workload was run"
+  ]
+}

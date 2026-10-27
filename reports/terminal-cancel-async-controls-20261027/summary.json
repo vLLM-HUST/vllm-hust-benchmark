@@ -1,0 +1,70 @@
+{
+  "schema": "terminal-original-cancel-async-arm64-controls/v1",
+  "status": "environment_and_verifier_controls_passed",
+  "task": "cancel-async-tasks",
+  "task_revision": "7131e4375048a0e408a8fb404b5f499d726b695b",
+  "harbor_version": "0.24.0",
+  "harbor_revision": "b53b8134e1241686dca7759af188f987ecc48e8b",
+  "platform": "linux/arm64",
+  "base_manifest": "sha256:608b27b2db85abf38d81685085cd1166a5ed7ada66549f0dfe53a75bb830cd5d",
+  "derived_image": "sha256:5011b5c105e46b2ca856715a1ffbb756a3864697460faf9f52266392811c7620",
+  "original_task_tests_solution_instructions_unchanged": true,
+  "changed_files": [
+    "task.toml",
+    "environment/Dockerfile"
+  ],
+  "controls": [
+    {
+      "role": "nop",
+      "reward": 0.0,
+      "tests": 6,
+      "passed": 0,
+      "failed": 6,
+      "skipped": 0,
+      "process_exit_code": 0,
+      "all_owned_containers_released": true,
+      "source_result_sha256": "c48333ecf758e9f6ad72dd19c874b6867f7fa7c11bcb55d338dcb255f90152fd",
+      "scorer_output_sha256": "7019d898de2e86e92ccd796492596e50c726334be08d80bc81c3b742be04591d",
+      "model_calls": 0
+    },
+    {
+      "role": "oracle",
+      "reward": 1.0,
+      "tests": 6,
+      "passed": 6,
+      "failed": 0,
+      "skipped": 0,
+      "process_exit_code": 0,
+      "all_owned_containers_released": true,
+      "source_result_sha256": "8814635ee136b8e76ba274d06f6f709796253ddd086bc443fe8c3792fd672e23",
+      "scorer_output_sha256": "08e1b55f84d978f9c316deac21147051a1ef97a485c62c5146babca775854a16",
+      "model_calls": 0
+    }
+  ],
+  "model_task_attempts": 0,
+  "model_calls": 0,
+  "official_89_task_model_coverage": 0,
+  "full_dataset_acceptance": false,
+  "amd64_image_equivalence_claimed": false,
+  "cpu_limit": 1,
+  "memory_bytes": 2147483648,
+  "cpuset": "24-31",
+  "network_mtu": 1400,
+  "private_task_or_solution_content_included": false,
+  "original_precontainer_failure": {
+    "reward": null,
+    "agent_execution": null,
+    "verifier": null,
+    "containers_started": 0,
+    "receipt_sha256": "7377662becea533540061ccedb29d8c7f50a69973dbf9ecadebf1e6725bafd0e",
+    "reason": "Missing Docker Compose plugin in isolated config; original failure retained."
+  },
+  "transport": {
+    "kind": "Fixed official uv0.9.5 installer and ARM64 tar cache",
+    "tests_unchanged": true,
+    "readonly_mount": true,
+    "before_after_host_hash_checks": true,
+    "no_shared_task_answers": true
+  },
+  "evidence_manifest_sha256": "6c1260861a46a9fa603cc99c6df9e63001eb2993540a621a56dcff5c4e175e7f"
+}

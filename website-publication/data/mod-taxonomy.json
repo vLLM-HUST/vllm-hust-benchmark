@@ -55,6 +55,16 @@
     "unified-communication-migration": {"kind":"retired","capability":"parallel_communication","phases":["prefill","decode"],"lifecycle":"retired","evidence":"host_integration_missing"},
     "layered-prefill-migration": {"kind":"retired","capability":"prefill_optimization","phases":["prefill"],"lifecycle":"retired","evidence":"no_activation_entry"},
     "activation-sparsity-migration": {"kind":"retired","capability":"operators_attention","phases":["prefill","decode"],"lifecycle":"retired","evidence":"operator_integration_missing"},
-    "qos-scheduler-migration": {"kind":"retired","capability":"scheduling_routing","phases":["request_admission"],"lifecycle":"retired","evidence":"host_integration_missing"}
+    "qos-scheduler-migration": {"kind":"retired","capability":"scheduling_routing","phases":["request_admission"],"lifecycle":"retired","evidence":"host_integration_missing"},
+    "muxpd": {
+      "kind": "runtime_mod",
+      "capability": "execution_optimization",
+      "phases": [
+        "prefill",
+        "decode"
+      ],
+      "lifecycle": "implemented_restricted",
+      "evidence": "functionally_validated"
+    }
   }
 }

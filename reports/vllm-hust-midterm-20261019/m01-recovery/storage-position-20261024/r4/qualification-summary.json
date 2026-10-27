@@ -1,0 +1,163 @@
+{
+  "schema": "storage-diagnostic-qualification-summary/v1",
+  "run_id": "capture-b1-storage-r4",
+  "implementation_variant": "diagnostic-progress-source-protected/v1 + bounded-position-stages/v1",
+  "measurement_role": "diagnostic_qualification",
+  "workload": {
+    "completed": 200,
+    "failed": 0,
+    "total_input_tokens": 282265,
+    "total_output_tokens": 51200,
+    "scope": "diagnostic workload; timing includes instrumentation",
+    "effective_flops": null,
+    "m01_attainment": null
+  },
+  "sealed_original_directory": "/root/m01-capture-b1-storage-r4",
+  "raw_manifest_sha256": "43c02b282833209d6253138f20f26795d12efb3a7e24e60eeffb65c064a2da65",
+  "raw_manifest_entries_verified": 21,
+  "source_plan_sha256": "56090e6c04f3f276ad2ef2030fd606dee0e33f87e466f4ecf607b4b46beb72d0",
+  "fresh_cache": {
+    "policy": "fresh empty caches; no previous run or compile seed imported",
+    "destination": "/root/m01-capture-b1-storage-r4-cache",
+    "initial_entries": [],
+    "measurement_role": "diagnostic_qualification",
+    "original_command_sha256": "5032a2cd083517a7399912af8c68a39fff3c99a8d975077579e656e1bf64ec32",
+    "startup_excluded_from_measurement": true,
+    "performance_acceptance": false
+  },
+  "sessions_drained": true,
+  "all_devices_released": true,
+  "client_exit_code": 0,
+  "service_exit_code": 130,
+  "position_stages": {
+    "waves_per_rank": 128,
+    "records_per_rank": 256,
+    "audit_path": "/root/m01-storage-accounting-20261024/r4-position-stage-audit.json",
+    "audit_sha256": "529acbf5425cc6bf5ec8deb77bedcdcca09b343c1d2e60b069e19b818463b60b",
+    "summaries": [
+      {
+        "rank": 0,
+        "checks": {
+          "pre_rope_vs_host": {
+            "elements": 245757,
+            "mismatches": 0,
+            "waves_with_mismatch": 0,
+            "delta_histogram": {
+              "0": 245757
+            }
+          },
+          "pre_optimistic_vs_host": {
+            "elements": 2938,
+            "mismatches": 580,
+            "waves_with_mismatch": 115,
+            "delta_histogram": {
+              "0": 2358,
+              "-2": 248,
+              "-1": 332
+            }
+          },
+          "post_position_vs_formula": {
+            "elements": 81919,
+            "mismatches": 0,
+            "waves_with_mismatch": 0,
+            "delta_histogram": {
+              "0": 81919
+            }
+          },
+          "post_rope_vs_formula": {
+            "elements": 245757,
+            "mismatches": 0,
+            "waves_with_mismatch": 0,
+            "delta_histogram": {
+              "0": 245757
+            }
+          },
+          "post_rope_vs_scalar_position": {
+            "elements": 245757,
+            "mismatches": 5220,
+            "waves_with_mismatch": 115,
+            "delta_histogram": {
+              "0": 240537,
+              "2": 2232,
+              "1": 2988
+            }
+          },
+          "draft_rope_vs_post": {
+            "elements": 245757,
+            "mismatches": 0,
+            "waves_with_mismatch": 0,
+            "delta_histogram": {
+              "0": 245757
+            }
+          }
+        }
+      },
+      {
+        "rank": 1,
+        "checks": {
+          "pre_rope_vs_host": {
+            "elements": 245757,
+            "mismatches": 0,
+            "waves_with_mismatch": 0,
+            "delta_histogram": {
+              "0": 245757
+            }
+          },
+          "pre_optimistic_vs_host": {
+            "elements": 2938,
+            "mismatches": 584,
+            "waves_with_mismatch": 116,
+            "delta_histogram": {
+              "0": 2354,
+              "-2": 250,
+              "-1": 334
+            }
+          },
+          "post_position_vs_formula": {
+            "elements": 81919,
+            "mismatches": 0,
+            "waves_with_mismatch": 0,
+            "delta_histogram": {
+              "0": 81919
+            }
+          },
+          "post_rope_vs_formula": {
+            "elements": 245757,
+            "mismatches": 0,
+            "waves_with_mismatch": 0,
+            "delta_histogram": {
+              "0": 245757
+            }
+          },
+          "post_rope_vs_scalar_position": {
+            "elements": 245757,
+            "mismatches": 5256,
+            "waves_with_mismatch": 116,
+            "delta_histogram": {
+              "0": 240501,
+              "2": 2250,
+              "1": 3006
+            }
+          },
+          "draft_rope_vs_post": {
+            "elements": 245757,
+            "mismatches": 0,
+            "waves_with_mismatch": 0,
+            "delta_histogram": {
+              "0": 245757
+            }
+          }
+        }
+      }
+    ]
+  },
+  "conclusion": "Observed optimistic device operand differs from the host progress snapshot before fused position correction. RoPE upload, fused formula and later draft copy agree with their captured inputs. Mechanism remains under isolated probe; no manual correction of raw data.",
+  "effective_flops": null,
+  "reference_seconds": null,
+  "m01_attainment": null,
+  "limitations": [
+    "Diagnostic observers can perturb timing; not a formal performance result.",
+    "First128 wave localization is not full stream-order or model-correctness qualification.",
+    "Complete useful-work F and independently calibrated dependency Tref remain unresolved."
+  ]
+}

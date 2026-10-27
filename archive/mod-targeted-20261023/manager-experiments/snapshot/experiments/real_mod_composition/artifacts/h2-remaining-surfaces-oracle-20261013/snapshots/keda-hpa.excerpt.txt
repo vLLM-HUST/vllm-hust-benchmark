@@ -1,0 +1,26 @@
+   160	
+   161		minReplicas := scaledObject.GetHPAMinReplicas()
+   162		maxReplicas := scaledObject.GetHPAMaxReplicas()
+   163	
+   164		hpa := &autoscalingv2.HorizontalPodAutoscaler{
+   165			Spec: autoscalingv2.HorizontalPodAutoscalerSpec{
+   166				MinReplicas: minReplicas,
+   167				MaxReplicas: maxReplicas,
+   168				Metrics:     scaledObjectMetricSpecs,
+   169				Behavior:    behavior,
+   170				ScaleTargetRef: autoscalingv2.CrossVersionObjectReference{
+   171					Name:       scaledObject.Spec.ScaleTargetRef.Name,
+   172					Kind:       gvkr.Kind,
+   173					APIVersion: gvkr.GroupVersion().String(),
+   174				}},
+   175			ObjectMeta: metav1.ObjectMeta{
+   176				Name:        getHPAName(scaledObject),
+   177				Namespace:   scaledObject.Namespace,
+   178				Labels:      labels,
+   179				Annotations: scaledObject.Annotations,
+   180			},
+   181			TypeMeta: metav1.TypeMeta{
+   182				APIVersion: "v2",
+   183			},
+   184		}
+   185	

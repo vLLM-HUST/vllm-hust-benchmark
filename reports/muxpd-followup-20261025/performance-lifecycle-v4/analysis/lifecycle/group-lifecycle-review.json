@@ -1,0 +1,693 @@
+{
+  "schema": "muxpd-group-lifecycle-independent-review-v1",
+  "reviewed_at": "2026-10-26T01:05:28.378061+00:00",
+  "reviewer": "numerical_probe; lightweight CPU parsing of three known terminal traces during authorized quiet-period review",
+  "scope": "Original bounded lifecycle gates only; no compression, full-run/repository scan, tests, device/model/API calls, quality or performance inference. Known trace files and small receipts only.",
+  "runs": [
+    {
+      "label": "group-cancel-partial-block22-hccl-true-01",
+      "scenario": "partial",
+      "review_passed": true,
+      "plan_sha256": "5921fbefdfdc92415490c8e52bef0ee02ad52b8b020e858f16e3a45611579ef8",
+      "source_receipts": {
+        "vllm": {
+          "path": "/root/workspace/vllm-hust/vllm/__init__.py",
+          "bytes": 3661,
+          "sha256": "fd3708e5a13abe98c566afd79a6b1987cef70c0548bb19c1218ff6a7f9d43346",
+          "commit": "d0f22d2bda562156e4dbf433ce645e1769b4f804",
+          "status": ""
+        },
+        "vllm_ascend": {
+          "path": "/root/workspace/vllm-ascend-hust/vllm_ascend/__init__.py",
+          "bytes": 2276,
+          "sha256": "cfe116148053fcb120d766d99ca5bca2c37afac8822e72c6b1fce20af8a0e6d7",
+          "commit": "03766ac696fde5ab1980d80ca0b8543d3580c989",
+          "status": "M ../csrc/build_aclnn.sh"
+        },
+        "vllm_muxpd": {
+          "path": "/root/workspace/muxpd-groupfx-followup/src/vllm_muxpd/__init__.py",
+          "bytes": 106,
+          "sha256": "1cc95de2a19c51dd5406899daf19c1a0e8c8be80175ece841bbdcb1dd71bd549",
+          "commit": "f7ed21e183b27d2141176f3e7a5c8a5ff4ede07d",
+          "status": ""
+        }
+      },
+      "artifacts": [
+        {
+          "path": "/root/workspace/muxpd-followup-20261025/runs/group-cancel-partial-block22-hccl-true-01/controller.json",
+          "bytes": 2252,
+          "sha256": "b37ba635229684311f780889600019c565794b2933eaac272d38276d48f7aea9"
+        },
+        {
+          "path": "/root/workspace/muxpd-followup-20261025/runs/group-cancel-partial-block22-hccl-true-01/producer-controller.py",
+          "bytes": 5343,
+          "sha256": "87183d3a5e1f6e4cd51048737f69e214b10474f3c5624c4c0a095fe710117e45"
+        },
+        {
+          "path": "/root/workspace/muxpd-followup-20261025/runs/group-cancel-partial-block22-hccl-true-01/plan.json",
+          "bytes": 8575,
+          "sha256": "fa884d3b12300ada90a3869aafbc35be1b16fbd2464032c817a28df19d4b4aa5"
+        },
+        {
+          "path": "/root/workspace/muxpd-followup-20261025/runs/group-cancel-partial-block22-hccl-true-01/engine-args.json",
+          "bytes": 1513,
+          "sha256": "7604578e6b21e6b1cd17ba80bd37144c37f013f2a6748de56a4b4aae0ee9c708"
+        },
+        {
+          "path": "/root/workspace/muxpd-followup-20261025/runs/group-cancel-partial-block22-hccl-true-01/producer/pressure_probe.py",
+          "bytes": 6776,
+          "sha256": "6a966ba60f350a6659e5e9f30f6d7f62e00ed78f650251e6413cb7d6df54ebee"
+        },
+        {
+          "path": "/root/workspace/muxpd-followup-20261025/runs/group-cancel-partial-block22-hccl-true-01/producer/pressure_observer.py",
+          "bytes": 10099,
+          "sha256": "9d04856f5a8c638cbb3bc6772cef9786d0774663b40719fe5d310d233319c884"
+        },
+        {
+          "path": "/root/workspace/muxpd-followup-20261025/runs/group-cancel-partial-block22-hccl-true-01/producer/pressure_override_guard.py",
+          "bytes": 2367,
+          "sha256": "9951e51d0a17756b95df27366548c59f484749b4bcd8f774d19a0e0d42ef20b7"
+        },
+        {
+          "path": "/root/workspace/muxpd-followup-20261025/runs/group-cancel-partial-block22-hccl-true-01/results/run.json",
+          "bytes": 559861,
+          "sha256": "8900de9f03ebed847b89065bf42212d53b49ea9a5eb30bdcf33565e7e771e01a"
+        },
+        {
+          "path": "/root/workspace/muxpd-followup-20261025/runs/group-cancel-partial-block22-hccl-true-01/process.log",
+          "bytes": 72426,
+          "sha256": "8c56eb25f9e7c7560400d6630dbc852507465ade22aa0f5f4fcc079be942554a"
+        },
+        {
+          "path": "/root/workspace/muxpd-followup-20261025/runs/group-cancel-partial-block22-hccl-true-01/npu-before.txt",
+          "bytes": 3393,
+          "sha256": "d6f4702c4b6db0130ad860bf589c4b932635e20a1ca94181c2907104eded3f95"
+        },
+        {
+          "path": "/root/workspace/muxpd-followup-20261025/runs/group-cancel-partial-block22-hccl-true-01/npu-after.txt",
+          "bytes": 3393,
+          "sha256": "0a7203b4a739eeb0dc5083c7db35f210c5436fe544608ed3969d64818389275e"
+        },
+        {
+          "path": "/root/workspace/muxpd-followup-20261025/runs/group-cancel-partial-block22-hccl-true-01/producer/frozen_pressure_probe.py",
+          "bytes": 31721,
+          "sha256": "2585b8d236c6065b9de780a67735c092296b2c3490991bbf69413993fe33a8f6"
+        },
+        {
+          "path": "/root/workspace/muxpd-followup-20261025/runs/group-cancel-partial-block22-hccl-true-01/results/pressure/pressure-487719.jsonl",
+          "bytes": 2260913,
+          "sha256": "e6c8d65f859d86ea4d43fc9771ea32b2acd167d91909ec59e1d19861f8a36a0b"
+        },
+        {
+          "path": "/root/workspace/muxpd-followup-20261025/performance/cancellation-headroom-v1/group-partial-plan.json",
+          "bytes": 8575,
+          "sha256": "fa884d3b12300ada90a3869aafbc35be1b16fbd2464032c817a28df19d4b4aa5"
+        }
+      ],
+      "common_checks": {
+        "controller_and_child_terminal_pass_exit0": true,
+        "controller_timeout_or_forced_termination_recorded": false,
+        "shutdown_returned": true,
+        "known_input_files_unchanged": true,
+        "complete_run_inventory_scan_performed": false,
+        "trace_rows": 1146,
+        "trace_single_pid_contiguous_monotonic_no_errors": true,
+        "frozen_original_auditor_exact_recomputation": true,
+        "request_ID_prompt_recipe_actual_admission_steps_and_output_lengths_bound": true,
+        "submitted_requests": 11,
+        "completed_noncancelled_outputs": 10,
+        "engine_steps": 165,
+        "pool_blocks": 22,
+        "final_usable_blocks_returned": 21,
+        "physical_devices_empty_before_after": [
+          1,
+          2,
+          3,
+          6
+        ]
+      },
+      "lifecycle_evidence": {
+        "kind": "P8cancellation",
+        "cancelled_internal_ids": [
+          "1-ba0026df"
+        ],
+        "cohort": 2,
+        "abort_before_sequence": 24,
+        "abort_after_sequence": 25,
+        "cancelled_block_ids": [
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11
+        ],
+        "positive_held_snapshots_through_ack": 48,
+        "ack_before_sequence": 72,
+        "ack_after_sequence": 73,
+        "ack_completed_layers": 40,
+        "free_blocks_before_ack": 3,
+        "free_blocks_after_ack": 10,
+        "physical_reuse_ids": [
+          9,
+          10,
+          11
+        ],
+        "fresh_allocation_evidence": [
+          {
+            "before_sequence": 621,
+            "after_sequence": 622,
+            "internal_id": "4-bcc3791b",
+            "external_id": "4",
+            "fresh_released_block_ids": [
+              9,
+              10,
+              11
+            ]
+          },
+          {
+            "before_sequence": 751,
+            "after_sequence": 752,
+            "internal_id": "5-85d4c230",
+            "external_id": "5",
+            "fresh_released_block_ids": [
+              9,
+              10,
+              11
+            ]
+          },
+          {
+            "before_sequence": 885,
+            "after_sequence": 886,
+            "internal_id": "8-9d68afb0",
+            "external_id": "8",
+            "fresh_released_block_ids": [
+              9,
+              10,
+              11
+            ]
+          },
+          {
+            "before_sequence": 1015,
+            "after_sequence": 1016,
+            "internal_id": "9-b2204b61",
+            "external_id": "9",
+            "fresh_released_block_ids": [
+              9,
+              10,
+              11
+            ]
+          }
+        ]
+      },
+      "cleanup": {
+        "native_SIGTERM_fallback_count": 4,
+        "native_SIGKILL_fallback_count": 0,
+        "original_shutdown_log_lines": [
+          "INFO 10-26 00:36:11 [multiproc_executor.py:426] [shutdown] Executor: waiting for worker exit count=4",
+          "WARNING 10-26 00:36:16 [multiproc_executor.py:438] [shutdown] Executor: workers still running after grace period; sending SIGTERM count=4"
+        ],
+        "scope": "Controller exit0, returned shutdown and archived empty devices support bounded cleanup. Native escalation is preserved; no globally graceful/no-force claim."
+      }
+    },
+    {
+      "label": "group-cancel-full-block22-hccl-true-01",
+      "scenario": "full",
+      "review_passed": true,
+      "plan_sha256": "5a308dd10a6a4530065d264e1031c498d515c0bc462dd051e399ed4d835d07e2",
+      "source_receipts": {
+        "vllm": {
+          "path": "/root/workspace/vllm-hust/vllm/__init__.py",
+          "bytes": 3661,
+          "sha256": "fd3708e5a13abe98c566afd79a6b1987cef70c0548bb19c1218ff6a7f9d43346",
+          "commit": "d0f22d2bda562156e4dbf433ce645e1769b4f804",
+          "status": ""
+        },
+        "vllm_ascend": {
+          "path": "/root/workspace/vllm-ascend-hust/vllm_ascend/__init__.py",
+          "bytes": 2276,
+          "sha256": "cfe116148053fcb120d766d99ca5bca2c37afac8822e72c6b1fce20af8a0e6d7",
+          "commit": "03766ac696fde5ab1980d80ca0b8543d3580c989",
+          "status": "M ../csrc/build_aclnn.sh"
+        },
+        "vllm_muxpd": {
+          "path": "/root/workspace/muxpd-groupfx-followup/src/vllm_muxpd/__init__.py",
+          "bytes": 106,
+          "sha256": "1cc95de2a19c51dd5406899daf19c1a0e8c8be80175ece841bbdcb1dd71bd549",
+          "commit": "f7ed21e183b27d2141176f3e7a5c8a5ff4ede07d",
+          "status": ""
+        }
+      },
+      "artifacts": [
+        {
+          "path": "/root/workspace/muxpd-followup-20261025/runs/group-cancel-full-block22-hccl-true-01/controller.json",
+          "bytes": 2234,
+          "sha256": "c9326a9027c3fb0b7683baadf9196715a706a9dce7e411f007c9966b06313fa8"
+        },
+        {
+          "path": "/root/workspace/muxpd-followup-20261025/runs/group-cancel-full-block22-hccl-true-01/producer-controller.py",
+          "bytes": 5343,
+          "sha256": "87183d3a5e1f6e4cd51048737f69e214b10474f3c5624c4c0a095fe710117e45"
+        },
+        {
+          "path": "/root/workspace/muxpd-followup-20261025/runs/group-cancel-full-block22-hccl-true-01/plan.json",
+          "bytes": 8569,
+          "sha256": "d882109dbc2d883e2e98b5d4400facaedb6972be2beceee729de2d03ed434ec2"
+        },
+        {
+          "path": "/root/workspace/muxpd-followup-20261025/runs/group-cancel-full-block22-hccl-true-01/engine-args.json",
+          "bytes": 1513,
+          "sha256": "7604578e6b21e6b1cd17ba80bd37144c37f013f2a6748de56a4b4aae0ee9c708"
+        },
+        {
+          "path": "/root/workspace/muxpd-followup-20261025/runs/group-cancel-full-block22-hccl-true-01/producer/pressure_probe.py",
+          "bytes": 6776,
+          "sha256": "6a966ba60f350a6659e5e9f30f6d7f62e00ed78f650251e6413cb7d6df54ebee"
+        },
+        {
+          "path": "/root/workspace/muxpd-followup-20261025/runs/group-cancel-full-block22-hccl-true-01/producer/pressure_observer.py",
+          "bytes": 10099,
+          "sha256": "9d04856f5a8c638cbb3bc6772cef9786d0774663b40719fe5d310d233319c884"
+        },
+        {
+          "path": "/root/workspace/muxpd-followup-20261025/runs/group-cancel-full-block22-hccl-true-01/producer/pressure_override_guard.py",
+          "bytes": 2367,
+          "sha256": "9951e51d0a17756b95df27366548c59f484749b4bcd8f774d19a0e0d42ef20b7"
+        },
+        {
+          "path": "/root/workspace/muxpd-followup-20261025/runs/group-cancel-full-block22-hccl-true-01/results/run.json",
+          "bytes": 559692,
+          "sha256": "9259f9468c64858b4b1427f84026c211d7b0d8f05b52ca9e6c6ecac84107542f"
+        },
+        {
+          "path": "/root/workspace/muxpd-followup-20261025/runs/group-cancel-full-block22-hccl-true-01/process.log",
+          "bytes": 72237,
+          "sha256": "a8379c238a41b9700471e18967b64c4d97a20a3762397d3f40753f67021e521b"
+        },
+        {
+          "path": "/root/workspace/muxpd-followup-20261025/runs/group-cancel-full-block22-hccl-true-01/npu-before.txt",
+          "bytes": 3393,
+          "sha256": "e3938df0efb5f9678ea7cfa494a0da999716cb5433f9bb00f6883dc5704da351"
+        },
+        {
+          "path": "/root/workspace/muxpd-followup-20261025/runs/group-cancel-full-block22-hccl-true-01/npu-after.txt",
+          "bytes": 3393,
+          "sha256": "7ec5d89399d855f382e798cc3a7c08b2fe915d8d8bca3dd29c1eb52b7f6c820e"
+        },
+        {
+          "path": "/root/workspace/muxpd-followup-20261025/runs/group-cancel-full-block22-hccl-true-01/producer/frozen_pressure_probe.py",
+          "bytes": 31721,
+          "sha256": "2585b8d236c6065b9de780a67735c092296b2c3490991bbf69413993fe33a8f6"
+        },
+        {
+          "path": "/root/workspace/muxpd-followup-20261025/runs/group-cancel-full-block22-hccl-true-01/results/pressure/pressure-502515.jsonl",
+          "bytes": 2064684,
+          "sha256": "5a45d093ad4f97e4941b4935bdd4556199b7981649bc471882c25182fa636bbd"
+        },
+        {
+          "path": "/root/workspace/muxpd-followup-20261025/performance/cancellation-headroom-v1/group-full-plan.json",
+          "bytes": 8569,
+          "sha256": "d882109dbc2d883e2e98b5d4400facaedb6972be2beceee729de2d03ed434ec2"
+        }
+      ],
+      "common_checks": {
+        "controller_and_child_terminal_pass_exit0": true,
+        "controller_timeout_or_forced_termination_recorded": false,
+        "shutdown_returned": true,
+        "known_input_files_unchanged": true,
+        "complete_run_inventory_scan_performed": false,
+        "trace_rows": 1116,
+        "trace_single_pid_contiguous_monotonic_no_errors": true,
+        "frozen_original_auditor_exact_recomputation": true,
+        "request_ID_prompt_recipe_actual_admission_steps_and_output_lengths_bound": true,
+        "submitted_requests": 11,
+        "completed_noncancelled_outputs": 9,
+        "engine_steps": 165,
+        "pool_blocks": 22,
+        "final_usable_blocks_returned": 21,
+        "physical_devices_empty_before_after": [
+          1,
+          2,
+          3,
+          6
+        ]
+      },
+      "lifecycle_evidence": {
+        "kind": "P8cancellation",
+        "cancelled_internal_ids": [
+          "1-90fe9a32",
+          "2-9ef9efe9"
+        ],
+        "cohort": 2,
+        "abort_before_sequence": 24,
+        "abort_after_sequence": 25,
+        "cancelled_block_ids": [
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18
+        ],
+        "positive_held_snapshots_through_ack": 6,
+        "ack_before_sequence": 30,
+        "ack_after_sequence": 31,
+        "ack_completed_layers": 8,
+        "free_blocks_before_ack": 3,
+        "free_blocks_after_ack": 17,
+        "physical_reuse_ids": [
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          16,
+          17,
+          18
+        ],
+        "fresh_allocation_evidence": [
+          {
+            "before_sequence": 589,
+            "after_sequence": 590,
+            "internal_id": "3-b33eccb1",
+            "external_id": "3",
+            "fresh_released_block_ids": [
+              9,
+              10,
+              11
+            ]
+          },
+          {
+            "before_sequence": 591,
+            "after_sequence": 592,
+            "internal_id": "4-900e8a5c",
+            "external_id": "4",
+            "fresh_released_block_ids": [
+              5,
+              6,
+              7,
+              8,
+              16,
+              17,
+              18
+            ]
+          },
+          {
+            "before_sequence": 721,
+            "after_sequence": 722,
+            "internal_id": "5-819a0ee9",
+            "external_id": "5",
+            "fresh_released_block_ids": [
+              5,
+              6,
+              7,
+              8,
+              16,
+              17,
+              18
+            ]
+          },
+          {
+            "before_sequence": 723,
+            "after_sequence": 724,
+            "internal_id": "6-98cecfac",
+            "external_id": "6",
+            "fresh_released_block_ids": [
+              9,
+              10,
+              11
+            ]
+          },
+          {
+            "before_sequence": 853,
+            "after_sequence": 854,
+            "internal_id": "7-86c2a595",
+            "external_id": "7",
+            "fresh_released_block_ids": [
+              9,
+              10,
+              11
+            ]
+          },
+          {
+            "before_sequence": 855,
+            "after_sequence": 856,
+            "internal_id": "8-adf84125",
+            "external_id": "8",
+            "fresh_released_block_ids": [
+              5,
+              6,
+              7,
+              8,
+              16,
+              17,
+              18
+            ]
+          },
+          {
+            "before_sequence": 985,
+            "after_sequence": 986,
+            "internal_id": "9-9aaa8118",
+            "external_id": "9",
+            "fresh_released_block_ids": [
+              5,
+              6,
+              7,
+              8,
+              16,
+              17,
+              18
+            ]
+          },
+          {
+            "before_sequence": 987,
+            "after_sequence": 988,
+            "internal_id": "10-899d8864",
+            "external_id": "10",
+            "fresh_released_block_ids": [
+              9,
+              10,
+              11
+            ]
+          }
+        ]
+      },
+      "cleanup": {
+        "native_SIGTERM_fallback_count": 4,
+        "native_SIGKILL_fallback_count": 0,
+        "original_shutdown_log_lines": [
+          "INFO 10-26 00:41:00 [multiproc_executor.py:426] [shutdown] Executor: waiting for worker exit count=4",
+          "WARNING 10-26 00:41:05 [multiproc_executor.py:438] [shutdown] Executor: workers still running after grace period; sending SIGTERM count=4"
+        ],
+        "scope": "Controller exit0, returned shutdown and archived empty devices support bounded cleanup. Native escalation is preserved; no globally graceful/no-force claim."
+      }
+    },
+    {
+      "label": "group-pressure-block20-hccl-true-01",
+      "scenario": "pressure",
+      "review_passed": true,
+      "plan_sha256": "5355298df65b48df6e03ae48d75644d042a64ec315f6d008fe84b69b4e55693c",
+      "source_receipts": {
+        "vllm": {
+          "path": "/root/workspace/vllm-hust/vllm/__init__.py",
+          "bytes": 3661,
+          "sha256": "fd3708e5a13abe98c566afd79a6b1987cef70c0548bb19c1218ff6a7f9d43346",
+          "commit": "d0f22d2bda562156e4dbf433ce645e1769b4f804",
+          "status": ""
+        },
+        "vllm_ascend": {
+          "path": "/root/workspace/vllm-ascend-hust/vllm_ascend/__init__.py",
+          "bytes": 2276,
+          "sha256": "cfe116148053fcb120d766d99ca5bca2c37afac8822e72c6b1fce20af8a0e6d7",
+          "commit": "03766ac696fde5ab1980d80ca0b8543d3580c989",
+          "status": "M ../csrc/build_aclnn.sh"
+        },
+        "vllm_muxpd": {
+          "path": "/root/workspace/muxpd-groupfx-followup/src/vllm_muxpd/__init__.py",
+          "bytes": 106,
+          "sha256": "1cc95de2a19c51dd5406899daf19c1a0e8c8be80175ece841bbdcb1dd71bd549",
+          "commit": "f7ed21e183b27d2141176f3e7a5c8a5ff4ede07d",
+          "status": ""
+        }
+      },
+      "artifacts": [
+        {
+          "path": "/root/workspace/muxpd-followup-20261025/runs/group-pressure-block20-hccl-true-01/controller.json",
+          "bytes": 2216,
+          "sha256": "96141b93a06fa1165d10f13128d9215b083c9e167db0e5b373b79c0933ea30d1"
+        },
+        {
+          "path": "/root/workspace/muxpd-followup-20261025/runs/group-pressure-block20-hccl-true-01/producer-controller.py",
+          "bytes": 5343,
+          "sha256": "87183d3a5e1f6e4cd51048737f69e214b10474f3c5624c4c0a095fe710117e45"
+        },
+        {
+          "path": "/root/workspace/muxpd-followup-20261025/runs/group-pressure-block20-hccl-true-01/plan.json",
+          "bytes": 7008,
+          "sha256": "bb5c821f3d8e0a510fbd565dd82013d1b5f5d195c97c2786e2f307bc563e2357"
+        },
+        {
+          "path": "/root/workspace/muxpd-followup-20261025/runs/group-pressure-block20-hccl-true-01/engine-args.json",
+          "bytes": 1513,
+          "sha256": "7604578e6b21e6b1cd17ba80bd37144c37f013f2a6748de56a4b4aae0ee9c708"
+        },
+        {
+          "path": "/root/workspace/muxpd-followup-20261025/runs/group-pressure-block20-hccl-true-01/producer/pressure_probe.py",
+          "bytes": 31721,
+          "sha256": "2585b8d236c6065b9de780a67735c092296b2c3490991bbf69413993fe33a8f6"
+        },
+        {
+          "path": "/root/workspace/muxpd-followup-20261025/runs/group-pressure-block20-hccl-true-01/producer/pressure_observer.py",
+          "bytes": 10099,
+          "sha256": "9d04856f5a8c638cbb3bc6772cef9786d0774663b40719fe5d310d233319c884"
+        },
+        {
+          "path": "/root/workspace/muxpd-followup-20261025/runs/group-pressure-block20-hccl-true-01/producer/pressure_override_guard.py",
+          "bytes": 2367,
+          "sha256": "9951e51d0a17756b95df27366548c59f484749b4bcd8f774d19a0e0d42ef20b7"
+        },
+        {
+          "path": "/root/workspace/muxpd-followup-20261025/runs/group-pressure-block20-hccl-true-01/results/run.json",
+          "bytes": 353871,
+          "sha256": "70c7a06aa1144e90d47208ee79d7a67a668dffc61a5c9b97e902c94a174b6cc0"
+        },
+        {
+          "path": "/root/workspace/muxpd-followup-20261025/runs/group-pressure-block20-hccl-true-01/process.log",
+          "bytes": 72181,
+          "sha256": "875a2c1d16778330f3706b7259e5ad3a055f288a723d8bae593fd540062f5e8e"
+        },
+        {
+          "path": "/root/workspace/muxpd-followup-20261025/runs/group-pressure-block20-hccl-true-01/npu-before.txt",
+          "bytes": 3393,
+          "sha256": "28ee2d3e6458de4380242bba3fc4b21f3d342cdf46abd8b2927556e47daf110c"
+        },
+        {
+          "path": "/root/workspace/muxpd-followup-20261025/runs/group-pressure-block20-hccl-true-01/npu-after.txt",
+          "bytes": 3393,
+          "sha256": "c4358ee9f49b7e0211f5d4bdec64e32038bcd87f74de674aa66f994683002507"
+        },
+        {
+          "path": "/root/workspace/muxpd-followup-20261025/runs/group-pressure-block20-hccl-true-01/results/pressure/pressure-514473.jsonl",
+          "bytes": 1931299,
+          "sha256": "a3ce7c343fbb25d77961d3cfff3aca0af668e258722ff71f8e5d0fadb0021d02"
+        },
+        {
+          "path": "/root/workspace/muxpd-followup-20261025/performance/plans-geometry01-block20/group-pressure-plan.json",
+          "bytes": 7008,
+          "sha256": "bb5c821f3d8e0a510fbd565dd82013d1b5f5d195c97c2786e2f307bc563e2357"
+        }
+      ],
+      "common_checks": {
+        "controller_and_child_terminal_pass_exit0": true,
+        "controller_timeout_or_forced_termination_recorded": false,
+        "shutdown_returned": true,
+        "known_input_files_unchanged": true,
+        "complete_run_inventory_scan_performed": false,
+        "trace_rows": 904,
+        "trace_single_pid_contiguous_monotonic_no_errors": true,
+        "frozen_original_auditor_exact_recomputation": true,
+        "request_ID_prompt_recipe_actual_admission_steps_and_output_lengths_bound": true,
+        "submitted_requests": 3,
+        "completed_noncancelled_outputs": 3,
+        "engine_steps": 129,
+        "pool_blocks": 20,
+        "final_usable_blocks_returned": 19,
+        "physical_devices_empty_before_after": [
+          1,
+          2,
+          3,
+          6
+        ]
+      },
+      "lifecycle_evidence": {
+        "kind": "actual_allocator_pressure",
+        "allocation_none_count": 64,
+        "allocation_none_by_internal_id": {
+          "0-881c0be6": 33,
+          "2-8f2feebd": 31
+        },
+        "preempted_internal_id": "0-881c0be6",
+        "seed_outputs_at_preemption": 2,
+        "allocation_none_sequence": 18,
+        "preempt_before_sequence": 19,
+        "preempt_after_sequence": 20,
+        "seed_status_transition": [
+          "RUNNING",
+          "PREEMPTED"
+        ],
+        "seed_preemption_count_transition": [
+          0,
+          1
+        ],
+        "seed_released_block_ids": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "pending_prefill_internal_ids": [
+          "1-8894b36f"
+        ],
+        "preserved_prefill_block_ids": [
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19
+        ],
+        "free_blocks_transition": [
+          0,
+          4
+        ],
+        "prefill_completion_receipt_before_after": [
+          22,
+          23
+        ],
+        "prefill_layer_progress": [
+          4,
+          40
+        ],
+        "P_blocks_preserved_across_preemption_and_completion": true,
+        "second_peer_waiting_at_seed_preemption": "2-8f2feebd",
+        "all_original_output_lengths": [
+          64,
+          32,
+          32
+        ]
+      },
+      "cleanup": {
+        "native_SIGTERM_fallback_count": 4,
+        "native_SIGKILL_fallback_count": 1,
+        "original_shutdown_log_lines": [
+          "INFO 10-26 00:45:44 [multiproc_executor.py:426] [shutdown] Executor: waiting for worker exit count=4",
+          "WARNING 10-26 00:45:49 [multiproc_executor.py:438] [shutdown] Executor: workers still running after grace period; sending SIGTERM count=4",
+          "WARNING 10-26 00:45:53 [multiproc_executor.py:448] [shutdown] Executor: workers still running after SIGTERM; sending SIGKILL count=1"
+        ],
+        "scope": "Controller exit0, returned shutdown and archived empty devices support bounded cleanup. Native escalation is preserved; no globally graceful/no-force claim."
+      }
+    }
+  ],
+  "prior_failure_boundary": "Original raw20suite partial-cancellation FAIL remains unchanged; group20 here is the distinct originalpressure scenario and group22cancellation is the explicit headroom treatment. Neither new result retroactively changes that failedsuite.",
+  "conclusion": "Both group22 cancellation traces substantiate actualP8 abort, positivevictimblock ownership throughmatchingACK, releaseafterACK and freshphysicalreuse. Group20pressure substantiates actualallocationNone andseedDpreemption while15pendingPblocks remainowned andPcompletes. No gap found within frozen gates. Preserve nativeSIGTERM inallthree andadditionalSIGKILLcount1ingroup20pressure."
+}

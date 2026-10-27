@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "kind": "engineering-quality-smoke",
+  "date_utc": "2026-09-27",
+  "model": "Qwen3.5-35B-A3B",
+  "deployment": "BF16, TP=2, Ascend 910B2 devices 2,3, APC, real MTP2, async, align, FULL_AND_PIECEWISE",
+  "candidate_config_sha256": "622f0078363dfa0639cd945413638dcffeb7addd6cc42433622fab5e093fb271",
+  "selection_source_sha256": "d0b970ce1a6e7c4188a87a2680d37c550ac866ed0b40ccdade7df9c69e4f37e1",
+  "fixture": "A3-32K-FP16 historical commissioning fixture, four deterministic requests",
+  "fixture_sha256": "d1cf1cb02561f78255e92c6c916fcec300fdad341600a93d63ebd988530aa3c7",
+  "candidate": {
+    "completed": 4,
+    "correct": 4,
+    "failed": 0,
+    "silent_truncations": 0,
+    "scheduler_commits": 4,
+    "tp_rank_commit_acknowledgements": 8,
+    "result_sha256": "3550bf929f54314ab1127f7a9ec6976d71c676f69054f1274fa8099994e326"
+  },
+  "official_swe_60s_protocol_check": {
+    "valid": true,
+    "failed_requests": 0,
+    "summary_sha256": "6f08023a917fb35d3a814a3ef6b2357c974444161e4bf3bf84b91a58f40c1e2b"
+  },
+  "limitations": [
+    "A3 is a historical local quality fixture, not SWE task-solving accuracy.",
+    "Four cases cannot establish broad semantic quality or statistical performance.",
+    "The 60-second check is protocol validation, not a Frontier performance point."
+  ]
+}

@@ -1,0 +1,79 @@
+{
+  "status": "reviewed_step_limit_partial_patch_compile_failure_not_functional_negative",
+  "agent": {
+    "status": "LimitsExceeded",
+    "model_calls": 100,
+    "elapsed_seconds": 437.4548026807606,
+    "agent_submitted": false,
+    "patch_sha256": "7680ba2c4c52db6ed45c5cc6ab487c5011b638a50cdd983b9c324fdec9d2ec0d",
+    "container_cleanup_exit_code": 0
+  },
+  "request_audit": {
+    "attempts": 100,
+    "successful_returns": 100,
+    "rejected": 0,
+    "response_ids_usage_content_hashes_matched": true,
+    "http_retries": 0
+  },
+  "official_grading": {
+    "resolved": false,
+    "unresolved": [],
+    "model_calls": 0,
+    "fail_to_pass": {
+      "expected": 1,
+      "passed": 0,
+      "failed": 0,
+      "missing": 1
+    },
+    "pass_to_pass": {
+      "expected": 0,
+      "passed": 0,
+      "failed": 0,
+      "missing": 0
+    },
+    "test_counts": {
+      "ERROR": 1
+    }
+  },
+  "partial_patch": {
+    "submitted": false,
+    "raw_bytes": 7862,
+    "sha256": "7680ba2c4c52db6ed45c5cc6ab487c5011b638a50cdd983b9c324fdec9d2ec0d",
+    "apply_exit_code": 0,
+    "captured_paths": 4,
+    "after_equals_graded": true
+  },
+  "failure_mechanism": {
+    "Agent_termination": "100 original steps exhausted before1200s; unsubmitted partial patch.100successfulHTTP0rejected,not context failure.",
+    "grading": "TypeScript compilation failed before required test execution; officialfalse remains, F2Pmissing1. Not a functional assertion failure."
+  },
+  "compiler_errors": [
+    "TS2307 missing OperationProgressTracker module imported by partial patch",
+    "TS1361 imported type used as runtime value",
+    "TS2554 existing test supplied8arguments to modified9argumentconstructor"
+  ],
+  "test_execution_boundary": "Original parser projected1ERROR; F2P1missing. No required functional test ran; preserve officialfalse without calling it failed assertion.",
+  "resource_release": {
+    "service_exit_code": 0,
+    "sessions_drained": true,
+    "all_devices_released": true,
+    "CPU_agent_cleanup_exit_code": 0
+  },
+  "evidence": {
+    "CPU_seal_sha256": "670543f9fee171236c8ea64720fca101a6e733c08374e6392a7bfae035ce2c08",
+    "CPU_files": 60,
+    "public_CPU_summary_sha256": "b63849160f9ec9282020982c977576770a27080dc36d6582bdf798e8221c0de2",
+    "storage_original_review_sha256": "6aa1657ba83160a6b802314771ead2d2eb4be2498c5804f404e16b10aba961c4",
+    "storage_final_review_sha256": "fa6f1afb30178427f96435cd0514a7041c101aaf2a9e73c7a4de02e36ed5fccf",
+    "service_receipt_sha256": "8c4721381c8f68821da22231f0a90a5cf844db183037c34b16fc67d9808dc909",
+    "service_seal_sha256": "6a3dad28dbc139b93a2c3aca26a457f91021d4194b230fc73cbf5a83c35dff3c"
+  },
+  "counts": {
+    "attempts": 18,
+    "original_official_positive": 2,
+    "same_answers_recovery_positive": 3,
+    "unattempted": 713,
+    "does_not_add_recovery_as_new_attempt": true
+  },
+  "new_review_model_or_grading_calls": 0
+}

@@ -1,0 +1,21 @@
+# MuxPD 质量与原生参考追加 v5：本地草稿
+
+**这是尚未冻结发布范围的准备目录。raw 的固定质量不退化条件失败；group 质量、实用默认原生参考与实际混合 profiler 尚无本目录接纳的终态结果。**
+
+[草稿报告](REPORT-DRAFT-v1.md)引用已完成的两个原生控制和 raw 结果。两原生控制各165/200，raw166/200，但 raw 在两原生共同正确的165题中新增3错，因此严格门槛和独立补充答案门槛均保持失败。收集成功、总分较高或 #11 的有界调查关闭都不能代替质量通过。
+
+[准备状态](staging-state-v1.json)只列已知的 N2/raw 本地胶囊和待补证据，**不是最终 terminal selection、archive index 或上传清单**。完整原件继续保存在既有本地胶囊；本目录未复制压缩包、完整请求数据集或运行日志，也未生成公开下载回执。N1 已位于[既有 v3](../device-evidence-v3/README.md)，v2/v3/v4/协议全部旧文件保持原字节。
+
+小文件入口：
+
+- [两原生控制成对描述](analysis/native-pair/paired-description.json)、[澄清后的原报告](originals/NATIVE-PAIR-README-v2.md.source)与[后补 custody 范围订正](analysis/native-pair/calibration-custody-supplement-v1.json)。原执行报告不倒改。
+- [raw 审查](analysis/raw/review.json)、[严格结果](analysis/raw/strict-result-v1.json)、[补充结果](analysis/raw/supplementary-result-v1.json)、[七项正反变化原文](originals/RAW-QUALITY-README-v1.md.source)。
+- [源码支持与处置范围原文](originals/RAW-QUALITY-FAILURE-SCOPE-REVIEW-v1.md.source)、[批不变/strict 算子审计](originals/BATCH-INVARIANT-SOURCE-AUDIT-v1.md.source)。这些是只读分析，不是修复或新设备结果。
+- [默认原生 v2 冻结身份](frozen/native-default-backend-v2/execution-identity-v2.json)与[混合 profiler 冻结身份](frozen/group-prefill-profile-v1/execution-identity-v1.json)：只保存计划、配置、生产者和原CPU准备身份，不宣称执行成功。
+- [复制映射](canonical-copy-map-draft-v1.json)保存原执行路径与 SHA；`.source` 文件保留原字节，内部原相对/绝对路径未改写。请通过本页导航，不将这些历史路径当作归档重定位后的可执行接口。
+
+```sh
+python reports/muxpd-followup-20261025/quality-reference-v5/verify_staging_v1.py
+```
+
+该检查只验证小文件副本、草稿边界及旧文件未变，不重新评分、不读活跃输出、不启动模型、不重新验证胶囊载荷、不证明远端可下载。终态材料齐备后仍需另存最终明确选择、support/index、归档核验与上传后的独立公开回执；不得把本草稿的 pending 改称既有证据已通过。

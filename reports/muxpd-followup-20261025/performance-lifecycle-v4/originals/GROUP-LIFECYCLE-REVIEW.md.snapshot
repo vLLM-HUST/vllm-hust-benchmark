@@ -1,0 +1,17 @@
+Grouped cancellation22 and pressure20: independent terminal review
+
+All three original bounded lifecycle gates pass independent trace re-evaluation. Exact producer/observer/guard hashes, source receipts, controller command, frozen plan, request identity, prompt recipe, actual admission steps and fixed-length outputs were checked. Only known small receipts and traces were read; no full-run or repository inventory scan, compression, test suite or hardware action occurred.
+
+| Run | Evidence | Final drain |
+|---|---|---|
+| group-cancel-partial-block22-hccl-true-01 | P8 abort; 7 victim blocks held through ACK 72→73; free3→10; fresh reuse[9, 10, 11] | 21 usableblocks |
+| group-cancel-full-block22-hccl-true-01 | P8 abort; 14 victim blocks held through ACK 30→31; free3→17; fresh reuse[5, 6, 7, 8, 9, 10, 11, 16, 17, 18] | 21 usableblocks |
+| group-pressure-block20-hccl-true-01 | 64 allocation-None events; one real seed D preemption at19→20; all15 pendingPblocks5–19 retained; P4→P40 completion at22→23 | 19 usableblocks |
+
+Cancellation runs each finish165steps with10partial/9full noncancelled outputs. Pressure finishes129steps with all3outputs (seed64, peers32each); seed moves RUNNING→PREEMPTED, preemptioncount0→1, and releases its4blocks while pendingP retains15blocks. AllocationNone counts are33forseed and31forwaitingsecondpeer. These distinct observations must not be collapsed into cancellation/preemption coverage of an untested matrix.
+
+Allthreecontrollers exit0, child shutdown returns, and archived physicaldevices1/2/3/6 are empty. Allthree nativeExecutors use SIGTERM fallback(count4). **Grouppressure20 additionally logs SIGKILL count1 at00:45:53.** Bounded cleanup is supported; globally graceful or signal-free cleanup is not.
+
+The prior raw20suite cancellationfailure remainsfailed. Group20pressure is a distinct pressure scenario;22-block cancellation has explicit additional headroom. No prior report was overwritten, no performance/quality conclusion follows, and these later experiments do not retroactively enter the fixedv3publication cutoff.
+
+Exact artifacts, source status, request/block/ACK/preemption sequences and shutdown excerpts: group-lifecycle-review.json SHA256 `2e272d373881024698b411ea11dfec016d620acf9f20d9b0dd29c5a3eb929d68`.

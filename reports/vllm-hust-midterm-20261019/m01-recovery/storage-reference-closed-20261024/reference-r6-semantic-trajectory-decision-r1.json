@@ -1,0 +1,183 @@
+{
+  "schema": "reference-semantic-trajectory-decision/v1",
+  "status": "independent_semantic_review_no_measurement_no_adapter",
+  "decision": "可以采用完整 r6 请求轨迹作为明确、固定的独立参考轨迹；不要求它与 formal 的生成文本或实际 expert IDs 逐位相同。必须继续使用 formal 自有请求工作量、ordered acceptance、必要依赖与重建 workgroups，不得继承 r6 波次、出现次数或加权总时间。Target 的采用可直接放宽到该参考流的完整因果位置；draft 必须区分源状态等价复用和显式路由分布模型，不能混称。",
+  "scope": "这是一份原方法允许范围的语义裁定，不是完整 T参/η 资格，也不是对未实施设备 adapter 的验证。所有证据为已有文件的 CPU 只读检查，未初始化设备或启动计量。",
+  "normative_basis": [
+    {
+      "path": "/root/m01-delivery-benchmark-20261024/reports/vllm-hust-midterm-20261019/milestone-v15/project4-v1.5.txt",
+      "lines": [
+        51,
+        53,
+        54,
+        55,
+        57,
+        59,
+        61
+      ],
+      "content": "V1.5要求对应配置及工况的参考模型、独立标定、必要工作量和实际阶段依赖，F/T/T参覆盖同一工作量，复算前确定参考方法及适用范围，不以实测T反向拟合。原文没有要求输出文本逐位相同、原始expert ID完全可还原、或每个frame具备完整数值trace。",
+      "interpretation": "必须证明工作量与适用性；不能把逐位formal trace自行添加为唯一证明方式。独立参考轨迹的选取也不能用于事后挑高η。",
+      "original_document_sha256_from_excerpt": "08196093d69c655bbae39f902a77ed89b2aaba71237adabe13f9122e8769a1ca",
+      "excerpt_sha256": "7f9352a85ec8025731b37b57362d80bfc48f8204ae9d1877eba521377267fa24"
+    },
+    {
+      "path": "/root/m01-storage-accounting-20261024/formal-reference-method-r1.json",
+      "lines": [
+        4,
+        5,
+        6,
+        9,
+        10
+      ],
+      "content": "使用own200request input/output、own native ordered MTP2 arrays、own prefill；不转移r6 numerator或route multiplicity；允许independent semantic workload model或justified bounds；exact expert-vector hit非必要条件。",
+      "interpretation": "禁止的是旧工作量、旧聚合权重与不适用时延的移植，不是禁止r6逐行数据成为独立模型的参考样本。既有r1没有冻结必须使用formal文本的唯一参考流，因此可在新的复算开始前明确固定r6整条流，记录相对于formal-token-prefix方案的模型选择差异。"
+    }
+  ],
+  "existing_identity_evidence": {
+    "path": "/root/m01-storage-accounting-20261024/reference-recheck-route-transport-r1.json",
+    "model_weight_identity_equal": true,
+    "resolved_payload_identity_equal": true,
+    "common_source_paths_equal_sha": 4362,
+    "prompt_matches": 200,
+    "input_and_output_lengths_equal": true,
+    "outputs_equal_requests_not_a_requirement_for_independent_reference": 41,
+    "acceptance_equal_requests_not_a_global_reuse_requirement": 7,
+    "formal_work_to_preserve": {
+      "acceptance_steps": 19013,
+      "draft_full_queries": 32116,
+      "draft_necessary_KV_rows": 347709,
+      "draft_attention_pairs": 49450415
+    },
+    "r6_counts_that_must_not_replace_formal": {
+      "acceptance_steps": 19022,
+      "draft_full_queries": 32100,
+      "draft_necessary_KV_rows": 347668,
+      "draft_attention_pairs": 49433590
+    }
+  },
+  "adoption_rules": [
+    {
+      "id": "R1",
+      "decision": "允许",
+      "rule": "一次固定200请求全体r6参考输出流、tokenizer/source/archive SHA及确定性的request-position-locator，不按prompt或layer分别选择formal/r6中较有利的路线。不得读取测得T或算出的η来挑参考流。",
+      "effect": "该流定义独立参考的数据值；formal自己的输入输出规模、acceptance序列、必要行数、算量、队列/依赖和workgroup重建继续定义参考的工作结构。"
+    },
+    {
+      "id": "R2",
+      "decision": "允许",
+      "rule": "Target按同一参考请求、层、因果position取r6逐行route payload，重新聚合为formal自己的必要workgroup。该参考流内的位置对应已固定后，不再因formal输出文本不同、acceptance分段不同或旧波次不同而拒绝该target行。",
+      "effect": "41相同完整输出/共同前缀306935行是formal-token-context方案的复用界，不是r6独立参考方案的上限。目标可覆盖全部333265必要target行；最终需逐行覆盖校验，不能只改计数宣称已绑定。",
+      "source_reason": "Target语义由其token因果前缀和目标模型状态定义；acceptance只改变这些位置怎样分批提交。跨batch浮点差异属于已披露的参考模型适用性，不被冒称formal精确expert trace。"
+    },
+    {
+      "id": "R3",
+      "decision": "允许但必须正确命名",
+      "rule": "canonical文本重新编码可作为明确的参考表示，不得冒称缺失的原server token ID日志。已知text round-trip和256长度本身不构成原始token序列唯一性定理；不因此强制新增逐位token trace，而是在方法中明示canonical表示与已有逐行route样本的关联假设。",
+      "effect": "可形成独立semantic route reference；不能写成formal实际路由被精确恢复。"
+    },
+    {
+      "id": "R4",
+      "decision": "允许源状态等价复用",
+      "rule": "Draft不要求整条formal/r6 acceptance完全相同。可逐个必要节点证明参考输入token、step、target hidden parent或前一draft hidden parent、被读取的版本化MTP KV依赖等价后复用；绝对wave ID和无关slot编号不是语义门槛。",
+      "effect": "可放宽六条整轨迹相同请求的保守界，但只看(request,position)或只看(step,position)不足以证明。可比较依赖图的语义同构，不要求数值hidden/KV逐位日志。"
+    },
+    {
+      "id": "R5",
+      "decision": "允许另立明确模型，当前不能无依据直接放行",
+      "rule": "若draft donor来自不同hidden parent/不同MTP cache版本，可将其作为显式经验路由分布模型的样本，而非把它改名为同一源节点。须在复算前固定donor选择/聚合规则、适用域和独立验证或有依据的误差界。不要把GMM latency模型的验证误当draft路由分布迁移本身已被验证。",
+      "effect": "V1.5和formal方法没有强制必须实现完整teacherforce adapter；有证据的分布模型/边界也是允许路径。但现有teacherforce proof并未提供这种draft donor模型的验证，不能仅凭同200prompt/256output给它零误差资格。"
+    },
+    {
+      "id": "R6",
+      "decision": "禁止",
+      "rule": "复制r6 group_counts向量及其observed_calls、旧wave频率、旧总T参/F，或用r6 acceptance替换formal acceptance来获得完整单值。禁止把未知路由、未验证primitive transport或缺测stage当零。",
+      "effect": "会改变同一工作量，直接违反formal own-work和V1.5同口径要求。"
+    },
+    {
+      "id": "R7",
+      "decision": "仍须核验",
+      "rule": "逐行重新聚合后，用各rank/source family的独立per-geometry时延或已验证模型；保持GMM特征域与模型误差规则。Dispatch/unpermute真实路由pattern的适用性独立判断，不能只凭GMM特征box覆盖将其放行。",
+      "effect": "语义轨迹选择闭合不自动等于全部时延闭合；不应因此重复标定已经有效的同几何叶节点。"
+    }
+  ],
+  "draft_source_basis": [
+    {
+      "path": "/root/modcost-runtime-028-20261017/vllm-workspace/vllm/vllm/v1/spec_decode/llm_base_proposer.py",
+      "lines": [
+        829,
+        854,
+        859,
+        864,
+        866
+      ],
+      "supports": "step0输入移一token，位置不变，并使用target_hidden_states；因此同position但不同target前缀不是同一个draft状态。"
+    },
+    {
+      "path": "/root/gennova-evidence/20261019-midterm-aligned/runtime/vllm_ascend/spec_decode/llm_base_proposer.py",
+      "lines": [
+        1475,
+        1493,
+        1494,
+        1514,
+        1516
+      ],
+      "supports": "后续step以先前draft输出token和hidden为输入并增加position；不能把target hidden或另一个step的hidden替代。"
+    },
+    {
+      "path": "/root/modcost-runtime-028-20261017/vllm-workspace/vllm/vllm/model_executor/models/qwen3_5_mtp.py",
+      "lines": [
+        155,
+        159,
+        160,
+        161,
+        162,
+        169,
+        175
+      ],
+      "supports": "token embedding和hidden分别归一后拼接并过FC，再进入MTP layer/attention/MoE；hidden parent是路由的真实数值输入，不只是审计标签。"
+    },
+    {
+      "path": "/root/m01-storage-accounting-20261024/draft_cache_dependencies_r6.py",
+      "lines": [
+        27,
+        40,
+        42,
+        45,
+        48,
+        63,
+        67,
+        69
+      ],
+      "supports": "相同logical position可能被不同step/stage覆写；query读取具体latest writer版本，step1 KV还依赖step0 full hidden。用于解释既有源执行的版本语义，不要求恢复数值checkpoint。"
+    }
+  ],
+  "teacherforce_proof_interpretation": {
+    "path": "/root/m01-storage-accounting-20261024/reference-teacherforce-proof-r5.json",
+    "verified_source_code_pins": 5,
+    "what_it_proves": "200条formal prompt的canonical长度/identity校验，以及347709必要draft KV行和32116 full query能以已知shifted retained token和明确hidden parent定义输入；不需要未知rejected token来定义该必要程序。",
+    "what_it_does_not_prove": "没有运行versioned-cache数值forward；没有证明任意旧r6 draft路由可直接替代另一parent/version的formal-shape节点；没有验证一个draft donor分布模型。",
+    "not_a_mandate": "formal输出teacherforce是一条实现路线，不是V1.5新增的唯一合法参考方法；不能以它难实现为由宣称所有独立参考不可用。"
+  },
+  "recommendation_to_parent": [
+    "立即冻结并使用完整r6 target reference方案，重聚合formal own workgroups；保留旧formal-token-prefix方案记录，但不把其41请求限制扩展到新定义。选择依据为已存在完整同任务路由样本和可复用性，不看η选优。",
+    "让route reviewer优先做draft依赖签名的逐节点结构复用，取消整条acceptance相同的粗门槛；规则使用step/parent/version依赖语义，不要求formal数值trace。",
+    "对真正不同draft状态，把缺口明确分成源状态输入缺失与独立分布模型适用性未验证；先评估已有可验证模型/边界，不能默认必须新建大adapter，也不能默认为旧donor就是同节点。",
+    "保持formal F/T及三seed必要工作量守恒，时延仍按新分组重算；完整时延适用性关闭后再出对应参考范围的T参/η，不将本裁定本身标为指标完成。"
+  ],
+  "measurement_runs_added": 0,
+  "files_owned_by_other_reviewers_modified": false,
+  "new_big_adapter_implemented": false,
+  "route_reviewer_coordination": {
+    "confirmed": "Route reviewer independently agrees GMM7D counts-to-latency validation is not a donor-state-to-route validation. Full target independent-reference regrouping is in progress.",
+    "draft_candidate_rule": "Same request/draft_step/canonical position; only existing r6 necessary full query donors; deterministic earliest source wave if multiple. Preserve source wave/local stage; duration_qualified=false until explicit source-equivalence or model applicability is justified.",
+    "interpretation": "This is a useful deterministic coverage inventory, not a newly validated nearest-row model. Missing direct donor counts can guide the next minimum action without forcing every absolute stage label to match."
+  },
+  "reviewed_evidence_sha256": {
+    "/root/m01-storage-accounting-20261024/formal-reference-method-r1.json": "1b1a398a7a3a698ec3c6772b72b48dc0bdee2ff5a8dd7c0ccad61ed86f41da79",
+    "/root/m01-storage-accounting-20261024/reference-teacherforce-proof-r5.json": "b5f582e71355515177b2f54efc700fd342b65db1c9d64b0bd0c069b39654e96d",
+    "/root/m01-storage-accounting-20261024/reference-recheck-route-transport-r1.json": "d041ee4755ea3433e1d15683001e568559cc9487071bc1b8b8069185d78bfac9",
+    "/root/m01-storage-accounting-20261024/reference-recheck-target-prefix-identity-r5.json": "4a740a8b3e12b234bbfe2be2b193b5c61e4b576b1d96e1f1cb173b52f5f0a0d1",
+    "/root/m01-storage-accounting-20261024/r6-scoped-stream-qualification-r1.json": "783ed52adc42db5c53b876d38ebbbbff5b71f5e9c1c9472a320a41afda2a1e13",
+    "/root/m01-storage-accounting-20261024/draft_cache_dependencies_r6.py": "0aab10d8df4b8b359d395643bbf96d6137d399b56606ac10126ad5cbc21c7494"
+  }
+}

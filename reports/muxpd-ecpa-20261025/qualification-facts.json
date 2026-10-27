@@ -1,0 +1,1600 @@
+{
+  "schema": "muxpd-ecpa-qualification-facts-v1",
+  "extractor": {
+    "path": "/root/workspace/references/benchmark-muxpd-publication/reports/muxpd-ecpa-20261025/extract_qualification_facts.py",
+    "bytes": 10669,
+    "sha256": "42228f5e50b057666f50702bdc5f952fb61f79e218e9222287249b0e00898630"
+  },
+  "scope": "Functional qualification of the captured builds, not performance or universal numerical equivalence.",
+  "qualification": {
+    "scope": "installed TP4 activation, outputs, cancellation, drain, next-start native rollback; no performance claim",
+    "passed": true,
+    "errors": [],
+    "git_commit": "658b4d0b4e8982bd281499005500ac4c3e0100f5",
+    "started_at_utc": "2026-10-25T19:40:11Z",
+    "finished_at_utc": "2026-10-25T19:49:16Z"
+  },
+  "steps": [
+    {
+      "name": "npu-before",
+      "exit_code": 0,
+      "passed": true,
+      "log": "npu-before.log"
+    },
+    {
+      "name": "installed-doctor",
+      "exit_code": 0,
+      "passed": true,
+      "log": "installed-doctor.log"
+    },
+    {
+      "name": "installed-list",
+      "exit_code": 0,
+      "passed": true,
+      "log": "installed-list.log"
+    },
+    {
+      "name": "installed-validate",
+      "exit_code": 0,
+      "passed": true,
+      "log": "installed-validate.log"
+    },
+    {
+      "name": "installed-disabled-status",
+      "exit_code": 0,
+      "passed": true,
+      "log": "installed-disabled-status.log"
+    },
+    {
+      "name": "write-configuration",
+      "exit_code": 0,
+      "passed": true,
+      "log": "write-configuration.log"
+    },
+    {
+      "name": "configure",
+      "exit_code": 0,
+      "passed": true,
+      "log": "configure.log"
+    },
+    {
+      "name": "enable",
+      "exit_code": 0,
+      "passed": true,
+      "log": "enable.log"
+    },
+    {
+      "name": "plan",
+      "exit_code": 0,
+      "passed": true,
+      "log": "plan.log"
+    },
+    {
+      "name": "render",
+      "exit_code": 0,
+      "passed": true,
+      "log": "render.log"
+    },
+    {
+      "name": "candidate-dry-run",
+      "exit_code": 0,
+      "passed": true,
+      "log": "candidate-dry-run.log"
+    },
+    {
+      "name": "enabled-before-start-status",
+      "exit_code": 0,
+      "passed": true,
+      "log": "enabled-before-start-status.log"
+    },
+    {
+      "name": "healthy-before-request-status",
+      "exit_code": 0,
+      "passed": true,
+      "log": "healthy-before-request-status.log"
+    },
+    {
+      "name": "candidate-smoke",
+      "exit_code": 0,
+      "passed": true,
+      "log": "candidate-smoke.log"
+    },
+    {
+      "name": "candidate-effective-status",
+      "exit_code": 0,
+      "passed": true,
+      "log": "candidate-effective-status.log"
+    },
+    {
+      "name": "overlap",
+      "exit_code": 0,
+      "passed": true,
+      "log": "overlap.log"
+    },
+    {
+      "name": "prefill-cancel",
+      "exit_code": 0,
+      "passed": true,
+      "log": "prefill-cancel.log"
+    },
+    {
+      "name": "after-cancel-smoke",
+      "exit_code": 0,
+      "passed": true,
+      "log": "after-cancel-smoke.log"
+    },
+    {
+      "name": "trace-audit",
+      "exit_code": 0,
+      "passed": true,
+      "log": "trace-audit.log"
+    },
+    {
+      "name": "candidate-stopped-status",
+      "exit_code": 0,
+      "passed": true,
+      "log": "candidate-stopped-status.log"
+    },
+    {
+      "name": "npu-after-candidate",
+      "exit_code": 0,
+      "passed": true,
+      "log": "npu-after-candidate.log"
+    },
+    {
+      "name": "disable",
+      "exit_code": 0,
+      "passed": true,
+      "log": "disable.log"
+    },
+    {
+      "name": "disabled-status",
+      "exit_code": 0,
+      "passed": true,
+      "log": "disabled-status.log"
+    },
+    {
+      "name": "native-dry-run",
+      "exit_code": 0,
+      "passed": true,
+      "log": "native-dry-run.log"
+    },
+    {
+      "name": "native-smoke",
+      "exit_code": 0,
+      "passed": true,
+      "log": "native-smoke.log"
+    },
+    {
+      "name": "native-running-status",
+      "exit_code": 0,
+      "passed": true,
+      "log": "native-running-status.log"
+    },
+    {
+      "name": "npu-after-native",
+      "exit_code": 0,
+      "passed": true,
+      "log": "npu-after-native.log"
+    }
+  ],
+  "services": [
+    {
+      "label": "candidate",
+      "argv": [
+        "/root/workspace/.muxpd-ecpa-runtime/bin/vllm-muxpd",
+        "serve",
+        "--model",
+        "/root/workspace/models/Qwen3.5-35B-A3B",
+        "--tensor-parallel-size",
+        "4",
+        "--port",
+        "8126",
+        "--trace-path",
+        "/root/workspace/muxpd-ecpa-plugin/local-results/ecpa-tp4-20261025-final/trace-{pid}.jsonl"
+      ],
+      "manager_pid": 138674,
+      "log": "candidate-service.log",
+      "started_monotonic": 8655969.44855657,
+      "healthy_after_s": 213.07354806177318,
+      "exit_code": 130,
+      "stopped_monotonic": 8656228.682472222
+    },
+    {
+      "label": "native-rollback",
+      "argv": [
+        "/root/workspace/.muxpd-ecpa-runtime/bin/vllm-hust-ext",
+        "run",
+        "--",
+        "/root/workspace/.muxpd-ecpa-runtime/bin/python",
+        "-m",
+        "vllm.entrypoints.openai.api_server",
+        "--model",
+        "/root/workspace/models/Qwen3.5-35B-A3B",
+        "--served-model-name",
+        "Qwen3.5-35B-A3B",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "8126",
+        "--tensor-parallel-size",
+        "4",
+        "--data-parallel-size",
+        "1",
+        "--pipeline-parallel-size",
+        "1",
+        "--api-server-count",
+        "1",
+        "--enable-expert-parallel",
+        "--dtype",
+        "bfloat16",
+        "--max-model-len",
+        "16384",
+        "--max-num-batched-tokens",
+        "16384",
+        "--max-num-seqs",
+        "8",
+        "--gpu-memory-utilization",
+        "0.85",
+        "--language-model-only",
+        "--enable-chunked-prefill",
+        "--no-async-scheduling",
+        "--no-enable-prefix-caching",
+        "--mamba-cache-mode",
+        "none",
+        "--no-enforce-eager",
+        "--no-numa-bind",
+        "--additional-config",
+        "{\"enable_cpu_binding\":false}",
+        "--compilation-config",
+        "{\"mode\":3,\"cudagraph_mode\":\"FULL_DECODE_ONLY\",\"cudagraph_capture_sizes\":[1,2,4,8],\"max_cudagraph_capture_size\":8}"
+      ],
+      "manager_pid": 172096,
+      "log": "native-rollback-service.log",
+      "started_monotonic": 8656251.910402756,
+      "healthy_after_s": 201.05217731185257,
+      "exit_code": 130,
+      "stopped_monotonic": 8656475.024673322
+    }
+  ],
+  "build_identities": {
+    "plugin": {
+      "commit": "658b4d0b4e8982bd281499005500ac4c3e0100f5",
+      "tracked_status": ""
+    },
+    "manager": {
+      "commit": "c27d14cd92658e732fa336cb1a453e64f73371cd",
+      "tracked_status": ""
+    },
+    ".gitignore": {
+      "sha256": "684888c0ebb17f374298b65ee2807526c066094c701bcc7ebbe1c1095f494fc1",
+      "bytes": 1
+    },
+    "vllm_ascend_muxpd-0.2.0a1-py3-none-any.whl": {
+      "sha256": "7cc6b1d9fc8a2afa90526495a7f33e4d08901001d7c7195fbac3bf9ad06ecd7f",
+      "bytes": 82326
+    },
+    "vllm_ascend_muxpd-0.2.0a1.tar.gz": {
+      "sha256": "c070ea79c320d18684c755ec46926f25169402bc14888e70134b8b721d41c793",
+      "bytes": 157846
+    }
+  },
+  "model_host_provenance": {
+    "model_path": "/root/workspace/models/Qwen3.5-35B-A3B",
+    "model_resolved": "/data/shared_upload/models/vspec/Qwen3.5-35B-A3B",
+    "small_files": {
+      "config.json": {
+        "bytes": 3544,
+        "sha256": "5e4d7f74fec2f360eb9cfbfcd6ec0c4c76e684d3a11caaed259d9fd9bfbc7944"
+      },
+      "generation_config.json": {
+        "bytes": 244,
+        "sha256": "4f25002776b741773666203dcea8f54619f177ace3ae483d311102092a4658e0"
+      },
+      "tokenizer_config.json": {
+        "bytes": 16710,
+        "sha256": "316230d6a809701f4db5ea8f8fc862bc3a6f3229c937c174e674ff3ca0a64ac8"
+      },
+      "tokenizer.json": {
+        "bytes": 12807982,
+        "sha256": "5f9e4d4901a92b997e463c1f46055088b6cca5ca61a6522d1b9f64c4bb81cb42"
+      },
+      "model.safetensors.index.json": {
+        "bytes": 187463,
+        "sha256": "d8d0b7ca4e61ae107e3e87a3ff21136b3ac7c789e64bb24267227ca804e04205"
+      },
+      "chat_template.jinja": {
+        "bytes": 7756,
+        "sha256": "a4aee8afcf2e0711942cf848899be66016f8d14a889ff9ede07bca099c28f715"
+      }
+    },
+    "weight_files": {
+      "model.safetensors-00001-of-00014.safetensors": {
+        "bytes": 5368709816,
+        "mtime_ns": 1791497154318109346
+      },
+      "model.safetensors-00002-of-00014.safetensors": {
+        "bytes": 5368709808,
+        "mtime_ns": 1791497616119679719
+      },
+      "model.safetensors-00003-of-00014.safetensors": {
+        "bytes": 5368709808,
+        "mtime_ns": 1791497819819988640
+      },
+      "model.safetensors-00004-of-00014.safetensors": {
+        "bytes": 5368709816,
+        "mtime_ns": 1791497844288501557
+      },
+      "model.safetensors-00005-of-00014.safetensors": {
+        "bytes": 5368709816,
+        "mtime_ns": 1791497812119827046
+      },
+      "model.safetensors-00006-of-00014.safetensors": {
+        "bytes": 5368709816,
+        "mtime_ns": 1791499565799919813
+      },
+      "model.safetensors-00007-of-00014.safetensors": {
+        "bytes": 5368709808,
+        "mtime_ns": 1791497814003866592
+      },
+      "model.safetensors-00008-of-00014.safetensors": {
+        "bytes": 5368709808,
+        "mtime_ns": 1791497941386528996
+      },
+      "model.safetensors-00009-of-00014.safetensors": {
+        "bytes": 5255463936,
+        "mtime_ns": 1791498560515263762
+      },
+      "model.safetensors-00010-of-00014.safetensors": {
+        "bytes": 5368710456,
+        "mtime_ns": 1791499366451633950
+      },
+      "model.safetensors-00011-of-00014.safetensors": {
+        "bytes": 5368710464,
+        "mtime_ns": 1791499658093965933
+      },
+      "model.safetensors-00012-of-00014.safetensors": {
+        "bytes": 5368710456,
+        "mtime_ns": 1791499641473599338
+      },
+      "model.safetensors-00013-of-00014.safetensors": {
+        "bytes": 5367839544,
+        "mtime_ns": 1791499878298759361
+      },
+      "model.safetensors-00014-of-00014.safetensors": {
+        "bytes": 2224764664,
+        "mtime_ns": 1791499859010343590
+      }
+    },
+    "weight_identity_scope": "weight sizes and mtimes; no claim of full weight SHA256",
+    "cgroup": {
+      "cpu.max": "1600000 100000",
+      "memory.max": "137438953472"
+    }
+  },
+  "configuration": {
+    "launch_options": {
+      "batch_admission_policy_config": {
+        "execution": "decoupled",
+        "stream_mode": "overlap",
+        "layers_per_slice": 4,
+        "adaptive_layers": false,
+        "prefill_first": false,
+        "decode_graph": true,
+        "compile_full_prefill": false,
+        "prefill_layer_token_budget": 0,
+        "decode_budget_guard": false,
+        "overlap_communication": "isolated",
+        "trace_path": "/root/workspace/muxpd-ecpa-plugin/local-results/ecpa-tp4-20261025-final/trace-{pid}.jsonl"
+      }
+    }
+  },
+  "smoke": {
+    "candidate-smoke": {
+      "reported_passed": true,
+      "test_count": 9,
+      "passed_count": 9,
+      "tests": [
+        {
+          "name": "initial_health",
+          "passed": true
+        },
+        {
+          "name": "greedy_arithmetic",
+          "passed": true
+        },
+        {
+          "name": "concurrent_chinese_0",
+          "passed": true
+        },
+        {
+          "name": "concurrent_chinese_1",
+          "passed": true
+        },
+        {
+          "name": "concurrent_chinese_2",
+          "passed": true
+        },
+        {
+          "name": "long_prompt_2305_tokens",
+          "passed": true
+        },
+        {
+          "name": "cancel_long_generation",
+          "passed": true
+        },
+        {
+          "name": "health_after_cancel",
+          "passed": true
+        },
+        {
+          "name": "greedy_after_cancel",
+          "passed": true
+        }
+      ]
+    },
+    "after-cancel-smoke": {
+      "reported_passed": true,
+      "test_count": 9,
+      "passed_count": 9,
+      "tests": [
+        {
+          "name": "initial_health",
+          "passed": true
+        },
+        {
+          "name": "greedy_arithmetic",
+          "passed": true
+        },
+        {
+          "name": "concurrent_chinese_0",
+          "passed": true
+        },
+        {
+          "name": "concurrent_chinese_1",
+          "passed": true
+        },
+        {
+          "name": "concurrent_chinese_2",
+          "passed": true
+        },
+        {
+          "name": "long_prompt_2305_tokens",
+          "passed": true
+        },
+        {
+          "name": "cancel_long_generation",
+          "passed": true
+        },
+        {
+          "name": "health_after_cancel",
+          "passed": true
+        },
+        {
+          "name": "greedy_after_cancel",
+          "passed": true
+        }
+      ]
+    },
+    "native-smoke": {
+      "reported_passed": true,
+      "test_count": 9,
+      "passed_count": 9,
+      "tests": [
+        {
+          "name": "initial_health",
+          "passed": true
+        },
+        {
+          "name": "greedy_arithmetic",
+          "passed": true
+        },
+        {
+          "name": "concurrent_chinese_0",
+          "passed": true
+        },
+        {
+          "name": "concurrent_chinese_1",
+          "passed": true
+        },
+        {
+          "name": "concurrent_chinese_2",
+          "passed": true
+        },
+        {
+          "name": "long_prompt_2305_tokens",
+          "passed": true
+        },
+        {
+          "name": "cancel_long_generation",
+          "passed": true
+        },
+        {
+          "name": "health_after_cancel",
+          "passed": true
+        },
+        {
+          "name": "greedy_after_cancel",
+          "passed": true
+        }
+      ]
+    }
+  },
+  "natural": {
+    "requests_per_role": 8,
+    "exact_text_count": 7,
+    "rows": [
+      {
+        "case": 0,
+        "payload_equal": true,
+        "text_exact": true,
+        "candidate_text_sha256": "73475cb40a568e8da8a045ced110137e159f890ac4da883b6b17dc651b3a8049",
+        "native_text_sha256": "73475cb40a568e8da8a045ced110137e159f890ac4da883b6b17dc651b3a8049",
+        "candidate_http_status": 200,
+        "native_http_status": 200,
+        "candidate_check_passed": true,
+        "native_check_passed": true,
+        "candidate_finish_reason": "stop",
+        "native_finish_reason": "stop",
+        "candidate_usage": {
+          "prompt_tokens": 28,
+          "total_tokens": 31,
+          "completion_tokens": 3,
+          "prompt_tokens_details": null
+        },
+        "native_usage": {
+          "prompt_tokens": 28,
+          "total_tokens": 31,
+          "completion_tokens": 3,
+          "prompt_tokens_details": null
+        },
+        "token_ids_observed": false
+      },
+      {
+        "case": 1,
+        "payload_equal": true,
+        "text_exact": true,
+        "candidate_text_sha256": "7688b6ef52555962d008fff894223582c484517cea7da49ee67800adc7fc8866",
+        "native_text_sha256": "7688b6ef52555962d008fff894223582c484517cea7da49ee67800adc7fc8866",
+        "candidate_http_status": 200,
+        "native_http_status": 200,
+        "candidate_check_passed": true,
+        "native_check_passed": true,
+        "candidate_finish_reason": "stop",
+        "native_finish_reason": "stop",
+        "candidate_usage": {
+          "prompt_tokens": 26,
+          "total_tokens": 29,
+          "completion_tokens": 3,
+          "prompt_tokens_details": null
+        },
+        "native_usage": {
+          "prompt_tokens": 26,
+          "total_tokens": 29,
+          "completion_tokens": 3,
+          "prompt_tokens_details": null
+        },
+        "token_ids_observed": false
+      },
+      {
+        "case": 2,
+        "payload_equal": true,
+        "text_exact": false,
+        "candidate_text_sha256": "aff3b376a40a205a25c9f9f73e475e9e12eb73cb37efe466683ba5884980ce91",
+        "native_text_sha256": "9af378c13e4bbe085eab7c938e4ab19936004589f3e8a281747bb6063130981a",
+        "candidate_http_status": 200,
+        "native_http_status": 200,
+        "candidate_check_passed": true,
+        "native_check_passed": true,
+        "candidate_finish_reason": "stop",
+        "native_finish_reason": "stop",
+        "candidate_usage": {
+          "prompt_tokens": 20,
+          "total_tokens": 55,
+          "completion_tokens": 35,
+          "prompt_tokens_details": null
+        },
+        "native_usage": {
+          "prompt_tokens": 20,
+          "total_tokens": 54,
+          "completion_tokens": 34,
+          "prompt_tokens_details": null
+        },
+        "token_ids_observed": false
+      },
+      {
+        "case": 3,
+        "payload_equal": true,
+        "text_exact": true,
+        "candidate_text_sha256": "5000937abc87626c698fe9e2cafdca31943b616ceb91a1f2a2bcda78c35d005f",
+        "native_text_sha256": "5000937abc87626c698fe9e2cafdca31943b616ceb91a1f2a2bcda78c35d005f",
+        "candidate_http_status": 200,
+        "native_http_status": 200,
+        "candidate_check_passed": true,
+        "native_check_passed": true,
+        "candidate_finish_reason": "stop",
+        "native_finish_reason": "stop",
+        "candidate_usage": {
+          "prompt_tokens": 21,
+          "total_tokens": 50,
+          "completion_tokens": 29,
+          "prompt_tokens_details": null
+        },
+        "native_usage": {
+          "prompt_tokens": 21,
+          "total_tokens": 50,
+          "completion_tokens": 29,
+          "prompt_tokens_details": null
+        },
+        "token_ids_observed": false
+      },
+      {
+        "case": 4,
+        "payload_equal": true,
+        "text_exact": true,
+        "candidate_text_sha256": "5dd272b4f316b776a7b8e3d0894b37e1e42be3d5d3b204b8a5836cc50597a6b1",
+        "native_text_sha256": "5dd272b4f316b776a7b8e3d0894b37e1e42be3d5d3b204b8a5836cc50597a6b1",
+        "candidate_http_status": 200,
+        "native_http_status": 200,
+        "candidate_check_passed": true,
+        "native_check_passed": true,
+        "candidate_finish_reason": "stop",
+        "native_finish_reason": "stop",
+        "candidate_usage": {
+          "prompt_tokens": 25,
+          "total_tokens": 27,
+          "completion_tokens": 2,
+          "prompt_tokens_details": null
+        },
+        "native_usage": {
+          "prompt_tokens": 25,
+          "total_tokens": 27,
+          "completion_tokens": 2,
+          "prompt_tokens_details": null
+        },
+        "token_ids_observed": false
+      },
+      {
+        "case": 5,
+        "payload_equal": true,
+        "text_exact": true,
+        "candidate_text_sha256": "34ff51c7b6320bbd7b2f00b6b25dd5523bbab517f120b33264c7f7e7794a0b35",
+        "native_text_sha256": "34ff51c7b6320bbd7b2f00b6b25dd5523bbab517f120b33264c7f7e7794a0b35",
+        "candidate_http_status": 200,
+        "native_http_status": 200,
+        "candidate_check_passed": true,
+        "native_check_passed": true,
+        "candidate_finish_reason": "stop",
+        "native_finish_reason": "stop",
+        "candidate_usage": {
+          "prompt_tokens": 22,
+          "total_tokens": 30,
+          "completion_tokens": 8,
+          "prompt_tokens_details": null
+        },
+        "native_usage": {
+          "prompt_tokens": 22,
+          "total_tokens": 30,
+          "completion_tokens": 8,
+          "prompt_tokens_details": null
+        },
+        "token_ids_observed": false
+      },
+      {
+        "case": 6,
+        "payload_equal": true,
+        "text_exact": true,
+        "candidate_text_sha256": "8ab6b4a41f6753e93d87b03f682f5317255499f70fe3e200431fb7e641cd8bf9",
+        "native_text_sha256": "8ab6b4a41f6753e93d87b03f682f5317255499f70fe3e200431fb7e641cd8bf9",
+        "candidate_http_status": 200,
+        "native_http_status": 200,
+        "candidate_check_passed": true,
+        "native_check_passed": true,
+        "candidate_finish_reason": "stop",
+        "native_finish_reason": "stop",
+        "candidate_usage": {
+          "prompt_tokens": 18,
+          "total_tokens": 48,
+          "completion_tokens": 30,
+          "prompt_tokens_details": null
+        },
+        "native_usage": {
+          "prompt_tokens": 18,
+          "total_tokens": 48,
+          "completion_tokens": 30,
+          "prompt_tokens_details": null
+        },
+        "token_ids_observed": false
+      },
+      {
+        "case": 7,
+        "payload_equal": true,
+        "text_exact": true,
+        "candidate_text_sha256": "c61da2a1c09217bec2dc28655d5144dd40fe1e27fba7d9b0e103afc683c6fa95",
+        "native_text_sha256": "c61da2a1c09217bec2dc28655d5144dd40fe1e27fba7d9b0e103afc683c6fa95",
+        "candidate_http_status": 200,
+        "native_http_status": 200,
+        "candidate_check_passed": true,
+        "native_check_passed": true,
+        "candidate_finish_reason": "stop",
+        "native_finish_reason": "stop",
+        "candidate_usage": {
+          "prompt_tokens": 22,
+          "total_tokens": 61,
+          "completion_tokens": 39,
+          "prompt_tokens_details": null
+        },
+        "native_usage": {
+          "prompt_tokens": 22,
+          "total_tokens": 61,
+          "completion_tokens": 39,
+          "prompt_tokens_details": null
+        },
+        "token_ids_observed": false
+      }
+    ],
+    "scope": "Text comparison only; no token equivalence or cause inferred."
+  },
+  "manager_statuses": {
+    "installed-disabled-status": {
+      "extension_id": "org.vllm-hust.muxpd",
+      "states": [
+        "installed",
+        "discovered",
+        "compatible",
+        "configured"
+      ],
+      "evidence": [
+        "host capability registry is unavailable; used legacy module probes",
+        "host version 0.1.dev1+gd0f22d2bd.empty satisfies the declared range",
+        "protocol vllm.batch-admission-policy 1.1 satisfies the declared range",
+        "protocol vllm.scheduler-class is not independently versioned; compatibility is governed by host ranges and acceptance evidence",
+        "protocol vllm.worker-class is not independently versioned; compatibility is governed by host ranges and acceptance evidence",
+        "vLLM launch configuration can be rendered"
+      ]
+    },
+    "enabled-before-start-status": {
+      "extension_id": "org.vllm-hust.muxpd",
+      "states": [
+        "installed",
+        "discovered",
+        "compatible",
+        "configured",
+        "enabled"
+      ],
+      "evidence": [
+        "host capability registry is unavailable; used legacy module probes",
+        "host version 0.1.dev1+gd0f22d2bd.empty satisfies the declared range",
+        "protocol vllm.batch-admission-policy 1.1 satisfies the declared range",
+        "protocol vllm.scheduler-class is not independently versioned; compatibility is governed by host ranges and acceptance evidence",
+        "protocol vllm.worker-class is not independently versioned; compatibility is governed by host ranges and acceptance evidence",
+        "vLLM launch configuration can be rendered"
+      ]
+    },
+    "healthy-before-request-status": {
+      "extension_id": "org.vllm-hust.muxpd",
+      "states": [
+        "installed",
+        "discovered",
+        "compatible",
+        "configured",
+        "enabled"
+      ],
+      "evidence": [
+        "host capability registry is unavailable; used legacy module probes",
+        "host version 0.1.dev1+gd0f22d2bd.empty satisfies the declared range",
+        "protocol vllm.batch-admission-policy 1.1 satisfies the declared range",
+        "protocol vllm.scheduler-class is not independently versioned; compatibility is governed by host ranges and acceptance evidence",
+        "protocol vllm.worker-class is not independently versioned; compatibility is governed by host ranges and acceptance evidence",
+        "vLLM launch configuration can be rendered"
+      ]
+    },
+    "candidate-effective-status": {
+      "extension_id": "org.vllm-hust.muxpd",
+      "states": [
+        "installed",
+        "discovered",
+        "compatible",
+        "configured",
+        "enabled",
+        "runtime_effective"
+      ],
+      "evidence": [
+        "host capability registry is unavailable; used legacy module probes",
+        "host version 0.1.dev1+gd0f22d2bd.empty satisfies the declared range",
+        "protocol vllm.batch-admission-policy 1.1 satisfies the declared range",
+        "protocol vllm.scheduler-class is not independently versioned; compatibility is governed by host ranges and acceptance evidence",
+        "protocol vllm.worker-class is not independently versioned; compatibility is governed by host ranges and acceptance evidence",
+        "vLLM launch configuration can be rendered",
+        "live module runtime evidence launch_id=516c500e-c0cb-442b-a59e-67c43f1642d6 components=3 pids=[141410, 145259, 145261, 145262, 145263]; all declared modules observed, not an all-rank device qualification"
+      ]
+    },
+    "candidate-stopped-status": {
+      "extension_id": "org.vllm-hust.muxpd",
+      "states": [
+        "installed",
+        "discovered",
+        "compatible",
+        "configured",
+        "enabled"
+      ],
+      "evidence": [
+        "host capability registry is unavailable; used legacy module probes",
+        "host version 0.1.dev1+gd0f22d2bd.empty satisfies the declared range",
+        "protocol vllm.batch-admission-policy 1.1 satisfies the declared range",
+        "protocol vllm.scheduler-class is not independently versioned; compatibility is governed by host ranges and acceptance evidence",
+        "protocol vllm.worker-class is not independently versioned; compatibility is governed by host ranges and acceptance evidence",
+        "vLLM launch configuration can be rendered"
+      ]
+    },
+    "disabled-status": {
+      "extension_id": "org.vllm-hust.muxpd",
+      "states": [
+        "installed",
+        "discovered",
+        "compatible",
+        "configured"
+      ],
+      "evidence": [
+        "host capability registry is unavailable; used legacy module probes",
+        "host version 0.1.dev1+gd0f22d2bd.empty satisfies the declared range",
+        "protocol vllm.batch-admission-policy 1.1 satisfies the declared range",
+        "protocol vllm.scheduler-class is not independently versioned; compatibility is governed by host ranges and acceptance evidence",
+        "protocol vllm.worker-class is not independently versioned; compatibility is governed by host ranges and acceptance evidence",
+        "vLLM launch configuration can be rendered"
+      ]
+    },
+    "native-running-status": {
+      "extension_id": "org.vllm-hust.muxpd",
+      "states": [
+        "installed",
+        "discovered",
+        "compatible",
+        "configured"
+      ],
+      "evidence": [
+        "host capability registry is unavailable; used legacy module probes",
+        "host version 0.1.dev1+gd0f22d2bd.empty satisfies the declared range",
+        "protocol vllm.batch-admission-policy 1.1 satisfies the declared range",
+        "protocol vllm.scheduler-class is not independently versioned; compatibility is governed by host ranges and acceptance evidence",
+        "protocol vllm.worker-class is not independently versioned; compatibility is governed by host ranges and acceptance evidence",
+        "vLLM launch configuration can be rendered"
+      ]
+    }
+  },
+  "trace_audit": {
+    "passed": true,
+    "cohorts": 20,
+    "max_complete_prompt_tokens": 12000,
+    "max_decode_steps_before_prefill_completion": 9,
+    "prefill_retirements": {
+      "completed": 25,
+      "cancelled": 1
+    },
+    "receipt_checks": {
+      "layer_progress_steps": 379
+    },
+    "model_layers_by_pid": {
+      "141410": 40
+    },
+    "quota_reasons": {
+      "fixed_quota": 379
+    },
+    "progress_sources": {
+      "layer_hooks": 52,
+      "none": 327
+    },
+    "work_quota_sources": {
+      "configured_layers_per_slice": 52
+    },
+    "scope": "host lifecycle/progress receipts; kernel overlap needs profiling"
+  },
+  "client_probes": {
+    "overlap": {
+      "passed": true,
+      "cancel_delay_s": null,
+      "decode_content_events_before_prefill_first_token": 7
+    },
+    "prefill-cancel": {
+      "passed": true,
+      "cancel_delay_s": 0.1,
+      "decode_content_events_before_prefill_first_token": null
+    }
+  },
+  "graph_final_snapshots": [
+    {
+      "rank": 1,
+      "line": 361,
+      "counters": {
+        "enabled": true,
+        "attached": true,
+        "capture_started": true,
+        "captured": true,
+        "failed": false,
+        "closed": false,
+        "compile_full_prefill": false,
+        "prefill_compile_profiled": false,
+        "includes_startup_warmups": true,
+        "captured_graph_entries": 4,
+        "decode_replay_calls": 351,
+        "decode_capture_forward_calls": 4,
+        "decode_eager_fallback_calls": 4,
+        "decode_uncaptured_full_calls": 0,
+        "decode_forward_failures": 0,
+        "prefill_forced_eager_calls": 21,
+        "prefill_compiled_calls": 0,
+        "prefill_compile_profile_runs": 0,
+        "prefill_compile_profile_failures": 0,
+        "capture_attempts": 1,
+        "capture_successes": 1,
+        "capture_failures": 0
+      }
+    },
+    {
+      "rank": 0,
+      "line": 362,
+      "counters": {
+        "enabled": true,
+        "attached": true,
+        "capture_started": true,
+        "captured": true,
+        "failed": false,
+        "closed": false,
+        "compile_full_prefill": false,
+        "prefill_compile_profiled": false,
+        "includes_startup_warmups": true,
+        "captured_graph_entries": 4,
+        "decode_replay_calls": 351,
+        "decode_capture_forward_calls": 4,
+        "decode_eager_fallback_calls": 4,
+        "decode_uncaptured_full_calls": 0,
+        "decode_forward_failures": 0,
+        "prefill_forced_eager_calls": 21,
+        "prefill_compiled_calls": 0,
+        "prefill_compile_profile_runs": 0,
+        "prefill_compile_profile_failures": 0,
+        "capture_attempts": 1,
+        "capture_successes": 1,
+        "capture_failures": 0
+      }
+    },
+    {
+      "rank": 2,
+      "line": 363,
+      "counters": {
+        "enabled": true,
+        "attached": true,
+        "capture_started": true,
+        "captured": true,
+        "failed": false,
+        "closed": false,
+        "compile_full_prefill": false,
+        "prefill_compile_profiled": false,
+        "includes_startup_warmups": true,
+        "captured_graph_entries": 4,
+        "decode_replay_calls": 351,
+        "decode_capture_forward_calls": 4,
+        "decode_eager_fallback_calls": 4,
+        "decode_uncaptured_full_calls": 0,
+        "decode_forward_failures": 0,
+        "prefill_forced_eager_calls": 21,
+        "prefill_compiled_calls": 0,
+        "prefill_compile_profile_runs": 0,
+        "prefill_compile_profile_failures": 0,
+        "capture_attempts": 1,
+        "capture_successes": 1,
+        "capture_failures": 0
+      }
+    },
+    {
+      "rank": 3,
+      "line": 364,
+      "counters": {
+        "enabled": true,
+        "attached": true,
+        "capture_started": true,
+        "captured": true,
+        "failed": false,
+        "closed": false,
+        "compile_full_prefill": false,
+        "prefill_compile_profiled": false,
+        "includes_startup_warmups": true,
+        "captured_graph_entries": 4,
+        "decode_replay_calls": 351,
+        "decode_capture_forward_calls": 4,
+        "decode_eager_fallback_calls": 4,
+        "decode_uncaptured_full_calls": 0,
+        "decode_forward_failures": 0,
+        "prefill_forced_eager_calls": 21,
+        "prefill_compiled_calls": 0,
+        "prefill_compile_profile_runs": 0,
+        "prefill_compile_profile_failures": 0,
+        "capture_attempts": 1,
+        "capture_successes": 1,
+        "capture_failures": 0
+      }
+    }
+  ],
+  "graph_scope": "Host path counters include startup warmups; not kernel concurrency or performance evidence.",
+  "native_rollback": {
+    "dry_run_muxpd_selectors": [],
+    "native_extension_manifests": {},
+    "shutdown_warnings": [
+      {
+        "line": 306,
+        "text": "(APIServer pid=172097) ERROR 10-25 19:49:13 [async_llm.py:704] vllm.v1.engine.exceptions.EngineDeadError: EngineCore encountered an issue. See stack trace (above) for the root cause."
+      },
+      {
+        "line": 313,
+        "text": "/usr/local/python3.12.13/lib/python3.12/multiprocessing/resource_tracker.py:279: UserWarning: resource_tracker: There appear to be 4 leaked semaphore objects to clean up at shutdown"
+      },
+      {
+        "line": 314,
+        "text": "  warnings.warn('resource_tracker: There appear to be %d '"
+      },
+      {
+        "line": 315,
+        "text": "/usr/local/python3.12.13/lib/python3.12/multiprocessing/resource_tracker.py:279: UserWarning: resource_tracker: There appear to be 6 leaked shared_memory objects to clean up at shutdown"
+      },
+      {
+        "line": 316,
+        "text": "  warnings.warn('resource_tracker: There appear to be %d '"
+      }
+    ],
+    "warning_scope": "Warnings retained from SIGINT teardown after request checks; shutdown is not warning-free."
+  },
+  "npu_process_tables": {
+    "npu-before": {
+      "reported_no_process_devices": [
+        1,
+        2,
+        3,
+        6
+      ],
+      "scope": "npu-smi process-table statements, not zero allocated HBM"
+    },
+    "npu-after-candidate": {
+      "reported_no_process_devices": [
+        1,
+        2,
+        3,
+        6
+      ],
+      "scope": "npu-smi process-table statements, not zero allocated HBM"
+    },
+    "npu-after-native": {
+      "reported_no_process_devices": [
+        1,
+        2,
+        3,
+        6
+      ],
+      "scope": "npu-smi process-table statements, not zero allocated HBM"
+    }
+  },
+  "cpu": {
+    "reported_passed": true,
+    "command_count": 18,
+    "expected_returncodes_match": true,
+    "commands": [
+      {
+        "label": "plugin-version",
+        "returncode": 0,
+        "expected_returncode": 0
+      },
+      {
+        "label": "plugin-manifest",
+        "returncode": 0,
+        "expected_returncode": 0
+      },
+      {
+        "label": "plugin-configuration",
+        "returncode": 0,
+        "expected_returncode": 0
+      },
+      {
+        "label": "plugin-plan",
+        "returncode": 0,
+        "expected_returncode": 0
+      },
+      {
+        "label": "manager-list",
+        "returncode": 0,
+        "expected_returncode": 0
+      },
+      {
+        "label": "manager-inspect",
+        "returncode": 0,
+        "expected_returncode": 0
+      },
+      {
+        "label": "manager-validate",
+        "returncode": 0,
+        "expected_returncode": 0
+      },
+      {
+        "label": "manager-status-installed",
+        "returncode": 0,
+        "expected_returncode": 0
+      },
+      {
+        "label": "manager-configure",
+        "returncode": 0,
+        "expected_returncode": 0
+      },
+      {
+        "label": "manager-enable",
+        "returncode": 0,
+        "expected_returncode": 0
+      },
+      {
+        "label": "manager-status-enabled",
+        "returncode": 0,
+        "expected_returncode": 0
+      },
+      {
+        "label": "missing-native-doctor",
+        "returncode": 1,
+        "expected_returncode": 1
+      },
+      {
+        "label": "missing-native-serve",
+        "returncode": 2,
+        "expected_returncode": 2
+      },
+      {
+        "label": "manager-disable",
+        "returncode": 0,
+        "expected_returncode": 0
+      },
+      {
+        "label": "manager-status-disabled",
+        "returncode": 0,
+        "expected_returncode": 0
+      },
+      {
+        "label": "static-no-native-import-probe",
+        "returncode": 0,
+        "expected_returncode": 0
+      },
+      {
+        "label": "installed-pure-tests",
+        "returncode": 0,
+        "expected_returncode": 0
+      },
+      {
+        "label": "final-installed-origins",
+        "returncode": 0,
+        "expected_returncode": 0
+      }
+    ],
+    "native_packages_absent": {
+      "torch": true,
+      "torch_npu": true,
+      "vllm": true,
+      "vllm_ascend": true
+    },
+    "package_file_counts": {
+      "plugin": 18,
+      "manager": 42
+    },
+    "indexed_files_verified": 42,
+    "copied_tests_verified": 9,
+    "test_summary_lines": [
+      "219 passed, 4 skipped in 1.18s"
+    ],
+    "pinned_source_test_summary_lines": [
+      "784 passed, 2 skipped in 80.18s (0:01:20)"
+    ]
+  },
+  "retained_failed_attempt": {
+    "passed": false,
+    "errors": [
+      {
+        "type": "RuntimeError",
+        "message": "candidate startup exited 1",
+        "traceback": "Traceback (most recent call last):\n  File \"/root/workspace/muxpd-ecpa-plugin/local-results/ecpa-tp4-20261025/qualify.py\", line 242, in <module>\n    main()\n  File \"/root/workspace/muxpd-ecpa-plugin/local-results/ecpa-tp4-20261025/qualify.py\", line 201, in main\n    proc = start_service(\"candidate\", launch)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/root/workspace/muxpd-ecpa-plugin/local-results/ecpa-tp4-20261025/qualify.py\", line 101, in start_service\n    raise RuntimeError(f\"{label} startup exited {proc.returncode}\")\nRuntimeError: candidate startup exited 1\n"
+      }
+    ],
+    "git_commit": "65f295de3d6d3b4b7fba83f0544be2a546a15b48",
+    "started_at_utc": "2026-10-25T19:34:25Z",
+    "finished_at_utc": "2026-10-25T19:36:33Z"
+  },
+  "sources": [
+    {
+      "path": "/root/workspace/muxpd-ecpa-plugin/local-results/ecpa-tp4-20261025-final/qualification.json",
+      "bytes": 16221,
+      "sha256": "0f56fc058b94ecf82b55f647bd4353eab2f4a22406aecba85c6fe886f83203e5"
+    },
+    {
+      "path": "/root/workspace/muxpd-ecpa-plugin/local-results/ecpa-tp4-20261025/qualification.json",
+      "bytes": 7394,
+      "sha256": "f8878188ad2975dc99def0072520d6839197c8c73a7847a54de547b180238ea8"
+    },
+    {
+      "path": "/tmp/muxpd-final-wheel-cpu-vbFgP2hG/validation.json",
+      "bytes": 31915,
+      "sha256": "2249148fd8783a323bd27a8afd49ddd7834f6bb4b74a737b77cb65687867ea39"
+    },
+    {
+      "path": "/tmp/muxpd-final-wheel-cpu-vbFgP2hG/receipt-files.json",
+      "bytes": 6654,
+      "sha256": "e80e160ebf94467cb6b3b2e3037e2d46955b7b53a857727405261db80c17dc11"
+    },
+    {
+      "path": "/tmp/muxpd-final-wheel-cpu-vbFgP2hG/audit.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/muxpd-final-wheel-cpu-vbFgP2hG/audit_install.py",
+      "bytes": 9506,
+      "sha256": "6fbedff1256a10d85fa6b1593a22f6c4071cbdc5bb6eeb9171c91dd492f3438f"
+    },
+    {
+      "path": "/tmp/muxpd-final-wheel-cpu-vbFgP2hG/configuration.json",
+      "bytes": 412,
+      "sha256": "ce2beb0cd847a73c938af600291be6f33d1d6b9421be1b2e82bed6e454a42203"
+    },
+    {
+      "path": "/tmp/muxpd-final-wheel-cpu-vbFgP2hG/final-installed-origins.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/muxpd-final-wheel-cpu-vbFgP2hG/final-installed-origins.stdout",
+      "bytes": 227,
+      "sha256": "e76ea500b9bf057650050d4da27c034c42c2e46012bd6b613f3aec67392a8b8e"
+    },
+    {
+      "path": "/tmp/muxpd-final-wheel-cpu-vbFgP2hG/install.log",
+      "bytes": 955,
+      "sha256": "df791eb866a0f4104d8e14b38fe192d50fe83ca7563798778888c7b267943a8f"
+    },
+    {
+      "path": "/tmp/muxpd-final-wheel-cpu-vbFgP2hG/installed-pure-tests.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/muxpd-final-wheel-cpu-vbFgP2hG/installed-pure-tests.stdout",
+      "bytes": 351,
+      "sha256": "3882c1bc5aed4b152f2bb9a6b0da231f558cd1e3e1860eebceca7827ffee2fc6"
+    },
+    {
+      "path": "/tmp/muxpd-final-wheel-cpu-vbFgP2hG/manager-configure.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/muxpd-final-wheel-cpu-vbFgP2hG/manager-configure.stdout",
+      "bytes": 31,
+      "sha256": "bc232df8c5092e3c5ebd8f8edec2ce517233af78b1a4cf81b5fce905e50569e2"
+    },
+    {
+      "path": "/tmp/muxpd-final-wheel-cpu-vbFgP2hG/manager-disable.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/muxpd-final-wheel-cpu-vbFgP2hG/manager-disable.stdout",
+      "bytes": 29,
+      "sha256": "6a5cd40f5a4e360b2059699c119fef4ef4071f5dfdfeabc8909c57347b89f8c6"
+    },
+    {
+      "path": "/tmp/muxpd-final-wheel-cpu-vbFgP2hG/manager-enable.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/muxpd-final-wheel-cpu-vbFgP2hG/manager-enable.stdout",
+      "bytes": 28,
+      "sha256": "36be0aa859544e8e9f8fdca857e64a4dfeb7329881ee561382e397d7be908efa"
+    },
+    {
+      "path": "/tmp/muxpd-final-wheel-cpu-vbFgP2hG/manager-inspect.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/muxpd-final-wheel-cpu-vbFgP2hG/manager-inspect.stdout",
+      "bytes": 3090,
+      "sha256": "95c25741f46d3925e46849666a92b397e1994f1131806fcd95b74f4e0b58fd81"
+    },
+    {
+      "path": "/tmp/muxpd-final-wheel-cpu-vbFgP2hG/manager-list.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/muxpd-final-wheel-cpu-vbFgP2hG/manager-list.stdout",
+      "bytes": 3352,
+      "sha256": "c19c0ae52a0f634cd9af7e57feab228fc5ff1af97dbce7c554b6aa222ecc95b2"
+    },
+    {
+      "path": "/tmp/muxpd-final-wheel-cpu-vbFgP2hG/manager-status-disabled.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/muxpd-final-wheel-cpu-vbFgP2hG/manager-status-disabled.stdout",
+      "bytes": 692,
+      "sha256": "91acf8d6e4d66f66643fa5183185917284ac79e713f8d86f55d5fb36a8e3828b"
+    },
+    {
+      "path": "/tmp/muxpd-final-wheel-cpu-vbFgP2hG/manager-status-enabled.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/muxpd-final-wheel-cpu-vbFgP2hG/manager-status-enabled.stdout",
+      "bytes": 707,
+      "sha256": "623008280233428ab978ff2d7a2f0dfd682229c2ce4f2e82afc3231ea7eb9034"
+    },
+    {
+      "path": "/tmp/muxpd-final-wheel-cpu-vbFgP2hG/manager-status-installed.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/muxpd-final-wheel-cpu-vbFgP2hG/manager-status-installed.stdout",
+      "bytes": 692,
+      "sha256": "91acf8d6e4d66f66643fa5183185917284ac79e713f8d86f55d5fb36a8e3828b"
+    },
+    {
+      "path": "/tmp/muxpd-final-wheel-cpu-vbFgP2hG/manager-validate.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/muxpd-final-wheel-cpu-vbFgP2hG/manager-validate.stdout",
+      "bytes": 3090,
+      "sha256": "95c25741f46d3925e46849666a92b397e1994f1131806fcd95b74f4e0b58fd81"
+    },
+    {
+      "path": "/tmp/muxpd-final-wheel-cpu-vbFgP2hG/missing-native-doctor.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/muxpd-final-wheel-cpu-vbFgP2hG/missing-native-doctor.stdout",
+      "bytes": 457,
+      "sha256": "9c11b4c209a136f61f4c613cc45439f6b34674786c18828407b28888de62613d"
+    },
+    {
+      "path": "/tmp/muxpd-final-wheel-cpu-vbFgP2hG/missing-native-serve.stderr",
+      "bytes": 298,
+      "sha256": "eeef368c8583fc743caac4cd49a8db3bb24b918bad8c216d630acc4dfc7a9310"
+    },
+    {
+      "path": "/tmp/muxpd-final-wheel-cpu-vbFgP2hG/missing-native-serve.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/muxpd-final-wheel-cpu-vbFgP2hG/plugin-configuration.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/muxpd-final-wheel-cpu-vbFgP2hG/plugin-configuration.stdout",
+      "bytes": 412,
+      "sha256": "ce2beb0cd847a73c938af600291be6f33d1d6b9421be1b2e82bed6e454a42203"
+    },
+    {
+      "path": "/tmp/muxpd-final-wheel-cpu-vbFgP2hG/plugin-manifest.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/muxpd-final-wheel-cpu-vbFgP2hG/plugin-manifest.stdout",
+      "bytes": 2763,
+      "sha256": "750eae97493a1112b71293b2f1ad14b1fb7d65593d4a4432979b74a52ecea739"
+    },
+    {
+      "path": "/tmp/muxpd-final-wheel-cpu-vbFgP2hG/plugin-plan.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/muxpd-final-wheel-cpu-vbFgP2hG/plugin-plan.stdout",
+      "bytes": 1670,
+      "sha256": "e266dbe95eb7af0fe50f6d8ede6ac9ca6f23101d55c85feb16d9438184d4f25f"
+    },
+    {
+      "path": "/tmp/muxpd-final-wheel-cpu-vbFgP2hG/plugin-version.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/muxpd-final-wheel-cpu-vbFgP2hG/plugin-version.stdout",
+      "bytes": 8,
+      "sha256": "be5fdb1a282e0aefa0d1647fd07482f98e682a17b9f915db5c0b168838cf6682"
+    },
+    {
+      "path": "/tmp/muxpd-final-wheel-cpu-vbFgP2hG/static-no-native-import-probe.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/muxpd-final-wheel-cpu-vbFgP2hG/static-no-native-import-probe.stdout",
+      "bytes": 11049,
+      "sha256": "93596e0464b6799d4ecc2625ab529bb027dbaccf1b5a7db913a823dedfe64340"
+    },
+    {
+      "path": "/tmp/muxpd-final-wheel-cpu-vbFgP2hG/venv.log",
+      "bytes": 215,
+      "sha256": "1ba0380e38fe4df3115bbd0b5095c19b640890581cf73268b9a0fd1473023be5"
+    },
+    {
+      "path": "/tmp/muxpd-final-wheel-cpu-vbFgP2hG/tests/test_deployment.py",
+      "bytes": 10124,
+      "sha256": "090321b833ee322cc6b9186064d89d00c907633d4e888f4624bac8a6a747e5f6"
+    },
+    {
+      "path": "/tmp/muxpd-final-wheel-cpu-vbFgP2hG/tests/test_runtime_evidence.py",
+      "bytes": 4099,
+      "sha256": "a314302224efc222c98a5933c876993207a1e5c8e90e177fcb475b503ca9b319"
+    },
+    {
+      "path": "/tmp/muxpd-final-wheel-cpu-vbFgP2hG/tests/test_native_compat.py",
+      "bytes": 4579,
+      "sha256": "4de94c1d18c0bf841bc55748da90703170d0a5095ee9a5bafc15f51aaadbf8a7"
+    },
+    {
+      "path": "/tmp/muxpd-final-wheel-cpu-vbFgP2hG/tests/test_policy.py",
+      "bytes": 11190,
+      "sha256": "9c7b8c547bc3cf4fbc9213edbe23852253b8b0bdd7f41f8ae1eed3f56b73acfd"
+    },
+    {
+      "path": "/tmp/muxpd-final-wheel-cpu-vbFgP2hG/tests/test_lanes.py",
+      "bytes": 11656,
+      "sha256": "c69246eb3bf476e5555ec3b594a1f19c5c424ba3955e5963e8d0bc3fa59ee5f0"
+    },
+    {
+      "path": "/tmp/muxpd-final-wheel-cpu-vbFgP2hG/tests/test_decode_graph.py",
+      "bytes": 30734,
+      "sha256": "50f93cd558e1a115ece5c839cea0aa95dc6cdda6f67c461d061409e1ebc74434"
+    },
+    {
+      "path": "/tmp/muxpd-final-wheel-cpu-vbFgP2hG/tests/test_communicators.py",
+      "bytes": 7696,
+      "sha256": "192985d96b5bbd35338e22c992bf391302cdd572a1433be07c1b46c37f388531"
+    },
+    {
+      "path": "/tmp/muxpd-final-wheel-cpu-vbFgP2hG/tests/test_overlap.py",
+      "bytes": 12548,
+      "sha256": "1a5683b68e1ec16c0c42cc707fb679e4a050c15e5ebf2f0222cd64758737090c"
+    },
+    {
+      "path": "/tmp/muxpd-final-wheel-cpu-vbFgP2hG/tests/test_slice_timing.py",
+      "bytes": 2941,
+      "sha256": "d8d1d0d672a2028f99da1e7283b3e736d68727531cbdae5f7016f47a37f8529f"
+    },
+    {
+      "path": "/root/workspace/muxpd-ecpa-plugin/local-results/ecpa-tp4-20261025-final/candidate-natural.json",
+      "bytes": 12386,
+      "sha256": "96b236f8eb18e9b8c3e1b3ce2a0340247c56c3f91ab221e9a204825bbd3b3930"
+    },
+    {
+      "path": "/root/workspace/muxpd-ecpa-plugin/local-results/ecpa-tp4-20261025-final/native-natural.json",
+      "bytes": 12383,
+      "sha256": "8e1064e6c2daeb67faf5b0ad2b2fe9dcad2c65a97940c18a18ec06cbc637fb8f"
+    },
+    {
+      "path": "/root/workspace/muxpd-ecpa-plugin/local-results/ecpa-tp4-20261025-final/candidate-smoke.json",
+      "bytes": 85935,
+      "sha256": "764d3129440131070df13395505fd24375d35fb0daa6268e016d601dac23c8e4"
+    },
+    {
+      "path": "/root/workspace/muxpd-ecpa-plugin/local-results/ecpa-tp4-20261025-final/after-cancel-smoke.json",
+      "bytes": 85374,
+      "sha256": "d806f6c8390b253b7d018feb1ba7a306a99c79ea55da03fd0c89f756661e5f0d"
+    },
+    {
+      "path": "/root/workspace/muxpd-ecpa-plugin/local-results/ecpa-tp4-20261025-final/native-smoke.json",
+      "bytes": 86474,
+      "sha256": "7f77482683718223f1c9b1194fe60683489709e0ed16975911555f888fecd4bc"
+    },
+    {
+      "path": "/root/workspace/muxpd-ecpa-plugin/local-results/ecpa-tp4-20261025-final/installed-disabled-status.log",
+      "bytes": 1313,
+      "sha256": "ee7499809257ba0973275f093b317bb2b62fe74a6442714436a26c51728bb0c8"
+    },
+    {
+      "path": "/root/workspace/muxpd-ecpa-plugin/local-results/ecpa-tp4-20261025-final/enabled-before-start-status.log",
+      "bytes": 1328,
+      "sha256": "7e9c1bc5b7cea01812671fb2229c62ce8b0ac06035bb4f54a7c2ff26b0b6c576"
+    },
+    {
+      "path": "/root/workspace/muxpd-ecpa-plugin/local-results/ecpa-tp4-20261025-final/healthy-before-request-status.log",
+      "bytes": 1328,
+      "sha256": "7d73d04e2b517eeac67b970463fa1ab6800f79b29167e2ce6aacfb464dc3ef47"
+    },
+    {
+      "path": "/root/workspace/muxpd-ecpa-plugin/local-results/ecpa-tp4-20261025-final/candidate-effective-status.log",
+      "bytes": 1564,
+      "sha256": "24844c2c1a25090d9a927de0ad41b77fc262fa4ae618b9799c933d980d5e4c03"
+    },
+    {
+      "path": "/root/workspace/muxpd-ecpa-plugin/local-results/ecpa-tp4-20261025-final/candidate-stopped-status.log",
+      "bytes": 1328,
+      "sha256": "d20f5f0ead8b26bb5a7c6008269ff5cc3b07c4f11ead7164d6aa8ead9c63ae9d"
+    },
+    {
+      "path": "/root/workspace/muxpd-ecpa-plugin/local-results/ecpa-tp4-20261025-final/disabled-status.log",
+      "bytes": 1313,
+      "sha256": "21a02f9b223e56eba60e7f02051040c1759e369da6b7a8679ae3b69628319b72"
+    },
+    {
+      "path": "/root/workspace/muxpd-ecpa-plugin/local-results/ecpa-tp4-20261025-final/native-running-status.log",
+      "bytes": 1313,
+      "sha256": "f3f5487a19ac5f0fd72a4f2b61d009adbe8353d2f59115736838aa421c3ae862"
+    },
+    {
+      "path": "/root/workspace/muxpd-ecpa-plugin/local-results/ecpa-tp4-20261025-final/candidate-service.log",
+      "bytes": 56404,
+      "sha256": "cce11a0aaf30c62534e97b56c505020d2eb1524ef081e49f824534c173209789"
+    },
+    {
+      "path": "/root/workspace/muxpd-ecpa-plugin/local-results/ecpa-tp4-20261025-final/native-rollback-service.log",
+      "bytes": 42867,
+      "sha256": "f826553db0bdc9be629b6858b5b88892859556ea030292bdcec98191ea29c9d2"
+    },
+    {
+      "path": "/root/workspace/muxpd-ecpa-plugin/local-results/ecpa-tp4-20261025-final/npu-before.log",
+      "bytes": 3393,
+      "sha256": "756f04f5980e240748a9f7661587c245e6a001e13cb7095f6efb99d1cb734f93"
+    },
+    {
+      "path": "/root/workspace/muxpd-ecpa-plugin/local-results/ecpa-tp4-20261025-final/npu-after-candidate.log",
+      "bytes": 3393,
+      "sha256": "b7d8081eaa648ecd600b720bdda6024a27e66f4b76470641cbb43052209b744c"
+    },
+    {
+      "path": "/root/workspace/muxpd-ecpa-plugin/local-results/ecpa-tp4-20261025-final/npu-after-native.log",
+      "bytes": 3393,
+      "sha256": "6e6e78eeabc05a1a6a90c4ac1790009105158d56d648e3a0f00205758dcb24ea"
+    },
+    {
+      "path": "/root/workspace/muxpd-ecpa-plugin/local-results/ecpa-tp4-20261025-final/native-dry-run.log",
+      "bytes": 1200,
+      "sha256": "e4528a61d3b89043f756c940bba43728e80330b4a5ca7ccd0bac1255061b02ce"
+    },
+    {
+      "path": "/root/workspace/muxpd-ecpa-plugin/local-results/ecpa-tp4-20261025-final/full-pinned-tests.log",
+      "bytes": 922,
+      "sha256": "36e60ef6c086da2f913f30a8de661ddc0d593f513653c960d5d26ed2ea167eb2"
+    },
+    {
+      "path": "/root/workspace/muxpd-ecpa-plugin/local-results/ecpa-tp4-20261025-final/build-identities.json",
+      "bytes": 631,
+      "sha256": "c8e5421247f68f19a387d06f7c40973626abab4593bf3ac3548ba426e03e699f"
+    },
+    {
+      "path": "/root/workspace/muxpd-ecpa-plugin/local-results/ecpa-tp4-20261025-final/model-host-provenance.json",
+      "bytes": 2962,
+      "sha256": "421cb5d3f70c0d1d934f02b715035744ec6753859f2bf43e2fbbd06cd0c759aa"
+    },
+    {
+      "path": "/root/workspace/muxpd-ecpa-plugin/local-results/ecpa-tp4-20261025-final/configuration.json",
+      "bytes": 525,
+      "sha256": "ef079d29487508ac0c2dbc8355f36be02fd784fe8e3866393ce3cc59042d9a27"
+    },
+    {
+      "path": "/root/workspace/muxpd-ecpa-plugin/local-results/ecpa-tp4-20261025-final/trace-audit.log",
+      "bytes": 573,
+      "sha256": "d6f17a237d62adc2a622f8d0fbabd20a4a08197d3996a1d03e8c3845886fc165"
+    },
+    {
+      "path": "/root/workspace/muxpd-ecpa-plugin/local-results/ecpa-tp4-20261025-final/overlap.json",
+      "bytes": 2051,
+      "sha256": "81a58d22ab71e780da8bdf26fb59ce00542a2b9a0f5a5530d2ded2cdd1d081bf"
+    },
+    {
+      "path": "/root/workspace/muxpd-ecpa-plugin/local-results/ecpa-tp4-20261025-final/prefill-cancel.json",
+      "bytes": 1596,
+      "sha256": "b88e1a2696d323c591f9692c8faac4b9a69db26593155be7abde66c1d21fa848"
+    }
+  ]
+}

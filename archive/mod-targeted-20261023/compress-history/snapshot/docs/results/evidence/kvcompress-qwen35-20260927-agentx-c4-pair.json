@@ -1,0 +1,93 @@
+{
+  "schema_version": 1,
+  "kind": "official-client-paired-engineering-result",
+  "date_utc": "2026-09-27",
+  "status": "valid-protocol-performance-regression",
+  "leaderboard_eligible_positive": false,
+  "client": {
+    "repository": "https://github.com/vLLM-HUST/agentx-bench",
+    "commit": "e0c34de525246c98d14df590f9864d7be7a25075",
+    "harness_commit": "56a0cf70f4c0359454ee4bd15a17770b541a3e3e",
+    "aiperf_version": "0.12.0",
+    "dataset": "semianalysisai/cc-traces-weka-062126-256k",
+    "dataset_revision": "8fecd2fc56694469f758f0afbbb6335ad3043740",
+    "dataset_sessions": 393,
+    "dataset_fingerprint": "0d8fdac271289f80",
+    "concurrent_agent_clients": 4,
+    "measurement_seconds": 900,
+    "warmup": "official primers plus 10 additional requests per lane",
+    "chips": 2
+  },
+  "model": {
+    "name": "Qwen3.5-35B-A3B",
+    "revision": "59d61f3ce65a6d9863b86d2e96597125219dc754",
+    "dtype": "bfloat16",
+    "configured_context_tokens": 262144
+  },
+  "runtime": {
+    "accelerator": "Ascend 910B2",
+    "devices": "2,3",
+    "tensor_parallel_size": 2,
+    "vllm_commit": "fc06902b7dd7aa1610438cd061ccf7f04b31c609",
+    "vllm_ascend_commit": "5422a07c4dd471c2224afcfdfdca62fb4c5f75f3",
+    "triton_ascend_commit": "b90ab001238f8dde175aebfea23de36bd2cf06a6",
+    "cann_version": "9.1.0",
+    "pytorch_version": "2.13.0+cpu",
+    "torch_npu_version": "2.13.0rc1",
+    "plugin_version": "0.8.0 uncommitted development candidate",
+    "settings": "APC, async, mamba_cache_mode=align, FULL_AND_PIECEWISE, MTP disabled for AgentX forced-acceptance rule, block_size=128, max_num_batched_tokens=8192, max_num_seqs=8, thinking disabled",
+    "baseline_compression_threshold_tokens": 262272,
+    "candidate_compression_threshold_tokens": 9216,
+    "candidate_physical_budget_tokens": 8192
+  },
+  "arms": {
+    "B0": {
+      "run_id": "20260927T141037Z-smoke-c4-7c1a0c28",
+      "submission_valid": true,
+      "submission_invalid_reasons": [],
+      "completed_requests": 86,
+      "max_input_tokens_observed": 169166,
+      "output_tokens_per_second": 57.49241844416421,
+      "output_tokens_per_second_per_chip": 28.746209222082104,
+      "decode_tokens_per_second_p90": 63.68708640695081,
+      "ttft_p95_ms": 1585.6927615,
+      "itl_p90_ms": 22.265915595662506,
+      "run_json_sha256": "954760a49f036950a48a2468a291817b5b205bae4677c71b1214171a076d916e",
+      "aiperf_report_sha256": "bce84032dd3298bf0ab5141adb493f03f48ed9a1f98e2b36368ef65130b9ae82"
+    },
+    "B1": {
+      "run_id": "20260927T134350Z-smoke-c4-888899da",
+      "submission_valid": true,
+      "submission_invalid_reasons": [],
+      "completed_requests": 82,
+      "max_input_tokens_observed": 169165,
+      "output_tokens_per_second": 52.626530770118435,
+      "output_tokens_per_second_per_chip": 26.313265385059218,
+      "decode_tokens_per_second_p90": 61.7010309442562,
+      "ttft_p95_ms": 1873.8986679999998,
+      "itl_p90_ms": 23.844223341979948,
+      "run_json_sha256": "154fed90b4b1dbc881b2d1d394e8490abb50cf4f3c28ad86483684b1a8f0019d",
+      "aiperf_report_sha256": "2cbc71b7e134f17fccec8f0bfa3c82755d92bf1d8ba260808b97483da0826098"
+    }
+  },
+  "candidate_vs_baseline": {
+    "output_tps_change_pct": -8.463529289120874,
+    "decode_p90_tps_change_pct": -3.118458662096768,
+    "ttft_p95_ms_change_pct": 18.175393966443345
+  },
+  "service_observations": {
+    "preemptions": "zero on both arms at final metrics sample",
+    "prefix_caching": "server-side hit counters increased on both arms; final cumulative samples include warmup",
+    "compression": "B1 scheduler commits and two TP-rank acknowledgements observed in live logs; exact log counts were not archived",
+    "mtp": "disabled on both AgentX arms as required without matched forced-acceptance evidence"
+  },
+  "limitations": [
+    "The longest observed input was about 169K tokens, not 256K; 262,144 is configured capacity.",
+    "The fixed-window closed-loop arms completed different turn mixes (86 vs 82 requests).",
+    "One run per arm cannot establish repeatability or statistical significance.",
+    "AIPerf warned that streamed usage lacked cached-token detail; server-side prefix counters were available.",
+    "The 900-second smoke is not the formal one-hour AgentX result.",
+    "Original request records contain generated content and remain in ignored local result directories.",
+    "This local excerpt is not a publicly accessible complete raw report or an official website submission."
+  ]
+}

@@ -1,0 +1,222 @@
+"""Root-owned separate mixed-P/D profile process; dry-run is CPU/filesystem only."""
+
+import argparse
+import hashlib
+import json
+import os
+import re
+import shutil
+import signal
+import subprocess
+import time
+from datetime import UTC, datetime
+from pathlib import Path
+
+SOURCE = "f7ed21e183b27d2141176f3e7a5c8a5ff4ede07d"
+
+
+def now():
+    return datetime.now(UTC).isoformat()
+
+
+def verify_bundle(bundle):
+    path = bundle / "execution-identity-v1.json"
+    identity = json.loads(path.read_text())
+    required = {"perf_group_prefill.py", "profile_group_ingress.py", "perf_provenance.py", "run_controlled_group_profile.py",
+                "group-plan-v1.json", "native-async-plan-v1.json",
+                "raw-engine-args.json", "group-engine-args.json", "native-engine-args.json", "native-async-engine-args.json"}
+    if not required <= set(identity["files"]):
+        raise ValueError("Incomplete frozen producer/configuration bundle")
+    for name, row in identity["files"].items():
+        data = (bundle / name).read_bytes()
+        if hashlib.sha256(data).hexdigest() != row["sha256"] or len(data) != row["size_bytes"]:
+            raise ValueError(f"Frozen producer bundle changed: {name}")
+    return identity, hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def child_environment(source, destination):
+    env = os.environ.copy()
+    if env.get("VLLM_BATCH_INVARIANT") not in (None, "0"):
+        raise ValueError("Remove enabled/malformed batch-invariance setting")
+    if any(env.get(key) for key in ("MUXPD_NUMERIC_OUTPUT", "MUXPD_PRESSURE_TRACE_DIR", "VLLM_TORCH_PROFILER_DIR")):
+        raise ValueError("No numerical, pressure or profiling observer environment")
+    env.update(ASCEND_RT_VISIBLE_DEVICES="0,1,2,3", OMP_NUM_THREADS="1",
+               VLLM_USE_V2_MODEL_RUNNER="0", VLLM_ENABLE_V1_MULTIPROCESSING="0",
+               HCCL_DETERMINISTIC="true", VLLM_CACHE_ROOT=str(destination / "compiler-cache"))
+    env["PYTHONPATH"] = ":".join([str(source / "src"), "/root/workspace/vllm-hust",
+                                    "/root/workspace/vllm-ascend-hust", env.get("PYTHONPATH", "")])
+    return env
+
+
+def preview(args):
+    if not re.fullmatch(r"[a-z0-9][a-z0-9._-]+", args.label) or not 60 <= args.timeout <= 3600:
+        raise ValueError("Require a safe fresh label and timeout60..3600 seconds")
+    identity, identity_sha = verify_bundle(args.bundle)
+    if not args.python.is_file():
+        raise FileNotFoundError(args.python)
+    commit = subprocess.check_output(["git", "-C", str(args.source), "rev-parse", "HEAD"], text=True).strip()
+    status = subprocess.check_output(["git", "-C", str(args.source), "status", "--porcelain"], text=True)
+    if commit != SOURCE or status:
+        raise ValueError("A clean exact public f7 source checkout is required")
+    destination = args.output_root / args.label
+    if destination.exists():
+        raise FileExistsError(destination)
+    plan = "native-async-plan-v1.json" if args.role == "native-async" else "group-plan-v1.json"
+    experiment = "reference-async" if args.role == "native-async" else ("reference" if args.role == "native" else "group")
+    command = [str(args.python), str(destination / "producer/profile_group_ingress.py"), "run",
+               "--plan", str(destination / "plan.json"), "--engine-args", str(destination / "engine-args.json"),
+               "--variant", args.role, "--experiment", experiment, "--hccl", "true",
+               "--output", str(destination / "results")]
+    environment = child_environment(args.source, destination)
+    return {"destination": str(destination), "command": command, "plan": plan,
+            "config": args.role + "-engine-args.json", "source_commit": commit, "source_status": status,
+            "source": str(args.source),
+            "config_sha256": hashlib.sha256((args.bundle / (args.role + "-engine-args.json")).read_bytes()).hexdigest(),
+            "plan_file_sha256": hashlib.sha256((args.bundle / plan).read_bytes()).hexdigest(),
+            "execution_identity_sha256": identity_sha, "bundle_files": identity["files"],
+            "environment": {key: environment.get(key) for key in (
+                "ASCEND_RT_VISIBLE_DEVICES", "OMP_NUM_THREADS", "VLLM_USE_V2_MODEL_RUNNER",
+                "VLLM_ENABLE_V1_MULTIPROCESSING", "HCCL_DETERMINISTIC", "VLLM_BATCH_INVARIANT", "PYTHONPATH", "VLLM_CACHE_ROOT")},
+            "scope": "Root exclusively owns the four-card lease; fresh single attempt, no retries. Dry-run makes no device call."}
+
+
+def live_group_members(group):
+    members = []
+    for path in Path("/proc").glob("[0-9]*/stat"):
+        try:
+            text = path.read_text()
+        except (FileNotFoundError, ProcessLookupError):
+            continue
+        fields = text[text.rfind(")") + 2:].split()
+        if int(fields[2]) == group and fields[0] != "Z":
+            members.append(int(path.parent.name))
+    return sorted(members)
+
+
+def empty_inventory(text):
+    physical = set(re.findall(r"^\|\s*(\d+)\s+910B2\s*\|", text, flags=re.MULTILINE))
+    empty = set(re.findall(r"No running processes found in NPU (\d+)\b", text))
+    if len(physical) != 4 or empty != physical:
+        raise RuntimeError("Current four-card 910B2 inventory is incomplete or has running processes")
+    return {"physical_npu_ids": sorted(physical, key=int), "no_running_processes": True,
+            "logical_ASCEND_RT_VISIBLE_DEVICES": "0,1,2,3"}
+
+
+def terminal_passed(record, child):
+    return bool(record.get("exit_code") == 0 and not record["errors"]
+                and not record.get("owned_group_before_cleanup", ["missing"])
+                and not record.get("owned_group_after_cleanup", ["missing"])
+                and not record.get("forced_termination") and not record.get("timeout")
+                and record.get("empty_inventory_before")
+                and record["empty_inventory_before"] == record.get("empty_inventory_after")
+                and child.get("collection_complete") and child.get("shutdown_returned") and not child.get("errors"))
+
+
+def execute(args, prepared):
+    root = Path(prepared["destination"])
+    root.mkdir(parents=True, exist_ok=False)
+    tools = root / "producer"
+    tools.mkdir()
+    for name in prepared["bundle_files"]:
+        shutil.copyfile(args.bundle / name, tools / name)
+    shutil.copyfile(args.bundle / "execution-identity-v1.json", tools / "execution-identity-v1.json")
+    verify_bundle(tools)
+    shutil.copyfile(args.bundle / prepared["plan"], root / "plan.json")
+    shutil.copyfile(args.bundle / prepared["config"], root / "engine-args.json")
+    record = {**prepared, "label": args.label, "role": args.role, "started_at": now(),
+              "timeout_seconds": args.timeout, "passed": False, "errors": [],
+              "producer_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+              "parent_HCCL_DETERMINISTIC": os.environ.get("HCCL_DETERMINISTIC")}
+
+    def save():
+        (root / "controller.json").write_text(json.dumps(record, indent=2) + "\n")
+
+    process = None
+    save()
+    try:
+        before = subprocess.check_output(["npu-smi", "info"], timeout=30)
+        (root / "npu-before.txt").write_bytes(before)
+        record["empty_inventory_before"] = empty_inventory(before.decode())
+        with (root / "process.log").open("x") as log:
+            process = subprocess.Popen(prepared["command"], cwd=args.source,
+                env=child_environment(args.source, root), stdout=log, stderr=subprocess.STDOUT, start_new_session=True)
+            record["pid"] = record["process_group"] = process.pid
+            save()
+            started, next_notice = time.monotonic(), 0
+            while process.poll() is None:
+                elapsed = time.monotonic() - started
+                if elapsed > args.timeout:
+                    record["timeout"] = True
+                    raise TimeoutError("Frozen performance process exceeded its total deadline")
+                if elapsed >= next_notice:
+                    print(f"{args.label}: pid={process.pid} running {elapsed:.0f}s", flush=True)
+                    next_notice = elapsed + 30
+                time.sleep(1)
+            record["exit_code"] = process.returncode
+    except BaseException as error:  # noqa: BLE001 -- interruption must still clean the owned group
+        record["errors"].append(repr(error))
+    finally:
+        if process is not None:
+            members = live_group_members(process.pid)
+            record["owned_group_before_cleanup"] = members
+            if members:
+                try:
+                    os.killpg(process.pid, signal.SIGINT)
+                    deadline = time.monotonic() + 45
+                    while live_group_members(process.pid) and time.monotonic() < deadline:
+                        time.sleep(1)
+                    if live_group_members(process.pid):
+                        record["forced_termination"] = True
+                        os.killpg(process.pid, signal.SIGKILL)
+                except ProcessLookupError:
+                    pass
+            try:
+                process.wait(timeout=10)
+            except subprocess.TimeoutExpired:
+                record["errors"].append("Owned process did not exit after cleanup")
+            record["exit_code"] = process.returncode
+            record["owned_group_after_cleanup"] = live_group_members(process.pid)
+        try:
+            after = subprocess.check_output(["npu-smi", "info"], timeout=30)
+            (root / "npu-after.txt").write_bytes(after)
+            record["empty_inventory_after"] = empty_inventory(after.decode())
+            if record.get("empty_inventory_before") != record["empty_inventory_after"]:
+                raise RuntimeError("Physical inventory differs across the run")
+        except Exception as error:  # noqa: BLE001 -- retain failed hardware receipt without losing run custody
+            record["errors"].append("Final hardware receipt: " + repr(error))
+        child = root / "results/run.json"
+        try:
+            value = json.loads(child.read_text()) if child.exists() else {}
+        except ValueError as error:
+            record["errors"].append("Malformed child report: " + repr(error))
+            value = {}
+        record["passed"] = terminal_passed(record, value)
+        record["finished_at"] = now()
+        save()
+    print(json.dumps({"label": args.label, "passed": bool(record["passed"]), "output": str(root)}), flush=True)
+    return 0 if record["passed"] else 1
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("command", choices=("dry-run", "run"))
+    parser.add_argument("--role", choices=("raw", "group"), required=True)
+    parser.add_argument("--label", required=True)
+    parser.add_argument("--bundle", type=Path, default=Path(__file__).resolve().parent)
+    parser.add_argument("--source", type=Path, default=Path("/root/workspace/muxpd-groupfx-followup"))
+    parser.add_argument("--python", type=Path, default=Path("/root/workspace/.muxpd-ecpa-runtime/bin/python"))
+    parser.add_argument("--output-root", type=Path, default=Path("/root/workspace/muxpd-followup-20261025/runs"))
+    parser.add_argument("--timeout", type=int, default=3000)
+    args = parser.parse_args()
+    for key in ("bundle", "source", "output_root"):
+        setattr(args, key, getattr(args, key).resolve())
+    args.python = args.python.absolute()  # Preserve the venv's executable symlink and pyvenv.cfg lookup.
+    prepared = preview(args)
+    if args.command == "dry-run":
+        print(json.dumps(prepared, indent=2))
+        return 0
+    return execute(args, prepared)
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

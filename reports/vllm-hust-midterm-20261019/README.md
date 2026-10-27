@@ -1,10 +1,18 @@
 # vLLM-HUST中期测试记录
 
-主报告：[中期测试报告](%E4%B8%AD%E6%9C%9F%E6%B5%8B%E8%AF%95%E6%8A%A5%E5%91%8A.md)。测试对象为vLLM-HUST推理引擎，涵盖数据集性能、长上下文与设备标定。当前整体验收尚未完成。
+当前定义：B0固定为vLLM 0.18 + vLLM-Ascend
+0.18；B1是当前已实测最优优化配置，基座版本不限但明确标注。其他版本Native仅为版本对照，不称B0。原始归档中的历史运行ID保持不变。
+
+主报告：[中期测试报告](%E4%B8%AD%E6%9C%9F%E6%B5%8B%E8%AF%95%E6%8A%A5%E5%91%8A.md)，当前V0.75采用[项目里程碑大纲V1.5课题四](milestone-v15/README.md)。旧报告快照及原始证据保留，当前整体验收尚未完成。
+
+**指定0.18吞吐对照已存在：** C16 SWE-prefix-reuse 900秒窗口，B0 247.2656、B1 885.9611
+token/s，3.5830倍（+258.30%）。见[复用审计](../c16-baseline018-reuse-20261022/README.md)。该比值描述两套完整部署；客户端运行时版本和B1设备占用原始证据仍待补核，不能据此宣布完整验收或把收益归于单个MOD。MMLU-Pro等其他工况的0.18配对仍分别判断。
 
 第五章列出数据集性能结果。下述合成长输入实验采用不同运行栈及缓存配置，作为独立诊断归档，不纳入第五章方案的验收判定。
 
 ## M01 同工况参考补测
+
+当前V0.75按[V1.5课题四](milestone-v15/project4-v1.5.txt)报告`C=F/(k×T×10¹²)`和`η=T参/T×100%`，有效工作量、匹配无插桩计时及模型依赖参考仍未闭合。见[当前方法与状态](milestone-v15/method-status.json)。旧经验参考仅作历史插桩结果；[75种通信图参考](m01-recovery/collective-graph-20261023/README.md)已完成，不再列为未测。
 
 V0.64纳入GDN递归、WY/KKT、卷积、HBM及同接口通信参考，18类计算参考和设备最终预处理映射已完成汇总核对。
 完整证据见[参考补测与汇总](m01-recovery/reference-closure-20261022/README.md)。
@@ -12,7 +20,7 @@ V0.65完成本次插桩请求窗口的经验参考核算：达成率30.2443%–3
 
 ## 恢复环境性能与成本配对
 
-V0.59新增5.10节：两臂各完成200请求、零失败。请求阶段吞吐提升29.20%，平均TTFT降低10.23%，平均TPOT降低4.43%，请求阶段资源成本降低22.60%；含启动、编译与退出的全流程成本增加57.13%，未达到M06阈值。P99
+V0.59新增5.10节：两臂各完成200请求、零失败。请求阶段吞吐提升29.20%，平均TTFT降低10.23%，平均TPOT降低4.43%，请求阶段资源成本降低22.60%；含启动、编译与退出的全流程成本增加57.13%，该全流程增幅不是V1.5当前成本否决条件，货币费用与同区间利用率判定仍待核验。P99
 TPOT增加121.48%。单次配对不推断长期摊销或统计显著性。
 
 完整原始记录、独立预检查、空编译缓存、退出证据及首次协议偏差结果保存在[m06-paired-20261021](m06-paired-20261021/archive.json)。本组不覆盖既有环境结果。可运行
@@ -29,7 +37,7 @@ token，6/6完成、零传输失败；正文严格匹配0/6，按唯一`</think>
 
 B1定义为“当前已实测最优的vLLM-HUST优化方案”。按同工况、同指标从已测MOD或兼容组合选择；本章保留具体候选的配对证据。候选范围、选择复算及补测依据见[B1候选结果审计](B1-CANDIDATE-AUDIT.md)。
 
-新增MMLU-Pro同机配对沿用原200条输入及学校栈优化配置，B0/B1各200成功、0失败。吞吐、平均TTFT、平均TPOT及请求区间资源成本达到内部阈值；P99
+新增MMLU-Pro同机配对沿用原200条输入及学校栈优化配置，开发栈对照与优化配置各200成功、0失败。吞吐、平均TTFT、平均TPOT及请求区间资源成本相对开发栈对照达到数值阈值，不是相对固定B0的验收结果；P99
 TPOT与完整生命周期成本未改善。完整配置、统计边界和结果见主报告5.2节，数值由`aligned-mmlu-results.json`生成。
 
 E24/R36与KV
@@ -98,3 +106,15 @@ python compare_long_runs.py midterm-run-20261019-r4 midterm-b1-20261019 comparis
 ```
 
 原始运行脚本中的绝对路径用于追溯本机环境，不应直接在其他机器执行。 主报告列出的既有来源依赖原报告仓库或保留的私有证据，未声称全部包含在本归档中。
+
+- Terminal原答案恢复评分：[规范结果](../terminal-openssl-model-recovery-20261026/README.md)。
+
+- Navidrome增量：[规范结果](../swe-native018-navidrome-20261027/README.md)。
+
+- Terminal部分产物恢复评分：[规范结果](../terminal-cancel-async-partial-recovery-20261027/README.md)。
+
+- SWE增量与评分依赖：[规范结果](../swe-native018-protonmail-qutebrowser-20261027/README.md)；[Terminal Cython控制](../terminal-build-cython-controls-20261027/README.md)。
+
+- V0.95：[Protonmail同答案依赖恢复](../swe-protonmail-dependency-recovery-20261027/README.md)；[Cython单项诊断](../terminal-cython-single-trace-20261027/README.md)。
+
+- V0.96：[Tutanota增量及当前18题聚合](../swe-native018-tutanota-20261027/README.md)。

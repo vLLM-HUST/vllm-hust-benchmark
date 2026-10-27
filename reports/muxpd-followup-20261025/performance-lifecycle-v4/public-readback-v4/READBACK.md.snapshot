@@ -1,0 +1,13 @@
+# V4 anonymous public readback
+
+The first v4 attempt passed at **2026-10-26 02:05:57 UTC**. Anonymous downloads verified all **18 new assets / 96,990,295 bytes** against the fixed selection. All **13 capsules** have exactly their expected members: **1,181 original regular files plus 13 byte-exact embedded capsule manifests**. The support capsule's **122 files** are included in that total. Archive members were read and hashed in memory; nothing was extracted or executed.
+
+The before and after public API snapshots both contain **57 assets**, with identical complete snapshot bytes: SHA256 `7ff2bb6b719eee3014fd7aaf331a4e33c1d183aee771ab282e490ea2461d6c21`. Stable identity fields for the previous **39 assets** match both the earlier v3 anonymous public snapshot and the root's preupload snapshot. Old asset bytes were **not downloaded again**; these observations do not establish continuous immutability between snapshots. Download counts and uploader fields are excluded from the stable-field comparison.
+
+The final receipt is [attempt-01/public-readback-receipt-v4.json](attempt-01/public-readback-receipt-v4.json), SHA256 `30c334995098ba4f136956ea8634bafcd06b995fa9a30baf02dc30b80201368d`. Each asset has its own HTTP/size/SHA receipt, and each capsule has both the exact indexed manifest and a full member-verification receipt. No v4 attempt failed. Earlier v3 failed attempts and all original v4 preparation artifacts remain unchanged; this new receipt supplies public-readback evidence without rewriting their historical preparation status.
+
+The validator was frozen before network access, passed ten in-memory positive/negative fixtures, and received a separate source-only review. Its SHA256 is `d16df2411eae61878c122030b885eb0b23d60a9659f33b70900369706ae07bcb`. API GET requests used a direct connection without a proxy; asset GET requests used the standard environment proxy. No tokens, authorization headers, netrc, authenticated GitHub CLI, or remote write operations were used.
+
+[Public release](https://github.com/vLLM-HUST/vllm-hust-benchmark/releases/tag/evidence-muxpd-followup-20261025). This verifies publication bytes and member custody, not experimental acceptance, performance superiority, numerical correctness, quality, or physical overlap. The fixed v4 scope remains twelve terminal runs plus support; later runs are excluded.
+
+`small-copy-selection-v4.json` selects only byte-preserved code, logs, API snapshots, manifests and receipts for canonical integration. Downloaded `.tar.gz` payloads are excluded from Git.

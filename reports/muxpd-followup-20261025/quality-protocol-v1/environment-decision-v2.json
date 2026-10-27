@@ -1,0 +1,32 @@
+{
+  "recorded_at": "2026-10-25T23:01:31.533157+00:00",
+  "plan_sha256": "dd3e1f305475ec556dc824947f26d5fb5743242e82b5099155c95b8954bb2e65",
+  "decision": "Use HCCL_DETERMINISTIC=true in BOTH fresh native controls and raw/group quality candidates. Leave VLLM_BATCH_INVARIANT unset. All arms use explicit enable_npugraph_ex=false, enable_static_kernel=false.",
+  "before_any_quality_model_output": false,
+  "plugin_source_commit": "f7ed21e183b27d2141176f3e7a5c8a5ff4ede07d",
+  "native_configuration": "root/native-quality-fusion-engine-args.json",
+  "raw_configuration": "root/raw-fusion-engine-args.json",
+  "group_configuration": "root/group-fusion-engine-args.json",
+  "basis": {
+    "path": "/root/workspace/muxpd-followup-20261025/numerics/native-hccl-true-fresh-derived.json",
+    "sha256": "4b7a0c53879bafa5154d86252000b7bf97cff9664c62f2c8708f26b2b8c11108",
+    "observation": "Two fresh native processes, 15/15 exact warm pairs in each and 15/15 exact cross-process pairs; each comparison set has120 byte-identical full-vocabulary vectors. This is only the fixed diagnostic workload."
+  },
+  "limitations": [
+    "Quality result applies only to this explicit deterministic-collective/fusion configuration and fixed200 cases.",
+    "This does not prove raw/group correctness or the cause of every earlier difference.",
+    "Collective determinism may impose performance cost; separate uninstrumented measurement is required.",
+    "No frozen input, gold, parser, or acceptance criterion is changed."
+  ],
+  "supersedes": "environment-decision-v1.json only for8192-token revised quality plan; earlier2048 attempt preserved",
+  "before_any_v2_quality_model_output": true,
+  "before_any_candidate_quality_model_output": true,
+  "quality_cap_revision": {
+    "max_tokens": 8192,
+    "maximum_engine_steps": 215300,
+    "maximum_wall_seconds": 10800,
+    "reason": "Original2048 no-truncation gate failed in native-only calibration; same200 cases/allarms uniformly rerun, no candidate output examined, no case/gold/scoring changes.",
+    "failed_attempt": "runs/native-quality-hccl-true-01",
+    "stop_receipt_sha256": "cbc92bb0369b9ba2498f937b6f93750939ec4cd21c0ebfafead60c35588456a0"
+  }
+}

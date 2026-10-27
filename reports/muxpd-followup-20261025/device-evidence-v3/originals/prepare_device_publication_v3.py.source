@@ -1,0 +1,182 @@
+"""Assemble explicitly selected v3 additions locally; no uploads or Git mutations."""
+
+import json
+from pathlib import Path
+
+import build_capsule as b
+
+ROOT = Path('/root/workspace/muxpd-followup-20261025')
+PUB = ROOT / 'publication'
+REPO = Path('/root/workspace/references/benchmark-muxpd-followup')
+CANON = REPO / 'reports/muxpd-followup-20261025/device-evidence-v3'
+RELEASE = 'https://github.com/vLLM-HUST/vllm-hust-benchmark/releases/download/evidence-muxpd-followup-20261025/'
+LABELS = [
+    'raw-fusion-composite-plain-hccl-true-01', 'group-fusion-composite-plain-hccl-true-01',
+    'source98-plain-raw-bridge-01', 'source98-plain-group-bridge-01',
+    'native-quality-hccl-true-01', 'native-quality-v2-hccl-true-01',
+    'raw-pressure-suite-hccl-true-01', 'source98-manager-raw-bridge-01', 'source98-manager-group-bridge-01',
+]
+
+
+def read(path):
+    return json.loads(path.read_text())
+
+
+def capsule_row(directory):
+    receipt = read(directory / 'receipt.json')
+    manifest = read(directory / 'manifest.json')
+    assert receipt['verified'] and receipt['archive'] == b.identity(Path(receipt['archive']['path']))
+    assert receipt['members_verified'] == len(manifest['members'])
+    return {'capsule_id': manifest['capsule_id'], 'kind': manifest['kind'],
+            'archive': receipt['archive'], 'manifest': b.identity(directory / 'manifest.json'),
+            'receipt': b.identity(directory / 'receipt.json'), 'original_members': receipt['members_verified'],
+            'original_bytes': receipt['original_bytes'], 'terminal': manifest.get('terminal'),
+            'remote_asset': None, 'remote_download_verified': False}
+
+
+def main():
+    rows = [capsule_row(PUB / f'muxpd-{label}-capsule-v1') for label in LABELS]
+    assert all(row['terminal']['finished_at'] for row in rows)
+    b.write_new(PUB / 'terminal-selection-v3.json', {
+        'schema': 'muxpd-explicit-terminal-selection-v3', 'created_at': b.now(),
+        'fixed_cutoff': 'source98-manager-group-bridge-01 finished 2026-10-26T00:22:40 UTC',
+        'runs': [{'kind': row['kind'], **row['terminal']} for row in rows],
+        'excluded': ['All22-block cancellation attempts after the cutoff', 'All performance timing/profile attempts',
+                     'Any second native or candidate MCQ quality attempt', 'Unselected active runs'],
+        'scope': 'Nine explicit new terminal additions only. Old v1/v2/protocol evidence remains separate and unchanged.'})
+    export_path = PUB / 'source-exports/muxpd-98eac12dc2595a8742a81b58e96b899fed905194/source-manifest.json'
+    export = read(export_path)
+    b.write_new(PUB / 'source-selection-v3.json', {
+        'schema': 'muxpd-source-selection-v3', 'extends': b.identity(PUB / 'source-selection-v1.json'),
+        'exports': [{'commit': export['commit'], 'tree': export['tree'], 'archive': export['archive'],
+                     'manifest': b.identity(export_path), 'members': len(export['members'])}],
+        'scope': 'New exact committed source98 tree only. Earlier seven source exports retain their published identities.'})
+    names = [
+        'publication/PRELIMINARY-REPORT-v3.md', 'publication/terminal-selection-v3.json',
+        'publication/source-selection-v3.json', 'publication/verify_device_inputs_v3.py',
+        'publication/prepare_device_publication_v3.py', 'publication/device-input-reverification-v3/summary.json',
+        'publication/manager-archive-reverification-v3.json', 'publication/build_capsule.py',
+        'publication/build_manager_capsule.py', 'publication/test_manager_capsule.py',
+        'publication/MANAGER-CAPSULE-BUILDER-V1.md', 'publication/manager-capsule-builder-freeze-v1.json',
+        'publication/manager-capsule-cpu-tests-v3.log', 'publication/manager-capsule-ruff-v2.log',
+        'publication/manager-validation-no-write-v1.json', 'publication/manager-capsule-upload-selection-v1.json',
+        'publication/manager-validator-bytecode-side-effect-v1/receipt.json',
+        'publication/manager-validator-bytecode-side-effect-v1/raw-verify_startup_readbacks98.cpython-312.pyc',
+        'publication/manager-validator-bytecode-side-effect-v1/group-verify_startup_readbacks98.cpython-312.pyc',
+        'numerics/raw-observed-vs-plain-composite-v1.json', 'numerics/group-observed-vs-plain-composite-v1.json',
+        'numerics/raw-vs-group-plain-composite-v1.json', 'numerics/raw-f7-vs-source98-plain-composite-v1.json',
+        'numerics/group-f7-vs-source98-plain-composite-v1.json', 'numerics/raw-vs-group-source98-plain-composite-v1.json',
+        'numerics/compare_composite_token_replay.py', 'numerics/test_composite_token_replay.py',
+        'numerics/PLAIN-COMPOSITE-REPLAY.md', 'numerics/plain-composite-source-receipt-v1.json',
+        'numerics/probe_composite_plain.py', 'numerics/DETERMINISTIC-PROFILE-98EAC12-BRIDGE.md',
+        'numerics/deterministic-profile-98eac12-validation.json',
+        'numerics/bridge98/source-manifest.json', 'numerics/bridge98/bridge98-cpu-freeze.json',
+        'numerics/bridge98/manager_source_bridge98_v3.py', 'numerics/bridge98/probe_composite_plain98.py',
+        'numerics/bridge98/verify_startup_readbacks98.py', 'numerics/bridge98/test_bridge98.py',
+        'numerics/bridge98/cpu-tests-v3.log', 'numerics/bridge98/ruff-v3.log', 'numerics/bridge98/README.md',
+        'root/validate_single_quality_control_v1.py', 'quality/native-control-01-description-v1.json',
+        'quality/score_quality.py', 'quality/supplementary/score_supplementary.py',
+        'quality/supplementary/protocol.json', 'quality/supplementary/freeze-receipt.json',
+        'performance/pressure-suite-failure-01/DIAGNOSIS.md',
+        'performance/pressure-suite-failure-01/replay_allocation_predictor.py',
+        'performance/pressure-suite-failure-01/predictor-results.json',
+        'performance/pressure-suite-failure-01/phase-2-compact-trace.json',
+        'performance/pressure-suite-failure-01/source-identities.json',
+    ]
+    for name in ('RAW-REVIEW.md', 'raw-review.json', 'SHA256SUMS-raw-review', 'GROUP-REVIEW.md', 'group-review.json',
+                 'SHA256SUMS-group-review', 'MANAGER-RAW-REVIEW.md', 'manager-raw-review.json',
+                 'SHA256SUMS-manager-raw-review', 'MANAGER-GROUP-REVIEW.md', 'manager-group-review.json',
+                 'SHA256SUMS-manager-group-review'):
+        names.append('numerics/bridge98-review-v1/' + name)
+    for name in ('controller.py', 'owned_processes.py', 'capture_source_metadata.py', 'execution-identity.json',
+                 'test_controller.py', 'cpu-tests-final.log', 'ruff-v1.log', 'README.md', 'SHA256SUMS'):
+        names.append('root/source98-bridge-v1/' + name)
+    names += [str(export_path.relative_to(ROOT)), str(Path(export['archive']['path']).relative_to(ROOT))]
+    selection = {'schema': 'muxpd-support-selection-v3', 'extends': b.identity(PUB / 'support-selection-v2.json'),
+                 'files': [{'path': str(ROOT / name), 'member': 'support/' + name,
+                            'sha256': b.identity(ROOT / name)['sha256']} for name in sorted(names)],
+                 'scope': 'Explicit finite terminal comparisons, review/scoring/diagnosis/source/build custody. No subsequent22-block run, timing or profile result selected.'}
+    b.write_new(PUB / 'support-selection-v3.json', selection)
+    support_manifest = PUB / 'muxpd-20261026-support-v3-manifest.json'
+    b.freeze_support(PUB / 'support-selection-v3.json', 'muxpd-20261026-support-v3', support_manifest)
+    support_dir = PUB / 'muxpd-20261026-support-v3-capsule'
+    b.build(support_manifest, support_dir)
+    rows.append(capsule_row(support_dir))
+    counts = {'terminal_runs': 9, 'capsules': 10, 'original_members': sum(row['original_members'] for row in rows),
+              'original_bytes': sum(row['original_bytes'] for row in rows),
+              'archive_bytes': sum(row['archive']['bytes'] for row in rows),
+              'failed_terminal_attempts_preserved': 2, 'intentional_manager_exit130': 2}
+    index = {'schema': 'muxpd-terminal-publication-index-v3', 'created_at': b.now(), 'status': 'local_verified_not_uploaded',
+             'extends': b.identity(PUB / 'publication-index-v2.json'),
+             'quality_protocol_dependency': b.identity(PUB / 'quality-protocol-manifest-v1.json'),
+             'terminal_selection': b.identity(PUB / 'terminal-selection-v3.json'),
+             'report': b.identity(PUB / 'PRELIMINARY-REPORT-v3.md'),
+             'input_reverification': b.identity(PUB / 'device-input-reverification-v3/summary.json'),
+             'capsules': rows, 'counts': counts, 'current_performance_claim': False, 'paired_quality_accepted': False,
+             'scope': 'Delta-only v3 additions. No old evidence is overwritten; cutoff fixed through source98 Manager group.'}
+    b.write_new(PUB / 'publication-index-v3.json', index)
+    uploads = [Path(row['archive']['path']) for row in rows]
+    uploads += [PUB / name for name in ['publication-index-v3.json', 'terminal-selection-v3.json',
+                                       'support-selection-v3.json', 'source-selection-v3.json', 'PRELIMINARY-REPORT-v3.md']]
+    with (PUB / 'SHA256SUMS-v3').open('x') as stream:
+        for path in uploads:
+            stream.write(f"{b.identity(path)['sha256']}  {path.name}\n")
+    uploads.append(PUB / 'SHA256SUMS-v3')
+    upload_selection = {'schema': 'muxpd-release-upload-selection-v3', 'status': 'prepared_not_uploaded',
+                        'extends': b.identity(PUB / 'upload-selection-v2.json'), 'planned_release_base': RELEASE,
+                        'files': [{**b.identity(path), 'planned_url': RELEASE + path.name} for path in uploads],
+                        'scope': 'Sixteen NEW assets only; existing v1/v2/protocol assets are neither replaced nor uploaded again.'}
+    b.write_new(PUB / 'upload-selection-v3.json', upload_selection)
+    CANON.mkdir(parents=True, exist_ok=False)
+    copies = []
+
+    def copy(source, relative):
+        destination = CANON / relative
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        with destination.open('xb') as stream:
+            stream.write(source.read_bytes())
+        identity = b.identity(source)
+        copies.append({'canonical_path': relative, 'source': identity, 'sha256': identity['sha256'], 'bytes': identity['bytes']})
+
+    for source_name, target in [
+        ('publication-index-v3.json', 'archive-index-v3.json'), ('terminal-selection-v3.json', 'terminal-selection-v3.json'),
+        ('support-selection-v3.json', 'support-selection-v3.json'), ('source-selection-v3.json', 'source-selection-v3.json'),
+        ('upload-selection-v3.json', 'upload-selection-v3.json'), ('SHA256SUMS-v3', 'SHA256SUMS-v3'),
+        ('PRELIMINARY-REPORT-v3.md', 'originals/PRELIMINARY-REPORT-v3.md.source'),
+        ('canonical-pre-device-v3.json', 'preserved-originals-v3.json'),
+        ('device-input-reverification-v3/summary.json', 'analysis/device-input-reverification-v3.json'),
+        ('manager-archive-reverification-v3.json', 'analysis/manager-archive-reverification-v3.json'),
+        ('manager-capsule-builder-freeze-v1.json', 'analysis/manager-capsule-builder-freeze-v1.json'),
+        ('manager-validation-no-write-v1.json', 'analysis/manager-validation-no-write-v1.json'),
+        ('manager-validator-bytecode-side-effect-v1/receipt.json', 'analysis/manager-validator-bytecode-side-effect-v1.json'),
+    ]:
+        copy(PUB / source_name, target)
+    for source_name in names:
+        source = ROOT / source_name
+        if source.suffix == '.json' and source_name.startswith('numerics/'):
+            copy(source, 'analysis/' + source_name.removeprefix('numerics/'))
+    copy(ROOT / 'quality/native-control-01-description-v1.json', 'analysis/native-control-01-description-v1.json')
+    copy(ROOT / 'performance/pressure-suite-failure-01/DIAGNOSIS.md', 'originals/PRESSURE-SUITE-DIAGNOSIS.md.source')
+    copy(ROOT / 'performance/pressure-suite-failure-01/predictor-results.json', 'analysis/pressure-predictor-results.json')
+    copy(export_path, 'analysis/source98-exact-tree-manifest.json')
+    for name in ['build_manager_capsule.py', 'verify_device_inputs_v3.py', 'prepare_device_publication_v3.py', 'MANAGER-CAPSULE-BUILDER-V1.md']:
+        copy(PUB / name, 'originals/' + name + '.source')
+    assets = []
+    for row in rows:
+        mid, rid = f"custody/{row['capsule_id']}.manifest.json", f"custody/{row['capsule_id']}.receipt.json"
+        copy(Path(row['manifest']['path']), mid)
+        copy(Path(row['receipt']['path']), rid)
+        assets.append({'capsule_id': row['capsule_id'], 'name': Path(row['archive']['path']).name,
+                       'sha256': row['archive']['sha256'], 'bytes': row['archive']['bytes'], 'manifest': mid, 'receipt': rid,
+                       'planned_download_url': RELEASE + Path(row['archive']['path']).name,
+                       'publication_state': 'prepared_not_uploaded', 'remote_verified': False})
+    b.write_new(CANON / 'release-assets-v3.json', {'schema': 'muxpd-canonical-release-assets-v3', 'release_base': RELEASE,
+                'publication_state': 'prepared_not_uploaded', 'assets': assets})
+    b.write_new(CANON / 'canonical-copy-map.json', {'schema': 'muxpd-canonical-copy-map-v3', 'copies': copies,
+                'scope': 'Exact metadata/original-source copies only; no archive payload copied into Git.'})
+    print(json.dumps({'counts': counts, 'upload_assets': len(uploads), 'canonical_copies': len(copies),
+                      'upload_selection': str(PUB / 'upload-selection-v3.json'), 'canonical': str(CANON)}, indent=2))
+
+
+if __name__ == '__main__':
+    main()

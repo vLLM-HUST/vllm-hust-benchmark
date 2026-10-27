@@ -1,0 +1,322 @@
+"""Append seven existing terminal capsules plus one explicit support capsule.
+
+The input descriptor is written only after every final report is available. This
+orchestrator uses the unchanged original capsule builder and never uploads.
+"""
+
+import argparse
+import json
+from pathlib import Path
+
+import build_capsule as b
+
+ROOT = Path("/root/workspace/muxpd-followup-20261025")
+PUB = ROOT / "publication"
+PREP = PUB / "v5-preparation"
+CANON = Path(
+    "/root/workspace/references/benchmark-muxpd-quality-v5/reports/muxpd-followup-20261025/quality-reference-v5"
+)
+RELEASE = "https://github.com/vLLM-HUST/vllm-hust-benchmark/releases/download/evidence-muxpd-followup-20261025/"
+EXPECTED = {
+    "native-quality-v2-hccl-true-02",
+    "raw-quality-v2-hccl-true-01",
+    "group-quality-v2-hccl-true-01",
+    "perf-native-default-backend-v2-01",
+    "perf-native-default-backend-v2-02",
+    "profile-f7-raw-mixed-01",
+    "profile-f7-group-mixed-01",
+}
+
+
+def read(path):
+    return json.loads(Path(path).read_text())
+
+
+def capsule_row(directory):
+    directory = Path(directory)
+    receipt, manifest = (
+        read(directory / "receipt.json"),
+        read(directory / "manifest.json"),
+    )
+    assert receipt["verified"] and receipt["members_verified"] == len(
+        manifest["members"]
+    )
+    check = b.verify_archive(
+        Path(receipt["archive"]["path"]), manifest, receipt["archive"]["sha256"]
+    )
+    assert check["members_verified"] == receipt["members_verified"]
+    terminal = manifest.get("terminal")
+    if manifest["kind"] == "terminal-run":
+        assert b.validate_terminal(terminal["run_path"]) == terminal
+        assert (
+            b.walk_members(Path(terminal["run_path"]), f"runs/{terminal['label']}")
+            == manifest["members"]
+        )
+    return {
+        "capsule_id": manifest["capsule_id"],
+        "kind": manifest["kind"],
+        "archive": receipt["archive"],
+        "manifest": b.identity(directory / "manifest.json"),
+        "receipt": b.identity(directory / "receipt.json"),
+        "original_members": receipt["members_verified"],
+        "original_bytes": receipt["original_bytes"],
+        "terminal": terminal,
+        "remote_download_verified": False,
+    }
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--inputs", type=Path, required=True)
+    args = parser.parse_args()
+    inputs = read(args.inputs)
+    assert inputs["all_reports_final_for_this_cutoff"] is True
+    assert not (PUB / "terminal-selection-v5.json").exists()
+    assert len(inputs["capsule_directories"]) == 7
+    for row in inputs["required_final_reports"]:
+        assert b.identity(row["path"])["sha256"] == row["sha256"], row["path"]
+    rows = [capsule_row(Path(path)) for path in inputs["capsule_directories"]]
+    assert {r["terminal"]["label"] for r in rows} == EXPECTED
+    assert all(
+        r["terminal"]["controller_passed"] and r["terminal"]["exit_code"] == 0
+        for r in rows
+    )
+    b.write_new(
+        PREP / "input-capsule-reverification-v5.json",
+        {
+            "schema": "muxpd-v5-input-capsule-reverification",
+            "created_at": b.now(),
+            "producer": b.identity(__file__),
+            "builder": b.identity(PUB / "build_capsule.py"),
+            "capsules": rows,
+            "scope": "Seven existing complete terminal inventories and compressed archives reverified without rebuilding. Collection PASS is not quality acceptance.",
+        },
+    )
+    b.write_new(
+        PUB / "terminal-selection-v5.json",
+        {
+            "schema": "muxpd-explicit-terminal-selection-v5",
+            "created_at": b.now(),
+            "extends": b.identity(PUB / "terminal-selection-v4.json"),
+            "fixed_cutoff": "N2/raw/group quality, two practical native-default-v2 references, raw/group mixed profiler; seven explicit terminal runs only.",
+            "runs": [row["terminal"] for row in rows],
+            "excluded": [
+                "Earlier N1 already in v3",
+                "All prior v4 runs already published",
+                "Unlisted or future attempts",
+            ],
+            "scope": "Strict and supplementary quality failures remain failures; no old capsule rebuilt or relabeled.",
+        },
+    )
+    support = {}
+    for row in inputs["support_files"]:
+        actual = b.identity(row["path"])
+        assert actual["sha256"] == row["sha256"], row["path"]
+        member = b.safe_name(row["member"])
+        assert member not in support
+        support[member] = {
+            "path": row["path"],
+            "member": member,
+            "sha256": actual["sha256"],
+        }
+    tree_inventories = []
+    for tree in inputs["complete_support_trees"]:
+        inventory = b.walk_members(Path(tree["path"]), tree["member_prefix"])
+        tree_inventories.append({"tree": tree, "members": inventory})
+        for row in inventory:
+            assert row["member"] not in support
+            support[row["member"]] = {
+                "path": row["path"],
+                "member": row["member"],
+                "sha256": row["sha256"],
+            }
+    # Bind this exact finalization operation and new terminal cutoff too.
+    for path in [
+        args.inputs,
+        PUB / "terminal-selection-v5.json",
+        PREP / "input-capsule-reverification-v5.json",
+    ]:
+        member = "support/" + str(path.relative_to(ROOT))
+        assert member not in support
+        support[member] = {
+            "path": str(path),
+            "member": member,
+            "sha256": b.identity(path)["sha256"],
+        }
+    b.write_new(
+        PUB / "support-selection-v5.json",
+        {
+            "schema": "muxpd-support-selection-v5",
+            "created_at": b.now(),
+            "extends": b.identity(PUB / "support-selection-v4.json"),
+            "files": [support[k] for k in sorted(support)],
+            "complete_trees": [x["tree"] for x in tree_inventories],
+            "scope": inputs["support_scope"],
+        },
+    )
+    support_manifest = PUB / "muxpd-20261026-support-v5-manifest.json"
+    b.freeze_support(
+        PUB / "support-selection-v5.json", "muxpd-20261026-support-v5", support_manifest
+    )
+    output = PUB / "muxpd-20261026-support-v5-capsule"
+    b.build(support_manifest, output)
+    for item in tree_inventories:
+        assert (
+            b.walk_members(Path(item["tree"]["path"]), item["tree"]["member_prefix"])
+            == item["members"]
+        )
+    rows.append(capsule_row(output))
+    counts = {
+        "terminal_runs": 7,
+        "capsules": 8,
+        "passed_terminal_collections": 7,
+        "original_members": sum(r["original_members"] for r in rows),
+        "original_bytes": sum(r["original_bytes"] for r in rows),
+        "archive_bytes": sum(r["archive"]["bytes"] for r in rows),
+    }
+    b.write_new(
+        PUB / "publication-index-v5.json",
+        {
+            "schema": "muxpd-terminal-publication-index-v5",
+            "created_at": b.now(),
+            "status": "local_verified_not_uploaded",
+            "extends": b.identity(PUB / "publication-index-v4.json"),
+            "terminal_selection": b.identity(PUB / "terminal-selection-v5.json"),
+            "support_selection": b.identity(PUB / "support-selection-v5.json"),
+            "report": b.identity(PUB / "QUALITY-REFERENCE-v5.md"),
+            "input_reverification": b.identity(
+                PREP / "input-capsule-reverification-v5.json"
+            ),
+            "capsules": rows,
+            "counts": counts,
+            "claims": inputs["claims"],
+            "scope": "Complete fixed quality outcomes, separately described practical native reference, and actual mixed-work diagnostic. No general quality, goodput, physical overlap, or fewer-kernel-launch claim.",
+        },
+    )
+    uploads = [Path(r["archive"]["path"]) for r in rows] + [
+        PUB / n
+        for n in [
+            "publication-index-v5.json",
+            "terminal-selection-v5.json",
+            "support-selection-v5.json",
+            "QUALITY-REFERENCE-v5.md",
+        ]
+    ]
+    with (PUB / "SHA256SUMS-v5").open("x") as f:
+        for path in uploads:
+            f.write(f"{b.identity(path)['sha256']}  {path.name}\n")
+    uploads.append(PUB / "SHA256SUMS-v5")
+    previous = read(PUB / "prior57-release-api-v5.json")[
+        "assets"
+    ]
+    assert len(previous) == 57
+    previous_names = {row["name"] for row in previous}
+    assert not previous_names.intersection(path.name for path in uploads)
+    b.write_new(
+        PUB / "upload-selection-v5.json",
+        {
+            "schema": "muxpd-release-upload-selection-v5",
+            "status": "prepared_not_uploaded",
+            "extends": b.identity(PUB / "upload-selection-v4.json"),
+            "planned_release_base": RELEASE,
+            "files": [
+                {**b.identity(path), "planned_url": RELEASE + path.name}
+                for path in uploads
+            ],
+            "previous57_inventory": b.identity(
+                PUB / "prior57-release-api-v5.json"
+            ),
+            "scope": "Thirteen NEW assets only. No old asset replaced/reuploaded. Prior57 is a historical API snapshot; new public readback remains pending.",
+        },
+    )
+    copies = []
+
+    def copy(source, target):
+        source, target = Path(source), CANON / target
+        target.parent.mkdir(parents=True, exist_ok=True)
+        with target.open("xb") as f:
+            f.write(source.read_bytes())
+        ident = b.identity(source)
+        copies.append(
+            {
+                "canonical_path": str(target.relative_to(CANON)),
+                "source": ident,
+                "bytes": ident["bytes"],
+                "sha256": ident["sha256"],
+            }
+        )
+
+    for name, target in [
+        ("publication-index-v5.json", "archive-index-v5.json"),
+        ("terminal-selection-v5.json", "terminal-selection-v5.json"),
+        ("support-selection-v5.json", "support-selection-v5.json"),
+        ("upload-selection-v5.json", "upload-selection-v5.json"),
+        ("SHA256SUMS-v5", "SHA256SUMS-v5"),
+        ("QUALITY-REFERENCE-v5.md", "REPORT-v5.md"),
+        (
+            "v5-preparation/input-capsule-reverification-v5.json",
+            "analysis/input-capsule-reverification-v5.json",
+        ),
+    ]:
+        copy(PUB / name, target)
+    for row in inputs["canonical_copies"]:
+        copy(row["source"], row["target"])
+    assets = []
+    for row in rows:
+        manifest = f"custody/{row['capsule_id']}.manifest.json"
+        receipt = f"custody/{row['capsule_id']}.receipt.json"
+        copy(row["manifest"]["path"], manifest)
+        copy(row["receipt"]["path"], receipt)
+        assets.append(
+            {
+                "capsule_id": row["capsule_id"],
+                "name": Path(row["archive"]["path"]).name,
+                "sha256": row["archive"]["sha256"],
+                "bytes": row["archive"]["bytes"],
+                "manifest": manifest,
+                "receipt": receipt,
+                "publication_state": "prepared_not_uploaded",
+                "planned_download_url": RELEASE + Path(row["archive"]["path"]).name,
+                "remote_verified": False,
+            }
+        )
+    b.write_new(
+        CANON / "release-assets-v5.json",
+        {
+            "schema": "muxpd-canonical-release-assets-v5",
+            "publication_state": "prepared_not_uploaded",
+            "release_base": RELEASE,
+            "assets": assets,
+        },
+    )
+    b.write_new(
+        CANON / "canonical-copy-map-v5.json",
+        {
+            "schema": "muxpd-canonical-copy-map-v5",
+            "copies": copies,
+            "scope": "New small exact copies only; older staging map and all pre-v5 files remain unchanged. Large parsed profile trees and raw runs stay in release capsules.",
+        },
+    )
+    b.write_new(
+        PREP / "finalization-receipt-v5.json",
+        {
+            "created_at": b.now(),
+            "producer": b.identity(__file__),
+            "inputs": b.identity(args.inputs),
+            "counts": counts,
+            "upload_assets": len(uploads),
+            "support_files": len(support),
+            "canonical_copies": len(copies),
+            "github_mutation": False,
+        },
+    )
+    print(
+        json.dumps(
+            {"counts": counts, "upload_assets": len(uploads), "canonical": str(CANON)},
+            indent=2,
+        )
+    )
+
+
+if __name__ == "__main__":
+    main()

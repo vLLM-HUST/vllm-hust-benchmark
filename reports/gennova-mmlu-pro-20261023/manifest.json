@@ -1,0 +1,169 @@
+{
+  "schema": "gennova-independent-engine-evidence/v1",
+  "scope": "Independent Qwen3.5 BF16 TP2 qualification and MMLU-Pro request-engine comparison",
+  "native_fix_pr": "https://github.com/vLLM-HUST/GenNova/pull/171",
+  "source_commit": "ea13161d09446b8e8db0fc903b2356e75d1b4002",
+  "native_fix_merge": "946095c8d01b03b80a7b24928e739083bc74367c",
+  "archives": [
+    {
+      "run": "native-r1",
+      "status": "completed",
+      "archive": "native-r1.tar.gz",
+      "sha256": "16b8122eb3b8eab64fdd1cfa808fb0209c2bff97d426e631d0dfed3e93b99e2b",
+      "members": {
+        "native-r1/SHA256SUMS": "ce7f8aef850dd4209e1cc96d0e3215c80bfd3c094013bd63c16ab63dec386809",
+        "native-r1/native-libraries.json": "416e500726050a816c45cd44d61dc4e3468db676dd258a20bcd6aebc60ef8dc9",
+        "native-r1/npu-after.txt": "e50e48491f0f6984c721f30fa4cf315688e4a7ce11bcae5f42e51bcb36b9bd07",
+        "native-r1/npu-before.txt": "ad1f9da91f49eaf0fa7dce9b783b5e60d4a71fce9e729d79ef3c506e8ae16e52",
+        "native-r1/receipt.json": "ed0a5ab439af93360c6cb6264f54ca3ab86def17a15b29b1481b30a67e3bcefc",
+        "native-r1/results.json": "d39e4559767f809ebe8758f50ecada3c2bd77faaa38e92fbc1558ac75c4ee5be",
+        "native-r1/service.log": "84a5ef37befbe6c73c19915b2818086cdd525122dbf2ffb039775b1baa556319"
+      }
+    },
+    {
+      "run": "checkpoint-r1",
+      "status": "failed",
+      "archive": "checkpoint-r1.tar.gz",
+      "sha256": "36481e952a940b49b1aef4aee1f5d7f3aa10741f8b005531e176d6863f09d05d",
+      "members": {
+        "checkpoint-r1/SHA256SUMS": "f50ac951e555258d716e171512ff3133143c693741f40081fcb280283bba8f0e",
+        "checkpoint-r1/npu-after.txt": "d7115266b204884a4e2c7c6bb55a2e091d35568374554a3f7c3e22a8b33c87b3",
+        "checkpoint-r1/npu-before.txt": "96e36a018baf279d0176d109e3f6c1c5e4164d7551ace9e8329107ede379783b",
+        "checkpoint-r1/receipt.json": "611f1184c64f6ec6f93592135bf040a0ea17e242e9875f015932df942dc2ea24",
+        "checkpoint-r1/service.log": "4e44185c9bdc3999bcc17637e5cb66ef8e8a814f8528d0db25f4f838839d6fdd"
+      }
+    },
+    {
+      "run": "checkpoint-r2",
+      "status": "completed",
+      "archive": "checkpoint-r2.tar.gz",
+      "sha256": "1dbacea21b1e5e124b442be55e3796fad6fd9473dc5fea8e267d8cabc9caf468",
+      "members": {
+        "checkpoint-r2/SHA256SUMS": "51e4f963412eea6a23da9041345e476b23de6a7b5eda495cde2d81833d1c00c1",
+        "checkpoint-r2/checkpoint-rank0.json": "166d3406691a40a009cb503cece3351a7ceb86eed1af30e421f4c4fa1a72da70",
+        "checkpoint-r2/checkpoint-rank1.json": "2d07a0e5a52d16294a474ca824f4ac0d336ad951b8dcf45348a64e6f23f412b0",
+        "checkpoint-r2/npu-after.txt": "a58392f4767a727c35e479332d0b18d8edda0f0784020af9449c118673beb53e",
+        "checkpoint-r2/npu-before.txt": "e90769dc504d29d5ff575c0f5d18f8779793c615816657756265df9c37f9954d",
+        "checkpoint-r2/receipt.json": "e5578a8b462b0f0a738981ab0031f8f83beecba0696765c77166ec90525ae152",
+        "checkpoint-r2/service.log": "5b01f4e3164b6436bd73b81b8c67aeb86dbdaeb684838082830691ce5cba0eb2",
+        "checkpoint-r2/weights-rank0.json": "ef7103980b028aaa3ee350546e0c6d2c01536821cd2a1252e16d6426eecdb169",
+        "checkpoint-r2/weights-rank1.json": "9f370dbe4e9bea82e5b5660fb8823a13682dc2f8670251e53d08cec142700cc9"
+      }
+    },
+    {
+      "run": "engine-r1",
+      "status": "completed",
+      "archive": "engine-r1.tar.gz",
+      "sha256": "4120e33b67a3985bff342ac99e01d367703c67eb9ff7e32c8a06bc1bbf55bed7",
+      "members": {
+        "engine-r1/SHA256SUMS": "1ce110a9cd8ab41e1560649bf1392b521ff1ed318de0092df024e300d02359f4",
+        "engine-r1/device-samples.jsonl": "4a362ecb39bd295b8f1a7827789ce65dd35c27af806e6fc0081e31d3ff5302ce",
+        "engine-r1/model-identity.json": "c54582e88497ad6fcef2e6979ef857cb9e73ce0f5dd4b726eb8345aa379d349e",
+        "engine-r1/npu-after.txt": "a739d6b0abd60bce9ca6d8d6ce6f3767e6dba9dd84540ec4d8536449304a7ba6",
+        "engine-r1/npu-before.txt": "7b29dcc9bd8565fcc624496989a05721207c327e8a7246de4bf59cd97db7661c",
+        "engine-r1/rank-0.json": "1990960d79bc023b54263584c0ad0e968952945f0795a7060444f7a23d74b4a7",
+        "engine-r1/rank-1.json": "8087de12cfd6443420b18978b6b3d05cf8b7e7c7282bdf2cc656fdb09035dcb8",
+        "engine-r1/receipt.json": "482d86c47d9d62401e8ad0dfa0b9b69c298dab51fc4bf83662686bca13615033",
+        "engine-r1/service.log": "54082373687a06ebd4a882d0f983079fb09ca3720c952f780e782580b47ac021",
+        "engine-r1/source-b1_engine_probe.py": "3399608816e938b90276e1ff7ab3761489381d49ac430bc04a813f75079ed190",
+        "engine-r1/source-comparison-plan.json": "b6371a333f0e9a65c3658894b719266b2758906c9a6d8fae494e9f5f0f879ea2",
+        "engine-r1/source-engine_probe.py": "ff589b23bf6d27e86c52113dae110758af9fa17b69192632fef47a9b1f26d836",
+        "engine-r1/source-run_owned.py": "7ee0f6b84ead217c72293a5f8fbf770cddd3fc79d31a6fabccff3b478a8e6a40"
+      }
+    },
+    {
+      "run": "b1-r1",
+      "status": "failed",
+      "archive": "b1-r1.tar.gz",
+      "sha256": "8f4710b478225b05b14d98985727655c7ceaf5a9c5ce1e3a1065facc828162ff",
+      "members": {
+        "b1-r1/SHA256SUMS": "d9b4461741dfe85d7a0a6a6e413b2834eaf072bcd2a180b666e7b627ff214ba7",
+        "b1-r1/device-samples.jsonl": "37bcd8d5fd5c91dfba149967afaa05f63e17bab5109cf3e1acd70d11a887babb",
+        "b1-r1/microflow-1099937.jsonl": "3c87c4be5712610d71ee808d6ed655061cbc87a6535cb5d91250df69588bc113",
+        "b1-r1/microflow-1099938.jsonl": "c36b0deee325de089b2dd44ce4f6f4dd9e0e1904ec44d594db8043e0a81936d2",
+        "b1-r1/model-identity.json": "c54582e88497ad6fcef2e6979ef857cb9e73ce0f5dd4b726eb8345aa379d349e",
+        "b1-r1/npu-after.txt": "3a1400b3742ff81ab2f964c073e153c67934354236476c4c9d3de0e63586d7f2",
+        "b1-r1/npu-before.txt": "a001a8e234b47a6ebfcbd41863b245693cd290a131ae4b8f48ba79a3d77459b2",
+        "b1-r1/receipt.json": "30e3b910215e081565845383d69a2a13b8bdd6d8ea36f0f881441748dc0dc7f6",
+        "b1-r1/runtime.json": "b6ebaf636af07254a32e7fdecad0564db1fed10d24f9807e4283b77e279faae9",
+        "b1-r1/service.log": "1cb7cd068b0d237b83d46336c4ba1d9bcab3ac9fc776245d96b7a66eb2e73d19",
+        "b1-r1/serving-arguments.json": "fdecd1fac77da90aa03757105c21a4688daf75c5254c623387f0126a77246dc0",
+        "b1-r1/source-b1_engine_probe.py": "e80b7a94a5b78d506adc157559b7bec1f4cf8da9880debca7b0a8475accc3103",
+        "b1-r1/source-comparison-plan.json": "b6371a333f0e9a65c3658894b719266b2758906c9a6d8fae494e9f5f0f879ea2",
+        "b1-r1/source-engine_probe.py": "ff589b23bf6d27e86c52113dae110758af9fa17b69192632fef47a9b1f26d836",
+        "b1-r1/source-run_owned.py": "5177fae55883dc2f3cae4e761d92cb2acc7ae22541b8ed207065aad5b5deb8fe"
+      }
+    },
+    {
+      "run": "b1-r2",
+      "status": "completed",
+      "archive": "b1-r2.tar.gz",
+      "sha256": "2e198ff42ec3ce52ac603a02d73ce96a564cfa58e9f7f00a173787882760eaa2",
+      "members": {
+        "b1-r2/SHA256SUMS": "3c709fb2fa7fc426279c3dbce9c4ecdbf830a7309631966b8c294a5493d97dad",
+        "b1-r2/device-samples.jsonl": "a144ace9f5d1e54accbd2804afca3866d8a37aa20ff38592446ef55523d53a09",
+        "b1-r2/host-memory-advice.json": "ebce2f853cc27de5f0a4ccf59842255cd9f015c57b0ce23144426c8d900e0603",
+        "b1-r2/microflow-1141844.jsonl": "b51aa113e59236dc5e85db3a18a0d8b1759ec3e324fb7f7eaa4b5944f0b391f6",
+        "b1-r2/microflow-1141845.jsonl": "74a793789ffec8bd044c6ee8a244ab6ce49f67db2cf062d1e039f664870467e5",
+        "b1-r2/model-identity.json": "c54582e88497ad6fcef2e6979ef857cb9e73ce0f5dd4b726eb8345aa379d349e",
+        "b1-r2/npu-after.txt": "73ce5c0d2b822c8da6c35edbf934fd37d526046b58bc4f165ab85b3acae7874c",
+        "b1-r2/npu-before.txt": "f4148896f2a0e0513e2579e6907e7390b035c6119a65d9a74554532f808f13f6",
+        "b1-r2/receipt.json": "90fa0c2fc555c28a1d647a7766a60a6696f0c0612ec61d4084c443df25f61ffb",
+        "b1-r2/results.json": "15e7397ad109c069f324708b6cf40dc15ee987553f79a195dc954ec1a2369cdd",
+        "b1-r2/runtime.json": "b6ebaf636af07254a32e7fdecad0564db1fed10d24f9807e4283b77e279faae9",
+        "b1-r2/service.log": "07b69f841f28f9a31fd988dfbc58d89a3b0b88378efcfd360883a1d23bdc13ad",
+        "b1-r2/serving-arguments.json": "fdecd1fac77da90aa03757105c21a4688daf75c5254c623387f0126a77246dc0",
+        "b1-r2/source-b1_engine_probe.py": "00670cb5bf2046d56a0276ad5a1bb21a90308ee1bd7784a987228ef760268048",
+        "b1-r2/source-comparison-plan.json": "b6371a333f0e9a65c3658894b719266b2758906c9a6d8fae494e9f5f0f879ea2",
+        "b1-r2/source-engine_probe.py": "ff589b23bf6d27e86c52113dae110758af9fa17b69192632fef47a9b1f26d836",
+        "b1-r2/source-run_owned.py": "f31303d3f5f3287851032d54078dc48b4d0008f781f475afd9690d748d5c3528"
+      }
+    },
+    {
+      "run": "snapshot-r1",
+      "status": "completed",
+      "archive": "snapshot-r1.tar.gz",
+      "sha256": "ee8845a29eb11845299a198a8a886686382e13001f0ecd883ef04281f4a5474d",
+      "members": {
+        "snapshot-r1/SHA256SUMS": "00c3697ca9b6dfd22c740985d398c51ebc8857f875de4df2e7ac26b8a574ba72",
+        "snapshot-r1/device-samples.jsonl": "9ede69a285c9103fedda93f0ab98e91b235e2c10a6280d9d5a7863218a367f89",
+        "snapshot-r1/model-identity.json": "c54582e88497ad6fcef2e6979ef857cb9e73ce0f5dd4b726eb8345aa379d349e",
+        "snapshot-r1/npu-after.txt": "5c423e88246ac107d404d978b2b84f83cb38c6ec56d16bd137ea2ea8a3fcb858",
+        "snapshot-r1/npu-before.txt": "829be87e851131014a4a7a80021ff0765d9fe85e295550d6b4b319c144b00475",
+        "snapshot-r1/receipt.json": "e24bac2a6c596cb323626aa8382672f0a85095bbff0395524a02628f17397aad",
+        "snapshot-r1/results.json": "664e64db920f023f93add796f15a4e01e5472498064acaeb2093722d1c486853",
+        "snapshot-r1/service.log": "0da4a61b8fc364d21972ffd039d2c3436b28d1bdb43fca8b184f077d40f894ba",
+        "snapshot-r1/source-b1_engine_probe.py": "00670cb5bf2046d56a0276ad5a1bb21a90308ee1bd7784a987228ef760268048",
+        "snapshot-r1/source-comparison-plan.json": "b6371a333f0e9a65c3658894b719266b2758906c9a6d8fae494e9f5f0f879ea2",
+        "snapshot-r1/source-engine_probe.py": "ff589b23bf6d27e86c52113dae110758af9fa17b69192632fef47a9b1f26d836",
+        "snapshot-r1/source-run_owned.py": "f31303d3f5f3287851032d54078dc48b4d0008f781f475afd9690d748d5c3528",
+        "snapshot-r1/source-state_snapshot_probe.py": "0c8c454e56636f3104568c89069e70532c7158f7697fee3e7b7b3028f7a492dc",
+        "snapshot-r1/source-state_tensor.py": "e04957ebaad18c2adaeeb00b01ec7b51f87a7a1c3718af6e451c4f1778d07641"
+      }
+    },
+    {
+      "run": "protocol",
+      "archive": "protocol-and-tools.tar.gz",
+      "sha256": "ee97b5031858f4f1d08d8845a3391f79620450e16a20e4234901c92f3f8072a2",
+      "members": {
+        "protocol/compare_engines.py": "19ae742685bb08dbe7f47241386b97cf2d86ede909a37a00f59b19bbda4ad0f6",
+        "protocol/adjudication.json": "f560fc1b4f9949e7bbe473459f8a1341a4971e28ea61a04e3cddbd17a4e97151",
+        "protocol/build-retry-receipt.json": "e2879708985ef4020edef242bc351a3ef5f881b78f676783e1f52f642baeff92",
+        "protocol/build-receipt.json": "349d59ace3aaed574156a4b32f1cc3be6d51c76614f1c226a9c6623c3d5094d7",
+        "protocol/record_build_retry.py": "ea8b15410acc06068e554715164e88b27c6b031d836e470c8dc09a0a4c3e4ebf",
+        "protocol/launch_boundary_b1.py": "180a999c15be9dfb29275b9f9020983a0c342fe38bbdee185e7e46f8f565b394",
+        "protocol/run_owned.py": "f31303d3f5f3287851032d54078dc48b4d0008f781f475afd9690d748d5c3528",
+        "protocol/package_evidence.py": "dc32e715003da85031d14d308a43f300e2cc407ab2646dcb46fb66b2cf3c9b65",
+        "protocol/workload.json": "4882b093972d2aa7ae5ad8555ac85d0092533e81f0a18ff488ba274797459ee1",
+        "protocol/prepare_workload.py": "e6ccc4fdaa095cfbc58ee9beefdf9542f3863afd33b44746092cde499bd5cb94",
+        "protocol/engine_probe.py": "ff589b23bf6d27e86c52113dae110758af9fa17b69192632fef47a9b1f26d836",
+        "protocol/comparison-unqualified-r2.json": "1ad0f423bdf6186423cd111be4fb64fc4decee439ec7d75c1ad8e559a6b7623f",
+        "protocol/test_compare_engines.py": "709ac63036c1d5599493651949e56e10a7f14f55902c459002721926a730e777",
+        "protocol/b1_engine_probe.py": "ff76b508f7a3a09e1396a9056bc32ec875398abcf670235ab659aff7ac5c9fb5",
+        "protocol/comparison-plan.json": "b6371a333f0e9a65c3658894b719266b2758906c9a6d8fae494e9f5f0f879ea2"
+      }
+    }
+  ],
+  "full_dataset_quality_score": null,
+  "b1_replacement_approved": false
+}

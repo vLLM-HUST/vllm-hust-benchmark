@@ -1,0 +1,345 @@
+{
+  "schema": "milestone-v15-reuse/v1",
+  "method": {
+    "schema": "m01-method-status/v1",
+    "method_version": "V1.5",
+    "outline": {
+      "path": "reports/vllm-hust-midterm-20261019/milestone-v15/project4-v1.5.txt",
+      "bytes": 19177,
+      "sha256": "7f9352a85ec8025731b37b57362d80bfc48f8204ae9d1877eba521377267fa24",
+      "source_docx_sha256": "08196093d69c655bbae39f902a77ed89b2aaba71237adabe13f9122e8769a1ca",
+      "source_docx_available_in_this_repository": false,
+      "scope": "Exact Project 4 extract; source DOCX digest supplied by document owner"
+    },
+    "status": "own-compute-pair-closed-whole-chain-reference-pending",
+    "effective_compute_formula": "C = F / (k * T * 10^12)",
+    "effective_compute_unit": "TFLOPS per participating chip",
+    "reference_effective_compute_formula": "C_reference = F / (k * T_reference * 10^12)",
+    "reference_effective_compute_unit": "TFLOPS per participating chip",
+    "efficiency_formula": "eta = C / C_reference * 100% = T_reference / T * 100%",
+    "reference_scope": "Measured and reference compute use the same effective work F and participating chip count k within each efficiency calculation. The calibrated reference is not a proven theoretical upper bound or vendor peak.",
+    "equivalent_threshold": "C >= 0.5 * C_reference",
+    "threshold_percent": 50,
+    "current": {
+      "effective_flops": 1812905151088034,
+      "participating_chips": 2,
+      "matched_uninstrumented_seconds": null,
+      "reference_seconds": null,
+      "effective_tflops_per_chip": 7.1042207644080255,
+      "reference_effective_tflops_per_chip": null,
+      "efficiency_percent": null,
+      "passed": null,
+      "matched_synchronized_seconds": 127.59352582134306
+    },
+    "requirements": {
+      "effective_flops_excludes": [
+        "padding",
+        "redundant computation",
+        "unaccepted draft tokens",
+        "cache-omitted work"
+      ],
+      "timing": "Matched-workload uninstrumented synchronized wall clock including transfer, communication and synchronization; no estimated subtraction of instrumentation overhead.",
+      "reference": "Independent calibration, necessary workload, actual stage dependencies, resource overlap and necessary scheduling; exclude redundant work and extra implementation waiting.",
+      "forbidden_reference_substitutes": [
+        "global max(compute, HBM, communication)",
+        "reverse fitting to measured B0 or B1 time"
+      ],
+      "comparison": "Same reference method; separately derive reference time when precision, workload or execution path differs. Efficiency ratios under different references are not performance gains.",
+      "timing_refinement": "Same-run basic-operation F and synchronized T retain all native statistics and host-counting costs. Official B0/B1 own F/T/C pairing is closed. Prior operator-DAG eta remains attached to its own method. New whole-chain reference and acceptance remain unresolved. Not strictly uninstrumented."
+    },
+    "fair_comparison": {
+      "fixed_b0": {
+        "vllm": "0.18",
+        "vllm_ascend": "0.18"
+      },
+      "b1_base_version_constraint": null,
+      "common_conditions": [
+        "base model and source weights",
+        "data and task scope",
+        "request semantics",
+        "sampling and output constraints",
+        "quality and SLO",
+        "statistics",
+        "physical accelerator model, count and interconnect",
+        "comparable host resources"
+      ],
+      "allowed_implementation_differences": [
+        "weight quantization",
+        "activation quantization",
+        "KV quantization",
+        "speculative decoding",
+        "cache management",
+        "graph mode",
+        "operators",
+        "batching",
+        "scheduling",
+        "logical parallelism"
+      ],
+      "auxiliary_resources_included": true,
+      "quality_and_performance_bind_actual_configuration": true
+    },
+    "pending_evidence": [
+      "Freeze executable whole-chain reference identity, calibration/validation samples and applicability checks",
+      "Independent whole-chain reference evidence; official 0.18 is B0, not an automatic reference ceiling"
+    ],
+    "existing_audit_path": "reports/vllm-hust-midterm-20261019/m01-recovery/method-v526-20261023/README.md",
+    "historical_instrumented": {
+      "classification": "historical empirical-resource reference, not current V1.5 efficiency or acceptance",
+      "request_window_seconds": 135.340126192,
+      "empirical_attainment_percent_range": [
+        30.2443,
+        30.2505
+      ],
+      "reference_formula": "T_ref = max(T_compute, T_HBM, T_comm)",
+      "evidence_path": "reports/vllm-hust-midterm-20261019/m01-recovery/request-assessment-20261022/m01-request-window-assessment.json"
+    },
+    "additional_existing_evidence": [
+      "reports/vllm-hust-midterm-20261019/m01-recovery/collective-graph-20261023/manifest.json",
+      "reports/vllm-hust-midterm-20261019/m01-recovery/boundary-measured-20261023/manifest.json"
+    ],
+    "measured_synchronized_b1": {
+      "completed": 200,
+      "failed": 0,
+      "client_seconds": 120.6243702378124,
+      "synchronized_seconds": 120.65347687713802,
+      "effective_flops": null,
+      "efficiency_percent": null
+    },
+    "current_measurement": {
+      "run_id": "timing-b1-storage-r1",
+      "evidence_path": "reports/vllm-hust-midterm-20261019/m01-recovery/storage-timing-20261024/arithmetic.json",
+      "arithmetic_convention": "V1.5 2MNK, activated top8 experts, actual causal structure, necessary draft KV/hidden closure. Basic float additions/subtractions/multiplications and matrix multiply-adds; SFUs/comparisons/division reported separately without invented equivalents.",
+      "implementation_variant": "owned-optimistic-causal-draft/v1",
+      "strict_uninstrumented": false,
+      "host_prefill_counting": true,
+      "native_detailed_acceptance": true,
+      "all_measurement_cost_retained": true,
+      "device_journals": false,
+      "model_profiler": false,
+      "replaces_prior_best_b1_performance": false
+    },
+    "reference_supplement": {
+      "path": "reports/vllm-hust-midterm-20261019/m01-recovery/storage-reference-supplement-20261024/summary.json",
+      "sha256": "eafd20b91d5b8d2571e28604a8931ed4596e88c810fb551a7fe80b20f0020861",
+      "unique_cases": 281,
+      "numerical_checks": 1402,
+      "stable_graph_groups": 478,
+      "unstable_graph_groups": 60,
+      "validation": {
+        "fit_count": 1,
+        "source_rank_heldout_groups": 32,
+        "passed": 6,
+        "failed": 26,
+        "old_training_anchors_reused": true,
+        "heldout_not_used_for_training": true,
+        "k_and_thresholds_unchanged": true,
+        "evidence": "minimum-reference-model-mismatch-audit-r1.json"
+      },
+      "scenario_coverage": [
+        {
+          "seed": 0,
+          "missing_duration": 18111,
+          "measured_or_modeled_but_unqualified": 317712,
+          "qualified_duration": 25273
+        },
+        {
+          "seed": 1,
+          "missing_duration": 18081,
+          "measured_or_modeled_but_unqualified": 314176,
+          "qualified_duration": 28839
+        },
+        {
+          "seed": 2,
+          "missing_duration": 18051,
+          "measured_or_modeled_but_unqualified": 315536,
+          "qualified_duration": 27509
+        }
+      ]
+    },
+    "paired_own_compute": {
+      "schema": "m01-own-compute-pair/v1",
+      "status": "own_F_T_C_closed_reference_method_pending",
+      "rows": {
+        "B0": {
+          "F": 1829161955258989,
+          "T_seconds": 238.12670116312802,
+          "chips": 2,
+          "C_TFLOPS_per_chip": 3.840732572879189
+        },
+        "B1": {
+          "F": 1812905151088034,
+          "T_seconds": 127.59352582134306,
+          "chips": 2,
+          "C_TFLOPS_per_chip": 7.1042207644080255
+        }
+      },
+      "C_gain_percent": 84.97046148366367,
+      "reference_seconds": null,
+      "reference_tflops_per_chip": null,
+      "eta_percent": null,
+      "attainment": null,
+      "reference_method_status": "whole_chain_execution_protocol_not_frozen",
+      "baseline_is_reference_ceiling": false,
+      "identities": {
+        "B0": "vLLM 0.18.0 / vLLM-Ascend 0.18.0 with disclosed text-only compatibility patches",
+        "B1": "vLLM 0.28.1.post1.dev143+gf18cf803c / vLLM-Ascend 0.25.1rc2 development stack; vLLM-HUST combined optimization"
+      },
+      "workload": {
+        "model": "Qwen3.5-35B-A3B",
+        "dtype": "BF16",
+        "hardware": "Ascend 910B2",
+        "TP": 2,
+        "requests_per_arm": 200,
+        "dataset": "MMLU-Pro",
+        "actual_input_tokens_per_arm": 282265,
+        "actual_output_tokens_per_arm": 51200,
+        "output_budget": 256,
+        "ignore_eos": false
+      },
+      "measurement": {
+        "same_run_F_T": true,
+        "all_accounting_cost_retained": true,
+        "strict_uninstrumented": false,
+        "fresh_per_run_cache": true
+      },
+      "scope": "Effective-compute gain, not independent reference attainment or a task-quality score. Actual implementation differences and necessary arithmetic differ.",
+      "supersedes": {
+        "B0_r1_F": 1829506984194363,
+        "reason": "Native Mamba aligned-block publication dependencies corrected; original timing and raw requests unchanged."
+      },
+      "evidence": {
+        "paired-own-metrics-closed-r2.json": "2b73f3c8a79a80a4fce4e4d3f26fbb6070992659f5057d1a2ad0b49e4710d503",
+        "profiling-final-export-audit-r2.json": "6711f48dffa99b19a73b211d40c25b5f51f8d8505ef3def4644234f3bed54224",
+        "profiling-group-sum-audit-r2.json": "2b9f3d50ecd8ef0e971ab9ba3e5bda5d22488cf385e2e9797e663bd1c2795320",
+        "formal-necessary-full-export-audit-r2.json": "180b93a1a4cd20c6a8bcf0e51c9d0f3f1890b93c3f9d0cf6784c0fcbef4a488e",
+        "native-align-independent-source-review-r2.json": "d191b1c7ce993f82941864a8e30cb6d1e98058f53db27dc1a6b891e1b62b5073",
+        "B1-native-align-applicability-source-review-r1.json": "5342fd3eb12a83bb46e6024589d9f31cf67d6449ebf1bd50f1452f22ebfba3e2"
+      }
+    },
+    "paired_own_compute_source": {
+      "path": "reports/vllm-hust-midterm-20261019/m01-recovery/official018-paired-compute-20261024/summary.json",
+      "sha256": "7b31cd029e6a00217be5e32e9cc56c92c19875a3a47f57d4624bfce5b7722c3a"
+    },
+    "reference_closure": {
+      "path": "reports/vllm-hust-midterm-20261019/m01-recovery/storage-reference-closed-20261024/summary.json",
+      "sha256": "353635dd911b9a54cddab95e01734774bb52577b4b9cd64458b5c9369d0ad6ab",
+      "primary_display_seed": 0,
+      "scenario_sensitivity_range": {
+        "reference_seconds": [
+          47.503348961177785,
+          47.557189519622206
+        ],
+        "reference_tflops_per_chip": [
+          19.060263751919415,
+          19.081866760274465
+        ],
+        "efficiency_percent": [
+          37.2302188966015,
+          37.27241583261204
+        ]
+      },
+      "reference_identity": "Declared independent empirical reference: canonical r6 target and validated same-request/step draft statistical route payloads, regrouped by formal own workgroups/F/T/dependencies. Not recovered formal actual expert paths.",
+      "limitations": [
+        "All three schedule scenarios are reported. Their range is sensitivity, not a confidence interval or bound over all schedules.",
+        "CPU timings mix existing pinned-slab/DMA transaction-context anchors with new pre-touched ordinary-slab intrinsic CPU measurements. Rank anchor median new/old ratios are about0.741 and0.687; no ratio correction, subtraction or overwrite was applied.",
+        "Draft routes are an independently validated aggregate statistical reference. Hidden/KV state and expert IDs are not claimed identical to formal execution. The archive and reused oracle points are disclosed in the route methods.",
+        "Original failed measurements and earlier nonqualified snapshots remain preserved. Only the previously failed concat rank0 rows4 input received the frozen longer-graph precision correction.",
+        "Component model error criteria and calibration support are empirical. They are not a whole-model uncertainty guarantee or hardware peak theorem.",
+        "B1 remains its actual measured development stack. Official vLLM0.18/Ascend0.18 B0 identity is unchanged."
+      ],
+      "classification": "Prior operator-DAG method; not current whole-chain reference acceptance",
+      "reference_seconds": 47.503348961177785,
+      "reference_tflops_per_chip": 19.081866760274465,
+      "efficiency_percent": 37.2302188966015,
+      "threshold_percent": 50,
+      "attainment": false
+    },
+    "whole_chain_method_revision": {
+      "status": "principles_recorded_execution_protocol_not_frozen",
+      "requested_threshold_percent": 90,
+      "external_acceptance_approval_record": null,
+      "baseline_normalization_is_reference_attainment": false
+    }
+  },
+  "cost_method": {
+    "section": "3.4.4",
+    "allocated_expense": "P * k * T / (24 * D * 3600)",
+    "yuan_per_million_output_tokens": "1e6 * allocated_expense / N",
+    "request_population": "Same requests initiated and successfully completed inside the measurement interval; cross-interval usage separate",
+    "cards": "All occupied cards; no utilization discount on fixed fees",
+    "utilization": "Same interval, per-node/card AI Core samples, time-weighted means",
+    "lifecycle_is_current_gate": false,
+    "passed": null
+  },
+  "stability_method": {
+    "section": "3.4.3",
+    "task_scope": [
+      "MMLU-Pro",
+      "HLE-Verified",
+      "SWE-bench-Pro",
+      "FrontierScience",
+      "TerminalBench 2.1"
+    ],
+    "actual_context_minimum": 16384,
+    "compatible_32k_reusable": true,
+    "requires_continuous_intervals": true,
+    "six_probe_pass_is_task_stability_pass": false,
+    "passed": null
+  },
+  "recomputed": {
+    "c16_fixed_b0": {
+      "b0_requests": 408,
+      "b1_requests": 1296,
+      "matched_b0_requests": 408,
+      "field_differences": {
+        "trajectory_id": 0,
+        "prompt_sha256": 370,
+        "prompt_tokens": 0,
+        "expected_output_tokens": 0
+      },
+      "first_turn_hash_differences": 0,
+      "identical_upstream_weight_shards": 14,
+      "window_tokens": [
+        222539,
+        797365
+      ],
+      "descriptive_ratio": 3.5830348837731814,
+      "descriptive_gain_percent": 258.30348837731816,
+      "scope": "Input identity audit, not quality acceptance or isolated MOD attribution",
+      "evidence_path": "reports/c16-baseline018-reuse-20261022/manifest.json",
+      "passed": null
+    },
+    "historical_development_pair_resource_cost": {
+      "source_path": "reports/vllm-hust-midterm-20261019/m06-paired-20261021/m06-prechecked-pair-result-r1.json",
+      "historical_b0_field_means": "0.28.1/0.25.1rc2 development control, NOT fixed B0",
+      "reserved_cards": 4,
+      "card_seconds_per_output_token": {
+        "b1": 0.006486927666774136,
+        "b0": 0.008381199622963322
+      },
+      "reduction_percent": 22.601441815073166,
+      "current_currency_cost_passed": null,
+      "scope": "Recomputed historical resource coefficient; not new V1.5 monetary acceptance"
+    }
+  },
+  "decision_relevant_gaps": {
+    "m01": [
+      "Freeze executable whole-chain reference identity, calibration/validation samples and applicability checks",
+      "Independent whole-chain reference evidence; official 0.18 is B0, not an automatic reference ceiling"
+    ],
+    "performance": [
+      "C16 client identity and B1 resource occupancy",
+      "Applicable fixed-B0 latency/quality/SLO comparison, not universal extra repetitions"
+    ],
+    "stability": [
+      "Five-task completion and anomaly coverage",
+      "Actual >=16K continuous intervals with comparable 4K load and window statistics"
+    ],
+    "cost": [
+      "Representative fixed-B0 comparison and applicable quality/SLO",
+      "Documented monthly all-in fee and month-day basis",
+      "Same successful-request population and time-weighted same-interval utilization"
+    ]
+  },
+  "new_measurements_started": false
+}

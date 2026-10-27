@@ -62,7 +62,7 @@ def test_report_table_is_rendered_from_the_assessment():
     builder = importlib.util.module_from_spec(builder_spec)
     builder_spec.loader.exec_module(builder)
     report = (REPORT / "中期测试报告.md").read_text()
-    actual = builder.tables(builder.section(report, "#### 设备窗口经验参考核算"))
+    actual = builder.tables(builder.section(report, "#### 历史设备窗口经验参考核算"))
     expected = builder.tables(
         module("render_accounting_assessment").render(assessment()) + "\n"
     )

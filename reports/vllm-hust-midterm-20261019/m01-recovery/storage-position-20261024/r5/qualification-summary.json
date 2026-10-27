@@ -1,0 +1,73 @@
+{
+  "run_id": "capture-b1-storage-r5",
+  "implementation_variant": "diagnostic-owned-optimistic-operand/v1",
+  "result": "200-request transport and position/address qualification passed; separate second-draft causal-read discrepancy found",
+  "workload": {
+    "completed": 200,
+    "failed": 0,
+    "total_input_tokens": 282265,
+    "total_output_tokens": 51200,
+    "scope": "diagnostic workload; timing includes instrumentation",
+    "effective_flops": null,
+    "m01_attainment": null
+  },
+  "checksums": {
+    "entries": 21,
+    "original_sha256": "8668cf63adfb726d27956d18ded48b36ab36fd6f7a1a5303541d519f37881460"
+  },
+  "lifecycle": {
+    "client_exit": 0,
+    "service_exit": 130,
+    "service_exit_reason": "intentional controlled shutdown after client and export",
+    "sessions_drained": true,
+    "devices_released": [
+      3,
+      6
+    ],
+    "oom_events": 0
+  },
+  "position_qualification": {
+    "waves_per_rank": 879,
+    "stage_waves_per_rank": 128,
+    "stage_comparison_families": 6,
+    "all_stage_mismatches": 0,
+    "full_run_address_mismatches": 0,
+    "owned_operand_calls_per_rank": 879
+  },
+  "second_draft_read_extent": {
+    "rows_per_rank": 19347,
+    "one_extra": 2389,
+    "two_extra": 1855,
+    "total_mismatch_rows": 4244,
+    "delta_matches_unselected_tail": true,
+    "confirmed_kernel_semantics_probe": "/root/m01-storage-causal-probe-r2",
+    "device_cases_passed": 18,
+    "interpretation": "Actual owned wave-FIA reads the device endpoint; marked extra tail changes output. Candidate selected-position length excludes it. Full-model correction not yet tested."
+  },
+  "cache_policy": {
+    "policy": "fresh empty caches; no previous run or compile seed imported",
+    "destination": "/root/m01-capture-b1-storage-r5-cache",
+    "initial_entries": [],
+    "measurement_role": "diagnostic_qualification",
+    "original_command_sha256": "5032a2cd083517a7399912af8c68a39fff3c99a8d975077579e656e1bf64ec32",
+    "startup_excluded_from_measurement": true,
+    "performance_acceptance": false
+  },
+  "evidence": {
+    "raw": "/root/m01-capture-b1-storage-r5",
+    "audit": "/root/vllm-hust-migration-20261023/storage-r5-final-audit.json",
+    "positions": "/root/m01-storage-accounting-20261024/r5-accounting-audit.json",
+    "causal_lengths": "/root/m01-storage-accounting-20261024/r5-draft-causal-lengths.json",
+    "launch": "/root/vllm-hust-migration-20261023/storage-r5-launch-observation.json"
+  },
+  "formal_metrics": {
+    "effective_flops": null,
+    "reference_seconds": null,
+    "efficiency_percent": null
+  },
+  "remaining": [
+    "Validate corrected causal endpoint in full model with required useful-work routing evidence included.",
+    "Compose necessary-work F and independent stage reference; obtain matching uninstrumented synchronized timing for corrected combination."
+  ],
+  "identity": "Not original best B1 performance; r5 diagnostic136.39097173698246s includes instrumentation; do not substitute for formal timing or reuse prior best throughput."
+}

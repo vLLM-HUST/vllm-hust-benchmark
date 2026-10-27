@@ -1,0 +1,14 @@
+# Independent review of the six-run primary report
+
+The reviewed primary report has no concrete reporting blocker. This is a CPU-only review of retained analysis and controller files, not a new performance experiment. It does not validate archives or independently reread the raw token arrays.
+
+- All six roles and 36 windows are retained: 12 warmups and all 24 measured windows. Every preserved summary field, including per-request TTFT, agrees with the CSV; all retained drain receipts are complete.
+- Recomputed all 11 primary metrics from the CSV, including process means, group/raw means, both adjacent pairs, raw drift, matched-native means and drift. All 176 displayed numeric cells agree after rounding. The six terminal controllers have exit 0 and chronological, nonoverlapping N1/R1/G1/G2/R2/N2 intervals.
+- The report preserves both mixed-load group/raw improvements, +5.913% and +1.047%, rather than presenting only the pooled +3.466%. It discloses native throughput drift of −6.833%. Group/native mixed throughput is −2.325%, long-P TTFT +35.959%, and seed-gap P99 +29.533%.
+- The retained comparison output contains all 15 role pairs across six windows and all 12 within-process measured-window comparisons. Its detailed records support the same-role repeatability, raw/group equality, and native/plugin mixed-output differences reported. This review checks that comparison output and its reporting; it does not independently recompute token comparisons from raw run arrays.
+- Independently recomputed all 24,528 gaps from the 48 retained seed arrival arrays, their strict >100 ms counts, ingress intersections, maxima, and all 12 supplementary table rows. The protocol timestamp is after N1 and before R1. Its calibration-informed, descriptive scope is explicit, and it does not replace the original P99 metrics or establish HTTP goodput.
+- All three counter snapshots contain four ranks with HCCL=true and no batch-invariant override. Before/after counter differences support 2,044 measured decode replays per plugin rank and six returns from each of ten groups. Native replay-counter unavailability is preserved. These observations do not establish physical overlap or operator savings.
+
+The report correctly leaves practical default-native references, quality acceptance, HCCL cost, and physical profiling outside the six-run estimate. Mixed native/plugin output differences prevent interpreting that timing comparison as pure scheduling overhead. Two fresh processes per role do not support a general significance or equivalence claim.
+
+`review.json` records every reviewed input hash, the independently recomputed metrics, and the exact review-script hash. All reviewed input bytes were checked unchanged after the review. No frozen producer, result, runtime, device, or remote repository was modified.

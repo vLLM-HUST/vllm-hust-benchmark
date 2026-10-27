@@ -1,0 +1,263 @@
+{
+  "status": "passed_functional_smoke",
+  "recorded_at_utc": "2026-10-09T16:40:12.047504+00:00",
+  "service": {
+    "base_url": "http://127.0.0.1:8000",
+    "served_model_name": "qwen35-pyramidkv",
+    "health_status_at_validation": 200
+  },
+  "hardware": {
+    "accelerator": "Ascend 910B2",
+    "count": 2,
+    "physical_ids_at_validation": [
+      6,
+      7
+    ],
+    "logical_visible_devices": [
+      0,
+      1
+    ],
+    "cann": "9.1.0"
+  },
+  "source_commits": {
+    "vllm": "d0f22d2bda562156e4dbf433ce645e1769b4f804",
+    "vllm_ascend": "03766ac696fde5ab1980d80ca0b8543d3580c989",
+    "kvcompress": "a82e08798c10cee8bc0f0468fb0b05def064ae78",
+    "pyramidkv": "b0cd3fd73635b97b7c7372219e393e366df7c8d0",
+    "worker": "1265f52680a9530cfcf77a5de13a6bf7ef30dc2c",
+    "extension_manager": "98903e416bdb593186b8245fd95180dafde995b9"
+  },
+  "packages": {
+    "torch": "2.10.0+cpu",
+    "torch-npu": "2.10.0.post4",
+    "transformers": "5.14.1",
+    "triton-ascend": "3.2.2",
+    "vllm": "0.23.0+empty",
+    "vllm-ascend": "0.23.0.post1",
+    "vllm-hust-ext": "0.2.0.dev0",
+    "fastapi": "0.136.3",
+    "starlette": "1.7.0"
+  },
+  "model": {
+    "path": "$MODEL_PATH",
+    "revision": "59d61f3ce65a6d9863b86d2e96597125219dc754",
+    "weight_shards_sha256_matched": 14,
+    "hash_evidence": "model-hashes.json"
+  },
+  "runtime": {
+    "dtype": "bfloat16",
+    "tensor_parallel_size": 2,
+    "max_model_len": 32768,
+    "max_num_seqs": 4,
+    "max_num_batched_tokens": 4096,
+    "kv_cache_memory_bytes_per_worker": 8589934592,
+    "prefix_caching": true,
+    "chunked_prefill": true,
+    "async_scheduling": true,
+    "mamba_cache_mode": "align",
+    "graph_mode": "FULL_AND_PIECEWISE",
+    "mtp_speculative_tokens": 2,
+    "activation": "direct_environment",
+    "host_abi_environment_VLLM_VERSION": "0.25.1"
+  },
+  "compression_config": {
+    "schema_version": 1,
+    "provider": "ascend_kvcompress",
+    "method": "pyramidkv",
+    "method_config": {
+      "max_capacity_prompt": 512,
+      "min_compression_prompt_tokens": 4096,
+      "window_size": 8,
+      "kernel_size": 7,
+      "pooling": "maxpool",
+      "beta": 20,
+      "kv_cache_granularity": "kv_head",
+      "gqa_score_aggregation": "mean",
+      "merge": null
+    }
+  },
+  "requests": [
+    {
+      "name": "short",
+      "status": 200,
+      "elapsed_seconds": 19.539107530377805,
+      "usage": {
+        "prompt_tokens": 23,
+        "total_tokens": 25,
+        "completion_tokens": 2,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "multimodal_tokens": null
+        }
+      },
+      "choices": [
+        {
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "2",
+            "refusal": null,
+            "annotations": null,
+            "audio": null,
+            "function_call": null,
+            "reasoning": null
+          },
+          "logprobs": null,
+          "finish_reason": "stop",
+          "stop_reason": null,
+          "token_ids": null,
+          "routed_experts": null
+        }
+      ]
+    },
+    {
+      "name": "long",
+      "status": 200,
+      "elapsed_seconds": 5.757962927222252,
+      "usage": {
+        "prompt_tokens": 5312,
+        "total_tokens": 5318,
+        "completion_tokens": 6,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "multimodal_tokens": null
+        }
+      },
+      "choices": [
+        {
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "长文本测试成功。",
+            "refusal": null,
+            "annotations": null,
+            "audio": null,
+            "function_call": null,
+            "reasoning": null
+          },
+          "logprobs": null,
+          "finish_reason": "stop",
+          "stop_reason": null,
+          "token_ids": null,
+          "routed_experts": null
+        }
+      ]
+    },
+    {
+      "name": "long-repeat",
+      "status": 200,
+      "elapsed_seconds": 0.5756653100252151,
+      "usage": {
+        "prompt_tokens": 5312,
+        "total_tokens": 5318,
+        "completion_tokens": 6,
+        "prompt_tokens_details": {
+          "cached_tokens": 2048,
+          "multimodal_tokens": null
+        }
+      },
+      "choices": [
+        {
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "长文本测试成功。",
+            "refusal": null,
+            "annotations": null,
+            "audio": null,
+            "function_call": null,
+            "reasoning": null
+          },
+          "logprobs": null,
+          "finish_reason": "stop",
+          "stop_reason": null,
+          "token_ids": null,
+          "routed_experts": null
+        }
+      ]
+    }
+  ],
+  "compression_transactions": [
+    {
+      "request_id": "chatcmpl-9caa9d8cfc6bb687-b0ec7258",
+      "semantic_tokens": 5312,
+      "physical_tokens": 2048,
+      "source_blocks": 3,
+      "destination_blocks": 1,
+      "released_blocks": 3,
+      "acknowledged_tp_ranks": [
+        0,
+        1
+      ]
+    },
+    {
+      "request_id": "chatcmpl-aac45675d41a9852-9e406033",
+      "semantic_tokens": 5312,
+      "physical_tokens": 2048,
+      "source_blocks": 3,
+      "destination_blocks": 1,
+      "released_blocks": 3,
+      "acknowledged_tp_ranks": [
+        0,
+        1
+      ]
+    }
+  ],
+  "mtp_metrics": {
+    "num_drafts": 7.0,
+    "num_draft_tokens": 14.0,
+    "num_accepted_tokens": 10.0
+  },
+  "evidence": {
+    "server_log": "compression.log",
+    "requests": "responses/",
+    "metrics": "speculative-metrics.txt",
+    "hardware": "npu-serving.txt",
+    "launch": "launch-command.txt",
+    "environment": "environment.sh.txt",
+    "native_build": "build-qwen.sh.txt and build-native.py.txt",
+    "shared_adapter_manifest_backport": "manager-manifest-backport.patch"
+  },
+  "artifact_sha256": {
+    "build-native.py.txt": "a5f8e19346c4fe6922968d02a33d7f6906c5eec3e09fddf25c3c540d612ca5cb",
+    "build-qwen.sh.txt": "cca79593ad0349ec9d3b612ad408007856145f930c3b589850e16f737638ffad",
+    "compression.log": "0bd3ddf49e0c60abdc2b0b985abfe774af0c86b5c2c4b0fe5ea19b4af63233a4",
+    "dependency-check.txt": "4efd3cabd2d5bbf3854177d2c55eac815da5388d783b4470056b7e380464fb94",
+    "environment.sh.txt": "a91bf5857a0d8ee83d87208167a599e7ba03e50fa4945b5dc5237ca964f44cb6",
+    "launch-command.txt": "76ef1dcb5446bc3ddad423c78cd881f734beb950339df48bf6db8d0b92436704",
+    "manager-manifest-backport.patch": "e4f54eb920224e5a282168d38709b114809335654395b80b4501c98d418321e3",
+    "model-hashes.json": "65e2d996359970fb80a173cdc0566375bfcd78974fabf76ecf993ebeeb69acd2",
+    "npu-serving.txt": "b3f3145f8b9ff7f3159184fae87279dd98f7e488283493b0b358f92ac85f0251",
+    "responses/long-repeat-response.json": "2f942869e86ef7034769c33307029b69e40111a79d3d3b0e0ba5891e64dce54b",
+    "responses/long-response.json": "4df2dc5c4bab3c77cf60090760e35b66cafc1a5f8b368e2b1110c9b5f9662bef",
+    "responses/short-response.json": "720cb32dda2550a6a6772ccda4a423ae83f4287f110d31cf256627bbdc4f16fb",
+    "script-recheck/long-repeat-response.json": "6df895745b1e5c5c5541885d16500896af5acded9cc0141d6c6e5069edf7af3c",
+    "script-recheck/long-response.json": "7138500ad6e572c59c4ec72f6fcdd987852320591cedba12ae6e01ed512a957d",
+    "script-recheck/metrics-after.txt": "b94d388918da3d91ed73c328194edb8f2deedfe722eb0ae844ae3612801f512b",
+    "script-recheck/metrics-before.txt": "7385525d7cb366c14d424f14180d9a7ffaf600bce094baba95d39e94b6ec3242",
+    "script-recheck/server-excerpt.log": "9235040ee6544a5542255e2f395faa20500d173f20b89ac0101ef2273bc36a30",
+    "script-recheck/short-response.json": "1a732681b0b7db8baccf117f217b56e2abe17c01e521dae8e24b7ab7fdbeb18b",
+    "script-recheck/summary.json": "c37a83f64e0f18543a45cc1c2a20131bc7cbbae508aa981647311ff8a50f8379",
+    "speculative-metrics.txt": "42d8e8aa90bd5be4e1f0a08d991bd4c5f5472195d163d238ad9c51818ec1d60e"
+  },
+  "implementation_notes": [
+    "Pinned HUST vLLM and vLLM-Ascend sources; Qwen-required CANN kernels and native PyTorch bindings compiled from these sources.",
+    "Original user repositories have no tracked edits. Isolated shared adapter has a Bundle v1 manifest-only backport; runtime Python is unchanged.",
+    "Host git metadata was restored as standalone pinned checkouts after container restart; source contents preserved.",
+    "Evidence exports omit process lifetime claims and normalize local model paths; original raw runtime artifacts remain on the validation host."
+  ],
+  "limitations": [
+    "Three functional smoke requests only; no formal quality, throughput, stress, 32K-boundary or 256K qualification.",
+    "Current local model revision differs from historical repository qualification.",
+    "Extension Manager joint launch planning conflicts on vllm.environment. serve.sh successfully uses direct environment activation.",
+    "Known dependency metadata conflicts remain in the inherited environment; runtime smoke passed, but pip check is not clean. See dependency-check.txt.",
+    "Native build selects Qwen-serving operators and is not a full all-model Ascend operator build.",
+    "Service is a running process, not a system boot service; after container/server restart, run serve.sh again.",
+    "Recorded request timings include warmup and cache effects; they are not comparative performance measurements."
+  ],
+  "script_recheck": {
+    "summary": "script-recheck/summary.json",
+    "passed": true,
+    "note": "Parameterized script rerun on the already warm server; not an independent cold-start or performance result. Initial script attempt rejected the suffixed engine ID; parser fixed and unit-tested before the successful rerun."
+  }
+}

@@ -1,0 +1,294 @@
+"""Separate diagnostic: profile actual P12000 progress alongside seed-D replays."""
+
+import argparse
+import hashlib
+import json
+import os
+import time
+import traceback
+from datetime import UTC, datetime
+from pathlib import Path
+
+import perf_group_prefill as perf
+
+
+def cohort_state(scheduler):
+    cohort = scheduler._prefill_cohort
+    if cohort is None:
+        return None
+    return {"sequence": cohort.sequence, "completed_layers": cohort.completed_layers,
+            "pending_ids": sorted(cohort.pending_ids)}
+
+
+def capture(engine, plan, sampling, delta_kind):
+    definition = next(row for row in plan["workloads"] if row["name"] == "long-P-ingress")
+    scheduler = engine.engine_core.engine_core.scheduler
+    report = {"requests": [], "steps": [], "profile_started": False, "profile_stopped": False,
+              "errors": [], "complete": False, "profile_diagnostic": True}
+    by_external = {}
+    started = time.monotonic()
+
+    def admit(definitions, stage):
+        rows = []
+        for definition in definitions:
+            external = "profile-" + str(len(report["requests"]))
+            params = sampling(max_tokens=definition["outputs"], output_kind=delta_kind, **plan["sampling"])
+            internal = engine.add_request(external, {"prompt_token_ids": plan["prompts"][definition["prompt"]]}, params)
+            state = engine.output_processor.request_states[internal]
+            if state.external_req_id != external or state.output_kind != delta_kind or state.stream_interval != 1:
+                raise RuntimeError("Actual DELTA request binding/interval mismatch")
+            row = {"external_id": external, "internal_id": internal, "prompt": definition["prompt"], "stage": stage,
+                   "requested_outputs": definition["outputs"], "token_ids": [], "finished": False}
+            report["requests"].append(row)
+            by_external[external] = row
+            rows.append(row)
+        return rows
+
+    try:
+        seeds = admit(definition["initial"], "seed")
+        ingress = None
+        while engine.has_unfinished_requests():
+            if len(report["steps"]) >= plan["max_window_steps"] or time.monotonic() - started > plan["max_window_seconds"]:
+                raise RuntimeError("Mixed diagnostic exceeded unchanged finite workload bound")
+            before = cohort_state(scheduler)
+            seed_before = [len(row["token_ids"]) for row in seeds]
+            outputs = engine.step()
+            for output in outputs:
+                if output.request_id not in by_external or len(output.outputs) != 1:
+                    raise RuntimeError("Unknown/multiple diagnostic output")
+                row, item = by_external[output.request_id], output.outputs[0]
+                if row["finished"] or len(item.token_ids) != 1:
+                    raise RuntimeError("Expected one true DELTA token from unfinished request")
+                row["token_ids"].extend(item.token_ids)
+                if output.finished:
+                    row["finished"] = True
+                    row["finish_reason"] = item.finish_reason
+                    if item.finish_reason != "length" or len(row["token_ids"]) != row["requested_outputs"]:
+                        raise RuntimeError("Fixed output length violated")
+            after = cohort_state(scheduler)
+            seed_after = [len(row["token_ids"]) for row in seeds]
+            event = {"step": len(report["steps"]) + 1, "P_before": before, "P_after": after,
+                     "seed_counts_before": seed_before, "seed_counts_after": seed_after,
+                     "profile_active": report["profile_started"] and not report["profile_stopped"],
+                     "P_output_count": len(ingress["token_ids"]) if ingress else None}
+            report["steps"].append(event)
+            if ingress is None and all(count >= definition["ingress_after_each_seed_token"] for count in seed_after):
+                if seed_after != [32] * 4 or any(row["finished"] for row in seeds):
+                    raise RuntimeError("Missed exact four-seed token32 profile boundary")
+                engine.start_profile(profile_prefix="mixed-p12000-ingress")
+                report["profile_started"] = True
+                report["worker_before"] = engine.collective_rpc(perf.worker_profile_state)
+                perf.require_worker_controls(report["worker_before"], "true")
+                if not all(row["running"] for row in report["worker_before"]):
+                    raise RuntimeError("A native worker profiler did not start")
+                report["capture_start_after_step"] = event["step"]
+                report["capture_start_seed_counts"] = seed_after
+                ingress = admit(definition["ingress"], "ingress")[0]
+                report["ingress_internal_id"] = ingress["internal_id"]
+            elif ingress is not None and len(ingress["token_ids"]) == 1 and not report["profile_stopped"]:
+                report["worker_after"] = engine.collective_rpc(perf.worker_profile_state)
+                perf.require_worker_controls(report["worker_after"], "true")
+                if not all(row["running"] for row in report["worker_after"]):
+                    raise RuntimeError("A worker profiler stopped before P completed")
+                report["capture_stop_after_step"] = event["step"]
+                report["capture_stop_seed_counts"] = seed_after
+                report["capture_stop_P_output_count"] = 1
+                engine.stop_profile()
+                report["worker_after_stop"] = engine.collective_rpc(perf.worker_profile_state)
+                perf.require_worker_controls(report["worker_after_stop"], "true")
+                if any(row["running"] for row in report["worker_after_stop"]):
+                    raise RuntimeError("A native worker profiler remained active after stop")
+                report["profile_stopped"] = True
+        report["complete"] = report["profile_stopped"] and all(row["finished"] for row in report["requests"])
+        if not report["complete"]:
+            raise RuntimeError("Mixed profile or fixed workload did not finish")
+        report["drain_after"] = perf.drain_engine(engine)
+        report["counter_deltas"] = perf.counter_deltas(report["worker_before"], report["worker_after"])
+        report["capture_coverage"] = coverage(report)
+        if not report["capture_coverage"]["passed"]:
+            raise RuntimeError("Actual P progress and concurrent D returns were not observed")
+    except BaseException:  # noqa: BLE001 -- preserve diagnostics and stop only our profiler
+        report["errors"].append(traceback.format_exc())
+    finally:
+        if report["profile_started"] and not report["profile_stopped"]:
+            try:
+                engine.stop_profile()
+            except Exception:  # noqa: BLE001 -- preserve original failure and cleanup receipt
+                report["errors"].append(traceback.format_exc())
+    return report
+
+
+def capture_contract(report):
+    """Reconcile retained events with fixed request lengths and real boundaries."""
+    errors = []
+    requests, steps = report.get("requests", []), report.get("steps", [])
+    seeds = [row for row in requests if row.get("stage") == "seed"]
+    ingress = [row for row in requests if row.get("stage") == "ingress"]
+    if len(seeds) != 4 or len(ingress) != 1 or len(requests) != 5:
+        return ["Expected exactly four seed and one ingress requests"]
+    if (len({row["internal_id"] for row in requests}) != 5
+            or len({row["external_id"] for row in requests}) != 5
+            or report.get("ingress_internal_id") != ingress[0]["internal_id"]):
+        errors.append("Request identity is inconsistent")
+    for row in requests:
+        expected = 512 if row["stage"] == "seed" else 128
+        if not row.get("finished") or row.get("finish_reason") != "length" or row["requested_outputs"] != expected or len(row["token_ids"]) != expected:
+            errors.append("Fixed request completion or retained output length differs")
+    start, stop = report.get("capture_start_after_step"), report.get("capture_stop_after_step")
+    if not steps or type(start) is not int or type(stop) is not int or not 1 <= start < stop <= len(steps):
+        return errors + ["Missing or impossible capture boundaries"]
+    if not report.get("profile_started") or not report.get("profile_stopped"):
+        errors.append("Profiler did not start and stop")
+    previous_seeds, previous_p = [0] * 4, 0
+    ingress_sequence, previous_layers = None, 0
+    for index, event in enumerate(steps, 1):
+        if event["step"] != index or event["seed_counts_before"] != previous_seeds:
+            errors.append("Noncontiguous event or seed-token history")
+        current_seeds = event["seed_counts_after"]
+        if len(current_seeds) != 4 or any(b - a not in (0, 1) for a, b in zip(previous_seeds, current_seeds, strict=False)):
+            errors.append("Seed events differ from one-token DELTA arrivals")
+        previous_seeds = current_seeds
+        for state in (event["P_before"], event["P_after"]):
+            if state and report["ingress_internal_id"] in state["pending_ids"]:
+                if ingress_sequence is None:
+                    ingress_sequence = state["sequence"]
+                if (state["sequence"] != ingress_sequence
+                        or state["pending_ids"] != [report["ingress_internal_id"]]
+                        or not previous_layers <= state["completed_layers"] <= 40):
+                    errors.append("Ingress cohort identity or monotone layer progress differs")
+                previous_layers = state["completed_layers"]
+        if bool(event["profile_active"]) != (start < index <= stop):
+            errors.append("Profile-active interval differs from boundaries")
+        current_p = event["P_output_count"]
+        if index <= start:
+            if current_p is not None:
+                errors.append("P output appeared before ingress admission")
+        elif type(current_p) is not int or current_p - previous_p not in (0, 1):
+            errors.append("Ingress events differ from one-token DELTA arrivals")
+        else:
+            if (index < stop and current_p != 0) or (index == stop and current_p != 1):
+                errors.append("Profiler did not stop at the first ingress token")
+            previous_p = current_p
+    if previous_seeds != [len(row["token_ids"]) for row in seeds] or previous_p != len(ingress[0]["token_ids"]):
+        errors.append("Final event counters differ from retained output tokens")
+    if (steps[start - 1]["seed_counts_after"] != [32] * 4
+            or report.get("capture_start_seed_counts") != steps[start - 1]["seed_counts_after"]
+            or report.get("capture_stop_seed_counts") != steps[stop - 1]["seed_counts_after"]
+            or report.get("capture_stop_P_output_count") != steps[stop - 1]["P_output_count"]):
+        errors.append("Reported capture boundary counters differ from actual events")
+    return sorted(set(errors))
+
+
+def coverage(report):
+    rid = report.get("ingress_internal_id")
+    progress, mixed = [], []
+    contract_errors = capture_contract(report)
+    for event in report["steps"]:
+        if not event["profile_active"]:
+            continue
+        before, after = event["P_before"], event["P_after"]
+        p_before = before and rid in before["pending_ids"]
+        p_after = after and rid in after["pending_ids"]
+        same_cohort = not p_before or (p_after and after["sequence"] == before["sequence"])
+        advanced = ((p_after and same_cohort and after["completed_layers"] > (before["completed_layers"] if p_before else 0))
+                    or (p_before and before["completed_layers"] > 0 and not p_after and event["P_output_count"] == 1))
+        if advanced:
+            progress.append(event["step"])
+            if any(b > a for a, b in zip(event["seed_counts_before"], event["seed_counts_after"], strict=True)):
+                mixed.append(event["step"])
+    deltas = report.get("counter_deltas", {})
+    replay = {str(rank): row["native_decode_graph"].get("decode_replay_calls", 0) for rank, row in deltas.items()}
+    passed = (not contract_errors and report.get("capture_start_seed_counts") == [32] * 4
+              and report.get("capture_stop_P_output_count") == 1 and bool(progress) and bool(mixed)
+              and len(replay) == 4 and all(count > 0 for count in replay.values()))
+    return {"passed": passed, "capture_contract_errors": contract_errors,
+            "P_progress_steps": progress, "same_step_P_progress_and_D_return": mixed,
+            "D_controller_replay_deltas": replay,
+            "scope": "Host scheduling and successful AOT/D-controller returns; actual CANN trace audit remains required"}
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("command", choices=("dry-run", "run"))
+    parser.add_argument("--plan", type=Path, required=True)
+    parser.add_argument("--engine-args", type=Path, required=True)
+    parser.add_argument("--variant", choices=("raw", "group"), required=True)
+    parser.add_argument("--experiment", choices=("group",), default="group")
+    parser.add_argument("--hccl", choices=("true",), default="true")
+    parser.add_argument("--output", type=Path, required=True)
+    args = parser.parse_args()
+    plan = perf.load_plan(args.plan)
+    perf.validate_role_plan(args.variant, plan)
+    engine_args = perf.validate(args, json.loads(args.engine_args.read_text()))
+    if args.output.exists():
+        raise FileExistsError(args.output)
+    if args.command == "dry-run":
+        perf.save(args.output, {"validated": True, "profile": "seedD32-through-P12000-first-token", "plan_sha256": plan["plan_sha256"]})
+        return 0
+    args.output.mkdir(parents=True)
+    perf.require_control_environment(perf.control_environment(), "true")
+    if any(os.environ.get(key) for key in ("MUXPD_NUMERIC_OUTPUT", "MUXPD_PRESSURE_TRACE_DIR", "VLLM_TORCH_PROFILER_DIR")):
+        raise ValueError("No other observers allowed")
+    os.environ["VLLM_ENABLE_V1_MULTIPROCESSING"] = "0"
+    helper, helper_sha = perf.provenance_helpers()
+    engine_args["profiler_config"] = {"profiler": "torch", "torch_profiler_dir": str(args.output / "profile"),
+        "torch_profiler_with_stack": False, "torch_profiler_with_memory": False,
+        "ignore_frontend": True, "delay_iterations": 0, "max_iterations": 0}
+    report = {"schema": "muxpd-group-ingress-profile-run-v1", "mode": "mixed-profile", "variant": args.variant,
+        "plan_sha256": plan["plan_sha256"], "hccl": "true", "engine_args": engine_args,
+        "started_at": datetime.now(UTC).isoformat(), "pid": os.getpid(), "producer_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+        "timing_dependency_sha256": hashlib.sha256(Path(perf.__file__).read_bytes()).hexdigest(),
+        "provenance_helper_sha256": helper_sha, "environment": helper.runtime_environment(),
+        "errors": [], "collection_complete": False, "shutdown_returned": False, "actual_CANN_exports_audited": False,
+        "scope": "Separate instrumented mixed P+D diagnostic; no throughput/latency benefit from this capture"}
+    llm = None
+    perf.save(args.output / "run.json", report)
+    try:
+        from vllm import LLM, SamplingParams
+        from vllm.sampling_params import RequestOutputKind
+        from vllm.v1.engine.core_client import InprocClient
+
+        report["sources"] = helper.source_identities()
+        if any(report["sources"][name]["commit"] != value for name, value in perf.NATIVE_SOURCES.items()):
+            raise ValueError("Native source pins differ")
+        if report["sources"]["vllm_muxpd"]["commit"] != perf.SOURCE or report["sources"]["vllm_muxpd"]["status"]:
+            raise ValueError("Exact clean f7 required")
+        llm = LLM(**engine_args)
+        engine = llm.llm_engine
+        if not isinstance(engine.engine_core, InprocClient):
+            raise TypeError("Mixed profile requires InprocClient")
+        core = engine.engine_core.engine_core
+        if core.vllm_config.scheduler_config.async_scheduling or core.batch_queue_size != 1 or engine.output_processor.stream_interval != 1:
+            raise RuntimeError("Mixed profiler requires the synchronous DELTA recipe")
+        report["worker_after_init"] = engine.collective_rpc(perf.worker_counters)
+        perf.require_worker_controls(report["worker_after_init"], "true")
+        definition = next(row for row in plan["workloads"] if row["name"] == "long-P-ingress")
+        report["warmup"] = perf.window(engine, definition, plan, SamplingParams, RequestOutputKind.DELTA, "warm-mixed")
+        if not report["warmup"]["complete"] or report["warmup"]["error"]:
+            raise RuntimeError("Identical mixed warmup failed")
+        report["warmup"]["drain_after"] = perf.drain_engine(engine)
+        perf.save(args.output / "run.json", report)
+        report["capture"] = capture(engine, plan, SamplingParams, RequestOutputKind.DELTA)
+        if report["capture"]["errors"] or not report["capture"]["complete"]:
+            raise RuntimeError("Mixed capture failed; no retry")
+        group_calls = [row["prefill_group_calls"] for row in report["capture"]["counter_deltas"].values()]
+        if (args.variant == "group" and any(calls != [1] * 10 for calls in group_calls)) or (args.variant == "raw" and any(calls is not None for calls in group_calls)):
+            raise RuntimeError("Captured grouped-P execution differs from one full ten-group P cohort")
+        report["collection_complete"] = True
+    except BaseException:  # noqa: BLE001 -- preserve all capture failures and attempt shutdown
+        report["errors"].append(traceback.format_exc())
+    finally:
+        if llm is not None:
+            try:
+                llm.llm_engine.engine_core.shutdown()
+                report["shutdown_returned"] = True
+            except Exception:  # noqa: BLE001 -- shutdown must not erase initial diagnostic error
+                report["errors"].append(traceback.format_exc())
+        report["finished_at"] = datetime.now(UTC).isoformat()
+        perf.save(args.output / "run.json", report)
+    print(json.dumps({"complete": report["collection_complete"], "errors": report["errors"]}))
+    return 0 if report["collection_complete"] and report["shutdown_returned"] and not report["errors"] else 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

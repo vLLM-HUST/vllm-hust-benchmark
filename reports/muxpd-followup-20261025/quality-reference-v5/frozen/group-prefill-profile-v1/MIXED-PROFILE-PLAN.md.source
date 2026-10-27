@@ -1,0 +1,115 @@
+# Separate actual mixed-P/D profiler diagnostic
+
+This package complements the frozen `group-prefill-v1` no-profiler performance
+family. It has no latency or throughput estimator. It profiles the same warmed
+four P128/D512 seed requests and P12000/D128 ingress, with identical frozen token
+IDs and sampling parameters. Raw and grouped runs use clean public plugin f7,
+the same pinned Core/Ascend trees and HCCL_DETERMINISTIC=true. Their engine
+configurations differ only in `compile_prefill_groups`; the graph backend remains
+`enable_npugraph_ex=false`, `enable_static_kernel=false` on both sides.
+
+The unchanged timing producer and helper are copied dependencies, bound by
+`timing-execution-identity-v1.json`. No older producer, workload plan, result or
+report is replaced. The unused native/native-async files remain provenance for
+that exact copied timing bundle; this profile CLI accepts only raw or group.
+
+## Fixed capture boundary and receipts
+
+1. Complete one unprofiled, identical mixed workload warmup and drain the engine.
+2. Admit four seed requests through native `LLMEngine.add_request` with DELTA
+   output and stream interval1. Read actual returned tokens after each step.
+3. After all four return exactly32 tokens, start the ordinary native worker
+   profilers, obtain four active rank/PID/device/environment receipts, then admit
+   the single frozen P12000 ingress request.
+4. Capture until that ingress returns its first token. Record actual scheduler
+   P-cohort layer progress and seed-D returns for every step in memory. Obtain
+   post-capture counters, stop profiling, and require all four workers to report
+   inactive profilers. No further engine step occurs inside the profiler.
+5. Finish the remaining fixed outputs without profiling, then drain and shut
+   down. All five requests must reach their exact ignore-EOS output budgets;
+   no retry, omission or truncated successful result is allowed.
+
+The existing workload bounds remain2048 steps and300 seconds per window. The
+root controller bounds the whole fresh process at3000 seconds, plus bounded
+owned-process cleanup. Profiler start/stop/export overhead can cause a failure
+under these finite limits; retain that attempt rather than extending it silently.
+
+Native Ascend `TorchNPUProfilerWrapper` uses CPU+NPU activities, Text export,
+Level1, PipeUtilization and data simplification; stack and memory collection are
+disabled. Exact source:
+`vllm_ascend/profiler/torch_npu_profiler.py` at Ascend03766ac. Existing ordinary
+worker classes are retained. The synchronous scheduler-state read is diagnostic
+instrumentation, outside the separate no-profiler timing family.
+
+## What an actual trace must prove
+
+Successful collection alone is not an audited profile. `audit_mixed_profile.py`
+requires all of the following before reporting a passing capture:
+
+- Four distinct trace paths and file hashes, native `profiler_info_<rank>.json`,
+  exact rank sets0..3, stable actual worker PIDs, and CPU-op PIDs in the traces.
+- Four distinct observed hardware labels bound through the native rank/PID
+  receipts. Visible worker ordinal is recorded separately and is never assumed
+  equal to the host `npu-smi` physical ID.
+- Actual P-layer advancement with same-step seed-D token returns. Grouped runs
+  must record exactly one successful call to each of ten P groups on every rank;
+  raw runs must have no grouped-P executor.
+- Retained request/token arrays and every contiguous event must agree with the
+  exact capture boundaries, one-token DELTA histories and final output lengths.
+  Creating a zero-layer pending cohort does not count as P progress; the single
+  ingress cohort must keep its identity and advance monotonically.
+- Positive native D-controller replay deltas on all ranks, no capture/fallback/
+  uncaptured/failure deltas, and actual exported
+  `AscendCL@aclmdlRIExecuteAsync` counts exactly equal to those deltas.
+- One profiling-enable and one profiling-disable marker, no graph-capture APIs,
+  and stopped worker profilers before unprofiled completion.
+
+The exact replay API is deliberately fail-closed. If this backend exports a
+different API, retain the complete inventory and failed audit, inspect the
+actual native source/export, then version any revised auditor explicitly.
+
+The raw/group comparison additionally requires identical actual P-progress and
+D-return signatures, capture boundaries, per-rank replay counts, source/runtime
+identities and observed hardware labels. Config normalization removes only the
+group flag and profiler output directory. A changed execution path fails the
+matched-capture comparison; it cannot be silently treated as equivalent work.
+
+The report includes every exported AscendCL runtime API's count and inclusive
+host duration distribution, including zero-duration calls, plus signed
+group-minus-raw count/duration differences. Inclusive API durations can overlap
+or include waiting; their sum is not end-to-end wall time. This mixed window
+cannot isolate P-only device time or prove Cube/Vector utilization limits. The
+profiler also perturbs readiness and scheduling. Only the separate no-profiler
+ABBA family can establish performance changes; the older pure-D16 profile does
+not establish grouped-P execution benefit.
+
+## Root-owned commands
+
+Only root may run hardware, under the existing exclusive four-card lease. The
+controller preserves the host venv interpreter symlink, copies every frozen
+dependency, owns one fresh process group, records before/after physical device
+inventories, and fails any timeout, forced cleanup or residual worker. It emits
+the standard source/config/plan custody fields for the frozen capsule builder.
+
+```bash
+python run_controlled_group_profile.py dry-run --role raw --label check-mixed-profile-raw
+python run_controlled_group_profile.py dry-run --role group --label check-mixed-profile-group
+python run_controlled_group_profile.py run --role raw --label profile-f7-raw-mixed-01
+python run_controlled_group_profile.py run --role group --label profile-f7-group-mixed-01
+```
+
+After successful collection, discover each actual rank's
+`ASCEND_PROFILER_OUTPUT/trace_view.json` under its own attempt. Supply the paths
+explicitly; filename order is not accepted as rank identity.
+
+```bash
+python audit_mixed_profile.py capture --run RAW/results/run.json --trace 0=RAW_RANK0_TRACE --trace 1=RAW_RANK1_TRACE --trace 2=RAW_RANK2_TRACE --trace 3=RAW_RANK3_TRACE --output NEW-raw-mixed-audit.json
+python audit_mixed_profile.py capture --run GROUP/results/run.json --trace 0=GROUP_RANK0_TRACE --trace 1=GROUP_RANK1_TRACE --trace 2=GROUP_RANK2_TRACE --trace 3=GROUP_RANK3_TRACE --output NEW-group-mixed-audit.json
+python audit_mixed_profile.py compare --raw NEW-raw-mixed-audit.json --group NEW-group-mixed-audit.json --output NEW-mixed-comparison.json
+```
+
+CPU fixtures exercise true P progress, exact start/stop gates, fixed completion,
+stop failure, duplicate trace rejection, worker/hardware binding, zero-duration
+API counting and unequal actual replay-count rejection. These are producer/audit
+checks, not hardware observations. No model or device was launched during this
+package preparation.
