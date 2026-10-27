@@ -2,6 +2,40 @@
   "version": "source-adapters/v1",
   "status_policy": "Implementation, asset verification and runtime reproduction are independent. All other registered sources remain NOT_IMPLEMENTED.",
   "adapters": {
+    "CODEJUDGE_EVAL": {
+      "kind": "task_dataset",
+      "mapping": "publisher_full_prompt",
+      "input_fields": [
+        "input"
+      ],
+      "required_fields": [
+        "statement",
+        "data_id",
+        "task_id",
+        "source",
+        "url",
+        "code",
+        "input",
+        "answer"
+      ],
+      "outcome_fields": [
+        "answer"
+      ],
+      "annotation_fields": [
+        "statement",
+        "data_id",
+        "task_id",
+        "source",
+        "url",
+        "code"
+      ],
+      "id_field": "data_id",
+      "requirements": [
+        "Use complete original input verbatim, including published few-shot examples; answer is reference-only",
+        "Preserve source file/settings and original problem/candidate/model provenance; no synthetic replacement prompts"
+      ],
+      "status": "EXPLICIT_ORIGINAL_PROMPT_MAPPING_NATIVE_VALIDATION_PENDING"
+    },
     "DEEPPLANNING": {
       "kind": "native_environment_dataset",
       "mapping": "deepplanning_original_tasks",

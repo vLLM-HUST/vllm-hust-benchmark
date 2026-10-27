@@ -2673,7 +2673,20 @@
     "CODEJUDGE_EVAL": {
       "scope": "public",
       "delivery_kind": "review_original_source_protocol",
-      "status": "BLOCKED",
+      "status": "IN_PROGRESS",
+      "original_asset_and_candidate_consumer_evidence": {
+        "server_asset_receipt": "codejudge-original-assets-32028-002/preparation-public.json",
+        "server_consumer_receipt": "codejudge-candidate-install-32028-001/audit-public.json",
+        "candidate_wheel_sha256": "f78f2ace506decf5be8f9f80f174709f38c2ca99a56302f62e7b6d5b61b6ef15",
+        "identity_note": "pragma: allowlist secret - public software artifact checksum",
+        "original_variants": 6,
+        "rows_per_variant": 1860,
+        "original_configuration_rows_verified_and_indexed": 11160,
+        "research_readbacks": 18,
+        "public_preparer": "scripts/prepare_reused_research_assets.py CODEJUDGE_EVAL --mode verify",
+        "model_calls": 0,
+        "boundary": "Actual installed candidate and pinned research consumer, not current actual CI artifact, native model execution or paper-score reproduction.0/1-shot and three judging settings are separate configurations, not11160 unique base questions. Initial HTTP429 receipt retained; second attempt only after10-minute cooldown succeeded."
+      },
       "protocol_review": {
         "paper_url": "https://aclanthology.org/2025.coling-main.7.pdf",
         "publisher_repository": "https://github.com/CodeLLM-Research/CodeJudge-Eval",
@@ -2689,7 +2702,7 @@
       "legacy_checked": false,
       "existing_receipt": null,
       "delivery_receipt": null,
-      "blocker": "20261027 publisher/ACL identity confirmed for COLING2025 CodeJudge-Eval, not the different CodeJudge framework. Server metadata pins CodeResearch/CodeJudge-Eval revision6541deb0c42e56ec1300d94d4e9ae7b3b4cc764a: six original0shot/1shot x easy/middle/hard JSON variants, expected sizes and publisher LFS digests recorded. First asset request returned HTTP429 Too Many Requests; no raw variant acquired or model called. Preserve failure and back off, no limit bypass. Native prompt/output/scoring protocol, acquisition, public adapter and runtime remain pending; do not synthesize judging prompts from code-generation data. Server receipts codejudge-original-metadata-32028-001.json and codejudge-original-assets-32028-001/preparation-public.json."
+      "blocker": "20261027 publisher/ACL identity confirmed for COLING2025 CodeJudge-Eval, not the different CodeJudge framework. Server metadata pins CodeResearch/CodeJudge-Eval revision6541deb0c42e56ec1300d94d4e9ae7b3b4cc764a: six original0shot/1shot x easy/middle/hard JSON variants, expected sizes and publisher LFS digests recorded. First asset request HTTP429 retained; after10-minute cooldown all six originals acquired and checksum-verified, complete11160 configuration rows preserved/indexed with18 candidate research readbacks and public preparation verification.0 model calls. Native model/scoring, output-extractor implementation and actual CI consumer qualification remain pending; do not synthesize judging prompts from code-generation data. Server receipts codejudge-original-metadata-32028-001.json and codejudge-original-assets-32028-001/preparation-public.json."
     },
     "DRAGON_PUBLIC": {
       "scope": "public",

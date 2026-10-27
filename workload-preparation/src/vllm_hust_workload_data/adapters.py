@@ -190,6 +190,18 @@ def adapt_row(
             raise ValueError(
                 f"{source_id}: invalid text field at row {index}; payload suppressed"
             )
+    if source_id == "CODEJUDGE_EVAL":
+        if any(
+            not isinstance(row[key], str) or not row[key].strip()
+            for key in ("statement", "source", "url", "code", "input", "answer")
+        ):
+            raise ValueError("CODEJUDGE_EVAL: original text fields required")
+        if any(
+            type(row[key]) is not int or row[key] < 0 for key in ("data_id", "task_id")
+        ) or row["answer"] not in set("ABCDEFGHI"):
+            raise ValueError(
+                "CODEJUDGE_EVAL: original identifiers/answer label required"
+            )
     if source_id == "QUALITY" and (
         any(
             not isinstance(row[key], str) or not row[key].strip()

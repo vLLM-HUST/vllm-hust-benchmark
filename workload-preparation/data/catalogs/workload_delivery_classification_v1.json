@@ -21,6 +21,18 @@
     {"source_id": "PAIO-SEMANTIC-SIMILAR-5000", "asset_group": "enterprise-private-requests", "related_workload_ids": [], "boundary": "Semantic similarity is not exact-prefix or KV reuse; preserve original private requests without rewriting."}
   ],
   "source_entrypoints": {
+    "CODEJUDGE_EVAL": [
+      {
+        "role": "prepare_assets",
+        "path": "scripts/prepare_reused_research_assets.py",
+        "scope": "Fixed publisher six original JSON variants; plan/download/verify modes, explicit same-version HF mirror optional. Not native scoring."
+      },
+      {
+        "role": "data_reading_only",
+        "path": "workload-preparation/src/vllm_hust_workload_data/adapters.py",
+        "scope": "Preserve original complete input, independent answer and original problem/candidate provenance. No replacement judging prompt or claim of author runtime."
+      }
+    ],
     "DEEPPLANNING": [
       {
         "role": "prepare_assets",

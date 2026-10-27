@@ -76,8 +76,9 @@ def test_original_research_assets_are_registered_without_native_completion_claim
     sources = json.loads(
         runner.CATALOG.read_text("utf-8"), object_pairs_hook=unique_object
     )["sources"]
-    assert len(sources) == 104  # frozen100 plus four already-planned sources
+    assert len(sources) == 105  # frozen100 plus five already-planned sources
     assert sum(EXPECTED.values()) == 48
+
     ledger = json.loads(
         (ROOT / "docs/workload-data/dataset-validation-status.json").read_text("utf-8")
     )
@@ -365,3 +366,29 @@ def test_explicit_download_and_resume_reuse_verified_bytes_without_native_claim(
     assert json.loads((output / "source-preparation.private.json").read_text("utf-8"))[
         "verified_files"
     ] == [{"path": "original.jsonl", "reused": True}]
+
+
+def test_explicit_publisher_data_profile_reuses_existing_asset_preparer():
+    source, selected = runner.selection("CODEJUDGE_EVAL")
+    assert source["publisher_metadata_acquisition"]["registered_file_roles"] == ["data"]
+    assert len(selected) == 6
+    assert all(item["role"] == "data" for item in selected)
+
+
+def test_invalid_publisher_acquisition_roles_fail_closed(tmp_path, monkeypatch):
+    catalog = tmp_path / "catalog.json"
+    source = {
+        "publisher_metadata_acquisition": {
+            "identity_source": "fixture",
+            "registered_file_roles": [{}],
+        },
+        "files": [{"path": "fixture.json", "role": "data"}],
+    }
+    catalog.write_text(json.dumps({"sources": {"fixture": source}}))
+    monkeypatch.setattr(runner, "CATALOG", catalog)
+    with pytest.raises(ValueError, match="asset roles"):
+        runner.selection("fixture")
+    source["publisher_metadata_acquisition"].pop("registered_file_roles")
+    catalog.write_text(json.dumps({"sources": {"fixture": source}}))
+    with pytest.raises(ValueError, match="distinct original"):
+        runner.selection("fixture")
