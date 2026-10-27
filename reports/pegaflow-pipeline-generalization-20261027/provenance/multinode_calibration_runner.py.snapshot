@@ -1,0 +1,220 @@
+"""Measure causal P/D requests, fan-in and decode/restore interference."""
+
+import asyncio
+import json
+import math
+import statistics
+import time
+import traceback
+from collections import Counter
+from pathlib import Path
+
+import httpx
+
+
+ROOT = Path('/data/shared_upload/hust-zsx/issue23-multinode-calibration-20261027')
+CFG = json.loads((ROOT/'config.json').read_text())
+INST = {r['id']:r for r in CFG['instances']}
+LABEL_PREFIX = 'gated-v3-'
+TRACE_OFFSETS = {}
+INITIAL_COMPUTED = {}
+
+
+def audit_initial_computed():
+    for path in (ROOT/'scheduler-traces/D0').glob('*.jsonl'):
+        with path.open() as stream:
+            stream.seek(TRACE_OFFSETS.get(str(path),0))
+            while True:
+                position=stream.tell();line=stream.readline()
+                if not line or not line.endswith('\n'):
+                    stream.seek(position);break
+                item=json.loads(line)
+                if item['event']!='schedule':continue
+                for key,count in item['scheduled_tokens'].items():
+                    if key not in INITIAL_COMPUTED:
+                        INITIAL_COMPUTED[key]=item['requests_after'][key]['computed_tokens']-count
+            TRACE_OFFSETS[str(path)]=stream.tell()
+
+
+def append(path, value):
+    with path.open('a',encoding='utf-8') as stream:
+        stream.write(json.dumps(value,separators=(',',':'))+'\n')
+
+
+def quantiles(values):
+    if not values:return None
+    values=sorted(values)
+    return {'mean':statistics.mean(values),**{f'p{p}':values[math.ceil(p/100*len(values))-1] for p in [50,95,99]},'max':values[-1]}
+
+
+def url(name):
+    row=INST[name]
+    return f"http://{row['host']}:{row['model_port']}"
+
+
+async def snapshot(client,out,label):
+    async def one(name,item,kind):
+        port=item['model_port'] if kind=='model' else item['engine_http_port']
+        try:
+            response=await client.get(f"http://{item['host']}:{port}/metrics",timeout=3)
+            (out/f'{label}-{name}-{kind}.prom').write_text(response.text)
+        except Exception as e:append(out/'events.jsonl',{'event':'metrics_error','name':name,'error':str(e)})
+    await asyncio.gather(*(one(name,item,kind) for name,item in INST.items() for kind in ['engine','model']))
+
+
+async def reset(client):
+    for name,item in INST.items():
+        (await client.post(url(name)+'/reset_prefix_cache',timeout=30)).raise_for_status()
+        (await client.post(f"http://{item['host']}:{item['engine_http_port']}/cache/memory/cleanup",timeout=30)).raise_for_status()
+
+
+async def condition(client,plans,label,*,clear=True,split='calibration'):
+    label=LABEL_PREFIX+label
+    out=ROOT/'runs'/label;out.mkdir(exist_ok=False)
+    if clear:await reset(client)
+    await snapshot(client,out,'before')
+    origin=time.monotonic()+.05;epoch=time.time_ns()
+    event=lambda kind,**kw:append(out/'events.jsonl',{'event':kind,'epoch_ns':time.time_ns(),'monotonic_ns':time.monotonic_ns(),**kw})
+    schedule=[{k:v for k,v in plan.items() if k!='row'} for plan in plans]
+    (out/'schedule.json').write_text(json.dumps({'split':split,'epoch_ns':epoch,'requests':schedule},indent=2))
+    (ROOT/'phase.json').write_text(json.dumps({'label':label,'split':split,'epoch_ns':epoch}))
+    complete=[asyncio.Event() for _ in plans]
+
+    async def request(index,plan):
+        source=plan['row'];rid=f'mc27-{label}-{index:03d}'
+        record={'request_id':rid,'source_id':source['id'],'split':split,'P':plan['P'],'D':'D0',
+                'prompt_tokens':source['prompt_tokens'],'output_budget':plan.get('output',128),
+                'nominal_s':plan.get('at',0),'cache_salt':plan.get('salt',rid),'previous':plan.get('previous')}
+        async def stamp(name):
+            record[name]=time.monotonic()-origin;event(name,request_id=rid,at_s=record[name])
+        try:
+            await asyncio.sleep(max(0,origin+record['nominal_s']-time.monotonic()))
+            if record['previous'] is not None:await complete[record['previous']].wait()
+            await stamp('ready_s')
+            payload={'model':'qwen25','prompt':source['prompt_token_ids'],'temperature':0.,'ignore_eos':True,
+                     'request_id':rid,'cache_salt':record['cache_salt'],'seed':20261027}
+            await stamp('P_submit_s')
+            response=await client.post(url(record['P'])+'/v1/completions',json={**payload,'max_tokens':1,'stream':False},
+                                       headers={'X-Request-Id':rid},timeout=180)
+            response.raise_for_status();record['P_usage']=response.json().get('usage');await stamp('P_response_s')
+            marker=ROOT/'visibility'/record['P']/f'{rid}.tp0.visible'
+            record['source_marker_at_P_response']=marker.exists()
+            # Full-prefix readiness is enforced by the D connector, and timed there.
+            await stamp('D_submit_s')
+            chunks=[];ids=[];usage=None;done=False
+            async with client.stream('POST',url('D0')+'/v1/completions',json={**payload,'max_tokens':record['output_budget'],
+                'stream':True,'stream_options':{'include_usage':True},'return_token_ids':True},
+                headers={'X-Request-Id':rid},timeout=180) as reply:
+                reply.raise_for_status()
+                async for line in reply.aiter_lines():
+                    if not line.startswith('data: '):continue
+                    raw=line[6:]
+                    if raw=='[DONE]':done=True;break
+                    item=json.loads(raw)
+                    if item.get('error'):raise RuntimeError(str(item['error']))
+                    usage=item.get('usage') or usage
+                    for choice in item.get('choices',[]):
+                        tokens=choice.get('token_ids') or [];piece=choice.get('text','')
+                        if not tokens and not piece:continue
+                        if 'first_s' not in record:await stamp('first_s')
+                        record['last_token_s']=time.monotonic()-origin
+                        chunks.append({'at_s':record['last_token_s'],'token_ids':tokens,'text_chars':len(piece)})
+                        ids.extend(tokens)
+            if not done or usage is None or 'first_s' not in record:raise RuntimeError('Incomplete stream')
+            if usage['prompt_tokens']!=source['prompt_tokens']:raise ValueError('Prompt token count mismatch')
+            if usage['completion_tokens']!=record['output_budget']:raise ValueError('Output token budget mismatch')
+            record.update(status='ok',D_usage=usage,stream_chunks=chunks,output_token_ids=ids,
+                          source_marker_at_finish=marker.exists())
+            if marker.exists():record['source_marker']=marker.read_text()
+            detail=usage.get('prompt_tokens_details') or {}
+            record['D_cached_tokens']=detail.get('cached_tokens')
+            record['expected_full_block_prefix']=((source['prompt_tokens']-1)//128)*128
+        except Exception as error:
+            record.update(status='error',error=f'{type(error).__name__}: {error}',traceback=traceback.format_exc())
+        finally:
+            record['finish_s']=time.monotonic()-origin
+            if 'first_s' in record:
+                record['TTFT_s']=record['first_s']-record['ready_s']
+                record['D_TTFT_s']=record['first_s']-record['D_submit_s']
+                record['E2E_s']=record['finish_s']-record['ready_s']
+                record['TPOT_ms']=(record['last_token_s']-record['first_s'])/max(1,record['output_budget']-1)*1000
+            append(out/'requests.jsonl',record);complete[index].set()
+        return record
+
+    rows=await asyncio.wait_for(asyncio.gather(*(request(i,p) for i,p in enumerate(plans))),timeout=420)
+    # Cross-node shared-file visibility can lag the completed HTTP response.
+    # This audit is outside every request's measured service interval.
+    audit_initial_computed()
+    for record in rows:
+        if record['status']!='ok':continue
+        candidates=[v for k,v in INITIAL_COMPUTED.items() if k.startswith('cmpl-'+record['request_id']+'-')]
+        if len(candidates)>1:raise RuntimeError('Ambiguous first D compute trace: '+record['request_id'])
+        record['D_initial_computed_tokens']=candidates[0] if candidates else None
+    (out/'audited-requests.jsonl').write_text(''.join(json.dumps(r)+'\n' for r in rows))
+    good=[r for r in rows if r['status']=='ok']
+    summary={'label':label,'split':split,'requests':len(rows),'statuses':dict(Counter(r['status'] for r in rows)),
+             'elapsed_s':time.monotonic()-origin,'P_routes':dict(Counter(r['P'] for r in rows)),
+             'missing_source_markers':sum(not r.get('source_marker_at_finish') for r in good),
+             'trace_audit_pending':sum(r['D_initial_computed_tokens'] is None for r in good),
+             'partial_D_restore':sum(r['D_initial_computed_tokens'] is not None and r['D_initial_computed_tokens']<r['expected_full_block_prefix'] for r in good)}
+    for field in ['TTFT_s','D_TTFT_s','E2E_s','TPOT_ms']:
+        summary[field]=quantiles([r[field] for r in good])
+    (out/'summary.json').write_text(json.dumps(summary,indent=2));await snapshot(client,out,'after')
+    print(json.dumps(summary),flush=True)
+    if len(good)!=len(rows):raise RuntimeError(f'Failed requests in {label}')
+    if summary['partial_D_restore']:raise RuntimeError(f'Incomplete P/D handoff in {label}')
+    return summary
+
+
+async def main():
+    source=[json.loads(line) for line in (ROOT/'requests.jsonl').read_text().splitlines()]
+    cal=[r for r in source if r['split']=='calibration']
+    representatives=[min(cal,key=lambda r:abs(r['prompt_tokens']-n)) for n in [1024,4096,8192,16384,24576]]
+    results={}
+    async with httpx.AsyncClient(limits=httpx.Limits(max_connections=128,max_keepalive_connections=64),timeout=240,trust_env=False) as client:
+        for name in INST:(await client.get(url(name)+'/health')).raise_for_status()
+        smoke=[{'row':representatives[i],'P':f'P{j%2}','output':16} for j,i in enumerate([0,2,4])]
+        results['warmup']=await condition(client,smoke,'warmup-three-paths',split='warmup')
+        if results['warmup']['partial_D_restore']:
+            raise RuntimeError('Warmup did not restore full P prefixes at D')
+        for repeat in range(3):
+            for index,row in enumerate(representatives):
+                label=f'single-r{repeat}-n{row["prompt_tokens"]}'
+                salt=f'single-{repeat}-{index}'
+                plan={'row':row,'P':f'P{repeat%2}','output':64,'salt':salt}
+                results[label]=await condition(client,[plan],label)
+                warm=label+'-warm'
+                results[warm]=await condition(client,[plan],warm,clear=False)
+                (ROOT/'gated-v3-calibration-summary.json').write_text(json.dumps(results,indent=2))
+        for batch in [4,8,16]:
+            for repeat in range(2):
+                label=f'fanin-b{batch}-r{repeat}'
+                plans=[{'row':representatives[i%5],'P':f'P{i%2}','output':128} for i in range(batch)]
+                results[label]=await condition(client,plans,label)
+                (ROOT/'gated-v3-calibration-summary.json').write_text(json.dumps(results,indent=2))
+        for repeat in range(2):
+            label=f'decode-restore-overlap-r{repeat}'
+            plans=[{'row':representatives[3],'P':'P0','output':512},
+                   *[{'row':representatives[i%4],'P':f'P{i%2}','output':64,'at':1.0+i*.15} for i in range(4)]]
+            results[label]=await condition(client,plans,label)
+            (ROOT/'gated-v3-calibration-summary.json').write_text(json.dumps(results,indent=2))
+        # Session-separated validation inputs are kept out of component fitting.
+        test=sorted((r for r in source if r['split']=='test'),key=lambda r:(r['step_id'],r['task']))
+        tasks=sorted({r['task'] for r in test})
+        for rate in [.5,2.0]:
+            previous={};plans=[]
+            for index,row in enumerate(test):
+                plans.append({'row':row,'P':f"P{tasks.index(row['task'])%2}",'output':128,
+                              'at':index/rate,'salt':f'validation-{rate}', 'previous':previous.get(row['task'])})
+                previous[row['task']]=index
+            label=f'validation-95-rps{rate:g}'
+            results[label]=await condition(client,plans,label,split='validation')
+            (ROOT/'gated-v3-calibration-summary.json').write_text(json.dumps(results,indent=2))
+    (ROOT/'gated-v3-done.json').write_text(json.dumps({'epoch_ns':time.time_ns(),'conditions':len(results)}))
+
+
+if __name__=='__main__':
+    try:asyncio.run(main())
+    except BaseException as error:
+        (ROOT/'gated-v3-failure.json').write_text(json.dumps({'epoch_ns':time.time_ns(),'error':str(error),'traceback':traceback.format_exc()},indent=2))
+        raise

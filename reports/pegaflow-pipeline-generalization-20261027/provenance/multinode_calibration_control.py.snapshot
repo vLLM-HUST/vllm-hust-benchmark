@@ -1,0 +1,64 @@
+"""Bounded SSH transport and owned calibration records for the allocated nodes."""
+
+import argparse
+import json
+import subprocess
+from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
+
+
+BASE = Path(__file__).resolve().parents[1]
+OUT = BASE / "experiment-results/issue23-multinode-calibration-20261027"
+REMOTE = "/data/shared_upload/hust-zsx/issue23-multinode-calibration-20261027"
+PYTHON = "/usr/local/python3.12.13/bin/python3.12"
+HOSTS = {"81": "main.hust-zsx-81.user.coder", "91": "main.hust-zsx-91.user.coder"}
+
+
+def run(node, code, timeout=90):
+    command = ["ssh", "-o", "BatchMode=yes", "-o", "ConnectTimeout=15"]
+    if node == "91":
+        command += ["-F", str(Path.home() / ".ssh/coder-hust-zsx-91.conf")]
+    command += [HOSTS[node], PYTHON + " -"]
+    result = subprocess.run(command, input=code, text=True, encoding="utf-8",
+                            capture_output=True, timeout=timeout)
+    return {"returncode": result.returncode, "stdout": result.stdout, "stderr": result.stderr}
+
+
+def ib_test(size, *, odp=False, port=32815, qp=1, iterations=256):
+    command = ["ib_read_bw", "-d", "mlx5_2", "-x", "5", "-s", str(size), "-n", str(iterations),
+               "-q", str(qp), "-t", "8", "--report_gbits", "-p", str(port)]
+    if odp:
+        command.append("--odp")
+
+    def code(client):
+        argv = [*command, *(["192.168.0.4"] if client else [])]
+        return ("import subprocess,json\n"
+                f"p=subprocess.run({argv!r},capture_output=True,text=True,timeout=22)\n"
+                "print(json.dumps({'command':p.args,'code':p.returncode,'stdout':p.stdout,'stderr':p.stderr}))\n")
+
+    with ThreadPoolExecutor(2) as pool:
+        server = pool.submit(run, "81", code(False), 35)
+        import time
+        time.sleep(1.5)
+        client = pool.submit(run, "91", code(True), 35)
+        return {"size": size, "odp": odp, "server": server.result(), "client": client.result()}
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("action", choices=["ib-smoke", "run-file"])
+    parser.add_argument("--node", choices=HOSTS)
+    parser.add_argument("--file", type=Path)
+    args = parser.parse_args()
+    OUT.mkdir(exist_ok=True)
+    if args.action == "ib-smoke":
+        for size, odp, port in [(4096, False, 32815), (1048576, False, 32816), (1048576, True, 32817)]:
+            result = ib_test(size, odp=odp, port=port)
+            (OUT / f"ib-smoke-{size}-odp{int(odp)}.json").write_text(json.dumps(result,indent=2),encoding="utf-8")
+            print(json.dumps(result), flush=True)
+    else:
+        print(json.dumps(run(args.node, args.file.read_text(encoding="utf-8"), 180)))
+
+
+if __name__ == "__main__":
+    main()

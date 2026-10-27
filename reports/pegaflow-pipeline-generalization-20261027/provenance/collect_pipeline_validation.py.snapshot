@@ -1,0 +1,41 @@
+"""Retrieve reserved outcomes after selection has been frozen."""
+
+import argparse
+import base64
+import io
+import json
+import tarfile
+from pathlib import Path
+
+from multinode_calibration_control import run
+
+BASE=Path(__file__).resolve().parents[1]/'experiment-results/issue23-generalization-20261027'
+REMOTE='/data/shared_upload/hust-zsx/issue23-generalization-20261027'
+
+
+def main():
+    parser=argparse.ArgumentParser();parser.add_argument('phase');args=parser.parse_args()
+    receipt=json.loads((BASE/'selection-freeze.json').read_text())
+    assert receipt['heldout_outcomes_opened_before_freeze'] is False
+    phase=args.phase
+    destination=BASE/('validation-C-raw' if phase=='C' else 'calibration-'+phase)
+    result=run('81',f'''from pathlib import Path
+import tarfile,io,base64
+r=Path({REMOTE!r})/{phase!r};buf=io.BytesIO()
+assert (r/'done.json').exists()
+with tarfile.open(fileobj=buf,mode='w:gz',compresslevel=3) as archive:
+ for p in r.rglob('*'):
+  rel=p.relative_to(r)
+  if not p.is_file() or rel.parts[0] in ['source','visibility']:continue
+  if {phase!r}!='C' and rel.parts[0]!='holdout':continue
+  archive.add(p,arcname=str(rel),recursive=False)
+print(base64.b64encode(buf.getvalue()).decode())
+''',180)
+    if result['returncode']:raise RuntimeError(result['stderr'])
+    payload=base64.b64decode(result['stdout']);destination.mkdir(exist_ok=True)
+    (BASE/(phase+'-validation-raw.tar.gz')).write_bytes(payload)
+    with tarfile.open(fileobj=io.BytesIO(payload),mode='r:gz') as archive:archive.extractall(destination,filter='data')
+    print(json.dumps({'phase':phase,'bytes':len(payload),'destination':str(destination)}))
+
+
+if __name__=='__main__':main()

@@ -1,0 +1,283 @@
+{
+  "schema": "pegaflow-multinode-profile/v1",
+  "models": {
+    "P": {
+      "schema": "pegaflow-step-cost/v1",
+      "metadata": {
+        "model": "Qwen2.5-7B-Instruct",
+        "dtype": "bfloat16",
+        "hardware": "Ascend 910B2",
+        "vllm": "0.23.0",
+        "vllm_ascend": "0.23.0",
+        "role": "P",
+        "max_model_tokens": 32768,
+        "training_tasks": [
+          "adaptive-rejection-sampler",
+          "code-from-image"
+        ],
+        "response_delay_s": 0.011282149,
+        "step_scope": "schedule-to-update wall time including synchronous connector work",
+        "P_decode_scope": "D decode coefficients supplied for schema completeness; P output budget is one token"
+      },
+      "fit": "nonnegative linear cost with Huber reweighting; calibration tasks only",
+      "models": {
+        "decode": {
+          "coefficients": [
+            0.01798385308332552,
+            0.005920436060028652,
+            0.0035107062285111845
+          ],
+          "training_steps": 5242,
+          "training_MAPE_percent": 8.77632979067654,
+          "training_absolute_error_s": {
+            "mean": 0.0058475739182281,
+            "p50": 0.0005015048129694728,
+            "p95": 0.045697940284678766,
+            "max": 0.24725393276885826
+          }
+        },
+        "prefill": {
+          "coefficients": [
+            0.04213780494826235,
+            0.0913704234351124,
+            0.044001325062390434,
+            0.0,
+            0.036787331973794135
+          ],
+          "training_steps": 99,
+          "training_MAPE_percent": 7.5385548663086785,
+          "training_absolute_error_s": {
+            "mean": 0.012257242637865472,
+            "p50": 0.010075993750778757,
+            "p95": 0.02724032532295796,
+            "max": 0.1145246369130355
+          }
+        }
+      },
+      "dispatch_gap_s": 0.000156224,
+      "response_delay_s": 0.011282149
+    },
+    "D": {
+      "schema": "pegaflow-step-cost/v1",
+      "metadata": {
+        "model": "Qwen2.5-7B-Instruct",
+        "dtype": "bfloat16",
+        "hardware": "Ascend 910B2",
+        "vllm": "0.23.0",
+        "vllm_ascend": "0.23.0",
+        "role": "D",
+        "max_model_tokens": 32768,
+        "training_tasks": [
+          "adaptive-rejection-sampler",
+          "code-from-image"
+        ],
+        "response_delay_s": 0.002988702,
+        "step_scope": "schedule-to-update wall time including synchronous connector work",
+        "P_decode_scope": "D decode coefficients supplied for schema completeness; P output budget is one token"
+      },
+      "fit": "nonnegative linear cost with Huber reweighting; calibration tasks only",
+      "models": {
+        "decode": {
+          "coefficients": [
+            0.01798385308332552,
+            0.005920436060028652,
+            0.0035107062285111845
+          ],
+          "training_steps": 5242,
+          "training_MAPE_percent": 8.77632979067654,
+          "training_absolute_error_s": {
+            "mean": 0.0058475739182281,
+            "p50": 0.0005015048129694728,
+            "p95": 0.045697940284678766,
+            "max": 0.24725393276885826
+          }
+        },
+        "prefill": {
+          "coefficients": [
+            0.05859536649603689,
+            0.0,
+            0.04581104479286507,
+            0.011870513553251784,
+            0.00733668632744574
+          ],
+          "training_steps": 69,
+          "training_MAPE_percent": 6.4820272639414105,
+          "training_absolute_error_s": {
+            "mean": 0.004647128905139862,
+            "p50": 0.002823175373434246,
+            "p95": 0.014788796340370301,
+            "max": 0.05483551037343424
+          }
+        }
+      },
+      "dispatch_gap_s": 0.0001557335,
+      "response_delay_s": 0.002988702
+    }
+  },
+  "native": [
+    {
+      "tokens": 1152,
+      "load_complete_seconds": 0.27504,
+      "query_seconds": 0.0017314380265114337,
+      "save_RPC_seconds": 0,
+      "repeats": 3,
+      "restore_range_s": [
+        0.22087225783616304,
+        0.2984806001186371
+      ]
+    },
+    {
+      "tokens": 2944,
+      "load_complete_seconds": 0.800945,
+      "query_seconds": 0.020767254362592524,
+      "save_RPC_seconds": 0,
+      "repeats": 3,
+      "restore_range_s": [
+        0.47156998701393604,
+        0.7957860361784697
+      ]
+    },
+    {
+      "tokens": 8192,
+      "load_complete_seconds": 2.1011100000000003,
+      "query_seconds": 0.019131237988378125,
+      "save_RPC_seconds": 0,
+      "repeats": 3,
+      "restore_range_s": [
+        1.7398683819919825,
+        2.6397216198965907
+      ]
+    },
+    {
+      "tokens": 15232,
+      "load_complete_seconds": 5.83526,
+      "query_seconds": 0.007919481860469979,
+      "save_RPC_seconds": 0,
+      "repeats": 3,
+      "restore_range_s": [
+        2.2484866911545396,
+        6.644368723034859
+      ]
+    },
+    {
+      "tokens": 24704,
+      "load_complete_seconds": 5.60619,
+      "query_seconds": 0.0026854886808305167,
+      "save_RPC_seconds": 0,
+      "repeats": 3,
+      "restore_range_s": [
+        4.980553936678916,
+        8.024163153022528
+      ]
+    }
+  ],
+  "network_seconds_per_byte": 9.551015877882526e-11,
+  "P_blocks": [
+    5804,
+    5804
+  ],
+  "D_blocks": 5905,
+  "P_CPU_bytes": [
+    8589934592,
+    8589934592
+  ],
+  "D_CPU_bytes": 17179869184,
+  "scope": "calibration sessions only; full connector; default FCFS, graph decode, 2P1D",
+  "calibration_cases": [
+    "gated-v3-fanin-b16-r0",
+    "gated-v3-fanin-b4-r0",
+    "gated-v3-fanin-b4-r1",
+    "gated-v3-fanin-b8-r0",
+    "gated-v3-fanin-b8-r1",
+    "gated-v3-single-r0-n1167",
+    "gated-v3-single-r0-n1167-warm",
+    "gated-v3-single-r0-n15274",
+    "gated-v3-single-r0-n15274-warm",
+    "gated-v3-single-r0-n24724",
+    "gated-v3-single-r0-n24724-warm",
+    "gated-v3-single-r0-n2948",
+    "gated-v3-single-r0-n2948-warm",
+    "gated-v3-single-r0-n8263",
+    "gated-v3-single-r0-n8263-warm",
+    "gated-v3-single-r1-n1167",
+    "gated-v3-single-r1-n1167-warm",
+    "gated-v3-single-r1-n15274",
+    "gated-v3-single-r1-n15274-warm",
+    "gated-v3-single-r1-n24724",
+    "gated-v3-single-r1-n24724-warm",
+    "gated-v3-single-r1-n2948",
+    "gated-v3-single-r1-n2948-warm",
+    "gated-v3-single-r1-n8263",
+    "gated-v3-single-r1-n8263-warm",
+    "gated-v3-single-r2-n1167",
+    "gated-v3-single-r2-n1167-warm",
+    "gated-v3-single-r2-n15274",
+    "gated-v3-single-r2-n15274-warm",
+    "gated-v3-single-r2-n24724",
+    "gated-v3-single-r2-n24724-warm",
+    "gated-v3-single-r2-n2948",
+    "gated-v3-single-r2-n2948-warm",
+    "gated-v3-single-r2-n8263",
+    "gated-v3-single-r2-n8263-warm"
+  ],
+  "observed_configs": {
+    "D0": {
+      "max_num_seqs": 128,
+      "max_num_batched_tokens": 2048,
+      "num_gpu_blocks": 5905,
+      "block_size": 128
+    },
+    "P0": {
+      "max_num_seqs": 128,
+      "max_num_batched_tokens": 8192,
+      "num_gpu_blocks": 5804,
+      "block_size": 128
+    },
+    "P1": {
+      "max_num_seqs": 128,
+      "max_num_batched_tokens": 8192,
+      "num_gpu_blocks": 5804,
+      "block_size": 128
+    }
+  },
+  "copy_lanes": 1,
+  "copy_compute_overlap": true,
+  "training_coverage": {
+    "P": {
+      "sequences": [
+        1,
+        3
+      ],
+      "prefill_tokens": [
+        4,
+        8192
+      ],
+      "decode_tokens": [
+        0,
+        0
+      ],
+      "context_sum": [
+        1167,
+        32768
+      ]
+    },
+    "D": {
+      "sequences": [
+        1,
+        5
+      ],
+      "prefill_tokens": [
+        0,
+        86
+      ],
+      "decode_tokens": [
+        0,
+        5
+      ],
+      "context_sum": [
+        1167,
+        34429
+      ]
+    }
+  }
+}

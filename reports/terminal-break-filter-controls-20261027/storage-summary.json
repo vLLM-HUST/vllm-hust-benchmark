@@ -1,0 +1,65 @@
+{
+  "schema": "terminal-controls-review-v1",
+  "task": "break-filter-js-from-html",
+  "architecture": "ARM64",
+  "original_task_tests_oracle_unchanged": true,
+  "original_alert_timeout_seconds": 5,
+  "original_verifier_timeout_seconds": 1200,
+  "original_build_image_reused": true,
+  "original_r1": {
+    "build_exit": 0,
+    "nop_exit": 130,
+    "reward": null,
+    "CTRF": false,
+    "mount_guard_preverifier_failure_preserved": true
+  },
+  "controls": {
+    "build_reused": true,
+    "new_build": false,
+    "nop": {
+      "Harbor_exit": 0,
+      "test_count": 1,
+      "passed": 0,
+      "failed": 1,
+      "reward": 0,
+      "cause": "original expected file absent"
+    },
+    "oracle": {
+      "Harbor_exit": 0,
+      "control_wrapper_exit": 1,
+      "test_count": 1,
+      "passed": 0,
+      "failed": 1,
+      "reward": 0,
+      "cause": "original assert alert_detected after original 5-second alert wait",
+      "test_body_executed": true
+    },
+    "pipeline": "failed_or_incomplete",
+    "new_Agent": 0,
+    "new_model": 0,
+    "task_coverage_added": 0
+  },
+  "resources": {
+    "cpu": 1,
+    "memory_GiB": 2,
+    "cpuset": "24-31",
+    "MTU": 1400,
+    "readonly_dependency_cache": true,
+    "three_original_trial_log_mounts": true,
+    "released": true
+  },
+  "diagnosis": {
+    "observed": "Oracle file existed, original filter returned zero, original browser test completed and did not observe alert within five seconds.",
+    "uncertain": "Original temporary filtered HTML and browser DOM were not retained; existing logs do not establish whether parser serialization, browser handling or timing caused failure.",
+    "assertion_message_is_not_filtered_output_evidence": true,
+    "new_diagnostic_execution": false
+  },
+  "CPU_preflight_path_read_failure_preserved": true,
+  "independent_review_sha256": "6c903ee9a5b12d5f5dc50688fe6192fb7e169b570e38b85736594026e0fb9f2b",
+  "original_seal_sha256": "393026a5acba4a0c0f07c457810337029ce917b6bfe97472ae10e84318df35ea",
+  "verified_original_files": 77,
+  "new_Agent_attempts": 0,
+  "new_model_calls": 0,
+  "Terminal_attempted_coverage_increment": 0,
+  "prior_results_unchanged": true
+}

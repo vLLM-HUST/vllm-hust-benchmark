@@ -41,6 +41,26 @@ def test_codejudge_delivery_requires_original_native_and_actual_ci_evidence():
         )
 
 
+def test_deepplanning_shopping_audit_is_partial_not_full_source_completion():
+    ledger = json.loads(
+        (ROOT / "docs/workload-data/dataset-validation-status.json").read_text("utf-8")
+    )
+    row = ledger["delivery_inventory"]["DEEPPLANNING"]
+    partial = row["preparation_evidence"]["remaining_shopping_native_run"]
+    receipt = json.loads((ROOT / partial["receipt"]).read_text("utf-8"))
+    assert row["checked"] is False
+    assert receipt["source_checkbox_eligible"] is False
+    assert receipt["native_request_attempts"] == 158
+    assert receipt["saved_assistant_messages"] == 154
+    assert sum(case["model_messages"] for case in receipt["case_scores"]) == 154
+    assert sum(case["tool_calls"] for case in receipt["case_scores"]) == 321
+    assert all(case["case_score"] == 0.0 for case in receipt["case_scores"])
+    assert receipt["saved_consistency_verification"]["new_model_calls"] == 0
+    assert receipt["executed_verifier_sha256"] in _script_hashes_for_line_endings(
+        (ROOT / receipt["public_verifier"]).read_bytes()
+    )
+
+
 def test_scienceworld_delivery_requires_native_scores_and_actual_ci_consumer():
     ledger = json.loads(
         (ROOT / "docs/workload-data/dataset-validation-status.json").read_text("utf-8")

@@ -1,0 +1,98 @@
+"""Open heldouts only after an immutable selection receipt exists."""
+
+import argparse
+import copy
+import gzip
+import hashlib
+import json
+import statistics
+import sys
+from pathlib import Path
+
+
+BASE = Path(__file__).resolve().parents[1]
+SOURCE = BASE/'worktrees/pegaflow-issue23-simulator/scripts/issue23'
+sys.path.insert(0, str(SOURCE))
+from pd_multinode_simulator import CalibratedPD
+from pd_pipeline_simulator import PipelineSimulation
+from prepare_multinode_profile import hashes, quantiles
+
+
+def rows(path):
+    return [json.loads(line) for line in path.read_text(encoding='utf-8').splitlines() if line]
+
+
+def main():
+    parser=argparse.ArgumentParser();parser.add_argument('--root',type=Path,required=True)
+    parser.add_argument('--profile',type=Path,required=True);parser.add_argument('--receipt',type=Path,required=True)
+    parser.add_argument('--output',type=Path,required=True);args=parser.parse_args()
+    receipt=json.loads(args.receipt.read_text());raw=args.profile.read_bytes()
+    if hashlib.sha256(raw).hexdigest()!=receipt['profile_sha256']:
+        raise RuntimeError('Profile differs from the pre-unblinding receipt')
+    selected=json.loads(raw);cfg=json.loads((args.root/'config.json').read_text())
+    source={r['id']:r for r in rows(args.root/'requests.jsonl')}
+    folders=list((args.root/'holdout').glob('*/audited-requests.jsonl'))
+    if len(folders)!=1:raise ValueError('Expected exactly one heldout acquisition')
+    records=sorted(rows(folders[0]),key=lambda r:r['request_id'])
+    if any(r['status']!='ok' for r in records):raise ValueError('Heldout acquisition failed')
+    producers=[r for r in cfg['instances'] if r['role']=='P'];consumers=[r for r in cfg['instances'] if r['role']=='D']
+    workload={'requests':[]}
+    for r in records:
+        row=source[r['source_id']]
+        workload['requests'].append({'id':r['request_id'],'task':row['task'],'prompt_tokens':r['prompt_tokens'],
+            'output_tokens':r['output_budget'],'arrival_s':r['nominal_s'],
+            'P':next(i for i,p in enumerate(producers) if p['id']==r['P']),
+            'D':next(i for i,p in enumerate(consumers) if p['id']==r['D']),
+            'hashes':hashes(row['prompt_token_ids'],r['cache_salt'])})
+    # Read deployment configuration, never measured request latency, for capacities.
+    engine={}; initial={}
+    for path in (args.root/'scheduler-traces').rglob('*.jsonl'):
+        for line in path.open(encoding='utf-8'):
+            r=json.loads(line)
+            if r['event']=='scheduler_config':engine[path.parent.name]=r
+            elif r['event']=='schedule' and path.parent.name.startswith('D'):
+                for key,count in r['scheduled_tokens'].items():initial.setdefault(key,r['requests_after'][key]['computed_tokens']-count)
+    audit=[]
+    for record in records:
+        candidates=[value for key,value in initial.items() if key.startswith('cmpl-'+record['request_id']+'-')]
+        if len(candidates)!=1:raise ValueError('Missing or ambiguous full-prefix trace')
+        audit.append({'id':record['request_id'],'computed':candidates[0],'expected':record['expected_full_block_prefix']})
+    if any(r['computed']<r['expected'] for r in audit):raise ValueError('Incomplete external handoff')
+    config={'P':len(producers),'D':len(consumers),'P_token_budget':cfg['P_batched_tokens'],
+        'D_token_budget':cfg['D_batched_tokens'],'P_max_sequences':cfg.get('P_max_sequences',cfg['max_num_seqs']),
+        'D_max_sequences':cfg.get('D_max_sequences',cfg['max_num_seqs']),
+        'P_CPU_GiB':producers[0]['host_pool_bytes']/2**30,'D_CPU_GiB':consumers[0]['host_pool_bytes']/2**30,
+        'engine_hosts':[r['node'] for r in producers+consumers],'host_CPU_cores':{'P':8,'D':4},
+        'host_copy_GBps':{consumers[0]['node']:selected['restore_model']['component_probe_GBps']['B2' if consumers[0]['node']=='P' else 'A2']}}
+    args.output.mkdir(exist_ok=False)
+    (args.output/'handoff-audit.json').write_text(json.dumps(audit,indent=2))
+    (args.output/'workload.json').write_text(json.dumps(workload));(args.output/'config.json').write_text(json.dumps(config,indent=2))
+    comparisons={}
+    for label,profile,implementation in [
+        ('previous_frozen',json.loads((BASE/'experiment-results/issue23-multinode-calibration-20261027/profile-final/profile.json').read_text()),CalibratedPD),
+        ('same_data_legacy',copy.deepcopy(selected),CalibratedPD),('pipeline',copy.deepcopy(selected),PipelineSimulation)]:
+        profile['P_blocks']=[engine[r['id']]['num_gpu_blocks'] for r in producers]
+        profile['D_blocks']=engine[consumers[0]['id']]['num_gpu_blocks']
+        prediction=implementation(workload,profile,config).run()
+        (args.output/(label+'-prediction.json.gz')).write_bytes(gzip.compress(json.dumps(prediction).encode(),mtime=0))
+        pred={r['id']:r for r in prediction['per_request']};pairs=[]
+        for actual in records:
+            p=pred[actual['request_id']]
+            pairs.append({'id':actual['request_id'],'actual_TTFT':actual['TTFT_s'],'predicted_TTFT':p['TTFT'],
+                'actual_E2E':actual['E2E_s'],'predicted_E2E':p['E2E'],
+                'actual_P':actual['P_response_s']-actual['P_submit_s'],
+                'predicted_P':p['stages']['P']['engine_end']-p['ready'],
+                'actual_D':actual['D_TTFT_s'],'predicted_D':p['first']-p['stages']['P']['engine_end']})
+        result={'requests':len(records),'per_request':pairs}
+        for measure in ['TTFT','E2E','P','D']:
+            a=[r['actual_'+measure] for r in pairs];b=[r['predicted_'+measure] for r in pairs]
+            result[measure]={'actual':quantiles(a),'predicted':quantiles(b),
+                'MAE_s':statistics.mean(abs(x-y) for x,y in zip(a,b)),
+                'MAPE_percent':statistics.mean(abs(x-y)/x*100 for x,y in zip(a,b)),
+                'bias_s':statistics.mean(y-x for x,y in zip(a,b))}
+        comparisons[label]=result
+    (args.output/'comparison.json').write_text(json.dumps(comparisons,indent=2))
+    print(json.dumps({k:{m:v[m] for m in ['TTFT','E2E','P','D']} for k,v in comparisons.items()},indent=2))
+
+
+if __name__=='__main__':main()

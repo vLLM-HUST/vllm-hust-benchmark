@@ -1,0 +1,47 @@
+"""Start a single owned phase on one physical node and publish readiness."""
+
+import argparse
+import json
+import os
+import subprocess
+import time
+import urllib.request
+from pathlib import Path
+
+
+def main():
+    p=argparse.ArgumentParser();p.add_argument('--phase',required=True);p.add_argument('--node',required=True,choices=['P','D']);args=p.parse_args()
+    root=Path('/data/shared_upload/hust-zsx/issue23-generalization-20261027')/args.phase
+    cfg=json.loads((root/'config.json').read_text())
+    env=dict(os.environ,MAX_JOBS='2',TORCHINDUCTOR_COMPILE_THREADS='1')
+    py='/usr/local/python3.12.13/bin/python3.12'
+    def deploy(action):
+        result=subprocess.run([py,str(root/'deploy.py'),'--node',args.node,action],capture_output=True,text=True,timeout=40,env=env)
+        print(result.stdout,flush=True)
+        if result.returncode:raise RuntimeError(result.stderr)
+    instances=[r for r in cfg['instances'] if r['node']==args.node]
+    if not all((root/'services'/(r['id']+'-engine.process.json')).exists() for r in instances):deploy('native')
+    endpoints=[f"http://{r['host']}:{r['engine_http_port']}/health" for r in cfg['instances'] if r['node']==args.node]
+    for attempt in range(300):
+        ready=[]
+        for endpoint in endpoints:
+            try:ready.append(urllib.request.urlopen(endpoint,timeout=1).status==200)
+            except Exception:ready.append(False)
+        if all(ready):break
+        time.sleep(.25)
+    else:raise RuntimeError('Native services did not become healthy')
+    if not (root/'services'/(args.node+'-resources.process.json')).exists():deploy('monitor')
+    if not all((root/'services'/(r['id']+'-model.process.json')).exists() for r in instances):deploy('model')
+    endpoints=[f"http://{r['host']}:{r['model_port']}/health" for r in cfg['instances'] if r['node']==args.node]
+    for attempt in range(240):
+        ready=[]
+        for endpoint in endpoints:
+            try:ready.append(urllib.request.urlopen(endpoint,timeout=1).status==200)
+            except Exception:ready.append(False)
+        (root/f'readiness-{args.node}.json').write_text(json.dumps({'epoch_ns':time.time_ns(),'ready':ready}))
+        if all(ready):return
+        time.sleep(2)
+    raise RuntimeError('Model startup timeout')
+
+
+if __name__=='__main__':main()

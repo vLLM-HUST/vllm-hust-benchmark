@@ -1,0 +1,1072 @@
+{
+  "schema": "pegaflow-multinode-profile/v1",
+  "models": {
+    "P": {
+      "schema": "pegaflow-step-cost/v1",
+      "metadata": {
+        "model": "Qwen2.5-7B-Instruct",
+        "dtype": "bfloat16",
+        "hardware": "Ascend 910B2",
+        "vllm": "0.23.0",
+        "vllm_ascend": "0.23.0",
+        "role": "P",
+        "max_model_tokens": 32768,
+        "training_tasks": [
+          "adaptive-rejection-sampler",
+          "code-from-image"
+        ],
+        "response_delay_s": 0.0165719815,
+        "step_scope": "schedule-to-update wall time including synchronous connector work",
+        "P_decode_scope": "D decode coefficients supplied for schema completeness; P output budget is one token"
+      },
+      "fit": "nonnegative linear cost with Huber reweighting; calibration tasks only",
+      "models": {
+        "decode": {
+          "coefficients": [
+            0.01816322388112986,
+            0.000763790282867956,
+            0.004956276671906552
+          ]
+        },
+        "prefill": {
+          "coefficients": [
+            0.049559380419999494,
+            0.08709544643674642,
+            0.04601412574337013,
+            0.0,
+            0.01725883714350669
+          ]
+        }
+      },
+      "dispatch_gap_s": 0.000136312,
+      "response_delay_s": 0.02023044
+    },
+    "D": {
+      "schema": "pegaflow-step-cost/v1",
+      "metadata": {
+        "model": "Qwen2.5-7B-Instruct",
+        "dtype": "bfloat16",
+        "hardware": "Ascend 910B2",
+        "vllm": "0.23.0",
+        "vllm_ascend": "0.23.0",
+        "role": "D",
+        "max_model_tokens": 32768,
+        "training_tasks": [
+          "adaptive-rejection-sampler",
+          "code-from-image"
+        ],
+        "response_delay_s": 0.025855738,
+        "step_scope": "schedule-to-update wall time including synchronous connector work",
+        "P_decode_scope": "D decode coefficients supplied for schema completeness; P output budget is one token"
+      },
+      "fit": "nonnegative linear cost with Huber reweighting; calibration tasks only",
+      "models": {
+        "decode": {
+          "coefficients": [
+            0.01816322388112986,
+            0.000763790282867956,
+            0.004956276671906552
+          ]
+        },
+        "prefill": {
+          "coefficients": [
+            0.039478041493875446,
+            0.020988442235716435,
+            0.16129871839503743,
+            0.010630697441471245,
+            0.0
+          ]
+        }
+      },
+      "dispatch_gap_s": 0.000136348,
+      "response_delay_s": 0.024653748
+    }
+  },
+  "CPU_models": {
+    "P": {
+      "schema": "pegaflow-step-cost/v1",
+      "metadata": {
+        "model": "Qwen2.5-7B-Instruct",
+        "dtype": "bfloat16",
+        "hardware": "Ascend 910B2",
+        "vllm": "0.23.0",
+        "vllm_ascend": "0.23.0",
+        "role": "P",
+        "max_model_tokens": 32768,
+        "training_tasks": [
+          "adaptive-rejection-sampler",
+          "code-from-image"
+        ],
+        "response_delay_s": 0.0165719815,
+        "step_scope": "schedule-to-update wall time including synchronous connector work",
+        "P_decode_scope": "D decode coefficients supplied for schema completeness; P output budget is one token"
+      },
+      "fit": "nonnegative linear cost with Huber reweighting; calibration tasks only",
+      "models": {
+        "decode": {
+          "coefficients": [
+            0.01799478028782336,
+            0.0006253696702611565,
+            0.0010899176933551254
+          ]
+        },
+        "prefill": {
+          "coefficients": [
+            0.07162493171155353,
+            0.032835390163702766,
+            0.01457114854324694,
+            0.0,
+            0.02343909974808505
+          ]
+        }
+      },
+      "dispatch_gap_s": 0,
+      "response_delay_s": 0
+    },
+    "D": {
+      "schema": "pegaflow-step-cost/v1",
+      "metadata": {
+        "model": "Qwen2.5-7B-Instruct",
+        "dtype": "bfloat16",
+        "hardware": "Ascend 910B2",
+        "vllm": "0.23.0",
+        "vllm_ascend": "0.23.0",
+        "role": "D",
+        "max_model_tokens": 32768,
+        "training_tasks": [
+          "adaptive-rejection-sampler",
+          "code-from-image"
+        ],
+        "response_delay_s": 0.025855738,
+        "step_scope": "schedule-to-update wall time including synchronous connector work",
+        "P_decode_scope": "D decode coefficients supplied for schema completeness; P output budget is one token"
+      },
+      "fit": "nonnegative linear cost with Huber reweighting; calibration tasks only",
+      "models": {
+        "decode": {
+          "coefficients": [
+            0.01799478028782336,
+            0.0006253696702611565,
+            0.0010899176933551254
+          ]
+        },
+        "prefill": {
+          "coefficients": [
+            0.045689550517285654,
+            0.0,
+            0.16232984081856727,
+            0.01759664500864751,
+            0.0
+          ]
+        }
+      },
+      "dispatch_gap_s": 0,
+      "response_delay_s": 0
+    }
+  },
+  "native": [
+    {
+      "tokens": 128,
+      "load_complete_seconds": 0.0035700000000000003,
+      "query_seconds": 0.025544512875283858,
+      "save_RPC_seconds": 0
+    },
+    {
+      "tokens": 256,
+      "load_complete_seconds": 0.0043,
+      "query_seconds": 0.0014297023376427123,
+      "save_RPC_seconds": 0
+    },
+    {
+      "tokens": 384,
+      "load_complete_seconds": 0.009665,
+      "query_seconds": 0.0016567893733236238,
+      "save_RPC_seconds": 0
+    },
+    {
+      "tokens": 512,
+      "load_complete_seconds": 0.008865,
+      "query_seconds": 0.0018838764090045351,
+      "save_RPC_seconds": 0
+    },
+    {
+      "tokens": 640,
+      "load_complete_seconds": 0.010034999999999999,
+      "query_seconds": 0.0032478327532241814,
+      "save_RPC_seconds": 0
+    },
+    {
+      "tokens": 768,
+      "load_complete_seconds": 0.01165,
+      "query_seconds": 0.004611789097443827,
+      "save_RPC_seconds": 0
+    },
+    {
+      "tokens": 896,
+      "load_complete_seconds": 0.01111,
+      "query_seconds": 0.005975745441663474,
+      "save_RPC_seconds": 0
+    },
+    {
+      "tokens": 1024,
+      "load_complete_seconds": 0.01267,
+      "query_seconds": 0.00733970178588312,
+      "save_RPC_seconds": 0
+    },
+    {
+      "tokens": 1152,
+      "load_complete_seconds": 0.028390000000000002,
+      "query_seconds": 0.00806558976749794,
+      "save_RPC_seconds": 0
+    },
+    {
+      "tokens": 1280,
+      "load_complete_seconds": 0.01967,
+      "query_seconds": 0.00879147774911276,
+      "save_RPC_seconds": 0
+    },
+    {
+      "tokens": 1408,
+      "load_complete_seconds": 0.02296,
+      "query_seconds": 0.009517365730727579,
+      "save_RPC_seconds": 0
+    },
+    {
+      "tokens": 1664,
+      "load_complete_seconds": 0.021445,
+      "query_seconds": 0.010969141693957218,
+      "save_RPC_seconds": 0
+    },
+    {
+      "tokens": 1792,
+      "load_complete_seconds": 0.025529999999999997,
+      "query_seconds": 0.011695029675572038,
+      "save_RPC_seconds": 0
+    },
+    {
+      "tokens": 1920,
+      "load_complete_seconds": 0.043120000000000006,
+      "query_seconds": 0.012420917657186857,
+      "save_RPC_seconds": 0
+    },
+    {
+      "tokens": 2048,
+      "load_complete_seconds": 0.05521,
+      "query_seconds": 0.013146805638801677,
+      "save_RPC_seconds": 0
+    },
+    {
+      "tokens": 2304,
+      "load_complete_seconds": 0.054445,
+      "query_seconds": 0.015723910426886704,
+      "save_RPC_seconds": 0
+    },
+    {
+      "tokens": 3072,
+      "load_complete_seconds": 0.02909,
+      "query_seconds": 0.02345522479114178,
+      "save_RPC_seconds": 0
+    },
+    {
+      "tokens": 3712,
+      "load_complete_seconds": 0.082785,
+      "query_seconds": 0.02989798676135435,
+      "save_RPC_seconds": 0
+    },
+    {
+      "tokens": 3840,
+      "load_complete_seconds": 0.08533,
+      "query_seconds": 0.03118653915539686,
+      "save_RPC_seconds": 0
+    },
+    {
+      "tokens": 4096,
+      "load_complete_seconds": 0.056100000000000004,
+      "query_seconds": 0.033763643943481886,
+      "save_RPC_seconds": 0
+    },
+    {
+      "tokens": 5760,
+      "load_complete_seconds": 0.13204000000000002,
+      "query_seconds": 0.049004964493338354,
+      "save_RPC_seconds": 0
+    },
+    {
+      "tokens": 6784,
+      "load_complete_seconds": 0.10574,
+      "query_seconds": 0.05838423867786542,
+      "save_RPC_seconds": 0
+    },
+    {
+      "tokens": 7424,
+      "load_complete_seconds": 0.15402,
+      "query_seconds": 0.06424628504319482,
+      "save_RPC_seconds": 0
+    },
+    {
+      "tokens": 7936,
+      "load_complete_seconds": 0.13398,
+      "query_seconds": 0.06893592213545836,
+      "save_RPC_seconds": 0
+    },
+    {
+      "tokens": 8192,
+      "load_complete_seconds": 0.18357,
+      "query_seconds": 0.07128074068159013,
+      "save_RPC_seconds": 0
+    },
+    {
+      "tokens": 8448,
+      "load_complete_seconds": 0.13321,
+      "query_seconds": 0.06985072589340306,
+      "save_RPC_seconds": 0
+    },
+    {
+      "tokens": 8960,
+      "load_complete_seconds": 0.12724,
+      "query_seconds": 0.06699069631702895,
+      "save_RPC_seconds": 0
+    },
+    {
+      "tokens": 9856,
+      "load_complete_seconds": 0.118875,
+      "query_seconds": 0.06198564455837422,
+      "save_RPC_seconds": 0
+    },
+    {
+      "tokens": 10624,
+      "load_complete_seconds": 0.14533000000000001,
+      "query_seconds": 0.057695600193813035,
+      "save_RPC_seconds": 0
+    },
+    {
+      "tokens": 11392,
+      "load_complete_seconds": 0.17912,
+      "query_seconds": 0.05340555582925185,
+      "save_RPC_seconds": 0
+    },
+    {
+      "tokens": 13184,
+      "load_complete_seconds": 0.328935,
+      "query_seconds": 0.04339545231194241,
+      "save_RPC_seconds": 0
+    },
+    {
+      "tokens": 13824,
+      "load_complete_seconds": 0.24905,
+      "query_seconds": 0.039820415341474756,
+      "save_RPC_seconds": 0
+    },
+    {
+      "tokens": 15232,
+      "load_complete_seconds": 0.25954,
+      "query_seconds": 0.031955334006445915,
+      "save_RPC_seconds": 0
+    },
+    {
+      "tokens": 16384,
+      "load_complete_seconds": 0.30415,
+      "query_seconds": 0.025520267459604132,
+      "save_RPC_seconds": 0
+    },
+    {
+      "tokens": 24576,
+      "load_complete_seconds": 0.5409550000000001,
+      "query_seconds": 0.027315844592232963,
+      "save_RPC_seconds": 0
+    }
+  ],
+  "network_seconds_per_byte": 9.551015877882526e-11,
+  "P_blocks": [
+    5804,
+    5804
+  ],
+  "D_blocks": 5905,
+  "P_CPU_bytes": [
+    8589934592,
+    8589934592
+  ],
+  "D_CPU_bytes": 17179869184,
+  "scope": "Condition-balanced calibration with grouped role-swap and context-band validation",
+  "calibration_cases": [
+    "A2/gen-copy-cohort-b4",
+    "A2/gen-copy-cohort-b8",
+    "A2/gen-curve-n15360-b1-r0",
+    "A2/gen-curve-n15360-b1-r1",
+    "A2/gen-curve-n15360-b16-r0",
+    "A2/gen-curve-n15360-b16-r1",
+    "A2/gen-curve-n15360-b4-r0",
+    "A2/gen-curve-n15360-b4-r1",
+    "A2/gen-curve-n15360-b8-r0",
+    "A2/gen-curve-n15360-b8-r1",
+    "A2/gen-curve-n24576-b1-r0",
+    "A2/gen-curve-n24576-b1-r1",
+    "A2/gen-curve-n24576-b4-r0",
+    "A2/gen-curve-n24576-b4-r1",
+    "A2/gen-curve-n24576-b8-r0",
+    "A2/gen-curve-n24576-b8-r1",
+    "A2/gen-curve-n8192-b1-r0",
+    "A2/gen-curve-n8192-b1-r1",
+    "A2/gen-curve-n8192-b16-r0",
+    "A2/gen-curve-n8192-b16-r1",
+    "A2/gen-curve-n8192-b4-r0",
+    "A2/gen-curve-n8192-b4-r1",
+    "A2/gen-curve-n8192-b8-r0",
+    "A2/gen-curve-n8192-b8-r1",
+    "A2/gen-decode-restore-overlap-r0",
+    "A2/gen-decode-restore-overlap-r1",
+    "A2/gen-geometry-b1-r0",
+    "A2/gen-geometry-b1-r1",
+    "A2/gen-geometry-b128-r0",
+    "A2/gen-geometry-b128-r1",
+    "A2/gen-geometry-b16-r0",
+    "A2/gen-geometry-b16-r1",
+    "A2/gen-geometry-b192-r0",
+    "A2/gen-geometry-b192-r1",
+    "A2/gen-geometry-b2-r0",
+    "A2/gen-geometry-b2-r1",
+    "A2/gen-geometry-b32-r0",
+    "A2/gen-geometry-b32-r1",
+    "A2/gen-geometry-b4-r0",
+    "A2/gen-geometry-b4-r1",
+    "A2/gen-geometry-b64-r0",
+    "A2/gen-geometry-b64-r1",
+    "A2/gen-geometry-b8-r0",
+    "A2/gen-geometry-b8-r1",
+    "A2/gen-mixed-arrivals16-r0",
+    "A2/gen-mixed-arrivals16-r1",
+    "A2/gen-shared32-r0",
+    "A2/gen-shared32-r1",
+    "B2/gen-copy-cohort-b4",
+    "B2/gen-copy-cohort-b8",
+    "B2/gen-curve-n15360-b1-r0",
+    "B2/gen-curve-n15360-b1-r1",
+    "B2/gen-curve-n15360-b16-r0",
+    "B2/gen-curve-n15360-b16-r1",
+    "B2/gen-curve-n15360-b4-r0",
+    "B2/gen-curve-n15360-b4-r1",
+    "B2/gen-curve-n15360-b8-r0",
+    "B2/gen-curve-n15360-b8-r1",
+    "B2/gen-curve-n24576-b1-r0",
+    "B2/gen-curve-n24576-b1-r1",
+    "B2/gen-curve-n24576-b4-r0",
+    "B2/gen-curve-n24576-b4-r1",
+    "B2/gen-curve-n24576-b8-r0",
+    "B2/gen-curve-n24576-b8-r1",
+    "B2/gen-curve-n8192-b1-r0",
+    "B2/gen-curve-n8192-b1-r1",
+    "B2/gen-curve-n8192-b16-r0",
+    "B2/gen-curve-n8192-b16-r1",
+    "B2/gen-curve-n8192-b4-r0",
+    "B2/gen-curve-n8192-b4-r1",
+    "B2/gen-curve-n8192-b8-r0",
+    "B2/gen-curve-n8192-b8-r1",
+    "B2/gen-decode-restore-overlap-r0",
+    "B2/gen-decode-restore-overlap-r1",
+    "B2/gen-geometry-b1-r0",
+    "B2/gen-geometry-b1-r1",
+    "B2/gen-geometry-b128-r0",
+    "B2/gen-geometry-b128-r1",
+    "B2/gen-geometry-b16-r0",
+    "B2/gen-geometry-b16-r1",
+    "B2/gen-geometry-b192-r0",
+    "B2/gen-geometry-b192-r1",
+    "B2/gen-geometry-b2-r0",
+    "B2/gen-geometry-b2-r1",
+    "B2/gen-geometry-b32-r0",
+    "B2/gen-geometry-b32-r1",
+    "B2/gen-geometry-b4-r0",
+    "B2/gen-geometry-b4-r1",
+    "B2/gen-geometry-b64-r0",
+    "B2/gen-geometry-b64-r1",
+    "B2/gen-geometry-b8-r0",
+    "B2/gen-geometry-b8-r1",
+    "B2/gen-mixed-arrivals16-r0",
+    "B2/gen-mixed-arrivals16-r1",
+    "B2/gen-shared32-r0",
+    "B2/gen-shared32-r1"
+  ],
+  "observed_configs": {
+    "D0": {
+      "max_num_seqs": 128,
+      "max_num_batched_tokens": 2048,
+      "num_gpu_blocks": 5905,
+      "block_size": 128
+    },
+    "P0": {
+      "max_num_seqs": 128,
+      "max_num_batched_tokens": 8192,
+      "num_gpu_blocks": 5804,
+      "block_size": 128
+    },
+    "P1": {
+      "max_num_seqs": 128,
+      "max_num_batched_tokens": 8192,
+      "num_gpu_blocks": 5804,
+      "block_size": 128
+    }
+  },
+  "copy_lanes": 1,
+  "copy_compute_overlap": true,
+  "training_coverage": {
+    "P": {
+      "sequences": [
+        1,
+        15
+      ],
+      "prefill_tokens": [
+        1,
+        8192
+      ],
+      "decode_tokens": [
+        0,
+        0
+      ],
+      "context_sum": [
+        129,
+        229110
+      ]
+    },
+    "D": {
+      "sequences": [
+        1,
+        16
+      ],
+      "prefill_tokens": [
+        0,
+        1065
+      ],
+      "decode_tokens": [
+        0,
+        16
+      ],
+      "context_sum": [
+        129,
+        245254
+      ]
+    }
+  },
+  "validation": {
+    "gated-v3-validation-95-rps0.5": {
+      "requests": 95,
+      "actual_TTFT": {
+        "mean": 0.5196614528172895,
+        "p50": 0.43523885775357485,
+        "p95": 1.1438820660114288,
+        "p99": 2.0790025908499956,
+        "max": 2.0790025908499956
+      },
+      "predicted_TTFT": {
+        "mean": 0.4994931831387882,
+        "p50": 0.3743616660995315,
+        "p95": 1.1505505134731209,
+        "p99": 2.306245377662549,
+        "max": 2.306245377662549
+      },
+      "TTFT_MAE_s": 0.08337251706756343,
+      "TTFT_MAPE_percent": 15.546260914359367,
+      "actual_E2E": {
+        "mean": 3.0598026191521632,
+        "p50": 2.980186174623668,
+        "p95": 3.7039226135239005,
+        "p99": 4.841222511604428,
+        "max": 4.841222511604428
+      },
+      "predicted_E2E": {
+        "mean": 3.0507098936133725,
+        "p50": 2.925516975347449,
+        "p95": 3.709932668686207,
+        "p99": 5.138817120641903,
+        "max": 5.138817120641903
+      }
+    },
+    "gated-v3-validation-95-rps2": {
+      "requests": 95,
+      "actual_TTFT": {
+        "mean": 0.5346334739539184,
+        "p50": 0.4715430550277233,
+        "p95": 1.165859199129045,
+        "p99": 1.9715482033789158,
+        "max": 1.9715482033789158
+      },
+      "predicted_TTFT": {
+        "mean": 0.6439320807760177,
+        "p50": 0.5424049131399897,
+        "p95": 1.5025853512546803,
+        "p99": 2.306245377662563,
+        "max": 2.306245377662563
+      },
+      "TTFT_MAE_s": 0.15830144231603985,
+      "TTFT_MAPE_percent": 28.337190607884352,
+      "actual_E2E": {
+        "mean": 3.870539850614181,
+        "p50": 3.8461112836375833,
+        "p95": 4.647212454117835,
+        "p99": 5.8744824305176735,
+        "max": 5.8744824305176735
+      },
+      "predicted_E2E": {
+        "mean": 3.8675485881879372,
+        "p50": 3.76322718635679,
+        "p95": 4.89080105378352,
+        "p99": 5.903148798642391,
+        "max": 5.903148798642391
+      }
+    }
+  },
+  "execution_mode": "graph",
+  "validation_scope": "Qwen2.5-7B BF16, Ascend 910B2, TP1, 2P1D, 8 causal sessions, nominal .5/2 rps, output 128",
+  "graph_models": {
+    "P": {
+      "schema": "pegaflow-step-cost/v1",
+      "metadata": {
+        "model": "Qwen2.5-7B-Instruct",
+        "dtype": "bfloat16",
+        "hardware": "Ascend 910B2",
+        "vllm": "0.23.0",
+        "vllm_ascend": "0.23.0",
+        "role": "P",
+        "max_model_tokens": 32768,
+        "training_tasks": [
+          "adaptive-rejection-sampler",
+          "code-from-image"
+        ],
+        "response_delay_s": 0.0165719815,
+        "step_scope": "schedule-to-update wall time including synchronous connector work",
+        "P_decode_scope": "D decode coefficients supplied for schema completeness; P output budget is one token"
+      },
+      "fit": "nonnegative linear cost with Huber reweighting; calibration tasks only",
+      "models": {
+        "decode": {
+          "kind": "linear",
+          "coefficients": [
+            0.01816322388112986,
+            0.000763790282867956,
+            0.004956276671906552
+          ],
+          "training_steps": 20446
+        },
+        "prefill": {
+          "kind": "linear",
+          "coefficients": [
+            0.049559380419999494,
+            0.08709544643674642,
+            0.04601412574337013,
+            0.0,
+            0.01725883714350669
+          ],
+          "training_steps": 414
+        }
+      },
+      "dispatch_gap_s": 0.000136312,
+      "response_delay_s": 0.02023044
+    },
+    "D": {
+      "schema": "pegaflow-step-cost/v1",
+      "metadata": {
+        "model": "Qwen2.5-7B-Instruct",
+        "dtype": "bfloat16",
+        "hardware": "Ascend 910B2",
+        "vllm": "0.23.0",
+        "vllm_ascend": "0.23.0",
+        "role": "D",
+        "max_model_tokens": 32768,
+        "training_tasks": [
+          "adaptive-rejection-sampler",
+          "code-from-image"
+        ],
+        "response_delay_s": 0.025855738,
+        "step_scope": "schedule-to-update wall time including synchronous connector work",
+        "P_decode_scope": "D decode coefficients supplied for schema completeness; P output budget is one token"
+      },
+      "fit": "nonnegative linear cost with Huber reweighting; calibration tasks only",
+      "models": {
+        "decode": {
+          "kind": "linear",
+          "coefficients": [
+            0.01816322388112986,
+            0.000763790282867956,
+            0.004956276671906552
+          ],
+          "training_steps": 20446
+        },
+        "prefill": {
+          "kind": "linear",
+          "coefficients": [
+            0.039478041493875446,
+            0.020988442235716435,
+            0.16129871839503743,
+            0.010630697441471245,
+            0.0
+          ],
+          "training_steps": 358
+        }
+      },
+      "dispatch_gap_s": 0.000136348,
+      "response_delay_s": 0.024653748
+    }
+  },
+  "restore_model": {
+    "coefficients": [
+      9.851022196673144e-05,
+      0.16031585571422183,
+      0.0
+    ],
+    "busy_slowdown": 1,
+    "samples": 258
+  },
+  "restore_coverage": {
+    "blocks": [
+      1,
+      192
+    ],
+    "request_count": [
+      1,
+      4
+    ]
+  },
+  "api_inbound": {
+    "P": [
+      0.01663428692385122,
+      0.003969924323874752
+    ],
+    "D": [
+      0.016298171249958186,
+      0.004063194601505682
+    ]
+  },
+  "idle_poll_s": 0.001979943793706294,
+  "query_fixed_s": 0,
+  "discovery_model": {
+    "kind": "transport",
+    "coefficients": [
+      0,
+      0
+    ]
+  },
+  "fit_selection": {
+    "P:prefill": {
+      "selected": "linear",
+      "candidates": [
+        {
+          "name": "linear",
+          "folds": [
+            {
+              "fold": "phase:A2",
+              "relative_error": 0.18253461768758228
+            },
+            {
+              "fold": "phase:B2",
+              "relative_error": 0.23885258587665098
+            },
+            {
+              "fold": "context:0",
+              "relative_error": 0.22347245136323016
+            },
+            {
+              "fold": "context:1",
+              "relative_error": 0.22361980258617092
+            },
+            {
+              "fold": "context:2",
+              "relative_error": 0.4036193553636752
+            }
+          ],
+          "score": 0.2544197625754619
+        },
+        {
+          "name": "graph_shape",
+          "folds": [
+            {
+              "fold": "phase:A2",
+              "relative_error": 0.18253461768758228
+            },
+            {
+              "fold": "phase:B2",
+              "relative_error": 0.23885258587665098
+            },
+            {
+              "fold": "context:0",
+              "relative_error": 0.22347245136323016
+            },
+            {
+              "fold": "context:1",
+              "relative_error": 0.22361980258617092
+            },
+            {
+              "fold": "context:2",
+              "relative_error": 0.4036193553636752
+            }
+          ],
+          "score": 0.2544197625754619
+        }
+      ]
+    },
+    "P:decode": {
+      "selected": "linear",
+      "candidates": [
+        {
+          "name": "linear",
+          "folds": [
+            {
+              "fold": "phase:A2",
+              "relative_error": 0.04055129614505477
+            },
+            {
+              "fold": "phase:B2",
+              "relative_error": 0.028651735152219412
+            },
+            {
+              "fold": "context:0",
+              "relative_error": 0.03347588209780745
+            },
+            {
+              "fold": "context:1",
+              "relative_error": 0.03676748814973062
+            },
+            {
+              "fold": "context:2",
+              "relative_error": 0.03999102740960263
+            }
+          ],
+          "score": 0.035887485790882974
+        },
+        {
+          "name": "graph_shape",
+          "folds": [
+            {
+              "fold": "phase:A2",
+              "relative_error": 0.04021052193093267
+            },
+            {
+              "fold": "phase:B2",
+              "relative_error": 0.02819053302768987
+            },
+            {
+              "fold": "context:0",
+              "relative_error": 0.0327639336858778
+            },
+            {
+              "fold": "context:1",
+              "relative_error": 0.036240430460388134
+            },
+            {
+              "fold": "context:2",
+              "relative_error": 0.058023791599435444
+            }
+          ],
+          "score": 0.03908584214086479
+        }
+      ]
+    },
+    "D:prefill": {
+      "selected": "linear",
+      "candidates": [
+        {
+          "name": "linear",
+          "folds": [
+            {
+              "fold": "phase:A2",
+              "relative_error": 0.47287308671793127
+            },
+            {
+              "fold": "phase:B2",
+              "relative_error": 0.5174113529247122
+            },
+            {
+              "fold": "context:0",
+              "relative_error": 1.2412443732410898
+            },
+            {
+              "fold": "context:1",
+              "relative_error": 0.37774905108594675
+            },
+            {
+              "fold": "context:2",
+              "relative_error": 0.3611264824816189
+            }
+          ],
+          "score": 0.5940808692902598
+        },
+        {
+          "name": "graph_shape",
+          "folds": [
+            {
+              "fold": "phase:A2",
+              "relative_error": 0.47287308671793127
+            },
+            {
+              "fold": "phase:B2",
+              "relative_error": 0.5174113529247122
+            },
+            {
+              "fold": "context:0",
+              "relative_error": 1.2412443732410898
+            },
+            {
+              "fold": "context:1",
+              "relative_error": 0.37774905108594675
+            },
+            {
+              "fold": "context:2",
+              "relative_error": 0.3611264824816189
+            }
+          ],
+          "score": 0.5940808692902598
+        }
+      ]
+    },
+    "D:decode": {
+      "selected": "linear",
+      "candidates": [
+        {
+          "name": "linear",
+          "folds": [
+            {
+              "fold": "phase:A2",
+              "relative_error": 0.04055129614505477
+            },
+            {
+              "fold": "phase:B2",
+              "relative_error": 0.028651735152219412
+            },
+            {
+              "fold": "context:0",
+              "relative_error": 0.03347588209780745
+            },
+            {
+              "fold": "context:1",
+              "relative_error": 0.03676748814973062
+            },
+            {
+              "fold": "context:2",
+              "relative_error": 0.03999102740960263
+            }
+          ],
+          "score": 0.035887485790882974
+        },
+        {
+          "name": "graph_shape",
+          "folds": [
+            {
+              "fold": "phase:A2",
+              "relative_error": 0.04021052193093267
+            },
+            {
+              "fold": "phase:B2",
+              "relative_error": 0.02819053302768987
+            },
+            {
+              "fold": "context:0",
+              "relative_error": 0.0327639336858778
+            },
+            {
+              "fold": "context:1",
+              "relative_error": 0.036240430460388134
+            },
+            {
+              "fold": "context:2",
+              "relative_error": 0.058023791599435444
+            }
+          ],
+          "score": 0.03908584214086479
+        }
+      ]
+    },
+    "restore": [
+      {
+        "busy_slowdown": 1,
+        "folds": [
+          {
+            "fold": "A2",
+            "relative_error": 0.5740263280669756
+          },
+          {
+            "fold": "B2",
+            "relative_error": 1.587149243987229
+          }
+        ],
+        "score": 1.0805877860271023
+      },
+      {
+        "busy_slowdown": 2,
+        "folds": [
+          {
+            "fold": "A2",
+            "relative_error": 0.5135257636657425
+          },
+          {
+            "fold": "B2",
+            "relative_error": 2.0522305479727803
+          }
+        ],
+        "score": 1.2828781558192615
+      },
+      {
+        "busy_slowdown": 4,
+        "folds": [
+          {
+            "fold": "A2",
+            "relative_error": 0.602513807576138
+          },
+          {
+            "fold": "B2",
+            "relative_error": 3.0481606361040727
+          }
+        ],
+        "score": 1.8253372218401054
+      }
+    ],
+    "discovery": [
+      {
+        "kind": "transport",
+        "size": 0,
+        "folds": [
+          {
+            "fold": "A2",
+            "relative_error": 0.28856328662476655
+          },
+          {
+            "fold": "B2",
+            "relative_error": 0.41252062712208093
+          }
+        ],
+        "score": 0.3505419568734237
+      },
+      {
+        "kind": "fixed",
+        "size": 1,
+        "folds": [
+          {
+            "fold": "A2",
+            "relative_error": 3.1304515035971447
+          },
+          {
+            "fold": "B2",
+            "relative_error": 1.3570666779877383
+          }
+        ],
+        "score": 2.2437590907924414
+      },
+      {
+        "kind": "linear",
+        "size": 2,
+        "folds": [
+          {
+            "fold": "A2",
+            "relative_error": 1.19518456267522
+          },
+          {
+            "fold": "B2",
+            "relative_error": 1.3395399010005982
+          }
+        ],
+        "score": 1.2673622318379092
+      }
+    ]
+  },
+  "acquisition_phases": [
+    "A2",
+    "B2"
+  ]
+}

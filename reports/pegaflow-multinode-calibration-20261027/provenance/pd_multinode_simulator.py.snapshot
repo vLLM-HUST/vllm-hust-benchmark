@@ -1,0 +1,585 @@
+"""Configurable measured-cost P/D replay with endogenous queueing and cache reuse."""
+
+from __future__ import annotations
+
+import argparse
+import heapq
+import json
+import math
+import random
+from pathlib import Path
+
+from pd_serving_simulator import (
+    ServingSimulation,
+    HostCache,
+    DOMAIN,
+    BLOCK_BYTES,
+    interpolate,
+)
+from step_simulator import CostModel, Job, KVPool, Request
+
+
+class HandoffPool(KVPool):
+    def prefix(self, job):
+        external = getattr(job, "external_prefix", None)
+        if external is not None:
+            return [next(iter(self.cached[self.key(job, i)])) for i in range(external)]
+        return super().prefix(job)
+
+
+class CalibratedPD(ServingSimulation):
+    def __init__(self, workload, profile, config=None):
+        self.config = dict(config or {})
+        allowed = {
+            "P",
+            "D",
+            "seed",
+            "session_dependencies",
+            "P_token_budget",
+            "D_token_budget",
+            "max_sequences",
+            "P_max_sequences",
+            "D_max_sequences",
+            "P_NPU_KV_GiB",
+            "D_NPU_KV_GiB",
+            "P_CPU_GiB",
+            "D_CPU_GiB",
+            "GPU_APC",
+            "copy_compute_overlap",
+            "copy_lanes",
+            "engine_hosts",
+            "host_CPU_cores",
+            "network_Gbps",
+            "host_memory_GBps",
+            "P_routing",
+            "D_routing",
+            "engine_policy",
+            "handoff_policy",
+            "execution_mode",
+        }
+        if set(self.config) - allowed:
+            raise ValueError(
+                "Unknown configuration fields: "
+                + str(sorted(set(self.config) - allowed))
+            )
+        mode = profile.get("execution_mode", "graph")
+        if self.config.get("execution_mode", mode) != mode:
+            raise ValueError(
+                "Select a cost profile calibrated for the requested execution mode"
+            )
+        for field in [
+            "P",
+            "D",
+            "P_token_budget",
+            "D_token_budget",
+            "max_sequences",
+            "P_max_sequences",
+            "D_max_sequences",
+            "copy_lanes",
+        ]:
+            if field in self.config and (
+                not isinstance(self.config[field], int) or self.config[field] < 1
+            ):
+                raise ValueError(field + " requires a positive integer")
+        for field in [
+            "P_NPU_KV_GiB",
+            "D_NPU_KV_GiB",
+            "P_CPU_GiB",
+            "D_CPU_GiB",
+            "network_Gbps",
+        ]:
+            if field in self.config and (
+                not math.isfinite(self.config[field]) or self.config[field] <= 0
+            ):
+                raise ValueError(field + " requires a positive finite value")
+        if self.config.get("handoff_policy", "full") not in ["full", "best_effort"]:
+            raise ValueError("Unknown handoff policy")
+        self.profile = profile
+        requests = workload["requests"]
+        known = {r["id"] for r in requests}
+        if len(known) != len(requests) or not requests:
+            raise ValueError(
+                "Workload requires unique request IDs and at least one request"
+            )
+        limit = profile["models"]["D"].get("metadata", {}).get("max_model_tokens")
+        self.predecessors = {}
+        previous = {}
+        for row in requests:
+            if not math.isfinite(row["arrival_s"]) or row["arrival_s"] < 0:
+                raise ValueError("Arrival times must be finite and nonnegative")
+            if min(row["prompt_tokens"], row["output_tokens"]) < 1:
+                raise ValueError("Token lengths must be positive")
+            if limit and row["prompt_tokens"] + row["output_tokens"] > limit:
+                raise ValueError(
+                    "Request exceeds the profiled model context limit: " + row["id"]
+                )
+            predecessor = row.get("depends_on")
+            if predecessor is None and self.config.get("session_dependencies", True):
+                predecessor = previous.get(row["task"])
+            if predecessor is not None and predecessor not in known:
+                raise ValueError("Unknown dependency: " + predecessor)
+            self.predecessors[row["id"]] = predecessor
+            previous[row["task"]] = row["id"]
+        walked = set()
+        for key in known:
+            seen = set()
+            while key is not None and key not in walked:
+                if key in seen:
+                    raise ValueError("Cyclic request dependency")
+                seen.add(key)
+                key = self.predecessors[key]
+            walked.update(seen)
+        p_count = self.config.get("P", 2)
+        d_count = self.config.get("D", 1)
+        self.seed = random.Random(self.config.get("seed", 20261027))
+        rows = [
+            {
+                "id": r["id"],
+                "task": r["task"]
+                if self.config.get("session_dependencies", True)
+                else r["id"],
+                "tokens": r["prompt_tokens"],
+                "hashes": r["hashes"],
+            }
+            for r in workload["requests"]
+        ]
+        bundle = {
+            "rows": rows,
+            "initial_inventory": [],
+            "costs": {"seconds_per_pd_byte": profile["network_seconds_per_byte"]},
+        }
+        protocol = {
+            "test_order": [r["id"] for r in rows],
+            "arrival_condition": {
+                "offered_arrivals_seconds": [
+                    r["arrival_s"] for r in workload["requests"]
+                ]
+            },
+        }
+        super().__init__(
+            bundle,
+            protocol,
+            profile["models"]["D"],
+            {"native": profile["native"]},
+            p_count=p_count,
+            d_count=d_count,
+            p_tokens=self.config.get("P_token_budget", 8192),
+            d_tokens=self.config.get("D_token_budget", 2048),
+            max_sequences=self.config.get("max_sequences", 128),
+        )
+        self.specs = {r["id"]: r for r in workload["requests"]}
+        self.role_models = {k: CostModel(v) for k, v in profile["models"].items()}
+        self.cpu_models = {
+            k: CostModel(v) for k, v in profile.get("CPU_models", {}).items()
+        }
+        blocks = [
+            profile["P_blocks"][i % len(profile["P_blocks"])] for i in range(p_count)
+        ] + [profile["D_blocks"]] * d_count
+        host_bytes = [
+            profile["P_CPU_bytes"][i % len(profile["P_CPU_bytes"])]
+            for i in range(p_count)
+        ] + [profile["D_CPU_bytes"]] * d_count
+        for node in range(self.node_count):
+            role = "P" if node < p_count else "D"
+            if role + "_NPU_KV_GiB" in self.config:
+                blocks[node] = int(
+                    self.config[role + "_NPU_KV_GiB"] * 2**30 // BLOCK_BYTES
+                )
+            if role + "_CPU_GiB" in self.config:
+                host_bytes[node] = int(self.config[role + "_CPU_GiB"] * 2**30)
+        self.pools = [
+            HandoffPool(n, 128, enable_caching=self.config.get("GPU_APC", True))
+            for n in blocks
+        ]
+        self.host = [HostCache(n) for n in host_bytes]
+        self.budget = {"CPU_pool_bytes": host_bytes, "NPU_blocks": blocks}
+        self.overlap = self.config.get(
+            "copy_compute_overlap", profile.get("copy_compute_overlap", True)
+        )
+        self.copy_lanes = self.config.get("copy_lanes", profile.get("copy_lanes", 1))
+        self.hosts = self.config.get(
+            "engine_hosts", ["P-host"] * p_count + ["D-host"] * d_count
+        )
+        if len(self.hosts) != self.node_count:
+            raise ValueError("engine_hosts must name every P, then every D")
+        self.cpu_cores = self.config.get("host_CPU_cores", {"P-host": 8, "D-host": 4})
+        if any(not isinstance(n, int) or n < 1 for n in self.cpu_cores.values()):
+            raise ValueError("host_CPU_cores requires positive integer capacities")
+        self.cpu_free = {
+            host: [0.0] * int(self.cpu_cores.get(host, 4)) for host in set(self.hosts)
+        }
+        self.network_free = {}
+        self.memory_free = {}
+        self.route_cursor = {"P": 0, "D": 0}
+        self.route_affinity = {}
+        self.coverage = []
+
+    def resource(self, resource, seconds, kind, key, data, *, payload=0, node=None):
+        memory_hosts = []
+        endpoints = []
+        start = self.now
+        if resource.startswith("RDMA"):
+            target, _, _, source, _ = data
+            endpoints = [
+                f"NIC:{self.hosts[source]}:out",
+                f"NIC:{self.hosts[target]}:in",
+            ]
+            start = max(self.now, *(self.network_free.get(k, 0) for k in endpoints))
+            rate = self.config.get("network_Gbps")
+            if rate is not None:
+                seconds = max(
+                    0, seconds - payload * self.network_s_per_byte
+                ) + payload * 8 / (rate * 1e9)
+            memory_hosts = list({self.hosts[source], self.hosts[target]})
+            resource = f"RDMA:{self.hosts[source]}->{self.hosts[target]}"
+        elif node is not None:
+            memory_hosts = [self.hosts[node]]
+        if resource.startswith("H2D:") and self.copy_lanes > 1:
+            resource = min(
+                (f"{resource}:{i}" for i in range(self.copy_lanes)),
+                key=lambda name: self.resource_free.get(name, 0),
+            )
+        start = max(start, self.resource_free.get(resource, 0))
+        if payload and memory_hosts and self.config.get("host_memory_GBps"):
+            start = max(
+                start, *(self.memory_free.get(host, 0) for host in memory_hosts)
+            )
+            for host in memory_hosts:
+                rate = self.memory_rate(host)
+                self.memory_free[host] = start + payload / (rate * 1e9)
+                seconds = max(seconds, payload / (rate * 1e9))
+        for endpoint in endpoints:
+            self.network_free[endpoint] = start + seconds
+        self.resource_free[resource] = start
+        return super().resource(
+            resource, seconds, kind, key, data, payload=payload, node=node
+        )
+
+    def memory_rate(self, host):
+        rate = self.config["host_memory_GBps"]
+        rate = rate[host] if isinstance(rate, dict) else rate
+        if not math.isfinite(rate) or rate <= 0:
+            raise ValueError("host_memory_GBps requires positive finite capacities")
+        return rate
+
+    def route(self, key, role):
+        spec = self.specs[key]
+        count = self.p_count if role == "P" else self.d_count
+        if role in spec:
+            lane = spec[role]
+            if not 0 <= lane < count:
+                raise ValueError(
+                    f"Explicit {role} route exceeds configured engine count"
+                )
+            return lane
+        policy = self.config.get(role + "_routing", "session_affinity")
+        if policy == "session_affinity":
+            identity = role, spec["task"]
+            if identity not in self.route_affinity:
+                self.route_affinity[identity] = self.route_cursor[role] % count
+                self.route_cursor[role] += 1
+            return self.route_affinity[identity]
+        if policy == "random":
+            return self.seed.randrange(count)
+        if policy == "round_robin":
+            lane = self.route_cursor[role] % count
+            self.route_cursor[role] += 1
+            return lane
+        if policy == "least_outstanding_tokens":
+            offset = 0 if role == "P" else self.p_count
+
+            def load(lane):
+                node = lane + offset
+                pending = [
+                    j
+                    for j in self.jobs.values()
+                    if j.get(role) == node
+                    and (role != "P" or "engine_end" not in j["stages"].get("P", {}))
+                ]
+                return sum(
+                    self.rows[j["id"]]["tokens"] + self.specs[j["id"]]["output_tokens"]
+                    for j in pending
+                ), lane
+
+            return min(range(count), key=load)
+        raise ValueError("Unknown routing policy: " + policy)
+
+    def submit_ready(self):
+        remaining = []
+        for key in self.arrived:
+            row = self.rows[key]
+            predecessor = self.predecessors[key]
+            if row["task"] in self.live_tasks or (
+                predecessor is not None and predecessor not in self.finished
+            ):
+                remaining.append(key)
+                continue
+            lane = self.route(key, "P")
+            self.live_tasks.add(row["task"])
+            self.jobs[key] = {
+                "id": key,
+                "P": lane,
+                "offered": self.offered[key],
+                "ready": max(self.offered[key], self.sessions.get(row["task"], 0)),
+                "stages": {},
+                "engine_jobs": {},
+            }
+            self.prepare(key, lane)
+        self.arrived = remaining
+        self.peak_live = max(self.peak_live, len(self.jobs))
+
+    def prepare(self, key, node):
+        if node >= self.p_count:
+            job = Job(self.request(key, node))
+            live = self.jobs[key]
+            live["engine_jobs"][node] = job
+            self.preparing.add((node, key))
+            gpu = len(self.pools[node].prefix(job))
+            hashes = self.rows[key]["hashes"]
+            source = live["P"]
+            target = len(hashes)
+            if self.config.get("handoff_policy", "full") == "best_effort":
+                target = gpu
+                while target < len(hashes) and (
+                    hashes[target] in self.host[node].keys
+                    or hashes[target] in self.host[source].keys
+                ):
+                    target += 1
+            missing = [h for h in hashes[gpu:target] if h not in self.host[node].keys]
+            if any(h not in self.host[source].keys for h in missing):
+                raise ValueError("Source CPU cache cannot supply full handoff")
+            live["stages"]["D"] = {
+                "prepare": self.now,
+                "node": node,
+                "NPU_initial_prefix_blocks": gpu,
+                "target_prefix_blocks": target,
+                "restore_bytes": (target - gpu) * BLOCK_BYTES,
+            }
+            job.external_prefix = target
+            self.host[source].pins.update(missing)
+            if missing:
+                payload = len(missing) * BLOCK_BYTES
+                query = interpolate(
+                    self.native, self.rows[key]["tokens"], "query_seconds"
+                )
+                self.resource(
+                    "RDMA:P-to-D",
+                    query + payload * self.network_s_per_byte,
+                    "remote_done",
+                    key,
+                    (node, gpu, target, source, missing),
+                    payload=payload,
+                )
+            else:
+                self.restore(key, node, gpu, target)
+            return
+        # save_only producers reuse local NPU APC but never load host cache.
+        job = Job(self.request(key, node))
+        self.jobs[key]["engine_jobs"][node] = job
+        self.preparing.add((node, key))
+        gpu = len(self.pools[node].prefix(job))
+        self.jobs[key]["stages"]["P"] = {
+            "prepare": self.now,
+            "node": node,
+            "NPU_initial_prefix_blocks": gpu,
+            "target_prefix_blocks": gpu,
+            "restore_bytes": 0,
+        }
+        self.admit(key, node)
+
+    def request(self, key, node):
+        row = self.rows[key]
+        return Request(
+            key,
+            self.now,
+            row["tokens"],
+            1 if node < self.p_count else self.specs[key]["output_tokens"],
+            tuple(row["hashes"]),
+            DOMAIN,
+            task=row["task"],
+        )
+
+    def schedule(self, node):
+        role = "P" if node < self.p_count else "D"
+        self.model = self.role_models[role]
+        self.max_sequences = self.config.get(
+            role + "_max_sequences", self.config.get("max_sequences", 128)
+        )
+        policy = self.config.get("engine_policy", "fcfs")
+        if policy == "shortest_remaining_tokens":
+            self.waiting[node] = type(self.waiting[node])(
+                sorted(
+                    self.waiting[node],
+                    key=lambda j: (
+                        j.request.prompt_tokens
+                        - len(self.pools[node].prefix(j)) * 128
+                        + j.request.output_tokens
+                    ),
+                )
+            )
+        elif policy != "fcfs":
+            raise ValueError("Unknown engine policy: " + policy)
+        before = len(self.steps)
+        super().schedule(node)
+        if len(self.steps) == before:
+            return
+        step = self.steps[-1]
+        if role not in self.cpu_models:
+            return
+        cpu = self.cpu_models[role].duration(step)
+        wall = step["end"] - step["start"]
+        slots = self.cpu_free[self.hosts[node]]
+        parallel = min(len(slots), max(1, math.ceil(cpu / wall)))
+        selected = sorted(range(len(slots)), key=lambda i: slots[i])[:parallel]
+        start = max(self.now, *(slots[i] for i in selected))
+        wait = start - self.now
+        for lane in selected:
+            slots[lane] = start + cpu / parallel
+        step.update(host_CPU_s=cpu, host_CPU_wait_s=wait)
+        if wait:
+            step["start"] += wait
+            step["end"] += wait
+            self.engine_until[node] += wait
+            for index, event in enumerate(self.events):
+                if event[2] == "step_done" and event[3] == str(node):
+                    self.events[index] = (event[0] + wait, *event[1:])
+                    break
+            heapq.heapify(self.events)
+
+    def step_done(self, node, scheduled):
+        self.model = self.role_models["P" if node < self.p_count else "D"]
+        return super().step_done(node, scheduled)
+
+    def engine_done(self, key, node):
+        if node >= self.p_count:
+            super().engine_done(key, node)
+            row = self.finished[key]
+            row["TPOT_ms"] = (
+                (row["end"] - row["first"])
+                / max(1, self.specs[key]["output_tokens"] - 1)
+                * 1000
+            )
+            return
+        self.jobs[key]["stages"]["P"]["engine_end"] = self.now
+        # P's measured schedule-to-update cost already contains synchronous save.
+        self.host[node].add(self.rows[key]["hashes"])
+        self.pools[node].release(self.jobs[key]["engine_jobs"][node])
+        self.jobs[key]["D"] = self.p_count + self.route(key, "D")
+        self.prepare(key, self.jobs[key]["D"])
+
+    def run(self):
+        result = super().run()
+        result["scope"] = (
+            "Parameterized measured-cost P/D model; calibration deployment was 2P1D"
+        )
+        result["settings"].update(
+            P=self.p_count,
+            D=self.d_count,
+            configuration=self.config,
+            transfer_model="measured RDMA discovery and serialized D restore; P synchronous save included in step cost",
+            arrivals="workload arrival ledger with optional same-session completion dependency",
+        )
+        result["summary"]["host_CPU_wait_s"] = sum(
+            s.get("host_CPU_wait_s", 0) for s in self.steps
+        )
+        if (self.p_count, self.d_count) != (2, 1):
+            self.coverage.append("P/D engine counts differ from real 2P1D validation")
+        validated = {
+            "P_token_budget": 8192,
+            "D_token_budget": 2048,
+            "max_sequences": 128,
+            "P_max_sequences": 128,
+            "D_max_sequences": 128,
+            "GPU_APC": True,
+            "P_CPU_GiB": 8,
+            "D_CPU_GiB": 16,
+            "engine_policy": "fcfs",
+            "copy_compute_overlap": True,
+            "copy_lanes": self.profile.get("copy_lanes", 1),
+            "handoff_policy": "full",
+            "host_CPU_cores": {"P-host": 8, "D-host": 4},
+            "engine_hosts": ["P-host", "P-host", "D-host"],
+        }
+        for field, value in self.config.items():
+            if field in validated and value != validated[field]:
+                self.coverage.append(
+                    f"{field} differs from the end-to-end validation configuration"
+                )
+        outside_steps = 0
+        for step in self.steps:
+            role = "P" if step["node"] < self.p_count else "D"
+            bounds = self.profile.get("training_coverage", {}).get(role, {})
+            if any(
+                step[k] < low or step[k] > high for k, (low, high) in bounds.items()
+            ):
+                self.coverage.append(
+                    f"{role} compute step outside fitted feature ranges"
+                )
+                outside_steps += 1
+        result["summary"]["extrapolated_steps"] = outside_steps
+        result["coverage"] = {
+            "extrapolations": sorted(set(self.coverage)),
+            "classification": "extrapolated"
+            if self.coverage
+            else "within_component_feature_ranges",
+        }
+        result["limitations"] = [
+            "Predicts fixed token budgets and existing token histories; not an answer-quality model",
+            "P cost includes synchronous connector save and host overhead",
+            "D restore uses isolated service curves; copy/compute contention is an approximation",
+            "Network is an aggregate service resource, not a packet or switch simulator",
+            "3-card 2P1D calibration does not directly validate a 4-card 2P2D deployment",
+            "Shared CPU budget uses measured model-process CPU work; native copy-worker CPU and host memory contention need additional profiles when topology changes",
+        ]
+        return result
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--profile", type=Path, required=True)
+    parser.add_argument("--workload", type=Path, required=True)
+    parser.add_argument("--config", type=Path)
+    parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--rps", type=float)
+    parser.add_argument("--arrival", choices=["fixed", "poisson"], default="fixed")
+    parser.add_argument("--output-tokens", type=int)
+    parser.add_argument("--seed", type=int, default=20261027)
+    parser.add_argument("--reroute", action="store_true")
+    args = parser.parse_args()
+    workload = json.loads(args.workload.read_text(encoding="utf-8"))
+    config = json.loads(args.config.read_text(encoding="utf-8")) if args.config else {}
+    config.setdefault("seed", args.seed)
+    rng = random.Random(args.seed)
+    at = 0
+    for index, row in enumerate(workload["requests"]):
+        if args.rps is not None:
+            if args.rps <= 0:
+                raise ValueError("rps must be positive")
+            if args.arrival == "fixed":
+                at = index / args.rps
+            elif index:
+                at += rng.expovariate(args.rps)
+            row["arrival_s"] = at
+        if args.output_tokens is not None:
+            if args.output_tokens < 1:
+                raise ValueError("output-tokens must be positive")
+            row["output_tokens"] = args.output_tokens
+        if args.reroute:
+            row.pop("P", None)
+            row.pop("D", None)
+    result = CalibratedPD(
+        workload, json.loads(args.profile.read_text(encoding="utf-8")), config
+    ).run()
+    if args.output.exists():
+        raise FileExistsError(args.output)
+    args.output.parent.mkdir(exist_ok=True, parents=True)
+    args.output.write_text(json.dumps(result, indent=2), encoding="utf-8")
+    print(
+        json.dumps(
+            {"summary": result["summary"], "coverage": result["coverage"]}, indent=2
+        )
+    )
+
+
+if __name__ == "__main__":
+    main()
