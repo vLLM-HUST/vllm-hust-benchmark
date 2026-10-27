@@ -82,7 +82,7 @@ def run(args):
         "model_name": args.model,
         "model_type": "openai",
         "base_url": endpoint,
-        "api_key_env": "DEEPPLANNING_LOCAL_KEY",
+        "api_key_env": "DEEPPLANNING_LOCAL_KEY",  # pragma: allowlist secret - environment variable name, not a credential
         "temperature": 0.0,
     }
     (code / "models_config.json").write_text(
