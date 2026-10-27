@@ -8,6 +8,32 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def test_azure_lmm_completion_is_only_a_verified_trace_asset():
+    ledger = json.loads(
+        (ROOT / "docs/workload-data/dataset-validation-status.json").read_text("utf-8")
+    )
+    row = ledger["delivery_inventory"]["AZURE_LMM_2025"]
+    if not row["checked"]:
+        return
+    delivery = json.loads((ROOT / row["delivery_receipt"]).read_text("utf-8"))
+    assert delivery["source_checkbox_eligible"]
+    assert delivery["delivery_kind"] == "metadata_asset_not_native_model_benchmark"
+    assert delivery["original_asset"]["rows_all_fields_verified_and_indexed"] == 1000000
+    assert (
+        delivery["exact_ci_and_research"]["installed_payloads_byte_equal_ci_wheel"]
+        == 47
+    )
+    assert delivery["exact_ci_and_research"][
+        "all_ci_payloads_byte_equal_candidate_full_audit"
+    ]
+    assert delivery["exact_ci_and_research"]["fixed_actual_ci_research_roundtrips"] == 6
+    assert (
+        delivery["model_calls"] == delivery["synthetic_prompts_or_media_created"] == 0
+    )
+    assert not delivery["original_request_replay_claim"]
+    assert not delivery["visual_benchmark_or_quality_claim"]
+
+
 def test_repobench_completion_requires_native_and_fixed_original_scoring():
     ledger = json.loads(
         (ROOT / "docs/workload-data/dataset-validation-status.json").read_text("utf-8")

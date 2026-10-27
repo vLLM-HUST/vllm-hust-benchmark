@@ -1,11 +1,12 @@
 # 数据集逐项验证清单
 
-### Azure LMM 2025服务轨迹资产（接入中，未交付）
+### Azure LMM 2025服务轨迹元数据资产（已交付，非视觉benchmark）
 
 - [x] [微软固定原发布说明](https://github.com/Azure/AzurePublicDataset/blob/215becdacba1ce682c7368642ce97d5a332de7a6/AzureLMMInferenceDataset2025.md)与gzip身份已核验；服务器取得8524196字节原压缩CSV，完整检查100万行四字段。原文件不解压复制到本地或Git；原timestamp字符串和所有数字字符串保持不变，时区未声明，不推断全局绝对时间。
 - [x] 实现原`.csv.gz`流式读取及独立`AZURE_LMM_2025`字段契约，保留TIMESTAMP/NumImages/ContextTokens/GeneratedTokens。元数据没有原prompt或图像内容；`request_body()`拒绝，不造prompt、不把它当视觉任务或模型质量benchmark。官方绘图分析不迁入。
 - [x] 候选包47安装载荷逐字节一致；公开取得/核验/准备命令已实际执行，100万原行四字段全部保真并建索引，固定研究消费者首3/末3共6条回读与公共消费者一致，6条均拒绝`request_body()`。新增模型调用0、无研究观测/分析迁入。
-- [ ] 尚待实际CI工件换锁复核，候选包通过不算正式来源交付，当前不打总勾。
+- [x] 实际CPU CI
+  `040046b5`成功，47安装载荷与CI包及全量核验候选包均逐字节一致；复用100万行保真与索引，实际CI首3/末3研究回读6条一致，公开准备另做3条smoke，不冒称重跑全量。以服务轨迹资产打勾，不宣称请求回放或视觉推理。[交付回执](validation/azure-lmm-2025-asset-delivery-20261027.json)
 
 取得/核验入口：`python scripts/prepare_reused_research_assets.py AZURE_LMM_2025 --mode plan`默认离线计划；新外部目录取得原文件用`--mode download --data-root <目录> --github-api`，已有原数据用`--mode verify --data-root <目录>`。准备统一索引用`python scripts/prepare_reused_source_records.py AZURE_LMM_2025 --data-root <原目录> --output <新外部索引目录>`，不下载模型或执行推理。它是服务轨迹资产，不是原始多模态请求回放；发布方描述的按长度/图像数构造流量也不在这里冒称原请求。
 
@@ -190,7 +191,8 @@ tree元数据、`--node`私有node路径、`--output`独立日志目录和`--exe
 
 - [x] 复用已有MMMU原生字段适配，更新92文件身份并保留旧登记revision；全16字段/11550行及索引完整，答案/解释与输入分离。精确CI的44载荷逐字节核验、152条公共/研究往返通过，未迁入研究观测或分析。
 
-当前机器清单计算：**55/113项已交付，58项待补**（另5项仅分类，不计入分母）。新增RepoBench官方默认配置90原题的NPU生成、固定评分与保存审计；样本EM均0，不代表质量通过。OpenThoughts3九条原语料续写预算耗尽的边界不变。以下历史统计保留其原时点，不代表当前总数。
+当前机器清单计算：**56/113项已交付，57项待补**（另5项仅分类，不计入分母）。新增Azure LMM
+2025全100万行/实际CI公共与研究接入闭环，仅按服务轨迹元数据资产交付，不是视觉benchmark或原始请求回放。RepoBench样本EM均0、OpenThoughts3九条预算耗尽的边界不变。以下历史统计保留其原时点，不代表当前总数。
 
 ### ChartQA分步骤（来源总勾已完成：固定原测试抽样交付）
 
@@ -471,7 +473,7 @@ TB；服务器/data约1.42TB可用，未缩小语料。ChartQA当前两卡主机
 | DRAGON_PUBLIC              | [ ] 待开展                   | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                      |
 | TEMPORALWIKI               | [ ] 待开展                   | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                      |
 | COPILOT_AGENT_2026         | [ ] 待开展                   | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                      |
-| AZURE_LMM_2025             | [ ] 服务轨迹资产接入中       | 原gzip100万行四字段取得并校验；候选公共准备、索引与研究回读核验中。无原prompt/媒体，不造请求；实际CI闭环前不勾。                                                                                                                                                                                                  |
+| AZURE_LMM_2025             | [x] 服务轨迹元数据资产交付   | 全100万行四字段保真/索引、47实际CI安装载荷、首3/末3研究回读完成；无原prompt/媒体，不造请求，不称视觉benchmark。见[回执](validation/azure-lmm-2025-asset-delivery-20261027.json)。                                                                                                                                 |
 | HLE_VERIFIED               | — 仅分类                     | 本轮不补实现、不重跑                                                                                                                                                                                                                                                                                              |
 | SWE_BENCH_PRO              | — 仅分类                     | 本轮不补实现、不重跑                                                                                                                                                                                                                                                                                              |
 | FRONTIERSCIENCE            | — 仅分类                     | 本轮不补实现、不重跑                                                                                                                                                                                                                                                                                              |
