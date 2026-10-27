@@ -8,6 +8,38 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def test_scienceworld_delivery_requires_native_scores_and_actual_ci_consumer():
+    ledger = json.loads(
+        (ROOT / "docs/workload-data/dataset-validation-status.json").read_text("utf-8")
+    )
+    row = ledger["delivery_inventory"]["SCIENCEWORLD"]
+    assert row["checked"] and row["status"] == "AVAILABLE"
+    delivery = json.loads((ROOT / row["delivery_receipt"]).read_text("utf-8"))
+    assert delivery["source_checkbox_eligible"]
+    assert delivery["status"] == "END_TO_END_EXECUTED_AND_SCORED"
+    assert delivery["original_assets"]["original_rows"] == 7207
+    assert delivery["native_profile"]["selected_original_episodes"] == 9
+    assert delivery["native_profile"]["original_model_call_attempts"] == 464
+    assert delivery["native_profile"]["max_generation_tokens"] == 50
+    assert delivery["native_profile"]["environment_step_limit"] == 100
+    assert delivery["native_profile"]["valid_model_outputs_rerun"] == 0
+    assert len(delivery["saved_score_consistency"]["episodes"]) == 9
+    assert delivery["saved_score_consistency"]["model_calls"] == 0
+    actual = delivery["exact_ci_and_research"]
+    assert actual["installed_payloads"] == 51
+    assert actual["reused_actual_ci_research_readbacks"] == 9
+    assert actual["reused_original_full_fields_and_index"] == 7207
+    assert actual["new_native_inference_calls"] == 0
+    assert (
+        delivery["software_ci"]["tests"]
+        == delivery["software_ci"]["lint"]
+        == delivery["software_ci"]["cpu_correctness"]
+        == "success"
+    )
+    assert delivery["strict_environment_replay"]["status"] == "FAILED_NOT_WAIVED"
+    assert not delivery["quality_claim"]
+
+
 def test_azure_lmm_completion_is_only_a_verified_trace_asset():
     ledger = json.loads(
         (ROOT / "docs/workload-data/dataset-validation-status.json").read_text("utf-8")
