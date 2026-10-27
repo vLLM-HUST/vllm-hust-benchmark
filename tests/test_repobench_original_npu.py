@@ -111,3 +111,22 @@ def test_generation_keeps_native_sampling_budget_and_only_decodes_suffix(device_
 def test_execute_requires_explicit_resource_window_before_any_files():
     with pytest.raises(ValueError, match="idle research/NPU window"):
         RUN.execute(SimpleNamespace(execute=True, resource_window_confirmed=False))
+
+
+def test_author_scorer_runs_in_fresh_fixed_hash_process(tmp_path, monkeypatch):
+    calls = []
+    monkeypatch.setenv("PYTHONHASHSEED", "123")
+
+    def run(command, **kwargs):
+        calls.append((command, kwargs))
+        return SimpleNamespace(returncode=0, stdout="official report")
+
+    monkeypatch.setattr(RUN.subprocess, "run", run)
+    assert (
+        RUN.score_original(tmp_path, tmp_path / "results", "python")
+        == "official report"
+    )
+    command, options = calls[0]
+    assert command[1] == str(tmp_path / "eval.py")
+    assert command[-2:] == ["--language", "python"]
+    assert options["env"]["PYTHONHASHSEED"] == "0"

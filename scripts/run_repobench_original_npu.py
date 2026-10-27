@@ -7,13 +7,13 @@ emulation or execution of generated code. Default prints a plan only.
 
 import argparse
 from collections import defaultdict
-from contextlib import redirect_stdout
 import hashlib
 import importlib.util
-import io
 import json
+import os
 from pathlib import Path
 import sys
+import subprocess
 
 from prepare_repobench_original_assets import REVISION, verify_original
 
@@ -93,6 +93,34 @@ def original_module(source, name):
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module
+
+
+def score_original(source, results, language):
+    """Author scorer unchanged; freeze Python hash ordering in a fresh process.
+
+    CodeBLEU0.7 dataflow matching was empirically hash-seed-sensitive. Seed0 is
+    a declared reproducibility configuration, not a search for a better score.
+    Setting os.environ inside the existing interpreter would not fix its hash.
+    """
+    env = os.environ.copy()
+    env["PYTHONHASHSEED"] = "0"
+    completed = subprocess.run(
+        [
+            sys.executable,
+            str(source / "eval.py"),
+            "--path",
+            str(results),
+            "--language",
+            language,
+        ],
+        env=env,
+        capture_output=True,
+        text=True,
+    )
+    if completed.returncode:
+        sys.stderr.write(completed.stderr)
+        completed.check_returncode()
+    return completed.stdout
 
 
 def prepare(args, author, tokenizer):
@@ -216,6 +244,7 @@ def execute(args):
         "attention_implementation": "eager",
         "source_checkbox_eligible": False,
         "author_model_quality_reproduced": False,
+        "scoring_python_hash_seed": 0,
     }
     path = args.output / "receipt-public.json"
     path.write_text(json.dumps(receipt, indent=2))
@@ -286,13 +315,9 @@ def execute(args):
                     + "\n"
                 )
             path.write_text(json.dumps(receipt, indent=2))
-        scorer = original_module(args.source_root, "eval")
         for language in args.languages:
-            output = io.StringIO()
-            with redirect_stdout(output):
-                scorer.eval(str(args.output / language), language=language)
             (args.output / (language + "-official-scoring.txt")).write_text(
-                output.getvalue()
+                score_original(args.source_root, args.output / language, language)
             )
         verify_original(args.source_root, args.archive)
         receipt["status"] = (

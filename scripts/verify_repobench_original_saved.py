@@ -6,8 +6,6 @@ Failed/unknown attempts remain explicit; no replacement, normalization or retry.
 """
 
 import argparse
-from contextlib import redirect_stdout
-import io
 import json
 from pathlib import Path
 import sys
@@ -148,23 +146,61 @@ def execute(args):
     )
     audit_result_files(completed, root, partial=args.partial)
     scores = {}
+    legacy_report_matches = {}
     if not args.partial:
         equal(
             receipt["model_calls"],
             len(saved_selection),
             "one native generation per selected task",
         )
-        scorer = native.original_module(args.source_root, "eval")
-        for language in languages:
-            report = io.StringIO()
-            with redirect_stdout(report):
-                scorer.eval(str(root / language), language=language)
-            equal(
-                report.getvalue(),
-                (root / (language + "-official-scoring.txt")).read_text(),
-                "unchanged author EM/ES/CodeBLEU full report",
+        freeze = getattr(args, "freeze_scoring_output", None)
+        if receipt.get("scoring_python_hash_seed") != 0 and freeze is None:
+            raise ValueError(
+                "Legacy unseeded CodeBLEU reports are hash-sensitive; explicitly freeze scores in a new external directory, retaining original reports"
             )
-            scores[language] = report.getvalue()
+        if freeze is not None:
+            freeze = freeze.resolve()
+            if freeze.exists() or any(
+                freeze.is_relative_to(p.resolve())
+                for p in [root, args.source_root, args.data_root, args.model_root]
+            ):
+                raise ValueError(
+                    "fresh scoring directory outside original source/data/model/run required"
+                )
+            freeze.mkdir(parents=True, mode=0o700)
+        for language in languages:
+            report = native.score_original(args.source_root, root / language, language)
+            equal(
+                native.score_original(args.source_root, root / language, language),
+                report,
+                "repeatable unchanged author scoring at PYTHONHASHSEED=0",
+            )
+            legacy_report_matches[language] = (
+                report == (root / (language + "-official-scoring.txt")).read_text()
+            )
+            if receipt.get("scoring_python_hash_seed") == 0:
+                equal(
+                    legacy_report_matches[language],
+                    True,
+                    "original fixed-seed author report",
+                )
+            if freeze is not None:
+                (freeze / (language + "-official-scoring.txt")).write_text(report)
+            scores[language] = report
+        if freeze is not None:
+            (freeze / "scoring-profile-public.json").write_text(
+                json.dumps(
+                    {
+                        "source_id": "REPOBENCH",
+                        "python_hash_seed": 0,
+                        "author_scoring_code_unchanged": True,
+                        "unseeded_reports_retained": True,
+                        "original_report_matches_fixed_seed": legacy_report_matches,
+                        "new_model_calls": 0,
+                    },
+                    indent=2,
+                )
+            )
     native.verify_original(args.source_root, args.archive)
     return {
         "source_id": "REPOBENCH",
@@ -175,6 +211,8 @@ def execute(args):
         "verified_saved_tasks": len(completed),
         "unknown_attempt_indices": unknown,
         "official_reports": scores,
+        "scoring_python_hash_seed": None if args.partial else 0,
+        "legacy_original_report_matches_fixed_seed": legacy_report_matches,
         "new_model_calls": 0,
         "source_checkbox_eligible": False,
         "note": "Source delivery additionally requires public/research consumer evidence; this is not author CUDA baseline quality reproduction.",
@@ -186,6 +224,11 @@ def main():
     for name in ("source-root", "archive", "data-root", "model-root", "run-root"):
         parser.add_argument("--" + name, type=Path, required=True)
     parser.add_argument("--partial", action="store_true")
+    parser.add_argument(
+        "--freeze-scoring-output",
+        type=Path,
+        help="Explicit fresh external scoring output for historical unseeded reports; original reports retained, no inference",
+    )
     args = parser.parse_args()
     print(json.dumps(execute(args), indent=2))
 

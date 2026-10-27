@@ -81,3 +81,100 @@ def test_partial_unknown_attempt_is_retained_not_completed(tmp_path):
         [task], tmp_path, None, None, partial=True
     )
     assert completed == [] and unknown == [0]
+
+
+@pytest.mark.parametrize(
+    "mode",
+    [
+        "legacy_frozen",
+        "legacy_not_frozen",
+        "controlled_changed",
+        "nonrepeatable",
+        "controlled_exact",
+    ],
+)
+def test_fixed_seed_scoring_never_overwrites_legacy_reports(
+    tmp_path, monkeypatch, mode
+):
+    root = tmp_path / "run"
+    root.mkdir()
+    selection = [{"language": "python"}]
+    receipt = {
+        "source_id": "REPOBENCH",
+        "code_revision": AUDIT.native.REVISION,
+        "model_revision": AUDIT.native.MODEL_REVISION,
+        "prompt_budget": 15800,
+        "max_new_tokens": 128,
+        "temperature": 0.2,
+        "top_p": 0.95,
+        "do_sample": True,
+        "status": "ORIGINAL_GENERATION_AND_AUTHOR_SCORING_COMPLETED_PENDING_SAVED_AUDIT",
+        "verified_parameter_device_type": "npu",
+        "per_stratum": 1,
+        "selected_tasks": 1,
+        "model_calls": 1,
+    }
+    if mode.startswith("controlled"):
+        receipt["scoring_python_hash_seed"] = 0
+    (root / "receipt-public.json").write_text(json.dumps(receipt))
+    (root / "selection.private.json").write_text(json.dumps(selection))
+    saved = "fixed report" if mode == "controlled_exact" else "legacy report"
+    original = root / "python-official-scoring.txt"
+    original.write_text(saved)
+    before = original.stat().st_mtime_ns
+    monkeypatch.setattr(AUDIT.native, "verify_original", lambda *a: None)
+    monkeypatch.setattr(AUDIT.native, "verify_files", lambda *a: None)
+    monkeypatch.setattr(AUDIT.native, "prepare", lambda *a: selection)
+    monkeypatch.setattr(AUDIT.native, "original_module", lambda *a: SimpleNamespace())
+    monkeypatch.setitem(
+        sys.modules,
+        "transformers",
+        SimpleNamespace(
+            AutoTokenizer=SimpleNamespace(from_pretrained=lambda *a, **kw: None)
+        ),
+    )
+    monkeypatch.setattr(
+        AUDIT, "audit_saved_tasks", lambda *a, **kw: ([("fixture", "fixture")], [])
+    )
+    monkeypatch.setattr(AUDIT, "audit_result_files", lambda *a, **kw: None)
+    counter = []
+
+    def score(*a):
+        counter.append(1)
+        return (
+            "different repeat"
+            if mode == "nonrepeatable" and len(counter) % 2 == 0
+            else "fixed report"
+        )
+
+    monkeypatch.setattr(AUDIT.native, "score_original", score)
+    freeze = (
+        None
+        if mode in ["legacy_not_frozen", "controlled_changed", "controlled_exact"]
+        else tmp_path / "fixed-scores"
+    )
+    args = SimpleNamespace(
+        source_root=tmp_path / "source",
+        archive=tmp_path / "source.zip",
+        data_root=tmp_path / "data",
+        model_root=tmp_path / "model",
+        run_root=root,
+        partial=False,
+        freeze_scoring_output=freeze,
+    )
+    if mode in ["legacy_not_frozen", "controlled_changed", "nonrepeatable"]:
+        with pytest.raises(ValueError):
+            AUDIT.execute(args)
+    else:
+        result = AUDIT.execute(args)
+        assert (
+            result["scoring_python_hash_seed"] == 0 and result["new_model_calls"] == 0
+        )
+        if freeze:
+            assert (
+                freeze / "python-official-scoring.txt"
+            ).read_text() == "fixed report"
+            assert result["legacy_original_report_matches_fixed_seed"] == {
+                "python": False
+            }
+    assert original.read_text() == saved and original.stat().st_mtime_ns == before

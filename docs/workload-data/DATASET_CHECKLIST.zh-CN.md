@@ -2,6 +2,8 @@
 
 ### RepoBench原生仓库级代码补全（准备中，未交付）
 
+评分可复现性：本次实测CodeBLEU0.7的Python结果受Python哈希种子影响，同一批保存输出总CodeBLEU出现19.93/20.13两值，EM/ES及Java分数不变。原生入口现以新评分子进程固定`PYTHONHASHSEED=0`，不修改作者评分代码；旧无种子报告必须显式加`--freeze-scoring-output <新外部评分目录>`由保存审计生成独立评分文件并重复核验两次，原报告保留，不能反复重算挑高分。已完成90题的固定种子评分审计，新增模型调用0；样本Python/Java的EM均为0，负面结果保留，不代表质量达标或作者CUDA基线复现。
+
 - [x] 运行中部分保存审计：90题固定选择从原Parquet重建一致，前43题的token解码、作者下一行提取、原参考及结果关系核验通过，新增模型调用0；当时索引43仍在执行，保留未知而不计完成。整套原生生成、官方评分及最终审计前不打总勾。旧运行进程的receipt沿用初始“输入已准备”标签至终态，实际执行以保存attempt、NPU参数证明及活进程核实；公共入口已修正后续运行的状态标签，不为改标签重跑有效结果。
 
 作者模型取得方式：在服务器已有授权的HF客户端环境运行`hf download deepseek-ai/deepseek-coder-1.3b-base --revision c919139c3a9b4070729c8b2cca4847ab29ca8d94 --include LICENSE config.json generation_config.json pytorch_model.bin special_tokens_map.json tokenizer.json tokenizer_config.json --local-dir <外部模型目录>`。固定版本七文件会在原生入口再次核对大小/SHA256；不依赖浮动main，不下载自定义Python代码，不把模型放进Git。主站网络不可用时可显式设置同发布方镜像`HF_ENDPOINT=https://hf-mirror.com`，仍核对同一固定身份。已有模型直接复用，不重下。
