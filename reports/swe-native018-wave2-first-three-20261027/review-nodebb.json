@@ -1,0 +1,91 @@
+{
+  "status": "reviewed_valid_functional_negative_submitted_patch",
+  "agent": {
+    "status": "Submitted",
+    "model_calls": 54,
+    "elapsed_seconds": 265.49568465165794,
+    "agent_submitted": true,
+    "patch_sha256": "d37f8e288c048ed05b643fb2f9c5dd1a9ea3343dff297f6afe4f2f562b6f5ed2",
+    "container_cleanup_exit_code": 0
+  },
+  "request_audit": {
+    "attempts": 54,
+    "successful_returns": 54,
+    "rejected": 0,
+    "response_ids_usage_content_hashes_matched": true,
+    "http_retries": 0
+  },
+  "official_grading": {
+    "resolved": false,
+    "unresolved": [],
+    "model_calls": 0,
+    "fail_to_pass": {
+      "expected": 3,
+      "passed": 0,
+      "failed": 3,
+      "missing": 0
+    },
+    "pass_to_pass": {
+      "expected": 252,
+      "passed": 252,
+      "failed": 0,
+      "missing": 0
+    },
+    "test_counts": {
+      "PASSED": 252,
+      "FAILED": 3
+    }
+  },
+  "application": {
+    "status": "applied",
+    "apply_exit_code": 0,
+    "state_capture": "complete",
+    "raw_patch_bytes": 5105,
+    "raw_patch_sha256": "d37f8e288c048ed05b643fb2f9c5dd1a9ea3343dff297f6afe4f2f562b6f5ed2",
+    "after_equals_graded": true,
+    "changed_path_count": 3
+  },
+  "raw_vs_parsed": {
+    "raw_Mocha": {
+      "tests": 265,
+      "passes": 262,
+      "failures": 3,
+      "pending": 0
+    },
+    "original_parser_unique": {
+      "PASSED": 252,
+      "FAILED": 3
+    },
+    "preserved_original_parser_no_rewrite": true
+  },
+  "failure_mechanism": {
+    "observed": "Concurrent posting test expected9 bad-request responses but observed0; the following two unread-count assertions observed13 vs expected4. All three required tests executed and failed; no missing tests.",
+    "source_support": "Frozen original dataset test patch posts10 concurrent requests to the actual topics API. Submitted patch modifies posting controller, error translation and a local diagnostic file.",
+    "inference_boundary": "Nine additional unread items are consistent with failure to reject the nine extra concurrent posts. Internal lock root cause was not separately executed or proven; no speculative library diagnosis."
+  },
+  "original_fixture_clean": true,
+  "resource_release": {
+    "service_exit_code": 0,
+    "sessions_drained": true,
+    "all_devices_released": true,
+    "CPU_cleanup_exit_code": 0
+  },
+  "evidence": {
+    "CPU_seal_sha256": "17be1899e1f1eddfd45e1dac5d6940d4baac24da4a8f2cef0b33364e3e044c08",
+    "CPU_files": 59,
+    "public_CPU_summary_sha256": "9683b7c8a8e31cc80b3eefb150001886a14ef7be45af501e8720c67d10f574fc",
+    "storage_result_review_sha256": "c1d104cda13f3eb443cfc5bdddecbf8d1073d47e4fc7c9f3d47dd663116b278d",
+    "raw_assertion_review_sha256": "a80bbbd13bd0a2769e31142f45445729171cfb818897a19964ecf0e14666b6e9",
+    "service_receipt_sha256": "1a8e21534d103335d7b18ee03ade51a80460b21c36206ddb50d1c995e0f5fdc5",
+    "service_seal_sha256": "b77e0040bb9ac7bdc07d0498dbe06cb152c68cd2939db82aca98c95e1356c3c9",
+    "service_files": 14
+  },
+  "current_counts": {
+    "attempts": 19,
+    "original_official_positive": 2,
+    "same_answer_recovery_positive": 3,
+    "unattempted": 712,
+    "prior_V096_18_attempt_snapshot_unchanged": true
+  },
+  "new_review_model_or_grading_calls": 0
+}
