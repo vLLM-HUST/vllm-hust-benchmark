@@ -849,6 +849,18 @@
       "normalization": {},
       "requirements": ["Original v1.1 Python and Java next-line completion records, preserving nested context path/snippet order and values", "Full all_code, next_line and gold_snippet_index stay reference-side, not blind model inputs", "Reuse author construct_prompt, date/length selection, tokenizer-dependent window handling, next-line extraction and scoring; raw records are not chat requests", "Physical file and row references are original release positions, not timestamps or server arrival order"],
       "status": "ORIGINAL_FIELDS_MAPPED_NATIVE_AND_RESEARCH_CLOSURE_PENDING"
+    },
+    "COPILOT_AGENT_2026": {
+      "kind": "request_metadata",
+      "mapping": "copilot_original_session_metadata",
+      "input_fields": [],
+      "required_fields": ["session_id", "date", "turns"],
+      "outcome_fields": [],
+      "annotation_fields": ["session_id", "date", "turns"],
+      "id_field": "",
+      "normalization": {},
+      "requirements": ["Original nested session metadata only; no prompts or request replay", "Keep complete original turns, llm_calls, tool_batches, function_calls and all nested extension fields without flattening or coercion", "Use original file SHA256 and row index as identity; do not deduplicate by session label", "Anonymous model names and cache counters do not establish real model identity or exact engine KV blocks"],
+      "status": "ORIGINAL_METADATA_MAPPED_FULL_PROVIDER_AND_RESEARCH_VALIDATION_PENDING"
     }
   }
 }

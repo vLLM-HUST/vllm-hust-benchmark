@@ -76,7 +76,7 @@ def test_original_research_assets_are_registered_without_native_completion_claim
     sources = json.loads(
         runner.CATALOG.read_text("utf-8"), object_pairs_hook=unique_object
     )["sources"]
-    assert len(sources) == 101  # frozen100 plus the already-planned Azure LMM asset
+    assert len(sources) == 102  # frozen100 plus two already-planned metadata assets
     assert sum(EXPECTED.values()) == 48
     ledger = json.loads(
         (ROOT / "docs/workload-data/dataset-validation-status.json").read_text("utf-8")

@@ -44,7 +44,7 @@ def test_enterprise_and_traces_not_forced_into_task_classes():
         ]
         == []
     )
-    assert not provider.delivery_source_plan("COPILOT_AGENT_2026")[
+    assert provider.delivery_source_plan("COPILOT_AGENT_2026")[
         "data_provider_source_registered"
     ]
 

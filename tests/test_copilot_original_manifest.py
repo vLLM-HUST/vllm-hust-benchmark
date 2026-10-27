@@ -18,6 +18,22 @@ from vllm_hust_workload_data.copilot import (
     verify_session,
 )
 from vllm_hust_workload_data.adapters import adapt_row
+from vllm_hust_workload_data.registry import adapter_spec, source_spec
+
+
+def test_registered_release_uses_original_all_shards_not_requests():
+    source = source_spec("COPILOT_AGENT_2026")
+    spec = adapter_spec("COPILOT_AGENT_2026")
+    assert source["revision"] == "ghcp-coding-agent-2026"
+    assert source["release_id"] == 400522856
+    assert len(source["files"]) == 606
+    assert sum(item["rows"] for item in source["files"]) == 301026
+    assert len({item["path"].split("/")[0] for item in source["files"]}) == 7
+    assert all(item["role"] == "raw_source" for item in source["files"])
+    assert all(item["path"].endswith(".jsonl.gz") for item in source["files"])
+    assert spec["kind"] == "request_metadata"
+    assert spec["input_fields"] == spec["outcome_fields"] == []
+    assert spec["id_field"] == ""
 
 
 def metadata_spec():
