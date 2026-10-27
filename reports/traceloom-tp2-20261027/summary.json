@@ -1,0 +1,260 @@
+{
+  "status": "COMPLETE_ABBA_STRUCTURAL_CONTROL",
+  "protocol": {
+    "status": "frozen_before_capture",
+    "cells": [
+      {
+        "name": "c0-host",
+        "backend": "HOST"
+      },
+      {
+        "name": "c1-aiv",
+        "backend": "AIV"
+      },
+      {
+        "name": "c2-aiv",
+        "backend": "AIV"
+      },
+      {
+        "name": "c3-host",
+        "backend": "HOST"
+      }
+    ],
+    "runtime": "/workspace/traceloom-guidance-20261025/runtime-v2",
+    "model": "/models/Qwen3-0.6B",
+    "independent_unit": "engine process; ranks and replays are paired/nested observations",
+    "purpose": "Archive a complete current-runtime two-repetition structural comparison; not historical FFTS+ reproduction",
+    "configuration": "Same qualified TP2 pilot; two warmup and two profiled sequential requests per process",
+    "no_unprofiled_speedup_claim": true,
+    "scripts": {
+      "tp2_pilot.py": "2719a97c8e8a4c150b64e308fb0b1d2fbbcc73388efdae49102cc40cd4ea8477",
+      "run_tp2_formal.py": "ab7f62c304c43649b17df97c08cb03373f1d685c96d0a8f4a9de184b07782550",
+      "launch_tp2_pilot.py": "b3c2d93947ea72b267c075832e61ef9df056fa8ce77f76db7d004bbaaa0a3751"
+    }
+  },
+  "independent_processes": 4,
+  "profiles": 8,
+  "outputs_identical": true,
+  "workers": [
+    {
+      "cell": "c0-host",
+      "backend": "HOST",
+      "rank": 0,
+      "launches": 1798,
+      "members": 46562,
+      "units": 62,
+      "matching_coordinates": 1798,
+      "receipt": "/workspace/traceloom-tp2-analysis-20261027/c0-host/raw-worker-0.json",
+      "sha256": "bce5499ffc37dd5639982c517e616849a1ff07a25fbae0faaf471111b86080ef"
+    },
+    {
+      "cell": "c0-host",
+      "backend": "HOST",
+      "rank": 1,
+      "launches": 1798,
+      "members": 46562,
+      "units": 62,
+      "matching_coordinates": 1798,
+      "receipt": "/workspace/traceloom-tp2-analysis-20261027/c0-host/raw-worker-1.json",
+      "sha256": "072bcf9ae3ede8837a7adcda934b29d6e1b4cfc61e055d4adfb7bfa937fc1f02"
+    },
+    {
+      "cell": "c1-aiv",
+      "backend": "AIV",
+      "rank": 0,
+      "launches": 1798,
+      "members": 21824,
+      "units": 62,
+      "matching_coordinates": 1798,
+      "receipt": "/workspace/traceloom-tp2-analysis-20261027/c1-aiv/raw-worker-0.json",
+      "sha256": "7f90236df842c3077c7629d0e82bf90d95532cf22dbfb81f2f4a222d7ce26659"
+    },
+    {
+      "cell": "c1-aiv",
+      "backend": "AIV",
+      "rank": 1,
+      "launches": 1798,
+      "members": 21824,
+      "units": 62,
+      "matching_coordinates": 1798,
+      "receipt": "/workspace/traceloom-tp2-analysis-20261027/c1-aiv/raw-worker-1.json",
+      "sha256": "b83483e09f78088d54add5ef084805b978e3790ffd189de99378171165310deb"
+    },
+    {
+      "cell": "c2-aiv",
+      "backend": "AIV",
+      "rank": 0,
+      "launches": 1798,
+      "members": 21824,
+      "units": 62,
+      "matching_coordinates": 1798,
+      "receipt": "/workspace/traceloom-tp2-analysis-20261027/c2-aiv/raw-worker-0.json",
+      "sha256": "7ba014cc716645c9958b4e65a61f6372152c7f0267d9ab9772f4732b3bf79fb0"
+    },
+    {
+      "cell": "c2-aiv",
+      "backend": "AIV",
+      "rank": 1,
+      "launches": 1798,
+      "members": 21824,
+      "units": 62,
+      "matching_coordinates": 1798,
+      "receipt": "/workspace/traceloom-tp2-analysis-20261027/c2-aiv/raw-worker-1.json",
+      "sha256": "61821de2c4ecd56c1f6928434fb2a7052c522d1b37e45df298ca0e539a15fc5d"
+    },
+    {
+      "cell": "c3-host",
+      "backend": "HOST",
+      "rank": 0,
+      "launches": 1798,
+      "members": 46562,
+      "units": 62,
+      "matching_coordinates": 1798,
+      "receipt": "/workspace/traceloom-tp2-analysis-20261027/c3-host/raw-worker-0.json",
+      "sha256": "aa4e5eb3199945c47ebd492d4f46eeb7dd2d6527b52a37f607c9cace9537121a"
+    },
+    {
+      "cell": "c3-host",
+      "backend": "HOST",
+      "rank": 1,
+      "launches": 1798,
+      "members": 46562,
+      "units": 62,
+      "matching_coordinates": 1798,
+      "receipt": "/workspace/traceloom-tp2-analysis-20261027/c3-host/raw-worker-1.json",
+      "sha256": "5cb81384c54f741fbef1d262631c294cdde61bbab9db3d63ae03b700d759b375"
+    }
+  ],
+  "totals": {
+    "launches": 14384,
+    "members": 273544,
+    "units": 496,
+    "matching_coordinates": 14384
+  },
+  "comparisons": [
+    {
+      "path": "/workspace/traceloom-tp2-analysis-20261027/comparison-0.json",
+      "sha256": "abeb91775a258a310d47ddb366c3fb79c5610390bdcce500563c35c3130c4a19",
+      "answer_agreement": [
+        {
+          "slots": true,
+          "left_samples": true,
+          "right_samples": true
+        },
+        {
+          "slots": true,
+          "left_samples": true,
+          "right_samples": true
+        }
+      ],
+      "per_rank": [
+        {
+          "members": {
+            "shared_members": 295,
+            "left_only_members": 456,
+            "right_only_members": 57
+          },
+          "left_medians_ns": {
+            "shared_task_sum_ns": 1625509.0,
+            "specific_task_sum_ns": 16090122.0,
+            "total_task_sum_ns": 17717049.0,
+            "visible_union_ns": 17717049.0,
+            "envelope_ns": 20907937.0
+          },
+          "right_medians_ns": {
+            "shared_task_sum_ns": 1658582.0,
+            "specific_task_sum_ns": 1071749.0,
+            "total_task_sum_ns": 2733084.0,
+            "visible_union_ns": 2733084.0,
+            "envelope_ns": 19274064.0
+          }
+        },
+        {
+          "members": {
+            "shared_members": 295,
+            "left_only_members": 456,
+            "right_only_members": 57
+          },
+          "left_medians_ns": {
+            "shared_task_sum_ns": 1626440.0,
+            "specific_task_sum_ns": 558580.0,
+            "total_task_sum_ns": 2184620.0,
+            "visible_union_ns": 2184620.0,
+            "envelope_ns": 20822510.0
+          },
+          "right_medians_ns": {
+            "shared_task_sum_ns": 1656810.0,
+            "specific_task_sum_ns": 10745590.0,
+            "total_task_sum_ns": 12401810.0,
+            "visible_union_ns": 12401810.0,
+            "envelope_ns": 19118200.0
+          }
+        }
+      ]
+    },
+    {
+      "path": "/workspace/traceloom-tp2-analysis-20261027/comparison-1.json",
+      "sha256": "92acd3892fbffe271ec698c8c8237a09f54685fc09e86b89b7a6b7a8a057d202",
+      "answer_agreement": [
+        {
+          "slots": true,
+          "left_samples": true,
+          "right_samples": true
+        },
+        {
+          "slots": true,
+          "left_samples": true,
+          "right_samples": true
+        }
+      ],
+      "per_rank": [
+        {
+          "members": {
+            "shared_members": 295,
+            "left_only_members": 456,
+            "right_only_members": 57
+          },
+          "left_medians_ns": {
+            "shared_task_sum_ns": 1609446.0,
+            "specific_task_sum_ns": 9534321.0,
+            "total_task_sum_ns": 11142486.0,
+            "visible_union_ns": 11142486.0,
+            "envelope_ns": 18063082.0
+          },
+          "right_medians_ns": {
+            "shared_task_sum_ns": 1634712.0,
+            "specific_task_sum_ns": 5560971.0,
+            "total_task_sum_ns": 7195511.0,
+            "visible_union_ns": 7195511.0,
+            "envelope_ns": 19768305.0
+          }
+        },
+        {
+          "members": {
+            "shared_members": 295,
+            "left_only_members": 456,
+            "right_only_members": 57
+          },
+          "left_medians_ns": {
+            "shared_task_sum_ns": 1657320.0,
+            "specific_task_sum_ns": 553930.0,
+            "total_task_sum_ns": 2211850.0,
+            "visible_union_ns": 2211850.0,
+            "envelope_ns": 17905930.0
+          },
+          "right_medians_ns": {
+            "shared_task_sum_ns": 1665840.0,
+            "specific_task_sum_ns": 706750.0,
+            "total_task_sum_ns": 2372570.0,
+            "visible_union_ns": 2372570.0,
+            "envelope_ns": 19832520.0
+          }
+        }
+      ]
+    }
+  ],
+  "script_sha256": "b0d3b569fcda43746074b4a763338a0e9d150bfbad37a74669e92d11c5d634b9",
+  "analyzer_sha256": "6d6fa72d835ca77d1ae2d3390e972898ee68e8efb671704c42e9024d3026b517",
+  "runtime_manifest_sha256": "67b57fceb9c4401e30659bfa175ef991a3f5f19e215d9808c087a54e7ea985a3",
+  "interpretation": "Structural correctness and current-runtime repeatability; raw workflow returns the same answers. Not a StriaTrace run, historical FFTS+ reproduction, or unprofiled speedup result."
+}
