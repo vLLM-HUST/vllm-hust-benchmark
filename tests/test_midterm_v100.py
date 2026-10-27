@@ -43,12 +43,17 @@ def test_frozen_snapshots_and_unrelated_results_unchanged():
         "m01_method",
         "wholechain_reference",
         "current_summary",
+        "paired_own_compute",
+        "milestone_contract",
+        "corrected_quality",
     }
     for key in old:
         if key not in changed:
             assert value[key] == old[key], key
     assert value["m01_method_at_v099"] == old["m01_method"]
     assert value["wholechain_reference_at_v099"] == old["wholechain_reference"]
+    for key in ("paired_own_compute", "milestone_contract", "corrected_quality"):
+        assert value[key + "_at_v099"] == old[key]
     for key in (
         "dataset",
         "model",
@@ -181,6 +186,42 @@ def test_m01_current_strength_null_and_historical_values_preserved():
     verdict = next(s for s in value["sections"] if s["id"] == "m01-verdict")
     assert "历史" in verdict["tables"][0]["headers"][-1]
     assert "Historical" in verdict["tables_en"][0]["headers"][-1]
+
+
+def test_all_current_reference_copies_and_milestone_rows_are_revised():
+    value = payload()
+    assert value["paired_own_compute"] == value["m01_method"]["paired_own_compute"]
+    assert value["milestone_contract"]["method"] == value["m01_method"]
+    assert value["paired_own_compute"]["attainment"] is None
+    assert (
+        value["paired_own_compute"]["wholechain_reference"]["reference_qualified"]
+        is None
+    )
+    assert value["milestone_contract"]["method"]["current"]["passed"] is None
+    assert (
+        value["milestone_contract"]["method"]["wholechain_reference"][
+            "reference_qualified"
+        ]
+        is None
+    )
+    quality = value["corrected_quality"]
+    assert quality["reference"]["attainment"] is None
+    assert quality["reference"]["historical_empirical_attainment"] is True
+    assert (
+        quality["reference"]["status"] != "independent_wholechain_reference_qualified"
+    )
+    old = value["corrected_quality_at_v099"]
+    for key in ("quality", "own_metrics", "reference_at_quality_audit"):
+        assert quality[key] == old[key]
+    for key in ("C_ref_TFLOPS_per_chip", "T_ref_seconds", "eta_percent"):
+        assert quality["reference"][key] == old["reference"][key]
+    section = next(s for s in value["sections"] if s["id"] == "milestone-v15")
+    for key, english in (("tables", False), ("tables_en", True)):
+        rows = [r for t in section[key] for r in t["rows"] if r[0].startswith("3.4.1")]
+        assert len(rows) == 1
+        assert rows[0][2] == b.m01_note(english)
+        assert "are complete" not in rows[0][2]
+        assert "配对验收完成" not in rows[0][2]
 
 
 def load_verifier(folder):
