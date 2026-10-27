@@ -3,6 +3,27 @@
 当前交付
 **65/113项**，待完成48项，另5项仅分类。首批#432的60项和第二批#538的ScienceWorld已合入main；早期五个草稿已关闭为被汇总承接，历史和分支保留。第三批新增CodeJudge-Eval、DeepPlanning、OpenMath及OpenCode固定原生profile的实际CI消费交付，尚未合入。OpenMath/OpenCode是训练语料原问题生成，不是独立质量benchmark。打勾不代表全量模型评测、高分或性能保证。
 
+### NatureBench科学代码工作流（进行中，不打来源总勾）
+
+- [x] 固定官方代码与数据版本，服务器取得56份原始运行/评估/环境/任务列表文件，共514543字节，Git blob及SHA256核验通过；30份Python只做语法解析，未执行科学任务代码。
+- [x] 完整90任务的CPU3/GPU-low70/GPU-high17分组，以及NatureBench-25的1/22/2分组全部核验；25任务轨道是原90任务的按资源一致子集，不新增来源计数。
+- [x] 未改的官方`run_naturebench.py --help`返回0；这只是准备客户端中的CLI可用性，不代表原始conda环境复现、Agent执行或科学评分通过。
+- [ ] 已开始在服务器按未改官方`--tasks cpu --download-only`获取作者全部3个CPU任务；固定版本元数据576文件、约2.75GB不代表已下载完成。这里CPU指科学任务资源组，后续LLM仍须使用NPU，未启用CPU模型推理。
+- [ ] 原始任务包及隐藏评估/许可关系、隔离环境、完整原生Agent流程、官方评估器与有效性judge、公共数据/研究消费者接通仍待完成，不以静态问答或`--skip-judge`替代。
+
+```bash
+python scripts/prepare_jsonschemabench_author_source.py --source naturebench \
+  --action prepare --author-root <仓库外官方源码目录> --max-bytes 600000
+python scripts/verify_naturebench_original_contract.py \
+  --author-root <同一官方源码目录> --output <源码目录外的新证据文件>
+# 在上述官方源码目录中，使用配置 naturebench-original-release.json 固定的数据版本：
+python run_naturebench.py --dataset-id FrontisAI/NatureBench \
+  --dataset-revision <配置中的dataset_revision> --data-dir <仓库外服务器数据目录> \
+  --tasks cpu --download-only
+```
+
+官方数据是科学代码任务包：`problem/`向Agent可见，`evaluation/`与隐藏真值不可泄漏；任务环境、评估器和有效性审查均属于原生流程。当前ARM/NPU服务器没有Docker/Podman/bwrap，官方conda导出又包含linux-64/MKL构建，不能悄悄换包便宣称原环境已复现。代码/任务规范的MIT许可不覆盖全部第三方科学数据，必须保留每任务许可与署名；公开可下载不等于可随意再分发。[原始版本与资源分组](../../configs/workload-native/naturebench-original-release.json)；[阶段证据](validation/naturebench-original-readiness-20261028.json)。
+
 ### OpenCodeInstruct原始代码训练语料（固定原始profile已交付）
 
 - [x] 核验官方固定版本元数据：50个原始train分片、6,861,113,102字节，公开CC-BY-4.0。复用已有原字段适配，问题与教师代码、原测试、历史测试状态和判断信息分开保存，不生成替代题目。
@@ -650,7 +671,7 @@ TB；服务器/data约1.42TB可用，未缩小语料。ChartQA当前两卡主机
 | REPOBENCH                  | [x] 固定原生抽样交付完成                   | 官方默认30层各3题共90原题NPU生成/原评分及保存审计完成；49684原行与60研究回读复用，47实际CI安装载荷重新核对。固定评分哈希种子0，EM均0保留，不是质量验收。见[交付回执](validation/repobench-native-delivery-20261027.json)。                                                                                        |
 | CROSSCODEEVAL              | [x] 原生协议已交付                         | 69,494配置行全字段/索引核验复用；四语言原0..2生成/评分保留，公共入口原3..5共12条NPU生成及作者评分通过。精确成功CI44文件及12处公共/研究回查完成；非全语料或所有检索配置推理。[证据](validation/crosscodeeval-original-acquisition-20261026.json)。                                                                 |
 | LOCOMO                     | [x] 原生抽样交付                           | 原9题复用、新99题执行及原提示/官方评分复核完成，合计108条；第3类全96题，其他四类各原前三题。原数据不改，第5类显式缺键兼容非上游已合并补丁；研究端接通。不称全1986题、图像或RAG完成。[交付回执](validation/locomo-native-delivery-20261025.json)                                                                   |
-| NATUREBENCH                | [ ] 待开展                                 | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                      |
+| NATUREBENCH                | [ ] 原协议准备已验证，原生未完成           | 固定56份官方源码及90/25任务资源分组核验通过；官方全部3个CPU任务下载进行中，原始数据/隔离环境/ARM-NPU科学Agent/评估器/有效性judge及消费接通待完成，不能替换成静态问答。                                                                                                                                            |
 | DISCOVERYBENCH             | [ ] 完整原始资产已取得，原生任务待验证     | 固定官方版本1499文件、54085184字节已在服务器逐份Git blob/大小及文件集合核验，公共只读入口复用通过，无重下。包括原real/synth数据及Agent/评判协议；1499是文件数不是题数。代码执行环境、原生Agent/评分及消费闭环未完成，不打总勾。                                                                                   |
 | MLAGENTBENCH               | [ ] 待开展                                 | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                      |
 | MLEBENCH                   | [ ] 待开展                                 | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                      |
