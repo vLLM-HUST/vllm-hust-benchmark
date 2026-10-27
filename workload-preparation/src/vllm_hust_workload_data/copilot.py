@@ -4,6 +4,113 @@ This is asset integrity checking, not trace analysis or request synthesis.
 """
 
 from datetime import date
+import gzip
+import hashlib
+import json
+from pathlib import Path, PurePosixPath
+import tarfile
+
+
+def verify_session(row):
+    """Check structural containers without flattening or inferring missing links."""
+    if (
+        not isinstance(row, dict)
+        or set(row) != {"session_id", "date", "turns"}
+        or not isinstance(row["session_id"], str)
+        or not isinstance(row["date"], str)
+        or not isinstance(row["turns"], list)
+    ):
+        raise ValueError("invalid original session structure; payload suppressed")
+    for turn in row["turns"]:
+        if (
+            not isinstance(turn, dict)
+            or not isinstance(turn.get("turn_id"), str)
+            or not isinstance(turn.get("llm_calls"), list)
+            or not isinstance(turn.get("tool_batches"), list)
+            or any(not isinstance(call, dict) for call in turn["llm_calls"])
+        ):
+            raise ValueError("invalid original turn structure; payload suppressed")
+        for batch in turn["tool_batches"]:
+            if (
+                not isinstance(batch, dict)
+                or not isinstance(batch.get("function_calls"), list)
+                or any(not isinstance(call, dict) for call in batch["function_calls"])
+            ):
+                raise ValueError("invalid original tool batch; payload suppressed")
+
+
+def extract_verified_archive(archive, output, *, expected_sha256, expected_bytes):
+    """Safely expand a pinned publisher archive; never execute or alter sessions.
+
+    A fresh directory is mandatory. Failures remain available for inspection;
+    this routine does not remove or overwrite partial work. Only manifest and
+    original gzip JSONL members are accepted. No decompressed copy is written.
+    """
+    archive, output = Path(archive), Path(output).resolve()
+    if output.exists():
+        raise ValueError("fresh original-member output required")
+    if archive.stat().st_size != expected_bytes:
+        raise ValueError("publisher archive size mismatch")
+    with archive.open("rb") as stream:
+        if hashlib.file_digest(stream, "sha256").hexdigest() != expected_sha256:
+            raise ValueError("publisher archive checksum mismatch")
+    output.mkdir(parents=True, mode=0o700)
+    measured, manifests, names = [], [], set()
+    with tarfile.open(archive, "r|gz") as bundle:
+        for member in bundle:
+            relative = PurePosixPath(member.name)
+            if (
+                relative.is_absolute()
+                or ".." in relative.parts
+                or "\\" in member.name
+                or not (output / member.name).resolve().is_relative_to(output)
+            ):
+                raise ValueError("unsafe publisher member path")
+            if member.isdir():
+                continue
+            if (
+                not member.isfile()
+                or len(relative.parts) != 2
+                or not relative.parts[0].startswith("date=")
+                or not (
+                    relative.name == "manifest.json"
+                    or relative.name.endswith(".jsonl.gz")
+                )
+                or member.name in names
+            ):
+                raise ValueError("unexpected or duplicate publisher member")
+            names.add(member.name)
+            target = output / member.name
+            target.parent.mkdir(parents=True, exist_ok=True)
+            digest, size = hashlib.sha256(), 0
+            stream = bundle.extractfile(member)
+            with stream, target.open("xb") as destination:
+                while chunk := stream.read(1024 * 1024):
+                    destination.write(chunk)
+                    digest.update(chunk)
+                    size += len(chunk)
+            if size != member.size:
+                raise ValueError("truncated publisher member")
+            info = {"path": member.name, "bytes": size, "sha256": digest.hexdigest()}
+            if relative.name == "manifest.json":
+                manifest = json.loads(target.read_text(encoding="utf-8"))
+                if relative.parts[0] != f"date={manifest.get('date')}":
+                    raise ValueError("publisher manifest directory/date mismatch")
+                manifests.append(manifest)
+            else:
+                rows = 0
+                with gzip.open(target, "rt", encoding="utf-8") as lines:
+                    for line in lines:
+                        row = json.loads(line)
+                        verify_session(row)
+                        if relative.parts[0] != f"date={row['date']}":
+                            raise ValueError("session directory/date mismatch")
+                        rows += 1
+                measured.append({**info, "rows": rows})
+    if len(manifests) != 1:
+        raise ValueError("one original day manifest required per release archive")
+    qualification = qualify_day_manifest(manifests[0], measured)
+    return {"qualification": qualification, "files": measured, "model_calls": 0}
 
 
 def qualify_day_manifest(manifest: dict, members: list[dict]) -> dict:

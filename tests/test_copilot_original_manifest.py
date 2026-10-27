@@ -1,10 +1,111 @@
 """Small invented integrity fixtures, not workload data or native validation."""
 
 from copy import deepcopy
+import gzip
+import hashlib
+import io
+import json
+import tarfile
 
 import pytest
 
-from vllm_hust_workload_data.copilot import qualify_day_manifest
+from vllm_hust_workload_data.copilot import (
+    extract_verified_archive,
+    qualify_day_manifest,
+    verify_session,
+)
+
+
+def archive_fixture(tmp_path, *, unsafe=None, manifest_first=False):
+    row = {"session_id": "fixture", "date": "2026-06-01", "turns": []}
+    payload = gzip.compress((json.dumps(row) + "\n").encode())
+    manifest = {
+        "complete": True,
+        "date": row["date"],
+        "n_sessions": 1,
+        "n_shards": 1,
+        "total_bytes": len(payload),
+        "shards": [{"shard_idx": 0, "n_sessions": 1, "size_bytes": len(payload)}],
+    }
+    entries = [
+        ("date=2026-06-01/shard-0000.jsonl.gz", payload),
+        ("date=2026-06-01/manifest.json", json.dumps(manifest).encode()),
+    ]
+    if manifest_first:
+        entries.reverse()
+    if unsafe:
+        entries.insert(0, (unsafe, b"not original data"))
+    archive = tmp_path / "original.tar.gz"
+    with tarfile.open(archive, "w:gz") as bundle:
+        for name, data in entries:
+            info = tarfile.TarInfo(name)
+            info.size = len(data)
+            bundle.addfile(info, io.BytesIO(data))
+    return archive, payload
+
+
+def extract(archive, output, **kwargs):
+    return extract_verified_archive(
+        archive,
+        output,
+        expected_bytes=archive.stat().st_size,
+        expected_sha256=hashlib.sha256(archive.read_bytes()).hexdigest(),
+        **kwargs,
+    )
+
+
+@pytest.mark.parametrize("manifest_first", [False, True])
+def test_extract_unchanged_gzip_without_order_assumptions(tmp_path, manifest_first):
+    archive, payload = archive_fixture(tmp_path, manifest_first=manifest_first)
+    result = extract(archive, tmp_path / "data")
+    assert result["qualification"]["sessions"] == 1
+    assert result["model_calls"] == 0
+    target = tmp_path / "data/date=2026-06-01/shard-0000.jsonl.gz"
+    assert target.read_bytes() == payload
+    with pytest.raises(ValueError, match="fresh"):
+        extract(archive, tmp_path / "data")
+
+
+@pytest.mark.parametrize(
+    "name", ["../escape", "/escape", "date=x/analysis.py", "date=x/a\\b"]
+)
+def test_extract_rejects_unsafe_or_non_asset_members(tmp_path, name):
+    archive, _ = archive_fixture(tmp_path, unsafe=name)
+    with pytest.raises(ValueError):
+        extract(archive, tmp_path / "data")
+    assert not (tmp_path / "escape").exists()
+
+
+def test_bad_archive_identity_does_not_create_output(tmp_path):
+    archive, _ = archive_fixture(tmp_path)
+    with pytest.raises(ValueError, match="checksum"):
+        extract_verified_archive(
+            archive,
+            tmp_path / "data",
+            expected_bytes=archive.stat().st_size,
+            expected_sha256="0" * 64,
+        )
+    assert not (tmp_path / "data").exists()
+
+
+def test_nested_fields_remain_untouched_and_bad_containers_rejected():
+    row = {
+        "session_id": "fixture",
+        "date": "2026-06-01",
+        "turns": [
+            {
+                "turn_id": "t",
+                "llm_calls": [{"unknown_extension": [1, None]}],
+                "tool_batches": [{"function_calls": [{"status": 2}]}],
+            }
+        ],
+    }
+    before = deepcopy(row)
+    verify_session(row)
+    assert row == before
+    row["turns"][0]["tool_batches"][0]["function_calls"] = ["not an object"]
+    with pytest.raises(ValueError, match="payload suppressed"):
+        verify_session(row)
 
 
 def fixture():
