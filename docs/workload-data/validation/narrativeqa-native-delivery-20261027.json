@@ -1,0 +1,37 @@
+{
+  "source_id": "NARRATIVEQA",
+  "status": "ORIGINAL_SUMMARY_QA_NATIVE_AND_PUBLIC_RESEARCH_DELIVERY_VERIFIED",
+  "source_checkbox_eligible": true,
+  "native_execution_and_saved_audit": "docs/workload-data/validation/narrativeqa-summary-native-checkpoint-20261027.json",
+  "validated_setting": "Publisher original summary-QA, not full-story",
+  "original_tables": 3,
+  "all_original_questions_fields_and_relations_verified": 46765,
+  "original_documents": 1572,
+  "original_summaries": 1572,
+  "original_split_counts": {"test": 10557, "train": 32747, "valid": 3461},
+  "original_answers_and_tokenized_references_separate_from_input": true,
+  "prepared_reference_index_rows": 46765,
+  "provider_and_research": {
+    "ci_commit": "46e2c29e283dc84489b442bd60ee31a2505a18c1",
+    "successful_cpu_ci_run": 40386282259,
+    "ci_artifact": 12681291486,
+    "wheel_sha256": "e3a6067cbd699be8aa4364cb7ac638cc46f3eba50a104ad88774364bfe187887",
+    "installed_payloads_byte_equal": 44,
+    "public_and_fixed_research_roundtrips": 18,
+    "selection": "First3 and last3 original questions per each3split; includes all3 native task rows0/1/2",
+    "research_consumer_snapshot": "dd410314",
+    "research_consumer_sha256": "556f2633d4ffef7fb5dd7197ea3772805cf3ec0cbdc5b35ee81aec19649a928d",
+    "research_default_dependency_changed": false,
+    "new_model_calls": 0
+  },
+  "server_handoff_receipt": "narrativeqa-ci-provider-research-audit-32028-001/receipt-public.json",
+  "raw_payloads_published": false,
+  "observations_or_research_analysis_migrated": false,
+  "limitations": [
+    "Three fixed original test generations, not full10557-test inference or full-story experiment",
+    "Declared9B chat prompt/nonthinking/256 output budget, not2018 author model reproduction",
+    "Pinned AllenAI scoring implementation and declared normalization, not byte-identical author-paper metric claim",
+    "Generation metrics with both references; no IR ranking/MRR evaluation or story retrieval claim",
+    "No quality-pass, performance result or scientific conclusion"
+  ]
+}

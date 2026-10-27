@@ -1,0 +1,21 @@
+{
+  "version": "release-dataset-selection/v1",
+  "sources": [
+    {
+      "source_id": "BURSTGPT", "repo_id": "HPMLL/BurstGPT", "tag": "v2.0",
+      "unit": "request_records", "asset_kind": "production_request_metadata",
+      "files": [
+        {"name": "BurstGPT_1.csv", "bytes": 52283111, "sha256": "4bb3783693d0a435686fbfc885615d2349bd067239079fa4b749f2e679e12122"},
+        {"name": "BurstGPT_2.csv", "bytes": 144819209, "sha256": "44bf5942b03fca42c01a226a545ad3a750ec62688faecd67b6831c56a8928bf7"},
+        {"name": "BurstGPT_3.csv", "bytes": 231682327, "sha256": "2299986a07388aa303ec2c41d1131e756db650a39ed6ef9dfe7cc3d7f9a43b8f"}
+      ],
+      "scope": "三个保留失败的完整发布文件；不重复下载/累计without_fails派生版本。发布时间字段不代表样本时间范围互不重叠。无prompt正文。"
+    },
+    {
+      "source_id": "TRACELAB", "repo_id": "uw-syfi/TraceLab", "tag": "v0.0.2",
+      "unit": "llm_rounds", "asset_kind": "observed_coding_agent_trace",
+      "files": [{"name": "syfi_coding_trace.jsonl.gz", "bytes": 100939722, "sha256": "11ce51ec0a25e3d1d95b025bca2f7d1647e47571eb7cc968acd5fc64d4b4fb65"}],
+      "scope": "完整JSONL压缩发布；不另计等价DuckDB或旧版，轮次不等于独立父任务。只解析，不执行轨迹内容。"
+    }
+  ]
+}

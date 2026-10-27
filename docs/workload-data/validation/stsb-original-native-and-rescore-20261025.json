@@ -1,0 +1,192 @@
+{
+  "source_id": "STSB",
+  "status": "ORIGINAL_FULL_DEV_TEST_NPU_AND_SAME_EVALUATOR_RESCORE_VERIFIED",
+  "original_native_run": {
+    "source_id": "STSB",
+    "status": "ORIGINAL_FULL_SPLITS_EXECUTED_AND_SCORED",
+    "mode": "run",
+    "generation_performed_this_run": true,
+    "dataset_sha256": "aa3ae9b0060fdab8a7239df4bed7668086b4181e7cf6e921d086a70f9e42c17e", "dataset_sha256_note": "pragma: allowlist secret - public source or private-result digest only",
+    "model_repo": "sentence-transformers/all-mpnet-base-v2",
+    "model_revision": "e8c3b32edf5434bc2275fc9bab85f82640a19130", "model_revision_note": "pragma: allowlist secret - public source or private-result digest only",
+    "framework_revision": "dfcbbd93056c6292ee6a245c0740683a270df0b1", "framework_revision_note": "pragma: allowlist secret - public source or private-result digest only",
+    "protocol": {
+      "splits": [
+        "dev",
+        "test"
+      ],
+      "expected_rows": {
+        "dev": 1500,
+        "test": 1379
+      },
+      "batch_size": 16,
+      "dtype": "torch.float32",
+      "attention": "eager",
+      "reference_normalization": "float(original_score)/5.0, matching publisher example",
+      "similarity": "model default cosine",
+      "native_task": "continuous sentence-pair similarity",
+      "model_backend": "NPU only",
+      "raw_train_rows_retained_not_evaluated": 5749
+    },
+    "splits": [
+      {
+        "split": "dev",
+        "original_pairs": 1500,
+        "metrics": {
+          "sts_dev_pearson_cosine": 0.8806180705953915,
+          "sts_dev_spearman_cosine": 0.8810634498813258
+        },
+        "primary_metric": "sts_dev_spearman_cosine"
+      },
+      {
+        "split": "test",
+        "original_pairs": 1379,
+        "metrics": {
+          "sts_test_pearson_cosine": 0.8404380734911349,
+          "sts_test_spearman_cosine": 0.8341736930300715
+        },
+        "primary_metric": "sts_test_spearman_cosine"
+      }
+    ],
+    "encoding_calls": [
+      {
+        "input_sha256": "d53cc4ce5ab1ad19e043884b49f48576ecc8fd060785411fd1e4370369226e6d", "input_sha256_note": "pragma: allowlist secret - public source or private-result digest only",
+        "encode_options": {
+          "batch_size": 16,
+          "show_progress_bar": false,
+          "convert_to_numpy": true,
+          "precision": null,
+          "normalize_embeddings": false,
+          "truncate_dim": null
+        },
+        "file": "encode-0.private.npy",
+        "sha256": "f83dd2fe79fbec738ead96a51a8a4c81434710cdc2d494d32bd74a015ecbf84a", "sha256_note": "pragma: allowlist secret - public source or private-result digest only",
+        "rows": 1500
+      },
+      {
+        "input_sha256": "b5e3fa03702fccd27434ce33fb685a11a2e73d2b059ef975622002f344405270", "input_sha256_note": "pragma: allowlist secret - public source or private-result digest only",
+        "encode_options": {
+          "batch_size": 16,
+          "show_progress_bar": false,
+          "convert_to_numpy": true,
+          "precision": null,
+          "normalize_embeddings": false,
+          "truncate_dim": null
+        },
+        "file": "encode-1.private.npy",
+        "sha256": "ce1ccded1fa348a6719990d2d3cdfeaacbea3e642b051a7d78307d1465e7f037", "sha256_note": "pragma: allowlist secret - public source or private-result digest only",
+        "rows": 1500
+      },
+      {
+        "input_sha256": "7abd86f6ff9b2b2f8d0f78fadb171ca7f97ec03043263237e771de4746a47675", "input_sha256_note": "pragma: allowlist secret - public source or private-result digest only",
+        "encode_options": {
+          "batch_size": 16,
+          "show_progress_bar": false,
+          "convert_to_numpy": true,
+          "precision": null,
+          "normalize_embeddings": false,
+          "truncate_dim": null
+        },
+        "file": "encode-2.private.npy",
+        "sha256": "473680b6684cac14cabedb687bbc370d71cacb2a1fea17d6b73d500b7e76f096", "sha256_note": "pragma: allowlist secret - public source or private-result digest only",
+        "rows": 1379
+      },
+      {
+        "input_sha256": "8b0deb17ca6aaaec3d504cde2a07f4fa46fc6bbd6447d82ae7fa8bf6a0385790", "input_sha256_note": "pragma: allowlist secret - public source or private-result digest only",
+        "encode_options": {
+          "batch_size": 16,
+          "show_progress_bar": false,
+          "convert_to_numpy": true,
+          "precision": null,
+          "normalize_embeddings": false,
+          "truncate_dim": null
+        },
+        "file": "encode-3.private.npy",
+        "sha256": "ac42bfbd3623cc35d7862272b6e81cb99ab5609c022a390baa401a7f8d83a886", "sha256_note": "pragma: allowlist secret - public source or private-result digest only",
+        "rows": 1379
+      }
+    ],
+    "device": "npu:1",
+    "source_checkbox_eligible": false,
+    "raw_payloads_published": false,
+    "started_at_unix": 1792891279.2066648,
+    "model_parameters_verified_on_npu": true,
+    "encoder_native_max_length": 384,
+    "similarity_fn_name": "cosine",
+    "model_forward_embeddings_verified_on_npu": true,
+    "finished_at_unix": 1792891290.0466275
+  },
+  "original_metrics_equal_cached_rescore": true,
+  "cached_rescore_status": "ORIGINAL_EMBEDDINGS_RESCORED_NOT_NEW_MODEL_EXECUTION",
+  "cached_rescore_model_execution": false,
+  "cached_rescore_native_receipt_sha256": "cdc986ca5815234ce0cea0043d12c6b8fa5ae5fbc73468bebaeafe20e55776a6", "cached_rescore_native_receipt_sha256_note": "pragma: allowlist secret - public source or private-result digest only",
+  "public_runner": "scripts/run_stsb_original.py",
+  "public_runner_sha256": "f421676684700908e2ecbdac001adf3c23705dfb9b49fd642f546b437513a47c", "public_runner_sha256_note": "pragma: allowlist secret - public source or private-result digest only",
+  "publisher_wheel_source_audit": {
+    "status": "PYPI_PUBLISHER_WHEEL_INSTALLED_BYTES_AND_TAGGED_SOURCE_EQUIVALENCE_VERIFIED",
+    "publisher_wheel": {
+      "url": "https://files.pythonhosted.org/packages/bb/a6/a607a737dc1a00b7afe267b9bfde101b8cee2529e197e57471d23137d4e5/sentence_transformers-5.1.2-py3-none-any.whl", "url_note": "pragma: allowlist secret - public PyPI artifact URL",
+      "filename": "sentence_transformers-5.1.2-py3-none-any.whl",
+      "bytes": 488009,
+      "sha256": "724ce0ea62200f413f1a5059712aff66495bc4e815a1493f7f9bca242414c333", "sha256_note": "pragma: allowlist secret - public source or private-result digest only"
+    },
+    "installed_source_files": [
+      {
+        "path": "sentence_transformers/SentenceTransformer.py",
+        "bytes": 127902,
+        "sha256": "3559767b5fbee5d824947e9ae9e2cc239ba526209592cc9a86e80449caab3785", "sha256_note": "pragma: allowlist secret - public source or private-result digest only",
+        "publisher_crlf_lines": 2514,
+        "normalized_only_line_endings_equals_git_source": true
+      },
+      {
+        "path": "sentence_transformers/evaluation/EmbeddingSimilarityEvaluator.py",
+        "bytes": 11600,
+        "sha256": "e5a432f045c09af33359194f36953dd62d0d2c2f9a79b004f975426f5b3a63c8", "sha256_note": "pragma: allowlist secret - public source or private-result digest only",
+        "publisher_crlf_lines": 272,
+        "normalized_only_line_endings_equals_git_source": true
+      },
+      {
+        "path": "sentence_transformers/evaluation/SentenceEvaluator.py",
+        "bytes": 4801,
+        "sha256": "ee68e2d3ade680f97d84cb4155eded4a50657f21b1b71ef57ed68d3cf1a54dad", "sha256_note": "pragma: allowlist secret - public source or private-result digest only",
+        "publisher_crlf_lines": 120,
+        "normalized_only_line_endings_equals_git_source": true
+      },
+      {
+        "path": "sentence_transformers/evaluation/__init__.py",
+        "bytes": 1291,
+        "sha256": "f9367044780bba1530cfcd81cabb56d10744f8e7b9784343b73ab5df809472bd", "sha256_note": "pragma: allowlist secret - public source or private-result digest only",
+        "publisher_crlf_lines": 33,
+        "normalized_only_line_endings_equals_git_source": true
+      },
+      {
+        "path": "sentence_transformers/similarity_functions.py",
+        "bytes": 4932,
+        "sha256": "552baecea6d62b19cccc06d6f5293ff7caca9740a5ddcd9f1901263b7112bfb3", "sha256_note": "pragma: allowlist secret - public source or private-result digest only",
+        "publisher_crlf_lines": 129,
+        "normalized_only_line_endings_equals_git_source": true
+      },
+      {
+        "path": "sentence_transformers/util/similarity.py",
+        "bytes": 7709,
+        "sha256": "4cf92c15f6166c79c8e2c84b6406af6450409025c5d1627ae548e6dd8f6d2352", "sha256_note": "pragma: allowlist secret - public source or private-result digest only",
+        "publisher_crlf_lines": 232,
+        "normalized_only_line_endings_equals_git_source": true
+      }
+    ],
+    "installed_source_modified": false,
+    "model_calls": 0,
+    "source_checkbox_eligible": false,
+    "raw_payloads_published": false
+  },
+  "preliminary_rejections_before_any_original_pair_encoding": [
+    "Git LF vs official PyPI wheel CRLF: reject strict Git-byte comparison, then pin original wheel bytes separately",
+    "Concrete model class mismatch caused automatic generic-pooling fallback: rejected before encoding, then use original SentenceTransformer class and external validation proxy"
+  ],
+  "original_task_pair_replaced_or_rewritten": false,
+  "model_changed_to_raise_score": false,
+  "fixed_ci_artifact_verified": false,
+  "source_checkbox_eligible": false,
+  "research_observation_or_analysis_migrated": false,
+  "raw_payloads_published": false
+}

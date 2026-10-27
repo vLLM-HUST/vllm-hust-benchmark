@@ -1,0 +1,472 @@
+{
+  "version": "legacy-generator-disposition/v2",
+  "entries": [
+    {
+      "legacy_family_id": "session-affine-multi-turn",
+      "action": "CANONICALIZED",
+      "canonical_family_ids": [
+        "conversation-continuation"
+      ],
+      "profile_ids": [],
+      "reason": "保留核心会话语义，显式记录 history scope。",
+      "legacy_api_status": "REMOVED_IN_0.2_USE_SOURCE_ADAPTERS",
+      "data_role": "RETIRED_SYNTHETIC_IMPLEMENTATION",
+      "implementation": "REMOVED_FROM_ACTIVE_PACKAGE",
+      "default_data_source": false,
+      "auto_fallback": false,
+      "old_code_commit": "a5604688f08208a373e09601ae8b3ba6a9a8461a",
+      "replacement_policy": "Resolve canonical family sources explicitly; never silently substitute a dataset"
+    },
+    {
+      "legacy_family_id": "session-affine-bursty",
+      "action": "MERGED",
+      "canonical_family_ids": [
+        "conversation-continuation"
+      ],
+      "profile_ids": [
+        "bursty-arrival"
+      ],
+      "reason": "同一会话核心加到达变体，不再作为独立 family。",
+      "legacy_api_status": "REMOVED_IN_0.2_USE_SOURCE_ADAPTERS",
+      "data_role": "RETIRED_SYNTHETIC_IMPLEMENTATION",
+      "implementation": "REMOVED_FROM_ACTIVE_PACKAGE",
+      "default_data_source": false,
+      "auto_fallback": false,
+      "old_code_commit": "a5604688f08208a373e09601ae8b3ba6a9a8461a",
+      "replacement_policy": "Resolve canonical family sources explicitly; never silently substitute a dataset"
+    },
+    {
+      "legacy_family_id": "rag-followup",
+      "action": "RETAINED",
+      "canonical_family_ids": [
+        "rag-followup"
+      ],
+      "profile_ids": [],
+      "reason": "真实检索条件可与普通文档分析区分。",
+      "legacy_api_status": "REMOVED_IN_0.2_USE_SOURCE_ADAPTERS",
+      "data_role": "RETIRED_SYNTHETIC_IMPLEMENTATION",
+      "implementation": "REMOVED_FROM_ACTIVE_PACKAGE",
+      "default_data_source": false,
+      "auto_fallback": false,
+      "old_code_commit": "a5604688f08208a373e09601ae8b3ba6a9a8461a",
+      "replacement_policy": "Resolve canonical family sources explicitly; never silently substitute a dataset"
+    },
+    {
+      "legacy_family_id": "long-context-doc-analysis",
+      "action": "CANONICALIZED",
+      "canonical_family_ids": [
+        "document-grounded-analysis"
+      ],
+      "profile_ids": [
+        "long-context"
+      ],
+      "reason": "将任务与长输入压力分开。",
+      "legacy_api_status": "REMOVED_IN_0.2_USE_SOURCE_ADAPTERS",
+      "data_role": "RETIRED_SYNTHETIC_IMPLEMENTATION",
+      "implementation": "REMOVED_FROM_ACTIVE_PACKAGE",
+      "default_data_source": false,
+      "auto_fallback": false,
+      "old_code_commit": "a5604688f08208a373e09601ae8b3ba6a9a8461a",
+      "replacement_policy": "Resolve canonical family sources explicitly; never silently substitute a dataset"
+    },
+    {
+      "legacy_family_id": "tool-scaffold-agent",
+      "action": "SPLIT_DIMENSIONS",
+      "canonical_family_ids": [
+        "tool-interaction"
+      ],
+      "profile_ids": [
+        "tool-schema-reuse"
+      ],
+      "reason": "工具 scaffold 共享不等于实际工具调用，保留两种独立标签。",
+      "legacy_api_status": "REMOVED_IN_0.2_USE_SOURCE_ADAPTERS",
+      "data_role": "RETIRED_SYNTHETIC_IMPLEMENTATION",
+      "implementation": "REMOVED_FROM_ACTIVE_PACKAGE",
+      "default_data_source": false,
+      "auto_fallback": false,
+      "old_code_commit": "a5604688f08208a373e09601ae8b3ba6a9a8461a",
+      "replacement_policy": "Resolve canonical family sources explicitly; never silently substitute a dataset"
+    },
+    {
+      "legacy_family_id": "repo-aware-coding-assistant",
+      "action": "CANONICALIZED",
+      "canonical_family_ids": [
+        "interactive-repository-assistance"
+      ],
+      "profile_ids": [],
+      "reason": "人机交互编辑与自主 issue loop 的依赖/等待不同。",
+      "legacy_api_status": "REMOVED_IN_0.2_USE_SOURCE_ADAPTERS",
+      "data_role": "RETIRED_SYNTHETIC_IMPLEMENTATION",
+      "implementation": "REMOVED_FROM_ACTIVE_PACKAGE",
+      "default_data_source": false,
+      "auto_fallback": false,
+      "old_code_commit": "a5604688f08208a373e09601ae8b3ba6a9a8461a",
+      "replacement_policy": "Resolve canonical family sources explicitly; never silently substitute a dataset"
+    },
+    {
+      "legacy_family_id": "experiment-planning-assistant",
+      "action": "RETAINED_CANDIDATE",
+      "canonical_family_ids": [
+        "scientific-experiment-planning"
+      ],
+      "profile_ids": [],
+      "reason": "源码包含 campaign/branch/sibling 关系，不能仅因 science 名称与流水线合并；需真实数据复核。",
+      "legacy_api_status": "REMOVED_IN_0.2_USE_SOURCE_ADAPTERS",
+      "data_role": "RETIRED_SYNTHETIC_IMPLEMENTATION",
+      "implementation": "REMOVED_FROM_ACTIVE_PACKAGE",
+      "default_data_source": false,
+      "auto_fallback": false,
+      "old_code_commit": "a5604688f08208a373e09601ae8b3ba6a9a8461a",
+      "replacement_policy": "Resolve canonical family sources explicitly; never silently substitute a dataset"
+    },
+    {
+      "legacy_family_id": "simulation-analysis-verification",
+      "action": "RETAINED_CANDIDATE",
+      "canonical_family_ids": [
+        "simulation-analysis-verification"
+      ],
+      "profile_ids": [],
+      "reason": "源码是 run/template/verifier/revision 链，与 campaign 分支不是同一关系。",
+      "legacy_api_status": "REMOVED_IN_0.2_USE_SOURCE_ADAPTERS",
+      "data_role": "RETIRED_SYNTHETIC_IMPLEMENTATION",
+      "implementation": "REMOVED_FROM_ACTIVE_PACKAGE",
+      "default_data_source": false,
+      "auto_fallback": false,
+      "old_code_commit": "a5604688f08208a373e09601ae8b3ba6a9a8461a",
+      "replacement_policy": "Resolve canonical family sources explicitly; never silently substitute a dataset"
+    },
+    {
+      "legacy_family_id": "async-document-pipeline",
+      "action": "PROFILE_ONLY",
+      "canonical_family_ids": [
+        "document-grounded-analysis",
+        "structured-generation",
+        "text-transformation"
+      ],
+      "profile_ids": [
+        "async-batch"
+      ],
+      "reason": "移除异步/批处理作为平行任务类别；具体任务按输入内容判定，queue/job 关系作为 profile。",
+      "legacy_api_status": "REMOVED_IN_0.2_USE_SOURCE_ADAPTERS",
+      "data_role": "RETIRED_SYNTHETIC_IMPLEMENTATION",
+      "implementation": "REMOVED_FROM_ACTIVE_PACKAGE",
+      "default_data_source": false,
+      "auto_fallback": false,
+      "old_code_commit": "a5604688f08208a373e09601ae8b3ba6a9a8461a",
+      "replacement_policy": "Resolve canonical family sources explicitly; never silently substitute a dataset"
+    },
+    {
+      "legacy_family_id": "code-eval-judge",
+      "action": "CANONICALIZED",
+      "canonical_family_ids": [
+        "code-evaluation"
+      ],
+      "profile_ids": [],
+      "reason": "保留输入评判而非代码生成的区别。",
+      "legacy_api_status": "REMOVED_IN_0.2_USE_SOURCE_ADAPTERS",
+      "data_role": "RETIRED_SYNTHETIC_IMPLEMENTATION",
+      "implementation": "REMOVED_FROM_ACTIVE_PACKAGE",
+      "default_data_source": false,
+      "auto_fallback": false,
+      "old_code_commit": "a5604688f08208a373e09601ae8b3ba6a9a8461a",
+      "replacement_policy": "Resolve canonical family sources explicitly; never silently substitute a dataset"
+    },
+    {
+      "legacy_family_id": "structured-json-generation",
+      "action": "CANONICALIZED",
+      "canonical_family_ids": [
+        "structured-generation"
+      ],
+      "profile_ids": [],
+      "reason": "扩展格式覆盖，JSON 为 subtype；不借名称声明协议已接入。",
+      "legacy_api_status": "REMOVED_IN_0.2_USE_SOURCE_ADAPTERS",
+      "data_role": "RETIRED_SYNTHETIC_IMPLEMENTATION",
+      "implementation": "REMOVED_FROM_ACTIVE_PACKAGE",
+      "default_data_source": false,
+      "auto_fallback": false,
+      "old_code_commit": "a5604688f08208a373e09601ae8b3ba6a9a8461a",
+      "replacement_policy": "Resolve canonical family sources explicitly; never silently substitute a dataset"
+    },
+    {
+      "legacy_family_id": "multi-turn-support-chat",
+      "action": "MERGED",
+      "canonical_family_ids": [
+        "conversation-continuation"
+      ],
+      "profile_ids": [
+        "customer-support"
+      ],
+      "reason": "客服是应用限定；请求内/跨请求历史仍显式分开。",
+      "legacy_api_status": "REMOVED_IN_0.2_USE_SOURCE_ADAPTERS",
+      "data_role": "RETIRED_SYNTHETIC_IMPLEMENTATION",
+      "implementation": "REMOVED_FROM_ACTIVE_PACKAGE",
+      "default_data_source": false,
+      "auto_fallback": false,
+      "old_code_commit": "a5604688f08208a373e09601ae8b3ba6a9a8461a",
+      "replacement_policy": "Resolve canonical family sources explicitly; never silently substitute a dataset"
+    },
+    {
+      "legacy_family_id": "realtime-voice-assistant",
+      "action": "RETIRE_PROXY_AS_REAL_FAMILY",
+      "canonical_family_ids": [],
+      "profile_ids": [
+        "text-carried-media-proxy",
+        "audio"
+      ],
+      "reason": "从真实 workload family 目录移除文本 voice 代理，保留兼容探针和限制；真实音频另补定义。",
+      "legacy_api_status": "REMOVED_IN_0.2_USE_SOURCE_ADAPTERS",
+      "data_role": "RETIRED_SYNTHETIC_IMPLEMENTATION",
+      "implementation": "REMOVED_FROM_ACTIVE_PACKAGE",
+      "default_data_source": false,
+      "auto_fallback": false,
+      "old_code_commit": "a5604688f08208a373e09601ae8b3ba6a9a8461a",
+      "replacement_policy": "Resolve canonical family sources explicitly; never silently substitute a dataset"
+    },
+    {
+      "legacy_family_id": "session-continuation-maintenance",
+      "action": "MERGED",
+      "canonical_family_ids": [
+        "conversation-continuation"
+      ],
+      "profile_ids": [
+        "maintenance-resume"
+      ],
+      "reason": "维护是会话生命周期变体，保留维护变量与旧 ID。",
+      "legacy_api_status": "REMOVED_IN_0.2_USE_SOURCE_ADAPTERS",
+      "data_role": "RETIRED_SYNTHETIC_IMPLEMENTATION",
+      "implementation": "REMOVED_FROM_ACTIVE_PACKAGE",
+      "default_data_source": false,
+      "auto_fallback": false,
+      "old_code_commit": "a5604688f08208a373e09601ae8b3ba6a9a8461a",
+      "replacement_policy": "Resolve canonical family sources explicitly; never silently substitute a dataset"
+    },
+    {
+      "legacy_family_id": "shared-prefix-multi-tenant-assistant",
+      "action": "PROFILE_ONLY",
+      "canonical_family_ids": [],
+      "profile_ids": [
+        "exact-prefix-sharing",
+        "multi-tenant-soak"
+      ],
+      "reason": "前缀共享和多租户是跨任务特征，不再与任务类别平行重复计数。",
+      "legacy_api_status": "REMOVED_IN_0.2_USE_SOURCE_ADAPTERS",
+      "data_role": "RETIRED_SYNTHETIC_IMPLEMENTATION",
+      "implementation": "REMOVED_FROM_ACTIVE_PACKAGE",
+      "default_data_source": false,
+      "auto_fallback": false,
+      "old_code_commit": "a5604688f08208a373e09601ae8b3ba6a9a8461a",
+      "replacement_policy": "Resolve canonical family sources explicitly; never silently substitute a dataset"
+    },
+    {
+      "legacy_family_id": "dynamic-rag-corpus-update",
+      "action": "CANONICALIZED_CANDIDATE",
+      "canonical_family_ids": [
+        "evolving-corpus-rag"
+      ],
+      "profile_ids": [],
+      "reason": "显式版本更新依赖有研究意义，数据缺口不构成直接删除理由。",
+      "legacy_api_status": "REMOVED_IN_0.2_USE_SOURCE_ADAPTERS",
+      "data_role": "RETIRED_SYNTHETIC_IMPLEMENTATION",
+      "implementation": "REMOVED_FROM_ACTIVE_PACKAGE",
+      "default_data_source": false,
+      "auto_fallback": false,
+      "old_code_commit": "a5604688f08208a373e09601ae8b3ba6a9a8461a",
+      "replacement_policy": "Resolve canonical family sources explicitly; never silently substitute a dataset"
+    },
+    {
+      "legacy_family_id": "memory-write-then-reuse",
+      "action": "CANONICALIZED_CANDIDATE",
+      "canonical_family_ids": [
+        "memory-write-read"
+      ],
+      "profile_ids": [],
+      "reason": "写读依赖与仅对话历史不同，继续补直接事件数据。",
+      "legacy_api_status": "REMOVED_IN_0.2_USE_SOURCE_ADAPTERS",
+      "data_role": "RETIRED_SYNTHETIC_IMPLEMENTATION",
+      "implementation": "REMOVED_FROM_ACTIVE_PACKAGE",
+      "default_data_source": false,
+      "auto_fallback": false,
+      "old_code_commit": "a5604688f08208a373e09601ae8b3ba6a9a8461a",
+      "replacement_policy": "Resolve canonical family sources explicitly; never silently substitute a dataset"
+    },
+    {
+      "legacy_family_id": "preemption-resume-long-decode",
+      "action": "PROFILE_ONLY",
+      "canonical_family_ids": [],
+      "profile_ids": [
+        "preemption-resume"
+      ],
+      "reason": "保留压力/生命周期变量，不宣称独立应用或恢复已实现。",
+      "legacy_api_status": "REMOVED_IN_0.2_USE_SOURCE_ADAPTERS",
+      "data_role": "RETIRED_SYNTHETIC_IMPLEMENTATION",
+      "implementation": "REMOVED_FROM_ACTIVE_PACKAGE",
+      "default_data_source": false,
+      "auto_fallback": false,
+      "old_code_commit": "a5604688f08208a373e09601ae8b3ba6a9a8461a",
+      "replacement_policy": "Resolve canonical family sources explicitly; never silently substitute a dataset"
+    },
+    {
+      "legacy_family_id": "mixed-prefill-decode-interference",
+      "action": "PROFILE_ONLY",
+      "canonical_family_ids": [],
+      "profile_ids": [
+        "prefill-decode-mix"
+      ],
+      "reason": "输入/输出混合是请求压力，干扰是待测结果。",
+      "legacy_api_status": "REMOVED_IN_0.2_USE_SOURCE_ADAPTERS",
+      "data_role": "RETIRED_SYNTHETIC_IMPLEMENTATION",
+      "implementation": "REMOVED_FROM_ACTIVE_PACKAGE",
+      "default_data_source": false,
+      "auto_fallback": false,
+      "old_code_commit": "a5604688f08208a373e09601ae8b3ba6a9a8461a",
+      "replacement_policy": "Resolve canonical family sources explicitly; never silently substitute a dataset"
+    },
+    {
+      "legacy_family_id": "overload-backpressure",
+      "action": "PROFILE_ONLY",
+      "canonical_family_ids": [],
+      "profile_ids": [
+        "overload-recovery"
+      ],
+      "reason": "删除 backpressure 策略作为 workload 类别的混淆。",
+      "legacy_api_status": "REMOVED_IN_0.2_USE_SOURCE_ADAPTERS",
+      "data_role": "RETIRED_SYNTHETIC_IMPLEMENTATION",
+      "implementation": "REMOVED_FROM_ACTIVE_PACKAGE",
+      "default_data_source": false,
+      "auto_fallback": false,
+      "old_code_commit": "a5604688f08208a373e09601ae8b3ba6a9a8461a",
+      "replacement_policy": "Resolve canonical family sources explicitly; never silently substitute a dataset"
+    },
+    {
+      "legacy_family_id": "cancellation-timeout-churn",
+      "action": "PROFILE_ONLY",
+      "canonical_family_ids": [],
+      "profile_ids": [
+        "cancel-timeout-retry"
+      ],
+      "reason": "这是生命周期与重试关系，可附加到多种任务。",
+      "legacy_api_status": "REMOVED_IN_0.2_USE_SOURCE_ADAPTERS",
+      "data_role": "RETIRED_SYNTHETIC_IMPLEMENTATION",
+      "implementation": "REMOVED_FROM_ACTIVE_PACKAGE",
+      "default_data_source": false,
+      "auto_fallback": false,
+      "old_code_commit": "a5604688f08208a373e09601ae8b3ba6a9a8461a",
+      "replacement_policy": "Resolve canonical family sources explicitly; never silently substitute a dataset"
+    },
+    {
+      "legacy_family_id": "kv-eviction-recompute",
+      "action": "PROFILE_ONLY",
+      "canonical_family_ids": [],
+      "profile_ids": [
+        "working-set-revisit",
+        "exact-prefix-sharing"
+      ],
+      "reason": "eviction/recompute 是运行结果，输入定义改为回访工作集。",
+      "legacy_api_status": "REMOVED_IN_0.2_USE_SOURCE_ADAPTERS",
+      "data_role": "RETIRED_SYNTHETIC_IMPLEMENTATION",
+      "implementation": "REMOVED_FROM_ACTIVE_PACKAGE",
+      "default_data_source": false,
+      "auto_fallback": false,
+      "old_code_commit": "a5604688f08208a373e09601ae8b3ba6a9a8461a",
+      "replacement_policy": "Resolve canonical family sources explicitly; never silently substitute a dataset"
+    },
+    {
+      "legacy_family_id": "multi-tenant-fairness-soak",
+      "action": "PROFILE_ONLY",
+      "canonical_family_ids": [],
+      "profile_ids": [
+        "multi-tenant-soak"
+      ],
+      "reason": "公平性是结果，保留可观测的租户需求与持续时段。",
+      "legacy_api_status": "REMOVED_IN_0.2_USE_SOURCE_ADAPTERS",
+      "data_role": "RETIRED_SYNTHETIC_IMPLEMENTATION",
+      "implementation": "REMOVED_FROM_ACTIVE_PACKAGE",
+      "default_data_source": false,
+      "auto_fallback": false,
+      "old_code_commit": "a5604688f08208a373e09601ae8b3ba6a9a8461a",
+      "replacement_policy": "Resolve canonical family sources explicitly; never silently substitute a dataset"
+    },
+    {
+      "legacy_family_id": "multimodal-online-serving",
+      "action": "CANONICALIZED",
+      "canonical_family_ids": [
+        "multimodal-understanding"
+      ],
+      "profile_ids": [
+        "image"
+      ],
+      "reason": "真实媒体是准入条件；载荷来源继续扩展至音频/视频。",
+      "legacy_api_status": "REMOVED_IN_0.2_USE_SOURCE_ADAPTERS",
+      "data_role": "RETIRED_SYNTHETIC_IMPLEMENTATION",
+      "implementation": "REMOVED_FROM_ACTIVE_PACKAGE",
+      "default_data_source": false,
+      "auto_fallback": false,
+      "old_code_commit": "a5604688f08208a373e09601ae8b3ba6a9a8461a",
+      "replacement_policy": "Resolve canonical family sources explicitly; never silently substitute a dataset"
+    },
+    {
+      "legacy_family_id": "scientific-code-agent",
+      "action": "CANONICALIZED",
+      "canonical_family_ids": [
+        "scientific-coding-workflow"
+      ],
+      "profile_ids": [],
+      "reason": "保留科学代码的执行/验证目标，不以 stage 标签声称已执行。",
+      "legacy_api_status": "REMOVED_IN_0.2_USE_SOURCE_ADAPTERS",
+      "data_role": "RETIRED_SYNTHETIC_IMPLEMENTATION",
+      "implementation": "REMOVED_FROM_ACTIVE_PACKAGE",
+      "default_data_source": false,
+      "auto_fallback": false,
+      "old_code_commit": "a5604688f08208a373e09601ae8b3ba6a9a8461a",
+      "replacement_policy": "Resolve canonical family sources explicitly; never silently substitute a dataset"
+    },
+    {
+      "legacy_family_id": "semantic-similarity-routing",
+      "action": "PROFILE_ONLY",
+      "canonical_family_ids": [],
+      "profile_ids": [
+        "semantic-near-duplicate"
+      ],
+      "reason": "移除 routing 策略名作为独立 family，保留相似关系。",
+      "legacy_api_status": "REMOVED_IN_0.2_USE_SOURCE_ADAPTERS",
+      "data_role": "RETIRED_SYNTHETIC_IMPLEMENTATION",
+      "implementation": "REMOVED_FROM_ACTIVE_PACKAGE",
+      "default_data_source": false,
+      "auto_fallback": false,
+      "old_code_commit": "a5604688f08208a373e09601ae8b3ba6a9a8461a",
+      "replacement_policy": "Resolve canonical family sources explicitly; never silently substitute a dataset"
+    },
+    {
+      "legacy_family_id": "prefill-decode-disaggregation",
+      "action": "PROFILE_ONLY",
+      "canonical_family_ids": [],
+      "profile_ids": [
+        "pd-disaggregation"
+      ],
+      "reason": "保留独立拓扑维度，未与普通 P/D 混合合并。",
+      "legacy_api_status": "REMOVED_IN_0.2_USE_SOURCE_ADAPTERS",
+      "data_role": "RETIRED_SYNTHETIC_IMPLEMENTATION",
+      "implementation": "REMOVED_FROM_ACTIVE_PACKAGE",
+      "default_data_source": false,
+      "auto_fallback": false,
+      "old_code_commit": "a5604688f08208a373e09601ae8b3ba6a9a8461a",
+      "replacement_policy": "Resolve canonical family sources explicitly; never silently substitute a dataset"
+    },
+    {
+      "legacy_family_id": "long-horizon-software-engineering-agent",
+      "action": "CANONICALIZED",
+      "canonical_family_ids": [
+        "repository-agent-loop"
+      ],
+      "profile_ids": [],
+      "reason": "长程自主 loop 与交互式助手保持区分。",
+      "legacy_api_status": "REMOVED_IN_0.2_USE_SOURCE_ADAPTERS",
+      "data_role": "RETIRED_SYNTHETIC_IMPLEMENTATION",
+      "implementation": "REMOVED_FROM_ACTIVE_PACKAGE",
+      "default_data_source": false,
+      "auto_fallback": false,
+      "old_code_commit": "a5604688f08208a373e09601ae8b3ba6a9a8461a",
+      "replacement_policy": "Resolve canonical family sources explicitly; never silently substitute a dataset"
+    }
+  ]
+}

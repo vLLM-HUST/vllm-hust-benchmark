@@ -1,0 +1,107 @@
+{
+  "schema_version": "workload-server-validation/v1",
+  "source_id": "AI2_ARC",
+  "subsuite": "ARC-Challenge",
+  "revision": "210d026faf9955653af8916fad021475a3f00453",
+  "selected_samples": [
+    "test:0",
+    "test:1",
+    "test:2"
+  ],
+  "selection": "first three original ARC-Challenge test rows, fixed before execution",
+  "runner": "lm-eval==0.4.11",
+  "served_model": "workload-qwen35-27b",
+  "protocol": "original multiple-choice loglikelihood; no chat conversion",
+  "changes_from_upstream_task": [
+    "local byte-identical parquet paths",
+    "three test rows only"
+  ],
+  "claim_boundary": "ARC-Challenge sample integration, not ARC-Easy, full benchmark accuracy or performance",
+  "status": "END_TO_END_EXECUTED_AND_SCORED",
+  "max_length": 16384,
+  "task_config_sha256": {
+    "arc_challenge.yaml": "682621c26ae24b1065a2d732460a55a8ef2b9f2544574431666c9309a9efd7bd",
+    "arc_easy.yaml": "96da1d9efe1df88659481cedc13985cb347dc068554a2eae561303fa39bfab3f"
+  },
+  "tokenizer_sha256": {
+    "config.json": "f8d190c5b89c1521220f935d2567a587d6e291ed69066a45a106560b05a2174c",
+    "tokenizer.json": "5f9e4d4901a92b997e463c1f46055088b6cca5ca61a6522d1b9f64c4bb81cb42",
+    "tokenizer_config.json": "316230d6a809701f4db5ea8f8fc862bc3a6f3229c937c174e674ff3ca0a64ac8"
+  },
+  "reader_validation": {
+    "prepared_records": 3,
+    "resolved_records": 3,
+    "code_sha256": {
+      "__init__.py": "bd7ec2ac1ab4aeb83a5b0ffa0af756d58ea151c7cdae3756628fdbf8a64b6609",
+      "adapters.py": "2219c9d19c3c16bf721b66e260e0b3a7b2c75c0bd28aa7cf9cae68a2cf4e9dc8",
+      "assets.py": "69d12cf2390d8bfd2550ebf7faefb7f8b384d21c9f56aff6efe6d6964b4f08f0",
+      "bindings.py": "671f2a51c0ddb2d2202f6372d456433c67bb9bc2c5590b3b99e216787da375c6",
+      "catalog.py": "9418455fab9985348cb7c67b70ebad67c0532603dc5ed6e4e2c3888647d0c8ff",
+      "consumer.py": "82b105bdca6790a75c36ce36051aeaebb4da2b235480dd6099eeb60b21563090",
+      "execution.py": "0981c438c601aa65b9e6996fdcbf09324ff3231b968c6ce8ac9905874a0948d1",
+      "identity.py": "cd3b346e21786e1b06c325914eb9511c0c03151eac1d1b1ed1fa9cad54e05447",
+      "input_views.py": "6b407231ddc466ee8fddbb53adc9eb99e5a9014b1613352599227ff0aeef3691",
+      "mapping_contract.py": "e07e647e7984a21e53f6363320a508d6fb7decadbffa3262a6ba598d894fdd63",
+      "pipeline.py": "45dfd6875cd7930ba2695a8cc7a2b27aeb2a0926ebd41c79cdb4c342be44fd0f",
+      "provider.py": "2f583179802e57ecef5c5bed2fd5d5e38f65eb19d5098fe5fade0e2f0918643f",
+      "records.py": "083964089a025d70a9a4e922ee80ba299233d393fa64a6650264008c33c53b36",
+      "registry.py": "af7d43ce080cb567e365b6718c2a2a3b0a9591d4b7186d6ffa7602b1580f2a82",
+      "taxonomy.py": "63cafa5460eb6fcd05ceec7b5d736763cbba563f5433118a91b17bffa97748f7"
+    }
+  },
+  "helper_sha256": "f45dbe69e17309fcd74dd49fc3b74ce8dc6d7921a4c46c3268c1dcc593088568",
+  "metrics": {
+    "arc_challenge": {
+      "alias": "arc_challenge",
+      "acc,none": 0.6666666666666666,
+      "acc_stderr,none": "N/A",
+      "acc_norm,none": 0.6666666666666666,
+      "acc_norm_stderr,none": "N/A"
+    }
+  },
+  "sample_counts": {
+    "arc_challenge": {
+      "original": 1172,
+      "effective": 3
+    }
+  },
+  "private_results_sha256": "a119a1250218d056b57dff8f7f9adee6e062c167f39035c513b6e0bb730ef0a3",
+  "verified_at_utc": "2026-10-21T19:08:04.750869+00:00",
+  "server_inventory": {
+    "accelerator": "Ascend 910B2",
+    "chips": 2,
+    "backend": "vllm-ascend",
+    "precision": "bfloat16",
+    "mode": "graph",
+    "text_only": true
+  },
+  "model_artifact": {
+    "id": "Qwen/Qwen3.5-27B",
+    "config_sha256": "f8d190c5b89c1521220f935d2567a587d6e291ed69066a45a106560b05a2174c",
+    "publisher_weight_hashes_verified": false,
+    "tensor_parallel_size": 2,
+    "max_model_len": 16384
+  },
+  "engine_versions": {
+    "vllm": "0.23.0+empty",
+    "vllm-ascend": "0.23.0",
+    "torch": "2.10.0+cpu",
+    "torch-npu": "2.10.0.post4",
+    "transformers": "5.5.4",
+    "lm-eval": "0.4.11",
+    "datasets": "3.6.0",
+    "pyarrow": "19.0.1",
+    "huggingface-hub": "1.31.0"
+  },
+  "raw_data_or_answers_published": false,
+  "private_run_directory": "arc-challenge-002",
+  "task_count": 3,
+  "candidate_likelihood_requests": 12,
+  "model_answer_correct_count": 2,
+  "model_answer_incorrect_count": 1,
+  "first_bringup": {
+    "directory": "arc-challenge-001",
+    "status": "END_TO_END_EXECUTED_AND_SCORED",
+    "scope": "same three tasks; not extra validation samples"
+  }
+}

@@ -1,0 +1,61 @@
+{
+  "schema_version": "arc-native-range-audit/v1",
+  "date": "2026-10-24",
+  "status": "ORIGINAL_NATIVE_EXECUTION_AND_SCORING_AUDITED",
+  "source_id": "AI2_ARC",
+  "revision": "210d026faf9955653af8916fad021475a3f00453",
+  "model": "workload-qwen35-27b-128k-nonthinking",
+  "max_length": 131072,
+  "native_framework": "lm-eval[api]==0.4.11",
+  "selection_rule": "last three original test rows per suite, fixed before outcomes; historical first three not rerun",
+  "checks": [
+    {
+      "suite": "ARC-Challenge",
+      "original_doc_ids": [
+        1169,
+        1170,
+        1171
+      ],
+      "actual_samples": 3,
+      "candidate_likelihood_requests": 12,
+      "inputs_choices_references_equal_original": true,
+      "metrics": {
+        "alias": "arc_challenge",
+        "acc,none": 0.6666666666666666,
+        "acc_stderr,none": "N/A",
+        "acc_norm,none": 1.0,
+        "acc_norm_stderr,none": "N/A"
+      },
+      "runner_sha256": "d63554ffd781195e7457bd8415c0641f0829a6b4bba8cf05b7dadbe4834f2e06",
+      "private_results_sha256": "78fd163b887db69602de8eb31a69d276b0f27d9d17c29ed8a726a1c5cb1ab80a",
+      "elapsed_seconds_including_setup": 49.82322692871094,
+      "task_config_sha256": "682621c26ae24b1065a2d732460a55a8ef2b9f2544574431666c9309a9efd7bd"
+    },
+    {
+      "suite": "ARC-Easy",
+      "original_doc_ids": [
+        2373,
+        2374,
+        2375
+      ],
+      "actual_samples": 3,
+      "candidate_likelihood_requests": 12,
+      "inputs_choices_references_equal_original": true,
+      "metrics": {
+        "alias": "arc_easy",
+        "acc,none": 0.6666666666666666,
+        "acc_stderr,none": "N/A",
+        "acc_norm,none": 1.0,
+        "acc_norm_stderr,none": "N/A"
+      },
+      "runner_sha256": "d63554ffd781195e7457bd8415c0641f0829a6b4bba8cf05b7dadbe4834f2e06",
+      "private_results_sha256": "26998c9d802316cbe46a0c220ce8e4d4d5651f88ef4c85e0cc336ead9a69b33d",
+      "elapsed_seconds_including_setup": 38.380207538604736,
+      "task_config_sha256": "96da1d9efe1df88659481cedc13985cb347dc068554a2eae561303fa39bfab3f"
+    }
+  ],
+  "audit_new_model_calls": 0,
+  "full_test_execution": false,
+  "raw_payloads_published": false,
+  "warning": "harness n-samples effective reports full split size with explicit samples; actual saved doc_ids define executed scope; no pooled accuracy across profiles"
+}

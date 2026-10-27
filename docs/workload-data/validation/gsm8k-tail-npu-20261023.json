@@ -1,0 +1,63 @@
+{
+  "schema_version": "gsm8k-original-npu-supplemental-sample/v1",
+  "source_id": "GSM8K",
+  "source_revision": "740312add88f781978c0658806c59bc2815b9866",
+  "test_file_sha256": "ee7b8da9e381df27b9e3f7758a159ab2bdaa4dbaa910546cbbc47e0cb44e4f59",
+  "source_license": "MIT",
+  "status": "END_TO_END_EXECUTED_AND_SCORED",
+  "selected_samples": ["test:1316", "test:1317", "test:1318"],
+  "verified_unique_tasks": 3,
+  "model_calls": 3,
+  "model": {
+    "served_name": "workload-qwen35-27b-128k-nonthinking",
+    "model_revision": "fc05daec18b0a78c049392ed2e771dde82bdf654",
+    "model_config_sha256": "f8d190c5b89c1521220f935d2567a587d6e291ed69066a45a106560b05a2174c",
+    "evaluation_model": "Existing local Qwen3.5-27B NPU service; GSM8K does not prescribe one publisher model"
+  },
+  "runtime": {
+    "runner": "lm-eval==0.4.11",
+    "datasets": "3.6.0",
+    "pyarrow": "19.0.1",
+    "huggingface_hub": "1.31.0",
+    "vllm": "0.23.0+empty",
+    "vllm_ascend": "0.23.0",
+    "server_inventory": {
+      "backend": "vllm-ascend",
+      "accelerator": "Ascend 910B2",
+      "chip_count": 2,
+      "precision": "bfloat16",
+      "tensor_parallel_size": 2,
+      "text_only": true
+    }
+  },
+  "protocol": {
+    "upstream_task_config_sha256": "82eb1780b263bc040729032b3e076990c7933f42163c91e359f38820dd1d8833",
+    "prompt_fewshot": 5,
+    "max_gen_toks": 2048,
+    "enable_thinking": false,
+    "chat_api_transport": true,
+    "upstream_prompt_and_scoring_functions_unchanged": true,
+    "http_retries": 0
+  },
+  "metrics": {
+    "gsm8k": {
+      "exact_match,strict-match": 1.0,
+      "exact_match,flexible-extract": 1.0
+    }
+  },
+  "sample_counts": {
+    "gsm8k": {
+      "original": 1319,
+      "effective": 1319
+    }
+  },
+  "harness_cardinality_caveat": "lm-eval reports effective=1319 for explicit row selection in this version; the runner verified the actual unique logged doc_ids are exactly 1316, 1317, and 1318, so this receipt counts three tasks only.",
+  "prior_failed_invocation": {
+    "attempt": "gsm8k-tail-1316-001",
+    "failure": "HTTP 404 from passing the base /v1 path instead of the chat-completions endpoint",
+    "model_generations": 0,
+    "raw_results_published": false
+  },
+  "claim_boundary": "Three additional original GSM8K test tasks completed and scored. Together with prior test:0-2 evidence, six noncontiguous tasks are sampled; this is not a full 1319-row score, full publisher environment reproduction, or performance result.",
+  "raw_requests_answers_and_model_outputs_published": false
+}

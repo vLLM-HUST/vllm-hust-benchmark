@@ -1,0 +1,43 @@
+{
+  "source_id": "DS1000",
+  "status": "ORIGINAL_FIRST3_PANDAS_AUTHOR_FUNCTIONAL_EVALUATION_COMPLETE_DELIVERY_PENDING",
+  "code_revision": "b39aab71da6d23ef8d3cac59a7c5f834516ab334",
+  "official_archive_url": "https://codeload.github.com/xlang-ai/DS-1000/tar.gz/b39aab71da6d23ef8d3cac59a7c5f834516ab334",
+  "observed_archive_sha256": "78397aaebfcd71b967581131b76f6888b5a334b6d3b217e4ed545a181526354f",
+  "publisher_checksum_available_for_archive": false,
+  "author_file_sha256": {
+    "test_ds1000.py": "32ebe279eefa2d3cb1d633a82b43954ea813567e2fca28a9f6d777ce7f04d50c",
+    "execution.py": "fab0beb2a5c3300f4540c2225ffc013881e5770fed388ad20d4620ae040cd311",
+    "environment.yml": "61575788abe7cd77d26921ba2043efb652d2e1a9fe569378e9405a8469bb76aa"
+  },
+  "original_data_rows_equal_between_existing_hf_asset_and_author_archive": 1000,
+  "original_problem_ids": [0, 1, 2],
+  "selected_library": "Pandas",
+  "official_evaluation_function": "test_ds1000.eval_ds1000",
+  "official_postprocess_used": true,
+  "official_timeout_seconds": 120,
+  "official_max_workers": 16,
+  "official_source_modified": false,
+  "task_subset_binding": "Load original1000, bind original first3 to author ds1000 global, call unchanged eval_ds1000 with corresponding postprocessed answers. No placeholders for other997; no context/test_execution/applicable test_string removed.",
+  "author_summary": {
+    "count": 3,
+    "mean_as_publisher_formatted": 0.667,
+    "Origin": {"count": 2, "mean": 1.0},
+    "Difficult-Rewrite": {"count": 1, "mean": 0.0},
+    "sha256": "c6dba7e20221fc82a2380263fe5232da5e80835388f42a48b9fd0454570b5558"
+  },
+  "runtime": {"python": "3.10.22", "numpy": "1.26.4", "pandas": "1.5.3", "tqdm": "4.67.1", "platform": "linux-aarch64", "package_channel": "conda-forge"},
+  "environment_scope": "Python3.10/NumPy1.26.4/Pandas1.5.3 match author environment.yml; original selected contexts require copy/numpy/pandas only. Not the full seven-library environment.",
+  "isolation": {"user_mount_network_pid_namespaces_and_chroot": true, "host_uid": 65534, "capabilities_cleared_and_no_new_privs": true, "host_data_root_proc_and_npu_devices_absent": true, "network_unreachable": true, "inputs_readonly": true, "runtime_mount_alias": "/opt/python", "cpu_limit_seconds": 300, "address_space_limit_bytes": 2147483648, "outer_deadline_seconds": 600, "security_certification_claim": false},
+  "server_receipt": "/data/shared_upload/hust-phr/ds1000-functional-sandbox-20261025-002/assets/output/receipt-public.json",
+  "prior_failed_attempt": "001 failed before author import/candidate execution: Python -I excluded script directory. Corrected trusted /inputs search path only; failure log retained.",
+  "dependency_resolution_failure_retained": "tqdm4.70.1 requires Python>=3.11; use author-unpinned tqdm4.67.1 while preserving author Python3.10/NumPy/Pandas versions.",
+  "new_model_calls": 0,
+  "original_length_termination_preserved": true,
+  "candidate_repaired_or_replaced": false,
+  "full1000_functional_execution_claim": false,
+  "all_seven_libraries_qualified": false,
+  "source_checkbox_eligible": false,
+  "raw_payloads_published": false,
+  "remaining_gap": "Public reusable isolated-scoring entry and fixed-artifact/research consumer closure pending."
+}

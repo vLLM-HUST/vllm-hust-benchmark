@@ -1,0 +1,38 @@
+{
+  "schema_version": "original-native-generation-pilot/v1",
+  "source_id": "XSUM",
+  "date": "2026-10-25",
+  "status": "ORIGINAL_FIRST3_NATIVE_BART_GENERATION_COMPLETED_SCORING_AND_PUBLIC_INTEGRATION_PENDING",
+  "model": "facebook/bart-large-xsum",
+  "model_revision": "2179ab81d3f133e639f2957aec5380e9d56b2783",
+  "dataset_revision": "7d4d486c2f8ef850b1a11aead99b894ff3dd7da9",
+  "split": "test",
+  "selected_original_indices_before_outputs": [
+    0,
+    1,
+    2
+  ],
+  "model_calls": 3,
+  "versions": {
+    "torch": "2.10.0+cpu",
+    "torch-npu": "2.10.0.post4",
+    "transformers": "4.57.3",
+    "pyarrow": "21.0.0"
+  },
+  "device": "npu:1",
+  "all_model_parameters_verified_on_npu": true,
+  "native_generation_config": {
+    "max_length": 62,
+    "min_length": 11,
+    "num_beams": 6,
+    "no_repeat_ngram_size": 3
+  },
+  "input_policy": "Official BART summarization pipeline with native1024 token encoder truncation; no extra capacity-driven crop, no changed output budget",
+  "original_test_rows": 11334,
+  "native_scoring_completed": false,
+  "public_native_entry_complete": false,
+  "fixed_ci_artifact_verified": false,
+  "research_consumption_verified": false,
+  "source_checkbox_eligible": false,
+  "raw_payloads_published": false
+}

@@ -1,0 +1,70 @@
+{
+  "source_id": "CHARTQA",
+  "status": "ORIGINAL_TEST_SAMPLED_NATIVE_DELIVERY_VERIFIED",
+  "source_checkbox_eligible": true,
+  "source": {
+    "repository": "HuggingFaceM4/ChartQA",
+    "revision": "b605b6e08b57faf4359aeb2fe6a3ca595f99b6c5",
+    "file": "data/test-00000-of-00001-e2cd0b7a0f9eb20d.parquet",
+    "bytes": 68898419,
+    "sha256": "efcf31333368c485eb569ec7bd4cc3694bd0e8e1a06c503124b51d27c924491d",
+    "rows": 2500,
+    "all_four_fields_and_image_bytes_verified": true,
+    "scope": "Original test split only"
+  },
+  "native_validation": {
+    "toolkit": "open-compass/VLMEvalKit",
+    "revision": "160e8a7d0cb1d4d739c1757038775cf2720d6895",
+    "git_tree": "417350395a289dd88538ac6cc031bf47c6e9f5d4",
+    "model": "Qwen/Qwen3.5-9B",
+    "model_revision": "c202236235762e1c871ad0ccb60c8ee5ba337b9a",
+    "profile": "Ascend910B2, BF16, TP1, 262144 context; enable_thinking=false",
+    "original_api_budget": 2048,
+    "batches": [
+      {"positions": [0, 1, 2], "category": 0, "prompt_tokens": [549, 549, 547], "completion_tokens": [3, 5, 2], "stop": 3, "original_relaxed_accuracy_percent": 66.66666666666666, "existing_generation_reused": true},
+      {"positions": [1250, 1251, 1252], "category": 1, "prompt_tokens": [467, 475, 473], "completion_tokens": [3, 5, 4], "stop": 3, "original_relaxed_accuracy_percent": 100.0, "public_native_entry_executed": true}
+    ],
+    "both_saved_batches_public_verifier_passed": true,
+    "verification_new_model_calls": 0,
+    "paid_judge_calls": 0,
+    "original_encoder_and_scorer_unmodified": true,
+    "http_lossless_pixel_identity_claim": false,
+    "full_test_inference_or_performance_claim": false
+  },
+  "provider_and_research": {
+    "ci_commit": "9a67bcd38e4c742bade97d413a09f228e886831b",
+    "successful_cpu_ci_run": 40343189959,
+    "ci_artifact": 12660381797,
+    "wheel_sha256": "c1432a3862b7a36ae3e6f07d243fba54479ca544e883d23657ae3ad64298fd8b",
+    "installed_payloads_byte_equal": 44,
+    "full_original_index_rows": 2500,
+    "public_and_fixed_research_roundtrips": 6,
+    "research_consumer_snapshot": "dd410314",
+    "research_consumer_sha256": "556f2633d4ffef7fb5dd7197ea3772805cf3ec0cbdc5b35ee81aec19649a928d",
+    "research_default_dependency_changed": false,
+    "observations_or_research_analysis_migrated": false
+  },
+  "environment": {
+    "python": "3.12.13",
+    "isolated_client_decord_import_and_pip_check_passed": true,
+    "lock": "configs/workload-native/chartqa-native-client-py312-verified-lock.txt",
+    "lock_is_standalone_bootstrap": false,
+    "fixed_builder_fresh_full_rebuild_verified": false,
+    "actual_recovery": "Reused identity-verified FFmpeg/Decord build artifacts; installed Decord into qualified private venv using corrected explicit prefix; isolated Python import and pip check passed",
+    "old_builder_incident": "5a502c70 followed the venv interpreter symlink and installed Decord into the old container system Python, then failed pip check. dd66b240 fixes qualification and installation prefix. New instance root Decord absent; no global rollback attempted."
+  },
+  "server_receipts": [
+    "chartqa-public-saved-audit-32028-001/receipt-public.json",
+    "chartqa-public-category1-native-32028-001/receipt-private.json",
+    "chartqa-public-category1-saved-audit-32028-001/receipt-public.json",
+    "chartqa-ci-provider-research-audit-32028-001/receipt-public.json",
+    "chartqa-pure-client-recovery-32028-001/process-private.json"
+  ],
+  "raw_payloads_published": false,
+  "limitations": [
+    "Six fixed original tasks cover both original categories, not a complete 2500-task quality evaluation",
+    "HF original-test storage view is lossless for source fields, not the byte-identical toolkit preset TSV",
+    "Native image encoding may use JPEG; original prompt-cache pixels and native wire encoding are checked separately",
+    "Fixed runtime builder is covered by CPU contracts and composed server recovery, not a fresh end-to-end rebuild"
+  ]
+}

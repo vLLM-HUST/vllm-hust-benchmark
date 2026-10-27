@@ -1,0 +1,41 @@
+{
+  "schema_version": "native-workload-delivery-receipt/v1",
+  "source_id": "MATH500",
+  "date": "2026-10-24",
+  "status": "UPSTREAM_NATIVE_SAMPLE_DELIVERY_AVAILABLE",
+  "source_commit": "3f397e69abd0263913d10c4e243b6d29a9a6bf8a",
+  "scope": "Fixed upstream original test indices 0,1,2; all four epochs per task and model_graded_fact scoring. Full 500-task execution is supported but was not performed.",
+  "available_original_tasks": 500,
+  "verified_unique_original_tasks": 3,
+  "verified_sample_epochs": 12,
+  "native_execution_receipt": "math500-upstream-inspect-native-20261024.json",
+  "installed_ci_reader_receipt": "math500-ci-reader-3f397e69-20261024.json",
+  "source_integrity_receipt": "math500-source-read-20261023.json",
+  "documentation": "docs/workload-data/MATH500_ORIGINAL_TASK.zh-CN.md",
+  "public_runner": "scripts/run_math500_native.py",
+  "native_task": "hf/HuggingFaceH4/MATH-500@6e4ed1a2a79af7d8630a6b768ec859cb5af4d3be",
+  "framework": "inspect-ai==0.3.283",
+  "scoring": "Original model_graded_fact, 4 epochs and pass_at_1 reducer; default grader is the task model, not an independent quality oracle.",
+  "diagnostic_scorer_not_used_for_delivery": "PRM800K deterministic grader wrapper is a separate diagnostic, not a substitute for the upstream task.",
+  "service_configuration_reference": "bbh-all-task-variants-original-npu-20261024.json",
+  "ci": {
+    "cpu_correctness_run": 40072292822,
+    "main_run": 40072292831,
+    "cpu_correctness": "success",
+    "lint": "success",
+    "tests": "success"
+  },
+  "source_checkbox_eligible": true,
+  "full_suite_validated": false,
+  "independent_quality_claim": false,
+  "performance_claim": false,
+  "new_research_consumer_test_claim": false,
+  "raw_data_published": false,
+  "model_outputs_published": false,
+  "limits": [
+    "Only the fixed three-task, four-epoch original protocol is validated on the documented NPU service.",
+    "No task rewriting, input truncation, shortened original flow or failed-sample replacement.",
+    "Same fixed upstream revision was downloaded through a mirror because direct Hub access timed out; original source SHA was verified.",
+    "The documented existing service environment was reused; clean-machine compiler/container recreation was not validated."
+  ]
+}

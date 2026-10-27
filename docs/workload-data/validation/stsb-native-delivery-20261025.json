@@ -1,0 +1,38 @@
+{
+  "schema_version": "native-workload-delivery-receipt/v1",
+  "source_id": "STSB",
+  "date": "2026-10-25",
+  "status": "ORIGINAL_FULL_DEV_TEST_SENTENCE_SIMILARITY_INTEGRATION_AVAILABLE",
+  "data_commit": "6969a58139f512c3c599c8b2c4b7cca9e9a488db", "data_commit_note": "pragma: allowlist secret - public fixed software or model identity",
+  "public_runner": "scripts/run_stsb_original.py",
+  "public_runner_sha256": "f421676684700908e2ecbdac001adf3c23705dfb9b49fd642f546b437513a47c", "public_runner_sha256_note": "pragma: allowlist secret - public fixed software or model identity",
+  "native_execution_and_rescore_receipt": "docs/workload-data/validation/stsb-original-native-and-rescore-20261025.json",
+  "candidate_consumer_receipt": "docs/workload-data/validation/stsb-candidate-consumer-20261025.json",
+  "fixed_ci_research_handoff_receipt": "docs/workload-data/validation/stsb-fixed-ci-research-handoff-20261025.json",
+  "original_dataset_rows": 8628,
+  "original_train_rows_retained_not_evaluated": 5749,
+  "full_native_evaluation_pairs": {
+    "dev": 1500,
+    "test": 1379
+  },
+  "model": {
+    "repo_id": "sentence-transformers/all-mpnet-base-v2",
+    "revision": "e8c3b32edf5434bc2275fc9bab85f82640a19130", "revision_note": "pragma: allowlist secret - public fixed software or model identity",
+    "original_model_type": "SentenceTransformer",
+    "model_native_maximum_tokens": 384,
+    "dtype": "FP32",
+    "backend": "torch_npu",
+    "device": "npu:1"
+  },
+  "evaluator": "original Sentence Transformers5.1.2 EmbeddingSimilarityEvaluator, model-default cosine Pearson/Spearman",
+  "original_dataset_or_sentences_rewritten": false,
+  "continuous_reference_labels_exposed_to_model": false,
+  "preserved_raw_score_string": true,
+  "original_publisher_score_normalization": "float(score)/5.0 only in original evaluation call",
+  "source_checkbox_eligible": true,
+  "research_default_dependency_lock_updated": false,
+  "research_observation_or_analysis_migrated": false,
+  "engine_performance_or_scientific_conclusion_claim": false,
+  "raw_payloads_published": false,
+  "boundary": "Fixed original STSBenchmark SBERT distribution and named dev/test evaluation recipe; not training reproduction, all embedding datasets, production retrieval traffic or KV reuse evidence. Original data, full vectors and indices stay external."
+}

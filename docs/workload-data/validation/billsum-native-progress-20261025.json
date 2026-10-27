@@ -1,0 +1,112 @@
+{
+  "source_id": "BILLSUM",
+  "status": "NATIVE_PUBLIC_ENTRY_VERIFIED_FIXED_CI_CONSUMPTION_PENDING",
+  "source_checkbox_eligible": false,
+  "raw_payloads_published": false,
+  "original_rows": {
+    "train": 18949,
+    "test": 3269,
+    "ca_test": 1237
+  },
+  "dataset_variant": "FiscalNote HF text/summary/title, not original-paper clean_text/full raw archive",
+  "original_primary_generation": {
+    "model": "google/pegasus-billsum",
+    "device": "npu:1",
+    "model_calls": 6,
+    "scoring_model_calls": 0,
+    "splits": [
+      {
+        "split": "test",
+        "original_indices": [
+          0,
+          1,
+          2
+        ],
+        "native_responses_reused": 3,
+        "rouge": {
+          "rouge1": 55.5146,
+          "rouge2": 38.578,
+          "rougeL": 46.9162,
+          "rougeLsum": 49.7127
+        },
+        "selection_mode": "FIRST3_BY_FROZEN_30MIN_RULE",
+        "estimated_full_native_seconds": 32960.57890409022
+      },
+      {
+        "split": "ca_test",
+        "original_indices": [
+          0,
+          1,
+          2
+        ],
+        "native_responses_reused": 3,
+        "rouge": {
+          "rouge1": 34.9632,
+          "rouge2": 14.4509,
+          "rougeL": 23.1301,
+          "rougeLsum": 32.7337
+        },
+        "selection_mode": "FIRST3_BY_FROZEN_30MIN_RULE",
+        "estimated_full_native_seconds": 9897.252646230627
+      }
+    ]
+  },
+  "public_entry_validation": [
+    {
+      "split": "test",
+      "original_indices": [
+        3,
+        4,
+        5
+      ],
+      "new_model_calls": 3,
+      "scoring_model_calls": 0,
+      "rouge": {
+        "rouge1": 64.6119,
+        "rouge2": 43.8143,
+        "rougeL": 49.7862,
+        "rougeLsum": 59.5847
+      }
+    },
+    {
+      "split": "ca_test",
+      "original_indices": [
+        3,
+        4,
+        5
+      ],
+      "new_model_calls": 3,
+      "scoring_model_calls": 0,
+      "rouge": {
+        "rouge1": 42.1063,
+        "rouge2": 17.1999,
+        "rougeL": 23.9607,
+        "rougeLsum": 37.5223
+      }
+    }
+  ],
+  "whole_test_suites_inference_claim": false,
+  "research_default_dependency_lock_updated": false,
+  "candidate_consumer_verification": {
+    "source_id": "BILLSUM",
+    "status": "CANDIDATE_ALL_ORIGINAL_FIELDS_PUBLIC_AND_RESEARCH_CONSUMPTION_VERIFIED",
+    "model_calls": 0,
+    "source_checkbox_eligible": false,
+    "raw_payloads_published": false,
+    "fixed_ci_wheel_claim": false,
+    "research_default_dependency_lock_updated": false,
+    "original_rows": {
+      "test": 3269,
+      "ca_test": 1237,
+      "train": 18949
+    },
+    "public_index_rows": 23455,
+    "research_import_rows": 18,
+    "research_direct_prepare_rows": 23455,
+    "public_index_reused_without_rebuild": true,
+    "public_and_research_roundtrips": 18,
+    "research_source_files_unchanged": 40,
+    "scientific_analysis_acceptance_claim": false,
+    "research_observation_or_analysis_migrated": false
+  }
+}

@@ -1,0 +1,124 @@
+{
+  "source_id": "GSM8K",
+  "revision": "740312add88f781978c0658806c59bc2815b9866",
+  "selected_samples": [
+    "test:0",
+    "test:1",
+    "test:2"
+  ],
+  "selection": "first three original test rows, fixed before model execution",
+  "model": "workload-qwen35-27b",
+  "started_at_unix": 1792608265.9068115,
+  "runner": "lm-eval==0.4.11",
+  "task_config_sha256": "82eb1780b263bc040729032b3e076990c7933f42163c91e359f38820dd1d8833",
+  "changes_from_upstream_task": [
+    "local byte-identical parquet paths",
+    "three test rows only",
+    "chat API transport",
+    "max_gen_toks=2048",
+    "enable_thinking=false"
+  ],
+  "prompt_filters_metric_fewshot": "unchanged upstream gsm8k recipe; five training examples",
+  "claim_boundary": "integration sample, not full benchmark score or performance evaluation",
+  "status": "END_TO_END_EXECUTED_AND_SCORED",
+  "versions": {
+    "lm-eval": "0.4.11",
+    "datasets": "3.6.0",
+    "pyarrow": "19.0.1",
+    "huggingface-hub": "1.31.0"
+  },
+  "metrics": {
+    "gsm8k": {
+      "alias": "gsm8k",
+      "exact_match,strict-match": 1,
+      "exact_match_stderr,strict-match": "N/A",
+      "exact_match,flexible-extract": 1,
+      "exact_match_stderr,flexible-extract": "N/A"
+    }
+  },
+  "sample_counts": {
+    "gsm8k": {
+      "original": 1319,
+      "effective": 3
+    }
+  },
+  "finished_at_unix": 1792608304.9043102,
+  "schema_version": "workload-server-validation/v1",
+  "server_inventory": {
+    "accelerator": "Ascend 910B2",
+    "chips": 2,
+    "backend": "vllm-ascend",
+    "precision": "bfloat16",
+    "mode": "graph",
+    "text_only": true
+  },
+  "model_artifact": {
+    "id": "Qwen/Qwen3.5-27B",
+    "config_sha256": "f8d190c5b89c1521220f935d2567a587d6e291ed69066a45a106560b05a2174c",
+    "publisher_weight_hashes_verified": false,
+    "tensor_parallel_size": 2,
+    "max_model_len": 16384
+  },
+  "engine_versions": {
+    "vllm": "0.23.0+empty",
+    "vllm-ascend": "0.23.0",
+    "torch": "2.10.0+cpu",
+    "torch-npu": "2.10.0.post4",
+    "transformers": "5.5.4"
+  },
+  "reader_validation": {
+    "installed_distribution": "vllm-hust-workload-data==0.1.0",
+    "prepared_records": 3,
+    "resolved_records": 3,
+    "reference_answers_excluded_from_input": true,
+    "selection_metadata_preserved": true,
+    "run": "gsm8k-reader-002",
+    "code_sha256": {
+      "__init__.py": "bd7ec2ac1ab4aeb83a5b0ffa0af756d58ea151c7cdae3756628fdbf8a64b6609",
+      "adapters.py": "2a5d9ba89879972f6e04d76d56fd978febabc93857c878e00a970ea51f5d2867",
+      "assets.py": "386c55788c85f4fd3b48867244b2bd5d92901348513afdab00b953d7d70989fe",
+      "bindings.py": "c0eecd156f902289e8257bfc3df9c62e4e4807edd9e6467055ea01f8ec712a68",
+      "catalog.py": "2e149dea7c2738d6b56c5a5da2a92bd6d813b5bbff73a4d877f6637cad9d1e8b",
+      "consumer.py": "d2706c4baa172513b3b5631c6f4610967200c68caccdd2eb0fdca5ad98782a93",
+      "execution.py": "ab1ae4fffe82708068c642ec05626ad3c781afa77b779b8cce2230dbee13e43b",
+      "identity.py": "cd3b346e21786e1b06c325914eb9511c0c03151eac1d1b1ed1fa9cad54e05447",
+      "input_views.py": "6b407231ddc466ee8fddbb53adc9eb99e5a9014b1613352599227ff0aeef3691",
+      "mapping_contract.py": "89fc5c545378e7abbeec16378248730ae059d51b75075c522acea5f908f8a577",
+      "pipeline.py": "45dfd6875cd7930ba2695a8cc7a2b27aeb2a0926ebd41c79cdb4c342be44fd0f",
+      "provider.py": "2f583179802e57ecef5c5bed2fd5d5e38f65eb19d5098fe5fade0e2f0918643f",
+      "records.py": "e8e3c52d4010f8b13b7e5590656bfade7aa1aab44b761d57b41a086ae0b0b887",
+      "registry.py": "2efc02a9d1c5bd36d57c37b1ab75643c60822a33da4f3f0940b09ef8fe5ffe6e",
+      "taxonomy.py": "31a969a4eaf6148ab2c672309f87c54b37780cb3761a43df61b8e7b7a50904c4"
+    },
+    "wheel_sha256": "c615fbe3618b80fa60251dba745a77b96be0fff58cc4314c952874a33c9dd432"
+  },
+  "private_evidence": {
+    "run_directory": "gsm8k-003",
+    "results_sha256": "2fe0240b74f4655c39d13b428e69146a189c632b57595672e78afbdbfc571097",
+    "not_published": [
+      "source_payload",
+      "reference_answers",
+      "model_responses"
+    ]
+  },
+  "attempts": [
+    {
+      "run": "gsm8k-001",
+      "status": "HARNESS_ERROR",
+      "cause": "missing optional API dependency tenacity",
+      "model_requests": 0
+    },
+    {
+      "run": "gsm8k-002",
+      "status": "END_TO_END_EXECUTED_AND_SCORED",
+      "unique_tasks": 3
+    },
+    {
+      "run": "gsm8k-003",
+      "status": "END_TO_END_EXECUTED_AND_SCORED",
+      "unique_tasks": 3,
+      "revalidation_not_new_tasks": true
+    }
+  ],
+  "official_runner_reference": "https://github.com/EleutherAI/lm-evaluation-harness/blob/v0.4.11/lm_eval/tasks/gsm8k/gsm8k.yaml"
+}

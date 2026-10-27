@@ -1,0 +1,91 @@
+{
+  "schema_version": "locomo-original-npu-sample-receipt/v1",
+  "source_id": "LOCOMO",
+  "source_revision": "3eb6f2c585f5e1699204e3c3bdf7adc5c28cb376",
+  "source_sha256": "79fa87e90f04081343b8c8debecb80a9a6842b76a7aa537dc9fdf651ea698ff4",
+  "source_license": "CC-BY-NC-4.0",
+  "status": "END_TO_END_EXECUTED_AND_SCORED",
+  "selected_samples": [3, 4, 5],
+  "scoring": "COMPLETED",
+  "supplemental_sample_batch": true,
+  "selected_scope": "original questions 3-5 in the first conversation; three additional tasks after indices 0-2",
+  "input_integrity": {
+    "full_original_conversation_per_question": true,
+    "conversation_sessions": 19,
+    "original_turns": 419,
+    "generated_memories_injected": false,
+    "original_prompt_formatter": "AST-selected publisher get_input_context and QA templates",
+    "publisher_gpt_utils_sha256": "5fc977375878199735acd28fba5ae6f4d657fa0e000c0d2918a90c07b6035793"
+  },
+  "model": {
+    "served_name": "workload-qwen35-27b-128k-nonthinking",
+    "model_revision": "fc05daec18b0a78c049392ed2e771dde82bdf654",
+    "model_config_sha256": "f8d190c5b89c1521220f935d2567a587d6e291ed69066a45a106560b05a2174c",
+    "substitution": "Qwen3.5-27B on local NPU instead of publisher GPT-4-Turbo"
+  },
+  "runtime": {
+    "vllm": "0.23.0+empty",
+    "vllm_ascend": "0.23.0",
+    "hardware": "2 x Ascend 910B2",
+    "dtype": "bfloat16",
+    "tensor_parallel_size": 2,
+    "max_model_len": 131072,
+    "max_num_seqs": 2,
+    "gpu_memory_utilization": 0.75,
+    "enable_thinking": false,
+    "service_run": "model-qwen35-27b-recovery-001"
+  },
+  "recovery_environment_change": "Fresh caches and TMPDIR on instance-local /tmp; diagnostic change only, not a proven root-cause fix.",
+  "generation_profile": {
+    "publisher_context_profile": "gpt-4-turbo, batch_size=1, no RAG",
+    "temperature": 0,
+    "max_tokens": 32,
+    "model_calls": 3,
+    "http_retries": 0,
+    "publisher_modules_unchanged": true
+  },
+  "scorer": {
+    "name": "publisher eval_question_answering and F1 functions",
+    "publisher_evaluation_sha256": "8e3be5d57ff2ff9ec5cd05939592f468c5f3f1fd95d13e431932bdf6bf0fd6fd",
+    "scorer_runs": 1,
+    "not_bertscore": true
+  },
+  "samples": [
+    {
+      "original_flat_index": 3,
+      "parent_index": 0,
+      "question_index": 3,
+      "category": 1,
+      "prompt_tokens": 18094,
+      "completion_tokens": 4,
+      "finish_reason": "stop",
+      "publisher_f1": 1.0
+    },
+    {
+      "original_flat_index": 4,
+      "parent_index": 0,
+      "question_index": 4,
+      "category": 1,
+      "prompt_tokens": 18095,
+      "completion_tokens": 3,
+      "finish_reason": "stop",
+      "publisher_f1": 0.5
+    },
+    {
+      "original_flat_index": 5,
+      "parent_index": 0,
+      "question_index": 5,
+      "category": 2,
+      "prompt_tokens": 18110,
+      "completion_tokens": 10,
+      "finish_reason": "stop",
+      "publisher_f1": 0.7499999999999999
+    }
+  ],
+  "aggregate": {
+    "publisher_f1_mean": 0.75,
+    "all_generations_stop": true
+  },
+  "claim_boundary": "Three additional original QA tasks completed with publisher F1. These are not new conversations, full-suite coverage, publisher model/environment reproduction, category-5 validation, a performance result, or evidence that the NFS issue is fixed.",
+  "raw_requests_and_model_responses_published": false
+}

@@ -1,0 +1,30 @@
+{
+  "mapping_version": "source-mapping/v1",
+  "source": {
+    "source_id": "JSONSCHEMABENCH",
+    "revision": "5bd0f4640badc6f3f02df796421d21cb0ca0b141",
+    "unit": "original_schema_row",
+    "publisher": "EPFL DLAB JSONSchemaBench authors",
+    "locator": "https://huggingface.co/datasets/epfl-dlab/JSONSchemaBench",
+    "license": "MIT per fixed publisher dataset card; preserve original schema provenance",
+    "provenance_kind": "published_schema_corpus"
+  },
+  "families": ["structured-generation"],
+  "records_path": [],
+  "identity": {"task_id": {"path": ["unique_id"], "type": "string", "required": true}},
+  "input": {"json_schema": {"path": ["json_schema"], "type": "string", "required": true}},
+  "features": {},
+  "outcome": {},
+  "runtime": {
+    "kind": "task_dataset",
+    "requirements": ["Preserve original serialized json_schema and unique_id; original file identifies configuration/split and original row order", "No fabricated prompt, schema rewriting, external reference resolution or research feature extraction", "Native author Dataset decodes json_schema for original few-shot formatter/bench/evaluator; this mapping only reads original rows"],
+    "environment_ref": "configs/workload-native/jsonschemabench-client-requirements.txt",
+    "termination_ref": "scripts/run_jsonschemabench_official.py",
+    "scorer_ref": "epfl-dlab/JSONSchemaBench@8003e8405c4d8d8b327b1eb472c9856297d75493/core/evaluator.py"
+  },
+  "replay": {"order": "source_file_order_not_assumed_arrival_order", "artificial_load": false},
+  "evidence": {
+    "field_reference": "https://huggingface.co/datasets/epfl-dlab/JSONSchemaBench/blob/5bd0f4640badc6f3f02df796421d21cb0ca0b141/README.md",
+    "review_status": "field_contract_reviewed"
+  }
+}

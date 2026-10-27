@@ -1,0 +1,92 @@
+{
+  "source_id": "RULER",
+  "original_control_flow_audit": {
+    "source_id": "RULER",
+    "status": "ORIGINAL_QA2_4K_CONTROL_FLOW_AND_MANDATORY_CONTEXT_AUDITED",
+    "source_commit": "c3f5e3b4f87f97e048793bb510a3a6b19a46bf3a",
+    "original_qa_code_sha256": "f00c0b59cf8698e90831bbf461c2c4f40f2a30f2469534c27455808c717281d0",
+    "original_hotpot_lfs_sha256": "e3da074df24e8369009918aa5cdbdd254dadcde4c63f7569d36afd6f2268caa8",
+    "tokenizer_model": "Qwen/Qwen3.5-27B",
+    "selected_original_rows_checked": 500,
+    "original_required_document_count_distribution": {
+      "2": 4,
+      "5": 1,
+      "10": 495
+    },
+    "original_output_budget": 32,
+    "requested_max_seq_length": 4096,
+    "mandatory_context_lower_bound_plus_output_tokens_max": 3416,
+    "infeasible_exact_min10_original_rows": [],
+    "checked_original_longer_lengths_above_all500_mandatory_context_lower_bounds": [
+      8192,
+      16384,
+      32768,
+      65536,
+      131072
+    ],
+    "original_generator_loop_decrements_only_above10_and_has_no_exit_when10_still_overlength": true,
+    "original_control_flow_replay_witness": {
+      "original_row_offset": 251,
+      "original_initial_num_docs": 27,
+      "original_required_document_count": 10,
+      "stuck_used_docs": 7,
+      "steps": [
+        {
+          "used_docs": 27,
+          "error_type": "original_length_assertion"
+        },
+        {
+          "used_docs": 17,
+          "error_type": "original_length_assertion"
+        },
+        {
+          "used_docs": 7,
+          "error_type": "ValueError"
+        }
+      ],
+      "kind": "decrement_undershoots_required_docs_then_negative_random_sample_repeats_without_state_change"
+    },
+    "original_valid_prefix_rows_before_witness": 251,
+    "original_valid_prefix_sha256": "dad17d416120f7660568eac2d32ea85640548e0ed1c98321c4b72c1e1d6bcdb7",
+    "running_process_current_instruction_pointer_or_row_inspected": false,
+    "unavoidable_nontermination_for_requested_full500_selection": true,
+    "raw_context_reference_or_question_changed": false,
+    "model_calls": 0,
+    "source_checkbox_eligible": false,
+    "raw_payloads_published": false
+  },
+  "compatibility_preparation_audit": {
+    "source_id": "RULER",
+    "status": "QA2_FULL500_REQUIRED_DOC_FLOOR_COMPAT_PREPARATION_AUDITED",
+    "task": "qa_2",
+    "generator_max_seq_length": 4096,
+    "generator_seed": 42,
+    "original_questions_and_references_verified": 500,
+    "all_original_required_documents_present": true,
+    "original_valid_prefix_rows_exactly_preserved": 251,
+    "original_prefix_sha256": "dad17d416120f7660568eac2d32ea85640548e0ed1c98321c4b72c1e1d6bcdb7",
+    "data_sha256": "a542d0d301a3ae5212782fb80101139e9c9484786738433ced52f389be394af3",
+    "output_budget": 32,
+    "maximum_source_input_plus_output_tokens": 4093,
+    "generator_compatibility": {
+      "patch_id": "ruler-qa-required-doc-floor/v1",
+      "target_relative_path": "scripts/data/synthetic/qa.py",
+      "original_source_sha256": "f00c0b59cf8698e90831bbf461c2c4f40f2a30f2469534c27455808c717281d0",
+      "runtime_source_sha256": "866140313186fd2bca7f5c40833f539ed20b96d0a1fa2ac17cb2e476d7cb39ea",
+      "explicit_opt_in": true,
+      "question_renderer_ast_preserved": true,
+      "original_checkout_overwritten": false,
+      "runtime_copy_created_fresh": true,
+      "change_scope": "clamp decrement to original required context document count; no question/document filtering or output-budget change",
+      "inference_or_scoring_executed": false
+    },
+    "other_publisher_files_equal": 26,
+    "original_publisher_snapshot_files_unchanged": 27,
+    "question_context_or_answer_filtering_performed": false,
+    "compatibility_is_explicit_opt_in_not_unmodified_publisher_generator_claim": true,
+    "model_calls": 0,
+    "source_checkbox_eligible": false,
+    "raw_payloads_published": false
+  },
+  "raw_payloads_published": false
+}

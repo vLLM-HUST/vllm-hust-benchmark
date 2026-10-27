@@ -1,0 +1,45 @@
+{
+  "schema_version": "native-workload-delivery-receipt/v1",
+  "source_id": "BBH",
+  "date": "2026-10-24",
+  "status": "ORIGINAL_TASK_NATIVE_SAMPLE_DELIVERY_AVAILABLE",
+  "source_commit": "3f397e69abd0263913d10c4e243b6d29a9a6bf8a",
+  "scope": "All 27 original task variants supported; fixed original indices 0,1,2 per variant verified, including three reused Boolean tasks. Not full-suite execution or paper equivalence.",
+  "available_original_rows": 6511,
+  "verified_unique_original_task_instances": 81,
+  "source_revision": "9ee07bd481feebf959a6b59d61ea57bdcf30964d",
+  "source_integrity_receipt": "bbh-all-original-assets-server-20261024.json",
+  "native_execution_receipts": [
+    "bbh-boolean-original-npu-20261023.json",
+    "bbh-all-task-variants-original-npu-20261024.json"
+  ],
+  "fixed_ci_artifact_receipt": "ci-installed-reader-3f397e69-20261024.json",
+  "documentation": "docs/workload-data/BBH_ORIGINAL_INPUTS.zh-CN.md",
+  "commands": {
+    "prepare": "workload-data prepare-bbh-original --data-archive ORIGINAL_FIXED_ARCHIVE --output EXTERNAL_NEW_DATA_DIRECTORY",
+    "execute_and_score": "python scripts/run_bbh_original_tasks.py --data-root EXTERNAL_DATA_DIRECTORY --output EXTERNAL_NEW_PRIVATE_RESULTS --endpoint http://127.0.0.1:19466/v1 --model workload-qwen35-27b-128k-nonthinking --max-model-len 131072 --task-ids ORIGINAL_TASK_IDS",
+    "full_selected_task_files": "Append --full; full execution was not performed in this validation."
+  },
+  "scoring": "Pinned lm-eval 0.4.11 BBH reference generation, regex and exact_match; not publisher scoring code or original paper model configuration.",
+  "validated_service": "Qwen3.5-27B, two Ascend 910B2 NPUs, BF16, TP2, 131072 context, graph, nonthinking; full identity and launch command in the documentation.",
+  "ci": {
+    "cpu_correctness_run": 40072292822,
+    "cpu_correctness": "success",
+    "main_run": 40072292831,
+    "lint": "success",
+    "tests": "success"
+  },
+  "historical_research_consumer_evidence_reused": true,
+  "new_research_consumer_test_claim": false,
+  "raw_data_published": false,
+  "model_outputs_published": false,
+  "performance_claim": false,
+  "full_suite_validated": false,
+  "source_checkbox_eligible": true,
+  "remaining_limits": [
+    "Only the declared original fixed samples were run; users can run all supported original task files through the same entrypoint.",
+    "Low scores and unextracted answers are retained; no accuracy or optimization improvement claim.",
+    "Service verification reused the documented existing NPU environment; no clean-machine compiler/container recreation claim.",
+    "Research observation and analysis stay outside the benchmark; the newer wheel is not claimed as a newly locked research-side dependency."
+  ]
+}
