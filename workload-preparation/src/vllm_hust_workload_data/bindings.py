@@ -65,7 +65,7 @@ def bind_source(
                 "file differs from pinned publisher/previous identity; do not overwrite its revision"
             )
         if (
-            source_id in {"REPOBENCH", "AZURE_LMM_2025", "COPILOT_AGENT_2026"}
+            source_id in {"REPOBENCH", "AZURE_LMM_2025", "COPILOT_AGENT_2026", "DOCVQA"}
             and relative not in known
         ):
             raise ValueError("source requires registered original assets")

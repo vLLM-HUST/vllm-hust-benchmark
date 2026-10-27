@@ -850,6 +850,18 @@
       "requirements": ["Original v1.1 Python and Java next-line completion records, preserving nested context path/snippet order and values", "Full all_code, next_line and gold_snippet_index stay reference-side, not blind model inputs", "Reuse author construct_prompt, date/length selection, tokenizer-dependent window handling, next-line extraction and scoring; raw records are not chat requests", "Physical file and row references are original release positions, not timestamps or server arrival order"],
       "status": "ORIGINAL_FIELDS_MAPPED_NATIVE_AND_RESEARCH_CLOSURE_PENDING"
     },
+    "DOCVQA": {
+      "kind": "task_dataset",
+      "mapping": "native_fields",
+      "input_fields": ["question", "image"],
+      "required_fields": ["questionId", "question", "question_types", "image", "docId", "ucsf_document_id", "ucsf_document_page_no", "answers", "data_split"],
+      "outcome_fields": ["answers"],
+      "annotation_fields": ["questionId", "question_types", "docId", "ucsf_document_id", "ucsf_document_page_no", "data_split"],
+      "id_field": "questionId",
+      "normalization": {},
+      "requirements": ["Original validation fields and PNG bytes preserved without resizing or answer coercion", "Use the pinned maintained Inspect Evals task for native template, thumbnail1024 and ANLS; this raw reader is not an alternative prompt/scorer", "No task execution or research integration is established by catalog registration"],
+      "status": "ORIGINAL_VALIDATION_FIELDS_MAPPED_NATIVE_AND_RESEARCH_PENDING"
+    },
     "COPILOT_AGENT_2026": {
       "kind": "request_metadata",
       "mapping": "copilot_original_session_metadata",

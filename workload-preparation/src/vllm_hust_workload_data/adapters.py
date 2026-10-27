@@ -108,6 +108,10 @@ def adapt_row(
     source_id: str, row: dict, *, source: dict, spec: dict, index: int
 ) -> WorkloadRecord:
     """Projection is explicit/allowlisted; outcome fields never become task inputs."""
+    if source_id == "DOCVQA":
+        from .docvqa import verify_question
+
+        verify_question(row)
     if source_id == "COPILOT_AGENT_2026":
         from .copilot import verify_session
 

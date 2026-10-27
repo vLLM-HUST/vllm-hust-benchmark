@@ -17,6 +17,72 @@ runner = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(runner)
 
 
+def test_docvqa_public_prepare_preserves_original_fields_and_media(tmp_path):
+    from vllm_hust_workload_data.consumer import resolve_input
+
+    pa = pytest.importorskip("pyarrow")
+    pq = pytest.importorskip("pyarrow.parquet")
+    sid = "DOCVQA"
+    filename = "DocVQA/validation-00000-of-00006.parquet"
+    original = {
+        "questionId": "fixture-question",
+        "question": "fixture input",
+        "question_types": ["fixture type"],
+        "docId": 7,
+        "image": {"bytes": b"\x89PNG\r\n\x1a\nfixture", "path": "fixture.png"},
+        "ucsf_document_id": "fixture-document",
+        "ucsf_document_page_no": "001",
+        "answers": ["fixture reference"],
+        "data_split": "val",
+    }
+    data = tmp_path / "original"
+    path = data / filename
+    path.parent.mkdir(parents=True)
+    pq.write_table(pa.Table.from_pylist([original]), path)
+    raw = path.read_bytes()
+    catalog = tmp_path / "catalog"
+    (catalog / "data/catalogs").mkdir(parents=True)
+    for name in (
+        "source_manifests_v1.json",
+        "adapter_registry_v1.json",
+        "adapter_extensions_v1.json",
+    ):
+        payload = json.loads(
+            (ROOT / "workload-preparation/data/catalogs" / name).read_text("utf-8")
+        )
+        if name == "source_manifests_v1.json":
+            payload["sources"][sid]["files"] = [
+                {
+                    "path": filename,
+                    "sha256": hashlib.sha256(raw).hexdigest(),
+                    "bytes": len(raw),
+                    "rows": 1,
+                    "role": "raw_source",
+                }
+            ]
+        (catalog / "data/catalogs" / name).write_text(
+            json.dumps(payload), encoding="utf-8"
+        )
+    output = tmp_path / "prepared"
+    result = runner.prepare(sid, data_root=data, output=output, catalog_root=catalog)
+    db = output / "prepared/workload.sqlite"
+    with sqlite3.connect(db) as connection:
+        ids = connection.execute("select record_id from records").fetchall()
+    assert len(ids) == 1
+    record = resolve_input(db, ids[0][0], data_root=data)
+    assert {
+        **record.task["input"],
+        **record.replay["annotations"],
+        **record.outcome_record(),
+    } == original
+    assert "answers" not in record.task["input"]
+    assert path.read_bytes() == raw
+    assert result["source_rows_fully_bound"] == 1
+    assert not result["native_execution_complete"]
+    with pytest.raises(ValueError, match="not a ready model request"):
+        record.request_body()
+
+
 def test_copilot_public_prepare_index_and_resolve_preserve_original_nested_metadata(
     tmp_path,
 ):
