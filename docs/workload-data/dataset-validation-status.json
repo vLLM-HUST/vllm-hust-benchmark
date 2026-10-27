@@ -2177,6 +2177,18 @@
         "planned_original_tasks": 93,
         "selection": "First3 original tasks per31 public MCQ source files; selection fixed before inference",
         "first_completed_category_snapshot": {"category": "TableQA", "n_total": 3, "accuracy": 0.0, "precision": 0.0, "coverage": 1.0},
+        "partial_saved_audit": {
+          "entry": "scripts/verify_labbench_original_saved.py",
+          "verified_categories": ["TableQA", "ProtocolQA", "FigQA", "LitQA2"],
+          "verified_original_tasks": 12,
+          "new_model_calls": 0,
+          "original_request_images_parser_and_scores_reconstructed": true,
+          "finish_reasons": {"stop": 12},
+          "official_parsed_answers": 1,
+          "official_correct_answers": 0,
+          "diagnosis": "Eleven original outputs were not parsed into a choice by the unchanged author parser. Examples include extra parentheses/angle brackets within ANSWER tags or missing tags. Author coverage=1 includes null outputs because sure compares only against the unsure choice; it is not effective parse coverage. No post-hoc normalization, prompt edits or replacement tasks applied.",
+          "source_checkbox_eligible": false
+        },
         "resource_policy": "Private coordinator waits before each task until API is idle and no NPU owner other than this model engine is present; no research task/service is stopped",
         "source_checkbox_eligible": false
       },
