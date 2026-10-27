@@ -1,0 +1,64 @@
+{
+  "status": "original_context_budget_failure_reviewed_unscored_null_preserved",
+  "task": "circuit-fibsqrt",
+  "CPU_exit_code": 0,
+  "agent_seconds": 330.91977,
+  "trajectory_agent_steps": 9,
+  "Harbor_n_episodes": 10,
+  "completed_API_latency_entries": 9,
+  "HTTP_requests": 11,
+  "HTTP_success": 10,
+  "HTTP_rejected": 1,
+  "output_length_fallback": 1,
+  "accounting_boundary": "Original response truncated at4096 triggered Terminus OutputLengthExceededError recursive query. One extra successful HTTP outside9 recorded responses; final context rejection outside them. Episodes and turns are not HTTP count. Model cost-map network retries are separate non-model fetches.",
+  "trajectory_usage": {
+    "total_prompt_tokens": 125594,
+    "total_completion_tokens": 10818,
+    "total_cached_tokens": 0
+  },
+  "API_metric_usage": {
+    "prompt_tokens": 131043.0,
+    "completion_tokens": 14914.0
+  },
+  "usage_delta": {
+    "prompt_tokens": 5449,
+    "completion_tokens": 4096
+  },
+  "verifier": null,
+  "reward": null,
+  "CTRF": null,
+  "official_scored": false,
+  "exception_type": "ContextLengthExceededError",
+  "cause": "Original32768 context exceeded by at least28673 prompt+4096 reserved output=32769; original summarization disabled. Neither100turn nor3600s exhaustion. No runner/config defect demonstrated by this bound.",
+  "budget": {
+    "turns": 100,
+    "max_tokens": 4096,
+    "seed": 17,
+    "agent_timeout_sec": 3600,
+    "verifier_timeout_sec": 3600,
+    "whole_trial_retries": 0,
+    "litellm_sdk_retries": 0,
+    "harbor_llm_layer_attempts": 3,
+    "terminus_query_layer_attempts": 3
+  },
+  "context_tokens": 32768,
+  "answer_boundary": {
+    "status": "bounded_static_no_answer_file_write_observed",
+    "command_count": 19,
+    "python_bodies": 6,
+    "generator_rewrites": 4,
+    "generator_removed_before_final_two_commands": true,
+    "last_command_only_printed_counts": true,
+    "answer_write_command_found": false,
+    "executed_python_has_no_file_IO_or_dynamic_execution": true,
+    "original_simulator_fopen_readonly": true,
+    "complete_answer_snapshot": false,
+    "original_final_answer_file_SHA_unknown": true,
+    "recovery_boundary": "Do not synthesize gates.txt from printed signal counts, execute unfinished generators, repair an answer, or score an imagined artifact. Original trial remains unscored null. Transient helper/native sim bytes are not retained original solution snapshots.",
+    "new_execution": 0
+  },
+  "Terminal_attempts": 4,
+  "Terminal_unattempted": 85,
+  "prior3_unchanged": true,
+  "new_Agent_model_verifier_controls": 0
+}
