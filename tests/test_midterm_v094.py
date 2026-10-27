@@ -13,6 +13,8 @@ import build_midterm_v094 as builder  # noqa: E402
 
 
 def read(path):
+    if path == builder.REPORT:
+        path = "reports/vllm-hust-midterm-20261019/中期测试报告-v094.md"
     return (ROOT / path).read_bytes()
 
 
