@@ -9,7 +9,8 @@
 - [x] 全量原关系已核验：问题和参考问题逐字一致、全部公开/参考文本ID映射及正文一致、933条参考文本关联有效。四份原文件均未修改，不把参考答案混入模型输入。
 - [x] 原作者16份协议/核心库文件、44366字节已从固定Git
   blob取得并核验；复用现有作者源码获取入口，不复制作者代码入仓库。原始Git连接失败、HF主通道失败及改用原始同摘要传输的过程保留。
-- [ ] 原生适配、公共/研究消费、官方检索/生成与评分尚未完成；需要适配NPU的embedding和reader环境，未以只读检查替代benchmark运行。[准备证据](validation/dragon-original-preparation-20261028.json)
+- [x] 原始四文件关联适配已实现；服务器独立安装候选wheel，55个包载荷与wheel一致。全部600条原问题/参考字段及索引通过，原前3条公共/当前研究消费者回读逐字段一致，0模型调用。当前研究main版本已在线核对；未更改研究线程默认依赖。
+- [ ] 实际CI工件消费及官方检索/生成与评分尚未完成；需要适配NPU的embedding和reader环境。候选包读取/回读不替代benchmark运行。[准备与候选消费证据](validation/dragon-original-preparation-20261028.json)
 
 ```bash
 python scripts/prepare_reused_research_assets.py DRAGON_PUBLIC --mode plan
@@ -18,6 +19,17 @@ python scripts/prepare_reused_research_assets.py DRAGON_PUBLIC --mode download \
 python scripts/prepare_jsonschemabench_author_source.py --source dragon --action prepare \
   --author-root <仓库外作者源码目录> --max-bytes 100000
 ```
+
+准备好原始四文件后，可使用公共原字段读取入口（不是模型执行或评分入口）：
+
+```python
+from pathlib import Path
+from vllm_hust_workload_data import iter_workload
+
+records = iter_workload("DRAGON_PUBLIC", data_root=Path("/external/dragon-original"))
+```
+
+保持发布方600个问题的原始顺序；`task.input`只含原id/question，`outcome.original_reference_qa`保留完整原始8字段参考，`runtime.corpus_file`指向完整原语料。四份文件逐一检查版本/摘要及完整关联，不能按参考文件行号拼答案；协议版本与各数据仓库版本分别保留。读取前后均核验原文件，参考变更会失败，不从gold生成输入。
 
 仅登记既定113项中的`DRAGON_PUBLIC`，不新增交付范围；参考仓库虽名含private，已通过官方无凭据元数据实查同版本非gated且Apache-2.0，不能仅凭名字推断公开/私有。四份资产保持独立版本身份，均固定同一发布标签。其月度新闻快照不是生产文档增删事件或逐请求版本轨迹，不补造不存在的在线事件。
 

@@ -862,6 +862,16 @@
       "requirements": ["Original validation fields and PNG bytes preserved without resizing or answer coercion", "Use the pinned maintained Inspect Evals task for native template, thumbnail1024 and ANLS; this raw reader is not an alternative prompt/scorer", "No task execution or research integration is established by catalog registration"],
       "status": "ORIGINAL_VALIDATION_FIELDS_MAPPED_NATIVE_AND_RESEARCH_PENDING"
     },
+    "DRAGON_PUBLIC": {
+      "kind":"task_dataset", "mapping":"dragon_original_tasks",
+      "input_fields":["original_question"],
+      "required_fields":["original_question","original_reference_qa","original_query_offset","corpus_file","reference_text_mapping_file","release_tag","asset_references"],
+      "outcome_fields":["original_reference_qa"],
+      "annotation_fields":["release_tag","original_query_offset"],
+      "id_field":null, "normalization":{},
+      "requirements":["Full exact four-file original release, public question order/IDs, corpus and separate author QA/reference ID mapping", "Original retrieval/generation/scorer still required; no synthetic questions, replacement corpus or update/delete event invention"],
+      "status":"ORIGINAL_FIELDS_MAPPED_NATIVE_AND_RESEARCH_CLOSURE_PENDING"
+    },
     "COPILOT_AGENT_2026": {
       "kind": "request_metadata",
       "mapping": "copilot_original_session_metadata",
