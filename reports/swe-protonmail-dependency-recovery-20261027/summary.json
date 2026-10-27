@@ -1,0 +1,91 @@
+{
+  "schema": "swe-protonmail-derived-native-dependency-verifier-recovery-v1",
+  "dataset": "SWE-bench-Pro",
+  "repository": "protonmail/webclients",
+  "classification": "original submitted answer valid positive after original test restoration and pinned native dependency repair",
+  "original_result": {
+    "official": false,
+    "parsed_tests": 0,
+    "functional_coverage_available": false
+  },
+  "test_source_only_recovery_result": {
+    "official": false,
+    "parsed_tests": 0,
+    "functional_coverage_available": false,
+    "reason": "canvas native module missing before test bodies"
+  },
+  "derived_dependency_recovery_result": {
+    "official": true,
+    "parsed_tests": 3,
+    "passed": 3,
+    "failed": 0,
+    "F2P": {
+      "expected": 1,
+      "passed": 1,
+      "failed": 0,
+      "missing": 0,
+      "tests": [
+        {
+          "name": "src/app/store/_uploads/mimeTypeParser/mimeTypeParser.test.ts | mimeTypeFromFile Based on mimetypeFromExtension()",
+          "status": "PASSED"
+        }
+      ]
+    },
+    "P2P": {
+      "expected": 1,
+      "passed": 1,
+      "failed": 0,
+      "missing": 0,
+      "tests": [
+        {
+          "name": "src/app/store/_uploads/mimeTypeParser/mimeTypeParser.test.ts | mimeTypeFromFile Based on File.type",
+          "status": "PASSED"
+        }
+      ]
+    },
+    "tests": [
+      {
+        "name": "src/app/store/_uploads/mimeTypeParser/mimeTypeParser.test.ts | mimeTypeFromFile Based on File.type",
+        "status": "PASSED"
+      },
+      {
+        "name": "src/app/store/_uploads/mimeTypeParser/mimeTypeParser.test.ts | mimeTypeFromFile Based on mimetypeFromExtension()",
+        "status": "PASSED"
+      },
+      {
+        "name": "src/app/store/_uploads/mimeTypeParser/mimeTypeParser.test.ts | mimeTypeFromFile Fallback to application/octet-stream",
+        "status": "PASSED"
+      }
+    ]
+  },
+  "Agent_attempts_added": 0,
+  "model_requests_added": 0,
+  "task_attempts_added": 0,
+  "verifier_only_recovery_executions": 1,
+  "aggregate_distinction": {
+    "attempted_tasks": 17,
+    "total_tasks": 731,
+    "unattempted_tasks": 714,
+    "original_official_positives": 2,
+    "original_official_denominator": 17,
+    "positives_after_disclosed_recovery": 3,
+    "recovery_denominator": 17,
+    "not_an_18th_task": true
+  },
+  "original_Agent_patch_reused": true,
+  "patch_sha256": "e7bf2eb1b6daac6b865dd7ed07bef399ded566172b931f5dd141369235764e87",
+  "patch_bytes": 131723,
+  "patch_apply_exit": 0,
+  "after_equals_graded": true,
+  "test_source_bytes": 1033,
+  "test_source_sha256": "e4de5749a0da6f4473831b7168ffa181f9796005dce57b382f3fdf51e55ab455",
+  "test_file_mode": "0644 from original dataset test_patch new-file mode100644",
+  "test_origin": "frozen original dataset test_patch; not a claim that missing original Git commit was restored",
+  "test_source_unchanged_after_grading": true,
+  "original_parser_run_script_scoring_rules_and_budgets_unchanged": true,
+  "raw_output_caveat": "Original run_script also probes the mail workspace and records No tests found there; drive suite reports3passed and all original F2P/P2P names are present and passed. This output is retained, not removed or bypassed.",
+  "controller_exit": 1,
+  "grading_process_exit": 0,
+  "post_result_release_verified": true,
+  "is_new_Agent_run": false
+}
