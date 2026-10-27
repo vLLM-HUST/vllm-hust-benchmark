@@ -3,7 +3,8 @@
 当前定义：B0固定为vLLM 0.18 + vLLM-Ascend
 0.18；B1是当前已实测最优优化配置，基座版本不限但明确标注。其他版本Native仅为版本对照，不称B0。原始归档中的历史运行ID保持不变。
 
-主报告：[中期测试报告](%E4%B8%AD%E6%9C%9F%E6%B5%8B%E8%AF%95%E6%8A%A5%E5%91%8A.md)，当前V0.97采用已批准的课题四方法。SWE累计21项、原记录3/21及同答案恢复4/21；Terminal累计3项，Cython原null与派生重建10/11、reward0分别保留。[SWE规范证据](../swe-native018-wave2-first-three-20261027/README.md)、[Terminal规范证据](../terminal-cython-context-20261027/README.md)。旧报告快照及原始证据保留，当前整体验收尚未完成。
+主报告：[中期测试报告](%E4%B8%AD%E6%9C%9F%E6%B5%8B%E8%AF%95%E6%8A%A5%E5%91%8A.md)，当前V0.98采用已批准的课题四方法。SWE累计24项、原记录3/24及同答案恢复4/24，707项未执行；Terminal累计3项，break-filter正控制失败不增加模型覆盖，原Cython
+null与派生重建结果保留。[SWE规范证据](../swe-native018-wave2-followup-20261027/README.md)、[break-filter控制证据](../terminal-break-filter-controls-20261027/README.md)、[Cython原有证据](../terminal-cython-context-20261027/README.md)。旧报告快照及原始证据保留，当前整体验收尚未完成。
 
 **指定0.18吞吐对照已存在：** C16 SWE-prefix-reuse 900秒窗口，B0 247.2656、B1 885.9611
 token/s，3.5830倍（+258.30%）。见[复用审计](../c16-baseline018-reuse-20261022/README.md)。该比值描述两套完整部署；客户端运行时版本和B1设备占用原始证据仍待补核，不能据此宣布完整验收或把收益归于单个MOD。MMLU-Pro等其他工况的0.18配对仍分别判断。

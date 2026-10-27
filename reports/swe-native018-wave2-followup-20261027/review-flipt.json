@@ -1,0 +1,93 @@
+{
+  "status": "reviewed_original_false_compile_failure_before_target_tests",
+  "agent": {
+    "status": "Submitted",
+    "model_calls": 67,
+    "elapsed_seconds": 428.66759599000216,
+    "agent_submitted": true,
+    "patch_sha256": "172289ec3a6494228cc259b2d968892dba04ad27ed2713479346b0581c424476",
+    "container_cleanup_exit_code": 0
+  },
+  "request_audit": {
+    "attempts": 67,
+    "successful_returns": 67,
+    "rejected": 0,
+    "response_ids_usage_content_hashes_matched": true,
+    "http_retries": 0
+  },
+  "official_grading": {
+    "resolved": false,
+    "unresolved": [],
+    "model_calls": 0,
+    "fail_to_pass": {
+      "expected": 4,
+      "passed": 0,
+      "failed": 0,
+      "missing": 4
+    },
+    "pass_to_pass": {
+      "expected": 0,
+      "passed": 0,
+      "failed": 0,
+      "missing": 0
+    },
+    "test_counts": {}
+  },
+  "raw_test_observation": {
+    "compiler_error": "internal/ext/common.go:20:2: syntax error: non-declaration statement outside function body",
+    "mechanism": "The unchanged Agent patch adds a duplicate field declaration outside a type declaration in internal/ext/common.go. Retained compiler stderr identifies this file and line.",
+    "parser_entries": 0,
+    "target_tests_executed": false,
+    "boundary": "Four missing F2P names are not four observed functional assertion failures. Original official false and unresolved=[] retained; no parser or patch correction."
+  },
+  "application": {
+    "status": "applied",
+    "apply_exit_code": 0,
+    "state_capture": "complete",
+    "raw_patch_bytes": 102632,
+    "raw_patch_sha256": "172289ec3a6494228cc259b2d968892dba04ad27ed2713479346b0581c424476",
+    "after_equals_graded": true,
+    "affected_paths": 8
+  },
+  "original_fixture": {
+    "exact_tracked_go_work_sum": {
+      "file_sha256": "b4f4d9b83d96b763876075214ed05582d5e9e0d9379e9342c2c06c7cac1a73bb",
+      "diff_sha256": "628cc287637d8953c48a77d4f4a4473ee3cb801c027fbe7282a0a5d3f6a41e5d"
+    },
+    "image_content_changed": false,
+    "fixture_unchanged_for_admission": true,
+    "not_a_clean_initial_tracked_tree": true
+  },
+  "resource_release": {
+    "service_exit_code": 0,
+    "sessions_drained": true,
+    "all_devices_released": true,
+    "CPU_agent_cleanup_exit_code": 0,
+    "CPU_grade_controller_exited": true,
+    "CPU_docker_ps_a_empty": true
+  },
+  "evidence": {
+    "CPU_files": 66,
+    "CPU_seal_sha256": "ca087b869bd5fcdbc3036db0b2e34f962ccbaa0ab4909e3c4a9b46fcc04e4afa",
+    "CPU_summary_sha256": "ddf2c535d9caa420281eb043d35eff97f2c6af15c6f95818e2e10012d45e4a4b",
+    "storage_result_review_sha256": "7432e0df47a308c2f890a8ff9635e540344256f25b98aa6af8a9039006c52cbb",
+    "lifecycle_source_review_sha256": "b3987b81ca33a5b1fc13340d933bd45210f9dc1e9ae332560a3b3ab8505ef073",
+    "service_receipt_sha256": "162818debdfcf1c2dd4785bdf97804260270c93c7fa4cba5c894a3521f4df221",
+    "service_seal_sha256": "38f0ad9e7b7188c15e5b120ab1e5a07981044985c4290ede2e24cc45896356c0",
+    "service_files": 14
+  },
+  "current_counts": {
+    "attempts": 22,
+    "original_official_positive": 3,
+    "same_answer_recovery_positive": 4,
+    "unattempted": 709,
+    "prior_snapshots_unchanged": true
+  },
+  "new_review_model_or_grading_calls": 0,
+  "V097_snapshot_unchanged": {
+    "attempts": 21,
+    "original_official_positive": 3,
+    "same_answer_recovery_positive": 4,
+    "unattempted": 710
+  }
+}

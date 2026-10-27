@@ -1,0 +1,107 @@
+{
+  "schema": "terminal-original-controls/v1",
+  "task": "break-filter-js-from-html",
+  "architecture": "arm64",
+  "derived_image_id": "sha256:df9273b044f4ddb4d369dc1dbd730b87ef16c55f450d266a9fadd550d043732c",
+  "original_task_files": 12,
+  "task_oracle_tests_changed": false,
+  "original_budget": {
+    "build_seconds": 600,
+    "agent_seconds": 1200,
+    "verifier_seconds": 1200,
+    "browser_alert_wait_seconds": 5,
+    "CPUs": 1,
+    "memory_GiB": 2,
+    "cpuset": "24-31",
+    "network_MTU": 1400
+  },
+  "original_r1": {
+    "build_exit_code": 0,
+    "nop_exit_code": 130,
+    "reward": null,
+    "CTRF_present": false,
+    "oracle_started": false,
+    "failure_phase": "mount guard before verifier",
+    "preserved": true,
+    "sealed_files": 57
+  },
+  "r2": {
+    "reused_original_built_image": true,
+    "new_image_build": false,
+    "controls": {
+      "nop": {
+        "control_status": "passed",
+        "Harbor_exit_code": 0,
+        "reward": 0.0,
+        "counts": {
+          "tests": 1,
+          "passed": 0,
+          "failed": 1,
+          "skipped": 0,
+          "pending": 0,
+          "other": 0
+        },
+        "tests": [
+          {
+            "name": "test_outputs.py::test_out_html_bypasses_filter",
+            "status": "failed"
+          }
+        ],
+        "owned_containers_released": true
+      },
+      "oracle": {
+        "control_status": "failed",
+        "Harbor_exit_code": 0,
+        "reward": 0.0,
+        "counts": {
+          "tests": 1,
+          "passed": 0,
+          "failed": 1,
+          "skipped": 0,
+          "pending": 0,
+          "other": 0
+        },
+        "tests": [
+          {
+            "name": "test_outputs.py::test_out_html_bypasses_filter",
+            "status": "failed"
+          }
+        ],
+        "owned_containers_released": true
+      }
+    },
+    "pipeline_status": "failed_or_incomplete",
+    "oracle_wrapper_exit_code": 1,
+    "sealed_files": 77
+  },
+  "boundary": {
+    "original_positive_control_passed": false,
+    "target_test_body_executed": true,
+    "observed_failure": "No alert observed within the original five-second wait",
+    "filtered_HTML_and_browser_DOM_not_captured": true,
+    "specific_parser_browser_version_or_ARM64_cause_not_established": true,
+    "model_task_score": null,
+    "new_model_calls": 0,
+    "new_model_task_attempts": 0,
+    "total_model_tasks_attempted": 3,
+    "total_tasks": 89,
+    "unattempted_model_tasks": 86
+  },
+  "all_owned_containers_released": true,
+  "evidence_sha256": {
+    "nop_receipt": "b2b5ca73b4658391d073e674fe1ede7b9443c73b44d6e300c1430428cfdec113",
+    "nop_ctrf": "2426691ae1cbd79bd04e8d29d9ae7b0f7a5f53fdfd08270dae2e793954228e56",
+    "oracle_receipt": "e4deb0cd5895ae0f3fd86dafa17adcbe42cdf26e9306df72139d670f0d99bf6b",
+    "oracle_ctrf": "6f49317b34c2a91fb15e0a40994053fb4524f2ff8fbc5df98d226c61ec018e75",
+    "r1_seal": "9009140ecc54944917318b312e7de928d101638287e31531777f835b66396e67",
+    "r1_pipeline": "5859ff7480372d73d31333e5ce294ce409fced646cab31f23aa92de84a2eb378",
+    "r1_nop": "c966c2ffc4d97297780f5d57c583fab81f7e741d51eebb8de4cadec3705913fe",
+    "r2_seal": "393026a5acba4a0c0f07c457810337029ce917b6bfe97472ae10e84318df35ea",
+    "r2_pipeline": "42670263eacf96635cced0c9fab663dcc9168e94e7cfbaa8bcce2f2bd87904da",
+    "r2_build_plan": "58eb637215968932175f99415e515b9458f431d73796541cdc6b674e0089f7ae",
+    "r2_controls_plan": "7ed7e89fec5b730f6457f4c8ef3bcaf7c6a7b9e0e36322a988f6a3da1b688d5d",
+    "r2_image": "6958580259fe938452f1a668e014bb0f0cccea87193c0559cd0d826c1712ba9b",
+    "derivation_source": "2515062d7649e3d7ab35149816894210c559f6297ce9a11d96efb4fed5790e23"
+  },
+  "private_task_oracle_answers_or_requests_included": false
+}
