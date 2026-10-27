@@ -63,6 +63,117 @@ def test_existing_data_never_overwritten(tmp_path):
         MODULE.prepare(tmp_path, execute=True)
 
 
+@pytest.mark.parametrize(
+    "endpoint", ["https://huggingface.co", "https://hf-mirror.com"]
+)
+def test_official_index_plan_and_exact_readonly_reuse(tmp_path, monkeypatch, endpoint):
+    target = tmp_path / "publisher-index"
+    assert MODULE.prepare_publisher_index(target)["status"] == "PLAN_ONLY"
+    assert not target.exists()
+    payloads = {
+        "README.md": b"fixture card\n",
+        "train_relevant.csv": b"qid,question\n0,original fixture\n",
+        "test_relevant.csv": b"qid,question\n1,fixed first\n2,fixed second\n",
+    }
+    identities = {
+        name: (
+            len(data),
+            MODULE.hashlib.sha1(f"blob {len(data)}\0".encode() + data).hexdigest(),
+        )
+        for name, data in payloads.items()
+    }
+    monkeypatch.setattr(MODULE, "HF_INDEX_FILES", identities)
+    monkeypatch.setattr(
+        MODULE,
+        "urlopen",
+        lambda request, **kwargs: io.BytesIO(
+            payloads[request.full_url.rsplit("/", 1)[1]]
+        ),
+    )
+    result = MODULE.prepare_publisher_index(target, execute=True, hf_endpoint=endpoint)
+    assert result["transport_endpoint"] == endpoint
+    assert result["files_verified"] == 3
+    assert result["original_csv_structure"]["test_relevant.csv"]["original_rows"] == 2
+    assert result["source_checkbox_eligible"] is False
+    monkeypatch.setattr(
+        MODULE,
+        "urlopen",
+        lambda *args, **kwargs: pytest.fail("read-only reuse requested network"),
+    )
+    assert (
+        MODULE.prepare_publisher_index(target, verify_only=True)["files_verified"] == 3
+    )
+    (target / "test_relevant.csv").write_text("changed")
+    with pytest.raises(ValueError, match="blob/size mismatch"):
+        MODULE.prepare_publisher_index(target, verify_only=True)
+
+
+def test_official_index_rejects_existing_destination(tmp_path):
+    with pytest.raises(ValueError, match="fresh external"):
+        MODULE.prepare_publisher_index(tmp_path, execute=True)
+
+
+def test_official_index_rejects_arbitrary_transport(tmp_path):
+    with pytest.raises(ValueError, match="fixed public"):
+        MODULE.prepare_publisher_index(
+            tmp_path / "absent", hf_endpoint="http://other.invalid"
+        )
+
+
+def test_official_answer_keys_stay_reference_assets(tmp_path, monkeypatch):
+    payload = b"dataset,metadata_id,qid,gold\nfixture,0,0,reference\n"
+    identity = MODULE.hashlib.sha1(
+        f"blob {len(payload)}\0".encode() + payload
+    ).hexdigest()
+    monkeypatch.setattr(
+        MODULE, "HF_ANSWER_FILES", {"answer_key/tiny.csv": (len(payload), identity)}
+    )
+    monkeypatch.setattr(MODULE, "urlopen", lambda *args, **kwargs: io.BytesIO(payload))
+    result = MODULE.prepare_publisher_index(
+        tmp_path / "keys", execute=True, answer_keys=True
+    )
+    assert (
+        result["release"] == "publisher-answer-keys" and result["files_verified"] == 1
+    )
+    assert result["original_csv_structure"]["answer_key/tiny.csv"]["original_rows"] == 1
+    assert result["source_checkbox_eligible"] is False and result["model_calls"] == 0
+
+
+def test_reuse_non_utf8_original_bytes_records_parse_failure_not_fake_readiness(
+    tmp_path, monkeypatch
+):
+    payload = b"id,gold\n0,original\x92reference\n"
+    identity = MODULE.hashlib.sha1(
+        f"blob {len(payload)}\0".encode() + payload
+    ).hexdigest()
+    monkeypatch.setattr(
+        MODULE, "HF_ANSWER_FILES", {"answer_key/tiny.csv": (len(payload), identity)}
+    )
+    previous = tmp_path / "previous"
+    (previous / "answer_key").mkdir(parents=True)
+    (previous / "answer_key/tiny.csv").write_bytes(payload)
+    monkeypatch.setattr(
+        MODULE,
+        "urlopen",
+        lambda *args, **kwargs: pytest.fail("valid asset redownloaded"),
+    )
+    output = tmp_path / "fresh"
+    result = MODULE.prepare_publisher_index(
+        output, execute=True, answer_keys=True, reuse_assets=previous
+    )
+    assert result["reused_original_files"] == ["answer_key/tiny.csv"]
+    assert result["files_verified"] == 1 and len(result["csv_parse_errors"]) == 1
+    assert (
+        result["status"]
+        == "ORIGINAL_PUBLISHER_FILES_VERIFIED_WITH_PARSE_ERRORS_NOT_NATIVE_EXECUTION"
+    )
+    assert (output / "answer_key/tiny.csv").read_bytes() == payload
+    assert (
+        result["original_csv_structure"] == {}
+        and result["source_checkbox_eligible"] is False
+    )
+
+
 @pytest.mark.parametrize("wrong_member_size", [False, True])
 def test_download_extract_identity_and_size_guard_with_tiny_fixture(
     tmp_path, monkeypatch, wrong_member_size

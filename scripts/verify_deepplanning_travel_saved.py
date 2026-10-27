@@ -8,6 +8,7 @@ This is protocol/score consistency, not quality, performance or causal analysis.
 import argparse
 import json
 from pathlib import Path
+import shutil
 import sys
 from threading import Lock
 import zipfile
@@ -64,6 +65,13 @@ def verify_database(archive_path, database, language, case):
     return count
 
 
+def verify_aggregate(saved, recomputed):
+    keys = ("total", "success", "failed", "average_score", "pass_rate", "metrics")
+    if any(saved.get(key) != recomputed.get(key) for key in keys):
+        raise ValueError("original full-test-denominator score aggregation changed")
+    return {key: recomputed.get(key) for key in keys}
+
+
 def audit(assets, native_root, output):
     assets, native_root, output = map(
         lambda value: Path(value).resolve(), (assets, native_root, output)
@@ -106,7 +114,7 @@ def audit(assets, native_root, output):
             raise ValueError("selected tasks did not complete all original phases")
     sys.path.insert(0, str(domain))
     from agent.prompts import get_system_prompt
-    from evaluation.eval_converted import process_single_evaluation
+    from evaluation.eval_converted import evaluate_plans, process_single_evaluation
 
     output.mkdir(mode=0o700)
     native = native_root / "native-results"
@@ -153,6 +161,20 @@ def audit(assets, native_root, output):
                 "scores": recomputed["scores"],
             }
         )
+    aggregate_root = output / "aggregate"
+    plans = aggregate_root / "converted_plans"
+    plans.mkdir(parents=True)
+    for case in ids:
+        name = f"id_{case}_converted.json"
+        shutil.copyfile(native / "converted_plans" / name, plans / name)
+    recomputed_summary = evaluate_plans(
+        result_dir=aggregate_root,
+        test_data_path=domain / f"data/travelplanning_query_{language}.json",
+        database_dir=database,
+        workers=1,
+        verbose=False,
+    )
+    aggregate = verify_aggregate(result["scoring"], recomputed_summary)
     return {
         "source_id": "DEEPPLANNING",
         "domain": "travel",
@@ -161,6 +183,10 @@ def audit(assets, native_root, output):
         "model_calls": 0,
         "source_checkbox_eligible": False,
         "checked_cases": checked,
+        "official_aggregate_recomputed": aggregate,
+        "official_test_denominator": len(rows),
+        "validated_subset_count": len(ids),
+        "denominator_boundary": "Publisher aggregate includes the complete original language test set, not only the sampled tasks; do not present it as sampled mean or full-run quality.",
         "boundary": "Saved original workflow consistency only. Converter request/response bodies are not retained by publisher; no claim of independently replayed conversion, author-model reproduction, complete source or performance.",
     }
 

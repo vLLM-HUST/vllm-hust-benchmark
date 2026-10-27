@@ -82,3 +82,19 @@ def test_running_native_task_cannot_be_audited_as_complete(tmp_path, monkeypatch
     with pytest.raises(ValueError, match="not terminal"):
         MODULE.audit(assets, native, output)
     assert not output.exists()
+
+
+def test_original_full_test_denominator_not_replaced_by_sample_mean():
+    saved = {
+        "total": 3,
+        "success": 3,
+        "failed": 0,
+        "average_score": 1 / 120,
+        "pass_rate": 0,
+        "metrics": {"delivery_rate": 3 / 120},
+        "elapsed_time": 10,
+    }
+    fresh = dict(saved, elapsed_time=20)
+    assert MODULE.verify_aggregate(saved, fresh)["average_score"] == 1 / 120
+    with pytest.raises(ValueError, match="denominator"):
+        MODULE.verify_aggregate(saved, dict(fresh, average_score=1 / 3))

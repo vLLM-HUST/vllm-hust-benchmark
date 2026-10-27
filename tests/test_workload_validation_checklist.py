@@ -61,6 +61,23 @@ def test_deepplanning_shopping_audit_is_partial_not_full_source_completion():
     )
 
 
+def test_deepplanning_english_travel_partial_is_not_whole_source_completion():
+    ledger = json.loads(
+        (ROOT / "docs/workload-data/dataset-validation-status.json").read_text("utf-8")
+    )
+    row = ledger["delivery_inventory"]["DEEPPLANNING"]
+    partial = row["preparation_evidence"]["english_travel_native_run"]
+    receipt = json.loads((ROOT / partial["receipt"]).read_text("utf-8"))
+    assert receipt["original_ids"] == ["0", "1", "2"]
+    assert receipt["original_cases_scored"] == 3
+    assert receipt["original_tool_call_result_pairs"] == 81
+    assert receipt["official_full_test_denominator"] == 120
+    assert receipt["official_aggregate_recomputed_equal"] is True
+    assert all(case["case_acc"] == 0 for case in receipt["saved_case_scores"])
+    assert receipt["saved_audit_new_model_calls"] == 0
+    assert row["checked"] is False and receipt["source_checkbox_eligible"] is False
+
+
 def test_discoverybench_original_assets_are_not_native_completion():
     ledger = json.loads(
         (ROOT / "docs/workload-data/dataset-validation-status.json").read_text("utf-8")
