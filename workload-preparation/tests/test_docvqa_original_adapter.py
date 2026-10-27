@@ -77,6 +77,7 @@ def test_no_type_coercion_or_unsafe_media_paths(field, value):
 
 def test_pinned_original_validation_inventory_not_delivery_claim():
     source = source_spec("DOCVQA")
+    assert source["platform"] == "hf"
     assert len(source["files"]) == 6
     assert sum(f["rows"] for f in source["files"]) == 5349
     assert sum(f["bytes"] for f in source["files"]) == 1055835028

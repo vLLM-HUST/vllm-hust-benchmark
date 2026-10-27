@@ -81,7 +81,13 @@ def execute(args):
     output = Path(args.output).resolve()
     data = Path(args.data_root).resolve()
     source = Path(args.framework_source_root).resolve()
-    if output.exists() or output.is_relative_to(data) or data.is_relative_to(output):
+    if (
+        output.exists()
+        or output.is_relative_to(data)
+        or data.is_relative_to(output)
+        or output.is_relative_to(source)
+        or source.is_relative_to(output)
+    ):
         raise ValueError("fresh output separate from original data required")
     if args.max_tokens <= 0:
         raise ValueError("positive declared model output budget required")
@@ -107,6 +113,8 @@ def execute(args):
     try:
         # Cache placement is deployment configuration, not a task modification.
         os.environ["XDG_CACHE_HOME"] = str(Path(args.inspect_cache_root).resolve())
+        os.environ["XDG_DATA_HOME"] = str(output / "native-runtime-data")
+        os.environ["XDG_CONFIG_HOME"] = str(output / "native-runtime-config")
         os.environ["INSPECT_EVALS_CACHE_DIR"] = str(
             Path(args.image_cache_root).resolve()
         )
@@ -126,6 +134,7 @@ def execute(args):
             "openai-api/local/" + args.model,
             base_url=endpoint,
             api_key="unused-local",  # pragma: allowlist secret - dummy credential for loopback NPU API only
+            max_retries=0,  # Disable SDK retries as well as native evaluator retries.
             config=GenerateConfig(
                 max_tokens=args.max_tokens,
                 max_retries=0,

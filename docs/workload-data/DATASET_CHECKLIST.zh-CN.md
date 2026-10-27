@@ -1,30 +1,17 @@
 # 数据集逐项验证清单
 
-### Copilot 2026嵌套会话元数据（原包已取得，未交付）
+### Copilot 2026嵌套会话元数据（已交付，非原始请求回放）
 
-- [x] 固定[官方release](https://github.com/Azure/AzurePublicDataset/releases/tag/ghcp-coding-agent-2026)身份400522856及七份逐日原包、发布方SHA256/大小，共3218886136字节。数据release标签指向的旧Git提交没有后补文档；官方说明/schema/card/README四文件另固定到文档版本215becda，已逐文件核验，不假称它们同属release标签。
-- [x] 七包均已在服务器取得并与发布方大小/SHA256核对一致，共3.22GB；首包首原始分片原位置0–2已只读检查，保留session/turn/llm_calls/tool_batches和消息/请求关联字段，不造缺失内容。
-- [x] 七天原始归档全部展开并检查606片、301026会话的原始结构，公共代码又独立核验了所有分片身份、逐片行数、会话结构及七份官方manifest，并与初次完整检查清单一致。统一来源注册和元数据适配已补齐；全量绑定/索引与实际CI研究回读仍待完成，不打来源总勾。
+- [x] 固定[官方release](https://github.com/Azure/AzurePublicDataset/releases/tag/ghcp-coding-agent-2026)身份400522856及七份原包，共3218886136字节，全部发布方SHA256和大小匹配。后补说明/schema/card另固定文档版本215becda，不假称文档属于旧release标签。
+- [x] 公共代码独立核验七日606个原gzip分片、301026个原会话及七份官方manifest，逐片身份、行数、完整嵌套结构和每日总量均一致。最初检查器遇到夹在包中的manifest而停止的失败回执仍保留，已复用原分片纠正检查，不重下或覆盖。
+- [x] 公共准备入口完成全部301026条引用索引；七日各固定首片首3/末片末3，共42条候选研究回读，session/turn/call/tool及未知扩展字段均与原JSON一致。相同session_id不去重，使用文件SHA和行号身份，不把元数据变成请求。
+- [x] 实际CI提交1923bbfd的49个安装载荷与候选包逐字节一致；复用完整索引，再用实际CI包完成42条固定研究回读和单片首3条公共准备smoke。来源按元数据资产打总勾，0模型调用。[交付回执](validation/copilot-2026-metadata-delivery-20261027.json)
 
-原包中还夹有官方逐日`manifest.json`，初始服务器检查器遇到它时停止；这不是原数据异常。现已显式保留它为发布方元数据，重新核验并复用先前完成的27870个原会话分片结果，不重复计数、不覆盖原文件，继续核查余下分片。旧失败日志/回执保留，未重下数据或调用模型；公共接入仍未完成。
+取得/展开计划：`python scripts/prepare_copilot_original_assets.py --output /private/copilot`；加`--execute`才获取七包，已有归档可加`--reuse-archive-dir /private/existing-archives`。已有完整目录只读核验：`python scripts/prepare_copilot_original_assets.py --verify-data-root /private/copilot/data --output /private/fresh-copilot-audit`。后者已在服务器全量完成；公共展开曾对第六日22片/10674会话真实验证，不将该单日检查冒称整套七包下载/展开命令端到端重跑。
 
-逐日完整性核验入口为`vllm_hust_workload_data.copilot.qualify_day_manifest`。服务器前两日已独立核对发布方manifest：6月1日112片/55870会话/607734890压缩分片字节，6月2日121片/60145会话/635217886字节，片名、逐片字节数、逐片会话数和总数均一致。这里的字节数指原始内层gzip分片，不等于外层发布归档大小；不将前两日通过视为七日全量或公共交付完成。12项小型完整性夹具测试覆盖缺片、重复、大小/行数不符和发布清单自相矛盾，不作为真实数据运行证据。
+统一准备：`python scripts/prepare_reused_source_records.py COPILOT_AGENT_2026 --data-root /private/copilot/data --output /private/fresh-copilot-prepared`。输出只含引用索引与准备证据；原数据留仓库外，失败现场保留。
 
-公共安全展开入口`vllm_hust_workload_data.copilot.extract_verified_archive`已在服务器复用第六日原归档完成真实核验：22片、10674原会话、127078302内层gzip字节，与该日官方manifest一致；保留原分片，不调用模型、不重新下载。相关完整性/清单测试45项通过。其余日期检查、统一注册、索引和研究接入仍待完成，因此该来源继续不打总勾。
-
-候选适配器已在服务器对第六日22个原分片各固定首3条、共66条原会话验证：全部嵌套字段与原JSON一致，模型输入和参考答案均为空，`request_body()`明确拒绝将元数据当请求。身份使用原文件SHA256与行号，不依赖session_id去重。此结果只证明候选适配器保真，不代表已注册来源、正式CI包或研究消费链路通过。
-
-资产准备命令：安装公共数据包后执行`python scripts/prepare_copilot_original_assets.py --output /private/copilot`先看无写入计划；加`--execute`才获取七个固定官方发布包，加`--reuse-archive-dir /private/existing-archives`则先校验并复用七包、不联网重下。输出必须是仓库外全新目录，原始分片位于输出的`data/date=.../`，逐日manifest一并保留；失败现场不覆盖、不删除。七包固定大小及SHA256已再次对服务器原文件核验，总计3218886136字节。当前该命令的整套七包流程尚未完成真实端到端核验，不能以单日展开/小型夹具替代；后续统一索引入口也仍待接通。
-
-已有完整数据目录可用同一命令的`--verify-data-root /private/copilot/data --output /private/fresh-copilot-audit`模式只读核验：严格要求七个固定日期目录，逐片测量SHA256、原始行数、会话结构、日期和官方manifest总数，不复制或改写数据。该模式与`--execute`互斥，审计输出必须是原数据及仓库之外的新目录。服务器公共代码全量审计现已正常结束，七日606片/301026会话与官方清单和初次完整检查一致；这仍不替代公共索引和研究接入验证。
-
-公共来源现已注册全部606个原分片，准备入口为`python scripts/prepare_reused_source_records.py COPILOT_AGENT_2026 --data-root /private/copilot/data --output /private/fresh-copilot-prepared`；输出只保存引用索引和准备证据，不把原会话复制进仓库。该完整命令已在服务器候选包启动，301026会话的全量绑定/索引尚在运行，不能将启动视为通过。
-
-实际CI提交`1923bbfd`的CPU
-smoke及主CI均已通过，工件`12703669932`已安装到服务器；49份公共载荷与候选包逐字节一致。原始全量审计现已通过；实际CI包的42条固定研究回读及单片首3条公共命令验证继续等待候选绑定/索引完成；索引复用，不冒称重新全量构建通过。相同session_id的不同行保留独立文件/行身份，已有小型公共准备—索引—回读夹具验证，但它不能替代服务器真实链路。
-
-这是已登记的服务轨迹资产，不是新增Agent任务环境。只有匿名模型标签、token/缓存计数、消息片段类型和工具状态等元数据，未发布原prompt、代码、模型响应或工具输出；不编造请求，不将Model
-A等映射成真实模型，不把缓存token计数推成精确KV块身份。作者绘图、特征和研究分析不迁入；实际字段语义仍须原数据核验。
+边界：只有匿名模型标签、token/缓存计数、消息片段类型和工具状态等元数据，没有原prompt、代码、模型响应或工具输出。`request_body()`明确拒绝，不造prompt，不映射真实模型，不将缓存计数推成精确KV块；作者绘图、特征和研究分析不迁入。研究侧固定消费者回读已验证，不表示其默认依赖已自动更新。
 
 ### DocVQA原始文档视觉问答（运行来源核查，未交付）
 
@@ -38,7 +25,20 @@ A等映射成真实模型，不把缓存token计数推成精确KV块身份。作
 - [x] 服务器完整检查5349条、9个原始字段、5349个唯一questionId、1286个原图路径及全部PNG字节；固定首三题ID为49153、24580、57349。公共目录已登记原文件身份，新增原字段适配：原图不缩放，answers仅作参考，不当作模型输入。相关55项软件测试通过，不替代真实接入或原生运行。
 - [x] 原生工厂首次在Inspect底层缓存写入时返回空间不足，失败日志保留；仅将该进程的XDG_CACHE_HOME指向共享盘新目录、复用HF已取得的原缓存后，未修改的工厂成功加载全部5349题，固定首三题身份及框架缩略图已核验，原六片SHA不变，0模型调用。
 - [x] 服务器候选包的公共准备命令完成全量5349条绑定与索引，全部原字段逐条核对一致；六片各固定首3/末3、共36条经固定研究消费者回读，与公共结果全字段一致，原PNG字节及参考答案保真。首个候选检查器误在绑定前直接读raw_source目录的失败现场保留，修正检查顺序后通过，未修改数据或源角色语义。该结果是候选包证据，不冒称实际CI工件。
-- [ ] 原生模型运行/评分及实际CI工件研究回读仍未完成，来源总勾保持未完成。
+- [x] 原生固定首三题已完成，仅使用现有NPU
+  Qwen3.5-9B/BF16/TP1及16384输出预算，无thinking覆盖。三次原始请求、三条原生评分、样本错误0；ANLS依题ID49153/24580/57349分别为0.75/1/1。这只是固定可用性抽样，不外推全量或模型质量。
+- [x] 三条保存结果独立复核完成：由原PNG重建原框架1024缩略图，完整原生model-input图像附件、原模板、原API输出和原ANLS重算一致，新增模型调用0，不清洗答案。官方API日志会把图像base64替换为固定标记；不声称由该脱敏日志证明线上图像字节，只核验日志中完整保留的原生模型输入附件。
+- [ ] 实际CI工件研究回读待完成，来源总勾保持未完成，不重跑上述模型请求。保存复核入口为`python scripts/verify_docvqa_original_saved.py --run-root <原运行目录> --data-root <原六片目录> --framework-source-root <固定原source> --output <新外部审计目录>`，只核查保存结果，不调用模型。
+
+环境补充：冻结基础环境缺少可选API
+SDK，按同一未修改uv.lock中五个版本及制品哈希补齐，执行`uv pip install --python <独立venv/bin/python> --no-deps --require-hashes -r configs/workload-native/docvqa-api-client-requirements.txt`后再`uv pip check --python <独立venv/bin/python>`。服务器检查106个环境包兼容；不修改模型服务环境。运行时将固定Inspect
+Evals原source/src放入PYTHONPATH，保留其原资源文件，避免上游非editable安装缺漏数据资源。
+
+原生入口：`python scripts/run_docvqa_original.py --data-root <原六片data目录> --framework-source-root <固定Inspect原source> --output <新外部结果目录> --inspect-cache-root <共享盘缓存目录> --image-cache-root <共享盘图像缓存目录> --endpoint http://127.0.0.1:19466/v1 --model Qwen/Qwen3.5-9B --api-server-pid <已核实API进程PID> --npu-engine-pid <已核实引擎PID> --max-tokens 16384`。沿用原生工厂、模板、图像处理及ANLS；每次传输前等服务空闲且无其他NPU所有者，SDK/框架/样本重试均关闭。原日志缓冲和trace通过进程级XDG_DATA_HOME/XDG_CONFIG_HOME定向本次外部结果目录。
+
+首次两次启动均在模型调用前失败，已保存现场：可选SDK缺失；随后/root独立98GB卷已满，原生samplebuffer默认写入失败。未删卷、未重启，后续只修客户端依赖和本进程外部目录。第三次完成时控制界面提示AF_UNIX路径过长，原生任务仍完成；不声称其交互控制界面可用。
+
+原数据获取使用发布方HF入口：`hf download lmms-lab-encoder/DocVQA --repo-type dataset --revision 539088ef8a8ada01ac8e2e6d4e372586748a265e --include 'DocVQA/validation-*.parquet' README.md --local-dir /private/docvqa/data`。只能选择该固定原验证集；镜像需显式设置HF_ENDPOINT，仍校验相同SHA，不能用同名其他版本替换。
 
 公共准备入口（服务器候选包全量准备及36条研究回读已核验）：`python scripts/prepare_reused_source_records.py DOCVQA --data-root /private/docvqa/data --output /private/fresh-docvqa-prepared`。原文件目录应包含`DocVQA/validation-00000-of-00006.parquet`等六片；准备输出是原位置引用索引，不是替代benchmark。原生执行仍使用固定Inspect
 Evals任务的模板、1024缩略图和ANLS，准备完成不等于任务通过。
@@ -93,19 +93,18 @@ Similarity/CodeBLEU小型自一致夹具及venv依赖检查；这些是环境检
   denied）。私有Node可复用但不代表沙箱可用；二进制存在本身也不算环境合格。
 - [ ] 提供合格隔离worker后执行原渲染及完整VQA评测。Python/JavaScript/TeX生成代码不能直接在宿主机执行；worker应无网络、凭据或NPU设备，原输入只读、输出限额且有CPU/RAM/PID/时间边界。VQA可用明确配置的本地NPU视觉模型，不默认授权付费judge；渲染成功不能代替VQA完成。
 
-### Mooncake官方存储回放（准备恢复，未交付）
+### Mooncake官方存储回放（固定原生抽样交付完成）
 
-- [x] 实际CI工件`32e2e975`的46份安装载荷逐字节一致；35639条原始轨迹元数据逐字段保留并建立索引，固定研究消费者对每份首3/末3条共12条回读一致。所有记录均拒绝`request_body()`，不把长度/哈希元数据编成prompt；0模型调用、0存储回放。
+- [x] 实际CI工件32e2e975的46个安装载荷和既有35639条原元数据保真/索引证据复用；固定研究消费者首3/末3共12条回读完成，所有原记录拒绝`request_body()`，不编prompt。
+- [x] 两份原轨迹共12031/23608条、九份固定官方模块已校验；旧目录七份不同身份模块未修改或冒用。模型名glm5仅指原工具的KV存储布局，不是部署GLM5模型。
+- [x] 在已授权、已记录的研究空闲独立I/O窗口，conversation/toolagent各固定原始首3条运行exit0。保留默认512-token页、2000页、单线程、unpaced、single文件、无fsync。每场景原生日志均为3请求/23100
+  token/2读页操作/42写页操作，独立保存审计重算并核对覆盖，没有重放模型或磁盘任务。
+- [x] 原清理器因官方工具实际多嵌套一层scenario目录而保护性拒删，旧失败回执保留。核对真实路径、所有者、文件类型、单硬链接、inode及无打开FD后，仅删除本次两个明确的生成data.bin并移除空目录；原始数据/源码/日志不动。逻辑文件上限224919552000字节，实际分配4723318784字节，不能把逻辑容量当已回收物理空间。
+- [x] 原生日志、原始文件身份、实际CI研究回读及清理证据闭环完成，按官方存储回放资产打勾。[交付回执](validation/mooncake-official-storage-delivery-20261027.json)
 
-- [x] 两份已有原始轨迹复用并校验，分别12031/23608行，固定各首3条；未重新下载或构造prompt。
+准备入口：`python scripts/prepare_mooncake_storage_plan.py --help`；原生执行入口：`python scripts/run_mooncake_storage_original.py --help`。显式指定原工具源码、原trace目录、新测试页/结果目录、容量预算和已确认的独立I/O窗口，先检查计划再运行，不能在研究测量时抢I/O。
 
-- [x] 旧目录七份工具文件与固定版本身份不一致，未复用、未修改旧文件；缺失/不一致的九份官方模块重新取得并全部校验通过，默认512-token页/2000页/单线程/unpaced（不按时间戳等待）的原始计划已生成。
-
-- [x] 用户已授权：仅在研究侧没有测量任务的独立I/O窗口运行固定原始样本，保留结果证据后清理本次专用目录的测试页文件。
-
-- [x] 已准备条件等待任务`mooncake-authorized-native-32028-001`：先等本线程的数据审计结束，再确认API空闲、无其他NPU所有者及未知Python测量任务；不停止或抢占研究进程。清理逻辑的五项字节级服务器软件夹具通过，拒绝未知文件、软/硬链接和仍被进程打开的文件；只删除本次专用目录中逐项留证的生成`data.bin`，不递归删目录、不删除原始数据或回执。这不是实际存储回放证据，当前未写测试页。
-
-- [ ] 等待实际独立磁盘I/O窗口，再执行官方存储回放；两场景文件容量上限224919552000字节。授权不等于窗口已满足，当前尚未写KV测试页，不运行模型、不报告引擎性能。回放、计数审计及测试页清理记录仍待完成；已有固定CI工件/研究消费证据复用。
+范围：仅固定原始抽样，不称全35639条磁盘回放；无原prompt、无NPU推理、无引擎性能结论。完整trace无冲突映射所需约9.37TiB的容量边界仍在，不能由首3条通过外推全量；这次首3条的哈希页号没有触发modulo碰撞。
 
 ### LAB-Bench官方执行环境（固定原生抽样交付完成）
 
@@ -462,7 +461,7 @@ TB；服务器/data约1.42TB可用，未缩小语料。ChartQA当前两卡主机
 | BURSTGPT                   | [x] 已交付                   | 三份各原20条官方模拟已核；固定CI提供者及研究消费端三份各原3行消费相等。无新模型调用；第2/3份仅授权官方缩放，不作原时序性能结论。见[回执](validation/burstgpt-native-delivery-20261025.json)。                                                                                                                     |
 | TRACELAB                   | [ ] 缺口已列待补             | 复用历史证据；原生缺口见37项复核表及方案8.5.2                                                                                                                                                                                                                                                                     |
 | AZURE_LLM                  | [x] 数据资产可用             | Azure 本轮脱敏回执；非模型 benchmark                                                                                                                                                                                                                                                                              |
-| MOONCAKE                   | [ ] 缺口已列待补             | 官方工具未运行；全局无冲突需9.37 TiB；容量受限profile及SSH恢复待办                                                                                                                                                                                                                                                |
+| MOONCAKE                   | [x] 固定官方存储回放可用     | 两原轨迹35639条读取/索引及12实际CI研究回读；两个官方场景各首3条原生I/O通过并独立核验，测试页已精确清理。无prompt合成、无模型推理或性能结论。[证据](validation/mooncake-official-storage-delivery-20261027.json)                                                                                                   |
 | QRECC                      | [ ] 阻塞                     | 官方原始collection规模超过当前约1.42TB可用空间；未缩减或替换                                                                                                                                                                                                                                                      |
 | INFINITEBENCH              | [ ] 历史资产已复用           | 已复用研究原12文件的版本/URL/校验和，支持离线计划与原文件只读校验；服务器路径、准备映射、原生执行/评分和固定消费待补。不是重新取数，不提前勾选。                                                                                                                                                                  |
 | RULER                      | [x] 可用                     | 原13种任务15组配置2530条真实请求及原评分审计完成，完整输入/预算保留；固定CI工件完成7500条全字段重建、公共回查90条及研究两路径各45条。QA2显式兼容修复已披露；不声称完整长度网格或复现发布方模型。                                                                                                                  |
@@ -525,7 +524,7 @@ TB；服务器/data约1.42TB可用，未缩小语料。ChartQA当前两卡主机
 | CODEJUDGE_EVAL             | [ ] 待开展                   | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                      |
 | DRAGON_PUBLIC              | [ ] 待开展                   | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                      |
 | TEMPORALWIKI               | [ ] 待开展                   | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                      |
-| COPILOT_AGENT_2026         | [ ] 原包已取，接入中         | 官方七日原包共3.22GB全部取得并验SHA，前三原行结构已检查；全量分片/嵌套关系、公共准备及CI/研究回读尚待，不造请求。                                                                                                                                                                                                 |
+| COPILOT_AGENT_2026         | [x] 原生元数据资产可用       | 七日606分片/301026原会话全量核验和索引，49实际CI载荷与候选一致，42固定实际CI研究回读及3条公共smoke完成；不造prompt、不宣称请求回放。[证据](validation/copilot-2026-metadata-delivery-20261027.json)                                                                                                               |
 | AZURE_LMM_2025             | [x] 服务轨迹元数据资产交付   | 全100万行四字段保真/索引、47实际CI安装载荷、首3/末3研究回读完成；无原prompt/媒体，不造请求，不称视觉benchmark。见[回执](validation/azure-lmm-2025-asset-delivery-20261027.json)。                                                                                                                                 |
 | HLE_VERIFIED               | — 仅分类                     | 本轮不补实现、不重跑                                                                                                                                                                                                                                                                                              |
 | SWE_BENCH_PRO              | — 仅分类                     | 本轮不补实现、不重跑                                                                                                                                                                                                                                                                                              |

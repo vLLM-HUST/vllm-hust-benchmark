@@ -8,7 +8,7 @@
     {"source_id": "AZURE_LMM_2025", "asset_group": "serving-traces", "related_workload_ids": [], "boundary": "Original multimodal serving metadata; no inference of missing media or request bodies."},
     {"source_id": "BURSTGPT", "asset_group": "serving-traces", "related_workload_ids": [], "boundary": "Original traffic trace; official simulator may use an external prompt pool, not original private prompts."},
     {"source_id": "MOONCAKE", "asset_group": "serving-traces", "related_workload_ids": [], "boundary": "Original trace/replay contract must be inspected; no fabricated raw prompts."},
-    {"source_id": "COPILOT_AGENT_2026", "asset_group": "serving-traces", "related_workload_ids": [], "boundary": "Registered coding-agent lifecycle metadata source; acquisition and native field semantics pending."},
+    {"source_id": "COPILOT_AGENT_2026", "asset_group": "serving-traces", "related_workload_ids": [], "boundary": "Original nested coding-agent session metadata, not raw requests. Full publisher asset and fixed CI/research readbacks qualified separately; this classification alone establishes no runtime evidence."},
     {"source_id": "MULTIAGENTBENCH", "asset_group": "cross-task-relationships", "related_workload_ids": [], "boundary": "Multi-agent collaboration/competition is a cross-task relation; preserve original environments and scoring, do not invent a 41st task class."},
     {"source_id": "RULER", "asset_group": "controlled-long-context-probes", "related_workload_ids": [], "boundary": "Publisher-generated controlled probes, not natural user requests; preserve original generator parameters and scoring."},
     {"source_id": "PAIO-CODE-EVAL-1000", "asset_group": "enterprise-private-requests", "related_workload_ids": ["W12"], "boundary": "Original code-judge requests, not code-generation test gold; private payloads remain external."},
@@ -21,6 +21,16 @@
     {"source_id": "PAIO-SEMANTIC-SIMILAR-5000", "asset_group": "enterprise-private-requests", "related_workload_ids": [], "boundary": "Semantic similarity is not exact-prefix or KV reuse; preserve original private requests without rewriting."}
   ],
   "source_entrypoints": {
+    "COPILOT_AGENT_2026": [
+      {"role": "prepare_assets", "path": "scripts/prepare_copilot_original_assets.py", "scope": "Pinned seven-archive acquisition/reuse, original extraction and independent directory verification; raw assets stay external."},
+      {"role": "prepare_assets", "path": "scripts/prepare_reused_source_records.py", "scope": "Select COPILOT_AGENT_2026: bind original shards and prepare reference index, no generated prompts."},
+      {"role": "data_reading_only", "path": "workload-preparation/src/vllm_hust_workload_data/consumer.py", "scope": "Resolve original nested session metadata from prepared references; not request replay or research analysis."}
+    ],
+    "DOCVQA": [
+      {"role": "prepare_assets", "path": "scripts/prepare_reused_source_records.py", "scope": "Select DOCVQA: original validation field/image references only; answers stay separate."},
+      {"role": "original_profile", "path": "scripts/run_docvqa_original.py", "scope": "Pinned maintained Inspect Evals task, original template/thumbnail1024/ANLS; fixed local NPU fallback model, not publisher model reproduction."},
+      {"role": "saved_output_reuse_audit", "path": "scripts/verify_docvqa_original_saved.py", "scope": "Offline original input/model-attachment/output/native ANLS verification; raw API image redaction explicitly recorded, no new model calls."}
+    ],
     "PAWS": [
       {"role": "prepare_assets", "path": "scripts/prepare_paws_original_assets.py"},
       {"role": "original_profile", "path": "scripts/run_paws_original.py"},
@@ -373,7 +383,7 @@
       {
         "role": "original_profile",
         "path": "scripts/run_mooncake_storage_original.py",
-        "scope": "Official default storage I/O replay only, not engine requests or deployed models. Software/mock-process controls verified; real storage replay pending."
+        "scope": "Official default storage I/O replay only, not engine requests or deployed models. Fixed first3 per two scenarios and saved coverage verified; see explicit delivery receipt, not full trace or performance evidence."
       },
       {
         "role": "prepare_assets",

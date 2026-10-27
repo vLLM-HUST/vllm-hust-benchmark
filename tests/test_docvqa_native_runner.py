@@ -36,6 +36,8 @@ def test_native_fixed_selection_transport_guard_and_failure_receipt(
     tmp_path, monkeypatch, fail_sample
 ):
     monkeypatch.setenv("XDG_CACHE_HOME", "fixture-old-cache")
+    monkeypatch.setenv("XDG_DATA_HOME", "fixture-old-data")
+    monkeypatch.setenv("XDG_CONFIG_HOME", "fixture-old-config")
     monkeypatch.setenv("INSPECT_EVALS_CACHE_DIR", "fixture-old-image-cache")
     monkeypatch.setattr(
         runner, "verify_originals", lambda *a: {"files": [{"rows": 5349}]}
@@ -72,6 +74,7 @@ def test_native_fixed_selection_transport_guard_and_failure_receipt(
     def get_model(name, **kwargs):
         assert name == "openai-api/local/Qwen/fixture"
         assert kwargs["config"]["max_retries"] == 0
+        assert kwargs["max_retries"] == 0
         assert kwargs["config"]["max_connections"] == 1
         return model
 
