@@ -13,6 +13,8 @@ b = importlib.import_module("build_midterm_v098")
 
 
 def read(path):
+    if path == b.REPORT:
+        path = "reports/vllm-hust-midterm-20261019/中期测试报告-v098.md"
     return (ROOT / path).read_bytes()
 
 
