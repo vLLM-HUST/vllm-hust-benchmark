@@ -1,0 +1,311 @@
+"""Endogenous host-cache capacity and continuous-D-batching counterfactuals."""
+
+from __future__ import annotations
+
+import argparse
+import hashlib
+import statistics
+from collections import Counter
+from dataclasses import replace
+from pathlib import Path
+
+from pd_serial_simulator import Simulation, input_path, load_runtime, read, write
+
+
+def batch_ratio(profile, count, context):
+    """Interpolate measured eager128 normalized decode-step medians."""
+    points = sorted(profile, key=lambda row: row["context_tokens"])
+
+    def at(row):
+        keys = sorted(int(k) for k in row["normalized"])
+        lo = max((k for k in keys if k <= count), default=keys[0])
+        hi = min((k for k in keys if k >= count), default=keys[-1])
+        if lo == hi:
+            return row["normalized"][str(lo)]
+        weight = (count - lo) / (hi - lo)
+        return (1 - weight) * row["normalized"][str(lo)] + weight * row["normalized"][str(hi)]
+
+    low = max(
+        (r for r in points if r["context_tokens"] <= context),
+        key=lambda r: r["context_tokens"],
+        default=points[0],
+    )
+    high = min(
+        (r for r in points if r["context_tokens"] >= context),
+        key=lambda r: r["context_tokens"],
+        default=points[-1],
+    )
+    if low["context_tokens"] == high["context_tokens"]:
+        return at(low)
+    weight = (context - low["context_tokens"]) / (high["context_tokens"] - low["context_tokens"])
+    return at(low) * (1 - weight) + at(high) * weight
+
+
+def decode_step_seconds(single, ratio, unbatchable):
+    return (1 - unbatchable) * max(single) * ratio + unbatchable * sum(single)
+
+
+class BatchedSimulation(Simulation):
+    """One engine per D, decode-first scheduling, 128-token shared step budget.
+
+    Head service (restore, fixed overhead and uncached prefill) retains the
+    original calibrated total and is distributed over remaining prompt tokens.
+    Head work is additive in mixed steps; only decode uses measured batch gains.
+    Copy/inventory gates are held for individual operations and engine steps.
+    """
+
+    def __init__(
+        self,
+        runtime,
+        bundle,
+        protocol,
+        seed,
+        profile,
+        *,
+        cap=4,
+        host_gib=16,
+        npu_gib=16,
+        unbatchable=0.25,
+    ):
+        super().__init__(runtime, bundle, protocol, seed)
+        if cap < 1 or cap > 8 or not 0 <= unbatchable <= 1:
+            raise ValueError("Unsupported batching parameters")
+        self.protocol = dict(
+            protocol, pool_bytes_per_instance=host_gib * 2**30, npu_kv_bytes=npu_gib * 2**30
+        )
+        self.layout = replace(self.layout, capacities=(host_gib * 2**30,) * 4)
+        if not self.layout.feasible():
+            raise ValueError("Initial cache does not fit")
+        self.cap, self.profile, self.unbatchable = cap, profile, unbatchable
+        self.d_slots = {2: set(), 3: set()}
+        self.engine = {2: {}, 3: {}}
+        self.steps, self.npu_peak = [], [0] * 4
+
+    def stage(self, key, node):
+        super().stage(key, node)
+        if node >= 2:
+            del self.active[node]
+            self.d_slots[node].add(key)
+
+    def reservation(self, key):
+        return (self.rows[key]["tokens"] + 128) * self.costs.bytes_per_token
+
+    def api(self, key, node):
+        if node < 2:
+            self.npu_peak[node] = max(
+                self.npu_peak[node], (self.rows[key]["tokens"] + 1) * self.costs.bytes_per_token
+            )
+            super().api(key, node)
+            return
+        job, item = self.jobs[key], self.demand(key)
+        count = min(job["count"], self.layout.prefix(node, item.hashes))
+        prefix = count * 128
+        first = self.world.compute(node, item.tokens, prefix)
+        tail = self.world.decode_tail(node, item.tokens)
+        job["phase"] = "api"
+        job["stages"]["D"].update(
+            api_start=self.now,
+            cached_tokens=prefix,
+            first_service=first,
+            tail_service=tail,
+            isolated_restore_seconds=self.world.restore(node, prefix),
+        )
+        self.engine[node][key] = {
+            "prompt": prefix,
+            "remaining": item.tokens - prefix,
+            "head_per_token": first / (item.tokens - prefix),
+            "decode_left": 127,
+            "published": count,
+        }
+        self.apis.append(
+            {
+                "id": key,
+                "node": node,
+                "at": self.now,
+                "tokens": item.tokens,
+                "cached_tokens": prefix,
+                "first_service": first,
+                "full_service": first + tail,
+            }
+        )
+        used = sum(self.reservation(k) for k in self.engine[node])
+        self.npu_peak[node] = max(self.npu_peak[node], used)
+
+    def pump(self):
+        for node in range(4):
+            if node < 2:
+                if node not in self.active and self.queues[node]:
+                    self.stage(self.queues[node].popleft(), node)
+            else:
+                while len(self.d_slots[node]) < self.cap and self.queues[node]:
+                    self.stage(self.queues[node].popleft(), node)
+        remaining = []
+        for kind, key, data in self.wait_ops:
+            job = self.jobs[key]
+            if kind == "check":
+                source, node, count = data
+                gates = sorted({source, node}) if count > 0 and source != node else []
+                if any(n in self.gates for n in gates):
+                    remaining.append((kind, key, data))
+                    continue
+                for n in gates:
+                    self.gates[n] = key
+                job["held_gates"] = gates
+                self.check(key, *data)
+            elif kind == "link":
+                if data[-1] in self.links:
+                    remaining.append((kind, key, data))
+                    continue
+                self.links[data[-1]] = key
+                job["phase"] = "copy"
+                seconds = self.route_rpc + self.world.copy_seconds(data[0], data[1], data[3])
+                self.event(self.now + seconds, "copied", key, data)
+            else:
+                node = data
+                used = sum(self.reservation(k) for k in self.engine.get(node, {}))
+                memory_blocked = (
+                    node >= 2 and used + self.reservation(key) > self.protocol["npu_kv_bytes"]
+                )
+                if node in self.gates or memory_blocked:
+                    remaining.append((kind, key, data))
+                    continue
+                self.api(key, node)
+        self.wait_ops = remaining
+        for node in (2, 3):
+            self.schedule_step(node)
+
+    def schedule_step(self, node):
+        if node in self.gates or not self.engine[node]:
+            return
+        engine = self.engine[node]
+        decoding = [key for key, state in engine.items() if state["remaining"] == 0]
+        budget = self.protocol["prefill"] - len(decoding)
+        heads = []
+        duration = 0.0
+        for key, state in engine.items():
+            if state["remaining"] and budget:
+                amount = min(budget, state["remaining"])
+                heads.append((key, amount))
+                duration += state["head_per_token"] * amount
+                budget -= amount
+        if decoding:
+            singles = [self.costs.decode_seconds[node - 2] / 127] * len(decoding)
+            context = statistics.mean(
+                self.rows[k]["tokens"] + 127 - engine[k]["decode_left"] for k in decoding
+            )
+            ratio = batch_ratio(self.profile, len(decoding), context)
+            duration += decode_step_seconds(singles, ratio, self.unbatchable)
+        if duration <= 0:
+            raise ValueError("Engine scheduled empty work")
+        self.steps.append(
+            {
+                "node": node,
+                "start": self.now,
+                "end": self.now + duration,
+                "decoding": decoding,
+                "heads": heads,
+                "active": list(engine),
+            }
+        )
+        self.gates[node] = "engine"
+        self.event(self.now + duration, "engine_step", str(node), (node, decoding, heads))
+
+    def complete(self, key, node):
+        if node >= 2:
+            del self.engine[node][key]
+            self.d_slots[node].remove(key)
+            # Reuse the serial lifecycle accounting after releasing the step.
+            self.gates[node] = key
+            self.active[node] = key
+        super().complete(key, node)
+
+    def extra_event(self, kind, key, data):
+        if kind != "engine_step":
+            return False
+        node, decoding, heads = data
+        del self.gates[node]
+        for current, amount in heads:
+            state, item = self.engine[node][current], self.demand(current)
+            state["prompt"] += amount
+            state["remaining"] -= amount
+            while state["published"] < state["prompt"] // 128:
+                pos = state["published"]
+                logical = (
+                    item.hashes[pos]
+                    if pos < len(item.hashes)
+                    else hashlib.sha256(
+                        f"private-generated:{node}:{current}:{pos}".encode()
+                    ).digest()
+                )
+                self.publish(node, current, pos, logical)
+                state["published"] += 1
+            if state["remaining"] == 0:
+                self.jobs[current]["first"] = self.now
+                self.ledger.observe(current, node, "first", self.now)
+        for current in decoding:
+            state, item = self.engine[node][current], self.demand(current)
+            state["decode_left"] -= 1
+            target = (item.tokens + 127 - state["decode_left"]) // 128
+            while state["published"] < target:
+                pos = state["published"]
+                logical = hashlib.sha256(
+                    f"private-generated:{node}:{current}:{pos}".encode()
+                ).digest()
+                self.publish(node, current, pos, logical)
+                state["published"] += 1
+            if not state["decode_left"]:
+                self.complete(current, node)
+        return True
+
+    def run(self):
+        result = super().run()
+        result.update(
+            scope="Task-affinity P/D baseline with endogenous cache and continuous D batching",
+            settings={
+                "host_bytes_each": self.protocol["pool_bytes_per_instance"],
+                "npu_kv_bytes_each": self.protocol["npu_kv_bytes"],
+                "D_max_sequences": self.cap,
+                "P_max_sequences": 1,
+                "max_num_batched_tokens": self.protocol["prefill"],
+                "decode_unbatchable_fraction": self.unbatchable,
+                "mode": "eager128",
+            },
+            engine_steps=self.steps,
+            peak_npu_kv_reservation_bytes=self.npu_peak,
+        )
+        result["batch_step_counts"] = dict(Counter(str(len(s["decoding"])) for s in self.steps))
+        return result
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--inputs", type=Path, required=True)
+    parser.add_argument("--component-profile", type=Path, required=True)
+    parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--cap", type=int, default=4)
+    parser.add_argument("--host-gib", type=int, default=16)
+    parser.add_argument("--npu-gib", type=int, default=16)
+    parser.add_argument("--unbatchable", type=float, default=0.25)
+    args = parser.parse_args()
+    if args.output.exists():
+        raise FileExistsError(args.output)
+    bundle = read(input_path(args.inputs, "simulation-inputs.json"))
+    protocol = read(input_path(args.inputs, "protocol.json"))
+    profile = read(args.component_profile)["profiles"]["eager128"]
+    result = BatchedSimulation(
+        load_runtime(),
+        bundle,
+        protocol,
+        args.inputs / "calibration-seed",
+        profile,
+        cap=args.cap,
+        host_gib=args.host_gib,
+        npu_gib=args.npu_gib,
+        unbatchable=args.unbatchable,
+    ).run()
+    write(args.output, result)
+    print({key: result[key] for key in ("TTFT", "finish_span", "cache_hits", "batch_step_counts")})
+
+
+if __name__ == "__main__":
+    main()
