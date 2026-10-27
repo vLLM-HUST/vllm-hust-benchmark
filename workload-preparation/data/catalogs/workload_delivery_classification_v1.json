@@ -31,6 +31,16 @@
         "role": "data_reading_only",
         "path": "workload-preparation/src/vllm_hust_workload_data/adapters.py",
         "scope": "Preserve original complete input, independent answer and original problem/candidate provenance. No replacement judging prompt or claim of author runtime."
+      },
+      {
+        "role": "original_profile",
+        "path": "scripts/run_codejudge_original.py",
+        "scope": "Original published prompts and independent declared paper-protocol extraction/Accuracy/Macro-F1 implementation; not author regex or exact score reproduction. Supports full settings and saved-case resume without repeating completed requests."
+      },
+      {
+        "role": "saved_output_reuse_audit",
+        "path": "scripts/verify_codejudge_saved.py",
+        "scope": "Offline original selection/request/reference/response and declared metrics consistency, no model or network calls."
       }
     ],
     "DEEPPLANNING": [

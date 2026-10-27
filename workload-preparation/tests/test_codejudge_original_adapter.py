@@ -60,4 +60,5 @@ def test_six_configuration_files_not_six_new_datasets():
     assert len(manifest["files"]) == 6
     assert sum(file["rows"] for file in manifest["files"]) == 11160
     assert len({file["sha256"] for file in manifest["files"]}) == 6
-    assert manifest["native_reference_command"] is None
+    assert "run_codejudge_original.py" in manifest["native_reference_command"]
+    assert "not author regex" in manifest["native_reference_command"]
