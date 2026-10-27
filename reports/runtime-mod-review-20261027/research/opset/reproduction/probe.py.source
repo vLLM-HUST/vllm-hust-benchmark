@@ -1,0 +1,73 @@
+"""Bounded standalone external-validity probe; not plugin integration acceptance."""
+import importlib.util
+import json
+import os
+from pathlib import Path
+import statistics
+import subprocess
+import sys
+import time
+
+import torch
+import torch_npu
+from vllm_hust_operator_optimizations.optimizations.linear_swiglu_kernel import linear_swiglu
+
+root = Path('/root/lumi-opset-study-20261026')
+card = int(sys.argv[1])
+torch.npu.set_device(0)
+# Establish a context, then confirm npu-smi puts this PID on the intended card.
+torch.empty(1,device='npu'); torch.npu.synchronize()
+info=subprocess.check_output(['npu-smi','info'],text=True,timeout=20)
+rows=[line for line in info.splitlines() if str(os.getpid()) in line]
+assert rows and all(line.split()[1]==str(card) for line in rows), (card,rows)
+(root/'results'/f'card-{card}-actual-placement.txt').write_text(info)
+print(f'confirmed physical card={card} pid={os.getpid()}',flush=True)
+torch.manual_seed(20261026)
+spec = importlib.util.spec_from_file_location('opset_native_matmul', '/vllm-workspace/vllm-ascend/vllm_ascend/ops/triton/batch_invariant/matmul.py')
+native = importlib.util.module_from_spec(spec)
+sys.modules[spec.name] = native
+spec.loader.exec_module(native)
+result = {'physical_card':card, 'torch':torch.__version__, 'torch_npu':torch_npu.__version__, 'cases':[]}
+
+def save():
+    (root/'results'/f'card-{card}.json').write_text(json.dumps(result, indent=2))
+
+def synced(fn):
+    torch.npu.synchronize()
+    start = time.perf_counter_ns()
+    y = fn()
+    torch.npu.synchronize()
+    return (time.perf_counter_ns()-start)/1e6
+
+for m in (1,32,128):
+    k,n=3584,18944
+    x=torch.randn((m,k),dtype=torch.bfloat16,device='npu')
+    w=torch.randn((2*n,k),dtype=torch.bfloat16,device='npu')
+    funcs={'native_triton':lambda:torch_npu.npu_swiglu(native.linear_persistent(x,w)),
+           'aclnn':lambda:torch_npu.npu_swiglu(torch.nn.functional.linear(x,w)),
+           'fused':lambda:linear_swiglu(x,w)}
+    # FP32 CPU reference is outside timed region.
+    z=torch.nn.functional.linear(x.cpu().float(),w.cpu().float())
+    gate,up=z.chunk(2,dim=-1)
+    ref=torch.nn.functional.silu(gate)*up
+    case={'M':m,'K':k,'N':n,'correctness':{},'rounds':[]}
+    result['cases'].append(case)
+    for name,fn in funcs.items():
+        print(f'card={card} M={m} compile/check {name}',flush=True)
+        y=fn().cpu().float()
+        delta=y-ref
+        case['correctness'][name]={'finite':bool(torch.isfinite(y).all()),'max_abs':delta.abs().max().item(),'rmse':delta.square().mean().sqrt().item(),'relative_l2':(delta.norm()/ref.norm()).item()}
+        save()
+        torch.testing.assert_close(y,ref,rtol=.02,atol=.125)
+        for _ in range(10):fn()
+        torch.npu.synchronize()
+    for r in range(3):
+        order=['native_triton','fused','aclnn'] if (r+card)%2==0 else ['aclnn','fused','native_triton']
+        record={'round':r,'order':order,'timings':{}}
+        for name in order:
+            values=[synced(funcs[name]) for _ in range(50)]
+            record['timings'][name]={'mean_ms':statistics.mean(values),'median_ms':statistics.median(values),'sd_ms':statistics.stdev(values),'samples_ms':values}
+        case['rounds'].append(record);save()
+        print(f'card={card} M={m} round={r} '+str({k:v['mean_ms'] for k,v in record['timings'].items()}),flush=True)
+result['completed']=True
+save()
