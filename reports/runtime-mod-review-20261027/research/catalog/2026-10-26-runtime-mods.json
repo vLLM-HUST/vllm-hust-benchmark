@@ -1,0 +1,1155 @@
+{
+  "observed_date": "2026-10-26",
+  "scope": "public_surface != false and taxonomy.kind == runtime_mod",
+  "sources": {
+    "page": "https://vllm-hust.sage.org.ai/plugins.html",
+    "registry": "https://vllm-hust.sage.org.ai/data/ecosystem.json?v=state-scheduler-archive-20261018",
+    "taxonomy": "https://vllm-hust.sage.org.ai/data/mod-taxonomy.json?v=state-scheduler-archive-20261018"
+  },
+  "verification": "Website catalog metadata only; source implementation and evidence artifacts not independently audited. Compatibility prose omitted; versions and platforms retained.",
+  "components": [
+    {
+      "id": "adm",
+      "name": "ADM",
+      "canonical_repository": "https://github.com/vLLM-HUST/ascend-distributed-metadata",
+      "system_role": "dp_metadata_sync",
+      "execution_planes": [
+        "worker"
+      ],
+      "deployment_topology": "in_process",
+      "integration_contracts": [
+        "vllm_hust.extension_manifest.v0.3-experimental"
+      ],
+      "integration_surfaces": [
+        "vllm_hust.extension_bundles",
+        "vllm.general_plugins",
+        "NPUModelRunner._sync_metadata_across_dp (AST-pinned)"
+      ],
+      "public_effect_status": "measured",
+      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/e759add873a1f0a3d2f54b004c2eb650fc811245/archive/mod-git-20261022/website-source-ascend-distributed-metadata/snapshot/qualifications/qwen3moe-dp4-int64-word-20260928.json",
+      "functional_compatibility": {
+        "status": "passed",
+        "scope": "Qwen3-30B-A3B-W8A8 · Ascend 910B2 · TP1/DP4 · FULL_DECODE_ONLY graph"
+      },
+      "compatibility": {
+        "status": "verified",
+        "host": "vLLM-HUST + vLLM-Ascend-HUST",
+        "versions": [
+          "Core e1248fa2655fdb8d72f80a5d6c28fa9c75b660c0",
+          "Ascend 367b8e62da799870a7476ce34f5f7658589a8aad",
+          "ADM performance artifact 16362b2d6c229ec1c900b87cdb2c974039db95a6",
+          "ECPA 0.3 package 462e0750faf7eea6317b13b692fb3326894d5796"
+        ],
+        "platforms": [
+          "Ascend 910B2 · TP1/DP4 · FULL_DECODE_ONLY graph"
+        ],
+        "models": [
+          "Qwen3-30B-A3B-W8A8 — matched DP4 serving qualified",
+          "Qwen3.5-35B-A3B — DP2 functional; throughput benefit unconfirmed"
+        ]
+      },
+      "taxonomy": {
+        "kind": "runtime_mod",
+        "capability": "parallel_communication",
+        "phases": [
+          "prefill",
+          "decode"
+        ],
+        "lifecycle": "implemented_restricted",
+        "evidence": "topology_limited"
+      }
+    },
+    {
+      "id": "bidkv",
+      "name": "BidKV",
+      "canonical_repository": "https://github.com/vLLM-HUST/vllm-hust-bidkv",
+      "system_role": "scheduler_policy",
+      "execution_planes": [
+        "scheduler"
+      ],
+      "deployment_topology": "in_process",
+      "integration_contracts": [
+        "vllm_hust.extension_manifest.v0.3-experimental",
+        "vllm.preemption_policy.v1"
+      ],
+      "integration_surfaces": [
+        "vLLM-HUST preemption-policy API v1 (organization PR #11 merged)",
+        "vLLM-HUST Extension Manager bundle"
+      ],
+      "public_effect_status": "measured",
+      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/e759add873a1f0a3d2f54b004c2eb650fc811245/archive/mod-git-20261022/website-source-vllm-hust-bidkv/snapshot/results/qwen35-evoscientist-20260929/README.md#high-concurrency-kv-pressure-result",
+      "functional_compatibility": {
+        "status": "passed",
+        "scope": "Qwen3.5-35B-A3B · Ascend TP4 · FULL_AND_PIECEWISE graph; Qwen3.8-27B · Ascend TP4 · FULL_DECODE_ONLY graph"
+      },
+      "compatibility": {
+        "status": "verified",
+        "host": "vLLM-HUST (setting-specific pinned runtimes)",
+        "versions": [
+          "BidKV 0.2.1 measured @ a0cba97",
+          "Manifest 0.3 @ 6f1fc75",
+          "Qwen3.5 evidence merged @ edb7f09",
+          "Qwen3.8 qualified runtime tree 199e0bd"
+        ],
+        "platforms": [
+          "Ascend NPU · TP4 · FULL_AND_PIECEWISE",
+          "Ascend NPU · TP4 · FULL_DECODE_ONLY"
+        ],
+        "models": [
+          "Qwen3.5-35B-A3B — TP4 C12 KV-pressure measured; tested-cell benefit",
+          "Qwen3.8-27B — artifact functional qualified; effectiveness matrix incomplete",
+          "Qwen3-0.6B — vLLM/vLLM-Ascend 0.23 lane",
+          "Qwen2.5-3B — vLLM/vLLM-Ascend 0.23 lane"
+        ]
+      },
+      "taxonomy": {
+        "kind": "runtime_mod",
+        "capability": "scheduling_routing",
+        "phases": [
+          "request_admission",
+          "state_lifecycle"
+        ],
+        "lifecycle": "implemented",
+        "evidence": "measured_inconclusive"
+      }
+    },
+    {
+      "id": "diffspec",
+      "name": "DiffSpec",
+      "canonical_repository": "https://github.com/vLLM-HUST/vllm-ascend-hust-diffspec",
+      "system_role": "decoding_mechanism",
+      "execution_planes": [
+        "scheduler",
+        "worker",
+        "native",
+        "device"
+      ],
+      "deployment_topology": "in_process",
+      "integration_contracts": [
+        "vllm_hust.extension_manifest.v0.3-experimental"
+      ],
+      "integration_surfaces": [
+        "vllm.general_plugins",
+        "vllm.speculative_config",
+        "vllm-ascend runtime patch surface"
+      ],
+      "public_effect_status": "not-beneficial-in-tested-cell",
+      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/e759add873a1f0a3d2f54b004c2eb650fc811245/archive/mod-git-20261022/website-source-vllm-ascend-hust-diffspec/snapshot/docs/evidence/sage-mate-20260904-tp4-graph.md",
+      "functional_compatibility": {
+        "status": "passed",
+        "scope": "Qwen3.8-27B + VirVen/Qwen3.5-27B-EAGLE3-v2 · Ascend TP4 graph"
+      },
+      "compatibility": {
+        "status": "verified",
+        "host": "vLLM Ascend",
+        "versions": [
+          "Core 762f85b3 + Ascend 4e57439e + DiffSpec 9986978",
+          "Manifest 0.3 @ 9d9ddc9"
+        ],
+        "platforms": [
+          "Ascend NPU · TP4 · FULL_DECODE_ONLY graph"
+        ],
+        "models": [
+          "Qwen3.8-27B — verified functional, performance degraded",
+          "VirVen/Qwen3.5-27B-EAGLE3-v2 — required draft",
+          "Llama-3.1-8B — historical batch-1 lane only"
+        ]
+      },
+      "taxonomy": {
+        "kind": "runtime_mod",
+        "capability": "decoding",
+        "phases": [
+          "decode"
+        ],
+        "lifecycle": "implemented_restricted",
+        "evidence": "qualified_restricted"
+      }
+    },
+    {
+      "id": "vspec",
+      "name": "vSpec",
+      "canonical_repository": "https://github.com/vLLM-HUST/vllm-hust-vSpec",
+      "system_role": "decoding_mechanism",
+      "execution_planes": [
+        "scheduler",
+        "worker",
+        "native",
+        "device"
+      ],
+      "deployment_topology": "in_process",
+      "integration_contracts": [
+        "vllm_hust.extension_manifest.v0.3-experimental"
+      ],
+      "integration_surfaces": [
+        "vllm.general_plugins",
+        "vllm_hust.extension_bundles",
+        "ModelRegistry.register_model"
+      ],
+      "public_effect_status": "measured",
+      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/e759add873a1f0a3d2f54b004c2eb650fc811245/archive/mod-git-20261022/website-source-vllm-hust-vSpec/snapshot/docs/gsm8k_b128_recovery_and_arc_easy_20260913.md",
+      "functional_compatibility": null,
+      "compatibility": {
+        "status": "verified",
+        "host": "vLLM-HUST + vLLM-Ascend-HUST",
+        "versions": [
+          "vLLM-HUST 762f85b3",
+          "vLLM-Ascend-HUST 4e57439e",
+          "vSpec 0.13.2"
+        ],
+        "platforms": [
+          "Ascend NPU",
+          "Eager or graph"
+        ],
+        "models": [
+          "Qwen2.5-14B-Instruct — verified target",
+          "Qwen2.5-0.5B-Instruct — Draft",
+          "Eagle-Qwen2.5-14B-Instruct — EAGLE"
+        ]
+      },
+      "taxonomy": {
+        "kind": "runtime_mod",
+        "capability": "decoding",
+        "phases": [
+          "decode"
+        ],
+        "lifecycle": "qualification_pending",
+        "evidence": "hardware_validation_pending"
+      }
+    },
+    {
+      "id": "latchmoe",
+      "name": "LatchMoE",
+      "canonical_repository": "https://github.com/vLLM-HUST/vllm-ascend-hust-LatchMoE",
+      "system_role": "operator_runtime",
+      "execution_planes": [
+        "worker",
+        "native",
+        "device"
+      ],
+      "deployment_topology": "in_process",
+      "integration_contracts": [
+        "vllm_hust.extension_manifest.v0.3-experimental"
+      ],
+      "integration_surfaces": [
+        "vllm.general_plugins",
+        "vllm-ascend-hust MoE offload seam v2 (organization PR #9 merged)",
+        "latchmoe validated launcher"
+      ],
+      "public_effect_status": "not-beneficial-in-tested-cell",
+      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/f57dbc2b1020c6f50b7a0a36db43fcd8a0bd0198/reports/vllm-hust-midterm-20261019/b1-mod-source-audit-20261020.json",
+      "functional_compatibility": {
+        "status": "passed",
+        "scope": "Qwen3-30B-A3B · Ascend TP4 · PIECEWISE graph; Qwen3.8-27B not applicable"
+      },
+      "compatibility": {
+        "status": "verified",
+        "host": "vLLM Ascend HUST",
+        "versions": [
+          "Current package 0.3.0 @ 75b922b",
+          "Manifest 0.3 @ f2cc19c",
+          "Historical TP4 performance artifact 63781f3d · Core 762f85b3 + Ascend 4e57439e/seam-v2"
+        ],
+        "platforms": [
+          "Current release scope: Ascend NPU · TP1 · PIECEWISE · prefix cache off",
+          "Historical performance scope: Ascend NPU · TP4 · PIECEWISE graph"
+        ],
+        "models": [
+          "Qwen3-30B-A3B — current TP1 functional release scope; historical TP4 performance degraded",
+          "Qwen3.8-27B — not applicable (dense)",
+          "GLM-4.7-Flash — historical single-NPU lane",
+          "Qwen3-Next-80B-A3B-Instruct — historical single-NPU lane"
+        ]
+      },
+      "taxonomy": {
+        "kind": "runtime_mod",
+        "capability": "operators_attention",
+        "phases": [
+          "prefill",
+          "decode"
+        ],
+        "lifecycle": "implemented_restricted",
+        "evidence": "qualified_restricted"
+      }
+    },
+    {
+      "id": "opfuse",
+      "name": "OpFuse",
+      "canonical_repository": "https://github.com/vLLM-HUST/vllm-hust-opfuse",
+      "system_role": "operator_fusion",
+      "execution_planes": [
+        "worker"
+      ],
+      "deployment_topology": "in_process",
+      "integration_contracts": [
+        "vllm_hust.extension_manifest.v0.3-experimental"
+      ],
+      "integration_surfaces": [
+        "vllm_hust.extension_bundles",
+        "vllm.general_plugins"
+      ],
+      "public_effect_status": "preview",
+      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-opfuse",
+      "functional_compatibility": {
+        "status": "preview",
+        "scope": "scaffold only; not yet qualified on Ascend 910B2"
+      },
+      "compatibility": {
+        "status": "experimental",
+        "host": "vLLM-HUST + vLLM-Ascend-HUST",
+        "versions": [
+          "scaffold from patch-plugin-template @ initial commit"
+        ],
+        "platforms": [
+          "Ascend 910B2 (target; not yet qualified)"
+        ],
+        "models": [
+          "Qwen3-0.6B — smoke-test lane only"
+        ]
+      },
+      "taxonomy": {
+        "kind": "runtime_mod",
+        "capability": "execution_optimization",
+        "phases": [
+          "prefill",
+          "decode"
+        ],
+        "lifecycle": "research",
+        "evidence": "host_integration_pending"
+      }
+    },
+    {
+      "id": "kvcompress-ascend",
+      "name": "Ascend KV Compression",
+      "canonical_repository": "https://github.com/vLLM-HUST/vllm-ascend-kvcompress-hust",
+      "system_role": "kv_state_manager",
+      "execution_planes": [
+        "scheduler",
+        "worker",
+        "device"
+      ],
+      "deployment_topology": "in_process",
+      "integration_contracts": [
+        "vllm_hust.extension_manifest.v0.3-experimental"
+      ],
+      "integration_surfaces": [
+        "vllm.general_plugins",
+        "vllm.kv_compression.provider",
+        "vllm.kv_lifecycle"
+      ],
+      "public_effect_status": "not-beneficial-in-tested-cell",
+      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/e759add873a1f0a3d2f54b004c2eb650fc811245/archive/mod-git-20261022/website-source-vllm-hust-website/snapshot/docs/FRONTIER-QWEN35-KVCOMPRESS.md",
+      "functional_compatibility": null,
+      "compatibility": {
+        "status": "verified",
+        "host": "vLLM-HUST + vLLM-Ascend-HUST",
+        "versions": [
+          "vLLM-HUST 0.25.1+frontier.unified",
+          "vLLM-Ascend-HUST 0.25.1rc1",
+          "Measured KVCompress artifact 2ca0f933",
+          "Manifest 0.3 @ 784bb0d",
+          "Current compatibility head d5507c2 (per-layer MTP graph replay; no performance transfer)"
+        ],
+        "platforms": [
+          "Ascend 910B2 · TP2 · FULL_AND_PIECEWISE graph"
+        ],
+        "models": [
+          "Qwen3.5-35B-A3B — unified BF16 setting verified"
+        ]
+      },
+      "taxonomy": {
+        "kind": "runtime_mod",
+        "capability": "kv_management",
+        "phases": [
+          "prefill",
+          "decode",
+          "state_lifecycle"
+        ],
+        "lifecycle": "implemented",
+        "evidence": "measured_not_beneficial"
+      }
+    },
+    {
+      "id": "prefix-router-migration",
+      "name": "Prefix Router",
+      "canonical_repository": "https://github.com/vLLM-HUST/vllm-hust-prefix-router",
+      "system_role": "request_router",
+      "execution_planes": [
+        "api",
+        "cluster_control"
+      ],
+      "deployment_topology": "separate_application",
+      "integration_contracts": [
+        "vLLM-HUST request fingerprint",
+        "vLLM-HUST KV event stream",
+        "OpenAI-compatible HTTP"
+      ],
+      "integration_surfaces": [
+        "vllm.kv_event_publisher",
+        "request fingerprint adapter",
+        "OpenAI-compatible HTTP"
+      ],
+      "public_effect_status": "beneficial",
+      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/f57dbc2b1020c6f50b7a0a36db43fcd8a0bd0198/website-publication/data/leaderboard_prefix_routing_mean_evidence.json",
+      "functional_compatibility": null,
+      "compatibility": {
+        "status": "experimental",
+        "host": "External router over vLLM-HUST request fingerprint and KV events",
+        "versions": [
+          "Router merge 8115ed5",
+          "vLLM-HUST >=0.23.1,<0.24 functional carrier"
+        ],
+        "platforms": [
+          "Ascend 910B2 · two TP2+EP replicas measured"
+        ]
+      },
+      "taxonomy": {
+        "kind": "runtime_mod",
+        "capability": "scheduling_routing",
+        "phases": [
+          "request_admission",
+          "state_lifecycle"
+        ],
+        "lifecycle": "implemented_restricted",
+        "evidence": "measured_beneficial"
+      }
+    },
+    {
+      "id": "kv-tiering-migration",
+      "name": "KV Tiering",
+      "canonical_repository": "https://github.com/vLLM-HUST/vllm-hust-kv-tiering",
+      "system_role": "kv_residency_provider",
+      "execution_planes": [
+        "scheduler",
+        "worker",
+        "external_service"
+      ],
+      "deployment_topology": "mixed",
+      "integration_contracts": [
+        "vllm_hust.extension_manifest.v0.3-experimental"
+      ],
+      "integration_surfaces": [
+        "vllm.kv_offload",
+        "vllm.kv_connector"
+      ],
+      "public_effect_status": "inconclusive",
+      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/e759add873a1f0a3d2f54b004c2eb650fc811245/archive/mod-git-20261022/website-source-vllm-hust-website-extra/snapshot/docs/FRONTIER-KV-TIERING-20260926.md",
+      "functional_compatibility": null,
+      "compatibility": {
+        "status": "experimental",
+        "host": "ECPA 0.3 custom Provider; current host qualification pending",
+        "versions": [
+          "ECPA 0.3 package 03f17227; historical runtime evidence remains pinned to Tiering 7ba646a / Host 49f0827 / Manager cf1ea71"
+        ],
+        "platforms": [
+          "Ascend 910B2 · TP2 · CANN 9.1.0 · graph/APC/MTP2/async"
+        ],
+        "models": [
+          "Qwen3.5-35B-A3B BF16 — pinned setting only"
+        ]
+      },
+      "taxonomy": {
+        "kind": "runtime_mod",
+        "capability": "kv_management",
+        "phases": [
+          "state_lifecycle"
+        ],
+        "lifecycle": "qualification_pending",
+        "evidence": "runtime_effective_pending"
+      }
+    },
+    {
+      "id": "knorm-migration",
+      "name": "KNorm",
+      "canonical_repository": "https://github.com/vLLM-HUST/vllm-hust-knorm",
+      "system_role": "kv_compression_method",
+      "execution_planes": [
+        "scheduler",
+        "worker"
+      ],
+      "deployment_topology": "in_process",
+      "integration_contracts": [
+        "vllm_hust.extension_manifest.v0.3-experimental"
+      ],
+      "integration_surfaces": [
+        "vllm.kv_compression.provider",
+        "vllm.kv_lifecycle"
+      ],
+      "public_effect_status": "preview",
+      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-knorm",
+      "functional_compatibility": null,
+      "compatibility": {
+        "status": "inspect_only",
+        "host": "Host-owned transactional KV-compression lifecycle pending",
+        "versions": [
+          "ECPA 0.3 package 563173e1"
+        ],
+        "platforms": [
+          "Platform support unverified"
+        ]
+      },
+      "taxonomy": {
+        "kind": "runtime_mod",
+        "capability": "kv_management",
+        "phases": [
+          "prefill",
+          "decode",
+          "state_lifecycle"
+        ],
+        "lifecycle": "qualification_pending",
+        "evidence": "hardware_validation_pending"
+      }
+    },
+    {
+      "id": "pyramidkv-ascend-migration",
+      "name": "PyramidKV Ascend",
+      "canonical_repository": "https://github.com/vLLM-HUST/vllm-ascend-pyramidkv-hust",
+      "system_role": "kv_compression_provider",
+      "execution_planes": [
+        "scheduler",
+        "worker",
+        "device"
+      ],
+      "deployment_topology": "in_process",
+      "integration_contracts": [],
+      "integration_surfaces": [
+        "vllm.kv_compression.provider",
+        "vllm-ascend attention"
+      ],
+      "public_effect_status": "validated",
+      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/tree/0dd2d1293e8d0f2e23c1e3c5bfe0a38e588a890c/archive/mod-git-20261022/pyramidkv-website-source/snapshot/evidence/current/2026-10-09-paired-evaluation",
+      "functional_compatibility": null,
+      "compatibility": {
+        "status": "experimental",
+        "host": "vLLM-HUST + vLLM-Ascend-HUST through KVCompress method API v1",
+        "versions": [
+          "PyramidKV merge 565077b",
+          "KVCompress >=0.9,<0.10 candidate wheel"
+        ],
+        "platforms": [
+          "Ascend 910B2 · Qwen3.5-35B-A3B BF16 · TP2"
+        ]
+      },
+      "taxonomy": {
+        "kind": "runtime_mod",
+        "capability": "kv_management",
+        "phases": [
+          "prefill",
+          "decode",
+          "state_lifecycle"
+        ],
+        "lifecycle": "implemented_restricted",
+        "evidence": "functionally_validated"
+      }
+    },
+    {
+      "id": "quantized-kv-cache-migration",
+      "name": "Quantized KV Cache",
+      "canonical_repository": "https://github.com/vLLM-HUST/vllm-ascend-quantized-kv-cache-hust",
+      "system_role": "kv_quantization_research",
+      "execution_planes": [
+        "worker",
+        "device"
+      ],
+      "deployment_topology": "in_process",
+      "integration_contracts": [],
+      "integration_surfaces": [
+        "proposed KV format provider",
+        "proposed quantize/dequantize dispatch"
+      ],
+      "public_effect_status": "validated",
+      "public_effect_url": "https://github.com/vLLM-HUST/vllm-ascend-quantized-kv-cache-hust/tree/ae7b44bfee695d0ba580040dffd10eb802104485#%E5%B7%B2%E9%AA%8C%E8%AF%81%E7%8E%AF%E5%A2%83",
+      "functional_compatibility": null,
+      "compatibility": {
+        "status": "experimental",
+        "host": "vLLM Ascend HUST",
+        "versions": [
+          "Plugin 0.2.0.dev0 @ ae7b44b",
+          "Core 8a6655cf62 + Ascend f4f49832"
+        ],
+        "platforms": [
+          "Ascend 910B single card · Qwen2.5-14B · 8K"
+        ]
+      },
+      "taxonomy": {
+        "kind": "runtime_mod",
+        "capability": "kv_management",
+        "phases": [
+          "prefill",
+          "decode",
+          "state_lifecycle"
+        ],
+        "lifecycle": "implemented_restricted",
+        "evidence": "functionally_validated"
+      }
+    },
+    {
+      "id": "simllm-migration",
+      "name": "SimLLM",
+      "canonical_repository": "https://github.com/vLLM-HUST/vllm-ascend-simllm-hust",
+      "system_role": "kv_reuse_policy",
+      "execution_planes": [
+        "scheduler",
+        "worker"
+      ],
+      "deployment_topology": "in_process",
+      "integration_contracts": [
+        "vllm_hust.extension_manifest.v0.3-experimental"
+      ],
+      "integration_surfaces": [
+        "vllm.general_plugins",
+        "vLLM Ascend NPUModelRunner worker patch",
+        "Extension Manager activation environment"
+      ],
+      "public_effect_status": "beneficial",
+      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/e759add873a1f0a3d2f54b004c2eb650fc811245/archive/mod-git-20261022/website-source-vllm-ascend-simllm-hust/snapshot/benchmarks/results/qwen35_latency_20261008/README.md",
+      "functional_compatibility": null,
+      "compatibility": {
+        "status": "experimental",
+        "host": "vLLM Ascend HUST NPUModelRunner",
+        "versions": [
+          "Plugin 0.1.0.dev0",
+          "Manifest 0.3 @ d12428f",
+          "Merge 1110fe5"
+        ],
+        "platforms": [
+          "Ascend 910B3 · Qwen3.5-35B-A3B W8A8 · TP1/TP2 measured"
+        ],
+        "models": [
+          "Qwen3.5-35B-A3B W8A8 — fixed-card one-output-token similarity replay"
+        ]
+      },
+      "taxonomy": {
+        "kind": "runtime_mod",
+        "capability": "kv_management",
+        "phases": [
+          "prefill",
+          "state_lifecycle"
+        ],
+        "lifecycle": "implemented_restricted",
+        "evidence": "measured_beneficial"
+      }
+    },
+    {
+      "id": "split-batch-full-graph-migration",
+      "name": "Split-Batch / Full-Graph Parallel",
+      "canonical_repository": "https://github.com/vLLM-HUST/vllm-ascend-split-batch-hust",
+      "system_role": "graph_execution_policy",
+      "execution_planes": [
+        "scheduler",
+        "worker",
+        "native",
+        "device"
+      ],
+      "deployment_topology": "in_process",
+      "integration_contracts": [],
+      "integration_surfaces": [
+        "proposed graph lifecycle seam",
+        "dual-stream replay",
+        "split-batch planning"
+      ],
+      "public_effect_status": "preview",
+      "public_effect_url": "https://github.com/vLLM-HUST/vllm-ascend-split-batch-hust",
+      "functional_compatibility": null,
+      "compatibility": {
+        "status": "inspect_only",
+        "host": "vLLM Ascend (graph/worker contract pending)",
+        "versions": [
+          "Extension 0.1.0.dev0",
+          "Manifest 0.2-experimental"
+        ],
+        "platforms": [
+          "Ascend NPU target; hardware unverified"
+        ]
+      },
+      "taxonomy": {
+        "kind": "runtime_mod",
+        "capability": "execution_optimization",
+        "phases": [
+          "prefill",
+          "decode"
+        ],
+        "lifecycle": "pending",
+        "evidence": "activation_pending"
+      }
+    },
+    {
+      "id": "pipeline-microbatch-migration",
+      "name": "Pipeline Microbatch",
+      "canonical_repository": "https://github.com/vLLM-HUST/vllm-hust-pipeline-microbatch",
+      "system_role": "pipeline_scheduling_policy",
+      "execution_planes": [
+        "scheduler",
+        "worker",
+        "native"
+      ],
+      "deployment_topology": "distributed_service",
+      "integration_contracts": [],
+      "integration_surfaces": [
+        "proposed pipeline scheduler",
+        "proposed executor and communication contracts"
+      ],
+      "public_effect_status": "inconclusive",
+      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/e759add873a1f0a3d2f54b004c2eb650fc811245/archive/mod-git-20261022/website-source-vllm-hust-website/snapshot/docs/FRONTIER-QWEN35-PIPELINE-K8S.md",
+      "functional_compatibility": null,
+      "compatibility": {
+        "status": "verified",
+        "host": "vLLM reference scheduler policy",
+        "versions": [
+          "Pipeline a15a229",
+          "vLLM 0.25.1 experimental backport · protocol 1.1"
+        ],
+        "platforms": [
+          "Ascend 910B2 · Qwen3.5-35B-A3B · TP2/PP2"
+        ],
+        "models": [
+          "Qwen3.5-35B-A3B — matched four-chip TP2/PP2 five-point observation"
+        ]
+      },
+      "taxonomy": {
+        "kind": "runtime_mod",
+        "capability": "execution_optimization",
+        "phases": [
+          "prefill",
+          "decode"
+        ],
+        "lifecycle": "implemented",
+        "evidence": "measured_inconclusive"
+      }
+    },
+    {
+      "id": "kv-materialization-arrival-control",
+      "name": "KV Materialization Arrival Control",
+      "canonical_repository": "https://github.com/vLLM-HUST/vllm-hust-kv-materialization-arrival-control",
+      "system_role": "kv_materialization_policy",
+      "execution_planes": [
+        "scheduler",
+        "worker"
+      ],
+      "deployment_topology": "in_process",
+      "integration_contracts": [],
+      "integration_surfaces": [
+        "vllm.general_plugins",
+        "request arrival control",
+        "prefix-cache policy"
+      ],
+      "public_effect_status": "measured",
+      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/e759add873a1f0a3d2f54b004c2eb650fc811245/archive/mod-git-20261022/website-source-vllm-hust-website/snapshot/docs/FRONTIER-QWEN35-KV-MATERIALIZATION.md",
+      "functional_compatibility": null,
+      "compatibility": {
+        "status": "verified",
+        "host": "vLLM-HUST",
+        "versions": [
+          "Measured plugin artifact 53a6b113",
+          "Plugin 0.1.0 research carrier"
+        ],
+        "platforms": [
+          "Ascend 910B2 · TP2 · FULL_AND_PIECEWISE graph",
+          "Qwen2.5-7B-Instruct · M2 controller research path"
+        ],
+        "models": [
+          "Qwen3.5-35B-A3B — unified BF16 five-point observation",
+          "Qwen2.5-7B-Instruct — M2 controller negative boundary"
+        ]
+      },
+      "taxonomy": {
+        "kind": "runtime_mod",
+        "capability": "scheduling_routing",
+        "phases": [
+          "request_admission",
+          "state_lifecycle"
+        ],
+        "lifecycle": "implemented_restricted",
+        "evidence": "specialized_workload"
+      }
+    },
+    {
+      "id": "betterscale",
+      "name": "BetterScale",
+      "canonical_repository": "https://github.com/vLLM-HUST/BetterScale",
+      "system_role": "graph_execution_policy",
+      "execution_planes": [
+        "worker",
+        "native",
+        "device"
+      ],
+      "deployment_topology": "in_process",
+      "integration_contracts": [],
+      "integration_surfaces": [
+        "vLLM --worker-cls / native Worker lifecycle",
+        "Pinned vLLM-Ascend runtime hooks"
+      ],
+      "public_effect_status": "measured",
+      "public_effect_url": "https://vllm-hust.sage.org.ai/betterscale.html#service-throughput",
+      "functional_compatibility": {
+        "status": "passed",
+        "scope": "DeepSeek-V4-Flash-0731-w8a8 · Ascend 910B2 TP8 / TP1-DP8-EP8, bounded K5 configurations"
+      },
+      "compatibility": {
+        "status": "verified",
+        "host": "vLLM Ascend",
+        "versions": [
+          "vLLM 0.25.1 + vLLM-Ascend 0.25.1rc1",
+          "vllm-betterscale 0.3.2 / betterscale.worker.Worker"
+        ],
+        "platforms": [
+          "8 × Ascend 910B2 / HCCS · TP8 + EP or TP1 / DP8 / EP8",
+          "2 × Ascend 910B2 · TP2 · FULL graph · Qwen3.5 small-fish prototype"
+        ],
+        "models": [
+          "DeepSeek-V4-Flash-0731-w8a8 · W8A8 / BF16 activations",
+          "Qwen3.5-35B-A3B — TP2 small-fish five-point smoke observation; shared-host, single observations"
+        ]
+      },
+      "taxonomy": {
+        "kind": "runtime_mod",
+        "capability": "execution_optimization",
+        "phases": [
+          "prefill",
+          "decode"
+        ],
+        "lifecycle": "implemented",
+        "evidence": "measured_beneficial"
+      }
+    },
+    {
+      "id": "stateaxis-automatic-prefix-cache",
+      "name": "StateAxis Automatic Prefix Cache",
+      "canonical_repository": "https://github.com/vLLM-HUST/stateaxis-automatic-prefix-cache",
+      "system_role": "prefix_cache_policy",
+      "execution_planes": [
+        "scheduler",
+        "worker"
+      ],
+      "deployment_topology": "in_process",
+      "integration_contracts": [
+        "vllm_hust.extension_manifest.v0.3-experimental"
+      ],
+      "integration_surfaces": [
+        "vLLM-HUST Extension Manager descriptor",
+        "proposed StateAxis prefix-cache host contract"
+      ],
+      "public_effect_status": "preview",
+      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/ddc4f6a3290e447260fc8f6c03ea36d3ca514e23/archive/mod-git-20261021/stateaxis-automatic-prefix-cache/snapshot/evidence/ISSUE95_BOUNDED_APC_CLOSURE_20260815.md",
+      "functional_compatibility": {
+        "status": "passed",
+        "scope": "Manifest 0.3 hash-bound experimental activation contract; performance qualification remains separate"
+      },
+      "compatibility": {
+        "status": "experimental",
+        "host": "StateAxis through vLLM-HUST Extension Manager",
+        "versions": [
+          "repository main @ 9b0962232c7601f66100c83a3394ad73a2113ce8",
+          "Manifest 0.3 experimental",
+          "runtime ID org.vllm-hust.stateaxis-automatic-prefix-cache"
+        ],
+        "platforms": [
+          "ECPA activation contract verified; useful cache-hit hardware qualification pending"
+        ],
+        "models": [
+          "Frozen source evidence only; no split-MOD model qualification"
+        ]
+      },
+      "taxonomy": {
+        "kind": "runtime_mod",
+        "capability": "kv_management",
+        "phases": [
+          "prefill",
+          "state_lifecycle"
+        ],
+        "lifecycle": "implemented_restricted",
+        "evidence": "runtime_effective_no_benefit_demonstrated"
+      }
+    },
+    {
+      "id": "stateaxis-async-kv-transfer",
+      "name": "StateAxis Async KV Transfer",
+      "canonical_repository": "https://github.com/vLLM-HUST/stateaxis-async-kv-transfer",
+      "system_role": "kv_transfer_overlap",
+      "execution_planes": [
+        "worker",
+        "device"
+      ],
+      "deployment_topology": "in_process",
+      "integration_contracts": [
+        "vllm_hust.extension_manifest.v0.3-experimental"
+      ],
+      "integration_surfaces": [
+        "vLLM-HUST Extension Manager descriptor",
+        "proposed StateAxis bounded transfer-lane host contract"
+      ],
+      "public_effect_status": "measured",
+      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/ddc4f6a3290e447260fc8f6c03ea36d3ca514e23/archive/mod-git-20261021/stateaxis-async-kv-transfer/snapshot/evidence/issue76-async-transfer-20260815-r5/result.json",
+      "functional_compatibility": {
+        "status": "passed",
+        "scope": "Manifest 0.3 ECPA-only bounded transfer contract; fresh version-bound performance qualification pending"
+      },
+      "compatibility": {
+        "status": "experimental",
+        "host": "StateAxis through vLLM-HUST Extension Manager",
+        "versions": [
+          "repository main @ d8d8dd6cbba8b60c1bdf2bcc70db898884e0ed38",
+          "Manifest 0.3 experimental",
+          "runtime ID org.vllm-hust.stateaxis-async-kv-transfer"
+        ],
+        "platforms": [
+          "Experimental ECPA activation contract; current-version NPU qualification pending"
+        ],
+        "models": [
+          "Frozen source evidence only; no split-MOD model qualification"
+        ]
+      },
+      "taxonomy": {
+        "kind": "runtime_mod",
+        "capability": "kv_management",
+        "phases": [
+          "state_lifecycle"
+        ],
+        "lifecycle": "implemented_restricted",
+        "evidence": "historical_scoped_positive_current_unqualified"
+      }
+    },
+    {
+      "id": "stateaxis-pipelined-weight-loading",
+      "name": "StateAxis Pipelined Weight Loading",
+      "canonical_repository": "https://github.com/vLLM-HUST/stateaxis-pipelined-weight-loading",
+      "system_role": "model_weight_loading",
+      "execution_planes": [
+        "worker",
+        "native"
+      ],
+      "deployment_topology": "in_process",
+      "integration_contracts": [
+        "vllm_hust.extension_manifest.v0.3-experimental"
+      ],
+      "integration_surfaces": [
+        "vLLM-HUST Extension Manager descriptor",
+        "proposed StateAxis identity-bound loader host contract"
+      ],
+      "public_effect_status": "preview",
+      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/ddc4f6a3290e447260fc8f6c03ea36d3ca514e23/archive/mod-git-20261021/stateaxis-pipelined-weight-loading/snapshot/evidence/qwen35-loader-sharded-qualification-20261012/RESULT.json",
+      "functional_compatibility": {
+        "status": "passed",
+        "scope": "Manifest 0.3 identity-bound activation contract; formal matched performance qualification remains separate"
+      },
+      "compatibility": {
+        "status": "experimental",
+        "host": "StateAxis through vLLM-HUST Extension Manager",
+        "versions": [
+          "repository main @ f5f4ffc30c9754d525017aa15191ca9fa3dc4c2e",
+          "Manifest 0.3 experimental",
+          "runtime ID org.vllm-hust.stateaxis-pipelined-weight-loading"
+        ],
+        "platforms": [
+          "2 x Ascend 910B2 startup carrier diagnostic; formal ECPA platform qualification pending"
+        ],
+        "models": [
+          "Qwen3.5-35B-A3B BF16 TP2 startup carrier diagnostic; steady-state throughput unclaimed"
+        ]
+      },
+      "taxonomy": {
+        "kind": "runtime_mod",
+        "capability": "startup_deployment",
+        "phases": [
+          "service_startup"
+        ],
+        "lifecycle": "implemented_restricted",
+        "evidence": "startup_diagnostic_formal_ecpa_pending"
+      }
+    },
+    {
+      "id": "gdn-state-codec",
+      "name": "GDN State Codec",
+      "canonical_repository": "https://github.com/vLLM-HUST/gdn-state-codec",
+      "system_role": "recurrent_state_compression",
+      "execution_planes": [
+        "worker",
+        "native",
+        "device"
+      ],
+      "deployment_topology": "in_process",
+      "integration_contracts": [
+        "vllm_hust.extension_manifest.v0.3-experimental",
+        "vllm.general_plugins"
+      ],
+      "integration_surfaces": [
+        "vLLM-HUST Extension Manager bundle",
+        "vLLM general plugin",
+        "vLLM Ascend Qwen GDN provider boundary",
+        "AscendC state-codec kernels"
+      ],
+      "public_effect_status": "not-beneficial-in-tested-cell",
+      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/819b1975f346dca514f58880ca62518850100b2d/archive/mod-git-20261022/gdn-state-codec/snapshot/evidence/qwen35-agentx-v020-expanded-20261009/ROUND-RESULTS.md",
+      "functional_compatibility": {
+        "status": "passed",
+        "scope": "ECPA 0.3 managed activation · Qwen3.5-35B-A3B · 2 × Ascend 910B2 · TP2 eager · single request"
+      },
+      "compatibility": {
+        "status": "experimental",
+        "host": "vLLM 0.23 + vLLM Ascend 0.23, managed by vLLM-HUST Extension Manager",
+        "versions": [
+          "GDN State Codec 0.2.0.dev1 @ 0de7f0c",
+          "ECPA Manifest 0.3 experimental @ Extension Manager 075dbcb",
+          "runtime ID org.vllm-hust.gdn-state-codec"
+        ],
+        "platforms": [
+          "2 × Ascend 910B2 · TP2 · eager"
+        ],
+        "models": [
+          "Qwen3.5-35B-A3B · activation passed; tested AgentX cells not beneficial",
+          "Qwen3.8 GDN family · mechanism only, no performance qualification"
+        ]
+      },
+      "taxonomy": {
+        "kind": "runtime_mod",
+        "capability": "state_compression",
+        "phases": [
+          "decode",
+          "state_lifecycle"
+        ],
+        "lifecycle": "implemented_restricted",
+        "evidence": "measured_inconclusive"
+      }
+    },
+    {
+      "id": "vllm-hust-opset",
+      "name": "OPset",
+      "canonical_repository": "https://github.com/vLLM-HUST/vllm-hust-opset",
+      "system_role": "operator_runtime",
+      "execution_planes": [
+        "worker",
+        "device"
+      ],
+      "deployment_topology": "in_process",
+      "integration_contracts": [
+        "vllm_hust.extension_manifest.v0.3-experimental"
+      ],
+      "integration_surfaces": [
+        "vllm_hust.extension_bundles",
+        "vllm.general_plugins",
+        "Ascend batch-invariant Graph/Triton linear path"
+      ],
+      "public_effect_status": "beneficial",
+      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/819b1975f346dca514f58880ca62518850100b2d/archive/mod-git-20261022/vllm-hust-opset/snapshot/docs/optimizations/linear-swiglu-graph.md",
+      "functional_compatibility": null,
+      "compatibility": {
+        "status": "verified",
+        "host": "vLLM-HUST + vllm-ascend-hust",
+        "versions": [
+          "vllm-hust-opset 0.3.2; Manifest 0.3 @ e6f8050; fixed source commits in repository compatibility/verified-line.json"
+        ],
+        "platforms": [
+          "Ascend 910B2 · CANN 9.1.0-beta.3 · Graph + VLLM_BATCH_INVARIANT=1"
+        ],
+        "models": [
+          "Qwen2.5-7B-Instruct — matched Graph validation"
+        ]
+      },
+      "taxonomy": {
+        "kind": "runtime_mod",
+        "capability": "operators_attention",
+        "phases": [
+          "prefill",
+          "decode"
+        ],
+        "lifecycle": "implemented_restricted",
+        "evidence": "measured_beneficial"
+      }
+    },
+    {
+      "id": "core-attention-boundary",
+      "name": "Core Attention Boundary",
+      "canonical_repository": "https://github.com/xmdhb/vllm-hust-core-attention-boundary",
+      "system_role": "attention_execution_policy",
+      "execution_planes": [
+        "worker",
+        "native"
+      ],
+      "deployment_topology": "in_process",
+      "integration_contracts": [],
+      "integration_surfaces": [
+        "vllm.general_plugins",
+        "core attention decode/extend/prefill boundary"
+      ],
+      "public_effect_status": "preview",
+      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/e759add873a1f0a3d2f54b004c2eb650fc811245/archive/mod-git-20261022/website-source-vllm-hust-website-extra/snapshot/docs/FRONTIER-QWEN35-OP02-CORE-ATTENTION-BOUNDARY.md",
+      "functional_compatibility": null,
+      "compatibility": {
+        "status": "experimental",
+        "host": "vLLM 0.23.0+empty + vLLM-Ascend 0.23.0.post1",
+        "versions": [
+          "vllm-hust-core-attention-boundary 0.1.0.dev0 @ 8b5ebb1382bc3624b5250ccec53d5554b6c86003",
+          "Extension Manager 0.2.0.dev0 @ 52e96021c8017938b133ddba895795a13f707568"
+        ],
+        "platforms": [
+          "Ascend 910B2 · TP2+EP · FULL_DECODE_ONLY"
+        ],
+        "models": [
+          "Qwen3.5-35B-A3B · local C1/C2/C4/C8/C16 protocol observations"
+        ]
+      },
+      "taxonomy": {
+        "kind": "runtime_mod",
+        "capability": "operators_attention",
+        "phases": [
+          "prefill",
+          "decode"
+        ],
+        "lifecycle": "implemented_restricted",
+        "evidence": "runtime_effective_no_causal_attribution"
+      }
+    },
+    {
+      "id": "muxpd",
+      "name": "MuxPD",
+      "canonical_repository": "https://github.com/vLLM-HUST/vllm-ascend-MuxPD-hust",
+      "system_role": "graph_execution_policy",
+      "execution_planes": [
+        "scheduler",
+        "worker",
+        "native",
+        "device"
+      ],
+      "deployment_topology": "in_process",
+      "integration_contracts": [
+        "vllm_hust.extension_manifest.v0.3-experimental",
+        "vllm.scheduler-class.v1",
+        "vllm.worker-class.v1",
+        "vllm.batch-admission-policy.v1"
+      ],
+      "integration_surfaces": [
+        "Pinned V1 scheduler_cls / worker_cls projection",
+        "--batch-admission-policy / --batch-admission-policy-config",
+        "Manager-bound module output evidence"
+      ],
+      "public_effect_status": "validated",
+      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/19081ff39a25c3c8ac821ae7885688ea24a03e90/reports/muxpd-ecpa-20261025/RELEASE-QUALIFICATION.md",
+      "functional_compatibility": null,
+      "compatibility": {
+        "status": "verified",
+        "host": "ECPA 0.3 class-carrier projection on pinned HUST V1 scheduler / Ascend NPUModelRunner; functional scope only",
+        "versions": [
+          "MuxPD 0.2.0a1 / 658b4d0b4e8982bd281499005500ac4c3e0100f5",
+          "Core d0f22d2bda562156e4dbf433ce645e1769b4f804 / Ascend 03766ac696fde5ab1980d80ca0b8543d3580c989",
+          "Manager 0.3.1.dev1: 894c109/ac0fb620 directly tested; b7dc139/b78dd617 linked by all 42 runtime-package file bytes",
+          "Torch 2.10.0+cpu / torch-npu 2.10.0.post4"
+        ],
+        "platforms": [
+          "Single-node Ascend 910B2, TP4+EP; DP1/PP1; raw-P q4 + isolated P/D groups + decode FULL graph"
+        ],
+        "models": [
+          "Qwen3.5-35B-A3B BF16 only; weight sizes/mtimes recorded, full weights not hashed"
+        ]
+      },
+      "taxonomy": {
+        "kind": "runtime_mod",
+        "capability": "execution_optimization",
+        "phases": [
+          "prefill",
+          "decode"
+        ],
+        "lifecycle": "implemented_restricted",
+        "evidence": "functionally_validated"
+      }
+    }
+  ]
+}

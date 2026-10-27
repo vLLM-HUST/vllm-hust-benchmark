@@ -1,0 +1,29 @@
+# MOD 正式评审意见
+
+以下为截至2026-10-27的正式评价，由 Fletcher
+代表。评价针对本轮审阅实现及当前部署需求；实测、历史证据与待验证方向的边界见各专题。BetterScale、BidKV按要求跳过，不作技术评价。
+
+| MOD                                | 正式评价                                                                                                                                                                                                                               |
+| ---------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| SimLLM                             | 匹配规则不足以可靠区分事实性差异，无法保障精确信息的保真性；不适用于要求准确性保证的任务。不将此判断扩展到严格相同前缀缓存。[依据](simllm/principles.md)                                                                               |
+| Pipeline Microbatch                | PP不是本轮目标部署的主流路线，专项微批调度缺乏优先投入依据，不继续研究或复现。DeepInfer的大规模部署采用EP/DP；其“不采用TP”的明确说明仅作架构背景，不等同于对PP的否证。[机制](pipeline-microbatch/principles.md)；见表后引用。          |
+| KV Materialization Arrival Control | 已有可复用缓存且存在在线流量或其他活跃任务时，主动重算的计算机会成本过高。应优先改良缓存容量、分层存储与复用路径，避免通过重算处理缓存问题。[SGLang HiCache说明](https://www.lmsys.org/blog/2025-09-10-sglang-hicache/)                |
+| KV Tiering                         | 当前Ascend同步设备搬运路径不可取。同步复制与device synchronization阻塞执行并干扰计算，不满足生产采用要求；应改为可与计算重叠的异步路径。此处为实现与采用判断，非本轮干扰幅度实测。[依据](kv-tiering/principles.md)                     |
+| Ascend KVCompress                  | 打分及数据搬运引入额外开销，同时牺牲精确full-attention语义；既有结果收益有限，当前投入产出比不足。[依据](kvcompress/principles.md)                                                                                                     |
+| MuxPD                              | 当前吞吐不合格。按层暂停增加中间激活保存及调度开销；优先采用mixed batching、chunked prefill，并在显存与延迟预算允许时扩大batch。[依据](muxpd/principles.md)                                                                            |
+| OPset                              | 融合不合格：相对普通ACLNN分开执行，时延增加48.37%–82.31%。删除多余清零有用，但宜作为主线小补丁，不宜独立作为MOD。[两卡实测](opset/reproduction/README.md)                                                                              |
+| Core Attention Boundary            | 缺少有效benchmark，尚无充分证据证明CPU元数据边界替换带来实质性能收益，优化价值未得到验证。[依据](core-attention-boundary/principles.md)                                                                                                |
+| GDN State Codec                    | 参考BetterScale既有LeapQuant实验，在Ascend上未获得稳定收益；AIC/AIV协作与数据搬运成本是主要限制，不重复投入同类研究。本轮未重新复核既有实验。[依据](gdn-state-codec/principles.md)                                                     |
+| Prefix Router                      | 缓存感知路由有明确需求，值得推进。应结合分布式KV存储，将缓存可达性、传输成本与节点负载纳入决策，优先复用而非重算；当前版本并未完成这一系统能力。[依据](prefix-router/principles.md)                                                    |
+| PyramidKV                          | 当前整体性价比不足。KV容量下降未转化为整体收益，额外打分、搬运及精度代价抵消其价值；已读配置长输入吞吐下降2.6%–10.3%。[依据](pyramidkv/principles.md)                                                                                  |
+| Quantized KV Cache                 | 不推荐依赖独立量化、反量化及稠密中间结果物化的路径，其额外GM往返可能抵消收益。优先考虑产出与消费保持量化状态的实现；融合online antiquant需另证净收益，不与显式还原混同。[依据](quantized-kv/principles.md)                             |
+| vSpec（35B）                       | 当前不合格：准确率相对原生及MTP2分别下降3.57、3.21个百分点；gamma、refill、capture buckets及动态宽度runtime同时不同，未隔离自适应策略相对MTP的独立收益。保留实测速度与精度因果归因边界。[实测](speculative-mmlu-pro/results-qwen35.md) |
+| DiffSpec                           | 性能收益不合格，需要重新评估项目可行性。结论限于B16/C04三臂56题首轮，检索未生效，完整三臂280题未完成；不构成完整方法的否证。[实测](speculative-mmlu-pro/results-diffspec.md)                                                           |
+| StateAxis Async KV Transfer        | 原理正确；需适配Qwen3.5-35B-A3B，并选择合适的缓存压力workload进一步验证。[依据](stateaxis-data-paths/principles.md)                                                                                                                    |
+| StateAxis Automatic Prefix Cache   | 有潜力，主要来自recurrent state checkpointing对特定数据集前缀匹配的支持。需高效异步实现，确保状态保存与搬运不干扰计算；目前为待验证方向。[依据](stateaxis-data-paths/principles.md)                                                    |
+| StateAxis Pipelined Weight Loading | 实用，建议推广到系统默认主线，做成default-in（默认启用）。历史收益包含校验实现等共同优化，不全部归因于传输流水。[依据](stateaxis-data-paths/principles.md)                                                                             |
+
+## DeepInfer部署引用
+
+DeepInfer官方部署Q&A原文：“TP and CP are not used for now.” 其decode配置为EP64–128 /
+DP64–128。此引用说明大规模部署可以采用EP/DP路线，但不直接证明PP在所有推理场景中无价值，也不构成对行业采用比例的统计。[官方原文](https://github.com/deepseek-ai/DeepInfer/blob/main/doc/inference_deployment_qa.md)（核对日期：2026-10-27）

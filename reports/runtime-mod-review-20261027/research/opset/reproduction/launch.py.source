@@ -1,0 +1,37 @@
+import ctypes
+import fcntl
+import os
+from pathlib import Path
+import subprocess
+import sys
+card=int(sys.argv[1])
+locks=[]
+for path in (f'/root/npu-device-{card}.lock',f'/tmp/npu-physical-{card}.lock',f'/var/lock/betterscale-npu-{card}.lock'):
+    f=open(path,'a')
+    fcntl.flock(f,fcntl.LOCK_EX|fcntl.LOCK_NB)
+    locks.append(f)
+info=subprocess.check_output(['npu-smi','info'],text=True,timeout=20)
+if f'No running processes found in NPU {card}' not in info:
+    raise SystemExit('Device not confirmed idle; refusing launch')
+root=Path('/root/lumi-opset-study-20261026')
+(root/'results'/f'card-{card}-admission.txt').write_text(info)
+# Resolve physical ID with the runtime before masking; never assume IDs match.
+lib=ctypes.CDLL('libascendcl.so')
+assert lib.aclInit(None)==0
+rt=ctypes.CDLL('libruntime.so')
+count=ctypes.c_uint32()
+assert lib.aclrtGetDeviceCount(ctypes.byref(count))==0
+mapping={}
+for logical in range(count.value):
+    physical=ctypes.c_int32(-1)
+    assert rt.rtGetDevicePhyIdByIndex(logical,ctypes.byref(physical))==0
+    mapping[physical.value]=logical
+lib.aclFinalize()
+assert card in (2,7) and card in mapping
+(root/'results'/f'card-{card}-mapping.txt').write_text(str(mapping))
+env=os.environ.copy()
+env.update(ASCEND_RT_VISIBLE_DEVICES=str(mapping[card]),PYTHONPATH=str(root/'source/src'),TRITON_CACHE_DIR=str(root/f'cache-{card}'),TRITON_DUMP_DIR=str(root/f'dump-{card}'),TRITON_KERNEL_DUMP='1',OMP_NUM_THREADS='4',VLLM_PLUGINS='')
+with open(root/'results'/f'card-{card}.log','w') as out:
+    run=subprocess.run([str(root/'venv/bin/python'),str(root/'probe.py'),str(card)],env=env,stdout=out,stderr=subprocess.STDOUT,timeout=900)
+(root/'results'/f'card-{card}-exit.txt').write_text(str(run.returncode))
+raise SystemExit(run.returncode)
