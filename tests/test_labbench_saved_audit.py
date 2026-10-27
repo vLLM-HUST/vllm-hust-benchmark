@@ -18,6 +18,52 @@ AUDIT = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(AUDIT)
 
 
+def test_native_delivery_receipt_keeps_fixed_selection_negative_results_and_scope():
+    ledger = json.loads(
+        (ROOT / "docs/workload-data/dataset-validation-status.json").read_text("utf-8")
+    )
+    current = ledger["delivery_inventory"]["LABBENCH"]
+    evidence = json.loads((ROOT / current["delivery_receipt"]).read_text("utf-8"))
+    assert current["checked"] and current["status"] == "AVAILABLE"
+    assert evidence["source_id"] == "LABBENCH" and evidence["source_checkbox_eligible"]
+    assert evidence["selected_tasks"] == 93
+    categories = evidence["official_categories"]
+    assert [item["category"] for item in categories] == list(AUDIT.CATEGORIES)
+    assert [item["saved_tasks_verified"] for item in categories] == [
+        3,
+        3,
+        3,
+        3,
+        45,
+        30,
+        3,
+        3,
+    ]
+    assert evidence["finish_reasons"] == {"stop": 87, "length": 6}
+    assert (
+        evidence["parsed_answers"]
+        == sum(item["parsed_answers"] for item in categories)
+        == 45
+    )
+    assert (
+        evidence["correct_answers"]
+        == sum(
+            round(item["metrics"]["accuracy"] * item["saved_tasks_verified"])
+            for item in categories
+        )
+        == 14
+    )
+    assert evidence["original_public_rows_preserved_and_indexed"] == 1967
+    assert evidence["fixed_research_readbacks_reused"] == 124
+    assert evidence["verified_installed_payloads"] == 46
+    assert evidence["audit_new_model_calls"] == evidence["valid_generations_rerun"] == 0
+    assert evidence["original_author_cot_prompt_retained"] is True
+    assert evidence["thinking_override"] is False
+    assert not evidence["quality_acceptance_or_author_model_reproduction"]
+    assert not evidence["performance_claim"]
+    assert not evidence["raw_data_images_or_model_outputs_published"]
+
+
 @pytest.mark.parametrize("tamper", [None, "request", "score", "missing", "failed"])
 def test_saved_replay_rejects_changed_evidence(tmp_path, tamper):
     instance = SimpleNamespace(id="fixed-id", model_dump=lambda: {"id": "fixed-id"})
