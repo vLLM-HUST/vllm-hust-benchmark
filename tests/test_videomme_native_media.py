@@ -145,3 +145,44 @@ def test_memory_headroom_respects_container_limit(tmp_path, media, monkeypatch):
         media.Path, "is_file", lambda path: str(path).replace("\\", "/") in paths
     )
     assert media.available_memory_bytes() == 1073741824
+
+
+@pytest.mark.parametrize(
+    "stats,expected",
+    [
+        (
+            "file 3072\nshmem 0\ninactive_file 2048\nfile_dirty 0\nfile_writeback 0\n",
+            3072,
+        ),
+        (
+            "file 3072\nshmem 2048\ninactive_file 2048\nfile_dirty 100\nfile_writeback 100\n",
+            1848,
+        ),
+        ("file 3072\nshmem 0\ninactive_file 0\nfile_dirty 0\nfile_writeback 0\n", 1024),
+        (
+            "file 3072\nshmem 0\ninactive_file 2048\nfile_dirty 2048\nfile_writeback 1\n",
+            1024,
+        ),
+        (
+            "file -1\nshmem 0\ninactive_file 2048\nfile_dirty 0\nfile_writeback 0\n",
+            1024,
+        ),
+        ("file 3072\ninactive_file 2048\n", 1024),
+    ],
+)
+def test_clean_inactive_cache_is_reclaimable_without_touching_model_pages(
+    media, monkeypatch, stats, expected
+):
+    paths = {
+        "/proc/meminfo": "MemAvailable: 8388608 kB\n",
+        "/sys/fs/cgroup/memory.max": "4096",
+        "/sys/fs/cgroup/memory.current": "3072",
+        "/sys/fs/cgroup/memory.stat": stats,
+    }
+    monkeypatch.setattr(
+        media.Path, "read_text", lambda path: paths[str(path).replace("\\", "/")]
+    )
+    monkeypatch.setattr(
+        media.Path, "is_file", lambda path: str(path).replace("\\", "/") in paths
+    )
+    assert media.available_memory_bytes() == expected

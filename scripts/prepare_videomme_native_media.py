@@ -142,9 +142,46 @@ def available_memory_bytes():
         if limit_path.is_file() and current_path.is_file():
             limit = limit_path.read_text().strip()
             if limit != "max":
-                available = min(
-                    available, max(0, int(limit) - int(current_path.read_text()))
+                current_before = int(current_path.read_text())
+                reclaimable = 0
+                stats_path = Path("/sys/fs/cgroup/memory.stat")
+                if stats_path.is_file():
+                    # Count only a conservative lower bound for clean inactive
+                    # file cache. Never count active pages, shmem, dirty/writeback
+                    # pages, or anonymous model/runtime allocations as free.
+                    try:
+                        stats = dict(
+                            line.split() for line in stats_path.read_text().splitlines()
+                        )
+                        values = {
+                            key: int(stats[key])
+                            for key in (
+                                "file",
+                                "shmem",
+                                "inactive_file",
+                                "file_dirty",
+                                "file_writeback",
+                            )
+                        }
+                        if all(value >= 0 for value in values.values()):
+                            reclaimable = max(
+                                0,
+                                min(
+                                    values["inactive_file"],
+                                    max(0, values["file"] - values["shmem"]),
+                                )
+                                - values["file_dirty"]
+                                - values["file_writeback"],
+                            )
+                    except (OSError, KeyError, ValueError):
+                        reclaimable = 0
+                current_used = max(current_before, int(current_path.read_text()))
+                reclaimable = min(reclaimable, max(0, current_used))
+                bounded = min(
+                    int(limit),
+                    max(0, int(limit) - current_used + reclaimable),
                 )
+                available = min(available, bounded)
         return available
     except (OSError, KeyError, ValueError):
         raise ValueError(
