@@ -1,0 +1,46 @@
+{
+  "created_at": "2026-10-28T05:38:45.910799+00:00",
+  "runs": [
+    {
+      "label": "layer-native-01",
+      "controller_claimed_pass": true,
+      "child_claimed_pass": true,
+      "finished_at": "2026-10-28T05:33:17.131359+00:00",
+      "owned_members_after_cleanup": [],
+      "idle_physical_after": [
+        "0",
+        "2",
+        "3",
+        "4"
+      ],
+      "known_shutdown_ownership_error": false,
+      "traceback_count": 0,
+      "audited_lifecycle_pass": true,
+      "process_log_sha256": "55c16a039e9d5e28e4ff705100e824c724ea29ac54f6ab57552e8b80fd791ac3",
+      "original_controller_sha256": "cf23b804ffa1b7da3afed08df04c90c5fa8051b86cc65582d8a6c1725c9121d9",
+      "original_child_sha256": "7497f1e3f06279a8a572e6d5d2026a815e671af126effce945ad2405b2cd4009",
+      "note": "No traceback or known ownership error in full terminal log."
+    },
+    {
+      "label": "layer-raw-01",
+      "controller_claimed_pass": true,
+      "child_claimed_pass": true,
+      "finished_at": "2026-10-28T05:36:39.971927+00:00",
+      "owned_members_after_cleanup": [],
+      "idle_physical_after": [
+        "0",
+        "2",
+        "3",
+        "4"
+      ],
+      "known_shutdown_ownership_error": true,
+      "traceback_count": 4,
+      "audited_lifecycle_pass": false,
+      "process_log_sha256": "0f3b67e3ceb0d0f4c961361a55a4b7f6ed688754ea255a663f6a4889c58ed6cf",
+      "original_controller_sha256": "7970ea3d4aef3569fc94a0a7c593fac74fc132a58832498aa0f2fb52ba259b51",
+      "original_child_sha256": "56d67286db63e8b645527b972e4f2a4bc2d93d46efdd7c51030edc447167e3d6",
+      "note": "Original controller/run bytes preserved. Worker shutdown errors did not propagate to coordinator; claimed PASS is superseded for lifecycle acceptance by this audit."
+    }
+  ],
+  "next": "Versioned diagnostic teardown restoring only owned hooks before model shutdown, plus controller process-log error audit; rerun both roles. No runtime model/sampling change."
+}
