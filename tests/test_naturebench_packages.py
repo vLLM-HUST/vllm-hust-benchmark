@@ -212,3 +212,28 @@ def test_resource_header_cannot_disagree_with_dataset_revision(tmp_path):
     )
     with pytest.raises(ValueError, match="identity"):
         source_spec("NATUREBENCH", root)
+
+
+def test_installed_ci_evidence_does_not_mark_scientific_execution_complete():
+    from pathlib import Path
+
+    root = Path(__file__).resolve().parents[1]
+    receipt = json.loads(
+        (
+            root
+            / "docs/workload-data/validation/naturebench-original-readiness-20261028.json"
+        ).read_text("utf-8")
+    )
+    package_reader = receipt["original_package_reader"]
+    assert package_reader["installed_ci_wheel_research_readback_verified"]
+    actual = package_reader["actual_ci_wheel"]
+    assert actual["artifact_id"] == 12783786040
+    assert actual["verified_installed_payloads"] == 59
+    assert (
+        actual["original_task_packages"]
+        == actual["provider_readbacks"]
+        == actual["research_readbacks"]
+        == 3
+    )
+    assert actual["model_calls"] == 0
+    assert not actual["scientific_execution"] and not actual["source_checkbox_eligible"]
