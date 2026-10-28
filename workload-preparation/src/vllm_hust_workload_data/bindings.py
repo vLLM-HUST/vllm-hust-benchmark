@@ -57,6 +57,7 @@ def bind_source(
         else {}
     )
     result = []
+    native_assets = {}
     if source_id == "NATUREBENCH" and mapping is None:
         from .naturebench import relation_spec
 
@@ -85,6 +86,16 @@ def bind_source(
             )
         count = 0
         for row in iter_source_rows(path, spec):
+            if source_id == "APPWORLD":
+                from .appworld import row_assets
+
+                for asset in row_assets(row):
+                    if (
+                        asset["path"] in native_assets
+                        and native_assets[asset["path"]] != asset
+                    ):
+                        raise ValueError("original shared asset changed during binding")
+                    native_assets[asset["path"]] = asset
             if mapping is not None:
                 from .adapters import adapt_row
 
@@ -139,6 +150,15 @@ def bind_source(
         ),
         "adapter_contract_status": spec["status"],
         "raw_data_copied": False,
+        **(
+            {
+                "native_task_assets": [
+                    native_assets[name] for name in sorted(native_assets)
+                ]
+            }
+            if source_id == "APPWORLD"
+            else {}
+        ),
         **(
             {"native_task_assets": deepcopy(upstream["files"])}
             if source_id == "NATUREBENCH" and mapping is None

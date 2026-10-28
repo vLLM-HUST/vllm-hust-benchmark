@@ -5,10 +5,16 @@ import json
 import pytest
 
 from vllm_hust_workload_data.appworld import SPLITS, adapt_case, original_task_bundles
+from vllm_hust_workload_data import iter_workload
+from vllm_hust_workload_data.bindings import bind_source
+from vllm_hust_workload_data.consumer import resolve_input
+from vllm_hust_workload_data.pipeline import prepared_rows, run
 
 
 def fixture_root(tmp_path):
     (tmp_path / "datasets").mkdir()
+    for name in ("version.txt", "LICENSE", "README_BEFORE_SHARING.md"):
+        (tmp_path / name).write_text("structural fixture only")
     for name in ("base_dbs", "api_docs"):
         (tmp_path / name).mkdir()
         (tmp_path / name / "fixture.json").write_text("{}")
@@ -58,3 +64,62 @@ def test_missing_reference_bundle_is_not_synthetic_fallback(tmp_path):
     (root / "tasks/fixture_0/ground_truth/evaluation.py").unlink()
     with pytest.raises(ValueError, match="reference bundles"):
         next(original_task_bundles(root))
+
+
+def test_unified_binding_reader_and_reference_integrity(tmp_path):
+    root = fixture_root(tmp_path)
+    manifest = bind_source(
+        "APPWORLD",
+        data_root=root,
+        files=["datasets/test_normal.txt"],
+        revision="fixture-local-not-publisher-verified",
+    )
+    records = list(iter_workload("APPWORLD", data_root=root, manifest=manifest))
+    assert len(records) == 1 and records[0].task["task_id"] == "fixture_2"
+    assert not manifest["upstream_revision_verified"]
+    assert len(manifest["native_task_assets"]) == 9
+    (root / "tasks/fixture_2/ground_truth/evaluation.py").write_text(
+        "# changed reference\n"
+    )
+    with pytest.raises(ValueError):
+        list(iter_workload("APPWORLD", data_root=root, manifest=manifest))
+
+
+def test_index_consumer_preserves_bundle_and_rejects_changed_database(tmp_path):
+    root = tmp_path / "data"
+    root.mkdir()
+    fixture_root(root)
+    manifest = bind_source(
+        "APPWORLD",
+        data_root=root,
+        files=["datasets/test_normal.txt"],
+        revision="fixture-local-not-publisher-verified",
+    )
+    manifest_path = tmp_path / "binding.json"
+    manifest_path.write_text(json.dumps(manifest))
+    output = tmp_path / "prepared"
+    report = run(
+        {
+            "sources": [
+                {
+                    "source_id": "APPWORLD",
+                    "data_root": str(root),
+                    "manifest": str(manifest_path),
+                }
+            ]
+        },
+        output=output,
+    )
+    assert report["native_tasks_run"] == 0
+    indexed = list(prepared_rows(output / "workload.sqlite"))
+    assert len(indexed) == 1
+    record = resolve_input(
+        output / "workload.sqlite", indexed[0]["record_id"], data_root=root
+    )
+    assert record.task["task_id"] == "fixture_2"
+    assert record.outcome["reference_files"][0]["path"].endswith("evaluation.py")
+    (root / "tasks/fixture_2/dbs/fixture.jsonl").write_text('{"modified": true}\n')
+    with pytest.raises(ValueError):
+        resolve_input(
+            output / "workload.sqlite", indexed[0]["record_id"], data_root=root
+        )

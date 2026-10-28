@@ -401,9 +401,33 @@ docker build --network=host --build-arg APPWORLD_CORE_IMAGE="$(cat /private/appw
   -t workload-native/appworld-react-cpu:local /private/appworld-react-build-context
 ```
 
-这份公共实验配方尚待独立重建验证；140项实验依赖的既有安装证据不等于公共配方重建通过。默认原作者70B模型配置不变地归档；9B是资源适配替代，不能宣称复现70B结果。原始任务下载与目录核验、模型代理和完整隔离启动仍是独立步骤；不能仅靠镜像构建或入口计划输出打总勾。
+这份公共实验配方已在服务器独立构建成功，并通过离线非root只读容器中的原配置、核心83项版本及原生依赖导入检查。新解析环境有152项依赖，不等同先前140项完整环境，也不是原作者锁定依赖。默认原作者70B模型配置不变地归档；9B是资源适配替代，不能宣称复现70B结果。原始任务下载与目录核验、模型代理和完整隔离启动仍是独立步骤；不能仅靠镜像构建或入口计划输出打总勾。
 
-`--network=host`只用于本专用CPU工作区的软件依赖构建，以避开嵌套Docker桥接网络的PyPI连接问题；原始数据和任务均不进入构建上下文，任务执行必须保持`--network=none`，不能照搬构建网络配置。源代码级任务包读取模块`vllm_hust_workload_data.appworld`已在服务器核验全部732项任务、14,643个任务文件和46个共享数据库/API文档引用；目前尚未注册统一provider及完成研究端联调，不视为该来源已交付。
+`--network=host`只用于本专用CPU工作区的软件依赖构建，以避开嵌套Docker桥接网络的PyPI连接问题；原始数据和任务均不进入构建上下文，任务执行必须保持`--network=none`，不能照搬构建网络配置。读取模块保留全部732项任务、14,643个任务文件、46个共享数据库/API文档引用及原始划分/版本/许可文件。统一绑定与索引回查已在服务器原数据上验证，安装产物及研究端联调仍待完成，不视为该来源已交付。
+
+绑定已有原始数据（不会下载、改写或执行任务）：
+
+```bash
+python -m vllm_hust_workload_data.pipeline bind APPWORLD \
+  --data-root /private/appworld/world/data \
+  --files datasets/train.txt datasets/dev.txt datasets/test_normal.txt datasets/test_challenge.txt \
+  --revision private-original-cli-acquisition-YYYYMMDD \
+  --output /private/appworld-delivery/binding.json
+```
+
+`--revision`应如实标识本次原始数据快照；本地哈希绑定不是发布方签名认证。将以下内容保存为外部配置，再用通用`pipeline plan/run`入口准备仅含引用的索引。父目录须事先存在，输出文件/索引目录必须全新，不能放进Git：
+
+```json
+{"sources":[{"source_id":"APPWORLD","data_root":"/private/appworld/world/data","manifest":"/private/appworld-delivery/binding.json"}]}
+```
+
+```bash
+python -m vllm_hust_workload_data.pipeline plan --config /private/appworld-delivery/config.json
+python -m vllm_hust_workload_data.pipeline run --config /private/appworld-delivery/config.json \
+  --output /private/appworld-delivery/prepared
+```
+
+真实数据的统一绑定/索引/三条回查已通过：732项任务及全部14,696个原始文件身份得到固定；`consumer.resolve_input`回查时校验该任务及共享/参考资产，返回原生环境任务而非可直接发送的请求。原生Agent仍使用前述独立环境与执行入口，不把索引成功当作原生推理完成。安装产物及研究端联调仍待核验。
 
 ## Video-MME 原生视频任务
 

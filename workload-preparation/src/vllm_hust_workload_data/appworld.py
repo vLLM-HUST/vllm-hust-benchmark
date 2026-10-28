@@ -15,6 +15,43 @@ from .records import WorkloadRecord
 SPLITS = ("train", "dev", "test_normal", "test_challenge")
 
 
+def original_rows(split_path):
+    path = Path(split_path)
+    if path.parent.name != "datasets" or path.name not in {
+        f"{split}.txt" for split in SPLITS
+    }:
+        raise ValueError("original datasets/{split}.txt entry required")
+    for row in original_task_bundles(path.parent.parent):
+        if row["split"] == path.stem:
+            yield row
+
+
+def row_assets(row):
+    assets = [
+        row["spec_file"],
+        row["split_file"],
+        *row["database_files"],
+        *row["reference_files"],
+    ]
+    for files in row["shared_environment_files"].values():
+        assets.extend(files)
+    assets.extend(row["original_release_files"])
+    return assets
+
+
+def record_assets(record):
+    annotations = record.replay["annotations"]
+    inputs = record.task["input"]
+    return row_assets(
+        {
+            **annotations,
+            "database_files": inputs["database_files"],
+            "shared_environment_files": inputs["shared_environment_files"],
+            "reference_files": record.outcome["reference_files"],
+        }
+    )
+
+
 def file_reference(path, root):
     resolved = path.resolve(strict=True)
     if not resolved.is_relative_to(root) or not resolved.is_file():
@@ -32,6 +69,10 @@ def file_reference(path, root):
 
 def original_task_bundles(data_root):
     root = Path(data_root).resolve(strict=True)
+    release_files = [
+        file_reference(root / name, root)
+        for name in ("version.txt", "LICENSE", "README_BEFORE_SHARING.md")
+    ]
     shared = {}
     for name in ("base_dbs", "api_docs"):
         shared[name] = [
@@ -74,6 +115,7 @@ def original_task_bundles(data_root):
             if not groups[name]:
                 raise ValueError("original database and reference bundles required")
         yield {
+            "original_release_files": deepcopy(release_files),
             "shared_environment_files": deepcopy(shared),
             "task_id": identity,
             "split": split,
@@ -87,6 +129,20 @@ def original_task_bundles(data_root):
 
 
 def adapt_case(row, *, source, index):
+    required = {
+        "task_id",
+        "split",
+        "split_offset",
+        "original_specs",
+        "database_files",
+        "shared_environment_files",
+        "spec_file",
+        "split_file",
+        "reference_files",
+        "original_release_files",
+    }
+    if not isinstance(row, dict) or required - row.keys():
+        raise ValueError("APPWORLD: missing required fields; no generated fallback")
     return WorkloadRecord(
         source=deepcopy(source),
         task={
@@ -115,7 +171,13 @@ def adapt_case(row, *, source, index):
             "order": "original_split_file_order_not_request_arrival",
             "annotations": {
                 key: deepcopy(row[key])
-                for key in ("split", "split_offset", "spec_file", "split_file")
+                for key in (
+                    "split",
+                    "split_offset",
+                    "spec_file",
+                    "split_file",
+                    "original_release_files",
+                )
             },
             "unmapped_field_names": [],
             "synthetic_fallback": False,

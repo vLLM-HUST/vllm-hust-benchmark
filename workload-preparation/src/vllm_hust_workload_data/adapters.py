@@ -13,6 +13,11 @@ from .registry import adapter_spec, source_spec
 
 def iter_source_rows(path, spec):
     """Use one source view for reading, binding and index resolution."""
+    if spec["mapping"] == "appworld_original_task_bundles":
+        from .appworld import original_rows
+
+        yield from original_rows(path)
+        return
     if spec["mapping"] == "livecodebench_original_tasks":
         from .livecodebench import original_rows
 
@@ -169,6 +174,10 @@ def adapt_row(
         return adapt_case(row, source=source, index=index)
     if spec["mapping"] == "scienceworld_original_goldpaths":
         from .scienceworld import adapt_case
+
+        return adapt_case(row, source=source, index=index)
+    if spec["mapping"] == "appworld_original_task_bundles":
+        from .appworld import adapt_case
 
         return adapt_case(row, source=source, index=index)
     if source_id == "DOCVQA":
@@ -642,6 +651,12 @@ def iter_workload(
             "official native runner required; no QBI fallback or prompt flattening"
         )
     manifest = source_spec(source_id, catalog_root) if manifest is None else manifest
+    if source_id == "APPWORLD":
+        assets = manifest.get("native_task_assets")
+        if not isinstance(assets, list) or not assets:
+            raise ValueError("bind original AppWorld task bundles before reading")
+        for asset in assets:
+            verify_file(Path(data_root), asset)
     if manifest.get("source_id", source_id) != source_id or not manifest.get(
         "revision"
     ):

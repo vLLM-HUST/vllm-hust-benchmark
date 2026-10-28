@@ -2,6 +2,17 @@
   "version": "source-adapters/v1",
   "status_policy": "Implementation, asset verification and runtime reproduction are independent. All other registered sources remain NOT_IMPLEMENTED.",
   "adapters": {
+    "APPWORLD": {
+      "kind": "native_environment_dataset",
+      "mapping": "appworld_original_task_bundles",
+      "input_fields": ["original_specs", "database_files", "shared_environment_files"],
+      "required_fields": ["task_id", "split", "original_specs", "spec_file", "split_file", "database_files", "reference_files", "shared_environment_files", "original_release_files"],
+      "outcome_fields": ["reference_files"],
+      "annotation_fields": ["split", "split_offset", "spec_file", "split_file", "original_release_files"],
+      "id_field": "task_id",
+      "requirements": ["Unchanged original AppWorld data root, native Agent, environment and evaluator required", "Bind original split files and all task/shared/reference assets; never flatten into question-answer prompts", "Reference assets are never model input; raw assets and generated outputs remain private"],
+      "status": "ORIGINAL_BUNDLE_READER_IMPLEMENTED_NATIVE_DELIVERY_PENDING"
+    },
     "CODEJUDGE_EVAL": {
       "kind": "task_dataset",
       "mapping": "publisher_full_prompt",
