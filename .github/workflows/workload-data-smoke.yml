@@ -194,6 +194,8 @@ on:
       - 'scripts/score_flores200_original_results.py'
       - 'tests/test_flores200_original_runner.py'
       - 'scripts/prepare_reused_research_assets.py'
+      - 'scripts/prepare_livecodebench_original_tasks.py'
+      - 'tests/test_livecodebench_original_preparation.py'
       - 'scripts/prepare_reused_source_records.py'
       - 'scripts/verify_infinitebench_original_code.py'
       - 'scripts/run_infinitebench_original.py'
@@ -396,6 +398,8 @@ jobs:
         run: python -m pytest -q tests/test_humaneval_official_samples.py tests/test_humaneval_isolated_scoring.py tests/test_bigcodebench_official_samples.py tests/test_bigcodebench_scoring_assets.py tests/test_bigcodebench_scoring_plan.py tests/test_bigcodebench_container_scoring.py tests/test_ds1000_official_samples.py tests/test_ds1000_isolated_scoring.py
       - name: BigCodeBench CPU image contract fixtures, no image build or task execution
         run: python -m pytest -q tests/test_bigcodebench_cpu_environment.py
+      - name: LiveCodeBench opaque original task preparation fixtures, no task execution
+        run: python -m pytest -q tests/test_livecodebench_original_preparation.py
       - name: Author JSONSchemaBench local Engine interface fixtures
         run: python -m pytest -q tests/test_jsonschemabench_local_engine.py tests/test_jsonschemabench_environment_probe.py tests/test_jsonschemabench_original_assets.py tests/test_jsonschemabench_official_runner.py tests/test_jsonschemabench_original_records.py tests/test_xsum_original_runner.py
       - name: Verify exact current-source wheel payload

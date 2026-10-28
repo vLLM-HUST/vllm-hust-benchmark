@@ -167,7 +167,16 @@ python scripts/prepare_reused_research_assets.py LIVECODEBENCH \
   --files code_generation/test.jsonl --max-bytes 10000000000
 ```
 
-此入口不解码私有测试、不构造提示、不运行模型、不执行生成代码或评分。私有测试可能包含 pickle，只能在合格隔离容器中交给官方加载流程，不能在宿主机反序列化。数据卡仅标注通用
+完整原文件校验后，可用固定原文件顺序抽样准备原题（默认先打印计划，增加 `--execute` 才写入外部新目录）：
+
+```bash
+python scripts/prepare_livecodebench_original_tasks.py \
+  --data-root /private/livecodebench-original-code \
+  --output /private/livecodebench-original-tasks --sample-count 3 --execute
+```
+
+每条原题的所有字段、完整测试字符串和元信息均保留，不替换失败题、不减少每题测试。该准备入口不解码私有测试、不构造提示、不运行模型、不执行生成代码或评分。私有测试可能包含
+pickle，只能在合格隔离容器中交给官方加载流程，不能在宿主机反序列化。数据卡仅标注通用
 `cc`，具体许可待核实，不公开再分发原文件。原生代码生成、自修复、代码执行、测试输出预测的执行环境、预算和评分闭环尚未完成；不得把下载/读取成功作为 benchmark
 跑通。进度以[唯一清单](../docs/workload-data/DATASET_CHECKLIST.zh-CN.md)为准。
 

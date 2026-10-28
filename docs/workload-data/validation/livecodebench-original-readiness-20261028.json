@@ -1,0 +1,74 @@
+{
+  "source_id": "LIVECODEBENCH",
+  "recorded_at": "2026-10-28",
+  "status": "ALL_THREE_PINNED_ORIGINAL_ASSETS_ACQUIRED_NATIVE_EXECUTION_PENDING",
+  "source_checkbox_eligible": false,
+  "native_execution_complete": false,
+  "model_calls": 0,
+  "raw_payloads_published": false,
+  "research_analysis_migrated": false,
+  "original_file_identities": "workload-preparation/data/catalogs/source_manifests_v1.json#sources.LIVECODEBENCH",
+  "acquisition": {
+    "server_scope": "owned dedicated CPU workspace workload-native-cpu-20261028, no NPU allocation",
+    "small_original_files": 2,
+    "small_original_bytes": 144814,
+    "small_public_verifier_exit_code": 0,
+    "full_codegen_original_bytes": 9375644586,
+    "full_codegen_public_acquirer_exit_code": 0,
+    "all_publisher_lfs_sha256_verified": true,
+    "full_codegen_log": "/root/livecodebench-full-original-acquisition-20261028-001",
+    "transport": "Official endpoint connection refused; explicit hf-mirror.com transport for unchanged pinned official assets",
+    "dataset_license": "Publisher cards declare generic cc; specific terms unresolved, no redistribution"
+  },
+  "original_task_preparation": {
+    "public_entry": "scripts/prepare_livecodebench_original_tasks.py",
+    "actual_exit_code": 0,
+    "selection_rule": "first_n_publisher_file_rows_no_replacement",
+    "selected_positions": [0, 1, 2],
+    "selected_question_ids": ["abc301_f", "abc301_a", "abc301_c"],
+    "original_fields_per_selected_row": 11,
+    "original_fields_unchanged": true,
+    "private_test_fields_remain_opaque": true,
+    "private_tests_decoded_on_host": false,
+    "output_sha256": "34f1635c1221d0e393243358a69dcfe0aa1d7cb28facf5e3634e4b11f08ad47a", "identity_note": "pragma: allowlist secret - derived original private task file identity, not content",
+    "private_output_root": "/root/livecodebench-original-prepared-20261028-001"
+  },
+  "isolated_original_loader": {
+    "actual_exit_code": 0,
+    "network_mode": "none",
+    "sandbox_user": "65534:65534",
+    "read_only_rootfs": true,
+    "memory_bytes": 8589934592,
+    "all_capabilities_dropped": true,
+    "no_new_privileges": true,
+    "original_constructor_and_get_evaluation_sample_used": true,
+    "complete_test_counts": [
+      {"question_id": "abc301_f", "public_tests": 3, "private_tests": 24, "total": 27},
+      {"question_id": "abc301_a", "public_tests": 3, "private_tests": 12, "total": 15},
+      {"question_id": "abc301_c", "public_tests": 4, "private_tests": 30, "total": 34}
+    ],
+    "private_tests_decoded_only_inside_container": true,
+    "generated_code_executed": false,
+    "full_native_environment_qualified": false,
+    "private_receipt": "/root/livecodebench-original-loader-audit-20261028-002/audit-public.json",
+    "retained_prior_failure": "Initial read-only-root Docker copy staging rejected before author code/task loading; fixed using separate named-volume staging and read-only mount, without weakening runtime rootfs isolation.",
+    "boundary": "Original task-format compatibility only, using existing qualified CPU image. This does not establish the separate complete LiveCodeBench runtime environment, generation, grading or research consumer delivery."
+  },
+  "native_protocol_boundaries": {
+    "code_generation_samples_per_question": 10,
+    "temperature": 0.2,
+    "top_p": 0.95,
+    "max_tokens": 2000,
+    "code_generation_evaluation_timeout_seconds": 6,
+    "self_repair": "Must consume actual original generation and original feedback; author repair n=1 is distinct from code-generation n=10",
+    "isolation": "Code generation and execution graders execute code; test-output prediction grader uses eval. All native scoring must remain in qualified isolated containers.",
+    "scope": "Code generation, self-repair, code execution and test-output prediction require separately evidenced native coverage. Assets and task preparation are not benchmark delivery."
+  },
+  "remaining": [
+    "Reproducible qualified API client and isolated native scoring environment",
+    "Original prompts and extraction bound to actual suitable NPU model identity",
+    "Fixed-sample native generation, complete test execution and original scoring",
+    "Self-repair with real original feedback and other two original scenarios",
+    "Independent saved-output audit and maintained research consumer roundtrip"
+  ]
+}

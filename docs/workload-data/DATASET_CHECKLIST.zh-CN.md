@@ -17,15 +17,21 @@ SHA256、字节数核对一致；这不是原生运行或评分通过。
 
 原始文件仅在服务器 `/root/livecodebench-original-data-20261028-001`，未进入 Git 或
 Windows。官方直连返回连接拒绝后，经显式镜像传输获取同一固定版本。完整代码生成仓库 `livecodebench/code_generation` 的 revision 为
-`bb83f1c3c643a772b7a2a8f07bd62c2aab76be8f`，`test.jsonl` 为9,375,644,586字节，尚未下载。数据卡仅标注
+`bb83f1c3c643a772b7a2a8f07bd62c2aab76be8f`，`test.jsonl` 为9,375,644,586字节，现已由公共获取入口完整下载至服务器
+`/root/livecodebench-full-original-data-20261028-001` 并通过原始LFS SHA256校验，退出码0。固定原顺序前3题
+`abc301_f`、`abc301_a`、`abc301_c`
+已由公共准备入口保留全部11字段及不解码的完整私有测试，退出码0；尚未运行模型或评分。证据见[准备回执](validation/livecodebench-original-readiness-20261028.json)。数据卡仅标注
 `license: cc`，不能据此推断具体 CC 条款或随意再分发；代码 MIT 许可不替代数据许可。
 
 - [x] 核查
   `benchmarks/code_generation.py`、`runner/parser.py`、`runner/scenario_router.py`、`runner/main.py`、`runner/runner_utils.py`
   和 `runner/oai_runner.py`。
+- [x] 三个固定版本的原文件已取得并校验，固定前3题已按原字段完整准备；未将准备完成当作原生交付。
+- [x] 固定3题已在无网络、非root、只读根文件系统的隔离容器中通过官方题目构造器和完整测试绑定检查，原公开加私有测试分别为27、15、34条，未减少测试。这里只验证格式兼容，不代表原生环境整体合格或已生成/评分。
 - [ ] 固定原始数据仓库 revision、原文件哈希及许可。默认加载器使用 `code_generation_lite`；`--not_fast` 对应 `code_generation`
   完整测试。当前完整加载函数虽然接收 `release_version`，却未将它传给数据加载器，不能仅凭命令参数声称固定发布版本。
-- [ ] 在隔离容器中加载原生题目和评分。私有测试字段可能经 base64、zlib 和 pickle 解码，禁止在宿主机反序列化；对外读取接口保留原字段，不自行删测试或改题。
+- [ ] 在隔离容器中加载原生题目和评分。私有测试字段可能经 base64、zlib 和 pickle 解码，禁止在宿主机反序列化；测试输出预测的原评分器也使用
+  `eval`，不能因为任务名字不含代码执行就放到宿主机运行。对外读取接口保留原字段，不自行删测试或改题。
 - [ ] 保留原生默认生成预算：每题10个样本、temperature 0.2、top_p 0.95、max_tokens 2000；原评分默认 timeout
   6秒。固定抽样只减少题数，不减少每题候选和测试。
 - [ ] 核验现有 NPU 模型与原生提示风格的适配。官方 OpenAI runner 可使用 SDK 的服务地址配置，但官方主入口仍要求模型在 `LanguageModelStore`
