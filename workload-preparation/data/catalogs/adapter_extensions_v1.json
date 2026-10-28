@@ -2,6 +2,17 @@
   "version": "adapter-extensions/v1",
   "boundary": "Field contracts from publisher metadata/docs. No real source payload downloaded or full adapter validation claimed.",
   "adapters": {
+    "TEMPORALWIKI": {
+      "kind": "task_dataset",
+      "mapping": "native_fields",
+      "input_fields": ["subject", "relation"],
+      "required_fields": ["subject", "relation", "object"],
+      "outcome_fields": ["object"],
+      "annotation_fields": [],
+      "id_field": "",
+      "requirements": ["Original eight dated changed/unchanged CSVs, all original strings and file/row identities retained; no synthetic temporal events or chat prompt", "Object is a separate reference in this data envelope; original likelihood evaluator must consume the complete triple under its own protocol, not silently drop object", "Original checkpoint, preprocessing, perplexity/generation scorer and NPU-qualified environment required separately; reader is not native completion"],
+      "status": "ORIGINAL_PROBE_FIELDS_MAPPED_NATIVE_EXECUTION_PENDING"
+    },
     "NATUREBENCH": {
       "kind": "task_dataset",
       "mapping": "naturebench_original_packages",

@@ -5,6 +5,7 @@
   "author_source_pins": "configs/workload-native/temporalwiki-author-source.json",
   "public_source_preparer": "scripts/prepare_jsonschemabench_author_source.py --source temporalwiki",
   "public_protocol_verifier": "scripts/verify_temporalwiki_original_contract.py",
+  "public_probe_asset_preparer": "scripts/prepare_temporalwiki_original_assets.py",
   "original_source_verification": {
     "files": 177,
     "bytes": 382667,
@@ -20,7 +21,8 @@
   "dataset_acquisition": {
     "publisher": "https://huggingface.co/datasets/seonghyeonye/TemporalWiki",
     "original_archives_in_author_readme": ["Wikipedia_Full.zip", "TWiki_Diffsets.zip", "TWiki_Probes.zip"],
-    "revision_and_content_identities_registered": false,
+    "all_three_archive_identities_registered": false,
+    "complete_probe_file_profile": "workload-preparation/data/catalogs/temporalwiki_original_probe_files_v1.json",
     "all_original_archives_acquired": false,
     "original_probe_archive": {
       "archive": "TWiki_Probes.zip",
@@ -31,11 +33,32 @@
       "transport": "hf-mirror.com same fixed publisher revision/path, download=true, whole original object",
       "publisher_identity_evidence": "https://huggingface.co/datasets/seonghyeonye/TemporalWiki/commit/b58cf6dd919f873c76ef1232aac16a31d135e2ff",
       "server_receipt": "temporalwiki-original-probes-32028-001/acquisition-public.json",
-      "public_getter_archive_inspection_adapter_and_native_execution_pending": true
+      "public_preparation_and_adapter_verified_native_execution_pending": true
     },
     "mirror_metadata_attempt": "FAILED_HTTP403_FORBIDDEN",
     "local_origin_metadata_attempt": "FAILED_NETWORK_CONNECTION_TIMEOUT_METADATA_ONLY_NO_RAW_DOWNLOAD",
     "publisher_viewer_observation": "Official dataset page reports heterogeneous text versus subject/relation/object CSV schemas; generic flattened load_dataset view is not a substitute for original three archive types"
+  },
+  "original_probe_preparation_and_consumer": {
+    "status": "ALL_ORIGINAL_PROBE_FIELDS_AND_INDEX_PLUS24_RESEARCH_READBACKS_VERIFIED_CANDIDATE_SOURCE",
+    "public_download_action_reused_verified_archive_no_redownload": true,
+    "public_extract_and_verify_exit_code": 0,
+    "all_original_files_preserved": 9,
+    "original_csv_files": 8,
+    "original_rows_and_index_references": 35948,
+    "file_row_counts": [1776, 6935, 1982, 7340, 1358, 7313, 1951, 7293],
+    "provider_readbacks": 24,
+    "research_readbacks": 24,
+    "fixed_readback_selection": "Original first3 rows of each of8 files, not replacement native task sampling or model execution",
+    "research_revision": "dd4103140d358cf211b88f24296b7419d170a54f", "research_note": "pragma: allowlist secret - verified current research revision",
+    "research_consumer_sha256": "556f2633d4ffef7fb5dd7197ea3772805cf3ec0cbdc5b35ee81aec19649a928d", "consumer_note": "pragma: allowlist secret - verified original research consumer identity",
+    "input_and_outcome_full_record_equality": true,
+    "candidate_source_not_ci_wheel": true,
+    "actual_ci_wheel_verification_pending": true,
+    "server_receipt": "temporalwiki-candidate-index-32028-001/audit-public.json",
+    "model_calls": 0,
+    "native_tasks_run": 0,
+    "source_checkbox_eligible": false
   },
   "native_protocol": {
     "original_environment": "Python3.8; torch1.9.0+cu111, torchvision0.10.0+cu111, transformers4.12.3, pytorch-lightning1.5.1; other author requirements remain unpinned",
@@ -48,7 +71,7 @@
     "original_checkpoints_acquired": false,
     "qwen_chat_qa_substitution": false
   },
-  "pending": ["Original data revision, identities, licensing and archive acquisition", "Original corpus/probe file and snapshot relations, adapter, reference-only index and current research readbacks", "Qualified NPU-compatible original environment and declared original checkpoint/model profile", "Fixed original tasks through full native evaluation, preserved scorer and failures"],
+  "pending": ["Actual CI software wheel independent installation and original field/index/current research verification", "Original data licensing and remaining full/difference corpus archive identities/acquisition", "Qualified NPU-compatible original environment and declared original checkpoint/model profile", "Fixed original tasks through full native evaluation, preserved scorer and failures"],
   "model_calls": 0,
   "native_tasks_run": 0,
   "research_observation_or_analysis_migrated": false,
