@@ -96,10 +96,28 @@ def execute(args):
     ):
         raise ValueError("original module and parsed code must be mounted read-only")
     output = args.output.resolve()
-    if not output.is_relative_to(Path("/tmp")) or output.exists():
-        raise ValueError(
-            "fresh bounded /tmp output required; export only after container termination"
-        )
+    output_root = next(
+        (
+            base
+            for base in (Path("/tmp"), Path("/output"))
+            if output.is_relative_to(base)
+        ),
+        None,
+    )
+    if output_root is None or output.exists():
+        raise ValueError("fresh bounded tmpfs output required")
+    mounts = [
+        line.split(" - ", 1)
+        for line in Path("/proc/self/mountinfo").read_text().splitlines()
+    ]
+    if not any(
+        left.split()[4] == str(output_root) and right.split()[0] == "tmpfs"
+        for left, right in mounts
+    ):
+        raise ValueError("output root must be an explicit bounded tmpfs mount")
+    space = os.statvfs(output_root)
+    if space.f_blocks * space.f_frsize > 256 * 1024**2:
+        raise ValueError("output tmpfs exceeds declared256MiB bound")
     output.mkdir(mode=0o700, parents=True)
     # This file-size bound complements the Docker CPU/RAM/PID/time/tmpfs limits.
     import resource

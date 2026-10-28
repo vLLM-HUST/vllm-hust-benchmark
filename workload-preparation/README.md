@@ -498,7 +498,7 @@ docker run --rm --network none --user 65534:65534 --read-only --cap-drop ALL \
 
 公开组件worker为`scripts/run_structeval_matplotlib_worker.py`。它只接收原工作流提取的完整`parsed_code`，不重新提取、不修复代码、不添加替代答案；调用固定原`render_matplotlib.py`，保留其0/1结果。原工作流实际使用`safe_unicode_decode`与`extract_renderable_code`，不能用其他便捷提取函数代替。调用方须保留原生成输出、原提取结果及对应关系，worker本身不证明该关系，也不执行完整语法评分或VQA。
 
-输入与原模块须只读挂载，输出仅写入有界`/tmp`。额外检查非root容器PID1、只读根、无外网接口、无能力/提权、无Docker/NPU设备及常见凭据环境变量。此为本任务有界执行隔离，不是安全认证。代码文件不得超过16MiB，单文件输出受64MiB限制；超出资源时保留阻塞，不截断原输入或当作错误答案。先不加`--execute`检查计划：
+输入与原模块须只读挂载，输出只允许写入不超过256MiB的显式tmpfs（`/tmp`或控制器的`/output`）。额外检查非root容器PID1、只读根、无外网接口、无能力/提权、无Docker/NPU设备及常见凭据环境变量。此为本任务有界执行隔离，不是安全认证。代码文件不得超过16MiB，单文件输出受64MiB限制；超出资源时保留阻塞，不截断原输入或当作错误答案。先不加`--execute`检查底层worker计划：
 
 ```bash
 docker create --name structeval-matplotlib-case-001 --network none \
@@ -512,7 +512,21 @@ docker create --name structeval-matplotlib-case-001 --network none \
   --code-sha256 ORIGINAL_PARSED_CODE_SHA256 --output /tmp/renderer-output
 ```
 
-两个宿主目录应预先准备且UID65534可读；软件目录仅放worker与已核验原模块，输入目录仅放该题原提取结果，不挂载评分参考、其他任务或凭据。实际执行时显式增加`--execute`，由外部控制器启动容器、等待最多120秒，超时后仅停止已核对ID的本次容器并保留故障。不要以`timeout docker wait`替代停止容器；前者只会停止等待。容器结束后由可信控制器校验并导出指定PNG/日志/组件结果，不执行导出的内容。公开worker在服务器的正/负准备夹具中分别保留原返回1/0，**仍不是原题与VQA验证完成**。
+上面的直接worker示例只供底层计划/诊断；`/tmp`在容器停止后消失，不能据此安排事后导出。实际执行使用公开控制器，它不依赖CLI与Docker daemon共享宿主路径：
+
+```bash
+python scripts/run_structeval_matplotlib_isolated.py \
+  --image "$(cat /private/structeval-matplotlib-image-id.txt)" \
+  --task-id ORIGINAL_TASK_ID --renderer /private/original-source/render_matplotlib.py \
+  --code-file /private/original-parser-output/parsed-code.txt \
+  --code-sha256 ORIGINAL_PARSED_CODE_SHA256 \
+  --output /private/structeval-runs/fresh-case --timeout 120
+```
+
+先查看计划；确认专用Linux
+Docker服务、原提取结果与新输出父目录就绪后加`--execute`。控制器以`docker cp`传输文件，只在新专用卷中处理所有权，不改原输入字节或600权限。生成代码只在非root、无网络、CPU1/RAM2GiB/PIDs256的worker中执行；单独的可信只读持有进程保持256MiB输出卷，worker结束后校验并导出指定PNG、原渲染日志和组件结果，再释放持有进程。持有进程不执行生成代码、不读取评分参考；正常结果保存为外部私有文件，容器/卷不自动删除。
+
+执行超时后仅停止ID、操作标签、名称全部匹配的本次worker，返回`BLOCKED`而不是伪造模型0分。失败或超时时暂留输出持有进程供检查（上限1小时），回执记录其ID；确认已保存证据后再停止本次持有进程，不重跑有效模型输出。不要以`timeout docker wait`替代停止容器，也不要在观察连接失败时盲目重启任务。原工作流即使把渲染异常折算为0，也不能覆盖控制器的资源阻塞状态。公开链路已验证正常1、语法失败0、超时不填分及退出后导出，**仍不是原题与VQA验证完成**。
 
 完整VQA须调用原`vqa_eval_async`并保留全部原问题、期望答案及对应原图；答案进入作者定义的裁判输入，不进入生成模型输入。原评测器会把部分API/解析异常折算为0或None，因此必须另核实际裁判请求、响应、图片身份和异常日志；不能只凭一个0分文件就认定裁判成功运行，也不能把资源/接口失败当作模型质量结论。
 
