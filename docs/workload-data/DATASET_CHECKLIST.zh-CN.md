@@ -524,8 +524,9 @@ Similarity/CodeBLEU小型自一致夹具及venv依赖检查；这些是环境检
 ### StructEval剩余渲染/VQA环境（未交付）
 
 - [x] 公开只读入口`scripts/prepare_structeval_rendering_plan.py --data-file <原parquet> --official-archive <固定官方zip> --package-root <原structeval包目录> --output <新元数据json>`已在服务器执行；2035原行、27官方模块身份通过，明确950非渲染/1085渲染行。只输出原协议计数与固定位置，不调用模型或渲染器。
-- [x] 现有950条非渲染结果保留不重跑；当前PATH没有Docker/Podman/bwrap，完整隔离namespace探测失败（挂载传播Permission
-  denied）。私有Node可复用但不代表沙箱可用；二进制存在本身也不算环境合格。
+- [x] 现有950条非渲染结果保留不重跑；历史NPU宿主隔离不可用问题由已授权的专用CPU
+  Docker工作区承接，不在NPU宿主执行生成代码。当前Matplotlib最小镜像及隔离控制器已实测，其他渲染格式依赖仍待补齐。
+- [x] 原Text-to-Matplotlib固定前三题000802/000803/000804已通过生成、官方代码提取、CPU隔离渲染及完整VQA，7/8/8个原问答对保留。6次实际模型调用均stop，生成提示、裁判提示和图片字节已独立核验；使用现有Qwen3.5-9B、显式关闭thinking，不宣称作者模型复现或引擎性能。27个官方模块未改，未增加来源完成数。
 - [ ] 提供合格隔离worker后执行原渲染及完整VQA评测。Python/JavaScript/TeX生成代码不能直接在宿主机执行；worker应无网络、凭据或NPU设备，原输入只读、输出限额且有CPU/RAM/PID/时间边界。VQA可用明确配置的本地NPU视觉模型，不默认授权付费judge；渲染成功不能代替VQA完成。
 
 ### Mooncake官方存储回放（固定原生抽样交付完成）
@@ -759,7 +760,8 @@ LMM
 - [x] 公共审计入口在服务器重评950条历史原题输出，19个非渲染协议各50条；官方分数一致，新增模型调用0次。
 - [x] 完整2035条记录及索引、每条10个原字段和参考隔离核验通过。
 - [x] 44种原协议组合各取原始前3条，132处公共入口与固定研究消费者回查通过；研究默认依赖未改变。
-- [ ] 剩余1085条渲染/VQA协议的原生执行、视觉评分及完整来源交付。
+- [x] 2026-10-29新增Text-to-Matplotlib前三题原生渲染/VQA闭环，历史950题未重跑。
+- [ ] 其他渲染/VQA协议及完整来源交付；1085条渲染任务目前完成3条，仍不代表整个来源完成。
 
 以上使用[原阶段回执](validation/structeval-nonrender-checkpoint3-20261025.json)记录；前三项是证据复用与数据链路核验，不是整套原生benchmark完成。
 

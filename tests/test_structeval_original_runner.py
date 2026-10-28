@@ -11,6 +11,51 @@ import pytest
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def test_matplotlib_selection_preserves_original_rows_and_requires_rendering():
+    spec = importlib.util.spec_from_file_location(
+        "structeval_render_selection", ROOT / "scripts/run_structeval_original_json.py"
+    )
+    runner = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(runner)
+    rows = [
+        {
+            "input_type": "Text",
+            "output_type": "Matplotlib",
+            "rendering": value,
+            "task_id": str(index),
+            "VQA": ["original relationship fixture"],
+        }
+        for index, value in enumerate([False, True, True, True])
+    ]
+    selected, available = runner.select_original_rows(
+        rows, output_type="Matplotlib", rendering=True
+    )
+    assert available == 3
+    assert [index for index, _ in selected] == [1, 2, 3]
+    assert all(row is rows[index] for index, row in selected)
+
+
+def test_matplotlib_cli_requires_explicit_isolated_dispatch_before_data_access():
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(ROOT / "scripts/run_structeval_original_json.py"),
+            "--data-file",
+            "absent",
+            "--official-archive",
+            "absent",
+            "--output",
+            "absent",
+            "--output-type",
+            "Matplotlib",
+        ],
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 2
+    assert "requires both private render queue and pinned image" in result.stderr
+
+
 def test_nonrendering_protocol_selection_keeps_original_rows_and_boundaries():
     spec = importlib.util.spec_from_file_location(
         "structeval_selection", ROOT / "scripts/run_structeval_original_json.py"
@@ -133,7 +178,22 @@ def test_completed_protocol_audit_adds_only_previously_unexecuted_rows():
         assert checkpoint["full_nonrendering_protocols"] == len(seen)
         assert checkpoint["audit_model_calls"] == 0
         assert not checkpoint["full_source_completed"]
-    assert ledger["verified_unique_native_tasks"] == count
+    rendering = checkpoint["render_preparation_followup_20261029"][
+        "original_matplotlib_selection_review"
+    ]
+    assert rendering["sampled_original_tasks_executed"]
+    assert rendering["fixed_first3_original_task_ids"] == ["000802", "000803", "000804"]
+    assert rendering["original_vqa_pairs_per_task"] == [7, 8, 8]
+    assert (
+        rendering["original_generation_calls"]
+        == rendering["original_complete_vqa_judge_calls"]
+        == 3
+    )
+    assert rendering["all_original_judge_questions_answers_and_image_bytes_verified"]
+    assert not rendering["source_checkbox_eligible"]
+    assert ledger["verified_unique_native_tasks"] == count + len(
+        rendering["fixed_first3_original_task_ids"]
+    )
     held = receipt.get("held_native_exit_evidence")
     if held:
         assert held["native_exit_code"] == 0

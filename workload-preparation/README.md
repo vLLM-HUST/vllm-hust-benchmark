@@ -528,11 +528,13 @@ Docker服务、原提取结果与新输出父目录就绪后加`--execute`。控
 
 执行超时后仅停止ID、操作标签、名称全部匹配的本次worker，返回`BLOCKED`而不是伪造模型0分。失败或超时时暂留输出持有进程供检查（上限1小时），回执记录其ID；确认已保存证据后再停止本次持有进程，不重跑有效模型输出。不要以`timeout docker wait`替代停止容器，也不要在观察连接失败时盲目重启任务。原工作流即使把渲染异常折算为0，也不能覆盖控制器的资源阻塞状态。公开链路已验证正常1、语法失败0、超时不填分及退出后导出，**仍不是原题与VQA验证完成**。
 
-原工作流的分派适配点为`scripts/structeval_render_queue.py`中的`MatplotlibRenderQueue.render`，参数与原`render_matplotlib_and_screenshot`一致。它只传输原`parsed_code`与校验后的返回图片；按原任务/代码/固定镜像身份复用已保留结果，不覆盖已有图片。每次独立实验使用新的私有队列目录，只有恢复同一次运行时复用旧目录，不跨模型/实验混用。适配点目前只有软件协议测试，后端及真实原工作流联调仍待完成，不能把它当作已跑通的完整原题入口。
+原工作流的分派适配点为`scripts/structeval_render_queue.py`中的`MatplotlibRenderQueue.render`，参数与原`render_matplotlib_and_screenshot`一致。它只传输原`parsed_code`与校验后的返回图片；按原任务/代码/固定镜像身份复用已保留结果，不覆盖已有图片。每次独立实验使用新的私有队列目录，只有恢复同一次运行时复用旧目录，不跨模型/实验混用。实际CPU隔离分派已验证有效代码1、语法错误0及恢复不重新启动；原工作流固定前三题的生成、原解析器、隔离渲染和完整VQA也已通过，其他渲染协议仍未验证。
 
-接入时保留原`THREAD_RENDERERS`的其他项，仅把`matplotlib`调用位置绑定到该分派器；原提取器与任务内容不变。原`render_file_async`返回后必须调用`require_ready_for_judge()`，通过后再进入原`evaluate_file`。这道门禁防止原框架捕获异常后填0，掩盖资源或通信失败。官方2035行数据中该协议有50题，初始固定原位置79/80/81、ID000802/000803/000804，尚未执行；验证流程先按固定三题接通，后续扩至50题时复用有效结果，不重新生成已完成样本。
+接入时保留原`THREAD_RENDERERS`的其他项，仅把`matplotlib`调用位置绑定到该分派器；原提取器与任务内容不变。原`render_file_async`返回后必须调用`require_ready_for_judge()`，通过后再进入原`evaluate_file`。这道门禁防止原框架捕获异常后填0，掩盖资源或通信失败。官方2035行数据中该协议有50题，已完成固定原位置79/80/81、ID000802/000803/000804；后续扩至50题时从`--start 3 --count 47`继续，保留前三题结果，不重新生成。
 
-隔离CPU端单任务入口为`python scripts/run_structeval_render_queue_backend.py --request /private/queue/JOB.request.json --renderer /private/original/render_matplotlib.py --work-root /private/render-work --image sha256:IMAGE_ID`，默认只检查计划；确认专用Docker与固定镜像就绪后加`--execute`。请求文件名必须匹配内容哈希。执行仅调用上述隔离控制器，先发布原图片、后发布结果；恢复时核验并复用同一输入的已保存控制器结果。已有未完成或阻塞目录必须先检查实际容器，不自动重启，不把超时变成模型0分。请求及原图片只保存在操作者指定的私有目录；跨机器需另行安全传输，不要求共享SSH凭据。该端与分派器的联通目前只有不执行代码的IPC夹具验证，实际服务器原题与完整VQA尚未通过。
+原生入口在原命令后指定`--output-type Matplotlib --render-queue /private/queue --render-image sha256:IMAGE_ID --model Qwen/Qwen3.5-9B --disable-thinking`。队列须预先创建，输出目录须为新目录；同时在隔离CPU端处理该队列请求。原作者27个Python模块仍逐字节核验，只在内存中切换渲染调用位置；生成和裁判均保留原`max_tokens=None`、温度0及完整任务内容。实际前三题各保留10字段、7/8/8个VQA问答对，3次生成与3次裁判均stop；实际裁判图片与原渲染图片逐字节一致。9B是现有NPU服务的替代模型，不宣称复现作者推荐模型或据此证明引擎性能。模型请求和响应保存在私有运行目录，不入Git。
+
+隔离CPU端单任务入口为`python scripts/run_structeval_render_queue_backend.py --request /private/queue/JOB.request.json --renderer /private/original/render_matplotlib.py --work-root /private/render-work --image sha256:IMAGE_ID`，默认只检查计划；确认专用Docker与固定镜像就绪后加`--execute`。请求文件名必须匹配内容哈希。执行仅调用上述隔离控制器，先发布原图片、后发布结果；恢复时核验并复用同一输入的已保存控制器结果。已有未完成或阻塞目录必须先检查实际容器，不自动重启，不把超时变成模型0分。请求及原图片只保存在操作者指定的私有目录；跨机器需另行安全传输，不要求共享SSH凭据。此链路已完成上述三道原题，但不能据此勾选整个StructEval来源。
 
 完整VQA须调用原`vqa_eval_async`并保留全部原问题、期望答案及对应原图；答案进入作者定义的裁判输入，不进入生成模型输入。原评测器会把部分API/解析异常折算为0或None，因此必须另核实际裁判请求、响应、图片身份和异常日志；不能只凭一个0分文件就认定裁判成功运行，也不能把资源/接口失败当作模型质量结论。
 
