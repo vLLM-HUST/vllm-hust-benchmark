@@ -138,3 +138,62 @@ python -m pytest -q workload-preparation/tests tests/test_workload_data_boundary
 
 长输出运行维度见
 [LongWriter-6k 原消息接入](../docs/workload-data/LONGWRITER_ORIGINAL_MESSAGES.zh-CN.md)：保留原始user消息，隔离最后assistant参考；不要将训练语料生成接入称为LongBench-Write官方评分或长输出能力验收。
+
+## Video-MME 原生视频任务
+
+这是发布方原始Video-MME与固定VLMEvalKit的两个已有配置：`Video-MME_8frame`和`Video-MME_8frame_subs`，不是把64帧配置临时减成8帧。原2700题/900视频全部保留；默认每种duration取最先3个不同视频并保留每视频全部3题，每配置27题。选题在推理前固定，不因失败换题；`--full`才选择全部2700题。
+
+数据限学术研究，禁止把本入口视为商业使用或再分发授权。原媒体、字幕、题目、抽帧及模型输出均放在外部私有目录；准备完整原发布版须预留至少500GiB磁盘，首次获取/完整校验耗时不等同原题推理耗时。
+
+以下命令从仓库根目录运行。已有合格ChartQA/MVBench HTTP客户端与固定工具包时直接复用，不重新安装。新Linux ARM/Python3.12客户端先装官方CPU
+Torch与直接依赖，再构建Decord/FFmpeg；CPU库只用于图像/视频处理，模型推理仍在单独NPU服务：
+
+```bash
+python3.12 -m venv /private/vlm-client
+PY=/private/vlm-client/bin/python
+$PY -m pip install torch==2.10.0 torchvision==0.25.0 \
+  --index-url https://download.pytorch.org/whl/cpu
+$PY -m pip install -r configs/workload-native/chartqa-native-client-py312-direct-requirements.txt
+python scripts/prepare_chartqa_native_runtime.py \
+  --output /private/vlm-runtime --python "$PY" --execute
+$PY -m pip install -r configs/workload-native/chartqa-native-client-py312-verified-lock.txt
+$PY -m pip check
+$PY -m pip install --no-deps --target /private/videomme-subtitle-overlay \
+  -r configs/workload-native/videomme-subtitle-requirements.txt
+python scripts/prepare_chartqa_native_toolkit.py \
+  --output /private/VLMEvalKit --archive --execute
+```
+
+原版库的字幕版本使用显式隔离overlay，不升级在用模型环境。运行客户端时设置其私有FFmpeg库路径，不修改模型服务进程。原数据获取和作者原解包：
+
+```bash
+python3.12 -m venv /private/videomme-download-client
+/private/videomme-download-client/bin/python -m pip install huggingface_hub==0.36.0
+/private/videomme-download-client/bin/python scripts/prepare_videomme_original_assets.py --cache /private/videomme-cache \
+  --action download --accept-academic-only --max-bytes 101002235118
+SNAPSHOT=/private/videomme-cache/datasets--lmms-lab--Video-MME/snapshots/ead1408f75b618502df9a1d8e0950166bf0a2a0b
+$PY scripts/prepare_videomme_native_media.py \
+  --official-checkout /private/VLMEvalKit --snapshot "$SNAPSHOT" \
+  --output /private/videomme-media-receipt.json --execute --accept-academic-only
+```
+
+原站不可达时，获取入口可显式增加`--hf-endpoint https://hf-mirror.com`；固定版本、全24文件大小/SHA256和原内容检查不变，不替换原题。再次获取会复用SDK缓存；已具备原文件时先用`--action verify`，不要盲目重下。只需字段/索引的研究输入可再执行`--action prepare-data --data-root /private/videomme-annotations`，它不等于媒体或原生任务已完成。
+
+使用现有支持8图像输入的NPU视觉模型服务。示例模型为实际验证采用的`Qwen/Qwen3.5-9B`；必须与服务端声明ID一致。以下保留原2048输出预算、temperature0、显式nonthinking和原exact-matching评分；无外部付费judge。不同profile必须用不同新输出目录：
+
+```bash
+mkdir -p /private/videomme-frames
+for PROFILE in Video-MME_8frame Video-MME_8frame_subs; do
+  LD_LIBRARY_PATH=/private/vlm-runtime/install/lib "$PY" scripts/run_videomme_original.py \
+    --official-checkout /private/VLMEvalKit --snapshot "$SNAPSHOT" \
+    --media-receipt /private/videomme-media-receipt.json \
+    --frame-cache /private/videomme-frames \
+    --subtitle-overlay /private/videomme-subtitle-overlay \
+    --model Qwen/Qwen3.5-9B --profile "$PROFILE" \
+    --output "/private/videomme-native-$PROFILE" --execute --accept-academic-only
+done
+```
+
+默认endpoint为本机`http://127.0.0.1:19466/v1/chat/completions`；可用`--endpoint`明确绑定合规本机转发入口。若先检查抽帧/字幕/原提示，增加`--prepare-prompts-only`并使用单独的新输出目录：该模式0模型调用、无评分，不能算benchmark完成。去掉`--execute`仅输出计划。
+
+字幕配置仅提取原作者在采样帧时间戳处选取的字幕，缺失字幕按原逻辑处理，不补全整段转录。请求失败、空答案、帧数或原题关系不一致会保留失败并停止；不得缩短视频题、改预算或换题凑通过。验收实际进度和已运行范围见[唯一清单](../docs/workload-data/DATASET_CHECKLIST.zh-CN.md)与[实测记录](../docs/workload-data/validation/videomme-original-readiness-20261028.json)，不是全量质量或性能结论。

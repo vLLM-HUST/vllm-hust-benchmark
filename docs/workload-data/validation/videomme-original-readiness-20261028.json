@@ -1,8 +1,9 @@
 {
   "schema_version": "native-source-readiness/v1",
   "source_id": "VIDEOMME",
-  "status": "ACTUAL_CI_ORIGINAL_ANNOTATION_CONSUMER_VERIFIED_NATIVE_MEDIA_AND_EXECUTION_PENDING",
-  "checked": false,
+  "status": "ORIGINAL_VIDEO_MME_BOTH_OFFICIAL_PROFILES_SAMPLED_NATIVE_DELIVERY_VERIFIED",
+  "checked": true,
+  "source_checkbox_eligible": true,
   "actual_ci_artifact": true,
   "ci_run": 40640270353,
   "ci_artifact_id": 12795044334,
@@ -13,9 +14,9 @@
   "prepared_index_records": 2700,
   "provider_current_research_roundtrips": 27,
   "research_revision": "dd4103140d358cf211b88f24296b7419d170a54f", "research_note": "pragma: allowlist secret - live main revision checked before existing consumer reuse",
-  "model_calls": 0,
-  "native_scoring_completed": false,
-  "media_verified": false,
+  "model_calls": 54,
+  "native_scoring_completed": true,
+  "media_verified": true,
   "original_release_integrity": {
     "status": "ALL24_ORIGINAL_FILES_VERIFIED_NOT_NATIVE_EXECUTION",
     "original_files_verified": 24,
@@ -26,7 +27,11 @@
     "recovered_missing_file_bytes": 2241427390,
     "other23_original_files_reused_not_redownloaded": true,
     "native_media_preparation_process_observed_running": true,
-    "native_media_preparation_completed": false,
+    "native_media_preparation_completed": true,
+    "native_media_preparation_actual_exit_code": 0,
+    "original_videos_verified": 900,
+    "original_subtitles_verified": 744,
+    "original_unpacked_bytes_verified": 101427428166,
     "model_calls": 0
   },
   "server_environment_preflight": {
@@ -50,10 +55,63 @@
   "original_table_md5_equal": true,
   "original_subtitle_files_parsed": 744,
   "original_subtitle_events_parsed": 275142,
-  "remaining": [
-    "Execute gated unchanged author full media extraction and byte verification",
-    "Coordinate resource ownership and run original54 selected video tasks across both official8-frame profiles",
-    "Verify native wire inputs, complete original scoring and saved output relations"
-  ],
-  "boundary": "Real CI installed data component and current research consumer verified, not video-media readiness or native benchmark completion. All raw tasks, media, private database and outputs remain external; no research observation or analysis is included. No previous model result rerun."
+  "native_execution": {
+    "entrypoint": "scripts/run_videomme_original.py",
+    "protocol": "configs/workload-native/videomme-original-protocol.json",
+    "model": "Qwen/Qwen3.5-9B",
+    "model_revision": "c202236235762e1c871ad0ccb60c8ee5ba337b9a", "model_note": "pragma: allowlist secret - existing qualified official reader artifact identity",
+    "hardware": "Ascend910B2, BF16, TP1,262144 context; existing service unchanged",
+    "profiles": [
+      {"name": "Video-MME_8frame", "frames": 8, "fps": -1, "use_subtitle": false, "fixed_tasks": 27, "correct": 13, "stop": 27, "length": 0, "actual_exit_code": 0},
+      {"name": "Video-MME_8frame_subs", "frames": 8, "fps": -1, "use_subtitle": true, "fixed_tasks": 27, "correct": 13, "stop": 27, "length": 0, "actual_exit_code": 0}
+    ],
+    "unique_original_questions": 27,
+    "unique_original_videos": 9,
+    "executed_profile_tasks": 54,
+    "fixed_positions_each_profile": [0,1,2,3,4,5,6,7,8,900,901,902,903,904,905,906,907,908,1800,1801,1802,1803,1804,1805,1806,1807,1808],
+    "duration_groups": ["short", "medium", "long"],
+    "sampled_domain": "Knowledge",
+    "sampled_sub_category": "Humanity & History",
+    "other_domain_quality_coverage_claim": false,
+    "original_api_output_budget": 2048,
+    "temperature": 0,
+    "enable_thinking": false,
+    "original_prompt_frame_subtitle_and_api_encoder_unmodified": true,
+    "original_subtitle_sample_timestamps_preserved": true,
+    "question_replacement_or_budget_reduction": false,
+    "scorer": "Unmodified VideoMME.evaluate(model=exact_matching)",
+    "unresolved_original_scores": 0,
+    "paid_judge_calls": 0,
+    "sampled_profile_accuracy_each": "13/27; not full2700 quality or paper-model reproduction"
+  },
+  "independent_saved_native_audit": {
+    "actual_exit_code": 0,
+    "verified_profile_tasks": 54,
+    "frozen_preinference_prompts_and_all8_frame_hashes_equal": true,
+    "saved_wire_reconstructed_with_original_encoder_equal": true,
+    "saved_response_answer_usage_finish_and_reference_relations_equal": true,
+    "original_scores_recalculated_equal_for_all54": true,
+    "new_model_calls": 0,
+    "ip_network_and_model_generate_calls_forbidden": true,
+    "retained_warnings": ["Optional author .env absent; self-hosted local-only model used", "Original empty sampled metric groups report nan, not zero; not all semantic domains were sampled"],
+    "initial_auditor_import_path_failure_retained": true
+  },
+  "current_source_scoped_ci_and_maintained_consumer_reuse": {
+    "current_successful_ci_run": 40663611039,
+    "current_artifact_id": 12805255361,
+    "old_and_current_package_files": 64,
+    "byte_equal_payloads": 63,
+    "only_changed_resource": "resources/source_manifests_v1.json",
+    "only_changed_source_descriptor": "BIGCODEBENCH",
+    "videomme_manifest_reader_adapter_and_contract_unchanged": true,
+    "old2700_fields_index_and27_research_readbacks_reused": true,
+    "research_main_and_maintained_tree_identity_rechecked": true,
+    "maintained_consumer_byte_equal_to_tested_entry": true,
+    "research_default_dependency_upgraded": false,
+    "all_unmerged_research_branches_claimed_integrated": false,
+    "new_model_calls": 0
+  },
+  "remaining": [],
+  "unvalidated_optional_scope": ["Full2700 question inference/quality", "Other semantic domains in model execution", "Other64-frame/fps profiles", "Other models/hardware and performance improvement"],
+  "boundary": "Full original24 files,900 videos/744 subtitles and2700 annotation/provider records preserved;54 fixed profile tasks (27 unique questions) completed with original scoring and saved audit, current maintained consumer evidence reused only after source-scoped byte comparison. Not full2700 quality, all-domain model coverage, arbitrary-branch integration, paper-model reproduction or performance proof. Academic-only terms apply. All raw tasks/media/requests/results remain external; no research observation or analysis migrated, no previous valid model result rerun."
 }

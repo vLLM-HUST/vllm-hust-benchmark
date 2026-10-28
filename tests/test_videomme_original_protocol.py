@@ -23,8 +23,41 @@ def test_original_profiles_keep_subtitle_and_no_subtitle_distinct():
     ]
     assert [p["use_subtitle"] for p in spec["profiles"]] == [False, True]
     assert all(p["frames"] == 8 and p["fps"] == -1 for p in spec["profiles"])
-    assert not spec["source_checkbox_eligible"] and spec["completed_native_calls"] == 0
-    assert spec["remaining"] and spec["usage_boundary"]
+    assert not spec["source_checkbox_eligible"]  # A config alone is never evidence.
+    evidence = json.loads(
+        (ROOT / spec["source_completion_evidence"]).read_text("utf-8")
+    )
+    assert (
+        spec["completed_native_calls"]
+        == evidence["native_execution"]["executed_profile_tasks"]
+        == 54
+    )
+    assert evidence["checked"] and evidence["native_scoring_completed"]
+    assert spec["remaining"] == [] and spec["usage_boundary"]
+
+
+def test_recorded_native_delivery_retains_sample_and_evidence_boundaries():
+    evidence = json.loads(
+        (
+            ROOT
+            / "docs/workload-data/validation/videomme-original-readiness-20261028.json"
+        ).read_text("utf-8")
+    )
+    native = evidence["native_execution"]
+    assert evidence["original_rows_all11_fields_equal"] == 2700
+    assert native["unique_original_questions"] == 27
+    assert native["unique_original_videos"] == 9
+    assert [profile["fixed_tasks"] for profile in native["profiles"]] == [27, 27]
+    assert all(profile["actual_exit_code"] == 0 for profile in native["profiles"])
+    assert evidence["independent_saved_native_audit"]["new_model_calls"] == 0
+    assert not native["other_domain_quality_coverage_claim"]
+    assert not native["question_replacement_or_budget_reduction"]
+    assert (
+        evidence["current_source_scoped_ci_and_maintained_consumer_reuse"][
+            "only_changed_source_descriptor"
+        ]
+        == "BIGCODEBENCH"
+    )
 
 
 def test_frozen_selection_keeps_nine_videos_and_all_original_questions():
