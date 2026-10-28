@@ -106,3 +106,10 @@ model/configuration.
 The [batched-metadata series](batched/README.md) preserves four new process lifecycles, the
 unsuccessful first activation and the corrected native-kernel/device tests. It does not overwrite
 the correction-cache-only observations above.
+
+## Separate fixed-budget follow-up
+
+The [preregistered 2 GiB pressure comparison](memory-pressure/README.md) uses four new process
+lifecycles and the batched candidate. It reports the complete six-cell matrix, conditional
+primary-cell service benefit, remaining regressions, preemption/cache evidence and equal-reservation
+HBM cost. It does not replace either negative 8 GiB series.
