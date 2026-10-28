@@ -128,8 +128,9 @@ def test_refuses_foreign_work_directory_before_docker(tmp_path, monkeypatch):
     assert not (tmp_path / "bootstrap-state.json").exists()
 
 
+@pytest.mark.parametrize("truncate_once", [False, True])
 def test_standalone_installer_pins_source_and_refuses_changed_files(
-    tmp_path, monkeypatch
+    tmp_path, monkeypatch, truncate_once
 ):
     monkeypatch.setattr(bootstrap, "LOCK", tmp_path / "absent-lock.json")
     seen = []
@@ -187,13 +188,16 @@ def test_standalone_installer_pins_source_and_refuses_changed_files(
                 json.dumps(trees[request.full_url.rsplit("/", 1)[-1]]).encode()
             )
         assert request.full_url.endswith("?ref=" + revision)
+        if truncate_once and "/contents/README.md?" in request.full_url:
+            if seen.count(request.full_url) == 1:
+                return io.BytesIO(b"truncated")
         return io.BytesIO(b"frozen source bytes")
 
     monkeypatch.setattr(bootstrap.urllib.request, "urlopen", fetch)
     target = tmp_path / "fresh-source"
     args = ["--source-revision", "main", "--source-directory", str(target)]
     assert bootstrap.source_repository(args) == target
-    assert len([url for url in seen if "/contents/" in url]) == 13
+    assert len([url for url in seen if "/contents/" in url]) == 13 + int(truncate_once)
     assert (
         json.loads((target / "source-installation.json").read_text())["commit"]
         == revision
