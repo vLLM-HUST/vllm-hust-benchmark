@@ -1,5 +1,11 @@
 # BigCodeBench 原始任务生成阶段验证
 
+## 当前状态（2026-10-28）
+
+固定原0/1/2的原生生成、sanitize、参考实现检查和候选功能评分均已完成：参考3/3通过，候选pass/pass/fail，抽样pass@1=2/3。保存结果独立复核通过；复用旧NPU生成，评分与复核未新增模型调用。实际CI数据包保留完整1140条原记录及9字段，固定3条冻结研究消费者回读通过。此结果不代表1140题全量质量或活动研究分支已经接通。
+
+CPU镜像配方及完整Python依赖锁已补齐，正在专用服务器验证从头构建，终态前来源总勾保持未选。已实时核对研究main与受维护工作树同为dd410314，consumer/pipeline无改动且消费者字节与实测入口相同；不将其他未合并分支视为接通，也不升级研究默认依赖。下文带2026-10-23/25/26日期的“尚未评分”等描述属于历史阶段，当前状态以本节及[实际回执](validation/bigcodebench-container-runtime-readiness-20261028.json)为准。
+
 ## 已完成范围
 
 2026-10-23 在现有双卡 Ascend 910B2、Qwen3.5-27B、TP=2、BF16 服务上， 预选原始 v0.1.4 文件前三条 BigCodeBench/0、/1、/2，使用
@@ -55,6 +61,16 @@ python scripts/run_bigcodebench_original_generation.py \
 准备入口自动复用生成回执中的选择，并保留完整1140条原始数据供官方 `BIGCODEBENCH_OVERRIDE_PATH` 使用。所有模式仍采用原版Instruct提示、1280预算、
 greedy设置，不因失败换题或重写输出。退出0要求全部选定题正常stop，而非仅默认三题。
 
+已有有效生成目录时直接准备评分输入，不重复请求模型：
+
+```bash
+python scripts/prepare_bigcodebench_official_samples.py \
+  --generation-dir /private/bigcodebench-generation-new \
+  --data-root /private/bigcodebench \
+  --official-code /private/bigcodebench-fixed-source \
+  --output /private/bigcodebench-score-input
+```
+
 这些通用选择模式现有CPU夹具测试，尚无新服务器运行证据；上文2026-10-23的回执仍指向 当时固定前三题及旧脚本摘要，未改写为新版本已验证。后续功能评分仍须执行原版sanitize、
 原始测试和官方评分，生成及准备成功均不足以勾选完成。
 
@@ -96,7 +112,7 @@ worker选择；使用独立输出缓存，避免沿用其他选题的groundtruth
 数据限制为30GiB、栈限制10MiB，不能照搬DS1000隔离器的2GiB硬限制。仍须另行完成
 隔离launcher的实际验证、依赖及并发预检、实际sanitize/参考实现/候选评分和完整结果覆盖检查。
 
-### 隔离容器执行入口（软件实现，尚未实跑）
+### 隔离容器执行入口
 
 固定源码中`evaluate`还会顶层导入`gradio_client`、`e2b`和生成模块，`sanitize`依赖`tree_sitter_python`等CLI库；不能只安装`requirements-eval.txt`就视为完整环境。容器worker现先在已核验隔离内执行这两个真实官方模块的导入探测，再执行原sanitize及评分；失败按环境缺口保留，不记作模型答错。该探测不带题目参数，不执行候选代码；软件夹具通过不等于真实镜像已通过。
 
@@ -137,6 +153,27 @@ python scripts/run_bigcodebench_container_scoring.py \
 默认`--staging bind`只适用于客户端和容器daemon可见同一组绝对路径的环境。独立Docker服务不满足这一假设时，增加`--staging volume`：启动器创建本任务专用命名卷，通过Docker
 copy API复制已校验的输入、作者源码和保存输出，再以只读输入/源码、非root worker执行相同原评分流程，结束后取回输出。不会将客户端路径当成daemon宿主路径，也不挂载宿主Docker
 socket。
+
+### 可复现的 CPU 评分环境
+
+评分只在CPU容器中执行生成的Python代码；模型推理仍在NPU服务。此配方限定Linux
+aarch64、Python3.10.22，不声称已验证x86或其他Python版本。使用固定官方Python镜像、原32份评分源码和[完整实跑依赖锁](../../configs/workload-native/bigcodebench-cpu-py310-aarch64.lock.txt)，保留作者固定版本；scikit-image0.18.0在该平台没有对应wheel，构建同版本源码。e2b0.17已被发布方废弃，只为原CLI导入兼容保留，不连接其云服务；旧依赖必须保留隔离边界。
+
+```bash
+python scripts/prepare_bigcodebench_cpu_context.py \
+  --official-code /private/bigcodebench-fixed-source \
+  --output /private/bigcodebench-cpu-context --prepare
+DOCKER_BUILDKIT=0 docker build --network=host \
+  --iidfile /private/bigcodebench-cpu-image.id \
+  -t bigcodebench-cpu:local /private/bigcodebench-cpu-context
+```
+
+上下文只复制校验通过的32份原软件及6份明确列出的运行时文件，不递归复制仓库、`.git`、原始题目、企业数据、模型权重或凭据。构建只安装依赖并验证原CLI导入，不执行题目。`DOCKER_BUILDKIT=0`适用于本次无buildx插件的Docker服务；已有BuildKit的环境可按其构建器配置执行同一普通Dockerfile。`--network=host`仅用于已批准的专用CPU构建环境联网安装依赖，正式评分仍强制`--network=none`。
+
+构建内置检查会核验完整Python锁、所有原评分依赖、pip check、32源码摘要、原sanitize/evaluate导入，以及CPU
+Torch不依赖CUDA。失败不得绕过版本或导入检查。Python锁不等于底层APT库逐字节冻结；记录实际构建镜像ID，不据不同构建环境报告性能对比。上方隔离评分命令的`SCORING_IMAGE_ID`应取该iidfile中的完整`sha256:...`，而不是可变标签；原worker并行选择、30GiB限制、原题/参考检查保持不变。
+
+该公开配方目前服务器构建中；既有评分结果来自已单独完成全部依赖/原CLI核验的CPU镜像，不能用既有评分反推本次配方已经构建成功。
 
 命名卷准备阶段只有固定的输出目录所有权初始化程序执行；它仅挂载本任务新输出卷，并使用CHOWN/FOWNER两个权限设置目录，既不导入作者模块也不执行生成代码。真正评分worker仍清空全部capabilities。容器/卷句柄保留，不自动prune。服务器已用无害软件夹具验证公开传递函数、只读输入/源码、UID65534、已有输出保留和copy-back，0模型调用、未运行原任务，不替代正式评分。
 
