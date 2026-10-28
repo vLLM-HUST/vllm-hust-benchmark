@@ -60,6 +60,46 @@ def test_mutable_images_or_root_uid_rejected(tmp_path, image, uid):
         launcher.container_command("docker", image, "fixture", tmp_path, uid, {})
 
 
+def test_named_volume_transport_never_mounts_client_host_paths(tmp_path):
+    name = "hust-bcb-" + "b" * 32
+    volumes = {key: name + "-" + key for key in ("inputs", "author", "output")}
+    command = launcher.container_command(
+        "docker", "sha256:" + "a" * 64, name, tmp_path, 65534, {}, volumes
+    )
+    mounts = [command[i + 1] for i, value in enumerate(command) if value == "--mount"]
+    assert all(value.startswith("type=volume,") for value in mounts)
+    assert sum(value.endswith(",readonly") for value in mounts) == 2
+    assert not any(str(tmp_path) in value for value in command)
+    volumes["output"] = "/host/path,readonly"
+    with pytest.raises(ValueError, match="owned named volumes"):
+        launcher.container_command(
+            "docker", "sha256:" + "a" * 64, name, tmp_path, 65534, {}, volumes
+        )
+
+
+def test_named_volume_staging_uses_copy_api_without_candidate_execution(
+    tmp_path, monkeypatch
+):
+    calls = []
+    monkeypatch.setattr(
+        launcher.subprocess,
+        "run",
+        lambda command, **kwargs: calls.append((command, kwargs)),
+    )
+    name = "hust-bcb-" + "b" * 32
+    volumes = launcher.stage_named_volumes(
+        "docker", "sha256:" + "a" * 64, name, tmp_path, 65534, None
+    )
+    assert len(volumes) == 3
+    assert len([cmd for cmd, _ in calls if cmd[1] == "cp"]) == 3
+    executed = [cmd for cmd, _ in calls if cmd[1] == "run"]
+    assert len(executed) == 1 and "--network=none" in executed[0]
+    assert "--evaluate" not in executed[0] and "--cap-add=CHOWN" in executed[0]
+    assert "--cap-add=FOWNER" in executed[0]
+    assert "os.chown('/output'" in executed[0][-1]
+    assert all(opts["check"] is True for _, opts in calls)
+
+
 def result():
     ids = ["BigCodeBench/5", "BigCodeBench/8", "BigCodeBench/11"]
     evaluation = {

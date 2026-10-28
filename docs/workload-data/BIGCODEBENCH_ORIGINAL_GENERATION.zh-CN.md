@@ -134,6 +134,12 @@ python scripts/run_bigcodebench_container_scoring.py \
   --sandbox-uid 65534
 ```
 
+默认`--staging bind`只适用于客户端和容器daemon可见同一组绝对路径的环境。独立Docker服务不满足这一假设时，增加`--staging volume`：启动器创建本任务专用命名卷，通过Docker
+copy API复制已校验的输入、作者源码和保存输出，再以只读输入/源码、非root worker执行相同原评分流程，结束后取回输出。不会将客户端路径当成daemon宿主路径，也不挂载宿主Docker
+socket。
+
+命名卷准备阶段只有固定的输出目录所有权初始化程序执行；它仅挂载本任务新输出卷，并使用CHOWN/FOWNER两个权限设置目录，既不导入作者模块也不执行生成代码。真正评分worker仍清空全部capabilities。容器/卷句柄保留，不自动prune。服务器已用无害软件夹具验证公开传递函数、只读输入/源码、UID65534、已有输出保留和copy-back，0模型调用、未运行原任务，不替代正式评分。
+
 启动器要求已授权Linux root进行私有目录分配；候选代码只在非root容器中执行。
 禁网、只读根文件系统/输入/官方源码、清空capabilities、no-new-privileges，不映射NPU、 宿主PID或Docker
 socket；只允许新建输出目录可写。总内存32GiB、禁止swap、进程数1024， 并保留作者30GiB地址空间/数据和10MiB栈限制，不覆盖官方worker选择；资源不足不能算完成。
@@ -156,5 +162,6 @@ sanitize结束后、调用evaluate之前先核对原选题ID和顺序；丢题�
 
 交付范围按统一规则区分：完整原数据的字段、ID和索引必须保留；运行采用事前固定的原始样本（当前前三题），每题均需通过官方sanitize、参考实现环境检查及候选功能评分。样本内不得删减流程、换失败题或把缺依赖算作模型答错。小协议预计执行及评分不超过30分钟则全跑，否则固定至少三条；完整1140条质量测评另记，不与本批抽样可用性验证混淆。评分计划的`validation_scope`明确记录数据总量、选题数和是否全选。
 
-当前未找到Docker/Podman或Docker socket，已有HumanEval隔离探测也未通过。 这不证明每种沙箱都不可行，但不能绕过隔离裸执行生成代码。
-必须记为生成阶段完成、功能评分未运行，不能据HTTP成功或stop宣称代码正确、 官方pass@1、完整任务验证或性能提升。
+2026-10-28更新：专用零卡CPU工作区的Docker运行时已通过无害探测，Docker侧实际40GiB限制、32GiB任务容器及原30GiB地址空间/data和10MiB栈限制均已核验，原卷保留。Docker不支持`--ulimit as`，入口已修复为隔离worker在作者导入/执行前设置并核验相同RLIMIT_AS；没有缩小预算。HumanEval自身历史官方抽样评分早已完成，直接复用，不因本次准备重复评分。
+
+BigCodeBench的官方Python3.10完整依赖镜像及其真实导入、原sanitize、参考实现和候选评分仍待完成，不能以Python3.12无害探测镜像替代。运行时准备和跨daemon传递证据见[回执](validation/bigcodebench-container-runtime-readiness-20261028.json)，来源总勾保持未选；不据HTTP成功、stop或隔离夹具宣称代码正确、官方pass@1、完整任务验证或性能提升。

@@ -18,7 +18,7 @@ import uuid
 from prepare_bigcodebench_scoring_plan import build_plan
 
 
-def container_command(engine, image, name, work, uid, environment):
+def container_command(engine, image, name, work, uid, environment, volumes=None):
     if not re.fullmatch(r"sha256:[0-9a-f]{64}", image):
         raise ValueError("immutable locally installed image ID required")
     if not 1 <= uid <= 2**31 - 2:
@@ -26,6 +26,15 @@ def container_command(engine, image, name, work, uid, environment):
     work = Path(work)
     if "," in str(work):
         raise ValueError("mount paths containing commas unsupported")
+    if volumes is not None and (
+        set(volumes) != {"inputs", "author", "output"}
+        or any(
+            not re.fullmatch(r"hust-bcb-[a-f0-9]{32}-(inputs|author|output)", value)
+            for value in volumes.values()
+        )
+        or len(set(volumes.values())) != 3
+    ):
+        raise ValueError("distinct owned named volumes required")
     command = [
         engine,
         "run",
@@ -64,12 +73,80 @@ def container_command(engine, image, name, work, uid, environment):
     ):
         command += [
             "--mount",
-            f"type=bind,source={work / source},target={target}"
+            (
+                f"type=volume,source={volumes[source]},target={target}"
+                if volumes
+                else f"type=bind,source={work / source},target={target}"
+            )
             + (",readonly" if readonly else ""),
         ]
     for key, value in environment.items():
         command += ["--env", f"{key}={value}"]
     return [*command, image, "/inputs/worker.py", "--evaluate"]
+
+
+def stage_named_volumes(engine, image, name, work, uid, log):
+    """Use Docker copy API when client and daemon do not share host paths.
+
+    Provisioning containers execute only the fixed ownership initializer, never
+    author or generated code. All task execution remains in the nonroot worker.
+    Owned containers/volumes are retained for audit, not pruned automatically.
+    """
+    volumes = {key: name + "-" + key for key in ("inputs", "author", "output")}
+    # Validate the same names before creating any object.
+    container_command(engine, image, name, work, uid, {}, volumes)
+
+    def run(*arguments):
+        subprocess.run(
+            [engine, *arguments], check=True, stdout=log, stderr=subprocess.STDOUT
+        )
+
+    for volume in volumes.values():
+        run("volume", "create", "--label", "hust.workload.owner=" + name, volume)
+    stage = name + "-stage"
+    command = [
+        "create",
+        "--name",
+        stage,
+        "--pull=never",
+        "--network=none",
+        "--entrypoint",
+        "/usr/local/bin/python3",
+    ]
+    for key, volume in volumes.items():
+        command += ["--mount", f"type=volume,source={volume},target=/{key}"]
+    run(*command, image, "-I", "-c", "pass")
+    for key in volumes:
+        run("cp", "-a", str(Path(work) / key) + "/.", f"{stage}:/{key}")
+    # Only the fresh private output-volume root is chowned. No host mounts,
+    # author imports, candidate execution or global daemon configuration here.
+    run(
+        "run",
+        "--name",
+        name + "-ownership",
+        "--pull=never",
+        "--network=none",
+        "--read-only",
+        "--user",
+        "0:0",
+        "--cap-drop=ALL",
+        "--cap-add=CHOWN",
+        "--cap-add=FOWNER",
+        "--security-opt=no-new-privileges:true",
+        "--memory",
+        "256m",
+        "--pids-limit",
+        "32",
+        "--mount",
+        f"type=volume,source={volumes['output']},target=/output",
+        "--entrypoint",
+        "/usr/local/bin/python3",
+        image,
+        "-I",
+        "-c",
+        f"import os; os.chown('/output', {uid}, {uid}); os.chmod('/output', 0o700)",
+    )
+    return volumes
 
 
 def launch(args):
@@ -85,9 +162,7 @@ def launch(args):
         if work.is_relative_to(source) or source.is_relative_to(work):
             raise ValueError("fresh work-root must not overlap input/source")
     name = "hust-bcb-" + uuid.uuid4().hex
-    command = container_command(
-        engine, args.image, name, work, args.sandbox_uid, plan["required_environment"]
-    )
+    container_command(engine, args.image, name, work, args.sandbox_uid, {})
     inspected = subprocess.run(
         [engine, "image", "inspect", args.image],
         check=True,
@@ -100,6 +175,7 @@ def launch(args):
     work.mkdir(mode=0o700, parents=True, exist_ok=False)
     for name_dir in ("inputs", "author", "output"):
         (work / name_dir).mkdir(mode=0o755)
+        (work / name_dir).chmod(0o755)
     os.chown(work / "output", args.sandbox_uid, args.sandbox_uid)
     (work / "output").chmod(0o700)
     # Only verified publisher sources and requirements, never the whole host tree.
@@ -145,8 +221,39 @@ def launch(args):
     }
     control_path = work / "launch-private.json"
     control_path.write_text(json.dumps(control, indent=2))
-    with (work / "container-private.log").open("xb") as log:
-        completed = subprocess.run(command, stdout=log, stderr=subprocess.STDOUT)
+    try:
+        volumes = None
+        with (work / "container-private.log").open("xb") as log:
+            if args.staging == "volume":
+                volumes = stage_named_volumes(
+                    engine, args.image, name, work, args.sandbox_uid, log
+                )
+                control["owned_named_volumes"] = volumes
+                control_path.write_text(json.dumps(control, indent=2))
+            command = container_command(
+                engine,
+                args.image,
+                name,
+                work,
+                args.sandbox_uid,
+                plan["required_environment"],
+                volumes,
+            )
+            completed = subprocess.run(command, stdout=log, stderr=subprocess.STDOUT)
+            if volumes and completed.returncode == 0:
+                subprocess.run(
+                    [engine, "cp", "-a", name + ":/output/.", str(work / "output")],
+                    check=True,
+                    stdout=log,
+                    stderr=subprocess.STDOUT,
+                )
+    except Exception as error:
+        control.update(
+            status="CONTAINER_PREPARATION_OR_COPY_FAILED_NOT_SCORED",
+            exception_type=type(error).__name__,
+        )
+        control_path.write_text(json.dumps(control, indent=2))
+        raise
     control["container_cli_exit_code"] = completed.returncode
     receipt = work / "output/receipt-public.json"
     if completed.returncode == 0 and receipt.is_file():
@@ -167,6 +274,12 @@ def main():
     parser.add_argument("--official-code", required=True, type=Path)
     parser.add_argument("--work-root", required=True, type=Path)
     parser.add_argument("--sandbox-uid", required=True, type=int)
+    parser.add_argument(
+        "--staging",
+        choices=["bind", "volume"],
+        default="bind",
+        help="Use volume for independent Docker daemon filesystem; no host bind-path assumption",
+    )
     launch(parser.parse_args())
 
 

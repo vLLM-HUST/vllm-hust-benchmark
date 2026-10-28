@@ -34,11 +34,22 @@
     "failure_retained_privately": true
   },
   "official_evaluation_image_qualified": false,
+  "independent_daemon_staging_fixture": {
+    "public_entrypoint": "scripts/run_bigcodebench_container_scoring.py --staging volume",
+    "actual_container_exit_code": 0,
+    "nonroot_uid": 65534,
+    "inputs_and_author_readonly": true,
+    "preserved_output_and_copy_back_verified": true,
+    "original_task_code_executed": false,
+    "model_calls": 0,
+    "initial_ownership_permission_failure_retained": true,
+    "ownership_initializer_scope": "Only fresh output volume; fixed provisioning code with CHOWN/FOWNER, no author imports or task code. Scoring worker still drops all capabilities.",
+    "scope": "Actual Docker software fixture with candidate public volume API, not original tasks, official dependency image or native scoring"
+  },
   "official_sanitize_or_functional_scoring_executed": false,
   "new_model_calls": 0,
   "remaining": [
     "Prepare and qualify immutable original Python3.10 evaluation image with complete publisher dependencies",
-    "Verify client-to-daemon data staging for the independent Docker filesystem",
     "Execute unchanged original sanitizer and functional scorer on saved fixed completions",
     "Verify original reference checks, saved scoring and final provider/research handoff"
   ],
