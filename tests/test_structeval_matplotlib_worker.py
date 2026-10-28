@@ -22,6 +22,27 @@ def module():
     return loaded
 
 
+def test_latex_original_argument_order_and_defaults_preserved(tmp_path):
+    calls = []
+
+    def original(latex_code, output_path, task_id, dpi=300, timeout_seconds=45):
+        calls.append((latex_code, output_path, task_id, dpi, timeout_seconds))
+        return 0
+
+    code = "inert argument fixture, never compiled"
+    assert (
+        module().invoke_original_renderer(
+            SimpleNamespace(render_latex_to_png=original),
+            "latex",
+            "000600",
+            code,
+            tmp_path,
+        )
+        == 0
+    )
+    assert calls == [(code, str(tmp_path), "000600", 300, 45)]
+
+
 def test_compiler_diagnostic_retains_exact_command_and_return():
     result = object()
     command = ["compiler", "original.typ", "original.pdf"]

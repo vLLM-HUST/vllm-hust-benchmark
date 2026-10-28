@@ -534,7 +534,7 @@ Docker服务、原提取结果与新输出父目录就绪后加`--execute`。控
 
 原生入口在原命令后指定`--output-type Matplotlib --render-queue /private/queue --render-image sha256:IMAGE_ID --model Qwen/Qwen3.5-9B --disable-thinking`。队列须预先创建，输出目录须为新目录；同时在隔离CPU端处理该队列请求。原作者27个Python模块仍逐字节核验，只在内存中切换渲染调用位置；生成和裁判均保留原`max_tokens=None`、温度0及完整任务内容。实际前三题各保留10字段、7/8/8个VQA问答对，3次生成与3次裁判均stop；实际裁判图片与原渲染图片逐字节一致。9B是现有NPU服务的替代模型，不宣称复现作者推荐模型或据此证明引擎性能。模型请求和响应保存在私有运行目录，不入Git。
 
-隔离CPU端单任务入口为`python scripts/run_structeval_render_queue_backend.py --request /private/queue/JOB.request.json --renderer /private/original/render_matplotlib.py --work-root /private/render-work --image sha256:IMAGE_ID`，默认只检查计划；确认专用Docker与固定镜像就绪后加`--execute`。请求文件名必须匹配内容哈希。执行仅调用上述隔离控制器，先发布原图片、后发布结果；恢复时核验并复用同一输入的已保存控制器结果。已有未完成或阻塞目录必须先检查实际容器，不自动重启，不把超时变成模型0分。请求及原图片只保存在操作者指定的私有目录；跨机器需另行安全传输，不要求共享SSH凭据。此链路已完成全部50道Matplotlib原题，共50次生成、49次视觉裁判，99次调用均stop；000815的原生成代码AttributeError使原渲染器返回0，按作者缺图规则跳过该题裁判，未发现缺模块或资源不足，不换题或重生成。其他24个渲染协议仍未完成，不能据此勾选整个StructEval来源。
+隔离CPU端单任务入口为`python scripts/run_structeval_render_queue_backend.py --request /private/queue/JOB.request.json --renderer /private/original/render_matplotlib.py --work-root /private/render-work --image sha256:IMAGE_ID`，默认只检查计划；确认专用Docker与固定镜像就绪后加`--execute`。请求文件名必须匹配内容哈希。执行仅调用上述隔离控制器，先发布原图片、后发布结果；恢复时核验并复用同一输入的已保存控制器结果。已有未完成或阻塞目录必须先检查实际容器，不自动重启，不把超时变成模型0分。请求及原图片只保存在操作者指定的私有目录；跨机器需另行安全传输，不要求共享SSH凭据。此链路已完成全部50道Matplotlib原题，共50次生成、49次视觉裁判，99次调用均stop；000815的原生成代码AttributeError使原渲染器返回0，按作者缺图规则跳过该题裁判，未发现缺模块或资源不足，不换题或重生成。此结论只覆盖该协议，其他格式进度见后续小节及唯一机器清单，不能据此勾选整个StructEval来源。
 
 完整VQA须调用原`vqa_eval_async`并保留全部原问题、期望答案及对应原图；答案进入作者定义的裁判输入，不进入生成模型输入。原评测器会把部分API/解析异常折算为0或None，因此必须另核实际裁判请求、响应、图片身份和异常日志；不能只凭一个0分文件就认定裁判成功运行，也不能把资源/接口失败当作模型质量结论。
 
@@ -568,7 +568,17 @@ ARM64环境，不据此宣称其他架构已运行。
 
 隔离端`--renderer`须指向对应原`render_html.py`、`render_canvas.py`或`render_markdown.py`；同目录保留原`render_utils.py`，Canvas/Markdown还须有原`render_html.py`，均固定哈希、只读装入。Canvas原函数把输入嵌入其JavaScript包装，Markdown按作者默认转换器生成HTML；不增加代码修补、替代包装或Markdown扩展。资源门禁覆盖被内部调用的HTML浏览器工厂，不仅检查外层函数。
 
-三种格式的正常1、空输入0、外部HTTP/S资产阻塞，以及SVG兼容性，共10项CPU隔离控制已通过，已保留结果不重新启动容器。\*\*这些是执行入口和环境控制，不是原题验证；三种格式的原始任务与完整VQA尚未运行，不增加来源完成数。\*\*运行原题仍需研究空闲、NPU窗口和固定原顺序选题，失败不得替换成其他题目。
+三种格式的正常1、空输入0、外部HTTP/S资产阻塞，以及SVG兼容性，共10项CPU隔离控制已通过。其后六组协议各固定前三题实际完成18道原题、36次模型调用、158对完整VQA；Canvas三题VQA均0，原最终分0.29/0.3/0.3如实保留。Text-to-HTML另执行剩余47题，与前三题合计50题、100次stop调用、345对原VQA，原字段、提示、提取代码及实际裁判图片字节独立核验。其他五组剩余220题尚未计为完成。控制夹具不计原题，既有有效原题不重跑，整个StructEval来源仍未勾选。
+
+### StructEval LaTeX/TikZ 编译入口
+
+固定原数据中的协议名称大小写不同：Text→`Latex`有50题、Text→`Tikz`有50题、`Matplotlib`→`TikZ`有100题。使用原生入口的对应`--input-type`和`--output-type`，同时指定私有`--render-queue`及固定`--render-image`。不把Matplotlib输入改写为文字任务，也不把三组混成重新生成的题目。
+
+`configs/workload-native/structeval-latex-cpu.Dockerfile`以已合格最小Matplotlib镜像为`RENDER_BASE`；构建目录仅放配方及`scripts/verify_structeval_latex_environment.py`，不放题目、模型或生成代码。配方沿用基础镜像的`/uv`安装观察版本`pdf2image==1.17.0`，增加原作者已有回退路径所需的pdfLaTeX、LuaLaTeX、Poppler及TeX包，不增加Tectonic替代实现。系统包快照未固定，不称为作者环境锁。
+
+隔离端把`--renderer`指向原`render_latex.py`；手动调用worker/控制器时使用`--renderer-kind latex`。同一原函数用于三个协议，按原签名`render_latex_to_png(latex_code, output_path, task_id)`调用，保留默认dpi300、45秒预算、原解析器、片段包装、颜色前导、原引擎回退及第一PDF页转换，不修补生成代码。TeX临时缓存留在有界`/tmp`，生成代码仍用非root、只读根、断网及CPU/RAM/PID/时间限额。
+
+公共配方已实际构建，非root/只读/断网软件核验与五项隔离控制通过：TikZ片段、完整LaTeX文档、fontspec/LuaLaTeX、缺失文档类0且缺图、Matplotlib兼容。原始200题及完整VQA尚未运行，不能以这些控制代替。若专用Docker的bridge下载失败，先对比同一官方资产在工作区与构建容器的可达性；本次仅对可信软件安装构建使用经核验的`--network=host`，不修改全局网络、不允许生成代码使用该网络。首次bridge获取失败及第二次无pip失败均保留，公共配方已使用现有uv修正。
 
 ## Video-MME 原生视频任务
 

@@ -60,6 +60,7 @@ def main():
             "Markdown",
             "React",
             "Vue",
+            "Matplotlib",
         ],
     )
     parser.add_argument(
@@ -77,6 +78,9 @@ def main():
             "HTML",
             "Canvas",
             "Markdown",
+            "Latex",
+            "Tikz",
+            "TikZ",
         ],
     )
     parser.add_argument("--render-queue", type=Path)
@@ -102,6 +106,9 @@ def main():
         "HTML",
         "Canvas",
         "Markdown",
+        "Latex",
+        "Tikz",
+        "TikZ",
     }
     if rendering != bool(args.render_queue and args.render_image):
         parser.error(
@@ -199,6 +206,7 @@ def main():
         from structeval_render_queue import (
             CanvasRenderQueue,
             HtmlRenderQueue,
+            LatexRenderQueue,
             MarkdownRenderQueue,
             MatplotlibRenderQueue,
             SvgRenderQueue,
@@ -212,6 +220,9 @@ def main():
             "HTML": HtmlRenderQueue,
             "Canvas": CanvasRenderQueue,
             "Markdown": MarkdownRenderQueue,
+            "Latex": LatexRenderQueue,
+            "Tikz": LatexRenderQueue,
+            "TikZ": LatexRenderQueue,
         }[args.output_type]
         queue = queue_class(
             args.render_queue,
@@ -227,6 +238,8 @@ def main():
                 )
 
             render_main.ASYNC_RENDERERS[args.output_type.lower()] = remote_browser
+        elif args.output_type in {"Latex", "Tikz", "TikZ"}:
+            render_main.render_latex_to_png = queue.render
         else:
             render_main.THREAD_RENDERERS[args.output_type.lower()] = queue.render
         original_render_file = workflow.render_file_async

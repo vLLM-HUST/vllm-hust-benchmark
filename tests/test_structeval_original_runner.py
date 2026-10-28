@@ -12,7 +12,18 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 @pytest.mark.parametrize(
-    "output_type", ["Matplotlib", "Typst", "SVG", "HTML", "Canvas", "Markdown"]
+    "output_type",
+    [
+        "Matplotlib",
+        "Typst",
+        "SVG",
+        "HTML",
+        "Canvas",
+        "Markdown",
+        "Latex",
+        "Tikz",
+        "TikZ",
+    ],
 )
 def test_matplotlib_selection_preserves_original_rows_and_requires_rendering(
     output_type,
@@ -41,7 +52,18 @@ def test_matplotlib_selection_preserves_original_rows_and_requires_rendering(
 
 
 @pytest.mark.parametrize(
-    "output_type", ["Matplotlib", "Typst", "SVG", "HTML", "Canvas", "Markdown"]
+    "output_type",
+    [
+        "Matplotlib",
+        "Typst",
+        "SVG",
+        "HTML",
+        "Canvas",
+        "Markdown",
+        "Latex",
+        "Tikz",
+        "TikZ",
+    ],
 )
 def test_matplotlib_cli_requires_explicit_isolated_dispatch_before_data_access(
     output_type,
@@ -259,12 +281,22 @@ def test_completed_protocol_audit_adds_only_previously_unexecuted_rows():
     assert not nested["failed_scores_replaced_or_retried"]
     assert not nested["source_checkbox_eligible"]
     assert nested["remaining_original_tasks_in_these_six_protocols"] == 267
+    html = nested["text_html_remaining47"]
+    assert html["new_original_tasks"] == 47
+    assert html["previous_first3_reused_not_rerun"] == 3
+    assert html["combined_unique_protocol_tasks"] == 50
+    assert html["new_generation_calls"] == html["new_judge_calls"] == 47
+    assert html["combined_generation_and_judge_calls"] == 100
+    assert html["combined_original_vqa_pairs"] == 345
+    assert html["combined_original_render_scores"] == {"1": 50}
+    assert not html["source_checkbox_eligible"]
     assert (
         ledger["verified_unique_native_tasks"]
         == count
         + continued["combined_unique_protocol_tasks"]
         + svg_continued["combined_unique_protocol_tasks"]
         + nested["unique_original_tasks"]
+        + html["new_original_tasks"]
     )
     held = receipt.get("held_native_exit_evidence")
     if held:

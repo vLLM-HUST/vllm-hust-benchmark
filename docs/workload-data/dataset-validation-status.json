@@ -1480,9 +1480,9 @@
         "docs/workload-data/validation/structeval-nonrender-checkpoint2-20261024.json",
         "docs/workload-data/validation/structeval-nonrender-checkpoint3-20261025.json"
       ],
-      "verified_unique_native_tasks": 1068,
-      "native_queue_state": "950_NONRENDER_PLUS_ALL50_MATPLOTLIB_ALL50_SVG_AND_SIX_BROWSER_FIRST3_AUDITED",
-      "blocker": "All950 nonrender originals retained without rerun. All50 Matplotlib tasks officially scored with99 stop calls; original renderer0/AttributeError case retained. All50 SVG tasks generated/isolated-rendered/complete-VQA-scored with100 stop calls; first3 reused. Six HTML/Canvas/Markdown protocols fixed first3 completed:18 unique original tasks,36 stop calls,158 complete original VQA pairs, source fields, prompts, parsed code and actual judge image bytes independently audited. Canvas VQA0 and final0.29/0.3/0.3 retained without replacement. Verified unique tasks1068; remaining23 partially/uncovered render groups and967 rows pending, including267 remaining originals in these six protocols. Source unchecked. Public browser and Markdown recipes built and CPU controls qualified. First3 Typst outputs have Markdown-style headings, original render0/final0.1 and0 judge calls by missing-image rule; syntax diagnostics audited without regeneration, excluded from verified count due missing actual Typst judge coverage. Stronger existing27B permission requested, not started. Other browser/CDN/npm/TeX formats still need faithful isolation; never enable unrestricted generated-code egress.",
+      "verified_unique_native_tasks": 1115,
+      "native_queue_state": "950_NONRENDER_ALL50_MATPLOTLIB_ALL50_SVG_ALL50_TEXT_HTML_AND_FIVE_BROWSER_FIRST3_AUDITED",
+      "blocker": "All950 nonrender originals reused without rerun. Full50 Matplotlib tasks scored with99 stop calls, original renderer0/AttributeError retained. Full50 SVG tasks scored with100 stop calls. Six browser first3 samples completed18 tasks/36 stop calls/158 VQA pairs; Text-to-HTML remaining47 now independently audited with94 stop calls and324 original VQA pairs, bringing that protocol to50 tasks/100 calls/345 pairs. Exact fields, prompts, parsed code, complete QA and actual judge image bytes verified. Canvas VQA0/final0.29/0.3/0.3 retained. Verified unique tasks1115; remaining22 partially/uncovered render groups and920 rows pending, including220 remaining browser tasks. LaTeX/TikZ recipe and five isolated CPU controls qualified, but its200 original tasks/VQA not run. Public browser/Markdown recipes qualified. Typst first3 Markdown-style outputs retain original render0/final0.1/zero judge calls, excluded from completion count due missing actual judge coverage; stronger27B permission pending, not started. Other browser/CDN/npm formats need faithful isolation; no unrestricted generated-code egress. Source remains unchecked.",
       "rendering_preparation": {
         "nested_html_canvas_markdown_components": {
           "status": "SIX_FIXED_FIRST3_ORIGINAL_PROTOCOLS_GENERATION_RENDER_COMPLETE_VQA_AUDITED",
@@ -1491,10 +1491,18 @@
           "existing_browser_recipe_reused": true,
           "markdown_recipe": "configs/workload-native/structeval-markdown-cpu.Dockerfile",
           "receipt": "docs/workload-data/validation/structeval-nonrender-checkpoint3-20261025.json",
-          "original_tasks_executed": 18,
-          "model_calls": 36,
-          "remaining_original_tasks_in_these_six_protocols": 267,
+          "original_tasks_executed": 65,
+          "model_calls": 130,
+          "remaining_original_tasks_in_these_six_protocols": 220,
           "nested_external_http_resources_block_not_model0": true,
+          "source_checkbox_eligible": false
+        },
+        "latex_tikz_component": {
+          "status": "FIVE_ORIGINAL_RENDERER_CPU_CONTROLS_PASSED_NATIVE_TASKS_PENDING",
+          "recipe": "configs/workload-native/structeval-latex-cpu.Dockerfile",
+          "verifier": "scripts/verify_structeval_latex_environment.py",
+          "original_tasks_executed": 0,
+          "model_calls": 0,
           "source_checkbox_eligible": false
         },
         "svg_browser_component": {

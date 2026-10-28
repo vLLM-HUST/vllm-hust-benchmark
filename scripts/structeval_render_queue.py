@@ -224,6 +224,15 @@ class TypstRenderQueue(MatplotlibRenderQueue):
         return super().render(task_id, typst_code, img_output_path)
 
 
+class LatexRenderQueue(MatplotlibRenderQueue):
+    def __init__(self, root, **kwargs):
+        super().__init__(root, renderer_kind="latex", **kwargs)
+
+    def render(self, latex_code, output_path, task_id):
+        """Exact original LaTeX/TikZ helper contract; preserve default DPI/time."""
+        return super().render(task_id, latex_code, output_path)
+
+
 class SvgRenderQueue(MatplotlibRenderQueue):
     def __init__(self, root, **kwargs):
         super().__init__(root, renderer_kind="svg", **kwargs)

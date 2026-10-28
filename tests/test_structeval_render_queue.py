@@ -14,6 +14,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 from structeval_render_queue import (
     CanvasRenderQueue,
     HtmlRenderQueue,
+    LatexRenderQueue,
     MarkdownRenderQueue,
     MatplotlibRenderQueue,
     RenderBlocked,
@@ -42,6 +43,31 @@ def test_typst_keyword_parameters_match_the_original_renderer(tmp_path):
         "typst_code",
         "img_output_path",
     ]
+
+
+def test_latex_keyword_order_and_unchanged_super_dispatch(tmp_path, monkeypatch):
+    queue = LatexRenderQueue(
+        tmp_path, image_root=tmp_path / "images", image="sha256:" + "0" * 64
+    )
+    assert list(inspect.signature(queue.render).parameters) == [
+        "latex_code",
+        "output_path",
+        "task_id",
+    ]
+    calls = []
+
+    def inert(self, *args):
+        calls.append(args)
+        return 1
+
+    monkeypatch.setattr(MatplotlibRenderQueue, "render", inert)
+    code = "inert LaTeX argument fixture"
+    assert (
+        queue.render(latex_code=code, output_path=tmp_path / "images", task_id="000600")
+        == 1
+    )
+    assert calls == [("000600", code, tmp_path / "images")]
+    assert queue.renderer_kind == "latex"
 
 
 @pytest.mark.parametrize(

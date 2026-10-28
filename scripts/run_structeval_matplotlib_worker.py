@@ -23,6 +23,10 @@ from types import ModuleType, SimpleNamespace
 RENDERER_SHA256 = "7c5a37b25df94bf370cc37dda86d269bcc071680a5ec3b07484a777ffee0b09f"  # pragma: allowlist secret - fixed original author module
 RENDERERS = {
     "matplotlib": (RENDERER_SHA256, "render_matplotlib_and_screenshot"),
+    "latex": (
+        "b53cd11950d6eb77cf42e71d55e020950ddd538f54252328c134440a8a40832d",  # pragma: allowlist secret - fixed original author module
+        "render_latex_to_png",
+    ),
     "typst": (
         "b6e7bf8e8ebeaca7836cc4d853f7a87772e46e386e38ada07386e0015dd2a39c",  # pragma: allowlist secret - fixed original author module
         "render_typst_and_screenshot",
@@ -106,6 +110,14 @@ def run_retaining_errors(original_run, *args, **kwargs):
                 2, b"\nOriginal captured compiler/converter stderr:\n" + raw + b"\n"
             )
         raise
+
+
+def invoke_original_renderer(module, kind, task_id, code, output):
+    """Preserve the author's distinct LaTeX positional contract and defaults."""
+    render = getattr(module, RENDERERS[kind][1])
+    if kind == "latex":
+        return render(code, str(output), task_id)
+    return render(task_id, code, str(output))
 
 
 def require_isolation():
@@ -249,7 +261,7 @@ def execute(args):
                 module.subprocess = SimpleNamespace(
                     run=lambda *a, **kw: run_retaining_errors(author_run, *a, **kw)
                 )
-            score = getattr(module, RENDERERS[kind][1])(args.task_id, code, str(output))
+            score = invoke_original_renderer(module, kind, args.task_id, code, output)
             if inspect.isawaitable(score):
                 score = asyncio.run(score)
             if requested:
