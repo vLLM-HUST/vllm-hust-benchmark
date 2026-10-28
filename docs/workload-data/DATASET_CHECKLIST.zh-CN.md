@@ -3,6 +3,29 @@
 当前交付
 **65/113项**，待完成48项，另5项仅分类。首批#432的60项和第二批#538的ScienceWorld已合入main；早期五个草稿已关闭为被汇总承接，历史和分支保留。第三批新增CodeJudge-Eval、DeepPlanning、OpenMath及OpenCode固定原生profile的实际CI消费交付，尚未合入。OpenMath/OpenCode是训练语料原问题生成，不是独立质量benchmark。打勾不代表全量模型评测、高分或性能保证。
 
+### TemporalWiki演化语料与原生探针评测（进行中，不打来源总勾）
+
+- [x] 官方代码版本已固定，177份原软件/配置共382,667字节在服务器逐文件Git blob及SHA256核验；13份Python仅AST解析，162份原配置保留，不导入或执行作者代码。
+
+- [x] 原协议已区分：56份探针困惑度配置、56份语料困惑度配置，以及44份微调/6份预训练配置。README示例并不是普通聊天问答，不能换成当前Qwen API调用冒充复现。
+
+- [x] 官方历史上传版本的完整TWiki_Probes.zip已在服务器取得，620,459字节，与发布方LFS SHA256一致，未在本地下载数据；获取回执已保存。
+
+- [ ] 原始探针包的公共获取入口、归档/字段/时间快照关系、许可及适配待补；另外两种归档尚未取得，不得把Wikipedia全文、差分语料和subject/relation/object探针强行合并为同一种行结构。
+
+- [ ] 官方模型/checkpoint、合格NPU环境、原生评测及公共/研究消费接通待完成。旧环境为Python3.8、Torch1.9
+  CUDA11.1等，不在当前NPU环境盲装或静默修改作者配置。
+
+  仅准备/核验作者软件（外部目录；不下载数据或权重、不执行训练/推理）：
+
+  ```bash
+  python scripts/prepare_jsonschemabench_author_source.py --source temporalwiki --author-root /external/temporalwiki
+  python scripts/prepare_jsonschemabench_author_source.py --source temporalwiki --author-root /external/temporalwiki --action prepare --max-bytes 382667
+  python scripts/verify_temporalwiki_original_contract.py --author-root /external/temporalwiki
+  ```
+
+  服务器GitHub匿名配额及原代码域名连接失败记录保留；最终只通过已有认证读取原小型软件并内存中转到服务器，没有发送凭据、原软件入Git或本地落数据集。HF镜像元数据403与原站连接超时仍是数据获取缺口。软件无LICENSE文件，Wikipedia衍生数据许可应另外核对。[阶段证据](validation/temporalwiki-original-readiness-20261028.json)。
+
 ### NatureBench科学代码工作流（进行中，不打来源总勾）
 
 - [x] 固定官方代码与数据版本，服务器取得56份原始运行/评估/环境/任务列表文件，共514543字节，Git blob及SHA256核验通过；30份Python只做语法解析，未执行科学任务代码。
@@ -741,7 +764,7 @@ TB；服务器/data约1.42TB可用，未缩小语料。ChartQA当前两卡主机
 | DOCVQA                     | [x] 固定原生视觉问答可用                   | 六原文件5349题全字段/原图及引用索引、36实际CI研究回读；固定首3题NPU原生模板/图像处理/ANLS及独立保存复核完成，分数0.75/1/1。非全量模型评测或作者模型质量复现。[证据](validation/docvqa-original-native-delivery-20261027.json)                                                                                     |
 | CODEJUDGE_EVAL             | [x] 原生固定抽样可用                       | 六份发布原JSON共11160配置行核验/索引、18条原题NPU执行和独立评分/保存核验通过；实际CI工件独立安装及18条研究回读通过。[交付证据](validation/codejudge-original-native-delivery-20261027.json)。不是作者未发布regex或论文分数复现。                                                                                  |
 | DRAGON_PUBLIC              | [ ] 待开展                                 | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                      |
-| TEMPORALWIKI               | [ ] 待开展                                 | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                      |
+| TEMPORALWIKI               | [ ] 原软件/配置核验通过，原生未完成        | 177份原软件382667字节、13份AST及162份配置在服务器核验通过；原探针包620459字节整包SHA256已核验，其他归档/公共适配、模型/checkpoint、合格NPU原生评测及公共/研究消费仍待补，不改成Qwen聊天问答。                                                                                                                     |
 | COPILOT_AGENT_2026         | [x] 原生元数据资产可用                     | 七日606分片/301026原会话全量核验和索引，49实际CI载荷与候选一致，42固定实际CI研究回读及3条公共smoke完成；不造prompt、不宣称请求回放。[证据](validation/copilot-2026-metadata-delivery-20261027.json)                                                                                                               |
 | AZURE_LMM_2025             | [x] 服务轨迹元数据资产交付                 | 全100万行四字段保真/索引、47实际CI安装载荷、首3/末3研究回读完成；无原prompt/媒体，不造请求，不称视觉benchmark。见[回执](validation/azure-lmm-2025-asset-delivery-20261027.json)。                                                                                                                                 |
 | HLE_VERIFIED               | — 仅分类                                   | 本轮不补实现、不重跑                                                                                                                                                                                                                                                                                              |

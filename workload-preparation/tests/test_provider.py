@@ -25,8 +25,9 @@ def test_every_class_has_an_explicit_plan():
 def test_catalog_registration_does_not_claim_runtime_or_local_data():
     sources = provider.list_sources()
     assert (
-        len(sources) == 106
-    )  # existing105 plus previously planned DRAGON_PUBLIC manifest
+        len(sources) == 107
+    )  # existing106 plus already-planned TEMPORALWIKI metadata, not new scope
+    assert any(row["source_id"] == "TEMPORALWIKI" for row in sources)
     assert sum(row["source_id"].startswith("PAIO-") for row in sources) == 8
     assert all(
         row["runtime_validation"] == "NOT_ESTABLISHED_BY_CATALOG" for row in sources

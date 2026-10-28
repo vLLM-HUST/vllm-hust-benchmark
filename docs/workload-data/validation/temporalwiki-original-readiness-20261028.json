@@ -1,0 +1,56 @@
+{
+  "source_id": "TEMPORALWIKI",
+  "status": "ORIGINAL_SOFTWARE_AND_CONFIGURATIONS_VERIFIED_NATIVE_PENDING",
+  "source_checkbox_eligible": false,
+  "author_source_pins": "configs/workload-native/temporalwiki-author-source.json",
+  "public_source_preparer": "scripts/prepare_jsonschemabench_author_source.py --source temporalwiki",
+  "public_protocol_verifier": "scripts/verify_temporalwiki_original_contract.py",
+  "original_source_verification": {
+    "files": 177,
+    "bytes": 382667,
+    "python_ast_parsed_not_imported": 13,
+    "original_configurations": 162,
+    "configuration_modes": {"evaluate_ppl": 56, "evaluate_ppl_corpus": 56, "finetune": 44, "pretrain": 5, "pretrain_brute": 1},
+    "server_public_verifier_exit_code": 0,
+    "github_anonymous_source_acquisition_attempt": "FAILED_HTTP403_RATE_LIMIT_PARTIAL_ORIGINAL_FILES_PRESERVED",
+    "raw_github_transport_attempt": "FAILED_CONNECTION_RESET_PARTIAL_ORIGINAL_FILES_PRESERVED",
+    "completed_transport": "Existing authenticated GitHub CLI read original small software in memory, sent only verified original bytes over host-verified SSH; no credentials or task data transferred, no raw software persisted locally or redistributed in Git",
+    "first_isolated_flag_invocation": "FAILED_IMPORT_PATH_WITH_PYTHON_I; normal documented public script invocation passed, no author code import"
+  },
+  "dataset_acquisition": {
+    "publisher": "https://huggingface.co/datasets/seonghyeonye/TemporalWiki",
+    "original_archives_in_author_readme": ["Wikipedia_Full.zip", "TWiki_Diffsets.zip", "TWiki_Probes.zip"],
+    "revision_and_content_identities_registered": false,
+    "all_original_archives_acquired": false,
+    "original_probe_archive": {
+      "archive": "TWiki_Probes.zip",
+      "revision": "b58cf6dd919f873c76ef1232aac16a31d135e2ff", "revision_note": "pragma: allowlist secret - fixed official original probe upload revision",
+      "sha256": "a6bd19256725f21ce2dbb3eb482c23ea974f9f1869eabee5c128b2ab730e88bd", "identity_note": "pragma: allowlist secret - publisher LFS identity verified against full original archive",
+      "bytes": 620459,
+      "whole_original_archive_verified": true,
+      "transport": "hf-mirror.com same fixed publisher revision/path, download=true, whole original object",
+      "publisher_identity_evidence": "https://huggingface.co/datasets/seonghyeonye/TemporalWiki/commit/b58cf6dd919f873c76ef1232aac16a31d135e2ff",
+      "server_receipt": "temporalwiki-original-probes-32028-001/acquisition-public.json",
+      "public_getter_archive_inspection_adapter_and_native_execution_pending": true
+    },
+    "mirror_metadata_attempt": "FAILED_HTTP403_FORBIDDEN",
+    "local_origin_metadata_attempt": "FAILED_NETWORK_CONNECTION_TIMEOUT_METADATA_ONLY_NO_RAW_DOWNLOAD",
+    "publisher_viewer_observation": "Official dataset page reports heterogeneous text versus subject/relation/object CSV schemas; generic flattened load_dataset view is not a substitute for original three archive types"
+  },
+  "native_protocol": {
+    "original_environment": "Python3.8; torch1.9.0+cu111, torchvision0.10.0+cu111, transformers4.12.3, pytorch-lightning1.5.1; other author requirements remain unpinned",
+    "original_evaluation": "Checkpoint-based GPT2/T5 probe and perplexity workflows; evaluators call model.to('cuda') and tensor.cuda()",
+    "example_config": "configs/evaluation/GPT2/subset/0801-0901_changed.json",
+    "example_config_actual_mode": "evaluate_ppl",
+    "example_model": "gpt2-large",
+    "example_checkpoint": "outputs/09/GPT2_diff",
+    "npu_environment_qualified": false,
+    "original_checkpoints_acquired": false,
+    "qwen_chat_qa_substitution": false
+  },
+  "pending": ["Original data revision, identities, licensing and archive acquisition", "Original corpus/probe file and snapshot relations, adapter, reference-only index and current research readbacks", "Qualified NPU-compatible original environment and declared original checkpoint/model profile", "Fixed original tasks through full native evaluation, preserved scorer and failures"],
+  "model_calls": 0,
+  "native_tasks_run": 0,
+  "research_observation_or_analysis_migrated": false,
+  "enterprise_raw_data_published": false
+}
