@@ -1,4 +1,4 @@
-"""CPU-render dispatch for the unchanged author Matplotlib callable contract.
+"""CPU-render dispatch preserving pinned author callable/artifact contracts.
 
 Only transfers already parsed code and returned image bytes. Never executes code,
 replaces prompts/questions, calls models, or treats worker failures as model0.
@@ -222,3 +222,11 @@ class TypstRenderQueue(MatplotlibRenderQueue):
     def render(self, task_id, typst_code, img_output_path):
         """Exact original Typst keyword contract; original score/image can differ."""
         return super().render(task_id, typst_code, img_output_path)
+
+
+class SvgRenderQueue(MatplotlibRenderQueue):
+    def __init__(self, root, **kwargs):
+        super().__init__(root, renderer_kind="svg", **kwargs)
+
+    def render(self, task_id, svg_code, img_output_path):
+        return super().render(task_id, svg_code, img_output_path)

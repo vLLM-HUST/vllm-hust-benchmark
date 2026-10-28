@@ -11,7 +11,7 @@ import pytest
 ROOT = Path(__file__).resolve().parents[1]
 
 
-@pytest.mark.parametrize("output_type", ["Matplotlib", "Typst"])
+@pytest.mark.parametrize("output_type", ["Matplotlib", "Typst", "SVG"])
 def test_matplotlib_selection_preserves_original_rows_and_requires_rendering(
     output_type,
 ):
@@ -38,7 +38,7 @@ def test_matplotlib_selection_preserves_original_rows_and_requires_rendering(
     assert all(row is rows[index] for index, row in selected)
 
 
-@pytest.mark.parametrize("output_type", ["Matplotlib", "Typst"])
+@pytest.mark.parametrize("output_type", ["Matplotlib", "Typst", "SVG"])
 def test_matplotlib_cli_requires_explicit_isolated_dispatch_before_data_access(
     output_type,
 ):
@@ -212,10 +212,17 @@ def test_completed_protocol_audit_adds_only_previously_unexecuted_rows():
     )
     assert continued["combined_render_scores"] == {"1": 49, "0": 1}
     assert not continued["source_checkbox_eligible"]
-    assert (
-        ledger["verified_unique_native_tasks"]
-        == count + continued["combined_unique_protocol_tasks"]
-    )
+    svg = checkpoint["render_preparation_followup_20261029"][
+        "svg_browser_native_followup"
+    ]
+    assert svg["fixed_first3_original_task_ids"] == ["001200", "001201", "001202"]
+    assert svg["original_vqa_pairs_per_task"] == [7, 8, 10]
+    assert svg["actual_generation_calls"] == svg["actual_judge_calls"] == 3
+    assert svg["all_original_judge_pairs_and_actual_image_bytes_verified"]
+    assert not svg["source_checkbox_eligible"]
+    assert ledger["verified_unique_native_tasks"] == count + continued[
+        "combined_unique_protocol_tasks"
+    ] + len(svg["fixed_first3_original_task_ids"])
     held = receipt.get("held_native_exit_evidence")
     if held:
         assert held["native_exit_code"] == 0

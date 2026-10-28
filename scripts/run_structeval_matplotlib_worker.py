@@ -1,4 +1,4 @@
-"""Pinned original Matplotlib/Typst components in qualified offline containers.
+"""Pinned original render components in qualified offline containers.
 
 Input must be unchanged parsed_code from the author's original workflow. This
 worker does not replace that parser, native generation, syntax scoring or VQA.
@@ -6,15 +6,18 @@ Plan by default; never execute candidate code on the host.
 """
 
 import argparse
+import asyncio
 import hashlib
 import importlib.util
+import inspect
 import json
 import os
 from pathlib import Path
 import re
 import socket
 import subprocess
-from types import SimpleNamespace
+import sys
+from types import ModuleType, SimpleNamespace
 
 RENDERER_SHA256 = "7c5a37b25df94bf370cc37dda86d269bcc071680a5ec3b07484a777ffee0b09f"  # pragma: allowlist secret - fixed original author module
 RENDERERS = {
@@ -23,7 +26,32 @@ RENDERERS = {
         "b6e7bf8e8ebeaca7836cc4d853f7a87772e46e386e38ada07386e0015dd2a39c",  # pragma: allowlist secret - fixed original author module
         "render_typst_and_screenshot",
     ),
+    "svg": (
+        "58539c3236da7cf26e3af3c1fc4e13036320822422bcb79dbdd797c96d438c06",  # pragma: allowlist secret - fixed original author module
+        "render_svg_and_screenshot",
+    ),
 }
+EXTRA_MODULES = {
+    "svg": {
+        "render_utils.py": "947172ba0d07979caf4180db0f9204d9c8db2aad81dae7f2608e5ece33932de4",  # pragma: allowlist secret - original relative import
+    }
+}
+
+
+async def browser_without_external_assets(original_start, requested, *args, **kwargs):
+    """Same author factory/arguments; block unfetched network assets, not model0."""
+    browser, context, page, playwright = await original_start(*args, **kwargs)
+
+    async def guard(route):
+        url = route.request.url
+        if url.startswith(("http://", "https://", "ws://", "wss://")):
+            requested.append(url)
+            await route.abort()
+        else:
+            await route.continue_()
+
+    await context.route("**/*", guard)
+    return browser, context, page, playwright
 
 
 def run_retaining_errors(original_run, *args, **kwargs):
@@ -86,6 +114,14 @@ def verify_inputs(renderer, code_file, expected_sha256, renderer_kind="matplotli
     renderer = Path(renderer).resolve(strict=True)
     if hashlib.sha256(renderer.read_bytes()).hexdigest() != RENDERERS[renderer_kind][0]:
         raise ValueError("unchanged pinned original renderer required")
+    for name, expected in EXTRA_MODULES.get(renderer_kind, {}).items():
+        path = renderer.parent / name
+        if (
+            path.is_symlink()
+            or not path.is_file()
+            or hashlib.sha256(path.read_bytes()).hexdigest() != expected
+        ):
+            raise ValueError("unchanged original relative module required")
     code_file = Path(code_file).resolve(strict=True)
     if not re.fullmatch(r"[0-9a-f]{64}", expected_sha256):
         raise ValueError("explicit parsed-code SHA256 required")
@@ -120,9 +156,10 @@ def execute(args):
     renderer, code_file, code = verify_inputs(
         args.renderer, args.code_file, args.code_sha256, kind
     )
-    if not all(
-        os.statvfs(path).f_flag & os.ST_RDONLY for path in (renderer, code_file)
-    ):
+    readonly_inputs = [renderer, code_file] + [
+        renderer.parent / name for name in EXTRA_MODULES.get(kind, {})
+    ]
+    if not all(os.statvfs(path).f_flag & os.ST_RDONLY for path in readonly_inputs):
         raise ValueError("original module and parsed code must be mounted read-only")
     output = args.output.resolve()
     output_root = next(
@@ -157,17 +194,35 @@ def execute(args):
         with (output / "renderer-private.log").open("xb") as log:
             os.dup2(log.fileno(), 1)
             os.dup2(log.fileno(), 2)
+            package = ModuleType("_pinned_structeval_renderer")
+            package.__path__ = [str(renderer.parent)]
+            sys.modules[package.__name__] = package
             spec = importlib.util.spec_from_file_location(
-                "original_structeval_matplotlib", renderer
+                package.__name__ + ".component", renderer
             )
             module = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(module)
+            requested = []
+            if kind in EXTRA_MODULES:
+                original_start = module.start_browser
+                module.start_browser = lambda *a, **kw: browser_without_external_assets(
+                    original_start, requested, *a, **kw
+                )
             if kind == "typst":
                 author_run = module.subprocess.run
                 module.subprocess = SimpleNamespace(
                     run=lambda *a, **kw: run_retaining_errors(author_run, *a, **kw)
                 )
             score = getattr(module, RENDERERS[kind][1])(args.task_id, code, str(output))
+            if inspect.isawaitable(score):
+                score = asyncio.run(score)
+            if requested:
+                (output / "unavailable-assets-private.json").write_text(
+                    json.dumps(requested), encoding="utf-8"
+                )
+                raise ValueError(
+                    "unfetched original browser assets; resource block, not model score"
+                )
     finally:
         for target, descriptor in zip((1, 2), saved_fds):
             os.dup2(descriptor, target)

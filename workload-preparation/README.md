@@ -549,6 +549,16 @@ musl二进制`typst`。不要把原始任务、模型或生成代码放入构建
 
 实际固定前三题为原位置234/235/236、ID001401/001402/001406。9B的三次生成均stop，但包含不能编译的Markdown式标题，原渲染分数均0、原最终分数均0.1；原缺图规则使视觉裁判调用数为0。原10字段、8/8/9个问答对、生成提示、原提取结果和27个作者模块已核验。诊断只复用三份失败代码重新编译以保留原先丢失的stderr，没有重新生成、替换题目或覆盖原评分。\*\*这些结果证明失败分支可执行，不证明Typst实际视觉裁判已覆盖，不计来源或新增原题验证完成数。\*\*更强模型配置尚未启动，需在获准且研究空闲后单独验证；不能把控制夹具当原题或用模型生成错误冒充环境成功。
 
+### StructEval SVG 浏览器入口
+
+原生入口支持`--output-type SVG --render-queue /private/queue --render-image sha256:BROWSER_IMAGE_ID`，其余原始数据/源码、模型和预算参数同上。隔离端仍使用`run_structeval_render_queue_backend.py --renderer /private/original/render_svg.py`，并要求同目录原`render_utils.py`；两个模块均固定哈希核验并只读装入，不重写原SVG包装页面或原解析器。原异步渲染位置只做隔离CPU分派，原评分和全部VQA问题不变。
+
+浏览器基础软件配方为`configs/workload-native/structeval-browser-cpu.Dockerfile`：构建上下文只放配方、`structeval-browser-py311-observed.txt`与`scripts/verify_structeval_browser_environment.py`，指定已合格Matplotlib基础镜像`--build-arg RENDER_BASE=...`。七个扩展依赖版本来自已取得并验证的环境，Playwright按官方`install --with-deps chromium`准备浏览器；不是作者环境锁，apt系统包快照未固定。公共配方已实际构建退出0，并在非root/离线/只读容器通过依赖及浏览器资产核验和四项隔离控制；原题使用的准备镜像与公共配方镜像分开记录，没有为配方重复运行有效原题。历史Matplotlib脚本文件名保留以兼容，实际渲染类型由明确的selector及原模块哈希决定。
+
+执行仍要求非root、只读根文件系统、无网络/凭据/NPU设备及明确CPU/RAM/PID/tmpfs/时间边界。内联SVG及空输入保持原行为；若浏览器实际请求未取得的HTTP/S资源，则在原视觉裁判前返回资源阻塞，私有日志记录缺失资源，不将缺图或白图静默记成模型0分，也不擅自开放网络或删改原资产。该门禁及Matplotlib兼容性已通过服务器控制验证。
+
+已完成原位置94/95/96、ID001200/001201/001202：各10字段与7/8/10个原问答对保留；3次生成和3次实际视觉裁判均stop，原提取代码、裁判提示和实际PNG字节已独立核验。原最终分0.9/0.65/1.0如实保留。使用现有Qwen3.5-9B、显式关闭thinking、温度0和原`max_tokens=None`，不是作者模型复现或性能结论。剩余47题尚未运行；继续时使用新的运行目录和`--start 3 --count 47`，不重新生成已完成前三题。其他渲染协议仍未完成，不据此勾选整个StructEval来源。
+
 ## Video-MME 原生视频任务
 
 这是发布方原始Video-MME与固定VLMEvalKit的两个已有配置：`Video-MME_8frame`和`Video-MME_8frame_subs`，不是把64帧配置临时减成8帧。原2700题/900视频全部保留；默认每种duration取最先3个不同视频并保留每视频全部3题，每配置27题。选题在推理前固定，不因失败换题；`--full`才选择全部2700题。

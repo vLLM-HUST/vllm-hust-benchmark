@@ -11,11 +11,15 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 import run_structeval_render_queue_backend as backend
-from structeval_render_queue import MatplotlibRenderQueue, TypstRenderQueue
+from structeval_render_queue import (
+    MatplotlibRenderQueue,
+    SvgRenderQueue,
+    TypstRenderQueue,
+)
 
 
 @pytest.mark.parametrize("score", [0, 1])
-@pytest.mark.parametrize("kind", ["matplotlib", "typst"])
+@pytest.mark.parametrize("kind", ["matplotlib", "typst", "svg"])
 def test_complete_dispatch_and_retained_resume_without_execution(
     tmp_path, monkeypatch, score, kind
 ):
@@ -24,7 +28,11 @@ def test_complete_dispatch_and_retained_resume_without_execution(
     work = tmp_path / "work"
     work.mkdir()
     image = "sha256:" + "0" * 64
-    queue_class = TypstRenderQueue if kind == "typst" else MatplotlibRenderQueue
+    queue_class = {
+        "typst": TypstRenderQueue,
+        "matplotlib": MatplotlibRenderQueue,
+        "svg": SvgRenderQueue,
+    }[kind]
     queue = queue_class(
         queue_root,
         image_root=tmp_path / "images",

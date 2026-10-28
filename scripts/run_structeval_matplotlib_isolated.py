@@ -15,7 +15,7 @@ import subprocess
 import sys
 import uuid
 
-from run_structeval_matplotlib_worker import RENDERERS, verify_inputs
+from run_structeval_matplotlib_worker import EXTRA_MODULES, RENDERERS, verify_inputs
 
 OWNER_LABEL = "vllm-hust.structeval-operation"
 
@@ -247,6 +247,8 @@ def run(args):
             stage + ":/software/worker.py",
         )
         docker("cp", renderer, stage + ":/software/render_matplotlib.py")
+        for name in EXTRA_MODULES.get(kind, {}):
+            docker("cp", renderer.parent / name, stage + ":/software/" + name)
         docker("cp", code_file, stage + ":/input/parsed-code.txt")
         docker("start", "-a", stage)
         if json.loads(docker("inspect", stage))[0]["State"]["ExitCode"] != 0:
