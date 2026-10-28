@@ -23,6 +23,25 @@ ROOT = Path(__file__).resolve().parents[1]
 LOCK = ROOT / "src/vllm_hust_benchmark/data/swe_bench_pro_v1_lock.json"
 
 
+RUNTIME_SOURCE_FILES = [
+    "README.md",
+    "pyproject.toml",
+    "src/vllm_hust_benchmark/__init__.py",
+    "src/vllm_hust_benchmark/_version.py",
+    "src/vllm_hust_benchmark/swe_bench_pro.py",
+    "src/vllm_hust_benchmark/swe_bench_pro_inputs.py",
+    "src/vllm_hust_benchmark/swe_bench_pro_grading.py",
+    "src/vllm_hust_benchmark/swe_bench_pro_timing.py",
+    "src/vllm_hust_benchmark/swe_submodule_fixture.py",
+    "src/vllm_hust_benchmark/data/swe_bench_pro_v1_lock.json",
+    "src/vllm_hust_benchmark/data/swe_bench_pro_bootstrap_lock.json",
+    "docs/examples/swe-bench-pro/client-requirements.txt",
+    "docs/examples/swe-bench-pro/single-agent.json",
+    "scripts/prepare_swe_bench_pro_environment.py",
+    "scripts/run_swe_bench_pro.py",
+]
+
+
 def source_repository(argv):
     """A single downloaded installer can fetch only its small runtime sources.
 
@@ -67,21 +86,6 @@ def source_repository(argv):
         directory.mkdir(parents=True, mode=0o700)
         receipt = {"commit": revision, "files": {}}
         receipt_path.write_text(json.dumps(receipt, indent=2) + "\n")
-    files = [
-        "README.md",
-        "pyproject.toml",
-        "src/vllm_hust_benchmark/__init__.py",
-        "src/vllm_hust_benchmark/_version.py",
-        "src/vllm_hust_benchmark/swe_bench_pro.py",
-        "src/vllm_hust_benchmark/swe_bench_pro_inputs.py",
-        "src/vllm_hust_benchmark/swe_bench_pro_timing.py",
-        "src/vllm_hust_benchmark/data/swe_bench_pro_v1_lock.json",
-        "src/vllm_hust_benchmark/data/swe_bench_pro_bootstrap_lock.json",
-        "docs/examples/swe-bench-pro/client-requirements.txt",
-        "docs/examples/swe-bench-pro/single-agent.json",
-        "scripts/prepare_swe_bench_pro_environment.py",
-        "scripts/run_swe_bench_pro.py",
-    ]
     trees = {}
 
     def tree_entries(tree):
@@ -96,7 +100,7 @@ def source_repository(argv):
             trees[tree] = {entry["path"]: entry for entry in result["tree"]}
         return trees[tree]
 
-    for relative in files:
+    for relative in RUNTIME_SOURCE_FILES:
         tree = revision
         for component in Path(relative).parts[:-1]:
             entry = tree_entries(tree)[component]

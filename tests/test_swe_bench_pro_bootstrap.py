@@ -1,8 +1,12 @@
+import ast
 import importlib.util
 import hashlib
 import io
 import json
 from pathlib import Path
+import shutil
+import subprocess
+import sys
 
 import pytest
 
@@ -12,6 +16,55 @@ spec = importlib.util.spec_from_file_location(
 )
 bootstrap = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(bootstrap)
+
+
+def test_standalone_source_list_covers_runtime_package_imports():
+    package = ROOT / "src/vllm_hust_benchmark"
+    declared = set(bootstrap.RUNTIME_SOURCE_FILES)
+    for relative in declared:
+        path = ROOT / relative
+        if path.suffix != ".py":
+            continue
+        for node in ast.walk(ast.parse(path.read_text())):
+            if not isinstance(node, ast.ImportFrom):
+                continue
+            modules = []
+            if node.level == 1:
+                modules = (
+                    [node.module.split(".")[0]]
+                    if node.module
+                    else [a.name for a in node.names]
+                )
+            elif node.module and node.module.startswith("vllm_hust_benchmark."):
+                modules = [node.module.split(".")[1]]
+            for module in modules:
+                dependency = package / (module + ".py")
+                assert str(dependency.relative_to(ROOT)) in declared, (
+                    relative,
+                    module,
+                )
+
+
+def test_standalone_runtime_imports_without_the_repository_on_python_path(tmp_path):
+    for relative in bootstrap.RUNTIME_SOURCE_FILES:
+        if relative.startswith("src/") and relative.endswith(".py"):
+            target = tmp_path / relative
+            target.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(ROOT / relative, target)
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-I",
+            "-c",
+            "import sys; sys.path.insert(0, sys.argv[1]); "
+            "from vllm_hust_benchmark import swe_bench_pro",
+            str(tmp_path / "src"),
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert result.returncode == 0, result.stderr
 
 
 def test_model_probe_checks_served_identity_without_model_inference(monkeypatch):
@@ -145,7 +198,9 @@ def test_standalone_installer_pins_source_and_refuses_changed_files(
             "_version.py",
             "swe_bench_pro.py",
             "swe_bench_pro_inputs.py",
+            "swe_bench_pro_grading.py",
             "swe_bench_pro_timing.py",
+            "swe_submodule_fixture.py",
             "data/",
         ],
         "src/vllm_hust_benchmark/data": [
@@ -197,7 +252,9 @@ def test_standalone_installer_pins_source_and_refuses_changed_files(
     target = tmp_path / "fresh-source"
     args = ["--source-revision", "main", "--source-directory", str(target)]
     assert bootstrap.source_repository(args) == target
-    assert len([url for url in seen if "/contents/" in url]) == 13 + int(truncate_once)
+    assert len([url for url in seen if "/contents/" in url]) == len(
+        bootstrap.RUNTIME_SOURCE_FILES
+    ) + int(truncate_once)
     assert (
         json.loads((target / "source-installation.json").read_text())["commit"]
         == revision
