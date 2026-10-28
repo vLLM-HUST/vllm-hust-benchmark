@@ -2,6 +2,17 @@
   "version": "adapter-extensions/v1",
   "boundary": "Field contracts from publisher metadata/docs. No real source payload downloaded or full adapter validation claimed.",
   "adapters": {
+    "VIDEOMME": {
+      "kind": "task_dataset",
+      "mapping": "videomme_original_tasks",
+      "input_fields": ["question", "options", "videoID"],
+      "required_fields": ["video_id", "duration", "domain", "sub_category", "url", "videoID", "question_id", "task_type", "question", "options", "answer"],
+      "outcome_fields": ["answer"],
+      "annotation_fields": ["video_id", "duration", "domain", "sub_category", "url", "question_id", "task_type"],
+      "id_field": "question_id",
+      "requirements": ["Original annotation rows and all original fields preserved; no generated request or observed outcome", "Video/subtitle filenames follow the pinned author view contract; actual archive extraction/media verification and original frame/subtitle processing are separate", "Academic research only; no raw media/annotations/outputs redistributed by this package"],
+      "status": "ORIGINAL_FIELDS_MAPPED_MEDIA_NATIVE_AND_CONSUMER_VALIDATION_PENDING"
+    },
     "MVBENCH": {
       "kind": "task_dataset",
       "mapping": "mvbench_original_video_tasks",

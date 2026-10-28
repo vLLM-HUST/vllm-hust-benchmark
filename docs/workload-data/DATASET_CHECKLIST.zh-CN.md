@@ -60,9 +60,27 @@ python scripts/run_mvbench_original.py --official-checkout /external/VLMEvalKit 
 - [x] 推理前固定各时长原顺序前三个不同视频，保留每视频全部3题，共27题/profile、计划54次调用。不能按模型结果换题，字幕只按原始采样帧时间提取。
 - [x] 公共原表准备入口已在服务器生成/复核2700题完整原TSV，与作者MD5一致；全部题目/选项/答案及视频/字幕路径关系通过，原注释不改写。只有准备证据，不冒充完整媒体或原生执行。
 - [x] 字幕库pysubs21.8.0按官方PyPI轮子SHA256独立安装，未改基础客户端/模型服务；原subtitle.zip完整身份及744份原SRT、275142条事件解析通过，0模型调用。镜像无可用版本的失败保留，官方PyPI安装成功，未静默换版本。
+- [x] 候选安装包在服务器核验64载荷，原2700条全部11字段可完整重建、完整2700条索引通过；固定27题在提供侧与实时核对的当前研究消费者回读一致。仅注释数据链，0模型调用；视频未就绪，不冒充原生benchmark完成或实际CI工件验证。
 - [ ] 约101GB完整24原文件在服务器外部缓存准备，尚未完成全部归档校验/解包；原生视频提示、执行、评分及统一数据/研究消费待完成，当前0模型调用。
 
 配置见`configs/workload-native/videomme-original-protocol.json`。原项目明确仅限学术研究、禁止商业用途及未经许可的再分发/修改；本次按科研用途私下验证，不公开原视频、题目、字幕或模型输出。[原项目使用条款](https://github.com/MME-Benchmarks/Video-MME#-dataset)。64帧及变fps配置不在当前已验证范围，不能以这份计划宣称它们已跑通。
+
+获取入口默认只做离线计划；完整下载须显式确认学术限定、预算和外部缓存，预留至少500GiB供原归档、后续解包及服务余量。下载依赖单独环境中的`huggingface_hub==0.36.0`，其余计划/校验/注释视图使用标准库。已有同一缓存的下载任务存活时不另起重复任务；官方SDK复用固定原始对象和断点。原站不可达可显式加`--hf-endpoint https://hf-mirror.com`，仍核验同一固定版本与文件身份，不绕过访问门槛。
+
+```bash
+python scripts/prepare_videomme_original_assets.py --cache /external/hf-cache
+python scripts/prepare_videomme_original_assets.py --cache /external/hf-cache --action download --accept-academic-only --max-bytes 101002235118
+python scripts/prepare_videomme_original_assets.py --cache /external/hf-cache --action prepare-data --accept-academic-only --data-root /external/videomme-annotation-data
+```
+
+`prepare-data`只校验并硬链接原注释到同文件系统的新目录；即使视频缺失也可用于原记录核验，绝不声称原生媒体已就绪。完整归档另用`--action verify --accept-academic-only`逐文件校验，仍不是解包、视频解码或推理。
+
+安装公共数据包后，使用外部配置`{"sources":[{"source_id":"VIDEOMME","data_root":"/external/videomme-annotation-data"}]}`走统一prepare/index/resolve。原始11字段、原视频/问题ID、选项顺序及答案均保留，参考答案不混入输入，媒体和字幕路径只是原生布局引用，读取器不伪造请求或实际媒体就绪状态。
+
+```bash
+python -m vllm_hust_workload_data.pipeline plan --config /external/videomme-prepare.json
+python -m vllm_hust_workload_data.pipeline run --config /external/videomme-prepare.json --output /external/videomme-prepared-new
+```
 
 原表准备默认只输出离线计划；核验原Parquet与固定作者代码后加`--execute`，原生成函数生成/核对整表，不检查或假装存在900视频。已有异常表拒绝覆盖，原数据目录必须在仓库外：
 

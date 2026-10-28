@@ -94,3 +94,79 @@ def test_table_preparation_refuses_in_repository_data_before_optional_imports(
     with pytest.raises(ValueError, match="External data root"):
         module.prepare_view(tmp_path / "absent-code", snapshot)
     assert list(snapshot.iterdir()) == []
+
+
+def test_acquisition_plan_does_not_download_or_create_paths(tmp_path):
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-I",
+            str(ROOT / "scripts/prepare_videomme_original_assets.py"),
+            "--cache",
+            str(tmp_path / "absent-cache"),
+        ],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    plan = json.loads(result.stdout)
+    assert plan["status"] == "PLAN_ONLY" and plan["original_files"] == 24
+    assert plan["original_release_bytes"] == 101002235118
+    assert not plan["native_media_ready"] and not plan["source_checkbox"]
+    assert list(tmp_path.iterdir()) == []
+
+
+def test_download_refuses_without_explicit_research_terms_and_byte_budget(tmp_path):
+    entry = ROOT / "scripts/prepare_videomme_original_assets.py"
+    base = [
+        sys.executable,
+        "-I",
+        str(entry),
+        "--cache",
+        str(tmp_path / "absent-cache"),
+        "--action",
+        "download",
+    ]
+    result = subprocess.run(base, capture_output=True, text=True)
+    assert result.returncode != 0 and "academic-only" in result.stderr
+    result = subprocess.run(
+        [*base, "--accept-academic-only"], capture_output=True, text=True
+    )
+    assert result.returncode != 0 and "byte budget" in result.stderr
+    assert list(tmp_path.iterdir()) == []
+
+
+def test_annotation_regular_view_does_not_imply_video_acquisition(tmp_path):
+    import hashlib
+
+    spec = importlib.util.spec_from_file_location(
+        "videomme_assets", ROOT / "scripts/prepare_videomme_original_assets.py"
+    )
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    snapshot = tmp_path / "snapshot"
+    snapshot.mkdir()
+    raw = b"software-fixture-only"
+    (snapshot / "fixture.bin").write_bytes(raw)
+    manifest = {
+        "files": [
+            {
+                "path": "fixture.bin",
+                "bytes": len(raw),
+                "sha256": hashlib.sha256(raw).hexdigest(),
+                "role": "data",
+            },
+            {
+                "path": "absent-video.zip",
+                "bytes": 999,
+                "sha256": "fixture-not-publisher",
+                "role": "source_archive",
+            },
+        ]
+    }
+    target = tmp_path / "data-view"
+    assert module.prepare_data_view(snapshot, target, manifest) == 1
+    assert (snapshot / "fixture.bin").samefile(target / "fixture.bin")
+    assert not (target / "absent-video.zip").exists()
+    with pytest.raises(ValueError, match="missing"):
+        module.verify_files(snapshot, manifest["files"])
