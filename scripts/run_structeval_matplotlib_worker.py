@@ -1,4 +1,4 @@
-"""Original Matplotlib component inside a qualified offline container only.
+"""Pinned original Matplotlib/Typst components in qualified offline containers.
 
 Input must be unchanged parsed_code from the author's original workflow. This
 worker does not replace that parser, native generation, syntax scoring or VQA.
@@ -13,8 +13,34 @@ import os
 from pathlib import Path
 import re
 import socket
+import subprocess
+from types import SimpleNamespace
 
 RENDERER_SHA256 = "7c5a37b25df94bf370cc37dda86d269bcc071680a5ec3b07484a777ffee0b09f"  # pragma: allowlist secret - fixed original author module
+RENDERERS = {
+    "matplotlib": (RENDERER_SHA256, "render_matplotlib_and_screenshot"),
+    "typst": (
+        "b6e7bf8e8ebeaca7836cc4d853f7a87772e46e386e38ada07386e0015dd2a39c",  # pragma: allowlist secret - fixed original author module
+        "render_typst_and_screenshot",
+    ),
+}
+
+
+def run_retaining_errors(original_run, *args, **kwargs):
+    """Keep author's exact command/return/exception; retain captured diagnostics."""
+    try:
+        return original_run(*args, **kwargs)
+    except subprocess.CalledProcessError as error:
+        if error.stderr:
+            raw = (
+                error.stderr.encode("utf-8", "replace")
+                if isinstance(error.stderr, str)
+                else error.stderr
+            )
+            os.write(
+                2, b"\nOriginal captured compiler/converter stderr:\n" + raw + b"\n"
+            )
+        raise
 
 
 def require_isolation():
@@ -54,9 +80,11 @@ def require_isolation():
         )
 
 
-def verify_inputs(renderer, code_file, expected_sha256):
+def verify_inputs(renderer, code_file, expected_sha256, renderer_kind="matplotlib"):
+    if renderer_kind not in RENDERERS:
+        raise ValueError("explicit supported original renderer required")
     renderer = Path(renderer).resolve(strict=True)
-    if hashlib.sha256(renderer.read_bytes()).hexdigest() != RENDERER_SHA256:
+    if hashlib.sha256(renderer.read_bytes()).hexdigest() != RENDERERS[renderer_kind][0]:
         raise ValueError("unchanged pinned original renderer required")
     code_file = Path(code_file).resolve(strict=True)
     if not re.fullmatch(r"[0-9a-f]{64}", expected_sha256):
@@ -88,8 +116,9 @@ def execute(args):
         return result
     require_isolation()
     os.umask(0o077)
+    kind = getattr(args, "renderer_kind", "matplotlib")
     renderer, code_file, code = verify_inputs(
-        args.renderer, args.code_file, args.code_sha256
+        args.renderer, args.code_file, args.code_sha256, kind
     )
     if not all(
         os.statvfs(path).f_flag & os.ST_RDONLY for path in (renderer, code_file)
@@ -133,9 +162,12 @@ def execute(args):
             )
             module = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(module)
-            score = module.render_matplotlib_and_screenshot(
-                args.task_id, code, str(output)
-            )
+            if kind == "typst":
+                author_run = module.subprocess.run
+                module.subprocess = SimpleNamespace(
+                    run=lambda *a, **kw: run_retaining_errors(author_run, *a, **kw)
+                )
+            score = getattr(module, RENDERERS[kind][1])(args.task_id, code, str(output))
     finally:
         for target, descriptor in zip((1, 2), saved_fds):
             os.dup2(descriptor, target)
@@ -143,6 +175,8 @@ def execute(args):
     if type(score) is not int or score not in (0, 1):
         raise ValueError("unexpected original renderer result")
     image = output / (args.task_id + ".png")
+    if image.exists() and (not image.is_file() or image.is_symlink()):
+        raise ValueError("nonregular named output retained as resource/protocol block")
     png_valid = False
     if image.is_file() and not image.is_symlink():
         from PIL import Image
@@ -158,7 +192,9 @@ def execute(args):
         render_score=score,
         png_valid=png_valid,
         parsed_code_sha256=args.code_sha256,
-        original_renderer_sha256=RENDERER_SHA256,
+        original_renderer_sha256=RENDERERS[kind][0],
+        renderer_kind=kind,
+        image_present=image.is_file() and not image.is_symlink(),
         original_parser_relation_verified_by_worker=False,
         native_pipeline_complete=False,
     )
@@ -177,6 +213,9 @@ def main():
     parser.add_argument("--code-sha256", required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--execute", action="store_true")
+    parser.add_argument(
+        "--renderer-kind", choices=sorted(RENDERERS), default="matplotlib"
+    )
     args = parser.parse_args()
     try:
         result = execute(args)

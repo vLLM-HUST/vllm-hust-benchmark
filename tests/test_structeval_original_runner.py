@@ -11,7 +11,10 @@ import pytest
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def test_matplotlib_selection_preserves_original_rows_and_requires_rendering():
+@pytest.mark.parametrize("output_type", ["Matplotlib", "Typst"])
+def test_matplotlib_selection_preserves_original_rows_and_requires_rendering(
+    output_type,
+):
     spec = importlib.util.spec_from_file_location(
         "structeval_render_selection", ROOT / "scripts/run_structeval_original_json.py"
     )
@@ -20,7 +23,7 @@ def test_matplotlib_selection_preserves_original_rows_and_requires_rendering():
     rows = [
         {
             "input_type": "Text",
-            "output_type": "Matplotlib",
+            "output_type": output_type,
             "rendering": value,
             "task_id": str(index),
             "VQA": ["original relationship fixture"],
@@ -28,14 +31,17 @@ def test_matplotlib_selection_preserves_original_rows_and_requires_rendering():
         for index, value in enumerate([False, True, True, True])
     ]
     selected, available = runner.select_original_rows(
-        rows, output_type="Matplotlib", rendering=True
+        rows, output_type=output_type, rendering=True
     )
     assert available == 3
     assert [index for index, _ in selected] == [1, 2, 3]
     assert all(row is rows[index] for index, row in selected)
 
 
-def test_matplotlib_cli_requires_explicit_isolated_dispatch_before_data_access():
+@pytest.mark.parametrize("output_type", ["Matplotlib", "Typst"])
+def test_matplotlib_cli_requires_explicit_isolated_dispatch_before_data_access(
+    output_type,
+):
     result = subprocess.run(
         [
             sys.executable,
@@ -47,13 +53,16 @@ def test_matplotlib_cli_requires_explicit_isolated_dispatch_before_data_access()
             "--output",
             "absent",
             "--output-type",
-            "Matplotlib",
+            output_type,
         ],
         capture_output=True,
         text=True,
     )
     assert result.returncode == 2
-    assert "requires both private render queue and pinned image" in result.stderr
+    assert (
+        f"{output_type} requires both private render queue and pinned image"
+        in result.stderr
+    )
 
 
 def test_nonrendering_protocol_selection_keeps_original_rows_and_boundaries():

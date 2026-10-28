@@ -11,7 +11,11 @@ import time
 import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
-from structeval_render_queue import MatplotlibRenderQueue, RenderBlocked
+from structeval_render_queue import (
+    MatplotlibRenderQueue,
+    RenderBlocked,
+    TypstRenderQueue,
+)
 
 
 def test_keyword_parameters_match_the_original_renderer(tmp_path):
@@ -21,6 +25,17 @@ def test_keyword_parameters_match_the_original_renderer(tmp_path):
     assert list(inspect.signature(queue.render).parameters) == [
         "task_id",
         "python_code",
+        "img_output_path",
+    ]
+
+
+def test_typst_keyword_parameters_match_the_original_renderer(tmp_path):
+    queue = TypstRenderQueue(
+        tmp_path, image_root=tmp_path / "images", image="sha256:" + "0" * 64
+    )
+    assert list(inspect.signature(queue.render).parameters) == [
+        "task_id",
+        "typst_code",
         "img_output_path",
     ]
 

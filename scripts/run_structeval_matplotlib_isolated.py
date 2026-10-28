@@ -15,7 +15,7 @@ import subprocess
 import sys
 import uuid
 
-from run_structeval_matplotlib_worker import RENDERER_SHA256, verify_inputs
+from run_structeval_matplotlib_worker import RENDERERS, verify_inputs
 
 OWNER_LABEL = "vllm-hust.structeval-operation"
 
@@ -26,7 +26,16 @@ def docker(*args):
     ).strip()
 
 
-def worker_command(image, operation, software, inputs, task_id, code_sha, outputs):
+def worker_command(
+    image,
+    operation,
+    software,
+    inputs,
+    task_id,
+    code_sha,
+    outputs,
+    renderer_kind="matplotlib",
+):
     return [
         "run",
         "-d",
@@ -80,6 +89,8 @@ def worker_command(image, operation, software, inputs, task_id, code_sha, output
         "--output",
         "/output/job",
         "--execute",
+        "--renderer-kind",
+        renderer_kind,
     ]
 
 
@@ -106,8 +117,10 @@ def export_file(identity, source, destination, maximum):
 
 
 def run(args):
+    kind = getattr(args, "renderer_kind", "matplotlib")
     if (
-        not re.fullmatch(r"sha256:[0-9a-f]{64}", args.image)
+        kind not in RENDERERS
+        or not re.fullmatch(r"sha256:[0-9a-f]{64}", args.image)
         or not re.fullmatch(r"[A-Za-z0-9_-]{1,64}", args.task_id)
         or not 1 <= args.timeout <= 600
     ):
@@ -129,7 +142,7 @@ def run(args):
         raise ValueError("explicitly owned Linux Docker service required")
     os.umask(0o077)
     renderer, code_file, _ = verify_inputs(
-        args.renderer, args.code_file, args.code_sha256
+        args.renderer, args.code_file, args.code_sha256, kind
     )
     output = args.output.resolve()
     repository = Path(__file__).resolve().parents[1]
@@ -163,6 +176,7 @@ def run(args):
         image=args.image,
         timeout_seconds=args.timeout,
         parsed_code_sha256=args.code_sha256,
+        renderer_kind=kind,
     )
 
     def save():
@@ -286,6 +300,7 @@ def run(args):
                 args.task_id,
                 args.code_sha256,
                 outputs,
+                kind,
             )
         )
         result.update(
@@ -338,7 +353,7 @@ def run(args):
         if (
             component.get("task_id") != args.task_id
             or component.get("parsed_code_sha256") != args.code_sha256
-            or component.get("original_renderer_sha256") != RENDERER_SHA256
+            or component.get("original_renderer_sha256") != RENDERERS[kind][0]
             or type(component.get("render_score")) is not int
             or component["render_score"] not in (0, 1)
         ):
@@ -349,7 +364,8 @@ def run(args):
             output / "renderer-private.log",
             64 * 1024**2,
         )
-        if component.get("png_valid"):
+        image_present = component.get("image_present", bool(component.get("png_valid")))
+        if image_present:
             png = output / (args.task_id + ".png")
             export_file(
                 holder,
@@ -358,7 +374,10 @@ def run(args):
                 64 * 1024**2,
             )
             with png.open("rb") as stream:
-                if stream.read(8) != b"\x89PNG\r\n\x1a\n":
+                if (
+                    component.get("png_valid")
+                    and stream.read(8) != b"\x89PNG\r\n\x1a\n"
+                ):
                     raise ValueError("invalid exported PNG signature")
                 stream.seek(0)
                 result["png_sha256"] = hashlib.file_digest(stream, "sha256").hexdigest()
@@ -366,6 +385,7 @@ def run(args):
             status="ORIGINAL_RENDERER_COMPONENT_RETURNED_VQA_PENDING",
             render_score=component["render_score"],
             png_valid=bool(component.get("png_valid")),
+            image_present=image_present,
             timed_out=False,
         )
         save()
@@ -395,6 +415,9 @@ def main():
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--timeout", type=int, default=120)
     parser.add_argument("--execute", action="store_true")
+    parser.add_argument(
+        "--renderer-kind", choices=sorted(RENDERERS), default="matplotlib"
+    )
     args = parser.parse_args()
     try:
         result = run(args)

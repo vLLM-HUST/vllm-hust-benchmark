@@ -543,7 +543,11 @@ Docker服务、原提取结果与新输出父目录就绪后加`--execute`。控
 `configs/workload-native/structeval-typst-cpu.Dockerfile`以已合格的最小Matplotlib软件镜像为基础：将自己的基础镜像身份传给`--build-arg RENDER_BASE=...`，构建目录放入该Dockerfile、`scripts/verify_structeval_typst_environment.py`和从[Typst官方v0.13.1发布页](https://github.com/typst/typst/releases/tag/v0.13.1)取得的ARM64
 musl二进制`typst`。不要把原始任务、模型或生成代码放入构建目录。配方核验观察到的二进制SHA256；此旧发布的GitHub元数据无厂商digest，不能把观察哈希称为厂商签名。
 
-服务器已实际构建并在非root、无网络、只读根文件系统中核验Typst0.13.1、ImageMagick、Ghostscript和字体。为执行原作者PDF转PNG流程，仅开启PDF读权限，PS等规则不放宽；发行版配置的嵌套注释保持不变。原Typst模块在隔离容器中已通过两个可信控制：正常文本返回1并生成2480×3508的PNG，非法Typst语法返回0，两个容器均确认退出。OS软件包版本记录于现有阶段回执，但配方尚未固定apt快照，不能称为作者环境锁或位级可复现环境。**控制夹具不是原始任务；原题及完整VQA尚未验证，不计交付完成。**
+服务器已实际构建并在非root、无网络、只读根文件系统中核验Typst0.13.1、ImageMagick、Ghostscript和字体。为执行原作者PDF转PNG流程，仅开启PDF读权限，PS等规则不放宽；发行版配置的嵌套注释保持不变。原Typst模块在隔离容器中已通过正常文本1/非法语法0两个控制；公共分派入口又通过Typst正常、语法错误、多页缺图和Matplotlib兼容性四项控制，并确认退出与有效结果复用不重新启动。OS软件包版本记录于现有阶段回执，但配方尚未固定apt快照，不能称为作者环境锁或位级可复现环境。
+
+使用原生入口的`--output-type Typst --render-queue /private/queue --render-image sha256:TYPST_IMAGE_ID`；其他输入、模型与预算参数同上。隔离端仍用`run_structeval_render_queue_backend.py`，将`--renderer`指向原`render_typst.py`，它按请求中固定的渲染类型核验源文件与镜像。单独调用控制器或worker时显式加`--renderer-kind typst`，默认仍为Matplotlib，已有Matplotlib请求身份与缓存不改。Typst多页输出可能不生成作者指定名称的PNG：必须保留原渲染器返回1及缺图状态，由原VQA规则处理，不能补造单页图片或改返回值。编译器捕获的stderr只保存在私有运行日志；命令、返回值与异常保持原样，不自动重试，不修补生成代码。
+
+实际固定前三题为原位置234/235/236、ID001401/001402/001406。9B的三次生成均stop，但包含不能编译的Markdown式标题，原渲染分数均0、原最终分数均0.1；原缺图规则使视觉裁判调用数为0。原10字段、8/8/9个问答对、生成提示、原提取结果和27个作者模块已核验。诊断只复用三份失败代码重新编译以保留原先丢失的stderr，没有重新生成、替换题目或覆盖原评分。\*\*这些结果证明失败分支可执行，不证明Typst实际视觉裁判已覆盖，不计来源或新增原题验证完成数。\*\*更强模型配置尚未启动，需在获准且研究空闲后单独验证；不能把控制夹具当原题或用模型生成错误冒充环境成功。
 
 ## Video-MME 原生视频任务
 

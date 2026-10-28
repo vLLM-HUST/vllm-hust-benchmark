@@ -12,7 +12,7 @@ import re
 from types import SimpleNamespace
 
 from run_structeval_matplotlib_isolated import run as run_isolated
-from run_structeval_matplotlib_worker import RENDERER_SHA256
+from run_structeval_matplotlib_worker import RENDERERS
 from structeval_render_queue import publish_new
 
 
@@ -31,6 +31,7 @@ def process(request_path, *, renderer, work_root, image, timeout=120, execute=Fa
         raise ValueError("request filename/content identity mismatch")
     request = json.loads(raw)
     code = request.get("parsed_code")
+    kind = request.get("renderer_kind", "matplotlib")
     if (
         request.get("schema_version") != "structeval-render-request/v1"
         or not isinstance(code, str)
@@ -38,7 +39,8 @@ def process(request_path, *, renderer, work_root, image, timeout=120, execute=Fa
         or not re.fullmatch(r"[A-Za-z0-9_-]{1,64}", request["task_id"])
         or request.get("image") != image
         or not re.fullmatch(r"sha256:[0-9a-f]{64}", image)
-        or request.get("original_renderer_sha256") != RENDERER_SHA256
+        or kind not in RENDERERS
+        or request.get("original_renderer_sha256") != RENDERERS[kind][0]
         or len(code.encode("utf-8")) > 16 * 1024**2
         or hashlib.sha256(code.encode("utf-8")).hexdigest()
         != request.get("parsed_code_sha256")
@@ -72,6 +74,7 @@ def process(request_path, *, renderer, work_root, image, timeout=120, execute=Fa
                 output=output,
                 timeout=timeout,
                 execute=True,
+                renderer_kind=kind,
             )
         )
     if (
@@ -85,7 +88,9 @@ def process(request_path, *, renderer, work_root, image, timeout=120, execute=Fa
             "render_score"
         ] not in (0, 1):
             raise ValueError("invalid original renderer result")
-        if result["render_score"] == 1:
+        if kind != "matplotlib" and result.get("renderer_kind") != kind:
+            raise ValueError("retained original renderer kind differs")
+        if result.get("image_present", result["render_score"] == 1):
             png = output / (request["task_id"] + ".png")
             if (
                 png.is_symlink()

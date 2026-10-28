@@ -11,7 +11,7 @@ from pathlib import Path
 import re
 import time
 
-from run_structeval_matplotlib_worker import RENDERER_SHA256
+from run_structeval_matplotlib_worker import RENDERERS
 
 
 class RenderBlocked(RuntimeError):
@@ -31,7 +31,16 @@ def publish_new(path, raw):
 
 
 class MatplotlibRenderQueue:
-    def __init__(self, root, *, image_root, image, timeout=600, poll_interval=0.2):
+    def __init__(
+        self,
+        root,
+        *,
+        image_root,
+        image,
+        timeout=600,
+        poll_interval=0.2,
+        renderer_kind="matplotlib",
+    ):
         self.root = Path(root).resolve(strict=True)
         self.image_root = Path(image_root).resolve()
         if (
@@ -39,11 +48,13 @@ class MatplotlibRenderQueue:
             or not re.fullmatch(r"sha256:[0-9a-f]{64}", image)
             or timeout <= 0
             or poll_interval <= 0
+            or renderer_kind not in RENDERERS
         ):
             raise ValueError(
                 "private existing queue, pinned image and positive bounds required"
             )
         self.image = image
+        self.renderer_kind = renderer_kind
         self.timeout = timeout
         self.poll_interval = poll_interval
         self.failures = []
@@ -85,10 +96,13 @@ class MatplotlibRenderQueue:
             "schema_version": "structeval-render-request/v1",
             "task_id": task_id,
             "image": self.image,
-            "original_renderer_sha256": RENDERER_SHA256,
+            "original_renderer_sha256": RENDERERS[self.renderer_kind][0],
             "parsed_code": parsed_code,
             "parsed_code_sha256": hashlib.sha256(code).hexdigest(),
         }
+        # Preserve existing Matplotlib request identities for valid retained jobs.
+        if self.renderer_kind != "matplotlib":
+            request["renderer_kind"] = self.renderer_kind
         raw = json.dumps(request, ensure_ascii=False, sort_keys=True).encode("utf-8")
         digest = hashlib.sha256(raw).hexdigest()
         identity = digest[:32]
@@ -153,7 +167,15 @@ class MatplotlibRenderQueue:
                 }
             )
             raise RenderBlocked("original renderer result/provenance mismatch")
-        if score == 1:
+        if (
+            self.renderer_kind != "matplotlib"
+            and result.get("renderer_kind") != self.renderer_kind
+        ):
+            raise ValueError("original renderer kind mismatch")
+        image_present = result.get("image_present", score == 1)
+        if type(image_present) is not bool:
+            raise ValueError("explicit original output-file presence required")
+        if image_present:
             image = self.root / (identity + ".response.png")
             if (
                 not image.is_file()
@@ -191,3 +213,12 @@ class MatplotlibRenderQueue:
             raise RenderBlocked(
                 "original renderer failures may be swallowed upstream; stop before VQA"
             )
+
+
+class TypstRenderQueue(MatplotlibRenderQueue):
+    def __init__(self, root, **kwargs):
+        super().__init__(root, renderer_kind="typst", **kwargs)
+
+    def render(self, task_id, typst_code, img_output_path):
+        """Exact original Typst keyword contract; original score/image can differ."""
+        return super().render(task_id, typst_code, img_output_path)

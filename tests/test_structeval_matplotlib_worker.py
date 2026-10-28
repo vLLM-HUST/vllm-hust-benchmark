@@ -20,6 +20,39 @@ def module():
     return loaded
 
 
+def test_compiler_diagnostic_retains_exact_command_and_return():
+    result = object()
+    command = ["compiler", "original.typ", "original.pdf"]
+
+    def original(actual, **kwargs):
+        assert actual is command
+        assert kwargs == {"check": True, "capture_output": True, "text": True}
+        return result
+
+    assert (
+        module().run_retaining_errors(
+            original, command, check=True, capture_output=True, text=True
+        )
+        is result
+    )
+
+
+def test_compiler_diagnostic_retains_same_exception_without_retry(capfd):
+    error = subprocess.CalledProcessError(
+        1, ["compiler"], stderr="inert compiler fixture"
+    )
+    calls = []
+
+    def original(*args, **kwargs):
+        calls.append((args, kwargs))
+        raise error
+
+    with pytest.raises(subprocess.CalledProcessError) as caught:
+        module().run_retaining_errors(original, ["compiler"], check=True)
+    assert caught.value is error and len(calls) == 1
+    assert "inert compiler fixture" in capfd.readouterr().err
+
+
 def test_plan_has_no_runtime_data_requirement(tmp_path):
     result = subprocess.run(
         [

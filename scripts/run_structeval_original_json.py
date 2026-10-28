@@ -54,7 +54,7 @@ def main():
     parser.add_argument(
         "--output-type",
         default="JSON",
-        choices=["CSV", "JSON", "XML", "YAML", "TOML", "Matplotlib"],
+        choices=["CSV", "JSON", "XML", "YAML", "TOML", "Matplotlib", "Typst"],
     )
     parser.add_argument("--render-queue", type=Path)
     parser.add_argument("--render-image")
@@ -64,7 +64,7 @@ def main():
     parser.add_argument(
         "--all-selected",
         action="store_true",
-        help="All original rows of the explicit non-rendering protocol",
+        help="All original rows of the explicit protocol",
     )
     parser.add_argument(
         "--all-json",
@@ -72,11 +72,15 @@ def main():
         help="All original Text-to-JSON tasks only; excludes format-to-JSON conversions",
     )
     args = parser.parse_args()
-    rendering = args.output_type == "Matplotlib"
+    rendering = args.output_type in {"Matplotlib", "Typst"}
     if rendering != bool(args.render_queue and args.render_image):
-        parser.error("Matplotlib requires both private render queue and pinned image")
+        parser.error(
+            f"{args.output_type} requires both private render queue and pinned image"
+        )
     if not rendering and (args.render_queue or args.render_image):
-        parser.error("render dispatch only supports the explicit Matplotlib protocol")
+        parser.error(
+            "render dispatch only supports explicit Matplotlib/Typst protocols"
+        )
     if args.all_json and (args.input_type != "Text" or args.output_type != "JSON"):
         parser.error("--all-json is only the historical Text-to-JSON selection")
     url = urlparse(args.endpoint)
@@ -164,15 +168,18 @@ def main():
     queue = None
     if rendering:
         import structeval.render_engine.main as render_main
-        from structeval_render_queue import MatplotlibRenderQueue
+        from structeval_render_queue import MatplotlibRenderQueue, TypstRenderQueue
 
-        queue = MatplotlibRenderQueue(
+        queue_class = (
+            TypstRenderQueue if args.output_type == "Typst" else MatplotlibRenderQueue
+        )
+        queue = queue_class(
             args.render_queue,
             image_root=args.output / "official-workflow" / "images",
             image=args.render_image,
             timeout=900,
         )
-        render_main.THREAD_RENDERERS["matplotlib"] = queue.render
+        render_main.THREAD_RENDERERS[args.output_type.lower()] = queue.render
         original_render_file = workflow.render_file_async
 
         async def guarded_render(**kwargs):
