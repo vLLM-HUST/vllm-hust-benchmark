@@ -1,0 +1,46 @@
+{
+  "source_id": "BIGCODEBENCH",
+  "status": "DEDICATED_CPU_CONTAINER_RESOURCE_AND_ISOLATION_PROBE_PASSED_OFFICIAL_IMAGE_PENDING",
+  "source_checkbox_eligible": false,
+  "npu_requested_for_execution_runtime": 0,
+  "docker_version": "29.9.1",
+  "architecture": "aarch64",
+  "dedicated_workspace_home_gib": 80,
+  "dedicated_docker_service_memory_requested_and_limited_gib": 40,
+  "actual_service_cgroup_memory_limit_bytes": 42949672960,
+  "original_persistent_volume_and_preexisting_file_hashes_preserved_across_owned_rebuild": true,
+  "global_active_template_unchanged": true,
+  "other_workspaces_updated": false,
+  "harmless_probe": {
+    "actual_exit_code": 0,
+    "nonroot": true,
+    "capabilities_empty": true,
+    "no_new_privileges": true,
+    "seccomp_filter": true,
+    "readonly_root_and_input": true,
+    "network_unreachable": true,
+    "npu_and_docker_socket_absent": true,
+    "container_memory_limit_bytes": 34359738368,
+    "address_space_and_data_limit_bytes": 32212254720,
+    "stack_limit_bytes": 10485760,
+    "cpu_limit": 1,
+    "generated_or_reference_task_code_executed": false
+  },
+  "actual_failure_and_fix": {
+    "unsupported_docker_flag": "--ulimit as=32212254720:32212254720",
+    "failed_cli_exit_code": 125,
+    "fix": "Remove unsupported Docker as flag; set and verify identical RLIMIT_AS in isolated worker before importing or executing original author scoring",
+    "original_memory_budget_reduced": false,
+    "failure_retained_privately": true
+  },
+  "official_evaluation_image_qualified": false,
+  "official_sanitize_or_functional_scoring_executed": false,
+  "new_model_calls": 0,
+  "remaining": [
+    "Prepare and qualify immutable original Python3.10 evaluation image with complete publisher dependencies",
+    "Verify client-to-daemon data staging for the independent Docker filesystem",
+    "Execute unchanged original sanitizer and functional scorer on saved fixed completions",
+    "Verify original reference checks, saved scoring and final provider/research handoff"
+  ],
+  "boundary": "Bounded harmless software/resource qualification, not a security certification, native task scoring or source completion. No generated code executed on a host; no HumanEval results rerun. Private platform identities and raw tasks are not published."
+}

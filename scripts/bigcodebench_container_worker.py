@@ -16,6 +16,18 @@ def require(condition, message):
         raise RuntimeError(message)
 
 
+def set_address_space_limit():
+    """Docker has no --ulimit as; retain the original30GiB limit in worker."""
+    import resource
+
+    bound = 30 * 1024**3
+    resource.setrlimit(resource.RLIMIT_AS, (bound, bound))
+    require(
+        resource.getrlimit(resource.RLIMIT_AS) == (bound, bound),
+        "original30GiB address-space limit not enforced",
+    )
+
+
 def assert_isolation(host_namespaces):
     require(
         sys.platform == "linux" and os.getpid() == 1 and os.geteuid() != 0,
@@ -152,6 +164,7 @@ def run_official_steps(commands, selected_ids, sanitized):
 def evaluate():
     control = json.loads(Path("/inputs/control-private.json").read_text())
     assert_isolation(control["host_namespaces"])
+    set_address_space_limit()
     plan = control["plan"]
     for name, expected in plan["publisher_source_checksums"].items():
         require(

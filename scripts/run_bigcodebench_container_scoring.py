@@ -45,8 +45,6 @@ def container_command(engine, image, name, work, uid, environment):
         "--memory-swap",
         "32g",
         "--ulimit",
-        "as=32212254720:32212254720",
-        "--ulimit",
         "data=32212254720:32212254720",
         "--ulimit",
         "stack=10485760:10485760",

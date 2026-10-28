@@ -5,6 +5,7 @@ import json
 import importlib.util
 from pathlib import Path
 import sys
+from types import SimpleNamespace
 
 import pytest
 
@@ -38,7 +39,8 @@ def test_container_flags_are_offline_nonroot_bounded_and_private(tmp_path):
     assert command[command.index("--user") + 1] == "65534:65534"
     assert command[command.index("--memory") + 1] == "32g"
     assert command[command.index("--pids-limit") + 1] == "1024"
-    assert "as=32212254720:32212254720" in command
+    assert not any(value.startswith("as=") for value in command)
+    assert "data=32212254720:32212254720" in command
     mounts = [command[i + 1] for i, x in enumerate(command) if x == "--mount"]
     assert len(mounts) == 3
     assert sum(m.endswith(",readonly") for m in mounts) == 2
@@ -99,6 +101,21 @@ def test_environment_or_coverage_failure_cannot_be_accepted(failure):
 def test_worker_refuses_current_unqualified_host_before_import():
     with pytest.raises(RuntimeError, match="private nonroot PID1"):
         worker.assert_isolation({})
+
+
+def test_address_space_budget_is_set_in_worker_not_unsupported_docker_flag(monkeypatch):
+    calls = []
+    resource = SimpleNamespace(
+        RLIMIT_AS=9,
+        setrlimit=lambda key, limits: calls.append((key, limits)),
+        getrlimit=lambda key: (30 * 1024**3, 30 * 1024**3),
+    )
+    monkeypatch.setitem(sys.modules, "resource", resource)
+    worker.set_address_space_limit()
+    assert calls == [(9, (32212254720, 32212254720))]
+    resource.getrlimit = lambda key: (1, 1)
+    with pytest.raises(RuntimeError, match="not enforced"):
+        worker.set_address_space_limit()
 
 
 def test_cli_import_probe_is_separate_from_candidate_execution(monkeypatch):
