@@ -82,20 +82,53 @@ def source_repository(argv):
         "scripts/prepare_swe_bench_pro_environment.py",
         "scripts/run_swe_bench_pro.py",
     ]
+    trees = {}
+
+    def tree_entries(tree):
+        if tree not in trees:
+            request = urllib.request.Request(
+                api + "/git/trees/" + tree, headers=request_headers
+            )
+            with urllib.request.urlopen(request, timeout=30) as response:
+                result = json.load(response)
+            if result.get("truncated"):
+                raise ValueError("source Git tree is truncated")
+            trees[tree] = {entry["path"]: entry for entry in result["tree"]}
+        return trees[tree]
+
     for relative in files:
+        tree = revision
+        for component in Path(relative).parts[:-1]:
+            entry = tree_entries(tree)[component]
+            if entry["type"] != "tree":
+                raise ValueError("source parent is not a Git tree: " + relative)
+            tree = entry["sha"]
+        blob = tree_entries(tree)[Path(relative).name]
+        if blob["type"] != "blob":
+            raise ValueError("source is not a Git blob: " + relative)
         path = directory / relative
         if path.exists():
             if receipt["files"].get(relative) != sha256(path):
                 raise ValueError("installed source changed: " + relative)
+            verify_git_blob(path, blob)
             continue
         path.parent.mkdir(parents=True, exist_ok=True)
         headers = {
             "Accept": "application/vnd.github.raw+json",
             "User-Agent": "swe-bench-pro-bootstrap",
         }
-        download(
-            api + "/contents/" + relative + "?ref=" + revision, path, headers=headers
-        )
+        for attempt in range(3):
+            try:
+                download(
+                    api + "/contents/" + relative + "?ref=" + revision,
+                    path,
+                    headers=headers,
+                    git_blob=blob,
+                )
+                break
+            except (OSError, ValueError):
+                if attempt == 2:
+                    raise
         receipt["files"][relative] = sha256(path)
         receipt_path.write_text(json.dumps(receipt, indent=2) + "\n")
     print("SOURCE_COMMIT " + revision, flush=True)
@@ -110,7 +143,14 @@ def sha256(path):
     return h.hexdigest()
 
 
-def download(url, path, expected=None, headers=None):
+def verify_git_blob(path, blob):
+    data = path.read_bytes()
+    digest = hashlib.sha1(b"blob " + str(len(data)).encode() + b"\0" + data).hexdigest()
+    if len(data) != blob["size"] or digest != blob["sha"]:
+        raise ValueError("source size or Git blob SHA differs: " + str(path))
+
+
+def download(url, path, expected=None, headers=None, git_blob=None):
     if path.exists():
         if expected and sha256(path) == expected:
             return
@@ -126,6 +166,8 @@ def download(url, path, expected=None, headers=None):
         shutil.copyfileobj(response, output)
     if expected and sha256(temporary) != expected:
         raise ValueError("download SHA256 differs: " + str(path))
+    if git_blob is not None:
+        verify_git_blob(temporary, git_blob)
     temporary.replace(path)
 
 
