@@ -180,6 +180,67 @@ pickle，只能在合格隔离容器中交给官方加载流程，不能在宿�
 `cc`，具体许可待核实，不公开再分发原文件。原生代码生成、自修复、代码执行、测试输出预测的执行环境、预算和评分闭环尚未完成；不得把下载/读取成功作为 benchmark
 跑通。进度以[唯一清单](../docs/workload-data/DATASET_CHECKLIST.zh-CN.md)为准。
 
+### LiveCodeBench 代码生成原生链路
+
+以下是**代码生成单场景**的入口，不代表自修复、代码执行、测试输出预测也已交付。实际验证状态见[准备与运行回执](../docs/workload-data/validation/livecodebench-original-readiness-20261028.json)。所有路径均为服务器数据盘路径示例，CPU隔离评分节点和NPU推理节点可分开；不要在本地下载原始数据或模型。
+
+在CPU节点下载固定作者源码压缩包至新的外部路径；工作进程会核验固定SHA256，不接受任意源码版本：
+
+```bash
+test ! -e /private/lcb-source.tar.gz && curl --fail --location \
+  --output /private/lcb-source.tar.gz \
+  https://codeload.github.com/LiveCodeBench/LiveCodeBench/tar.gz/28fef95ea8c9f7a547c8329f2cd3d32b92c1fa24
+```
+
+构建固定Python3.10.22/aarch64的CPU API客户端与原生评分环境，只将两份公开环境文件放入构建上下文，不放数据、模型或整个仓库：
+
+```bash
+LCB_CONTEXT=$(mktemp -d)
+cp configs/workload-native/livecodebench-api-cpu.Dockerfile \
+  configs/workload-native/livecodebench-api-cpu.lock.txt "$LCB_CONTEXT/"
+DOCKER_BUILDKIT=0 docker build \
+  -f "$LCB_CONTEXT/livecodebench-api-cpu.Dockerfile" \
+  -t workload-native/livecodebench-api-cpu "$LCB_CONTEXT"
+LCB_IMAGE=$(docker image inspect --format '{{.Id}}' workload-native/livecodebench-api-cpu)
+```
+
+这是API/评分专用环境，不声称安装上游全部CUDA/vLLM/云供应商依赖；模型由独立NPU推理服务提供。Anthropic包是官方提示模块的直接导入依赖，不代表调用外部服务。
+
+将前文准备的原题交给隔离容器生成官方generic API提示，保持实际模型标识，不冒用GPT名称。此步骤不请求模型：
+
+```bash
+python scripts/run_livecodebench_container_scoring.py \
+  --prepared-dir /private/livecodebench-original-tasks \
+  --author-archive /private/lcb-source.tar.gz --image "$LCB_IMAGE" \
+  --work-root /private/lcb-prompts --model Qwen/Qwen3.5-9B \
+  --prepare-prompts --execute
+```
+
+将 `/private/lcb-prompts/native-output/results/requests-private.json`
+通过服务器间传输放到NPU节点；协调好设备使用窗口、核验服务身份与空闲后，在该节点运行：
+
+```bash
+python scripts/run_livecodebench_original_generation.py \
+  --prompts /private/lcb-requests.json --output /private/lcb-generation \
+  --endpoint http://127.0.0.1:19466/v1 --disable-thinking --timeout 1200 --execute
+```
+
+每题保留官方10个候选、2000生成token、temperature0.2和top_p0.95。`--disable-thinking`
+是本次Qwen非思考配置；不适用其他模型时不要盲目沿用。默认HTTP等待90秒，本次因通信等待超时显式设置1200秒，**不是提高生成预算或官方评分时限**。首次90秒失败证据保留，不替换原题；任何请求失败停止，不隐藏重试、不换题凑通过。全部请求和原始响应保存在外部输出目录，生成代码此时不执行。
+
+将完整 `/private/lcb-generation` 目录传回CPU节点，按保存响应执行官方提取器与评分器，不重新推理：
+
+```bash
+python scripts/run_livecodebench_container_scoring.py \
+  --prepared-dir /private/livecodebench-original-tasks \
+  --generations-dir /private/lcb-generation \
+  --author-archive /private/lcb-source.tar.gz --image "$LCB_IMAGE" \
+  --work-root /private/lcb-codegen-scoring --model Qwen/Qwen3.5-9B --execute
+```
+
+工作进程会重建官方原始提示并核对保存请求、原题ID、候选索引和完整测试绑定；原CLI的12个评分worker和每测试6秒设置不变。生成代码与私有测试解码只在无网络、非root、只读根文件系统容器内运行。容器使用32GiB内存上限及独立输入只读/输出可写卷；仅新建输出卷的所有权初始化使用最小CHOWN/FOWNER权限，不在宿主机执行生成代码。需有授权的Linux
+Docker节点和足够内存；不满足时标阻塞，不能退回宿主机执行。评分不要求模型答对；原始失败与截断输出保留，不能将抽样成绩解释为论文复现、全量质量或引擎性能。
+
 ## Video-MME 原生视频任务
 
 这是发布方原始Video-MME与固定VLMEvalKit的两个已有配置：`Video-MME_8frame`和`Video-MME_8frame_subs`，不是把64帧配置临时减成8帧。原2700题/900视频全部保留；默认每种duration取最先3个不同视频并保留每视频全部3题，每配置27题。选题在推理前固定，不因失败换题；`--full`才选择全部2700题。

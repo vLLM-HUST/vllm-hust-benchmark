@@ -20,7 +20,7 @@ Windows。官方直连返回连接拒绝后，经显式镜像传输获取同一�
 `bb83f1c3c643a772b7a2a8f07bd62c2aab76be8f`，`test.jsonl` 为9,375,644,586字节，现已由公共获取入口完整下载至服务器
 `/root/livecodebench-full-original-data-20261028-001` 并通过原始LFS SHA256校验，退出码0。固定原顺序前3题
 `abc301_f`、`abc301_a`、`abc301_c`
-已由公共准备入口保留全部11字段及不解码的完整私有测试，退出码0；尚未运行模型或评分。证据见[准备回执](validation/livecodebench-original-readiness-20261028.json)。数据卡仅标注
+已由公共准备入口保留全部11字段及不解码的完整私有测试，退出码0；现已完成这3题的30候选原始生成、原评分器评分与独立保存结果核验。证据见[分阶段回执](validation/livecodebench-original-readiness-20261028.json)。数据卡仅标注
 `license: cc`，不能据此推断具体 CC 条款或随意再分发；代码 MIT 许可不替代数据许可。
 
 - [x] 核查
@@ -28,6 +28,8 @@ Windows。官方直连返回连接拒绝后，经显式镜像传输获取同一�
   和 `runner/oai_runner.py`。
 - [x] 三个固定版本的原文件已取得并校验，固定前3题已按原字段完整准备；未将准备完成当作原生交付。
 - [x] 固定3题已在无网络、非root、只读根文件系统的隔离容器中通过官方题目构造器和完整测试绑定检查，原公开加私有测试分别为27、15、34条，未减少测试。这里只验证格式兼容，不代表原生环境整体合格或已生成/评分。
+- [x] 公开CPU环境配方实际构建、53个依赖版本及原模块导入核验通过；公开提示准备入口输出与实际NPU请求逐字节一致。
+- [x] 代码生成固定3题×10候选已在现有Qwen3.5-9B上完成推理和官方隔离评分，7/30候选正确；21个length输出全部保留，不能当作模型质量或论文复现证据。首次90秒通信超时保留，仅将后续通信等待显式改为1200秒，生成2000-token预算与评分6秒时限未改。评分输出和指标独立核验通过，不重跑推理。
 - [ ] 固定原始数据仓库 revision、原文件哈希及许可。默认加载器使用 `code_generation_lite`；`--not_fast` 对应 `code_generation`
   完整测试。当前完整加载函数虽然接收 `release_version`，却未将它传给数据加载器，不能仅凭命令参数声称固定发布版本。
 - [ ] 在隔离容器中加载原生题目和评分。私有测试字段可能经 base64、zlib 和 pickle 解码，禁止在宿主机反序列化；测试输出预测的原评分器也使用
@@ -908,7 +910,7 @@ TB；服务器/data约1.42TB可用，未缩小语料。ChartQA当前两卡主机
 | AGENTBENCH                 | [ ] 等研究窗口后续跑                       | 官方FC ALFWorld前三组全41题已审计：复用0–2、新执行3–40，保留失败及原评分；剩68题待验证，不启动下一组、不冒充AgentBench整套完成。[回执](validation/agentbench-original-complete-groups-audit-20261024.json)                                                                                                                                                                                                                                                                |
 | SCHEMASTORE                | [x] 原schema资产已完成                     | 原4810文件全核验，官方CLI测试976 schemas exit0；全1006 schema/3688正负例引用及索引、精确CI45文件和固定研究端16 schema/70例子字节回查通过。[回执](validation/schemastore-native-delivery-20261027.json)。非LLM请求/质量benchmark。                                                                                                                                                                                                                                         |
 | JSONSCHEMABENCH            | [x] 原生固定协议交付                       | 11原配置全部核验：WashingtonPost全38，其余9具名及default各原前3，共68配置视图任务；原bench/evaluator及逐项重评通过。33原文件19100视图行/索引、99处固定提供者/研究回查通过。旧生成复用，不称全量推理、统一后端性能或模型质量达标。[交付回执](validation/jsonschemabench-official-workflow-readiness-20261024.json)                                                                                                                                                         |
-| LIVECODEBENCH              | [ ] 原生协议核查中                         | 已核查官方加载器、API runner 和默认预算；尚未下载原始数据、执行模型或评分，不能计为已交付。见下方接入约束。                                                                                                                                                                                                                                                                                                                                                               |
+| LIVECODEBENCH              | [ ] 代码生成实测，来源闭环待补             | 三份原文件已取得校验；公开环境和入口完成3题×10候选的原始生成/隔离评分与保存结果审计。其余三个原生场景、研究消费和实际CI工件闭环待补；不能计为整个来源已交付。见上方分阶段记录。                                                                                                                                                                                                                                                                                           |
 | HUMANEVAL                  | [x] 已交付                                 | 原前三题NPU生成结果复用，公共隔离入口官方评分2/3，失败保留；164题原字段公共/研究消费相等，原3题索引消费相等。不是全164题模型成绩。见[回执](validation/humaneval-native-delivery-20261025.json)。                                                                                                                                                                                                                                                                          |
 | MBPP                       | [x] full原生抽样可用                       | 原题11/12/13双NPU生成、原始三测试与setup隔离CodeEval：参考解均通过，预测2通过/1失败原样保留；974原记录完整映射/索引，14处公共/研究回查一致，精确CI安装工件已核。[证据](validation/mbpp-original-native-sample-20261026.json)；非全500题，sanitized仅取得资产。                                                                                                                                                                                                            |
 | REPOBENCH                  | [x] 固定原生抽样交付完成                   | 官方默认30层各3题共90原题NPU生成/原评分及保存审计完成；49684原行与60研究回读复用，47实际CI安装载荷重新核对。固定评分哈希种子0，EM均0保留，不是质量验收。见[交付回执](validation/repobench-native-delivery-20261027.json)。                                                                                                                                                                                                                                                |

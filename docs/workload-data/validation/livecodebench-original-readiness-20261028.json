@@ -1,10 +1,11 @@
 {
   "source_id": "LIVECODEBENCH",
   "recorded_at": "2026-10-28",
-  "status": "ALL_THREE_PINNED_ORIGINAL_ASSETS_ACQUIRED_NATIVE_EXECUTION_PENDING",
+  "status": "ORIGINAL_CODEGEN_SAMPLE_SCORED_OTHER_SCENARIOS_AND_CONSUMER_PENDING",
   "source_checkbox_eligible": false,
   "native_execution_complete": false,
-  "model_calls": 0,
+  "model_calls": 4,
+  "model_call_count_scope": "HTTP attempts: one retained 90-second timeout and three completed requests;30 saved candidate outputs, not40 completed outputs",
   "raw_payloads_published": false,
   "research_analysis_migrated": false,
   "original_file_identities": "workload-preparation/data/catalogs/source_manifests_v1.json#sources.LIVECODEBENCH",
@@ -54,6 +55,43 @@
     "retained_prior_failure": "Initial read-only-root Docker copy staging rejected before author code/task loading; fixed using separate named-volume staging and read-only mount, without weakening runtime rootfs isolation.",
     "boundary": "Original task-format compatibility only, using existing qualified CPU image. This does not establish the separate complete LiveCodeBench runtime environment, generation, grading or research consumer delivery."
   },
+  "public_api_environment": {
+    "dockerfile": "configs/workload-native/livecodebench-api-cpu.Dockerfile",
+    "lock": "configs/workload-native/livecodebench-api-cpu.lock.txt",
+    "build_actual_exit_code": 0,
+    "verified_pinned_distributions": 53,
+    "original_module_qualification_exit_code": 0,
+    "pip_check_exit_code": 0,
+    "scope": "CPU API transport and original grader modules; inference external NPU. Not upstream whole CUDA/vLLM/main CLI environment.",
+    "private_qualification": "/root/livecodebench-public-api-qualification-20261028-001/audit-public.json"
+  },
+  "code_generation_native_sample": {
+    "model": "Qwen/Qwen3.5-9B",
+    "model_mode": "explicit non-thinking on existing unchanged BF16 TP1 NPU service",
+    "prompt_style": "Official OpenAIChat generic API template with actual Qwen model identifier",
+    "public_prompt_preparation_exit_code": 0,
+    "public_prepared_requests_byte_equal_actual_used_requests": true,
+    "completed_question_ids": ["abc301_f", "abc301_a", "abc301_c"],
+    "sample_boundary": "Fixed first3 rows, all from AtCoder ABC301; not all platforms, all difficulty coverage or full source evaluation",
+    "completed_candidates_per_question": [10, 10, 10],
+    "generation_actual_exit_code": 0,
+    "transport_timeout_seconds": 1200,
+    "retained_first_attempt": "90-second default HTTP timeout before any saved response; same original task retained, no budget reduction, no task substitution or hidden automatic retries",
+    "finish_reasons": {"length": 21, "stop": 9},
+    "scoring_actual_exit_code": 0,
+    "passed_candidates_per_question": [0, 6, 1],
+    "sample_metrics": {"pass@1": 0.23333333333333328, "pass@5": 0.5, "pass@10": 0.6666666666666666},
+    "metric_scope": "Original scorer on fixed3 tasks with all original tests bound and author early-failure behavior retained. 21 length-limited candidates remain unmodified; not recommended-model quality, full benchmark, paper-score or performance evidence.",
+    "worker": "scripts/livecodebench_container_worker.py",
+    "generation_entry": "scripts/run_livecodebench_original_generation.py",
+    "container_entry": "scripts/run_livecodebench_container_scoring.py",
+    "independent_saved_output_audit_exit_code": 0,
+    "independent_audit_additional_model_or_task_execution": false,
+    "private_generation": "/data/shared_upload/hust-phr/workload-benchmark-native-delivery-20261024/livecodebench-original-native-generation-32028-002",
+    "private_scoring": "/root/livecodebench-original-native-scoring-20261028-002",
+    "private_saved_audit": "/root/livecodebench-saved-codegen-audit-20261028-001/audit-public.json",
+    "retained_staging_failures": "First public prompt preparation falsely counted sysfs bonding_masters as an interface, fixed using actual /proc/net/dev; first scoring attempt blocked by copied input-directory umask, fixed only fresh staging traversal mode. Both failed before generated code evaluation; no inference rerun for these fixes."
+  },
   "native_protocol_boundaries": {
     "code_generation_samples_per_question": 10,
     "temperature": 0.2,
@@ -65,10 +103,7 @@
     "scope": "Code generation, self-repair, code execution and test-output prediction require separately evidenced native coverage. Assets and task preparation are not benchmark delivery."
   },
   "remaining": [
-    "Reproducible qualified API client and isolated native scoring environment",
-    "Original prompts and extraction bound to actual suitable NPU model identity",
-    "Fixed-sample native generation, complete test execution and original scoring",
     "Self-repair with real original feedback and other two original scenarios",
-    "Independent saved-output audit and maintained research consumer roundtrip"
+    "Public original-field adapter/index, maintained research consumer roundtrip and actual current CI artifact verification"
   ]
 }

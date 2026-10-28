@@ -196,6 +196,12 @@ on:
       - 'scripts/prepare_reused_research_assets.py'
       - 'scripts/prepare_livecodebench_original_tasks.py'
       - 'tests/test_livecodebench_original_preparation.py'
+      - 'scripts/run_livecodebench_original_generation.py'
+      - 'scripts/livecodebench_container_worker.py'
+      - 'scripts/run_livecodebench_container_scoring.py'
+      - 'tests/test_livecodebench_original_generation.py'
+      - 'configs/workload-native/livecodebench-api-cpu.Dockerfile'
+      - 'configs/workload-native/livecodebench-api-cpu.lock.txt'
       - 'scripts/prepare_reused_source_records.py'
       - 'scripts/verify_infinitebench_original_code.py'
       - 'scripts/run_infinitebench_original.py'
@@ -399,7 +405,7 @@ jobs:
       - name: BigCodeBench CPU image contract fixtures, no image build or task execution
         run: python -m pytest -q tests/test_bigcodebench_cpu_environment.py
       - name: LiveCodeBench opaque original task preparation fixtures, no task execution
-        run: python -m pytest -q tests/test_livecodebench_original_preparation.py
+        run: python -m pytest -q tests/test_livecodebench_original_preparation.py tests/test_livecodebench_original_generation.py
       - name: Author JSONSchemaBench local Engine interface fixtures
         run: python -m pytest -q tests/test_jsonschemabench_local_engine.py tests/test_jsonschemabench_environment_probe.py tests/test_jsonschemabench_original_assets.py tests/test_jsonschemabench_official_runner.py tests/test_jsonschemabench_original_records.py tests/test_xsum_original_runner.py
       - name: Verify exact current-source wheel payload
