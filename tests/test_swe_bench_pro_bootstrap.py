@@ -39,11 +39,10 @@ def test_standalone_source_list_covers_runtime_package_imports():
                 modules = [node.module.split(".")[1]]
             for module in modules:
                 dependency = package / (module + ".py")
-                if dependency.is_file():
-                    assert str(dependency.relative_to(ROOT)) in declared, (
-                        relative,
-                        module,
-                    )
+                assert str(dependency.relative_to(ROOT)) in declared, (
+                    relative,
+                    module,
+                )
 
 
 def test_standalone_runtime_imports_without_the_repository_on_python_path(tmp_path):
@@ -199,6 +198,7 @@ def test_standalone_installer_pins_source_and_refuses_changed_files(
             "_version.py",
             "swe_bench_pro.py",
             "swe_bench_pro_inputs.py",
+            "swe_bench_pro_grading.py",
             "swe_bench_pro_timing.py",
             "swe_submodule_fixture.py",
             "data/",

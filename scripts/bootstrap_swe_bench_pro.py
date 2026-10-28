@@ -30,6 +30,7 @@ RUNTIME_SOURCE_FILES = [
     "src/vllm_hust_benchmark/_version.py",
     "src/vllm_hust_benchmark/swe_bench_pro.py",
     "src/vllm_hust_benchmark/swe_bench_pro_inputs.py",
+    "src/vllm_hust_benchmark/swe_bench_pro_grading.py",
     "src/vllm_hust_benchmark/swe_bench_pro_timing.py",
     "src/vllm_hust_benchmark/swe_submodule_fixture.py",
     "src/vllm_hust_benchmark/data/swe_bench_pro_v1_lock.json",
