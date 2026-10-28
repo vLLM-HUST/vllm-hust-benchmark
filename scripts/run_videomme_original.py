@@ -8,6 +8,7 @@ import argparse
 import copy
 import csv
 import hashlib
+import importlib.metadata
 import json
 import os
 from pathlib import Path
@@ -18,6 +19,22 @@ from prepare_videomme_original_view import REVISION, ROOT, prepare_view
 from run_chartqa_original import validate_completion, validate_endpoint
 
 PROFILES = {"Video-MME_8frame": False, "Video-MME_8frame_subs": True}
+
+
+def prepare_subtitle_dependency(overlay=None):
+    if overlay is not None:
+        overlay = Path(overlay).resolve(strict=True)
+        if not overlay.is_dir() or overlay.is_relative_to(ROOT):
+            raise ValueError("External isolated subtitle dependency directory required")
+        sys.path.insert(0, str(overlay))
+    import pysubs2
+
+    if importlib.metadata.version("pysubs2") != "1.8.0":
+        raise ValueError("Qualified pysubs2==1.8.0 required, never auto-upgrade")
+    if overlay is not None and not Path(pysubs2.__file__).resolve().is_relative_to(
+        overlay
+    ):
+        raise ValueError("Subtitle import did not use the declared isolated overlay")
 
 
 def pin_native_cache(snapshot):
@@ -117,6 +134,11 @@ def main():
     parser.add_argument("--snapshot", type=Path, required=True)
     parser.add_argument("--media-receipt", type=Path, required=True)
     parser.add_argument("--frame-cache", type=Path, required=True)
+    parser.add_argument(
+        "--subtitle-overlay",
+        type=Path,
+        help="Optional external pysubs2==1.8.0 target installation",
+    )
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--model", required=True)
     parser.add_argument("--profile", choices=PROFILES, required=True)
@@ -176,6 +198,8 @@ def main():
         snapshot, json.loads(args.media_receipt.read_text("utf-8")), required_paths
     )
     cache = pin_native_cache(snapshot)
+    if PROFILES[args.profile]:
+        prepare_subtitle_dependency(args.subtitle_overlay)
     sys.dont_write_bytecode = True
     os.environ.update(
         LMUData=str(frames),

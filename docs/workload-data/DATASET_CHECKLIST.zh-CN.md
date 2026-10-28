@@ -108,6 +108,15 @@ python -m pip --isolated install --no-deps --only-binary=:all: --require-hashes 
 python scripts/run_videomme_original.py --official-checkout /external/VLMEvalKit --snapshot /external/hf-cache/datasets--lmms-lab--Video-MME/snapshots/ead1408f75b618502df9a1d8e0950166bf0a2a0b --media-receipt /external/videomme-native-media-receipt.json --frame-cache /external/videomme-frames --output /external/videomme-8frame-run --model Qwen/Qwen3.5-9B --profile Video-MME_8frame
 ```
 
+运行环境须使用独立CPU解码/API客户端，不能往在用NPU服务中装评测依赖。服务器实测Python3.12客户端：torch2.10.0+cpu、Decord0.6.0、pandas3.0.5及外部FFmpeg动态库，原工具包和评分/API类导入通过；`/v1/models`只读确认既有Qwen3.5-9B服务存在，不代表已执行视频。原工具包找不到可选`.env`时会打印提示，本地服务不需要因此创建外部凭据或付费judge。
+
+带字幕配置显式传入已按上述哈希安装的独立字幕目录，入口检查pysubs2==1.8.0及实际模块来源，不自动升级。无字幕配置不加载该overlay。先建立外部帧缓存、在进程启动时提供已准备好的FFmpeg库位置，再使用原配置；以下仍默认计划，不发模型请求：
+
+```bash
+mkdir -p /external/videomme-frames
+LD_LIBRARY_PATH=/external/ffmpeg/lib python -B scripts/run_videomme_original.py --official-checkout /external/VLMEvalKit --snapshot /external/hf-cache/datasets--lmms-lab--Video-MME/snapshots/ead1408f75b618502df9a1d8e0950166bf0a2a0b --media-receipt /external/videomme-native-media-receipt.json --frame-cache /external/videomme-frames --subtitle-overlay /external/videomme-subtitle-overlay --output /external/videomme-8frame-subs-run --model Qwen/Qwen3.5-9B --profile Video-MME_8frame_subs
+```
+
 ### LongVideoBench长视频交错理解（原协议已审，数据授权待完成）
 
 - [x] 2026-10-28复核[官方数据页](https://huggingface.co/datasets/longvideobench/LongVideoBench)及[原生软件](https://github.com/longvideobench/LongVideoBench)：6678题，validation1337/test5341；长视频、字幕与图像交错关系属于原任务，不能用Video-MME替代，不构造纯文本题冒充。

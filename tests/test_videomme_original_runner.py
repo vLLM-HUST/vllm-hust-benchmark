@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 import subprocess
 import sys
+from types import SimpleNamespace
 
 import pytest
 
@@ -93,3 +94,25 @@ def test_readiness_never_comes_from_annotation_only_receipt(tmp_path, runner):
         runner.check_media_receipt(
             tmp_path, {"source_id": "VIDEOMME", "model_calls": 0}
         )
+
+
+def test_subtitle_overlay_is_explicit_and_version_checked(
+    tmp_path, runner, monkeypatch
+):
+    overlay = tmp_path / "overlay"
+    overlay.mkdir()
+    fake = SimpleNamespace(__file__=str(overlay / "pysubs2/__init__.py"))
+    monkeypatch.setitem(sys.modules, "pysubs2", fake)
+    monkeypatch.setattr(runner.importlib.metadata, "version", lambda name: "1.8.0")
+    monkeypatch.setattr(sys, "path", sys.path.copy())
+    runner.prepare_subtitle_dependency(overlay)
+    assert sys.path[0] == str(overlay.resolve())
+    monkeypatch.setattr(
+        runner.importlib.metadata, "version", lambda name: "0.0-fixture"
+    )
+    with pytest.raises(ValueError, match="never auto-upgrade"):
+        runner.prepare_subtitle_dependency(overlay)
+    monkeypatch.setattr(runner.importlib.metadata, "version", lambda name: "1.8.0")
+    fake.__file__ = str(tmp_path / "other-pysubs2/__init__.py")
+    with pytest.raises(ValueError, match="declared isolated overlay"):
+        runner.prepare_subtitle_dependency(overlay)
