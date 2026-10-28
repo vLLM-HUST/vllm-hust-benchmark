@@ -21,6 +21,12 @@
     {"source_id": "PAIO-SEMANTIC-SIMILAR-5000", "asset_group": "enterprise-private-requests", "related_workload_ids": [], "boundary": "Semantic similarity is not exact-prefix or KV reuse; preserve original private requests without rewriting."}
   ],
   "source_entrypoints": {
+    "MVBENCH": [
+      {"role": "prepare_assets", "path": "scripts/prepare_mvbench_original_assets.py", "scope": "Fixed complete original video snapshot and external regular-file data view; plan by default, no model calls"},
+      {"role": "prepare_assets", "path": "scripts/prepare_mvbench_original_view.py", "scope": "Unchanged author full4000 TSV generation and table identity validation; no model calls"},
+      {"role": "original_profile", "path": "configs/workload-native/mvbench-original-protocol.json", "scope": "Pinned official20-type video task view and fixed original first3 per type,16 frames"},
+      {"role": "generation", "path": "scripts/run_mvbench_original.py", "scope": "Original role preprocessing, video prompt/API encoder and exact_matching scorer; default fixed60, explicit --full all4000; no performance claim"}
+    ],
     "DISCOVERYBENCH": [
       {"role": "prepare_assets", "path": "scripts/prepare_discoverybench_original_assets.py", "scope": "Fixed unchanged official Git tree, original real/synth tasks and native protocol; external acquisition or read-only reuse. No Agent execution, scoring or source completion."}
     ],

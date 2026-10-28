@@ -180,3 +180,17 @@ def test_source_delivery_requires_native_scoring_and_actual_ci_research_evidence
     assert ci["fixed_original_provider_and_current_research_roundtrips"] == 60
     assert ci["additional_model_calls"] == 0
     assert proof["remaining"] == [] and proof["validation_limits"]
+
+
+def test_delivery_navigation_exposes_the_actual_public_entrypoints():
+    from vllm_hust_workload_data.provider import delivery_source_plan
+
+    source = delivery_source_plan("MVBENCH")
+    entries = {(entry["role"], entry["path"]) for entry in source["entrypoints"]}
+    assert ("prepare_assets", "scripts/prepare_mvbench_original_assets.py") in entries
+    assert ("prepare_assets", "scripts/prepare_mvbench_original_view.py") in entries
+    assert ("generation", "scripts/run_mvbench_original.py") in entries
+    assert (
+        "original_profile",
+        "configs/workload-native/mvbench-original-protocol.json",
+    ) in entries
