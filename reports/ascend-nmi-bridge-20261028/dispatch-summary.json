@@ -1,0 +1,78 @@
+{
+  "scope": "One profiler process per precision on the late 28-layer state. Six replay rounds per layout; diagnostic kernel durations only, not independent performance repetitions or end-to-end speedups.",
+  "warnings": "Profiler reported stopping in RECORD state and op_attr unsupported for Text export. All four exports contain exactly 168 attention events (28 layers x 6 replays). This validates the expected attention-event count, not completeness of every trace field. Exact internal kernel/tiling identity is not exposed by the common FIA name.",
+  "records": [
+    {
+      "precision": 0,
+      "path": "native",
+      "attention_events": 168,
+      "names": {
+        "FusedInferAttentionScore": 168
+      },
+      "core_types": {
+        "MIX_AIC": 168
+      },
+      "block_counts": {
+        "24": 168
+      },
+      "median_profiled_kernel_us": 257.504,
+      "summed_profiled_kernel_us_per_replay": 7214.471333333334,
+      "kernel_csv": "dispatch-profiles/precision0/profiles/native/coder-admin-shuhao-evaluation-f8bbc8444-v47sc_452090_20261028012922133_ascend_pt/ASCEND_PROFILER_OUTPUT/kernel_details.csv",
+      "kernel_csv_sha256": "f0cce011be084f8eed060ca8c5bf5b5b0df1e07818411ac18f9076009ecb8981"
+    },
+    {
+      "precision": 0,
+      "path": "bnsd",
+      "attention_events": 168,
+      "names": {
+        "FusedInferAttentionScore": 168
+      },
+      "core_types": {
+        "MIX_AIC": 168
+      },
+      "block_counts": {
+        "24": 168
+      },
+      "median_profiled_kernel_us": 156.624,
+      "summed_profiled_kernel_us_per_replay": 4389.891333333333,
+      "kernel_csv": "dispatch-profiles/precision0/profiles/bnsd/coder-admin-shuhao-evaluation-f8bbc8444-v47sc_452090_20261028012932003_ascend_pt/ASCEND_PROFILER_OUTPUT/kernel_details.csv",
+      "kernel_csv_sha256": "c5aafe4b59986e063685aa59a4d165651bdb18ab480ffe1bb5f80358af80534b"
+    },
+    {
+      "precision": 1,
+      "path": "native",
+      "attention_events": 168,
+      "names": {
+        "FusedInferAttentionScore": 168
+      },
+      "core_types": {
+        "MIX_AIC": 168
+      },
+      "block_counts": {
+        "24": 168
+      },
+      "median_profiled_kernel_us": 162.864,
+      "summed_profiled_kernel_us_per_replay": 4560.9113333333335,
+      "kernel_csv": "dispatch-profiles/precision1/profiles/native/coder-admin-shuhao-evaluation-f8bbc8444-v47sc_453428_20261028013052184_ascend_pt/ASCEND_PROFILER_OUTPUT/kernel_details.csv",
+      "kernel_csv_sha256": "42071b159cbd4f873819651d552cabb4cf3a845af65ecb409333c4db2e6a4871"
+    },
+    {
+      "precision": 1,
+      "path": "bnsd",
+      "attention_events": 168,
+      "names": {
+        "FusedInferAttentionScore": 168
+      },
+      "core_types": {
+        "MIX_AIC": 168
+      },
+      "block_counts": {
+        "24": 168
+      },
+      "median_profiled_kernel_us": 158.493,
+      "summed_profiled_kernel_us_per_replay": 4439.461333333334,
+      "kernel_csv": "dispatch-profiles/precision1/profiles/bnsd/coder-admin-shuhao-evaluation-f8bbc8444-v47sc_453428_20261028013102799_ascend_pt/ASCEND_PROFILER_OUTPUT/kernel_details.csv",
+      "kernel_csv_sha256": "093e0a2a0cb16df423af491ca71c74f770cdd6db5af7947bd6b0b60eca4120ac"
+    }
+  ]
+}
