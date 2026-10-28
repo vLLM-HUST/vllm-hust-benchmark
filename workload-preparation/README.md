@@ -381,14 +381,14 @@ DOCKER_BUILDKIT=0 docker build --network=host --memory 2g \
 构建中调用官方`appworld install`，受保护代码仅留在本地私有镜像，不发布或复制到Git；不会获取任务数据或执行生成代码。配方校验Python/83项版本、核心环境和评分函数能否导入，并执行`pip check`，不调用它们运行任务。镜像默认非root，后续仍需单独配置离线隔离、可写任务状态、原生Agent依赖与流程、NPU模型请求及官方评分；不能以构建成功给来源打勾。真实构建状态以[既有回执](../docs/workload-data/validation/appworld-core-client-preparation-20261028.json)为准。
 
 公共原生调用入口为`scripts/run_appworld_original_react.py`。默认仅输出计划；它校验固定原始配置SHA256，只绑定实际模型名与provider，不改原任务、ReAct预算或原评分调用。执行时要求非root、只读根文件系统、network-none容器及单独环境Unix
-socket；这些基础检查不能替代完整隔离配置审计。示例（先不加`--execute`）：
+socket；这些基础检查不能替代完整隔离配置审计。`--local-unbilled`只用于明确不收API费用的本地服务，零API计费不表示NPU成本为零，也不修改原作者调用次数、生成预算和费用上限。`--service-context`须与实际部署一致，不是单次生成预算；收费provider不可启用零计费选项。示例（先不加`--execute`）：
 
 ```bash
 python scripts/run_appworld_original_react.py \
   --profile /author/experiments/configs/react_llama3_test_normal.jsonnet \
   --model openai/Qwen/Qwen3.5-9B --api-base http://127.0.0.1:14001/v1 \
   --environment-url http+unix://%2Fenvironment-io%2Fenvironment.sock \
-  --experiment original-react-check --limit 3
+  --experiment original-react-check --limit 3 --local-unbilled --service-context 262144
 ```
 
 执行前仍需完整实验依赖、原始数据、原作者软件导入路径、私有模型代理和环境服务；核心镜像本身不足以执行。此公共入口已经通过服务器离线非root只读容器的原配置哈希、依赖导入及隔离前置检查，但尚未完成该入口的原生推理实跑和研究端联调，不把私有驱动三条原生任务的证据冒充此入口验证。运行输出包含原始任务与生成代码，必须留在服务器私有目录；失败不替换任务。

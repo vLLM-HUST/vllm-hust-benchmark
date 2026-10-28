@@ -23,6 +23,27 @@ def validate_profile(path):
         raise ValueError("unchanged pinned original test_normal profile required")
 
 
+def local_billing_registration(model, context_length):
+    """Only explicit local, unbilled OpenAI-compatible service binding."""
+    if (
+        not model.startswith("openai/")
+        or not model.removeprefix("openai/")
+        or context_length < 1
+    ):
+        raise ValueError(
+            "actual openai/model identifier and positive service context required"
+        )
+    return {
+        model.removeprefix("openai/"): {
+            "max_tokens": context_length,
+            "input_cost_per_token": 0,
+            "output_cost_per_token": 0,
+            "litellm_provider": "openai",
+            "mode": "chat",
+        }
+    }
+
+
 def require_isolation():
     if os.name != "posix" or os.geteuid() == 0:
         raise ValueError("nonroot Linux isolated container required")
@@ -64,6 +85,7 @@ def run(args):
     if not args.execute:
         return report
     require_isolation()
+    os.umask(0o077)  # Native outputs contain original task/state/code, keep private.
     validate_profile(args.profile)
     endpoint = urlsplit(args.api_base)
     if (
@@ -94,6 +116,10 @@ def run(args):
     # Endpoint/key are provider configuration, not extra GeneratorParams.
     litellm.api_base = args.api_base
     litellm.api_key = os.environ[args.api_key_env]
+    if args.local_unbilled:
+        litellm.register_model(
+            local_billing_registration(args.model, args.service_context)
+        )
     AppWorld.init_defaults.timeout_seconds = 60
     AppWorld.init_defaults.random_seed = 123
     AppWorld.init_defaults.experiment_name = args.experiment
@@ -101,6 +127,18 @@ def run(args):
     output = Path(path_store.experiment_outputs) / args.experiment / "recoma_output"
     output.mkdir(parents=True, exist_ok=False)
     write_json(config, str(output / "bound_config.private.json"), silent=True)
+    write_json(
+        {
+            "actual_model": args.model,
+            "original_profile_sha256": PROFILE_SHA256,
+            "local_unbilled_api": args.local_unbilled,
+            "zero_api_billing_is_not_zero_npu_resource_cost": args.local_unbilled,
+            "original_generation_and_search_budgets_unchanged": True,
+            "source_checkbox_eligible": False,
+        },
+        str(output / "runtime-binding.private.json"),
+        silent=True,
+    )
     predictions = []
     with requests_unixsocket.monkeypatch():
         systems = build_configurable_systems_from_json(config, str(output))
@@ -133,6 +171,17 @@ def main():
     parser.add_argument("--environment-url", required=True)
     parser.add_argument("--experiment", required=True)
     parser.add_argument("--limit", type=int, default=3)
+    parser.add_argument(
+        "--local-unbilled",
+        action="store_true",
+        help="explicit local API billing only, not accelerator cost",
+    )
+    parser.add_argument(
+        "--service-context",
+        type=int,
+        default=262144,
+        help="actual deployed model context; not generation budget",
+    )
     parser.add_argument("--execute", action="store_true")
     print(json.dumps(run(parser.parse_args()), indent=2))
 

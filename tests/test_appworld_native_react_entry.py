@@ -68,3 +68,20 @@ def test_experiment_image_keeps_original_dependency_version():
     assert "requests-unixsocket==0.4.1" in text
     assert "USER 65534:65534" in text
     assert "COPY data" not in text and "COPY models" not in text
+
+
+def test_local_billing_is_explicit_actual_model_metadata_not_generation_budget():
+    registration = module().local_billing_registration("openai/Qwen/Qwen3.5-9B", 262144)
+    assert list(registration) == ["Qwen/Qwen3.5-9B"]
+    assert registration["Qwen/Qwen3.5-9B"]["input_cost_per_token"] == 0
+    assert registration["Qwen/Qwen3.5-9B"]["max_tokens"] == 262144
+    assert "generator_params" not in registration
+
+
+@pytest.mark.parametrize(
+    "model,context",
+    [("together_ai/paid-model", 262144), ("openai/", 262144), ("openai/actual", 0)],
+)
+def test_local_billing_rejects_other_provider_or_invalid_context(model, context):
+    with pytest.raises(ValueError):
+        module().local_billing_registration(model, context)
