@@ -100,6 +100,12 @@ python scripts/prepare_videomme_native_media.py --official-checkout /external/VL
 python -m pip --isolated install --no-deps --only-binary=:all: --require-hashes --target /external/videomme-subtitle-overlay -r configs/workload-native/videomme-subtitle-requirements.txt
 ```
 
+原生执行入口已提供，但尚未真实执行，不据软件测试打来源总勾。完整媒体回执通过后，分别选择作者已有`Video-MME_8frame`、`Video-MME_8frame_subs`配置；默认只输出计划，显式执行另加`--execute --accept-academic-only`。每个配置固定27题，覆盖短/中/长视频各前三个视频的全部原问题；`--full`运行该配置全部2700题。入口保持原提示、抽帧/字幕、API编码、2048生成预算及exact-matching评分，不更换失败题，不调用付费judge；未决评分和错误保留，不写成完成。使用专用外部帧缓存和新的私有输出目录，完整媒体回执、当前选定媒体SHA及作者源码均检查；原SDK缓存缺失的main元数据引用显式绑定固定版本，已有冲突引用拒绝覆盖。执行前仍须协调研究侧资源，不能把示例命令视为获准占卡。
+
+```bash
+python scripts/run_videomme_original.py --official-checkout /external/VLMEvalKit --snapshot /external/hf-cache/datasets--lmms-lab--Video-MME/snapshots/ead1408f75b618502df9a1d8e0950166bf0a2a0b --media-receipt /external/videomme-native-media-receipt.json --frame-cache /external/videomme-frames --output /external/videomme-8frame-run --model Qwen/Qwen3.5-9B --profile Video-MME_8frame
+```
+
 ### TemporalWiki演化语料与原生探针评测（进行中，不打来源总勾）
 
 - [x] 官方代码版本已固定，177份原软件/配置共382,667字节在服务器逐文件Git blob及SHA256核验；13份Python仅AST解析，162份原配置保留，不导入或执行作者代码。
