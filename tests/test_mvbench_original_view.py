@@ -91,15 +91,11 @@ def test_native_runner_plan_without_video_or_model_access(tmp_path):
 
 
 def test_native_fixed_positions_preserves_all_groups_and_source_indices(monkeypatch):
-    import pandas as pd
-
     monkeypatch.syspath_prepend(str(ROOT / "scripts"))
     import run_mvbench_original as runner
 
-    data = pd.DataFrame(
-        [{"task_type": f"task-{task}"} for task in range(20) for _ in range(4)]
-    )
+    data = [{"task_type": f"task-{task}"} for task in range(20) for _ in range(4)]
     expected = [task * 4 + offset for task in range(20) for offset in range(3)]
     assert runner.fixed_positions(data) == expected
     with pytest.raises(ValueError, match="twenty-type"):
-        runner.fixed_positions(data.iloc[:76])
+        runner.fixed_positions(data[:76])

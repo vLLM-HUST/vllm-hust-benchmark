@@ -18,11 +18,14 @@ from run_chartqa_original import validate_completion, validate_endpoint
 
 
 def fixed_positions(data):
+    groups = {}
+    for index, row in enumerate(data):
+        groups.setdefault(row["task_type"], []).append(index)
     selected = []
-    for _, group in data.groupby("task_type", sort=False):
+    for group in groups.values():
         if len(group) < 3:
             raise ValueError("Original task group has fewer than three cases")
-        selected.extend(int(index) for index in group.iloc[:3].index)
+        selected.extend(group[:3])
     if len(selected) != 60 or len(set(selected)) != 60:
         raise ValueError("Complete twenty-type fixed selection required")
     return selected
@@ -81,7 +84,7 @@ def main():
     dataset = MVBench_MP4(dataset="MVBench_MP4", nframe=16, fps=-1)
     if len(dataset.data) != 4000:
         raise ValueError("Original complete dataset required")
-    selected = fixed_positions(dataset.data)
+    selected = fixed_positions(dataset.data.to_dict(orient="records"))
     model = OpenAIWrapper(
         model=args.model, key="local-only", api_base=args.endpoint, retry=1, timeout=300
     )  # pragma: allowlist secret - local dummy key
