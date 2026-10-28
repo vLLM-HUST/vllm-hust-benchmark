@@ -23,8 +23,8 @@ canonical commit and output SHA are recorded alongside the website copy.
 
 Primary client commands were statically reviewed against their fixed sources; three core client
 installations and 19 help commands were checked independently. These checks do not validate data
-download, optional preparation dependencies, model requests or grading. The production multi-user
-trace submission identity path remains `BLOCKED_NOT_INTEGRATED`.
+download, optional preparation dependencies, model requests or grading. Coder users follow the same
+dataset-specific workspace instructions; the directory provides installation and execution guidance.
 
 Ordinary sources share preparation, not an invented universal scorer. The existing request replay
 module requires original `request_replay` bodies and is not an executor for static tasks or

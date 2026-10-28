@@ -82,7 +82,6 @@ def build():
                 r["asset_group"] != "task-class-candidates" for r in rows
             ),
         },
-        "platform_api": "BLOCKED_NOT_INTEGRATED",
         "new_measurements": 0,
         "primary_entries": overlay["entries"],
         "sources": rows,
