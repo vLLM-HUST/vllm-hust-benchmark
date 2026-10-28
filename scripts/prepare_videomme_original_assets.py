@@ -27,7 +27,7 @@ def snapshot_path(cache, manifest):
 
 
 def verify_files(snapshot, descriptors):
-    count = 0
+    paths = []
     for item in descriptors:
         relative = Path(item["path"])
         if (
@@ -40,6 +40,10 @@ def verify_files(snapshot, descriptors):
         path = Path(snapshot) / relative
         if not path.is_file() or path.stat().st_size != item["bytes"]:
             raise ValueError(f"Original file missing or size differs: {item['path']}")
+        paths.append((item, path))
+    # Reject partial releases before streaming any multi-gigabyte archive.
+    count = 0
+    for item, path in paths:
         digest = hashlib.sha256()
         with path.open("rb") as stream:
             for block in iter(lambda: stream.read(1024 * 1024), b""):

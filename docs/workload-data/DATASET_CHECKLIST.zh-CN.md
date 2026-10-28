@@ -88,6 +88,12 @@ python -m vllm_hust_workload_data.pipeline run --config /external/videomme-prepa
 python scripts/prepare_videomme_original_view.py --official-checkout /external/VLMEvalKit --snapshot /external/hf-cache/datasets--lmms-lab--Video-MME/snapshots/ead1408f75b618502df9a1d8e0950166bf0a2a0b
 ```
 
+完整归档到齐后，可用以下媒体准备入口。默认只计划，显式执行须加`--execute --accept-academic-only`：先验证全部原文件，再检查ZIP原始成员名、重名覆盖、解包预算、内存和磁盘余量，使用固定作者原解包函数，最后逐字节比较全部输出与原归档流/CRC并生成外部回执。已有video/subtitle目录拒绝跳过或覆盖，未知/其他任务的提取锁不清理；失败半成品保留待核查。原函数软件夹具和部分已到齐归档头已在服务器预检，不代表完整媒体已解包或原生任务完成。
+
+```bash
+python scripts/prepare_videomme_native_media.py --official-checkout /external/VLMEvalKit --snapshot /external/hf-cache/datasets--lmms-lab--Video-MME/snapshots/ead1408f75b618502df9a1d8e0950166bf0a2a0b --output /external/videomme-native-media-receipt.json
+```
+
 字幕依赖仅装到新的外部目录，不升级已验证的基础环境。原生调用方仍须显式加载该目录并核验版本；安装依赖不是原生评测：
 
 ```bash

@@ -22,6 +22,7 @@
   ],
   "source_entrypoints": {
     "VIDEOMME": [
+      {"role": "prepare_assets", "path": "scripts/prepare_videomme_native_media.py", "scope": "Complete original release verification, gated unchanged author extraction and byte/CRC comparison; no native model inference, fresh media directories only"},
       {"role": "prepare_assets", "path": "scripts/prepare_videomme_original_assets.py", "scope": "Explicit academic-only full release acquisition/verification, or annotation-only regular-file view; not media extraction or native execution"},
       {"role": "prepare_assets", "path": "scripts/prepare_videomme_original_view.py", "scope": "Original2700 table/relations only, plan by default; not completed media acquisition, native inference or scoring"},
       {"role": "original_profile", "path": "configs/workload-native/videomme-original-protocol.json", "scope": "Frozen original8frame and8frame_subs task selection; both native validations pending"}
