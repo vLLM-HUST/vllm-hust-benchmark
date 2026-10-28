@@ -285,6 +285,28 @@ python scripts/run_livecodebench_container_scoring.py \
 
 ### LiveCodeBench 代码执行预测与测试输出预测
 
+公共数据包另提供`livecodebench_original_tasks`字段适配，可通过现有`iter_workload`与索引准备入口读取三个原始文件。它保留代码生成的完整不透明私有测试、执行预测的原生`id`、输出预测的题号与`test_id`关系；答案单独返回，不生成API请求。Parquet时间戳显式保存类型与ISO8601值。自修复不是第四份数据集，必须额外接入真实的先前输出和评分反馈。此适配读取通过不能替代下文原生运行与评分。
+
+例如，已按公共获取入口放置原文件后，可以通过明确的文件选择读取执行预测：
+
+```python
+from pathlib import Path
+from vllm_hust_workload_data.adapters import iter_workload
+
+records = iter_workload(
+    "LIVECODEBENCH",
+    data_root=Path("/private/livecodebench-original"),
+    files=["execution-v2/data/test-00000-of-00001.parquet"],
+    limit=3,
+)
+for record in records:
+    original_inputs = record.input_record()
+    original_references = record.outcome_record()
+    # Pass through the original scenario formatter/scorer, not request_body().
+```
+
+`limit`仅限制读取条数，仍校验整个原文件的固定摘要，不表示已完成这些任务的推理。省略`limit`读取选中文件的全部case；选择其他场景时显式更换原文件路径。
+
 这两个场景使用固定发布版的原始
 Parquet，分别有479和442个case。默认选择原始行序的前三条；`--full`选择全量。准备入口复制完整原文件并校验固定摘要，原字段与日期类型由隔离容器中的作者数据类读取，不把任务改写成自定义问答。代码执行场景按原始`id`区分case，测试输出场景按`(question_id,test_id)`区分；不能按题号去重。
 
