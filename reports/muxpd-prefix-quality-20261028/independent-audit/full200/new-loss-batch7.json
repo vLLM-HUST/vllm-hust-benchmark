@@ -1,0 +1,74 @@
+{
+  "case_id": "mmlu-pro-07338",
+  "original_batch": {
+    "batch_id": 7,
+    "case_ids": [
+      "mmlu-pro-07151",
+      "mmlu-pro-07213",
+      "mmlu-pro-07275",
+      "mmlu-pro-07338",
+      "mmlu-pro-07401",
+      "mmlu-pro-07461",
+      "mmlu-pro-07524",
+      "mmlu-pro-07585"
+    ],
+    "seed_case_id": "mmlu-pro-07151",
+    "prompt_tokens": 10825
+  },
+  "index_in_batch_zero_based": 3,
+  "stage": "peers",
+  "sources": [
+    {
+      "label": "native-quality-v2-hccl-true-01",
+      "path": "/root/workspace/muxpd-followup-20261025/runs/native-quality-v2-hccl-true-01/results/run.json",
+      "sha256": "cb7c36fb75a5f586c01d3e4f30a7369b5befa7bbc6021d1fcf0c5cb3a71a6a28",
+      "output_tokens": 4723,
+      "finish_reason": "stop"
+    },
+    {
+      "label": "native-quality-v2-hccl-true-02",
+      "path": "/root/workspace/muxpd-followup-20261025/runs/native-quality-v2-hccl-true-02/results/run.json",
+      "sha256": "14454401799a1745ca369891f177624ce1ff4348c2a29c8addb00f8b5d90500e",
+      "output_tokens": 4723,
+      "finish_reason": "stop"
+    },
+    {
+      "label": "raw-quality-v2-hccl-true-01",
+      "path": "/root/workspace/muxpd-followup-20261025/runs/raw-quality-v2-hccl-true-01/results/run.json",
+      "sha256": "75aa8495902fd795dbe845da35eb1bf06bb3adea7c81b515e8c3375b07a13f9e",
+      "output_tokens": 5133,
+      "finish_reason": "stop"
+    },
+    {
+      "label": "prefix-quality-full-01",
+      "path": "/root/workspace/muxpd-quality-layout-20261028/quality-runs/prefix-quality-full-01/results/run.json",
+      "sha256": "344f459193c04c75ad675dcd8c07d7f32eedef5a892dfe2af14271268206e192",
+      "output_tokens": 8192,
+      "finish_reason": "length"
+    }
+  ],
+  "first_differences": [
+    {
+      "reference": "native-quality-v2-hccl-true-01",
+      "common_prefix_tokens": 206,
+      "first_difference_output_token_one_based": 207,
+      "reference_token_id": 318,
+      "prefix_token_id": 198
+    },
+    {
+      "reference": "native-quality-v2-hccl-true-02",
+      "common_prefix_tokens": 206,
+      "first_difference_output_token_one_based": 207,
+      "reference_token_id": 318,
+      "prefix_token_id": 198
+    },
+    {
+      "reference": "raw-quality-v2-hccl-true-01",
+      "common_prefix_tokens": 37,
+      "first_difference_output_token_one_based": 38,
+      "reference_token_id": 7661,
+      "prefix_token_id": 26068
+    }
+  ],
+  "interpretation": "Both native controls and old raw stop correctly with H. Prefix reaches unchanged8192 max_tokens; original score requires stop, so answer=null, incomplete, wrong. No fallback/retry/extension."
+}
