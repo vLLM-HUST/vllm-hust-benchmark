@@ -1,0 +1,26 @@
+{
+  "source_id": "MVBENCH",
+  "checked": false,
+  "status": "ORIGINAL_FULL_SNAPSHOT_AND_TABLE_PREPARED_NOT_NATIVE_EXECUTION",
+  "dataset_repository": "https://huggingface.co/datasets/OpenGVLab/MVBench",
+  "dataset_revision": "a776e554280b99b70f00cc3eacd69a65e0727efc", "revision_note": "pragma: allowlist secret - public dataset revision",
+  "official_video_files_verified": 3895,
+  "official_video_bytes_verified": 15796297352,
+  "table_rows": 4000,
+  "table_md5": "5c8c6f8b7972c2de65a629590f7c42f5", "table_note": "pragma: allowlist secret - original author table digest",
+  "native_view": "MVBench_MP4",
+  "selection": "Original first three cases in each of all twenty native task types, fixed before inference",
+  "selected_cases": 60,
+  "frames_per_case": 16,
+  "model_calls": 0,
+  "scoring_completed": false,
+  "source_checkbox_eligible": false,
+  "entrypoint": "scripts/prepare_mvbench_original_view.py",
+  "protocol": "configs/workload-native/mvbench-original-protocol.json",
+  "remaining": [
+    "Finish original constructor, frame decoding and fixed prompt validation",
+    "Run all sixty fixed original cases through the existing suitable NPU vision model",
+    "Run the unchanged supported exact-matching scorer and retain failed cases",
+    "Complete reusable asset acquisition, data adapter, research consumer and CI wheel checks"
+  ]
+}

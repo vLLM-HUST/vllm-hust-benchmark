@@ -28,6 +28,10 @@ on:
       - 'tests/test_temporalwiki_original_contract.py'
       - 'scripts/prepare_temporalwiki_original_assets.py'
       - 'tests/test_temporalwiki_original_assets.py'
+      - 'scripts/prepare_mvbench_original_view.py'
+      - 'scripts/run_mvbench_original.py'
+      - 'configs/workload-native/mvbench-original-protocol.json'
+      - 'tests/test_mvbench_original_view.py'
       - 'scripts/run_tau2_original_telecom.py'
       - 'scripts/run_gsm8k_incremental_samples.py'
       - 'scripts/run_arc_original_samples.py'
@@ -315,7 +319,7 @@ jobs:
       - name: NatureBench original source and task-group fixtures only; no scientific tasks
         run: python -m pytest -q tests/test_naturebench_original_contract.py tests/test_naturebench_original_assets.py tests/test_naturebench_packages.py
       - name: TemporalWiki original protocol fixtures only; no data, training or inference
-        run: python -m pytest -q tests/test_temporalwiki_original_contract.py tests/test_temporalwiki_original_assets.py
+        run: python -m pytest -q tests/test_temporalwiki_original_contract.py tests/test_temporalwiki_original_assets.py tests/test_mvbench_original_view.py
       - name: MBPP original preparation and mocked execution controls only
         run: python -m pytest -q tests/test_mbpp_original_assets.py tests/test_mbpp_original_generation.py tests/test_mbpp_scoring_preparation.py tests/test_mbpp_isolated_scoring.py tests/test_mbpp_native_delivery_receipt.py
       - name: Serving trace and ToolACE preparation software fixtures only
