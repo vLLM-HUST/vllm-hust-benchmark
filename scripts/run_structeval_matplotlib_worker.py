@@ -1,0 +1,174 @@
+"""Original Matplotlib component inside a qualified offline container only.
+
+Input must be unchanged parsed_code from the author's original workflow. This
+worker does not replace that parser, native generation, syntax scoring or VQA.
+Plan by default; never execute candidate code on the host.
+"""
+
+import argparse
+import hashlib
+import importlib.util
+import json
+import os
+from pathlib import Path
+import re
+import socket
+
+RENDERER_SHA256 = "7c5a37b25df94bf370cc37dda86d269bcc071680a5ec3b07484a777ffee0b09f"  # pragma: allowlist secret - fixed original author module
+
+
+def require_isolation():
+    if os.name != "posix" or os.geteuid() == 0 or os.getpid() != 1:
+        raise ValueError("nonroot Linux container PID1 required")
+    if not Path("/.dockerenv").is_file() or not os.statvfs("/").f_flag & os.ST_RDONLY:
+        raise ValueError("read-only Docker container required")
+    if {name for _, name in socket.if_nameindex()} != {"lo"}:
+        raise ValueError("network-none container required")
+    status = dict(
+        line.split(":", 1)
+        for line in Path("/proc/self/status").read_text().splitlines()
+        if ":" in line
+    )
+    if (
+        any(
+            int(status[key].strip(), 16)
+            for key in ("CapEff", "CapPrm", "CapInh", "CapBnd")
+        )
+        or status["NoNewPrivs"].strip() != "1"
+    ):
+        raise ValueError("drop all capabilities and disallow privilege escalation")
+    if any(
+        Path(path).exists() for path in ("/var/run/docker.sock", "/run/docker.sock")
+    ) or list(Path("/dev").glob("davinci*")):
+        raise ValueError("no Docker API or NPU device may be exposed")
+    if any(
+        value
+        and re.search(
+            r"(?:^|_)(?:TOKEN|SECRET|PASSWORD|API_KEY|ACCESS_KEY|PRIVATE_KEY|CREDENTIALS?)(?:$|_)",
+            key,
+        )
+        for key, value in os.environ.items()
+    ):
+        raise ValueError(
+            "renderer must not inherit common credential environment variables"
+        )
+
+
+def verify_inputs(renderer, code_file, expected_sha256):
+    renderer = Path(renderer).resolve(strict=True)
+    if hashlib.sha256(renderer.read_bytes()).hexdigest() != RENDERER_SHA256:
+        raise ValueError("unchanged pinned original renderer required")
+    code_file = Path(code_file).resolve(strict=True)
+    if not re.fullmatch(r"[0-9a-f]{64}", expected_sha256):
+        raise ValueError("explicit parsed-code SHA256 required")
+    if code_file.stat().st_size > 16 * 1024 * 1024:
+        raise ValueError(
+            "parsed-code file exceeds declared worker input resource bound"
+        )
+    raw = code_file.read_bytes()
+    if hashlib.sha256(raw).hexdigest() != expected_sha256:
+        raise ValueError(
+            "parsed-code snapshot changed; never reconstruct replacement code"
+        )
+    return renderer, code_file, raw.decode("utf-8")
+
+
+def execute(args):
+    if not re.fullmatch(r"[A-Za-z0-9_-]{1,64}", args.task_id):
+        raise ValueError("original safe task identifier required")
+    result = {
+        "source_id": "STRUCTEVAL",
+        "task_id": args.task_id,
+        "status": "PLAN_ONLY",
+        "model_calls": 0,
+        "vqa_executed": False,
+        "source_checkbox_eligible": False,
+    }
+    if not args.execute:
+        return result
+    require_isolation()
+    os.umask(0o077)
+    renderer, code_file, code = verify_inputs(
+        args.renderer, args.code_file, args.code_sha256
+    )
+    if not all(
+        os.statvfs(path).f_flag & os.ST_RDONLY for path in (renderer, code_file)
+    ):
+        raise ValueError("original module and parsed code must be mounted read-only")
+    output = args.output.resolve()
+    if not output.is_relative_to(Path("/tmp")) or output.exists():
+        raise ValueError(
+            "fresh bounded /tmp output required; export only after container termination"
+        )
+    output.mkdir(mode=0o700, parents=True)
+    # This file-size bound complements the Docker CPU/RAM/PID/time/tmpfs limits.
+    import resource
+
+    resource.setrlimit(resource.RLIMIT_FSIZE, (64 * 1024 * 1024, 64 * 1024 * 1024))
+    saved_fds = [os.dup(1), os.dup(2)]
+    try:
+        with (output / "renderer-private.log").open("xb") as log:
+            os.dup2(log.fileno(), 1)
+            os.dup2(log.fileno(), 2)
+            spec = importlib.util.spec_from_file_location(
+                "original_structeval_matplotlib", renderer
+            )
+            module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(module)
+            score = module.render_matplotlib_and_screenshot(
+                args.task_id, code, str(output)
+            )
+    finally:
+        for target, descriptor in zip((1, 2), saved_fds):
+            os.dup2(descriptor, target)
+            os.close(descriptor)
+    if type(score) is not int or score not in (0, 1):
+        raise ValueError("unexpected original renderer result")
+    image = output / (args.task_id + ".png")
+    png_valid = False
+    if image.is_file() and not image.is_symlink():
+        from PIL import Image
+
+        try:
+            with Image.open(image) as pixels:
+                png_valid = pixels.format == "PNG"
+                pixels.verify()
+        except (OSError, ValueError):
+            png_valid = False
+    result.update(
+        status="ORIGINAL_RENDERER_RETURNED_VQA_PENDING",
+        render_score=score,
+        png_valid=png_valid,
+        parsed_code_sha256=args.code_sha256,
+        original_renderer_sha256=RENDERER_SHA256,
+        original_parser_relation_verified_by_worker=False,
+        native_pipeline_complete=False,
+    )
+    with (output / "component-result-private.json").open(
+        "x", encoding="utf-8"
+    ) as stream:
+        json.dump(result, stream, indent=2)
+    return result
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--task-id", required=True)
+    parser.add_argument("--renderer", type=Path, required=True)
+    parser.add_argument("--code-file", type=Path, required=True)
+    parser.add_argument("--code-sha256", required=True)
+    parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--execute", action="store_true")
+    args = parser.parse_args()
+    try:
+        result = execute(args)
+    except (ValueError, OSError) as error:
+        parser.exit(
+            1,
+            f"StructEval worker rejected ({type(error).__name__}); retain private container logs\n",
+        )
+    print(json.dumps(result, indent=2))
+
+
+if __name__ == "__main__":
+    main()

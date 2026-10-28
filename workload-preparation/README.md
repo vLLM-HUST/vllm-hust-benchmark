@@ -494,7 +494,27 @@ docker run --rm --network none --user 65534:65534 --read-only --cap-drop ALL \
   --tmpfs /tmp:size=256m "$(cat /private/structeval-matplotlib-image-id.txt)"
 ```
 
-默认命令仅校验版本与依赖导入，不执行生成代码。真实原题必须使用固定原源码、完整生成输出和原始VQA问题，另外接入有界隔离worker；不能因为PNG生成成功就宣称任务通过。不得在宿主机运行原渲染器中的`os.system`，也不得为离线出图删掉其他格式的CDN脚本。[现有阶段回执](../docs/workload-data/validation/structeval-nonrender-checkpoint3-20261025.json)区分组件夹具与原生任务证据。
+默认命令仅校验版本与依赖导入，不执行生成代码。真实原题必须使用固定原源码、完整生成输出和原始VQA问题，不能因为PNG生成成功就宣称任务通过。不得在宿主机运行原渲染器中的`os.system`，也不得为离线出图删掉其他格式的CDN脚本。[现有阶段回执](../docs/workload-data/validation/structeval-nonrender-checkpoint3-20261025.json)区分组件夹具与原生任务证据。
+
+公开组件worker为`scripts/run_structeval_matplotlib_worker.py`。它只接收原工作流提取的完整`parsed_code`，不重新提取、不修复代码、不添加替代答案；调用固定原`render_matplotlib.py`，保留其0/1结果。原工作流实际使用`safe_unicode_decode`与`extract_renderable_code`，不能用其他便捷提取函数代替。调用方须保留原生成输出、原提取结果及对应关系，worker本身不证明该关系，也不执行完整语法评分或VQA。
+
+输入与原模块须只读挂载，输出仅写入有界`/tmp`。额外检查非root容器PID1、只读根、无外网接口、无能力/提权、无Docker/NPU设备及常见凭据环境变量。此为本任务有界执行隔离，不是安全认证。代码文件不得超过16MiB，单文件输出受64MiB限制；超出资源时保留阻塞，不截断原输入或当作错误答案。先不加`--execute`检查计划：
+
+```bash
+docker create --name structeval-matplotlib-case-001 --network none \
+  --user 65534:65534 --read-only --cap-drop ALL --security-opt no-new-privileges \
+  --memory 2g --cpus 1 --pids-limit 256 --tmpfs /tmp:size=256m \
+  --mount type=bind,src=/private/structeval-worker-software,dst=/software,readonly \
+  --mount type=bind,src=/private/structeval-one-case,dst=/input,readonly \
+  --entrypoint /opt/venv/bin/python "$(cat /private/structeval-matplotlib-image-id.txt)" \
+  -B /software/run_structeval_matplotlib_worker.py --task-id ORIGINAL_TASK_ID \
+  --renderer /software/render_matplotlib.py --code-file /input/parsed-code.txt \
+  --code-sha256 ORIGINAL_PARSED_CODE_SHA256 --output /tmp/renderer-output
+```
+
+两个宿主目录应预先准备且UID65534可读；软件目录仅放worker与已核验原模块，输入目录仅放该题原提取结果，不挂载评分参考、其他任务或凭据。实际执行时显式增加`--execute`，由外部控制器启动容器、等待最多120秒，超时后仅停止已核对ID的本次容器并保留故障。不要以`timeout docker wait`替代停止容器；前者只会停止等待。容器结束后由可信控制器校验并导出指定PNG/日志/组件结果，不执行导出的内容。公开worker在服务器的正/负准备夹具中分别保留原返回1/0，**仍不是原题与VQA验证完成**。
+
+完整VQA须调用原`vqa_eval_async`并保留全部原问题、期望答案及对应原图；答案进入作者定义的裁判输入，不进入生成模型输入。原评测器会把部分API/解析异常折算为0或None，因此必须另核实际裁判请求、响应、图片身份和异常日志；不能只凭一个0分文件就认定裁判成功运行，也不能把资源/接口失败当作模型质量结论。
 
 ## Video-MME 原生视频任务
 
