@@ -58,9 +58,23 @@ python scripts/run_mvbench_original.py --official-checkout /external/VLMEvalKit 
 
 - [x] 固定发布元数据、README原Git身份和2700题原Parquet完整SHA256已核验；900视频，短/中/长各900题；官方工具包已有8帧无字幕和带字幕两profile，不是自行削减64帧配置。
 - [x] 推理前固定各时长原顺序前三个不同视频，保留每视频全部3题，共27题/profile、计划54次调用。不能按模型结果换题，字幕只按原始采样帧时间提取。
-- [ ] 约101GB完整24原文件在服务器外部缓存准备，尚未完成全部归档校验/解包；缺少字幕依赖，原生提示、执行、评分及统一数据/研究消费待完成，当前0模型调用。
+- [x] 公共原表准备入口已在服务器生成/复核2700题完整原TSV，与作者MD5一致；全部题目/选项/答案及视频/字幕路径关系通过，原注释不改写。只有准备证据，不冒充完整媒体或原生执行。
+- [x] 字幕库pysubs21.8.0按官方PyPI轮子SHA256独立安装，未改基础客户端/模型服务；原subtitle.zip完整身份及744份原SRT、275142条事件解析通过，0模型调用。镜像无可用版本的失败保留，官方PyPI安装成功，未静默换版本。
+- [ ] 约101GB完整24原文件在服务器外部缓存准备，尚未完成全部归档校验/解包；原生视频提示、执行、评分及统一数据/研究消费待完成，当前0模型调用。
 
 配置见`configs/workload-native/videomme-original-protocol.json`。原项目明确仅限学术研究、禁止商业用途及未经许可的再分发/修改；本次按科研用途私下验证，不公开原视频、题目、字幕或模型输出。[原项目使用条款](https://github.com/MME-Benchmarks/Video-MME#-dataset)。64帧及变fps配置不在当前已验证范围，不能以这份计划宣称它们已跑通。
+
+原表准备默认只输出离线计划；核验原Parquet与固定作者代码后加`--execute`，原生成函数生成/核对整表，不检查或假装存在900视频。已有异常表拒绝覆盖，原数据目录必须在仓库外：
+
+```bash
+python scripts/prepare_videomme_original_view.py --official-checkout /external/VLMEvalKit --snapshot /external/hf-cache/datasets--lmms-lab--Video-MME/snapshots/ead1408f75b618502df9a1d8e0950166bf0a2a0b
+```
+
+字幕依赖仅装到新的外部目录，不升级已验证的基础环境。原生调用方仍须显式加载该目录并核验版本；安装依赖不是原生评测：
+
+```bash
+python -m pip --isolated install --no-deps --only-binary=:all: --require-hashes --target /external/videomme-subtitle-overlay -r configs/workload-native/videomme-subtitle-requirements.txt
+```
 
 ### TemporalWiki演化语料与原生探针评测（进行中，不打来源总勾）
 

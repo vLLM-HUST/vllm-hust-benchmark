@@ -21,6 +21,10 @@
     {"source_id": "PAIO-SEMANTIC-SIMILAR-5000", "asset_group": "enterprise-private-requests", "related_workload_ids": [], "boundary": "Semantic similarity is not exact-prefix or KV reuse; preserve original private requests without rewriting."}
   ],
   "source_entrypoints": {
+    "VIDEOMME": [
+      {"role": "prepare_assets", "path": "scripts/prepare_videomme_original_view.py", "scope": "Original2700 table/relations only, plan by default; not completed media acquisition, native inference or scoring"},
+      {"role": "original_profile", "path": "configs/workload-native/videomme-original-protocol.json", "scope": "Frozen original8frame and8frame_subs task selection; both native validations pending"}
+    ],
     "MVBENCH": [
       {"role": "prepare_assets", "path": "scripts/prepare_mvbench_original_assets.py", "scope": "Fixed complete original video snapshot and external regular-file data view; plan by default, no model calls"},
       {"role": "prepare_assets", "path": "scripts/prepare_mvbench_original_view.py", "scope": "Unchanged author full4000 TSV generation and table identity validation; no model calls"},
