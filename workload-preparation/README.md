@@ -538,6 +538,13 @@ Docker服务、原提取结果与新输出父目录就绪后加`--execute`。控
 
 完整VQA须调用原`vqa_eval_async`并保留全部原问题、期望答案及对应原图；答案进入作者定义的裁判输入，不进入生成模型输入。原评测器会把部分API/解析异常折算为0或None，因此必须另核实际裁判请求、响应、图片身份和异常日志；不能只凭一个0分文件就认定裁判成功运行，也不能把资源/接口失败当作模型质量结论。
 
+### StructEval Typst 环境补充
+
+`configs/workload-native/structeval-typst-cpu.Dockerfile`以已合格的最小Matplotlib软件镜像为基础：将自己的基础镜像身份传给`--build-arg RENDER_BASE=...`，构建目录放入该Dockerfile、`scripts/verify_structeval_typst_environment.py`和从[Typst官方v0.13.1发布页](https://github.com/typst/typst/releases/tag/v0.13.1)取得的ARM64
+musl二进制`typst`。不要把原始任务、模型或生成代码放入构建目录。配方核验观察到的二进制SHA256；此旧发布的GitHub元数据无厂商digest，不能把观察哈希称为厂商签名。
+
+服务器已实际构建并在非root、无网络、只读根文件系统中核验Typst0.13.1、ImageMagick、Ghostscript和字体。为执行原作者PDF转PNG流程，仅开启PDF读权限，PS等规则不放宽；发行版配置的嵌套注释保持不变。OS软件包版本记录于现有阶段回执，但配方尚未固定apt快照，不能称为作者环境锁或位级可复现环境。**目前只完成CLI环境准备，尚未验证原Typst渲染器、原题和VQA，不计交付完成。**
+
 ## Video-MME 原生视频任务
 
 这是发布方原始Video-MME与固定VLMEvalKit的两个已有配置：`Video-MME_8frame`和`Video-MME_8frame_subs`，不是把64帧配置临时减成8帧。原2700题/900视频全部保留；默认每种duration取最先3个不同视频并保留每视频全部3题，每配置27题。选题在推理前固定，不因失败换题；`--full`才选择全部2700题。
