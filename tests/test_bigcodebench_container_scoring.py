@@ -236,3 +236,67 @@ def test_dependency_probe_keeps_pins_and_pip_check(tmp_path, monkeypatch):
     versions["numpy"] = "newer-unqualified"
     with pytest.raises(RuntimeError, match="dependency version mismatch"):
         worker.qualify_environment(requirements)
+
+
+@pytest.mark.parametrize("actual", ["4.15", "4.15.0", "4.15.0.0"])
+def test_original_version_pin_uses_pep440_release_equality(
+    tmp_path, monkeypatch, actual
+):
+    requirements = tmp_path / "requirements.txt"
+    requirements.write_text("selenium==4.15\n")
+    monkeypatch.setattr(worker.sys, "version_info", (3, 10, 0))
+    monkeypatch.setattr(worker.metadata, "version", lambda name: actual)
+    monkeypatch.setattr(worker.subprocess, "run", lambda *args, **kwargs: None)
+    assert worker.qualify_environment(requirements) == {"selenium": actual}
+
+
+@pytest.mark.parametrize("actual", ["4.14.0", "4.15.1", "4.15.0rc1", "4.15.0+changed"])
+def test_original_version_pin_rejects_real_version_drift(tmp_path, monkeypatch, actual):
+    requirements = tmp_path / "requirements.txt"
+    requirements.write_text("selenium==4.15\n")
+    monkeypatch.setattr(worker.sys, "version_info", (3, 10, 0))
+    monkeypatch.setattr(worker.metadata, "version", lambda name: actual)
+    with pytest.raises(RuntimeError, match="selenium expected 4.15"):
+        worker.qualify_environment(requirements)
+
+
+def test_import_created_library_cache_does_not_impersonate_old_groundtruth(
+    tmp_path, monkeypatch
+):
+    cache = tmp_path / "fresh-cache"
+    monkeypatch.setattr(
+        worker, "qualify_environment", lambda path: {"selenium": "4.15.0"}
+    )
+
+    def imports():
+        hub = cache / "huggingface" / "hub"
+        hub.mkdir(parents=True)
+        (hub / "version.txt").write_text("1")
+
+    monkeypatch.setattr(worker, "qualify_author_entrypoints", imports)
+    assert worker.qualify_fresh_author_environment("original-requirements", cache) == {
+        "selenium": "4.15.0"
+    }
+
+
+def test_preexisting_cache_is_rejected_before_author_imports(tmp_path, monkeypatch):
+    cache = tmp_path / "old-cache"
+    cache.mkdir()
+    monkeypatch.setattr(
+        worker, "qualify_environment", lambda path: pytest.fail("must reject first")
+    )
+    with pytest.raises(RuntimeError, match="before author imports"):
+        worker.qualify_fresh_author_environment("original-requirements", cache)
+
+
+def test_import_created_groundtruth_pickle_is_rejected(tmp_path, monkeypatch):
+    cache = tmp_path / "fresh-cache"
+    monkeypatch.setattr(worker, "qualify_environment", lambda path: {})
+
+    def imports():
+        cache.mkdir()
+        (cache / "not-fresh.pkl").write_bytes(b"old-reference")
+
+    monkeypatch.setattr(worker, "qualify_author_entrypoints", imports)
+    with pytest.raises(RuntimeError, match="groundtruth cache populated"):
+        worker.qualify_fresh_author_environment("original-requirements", cache)

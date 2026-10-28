@@ -1,6 +1,6 @@
 {
   "source_id": "BIGCODEBENCH",
-  "status": "DEDICATED_CPU_CONTAINER_RESOURCE_AND_ISOLATION_PROBE_PASSED_OFFICIAL_IMAGE_PENDING",
+  "status": "ORIGINAL_NATIVE_SCORING_AND_SAVED_AUDIT_PASSED_CONSUMER_CLOSURE_PENDING",
   "source_checkbox_eligible": false,
   "npu_requested_for_execution_runtime": 0,
   "docker_version": "29.9.1",
@@ -33,7 +33,30 @@
     "original_memory_budget_reduced": false,
     "failure_retained_privately": true
   },
-  "official_evaluation_image_qualified": false,
+  "official_evaluation_image_qualified": true,
+  "original_cpu_environment": {
+    "python": "3.10.22",
+    "cpu_torch": "2.2.2",
+    "cuda_runtime": null,
+    "fixed_author_files_verified": 32,
+    "all_original_evaluation_requirements_verified": true,
+    "pip_check_exit_code": 0,
+    "original_sanitize_and_evaluate_imports_passed": true,
+    "original_scikit_image_018_source_build_reused": true,
+    "missing_native_system_library_fixed": "libsndfile1",
+    "version_equality_fix": "Publisher selenium==4.15 and installed4.15.0 are equal under PEP440; use standard release equality, reject actual patch/prerelease/local drift",
+    "deprecated_e2b_version": "0.17.0",
+    "deprecated_e2b_warning_retained": true,
+    "e2b_remote_execution_used": false,
+    "dependency_boundary": "Retain publisher fixed evaluation pins; compatible SDK candidates stay within original setup.cfg bounds. Native scorer is local/offline, not an e2b cloud run. This is not a security certification of legacy packages."
+  },
+  "fresh_reference_cache_gate_fix": {
+    "initial_native_entry_failure_retained": true,
+    "failed_before_sanitizer_or_functional_scoring": true,
+    "cause": "Original CLI dependency imports legitimately initialize a fresh Hugging Face cache directory/version.txt; testing whole directory absence after imports was a false rejection",
+    "fix": "Require absent non-symlink cache before any author imports; reject precomputed groundtruth pickle after import qualification; preserve fresh original reference checks",
+    "existing_generated_completions_rerun": false
+  },
   "independent_daemon_staging_fixture": {
     "public_entrypoint": "scripts/run_bigcodebench_container_scoring.py --staging volume",
     "actual_container_exit_code": 0,
@@ -46,12 +69,27 @@
     "ownership_initializer_scope": "Only fresh output volume; fixed provisioning code with CHOWN/FOWNER, no author imports or task code. Scoring worker still drops all capabilities.",
     "scope": "Actual Docker software fixture with candidate public volume API, not original tasks, official dependency image or native scoring"
   },
-  "official_sanitize_or_functional_scoring_executed": false,
+  "official_sanitize_or_functional_scoring_executed": true,
+  "native_scoring_completed": true,
+  "original_sanitizer_selected_tasks": 3,
+  "native_scoring_summary": {
+    "fixed_task_ids": ["BigCodeBench/0", "BigCodeBench/1", "BigCodeBench/2"],
+    "native_container_actual_exit_code": 0,
+    "reference_pass_rate": 1.0,
+    "candidate_statuses": ["pass", "pass", "fail"],
+    "official_pass_at_1": 0.6666666666666666,
+    "original_rows_preserved": 1140,
+    "original_raw_solutions_unchanged": true,
+    "independent_saved_scoring_and_container_audit_passed": true,
+    "additional_task_execution_in_saved_audit": false,
+    "new_model_calls": 0,
+    "full1140_task_quality_claim": false,
+    "provider_research_final_closure_completed": false
+  },
   "new_model_calls": 0,
   "remaining": [
-    "Prepare and qualify immutable original Python3.10 evaluation image with complete publisher dependencies",
-    "Execute unchanged original sanitizer and functional scorer on saved fixed completions",
-    "Verify original reference checks, saved scoring and final provider/research handoff"
+    "Publish reusable tested CPU environment lock/build instructions, without private platform identities",
+    "Verify complete original acquisition/1140-row adapter and actual-CI provider/current-research handoff"
   ],
   "boundary": "Bounded harmless software/resource qualification, not a security certification, native task scoring or source completion. No generated code executed on a host; no HumanEval results rerun. Private platform identities and raw tasks are not published."
 }

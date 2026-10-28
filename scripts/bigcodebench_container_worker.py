@@ -80,6 +80,8 @@ def assert_isolation(host_namespaces):
 
 
 def qualify_environment(requirements):
+    from packaging.version import InvalidVersion, Version
+
     require(sys.version_info[:2] == (3, 10), "official image Python3.10 required")
     versions = {}
     for line in Path(requirements).read_text().splitlines():
@@ -89,9 +91,15 @@ def qualify_environment(requirements):
         name, separator, expected = line.partition("==")
         require(not any(c in name for c in " ;<>!@/"), "unsupported requirement syntax")
         actual = metadata.version(name)
+        matches = not separator
+        if separator:
+            try:
+                matches = Version(actual) == Version(expected)
+            except InvalidVersion:
+                matches = False
         require(
-            not separator or actual == expected,
-            "official evaluation dependency version mismatch",
+            matches,
+            f"official evaluation dependency version mismatch: {name} expected {expected}, installed {actual}",
         )
         versions[name.lower().replace("_", "-")] = actual
     subprocess.run([sys.executable, "-m", "pip", "check"], check=True, timeout=120)
@@ -110,6 +118,23 @@ def qualify_author_entrypoints():
         check=True,
         timeout=120,
     )
+
+
+def qualify_fresh_author_environment(requirements, cache):
+    cache = Path(cache)
+    require(
+        not cache.exists() and not cache.is_symlink(),
+        "fresh groundtruth cache required before author imports",
+    )
+    versions = qualify_environment(requirements)
+    qualify_author_entrypoints()
+    # Library imports may initialize Hugging Face cache directories/version.txt.
+    # They must not supply a precomputed author groundtruth pickle.
+    require(
+        not any(cache.rglob("*.pkl")),
+        "unexpected groundtruth cache populated during import qualification",
+    )
+    return versions
 
 
 def validate_results(evaluation, metrics, ids):
@@ -182,10 +207,8 @@ def evaluate():
             hashlib.sha256(path.read_bytes()).hexdigest() == expected,
             "staged original input identity changed",
         )
-    versions = qualify_environment("/author/Requirements/requirements-eval.txt")
-    qualify_author_entrypoints()
-    require(
-        not Path("/output/fresh-cache").exists(), "fresh groundtruth cache required"
+    versions = qualify_fresh_author_environment(
+        "/author/Requirements/requirements-eval.txt", "/output/fresh-cache"
     )
     sanitized = Path("/output/raw-solutions-private-sanitized.jsonl")
     selected_ids = plan["selected_task_ids"]

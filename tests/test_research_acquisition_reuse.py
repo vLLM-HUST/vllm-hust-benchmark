@@ -378,6 +378,16 @@ def test_explicit_publisher_data_profile_reuses_existing_asset_preparer():
     assert all(item["role"] == "data" for item in selected)
 
 
+def test_bigcodebench_getter_preserves_fixed_original_parquet_only():
+    source, selected = runner.selection("BIGCODEBENCH")
+    assert source["publisher_metadata_acquisition"]["registered_file_roles"] == ["data"]
+    assert len(selected) == 1
+    assert selected[0]["path"] == "data/v0.1.4-00000-of-00001.parquet"
+    assert selected[0]["bytes"] == 2362110
+    assert selected[0]["rows"] == 1140
+    assert source["revision"] in selected[0]["url"]
+
+
 def test_invalid_publisher_acquisition_roles_fail_closed(tmp_path, monkeypatch):
     catalog = tmp_path / "catalog.json"
     source = {
