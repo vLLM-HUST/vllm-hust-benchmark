@@ -388,10 +388,22 @@ python scripts/run_appworld_original_react.py \
   --profile /author/experiments/configs/react_llama3_test_normal.jsonnet \
   --model openai/Qwen/Qwen3.5-9B --api-base http://127.0.0.1:14001/v1 \
   --environment-url http+unix://%2Fenvironment-io%2Fenvironment.sock \
-  --experiment original-react-check --limit 3 --local-unbilled --service-context 262144
+  --experiment original-react-check --limit 3 --local-unbilled --service-context 262144 \
+  --model-queue /transport
 ```
 
-执行前仍需完整实验依赖、原始数据、原作者软件导入路径、私有模型代理和环境服务；核心镜像本身不足以执行。此公共入口已经通过服务器离线非root只读容器的原配置哈希、依赖导入及隔离前置检查，但尚未完成该入口的原生推理实跑和研究端联调，不把私有驱动三条原生任务的证据冒充此入口验证。运行输出包含原始任务与生成代码，必须留在服务器私有目录；失败不替换任务。
+`--model-queue`在离线Agent容器内启动回环代理，把原始请求交给单独的可信模型worker。操作者须预先建立服务器私有队列目录，并且仅把该子目录挂入Agent容器为`/transport`；生成代码的环境容器不得获得队列或Docker
+socket。可信worker使用同一队列的宿主机路径及已有模型服务（或事先授权的回环转发），不自动启停模型、建立SSH或抢占研究资源。仅获得空闲验证窗口后启动：
+
+```bash
+python scripts/appworld_model_transport.py --queue /private/appworld-queue \
+  --api-base http://127.0.0.1:19466/v1 --disable-thinking \
+  --watch --max-jobs 300 --idle-timeout 600
+```
+
+不带`--watch`或`--execute-one`时只输出计划。`--disable-thinking`是本Qwen绑定的显式选项，不是其他模型的默认设置；它不覆盖原请求中冲突的设置。worker保留原请求、实际转发请求和原始响应，已返回或已认领的请求不会自动重复发送；超时或失败保留现场，不能删掉标记盲目重试。原始内容仅保留服务器私有目录，不提交Git。此传输当前通过回环协议夹具测试，尚不是新公共入口的真实原题推理证据。
+
+执行前仍需完整实验依赖、原始数据、原作者软件导入路径、模型worker和环境服务；核心镜像本身不足以执行。此公共入口已经通过服务器离线非root只读容器的原配置哈希、依赖导入及隔离前置检查，但尚未完成该入口的原生推理实跑和研究端联调，不把私有驱动三条原生任务的证据冒充此入口验证。运行输出包含原始任务与生成代码，必须留在服务器私有目录；失败不替换任务。
 
 完整实验镜像配方为`configs/workload-native/appworld-react-cpu.Dockerfile`。在新的外部软件构建目录中准备`author/`（上述固定10文件核验后的原作者目录）和`litellm-original/`，以及该Dockerfile。LiteLLM必须取BerriAI/litellm原始提交`f20184cd49c77ee66da21001a960f50b8875c321`对应的v1.37.19源码；已取得归档的SHA256为`61ce6448db7d0d26e26670910c5830ac56ef7539db6593f328a0fe36215ffde5`。校验归档后在服务器解包完整源码（保留原符号链接及其目标），不要改用新版本以绕过PyPI旧版本缺失。构建时传入已核验核心镜像的实际ID：
 
@@ -404,6 +416,40 @@ docker build --network=host --build-arg APPWORLD_CORE_IMAGE="$(cat /private/appw
 这份公共实验配方已在服务器独立构建成功，并通过离线非root只读容器中的原配置、核心83项版本及原生依赖导入检查。新解析环境有152项依赖，不等同先前140项完整环境，也不是原作者锁定依赖。默认原作者70B模型配置不变地归档；9B是资源适配替代，不能宣称复现70B结果。原始任务下载与目录核验、模型代理和完整隔离启动仍是独立步骤；不能仅靠镜像构建或入口计划输出打总勾。
 
 `--network=host`只用于本专用CPU工作区的软件依赖构建，以避开嵌套Docker桥接网络的PyPI连接问题；原始数据和任务均不进入构建上下文，任务执行必须保持`--network=none`，不能照搬构建网络配置。读取模块保留全部732项任务、14,643个任务文件、46个共享数据库/API文档引用及原始划分/版本/许可文件。统一绑定与索引回查已在服务器原数据上验证，安装产物及研究端联调仍待完成，不视为该来源已交付。
+
+隔离启动示例：先由操作者准备本任务专用的可写输出、缓存、队列及socket子目录，确保UID65534可访问；原始输入只读暂存，并预建空的`world/experiments`嵌套挂载点。不要递归改动原始共享数据目录、其他人的工作区或模型权重。`/private/appworld-agent-software`只放本仓库两个公开入口脚本；下面镜像ID文件分别来自前述构建。Docker
+daemon与CLI不在同一容器时，先核实绑定源在daemon侧的实际位置，不能假定CLI侧`/root`可直接绑定。
+
+```bash
+docker run -d --name appworld-environment --network none --user 65534:65534 \
+  --read-only --cap-drop ALL --security-opt no-new-privileges \
+  --memory 4g --cpus 1 --pids-limit 1024 --tmpfs /tmp:size=512m \
+  --mount type=bind,src=/private/appworld/world,dst=/work,readonly \
+  --mount type=bind,src=/private/appworld-output,dst=/work/experiments \
+  --mount type=bind,src=/private/appworld-env-socket,dst=/io \
+  --entrypoint /opt/venv/bin/python "$(cat /private/appworld-core-image-id.txt)" \
+  -m uvicorn appworld.serve.environment:app --uds /io/environment.sock
+
+docker run --name appworld-agent --network none --user 65534:65534 \
+  --read-only --cap-drop ALL --security-opt no-new-privileges \
+  --memory 4g --cpus 1 --pids-limit 1024 --tmpfs /tmp:size=512m \
+  --mount type=bind,src=/private/appworld/world,dst=/work,readonly \
+  --mount type=bind,src=/private/appworld-output,dst=/work/experiments \
+  --mount type=bind,src=/private/appworld-agent-cache,dst=/nonexistent \
+  --mount type=bind,src=/private/appworld-agent-software,dst=/entry,readonly \
+  --mount type=bind,src=/private/appworld-env-socket,dst=/environment-io,readonly \
+  --mount type=bind,src=/private/appworld-queue,dst=/transport \
+  --workdir /author --entrypoint /opt/venv/bin/python \
+  "$(cat /private/appworld-react-image-id.txt)" -B /entry/run_appworld_original_react.py \
+  --profile /author/experiments/configs/react_llama3_test_normal.jsonnet \
+  --model openai/Qwen/Qwen3.5-9B --api-base http://127.0.0.1:14001/v1 \
+  --environment-url http+unix://%2Fenvironment-io%2Fenvironment.sock \
+  --experiment original-react-check --limit 3 --local-unbilled --service-context 262144 \
+  --model-queue /transport
+```
+
+Agent命令默认仅检查计划；实际执行需环境socket、模型worker及资源窗口就绪后显式增加`--execute`。上例不挂载Docker
+socket、不暴露NPU设备、不让生成代码接触模型队列；失败容器和日志先保留，不能为“跑通”替换题目。公开启动组合尚待真实环境联调验证，既有私有驱动原生结果与该组合的验证状态分开记录。
 
 绑定已有原始数据（不会下载、改写或执行任务）：
 

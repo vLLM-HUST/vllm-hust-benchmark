@@ -99,6 +99,21 @@ def run(args):
         raise ValueError(
             "separate original environment over private Unix socket required"
         )
+    if args.model_queue is not None:
+        from appworld_model_transport import model_proxy
+
+        if (
+            endpoint.hostname != "127.0.0.1"
+            or endpoint.port is None
+            or endpoint.path.rstrip("/") != "/v1"
+        ):
+            raise ValueError("queue proxy requires explicit http://127.0.0.1:PORT/v1")
+        with model_proxy(args.model_queue, port=endpoint.port):
+            return execute_native(args, report)
+    return execute_native(args, report)
+
+
+def execute_native(args, report):
     # Runtime imports are intentionally absent from plan/CI paths.
     import litellm
     import requests_unixsocket
@@ -183,6 +198,11 @@ def main():
         help="actual deployed model context; not generation budget",
     )
     parser.add_argument("--execute", action="store_true")
+    parser.add_argument(
+        "--model-queue",
+        type=Path,
+        help="dedicated private queue mount for offline Agent loopback proxy",
+    )
     print(json.dumps(run(parser.parse_args()), indent=2))
 
 
