@@ -5,6 +5,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1] / "workload-preparation"
 DATA_MODULES = {
+    "mvbench",  # Original ordered video task/media/answer relations only.
     "naturebench",  # Original package/material references only, no scientific execution.
     "deepplanning",  # Original queries/metadata/database references only.
     "dragon",  # Original four-file task/corpus/reference identities only.
