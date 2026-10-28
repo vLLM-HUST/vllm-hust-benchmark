@@ -12,6 +12,9 @@ import pytest
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 import run_structeval_render_queue_backend as backend
 from structeval_render_queue import (
+    CanvasRenderQueue,
+    HtmlRenderQueue,
+    MarkdownRenderQueue,
     MatplotlibRenderQueue,
     SvgRenderQueue,
     TypstRenderQueue,
@@ -19,7 +22,9 @@ from structeval_render_queue import (
 
 
 @pytest.mark.parametrize("score", [0, 1])
-@pytest.mark.parametrize("kind", ["matplotlib", "typst", "svg"])
+@pytest.mark.parametrize(
+    "kind", ["matplotlib", "typst", "svg", "html", "canvas", "markdown"]
+)
 def test_complete_dispatch_and_retained_resume_without_execution(
     tmp_path, monkeypatch, score, kind
 ):
@@ -32,6 +37,9 @@ def test_complete_dispatch_and_retained_resume_without_execution(
         "typst": TypstRenderQueue,
         "matplotlib": MatplotlibRenderQueue,
         "svg": SvgRenderQueue,
+        "html": HtmlRenderQueue,
+        "canvas": CanvasRenderQueue,
+        "markdown": MarkdownRenderQueue,
     }[kind]
     queue = queue_class(
         queue_root,

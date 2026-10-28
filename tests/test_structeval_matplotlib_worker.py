@@ -126,6 +126,36 @@ def test_browser_asset_guard_preserves_factory_arguments_and_inline_resources():
     assert requested == ["https://example.invalid/a.svg"]
 
 
+def test_nested_pinned_html_factory_guarded_but_unrelated_module_untouched(monkeypatch):
+    loaded = module()
+    calls = []
+    contexts = []
+
+    class Context:
+        async def route(self, pattern, callback):
+            assert pattern == "**/*"
+            contexts.append(self)
+
+    async def original(*args, **kwargs):
+        calls.append((args, kwargs))
+        return (object(), Context(), object(), object())
+
+    top = SimpleNamespace(start_browser=original)
+    nested = SimpleNamespace(start_browser=original)
+    outsider = SimpleNamespace(start_browser=original)
+    monkeypatch.setitem(sys.modules, "_guard_fixture.render_html", nested)
+    monkeypatch.setitem(sys.modules, "other_library.render_html", outsider)
+    loaded.guard_browser_factories(top, "_guard_fixture", [])
+
+    async def exercise():
+        await top.start_browser(headless=True)
+        await nested.start_browser(headless=False)
+
+    asyncio.run(exercise())
+    assert calls == [((), {"headless": True}), ((), {"headless": False})]
+    assert len(contexts) == 2 and outsider.start_browser is original
+
+
 def test_plan_has_no_runtime_data_requirement(tmp_path):
     result = subprocess.run(
         [

@@ -12,6 +12,9 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 from structeval_render_queue import (
+    CanvasRenderQueue,
+    HtmlRenderQueue,
+    MarkdownRenderQueue,
     MatplotlibRenderQueue,
     RenderBlocked,
     SvgRenderQueue,
@@ -37,6 +40,27 @@ def test_typst_keyword_parameters_match_the_original_renderer(tmp_path):
     assert list(inspect.signature(queue.render).parameters) == [
         "task_id",
         "typst_code",
+        "img_output_path",
+    ]
+
+
+@pytest.mark.parametrize(
+    "queue_type,code_parameter",
+    [
+        (HtmlRenderQueue, "html_content"),
+        (CanvasRenderQueue, "canvas_html"),
+        (MarkdownRenderQueue, "markdown_content"),
+    ],
+)
+def test_nested_browser_keyword_parameters_match_original(
+    tmp_path, queue_type, code_parameter
+):
+    queue = queue_type(
+        tmp_path, image_root=tmp_path / "images", image="sha256:" + "0" * 64
+    )
+    assert list(inspect.signature(queue.render).parameters) == [
+        "task_id",
+        code_parameter,
         "img_output_path",
     ]
 

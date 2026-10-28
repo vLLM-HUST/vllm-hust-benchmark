@@ -60,3 +60,13 @@ def test_recipe_keeps_browser_installation_in_software_build_only():
     assert cache_environment in text
     assert text.rfind("USER 65534:65534") > text.rfind("RUN ")
     assert "run_structeval_original_json" not in text
+
+
+def test_markdown_extension_reuses_browser_assets_and_checks_observed_version():
+    text = (
+        ROOT / "configs/workload-native/structeval-markdown-cpu.Dockerfile"
+    ).read_text()
+    assert "ARG RENDER_BASE" in text and "Markdown==3.11.2" in text
+    assert "version('Markdown') == '3.11.2'" in text
+    assert "playwright install" not in text and "apt-get" not in text
+    assert text.rfind("USER 65534:65534") > text.rfind("RUN ")

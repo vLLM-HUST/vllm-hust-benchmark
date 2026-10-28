@@ -557,7 +557,18 @@ musl二进制`typst`。不要把原始任务、模型或生成代码放入构建
 
 执行仍要求非root、只读根文件系统、无网络/凭据/NPU设备及明确CPU/RAM/PID/tmpfs/时间边界。内联SVG及空输入保持原行为；若浏览器实际请求未取得的HTTP/S资源，则在原视觉裁判前返回资源阻塞，私有日志记录缺失资源，不将缺图或白图静默记成模型0分，也不擅自开放网络或删改原资产。该门禁及Matplotlib兼容性已通过服务器控制验证。
 
-已完成原位置94/95/96、ID001200/001201/001202：各10字段与7/8/10个原问答对保留；3次生成和3次实际视觉裁判均stop，原提取代码、裁判提示和实际PNG字节已独立核验。原最终分0.9/0.65/1.0如实保留。使用现有Qwen3.5-9B、显式关闭thinking、温度0和原`max_tokens=None`，不是作者模型复现或性能结论。剩余47题尚未运行；继续时使用新的运行目录和`--start 3 --count 47`，不重新生成已完成前三题。其他渲染协议仍未完成，不据此勾选整个StructEval来源。
+原位置94/95/96、ID001200/001201/001202各10字段与7/8/10个原问答对保留，原最终分0.9/0.65/1.0如实记录。其后按`--start 3 --count 47`执行其余原题，保留前三题结果不重生成；现在全50题已完成，共50次生成、50次实际视觉裁判，100次调用均stop，原提取代码、397个原问答对、裁判提示及PNG字节均独立核验。新实验可用`--all-selected`选择完整协议，但不要为展示命令重复跑已有有效结果。使用现有Qwen3.5-9B、显式关闭thinking、温度0和原`max_tokens=None`，不是作者模型复现或性能结论。其他渲染协议仍未完成，不据此勾选整个StructEval来源。
+
+### StructEval HTML、Canvas、Markdown 接入
+
+复用同一原生入口与隔离分派器：指定`--output-type HTML`、`Canvas`或`Markdown`，并指定与该格式匹配的固定渲染镜像及私有队列。HTML的原输入协议包括`--input-type Text`、`Markdown`、`React`、`Vue`；Canvas和Markdown当前对应原Text输入协议。准备、选题及原评分仍使用固定原始数据和原源码，不构造替代题目。
+
+HTML、Canvas直接复用已合格的浏览器镜像。Markdown使用`configs/workload-native/structeval-markdown-cpu.Dockerfile`，以该浏览器镜像传入`--build-arg RENDER_BASE=...`，仅增加观察到的`Markdown==3.11.2`，不重下浏览器。该扩展已实际构建退出0。当前配方为已验证的Linux
+ARM64环境，不据此宣称其他架构已运行。
+
+隔离端`--renderer`须指向对应原`render_html.py`、`render_canvas.py`或`render_markdown.py`；同目录保留原`render_utils.py`，Canvas/Markdown还须有原`render_html.py`，均固定哈希、只读装入。Canvas原函数把输入嵌入其JavaScript包装，Markdown按作者默认转换器生成HTML；不增加代码修补、替代包装或Markdown扩展。资源门禁覆盖被内部调用的HTML浏览器工厂，不仅检查外层函数。
+
+三种格式的正常1、空输入0、外部HTTP/S资产阻塞，以及SVG兼容性，共10项CPU隔离控制已通过，已保留结果不重新启动容器。\*\*这些是执行入口和环境控制，不是原题验证；三种格式的原始任务与完整VQA尚未运行，不增加来源完成数。\*\*运行原题仍需研究空闲、NPU窗口和固定原顺序选题，失败不得替换成其他题目。
 
 ## Video-MME 原生视频任务
 

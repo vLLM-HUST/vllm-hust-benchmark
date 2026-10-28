@@ -230,3 +230,27 @@ class SvgRenderQueue(MatplotlibRenderQueue):
 
     def render(self, task_id, svg_code, img_output_path):
         return super().render(task_id, svg_code, img_output_path)
+
+
+class HtmlRenderQueue(MatplotlibRenderQueue):
+    def __init__(self, root, **kwargs):
+        super().__init__(root, renderer_kind="html", **kwargs)
+
+    def render(self, task_id, html_content, img_output_path):
+        return super().render(task_id, html_content, img_output_path)
+
+
+class CanvasRenderQueue(MatplotlibRenderQueue):
+    def __init__(self, root, **kwargs):
+        super().__init__(root, renderer_kind="canvas", **kwargs)
+
+    def render(self, task_id, canvas_html, img_output_path):
+        return super().render(task_id, canvas_html, img_output_path)
+
+
+class MarkdownRenderQueue(MatplotlibRenderQueue):
+    def __init__(self, root, **kwargs):
+        super().__init__(root, renderer_kind="markdown", **kwargs)
+
+    def render(self, task_id, markdown_content, img_output_path):
+        return super().render(task_id, markdown_content, img_output_path)

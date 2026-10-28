@@ -49,12 +49,35 @@ def main():
     parser.add_argument(
         "--input-type",
         default="Text",
-        choices=["Text", "CSV", "JSON", "XML", "YAML", "TOML"],
+        choices=[
+            "Text",
+            "CSV",
+            "JSON",
+            "XML",
+            "YAML",
+            "TOML",
+            "HTML",
+            "Markdown",
+            "React",
+            "Vue",
+        ],
     )
     parser.add_argument(
         "--output-type",
         default="JSON",
-        choices=["CSV", "JSON", "XML", "YAML", "TOML", "Matplotlib", "Typst", "SVG"],
+        choices=[
+            "CSV",
+            "JSON",
+            "XML",
+            "YAML",
+            "TOML",
+            "Matplotlib",
+            "Typst",
+            "SVG",
+            "HTML",
+            "Canvas",
+            "Markdown",
+        ],
     )
     parser.add_argument("--render-queue", type=Path)
     parser.add_argument("--render-image")
@@ -72,15 +95,20 @@ def main():
         help="All original Text-to-JSON tasks only; excludes format-to-JSON conversions",
     )
     args = parser.parse_args()
-    rendering = args.output_type in {"Matplotlib", "Typst", "SVG"}
+    rendering = args.output_type in {
+        "Matplotlib",
+        "Typst",
+        "SVG",
+        "HTML",
+        "Canvas",
+        "Markdown",
+    }
     if rendering != bool(args.render_queue and args.render_image):
         parser.error(
             f"{args.output_type} requires both private render queue and pinned image"
         )
     if not rendering and (args.render_queue or args.render_image):
-        parser.error(
-            "render dispatch only supports explicit Matplotlib/Typst/SVG protocols"
-        )
+        parser.error("render dispatch requires an explicitly supported render protocol")
     if args.all_json and (args.input_type != "Text" or args.output_type != "JSON"):
         parser.error("--all-json is only the historical Text-to-JSON selection")
     url = urlparse(args.endpoint)
@@ -169,6 +197,9 @@ def main():
     if rendering:
         import structeval.render_engine.main as render_main
         from structeval_render_queue import (
+            CanvasRenderQueue,
+            HtmlRenderQueue,
+            MarkdownRenderQueue,
             MatplotlibRenderQueue,
             SvgRenderQueue,
             TypstRenderQueue,
@@ -178,6 +209,9 @@ def main():
             "Typst": TypstRenderQueue,
             "Matplotlib": MatplotlibRenderQueue,
             "SVG": SvgRenderQueue,
+            "HTML": HtmlRenderQueue,
+            "Canvas": CanvasRenderQueue,
+            "Markdown": MarkdownRenderQueue,
         }[args.output_type]
         queue = queue_class(
             args.render_queue,
@@ -185,14 +219,14 @@ def main():
             image=args.render_image,
             timeout=900,
         )
-        if args.output_type == "SVG":
+        if args.output_type in {"SVG", "HTML", "Canvas", "Markdown"}:
 
-            async def remote_svg(task_id, svg_code, img_output_path):
+            async def remote_browser(task_id, parsed_code, img_output_path):
                 return await asyncio.to_thread(
-                    queue.render, task_id, svg_code, img_output_path
+                    queue.render, task_id, parsed_code, img_output_path
                 )
 
-            render_main.ASYNC_RENDERERS["svg"] = remote_svg
+            render_main.ASYNC_RENDERERS[args.output_type.lower()] = remote_browser
         else:
             render_main.THREAD_RENDERERS[args.output_type.lower()] = queue.render
         original_render_file = workflow.render_file_async

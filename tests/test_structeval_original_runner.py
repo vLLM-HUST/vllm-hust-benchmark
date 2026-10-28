@@ -11,7 +11,9 @@ import pytest
 ROOT = Path(__file__).resolve().parents[1]
 
 
-@pytest.mark.parametrize("output_type", ["Matplotlib", "Typst", "SVG"])
+@pytest.mark.parametrize(
+    "output_type", ["Matplotlib", "Typst", "SVG", "HTML", "Canvas", "Markdown"]
+)
 def test_matplotlib_selection_preserves_original_rows_and_requires_rendering(
     output_type,
 ):
@@ -38,7 +40,9 @@ def test_matplotlib_selection_preserves_original_rows_and_requires_rendering(
     assert all(row is rows[index] for index, row in selected)
 
 
-@pytest.mark.parametrize("output_type", ["Matplotlib", "Typst", "SVG"])
+@pytest.mark.parametrize(
+    "output_type", ["Matplotlib", "Typst", "SVG", "HTML", "Canvas", "Markdown"]
+)
 def test_matplotlib_cli_requires_explicit_isolated_dispatch_before_data_access(
     output_type,
 ):
@@ -220,9 +224,28 @@ def test_completed_protocol_audit_adds_only_previously_unexecuted_rows():
     assert svg["actual_generation_calls"] == svg["actual_judge_calls"] == 3
     assert svg["all_original_judge_pairs_and_actual_image_bytes_verified"]
     assert not svg["source_checkbox_eligible"]
-    assert ledger["verified_unique_native_tasks"] == count + continued[
-        "combined_unique_protocol_tasks"
-    ] + len(svg["fixed_first3_original_task_ids"])
+    svg_continued = svg["remaining47_audit"]
+    assert (
+        svg_continued["status"]
+        == "ALL50_ORIGINAL_SVG_TASKS_EXECUTED_AND_COMPLETE_VQA_AUDITED"
+    )
+    assert (
+        svg_continued["new_original_tasks"] == 47
+        and svg_continued["previous_first3_reused_not_rerun"] == 3
+    )
+    assert (
+        svg_continued["new_generation_calls"] == svg_continued["new_judge_calls"] == 47
+    )
+    assert svg_continued[
+        "complete_original_judge_pairs_and_actual_image_bytes_verified"
+    ]
+    assert not svg_continued["source_checkbox_eligible"]
+    assert (
+        ledger["verified_unique_native_tasks"]
+        == count
+        + continued["combined_unique_protocol_tasks"]
+        + svg_continued["combined_unique_protocol_tasks"]
+    )
     held = receipt.get("held_native_exit_evidence")
     if held:
         assert held["native_exit_code"] == 0

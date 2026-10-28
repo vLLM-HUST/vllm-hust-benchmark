@@ -1480,12 +1480,24 @@
         "docs/workload-data/validation/structeval-nonrender-checkpoint2-20261024.json",
         "docs/workload-data/validation/structeval-nonrender-checkpoint3-20261025.json"
       ],
-      "verified_unique_native_tasks": 1003,
-      "native_queue_state": "950_NONRENDER_REUSED_PLUS50_MATPLOTLIB_PLUS3_SVG_ORIGINAL_VQA_AUDITED",
-      "blocker": "All950 nonrender originals retained without rerun. All50 Matplotlib tasks generated/rendered/officially scored;99 calls all stop,49 successful renders and original AttributeError renderer0 retained with official judge skip. First3 SVG originals generated/rendered/complete-VQA-scored with6 stop calls; exact prompts, parsed code, all original fields/QA and actual judge images audited. Verified unique tasks1003. SVG remaining47 and other rendering formats pending; source unchecked. Browser public recipe built, nonroot offline verifier and4 controls passed; actual native preparation image separately recorded, valid original tasks not rerun for recipe. Typst dispatch passes controls including multipage score1-without-named-image. First3 Typst outputs have Markdown-style headings, all original render0/final0.1,0 judge calls by missing-image rule; syntax diagnostics audited without regeneration, excluded from verified count due missing actual Typst judge coverage. Stronger existing27B permission requested, not started. Other browser/CDN/npm/TeX formats still require faithful isolation; never enable unrestricted generated-code egress.",
+      "verified_unique_native_tasks": 1050,
+      "native_queue_state": "950_NONRENDER_REUSED_PLUS_ALL50_MATPLOTLIB_AND_ALL50_SVG_ORIGINAL_VQA_AUDITED",
+      "blocker": "All950 nonrender originals retained without rerun. All50 Matplotlib tasks officially scored with99 stop calls; original renderer0/AttributeError case retained. All50 SVG tasks generated/isolated-rendered/complete-VQA-scored with100 stop calls; first3 reused,47 newly executed. Exact original fields, prompts, parsed code, QA and judge image bytes independently audited. Verified unique tasks1050; remaining23 render groups/985 rows pending, source unchecked. Public browser recipe built and controls qualified. HTML/Canvas/Markdown dispatch and10 CPU controls verified but original tasks/VQA not run; Markdown extension reuses browser assets. First3 Typst outputs have Markdown-style headings, original render0/final0.1 and0 judge calls by missing-image rule; syntax diagnostics audited without regeneration, excluded from verified count due missing actual Typst judge coverage. Stronger existing27B permission requested, not started. Other browser/CDN/npm/TeX formats still need faithful isolation; never enable unrestricted generated-code egress.",
       "rendering_preparation": {
+        "nested_html_canvas_markdown_components": {
+          "status": "ORIGINAL_RENDERER_TEN_CPU_CONTROLS_PASSED_NATIVE_TASKS_PENDING",
+          "outputs": ["HTML", "Canvas", "Markdown"],
+          "native_entry": "scripts/run_structeval_original_json.py",
+          "existing_browser_recipe_reused": true,
+          "markdown_recipe": "configs/workload-native/structeval-markdown-cpu.Dockerfile",
+          "receipt": "docs/workload-data/validation/structeval-nonrender-checkpoint3-20261025.json",
+          "original_tasks_executed": 0,
+          "model_calls": 0,
+          "nested_external_http_resources_block_not_model0": true,
+          "source_checkbox_eligible": false
+        },
         "svg_browser_component": {
-          "status": "FIRST3_ORIGINAL_SVG_GENERATION_RENDER_AND_COMPLETE_VQA_AUDITED",
+          "status": "ALL50_ORIGINAL_SVG_GENERATION_RENDER_AND_COMPLETE_VQA_AUDITED",
           "native_entry": "scripts/run_structeval_original_json.py --output-type SVG",
           "recipe": "configs/workload-native/structeval-browser-cpu.Dockerfile",
           "recipe_build_qualification_pending": false,
@@ -1493,10 +1505,10 @@
           "public_recipe_four_isolated_controls_passed": true,
           "original_tasks_reexecuted_on_public_recipe_image": false,
           "receipt": "docs/workload-data/validation/structeval-nonrender-checkpoint3-20261025.json",
-          "original_tasks_executed_and_audited": 3,
-          "original_generation_calls": 3,
-          "original_judge_calls": 3,
-          "full50_protocol_executed": false,
+          "original_tasks_executed_and_audited": 50,
+          "original_generation_calls": 50,
+          "original_judge_calls": 50,
+          "full50_protocol_executed": true,
           "external_http_asset_request_blocks_not_model0": true,
           "source_checkbox_eligible": false
         },

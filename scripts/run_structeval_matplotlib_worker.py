@@ -7,6 +7,7 @@ Plan by default; never execute candidate code on the host.
 
 import argparse
 import asyncio
+from functools import partial
 import hashlib
 import importlib.util
 import inspect
@@ -30,12 +31,30 @@ RENDERERS = {
         "58539c3236da7cf26e3af3c1fc4e13036320822422bcb79dbdd797c96d438c06",  # pragma: allowlist secret - fixed original author module
         "render_svg_and_screenshot",
     ),
+    "html": (
+        "9903eecf78ff9201d54b8cc2aebad1908ba5e68d5e2fdc8426cdb72a07c40f99",  # pragma: allowlist secret - fixed original author module
+        "render_html_and_screenshot",
+    ),
+    "canvas": (
+        "06bc0e0790cac32f54ae724147ee7d096e5d34a3fc74d837aab0558f24632806",  # pragma: allowlist secret - fixed original author module
+        "render_canvas_and_screenshot",
+    ),
+    "markdown": (
+        "4daf5cd98a27786a23a2aa372cfcd087e2a12520add3b32bc07cde39dc44a1f0",  # pragma: allowlist secret - fixed original author module
+        "render_markdown_and_screenshot",
+    ),
 }
 EXTRA_MODULES = {
     "svg": {
         "render_utils.py": "947172ba0d07979caf4180db0f9204d9c8db2aad81dae7f2608e5ece33932de4",  # pragma: allowlist secret - original relative import
     }
 }
+EXTRA_MODULES["html"] = dict(EXTRA_MODULES["svg"])
+for _kind in ("canvas", "markdown"):
+    EXTRA_MODULES[_kind] = {
+        **EXTRA_MODULES["svg"],
+        "render_html.py": RENDERERS["html"][0],
+    }
 
 
 async def browser_without_external_assets(original_start, requested, *args, **kwargs):
@@ -52,6 +71,24 @@ async def browser_without_external_assets(original_start, requested, *args, **kw
 
     await context.route("**/*", guard)
     return browser, context, page, playwright
+
+
+def guard_browser_factories(module, namespace, requested):
+    """Guard nested pinned renderer factories, never unrelated imported packages."""
+    targets = [module] + [
+        value
+        for name, value in list(sys.modules.items())
+        if name.startswith(namespace + ".")
+    ]
+    bindings = [
+        (target, target.start_browser)
+        for target in targets
+        if hasattr(target, "start_browser")
+    ]
+    for target, original_start in bindings:
+        target.start_browser = partial(
+            browser_without_external_assets, original_start, requested
+        )
 
 
 def run_retaining_errors(original_run, *args, **kwargs):
@@ -204,10 +241,9 @@ def execute(args):
             spec.loader.exec_module(module)
             requested = []
             if kind in EXTRA_MODULES:
-                original_start = module.start_browser
-                module.start_browser = lambda *a, **kw: browser_without_external_assets(
-                    original_start, requested, *a, **kw
-                )
+                # Canvas/Markdown call a relative HTML renderer. Guard every
+                # pinned module's existing factory without rewriting its body.
+                guard_browser_factories(module, package.__name__, requested)
             if kind == "typst":
                 author_run = module.subprocess.run
                 module.subprocess = SimpleNamespace(
