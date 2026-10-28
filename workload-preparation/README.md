@@ -584,6 +584,8 @@ ARM64环境，不据此宣称其他架构已运行。
 
 这是发布方原始Video-MME与固定VLMEvalKit的两个已有配置：`Video-MME_8frame`和`Video-MME_8frame_subs`，不是把64帧配置临时减成8帧。原2700题/900视频全部保留；默认每种duration取最先3个不同视频并保留每视频全部3题，每配置27题。选题在推理前固定，不因失败换题；`--full`才选择全部2700题。
 
+Video-MME-v2是另一个原评测协议，不适用本节旧版8帧配置或评分；其资产准备与未完成项见下一节及阶段回执，不能复用旧预测冒充v2已验证。
+
 数据限学术研究，禁止把本入口视为商业使用或再分发授权。原媒体、字幕、题目、抽帧及模型输出均放在外部私有目录；准备完整原发布版须预留至少500GiB磁盘，首次获取/完整校验耗时不等同原题推理耗时。
 
 以下命令从仓库根目录运行。已有合格ChartQA/MVBench HTTP客户端与固定工具包时直接复用，不重新安装。新Linux ARM/Python3.12客户端先装官方CPU
@@ -638,3 +640,21 @@ done
 默认endpoint为本机`http://127.0.0.1:19466/v1/chat/completions`；可用`--endpoint`明确绑定合规本机转发入口。若先检查抽帧/字幕/原提示，增加`--prepare-prompts-only`并使用单独的新输出目录：该模式0模型调用、无评分，不能算benchmark完成。去掉`--execute`仅输出计划。
 
 字幕配置仅提取原作者在采样帧时间戳处选取的字幕，缺失字幕按原逻辑处理，不补全整段转录。请求失败、空答案、帧数或原题关系不一致会保留失败并停止；不得缩短视频题、改预算或换题凑通过。验收实际进度和已运行范围见[唯一清单](../docs/workload-data/DATASET_CHECKLIST.zh-CN.md)与[实测记录](../docs/workload-data/validation/videomme-original-readiness-20261028.json)，不是全量质量或性能结论。
+
+## Video-MME-v2 原资产准备（原生执行仍待补）
+
+复用现有获取器，不另建下载框架：
+
+```bash
+python scripts/prepare_reused_research_assets.py VIDEOMME_V2 --mode plan
+python scripts/prepare_reused_research_assets.py VIDEOMME_V2 --mode download \
+  --data-root /private/videomme-v2-original --max-bytes 10000000
+python scripts/prepare_reused_research_assets.py VIDEOMME_V2 --mode verify \
+  --data-root /private/videomme-v2-original
+```
+
+这里只注册固定官方版本的四份小资产，共9046844字节：原README、eval.yaml、全部test.parquet与subtitle.zip，不包含视频。已有原文件直接用只读verify，不重复下载。全部3200题、800个四题组、11字段与800份字幕身份/对应关系已在服务器核验；原始文件不进入代码仓库。新环境须自行具备合规网络可达性，不能以本文命令已列出推断当地下载成功。
+
+官方源码固定为`MME-Benchmarks/Video-MME-v2@b2834bd4091d6234ccaf0fa1f149a7ef4eac5875`；原评测脚本为`evaluation/test_video_mme_v2.py`。原分组非线性rating与accuracy均需保留，不以旧版逐题正确率替换。抽样按两个原group_type各最先三个完整四题组，保留每组全部四题和原顺序，不取孤立三题；该固定计划共24题，尚未推理。
+
+目前仅完成原资产和原评分器参考/CPU控制。仍缺视频、干净的原生读取/抽帧环境、64帧原提示、合适NPU服务、实际推理评分及固定工件消费。当前32图上限的服务不能声称执行过官方64帧配置；不为跑通缩帧或删减字幕。具体证据与限制见[阶段回执](../docs/workload-data/validation/videomme-v2-original-preparation-20261029.json)，来源总勾保持未完成。

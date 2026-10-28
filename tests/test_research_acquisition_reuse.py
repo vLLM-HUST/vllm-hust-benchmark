@@ -36,6 +36,50 @@ def unique_object(pairs):
     return result
 
 
+def test_videomme_v2_small_assets_do_not_claim_video_or_native_delivery():
+    source, files = runner.selection("VIDEOMME_V2")
+    assert {item["path"] for item in files} == {
+        "README.md",
+        "eval.yaml",
+        "test.parquet",
+        "subtitle.zip",
+    }
+    assert sum(item["bytes"] for item in files) == 9046844
+    assert all(source["revision"] in item["url"] for item in files)
+    assert not any(item["path"].startswith("videos/") for item in files)
+    receipt = json.loads(
+        (
+            ROOT
+            / "docs/workload-data/validation/videomme-v2-original-preparation-20261029.json"
+        ).read_text("utf-8")
+    )
+    assert receipt["original_rows"] == receipt["original_groups"] * 4 == 3200
+    assert len(receipt["original_fields"]) == 11 and receipt["subtitle_files"] == 800
+    assert sum(receipt["group_types"].values()) == 800
+    assert receipt["reference_controls_are_not_model_scores"]
+    assert (
+        receipt["original_metric_software_controls_not_model_scores"][
+            "first_wrong_sequential_logic"
+        ]
+        == 0
+    )
+    assert (
+        receipt["original_metric_software_controls_not_model_scores"][
+            "three_correct_relevance"
+        ]
+        == 56.25
+    )
+    assert (
+        receipt["official_recommended_frames"] > receipt["current_service_image_limit"]
+    )
+    assert receipt["model_calls"] == receipt["local_windows_raw_files_written"] == 0
+    assert not receipt["source_checkbox_eligible"] and not receipt["videos_acquired"]
+    inventory = json.loads(
+        (ROOT / "docs/workload-data/dataset-validation-status.json").read_text("utf-8")
+    )["delivery_inventory"]["VIDEOMME_V2"]
+    assert not inventory["checked"] and inventory["delivery_receipt"] is None
+
+
 def test_livecodebench_original_assets_are_pinned_per_dataset_not_code_revision():
     source, files = runner.selection("LIVECODEBENCH")
     assert len(files) == 3
