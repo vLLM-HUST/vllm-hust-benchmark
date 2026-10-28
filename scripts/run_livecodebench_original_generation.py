@@ -27,7 +27,12 @@ def local_endpoint(value):
 
 
 def native_samples(scenario):
-    if scenario not in {"codegeneration", "selfrepair"}:
+    if scenario not in {
+        "codegeneration",
+        "selfrepair",
+        "codeexecution",
+        "testoutputprediction",
+    }:
         raise ValueError("explicit supported original scenario required")
     return 1 if scenario == "selfrepair" else 10
 
@@ -47,7 +52,16 @@ def requests_from(path, *, scenario="codegeneration"):
     }
     for row in rows:
         body = row["request"]
-        if not isinstance(row.get("question_id"), str) or not row["question_id"]:
+        qid = row.get("question_id")
+        if (
+            type(qid)
+            not in (
+                {str, int}
+                if scenario in {"codeexecution", "testoutputprediction"}
+                else {str}
+            )
+            or qid == ""
+        ):
             raise ValueError("original question identifier required")
         if any(body.get(k) != v for k, v in expected.items()):
             raise ValueError(f"original {scenario} defaults must remain unchanged")
@@ -72,6 +86,26 @@ def requests_from(path, *, scenario="codegeneration"):
             identity = f"{row['question_id']}::candidate:{index}"
             if row.get("request_id") != identity:
                 raise ValueError("original repair request relationship required")
+            ids.append(identity)
+        elif scenario == "codeexecution":
+            identity = row.get("id")
+            if (
+                not isinstance(identity, str)
+                or not identity
+                or row.get("request_id") != identity
+            ):
+                raise ValueError("original code-execution sample id required")
+            ids.append(identity)
+        elif scenario == "testoutputprediction":
+            if type(row.get("test_id")) is not int:
+                raise ValueError("original test identity required")
+            identity = json.dumps(
+                [qid, row["test_id"]], ensure_ascii=False, separators=(",", ":")
+            )
+            if row.get("request_id") != identity:
+                raise ValueError(
+                    "original question/test identity relationship required"
+                )
             ids.append(identity)
         else:
             ids.append(row["question_id"])
@@ -135,6 +169,9 @@ def run(
                 saved.update(
                     request_id=row["request_id"], candidate_index=row["candidate_index"]
                 )
+            elif scenario in {"codeexecution", "testoutputprediction"}:
+                saved.update(request_id=row["request_id"])
+                saved.update({key: row[key] for key in ("id", "test_id") if key in row})
             path = output / f"{position}.request-response.private.json"
             path.write_text(json.dumps(saved, ensure_ascii=False), encoding="utf-8")
             receipt["attempted_requests"] += 1
@@ -163,6 +200,11 @@ def run(
             if scenario == "selfrepair"
             else "ORIGINAL_GENERATION_RETURNED_NATIVE_SCORING_PENDING"
         )
+        if scenario in {"codeexecution", "testoutputprediction"}:
+            receipt["status"] = {
+                "codeexecution": "ORIGINAL_CODE_EXECUTION_GENERATION_RETURNED_NATIVE_SCORING_PENDING",
+                "testoutputprediction": "ORIGINAL_TEST_OUTPUT_PREDICTION_GENERATION_RETURNED_NATIVE_SCORING_PENDING",
+            }[scenario]
     except BaseException as error:
         receipt.update(
             status="STOP_RETAINED_NEEDS_TRIAGE", error_type=type(error).__name__
@@ -184,7 +226,14 @@ def main():
     parser.add_argument("--timeout", type=int, default=90)
     parser.add_argument("--execute", action="store_true")
     parser.add_argument(
-        "--scenario", choices=["codegeneration", "selfrepair"], default="codegeneration"
+        "--scenario",
+        choices=[
+            "codegeneration",
+            "selfrepair",
+            "codeexecution",
+            "testoutputprediction",
+        ],
+        default="codegeneration",
     )
     args = parser.parse_args()
     if not args.execute:

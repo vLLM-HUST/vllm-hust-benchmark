@@ -107,6 +107,12 @@ def repair_baseline(args, tasks):
 
 
 def prepare_prompts(args):
+    if args.scenario in {"codeexecution", "testoutputprediction"}:
+        from livecodebench_other_scenarios import run_other
+
+        return run_other(
+            args, require_isolated_worker, author_checkout, outputs_from_saved
+        )
     require_isolated_worker()
     output = Path(args.output).resolve()
     if output.exists():
@@ -187,6 +193,12 @@ def prepare_prompts(args):
 
 
 def score(args):
+    if args.scenario in {"codeexecution", "testoutputprediction"}:
+        from livecodebench_other_scenarios import run_other
+
+        return run_other(
+            args, require_isolated_worker, author_checkout, outputs_from_saved
+        )
     require_isolated_worker()
     output = Path(args.output).resolve()
     if output.exists():
@@ -334,9 +346,17 @@ def main():
     parser.add_argument("--model", required=True)
     parser.add_argument("--prepare-prompts", action="store_true")
     parser.add_argument(
-        "--scenario", choices=["codegeneration", "selfrepair"], default="codegeneration"
+        "--scenario",
+        choices=[
+            "codegeneration",
+            "selfrepair",
+            "codeexecution",
+            "testoutputprediction",
+        ],
+        default="codegeneration",
     )
     parser.add_argument("--prior-evaluation", type=Path)
+    parser.add_argument("--sample-count", type=int, default=3)
     parser.add_argument(
         "--repair-feedback-compat",
         choices=["strict", "error-message-only"],

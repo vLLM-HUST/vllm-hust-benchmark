@@ -283,6 +283,49 @@ python scripts/run_livecodebench_container_scoring.py \
 
 这里的接口、夹具测试和准备成功不等于实跑完成；修复推理、后续评分与保存审计的实际状态以[唯一清单](../docs/workload-data/DATASET_CHECKLIST.zh-CN.md)和[分阶段回执](../docs/workload-data/validation/livecodebench-original-readiness-20261028.json)为准。
 
+### LiveCodeBench 代码执行预测与测试输出预测
+
+这两个场景使用固定发布版的原始
+Parquet，分别有479和442个case。默认选择原始行序的前三条；`--full`选择全量。准备入口复制完整原文件并校验固定摘要，原字段与日期类型由隔离容器中的作者数据类读取，不把任务改写成自定义问答。代码执行场景按原始`id`区分case，测试输出场景按`(question_id,test_id)`区分；不能按题号去重。
+
+以下对两个场景分别执行，`SCENARIO`取`codeexecution`或`testoutputprediction`。沿用上文固定作者归档与已经构建的`LCB_IMAGE`，不同场景使用不同的全新输出目录：
+
+```bash
+SCENARIO=codeexecution
+python scripts/prepare_livecodebench_original_tasks.py \
+  --data-root /private/livecodebench-original \
+  --output /private/lcb-$SCENARIO-prepared --scenario "$SCENARIO"
+python scripts/run_livecodebench_container_scoring.py \
+  --prepared-dir /private/lcb-$SCENARIO-prepared \
+  --author-archive /private/lcb-source.tar.gz --image "$LCB_IMAGE" \
+  --work-root /private/lcb-$SCENARIO-prompts --model Qwen/Qwen3.5-9B \
+  --scenario "$SCENARIO" --prepare-prompts --execute
+```
+
+将生成的`native-output/results/requests-private.json`复制到模型服务所在节点，在仓库外部目录保存回答：
+
+```bash
+python scripts/run_livecodebench_original_generation.py \
+  --prompts /private/lcb-requests-private.json \
+  --output /private/lcb-generation \
+  --endpoint http://127.0.0.1:19466/v1 --scenario "$SCENARIO" \
+  --disable-thinking --timeout 1200 --execute
+```
+
+两种场景均保留原生每case十个候选、2000-token预算、temperature=0.2和top_p=0.95；代码执行保留官方非CoT模板。`--timeout`只设置HTTP等待时间，不改变原生评分时间限制。将完整回答目录传回CPU节点后评分：
+
+```bash
+python scripts/run_livecodebench_container_scoring.py \
+  --prepared-dir /private/lcb-$SCENARIO-prepared \
+  --generations-dir /private/lcb-generation \
+  --author-archive /private/lcb-source.tar.gz --image "$LCB_IMAGE" \
+  --work-root /private/lcb-$SCENARIO-scoring --model Qwen/Qwen3.5-9B \
+  --scenario "$SCENARIO" --execute
+```
+
+官方评分器的单位不同：代码执行为百分数，测试输出为比例，不应直接混用。评分涉及生成内容的解释执行，必须保留上述离线、非root
+Docker隔离，不能在宿主机直接评分。命令支持情况、真实运行和统一接入完成情况分别核验，以唯一清单为准。
+
 ## Video-MME 原生视频任务
 
 这是发布方原始Video-MME与固定VLMEvalKit的两个已有配置：`Video-MME_8frame`和`Video-MME_8frame_subs`，不是把64帧配置临时减成8帧。原2700题/900视频全部保留；默认每种duration取最先3个不同视频并保留每视频全部3题，每配置27题。选题在推理前固定，不因失败换题；`--full`才选择全部2700题。

@@ -1,11 +1,11 @@
 {
   "source_id": "LIVECODEBENCH",
   "recorded_at": "2026-10-28",
-  "status": "CODEGEN_AND_DECLARED_COMPAT_REPAIR_SCORED_OTHER_TWO_SCENARIOS_AND_CONSUMER_PENDING",
+  "status": "FOUR_SCENARIOS_SAMPLE_SCORED_DECLARED_REPAIR_COMPAT_PROVIDER_CONSUMER_PENDING",
   "source_checkbox_eligible": false,
   "native_execution_complete": false,
-  "model_calls": 27,
-  "model_call_count_scope": "HTTP attempts: one retained codegen timeout,three completed codegen requests and23 completed repair requests.53 saved generated candidates;7 accepted baseline candidates carried into repair are not new model outputs.",
+  "model_calls": 33,
+  "model_call_count_scope": "HTTP attempts: one retained codegen timeout,three completed codegen requests,23 completed repair requests,three codeexecution and three testoutputprediction requests.113 saved generated candidates;7 accepted baseline candidates carried into repair are not new model outputs.",
   "raw_payloads_published": false,
   "research_analysis_migrated": false,
   "original_file_identities": "workload-preparation/data/catalogs/source_manifests_v1.json#sources.LIVECODEBENCH",
@@ -126,6 +126,39 @@
     "private_saved_audit": "/root/livecodebench-saved-repair-audit-20261028-001/audit-public.json",
     "boundary": "Fixed3-question usability check with explicit approved feedback display compatibility; truncated/incorrect outputs retained. Not unmodified-author-template reproduction, full source quality, engine improvement or a scientific conclusion."
   },
+  "other_native_scenarios": {
+    "recorded_at": "2026-10-29",
+    "selection": "First three unchanged original Parquet rows per scenario; not full benchmark",
+    "codeexecution": {
+      "source_rows": 479,
+      "question_ids": [2777,2777,2777],
+      "native_case_ids": ["sample_0","sample_1","sample_2"],
+      "response_candidates": [10,10,10],
+      "graded_candidates": [10,10,10],
+      "native_scoring_exit_code": 0,
+      "metric_unit": "author percentage",
+      "private_scoring": "/root/livecodebench-codeexecution-scoring-20261028-001"
+    },
+    "testoutputprediction": {
+      "source_rows": 442,
+      "question_ids": ["2727","2727","2728"],
+      "test_ids": [0,1,0],
+      "native_scoring_exit_code": 0,
+      "metric_unit": "author fraction",
+      "private_scoring": "/root/livecodebench-testoutputprediction-scoring-20261028-001"
+    },
+    "original_parquet_fields_and_types_preserved": true,
+    "scoring_isolated_offline_nonroot": true,
+    "model_service_reconfigured": false,
+    "source_checkbox_eligible": false,
+    "independent_saved_audit_complete": true,
+    "independent_saved_audit_exit_code": 0,
+    "audit_additional_model_or_task_execution": false,
+    "all60_other_scenario_candidates_finished_with_stop": true,
+    "private_saved_audit": "/root/livecodebench-other-saved-audit-20261029-001/audit-public.json",
+    "retained_preflight_failure": "First private launcher placed generator outside its scripts directory; external-output safeguard rejected before HTTP calls. Corrected deployment layout in a fresh evidence directory; no valid output repeated.",
+    "private_generation": "/data/shared_upload/hust-phr/workload-benchmark-native-delivery-20261024/livecodebench-other-native-generation-32028-002"
+  },
   "native_protocol_boundaries": {
     "code_generation_samples_per_question": 10,
     "temperature": 0.2,
@@ -137,7 +170,6 @@
     "scope": "Code generation, self-repair, code execution and test-output prediction require separately evidenced native coverage. Assets and task preparation are not benchmark delivery."
   },
   "remaining": [
-    "Original code-execution and test-output-prediction scenarios",
     "Public original-field adapter/index, maintained research consumer roundtrip and actual current CI artifact verification"
   ]
 }

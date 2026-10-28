@@ -17,6 +17,7 @@ import uuid
 
 from livecodebench_container_worker import AUTHOR_SHA
 from livecodebench_repair import repair_identities
+from livecodebench_other_scenarios import ASSETS
 
 
 def staging_directory(path):
@@ -36,8 +37,9 @@ def worker_command(
     prepare_prompts=False,
     scenario="codegeneration",
     repair_feedback_compat="strict",
+    sample_count=3,
 ):
-    if scenario not in {"codegeneration", "selfrepair"}:
+    if scenario not in {"codegeneration", "selfrepair"} | ASSETS.keys():
         raise ValueError("explicit supported original scenario required")
     if not re.fullmatch(r"sha256:[0-9a-f]{64}", image):
         raise ValueError("immutable existing local image ID required")
@@ -94,6 +96,8 @@ def worker_command(
         model,
         "--scenario",
         scenario,
+        "--sample-count",
+        str(sample_count),
     ]
     if scenario == "selfrepair":
         if repair_feedback_compat not in {"strict", "error-message-only"}:
@@ -127,8 +131,14 @@ def execute(args):
         raise ValueError("fresh work root independent from existing evidence required")
     if hashlib.sha256(archive.read_bytes()).hexdigest() != AUTHOR_SHA:
         raise ValueError("fixed author source archive mismatch")
-    task_path = prepared / "codegen-original-tasks.private.json"
     original = json.loads((prepared / "receipt-private.json").read_text("utf-8"))
+    task_name = original.get("task_file_name", "codegen-original-tasks.private.json")
+    if Path(task_name).name != task_name:
+        raise ValueError("contained original task file basename required")
+    task_path = prepared / task_name
+    other = args.scenario in ASSETS
+    if other and original.get("scenario") != args.scenario:
+        raise ValueError("original prepared scenario differs")
     if (
         hashlib.sha256(task_path.read_bytes()).hexdigest()
         != original["task_file_sha256"]
@@ -146,7 +156,7 @@ def execute(args):
                 "original evaluated tasks differ from selected original source"
             )
     need_generation = not args.prepare_prompts and (
-        args.scenario == "codegeneration" or bool(expected_repairs)
+        args.scenario == "codegeneration" or other or bool(expected_repairs)
     )
     if need_generation and generations is None:
         raise ValueError("saved original generations required for scoring")
@@ -164,6 +174,17 @@ def execute(args):
                 == "ORIGINAL_SELF_REPAIR_GENERATION_RETURNED_NATIVE_SCORING_PENDING"
                 and generated.get("completed_request_ids") == expected_repairs
             )
+        if other:
+            status = {
+                "codeexecution": "ORIGINAL_CODE_EXECUTION_GENERATION_RETURNED_NATIVE_SCORING_PENDING",
+                "testoutputprediction": "ORIGINAL_TEST_OUTPUT_PREDICTION_GENERATION_RETURNED_NATIVE_SCORING_PENDING",
+            }[args.scenario]
+            ids = generated.get("completed_request_ids", [])
+            valid = (
+                generated["status"] == status
+                and len(ids) == original["selected_case_count"]
+                and len(set(ids)) == len(ids)
+            )
         if not valid:
             raise ValueError(
                 "complete original generation and task relationships required"
@@ -176,6 +197,9 @@ def execute(args):
         prepare_prompts=args.prepare_prompts,
         scenario=args.scenario,
         repair_feedback_compat=args.repair_feedback_compat,
+        sample_count=original.get(
+            "selected_case_count", len(original.get("selected_question_ids") or [])
+        ),
     )
     image = json.loads(
         subprocess.check_output(["docker", "image", "inspect", args.image], text=True)
@@ -197,6 +221,10 @@ def execute(args):
             Path(__file__).with_name("livecodebench_repair.py"),
             inputs / "livecodebench_repair.py",
         ),
+        (
+            Path(__file__).with_name("livecodebench_other_scenarios.py"),
+            inputs / "livecodebench_other_scenarios.py",
+        ),
     ]:
         shutil.copyfile(source, target)
         target.chmod(0o444)
@@ -204,7 +232,9 @@ def execute(args):
         shutil.copyfile(args.prior_evaluation, inputs / "prior-evaluation.json")
         (inputs / "prior-evaluation.json").chmod(0o444)
     generation_count = (
-        len(expected_repairs)
+        original["selected_case_count"]
+        if other
+        else len(expected_repairs)
         if args.scenario == "selfrepair"
         else len(original["selected_question_ids"])
     )
@@ -308,7 +338,12 @@ def execute(args):
         native = json.loads(
             (work / "native-output/results/receipt-private.json").read_text("utf-8")
         )
-        if native["selected_question_ids"] != original["selected_question_ids"]:
+        if (
+            not other
+            and native["selected_question_ids"] != original["selected_question_ids"]
+            or other
+            and len(native["selected_case_ids"]) != original["selected_case_count"]
+        ):
             raise ValueError("original scoring question relationships incomplete")
         receipt["status"] = (
             "ORIGINAL_API_PROMPTS_PREPARED_NO_MODEL_CALLS"
@@ -317,6 +352,8 @@ def execute(args):
             if args.scenario == "selfrepair"
             else "ORIGINAL_CODEGEN_SAMPLE_SCORED_OTHER_SCENARIOS_PENDING"
         )
+        if other and not args.prepare_prompts:
+            receipt["status"] = "ORIGINAL_SCENARIO_SAMPLE_SCORED_SOURCE_CLOSURE_PENDING"
     except BaseException as error:
         receipt.update(
             status="STOP_RETAINED_NEEDS_TRIAGE", error_type=type(error).__name__
@@ -340,7 +377,14 @@ def main():
     parser.add_argument("--execute", action="store_true")
     parser.add_argument("--prepare-prompts", action="store_true")
     parser.add_argument(
-        "--scenario", choices=["codegeneration", "selfrepair"], default="codegeneration"
+        "--scenario",
+        choices=[
+            "codegeneration",
+            "selfrepair",
+            "codeexecution",
+            "testoutputprediction",
+        ],
+        default="codegeneration",
     )
     parser.add_argument("--prior-evaluation", type=Path)
     parser.add_argument(

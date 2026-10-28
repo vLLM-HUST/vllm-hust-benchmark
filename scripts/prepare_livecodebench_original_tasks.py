@@ -98,7 +98,19 @@ def main():
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--sample-count", type=int, default=3)
     parser.add_argument("--execute", action="store_true")
+    parser.add_argument(
+        "--scenario",
+        choices=["codegeneration", "codeexecution", "testoutputprediction"],
+        default="codegeneration",
+    )
+    parser.add_argument(
+        "--full",
+        action="store_true",
+        help="Full original Parquet scenario, not a reduced native per-case budget",
+    )
     args = parser.parse_args()
+    if args.full and args.scenario == "codegeneration":
+        parser.error("codegeneration requires an explicit fixed sample count")
     if not args.execute:
         print(
             json.dumps(
@@ -108,7 +120,25 @@ def main():
                     "source_checkbox_eligible": False,
                     "selection_rule": "first_n_publisher_file_rows_no_replacement",
                     "sample_count": args.sample_count,
+                    "scenario": args.scenario,
+                    "full": args.full,
                 }
+            )
+        )
+        return
+    if args.scenario != "codegeneration":
+        from livecodebench_other_scenarios import prepare_asset
+
+        print(
+            json.dumps(
+                prepare_asset(
+                    args.data_root,
+                    args.output,
+                    scenario=args.scenario,
+                    sample_count=args.sample_count,
+                    full=args.full,
+                ),
+                indent=2,
             )
         )
         return
