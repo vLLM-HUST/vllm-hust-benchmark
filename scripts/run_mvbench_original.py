@@ -42,6 +42,11 @@ def main():
         "--endpoint", default="http://127.0.0.1:19466/v1/chat/completions"
     )
     parser.add_argument("--execute", action="store_true")
+    parser.add_argument(
+        "--full",
+        action="store_true",
+        help="Run all4000 original tasks, not the fixed60 validation sample",
+    )
     args = parser.parse_args()
     validate_endpoint(args.endpoint)
     if not args.execute:
@@ -49,7 +54,7 @@ def main():
             json.dumps(
                 {
                     "status": "PLAN_ONLY",
-                    "selected_original_tasks": 60,
+                    "selected_original_tasks": 4000 if args.full else 60,
                     "frames_each": 16,
                     "scorer": "original_exact_matching",
                     "model_calls": 0,
@@ -84,7 +89,11 @@ def main():
     dataset = MVBench_MP4(dataset="MVBench_MP4", nframe=16, fps=-1)
     if len(dataset.data) != 4000:
         raise ValueError("Original complete dataset required")
-    selected = fixed_positions(dataset.data.to_dict(orient="records"))
+    selected = (
+        list(range(4000))
+        if args.full
+        else fixed_positions(dataset.data.to_dict(orient="records"))
+    )
     model = OpenAIWrapper(
         model=args.model, key="local-only", api_base=args.endpoint, retry=1, timeout=300
     )  # pragma: allowlist secret - local dummy key
@@ -93,6 +102,7 @@ def main():
     output.mkdir(mode=0o700, parents=True, exist_ok=False)
     receipt = {
         "source_id": "MVBENCH",
+        "scope": "ALL4000_ORIGINAL_TASKS" if args.full else "FIXED_FIRST3_PER20_TYPES",
         "status": "RUNNING",
         "model": args.model,
         "selected_original_positions": selected,
@@ -172,13 +182,13 @@ def main():
             str(prediction_file), model="exact_matching"
         )
         score = load(str(output / "predictions-private_score.xlsx"))
-        if len(score) != 60 or not score["score"].isin([0, 1]).all():
+        if len(score) != len(selected) or not score["score"].isin([0, 1]).all():
             raise ValueError(
                 "Native scoring incomplete; never count missing predictions as success"
             )
         verify(source, archive=True)
         receipt["status"] = (
-            "FIXED_60_ORIGINAL_VIDEO_TASKS_AND_NATIVE_SCORING_COMPLETE_NOT_SOURCE_DELIVERY"
+            "SELECTED_ORIGINAL_VIDEO_TASKS_AND_NATIVE_SCORING_COMPLETE_NOT_SOURCE_DELIVERY"
         )
     except BaseException as error:
         receipt.update(

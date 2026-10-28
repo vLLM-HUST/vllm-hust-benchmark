@@ -2,6 +2,17 @@
   "version": "adapter-extensions/v1",
   "boundary": "Field contracts from publisher metadata/docs. No real source payload downloaded or full adapter validation claimed.",
   "adapters": {
+    "MVBENCH": {
+      "kind": "task_dataset",
+      "mapping": "mvbench_original_video_tasks",
+      "input_fields": ["question", "candidates", "video", "media_path"],
+      "required_fields": ["original", "task_type", "original_task_offset", "original_global_index", "media_root", "media_path"],
+      "outcome_fields": ["answer"],
+      "annotation_fields": ["original_case_annotations"],
+      "id_field": "",
+      "requirements": ["Original video-view test.json, all four observed case schemas and all media relations preserved; no generated prompts or request-arrival claims", "Raw main-view annotation sidecars are retained separately; temporal/subtitle metadata remain annotations and are not silently injected into the native MP4 protocol", "Reading does not perform video decoding, model execution or native scoring"],
+      "status": "ORIGINAL4000_FIELDS_AND_NATIVE60_VERIFIED_PROVIDER_CONSUMER_CLOSURE_PENDING"
+    },
     "TEMPORALWIKI": {
       "kind": "task_dataset",
       "mapping": "native_fields",

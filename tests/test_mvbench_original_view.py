@@ -63,7 +63,8 @@ def test_fixed_sample_covers_all_twenty_original_types():
     assert profile["dataset_revision"] == MODULE.REVISION
 
 
-def test_native_runner_plan_without_video_or_model_access(tmp_path):
+@pytest.mark.parametrize("full", [False, True])
+def test_native_runner_plan_without_video_or_model_access(tmp_path, full):
     result = subprocess.run(
         [
             sys.executable,
@@ -78,13 +79,14 @@ def test_native_runner_plan_without_video_or_model_access(tmp_path):
             str(tmp_path / "output"),
             "--model",
             "example",
+            *(["--full"] if full else []),
         ],
         check=True,
         capture_output=True,
         text=True,
     )
     plan = json.loads(result.stdout)
-    assert plan["selected_original_tasks"] == 60
+    assert plan["selected_original_tasks"] == (4000 if full else 60)
     assert plan["frames_each"] == 16
     assert plan["model_calls"] == 0
     assert list(tmp_path.iterdir()) == []
@@ -99,3 +101,59 @@ def test_native_fixed_positions_preserves_all_groups_and_source_indices(monkeypa
     assert runner.fixed_positions(data) == expected
     with pytest.raises(ValueError, match="twenty-type"):
         runner.fixed_positions(data[:76])
+
+
+def asset_module():
+    spec = importlib.util.spec_from_file_location(
+        "mvbench_original_assets", ROOT / "scripts/prepare_mvbench_original_assets.py"
+    )
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def test_complete_publisher_file_manifest_is_not_duplicate_task_tables():
+    module = asset_module()
+    manifest = json.loads(module.MANIFEST.read_text(encoding="utf-8"))
+    files = manifest["files"]
+    assert len(files) == len({item["path"] for item in files}) == 3895
+    assert sum(item["bytes"] for item in files) == 15796297352
+    assert [item["path"] for item in files if item["role"] == "data"] == ["test.json"]
+    assert manifest["revision"] == MODULE.REVISION
+
+
+def test_complete_asset_verification_and_regular_view_do_not_copy_media(tmp_path):
+    import hashlib
+
+    module = asset_module()
+    snapshot = tmp_path / "snapshot"
+    snapshot.mkdir()
+    raw = b"fixture-only-not-original-data"
+    (snapshot / "fixture.bin").write_bytes(raw)
+    manifest = {
+        "files": [
+            {
+                "path": "fixture.bin",
+                "bytes": len(raw),
+                "sha256": hashlib.sha256(raw).hexdigest(),
+            }
+        ]
+    }
+    assert module.verify_snapshot(snapshot, manifest) == 1
+    view = tmp_path / "regular-view"
+    module.materialize(snapshot, view, manifest)
+    assert (snapshot / "fixture.bin").samefile(view / "fixture.bin")
+    with pytest.raises(FileExistsError):
+        module.materialize(snapshot, view, manifest)
+    (snapshot / "fixture.bin").write_bytes(b"changed")
+    with pytest.raises(ValueError):
+        module.verify_snapshot(view, manifest)
+
+
+def test_native_cache_ref_never_overwrites_other_revision(tmp_path):
+    module = asset_module()
+    manifest = {"revision": "fixture-revision"}
+    module.ensure_native_ref(tmp_path, manifest)
+    module.ensure_native_ref(tmp_path, manifest)
+    with pytest.raises(ValueError, match="no overwrite"):
+        module.ensure_native_ref(tmp_path, {"revision": "different-fixture"})

@@ -6,15 +6,39 @@
 ### MVBench视频理解（进行中，不打来源总勾）
 
 - [x] 官方video分支完整3895文件共15,796,297,352字节已在服务器逐文件校验，复用单份外部缓存，不下载到开发机或提交原始视频。
+
 - [x] 固定版本VLMEvalKit的原始生成函数已生成全部4000题MVBench_MP4表，MD5与作者定义一致；正常完整构造器通过，不伪造部分数据完整性。
+
 - [x] 固定20类每类原顺序前3题，共60题，已完成原始16帧解码与提示构造检查；0模型调用，不代表原生执行完成。
+
 - [x] 60题原始流程推理及官方支持的exact_matching评分已完成，34/60；全部60题得到有效响应和0/1评分，实际子进程退出码0。只代表固定样本可执行，不是4000题全评、论文分数复现或性能结论；不替换失败。
+
 - [x] 候选纯数据读取/投影在服务器核验全部4000题原字段、选项/答案和媒体关系；额外时间边界、fps、show_name与subtitle原样保留，不静默丢弃、不塞进原协议没有使用的模型输入。这不是统一提供侧或研究消费闭环。
+
 - [ ] 公共获取、数据适配、研究消费者与实际CI工件消费闭环。
+
+  候选安装包的统一入口已在服务器核验全部4000原字段/媒体关系、4000条完整准备索引及60条提供侧/当前研究消费者逐值回读；公共获取入口也已复用完整缓存、校验3895文件并建立不复制视频的普通文件视图。尚待实际CI工件独立安装验证，暂不打来源总勾。
 
 复用已核验的外部完整快照、VLMEvalKit和FFmpeg/Decord环境。模型为现有NPU视觉模型Qwen3.5-9B，是适配的替代模型，不宣称复现VideoChat2论文分数。保持原始16帧、2048输出token和温度0；关闭thinking为显式模型profile，不改题。原始API角色预处理及编码保持不变，评分使用官方支持的exact_matching，不调用付费judge。抽样评分表使用连续评价索引，原始全局索引另存source_index；题目、选项、答案和视频关系不变。
 
 以下是准备入口（默认仅计划，无下载、无模型调用）：
+
+完整资产获取和校验：下载依赖单独准备环境中的`huggingface_hub==0.36.0`；计划、校验与建立普通文件视图只依赖Python标准库。下载需显式完整字节预算和至少100GiB可用空间；已有缓存由官方Hub工具复用。不可达时可显式选择`--hf-endpoint https://hf-mirror.com`，固定版本与全部SHA256不变。
+
+```bash
+python scripts/prepare_mvbench_original_assets.py --cache /external/hf-cache
+python scripts/prepare_mvbench_original_assets.py --cache /external/hf-cache --action download --max-bytes 15796297352
+python scripts/prepare_mvbench_original_assets.py --cache /external/hf-cache --action prepare --data-root /external/mvbench-original-data
+```
+
+`prepare`先完整校验，再在同文件系统的新目录中建立硬链接普通文件视图，避免额外复制视频，也不放宽公共读取器的路径检查；跨文件系统会明确失败，已有目录不覆盖、不自动清理。原快照供原生执行，普通文件视图供统一准备与研究读取。完整3895文件清单进入公共安装包，只有`test.json`是主任务表，不将原始侧标注重复计为新任务。
+
+安装公共数据包后，外部配置为`{"sources":[{"source_id":"MVBENCH","data_root":"/external/mvbench-original-data"}]}`；使用统一入口准备完整索引，输入引用中不写原题或答案：
+
+```bash
+python -m vllm_hust_workload_data.pipeline plan --config /external/mvbench-prepare.json
+python -m vllm_hust_workload_data.pipeline run --config /external/mvbench-prepare.json --output /external/mvbench-prepared-new
+```
 
 ```bash
 python scripts/prepare_mvbench_original_view.py --official-checkout /external/VLMEvalKit --snapshot /external/hf-cache/datasets--OpenGVLab--MVBench/snapshots/a776e554280b99b70f00cc3eacd69a65e0727efc
@@ -27,6 +51,8 @@ python scripts/run_mvbench_original.py --official-checkout /external/VLMEvalKit 
 ```
 
 仅在确认窗口后加`--execute`；原始请求、响应、预测及评分保存到新的私有输出目录，不加入Git。来源总勾须等上述全部交付环节通过。
+
+上述原生入口默认固定60题验证；完整正式评测可增加`--full --execute`运行全部4000原题及同一原生评分。当前实际证据只覆盖固定60题，不把全量可运行入口写成已完成全量评测。
 
 ### TemporalWiki演化语料与原生探针评测（进行中，不打来源总勾）
 
