@@ -45,6 +45,7 @@ def main():
             "dragon",
             "naturebench",
             "temporalwiki",
+            "appworld-react",
         ],
         default="jsonschemabench",
         help="Pinned original author source only; historical default unchanged",

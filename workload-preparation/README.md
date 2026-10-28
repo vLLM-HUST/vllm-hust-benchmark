@@ -350,6 +350,18 @@ Docker隔离，不能在宿主机直接评分。命令支持情况、真实运�
 
 ## AppWorld ARM核心环境准备（不是原生任务交付）
 
+官方ReAct运行器的软件文件可单独准备，固定版本中包含8份ReCoMa模块、原始提示和原始Llama3配置，不下载任务或模型，也不运行Agent：
+
+```bash
+python scripts/prepare_jsonschemabench_author_source.py --source appworld-react \
+  --author-root /private/appworld-react-author --action prepare --max-bytes 34698
+python scripts/prepare_jsonschemabench_author_source.py --source appworld-react \
+  --author-root /private/appworld-react-author --action verify
+```
+
+该原配置仍指向作者的Llama3-70B服务，不能直接冒用其模型名连接本地模型。其提示长度限制是22000**字符**，ReAct交互历史输出上限20000字符，每次生成400
+tokens、最多100次LLM调用和500次环境调用；这些原生规则不能为了跑通自行降低。实验依赖安装、实际模型绑定、隔离环境和官方评分需要另行核验。当前ReCoMa0.0.4的精确依赖LiteLLM1.37.19在PyPI入口返回404；官方Git标签仍可用，已以同版本固定源码构建并通过实验依赖及离线非root导入检查，没有换版本；140项安装分发中的原核心83项版本不变。其用户缓存使用专用可写卷，根文件系统、任务和代码仍只读。实际模型绑定、Agent任务执行与评分仍未完成，不以依赖安装给来源打勾。
+
 固定作者版本`0.1.3.post1`的官方Docker服务镜像经元数据核查仅有amd64，不能直接作为当前ARM节点的合格环境。新增核心配方沿用该版本官方Dockerfile的Python/uv安装路径，固定已核验的官方ARM64基础镜像，使用此前实际安装观察到的83项核心版本；这是可复现核心环境配方，不是作者依赖锁、完整Agent环境或代码执行隔离资格证明。
 
 以下只复制三份软件文件到新的仓库外目录，不把任务数据、模型或企业资产放进构建上下文：
