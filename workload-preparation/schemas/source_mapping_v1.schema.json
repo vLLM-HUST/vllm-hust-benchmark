@@ -1,0 +1,385 @@
+{
+  "type": "object",
+  "properties": {
+    "mapping_version": {
+      "const": "source-mapping/v1"
+    },
+    "source": {
+      "type": "object",
+      "properties": {
+        "source_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "revision": {
+          "type": "string",
+          "minLength": 1
+        },
+        "unit": {
+          "type": "string",
+          "minLength": 1
+        },
+        "publisher": {
+          "type": "string",
+          "minLength": 1
+        },
+        "locator": {
+          "type": "string",
+          "minLength": 1
+        },
+        "license": {
+          "type": "string",
+          "minLength": 1
+        },
+        "provenance_kind": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "source_id",
+        "revision",
+        "unit",
+        "publisher",
+        "locator",
+        "license",
+        "provenance_kind"
+      ],
+      "additionalProperties": false
+    },
+    "families": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "audio-streaming-interaction",
+          "code-evaluation",
+          "code-generation-with-tests",
+          "conversation-continuation",
+          "document-grounded-analysis",
+          "evolving-corpus-rag",
+          "general-single-turn-assistant",
+          "interactive-repository-assistance",
+          "memory-write-read",
+          "multimodal-understanding",
+          "rag-followup",
+          "repository-agent-loop",
+          "scientific-coding-workflow",
+          "scientific-experiment-planning",
+          "simulation-analysis-verification",
+          "standalone-reasoning",
+          "structured-generation",
+          "text-transformation",
+          "tool-interaction"
+        ]
+      }
+    },
+    "records_path": {
+      "type": "array",
+      "items": {
+        "anyOf": [
+          {
+            "type": "string",
+            "minLength": 1
+          },
+          {
+            "type": "integer",
+            "minimum": 0
+          }
+        ]
+      }
+    },
+    "identity": {
+      "type": "object",
+      "properties": {
+        "task_id": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/rule"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "parent_task_id": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/rule"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "session_id": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/rule"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "task_id"
+      ],
+      "additionalProperties": false
+    },
+    "input": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/$defs/rule"
+      },
+      "minProperties": 1
+    },
+    "outcome": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/$defs/rule"
+      }
+    },
+    "features": {
+      "type": "object",
+      "propertyNames": {
+        "enum": [
+          "agent_events",
+          "audio",
+          "audio_chunks",
+          "audio_events",
+          "calls",
+          "candidates",
+          "choices",
+          "code",
+          "constraints",
+          "corpus_events",
+          "data_assets",
+          "documents",
+          "edits",
+          "file_events",
+          "files",
+          "history_sessions",
+          "instruction",
+          "libraries",
+          "media",
+          "memory_events",
+          "messages",
+          "output_schema",
+          "prompt",
+          "query",
+          "results",
+          "rubric",
+          "stages",
+          "tools",
+          "transform_source",
+          "video",
+          "visible_test_code",
+          "visible_tests"
+        ]
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/rule"
+      }
+    },
+    "runtime": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "enum": [
+            "task_dataset",
+            "request_replay",
+            "trace_only"
+          ]
+        },
+        "requirements": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "environment_ref": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "termination_ref": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "scorer_ref": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "kind",
+        "requirements",
+        "environment_ref",
+        "termination_ref",
+        "scorer_ref"
+      ],
+      "additionalProperties": false
+    },
+    "replay": {
+      "type": "object",
+      "properties": {
+        "order": {
+          "const": "source_file_order_not_assumed_arrival_order"
+        },
+        "artificial_load": {
+          "const": false
+        }
+      },
+      "required": [
+        "order",
+        "artificial_load"
+      ],
+      "additionalProperties": false
+    },
+    "evidence": {
+      "type": "object",
+      "properties": {
+        "field_reference": {
+          "type": "string",
+          "minLength": 1
+        },
+        "review_status": {
+          "enum": [
+            "needs_review",
+            "field_contract_reviewed"
+          ]
+        }
+      },
+      "required": [
+        "field_reference",
+        "review_status"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "mapping_version",
+    "source",
+    "families",
+    "records_path",
+    "identity",
+    "input",
+    "outcome",
+    "features",
+    "runtime",
+    "replay",
+    "evidence"
+  ],
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$defs": {
+    "rule": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "integer",
+                "minimum": 0
+              }
+            ]
+          }
+        },
+        "type": {
+          "enum": [
+            "array",
+            "boolean",
+            "number",
+            "object",
+            "schema",
+            "string"
+          ]
+        },
+        "required": {
+          "type": "boolean"
+        },
+        "fields": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/rule"
+          },
+          "minProperties": 1
+        },
+        "items": {
+          "$ref": "#/$defs/rule"
+        }
+      },
+      "required": [
+        "path",
+        "type",
+        "required"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "object"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "fields"
+            ],
+            "not": {
+              "required": [
+                "items"
+              ]
+            }
+          },
+          "else": {
+            "not": {
+              "required": [
+                "fields"
+              ]
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "array"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "items"
+            ]
+          },
+          "else": {
+            "not": {
+              "required": [
+                "items"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  },
+  "description": "Structural schema. Always run mapping-check as well for path overlap, QBI protection and semantic type checks. Passing does not authenticate publisher semantics."
+}

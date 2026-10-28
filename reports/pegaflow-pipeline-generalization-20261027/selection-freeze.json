@@ -1,0 +1,29 @@
+{
+  "frozen_utc": "2026-10-27T13:33:45.473869+00:00",
+  "profile": "profile-selected-v2.json",
+  "profile_sha256": "a5dfa896f173dbf4f4262fa3de3d9d3406e7a4d3b07f8bb7768b1afb9e62f7e3",
+  "source_sha256": {
+    "pd_pipeline_simulator.py": "fdcc093966c2dcbd726f32bcd5a7a63286f4c91a17482f662a2b1429f08fcda8",
+    "pd_multinode_simulator.py": "894cda582ac264a77d6574b9428508d8a44e012f6576ddaebb66fc17309e73e7",
+    "pd_serving_simulator.py": "1f260b6f08fec3e26f1f15a3cda735dc4eafda7fffe1519617357a7aba675568",
+    "step_simulator.py": "c1409efded90c5abdc9325af0ca6b949509d78a5528a2c7715c87d798cbae13f",
+    "fit_pipeline_profile.py": "b27f23a2016f28698391c84b590d65fefc62fb91dbd26b6f560579eaa2be24f3"
+  },
+  "selection_data": [
+    "calibration-A2-normalized.json.gz",
+    "calibration-B2-normalized.json.gz"
+  ],
+  "heldout_outcomes_opened_before_freeze": false,
+  "resource_capacity_inputs": "128-block component probes only; two repeats excluded from restore coefficient fitting and CV scores",
+  "model_selection": "condition-balanced robust fits; grouped role-swap and context-band validation; simple model preferred within 5%",
+  "topology": {
+    "physical_NPUs": {
+      "81": 2,
+      "91": 1
+    },
+    "A2": "2P1D",
+    "B2_training": "1P2D",
+    "B2_holdout": "1P1D with the second D engine loaded idle",
+    "C": "2P1D"
+  }
+}

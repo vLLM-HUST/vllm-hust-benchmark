@@ -1,0 +1,171 @@
+{
+  "schema_version": "workload-gap-sources/v1",
+  "review_date": "2026-10-21",
+  "scope": "LLM serving and multimodal/agent requests; not a claim of exhaustive AI workload coverage",
+  "baseline": {"research_classes": 36, "public_candidate_sources": 89, "enterprise_assets": 8},
+  "status_for_all_new_sources": {
+    "official_reference_checked": true,
+    "payload_acquired_in_this_change": false,
+    "adapter_implemented_in_this_change": false,
+    "real_execution_validated_in_this_change": false,
+    "redistribution_review_completed": false
+  },
+  "classification_proposals": [
+    {"id":"multi-agent-collaboration","role":"execution_relationship","sources":["MULTIAGENTBENCH"],"boundary":"Orthogonal to coding/science/business task type; do not count topology as a disjoint task family."},
+    {"id":"constraint-planning","role":"task_subclass_proposal","sources":["DEEPPLANNING"],"boundary":"General constraints and replanning are not scientific-experiment planning."},
+    {"id":"streaming-video-interaction","role":"execution_protocol_proposal","sources":["STREAMINGBENCH","OVOBENCH"],"boundary":"Preserve query timestamps and permitted prefixes; offline whole-video inference is not equivalent."},
+    {"id":"text-to-speech-generation","role":"task_family_proposal","sources":["LIBRITTS","LJSPEECH"],"boundary":"Text input and generated audio output; not ASR or a text-only voice proxy."},
+    {"id":"embedding-retrieval","role":"task_family_proposal","sources":["BEIR_SCIFACT","BEIR_NFCORPUS","STSB"],"boundary":"Embedding output and retrieval/similarity protocol, not generated text."},
+    {"id":"reranking","role":"task_family_proposal","sources":["BEIR_SCIFACT","BEIR_NFCORPUS","MSMARCO_PASSAGE"],"boundary":"Query-candidate relevance scoring; declare the candidate set and do not fabricate official negatives."},
+    {"id":"long-output","role":"cross_task_dimension","existing_sources":["LONGWRITER"],"sources":[],"boundary":"Use source-provided task and recorded/target length; do not force output to a chosen length."}
+  ],
+  "sources": [
+    {
+      "id":"MULTIAGENTBENCH","name":"MultiAgentBench / MARBLE",
+      "kind":"official_task_suite_and_framework","fit":"DIRECT_TASKS_NOT_PRODUCTION_TRACES",
+      "workloads":["multi-agent-collaboration"],
+      "official_urls":["https://github.com/ulab-uiuc/MARBLE","https://arxiv.org/abs/2503.01935"],
+      "required_assets":"Official per-scenario tasks/configuration, environment, coordination protocol and scorer.",
+      "limit":"Task definitions are not pre-existing production request/communication traces. Keep source scenario identities."
+    },
+    {
+      "id":"DEEPPLANNING","name":"Qwen DeepPlanning",
+      "kind":"official_tasks_databases_and_harness","fit":"DIRECT",
+      "workloads":["constraint-planning","application-api-workflow"],
+      "official_urls":["https://qwenlm.github.io/Qwen-Agent/en/benchmarks/deepplanning/","https://huggingface.co/datasets/Qwen/DeepPlanning"],
+      "required_assets":"Fixed task version, travel/shopping databases, sandbox, tools and official constraint evaluator.",
+      "limit":"Travel has Chinese/English tasks; shopping has English tasks. Keep per-language records and link equivalent tasks only with publisher evidence; count records, executions and parent tasks separately. Do not rewrite a tool-mediated task as one chat prompt."
+    },
+    {
+      "id":"STREAMINGBENCH","name":"StreamingBench",
+      "kind":"official_timestamped_video_qa","fit":"DIRECT_WITH_PROTOCOL",
+      "workloads":["streaming-video-interaction","video-understanding"],
+      "official_urls":["https://streamingbench.github.io/","https://github.com/THUNLP-MT/StreamingBench","https://huggingface.co/datasets/mjuicem/StreamingBench"],
+      "required_assets":"Original videos, questions, timestamps and official prefix/protocol configuration.",
+      "limit":"A source-simulated streaming task does not itself establish measured real-time streaming latency."
+    },
+    {
+      "id":"OVOBENCH","name":"OVO-Bench",
+      "kind":"official_online_video_tasks","fit":"DIRECT_WITH_PROTOCOL",
+      "workloads":["streaming-video-interaction"],
+      "official_urls":["https://github.com/JoeLeelyf/OVO-Bench","https://arxiv.org/abs/2501.05510"],
+      "required_assets":"Fixed source video/chunks, task annotations, query timing and native evaluation.",
+      "limit":"Respect temporal visibility and task modes; no future frames or offline-to-live performance equivalence."
+    },
+    {
+      "id":"FULL_DUPLEX_BENCH","name":"Full-Duplex-Bench",
+      "kind":"official_spoken_interaction_suite","fit":"DIRECT_WITH_VERSIONED_PROTOCOL",
+      "workloads":["audio-streaming-interaction"],
+      "official_urls":["https://full-duplex-bench.github.io/","https://github.com/DanielLin94144/Full-Duplex-Bench"],
+      "required_assets":"Choose a fixed v1/v1.5/v2/v3 protocol, corresponding audio/metadata, client/server loop and scorer.",
+      "limit":"Version data and execution differ; publisher-constructed audio is labeled as such. Base-corpus rights require separate review."
+    },
+    {
+      "id":"LIBRITTS","name":"LibriTTS (SLR60)",
+      "kind":"official_text_audio_corpus","fit":"DIRECT_TTS_INPUT_NOT_INTERACTIVE_TRACE",
+      "workloads":["text-to-speech-generation"],
+      "official_urls":["https://openslr.org/60"],
+      "required_assets":"One declared official split with transcripts, speaker identity and waveform references.",
+      "license_hint":"Publisher states CC BY 4.0; retain attribution and verify the selected assets.",
+      "limit":"Not a duplex dialogue corpus or an official universal TTS scorer."
+    },
+    {
+      "id":"LJSPEECH","name":"LJ Speech 1.1",
+      "kind":"publisher_text_audio_corpus","fit":"DIRECT_TTS_INPUT_NOT_INTERACTIVE_TRACE",
+      "workloads":["text-to-speech-generation"],
+      "official_urls":["https://keithito.com/LJ-Speech-Dataset/"],
+      "required_assets":"Version 1.1 metadata and original waveform mapping.",
+      "license_hint":"Publisher declares public domain; confirm intended jurisdiction and selected files.",
+      "limit":"Single-speaker reading is not representative of all speech generation or conversational timing."
+    },
+    {
+      "id":"BEIR_SCIFACT","name":"SciFact, BEIR retrieval release",
+      "kind":"fixed_retrieval_dataset","fit":"DIRECT_RETRIEVAL_PROTOCOL",
+      "workloads":["embedding-retrieval","reranking"],
+      "official_urls":["https://github.com/beir-cellar/beir","https://github.com/allenai/scifact"],
+      "required_assets":"Distinguish BEIR release from original SciFact; pin corpus, queries, qrels and split.",
+      "limit":"BEIR is a collection/framework, not one dataset. Candidate retrieval protocol and corpus rights remain explicit."
+    },
+    {
+      "id":"BEIR_NFCORPUS","name":"NFCorpus, BEIR retrieval release",
+      "kind":"fixed_retrieval_dataset","fit":"DIRECT_RETRIEVAL_PROTOCOL",
+      "workloads":["embedding-retrieval","reranking"],
+      "official_urls":["https://github.com/beir-cellar/beir","https://www.cl.uni-heidelberg.de/statnlpgroup/nfcorpus/"],
+      "required_assets":"Pinned corpus, queries, qrels and split with original data terms.",
+      "license_hint":"Original NFCorpus page permits academic use; other uses require consultation with its data owner.",
+      "limit":"Ranking a selected candidate set differs from full-corpus retrieval; record both protocols."
+    },
+    {
+      "id":"MSMARCO_PASSAGE","name":"MS MARCO passage ranking",
+      "kind":"publisher_ranking_dataset","fit":"DIRECT_RESEARCH_ONLY_TERMS",
+      "workloads":["reranking","embedding-retrieval"],
+      "official_urls":["https://microsoft.github.io/msmarco/"],
+      "required_assets":"Explicit passage-ranking version, queries, corpus, qrels and candidate protocol.",
+      "license_hint":"Publisher restricts use to non-commercial research; not a default enterprise redistribution asset.",
+      "limit":"Do not conflate original QA, passage ranking and document ranking releases."
+    },
+    {
+      "id":"STSB","name":"STS Benchmark, Sentence Transformers distribution",
+      "kind":"versioned_sentence_similarity_pairs","fit":"DIRECT_SIMILARITY_NOT_RETRIEVAL_TRACE",
+      "workloads":["embedding-retrieval"],
+      "official_urls":["https://www.sbert.net/docs/sentence_transformer/dataset_overview.html","https://huggingface.co/datasets/sentence-transformers/stsb"],
+      "required_assets":"Pin distribution/revision, split, two texts and score scale; retain original lineage.",
+      "limit":"A similarity pair is not a production retrieval request or evidence of prefix reuse; MTEB remains the evaluation framework."
+    },
+    {
+      "id":"DOCVQA","name":"DocVQA single-document release",
+      "kind":"official_document_image_qa","fit":"DIRECT",
+      "workloads":["visual-document-chart"],
+      "official_urls":["https://site.docvqa.org/datasets/docvqa"],
+      "required_assets":"Choose original single-document release; pin document images, QA annotations and access conditions.",
+      "limit":"Not the same asset as DocVQA2026; registration/download rights and image rights need explicit review."
+    },
+    {
+      "id":"CODEJUDGE_EVAL","name":"CodeJudge-Eval (COLING 2025)",
+      "kind":"author_published_code_judging_tasks","fit":"DIRECT",
+      "workloads":["code-evaluation"],
+      "official_urls":["https://aclanthology.org/2025.coling-main.7/","https://github.com/CodeLLM-Research/CodeJudge-Eval","https://huggingface.co/datasets/CodeResearch/CodeJudge-Eval"],
+      "required_assets":"Pinned released input/code and separate answer labels; retain original problem provenance and grouping.",
+      "limit":"Not the different VichyTong/CodeJudge framework. Do not invent judge prompts from existing code-generation questions."
+    },
+    {
+      "id":"DRAGON_PUBLIC","name":"DRAGOn public news QA/text snapshots",
+      "kind":"author_published_versioned_rag_assets","fit":"PARTIAL_UPDATE_EVENT_COVERAGE_UNVERIFIED",
+      "workloads":["evolving-corpus-rag"],
+      "official_urls":["https://github.com/RussianNLP/DRAGON","https://huggingface.co/datasets/ai-forever/hist-rag-bench-public-questions","https://huggingface.co/datasets/ai-forever/hist-rag-bench-public-texts"],
+      "required_assets":"Matching fixed public QA/text release tags and original version identity.",
+      "limit":"Monthly snapshots and publisher-generated questions are not per-document production update/delete events or query-version bindings. Private-named sources are not assumed accessible."
+    },
+    {
+      "id":"TEMPORALWIKI","name":"TemporalWiki (EMNLP 2022)",
+      "kind":"author_published_temporal_snapshots_and_diffs","fit":"PARTIAL_NOT_NATIVE_RAG_EVENT_TRACE",
+      "workloads":["evolving-corpus-rag"],
+      "official_urls":["https://github.com/joeljang/temporalwiki","https://arxiv.org/abs/2204.14211"],
+      "required_assets":"Pinned released snapshot/diff/evaluation assets and their original licenses.",
+      "limit":"Designed for ever-evolving language models; use only its real temporal assets, not relabeling them as complete online RAG traces."
+    },
+    {
+      "id":"COPILOT_AGENT_2026","name":"GitHub Copilot Coding Agent Traces 2026",
+      "kind":"publisher_production_metadata_trace","fit":"DIRECT_METADATA_ONLY",
+      "workloads":["repository-agent-loop","observed-request-lifecycle","cache-and-tool-accounting"],
+      "official_urls":["https://github.com/Azure/AzurePublicDataset/blob/master/GitHubCopilotCodingAgentDataset2026.md"],
+      "required_assets":"Pinned ghcp-coding-agent-2026 release shards, schema and attribution.",
+      "limit":"No prompts, source code or tool outputs; cannot replay original requests or derive exact KV block identity. Cancellation/attempt semantics must be checked from actual fields."
+    },
+    {
+      "id":"AZURE_LMM_2025","name":"Azure LMM Inference Traces 2025",
+      "kind":"publisher_multimodal_service_metadata","fit":"METADATA_ONLY_REVIEW_REQUIRED",
+      "workloads":["multimodal-arrivals","request-size-distribution"],
+      "official_urls":["https://github.com/Azure/AzurePublicDataset/blob/master/AzureLMMInferenceDataset2025.md"],
+      "required_assets":"Its own 2025 release/schema, separate from existing AZURE_LLM 2023 code/conv files.",
+      "limit":"Metadata is not image/video content or proof of a runnable visual task; inspect actual fields before assigning lifecycle coverage."
+    }
+  ],
+  "unresolved_evidence_gaps": [
+    {"id":"joint-update-delete-query-events","related_sources":["DRAGON_PUBLIC","TEMPORALWIKI"],"status":"NO_COMPLETE_DIRECT_SOURCE_CONFIRMED","missing":"Document identities, update/delete sequence, query time and binding to the authoritative document version."},
+    {"id":"cancellation-retry-attempt-lineage","related_sources":["COPILOT_AGENT_2026"],"status":"FIELD_QUALIFICATION_PENDING","missing":"Explicit cancellation, timeout, parent attempt identity and ordering; do not infer from latency or a failed tool call."},
+    {"id":"runtime-kv-preemption-recovery-events","related_sources":[],"status":"NO_COMPLETE_DIRECT_SOURCE_CONFIRMED","missing":"Actual engine cache/block ownership, eviction, migration and recomputation events; task input alone cannot contain this evidence."}
+  ],
+  "existing_sources_to_finish_first": ["REPOBENCH","CROSSCODEEVAL","LONGMEMEVAL","LONGMEMEVAL_V2","LOCOMO","JSONSCHEMABENCH","SPIDER","BFCL","APPWORLD","WEBARENA","OSWORLD","MMMU","VISIONARENA","VIDEOMME","LIBRISPEECH","FLEURS","SCIENCEAGENTBENCH","NATUREBENCH","XSUM","FLORES200"],
+  "policy": "Missing sources remain visible but never fall back to synthetic data. No raw public/private payloads are distributed in this catalog. Each usable source requires its own sample receipt."
+}

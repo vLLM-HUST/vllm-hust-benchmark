@@ -1,0 +1,39 @@
+"""Collect calibration records while keeping holdout outcomes outside analysis."""
+
+import argparse
+import base64
+import io
+import json
+import tarfile
+from pathlib import Path
+
+from multinode_calibration_control import run
+
+
+BASE=Path(__file__).resolve().parents[1]/'experiment-results/issue23-generalization-20261027'
+REMOTE='/data/shared_upload/hust-zsx/issue23-generalization-20261027'
+
+
+def collect(phase,label):
+    code=f'''from pathlib import Path
+import tarfile,io,base64
+r=Path({REMOTE!r})/{phase!r};buf=io.BytesIO()
+with tarfile.open(fileobj=buf,mode='w:gz',compresslevel=3) as archive:
+ for p in r.rglob('*'):
+  rel=p.relative_to(r)
+  if not p.is_file() or rel.parts[0] in ['source','resources','visibility','holdout']:continue
+  archive.add(p,arcname=str(rel),recursive=False)
+ for name in ['protocol.json','protocol.initial.json']:
+  archive.add(r.parent/name,arcname=name)
+print(base64.b64encode(buf.getvalue()).decode())
+'''
+    result=run('81',code,180)
+    if result['returncode']:raise RuntimeError(result['stderr'])
+    payload=base64.b64decode(result['stdout']);destination=BASE/label;destination.mkdir(exist_ok=False)
+    (BASE/(label+'.tar.gz')).write_bytes(payload)
+    with tarfile.open(fileobj=io.BytesIO(payload),mode='r:gz') as archive:archive.extractall(destination,filter='data')
+    print(json.dumps({'phase':phase,'destination':str(destination),'bytes':len(payload)}))
+
+
+if __name__=='__main__':
+    p=argparse.ArgumentParser();p.add_argument('phase');p.add_argument('label');a=p.parse_args();collect(a.phase,a.label)

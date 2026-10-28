@@ -1,0 +1,334 @@
+"""Publish numerical comparisons for an original-configuration serial simulation."""
+
+import argparse
+import csv
+import gzip
+import hashlib
+import shutil
+from pathlib import Path
+
+from pd_serial_simulator import OriginalWorld, load_runtime, quantiles, read, write
+
+
+def compare(prediction, real):
+    by_id = {r["id"]: r for r in prediction["per_request"]}
+    if set(by_id) != {r["id"] for r in real}:
+        raise ValueError("Prediction and measurement request sets differ")
+    actual = {
+        "TTFT": quantiles([r["ttft_seconds"] for r in real]),
+        "finish_span": max(r["arrival_seconds"] + r["completion_seconds"] for r in real),
+    }
+    errors = [abs(by_id[r["id"]]["TTFT"] - r["ttft_seconds"]) for r in real]
+    predicted = {"TTFT": prediction["TTFT"], "finish_span": prediction["finish_span"]}
+    return {
+        "measured": actual,
+        "predicted": predicted,
+        "relative_error_percent": {
+            **{
+                key: 100 * (predicted["TTFT"][key] / actual["TTFT"][key] - 1)
+                for key in ("mean", "p95", "p99")
+            },
+            "finish_span": 100 * (predicted["finish_span"] / actual["finish_span"] - 1),
+        },
+        "paired_TTFT_absolute_error_s": quantiles(errors),
+        "measured_worst": max(real, key=lambda r: r["ttft_seconds"])["id"],
+        "predicted_worst": max(by_id.values(), key=lambda r: r["TTFT"])["id"],
+    }
+
+
+def validate_trace(prediction, rows):
+    sessions = {}
+    for row in sorted(prediction["per_request"], key=lambda r: r["ready"]):
+        task = rows[row["id"]]["task"]
+        if not row["offered"] <= row["ready"] <= row["first"] <= row["end"]:
+            raise ValueError("Invalid causal request timeline")
+        if row["ready"] < sessions.get(task, 0) - 1e-9:
+            raise ValueError("Session overtook its predecessor")
+        if row["stages"]["P"]["end"] > row["stages"]["D"]["start"] + 1e-9:
+            raise ValueError("D started before P completion")
+        sessions[task] = row["end"]
+    for node in range(4):
+        intervals = sorted(
+            (r["at"], r["at"] + r["full_service"]) for r in prediction["apis"] if r["node"] == node
+        )
+        if any(a[1] > b[0] + 1e-8 for a, b in zip(intervals, intervals[1:], strict=False)):
+            raise ValueError("Original serial engine overlaps API requests")
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--run", type=Path, required=True)
+    parser.add_argument("--observed", type=Path, required=True)
+    parser.add_argument("--output", type=Path, required=True)
+    args = parser.parse_args()
+    if args.output.exists():
+        raise FileExistsError(args.output)
+    root = args.output
+    root.mkdir(parents=True)
+    (root / ".gitattributes").write_text(
+        "* text=auto eol=lf\n*.gz binary\n*.png binary\n*.snapshot -text\n",
+        encoding="utf-8",
+        newline="\n",
+    )
+    prediction = read(args.run / "prediction-serial-deterministic.json.gz")
+    bundle = read(args.run / "inputs/simulation-inputs.json")
+    protocol = read(args.run / "inputs/protocol.json")
+    validate_trace(prediction, {r["id"]: r for r in bundle["rows"]})
+    shutil.copyfile(
+        args.run / "prediction-serial-deterministic.json.gz", root / "prediction.json.gz"
+    )
+    observations, comparisons, pairs = {}, {}, []
+    predicted = {r["id"]: r for r in prediction["per_request"]}
+    for arm in ("B-before", "B-after"):
+        rows = read(args.observed / f"{arm}-requests.json.gz")
+        comparisons[arm] = compare(prediction, rows)
+        observations[arm] = [
+            {
+                "id": r["id"],
+                "ready": r["arrival_seconds"],
+                "TTFT": r["ttft_seconds"],
+                "end": r["arrival_seconds"] + r["completion_seconds"],
+                "p": r["route"]["p"],
+                "d": r["route"]["d"],
+                "P_cached_tokens": r["P"]["num_cached_tokens"],
+                "D_cached_tokens": r["D"]["num_cached_tokens"],
+            }
+            for r in rows
+        ]
+        for row in rows:
+            p = predicted[row["id"]]
+            pairs.append(
+                {
+                    "arm": arm,
+                    "id": row["id"],
+                    "measured_TTFT_s": row["ttft_seconds"],
+                    "predicted_TTFT_s": p["TTFT"],
+                    "error_s": p["TTFT"] - row["ttft_seconds"],
+                    "measured_D_cached_tokens": row["D"]["num_cached_tokens"],
+                    "predicted_D_cached_tokens": p["stages"]["D"]["cached_tokens"],
+                }
+            )
+    write(root / "observations.json.gz", {"kind": "normalized_measurement", "arms": observations})
+    write(root / "comparison.json", comparisons)
+    with (root / "per-request.csv").open("w", newline="", encoding="utf-8") as stream:
+        writer = csv.DictWriter(stream, fieldnames=list(pairs[0]), lineterminator="\n")
+        writer.writeheader()
+        writer.writerows(pairs)
+    for name in (
+        "simulation-inputs.json",
+        "protocol.json",
+        "B-before-initial-state-contract.json",
+        "cost-model.json",
+    ):
+        raw = (args.run / "inputs" / name).read_bytes()
+        target = root / "inputs" / (name + ".gz")
+        target.parent.mkdir(exist_ok=True)
+        target.write_bytes(gzip.compress(raw, mtime=0))
+    support = {}
+    for node in range(4):
+        role = "P" if node < 2 else "D"
+        values = [
+            read(p)[role]["prompt_tokens"] - read(p)[role]["num_cached_tokens"]
+            for p in (args.run / "inputs/calibration-seed").glob("*.json")
+            if read(p)["lane"] == node % 2
+        ]
+        support[str(node)] = {
+            "seed_refit_uncached_min": min(values),
+            "seed_refit_uncached_max": max(values),
+        }
+    write(root / "calibration-support.json", support)
+    exploratory = read(args.run / "prediction.json.gz")
+    exploratory["physics"] = "seed-refit"
+    exploratory["status"] = "Extrapolation diagnosis; D0 seed has only 4-121 uncached tokens"
+    write(root / "exploratory-seed-refit.json.gz", exploratory)
+    rt = load_runtime()
+    values = dict(bundle["costs"])
+    values["service"] = tuple(rt["core"].ObservedLatencyModel(**r) for r in values["service"])
+    values["decode_seconds"] = tuple(values["decode_seconds"])
+    world = OriginalWorld(rt["Costs"](**values))
+    components = []
+    for arm in ("B-before", "B-after"):
+        for row in read(args.observed / f"{arm}-requests.json.gz"):
+            for role in ("P", "D"):
+                node = row["route"][role.lower()]
+                result = row[role]
+                predicted_first = world.compute(
+                    node, result["prompt_tokens"], result["num_cached_tokens"]
+                )
+                actual = row[role + "_wire"]["complete_seconds" if role == "P" else "first_seconds"]
+                components.append(
+                    {
+                        "arm": arm,
+                        "id": row["id"],
+                        "role": role,
+                        "node": node,
+                        "measured_service_s": actual,
+                        "predicted_service_s": predicted_first,
+                        "scope": "Conditioned on actual prefix for diagnosis only",
+                    }
+                )
+    write(root / "conditioned-component-errors.json.gz", components)
+    config = {
+        key: protocol[key]
+        for key in (
+            "model",
+            "tp",
+            "P",
+            "D",
+            "block",
+            "prefill",
+            "context",
+            "dtype",
+            "P_output",
+            "D_output",
+            "pool_bytes_per_instance",
+            "npu_kv_bytes",
+            "source_derived_reclaim_batch",
+        )
+    }
+    config.update(
+        max_num_seqs=1,
+        enforce_eager=True,
+        async_scheduling=False,
+        routing="task-affinity; sorted session index mod 2 for both P and D",
+        nominal_arrivals="exact frozen arrival ledger",
+        session_dependency="previous full completion",
+        initial_cache_state_exact=prediction["initial_cache_state_exact"],
+        control_cost=prediction["control_cost"],
+        source_commit=read(args.run / "inputs/source-manifest.json")["commit"],
+        fixed_target_route_or_cache_hits=False,
+        target_service_labels_as_physics=False,
+        scope="Baseline re-decision only; hardware endpoint synchronization and native publication approximated",
+    )
+    write(root / "configuration.json", config)
+    import matplotlib
+
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    fig, axes = plt.subplots(1, 2, figsize=(12.4, 4.4), layout="constrained")
+    labels = ("Mean", "p95", "p99 / max")
+    groups = [
+        ("Measured before", comparisons["B-before"]["measured"]["TTFT"], "#267c8e"),
+        ("Simulation", prediction["TTFT"], "#ce873d"),
+        ("Measured after", comparisons["B-after"]["measured"]["TTFT"], "#707785"),
+    ]
+    for i, (label, metrics, color) in enumerate(groups):
+        xs = [x + (i - 1) * 0.25 for x in range(3)]
+        ys = [metrics[k] for k in ("mean", "p95", "p99")]
+        bars = axes[0].bar(xs, ys, width=0.23, label=label, color=color)
+        axes[0].bar_label(bars, fmt="%.1f", fontsize=8)
+    axes[0].set(
+        xticks=range(3),
+        xticklabels=labels,
+        ylabel="TTFT (s)",
+        ylim=(0, 100),
+        title="Aggregate comparison",
+    )
+    axes[0].legend(fontsize=8)
+    before = {r["id"]: r for r in observations["B-before"]}
+    xs = [before[r["id"]]["TTFT"] for r in prediction["per_request"]]
+    ys = [r["TTFT"] for r in prediction["per_request"]]
+    axes[1].scatter(
+        xs,
+        ys,
+        c=["#267c8e" if r["D"] == 2 else "#ce873d" for r in prediction["per_request"]],
+        s=22,
+        alpha=0.75,
+    )
+    axes[1].plot([0, 90], [0, 90], "--", color="#888", lw=1)
+    axes[1].set(
+        xlabel="Measured before: TTFT (s)", ylabel="Simulated TTFT (s)", title="95 paired requests"
+    )
+    for ax in axes:
+        ax.grid(axis="y", alpha=0.15)
+        ax.spines[["top", "right"]].set_visible(False)
+    fig.suptitle(
+        "Original serial 2P2D baseline | Qwen2.5-7B BF16 | eager, 128-token budget | 2 GiB CPU/NPU KV"
+    )
+    fig.savefig(root / "validation.png", dpi=160)
+    plt.close(fig)
+    lines = [
+        "# 原配置 2P2D 串行模拟验证",
+        "",
+        "日期：2026-10-27。范围：原实验基线 B-before/B-after；单次新模拟同时对照两次历史测量。",
+        "",
+        "预测从原始输入、相同初始缓存、原冻结到达轨迹及测试前成本模型出发。路由按原会话绑定规则重新计算，缓存逐块发布/回收，D 恢复边界重新选择。目标请求的实测耗时、命中量和路由不作为世界服务标签。",
+        "",
+        "## 结果",
+        "",
+        "| 指标 | 原基线第一次实测 | 新模拟 | 原基线第二次实测 |",
+        "|---|---:|---:|---:|",
+    ]
+    for key, label in [("mean", "平均 TTFT"), ("p95", "TTFT p95"), ("p99", "TTFT p99／最大值")]:
+        lines.append(
+            f"| {label}（秒） | {comparisons['B-before']['measured']['TTFT'][key]:.2f} | {prediction['TTFT'][key]:.2f} | {comparisons['B-after']['measured']['TTFT'][key]:.2f} |"
+        )
+    lines += [
+        f"| 全部完成（秒） | {comparisons['B-before']['measured']['finish_span']:.2f} | {prediction['finish_span']:.2f} | {comparisons['B-after']['measured']['finish_span']:.2f} |",
+        "",
+        "![Validation](validation.png)",
+        "",
+        "逐请求差异见 [per-request.csv](per-request.csv)，完整汇总见 [comparison.json](comparison.json)。",
+        "",
+    ]
+    for arm in ("B-before", "B-after"):
+        c = comparisons[arm]
+        lines.append(
+            f"相对 {arm}，逐请求 TTFT 绝对误差均值 {c['paired_TTFT_absolute_error_s']['mean']:.2f} 秒，最大 {c['paired_TTFT_absolute_error_s']['max']:.2f} 秒。"
+        )
+    selected = predicted["feal-differential-cryptanalysis:12"]
+    lines += [
+        "",
+        "## 恢复边界与模型范围",
+        "",
+        f"`feal-differential-cryptanalysis:12` 在本次基线模拟中重新选择了 {selected['boundary']['selected']} 块；决策时 P/D 可见前缀分别为 {selected['boundary']['P_available']}／{selected['boundary']['D_available']} 块。其逐候选成本、发布与回收事件保存在 prediction.json.gz。该数字由模拟状态产生，并非固定历史恢复量。",
+        "",
+        "本轮保持原来的每卡串行、CPU 池与 NPU KV 各 2 GiB、eager、128 token 步预算、P 输出 1／D 输出 128。仍保留原实验的 D 补算路径，用于先验证原配置；未施加完整 KV 必须交接的新约束。",
+        "",
+        "原配置的可观察参数和初始原生缓存摘要吻合；底层物理 owner 分组、每块原生发布时间采用近似。控制开销采用此前完成的 380 条记录的聚合均值，不查询目标请求自身的耗时；模拟器在本机消耗的 CPU 时间单独记录，不改变虚拟时钟。单一固定成本模型无法重现两轮实测的端点时变。",
+        "",
+        "原始测试前成本模型没有根据本次验证结果重拟合。D0 的长重算输入超出原冷启动样本支持，预测仍有外推风险。当前组级接近不等于逐请求、缓存回收或新策略已经验收。",
+        "",
+        "附带保留独立32样本重拟合的探索结果：该模型缺少原成本模型中的冷启动点，D0 未复用输入只有 4–121 token，却用于上万 token 重算，明显低估服务时间。见 calibration-support.json 和 exploratory-seed-refit.json.gz；该探索不作为主结果。",
+        "",
+        "## 复现",
+        "",
+        "在 PegaFlow 仓库根目录执行，R 为本报告目录的本地路径：",
+        "",
+        "```sh",
+        'python scripts/issue23/pd_serial_simulator.py --inputs "$R/inputs" --output /tmp/serial-prediction.json.gz',
+        "python -m pytest -q scripts/issue23/test_pd_serial_simulator.py",
+        "```",
+        "",
+        "本报告是本地 CPU 开发验证；实现位于 PegaFlow scripts/issue23，数值证据位于 benchmark reports。",
+    ]
+    (root / "README.md").write_text("\n".join(lines) + "\n", encoding="utf-8", newline="\n")
+    provenance = root / "provenance"
+    provenance.mkdir()
+    shutil.copyfile(args.run / "inputs/source-manifest.json", provenance / "source-manifest.json")
+    for name in ("pd_serial_simulator.py", "report_pd_serial_validation.py"):
+        shutil.copyfile(Path(__file__).with_name(name), provenance / (name + ".snapshot"))
+    members = []
+    for path in sorted(root.rglob("*")):
+        if path.is_file():
+            raw = path.read_bytes()
+            members.append(
+                {
+                    "path": path.relative_to(root).as_posix(),
+                    "bytes": len(raw),
+                    "sha256": hashlib.sha256(raw).hexdigest(),
+                }
+            )
+    write(
+        root / "manifest.json",
+        {
+            "scope": "Numerical development validation; simulations and measurements separate",
+            "members": members,
+        },
+    )
+    print({arm: c["relative_error_percent"] for arm, c in comparisons.items()})
+
+
+if __name__ == "__main__":
+    main()

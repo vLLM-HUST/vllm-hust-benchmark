@@ -1,0 +1,60 @@
+{
+  "schema_version": "source-validation-service-profile/v1",
+  "id": "text-only-128k-nonthinking/v1",
+  "purpose": "dataset/request correctness integration only; not an official performance baseline",
+  "model": {
+    "id": "Qwen/Qwen3.5-27B",
+    "revision": "fc05daec18b0a78c049392ed2e771dde82bdf654",
+    "artifact_record": "../validation/qwen35-27b-deployable-artifact-20261022.json"
+  },
+  "engine_versions": {
+    "vllm": "0.23.0+empty",
+    "vllm-ascend": "0.23.0",
+    "torch": "2.10.0+cpu",
+    "torch-npu": "2.10.0.post4",
+    "transformers": "5.5.4"
+  },
+  "observed_precision": "bfloat16",
+  "required_backend": "NPU",
+  "observed_hardware": {
+    "chip": "Ascend 910B2",
+    "chips": 2,
+    "nodes": 1
+  },
+  "entrypoint": [
+    "python",
+    "-m",
+    "vllm.entrypoints.openai.api_server"
+  ],
+  "argv_template": [
+    "--model",
+    "<MODEL_DIR>",
+    "--served-model-name",
+    "workload-qwen35-27b-128k-nonthinking",
+    "--tensor-parallel-size",
+    "2",
+    "--max-model-len",
+    "131072",
+    "--max-num-seqs",
+    "2",
+    "--gpu-memory-utilization",
+    "0.75",
+    "--host",
+    "127.0.0.1",
+    "--port",
+    "19466",
+    "--enable-auto-tool-choice",
+    "--tool-call-parser",
+    "qwen3_coder",
+    "--reasoning-parser",
+    "qwen3",
+    "--language-model-only",
+    "--default-chat-template-kwargs",
+    "{\"enable_thinking\": false}"
+  ],
+  "graph_mode": "observed enforce_eager=False; no eager flag or fallback",
+  "input_policy": "original messages, stream and explicit budgets unchanged; omitted budgets stay omitted",
+  "cache_and_tmp_policy": "use a task-owned data volume with sufficient headroom; use short TMPDIR for Unix sockets; do not cache in a nearly full root volume",
+  "quality_claim": false,
+  "performance_claim": false
+}

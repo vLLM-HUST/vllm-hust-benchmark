@@ -1,0 +1,19 @@
+{
+  "source_id": "DUREADER",
+  "publisher_revision": "c625076b06da8f56d59f19c41c73bd580a98a347",
+  "asset_scope": "Unchanged publisher search demo dev100, not full DuReader or Zhidao",
+  "selection": "full original dev file order, positions0..99; fixed ranges of at least3 also supported",
+  "entrypoint": "scripts/run_dureader_original.py",
+  "model_profile": "Existing Qwen3.5-27B native non-thinking chat template, BF16 TP2 Ascend NPU",
+  "model_is_publisher_baseline": false,
+  "input": "Original question and every original document title/paragraph, no oracle selection or truncation",
+  "generation": {"max_tokens": 8192, "context_capacity": 131072, "temperature": 0, "seed": 20261026, "retry": false},
+  "budget_boundary": "Declared generative fallback configuration. Publisher old extractive baseline has no autoregressive LLM token budget. No official quality reproduction or cross-model ranking claim.",
+  "output": "Original prediction JSON fields answers/yesno_answers/entity_answers; attach original identity/type as task metadata, never infer these from gold answers",
+  "malformed_output": "Retain raw response, no repair or retry; missing native prediction scored under publisher rules",
+  "scoring": "Original main/all/description/entity/yesno functions and BLEU/ROUGE-L/entity P/R/F1; explicit Python3 dictionary snapshot/key-order compatibility only",
+  "prepare_scoring_software": "scripts/prepare_dureader_official_scorer.py",
+  "saved_native_scoring": "scripts/score_dureader_original.py",
+  "small_dataset_policy": "Full100 original demo dev tasks rather than only3; train100 preserved for preparation/consumer, not mislabeled as test cases",
+  "source_checkbox_requires_actual_execution_receipt": true
+}

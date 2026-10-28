@@ -1,0 +1,140 @@
+{
+  "schema_version": "bfcl-simple-python-original/v1",
+  "source_id": "BFCL",
+  "revision": "6ea57973c7a6097fd7c5915698c54c17c5b1b6c8",
+  "subsuite": "v4/simple_python",
+  "status": "END_TO_END_EXECUTED_AND_SCORED",
+  "selected_ids": [
+    "simple_python_0",
+    "simple_python_1",
+    "simple_python_2"
+  ],
+  "original_task_rows": 400,
+  "original_file_sha256": {
+    "BFCL_v4_simple_python.json": "82dd63ba502eb2520c6b5d1d9a5c4b590e03ff261565175561f6228a367d1991",
+    "possible_answer/BFCL_v4_simple_python.json": "90cd5bc653690ee8e459b5b3f3fc9458606f7f3fcbf795bb51b7dc581f8c86dc"
+  },
+  "helper_sha256": "f90797827d70533ad778bf97a4a7c8c498e8103c68d533edd2fc28b2e4734c44",
+  "unchanged_official_python_files": 110,
+  "model": "workload-qwen35-27b-128k-nonthinking",
+  "cpu_model_inference": false,
+  "generated_code_or_tool_execution": false,
+  "scoring_kind": "ORIGINAL_BFCL_AST_ARGUMENT_MATCH_NOT_TOOL_EXECUTION",
+  "model_deployment_adaptation": {
+    "new_profile": "local-qwen35-27b-npu-FC",
+    "source_compatibility_profile": "Qwen/Qwen3-32B-FC",
+    "original_handler": "QwenFCHandler",
+    "underscore_to_dot": false,
+    "task_scorer_parser_python_changed": false,
+    "paper_model_protocol_equivalence_claim": false
+  },
+  "generation_budget": "original OSSHandler min(4096, context-input_tokens-2)",
+  "temperature": 0,
+  "runtime_versions": {
+    "bfcl_eval": "0.0.0.dev0",
+    "torch": "2.8.0+cpu",
+    "transformers": "5.20.2",
+    "openai": "3.36.1",
+    "tree_sitter": "0.21.3",
+    "numpy": "1.26.4",
+    "soundfile": "0.13.1"
+  },
+  "full_suite_claim": false,
+  "performance_claim": false,
+  "started_at_unix": 1792691557.7894535,
+  "samples": [
+    {
+      "id": "simple_python_0",
+      "status": "EXECUTED_AND_OFFICIALLY_STATIC_SCORED",
+      "preflight_prompt_tokens": 233,
+      "prompt_sha256": "27f81cf977106389173eca7231a48cbe59700c6eee66491f873f65365c771542",
+      "model_request_attempted": true,
+      "finish_reason": "stop",
+      "usage": {
+        "completion_tokens": 39,
+        "prompt_tokens": 233,
+        "total_tokens": 272,
+        "completion_tokens_details": null,
+        "prompt_tokens_details": null
+      },
+      "official_valid": true,
+      "official_error_type": null,
+      "private_result_sha256": "972bc385009ca04a245f0d256659cb1e6167641d947260ddac3d184639aef62e"
+    },
+    {
+      "id": "simple_python_1",
+      "status": "EXECUTED_AND_OFFICIALLY_STATIC_SCORED",
+      "preflight_prompt_tokens": 170,
+      "prompt_sha256": "25e3a3476af373caaf33d783d055bcee70c0ee48b95a0ebffc867e3405499202",
+      "model_request_attempted": true,
+      "finish_reason": "stop",
+      "usage": {
+        "completion_tokens": 26,
+        "prompt_tokens": 170,
+        "total_tokens": 196,
+        "completion_tokens_details": null,
+        "prompt_tokens_details": null
+      },
+      "official_valid": true,
+      "official_error_type": "simple_function_checker:unclear",
+      "private_result_sha256": "2448e3f5e44d9064afea3667d06c091d9446497a10e2de818800af8f414e3119"
+    },
+    {
+      "id": "simple_python_2",
+      "status": "EXECUTED_AND_OFFICIALLY_STATIC_SCORED",
+      "preflight_prompt_tokens": 257,
+      "prompt_sha256": "a0f61fe3a1c0fa1c3f0e4a62ec4493f5aa4b74932a08b9e2696a92c4b91b7c92",
+      "model_request_attempted": true,
+      "finish_reason": "stop",
+      "usage": {
+        "completion_tokens": 33,
+        "prompt_tokens": 257,
+        "total_tokens": 290,
+        "completion_tokens_details": null,
+        "prompt_tokens_details": null
+      },
+      "official_valid": true,
+      "official_error_type": "simple_function_checker:unclear",
+      "private_result_sha256": "eb01a24ab99fc8bf7cdf202ae9239a6b866c92d5a63b4594351abce9ebf07bfb"
+    }
+  ],
+  "official_valid_count": 3,
+  "finished_at_unix": 1792691562.0653377,
+  "source_checkbox_eligible": true,
+  "private_run": "bfcl-v4-simple-python-public-handoff-003",
+  "process_returncode": 0,
+  "selected_samples": [
+    "simple_python_0",
+    "simple_python_1",
+    "simple_python_2"
+  ],
+  "completed_samples": [
+    "simple_python_0",
+    "simple_python_1",
+    "simple_python_2"
+  ],
+  "unique_original_tasks": 3,
+  "server_inventory": {
+    "backend": "vllm-ascend",
+    "chip_model": "910B2",
+    "chip_count": 2,
+    "physical_device_ids": [
+      3,
+      4
+    ],
+    "precision": "BF16",
+    "graph_mode": true
+  },
+  "private_payloads_published": false,
+  "pip_check": "No broken requirements found (inherited PYTHONPATH/PYTHONHOME/LD_PRELOAD cleared)",
+  "preparation": {
+    "command": "workload-data prepare-bfcl-simple-python",
+    "original_filename_kept": true,
+    "declared_row_format": "jsonl",
+    "model_calls": 0,
+    "scorer_runs": 0,
+    "scorer_sidecar_not_a_task_input": true
+  },
+  "previous_attempts": "native-001 import failed before model requests (qwen-agent missing soundfile dependency); native-002 same three tasks completed. Public-handoff-003 still three unique tasks across runs.",
+  "official_result_interpretation": "The official valid field is authoritative for static score. Non-null error_type values accompanying valid=true are preserved, not silently rewritten. No execution of real tools or generated code."
+}

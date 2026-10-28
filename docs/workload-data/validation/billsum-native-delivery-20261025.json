@@ -1,0 +1,123 @@
+{
+  "schema_version": "native-workload-delivery-receipt/v1",
+  "source_id": "BILLSUM",
+  "date": "2026-10-25",
+  "status": "PUBLISHER_HF_ORIGINAL_BILLS_PEGASUS_AND_HF_ROUGE_AVAILABLE",
+  "data_commit": "053f778a93ccd8550651fddc5c1e892f50ac893a",
+  "source_checkbox_eligible": true,
+  "public_runner": "scripts/run_billsum_original.py",
+  "public_asset_preparer": "scripts/prepare_billsum_original_assets.py",
+  "public_runner_sha256": "3b35da4e759294702b7945ce51e7880f6a8f674fd9193935aea2e1ababd6df3d",
+  "native_progress_receipt": "docs/workload-data/validation/billsum-native-progress-20261025.json",
+  "dataset_variant": "Publisher FiscalNote/billsum HF text/summary/title; not paper clean_text or raw-archive IDs",
+  "model": "google/pegasus-billsum",
+  "framework": "transformers4.57.3 / torch2.10.0+cpu + torch_npu2.10.0.post4 / CANN9.1.0 / Ascend910B2",
+  "primary_original_indices_per_evaluation_split": {
+    "test": [
+      0,
+      1,
+      2
+    ],
+    "ca_test": [
+      0,
+      1,
+      2
+    ]
+  },
+  "selection_rule": "Frozen first3 each original evaluation split; native full forecasts32960.58/9897.25seconds exceed30minutes",
+  "public_generation_main_ast_identical_to_fixed_entry": true,
+  "fixed_entry_rescore": [
+    {
+      "split": "test",
+      "original_indices": [
+        3,
+        4,
+        5
+      ],
+      "rouge": {
+        "rouge1": 64.6119,
+        "rouge2": 43.8143,
+        "rougeL": 49.7862,
+        "rougeLsum": 59.5847
+      },
+      "native_responses_reused": 3,
+      "model_calls": 0
+    },
+    {
+      "split": "ca_test",
+      "original_indices": [
+        3,
+        4,
+        5
+      ],
+      "rouge": {
+        "rouge1": 42.1063,
+        "rouge2": 17.1999,
+        "rougeL": 23.9607,
+        "rougeLsum": 37.5223
+      },
+      "native_responses_reused": 3,
+      "model_calls": 0
+    }
+  ],
+  "cpu_ci_run": 40164061666,
+  "cpu_ci_conclusion": "success",
+  "root_ci_run": 40164061544,
+  "root_ci_conclusion": "success",
+  "fixed_consumer": {
+    "source_id": "BILLSUM",
+    "status": "FIXED_CI_ALL_ORIGINAL_FIELDS_PUBLIC_AND_RESEARCH_CONSUMPTION_VERIFIED",
+    "model_calls": 0,
+    "source_checkbox_eligible": false,
+    "raw_payloads_published": false,
+    "fixed_ci_wheel_claim": true,
+    "research_default_dependency_lock_updated": false,
+    "installed_payload_files_equal": 39,
+    "data_commit": "053f778a93ccd8550651fddc5c1e892f50ac893a",
+    "data_wheel_sha256": "b7f9a5b7dbaecdfa65f4d6c5375af40cbeb00a80cbe6e47e5b3916d888e5347a",
+    "cpu_ci_run": 40164061666,
+    "original_rows": {
+      "test": 3269,
+      "ca_test": 1237,
+      "train": 18949
+    },
+    "public_index_rows": 23455,
+    "research_import_rows": 18,
+    "research_direct_prepare_rows": 23455,
+    "public_index_reused_without_rebuild": true,
+    "public_and_research_roundtrips": 18,
+    "research_source_files_unchanged": 40,
+    "scientific_analysis_acceptance_claim": false,
+    "research_observation_or_analysis_migrated": false
+  },
+  "original_fields_preserved": [
+    "text",
+    "summary",
+    "title"
+  ],
+  "model_input_fields": [
+    "text"
+  ],
+  "reference_summary_or_title_in_model_input": false,
+  "original_encoder_window_tokens": 1024,
+  "generation_length_penalty": 0.6,
+  "generation_num_beams": 8,
+  "fixed_rescore_new_model_calls": 0,
+  "research_source_files_changed": 0,
+  "full_evaluation_suites_inference_claim": false,
+  "original_paper_preprocessing_or_training_reproduction_claim": false,
+  "full_raw_archive_field_preservation_claim": false,
+  "performance_claim": false,
+  "raw_payloads_published": false,
+  "research_default_dependency_lock_updated": false,
+  "reuse_audit": {
+    "benchmark_main_commit": "034d0ea5de8be8a628313b068349d069973f5b20",
+    "billsum_named_paths_on_main": [],
+    "open_pr_title_body_search_matches": [
+      426
+    ],
+    "pr426_head": "d7fae03d051e913cfdfbbf45212f9e12b1deffb7",
+    "pr426_billsum_named_paths": [],
+    "interpretation": "Existing source registration upgraded; reuse shared summary asset/scoring utilities, no second runtime found in checked named paths. Search is not a global proof of absence."
+  }
+}

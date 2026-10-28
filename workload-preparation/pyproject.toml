@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=77.0.3,<81.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "vllm-hust-workload-data"
+version = "0.1.0"
+description = "Source-backed dataset catalog, adapters and preparation for vLLM-HUST"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = []
+authors = [{name = "Shuhao Prototype"}]
+keywords = ["llm-serving", "workloads", "benchmarking", "trace-replay"]
+
+[project.urls]
+Repository = "https://github.com/vLLM-HUST/vllm-hust-benchmark"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[project.optional-dependencies]
+data = [
+    "pyarrow>=15",
+]
+dev = [
+    "build>=1.2",
+    "pytest>=8.0",
+    # Keep local and CI checks on the same reviewed rule baseline.
+    "ruff==0.15.2",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

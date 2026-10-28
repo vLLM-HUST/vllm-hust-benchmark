@@ -1,0 +1,605 @@
+{
+  "taxonomy_version": "workload-taxonomy/v2",
+  "status": "ACTIVE_RESEARCH_CLASS_DEFINITIONS_NOT_VALIDATED_SYSTEM_LAWS",
+  "updated_at": "2026-09-14",
+  "base_taxonomy": "workload_taxonomy_v1.json",
+  "compatibility": "v1 family IDs retain preparation-feature and ownership grouping; replaced groups are not v2 leaves. Historical receipts remain unchanged.",
+  "replacements": [
+    {
+      "family_id": "stateful-environment-interaction",
+      "parent_family_id": "tool-interaction",
+      "canonical_name": "状态化环境操作",
+      "strict_definition": "在环境状态和合法动作约束下，连续移动、观察、操纵对象完成目标。",
+      "exclusion": "不含网页UI、SQL、桌面和仓库编辑；模态不决定本类。",
+      "candidate_source_ids": [
+        "AGENTBENCH"
+      ],
+      "system_measurements": [
+        "可执行动作集合大小与变化",
+        "对象状态重访",
+        "环境步进与模型调用成本"
+      ],
+      "status": "DEFINED_RUNTIME_GENERALIZATION_UNVALIDATED"
+    },
+    {
+      "family_id": "database-query-update",
+      "parent_family_id": "tool-interaction",
+      "canonical_name": "数据库查询与更新执行",
+      "strict_definition": "实际任务契约要求查询或修改数据库，并根据返回结果继续操作。",
+      "exclusion": "仅生成SQL文本而无执行反馈属于结构化生成。",
+      "candidate_source_ids": [
+        "AGENTBENCH"
+      ],
+      "system_measurements": [
+        "查询与更新序列",
+        "结果集大小",
+        "数据库服务时间及会话隔离"
+      ],
+      "status": "DEFINED_RUNTIME_GENERALIZATION_UNVALIDATED"
+    },
+    {
+      "family_id": "knowledge-graph-traversal",
+      "parent_family_id": "tool-interaction",
+      "canonical_name": "知识图谱查询与遍历",
+      "strict_definition": "通过实体关系查询、邻居扩展与路径遍历获得答案。",
+      "exclusion": "普通文档检索和表SQL不归本类；当前KG历史未接入。",
+      "candidate_source_ids": [
+        "AGENTBENCH"
+      ],
+      "system_measurements": [
+        "遍历分支与深度",
+        "查询返回规模",
+        "图服务往返"
+      ],
+      "status": "DEFINED_RUNTIME_GENERALIZATION_UNVALIDATED"
+    },
+    {
+      "family_id": "web-navigation-interaction",
+      "parent_family_id": "tool-interaction",
+      "canonical_name": "网页导航与交互",
+      "strict_definition": "通过网页状态反馈执行检索、页面跳转、表单或交易操作。",
+      "exclusion": "单纯以检索工具读证据的任务归证据检索；图片是附加属性。",
+      "candidate_source_ids": [
+        "AGENTBENCH",
+        "MIND2WEB",
+        "WEBARENA",
+        "VISUALWEBARENA",
+        "WORKARENA"
+      ],
+      "system_measurements": [
+        "页面状态变化",
+        "DOM或截图体积",
+        "导航与会话生命周期"
+      ],
+      "status": "DEFINED_RUNTIME_GENERALIZATION_UNVALIDATED"
+    },
+    {
+      "family_id": "os-command-execution",
+      "parent_family_id": "tool-interaction",
+      "canonical_name": "操作系统命令执行",
+      "strict_definition": "通过命令行和进程、文件系统反馈完成系统操作。",
+      "exclusion": "以仓库代码修改和测试为目标的任务优先归仓库Agent。",
+      "candidate_source_ids": [
+        "AGENTBENCH"
+      ],
+      "system_measurements": [
+        "进程启动与命令链",
+        "文件IO",
+        "隔离环境创建"
+      ],
+      "status": "DEFINED_RUNTIME_GENERALIZATION_UNVALIDATED"
+    },
+    {
+      "family_id": "desktop-gui-interaction",
+      "parent_family_id": "tool-interaction",
+      "canonical_name": "桌面GUI操作",
+      "strict_definition": "通过桌面应用视觉或可访问性状态，执行点击、输入和跨应用操作。",
+      "exclusion": "网页导航为主的任务归网页；桌面截图识别静态题不属于交互。",
+      "candidate_source_ids": [
+        "OSWORLD"
+      ],
+      "system_measurements": [
+        "截图与控件状态",
+        "UI等待",
+        "应用切换与环境重置"
+      ],
+      "status": "DEFINED_RUNTIME_GENERALIZATION_UNVALIDATED"
+    },
+    {
+      "family_id": "application-api-workflow",
+      "parent_family_id": "tool-interaction",
+      "canonical_name": "应用API多步工作流",
+      "strict_definition": "通过应用API调用及状态反馈完成多步任务。",
+      "exclusion": "静态参考函数调用列表不算实际工作流；业务政策办理优先单列。",
+      "candidate_source_ids": [
+        "APPWORLD",
+        "BFCL",
+        "TOOLBENCH"
+      ],
+      "system_measurements": [
+        "调用依赖与扇出",
+        "请求响应大小",
+        "状态读改与服务时间"
+      ],
+      "status": "DEFINED_RUNTIME_GENERALIZATION_UNVALIDATED"
+    },
+    {
+      "family_id": "policy-constrained-service",
+      "parent_family_id": "tool-interaction",
+      "canonical_name": "规则约束业务办理与排障",
+      "strict_definition": "按业务政策、用户或系统状态进行查询、修改、办理或排障。",
+      "exclusion": "是否有人类用户作为运行模式，不将solo排障排除；业务主题单独不足以归类。",
+      "candidate_source_ids": [
+        "TAUBENCH"
+      ],
+      "system_measurements": [
+        "业务规则与终止路径",
+        "故障组件",
+        "事务及人工接管"
+      ],
+      "status": "DEFINED_RUNTIME_GENERALIZATION_UNVALIDATED"
+    },
+    {
+      "family_id": "tool-call-generation",
+      "parent_family_id": "tool-interaction",
+      "canonical_name": "工具选择与参数生成",
+      "strict_definition": "从工具声明中选择调用并生成参数；任务本身可以是静态评测。",
+      "exclusion": "必须与实际执行轨迹分开；参考列表不推出依赖或并行。",
+      "candidate_source_ids": [
+        "BFCL",
+        "XLAM_TOOL",
+        "TOOLACE"
+      ],
+      "system_measurements": [
+        "菜单与schema规模",
+        "参数生成长度",
+        "约束解码成本"
+      ],
+      "status": "DEFINED_RUNTIME_GENERALIZATION_UNVALIDATED"
+    },
+    {
+      "family_id": "evidence-search-synthesis",
+      "parent_family_id": "tool-interaction",
+      "canonical_name": "证据检索与综合",
+      "strict_definition": "主动检索、分段读取资料并整合证据完成问题。",
+      "exclusion": "区分离线证据与在线网络；不是所有GAIA版本均有本地运行证据。",
+      "candidate_source_ids": [
+        "GAIA",
+        "BFCL"
+      ],
+      "system_measurements": [
+        "检索与续读链",
+        "证据范围和对象身份",
+        "检索服务与模型处理成本"
+      ],
+      "status": "DEFINED_RUNTIME_GENERALIZATION_UNVALIDATED"
+    },
+    {
+      "family_id": "conversation-memory-recall",
+      "parent_family_id": "memory-write-read",
+      "canonical_name": "跨会话对话记忆",
+      "strict_definition": "问题依赖较早会话或长期对话中的信息。",
+      "exclusion": "当前会话普通续接不自动属于长期记忆；参考证据不是实际read。",
+      "candidate_source_ids": [
+        "LONGMEMEVAL",
+        "LOCOMO"
+      ],
+      "system_measurements": [
+        "历史会话规模",
+        "证据稀疏性",
+        "记忆读写生命周期"
+      ],
+      "status": "DEFINED_RUNTIME_GENERALIZATION_UNVALIDATED"
+    },
+    {
+      "family_id": "experience-memory-recall",
+      "parent_family_id": "memory-write-read",
+      "canonical_name": "任务经历与环境轨迹记忆",
+      "strict_definition": "后续任务依赖过去执行经历、环境观察或操作历史。",
+      "exclusion": "历史浏览轨迹是记忆输入，不自动证明记忆系统运行行为。",
+      "candidate_source_ids": [
+        "LONGMEMEVAL_V2"
+      ],
+      "system_measurements": [
+        "历史状态体积",
+        "版本变化",
+        "问题到经历集合共享"
+      ],
+      "status": "DEFINED_RUNTIME_GENERALIZATION_UNVALIDATED"
+    },
+    {
+      "family_id": "image-understanding",
+      "parent_family_id": "multimodal-understanding",
+      "canonical_name": "一般图像理解",
+      "strict_definition": "理解静态自然或场景图像完成问答等任务。",
+      "exclusion": "以文档版式或图表结构为核心者单列；交互UI任务不归静态图像。",
+      "candidate_source_ids": [
+        "VISIONARENA",
+        "MMMU"
+      ],
+      "system_measurements": [
+        "分辨率",
+        "图像数量",
+        "视觉编码成本"
+      ],
+      "status": "DEFINED_RUNTIME_GENERALIZATION_UNVALIDATED"
+    },
+    {
+      "family_id": "visual-document-chart",
+      "parent_family_id": "multimodal-understanding",
+      "canonical_name": "视觉文档与图表理解",
+      "strict_definition": "围绕图表结构、文字版式、表格等视觉文档完成理解。",
+      "exclusion": "纯文本提供的表格不自动算图像任务；保留图表和文档子标签。",
+      "candidate_source_ids": [
+        "CHARTQA",
+        "MMMU"
+      ],
+      "system_measurements": [
+        "版式和图表结构",
+        "切片与OCR",
+        "视觉token"
+      ],
+      "status": "DEFINED_RUNTIME_GENERALIZATION_UNVALIDATED"
+    },
+    {
+      "family_id": "video-understanding",
+      "parent_family_id": "multimodal-understanding",
+      "canonical_name": "视频理解",
+      "strict_definition": "对带时间顺序的视频帧或片段进行理解。",
+      "exclusion": "单图不归此类；抽帧数不自动代表真实媒体时长。",
+      "candidate_source_ids": [
+        "VIDEOMME",
+        "VIDEOMME_V2",
+        "MVBENCH",
+        "LONGVIDEOBENCH"
+      ],
+      "system_measurements": [
+        "帧数与采样",
+        "时序跨度",
+        "解码编码成本"
+      ],
+      "status": "DEFINED_RUNTIME_GENERALIZATION_UNVALIDATED"
+    },
+    {
+      "family_id": "offline-audio-understanding",
+      "parent_family_id": "multimodal-understanding",
+      "canonical_name": "离线音频识别与理解",
+      "strict_definition": "处理完整音频或预先给定片段进行识别、描述或问答。",
+      "exclusion": "真实流式轮换/打断属于音频流交互；ASR与声景理解仍保留子标签。",
+      "candidate_source_ids": [
+        "LIBRISPEECH",
+        "FLEURS",
+        "WAVCAPS"
+      ],
+      "system_measurements": [
+        "音频时长",
+        "编码采样",
+        "输入输出长度"
+      ],
+      "status": "DEFINED_RUNTIME_GENERALIZATION_UNVALIDATED"
+    },
+    {
+      "family_id": "text-summarization",
+      "parent_family_id": "text-transformation",
+      "canonical_name": "文本摘要",
+      "strict_definition": "压缩一篇或多篇给定文本，保留重要信息。",
+      "exclusion": "开放写作、翻译和仅抽字段不归此类；单/多文档保留子标签。",
+      "candidate_source_ids": [
+        "XSUM",
+        "MULTINEWS",
+        "BILLSUM",
+        "XLSUM",
+        "DOLLY",
+        "NATURAL_INSTRUCTIONS"
+      ],
+      "system_measurements": [
+        "压缩比",
+        "文档数",
+        "输入输出长度"
+      ],
+      "status": "DEFINED_RUNTIME_GENERALIZATION_UNVALIDATED"
+    },
+    {
+      "family_id": "text-translation",
+      "parent_family_id": "text-transformation",
+      "canonical_name": "文本翻译",
+      "strict_definition": "在语言之间转换给定内容。",
+      "exclusion": "同语言改写不归此类。",
+      "candidate_source_ids": [
+        "FLORES200",
+        "NATURAL_INSTRUCTIONS"
+      ],
+      "system_measurements": [
+        "语言对",
+        "长度扩张",
+        "解码长度"
+      ],
+      "status": "DEFINED_RUNTIME_GENERALIZATION_UNVALIDATED"
+    },
+    {
+      "family_id": "text-extraction-classification",
+      "parent_family_id": "text-transformation",
+      "canonical_name": "文本抽取与分类",
+      "strict_definition": "根据给定文本抽取字段或输出类别。",
+      "exclusion": "schema格式作为属性；开放生成和摘要不归此类。",
+      "candidate_source_ids": [
+        "DOLLY",
+        "NATURAL_INSTRUCTIONS",
+        "TULU3"
+      ],
+      "system_measurements": [
+        "输出稀疏度",
+        "类别或字段约束",
+        "证据位置"
+      ],
+      "status": "DEFINED_RUNTIME_GENERALIZATION_UNVALIDATED"
+    },
+    {
+      "family_id": "text-rewriting",
+      "parent_family_id": "text-transformation",
+      "canonical_name": "文本改写与编辑",
+      "strict_definition": "在保留或指定改变内容的条件下编辑给定文本。",
+      "exclusion": "翻译、摘要按主要目标单列，开放写作不归此类。",
+      "candidate_source_ids": [
+        "NATURAL_INSTRUCTIONS",
+        "TULU3",
+        "DOLLY"
+      ],
+      "system_measurements": [
+        "修改范围",
+        "保留片段",
+        "输出长度"
+      ],
+      "status": "DEFINED_RUNTIME_GENERALIZATION_UNVALIDATED"
+    },
+    {
+      "family_id": "repository-completion",
+      "parent_family_id": "interactive-repository-assistance",
+      "canonical_name": "仓库上下文代码补全",
+      "strict_definition": "给定仓库上下文完成局部代码补全。",
+      "exclusion": "不要求执行工具循环；修复仓库并跑测试属于仓库Agent。",
+      "candidate_source_ids": [
+        "REPOBENCH",
+        "CROSSCODEEVAL"
+      ],
+      "system_measurements": [
+        "文件上下文",
+        "补全长度",
+        "跨文件依赖"
+      ],
+      "status": "DEFINED_RUNTIME_GENERALIZATION_UNVALIDATED"
+    },
+    {
+      "family_id": "interactive-code-editing",
+      "parent_family_id": "interactive-repository-assistance",
+      "canonical_name": "交互式代码编辑助手",
+      "strict_definition": "有人参与的代码编辑与反馈会话。",
+      "exclusion": "静态补全与自主长程仓库执行分别归类。",
+      "candidate_source_ids": [
+        "TRACELAB"
+      ],
+      "system_measurements": [
+        "编辑范围",
+        "会话轮次",
+        "增量上下文"
+      ],
+      "status": "DEFINED_RUNTIME_GENERALIZATION_UNVALIDATED"
+    }
+  ],
+  "record_rules": [
+    {"source_id":"STSB","native_subtype":"semantic_similarity","family_id":"embedding-retrieval"},
+    {"source_id":"BEIR_SCIFACT","native_subtype":"dense_retrieval","family_id":"embedding-retrieval"},
+    {"source_id":"BEIR_NFCORPUS","native_subtype":"dense_retrieval","family_id":"embedding-retrieval"},
+    {"source_id":"BEIR_SCIFACT","native_subtype":"dense_top100_cross_encoder_reranking","family_id":"reranking"},
+    {"source_id":"BEIR_NFCORPUS","native_subtype":"dense_top100_cross_encoder_reranking","family_id":"reranking"},
+    {
+      "source_id": "AGENTBENCH",
+      "native_subtype": "alfworld",
+      "family_id": "stateful-environment-interaction"
+    },
+    {
+      "source_id": "AGENTBENCH",
+      "native_subtype": "dbbench",
+      "family_id": "database-query-update"
+    },
+    {
+      "source_id": "AGENTBENCH",
+      "native_subtype": "knowledgegraph",
+      "family_id": "knowledge-graph-traversal"
+    },
+    {
+      "source_id": "AGENTBENCH",
+      "native_subtype": "os_interaction",
+      "family_id": "os-command-execution"
+    },
+    {
+      "source_id": "AGENTBENCH",
+      "native_subtype": "webshop",
+      "family_id": "web-navigation-interaction"
+    },
+    {
+      "source_id": "GAIA",
+      "native_subtype": "offline-evidence",
+      "family_id": "evidence-search-synthesis"
+    },
+    {
+      "source_id": "TAUBENCH",
+      "native_subtype": "telecom-solo",
+      "family_id": "policy-constrained-service"
+    },
+    {
+      "source_id": "XLAM_TOOL",
+      "native_subtype": "function-calling",
+      "family_id": "tool-call-generation"
+    },
+    {
+      "source_id": "TOOLACE",
+      "native_subtype": "function-calling",
+      "family_id": "tool-call-generation"
+    },
+    {
+      "source_id": "APPWORLD",
+      "native_subtype": "api-workflow",
+      "family_id": "application-api-workflow"
+    },
+    {
+      "source_id": "MIND2WEB",
+      "native_subtype": "web-demonstration",
+      "family_id": "web-navigation-interaction"
+    },
+    {
+      "source_id": "WEBARENA",
+      "native_subtype": "web-task",
+      "family_id": "web-navigation-interaction"
+    },
+    {
+      "source_id": "VISUALWEBARENA",
+      "native_subtype": "web-task",
+      "family_id": "web-navigation-interaction"
+    },
+    {
+      "source_id": "WORKARENA",
+      "native_subtype": "web-task",
+      "family_id": "web-navigation-interaction"
+    },
+    {
+      "source_id": "OSWORLD",
+      "native_subtype": "desktop-task",
+      "family_id": "desktop-gui-interaction"
+    },
+    {
+      "source_id": "BFCL",
+      "native_subtype": "static-function-calling",
+      "family_id": "tool-call-generation"
+    },
+    {
+      "source_id": "BFCL",
+      "native_subtype": "stateful-multi-turn",
+      "family_id": "application-api-workflow"
+    },
+    {
+      "source_id": "BFCL",
+      "native_subtype": "web-search",
+      "family_id": "evidence-search-synthesis"
+    },
+    {
+      "source_id": "LONGMEMEVAL",
+      "native_subtype": "conversation-memory",
+      "family_id": "conversation-memory-recall"
+    },
+    {
+      "source_id": "LOCOMO",
+      "native_subtype": "conversation-memory",
+      "family_id": "conversation-memory-recall"
+    },
+    {
+      "source_id": "LONGMEMEVAL_V2",
+      "native_subtype": "experience-memory",
+      "family_id": "experience-memory-recall"
+    },
+    {
+      "source_id": "REPOBENCH",
+      "native_subtype": "repository-completion",
+      "family_id": "repository-completion"
+    },
+    {
+      "source_id": "CROSSCODEEVAL",
+      "native_subtype": "repository-completion",
+      "family_id": "repository-completion"
+    },
+    {
+      "source_id": "TRACELAB",
+      "native_subtype": "interactive-editing",
+      "family_id": "interactive-code-editing"
+    },
+    {
+      "source_id": "CHARTQA",
+      "native_subtype": "chart-question",
+      "family_id": "visual-document-chart"
+    },
+    {
+      "source_id": "MMMU",
+      "native_subtype": "chart-or-document",
+      "family_id": "visual-document-chart"
+    },
+    {
+      "source_id": "MMMU",
+      "native_subtype": "general-image",
+      "family_id": "image-understanding"
+    },
+    {
+      "source_id": "VIDEOMME",
+      "native_subtype": "video",
+      "family_id": "video-understanding"
+    },
+    {
+      "source_id": "VIDEOMME_V2",
+      "native_subtype": "video",
+      "family_id": "video-understanding"
+    },
+    {
+      "source_id": "MVBENCH",
+      "native_subtype": "video",
+      "family_id": "video-understanding"
+    },
+    {
+      "source_id": "LONGVIDEOBENCH",
+      "native_subtype": "video",
+      "family_id": "video-understanding"
+    },
+    {
+      "source_id": "LIBRISPEECH",
+      "native_subtype": "transcription",
+      "family_id": "offline-audio-understanding"
+    },
+    {
+      "source_id": "FLEURS",
+      "native_subtype": "transcription",
+      "family_id": "offline-audio-understanding"
+    },
+    {
+      "source_id": "WAVCAPS",
+      "native_subtype": "audio-caption",
+      "family_id": "offline-audio-understanding"
+    },
+    {
+      "source_id": "XSUM",
+      "native_subtype": "summarization",
+      "family_id": "text-summarization"
+    },
+    {
+      "source_id": "XLSUM",
+      "native_subtype": "summarization",
+      "family_id": "text-summarization"
+    },
+    {
+      "source_id": "MULTINEWS",
+      "native_subtype": "summarization",
+      "family_id": "text-summarization"
+    },
+    {
+      "source_id": "BILLSUM",
+      "native_subtype": "summarization",
+      "family_id": "text-summarization"
+    },
+    {
+      "source_id": "FLORES200",
+      "native_subtype": "translation",
+      "family_id": "text-translation"
+    }
+  ],
+  "unresolved_policy": "No source-only or keyword fallback. Native subtype must come from reviewed task contract/field. Unmatched records remain unclassified; rule match never upgrades evidence type.",
+  "excluded_axes": [
+    "model_success",
+    "model_name",
+    "long_context",
+    "high_reuse",
+    "arrival_burst",
+    "cache_policy"
+  ],
+  "references": [
+    "https://github.com/THUDM/AgentBench",
+    "research/peng-haoran/reports/issue20-delivery.md",
+    "workload_taxonomy_v1.json"
+  ]
+}

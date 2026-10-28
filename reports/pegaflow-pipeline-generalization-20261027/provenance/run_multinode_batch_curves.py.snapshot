@@ -1,0 +1,46 @@
+"""Measure resident-cache decode scaling after full-P/D validation has drained."""
+
+import asyncio
+import json
+import time
+from pathlib import Path
+
+import httpx
+
+import calibration_runner_gated3 as runner
+
+
+ROOT=runner.ROOT
+
+
+async def main():
+    started=time.monotonic()
+    while not (ROOT/'gated-v3-done.json').exists():
+        if (ROOT/'gated-v3-failure.json').exists():raise RuntimeError('Primary campaign failed')
+        if time.monotonic()-started>700:raise TimeoutError('Primary campaign did not drain')
+        await asyncio.sleep(2)
+    source=[json.loads(l) for l in (ROOT/'requests.jsonl').read_text().splitlines()]
+    calibration=[r for r in source if r['split']=='calibration']
+    result={}
+    async with httpx.AsyncClient(limits=httpx.Limits(max_connections=128,max_keepalive_connections=64),timeout=240,trust_env=False) as client:
+        for context in [8192,24576]:
+            row=min(calibration,key=lambda r:abs(r['prompt_tokens']-context))
+            plans=[{'row':row,'P':f'P{i%2}','output':1,'salt':f'curve-{context}-{i}'} for i in range(16)]
+            for group in range(4):
+                label=f'curve-seed-n{context}-g{group}'
+                result[label]=await runner.condition(client,plans[group*4:group*4+4],label,clear=group==0,split='warmup')
+            for batch in [1,2,4,8,16]:
+                for repeat in range(2):
+                    label=f'curve-n{context}-b{batch}-r{repeat}'
+                    warm=[{**p,'output':64} for p in plans[:batch]]
+                    result[label]=await runner.condition(client,warm,label,clear=False)
+                    (ROOT/'batch-curve-summary.json').write_text(json.dumps(result,indent=2))
+    (ROOT/'batch-curve-done.json').write_text(json.dumps({'epoch_ns':time.time_ns(),'cases':len(result)}))
+
+
+if __name__=='__main__':
+    try:asyncio.run(main())
+    except BaseException as error:
+        import traceback
+        (ROOT/'batch-curve-failure.json').write_text(json.dumps({'error':str(error),'traceback':traceback.format_exc()}))
+        raise

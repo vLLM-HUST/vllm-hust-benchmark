@@ -1,0 +1,31 @@
+{
+  "schema_version": "native-workload-delivery-receipt/v1",
+  "source_id": "GSM8K",
+  "date": "2026-10-24",
+  "status": "UPSTREAM_NATIVE_SAMPLE_DELIVERY_AVAILABLE",
+  "available_original_tasks": 1319,
+  "verified_unique_original_tasks": 204,
+  "native_execution_receipt": "gsm8k-cumulative-coverage-20261023.json",
+  "installed_ci_reader_receipt": "reasoning-ci-assets-20261024.json",
+  "documentation": "docs/workload-data/REASONING_ORIGINAL_SOURCES.zh-CN.md",
+  "public_runner": "scripts/run_gsm8k_incremental_samples.py",
+  "framework": "lm-eval[api]==0.4.11",
+  "protocol": "Original gsm8k five-training-example recipe, prompts, stops, strict/flexible numeric extraction and exact_match; disclosed chat transport, non-thinking and 2048 generation budget.",
+  "scope": "Reuse original test IDs 0..200 and 1316..1318 from existing native receipts. Installed fixed CI provider checks both complete original Parquets and all original input/reference fields; three records per file roundtrip. Saved tail native documents and metrics rechecked without model calls.",
+  "full_run_command_selection": "--start 0 --count 1319",
+  "data_provider_receipt_commit": "3f397e69abd0263913d10c4e243b6d29a9a6bf8a",
+  "source_checkbox_eligible": true,
+  "full_suite_validated": false,
+  "pooled_accuracy_reported": false,
+  "performance_claim": false,
+  "new_research_consumer_test_claim": false,
+  "new_model_calls": 0,
+  "raw_data_published": false,
+  "model_outputs_published": false,
+  "limits": [
+    "Historical execution profiles differ; coverage is deduplicated but quality and performance are not pooled.",
+    "The current audit of three saved tail tasks does not re-execute or independently reaudit every historical model response.",
+    "Dataset and model weights are acquired outside the repository; original file SHA checks are mandatory.",
+    "Documented existing NPU service is reused; clean-machine model/compiler recreation is not validated."
+  ]
+}

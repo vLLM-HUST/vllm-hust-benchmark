@@ -1,0 +1,54 @@
+{
+  "source_id": "TULU3",
+  "status": "ORIGINAL_DIALOGUE_SAMPLED_NATIVE_DELIVERY_VERIFIED",
+  "source_checkbox_eligible": true,
+  "source": {
+    "repository": "allenai/tulu-3-sft-mixture",
+    "revision": "b14afda60f1bbebe55d5d2fa1e4df5042f97f8be",
+    "original_files": 6,
+    "original_bytes": 1412954868,
+    "original_rows": 939343,
+    "all_original_fields_and_full_index_verified": true
+  },
+  "native_validation": {
+    "selection": "Original physical rows 0,1,2 in each of all six Parquet shards; all original assistant target positions",
+    "conversations": 18,
+    "requests": 21,
+    "requests_by_shard": [3, 6, 3, 3, 3, 3],
+    "model": "Qwen3.5-27B BF16 TP2 Ascend910B2",
+    "operator_max_tokens": 512,
+    "context_capacity": 131072,
+    "finish_counts": {"length": 13, "stop": 8},
+    "original_history_teacher_forced": true,
+    "target_and_future_messages_excluded": true,
+    "full_prompt_token_usage_independently_verified": true,
+    "quality_score_claim": false,
+    "publisher_generation_budget_claim": false,
+    "full_corpus_inference_claim": false
+  },
+  "provider_and_research": {
+    "ci_commit": "9e9d67b7427cfdea45b80bec5239c26f29f0050c",
+    "successful_cpu_ci_run": 40290265473,
+    "wheel_sha256": "e757f19d02568e85b0a2aaacd87811161d2c021e23f47aa2aa5a732858d5dd66",
+    "installed_payloads_byte_equal": 44,
+    "all_original_rows_compared": 939343,
+    "public_and_fixed_research_roundtrips": 18,
+    "research_consumer_revision": "dd4103140d358cf211b88f24296b7419d170a54f",
+    "research_default_dependency_changed": false,
+    "saved_native_requests_reconciled_against_exact_ci_provider": true,
+    "new_model_calls_during_audits": 0
+  },
+  "server_receipts": [
+    "tulu3-native-original-prefix-audit-32050-001/receipt-public.json",
+    "tulu3-native-ci-original-prefix-audit-32050-001/receipt-public.json",
+    "tulu3-full-ci-provider-research-audit-32050-001/receipt-public.json"
+  ],
+  "limitations": [
+    "Mixed training dialogue corpus, not an independent officially scored benchmark or live agent episode",
+    "13 length terminations retained; no answer quality or paper-model replication claim",
+    "Publisher prose count 939344 differs from metadata and original file count 939343; no rows added or removed",
+    "Mixture ODC-BY and component-specific terms, including noncommercial restrictions, remain applicable",
+    "Successful CPU package CI does not imply all root CI jobs green; lint baseline update is separately unresolved"
+  ],
+  "raw_payloads_published": false
+}

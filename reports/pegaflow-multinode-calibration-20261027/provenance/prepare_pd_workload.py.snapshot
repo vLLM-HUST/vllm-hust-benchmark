@@ -1,0 +1,81 @@
+"""Convert tokenized request histories into latency-free simulator inputs."""
+
+import argparse
+import json
+import random
+from pathlib import Path
+
+from prepare_multinode_profile import hashes
+
+
+def prepare(
+    source, *, split=None, rps=1, arrival="fixed", seed=20261027, output_tokens=128
+):
+    selected = [r for r in source if split is None or r.get("split") == split]
+    if not selected or rps <= 0 or output_tokens < 1:
+        raise ValueError("Need requests, positive rps and output budget")
+    selected.sort(key=lambda r: (r.get("step_id", 0), r.get("task", r["id"])))
+    rng = random.Random(seed)
+    at = 0
+    requests = []
+    for index, row in enumerate(selected):
+        if arrival == "fixed":
+            at = index / rps
+        elif index:
+            at += rng.expovariate(rps)
+        tokens = row.get("prompt_token_ids")
+        if tokens is None and "hashes" not in row:
+            raise ValueError(
+                "Supply prompt_token_ids or explicit prefix hashes: " + row["id"]
+            )
+        count = len(tokens) if tokens is not None else row["prompt_tokens"]
+        if row.get("prompt_tokens", count) != count:
+            raise ValueError("Token count differs: " + row["id"])
+        requests.append(
+            {
+                "id": row["id"],
+                "task": row.get("task", row["id"]),
+                "prompt_tokens": count,
+                "output_tokens": row.get("output_tokens", output_tokens),
+                "arrival_s": at,
+                "hashes": hashes(tokens, row.get("cache_salt", "shared"))
+                if tokens is not None
+                else row["hashes"],
+            }
+        )
+    return {
+        "schema": "pegaflow-pd-workload/v1",
+        "source_scope": "tokenized histories and prefix identities",
+        "arrival": {"kind": arrival, "rps": rps, "seed": seed},
+        "requests": requests,
+    }
+
+
+if __name__ == "__main__":
+    p = argparse.ArgumentParser(description=__doc__)
+    p.add_argument("--requests", type=Path, required=True)
+    p.add_argument("--output", type=Path, required=True)
+    p.add_argument("--split")
+    p.add_argument("--rps", type=float, default=1)
+    p.add_argument("--arrival", choices=["fixed", "poisson"], default="fixed")
+    p.add_argument("--seed", type=int, default=20261027)
+    p.add_argument("--output-tokens", type=int, default=128)
+    args = p.parse_args()
+    source = [
+        json.loads(line)
+        for line in args.requests.read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ]
+    result = prepare(
+        source,
+        split=args.split,
+        rps=args.rps,
+        arrival=args.arrival,
+        seed=args.seed,
+        output_tokens=args.output_tokens,
+    )
+    if args.output.exists():
+        raise FileExistsError(args.output)
+    args.output.parent.mkdir(exist_ok=True, parents=True)
+    args.output.write_text(json.dumps(result, indent=2), encoding="utf-8")
+    print(json.dumps({"output": str(args.output), "requests": len(result["requests"])}))

@@ -1,0 +1,67 @@
+{
+  "source_id": "MBPP",
+  "status": "ORIGINAL_FIXED_SAMPLE_NATIVE_EXECUTION_AND_FIXED_PROVIDER_RESEARCH_CONSUMER_VERIFIED",
+  "source_checkbox_eligible": true,
+  "public_execution_source_revision": "e389739ec30d7b1d051a7c952a92bd15956a5e3d",
+  "publisher": {
+    "repo_id": "google-research-datasets/mbpp",
+    "revision": "4bb6404fdc6cacfda99d4ac4205087b89d32030c",
+    "asset_files_verified": 9,
+    "full_split_rows": {"prompt": 10, "test": 500, "train": 374, "validation": 90},
+    "sanitized_split_rows": {"prompt": 7, "test": 257, "train": 120, "validation": 43},
+    "acquisition": "Official host unreachable from server; fixed-revision mirror bytes verified against all nine pinned hashes. No dataset downloaded to the client."
+  },
+  "generation": {
+    "model": "Qwen3.5-27B", "precision": "bfloat16", "tensor_parallel_size": 2,
+    "accelerator": "Ascend910B2", "context_capacity": 131072, "max_tokens": 4096,
+    "selected_original_rows": [0, 1, 2], "selected_task_ids": [11, 12, 13],
+    "demonstration_task_ids": [2, 3, 4],
+    "protocol": "Publisher full configuration README three-shot prompt, all three original tests, raw completions, temperature0, stop [DONE]. No chat template, code repair, extraction, task replacement or truncation.",
+    "finish_reasons": ["stop", "stop", "stop"],
+    "prompt_tokens": [662, 789, 813], "completion_tokens": [81, 18, 41],
+    "new_native_model_calls": 3
+  },
+  "scoring": {
+    "evaluator_revision": "8fc5bae6479c4fbbb28c3f8b644f6a15b3f3b5bd",
+    "status": "SELECTED_ORIGINAL_TESTS_CODEEVAL_SCORED",
+    "tasks_sha256": "a0d2d353b2bc8282befc6cafa545532d9e971a4c41164bd24499e83a1e9fdb8a",
+    "python": "3.10.22", "numpy": "1.26.4", "tqdm": "4.70.1",
+    "timeout_seconds_per_task": 3, "num_workers": 1,
+    "original_reference_checks_passed": true,
+    "passed": [true, true, false], "pass_at_1": 0.6666666666666666,
+    "original_failure_retained": true, "challenge_tests_executed": false,
+    "isolation_checks_passed_before_import_and_execution": true, "generated_code_executed": true,
+    "worker_sha256": "61add46463c655fa0f923d8e0169bd9677611956401d6c4435084048c0768207",
+    "namespace_helper_sha256": "a410c59345872316a931092e4b5b9656c32b0396921b58f52c2cbd77d90daacc",
+    "model_calls_during_scoring": 0
+  },
+  "retained_setup_failures": [
+    "First scorer attempt failed before interpreter execution because a private parent blocked the sandbox UID.",
+    "Second attempt stopped at the isolation guard before scorer import because a runtime bound below /data created that forbidden namespace root. No generated code executed in either failed attempt. A dedicated accessible /opt runtime copy resolved this without widening private directory permissions or weakening isolation checks."
+  ],
+  "server_evidence": {
+    "generation": "/data/shared_upload/hust-phr/workload-benchmark-native-delivery-20261024/mbpp-original-generation-32063-001/receipt-private.json",
+    "preparation": "/data/shared_upload/hust-phr/workload-benchmark-native-delivery-20261024/mbpp-scoring-inputs-32063-001/receipt-private.json",
+    "scoring": "/data/shared_upload/hust-phr/mbpp-functional-sandbox-20261026-003/receipt-public.json"
+  },
+  "fixed_consumer": {
+    "provider_commit": "44e24f46f574537fe3a43ead1ed5470148307948",
+    "software_ci_run": 40219022926,
+    "wheel_sha256": "2170c0610ef5fc3b628f66f14c9b8e80118b428d040843944f46d3b19cccad23",
+    "exact_installed_payload_files": 41,
+    "full_original_rows_and_fields_verified": 974,
+    "prepared_rows": 974,
+    "public_and_research_roundtrips": 14,
+    "selected_combined_original_indices": [0, 1, 2, 9, 10, 11, 12, 509, 510, 883, 884, 971, 972, 973],
+    "research_revision": "dd4103140d358cf211b88f24296b7419d170a54f",
+    "research_top_level_reader_is_public_provider": true,
+    "reference_code_setup_and_challenge_separated_from_input": true,
+    "research_default_lock_changed": false,
+    "new_model_calls": 0,
+    "observations_or_features_executed": false,
+    "server_receipt": "/data/shared_upload/hust-phr/workload-benchmark-native-delivery-20261024/mbpp-fixed-provider-research-consumer-32063-001/receipt-public.json"
+  },
+  "remaining": "Full configuration delivered: original fixed first3 native generation/scoring, all974 original full records mapped/indexed,14 public/research resolutions equal under exact installed candidate provider. Sanitized assets acquired only, not native evaluated; no full500 model evaluation, paper model/sampling replication, research default lock promotion or clean global CANN metadata claim.",
+  "raw_data_or_completions_published": false,
+  "performance_or_quality_acceptance_claim": false
+}

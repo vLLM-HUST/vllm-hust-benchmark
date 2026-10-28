@@ -1,0 +1,149 @@
+{
+  "schema_version": "original-native-workload-validation/v1",
+  "source_id": "XSUM",
+  "date": "2026-10-25",
+  "status": "ORIGINAL_FIXED_SAMPLES_GENERATED_AND_ORIGINAL_HF_ROUGE_VERIFIED",
+  "original_native_generation_receipt": "docs/workload-data/validation/xsum-native-generation-pilot-20261025.json",
+  "primary_frozen_original_indices": [
+    0,
+    1,
+    2
+  ],
+  "original_hf_recipe_scoring": {
+    "source_id": "XSUM",
+    "status": "SAVED_ORIGINAL_NPU_OUTPUTS_OFFICIAL_HF_ROUGE_COMPLETED",
+    "model_calls": 0,
+    "source_checkbox_eligible": false,
+    "started_at_unix": 1792897695.9307556,
+    "files": [
+      {
+        "path": "source/run_summarization.py",
+        "bytes": 33123,
+        "git_blob": "da837f7e6cb59b8fecb0e152cec831a0be072348",
+        "sha256": "38dfdda2a5ea6692b9695feda626abd37e7b1aa52ba6fc1d5695cfd6748a25f7",
+        "transport_url": "https://api.github.com/repos/huggingface/transformers/git/blobs/da837f7e6cb59b8fecb0e152cec831a0be072348"
+      },
+      {
+        "path": "metric/rouge.py",
+        "bytes": 6140,
+        "git_blob": "8437382790dfabf9aa62ade37b6f166dfb69e877",
+        "sha256": "805b71b855be6dc270ce2366639a4e264c2a1fb93a2c8a50f9fb9ef5a2b9c21a",
+        "transport_url": "https://hf-mirror.com/spaces/evaluate-metric/rouge/resolve/1bc20e7e9df922e5dfb597c31a4ea8467a89caff/rouge.py"
+      },
+      {
+        "path": "source/punkt_tab.zip",
+        "bytes": 4319076,
+        "git_blob": "5e5ff6137d5ee6025e400d1c3a7b21914c48b635",
+        "sha256": "e57f64187974277726a3417ca6f181ec5403676c717672eef6a748a7b20e0106",
+        "transport_url": "https://api.github.com/repos/nltk/nltk_data/git/blobs/5e5ff6137d5ee6025e400d1c3a7b21914c48b635"
+      }
+    ],
+    "original_test_rows": 11334,
+    "original_indices": [
+      0,
+      1,
+      2
+    ],
+    "rouge": {
+      "rouge1": 58.7508,
+      "rouge2": 26.447,
+      "rougeL": 52.6489,
+      "rougeLsum": 52.6489
+    },
+    "native_responses_reused": 3,
+    "original_rows_and_input_identity_verified": true,
+    "original_postprocess_text_executed": true,
+    "metric_source_unmodified": true,
+    "bootstrap_seed": 42,
+    "use_stemmer": true,
+    "metrics_scaled_and_rounded_as_original_recipe": true,
+    "estimated_full_native_test_seconds": 11870.171549879014,
+    "selection_mode": "FIRST3_BY_FROZEN_30MIN_RULE",
+    "raw_payloads_published": false,
+    "finished_at_unix": 1792897726.9738579
+  },
+  "public_primary_rescore": {
+    "source_id": "XSUM",
+    "status": "ORIGINAL_XSUM_SAVED_NATIVE_RESPONSES_SCORED",
+    "model_calls": 0,
+    "split": "test",
+    "model": "facebook/bart-large-xsum",
+    "model_revision": "2179ab81d3f133e639f2957aec5380e9d56b2783",
+    "dataset_revision": "7d4d486c2f8ef850b1a11aead99b894ff3dd7da9",
+    "source_checkbox_eligible": false,
+    "raw_payloads_published": false,
+    "rouge": {
+      "rouge1": 58.7508,
+      "rouge2": 26.447,
+      "rougeL": 52.6489,
+      "rougeLsum": 52.6489
+    },
+    "original_indices": [
+      0,
+      1,
+      2
+    ],
+    "native_responses_reused": 3,
+    "scoring_complete": true
+  },
+  "public_unseen_original_sample_score": {
+    "source_id": "XSUM",
+    "status": "ORIGINAL_XSUM_SAVED_NATIVE_RESPONSES_SCORED",
+    "model_calls": 0,
+    "split": "test",
+    "model": "facebook/bart-large-xsum",
+    "model_revision": "2179ab81d3f133e639f2957aec5380e9d56b2783",
+    "dataset_revision": "7d4d486c2f8ef850b1a11aead99b894ff3dd7da9",
+    "source_checkbox_eligible": false,
+    "raw_payloads_published": false,
+    "rouge": {
+      "rouge1": 39.8693,
+      "rouge2": 8.9711,
+      "rougeL": 31.3725,
+      "rougeLsum": 31.3725
+    },
+    "original_indices": [
+      3,
+      4,
+      5
+    ],
+    "native_responses_reused": 3,
+    "scoring_complete": true
+  },
+  "original_blank_document_edge_score": {
+    "source_id": "XSUM",
+    "status": "ORIGINAL_XSUM_SAVED_NATIVE_RESPONSES_SCORED",
+    "model_calls": 0,
+    "split": "test",
+    "model": "facebook/bart-large-xsum",
+    "model_revision": "2179ab81d3f133e639f2957aec5380e9d56b2783",
+    "dataset_revision": "7d4d486c2f8ef850b1a11aead99b894ff3dd7da9",
+    "source_checkbox_eligible": false,
+    "raw_payloads_published": false,
+    "rouge": {
+      "rouge1": 17.6471,
+      "rouge2": 0,
+      "rougeL": 17.6471,
+      "rougeLsum": 17.6471
+    },
+    "original_indices": [
+      11155
+    ],
+    "native_responses_reused": 1,
+    "scoring_complete": true
+  },
+  "original_blank_document_rows_per_split": {
+    "test": 1,
+    "train": 28,
+    "validation": 5
+  },
+  "public_asset_preparation": {
+    "original_data_and_model_files_verified_read_only": 11,
+    "original_scoring_files_downloaded_and_verified": 3,
+    "raw_data_or_weights_downloaded_locally": false
+  },
+  "source_checkbox_eligible": false,
+  "fixed_ci_artifact_and_research_handoff_still_required": true,
+  "full11334_test_inference_claim": false,
+  "raw_payloads_published": false
+}

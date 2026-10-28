@@ -1,0 +1,81 @@
+{
+  "source_id": "NATURALQUESTIONS",
+  "status": "ORIGINAL_NQ_OPEN_NATIVE_HARNESS_AND_FIXED_PROVIDER_RESEARCH_CONSUMER_VERIFIED",
+  "source_checkbox_eligible": true,
+  "profile_scope": "Original NQ-open question/answer task, not full Natural Questions document annotations, EfficientQA or retrieval",
+  "original_preparation_receipt": "docs/workload-data/validation/nq-open-original-preparation-20261026.json",
+  "publisher_revision": "fb26a3073b1fe636c97302890a27b491d6530130",
+  "original_files_and_fields_verified": {"train": 87925, "dev": 3610, "full_reference_index": 91535},
+  "native_model": {
+    "model": "Qwen3.5-27B",
+    "served_alias": "workload-qwen35-27b-128k-nonthinking",
+    "backend": "Existing Ascend910B2 NPU vLLM/vLLM-Ascend service; no client-side model inference",
+    "precision": "bfloat16", "tensor_parallel_size": 2, "context_capacity": 131072,
+    "existing_weight_and_service_configuration_changed": false,
+    "selection_boundary": "Existing deployable general-QA fallback, not the publisher T5XXL/DPR/REALM model or a recommended quality-reproduction baseline. Client CPU torch only supports tokenization/scoring."
+  },
+  "protocol": {
+    "framework": "lm-eval[api]==0.4.11",
+    "original_task_config_sha256": "c1c66deceebfc4bbd70bd9a78d9710795e95a62380207974b44855094a936c91",
+    "data_transport_change_only": "Original publisher train/dev JSONL replaces download, preserving every original question and answer alias",
+    "num_fewshot": 0, "max_gen_toks": 256,
+    "budget_assurance": "Unchanged pinned local API default, not a reduced question budget",
+    "stop_strings_filter_and_exact_match_unchanged": true,
+    "input_truncated": false, "failed_or_empty_answers_swapped_or_dropped": false,
+    "native_framework_not_publisher_tensorflow_cli_replication": true
+  },
+  "plain_profile": {
+    "execution_source_commit": "f1c218b32a8756ccee80db32c688550b068b6a7d",
+    "chat_template_applied": false,
+    "original_dev_ranges": [[0, 2], [3, 102], [103, 3609]],
+    "unique_original_dev_positions": 3610, "duplicate_positions_within_profile": 0,
+    "full_original_dev_generated_and_scored": true,
+    "original_train_questions_not_run_as_test": true,
+    "correct": 152, "exact_match": 0.042105263157894736, "empty_outputs_retained": 3127,
+    "private_result_sha256_by_range": ["108d5a5de3627d1e6822d7221d16b3dca452236871eea5e0591a0ac83a7cf421", "d97fc8d9132f44cea344b6a4dd7d2b0737418b308ce4a14548ab024fc82a0094", "30b8b6b4df8fa43292fef77252216282dd5d46d255f863b21a44d3664daada64"],
+    "boundary": "Negative model-format/quality result preserved, not a recommended Qwen instruction-quality baseline; no post-hoc repair or score-based selection"
+  },
+  "native_chat_profile": {
+    "execution_source_commit": "c2a044eafd687fad41cba0c3e12a45b625794218",
+    "original_dev_positions": [0, 1, 2], "actual_native_model_calls": 3,
+    "model_template_parameters": {"enable_thinking": false},
+    "native_harness_chat_template_mode": true,
+    "model_template_and_vocabulary_files_unchanged": true,
+    "original_task_text_stop_strings_references_and256_budget_unchanged": true,
+    "correct": 0, "exact_match": 0.0, "empty_outputs_retained": 0,
+    "private_result_sha256": "e1c866d7197f031ea5cd90b65813d870acb4b91ceaf93ce08cf12e8d89def6f9",
+    "new_unique_original_question_positions": 0,
+    "boundary": "Separate fixed3 model-format probe, not full3610 chat inference or quality acceptance; not pooled with plain profile"
+  },
+  "clean_client": {
+    "python": "3.12.13",
+    "versions": {"lm-eval": "0.4.11", "datasets": "3.6.0", "pyarrow": "19.0.1", "transformers": "5.5.4", "huggingface-hub": "1.31.0", "tokenizers": "0.22.2", "evaluate": "0.4.6", "jinja2": "3.1.6", "numpy": "1.26.4", "torch": "2.10.0+cpu"},
+    "pip_check": "No broken requirements found.",
+    "public_preparer": "scripts/prepare_lmeval_api_client.py",
+    "public_verify_only_cli_executed": true,
+    "constraints": "configs/workload-native/nq-open-lmeval-client-constraints.txt",
+    "vendor_runtime_reuse": "Four selected software directories linked without reinstalling vendor torch; symbolic links are not OS-enforced read-only mounts",
+    "old_active_environment_modified": false,
+    "old_unused_dependency_conflicts_preserved": ["opencv-python-headless5.0.0.93 requires numpy>=2, old client has1.26.4", "prometheus-fastapi-instrumentator8.1.0 requires starlette>=1, old client has0.50.0"],
+    "all3610_saved_outputs_refiltered_and_rescored_without_generation": true,
+    "old_and_clean_harness_core_module_bytes_equal": ["evaluator.py", "api/task.py", "models/api_models.py", "models/openai_completions.py", "filters/extraction.py"],
+    "nonfatal_git_discovery_warning_retained": true
+  },
+  "fixed_provider_research": {
+    "provider_commit": "a9bcfe6d9cfa64b8083c6eba12fc44c002dc30e1",
+    "wheel_sha256": "487572dd6bc320968ab83956004f1e0ee189e91cf1d068484af6d4302c769b4b",
+    "exact_installed_payload_files": 42, "full_original_reference_index": 91535,
+    "public_research_roundtrip_combined_positions": [0, 1, 2, 87922, 87923, 87924, 87925, 87926, 87927, 91532, 91533, 91534],
+    "question_and_complete_answer_aliases_equal": true,
+    "research_commit": "dd4103140d358cf211b88f24296b7419d170a54f",
+    "research_default_lock_changed": false,
+    "research_observations_or_analysis_migrated": false
+  },
+  "server_base": "/data/shared_upload/hust-phr/workload-benchmark-native-delivery-20261024",
+  "server_evidence": {"complete_native_and_clean_recheck": "nq-open-complete-clean-client-audit-32063-001/receipt-public.json", "native_chat_audit": "nq-open-nativechat-audit-32063-001/receipt-public.json", "research_consumer": "nq-open-fixed-provider-research-consumer-32063-001/receipt-public.json", "clean_client_preparation": "nq-open-clean-client-preparation-32063-001/receipt-public.json"},
+  "total_native_model_calls_across_distinct_profiles": 3613,
+  "new_model_calls_for_final_cpu_audits": 0,
+  "quality_acceptance_passed": false,
+  "performance_or_scientific_improvement_claim": false,
+  "raw_dataset_questions_predictions_or_weights_published": false
+}

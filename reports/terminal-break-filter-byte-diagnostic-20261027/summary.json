@@ -1,0 +1,76 @@
+{
+  "status": "completed_bounded_byte_diagnostic_not_original_control",
+  "task": "break-filter-js-from-html",
+  "architecture": "arm64",
+  "image_id": "sha256:df9273b044f4ddb4d369dc1dbd730b87ef16c55f450d266a9fadd550d043732c",
+  "process_exit": 0,
+  "container_exit": 0,
+  "elapsed_seconds": 12.250349223613739,
+  "original_oracle_filter_test_bytes_unchanged": true,
+  "filter": {
+    "original_output_bytes": 41,
+    "original_output_sha256": "c54abc57d8119305a3d25a62a7fc739c440ab2ac67404578ed5c572cbaa68dfc",
+    "filtered_bytes": 20,
+    "filtered_sha256": "a9d376c2645fb9f89a1d77ea5a202e0484214d181cbccffab28db89ecd1ac819",
+    "filter_exit_code": 0,
+    "original_filter_source_sha256": "9b04d17c5111dfaf8672b6cec09ae773327848c41b509f3ab4618766eba580f4",
+    "browser_session_started": false,
+    "original_alert_threshold_seconds_unchanged": 5,
+    "original_control_score_recomputed": false,
+    "diagnostic_only": true
+  },
+  "observed_byte_properties": {
+    "original_bytes": 41,
+    "filtered_bytes": 20,
+    "same_bytes": false,
+    "original_contains_script_token": true,
+    "filtered_contains_script_token": false,
+    "original_contains_alert_token": true,
+    "filtered_contains_alert_token": false,
+    "filtered_contains_on_attribute": false
+  },
+  "runtime": {
+    "Python": "3.13.17 (main, Oct 21 2026, 22:45:14) [GCC 12.2.0]",
+    "beautifulsoup4": "4.13.5",
+    "Chromium": "Chromium 156.0.8078.47 built on Debian GNU/Linux 12 (bookworm)",
+    "chromedriver": "ChromeDriver 156.0.8078.47 (1d17a2e2ee147bb7d6ae2ab6abdb3a2510c17775-refs/branch-heads/8078@{#1313})",
+    "parser_source_sha256": {
+      "html.parser": "4274e9112adf3fa57c7f9afa7c9b5c631456b18b7403cc627cc5027d02cdd2ae",
+      "_markupbase": "cb14dd6f2e2439eb70b806cd49d19911363d424c2b6b9f4b73c9c08022d47030",
+      "bs4": "cddcf733a060ea2e4bc786bfe1d573ad4bc446c84bd9a1eb6eb6bcfcef96786c",
+      "bs4.builder._htmlparser": "1229681983afe0e4b0466058bf841c85c1b8c6678e49ebe87741f7177cb0efba"
+    }
+  },
+  "resources": {
+    "CPUs": 1,
+    "memory_GiB": 2,
+    "cpuset": "24-31",
+    "MTU": 1400,
+    "timeout_seconds": 1200,
+    "original_tests_readonly_mount_verified": true,
+    "exact_mounts": 4
+  },
+  "diagnostic_pytest": {
+    "tests": 1,
+    "passed": 1,
+    "failed": 0
+  },
+  "interpretation": "Original filter actually transformed the original oracle output; literal script and alert tokens present before are absent after. This supports a filter-path explanation in this new diagnostic environment, but does not establish the exact removed original browser DOM or a particular parser-version/architecture regression.",
+  "boundaries": {
+    "HTML_body_published": false,
+    "new_browser_sessions": 0,
+    "new_Agent_model_calls": 0,
+    "new_original_controls": 0,
+    "new_model_task_attempts": 0,
+    "original_positive_control_reward": 0,
+    "original_five_second_threshold_unchanged": true,
+    "original_r1_null_preserved": true,
+    "fresh_transient_environment_not_claimed_original_snapshot": true,
+    "diagnostic_pytest_not_original_control_success": true,
+    "V098_original_snapshot_not_modified": true
+  },
+  "released": true,
+  "sealed_files": 34,
+  "seal_sha256": "d5a972807dc347073d5475ea8ea876b82aab42a235afbe29ba2ef10d44d87ca8",
+  "readonly_pytest_cache_warning_preserved": true
+}

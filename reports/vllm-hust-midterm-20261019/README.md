@@ -3,7 +3,8 @@
 当前定义：B0固定为vLLM 0.18 + vLLM-Ascend
 0.18；B1是当前已实测最优优化配置，基座版本不限但明确标注。其他版本Native仅为版本对照，不称B0。原始归档中的历史运行ID保持不变。
 
-主报告：[中期测试报告](%E4%B8%AD%E6%9C%9F%E6%B5%8B%E8%AF%95%E6%8A%A5%E5%91%8A.md)，当前V0.75采用[项目里程碑大纲V1.5课题四](milestone-v15/README.md)。旧报告快照及原始证据保留，当前整体验收尚未完成。
+主报告：[中期测试报告](%E4%B8%AD%E6%9C%9F%E6%B5%8B%E8%AF%95%E6%8A%A5%E5%91%8A.md)，当前V0.98采用已批准的课题四方法。SWE累计24项、原记录3/24及同答案恢复4/24，707项未执行；Terminal累计3项，break-filter正控制失败不增加模型覆盖，原Cython
+null与派生重建结果保留。[SWE规范证据](../swe-native018-wave2-followup-20261027/README.md)、[break-filter控制证据](../terminal-break-filter-controls-20261027/README.md)、[Cython原有证据](../terminal-cython-context-20261027/README.md)。旧报告快照及原始证据保留，当前整体验收尚未完成。
 
 **指定0.18吞吐对照已存在：** C16 SWE-prefix-reuse 900秒窗口，B0 247.2656、B1 885.9611
 token/s，3.5830倍（+258.30%）。见[复用审计](../c16-baseline018-reuse-20261022/README.md)。该比值描述两套完整部署；客户端运行时版本和B1设备占用原始证据仍待补核，不能据此宣布完整验收或把收益归于单个MOD。MMLU-Pro等其他工况的0.18配对仍分别判断。
@@ -12,7 +13,7 @@ token/s，3.5830倍（+258.30%）。见[复用审计](../c16-baseline018-reuse-2
 
 ## M01 同工况参考补测
 
-当前V0.75按[V1.5课题四](milestone-v15/project4-v1.5.txt)报告`C=F/(k×T×10¹²)`和`η=T参/T×100%`，有效工作量、匹配无插桩计时及模型依赖参考仍未闭合。见[当前方法与状态](milestone-v15/method-status.json)。旧经验参考仅作历史插桩结果；[75种通信图参考](m01-recovery/collective-graph-20261023/README.md)已完成，不再列为未测。
+历史V0.75时按[V1.5课题四](milestone-v15/project4-v1.5.txt)报告`C=F/(k×T×10¹²)`和`η=T参/T×100%`，有效工作量、匹配无插桩计时及模型依赖参考仍未闭合。见[当前方法与状态](milestone-v15/method-status.json)。旧经验参考仅作历史插桩结果；[75种通信图参考](m01-recovery/collective-graph-20261023/README.md)已完成，不再列为未测。
 
 V0.64纳入GDN递归、WY/KKT、卷积、HBM及同接口通信参考，18类计算参考和设备最终预处理映射已完成汇总核对。
 完整证据见[参考补测与汇总](m01-recovery/reference-closure-20261022/README.md)。
@@ -106,3 +107,15 @@ python compare_long_runs.py midterm-run-20261019-r4 midterm-b1-20261019 comparis
 ```
 
 原始运行脚本中的绝对路径用于追溯本机环境，不应直接在其他机器执行。 主报告列出的既有来源依赖原报告仓库或保留的私有证据，未声称全部包含在本归档中。
+
+- Terminal原答案恢复评分：[规范结果](../terminal-openssl-model-recovery-20261026/README.md)。
+
+- Navidrome增量：[规范结果](../swe-native018-navidrome-20261027/README.md)。
+
+- Terminal部分产物恢复评分：[规范结果](../terminal-cancel-async-partial-recovery-20261027/README.md)。
+
+- SWE增量与评分依赖：[规范结果](../swe-native018-protonmail-qutebrowser-20261027/README.md)；[Terminal Cython控制](../terminal-build-cython-controls-20261027/README.md)。
+
+- V0.95：[Protonmail同答案依赖恢复](../swe-protonmail-dependency-recovery-20261027/README.md)；[Cython单项诊断](../terminal-cython-single-trace-20261027/README.md)。
+
+- V0.96：[Tutanota增量及当前18题聚合](../swe-native018-tutanota-20261027/README.md)。

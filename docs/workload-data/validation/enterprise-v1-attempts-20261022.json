@@ -1,0 +1,156 @@
+{
+  "schema_version": "workload-private-source-attempts/v1",
+  "sources": [
+    {
+      "source_id": "PAIO-CODE-EVAL-1000",
+      "selection": "FIRST_3_ORIGINAL_RECORDS_BEFORE_EXECUTION",
+      "selected_samples": [
+        "8bc0c8a73856d4479a0d1f8828e7edb0137d20d7d618fbae72785719a0698e8e",
+        "1a9fb02960cb282d394a1b9c4cca53b34e50915df9aa2f970ef25d06f5419f0b",
+        "f2098e3f4a3b7263b624858dc2ccdae48ab1b672adfdc82c645358f25250a0bc"
+      ],
+      "model": "workload-qwen35-27b",
+      "request_change": "EXPLICIT_MODEL_ROUTING_ONLY",
+      "scoring": "NO_INDEPENDENT_ORACLE_SUPPLIED",
+      "status": "REQUEST_PROTOCOL_COMPLETED_NO_TASK_QUALITY_CLAIM",
+      "samples": [
+        {
+          "record_id": "8bc0c8a73856d4479a0d1f8828e7edb0137d20d7d618fbae72785719a0698e8e",
+          "original_model": "qwen3",
+          "original_stream": true,
+          "status": "REQUEST_PROTOCOL_COMPLETED",
+          "finish_reasons": [
+            "length"
+          ],
+          "model_quality": "NOT_EVALUATED",
+          "budget_exhausted": true
+        },
+        {
+          "record_id": "1a9fb02960cb282d394a1b9c4cca53b34e50915df9aa2f970ef25d06f5419f0b",
+          "original_model": "qwen3",
+          "original_stream": true,
+          "status": "REQUEST_PROTOCOL_COMPLETED",
+          "finish_reasons": [
+            "length"
+          ],
+          "model_quality": "NOT_EVALUATED",
+          "budget_exhausted": true
+        },
+        {
+          "record_id": "f2098e3f4a3b7263b624858dc2ccdae48ab1b672adfdc82c645358f25250a0bc",
+          "original_model": "qwen3",
+          "original_stream": true,
+          "status": "REQUEST_PROTOCOL_COMPLETED",
+          "finish_reasons": [
+            "length"
+          ],
+          "model_quality": "NOT_EVALUATED",
+          "budget_exhausted": true
+        }
+      ],
+      "run_directory": "paio-code-001",
+      "server_inventory": {
+        "accelerator": "Ascend 910B2",
+        "chips": 2,
+        "backend": "vllm-ascend"
+      }
+    },
+    {
+      "source_id": "PAIO-JSON-500",
+      "selection": "FIRST_3_ORIGINAL_RECORDS_BEFORE_EXECUTION",
+      "selected_samples": [
+        "d3dd20f96540a871e6a8677cd9872dbc20c8cc5f818a8fa8fa7feca6dff92df4",
+        "14b18d0c55e4da6d7bcd5b456a7a8cf6b5dc1b72671cceb4b3d995143287d040",
+        "4d634d1f990ab8fc59ffdc3147fc6d02200c3b30ff3e6059fada29499de0b9c4"
+      ],
+      "model": "workload-qwen35-27b",
+      "request_change": "EXPLICIT_MODEL_ROUTING_ONLY",
+      "scoring": "NO_INDEPENDENT_ORACLE_SUPPLIED",
+      "status": "PARTIAL_OR_FAILED",
+      "samples": [
+        {
+          "record_id": "d3dd20f96540a871e6a8677cd9872dbc20c8cc5f818a8fa8fa7feca6dff92df4",
+          "original_model": "qwen3",
+          "original_stream": true,
+          "status": "REQUEST_PROTOCOL_COMPLETED",
+          "finish_reasons": [
+            "length"
+          ],
+          "model_quality": "NOT_EVALUATED",
+          "budget_exhausted": true
+        },
+        {
+          "record_id": "14b18d0c55e4da6d7bcd5b456a7a8cf6b5dc1b72671cceb4b3d995143287d040",
+          "original_model": "qwen3",
+          "original_stream": true,
+          "status": "SERVER_REJECTED_ORIGINAL_REQUEST",
+          "http_status": 400,
+          "failure_class": "MODEL_CONTEXT_HEADROOM_REQUIREMENT"
+        },
+        {
+          "record_id": "4d634d1f990ab8fc59ffdc3147fc6d02200c3b30ff3e6059fada29499de0b9c4",
+          "original_model": "qwen3",
+          "original_stream": true,
+          "status": "SERVER_REJECTED_ORIGINAL_REQUEST",
+          "http_status": 400,
+          "failure_class": "MODEL_CONTEXT_HEADROOM_REQUIREMENT"
+        }
+      ],
+      "run_directory": "paio-json-001",
+      "server_inventory": {
+        "accelerator": "Ascend 910B2",
+        "chips": 2,
+        "backend": "vllm-ascend"
+      }
+    },
+    {
+      "source_id": "PAIO-CHAT-1000",
+      "selection": "FIRST_3_ORIGINAL_RECORDS_BEFORE_EXECUTION",
+      "selected_samples": [
+        "bba4bb0d6e10457df53453041058238f3540ec2cadd7ffb47156090f5173ae81",
+        "dd84642aa6b222fa905a68f486e5b4d2f1d861cfeb7c219bc88b0c6e6323bfe9",
+        "f0e6c7fe2e22187bc2d13c39b28e7518881c088dfe143fd2dc3b44adcfd1d5f3"
+      ],
+      "model": "workload-qwen35-27b",
+      "request_change": "EXPLICIT_MODEL_ROUTING_ONLY",
+      "scoring": "NO_INDEPENDENT_ORACLE_SUPPLIED",
+      "status": "PARTIAL_OR_FAILED",
+      "samples": [
+        {
+          "record_id": "bba4bb0d6e10457df53453041058238f3540ec2cadd7ffb47156090f5173ae81",
+          "original_model": "qwen3",
+          "original_stream": true,
+          "status": "SERVER_REJECTED_ORIGINAL_REQUEST",
+          "http_status": 400,
+          "failure_class": "MODEL_CONTEXT_HEADROOM_REQUIREMENT"
+        },
+        {
+          "record_id": "dd84642aa6b222fa905a68f486e5b4d2f1d861cfeb7c219bc88b0c6e6323bfe9",
+          "original_model": "qwen3",
+          "original_stream": true,
+          "status": "SERVER_REJECTED_ORIGINAL_REQUEST",
+          "http_status": 400,
+          "failure_class": "MODEL_CONTEXT_HEADROOM_REQUIREMENT"
+        },
+        {
+          "record_id": "f0e6c7fe2e22187bc2d13c39b28e7518881c088dfe143fd2dc3b44adcfd1d5f3",
+          "original_model": "qwen3",
+          "original_stream": true,
+          "status": "SERVER_REJECTED_ORIGINAL_REQUEST",
+          "http_status": 400,
+          "failure_class": "MODEL_CONTEXT_HEADROOM_REQUIREMENT"
+        }
+      ],
+      "run_directory": "paio-chat-001",
+      "server_inventory": {
+        "accelerator": "Ascend 910B2",
+        "chips": 2,
+        "backend": "vllm-ascend"
+      }
+    }
+  ],
+  "raw_payloads_published": false,
+  "quality_validated": false,
+  "checked_sources": 0,
+  "claim_boundary": "Attempted original first three requests per source; budget termination/context rejection is not a passed task. No source checked."
+}

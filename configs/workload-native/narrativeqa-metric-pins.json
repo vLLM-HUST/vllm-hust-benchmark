@@ -1,0 +1,33 @@
+{
+  "source_id": "NARRATIVEQA",
+  "metric_provider": "AllenAI allennlp-models NarrativeQA evaluation, not dataset-author code",
+  "metric_revision": "b1f372248c17ad12684d344955fbcd98e957e77e", "metric_revision_note": "pragma: allowlist secret - public source identity",
+  "scoring_files": [
+    {
+      "path": "narrativeqa.py",
+      "bytes": 2547,
+      "git_blob": "e5ad41857de78e436600f38f3512385c94bb8daf", "git_blob_note": "pragma: allowlist secret - public source identity",
+      "sha256": "c6d04a96246a991c09ddc8ba9ec9de57bff80670704c44545ef750917c8a29ca", "sha256_note": "pragma: allowlist secret - public source identity",
+      "url": "https://api.github.com/repos/allenai/allennlp-models/git/blobs/e5ad41857de78e436600f38f3512385c94bb8daf"
+    },
+    {
+      "path": "LICENSE",
+      "bytes": 11357,
+      "git_blob": "261eeb9e9f8b2b4b0d119366dda99c6fd7d35c64", "git_blob_note": "pragma: allowlist secret - public source identity",
+      "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4", "sha256_note": "pragma: allowlist secret - public source identity",
+      "url": "https://api.github.com/repos/allenai/allennlp-models/git/blobs/261eeb9e9f8b2b4b0d119366dda99c6fd7d35c64"
+    }
+  ],
+  "wordnet": {
+    "publisher": "nltk/nltk_data",
+    "revision": "550b6625bcef1f2abff2ff770a5a0d272c9c6b2a", "revision_note": "pragma: allowlist secret - public resource identity",
+    "bytes": 10775600,
+    "git_blob": "3c68cd207844f071a5206f7fbed23e5c607ec02f", "git_blob_note": "pragma: allowlist secret - public resource identity",
+    "sha256": "cbda5ea6eef7f36a97a43d4a75f85e07fccbb4f23657d27b4ccbc93e2646ab59", "sha256_note": "pragma: allowlist secret - public resource identity",
+    "url": "https://api.github.com/repos/nltk/nltk_data/git/blobs/3c68cd207844f071a5206f7fbed23e5c607ec02f"
+  },
+  "dependency_boundary": "py-rouge1.1, not pltrdy rouge1.0.1; install in isolated target, never overwrite shared client",
+  "metrics": ["BLEU-1", "BLEU-4", "METEOR", "ROUGE-L-F", "ROUGE-L-P", "ROUGE-L-R"],
+  "references": 2,
+  "limitations": "AllenAI implementation reports sentence BLEU-4 with weights(0,0,0,1) and rounds best-reference metrics to2decimals. Do not claim byte-identical author-paper evaluation or substitute another BLEU implementation silently. Native execution and full-story setting remain separate."
+}

@@ -1,0 +1,106 @@
+"""Project original control aggregates without exporting task or oracle bodies."""
+import ast
+import collections
+import hashlib
+import json
+from pathlib import Path
+
+W = Path("/swe-persist/swe-pro-shuhao-20261025")
+R = W / "terminal-build-cython-arm64-r1"
+
+def sha(p):
+    return hashlib.sha256(p.read_bytes()).hexdigest()
+
+def read(p):
+    return json.loads(p.read_text())
+
+def derive():
+    seal = R / "SHA256SUMS-controls-r1"
+    rows = seal.read_text().splitlines()
+    index = {}
+    for row in rows:
+        digest, name = row.split("  ", 1)
+        p = R / name
+        assert p.resolve().is_relative_to(R.resolve()) and not p.is_symlink()
+        assert sha(p) == digest, name
+        index[name] = digest
+    build = read(R / "build-plan.json")
+    plan = read(R / "controls-plan.json")
+    spec = build["spec"]
+    for group, key in (("original", "original_files"), ("task-arm64", "derived_files")):
+        for name, digest in spec[key].items():
+            assert sha(R / group / name) == digest
+    expected = {x.name for x in ast.parse((R / "original/tests/test_outputs.py").read_text()).body
+                if isinstance(x, ast.FunctionDef) and x.name.startswith("test_")}
+    assert len(expected) == 11
+    assert {name for name in spec["original_files"] if spec["original_files"][name] != spec["derived_files"][name]} == {"task.toml", "environment/Dockerfile"}
+    roles = {}
+    containers = []
+    for role in ("nop", "oracle"):
+        receipt = read(R / ("control-" + role + "-receipt.json"))
+        files = list((R / "jobs" / ("terminal-build-cython-" + role + "-arm64-r1")).glob("*/verifier/ctrf.json"))
+        assert len(files) == 1
+        tests = read(files[0])["results"]["tests"]
+        projected = [{"name": t["name"].split("::")[-1], "status": t["status"]} for t in tests]
+        assert {t["name"] for t in projected} == expected and len(projected) == 11
+        assert receipt["trial_exception"] is None and receipt["model_requests"] == 0
+        assert receipt["all_owned_containers_released"] and not receipt["remaining_owned_containers"]
+        assert receipt["ctrf_summary"]["passed"] == sum(t["status"] == "passed" for t in projected)
+        containers += receipt["containers"]
+        inspected = list(R.glob("control-" + role + "-container-*.json"))
+        assert len(inspected) == 1
+        container = read(inspected[0])
+        assert container["Image"] == plan["image_id"]
+        hc = container["HostConfig"]
+        assert hc["CpusetCpus"] == "24-31" and hc["Memory"] == 2147483648
+        assert hc["NanoCpus"] == 1000000000
+        assert "swe-pro-mtu1400" in container["NetworkSettings"]["Networks"]
+        logs = [m for m in container["Mounts"] if m["Destination"] == "/logs/verifier"]
+        assert len(logs) == 1 and logs[0]["RW"]
+        assert Path(logs[0]["Source"]).resolve().is_relative_to((R / "jobs").resolve())
+        roles[role] = {
+            "process_exit_code": receipt["exit_code"],
+            "control_status": receipt["status"],
+            "reward": receipt["reward"],
+            "elapsed_seconds": receipt["elapsed_seconds"],
+            "tests": projected,
+            "counts": dict(collections.Counter(t["status"] for t in projected)),
+            "all_owned_containers_released": True,
+            "receipt_sha256": sha(R / ("control-" + role + "-receipt.json")),
+            "ctrf_sha256": sha(files[0]),
+        }
+    assert len(containers) == len(set(containers)) == 2
+    pipeline = read(R / "pipeline-receipt.json")
+    assert pipeline["all_containers_absent_at_completion"] is True
+    result = {
+        "schema": "terminal-native-arm64-control-observation/v1",
+        "task": "build-cython-ext", "source_revision": spec["source_revision"],
+        "architecture": "arm64", "original_amd64_image_equivalence_claimed": False,
+        "base_manifest": spec["base_manifest"], "base_config": spec["base_config"],
+        "derived_image_id": plan["image_id"],
+        "build_exit_code": read(R / "build-exit.json")["exit_code"],
+        "task_files_sha256": spec["original_files"],
+        "derived_task_files_sha256": spec["derived_files"],
+        "original_tests_and_oracle_unchanged": True,
+        "resources": {"cpus": 1, "memory_bytes": 2147483648, "cpuset": "24-31", "MTU": 1400},
+        "budget": {"build_seconds": 600, "agent_seconds": 900, "verifier_seconds": 900},
+        "controls": roles, "pipeline_status": pipeline["status"],
+        "control_qualification_passed": roles["nop"]["reward"] == 0 and roles["oracle"]["reward"] == 1,
+        "model_calls": 0, "new_model_task_attempts": 0,
+        "all_containers_absent_at_completion": True,
+        "private_task_or_oracle_bodies_included": False,
+        "restricted_originals": {"controlled_location": "Authorized CPU persistent workspace; terminal-build-cython-arm64-r1",
+                                "seal_sha256": sha(seal), "files_verified": len(rows), "files": index},
+        "derivation_source_sha256": sha(Path(__file__)),
+        "interpretation": "ARM64 image build passed; nop control behaved as expected. Original oracle failed one outer repository-suite test. This is not a model failure or added model coverage. Internal traceback/root cause not established by the truncated original log; original failures are retained.",
+    }
+    return result
+
+if __name__ == "__main__":
+    value = derive()
+    output = W / "evidence/terminal-build-cython-controls-public-r1.json"
+    with output.open("x") as f:
+        json.dump(value, f, indent=2)
+        f.write("\n")
+    print(json.dumps({"summary_sha256": sha(output), "qualified": value["control_qualification_passed"],
+                      "model_calls": 0, "files_verified": value["restricted_originals"]["files_verified"]}))
