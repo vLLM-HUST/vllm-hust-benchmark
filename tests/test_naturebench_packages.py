@@ -105,3 +105,110 @@ def test_packaged_inventory_has_three_tasks_not_seven_metadata_files():
     assert (
         sum(item["path"].endswith("/metadata.json") for item in manifest["files"]) == 7
     )
+
+
+def catalog(tmp_path, manifest):
+    directory = tmp_path / "catalog" / "data" / "catalogs"
+    directory.mkdir(parents=True)
+    source = {**manifest, "unit": "source_rows", "provenance_kind": "fixture"}
+    adapter = read_catalog("adapter_extensions_v1.json")["adapters"]["NATUREBENCH"]
+    adapter = {
+        **adapter,
+        "code_revision": manifest["revision"],
+        "dataset_revision": manifest["dataset_revision"],
+    }
+    for filename, content in (
+        ("source_manifests_v1.json", {"sources": {"NATUREBENCH": source}}),
+        ("adapter_registry_v1.json", {"adapters": {"NATUREBENCH": adapter}}),
+        ("adapter_extensions_v1.json", {"adapters": {}}),
+    ):
+        (directory / filename).write_text(json.dumps(content), encoding="utf-8")
+    return tmp_path / "catalog"
+
+
+def test_unified_index_and_resolve_preserve_original_package(tmp_path):
+    from vllm_hust_workload_data.adapters import iter_workload
+    from vllm_hust_workload_data.bindings import bind_source
+    from vllm_hust_workload_data.consumer import resolve_input
+    from vllm_hust_workload_data.pipeline import prepared_rows, run
+
+    data = tmp_path / "data"
+    manifest, metadata = package(data)
+    root = catalog(tmp_path, manifest)
+    metadata_file = "tasks/fixture/metadata.json"
+    bound = bind_source(
+        "NATUREBENCH",
+        data_root=data,
+        files=[metadata_file],
+        revision=manifest["revision"],
+        catalog_root=root,
+    )
+    assert len(bound["files"]) == 1
+    assert len(bound["native_task_assets"]) == 7
+    binding = tmp_path / "binding.json"
+    binding.write_text(json.dumps(bound), encoding="utf-8")
+    expected = list(
+        iter_workload("NATUREBENCH", data_root=data, manifest=bound, catalog_root=root)
+    )[0]
+    assert expected.outcome_record()["original_task_metadata"] == metadata
+    assert "evaluation_assets" not in json.dumps(expected.input_record())
+    with pytest.raises(ValueError, match="not a ready"):
+        expected.request_body()
+    output = tmp_path / "prepared"
+    report = run(
+        {
+            "sources": [
+                {
+                    "source_id": "NATUREBENCH",
+                    "data_root": str(data),
+                    "manifest": str(binding),
+                }
+            ]
+        },
+        output=output,
+        catalog_root=root,
+    )
+    assert report["native_tasks_run"] == 0
+    assert report["sources"][0]["records"] == 1
+    rows = list(prepared_rows(output / "workload.sqlite"))
+    resolved = resolve_input(
+        output / "workload.sqlite", rows[0]["record_id"], data_root=data
+    )
+    assert resolved.input_record() == expected.input_record()
+    assert resolved.outcome_record() == expected.outcome_record()
+    assert b"hidden-answer" not in (output / "workload.sqlite").read_bytes()
+    assert b"original\\r\\nproblem" not in (output / "workload.sqlite").read_bytes()
+
+
+def test_mismatched_data_revision_rejected(tmp_path):
+    from vllm_hust_workload_data.adapters import iter_workload
+
+    manifest, _ = package(tmp_path / "data")
+    root = catalog(tmp_path, manifest)
+    manifest["dataset_revision"] = "different"
+    with pytest.raises(ValueError, match="revision mismatch"):
+        list(
+            iter_workload(
+                "NATUREBENCH",
+                data_root=tmp_path / "data",
+                manifest=manifest,
+                catalog_root=root,
+            )
+        )
+
+
+def test_resource_header_cannot_disagree_with_dataset_revision(tmp_path):
+    from vllm_hust_workload_data.registry import source_spec
+
+    manifest, _ = package(tmp_path / "data")
+    root = catalog(tmp_path, manifest)
+    directory = root / "data/catalogs"
+    path = directory / "source_manifests_v1.json"
+    content = json.loads(path.read_text("utf-8"))
+    content["sources"]["NATUREBENCH"].update(files=[], files_resource="assets.json")
+    path.write_text(json.dumps(content), encoding="utf-8")
+    (directory / "assets.json").write_text(
+        json.dumps({**manifest, "dataset_revision": "wrong"}), encoding="utf-8"
+    )
+    with pytest.raises(ValueError, match="identity"):
+        source_spec("NATUREBENCH", root)

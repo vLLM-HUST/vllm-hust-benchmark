@@ -6,13 +6,14 @@ is preparation infrastructure, not the official Agent/evaluation/judge workflow.
 
 from copy import deepcopy
 import json
-from pathlib import PurePosixPath
+from pathlib import Path, PurePosixPath
 
 from .assets import asset_path, verify_file
 from .registry import read_catalog
+from .records import WorkloadRecord
 
 
-def original_cpu_packages(data_root, *, manifest=None):
+def original_cpu_packages(data_root, *, manifest=None, task_ids=None):
     """Yield one package per original CPU task, verifying every related asset.
 
     Verification is repeated when the iterator advances or closes. Callers must
@@ -56,6 +57,14 @@ def original_cpu_packages(data_root, *, manifest=None):
         files[item["path"]] = item
     if not tasks or {PurePosixPath(name).parts[1] for name in files} != set(tasks):
         raise ValueError("every asset must belong to a registered task metadata")
+    if task_ids is not None:
+        if (
+            not task_ids
+            or len(set(task_ids)) != len(task_ids)
+            or set(task_ids) - set(tasks)
+        ):
+            raise ValueError("select distinct registered original task IDs")
+        tasks = [task for task in tasks if task in task_ids]
     fields = {
         "task_name": str,
         "workflow_topology": str,
@@ -117,3 +126,73 @@ def original_cpu_packages(data_root, *, manifest=None):
             }
         finally:
             verify()
+
+
+def relation_spec(source, spec):
+    """Persist the complete original asset graph with reference-only indexes."""
+    if (
+        source.get("source_id") != "NATUREBENCH"
+        or source.get("revision") != spec["code_revision"]
+        or source.get("dataset_revision") != spec["dataset_revision"]
+    ):
+        raise ValueError("NatureBench original code/data revision mismatch")
+    return {
+        **spec,
+        "original_package_source": {
+            "schema_version": "source-file-manifest/v1",
+            "source_id": "NATUREBENCH",
+            "repo_id": source["repo_id"],
+            "revision": source["revision"],
+            "dataset_revision": source["dataset_revision"],
+            "files": deepcopy(source.get("native_task_assets", source["files"])),
+        },
+    }
+
+
+def original_rows(path, spec):
+    """Resolve a top-level metadata reference to its whole original task package."""
+    path = Path(path)
+    context = spec["original_package_source"]
+    registered = {item["path"] for item in context["files"] if item["role"] == "data"}
+    relative = "/".join(path.parts[-3:])
+    parts = PurePosixPath(relative).parts
+    if relative not in registered or parts[0] != "tasks" or parts[2] != "metadata.json":
+        raise ValueError("registered original top-level task metadata required")
+    yield from original_cpu_packages(
+        path.parents[2], manifest=context, task_ids=[parts[1]]
+    )
+
+
+def adapt_case(row, *, source, index):
+    """Expose scientific problem inputs, keeping hidden evaluation separate."""
+    return WorkloadRecord(
+        source={**deepcopy(source), **deepcopy(row["source"])},
+        task={
+            "task_id": row["task_id"],
+            "identity_kind": "original_scientific_task_directory",
+            "native_unit": "scientific_task_package",
+            "input": deepcopy(row["input"]),
+        },
+        runtime={
+            "kind": "scientific_task_package",
+            "execution": "not_executed",
+            "environment_assets": deepcopy(row["environment_assets"]),
+            "license_assets": deepcopy(row["license_assets"]),
+            "requirements": [
+                "Original isolated scientific environment, Agent workflow, evaluator and validity judge required",
+                "Not a ready model request; package preparation does not complete native execution",
+            ],
+        },
+        replay={
+            "adapter_version": "source-adapter/v1",
+            "mapping": "naturebench_original_packages",
+            "source_row_index": index,
+            "order": "original_task_package_not_request_arrival",
+            "synthetic_fallback": False,
+            "unmapped_field_names": [],
+        },
+        outcome={
+            **deepcopy(row["outcome"]),
+            "reference_kind": "original_task_metadata_and_hidden_evaluation_not_observed_output",
+        },
+    )

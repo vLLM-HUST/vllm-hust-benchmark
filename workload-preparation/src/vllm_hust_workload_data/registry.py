@@ -36,6 +36,10 @@ def source_spec(source_id: str, root: Path | None = None) -> dict:
             or manifest.get("source_id") != source_id
             or manifest.get("revision") != source.get("revision")
             or manifest.get("repo_id") != source.get("repo_id")
+            or (
+                source.get("dataset_revision") is not None
+                and manifest.get("dataset_revision") != source["dataset_revision"]
+            )
             or not isinstance(manifest.get("files"), list)
             or not manifest["files"]
             or len({item["path"] for item in manifest["files"]})

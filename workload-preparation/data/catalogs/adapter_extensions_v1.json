@@ -2,6 +2,19 @@
   "version": "adapter-extensions/v1",
   "boundary": "Field contracts from publisher metadata/docs. No real source payload downloaded or full adapter validation claimed.",
   "adapters": {
+    "NATUREBENCH": {
+      "kind": "task_dataset",
+      "mapping": "naturebench_original_packages",
+      "input_fields": ["input"],
+      "required_fields": ["task_id", "source", "input", "environment_assets", "license_assets", "outcome", "native_execution_complete"],
+      "outcome_fields": ["outcome"],
+      "annotation_fields": [],
+      "id_field": "task_id",
+      "code_revision": "f92b849bc8d64944184a19c32f084f640246b668", "code_identity_note": "pragma: allowlist secret - fixed original code revision",
+      "dataset_revision": "27e2dc304464257d2884fa6996bc8ca5d4a2256b", "dataset_identity_note": "pragma: allowlist secret - fixed original data revision",
+      "requirements": ["Original CPU task package relationships only; hidden evaluation and performance metadata stay outcome-only; no task code or Agent executed"],
+      "status": "ORIGINAL_CPU_PACKAGE_READER_NATIVE_EXECUTION_PENDING"
+    },
     "CROSSCODEEVAL": {
       "kind": "task_dataset",
       "mapping": "crosscodeeval_original_archive",
