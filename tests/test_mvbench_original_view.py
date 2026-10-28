@@ -179,6 +179,7 @@ def test_source_delivery_requires_native_scoring_and_actual_ci_research_evidence
     assert ci["original_rows_verified"] == ci["indexed_original_records"] == 4000
     assert ci["fixed_original_provider_and_current_research_roundtrips"] == 60
     assert ci["additional_model_calls"] == 0
+    assert ci["native_entrypoints_discoverable_from_source_plan"] == 4
     assert proof["remaining"] == [] and proof["validation_limits"]
 
 
