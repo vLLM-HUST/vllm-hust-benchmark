@@ -108,6 +108,11 @@ python -m pip --isolated install --no-deps --only-binary=:all: --require-hashes 
 python scripts/run_videomme_original.py --official-checkout /external/VLMEvalKit --snapshot /external/hf-cache/datasets--lmms-lab--Video-MME/snapshots/ead1408f75b618502df9a1d8e0950166bf0a2a0b --media-receipt /external/videomme-native-media-receipt.json --frame-cache /external/videomme-frames --output /external/videomme-8frame-run --model Qwen/Qwen3.5-9B --profile Video-MME_8frame
 ```
 
+### LongVideoBench长视频交错理解（原协议已审，数据授权待完成）
+
+- [x] 2026-10-28复核[官方数据页](https://huggingface.co/datasets/longvideobench/LongVideoBench)及[原生软件](https://github.com/longvideobench/LongVideoBench)：6678题，validation1337/test5341；长视频、字幕与图像交错关系属于原任务，不能用Video-MME替代，不构造纯文本题冒充。
+- [ ] 官方文件访问要求登录、分享账号信息并接受条款，本任务未接受条款、未取得受控原数据，不绕过门槛。CC-BY-NC-SA-4.0及原视频权利边界须保留；已有公共工具包源码不等于原数据就绪。原文件身份、视频/字幕关系、合格NPU执行配置、原生推理/评分及实际CI消费均未完成，来源总勾保持未选。
+
 ### TemporalWiki演化语料与原生探针评测（进行中，不打来源总勾）
 
 - [x] 官方代码版本已固定，177份原软件/配置共382,667字节在服务器逐文件Git blob及SHA256核验；13份Python仅AST解析，162份原配置保留，不导入或执行作者代码。
