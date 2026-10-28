@@ -1,0 +1,202 @@
+{
+  "schema": "muxpd-new-loss-independent-final-v1",
+  "status": "PASS",
+  "passed": true,
+  "run_count": 4,
+  "direct_vector_files_verified": 160,
+  "vectors_per_observed_run": 80,
+  "one_based_window": [
+    1,
+    200,
+    201,
+    202,
+    203,
+    204,
+    205,
+    206,
+    207,
+    208
+  ],
+  "same_role_observed_plain_bridges": {
+    "native": {
+      "passed": true,
+      "equal_entire_prefixes": 8
+    },
+    "prefix": {
+      "passed": true,
+      "equal_entire_prefixes": 8
+    }
+  },
+  "historical_reproduction": "All eight entire retained prefixes match both native full-run references or prefix full-run reference for their role; frozen extracts independently rechecked against original terminal outputs.",
+  "source_schema_equivalence_passed": true,
+  "source_pairs_verified": 6,
+  "original_runtime_files_byte_equal": 20,
+  "prefix_cleanup_restore3_ranks": [
+    0,
+    1,
+    2,
+    3
+  ],
+  "first_token_differences_one_based": {
+    "mmlu-pro-07151": 56,
+    "mmlu-pro-07213": null,
+    "mmlu-pro-07275": null,
+    "mmlu-pro-07338": 207,
+    "mmlu-pro-07401": null,
+    "mmlu-pro-07461": 203,
+    "mmlu-pro-07524": null,
+    "mmlu-pro-07585": null
+  },
+  "selected_logits": [
+    {
+      "case_id": "mmlu-pro-07151",
+      "token_number_one_based": 1,
+      "same_request_history": true,
+      "full_cobatch_history_equivalence_asserted": false,
+      "conditional_same_request_history_distance": {
+        "different_elements": 0,
+        "max_abs": 0.0,
+        "rms": 0.0
+      },
+      "native": {
+        "top_two_token_ids": [
+          9764,
+          1206
+        ],
+        "top_two_values": [
+          31.625,
+          26.75
+        ],
+        "top_two_margin": 4.875
+      },
+      "prefix": {
+        "top_two_token_ids": [
+          9764,
+          1206
+        ],
+        "top_two_values": [
+          31.625,
+          26.75
+        ],
+        "top_two_margin": 4.875
+      }
+    },
+    {
+      "case_id": "mmlu-pro-07461",
+      "token_number_one_based": 203,
+      "same_request_history": true,
+      "full_cobatch_history_equivalence_asserted": false,
+      "conditional_same_request_history_distance": {
+        "different_elements": 240435,
+        "max_abs": 0.8125,
+        "rms": 0.1492629103672975
+      },
+      "native": {
+        "top_two_token_ids": [
+          11421,
+          10813
+        ],
+        "top_two_values": [
+          21.25,
+          21.0
+        ],
+        "top_two_margin": 0.25
+      },
+      "prefix": {
+        "top_two_token_ids": [
+          10813,
+          11421
+        ],
+        "top_two_values": [
+          21.5,
+          21.375
+        ],
+        "top_two_margin": 0.125
+      }
+    },
+    {
+      "case_id": "mmlu-pro-07338",
+      "token_number_one_based": 207,
+      "same_request_history": true,
+      "full_cobatch_history_equivalence_asserted": false,
+      "conditional_same_request_history_distance": {
+        "different_elements": 236875,
+        "max_abs": 0.9375,
+        "rms": 0.1220885188051322
+      },
+      "native": {
+        "top_two_token_ids": [
+          318,
+          198
+        ],
+        "top_two_values": [
+          26.375,
+          26.125
+        ],
+        "top_two_margin": 0.25
+      },
+      "prefix": {
+        "top_two_token_ids": [
+          198,
+          318
+        ],
+        "top_two_values": [
+          26.375,
+          26.25
+        ],
+        "top_two_margin": 0.125
+      }
+    },
+    {
+      "case_id": "mmlu-pro-07338",
+      "token_number_one_based": 208,
+      "same_request_history": false,
+      "full_cobatch_history_equivalence_asserted": false,
+      "distance_omitted_reason": "Request history already differs; no numerical distance interpreted.",
+      "native": {
+        "top_two_token_ids": [
+          2777,
+          55679
+        ],
+        "top_two_values": [
+          22.5,
+          20.75
+        ],
+        "top_two_margin": 1.75
+      },
+      "prefix": {
+        "top_two_token_ids": [
+          262,
+          1031
+        ],
+        "top_two_values": [
+          30.375,
+          18.125
+        ],
+        "top_two_margin": 12.25
+      }
+    }
+  ],
+  "seed_token56_logit_not_available": "Seed decision56 is outside the frozen capture window; top-two logits at that first divergence were not captured. Seed window1/200..208 top-two readings are retained in audit-v1.json.",
+  "no_distance_after_request_history_diverges": true,
+  "full_cobatch_history_equivalence_asserted": false,
+  "preserved_frozen_analyzer_v1_failure": {
+    "path": "/root/workspace/muxpd-quality-layout-20261028/new-loss-analysis-v1.json",
+    "sha256": "ebe82ac020a7efa789b3eb33a0a4809b66a64ddbdc1808bd6876c1d3577312de",
+    "passed": false
+  },
+  "data_audit": {
+    "path": "/root/workspace/muxpd-quality-layout-20261028/new-loss-independent-audit-v1/audit-v1.json",
+    "bytes": 91424,
+    "sha256": "0dcb0ffee7d26ca151f347292c04c9e9f871d5c8d36e26969bdfa73e5b02877f"
+  },
+  "source_schema_audit": {
+    "path": "/root/workspace/muxpd-quality-layout-20261028/new-loss-independent-audit-v1/source-schema-audit-v1.json",
+    "bytes": 11705,
+    "sha256": "97b1a3ed8ae7dbc6f3af3812c86ad7f65347e0d9d21b1c290c382d3ebc7b0682"
+  },
+  "no_analyzer_import_or_execution": true,
+  "npu_used": false,
+  "github_writes": false,
+  "scope": "Fresh-process bounded batch7, original8192 cap, abort target208. Same-role historical prefixes and observer bridges pass. Seed diverged at56 and peer07461 at203 before target207: target-only equal history is not equal full co-batch state. No unique convolution/collective causation, full-answer quality, or performance qualification."
+}

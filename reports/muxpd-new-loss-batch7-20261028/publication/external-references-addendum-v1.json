@@ -1,0 +1,110 @@
+{
+  "schema": "muxpd-new-loss-external-references-addendum-v1",
+  "status": "supplement_to_sealed_v1",
+  "supersedes_scope_only": {
+    "file": "external-references-v1.json",
+    "sha256": "55ee4330eb1ece99a436afbd0a4324fd92503f52faa0f218b479c5ebe2c9d679",
+    "field": "raw_reference"
+  },
+  "correction": "No raw experimental role was run in the four-run batch7 diagnostic. Nevertheless, the frozen analyzer validates every historical_runs entry, including raw-quality-v2-hccl-true-01. Its original controller.json, results/run.json and process.log are therefore required external inputs for a complete analyzer rerun; context-only does not mean optional to validation.",
+  "all_required_historical_labels": [
+    "native-quality-v2-hccl-true-01",
+    "native-quality-v2-hccl-true-02",
+    "raw-quality-v2-hccl-true-01",
+    "prefix-quality-full-01"
+  ],
+  "additional_control": {
+    "role": "raw",
+    "label": "raw-quality-v2-hccl-true-01",
+    "included_as_full_run_in_new_archive": false,
+    "historical_archive": {
+      "name": "muxpd-raw-quality-v2-hccl-true-01.tar.gz",
+      "bytes": 5103766,
+      "sha256": "bbfdef527e51194205b7f7cf1e5d5613f2b63e3c7c2e3e8482e075dc8cfabf8a",
+      "download_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/releases/download/evidence-muxpd-followup-20261025/muxpd-raw-quality-v2-hccl-true-01.tar.gz"
+    },
+    "run_member": {
+      "member": "runs/raw-quality-v2-hccl-true-01/results/run.json",
+      "bytes": 3397246,
+      "sha256": "75aa8495902fd795dbe845da35eb1bf06bb3adea7c81b515e8c3375b07a13f9e"
+    },
+    "public_manifest": {
+      "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/b77e05b0d906b0e14b274533edf6750ffacd0170/reports/muxpd-followup-20261025/quality-reference-v5/custody/muxpd-raw-quality-v2-hccl-true-01.manifest.json",
+      "sha256": "3f8a1911edc669668453481e1924beec349fb62eca26e4720837c5ae08f74d6c"
+    },
+    "public_readback_report": {
+      "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/b77e05b0d906b0e14b274533edf6750ffacd0170/reports/muxpd-followup-20261025/quality-reference-v5/PUBLIC-READBACK-v5.md",
+      "sha256": "608159a064f36f296acff94618d452961a72fc2d2b5c4d2148215f9c3f1ae093"
+    },
+    "asset_catalog": {
+      "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/b77e05b0d906b0e14b274533edf6750ffacd0170/reports/muxpd-followup-20261025/quality-reference-v5/release-assets-v5.json",
+      "sha256": "39e4b7dfcce1f828dab23856d3b6a6d0fc337fad0c8c6988e628497c44a0a3c0"
+    },
+    "used_by_candidate_reference_sha256": "75aa8495902fd795dbe845da35eb1bf06bb3adea7c81b515e8c3375b07a13f9e"
+  },
+  "required_raw_archive_members": [
+    {
+      "member": "runs/raw-quality-v2-hccl-true-01/controller.json",
+      "sha256": "a5132a334a3aa0d70c30e43d22a62421c755a96fb509c06ed08898ce4c553440",
+      "bytes": 2340
+    },
+    {
+      "member": "runs/raw-quality-v2-hccl-true-01/results/run.json",
+      "sha256": "75aa8495902fd795dbe845da35eb1bf06bb3adea7c81b515e8c3375b07a13f9e",
+      "bytes": 3397246
+    },
+    {
+      "member": "runs/raw-quality-v2-hccl-true-01/process.log",
+      "sha256": "b0cecdef7a00a7762f5e52d03547f799e957e10feb54f77d7f09c93bba7067cc",
+      "bytes": 40779
+    }
+  ],
+  "analyzer_evidence": {
+    "path": "new-loss-probe-v1/analyze_new_loss_v1.py",
+    "sha256": "428bc23332992f2d3ac7dea3674e0453dc279fbd3b00858a040ad996a16c46eb",
+    "function": "verify_historical_references",
+    "historical_loop_line": 46,
+    "original_byte_validation_lines": [
+      55,
+      56,
+      57,
+      58,
+      59,
+      60
+    ],
+    "retained_prefix_validation_lines": [
+      61,
+      62,
+      63,
+      64,
+      65,
+      66,
+      67,
+      68,
+      69,
+      70,
+      71,
+      72
+    ]
+  },
+  "binding_source": {
+    "path": "new-loss-probe-v1/source-manifest-v1.json",
+    "sha256": "66bf0d149c34b9bdc0064750f670910af94e26314ab4f39a0e462c40282d683a"
+  },
+  "external_catalog_source": {
+    "path": "/root/workspace/muxpd-quality-layout-20261028/full-quality-publication-staging/historical-controls-reference-v1.json",
+    "sha256": "35625085dcd81310fd28dc2427027bd02fcc29b931aefc450285bd967b688c6b"
+  },
+  "sealed_archive_unchanged": {
+    "name": "muxpd-new-loss-batch7-20261028-v1.tar.gz",
+    "bytes": 84817778,
+    "sha256": "19fb56eaf5201c30e38bcf9ced5736ccae09dfc1d943aa4b18291bb90d0af9bf"
+  },
+  "sealed_report_unchanged": {
+    "name": "REPORT-v1.zh-CN.md",
+    "sha256": "540a51b1d02893f058fc4bf336cc09f33f66db765486ad32e9c1144afa20097c"
+  },
+  "new_download_or_public_readback_performed": false,
+  "github_writes": false,
+  "npu_used": false
+}
