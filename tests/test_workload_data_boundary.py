@@ -5,6 +5,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1] / "workload-preparation"
 DATA_MODULES = {
+    "livecodebench",  # Original scenario fields and case/reference relations only.
     "videomme",  # Original task/option/reference/media-locator relations only.
     "mvbench",  # Original ordered video task/media/answer relations only.
     "naturebench",  # Original package/material references only, no scientific execution.
@@ -48,6 +49,27 @@ DATA_MODULES = {
 def test_only_data_modules_are_included():
     actual = {path.stem for path in (ROOT / "src/vllm_hust_workload_data").glob("*.py")}
     assert actual == DATA_MODULES
+
+
+def test_livecodebench_reader_has_no_model_scoring_network_or_private_decoder():
+    import ast
+
+    tree = ast.parse(
+        (ROOT / "src/vllm_hust_workload_data/livecodebench.py").read_text("utf-8")
+    )
+    imports = set()
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            imports.update(item.name for item in node.names)
+        elif isinstance(node, ast.ImportFrom):
+            imports.add(node.module)
+    assert imports == {"copy", "datetime", "json", "pathlib", "assets", "records"}
+    assert not any(
+        isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Name)
+        and node.func.id in {"eval", "exec", "compile", "__import__"}
+        for node in ast.walk(tree)
+    )
 
 
 def test_naturebench_reader_has_no_execution_network_or_research_imports():
