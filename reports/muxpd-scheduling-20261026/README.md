@@ -5,15 +5,22 @@ the asynchronous candidate's throughput recovery, shorter maximum streaming paus
 TTFT/P99 costs, and the bounded lifecycle checks. The quality limitation remains unresolved. The
 earlier [preparation draft](REPORT-DRAFT-v1.md) is retained as a historical cutoff.
 
+Publication status was corrected on 2026-10-28 in
+[PUBLICATION-STATUS-CORRECTION-v1.md](PUBLICATION-STATUS-CORRECTION-v1.md). The pending-upload
+wording retained in REPORT-v2 is stale editorial text: the recorded 2026-10-26 anonymous download
+and 212-member checks passed. The original report and evidence bytes are preserved; this correction
+changes no performance or quality result.
+
 Nine timed processes and one separate three-case lifecycle process pass. The candidate is within
 approximately 1.3% of the fresh native throughput reference, while its worst mixed seed pauses are
 about 85% shorter. It does not establish a native-relative throughput win, HTTP Goodput,
 Manager/default qualification, or semantic-quality acceptance.
 
-Original run artifacts belong in the planned benchmark Release tag
-`evidence-muxpd-scheduling-20261026`. They are not stored as payloads in this Git directory or in
-the plugin repository. Release publication/download verification is pending; the tag name is a
-publication plan, not proof that assets exist.
+Original run artifacts are published in the
+[benchmark Release](https://github.com/vLLM-HUST/vllm-hust-benchmark/releases/tag/evidence-muxpd-scheduling-20261026).
+They are not stored as payloads in this Git directory or in the plugin repository. See the
+[anonymous download receipt](public-download-verification-v1.json),
+[member verification](public-member-verification-v1.json), and [member manifest](MANIFEST-v1.json).
 
 The [packager](package_evidence_v1.py) selects only each terminal run's controller/config/workload,
 copied producers, results, process log and before/ after NPU inventories, plus this campaign's
