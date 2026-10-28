@@ -157,3 +157,26 @@ def test_native_cache_ref_never_overwrites_other_revision(tmp_path):
     module.ensure_native_ref(tmp_path, manifest)
     with pytest.raises(ValueError, match="no overwrite"):
         module.ensure_native_ref(tmp_path, {"revision": "different-fixture"})
+
+
+def test_source_delivery_requires_native_scoring_and_actual_ci_research_evidence():
+    ledger = json.loads(
+        (ROOT / "docs/workload-data/dataset-validation-status.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    item = ledger["delivery_inventory"]["MVBENCH"]
+    proof = json.loads((ROOT / item["delivery_receipt"]).read_text(encoding="utf-8"))
+    assert item["status"] == "AVAILABLE" and item["checked"]
+    assert proof["checked"] and proof["source_checkbox_eligible"]
+    assert proof["native_completed_cases"] == proof["model_calls"] == 60
+    assert proof["native_correct_cases"] == 34
+    assert proof["frames_per_case"] == 16
+    assert proof["native_child_returncode"] == 0
+    assert proof["saved_native_audit"]["original_qa_template_wire_text_verified"]
+    ci = proof["actual_ci_installed_evidence"]
+    assert ci["verified_installed_payloads"] == 62
+    assert ci["original_rows_verified"] == ci["indexed_original_records"] == 4000
+    assert ci["fixed_original_provider_and_current_research_roundtrips"] == 60
+    assert ci["additional_model_calls"] == 0
+    assert proof["remaining"] == [] and proof["validation_limits"]
