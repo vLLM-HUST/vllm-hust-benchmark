@@ -241,6 +241,48 @@ python scripts/run_livecodebench_container_scoring.py \
 工作进程会重建官方原始提示并核对保存请求、原题ID、候选索引和完整测试绑定；原CLI的12个评分worker和每测试6秒设置不变。生成代码与私有测试解码只在无网络、非root、只读根文件系统容器内运行。容器使用32GiB内存上限及独立输入只读/输出可写卷；仅新建输出卷的所有权初始化使用最小CHOWN/FOWNER权限，不在宿主机执行生成代码。需有授权的Linux
 Docker节点和足够内存；不满足时标阻塞，不能退回宿主机执行。评分不要求模型答对；原始失败与截断输出保留，不能将抽样成绩解释为论文复现、全量质量或引擎性能。
 
+### LiveCodeBench 自修复：真实反馈与显式兼容模式
+
+自修复承接上述官方评分输出，不重新生成初始候选、不人工编写错误反馈。作者流程会保留原本已通过的候选，只对其余候选各生成一个修复版本（`n=1`），随后交给原评分器重新评分。
+
+固定上游版本有一处已实测兼容问题：评分器的一类`error_code=-4`反馈只有`error_message`，但自修复模板强制读取缺失的`inputs/expected/error`，导致`KeyError`。默认`strict`仍保留上游行为。经明确允许，可以选择`--repair-feedback-compat error-message-only`：只对这些缺字段异常直接展示原有`error_message`，不添加输入、期望输出或其他虚构字段，不改原题、完整测试、生成预算或评分器。该配置必须标为**显式兼容模板**，不能宣称未经修改的官方自修复模板已通过。
+
+在CPU隔离节点，使用真实初始评分文件准备修复提示：
+
+```bash
+python scripts/run_livecodebench_container_scoring.py \
+  --prepared-dir /private/livecodebench-original-tasks \
+  --prior-evaluation /private/lcb-codegen-scoring/native-output/results/original-eval-all-private.json \
+  --author-archive /private/lcb-source.tar.gz --image "$LCB_IMAGE" \
+  --work-root /private/lcb-repair-prompts --model Qwen/Qwen3.5-9B \
+  --scenario selfrepair --repair-feedback-compat error-message-only --prepare-prompts --execute
+```
+
+准备回执给出`request_count`、原题ID、原候选索引、复用已通过候选数和原反馈文件哈希。原始反馈JSON不会重写。将准备出的`requests-private.json`在服务器间传到NPU节点后，先协调并核验独占使用窗口，再执行：
+
+```bash
+python scripts/run_livecodebench_original_generation.py \
+  --prompts /private/lcb-repair-requests.json --output /private/lcb-repair-generation \
+  --endpoint http://127.0.0.1:19466/v1 --scenario selfrepair \
+  --disable-thinking --timeout 1200 --execute
+```
+
+每个请求保留原题ID和原候选索引，辅助`request_id`仅用于区分同一道题的不同失败候选，不冒充新的原始题目。本次初始3题的30候选中，7个已通过候选不再请求模型，23个失败候选使用真实反馈生成修复。若准备回执的请求数为0，则不调用模型，评分时可省略`--generations-dir`并沿用全部原输出。
+
+将完整修复输出目录传回CPU节点，用同一原反馈、同一兼容模式核验提示与候选关系，并按作者流程组合修复结果及原已通过输出，再调用原评分器：
+
+```bash
+python scripts/run_livecodebench_container_scoring.py \
+  --prepared-dir /private/livecodebench-original-tasks \
+  --prior-evaluation /private/lcb-codegen-scoring/native-output/results/original-eval-all-private.json \
+  --generations-dir /private/lcb-repair-generation \
+  --author-archive /private/lcb-source.tar.gz --image "$LCB_IMAGE" \
+  --work-root /private/lcb-repair-scoring --model Qwen/Qwen3.5-9B \
+  --scenario selfrepair --repair-feedback-compat error-message-only --execute
+```
+
+这里的接口、夹具测试和准备成功不等于实跑完成；修复推理、后续评分与保存审计的实际状态以[唯一清单](../docs/workload-data/DATASET_CHECKLIST.zh-CN.md)和[分阶段回执](../docs/workload-data/validation/livecodebench-original-readiness-20261028.json)为准。
+
 ## Video-MME 原生视频任务
 
 这是发布方原始Video-MME与固定VLMEvalKit的两个已有配置：`Video-MME_8frame`和`Video-MME_8frame_subs`，不是把64帧配置临时减成8帧。原2700题/900视频全部保留；默认每种duration取最先3个不同视频并保留每视频全部3题，每配置27题。选题在推理前固定，不因失败换题；`--full`才选择全部2700题。

@@ -1,11 +1,11 @@
 {
   "source_id": "LIVECODEBENCH",
   "recorded_at": "2026-10-28",
-  "status": "ORIGINAL_CODEGEN_SAMPLE_SCORED_OTHER_SCENARIOS_AND_CONSUMER_PENDING",
+  "status": "CODEGEN_AND_DECLARED_COMPAT_REPAIR_SCORED_OTHER_TWO_SCENARIOS_AND_CONSUMER_PENDING",
   "source_checkbox_eligible": false,
   "native_execution_complete": false,
-  "model_calls": 4,
-  "model_call_count_scope": "HTTP attempts: one retained 90-second timeout and three completed requests;30 saved candidate outputs, not40 completed outputs",
+  "model_calls": 27,
+  "model_call_count_scope": "HTTP attempts: one retained codegen timeout,three completed codegen requests and23 completed repair requests.53 saved generated candidates;7 accepted baseline candidates carried into repair are not new model outputs.",
   "raw_payloads_published": false,
   "research_analysis_migrated": false,
   "original_file_identities": "workload-preparation/data/catalogs/source_manifests_v1.json#sources.LIVECODEBENCH",
@@ -92,6 +92,40 @@
     "private_saved_audit": "/root/livecodebench-saved-codegen-audit-20261028-001/audit-public.json",
     "retained_staging_failures": "First public prompt preparation falsely counted sysfs bonding_masters as an interface, fixed using actual /proc/net/dev; first scoring attempt blocked by copied input-directory umask, fixed only fresh staging traversal mode. Both failed before generated code evaluation; no inference rerun for these fixes."
   },
+  "self_repair_native_sample": {
+    "status": "DECLARED_COMPAT_REPAIR_GENERATION_SCORING_AND_SAVED_AUDIT_COMPLETE",
+    "strict_original_template_attempt": "Retained KeyError inputs before any repair model requests; original grader may emit error_code=-4 with only error_message",
+    "user_approved_compatibility": true,
+    "compatibility_mode": "error-message-only",
+    "compatibility_boundary": "Only known missing inputs/expected/error KeyError for original runtime error_code=-4 may fall back to existing error_message. Original feedback JSON is never rewritten, missing values never invented; other errors propagate. This is explicitly not an unmodified author repair template.",
+    "compatibility_handler": "scripts/livecodebench_repair.py",
+    "public_prompt_preparation_actual_exit_code": 0,
+    "completed_model_requests": 23,
+    "samples_per_failed_original_candidate": 1,
+    "carried_accepted_original_candidates": 7,
+    "original_codegen_candidates_regenerated": false,
+    "original_feedback_json_unchanged": true,
+    "prior_evaluation_sha256": "e43738a2f20e597400de49b93d9da9fd1d0a0c41b80645371654ec70ba3b337c", "identity_note": "pragma: allowlist secret - original saved evaluation file identity",
+    "model_service_reconfigured": false,
+    "generation_actual_exit_code": 0,
+    "scoring_complete": true,
+    "scoring_actual_exit_code": 0,
+    "original_template_unmodified": false,
+    "original_grader_unmodified": true,
+    "approved_fallback_candidate_count": 20,
+    "repair_finish_reasons": {"length": 12, "stop": 11},
+    "native_candidates_scored": 30,
+    "passed_candidates_per_question": [0, 7, 2],
+    "sample_metrics": {"pass@1": 0.3, "pass@5": 0.5925925925925926, "pass@10": 0.6666666666666666},
+    "independent_saved_audit_exit_code": 0,
+    "audit_additional_model_or_task_execution": false,
+    "source_checkbox_eligible": false,
+    "private_prompt_preparation": "/root/livecodebench-public-repair-prompts-20261028-002",
+    "private_generation": "/data/shared_upload/hust-phr/workload-benchmark-native-delivery-20261024/livecodebench-original-repair-generation-32028-001",
+    "private_scoring": "/root/livecodebench-repair-native-scoring-20261028-001",
+    "private_saved_audit": "/root/livecodebench-saved-repair-audit-20261028-001/audit-public.json",
+    "boundary": "Fixed3-question usability check with explicit approved feedback display compatibility; truncated/incorrect outputs retained. Not unmodified-author-template reproduction, full source quality, engine improvement or a scientific conclusion."
+  },
   "native_protocol_boundaries": {
     "code_generation_samples_per_question": 10,
     "temperature": 0.2,
@@ -103,7 +137,7 @@
     "scope": "Code generation, self-repair, code execution and test-output prediction require separately evidenced native coverage. Assets and task preparation are not benchmark delivery."
   },
   "remaining": [
-    "Self-repair with real original feedback and other two original scenarios",
+    "Original code-execution and test-output-prediction scenarios",
     "Public original-field adapter/index, maintained research consumer roundtrip and actual current CI artifact verification"
   ]
 }

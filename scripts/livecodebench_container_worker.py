@@ -62,13 +62,13 @@ def author_checkout(archive, destination):
     return root
 
 
-def outputs_from_saved(saved, *, question_id, messages, model):
+def outputs_from_saved(saved, *, question_id, messages, model, samples=10):
     if saved.get("question_id") != question_id:
         raise ValueError("original question relationship mismatch")
     expected = {
         "model": model,
         "messages": messages,
-        "n": 10,
+        "n": samples,
         "max_tokens": 2000,
         "temperature": 0.2,
         "top_p": 0.95,
@@ -80,13 +80,30 @@ def outputs_from_saved(saved, *, question_id, messages, model):
     if thinking not in (None, {"enable_thinking": False}) or body != expected:
         raise ValueError("original prompt or generation budget mismatch")
     choices = saved["response"]["choices"]
-    if len(choices) != 10 or sorted(c["index"] for c in choices) != list(range(10)):
-        raise ValueError("complete original ten-candidate response required")
+    if len(choices) != samples or sorted(c["index"] for c in choices) != list(
+        range(samples)
+    ):
+        raise ValueError(f"complete original {samples}-candidate response required")
     ordered = sorted(choices, key=lambda c: c["index"])
     outputs = [c["message"]["content"] for c in ordered]
     if any(not isinstance(text, str) or not text.strip() for text in outputs):
         raise ValueError("original empty completions cannot be replaced")
     return outputs
+
+
+def repair_baseline(args, tasks):
+    from livecodebench_repair import repair_identities
+
+    previous = json.loads(Path(args.prior_evaluation).read_text("utf-8"))
+    repair_identities(previous)
+    if [row["question_id"] for row in previous] != [task.question_id for task in tasks]:
+        raise ValueError("original evaluated tasks must match full-test source order")
+    if any(
+        row["question_content"] != task.question_content
+        for row, task in zip(previous, tasks)
+    ):
+        raise ValueError("original feedback question content differs")
+    return previous
 
 
 def prepare_prompts(args):
@@ -111,11 +128,13 @@ def prepare_prompts(args):
         openai_timeout=90,
     )
     model = LanguageModel(args.model, args.model, LMStyle.OpenAIChat, None)
+    if args.scenario == "selfrepair":
+        defaults.n = 1
     runner = OpenAIRunner(defaults, model)
     rows = json.loads(Path(args.tasks).read_text("utf-8"))
+    tasks = [CodeGenerationProblem(**raw) for raw in rows]
     requests = []
-    for raw in rows:
-        task = CodeGenerationProblem(**raw)
+    for task in tasks if args.scenario == "codegeneration" else []:
         body = {
             key: value
             for key, value in runner.client_kwargs.items()
@@ -123,7 +142,19 @@ def prepare_prompts(args):
         }
         body["messages"] = format_prompt_generation(task, model.model_style)
         requests.append({"question_id": task.question_id, "request": body})
-    if not requests or len({row["question_id"] for row in requests}) != len(requests):
+    if args.scenario == "selfrepair":
+        from livecodebench_repair import build_repair_requests, native_repair_formatter
+
+        previous = repair_baseline(args, tasks)
+        requests = build_repair_requests(
+            previous,
+            native_repair_formatter(args.repair_feedback_compat),
+            model.model_style,
+            runner.client_kwargs,
+        )
+    if (args.scenario == "codegeneration" and not requests) or len(
+        {row.get("request_id", row["question_id"]) for row in requests}
+    ) != len(requests):
         raise ValueError("distinct original task requests required")
     (output / "requests-private.json").write_text(
         json.dumps(requests, ensure_ascii=False), encoding="utf-8"
@@ -131,13 +162,24 @@ def prepare_prompts(args):
     receipt = {
         "source_id": "LIVECODEBENCH",
         "status": "ORIGINAL_API_PROMPTS_PREPARED_NO_MODEL_CALLS",
-        "selected_question_ids": [row["question_id"] for row in requests],
+        "selected_question_ids": [task.question_id for task in tasks],
+        "scenario": args.scenario,
+        "request_count": len(requests),
         "original_prompt_style": "OpenAIChat generic API template",
         "model": args.model,
         "model_calls": 0,
         "source_checkbox_eligible": False,
         "native_scoring_complete": False,
     }
+    if args.scenario == "selfrepair":
+        receipt.update(
+            repair_request_ids=[row["request_id"] for row in requests],
+            reused_accepted_candidates=10 * len(tasks) - len(requests),
+            prior_evaluation_sha256=hashlib.sha256(
+                Path(args.prior_evaluation).read_bytes()
+            ).hexdigest(),
+            repair_feedback_compat=args.repair_feedback_compat,
+        )
     (output / "receipt-private.json").write_text(
         json.dumps(receipt, indent=2), encoding="utf-8"
     )
@@ -164,7 +206,7 @@ def score(args):
         raise ValueError("distinct original tasks required")
     model = LanguageModel(args.model, args.model, LMStyle.OpenAIChat, None)
     results = []
-    for index, task in enumerate(tasks):
+    for index, task in enumerate(tasks if args.scenario == "codegeneration" else []):
         saved = json.loads(
             (
                 Path(args.generations) / f"{index}.request-response.private.json"
@@ -178,11 +220,63 @@ def score(args):
                 model=args.model,
             )
         )
-    combined = combine_results(Scenario.codegeneration, results, model)
-    defaults = SimpleNamespace(
-        scenario=Scenario.codegeneration, num_process_evaluate=12, timeout=6
+    previous = None
+    if args.scenario == "selfrepair":
+        from lcb_runner.runner.oai_runner import OpenAIRunner
+        from livecodebench_repair import (
+            build_repair_requests,
+            native_repair_formatter,
+            repaired_outputs,
+        )
+
+        previous = repair_baseline(args, tasks)
+        native = OpenAIRunner(
+            SimpleNamespace(
+                model=args.model,
+                use_cache=False,
+                n=1,
+                temperature=0.2,
+                top_p=0.95,
+                max_tokens=2000,
+                openai_timeout=90,
+            ),
+            model,
+        )
+        requests = build_repair_requests(
+            previous,
+            native_repair_formatter(args.repair_feedback_compat),
+            model.model_style,
+            native.client_kwargs,
+        )
+
+        def read_repair(position, request):
+            saved = json.loads(
+                (
+                    Path(args.generations) / f"{position}.request-response.private.json"
+                ).read_text("utf-8")
+            )
+            if (
+                saved.get("request_id") != request["request_id"]
+                or saved.get("candidate_index") != request["candidate_index"]
+            ):
+                raise ValueError("original repair candidate relationship mismatch")
+            return outputs_from_saved(
+                saved,
+                question_id=request["question_id"],
+                messages=request["request"]["messages"],
+                model=args.model,
+                samples=1,
+            )
+
+        results = repaired_outputs(previous, requests, read_repair)
+    scenario = (
+        Scenario.selfrepair
+        if args.scenario == "selfrepair"
+        else Scenario.codegeneration
     )
-    metrics = get_metrics(Scenario.codegeneration, defaults, tasks, combined)
+    combined = combine_results(scenario, results, model)
+    defaults = SimpleNamespace(scenario=scenario, num_process_evaluate=12, timeout=6)
+    metrics = get_metrics(scenario, defaults, tasks, combined)
     graded = extract_instance_results(metrics[1])
     if not (len(tasks) == len(combined) == len(graded) == len(metrics[2])):
         raise ValueError(
@@ -194,6 +288,9 @@ def score(args):
             tasks, combined, graded, metrics[2]
         )
     ]
+    if previous is not None:
+        for row, baseline in zip(evaluation, previous):
+            row["original_code_list"] = baseline["code_list"]
     (output / "original-metrics-private.json").write_text(
         json.dumps(metrics), encoding="utf-8"
     )
@@ -213,7 +310,15 @@ def score(args):
         "model_calls": 0,
         "source_checkbox_eligible": False,
         "all_four_scenarios_complete": False,
+        "scenario": args.scenario,
     }
+    if previous is not None:
+        receipt.update(
+            status="FIXED_ORIGINAL_SELFREPAIR_SAMPLE_SCORED_OTHER_SCENARIOS_PENDING",
+            repair_feedback_compat=args.repair_feedback_compat,
+            repaired_original_candidates=len(requests),
+            reused_accepted_candidates=10 * len(tasks) - len(requests),
+        )
     (output / "receipt-private.json").write_text(
         json.dumps(receipt, indent=2), encoding="utf-8"
     )
@@ -228,7 +333,18 @@ def main():
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--model", required=True)
     parser.add_argument("--prepare-prompts", action="store_true")
+    parser.add_argument(
+        "--scenario", choices=["codegeneration", "selfrepair"], default="codegeneration"
+    )
+    parser.add_argument("--prior-evaluation", type=Path)
+    parser.add_argument(
+        "--repair-feedback-compat",
+        choices=["strict", "error-message-only"],
+        default="strict",
+    )
     args = parser.parse_args()
+    if args.scenario == "selfrepair" and args.prior_evaluation is None:
+        parser.error("selfrepair requires actual original evaluated feedback")
     prepare_prompts(args) if args.prepare_prompts else score(args)
 
 

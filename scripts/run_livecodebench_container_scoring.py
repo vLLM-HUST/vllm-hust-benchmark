@@ -16,6 +16,7 @@ import sys
 import uuid
 
 from livecodebench_container_worker import AUTHOR_SHA
+from livecodebench_repair import repair_identities
 
 
 def staging_directory(path):
@@ -26,7 +27,18 @@ def staging_directory(path):
     return path
 
 
-def worker_command(image, name, model, uid=65534, *, prepare_prompts=False):
+def worker_command(
+    image,
+    name,
+    model,
+    uid=65534,
+    *,
+    prepare_prompts=False,
+    scenario="codegeneration",
+    repair_feedback_compat="strict",
+):
+    if scenario not in {"codegeneration", "selfrepair"}:
+        raise ValueError("explicit supported original scenario required")
     if not re.fullmatch(r"sha256:[0-9a-f]{64}", image):
         raise ValueError("immutable existing local image ID required")
     if not re.fullmatch(r"hust-lcb-[0-9a-f]{32}", name) or not 1 <= uid <= 2**31 - 2:
@@ -80,7 +92,20 @@ def worker_command(image, name, model, uid=65534, *, prepare_prompts=False):
         "/output/results",
         "--model",
         model,
+        "--scenario",
+        scenario,
     ]
+    if scenario == "selfrepair":
+        if repair_feedback_compat not in {"strict", "error-message-only"}:
+            raise ValueError(
+                "explicit native or approved feedback compatibility required"
+            )
+        command += [
+            "--prior-evaluation",
+            "/inputs/prior-evaluation.json",
+            "--repair-feedback-compat",
+            repair_feedback_compat,
+        ]
     return command + (["--prepare-prompts"] if prepare_prompts else [])
 
 
@@ -90,9 +115,9 @@ def execute(args):
             "authorized Linux root staging required; no host scoring fallback"
         )
     prepared = args.prepared_dir.resolve()
+    if args.scenario == "selfrepair" and args.prior_evaluation is None:
+        raise ValueError("selfrepair requires actual original evaluated feedback")
     generations = args.generations_dir.resolve() if args.generations_dir else None
-    if not args.prepare_prompts and generations is None:
-        raise ValueError("saved original generations required for scoring")
     archive, work = args.author_archive.resolve(), args.work_root.resolve()
     if work.exists() or any(
         work.is_relative_to(p) or p.is_relative_to(work)
@@ -110,20 +135,47 @@ def execute(args):
         or original["private_tests_decoded"] is not False
     ):
         raise ValueError("complete original generation and task relationships required")
-    if not args.prepare_prompts:
+    expected_repairs = []
+    if args.scenario == "selfrepair":
+        previous = json.loads(args.prior_evaluation.read_text("utf-8"))
+        expected_repairs = repair_identities(previous)
+        if [row["question_id"] for row in previous] != original[
+            "selected_question_ids"
+        ]:
+            raise ValueError(
+                "original evaluated tasks differ from selected original source"
+            )
+    need_generation = not args.prepare_prompts and (
+        args.scenario == "codegeneration" or bool(expected_repairs)
+    )
+    if need_generation and generations is None:
+        raise ValueError("saved original generations required for scoring")
+    if need_generation:
         generated = json.loads(
             (generations / "receipt-private.json").read_text("utf-8")
         )
-        if (
-            generated["status"] != "ORIGINAL_GENERATION_RETURNED_NATIVE_SCORING_PENDING"
-            or generated["completed_question_ids"] != original["selected_question_ids"]
-        ):
+        valid = (
+            generated["status"] == "ORIGINAL_GENERATION_RETURNED_NATIVE_SCORING_PENDING"
+            and generated["completed_question_ids"] == original["selected_question_ids"]
+        )
+        if args.scenario == "selfrepair":
+            valid = (
+                generated["status"]
+                == "ORIGINAL_SELF_REPAIR_GENERATION_RETURNED_NATIVE_SCORING_PENDING"
+                and generated.get("completed_request_ids") == expected_repairs
+            )
+        if not valid:
             raise ValueError(
                 "complete original generation and task relationships required"
             )
     name = "hust-lcb-" + uuid.uuid4().hex
     command = worker_command(
-        args.image, name, args.model, prepare_prompts=args.prepare_prompts
+        args.image,
+        name,
+        args.model,
+        prepare_prompts=args.prepare_prompts,
+        scenario=args.scenario,
+        repair_feedback_compat=args.repair_feedback_compat,
     )
     image = json.loads(
         subprocess.check_output(["docker", "image", "inspect", args.image], text=True)
@@ -141,12 +193,22 @@ def execute(args):
             Path(__file__).with_name("livecodebench_container_worker.py"),
             inputs / "worker.py",
         ),
+        (
+            Path(__file__).with_name("livecodebench_repair.py"),
+            inputs / "livecodebench_repair.py",
+        ),
     ]:
         shutil.copyfile(source, target)
         target.chmod(0o444)
-    for index in range(
-        0 if args.prepare_prompts else len(original["selected_question_ids"])
-    ):
+    if args.scenario == "selfrepair":
+        shutil.copyfile(args.prior_evaluation, inputs / "prior-evaluation.json")
+        (inputs / "prior-evaluation.json").chmod(0o444)
+    generation_count = (
+        len(expected_repairs)
+        if args.scenario == "selfrepair"
+        else len(original["selected_question_ids"])
+    )
+    for index in range(0 if args.prepare_prompts else generation_count):
         filename = f"{index}.request-response.private.json"
         target = inputs / "generations" / filename
         shutil.copyfile(generations / filename, target)
@@ -159,6 +221,10 @@ def execute(args):
         "model_calls": 0,
         "source_checkbox_eligible": False,
         "other_native_scenarios_complete": False,
+        "scenario": args.scenario,
+        "repair_feedback_compat": args.repair_feedback_compat
+        if args.scenario == "selfrepair"
+        else None,
     }
     try:
         with (work / "container-private.log").open("xb") as log:
@@ -247,6 +313,8 @@ def execute(args):
         receipt["status"] = (
             "ORIGINAL_API_PROMPTS_PREPARED_NO_MODEL_CALLS"
             if args.prepare_prompts
+            else "ORIGINAL_SELFREPAIR_SAMPLE_SCORED_OTHER_SCENARIOS_PENDING"
+            if args.scenario == "selfrepair"
             else "ORIGINAL_CODEGEN_SAMPLE_SCORED_OTHER_SCENARIOS_PENDING"
         )
     except BaseException as error:
@@ -271,6 +339,15 @@ def main():
     parser.add_argument("--model", required=True)
     parser.add_argument("--execute", action="store_true")
     parser.add_argument("--prepare-prompts", action="store_true")
+    parser.add_argument(
+        "--scenario", choices=["codegeneration", "selfrepair"], default="codegeneration"
+    )
+    parser.add_argument("--prior-evaluation", type=Path)
+    parser.add_argument(
+        "--repair-feedback-compat",
+        choices=["strict", "error-message-only"],
+        default="strict",
+    )
     args = parser.parse_args()
     if not args.execute:
         print(
