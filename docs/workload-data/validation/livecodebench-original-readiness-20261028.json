@@ -1,9 +1,10 @@
 {
   "source_id": "LIVECODEBENCH",
-  "recorded_at": "2026-10-28",
-  "status": "FOUR_SCENARIOS_SAMPLE_SCORED_DECLARED_REPAIR_COMPAT_PROVIDER_CONSUMER_PENDING",
-  "source_checkbox_eligible": false,
-  "native_execution_complete": false,
+  "recorded_at": "2026-10-29",
+  "status": "AVAILABLE_FIXED_ORIGINAL_SAMPLES_FOUR_SCENARIOS_WITH_DECLARED_REPAIR_COMPAT",
+  "source_checkbox_eligible": true,
+  "native_execution_complete": true,
+  "completion_scope": "Fixed original samples, full per-case native generation/scoring protocol; selfrepair explicitly approved error-message-only display compatibility. Not full-corpus scoring or unmodified repair-template reproduction. Historical phase-local pending flags below retain their original scope.",
   "model_calls": 33,
   "model_call_count_scope": "HTTP attempts: one retained codegen timeout,three completed codegen requests,23 completed repair requests,three codeexecution and three testoutputprediction requests.113 saved generated candidates;7 accepted baseline candidates carried into repair are not new model outputs.",
   "raw_payloads_published": false,
@@ -197,6 +198,30 @@
     "private_codegen_audit": "/root/livecodebench-codegen-index-consumer-20261029-001/audit-public.json",
     "source_checkbox_eligible": false
   },
+  "actual_ci_installation": {
+    "ci_run": 40724361508,
+    "cpu_job": 122943489867,
+    "cpu_job_conclusion": "success",
+    "artifact_id": 12831578310,
+    "source_commit": "47e9f8048195c9d03daeda4f0ecbf6219f3d62c9",
+    "wheel_sha256": "b7471995189009a18df8903243b45aa27048559cd5214cf1b324bac474ffeb06",
+    "identity_note": "pragma: allowlist secret - actual public software artifact identity",
+    "installed_software_payloads_byte_equal": 65,
+    "source_checkout_modules_equal_after_line_end_normalization": 38,
+    "installation_audit": "/root/livecodebench-actual-ci-47e9f804-20261029-001/installation-audit-public.json",
+    "codeexecution_full479_index_fixed3_research_readbacks_equal": true,
+    "testoutputprediction_full442_index_fixed3_research_readbacks_equal": true,
+    "installed_other_scenario_audit": "/root/livecodebench-installed-other-index-consumer-20261029-001/audit-public.json",
+    "codegeneration_installed_readbacks": "FIXED3_PROVIDER_AND_MAINTAINED_RESEARCH_READBACKS_EQUAL",
+    "installed_codegen_audit": "/root/livecodebench-installed-codegen-consumer-20261029-001/audit-public.json",
+    "main_ci_run": 40724361617,
+    "main_tests_job": 122943489811,
+    "main_lint_job": 122943489177,
+    "all_three_ci_jobs_conclusion": "success",
+    "source_checkbox_eligible": false,
+    "additional_model_or_scoring_calls": 0,
+    "retained_verifier_failure": "First source checkout byte comparison encountered CRLF versus CI LF; installed payload already exactly matched wheel. Verification-only correction normalized checkout line endings without repeating valid installation."
+  },
   "native_protocol_boundaries": {
     "code_generation_samples_per_question": 10,
     "temperature": 0.2,
@@ -207,7 +232,5 @@
     "isolation": "Code generation and execution graders execute code; test-output prediction grader uses eval. All native scoring must remain in qualified isolated containers.",
     "scope": "Code generation, self-repair, code execution and test-output prediction require separately evidenced native coverage. Assets and task preparation are not benchmark delivery."
   },
-  "remaining": [
-    "Install actual current CI software artifact and repeat provider/maintained-consumer integration against that artifact; source-checkout integration already verified"
-  ]
+  "remaining": []
 }

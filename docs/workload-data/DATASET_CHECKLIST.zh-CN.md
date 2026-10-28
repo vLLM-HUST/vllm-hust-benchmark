@@ -1,9 +1,9 @@
 # 数据集逐项验证清单
 
 当前交付
-**67/113项**，待完成46项，另5项仅分类。首批#432的60项和第二批#538的ScienceWorld已合入main；早期五个草稿已关闭为被汇总承接，历史和分支保留。第三批新增CodeJudge-Eval、DeepPlanning、OpenMath、OpenCode、MVBench及Video-MME固定原生profile交付，尚未合入。OpenMath/OpenCode是训练语料原问题生成，不是独立质量benchmark。打勾不代表全量模型评测、高分或性能保证。
+**68/113项**，待完成45项，另5项仅分类。首批#432的60项和第二批#538的ScienceWorld已合入main；早期五个草稿已关闭为被汇总承接，历史和分支保留。第三批新增CodeJudge-Eval、DeepPlanning、OpenMath、OpenCode、MVBench、Video-MME及LiveCodeBench固定原生profile交付，尚未合入。OpenMath/OpenCode是训练语料原问题生成，不是独立质量benchmark。打勾不代表全量模型评测、高分或性能保证。
 
-### LiveCodeBench接入约束（协议核查，不计完成）
+### LiveCodeBench（原生固定抽样交付完成；自修复显式兼容）
 
 核查依据为[官方源码](https://github.com/LiveCodeBench/LiveCodeBench/tree/28fef95ea8c9f7a547c8329f2cd3d32b92c1fa24)。固定源码压缩包已下载到专用
 CPU 工作区，SHA256 为
@@ -42,7 +42,7 @@ Windows。官方直连返回连接拒绝后，经显式镜像传输获取同一�
 - [x] 核验现有 NPU 模型与原生提示风格的适配。官方 OpenAI runner 可使用 SDK 的服务地址配置，但官方主入口仍要求模型在 `LanguageModelStore`
   中登记；不得冒用 GPT 名称掩盖实际模型，也不因依赖声明含 vLLM 而在 CPU 上运行模型。
 - [x] 分别明确代码生成、自修复、代码执行、测试输出预测的抽样覆盖状态。自修复承接真实代码生成及评测反馈，使用已声明兼容模板；不能宣称未经修改的官方模板或全量复现。四场景抽样已有证据，但统一接入和研究消费尚未闭环。
-- [ ] 补公共入口、可复现环境、原始输出及评分回执、研究侧无损消费核验后，再更新机器清单与完成计数。
+- [x] 公共入口、可复现环境、四场景原始输出及评分回执、维护中研究侧各3条无损回读、实际CI工件12831578310安装载荷及索引回读已核验；47e9f804三项远端CI通过。按固定原生抽样及显式兼容边界更新机器清单。
 
 ### MVBench视频理解（固定原生协议交付完成）
 
