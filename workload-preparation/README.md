@@ -380,6 +380,29 @@ DOCKER_BUILDKIT=0 docker build --network=host --memory 2g \
 
 构建中调用官方`appworld install`，受保护代码仅留在本地私有镜像，不发布或复制到Git；不会获取任务数据或执行生成代码。配方校验Python/83项版本、核心环境和评分函数能否导入，并执行`pip check`，不调用它们运行任务。镜像默认非root，后续仍需单独配置离线隔离、可写任务状态、原生Agent依赖与流程、NPU模型请求及官方评分；不能以构建成功给来源打勾。真实构建状态以[既有回执](../docs/workload-data/validation/appworld-core-client-preparation-20261028.json)为准。
 
+公共原生调用入口为`scripts/run_appworld_original_react.py`。默认仅输出计划；它校验固定原始配置SHA256，只绑定实际模型名与provider，不改原任务、ReAct预算或原评分调用。执行时要求非root、只读根文件系统、network-none容器及单独环境Unix
+socket；这些基础检查不能替代完整隔离配置审计。示例（先不加`--execute`）：
+
+```bash
+python scripts/run_appworld_original_react.py \
+  --profile /author/experiments/configs/react_llama3_test_normal.jsonnet \
+  --model openai/Qwen/Qwen3.5-9B --api-base http://127.0.0.1:14001/v1 \
+  --environment-url http+unix://%2Fenvironment-io%2Fenvironment.sock \
+  --experiment original-react-check --limit 3
+```
+
+执行前仍需完整实验依赖、原始数据、原作者软件导入路径、私有模型代理和环境服务；核心镜像本身不足以执行。此公共入口已经通过服务器离线非root只读容器的原配置哈希、依赖导入及隔离前置检查，但尚未完成该入口的原生推理实跑和研究端联调，不把私有驱动三条原生任务的证据冒充此入口验证。运行输出包含原始任务与生成代码，必须留在服务器私有目录；失败不替换任务。
+
+完整实验镜像配方为`configs/workload-native/appworld-react-cpu.Dockerfile`。在新的外部软件构建目录中准备`author/`（上述固定10文件核验后的原作者目录）和`litellm-original/`，以及该Dockerfile。LiteLLM必须取BerriAI/litellm原始提交`f20184cd49c77ee66da21001a960f50b8875c321`对应的v1.37.19源码；已取得归档的SHA256为`61ce6448db7d0d26e26670910c5830ac56ef7539db6593f328a0fe36215ffde5`。校验归档后在服务器解包完整源码（保留原符号链接及其目标），不要改用新版本以绕过PyPI旧版本缺失。构建时传入已核验核心镜像的实际ID：
+
+```bash
+docker build --build-arg APPWORLD_CORE_IMAGE="$(cat /private/appworld-core-image-id.txt)" \
+  --iidfile /private/appworld-react-image-id.txt \
+  -t workload-native/appworld-react-cpu:local /private/appworld-react-build-context
+```
+
+这份公共实验配方尚待独立重建验证；140项实验依赖的既有安装证据不等于公共配方重建通过。默认原作者70B模型配置不变地归档；9B是资源适配替代，不能宣称复现70B结果。原始任务下载与目录核验、模型代理和完整隔离启动仍是独立步骤；不能仅靠镜像构建或入口计划输出打总勾。
+
 ## Video-MME 原生视频任务
 
 这是发布方原始Video-MME与固定VLMEvalKit的两个已有配置：`Video-MME_8frame`和`Video-MME_8frame_subs`，不是把64帧配置临时减成8帧。原2700题/900视频全部保留；默认每种duration取最先3个不同视频并保留每视频全部3题，每配置27题。选题在推理前固定，不因失败换题；`--full`才选择全部2700题。

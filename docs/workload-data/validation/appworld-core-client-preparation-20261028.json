@@ -22,9 +22,29 @@
   "qualified_task_execution_environment": false,
   "native_react_execution": {
     "recorded_at": "2026-10-29",
-    "status": "ORIGINAL_FIXED3_AGENT_AND_EVALUATOR_RUNNING_FIRST_TASK_RETURNED",
+    "status": "ORIGINAL_FIXED3_AGENT_AND_EVALUATOR_EXIT0_SAVED_OUTPUT_AUDIT_PASSED_PUBLIC_DELIVERY_PENDING",
     "selected_original_task_ids": ["3d9a636_1", "3d9a636_2", "3d9a636_3"],
-    "completed_task_ids_at_snapshot": ["3d9a636_1"],
+    "completed_task_ids_at_snapshot": ["3d9a636_1", "3d9a636_2", "3d9a636_3"],
+    "native_container_exit_code": 0,
+    "native_container_oom_killed": false,
+    "official_saved_task_results": [
+      {"task_id": "3d9a636_1", "environment_steps": 35, "tests": 5, "passed": 1, "failed": 4, "task_success": false},
+      {"task_id": "3d9a636_2", "environment_steps": 50, "tests": 5, "passed": 1, "failed": 4, "task_success": false},
+      {"task_id": "3d9a636_3", "environment_steps": 55, "tests": 5, "passed": 1, "failed": 4, "task_success": false}
+    ],
+    "saved_model_http200_responses": 140,
+    "saved_finish_reasons": {"stop": 137, "length": 3},
+    "truncated_and_unsuccessful_outputs_retained": true,
+    "saved_output_audit": {
+      "private_receipt": "/root/appworld-native-saved-audit-20261029-001/audit-public.json",
+      "cpu_npu_request_response_byte_equal_pairs": 140,
+      "original_predictions_steps_and_saved_scores_consistent": true,
+      "both_containers_offline_nonroot_readonly_unprivileged": true,
+      "additional_model_calls_or_scorer_reruns": 0,
+      "selected_runtime_error_markers_absent": ["Read-only file system", "PermissionError", "Internal Server Error", "database is locked", "readonly database"],
+      "environment_traceback_counts": [2, 13, 9],
+      "diagnostic_boundary": "Marker checks do not attribute failed tasks to model quality or rule out every environment problem; traceback causes still require review."
+    },
     "first_task_official_saved_score_metadata": {
       "task_id": "3d9a636_1",
       "native_environment_steps": 35,
@@ -42,6 +62,16 @@
     "model_is_resource_fit_fallback_not_original_llama3_70b_reproduction": true,
     "original_generator_budget_stops_seed_and_task_workflow_unchanged": true,
     "source_modules_patched": false,
+    "public_entry_preflight": {
+      "entry": "scripts/run_appworld_original_react.py",
+      "private_receipt": "/root/appworld-public-entry-preflight-20261029-002/audit-public.json",
+      "isolation_checks_original_profile_and_native_imports_passed": true,
+      "agent_or_scorer_executed": false,
+      "model_calls": 0,
+      "retained_failure": "First preflight queried nested Docker sysfs outer network interfaces; Docker inspect confirmed network=none. Fixed current-namespace query using socket.if_nameindex; second isolated preflight passed.",
+      "public_full_experiments_recipe": "configs/workload-native/appworld-react-cpu.Dockerfile",
+      "public_recipe_independent_rebuild_verified": false
+    },
     "provider_binding": "Native model name plus LiteLLM provider endpoint/key settings; no unsupported extra GeneratorParams",
     "explicit_model_specific_binding": "Forwarded request adds only chat_template_kwargs.enable_thinking=false for Qwen; original incoming request and forwarded request saved separately, all prompt/budget fields retained",
     "api_billing": "No paid provider used; registered zero API billing does not represent NPU resource cost",
@@ -59,7 +89,7 @@
     "cpu_native_container": "appworld-original-agent-20261029-002",
     "cpu_state": "/run/swe-pro-docker/appworld-agent-transport-20261029-002/agent-state-private.json",
     "npu_state": "/data/shared_upload/hust-phr/workload-benchmark-native-delivery-20261024/appworld-native-model-window-32028-001/state-private.json",
-    "remaining": ["All3 tasks and official scores terminal verification", "Independent saved request/result/score and isolation audit", "Reusable full native public entry and package/provider/maintained-consumer/actual-CI closure"],
+    "remaining": ["Review saved environment tracebacks without repeating model generation", "Reusable full native public entry and package/provider/maintained-consumer/actual-CI closure"],
     "source_checkbox_eligible": false
   },
   "original_react_software_preparation": {
