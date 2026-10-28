@@ -6,13 +6,26 @@
 ### NatureBench科学代码工作流（进行中，不打来源总勾）
 
 - [x] 固定官方代码与数据版本，服务器取得56份原始运行/评估/环境/任务列表文件，共514543字节，Git blob及SHA256核验通过；30份Python只做语法解析，未执行科学任务代码。
+
 - [x] 完整90任务的CPU3/GPU-low70/GPU-high17分组，以及NatureBench-25的1/22/2分组全部核验；25任务轨道是原90任务的按资源一致子集，不新增来源计数。
+
 - [x] 未改的官方`run_naturebench.py --help`返回0；这只是准备客户端中的CLI可用性，不代表原始conda环境复现、Agent执行或科学评分通过。
+
 - [x] 官方全部3个CPU任务的576原文件已取得，共2,754,532,128字节，500份LFS SHA256和76份Git
   blob逐份核验通过。复用574份已有文件，两个超时对象以固定原URL整文件回退取得，未截断、改内容或换任务；58,059,841字节的重复临时副本已清理，规范数据和回执保留。
+
 - [x] 独立准备环境13个固定依赖/14个已安装分发，`pip check`及官方CLI
   help通过；公开只读入口核验576文件，官方`--skip-download --download-only`离线准备返回0。这不是科学任务执行；其他87个Full任务数据未取得。这里CPU是科学任务资源组，后续LLM仍须用NPU，未启用CPU模型推理。
-- [ ] 原始任务包及隐藏评估/许可关系、隔离环境、完整原生Agent流程、官方评估器与有效性judge、公共数据/研究消费者接通仍待完成，不以静态问答或`--skip-judge`替代。
+
+- [x] 3个CPU原始任务包的关系读取已在服务器逐包核验：576文件读取前后校验，保留7项原始元数据，隐藏评估与参考结果不进入题目输入；这是候选代码验证，不代表已安装CI工件、统一索引或研究消费者接通。
+
+- [ ] 统一索引与当前研究消费者接通、隔离环境、完整原生Agent流程、官方评估器与有效性judge仍待完成，不以静态问答或`--skip-judge`替代。
+
+  任务包关系核验（不执行科学代码、不调用模型）：
+
+  ```bash
+  python scripts/verify_naturebench_original_packages.py --data-root /path/to/original-naturebench-data
+  ```
 
 ```bash
 python scripts/prepare_jsonschemabench_author_source.py --source naturebench \

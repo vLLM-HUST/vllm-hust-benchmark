@@ -22,6 +22,8 @@ on:
       - 'scripts/prepare_naturebench_original_assets.py'
       - 'tests/test_naturebench_original_contract.py'
       - 'tests/test_naturebench_original_assets.py'
+      - 'scripts/verify_naturebench_original_packages.py'
+      - 'tests/test_naturebench_packages.py'
       - 'scripts/run_tau2_original_telecom.py'
       - 'scripts/run_gsm8k_incremental_samples.py'
       - 'scripts/run_arc_original_samples.py'
@@ -307,7 +309,7 @@ jobs:
       - name: OpenMath corpus generation and saved integrity CPU fixtures; no model
         run: python -m pytest -q tests/test_openmath2_original_runner.py tests/test_openmath2_delivery_receipt.py tests/test_opencode_original_manifest.py
       - name: NatureBench original source and task-group fixtures only; no scientific tasks
-        run: python -m pytest -q tests/test_naturebench_original_contract.py tests/test_naturebench_original_assets.py
+        run: python -m pytest -q tests/test_naturebench_original_contract.py tests/test_naturebench_original_assets.py tests/test_naturebench_packages.py
       - name: MBPP original preparation and mocked execution controls only
         run: python -m pytest -q tests/test_mbpp_original_assets.py tests/test_mbpp_original_generation.py tests/test_mbpp_scoring_preparation.py tests/test_mbpp_isolated_scoring.py tests/test_mbpp_native_delivery_receipt.py
       - name: Serving trace and ToolACE preparation software fixtures only
