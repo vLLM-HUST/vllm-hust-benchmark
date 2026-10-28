@@ -240,11 +240,31 @@ def test_completed_protocol_audit_adds_only_previously_unexecuted_rows():
         "complete_original_judge_pairs_and_actual_image_bytes_verified"
     ]
     assert not svg_continued["source_checkbox_eligible"]
+    nested = checkpoint["render_preparation_followup_20261029"][
+        "nested_browser_native_first3_checkpoint"
+    ]
+    assert len(nested["protocols"]) == 6
+    ids = nested["original_task_ids_by_protocol"]
+    assert len(ids) == 6 and all(len(group) == 3 for group in ids)
+    assert len({task for group in ids for task in group}) == 18
+    assert nested["unique_original_tasks"] == 18
+    assert sum(nested["original_vqa_pairs_by_protocol"]) == 158
+    assert nested["original_vqa_pairs_preserved"] == 158
+    assert nested["generation_calls"] == nested["judge_calls"] == 18
+    assert nested["finish_reasons"] == {"stop": 36}
+    assert nested[
+        "actual_judge_images_original_pairs_and_parsed_code_independently_verified"
+    ]
+    assert nested["canvas_vqa_scores"] == [0, 0, 0]
+    assert not nested["failed_scores_replaced_or_retried"]
+    assert not nested["source_checkbox_eligible"]
+    assert nested["remaining_original_tasks_in_these_six_protocols"] == 267
     assert (
         ledger["verified_unique_native_tasks"]
         == count
         + continued["combined_unique_protocol_tasks"]
         + svg_continued["combined_unique_protocol_tasks"]
+        + nested["unique_original_tasks"]
     )
     held = receipt.get("held_native_exit_evidence")
     if held:
