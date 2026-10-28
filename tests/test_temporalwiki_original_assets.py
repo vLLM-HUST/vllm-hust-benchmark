@@ -189,3 +189,21 @@ def test_reference_object_does_not_become_chat_input():
     assert not record.replay["synthetic_fallback"]
     with pytest.raises(ValueError, match="not a ready"):
         record.request_body()
+
+
+def test_real_ci_package_readback_does_not_claim_native_completion():
+    receipt = json.loads(
+        (
+            ROOT
+            / "docs/workload-data/validation/temporalwiki-original-readiness-20261028.json"
+        ).read_text("utf-8")
+    )
+    preparation = receipt["original_probe_preparation_and_consumer"]
+    assert not preparation["actual_ci_wheel_verification_pending"]
+    actual = preparation["actual_ci_wheel"]
+    assert actual["artifact_id"] == 12785028172
+    assert actual["verified_installed_payloads"] == 60
+    assert actual["original_rows_and_index_references"] == 35948
+    assert actual["provider_readbacks"] == actual["research_readbacks"] == 24
+    assert actual["model_calls"] == actual["native_tasks_run"] == 0
+    assert not actual["source_checkbox_eligible"]
