@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="700" viewBox="0 0 1120 700" role="img" aria-labelledby="title desc">
+  <title id="title">Coder 上的 SWE-bench Pro：入口、执行、存储三层架构</title>
+  <desc id="desc">自上而下：学生通过 Coder 创建 CPU 执行工作区，连接模型工作区；CPU 工作区内的 Agent 使用独立 DinD 服务管理任务沙箱；Agent 结果与 Docker 数据共用工作区持久卷。框表示部署和管理关系，不表示已验证的资源限制继承。</desc>
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L7 4L0 8" fill="none" stroke="#667b93" stroke-width="1.5"/></marker>
+    <style>
+      text{font-family:Arial,"PingFang SC","Microsoft YaHei",sans-serif;fill:#22354c;font-size:18px}
+      .title{font-size:27px;font-weight:600}.heading{font-size:21px;font-weight:600}.small{font-size:16px;fill:#53677e}.layer{font-size:16px;fill:#53677e;letter-spacing:2px}.mono{font-family:Menlo,Consolas,monospace;font-size:16px}
+    </style>
+  </defs>
+  <rect width="1120" height="700" rx="16" fill="#f8fafc"/>
+  <text x="32" y="42" class="title">SWE-bench Pro · Coder 部署架构</text>
+  <text x="32" y="70" class="small">学生无需物理机权限；CPU 执行与模型推理分开部署</text>
+  <text x="32" y="108" class="layer">操作入口</text>
+  <rect x="143" y="85" width="944" height="61" rx="10" fill="#e8eef6"/>
+  <text x="168" y="122" class="heading">Coder</text>
+  <text x="265" y="122">新建工作区 → 选择模板 → 打开终端 / SSH</text>
+  <path d="M458 146V177" stroke="#667b93" stroke-width="1.6" marker-end="url(#arrow)"/><path d="M941 146V177" stroke="#667b93" stroke-width="1.6" marker-end="url(#arrow)"/>
+  <text x="32" y="204" class="layer">执行模块</text>
+  <rect x="143" y="180" width="626" height="330" rx="12" fill="#ffffff" stroke="#b4c8dd" stroke-width="1.5"/>
+  <text x="163" y="211" class="heading">CPU 工作区</text>
+  <text x="163" y="239" class="small">模板：swe-bench-pro-cpu · 一个 Kubernetes Pod</text>
+  <rect x="163" y="259" width="176" height="190" rx="10" fill="#eaf2fc"/>
+  <text x="181" y="290" class="heading">dev 容器</text>
+  <text x="181" y="326">Agent 进程</text>
+  <text x="181" y="354" class="small">调用模型</text>
+  <text x="181" y="381" class="small">发出工具命令</text>
+  <text x="181" y="408" class="small">保存轨迹与补丁</text>
+  <rect x="397" y="259" width="352" height="190" rx="10" fill="#f0edf7"/>
+  <text x="413" y="290" class="heading">swe-pro-docker 容器</text>
+  <rect x="413" y="306" width="320" height="45" rx="7" fill="#ffffff"/>
+  <text x="573" y="334" text-anchor="middle">dockerd · 独立 Docker 服务</text>
+  <path d="M488 351V371M659 351V371" stroke="#667b93" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <rect x="413" y="375" width="150" height="53" rx="7" fill="#dfede5"/>
+  <rect x="580" y="375" width="153" height="53" rx="7" fill="#dfede5"/>
+  <text x="488" y="398" text-anchor="middle">任务 A 沙箱</text>
+  <text x="488" y="419" text-anchor="middle" class="small">代码 / 测试进程</text>
+  <text x="656" y="398" text-anchor="middle">任务 B 沙箱</text>
+  <text x="656" y="419" text-anchor="middle" class="small">代码 / 测试进程</text>
+  <path d="M339 326H397" stroke="#667b93" stroke-width="1.5" marker-end="url(#arrow)"/><path d="M397 347H339" stroke="#667b93" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="368" y="313" text-anchor="middle" class="small">socket</text>
+  <text x="368" y="372" text-anchor="middle" class="small">命令</text>
+  <text x="368" y="395" text-anchor="middle" class="small">输出</text>
+  <text x="163" y="483" class="small">物理机 A：上述进程共用同一个 Linux 内核 · DinD 使用 privileged 辅助容器</text>
+  <rect x="819" y="180" width="268" height="330" rx="12" fill="#ffffff" stroke="#c7bcd9" stroke-width="1.5"/>
+  <text x="839" y="211" class="heading">LLM 工作区</text>
+  <text x="839" y="239" class="small">或已有授权模型服务</text>
+  <rect x="839" y="259" width="228" height="88" rx="10" fill="#f0edf7"/>
+  <text x="953" y="294" text-anchor="middle">模型服务进程</text>
+  <text x="953" y="323" text-anchor="middle" class="small">接收历史 · 返回下一步操作</text>
+  <path d="M953 347V371" stroke="#667b93" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <rect x="839" y="375" width="228" height="53" rx="7" fill="#e8edf3"/>
+  <text x="953" y="407" text-anchor="middle">NPU / GPU</text>
+  <text x="839" y="464" class="small">可与 CPU 工作区同机</text>
+  <text x="839" y="489" class="small">也可部署在其他物理机</text>
+  <path d="M769 300H819" stroke="#667b93" stroke-width="1.5" marker-end="url(#arrow)"/><path d="M819 321H769" stroke="#667b93" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="794" y="282" text-anchor="middle" class="small">模型</text>
+  <text x="794" y="346" text-anchor="middle" class="small">API</text>
+  <path d="M251 510V543" stroke="#667b93" stroke-width="1.5" marker-end="url(#arrow)"/><path d="M573 510V543" stroke="#667b93" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="32" y="573" class="layer">持久存储</text>
+  <rect x="143" y="546" width="944" height="74" rx="10" fill="#fff4df"/>
+  <text x="163" y="576" class="heading">CPU 工作区专属持久卷 · 共用一份磁盘额度</text>
+  <text x="163" y="604" class="small">/root：客户端、轨迹、补丁</text>
+  <text x="565" y="604" class="small">Docker 数据：镜像缓存、任务容器可写层</text>
+  <text x="143" y="655" class="small">框表示部署 / 管理关系，不表示虚拟机隔离；实际 cgroup 层级与多沙箱合计限额尚未运行验证。</text>
+  <text x="143" y="681" class="small">示意图非页面截图。模型工作区需另行准备，benchmark 安装入口不会创建或重启模型服务。</text>
+</svg>
