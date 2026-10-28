@@ -100,6 +100,66 @@ NodeBB 的一道 V1 任务、一个独立 Agent。任务容器需要至少示例
 
 请使用独立的 **CPU 客户端虚拟环境**，不要把客户端依赖装进现有模型服务环境。 现成已验证的客户端可以直接复用，随后仍会重新校验来源和输入。
 
+## Coder 上的执行结构：Docker-in-Docker 沙箱
+
+### 学生需要什么权限、创建什么工作区
+
+![学生在 Coder 上的操作路径（示意，非页面截图）](images/swe-bench-pro-coder-workflow.svg)
+
+**不需要物理机 SSH 或 Kubernetes 管理员权限。** 管理员先发布带 Docker 执行能力的 `swe-bench-pro-cpu` 模板、准备固定 ARM
+任务镜像和下载源；学生创建该模板的 CPU 工作区， 再连接自己有权使用的模型 API。模型可运行在另一个 LLM 工作区，也可复用已授权的服务。 两个工作区之间的模型 API
+必须可达，服务需要鉴权时由 Agent 客户端提供凭据。 普通 CPU `ascend-devbox` 不保证具有 Docker 执行能力；安装 Docker 客户端本身不会提供 Docker 服务。
+
+### 从网页入口到物理机上的实际进程
+
+当前专用模板采用 **DinD（Docker-in-Docker）**：CPU 工作区 Pod 中除了运行 Agent 的 `dev` 容器，还有运行独立 `dockerd` 的
+`swe-pro-docker` 辅助容器。Agent 通过工作区内部共享的 Unix socket 连接这个 Docker 服务，由它创建每个任务的沙箱容器；不挂宿主机 Docker socket。
+这些沙箱不是新建的 Coder 工作区，也不是 Kubernetes 单独调度的新 Pod。
+
+![Coder 操作入口、CPU 与模型执行模块、持久存储的三层架构](images/swe-bench-pro-dind-physical.svg)
+
+图中的嵌套表示部署和管理关系，不代表沙箱有独立内核或独占 CPU。`dockerd` 与任务中的 shell、测试程序是不同进程，最终都由执行节点的同一个 Linux
+内核运行；一个任务沙箱可有多个进程。 模型工作区由学生或管理员另行创建，本 benchmark 安装入口不会创建它。
+
+平台模板的实际启动配置为：
+
+```bash
+dockerd --host=unix:///run/swe-pro-docker/docker.sock \
+  --data-root=/var/lib/docker --storage-driver=overlay2
+```
+
+`dev` 容器通过 `DOCKER_HOST=unix:///run/swe-pro-docker/docker.sock` 访问它。 这与把物理机 `/var/run/docker.sock`
+挂入工作区、直接控制宿主 Docker 的方式不同。 该实现使用 **privileged 辅助容器**，不能据此宣称具备虚拟机级安全隔离；普通 devbox 不自动开放这项能力。 平台实现见
+[工作区模板](https://github.com/yancanmao/npu-private-cloud/blob/main/templates/devbox/main.tf) 和
+[专用 CPU 模板生成器](https://github.com/yancanmao/npu-private-cloud/blob/main/scripts/create_swe_bench_workspace.py)。
+
+### 一道题的沙箱生命周期与数据位置
+
+1. 准备入口固定 V1 数据、Agent 源码和 ARM 任务镜像身份。
+1. 每个独立 Agent 创建自己的任务容器，以 `/app` 为代码工作目录；检查 `base_commit`、初始工作树、 镜像身份，并拒绝挂载卷的任务容器。不会把工作区 `/root`
+   或宿主代码目录挂给任务沙箱。
+1. Agent 在 CPU 工作区请求模型，收到操作后通过 Docker 服务在任务沙箱中执行；命令输出回到 Agent，再进入下一轮模型请求。代码修改和测试发生在沙箱内。
+1. 提交或失败后保存轨迹、报告与补丁，清理本次创建的任务容器。未提交时也尝试提取已有修改。 镜像缓存与 `/root` 中保存的运行结果保留；不能依靠已删除的沙箱恢复未提取的文件。
+1. `Submitted` 只表示 Agent 主动提交；官方评分是独立步骤，见后文结果判据。
+
+`/root` 与 Docker 的 `/var/lib/docker` 来自同一工作区持久卷的不同目录，共用所选额度。 例如申请 40 GiB，是客户端、结果、镜像和容器可写层合计使用 40
+GiB，不是每部分各有 40 GiB。 工作区 stop/start 可保留该卷的数据，但本入口不会自动恢复中断的 Agent 或保证任务进程继续运行。 生命周期实现见
+[`create_task_environment` 与 `_agent_task`](../src/vllm_hust_benchmark/swe_bench_pro.py)。
+
+### CPU 和内存限制：配置与运行验证分开
+
+| 对象                           | 当前源码或入门示例                        | 解释                                                                   |
+| ------------------------------ | ----------------------------------------- | ---------------------------------------------------------------------- |
+| 每个任务沙箱                   | `container.cpus=2`、`container.memory=4g` | 运行器传给 Docker 的单任务资源限制，可在实验配置中调整                 |
+| 平台 `swe-pro-docker` 辅助容器 | CPU limit `2`、memory limit `4Gi`         | 模板中外层容器的限制，不是每增加一个沙箱就新增这份资源                 |
+| Agent 所在 `dev` 容器          | 工作区模板与所选 CPU 档位                 | 与 Docker 辅助容器分别配置；CPU 工作区的档位不能直接当作每个沙箱的额度 |
+
+`--cpus=2` 限制的是约两核的 CPU 时间总量，不是固定绑定两个物理核心；指定核心集合是另一种配置。 参见
+[Docker 官方资源限制说明](https://docs.docker.com/engine/containers/resource_constraints/)。 如果内部沙箱的
+cgroup（Linux 资源限制组）确实位于外层 2 核限制之下，多个沙箱将共享这份总上限。 **当前文档核对了模板与运行器配置，但尚未证明特权 DinD 的实际 cgroup
+归属和多沙箱合计限额。** 不能仅凭嵌套图、`docker inspect` 的单任务配置或容器内看到的 CPU 数量声称已验证总隔离。 并行容量验收还需记录外层与任务进程的实际 cgroup、有效
+CPU/内存上限及受控负载测量；未做时标为未验证。
+
 ## 1. 获取本仓库与固定版本上游源码
 
 从本仓库根目录运行；`WORK` 必须是自己的绝对路径，`sources` 目录必须尚不存在：
