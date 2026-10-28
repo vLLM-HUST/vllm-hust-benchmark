@@ -1,0 +1,294 @@
+{
+  "entries": [
+    {
+      "source_id": "MMLU_PRO",
+      "client_repository": "https://github.com/vLLM-HUST/hust-eval-client-mmlu-pro",
+      "client_commit": "b6215bf76808b1e9d351295e2ecb401542317372",
+      "install_posix": [
+        "git clone https://github.com/vLLM-HUST/hust-eval-client-mmlu-pro.git",
+        "cd hust-eval-client-mmlu-pro",
+        "git checkout --detach b6215bf76808b1e9d351295e2ecb401542317372",
+        "python3 -m venv .venv",
+        ". .venv/bin/activate",
+        "python -m pip install .",
+        "hust-eval-mmlu-pro --help"
+      ],
+      "availability": "Public client core available; production trace-job submit API BLOCKED and separate.",
+      "license": "Catalog records MIT, ungated; verify pinned publisher card terms before redistribution.",
+      "official_data": "https://huggingface.co/datasets/TIGER-Lab/MMLU-Pro/tree/b189ec765aa7ed75c8acfea42df31fdae71f97be",
+      "dataset_revision": "b189ec765aa7ed75c8acfea42df31fdae71f97be",
+      "splits": "test12032; validation70 used for few-shot/reference preparation",
+      "prepare_extra_install": [
+        "python -m pip install '.[prepare]'"
+      ],
+      "download_example_not_executed": [
+        "python -m pip install huggingface_hub",
+        "hf download TIGER-Lab/MMLU-Pro --repo-type dataset --revision b189ec765aa7ed75c8acfea42df31fdae71f97be --include 'data/test-00000-of-00001.parquet' 'data/validation-00000-of-00001.parquet' README.md --local-dir ./assets/mmlu-pro",
+        "git clone https://github.com/TIGER-AI-Lab/MMLU-Pro.git ./reference/MMLU-Pro",
+        "git -C ./reference/MMLU-Pro checkout --detach f418b116db00b065c2aea046518d8fcf74d39872"
+      ],
+      "prerequisites": [
+        "Client-visible tokenizer/chat-template directory matching served model; pin transformers version used to freeze token IDs.",
+        "Actual runtime contract from service owner at ./service/runtime-contract.json, rather than client-local packages presented as server provenance.",
+        "MODEL_API must be service base without /v1; MODEL_NAME is actual served model; API key via named environment variable."
+      ],
+      "minimum_argv": [
+        [
+          "hust-eval-mmlu-pro",
+          "mmlu-pro",
+          "prepare",
+          "--assets",
+          "./assets/mmlu-pro/data",
+          "--model-path",
+          "./model-tokenizer",
+          "--reference",
+          "./reference/MMLU-Pro",
+          "--runtime-contract",
+          "./service/runtime-contract.json",
+          "--output",
+          "./run/plan"
+        ],
+        [
+          "hust-eval-mmlu-pro",
+          "mmlu-pro",
+          "run",
+          "--plan",
+          "./run/plan",
+          "--base-url",
+          "MODEL_API_WITHOUT_V1",
+          "--served-model",
+          "MODEL_NAME",
+          "--output",
+          "./run/answers",
+          "--limit",
+          "1"
+        ],
+        [
+          "hust-eval-mmlu-pro",
+          "mmlu-pro",
+          "summary",
+          "--plan",
+          "./run/plan",
+          "--accuracy-dir",
+          "./run/answers",
+          "--out",
+          "./run/summary.json"
+        ]
+      ],
+      "outputs": "Frozen plan, answers/request records, summary.json; one request is a smoke, not full quality.",
+      "scorer_boundary": "Local answer extraction; unparsed answers marked incorrect rather than upstream random guess; token-ID template and few-shot contract are not official leaderboard replication."
+    },
+    {
+      "source_id": "HLE_VERIFIED",
+      "client_repository": "https://github.com/vLLM-HUST/hust-eval-client-hle-verified",
+      "client_commit": "534c22cd2d826bed2e8cbcf674bbebf4c3004bc1",
+      "install_posix": [
+        "git clone https://github.com/vLLM-HUST/hust-eval-client-hle-verified.git",
+        "cd hust-eval-client-hle-verified",
+        "git checkout --detach 534c22cd2d826bed2e8cbcf674bbebf4c3004bc1",
+        "python3 -m venv .venv",
+        ". .venv/bin/activate",
+        "python -m pip install .",
+        "hust-eval-hle-verified --help"
+      ],
+      "availability": "Public client core available; production trace-job submit API BLOCKED and separate.",
+      "license": "Read original HLE-Verified publisher terms; client repository license does not cover dataset/embedded images.",
+      "configuration_steps": [
+        "mkdir -p run",
+        "cp examples/solver.json run/solver.json",
+        "cp examples/judge.json run/judge.json",
+        "Edit copied configs: endpoint, actual model name/artifact, token/time/concurrency budgets and api_key_env; values must correspond to existing authorized services. Do not paste key values into files."
+      ],
+      "minimum_argv": [
+        [
+          "hust-eval-hle-verified",
+          "fetch",
+          "--output",
+          "./assets/hle-verified"
+        ],
+        [
+          "hust-eval-hle-verified",
+          "prepare",
+          "--assets",
+          "./assets/hle-verified",
+          "--solver-config",
+          "./run/solver.json",
+          "--judge-config",
+          "./run/judge.json",
+          "--output",
+          "./run/plan",
+          "--subset",
+          "gold"
+        ],
+        [
+          "hust-eval-hle-verified",
+          "run",
+          "--plan",
+          "./run/plan",
+          "--output",
+          "./run/solver",
+          "--limit",
+          "1"
+        ],
+        [
+          "hust-eval-hle-verified",
+          "judge",
+          "--plan",
+          "./run/plan",
+          "--responses",
+          "./run/solver",
+          "--output",
+          "./run/judge"
+        ],
+        [
+          "hust-eval-hle-verified",
+          "summary",
+          "--plan",
+          "./run/plan",
+          "--responses",
+          "./run/solver",
+          "--grades",
+          "./run/judge",
+          "--output",
+          "./run/report"
+        ]
+      ],
+      "prerequisites": [
+        "Separate solver and judge configs may target same or different authorized services.",
+        "Real runtime contracts optional parser flags; bind owner-provided solver/judge runtime evidence for reproducibility. Omitted evidence must remain unknown.",
+        "Use a new run/output directory; fetch only into new assets directory, reuse and inventory existing fixed assets.",
+        "Image cases require multimodal solver; judge requires JSON schema/Structured Outputs. Text-only may be explicitly selected and must not imply image coverage."
+      ],
+      "outputs": "plan/, solver/, judge/, report/ with original errors/unresolved/truncation retained. First one sample is not full dataset evaluation.",
+      "official_data": "https://github.com/SKYLENAGE-AI/HLE-Verified/tree/b705e0fb541c025a1532ce0d60d70ae2f53b00e0",
+      "dataset_revision": "b705e0fb541c025a1532ce0d60d70ae2f53b00e0",
+      "splits": "Gold668 + Revision1143; default fetch excludes Uncertain; minimal example selects Gold",
+      "scorer_boundary": "Original HLE prompt/schema adaptation with substituted judge; not Verified author data-review reproduction or official leaderboard."
+    },
+    {
+      "source_id": "FRONTIERSCIENCE",
+      "client_repository": "https://github.com/vLLM-HUST/hust-eval-client-frontierscience",
+      "client_commit": "ff7b4315876258b5d0ac9b9413ef79ae27146fa4",
+      "install_posix": [
+        "git clone https://github.com/vLLM-HUST/hust-eval-client-frontierscience.git",
+        "cd hust-eval-client-frontierscience",
+        "git checkout --detach ff7b4315876258b5d0ac9b9413ef79ae27146fa4",
+        "python3 -m venv .venv",
+        ". .venv/bin/activate",
+        "python -m pip install .",
+        "hust-eval-frontierscience --help"
+      ],
+      "availability": "Public client core available; production trace-job submit API BLOCKED and separate.",
+      "license": "Follow original dataset terms at pinned publisher source; client software availability is not a grant to redistribute questions/answers.",
+      "configuration_steps": [
+        "mkdir -p run",
+        "cp examples/solver.json run/solver.json",
+        "cp examples/judge.json run/judge.json",
+        "Edit copied configs: endpoint, actual model name/artifact, token/time/concurrency budgets and api_key_env; values must correspond to existing authorized services. Do not paste key values into files."
+      ],
+      "minimum_argv": [
+        [
+          "hust-eval-frontierscience",
+          "fetch",
+          "--output",
+          "./assets/frontierscience"
+        ],
+        [
+          "hust-eval-frontierscience",
+          "prepare",
+          "--assets",
+          "./assets/frontierscience",
+          "--solver-config",
+          "./run/solver.json",
+          "--judge-config",
+          "./run/judge.json",
+          "--output",
+          "./run/plan"
+        ],
+        [
+          "hust-eval-frontierscience",
+          "run",
+          "--plan",
+          "./run/plan",
+          "--output",
+          "./run/solver",
+          "--limit",
+          "1"
+        ],
+        [
+          "hust-eval-frontierscience",
+          "judge",
+          "--plan",
+          "./run/plan",
+          "--responses",
+          "./run/solver",
+          "--output",
+          "./run/judge"
+        ],
+        [
+          "hust-eval-frontierscience",
+          "summary",
+          "--plan",
+          "./run/plan",
+          "--responses",
+          "./run/solver",
+          "--grades",
+          "./run/judge",
+          "--output",
+          "./run/report"
+        ]
+      ],
+      "prerequisites": [
+        "Separate solver and judge configs may target same or different authorized services.",
+        "Real runtime contracts optional parser flags; bind owner-provided solver/judge runtime evidence for reproducibility. Omitted evidence must remain unknown.",
+        "Use a new run/output directory; fetch only into new assets directory, reuse and inventory existing fixed assets."
+      ],
+      "outputs": "plan/, solver/, judge/, report/ with original errors/unresolved/truncation retained. First one sample is not full dataset evaluation.",
+      "official_data": "https://huggingface.co/datasets/openai/frontierscience/tree/25ed67db7da8f4591484e764008ff585544f5a30",
+      "dataset_revision": "25ed67db7da8f4591484e764008ff585544f5a30",
+      "splits": "Gold Olympiad100 + Research60; limit1 covers only initial selected item, not both tracks",
+      "scorer_boundary": "Qwen substitute judge, single trial; research rubric and extraction policy explicit; not official leaderboard replication."
+    },
+    {
+      "source_id": "SWE_BENCH_PRO",
+      "client_document": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/main/docs/SWE_BENCH_PRO.zh-CN.md",
+      "official_data": "https://huggingface.co/datasets/ScaleAI/SWE-bench_Pro/tree/2d52cb3df914a3fcf80c7f66738b3a88ae37fc50",
+      "split": "v1; not V2/Verified",
+      "minimal_user_command": "python3 bootstrap_swe_bench_pro.py --work /ABSOLUTE/PRIVATE/swe-pro-first --model-api http://MODEL_HOST:MODEL_PORT/v1 --model-name openai/SERVED_MODEL_NAME --run",
+      "prerequisites": [
+        "Admin-provided isolated ARM64 CPU/Docker template or owned authorized Docker; not model-host Docker socket.",
+        "Reachable pinned task image and dataset mirror; model endpoint with exact served model.",
+        "Secrets only via --api-key-env ENV_NAME, never value arguments."
+      ],
+      "availability": "Public standalone Agent/bootstrap exists; run records submission, official grade is separate. Not hosted trace-job API.",
+      "license": "Dataset and repository/task image terms apply; no private task/patch distribution in directory."
+    },
+    {
+      "source_id": "TERMINAL_BENCH_2_1",
+      "official_data": "https://github.com/harbor-framework/terminal-bench-2-1",
+      "client_document": "https://harborframework.com/docs",
+      "client_source": "https://github.com/harbor-framework/harbor/tree/b53b8134e1241686dca7759af188f987ecc48e8b",
+      "client_version": "Harbor0.24.0",
+      "install_posix": [
+        "python3 -m venv .venv",
+        ". .venv/bin/activate",
+        "python -m pip install harbor==0.24.0",
+        "harbor run --help"
+      ],
+      "minimum_user_command": "harbor run -c /ABSOLUTE/PRIVATE/job.json",
+      "prerequisites": [
+        "Pinned original2.1 task directory and image, unchanged task/test budgets, authorized isolated sandbox.",
+        "job.json is a real Harbor JobConfig with original task path, agent, actual model endpoint/config/resources/output; it is required input, not supplied by this command.",
+        "ARM64 compatibility of each task image and oracle must be declared; do not silently substitute2.0 or require AMD64 from historical report."
+      ],
+      "availability": "Original Harbor execution entry verified in project; reviewed public repo does not provide a universal ordinary-user ARM64 2.1 frozen job/bootstrap. Publish this setup dependency explicitly; do not call a result page runnable.",
+      "license": "Original task/source/container licenses apply; do not distribute private solutions."
+    }
+  ],
+  "provenance": {
+    "overlay_review_sha256": "6e69c5c16b81e16194e5c25717e036ae5e401f34563740addd4bb1e95e5fd140",
+    "original_catalog_export_sha256": "712cb0d78378de6e7f2548ae131b6e9ad8f0d12dcc36d2b9f9f77e05ca0f913c",
+    "core_install_help_receipt_sha256": "c2a06ee5680f84e8fd4d2d096f2a7b1ff5859e9e7936a281be1fc2efdc91e770",
+    "validation": "Three core installs and 19 help commands reported PASS; example requests, prepare extras, data downloads and scoring not executed for this publication."
+  }
+}
