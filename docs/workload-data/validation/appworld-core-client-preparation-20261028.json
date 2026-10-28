@@ -72,10 +72,15 @@
       "public_full_experiments_recipe": "configs/workload-native/appworld-react-cpu.Dockerfile",
       "public_recipe_independent_rebuild_verified": false,
       "public_recipe_build": {
-        "status": "RUNNING_NOT_YET_QUALIFIED",
+        "status": "FAILED_PYPI_BUILD_DEPENDENCY_TRANSPORT_TIMEOUT_RETAINED",
         "private_root": "/root/appworld-public-react-recipe-build-20261029-001",
         "docker_build_pid": 566893,
         "active_dependency_build_container": "67c5e5c933eb",
+        "dependency_build_exit_code": 2,
+        "dependency_build_oom_killed": false,
+        "failure": "PyPI poetry-core build-system dependency request timed out; no public image produced. Not task/model/scorer failure.",
+        "second_attempt": "Same recipe/source, bridge network, exit2 poetry-core request timeout; result retained in public-react-recipe-build-20261029-002",
+        "third_attempt": {"status": "DEPENDENCIES_RESOLVED_BUILD_RUNNING_NOT_QUALIFIED", "private_root": "/root/appworld-public-react-recipe-build-20261029-003", "worker_pid": 572209, "build_network": "host, software acquisition only; matches original successful builder", "task_runtime_network": "none unchanged"},
         "existing_original_software_reused_no_task_download": true,
         "model_calls": 0
       }
@@ -98,6 +103,22 @@
     "cpu_state": "/run/swe-pro-docker/appworld-agent-transport-20261029-002/agent-state-private.json",
     "npu_state": "/data/shared_upload/hust-phr/workload-benchmark-native-delivery-20261024/appworld-native-model-window-32028-001/state-private.json",
     "remaining": ["Review saved environment tracebacks without repeating model generation", "Reusable full native public entry and package/provider/maintained-consumer/actual-CI closure"],
+    "source_checkbox_eligible": false
+  },
+  "original_bundle_source_adapter_audit": {
+    "status": "SOURCE_ONLY_ALL732_AUDITED_PROVIDER_AND_CONSUMER_INTEGRATION_PENDING",
+    "module": "workload-preparation/src/vllm_hust_workload_data/appworld.py",
+    "private_receipt": "/root/appworld-original-adapter-audit-20261029-002/audit-public.json",
+    "original_tasks": 732,
+    "split_counts": {"train": 90, "dev": 57, "test_normal": 168, "test_challenge": 417},
+    "hashed_task_asset_references": 14643,
+    "shared_base_database_and_api_document_file_references": 46,
+    "all_original_specs_preserved": true,
+    "original_database_and_reference_relationships_preserved": true,
+    "references_excluded_from_model_input": true,
+    "original_evaluator_code_imported_or_executed": false,
+    "installed_package_provider_or_research_consumer_verified": false,
+    "model_calls": 0,
     "source_checkbox_eligible": false
   },
   "original_react_software_preparation": {

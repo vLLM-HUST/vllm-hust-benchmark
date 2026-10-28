@@ -396,12 +396,14 @@ python scripts/run_appworld_original_react.py \
 完整实验镜像配方为`configs/workload-native/appworld-react-cpu.Dockerfile`。在新的外部软件构建目录中准备`author/`（上述固定10文件核验后的原作者目录）和`litellm-original/`，以及该Dockerfile。LiteLLM必须取BerriAI/litellm原始提交`f20184cd49c77ee66da21001a960f50b8875c321`对应的v1.37.19源码；已取得归档的SHA256为`61ce6448db7d0d26e26670910c5830ac56ef7539db6593f328a0fe36215ffde5`。校验归档后在服务器解包完整源码（保留原符号链接及其目标），不要改用新版本以绕过PyPI旧版本缺失。构建时传入已核验核心镜像的实际ID：
 
 ```bash
-docker build --build-arg APPWORLD_CORE_IMAGE="$(cat /private/appworld-core-image-id.txt)" \
+docker build --network=host --build-arg APPWORLD_CORE_IMAGE="$(cat /private/appworld-core-image-id.txt)" \
   --iidfile /private/appworld-react-image-id.txt \
   -t workload-native/appworld-react-cpu:local /private/appworld-react-build-context
 ```
 
 这份公共实验配方尚待独立重建验证；140项实验依赖的既有安装证据不等于公共配方重建通过。默认原作者70B模型配置不变地归档；9B是资源适配替代，不能宣称复现70B结果。原始任务下载与目录核验、模型代理和完整隔离启动仍是独立步骤；不能仅靠镜像构建或入口计划输出打总勾。
+
+`--network=host`只用于本专用CPU工作区的软件依赖构建，以避开嵌套Docker桥接网络的PyPI连接问题；原始数据和任务均不进入构建上下文，任务执行必须保持`--network=none`，不能照搬构建网络配置。源代码级任务包读取模块`vllm_hust_workload_data.appworld`已在服务器核验全部732项任务、14,643个任务文件和46个共享数据库/API文档引用；目前尚未注册统一provider及完成研究端联调，不视为该来源已交付。
 
 ## Video-MME 原生视频任务
 
