@@ -1,0 +1,80 @@
+{
+  "schema": "muxpd-new-loss-late-window-analysis-v1",
+  "localization_allowed": false,
+  "passed": false,
+  "attempts": [
+    {
+      "directory": "/root/workspace/muxpd-quality-layout-20261028/new-loss-probe-runs-v1/new-loss-native-observed-01",
+      "terminal": true,
+      "collection_valid": false,
+      "errors": [
+        "ValueError: Original native source receipt differs: vllm_ascend"
+      ],
+      "reproduction_passed": false
+    },
+    {
+      "directory": "/root/workspace/muxpd-quality-layout-20261028/new-loss-probe-runs-v1/new-loss-native-plain-01",
+      "terminal": true,
+      "collection_valid": false,
+      "errors": [
+        "ValueError: Original native source receipt differs: vllm_ascend"
+      ],
+      "reproduction_passed": false
+    },
+    {
+      "directory": "/root/workspace/muxpd-quality-layout-20261028/new-loss-probe-runs-v1/new-loss-prefix-observed-01",
+      "terminal": true,
+      "collection_valid": false,
+      "errors": [
+        "ValueError: Original native source receipt differs: vllm_ascend"
+      ],
+      "reproduction_passed": false
+    },
+    {
+      "directory": "/root/workspace/muxpd-quality-layout-20261028/new-loss-probe-runs-v1/new-loss-prefix-plain-01",
+      "terminal": true,
+      "collection_valid": false,
+      "errors": [
+        "ValueError: Original native source receipt differs: vllm_ascend"
+      ],
+      "reproduction_passed": false
+    }
+  ],
+  "observer_plain_bridges": {
+    "native": {
+      "passed": false,
+      "reason": "Missing terminal valid same-role pair"
+    },
+    "prefix": {
+      "passed": false,
+      "reason": "Missing terminal valid same-role pair"
+    }
+  },
+  "errors": [
+    "Invalid/nonterminal attempt retained; no retry selection: new-loss-native-observed-01",
+    "Invalid/nonterminal attempt retained; no retry selection: new-loss-native-plain-01",
+    "Invalid/nonterminal attempt retained; no retry selection: new-loss-prefix-observed-01",
+    "Invalid/nonterminal attempt retained; no retry selection: new-loss-prefix-plain-01"
+  ],
+  "plan_sha256": "ae0706510213a83df43b6c9bbac310c572398dad7819aed1b853d1bec93c95f4",
+  "selected_one_based_positions": [
+    1,
+    200,
+    201,
+    202,
+    203,
+    204,
+    205,
+    206,
+    207,
+    208
+  ],
+  "known_context_divergences": {
+    "seed07151_first_divergence": 56,
+    "peer07461_first_divergence": 203,
+    "target07338_first_divergence": 207,
+    "scope": "All eight requests alive and equal current ordering do not imply matched full-batch or historical KV/GDN state. The window includes peer203 and target207, but cannot identify a unique root cause after earlier seed/peer divergence."
+  },
+  "scope": "Posterior diagnostic only; fresh batch omits seven prior batches. No exit-causality, quality, universal-equivalence or performance claim.",
+  "interpretation_blocked_reason": "Require each role's all8 full-run trajectory reproduction and same-role observed/plain complete-prefix bridge; do not retarget or interpret logits."
+}
