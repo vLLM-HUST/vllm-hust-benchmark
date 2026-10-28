@@ -100,3 +100,9 @@ the capsule. Trailing-newline formatting of this outer view does not alter the a
 `profile-analysis.json` contains diagnostic call summaries and output comparisons. These results
 justify continued metadata work, not advertising PyramidKV as faster or lower-HBM on this
 model/configuration.
+
+## Separate batched follow-up
+
+The [batched-metadata series](batched/README.md) preserves four new process lifecycles, the
+unsuccessful first activation and the corrected native-kernel/device tests. It does not overwrite
+the correction-cache-only observations above.
