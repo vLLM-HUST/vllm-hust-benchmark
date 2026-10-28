@@ -23,7 +23,13 @@ def select(rows, *, start=0, count=3, full=False):
         if start != 0 or count != 3:
             raise ValueError("full selection cannot combine with a range")
         return list(enumerate(rows))
-    if start < 0 or count < 3 or start + count > len(rows):
+    final_tail = 0 < count < 3 and start > 0 and start + count == len(rows)
+    if (
+        start < 0
+        or count <= 0
+        or (count < 3 and not final_tail)
+        or start + count > len(rows)
+    ):
         raise ValueError("preselect at least three original positions within range")
     return list(enumerate(rows))[start : start + count]
 
