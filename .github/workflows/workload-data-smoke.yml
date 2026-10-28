@@ -85,6 +85,9 @@ on:
       - 'tests/test_appworld_react_author_source.py'
       - 'scripts/run_appworld_original_react.py'
       - 'scripts/appworld_model_transport.py'
+      - 'scripts/verify_structeval_matplotlib_environment.py'
+      - 'tests/test_structeval_matplotlib_environment.py'
+      - 'configs/workload-native/structeval-matplotlib*'
       - 'tests/test_appworld_model_transport.py'
       - 'tests/test_appworld_native_react_entry.py'
       - 'configs/workload-native/appworld-react-author-source.json'
@@ -386,7 +389,7 @@ jobs:
       - name: Original TraceLab build and replay CPU contracts only
         run: python -m pytest -q tests/test_tracelab_original_build.py tests/test_tracelab_original_runner.py
       - name: Original PAWS and LongBench offline CPU contracts only
-        run: python -m pytest -q tests/test_paws_original_assets.py tests/test_paws_original_runner.py tests/test_longbench_v2_saved_audit.py tests/test_longbench_v2_capacity_preparation.py tests/test_narrativeqa_metric_preparation.py tests/test_narrativeqa_original_summary.py tests/test_schemastore_runtime.py tests/test_schemastore_original_validation.py tests/test_structeval_rendering_plan.py
+        run: python -m pytest -q tests/test_paws_original_assets.py tests/test_paws_original_runner.py tests/test_longbench_v2_saved_audit.py tests/test_longbench_v2_capacity_preparation.py tests/test_narrativeqa_metric_preparation.py tests/test_narrativeqa_original_summary.py tests/test_schemastore_runtime.py tests/test_schemastore_original_validation.py tests/test_structeval_rendering_plan.py tests/test_structeval_matplotlib_environment.py
       - name: Original model and metric CPU contracts only
         run: python -m pytest -q tests/test_gpqa_original_runner.py tests/test_xlsum_original_runner.py tests/test_beir_original_runner.py tests/test_stsb_original_runner.py tests/test_librispeech_original_runner.py tests/test_xsum_original_runner.py tests/test_multinews_original_runner.py tests/test_billsum_original_runner.py tests/test_flores200_original_assets.py tests/test_research_acquisition_reuse.py
       - name: Installed CLI and packaged catalogs

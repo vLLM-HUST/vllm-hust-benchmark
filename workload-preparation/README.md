@@ -475,6 +475,27 @@ python -m vllm_hust_workload_data.pipeline run --config /private/appworld-delive
 
 真实数据的统一绑定/索引/三条回查已通过：732项任务及全部14,696个原始文件身份得到固定；`consumer.resolve_input`回查时校验该任务及共享/参考资产，返回原生环境任务而非可直接发送的请求。原生Agent仍使用前述独立环境与执行入口，不把索引成功当作原生推理完成。安装产物及研究端联调仍待核验。
 
+## StructEval Matplotlib 渲染组件准备
+
+这是原作者Matplotlib渲染函数的隔离环境，不是完整StructEval执行入口。原27模块已经复核；其他浏览器/CDN/npm/TeX/Typst依赖、原题生成及完整VQA仍待验证。19类950条原非渲染结果保留，不重跑。
+
+最小镜像只包含观察并冻结的12项绘图依赖，符合原作者`matplotlib>=3.8`要求；不是作者依赖锁，不含其他benchmark运行时、受保护代码、原始任务或模型。已有服务器构建及原函数的可信准备夹具出图通过，**不是原题成绩**。
+
+```bash
+CONTEXT=/private/structeval-matplotlib-build-context
+mkdir "$CONTEXT"
+cp configs/workload-native/structeval-matplotlib-cpu.Dockerfile "$CONTEXT/Dockerfile"
+cp configs/workload-native/structeval-matplotlib-py311-observed.txt "$CONTEXT/"
+cp scripts/verify_structeval_matplotlib_environment.py "$CONTEXT/"
+docker build --network=host --iidfile /private/structeval-matplotlib-image-id.txt \
+  -t workload-native/structeval-matplotlib-cpu:local "$CONTEXT"
+docker run --rm --network none --user 65534:65534 --read-only --cap-drop ALL \
+  --security-opt no-new-privileges --memory 2g --cpus 1 --pids-limit 256 \
+  --tmpfs /tmp:size=256m "$(cat /private/structeval-matplotlib-image-id.txt)"
+```
+
+默认命令仅校验版本与依赖导入，不执行生成代码。真实原题必须使用固定原源码、完整生成输出和原始VQA问题，另外接入有界隔离worker；不能因为PNG生成成功就宣称任务通过。不得在宿主机运行原渲染器中的`os.system`，也不得为离线出图删掉其他格式的CDN脚本。[现有阶段回执](../docs/workload-data/validation/structeval-nonrender-checkpoint3-20261025.json)区分组件夹具与原生任务证据。
+
 ## Video-MME 原生视频任务
 
 这是发布方原始Video-MME与固定VLMEvalKit的两个已有配置：`Video-MME_8frame`和`Video-MME_8frame_subs`，不是把64帧配置临时减成8帧。原2700题/900视频全部保留；默认每种duration取最先3个不同视频并保留每视频全部3题，每配置27题。选题在推理前固定，不因失败换题；`--full`才选择全部2700题。
