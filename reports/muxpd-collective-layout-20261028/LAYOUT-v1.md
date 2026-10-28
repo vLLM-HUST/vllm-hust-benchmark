@@ -157,9 +157,18 @@ receipts 核对启动前后稳定及两基线一致，并保留共同的 Ascend 
 `c1187a0c145d1ab7874deeeb96b8b4172d25f1c35c27b84943a0c42dcc48b567`。见[主清单](MANIFEST-v1.json)、[补充包清单](SUPPLEMENT-v1.json)、[本地校验](local-member-verification-v1.json)。
 
 发布入口为
-[evidence-muxpd-collective-layout-20261028](https://github.com/vLLM-HUST/vllm-hust-benchmark/releases/tag/evidence-muxpd-collective-layout-20261028)。`PUBLIC_READBACK_PENDING`：上传/匿名公开下载复核尚在进行，不能把本地校验当作远端可用性证明。前置
+[evidence-muxpd-collective-layout-20261028](https://github.com/vLLM-HUST/vllm-hust-benchmark/releases/tag/evidence-muxpd-collective-layout-20261028)。`PUBLIC_READBACK_INCOMPLETE`：上传已完成，但匿名大文件下载未完成，不能把本地校验当作远端可用性证明。前置
 native/raw v3
 对照来自[层定位 Release](https://github.com/vLLM-HUST/vllm-hust-benchmark/releases/tag/evidence-muxpd-layer-localization-20261028)，与[层定位报告](../muxpd-layer-localization-20261028/LAYER-LOCALIZATION-v1.md)共同复核。
 
 后续需要为仍缺失的模式补齐同模式 plain 桥接；若要解释 suffix 内部差异，还需要相应层捕获及其桥接。任何候选都必须独立验证完整答案、严格不退化门、生命周期与性能。布局器增加的
 scratch、清零、双向 D2D 复制和通信载荷可能改变时延或重叠，本轮没有测量这些成本。后续完整答案实验的结果不在本报告证据范围内；Issue #23 的质量门继续为 **FAIL**。
+
+公开匿名读回已保留为
+**INCOMPLETE**，具体已验证的小附件/区段、失败和未完成范围见[公开读回状态](public-readback-status-v1.json)。本地完整校验、上传完成和公开完整下载核验是不同结论，未将前两者写成第三者通过。
+
+## 后续完整质量结果（2026-10-28）
+
+以上为各自冻结的短程诊断结果。其后完成的[原200题 prefix 复测](../muxpd-prefix-quality-20261028/FULL200-v1.md)为167/200，恢复旧三题，但新增07338截断且总截断11题，原逐题不退化门仍
+**FAIL**；[后验24题](../muxpd-prefix-quality-20261028/POSTERIOR24-v1.md)的改善不替代这一失败。两项后续质量小证据包的公开读回状态由该集合单独记录，不改变本集合大证据包的
+INCOMPLETE。

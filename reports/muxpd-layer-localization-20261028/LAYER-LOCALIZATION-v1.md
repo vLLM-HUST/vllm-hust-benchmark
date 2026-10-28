@@ -161,9 +161,18 @@ controller、child、日志和数组。早先同角色控制来自 `muxpd-qualit
 [本地成员校验](local-member-verification-v1.json)。
 
 发布入口为
-[evidence-muxpd-layer-localization-20261028](https://github.com/vLLM-HUST/vllm-hust-benchmark/releases/tag/evidence-muxpd-layer-localization-20261028)。`PUBLIC_READBACK_PENDING`：正在上传，尚未完成匿名公开下载复核。旧同角色对照仍需
+[evidence-muxpd-layer-localization-20261028](https://github.com/vLLM-HUST/vllm-hust-benchmark/releases/tag/evidence-muxpd-layer-localization-20261028)。`PUBLIC_READBACK_INCOMPLETE`：上传已完成，匿名大文件下载因网络故障未完成。旧同角色对照仍需
 [前一轮质量复核 Release](https://github.com/vLLM-HUST/vllm-hust-benchmark/releases/tag/evidence-muxpd-quality-review-20261028)；它们的准确身份见
 [外部依赖](external-dependencies-v1.json)。
 
 后续可分别控制通信总长度、P 行偏移和复制分配的影响。任何候选若改变 raw 输出，应重新建立同一候选的 plain/observed 对照，再验证完整质量与生命周期；不能把“候选与旧 raw
 不同”自动当成失败，也不能把单条轨迹接近 native 当成 200 题答案已恢复。本报告不包含任何后续布局实验结果，且保持 Issue #23 质量门 **FAIL**。
+
+公开匿名读回已保留为
+**INCOMPLETE**，具体已验证的小附件/区段、失败和未完成范围见[公开读回状态](public-readback-status-v1.json)。本地完整校验、上传完成和公开完整下载核验是不同结论，未将前两者写成第三者通过。
+
+## 后续完整质量结果（2026-10-28）
+
+以上为各自冻结的短程诊断结果。其后完成的[原200题 prefix 复测](../muxpd-prefix-quality-20261028/FULL200-v1.md)为167/200，恢复旧三题，但新增07338截断且总截断11题，原逐题不退化门仍
+**FAIL**；[后验24题](../muxpd-prefix-quality-20261028/POSTERIOR24-v1.md)的改善不替代这一失败。两项后续质量小证据包的公开读回状态由该集合单独记录，不改变本集合大证据包的
+INCOMPLETE。

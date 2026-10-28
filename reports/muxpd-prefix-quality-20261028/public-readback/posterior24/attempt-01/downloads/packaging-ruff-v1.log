@@ -1,0 +1,52 @@
+SIM117 [*] Use a single `with` statement with multiple contexts instead of nested `with` statements
+   --> build_archive_v1.py:132:5
+    |
+130 |       archive = STAGING / (NAME + ".tar.gz")
+131 |       write(manifest_path, manifest)
+132 | /     with archive.open("xb") as output:
+133 | |         with gzip.GzipFile(
+134 | |             filename="", fileobj=output, mode="wb", mtime=0, compresslevel=6
+135 | |         ) as zipped:
+    | |____________________^
+136 |               with tarfile.open(
+137 |                   fileobj=zipped, mode="w", format=tarfile.USTAR_FORMAT
+    |
+help: Combine `with` statements
+    |
+131 |     write(manifest_path, manifest)
+    -     with archive.open("xb") as output:
+    -         with gzip.GzipFile(
+    -             filename="", fileobj=output, mode="wb", mtime=0, compresslevel=6
+    -         ) as zipped:
+    -             with tarfile.open(
+    -                 fileobj=zipped, mode="w", format=tarfile.USTAR_FORMAT
+    -             ) as tar:
+    -                 for entry in entries:
+    -                     info = tarfile.TarInfo(entry["member"])
+    -                     info.size, info.mode, info.mtime = entry["bytes"], 0o644, 0
+    -                     with Path(entry["source"]).open("rb") as source:
+    -                         tar.addfile(info, source)
+    -                 payload = manifest_path.read_bytes()
+    -                 info = tarfile.TarInfo(manifest["embedded_manifest_member"])
+    -                 info.size, info.mode, info.mtime = len(payload), 0o644, 0
+    -                 tar.addfile(info, io.BytesIO(payload))
+132 +     with archive.open("xb") as output, gzip.GzipFile(
+133 +         filename="", fileobj=output, mode="wb", mtime=0, compresslevel=6
+134 +     ) as zipped:
+135 +         with tarfile.open(
+136 +             fileobj=zipped, mode="w", format=tarfile.USTAR_FORMAT
+137 +         ) as tar:
+138 +             for entry in entries:
+139 +                 info = tarfile.TarInfo(entry["member"])
+140 +                 info.size, info.mode, info.mtime = entry["bytes"], 0o644, 0
+141 +                 with Path(entry["source"]).open("rb") as source:
+142 +                     tar.addfile(info, source)
+143 +             payload = manifest_path.read_bytes()
+144 +             info = tarfile.TarInfo(manifest["embedded_manifest_member"])
+145 +             info.size, info.mode, info.mtime = len(payload), 0o644, 0
+146 +             tar.addfile(info, io.BytesIO(payload))
+147 |     # One full readback checks exact member set, all original bytes, safe paths
+    |
+
+Found 1 error.
+[*] 1 fixable with `--fix`.
