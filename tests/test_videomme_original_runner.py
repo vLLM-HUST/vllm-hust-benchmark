@@ -19,7 +19,10 @@ def runner(monkeypatch):
 
 
 @pytest.mark.parametrize("profile", ["Video-MME_8frame", "Video-MME_8frame_subs"])
-def test_offline_plan_never_reads_assets_or_calls_model(tmp_path, profile):
+@pytest.mark.parametrize("prepare_only", [False, True])
+def test_offline_plan_never_reads_assets_or_calls_model(
+    tmp_path, profile, prepare_only
+):
     result = subprocess.run(
         [
             sys.executable,
@@ -38,6 +41,7 @@ def test_offline_plan_never_reads_assets_or_calls_model(tmp_path, profile):
             "fixture-not-model",
             "--profile",
             profile,
+            *(["--prepare-prompts-only"] if prepare_only else []),
         ],
         check=True,
         capture_output=True,
@@ -116,3 +120,29 @@ def test_subtitle_overlay_is_explicit_and_version_checked(
     fake.__file__ = str(tmp_path / "other-pysubs2/__init__.py")
     with pytest.raises(ValueError, match="declared isolated overlay"):
         runner.prepare_subtitle_dependency(overlay)
+
+
+def test_original_prompt_preflight_keeps_frames_and_text_without_a_model(
+    tmp_path, runner
+):
+    frame = tmp_path / "fixture-frame.bin"
+    frame.write_bytes(b"software-fixture-not-real-media")
+    prompt = [{"type": "image", "value": str(frame)} for _ in range(8)]
+    prompt.append({"type": "text", "value": "unchanged software fixture"})
+    dataset = SimpleNamespace(build_prompt=lambda index, video_llm: prompt)
+    result = runner.prepare_original_prompts(dataset, [0, 1, 2], tmp_path)
+    assert result["model_calls"] == 0 and not result["source_checkbox_eligible"]
+    assert result["prepared_original_prompts"] == 3
+    records = json.loads((tmp_path / "original-prompts-private.json").read_text())
+    assert [record["source_index"] for record in records] == [0, 1, 2]
+    assert all(record["original_prompt"] == prompt for record in records)
+    assert all(len(record["frame_sha256"]) == 8 for record in records)
+
+
+def test_prompt_preflight_rejects_incomplete_frames_without_a_completion_receipt(
+    tmp_path, runner
+):
+    dataset = SimpleNamespace(build_prompt=lambda index, video_llm: [])
+    with pytest.raises(ValueError, match="eight-frame"):
+        runner.prepare_original_prompts(dataset, [0, 1, 2], tmp_path)
+    assert list(tmp_path.iterdir()) == []

@@ -128,6 +128,33 @@ def check_media_receipt(snapshot, receipt, required_paths=()):
                 raise ValueError("Selected original media bytes have changed")
 
 
+def prepare_original_prompts(dataset, selected, output):
+    """Freeze original decoded inputs without making any model requests."""
+    records = []
+    for index in selected:
+        prompt = dataset.build_prompt(index, video_llm=False)
+        images = [item["value"] for item in prompt if item["type"] == "image"]
+        if len(images) != 8:
+            raise ValueError("Original eight-frame input required")
+        hashes = [
+            hashlib.sha256(Path(path).read_bytes()).hexdigest() for path in images
+        ]
+        records.append(
+            {"source_index": index, "original_prompt": prompt, "frame_sha256": hashes}
+        )
+    (output / "original-prompts-private.json").write_text(
+        json.dumps(records, indent=2) + "\n", encoding="utf-8"
+    )
+    return {
+        "status": "ORIGINAL_VIDEO_PROMPTS_PREPARED_NOT_NATIVE_INFERENCE",
+        "selected_original_positions": selected,
+        "prepared_original_prompts": len(records),
+        "frames_each": 8,
+        "model_calls": 0,
+        "source_checkbox_eligible": False,
+    }
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--official-checkout", type=Path, required=True)
@@ -146,6 +173,11 @@ def main():
         "--endpoint", default="http://127.0.0.1:19466/v1/chat/completions"
     )
     parser.add_argument("--execute", action="store_true")
+    parser.add_argument(
+        "--prepare-prompts-only",
+        action="store_true",
+        help="With execute, decode/freeze original prompts only; no model/scoring calls",
+    )
     parser.add_argument("--accept-academic-only", action="store_true")
     parser.add_argument("--full", action="store_true")
     args = parser.parse_args()
@@ -181,7 +213,11 @@ def main():
         or output.is_relative_to(ROOT)
     ):
         raise ValueError("Fresh private output and external assets/cache required")
-    proof = verify(source, archive=True)
+    proof = {
+        **verify(source, archive=True),
+        "source_id": "VIDEOMME",
+        "scope": "Shared original toolkit source tree, not native task completion",
+    }
     prepare_view(source, snapshot)
     with (snapshot / "Video-MME.tsv").open(encoding="utf-8", newline="") as stream:
         original_records = list(csv.DictReader(stream, delimiter="\t"))
@@ -227,6 +263,21 @@ def main():
         raise ValueError("Original toolkit selected a different dataset snapshot")
     if fixed_positions(dataset.data.to_dict(orient="records")) != fixed:
         raise ValueError("Toolkit table changed original fixed selection")
+    if args.prepare_prompts_only:
+        output.mkdir(mode=0o700, parents=True, exist_ok=False)
+        result = prepare_original_prompts(dataset, selected, output)
+        result.update(source_id="VIDEOMME", profile=args.profile, source_proof=proof)
+        verify(source, archive=True)
+        (output / "receipt-private.json").write_text(
+            json.dumps(result, indent=2) + "\n", encoding="utf-8"
+        )
+        print(
+            json.dumps(
+                {key: value for key, value in result.items() if key != "source_proof"},
+                indent=2,
+            )
+        )
+        return
     model = OpenAIWrapper(
         model=args.model, key="local-only", api_base=args.endpoint, retry=1, timeout=300
     )  # pragma: allowlist secret - local dummy key
