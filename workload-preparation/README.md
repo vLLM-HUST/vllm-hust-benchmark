@@ -139,6 +139,38 @@ python -m pytest -q workload-preparation/tests tests/test_workload_data_boundary
 长输出运行维度见
 [LongWriter-6k 原消息接入](../docs/workload-data/LONGWRITER_ORIGINAL_MESSAGES.zh-CN.md)：保留原始user消息，隔离最后assistant参考；不要将训练语料生成接入称为LongBench-Write官方评分或长输出能力验收。
 
+## LiveCodeBench 原始资产准备（原生运行尚未交付）
+
+复用统一准备入口，不在仓库内下载数据。三个原始数据仓库分别固定 revision；代码仓库 revision 不替代数据 revision。先打印离线计划：
+
+```bash
+python scripts/prepare_reused_research_assets.py LIVECODEBENCH
+```
+
+只获取代码执行及测试输出预测的两个完整原文件（合计144,814字节）：
+
+```bash
+python scripts/prepare_reused_research_assets.py LIVECODEBENCH \
+  --mode download --data-root /private/livecodebench-originals \
+  --files execution-v2/data/test-00000-of-00001.parquet test_generation/test.parquet
+```
+
+已有上述目录时，将 `--mode download` 换成 `--mode verify`，即可按相同固定身份只读复核，不重复下载。显式镜像传输可加
+`--hf-endpoint https://hf-mirror.com`，仍核验原始 SHA256。下载失败保留现场；仅同一目录、同一固定 profile 可加 `--resume`
+继续，不能把失败文件当成功。
+
+完整代码生成原文件为9,375,644,586字节，默认预算明确拒绝；需要充足服务器空间并显式选择：
+
+```bash
+python scripts/prepare_reused_research_assets.py LIVECODEBENCH \
+  --mode download --data-root /private/livecodebench-original-code \
+  --files code_generation/test.jsonl --max-bytes 10000000000
+```
+
+此入口不解码私有测试、不构造提示、不运行模型、不执行生成代码或评分。私有测试可能包含 pickle，只能在合格隔离容器中交给官方加载流程，不能在宿主机反序列化。数据卡仅标注通用
+`cc`，具体许可待核实，不公开再分发原文件。原生代码生成、自修复、代码执行、测试输出预测的执行环境、预算和评分闭环尚未完成；不得把下载/读取成功作为 benchmark
+跑通。进度以[唯一清单](../docs/workload-data/DATASET_CHECKLIST.zh-CN.md)为准。
+
 ## Video-MME 原生视频任务
 
 这是发布方原始Video-MME与固定VLMEvalKit的两个已有配置：`Video-MME_8frame`和`Video-MME_8frame_subs`，不是把64帧配置临时减成8帧。原2700题/900视频全部保留；默认每种duration取最先3个不同视频并保留每视频全部3题，每配置27题。选题在推理前固定，不因失败换题；`--full`才选择全部2700题。

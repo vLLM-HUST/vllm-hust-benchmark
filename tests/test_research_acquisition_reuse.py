@@ -36,6 +36,50 @@ def unique_object(pairs):
     return result
 
 
+def test_livecodebench_original_assets_are_pinned_per_dataset_not_code_revision():
+    source, files = runner.selection("LIVECODEBENCH")
+    assert len(files) == 3
+    assert sum(item["bytes"] for item in files) == 9_375_789_400
+    assert source["access"]["license"] is None
+    assert all(item["publisher_revision"] in item["url"] for item in files)
+    assert all(item["publisher_repo_id"] in item["url"] for item in files)
+    assert all(source["revision"] != item["publisher_revision"] for item in files)
+    assert not any("lite" in item["url"] for item in files)
+    _, small = runner.selection(
+        "LIVECODEBENCH",
+        [
+            "execution-v2/data/test-00000-of-00001.parquet",
+            "test_generation/test.parquet",
+        ],
+    )
+    assert sum(item["bytes"] for item in small) == 144_814
+
+
+def test_livecodebench_default_byte_budget_rejects_full_download_before_io(
+    tmp_path, monkeypatch
+):
+    target = tmp_path / "must-not-be-created"
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        ["prepare", "LIVECODEBENCH", "--mode", "download", "--data-root", str(target)],
+    )
+    with pytest.raises(ValueError, match="byte budget"):
+        runner.main()
+    assert not target.exists()
+
+
+def test_livecodebench_plan_is_offline_and_not_native_delivery(monkeypatch, capsys):
+    monkeypatch.setattr(sys, "argv", ["prepare", "LIVECODEBENCH"])
+    runner.main()
+    plan = json.loads(capsys.readouterr().out)
+    assert plan["status"] == "OFFLINE_ORIGINAL_ASSET_PLAN"
+    assert plan["bytes"] == 9_375_789_400
+    assert plan["model_calls"] == 0
+    assert not plan["native_execution_complete"]
+    assert not plan["source_checkbox_eligible"]
+
+
 def test_repobench_uses_fixed_original_resource_files():
     source, selected = runner.selection("REPOBENCH")
     assert source["source_id"] == "REPOBENCH"

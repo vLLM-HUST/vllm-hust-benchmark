@@ -3,6 +3,36 @@
 当前交付
 **67/113项**，待完成46项，另5项仅分类。首批#432的60项和第二批#538的ScienceWorld已合入main；早期五个草稿已关闭为被汇总承接，历史和分支保留。第三批新增CodeJudge-Eval、DeepPlanning、OpenMath、OpenCode、MVBench及Video-MME固定原生profile交付，尚未合入。OpenMath/OpenCode是训练语料原问题生成，不是独立质量benchmark。打勾不代表全量模型评测、高分或性能保证。
 
+### LiveCodeBench接入约束（协议核查，不计完成）
+
+核查依据为[官方源码](https://github.com/LiveCodeBench/LiveCodeBench/tree/28fef95ea8c9f7a547c8329f2cd3d32b92c1fa24)。固定源码压缩包已下载到专用
+CPU 工作区，SHA256 为
+`56c7c42aee979def86b69547ecd6d5a877a0e4940af8923bf4325ca0defecbaf`。以下两个原始数据文件已取得并与发布仓库 LFS
+SHA256、字节数核对一致；这不是原生运行或评分通过。
+
+| 原始数据仓库                  | 固定 revision                            | 原路径                           | 字节数 | SHA256                                                           |
+| ----------------------------- | ---------------------------------------- | -------------------------------- | -----: | ---------------------------------------------------------------- |
+| livecodebench/execution-v2    | ff6ea0e2a638001006ddcc41259eff23a4283fb2 | data/test-00000-of-00001.parquet |  71483 | c54e4377642f689758c2ee8664457af1b95ba95813a18208003c7a5a1efa410f |
+| livecodebench/test_generation | 6f3ac40bbecf81eba15899139d279b077f2816fd | test.parquet                     |  73331 | 4826aa00c059d6d47a099606ceed2d0e51d3aeeb1868f1bcf349a038bb64b4b1 |
+
+原始文件仅在服务器 `/root/livecodebench-original-data-20261028-001`，未进入 Git 或
+Windows。官方直连返回连接拒绝后，经显式镜像传输获取同一固定版本。完整代码生成仓库 `livecodebench/code_generation` 的 revision 为
+`bb83f1c3c643a772b7a2a8f07bd62c2aab76be8f`，`test.jsonl` 为9,375,644,586字节，尚未下载。数据卡仅标注
+`license: cc`，不能据此推断具体 CC 条款或随意再分发；代码 MIT 许可不替代数据许可。
+
+- [x] 核查
+  `benchmarks/code_generation.py`、`runner/parser.py`、`runner/scenario_router.py`、`runner/main.py`、`runner/runner_utils.py`
+  和 `runner/oai_runner.py`。
+- [ ] 固定原始数据仓库 revision、原文件哈希及许可。默认加载器使用 `code_generation_lite`；`--not_fast` 对应 `code_generation`
+  完整测试。当前完整加载函数虽然接收 `release_version`，却未将它传给数据加载器，不能仅凭命令参数声称固定发布版本。
+- [ ] 在隔离容器中加载原生题目和评分。私有测试字段可能经 base64、zlib 和 pickle 解码，禁止在宿主机反序列化；对外读取接口保留原字段，不自行删测试或改题。
+- [ ] 保留原生默认生成预算：每题10个样本、temperature 0.2、top_p 0.95、max_tokens 2000；原评分默认 timeout
+  6秒。固定抽样只减少题数，不减少每题候选和测试。
+- [ ] 核验现有 NPU 模型与原生提示风格的适配。官方 OpenAI runner 可使用 SDK 的服务地址配置，但官方主入口仍要求模型在 `LanguageModelStore`
+  中登记；不得冒用 GPT 名称掩盖实际模型，也不因依赖声明含 vLLM 而在 CPU 上运行模型。
+- [ ] 分别明确代码生成、自修复、代码执行、测试输出预测的覆盖状态。自修复必须承接真实代码生成及评测反馈，不伪造错误反馈；单场景跑通不能宣称四场景全部交付。
+- [ ] 补公共入口、可复现环境、原始输出及评分回执、研究侧无损消费核验后，再更新机器清单与完成计数。
+
 ### MVBench视频理解（固定原生协议交付完成）
 
 - [x] 官方video分支完整3895文件共15,796,297,352字节已在服务器逐文件校验，复用单份外部缓存，不下载到开发机或提交原始视频。
@@ -872,7 +902,7 @@ TB；服务器/data约1.42TB可用，未缩小语料。ChartQA当前两卡主机
 | AGENTBENCH                 | [ ] 等研究窗口后续跑                       | 官方FC ALFWorld前三组全41题已审计：复用0–2、新执行3–40，保留失败及原评分；剩68题待验证，不启动下一组、不冒充AgentBench整套完成。[回执](validation/agentbench-original-complete-groups-audit-20261024.json)                                                                                                                                                                                                                                                                |
 | SCHEMASTORE                | [x] 原schema资产已完成                     | 原4810文件全核验，官方CLI测试976 schemas exit0；全1006 schema/3688正负例引用及索引、精确CI45文件和固定研究端16 schema/70例子字节回查通过。[回执](validation/schemastore-native-delivery-20261027.json)。非LLM请求/质量benchmark。                                                                                                                                                                                                                                         |
 | JSONSCHEMABENCH            | [x] 原生固定协议交付                       | 11原配置全部核验：WashingtonPost全38，其余9具名及default各原前3，共68配置视图任务；原bench/evaluator及逐项重评通过。33原文件19100视图行/索引、99处固定提供者/研究回查通过。旧生成复用，不称全量推理、统一后端性能或模型质量达标。[交付回执](validation/jsonschemabench-official-workflow-readiness-20261024.json)                                                                                                                                                         |
-| LIVECODEBENCH              | [ ] 待开展                                 | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| LIVECODEBENCH              | [ ] 原生协议核查中                         | 已核查官方加载器、API runner 和默认预算；尚未下载原始数据、执行模型或评分，不能计为已交付。见下方接入约束。                                                                                                                                                                                                                                                                                                                                                               |
 | HUMANEVAL                  | [x] 已交付                                 | 原前三题NPU生成结果复用，公共隔离入口官方评分2/3，失败保留；164题原字段公共/研究消费相等，原3题索引消费相等。不是全164题模型成绩。见[回执](validation/humaneval-native-delivery-20261025.json)。                                                                                                                                                                                                                                                                          |
 | MBPP                       | [x] full原生抽样可用                       | 原题11/12/13双NPU生成、原始三测试与setup隔离CodeEval：参考解均通过，预测2通过/1失败原样保留；974原记录完整映射/索引，14处公共/研究回查一致，精确CI安装工件已核。[证据](validation/mbpp-original-native-sample-20261026.json)；非全500题，sanitized仅取得资产。                                                                                                                                                                                                            |
 | REPOBENCH                  | [x] 固定原生抽样交付完成                   | 官方默认30层各3题共90原题NPU生成/原评分及保存审计完成；49684原行与60研究回读复用，47实际CI安装载荷重新核对。固定评分哈希种子0，EM均0保留，不是质量验收。见[交付回执](validation/repobench-native-delivery-20261027.json)。                                                                                                                                                                                                                                                |

@@ -4842,16 +4842,52 @@
       "provenance": "author_release",
       "fitness_status": "VARIABLES_REQUIRE_ASSET_INSPECTION",
       "discovery_status": "ENTRY_IDENTIFIED",
-      "revision": null,
-      "files": [],
+      "revision": "28fef95ea8c9f7a547c8329f2cd3d32b92c1fa24", "identity_note": "pragma: allowlist secret - fixed public code revision",
+      "publisher_metadata_acquisition": {
+        "registered_file_roles": ["data"],
+        "identity_source": "Fixed official dataset revisions and publisher LFS SHA256 metadata; transport may explicitly use hf-mirror.com without changing original files",
+        "boundary": "Acquisition only, not native delivery. Full code_generation test.jsonl is not lite; never unpickle its private tests on the host. Self-repair workflow, native prompts, original budgets and scoring remain separate."
+      },
+      "files": [
+        {
+          "path": "code_generation/test.jsonl",
+          "publisher_repo_id": "livecodebench/code_generation",
+          "publisher_revision": "bb83f1c3c643a772b7a2a8f07bd62c2aab76be8f", "revision_note": "pragma: allowlist secret - fixed public dataset revision",
+          "bytes": 9375644586,
+          "sha256": "412b80eacab2ac1deb5fc02a067ed3eddbf130f9a121d690bdbf76df09bc81c9", "sha256_note": "pragma: allowlist secret - publisher LFS identity",
+          "identity_note": "pragma: allowlist secret - publisher LFS identity",
+          "role": "data",
+          "url": "https://huggingface.co/datasets/livecodebench/code_generation/resolve/bb83f1c3c643a772b7a2a8f07bd62c2aab76be8f/test.jsonl"
+        },
+        {
+          "path": "execution-v2/data/test-00000-of-00001.parquet",
+          "publisher_repo_id": "livecodebench/execution-v2",
+          "publisher_revision": "ff6ea0e2a638001006ddcc41259eff23a4283fb2", "revision_note": "pragma: allowlist secret - fixed public dataset revision",
+          "bytes": 71483,
+          "sha256": "c54e4377642f689758c2ee8664457af1b95ba95813a18208003c7a5a1efa410f", "sha256_note": "pragma: allowlist secret - publisher LFS identity",
+          "identity_note": "pragma: allowlist secret - publisher LFS identity",
+          "role": "data",
+          "url": "https://huggingface.co/datasets/livecodebench/execution-v2/resolve/ff6ea0e2a638001006ddcc41259eff23a4283fb2/data/test-00000-of-00001.parquet"
+        },
+        {
+          "path": "test_generation/test.parquet",
+          "publisher_repo_id": "livecodebench/test_generation",
+          "publisher_revision": "6f3ac40bbecf81eba15899139d279b077f2816fd", "revision_note": "pragma: allowlist secret - fixed public dataset revision",
+          "bytes": 73331,
+          "sha256": "4826aa00c059d6d47a099606ceed2d0e51d3aeeb1868f1bcf349a038bb64b4b1", "sha256_note": "pragma: allowlist secret - publisher LFS identity",
+          "identity_note": "pragma: allowlist secret - publisher LFS identity",
+          "role": "data",
+          "url": "https://huggingface.co/datasets/livecodebench/test_generation/resolve/6f3ac40bbecf81eba15899139d279b077f2816fd/test.parquet"
+        }
+      ],
       "unit": "source_rows",
       "provenance_kind": "code_task_corpus",
       "access": {
         "license": null,
-        "gated": null,
-        "note": "Verify publisher terms before acquisition or redistribution"
+        "gated": false,
+        "note": "Official code MIT does not license datasets. Dataset cards only declare generic cc; specific CC terms remain unresolved. Keep raw assets external and do not redistribute."
       },
-      "metadata_snapshot": "public-source-metadata-v0.5; not a fresh web check"
+      "metadata_snapshot": "Official code and three fixed HF dataset revisions checked 2026-10-28; two small original files acquired and LFS-verified on dedicated CPU server; native execution pending"
     },
     "HUMANEVAL": {
       "source_id": "HUMANEVAL",
