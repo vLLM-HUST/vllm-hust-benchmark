@@ -21,6 +21,12 @@
     {"source_id": "PAIO-SEMANTIC-SIMILAR-5000", "asset_group": "enterprise-private-requests", "related_workload_ids": [], "boundary": "Semantic similarity is not exact-prefix or KV reuse; preserve original private requests without rewriting."}
   ],
   "source_entrypoints": {
+    "LIVECODEBENCH": [
+      {"role": "prepare_assets", "path": "scripts/prepare_reused_research_assets.py"},
+      {"role": "prepare_scoring_inputs", "path": "scripts/prepare_livecodebench_original_tasks.py"},
+      {"role": "generation", "path": "scripts/run_livecodebench_original_generation.py"},
+      {"role": "isolated_scoring", "path": "scripts/run_livecodebench_container_scoring.py"}
+    ],
     "VIDEOMME": [
       {"role": "prepare_assets", "path": "scripts/prepare_videomme_native_media.py", "scope": "Complete original release verification, gated unchanged author extraction and byte/CRC comparison; no native model inference, fresh media directories only"},
       {"role": "original_profile", "path": "scripts/run_videomme_original.py", "scope": "Original eight-frame with/without-subtitles profiles, fixed27 per profile or full2700, original API encoding and exact-matching scoring; real execution pending, plan by default"},

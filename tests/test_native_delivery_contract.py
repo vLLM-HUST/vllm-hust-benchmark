@@ -1215,6 +1215,20 @@ def test_code_generation_is_not_functional_execution_without_isolation():
             assert delivery["six_other_libraries"][
                 "author_16_worker_concurrency_preflight_passed"
             ]
+        elif sid == "BIGCODEBENCH":
+            delivery = json.loads(
+                (ROOT / current["delivery_receipt"]).read_text("utf-8")
+            )
+            assert delivery["source_checkbox_eligible"]
+            assert delivery["native_scoring_completed"]
+            assert delivery["harmless_probe"]["nonroot"]
+            assert delivery["harmless_probe"]["network_unreachable"]
+            assert delivery["harmless_probe"]["readonly_root_and_input"]
+            assert delivery["native_scoring_summary"][
+                "independent_saved_scoring_and_container_audit_passed"
+            ]
+            assert delivery["public_cpu_recipe"]["from_scratch_recipe_build_completed"]
+            assert delivery["public_cpu_recipe"]["locked_distributions_verified"] == 233
         else:
             assert not current["checked"]
         assert ledger["delivery_inventory"][sid]["isolation_preflight"]

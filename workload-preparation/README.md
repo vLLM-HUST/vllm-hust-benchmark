@@ -348,6 +348,26 @@ python scripts/run_livecodebench_container_scoring.py \
 官方评分器的单位不同：代码执行为百分数，测试输出为比例，不应直接混用。评分涉及生成内容的解释执行，必须保留上述离线、非root
 Docker隔离，不能在宿主机直接评分。命令支持情况、真实运行和统一接入完成情况分别核验，以唯一清单为准。
 
+## AppWorld ARM核心环境准备（不是原生任务交付）
+
+固定作者版本`0.1.3.post1`的官方Docker服务镜像经元数据核查仅有amd64，不能直接作为当前ARM节点的合格环境。新增核心配方沿用该版本官方Dockerfile的Python/uv安装路径，固定已核验的官方ARM64基础镜像，使用此前实际安装观察到的83项核心版本；这是可复现核心环境配方，不是作者依赖锁、完整Agent环境或代码执行隔离资格证明。
+
+以下只复制三份软件文件到新的仓库外目录，不把任务数据、模型或企业资产放进构建上下文：
+
+```bash
+CONTEXT=/private/appworld-core-build-context
+mkdir "$CONTEXT"
+cp configs/workload-native/appworld-core-cpu.Dockerfile "$CONTEXT/Dockerfile"
+cp configs/workload-native/appworld-core-client-py311-observed.txt "$CONTEXT/"
+cp scripts/verify_appworld_core_cpu_environment.py "$CONTEXT/"
+DOCKER_BUILDKIT=0 docker build --network=host --memory 2g \
+  --cpu-period 100000 --cpu-quota 100000 \
+  --iidfile /private/appworld-core-image-id.txt \
+  -t workload-native/appworld-core-cpu:local "$CONTEXT"
+```
+
+构建中调用官方`appworld install`，受保护代码仅留在本地私有镜像，不发布或复制到Git；不会获取任务数据或执行生成代码。配方校验Python/83项版本、核心环境和评分函数能否导入，并执行`pip check`，不调用它们运行任务。镜像默认非root，后续仍需单独配置离线隔离、可写任务状态、原生Agent依赖与流程、NPU模型请求及官方评分；不能以构建成功给来源打勾。真实构建状态以[既有回执](../docs/workload-data/validation/appworld-core-client-preparation-20261028.json)为准。
+
 ## Video-MME 原生视频任务
 
 这是发布方原始Video-MME与固定VLMEvalKit的两个已有配置：`Video-MME_8frame`和`Video-MME_8frame_subs`，不是把64帧配置临时减成8帧。原2700题/900视频全部保留；默认每种duration取最先3个不同视频并保留每视频全部3题，每配置27题。选题在推理前固定，不因失败换题；`--full`才选择全部2700题。
