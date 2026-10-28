@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="560" viewBox="0 0 1120 560" role="img" aria-labelledby="title desc">
+  <title id="title">学生在 Coder 上运行 SWE-bench Pro 的操作路径</title>
+  <desc id="desc">操作示意，非页面截图。创建专用 CPU 工作区运行 Agent 和 Docker 任务沙箱，连接另一个模型工作区的 API，最后在 CPU 工作区读取轨迹和补丁。学生无需登录物理机。</desc>
+  <defs>
+    <marker id="arrow" markerWidth="9" markerHeight="9" refX="8" refY="4" orient="auto"><path d="M0 0L8 4L0 8" fill="none" stroke="#55718f" stroke-width="1.5"/></marker>
+    <style>
+      text{font-family:Arial,"PingFang SC","Microsoft YaHei",sans-serif;fill:#203047;font-size:18px}
+      .title{font-size:28px;font-weight:600}.heading{font-size:22px;font-weight:600}.small{font-size:16px;fill:#53657c}.label{font-size:15px;fill:#53657c}.mono{font-family:Menlo,Consolas,monospace;font-size:16px}
+    </style>
+  </defs>
+  <rect width="1120" height="560" rx="20" fill="#f7f9fc"/>
+  <text x="40" y="48" class="title">在 Coder 上，学生需要操作什么？</text>
+  <text x="40" y="77" class="small">操作示意 · 非页面截图 · 无需物理机 SSH 或 Kubernetes 管理员权限</text>
+  <rect x="40" y="101" width="1040" height="58" rx="12" fill="#e7edf6"/>
+  <text x="62" y="137" class="heading">Coder</text>
+  <text x="175" y="137">工作区列表</text>
+  <path d="M306 130H343" stroke="#55718f" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="365" y="137">新建工作区 → 选择模板 → 打开终端</text>
+  <rect x="40" y="184" width="495" height="248" rx="15" fill="#ffffff" stroke="#b6c9df"/>
+  <rect x="40" y="184" width="495" height="6" rx="3" fill="#3974b5"/>
+  <text x="65" y="224" class="heading">CPU 工作区：执行 SWE-bench Pro</text>
+  <text x="65" y="258" class="small">选择专用模板</text>
+  <text x="65" y="288" class="mono">swe-bench-pro-cpu</text>
+  <rect x="65" y="308" width="445" height="55" rx="8" fill="#eef4fb"/>
+  <text x="82" y="342">打开终端，运行安装入口并填写模型 API</text>
+  <text x="65" y="391" class="small">Agent → Docker 任务沙箱 → 保存轨迹与补丁</text>
+  <rect x="585" y="184" width="495" height="248" rx="15" fill="#ffffff" stroke="#c6bddd"/>
+  <rect x="585" y="184" width="495" height="6" rx="3" fill="#8264ab"/>
+  <text x="610" y="224" class="heading">LLM 工作区：提供模型 API</text>
+  <text x="610" y="258" class="small">按平台模型指南创建并启动推理服务</text>
+  <text x="610" y="288" class="small">使用有权限访问的 NPU / GPU 资源</text>
+  <rect x="610" y="308" width="445" height="55" rx="8" fill="#f1eef8"/>
+  <text x="627" y="342">提供 API 地址、模型名与必要鉴权</text>
+  <text x="610" y="391" class="small">也可以复用已有授权服务，不必重复创建</text>
+  <path d="M535 282H585" stroke="#55718f" stroke-width="2" marker-end="url(#arrow)"/>
+  <path d="M585 304H535" stroke="#55718f" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="560" y="269" text-anchor="middle" class="label">API</text>
+  <path d="M287 432V470" stroke="#55718f" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="40" y="475" width="1040" height="49" rx="10" fill="#e9f3ee"/>
+  <text x="65" y="506">在 CPU 工作区读取结果：轨迹、报告、patch-private.diff；提交补丁 ≠ 官方评分通过</text>
+</svg>
