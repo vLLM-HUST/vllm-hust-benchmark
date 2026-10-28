@@ -3,6 +3,20 @@
 入口为 `scripts/bootstrap_terminal_arm64.py`，使用原 Harbor 0.24.0、Terminus-2 和原任务评分器。 目前只支持
 `openssl-selfsigned-cert`。这是 ARM64 环境与用户操作链验收，不是 89 题全量成绩， 也不是 B0/B1 性能配对。
 
+## 当前实测（2026-10-28）
+
+在已有 ARM64 CPU 工作区，用新客户端、新任务镜像和新模型服务窗口执行：
+
+| 运行                       | Reward | 原评分项 | 状态                     |
+| -------------------------- | -----: | -------: | ------------------------ |
+| 空答案 nop                 |      0 |      0/6 | 已评分                   |
+| 官方参考解 oracle          |      1 |      6/6 | 已评分                   |
+| Qwen3.5-35B-A3B 真实 Agent |      1 |      6/6 | 一次完成，客户端正常退出 |
+
+真实 Agent 使用 vLLM 0.18.0 / vLLM-Ascend 0.18.0、两张 Ascend 910B2、BF16、TP2/EP。 共 7 个 Agent 回合、16 次工具调用，原始
+usage 为输入 23,378、输出 2,400 tokens。 本次模型独立生成答案后直接调用原评分器，不是历史答案的补评分。
+[脱敏验收记录](./terminal-arm64-acceptance/README.md)列出来源、资源、完整计数和证据哈希。
+
 ## 使用前
 
 在本人已有的 ARM64 CPU 执行工作区打开终端。工作区需有独立 Docker 服务、Python 3.12 及以上、 可持久保存的目录，以及现有模型服务。模型和执行工作区分别管理，运行入口不申请
@@ -18,13 +32,13 @@ NPU、不部署模型。
 
 ## 下载固定版本入口
 
-从本页所处的固定 Git 提交下载脚本。`SOURCE_COMMIT` 由网站给出，不使用浮动 `main`：
+下载本次实际执行的固定脚本提交：
 
 ```bash
 python3 - <<'PY'
 import base64, json, urllib.request
 from pathlib import Path
-revision = "SOURCE_COMMIT"
+revision = "2109c36ba3fd6523e00cf3e6b2ecc725d693609a"  # pragma: allowlist secret - public source commit
 url = ("https://api.github.com/repos/vLLM-HUST/vllm-hust-benchmark/contents/"
        "scripts/bootstrap_terminal_arm64.py?ref=" + revision)
 with urllib.request.urlopen(url, timeout=120) as response:
@@ -97,4 +111,4 @@ turns 不等于最多 100 次 HTTP 请求。不同模型或预算需单独冻结
 与 pytest-json-ctrf 0.3.5。 只有原评分脚本中的精确安装器 URL 使用经哈希校验的本地副本，其余 curl 请求仍走真实客户端。 构建阶段也使用 MTU 1400
 和资源限制，避免只限制任务而遗漏准备过程。
 
-新模型单题与生产网站验证状态见本目录后续脱敏验收记录；正负控制不能代替真实 Agent 验收。
+本次单题实测覆盖准备、正负控制、真实 Agent、原评分器和结果读取。其他 ARM64 任务仍须逐题核验。
