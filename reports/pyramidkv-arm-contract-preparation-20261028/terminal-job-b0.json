@@ -1,0 +1,62 @@
+{
+  "agents": [
+    {
+      "kwargs": {
+        "api_base": "http://127.0.0.1:8000/v1",
+        "enable_summarize": false,
+        "interleaved_thinking": false,
+        "llm_call_kwargs": {
+          "extra_body": {
+            "chat_template_kwargs": {
+              "enable_thinking": false
+            }
+          },
+          "max_tokens": 4096,
+          "seed": 17
+        },
+        "llm_kwargs": {
+          "num_retries": 0
+        },
+        "max_turns": 100,
+        "model_info": {
+          "input_cost_per_token": 0,
+          "max_input_tokens": 32768,
+          "max_output_tokens": 4096,
+          "max_tokens": 32768,
+          "output_cost_per_token": 0
+        },
+        "parser_name": "json",
+        "proactive_summarization_threshold": 0,
+        "record_terminal_session": true,
+        "store_all_messages": true,
+        "temperature": 0,
+        "use_responses_api": false
+      },
+      "model_name": "openai/qwen35-pyramidkv",
+      "name": "terminus-2"
+    }
+  ],
+  "environment": {
+    "cpu_enforcement_policy": "limit",
+    "delete": true,
+    "force_build": false,
+    "memory_enforcement_policy": "limit",
+    "type": "docker"
+  },
+  "job_name": "pyramidkv-terminal-b0",
+  "jobs_dir": "jobs-b0",
+  "n_attempts": 1,
+  "n_concurrent_trials": 1,
+  "retry": {
+    "max_retries": 0
+  },
+  "tasks": [
+    {
+      "path": "tasks/openssl-selfsigned-cert"
+    }
+  ],
+  "timeout_multiplier": 1.0,
+  "verifier": {
+    "disable": false
+  }
+}

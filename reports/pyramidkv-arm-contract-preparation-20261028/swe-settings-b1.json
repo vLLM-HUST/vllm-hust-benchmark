@@ -1,0 +1,55 @@
+{
+  "agent": {
+    "automatic_retries": 0,
+    "http_timeouts": {
+      "connect": 180,
+      "pool": 180,
+      "read": null,
+      "write": 180
+    },
+    "max_tokens": 4096,
+    "seed": 17,
+    "step_limit": 100,
+    "temperature": 0,
+    "thinking": false,
+    "tool_timeout_seconds": 60,
+    "wall_budget_seconds": 1200
+  },
+  "batch": {
+    "arrival_time": 0,
+    "client_concurrency_limit": null,
+    "independent_agents_per_task": 1,
+    "instance_ids": [
+      "instance_NodeBB__NodeBB-0e07f3c9bace416cbab078a30eae972868c0a8a3-vf2cf3cbd463b7ad942381f1c6d077626485a1e9e"
+    ],
+    "program_instances": 1,
+    "repository": "NodeBB/NodeBB",
+    "selection": "explicit-task-ids",
+    "size": 1
+  },
+  "container": {
+    "cpus": 2,
+    "memory": "4g",
+    "network": "bridge"
+  },
+  "image_mirror_prefix": "",
+  "keep_image_archives": false,
+  "model": {
+    "api_base": "http://127.0.0.1:8000/v1",
+    "api_key_env": null,
+    "model_name": "openai/qwen35-pyramidkv"
+  },
+  "paths": {
+    "agent_source": "/absolute/swe-pro-sources/agent",
+    "crane": "/usr/local/bin/crane",
+    "dataset_parquet": "/absolute/private/v1.parquet",
+    "docker": "/usr/bin/docker",
+    "docker_host": "unix:///var/run/docker.sock",
+    "official_v1_source": "/absolute/swe-pro-sources/official-v1"
+  },
+  "protocol": {
+    "defer_grading": true
+  },
+  "run_id": "pyramidkv-swe-v1-arm-b1",
+  "schema": "swe-bench-pro-experiment-v1"
+}
