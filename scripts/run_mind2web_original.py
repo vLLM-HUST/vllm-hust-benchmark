@@ -68,6 +68,8 @@ def main():
             )
         )
         return
+    os.environ["HF_HUB_OFFLINE"] = "1"
+    os.environ["HF_DATASETS_OFFLINE"] = "1"
     author = verify_source(
         args.author_root, ROOT / "configs/workload-native/mind2web-author-source.json"
     )
