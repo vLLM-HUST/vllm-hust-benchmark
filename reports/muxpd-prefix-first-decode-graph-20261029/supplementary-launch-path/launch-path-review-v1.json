@@ -1,0 +1,248 @@
+{
+  "schema": "muxpd-graph-v2-post-run-launch-path-review-v1",
+  "created_at_utc": "2026-10-29T20:05:50.022634+00:00",
+  "passed": true,
+  "review_timing": "post-run discovery/record; this is not a pre-run matrix amendment",
+  "deviation_present": true,
+  "deviation": "Frozen matrix and dry runs name output root runs-v1 inside the v2 bundle; actual execution used runs-v2 inside that same bundle. Frozen matrix remains unchanged.",
+  "declared_output_root": "/root/workspace/muxpd-prefix-dtp-graph-v2-20261029/runs-v1",
+  "actual_output_root": "/root/workspace/muxpd-prefix-dtp-graph-v2-20261029/runs-v2",
+  "attempt_inventory": {
+    "declared_labels": [
+      "prefix-dtp-graph-v2-observed-01",
+      "prefix-dtp-graph-v2-plain-01"
+    ],
+    "actual_labels": [
+      "prefix-dtp-graph-v2-observed-01",
+      "prefix-dtp-graph-v2-plain-01"
+    ],
+    "declared_output_root_exists": false,
+    "run_roots_present": [
+      "/root/workspace/muxpd-prefix-dtp-graph-v2-20261029/runs-v2"
+    ],
+    "missing_actual_attempts": [],
+    "extra_actual_attempts": [],
+    "retry_or_attempt_selection_performed": false
+  },
+  "attempts": [
+    {
+      "label": "prefix-dtp-graph-v2-observed-01",
+      "profile": "prefix-dtp-graph-observed",
+      "terminal_finished_at": "2026-10-29T19:54:19.658430+00:00",
+      "declared_producer_command": [
+        "/root/workspace/.muxpd-ecpa-runtime/bin/python",
+        "/root/workspace/muxpd-prefix-dtp-graph-v2-20261029/runs-v1/prefix-dtp-graph-v2-observed-01/producer/graph_run_v1.py",
+        "--profile",
+        "prefix-dtp-graph-observed",
+        "--source",
+        "/root/workspace/muxpd-composite-token-logits",
+        "--plan",
+        "/root/workspace/muxpd-prefix-dtp-graph-v2-20261029/runs-v1/prefix-dtp-graph-v2-observed-01/plan-v1.json",
+        "--config",
+        "/root/workspace/muxpd-prefix-dtp-graph-v2-20261029/runs-v1/prefix-dtp-graph-v2-observed-01/base-engine-args.json",
+        "--output",
+        "/root/workspace/muxpd-prefix-dtp-graph-v2-20261029/runs-v1/prefix-dtp-graph-v2-observed-01/results"
+      ],
+      "actual_recorded_producer_command": [
+        "/root/workspace/.muxpd-ecpa-runtime/bin/python",
+        "/root/workspace/muxpd-prefix-dtp-graph-v2-20261029/runs-v2/prefix-dtp-graph-v2-observed-01/producer/graph_run_v1.py",
+        "--profile",
+        "prefix-dtp-graph-observed",
+        "--source",
+        "/root/workspace/muxpd-composite-token-logits",
+        "--plan",
+        "/root/workspace/muxpd-prefix-dtp-graph-v2-20261029/runs-v2/prefix-dtp-graph-v2-observed-01/plan-v1.json",
+        "--config",
+        "/root/workspace/muxpd-prefix-dtp-graph-v2-20261029/runs-v2/prefix-dtp-graph-v2-observed-01/base-engine-args.json",
+        "--output",
+        "/root/workspace/muxpd-prefix-dtp-graph-v2-20261029/runs-v2/prefix-dtp-graph-v2-observed-01/results"
+      ],
+      "producer_command_differences": [
+        {
+          "index": 1,
+          "declared": "/root/workspace/muxpd-prefix-dtp-graph-v2-20261029/runs-v1/prefix-dtp-graph-v2-observed-01/producer/graph_run_v1.py",
+          "actual": "/root/workspace/muxpd-prefix-dtp-graph-v2-20261029/runs-v2/prefix-dtp-graph-v2-observed-01/producer/graph_run_v1.py"
+        },
+        {
+          "index": 7,
+          "declared": "/root/workspace/muxpd-prefix-dtp-graph-v2-20261029/runs-v1/prefix-dtp-graph-v2-observed-01/plan-v1.json",
+          "actual": "/root/workspace/muxpd-prefix-dtp-graph-v2-20261029/runs-v2/prefix-dtp-graph-v2-observed-01/plan-v1.json"
+        },
+        {
+          "index": 9,
+          "declared": "/root/workspace/muxpd-prefix-dtp-graph-v2-20261029/runs-v1/prefix-dtp-graph-v2-observed-01/base-engine-args.json",
+          "actual": "/root/workspace/muxpd-prefix-dtp-graph-v2-20261029/runs-v2/prefix-dtp-graph-v2-observed-01/base-engine-args.json"
+        },
+        {
+          "index": 11,
+          "declared": "/root/workspace/muxpd-prefix-dtp-graph-v2-20261029/runs-v1/prefix-dtp-graph-v2-observed-01/results",
+          "actual": "/root/workspace/muxpd-prefix-dtp-graph-v2-20261029/runs-v2/prefix-dtp-graph-v2-observed-01/results"
+        }
+      ],
+      "producer_command_non_path_arguments_unchanged": true,
+      "environment_differences": [
+        {
+          "key": "PYTHONPATH",
+          "declared": "/root/workspace/muxpd-prefix-dtp-graph-v2-20261029/runs-v1/prefix-dtp-graph-v2-observed-01/producer:/root/workspace/muxpd-composite-token-logits/src:/root/workspace/vllm-hust:/root/workspace/vllm-ascend-hust:/root/workspace/vllm-hust:/root/workspace/vllm-ascend-hust:/usr/local/Ascend/cann-9.1.0/python/site-packages:/usr/local/Ascend/cann-9.1.0/opp/built-in/op_impl/ai_core/tbe:/usr/local/Ascend/ascend-toolkit/latest/python/site-packages:/usr/local/Ascend/ascend-toolkit/latest/opp/built-in/op_impl/ai_core/tbe:",
+          "actual": "/root/workspace/muxpd-prefix-dtp-graph-v2-20261029/runs-v2/prefix-dtp-graph-v2-observed-01/producer:/root/workspace/muxpd-composite-token-logits/src:/root/workspace/vllm-hust:/root/workspace/vllm-ascend-hust:/root/workspace/vllm-hust:/root/workspace/vllm-ascend-hust:/usr/local/Ascend/cann-9.1.0/python/site-packages:/usr/local/Ascend/cann-9.1.0/opp/built-in/op_impl/ai_core/tbe:/usr/local/Ascend/ascend-toolkit/latest/python/site-packages:/usr/local/Ascend/ascend-toolkit/latest/opp/built-in/op_impl/ai_core/tbe:"
+        },
+        {
+          "key": "VLLM_CACHE_ROOT",
+          "declared": "/root/workspace/muxpd-prefix-dtp-graph-v2-20261029/runs-v1/prefix-dtp-graph-v2-observed-01/compiler-cache",
+          "actual": "/root/workspace/muxpd-prefix-dtp-graph-v2-20261029/runs-v2/prefix-dtp-graph-v2-observed-01/compiler-cache"
+        }
+      ],
+      "environment_difference_is_same_path_prefix_replacement": true,
+      "producer_files_verified": 24,
+      "plan_and_config_byte_identity": true,
+      "resolved_launch_engine_args_unchanged": true,
+      "actual_loaded_helper_paths_and_hashes_verified": true,
+      "declared_controller_command": [
+        "/root/workspace/.venv/bin/python",
+        "/root/workspace/muxpd-prefix-dtp-graph-v2-20261029/graph_control_v1.py",
+        "run",
+        "--profile",
+        "prefix-dtp-graph-observed",
+        "--source",
+        "/root/workspace/muxpd-composite-token-logits",
+        "--label",
+        "prefix-dtp-graph-v2-observed-01",
+        "--expected-physical",
+        "2,3,4,6",
+        "--timeout",
+        "900",
+        "--output-root",
+        "/root/workspace/muxpd-prefix-dtp-graph-v2-20261029/runs-v1"
+      ],
+      "actual_output_root_evidenced_by_destination": "/root/workspace/muxpd-prefix-dtp-graph-v2-20261029/runs-v2",
+      "controller_non_output_parameters_verified_from_receipt": true
+    },
+    {
+      "label": "prefix-dtp-graph-v2-plain-01",
+      "profile": "prefix-dtp-graph-plain",
+      "terminal_finished_at": "2026-10-29T19:57:48.223221+00:00",
+      "declared_producer_command": [
+        "/root/workspace/.muxpd-ecpa-runtime/bin/python",
+        "/root/workspace/muxpd-prefix-dtp-graph-v2-20261029/runs-v1/prefix-dtp-graph-v2-plain-01/producer/graph_run_v1.py",
+        "--profile",
+        "prefix-dtp-graph-plain",
+        "--source",
+        "/root/workspace/muxpd-composite-token-logits",
+        "--plan",
+        "/root/workspace/muxpd-prefix-dtp-graph-v2-20261029/runs-v1/prefix-dtp-graph-v2-plain-01/plan-v1.json",
+        "--config",
+        "/root/workspace/muxpd-prefix-dtp-graph-v2-20261029/runs-v1/prefix-dtp-graph-v2-plain-01/base-engine-args.json",
+        "--output",
+        "/root/workspace/muxpd-prefix-dtp-graph-v2-20261029/runs-v1/prefix-dtp-graph-v2-plain-01/results"
+      ],
+      "actual_recorded_producer_command": [
+        "/root/workspace/.muxpd-ecpa-runtime/bin/python",
+        "/root/workspace/muxpd-prefix-dtp-graph-v2-20261029/runs-v2/prefix-dtp-graph-v2-plain-01/producer/graph_run_v1.py",
+        "--profile",
+        "prefix-dtp-graph-plain",
+        "--source",
+        "/root/workspace/muxpd-composite-token-logits",
+        "--plan",
+        "/root/workspace/muxpd-prefix-dtp-graph-v2-20261029/runs-v2/prefix-dtp-graph-v2-plain-01/plan-v1.json",
+        "--config",
+        "/root/workspace/muxpd-prefix-dtp-graph-v2-20261029/runs-v2/prefix-dtp-graph-v2-plain-01/base-engine-args.json",
+        "--output",
+        "/root/workspace/muxpd-prefix-dtp-graph-v2-20261029/runs-v2/prefix-dtp-graph-v2-plain-01/results"
+      ],
+      "producer_command_differences": [
+        {
+          "index": 1,
+          "declared": "/root/workspace/muxpd-prefix-dtp-graph-v2-20261029/runs-v1/prefix-dtp-graph-v2-plain-01/producer/graph_run_v1.py",
+          "actual": "/root/workspace/muxpd-prefix-dtp-graph-v2-20261029/runs-v2/prefix-dtp-graph-v2-plain-01/producer/graph_run_v1.py"
+        },
+        {
+          "index": 7,
+          "declared": "/root/workspace/muxpd-prefix-dtp-graph-v2-20261029/runs-v1/prefix-dtp-graph-v2-plain-01/plan-v1.json",
+          "actual": "/root/workspace/muxpd-prefix-dtp-graph-v2-20261029/runs-v2/prefix-dtp-graph-v2-plain-01/plan-v1.json"
+        },
+        {
+          "index": 9,
+          "declared": "/root/workspace/muxpd-prefix-dtp-graph-v2-20261029/runs-v1/prefix-dtp-graph-v2-plain-01/base-engine-args.json",
+          "actual": "/root/workspace/muxpd-prefix-dtp-graph-v2-20261029/runs-v2/prefix-dtp-graph-v2-plain-01/base-engine-args.json"
+        },
+        {
+          "index": 11,
+          "declared": "/root/workspace/muxpd-prefix-dtp-graph-v2-20261029/runs-v1/prefix-dtp-graph-v2-plain-01/results",
+          "actual": "/root/workspace/muxpd-prefix-dtp-graph-v2-20261029/runs-v2/prefix-dtp-graph-v2-plain-01/results"
+        }
+      ],
+      "producer_command_non_path_arguments_unchanged": true,
+      "environment_differences": [
+        {
+          "key": "PYTHONPATH",
+          "declared": "/root/workspace/muxpd-prefix-dtp-graph-v2-20261029/runs-v1/prefix-dtp-graph-v2-plain-01/producer:/root/workspace/muxpd-composite-token-logits/src:/root/workspace/vllm-hust:/root/workspace/vllm-ascend-hust:/root/workspace/vllm-hust:/root/workspace/vllm-ascend-hust:/usr/local/Ascend/cann-9.1.0/python/site-packages:/usr/local/Ascend/cann-9.1.0/opp/built-in/op_impl/ai_core/tbe:/usr/local/Ascend/ascend-toolkit/latest/python/site-packages:/usr/local/Ascend/ascend-toolkit/latest/opp/built-in/op_impl/ai_core/tbe:",
+          "actual": "/root/workspace/muxpd-prefix-dtp-graph-v2-20261029/runs-v2/prefix-dtp-graph-v2-plain-01/producer:/root/workspace/muxpd-composite-token-logits/src:/root/workspace/vllm-hust:/root/workspace/vllm-ascend-hust:/root/workspace/vllm-hust:/root/workspace/vllm-ascend-hust:/usr/local/Ascend/cann-9.1.0/python/site-packages:/usr/local/Ascend/cann-9.1.0/opp/built-in/op_impl/ai_core/tbe:/usr/local/Ascend/ascend-toolkit/latest/python/site-packages:/usr/local/Ascend/ascend-toolkit/latest/opp/built-in/op_impl/ai_core/tbe:"
+        },
+        {
+          "key": "VLLM_CACHE_ROOT",
+          "declared": "/root/workspace/muxpd-prefix-dtp-graph-v2-20261029/runs-v1/prefix-dtp-graph-v2-plain-01/compiler-cache",
+          "actual": "/root/workspace/muxpd-prefix-dtp-graph-v2-20261029/runs-v2/prefix-dtp-graph-v2-plain-01/compiler-cache"
+        }
+      ],
+      "environment_difference_is_same_path_prefix_replacement": true,
+      "producer_files_verified": 24,
+      "plan_and_config_byte_identity": true,
+      "resolved_launch_engine_args_unchanged": true,
+      "actual_loaded_helper_paths_and_hashes_verified": true,
+      "declared_controller_command": [
+        "/root/workspace/.venv/bin/python",
+        "/root/workspace/muxpd-prefix-dtp-graph-v2-20261029/graph_control_v1.py",
+        "run",
+        "--profile",
+        "prefix-dtp-graph-plain",
+        "--source",
+        "/root/workspace/muxpd-composite-token-logits",
+        "--label",
+        "prefix-dtp-graph-v2-plain-01",
+        "--expected-physical",
+        "2,3,4,6",
+        "--timeout",
+        "900",
+        "--output-root",
+        "/root/workspace/muxpd-prefix-dtp-graph-v2-20261029/runs-v1"
+      ],
+      "actual_output_root_evidenced_by_destination": "/root/workspace/muxpd-prefix-dtp-graph-v2-20261029/runs-v2",
+      "controller_non_output_parameters_verified_from_receipt": true
+    }
+  ],
+  "controller_cli_evidence_limit": "controller.json persists child producer argv, destination, selected inputs and environment, not the full original parent-controller argv. Exact child argv comparisons are verified; parent --output-root is evidenced by destination and the root operator declaration. Full parent-argv byte identity is not claimed.",
+  "control_source_findings": [
+    "Frozen controller preview derives destination from args.output_root / args.label; root selection is an explicit CLI input.",
+    "Freeze binds producer bytes and physical allocation but does not bind output-root pathname.",
+    "Execute requires a fresh destination with exist_ok=False and copies/hash-checks the same frozen producer/input files.",
+    "VLLM_CACHE_ROOT is per fresh destination; the derived cache path relocation is disclosed and no performance claim is made."
+  ],
+  "numerical_assessment": {
+    "requires_additional_downgrade": false,
+    "reason": "Only storage/derived module and cache path prefixes differ. Both runs retain exact producer, model configuration, plan, profile, hardware allocation, and actual loaded helper byte identities. Independent raw bit comparisons and historical/new prefix bridges still refer to the same verified recorded data.",
+    "unchanged_result": "Four local input rows match native bytes; actual prefix output equals B and differs from A/C at625/2048 entries per rank.",
+    "retained_limits": [
+      "Historical native used a different physical allocation; no unique graph/geometry causation.",
+      "No answer-quality non-regression acceptance or throughput/Goodput result follows from this diagnostic.",
+      "The frozen launch matrix pathname was not followed literally and is explicitly reported as a post-run path deviation."
+    ]
+  },
+  "original_audit_and_summary_unchanged": true,
+  "evidence_sha256": {
+    "/root/workspace/muxpd-prefix-dtp-graph-v2-20261029/freeze-manifest-v1.json": "b27108e753506c0fded2d64a33d37ef4acd8c6aff275511774b9e2d60b9e48e1",
+    "/root/workspace/muxpd-prefix-dtp-graph-v2-20261029/matrix-draft-v2.json": "1eb37000cab78733dec7f36636942c040cfcef1138612bbf8bbccc28544b5ade",
+    "/root/workspace/muxpd-prefix-dtp-graph-v2-20261029/runs-v2/prefix-dtp-graph-v2-observed-01/controller.json": "095d7114ac60f3db9ad398472ac2074f1d2969caf8afaafc59871cbdfed3121c",
+    "/root/workspace/muxpd-prefix-dtp-graph-v2-20261029/runs-v2/prefix-dtp-graph-v2-observed-01/results/run.json": "c2c3d357f2450880b078263688e4da6a745bc19f34ad9876c8bd6ee930e45a8e",
+    "/root/workspace/muxpd-prefix-dtp-graph-v2-20261029/dry-run-observed-v2.json": "ffc95378ac49354d13cff4a032043bbf47333fd239923ad7888ad4c0d95c48cc",
+    "/root/workspace/muxpd-prefix-dtp-graph-v2-20261029/runs-v2/prefix-dtp-graph-v2-observed-01/plan-v1.json": "deb054921d2cf7dd5bfbb9ba0f2b092e17233b6886105f783272672839e3f8c1",
+    "/root/workspace/muxpd-prefix-dtp-graph-v2-20261029/runs-v2/prefix-dtp-graph-v2-observed-01/base-engine-args.json": "d42f1007c5e059fdd872a4b77c8f003aa185e948a59c35373322690a6248d512",
+    "/root/workspace/muxpd-prefix-dtp-graph-v2-20261029/runs-v2/prefix-dtp-graph-v2-plain-01/controller.json": "976f076054f559eedbcec0690ec1cfc8b2069ef8dd25fe12163f262f52f47874",
+    "/root/workspace/muxpd-prefix-dtp-graph-v2-20261029/runs-v2/prefix-dtp-graph-v2-plain-01/results/run.json": "2da32f7ecdcd69c85f52ef5e8e7104a820eb80927070b2bf8eb90a20250c263f",
+    "/root/workspace/muxpd-prefix-dtp-graph-v2-20261029/dry-run-plain-v2.json": "565870658d3fde76c14b27b78cdfe5dee22a0589ba1e42a00647474849e22950",
+    "/root/workspace/muxpd-prefix-dtp-graph-v2-20261029/runs-v2/prefix-dtp-graph-v2-plain-01/plan-v1.json": "deb054921d2cf7dd5bfbb9ba0f2b092e17233b6886105f783272672839e3f8c1",
+    "/root/workspace/muxpd-prefix-dtp-graph-v2-20261029/runs-v2/prefix-dtp-graph-v2-plain-01/base-engine-args.json": "d42f1007c5e059fdd872a4b77c8f003aa185e948a59c35373322690a6248d512",
+    "/root/workspace/muxpd-prefix-dtp-graph-independent-audit-20261029/v2/summary-v2.json": "01763ac2be24a662826d1f9d19d46eab270cdec505613bc7611b0ed8ff3c046a",
+    "/root/workspace/muxpd-prefix-dtp-graph-v2-20261029/analysis-v2.json": "bfc4d4cfd3fd04e085511d10963b81ff02bd9585fc223eab1cf2ed0a9a0985fd",
+    "/root/workspace/muxpd-prefix-dtp-graph-independent-audit-20261029/v2/audit_v2.py": "323ed05d40f2fb4264db8571bf6e8f140e1de2b4601b930fa3615003b83326a7"
+  }
+}

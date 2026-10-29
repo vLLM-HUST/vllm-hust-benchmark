@@ -1,0 +1,35 @@
+import concurrent.futures,datetime,gzip,hashlib,json,pathlib,subprocess,tarfile
+root=pathlib.Path(__file__).parent;stage=root.parent/'publication-staging-v2';expected=json.loads((stage/'upload-assets-v3.json').read_text())['assets']
+raw=subprocess.check_output(['gh','api','repos/vLLM-HUST/vllm-hust-benchmark/releases/tags/evidence-muxpd-prefix-first-decode-graph-20261029'])
+with (root/'release-api.json').open('xb') as f:f.write(raw)
+release=json.loads(raw);assets={x['name']:x for x in release['assets']};assert set(assets)=={x['name'] for x in expected}
+for e in expected:
+ a=assets[e['name']];assert a['state']=='uploaded' and a['size']==e['bytes'] and a['digest']=='sha256:'+e['sha256']
+with (root/'expected-truth.json').open('x') as f:json.dump(expected,f,indent=2);f.write('\n')
+def get(e):
+ name=e['name'];target=root/name
+ assert not target.exists()
+ cmd=['curl','-q','--silent','--show-error','--location','--http1.1','--tlsv1.2','--connect-timeout','20','--max-time','180','--output',str(target),'--dump-header',str(root/(name+'.headers')),'--write-out','%{json}',assets[name]['browser_download_url']]
+ r=subprocess.run(cmd,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+ with (root/(name+'.curl.json')).open('xb') as f:f.write(r.stdout)
+ with (root/(name+'.stderr')).open('xb') as f:f.write(r.stderr)
+ try:meta=json.loads(r.stdout)
+ except Exception:meta={}
+ data=target.read_bytes() if target.exists() else b'';sha=hashlib.sha256(data).hexdigest()
+ result={'name':name,'exit_code':r.returncode,'http_code':meta.get('http_code'),'ssl_verify_result':meta.get('ssl_verify_result'),'bytes':len(data),'sha256':sha,'expected_bytes':e['bytes'],'expected_sha256':e['sha256'],'passed':r.returncode==0 and meta.get('http_code')==200 and meta.get('ssl_verify_result')==0 and len(data)==e['bytes'] and sha==e['sha256'],'attempts':1}
+ print(json.dumps(result),flush=True);return result
+with concurrent.futures.ThreadPoolExecutor(max_workers=2) as pool:results=list(pool.map(get,expected))
+record={'schema':'muxpd-prefix-graph-public-readback-v2','finished_at':datetime.datetime.now(datetime.UTC).isoformat(),'passed':all(x['passed'] for x in results),'assets':results,'api_inventory_passed':True,'anonymous_no_auth_no_cookie_curlrc_disabled':True,'scope':'One GET per asset; verified TLS; no retries or Range downloads. API metadata is not substituted for downloaded bytes.','archive_verified':False}
+if record['passed']:
+ archive=root/expected[0]['name'];manifest=json.loads((root/'archive-manifest-v1.json').read_text());items={x['member']:(x['bytes'],x['sha256']) for x in manifest['members']}
+ data=(root/'archive-manifest-v1.json').read_bytes();items['archive-manifest-v1.json']=(len(data),hashlib.sha256(data).hexdigest())
+ with tarfile.open(archive,'r:gz') as t:
+  members=t.getmembers();assert len(members)==len(items)==458 and {m.name for m in members}==set(items)
+  for m in members:
+   assert m.isfile();body=t.extractfile(m).read();assert (len(body),hashlib.sha256(body).hexdigest())==items[m.name]
+ with gzip.open(archive,'rb') as stream:
+  while stream.read(1048576):pass
+ record['archive_verified']=True;record['archive_members']=len(items);record['gzip_eof_crc_verified']=True
+record['status']='PASS' if record['passed'] and record['archive_verified'] else 'INCOMPLETE'
+with (root/'final-status-v2.json').open('x') as f:json.dump(record,f,indent=2);f.write('\n')
+print(json.dumps({'status':record['status'],'output':str(root/'final-status-v2.json')}),flush=True)

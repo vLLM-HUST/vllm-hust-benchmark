@@ -1,0 +1,744 @@
+"""Independent CPU audit. Never reads run children before all terminal gates."""
+
+import argparse
+import hashlib
+import io
+import json
+import re
+from datetime import UTC, datetime
+from pathlib import Path
+
+import numpy as np
+
+FREEZE = "b27108e753506c0fded2d64a33d37ef4acd8c6aff275511774b9e2d60b9e48e1"
+PROFILES = ("prefix-dtp-graph-observed", "prefix-dtp-graph-plain")
+LABELS = ("prefix-dtp-graph-v2-observed-01", "prefix-dtp-graph-v2-plain-01")
+DESCRIPTOR = {
+    "num_tokens": 1,
+    "num_reqs": 1,
+    "uniform": True,
+    "has_lora": False,
+    "num_active_loras": 0,
+}
+COUNTERS = (
+    "decode_replay_calls",
+    "decode_capture_forward_calls",
+    "decode_eager_fallback_calls",
+    "decode_uncaptured_full_calls",
+    "decode_forward_failures",
+)
+READS = {}
+
+
+def require(condition, text):
+    if not condition:
+        raise ValueError(text)
+
+
+def digest(raw):
+    return hashlib.sha256(raw).hexdigest()
+
+
+def data(path):
+    raw = Path(path).read_bytes()
+    READS[str(Path(path).resolve())] = {"bytes": len(raw), "sha256": digest(raw)}
+    return raw
+
+
+def read(path):
+    return json.loads(data(path))
+
+
+def terminal_gate(paths):
+    controllers = {}
+    for path in paths:
+        c = read(path / "controller.json")
+        require(
+            c.get("finished_at") and c.get("terminal_process_proven") is True,
+            "Nonterminal; child/log/tensors deliberately not read: " + str(path),
+        )
+        require(
+            c.get("passed") is True
+            and c.get("exit_code") == 0
+            and c.get("owned_members_after_cleanup") == []
+            and not c.get("cleanup_required")
+            and not c.get("forced_termination")
+            and c.get("errors") == [],
+            "Failed terminal lifecycle: " + str(path),
+        )
+        controllers[path] = c
+    return controllers
+
+
+def verify_files(root, files):
+    for name, expected in files.items():
+        require(digest(data(root / name)) == expected, "File identity differs: " + name)
+
+
+def ranks(rows):
+    require(
+        len(rows) == 4 and {r["rank"] for r in rows} == set(range(4)),
+        "Expected exactly four distinct ranks",
+    )
+    return sorted(rows, key=lambda r: r["rank"])
+
+
+def physical(path, controller):
+    expected = controller["expected_physical"]
+    for phase in ("before", "after"):
+        text = data(path / f"npu-{phase}.txt").decode()
+        actual = sorted(
+            set(re.findall(r"^\|\s*(\d+)\s+910B2\s*\|", text, re.MULTILINE)), key=int
+        )
+        idle = sorted(
+            set(re.findall(r"No running processes found in NPU (\d+)\b", text)), key=int
+        )
+        require(
+            len(actual) == 4
+            and actual == idle == expected == controller[f"idle_physical_{phase}"],
+            "Physical inventory differs",
+        )
+    require(
+        read(path / "producer/freeze-manifest-v1.json")["expected_physical"]
+        == expected,
+        "Inventory differs from run freeze",
+    )
+    return expected
+
+
+def tensor(root, receipt):
+    require(
+        receipt["shape"] == [1, 2048] and receipt["dtype"] == "torch.bfloat16",
+        "Expected one BF16 row",
+    )
+    values = {}
+    for kind in ("raw", "float32"):
+        item = receipt[kind]
+        require(Path(item["file"]).name == item["file"], "Unsafe tensor filename")
+        raw = data(root / item["file"])
+        require(
+            len(raw) == item["bytes"] and digest(raw) == item["sha256"],
+            "Tensor receipt mismatch",
+        )
+        values[kind] = raw
+    require(len(values["raw"]) == 4096, "BF16 raw size differs")
+    bits = (np.frombuffer(values["raw"], dtype="<u2").astype(np.uint32) << 16).reshape(
+        1, 2048
+    )
+    decoded = bits.view(np.float32)
+    saved = np.load(io.BytesIO(values["float32"]), allow_pickle=False)
+    require(
+        saved.shape == (1, 2048)
+        and saved.dtype == np.dtype("float32")
+        and np.array_equal(saved.view(np.uint32), bits)
+        and np.isfinite(decoded).all(),
+        "Raw/NPY bit identity or finite gate failed",
+    )
+    return values["raw"], decoded
+
+
+def compare(left, right):
+    difference = left[1].astype(np.float64) - right[1].astype(np.float64)
+    return {
+        "raw_byte_equal": left[0] == right[0],
+        "different_finite_elements": int(np.count_nonzero(difference)),
+        "max_absolute_error": float(np.abs(difference).max()),
+        "rms_error": float(np.sqrt(np.mean(difference * difference))),
+    }
+
+
+def check_operator(row, contract, contract_sha):
+    require(
+        row["passed"]
+        and row["errors"] == []
+        and row["contract_sha256"] == contract_sha
+        and row["bound_files"] == contract["bound_files"]
+        and row["actual_cached_operator_pointers_observed"] is False,
+        "Operator receipt failed",
+    )
+    require(digest(row["maps_raw"].encode()) == row["maps_sha256"], "Maps hash differs")
+    paths = set()
+    for line in row["maps_raw"].splitlines():
+        fields = line.split(maxsplit=5)
+        if (
+            len(fields) == 6
+            and fields[5].startswith("/")
+            and (
+                Path(fields[5].removesuffix(" (deleted)")).name
+                in contract["required_mapped_basenames"]
+            )
+        ):
+            paths.add(fields[5])
+    candidates = row["mapped_candidates"]
+    require(
+        len(candidates) == len(paths) and {c["path"] for c in candidates} == paths,
+        "Mapped candidate set differs",
+    )
+    loaded = {}
+    for candidate in candidates:
+        canonical = str(Path(candidate["path"]).resolve(strict=True))
+        require(
+            candidate["error"] is None
+            and candidate["real_path"] == canonical
+            and candidate["sha256"] == contract["allowed_mapped_files"].get(canonical),
+            "Mapped library is not allowed",
+        )
+        loaded[canonical] = candidate["sha256"]
+    require(
+        loaded == row["loaded_libraries"]
+        and all(
+            loaded.get(p) == sha for p, sha in contract["required_mapped_files"].items()
+        ),
+        "Required loaded library differs",
+    )
+
+
+def check_report(path, report, observed, plan, files, callables, contract):
+    require(
+        report["profile"] == PROFILES[0 if observed else 1]
+        and report["plan"] == plan
+        and report["passed"]
+        and report["collection_complete"]
+        and report["shutdown_returned"]
+        and not report["errors"]
+        and report["transport_trusted"],
+        "Run report failed",
+    )
+    require(
+        report["sources"] == report["sources_after_startup"], "Source startup changed"
+    )
+    plugin = report["sources"]["vllm_muxpd"]
+    require(
+        plugin["commit"] == "6c606f789450a45ef35afee398b0a3e516caa1a1"
+        and plugin["status"] == plugin["diff"] == "",
+        "Plugin source differs",
+    )
+    phases = [
+        ("graph_startup", "startup"),
+        ("worker_before", "snapshot"),
+        ("layout_installation", "layout_install"),
+    ]
+    if observed:
+        phases.append(("graph_arm", "arm"))
+    phases.append(("worker_after", "snapshot"))
+    if observed:
+        phases.append(("graph_final", "finalize"))
+    phases += [
+        ("layout_final", "layout_snapshot"),
+        ("layout_uninstall", "layout_uninstall"),
+    ]
+    journal = report["diagnostic_rpc"]
+    require(
+        [(j["label"], j["phase"]) for j in journal] == phases, "RPC phase order differs"
+    )
+    for item in journal:
+        entries = ranks(item["responses"])
+        require(
+            item["status"] == "validated"
+            and all(
+                e["ok"] is True
+                and e["error"] is None
+                and e["phase"] == item["phase"]
+                and e["schema"] == "muxpd-conv-rpc-envelope-v2"
+                for e in entries
+            )
+            and [e["data"] for e in entries] == report[item["label"]],
+            "RPC receipts differ",
+        )
+    for startup in ranks(report["graph_startup"]):
+        require(
+            startup["passed"]
+            and startup["poison"] is None
+            and startup["traceback"] is None
+            and startup["startup_restore_error"] is None
+            and startup["enabled"] is observed
+            and startup["descriptor"] == DESCRIPTOR,
+            "Startup role/identity failed",
+        )
+        for name, value in startup["base_identities"].items():
+            require(
+                value == callables[name], "Original Python identity differs: " + name
+            )
+        for name, expected in startup["helpers"].items():
+            require(
+                expected
+                == {
+                    "path": str(path / "producer" / (name + ".py")),
+                    "sha256": files[name + ".py"],
+                },
+                "Startup helper differs",
+            )
+        require(
+            read(
+                path
+                / "results/graph-startup"
+                / f"rank-{startup['rank']}"
+                / "startup-final.json"
+            )
+            == startup,
+            "Persisted startup differs from RPC",
+        )
+        for key, count in (
+            ("capture_attempts", 1),
+            ("captured_calls", 1),
+            ("core_calls", 1),
+            ("copy_calls", 2),
+            ("capture_restored", 3),
+        ):
+            require(
+                startup[key] == count * int(observed), "Startup capture count differs"
+            )
+    for phase in ("worker_before", "worker_after"):
+        for worker in ranks(report[phase]):
+            check_operator(
+                worker["operator_identity"],
+                contract,
+                files["operator-contract-v1.json"],
+            )
+            require(
+                worker["graph_observation_enabled"] == ("1" if observed else "0"),
+                "Worker tap environment differs",
+            )
+            for group in ("external_observer_modules", "diagnostic_modules"):
+                for name, identity in worker[group].items():
+                    require(
+                        identity
+                        == {
+                            "path": str(path / "producer" / (name + ".py")),
+                            "sha256": files[name + ".py"],
+                        },
+                        "Worker helper differs",
+                    )
+    require(
+        report["natural_completions"] == []
+        and len(report["state_before_abort"]["request_ids"]) == 8,
+        "Actual live eight-request boundary differs",
+    )
+    for row in ranks(report["layout_final"]):
+        require(
+            row["mode"] == "prefix"
+            and row["treated_cohorts"] == 1
+            and row["installed_hook_count"] == 3
+            and row["all_hooks_intact"]
+            and not row["errors"],
+            "P-prefix layout receipt failed",
+        )
+        seed, mixed = row["cohorts"]
+        require(
+            seed["d_rows"] == 0
+            and seed["zero_d_bypass_calls"] == 81
+            and not seed["calls"]
+            and mixed["d_rows"] == 1
+            and len(mixed["calls"]) == 81
+            and mixed["zero_d_bypass_calls"] == 0,
+            "P-prefix cohort boundary differs",
+        )
+    for row in ranks(report["layout_uninstall"]):
+        require(
+            row["ok"] and row["all_originals_restored"] and row["restored_count"] == 3,
+            "P-prefix restoration failed",
+        )
+
+
+def check_constructor(path, report, files, callables, contract):
+    receipt = report["scheduler_constructor_compat"]
+    actual = report["actual_scheduler"]
+    config = receipt["config"]
+    worker = "graph_workers_v1.PrefixDTPGraphWorker"
+    canonical = "vllm_muxpd.decoupled_worker.DecoupledMuxPDNPUWorker"
+    scheduler = "vllm_muxpd.decoupled_scheduler.DecoupledMuxPDScheduler"
+    require(
+        receipt["schema"] == "muxpd-graph-scheduler-constructor-compat-v2"
+        and receipt["passed"] is True
+        and receipt["state"] == "complete"
+        and receipt["calls"] == receipt["original_calls"] == 1
+        and receipt["init_restored"]
+        and receipt["non_init_methods_unchanged"]
+        and receipt["error"] is None
+        and receipt["original_exception"] is None
+        and receipt["restore_errors"] == []
+        and receipt["owner"]["pid"] == report["pid"],
+        "Constructor compatibility was not one successful restored call",
+    )
+    require(
+        config["worker_cls_before"]
+        == config["worker_cls_after"]
+        == config["owned_worker_cls_after"]
+        == actual["worker_cls"]
+        == worker
+        and config["worker_cls_during"] == canonical
+        and config["scheduler_cls_before"]
+        == config["scheduler_cls_during"]
+        == config["scheduler_cls_after"]
+        == actual["scheduler_cls"]
+        == scheduler
+        and config["parallel_config_same"]
+        and actual["config_aliases_preserved"]
+        and config["parallel_config_id"] == actual["parallel_config_id"]
+        and config["vllm_config_id"] == actual["vllm_config_id"],
+        "Constructor field mapping/configuration restoration differs",
+    )
+    original = receipt["scheduler"]
+    require(
+        original["module"] == actual["module"] == "vllm_muxpd.decoupled_scheduler"
+        and original["qualname"] == actual["qualname"] == "DecoupledMuxPDScheduler"
+        and original["class_id"] == actual["class_id"]
+        and original["instance_id"] == actual["instance_id"]
+        and all(
+            type(actual[k]) is int and actual[k] > 0
+            for k in ("class_id", "instance_id", "parallel_config_id", "vllm_config_id")
+        ),
+        "Actual original scheduler identity differs",
+    )
+    expected_sources = {
+        "scheduler": "/root/workspace/muxpd-composite-token-logits/src/vllm_muxpd/decoupled_scheduler.py",
+        "base_worker": "/root/workspace/muxpd-composite-token-logits/src/vllm_muxpd/decoupled_worker.py",
+        "policy": "/root/workspace/muxpd-composite-token-logits/src/vllm_muxpd/policy.py",
+    }
+    identities = {
+        key: {"path": source, "sha256": contract["bound_files"][source]}
+        for key, source in expected_sources.items()
+    }
+    identities["diagnostic_worker"] = {
+        "path": str(path / "producer/graph_workers_v1.py"),
+        "sha256": files["graph_workers_v1.py"],
+    }
+    require(
+        receipt["sources"] == identities
+        and actual["source"] == identities["scheduler"]
+        and receipt["original_init"]
+        == {
+            "module": "vllm_muxpd.decoupled_scheduler",
+            "qualname": "DecoupledMuxPDScheduler.__init__",
+            **identities["scheduler"],
+        },
+        "Constructor source identities differ",
+    )
+    inherited = {
+        name: {
+            "module": callables[name]["module"],
+            "qualname": callables[name]["qualname"],
+            **callables[name]["wrapper_source"],
+        }
+        for name in (
+            "execute_model",
+            "sample_tokens",
+            "load_model",
+            "initialize_from_config",
+        )
+    }
+    require(
+        receipt["inherited_worker_methods"] == inherited,
+        "Constructor inherited callable wrapper identities differ",
+    )
+    require(
+        report["driver_helper_modules"]
+        == {
+            name: {
+                "path": str(path / "producer" / (name + ".py")),
+                "sha256": files[name + ".py"],
+            }
+            for name in ("graph_rpc_v1", "graph_scheduler_compat_v2")
+        },
+        "Constructor driver helper identity differs",
+    )
+    names = receipt["non_init_method_names"]
+    require(
+        len(names) == len(set(names))
+        and "__init__" not in names
+        and {"schedule", "update_from_output", "add_request", "finish_requests"}
+        <= set(names),
+        "Original scheduling method identity set incomplete",
+    )
+
+
+def check_prior_failure(bundle):
+    reference = read(bundle / "v1-failure-reference-v2.json")
+    failed = Path(reference["failed_run"])
+    controller = read(failed / "controller.json")
+    require(
+        controller.get("finished_at")
+        and controller.get("terminal_process_proven")
+        and controller.get("exit_code") == 1
+        and controller.get("passed") is False
+        and controller.get("owned_members_after_cleanup") == [],
+        "Prior v1 failure is not terminal; no child/lineage file reads allowed",
+    )
+    verify_files(Path("/"), reference["immutable_references"])
+    prior = Path(reference["prior_probe"])
+    analysis = read(prior / "analysis-v1.json")
+    disposition = read(prior / "root-failure-disposition-v1.json")
+    child = read(failed / "results/run.json")
+    require(
+        reference["status"] == disposition["status"] == "FAILED_INCOMPLETE_MATRIX"
+        and analysis["passed"] is False
+        and analysis["interpretation_allowed"] is False
+        and len(analysis["attempts"]) == 1
+        and disposition["retry_selected"] is False
+        and child["passed"] is False
+        and child["collection_complete"] is False
+        and child["shutdown_returned"] is False
+        and child["admissions"] == []
+        and not (prior / "runs-v1" / reference["missing_plain_label"]).exists(),
+        "Prior failed matrix was relabelled or a retry selected",
+    )
+    return {
+        "status": "FAILED_INCOMPLETE_MATRIX",
+        "admissions": 0,
+        "plain_started": False,
+        "interpretation_allowed": False,
+        "reference_sha256": digest(data(bundle / "v1-failure-reference-v2.json")),
+    }
+
+
+def audit(bundle, runs):
+    reference = read(bundle / "native-reference-v1.json")
+    paths = [runs / label for label in LABELS]
+    require(
+        set(runs.iterdir()) == set(paths), "Exactly two predeclared attempts required"
+    )
+    native_paths = [Path(p) for p in reference["runs"]]
+    controllers = terminal_gate(paths + native_paths)
+    # Nothing below this line executes unless every new/native controller is terminal and valid.
+    frozen = read(bundle / "freeze-manifest-v1.json")
+    require(
+        digest(data(bundle / "freeze-manifest-v1.json")) == FREEZE
+        and frozen["status"] == "frozen",
+        "Root freeze differs",
+    )
+    verify_files(bundle, frozen["files"])
+    verify_files(bundle, frozen["preparation_files"])
+    verify_files(bundle, frozen["root_review_files"])
+    prior_failure = check_prior_failure(bundle)
+    verify_files(Path("/"), reference["immutable_references"])
+    plan = read(bundle / "plan-v1.json")
+    histories = read(bundle / "historical-prefixes-v1.json")["references"][
+        "prefix-quality-full-01"
+    ]
+    contract = read(bundle / "operator-contract-v1.json")
+    callables = read(bundle / "graph-source-contract-v1.json")["callables"]
+    verify_files(Path("/"), contract["bound_files"])
+    expected_config = read(bundle / "raw-engine-args-v1.json")
+    expected_config["worker_cls"] = "graph_workers_v1.PrefixDTPGraphWorker"
+    reports, allocations, prefix_comparisons = [], [], []
+    for index, path in enumerate(paths):
+        controller = controllers[path]
+        require(
+            controller["freeze_manifest_sha256"] == FREEZE
+            and controller["files"] == frozen["files"],
+            "Controller freeze differs",
+        )
+        require(
+            digest(data(path / "producer/freeze-manifest-v1.json")) == FREEZE,
+            "Run freeze copy differs",
+        )
+        verify_files(path / "producer", frozen["files"])
+        allocations.append(physical(path, controller))
+        require(
+            "Traceback" not in data(path / "process.log").decode(errors="replace"),
+            "Worker traceback",
+        )
+        report = read(path / "results/run.json")
+        check_report(
+            path, report, index == 0, plan, frozen["files"], callables, contract
+        )
+        require(
+            report["launch_config"] == expected_config, "Engine launch inputs differ"
+        )
+        cases = report["prefixes_before_abort"]
+        require(
+            set(cases) == set(histories) and len(cases) == 8,
+            "Prefix request set differs",
+        )
+        for case in plan["cases"]:
+            cid = case["case_id"]
+            tokens = cases[cid]["output_token_ids"]
+            require(
+                cases[cid]["prompt_token_ids"] == case["prompt_token_ids"]
+                and cases[cid]["num_preemptions"] == 0
+                and len(tokens) >= 208
+                and tokens == histories[cid]["token_ids"][: len(tokens)],
+                "Historical prefix differs: " + cid,
+            )
+            prefix_comparisons.append(
+                {
+                    "profile": PROFILES[index],
+                    "case_id": cid,
+                    "tokens": len(tokens),
+                    "exact": True,
+                }
+            )
+        require(
+            len(cases[plan["target_case_id"]]["output_token_ids"]) == 208,
+            "Target boundary differs",
+        )
+        check_constructor(path, report, frozen["files"], callables, contract)
+        reports.append(report)
+    require(
+        allocations[0] == allocations[1] == frozen["expected_physical"],
+        "New role allocations differ",
+    )
+    require(reports[0]["sources"] == reports[1]["sources"], "New role sources differ")
+    for cid in histories:
+        require(
+            reports[0]["prefixes_before_abort"][cid]["output_token_ids"]
+            == reports[1]["prefixes_before_abort"][cid]["output_token_ids"],
+            "Observed/plain prefix differs",
+        )
+    require(
+        not (paths[1] / "results/graph-observations").exists(), "Plain role has tensors"
+    )
+    observed = reports[0]
+    root = paths[0] / "results/graph-observations"
+    require(
+        set(root.iterdir()) == {root / f"rank-{r}" for r in range(4)},
+        "Graph tensor rank set differs",
+    )
+    native_root = Path(reference["observed_run"])
+    native_report = read(native_root / "results/run.json")
+    natives = {row["rank"]: row for row in ranks(native_report["dtp_final"])}
+    numerical, output_bytes = [], []
+    for row in ranks(observed["graph_final"]):
+        rank = row["rank"]
+        rankroot = root / f"rank-{rank}"
+        require(
+            read(rankroot / "final.json") == row
+            and row["passed"]
+            and row["poison"] is None
+            and row["capture_restored"] == 3
+            and row["serving_restored"] == 2
+            and row["uninstalled"]
+            and row["captured_calls"] == 1
+            and row["extra_collectives"] == 0
+            and row["original_return_alias_preserved"],
+            "Graph final failed",
+        )
+        before, after = row["replay"]["before"], row["replay"]["after"]
+        require(
+            row["replay"]["sentinel_before_replay"]
+            and row["replay"]["snapshot_before_next_replay"],
+            "Replay sentinel/snapshot ordering absent",
+        )
+        for value in (before, after):
+            require(
+                value["descriptor"] == DESCRIPTOR
+                and value["entry"] == row["startup"]["graph_entry"]
+                and value["mode"] == "FULL"
+                and value["capturing"] is False
+                and value["lane"] == "decode",
+                "Actual graph replay identity differs",
+            )
+        require(
+            {key: after["stats"][key] - before["stats"][key] for key in COUNTERS}
+            == dict(zip(COUNTERS, (1, 0, 0, 0, 0)))
+            == row["replay"]["delta"],
+            "Replay delta differs",
+        )
+        require(set(row["snapshots"]) == {"input", "output"}, "Expected two graph rows")
+        expected_files = {rankroot / "final.json"}
+        for snapshot in row["snapshots"].values():
+            expected_files |= {
+                rankroot / snapshot[k]["file"] for k in ("raw", "float32")
+            }
+        require(
+            set(rankroot.iterdir()) == expected_files, "Unexpected graph tensor files"
+        )
+        g = {
+            name: tensor(rankroot, receipt)
+            for name, receipt in row["snapshots"].items()
+        }
+        output_bytes.append(g["output"][0])
+        old = natives[rank]
+        nroot = native_root / "results/dtp-observations" / f"rank-{rank}"
+        old_seed = old["mapping"]["rows"][old["mapping"]["seed_sequence"]]
+        mapping = row["mapping"]
+        require(
+            mapping["seed_case_id"] == old_seed["case_id"]
+            and mapping["prompt_sha256"] == old_seed["prompt_sha256"]
+            and mapping["position"] == old_seed["num_computed_tokens"]
+            and mapping["output_token_ids"] == old_seed["output_token_ids"],
+            "Logical native seed differs",
+        )
+        receipts = {
+            "input": old["snapshots"]["input"],
+            "A": old["snapshots"]["actual"],
+            "B": old["branches"][0]["output"],
+            "C": old["branches"][2]["output"],
+        }
+        n = {name: tensor(nroot, receipt) for name, receipt in receipts.items()}
+        numerical.append(
+            {
+                "rank": rank,
+                "input": compare(g["input"], n["input"]),
+                "output": {
+                    key: compare(g["output"], n[key]) for key in ("A", "B", "C")
+                },
+            }
+        )
+    require(len(set(output_bytes)) == 1, "Reduced graph output differs across ranks")
+    all_inputs = all(row["input"]["raw_byte_equal"] for row in numerical)
+    if not all_inputs:
+        # Outputs are read for file integrity but are not used for reduction attribution.
+        for row in numerical:
+            row.pop("output")
+    old_allocations = [physical(path, controllers[path]) for path in native_paths]
+    return {
+        "passed": True,
+        "interpretation_allowed": True,
+        "reduction_boundary_comparison_allowed": all_inputs,
+        "geometry_or_graph_unique_causal_attribution_allowed": False,
+        "classification": "same_input_descriptive_boundary_comparison"
+        if all_inputs
+        else "upstream_mismatch_unlocalized",
+        "graph_physical": allocations[0],
+        "native_physical": old_allocations,
+        "same_physical_allocation": all(p == allocations[0] for p in old_allocations),
+        "graph_raw_rows_verified": 8,
+        "graph_npy_rows_verified": 8,
+        "native_raw_rows_verified": 16,
+        "prior_v1_failure": prior_failure,
+        "constructor_compatibility_pair_verified": True,
+        "native_npy_rows_verified": 16,
+        "historical_prefix_comparisons": prefix_comparisons,
+        "observed_plain_prefix_pairs": 8,
+        "graph_cross_rank_output_identical": True,
+        "numerical": numerical,
+        "scope": "Independent CPU/raw audit only. Changed hardware/topology is a confounder. No quality repair, performance gain, native cached-pointer or HCCL algorithm claim.",
+    }
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--bundle", type=Path, required=True)
+    parser.add_argument("--runs", type=Path, required=True)
+    parser.add_argument("--output", type=Path, required=True)
+    args = parser.parse_args()
+    require(not args.output.exists(), "Refuse to overwrite audit")
+    result = {"passed": False, "interpretation_allowed": False}
+    try:
+        result.update(audit(args.bundle.resolve(), args.runs.resolve()))
+    except Exception as error:  # noqa: BLE001 -- persist any failed audit without selecting or hiding it
+        result["error"] = f"{type(error).__name__}: {error}"
+    result.update(
+        schema="muxpd-prefix-dtp-graph-independent-raw-audit-v2",
+        created_at_utc=datetime.now(UTC).isoformat(),
+        audit_script_sha256=digest(Path(__file__).read_bytes()),
+        evidence=READS,
+    )
+    with args.output.open("x") as stream:
+        json.dump(result, stream, indent=2, allow_nan=False)
+        stream.write("\n")
+    print(
+        json.dumps(
+            {
+                "passed": result["passed"],
+                "output": str(args.output),
+                "error": result.get("error"),
+            }
+        )
+    )
+    return 0 if result["passed"] else 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
