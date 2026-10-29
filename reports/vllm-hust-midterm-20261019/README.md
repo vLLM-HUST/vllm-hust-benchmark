@@ -3,8 +3,10 @@
 当前定义：B0固定为vLLM 0.18 + vLLM-Ascend
 0.18；B1是当前已实测最优优化配置，基座版本不限但明确标注。其他版本Native仅为版本对照，不称B0。原始归档中的历史运行ID保持不变。
 
-主报告：[中期测试报告](%E4%B8%AD%E6%9C%9F%E6%B5%8B%E8%AF%95%E6%8A%A5%E5%91%8A.md)，当前V0.98采用已批准的课题四方法。SWE累计24项、原记录3/24及同答案恢复4/24，707项未执行；Terminal累计3项，break-filter正控制失败不增加模型覆盖，原Cython
-null与派生重建结果保留。[SWE规范证据](../swe-native018-wave2-followup-20261027/README.md)、[break-filter控制证据](../terminal-break-filter-controls-20261027/README.md)、[Cython原有证据](../terminal-cython-context-20261027/README.md)。旧报告快照及原始证据保留，当前整体验收尚未完成。
+主报告：[中期测试报告](%E4%B8%AD%E6%9C%9F%E6%B5%8B%E8%AF%95%E6%8A%A5%E5%91%8A.md)，当前V1.01纠正M01参考：保留B0/B1同轮F/T测量，C为3.8407/7.1042
+TFLOPS/芯片，描述性提升84.9705%；旧经验参考退出当前判定，替代参考、η及达标结论修订中。
+见[参考推导与缺口](m01-reference-revision-20261029/method.md)、[机器可读复算](m01-reference-revision-20261029/summary.json)和[当前方法状态](current-method.json)。本次未启动新实验。
+其他结果沿用V0.99：SWE累计26项、原记录3/26及同答案恢复4/26，705项未执行；Terminal累计4项，原失败、null和派生评分分别保留。[SWE规范证据](../swe-native018-wave2-openlibrary-navidrome-20261027/README.md)、[Circuit证据](../terminal-circuit-context-20261027/README.md)。旧报告快照及原始证据保留，当前整体验收尚未完成。
 
 **指定0.18吞吐对照已存在：** C16 SWE-prefix-reuse 900秒窗口，B0 247.2656、B1 885.9611
 token/s，3.5830倍（+258.30%）。见[复用审计](../c16-baseline018-reuse-20261022/README.md)。该比值描述两套完整部署；客户端运行时版本和B1设备占用原始证据仍待补核，不能据此宣布完整验收或把收益归于单个MOD。MMLU-Pro等其他工况的0.18配对仍分别判断。
@@ -13,7 +15,7 @@ token/s，3.5830倍（+258.30%）。见[复用审计](../c16-baseline018-reuse-2
 
 ## M01 同工况参考补测
 
-历史V0.75时按[V1.5课题四](milestone-v15/project4-v1.5.txt)报告`C=F/(k×T×10¹²)`和`η=T参/T×100%`，有效工作量、匹配无插桩计时及模型依赖参考仍未闭合。见[当前方法与状态](milestone-v15/method-status.json)。旧经验参考仅作历史插桩结果；[75种通信图参考](m01-recovery/collective-graph-20261023/README.md)已完成，不再列为未测。
+历史V0.75时按[V1.5课题四](milestone-v15/project4-v1.5.txt)报告`C=F/(k×T×10¹²)`和`η=T参/T×100%`，当时有效工作量、匹配无插桩计时及模型依赖参考仍未闭合。见[历史方法与状态](milestone-v15/method-status.json)。旧经验参考仅作历史插桩结果；[75种通信图参考](m01-recovery/collective-graph-20261023/README.md)已完成，不再列为未测。
 
 V0.64纳入GDN递归、WY/KKT、卷积、HBM及同接口通信参考，18类计算参考和设备最终预处理映射已完成汇总核对。
 完整证据见[参考补测与汇总](m01-recovery/reference-closure-20261022/README.md)。
