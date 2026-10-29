@@ -101,6 +101,48 @@ def test_classic_original_asset_plan_is_separate_from_verified():
     assert not plan["native_execution_complete"]
 
 
+def test_classic_native_delivery_keeps_original_failures_and_research_scope():
+    """Receipt consistency only, not native execution or external scoring."""
+    receipt = json.loads(
+        (
+            SCRIPTS.parent
+            / "docs/workload-data/validation/swebench-classic-native-delivery-20261030.json"
+        ).read_text(encoding="utf-8")
+    )
+    assert receipt["source_id"] == "SWE_BENCH" and receipt["source_checkbox_eligible"]
+    assert receipt["original_dataset"]["rows"] == 2294
+    assert receipt["original_dataset"]["fields"] == 12
+    assert receipt["fixed_original_ids"] == [
+        "astropy__astropy-11693",
+        "astropy__astropy-12057",
+        "astropy__astropy-12318",
+    ]
+    native = receipt["native_execution"]
+    assert native["total_backend_requests_including_incomplete_original_attempt"] == (
+        native["original_attempt_backend_requests_http200"]
+        + native["same_original_transport_recovery_requests_http200"]
+    )
+    assert native["original_transport_failures_retained"] == 2
+    assert not native["first_original_case_rerun"]
+    assert native["quality_failure_reruns"] == 0
+    assert native[
+        "composite_sample_outcomes_not_single_uninterrupted_official_score"
+    ] == {
+        "agent_submitted": 3,
+        "official_tests_completed": 2,
+        "resolved": 0,
+        "unresolved": 2,
+        "invalid_patch_before_tests": 1,
+    }
+    assert (
+        receipt["saved_result_audit"]["new_model_calls_or_functional_test_reruns"] == 0
+    )
+    assert receipt["data_and_research_consumer"][
+        "full2294_original_records_fields_and_index_verified"
+    ]
+    assert not receipt["raw_dataset_model_weights_or_native_outputs_published"]
+
+
 def test_verified_completion_cannot_complete_classic_or_hide_negative_outcomes():
     """Receipt consistency only; this test does not execute or rescore tasks."""
     folder = SCRIPTS.parent / "docs/workload-data"

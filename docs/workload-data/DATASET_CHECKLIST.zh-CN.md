@@ -1,7 +1,7 @@
 # 数据集逐项验证清单
 
 当前交付
-**72/113项**，待完成41项，另5项仅分类。首批#432的60项和第二批#538的ScienceWorld已合入main；早期五个草稿已关闭为被汇总承接，历史和分支保留。第三批新增CodeJudge-Eval、DeepPlanning、OpenMath、OpenCode、MVBench、Video-MME、LiveCodeBench、BigCodeBench、Spider、DRAGON及SWE_VERIFIED固定原生profile交付，尚未合入。OpenMath/OpenCode是训练语料原问题生成，不是独立质量benchmark。打勾不代表全量模型评测、高分或性能保证。
+**73/113项**，待完成40项，另5项仅分类。首批#432的60项和第二批#538的ScienceWorld已合入main；早期五个草稿已关闭为被汇总承接，历史和分支保留。第三批新增CodeJudge-Eval、DeepPlanning、OpenMath、OpenCode、MVBench、Video-MME、LiveCodeBench、BigCodeBench、Spider、DRAGON、SWE_VERIFIED及SWE_BENCH固定原生profile交付，尚未合入。OpenMath/OpenCode是训练语料原问题生成，不是独立质量benchmark。打勾不代表全量模型评测、高分或性能保证。
 
 ### LiveCodeBench（原生固定抽样交付完成；自修复显式兼容）
 
@@ -817,7 +817,7 @@ LMM
 
 - [x] 后续入口导航修复已通过固定提交9b36fb93的两项CI，并在服务器独立安装实际工件12879026361；67份包载荷一致，准备、生成、隔离评分三个入口已核验。与先前工件相比仅分类资源变更，原生结果和研究回查证据直接复用，不重复调用模型。
 
-### SWE-bench／Verified共用官方软件与环境（Verified固定抽样已交付，SWE-bench待完成）
+### SWE-bench／Verified共用官方软件与环境（两来源分别固定抽样交付）
 
 - [x] SWE_BENCH自身固定版本原测试Parquet已在服务器取得并按官方LFS大小/SHA核验，2,294条/12字段、12,097,227字节；原前三题11693/12057/12318均不在Verified中，不能复用其模型结果。复用公共获取/只读核验入口，Windows不落原数据。
 
@@ -828,7 +828,7 @@ LMM
 - [x] 最新实际CI工件12912171225再次核验两来源全字段/索引与各固定3条研究回读；67份软件载荷与b3e4
   Git对象相同。该提交两项CI均通过（40910826104、40910833864），仅同步137条既有基线行号，不新增豁免、不改摘要或审核标记。
 
-- [ ] SWE_BENCH原Agent模型执行与官方模型评分：首轮146次后端请求均200，11693原提交被官方判为非法补丁、保留且不重跑；另两题因本地SSH转发退出未完成，故障不当作质量结果。复用原受限转发权限恢复连接，只重新执行原12057/12318，原字段、顺序、模型、250步预算不变，旧失败尝试全部保留；恢复执行及评分/保存审计未完成前，不打来源勾。
+- [x] SWE_BENCH固定原三题原生链路完成：首题11693的非法补丁结果保留不重跑；连接中断的原12057/12318恢复后均提交并完成官方测试，均未修复，原失败尝试全部保留，不挑题或重跑质量失败。原模板、任务、提交、测试脚本/参考ID与保存评分独立核验；两轮146+238=384次NPU后端请求均200，模型窗口结束、租约释放，15分钟原生队列仍活。当前代码9399两项CI均绿，67份已核验软件载荷逐字节相同。[来源独立交付回执](validation/swebench-classic-native-delivery-20261030.json)；非全2294题评测，组合验证不冒称单轮官方榜单分数。
 
 - [x] 固定Verified原顺序前三题为Astropy12907/13033/13236，保留原13字段。发现已准备的新官方harness要求额外image/eval_script/log_parser/eval_type，不能直接套用旧数据。另固定官方v4.1.0发布版原87文件/594174字节及Git/SHA身份，`prepare_swebench_author_source.py --profile v4.1.0`计划与软件夹具通过，默认配置不变；没有补造字段或更换原题。
 
@@ -1017,7 +1017,7 @@ TB；服务器/data约1.42TB可用，未缩小语料。ChartQA当前两卡主机
 | NARRATIVEQA                | [x] 原summary-QA已完成                     | 原test前三题生成/双参考评分/保存审计完成；全46765问答三表字段关系与索引、精确CI44文件及固定研究端18处回查通过。[回执](validation/narrativeqa-native-delivery-20261027.json)。不是full-story、全test推理或作者模型复现。                                                                                                                                                                                                                                                                  |
 | XLAM_TOOL                  | [ ] 待开展                                 | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 | BIGCODEBENCH               | [x] 固定原题交付闭环                       | 原3条sanitize、参考3/3、候选pass/pass/fail及独立审计通过，0新增模型调用。公共原Parquet获取/摘要、实际CI64载荷、1140原9字段/索引及受维护研究入口3条回读已核验。原Python3.10完整依赖CPU-only镜像已实际评分；新增代码专用构建上下文32原源码+6运行文件，完整锁及公开配方服务器实际构建完成，233锁版本/71原评估要求/32原文件核验通过；复用已有有效原3条评分，不重跑模型或冒充新镜像评分结果。e2b0.17废弃警告保留。[回执](validation/bigcodebench-container-runtime-readiness-20261028.json)。 |
-| SWE_BENCH                  | [ ] 待开展                                 | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| SWE_BENCH                  | [x] 固定原三题原生链路完成                 | 全2294条/12字段、CI工件和研究回读通过；原Agent三题提交，原评分2未修复/1非法补丁，故障原题恢复且首题不重跑。384次NPU请求，保存审计通过，非全2294题评测；[独立回执](validation/swebench-classic-native-delivery-20261030.json)。                                                                                                                                                                                                                                                           |
 | SWE_VERIFIED               | [x] 固定三题原生链路完成                   | 原Agent144次NPU请求、官方参考对照3/3通过；模型1修复/1未修复/1非法补丁失败原样保留。保存结果审计、全500条数据字段/索引和固定3条研究回读通过，c585两项CI通过。非全量模型评测，SWE_BENCH另行待完成；[回执](validation/swebench-original-readiness-20261029.json)。                                                                                                                                                                                                                          |
 | VISIONARENA                | [ ] 待开展                                 | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 | MMMU                       | [x] 原validation抽样交付完成               | 全92文件/11550行/16字段与索引核验，30学科固定90题NPU推理和原评分（含4多图），152处公共/固定研究消费往返通过。[回执](validation/mmmu-native-delivery-20261027.json)。59次length保留，非完整validation质量或LLaVA复现。                                                                                                                                                                                                                                                                    |

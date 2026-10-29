@@ -718,9 +718,9 @@ python scripts/run_spider_official_scoring.py --assets /private/spider-scoring-a
 不加`--execute`只读核对并输出计划。执行仅支持具备权限的Linux Docker环境，容器非root、
 断网、只读，原SQL不在宿主执行；保留原值和DISTINCT，不注入gold值。低分正常保留； 资源/输出契约失败不冒充模型0分；容器与证据保留，无自动清理或宿主执行回退。
 
-## SWE-bench旧版原任务链路（Verified固定抽样已验证，原版待完成）
+## SWE-bench旧格式原任务链路（两来源分别固定抽样验证）
 
-SWE-bench原版12字段、Verified13字段的旧格式原任务的准备需要匹配harness版本：现有新版配置要求额外的镜像/评测脚本字段，不能为跑通自行补造。公共软件准备器新增`--profile v4.1.0`，固定官方发布版87份原文件；默认`current`保持不变。可先运行`python scripts/prepare_swebench_author_source.py --profile v4.1.0 --author-root /external/swebench-v410`查看固定源码归档地址；取得原软件归档后加`--archive /external/official-source.tar.gz --action prepare`核验准备。Verified原顺序前三题的ARM仓库镜像、原Agent执行与官方评分已完成，完整范围和失败结果见下文；SWE_BENCH原版自身仍待完成，不能套用Verified的来源完成状态。
+SWE-bench原版12字段、Verified13字段的旧格式原任务的准备需要匹配harness版本：现有新版配置要求额外的镜像/评测脚本字段，不能为跑通自行补造。公共软件准备器新增`--profile v4.1.0`，固定官方发布版87份原文件；默认`current`保持不变。可先运行`python scripts/prepare_swebench_author_source.py --profile v4.1.0 --author-root /external/swebench-v410`查看固定源码归档地址；取得原软件归档后加`--archive /external/official-source.tar.gz --action prepare`核验准备。Verified原顺序前三题的ARM仓库镜像、原Agent执行与官方评分已完成，完整范围和失败结果见下文；两来源各自固定原样本均已完成，交付各有独立回执，不互相套用完成状态。
 
 官方Agent软件复用相同准备入口，增加可选`--profile mini-swe-agent`，固定原78份源码/配置及完整性身份，不自行编写替代Agent：
 
@@ -747,7 +747,7 @@ python scripts/prepare_reused_research_assets.py SWE_BENCH --mode verify \
   --data-root /external/swebench-original
 ```
 
-已存在的同版文件直接用`verify`，不重复下载。SWE_BENCH固定原顺序前三题为Astropy11693/12057/12318，均不在本次Verified原生样本中；后续镜像、Agent、评分命令使用`--source-id SWE_BENCH`及该来源的原Parquet，不能借用Verified的任务结果。该来源原三题镜像与参考补丁环境对照已完成，对照3/3通过；实际CI工件已完成全2294条字段/索引与固定3条研究回读。b3e4a233两项CI均通过。首轮原Agent首题提交被原工具判为非法补丁、结果保留不重跑；另两题因本地转发退出而未完成，已恢复同样的受限连接并仅重新执行原故障题，原字段、顺序、模型与预算不变。恢复执行和最终官方模型评分尚未完成，因此仍不打来源完成勾。
+已存在的同版文件直接用`verify`，不重复下载。SWE_BENCH固定原顺序前三题为Astropy11693/12057/12318，均不在本次Verified原生样本中；后续镜像、Agent、评分命令使用`--source-id SWE_BENCH`及该来源的原Parquet，不能借用Verified的任务结果。该来源原三题镜像与参考补丁环境对照已完成，对照3/3通过；实际CI工件已完成全2294条字段/索引与固定3条研究回读。固定同一原三题的原Agent及官方评分已完成：首题非法补丁保留不重跑；原两题连接故障恢复后完成官方测试但均未修复，旧失败尝试全部保留。原字段、顺序、模板和250步预算不变，组合验证不冒称单轮官方榜单结果，非全2294题评测。来源交付与最新已核验代码CI见[独立回执](../docs/workload-data/validation/swebench-classic-native-delivery-20261030.json)。
 
 ```bash
 python scripts/prepare_swebench_original_images.py \
@@ -799,7 +799,7 @@ python scripts/run_swebench_original_grade.py \
 
 默认仍仅计划，追加`--execute`才执行未修改的官方`run_instance`及报告逻辑，保留原1800秒逐题测试时限。评分SDK边界仅增加容器隔离和限额：断网、cap0、NNP、无宿主挂载/设备、8GiB/2CPU/512PID；原题、补丁应用策略、测试、容差和判分不改。环境正对照可将`--predictions`替换为`--gold-control`并使用另一新输出目录，使用原参考补丁核验环境，必须与模型结果分开。
 
-验证范围：固定原前三题全部由原Agent提交，实际NPU请求144次；原参考补丁对照3/3通过。Qwen3.5-9B实际结果为一题修复、一题未修复、一题被官方工具拒绝非法补丁，失败输出未修补、未换题或重新生成。已从保存的原日志重新计算评分，并核对初始模板、任务文本、提交、原测试脚本和参考测试ID；这不是完整500题准确率，也不是引擎性能提升数据。SWE-bench原版自身的数据与执行尚待接入，不能借用Verified的完成状态。
+Verified验证范围：固定原前三题全部由原Agent提交，实际NPU请求144次；原参考补丁对照3/3通过。Qwen3.5-9B实际结果为一题修复、一题未修复、一题被官方工具拒绝非法补丁，失败输出未修补、未换题或重新生成。已从保存的原日志重新计算评分，并核对初始模板、任务文本、提交、原测试脚本和参考测试ID；这不是完整500题准确率，也不是引擎性能提升数据。SWE-bench原版有单独的原数据、三题原生结果及交付回执，不能互相借用完成状态。
 
 可复用环境清单：[评分客户端76包](../configs/workload-native/swebench-original-core-py312-aarch64.lock)、[Agent完整客户端120包](../configs/workload-native/swebench-original-agent-py312-aarch64.lock)，均为本次真实CPU客户端使用的官方PyPI包及SHA256，目标是Python3.12/Linux
 aarch64。请在独立虚拟环境使用`pip install --require-hashes -r <所选lock文件>`，再设置上述固定原作者源码根目录；不要安装进现有NPU服务环境。120包版本已逐项与实际导入环境核对，原生运行使用只读基础环境加独立差量层；未额外重跑一次全新扁平环境安装。原仓库镜像内Python3.9及其依赖仍由原安装脚本管理，不套用宿主客户端lock。
