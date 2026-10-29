@@ -1,0 +1,70 @@
+"""Score retained out256 outputs with the already frozen MMLU scorer; no inference."""
+import ast
+import hashlib
+import json
+from pathlib import Path
+import re
+import tarfile
+
+ROOT=Path('/root/gennova-evidence/20261019-midterm-aligned')
+BASE=Path('/root/fixed-b0-cost-20261029')
+OUT=Path(__file__).resolve().parent
+
+
+def sha(data):return hashlib.sha256(data).hexdigest()
+
+
+def main():
+    scorer=Path('/root/vllm-hust-benchmark/src/vllm_hust_benchmark/mmlu_pro_pyramidkv.py').read_bytes()
+    labels_raw=(ROOT/'verified-mmlu-quality-inputs.json').read_bytes()
+    verified=json.loads(labels_raw)
+    assert sha(scorer)==verified['scorer_source_sha256']
+    function=next(n for n in ast.parse(scorer).body if isinstance(n,ast.FunctionDef) and n.name=='extract_answer')
+    space={'re':re}
+    exec(compile(ast.Module(body=[function],type_ignores=[]),'<frozen-original-scorer>','exec'),space)
+    gold=verified['cases']
+    materialized=(ROOT/'materialized.200.jsonl').read_bytes()
+    prompts=[json.loads(line)['prompt'] for line in materialized.splitlines()]
+    assert len(prompts)==len(gold)==200
+    assert all(sha(p.encode())==g['prompt_sha256'] for p,g in zip(prompts,gold,strict=True))
+    b0dir=BASE/'b0-raw'
+    b0=(b0dir/'mmlu-pro-client-native.json').read_bytes()
+    b0plan=json.loads((b0dir/'execution-plan.json').read_bytes())
+    manifest=dict(line.split('  ',1)[::-1] for line in (b0dir/'SHA256SUMS').read_text().splitlines())
+    assert sha(b0)==manifest['mmlu-pro-client-native.json']
+    archive=(BASE/'b1-raw.tar.gz').read_bytes()
+    assert sha(archive)=='6bcfa2ae9a912f8b59a0dbdb61aa1713c94af97eb5db766a2c84e5c641bdff55'
+    with tarfile.open(BASE/'b1-raw.tar.gz') as tar:
+        b1=tar.extractfile('mmlu-pro.json').read()
+        b1plan=json.load(tar.extractfile('execution-plan.json'))
+    arms=[]
+    for role,raw,plan in [('B0',b0,b0plan),('B1',b1,b1plan)]:
+        args=plan['benchmark_args']
+        assert '--disable-shuffle' in args and args[args.index('--num-prompts')+1]=='200'
+        assert args[args.index('--custom-output-len')+1]=='256'
+        assert sha(materialized) in plan['source_sha256'].values()
+        data=json.loads(raw)
+        assert len(data['generated_texts'])==len(data['errors'])==len(data['output_lens'])==200
+        rows=[]
+        for i,(text,label,error,length) in enumerate(zip(data['generated_texts'],gold,data['errors'],data['output_lens'],strict=True)):
+            predicted=space['extract_answer'](text) if not error else None
+            rows.append(dict(index=i,case_id=label['case_id'],output_sha256=sha(text.encode()),
+                output_characters=len(text),output_tokens=length,request_success=not bool(error),
+                parsed=predicted is not None,correct=predicted==label['answer'],
+                contains_answer_marker=bool(re.search(r'answer is|[aA]nswer:',text))))
+        arms.append(dict(role=role,source_sha256=sha(raw),total=200,
+            request_success=sum(r['request_success'] for r in rows),correct=sum(r['correct'] for r in rows),
+            parsed=sum(r['parsed'] for r in rows),empty_outputs=sum(r['output_characters']==0 for r in rows),
+            at_output_budget=sum(r['output_tokens']==256 for r in rows),rows=rows))
+    result=dict(schema='retained-out256-quality/v1',arms=arms,scorer_source_sha256=sha(scorer),
+        label_manifest_sha256=sha(labels_raw),materialized_input_sha256=sha(materialized),
+        paired_correct_changes=dict(improved=sum(not a['correct'] and b['correct'] for a,b in zip(arms[0]['rows'],arms[1]['rows'],strict=True)),
+                                   regressed=sum(a['correct'] and not b['correct'] for a,b in zip(arms[0]['rows'],arms[1]['rows'],strict=True))),
+        interpretation='Derived original-scorer result on retained out256 generated_texts, not original online scoring or out8192 task quality. Scorer fallback may extract an option mentioned in unfinished text; no inferred final-answer or finish-reason validity.',
+        service_slo='No numeric SLO/goodput threshold recorded in these plans; do not invent one retrospectively.',
+        new_model_runs=0,private_text_published=False)
+    (OUT/'out256-quality-audit.json').write_text(json.dumps(result,indent=2)+'\n')
+    print(json.dumps([{k:v for k,v in a.items() if k!='rows'} for a in arms]))
+
+
+if __name__=='__main__':main()

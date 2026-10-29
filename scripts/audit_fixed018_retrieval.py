@@ -185,8 +185,7 @@ def audit(directory):
     )
 
 
-def audit_activation(files):
-    prefix = "retrieval-b1-r1/"
+def audit_activation(files, prefix="retrieval-b1-r1/", expected_requests=7):
 
     def rows(name):
         return [
@@ -197,10 +196,8 @@ def audit_activation(files):
 
     policy = rows("kvmat-policy.jsonl")
     engine = rows("kvmat-engine.jsonl")
-    if len(policy) != 7 or len(engine) != 7:
-        raise ValueError(
-            "Expected six retrieval admissions plus one parser qualification"
-        )
+    if len(policy) != expected_requests or len(engine) != expected_requests:
+        raise ValueError("Unexpected number of request admissions")
     salts = {}
     for row in policy:
         if (
@@ -219,7 +216,7 @@ def audit_activation(files):
         for r in engine
         if r["event"] == "school028_request_salt_admitted"
     }
-    if len(admitted) != 7 or admitted != salts:
+    if len(admitted) != expected_requests or admitted != salts:
         raise ValueError("Policy/engine linkage mismatch")
     ranks = {}
     for path in files:
@@ -256,7 +253,7 @@ def audit_activation(files):
     if identity.get("worker") != "corrected_serving_runtime.CorrectedWorker":
         raise ValueError("Serving corrections missing")
     return dict(
-        request_scoped_recompute_admissions=7,
+        request_scoped_recompute_admissions=expected_requests,
         reused_tokens=0,
         microflow=ranks,
         corrected_worker=identity["worker"],

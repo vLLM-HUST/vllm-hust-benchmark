@@ -64,7 +64,7 @@ def test_same_run_reanalysis_and_null_reference(monkeypatch):
 def test_report_current_conclusions_and_historical_boundary(monkeypatch):
     monkeypatch.syspath_prepend(str(ROOT / "scripts"))
     b = importlib.import_module("build_midterm_v101")
-    report = (ROOT / b.REPORT).read_text()
+    report = (ROOT / b.BASE / "中期测试报告-v101.md").read_text()
     assert "报告版本：V1.01" in report
     assert "同轮复算：B0 3.8407、B1 7.1042 TFLOPS/芯片" in " ".join(report.split())
     assert "M01通过" not in report
