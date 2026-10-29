@@ -47,6 +47,14 @@ EXPECTED = {
 }
 
 
+def test_mind2web_original_assets_use_existing_acquisition_roles():
+    source, files = runner.selection("MIND2WEB")
+    assert [item["path"] for item in files] == ["test.zip", "scores_all_data.pkl"]
+    assert sum(item["bytes"] for item in files) == 812936103
+    assert {item["role"] for item in files} == {"data", "raw_source"}
+    assert all(source["revision"] in item["url"] for item in files)
+
+
 def unique_object(pairs):
     result = {}
     for key, value in pairs:

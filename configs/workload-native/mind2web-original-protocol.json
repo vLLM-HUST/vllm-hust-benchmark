@@ -1,0 +1,85 @@
+{
+  "source_id": "MIND2WEB",
+  "status": "protocol_review_only_not_native_validated",
+  "author_repository": "https://github.com/OSU-NLP-Group/Mind2Web",
+  "author_revision": "33bd95caeee7bba22dd08ecc935845e15c5e5dc7", "author_revision_note": "pragma: allowlist secret - public publisher Git revision",
+  "author_acquisition": {
+    "archive_sha256": "a6870d4dc95e84cb9d9280df21ac490a99a231491217f17b2435f841a6641310", "archive_identity_note": "pragma: allowlist secret - verified public software archive SHA256",
+    "archive_bytes": 6412330,
+    "verified_git_blob_files": 31,
+    "server_archive_sha256_matches": true,
+    "installed_dependencies": true,
+    "client_python": "3.11.6",
+    "client_isolation": "python -I required to exclude inherited CANN PYTHONPATH packages",
+    "pip_check": "passed under isolated interpreter",
+    "official_entrypoint_import": "passed; no model calls",
+    "native_execution": "NOT_RUN"
+  },
+  "dataset_revision": "17ece8eb89862368edc0cc806acee6fca5163474", "dataset_revision_note": "pragma: allowlist secret - public publisher dataset revision",
+  "official_assets": [
+    {
+      "path": "test.zip",
+      "bytes": 567745122,
+      "sha256": "8f5fbe72afab942fe97cdf7fb397e179885d89b5c16862288e9a14bc6d41ca89", "identity_note": "pragma: allowlist secret - publisher public LFS SHA256",
+      "role": "original encrypted test splits",
+      "acquired": true,
+      "verified_server_bytes": 567745122,
+      "archive_members_checked": 15,
+      "uncompressed_bytes": 6107912752,
+      "decrypted": false
+    },
+    {
+      "path": "scores_all_data.pkl",
+      "bytes": 245190981,
+      "sha256": "884c97cd9ae0544485d21ea39e0d46422aee0291969a7324e56df3a84466dbd7", "identity_note": "pragma: allowlist secret - publisher public LFS SHA256",
+      "role": "official candidate scores and ranks",
+      "acquired": true,
+      "verified_server_bytes": 245190981,
+      "loaded": false
+    }
+  ],
+  "official_entrypoint": "src/action_prediction/evaluate_llm.py",
+  "official_evaluator": "src/action_prediction/metric.py",
+  "official_prompt": "src/action_prediction/llm_prompt.json",
+  "verified_author_behavior": {
+    "history": "original formatter uses the last five reference previous actions; this is offline teacher-forced history, not live rollout",
+    "candidate_tournament": "original LLM evaluator shuffles ranked top-k candidates and compares groups of five until selection terminates",
+    "generation_max_new_tokens": 50,
+    "candidate_recall_miss": "original evaluator records zero without a model call when no positive candidate survives top-k; retain this behavior and report it separately",
+    "metric_field_spelling": "original JSON uses marco_element_acc, marco_action_f1 and marco_step_acc; preserve original keys",
+    "api_compatibility": "legacy openai.ChatCompletion client; endpoint routing must not change prompt, generation budget or scorer"
+  },
+  "candidate_protocol": {
+    "provider": "official published DeBERTa candidate scores or original candidate generation evaluator",
+    "top_k": 50,
+    "ground_truth_injection": false
+  },
+  "sampling_unit": "complete original task with every original action; never isolated convenient actions",
+  "fixed_sampling": {
+    "tasks_per_split": 3,
+    "ordering": "lexicographic original archive member path, then original JSON array order",
+    "retain_all_actions": true,
+    "skip_missing_candidates": false,
+    "replace_failed_tasks": false,
+    "missing_asset_behavior": "block the original selected task; never replace it with a convenient one",
+    "selected_task_identity_receipt": "required after archive acquisition; no task IDs fabricated before reading originals"
+  },
+  "required_splits": ["test_task", "test_website", "test_domain"],
+  "reporting": "retain official macro and micro metrics separately; do not describe offline action prediction as live website execution",
+  "data_policy": "download original test archives externally; do not redistribute decrypted test files in this repository",
+  "environment_constraints": {
+    "official_openai_version": "0.28.0",
+    "official_torch_version": "2.0.1",
+    "official_transformers_version": "4.29.2",
+    "install_into_serving_environment": false,
+    "npu_model_fallback": "not yet qualified",
+    "candidate_pickle": "publisher pickle requires provenance verification and isolated loading; not arbitrary user-supplied pickle"
+  },
+  "remaining": [
+    "acquire and verify original software and test archives",
+    "acquire and verify official candidate score artifacts and required tokenizers",
+    "qualify isolated legacy client dependencies without changing NPU serving packages",
+    "run fixed complete tasks through original prompt, candidate selection and scoring",
+    "verify research consumer preserves all original action relationships"
+  ]
+}

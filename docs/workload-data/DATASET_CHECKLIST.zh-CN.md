@@ -3,6 +3,31 @@
 当前交付
 **73/113项**，待完成40项，另5项仅分类。首批#432的60项和第二批#538的ScienceWorld已合入main；早期五个草稿已关闭为被汇总承接，历史和分支保留。第三批新增CodeJudge-Eval、DeepPlanning、OpenMath、OpenCode、MVBench、Video-MME、LiveCodeBench、BigCodeBench、Spider、DRAGON、SWE_VERIFIED及SWE_BENCH固定原生profile交付，尚未合入。OpenMath/OpenCode是训练语料原问题生成，不是独立质量benchmark。打勾不代表全量模型评测、高分或性能保证。
 
+### Mind2Web（官方流程接入中，未交付）
+
+- [x] 固定官方源码版本 `33bd95caeee7bba22dd08ecc935845e15c5e5dc7`，31个文件逐一核对Git对象；服务器源码归档SHA256与中转端一致。
+- [x] 核对官方LLM入口、原始提示、候选排名、每轮五选项比较及评分；原生50-token生成预算不变。
+- [x] 固定原始数据版本及`test.zip`、`scores_all_data.pkl`的官方LFS大小和SHA256。
+- [x] 两份数据资产完整取得及服务器大小、官方LFS SHA256校验通过；加密测试归档15个JSON成员目录安全检查通过，展开约6.1GB，不在本地落盘。
+- [x] 官方旧版依赖安装到独立Python3.11环境，原版psutil5.9.5通过匹配头文件构建；`python -I -m pip check`及官方入口导入通过。必须使用`-I`排除继承的CANN路径，不改推理服务依赖。
+- [x] 三个split各固定前3原题，共9任务89动作；原始字段、完整动作、官方候选分数和排名覆盖40994个候选元素，受限pickle读取校验通过。
+- [x] 官方加载器及原始tokenizer端到端CPU预检通过，24/35/30个原始动作次序一致；各split的top50候选召回缺失为7/4/6，保留原生记零行为，不补候选、不换题。零模型调用，非原生执行完成。
+- [ ] 固定完整任务的所有动作通过原生入口执行并评分，保留失败结果。
+- [ ] 公共读取及研究消费核对原始动作关系，补齐交付回执后才打来源总勾。
+
+这里是离线网页动作预测，不是实时浏览器任务。原格式使用最近五条参考历史动作；正确候选不在top-k时原评分器直接记零，不得补入正确候选来提高通过率。保留官方`marco_*`字段及micro指标，分别解释其含义。解密测试文件仅存服务器，不公开再分发。
+
+协议与资产身份见[固定官方流程配置](../../configs/workload-native/mind2web-original-protocol.json)。配置检查仅证明约束已登记，不代表原生运行完成。
+
+公共资产入口（服务器已使用`verify`核对两份完整原文件；不解密、不执行pickle）：
+
+```bash
+python scripts/prepare_reused_research_assets.py MIND2WEB --mode plan
+python scripts/prepare_reused_research_assets.py MIND2WEB --mode verify --data-root /external/mind2web-original-assets
+```
+
+`data-root`中必须是原始`test.zip`和`scores_all_data.pkl`。缺文件时使用同一入口的`download`模式，显式指定外部目录和足以覆盖812936103字节的`--max-bytes`；不得将加密归档替换为自建题目。原生运行入口仍在实机验证，尚不能将此资产校验命令当作benchmark运行命令。
+
 ### LiveCodeBench（原生固定抽样交付完成；自修复显式兼容）
 
 核查依据为[官方源码](https://github.com/LiveCodeBench/LiveCodeBench/tree/28fef95ea8c9f7a547c8329f2cd3d32b92c1fa24)。固定源码压缩包已下载到专用
