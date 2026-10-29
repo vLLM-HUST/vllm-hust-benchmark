@@ -641,6 +641,28 @@ done
 
 字幕配置仅提取原作者在采样帧时间戳处选取的字幕，缺失字幕按原逻辑处理，不补全整段转录。请求失败、空答案、帧数或原题关系不一致会保留失败并停止；不得缩短视频题、改预算或换题凑通过。验收实际进度和已运行范围见[唯一清单](../docs/workload-data/DATASET_CHECKLIST.zh-CN.md)与[实测记录](../docs/workload-data/validation/videomme-original-readiness-20261028.json)，不是全量质量或性能结论。
 
+## Spider官方Test Suite评分环境（尚不代表原生交付）
+
+官方评分器要求sqlparse和NLTK但未提供版本锁。本仓库提供独立CPU软件配方
+`configs/workload-native/spider-test-suite-cpu.Dockerfile`，其中版本为明确披露的集成选择，
+不是作者环境锁。原题、数据库和评分器源码均不打入公开仓库或软件镜像。
+
+在服务器创建独立构建目录，复制该Dockerfile及 `scripts/verify_spider_test_suite_environment.py`；从NLTK官方固定提交获取
+[punkt_tab.zip](https://raw.githubusercontent.com/nltk/nltk_data/550b6625bcef1f2abff2ff770a5a0d272c9c6b2a/packages/tokenizers/punkt_tab.zip)
+至同一目录。资源SHA256必须为 `e57f64187974277726a3417ca6f181ec5403676c717672eef6a748a7b20e0106`，配方会校验。
+不要把此资源或数据库提交到Git。
+
+```bash
+docker build -f spider-test-suite-cpu.Dockerfile -t spider-test-suite-software .
+docker run --rm --network=none --read-only --user=65534:65534 \
+  --cap-drop=ALL --security-opt=no-new-privileges --cpus=1 --memory=512m \
+  --pids-limit=64 --tmpfs=/tmp:rw,nosuid,nodev,size=32m spider-test-suite-software
+```
+
+已在专用ARM64 CPU工作区构建并通过上述非root/只读/断网软件检查；这一步没有执行SQL、 原题或模型。后续仍须隔离运行未修改的官方评分器，使用公开dev对应的完整测试套件，
+再验证实际NPU生成和公共入口；不能用本检查替代Test Suite Accuracy。
+详见[阶段证据](../docs/workload-data/validation/spider-original-preparation-20261029.json)。
+
 ## Video-MME-v2 原资产准备（原生执行仍待补）
 
 复用现有获取器，不另建下载框架：

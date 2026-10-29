@@ -328,6 +328,19 @@ def test_completed_protocol_audit_adds_only_previously_unexecuted_rows():
     assert browser_followup["verified_unique_native_tasks"] == 1288
     assert browser_followup["remaining_original_tasks"] == 2035 - 1288
     assert browser_followup["text_markdown_remaining_47"] == "RUNNING_NOT_COUNTED"
+    browser_complete = checkpoint["complete_browser_protocol_audit_20261029"]
+    assert browser_complete["text_markdown_additional_original_tasks"] == 47
+    assert (
+        browser_complete["text_markdown_additional_generation_and_judge_stop_calls"]
+        == 94
+    )
+    assert browser_complete["text_markdown_additional_original_vqa_pairs"] == 377
+    assert browser_complete["previous_first3_reused_not_rerun"]
+    assert browser_complete["all_six_original_browser_protocols_complete"]
+    assert browser_complete["audit_new_model_calls"] == 0
+    assert not browser_complete["source_checkbox_eligible"]
+    assert browser_complete["verified_unique_native_tasks"] == 1335
+    assert browser_complete["remaining_original_tasks"] == 2035 - 1335
     assert (
         ledger["verified_unique_native_tasks"]
         == count
@@ -339,6 +352,7 @@ def test_completed_protocol_audit_adds_only_previously_unexecuted_rows():
         + react_html["new_original_tasks"]
         + browser_followup["vue_html_additional_original_tasks"]
         + browser_followup["text_canvas_additional_original_tasks"]
+        + browser_complete["text_markdown_additional_original_tasks"]
     )
     held = receipt.get("held_native_exit_evidence")
     if held:
