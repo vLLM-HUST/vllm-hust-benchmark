@@ -1,0 +1,238 @@
+{
+  "schema": "muxpd-native-conv-controller-v1",
+  "label": "conv-native-conv-observed-01",
+  "profile": "native-conv-observed",
+  "layout_mode": null,
+  "source": "/root/workspace/muxpd-composite-token-logits",
+  "source_commit": "6c606f789450a45ef35afee398b0a3e516caa1a1",
+  "source_equivalence": {
+    "source": "/root/workspace/muxpd-composite-token-logits",
+    "observer_source": "6c606f789450a45ef35afee398b0a3e516caa1a1",
+    "quality_runtime_source": "f7ed21e183b27d2141176f3e7a5c8a5ff4ede07d",
+    "existing_runtime_files": [
+      "src/vllm_muxpd/__init__.py",
+      "src/vllm_muxpd/communicators.py",
+      "src/vllm_muxpd/config.py",
+      "src/vllm_muxpd/decode_graph.py",
+      "src/vllm_muxpd/decoupled_scheduler.py",
+      "src/vllm_muxpd/decoupled_worker.py",
+      "src/vllm_muxpd/deployment.py",
+      "src/vllm_muxpd/evidence.py",
+      "src/vllm_muxpd/lanes.py",
+      "src/vllm_muxpd/manifests/__init__.py",
+      "src/vllm_muxpd/manifests/vllm-hust-extension-v0.3.json",
+      "src/vllm_muxpd/multiplex_scheduler.py",
+      "src/vllm_muxpd/native_compat.py",
+      "src/vllm_muxpd/overlap.py",
+      "src/vllm_muxpd/policy.py",
+      "src/vllm_muxpd/prefill_group_models.py",
+      "src/vllm_muxpd/prefill_groups.py",
+      "src/vllm_muxpd/scheduler.py",
+      "src/vllm_muxpd/slice_timing.py",
+      "src/vllm_muxpd/worker.py"
+    ],
+    "existing_runtime_diff": "",
+    "added_paths": [
+      "A\tdocs/fixed-token-numerical-diagnostic.md",
+      "A\tscripts/probe_fixed_token_numerics.py",
+      "A\tsrc/vllm_muxpd/numerical_diagnostics.py",
+      "A\tsrc/vllm_muxpd/numerical_workers.py",
+      "A\ttests/test_fixed_token_numerics_probe.py",
+      "A\ttests/test_numerical_diagnostics.py",
+      "A\ttests/test_numerical_worker_extension.py"
+    ],
+    "scope": "All src files existing at f7 are unchanged; 6c adds diagnostic code/docs/tests."
+  },
+  "destination": "/root/workspace/muxpd-gdn-conv-mode-20261028/runs-v1/conv-native-conv-observed-01",
+  "command": [
+    "/root/workspace/.muxpd-ecpa-runtime/bin/python",
+    "/root/workspace/muxpd-gdn-conv-mode-20261028/runs-v1/conv-native-conv-observed-01/producer/conv_run_v1.py",
+    "--profile",
+    "native-conv-observed",
+    "--source",
+    "/root/workspace/muxpd-composite-token-logits",
+    "--plan",
+    "/root/workspace/muxpd-gdn-conv-mode-20261028/runs-v1/conv-native-conv-observed-01/plan-v1.json",
+    "--config",
+    "/root/workspace/muxpd-gdn-conv-mode-20261028/runs-v1/conv-native-conv-observed-01/base-engine-args.json",
+    "--output",
+    "/root/workspace/muxpd-gdn-conv-mode-20261028/runs-v1/conv-native-conv-observed-01/results"
+  ],
+  "base_engine_args": {
+    "model": "/root/workspace/models/Qwen3.5-35B-A3B",
+    "tensor_parallel_size": 4,
+    "data_parallel_size": 1,
+    "pipeline_parallel_size": 1,
+    "enable_expert_parallel": true,
+    "dtype": "bfloat16",
+    "max_model_len": 16384,
+    "max_num_batched_tokens": 16384,
+    "max_num_seqs": 8,
+    "gpu_memory_utilization": 0.85,
+    "language_model_only": true,
+    "enable_chunked_prefill": true,
+    "async_scheduling": false,
+    "enable_prefix_caching": false,
+    "mamba_cache_mode": "none",
+    "enforce_eager": false,
+    "numa_bind": false,
+    "additional_config": {
+      "enable_cpu_binding": false,
+      "ascend_compilation_config": {
+        "enable_npugraph_ex": false,
+        "enable_static_kernel": false
+      }
+    },
+    "compilation_config": {
+      "mode": 3,
+      "cudagraph_mode": "FULL_DECODE_ONLY",
+      "cudagraph_capture_sizes": [
+        1,
+        2,
+        4,
+        8
+      ],
+      "max_cudagraph_capture_size": 8
+    },
+    "distributed_executor_backend": "mp",
+    "seed": 42,
+    "disable_log_stats": true
+  },
+  "launch_engine_args": {
+    "model": "/root/workspace/models/Qwen3.5-35B-A3B",
+    "tensor_parallel_size": 4,
+    "data_parallel_size": 1,
+    "pipeline_parallel_size": 1,
+    "enable_expert_parallel": true,
+    "dtype": "bfloat16",
+    "max_model_len": 16384,
+    "max_num_batched_tokens": 16384,
+    "max_num_seqs": 8,
+    "gpu_memory_utilization": 0.85,
+    "language_model_only": true,
+    "enable_chunked_prefill": true,
+    "async_scheduling": false,
+    "enable_prefix_caching": false,
+    "mamba_cache_mode": "none",
+    "enforce_eager": false,
+    "numa_bind": false,
+    "additional_config": {
+      "enable_cpu_binding": false,
+      "ascend_compilation_config": {
+        "enable_npugraph_ex": false,
+        "enable_static_kernel": false
+      }
+    },
+    "compilation_config": {
+      "mode": 3,
+      "cudagraph_mode": "FULL_DECODE_ONLY",
+      "cudagraph_capture_sizes": [
+        1,
+        2,
+        4,
+        8
+      ],
+      "max_cudagraph_capture_size": 8
+    },
+    "distributed_executor_backend": "mp",
+    "seed": 42,
+    "disable_log_stats": true,
+    "worker_cls": "vllm_ascend.worker.worker.NPUWorker",
+    "worker_extension_cls": "conv_workers_v1.ConvObserverExtension"
+  },
+  "files": {
+    "conv_run_v1.py": "a69fe84cb8fb769eaf332661f7618dc74f72a76d7b4b763e0e935f08d3632997",
+    "conv_control_v1.py": "ebfcf0ef31dcd3dd2b7ed91c4cb108c1ebd49282295a8f25e540342059791d49",
+    "conv_observer_v1.py": "24fa004b01a5f4bc7130bc9d8af5d6723dd616d56e90d5571a1e161d0d04c43f",
+    "conv_workers_v1.py": "6e6513fc00016548868b355b322e44a25094f001f9df92b3ec6a6c3f75f53bf6",
+    "conv_checks_v1.py": "a4b749c024cc1ff4e6a0e25f3660943571e90cd3b18fb4faf9f92ff4b1cd2f6f",
+    "conv_analyze_v1.py": "cc657ac603340e4559a566577a08f4823144a516a2a1fe8b407b63edac77ef52",
+    "plan-v1.json": "d98d808a8aea0fa9e0d8e227762b6f4903551866b364c0780334f4f42e0e845c",
+    "native-engine-args-v1.json": "5500cba24e78aa9edc44b8946fbd7d2fce571cd2320792d2cdaa5f9de14f5a9c",
+    "historical-prefixes-v1.json": "5e5f34d52e5ba3b2c5f747e8fc6c35397f694f590ef0fb41cd43501209aa5ae1",
+    "source-manifest-v1.json": "66bf0d149c34b9bdc0064750f670910af94e26314ab4f39a0e462c40282d683a",
+    "operator-contract-v1.json": "a85c3ad10e588511576d7bc36d3ac018b04f7fcd37237a64115155fa6dd59941",
+    "source_adapter_v2.py": "87193ce1da3a4728567af2a9c21d4bcbef36c727c3457f20ffb2bfcaeb1d6e8c",
+    "manifest-v2.json": "774719926c1773cabd1585dead14c0ea38ab8dc3054fe928ada50b20e44ba628"
+  },
+  "freeze_manifest_sha256": "210473ab31dea9287df225a5df4c1c157ce601b446b1791fb09d1b37954062fe",
+  "eligible_to_run": true,
+  "expected_physical": [
+    "0",
+    "1",
+    "2",
+    "7"
+  ],
+  "environment": {
+    "ASCEND_RT_VISIBLE_DEVICES": "0,1,2,3",
+    "HCCL_DETERMINISTIC": "true",
+    "VLLM_BATCH_INVARIANT": null,
+    "VLLM_USE_V2_MODEL_RUNNER": "0",
+    "VLLM_ENABLE_V1_MULTIPROCESSING": "0",
+    "PYTHONPATH": "/root/workspace/muxpd-gdn-conv-mode-20261028/runs-v1/conv-native-conv-observed-01/producer:/root/workspace/muxpd-composite-token-logits/src:/root/workspace/vllm-hust:/root/workspace/vllm-ascend-hust:/root/workspace/vllm-hust:/root/workspace/vllm-ascend-hust:/usr/local/Ascend/cann-9.1.0/python/site-packages:/usr/local/Ascend/cann-9.1.0/opp/built-in/op_impl/ai_core/tbe:/usr/local/Ascend/ascend-toolkit/latest/python/site-packages:/usr/local/Ascend/ascend-toolkit/latest/opp/built-in/op_impl/ai_core/tbe:",
+    "PYTHONDONTWRITEBYTECODE": "1",
+    "OMP_NUM_THREADS": "1",
+    "VLLM_CACHE_ROOT": "/root/workspace/muxpd-gdn-conv-mode-20261028/runs-v1/conv-native-conv-observed-01/compiler-cache"
+  },
+  "started_at": "2026-10-29T14:11:01.756596+00:00",
+  "timeout_seconds": 900,
+  "errors": [
+    "KeyboardInterrupt()",
+    "Terminal worker log contains a traceback or graph ownership error"
+  ],
+  "passed": false,
+  "idle_physical_before": [
+    "0",
+    "1",
+    "2",
+    "7"
+  ],
+  "controller_pid": 57000,
+  "pid": 57091,
+  "process_group": 57091,
+  "owned_members_after_spawn": [
+    57091
+  ],
+  "owned_members_before_cleanup": [
+    57091,
+    58711
+  ],
+  "cleanup_required": true,
+  "forced_termination": true,
+  "exit_code": -9,
+  "owned_members_after_cleanup": [],
+  "idle_physical_after": [
+    "0",
+    "1",
+    "2",
+    "7"
+  ],
+  "terminal_process_proven": true,
+  "terminal_process_log_audit": {
+    "sha256": "6a45a4060e0f4beef53b49c3ea101355f0f8d6d490b47fc18edda625214b4ef5",
+    "bytes": 61087,
+    "traceback_line_numbers": [
+      224,
+      234,
+      246,
+      256,
+      268,
+      278,
+      290,
+      300,
+      312,
+      324,
+      338,
+      350,
+      364,
+      376,
+      392,
+      404,
+      420
+    ],
+    "ownership_error_line_numbers": [],
+    "passed": false,
+    "scope": "Terminal worker traceback/ownership gate, separate from reproducibility and process cleanup."
+  },
+  "finished_at": "2026-10-29T14:19:36.382276+00:00"
+}
