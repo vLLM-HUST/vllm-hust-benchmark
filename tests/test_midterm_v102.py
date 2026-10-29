@@ -35,3 +35,11 @@ def test_current_report_binds_actual_outcomes(monkeypatch):
     assert "报告版本：V1.02" in report
     assert "锁页" in report and "21/200" in report and "37.2302%" in report
     assert "工况参考能力强度与整链见证；替代C参未确定" not in report
+    assert "当前合成压力配置实测失败" in report
+    # Updating the current M06 row must not overwrite the archived comparison.
+    prior_report = (ROOT / b.BASE / "中期测试报告-v101.md").read_text()
+    start, end = "<!-- BEGIN ALIGNED_MMLU -->", "<!-- END ALIGNED_MMLU -->"
+    assert (
+        report.split(start)[1].split(end)[0]
+        == prior_report.split(start)[1].split(end)[0]
+    )

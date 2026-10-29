@@ -235,11 +235,12 @@ def prepare():
     report = "\n\n".join(paragraphs)
     lines = []
     for line in report.splitlines():
-        if line.startswith("| M01 "):
+        first_cell = line.split("|")[1].strip() if line.startswith("|") else ""
+        if first_cell == "M01":
             line = "| M01 | 单芯片有效算力 | 中期η≥50%；最终η≥90% | B0 C=3.8407、B1 C=7.1042；B1模型参考19.0819、诊断37.2302% | 正式η仍未确定：B0参考、无插桩计时及质量未闭合 |"
-        elif line.startswith("| M05 "):
+        elif first_cell == "M05":
             line = "| M05 | 数据集运行与长上下文稳定性 | 五任务异常核查；实际≥16K连续区间及可比4K窗口 | B0 4K/16K完成153/73请求；B1正式4K的8请求失败，16K未执行 | 当前合成压力配置实测失败；五任务记录及缺失边界另列 |"
-        elif line.startswith("| M06 "):
+        elif first_cell == "M06":
             line = "| M06 | 单位成功输出成本及利用率 | 成本降低≥10%；高负载利用率明显改善 | 固定B0租赁估算66.2253→35.4849元/百万token，降低46.4178% | out256质量21/200对19/200；精确利用率与业务适用性未闭合 |"
         elif line.startswith("| 成本与利用率 "):
             line = "| 成本与利用率 | 固定B0原件和公开报价已恢复，租赁估算下降46.4178% | 同预算质量、适用SLO与精确配对利用率 |"
