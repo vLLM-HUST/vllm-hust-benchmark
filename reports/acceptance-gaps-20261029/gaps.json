@@ -23,9 +23,9 @@
       "id": "matched_serving_pair",
       "metrics": ["M02", "M03", "M04"],
       "status": "measured_numbers_with_applicability_gap",
-      "existing": "Fixed018 C16 throughput and equal-request TTFT/TPOT are already recomputed; B1 reserved resources and quality/SLO applicability remain unclosed. MMLU own timing pair is also available but raw B0 access is blocked.",
-      "evidence": "reports/c16-request-latency-reuse-20261026/README.md",
-      "next": "Recover allocation/configuration/request evidence. If a new representative pair is necessary, collect throughput, latency, cost, same-window utilization and termination evidence together rather than five independent campaigns.",
+      "existing": "Recovered MMLU fixed018/B1 out256 originals verify200 successful requests per arm, matching materialized input hashes and two reserved physical cards3/6. Throughput+86.6291%, meanTTFT-43.8072%, meanTPOT-50.3070% from original synchronized windows; all accounting overhead retained. Earlier C16 reuse remains separate.",
+      "evidence": "reports/acceptance-gaps-20261029/recovered-serving-summary.json",
+      "next": "Assess applicability of existing configuration quality and SLO evidence; do not assign out8192 task scores to out256 responses. Any actually needed new representative pair should collect serving/cost/utilization together.",
       "owner_role": "benchmark experiment maintainer"
     },
     {
@@ -40,11 +40,11 @@
     {
       "id": "fixed_baseline_cost",
       "metrics": ["M06"],
-      "status": "conditional_recalculation_raw_baseline_access_blocked",
-      "existing": "Public analogous-machine price and fixed018 own-time conditional arithmetic are available. B1 raw archive confirms two reserved cards. B0 timing-run allocation/request envelope/utilization still need originals; quality-run four-card allocation is a different run.",
-      "evidence": "reports/vllm-hust-midterm-20261019/m01-recovery/official018-paired-compute-20261024/summary.json",
-      "next": "Recover B0 timing originals, compute matched successful-cohort currency estimate and time-weighted utilization. If missing, share a fresh fixed018/B1 representative pair with serving metrics. Keep cost and utilization verdicts separate.",
-      "owner_role": "benchmark cost maintainer; storage custodian for originals"
+      "status": "cost_recomputed_utilization_alignment_and_applicability_unclosed",
+      "existing": "B0/B1 same two reserved cards and full200-request windows verified. Public analogous rental estimate66.2253 to35.4849 CNY/million output tokens, reduction46.4178%. B1 same-interval sample estimate22.3946%; B0 missing exact wall/perf bridge, with explicit conditional lifecycle sample bounds9.4245..16.7177% (not physical confidence bounds).",
+      "evidence": "reports/acceptance-gaps-20261029/recovered-serving-summary.json",
+      "next": "Review sampling-model bounds and quality/SLO applicability without inventing exact B0 utilization or declaring combined M06 passed. Prefer existing clock evidence; only if necessary collect matched utilization with the serving pair.",
+      "owner_role": "benchmark cost and measurement maintainer"
     }
   ],
   "do_not_reclassify_as_unmeasured": [
@@ -57,7 +57,7 @@
     "local_npu_observation": "Two visible910B2 physical5/6 had no running NPU process at inspection; this is not a reservation or launch admission.",
     "local_baseline_runtime": "Prior recovered018 runtime path is missing; an env named vllm-ascend-official-v0180 has no vllm distribution metadata. Name alone is not identity.",
     "corrected_candidate_runtime": "Current corrected B1 launch/source identity has not been recovered locally; older uncorrected launchers are not an acceptable silent substitute.",
-    "storage": "Known31391 and32420 refused SSH; recorded same-service ClusterIP timed out in preceding recovery checks.",
+    "storage": "User restored storage at port32267; pinned-host SSH succeeded and original B0 receipt/plan/request/monitor/boundary files verified against original SHA manifest. Storage has no NPU; no model run attempted. The27GiB old018 runtime remains on storage, not copied into8GiB free local disk.",
     "admitted": false
   },
   "tracking": {
