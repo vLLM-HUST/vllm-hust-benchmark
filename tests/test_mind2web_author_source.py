@@ -18,6 +18,7 @@ def test_default_plan_is_inert(tmp_path):
     raw = subprocess.check_output(
         [
             sys.executable,
+            "-I",
             str(ROOT / "scripts/prepare_mind2web_author_source.py"),
             "--author-root",
             str(output),

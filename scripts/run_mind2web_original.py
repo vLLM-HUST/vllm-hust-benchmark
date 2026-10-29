@@ -15,7 +15,8 @@ import random
 import sys
 from urllib.parse import urlsplit
 
-from prepare_jsonschemabench_author_source import verify_source
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from prepare_jsonschemabench_author_source import verify_source  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
 SPLITS = ("test_task", "test_website", "test_domain")

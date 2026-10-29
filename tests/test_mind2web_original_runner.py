@@ -20,6 +20,7 @@ spec.loader.exec_module(runner)
 def command(output, endpoint="http://127.0.0.1:19467/v1"):
     return [
         sys.executable,
+        "-I",
         str(ROOT / "scripts/run_mind2web_original.py"),
         "--author-root",
         "absent",

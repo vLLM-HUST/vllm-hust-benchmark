@@ -1,9 +1,9 @@
 # 数据集逐项验证清单
 
 当前交付
-**73/113项**，待完成40项，另5项仅分类。首批#432的60项和第二批#538的ScienceWorld已合入main；早期五个草稿已关闭为被汇总承接，历史和分支保留。第三批新增CodeJudge-Eval、DeepPlanning、OpenMath、OpenCode、MVBench、Video-MME、LiveCodeBench、BigCodeBench、Spider、DRAGON、SWE_VERIFIED及SWE_BENCH固定原生profile交付，尚未合入。OpenMath/OpenCode是训练语料原问题生成，不是独立质量benchmark。打勾不代表全量模型评测、高分或性能保证。
+**74/113项**，待完成39项，另5项仅分类。首批#432的60项和第二批#538的ScienceWorld已合入main；早期五个草稿已关闭为被汇总承接，历史和分支保留。第三批新增CodeJudge-Eval、DeepPlanning、OpenMath、OpenCode、MVBench、Video-MME、LiveCodeBench、BigCodeBench、Spider、DRAGON、SWE_VERIFIED及SWE_BENCH固定原生profile交付，尚未合入。OpenMath/OpenCode是训练语料原问题生成，不是独立质量benchmark。打勾不代表全量模型评测、高分或性能保证。
 
-### Mind2Web（官方流程接入中，未交付）
+### Mind2Web（固定原题原生交付完成）
 
 - [x] 固定官方源码版本 `33bd95caeee7bba22dd08ecc935845e15c5e5dc7`，31个文件逐一核对Git对象；服务器源码归档SHA256与中转端一致。
 - [x] 核对官方LLM入口、原始提示、候选排名、每轮五选项比较及评分；原生50-token生成预算不变。
@@ -12,14 +12,23 @@
 - [x] 官方旧版依赖安装到独立Python3.11环境，原版psutil5.9.5通过匹配头文件构建；`python -I -m pip check`及官方入口导入通过。必须使用`-I`排除继承的CANN路径，不改推理服务依赖。
 - [x] 三个split各固定前3原题，共9任务89动作；原始字段、完整动作、官方候选分数和排名覆盖40994个候选元素，受限pickle读取校验通过。
 - [x] 官方加载器及原始tokenizer端到端CPU预检通过，24/35/30个原始动作次序一致；各split的top50候选召回缺失为7/4/6，保留原生记零行为，不补候选、不换题。零模型调用，非原生执行完成。
-- [ ] 固定完整任务的所有动作通过原生入口执行并评分，保留失败结果。
+- [x] 固定9原题89动作完成846次NPU请求及官方评分；原提示、候选比较和50-token预算保留。显式非思考模型适配，首次默认模式失败保留，不是作者GPT-3.5复现。
 
 首次实机尝试已保留：现有Qwen3.5-9B服务首个模型请求HTTP200，但`message.content`为`None`，官方`postprocess_action_llm`调用`.strip()`报错，未形成有效评分。固定原题、50-token预算和评分器均未更改；本次不计完成，后续先核对模型响应/思考模式适配，不补造答案、不将接口200当作原生流程跑通。验证窗口已释放共享租约，原模型服务未停止。
 
 - [x] 本地构建包在服务器独立安装后，9原题89动作经公共索引、公共消费与现有研究消费接口逐字段还原一致；研究消费文件SHA256与当前工作区一致，未改研究代码、未运行研究分析。此证据不是远端CI产物验证。
-- [ ] 远端CI产物及最终公开入口联调、完整原生评分结果审计；完成前不打来源总勾。
+- [x] 实际CI产物12929054859的68个运行时文件与Git内容一致；安装后9题89动作双端索引消费通过。公共入口用846份保存响应复核，提示、次序、全部预测及官方指标一致，新增模型调用为零。原生结果审计及租约释放检查通过。[正式回执](validation/mind2web-native-delivery-20261030.json)。
 
 这里是离线网页动作预测，不是实时浏览器任务。原格式使用最近五条参考历史动作；正确候选不在top-k时原评分器直接记零，不得补入正确候选来提高通过率。保留官方`marco_*`字段及micro指标，分别解释其含义。解密测试文件仅存服务器，不公开再分发。
+
+原题准备与执行（先在独立客户端安装作者固定依赖；`tokenizer`使用本地Flan-T5-base tokenizer，模型推理由已部署服务承担）：
+
+```bash
+python -I scripts/prepare_mind2web_original_tasks.py --archive /external/mind2web-original-assets/test.zip --output /external/mind2web-fixed-tasks --execute
+python -I scripts/run_mind2web_original.py --author-root /external/mind2web-author --tasks-root /external/mind2web-fixed-tasks --tokenizer /external/flan-t5-base-tokenizer --scores /external/mind2web-original-assets/scores_all_data.pkl --output /external/mind2web-results --endpoint http://127.0.0.1:19467/v1 --model Qwen/Qwen3.5-9B --disable-thinking --execute
+```
+
+执行者必须事先取得自己的服务访问与资源窗口；此处回环地址是本次独占保护代理示例，不会自动创建服务或租约。去掉`--execute`仅生成计划，不调用模型。输出目录必须新建且位于仓库外。原生运行约846次请求，不是9次短问答；原ZIP读取采用标准库，解密需要CPU时间，不能据此宣称引擎性能。
 
 协议与资产身份见[固定官方流程配置](../../configs/workload-native/mind2web-original-protocol.json)。配置检查仅证明约束已登记，不代表原生运行完成。
 
@@ -1069,7 +1078,7 @@ TB；服务器/data约1.42TB可用，未缩小语料。ChartQA当前两卡主机
 | WAVCAPS                    | [ ] 待开展                                 | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 | SCIENCEAGENTBENCH          | [ ] 缺口已列待补                           | 复用历史证据；原生缺口见37项复核表及方案8.5.2                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 | DS1000                     | [x] 已交付                                 | 通用原题ID／范围／full入口已接通，七库24道原题生成及作者评分完成；1000原字段公共／研究消费一致。ARM移植差异及告警保留，非全1000题成绩。见[回执](validation/ds1000-native-delivery-20261025.json)。                                                                                                                                                                                                                                                                                       |
-| MIND2WEB                   | [ ] 待开展                                 | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| MIND2WEB                   | [x] 原生交付可用                           | 原始三split各前3完整任务共9题89动作、846次NPU请求及官方评分；原提示/预算不变，显式非思考模型适配。保存响应复核、实际CI包及双端索引消费通过，非全量/实时浏览器结论。[交付回执](validation/mind2web-native-delivery-20261030.json)                                                                                                                                                                                                                                                         |
 | GAIA                       | [ ] 待开展                                 | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 | STRUCTEVAL                 | [ ] 非渲染部分完成，渲染/VQA待验证         | 原19类950条非渲染任务结果保留，不重复计算；其余1085条尚未交付。专用CPU Docker工作区已可用，原27模块已复核暂存，公开静态依赖扫描验证15个渲染模块；CDN/npm等离线依赖、隔离渲染及完整VQA仍待验证，不打总勾。[阶段审计](validation/structeval-nonrender-checkpoint3-20261025.json)                                                                                                                                                                                                           |
 | PAWS                       | [x] 已完成                                 | 全8000条人工test＋15条辅助分类、保存输入/响应/评分复核；全751450条4字段/索引、精确CI44文件和固定研究消费21处回查通过。[交付回执](validation/paws-native-delivery-20261027.json)。声明式模型适配非作者聊天运行器；noisy辅助标签不作人工test。                                                                                                                                                                                                                                             |

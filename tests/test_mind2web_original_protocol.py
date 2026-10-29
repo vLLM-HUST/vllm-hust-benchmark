@@ -11,7 +11,7 @@ def test_mind2web_protocol_keeps_original_execution_requirements():
             encoding="utf-8"
         )
     )
-    assert protocol["status"] == "protocol_review_only_not_native_validated"
+    assert protocol["status"] == "fixed_original_native_sample_and_consumer_validated"
     assert len(protocol["author_revision"]) == 40
     assert protocol["candidate_protocol"]["top_k"] == 50
     assert protocol["candidate_protocol"]["ground_truth_injection"] is False
@@ -24,4 +24,8 @@ def test_mind2web_protocol_keeps_original_execution_requirements():
     assert (
         protocol["environment_constraints"]["install_into_serving_environment"] is False
     )
-    assert len(protocol["remaining"]) == 5
+    assert protocol["remaining"] == []
+    receipt = json.loads((root / protocol["delivery_receipt"]).read_text("utf-8"))
+    assert receipt["source_checkbox_eligible"]
+    assert receipt["native_model_requests"] == 846
+    assert receipt["saved_response_public_runner_replay"]["new_model_calls"] == 0

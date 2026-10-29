@@ -21,6 +21,12 @@
     {"source_id": "PAIO-SEMANTIC-SIMILAR-5000", "asset_group": "enterprise-private-requests", "related_workload_ids": [], "boundary": "Semantic similarity is not exact-prefix or KV reuse; preserve original private requests without rewriting."}
   ],
   "source_entrypoints": {
+    "MIND2WEB": [
+      {"role": "prepare_assets", "path": "scripts/prepare_reused_research_assets.py", "scope": "Original encrypted test ZIP and official candidate scores; verify publisher identities without unpickling"},
+      {"role": "prepare_assets", "path": "scripts/prepare_mind2web_author_source.py", "scope": "Pinned31 original software files; no execution or dependency installation"},
+      {"role": "prepare_assets", "path": "scripts/prepare_mind2web_original_tasks.py", "scope": "Original first3 complete tasks per split; all fields and actions retained"},
+      {"role": "generation", "path": "scripts/run_mind2web_original.py", "scope": "Unmodified original prompt, top50 tournament and scorer; explicit non-thinking Qwen fallback, original50-token budget"}
+    ],
     "DRAGON_PUBLIC": [
       {"role": "prepare_assets", "path": "scripts/prepare_reused_research_assets.py", "scope": "All four same-release original public/reference datasets; reference QA is scoring-only"},
       {"role": "original_profile", "path": "configs/workload-native/dragon-e5-original-artifact.json", "scope": "Exact author-listed original encoder export; not proof of NPU execution"},
