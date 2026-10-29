@@ -78,6 +78,48 @@ def test_compatible_wrapper_keeps_normal_author_formatting_unchanged():
     )
 
 
+@pytest.mark.parametrize("missing", ["inputs", "expected", "error"])
+def test_each_approved_missing_field_uses_exact_existing_error_message(missing):
+    metadata = json.dumps({"error_code": -4, "error_message": "original feedback"})
+
+    def original(*args):
+        raise KeyError(missing)
+
+    assert repair.compatible_check_prompt(original, "q", False, metadata) == (
+        "The above code is incorrect. The original evaluator reported the following error:\n"
+        "original feedback"
+    )
+
+
+@pytest.mark.parametrize("missing", ["inputs", "expected", "error"])
+@pytest.mark.parametrize(
+    "feedback",
+    [
+        {"error_code": -2, "error_message": "original wrong answer"},
+        {"error_code": -4},
+        {"error_code": -4, "error_message": ""},
+        {"error_code": -4, "error_message": "   "},
+        {"error_code": -4, "error_message": None},
+        {
+            "error_code": -4,
+            "error_message": "original feedback",
+            "inputs": "present",
+            "expected": "present",
+            "error": "present",
+        },
+    ],
+)
+def test_known_missing_key_does_not_enable_fallback_for_other_feedback(
+    missing, feedback
+):
+    def original(*args):
+        raise KeyError(missing)
+
+    with pytest.raises(KeyError) as caught:
+        repair.compatible_check_prompt(original, "q", False, json.dumps(feedback))
+    assert caught.value.args == (missing,)
+
+
 def test_accepted_original_output_is_carried_without_another_model_request():
     previous = evaluated()
     requests = [
