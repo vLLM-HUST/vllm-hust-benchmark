@@ -1,0 +1,32 @@
+{
+  "schema": "muxpd-conv-archive-plan-v1",
+  "status": "not-built-not-uploaded",
+  "proposed_archive_name": "muxpd-conv-diagnostic-20261029-v1.tar.gz",
+  "inputs_must_be_terminal_before_collection": [
+    "/root/workspace/muxpd-gdn-conv-mode-20261028/runs-v1/conv-native-conv-observed-01",
+    "/root/workspace/muxpd-gdn-conv-mode-v2-20261029/runs-v2/conv-v2-native-conv-observed-01",
+    "/root/workspace/muxpd-gdn-conv-mode-v2-20261029/runs-v2/conv-v2-native-conv-plain-01"
+  ],
+  "planned_groups": [
+    {
+      "archive_prefix": "protocol-v1",
+      "source": "/root/workspace/muxpd-gdn-conv-mode-20261028",
+      "selection": "Frozen producer/input files, preparation and root review receipts; all v1 failed model attempt controller/process log/inventory/results/producer; both terminal synthetic-smoke script/results/log and real maps."
+    },
+    {
+      "archive_prefix": "protocol-v2",
+      "source": "/root/workspace/muxpd-gdn-conv-mode-v2-20261029",
+      "selection": "Frozen producer/input files and root preparation/review; exactly both declared terminal runs including all controller/log/inventory/producer/results/checkpoints/conv raw and float32 tensor receipts; final analyzer and independent audit when available."
+    }
+  ],
+  "excluded_directory_names": [
+    "compiler-cache",
+    "__pycache__",
+    ".pytest_cache",
+    ".ruff_cache"
+  ],
+  "exclude_models_and_runtime_checkouts": true,
+  "external_dependencies": "external-dependencies-v1.json",
+  "manifest_construction": "After terminal proof, enumerate selected original regular files with unique safe relative member names; record original absolute source, size and SHA256. Tar includes each original plus an embedded manifest. Record archive size/SHA and verify all members plus gzip EOF/CRC locally. Do not mutate originals or use a mutable live run tree. Root owns upload and any subsequent public readback.",
+  "pending": "Plain terminal result, observed/plain and historical gate analysis, A/B/C interpretation, independent audit, final member enumeration/size/hash, upload and public readback."
+}

@@ -1,0 +1,60 @@
+{
+  "schema": "fixed018-public-price-conditional-cost/v1",
+  "checked_date": "2026-10-29",
+  "historical_snapshot": true,
+  "superseded_by": "recovered-serving-summary.json",
+  "supersession_reason": "Storage restored on2026-10-29; original B0 allocation and200 request records now verified. Keep this earlier conditional arithmetic unchanged; use recovered-serving-summary.json for current derived results. Price basis remains applicable.",
+  "price_basis": {
+    "provider": "天翼云",
+    "price_url": "https://www.ctyun.cn/document/10029787/10047957",
+    "billing_scope_url": "https://www.ctyun.cn/document/10029787/10030140",
+    "sku": "pak3.8xlarge.8",
+    "accelerator": "Ascend 910B, 2 cards, 64GB per card",
+    "vcpu": 32,
+    "host_memory_gb": 256,
+    "monthly_instance_CNY": 36908,
+    "monthly_per_card_equivalent_CNY": 18454,
+    "analytical_month_days": 30,
+    "day_count_is_provider_billing_claim": false,
+    "included": ["CPU", "host memory", "accelerator and accelerator memory"],
+    "excluded_separately_billed": ["cloud disk", "public network bandwidth"],
+    "scope": "User-authorized public analogous-machine list-price estimate, not actual invoice or identical910B2 host. No unsupported all-inclusive or electricity/tax breakdown claim."
+  },
+  "comparison_status": "conditional_synchronized_window_estimate_not_M06_acceptance",
+  "source_summary": "reports/vllm-hust-midterm-20261019/m01-recovery/official018-paired-compute-20261024/summary.json",
+  "source_summary_sha256": "7b31cd029e6a00217be5e32e9cc56c92c19875a3a47f57d4624bfce5b7722c3a",
+  "source_commit": "5be5225c422ff25e0510b3daf7e26443f412e01f",
+  "B0": {
+    "runtime": "vLLM0.18.0 / vLLM-Ascend0.18.0, disclosed text-only compatibility patches",
+    "synchronized_seconds": 238.12670116312802,
+    "output_tokens": 51200,
+    "assumed_reserved_cards": 2,
+    "reserved_cards_verified": false,
+    "estimated_CNY_per_million_output_tokens": 66.22525654755565
+  },
+  "B1": {
+    "runtime": "vLLM0.28.1 development / Ascend0.25.1rc2 development; corrected optimized combination",
+    "synchronized_seconds": 127.59352582134306,
+    "output_tokens": 51200,
+    "reserved_cards": 2,
+    "reserved_cards_verified": true,
+    "physical_devices": [3, 6],
+    "raw_archive": "reports/vllm-hust-midterm-20261019/m01-recovery/storage-timing-20261024/m01-storage-timing-r1-raw.tar.gz",
+    "raw_archive_sha256": "6bcfa2ae9a912f8b59a0dbdb61aa1713c94af97eb5db766a2c84e5c641bdff55",
+    "request_envelope_seconds": 127.53221422806382,
+    "request_envelope_estimated_CNY_per_million_output_tokens": 35.467898241052545,
+    "estimated_CNY_per_million_output_tokens": 35.48494956698292
+  },
+  "equal_allocation_equal_rate_reduction_percent": 46.417799768730895,
+  "cost_acceptance_pass": null,
+  "utilization_improvement_pass": null,
+  "M06_pass": null,
+  "limits": [
+    "Two-card B0 allocation is assumed, not established from the unavailable timing-run execution plan.",
+    "The paired calculation uses synchronized M01 windows, not verified paired M06 request envelopes.",
+    "B0 timing originals and same-window utilization remain inaccessible; B1 raw archive has been read back and hashed.",
+    "Out256 timing does not inherit out8192 task-quality scores; quality and SLO applicability must be assessed.",
+    "Same price and accounting scope applied to both arms; no price fitting to an improvement target.",
+    "22.60 percent remains a separate development-stack comparison, not fixed018 acceptance."
+  ]
+}
