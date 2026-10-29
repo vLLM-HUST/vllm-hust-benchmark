@@ -341,18 +341,26 @@ def test_completed_protocol_audit_adds_only_previously_unexecuted_rows():
     assert not browser_complete["source_checkbox_eligible"]
     assert browser_complete["verified_unique_native_tasks"] == 1335
     assert browser_complete["remaining_original_tasks"] == 2035 - 1335
-    assert (
-        ledger["verified_unique_native_tasks"]
-        == count
-        + continued["combined_unique_protocol_tasks"]
-        + svg_continued["combined_unique_protocol_tasks"]
-        + nested["unique_original_tasks"]
-        + html["new_original_tasks"]
-        + markdown_html["new_original_tasks"]
-        + react_html["new_original_tasks"]
-        + browser_followup["vue_html_additional_original_tasks"]
-        + browser_followup["text_canvas_additional_original_tasks"]
-        + browser_complete["text_markdown_additional_original_tasks"]
+    latex = checkpoint["latex_fixed_first3_native_audit_20261029"]
+    assert [p["original_tasks"] for p in latex["profiles"]] == [3, 3, 3]
+    assert sum(p["generation_calls"] for p in latex["profiles"]) == 9
+    assert [p["judge_calls"] for p in latex["profiles"]] == [3, 2, 3]
+    assert latex["all17_actual_calls_finished_stop"]
+    assert latex["audit_new_model_calls"] == 0
+    assert latex["three_protocols_only_sampled_not_complete"]
+    assert not latex["source_checkbox_eligible"]
+    assert latex["verified_unique_native_tasks"] == 1344
+    assert latex["remaining_original_tasks"] == 2035 - 1344
+    assert ledger["verified_unique_native_tasks"] == count + continued[
+        "combined_unique_protocol_tasks"
+    ] + svg_continued["combined_unique_protocol_tasks"] + nested[
+        "unique_original_tasks"
+    ] + html["new_original_tasks"] + markdown_html["new_original_tasks"] + react_html[
+        "new_original_tasks"
+    ] + browser_followup["vue_html_additional_original_tasks"] + browser_followup[
+        "text_canvas_additional_original_tasks"
+    ] + browser_complete["text_markdown_additional_original_tasks"] + sum(
+        p["original_tasks"] for p in latex["profiles"]
     )
     held = receipt.get("held_native_exit_evidence")
     if held:

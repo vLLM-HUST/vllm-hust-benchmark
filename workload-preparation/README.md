@@ -663,6 +663,21 @@ docker run --rm --network=none --read-only --user=65534:65534 \
 再验证实际NPU生成和公共入口；不能用本检查替代Test Suite Accuracy。
 详见[阶段证据](../docs/workload-data/validation/spider-original-preparation-20261029.json)。
 
+原数据和测试套件已按作者目录解压后，可用以下入口准备固定原始dev前缀；默认前三题， 全量使用`--count 1034`。此命令校验完整原套件ZIP及选中数据库的全部SQLite成员，
+不执行SQL，也不生成提示。输出目录必须是与原文件分离的新私有目录。
+
+```bash
+python scripts/prepare_spider_original_dev.py \
+  --data-root /private/spider_data \
+  --suite-root /private/test-suites/database \
+  --suite-archive /private/testsuitedatabases.zip \
+  --output /private/spider-dev-first3 --count 3
+```
+
+`inputs.private.jsonl`只含原问题、原schema和位置；`references.private.jsonl`保留七个原字段，
+`gold.private.txt`是官方评分格式的原SQL和db_id。参考文件不得送入模型。 服务器已用原前三题和完整32份数据库完成该准备，并在非root/只读/断网容器运行原评分器的
+参考答案控制（1.000）；这不是模型成绩。公共评分控制器、真实模型生成和消费闭环仍待完成。
+
 ## Video-MME-v2 原资产准备（原生执行仍待补）
 
 复用现有获取器，不另建下载框架：

@@ -35,12 +35,22 @@ def test_spider_archive_acquisition_is_not_native_delivery_or_publisher_digest()
         "all20_official_suites_present"
     ]
     assert not receipt["native_input_adapter_and_official_test_suite_scoring_verified"]
-    assert (
-        receipt["model_calls"]
-        == receipt["scorer_calls"]
-        == receipt["windows_raw_files_written"]
-        == 0
-    )
+    assert receipt["model_calls"] == receipt["windows_raw_files_written"] == 0
+    # Reference-only controls qualify the original scorer, not model delivery.
+    assert receipt["scorer_calls"] == 2
+    prepared = receipt["fixed_original_dev_preparation"]
+    assert prepared["selected_original_indices"] == [0, 1, 2]
+    assert prepared["selected_complete_official_suite_files"] == 32
+    assert not prepared["source_sql_executed_during_preparation"]
+    control = receipt["isolated_official_scorer_reference_control"]
+    assert control["reference_only_rows"] == 3
+    assert control["official_test_suite_accuracy"] == 1.0
+    assert control["official_scorer_source_unchanged"]
+    assert control["nonroot_readonly_network_none_cpu_execution"]
+    assert not control["plug_gold_values_into_predictions"]
+    assert control["keep_distinct"]
+    assert control["model_calls"] == 0
+    assert not control["native_model_benchmark_completed"]
     assert not receipt["source_checkbox_eligible"]
     inventory = json.loads(
         (DOCS / "dataset-validation-status.json").read_text("utf-8")
