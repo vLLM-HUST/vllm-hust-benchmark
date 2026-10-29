@@ -1,0 +1,146 @@
+{
+  "schema": "muxpd-prefix-dtp-graph-v1-independent-failure-review",
+  "created_at_utc": "2026-10-29T19:42:01.173575+00:00",
+  "audit_passed": true,
+  "experiment_passed": false,
+  "freeze_sha256": "f9598193cabac3c9932033e5fe05384da930a4f9dfdfa291f312e0bc4fd72886",
+  "frozen_producer_pairs_verified": 22,
+  "terminal": {
+    "finished_at": "2026-10-29T19:38:38.401218+00:00",
+    "terminal_process_proven": true,
+    "exit_code": 1,
+    "owned_members_after_cleanup": [],
+    "idle_physical_before": [
+      "2",
+      "3",
+      "4",
+      "6"
+    ],
+    "idle_physical_after": [
+      "2",
+      "3",
+      "4",
+      "6"
+    ],
+    "cleanup_required": null,
+    "forced_termination": null,
+    "errors": [
+      "Terminal worker log contains a traceback or graph ownership error"
+    ]
+  },
+  "failure": "Original DecoupledMuxPDScheduler.__init__ line127 rejects exact diagnostic worker string after all four worker warmup/capture succeeded. LLM construction did not return.",
+  "startup_rank_receipts": [
+    {
+      "rank": 0,
+      "passed": true,
+      "stage": "captured",
+      "capture_attempts": 1,
+      "captured_calls": 1,
+      "core_calls": 1,
+      "copy_calls": 2,
+      "capture_restored": 3,
+      "window": "CLOSED",
+      "startup_restore_error": null,
+      "graph_entry": {
+        "entry_id": 281467402339104,
+        "graph_id": 281467407781520
+      }
+    },
+    {
+      "rank": 1,
+      "passed": true,
+      "stage": "captured",
+      "capture_attempts": 1,
+      "captured_calls": 1,
+      "core_calls": 1,
+      "copy_calls": 2,
+      "capture_restored": 3,
+      "window": "CLOSED",
+      "startup_restore_error": null,
+      "graph_entry": {
+        "entry_id": 281468487139792,
+        "graph_id": 281467425641040
+      }
+    },
+    {
+      "rank": 2,
+      "passed": true,
+      "stage": "captured",
+      "capture_attempts": 1,
+      "captured_calls": 1,
+      "core_calls": 1,
+      "copy_calls": 2,
+      "capture_restored": 3,
+      "window": "CLOSED",
+      "startup_restore_error": null,
+      "graph_entry": {
+        "entry_id": 281468401272496,
+        "graph_id": 281467290407792
+      }
+    },
+    {
+      "rank": 3,
+      "passed": true,
+      "stage": "captured",
+      "capture_attempts": 1,
+      "captured_calls": 1,
+      "core_calls": 1,
+      "copy_calls": 2,
+      "capture_restored": 3,
+      "window": "CLOSED",
+      "startup_restore_error": null,
+      "graph_entry": {
+        "entry_id": 281467524956128,
+        "graph_id": 281466645089648
+      }
+    }
+  ],
+  "startup_files_verified": 20,
+  "requests_admitted": 0,
+  "actual_graph_serving_observation": false,
+  "graph_arm_or_layout_install_rpc_started": false,
+  "numeric_or_quality_interpretation_allowed": false,
+  "plain_role": "Not run; deterministically affected by same constructor guard; missing role remains part of failed v1 matrix, no retry selection.",
+  "shutdown_caveat": "Driver shutdown_returned is false because LLM construction did not return. OS/controller proves all owned processes exited without controller cleanup/forced kill; do not claim a successful measurement or normal driver shutdown.",
+  "next_design_review": {
+    "recommended": "Driver-only single-use owned wrapper around original DecoupledMuxPDScheduler.__init__. Validate exact diagnostic worker/source/base identity; map worker_cls to the exact original base string only while invoking original constructor once; restore worker_cls in finally, and restore owned class __init__ in outer finally.",
+    "preserved": "Original scheduler_cls, actual scheduler type, schedule/update/cancellation methods, model worker selection, source files, and all numerical producer logic.",
+    "alternative_not_selected": "A new scheduler subclass would additionally encounter MuxPDPolicy scheduler-name guard and require a second config mapping.",
+    "source_proof": {
+      "EngineCore": "executor construction line117 and KV initialization/warmup line131 precede scheduler construction line150",
+      "DecoupledScheduler": "Only worker_cls equality guard lines125-127 rejects this exact class; original constructor calls MuxPDScheduler directly before that guard",
+      "NativeScheduler": "stores vllm_config and parallel_config by reference at lines102/108, so finally restoration is visible to scheduler too"
+    }
+  },
+  "source_files": {
+    "/root/workspace/muxpd-composite-token-logits/src/vllm_muxpd/decoupled_scheduler.py": "9bbd6db2b0aeb22157a71c47f9bc571fecc72e1f9967332788d6bcbd041d641b",
+    "/root/workspace/muxpd-composite-token-logits/src/vllm_muxpd/policy.py": "8f4bfbdbbd78a7dd9885d622de6ecd1509e1d7e62210bb4fc06f414179250a6a",
+    "/root/workspace/vllm-hust/vllm/v1/engine/core.py": "41cbdc64bb1b0588cc041f88f399dda3a81cc1cdf96133c6871bc10e32b0c378",
+    "/root/workspace/vllm-hust/vllm/v1/core/sched/scheduler.py": "5d981e6cdafc63ac60bdde66415067c88bfa544e69e5ba56d6249ca03f61cd58"
+  },
+  "evidence": {
+    "/root/workspace/muxpd-prefix-dtp-graph-20261029/runs-v1/prefix-dtp-graph-observed-01/controller.json": "15ce8c231e45a8f19856c8ed9fe853f2c53e8d0703dc2274b96b7ff6284e4d7d",
+    "/root/workspace/muxpd-prefix-dtp-graph-20261029/runs-v1/prefix-dtp-graph-observed-01/results/run.json": "f03f8b7c51618167b418d898c0b0e84cb75c869fecff79377df78c89aedf7fa2",
+    "/root/workspace/muxpd-prefix-dtp-graph-20261029/runs-v1/prefix-dtp-graph-observed-01/process.log": "314e636ca4cb7b7eae3075f2d305f2cdf40707114514859a293fb8c376bb7eb4",
+    "/root/workspace/muxpd-prefix-dtp-graph-20261029/runs-v1/prefix-dtp-graph-observed-01/results/graph-startup/rank-0/003-warmup-return.json": "86b45b5ce47a823cb10238cd66732e758adf3c8cfc63e6288f8573a6b4ba2b66",
+    "/root/workspace/muxpd-prefix-dtp-graph-20261029/runs-v1/prefix-dtp-graph-observed-01/results/graph-startup/rank-0/startup-final.json": "c2bff78dec9b0074ff3da7053f1c6c47e13032bbb14e6df38889759ab7d75a1c",
+    "/root/workspace/muxpd-prefix-dtp-graph-20261029/runs-v1/prefix-dtp-graph-observed-01/results/graph-startup/rank-0/001-capture-enter.json": "80dc36f10a9ba8b9eab1f1b0cb1af52f2401d1efac14d614622cd98419529fdd",
+    "/root/workspace/muxpd-prefix-dtp-graph-20261029/runs-v1/prefix-dtp-graph-observed-01/results/graph-startup/rank-0/002-capture-return.json": "747970bb4489587c667af9f7beda0be128331eb430129ef537796fe2696dab94",
+    "/root/workspace/muxpd-prefix-dtp-graph-20261029/runs-v1/prefix-dtp-graph-observed-01/results/graph-startup/rank-0/000-warmup-enter.json": "d2f1bb519b7e561258c62cf32ff27a53266ebc2198fdcafce35d1a163686bf53",
+    "/root/workspace/muxpd-prefix-dtp-graph-20261029/runs-v1/prefix-dtp-graph-observed-01/results/graph-startup/rank-1/003-warmup-return.json": "082f84d68867416ab9e47e5801ebf450146942d3a4b2c222dcb89a853d15b2f3",
+    "/root/workspace/muxpd-prefix-dtp-graph-20261029/runs-v1/prefix-dtp-graph-observed-01/results/graph-startup/rank-1/startup-final.json": "b7072ec4535cdc4946fde921648f78b7d670483f51590723a682e2fcf455ecfe",
+    "/root/workspace/muxpd-prefix-dtp-graph-20261029/runs-v1/prefix-dtp-graph-observed-01/results/graph-startup/rank-1/001-capture-enter.json": "e9035124aaf1c1c0bb8db3b3222146096e4c1d60236f841bbe3193e100c34934",
+    "/root/workspace/muxpd-prefix-dtp-graph-20261029/runs-v1/prefix-dtp-graph-observed-01/results/graph-startup/rank-1/002-capture-return.json": "82d32be722eaca594cf8d0d7e0d6e8af3f60a88ed60844badb03e5963dfcf327",
+    "/root/workspace/muxpd-prefix-dtp-graph-20261029/runs-v1/prefix-dtp-graph-observed-01/results/graph-startup/rank-1/000-warmup-enter.json": "28e7dbed5888aa1dbb2f30567d8bdf80eaa41659b7236955906c5372a8b802d7",
+    "/root/workspace/muxpd-prefix-dtp-graph-20261029/runs-v1/prefix-dtp-graph-observed-01/results/graph-startup/rank-2/003-warmup-return.json": "a31893e9f4a5e6e38cd41ae12ea09ceb25bccf2ea07fcdf5b630aa662f53a4da",
+    "/root/workspace/muxpd-prefix-dtp-graph-20261029/runs-v1/prefix-dtp-graph-observed-01/results/graph-startup/rank-2/startup-final.json": "1b50fcf5785a33b71fa5ec2d764a528fe04a758bb62a6346a097b2c24a3a1c7e",
+    "/root/workspace/muxpd-prefix-dtp-graph-20261029/runs-v1/prefix-dtp-graph-observed-01/results/graph-startup/rank-2/001-capture-enter.json": "d19fa6dc40a9d69460bdbf15d876d99458ae2285504f274a6e0721665050c738",
+    "/root/workspace/muxpd-prefix-dtp-graph-20261029/runs-v1/prefix-dtp-graph-observed-01/results/graph-startup/rank-2/002-capture-return.json": "479cbef2d9207c9f42fb99035eac8fa8f8b98d438e5039d1373ecbccfb9cf013",
+    "/root/workspace/muxpd-prefix-dtp-graph-20261029/runs-v1/prefix-dtp-graph-observed-01/results/graph-startup/rank-2/000-warmup-enter.json": "75309f8919f2b1d1ca02c4df6eb16cd3fdeb7f1d2d531cfdf2946616a77909ea",
+    "/root/workspace/muxpd-prefix-dtp-graph-20261029/runs-v1/prefix-dtp-graph-observed-01/results/graph-startup/rank-3/003-warmup-return.json": "8bbccde98fd955aa4fbf14285d7280588405997e2914388afbf3b5339122c81c",
+    "/root/workspace/muxpd-prefix-dtp-graph-20261029/runs-v1/prefix-dtp-graph-observed-01/results/graph-startup/rank-3/startup-final.json": "3076d5898bbc97bd6bb40524281d3223ec318b5b22045bdb2484ea3424c8b847",
+    "/root/workspace/muxpd-prefix-dtp-graph-20261029/runs-v1/prefix-dtp-graph-observed-01/results/graph-startup/rank-3/001-capture-enter.json": "f452dff3789aad0cf72ce62f2b718687d2f8633d08c8ec91636fb75b920306cb",
+    "/root/workspace/muxpd-prefix-dtp-graph-20261029/runs-v1/prefix-dtp-graph-observed-01/results/graph-startup/rank-3/002-capture-return.json": "c765040c36bb765a7dc90497311b0f70d53d35e5aff94c7fd70c5e36a174b28d",
+    "/root/workspace/muxpd-prefix-dtp-graph-20261029/runs-v1/prefix-dtp-graph-observed-01/results/graph-startup/rank-3/000-warmup-enter.json": "6740ce53c392a6256045ebb559a3718565db01e5152b8d1663ad9b3a8f21a51a"
+  }
+}

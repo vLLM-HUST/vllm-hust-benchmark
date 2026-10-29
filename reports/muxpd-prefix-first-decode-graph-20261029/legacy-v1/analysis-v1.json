@@ -1,0 +1,105 @@
+{
+  "schema": "muxpd-prefix-dtp-graph-analysis-v1",
+  "passed": false,
+  "interpretation_allowed": false,
+  "attempts": [
+    {
+      "directory": "/root/workspace/muxpd-prefix-dtp-graph-20261029/runs-v1/prefix-dtp-graph-observed-01",
+      "collection_valid": false,
+      "errors": [
+        "ValueError: Controller lifecycle failed"
+      ]
+    }
+  ],
+  "errors": [
+    "Invalid/nonterminal attempt retained: prefix-dtp-graph-observed-01",
+    "Require exactly the two predeclared attempts"
+  ],
+  "source_proof": {
+    "source_receipts": {
+      "/root/workspace/vllm-hust/vllm/__init__.py": {
+        "path": "/root/workspace/vllm-hust/vllm/__init__.py",
+        "sha256": "fd3708e5a13abe98c566afd79a6b1987cef70c0548bb19c1218ff6a7f9d43346",
+        "commit": "d0f22d2bda562156e4dbf433ce645e1769b4f804",
+        "status": "",
+        "diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diff_bytes_utf8": "",
+        "changed_files": []
+      },
+      "/root/workspace/vllm-ascend-hust/vllm_ascend/__init__.py": {
+        "path": "/root/workspace/vllm-ascend-hust/vllm_ascend/__init__.py",
+        "sha256": "cfe116148053fcb120d766d99ca5bca2c37afac8822e72c6b1fce20af8a0e6d7",
+        "commit": "03766ac696fde5ab1980d80ca0b8543d3580c989",
+        "status": "M ../csrc/build_aclnn.sh",
+        "diff_sha256": "a03524d1d8a4b84c6da6c782b5f8b77b7c473c8d414cc9f17831869027f9922f",
+        "diff_bytes_utf8": "diff --git a/csrc/build_aclnn.sh b/csrc/build_aclnn.sh\nindex e0476e1..19fea47 100755\n--- a/csrc/build_aclnn.sh\n+++ b/csrc/build_aclnn.sh\n@@ -109,7 +109,7 @@ elif [[ \"$SOC_VERSION\" =~ ^ascend910b ]]; then\n         \"copy_and_expand_eagle_inputs\"\n         \"causal_conv1d\"\n         \"lightning_indexer_quant\"\n-        \"compressor\"\n+        # Local Qwen3.5 build: Compressor is not used by this model.\n         \"compressor_metadata\"\n         \"vllm_quant_lightning_indexer\"\n         \"vllm_quant_lightning_indexer_metadata\"\n",
+        "changed_files": [
+          {
+            "path": "csrc/build_aclnn.sh",
+            "exists": true,
+            "sha256": "b089d52475c6cb36fffd733bb5be3fbe4158b6845074751268938e98a1d0042c"
+          }
+        ]
+      }
+    },
+    "actual_source_checks": {
+      "/root/workspace/vllm-hust/vllm/__init__.py": {
+        "root": "/root/workspace/vllm-hust",
+        "module_parent_cwd": "/root/workspace/vllm-hust/vllm",
+        "old_status": "",
+        "new_status": "",
+        "diff": "",
+        "changed_files": []
+      },
+      "/root/workspace/vllm-ascend-hust/vllm_ascend/__init__.py": {
+        "root": "/root/workspace/vllm-ascend-hust",
+        "module_parent_cwd": "/root/workspace/vllm-ascend-hust/vllm_ascend",
+        "old_status": "M ../csrc/build_aclnn.sh",
+        "new_status": "M csrc/build_aclnn.sh",
+        "diff": "diff --git a/csrc/build_aclnn.sh b/csrc/build_aclnn.sh\nindex e0476e1..19fea47 100755\n--- a/csrc/build_aclnn.sh\n+++ b/csrc/build_aclnn.sh\n@@ -109,7 +109,7 @@ elif [[ \"$SOC_VERSION\" =~ ^ascend910b ]]; then\n         \"copy_and_expand_eagle_inputs\"\n         \"causal_conv1d\"\n         \"lightning_indexer_quant\"\n-        \"compressor\"\n+        # Local Qwen3.5 build: Compressor is not used by this model.\n         \"compressor_metadata\"\n         \"vllm_quant_lightning_indexer\"\n         \"vllm_quant_lightning_indexer_metadata\"\n",
+        "changed_files": [
+          {
+            "path": "csrc/build_aclnn.sh",
+            "exists": true,
+            "sha256": "b089d52475c6cb36fffd733bb5be3fbe4158b6845074751268938e98a1d0042c"
+          }
+        ]
+      }
+    },
+    "v1_result_preserved_sha256": "ebe82ac020a7efa789b3eb33a0a4809b66a64ddbdc1808bd6876c1d3577312de",
+    "scope": "Only source receipt formatting is adapted; every v1 lifecycle, invalid-attempt, exact four-profile, reproduction and observer/plain gate remains unchanged."
+  },
+  "protocol_lineage": {
+    "schema": "muxpd-prefix-graph-lineage-v1",
+    "upstream_plan": "/root/workspace/muxpd-gdn-decode-collective-20261029/probe-v1/plan-v1.json",
+    "plan_diagnostic_fields_changed": [
+      "schema",
+      "scope",
+      "dtp",
+      "graph_tap",
+      "plan_sha256"
+    ],
+    "immutable_references": {
+      "/root/workspace/muxpd-gdn-decode-collective-20261029/probe-v1/analysis-v1.json": "7f10818956a5dd69fa06040e31a59ef270ca91e75188a7e7fd63d20f4e00be15",
+      "/root/workspace/muxpd-gdn-decode-collective-20261029/probe-v1/freeze-manifest-v1.json": "4711d530564675c5632a9e95a6d6f3c21b1041047fd4ee523c9db96b425d3a4c",
+      "/root/workspace/muxpd-gdn-decode-collective-20261029/probe-v1/plan-v1.json": "25a6dc450d7f73ec1150b6e373f3ce4f08071d244b9abb56cd4aaf6e9d0bfef7",
+      "/root/workspace/muxpd-gdn-decode-collective-20261029/probe-v1/protocol-lineage-v1.json": "42942ee8ec4fa70d26a279bdb9cfb74750ac424f10d6eae7c9a8f50a9712e350",
+      "/root/workspace/muxpd-gdn-decode-collective-20261029/probe-v1/v1-failure-reference-v2.json": "777b373cbddbd510e290207b253ded166182931ce504e5bace05a27d0d34d577",
+      "/root/workspace/muxpd-gdn-decode-collective-20261029/probe-v1/operator-contract-v1.json": "1deb398545a13ed0f7462529310a9c866a3d918971dadc1f8b4c430130d70b62"
+    },
+    "byte_exact_reused_files": {
+      "conv_rpc_v2.py": "dfe841187a14dd8a9bf724798eacf25cde0dae213bffb882bf187205b9427e6c",
+      "conv_operator_identity_v2.py": "0b50a1801a36f398cf7cabdeb085ba6697b200e888884e801ab58e92115ca2c4",
+      "source_adapter_v2.py": "87193ce1da3a4728567af2a9c21d4bcbef36c727c3457f20ffb2bfcaeb1d6e8c",
+      "manifest-v2.json": "774719926c1773cabd1585dead14c0ea38ab8dc3054fe928ada50b20e44ba628",
+      "source-manifest-v1.json": "66bf0d149c34b9bdc0064750f670910af94e26314ab4f39a0e462c40282d683a",
+      "historical-prefixes-v1.json": "5e5f34d52e5ba3b2c5f747e8fc6c35397f694f590ef0fb41cd43501209aa5ae1",
+      "dtp_observer_v1.py": "6a08b5148e837e7bf946f0ded4332934c1c15d09e922cef078177c104e327afa",
+      "raw-engine-args-v1.json": "d42f1007c5e059fdd872a4b77c8f003aa185e948a59c35373322690a6248d512",
+      "prefill_collective_layout_v1.py": "6431c4c0abdd869ef17e7122f681c457ad2b4d5741f86c6a0653e9fca44e02fc"
+    },
+    "scope": "Previous failed conv attempt remains FAILED; prior successful DTP geometry result is not actual graph observation. No quality acceptance change.",
+    "operator_contract_extension": "Original library sets retained; graph-critical source files and graph design SHA added in this separate protocol."
+  },
+  "scope": "Actual prefix graph two-row observation. reduction_attribution_allowed means same-input reduction-boundary comparison, requiring all-rank input byte identity; it does not establish geometry or graph mode as unique cause. Hardware/topology may differ from native reference. Upstream mismatch is unlocalized. No quality repair or performance claim."
+}

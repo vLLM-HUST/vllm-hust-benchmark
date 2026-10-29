@@ -1,0 +1,346 @@
+"""One owned constructor compatibility scope; original scheduling stays intact."""
+
+from __future__ import annotations
+
+import hashlib
+import importlib
+import inspect
+import os
+from pathlib import Path
+from threading import get_ident
+
+CANONICAL = "vllm_muxpd.decoupled_worker.DecoupledMuxPDNPUWorker"
+DIAGNOSTIC = "graph_workers_v1.PrefixDTPGraphWorker"
+SCHEDULER = "vllm_muxpd.decoupled_scheduler.DecoupledMuxPDScheduler"
+SOURCE_ROOT = Path("/root/workspace/muxpd-composite-token-logits/src/vllm_muxpd")
+EXPECTED = {
+    "scheduler": (
+        SOURCE_ROOT / "decoupled_scheduler.py",
+        "9bbd6db2b0aeb22157a71c47f9bc571fecc72e1f9967332788d6bcbd041d641b",
+    ),
+    "base_worker": (
+        SOURCE_ROOT / "decoupled_worker.py",
+        "fa74e448325b2157e3a9ac168bfd47108e3ff278d44d6b1c6feba1aaf4c241ea",
+    ),
+    "diagnostic_worker": (
+        Path(__file__).resolve().parent / "graph_workers_v1.py",
+        "48123eb9bcc68eb740d5f739cdb491db9a2b13db6e6638f08d7dbe5de7484172",
+    ),
+}
+WORKER_METHODS = (
+    "execute_model",
+    "sample_tokens",
+    "load_model",
+    "initialize_from_config",
+)
+_ACTIVE = None
+
+
+def require(condition, message):
+    if not condition:
+        raise RuntimeError(message)
+
+
+def file_identity(path):
+    path = Path(path).resolve()
+    return {"path": str(path), "sha256": hashlib.sha256(path.read_bytes()).hexdigest()}
+
+
+def callable_identity(value):
+    return {
+        "module": value.__module__,
+        "qualname": value.__qualname__,
+        **file_identity(inspect.getsourcefile(value)),
+    }
+
+
+def error_record(error):
+    return {"type": type(error).__name__, "message": str(error)}
+
+
+def selector(value):
+    if isinstance(value, str) or value is None:
+        return value
+    return f"{value.__module__}.{value.__qualname__}"
+
+
+def methods(cls):
+    values = {}
+    for name in dir(cls):
+        if name == "__init__":
+            continue
+        value = inspect.getattr_static(cls, name)
+        if inspect.isroutine(value) or isinstance(value, (staticmethod, classmethod)):
+            values[name] = value
+    return values
+
+
+class ConstructorCompat:
+    def __init__(self, scheduler, diagnostic, base):
+        self.scheduler, self.diagnostic, self.base = scheduler, diagnostic, base
+        self.original = scheduler.__init__
+        self.original_methods = methods(scheduler)
+        self.owner = (os.getpid(), get_ident())
+        self.state, self.calls, self.original_calls = "new", 0, 0
+        self.error = self.original_exception = None
+        self.restore_errors = []
+        self.init_restored = self.non_init_methods_unchanged = False
+        self.config = {}
+        self.instance_id = None
+        self.original_succeeded = False
+        self.sources, self.worker_identities = {}, {}
+        self._verify_bindings()
+        self.original_identity = callable_identity(self.original)
+
+        def wrapped(instance, vllm_config, *args, **kwargs):
+            return self._invoke(instance, vllm_config, args, kwargs)
+
+        self.wrapper = wrapped
+
+    def _verify_bindings(self):
+        for role, cls in (
+            ("scheduler", self.scheduler),
+            ("base_worker", self.base),
+            ("diagnostic_worker", self.diagnostic),
+        ):
+            path, sha = EXPECTED[role]
+            identity = file_identity(inspect.getsourcefile(cls))
+            require(
+                identity == {"path": str(path), "sha256": sha},
+                "Constructor compatibility source identity differs: " + role,
+            )
+            module = importlib.import_module(cls.__module__)
+            require(
+                getattr(module, cls.__name__) is cls,
+                "Constructor compatibility module class identity differs",
+            )
+            self.sources[role] = identity
+        require(
+            f"{self.scheduler.__module__}.{self.scheduler.__qualname__}" == SCHEDULER,
+            "Expected exact original scheduler class",
+        )
+        require(
+            f"{self.base.__module__}.{self.base.__qualname__}" == CANONICAL,
+            "Expected canonical worker class",
+        )
+        require(
+            f"{self.diagnostic.__module__}.{self.diagnostic.__qualname__}" == DIAGNOSTIC
+            and self.diagnostic.__bases__ == (self.base,),
+            "Expected exact diagnostic worker direct base",
+        )
+        require(
+            self.original.__module__ == self.scheduler.__module__
+            and self.original.__qualname__ == self.scheduler.__qualname__ + ".__init__"
+            and file_identity(inspect.getsourcefile(self.original))
+            == self.sources["scheduler"],
+            "Expected original scheduler initializer identity",
+        )
+        for name in WORKER_METHODS:
+            value = getattr(self.base, name)
+            require(
+                getattr(self.diagnostic, name) is value,
+                "Changed inherited worker method: " + name,
+            )
+            self.worker_identities[name] = callable_identity(value)
+        self.sources["policy"] = file_identity(SOURCE_ROOT / "policy.py")
+
+    def _check_owner(self):
+        require(
+            (os.getpid(), get_ident()) == self.owner,
+            "Constructor compatibility requires owner process/thread",
+        )
+
+    def _record_error(self, error):
+        if self.error is None:
+            self.error = error_record(error)
+
+    def __enter__(self):
+        global _ACTIVE
+        self._check_owner()
+        require(self.state == "new", "Constructor compatibility context is single-use")
+        require(_ACTIVE is None, "Constructor compatibility context cannot nest")
+        require(
+            self.scheduler.__init__ is self.original,
+            "Original scheduler initializer ownership changed before scope",
+        )
+        self._verify_bindings()
+        self.scheduler.__init__ = self.wrapper
+        _ACTIVE = self
+        self.state = "active"
+        return self
+
+    def _invoke(self, instance, config, args, kwargs):
+        self.calls += 1
+        try:
+            self._check_owner()
+            require(
+                self.state == "active" and _ACTIVE is self,
+                "Constructor compatibility scope is inactive",
+            )
+            require(
+                self.calls == 1, "Constructor compatibility is single-use/non-reentrant"
+            )
+            require(
+                self.scheduler.__init__ is self.wrapper,
+                "Scheduler initializer ownership changed during scope",
+            )
+            require(
+                type(instance) is self.scheduler,
+                "Constructor requires exact original scheduler instance",
+            )
+            self._verify_bindings()
+            parallel = config.parallel_config
+            worker_before = parallel.worker_cls
+            scheduler_before = config.scheduler_config.scheduler_cls
+            require(
+                worker_before == DIAGNOSTIC, "Expected exact diagnostic worker selector"
+            )
+            self.instance_id = id(instance)
+            self.config = {
+                "vllm_config_id": id(config),
+                "parallel_config_id": id(parallel),
+                "parallel_config_same": True,
+                "worker_cls_before": worker_before,
+                "worker_cls_during": None,
+                "worker_cls_after": None,
+                "scheduler_cls_before": selector(scheduler_before),
+                "scheduler_cls_during": None,
+                "scheduler_cls_after": None,
+            }
+            parallel.worker_cls = CANONICAL
+            try:
+                self.config["worker_cls_during"] = parallel.worker_cls
+                self.config["scheduler_cls_during"] = selector(
+                    config.scheduler_config.scheduler_cls
+                )
+                require(
+                    parallel.worker_cls == CANONICAL,
+                    "Canonical worker selector mapping failed",
+                )
+                self.original_calls += 1
+                try:
+                    result = self.original(instance, config, *args, **kwargs)
+                except BaseException as error:
+                    self.original_exception = error_record(error)
+                    raise
+                require(
+                    instance.vllm_config is config
+                    and instance.parallel_config is parallel,
+                    "Original scheduler configuration references changed",
+                )
+                self.original_succeeded = True
+                return result
+            finally:
+                restore_errors = []
+                if config.parallel_config is not parallel:
+                    restore_errors.append(
+                        "parallel_config ownership changed during constructor"
+                    )
+                    self.config["parallel_config_same"] = False
+                if parallel.worker_cls != CANONICAL:
+                    restore_errors.append(
+                        "worker_cls ownership changed during constructor"
+                    )
+                else:
+                    parallel.worker_cls = worker_before
+                self.config["owned_worker_cls_after"] = selector(parallel.worker_cls)
+                self.config["worker_cls_after"] = selector(
+                    config.parallel_config.worker_cls
+                )
+                self.config["scheduler_cls_after"] = selector(
+                    config.scheduler_config.scheduler_cls
+                )
+                if config.scheduler_config.scheduler_cls is not scheduler_before:
+                    restore_errors.append(
+                        "scheduler_cls ownership changed during constructor"
+                    )
+                if restore_errors:
+                    self.restore_errors.extend(restore_errors)
+                    raise RuntimeError("; ".join(restore_errors))
+        except BaseException as error:
+            self._record_error(error)
+            raise
+
+    def __exit__(self, error_type, error, traceback):
+        global _ACTIVE
+        if error is not None:
+            self._record_error(error)
+        cleanup = []
+        try:
+            self._check_owner()
+            if self.scheduler.__init__ is self.wrapper:
+                self.scheduler.__init__ = self.original
+                self.init_restored = self.scheduler.__init__ is self.original
+            else:
+                cleanup.append(
+                    "Scheduler initializer ownership changed; foreign value preserved"
+                )
+            current = methods(self.scheduler)
+            self.non_init_methods_unchanged = (
+                current.keys() == self.original_methods.keys()
+                and all(
+                    current[name] is value
+                    for name, value in self.original_methods.items()
+                )
+            )
+            if not self.non_init_methods_unchanged:
+                cleanup.append("Original non-init scheduler methods changed")
+        except BaseException as failure:  # noqa: BLE001 -- retain cleanup errors alongside original failure
+            cleanup.append(str(failure))
+        finally:
+            if _ACTIVE is self:
+                _ACTIVE = None
+            self.restore_errors.extend(cleanup)
+            complete = (
+                self.calls == self.original_calls == 1
+                and self.original_succeeded
+                and self.error is None
+                and not self.restore_errors
+                and self.init_restored
+                and self.non_init_methods_unchanged
+            )
+            self.state = "complete" if complete else "failed"
+        if cleanup:
+            raise RuntimeError("; ".join(cleanup))
+        if error is None and not complete:
+            raise RuntimeError(
+                "Constructor compatibility did not complete exactly one successful original call"
+            )
+        return False
+
+    def receipt(self):
+        return {
+            "schema": "muxpd-graph-scheduler-constructor-compat-v2",
+            "passed": self.state == "complete",
+            "state": self.state,
+            "calls": self.calls,
+            "original_calls": self.original_calls,
+            "init_restored": self.init_restored,
+            "non_init_methods_unchanged": self.non_init_methods_unchanged,
+            "config": dict(self.config),
+            "scheduler": {
+                "module": self.scheduler.__module__,
+                "qualname": self.scheduler.__qualname__,
+                "class_id": id(self.scheduler),
+                "instance_id": self.instance_id,
+            },
+            "sources": dict(self.sources),
+            "original_init": dict(self.original_identity),
+            "inherited_worker_methods": dict(self.worker_identities),
+            "non_init_method_names": sorted(self.original_methods),
+            "error": self.error,
+            "original_exception": self.original_exception,
+            "restore_errors": list(self.restore_errors),
+            "owner": {"pid": self.owner[0], "thread_id": self.owner[1]},
+        }
+
+
+def scheduler_constructor_compat():
+    scheduler = importlib.import_module(
+        "vllm_muxpd.decoupled_scheduler"
+    ).DecoupledMuxPDScheduler
+    diagnostic = importlib.import_module("graph_workers_v1").PrefixDTPGraphWorker
+    base = importlib.import_module(
+        "vllm_muxpd.decoupled_worker"
+    ).DecoupledMuxPDNPUWorker
+    return ConstructorCompat(scheduler, diagnostic, base)
