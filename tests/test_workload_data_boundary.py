@@ -13,6 +13,7 @@ DATA_MODULES = {
     "naturebench",  # Original package/material references only, no scientific execution.
     "deepplanning",  # Original queries/metadata/database references only.
     "dragon",  # Original four-file task/corpus/reference identities only.
+    "mind2web",  # Original task/page/reference relations only; no Agent, observation or scoring.
     "scienceworld",  # Original publisher task/variation/reference relations only.
     "docvqa",  # Original field types and media paths only; no inference or analysis.
     "copilot",  # Original release integrity and nested metadata only, no analysis.
