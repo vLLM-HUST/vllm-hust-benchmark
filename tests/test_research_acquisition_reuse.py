@@ -5,6 +5,7 @@ import importlib.util
 import io
 import json
 from pathlib import Path
+import re
 import sys
 
 import pytest
@@ -15,6 +16,25 @@ spec = importlib.util.spec_from_file_location(
 )
 runner = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(runner)
+
+
+def test_existing_public_source_baseline_positions_match_unchanged_digests():
+    """Bookkeeping check, not a substitute for the actual secret scanner."""
+    path = "workload-preparation/data/catalogs/source_manifests_v1.json"
+    lines = (ROOT / path).read_text("utf-8").splitlines()
+    baseline = json.loads((ROOT / ".secrets.baseline").read_text("utf-8"))
+    for item in baseline["results"][path]:
+        assert item["type"] == "Hex High Entropy String"
+        assert item["is_secret"] is False
+        assert type(item["is_verified"]) is bool
+        line = lines[item["line_number"] - 1]
+        tokens = re.findall(r"(?<![0-9a-f])[0-9a-f]{40,64}(?![0-9a-f])", line)
+        # SHA1 is the scanner's existing identifier, not a security guarantee.
+        assert item["hashed_secret"] in {
+            hashlib.sha1(token.encode()).hexdigest() for token in tokens
+        }, "Existing source digest moved: synchronize its baseline position only"
+
+
 EXPECTED = {
     "WILDCHAT": 14,
     "ULTRACHAT": 8,
