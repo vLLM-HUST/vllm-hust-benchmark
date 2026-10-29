@@ -1,0 +1,85 @@
+{
+  "status": "cpu-preparation-unfrozen",
+  "device_executed": false,
+  "source_commit": "03766ac696fde5ab1980d80ca0b8543d3580c989",
+  "source_status_preexisting": " M csrc/build_aclnn.sh\n",
+  "source_files": {
+    "vllm_ascend/ops/gdn.py": "8c349f68d37bede53ebe4771ac0ffd4396896f11473627446ab71f782a01eb71",
+    "vllm_ascend/ops/gdn_attn_builder.py": "af181fdd860d221bf7d35512c26c265559e11f111ea97484a0bba68ae2fa6458",
+    "csrc/torch_binding.cpp": "c7462699459acb6ebd423aaac7197f0b6a3cac9766ed7b193308efe95254f27c",
+    "csrc/moe/causal_conv1d/op_host/causal_conv1d_tiling_validation.h": "304969059b75af613c678770fbebfa9e2c23261437a0779e05ffb8dcb9e031cd",
+    "csrc/moe/causal_conv1d/op_host/causal_conv1d_tiling.cpp": "83fcea2b5c84a3c4bc56da4163cff0d6019a5ffcb5683d45446f98298fcf727f",
+    "csrc/moe/causal_conv1d/op_kernel/causal_conv1d.h": "83af972763a708fce1b723106dcd243260fb3302c947d3a59ed34a868c6e0bf3",
+    "vllm_ascend/patch/worker/patch_qwen3_5.py": "97ff11df1d7db0930d5742cfc6020e5ec425064bd37ea5d17e5089712f5fcdae"
+  },
+  "design_sha256": "54f9dd090eac2fbcbdfda9efd448991ccd332f925bb1f209b61a5eafaf6b1c3d",
+  "scope": "Actual prefix FULL descriptor1 graph two-copy tap. Bind graph/runtime/dispatcher/forward-context/6c router and original worker source paths, including Python inference wrapper. Preserve previous exact allowed mapped library sets; no cached native pointer or HCCL algorithm observation.",
+  "bound_files": {
+    "/root/workspace/vllm-ascend-hust/vllm_ascend/ops/gdn.py": "8c349f68d37bede53ebe4771ac0ffd4396896f11473627446ab71f782a01eb71",
+    "/root/workspace/vllm-ascend-hust/vllm_ascend/ops/gdn_attn_builder.py": "af181fdd860d221bf7d35512c26c265559e11f111ea97484a0bba68ae2fa6458",
+    "/root/workspace/vllm-ascend-hust/csrc/torch_binding.cpp": "c7462699459acb6ebd423aaac7197f0b6a3cac9766ed7b193308efe95254f27c",
+    "/root/workspace/vllm-ascend-hust/csrc/moe/causal_conv1d/op_host/causal_conv1d_tiling_validation.h": "304969059b75af613c678770fbebfa9e2c23261437a0779e05ffb8dcb9e031cd",
+    "/root/workspace/vllm-ascend-hust/csrc/moe/causal_conv1d/op_host/causal_conv1d_tiling.cpp": "83fcea2b5c84a3c4bc56da4163cff0d6019a5ffcb5683d45446f98298fcf727f",
+    "/root/workspace/vllm-ascend-hust/csrc/moe/causal_conv1d/op_kernel/causal_conv1d.h": "83af972763a708fce1b723106dcd243260fb3302c947d3a59ed34a868c6e0bf3",
+    "/root/workspace/vllm-ascend-hust/vllm_ascend/patch/worker/patch_qwen3_5.py": "97ff11df1d7db0930d5742cfc6020e5ec425064bd37ea5d17e5089712f5fcdae",
+    "/root/workspace/vllm-ascend-hust/vllm_ascend/vllm_ascend_C.cpython-312-aarch64-linux-gnu.so": "ffaee2556caa173ace80ba25b35a0aa5cdd11b6f3985292ff50716bf238449e7",
+    "/root/workspace/vllm-ascend-hust/vllm_ascend/_cann_ops_custom/vendors/custom_transformer/op_api/lib/libcust_opapi.so": "08c7121f70c17a293dc7fe887dc3c8d8997e165c37e8b897e1cbe6e171c8fd7b",
+    "/root/workspace/vllm-ascend-hust/vllm_ascend/_cann_ops_custom/vendors/custom_transformer/op_impl/ai_core/tbe/kernel/config/ascend910b/causal_conv1d.json": "7d306b3fdbd02dd92df5df687f3e50541a35cc9c241c62c680780ef79712fcf4",
+    "/root/workspace/vllm-ascend-hust/vllm_ascend/_cann_ops_custom/vendors/custom_transformer/op_impl/ai_core/tbe/kernel/ascend910b/causal_conv1d/CausalConv1d_15db1c32d9e3fdd2cc8be564dbc309f8.json": "e33bf50d69626b13afcb8ead2ec06ed024ad48f29601e5f32b64f790c76f4392",
+    "/root/workspace/vllm-ascend-hust/vllm_ascend/_cann_ops_custom/vendors/custom_transformer/op_impl/ai_core/tbe/kernel/ascend910b/causal_conv1d/CausalConv1d_15db1c32d9e3fdd2cc8be564dbc309f8.o": "ffc227a7cc479f9044f43f016cdb20bf7adb7209d158d15e10fd40c4d4c7b24a",
+    "/root/workspace/vllm-ascend-hust/vllm_ascend/_cann_ops_custom/vendors/custom_transformer/op_impl/ai_core/tbe/kernel/ascend910b/causal_conv1d/CausalConv1d_a7280564d3ba44fea98d5ca869636992.json": "e10d827b1a562d2d59ea0fb7debe421b0c0dd47610bee05e440b837d95935b0f",
+    "/root/workspace/vllm-ascend-hust/vllm_ascend/_cann_ops_custom/vendors/custom_transformer/op_impl/ai_core/tbe/kernel/ascend910b/causal_conv1d/CausalConv1d_a7280564d3ba44fea98d5ca869636992.o": "b01590bdedb21564042eb501185ccb46f84b35d00b8024509bdfa18c2914147d",
+    "/usr/local/Ascend/cann-9.1.0/opp/vendors/batch_invariant/op_api/lib/libcust_opapi.so": "ff82d965a8a08bfa2862567022a04a1fd04df56d142f4393f1fb527592111069",
+    "/usr/local/Ascend/cann-9.1.0/opp/vendors/config.ini": "7473a624041a7281607d1a988a826c67f14fb203dc36f161f8f33b9ff9a8b4a5",
+    "/root/workspace/vllm-ascend-hust/csrc/aclnn_torch_adapter/op_api_common.h": "0d0dc34a02151b72fc8e50000fd1c2db948fbe8a4090c5c6eaae8dc229e12cbb",
+    "/root/workspace/vllm-hust/vllm/distributed/parallel_state.py": "60e8096c41b5cbbd225db85506cf17dc2ebd28eb12308520172ad6f74dd49ded",
+    "/root/workspace/vllm-hust/vllm/distributed/device_communicators/base_device_communicator.py": "19945f4d567280654e54099c23e61918a046c37515c4edc95ada720804aa5202",
+    "/root/workspace/vllm-ascend-hust/vllm_ascend/distributed/device_communicators/npu_communicator.py": "e91429f5cfba0b8af002b7c781db795d4826d7d96e4f08a9684664eb6d7ed275",
+    "/root/workspace/vllm-ascend-hust/vllm_ascend/ops/fused_moe/fused_moe.py": "3ac4c2a1ee5375bf212c2997db91868d7037c9032ec2ec954d455471a3125d5f",
+    "/root/workspace/vllm-ascend-hust/vllm_ascend/compilation/acl_graph.py": "b13492d8f117f7c7bcf3721f849f273c7c3ea890ae4cd022640b8280af9538a2",
+    "/root/workspace/vllm-ascend-hust/vllm_ascend/worker/model_runner_v1.py": "2c188ee04a4eb1c3b4f3bff9d5f3c4e4c69dddc4e0ed39137b09675420765463",
+    "/root/workspace/vllm-hust/vllm/v1/cudagraph_dispatcher.py": "51f632753af729aeee6ce4a802d9d74b64f22eef02a524f36e2a24b07ef0cf63",
+    "/root/workspace/vllm-hust/vllm/forward_context.py": "985adacc9e7ed2a7695819ac2e2ad9cb264a7d886806d3091ad75bfda7392242",
+    "/root/workspace/vllm-hust/vllm/v1/worker/gpu_model_runner.py": "6884aead6a0dc973d215a67e8c01368fee408c63c0b2813c26614314b2cd548a",
+    "/root/workspace/vllm-hust/vllm/v1/worker/workspace.py": "d0650393bc657064acc97fe2b227ebff8f85799a8f727a8c136098f1f79964df",
+    "/root/workspace/muxpd-composite-token-logits/src/vllm_muxpd/decode_graph.py": "32c31673985d1d66828caecfa09ce03a5930db18fd2d2ed27c798928ee29f724",
+    "/root/workspace/muxpd-composite-token-logits/src/vllm_muxpd/worker.py": "3b555dc5e46f8c2d2d23f00dbbe84db4e7baadf5378b9df686ffc4e7b661bbb3",
+    "/root/workspace/muxpd-composite-token-logits/src/vllm_muxpd/decoupled_worker.py": "fa74e448325b2157e3a9ac168bfd47108e3ff278d44d6b1c6feba1aaf4c241ea",
+    "/root/workspace/muxpd-composite-token-logits/src/vllm_muxpd/communicators.py": "feb9c1821e4479c500e87565a1d130ef857904a6c2694a62ace99fa94ec38aed",
+    "/usr/local/python3.12.13/lib/python3.12/site-packages/torch/utils/_contextlib.py": "f22c21a037c4b26a431112138fa66a5108c5e9cfe4c9169e732c1d15ea7a8406",
+    "/root/workspace/muxpd-composite-token-logits/src/vllm_muxpd/decoupled_scheduler.py": "9bbd6db2b0aeb22157a71c47f9bc571fecc72e1f9967332788d6bcbd041d641b",
+    "/root/workspace/muxpd-composite-token-logits/src/vllm_muxpd/scheduler.py": "6a9867929b8b938febfc298e011965d7176da1596dad557fdd3a8f252ad632bd",
+    "/root/workspace/muxpd-composite-token-logits/src/vllm_muxpd/policy.py": "8f4bfbdbbd78a7dd9885d622de6ecd1509e1d7e62210bb4fc06f414179250a6a",
+    "/root/workspace/vllm-hust/vllm/v1/engine/core.py": "41cbdc64bb1b0588cc041f88f399dda3a81cc1cdf96133c6871bc10e32b0c378",
+    "/root/workspace/vllm-hust/vllm/v1/core/sched/scheduler.py": "5d981e6cdafc63ac60bdde66415067c88bfa544e69e5ba56d6249ca03f61cd58"
+  },
+  "required_mapped_basenames": [
+    "vllm_ascend_C.cpython-312-aarch64-linux-gnu.so",
+    "libcust_opapi.so"
+  ],
+  "schema": "muxpd-conv-operator-provenance-contract-v2",
+  "required_mapped_files": {
+    "/root/workspace/vllm-ascend-hust/vllm_ascend/vllm_ascend_C.cpython-312-aarch64-linux-gnu.so": "ffaee2556caa173ace80ba25b35a0aa5cdd11b6f3985292ff50716bf238449e7",
+    "/root/workspace/vllm-ascend-hust/vllm_ascend/_cann_ops_custom/vendors/custom_transformer/op_api/lib/libcust_opapi.so": "08c7121f70c17a293dc7fe887dc3c8d8997e165c37e8b897e1cbe6e171c8fd7b"
+  },
+  "allowed_mapped_files": {
+    "/root/workspace/vllm-ascend-hust/vllm_ascend/vllm_ascend_C.cpython-312-aarch64-linux-gnu.so": "ffaee2556caa173ace80ba25b35a0aa5cdd11b6f3985292ff50716bf238449e7",
+    "/root/workspace/vllm-ascend-hust/vllm_ascend/_cann_ops_custom/vendors/custom_transformer/op_api/lib/libcust_opapi.so": "08c7121f70c17a293dc7fe887dc3c8d8997e165c37e8b897e1cbe6e171c8fd7b",
+    "/usr/local/Ascend/cann-9.1.0/opp/vendors/batch_invariant/op_api/lib/libcust_opapi.so": "ff82d965a8a08bfa2862567022a04a1fd04df56d142f4393f1fb527592111069"
+  },
+  "loader_configuration_files": {
+    "/usr/local/Ascend/cann-9.1.0/opp/vendors/config.ini": "7473a624041a7281607d1a988a826c67f14fb203dc36f161f8f33b9ff9a8b4a5",
+    "/root/workspace/vllm-ascend-hust/csrc/aclnn_torch_adapter/op_api_common.h": "0d0dc34a02151b72fc8e50000fd1c2db948fbe8a4090c5c6eaae8dc229e12cbb"
+  },
+  "additional_known_vendor": {
+    "path": "/usr/local/Ascend/cann-9.1.0/opp/vendors/batch_invariant/op_api/lib/libcust_opapi.so",
+    "sha256": "ff82d965a8a08bfa2862567022a04a1fd04df56d142f4393f1fb527592111069",
+    "requires_mapped": false,
+    "presence_does_not_prove_batch_invariance_enabled": true
+  },
+  "dtp_design_sha256": "9e68ce3006be6772a945795a5883c9ce0fa0431f0c6389b65b34d672aa136ffa",
+  "dtp_scope": "The inherited conv v2 full-path library/loader provenance remains required. Four additional bound source files identify the original TP and MoE boundary. Original Python bound methods and same TP group are separately checked by DTP installation/runtime; neither source SHA nor mapped paths observe cached native function pointers or prove binary numerical equivalence.",
+  "graph_design_sha256": "4292977ba6d9f8d9c0f5ab41b4080e2e818a42fea289ac372bb5365615120e15",
+  "graph_scope": "Actual prefix FULL descriptor1 graph two-copy tap. Bind graph/runtime/dispatcher/forward-context/6c router and original worker source paths, including Python inference wrapper. Preserve previous exact allowed mapped library sets; no cached native pointer or HCCL algorithm observation.",
+  "constructor_compat_design_sha256": "760bbd2184b81e858ae26a1c2fb0e505b07a125d89507c7277f7bfce0a372a4b"
+}

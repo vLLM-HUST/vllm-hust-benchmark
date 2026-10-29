@@ -24,6 +24,9 @@ provenance。涉及原件订正时保留旧字节及说明， 不要仅重新计
 - **中期 B0/B1、质量、长上下文、资源成本、M01：** [中期报告目录](reports/vllm-hust-midterm-20261019/README.md)，
   [B1 候选审计](reports/vllm-hust-midterm-20261019/B1-CANDIDATE-AUDIT.md)，以及该目录的
   `m01-*`、`quality*`、`long*` 文件/子目录。按当前报告的链接找证据，不凭文件名日期选“最新有效”。
+- **MuxPD 实际 decode 图数值边界：**
+  [首 D 图归约复核](reports/muxpd-prefix-first-decode-graph-20261029/README.md)，保留 v1
+  构造失败、跨物理卡分配及执行路径偏差；局部同输入结果不代表答案不退化或性能验收通过。
 - **Frontier 原始并发曲线：** [56-run 索引](reports/frontier-raw-recovery-20261020/README.md)。
 - **迁入 benchmark 的 MOD 数据：** [2026-10-21](archive/mod-git-20261021/)、
   [2026-10-22](archive/mod-git-20261022/)；每个 capsule 的 manifest 记录原仓库、固定提交、路径和 SHA256。
