@@ -33,13 +33,40 @@
       "original_pass_to_pass_counts": [13, 20, 644],
       "server_stage": "/root/swebench-v410-public-stage-20261029-001",
       "server_receipts": ["prepare-public.json", "core-import-public.json", "original-arm-specs-public.json"],
-      "image_builds_or_task_tests_run": 0,
+      "task_images_successfully_built_at_source_preflight": 0,
       "model_calls": 0,
       "source_checkbox_eligible": false,
       "boundary": "Verified source deployment/import and original script/spec derivation only; not installed legacy distribution metadata, ARM image suitability, Agent execution or official grading. Retained raw13-field records and tasks unchanged."
     },
+    "base_image_build_followup": {
+      "status": "TRUSTED_OFFICIAL_BASE_SOFTWARE_BUILD_IN_PROGRESS_NOT_NATIVE_DELIVERY",
+      "original_build_attempts_preserved": [
+        {"run": "base-build-original-001", "result": "FAILED_DOCKER_HUB_TIMEOUT_BEFORE_SOFTWARE_INSTALL"},
+        {"run": "base-build-original-002", "result": "FAILED_APT_DNS_WITH_DEFAULT_NETWORK_DISABLED_EXIT100"}
+      ],
+      "official_ubuntu_registry": "registry-1.docker.io/library/ubuntu",
+      "official_ubuntu_tag_resolved": "22.04",
+      "official_ubuntu_arm_manifest": "sha256:a8fb2ba88181746111cbbe2969826d6546b71226785b196c93d2c3445a25000d",
+      "identity_note": "pragma: allowlist secret - exact official public ARM software manifest",
+      "official_config_and_compressed_layer_sha256_and_uncompressed_diffid_verified": true,
+      "official_image_imported_only_into_independent_daemon": true,
+      "compressed_software_layer_bytes": 27684607,
+      "windows_software_blob_files_created": 0,
+      "relay": "Bounded RAM transfer through existing local proxy, official registry only, no mirror or task substitution",
+      "current_build_run": "base-build-host-network-003",
+      "unchanged_upstream_dockerfile": true,
+      "per_build_network_mode": "host",
+      "network_boundary": "Trusted original OS/package installation only; no generated task code. No daemon/global network change. This is not the later grading sandbox policy.",
+      "actual_progress_observed": "Original apt repositories resolved and all four original jammy channels began downloading signed indexes; build not yet complete",
+      "independent_filesystem_used_kib_observed": 2059132,
+      "independent_filesystem_available_kib_observed": 17358612,
+      "server_receipts": ["ubuntu-official-arm-001/transfer-public.json", "ubuntu-official-arm-001/load-public.json", "base-build-original-001/status-public.json", "base-build-original-002/status-public.json", "base-build-host-network-003/status-public.json"],
+      "native_tasks_executed": 0,
+      "model_calls": 0,
+      "source_checkbox_eligible": false
+    },
     "model_calls": 0,
-    "boundary": "Official make_test_spec reads legacy task fields and derives scripts from original repository specs. Source inspection and plan fixtures only; no ARM task image, Agent or grading completion claim."
+    "boundary": "Official make_test_spec reads legacy task fields and derives scripts from original repository specs. Source preparation and spec construction passed; shared base software build is separate and not yet complete. No ARM task image, Agent or grading completion claim."
   },
   "software_ci": {
     "commit": "a2f06018efa4577b097e6089505a5b2e97806665",
