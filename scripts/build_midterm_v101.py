@@ -32,12 +32,14 @@ def note(english=False):
             "a descriptive gain of 84.9705%. No qualified replacement C_ref is available; "
             "current eta and both midterm 50% / final 90% verdicts are unresolved. "
             "Independent repeats of the shared implementation do not establish workload-capacity strength. "
-            "Raw measurements and historical methods are retained; no new experiment."
+            "Raw measurements and historical methods are retained; no new experiment. "
+            "Same-run accounting costs remain; timing is not strictly uninstrumented."
         )
     return (
         "M01参考修订中。同轮复算：B0 3.8407、B1 7.1042 TFLOPS/芯片，描述性提升84.9705%。"
         "尚无经核验的替代C参；当前η及中期50%/最终90%判定均未确定。"
         "共享实现的独立重复不足以建立工况能力强度。保留原始测量与历史方法，本次未启动新实验。"
+        "本轮保留同轮计数成本，并非严格无插桩。"
     )
 
 
