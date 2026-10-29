@@ -60,16 +60,17 @@ def test_gap_inventory_is_not_an_experiment_count():
     data = json.loads((ROOT / "reports/acceptance-gaps-20261029/gaps.json").read_text())
     assert data["open_acceptance_families"] == len(data["families"]) == 4
     assert data["required_new_experiment_count"] is None
-    assert data["new_model_runs_started"] == 3
-    assert data["new_model_runs_completed"] == 2
-    assert data["new_service_start_attempts"] == 3
-    assert data["startup_failures_before_requests"] == 1
+    assert data["new_model_runs_started"] == 5
+    assert data["new_model_runs_completed"] == 3
+    assert data["new_service_start_attempts"] == 6
+    assert data["startup_failures_before_requests"] == 2
+    assert data["continuous_b1_failed_requests"] == 8
     paired = json.loads(
         (
             ROOT / "reports/long-context-fixed018-paired-20261029/summary.json"
         ).read_text()
     )
-    assert len(paired["arms"]) == data["new_model_runs_completed"]
+    assert len(paired["arms"]) + 1 == data["new_model_runs_completed"]
     assert all(a["status"] == "retrieval_complete" for a in paired["arms"])
     assert paired["continuous_stability_pass"] is None
     assert set(data["covered_metrics"]) == {"M01", "M02", "M03", "M04", "M05", "M06"}
