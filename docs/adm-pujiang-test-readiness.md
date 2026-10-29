@@ -73,3 +73,11 @@ Owner split: benchmark evaluation owns inputs, runner and scorer; runtime/ADM
 owns source compatibility and worker-path evidence; storage and operators own
 model access and exclusive device lease; reviewers approve each experiment.
 Keep historical raw data immutable and publish only sanitized receipts.
+
+## CPU-only readiness checks
+
+Against benchmark main `a181a5e94414bca9b51bb89e5ce2da6bdcef38ce`,
+`python3 scripts/run_mmlu_pro_original_samples.py --help` completed successfully;
+the FrontierScience frozen input validator rejected a synthetic file with a
+SHA-256 mismatch. Neither check accessed datasets, a model endpoint, a judge,
+containers, or NPU. No task score or runtime compatibility was established.
