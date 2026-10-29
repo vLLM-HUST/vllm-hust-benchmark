@@ -1,4 +1,4 @@
-"""Prepare pinned official SWE-bench software externally; never execute it.
+"""Prepare pinned official SWE-bench/Agent software externally; never execute it.
 
 The original package is shared by SWE-bench and Verified. A supplied official
 archive avoids hundreds of Git blob API requests. Each selected file is still
@@ -78,19 +78,20 @@ def main():
     parser.add_argument("--archive", type=Path)
     parser.add_argument(
         "--profile",
-        choices=["current", "v4.1.0"],
+        choices=["current", "v4.1.0", "mini-swe-agent"],
         default="current",
-        help="v4.1.0 preserves the legacy13-field task contract; default existing profile unchanged",
+        help="v4.1.0 preserves legacy13-field tasks; mini-swe-agent prepares official Agent software only; default unchanged",
     )
     parser.add_argument(
         "--action", choices=["plan", "prepare", "verify"], default="plan"
     )
     args = parser.parse_args()
-    pins_path = (
-        PINS
-        if args.profile == "current"
-        else PINS.with_name("swebench-v410-author-source.json")
-    )
+    profiles = {
+        "current": PINS,
+        "v4.1.0": PINS.with_name("swebench-v410-author-source.json"),
+        "mini-swe-agent": PINS.with_name("mini-swe-agent-author-source.json"),
+    }
+    pins_path = profiles[args.profile]
     pins = json.loads(pins_path.read_text(encoding="utf-8"))
     if args.action == "prepare":
         if args.archive is None:

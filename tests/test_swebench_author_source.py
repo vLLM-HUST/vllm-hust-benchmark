@@ -74,6 +74,45 @@ def test_cpu_recovery_does_not_qualify_repository_tasks_or_new_sources():
     )
 
 
+def test_official_agent_profile_is_plan_only_and_pins_all_runtime_configs(tmp_path):
+    import subprocess
+
+    output = tmp_path / "not-created-agent"
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(SCRIPTS / "prepare_swebench_author_source.py"),
+            "--profile",
+            "mini-swe-agent",
+            "--author-root",
+            str(output),
+        ],
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    report = json.loads(result.stdout)
+    assert report["files"] == 78 and report["bytes"] == 302226
+    assert report["status"] == "PLAN_ONLY"
+    assert report["model_calls"] == 0 and not report["source_checkbox_eligible"]
+    assert not output.exists()
+    pins = json.loads(
+        (
+            SCRIPTS.parent / "configs/workload-native/mini-swe-agent-author-source.json"
+        ).read_text(encoding="utf-8")
+    )
+    assert pins["repository"] == "SWE-agent/mini-swe-agent"
+    assert {"SWE_BENCH", "SWE_VERIFIED"} == set(pins["shared_source_ids"])
+    names = {item["path"] for item in pins["files"]}
+    assert {
+        "LICENSE.md",
+        "pyproject.toml",
+        "src/minisweagent/environments/docker.py",
+        "src/minisweagent/config/benchmarks/swebench.yaml",
+        "src/minisweagent/run/benchmarks/swebench.py",
+    } <= names
+
+
 def fixture(tmp_path, names=None, content=b"inert original software\n", kind=None):
     archive = tmp_path / "source.tar.gz"
     names = names or ["publisher-fixed/swebench/__init__.py"]

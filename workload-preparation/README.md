@@ -720,7 +720,20 @@ python scripts/run_spider_official_scoring.py --assets /private/spider-scoring-a
 
 ## SWE-bench旧版原任务的软件配置（原生执行仍待验证）
 
-SWE-bench旧版13字段原任务的准备需要匹配harness版本：现有新版配置要求额外的镜像/评测脚本字段，不能为跑通自行补造。公共软件准备器新增`--profile v4.1.0`，固定官方发布版87份原文件；默认`current`保持不变。可先运行`python scripts/prepare_swebench_author_source.py --profile v4.1.0 --author-root /external/swebench-v410`查看固定源码归档地址；取得原软件归档后加`--archive /external/official-source.tar.gz --action prepare`核验准备。当前仅源码/契约及计划经过核验，服务器安装、原任务镜像、Agent与评分仍待完成，不能把此配置称为已跑通的benchmark。
+SWE-bench旧版13字段原任务的准备需要匹配harness版本：现有新版配置要求额外的镜像/评测脚本字段，不能为跑通自行补造。公共软件准备器新增`--profile v4.1.0`，固定官方发布版87份原文件；默认`current`保持不变。可先运行`python scripts/prepare_swebench_author_source.py --profile v4.1.0 --author-root /external/swebench-v410`查看固定源码归档地址；取得原软件归档后加`--archive /external/official-source.tar.gz --action prepare`核验准备。服务器实际准备及原三题ARM规格构建已通过，原共享基础镜像已构建；原题环境/仓库镜像、Agent与评分仍待完成，不能把此配置称为已跑通的benchmark。
+
+官方Agent软件复用相同准备入口，增加可选`--profile mini-swe-agent`，固定原78份源码/配置及完整性身份，不自行编写替代Agent：
+
+```bash
+python scripts/prepare_swebench_author_source.py \
+  --profile mini-swe-agent --author-root /external/mini-swe-agent
+# 从上述计划给出的固定官方归档地址取得软件后：
+python scripts/prepare_swebench_author_source.py \
+  --profile mini-swe-agent --author-root /external/mini-swe-agent \
+  --archive /external/official-mini-agent-source.tar.gz --action prepare
+```
+
+这只准备原软件，不安装、不启动容器、不调用模型。服务器实际原文件核验通过，但Agent依赖、运行与评分尚未通过。后续按[官方SWE-bench入口](https://mini-swe-agent.com/latest/usage/swebench/)及[原Docker环境配置](https://mini-swe-agent.com/latest/reference/environments/docker/)接入；ARM镜像不能静默套用默认x86镜像名。本地NPU模型是部署适配，不是官方默认Claude的等价质量复现；原题、模板、步骤预算与测试应保持不变，安全隔离参数需单独核验。可信软件构建所用联网方式不得继承到生成代码的评分容器。
 
 ## DRAGON模型客户端与原生执行（固定前三题已验证）
 
