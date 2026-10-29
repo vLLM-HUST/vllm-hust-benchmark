@@ -20,6 +20,7 @@ from structeval_render_queue import (
     RenderBlocked,
     SvgRenderQueue,
     TypstRenderQueue,
+    publish_new,
 )
 
 
@@ -142,7 +143,11 @@ def test_original_code_result_and_cached_identity_preserved(tmp_path, score):
             "task_id": "000800",
             "controller_result": result,
         }
-        (tmp_path / (identity + ".response.json")).write_text(json.dumps(response))
+        # Match the real backend's atomic publication: the waiting reader must
+        # never observe the fixture between file creation and JSON completion.
+        publish_new(
+            tmp_path / (identity + ".response.json"), json.dumps(response).encode()
+        )
         assert future.result() == score
     assert queue.render("000800", code, tmp_path / "images") == score
     assert len(list(tmp_path.glob("*.request.json"))) == 1
@@ -208,8 +213,9 @@ def test_bad_backend_result_cannot_silently_advance_to_judge(tmp_path, kind):
         }
         if kind == "wrong_identity":
             response["request_sha256"] = "0" * 64
-        (tmp_path / (identity + ".response.json")).write_text(
-            "{" if kind == "bad_json" else json.dumps(response)
+        publish_new(
+            tmp_path / (identity + ".response.json"),
+            ("{" if kind == "bad_json" else json.dumps(response)).encode(),
         )
         with pytest.raises(RenderBlocked):
             future.result()
