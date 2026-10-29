@@ -58,11 +58,24 @@ def test_spider_archive_acquisition_is_not_native_delivery_or_publisher_digest()
     assert control["keep_distinct"]
     assert control["model_calls"] == 0
     assert not control["native_model_benchmark_completed"]
-    assert not receipt["source_checkbox_eligible"]
+    assert receipt["source_checkbox_eligible"]
+    closure = receipt["fixed_ci_artifact_closure"]
+    assert closure["both_ci_conclusions"] == "success"
+    assert closure["artifact_id"] == 12876710598
+    assert closure["all67_payloads_equal_fixed_git_blobs_without_normalization"]
+    assert closure["all67_installed_payloads_equal_actual_ci_wheel"]
+    assert (
+        closure["all_original_records_verified"]
+        == closure["original_index_rows_reused"]
+        == 11840
+    )
+    assert closure["public_research_readbacks"] == 12
+    assert closure["new_model_calls"] == 0
+    assert closure["native_results_reused_without_rerun"]
     inventory = json.loads(
         (DOCS / "dataset-validation-status.json").read_text("utf-8")
     )["delivery_inventory"]["SPIDER"]
-    assert not inventory["checked"] and inventory["delivery_receipt"] is None
+    assert inventory["checked"] and inventory["delivery_receipt"]
 
 
 def test_crosscodeeval_native_delivery_keeps_original_profiles_and_ci_consumer_scope():

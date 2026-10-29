@@ -655,7 +655,7 @@ for record in iter_workload("SPIDER", data_root=Path("/private/spider_data"), fi
     scorer_reference = record.outcome_record()  # 不送入模型
 ```
 
-此读取不运行SQL或替代原生模型/官方评分。当前候选安装包已验证，固定CI工件和研究消费仍待闭环。
+此读取不运行SQL或替代原生模型/官方评分。固定提交366f8323的CI工件12876710598已独立安装核对67份载荷、全11840条原记录和12次公共/研究回查；研究默认依赖未改。
 
 官方评分器要求sqlparse和NLTK但未提供版本锁。本仓库提供独立CPU软件配方
 `configs/workload-native/spider-test-suite-cpu.Dockerfile`，其中版本为明确披露的集成选择，
@@ -691,7 +691,7 @@ python scripts/prepare_spider_original_dev.py \
 `inputs.private.jsonl`只含原问题、原schema和位置；`references.private.jsonl`保留七个原字段，
 `gold.private.txt`是官方评分格式的原SQL和db_id。参考文件不得送入模型。 服务器已用原前三题和完整32份数据库完成该准备，并在非root/只读/断网容器运行原评分器的
 参考答案控制（1.000）；这不是模型成绩。后续已另完成真实NPU原前三题和公共评分入口验证： 三次原响应均stop、原输出未经SQL修补，完整官方32库Test Suite
-Accuracy为1.000。 这仅证明固定三题的执行链路，不代表全dev模型质量；provider/可安装工件与消费闭环仍待完成。
+Accuracy为1.000。 这仅证明固定三题的执行链路，不代表全dev模型质量；固定CI工件与研究消费闭环已完成，原推理结果复用未重跑。
 
 公开生成入口如下（默认只计划，执行须加`--execute`并指定新私有输出目录）：
 
