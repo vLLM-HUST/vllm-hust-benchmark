@@ -121,8 +121,8 @@ def section(values):
 
     return dict(
         id="acceptance-completion",
-        title="当前证据与缺口清单",
-        title_en="Current evidence and remaining gaps",
+        title="当前证据与缺口清单 / Current evidence and remaining gaps",
+        source_heading="V1.02 · 2026-10-29 · 固定B0补测 / Fixed-B0 supplement",
         scope="固定B0的4K/16K连续窗口已完成；B1状态卸载发生锁页主机内存分配失败，24个预热成功后8个正式请求失败，16K未执行。out256质量复算21/200对19/200，业务成本验收未闭合。"
         + note(),
         scope_en="Fixed B0 completed4K/16K continuous windows. B1 state offload failed pinned host allocation after24 successful warmup requests;8 formal requests failed and16K was not run. Out256 quality rescored21/200 versus19/200; business-cost acceptance remains open. "
