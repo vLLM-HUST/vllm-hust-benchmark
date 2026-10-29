@@ -819,6 +819,10 @@ LMM
 
 ### SWE-bench／Verified共用官方软件与环境（Verified固定抽样已交付，SWE-bench待完成）
 
+- [x] SWE_BENCH自身固定版本原测试Parquet已在服务器取得并按官方LFS大小/SHA核验，2,294条/12字段、12,097,227字节；原前三题11693/12057/12318均不在Verified中，不能复用其模型结果。复用公共获取/只读核验入口，Windows不落原数据。
+
+- [ ] SWE_BENCH原三题的官方仓库镜像、Agent执行、官方评分及最新CI数据/研究消费闭环：专用CPU公共原镜像构建已启动，独立19GiB硬限存储，NPU调用0；启动或数据读取不算来源完成。
+
 - [x] 固定Verified原顺序前三题为Astropy12907/13033/13236，保留原13字段。发现已准备的新官方harness要求额外image/eval_script/log_parser/eval_type，不能直接套用旧数据。另固定官方v4.1.0发布版原87文件/594174字节及Git/SHA身份，`prepare_swebench_author_source.py --profile v4.1.0`计划与软件夹具通过，默认配置不变；没有补造字段或更换原题。
 
 - [x] 服务器实际执行v4.1.0公共准备入口，87份原文件核验通过；只读复用已有客户端满足原14项直接依赖，原模块导入及固定前三题ARM规格构建通过。原FAIL_TO_PASS数量2/1/2、PASS_TO_PASS数量13/20/644保持不变；这是源码、依赖和规格核验，不是仓库测试或Agent执行。

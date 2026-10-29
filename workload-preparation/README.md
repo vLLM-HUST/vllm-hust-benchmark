@@ -718,9 +718,9 @@ python scripts/run_spider_official_scoring.py --assets /private/spider-scoring-a
 不加`--execute`只读核对并输出计划。执行仅支持具备权限的Linux Docker环境，容器非root、
 断网、只读，原SQL不在宿主执行；保留原值和DISTINCT，不注入gold值。低分正常保留； 资源/输出契约失败不冒充模型0分；容器与证据保留，无自动清理或宿主执行回退。
 
-## SWE-bench旧版原任务的软件配置（原生执行仍待验证）
+## SWE-bench旧版原任务链路（Verified固定抽样已验证，原版待完成）
 
-SWE-bench旧版13字段原任务的准备需要匹配harness版本：现有新版配置要求额外的镜像/评测脚本字段，不能为跑通自行补造。公共软件准备器新增`--profile v4.1.0`，固定官方发布版87份原文件；默认`current`保持不变。可先运行`python scripts/prepare_swebench_author_source.py --profile v4.1.0 --author-root /external/swebench-v410`查看固定源码归档地址；取得原软件归档后加`--archive /external/official-source.tar.gz --action prepare`核验准备。服务器实际准备及原三题ARM规格构建已通过，原共享基础镜像已构建；原题环境/仓库镜像、Agent与评分仍待完成，不能把此配置称为已跑通的benchmark。
+SWE-bench旧版13字段原任务的准备需要匹配harness版本：现有新版配置要求额外的镜像/评测脚本字段，不能为跑通自行补造。公共软件准备器新增`--profile v4.1.0`，固定官方发布版87份原文件；默认`current`保持不变。可先运行`python scripts/prepare_swebench_author_source.py --profile v4.1.0 --author-root /external/swebench-v410`查看固定源码归档地址；取得原软件归档后加`--archive /external/official-source.tar.gz --action prepare`核验准备。Verified原顺序前三题的ARM仓库镜像、原Agent执行与官方评分已完成，完整范围和失败结果见下文；SWE_BENCH原版自身仍待完成，不能套用Verified的来源完成状态。
 
 官方Agent软件复用相同准备入口，增加可选`--profile mini-swe-agent`，固定原78份源码/配置及完整性身份，不自行编写替代Agent：
 
@@ -736,6 +736,18 @@ python scripts/prepare_swebench_author_source.py \
 这只准备原软件，不安装、不启动容器、不调用模型。服务器实际原文件核验、独立客户端差量安装/依赖检查、原CLI帮助及原Docker环境类的隔离控制通过；原题Agent和评分的固定抽样结果见下文，不能将软件准备等同任务执行。后续按[官方SWE-bench入口](https://mini-swe-agent.com/latest/usage/swebench/)及[原Docker环境配置](https://mini-swe-agent.com/latest/reference/environments/docker/)接入；ARM镜像不能静默套用默认x86镜像名。本地NPU模型是部署适配，不是官方默认Claude的等价质量复现；原题、模板、步骤预算与测试应保持不变，安全隔离参数需单独核验。可信软件构建所用联网方式不得继承到生成代码的评分容器。
 
 原生执行分为原仓库镜像准备、官方Agent、官方功能评分三个入口。原v4.1.0镜像CLI没有架构参数且默认x86_64；本入口显式使用其原生`make_test_spec(..., arch=...)`与原构建器，不改Dockerfile、安装脚本或任务。示例使用同一份原始Parquet，不要求自行抽取问题或构造prompt：
+
+普通SWE-bench的固定原测试文件已单独登记：2,294条、12字段、12,097,227字节；它不是Verified的500条。获取、复核沿用现有公共入口，原始文件仅下载到调用者指定的仓库外目录：
+
+```bash
+python scripts/prepare_reused_research_assets.py SWE_BENCH --mode plan
+python scripts/prepare_reused_research_assets.py SWE_BENCH --mode download \
+  --data-root /external/swebench-original --max-bytes 13000000
+python scripts/prepare_reused_research_assets.py SWE_BENCH --mode verify \
+  --data-root /external/swebench-original
+```
+
+已存在的同版文件直接用`verify`，不重复下载。SWE_BENCH固定原顺序前三题为Astropy11693/12057/12318，均不在本次Verified原生样本中；后续镜像、Agent、评分命令使用`--source-id SWE_BENCH`及该来源的原Parquet，不能借用Verified的任务结果。当前仅该来源原文件和前三题选择器已核验，CPU原镜像准备已启动，尚未完成原生任务/评分或最新CI消费回读，因此仍不打完成勾。
 
 ```bash
 python scripts/prepare_swebench_original_images.py \
@@ -857,7 +869,7 @@ python scripts/prepare_reused_research_assets.py VIDEOMME_V2 --mode verify \
 
 目前仅完成原资产和原评分器参考/CPU控制。仍缺视频、干净的原生读取/抽帧环境、64帧原提示、合适NPU服务、实际推理评分及固定工件消费。当前32图上限的服务不能声称执行过官方64帧配置；不为跑通缩帧或删减字幕。具体证据与限制见[阶段回执](../docs/workload-data/validation/videomme-v2-original-preparation-20261029.json)，来源总勾保持未完成。
 
-## SWE-bench／Verified 共用官方软件准备（原生执行未完成）
+## SWE-bench／Verified 共用新版官方软件准备（仅软件核验，不替代旧版原生链路）
 
 两来源复用同一套官方 `SWE-bench/SWE-bench` 软件，不与本批仅分类的 SWE-bench Pro 混同。固定版本及605份文件身份见
 [软件清单](../configs/workload-native/swebench-author-source.json)。准备入口只获取并核验软件，不获取任务数据、仓库快照或镜像，不执行生成补丁。
@@ -889,7 +901,7 @@ PYTHONPATH=/private/swebench-author HF_HUB_OFFLINE=1 HF_DATASETS_OFFLINE=1 \
   /private/swebench-client/bin/python -m swebench.harness.run_evaluation --help
 ```
 
-发布方推荐x86_64、至少120GB可用存储、16GB内存、8核CPU；ARM64支持仍为实验性。本次ARM服务器的原605份软件准备和重复只读核验已完成，但不能据此声明原仓库镜像、完整Agent修复及官方功能评分可运行。模型推理仍须外接NPU，不能安装CUDA推理extra后默认为NPU可用。原Verified数据的已有读取证据直接保留，不重复下载；当前任务环境和原生执行边界见[阶段回执](../docs/workload-data/validation/swebench-original-readiness-20261029.json)。
+发布方推荐x86_64、至少120GB可用存储、16GB内存、8核CPU；ARM64支持仍为实验性。本节新版605份软件的准备与只读核验已完成，但它要求的数据字段与旧版13字段原任务不匹配，不能据此声明本节新版流程完成原生任务。已验证的Verified固定前三题使用上节v4.1.0及原mini-SWE-agent，而不是补造字段套用新版。模型推理外接NPU，不能安装CUDA推理extra后默认为NPU可用。原数据复用、不重复下载；环境、模型失败及来源边界见[回执](../docs/workload-data/validation/swebench-original-readiness-20261029.json)。
 
 ## LJSpeech 1.1 原始 TTS 语料准备（原生合成未完成）
 

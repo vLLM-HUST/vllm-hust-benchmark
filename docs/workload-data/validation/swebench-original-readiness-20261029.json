@@ -3,6 +3,36 @@
   "shared_preparation_source_ids": ["SWE_BENCH", "SWE_VERIFIED"],
   "status": "SWE_VERIFIED_FIXED_ORIGINAL_NATIVE_SAMPLE_OFFICIAL_GRADING_AND_CONSUMER_VALIDATED",
   "source_checkbox_eligible": true,
+  "shared_classic_original_asset_preparation": {
+    "source_id": "SWE_BENCH",
+    "status": "ORIGINAL_TEST_ASSETS_VERIFIED_CPU_ORIGINAL_IMAGE_PREPARATION_STARTED_NOT_NATIVE_DELIVERY",
+    "revision": "e48e2bd1e9fecd5bbd641e9414ac59da9f2e69f6", "identity_note": "pragma: allowlist secret - pinned public original dataset revision",
+    "path": "data/test-00000-of-00001.parquet",
+    "original_bytes": 12097227,
+    "original_sha256": "db4f70ef735b3162c74801ddcdf8d7bae8d704193788c6d844f898c20b571cbb", "sha_note": "pragma: allowlist secret - original public LFS asset digest",
+    "original_rows": 2294,
+    "original_fields": 12,
+    "fixed_first3": ["astropy__astropy-11693", "astropy__astropy-12057", "astropy__astropy-12318"],
+    "selected_ids_present_in_verified": 0,
+    "reuse_verified_native_results_as_classic": false,
+    "direct_server_download_failure": "URLError: Network is unreachable",
+    "official_pinned_lfs_size_sha_checked_bounded_ram_relay": true,
+    "windows_raw_data_files_created": 0,
+    "npu_server_receipt": "swe-classic-original-assets-32028-001/acquisition-public.json",
+    "cpu_image_preparation_root": "/root/swe-classic-original-native-preparation-20261029-001",
+    "cpu_builder_pid_at_launch": 358804,
+    "cpu_builder_start_ticks": "1231550096",
+    "public_image_entry_reused_unchanged": true,
+    "public_raw_asset_entry": "scripts/prepare_reused_research_assets.py",
+    "public_plan_exit": 0,
+    "public_readonly_verify_exit": 0,
+    "public_getter_server_receipt": "swe-classic-public-getter-32028-001/audit-public.json",
+    "public_verify_reused_original_files_without_redownload": true,
+    "independent_docker_hard_capacity_bytes": 20401094656,
+    "new_model_calls": 0,
+    "official_grading_completed": false,
+    "source_checkbox_eligible": false
+  },
   "completion_scope": "Verified original first3 only: original Agent, NPU inference, isolated official grading, saved-result audit and original-data/research readbacks. Not full500 model evaluation, not all cases passing, not SWE_BENCH completion.",
   "public_entry_code_ci": {
     "commit": "c5859eda5d1a49744d1066243e9f5358a3abc8d8",
@@ -212,9 +242,10 @@
         "server_receipt": "/root/mini-swe-client-20261029-001/mcp-runtime-repair-public.json"
       },
       "source_checkbox_eligible": false,
-      "remaining": ["Complete current public image/grade/Parquet entry CI and update the dataset-scoped delivery checkbox; SWE_BENCH remains a separate incomplete source"]
+      "remaining": ["No remaining Verified fixed-sample delivery step; current public entry CI is green and the source-scoped checkbox is updated. SWE_BENCH remains a separate incomplete source."],
+      "component_checkbox_boundary": "This nested Agent component alone cannot authorize source completion; the top-level source_checkbox_eligible includes official grading, saved-result audit, CI and consumer closure."
     },
-    "boundary": "Verified original3 completed native Agent and official grading, including two negative model outcomes. Original first3 gold controls all resolve. Full500 data preserved/readable, not full500 quality tested. Shared preparation does not complete SWE_BENCH; final source checkbox awaits current public code CI."
+    "boundary": "Verified original3 completed native Agent and official grading, including two negative model outcomes. Original first3 gold controls all resolve. Full500 data preserved/readable, not full500 quality tested. Current public code CI and source checkbox are complete. Shared preparation does not complete SWE_BENCH."
   },
   "software_ci": {
     "commit": "a2f06018efa4577b097e6089505a5b2e97806665",

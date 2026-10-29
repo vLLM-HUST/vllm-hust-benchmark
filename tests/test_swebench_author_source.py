@@ -5,6 +5,7 @@ import importlib.util
 import io
 import json
 from pathlib import Path
+import subprocess
 import sys
 import tarfile
 
@@ -72,6 +73,62 @@ def test_cpu_recovery_does_not_qualify_repository_tasks_or_new_sources():
         recovery["new_backing_file_capacity_bytes"] + 1024**3
         <= recovery["approved_total_extra_budget_bytes"]
     )
+
+
+def test_classic_original_asset_plan_is_separate_from_verified():
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(SCRIPTS / "prepare_reused_research_assets.py"),
+            "SWE_BENCH",
+            "--mode",
+            "plan",
+        ],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    plan = json.loads(result.stdout)
+    assert plan["source_id"] == "SWE_BENCH"
+    assert plan["bytes"] == 12097227
+    assert len(plan["files"]) == 1
+    assert plan["files"][0]["rows"] == 2294
+    assert len(plan["files"][0]["fields"]) == 12
+    assert "difficulty" not in plan["files"][0]["fields"]
+    assert plan["files"][0]["role"] == "data"
+    assert plan["model_calls"] == 0
+    assert not plan["source_checkbox_eligible"]
+    assert not plan["native_execution_complete"]
+
+
+def test_verified_completion_cannot_complete_classic_or_hide_negative_outcomes():
+    """Receipt consistency only; this test does not execute or rescore tasks."""
+    folder = SCRIPTS.parent / "docs/workload-data"
+    receipt = json.loads(
+        (folder / "validation/swebench-original-readiness-20261029.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    inventory = json.loads(
+        (folder / "dataset-validation-status.json").read_text(encoding="utf-8")
+    )["delivery_inventory"]
+    assert receipt["source_ids"] == ["SWE_VERIFIED"]
+    assert receipt["shared_preparation_source_ids"] == ["SWE_BENCH", "SWE_VERIFIED"]
+    assert receipt["source_checkbox_eligible"]
+    assert inventory["SWE_VERIFIED"]["checked"]
+    if inventory["SWE_BENCH"]["checked"]:
+        assert (
+            inventory["SWE_BENCH"]["delivery_receipt"]
+            != inventory["SWE_VERIFIED"]["delivery_receipt"]
+        ), "Classic must close with its own source-scoped evidence"
+    assert receipt["public_entry_code_ci"]["both_conclusions"] == "success"
+    assert receipt["official_grading_attempts"] == {
+        "gold_control": 3,
+        "model_predictions": 3,
+    }
+    assert receipt["original_test_executions_and_score_reports"] == 5
+    assert "not all cases passing" in receipt["completion_scope"]
+    assert "not SWE_BENCH completion" in receipt["completion_scope"]
 
 
 @pytest.mark.parametrize("profile,count", [("core", 76), ("agent", 120)])
