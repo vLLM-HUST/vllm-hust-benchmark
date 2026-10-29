@@ -21,6 +21,9 @@
     {"source_id": "PAIO-SEMANTIC-SIMILAR-5000", "asset_group": "enterprise-private-requests", "related_workload_ids": [], "boundary": "Semantic similarity is not exact-prefix or KV reuse; preserve original private requests without rewriting."}
   ],
   "source_entrypoints": {
+    "LJSPEECH": [
+      {"role": "prepare_assets", "path": "scripts/prepare_ljspeech_original_assets.py", "scope": "Full original1.1 speech archive with official TorchAudio checksum and exact matching resume only; not TTS model execution or quality scoring"}
+    ],
     "SWE_BENCH": [
       {"role": "prepare_assets", "path": "scripts/prepare_swebench_author_source.py", "scope": "Pinned original shared author software only, not task data, repository images, Agent execution or official grading"}
     ],

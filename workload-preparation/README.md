@@ -794,3 +794,23 @@ PYTHONPATH=/private/swebench-author HF_HUB_OFFLINE=1 HF_DATASETS_OFFLINE=1 \
 ```
 
 发布方推荐x86_64、至少120GB可用存储、16GB内存、8核CPU；ARM64支持仍为实验性。本次ARM服务器的原605份软件准备和重复只读核验已完成，但不能据此声明原仓库镜像、完整Agent修复及官方功能评分可运行。模型推理仍须外接NPU，不能安装CUDA推理extra后默认为NPU可用。原Verified数据的已有读取证据直接保留，不重复下载；当前任务环境和原生执行边界见[阶段回执](../docs/workload-data/validation/swebench-original-readiness-20261029.json)。
+
+## LJSpeech 1.1 原始 TTS 语料准备（原生合成未完成）
+
+本来源是原文本、规范化文本与单说话人波形的配对语料，不是已有自动语义评分器的 benchmark，也不以 ASR 转写代替 TTS 合成。
+固定[原始文件身份](../configs/workload-native/ljspeech-original-assets.json)，下载和核验只使用 Python 标准库：
+
+```bash
+python scripts/prepare_ljspeech_original_assets.py --data-root /private/ljspeech --action plan
+python scripts/prepare_ljspeech_original_assets.py --data-root /private/ljspeech \
+  --action download --max-bytes 3000000000
+python scripts/prepare_ljspeech_original_assets.py --data-root /private/ljspeech --action verify
+```
+
+仅在确认同一目录属于该获取器且先前传输已结束后，才用 `--action download --resume --max-bytes 3000000000`
+续传。入口要求匹配的私有来源记录及精确HTTP范围；服务器忽略续传范围、返回HTML或校验失败时保留原部分文件，不自动重试、覆盖或更换来源。完整文件已存在时只读核验，不重复下载。
+
+服务器已取得官方1.1完整原包2,748,572,632字节，并核对官方TorchAudio固定源码中的SHA256；这不是只验证下载链接。全部13,100条三字段元数据与13,100份WAV配对、RIFF长度和原音频头已核验。原包留在外部存储，不写入本机或Git；没有重复解压一份语料。可复用记录适配、TTS模型、真实NPU合成和固定工件消费仍待完成。
+
+VITS发布方提供对应LJ
+Speech的模型及原推理示例，可作为候选，但其CUDA/PyTorch1.6环境不等于已适配NPU；尚未取得并固定检查点，不宣称原生合成已运行。没有自动MOS分数可凭空补造，波形非空或格式合法也不能代表语音质量。[当前证据与缺口](../docs/workload-data/validation/ljspeech-original-readiness-20261029.json)持续更新，来源总勾保持未完成。
