@@ -105,6 +105,11 @@ def iter_source_rows(path, spec):
 
         yield from original_rows(path)
         return
+    if spec["mapping"] == "spider_original_tasks":
+        from .spider import original_rows
+
+        yield from original_rows(path)
+        return
     if spec["mapping"] == "qasper_original_questions":
         from .qasper import question_rows
 

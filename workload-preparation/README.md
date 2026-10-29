@@ -643,6 +643,20 @@ done
 
 ## Spider官方Test Suite评分环境（尚不代表原生交付）
 
+统一provider已注册四个原划分。安装本项目wheel后，可直接读取原解压目录； schema和`database`/`test_database`目录必须保留原布局，不把同名数据库合并。
+已在服务器独立安装环境核对全部11840条，原SQL、AST及query tokens只在参考侧。
+
+```python
+from pathlib import Path
+from vllm_hust_workload_data.adapters import iter_workload
+
+for record in iter_workload("SPIDER", data_root=Path("/private/spider_data"), files=["dev.json"]):
+    original_input = record.input_record()
+    scorer_reference = record.outcome_record()  # 不送入模型
+```
+
+此读取不运行SQL或替代原生模型/官方评分。当前候选安装包已验证，固定CI工件和研究消费仍待闭环。
+
 官方评分器要求sqlparse和NLTK但未提供版本锁。本仓库提供独立CPU软件配方
 `configs/workload-native/spider-test-suite-cpu.Dockerfile`，其中版本为明确披露的集成选择，
 不是作者环境锁。原题、数据库和评分器源码均不打入公开仓库或软件镜像。

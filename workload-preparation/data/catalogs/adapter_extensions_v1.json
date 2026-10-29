@@ -2,6 +2,17 @@
   "version": "adapter-extensions/v1",
   "boundary": "Field contracts from publisher metadata/docs. No real source payload downloaded or full adapter validation claimed.",
   "adapters": {
+    "SPIDER": {
+      "kind": "task_dataset",
+      "mapping": "spider_original_tasks",
+      "input_fields": ["db_id", "question", "schema"],
+      "required_fields": ["db_id", "question", "schema", "query", "query_toks", "query_toks_no_value", "sql", "question_toks", "database_asset", "original_split"],
+      "outcome_fields": ["query", "query_toks", "query_toks_no_value", "sql"],
+      "annotation_fields": ["question_toks", "database_asset", "original_split"],
+      "id_field": "",
+      "requirements": ["Keep original split, row order, all seven fields and complete schema", "Database and test_database namespaces remain distinct even for equal db_id", "Gold SQL, SQL AST and query tokens are reference-only; no invented chat prompt", "Reading does not execute SQL or replace official Test Suite Accuracy; public test lacks corresponding official distilled suites"],
+      "status": "ORIGINAL_READER_IMPLEMENTED_INSTALLED_CONSUMER_VALIDATION_PENDING"
+    },
     "LIVECODEBENCH": {
       "kind": "task_dataset",
       "mapping": "livecodebench_original_tasks",

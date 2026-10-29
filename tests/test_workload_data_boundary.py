@@ -5,6 +5,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1] / "workload-preparation"
 DATA_MODULES = {
+    "spider",  # Original split/schema/database relations; no SQL or observations.
     "appworld",  # Original task/database/shared/reference file relations only.
     "livecodebench",  # Original scenario fields and case/reference relations only.
     "videomme",  # Original task/option/reference/media-locator relations only.
