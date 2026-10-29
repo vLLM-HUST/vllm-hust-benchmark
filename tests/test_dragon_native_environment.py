@@ -1,11 +1,30 @@
 """Software dependency fixtures only; no imports of model stacks or NPU use."""
 
 import importlib.util
+import json
 from pathlib import Path
 from types import SimpleNamespace
 import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+def test_downloaded_embedding_artifact_is_not_native_execution():
+    receipt = json.loads(
+        (
+            ROOT
+            / "docs/workload-data/validation/dragon-original-preparation-20261028.json"
+        ).read_text(encoding="utf-8")
+    )["official_embedding_artifact_acquisition_20261029"]
+    assert receipt["original_files_verified"] == len(receipt["included_paths"]) == 11
+    assert receipt["original_lfs_sha256_and_small_file_git_blobs_verified"]
+    assert receipt["all_files_independently_sha256_reverified_on_server"]
+    assert receipt["original_transformer_pooling_normalize_modules_preserved"]
+    assert receipt["safetensors_offsets_and_tensor_sizes_cover_data_exactly"]
+    assert not receipt["model_weights_loaded"]
+    assert not receipt["npu_embedding_execution_verified"]
+    assert not receipt["cpu_model_inference"]
+    assert receipt["model_calls"] == receipt["source_checkbox_increment"] == 0
 
 
 def load():
