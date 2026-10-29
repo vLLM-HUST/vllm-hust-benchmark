@@ -22,6 +22,17 @@ def build(revision, read=None):
                 ["git", "show", f"{revision}:{path}"], cwd=ROOT
             )
 
+    # Historical builders must not re-label a later method as their old result.
+    if json.loads(read(METHOD)).get("method_version") == "reference-revision-20261029":
+        original_read = read
+
+        def read(path):
+            if path == METHOD:
+                path = REPORT_DIR + "/current-method-v099.json"
+            elif path == REPORT_DIR + "/method-history-index.json":
+                path = REPORT_DIR + "/method-history-index-v099.json"
+            return original_read(path)
+
     raw = read(REPORT)
     assert "报告版本：V0.83" in raw.decode()
     data = json.loads(read("website-publication/data/midterm-v082.json"))
