@@ -571,9 +571,9 @@
       "paired_C_gain_percent": 84.97046148366367
     }
   },
-  "report_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/7bfd2849eb021938d44babd791b048be7f6121c2/reports/vllm-hust-midterm-20261019/中期测试报告.md",
+  "report_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/ebed2d5decc2dba9b1e50e726b2ebb2ec576943d/reports/vllm-hust-midterm-20261019/中期测试报告.md",
   "report_sha256": "c78b9f4ac7d788ff3b6d1b23c2b093cbaeb021225417318ce5d18190eb2f4a8a",
-  "source_commit": "7bfd2849eb021938d44babd791b048be7f6121c2",
+  "source_commit": "ebed2d5decc2dba9b1e50e726b2ebb2ec576943d",
   "sections": [
     {
       "id": "corrected-quality",
@@ -782,8 +782,8 @@
     {
       "id": "v15-remaining",
       "title": "V1.5 证据复算与剩余边界 / V1.5 evidence reanalysis and remaining limits",
-      "scope": "M01参考修订中。同轮复算：B0 3.8407、B1 7.1042 TFLOPS/芯片，描述性提升84.9705%。尚无经核验的替代C参；当前η及中期50%/最终90%判定均未确定。共享实现的独立重复不足以建立工况能力强度。保留原始测量与历史方法，本次未启动新实验。",
-      "scope_en": "M01 reference under revision. Same-run reanalysis: B0 3.8407, B1 7.1042 TFLOPS/chip, a descriptive gain of 84.9705%. No qualified replacement C_ref is available; current eta and both midterm 50% / final 90% verdicts are unresolved. Independent repeats of the shared implementation do not establish workload-capacity strength. Raw measurements and historical methods are retained; no new experiment.",
+      "scope": "M01参考修订中。同轮复算：B0 3.8407、B1 7.1042 TFLOPS/芯片，描述性提升84.9705%。尚无经核验的替代C参；当前η及中期50%/最终90%判定均未确定。共享实现的独立重复不足以建立工况能力强度。保留原始测量与历史方法，本次未启动新实验。 成本采用回溯的首请求发起至末成功响应包络，与原benchmark duration相差毫秒，原数值保留。每臂200请求均在区间内、282265输入/51200输出，全部4张保留卡计费。等费用基础的资源系数下降22.601951%，卡4/5利用率却未提高，卡6/7为零。利用率按采样命令结束时间左保持、裁剪至同一区间；最大采样间隔对照1.068秒/B1 1.250秒，属回溯估计。P/D未绑定费用凭据，新输入/缓存命中输入拆分未闭合，且对照为0.28.1/0.25.1rc2开发栈，不作固定B0货币成本达标判定。图表的4元/卡时显示假设不是本场景综合月费依据。 SWE按完成时间归窗，实际上下文为输入+输出token，分位数用最近秩，与原插值分位数分别保留。下表为全小时，逐600/1200/1800秒窗口在复算JSON内；混合上下文不是受控4K/16K配对，E2E不等于TTFT/TPOT。不能由正常返回摘录证明全部任务无OOM、死锁、非预期退出或静默截断。",
+      "scope_en": "M01 reference under revision. Same-run reanalysis: B0 3.8407, B1 7.1042 TFLOPS/chip, a descriptive gain of 84.9705%. No qualified replacement C_ref is available; current eta and both midterm 50% / final 90% verdicts are unresolved. Independent repeats of the shared implementation do not establish workload-capacity strength. Raw measurements and historical methods are retained; no new experiment. Cost uses a retrospective first-start/last-success envelope, milliseconds different from the retained original benchmark duration. Each arm has 200 enclosed requests, 282,265 input and 51,200 output tokens; all four reserved cards count. Equal-fee resource coefficient falls 22.601951%, but card 4/5 utilization does not improve; cards 6/7 are zero. Utilization is left-held at sample-command end and clipped to the same interval; maximum gaps are 1.068/1.250 seconds (control/B1). This is a retrospective estimate. Fee P/month-days D and new/cache-hit input split remain unbound. The control is 0.28.1/0.25.1rc2, not fixed B0: no monetary acceptance. The chart's 4 CNY/card-hour display assumption is not a documented all-in fee for this run. SWE windows use completion time, actual input+output tokens and nearest-rank quantiles; original interpolated quantiles remain separate. Full-hour rows are below, with phase windows in the JSON. Mixed contexts are not a controlled 4K/16K pair, and E2E is not TTFT/TPOT. Normal-return extracts do not establish absence of OOM, deadlock, unexpected exits or silent truncation across all tasks.",
       "tables": [
         {
           "headers": [
