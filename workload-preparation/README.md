@@ -733,7 +733,7 @@ python scripts/prepare_swebench_author_source.py \
   --archive /external/official-mini-agent-source.tar.gz --action prepare
 ```
 
-这只准备原软件，不安装、不启动容器、不调用模型。服务器实际原文件核验通过，但Agent依赖、运行与评分尚未通过。后续按[官方SWE-bench入口](https://mini-swe-agent.com/latest/usage/swebench/)及[原Docker环境配置](https://mini-swe-agent.com/latest/reference/environments/docker/)接入；ARM镜像不能静默套用默认x86镜像名。本地NPU模型是部署适配，不是官方默认Claude的等价质量复现；原题、模板、步骤预算与测试应保持不变，安全隔离参数需单独核验。可信软件构建所用联网方式不得继承到生成代码的评分容器。
+这只准备原软件，不安装、不启动容器、不调用模型。服务器实际原文件核验、独立客户端差量安装/依赖检查、原CLI帮助及原Docker环境类的隔离控制通过；原题Agent运行和评分尚未通过。后续按[官方SWE-bench入口](https://mini-swe-agent.com/latest/usage/swebench/)及[原Docker环境配置](https://mini-swe-agent.com/latest/reference/environments/docker/)接入；ARM镜像不能静默套用默认x86镜像名。本地NPU模型是部署适配，不是官方默认Claude的等价质量复现；原题、模板、步骤预算与测试应保持不变，安全隔离参数需单独核验。可信软件构建所用联网方式不得继承到生成代码的评分容器。
 
 ## DRAGON模型客户端与原生执行（固定前三题已验证）
 
