@@ -8,6 +8,34 @@ ROOT = Path(__file__).resolve().parents[1]
 DOCS = ROOT / "docs/workload-data"
 
 
+def test_spider_archive_acquisition_is_not_native_delivery_or_publisher_digest():
+    receipt = json.loads(
+        (DOCS / "validation/spider-original-preparation-20261029.json").read_text(
+            "utf-8"
+        )
+    )
+    assert receipt["archive"]["bytes"] == 205800266
+    assert receipt["archive"]["all_archive_crc_verified"]
+    assert not receipt["archive"]["publisher_published_checksum_available"]
+    assert not receipt["archive"]["extracted"]
+    assert receipt["official_test_suite_database_archive_acquired_and_verified"]
+    assert receipt["test_suite_archive"]["bytes"] == 1269456098
+    assert receipt["test_suite_archive"]["all_archive_crc_verified"]
+    assert not receipt["test_suite_archive"]["publisher_published_checksum_available"]
+    assert not receipt["test_suite_archive"]["extracted"]
+    assert (
+        receipt["model_calls"]
+        == receipt["scorer_calls"]
+        == receipt["windows_raw_files_written"]
+        == 0
+    )
+    assert not receipt["source_checkbox_eligible"]
+    inventory = json.loads(
+        (DOCS / "dataset-validation-status.json").read_text("utf-8")
+    )["delivery_inventory"]["SPIDER"]
+    assert not inventory["checked"] and inventory["delivery_receipt"] is None
+
+
 def test_crosscodeeval_native_delivery_keeps_original_profiles_and_ci_consumer_scope():
     receipt = json.loads(
         (

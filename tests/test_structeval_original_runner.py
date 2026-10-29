@@ -290,6 +290,17 @@ def test_completed_protocol_audit_adds_only_previously_unexecuted_rows():
     assert html["combined_original_vqa_pairs"] == 345
     assert html["combined_original_render_scores"] == {"1": 50}
     assert not html["source_checkbox_eligible"]
+    markdown_html = nested["markdown_html_remaining47"]
+    assert markdown_html["new_original_tasks"] == 47
+    assert markdown_html["previous_first3_reused_not_rerun"] == 3
+    assert markdown_html["combined_unique_protocol_tasks"] == 50
+    assert (
+        markdown_html["new_generation_calls"] == markdown_html["new_judge_calls"] == 47
+    )
+    assert markdown_html["new_finish_reasons"] == {"stop": 94}
+    assert markdown_html["combined_original_vqa_pairs"] == 439
+    assert markdown_html["other_four_protocols_remaining_original_tasks"] == 173
+    assert not markdown_html["source_checkbox_eligible"]
     assert (
         ledger["verified_unique_native_tasks"]
         == count
@@ -297,6 +308,7 @@ def test_completed_protocol_audit_adds_only_previously_unexecuted_rows():
         + svg_continued["combined_unique_protocol_tasks"]
         + nested["unique_original_tasks"]
         + html["new_original_tasks"]
+        + markdown_html["new_original_tasks"]
     )
     held = receipt.get("held_native_exit_evidence")
     if held:
