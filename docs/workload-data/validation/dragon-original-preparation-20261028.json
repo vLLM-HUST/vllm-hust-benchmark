@@ -57,6 +57,23 @@
   "transport":"Official HF primary returned Network is unreachable; original failure receipt retained before explicit hf-mirror.com same-source/hash fallback and matching resume. All4 original SHA256 and sizes checked.",
   "server_receipts":["dragon-original-data-32028-001/source-preparation.private.json", "dragon-original-data-32028-001/schema-audit-public.json", "dragon-original-data-32028-001/relation-audit-public.json", "dragon-public-stage-32028-001/official-primary-failure.private.json"],
   "schema_audit_environment":"Existing beir-native-npu-client-32082-001 Python3.12/pyarrow reused unchanged; system Python lacks pyarrow and its initial import failure occurred before creating an audit receipt.",
+  "npu_native_environment_preflight_20261029": {
+    "entry": "scripts/probe_dragon_native_environment.py",
+    "server_receipt": "dragon-serving-environment-preflight-32028-001.json",
+    "receipt_sha256": "df96e032012bf24a2c87cb0643856595a75320bd1f62a4097e630dad4d11144c",
+    "identity_note": "pragma: allowlist secret - public software presence receipt digest",
+    "scope": "Probe subprocess with existing serving process environment, no model-stack imports, weights, device initialization, API calls or service changes. Original isolated112-package core client remains unchanged and separate.",
+    "serving_environment_present": ["torch", "torch_npu", "transformers", "datasets"],
+    "serving_environment_missing": ["sentence_transformers", "langchain_huggingface", "langchain", "langchain_chroma"],
+    "official_example_cuda_only_initialization_reviewed": true,
+    "official_reusable_core": "baseline.init_retriever/init_generation/get_results and evaluator.evaluate_rag_results; original get_results supports fixed take=3",
+    "original_standalone_cli_defaults": {"top_k": 5, "chunk_size_characters": 1000, "chunk_overlap_characters": 100},
+    "original_core_retrieval": "Chroma MMR over complete542-document corpus, no arbitrary lexical or random-embedding replacement",
+    "npu_embedding_execution_verified": false,
+    "cpu_model_fallback_permitted": false,
+    "model_calls": 0,
+    "next_steps": ["Qualify isolated model-client dependencies without mutating serving/core environments", "Bind one publisher-listed embedding profile to immutable local NPU model artifact", "Transport original templated reader prompts to existing NPU service without task/reference changes", "Run original full retrieval/generation/scoring per fixed first3 question; retain failed cases"]
+  },
   "model_calls":0, "original_data_changed":false, "raw_data_in_git":false,
   "boundary":"Same-release raw acquisition, all original ID/question/text/reference relationships, candidate and actual-CI provider/index/current research readbacks verified. Embedding/retrieval/generation/official task scoring and temporal update/delete event validation remain unverified. Original references must not become model prompts."
 }
