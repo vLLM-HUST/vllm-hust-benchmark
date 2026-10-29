@@ -2,6 +2,13 @@
   "source_ids": ["SWE_BENCH", "SWE_VERIFIED"],
   "status": "ORIGINAL_SHARED_SOFTWARE_AND_ISOLATED_CORE_CLIENT_READY_NATIVE_EXECUTION_PENDING",
   "source_checkbox_eligible": false,
+  "software_ci": {
+    "commit": "a2f06018efa4577b097e6089505a5b2e97806665",
+    "identity_note": "pragma: allowlist secret - verified fixed CI revision",
+    "cpu_smoke_run": 40834983215,
+    "main_ci_run": 40834989989,
+    "both_conclusions": "success"
+  },
   "author_source": {
     "repository": "SWE-bench/SWE-bench",
     "revision": "02e7a74ffd0b707aab73d203fe87bdc7c76afc8e",
@@ -59,6 +66,48 @@
     "task_image_disk_capacity_qualified": false,
     "docker_daemon_ready_after_resume_verified": false
   },
+  "docker_restore_diagnosis": {
+    "status": "RESTORE_RPC_WAIT_CONFIRMED_NO_RESTART_OR_DATA_REMOVAL",
+    "observed_docker_version": "29.9.1",
+    "pid1_dockerd_still_live": true,
+    "original_container_metadata_records": 1423,
+    "all_observed_container_metadata_running_paused_restarting_false": true,
+    "structeval_named_records": 1308,
+    "nonstopping_official_sigusr1_stack_capture": true,
+    "stack_observation": "Main goroutine waiting in Daemon.restore WaitGroup;1328 goroutines grouped in grpc transport waits, with restore tasks blocked in containerd Get. In-memory client writer blocked on net.Pipe while server waits for a request body. Embedded server confirmed in exact upstream version source.",
+    "confidence": "Startup wait and in-process transport path confirmed. Large stopped-container pool is a candidate trigger, not an experimentally isolated upstream defect or proof of damaged data.",
+    "daemon_restart_performed": false,
+    "containers_images_volumes_or_original_results_deleted": false,
+    "shared_platform_template_or_npu_service_changed": false,
+    "private_control_evidence_directory": "workload-native-cpu-docker-diagnosis-20261029-001",
+    "independent_temporary_daemon_recovery_permission_requested": true,
+    "temporary_daemon_launched": false,
+    "proposed_extra_disk_budget_gib": 20
+  },
+  "verified_original_data_actual_ci_readback": {
+    "status": "ALL500_ORIGINAL_FIELDS_INDEX_AND_FIXED3_RESEARCH_READBACKS_VERIFIED_ACTUAL_CI",
+    "original_asset_reused_not_redownloaded": true,
+    "artifact_id": 12880396493,
+    "installed_payloads_equal_wheel_and_exact_committed_blobs": 67,
+    "wheel_sha256": "46bb3ad1efa1d978c9c276c956120d29496296b910574867e11a85f1331db22a",
+    "wheel_note": "pragma: allowlist secret - actual installed CI software digest",
+    "original_rows": 500,
+    "original_field_names": ["FAIL_TO_PASS", "PASS_TO_PASS", "base_commit", "created_at", "difficulty", "environment_setup_commit", "hints_text", "instance_id", "patch", "problem_statement", "repo", "test_patch", "version"],
+    "all_original_fields_exact": true,
+    "unmapped_fields": 0,
+    "model_input_only_original_problem_statement": true,
+    "reference_patch_and_tests_not_in_model_input": true,
+    "original_index_rows": 500,
+    "fixed_first3_public_research_readbacks_equal": true,
+    "research_code_or_default_dependency_changed": false,
+    "server_receipt": "swe-verified-ci-a2f-consumer-32028-001/audit-public.json",
+    "receipt_sha256": "e6c72c5dd26db3365bc712833279a2b62d9aedac49e97240f46b4d7993abf650",
+    "receipt_note": "pragma: allowlist secret - full original-data and fixed installed research compatibility audit digest",
+    "retained_software_attempt": "The unchanged isolated reader client lacks pip; its module-not-found failure installed nothing. System pip then installed only the independently isolated target package directory with no dependencies; original client and serving environment unchanged.",
+    "model_calls": 0,
+    "native_repository_tasks_executed": false,
+    "source_checkbox_eligible": false
+  },
   "existing_verified_original_data_evidence_reused": "docs/workload-data/validation/public-original-assets-server-reader-20261023.json",
   "new_task_dataset_downloads": 0,
   "model_calls": 0,
@@ -70,6 +119,6 @@
     "Review fixed original instances and repository image requirements against available disk and experimental ARM support; do not substitute tasks to force a pass",
     "Run the original supported Agent workflow against an appropriate local NPU model",
     "Run isolated official functional grading with complete original tests and preserve failures",
-    "Complete unchanged-task provider/index/exact installed artifact and existing research consumer closure"
+    "Reuse the now-verified Verified500 original fields/index and fixed actual-CI research readbacks; SWE_BENCH own dataset/provider closure remains pending"
   ]
 }
