@@ -821,6 +821,7 @@ LMM
 - [x] 原示例CUDA专用初始化与可复用核心链路已核查；CLI默认top_k5/字符chunk1000/overlap100，核心使用完整语料的Chroma
   MMR，不能换成任意词法检索或随机embedding。
 - [ ] 独立模型客户端环境、发布方列举embedding模型的NPU工件、原提示读取传输及原前三题完整检索/生成/评分；不得CPU模型回落，不改现有服务。预检不计来源完成，见[阶段证据](validation/dragon-original-preparation-20261028.json)。
+- [x] 新客户端56项确定版本/原PyPI哈希安装及核心模块真实导入核验；Torch/NPU等六项保护版本未变。保留全套失败记录，修复仅限新客户端；全局已有11项依赖问题仍在，但未新增问题。不是干净全SDK或NPU模型执行合格，来源总勾不变。
 
 ### Video-MME-v2资产与原协议准备（尚未交付）
 

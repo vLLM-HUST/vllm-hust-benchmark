@@ -718,6 +718,31 @@ python scripts/run_spider_official_scoring.py --assets /private/spider-scoring-a
 不加`--execute`只读核对并输出计划。执行仅支持具备权限的Linux Docker环境，容器非root、
 断网、只读，原SQL不在宿主执行；保留原值和DISTINCT，不注入gold值。低分正常保留； 资源/输出契约失败不冒充模型0分；容器与证据保留，无自动清理或宿主执行回退。
 
+## DRAGON模型客户端软件准备（尚未完成原生NPU验证）
+
+原作者独立示例含CUDA初始化，不能直接在NPU节点照搬执行。检索、原提示与评分核心可复用， 但必须另行验证NPU
+embedding与现有reader服务的薄传输层，不能换成CPU或随机embedding。 当前仅完成独立客户端的软件导入，不是benchmark运行。
+
+已验证的Python3.12/aarch64客户端包记录在
+`configs/workload-native/dragon-npu-model-client-py312-observed.lock.txt`（56项、PyPI原始工件哈希）；
+这是观察到的集成版本，不是作者原始锁。先在已有合格NPU Python运行环境核对保护版本， 只向仓库外的新虚拟环境安装，不能在服务环境直接pip安装：
+
+```bash
+python scripts/probe_dragon_native_environment.py \
+  --runtime-profile configs/workload-native/dragon-npu-inherited-runtime-py312-observed.json
+python -m venv --system-site-packages /external/dragon-client
+/external/dragon-client/bin/python -m pip install --require-hashes --no-deps \
+  -r configs/workload-native/dragon-npu-model-client-py312-observed.lock.txt
+```
+
+版本不符时应在自己的隔离客户端重新解析，不能为复用这个观察锁而更改运行中的服务。 原`lib/requirements.txt`保持不变。HuggingFace接入需full
+extra，不能漏掉sentence-transformers； NumPy1.26保护配置下使用已实测可导入的Datasets4.8.5/Arrow22组合。继承环境pip check仍有11项
+已有SDK/工具依赖问题，修复后客户端未新增问题，不声称整个服务SDK依赖检查通过。
+
+需自行解析时，`scripts/prepare_dragon_model_client_lock.py`可将pip报告转为带哈希的确定计划，
+会拒绝保护包替换、非官方PyPI工件、凭据URL及缺失embedding依赖；该工具不执行安装。
+详细失败、修复及证据见[阶段记录](../docs/workload-data/validation/dragon-original-preparation-20261028.json)。
+
 ## Video-MME-v2 原资产准备（原生执行仍待补）
 
 复用现有获取器，不另建下载框架：

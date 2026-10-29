@@ -74,6 +74,32 @@
     "model_calls": 0,
     "next_steps": ["Qualify isolated model-client dependencies without mutating serving/core environments", "Bind one publisher-listed embedding profile to immutable local NPU model artifact", "Transport original templated reader prompts to existing NPU service without task/reference changes", "Run original full retrieval/generation/scoring per fixed first3 question; retain failed cases"]
   },
+  "isolated_npu_model_client_20261029": {
+    "server_root": "dragon-npu-model-client-32028-001",
+    "public_lock_builder": "scripts/prepare_dragon_model_client_lock.py",
+    "observed_lock": "configs/workload-native/dragon-npu-model-client-py312-observed.lock.txt",
+    "inherited_runtime_profile": "configs/workload-native/dragon-npu-inherited-runtime-py312-observed.json",
+    "final_reviewed_dependency_packages": 56,
+    "all_final_resolved_versions_equal_installed_metadata": true,
+    "artifact_downloads_hash_required": true,
+    "serving_runtime_six_protected_versions_unchanged": true,
+    "original_core_client_unchanged": true,
+    "system_site_packages_inherited_not_globally_modified": true,
+    "successful_imports": ["sentence_transformers", "langchain_huggingface", "langchain_chroma", "rag_bench.baseline", "rag_bench.evaluator"],
+    "imports_receipt": "dragon-npu-model-client-32028-001/imports-compatible-public.json",
+    "imports_receipt_sha256": "ad64c55a16a583a3628f53b7bbfb77357df366ece712fef6579226064b436465",
+    "receipt_identity_note": "pragma: allowlist secret - actual no-weight import receipt",
+    "pip_check_exit": 1,
+    "inherited_dependency_issue_count": 11,
+    "new_dependency_issues_after_repairs": 0,
+    "whole_serving_sdk_dependency_qualification_claim": false,
+    "retained_failures": ["Default HuggingFace extra resolution omitted sentence-transformers; explicit full extra resolved it", "New inherited vcs-versioning2.2.4/packaging25 conflict resolved only inside client using vcs-versioning2.1.2", "PyArrow26 actual import requires NumPy2 despite resolution; NumPy1.26 protected, PyArrow22 selected", "Datasets5.1 requires Arrow24+, so compatible Datasets4.8.5/Arrow22 pair resolved; original author requirements unmodified", "Initial final-lock merge omitted the earlier Arrow repair plan; strict installed-version equality rejected it, complete phase history then matched all56 versions"],
+    "model_calls": 0,
+    "model_weights_loaded": false,
+    "npu_embedding_execution_verified": false,
+    "source_checkbox_eligible": false,
+    "remaining": "Immutable publisher-listed embedding artifact, explicit actual NPU execution, unchanged full-corpus retrieval/reader/official scorer per fixed original task; imports and metadata checks do not replace native validation."
+  },
   "model_calls":0, "original_data_changed":false, "raw_data_in_git":false,
   "boundary":"Same-release raw acquisition, all original ID/question/text/reference relationships, candidate and actual-CI provider/index/current research readbacks verified. Embedding/retrieval/generation/official task scoring and temporal update/delete event validation remain unverified. Original references must not become model prompts."
 }

@@ -3,6 +3,7 @@
 import importlib.util
 from pathlib import Path
 from types import SimpleNamespace
+import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -44,3 +45,14 @@ def test_missing_dependencies_remain_explicit():
     assert set(report["missing_modules"]) == missing
     assert report["native_npu_adapter_required"]
     assert not report["service_changed"]
+
+
+def test_inherited_profile_never_silently_replaces_versions():
+    loaded = load()
+    profile = {
+        "schema_version": "dragon-inherited-runtime/v1",
+        "protected_versions": {"torch-npu": "fixed"},
+    }
+    assert loaded.verify_versions(profile, version=lambda _: "fixed")
+    with pytest.raises(ValueError, match="resolve separately"):
+        loaded.verify_versions(profile, version=lambda _: "different")

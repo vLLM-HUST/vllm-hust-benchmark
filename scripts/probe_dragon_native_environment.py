@@ -4,8 +4,11 @@ Presence of torch_npu is not proof of NPU execution. This software probe neither
 installs anything nor calls a model, changes a service or qualifies a benchmark.
 """
 
+import argparse
+from importlib import metadata
 import importlib.util
 import json
+from pathlib import Path
 
 MODEL_MODULES = (
     "torch",
@@ -40,5 +43,24 @@ def probe(*, locate=importlib.util.find_spec):
     }
 
 
+def verify_versions(profile, *, version=metadata.version):
+    if profile.get("schema_version") != "dragon-inherited-runtime/v1":
+        raise ValueError("explicit inherited runtime profile required")
+    expected = profile.get("protected_versions", {})
+    if not expected or any(version(name) != value for name, value in expected.items()):
+        raise ValueError(
+            "inherited runtime differs; resolve separately, do not replace serving stack"
+        )
+    return True
+
+
 if __name__ == "__main__":
-    print(json.dumps(probe(), sort_keys=True))
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--runtime-profile", type=Path)
+    args = parser.parse_args()
+    report = probe()
+    if args.runtime_profile:
+        report["inherited_profile_versions_match"] = verify_versions(
+            json.loads(args.runtime_profile.read_bytes())
+        )
+    print(json.dumps(report, sort_keys=True))
