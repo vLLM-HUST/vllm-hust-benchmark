@@ -718,10 +718,10 @@ python scripts/run_spider_official_scoring.py --assets /private/spider-scoring-a
 不加`--execute`只读核对并输出计划。执行仅支持具备权限的Linux Docker环境，容器非root、
 断网、只读，原SQL不在宿主执行；保留原值和DISTINCT，不注入gold值。低分正常保留； 资源/输出契约失败不冒充模型0分；容器与证据保留，无自动清理或宿主执行回退。
 
-## DRAGON模型客户端软件准备（尚未完成原生NPU验证）
+## DRAGON模型客户端与原生执行（固定前三题已验证）
 
 原作者独立示例含CUDA初始化，不能直接在NPU节点照搬执行。检索、原提示与评分核心可复用， 但必须另行验证NPU
-embedding与现有reader服务的薄传输层，不能换成CPU或随机embedding。 当前仅完成独立客户端的软件导入，不是benchmark运行。
+embedding与现有reader服务的薄传输层，不能换成CPU或随机embedding。固定原前三题已经通过实际执行和保存核验，范围及限制见下文；软件导入本身仍不代表原生验证。
 
 已验证的Python3.12/aarch64客户端包记录在
 `configs/workload-native/dragon-npu-model-client-py312-observed.lock.txt`（56项、PyPI原始工件哈希）；
@@ -742,6 +742,42 @@ extra，不能漏掉sentence-transformers； NumPy1.26保护配置下使用已�
 需自行解析时，`scripts/prepare_dragon_model_client_lock.py`可将pip报告转为带哈希的确定计划，
 会拒绝保护包替换、非官方PyPI工件、凭据URL及缺失embedding依赖；该工具不执行安装。
 详细失败、修复及证据见[阶段记录](../docs/workload-data/validation/dragon-original-preparation-20261028.json)。
+
+### DRAGON原生执行入口
+
+`scripts/run_dragon_original.py`复用固定作者核心，不是重新实现RAG：完整542篇语料，原CLI的字符分块1000/重叠100、Chroma
+MMR/top-k5，原俄语提示、模型自带chat模板和原评分器。默认原顺序前三题，`--full`执行全部600题；参考QA仅用于原评分，不加入检索池或模型提示。所选E5原工件固定在`configs/workload-native/dragon-e5-original-artifact.json`；保留原Transformer/Pooling/Normalize及512-token编码器窗口。执行使用原standalone
+CLI的无额外doc/query指令配置，不混称另一套YAML的k20/chunk500配置或发布方模型分数复现。
+
+原数据使用前述公共获取/核验入口；模型可用已验证客户端自带的官方Hub CLI取得固定版本，排除重复ONNX导出，运行时逐文件核对清单中的11份原文件。已有相同外部模型目录时直接只读复用，不重复下载：
+
+```bash
+/external/dragon-client/bin/hf download intfloat/multilingual-e5-large-instruct \
+  --revision 274baa43b0e13e37fafa6428dbc7938e62e5c439 \
+  --exclude 'onnx/*' --local-dir /external/models/multilingual-e5-large-instruct
+```
+
+在独立、已核验的NPU客户端中运行，先取得模型/API所有者授权的空闲窗口。模型目录、原始数据和输出均放在仓库外。下面默认仅展示计划；加`--execute`才加载NPU编码器并发送现有服务请求，`--engine-pid`和`--context-window`必须填写实际值。代码不启动、停止或改配模型服务，也不自动抢卡或重试失败题。原reader生成预算按该模型的原`generation_config`解析，缺失时沿用作者512上限；原模板提示直接通过`/v1/completions`传输，不再次套chat模板、不截断、不减少语料。
+
+```bash
+/external/dragon-client/bin/python scripts/run_dragon_original.py \
+  --author-root /external/dragon-author \
+  --data-root /external/dragon-original \
+  --embedding-root /external/models/multilingual-e5-large-instruct \
+  --reader-root /external/models/reader \
+  --output /external/runs/dragon-first3 \
+  --model ACTUAL_SERVED_MODEL --device npu:0 \
+  --endpoint http://127.0.0.1:19466/v1 \
+  --engine-pid ACTUAL_ENGINE_PID --context-window ACTUAL_CONTEXT_WINDOW
+```
+
+使用可见设备掩码时`--device`是该进程中的逻辑NPU编号，不是物理芯片编号。作者日志默认写入当前目录，入口将工作目录定位到新私有输出，结束时恢复，不在源码目录或HOME写作者日志。生成配置和分词器在NPU加载前检查：若原模型没有独立`generation_config.json`，显式使用Transformers的`from_model_config`从原`config.json`派生并记录来源，不补造发布方文件；已有但损坏的独立配置仍失败，不做静默回落。
+
+固定原前三题已在Ascend NPU完成：完整542篇/1157原分块，E5编码结果直接核验为NPU张量，现有Qwen3.5-9B
+reader完成3次原提示请求和官方评分。3次均为原512预算下的length终止，原样保留，不代表正确作答或模型质量复现；这不是未经修改的CUDA
+CLI。完整请求/响应、检索ID、原生编码结果及官方评分保留服务器，未纳入Git。精确CI工件与最终交付闭环完成前，来源总勾仍不打上。
+
+无推理复核入口为`python scripts/verify_dragon_original_saved.py --native-root /external/runs/dragon-first3 --author-root /external/dragon-author --data-root /external/dragon-original --reader-root /external/models/reader --output /external/audits/dragon-first3.json`。它逐字节匹配原完整模板、问题、检索分块及ID，核对全部原生编码输入/向量、原响应与原答案，调用原评分器并与保存评分比较；不会重跑嵌入、检索或reader，也不把length输出改成通过。
 
 ## Video-MME-v2 原资产准备（原生执行仍待补）
 

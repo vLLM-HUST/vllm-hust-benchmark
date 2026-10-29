@@ -370,7 +370,7 @@ records = iter_workload("DRAGON_PUBLIC", data_root=Path("/external/dragon-origin
 
 保持发布方600个问题的原始顺序；`task.input`只含原id/question，`outcome.original_reference_qa`保留完整原始8字段参考，`runtime.corpus_file`指向完整原语料。四份文件逐一检查版本/摘要及完整关联，不能按参考文件行号拼答案；协议版本与各数据仓库版本分别保留。读取前后均核验原文件，参考变更会失败，不从gold生成输入。
 
-核心库准备可使用外部Python3.12环境，以`configs/workload-native/dragon-core-client-py312-observed.txt`作为约束安装不修改的原`lib/requirements.txt`。这是实测兼容版本，不是作者冻结锁；原示例的embedding/reader模型依赖尚待准备，不能只安装核心库就宣称可以运行完整基线。客户端须清除继承的`PYTHONPATH`，不要修改在用NPU服务的环境。
+核心库准备可使用外部Python3.12环境，以`configs/workload-native/dragon-core-client-py312-observed.txt`作为约束安装不修改的原`lib/requirements.txt`。这是实测兼容版本，不是作者冻结锁；模型客户端另见`dragon-npu-model-client-py312-observed.lock.txt`，固定原前三题的NPU嵌入/现有reader适配已验证，不能只安装核心库就宣称完整基线可运行。客户端须排除未经核验的继承`PYTHONPATH`，不要修改在用NPU服务环境。
 
 仅登记既定113项中的`DRAGON_PUBLIC`，不新增交付范围；参考仓库虽名含private，已通过官方无凭据元数据实查同版本非gated且Apache-2.0，不能仅凭名字推断公开/私有。四份资产保持独立版本身份，均固定同一发布标签。其月度新闻快照不是生产文档增删事件或逐请求版本轨迹，不补造不存在的在线事件。
 
@@ -840,10 +840,13 @@ LMM
 - [x] 新增无模型加载的依赖预检，在服务器现有服务环境实际执行；torch_npu可发现，但缺sentence_transformers及三项LangChain组件，不把包存在等同NPU执行合格。
 - [x] 原示例CUDA专用初始化与可复用核心链路已核查；CLI默认top_k5/字符chunk1000/overlap100，核心使用完整语料的Chroma
   MMR，不能换成任意词法检索或随机embedding。
-- [ ] 原提示读取传输、实际NPU嵌入及原前三题完整检索/生成/评分；不得CPU模型回落，不改现有服务。模型文件准备不计来源完成，见[阶段证据](validation/dragon-original-preparation-20261028.json)。
+- [x] 固定原前三题的原提示传输、实际NPU嵌入、完整检索/生成/官方评分及无推理保存核验通过：完整542篇/1157原分块，5次直接验证输出NPU张量的编码调用，3次reader请求。3次均为作者512预算下的length终止，低质量结果保留；未缩提示、减少语料或替换题目，不算正确作答或性能证明。
 - [x] 新客户端56项确定版本/原PyPI哈希安装及核心模块真实导入核验；Torch/NPU等六项保护版本未变。保留全套失败记录，修复仅限新客户端；全局已有11项依赖问题仍在，但未新增问题。不是干净全SDK或NPU模型执行合格，来源总勾不变。
 - [x] 发布方列举的`intfloat/multilingual-e5-large-instruct`已固定官方版本`274baa43b0e13e37fafa6428dbc7938e62e5c439`，11份原模型/配置/分词器文件共1,142,121,329字节直接传到服务器；官方LFS
-  SHA256或Git对象及独立全文件SHA256复核通过。391个safetensors张量范围完整，原Transformer/Pooling/Normalize三模块不改。既有网络失败保留，未换代理节点、未绕过访问限制；Windows未保存权重，尚未加载模型或运行NPU嵌入。
+  SHA256或Git对象及独立全文件SHA256复核通过。391个safetensors张量范围完整，原Transformer/Pooling/Normalize三模块不改。既有网络失败保留，未换代理节点、未绕过访问限制；Windows未保存权重。此获取阶段没有加载模型或运行NPU，后续原生验证独立记录于上项。
+- [x] 发布方原始reader配置已核对：此Qwen版本没有独立generation_config，显式从原config派生；作者预算fallback512不变。无效物理设备掩码、HOME满盘日志错误、缺配置及未触发的ST6
+  hook均有记录，最终只调整部署适配和私有目录；不改作者核心、数据或在用服务。旧零hook计数未追认为有效设备证明，最终直接检查输出NPU张量。
+- [ ] 精确当前软件CI工件、安装后的原生导航和最终交付闭环；原有完整600行/索引及固定3条研究回查证据复用，研究代码及默认依赖不改。详见[持续阶段证据](validation/dragon-original-preparation-20261028.json)。
 
 ### Video-MME-v2资产与原协议准备（尚未交付）
 
@@ -1052,7 +1055,7 @@ TB；服务器/data约1.42TB可用，未缩小语料。ChartQA当前两卡主机
 | STSB                       | [x] 已完成                                 | 原dev1500/test1379全量NPU编码与原评分通过；8628行保真、固定CI组件、三split公共回查/研究消费及安装后缓存重算通过。不含训练复现或生产检索流量。                                                                                                                                                                                                                                                                                                                                            |
 | DOCVQA                     | [x] 固定原生视觉问答可用                   | 六原文件5349题全字段/原图及引用索引、36实际CI研究回读；固定首3题NPU原生模板/图像处理/ANLS及独立保存复核完成，分数0.75/1/1。非全量模型评测或作者模型质量复现。[证据](validation/docvqa-original-native-delivery-20261027.json)                                                                                                                                                                                                                                                            |
 | CODEJUDGE_EVAL             | [x] 原生固定抽样可用                       | 六份发布原JSON共11160配置行核验/索引、18条原题NPU执行和独立评分/保存核验通过；实际CI工件独立安装及18条研究回读通过。[交付证据](validation/codejudge-original-native-delivery-20261027.json)。不是作者未发布regex或论文分数复现。                                                                                                                                                                                                                                                         |
-| DRAGON_PUBLIC              | [ ] 待开展                                 | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| DRAGON_PUBLIC              | [ ] 原生固定3题完成，待精确CI交付          | 完整542篇/1157分块的NPU嵌入、原MMR检索、3次reader与官方评分及保存审计通过；3次length保留，未作质量/性能结论。                                                                                                                                                                                                                                                                                                                                                                            |
 | TEMPORALWIKI               | [ ] 原软件/配置核验通过，原生未完成        | 177份原软件382667字节、13份AST及162份配置在服务器核验通过；原探针包620459字节整包SHA256已核验，8CSV全部35948原字段/索引和24条当前研究回读通过，实际CI工件60载荷亦独立安装核验；其他归档、模型/checkpoint及合格NPU原生评测仍待补，不改成Qwen聊天问答。                                                                                                                                                                                                                                    |
 | COPILOT_AGENT_2026         | [x] 原生元数据资产可用                     | 七日606分片/301026原会话全量核验和索引，49实际CI载荷与候选一致，42固定实际CI研究回读及3条公共smoke完成；不造prompt、不宣称请求回放。[证据](validation/copilot-2026-metadata-delivery-20261027.json)                                                                                                                                                                                                                                                                                      |
 | AZURE_LMM_2025             | [x] 服务轨迹元数据资产交付                 | 全100万行四字段保真/索引、47实际CI安装载荷、首3/末3研究回读完成；无原prompt/媒体，不造请求，不称视觉benchmark。见[回执](validation/azure-lmm-2025-asset-delivery-20261027.json)。                                                                                                                                                                                                                                                                                                        |
