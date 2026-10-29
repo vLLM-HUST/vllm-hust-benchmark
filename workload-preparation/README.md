@@ -735,6 +735,21 @@ python scripts/prepare_swebench_author_source.py \
 
 这只准备原软件，不安装、不启动容器、不调用模型。服务器实际原文件核验、独立客户端差量安装/依赖检查、原CLI帮助及原Docker环境类的隔离控制通过；原题Agent运行和评分尚未通过。后续按[官方SWE-bench入口](https://mini-swe-agent.com/latest/usage/swebench/)及[原Docker环境配置](https://mini-swe-agent.com/latest/reference/environments/docker/)接入；ARM镜像不能静默套用默认x86镜像名。本地NPU模型是部署适配，不是官方默认Claude的等价质量复现；原题、模板、步骤预算与测试应保持不变，安全隔离参数需单独核验。可信软件构建所用联网方式不得继承到生成代码的评分容器。
 
+原Agent调用入口（原题验证进行中，官方功能评分尚待完成）：
+
+```bash
+python scripts/run_swebench_original_agent.py \
+  --source-id SWE_VERIFIED --records-json /external/original-rows.json \
+  --agent-root /external/mini-swe-agent --harness-root /external/swebench-v410 \
+  --docker-url unix:///external/private-docker.sock \
+  --endpoint http://127.0.0.1:19501/v1 --model Qwen/Qwen3.5-9B \
+  --arch arm64 --output /external/new-agent-results
+```
+
+默认仅计划，不导入原Agent、不创建输出或容器、不调用模型。`original-rows.json`须为官方原始任务按原顺序、保留全部字段的JSON数组，不是抽取问题后重写的prompt；默认取前三题，`--all`保留全部输入题目。服务器复用此前从原Parquet取得的固定三题，不重新下载或替换题目。执行前须准备对应原仓库镜像、确认研究任务空闲并取得模型独占窗口，再追加`--execute`；输出目录必须是仓库外新目录。
+
+该入口直接调用固定官方`process_instance`，保留原模板、工具循环、250步预算、提交与轨迹，镜像绑定采用原框架支持的部署字段；参考补丁和测试不拼进模型任务。仅使用本地兼容模型接口，价格信息缺失不当作已测量成本。真实执行发现固定LiteLLM版本还需可选`mcp`运行时，服务器补入官方`mcp==2.3.0`及必要新依赖后，原有依赖版本不变、`pip check`通过；CLI帮助通过本身并不能发现这一运行时缺口。生成补丁或轨迹不代表测试通过，原生功能评分仍须单独完成，失败样本不得换题凑通过。
+
 ## DRAGON模型客户端与原生执行（固定前三题已验证）
 
 原作者独立示例含CUDA初始化，不能直接在NPU节点照搬执行。检索、原提示与评分核心可复用， 但必须另行验证NPU
