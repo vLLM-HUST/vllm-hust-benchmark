@@ -1,7 +1,7 @@
 # 数据集逐项验证清单
 
 当前交付
-**70/113项**，待完成43项，另5项仅分类。首批#432的60项和第二批#538的ScienceWorld已合入main；早期五个草稿已关闭为被汇总承接，历史和分支保留。第三批新增CodeJudge-Eval、DeepPlanning、OpenMath、OpenCode、MVBench、Video-MME、LiveCodeBench、BigCodeBench及Spider固定原生profile交付，尚未合入。OpenMath/OpenCode是训练语料原问题生成，不是独立质量benchmark。打勾不代表全量模型评测、高分或性能保证。
+**71/113项**，待完成42项，另5项仅分类。首批#432的60项和第二批#538的ScienceWorld已合入main；早期五个草稿已关闭为被汇总承接，历史和分支保留。第三批新增CodeJudge-Eval、DeepPlanning、OpenMath、OpenCode、MVBench、Video-MME、LiveCodeBench、BigCodeBench、Spider及DRAGON固定原生profile交付，尚未合入。OpenMath/OpenCode是训练语料原问题生成，不是独立质量benchmark。打勾不代表全量模型评测、高分或性能保证。
 
 ### LiveCodeBench（原生固定抽样交付完成；自修复显式兼容）
 
@@ -835,7 +835,7 @@ LMM
 - [ ] 可复用provider/index和精确工件研究消费；资产完整性不等于适配完成。
 - [ ] 原生NPU文本到波形合成与适用输出核验。发布方VITS候选模型尚未取得/固定，CUDA示例与旧依赖不能直接当作NPU环境；不以ASR或虚构MOS评分代替TTS。详见[阶段回执](validation/ljspeech-original-readiness-20261029.json)。
 
-### DRAGON原生NPU环境预检（未交付）
+### DRAGON原生RAG（固定原生抽样交付完成）
 
 - [x] 新增无模型加载的依赖预检，在服务器现有服务环境实际执行；torch_npu可发现，但缺sentence_transformers及三项LangChain组件，不把包存在等同NPU执行合格。
 - [x] 原示例CUDA专用初始化与可复用核心链路已核查；CLI默认top_k5/字符chunk1000/overlap100，核心使用完整语料的Chroma
@@ -846,7 +846,7 @@ LMM
   SHA256或Git对象及独立全文件SHA256复核通过。391个safetensors张量范围完整，原Transformer/Pooling/Normalize三模块不改。既有网络失败保留，未换代理节点、未绕过访问限制；Windows未保存权重。此获取阶段没有加载模型或运行NPU，后续原生验证独立记录于上项。
 - [x] 发布方原始reader配置已核对：此Qwen版本没有独立generation_config，显式从原config派生；作者预算fallback512不变。无效物理设备掩码、HOME满盘日志错误、缺配置及未触发的ST6
   hook均有记录，最终只调整部署适配和私有目录；不改作者核心、数据或在用服务。旧零hook计数未追认为有效设备证明，最终直接检查输出NPU张量。
-- [ ] 精确当前软件CI工件、安装后的原生导航和最终交付闭环；原有完整600行/索引及固定3条研究回查证据复用，研究代码及默认依赖不改。详见[持续阶段证据](validation/dragon-original-preparation-20261028.json)。
+- [x] 精确提交675b7da2的两项CI均成功；实际CI工件12890070997的67份载荷与Git对象、独立安装文件一致。原生入口/保存核验器与实际服务器执行代码字节相同，模型身份清单只补公开哈希误报注释。安装后的四类导航、全部600条原字段/索引和固定3条当前研究回读通过，0新增推理。来源总项按原生固定抽样交付打勾，不是全600或质量/性能完成；见[交付证据](validation/dragon-original-preparation-20261028.json)。
 
 ### Video-MME-v2资产与原协议准备（尚未交付）
 
@@ -1055,7 +1055,7 @@ TB；服务器/data约1.42TB可用，未缩小语料。ChartQA当前两卡主机
 | STSB                       | [x] 已完成                                 | 原dev1500/test1379全量NPU编码与原评分通过；8628行保真、固定CI组件、三split公共回查/研究消费及安装后缓存重算通过。不含训练复现或生产检索流量。                                                                                                                                                                                                                                                                                                                                            |
 | DOCVQA                     | [x] 固定原生视觉问答可用                   | 六原文件5349题全字段/原图及引用索引、36实际CI研究回读；固定首3题NPU原生模板/图像处理/ANLS及独立保存复核完成，分数0.75/1/1。非全量模型评测或作者模型质量复现。[证据](validation/docvqa-original-native-delivery-20261027.json)                                                                                                                                                                                                                                                            |
 | CODEJUDGE_EVAL             | [x] 原生固定抽样可用                       | 六份发布原JSON共11160配置行核验/索引、18条原题NPU执行和独立评分/保存核验通过；实际CI工件独立安装及18条研究回读通过。[交付证据](validation/codejudge-original-native-delivery-20261027.json)。不是作者未发布regex或论文分数复现。                                                                                                                                                                                                                                                         |
-| DRAGON_PUBLIC              | [ ] 原生固定3题完成，待精确CI交付          | 完整542篇/1157分块的NPU嵌入、原MMR检索、3次reader与官方评分及保存审计通过；3次length保留，未作质量/性能结论。                                                                                                                                                                                                                                                                                                                                                                            |
+| DRAGON_PUBLIC              | [x] 固定原生抽样交付完成                   | 完整542篇/1157分块的NPU嵌入、原MMR/提示/官方评分和保存审计通过；实际CI67载荷及原600行/索引/固定3条研究回读通过。3次原512预算length保留，不是正确作答、全600或质量/性能结论。[回执](validation/dragon-original-preparation-20261028.json)。                                                                                                                                                                                                                                               |
 | TEMPORALWIKI               | [ ] 原软件/配置核验通过，原生未完成        | 177份原软件382667字节、13份AST及162份配置在服务器核验通过；原探针包620459字节整包SHA256已核验，8CSV全部35948原字段/索引和24条当前研究回读通过，实际CI工件60载荷亦独立安装核验；其他归档、模型/checkpoint及合格NPU原生评测仍待补，不改成Qwen聊天问答。                                                                                                                                                                                                                                    |
 | COPILOT_AGENT_2026         | [x] 原生元数据资产可用                     | 七日606分片/301026原会话全量核验和索引，49实际CI载荷与候选一致，42固定实际CI研究回读及3条公共smoke完成；不造prompt、不宣称请求回放。[证据](validation/copilot-2026-metadata-delivery-20261027.json)                                                                                                                                                                                                                                                                                      |
 | AZURE_LMM_2025             | [x] 服务轨迹元数据资产交付                 | 全100万行四字段保真/索引、47实际CI安装载荷、首3/末3研究回读完成；无原prompt/媒体，不造请求，不称视觉benchmark。见[回执](validation/azure-lmm-2025-asset-delivery-20261027.json)。                                                                                                                                                                                                                                                                                                        |

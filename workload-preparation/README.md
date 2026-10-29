@@ -775,7 +775,7 @@ CLI的无额外doc/query指令配置，不混称另一套YAML的k20/chunk500配�
 
 固定原前三题已在Ascend NPU完成：完整542篇/1157原分块，E5编码结果直接核验为NPU张量，现有Qwen3.5-9B
 reader完成3次原提示请求和官方评分。3次均为原512预算下的length终止，原样保留，不代表正确作答或模型质量复现；这不是未经修改的CUDA
-CLI。完整请求/响应、检索ID、原生编码结果及官方评分保留服务器，未纳入Git。精确CI工件与最终交付闭环完成前，来源总勾仍不打上。
+CLI。完整请求/响应、检索ID、原生编码结果及官方评分保留服务器，未纳入Git。提交675b7da2的两项CI均成功；实际工件67份载荷、安装导航、全部600行原字段/索引及固定3条当前研究回读通过，原生入口和保存核验器与服务器执行源码字节一致。来源已按固定原生抽样交付打勾，不是全600推理、质量或性能验收。
 
 无推理复核入口为`python scripts/verify_dragon_original_saved.py --native-root /external/runs/dragon-first3 --author-root /external/dragon-author --data-root /external/dragon-original --reader-root /external/models/reader --output /external/audits/dragon-first3.json`。它逐字节匹配原完整模板、问题、检索分块及ID，核对全部原生编码输入/向量、原响应与原答案，调用原评分器并与保存评分比较；不会重跑嵌入、检索或reader，也不把length输出改成通过。
 

@@ -2999,11 +2999,11 @@
     "DRAGON_PUBLIC": {
       "scope": "public",
       "delivery_kind": "review_original_source_protocol",
-      "status": "IN_PROGRESS",
-      "checked": false,
+      "status": "AVAILABLE",
+      "checked": true,
       "legacy_checked": false,
       "existing_receipt": null,
-      "delivery_receipt": null,
+      "delivery_receipt": "docs/workload-data/validation/dragon-original-preparation-20261028.json",
       "public_asset_preparer":"scripts/prepare_reused_research_assets.py",
       "author_source_preparer":"scripts/prepare_jsonschemabench_author_source.py --source dragon",
       "preparation_receipt":"docs/workload-data/validation/dragon-original-preparation-20261028.json",
@@ -3019,9 +3019,11 @@
       "native_embedding_execution_verified": true,
       "native_entrypoint": "scripts/run_dragon_original.py",
       "saved_output_verifier": "scripts/verify_dragon_original_saved.py",
-      "fixed_original_native_result": {"questions": 3, "complete_corpus_documents": 542, "original_chunks": 1157, "npu_embedding_encode_calls": 5, "reader_calls": 3, "reader_finish_reasons": ["length", "length", "length"], "official_scored_and_saved_audited": true, "quality_or_performance_claim": false, "exact_current_ci_delivery_pending": true},
+      "fixed_original_native_result": {"questions": 3, "complete_corpus_documents": 542, "original_chunks": 1157, "npu_embedding_encode_calls": 5, "reader_calls": 3, "reader_finish_reasons": ["length", "length", "length"], "official_scored_and_saved_audited": true, "quality_or_performance_claim": false, "exact_current_ci_delivery_pending": false},
+      "current_fixed_ci_delivery": {"commit": "675b7da22ead83fcb2a685acb280b09c28394e25", "commit_note": "pragma: allowlist secret - successful public native execution source", "artifact_id": 12890070997, "installed_payloads": 67, "original_rows_and_index_rows": 600, "fixed_research_roundtrips": 3, "native_code_and_saved_verifier_exact_server_blobs": true, "new_model_calls": 0},
       "cpu_model_fallback_permitted": false,
-      "blocker": "Fixed original3 native tasks and saved audit complete with full542-document/1157-chunk corpus, actual NPU encoder and original Chroma MMR/reader prompts/official scoring. Three512-token length outputs retained, not quality/performance success. New public execution/audit/navigation and exact current CI delivery closure remain pending. All four original same-tag files, original600-field/index and3 research readbacks already verified through actual prior CI wheel; reuse them after payload-compatibility audit, not model reruns. No fabricated update events, CPU model fallback or research default dependency change."
+      "blocker": null,
+      "scope_limits": "Fixed original3 only, with complete542-document/1157-chunk original corpus and original standalone Chroma MMR/prompt/scorer. All3 reader outputs end at original512 budget and are retained; availability is not correct answers, full600 quality, performance or update-event validation. Explicit NPU/existing-reader transport, not unchanged CUDA CLI; no CPU model inference or research default dependency change."
     },
     "TEMPORALWIKI": {
       "scope": "public",

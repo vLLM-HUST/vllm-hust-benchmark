@@ -1,6 +1,7 @@
 """Tiny saved-protocol fixtures; no dataset, tokenizer/model import or NPU use."""
 
 import importlib.util
+import json
 from pathlib import Path
 import sys
 
@@ -13,6 +14,38 @@ spec = importlib.util.spec_from_file_location(
 )
 runner = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(runner)
+
+
+def test_source_delivery_requires_native_and_exact_ci_handoff_not_good_answers():
+    receipt = json.loads(
+        (
+            SCRIPTS.parent
+            / "docs/workload-data/validation/dragon-original-preparation-20261028.json"
+        ).read_text("utf-8")
+    )
+    assert receipt["source_checkbox_eligible"]
+    native = receipt["fixed_original_native_20261029"]
+    assert native["original_question_ids"] == [0, 1, 2]
+    assert native["original_corpus_documents"] == 542
+    assert native["reader_actual_calls"] == 3
+    assert native["reader_finish_reasons"] == ["length"] * 3
+    assert native["all_parameters_and_returned_embedding_tensors_verified_on_npu"]
+    assert native["official_saved_scores_recomputed_equal"]
+    ci = receipt["current_native_delivery_ci_20261029"]
+    assert ci["main_ci_conclusion"] == ci["cpu_correctness_conclusion"] == "success"
+    assert ci["original_rows_and_index_rows_verified"] == 600
+    assert ci["fixed_public_current_research_roundtrips"] == 3
+    assert ci["native_and_saved_verifier_sources_equal_executed_server_blobs"]
+    assert ci["new_model_calls"] == 0
+    ledger = json.loads(
+        (
+            SCRIPTS.parent / "docs/workload-data/dataset-validation-status.json"
+        ).read_text("utf-8")
+    )["delivery_inventory"]["DRAGON_PUBLIC"]
+    assert ledger["checked"] and ledger["status"] == "AVAILABLE"
+    assert ledger["delivery_receipt"].endswith(
+        "dragon-original-preparation-20261028.json"
+    )
 
 
 def test_original_chunks_match_in_original_id_order_without_dedup():
