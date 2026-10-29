@@ -17,12 +17,24 @@ def test_spider_archive_acquisition_is_not_native_delivery_or_publisher_digest()
     assert receipt["archive"]["bytes"] == 205800266
     assert receipt["archive"]["all_archive_crc_verified"]
     assert not receipt["archive"]["publisher_published_checksum_available"]
-    assert not receipt["archive"]["extracted"]
+    assert receipt["archive"]["extracted"]
     assert receipt["official_test_suite_database_archive_acquired_and_verified"]
     assert receipt["test_suite_archive"]["bytes"] == 1269456098
     assert receipt["test_suite_archive"]["all_archive_crc_verified"]
     assert not receipt["test_suite_archive"]["publisher_published_checksum_available"]
-    assert not receipt["test_suite_archive"]["extracted"]
+    assert receipt["test_suite_archive"]["extracted"]
+    assert receipt["materialization"]["original_database_namespaces"] == {
+        "database": 166,
+        "test_database": 206,
+    }
+    assert receipt["materialization"][
+        "same_db_ids_not_collapsed_across_original_namespaces"
+    ]
+    assert receipt["all11840_original_question_schema_and_db_file_links_verified"]
+    assert receipt["official_public_dev_suite_coverage"][
+        "all20_official_suites_present"
+    ]
+    assert not receipt["native_input_adapter_and_official_test_suite_scoring_verified"]
     assert (
         receipt["model_calls"]
         == receipt["scorer_calls"]

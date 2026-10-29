@@ -772,11 +772,12 @@ LMM
 - [x] HTML、Canvas、Markdown六组协议各固定前三题已完成原生生成、隔离渲染和完整VQA；18道原题、36次stop调用、158对原问答保留，十个原字段、实际提示、原提取代码与裁判图片字节独立核验。Canvas三题VQA均0、原最终0.29/0.3/0.3如实保留，不换题凑分。
 - [x] Text-to-HTML全50道原题已完成；前三题复用、新增47题，合计100次调用均stop，345对原VQA、原字段、提示、提取代码和实际裁判图片字节独立核验。
 - [x] Markdown-to-HTML全50道原题已完成；前三题复用、新增47题，合计100次stop调用、439对原VQA，原字段、提示、提取代码和实际裁判图片字节独立核验；原转义警告及回退保留，不修补生成。
-- [ ] 上述其他四组剩余173道原题；复用有效前三题，不将固定抽样扩大宣称为全协议完成。
+- [x] React-to-HTML全45道原题已完成；前三题复用、新增42题，90次stop调用、408对原VQA、十个原字段/提示/提取代码/实际裁判图片字节独立核验，不重跑有效前三题。
+- [ ] 上述其他三组剩余131道原题；复用有效前三题，不将固定抽样扩大宣称为全协议完成。
 - [x] 原LaTeX/TikZ渲染器公共分派和配方已通过五项隔离CPU控制：片段、完整文档、LuaLaTeX、缺失文档类0/缺图、Matplotlib兼容。非root/只读/断网软件核验通过，原dpi300/45秒预算、引擎回退和首PDF页转换不改。
 - [ ] Text-to-Latex、Text-to-Tikz、Matplotlib-to-TikZ共200道原题及完整VQA；环境/控制通过不计原题或来源完成。
 - [x] Text-to-SVG全50题已完成原生生成、隔离渲染及完整VQA：前三题复用，新增47题，合计100次模型调用均stop；原字段、原提取代码关系、397个原问答对和实际裁判图片字节已独立核验，未重跑有效前三题。
-- [ ] 其他21种部分或尚未覆盖渲染协议及完整来源交付；当前累计1162条原题核验，剩余873条（含上述173条和200条），另三道Typst失败分支不计新增完成，来源保持未打勾。
+- [ ] 其他20种部分或尚未覆盖渲染协议及完整来源交付；当前累计1204条原题核验，剩余831条（含上述131条和200条），另三道Typst失败分支不计新增完成，来源保持未打勾。
 
 以上使用[原阶段回执](validation/structeval-nonrender-checkpoint3-20261025.json)记录；前三项是证据复用与数据链路核验，不是整套原生benchmark完成。
 
@@ -785,7 +786,9 @@ LMM
 - [x] 复用此前固定官方协议来源记录；原作者GoogleDrive数据包已在服务器取得，205800266字节、2234文件、ZIP
   CRC通过，Windows无原数据落盘。SHA256仅为接收端观察值，不冒称发布方校验和。
 - [x] 官方Test Suite数据库原包已取得，1269456098字节、3944文件、全部ZIP CRC通过；原包保留，未重新下载已完成数据包。
-- [ ] 两原包的边界受控解压、原题/完整schema/SQL/数据库关系核验；规范JSON目录盘点不等于完成原生适配。
+- [x] 两原包在新目录完成受控解压，6178文件/约6.99GB；原包不变。全11840条原记录与原schema/SQLite文件关联核验，372份原数据库文件头/哈希核验；166/206两个原目录同名DB不合并。
+- [ ] 物理SQLite schema、原SQL及实际官方评分核验：公开dev的20个DB均有测试套件；public
+  test使用的40个DB无对应套件，不以单库评分替代。文件关联不等于SQL/模型执行完成。
 - [ ] NPU原题生成、隔离运行原Test Suite
   Accuracy及固定消费闭环；不以旧单库执行或字符串一致替代。[阶段回执](validation/spider-original-preparation-20261029.json)只计获取，不计原生完成。
 
@@ -981,7 +984,7 @@ TB；服务器/data约1.42TB可用，未缩小语料。ChartQA当前两卡主机
 | LONGALPACA                 | [x] 原始指令语料使用已交付                 | 原12000条全部字段/索引和12处固定工件公共/研究回查，补回3231条file来源标识于非输入侧；固定原0..2与7324..7326共6题NPU执行并核验，6 stop，含2条原非空input。[证据](validation/longalpaca-native-delivery-20261026.json)。构造训练语料而非独立质量benchmark，不称全量生成、训练复现或每条均为文档分析。                                                                                                                                                                                      |
 | TOOLACE                    | [x] 有界原始历史续写可用                   | 全11300条原system/对话字段及索引、首尾6条固定工件公共/研究回查；原三会话全部15处NPU续写正常stop。[证据](validation/toolace-original-continuation-20261026.json)；原历史tool返回保留、不造工具/ID；无在线Agent/BFCL/ToolACE-8B复现或全量模型推理承诺。                                                                                                                                                                                                                                    |
 | DUREADER                   | [x] 原demo原生交付完成                     | 原dev100题/453文档完整NPU生成、五种原评分分支与保存输入/响应复核；94条预测格式有效、6条格式错误保留。200题/916文档保真及12处固定工件公共/研究消费复用。[交付证据](validation/dureader-native-delivery-20261026.json)。是Qwen生成式替代配置，不是作者旧基线或完整DuReader/Zhidao；无效Depends/ROUGE-L不填0。                                                                                                                                                                              |
-| SPIDER                     | [ ] 两官方原包CRC通过；原生待补            | 原数据包约206MB、官方测试套件约1.27GB均在服务器取得并通过全部ZIP CRC，本地无原数据。尚缺受控解压、题目/schema/SQL/DB绑定、NPU原生生成、隔离官方Test Suite Accuracy及消费闭环。观察SHA不冒称厂商摘要。[阶段证据](validation/spider-original-preparation-20261029.json)，不计完成。                                                                                                                                                                                                        |
+| SPIDER                     | [ ] 原包/解压/文件关联完成；原生待补       | 两官方原包CRC和受控解压完成，11840记录/schema/数据库文件关联核验，两个同名DB目录不混合。尚缺物理schema/原SQL、公开dev原Test Suite Accuracy、NPU生成、公共适配及消费。public test缺对应套件，不冒称已评分。[阶段证据](validation/spider-original-preparation-20261029.json)。                                                                                                                                                                                                             |
 | NATURALQUESTIONS           | [x] NQ-open原任务已交付                    | 原dev3610题纯文本全量NPU生成/评分，原生聊天模式另3题；91535条索引、12处固定工件公共/研究回查及干净客户端重评分通过；[交付证据](validation/nq-open-native-delivery-20261026.json)。低分与空输出保留，两profile不混分，不是完整NQ文档、RAG或质量通过。                                                                                                                                                                                                                                     |
 | MULTIAGENTBENCH            | [ ] 待开展                                 | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 | DEEPPLANNING               | [x] 五类原生样本及实际CI/研究消费闭环      | 购物三级、英文/中文旅行共5个profile各原前三题，合计15题原生执行/评分及保存审计通过；360条原字段/索引及15条当前研究回读经实际CI包复核。436次SDK尝试与414条保存消息分记；失败/零分保留，不宣称360题模型全跑或性能。[交付证据](validation/deepplanning-original-native-delivery-20261028.json)                                                                                                                                                                                              |

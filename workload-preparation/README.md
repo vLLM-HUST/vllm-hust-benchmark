@@ -568,7 +568,7 @@ ARM64环境，不据此宣称其他架构已运行。
 
 隔离端`--renderer`须指向对应原`render_html.py`、`render_canvas.py`或`render_markdown.py`；同目录保留原`render_utils.py`，Canvas/Markdown还须有原`render_html.py`，均固定哈希、只读装入。Canvas原函数把输入嵌入其JavaScript包装，Markdown按作者默认转换器生成HTML；不增加代码修补、替代包装或Markdown扩展。资源门禁覆盖被内部调用的HTML浏览器工厂，不仅检查外层函数。
 
-三种格式的正常1、空输入0、外部HTTP/S资产阻塞，以及SVG兼容性，共10项CPU隔离控制已通过。其后六组协议各固定前三题实际完成18道原题、36次模型调用、158对完整VQA；Canvas三题VQA均0，原最终分0.29/0.3/0.3如实保留。Text-to-HTML和Markdown-to-HTML各另执行剩余47题；每组与有效前三题合计50题、100次stop调用，分别345/439对原VQA。原字段、提示、提取代码及实际裁判图片字节独立核验，原转义警告与回退保留，不修补生成。其他四组剩余173题尚未计为完成。控制夹具不计原题，既有有效原题不重跑，整个StructEval来源仍未勾选。
+三种格式的正常1、空输入0、外部HTTP/S资产阻塞，以及SVG兼容性，共10项CPU隔离控制已通过。其后六组协议各固定前三题实际完成18道原题、36次模型调用、158对完整VQA；Canvas三题VQA均0，原最终分0.29/0.3/0.3如实保留。Text-to-HTML和Markdown-to-HTML各另执行剩余47题，每组累计50题/100次stop调用，分别345/439对原VQA；React-to-HTML另执行剩余42题，累计45题/90次stop调用/408对原VQA。原字段、提示、提取代码及实际裁判图片字节独立核验，原转义警告与回退保留，不修补生成。其他三组剩余131题尚未计为完成。控制夹具不计原题，既有有效原题不重跑，整个StructEval来源仍未勾选。
 
 ### StructEval LaTeX/TikZ 编译入口
 

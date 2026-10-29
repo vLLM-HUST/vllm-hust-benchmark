@@ -1,6 +1,6 @@
 {
   "source_id": "SPIDER",
-  "status": "BOTH_OFFICIAL_ARCHIVES_ACQUIRED_CRC_VERIFIED_NATIVE_PENDING",
+  "status": "ORIGINAL_ASSETS_MATERIALIZED_AND_FILE_LINKS_VERIFIED_NATIVE_PENDING",
   "archive": {
     "publisher_public_file_id": "1403EGqzIDoHMdQF4c9Bkyl7dZLZ5Wt6J", "id_note": "pragma: allowlist secret - public official author Drive file id",
     "path": "spider_data.zip",
@@ -12,7 +12,7 @@
     "uncompressed_bytes": 1834243872,
     "all_archive_crc_verified": true,
     "archive_paths_and_symlinks_checked": true,
-    "extracted": false
+    "extracted": true
   },
   "server_receipt": "/data/shared_upload/hust-phr/workload-benchmark-native-delivery-20261024/spider-original-data-32028-002/dataset-preparation-public.json",
   "server_receipt_sha256": "ef5622d8b11724a26365f735b02df3e7eb526361f734fae38159208895dee7db", "receipt_note": "pragma: allowlist secret - public acquisition metadata digest",
@@ -28,10 +28,28 @@
     "files": 3944,
     "uncompressed_bytes": 5155457198,
     "all_archive_crc_verified": true,
-    "extracted": false
+    "extracted": true
   },
   "original_json_member_inventory_not_database_binding": {"train_spider.json": 7000, "train_others.json": 1659, "dev.json": 1034, "test.json": 2147, "tables.json": 166, "test_tables.json": 206},
-  "canonical_member_note": "Canonical publisher JSONs parsed for inventory only. AppleDouble resource-fork entries under __MACOSX are not JSON task files; original archive retained unchanged. All question/schema/database relations and SQL scoring still pending.",
+  "canonical_member_note": "All canonical publisher JSONs bound to their original schema and database files. AppleDouble entries under __MACOSX are not JSON tasks; archives retained unchanged. Physical SQLite schema/query semantics and official scoring remain unverified.",
+  "materialization": {
+    "materialized_files": 6178,
+    "uncompressed_bytes": 6989701070,
+    "original_archives_unchanged": true,
+    "fresh_bounded_directory_and_path_guards_verified": true,
+    "original_sqlite_files": 372,
+    "original_database_namespaces": {"database": 166, "test_database": 206},
+    "same_db_ids_not_collapsed_across_original_namespaces": true,
+    "official_test_suite_sqlite_files": 3194,
+    "receipt": "/data/shared_upload/hust-phr/workload-benchmark-native-delivery-20261024/spider-official-extracted-32028-001/preparation-public.json",
+    "receipt_sha256": "d20a783a6c312d941c9ba7d117b47871ab5a33b4e08f699826ae841efddc157e", "identity_note": "pragma: allowlist secret - public extraction metadata digest"
+  },
+  "all11840_original_question_schema_and_db_file_links_verified": true,
+  "original_db_file_headers_and_sha256_verified": true,
+  "binding_audit": "/data/shared_upload/hust-phr/workload-benchmark-native-delivery-20261024/spider-official-extracted-32028-001/binding-audit-public.json",
+  "binding_audit_sha256": "b5a0457e505d37c875992842378f9c43818bb18dcad1dbf8ef60ce63d13dfcec", "binding_note": "pragma: allowlist secret - public file-link audit digest",
+  "official_public_dev_suite_coverage": {"original_dev_rows": 1034, "original_databases": 20, "all20_official_suites_present": true},
+  "other_split_boundary": "Training records and2147 public test records remain original data assets. The40 database IDs used by public test have no corresponding distilled suites in this official archive; do not replace with single-DB execution and call it official Test Suite Accuracy.",
   "original_questions_schema_and_database_relations_verified": false,
   "native_input_adapter_and_official_test_suite_scoring_verified": false,
   "installed_artifact_public_research_handoff_verified": false,
@@ -42,5 +60,5 @@
   "source_checkbox_eligible": false,
   "native_metric_required": "Unchanged official Test Suite Accuracy; no substitution with string equality or original single-database execution accuracy.",
   "transport_failure_retained": "First test-suite sender ended BrokenPipe with an owned receiver still waiting for an unflushed header, no test-suite destination/partial created. Only that exact PID/birth receiver terminated after identity checks. Immediate header flush, smaller stream chunks and per-session SSH keepalive allowed successful same-source transfer. Completed dataset archive and model/native jobs were not stopped or repeated.",
-  "boundary": "Acquisition only. Both official original archives now exist with full CRC checks; preserve receipts and do not blindly redownload. Bounded extraction, complete original fields/SQL/database binding, actual NPU generation, isolated official scoring and fixed consumer closure remain pending. No raw data redistributed."
+  "boundary": "Asset materialization and file-link preparation only. Both archives remain unchanged; preserve receipts and do not redownload/re-extract. Original SQL and physical schema execution, public adapter, actual NPU generation, isolated official dev Test Suite Accuracy and fixed consumer closure remain pending. No raw data redistributed."
 }
