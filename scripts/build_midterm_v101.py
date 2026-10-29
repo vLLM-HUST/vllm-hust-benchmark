@@ -206,6 +206,7 @@ def build(revision, read):
         )
     ]
     for section in data["sections"]:
+        prior_scope = {key: section.get(key, "") for key in ("scope", "scope_en")}
         if section["id"] in {
             "corrected-quality",
             "milestone-v15",
@@ -214,6 +215,10 @@ def build(revision, read):
         }:
             section.update(scope=note(), scope_en=note(True))
             section["evidence"] = links + section["evidence"]
+        if section["id"] == "v15-remaining":
+            for key, marker in (("scope", " 成本采用"), ("scope_en", " Cost uses")):
+                assert marker in prior_scope[key]
+                section[key] += marker + prior_scope[key].split(marker, 1)[1]
         if section["id"] == "milestone-v15":
             for key, english in (("tables", False), ("tables_en", True)):
                 for table in section[key]:
