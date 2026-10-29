@@ -46,12 +46,17 @@ def test_same_run_reanalysis_and_null_reference(monkeypatch):
             )
     old = json.loads(read("website-publication/data/midterm-v099.json"))
     for key in (
-        "paired_own_compute",
-        "corrected_quality",
         "swe_incremental_tasks",
         "terminal_circuit_original_model",
     ):
         assert data[key] == old[key]
+    for arm in ("B0", "B1"):
+        row = data["paired_own_compute"]["rows"][arm]
+        for key in ("F", "T_seconds", "chips", "C_TFLOPS_per_chip"):
+            assert row[key] == old["paired_own_compute"]["rows"][arm][key]
+        assert row["attainment"] is None
+    assert data["corrected_quality"]["quality"] == old["corrected_quality"]["quality"]
+    assert data["corrected_quality"]["reference"]["eta_percent"] is None
     assert raw["B1"]["eta_target_met"] is True  # preserved historical record
     assert hashlib.sha256(read(b.OLD_REPORT)).hexdigest() == old["report_sha256"]
 

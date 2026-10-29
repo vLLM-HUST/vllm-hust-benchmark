@@ -78,6 +78,25 @@ def derive(raw):
     return current
 
 
+def revise_pair(pair, current):
+    pair = copy.deepcopy(pair)
+    pair.update(
+        status="own_F_T_C_recomputed_reference_under_revision",
+        reference_method_status=current["status"],
+        wholechain_reference=current,
+        scope=note(True),
+    )
+    for target in (pair, *pair["rows"].values()):
+        for key in (
+            "reference_seconds",
+            "reference_tflops_per_chip",
+            "eta_percent",
+            "attainment",
+        ):
+            target[key] = None
+    return pair
+
+
 def revise_method(method, current):
     method = copy.deepcopy(method)
     method.update(
@@ -97,6 +116,7 @@ def revise_method(method, current):
     ):
         method["current"][key] = None
     method["reference_closure"] = {"status": "historical_only", "path": OLD_METHOD}
+    method["paired_own_compute"] = revise_pair(method["paired_own_compute"], current)
     method["requirements"]["reference"] = {
         "status": current["status"],
         "path": FOLDER + "/method.md",
@@ -164,6 +184,13 @@ def build(revision, read):
         m01_method=method,
     )
     data["current_summary"]["reference"] = current
+    data["paired_own_compute"] = revise_pair(data["paired_own_compute"], current)
+    quality_reference = data["corrected_quality"]["reference"]
+    for key in ("C_ref_TFLOPS_per_chip", "T_ref_seconds", "eta_percent", "attainment"):
+        quality_reference[key] = None
+    quality_reference.update(
+        status=current["status"], current_result_path=FOLDER + "/summary.json"
+    )
     data["milestone_contract"]["method"] = method
     data["milestone_contract"]["method_source"] = {
         "path": BASE + "/current-method.json",
