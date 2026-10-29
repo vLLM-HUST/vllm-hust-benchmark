@@ -434,7 +434,10 @@ records = iter_workload("DRAGON_PUBLIC", data_root=Path("/external/dragon-origin
 - [x] 官方0.1.3.post1核心客户端已在服务器Linux
   aarch64、完整CPython3.11.17隔离环境安装；官方`appworld install`、依赖一致性检查和CLI帮助均成功，83个安装发行包。受保护代码仅解包到服务器私有环境，未放入Git。
 - [x] 官方`appworld download data`取得14696文件、169528045字节，全部留在服务器；公共只读入口复用同一数据验证train90、dev57、test_normal168、test_challenge417，共732项原任务的划分ID和目录关系，无重下、无改题。[数据准备证据](validation/appworld-original-data-preparation-20261028.json)
-- [ ] 合格的任务隔离环境、原生Agent任务执行及官方评分仍待完成；安装和数据读取不代表原生benchmark跑通。无新增模型调用。[核心客户端准备证据](validation/appworld-core-client-preparation-20261028.json)
+- [ ] 交付闭环尚未完成。后续历史执行记录已包含固定三条原任务的隔离ReAct执行、140次模型请求及官方评分输出；三条任务均未成功，失败结果保留，不以换题或重跑提高分数。尚需复核原输出中的环境异常、公开入口与既有执行协议的一致性，并完成研究消费入口的原始任务与参考资产回查，不能用安装、读取或夹具测试替代这些验证。[核心客户端准备证据](validation/appworld-core-client-preparation-20261028.json)
+
+2026-10-30只读复核：原专用CPU
+Pod已不存在（Kubernetes返回`NotFound`），但本任务原持久卷仍为`Bound`，UID与既有记录一致。因此不能认定历史数据丢失，也不能认定旧进程仍在运行；恢复自有工作区后，应先从持久卷回查既有结果，不重复下载或执行原任务。本次未挂载卷、未修改平台配置、未新增模型调用，AppWorld保持未勾选。
 
 公共入口：`python scripts/prepare_appworld_runtime.py --output <仓库外新目录> --uv <已有uv> --python <完整Python3.11>`默认只输出计划。显式加`--execute --install-protected-code`才安装官方包并在私有环境解包；可用`--uv-cache <已有自有软件缓存>`避免重复下载。工具将`APPWORLD_ROOT`、`APPWORLD_CACHE`及临时目录都指向外部目录，不改HOME或模型服务环境。该版本声明范围安装不是作者冻结锁；ARM需要Python.h。历史缺头文件和根盘缓存失败均保留，未删数据掩盖失败。
 
@@ -1205,6 +1208,8 @@ TB；服务器/data约1.42TB可用，未缩小语料。ChartQA当前两卡主机
 - [ ] LONGBENCH/Qasper：研究端精确工件交接仍待复核；原197题续跑和官方评分已完成，不再列作原生缺口。来源整体未因此提前打勾，也不扩称其它LongBench子集。
 
 #### ScienceAgentBench verified版原生链路准备
+
+2026-10-30复查：固定官方README指向的`benchmark_verified.zip`分享链接在匿名访问（含官方分享下载参数）下返回HTTP401，未取得文件。只记录访问阻塞，不使用旧版资产替代、不绕过授权，也不将102题元数据与预览算作原生执行完成；继续推进其他来源。
 
 数据沿用`osunlp/ScienceAgentBench@9c6e96c9e74572e979b0930ee735041cef528cb7`的原`verified`文件，102题；代码固定为`OSU-NLP-Group/ScienceAgentBench@c26e151ed601ba109dc4d35e057ff8e73fec469d`。原适配保留task_inst、domain_knowledge、dataset_folder_tree和dataset_preview；gold_program_name与eval_script_name仅作参考，其余instance/domain/源码及输出路径字段保留元数据。不要把整个envelope或参考侧直接当模型输入。
 
