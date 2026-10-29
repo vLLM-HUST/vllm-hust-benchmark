@@ -733,22 +733,50 @@ python scripts/prepare_swebench_author_source.py \
   --archive /external/official-mini-agent-source.tar.gz --action prepare
 ```
 
-这只准备原软件，不安装、不启动容器、不调用模型。服务器实际原文件核验、独立客户端差量安装/依赖检查、原CLI帮助及原Docker环境类的隔离控制通过；原题Agent运行和评分尚未通过。后续按[官方SWE-bench入口](https://mini-swe-agent.com/latest/usage/swebench/)及[原Docker环境配置](https://mini-swe-agent.com/latest/reference/environments/docker/)接入；ARM镜像不能静默套用默认x86镜像名。本地NPU模型是部署适配，不是官方默认Claude的等价质量复现；原题、模板、步骤预算与测试应保持不变，安全隔离参数需单独核验。可信软件构建所用联网方式不得继承到生成代码的评分容器。
+这只准备原软件，不安装、不启动容器、不调用模型。服务器实际原文件核验、独立客户端差量安装/依赖检查、原CLI帮助及原Docker环境类的隔离控制通过；原题Agent和评分的固定抽样结果见下文，不能将软件准备等同任务执行。后续按[官方SWE-bench入口](https://mini-swe-agent.com/latest/usage/swebench/)及[原Docker环境配置](https://mini-swe-agent.com/latest/reference/environments/docker/)接入；ARM镜像不能静默套用默认x86镜像名。本地NPU模型是部署适配，不是官方默认Claude的等价质量复现；原题、模板、步骤预算与测试应保持不变，安全隔离参数需单独核验。可信软件构建所用联网方式不得继承到生成代码的评分容器。
 
-原Agent调用入口（原题验证进行中，官方功能评分尚待完成）：
+原生执行分为原仓库镜像准备、官方Agent、官方功能评分三个入口。原v4.1.0镜像CLI没有架构参数且默认x86_64；本入口显式使用其原生`make_test_spec(..., arch=...)`与原构建器，不改Dockerfile、安装脚本或任务。示例使用同一份原始Parquet，不要求自行抽取问题或构造prompt：
+
+```bash
+python scripts/prepare_swebench_original_images.py \
+  --source-id SWE_VERIFIED --records-file /external/original.parquet \
+  --harness-root /external/swebench-v410 --arch arm64 \
+  --docker-url unix:///external/private-docker.sock \
+  --output /external/new-image-preparation
+```
+
+默认仅计划；追加`--execute`才准备镜像，并复用已有镜像，不强制重建或清理。仅在可信软件构建确有网络需要时指定`--build-network host`，不改变Docker全局网络，更不用于生成代码的运行容器。服务器原镜像冷构建已完成；该公共入口又实际复用三份镜像通过检查、构建API调用为0，不把缓存检查冒称再次冷构建。
 
 ```bash
 python scripts/run_swebench_original_agent.py \
-  --source-id SWE_VERIFIED --records-json /external/original-rows.json \
+  --source-id SWE_VERIFIED --records-file /external/original.parquet \
   --agent-root /external/mini-swe-agent --harness-root /external/swebench-v410 \
   --docker-url unix:///external/private-docker.sock \
   --endpoint http://127.0.0.1:19501/v1 --model Qwen/Qwen3.5-9B \
   --arch arm64 --output /external/new-agent-results
 ```
 
-默认仅计划，不导入原Agent、不创建输出或容器、不调用模型。`original-rows.json`须为官方原始任务按原顺序、保留全部字段的JSON数组，不是抽取问题后重写的prompt；默认取前三题，`--all`保留全部输入题目。服务器复用此前从原Parquet取得的固定三题，不重新下载或替换题目。执行前须准备对应原仓库镜像、确认研究任务空闲并取得模型独占窗口，再追加`--execute`；输出目录必须是仓库外新目录。
+默认仅计划，不导入原Agent、不创建输出或容器、不调用模型。`--records-file`支持原Parquet与原字段JSON数组，旧`--records-json`参数仍可用；不是抽取问题后重写的prompt。默认取原物理顺序前三题，`--all`保留全部输入题目。Parquet入口已实测全部500条/13字段与原文件逐值一致，前三题导出字节与实际原生运行的JSON快照完全相同。执行前须准备对应原仓库镜像、确认研究任务空闲并取得模型独占窗口，再追加`--execute`；输出目录必须是仓库外新目录。
 
-该入口直接调用固定官方`process_instance`，保留原模板、工具循环、250步预算、提交与轨迹，镜像绑定采用原框架支持的部署字段；参考补丁和测试不拼进模型任务。仅使用本地兼容模型接口，价格信息缺失不当作已测量成本。真实执行发现固定LiteLLM版本还需可选`mcp`运行时，服务器补入官方`mcp==2.3.0`及必要新依赖后，原有依赖版本不变、`pip check`通过；CLI帮助通过本身并不能发现这一运行时缺口。生成补丁或轨迹不代表测试通过，原生功能评分仍须单独完成，失败样本不得换题凑通过。
+该入口直接调用固定官方`process_instance`，保留原模板、工具循环、250步预算、提交与轨迹，镜像绑定采用原框架支持的部署字段；参考补丁和测试不拼进模型任务。使用本地兼容模型接口；远端自有引擎可由调用方授权的回环转发接入，不内置平台凭据。价格信息缺失不当作已测量成本。真实执行发现固定LiteLLM版本还需可选`mcp`运行时，服务器补入官方`mcp==2.3.0`及必要新依赖后，原有依赖版本不变、`pip check`通过；CLI帮助通过本身并不能发现这一运行时缺口。
+
+生成补丁后使用同一原数据与其原参考测试评分，不重新生成模型输出：
+
+```bash
+python scripts/run_swebench_original_grade.py \
+  --source-id SWE_VERIFIED --records-file /external/original.parquet \
+  --harness-root /external/swebench-v410 --arch arm64 \
+  --docker-url unix:///external/private-docker.sock \
+  --predictions /external/new-agent-results/preds.json \
+  --output /external/new-original-grading
+```
+
+默认仍仅计划，追加`--execute`才执行未修改的官方`run_instance`及报告逻辑，保留原1800秒逐题测试时限。评分SDK边界仅增加容器隔离和限额：断网、cap0、NNP、无宿主挂载/设备、8GiB/2CPU/512PID；原题、补丁应用策略、测试、容差和判分不改。环境正对照可将`--predictions`替换为`--gold-control`并使用另一新输出目录，使用原参考补丁核验环境，必须与模型结果分开。
+
+验证范围：固定原前三题全部由原Agent提交，实际NPU请求144次；原参考补丁对照3/3通过。Qwen3.5-9B实际结果为一题修复、一题未修复、一题被官方工具拒绝非法补丁，失败输出未修补、未换题或重新生成。已从保存的原日志重新计算评分，并核对初始模板、任务文本、提交、原测试脚本和参考测试ID；这不是完整500题准确率，也不是引擎性能提升数据。SWE-bench原版自身的数据与执行尚待接入，不能借用Verified的完成状态。
+
+可复用环境清单：[评分客户端76包](../configs/workload-native/swebench-original-core-py312-aarch64.lock)、[Agent完整客户端120包](../configs/workload-native/swebench-original-agent-py312-aarch64.lock)，均为本次真实CPU客户端使用的官方PyPI包及SHA256，目标是Python3.12/Linux
+aarch64。请在独立虚拟环境使用`pip install --require-hashes -r <所选lock文件>`，再设置上述固定原作者源码根目录；不要安装进现有NPU服务环境。120包版本已逐项与实际导入环境核对，原生运行使用只读基础环境加独立差量层；未额外重跑一次全新扁平环境安装。原仓库镜像内Python3.9及其依赖仍由原安装脚本管理，不套用宿主客户端lock。
 
 ## DRAGON模型客户端与原生执行（固定前三题已验证）
 

@@ -35,7 +35,17 @@ RUN_ARGS = [
 
 
 def select_records(path, *, full=False):
-    rows = json.loads(Path(path).read_text(encoding="utf-8"))
+    path = Path(path)
+    if path.suffix.lower() == ".parquet":
+        import pyarrow.parquet as pq
+
+        rows = []
+        for batch in pq.ParquetFile(path).iter_batches(batch_size=1024 if full else 3):
+            rows.extend(batch.to_pylist())
+            if not full:
+                break
+    else:
+        rows = json.loads(path.read_text(encoding="utf-8"))
     if not isinstance(rows, list) or not rows:
         raise ValueError("nonempty original record array required")
     selected = rows if full else rows[:3]
@@ -197,7 +207,14 @@ def main():
     parser.add_argument(
         "--source-id", choices=["SWE_BENCH", "SWE_VERIFIED"], required=True
     )
-    parser.add_argument("--records-json", type=Path, required=True)
+    parser.add_argument(
+        "--records-file",
+        "--records-json",
+        dest="records_json",
+        type=Path,
+        required=True,
+        help="Original Parquet or JSON record array; legacy JSON flag retained",
+    )
     parser.add_argument("--agent-root", type=Path, required=True)
     parser.add_argument("--harness-root", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)

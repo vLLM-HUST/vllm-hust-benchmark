@@ -1,6 +1,6 @@
 {
   "source_ids": ["SWE_BENCH", "SWE_VERIFIED"],
-  "status": "ORIGINAL_SHARED_SOFTWARE_AND_ISOLATED_CORE_CLIENT_READY_NATIVE_EXECUTION_PENDING",
+  "status": "SWE_VERIFIED_FIXED_NATIVE_SAMPLE_AND_DATA_CHAIN_VALIDATED_PUBLIC_GRADING_CODE_CI_PENDING",
   "source_checkbox_eligible": false,
   "legacy_task_contract_review": {
     "status": "OFFICIAL_RELEASE_CONTRACT_IDENTIFIED_NOT_NATIVE_TASK_EXECUTION",
@@ -150,16 +150,19 @@
       "source_checkbox_eligible": false
     },
     "native_agent_execution_20261029": {
-      "status": "FIXED3_ORIGINAL_AGENT_RUNNING_OFFICIAL_GRADING_NOT_YET_EXECUTED",
+      "status": "FIXED3_ORIGINAL_AGENT_AND_OFFICIAL_GRADING_FINISHED_SAVED_AUDIT_PASSED_CI_PENDING",
       "public_entry": "scripts/run_swebench_original_agent.py",
       "original_process_instance_used_without_publisher_code_changes": true,
       "default_plan_actual_server_exit": 0,
       "server_stage": "/root/swe-mini-native-run-20261029-001",
-      "server_controller_pid_observed_live": 234681,
-      "guarded_npu_window_pid_observed_live": 3986356,
+      "server_controller_pid": 234681,
+      "server_controller_returncode": 0,
+      "guarded_npu_window_pid": 3986356,
+      "guarded_npu_window_terminal_status": "CLIENT_FINISHED_REQUESTING",
+      "owned_window_lease_released": true,
       "fixed_original_json_sha256": "94b766b3ecf5995852b5ba129913abd41bda87d4ed9e82dc8accbea3c0db7305", "data_identity_note": "pragma: allowlist secret - existing exact original three-task private data identity",
       "executing_entry_sha256": "f7e34b4eebf8e103c86778bcf770be9a601bf0e27e06df788bcbfed973c0f6b5", "software_identity_note": "pragma: allowlist secret - exact staged software actually used for the running original Agent",
-      "post_staging_public_input_hardening": "Public entry additionally rejects path-escaping external instance IDs. The same fixed original3 IDs satisfy this check. Running software was not modified; do not claim its staged bytes equal the later hardened entry.",
+      "post_staging_public_input_hardening": "Public entry additionally rejects path-escaping instance IDs and directly reads original Parquet. Original3 satisfy the guard; current Parquet export bytes exactly equal the actual native JSON snapshot. Running software was not modified; staged bytes are not claimed identical to the later input adapter.",
       "original_step_limit": 250,
       "original_cost_limit_unchanged": 3.0,
       "local_missing_price_metadata_is_not_measured_zero_cost": true,
@@ -168,17 +171,22 @@
       "periodic_original_queue_cooperatively_acknowledged_lease": true,
       "npu_service_identity_idle_and_ownership_checked_before_each_generation": true,
       "request_and_response_bodies_forwarded_without_rewriting": true,
-      "guarded_npu_generation_requests_observed_at_least": 19,
-      "completed_backend_http200_observed_at_least": 19,
+      "guarded_npu_generation_requests": 144,
+      "completed_backend_http200": 144,
       "guard_rejections_at_observation": 0,
-      "completed_original_agent_tasks_at_observation": 1,
+      "completed_original_agent_tasks": 3,
       "first_original_agent_terminal": {
         "instance_id": "astropy__astropy-12907",
         "exit_status": "Submitted",
         "trajectory_sha256": "63ae94f4ab4793a6569fc6846ab366688d500ff6db3341274d4e3d21ef9faa88", "identity_note": "pragma: allowlist secret - actual private original Agent terminal trajectory digest",
         "functional_test_result": "NOT_YET_GRADED_NOT_A_QUALITY_PASS"
       },
-      "official_functional_grading_executed": false,
+      "official_functional_grading_executed": true,
+      "original_gold_environment_control": {"attempted": 3, "completed": 3, "resolved": 3, "errors": 0},
+      "original_model_quality_results": {"attempted": 3, "tests_completed": 2, "resolved": 1, "unresolved": 1, "invalid_model_patch_rejected_before_tests": 1},
+      "invalid_patch_boundary": "Original official patch commands reject astropy__astropy-13236 with Only garbage was found in the patch input. It is preserved as an official model-output error, not an environment success or a quality pass; no rewrite or model rerun.",
+      "actual_model_environment": {"npu": "910B2", "physical_device": 3, "vllm": "0.23.0+empty", "vllm_ascend": "0.23.0", "cann_toolkit": "9.1.0", "torch": "2.10.0+cpu", "torch_npu": "2.10.0.post4", "transformers": "5.5.4", "model": "Qwen/Qwen3.5-9B", "model_revision": "c202236235762e1c871ad0ccb60c8ee5ba337b9a", "identity_note": "pragma: allowlist secret - fixed official model revision", "cpu_torch_distribution_label_not_cpu_inference_claim": true},
+      "saved_evidence_audit": {"server_receipt": "/root/swe-original-grading-20261029-001/saved-audit-public.json", "initial_original_templates_and_task_text_exact": 3, "submissions_equal_original_saved_predictions": 3, "original_eval_scripts_and_reference_test_ids_exact": 5, "original_score_reports_recomputed_equal": 5, "invalid_patch_failure_retained": 1, "new_model_calls": 0, "tests_rerun": 0, "old_container_config_hashes_preserved": 1423, "old_image_config_hashes_preserved": 108, "old_volume_names_preserved": 1365},
       "original_sdk_runtime_failure_retained": "Original LiteLLM retried ModuleNotFoundError:mcp before the first model request. Original Agent, tasks, images and budgets unchanged; no task replacement or model rerun.",
       "official_optional_runtime_repair": {
         "new_packages": {"mcp": "2.3.0", "mcp-types": "2.3.0", "opentelemetry-api": "1.45.1", "PyJWT": "2.15.1", "python-multipart": "0.0.32", "sse-starlette": "3.6.0", "starlette": "1.10.0", "uvicorn": "0.54.0", "cryptography": "50.0.2", "cffi": "2.1.1", "pycparser": "3.12"},
@@ -192,9 +200,9 @@
         "server_receipt": "/root/mini-swe-client-20261029-001/mcp-runtime-repair-public.json"
       },
       "source_checkbox_eligible": false,
-      "remaining": ["Reuse first Submitted trajectory and retain remaining two original task terminal trajectories/submissions", "Run isolated original functional grading without changing tests or tolerances", "Audit exact original request and submission provenance and integrate final evidence before source completion"]
+      "remaining": ["Complete current public image/grade/Parquet entry CI and update the dataset-scoped delivery checkbox; SWE_BENCH remains a separate incomplete source"]
     },
-    "boundary": "Original source/specs, shared environment and all3 repository images prepared. Original Agent is actually generating on NPU under a guarded exclusive window, not yet complete or graded. HTTP success and active execution do not count as source delivery."
+    "boundary": "Verified original3 completed native Agent and official grading, including two negative model outcomes. Original first3 gold controls all resolve. Full500 data preserved/readable, not full500 quality tested. Shared preparation does not complete SWE_BENCH; final source checkbox awaits current public code CI."
   },
   "software_ci": {
     "commit": "a2f06018efa4577b097e6089505a5b2e97806665",
@@ -389,17 +397,68 @@
     "native_repository_tasks_executed": false,
     "source_checkbox_eligible": false
   },
+  "latest_verified_original_data_ci_readback": {
+    "status": "ALL500_ORIGINAL_FIELDS_INDEX_AND_FIXED3_RESEARCH_READBACKS_VERIFIED_ACTUAL_CI",
+    "commit": "ea3c8423967399f93785e20ca656c5779ac1f0f6", "identity_note": "pragma: allowlist secret - actual public software CI revision",
+    "artifact_id": 12900186474,
+    "main_ci_run": 40879259941,
+    "cpu_ci_run": 40879266234,
+    "both_conclusions": "success",
+    "wheel_sha256": "61746bea51db73118f03f6e1f07dab43cb6e8c094fd1e2109228be3cc95f38dd", "wheel_identity_note": "pragma: allowlist secret - verified actual CI software artifact digest",
+    "exact_installed_wheel_git_blob_payloads": 67,
+    "normalization_used_for_software_or_original_data": false,
+    "original_rows_and_index_rows": 500,
+    "all13_original_fields_preserved": true,
+    "fixed_research_readbacks_equal": 3,
+    "current_local_research_head_verified": "dd4103140d358cf211b88f24296b7419d170a54f", "research_identity_note": "pragma: allowlist secret - actual unchanged research checkout revision",
+    "research_consumer_sha256": "556f2633d4ffef7fb5dd7197ea3772805cf3ec0cbdc5b35ee81aec19649a928d", "consumer_identity_note": "pragma: allowlist secret - actual current and frozen consumer source identity",
+    "server_receipt": "swe-verified-ci-ea3-consumer-32028-001/audit-public.json",
+    "receipt_sha256": "3be4cea5a154aa35a8940015fdeeb469475a1153f80362756c0f522143a8db99", "receipt_identity_note": "pragma: allowlist secret - original-field and installed-research compatibility audit digest",
+    "research_code_or_default_dependency_modified": false,
+    "original_data_redownloaded": false,
+    "model_calls": 0,
+    "retained_client_attempt": "Initial bare system Python lacked pyarrow; reused existing qualified DRAGON reader environment read-only instead of altering the serving environment."
+  },
+  "public_parquet_and_image_preparation_cli_validation": {
+    "raw_parquet_rows_verified_exact": 500,
+    "original_fields_per_row": 13,
+    "fixed3_export_bytes_equal_actual_native_json_snapshot": true,
+    "source_parquet_unchanged": true,
+    "raw_data_redownloaded": false,
+    "npu_reader_receipt": "swe-native-input-parity-32028-001/audit-public.json",
+    "cpu_cli_receipt": "/root/swe-original-public-cli-20261029-001/audit-public.json",
+    "public_image_preparation_exit": 0,
+    "existing_original_images_reused": 3,
+    "actual_build_api_calls_during_public_readiness_check": 0,
+    "cold_build_boundary": "Original cold images were built earlier with unchanged original Dockerfiles/scripts and recorded IDs. Later public readiness entry reused those images; not a second cold-build claim.",
+    "public_raw_parquet_agent_plan_exit": 0,
+    "public_raw_parquet_grade_plan_exit": 0,
+    "new_model_calls": 0,
+    "tests_rerun": 0
+  },
+  "public_cpu_environment_locks": {
+    "core": "configs/workload-native/swebench-original-core-py312-aarch64.lock",
+    "agent": "configs/workload-native/swebench-original-agent-py312-aarch64.lock",
+    "target": "CPython3.12 Linux aarch64 CPU clients only, not NPU serving environment or Python3.9 repository images",
+    "core_original_pypi_hashed_packages": 76,
+    "agent_flattened_pypi_hashed_packages": 120,
+    "all120_agent_versions_equal_actual_installed_distribution_resolution": true,
+    "separate_fresh_flat_install_performed": false,
+    "runtime_was_readonly_core_plus_isolated_overlays": true
+  },
   "existing_verified_original_data_evidence_reused": "docs/workload-data/validation/public-original-assets-server-reader-20261023.json",
   "new_task_dataset_downloads": 0,
-  "model_calls": 0,
-  "official_scoring_calls": 0,
+  "model_calls": 144,
+  "model_calls_source_scope": ["SWE_VERIFIED"],
+  "official_grading_attempts": {"gold_control": 3, "model_predictions": 3},
+  "original_test_executions_and_score_reports": 5,
   "research_code_or_default_dependency_changed": false,
   "raw_data_published": false,
   "remaining": [
     "Use the now-qualified independent owned Docker endpoint; original stalled daemon remains preserved and is not claimed repaired",
     "Review fixed original instances and repository image requirements against available disk and experimental ARM support; do not substitute tasks to force a pass",
-    "Run the original supported Agent workflow against an appropriate local NPU model",
-    "Run isolated official functional grading with complete original tests and preserve failures",
-    "Reuse the now-verified Verified500 original fields/index and fixed actual-CI research readbacks; SWE_BENCH own dataset/provider closure remains pending"
+    "Complete current public image/grade/Parquet entry CI before the final Verified delivery checkbox update",
+    "Keep fixed-sample model quality outcomes separate from environment controls and never substitute failed cases",
+    "Reuse Verified500 original fields/index and current actual-CI research readbacks; SWE_BENCH own dataset/provider and native closure remain pending"
   ]
 }

@@ -74,6 +74,41 @@ def test_cpu_recovery_does_not_qualify_repository_tasks_or_new_sources():
     )
 
 
+@pytest.mark.parametrize("profile,count", [("core", 76), ("agent", 120)])
+def test_public_cpu_dependency_locks_are_unique_hash_bound_and_not_inference_packages(
+    profile, count
+):
+    import re
+
+    path = (
+        SCRIPTS.parent
+        / f"configs/workload-native/swebench-original-{profile}-py312-aarch64.lock"
+    )
+    rows = [
+        line
+        for line in path.read_text(encoding="utf-8").splitlines()
+        if line and not line.startswith("#")
+    ]
+    assert len(rows) == count
+    names = set()
+    for line in rows:
+        match = re.fullmatch(
+            r"([A-Za-z0-9_.-]+)==([A-Za-z0-9.!+_-]+) --hash=sha256:([0-9a-f]{64})", line
+        )
+        assert match
+        name = re.sub(r"[-_.]+", "-", match[1]).lower()
+        assert name not in names and name not in {
+            "torch",
+            "torch-npu",
+            "triton",
+            "flash-attn",
+        }
+        names.add(name)
+    assert "pyarrow" in names
+    if profile == "agent":
+        assert {"mcp", "litellm", "jinja2"} <= names
+
+
 def test_official_agent_profile_is_plan_only_and_pins_all_runtime_configs(tmp_path):
     import subprocess
 

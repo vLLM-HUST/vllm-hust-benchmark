@@ -67,6 +67,18 @@ def test_original_physical_order_and_all_fields_preserved(tmp_path):
     assert path.read_text(encoding="utf-8") == json.dumps(rows)
 
 
+def test_original_parquet_retains_order_and_all_fields_without_json_export(tmp_path):
+    pa = pytest.importorskip("pyarrow")
+    pq = pytest.importorskip("pyarrow.parquet")
+    original = records()
+    path = tmp_path / "inert-original.parquet"
+    pq.write_table(pa.Table.from_pylist(original), path, row_group_size=2)
+    before = path.read_bytes()
+    assert runner.select_records(path) == original[:3]
+    assert runner.select_records(path, full=True) == original
+    assert path.read_bytes() == before
+
+
 @pytest.mark.parametrize("bad", [[], {}, [{"instance_id": "incomplete"}]])
 def test_incomplete_original_records_rejected(tmp_path, bad):
     path = tmp_path / "inert.json"
