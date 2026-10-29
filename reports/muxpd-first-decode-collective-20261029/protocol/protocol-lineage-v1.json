@@ -1,0 +1,42 @@
+{
+  "schema": "muxpd-native-dtp-protocol-lineage-v1",
+  "upstream_conv_v2": "/root/workspace/muxpd-gdn-conv-mode-v2-20261029",
+  "upstream_controller_runs": [
+    "/root/workspace/muxpd-gdn-conv-mode-v2-20261029/runs-v2/conv-v2-native-conv-observed-01",
+    "/root/workspace/muxpd-gdn-conv-mode-v2-20261029/runs-v2/conv-v2-native-conv-plain-01"
+  ],
+  "upstream_analysis": "/root/workspace/muxpd-gdn-conv-mode-v2-20261029/analysis-v2.json",
+  "upstream_plan": "/root/workspace/muxpd-gdn-conv-mode-v2-20261029/plan-v1.json",
+  "upstream_component_manifest": "/root/workspace/muxpd-gdn-decode-collective-20261029/cpu-component-manifest-v1.json",
+  "immutable_references": {
+    "/root/workspace/muxpd-gdn-conv-mode-v2-20261029/freeze-manifest-v1.json": "b500a57e4d5d64a8e40e2fe206b679020480218c7d51d3e8fa30333069fffb30",
+    "/root/workspace/muxpd-gdn-conv-mode-v2-20261029/analysis-v2.json": "bd4dbbfbc166e66112df846d2f25f9f342fa0f84a8f43b15775de014d8699aa1",
+    "/root/workspace/muxpd-gdn-conv-mode-v2-20261029/plan-v1.json": "d98d808a8aea0fa9e0d8e227762b6f4903551866b364c0780334f4f42e0e845c",
+    "/root/workspace/muxpd-gdn-decode-collective-20261029/cpu-component-manifest-v1.json": "92cb0fa81db90d848e1c59919f62bfb39d58f8c15c2ba09eb08fe01ff67e14f1",
+    "/root/workspace/muxpd-gdn-conv-mode-v2-20261029/runs-v2/conv-v2-native-conv-observed-01/controller.json": "a8346c3e277b9fb7435532898d5691cf6dbf2303e53778b3daefa41c96ce8891",
+    "/root/workspace/muxpd-gdn-conv-mode-v2-20261029/runs-v2/conv-v2-native-conv-plain-01/controller.json": "3fdd1bca0de28676fba5557aa745c64d5ce10e12c6e71780d6647ace0678c696"
+  },
+  "plan_diagnostic_fields_changed": [
+    "schema",
+    "scope",
+    "conv",
+    "dtp",
+    "plan_sha256"
+  ],
+  "byte_exact_reused_files": {
+    "conv_rpc_v2.py": "dfe841187a14dd8a9bf724798eacf25cde0dae213bffb882bf187205b9427e6c",
+    "conv_operator_identity_v2.py": "0b50a1801a36f398cf7cabdeb085ba6697b200e888884e801ab58e92115ca2c4",
+    "source_adapter_v2.py": "87193ce1da3a4728567af2a9c21d4bcbef36c727c3457f20ffb2bfcaeb1d6e8c",
+    "manifest-v2.json": "774719926c1773cabd1585dead14c0ea38ab8dc3054fe928ada50b20e44ba628",
+    "historical-prefixes-v1.json": "5e5f34d52e5ba3b2c5f747e8fc6c35397f694f590ef0fb41cd43501209aa5ae1",
+    "source-manifest-v1.json": "66bf0d149c34b9bdc0064750f670910af94e26314ab4f39a0e462c40282d683a",
+    "native-engine-args-v1.json": "5500cba24e78aa9edc44b8946fbd7d2fce571cd2320792d2cdaa5f9de14f5a9c",
+    "v1-failure-reference-v2.json": "777b373cbddbd510e290207b253ded166182931ce504e5bace05a27d0d34d577",
+    "dtp_observer_v1.py": "6a08b5148e837e7bf946f0ded4332934c1c15d09e922cef078177c104e327afa",
+    "dtp_orchestrate_v1.py": "d3be3f8fb67b01403e753bf45fcaf495288ad5f8e83d8bbca9df907be7bb6bd0"
+  },
+  "component_changes": {
+    "dtp_workers_v1.py": "Retain original binding/install/observer helpers; wrap every external RPC in v2 envelope and maintain install-state readback."
+  },
+  "scope": "Conv v2 passed its numerical diagnostic; its v1 failure remains failed. This new DTP experiment has different observation/extra postdrain collectives and requires its own full bridge. No quality qualification."
+}
