@@ -77,16 +77,27 @@ def main():
     parser.add_argument("--author-root", type=Path, required=True)
     parser.add_argument("--archive", type=Path)
     parser.add_argument(
+        "--profile",
+        choices=["current", "v4.1.0"],
+        default="current",
+        help="v4.1.0 preserves the legacy13-field task contract; default existing profile unchanged",
+    )
+    parser.add_argument(
         "--action", choices=["plan", "prepare", "verify"], default="plan"
     )
     args = parser.parse_args()
-    pins = json.loads(PINS.read_text(encoding="utf-8"))
+    pins_path = (
+        PINS
+        if args.profile == "current"
+        else PINS.with_name("swebench-v410-author-source.json")
+    )
+    pins = json.loads(pins_path.read_text(encoding="utf-8"))
     if args.action == "prepare":
         if args.archive is None:
             parser.error("explicit existing official software archive required")
         prepare(args.archive, args.author_root, pins)
     if args.action != "plan":
-        verify_source(args.author_root, PINS)
+        verify_source(args.author_root, pins_path)
     print(
         json.dumps(
             {

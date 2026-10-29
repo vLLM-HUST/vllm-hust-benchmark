@@ -19,6 +19,32 @@ module = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(module)
 
 
+def test_legacy_release_profile_plan_does_not_create_or_execute(
+    tmp_path, monkeypatch, capsys
+):
+    import json
+    import subprocess
+
+    output = tmp_path / "not-created"
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(SCRIPTS / "prepare_swebench_author_source.py"),
+            "--profile",
+            "v4.1.0",
+            "--author-root",
+            str(output),
+        ],
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    report = json.loads(result.stdout)
+    assert report["files"] == 87 and report["bytes"] == 594174
+    assert report["status"] == "PLAN_ONLY" and report["model_calls"] == 0
+    assert not output.exists()
+
+
 def test_cpu_recovery_does_not_qualify_repository_tasks_or_new_sources():
     receipt = json.loads(
         (

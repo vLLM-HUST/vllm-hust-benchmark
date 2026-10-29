@@ -718,6 +718,10 @@ python scripts/run_spider_official_scoring.py --assets /private/spider-scoring-a
 不加`--execute`只读核对并输出计划。执行仅支持具备权限的Linux Docker环境，容器非root、
 断网、只读，原SQL不在宿主执行；保留原值和DISTINCT，不注入gold值。低分正常保留； 资源/输出契约失败不冒充模型0分；容器与证据保留，无自动清理或宿主执行回退。
 
+## SWE-bench旧版原任务的软件配置（原生执行仍待验证）
+
+SWE-bench旧版13字段原任务的准备需要匹配harness版本：现有新版配置要求额外的镜像/评测脚本字段，不能为跑通自行补造。公共软件准备器新增`--profile v4.1.0`，固定官方发布版87份原文件；默认`current`保持不变。可先运行`python scripts/prepare_swebench_author_source.py --profile v4.1.0 --author-root /external/swebench-v410`查看固定源码归档地址；取得原软件归档后加`--archive /external/official-source.tar.gz --action prepare`核验准备。当前仅源码/契约及计划经过核验，服务器安装、原任务镜像、Agent与评分仍待完成，不能把此配置称为已跑通的benchmark。
+
 ## DRAGON模型客户端与原生执行（固定前三题已验证）
 
 原作者独立示例含CUDA初始化，不能直接在NPU节点照搬执行。检索、原提示与评分核心可复用， 但必须另行验证NPU
