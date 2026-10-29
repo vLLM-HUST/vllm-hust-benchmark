@@ -1,0 +1,69 @@
+{
+  "schema": "acceptance-gap-audit/v1",
+  "as_of": "2026-10-29",
+  "source_commit": "5be5225c422ff25e0510b3daf7e26443f412e01f",
+  "contract": "reports/vllm-hust-midterm-20261019/milestone-v15/project4-v1.5.txt",
+  "report_version": "V1.01",
+  "covered_metrics": ["M01", "M02", "M03", "M04", "M05", "M06"],
+  "open_acceptance_families": 4,
+  "required_new_experiment_count": null,
+  "new_model_runs_started": 0,
+  "count_scope": "Four unresolved acceptance families, not four missing experiments. Shared measurements and existing evidence must be reused before assigning new run counts.",
+  "families": [
+    {
+      "id": "reference_capacity",
+      "metrics": ["M01"],
+      "status": "reference_method_under_revision",
+      "existing": "Both own F/T/C and operator/communication calibrations exist; prior shared-implementation repetition does not establish reference capacity.",
+      "evidence": "reports/vllm-hust-midterm-20261019/m01-reference-revision-20261029/summary.json",
+      "next": "Establish independent applicable reference using existing calibration and implementation evidence before identifying any missing measurement; no repeated historical probes or target-derived denominator.",
+      "owner_role": "benchmark measurement and method maintainer"
+    },
+    {
+      "id": "matched_serving_pair",
+      "metrics": ["M02", "M03", "M04"],
+      "status": "measured_numbers_with_applicability_gap",
+      "existing": "Recovered MMLU fixed018/B1 out256 originals verify200 successful requests per arm, matching materialized input hashes and two reserved physical cards3/6. Throughput+86.6291%, meanTTFT-43.8072%, meanTPOT-50.3070% from original synchronized windows; all accounting overhead retained. Earlier C16 reuse remains separate.",
+      "evidence": "reports/acceptance-gaps-20261029/recovered-serving-summary.json",
+      "next": "Assess applicability of existing configuration quality and SLO evidence; do not assign out8192 task scores to out256 responses. Any actually needed new representative pair should collect serving/cost/utilization together.",
+      "owner_role": "benchmark experiment maintainer"
+    },
+    {
+      "id": "continuous_stability",
+      "metrics": ["M05"],
+      "status": "partial_existing_records_unclosed_continuous_comparison",
+      "existing": "Long-input probes and 300-second synthetic windows exist; they are not five-dataset continuous stability. Fixed018 MMLU original-case/service-log audit is added separately.",
+      "evidence": "reports/vllm-hust-midterm-20261019/milestone-v15/remaining-audit-r1.json",
+      "next": "Bind existing five-dataset request termination/service logs and actual contexts. Reuse qualifying32K intervals; only supplement missing comparable4K/16K continuous windows, without treating full SWE/Terminal task lists as a newly authorized queue.",
+      "owner_role": "benchmark dataset and stability maintainer"
+    },
+    {
+      "id": "fixed_baseline_cost",
+      "metrics": ["M06"],
+      "status": "cost_recomputed_utilization_alignment_and_applicability_unclosed",
+      "existing": "B0/B1 same two reserved cards and full200-request windows verified. Public analogous rental estimate66.2253 to35.4849 CNY/million output tokens, reduction46.4178%. B1 same-interval sample estimate22.3946%; B0 missing exact wall/perf bridge, with explicit conditional lifecycle sample bounds9.4245..16.7177% (not physical confidence bounds).",
+      "evidence": "reports/acceptance-gaps-20261029/recovered-serving-summary.json",
+      "next": "Review sampling-model bounds and quality/SLO applicability without inventing exact B0 utilization or declaring combined M06 passed. Prefer existing clock evidence; only if necessary collect matched utilization with the serving pair.",
+      "owner_role": "benchmark cost and measurement maintainer"
+    }
+  ],
+  "do_not_reclassify_as_unmeasured": [
+    "Fixed200 MMLU quality: B0 151/200, current corrected B1 156/200; corrected KV candidate143/200 is a measured failure.",
+    "FrontierScience160-case fixed018/frozen-combination pair exists; candidate quality did not improve. Preserve unresolved grades, not a reason to rerun until positive.",
+    "HLE fixed018 full text/image baseline and several other measured solutions exist; check each configuration rather than claiming all B1 quality is absent.",
+    "SWE/Terminal original failures, incomplete submissions and context rejections are outcomes; their full-dataset task counts are not this audit's missing experiment count."
+  ],
+  "execution_preflight": {
+    "local_npu_observation": "Two visible910B2 physical5/6 had no running NPU process at inspection; this is not a reservation or launch admission.",
+    "local_baseline_runtime": "Prior recovered018 runtime path is missing; an env named vllm-ascend-official-v0180 has no vllm distribution metadata. Name alone is not identity.",
+    "corrected_candidate_runtime": "Current corrected B1 launch/source identity has not been recovered locally; older uncorrected launchers are not an acceptable silent substitute.",
+    "storage": "User restored storage at port32267; pinned-host SSH succeeded and original B0 receipt/plan/request/monitor/boundary files verified against original SHA manifest. Storage has no NPU; no model run attempted. The27GiB old018 runtime remains on storage, not copied into8GiB free local disk.",
+    "admitted": false
+  },
+  "tracking": {
+    "primary": "https://github.com/vLLM-HUST/vllm-hust-benchmark/issues/378",
+    "dataset_scope": "https://github.com/vLLM-HUST/vllm-hust-benchmark/issues/254",
+    "trace_scope": "https://github.com/vLLM-HUST/vllm-hust-benchmark/issues/403",
+    "migration_326_reopened": false
+  }
+}
