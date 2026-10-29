@@ -21,6 +21,12 @@
     {"source_id": "PAIO-SEMANTIC-SIMILAR-5000", "asset_group": "enterprise-private-requests", "related_workload_ids": [], "boundary": "Semantic similarity is not exact-prefix or KV reuse; preserve original private requests without rewriting."}
   ],
   "source_entrypoints": {
+    "SWE_BENCH": [
+      {"role": "prepare_assets", "path": "scripts/prepare_swebench_author_source.py", "scope": "Pinned original shared author software only, not task data, repository images, Agent execution or official grading"}
+    ],
+    "SWE_VERIFIED": [
+      {"role": "prepare_assets", "path": "scripts/prepare_swebench_author_source.py", "scope": "Reuse same official software as SWE_BENCH; existing Verified original records remain separate; native execution pending"}
+    ],
     "SPIDER": [
       {"role": "prepare_assets", "path": "scripts/prepare_spider_original_dev.py", "scope": "Original dev prefix and complete official test-suite binding; no invented prompts or SQL execution"},
       {"role": "generation", "path": "scripts/run_spider_original_generation.py", "scope": "Original questions/schema, disclosed integration prompt, references excluded, no SQL repair"},

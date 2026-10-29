@@ -760,3 +760,37 @@ python scripts/prepare_reused_research_assets.py VIDEOMME_V2 --mode verify \
 官方源码固定为`MME-Benchmarks/Video-MME-v2@b2834bd4091d6234ccaf0fa1f149a7ef4eac5875`；原评测脚本为`evaluation/test_video_mme_v2.py`。原分组非线性rating与accuracy均需保留，不以旧版逐题正确率替换。抽样按两个原group_type各最先三个完整四题组，保留每组全部四题和原顺序，不取孤立三题；该固定计划共24题，尚未推理。
 
 目前仅完成原资产和原评分器参考/CPU控制。仍缺视频、干净的原生读取/抽帧环境、64帧原提示、合适NPU服务、实际推理评分及固定工件消费。当前32图上限的服务不能声称执行过官方64帧配置；不为跑通缩帧或删减字幕。具体证据与限制见[阶段回执](../docs/workload-data/validation/videomme-v2-original-preparation-20261029.json)，来源总勾保持未完成。
+
+## SWE-bench／Verified 共用官方软件准备（原生执行未完成）
+
+两来源复用同一套官方 `SWE-bench/SWE-bench` 软件，不与本批仅分类的 SWE-bench Pro 混同。固定版本及605份文件身份见
+[软件清单](../configs/workload-native/swebench-author-source.json)。准备入口只获取并核验软件，不获取任务数据、仓库快照或镜像，不执行生成补丁。
+
+在仓库外准备目录，下载原官方软件包后执行：
+
+```bash
+mkdir -p /private/swebench-downloads
+curl -fL https://api.github.com/repos/SWE-bench/SWE-bench/tarball/02e7a74ffd0b707aab73d203fe87bdc7c76afc8e \
+  -o /private/swebench-downloads/author.tar.gz
+python scripts/prepare_swebench_author_source.py \
+  --author-root /private/swebench-author --action plan
+python scripts/prepare_swebench_author_source.py \
+  --author-root /private/swebench-author --archive /private/swebench-downloads/author.tar.gz --action prepare
+python scripts/prepare_swebench_author_source.py \
+  --author-root /private/swebench-author --action verify
+```
+
+入口逐文件校验原Git对象、SHA256和字节数，复用已匹配的文件；不同文件或已有部分文件不覆盖。只提取固定软件成员，不使用不受控的tar解压。`verify`是只读核验。
+
+隔离核心客户端的76项依赖已在ARM/Python3.12服务器按确定哈希安装，`pip check`和未修改原评测CLI的帮助探测通过。以下是本次观察到的客户端配置，不是发布方全环境锁，也不包含任务镜像或推理extra：
+
+```bash
+python3 -m venv /private/swebench-client
+/private/swebench-client/bin/python -m pip install --require-hashes --no-deps \
+  -r configs/workload-native/swebench-core-client-py312-observed.lock.txt
+/private/swebench-client/bin/python -m pip check
+PYTHONPATH=/private/swebench-author HF_HUB_OFFLINE=1 HF_DATASETS_OFFLINE=1 \
+  /private/swebench-client/bin/python -m swebench.harness.run_evaluation --help
+```
+
+发布方推荐x86_64、至少120GB可用存储、16GB内存、8核CPU；ARM64支持仍为实验性。本次ARM服务器的原605份软件准备和重复只读核验已完成，但不能据此声明原仓库镜像、完整Agent修复及官方功能评分可运行。模型推理仍须外接NPU，不能安装CUDA推理extra后默认为NPU可用。原Verified数据的已有读取证据直接保留，不重复下载；当前任务环境和原生执行边界见[阶段回执](../docs/workload-data/validation/swebench-original-readiness-20261029.json)。
