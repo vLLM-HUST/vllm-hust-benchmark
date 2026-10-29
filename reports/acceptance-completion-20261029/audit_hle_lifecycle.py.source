@@ -1,0 +1,44 @@
+"""Bind retained HLE lifecycle/logs without copying questions or answers."""
+import hashlib
+import json
+from pathlib import Path
+import re
+
+
+def sha(p):
+    return hashlib.sha256(p.read_bytes()).hexdigest()
+
+
+roots = [Path('/root') / name for name in (
+    'hle018-full-baseline-r1', 'hle018-image-qualification-r1',
+    'hle018-revision-continuation-r1', 'hle018-revision-continuation-r2')]
+records = []
+for root in roots:
+    receipt = json.loads((root/'receipt.json').read_text())
+    logs = []
+    for p in sorted(root.glob('*.log')):
+        markers = []
+        for n, line in enumerate(p.read_text(errors='replace').splitlines(), 1):
+            kinds = [name for name, pattern in (
+                ('oom', r'out of memory|\boom\b'), ('deadlock', r'deadlock'),
+                ('traceback', r'Traceback \(most recent call last\)'),
+                ('error', r'\bERROR\b'), ('shared_memory', r'shared_memory|shared.memory'))
+                if re.search(pattern, line, re.I)]
+            if kinds:
+                markers.append(dict(line=n, kinds=kinds,
+                    line_sha256=hashlib.sha256(line.encode()).hexdigest(),
+                    advisory=any(x in line.lower() for x in (
+                        'may cause', 'risk', 'possible', 'if you encounter', 'potential',
+                        'userwarning', 'resource_tracker:', 'no available shared memory')),
+                    timestamp_prefix=(re.search(r'\d\d-\d\d \d\d:\d\d:\d\d', line).group(0)
+                        if re.search(r'\d\d-\d\d \d\d:\d\d:\d\d', line) else None)))
+        logs.append(dict(path=str(p), sha256=sha(p), markers=markers))
+    records.append(dict(root=str(root), receipt_sha256=sha(root/'receipt.json'),
+        receipt_fields={k: receipt[k] for k in (
+            'status', 'started', 'ended', 'solver_exit', 'client_exit', 'service_exit',
+            'all_devices_released', 'all_reserved_devices_released', 'original_service_exit_code')
+            if k in receipt}, logs=logs))
+out = Path('/root/long-context-storage-20261029-r1/hle-lifecycle-audit.json')
+out.write_text(json.dumps(dict(runs=records,
+    limitation='Unknown original controller/service exit remains unknown. All retained marker lines are hashed; advisory labels are lexical screening, not proof that no event occurred.'), indent=2)+'\n')
+print(json.dumps(records, indent=2))

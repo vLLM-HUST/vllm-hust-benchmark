@@ -1,0 +1,184 @@
+{
+  "schema": "five-dataset-retained-stability-review/v1",
+  "solver_runs": [
+    {
+      "root": "/root/hle018-full-baseline-r1/gold",
+      "index_sha256": "418d08070d42242971bd940167e60965a17ef160da6f072a0c9954c9536355b9",
+      "run_sha256": "8cec3de2080f4bda392f4207289089b943c9bddf2393e45b81a7cb17e597f3ee",
+      "cases": 668,
+      "statuses": {
+        "ok": 668
+      },
+      "finish_reasons": {
+        "stop": 289,
+        "length": 379
+      },
+      "missing_usage": 0,
+      "input_ge16k": 0,
+      "context_ge16k": 380,
+      "max_context": 23648,
+      "lifecycle": {
+        "status": null,
+        "solver_exit": null,
+        "client_exit": null,
+        "service_exit": null,
+        "all_devices_released": null,
+        "all_reserved_devices_released": null
+      }
+    },
+    {
+      "root": "/root/hle018-full-baseline-r1/revision",
+      "index_sha256": "57badb0fef621f779044f15dce60ef83ab8254386f333557f626c9b3913c150b",
+      "run_sha256": "ac04c08bb7ceed9e3c889616030acf1db3800f916944d3bfd3d81011b7b0982f",
+      "cases": 1143,
+      "statuses": {
+        "ok": 1143
+      },
+      "finish_reasons": {
+        "length": 704,
+        "stop": 439
+      },
+      "missing_usage": 0,
+      "input_ge16k": 1,
+      "context_ge16k": 706,
+      "max_context": 29972,
+      "lifecycle": {
+        "status": null,
+        "solver_exit": null,
+        "client_exit": null,
+        "service_exit": null,
+        "all_devices_released": null,
+        "all_reserved_devices_released": null
+      }
+    },
+    {
+      "root": "/root/gennova-evidence/20261019-midterm-aligned/frontierscience-native018-solver-r1",
+      "index_sha256": "4ce234f9e934b67fc5372389586691ee2577c92bf1207c38c7538a37873051e8",
+      "run_sha256": "89d125e0ab2855d773df4b5d3bddd8f3772b3de82fb285fe69fba309fb109a97",
+      "cases": 160,
+      "statuses": {
+        "ok": 160
+      },
+      "finish_reasons": {
+        "stop": 118,
+        "length": 42
+      },
+      "missing_usage": 0,
+      "input_ge16k": 0,
+      "context_ge16k": 43,
+      "max_context": 18029,
+      "lifecycle": {
+        "status": "completed",
+        "solver_exit": null,
+        "client_exit": null,
+        "service_exit": null,
+        "all_devices_released": true,
+        "all_reserved_devices_released": null
+      }
+    },
+    {
+      "root": "/root/gennova-evidence/20261019-midterm-aligned/m01-recovery-model-fs-paired-b1-solver-r1",
+      "index_sha256": "0feb7de76c03f41d7f3829c6d91c37717d56c8c3428b054b492ce75a4d0a84b2",
+      "run_sha256": "89d125e0ab2855d773df4b5d3bddd8f3772b3de82fb285fe69fba309fb109a97",
+      "cases": 160,
+      "statuses": {
+        "ok": 160
+      },
+      "finish_reasons": {
+        "stop": 119,
+        "length": 41
+      },
+      "missing_usage": 0,
+      "input_ge16k": 0,
+      "context_ge16k": 41,
+      "max_context": 17296,
+      "lifecycle": {
+        "status": "phase_completed",
+        "solver_exit": null,
+        "client_exit": null,
+        "service_exit": null,
+        "all_devices_released": true,
+        "all_reserved_devices_released": null
+      }
+    }
+  ],
+  "sources": [
+    {
+      "path": "reports/acceptance-gaps-20261029/fixed018-quality-stability.json",
+      "sha256": "ab7372d199f8bf5550f799724cfc4ad6feb3f0fd7a8c58cb0ccb23c58a9835c1"
+    },
+    {
+      "path": "reports/swe-native018-tutanota-20261027/summary-tutanota.json",
+      "sha256": "b63849160f9ec9282020982c977576770a27080dc36d6582bdf798e8221c0de2"
+    },
+    {
+      "path": "reports/swe-native018-protonmail-qutebrowser-20261027/README.md",
+      "sha256": "c84f27fe9e390f9e908d319664f17e9d507ec422a443098512a194d95389893e"
+    },
+    {
+      "path": "reports/terminal-circuit-context-20261027/summary.json",
+      "sha256": "884e72b65165c9dd29b1d53fd35adf02dfd10b40ea512f50462b3f8a7372e09a"
+    },
+    {
+      "path": "reports/terminal-cython-context-20261027/model-summary.json",
+      "sha256": "ce36c2fd6d75350ca9c7ddb760a86ebddb736957e9f189110791e4e231c91737"
+    },
+    {
+      "path": "reports/hle-native018-completed-20261026/provenance.json",
+      "sha256": "42094d03fd159f36ebc7ff8c9f3b2d3a4a0d14ca856fcc18bf077b9463146404"
+    }
+  ],
+  "review": [
+    {
+      "dataset": "MMLU-Pro",
+      "status": "200 completed; 18 explicit budget endings; no >=16K request in this quality arm",
+      "evidence": "reports/acceptance-gaps-20261029/fixed018-quality-stability.json",
+      "remaining": "No task-derived 16K continuous window; out256 quality audited separately."
+    },
+    {
+      "dataset": "HLE-Verified",
+      "status": "Gold668 and Revision1143 indexed solver outputs verified; all status ok",
+      "evidence": "solver-stability-20261029.json",
+      "remaining": "Original parent exit unavailable; qualification answer and continuation are separate service intervals, not one continuous run.",
+      "lifecycle_evidence": "hle-lifecycle-audit.json"
+    },
+    {
+      "dataset": "FrontierScience",
+      "status": "B0 and frozen-combination B1 each160 completed, length42/41; >=16K total-context43/41",
+      "evidence": [
+        "solver-stability-20261029.json",
+        "fs-b1-stability.json"
+      ],
+      "remaining": "Solver completion does not establish judge correctness or quality improvement. Old B1 frozen combination is not the new corrected current B1."
+    },
+    {
+      "dataset": "SWE-bench-Pro",
+      "status": "Published task traces include explicit context rejection and step-limit termination",
+      "evidence": [
+        "reports/swe-native018-tutanota-20261027/summary-tutanota.json",
+        "reports/swe-native018-protonmail-qutebrowser-20261027/README.md"
+      ],
+      "remaining": "Partial task scope and failures retained; no all-task stability pass. Later unmerged records remain under #403, no new queue."
+    },
+    {
+      "dataset": "TerminalBench2.1",
+      "status": "Retained Circuit/Cython traces have explicit context-limit rejection; original rewards null",
+      "evidence": [
+        "reports/terminal-circuit-context-20261027/summary.json",
+        "reports/terminal-cython-context-20261027/model-summary.json"
+      ],
+      "remaining": "Normal service release does not turn unsubmitted tasks into successful completions. No new Agent/verifier execution."
+    }
+  ],
+  "log_review": {
+    "HLE": "Retained OOM text is startup risk advice, ERROR words are torchair UserWarnings; shared-memory wait at startup and qualification shutdown warning. No actual OOM/traceback identified in reviewed logs. Original service exit unknown remains unresolved.",
+    "FrontierScience": "B0 OOM words are startup advice, B1 OOM words are KV-memory sizing advice; ERROR words are compiler UserWarnings. B1 shared-memory waits precede request service. Both recorded solver phases complete/release. No actual OOM inferred from warning keywords.",
+    "classification": "Marker detection is lexical screening. Manual interpretation is separate; an absent log event does not prove no unlogged failure."
+  },
+  "five_task_stability_acceptance": null,
+  "new_model_or_agent_calls": 0,
+  "limitations": [
+    "This audit counts actual total context, not only input length. It does not invent per-token timestamps missing from solver records.",
+    "Disjoint qualification, continuation, solver, judge and Agent intervals are not joined into a continuous high-load window."
+  ]
+}

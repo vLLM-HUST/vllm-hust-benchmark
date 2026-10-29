@@ -23,7 +23,10 @@ def build(revision, read=None):
             )
 
     # Historical builders must not re-label a later method as their old result.
-    if json.loads(read(METHOD)).get("method_version") == "reference-revision-20261029":
+    if json.loads(read(METHOD)).get("method_version") in {
+        "reference-revision-20261029",
+        "reference-model-reassessment-20261029",
+    }:
         original_read = read
 
         def read(path):

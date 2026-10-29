@@ -1,0 +1,60 @@
+"""Read sealed solver records; publish only scalar provenance and event counts."""
+import argparse
+from collections import Counter
+import hashlib
+import json
+from pathlib import Path
+import re
+
+
+def digest(path):return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def audit(root):
+    index=json.loads((root/'solver/index.json').read_text())
+    run=root/'solver/run.json'
+    assert digest(run)==index['run_sha256']
+    rows=[]
+    for name,expected in index['files'].items():
+        p=root/'solver/requests'/name
+        assert digest(p)==expected,name
+        data=json.loads(p.read_text())
+        usage=data.get('usage') or {}
+        start=data.get('started_unix')
+        elapsed=data.get('elapsed_s')
+        rows.append(dict(case_id=data['case_id'],source_sha256=expected,status=data.get('status'),
+            started_unix=start,ended_unix=start+elapsed if start is not None and elapsed is not None else None,
+            finish_reason=data.get('finish_reason'),input_tokens=usage.get('prompt_tokens'),
+            output_tokens=usage.get('completion_tokens'),total_tokens=usage.get('total_tokens'),
+            budget=(data.get('request') or {}).get('max_tokens',(data.get('request') or {}).get('max_completion_tokens'))))
+    logs=[]
+    for p in sorted(root.glob('*.log')):
+        markers=[]
+        for n,line in enumerate(p.read_text(errors='replace').splitlines(),1):
+            kinds=[name for name,pattern in [('oom',r'out of memory|\boom\b'),('deadlock',r'deadlock'),('traceback',r'Traceback \(most recent call last\)'),('error',r'\bERROR\b'),('shared_memory',r'shared_memory|shared.memory')] if re.search(pattern,line,re.I)]
+            if kinds:
+                markers.append(dict(line=n,kinds=kinds,line_sha256=hashlib.sha256(line.encode()).hexdigest(),
+                    framework_advisory=any(x in line.lower() for x in ('may cause','risk','possible','if you encounter','potential','userwarning')),
+                    case_ids=[r['case_id'] for r in rows if r['case_id'] in line]))
+        logs.append(dict(path=str(p),sha256=digest(p),markers=markers))
+    receipt_path=root/'receipt.json'
+    receipt=json.loads(receipt_path.read_text()) if receipt_path.exists() else {}
+    summary=dict(root=str(root),index_sha256=digest(root/'solver/index.json'),run_sha256=digest(run),
+        cases=len(rows),statuses=dict(Counter(r['status'] for r in rows)),
+        finish_reasons=dict(Counter(str(r['finish_reason']) for r in rows)),
+        missing_usage=sum(r['input_tokens'] is None or r['output_tokens'] is None for r in rows),
+        input_ge16k=sum((r['input_tokens'] or 0)>=16384 for r in rows),
+        context_ge16k=sum((r['total_tokens'] or 0)>=16384 for r in rows),
+        max_context=max((r['total_tokens'] or 0) for r in rows),
+        receipt_sha256=digest(receipt_path) if receipt_path.exists() else None,
+        lifecycle={k:receipt.get(k) for k in ('status','solver_exit','client_exit','service_exit','all_devices_released','all_reserved_devices_released')},
+        logs=logs,rows=rows,
+        scope='Record-level completion/length and preserved log markers, not a proof of no unlogged deadlock or silent truncation. Explicit length outcomes remain separate from unexplained termination. Disjoint runs are not joined into continuous windows.')
+    return summary
+
+
+if __name__=='__main__':
+    p=argparse.ArgumentParser();p.add_argument('--output',type=Path,required=True);p.add_argument('roots',type=Path,nargs='+');a=p.parse_args()
+    values=[audit(root) for root in a.roots]
+    a.output.write_text(json.dumps(dict(schema='retained-solver-stability/v1',runs=values),indent=2)+'\n')
+    print(json.dumps([{k:v for k,v in row.items() if k not in ('rows','logs','scope')} for row in values],indent=2))

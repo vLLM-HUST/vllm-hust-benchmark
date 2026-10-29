@@ -1,0 +1,45 @@
+"""Verify the public capsule and rerun its dependency/resource critical paths."""
+import argparse
+import hashlib
+import json
+from pathlib import Path
+import subprocess
+import sys
+import tarfile
+
+
+def main():
+    p=argparse.ArgumentParser();p.add_argument('archive',type=Path);p.add_argument('directory',type=Path);p.add_argument('output',type=Path);a=p.parse_args()
+    expected='78bb9be370824b9838e6355ac385b2e0ad9fa48c5c43813e33a97d4ff8d0f894'
+    assert hashlib.sha256(a.archive.read_bytes()).hexdigest()==expected
+    verified=0
+    with tarfile.open(a.archive) as tar:
+        names=set()
+        for member in tar:
+            assert member.isfile() and member.name not in names
+            assert not Path(member.name).is_absolute() and '..' not in Path(member.name).parts
+            names.add(member.name)
+            raw=tar.extractfile(member).read()
+            assert (a.directory/member.name).read_bytes()==raw,member.name
+            verified+=1
+    result=subprocess.run([sys.executable,str(a.directory/'verify_public_reference.py'),str(a.directory)],check=True,capture_output=True,text=True)
+    rows=[json.loads(line) for line in result.stdout.splitlines() if line.startswith('{')]
+    summary=json.loads((a.directory/'results/summary.json').read_text())
+    joint=json.loads((a.directory/'evidence/reference-draft-joint-independent-review-r5.json').read_text())
+    assert joint['unsupported_queries']==joint['unsupported_contexts']==0
+    assert len(rows)==4 and len(summary['scenarios'])==3
+    report=dict(schema='m01-reference-reassessment/v1',capsule_sha256=expected,members_byte_verified=verified,
+        graph_recomputation=rows,formal=summary['formal_result_unchanged'],
+        primary_seed=summary['primary_display_seed'],
+        statistical_route_validation=dict(distinct_truth_points=joint['unique_validation_truth_points'],error_groups=joint['validated_error_groups'],max_p95=joint['max_p95'],max_p99=joint['max_p99']),
+        reference_kind='Independently calibrated, resource-constrained semantic/statistical DAG model for the specified B1 necessary work. Not a chip peak or measured executable upper capacity.',
+        contractual_correction='V1.5 permits independently calibrated dependency/resource reference-time derivation with justified model applicability. An additional executed whole-chain witness and three-run median are not universal contractual gates.',
+        accepted_for='Reproducible B1 model scenario and diagnostic comparison to the retained same-run host-counted timing.',
+        not_accepted_for=['Shared B0 reference without B0-specific workload/path binding','Strict uninstrumented V1.5 acceptance using the current host-counted T','A simultaneous uncertainty bound from three seeds or node P95/P99','Full task-quality qualification of out256 responses'],
+        current_b0_reference_seconds=None,current_v15_efficiency_percent=None,current_v15_attainment=None,
+        new_device_measurements=0,original_records_modified=False)
+    a.output.write_text(json.dumps(report,indent=2)+'\n')
+    print(json.dumps(dict(verified=verified,scenarios=rows[:3],status='model_recomputed_formal_timing_and_B0_binding_still_open')))
+
+
+if __name__=='__main__':main()
