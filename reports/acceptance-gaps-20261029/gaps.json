@@ -7,7 +7,10 @@
   "covered_metrics": ["M01", "M02", "M03", "M04", "M05", "M06"],
   "open_acceptance_families": 4,
   "required_new_experiment_count": null,
-  "new_model_runs_started": 0,
+  "new_model_runs_started": 3,
+  "new_model_runs_completed": 2,
+  "new_service_start_attempts": 3,
+  "startup_failures_before_requests": 1,
   "count_scope": "Four unresolved acceptance families, not four missing experiments. Shared measurements and existing evidence must be reused before assigning new run counts.",
   "families": [
     {
@@ -32,9 +35,9 @@
       "id": "continuous_stability",
       "metrics": ["M05"],
       "status": "partial_existing_records_unclosed_continuous_comparison",
-      "existing": "Recovered fixed018 SWE-prefix-reuse five900s originals: actual input>=16K request counts22/52/91/127/168 atC1/2/4/8/16, zero client failures. Mixed-length dialogue coverage is not a controlled4K/16K pair or scored retrieval. Earlier development-stack300s and retrieval probes remain historical, never substituted for fixed B0.",
-      "evidence": "reports/long-context-fixed018-20261029/README.md",
-      "next": "Complete the actual fixed0.18/0.18 B0 versus optimized configuration long-context comparison, not a label-only correction. Audit existing source logs and comparable requests, then supplement only missing4K/16K continuous and retrieval measurements with joint utilization/cost telemetry. Preserve five-dataset task scope and all failures.",
+      "existing": "New fixed018 B0 and corrected B1 matched16K/32K synthetic retrieval completed: both6/6 correct, zero failed requests, same input token hashes, TP2/BF16 and reserved physical5/6. B1 seven recompute admissions include parser qualification; both Microflow ranks exercised. Earlier fixed018 five900s mixed-length windows remain separate, not controlled4K/16K stability.",
+      "evidence": "reports/long-context-fixed018-paired-20261029/README.md",
+      "next": "Retrieval pairing is now measured. Complete only the still-missing controlled fixed018 B0/B1 4K/16K continuous comparison and five-task service-event linkage, collecting joint utilization/cost telemetry where applicable. Do not substitute a six-case retrieval score for stability or general state-isolation proof.",
       "owner_role": "benchmark dataset and stability maintainer"
     },
     {
@@ -54,11 +57,12 @@
     "SWE/Terminal original failures, incomplete submissions and context rejections are outcomes; their full-dataset task counts are not this audit's missing experiment count."
   ],
   "execution_preflight": {
-    "local_npu_observation": "Two visible910B2 physical5/6 had no running NPU process at inspection; this is not a reservation or launch admission.",
-    "local_baseline_runtime": "Prior recovered018 runtime path is missing; an env named vllm-ascend-official-v0180 has no vllm distribution metadata. Name alone is not identity.",
-    "corrected_candidate_runtime": "Current corrected B1 launch/source identity has not been recovered locally; older uncorrected launchers are not an acceptable silent substitute.",
-    "storage": "User restored storage at port32267; pinned-host SSH succeeded and original B0 receipt/plan/request/monitor/boundary files verified against original SHA manifest. Storage has no NPU; no model run attempted. The27GiB old018 runtime remains on storage, not copied into8GiB free local disk.",
-    "admitted": false
+    "local_npu_observation": "Both new retrieval runs held exclusive physical5/6 locks and confirmed both910B2 devices released after completion; not a reservation for a future run.",
+    "local_baseline_runtime": "Restored necessary official018 interpreter/CANN8.5.1/compatibility overlay:12818963574 bytes and149999 members verified. Actual service imports vLLM0.18.0 and Ascend0.18.0; model configuration hashes match recovered source.",
+    "corrected_candidate_runtime": "Actual vLLM0.28.1.post1.dev143+gf18cf803c / Ascend0.25.1rc2.dev125+hust.20260903.4.g74f0c0a27.d20260909, CorrectedWorker with original Manager KV-recompute/Microflow bundles. Import checks may initialize NPU context and are performed under device locks.",
+    "storage": "Pinned-host32267 storage holds11 archived clean closed-task worktrees;89256 files verified before local removal, reclaiming10982886866 logical bytes. Shared Git objects, uncommitted work and weights preserved. Only extracted runtime restored; duplicate image archives remain on storage.",
+    "admitted": true,
+    "admission_scope": "The completed two-arm synthetic retrieval measurement only; not continuous stability or blanket admission for future jobs. One pre-request spawn-entry failure retained."
   },
   "tracking": {
     "primary": "https://github.com/vLLM-HUST/vllm-hust-benchmark/issues/378",
