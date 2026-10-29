@@ -720,7 +720,7 @@ python scripts/run_spider_official_scoring.py --assets /private/spider-scoring-a
 
 ## SWE-bench旧版原任务链路（Verified固定抽样已验证，原版待完成）
 
-SWE-bench旧版13字段原任务的准备需要匹配harness版本：现有新版配置要求额外的镜像/评测脚本字段，不能为跑通自行补造。公共软件准备器新增`--profile v4.1.0`，固定官方发布版87份原文件；默认`current`保持不变。可先运行`python scripts/prepare_swebench_author_source.py --profile v4.1.0 --author-root /external/swebench-v410`查看固定源码归档地址；取得原软件归档后加`--archive /external/official-source.tar.gz --action prepare`核验准备。Verified原顺序前三题的ARM仓库镜像、原Agent执行与官方评分已完成，完整范围和失败结果见下文；SWE_BENCH原版自身仍待完成，不能套用Verified的来源完成状态。
+SWE-bench原版12字段、Verified13字段的旧格式原任务的准备需要匹配harness版本：现有新版配置要求额外的镜像/评测脚本字段，不能为跑通自行补造。公共软件准备器新增`--profile v4.1.0`，固定官方发布版87份原文件；默认`current`保持不变。可先运行`python scripts/prepare_swebench_author_source.py --profile v4.1.0 --author-root /external/swebench-v410`查看固定源码归档地址；取得原软件归档后加`--archive /external/official-source.tar.gz --action prepare`核验准备。Verified原顺序前三题的ARM仓库镜像、原Agent执行与官方评分已完成，完整范围和失败结果见下文；SWE_BENCH原版自身仍待完成，不能套用Verified的来源完成状态。
 
 官方Agent软件复用相同准备入口，增加可选`--profile mini-swe-agent`，固定原78份源码/配置及完整性身份，不自行编写替代Agent：
 
@@ -747,7 +747,7 @@ python scripts/prepare_reused_research_assets.py SWE_BENCH --mode verify \
   --data-root /external/swebench-original
 ```
 
-已存在的同版文件直接用`verify`，不重复下载。SWE_BENCH固定原顺序前三题为Astropy11693/12057/12318，均不在本次Verified原生样本中；后续镜像、Agent、评分命令使用`--source-id SWE_BENCH`及该来源的原Parquet，不能借用Verified的任务结果。当前仅该来源原文件和前三题选择器已核验，CPU原镜像准备已启动，尚未完成原生任务/评分或最新CI消费回读，因此仍不打完成勾。
+已存在的同版文件直接用`verify`，不重复下载。SWE_BENCH固定原顺序前三题为Astropy11693/12057/12318，均不在本次Verified原生样本中；后续镜像、Agent、评分命令使用`--source-id SWE_BENCH`及该来源的原Parquet，不能借用Verified的任务结果。该来源原三题镜像与参考补丁环境对照已完成，对照3/3通过；实际CI工件已完成全2294条字段/索引与固定3条研究回读。原Agent模型执行、官方模型评分仍待完成，完整CI的公开摘要密钥误报已作精准标注、需重新验证，因此仍不打来源完成勾。
 
 ```bash
 python scripts/prepare_swebench_original_images.py \
@@ -901,7 +901,7 @@ PYTHONPATH=/private/swebench-author HF_HUB_OFFLINE=1 HF_DATASETS_OFFLINE=1 \
   /private/swebench-client/bin/python -m swebench.harness.run_evaluation --help
 ```
 
-发布方推荐x86_64、至少120GB可用存储、16GB内存、8核CPU；ARM64支持仍为实验性。本节新版605份软件的准备与只读核验已完成，但它要求的数据字段与旧版13字段原任务不匹配，不能据此声明本节新版流程完成原生任务。已验证的Verified固定前三题使用上节v4.1.0及原mini-SWE-agent，而不是补造字段套用新版。模型推理外接NPU，不能安装CUDA推理extra后默认为NPU可用。原数据复用、不重复下载；环境、模型失败及来源边界见[回执](../docs/workload-data/validation/swebench-original-readiness-20261029.json)。
+发布方推荐x86_64、至少120GB可用存储、16GB内存、8核CPU；ARM64支持仍为实验性。本节新版605份软件的准备与只读核验已完成，但它要求的数据字段与原版12字段及Verified13字段原任务不匹配，不能据此声明本节新版流程完成原生任务。已验证的Verified固定前三题使用上节v4.1.0及原mini-SWE-agent，而不是补造字段套用新版。模型推理外接NPU，不能安装CUDA推理extra后默认为NPU可用。原数据复用、不重复下载；环境、模型失败及来源边界见[回执](../docs/workload-data/validation/swebench-original-readiness-20261029.json)。
 
 ## LJSpeech 1.1 原始 TTS 语料准备（原生合成未完成）
 
