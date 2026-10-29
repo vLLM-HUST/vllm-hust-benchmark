@@ -4,6 +4,7 @@ from concurrent.futures import ThreadPoolExecutor
 import hashlib
 import inspect
 import json
+import os
 from pathlib import Path
 import sys
 import time
@@ -104,7 +105,26 @@ def test_svg_keyword_parameters_match_the_original_renderer(tmp_path):
 
 
 @pytest.mark.parametrize("score", [0, 1])
-def test_original_code_result_and_cached_identity_preserved(tmp_path, score):
+@pytest.mark.parametrize("transient_access_denial", [False, True])
+def test_original_code_result_and_cached_identity_preserved(
+    tmp_path, score, monkeypatch, transient_access_denial
+):
+    if transient_access_denial and os.name != "nt":
+        pytest.skip("Windows-only transient atomic-rename access failure")
+    denied = []
+    original_read = Path.read_bytes
+
+    def read_with_one_denial(path):
+        if (
+            transient_access_denial
+            and path.name.endswith(".response.json")
+            and not denied
+        ):
+            denied.append(path)
+            raise PermissionError("simulated temporary Windows file filter lock")
+        return original_read(path)
+
+    monkeypatch.setattr(Path, "read_bytes", read_with_one_denial)
     queue = MatplotlibRenderQueue(
         tmp_path,
         image_root=tmp_path / "images",
@@ -152,6 +172,7 @@ def test_original_code_result_and_cached_identity_preserved(tmp_path, score):
     assert queue.render("000800", code, tmp_path / "images") == score
     assert len(list(tmp_path.glob("*.request.json"))) == 1
     assert queue.receipts[-1]["retained_result_reused"]
+    assert len(denied) == int(transient_access_denial)
     queue.require_ready_for_judge()
 
 

@@ -124,7 +124,18 @@ class MatplotlibRenderQueue:
                     "render job timed out; retain same identity, do not replace task"
                 )
             time.sleep(self.poll_interval)
-        response = json.loads(response_path.read_bytes())
+        while True:
+            try:
+                response_raw = response_path.read_bytes()
+                break
+            except PermissionError:
+                # Windows can briefly deny opening an atomically renamed file
+                # while filesystem filters release it. Reuse the original
+                # deadline; never regenerate the job or accept malformed JSON.
+                if os.name != "nt" or time.monotonic() >= deadline:
+                    raise
+                time.sleep(self.poll_interval)
+        response = json.loads(response_raw)
         if (
             response.get("schema_version") != "structeval-render-response/v1"
             or response.get("request_sha256") != digest
