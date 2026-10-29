@@ -66,6 +66,16 @@
   },
   "required_splits": ["test_task", "test_website", "test_domain"],
   "reporting": "retain official macro and micro metrics separately; do not describe offline action prediction as live website execution",
+  "npu_fallback_profile": {
+    "model": "Qwen/Qwen3.5-9B",
+    "author_recommended_model": false,
+    "native_generation_budget": 50,
+    "temperature": 0,
+    "chat_template_kwargs": {"enable_thinking": false},
+    "boundary": "Explicit model-specific non-thinking adaptation; not original GPT-3.5 results. Original prompts, candidate ranking, tournament and scorer unchanged.",
+    "first_attempt": "Default model mode returned content=None after one HTTP200; original scorer failed. Retain failure, no valid score exists.",
+    "second_attempt": "Same original fixed tasks, independent output directory, raw model responses retained; not qualified complete until official result audit"
+  },
   "data_policy": "download original test archives externally; do not redistribute decrypted test files in this repository",
   "environment_constraints": {
     "official_openai_version": "0.28.0",

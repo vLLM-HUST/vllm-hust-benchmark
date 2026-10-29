@@ -930,6 +930,15 @@
       "requirements": ["Original validation fields and PNG bytes preserved without resizing or answer coercion", "Use the pinned maintained Inspect Evals task for native template, thumbnail1024 and ANLS; this raw reader is not an alternative prompt/scorer", "No task execution or research integration is established by catalog registration"],
       "status": "ORIGINAL_VALIDATION_FIELDS_MAPPED_NATIVE_AND_RESEARCH_PENDING"
     },
+    "MIND2WEB": {
+      "kind": "task_dataset", "mapping": "mind2web_original_tasks",
+      "input_fields": ["annotation_id", "website", "domain", "subdomain", "confirmed_task"],
+      "required_fields": ["annotation_id", "website", "domain", "subdomain", "confirmed_task", "actions", "action_reprs"],
+      "outcome_fields": ["action_reprs"], "annotation_fields": [],
+      "id_field": "annotation_id", "normalization": {},
+      "requirements": ["Original complete offline tasks and all actions; gold operations and candidate labels remain reference-side", "Original ranking and author evaluator required; no live browser claim"],
+      "status": "ORIGINAL_FIELDS_MAPPED_NATIVE_AND_RESEARCH_CLOSURE_PENDING"
+    },
     "DRAGON_PUBLIC": {
       "kind":"task_dataset", "mapping":"dragon_original_tasks",
       "input_fields":["original_question"],

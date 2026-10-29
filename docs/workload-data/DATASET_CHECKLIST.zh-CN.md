@@ -13,7 +13,11 @@
 - [x] 三个split各固定前3原题，共9任务89动作；原始字段、完整动作、官方候选分数和排名覆盖40994个候选元素，受限pickle读取校验通过。
 - [x] 官方加载器及原始tokenizer端到端CPU预检通过，24/35/30个原始动作次序一致；各split的top50候选召回缺失为7/4/6，保留原生记零行为，不补候选、不换题。零模型调用，非原生执行完成。
 - [ ] 固定完整任务的所有动作通过原生入口执行并评分，保留失败结果。
-- [ ] 公共读取及研究消费核对原始动作关系，补齐交付回执后才打来源总勾。
+
+首次实机尝试已保留：现有Qwen3.5-9B服务首个模型请求HTTP200，但`message.content`为`None`，官方`postprocess_action_llm`调用`.strip()`报错，未形成有效评分。固定原题、50-token预算和评分器均未更改；本次不计完成，后续先核对模型响应/思考模式适配，不补造答案、不将接口200当作原生流程跑通。验证窗口已释放共享租约，原模型服务未停止。
+
+- [x] 本地构建包在服务器独立安装后，9原题89动作经公共索引、公共消费与现有研究消费接口逐字段还原一致；研究消费文件SHA256与当前工作区一致，未改研究代码、未运行研究分析。此证据不是远端CI产物验证。
+- [ ] 远端CI产物及最终公开入口联调、完整原生评分结果审计；完成前不打来源总勾。
 
 这里是离线网页动作预测，不是实时浏览器任务。原格式使用最近五条参考历史动作；正确候选不在top-k时原评分器直接记零，不得补入正确候选来提高通过率。保留官方`marco_*`字段及micro指标，分别解释其含义。解密测试文件仅存服务器，不公开再分发。
 
@@ -27,6 +31,15 @@ python scripts/prepare_reused_research_assets.py MIND2WEB --mode verify --data-r
 ```
 
 `data-root`中必须是原始`test.zip`和`scores_all_data.pkl`。缺文件时使用同一入口的`download`模式，显式指定外部目录和足以覆盖812936103字节的`--max-bytes`；不得将加密归档替换为自建题目。原生运行入口仍在实机验证，尚不能将此资产校验命令当作benchmark运行命令。
+
+固定源码准备（服务器已实测31个原文件身份校验；不会执行作者代码或安装依赖）：
+
+```bash
+python scripts/prepare_mind2web_author_source.py --author-root /external/mind2web-author
+python scripts/prepare_mind2web_author_source.py --author-root /external/mind2web-author --archive /external/Mind2Web-33bd95c.tar.gz --execute
+```
+
+归档必须来自`https://api.github.com/repos/OSU-NLP-Group/Mind2Web/tarball/33bd95caeee7bba22dd08ecc935845e15c5e5dc7`；每个文件分别检查Git对象、字节数和SHA256，而非仅依赖归档名称。保留MIT许可证。客户端采用作者`requirements.txt`指定版本，已在Python3.11.6/aarch64独立环境安装和导入验证；源码构建psutil需要匹配Python头文件，不能通过升级版本绕过。NPU推理仍使用既有Qwen3.5-9B服务，CPU客户端的torch2.0.1不承担模型推理。非思考模式是显式的模型适配，不是作者GPT-3.5复现，也不能将抽样分数当作全量榜单或性能结论。
 
 ### LiveCodeBench（原生固定抽样交付完成；自修复显式兼容）
 
