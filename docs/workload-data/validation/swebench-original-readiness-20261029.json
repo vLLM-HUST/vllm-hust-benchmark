@@ -1,7 +1,19 @@
 {
-  "source_ids": ["SWE_BENCH", "SWE_VERIFIED"],
-  "status": "SWE_VERIFIED_FIXED_NATIVE_SAMPLE_AND_DATA_CHAIN_VALIDATED_PUBLIC_GRADING_CODE_CI_PENDING",
-  "source_checkbox_eligible": false,
+  "source_ids": ["SWE_VERIFIED"],
+  "shared_preparation_source_ids": ["SWE_BENCH", "SWE_VERIFIED"],
+  "status": "SWE_VERIFIED_FIXED_ORIGINAL_NATIVE_SAMPLE_OFFICIAL_GRADING_AND_CONSUMER_VALIDATED",
+  "source_checkbox_eligible": true,
+  "completion_scope": "Verified original first3 only: original Agent, NPU inference, isolated official grading, saved-result audit and original-data/research readbacks. Not full500 model evaluation, not all cases passing, not SWE_BENCH completion.",
+  "public_entry_code_ci": {
+    "commit": "c5859eda5d1a49744d1066243e9f5358a3abc8d8",
+    "main": "https://github.com/vLLM-HUST/vllm-hust-benchmark/actions/runs/40893299266",
+    "cpu_correctness": "https://github.com/vLLM-HUST/vllm-hust-benchmark/actions/runs/40893307702",
+    "both_conclusions": "success",
+    "qualified_prior_ci_data_payloads_exactly_equal_current_git_blobs": 67,
+    "payload_normalization_used": false,
+    "whole_wheel_or_metadata_byte_identity_claimed": false,
+    "additional_model_calls_or_test_reruns": 0
+  },
   "legacy_task_contract_review": {
     "status": "OFFICIAL_RELEASE_CONTRACT_IDENTIFIED_NOT_NATIVE_TASK_EXECUTION",
     "fixed_verified_original_instances": ["astropy__astropy-12907", "astropy__astropy-13033", "astropy__astropy-13236"],
@@ -457,7 +469,7 @@
   "remaining": [
     "Use the now-qualified independent owned Docker endpoint; original stalled daemon remains preserved and is not claimed repaired",
     "Review fixed original instances and repository image requirements against available disk and experimental ARM support; do not substitute tasks to force a pass",
-    "Complete current public image/grade/Parquet entry CI before the final Verified delivery checkbox update",
+    "Current public image/grade/Parquet code CI is green; Verified fixed-sample delivery checkbox is eligible, while full500 model evaluation was not performed",
     "Keep fixed-sample model quality outcomes separate from environment controls and never substitute failed cases",
     "Reuse Verified500 original fields/index and current actual-CI research readbacks; SWE_BENCH own dataset/provider and native closure remain pending"
   ]

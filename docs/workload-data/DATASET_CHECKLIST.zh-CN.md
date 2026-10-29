@@ -1,7 +1,7 @@
 # 数据集逐项验证清单
 
 当前交付
-**71/113项**，待完成42项，另5项仅分类。首批#432的60项和第二批#538的ScienceWorld已合入main；早期五个草稿已关闭为被汇总承接，历史和分支保留。第三批新增CodeJudge-Eval、DeepPlanning、OpenMath、OpenCode、MVBench、Video-MME、LiveCodeBench、BigCodeBench、Spider及DRAGON固定原生profile交付，尚未合入。OpenMath/OpenCode是训练语料原问题生成，不是独立质量benchmark。打勾不代表全量模型评测、高分或性能保证。
+**72/113项**，待完成41项，另5项仅分类。首批#432的60项和第二批#538的ScienceWorld已合入main；早期五个草稿已关闭为被汇总承接，历史和分支保留。第三批新增CodeJudge-Eval、DeepPlanning、OpenMath、OpenCode、MVBench、Video-MME、LiveCodeBench、BigCodeBench、Spider、DRAGON及SWE_VERIFIED固定原生profile交付，尚未合入。OpenMath/OpenCode是训练语料原问题生成，不是独立质量benchmark。打勾不代表全量模型评测、高分或性能保证。
 
 ### LiveCodeBench（原生固定抽样交付完成；自修复显式兼容）
 
@@ -817,7 +817,7 @@ LMM
 
 - [x] 后续入口导航修复已通过固定提交9b36fb93的两项CI，并在服务器独立安装实际工件12879026361；67份包载荷一致，准备、生成、隔离评分三个入口已核验。与先前工件相比仅分类资源变更，原生结果和研究回查证据直接复用，不重复调用模型。
 
-### SWE-bench／Verified共用官方软件与环境（两来源仍未交付）
+### SWE-bench／Verified共用官方软件与环境（Verified固定抽样已交付，SWE-bench待完成）
 
 - [x] 固定Verified原顺序前三题为Astropy12907/13033/13236，保留原13字段。发现已准备的新官方harness要求额外image/eval_script/log_parser/eval_type，不能直接套用旧数据。另固定官方v4.1.0发布版原87文件/594174字节及Git/SHA身份，`prepare_swebench_author_source.py --profile v4.1.0`计划与软件夹具通过，默认配置不变；没有补造字段或更换原题。
 
@@ -844,7 +844,7 @@ LMM
 - [x] 已导出实际CPU客户端的76包评分/120包Agent官方PyPI
   SHA锁定清单，120个最终版本与真实叠加环境逐项核对；不安装进NPU服务或原Python3.9测试镜像。未额外声称重跑过全新扁平环境安装。公共镜像入口显式传原生ARM规格，避免原CLI默认x86；原生任务/模板/测试脚本保持不变。
 
-- [ ] 当前批公共镜像、Parquet和评分入口的CI及最终来源级交付标记；仅Verified已完成上述固定抽样原生链路，SWE_BENCH自身数据/执行仍未完成，不共用完成勾选。
+- [x] 当前批公共镜像、Parquet和评分入口的c5859eda两项CI均通过（40893299266、40893307702）；67份已核验数据载荷与该提交Git对象逐字节相同，无归一化。Verified固定原顺序三题原生链路和研究回读完成，已打来源勾；模型失败保留，非全量500题评测。SWE_BENCH自身数据/执行仍未完成，不共用完成勾选。
 
 - [x] Verified固定三题的原作者源码部署、隔离客户端/ARM仓库镜像、官方Agent和原评分已完成；不以此替代SWE_BENCH自身的数据、任务与执行验证。
 
@@ -1007,7 +1007,7 @@ TB；服务器/data约1.42TB可用，未缩小语料。ChartQA当前两卡主机
 | XLAM_TOOL                  | [ ] 待开展                                 | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 | BIGCODEBENCH               | [x] 固定原题交付闭环                       | 原3条sanitize、参考3/3、候选pass/pass/fail及独立审计通过，0新增模型调用。公共原Parquet获取/摘要、实际CI64载荷、1140原9字段/索引及受维护研究入口3条回读已核验。原Python3.10完整依赖CPU-only镜像已实际评分；新增代码专用构建上下文32原源码+6运行文件，完整锁及公开配方服务器实际构建完成，233锁版本/71原评估要求/32原文件核验通过；复用已有有效原3条评分，不重跑模型或冒充新镜像评分结果。e2b0.17废弃警告保留。[回执](validation/bigcodebench-container-runtime-readiness-20261028.json)。 |
 | SWE_BENCH                  | [ ] 待开展                                 | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| SWE_VERIFIED               | [ ] 缺口已列待补                           | 复用历史证据；原生缺口见37项复核表及方案8.5.2                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| SWE_VERIFIED               | [x] 固定三题原生链路完成                   | 原Agent144次NPU请求、官方参考对照3/3通过；模型1修复/1未修复/1非法补丁失败原样保留。保存结果审计、全500条数据字段/索引和固定3条研究回读通过，c585两项CI通过。非全量模型评测，SWE_BENCH另行待完成；[回执](validation/swebench-original-readiness-20261029.json)。                                                                                                                                                                                                                          |
 | VISIONARENA                | [ ] 待开展                                 | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 | MMMU                       | [x] 原validation抽样交付完成               | 全92文件/11550行/16字段与索引核验，30学科固定90题NPU推理和原评分（含4多图），152处公共/固定研究消费往返通过。[回执](validation/mmmu-native-delivery-20261027.json)。59次length保留，非完整validation质量或LLaVA复现。                                                                                                                                                                                                                                                                    |
 | CHARTQA                    | [x] 原测试抽样原生交付完成                 | 原测试2500条全字段/图像字节/索引核验；双类别固定6题NPU生成、原评分与公共离线复核，CI产物和固定研究6条往返通过。[回执](validation/chartqa-native-delivery-20261026.json)。非全量质量/性能；修复构建器全新重编译未验证。                                                                                                                                                                                                                                                                   |
