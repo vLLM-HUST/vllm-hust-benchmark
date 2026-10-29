@@ -11,6 +11,10 @@ on:
       - 'tests/test_spider_test_suite_environment.py'
       - 'tests/test_spider_original_dev.py'
       - 'scripts/prepare_spider_original_dev.py'
+      - 'scripts/run_spider_official_scoring.py'
+      - 'scripts/run_spider_original_generation.py'
+      - 'tests/test_spider_official_scoring.py'
+      - 'tests/test_spider_original_generation.py'
       - 'scripts/verify_spider_test_suite_environment.py'
       - 'configs/workload-native/spider-test-suite-cpu.Dockerfile'
       - 'docs/workload-data/**'
@@ -447,7 +451,7 @@ jobs:
       - name: BigCodeBench CPU image contract fixtures, no image build or task execution
         run: python -m pytest -q tests/test_bigcodebench_cpu_environment.py
       - name: Spider CPU environment contract fixtures, no SQL or original task execution
-        run: python -m pytest -q tests/test_spider_test_suite_environment.py tests/test_spider_original_dev.py
+        run: python -m pytest -q tests/test_spider_test_suite_environment.py tests/test_spider_original_dev.py tests/test_spider_official_scoring.py tests/test_spider_original_generation.py
       - name: LiveCodeBench opaque original task preparation fixtures, no task execution
         run: python -m pytest -q tests/test_livecodebench_original_preparation.py tests/test_livecodebench_original_generation.py tests/test_livecodebench_repair.py tests/test_livecodebench_other_scenarios.py
       - name: Author JSONSchemaBench local Engine interface fixtures

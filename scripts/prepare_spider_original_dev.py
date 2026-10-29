@@ -112,7 +112,9 @@ def prepare(*, data_root, suite_root, suite_archive, output, count=3):
         with (output / name).open("x", encoding="utf-8") as stream:
             for value in values:
                 stream.write(json.dumps(value, ensure_ascii=False) + "\n")
-    (output / "gold.private.txt").write_text("".join(gold), encoding="utf-8")
+    (output / "gold.private.txt").write_text(
+        "".join(gold), encoding="utf-8", newline="\n"
+    )
     report = {
         "source_id": "SPIDER",
         "status": "ORIGINAL_DEV_AND_COMPLETE_SUITE_BOUND_NATIVE_EXECUTION_PENDING",

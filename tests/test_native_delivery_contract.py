@@ -34,10 +34,17 @@ def test_spider_archive_acquisition_is_not_native_delivery_or_publisher_digest()
     assert receipt["official_public_dev_suite_coverage"][
         "all20_official_suites_present"
     ]
-    assert not receipt["native_input_adapter_and_official_test_suite_scoring_verified"]
-    assert receipt["model_calls"] == receipt["windows_raw_files_written"] == 0
+    assert receipt["native_input_adapter_and_official_test_suite_scoring_verified"]
+    assert receipt["model_calls"] == 3
+    assert receipt["windows_raw_files_written"] == 0
     # Reference-only controls qualify the original scorer, not model delivery.
-    assert receipt["scorer_calls"] == 2
+    assert receipt["scorer_calls"] == 4
+    actual = receipt["actual_npu_and_public_scorer_followup"]
+    assert actual["fixed_original_dev_indices"] == [0, 1, 2]
+    assert actual["actual_responses_and_stop"] == 3
+    assert actual["raw_response_to_prediction_bytes_equal"]
+    assert actual["official_test_suite_accuracy"] == 1.0
+    assert not actual["source_checkbox_eligible"]
     prepared = receipt["fixed_original_dev_preparation"]
     assert prepared["selected_original_indices"] == [0, 1, 2]
     assert prepared["selected_complete_official_suite_files"] == 32

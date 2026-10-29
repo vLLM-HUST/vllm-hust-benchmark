@@ -795,8 +795,9 @@ LMM
   Accuracy为1.000。此为参考控制，不是模型成绩或来源完成。
 - [ ] 物理SQLite schema、原SQL及实际官方评分核验：公开dev的20个DB均有测试套件；public
   test使用的40个DB无对应套件，不以单库评分替代。文件关联不等于SQL/模型执行完成。
-- [ ] NPU原题生成、隔离运行原Test Suite
-  Accuracy及固定消费闭环；不以旧单库执行或字符串一致替代。[阶段回执](validation/spider-original-preparation-20261029.json)只计获取，不计原生完成。
+- [x] 公共生成/评分入口完成原dev位置0/1/2的真实NPU验证：Qwen3.5-9B三次响应均stop，原响应与SQL预测逐字节一致；官方完整32份测试库评分1.000。接入提示及4096输出预算明确非官方模板/预算，不据三题作质量结论。
+- [ ] 公共provider/可安装工件及固定消费闭环；原生三题生成/官方Test
+  Suite评分已验证，不重跑有效结果。完整来源仍不打勾，见[阶段回执](validation/spider-original-preparation-20261029.json)。
 
 ### Video-MME-v2资产与原协议准备（尚未交付）
 

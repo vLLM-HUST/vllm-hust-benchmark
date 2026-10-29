@@ -676,7 +676,33 @@ python scripts/prepare_spider_original_dev.py \
 
 `inputs.private.jsonl`只含原问题、原schema和位置；`references.private.jsonl`保留七个原字段，
 `gold.private.txt`是官方评分格式的原SQL和db_id。参考文件不得送入模型。 服务器已用原前三题和完整32份数据库完成该准备，并在非root/只读/断网容器运行原评分器的
-参考答案控制（1.000）；这不是模型成绩。公共评分控制器、真实模型生成和消费闭环仍待完成。
+参考答案控制（1.000）；这不是模型成绩。后续已另完成真实NPU原前三题和公共评分入口验证： 三次原响应均stop、原输出未经SQL修补，完整官方32库Test Suite
+Accuracy为1.000。 这仅证明固定三题的执行链路，不代表全dev模型质量；provider/可安装工件与消费闭环仍待完成。
+
+公开生成入口如下（默认只计划，执行须加`--execute`并指定新私有输出目录）：
+
+```bash
+python scripts/run_spider_original_generation.py --prepared /private/spider-dev-first3 \
+  --model Qwen/Qwen3.5-9B --max-tokens 4096 \
+  --output /private/spider-generation --execute
+```
+
+该提示与4096输出预算是明确披露的零样本接入配置，不是官方统一LLM模板或预算。 原问题/schema保持不变；参考文件不读取；多行或异常输出保留并阻塞，不剥代码块或换题。
+默认只允许本地`/v1`模型服务，服务部署与资源窗口由操作者确认。
+
+评分资产目录须包含`author/`（官方`taoyds/test-suite-sql-eval`固定提交
+`e97acc546ecbee8fa27fa8dbf025ef61493a876c`）、`inputs/`（上述准备入口输出）和
+`database/`（原完整测试套件）。未选数据库可以保留；选中数据库不得删减或增加变体。 官方源码不随本仓库分发，入口会校验五个运行模块的哈希。使用上节构建并核验的本地镜像ID：
+
+```bash
+python scripts/run_spider_official_scoring.py --assets /private/spider-scoring-assets \
+  --predictions /private/spider-generation/predictions.private.txt \
+  --image sha256:YOUR_QUALIFIED_LOCAL_IMAGE_ID \
+  --output /private/spider-scoring-output --execute
+```
+
+不加`--execute`只读核对并输出计划。执行仅支持具备权限的Linux Docker环境，容器非root、
+断网、只读，原SQL不在宿主执行；保留原值和DISTINCT，不注入gold值。低分正常保留； 资源/输出契约失败不冒充模型0分；容器与证据保留，无自动清理或宿主执行回退。
 
 ## Video-MME-v2 原资产准备（原生执行仍待补）
 
