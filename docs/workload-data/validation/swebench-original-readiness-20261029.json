@@ -122,11 +122,54 @@
     "server_receipts": ["new-api-readiness-public.json", "sandbox-public.json", "kernel-resource-limits-public.json"],
     "retained_transport_failure": "Digest-qualified OCI reference was invalid as Docker RepoTag. Initial load failed but left the correct untagged immutable image. Independent image-ID inspection confirmed the expected config and architecture; that exact image was reused without repeat loading. A transport-only tag-normalized archive was also prepared; all config/layer blobs remain byte-identical.",
     "native_benchmark_runtime_images_qualified": false,
+    "runtime_qualification_scope": "This field concerns SWE-bench repository task images. Two separately qualified StructEval component images are recorded below; they do not qualify SWE-bench tasks.",
+    "restored_render_components": {
+      "status": "TWO_EXACT_ORIGINAL_RENDER_IMAGES_AND_PUBLIC_CONTROLLER_CONTROLS_VERIFIED",
+      "transport": "Read-only reconstruction from owned Docker tar-split metadata and original layer payloads; every complete uncompressed layer SHA256 verified before import and again during bounded streaming. No alternate build or layer rewrite.",
+      "extra_image_archive_created": false,
+      "matplotlib": {
+        "image_id": "sha256:7d14b32bc488a991ba50d0f3f3a4d8bdf0342542c884d6ad6d85e677a1fd502c",
+        "image_note": "pragma: allowlist secret - exact previously qualified software image",
+        "original_layers": 8,
+        "layer_tar_bytes": 383319040,
+        "exact_config_and_all_diff_ids_preserved": true,
+        "environment_verifier_exit_code": 0
+      },
+      "browser": {
+        "image_id": "sha256:8d3eb558eca4edddb313d16e891be04655448f5354bb329188ecba26a8b6811a",
+        "image_note": "pragma: allowlist secret - exact previously qualified public browser software image",
+        "original_layers": 11,
+        "layer_tar_bytes": 1571398144,
+        "exact_config_and_all_diff_ids_preserved": true,
+        "environment_verifier_exit_code": 0
+      },
+      "public_controller_controls": [
+        {"fixture": "svg-valid", "render_score": 1, "worker_terminal_verified": true},
+        {"fixture": "svg-empty", "render_score": 0, "worker_terminal_verified": true},
+        {"fixture": "matplotlib-valid", "render_score": 1, "worker_terminal_verified": true},
+        {"fixture": "matplotlib-timeout", "status": "BLOCKED_COMPONENT_TIME_LIMIT_NOT_MODEL_SCORE", "render_score": null, "worker_terminal_verified": true}
+      ],
+      "scope": "Four controlled regression inputs through unchanged public isolated controllers. Not original benchmark samples, VQA, model inference or new source delivery.",
+      "original_metadata_reverified_after_import_and_controls": true,
+      "original_container_configs_hash_unchanged": 1423,
+      "original_image_configs_hash_unchanged": 108,
+      "original_volume_names_unchanged": 1365,
+      "new_daemon_images_after_recovery": 3,
+      "new_daemon_stopped_control_containers_retained": 12,
+      "new_daemon_running_containers_after_controls": 0,
+      "new_filesystem_used_kib_observed": 1884988,
+      "new_filesystem_available_kib_observed": 17532756,
+      "new_dev_auxiliary_bytes_observed": 231845323,
+      "server_receipts": ["matplotlib-image-recovery-public.json", "browser-image-recovery-public.json", "render-controller-regression/audit-public.json", "render-recovery-preservation-public.json"],
+      "native_tasks_executed": 0,
+      "model_calls": 0,
+      "source_checkbox_increment": 0
+    },
     "native_benchmark_tasks_executed": 0,
     "model_calls": 0,
     "research_code_or_npu_service_changed": false,
     "source_checkbox_count_increment": 0,
-    "next_gate": "Explicitly select the independent endpoint per command, restore or build the required pinned task runtime image, and reuse existing original generations/results. Do not treat the inert container probes as native task or scoring completion."
+    "next_gate": "Explicitly select the independent endpoint per command. Matplotlib/browser component images and controller controls are recovered, but remaining native rendering protocols and SWE repository images still require their own qualification. Reuse existing original generations/results; recovery probes are not new source completion."
   },
   "verified_original_data_actual_ci_readback": {
     "status": "ALL500_ORIGINAL_FIELDS_INDEX_AND_FIXED3_RESEARCH_READBACKS_VERIFIED_ACTUAL_CI",

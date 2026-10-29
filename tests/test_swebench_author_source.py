@@ -3,6 +3,7 @@
 import hashlib
 import importlib.util
 import io
+import json
 from pathlib import Path
 import sys
 import tarfile
@@ -16,6 +17,35 @@ spec = importlib.util.spec_from_file_location(
 )
 module = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(module)
+
+
+def test_cpu_recovery_does_not_qualify_repository_tasks_or_new_sources():
+    receipt = json.loads(
+        (
+            SCRIPTS.parent
+            / "docs/workload-data/validation/swebench-original-readiness-20261029.json"
+        ).read_text(encoding="utf-8")
+    )
+    recovery = receipt["independent_cpu_recovery"]
+    assert recovery["original_daemon_start_ticks_before_and_after_equal"]
+    assert not recovery["native_benchmark_runtime_images_qualified"]
+    assert recovery["native_benchmark_tasks_executed"] == 0
+    assert recovery["source_checkbox_count_increment"] == 0
+    components = recovery["restored_render_components"]
+    for name in ("matplotlib", "browser"):
+        assert components[name]["exact_config_and_all_diff_ids_preserved"]
+        assert components[name]["environment_verifier_exit_code"] == 0
+    assert len(components["public_controller_controls"]) == 4
+    timeout = components["public_controller_controls"][-1]
+    assert timeout["status"] == "BLOCKED_COMPONENT_TIME_LIMIT_NOT_MODEL_SCORE"
+    assert timeout["render_score"] is None
+    assert components["new_daemon_running_containers_after_controls"] == 0
+    assert components["model_calls"] == components["native_tasks_executed"] == 0
+    assert components["source_checkbox_increment"] == 0
+    assert (
+        recovery["new_backing_file_capacity_bytes"] + 1024**3
+        <= recovery["approved_total_extra_budget_bytes"]
+    )
 
 
 def fixture(tmp_path, names=None, content=b"inert original software\n", kind=None):
