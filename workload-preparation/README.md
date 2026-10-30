@@ -953,6 +953,19 @@ for record in iter_workload("LJSPEECH", data_root=Path("/private/ljspeech"), lim
 VITS发布方提供对应LJ
 Speech的模型及原推理示例，可作为候选，但其CUDA/PyTorch1.6环境不等于已适配NPU；尚未取得并固定检查点，不宣称原生合成已运行。没有自动MOS分数可凭空补造，波形非空或格式合法也不能代表语音质量。[当前证据与缺口](../docs/workload-data/validation/ljspeech-original-readiness-20261029.json)持续更新，来源总勾保持未完成。
 
+## MultiAgentBench 原始场景获取（原生执行未完成）
+
+官方MARBLE固定版本及原文件身份来自机器清单，获取入口不生成prompt、不改任务或关系。当前覆盖bargaining、coding、database、minecraft、research五份原JSONL，每份100条；不能据此声称包含官方全部环境或全部任务。先查看计划：
+
+```bash
+python -I scripts/prepare_multiagentbench_original_assets.py --data-root /private/marble-original
+```
+
+显式下载加`--action prepare --max-bytes 5369142`；已有原文件用`--action verify`，不重复下载。所有文件同时核对固定Git
+blob、SHA256及大小，已有损坏文件或partial保留并报错，不覆盖重试；目录必须位于仓库之外。服务器已通过公共入口复用五份原文件验证，但尚未核验各场景完整输入/答案关系、官方Agent运行环境、模型/裁判绑定、原生执行及评分、公共/研究消费。来源仍不打勾。
+
+原记录包含agents、environment、relationships、metrics等字段，Minecraft没有其他四份文件共有的task_id/scenario，database另含communication；不能强造同一静态问答格式或编造缺失ID。多Agent协作/竞争在当前分类中是跨任务关系，不另造第41类。
+
 ## BixBench 原科学任务准备与读取（原生执行未完成）
 
 本接口用于官方科学Agent任务，不用零样本问答替代Notebook工作流。原问题JSONL实际为205条扁平记录、17字段，不能按旧数据卡的嵌套`questions`结构加载。文件版本和64份ZIP身份见[固定原资产清单](data/catalogs/bixbench_original_files_v1.json)；205条问题引用其中59份。当前只取得固定原前三题所需的两份原ZIP，其余57份尚未取得。
