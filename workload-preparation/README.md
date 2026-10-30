@@ -984,6 +984,8 @@ for record in iter_workload("MULTIAGENTBENCH", data_root=Path("/private/marble-o
 
 原生运行尚未就绪：固定源码要求Python`>=3.9,<3.12`及原`poetry.lock`。`scripts/research/run_simulation.sh`使用`--config`，但当前`marble/main.py`实际解析`--config_path`；不可直接把示例运行成功作为已验证事实。模型调用经LiteLLM，保留原默认512-token预算及温度0；本地端点绑定仍需独立验证。`metrics.evaluate_llm`未配置时评分器回退到外部`gpt-3.5-turbo`，通信和规划评分均会调用模型，不能在未授权时直接启动。embedding另走`litellm.embedding`，已有聊天服务不代表具备该能力。以上为源码核查，不是环境安装、模型兼容或评分实跑证据。
 
+服务器已按原Git对象校验99份原软件文件（1420037字节），其中94份Python仅做静态解析，未导入或执行。固定原`marble/evaluator/evaluator.py`第324行的`except json.JSONDecodeError`缩进导致`SyntaxError`，服务器及直接原Git对象解析均复现；原文件保留，未打补丁，依赖尚未安装。须先找到与原任务兼容的正式可用版本，或明确审批并披露最小源码兼容修复，再验证原生运行；不能将该阻塞归咎于模型或靠删评分绕过。
+
 ## BixBench 原科学任务准备与读取（原生执行未完成）
 
 本接口用于官方科学Agent任务，不用零样本问答替代Notebook工作流。原问题JSONL实际为205条扁平记录、17字段，不能按旧数据卡的嵌套`questions`结构加载。文件版本和64份ZIP身份见[固定原资产清单](data/catalogs/bixbench_original_files_v1.json)；205条问题引用其中59份。当前只取得固定原前三题所需的两份原ZIP，其余57份尚未取得。
