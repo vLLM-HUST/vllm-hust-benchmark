@@ -19,6 +19,15 @@ OUTPUT = "docs/data-entrypoints.json"
 REPO = "vLLM-HUST/vllm-hust-benchmark"
 WEBSITE = "vLLM-HUST/vllm-hust-website"
 PREFIX = "website-publication/data/"
+# Relocation metadata only: retired website snapshots can still name this file.
+# Results live exclusively in the destination repository's current tree.
+RELOCATED_PUBLICATIONS = {
+    "data/gennova-validation-v1.json": (
+        "https://github.com/GenNova-HUST/gennova-benchmark/blob/"
+        "af93ddcc5687dfddc7d4423d22dcc76f13b02a6c/"
+        "evidence/gennova-mmlu-pro-20261023/historical-summary.json"
+    ),
+}
 URL = re.compile(r"https?://[^\s\"'<>`\\]+")
 LOCAL = re.compile(r"[\"'`]((?:\./|/)?data/[^\s\"'<>`]+)")
 BENCHMARK_PATH = re.compile(
@@ -245,6 +254,15 @@ def build(root, paths, sources):
             not parsed.scheme or parsed.netloc == "vllm-hust.sage.org.ai"
         ):
             record["benchmark_path"] = by_website.get(unquote(local))
+            if unquote(local) in RELOCATED_PUBLICATIONS:
+                if record["benchmark_path"]:
+                    raise ValueError(
+                        f"Relocated publication must not be copied back: {local}"
+                    )
+                record["resolution"] = "relocated-to-external-repository"
+                record["destination"] = RELOCATED_PUBLICATIONS[unquote(local)]
+                links.append(record)
+                continue
             record["resolution"] = (
                 "mapped"
                 if record["benchmark_path"]

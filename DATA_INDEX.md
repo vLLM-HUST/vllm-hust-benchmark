@@ -19,6 +19,10 @@
 Archive 与 reports 内也可能同时包含代码、报告和原始数据；上述规则是安全默认值，不意味着 每个 JSON 都是原始测量。修改前读该集合的契约和
 provenance。涉及原件订正时保留旧字节及说明， 不要仅重新计算 SHA256 来掩盖内容改变。
 
+GenNova 与 GenNova Autotune 独立结果已迁往
+[GenNova-HUST/gennova-benchmark](https://github.com/GenNova-HUST/gennova-benchmark)。
+旧网站采集快照中的已迁移引用标记为 `relocated-to-external-repository`，并给出新仓库固定版本入口； 它不是本仓库中的结果副本，也不是当前公开网站可访问性的证明。
+
 ## 常用问题入口
 
 - **固定B0完整回答联合测量：**

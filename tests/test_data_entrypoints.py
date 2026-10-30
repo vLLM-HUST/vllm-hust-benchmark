@@ -248,3 +248,29 @@ def test_refresh_pagination_drafts_and_manifest_identity(
         == ("c" if production_available else "b") * 40
     )
     assert bool(snapshot["production_manifest_error"]) is not production_available
+
+
+def test_relocated_publication_is_not_a_missing_file_or_local_copy(tmp_path):
+    sources = source_snapshot()
+    sources["website_references"].append(
+        {
+            "target": "./data/gennova-validation-v1.json",
+            "consumers": ["assets/gennova.js"],
+        }
+    )
+    catalog = index.build(tmp_path, [], sources)
+    entry = next(
+        r for r in catalog["references"] if "gennova-validation" in r["target"]
+    )
+    assert entry["resolution"] == "relocated-to-external-repository"
+    assert entry["benchmark_path"] is None
+    assert entry["destination"].startswith("https://github.com/GenNova-HUST/")
+    assert any(
+        r["resolution"] == "unmapped-frontend-reference" for r in catalog["references"]
+    )
+    path = "website-publication/data/gennova-validation-v1.json"
+    p = tmp_path / path
+    p.parent.mkdir(parents=True)
+    p.write_text("{}")
+    with pytest.raises(ValueError, match="must not be copied back"):
+        index.build(tmp_path, [path], sources)
