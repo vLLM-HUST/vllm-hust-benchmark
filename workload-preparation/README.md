@@ -1095,6 +1095,8 @@ daemon与客户端两侧有相同路径，并由操作者仅对运行副本设�
 
 对于已确认响应可能超过客户端默认60秒的本地模型，可显式加`--request-timeout 600`。这是传输等待时间，不是生成token预算或Agent步数；默认不覆盖作者客户端配置。须在回执披露该差异，不能通过重复请求或截断响应来掩盖超时。范围为60至1800秒，仍须核验模型绑定、客户端实际解析及原生任务终态。
 
+固定客户端实际核验表明，顶层`llm_model.timeout`会被忽略，必须使用`llm_model.router_kwargs.timeout`。公共入口已修正这一映射，服务器真实构造验证600秒、温度1.0、4096-token预算和原重试参数均保留；这仍不等于原生任务或评分完成。[原客户端核验证据](../docs/workload-data/validation/bixbench-official-client-20261030.json)
+
 执行沿用原40步科学Agent、双阶段工具交互、原生成预算及原轨迹保存，不是静态问答。当前9B绑定拒绝原角色序列`system,user,user,system`，报`System message must be at the beginning`；保留失败容器和日志，不能合并或删除末尾system来凑通过。需另行验证兼容模型；资源替代模型不得标为官方推荐。此入口不包含评分，作者默认开放答案judge为GPT-4o；未授权调用付费judge，不以轨迹生成、计划输出或Notebook夹具代替官方评分与来源总勾。
 
 开放答案评分入口（默认仅计划，服务器原生评分尚待验证）：

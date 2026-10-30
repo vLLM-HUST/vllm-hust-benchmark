@@ -182,7 +182,9 @@ async def execute(args, report):
     config["run_name"] = args.run_name
     config["agent"]["agent_kwargs"]["llm_model"]["name"] = args.model
     if args.request_timeout is not None:
-        config["agent"]["agent_kwargs"]["llm_model"]["timeout"] = args.request_timeout
+        config["agent"]["agent_kwargs"]["llm_model"].setdefault("router_kwargs", {})[
+            "timeout"
+        ] = args.request_timeout
     config["paths"].update(
         workspace_dir=str(workspace),
         trajectories_dir=str(output / "trajectories"),

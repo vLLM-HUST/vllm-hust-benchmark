@@ -66,6 +66,7 @@ async def execute(args, report):
     shutil.copyfile(original, copied)
     os.chmod(copied, 0o600)
     sys.path.insert(0, str(author))
+    os.environ["OPENAI_API_BASE"] = args.api_base
     os.environ["OPENAI_API_KEY"] = (
         "local-owned-no-paid-provider"  # pragma: allowlist secret - noncredential for owned loopback service
     )

@@ -27,9 +27,11 @@
     "new_native_tasks_completed": 0,
     "bixbench_previous_client_exit_code": 1,
     "bixbench_previous_error_type": "Timeout",
-    "bixbench_current_transport_timeout_seconds": 600,
+    "bixbench_current_requested_transport_timeout_seconds": 600,
+    "bixbench_current_effective_transport_timeout_seconds": 60,
+    "bixbench_next_binding_router_timeout_verified_seconds": 600,
     "trusted_cpu_cluster_target_nodeport_mapping_found": false,
-    "boundary": "Replacement identity independently confirmed. Previous BixBench attempt failed with timeout60s and reasoning-only text; all results retained. Owned nonthinking service restarted without the incompatible reasoning parser; same model, precision, context, original tasks and generation budget. New native attempt uses disclosed transport timeout600s and has content plus tool-call/result messages. No task completion, scoring, response-field rewriting or delivery checkbox asserted."
+    "boundary": "Previous BixBench timeout/reasoning-only failure retained. Corrected nonthinking parser binding has content and tool-call/result messages under the same model and task budgets. Real frozen-client preflight discovered top-level timeout600 was ignored: the live attempt still uses timeout60, not silently reconfigured or restarted. The next public invocation now sets verified router_kwargs.timeout600. Official grader import also passed without network/model calls. No task completion, scoring or delivery checkbox asserted."
   },
   "current_scope_note": "delivery_inventory is the current source-delivery ledger. sources/incident_gate and frozen receipts retain their original historical scope, not live service or current progress assertions.",
   "cpu_isolation_environment_latest": "docs/workload-data/validation/swebench-original-readiness-20261029.json#independent_cpu_recovery",
