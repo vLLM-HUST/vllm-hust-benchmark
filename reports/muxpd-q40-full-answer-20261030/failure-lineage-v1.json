@@ -1,0 +1,28 @@
+{
+  "schema": "muxpd-q40-full-answer-launch-failure-v1",
+  "created_at": "2026-10-30T13:11:48.411034+00:00",
+  "classification": "ROOT_LAUNCH_ENVIRONMENT_OMISSION_BEFORE_MODEL_CONSTRUCTION",
+  "controller_sha256": "294f127f2d45187e1237b61b0013a553eadf5db4b0965d2900c40411e7a80238",
+  "child_sha256": "433f81f693ecf390f9f3f173b8d69d7fee83a2f99a0f6851ef96c2a19bbfecf3",
+  "log_sha256": "6a71f0129448cce1af3d20f266ff7c994b9b52b6bf51a4d67e11dc2fec615010",
+  "freeze_sha256": "567ac0841da57824c8cc34afaa09d0579a659cd476d942362dc9f9857b7e5692",
+  "exit_code": 1,
+  "finished_at": "2026-10-30T13:09:44.535319+00:00",
+  "owned_members_before_cleanup": [],
+  "owned_members_after_cleanup": [],
+  "idle_physical_after": [
+    "3",
+    "4",
+    "5",
+    "6"
+  ],
+  "outputs": 0,
+  "admissions": 0,
+  "model_constructed": false,
+  "errors": [
+    "Traceback (most recent call last):\n  File \"/root/workspace/muxpd-q40-full-answer-batch7-20261030/runs-v1/prefix-q40-full-answer-batch7-v1-01/producer/quality_run_v1.py\", line 290, in run\n    raise RuntimeError(\nRuntimeError: Runtime environment differs from original quality before model construction\n"
+  ],
+  "root_cause": "Root invoked controller without sourcing /root/workspace/runtime/env.sh; exact historical runtime-environment guard rejected VLLM_VERSION, VLLM_PLUGINS, VLLM_WORKER_MULTIPROC_METHOD and LD_LIBRARY_PATH before importing vLLM or constructing LLM.",
+  "retention": "All v1 frozen producer/input/controller/log/result bytes preserved. No answer or numerical evidence resulted; not a failed answer candidate.",
+  "authorized_next": "New v2 bundle/label/matrix only; source runtime env and add exact expected-env guard to CPU controller preview. Retain same24 producer roles, quota4-to40, original natural answers/scorer/inputs. One newly declared attempt after narrow review and preflight; no selected answer retry."
+}
