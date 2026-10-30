@@ -996,6 +996,9 @@ python scripts/prepare_marble_evaluator_compat.py \
 
 默认只显示计划；加`--execute`才在全新独立目录生成`evaluator.py`、`COMPATIBILITY.patch`及回执。入口只接受已固定原文件SHA256，拒绝猜测修复；仅移除原324—326行各四个前导空格，原文件及其他字节不变。服务器对真实原文件完成静态解析，并仅提取原`parse_research_ratings`函数验证有效JSON、无JSON、非法JSON三个分支。完整模块尚未导入、原生Agent和官方评分未运行；运行配置必须显式披露兼容副本及其摘要，不能宣称“未经修改的官方代码”。此工具不自动替换原作者目录或升级环境。
 
+客户端预检已确认服务器ARM64及现有Python3.10满足原版本范围；当前默认Python3.12不满足，不能直接混装。原锁文件153包中的CUDA/Triton依赖受Linux
+x86_64标记约束，须按原标记选择当前架构，不强装GPU包。独立Poetry2.1.3工具环境已准备，原源码和锁文件摘要未变；这不是153包客户端已安装，更不是原生执行。后续安装继续使用独立缓存/环境，并保留至少5GiB磁盘余量，不能删除旧数据或结果腾空间。
+
 ## BixBench 原科学任务准备与读取（原生执行未完成）
 
 本接口用于官方科学Agent任务，不用零样本问答替代Notebook工作流。原问题JSONL实际为205条扁平记录、17字段，不能按旧数据卡的嵌套`questions`结构加载。文件版本和64份ZIP身份见[固定原资产清单](data/catalogs/bixbench_original_files_v1.json)；205条问题引用其中59份。当前只取得固定原前三题所需的两份原ZIP，其余57份尚未取得。
