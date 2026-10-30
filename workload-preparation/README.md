@@ -986,7 +986,7 @@ python -I scripts/prepare_jsonschemabench_author_source.py --source bixbench --a
 ```
 
 运行环境应独立于模型服务和源码目录：使用Python3.12以上和作者原`uv.lock`，将`UV_PROJECT_ENVIRONMENT`、`UV_CACHE_DIR`及`TMPDIR`显式设到外部目录，再执行`uv sync --frozen --no-dev --no-python-downloads --python <Python3.12路径> --project /external/bixbench-author`。专用CPU的Python3.12.13环境已完成这一步及依赖检查、安装后原源码核验。作者包安装后，在外部工作目录直接导入`bixbench`会报模块未找到；显式设置`PYTHONPATH=/external/bixbench-author`后，使用独立环境Python执行`-m bixbench.generate_trajectories --help`通过。这只是客户端入口加载验证；官方ARM64镜像及原作者Notebook
-API的隔离可信夹具也已通过，但模型连接、原任务和官方评分仍待验证。不得通过修改锁文件或切成零样本问答来宣称原流程完成。
+API的隔离可信夹具也已通过。原生Agent曾实际发出四次API请求，均因消息模板不兼容返回400，零有效模型完成、零任务完成、未评分；不能将请求尝试当成推理通过。不得通过修改锁文件、重排原消息或切成零样本问答来宣称原流程完成。
 
 数据准备公共入口使用已取得的原JSONL与ZIP，不自动下载。先用上述独立客户端Python运行以下命令查看计划，确认两个全新外部输出目录及空间后再加`--execute`：
 
@@ -1000,3 +1000,18 @@ API的隔离可信夹具也已通过，但模型连接、原任务和官方评�
 
 后续隔离执行还要求workspace在Docker
 daemon与客户端两侧有相同路径，并由操作者仅对运行副本设置非root容器所需的组权限；不得递归修改原始数据或共享目录。已验证的可信夹具使用UID/GID65534、运行目录setgid2770及控制器进程局部umask0007，避免root创建的0600文件阻止非root读取。任务容器保持离线、只读根、去除能力且只挂载本任务workspace；原执行器必须显式启用Docker，不能退回宿主机执行生成代码。[镜像与夹具证据](../docs/workload-data/validation/bixbench-notebook-preparation-20261030.json)不代表原生科学任务已跑通。
+
+原生Agent公共入口（默认仅输出计划，不调用模型）：
+
+```bash
+/external/bixbench-client/bin/python scripts/run_bixbench_original_agent.py \
+  --author-root /external/bixbench-author --data-root /private/bixbench-original \
+  --prepared /private/bixbench-prepared --output /private/bixbench-native-output \
+  --workspace /private/bixbench-native-workspaces --limit 3 \
+  --model openai/QUALIFIED_LOCAL_MODEL --api-base http://127.0.0.1:19466/v1 \
+  --docker-host unix:///run/owned-docker/docker.sock
+```
+
+将模型名、端口及Docker套接字替换为操作者已核验的专用环境；输出与workspace须是两个全新外部目录，不能覆盖准备目录。使用含`prepared_files`摘要的新准备回执，入口会再次核对原JSONL、ZIP、发布方软件和预处理文件身份。模型窗口空闲、容器资源及模型原消息模板兼容性就绪后才加`--execute`。远端模型可使用已授权的回环转发，或显式`--model-queue`配合前述可信worker；入口不自动建立网络连接或启动模型。
+
+执行沿用原40步科学Agent、双阶段工具交互、原生成预算及原轨迹保存，不是静态问答。当前9B绑定拒绝原角色序列`system,user,user,system`，报`System message must be at the beginning`；保留失败容器和日志，不能合并或删除末尾system来凑通过。需另行验证兼容模型；资源替代模型不得标为官方推荐。此入口不包含评分，作者默认开放答案judge为GPT-4o；未授权调用付费judge，不以轨迹生成、计划输出或Notebook夹具代替官方评分与来源总勾。
