@@ -1133,7 +1133,7 @@ daemon与客户端两侧有相同路径，并由操作者仅对运行副本设�
   --output /private/bixbench-new-grade-input --limit 3
 ```
 
-默认仅计划；确认固定前N题的原生运行全部保存后加`--execute`。入口复用官方`load_answer`与单答案提取规则，不生成新答案；核验题目ID与原参考答案，保留原`evaluation_mode`，缺题、重复或不一致直接报错，空答案不丢弃。此步骤目前只通过合成夹具测试，真实轨迹端到端转换仍待验证。下面的`--input-file`指向其输出`original-grade-input.private.csv`。
+默认仅计划；确认固定前N题的原生运行全部保存后加`--execute`。入口复用官方`load_answer`与单答案提取规则，不生成新答案；核验题目ID与原参考答案，将原JSONL的`eval_mode`原值映射到评分CSV的`evaluation_mode`，不允许缺失、冲突或未知模式静默退化为LLM默认判定。缺题、重复或不一致直接报错，空答案不丢弃。已使用两份真实保存的原轨迹验证逐行映射及原空答案解析；固定三题全部保存后的完整CSV写出仍待验证。下面的`--input-file`指向其输出`original-grade-input.private.csv`。
 
 ```bash
 /external/bixbench-client/bin/python scripts/run_bixbench_original_grader.py \

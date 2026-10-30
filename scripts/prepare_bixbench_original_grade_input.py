@@ -29,8 +29,15 @@ def grade_row(original, trajectory, load_answer):
         "target": original["ideal"],
         "predicted": answer,
     }
-    if "evaluation_mode" in original:
-        row["evaluation_mode"] = original["evaluation_mode"]
+    raw_mode = original.get("eval_mode")
+    csv_mode = original.get("evaluation_mode")
+    if raw_mode is not None and csv_mode is not None and raw_mode != csv_mode:
+        raise ValueError("conflicting original evaluation mode fields")
+    mode = raw_mode if raw_mode is not None else csv_mode
+    if mode not in {"str_verifier", "range_verifier", "llm_verifier"}:
+        raise ValueError("original evaluation mode missing or unsupported")
+    # Raw publisher JSONL uses eval_mode; grade_outputs.py expects this CSV key.
+    row["evaluation_mode"] = mode
     return row
 
 
@@ -64,11 +71,13 @@ def prepare(args):
     from prepare_jsonschemabench_author_source import verify_source
 
     verify_source(author, ROOT / "configs/workload-native/bixbench-author-source.json")
-    entries = {item["path"]: item for item in json.loads(CATALOG.read_text())["files"]}
+    entries = {
+        item["path"]: item for item in json.loads(CATALOG.read_text("utf-8"))["files"]
+    }
     metadata = verify_asset(data, entries["BixBench.jsonl"])
-    original = [json.loads(line) for line in metadata.read_text().splitlines()]
+    original = [json.loads(line) for line in metadata.read_text("utf-8").splitlines()]
     selected = original[: args.limit]
-    state = json.loads((native / "state.private.json").read_text())
+    state = json.loads((native / "state.private.json").read_text("utf-8"))
     expected = [row["question_id"] for row in selected]
     if (
         state["source_id"] != "BIXBENCH"
@@ -86,7 +95,7 @@ def prepare(args):
     for path in (native / "trajectories").rglob("*.json"):
         if path.is_symlink() or not path.resolve().is_relative_to(native):
             raise ValueError("trajectory escapes private native root")
-        value = json.loads(path.read_text())
+        value = json.loads(path.read_text("utf-8"))
         identity = value.get("problem_id")
         if identity not in expected or identity in found:
             raise ValueError("unexpected or duplicate native trajectory")
@@ -96,13 +105,7 @@ def prepare(args):
     rows = [grade_row(row, found[row["question_id"]], load_answer) for row in selected]
     output.mkdir(mode=0o700)
     destination = output / "original-grade-input.private.csv"
-    fields = ["question_id", "question", "target", "predicted"]
-    if any("evaluation_mode" in row for row in rows):
-        if not all("evaluation_mode" in row for row in rows):
-            raise ValueError(
-                "mixed missing evaluation_mode needs explicit original-scorer review"
-            )
-        fields.append("evaluation_mode")
+    fields = ["question_id", "question", "target", "predicted", "evaluation_mode"]
     with destination.open("x", newline="", encoding="utf-8") as stream:
         os.chmod(destination, 0o600)
         writer = csv.DictWriter(stream, fieldnames=fields)

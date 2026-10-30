@@ -18,7 +18,7 @@ def example():
         "question_id": "fixture-1",
         "question": "fixture question",
         "ideal": "fixture reference",
-        "evaluation_mode": "str_verifier",
+        "eval_mode": "str_verifier",
     }
     trajectory = {
         "problem_id": "fixture-1",
@@ -57,6 +57,34 @@ def test_empty_answer_is_retained_not_dropped_or_replaced():
     assert (
         MODULE.grade_row(original, trajectory, lambda value: value)["predicted"] == ""
     )
+
+
+@pytest.mark.parametrize("mode", ["str_verifier", "range_verifier", "llm_verifier"])
+def test_publisher_raw_mode_mapped_to_csv_without_changing_rule(mode):
+    original, trajectory = example()
+    original["eval_mode"] = mode
+    row = MODULE.grade_row(original, trajectory, lambda value: value)
+    assert row["evaluation_mode"] == mode
+    assert "eval_mode" not in row
+
+
+def test_explicit_csv_mode_is_supported_but_conflicts_rejected():
+    original, trajectory = example()
+    original["evaluation_mode"] = original.pop("eval_mode")
+    assert (
+        MODULE.grade_row(original, trajectory, lambda value: value)["evaluation_mode"]
+        == "str_verifier"
+    )
+    original["eval_mode"] = "range_verifier"
+    with pytest.raises(ValueError, match="conflicting"):
+        MODULE.grade_row(original, trajectory, lambda value: value)
+
+
+def test_missing_original_mode_cannot_silently_default_to_llm():
+    original, trajectory = example()
+    original.pop("eval_mode")
+    with pytest.raises(ValueError, match="missing"):
+        MODULE.grade_row(original, trajectory, lambda value: value)
 
 
 def test_plan_has_no_import_download_model_or_file_output(tmp_path):
