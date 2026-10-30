@@ -986,6 +986,16 @@ for record in iter_workload("MULTIAGENTBENCH", data_root=Path("/private/marble-o
 
 服务器已按原Git对象校验99份原软件文件（1420037字节），其中94份Python仅做静态解析，未导入或执行。固定原`marble/evaluator/evaluator.py`第324行的`except json.JSONDecodeError`缩进导致`SyntaxError`，服务器及直接原Git对象解析均复现；原文件保留，未打补丁，依赖尚未安装。须先找到与原任务兼容的正式可用版本，或明确审批并披露最小源码兼容修复，再验证原生运行；不能将该阻塞归咎于模型或靠删评分绕过。
 
+经明确批准，已增加独立的最小语法兼容副本入口，不再把这个语法错误视为无可处理的上游阻塞：
+
+```bash
+python scripts/prepare_marble_evaluator_compat.py \
+  --source /external/marble-author/marble/evaluator/evaluator.py \
+  --output /private/marble-evaluator-compat
+```
+
+默认只显示计划；加`--execute`才在全新独立目录生成`evaluator.py`、`COMPATIBILITY.patch`及回执。入口只接受已固定原文件SHA256，拒绝猜测修复；仅移除原324—326行各四个前导空格，原文件及其他字节不变。服务器对真实原文件完成静态解析，并仅提取原`parse_research_ratings`函数验证有效JSON、无JSON、非法JSON三个分支。完整模块尚未导入、原生Agent和官方评分未运行；运行配置必须显式披露兼容副本及其摘要，不能宣称“未经修改的官方代码”。此工具不自动替换原作者目录或升级环境。
+
 ## BixBench 原科学任务准备与读取（原生执行未完成）
 
 本接口用于官方科学Agent任务，不用零样本问答替代Notebook工作流。原问题JSONL实际为205条扁平记录、17字段，不能按旧数据卡的嵌套`questions`结构加载。文件版本和64份ZIP身份见[固定原资产清单](data/catalogs/bixbench_original_files_v1.json)；205条问题引用其中59份。当前只取得固定原前三题所需的两份原ZIP，其余57份尚未取得。
