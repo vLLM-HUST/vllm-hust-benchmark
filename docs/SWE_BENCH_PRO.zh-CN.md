@@ -9,7 +9,8 @@ Controller 接入与验证；运行本指南不需要克隆或安装它。 这�
 地址，不代表已经有可运行任务的 Docker 环境。不要给模型工作区挂宿主机 Docker socket，也不要把客户端依赖装入模型环境。
 
 在 Coder 中选择管理员发布的 `swe-bench-pro-cpu` 模板，新建自己的 **CPU 工作区**。该模板提供独立 Docker 服务、客户端和 socket；Docker
-镜像、容器数据与 `/root` 共用所选持久卷额度。建议单任务选择 40 GiB，实际准入仍受平台可用额度约束。普通 `ascend-devbox` 和模型 Ray 模板不能替代这个模板。
+镜像、容器数据与 `/root` 共用所选持久卷额度。单题可使用模板默认 20 GiB（安装前至少 15 GiB 可用）；多任务请先确认平台存储额度。普通 `ascend-devbox` 和模型
+Ray 模板不能替代这个模板。
 
 模板不存在时，由管理员先按私有云仓库的
 [`scripts/create_swe_bench_workspace.py`](https://github.com/yancanmao/npu-private-cloud/blob/main/scripts/create_swe_bench_workspace.py)
@@ -22,26 +23,28 @@ Controller 接入与验证；运行本指南不需要克隆或安装它。 这�
 | 在模板配置数据下载源和镜像仓库地址          | 下载并校验 V1 数据、固定镜像摘要和代码起点                 | 模型需要鉴权时，提供密钥环境变量名             |
 | 验证仓库制品可拉取，不依赖节点缓存          | 启动一个真实 Agent，保存状态、轨迹与补丁，清理本次任务容器 | 不需要知道旧工作区名称、Docker 路径或手填 JSON |
 
-在新工作区的终端运行下列入口。通过 GitHub 官方 API 获取安装脚本，不要求预先安装 Git，也不下载仓库内的历史图表和实验归档：
+在新工作区终端填写模型 API 与模型名，执行以下固定版本入口。官网提供小型运行包与原版 ARM64 crane 制品， 全部按校验和验证；无需 GitHub token，也不依赖共享出口的
+GitHub 匿名 API 配额。
 
 ```bash
-curl --fail --location \
-  -H 'Accept: application/vnd.github.raw+json' \
-  'https://api.github.com/repos/vLLM-HUST/vllm-hust-benchmark/contents/scripts/bootstrap_swe_bench_pro.py?ref=main' \
-  --output /root/bootstrap_swe_bench_pro.py
-
-python3 /root/bootstrap_swe_bench_pro.py \
-  --work /root/swe-pro-first \
-  --model-api http://MODEL_HOST:MODEL_PORT/v1 \
-  --model-name openai/SERVED_MODEL_NAME \
-  --run
+MODEL_API=https://MODEL_HOST/v1
+MODEL_NAME=openai/SERVED_MODEL_NAME
+BASE=https://vllm-hust.sage.org.ai/downloads/swe-bench-pro
+REV=1cc6899e284af5e7c1947d7496502022c3d5ee6a
+curl --fail --location "$BASE/$REV/bootstrap_swe_bench_pro.py" --output bootstrap_swe_bench_pro.py
+echo 'b39a128b576876b4a1e5ddd7d9b57e10a48822852a0c9e9df228a5025af15ee5  bootstrap_swe_bench_pro.py' | sha256sum --check
+python3 bootstrap_swe_bench_pro.py --source-revision "$REV" \
+  --source-bundle-url "$BASE/$REV/runtime.tar.gz" \
+  --source-bundle-sha256 1b3cc94fb8730f86b8976d7484953cf8587eb04e11d21a9b6e68872aae95ecdd \
+  --crane-archive-url "$BASE/crane-v0.20.3-linux-arm64.tar.gz" \
+  --work "$HOME/swe-pro-first" --model-api "$MODEL_API" --model-name "$MODEL_NAME" --run
 ```
 
-`MODEL_HOST:MODEL_PORT` 和 `SERVED_MODEL_NAME` 换成已有模型服务信息；脚本先检查 `/v1/models` 是否确实包含该模型。 需要认证时追加
+`MODEL_API` 和 `MODEL_NAME` 换成已有模型服务信息；脚本先检查 `/v1/models` 是否确实包含该模型。 需要认证时追加
 `--api-key-env MODEL_API_KEY`，密钥值只放工作区环境变量，不能写进 URL、命令参数或配置文件。 不加 `--run` 只准备环境，不发模型推理请求。
 
-安装脚本先将源码版本解析为一个固定 Git commit，下载小型运行文件，随后复用本仓库现有的 `check → prepare → verify-inputs → run`，没有第二套 Agent
-实现。 固定官方 Agent、V1 数据 SHA256 和社区 ARM 镜像来源仍以原锁定清单为准；入门任务的不可变 manifest/config 与工具下载摘要另见
+安装脚本验证指定 Git commit 的运行包 SHA256、文件清单与逐文件摘要，随后复用本仓库现有的 `check → prepare → verify-inputs → run`，没有第二套
+Agent 实现。 固定官方 Agent、V1 数据 SHA256 和社区 ARM 镜像来源仍以原锁定清单为准；入门任务的不可变 manifest/config 与工具下载摘要另见
 [`swe_bench_pro_bootstrap_lock.json`](../src/vllm_hust_benchmark/data/swe_bench_pro_bootstrap_lock.json)。
 镜像仓库返回不同摘要时，拒绝启动 Agent。现有客户端源码安装方式仍保留在后续章节。
 
@@ -286,15 +289,20 @@ Qwen3.5-35B-A3B 已在保留的两张 Ascend 910B2、BF16 TP2、每卡16GiB KV�
 [原生上下文单 Agent 报告](../reports/swe-bench-pro-native-context-20261020/README.md)。
 这是特定部署的实测配置，通用入口仍只依赖你自己的模型API；不会自动替你重启模型或调整资源。
 
-## 5. 独立评分（可选）
+## 5. 对保存的补丁独立评分
+
+上面的 bootstrap 已安装本地官方评分所需 CPU 依赖。使用以下命令复验保存的补丁， 不用重跑 Agent，不会发送模型请求，也不需要模型 API 仍然在线：
 
 ```bash
-"$PYTHON" -m vllm_hust_benchmark.swe_bench_pro grade \
+WORK="$HOME/swe-pro-first"
+"$WORK/client/bin/python" -m vllm_hust_benchmark.swe_bench_pro grade \
   --settings "$WORK/settings-private.json" --inputs "$WORK/inputs" \
-  --batch-directory "$WORK/run-001" --output "$WORK/grade-001"
+  --batch-directory "$WORK/run" --output "$WORK/grade-001"
 ```
 
-此步骤在模型计时之外调用固定版本官方评分器，用独立容器复验保存的补丁，不发送模型请求。 评分器另有自己的 Python 依赖，按固定源码的 requirements 安装到专用 CPU 环境后执行。
+bootstrap 的实际输出目录为 `$WORK/run`；若使用前文手动配置流程，按实际目录改为 `run-001`。
+每次评分使用新的输出目录，保留此前失败证据。评分器使用固定官方源码和独立任务容器， 不修改官方测试、补丁过滤或计分逻辑。
+
 保存 `grading-status.json` 及评分原件；只有官方输出完整才能判定 resolved，缺失输出保留未决。
 
 新评分入口在固定官方脚本外增加补丁应用取证，不改官方补丁过滤、测试、解析器或计分规则：
