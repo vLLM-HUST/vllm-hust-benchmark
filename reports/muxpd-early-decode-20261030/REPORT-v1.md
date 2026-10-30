@@ -34,8 +34,8 @@ FULL_DECODE_ONLY [1,2,4,8]
 保持不变。`enable_npugraph_ex=false`、`enable_static_kernel=false`、`HCCL_DETERMINISTIC=true`，batch
 invariance 关闭。原源码、数学路径和采样没有改变。
 
-保留普通采集窗口 `[1,200..208]`、128位置校验上限及原80份向量；仅给 rank0 的目标题补充2–199共198份向量。每步原 greedy
-调用一次，旧窗口与新增目标窗口取并集，最多一次原 full-batch clone；普通 bookkeeping 后复用同一次 D2H。实际 greedy 数据为 FP32，八行 clone
+保留普通采集窗口 `[1,200..208]`、128位置校验上限及原80份向量；仅给 rank0 的目标题补充2–199共198份向量。每次采样仅调用一次原 greedy，
+旧窗口与新增目标窗口取并集，最多一次原 full-batch clone；普通 bookkeeping 后复用同一次 D2H。实际 greedy 数据为 FP32，八行 clone
 最大7,946,240字节；新增目标向量 payload 为196,669,440字节/角色。新文件与普通80文件分开保存。
 
 | 角色   | 控制器正常终态（UTC，2026-10-30） | 结果                                        |
