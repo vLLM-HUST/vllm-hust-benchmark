@@ -2757,6 +2757,26 @@
       "scope_limits": "NQ-open only; not full document NQ, EfficientQA or DPR/REALM retrieval. Plain default profile has152/3610 EM and3127 empty outputs; native-chat fixed3 has0/3 EM with no empty output. Availability is not quality acceptance, and these profiles must not be pooled."
     },
     "MULTIAGENTBENCH": {
+      "original_asset_acquisition": {
+        "status": "FIVE_PINNED_ORIGINAL_JSONL_FILES_ACQUIRED_AND_PARSED_NOT_NATIVE_EXECUTION",
+        "server_directory": "/root/multiagentbench-original-assets-20261030-001",
+        "original_files": 5,
+        "original_bytes": 5369142,
+        "original_rows": 500,
+        "rows_per_file": 100,
+        "publisher_git_blob_and_size_verified": true,
+        "sha256_by_scenario": {
+          "bargaining": "786b03c4a7c20ba67ae59860ad6c01dd8bb4ce0528ae08515f921320488c1547",
+          "coding": "7189bb38cb1c099dfa42c55af9b56ad4d177df986ff0f357160928e9d401d48b",
+          "database": "e1128d946d49c4943849a758b0c2d22a1af57b7a71c43694107813d8a1542631",
+          "minecraft": "232785cbd492eff0fbb821db4db7415f5cf1f01a1326e7deaffe9f59a6f1d08d",
+          "research": "1c7583f1ee0583ac12a625fb5c19de7b5983344dde89a2254c1782d6309310e9"
+        },
+        "schema_boundary": "Minecraft lacks task_id and scenario fields present in the other four files; database alone adds communication. Preserve native per-scenario structure and agent/environment/relationship/metric contracts, not flat synthetic prompts. Full field values, reference relationships and all publisher scenarios are not yet qualified.",
+        "raw_files_on_windows_or_git": false,
+        "model_calls": 0,
+        "source_checkbox_eligible": false
+      },
       "protocol_review": {
         "status": "OFFICIAL_GIT_TREE_IDENTITIES_REGISTERED_NOT_ACQUIRED_OR_EXECUTED",
         "publisher": "https://github.com/ulab-uiuc/MARBLE",
@@ -2775,12 +2795,12 @@
       },
       "scope": "public",
       "delivery_kind": "review_original_source_protocol",
-      "status": "NOT_STARTED",
+      "status": "IN_PROGRESS",
       "checked": false,
       "legacy_checked": false,
       "existing_receipt": null,
       "delivery_receipt": null,
-      "blocker": null
+      "blocker": "Five original JSONL files acquired and identity-checked; native software/environment, unchanged per-scenario inputs/references, model/judge binding, official scoring and public/research consumption remain pending. No native execution or source completion."
     },
     "DEEPPLANNING": {
       "scope": "public",
