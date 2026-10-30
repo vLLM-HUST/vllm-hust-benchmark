@@ -48,8 +48,17 @@ def test_report_distinguishes_development_comparison_and_designated_baseline():
     assert "原生基线证据，10月12日至15日" not in text
     assert "不替代MMLU-Pro质量测量或M01运算计数" in text
     assert "0.18对应工况判定待完成" not in text
-    assert text.count("C16时延数值门槛达到；全部占用资源及适用质量/SLO仍待核验") == 2
+    historical = " ".join((REPORT / "中期测试报告-v102.md").read_text().split())
+    assert (
+        historical.count("C16时延数值门槛达到；全部占用资源及适用质量/SLO仍待核验") == 2
+    )
     assert (
         "C16数值门槛已达到；客户端记录版本已恢复；B1设备占用及质量/SLO适用性待核"
-        in text
+        in historical
     )
+    # Current outline rows now bind the complete fixed018/full-answer pair.
+    outline = text.split("## 二、大纲指标对照表", 1)[1].split("## 三、", 1)[0]
+    assert "495.8359→944.4738" in outline
+    assert "同一200题突发负载" in outline
+    assert "本轮固定子集正确数未下降" in outline
+    assert "C16" not in outline

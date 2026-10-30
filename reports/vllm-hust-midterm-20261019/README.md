@@ -3,9 +3,10 @@
 当前定义：B0固定为vLLM 0.18 + vLLM-Ascend
 0.18；B1是当前已实测最优优化配置，基座版本不限但明确标注。其他版本Native仅为版本对照，不称B0。原始归档中的历史运行ID保持不变。
 
-主报告：[中期测试报告](%E4%B8%AD%E6%9C%9F%E6%B5%8B%E8%AF%95%E6%8A%A5%E5%91%8A.md)，当前V1.01纠正M01参考：保留B0/B1同轮F/T测量，C为3.8407/7.1042
-TFLOPS/芯片，描述性提升84.9705%；旧经验参考退出当前判定，替代参考、η及达标结论修订中。
-见[参考推导与缺口](m01-reference-revision-20261029/method.md)、[机器可读复算](m01-reference-revision-20261029/summary.json)和[当前方法状态](current-method.json)。本次未启动新实验。
+主报告：[中期测试报告](%E4%B8%AD%E6%9C%9F%E6%B5%8B%E8%AF%95%E6%8A%A5%E5%91%8A.md)，当前V1.03新增固定200题、8192回答预算联合配对：B0/B1为143/153题正确，双方零请求失败；同轮吞吐提升90.48%，公开类似机型同费率成本降低47.50%。固定B0与4GiB/rank状态预算B1的4K/16K连续窗口均完成。配置、逐请求派生值、原始遥测和保留失败见[完整回答联合测量](../full-answer-joint-20261030/README.md)。
+
+M01仍保留原计数轮C=3.8407/7.1042 TFLOPS/芯片；新完整回答成绩不替代旧out256质量。独立依赖图参考19.0819
+TFLOPS/芯片及37.2302%仅为模型诊断，正式参考绑定、匹配计时与质量尚未闭合。见[参考复核](../acceptance-completion-20261029/README.md)和[当前方法状态](current-method.json)。
 其他结果沿用V0.99：SWE累计26项、原记录3/26及同答案恢复4/26，705项未执行；Terminal累计4项，原失败、null和派生评分分别保留。[SWE规范证据](../swe-native018-wave2-openlibrary-navidrome-20261027/README.md)、[Circuit证据](../terminal-circuit-context-20261027/README.md)。旧报告快照及原始证据保留，当前整体验收尚未完成。
 
 **指定0.18吞吐对照已存在：** C16 SWE-prefix-reuse 900秒窗口，B0 247.2656、B1 885.9611

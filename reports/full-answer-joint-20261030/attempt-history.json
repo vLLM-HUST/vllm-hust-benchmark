@@ -1,0 +1,119 @@
+{
+  "attempts": [
+    {
+      "run": "continuous-b1-packed-r1",
+      "description": "Total cgroup memory guard stopped warmup; no new driver allocation failure was recorded. Later EngineDeadError followed shutdown. The guard was prospectively revised, with original failure retained.",
+      "receipt": {
+        "status": "failed",
+        "started": 1793330070.128936,
+        "reserved_physical_cards": [
+          5,
+          6
+        ],
+        "children": [
+          {
+            "pid": 3807365,
+            "exit_code": -2
+          },
+          {
+            "pid": 3768175,
+            "exit_code": 130
+          }
+        ],
+        "model_run_started": true,
+        "service_pid": 3768175,
+        "client_pid": 3807365,
+        "error": "AssertionError: 2GiB container memory reserve reached",
+        "ended": 1793331070.7629375,
+        "all_reserved_devices_released": true,
+        "remaining_owned_pids": []
+      },
+      "receipt_sha256": "de3ffacb3cd0b70807f2629b76ebe9c8599b50f4ba78f68e26bb71e70b759304",
+      "source_manifest_sha256": "fbc7b00e85481268b34df06f067d7e32ba3fcfbb70f6ba1b39c803243a9a43d8"
+    },
+    {
+      "run": "continuous-b1-packed-r2",
+      "description": "Ordinary port bind returned EADDRINUSE before model startup. No requests ran; the exact transient TCP state was not captured. A bounded port-release wait was added without bypassing listeners.",
+      "receipt": {
+        "status": "failed",
+        "started": 1793333104.2158618,
+        "reserved_physical_cards": [
+          5,
+          6
+        ],
+        "children": [],
+        "model_run_started": false,
+        "error": "OSError: [Errno 98] Address already in use",
+        "ended": 1793333105.271942,
+        "all_reserved_devices_released": true,
+        "remaining_owned_pids": []
+      },
+      "receipt_sha256": "3cb9d6424afe61f5e92f27f4fa3c3f550a3251821fee10aa1f3722cdf2402435",
+      "source_manifest_sha256": "a3b1c9ebed1033afc1681f1e2f548f2c85ee086ee23e41cb8ebd6a0066dd581f"
+    },
+    {
+      "run": "continuous-b1-packed-r3",
+      "description": "Actual8GiB/rank host budget:24 warmup successes,16 formal successes and8 failures. Rank1 requested32MiB pinned allocation and received207001. No16K or full-answer B1 run followed.",
+      "receipt": {
+        "status": "failed",
+        "started": 1793333220.2076695,
+        "reserved_physical_cards": [
+          5,
+          6
+        ],
+        "children": [
+          {
+            "pid": 3914213,
+            "exit_code": 1
+          },
+          {
+            "pid": 3874589,
+            "exit_code": 130
+          }
+        ],
+        "model_run_started": true,
+        "service_pid": 3874589,
+        "client_pid": 3914213,
+        "client_exit": 1,
+        "error": "AssertionError: Client failed; no automatic retries",
+        "ended": 1793334315.3886356,
+        "all_reserved_devices_released": true,
+        "remaining_owned_pids": []
+      },
+      "receipt_sha256": "d370b2a131c7f2dc86787d10f5397632909891be55d2d6536eb20d9213e04449",
+      "source_manifest_sha256": "181df30c7ae466acb92da25198222cf8e4f8877e8f0ef1f0debb5549ddfaf604"
+    },
+    {
+      "run": "continuous-b1-packed-r4",
+      "description": "Prospective4GiB/rank host budget, plus disclosed inactive-runtime migration/page-cache change. Both continuous formal cohorts completed with zero failures; complete joint results are archived separately.",
+      "receipt": {
+        "status": "completed",
+        "started": 1793335708.8069978,
+        "reserved_physical_cards": [
+          5,
+          6
+        ],
+        "children": [
+          {
+            "pid": 3986072,
+            "exit_code": 0
+          },
+          {
+            "pid": 3949548,
+            "exit_code": 130
+          }
+        ],
+        "model_run_started": true,
+        "service_pid": 3949548,
+        "client_pid": 3986072,
+        "client_exit": 0,
+        "ended": 1793337378.378349,
+        "all_reserved_devices_released": true,
+        "remaining_owned_pids": []
+      },
+      "receipt_sha256": "9ff6caf263e3c9146252c009c8e9ca1b165b3a3b1fd5868b15d53c59f797f214",
+      "source_manifest_sha256": "8d424bbb88146cc8392cc823e48933b75796a55a4193c55ebf147b62d805b1f6"
+    }
+  ],
+  "scope": "All packed-host continuous attempts in this batch, including controller and pre-model admission failures. No best-of repeated joint arm selection."
+}
