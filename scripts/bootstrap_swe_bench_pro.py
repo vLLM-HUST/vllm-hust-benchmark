@@ -146,7 +146,9 @@ def bundle_repository(url, checksum, revision, directory=None):
         raise ValueError("source bundle requires an immutable source revision")
     if not re.fullmatch(r"[a-f0-9]{64}", checksum or ""):
         raise ValueError("source bundle requires its published SHA256")
-    directory = directory or Path.home() / ".local/share/swe-bench-pro/source" / revision
+    directory = (
+        directory or Path.home() / ".local/share/swe-bench-pro/source" / revision
+    )
     if not directory.is_absolute() or directory.is_symlink():
         raise ValueError("source-directory must be an absolute non-symlink directory")
     directory.parent.mkdir(parents=True, exist_ok=True)
@@ -161,14 +163,22 @@ def bundle_repository(url, checksum, revision, directory=None):
         if any(not entry.isfile() for entry in entries):
             raise ValueError("source bundle must contain regular files only")
         manifest = json.load(archive.extractfile("source-bundle.json"))
-        if manifest["commit"] != revision or set(manifest["files"]) != set(RUNTIME_SOURCE_FILES):
+        if manifest["commit"] != revision or set(manifest["files"]) != set(
+            RUNTIME_SOURCE_FILES
+        ):
             raise ValueError("source bundle revision or manifest differs")
         data = {name: archive.extractfile(name).read() for name in RUNTIME_SOURCE_FILES}
-        if any(hashlib.sha256(value).hexdigest() != manifest["files"][name] for name, value in data.items()):
+        if any(
+            hashlib.sha256(value).hexdigest() != manifest["files"][name]
+            for name, value in data.items()
+        ):
             raise ValueError("source bundle file SHA256 differs")
     receipt_path = directory / "source-installation.json"
     if directory.exists():
-        if not receipt_path.is_file() or json.loads(receipt_path.read_text()).get("commit") != revision:
+        if (
+            not receipt_path.is_file()
+            or json.loads(receipt_path.read_text()).get("commit") != revision
+        ):
             raise ValueError("source directory exists without this installer revision")
         for name, checksum in manifest["files"].items():
             if sha256(directory / name) != checksum:
@@ -269,9 +279,14 @@ def main():
         options.add_argument("--source-directory", type=Path)
         bundle, _ = options.parse_known_args()
         ROOT = (
-            bundle_repository(bundle.source_bundle_url, bundle.source_bundle_sha256,
-                              bundle.source_revision, bundle.source_directory)
-            if bundle.source_bundle_url else source_repository(sys.argv[1:])
+            bundle_repository(
+                bundle.source_bundle_url,
+                bundle.source_bundle_sha256,
+                bundle.source_revision,
+                bundle.source_directory,
+            )
+            if bundle.source_bundle_url
+            else source_repository(sys.argv[1:])
         )
         LOCK = ROOT / "src/vllm_hust_benchmark/data/swe_bench_pro_v1_lock.json"
     artifact_lock = json.loads(
@@ -291,8 +306,13 @@ def main():
         help="optional private source installation directory",
     )
     p.add_argument("--work", required=True, type=Path)
-    p.add_argument("--source-bundle-url", help="published small runtime bundle; avoids GitHub API rate limits")
-    p.add_argument("--source-bundle-sha256", help="published SHA256 for the runtime bundle")
+    p.add_argument(
+        "--source-bundle-url",
+        help="published small runtime bundle; avoids GitHub API rate limits",
+    )
+    p.add_argument(
+        "--source-bundle-sha256", help="published SHA256 for the runtime bundle"
+    )
     p.add_argument("--model-api", required=True)
     p.add_argument("--model-name", required=True)
     p.add_argument("--api-key-env")

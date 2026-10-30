@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Package only public runtime files from an operator-verified source checkout."""
+
 import argparse
 import hashlib
 import io
@@ -12,9 +13,12 @@ from bootstrap_swe_bench_pro import RUNTIME_SOURCE_FILES
 
 def build(root, revision, output):
     files = {name: (root / name).read_bytes() for name in RUNTIME_SOURCE_FILES}
-    manifest = {"commit": revision, "files": {
-        name: hashlib.sha256(value).hexdigest() for name, value in files.items()
-    }}
+    manifest = {
+        "commit": revision,
+        "files": {
+            name: hashlib.sha256(value).hexdigest() for name, value in files.items()
+        },
+    }
     files["source-bundle.json"] = (json.dumps(manifest, indent=2) + "\n").encode()
     with tarfile.open(output, "w:gz") as archive:
         for name, value in sorted(files.items()):

@@ -19,10 +19,19 @@ bootstrap = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(bootstrap)
 
 
-def test_bundle_installs_complete_runtime_without_api_and_rejects_tampering(tmp_path, monkeypatch):
+def test_bundle_installs_complete_runtime_without_api_and_rejects_tampering(
+    tmp_path, monkeypatch
+):
     revision = "b" * 40
-    contents = {name: (ROOT / name).read_bytes() for name in bootstrap.RUNTIME_SOURCE_FILES}
-    manifest = {"commit": revision, "files": {name: hashlib.sha256(data).hexdigest() for name, data in contents.items()}}
+    contents = {
+        name: (ROOT / name).read_bytes() for name in bootstrap.RUNTIME_SOURCE_FILES
+    }
+    manifest = {
+        "commit": revision,
+        "files": {
+            name: hashlib.sha256(data).hexdigest() for name, data in contents.items()
+        },
+    }
     contents["source-bundle.json"] = json.dumps(manifest).encode()
     archive = tmp_path / "release.tar.gz"
     with tarfile.open(archive, "w:gz") as tar:
@@ -31,12 +40,19 @@ def test_bundle_installs_complete_runtime_without_api_and_rejects_tampering(tmp_
             entry.size = len(data)
             tar.addfile(entry, io.BytesIO(data))
     seen = []
+
     def fetch(request, timeout):
         seen.append(request.full_url)
         return io.BytesIO(archive.read_bytes())
+
     monkeypatch.setattr(bootstrap.urllib.request, "urlopen", fetch)
     target = tmp_path / "install" / revision
-    args = ("https://site.example/runtime.tar.gz", bootstrap.sha256(archive), revision, target)
+    args = (
+        "https://site.example/runtime.tar.gz",
+        bootstrap.sha256(archive),
+        revision,
+        target,
+    )
     assert bootstrap.bundle_repository(*args) == target
     assert seen == ["https://site.example/runtime.tar.gz"]
     assert (target / "src/vllm_hust_benchmark/swe_patch_state.py").is_file()
