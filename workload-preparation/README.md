@@ -1084,6 +1084,24 @@ gram/英文停用词设置保持不变，关键词及分数按原tuple格式返�
 本配方已在专用ARM64 CPU工作区构建，并通过非root65534、无网络、只读根、去全部能力、禁止提权的真实容器`--help`探测，退出0；未挂载任务数据、Docker
 socket或NPU。任务运行还必须另行部署私有数据/输出、本地模型传输、各场景原环境和评分；镜像只证明软件导入底座可用，不代表Minecraft、数据库、研究工具等环境已齐备，也不是安全认证或原生任务完成。旧容器、镜像和结果未清理。
 
+### Research原题运行入口（真实推理尚未启动）
+
+`scripts/run_marble_original_research.py`要求既有独立Linux/Python3.10原锁客户端。默认只显示计划；软件和配置预检如下：
+
+```bash
+/external/marble-client/bin/python -I scripts/run_marble_original_research.py \
+  --author-root /external/marble-author \
+  --prepared-root /private/marble-official-research \
+  --bound-root /private/marble-local-research \
+  --output /private/marble-native-preflight --prepare-only
+```
+
+该命令核对固定100份原源码、批准的三行缩进补丁及原前三题部署绑定，创建独立软件副本、原资源路径、私有日志目录和运行配置；不会运行工具、模型或Agent。服务器已实际执行通过。源码/原配置不原地修改；输出必须是独立新目录，不得放入仓库或任何输入目录。
+
+确认NPU服务和可信worker可用后，将输出改成另一个全新私有目录并使用`--execute`。入口依次调用原`marble.main`，保留原题、Agent、关系、5轮协议及原函数各自生成预算；不以单次问答替代Agent。`model-queue/`使用既有`appworld_model_transport.py`协议，`keyword-queue/`使用上述关键词协议，均由可信worker对接NPU。运行器本身不会分配设备、恢复模型、提供SSH凭据或启动这些外部worker；未连接worker时不要开始原题运行。模型proxy仅监听本进程的`127.0.0.1:14005`，端口须空闲，外部推理服务不能指回该proxy形成环路。
+
+每题保留原stdout/stderr、结果JSONL及子进程PID/出生标记；正常失败保留并继续固定剩余原题，不补换题。任一CLI失败或缺失结果文件，运行器最终返回非零；低质量答案本身不等于CLI故障。运行终态仍需核验原评分、实际请求及研究消费，不能直接给来源打勾。当前仅准备入口实测通过；最新NPU入口连接拒绝，尚未启动这三题的真实推理。
+
 ## LongMemEval M 原检索与读者入口（问答评分尚未完成）
 
 [固定官方版本](https://github.com/xiaowu0162/LongMemEval/tree/9e0b455f4ef0e2ab8f2e582289761153549043fc)区分全历史和检索增强问答；M过长，不把全历史超限当作原检索路径不可用。原数据在服务器仓库外按发布方方式取得，本仓库不打包原题或权重。原软件可独立准备和核验：
