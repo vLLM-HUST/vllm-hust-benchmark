@@ -9,12 +9,13 @@ import copy
 import hashlib
 import json
 import re
+import subprocess
 import zipfile
 from pathlib import Path
 
 PROJECT = re.compile(
     r"betterscale|traceloom|gennova|latchmoe|tricard|"
-    r"prefix-cache-routing-reliability|prefix-routing-mean|"
+    r"prefix-cache-routing-reliability|prefix[ _-]routing|pr173-dev4|"
     r"ascend-adaptive-quantized|adaptive[ _-]+quantized[ _-]+kv|"
     r"vllm-hust-perf-analyzer|vllm-hust-cuda-(?:qk-rope|hybrid-apc|async-tp|fullgraph-matrix)",
     re.I,
@@ -56,6 +57,10 @@ def matches(value):
 def target_record(value):
     if not isinstance(value, dict):
         return False
+    # Withhold the whole measured comparison if its evidence belongs to a
+    # withdrawn work. Removing just the evidence URL corrupts its provenance.
+    if ("metrics" in value or "configuration" in value) and matches(value):
+        return True
     if any(matches(v) for k, v in value.items() if k in IDENTITY_KEYS):
         return True
     for key in ("configuration", "runtime", "provenance", "source_provenance"):
@@ -67,7 +72,10 @@ def target_record(value):
 
 def project_json(value, removed_ids, record=False):
     if isinstance(value, dict):
-        if record and target_record(value):
+        if record and (
+            target_record(value)
+            or (isinstance(value.get("id"), str) and value["id"] in removed_ids)
+        ):
             if isinstance(value.get("id"), str):
                 removed_ids.add(value["id"])
             return DROP
@@ -97,6 +105,49 @@ def project_json(value, removed_ids, record=False):
         ).strip()
         return retained if retained else DROP
     return value
+
+
+def prune_frontier(data, removed_ids):
+    """Keep declared plot selections consistent with the remaining evidence."""
+    if (
+        not isinstance(data, dict)
+        or data.get("schema_version") != "leaderboard-frontier/v1"
+    ):
+        return data
+    for _ in range(len(data["cohorts"]) + 1):
+        previous = len(data["cohorts"])
+        point_ids = {p["id"] for p in data["points"]}
+        cohorts = []
+        for cohort in data["cohorts"]:
+            points = [p for p in data["points"] if p["cohort_id"] == cohort["id"]]
+            contract = cohort["workload"]["contract"]
+            retain = bool(points)
+            if "display_series_ids" in contract:
+                series = {p.get("load", {}).get("concurrency_series") for p in points}
+                contract["display_series_ids"] = [
+                    s for s in contract["display_series_ids"] if s in series
+                ]
+                retain = retain and bool(contract["display_series_ids"])
+            if "comparison_point_ids" in contract:
+                contract["comparison_point_ids"] = [
+                    p for p in contract["comparison_point_ids"] if p in point_ids
+                ]
+                retain = retain and bool(contract["comparison_point_ids"])
+            if contract.get("default_groups") == []:
+                contract.pop("default_groups")
+            if retain:
+                cohorts.append(cohort)
+            else:
+                removed_ids.add(cohort["id"])
+        data["cohorts"] = cohorts
+        cohort_ids = {c["id"] for c in cohorts}
+        for point in data["points"]:
+            if point["cohort_id"] not in cohort_ids:
+                removed_ids.add(point["id"])
+        data["points"] = [p for p in data["points"] if p["cohort_id"] in cohort_ids]
+        if len(cohorts) == previous:
+            break
+    return data
 
 
 def clean_html(text):
@@ -265,6 +316,7 @@ def build(source, destination, policy_revision):
         if suffix == ".json" and name != "data/benchmark-source-manifest.json":
             data = json.loads(raw)
             projected = project_json(data, removed_ids)
+            prune_frontier(projected, removed_ids)
             documents[name] = (data, projected, raw)
             continue
         if suffix == ".html":
@@ -279,6 +331,7 @@ def build(source, destination, policy_revision):
     # Repeat with the full removed-id set so cross-file references cannot expose orphan records.
     for name, (original, _, raw) in documents.items():
         projected = project_json(original, removed_ids)
+        prune_frontier(projected, removed_ids)
         if projected is DROP:
             removed.append(name)
             continue
@@ -372,6 +425,19 @@ if __name__ == "__main__":
     args = parser.parse_args()
     audit = build(args.website, args.output, args.policy_revision)
     validate(args.output)
+    # Exercise the same schema gate used by the rendered chart, including
+    # references between configurations, cohorts and comparison series.
+    subprocess.run(
+        [
+            "node",
+            "-e",
+            "const fs=require('fs');const M=require('./assets/leaderboard-frontier-model.js');M.validate(JSON.parse(fs.readFileSync('data/leaderboard_frontier.json')));",
+        ],
+        cwd=args.output,
+        check=True,
+    )
+    for javascript in (args.output / "assets").glob("*.js"):
+        subprocess.run(["node", "--check", str(javascript.resolve())], check=True)
     if args.audit:
         args.audit.write_text(json.dumps(audit, ensure_ascii=False, indent=2) + "\n")
     print(

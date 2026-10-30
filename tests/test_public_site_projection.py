@@ -90,6 +90,16 @@ def test_combined_record_is_withheld_as_a_whole():
     assert projection.project_json([record], set()) == []
 
 
+def test_withdrawn_comparison_does_not_leave_an_unverifiable_native_point():
+    record = {
+        "id": "comparison-off",
+        "configuration": {"engine": "Native"},
+        "metrics": {"throughput": 42},
+        "evidence": {"url": "https://example.org/FRONTIER-PREFIX-ROUTING-MEAN.md"},
+    }
+    assert projection.project_json([record], set()) == []
+
+
 def test_manifest_tampering_is_detected(tmp_path):
     (tmp_path / "data").mkdir()
     (tmp_path / "data/result.json").write_text("{}")
@@ -101,3 +111,38 @@ def test_manifest_tampering_is_detected(tmp_path):
     (tmp_path / "data/benchmark-source-manifest.json").write_text(json.dumps(manifest))
     with pytest.raises(AssertionError):
         projection.validate(tmp_path)
+
+
+def test_frontier_prunes_missing_series_without_changing_points():
+    point = {
+        "id": "retained",
+        "cohort_id": "a",
+        "load": {"concurrency_series": "native"},
+        "metrics": {"output_tps": 42},
+    }
+    data = {
+        "schema_version": "leaderboard-frontier/v1",
+        "cohorts": [
+            {
+                "id": "a",
+                "workload": {
+                    "contract": {"display_series_ids": ["native", "withdrawn"]}
+                },
+            },
+            {"id": "empty", "workload": {"contract": {}}},
+        ],
+        "points": [point],
+    }
+    removed = set()
+    projection.prune_frontier(data, removed)
+    assert data["points"] == [point]
+    assert data["cohorts"] == [
+        {"id": "a", "workload": {"contract": {"display_series_ids": ["native"]}}}
+    ]
+    assert removed == {"empty"}
+
+
+def test_object_valued_id_is_not_treated_as_a_record_reference():
+    assert projection.project_json(
+        {"nested": {"id": {"type": "descriptive"}}}, {"gone"}
+    ) == {"nested": {"id": {"type": "descriptive"}}}
