@@ -1181,7 +1181,16 @@ python scripts/verify_dailytalk_original_models.py --acoustic-checkpoint /privat
 
 该核验入口不下载、反序列化或运行模型。原`TextDataset`的Guo批量推理路径读取原音素、说话人/情感映射及本轮/历史文本嵌入；保留完整原对话关系，并保持模型原有的最多10轮历史窗口，不改用无历史分支，也不将完整训练期重预处理当作该推理路径的必需步骤。
 
+取得原元数据和所选音频后，可准备原Guo批量输入。该入口保留原始行字节与顺序，复制原说话人、情绪、统计映射，并逐轮登记原有最近10轮历史和待生成的512维特征文件名；缺少历史话轮或原文件校验不符时直接报错。
+
+```bash
+python scripts/prepare_dailytalk_original_guo_inputs.py --metadata-root /private/dailytalk/original-assets --audio-root /private/dailytalk/audio --output /private/dailytalk/guo-inputs --action prepare
+python scripts/prepare_dailytalk_original_guo_inputs.py --metadata-root /private/dailytalk/original-assets --audio-root /private/dailytalk/audio --output /private/dailytalk/guo-inputs --action verify
+```
+
+输出包含原行子集`val_phone.fixed3.private.txt`、原映射和`guo-input-contract.private.json`。这不是嵌入或合成结果；仍需用原文本编码器执行发布方的`encode([raw_text])[0]`并运行原Guo声学模型和声码器。两个命令已在服务器上对全部29个固定原话轮实际通过，不加载模型、不访问网络，也不将输入准备计为来源完成。
+
 当前服务器已通过软件和元数据公开`verify`入口，42份原Python文件语法检查通过。已取得原`val_phone.txt`按首次出现顺序的前3个完整对话（23、30、59）全部29段原始WAV及转写，保留原元数据；所选ZIP成员的原CRC和SHA256已核验，未下载或验证整份5.34GB压缩包。上述公开音频入口的`verify`与复用式`prepare`也已通过服务器实测，均无新下载。该CPU节点不能直连Google
 Drive，首次音频取得使用已披露的纯内存HTTPS中转；当前公开下载函数已做真实HTTP范围探测，完整首次下载路径只有离线夹具覆盖，不能称为该节点直连下载通过。官方`history_guo`的900000步检查点也已取得并完成全文件SHA256与ZIP成员CRC校验，没有反序列化或运行。音频和检查点只在服务器保存。
 
-universal声码器及原512维文本编码器文件也已取得并校验，尚未做NPU前向。原生合成仍未运行：所需原编码器文本特征、NPU环境、原始评测与研究侧接入仍待完成。原依赖包含Torch1.7和TensorFlow2.5.1，原`synthesize.py`仅选择CUDA或CPU；不可直接运行并静默回退CPU，必须先完成独立NPU环境与设备适配核验。不能用现有Qwen文本服务替代声学模型，也不能把源码解析、原音频取得或检查点字节校验算作该来源完成。原公开资源与代码许可按发布方及组件各自LICENSE执行，本仓库不打包音频和权重。
+universal声码器及原512维文本编码器文件也已取得并校验，尚未做NPU前向。独立软件环境已通过依赖检查；保留原文件的兼容副本仅调整可选依赖按需导入和显式NPU设备选择，原`model`、`dataset`、`synthesize`模块导入检查已通过，未初始化NPU或加载权重。这不等于复现原Torch1.7/TensorFlow2.5.1环境，也不等于原生合成通过。所需原编码器文本特征、真实NPU前向、原始评测与研究侧接入仍待完成；不得静默回退CPU。不能用现有Qwen文本服务替代声学模型，也不能把源码解析、原音频取得或检查点字节校验算作该来源完成。原公开资源与代码许可按发布方及组件各自LICENSE执行，本仓库不打包音频和权重。
