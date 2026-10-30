@@ -23,13 +23,13 @@ Ray 模板不能替代这个模板。
 | 在模板配置数据下载源和镜像仓库地址          | 下载并校验 V1 数据、固定镜像摘要和代码起点                 | 模型需要鉴权时，提供密钥环境变量名             |
 | 验证仓库制品可拉取，不依赖节点缓存          | 启动一个真实 Agent，保存状态、轨迹与补丁，清理本次任务容器 | 不需要知道旧工作区名称、Docker 路径或手填 JSON |
 
-在新工作区终端填写模型 API 与模型名，执行以下固定版本入口。官网提供小型运行包与原版 ARM64 crane 制品， 全部按校验和验证；无需 GitHub token，也不依赖共享出口的
+在新工作区终端填写模型 API 与模型名，执行以下固定版本入口。已验证的 9443 平台网关提供小型运行包与原版 ARM64 crane 制品， 全部按校验和验证；无需 GitHub token，也不依赖共享出口的
 GitHub 匿名 API 配额。
 
 ```bash
 MODEL_API=https://MODEL_HOST/v1
 MODEL_NAME=openai/SERVED_MODEL_NAME
-BASE=https://vllm-hust.sage.org.ai/downloads/swe-bench-pro
+BASE=https://coder.sage.org.ai:9443/swe-bench-pro-artifacts
 REV=33efa2a4ce065bcd6d25ab387ddffd85b3826a3f # pragma: allowlist secret
 BUNDLE_SHA=fcf21b81bc91e569ab57ebb43791a0a4b7b1b8678dd5dc3487ad931c57e5e7b8 # pragma: allowlist secret
 curl --fail --location "$BASE/$REV/bootstrap_swe_bench_pro.py" --output bootstrap_swe_bench_pro.py
