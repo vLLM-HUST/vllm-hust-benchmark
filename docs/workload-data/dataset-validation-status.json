@@ -2543,6 +2543,16 @@
         "fixed_selected_question_ids": ["bix-1-q1", "bix-1-q2", "bix-10-q1"],
         "http200_responses_observed_lower_bound": 20,
         "content_and_tool_result_messages_observed": true,
+        "transport_recovery": {
+          "status": "SAME_NATIVE_ACTOR_TRANSPORT_RESUMED",
+          "retained_failure": "SSH transport observation timed out650s after the NPU had already saved its response and the server worker had exited; CPU still awaited that response.",
+          "saved_response_request_bytes_rechecked": true,
+          "saved_response_recovered_without_model_call": true,
+          "response_fields_modified": false,
+          "native_actor_or_notebook_restarted": false,
+          "resume_uses_exact_saved_response_before_new_inference": true,
+          "boundary": "Transport recovery only, not deterministic task replay or task/scoring completion. Ambiguous multiple saved generations require review rather than silent selection."
+        },
         "completed_questions_observed": 0,
         "official_scoring_executed": false,
         "model_parser_correction": "Removed incompatible reasoning parser for explicitly nonthinking requests; no message-role or response-field rewriting.",
