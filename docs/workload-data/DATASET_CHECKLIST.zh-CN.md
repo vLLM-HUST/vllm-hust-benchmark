@@ -437,7 +437,7 @@ records = iter_workload("DRAGON_PUBLIC", data_root=Path("/external/dragon-origin
 - [ ] 交付闭环尚未完成。后续历史执行记录已包含固定三条原任务的隔离ReAct执行、140次模型请求及官方评分输出；三条任务均未成功，失败结果保留，不以换题或重跑提高分数。尚需复核原输出中的环境异常、公开入口与既有执行协议的一致性，并完成研究消费入口的原始任务与参考资产回查，不能用安装、读取或夹具测试替代这些验证。[核心客户端准备证据](validation/appworld-core-client-preparation-20261028.json)
 
 2026-10-30只读复核：原专用CPU
-Pod已不存在（Kubernetes返回`NotFound`），但本任务原持久卷仍为`Bound`，UID与既有记录一致。因此不能认定历史数据丢失，也不能认定旧进程仍在运行；恢复自有工作区后，应先从持久卷回查既有结果，不重复下载或执行原任务。本次未挂载卷、未修改平台配置、未新增模型调用，AppWorld保持未勾选。
+Pod已不存在（Kubernetes返回`NotFound`）；Coder最新build为`stopped`、原因`autostop`、停止job成功，但本任务原80GiB持久卷仍为`Bound`，UID与既有记录一致。因此不能认定历史数据丢失，也不能认定旧进程仍在运行；恢复自有工作区后，应先从持久卷回查既有结果，不重复下载或执行原任务。本次未挂载卷、未修改平台配置、未新增模型调用，AppWorld保持未勾选。
 
 公共入口：`python scripts/prepare_appworld_runtime.py --output <仓库外新目录> --uv <已有uv> --python <完整Python3.11>`默认只输出计划。显式加`--execute --install-protected-code`才安装官方包并在私有环境解包；可用`--uv-cache <已有自有软件缓存>`避免重复下载。工具将`APPWORLD_ROOT`、`APPWORLD_CACHE`及临时目录都指向外部目录，不改HOME或模型服务环境。该版本声明范围安装不是作者冻结锁；ARM需要Python.h。历史缺头文件和根盘缓存失败均保留，未删数据掩盖失败。
 
