@@ -1157,6 +1157,12 @@ CRC和归档目录身份另行记录。完整102题仍可从发布方原归档�
 
 另需完成部署隔离：原镜像配方包含API凭据ENV字段，不能把真实凭据交给生成代码；参考程序和评价资源也应与生成代码隔离。原`compute_scores`在执行程序前计算CodeBERT，须核验NPU度量后端，不能静默在CPU推理或跳过该度量来宣称跑通。当前预检清空凭据值且未执行代码，完整科学环境和评分仍未验证。
 
+原`LLMEngine`会按模型名前缀选择OpenAI或Bedrock，`ScienceAgent`还直接查模型价格表，不能把Qwen名称填进去便宣称接通。显式本地通信模块为`scripts/scienceagentbench_local_engine.py`，仅实现原`respond(messages, temperature, top_p)`接口：使用真实本地模型标识及已拥有的回环端点，采用原GPT-chat分支的2000-token预算、采样参数和SDK重试设置，不修改消息，也不将隐藏推理字段冒充答案。该分支是明确选择的已发表生成配置，不宣称与其他原生模型分支或GPT模型质量等价。
+
+[薄客户端版本](../configs/workload-native/scienceagentbench-sdk-client-requirements.txt)固定为OpenAI1.54.4、httpx0.27.2及backoff2.2.1；在独立Python3.10客户端安装并通过依赖检查，现有服务和客户端未升级。服务器使用真实SDK对本进程的合成回环HTTP服务完成两次控制调用，核验原消息、模型名称、2000预算、可选thinking绑定和实际返回的用量字段；这些是协议控制，不是原题或NPU推理。默认依旧保留发布方外层backoff，不能在模型不可达时盲目启动原题运行。
+
+通信模块尚未接入原Agent的价格和tokenizer路径，不能用GPT别名、虚构单价或“成本为零”绕过价格表；未知价格应报告不可得，完整Agent绑定仍待完成。另检查了[官方OpenHands legacy入口](https://github.com/OpenHands/benchmarks/blob/542cb71c860c11d6a70238a1dd4b4ac7a3e0d4d2/legacy/scienceagentbench/run_infer.py)：它仍默认读取validation，旧镜像上下文还复制整个benchmark目录，不能直接当作本次verified数据与隔离部署已就绪的依据。未拉取旧镜像，也未切换到未经验证的替代流程。
+
 ## BixBench 原科学任务准备与读取（原生执行结束，评分待核验）
 
 本接口用于官方科学Agent任务，不用零样本问答替代Notebook工作流。原问题JSONL实际为205条扁平记录、17字段，不能按旧数据卡的嵌套`questions`结构加载。文件版本和64份ZIP身份见[固定原资产清单](data/catalogs/bixbench_original_files_v1.json)；205条问题引用其中59份。当前只取得固定原前三题所需的两份原ZIP，其余57份尚未取得。

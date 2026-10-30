@@ -368,6 +368,8 @@ on:
       - 'configs/workload-native/marble*'
       - 'scripts/verify_scienceagentbench_original_assets.py'
       - 'tests/test_scienceagentbench_original_assets.py'
+      - 'scripts/scienceagentbench_local_engine.py'
+      - 'tests/test_scienceagentbench_local_engine.py'
       - 'configs/workload-native/scienceagentbench*'
       - 'configs/workload-native/dailytalk*'
       - 'scripts/*dailytalk*'
@@ -499,7 +501,7 @@ jobs:
       - name: DailyTalk original preparation contracts, no audio, weights or synthesis
         run: python -m pytest -q tests/test_dailytalk_original_preparation.py tests/test_dailytalk_original_audio.py tests/test_dailytalk_original_models.py tests/test_dailytalk_original_guo_inputs.py
       - name: ScienceAgentBench original asset identity fixtures, no datasets or programs
-        run: python -m pytest -q tests/test_scienceagentbench_original_assets.py
+        run: python -m pytest -q tests/test_scienceagentbench_original_assets.py tests/test_scienceagentbench_local_engine.py
       - name: Offline navigation contracts, no remote refresh or model execution
         run: |
           python scripts/data_index.py --check
