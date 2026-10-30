@@ -2757,6 +2757,19 @@
       "scope_limits": "NQ-open only; not full document NQ, EfficientQA or DPR/REALM retrieval. Plain default profile has152/3610 EM and3127 empty outputs; native-chat fixed3 has0/3 EM with no empty output. Availability is not quality acceptance, and these profiles must not be pooled."
     },
     "MULTIAGENTBENCH": {
+      "native_software_review": {
+        "revision": "8d60fa17b5596b44458a52d4296061b9fc13d6f2",
+        "python_requirement": ">=3.9,<3.12",
+        "dependency_lock": "poetry.lock",
+        "actual_main_flag": "--config_path",
+        "example_script_flag": "scripts/research/run_simulation.sh uses --config; differs from marble/main.py parser",
+        "model_dispatch": "marble/llms/model_prompting.py calls litellm.completion; original default512 max tokens and temperature0.0; local endpoint environment handling must be verified with pinned LiteLLM, not assumed",
+        "judge_dispatch": "marble/evaluator/evaluator.py reads metrics.evaluate_llm; fallback gpt-3.5-turbo. Communication and planning evaluation call model_prompting; no external paid calls authorized or executed",
+        "embedding_dispatch": "marble/llms/text_embedding.py separately calls litellm.embedding; a chat endpoint alone does not establish embedding availability",
+        "source_code_executed": false,
+        "model_calls": 0,
+        "source_checkbox_eligible": false
+      },
       "original_asset_acquisition": {
         "status": "FIVE_PINNED_ORIGINAL_JSONL_FILES_ACQUIRED_AND_PARSED_NOT_NATIVE_EXECUTION",
         "public_entry": "scripts/prepare_multiagentbench_original_assets.py",
