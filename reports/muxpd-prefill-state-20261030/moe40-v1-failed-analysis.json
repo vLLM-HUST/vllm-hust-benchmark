@@ -1,0 +1,1626 @@
+{
+  "schema": "muxpd-target-peer-p-moe-survey-analysis-v1",
+  "passed": false,
+  "localization_allowed": false,
+  "attempts": [
+    {
+      "directory": "/root/workspace/muxpd-target-prefill-moe-survey-20261030/runs-v1/native-peer-p-moe-observed-v1-01",
+      "terminal": true,
+      "collection_valid": false,
+      "errors": [
+        "ValueError: Controller cleanup/lifecycle failed"
+      ],
+      "reproduction_passed": false
+    }
+  ],
+  "errors": [
+    "ValueError: Invalid attempt retained: native-peer-p-moe-observed-v1-01: ['ValueError: Controller cleanup/lifecycle failed']"
+  ],
+  "analysis_role": "native",
+  "quality_gate": "NOT_TESTED",
+  "scope": "Target07338 first P all40 final MoE hidden outputs only. Not residual/persistent-state/KV equivalence, answer repair, full200 quality or performance evidence.",
+  "plan_sha256": "ae0706510213a83df43b6c9bbac310c572398dad7819aed1b853d1bec93c95f4",
+  "source_receipt_adapter": {
+    "source_receipts": {
+      "/root/workspace/vllm-hust/vllm/__init__.py": {
+        "path": "/root/workspace/vllm-hust/vllm/__init__.py",
+        "sha256": "fd3708e5a13abe98c566afd79a6b1987cef70c0548bb19c1218ff6a7f9d43346",
+        "commit": "d0f22d2bda562156e4dbf433ce645e1769b4f804",
+        "status": "",
+        "diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diff_bytes_utf8": "",
+        "changed_files": []
+      },
+      "/root/workspace/vllm-ascend-hust/vllm_ascend/__init__.py": {
+        "path": "/root/workspace/vllm-ascend-hust/vllm_ascend/__init__.py",
+        "sha256": "cfe116148053fcb120d766d99ca5bca2c37afac8822e72c6b1fce20af8a0e6d7",
+        "commit": "03766ac696fde5ab1980d80ca0b8543d3580c989",
+        "status": "M ../csrc/build_aclnn.sh",
+        "diff_sha256": "a03524d1d8a4b84c6da6c782b5f8b77b7c473c8d414cc9f17831869027f9922f",
+        "diff_bytes_utf8": "diff --git a/csrc/build_aclnn.sh b/csrc/build_aclnn.sh\nindex e0476e1..19fea47 100755\n--- a/csrc/build_aclnn.sh\n+++ b/csrc/build_aclnn.sh\n@@ -109,7 +109,7 @@ elif [[ \"$SOC_VERSION\" =~ ^ascend910b ]]; then\n         \"copy_and_expand_eagle_inputs\"\n         \"causal_conv1d\"\n         \"lightning_indexer_quant\"\n-        \"compressor\"\n+        # Local Qwen3.5 build: Compressor is not used by this model.\n         \"compressor_metadata\"\n         \"vllm_quant_lightning_indexer\"\n         \"vllm_quant_lightning_indexer_metadata\"\n",
+        "changed_files": [
+          {
+            "path": "csrc/build_aclnn.sh",
+            "exists": true,
+            "sha256": "b089d52475c6cb36fffd733bb5be3fbe4158b6845074751268938e98a1d0042c"
+          }
+        ]
+      }
+    },
+    "actual_source_checks": {
+      "/root/workspace/vllm-hust/vllm/__init__.py": {
+        "root": "/root/workspace/vllm-hust",
+        "module_parent_cwd": "/root/workspace/vllm-hust/vllm",
+        "old_status": "",
+        "new_status": "",
+        "diff": "",
+        "changed_files": []
+      },
+      "/root/workspace/vllm-ascend-hust/vllm_ascend/__init__.py": {
+        "root": "/root/workspace/vllm-ascend-hust",
+        "module_parent_cwd": "/root/workspace/vllm-ascend-hust/vllm_ascend",
+        "old_status": "M ../csrc/build_aclnn.sh",
+        "new_status": "M csrc/build_aclnn.sh",
+        "diff": "diff --git a/csrc/build_aclnn.sh b/csrc/build_aclnn.sh\nindex e0476e1..19fea47 100755\n--- a/csrc/build_aclnn.sh\n+++ b/csrc/build_aclnn.sh\n@@ -109,7 +109,7 @@ elif [[ \"$SOC_VERSION\" =~ ^ascend910b ]]; then\n         \"copy_and_expand_eagle_inputs\"\n         \"causal_conv1d\"\n         \"lightning_indexer_quant\"\n-        \"compressor\"\n+        # Local Qwen3.5 build: Compressor is not used by this model.\n         \"compressor_metadata\"\n         \"vllm_quant_lightning_indexer\"\n         \"vllm_quant_lightning_indexer_metadata\"\n",
+        "changed_files": [
+          {
+            "path": "csrc/build_aclnn.sh",
+            "exists": true,
+            "sha256": "b089d52475c6cb36fffd733bb5be3fbe4158b6845074751268938e98a1d0042c"
+          }
+        ]
+      }
+    },
+    "v1_result_preserved_sha256": "ebe82ac020a7efa789b3eb33a0a4809b66a64ddbdc1808bd6876c1d3577312de",
+    "scope": "Only source receipt formatting is adapted; every v1 lifecycle, invalid-attempt, exact four-profile, reproduction and observer/plain gate remains unchanged."
+  },
+  "historical_controls": {
+    "audits": {
+      "native-observed": {
+        "directory": "/root/workspace/muxpd-quality-layout-20261028/new-loss-probe-runs-v1/new-loss-native-observed-01",
+        "terminal": true,
+        "collection_valid": true,
+        "errors": [],
+        "reproduction_passed": true,
+        "full_run_reproduction": {
+          "role": "native",
+          "required_full_run_references": [
+            "native-quality-v2-hccl-true-01",
+            "native-quality-v2-hccl-true-02"
+          ],
+          "comparisons": {
+            "native-quality-v2-hccl-true-01": {
+              "cases": {
+                "mmlu-pro-07151": {
+                  "observed_tokens": 209,
+                  "historical_full_tokens": 289,
+                  "at_least208": true,
+                  "exact_first208": true,
+                  "entire_retained_prefix_equal": true,
+                  "first_difference": null
+                },
+                "mmlu-pro-07213": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 302,
+                  "at_least208": true,
+                  "exact_first208": true,
+                  "entire_retained_prefix_equal": true,
+                  "first_difference": null
+                },
+                "mmlu-pro-07275": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 379,
+                  "at_least208": true,
+                  "exact_first208": true,
+                  "entire_retained_prefix_equal": true,
+                  "first_difference": null
+                },
+                "mmlu-pro-07338": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 4723,
+                  "at_least208": true,
+                  "exact_first208": true,
+                  "entire_retained_prefix_equal": true,
+                  "first_difference": null
+                },
+                "mmlu-pro-07401": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 575,
+                  "at_least208": true,
+                  "exact_first208": true,
+                  "entire_retained_prefix_equal": true,
+                  "first_difference": null
+                },
+                "mmlu-pro-07461": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 468,
+                  "at_least208": true,
+                  "exact_first208": true,
+                  "entire_retained_prefix_equal": true,
+                  "first_difference": null
+                },
+                "mmlu-pro-07524": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 467,
+                  "at_least208": true,
+                  "exact_first208": true,
+                  "entire_retained_prefix_equal": true,
+                  "first_difference": null
+                },
+                "mmlu-pro-07585": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 532,
+                  "at_least208": true,
+                  "exact_first208": true,
+                  "entire_retained_prefix_equal": true,
+                  "first_difference": null
+                }
+              },
+              "passed": true
+            },
+            "native-quality-v2-hccl-true-02": {
+              "cases": {
+                "mmlu-pro-07151": {
+                  "observed_tokens": 209,
+                  "historical_full_tokens": 289,
+                  "at_least208": true,
+                  "exact_first208": true,
+                  "entire_retained_prefix_equal": true,
+                  "first_difference": null
+                },
+                "mmlu-pro-07213": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 302,
+                  "at_least208": true,
+                  "exact_first208": true,
+                  "entire_retained_prefix_equal": true,
+                  "first_difference": null
+                },
+                "mmlu-pro-07275": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 379,
+                  "at_least208": true,
+                  "exact_first208": true,
+                  "entire_retained_prefix_equal": true,
+                  "first_difference": null
+                },
+                "mmlu-pro-07338": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 4723,
+                  "at_least208": true,
+                  "exact_first208": true,
+                  "entire_retained_prefix_equal": true,
+                  "first_difference": null
+                },
+                "mmlu-pro-07401": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 575,
+                  "at_least208": true,
+                  "exact_first208": true,
+                  "entire_retained_prefix_equal": true,
+                  "first_difference": null
+                },
+                "mmlu-pro-07461": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 468,
+                  "at_least208": true,
+                  "exact_first208": true,
+                  "entire_retained_prefix_equal": true,
+                  "first_difference": null
+                },
+                "mmlu-pro-07524": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 467,
+                  "at_least208": true,
+                  "exact_first208": true,
+                  "entire_retained_prefix_equal": true,
+                  "first_difference": null
+                },
+                "mmlu-pro-07585": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 532,
+                  "at_least208": true,
+                  "exact_first208": true,
+                  "entire_retained_prefix_equal": true,
+                  "first_difference": null
+                }
+              },
+              "passed": true
+            },
+            "raw-quality-v2-hccl-true-01": {
+              "cases": {
+                "mmlu-pro-07151": {
+                  "observed_tokens": 209,
+                  "historical_full_tokens": 445,
+                  "at_least208": true,
+                  "exact_first208": false,
+                  "entire_retained_prefix_equal": false,
+                  "first_difference": {
+                    "one_based_position": 56,
+                    "observed": 426,
+                    "historical": 4526
+                  }
+                },
+                "mmlu-pro-07213": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 237,
+                  "at_least208": true,
+                  "exact_first208": false,
+                  "entire_retained_prefix_equal": false,
+                  "first_difference": {
+                    "one_based_position": 51,
+                    "observed": 13,
+                    "historical": 11
+                  }
+                },
+                "mmlu-pro-07275": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 805,
+                  "at_least208": true,
+                  "exact_first208": false,
+                  "entire_retained_prefix_equal": false,
+                  "first_difference": {
+                    "one_based_position": 10,
+                    "observed": 79439,
+                    "historical": 16561
+                  }
+                },
+                "mmlu-pro-07338": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 5133,
+                  "at_least208": true,
+                  "exact_first208": false,
+                  "entire_retained_prefix_equal": false,
+                  "first_difference": {
+                    "one_based_position": 38,
+                    "observed": 26068,
+                    "historical": 7661
+                  }
+                },
+                "mmlu-pro-07401": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 702,
+                  "at_least208": true,
+                  "exact_first208": false,
+                  "entire_retained_prefix_equal": false,
+                  "first_difference": {
+                    "one_based_position": 100,
+                    "observed": 13,
+                    "historical": 198
+                  }
+                },
+                "mmlu-pro-07461": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 481,
+                  "at_least208": true,
+                  "exact_first208": false,
+                  "entire_retained_prefix_equal": false,
+                  "first_difference": {
+                    "one_based_position": 57,
+                    "observed": 1141,
+                    "historical": 279
+                  }
+                },
+                "mmlu-pro-07524": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 302,
+                  "at_least208": true,
+                  "exact_first208": false,
+                  "entire_retained_prefix_equal": false,
+                  "first_difference": {
+                    "one_based_position": 15,
+                    "observed": 16519,
+                    "historical": 2253
+                  }
+                },
+                "mmlu-pro-07585": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 544,
+                  "at_least208": true,
+                  "exact_first208": true,
+                  "entire_retained_prefix_equal": true,
+                  "first_difference": null
+                }
+              },
+              "passed": false
+            },
+            "prefix-quality-full-01": {
+              "cases": {
+                "mmlu-pro-07151": {
+                  "observed_tokens": 209,
+                  "historical_full_tokens": 445,
+                  "at_least208": true,
+                  "exact_first208": false,
+                  "entire_retained_prefix_equal": false,
+                  "first_difference": {
+                    "one_based_position": 56,
+                    "observed": 426,
+                    "historical": 4526
+                  }
+                },
+                "mmlu-pro-07213": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 302,
+                  "at_least208": true,
+                  "exact_first208": true,
+                  "entire_retained_prefix_equal": true,
+                  "first_difference": null
+                },
+                "mmlu-pro-07275": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 447,
+                  "at_least208": true,
+                  "exact_first208": true,
+                  "entire_retained_prefix_equal": true,
+                  "first_difference": null
+                },
+                "mmlu-pro-07338": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 8192,
+                  "at_least208": true,
+                  "exact_first208": false,
+                  "entire_retained_prefix_equal": false,
+                  "first_difference": {
+                    "one_based_position": 207,
+                    "observed": 318,
+                    "historical": 198
+                  }
+                },
+                "mmlu-pro-07401": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 682,
+                  "at_least208": true,
+                  "exact_first208": true,
+                  "entire_retained_prefix_equal": true,
+                  "first_difference": null
+                },
+                "mmlu-pro-07461": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 462,
+                  "at_least208": true,
+                  "exact_first208": false,
+                  "entire_retained_prefix_equal": false,
+                  "first_difference": {
+                    "one_based_position": 203,
+                    "observed": 11421,
+                    "historical": 10813
+                  }
+                },
+                "mmlu-pro-07524": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 417,
+                  "at_least208": true,
+                  "exact_first208": true,
+                  "entire_retained_prefix_equal": true,
+                  "first_difference": null
+                },
+                "mmlu-pro-07585": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 533,
+                  "at_least208": true,
+                  "exact_first208": true,
+                  "entire_retained_prefix_equal": true,
+                  "first_difference": null
+                }
+              },
+              "passed": false
+            }
+          },
+          "passed": true,
+          "scope": "All eight full-run trajectories through208 plus full retained seed prefix. Fresh batch7 lacks preceding seven batches; a failure blocks localization, never retargets."
+        },
+        "terminal_log": {
+          "sha256": "133c20736d6a73751b1b65c91526716b1f95f2ae50974b812f845392b92befc6",
+          "bytes": 33003,
+          "traceback_line_numbers": [],
+          "ownership_error_line_numbers": [],
+          "passed": true,
+          "scope": "Terminal worker traceback/ownership gate, separate from reproducibility and process cleanup."
+        },
+        "layout": {
+          "enabled": false
+        },
+        "live_boundary": {
+          "all_eight_live_before_abort": true,
+          "natural_completions": 0,
+          "preemptions": 0
+        },
+        "child_sha256": "b922fca151ae21fd011ca2527855007e22c3c1efa8e82ef1a20c4d84efbfa2c1"
+      },
+      "native-plain": {
+        "directory": "/root/workspace/muxpd-quality-layout-20261028/new-loss-probe-runs-v1/new-loss-native-plain-01",
+        "terminal": true,
+        "collection_valid": true,
+        "errors": [],
+        "reproduction_passed": true,
+        "full_run_reproduction": {
+          "role": "native",
+          "required_full_run_references": [
+            "native-quality-v2-hccl-true-01",
+            "native-quality-v2-hccl-true-02"
+          ],
+          "comparisons": {
+            "native-quality-v2-hccl-true-01": {
+              "cases": {
+                "mmlu-pro-07151": {
+                  "observed_tokens": 209,
+                  "historical_full_tokens": 289,
+                  "at_least208": true,
+                  "exact_first208": true,
+                  "entire_retained_prefix_equal": true,
+                  "first_difference": null
+                },
+                "mmlu-pro-07213": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 302,
+                  "at_least208": true,
+                  "exact_first208": true,
+                  "entire_retained_prefix_equal": true,
+                  "first_difference": null
+                },
+                "mmlu-pro-07275": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 379,
+                  "at_least208": true,
+                  "exact_first208": true,
+                  "entire_retained_prefix_equal": true,
+                  "first_difference": null
+                },
+                "mmlu-pro-07338": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 4723,
+                  "at_least208": true,
+                  "exact_first208": true,
+                  "entire_retained_prefix_equal": true,
+                  "first_difference": null
+                },
+                "mmlu-pro-07401": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 575,
+                  "at_least208": true,
+                  "exact_first208": true,
+                  "entire_retained_prefix_equal": true,
+                  "first_difference": null
+                },
+                "mmlu-pro-07461": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 468,
+                  "at_least208": true,
+                  "exact_first208": true,
+                  "entire_retained_prefix_equal": true,
+                  "first_difference": null
+                },
+                "mmlu-pro-07524": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 467,
+                  "at_least208": true,
+                  "exact_first208": true,
+                  "entire_retained_prefix_equal": true,
+                  "first_difference": null
+                },
+                "mmlu-pro-07585": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 532,
+                  "at_least208": true,
+                  "exact_first208": true,
+                  "entire_retained_prefix_equal": true,
+                  "first_difference": null
+                }
+              },
+              "passed": true
+            },
+            "native-quality-v2-hccl-true-02": {
+              "cases": {
+                "mmlu-pro-07151": {
+                  "observed_tokens": 209,
+                  "historical_full_tokens": 289,
+                  "at_least208": true,
+                  "exact_first208": true,
+                  "entire_retained_prefix_equal": true,
+                  "first_difference": null
+                },
+                "mmlu-pro-07213": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 302,
+                  "at_least208": true,
+                  "exact_first208": true,
+                  "entire_retained_prefix_equal": true,
+                  "first_difference": null
+                },
+                "mmlu-pro-07275": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 379,
+                  "at_least208": true,
+                  "exact_first208": true,
+                  "entire_retained_prefix_equal": true,
+                  "first_difference": null
+                },
+                "mmlu-pro-07338": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 4723,
+                  "at_least208": true,
+                  "exact_first208": true,
+                  "entire_retained_prefix_equal": true,
+                  "first_difference": null
+                },
+                "mmlu-pro-07401": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 575,
+                  "at_least208": true,
+                  "exact_first208": true,
+                  "entire_retained_prefix_equal": true,
+                  "first_difference": null
+                },
+                "mmlu-pro-07461": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 468,
+                  "at_least208": true,
+                  "exact_first208": true,
+                  "entire_retained_prefix_equal": true,
+                  "first_difference": null
+                },
+                "mmlu-pro-07524": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 467,
+                  "at_least208": true,
+                  "exact_first208": true,
+                  "entire_retained_prefix_equal": true,
+                  "first_difference": null
+                },
+                "mmlu-pro-07585": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 532,
+                  "at_least208": true,
+                  "exact_first208": true,
+                  "entire_retained_prefix_equal": true,
+                  "first_difference": null
+                }
+              },
+              "passed": true
+            },
+            "raw-quality-v2-hccl-true-01": {
+              "cases": {
+                "mmlu-pro-07151": {
+                  "observed_tokens": 209,
+                  "historical_full_tokens": 445,
+                  "at_least208": true,
+                  "exact_first208": false,
+                  "entire_retained_prefix_equal": false,
+                  "first_difference": {
+                    "one_based_position": 56,
+                    "observed": 426,
+                    "historical": 4526
+                  }
+                },
+                "mmlu-pro-07213": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 237,
+                  "at_least208": true,
+                  "exact_first208": false,
+                  "entire_retained_prefix_equal": false,
+                  "first_difference": {
+                    "one_based_position": 51,
+                    "observed": 13,
+                    "historical": 11
+                  }
+                },
+                "mmlu-pro-07275": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 805,
+                  "at_least208": true,
+                  "exact_first208": false,
+                  "entire_retained_prefix_equal": false,
+                  "first_difference": {
+                    "one_based_position": 10,
+                    "observed": 79439,
+                    "historical": 16561
+                  }
+                },
+                "mmlu-pro-07338": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 5133,
+                  "at_least208": true,
+                  "exact_first208": false,
+                  "entire_retained_prefix_equal": false,
+                  "first_difference": {
+                    "one_based_position": 38,
+                    "observed": 26068,
+                    "historical": 7661
+                  }
+                },
+                "mmlu-pro-07401": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 702,
+                  "at_least208": true,
+                  "exact_first208": false,
+                  "entire_retained_prefix_equal": false,
+                  "first_difference": {
+                    "one_based_position": 100,
+                    "observed": 13,
+                    "historical": 198
+                  }
+                },
+                "mmlu-pro-07461": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 481,
+                  "at_least208": true,
+                  "exact_first208": false,
+                  "entire_retained_prefix_equal": false,
+                  "first_difference": {
+                    "one_based_position": 57,
+                    "observed": 1141,
+                    "historical": 279
+                  }
+                },
+                "mmlu-pro-07524": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 302,
+                  "at_least208": true,
+                  "exact_first208": false,
+                  "entire_retained_prefix_equal": false,
+                  "first_difference": {
+                    "one_based_position": 15,
+                    "observed": 16519,
+                    "historical": 2253
+                  }
+                },
+                "mmlu-pro-07585": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 544,
+                  "at_least208": true,
+                  "exact_first208": true,
+                  "entire_retained_prefix_equal": true,
+                  "first_difference": null
+                }
+              },
+              "passed": false
+            },
+            "prefix-quality-full-01": {
+              "cases": {
+                "mmlu-pro-07151": {
+                  "observed_tokens": 209,
+                  "historical_full_tokens": 445,
+                  "at_least208": true,
+                  "exact_first208": false,
+                  "entire_retained_prefix_equal": false,
+                  "first_difference": {
+                    "one_based_position": 56,
+                    "observed": 426,
+                    "historical": 4526
+                  }
+                },
+                "mmlu-pro-07213": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 302,
+                  "at_least208": true,
+                  "exact_first208": true,
+                  "entire_retained_prefix_equal": true,
+                  "first_difference": null
+                },
+                "mmlu-pro-07275": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 447,
+                  "at_least208": true,
+                  "exact_first208": true,
+                  "entire_retained_prefix_equal": true,
+                  "first_difference": null
+                },
+                "mmlu-pro-07338": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 8192,
+                  "at_least208": true,
+                  "exact_first208": false,
+                  "entire_retained_prefix_equal": false,
+                  "first_difference": {
+                    "one_based_position": 207,
+                    "observed": 318,
+                    "historical": 198
+                  }
+                },
+                "mmlu-pro-07401": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 682,
+                  "at_least208": true,
+                  "exact_first208": true,
+                  "entire_retained_prefix_equal": true,
+                  "first_difference": null
+                },
+                "mmlu-pro-07461": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 462,
+                  "at_least208": true,
+                  "exact_first208": false,
+                  "entire_retained_prefix_equal": false,
+                  "first_difference": {
+                    "one_based_position": 203,
+                    "observed": 11421,
+                    "historical": 10813
+                  }
+                },
+                "mmlu-pro-07524": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 417,
+                  "at_least208": true,
+                  "exact_first208": true,
+                  "entire_retained_prefix_equal": true,
+                  "first_difference": null
+                },
+                "mmlu-pro-07585": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 533,
+                  "at_least208": true,
+                  "exact_first208": true,
+                  "entire_retained_prefix_equal": true,
+                  "first_difference": null
+                }
+              },
+              "passed": false
+            }
+          },
+          "passed": true,
+          "scope": "All eight full-run trajectories through208 plus full retained seed prefix. Fresh batch7 lacks preceding seven batches; a failure blocks localization, never retargets."
+        },
+        "terminal_log": {
+          "sha256": "395a10a9409f40c5a772dc0e5148c71fc495b9b1a978b296d82f2216615bb7e9",
+          "bytes": 31970,
+          "traceback_line_numbers": [],
+          "ownership_error_line_numbers": [],
+          "passed": true,
+          "scope": "Terminal worker traceback/ownership gate, separate from reproducibility and process cleanup."
+        },
+        "layout": {
+          "enabled": false
+        },
+        "live_boundary": {
+          "all_eight_live_before_abort": true,
+          "natural_completions": 0,
+          "preemptions": 0
+        },
+        "child_sha256": "ad9a425f220fc6490d5c5c1997745a1add9d8f3ab97d327f7232beea2a514db9"
+      },
+      "prefix-observed": {
+        "directory": "/root/workspace/muxpd-quality-layout-20261028/new-loss-probe-runs-v1/new-loss-prefix-observed-01",
+        "terminal": true,
+        "collection_valid": true,
+        "errors": [],
+        "reproduction_passed": true,
+        "full_run_reproduction": {
+          "role": "prefix",
+          "required_full_run_references": [
+            "prefix-quality-full-01"
+          ],
+          "comparisons": {
+            "native-quality-v2-hccl-true-01": {
+              "cases": {
+                "mmlu-pro-07151": {
+                  "observed_tokens": 218,
+                  "historical_full_tokens": 289,
+                  "at_least208": true,
+                  "exact_first208": false,
+                  "entire_retained_prefix_equal": false,
+                  "first_difference": {
+                    "one_based_position": 56,
+                    "observed": 4526,
+                    "historical": 426
+                  }
+                },
+                "mmlu-pro-07213": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 302,
+                  "at_least208": true,
+                  "exact_first208": true,
+                  "entire_retained_prefix_equal": true,
+                  "first_difference": null
+                },
+                "mmlu-pro-07275": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 379,
+                  "at_least208": true,
+                  "exact_first208": true,
+                  "entire_retained_prefix_equal": true,
+                  "first_difference": null
+                },
+                "mmlu-pro-07338": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 4723,
+                  "at_least208": true,
+                  "exact_first208": false,
+                  "entire_retained_prefix_equal": false,
+                  "first_difference": {
+                    "one_based_position": 207,
+                    "observed": 198,
+                    "historical": 318
+                  }
+                },
+                "mmlu-pro-07401": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 575,
+                  "at_least208": true,
+                  "exact_first208": true,
+                  "entire_retained_prefix_equal": true,
+                  "first_difference": null
+                },
+                "mmlu-pro-07461": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 468,
+                  "at_least208": true,
+                  "exact_first208": false,
+                  "entire_retained_prefix_equal": false,
+                  "first_difference": {
+                    "one_based_position": 203,
+                    "observed": 10813,
+                    "historical": 11421
+                  }
+                },
+                "mmlu-pro-07524": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 467,
+                  "at_least208": true,
+                  "exact_first208": true,
+                  "entire_retained_prefix_equal": true,
+                  "first_difference": null
+                },
+                "mmlu-pro-07585": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 532,
+                  "at_least208": true,
+                  "exact_first208": true,
+                  "entire_retained_prefix_equal": true,
+                  "first_difference": null
+                }
+              },
+              "passed": false
+            },
+            "native-quality-v2-hccl-true-02": {
+              "cases": {
+                "mmlu-pro-07151": {
+                  "observed_tokens": 218,
+                  "historical_full_tokens": 289,
+                  "at_least208": true,
+                  "exact_first208": false,
+                  "entire_retained_prefix_equal": false,
+                  "first_difference": {
+                    "one_based_position": 56,
+                    "observed": 4526,
+                    "historical": 426
+                  }
+                },
+                "mmlu-pro-07213": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 302,
+                  "at_least208": true,
+                  "exact_first208": true,
+                  "entire_retained_prefix_equal": true,
+                  "first_difference": null
+                },
+                "mmlu-pro-07275": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 379,
+                  "at_least208": true,
+                  "exact_first208": true,
+                  "entire_retained_prefix_equal": true,
+                  "first_difference": null
+                },
+                "mmlu-pro-07338": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 4723,
+                  "at_least208": true,
+                  "exact_first208": false,
+                  "entire_retained_prefix_equal": false,
+                  "first_difference": {
+                    "one_based_position": 207,
+                    "observed": 198,
+                    "historical": 318
+                  }
+                },
+                "mmlu-pro-07401": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 575,
+                  "at_least208": true,
+                  "exact_first208": true,
+                  "entire_retained_prefix_equal": true,
+                  "first_difference": null
+                },
+                "mmlu-pro-07461": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 468,
+                  "at_least208": true,
+                  "exact_first208": false,
+                  "entire_retained_prefix_equal": false,
+                  "first_difference": {
+                    "one_based_position": 203,
+                    "observed": 10813,
+                    "historical": 11421
+                  }
+                },
+                "mmlu-pro-07524": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 467,
+                  "at_least208": true,
+                  "exact_first208": true,
+                  "entire_retained_prefix_equal": true,
+                  "first_difference": null
+                },
+                "mmlu-pro-07585": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 532,
+                  "at_least208": true,
+                  "exact_first208": true,
+                  "entire_retained_prefix_equal": true,
+                  "first_difference": null
+                }
+              },
+              "passed": false
+            },
+            "raw-quality-v2-hccl-true-01": {
+              "cases": {
+                "mmlu-pro-07151": {
+                  "observed_tokens": 218,
+                  "historical_full_tokens": 445,
+                  "at_least208": true,
+                  "exact_first208": true,
+                  "entire_retained_prefix_equal": true,
+                  "first_difference": null
+                },
+                "mmlu-pro-07213": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 237,
+                  "at_least208": true,
+                  "exact_first208": false,
+                  "entire_retained_prefix_equal": false,
+                  "first_difference": {
+                    "one_based_position": 51,
+                    "observed": 13,
+                    "historical": 11
+                  }
+                },
+                "mmlu-pro-07275": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 805,
+                  "at_least208": true,
+                  "exact_first208": false,
+                  "entire_retained_prefix_equal": false,
+                  "first_difference": {
+                    "one_based_position": 10,
+                    "observed": 79439,
+                    "historical": 16561
+                  }
+                },
+                "mmlu-pro-07338": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 5133,
+                  "at_least208": true,
+                  "exact_first208": false,
+                  "entire_retained_prefix_equal": false,
+                  "first_difference": {
+                    "one_based_position": 38,
+                    "observed": 26068,
+                    "historical": 7661
+                  }
+                },
+                "mmlu-pro-07401": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 702,
+                  "at_least208": true,
+                  "exact_first208": false,
+                  "entire_retained_prefix_equal": false,
+                  "first_difference": {
+                    "one_based_position": 100,
+                    "observed": 13,
+                    "historical": 198
+                  }
+                },
+                "mmlu-pro-07461": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 481,
+                  "at_least208": true,
+                  "exact_first208": false,
+                  "entire_retained_prefix_equal": false,
+                  "first_difference": {
+                    "one_based_position": 57,
+                    "observed": 1141,
+                    "historical": 279
+                  }
+                },
+                "mmlu-pro-07524": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 302,
+                  "at_least208": true,
+                  "exact_first208": false,
+                  "entire_retained_prefix_equal": false,
+                  "first_difference": {
+                    "one_based_position": 15,
+                    "observed": 16519,
+                    "historical": 2253
+                  }
+                },
+                "mmlu-pro-07585": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 544,
+                  "at_least208": true,
+                  "exact_first208": true,
+                  "entire_retained_prefix_equal": true,
+                  "first_difference": null
+                }
+              },
+              "passed": false
+            },
+            "prefix-quality-full-01": {
+              "cases": {
+                "mmlu-pro-07151": {
+                  "observed_tokens": 218,
+                  "historical_full_tokens": 445,
+                  "at_least208": true,
+                  "exact_first208": true,
+                  "entire_retained_prefix_equal": true,
+                  "first_difference": null
+                },
+                "mmlu-pro-07213": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 302,
+                  "at_least208": true,
+                  "exact_first208": true,
+                  "entire_retained_prefix_equal": true,
+                  "first_difference": null
+                },
+                "mmlu-pro-07275": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 447,
+                  "at_least208": true,
+                  "exact_first208": true,
+                  "entire_retained_prefix_equal": true,
+                  "first_difference": null
+                },
+                "mmlu-pro-07338": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 8192,
+                  "at_least208": true,
+                  "exact_first208": true,
+                  "entire_retained_prefix_equal": true,
+                  "first_difference": null
+                },
+                "mmlu-pro-07401": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 682,
+                  "at_least208": true,
+                  "exact_first208": true,
+                  "entire_retained_prefix_equal": true,
+                  "first_difference": null
+                },
+                "mmlu-pro-07461": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 462,
+                  "at_least208": true,
+                  "exact_first208": true,
+                  "entire_retained_prefix_equal": true,
+                  "first_difference": null
+                },
+                "mmlu-pro-07524": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 417,
+                  "at_least208": true,
+                  "exact_first208": true,
+                  "entire_retained_prefix_equal": true,
+                  "first_difference": null
+                },
+                "mmlu-pro-07585": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 533,
+                  "at_least208": true,
+                  "exact_first208": true,
+                  "entire_retained_prefix_equal": true,
+                  "first_difference": null
+                }
+              },
+              "passed": true
+            }
+          },
+          "passed": true,
+          "scope": "All eight full-run trajectories through208 plus full retained seed prefix. Fresh batch7 lacks preceding seven batches; a failure blocks localization, never retargets."
+        },
+        "terminal_log": {
+          "sha256": "73d6f4c1ebbac2924d1c045db0fd3fd52ba80bc58f38dcf5f115e865166f9ed7",
+          "bytes": 44531,
+          "traceback_line_numbers": [],
+          "ownership_error_line_numbers": [],
+          "passed": true,
+          "scope": "Terminal worker traceback/ownership gate, separate from reproducibility and process cleanup."
+        },
+        "layout": {
+          "enabled": true,
+          "four_rank_install_final_restore": true
+        },
+        "live_boundary": {
+          "all_eight_live_before_abort": true,
+          "natural_completions": 0,
+          "preemptions": 0
+        },
+        "child_sha256": "e30628415b3ca4c0b9eb9e2e090413b1eb02215ea12951be4379da0f5ac822e0"
+      },
+      "prefix-plain": {
+        "directory": "/root/workspace/muxpd-quality-layout-20261028/new-loss-probe-runs-v1/new-loss-prefix-plain-01",
+        "terminal": true,
+        "collection_valid": true,
+        "errors": [],
+        "reproduction_passed": true,
+        "full_run_reproduction": {
+          "role": "prefix",
+          "required_full_run_references": [
+            "prefix-quality-full-01"
+          ],
+          "comparisons": {
+            "native-quality-v2-hccl-true-01": {
+              "cases": {
+                "mmlu-pro-07151": {
+                  "observed_tokens": 218,
+                  "historical_full_tokens": 289,
+                  "at_least208": true,
+                  "exact_first208": false,
+                  "entire_retained_prefix_equal": false,
+                  "first_difference": {
+                    "one_based_position": 56,
+                    "observed": 4526,
+                    "historical": 426
+                  }
+                },
+                "mmlu-pro-07213": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 302,
+                  "at_least208": true,
+                  "exact_first208": true,
+                  "entire_retained_prefix_equal": true,
+                  "first_difference": null
+                },
+                "mmlu-pro-07275": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 379,
+                  "at_least208": true,
+                  "exact_first208": true,
+                  "entire_retained_prefix_equal": true,
+                  "first_difference": null
+                },
+                "mmlu-pro-07338": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 4723,
+                  "at_least208": true,
+                  "exact_first208": false,
+                  "entire_retained_prefix_equal": false,
+                  "first_difference": {
+                    "one_based_position": 207,
+                    "observed": 198,
+                    "historical": 318
+                  }
+                },
+                "mmlu-pro-07401": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 575,
+                  "at_least208": true,
+                  "exact_first208": true,
+                  "entire_retained_prefix_equal": true,
+                  "first_difference": null
+                },
+                "mmlu-pro-07461": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 468,
+                  "at_least208": true,
+                  "exact_first208": false,
+                  "entire_retained_prefix_equal": false,
+                  "first_difference": {
+                    "one_based_position": 203,
+                    "observed": 10813,
+                    "historical": 11421
+                  }
+                },
+                "mmlu-pro-07524": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 467,
+                  "at_least208": true,
+                  "exact_first208": true,
+                  "entire_retained_prefix_equal": true,
+                  "first_difference": null
+                },
+                "mmlu-pro-07585": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 532,
+                  "at_least208": true,
+                  "exact_first208": true,
+                  "entire_retained_prefix_equal": true,
+                  "first_difference": null
+                }
+              },
+              "passed": false
+            },
+            "native-quality-v2-hccl-true-02": {
+              "cases": {
+                "mmlu-pro-07151": {
+                  "observed_tokens": 218,
+                  "historical_full_tokens": 289,
+                  "at_least208": true,
+                  "exact_first208": false,
+                  "entire_retained_prefix_equal": false,
+                  "first_difference": {
+                    "one_based_position": 56,
+                    "observed": 4526,
+                    "historical": 426
+                  }
+                },
+                "mmlu-pro-07213": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 302,
+                  "at_least208": true,
+                  "exact_first208": true,
+                  "entire_retained_prefix_equal": true,
+                  "first_difference": null
+                },
+                "mmlu-pro-07275": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 379,
+                  "at_least208": true,
+                  "exact_first208": true,
+                  "entire_retained_prefix_equal": true,
+                  "first_difference": null
+                },
+                "mmlu-pro-07338": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 4723,
+                  "at_least208": true,
+                  "exact_first208": false,
+                  "entire_retained_prefix_equal": false,
+                  "first_difference": {
+                    "one_based_position": 207,
+                    "observed": 198,
+                    "historical": 318
+                  }
+                },
+                "mmlu-pro-07401": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 575,
+                  "at_least208": true,
+                  "exact_first208": true,
+                  "entire_retained_prefix_equal": true,
+                  "first_difference": null
+                },
+                "mmlu-pro-07461": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 468,
+                  "at_least208": true,
+                  "exact_first208": false,
+                  "entire_retained_prefix_equal": false,
+                  "first_difference": {
+                    "one_based_position": 203,
+                    "observed": 10813,
+                    "historical": 11421
+                  }
+                },
+                "mmlu-pro-07524": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 467,
+                  "at_least208": true,
+                  "exact_first208": true,
+                  "entire_retained_prefix_equal": true,
+                  "first_difference": null
+                },
+                "mmlu-pro-07585": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 532,
+                  "at_least208": true,
+                  "exact_first208": true,
+                  "entire_retained_prefix_equal": true,
+                  "first_difference": null
+                }
+              },
+              "passed": false
+            },
+            "raw-quality-v2-hccl-true-01": {
+              "cases": {
+                "mmlu-pro-07151": {
+                  "observed_tokens": 218,
+                  "historical_full_tokens": 445,
+                  "at_least208": true,
+                  "exact_first208": true,
+                  "entire_retained_prefix_equal": true,
+                  "first_difference": null
+                },
+                "mmlu-pro-07213": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 237,
+                  "at_least208": true,
+                  "exact_first208": false,
+                  "entire_retained_prefix_equal": false,
+                  "first_difference": {
+                    "one_based_position": 51,
+                    "observed": 13,
+                    "historical": 11
+                  }
+                },
+                "mmlu-pro-07275": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 805,
+                  "at_least208": true,
+                  "exact_first208": false,
+                  "entire_retained_prefix_equal": false,
+                  "first_difference": {
+                    "one_based_position": 10,
+                    "observed": 79439,
+                    "historical": 16561
+                  }
+                },
+                "mmlu-pro-07338": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 5133,
+                  "at_least208": true,
+                  "exact_first208": false,
+                  "entire_retained_prefix_equal": false,
+                  "first_difference": {
+                    "one_based_position": 38,
+                    "observed": 26068,
+                    "historical": 7661
+                  }
+                },
+                "mmlu-pro-07401": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 702,
+                  "at_least208": true,
+                  "exact_first208": false,
+                  "entire_retained_prefix_equal": false,
+                  "first_difference": {
+                    "one_based_position": 100,
+                    "observed": 13,
+                    "historical": 198
+                  }
+                },
+                "mmlu-pro-07461": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 481,
+                  "at_least208": true,
+                  "exact_first208": false,
+                  "entire_retained_prefix_equal": false,
+                  "first_difference": {
+                    "one_based_position": 57,
+                    "observed": 1141,
+                    "historical": 279
+                  }
+                },
+                "mmlu-pro-07524": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 302,
+                  "at_least208": true,
+                  "exact_first208": false,
+                  "entire_retained_prefix_equal": false,
+                  "first_difference": {
+                    "one_based_position": 15,
+                    "observed": 16519,
+                    "historical": 2253
+                  }
+                },
+                "mmlu-pro-07585": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 544,
+                  "at_least208": true,
+                  "exact_first208": true,
+                  "entire_retained_prefix_equal": true,
+                  "first_difference": null
+                }
+              },
+              "passed": false
+            },
+            "prefix-quality-full-01": {
+              "cases": {
+                "mmlu-pro-07151": {
+                  "observed_tokens": 218,
+                  "historical_full_tokens": 445,
+                  "at_least208": true,
+                  "exact_first208": true,
+                  "entire_retained_prefix_equal": true,
+                  "first_difference": null
+                },
+                "mmlu-pro-07213": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 302,
+                  "at_least208": true,
+                  "exact_first208": true,
+                  "entire_retained_prefix_equal": true,
+                  "first_difference": null
+                },
+                "mmlu-pro-07275": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 447,
+                  "at_least208": true,
+                  "exact_first208": true,
+                  "entire_retained_prefix_equal": true,
+                  "first_difference": null
+                },
+                "mmlu-pro-07338": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 8192,
+                  "at_least208": true,
+                  "exact_first208": true,
+                  "entire_retained_prefix_equal": true,
+                  "first_difference": null
+                },
+                "mmlu-pro-07401": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 682,
+                  "at_least208": true,
+                  "exact_first208": true,
+                  "entire_retained_prefix_equal": true,
+                  "first_difference": null
+                },
+                "mmlu-pro-07461": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 462,
+                  "at_least208": true,
+                  "exact_first208": true,
+                  "entire_retained_prefix_equal": true,
+                  "first_difference": null
+                },
+                "mmlu-pro-07524": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 417,
+                  "at_least208": true,
+                  "exact_first208": true,
+                  "entire_retained_prefix_equal": true,
+                  "first_difference": null
+                },
+                "mmlu-pro-07585": {
+                  "observed_tokens": 208,
+                  "historical_full_tokens": 533,
+                  "at_least208": true,
+                  "exact_first208": true,
+                  "entire_retained_prefix_equal": true,
+                  "first_difference": null
+                }
+              },
+              "passed": true
+            }
+          },
+          "passed": true,
+          "scope": "All eight full-run trajectories through208 plus full retained seed prefix. Fresh batch7 lacks preceding seven batches; a failure blocks localization, never retargets."
+        },
+        "terminal_log": {
+          "sha256": "c484cc68961597d9e8d70a34166c3c659f749a527655cb654c3caf124625dc5b",
+          "bytes": 43434,
+          "traceback_line_numbers": [],
+          "ownership_error_line_numbers": [],
+          "passed": true,
+          "scope": "Terminal worker traceback/ownership gate, separate from reproducibility and process cleanup."
+        },
+        "layout": {
+          "enabled": true,
+          "four_rank_install_final_restore": true
+        },
+        "live_boundary": {
+          "all_eight_live_before_abort": true,
+          "natural_completions": 0,
+          "preemptions": 0
+        },
+        "child_sha256": "f2b1a56c45a91aab7f1efccc8e8bec1ba067c34f59fec7fff622b498df808e05"
+      }
+    },
+    "historical_observed_plain_bridges": {
+      "native": {
+        "passed": true,
+        "checks": {
+          "same_frozen_plan": true,
+          "same_role": true,
+          "same_engine_config": true,
+          "same_source_receipts": true,
+          "all_eight_complete_prefixes": true
+        },
+        "prefixes": {
+          "mmlu-pro-07151": {
+            "exact_equal": true,
+            "left_length": 209,
+            "right_length": 209,
+            "first_difference": null
+          },
+          "mmlu-pro-07213": {
+            "exact_equal": true,
+            "left_length": 208,
+            "right_length": 208,
+            "first_difference": null
+          },
+          "mmlu-pro-07275": {
+            "exact_equal": true,
+            "left_length": 208,
+            "right_length": 208,
+            "first_difference": null
+          },
+          "mmlu-pro-07338": {
+            "exact_equal": true,
+            "left_length": 208,
+            "right_length": 208,
+            "first_difference": null
+          },
+          "mmlu-pro-07401": {
+            "exact_equal": true,
+            "left_length": 208,
+            "right_length": 208,
+            "first_difference": null
+          },
+          "mmlu-pro-07461": {
+            "exact_equal": true,
+            "left_length": 208,
+            "right_length": 208,
+            "first_difference": null
+          },
+          "mmlu-pro-07524": {
+            "exact_equal": true,
+            "left_length": 208,
+            "right_length": 208,
+            "first_difference": null
+          },
+          "mmlu-pro-07585": {
+            "exact_equal": true,
+            "left_length": 208,
+            "right_length": 208,
+            "first_difference": null
+          }
+        },
+        "scope": "Full retained prefix equality, including seed progress beyond208; not just selected-window tokens."
+      },
+      "prefix": {
+        "passed": true,
+        "checks": {
+          "same_frozen_plan": true,
+          "same_role": true,
+          "same_engine_config": true,
+          "same_source_receipts": true,
+          "all_eight_complete_prefixes": true
+        },
+        "prefixes": {
+          "mmlu-pro-07151": {
+            "exact_equal": true,
+            "left_length": 218,
+            "right_length": 218,
+            "first_difference": null
+          },
+          "mmlu-pro-07213": {
+            "exact_equal": true,
+            "left_length": 208,
+            "right_length": 208,
+            "first_difference": null
+          },
+          "mmlu-pro-07275": {
+            "exact_equal": true,
+            "left_length": 208,
+            "right_length": 208,
+            "first_difference": null
+          },
+          "mmlu-pro-07338": {
+            "exact_equal": true,
+            "left_length": 208,
+            "right_length": 208,
+            "first_difference": null
+          },
+          "mmlu-pro-07401": {
+            "exact_equal": true,
+            "left_length": 208,
+            "right_length": 208,
+            "first_difference": null
+          },
+          "mmlu-pro-07461": {
+            "exact_equal": true,
+            "left_length": 208,
+            "right_length": 208,
+            "first_difference": null
+          },
+          "mmlu-pro-07524": {
+            "exact_equal": true,
+            "left_length": 208,
+            "right_length": 208,
+            "first_difference": null
+          },
+          "mmlu-pro-07585": {
+            "exact_equal": true,
+            "left_length": 208,
+            "right_length": 208,
+            "first_difference": null
+          }
+        },
+        "scope": "Full retained prefix equality, including seed progress beyond208; not just selected-window tokens."
+      }
+    },
+    "references_sha256": "cb9548ab59ac0584a78bd7699bc2ca2b0fba689c74e4c88d69f9697bc232d381"
+  }
+}

@@ -6,6 +6,8 @@ import hashlib
 import io
 import json
 from pathlib import Path
+import shutil
+import subprocess
 import tarfile
 import urllib.request
 
@@ -41,7 +43,31 @@ def main():
     for key, name in [("agent", "agent"), ("official_v1", "official-v1")]:
         pin = lock[key]
         url = f"https://codeload.github.com/{pin['repository']}/tar.gz/{pin['commit']}"
-        data = urllib.request.urlopen(url, timeout=120).read()
+        request = urllib.request.Request(
+            url, headers={"User-Agent": "swe-bench-pro-bootstrap/1.0"}
+        )
+        try:
+            data = urllib.request.urlopen(request, timeout=20).read()
+        except OSError:
+            curl = shutil.which("curl")
+            if not curl:
+                raise
+            data = subprocess.check_output(
+                [
+                    curl,
+                    "--fail",
+                    "--location",
+                    "--retry",
+                    "2",
+                    "--retry-all-errors",
+                    "--connect-timeout",
+                    "10",
+                    "--max-time",
+                    "120",
+                    url,
+                ],
+                timeout=400,
+            )
         destination = args.root / name
         extract_source(data, destination)
         expected = (
