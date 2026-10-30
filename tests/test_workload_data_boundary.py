@@ -23,6 +23,7 @@ DATA_MODULES = {
     "schemastore",  # Original schema/fixture bytes and identities only, no execution.
     "multinews",  # Original paired documents/references, no research analysis.
     "librispeech",  # Original audio/transcript bindings only, no observations.
+    "ljspeech",  # Original text/reference WAV relations only; no synthesis.
     "stsb",  # Publisher sentence pairs and labels only; no research analysis.
     "beir",  # Original retrieval assets and relations, no research analysis.
     "__init__",

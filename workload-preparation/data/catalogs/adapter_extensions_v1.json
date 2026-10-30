@@ -555,6 +555,17 @@
       },
       "normalization": {}
     },
+    "LJSPEECH": {
+      "kind": "task_dataset", "mapping": "native_fields",
+      "native_format": "ljspeech_original_archive",
+      "input_fields": ["text", "normalized_text"],
+      "required_fields": ["id", "text", "normalized_text", "audio", "metadata_member", "metadata_row_index"],
+      "outcome_fields": ["audio"],
+      "annotation_fields": ["id", "metadata_member", "metadata_row_index"],
+      "id_field": "id", "normalization": {},
+      "requirements": ["Original text and publisher-normalized text are distinct unchanged fields; native model frontend must choose explicitly", "Original WAV is a reference, not synthesized output or model input", "No NPU synthesis, scoring or research consumption is established by reading"],
+      "status": "ORIGINAL_ARCHIVE_ADAPTER_NATIVE_AND_RESEARCH_PENDING"
+    },
     "LIBRISPEECH": {
       "kind": "task_dataset",
       "mapping": "native_fields",

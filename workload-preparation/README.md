@@ -932,7 +932,20 @@ python scripts/prepare_ljspeech_original_assets.py --data-root /private/ljspeech
 仅在确认同一目录属于该获取器且先前传输已结束后，才用 `--action download --resume --max-bytes 3000000000`
 续传。入口要求匹配的私有来源记录及精确HTTP范围；服务器忽略续传范围、返回HTML或校验失败时保留原部分文件，不自动重试、覆盖或更换来源。完整文件已存在时只读核验，不重复下载。
 
-服务器已取得官方1.1完整原包2,748,572,632字节，并核对官方TorchAudio固定源码中的SHA256；这不是只验证下载链接。全部13,100条三字段元数据与13,100份WAV配对、RIFF长度和原音频头已核验。原包留在外部存储，不写入本机或Git；没有重复解压一份语料。可复用记录适配、TTS模型、真实NPU合成和固定工件消费仍待完成。
+服务器已取得官方1.1完整原包2,748,572,632字节，并核对官方TorchAudio固定源码中的SHA256；这不是只验证下载链接。全部13,100条三字段元数据与13,100份WAV配对、RIFF长度和原音频头已核验。原包留在外部存储，不写入本机或Git；没有重复解压一份语料。
+
+公共适配器直接流式读取该归档，保留CSV原行顺序，原`text`和发布方`normalized_text`分别保留；参考WAV以归档成员引用放在`outcome.audio`，不是模型输入或合成结果。TTS前端应按原模型协议明确选用哪一列，适配器不自行展开数字、清洗文本或构造API请求。
+
+```python
+from pathlib import Path
+from vllm_hust_workload_data import iter_workload
+
+for record in iter_workload("LJSPEECH", data_root=Path("/private/ljspeech"), limit=3):
+    original_text_fields = record.task["input"]
+    reference_wav = record.outcome["audio"]  # 不传入TTS模型
+```
+
+归档读取会先流式核对完整的文本/音频一一对应关系，即使`limit=3`也需要扫描原压缩包；因此不要在逐请求循环内重复创建迭代器。读取不会解码WAV、执行TTS或评分。软件夹具通过不等于原始数据消费或原生合成通过；真实NPU合成、固定软件工件和研究侧原数据消费仍待完成。
 
 VITS发布方提供对应LJ
 Speech的模型及原推理示例，可作为候选，但其CUDA/PyTorch1.6环境不等于已适配NPU；尚未取得并固定检查点，不宣称原生合成已运行。没有自动MOS分数可凭空补造，波形非空或格式合法也不能代表语音质量。[当前证据与缺口](../docs/workload-data/validation/ljspeech-original-readiness-20261029.json)持续更新，来源总勾保持未完成。
