@@ -2758,6 +2758,11 @@
     },
     "MULTIAGENTBENCH": {
       "native_software_review": {
+        "server_all500_original_field_shapes_inspected": true,
+        "database_reference_paths": ["task.labels", "task.root_causes", "task.number_of_labels_pred"],
+        "reference_use_verified_in_source": "marble/engine/engine.py passes these task fields to evaluator.evaluate_task_db; do not flatten whole task object into a model prompt",
+        "minecraft_original_identity_path": "environment.task_id",
+        "native_configuration_boundary": "Preserve agents, relationships, environment, memory, engine_planner, metrics and per-scenario unknown extensions. Runtime configuration is not one shared chat request; agent-private fields must not be flattened into all agents' inputs. All500 schema shapes inspected, not semantic/native execution qualification.",
         "revision": "8d60fa17b5596b44458a52d4296061b9fc13d6f2",
         "python_requirement": ">=3.9,<3.12",
         "dependency_lock": "poetry.lock",

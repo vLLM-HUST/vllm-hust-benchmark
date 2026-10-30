@@ -966,6 +966,8 @@ blob、SHA256及大小，已有损坏文件或partial保留并报错，不覆盖
 
 原记录包含agents、environment、relationships、metrics等字段，Minecraft没有其他四份文件共有的task_id/scenario，database另含communication；不能强造同一静态问答格式或编造缺失ID。多Agent协作/竞争在当前分类中是跨任务关系，不另造第41类。
 
+服务器已检查全部500条原记录的字段形状；这不等于完成语义适配或原生运行。Minecraft的原任务标识位于`environment.task_id`。database的`task.labels`、`task.root_causes`及`task.number_of_labels_pred`由原引擎传给数据库评估器，须保持参考/评分侧关系，不能将整个task字典拼入模型输入；各Agent私有配置也不能广播成共同prompt。恢复原生运行配置与构造模型输入是两回事。
+
 原生运行尚未就绪：固定源码要求Python`>=3.9,<3.12`及原`poetry.lock`。`scripts/research/run_simulation.sh`使用`--config`，但当前`marble/main.py`实际解析`--config_path`；不可直接把示例运行成功作为已验证事实。模型调用经LiteLLM，保留原默认512-token预算及温度0；本地端点绑定仍需独立验证。`metrics.evaluate_llm`未配置时评分器回退到外部`gpt-3.5-turbo`，通信和规划评分均会调用模型，不能在未授权时直接启动。embedding另走`litellm.embedding`，已有聊天服务不代表具备该能力。以上为源码核查，不是环境安装、模型兼容或评分实跑证据。
 
 ## BixBench 原科学任务准备与读取（原生执行未完成）
