@@ -51,10 +51,14 @@ def test_incompatible_worker_uid_rejected_before_api_call(tmp_path, monkeypatch)
     (tmp_path / (identity + ".request.json")).write_text("{}")
     owner = transport.os.stat(tmp_path).st_uid
 
-    class WorkerStat:
-        st_uid = owner + 1
+    original_fstat = transport.os.fstat
 
-    monkeypatch.setattr(transport.os, "fstat", lambda _fd: WorkerStat())
+    def worker_stat(fd):
+        values = list(original_fstat(fd))
+        values[4] = owner + 1
+        return transport.os.stat_result(values)
+
+    monkeypatch.setattr(transport.os, "fstat", worker_stat)
 
     def forbidden(*_args, **_kwargs):
         pytest.fail("ownership rejection must precede inference")
