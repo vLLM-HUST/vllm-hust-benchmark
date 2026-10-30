@@ -1,6 +1,6 @@
 {
   "schema_version": "workload-validation-checklist/v1",
-  "updated_at": "2026-10-30",
+  "updated_at": "2026-10-31",
   "current_navigation_compatibility_review": {
     "tracked_path_index_regenerated": true,
     "tracked_path_index_check": "passed",
@@ -16,8 +16,10 @@
     "boundary": "Navigation and environment contracts only. Do not rewrite frozen publication bytes to make a Windows checkout hash check green; no native dataset or scientific validation claimed."
   },
   "current_software_ci_review": {
-    "run_id": 41066124275,
-    "producer_commit": "58b657bd88f316e0356898b89cdb89d9ee8f46d2",
+    "run_id": 41086750269,
+    "producer_commit": "f1a93f92b937798097b517f33dedd658a5212cda",
+    "main_ci_run_id": 41086743748,
+    "main_ci_conclusion": "success",
     "identity_note": "pragma: allowlist secret - verified public CPU smoke producer revision",
     "conclusion": "success",
     "workflow": "Workload data CPU correctness smoke",
@@ -26,7 +28,7 @@
     "npu_requested": false,
     "linux_auxiliary_client_contract_tests_passed": 3,
     "linux_navigation_index_checks_passed": true,
-    "boundary": "Actual software-only GitHub Actions run for the named commit, including new BixBench grading contracts and official Research profile preparation. Not native dataset/task/scoring completion. Provider source/catalog/schema/provenance paths are unchanged from previously verified CI handoffs; no data or model runs repeated."
+    "boundary": "Actual software-only GitHub Actions runs for the named producer commit, including BixBench recovery contracts, explicit YAML test dependency, public source-hash audit and Research preparation. Not native dataset/task/scoring completion. Later DailyTalk source/metadata preparation adds a package catalog and is not covered by these historical producer runs; its current CI and installed-provider payload require fresh verification. No data or model runs repeated."
   },
   "current_checked_receipt_custody_review": {
     "date": "2026-10-30",
@@ -2776,7 +2778,27 @@
     "DAILYTALK": {
       "scope": "public",
       "delivery_kind": "review_original_source_protocol",
-      "status": "NOT_STARTED",
+      "status": "IN_PROGRESS",
+      "original_readiness": {
+        "publisher_repository": "https://github.com/keonlee9420/DailyTalk",
+        "publisher_revision": "05a0173dac8e68fb2b22190cfc5c22248538a1a6",
+        "revision_note": "pragma: allowlist secret - verified public publisher revision",
+        "original_software_files_verified": 52,
+        "original_software_bytes_verified": 326159,
+        "original_metadata_and_lexicon_files_verified": 11,
+        "original_metadata_and_lexicon_bytes_verified": 12631639,
+        "original_python_files_syntax_parsed": 42,
+        "original_python_syntax_errors": 0,
+        "server_receipt": "/root/dailytalk-public-software-20261031-001/preflight-public.json",
+        "actual_public_verify_commands_passed": 2,
+        "original_audio_files_acquired": 0,
+        "original_model_weights_acquired": 0,
+        "native_synthesis_or_scoring_executed": false,
+        "npu_device_adaptation_applied": false,
+        "required_native_protocol": "Official conversational TTS batch synthesis with original validation split and complete required dialogue history; not independent text QA or arbitrary single-turn synthesis.",
+        "remaining_native_prerequisites": ["Original audio and required preprocessed acoustic/history features", "Official acoustic checkpoint and original HiFi-GAN vocoder weights", "Qualified isolated runtime for publisher legacy dependencies", "Explicit NPU device binding: original synthesis chooses CUDA or CPU, neither proves NPU execution", "Fixed original dialogue selection, native synthesis outputs and applicable original evaluation", "Provider/research consumption of original audio-text-dialogue relationships"],
+        "boundary": "52 software files and11 original metadata/lexicon assets verified on the dedicated CPU server. Data acquisition and syntax checks are not model execution. No CPU neural inference, model substitution, transcript flattening or source completion claimed."
+      },
       "checked": false,
       "legacy_checked": false,
       "existing_receipt": null,

@@ -1146,3 +1146,21 @@ daemon与客户端两侧有相同路径，并由操作者仅对运行副本设�
 输入遵循发布方`grade_outputs.py`的CSV约定：`question`为原题、`target`为原参考答案、`predicted`为已保存的原生Agent答案；已有`evaluation_mode`原值须保留，不得改题或用模型重新生成答案。该入口不自动将轨迹改写成CSV，调用方须先核对逐题对应关系。加`--execute`后直接调用固定发布方的`grade_answers`，保留开放答案评分规则、温度1.0与作者默认生成配置；仅显式绑定已核验的本地judge和回环API。发布方会原地更新CSV，因此入口只传新私有副本，不覆盖输入。评分失败保留输出并报错。当前仅软件边界测试通过，尚无真实评分成功声明；替代judge的结果也不等于GPT-4o结果复现，必须披露模型差异，不能据此单独打来源总勾。
 
 跨节点评分可追加`--model-queue /private/bixbench-grading-queue`，复用生成阶段的`model_proxy`传输；API须为`127.0.0.1`且端口匹配，队列、输出、原输入及作者目录相互分离，均不得写入软件仓库。默认计划不创建代理或目录；执行时仅转发官方评分函数生成的原请求，不改提示、答案或计分。当前已在专用CPU真实客户端通过队列模式的计划检查，未执行评分。需要复现GPT-4o成绩时，应使用固定发布方原`grade_outputs.py`及操作者自行授权的官方认证/费用配置，不能将本地替代judge验证结果冒充该成绩。
+
+### DailyTalk：官方对话语音合成准备入口（原生验证未完成）
+
+[DailyTalk 官方发布](https://github.com/keonlee9420/DailyTalk)提供带历史上下文的对话语音合成基线及预训练模型，不是把录音转成普通文本问答的
+benchmark。官方上下文模型使用批量推理；抽样须保留原验证划分及所需完整对话历史，不能将单个话轮拆成无上下文题目。源码、转写/说话人/统计元数据与词典、原始音频、声学模型、HiFi-GAN声码器须分别取得和核验。
+
+以下入口只下载或核验原发布文件，不运行模型；默认`plan`无下载。软件固定52份文件，元数据与词典固定11份文件，均核验Git
+blob、字节数和SHA256。不包含音频或模型权重，不能据此声称完整语音任务可用。
+
+```bash
+python scripts/prepare_jsonschemabench_author_source.py --source dailytalk --author-root /private/dailytalk/author --action prepare --max-bytes 326159
+python scripts/prepare_dailytalk_original_metadata.py --data-root /private/dailytalk/original-assets --action prepare --max-bytes 12631639
+# 已取得文件只核验，不重新下载：
+python scripts/prepare_jsonschemabench_author_source.py --source dailytalk --author-root /private/dailytalk/author --action verify
+python scripts/prepare_dailytalk_original_metadata.py --data-root /private/dailytalk/original-assets --action verify
+```
+
+当前服务器已通过上述两个公开`verify`入口，42份原Python文件语法检查通过。原生合成尚未运行：音频、原声学检查点及声码器、声学/历史预处理特征、原始评测与研究侧接入仍待完成。原依赖包含Torch1.7和TensorFlow2.5.1，原`synthesize.py`仅选择CUDA或CPU；不可直接运行并静默回退CPU，必须先完成独立NPU环境与设备适配核验。不能用现有Qwen文本服务替代声学模型，也不能把源码解析或元数据读取算作该来源完成。原公开资源与代码许可按发布方及组件各自LICENSE执行，本仓库不打包音频和权重。

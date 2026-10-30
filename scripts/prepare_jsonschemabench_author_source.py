@@ -52,6 +52,7 @@ def main():
             "appworld-react",
             "bixbench",
             "marble",
+            "dailytalk",
         ],
         default="jsonschemabench",
         help="Pinned original author source only; historical default unchanged",
