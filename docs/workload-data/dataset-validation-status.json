@@ -2865,6 +2865,37 @@
           "isolated_native_runtime_qualified": false,
           "boundary": "Static import discovery only, not module execution or NPU forward. Publisher Torch1.7/TensorFlow2.5.1 requirements are not satisfied by this host; speech, history encoder and legacy model dependencies still need an isolated qualified runtime. No global environment was changed."
         },
+        "isolated_npu_runtime_software": {
+          "server_receipt": "dailytalk-isolated-runtime-20261031-001/dependency-import-public.json under the private shared task root",
+          "software_imports_passed": true,
+          "pip_check_exit_code": 0,
+          "system_site_packages_enabled": false,
+          "existing_vendor_torch_and_torch_npu_readonly_links_only": true,
+          "global_environment_modified": false,
+          "npu_initialized": false,
+          "model_calls": 0,
+          "publisher_legacy_versions_reproduced": false
+        },
+        "npu_compatibility_candidate": {
+          "server_receipt": "dailytalk-npu-compat-candidate-20261031-001/compatibility-public.json under the private shared task root",
+          "diff_receipt": "dailytalk-npu-compat-candidate-20261031-001/compatibility.diff under the private shared task root",
+          "changed_files": ["model/speaker_embedder.py", "synthesize.py"],
+          "changes": "Lazy original DeepSpeaker and G2p imports for unused optional paths; explicit NPU device selection with original seed and no CPU/CUDA neural fallback.",
+          "actual_publisher_module_imports_passed": ["model", "dataset", "synthesize"],
+          "original_files_preserved": true,
+          "model_weights_deserialized": false,
+          "native_npu_forward_verified": false,
+          "boundary": "Disclosed compatibility copy, not an unmodified publisher runtime or a native synthesis result. No question, history window, checkpoint, reference, model architecture or scoring change."
+        },
+        "selected_input_copy_on_npu_host": {
+          "server_receipt": "dailytalk-selected-input-assets-npu-20261031-001/transfer-public.json under the private shared task root",
+          "original_files_verified": 70,
+          "original_bytes_verified": 30215742,
+          "original_wav_files_verified": 29,
+          "original_cpu_files_preserved": true,
+          "windows_data_files_saved": false,
+          "neural_inference_executed": false
+        },
         "server_receipt": "/root/dailytalk-public-software-20261031-001/preflight-public.json",
         "actual_public_verify_commands_passed": 2,
         "original_audio_files_acquired": 29,
@@ -2941,7 +2972,7 @@
           "boundary": "Original Guo batch inference reads current/history text embedding arrays, original phoneme rows and speaker/emotion maps. Preserve its original10-turn policy and all sampled dialogue files; do not substitute the no-history model or require unrelated training preprocessing. Feature preparation and native inference are still pending."
         },
         "native_synthesis_or_scoring_executed": false,
-        "npu_device_adaptation_applied": false,
+        "npu_device_adaptation_applied": true,
         "required_native_protocol": "Official conversational TTS batch synthesis with original validation split and complete required dialogue history; not independent text QA or arbitrary single-turn synthesis.",
         "remaining_native_prerequisites": ["Original Guo current/history512D text embedding arrays on NPU, preserving original phoneme rows and speaker/emotion/statistic maps", "Qualified isolated runtime for publisher legacy dependencies", "Explicit NPU device binding: original synthesis chooses CUDA or CPU, neither proves NPU execution", "Native synthesis outputs for the fixed complete dialogues and applicable original evaluation", "Complete fresh public audio acquisition on a node with original-host network access; provider/research consumption of original audio-text-dialogue relationships"],
         "boundary": "52 software files,11 original metadata/lexicon assets,29 original WAVs covering the fixed first3 complete validation dialogues, and the official Guo900000 checkpoint are acquired on the dedicated CPU server. Exact selected archive members, not the entire5.34GB archive, were verified. Checkpoint bytes and ZIP CRCs were verified without pickle deserialization or neural execution. No local audio/weight files, prompt conversion, native synthesis, scoring or source completion claimed."
