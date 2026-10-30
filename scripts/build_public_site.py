@@ -108,6 +108,7 @@ def clean_html(text):
     # This shared card also describes PegaFlow; preserve that unrelated content.
     text = re.sub(r"LatchMoE is not applicable.*?(?=PegaFlow is)", "", text, flags=re.S)
     text = re.sub(r"LatchMoE 不适用于.*?(?=PegaFlow 是)", "", text, flags=re.S)
+    text = re.sub(r"'atlas-latchmoe-role': '[^']*',\s*", "", text)
     # Remove obsolete project-specific metadata from the shared route table.
     return text
 
@@ -118,6 +119,8 @@ def clean_javascript(path, text):
             ("    traceloom: {", '    "clm-lifecycle": {'),
             ('    "tricard-clm-lifecycle": {', "    betterscale: {"),
             ("    betterscale: {", "    bidkv: {"),
+            ("    latchmoe: {", '    "pegaflow-vllm-connectors": {'),
+            ('    "ascend-adaptive-quantized-kv": {', '    "kvcompress-ascend": {'),
         ]:
             if start in text:
                 a = text.index(start)
@@ -140,6 +143,17 @@ def clean_javascript(path, text):
             "",
         )
     if path == "assets/leaderboard-frontier.js":
+        start = "            ${point.configuration.mods.includes('betterscale')?"
+        end = "            <p class=\"frontier-popup-load\">${t('warmup')}"
+        if start in text:
+            a = text.index(start)
+            text = text[:a] + text[text.index(end, a) :]
+        text = re.sub(
+            r"        // BetterScale checkbox.*?(?=        const mods=)",
+            "",
+            text,
+            flags=re.S,
+        )
         text = text.replace(
             "仅展示并分别连接 BetterScale 与 Native 的 Pareto 前沿点；BetterScale 跨 workload 调优配置，不代表固定容量扫描。",
             "展示当前公开方案的 Pareto 前沿点；不同配置不代表固定容量扫描。",
@@ -147,6 +161,20 @@ def clean_javascript(path, text):
         text = text.replace(
             "Only show and connect BetterScale and Native Pareto frontier points; BetterScale is tuned across workloads, not a fixed-capacity sweep.",
             "Show the Pareto frontier of currently published configurations; different settings are not a fixed-capacity sweep.",
+        )
+    if path == "assets/site.js":
+        start, end = "        'betterscale.html': {", "        'index.html': {"
+        if start in text:
+            a = text.index(start)
+            text = text[:a] + text[text.index(end, a) :]
+    if path == "assets/midterm-report.js":
+        text = (
+            "\n".join(
+                line
+                for line in text.splitlines()
+                if "website-publication/data/betterscale-" not in line
+            )
+            + "\n"
         )
     return text
 
