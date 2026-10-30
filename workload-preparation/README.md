@@ -1038,6 +1038,16 @@ Research专用准备可在上述配置准备命令追加`--runtime-profile offic
 
 软件隔离镜像配方为`configs/workload-native/marble-compat-cpu.Dockerfile`。构建上下文只允许两个软件子目录：`client/`为已核验的Python3.10客户端（原锁93包＋披露的2包），`author/`为99份原软件及明确披露的评分器缩进兼容副本；禁止带入原题、答案、模型缓存、结果或凭据。操作者须先核验已有Ubuntu22.04基础镜像的不可变ID，显式传给`MARBLE_BASE_IMAGE`，不能把浮动tag当身份依据。
 
+Research关键词工具还会调用KeyBERT默认的`sentence-transformers/all-MiniLM-L6-v2`辅助模型。在要求模型只用NPU的部署中，不能让这个分支静默回落CPU推理。独立辅助客户端的实际版本约束见`configs/workload-native/marble-keybert-npu-client.txt`：先由平台提供匹配的厂商Torch/Torch-NPU构建，再在独立客户端安装其他依赖，不能升级现有服务或原MARBLE
+CPU环境。该文件是已观测的软件兼容组合，不是完整CANN/驱动安装脚本。辅助模型固定版本与资产校验在机器清单记录，原始权重不进入仓库。
+
+```bash
+python scripts/probe_marble_auxiliary_client.py \
+  --client-python /external/marble-keybert-npu/bin/python
+```
+
+默认仅计划；加`--execute`才核对独立客户端11项版本、`pip check`及真实库导入，不安装、不下载或加载模型，不初始化设备。公共入口已在服务器已准备环境执行通过，虚拟环境解释器路径不解析回基础解释器。这里尚未验证模型前向、NPU执行或KeyBERT远程后端，不能据此认为原生Research任务或评分已完成。CI只检查计划和夹具，不导入模型库或占卡。
+
 本配方已在专用ARM64 CPU工作区构建，并通过非root65534、无网络、只读根、去全部能力、禁止提权的真实容器`--help`探测，退出0；未挂载任务数据、Docker
 socket或NPU。任务运行还必须另行部署私有数据/输出、本地模型传输、各场景原环境和评分；镜像只证明软件导入底座可用，不代表Minecraft、数据库、研究工具等环境已齐备，也不是安全认证或原生任务完成。旧容器、镜像和结果未清理。
 

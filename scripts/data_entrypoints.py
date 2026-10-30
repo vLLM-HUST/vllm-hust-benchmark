@@ -187,7 +187,7 @@ def publication_bytes(root, path, tracked):
         name = part["name"]
         if Path(name).name != name or name in (".", ".."):
             raise ValueError("Unsafe publication part")
-        source = str(Path(path).with_name(name))
+        source = Path(path).with_name(name).as_posix()
         if source not in tracked:
             raise ValueError(f"Untracked publication part: {source}")
         chunk = (root / source).read_bytes()
@@ -332,23 +332,23 @@ def main(argv=None):
         sources = refresh(args.website, args.revision)
         previous_path = ROOT / SOURCES
         if previous_path.exists():
-            previous = json.loads(previous_path.read_text())
+            previous = json.loads(previous_path.read_text(encoding="utf-8"))
             if previous.get("releases") and not sources["releases"]:
                 raise ValueError(
                     "Remote refresh returned no public Releases; refusing to erase the existing inventory. Verify the API response and retry."
                 )
-        (ROOT / SOURCES).write_text(render(sources))
+        (ROOT / SOURCES).write_text(render(sources), encoding="utf-8")
     else:
-        sources = json.loads((ROOT / SOURCES).read_text())
+        sources = json.loads((ROOT / SOURCES).read_text(encoding="utf-8"))
     catalog = build(ROOT, tracked_paths(ROOT), sources)
     if args.refresh or args.write:
-        (ROOT / OUTPUT).write_text(render(catalog))
+        (ROOT / OUTPUT).write_text(render(catalog), encoding="utf-8")
         print(render(catalog["counts"]))
         return 0
     if args.check:
-        if not (ROOT / OUTPUT).exists() or (ROOT / OUTPUT).read_text() != render(
-            catalog
-        ):
+        if not (ROOT / OUTPUT).exists() or (ROOT / OUTPUT).read_text(
+            encoding="utf-8"
+        ) != render(catalog):
             print(
                 "Entry-point index is stale: python scripts/data_entrypoints.py --write"
             )

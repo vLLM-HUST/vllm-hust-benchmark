@@ -1,0 +1,14 @@
+# Separate auxiliary-model client; never install into serving or MARBLE CPU env.
+# First provide the matching platform vendor Torch/Torch-NPU builds in this env.
+# Validated Python3.12.13 imports/dependencies only; not model forward/scoring.
+torch===2.10.0+cpu
+torch-npu==2.10.0.post4
+sentence-transformers==3.4.1
+transformers==4.49.0
+tokenizers==0.21.0
+huggingface-hub==0.29.1
+scikit-learn==1.6.1
+joblib==1.4.2
+threadpoolctl==3.5.0
+numpy==1.26.4
+scipy==1.13.1

@@ -1,6 +1,20 @@
 {
   "schema_version": "workload-validation-checklist/v1",
   "updated_at": "2026-10-30",
+  "current_navigation_compatibility_review": {
+    "tracked_path_index_regenerated": true,
+    "tracked_path_index_check": "passed",
+    "windows_entrypoint_path_and_utf8_io_fixed": true,
+    "targeted_software_tests_passed": 50,
+    "targeted_software_tests_skipped": 1,
+    "skip_reason": "Windows host cannot create interpreter symlink; Linux CI fixture covers the path-preservation branch",
+    "windows_publication_index_check": "retained mismatch from checkout line endings, not asserted passed",
+    "differing_publication_input_hashes": 153,
+    "all_recorded_hashes_match_canonical_git_bytes": true,
+    "all_working_differences_are_line_endings_only": true,
+    "frozen_publications_or_recorded_publication_snapshot_rewritten": false,
+    "boundary": "Navigation and environment contracts only. Do not rewrite frozen publication bytes to make a Windows checkout hash check green; no native dataset or scientific validation claimed."
+  },
   "current_software_ci_review": {
     "run_id": 41057645305,
     "producer_commit": "fee2163ffd6f668cab74daec63a1a0632f7033e0",
@@ -2902,6 +2916,10 @@
                 "global_core_library_versions_unchanged": true,
                 "npu_initialized": false,
                 "server_receipt": "marble-keybert-minilm-runtime-20261030-001/import-public.json",
+                "public_environment_probe": "scripts/probe_marble_auxiliary_client.py",
+                "public_dependency_pins": "configs/workload-native/marble-keybert-npu-client.txt",
+                "public_probe_server_receipt": "marble-keybert-public-probe-20261030-001/preflight-public.json",
+                "public_probe_exit_code": 0,
                 "boundary": "Separate actual NPU-host client with vendor Torch/Torch-NPU links, not the CPU MARBLE client or existing serving environment. Imports and dependency consistency only; model forward/device compatibility and remote KeyBERT binding pending."
               },
               "model_loaded": false,
