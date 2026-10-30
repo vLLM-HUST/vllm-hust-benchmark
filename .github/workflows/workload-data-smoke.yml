@@ -473,7 +473,7 @@ jobs:
       - name: DRAGON NPU-client dependency probe fixtures, no model or device initialization
         run: python -m pytest -q tests/test_dragon_native_environment.py tests/test_dragon_model_client_lock.py tests/test_dragon_original_runner.py tests/test_dragon_original_saved.py
       - name: SWE-bench shared author software fixtures, no tasks or code execution
-        run: python -m pytest -q tests/test_swebench_author_source.py tests/test_mind2web_author_source.py tests/test_mind2web_original_protocol.py tests/test_mind2web_original_tasks.py tests/test_mind2web_original_runner.py tests/test_bixbench_author_source.py tests/test_bixbench_original_preparation.py tests/test_bixbench_original_agent.py tests/test_multiagentbench_original_assets.py tests/test_multiagentbench_adapter.py tests/test_marble_evaluator_compat.py tests/test_marble_author_source.py tests/test_marble_original_configs.py
+        run: python -m pytest -q tests/test_swebench_author_source.py tests/test_mind2web_author_source.py tests/test_mind2web_original_protocol.py tests/test_mind2web_original_tasks.py tests/test_mind2web_original_runner.py tests/test_bixbench_author_source.py tests/test_bixbench_original_preparation.py tests/test_bixbench_original_agent.py tests/test_multiagentbench_original_assets.py tests/test_multiagentbench_adapter.py tests/test_marble_evaluator_compat.py tests/test_marble_author_source.py tests/test_marble_original_configs.py tests/test_marble_cpu_recipe.py
       - name: LJSpeech original archive identity and resume fixtures, no audio or models
         run: python -m pytest -q tests/test_ljspeech_original_assets.py workload-preparation/tests/test_ljspeech.py
       - name: LiveCodeBench opaque original task preparation fixtures, no task execution
