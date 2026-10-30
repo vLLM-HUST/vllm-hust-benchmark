@@ -30,12 +30,13 @@ GitHub 匿名 API 配额。
 MODEL_API=https://MODEL_HOST/v1
 MODEL_NAME=openai/SERVED_MODEL_NAME
 BASE=https://vllm-hust.sage.org.ai/downloads/swe-bench-pro
-REV=1cc6899e284af5e7c1947d7496502022c3d5ee6a
+REV=33efa2a4ce065bcd6d25ab387ddffd85b3826a3f # pragma: allowlist secret
+BUNDLE_SHA=fcf21b81bc91e569ab57ebb43791a0a4b7b1b8678dd5dc3487ad931c57e5e7b8 # pragma: allowlist secret
 curl --fail --location "$BASE/$REV/bootstrap_swe_bench_pro.py" --output bootstrap_swe_bench_pro.py
-echo 'b39a128b576876b4a1e5ddd7d9b57e10a48822852a0c9e9df228a5025af15ee5  bootstrap_swe_bench_pro.py' | sha256sum --check
+echo 'f4700673883af8447442c89193881efa314649cb949b2fdca00bf8ea88fecea9  bootstrap_swe_bench_pro.py' | sha256sum --check # pragma: allowlist secret
 python3 bootstrap_swe_bench_pro.py --source-revision "$REV" \
   --source-bundle-url "$BASE/$REV/runtime.tar.gz" \
-  --source-bundle-sha256 1b3cc94fb8730f86b8976d7484953cf8587eb04e11d21a9b6e68872aae95ecdd \
+  --source-bundle-sha256 "$BUNDLE_SHA" \
   --crane-archive-url "$BASE/crane-v0.20.3-linux-arm64.tar.gz" \
   --work "$HOME/swe-pro-first" --model-api "$MODEL_API" --model-name "$MODEL_NAME" --run
 ```
