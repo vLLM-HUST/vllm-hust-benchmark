@@ -21,6 +21,8 @@ provenance。涉及原件订正时保留旧字节及说明， 不要仅重新计
 
 ## 常用问题入口
 
+- **固定B0完整回答联合测量：**
+  [2026-10-30配对](reports/full-answer-joint-20261030/README.md)，包含固定200题/max8192的同轮质量、时延、吞吐、利用率、公开报价成本及4K/16K连续窗口；失败配置与私有原件哈希独立保留，不替代M01旧计数轮。
 - **中期 B0/B1、质量、长上下文、资源成本、M01：** [中期报告目录](reports/vllm-hust-midterm-20261019/README.md)，
   [B1 候选审计](reports/vllm-hust-midterm-20261019/B1-CANDIDATE-AUDIT.md)，以及该目录的
   `m01-*`、`quality*`、`long*` 文件/子目录。按当前报告的链接找证据，不凭文件名日期选“最新有效”。
