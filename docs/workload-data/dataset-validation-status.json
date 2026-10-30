@@ -55,7 +55,7 @@
       "probe_nonroot_cap0_nnp_network_none_root_readonly": true,
       "probe_host_mounts_devices_credentials_or_docker_socket": false,
       "files_formatted_or_deleted": false,
-      "new_native_tasks_or_scoring_executed": false,
+      "native_tasks_or_scoring_executed_by_inert_probe": false,
       "boundary": "Recovered existing isolated daemon and original images; no full native task continuation. Initial Docker info reported stale running counts while ps returned no live containers; inspected original saved notebook has Pid0 and exited255, not an active Agent. Preserve old data and do not infer task liveness from aggregate counts."
     },
     "latest_npu_connection_probe": "Replacement host key matched user confirmation; authenticated inventory and original service health200 verified. Physical6 used; physical2 left free.",
@@ -85,7 +85,7 @@
     "previous_failed_binding_http200_responses": 6,
     "corrected_binding_native_http200_responses_lower_bound": 3,
     "corrected_binding_content_and_tool_messages_observed": true,
-    "new_native_tasks_completed": 0,
+    "new_native_tasks_completed": 1,
     "bixbench_previous_client_exit_code": 1,
     "bixbench_previous_error_type": "Timeout",
     "bixbench_current_requested_transport_timeout_seconds": 600,
@@ -93,7 +93,7 @@
     "bixbench_current_effective_transport_timeout_seconds": 600,
     "bixbench_next_binding_router_timeout_verified_seconds": 600,
     "trusted_cpu_cluster_target_nodeport_mapping_found": false,
-    "boundary": "Previous timeout/reasoning-only failures and the pre-autostop ignored top-level timeout600 are retained as historical evidence. The explicitly restored original service and new actor use verified router_kwargs.timeout600, unchanged task/model/generation budgets, and exact reuse of the completed question1 files. Original question2 is running, not an assertion that the interrupted actor memory survived. No scoring or source delivery checkbox asserted."
+    "boundary": "Previous timeout/reasoning-only failures and the pre-autostop ignored top-level timeout600 are retained as historical evidence. The restored original service and new actor use verified router_kwargs.timeout600 with unchanged task/model/generation budgets. Original question1 files were reused; question2 completed40 actions without an answer and was retained; question3 is running. This does not assert interrupted actor memory survived, scoring completed or the source delivery checkbox passed."
   },
   "current_scope_note": "delivery_inventory is the current source-delivery ledger. sources/incident_gate and frozen receipts retain their original historical scope, not live service or current progress assertions.",
   "cpu_isolation_environment_latest": "docs/workload-data/validation/swebench-original-readiness-20261029.json#independent_cpu_recovery",
@@ -2608,14 +2608,26 @@
         "effective_router_transport_timeout_seconds": 600,
         "fixed_selected_question_ids": ["bix-1-q1", "bix-1-q2", "bix-10-q1"],
         "completed_original_questions_reused": ["bix-1-q1"],
+        "new_original_questions_completed": ["bix-1-q2"],
+        "completed_fixed_question_count": 2,
         "original_trajectory_files_reused_unchanged": 2,
         "interrupted_task_memory_restored": false,
-        "active_original_question": "bix-1-q2",
+        "active_original_question": "bix-10-q1",
+        "second_question_saved_result": {
+          "problem_id": "bix-1-q2",
+          "original_actions": 40,
+          "answer_present": false,
+          "result_bytes": 12314,
+          "result_sha256": "ead8811ba832b4c4ab924f4aec9461e3a7f8a13bab682b8c6ec0650a64476986",
+          "trajectory_bytes": 4824959,
+          "trajectory_sha256": "72b399b4bac6cd299d95b1f28d0909f1c4b9190e2e9a7e19a6db2dedb622c829",
+          "boundary": "Original40-action workflow completed without a final answer. Preserve and score the failure; do not replace or rerun to improve quality."
+        },
         "new_http200_responses_observed_lower_bound": 2,
         "model_response_cache_identity": "same queue request UUID and exact body SHA256 only; distinct retries are not substituted with earlier responses",
         "official_scoring_executed": false,
         "source_checkbox_eligible": false,
-        "boundary": "Previous actor disappeared with its Pod. Reused complete question1 including its null answer; original question2 restarted in a fresh isolated notebook. Same fixed three tasks, original40-step workflow and generation budget; no prior completed question rerun, no task replacement, no native scoring or source completion yet."
+        "boundary": "Previous actor disappeared with its Pod. Reused complete question1 including its null answer; original question2 completed in a fresh isolated notebook and also has no final answer. Original question3 is running. Same fixed three tasks, original40-step workflow and generation budget; no completed question rerun, no task replacement, no native scoring or source completion yet."
       },
       "previous_native_attempt_14b_autostop": {
         "recovered_after_cpu_autostop": {
@@ -2829,7 +2841,25 @@
         "audio_archive_range_bytes_read": 14425611,
         "original_audio_archive_fully_downloaded_or_digest_verified": false,
         "selected_original_member_crc_and_sha256_verified": true,
-        "original_model_weights_acquired": 1,
+        "original_model_weights_acquired": 4,
+        "model_weight_count_semantics": "Four serialized files: acoustic checkpoint, universal vocoder checkpoint, encoder Transformer safetensors and encoder Dense safetensors. Not dataset completions or four independent benchmark models.",
+        "public_original_models_verifier": {
+          "status": "passed",
+          "server_receipt": "dailytalk-model-files-public-probe-20261031-001/preflight-public.json under the private shared task root",
+          "exact_original_files_verified": 15,
+          "model_files_deserialized": false,
+          "model_calls": 0,
+          "npu_forward_qualified": false
+        },
+        "generator_asset_copy_recovery": {
+          "server_receipt": "dailytalk-original-generator-assets-20261031-001/acquisition-public.json under the private shared task root",
+          "original_cpu_assets_preserved": true,
+          "interrupted_copy_prefix_verified_bytes": 424738816,
+          "only_missing_tail_retransferred_for_acoustic_checkpoint": true,
+          "complete_acoustic_and_vocoder_sha256_verified_on_npu_storage": true,
+          "transport_truncation_cause_established": false,
+          "model_calls": 0
+        },
         "official_acoustic_checkpoint": {
           "variant": "history_guo",
           "restore_step": 900000,
@@ -2841,10 +2871,39 @@
           "deserialized_or_executed": false,
           "neural_inference_on_cpu": false
         },
+        "official_vocoder_checkpoint": {
+          "variant": "universal",
+          "archive_bytes": 51942859,
+          "archive_sha256": "1fd93a04431b14296cf1d3f66a6fea89c2fdeb8f3b900a962e13ad21f67f9149",
+          "extracted_bytes": 55788858,
+          "extracted_sha256": "771eaf4876485a35e25577563d390c262e23c2421e4a8c929eacfde34a5b7a60",
+          "server_receipt": "/root/dailytalk-official-universal-vocoder-20261031-001/acquisition-public.json",
+          "original_member_crc_verified": true,
+          "model_deserialized_or_executed": false
+        },
+        "official_history_text_encoder": {
+          "model": "sentence-transformers/distiluse-base-multilingual-cased-v1",
+          "revision": "826fee3d516ebb14987355af373f5b69101c7006",
+          "embedding_dimension": 512,
+          "verified_files": 13,
+          "verified_bytes": 543484070,
+          "server_receipt": "dailytalk-distiluse-original-assets-20261031-001/acquisition-public.json under the private shared task root",
+          "original_safetensors_and_git_identities_verified": true,
+          "npu_forward_verified": false,
+          "model_loaded": false
+        },
+        "publisher_guo_input_contract_review": {
+          "source": "dataset.py:TextDataset.__getitem__, pinned original publisher revision",
+          "current_and_history_text_embeddings_required": true,
+          "history_window_turns": 10,
+          "original_phoneme_speaker_emotion_rows_required": true,
+          "training_full_corpus_reprocessing_required_for_this_inference_path": false,
+          "boundary": "Original Guo batch inference reads current/history text embedding arrays, original phoneme rows and speaker/emotion maps. Preserve its original10-turn policy and all sampled dialogue files; do not substitute the no-history model or require unrelated training preprocessing. Feature preparation and native inference are still pending."
+        },
         "native_synthesis_or_scoring_executed": false,
         "npu_device_adaptation_applied": false,
         "required_native_protocol": "Official conversational TTS batch synthesis with original validation split and complete required dialogue history; not independent text QA or arbitrary single-turn synthesis.",
-        "remaining_native_prerequisites": ["Required original acoustic/history preprocessing features", "Original universal HiFi-GAN vocoder weights required by the pinned model config", "Qualified isolated runtime for publisher legacy dependencies", "Explicit NPU device binding: original synthesis chooses CUDA or CPU, neither proves NPU execution", "Native synthesis outputs for the fixed complete dialogues and applicable original evaluation", "Complete fresh public audio acquisition on a node with original-host network access; provider/research consumption of original audio-text-dialogue relationships"],
+        "remaining_native_prerequisites": ["Original Guo current/history512D text embedding arrays on NPU, preserving original phoneme rows and speaker/emotion/statistic maps", "Qualified isolated runtime for publisher legacy dependencies", "Explicit NPU device binding: original synthesis chooses CUDA or CPU, neither proves NPU execution", "Native synthesis outputs for the fixed complete dialogues and applicable original evaluation", "Complete fresh public audio acquisition on a node with original-host network access; provider/research consumption of original audio-text-dialogue relationships"],
         "boundary": "52 software files,11 original metadata/lexicon assets,29 original WAVs covering the fixed first3 complete validation dialogues, and the official Guo900000 checkpoint are acquired on the dedicated CPU server. Exact selected archive members, not the entire5.34GB archive, were verified. Checkpoint bytes and ZIP CRCs were verified without pickle deserialization or neural execution. No local audio/weight files, prompt conversion, native synthesis, scoring or source completion claimed."
       },
       "checked": false,
