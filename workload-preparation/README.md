@@ -949,3 +949,27 @@ for record in iter_workload("LJSPEECH", data_root=Path("/private/ljspeech"), lim
 
 VITS发布方提供对应LJ
 Speech的模型及原推理示例，可作为候选，但其CUDA/PyTorch1.6环境不等于已适配NPU；尚未取得并固定检查点，不宣称原生合成已运行。没有自动MOS分数可凭空补造，波形非空或格式合法也不能代表语音质量。[当前证据与缺口](../docs/workload-data/validation/ljspeech-original-readiness-20261029.json)持续更新，来源总勾保持未完成。
+
+## BixBench 原科学任务准备与读取（原生执行未完成）
+
+本接口用于官方科学Agent任务，不用零样本问答替代Notebook工作流。原问题JSONL实际为205条扁平记录、17字段，不能按旧数据卡的嵌套`questions`结构加载。文件版本和64份ZIP身份见[固定原资产清单](data/catalogs/bixbench_original_files_v1.json)；205条问题引用其中59份。当前只取得固定原前三题所需的两份原ZIP，其余57份尚未取得。
+
+使用包含本适配器的本批组件版本；较早的固定安装锁不自动包含后续新增来源。目录由使用者显式提供，原`BixBench.jsonl`和ZIP文件名不变：
+
+```python
+from pathlib import Path
+from vllm_hust_workload_data import iter_workload
+from vllm_hust_workload_data.bixbench import original_capsule_path, restore_original_task
+
+root = Path("/private/bixbench-original")
+for record in iter_workload("BIXBENCH", data_root=root, limit=3):
+    original_input = record.task["input"]  # 原question及data_folder，不含参考答案
+    verified_zip = original_capsule_path(record, data_root=root)
+    original_row = restore_original_task(record)  # 含参考侧，仅供可信原生环境/评测器
+```
+
+读取保留原问题顺序、参考答案/假说/结果、元数据和未知扩展字段，不生成新prompt。参考侧不得整体作为模型输入；`request_body()`会明确拒绝把该环境任务当成现成API请求。`original_capsule_path`验证官方ZIP字节身份，不解压、不执行代码，也不代表Notebook环境可用。运行副本仍须经过作者预处理，移除参考Notebook，而不是把原ZIP内的全部内容暴露给Agent。
+
+完整元数据索引可以在部分ZIP尚缺时建立；这只证明问题引用可读取，不能据此声明所有任务可执行。现有pipeline配置中的来源项可写为`{"source_id":"BIXBENCH","data_root":"/private/bixbench-original"}`，输出目录必须与来源目录分离；研究消费继续使用原`resolve_input`接口。记录的`runtime.assets`列出对应原ZIP身份，适配阶段不会把缺失ZIP自动下载或替换成别的语料。
+
+服务器候选包已核验全部205条字段还原/索引及固定前三条公共和未修改研究消费回查，原ZIP摘要也通过；这不是科学Agent执行或评分。[候选交接证据](../docs/workload-data/validation/bixbench-candidate-handoff-20261030.json)明确区分本地构建候选包、实际CI工件和原生任务。实际CI工件资格、Python3.12以上的官方科学运行环境、NPU模型绑定及原评分仍待完成。

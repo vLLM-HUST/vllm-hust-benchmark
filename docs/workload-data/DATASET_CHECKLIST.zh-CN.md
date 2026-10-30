@@ -456,7 +456,9 @@ Pod已不存在（Kubernetes返回`NotFound`）；Coder最新build为`stopped`�
   blob身份和SHA256核验；实际为205条扁平问题、17字段，问题ID唯一。数据卡的嵌套`questions`结构不能用于本版本适配。原始正文、参考答案和canary没有进入本机文件或Git。
 - [x] 注册原JSONL及64个ZIP的完整文件身份，实际205条问题引用其中59个ZIP，约5.20GB；另5个已登记ZIP不因此变成额外任务。全部`data_folder`关系核验通过。固定原前三题为`bix-1-q1`、`bix-1-q2`、`bix-10-q1`，不为覆盖更多capsule而换题。[原始资产清单](../../workload-preparation/data/catalogs/bixbench_original_files_v1.json)、[准备证据](validation/bixbench-original-metadata-20261030.json)
 - [x] 固定原前三题对应的两份原ZIP已在服务器取得，共5,962,719字节，发布方LFS摘要及16个成员CRC全部核验；未解压或执行代码，没有原始数据落入本机文件。全体语料仍缺另57份引用ZIP，不能将两份算作全量资产取得。
-- [ ] 原生适配/索引及研究消费、Python3.12以上的官方科学Agent/Notebook隔离环境、NPU模型绑定和原评分仍待完成。官方镜像有ARM64元数据，但尚未拉取或验证运行；没有模型调用，不打来源总勾。
+- [x] 原生字段适配器安装候选软件包后，服务器全部205条原字段可还原、205条索引及固定前三条公共/未修改研究消费完整记录回查通过，原ZIP引用与摘要验证通过。输入只含原问题和数据目录名，答案/结果/未知扩展字段保持参考侧；不是API
+  prompt生成器。[候选包交接证据](validation/bixbench-candidate-handoff-20261030.json)
+- [ ] 实际CI工件资格、Python3.12以上的官方科学Agent/Notebook隔离环境、NPU模型绑定和原评分仍待完成。官方镜像有ARM64元数据，但尚未拉取或验证运行；没有模型调用，不打来源总勾。
 
 本来源保留科学Agent执行路线，不能用发布方另有的零样本问答模式替代。固定原配置默认40步，依赖`fhaviary`、`fhda`、`fhlmi`和`ldp`；作者入口为`bixbench/generate_trajectories.py`，随后按作者后处理/评分协议评判。原ZIP须保留为来源；运行副本按作者预处理移动Data内容、移除参考Notebook，不能将整个含参考Notebook的归档直接暴露给Agent。当前仅审查了这些源码路径，没有安装或运行该环境。
 

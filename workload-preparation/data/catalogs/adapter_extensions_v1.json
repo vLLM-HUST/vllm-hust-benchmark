@@ -941,6 +941,15 @@
       "requirements": ["Original validation fields and PNG bytes preserved without resizing or answer coercion", "Use the pinned maintained Inspect Evals task for native template, thumbnail1024 and ANLS; this raw reader is not an alternative prompt/scorer", "No task execution or research integration is established by catalog registration"],
       "status": "ORIGINAL_VALIDATION_FIELDS_MAPPED_NATIVE_AND_RESEARCH_PENDING"
     },
+    "BIXBENCH": {
+      "kind": "task_dataset", "mapping": "bixbench_original_tasks", "row_format": "jsonl",
+      "input_fields": ["question", "data_folder"],
+      "required_fields": ["question_id", "capsule_uuid", "question", "data_folder", "ideal", "distractors"],
+      "outcome_fields": ["ideal", "distractors", "answer", "hypothesis", "result"],
+      "annotation_fields": [], "id_field": "question_id", "normalization": {},
+      "requirements": ["Original flat question and full capsule environment; author Agent/preprocessing/scoring remain required", "Unknown extensions and reference fields retained separately; no original-task rewriting or zero-shot substitution"],
+      "status": "ORIGINAL_TASK_ADAPTER_IMPLEMENTED_NATIVE_EXECUTION_PENDING"
+    },
     "MIND2WEB": {
       "kind": "task_dataset", "mapping": "mind2web_original_tasks",
       "input_fields": ["annotation_id", "website", "domain", "subdomain", "confirmed_task"],

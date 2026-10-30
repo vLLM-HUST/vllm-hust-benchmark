@@ -24,6 +24,7 @@ DATA_MODULES = {
     "multinews",  # Original paired documents/references, no research analysis.
     "librispeech",  # Original audio/transcript bindings only, no observations.
     "ljspeech",  # Original text/reference WAV relations only; no synthesis.
+    "bixbench",  # Original question/reference/capsule relations only; no Agent.
     "stsb",  # Publisher sentence pairs and labels only; no research analysis.
     "beir",  # Original retrieval assets and relations, no research analysis.
     "__init__",
@@ -114,6 +115,27 @@ def test_dragon_reader_has_no_models_network_scoring_or_research_imports():
         isinstance(node, ast.Call)
         and isinstance(node.func, ast.Name)
         and node.func.id in {"eval", "exec", "compile"}
+        for node in ast.walk(tree)
+    )
+
+
+def test_bixbench_adapter_has_no_scientific_execution_or_research_imports():
+    import ast
+
+    tree = ast.parse(
+        (ROOT / "src/vllm_hust_workload_data/bixbench.py").read_text("utf-8")
+    )
+    imports = set()
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            imports.update(item.name for item in node.names)
+        elif isinstance(node, ast.ImportFrom):
+            imports.add(node.module)
+    assert imports == {"copy", "pathlib", "assets", "records", "registry"}
+    assert not any(
+        isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Name)
+        and node.func.id in {"eval", "exec", "compile", "__import__"}
         for node in ast.walk(tree)
     )
 
