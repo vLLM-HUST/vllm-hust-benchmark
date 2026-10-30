@@ -1190,6 +1190,8 @@ python scripts/prepare_dailytalk_original_guo_inputs.py --metadata-root /private
 
 输出包含原行子集`val_phone.fixed3.private.txt`、原映射和`guo-input-contract.private.json`。这不是嵌入或合成结果；仍需用原文本编码器执行发布方的`encode([raw_text])[0]`并运行原Guo声学模型和声码器。两个命令已在服务器上对全部29个固定原话轮实际通过，不加载模型、不访问网络，也不将输入准备计为来源完成。
 
+评价边界：[原论文第4节](https://arxiv.org/html/2207.01063)使用人工MOS及比较式CMOS评价自然度和对话上下文，不能用WAV格式检查或文本LLM打分替代。当前29话轮是固定原生流程验证样本，并非论文质量实验的260话轮样本；人工听评未开展，不声明复现论文质量分数。原生合成输出、文件完整性检查与人工质量评价分别记录。
+
 当前服务器已通过软件和元数据公开`verify`入口，42份原Python文件语法检查通过。已取得原`val_phone.txt`按首次出现顺序的前3个完整对话（23、30、59）全部29段原始WAV及转写，保留原元数据；所选ZIP成员的原CRC和SHA256已核验，未下载或验证整份5.34GB压缩包。上述公开音频入口的`verify`与复用式`prepare`也已通过服务器实测，均无新下载。该CPU节点不能直连Google
 Drive，首次音频取得使用已披露的纯内存HTTPS中转；当前公开下载函数已做真实HTTP范围探测，完整首次下载路径只有离线夹具覆盖，不能称为该节点直连下载通过。官方`history_guo`的900000步检查点也已取得并完成全文件SHA256与ZIP成员CRC校验，没有反序列化或运行。音频和检查点只在服务器保存。
 
