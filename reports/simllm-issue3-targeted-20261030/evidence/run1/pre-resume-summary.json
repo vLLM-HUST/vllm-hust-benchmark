@@ -1,0 +1,38 @@
+{
+  "passed": false,
+  "diagnostic_only": true,
+  "device": "7",
+  "model": "/tmp/simllm-issue3-quality-oct30/model-local",
+  "model_config_sha256": "5e4d7f74fec2f360eb9cfbfcd6ec0c4c76e684d3a11caaed259d9fd9bfbc7944",
+  "input_sha256": "eff808dd32306cf61fbf04060a62b04cfebc924d5ee60763b2a0c2fe8c3bbf1d",
+  "requests_per_arm": 12,
+  "final_wheel_sha256": "7ae77f00e47a4de1ad34acbbd02db57c4d0d565af2184ceee62490f621566666",
+  "rollback_wheel_sha256": "10c0db015afa70b34277c8272814e5ffca0715350344041a7c6b384c4498dfea",
+  "stages": [
+    {
+      "name": "baseline",
+      "requests": 12,
+      "wheel_sha256": "10c0db015afa70b34277c8272814e5ffca0715350344041a7c6b384c4498dfea",
+      "enabled": false,
+      "native_apc": false,
+      "semantic_reuse_events": 0,
+      "semantic_reused_tokens": 0,
+      "startup_banner_observed": false,
+      "patch_exercised": false,
+      "server_stopped": true
+    },
+    {
+      "name": "approximate",
+      "requests": 12,
+      "wheel_sha256": "7ae77f00e47a4de1ad34acbbd02db57c4d0d565af2184ceee62490f621566666",
+      "enabled": true,
+      "native_apc": false,
+      "semantic_reuse_events": 8,
+      "semantic_reused_tokens": 22556,
+      "startup_banner_observed": false,
+      "patch_exercised": true,
+      "server_stopped": true
+    }
+  ],
+  "error": "Traceback (most recent call last):\n  File \"/tmp/simllm-issue3-quality-oct30/run_quality_apc.py\", line 407, in main\n    raise RuntimeError(f\"{name} server exited: {server.returncode}\")\nRuntimeError: native_apc server exited: 1\n"
+}
