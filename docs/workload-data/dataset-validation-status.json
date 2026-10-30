@@ -1,6 +1,17 @@
 {
   "schema_version": "workload-validation-checklist/v1",
   "updated_at": "2026-10-30",
+  "current_software_ci_review": {
+    "run_id": 41057645305,
+    "producer_commit": "fee2163ffd6f668cab74daec63a1a0632f7033e0",
+    "identity_note": "pragma: allowlist secret - verified public CPU smoke producer revision",
+    "conclusion": "success",
+    "workflow": "Workload data CPU correctness smoke",
+    "native_execution": false,
+    "performance_testing": false,
+    "npu_requested": false,
+    "boundary": "Actual software-only GitHub Actions run for the named commit, including new BixBench grading contracts and official Research profile preparation. Not native dataset/task/scoring completion. Provider source/catalog/schema/provenance paths are unchanged from previously verified CI handoffs; no data or model runs repeated."
+  },
   "current_checked_receipt_custody_review": {
     "date": "2026-10-30",
     "checked_source_references": 75,
@@ -2860,6 +2871,17 @@
       },
       "fixed_original_configuration_preparation": {
         "official_research_profile_preparation": {
+          "research_tool_preflight": {
+            "server_receipt": "/root/marble-research-env-preflight-20261030-001/network-and-auxiliary-public.json",
+            "official_arxiv_api_http_status": 200,
+            "bounded_atom_feed_bytes_read": 2962,
+            "body_saved": false,
+            "original_keybert_default_model": "all-MiniLM-L6-v2",
+            "auxiliary_model_loaded": false,
+            "auxiliary_model_npu_binding_qualified": false,
+            "native_tool_action_executed": false,
+            "boundary": "Bounded official API access check and installed-source default inspection only. Query-based related-paper search initializes an auxiliary neural model; it must not silently infer on CPU under the NPU-only requirement. Other tools/endpoints and full native flow remain unqualified."
+          },
           "public_entry_option": "scripts/prepare_marble_original_configs.py --runtime-profile official-research",
           "server_receipt": "/root/marble-official-research-runtime-20261030-001/preparation-public.json",
           "selected_original_rows": 3,
