@@ -3351,8 +3351,8 @@
               "keybert_npu_keyword_control": {
                 "current_original_tool_transport": {
                   "public_binding_module": "scripts/marble_keybert_transport.py",
-                  "server_receipt": "/root/marble-research-keyword-transport-20261031-001/partial-boundary-public.json",
-                  "status": "NPU_KEYWORD_RESPONSE_RELAYED_ORIGINAL_WEB_TOOL_PENDING",
+                  "server_receipt": "/root/marble-research-keyword-transport-20261031-001/qualification-public.json",
+                  "status": "ORIGINAL_RELATED_PAPER_TOOL_RETURNED_WITH_NPU_KEYWORDS_NOT_AGENT_TASK",
                   "original_module_file_unchanged": true,
                   "original_default_keybert_factory_explicitly_rebound_in_process": true,
                   "existing_atomic_queue_writer_reused": true,
@@ -3361,10 +3361,15 @@
                   "returned_keyword_count": 5,
                   "npu_neural_forward_calls": 2,
                   "local_raw_data_files": 0,
-                  "original_tool_returned": false,
+                  "original_tool_returned": true,
+                  "returned_papers": 1,
+                  "original_actor_no_longer_live": true,
+                  "actor_exit_code": null,
+                  "exit_code_not_captured_by_original_background_launcher": true,
+                  "response_transport_note": "One extra trailing newline from relay print; independently verified equal response bytes after removing trailing newlines and all JSON values preserved. Future relay uses exact byte write.",
                   "synthetic_prerequisite_control_not_original_task": true,
                   "source_checkbox_eligible": false,
-                  "boundary": "Original get_related_papers consumed the remote keyword response and advanced to paper collection. Same actor was confirmed live after the observation deadline; no restart or duplicate request. Subsequent web acquisition and final tool return are not yet qualified."
+                  "boundary": "Original get_related_papers consumed the remote keyword response and returned one paper after about423.85 seconds of paper collection. Same actor observed to terminal, no restart or duplicate request. Original fields of returned papers, other tool endpoints, native Agent steps and scoring remain separate qualifications; this synthetic tool control is not a benchmark task."
                 },
                 "public_entry": "scripts/run_marble_keybert_npu.py",
                 "public_original_model_profile": "configs/workload-native/marble-minilm-original-assets.json",
@@ -3415,6 +3420,41 @@
             "boundary": "Bounded official API access check and installed-source default inspection only. Query-based related-paper search initializes an auxiliary neural model; it must not silently infer on CPU under the NPU-only requirement. Other tools/endpoints and full native flow remain unqualified."
           },
           "public_entry_option": "scripts/prepare_marble_original_configs.py --runtime-profile official-research",
+          "local_model_binding_preparation": {
+            "public_entry": "scripts/bind_marble_research_local.py",
+            "server_receipt": "/root/marble-local-research-binding-20261031-002/preflight-public.json",
+            "status": "FIXED3_LOCAL_RESEARCH_BINDINGS_PREPARED_NOT_EXECUTED",
+            "fixed_original_rows": 3,
+            "agent_counts": [5, 5, 3],
+            "original_iterations": 5,
+            "actor_model": "openai/Qwen/Qwen3-14B",
+            "judge_model": "openai/Qwen/Qwen3-14B",
+            "official_actor_model": "gpt-3.5-turbo",
+            "official_judge_model": "gpt-4o",
+            "official_model_reproduction": false,
+            "changed_configuration_fields": ["llm", "metrics.evaluate_llm", "output.file_path"],
+            "original_task_agents_relationships_and_unknown_fields_preserved": true,
+            "public_entry_exit_code": 0,
+            "native_config_loader_exit_code": 0,
+            "original_engine_constructor_preflight": {
+              "server_receipt": "/root/marble-local-research-engine-preflight-20261031-003/preflight-public.json",
+              "exit_code": 0,
+              "configurations": 3,
+              "agent_counts": [5, 5, 3],
+              "original_iterations": 5,
+              "current_iteration_each": 0,
+              "blocked_network_attempts": 0,
+              "native_agent_steps": 0,
+              "model_calls": 0,
+              "retained_preflight_failures": ["Missing private logs/app.log parent", "Missing original evaluator/evaluator_prompts.json relative binding"],
+              "environment_fixes_only": "Create private logs directory and bind original evaluator resource directory into private runtime cwd; no original source or prompt changes."
+            },
+            "model_calls": 0,
+            "judge_binding_quality_qualified": false,
+            "native_agent_execution": false,
+            "source_checkbox_eligible": false,
+            "retained_initial_preparation_failure": "First deployment placed the script outside its scripts/ layout and output inside the inferred software root; overlap guard rejected before output. Corrected software layout and separate output, did not weaken the guard."
+          },
           "server_receipt": "/root/marble-official-research-runtime-20261030-001/preparation-public.json",
           "selected_original_rows": 3,
           "original_converter_fill_defaults_used": true,
@@ -3704,7 +3744,7 @@
       "legacy_checked": false,
       "existing_receipt": null,
       "delivery_receipt": null,
-      "blocker": "Five original JSONL files acquired and identity-checked; native software/environment, unchanged per-scenario inputs/references, model/judge binding, official scoring and public/research consumption remain pending. No native execution or source completion."
+      "blocker": "Five original JSONL files and full500-row original provider/research consumption already verified; pinned100-file author source, disclosed evaluator syntax fix and isolated95-package CPU client prepared. Original Research fixed3 profile and explicit local model bindings load with original5/5/3 agents and5 iterations. Original arXiv ID tool and related-paper tool with NPU-only MiniLM/KeyBERT queue transport returned successfully as synthetic prerequisite controls, not original Agent tasks. Full native Agent steps, qualified replacement judge, original scoring and final artifact handoff remain pending; other four scenarios still need their own runtime/environment bindings. No full-source completion."
     },
     "DEEPPLANNING": {
       "scope": "public",

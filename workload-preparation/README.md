@@ -1034,6 +1034,17 @@ gpt-4o。这是Research场景的发布方配置依据，不代表其他场景，
 
 同版本官方模板的服务器逐字段对照还发现：`coding_configs/config_1/2/3.yaml`与原JSONL前三题并非同题，不能按编号直接替换；`test_config_world/test_config_world.yaml`与前三条bargaining的任务、Agent及关系也不一致。模板中的Coding/5次或WorldSimulation/3次只能作为公开运行设置参考，不能伪称已找回这些原题的完整配置。对照未改写原题或创建替代测试，完整原生资格仍待验证。
 
+对已经由原`official-research`流程准备好的固定前缀，可以显式生成本地模型部署绑定，不修改原准备目录：
+
+```bash
+python scripts/bind_marble_research_local.py \
+  --prepared-root /private/marble-official-research \
+  --output /private/marble-local-research \
+  --model openai/Qwen/Qwen3-14B --judge openai/Qwen/Qwen3-14B
+```
+
+默认只显示计划；加`--execute`才核对原准备回执、原配置摘要和完整连续前缀，在新目录只改`llm`、`metrics.evaluate_llm`、`output.file_path`。题目、Agent、关系、5轮、规划器、评分维度及未知字段保持不变，拒绝含其他Agent级模型绑定的输入。当前原前三题已在服务器通过这个公开入口及官方`Config.load`，Agent数仍为5/5/3，无新模型调用。随后原Engine构造也通过，三题均处于第0轮，无网络尝试或Agent步骤。运行工作目录须具有私有`logs/`，并能从`evaluator/evaluator_prompts.json`读取原评分提示；服务器只绑定原资源路径，未改提示，初次缺目录和资源路径的失败保留。明确披露本地执行/裁判替代，不能宣称复现官方GPT-3.5/GPT-4o结果；替代裁判资格、模型请求传输和完整原生运行仍待验证。本入口不会启动服务、执行Agent或修改环境。
+
 Research专用准备可在上述配置准备命令追加`--runtime-profile official-research`，并提供全新输出目录。默认仍只打印计划；加`--execute`后仅选原Research文件前N条，读取已固定官方脚本的字面量参数，通过原`fill_defaults`填入发布方清空的运行字段。入口检查原task、agents、relationships不变，不运行shell、模型、环境或评分。原官方模型与judge名称保留，因此生成配置不能直接盲跑。服务器原前三条已准备并在离线、非root、只读容器构造官方ResearchEnvironment成功，5次迭代及各自Agent数保留；这仍不证明检索工具、原生步骤或评分可用，后续须显式绑定已核验的本地模型、裁判、网络工具和私有输出。
 
 软件隔离镜像配方为`configs/workload-native/marble-compat-cpu.Dockerfile`。构建上下文只允许两个软件子目录：`client/`为已核验的Python3.10客户端（原锁93包＋披露的2包），`author/`为99份原软件及明确披露的评分器缩进兼容副本；禁止带入原题、答案、模型缓存、结果或凭据。操作者须先核验已有Ubuntu22.04基础镜像的不可变ID，显式传给`MARBLE_BASE_IMAGE`，不能把浮动tag当身份依据。
@@ -1068,7 +1079,7 @@ ASCEND_RT_VISIBLE_DEVICES="$OWNED_NPU_ID" \
 原Research模块的显式队列绑定在`scripts/marble_keybert_transport.py`。在原工具调用所在进程中使用`keyword_transport(paper_collector, private_queue)`上下文，只临时替换该模块的默认KeyBERT工厂；退出上下文恢复原工厂，不修改发布方文件。原查询和1—3
 gram/英文停用词设置保持不变，关键词及分数按原tuple格式返回。队列复用既有原子写入，每次调用一个UUID；可信跨机worker将该请求送至上述NPU入口，再将返回JSON写入同UUID的响应文件。超时保留请求并报错，不自动重发；worker不得把它接到公开端口或允许任务代码访问SSH凭据。
 
-实际跨机控制已确认原`get_related_papers`消费了NPU返回的5个关键词，原查询两端摘要一致，无本地原始数据文件。该控制仍在后续论文内容获取阶段，尚未观察到原工具返回；它不是原Agent题目，也不是Research场景完成。后续须跟踪同一进程，不重复启动，完整原生Agent与评分仍待验证。相关CI只运行夹具及协议检查，不访问arXiv或分配NPU。
+实际跨机控制已确认原`get_related_papers`消费了NPU返回的5个关键词，原查询两端摘要一致，无本地原始数据文件。同一进程的后续论文获取约423.85秒后返回1篇论文，未重发请求；后台启动器未保存退出码，因此只报告已观察到原工具返回和进程结束，不补造退出码。中继多打印的一枚末尾换行已披露，独立核验去除末尾换行后字节一致，JSON值和关键词分数不变；后续中继采用原字节写入。该控制不是原Agent题目，也不是Research场景完成，完整原生Agent与评分仍待验证。相关CI只运行夹具及协议检查，不访问arXiv或分配NPU。
 
 本配方已在专用ARM64 CPU工作区构建，并通过非root65534、无网络、只读根、去全部能力、禁止提权的真实容器`--help`探测，退出0；未挂载任务数据、Docker
 socket或NPU。任务运行还必须另行部署私有数据/输出、本地模型传输、各场景原环境和评分；镜像只证明软件导入底座可用，不代表Minecraft、数据库、研究工具等环境已齐备，也不是安全认证或原生任务完成。旧容器、镜像和结果未清理。
