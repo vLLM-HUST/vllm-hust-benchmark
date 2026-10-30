@@ -1053,6 +1053,18 @@ python scripts/probe_marble_auxiliary_client.py \
 NPU前向：模型参数与前向输入设备均核对，输出为NPU上的384维向量，保留原256-token模型上限。随后在同一专用环境补入[原锁版本的5项关键词依赖](../configs/workload-native/marble-keybert-npu-supplements.txt)，仅对这些包使用`--no-deps`安装，依赖检查通过；未升级原核心库或修改服务环境。KeyBERT原1—3
 gram、英文停用词的独立控制调用也通过，共观察到3次NPU神经前向，返回5个关键词。控制测试不是原Agent题目，Research工具的远程辅助模型绑定尚未接通，因此不能据此认为原生Research任务或评分已完成。CI只检查计划和夹具，不导入模型库或占卡。
 
+辅助模型的可复用单次工具后端如下。先完成上述独立环境和固定模型资产准备，并确认所选NPU空闲、取得共享执行窗口。`original-tool-query.json`只包含原工具收到的`query`字符串，不重写查询、不把参考答案拼入输入：
+
+```bash
+/external/marble-keybert-npu/bin/python scripts/run_marble_keybert_npu.py \
+  --model-root /private/all-MiniLM-L6-v2
+ASCEND_RT_VISIBLE_DEVICES="$OWNED_NPU_ID" \
+  /external/marble-keybert-npu/bin/python scripts/run_marble_keybert_npu.py \
+  --model-root /private/all-MiniLM-L6-v2 --execute < /private/original-tool-query.json
+```
+
+默认不读取输入、不加载模型；执行入口以[固定原文件身份](../configs/workload-native/marble-minilm-original-assets.json)核对模型，禁止远程代码和CPU神经前向，输出原KeyBERT关键词及实际前向次数。它是单次工具后端，不自行开放网络服务、分配卡或接管模型服务，也不等于Research工具已经接入此后端。跨机传输和原Agent调度仍须继续接通，不能以本命令代替原生多Agent流程。
+
 本配方已在专用ARM64 CPU工作区构建，并通过非root65534、无网络、只读根、去全部能力、禁止提权的真实容器`--help`探测，退出0；未挂载任务数据、Docker
 socket或NPU。任务运行还必须另行部署私有数据/输出、本地模型传输、各场景原环境和评分；镜像只证明软件导入底座可用，不代表Minecraft、数据库、研究工具等环境已齐备，也不是安全认证或原生任务完成。旧容器、镜像和结果未清理。
 
