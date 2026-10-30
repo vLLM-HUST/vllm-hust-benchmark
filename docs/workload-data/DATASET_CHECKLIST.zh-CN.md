@@ -431,6 +431,8 @@ records = iter_workload("DRAGON_PUBLIC", data_root=Path("/external/dragon-origin
 
 ### AppWorld固定原三题原生执行、官方评分与消费交接
 
+- [ ] 2026-10-31研究消费端完整性回归待修复：当前研究消费文件与既有回查证据的SHA256一致。小型结构夹具确认，修改原数据库资产后公共入口拒绝读取，研究旧入口却重新计算引用并返回。此前固定三题的原生执行、官方评分和未改资产的完整记录回读仍有效，但不能据此声称防篡改校验已闭环。拟仅让研究AppWorld消费委托现有公共reader，并补数据库/参考资产负例；研究线程已暂停，正在等待用户确认最小接入修复，不启动研究实验。机器记录见`dataset-validation-status.json`的`current_research_consumer_integrity_followup`。
+
 - [x] 2026-10-30经授权恢复原专用CPU工作区，原模板、持久卷及资源预算不变，实际Pod运行且两容器就绪。既有732条索引与历史实际CI提供方复用；固定原三条经未修改的研究消费入口读取，完整记录与历史保存结果一致，原specs及每题6份参考资产保持分离。0模型调用、0
   Agent或评分重跑。[研究消费回查证据](validation/appworld-research-consumer-20261030.json)
 
@@ -441,7 +443,7 @@ records = iter_workload("DRAGON_PUBLIC", data_root=Path("/external/dragon-origin
 
 - [x] 公共入口固定原三题完成141步ReAct及官方评分：28条精确缓存响应复用、113次新增NPU请求全部HTTP200。三题均1/5测试通过、任务未成功，失败保留；这表示原生流程可用，不表示高质量。实际CI71运行载荷与当前提供方一致，732条原索引不变，研究侧三题完整记录、原specs及每题6份独立参考资产回读通过。详见[最终交付回执](validation/appworld-native-delivery-20261030.json)。不代表全732题推理、原70B复现、确定性环境重放或性能结论；历史准备回执不升级为执行证据。
 
-2026-10-30只读复核：原专用CPU
+2026-10-30历史首次只读复核（早于上述原生交付完成，以下为当时结论，不代表当前勾选状态）：原专用CPU
 Pod已不存在（Kubernetes返回`NotFound`）；Coder最新build为`stopped`、原因`autostop`、停止job成功，但本任务原80GiB持久卷仍为`Bound`，UID与既有记录一致。因此不能认定历史数据丢失，也不能认定旧进程仍在运行；恢复自有工作区后，应先从持久卷回查既有结果，不重复下载或执行原任务。本次未挂载卷、未修改平台配置、未新增模型调用，AppWorld保持未勾选。
 
 公共入口：`python scripts/prepare_appworld_runtime.py --output <仓库外新目录> --uv <已有uv> --python <完整Python3.11>`默认只输出计划。显式加`--execute --install-protected-code`才安装官方包并在私有环境解包；可用`--uv-cache <已有自有软件缓存>`避免重复下载。工具将`APPWORLD_ROOT`、`APPWORLD_CACHE`及临时目录都指向外部目录，不改HOME或模型服务环境。该版本声明范围安装不是作者冻结锁；ARM需要Python.h。历史缺头文件和根盘缓存失败均保留，未删数据掩盖失败。
