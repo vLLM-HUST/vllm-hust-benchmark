@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from copy import deepcopy
 from itertools import islice
+import math
 from pathlib import Path
 
 from .assets import _json, asset_path, iter_rows, verify_file
@@ -283,6 +284,20 @@ def adapt_row(
             raise ValueError(
                 "CODEJUDGE_EVAL: original identifiers/answer label required"
             )
+    if source_id == "WAVCAPS" and (
+        any(
+            not isinstance(row[key], str) or not row[key].strip()
+            for key in ("id", "audio", "caption")
+        )
+        or type(row["duration"]) not in (int, float)
+        or not math.isfinite(row["duration"])
+        or row["duration"] < 0
+        or type(row["num_captions_per_audio"]) is not int
+        or row["num_captions_per_audio"] != 1
+    ):
+        raise ValueError(
+            "WavCaps requires original audio metadata and one weak caption"
+        )
     if source_id == "QUALITY" and (
         any(
             not isinstance(row[key], str) or not row[key].strip()

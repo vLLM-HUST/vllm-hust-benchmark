@@ -1163,6 +1163,44 @@ CRC和归档目录身份另行记录。完整102题仍可从发布方原归档�
 
 通信模块尚未接入原Agent的价格和tokenizer路径，不能用GPT别名、虚构单价或“成本为零”绕过价格表；未知价格应报告不可得，完整Agent绑定仍待完成。另检查了[官方OpenHands legacy入口](https://github.com/OpenHands/benchmarks/blob/542cb71c860c11d6a70238a1dd4b4ac7a3e0d4d2/legacy/scienceagentbench/run_infer.py)：它仍默认读取validation，旧镜像上下文还复制整个benchmark目录，不能直接当作本次verified数据与隔离部署已就绪的依据。未拉取旧镜像，也未切换到未经验证的替代流程。
 
+## WavCaps 原始音频元数据（数据适配已核验，原生音频执行待完成）
+
+复用现有获取器，不新增下载实现。默认只显示计划；服务器上可显式获取某份原始元数据，已自行取得的文件使用只读校验：
+
+```bash
+python scripts/prepare_reused_research_assets.py WAVCAPS
+python scripts/prepare_reused_research_assets.py WAVCAPS --mode download \
+  --data-root /private/wavcaps-original-metadata --max-bytes 1000000 \
+  --files data/json_files/SoundBible/sb_final.json
+python scripts/prepare_reused_research_assets.py WAVCAPS --mode verify \
+  --data-root /private/wavcaps-original-metadata \
+  --files data/json_files/SoundBible/sb_final.json
+```
+
+`download`仅对新外部目录或显式匹配的恢复目录执行，不覆盖旧数据；`verify`已在服务器对三份已取得原文件实际执行通过。下载仍受网络、来源条款和显式容量预算约束，失败不会换题或改文件。FreeSound的Git
+LFS URL仅登记身份，尚未实际取得；不要将其与GitHub普通blob传输混用。
+
+`workload-data catalog download-plan WAVCAPS`提供作者Git固定版本的四份原始JSON及身份，不下载音频或模型；这不是将Git元数据冒称为另一个Hub
+revision。发布方限制学术用途，音频还须保留原来源条件，不根据Hub许可标签推断可商用或再分发。当前CPU只取得SoundBible、BBC、AudioSet三份，合计140750条，FreeSound尚缺；默认读取四份时缺失即报错，部分使用必须显式选文件。
+
+安装本数据包后，可以对自行合法取得并通过固定哈希核验的原JSON使用现有接口：
+
+```python
+from pathlib import Path
+from vllm_hust_workload_data import iter_workload
+
+records = iter_workload(
+    "WAVCAPS",
+    data_root=Path("/private/wavcaps-original-metadata"),
+    files=["data/json_files/SoundBible/sb_final.json"],
+)
+for record in records:
+    audio_metadata = record.task["input"]  # 原audio定位信息和duration；不保证媒体已存在
+    weak_reference = record.outcome_record()  # caption及存在的原描述/类别，不送入模型
+```
+
+原`num_captions_per_audio=1`和作者/下载定位信息保留在annotations，各组件身份由源文件路径区分；没有新造prompt、任务顺序或五条参考。CPU对三份全部140750条完成原字段还原及输入/参考分离核验。这不表示音频已取得、原生模型已运行、质量已评分，或研究侧已通过CI安装消费。作者音频模型、完整原媒体与适用原评价协议仍待接通，不能把caption当输入答案或用Qwen文本生成替代音频推理。
+
 ## BixBench 原科学任务准备与读取（原生执行结束，评分待核验）
 
 本接口用于官方科学Agent任务，不用零样本问答替代Notebook工作流。原问题JSONL实际为205条扁平记录、17字段，不能按旧数据卡的嵌套`questions`结构加载。文件版本和64份ZIP身份见[固定原资产清单](data/catalogs/bixbench_original_files_v1.json)；205条问题引用其中59份。当前只取得固定原前三题所需的两份原ZIP，其余57份尚未取得。

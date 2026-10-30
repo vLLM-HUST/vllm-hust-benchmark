@@ -2,6 +2,19 @@
   "version": "adapter-extensions/v1",
   "boundary": "Field contracts from publisher metadata/docs. No real source payload downloaded or full adapter validation claimed.",
   "adapters": {
+    "WAVCAPS": {
+      "kind": "task_dataset",
+      "mapping": "original_audio_caption_metadata",
+      "records_path": ["data"],
+      "root_fields": ["num_captions_per_audio"],
+      "input_fields": ["audio", "duration"],
+      "required_fields": ["id", "audio", "duration", "caption", "num_captions_per_audio"],
+      "outcome_fields": ["caption", "description", "title", "category"],
+      "annotation_fields": ["id", "author", "href", "download_link", "num_captions_per_audio"],
+      "id_field": "id",
+      "requirements": ["Original weakly labelled audio-text corpus; metadata locator is not verified audio or a ready model request", "Caption and raw textual descriptions/categories remain reference-only; never invent chat prompts or copy one caption into five evaluation references", "Retain publisher academic-only and per-source audio terms; native audio model, media qualification and applicable evaluation remain separate"],
+      "status": "ORIGINAL_METADATA_ADAPTER_IMPLEMENTED_NATIVE_AUDIO_EXECUTION_PENDING"
+    },
     "MULTIAGENTBENCH": {
       "kind": "task_dataset", "mapping": "multiagentbench_original_configurations", "row_format": "jsonl",
       "input_fields": ["task"], "required_fields": ["task", "agents", "relationships", "environment"],
