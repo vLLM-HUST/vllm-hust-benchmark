@@ -1032,6 +1032,8 @@ socket连接尝试；这不是内核网络隔离认证或生成代码sandbox。�
 同版本`multiagentbench/runjsonl2yaml.sh`明确针对`research/research_main.jsonl`指定Research环境、5次迭代、graph协调、BaseMemory、原模型gpt-3.5-turbo及judge
 gpt-4o。这是Research场景的发布方配置依据，不代表其他场景，也不授权调用外部付费模型。后续资源替代模型及裁判须单独披露，原题、关系与5次迭代不得为跑通而缩减。该脚本已核验但未直接执行，尚未完成原生研究场景或评分。
 
+同版本官方模板的服务器逐字段对照还发现：`coding_configs/config_1/2/3.yaml`与原JSONL前三题并非同题，不能按编号直接替换；`test_config_world/test_config_world.yaml`与前三条bargaining的任务、Agent及关系也不一致。模板中的Coding/5次或WorldSimulation/3次只能作为公开运行设置参考，不能伪称已找回这些原题的完整配置。对照未改写原题或创建替代测试，完整原生资格仍待验证。
+
 软件隔离镜像配方为`configs/workload-native/marble-compat-cpu.Dockerfile`。构建上下文只允许两个软件子目录：`client/`为已核验的Python3.10客户端（原锁93包＋披露的2包），`author/`为99份原软件及明确披露的评分器缩进兼容副本；禁止带入原题、答案、模型缓存、结果或凭据。操作者须先核验已有Ubuntu22.04基础镜像的不可变ID，显式传给`MARBLE_BASE_IMAGE`，不能把浮动tag当身份依据。
 
 本配方已在专用ARM64 CPU工作区构建，并通过非root65534、无网络、只读根、去全部能力、禁止提权的真实容器`--help`探测，退出0；未挂载任务数据、Docker
