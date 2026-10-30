@@ -1,0 +1,113 @@
+{
+  "schema": "muxpd-moe-survey-failure-integrity-v1",
+  "created_at": "2026-10-30T10:12:47.790459+00:00",
+  "integrity_verified": true,
+  "experiment_valid": false,
+  "quality_gate": "NOT_TESTED",
+  "terminal": {
+    "finished_at": "2026-10-30T10:10:40.974942+00:00",
+    "exit_code": -9,
+    "timeout": true,
+    "cleanup_required": true,
+    "forced_termination": true,
+    "terminal_process_proven": true,
+    "owned_members_before_cleanup": [
+      113707,
+      115319
+    ],
+    "owned_members_after_cleanup": [],
+    "idle_physical_after": [
+      "3",
+      "4",
+      "5",
+      "6"
+    ],
+    "errors": [
+      "TimeoutError('Diagnostic exceeded finite total deadline')",
+      "Terminal worker log contains a traceback or graph ownership error"
+    ]
+  },
+  "result": {
+    "admissions": [],
+    "collection_complete": false,
+    "shutdown_returned": false,
+    "passed": false
+  },
+  "failure": {
+    "all_tp_ranks": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "exception": "RuntimeError: Survey requires original bound method: forward",
+    "frozen_guard": "moe_survey_v1.py:231 expects Qwen3NextDecoderLayer.forward",
+    "actual_release_patch": "VLLM_VERSION=0.25.1 selects patch_qwen3_5.py:216-217: Qwen3_5DecoderLayer.forward = AscendQwen3_5DecoderLayer.forward",
+    "source_and_all_rank_stack_match": true
+  },
+  "npy_export_count": 0,
+  "prefix_started": false,
+  "producer_count": 23,
+  "frozen_root_and_child_23_files_match": true,
+  "canonical_23_file_map_sha256": "49c013692a79e3352593198a2162228c66df2b01369e14d35fdc6c89ef31b3e0",
+  "files": {
+    "probe_run_v1.py": "063ebbb2048efc1a8b36269fa6af15e9459f8dc2c9ef2d78bc83222eacae3bd9",
+    "probe_control_v1.py": "4525dfa97aad321ee32d0f7f1a355983b1ef61b33abb5d042059d608cbada3d1",
+    "plan-v1.json": "6d99b3274da2e3784b5c1c5c98c73657944d44e9447676a7b4656aa3a9da6634",
+    "native-engine-args-v1.json": "5500cba24e78aa9edc44b8946fbd7d2fce571cd2320792d2cdaa5f9de14f5a9c",
+    "raw-engine-args-v1.json": "d42f1007c5e059fdd872a4b77c8f003aa185e948a59c35373322690a6248d512",
+    "prefill_collective_layout_v1.py": "6431c4c0abdd869ef17e7122f681c457ad2b4d5741f86c6a0653e9fca44e02fc",
+    "window_numeric_diagnostics_v1.py": "d2dbf8cbb4e66cbe0c7b402904e6d06310afad94c1055ec49cbe49af385d601f",
+    "window_numeric_workers_v1.py": "b85d3f7de15144d246894314f323e64dd39406288306433bc90f902aa2f4263e",
+    "numeric-window-adaptation-v1.json": "6e245b6c7541f5a5543741774b2536a0083dd70fd28b6eea3911715139fb9dfa",
+    "numeric-window-adaptation-v1.diff": "f61c8b9272ebea249e094ce0681d7da201af9cfee2e359a78f497ec54df8052d",
+    "historical-prefixes-v1.json": "5e5f34d52e5ba3b2c5f747e8fc6c35397f694f590ef0fb41cd43501209aa5ae1",
+    "source-manifest-v1.json": "66bf0d149c34b9bdc0064750f670910af94e26314ab4f39a0e462c40282d683a",
+    "new_loss_checks_v1.py": "2600200ef619d439a5dd2db7850b83a17be1167ca105a1e87c35c65945085c97",
+    "window_analysis_core_v1.py": "ddd04348c70e27c8416fe591941ed49413f615c778aabca431dfc337f4354ab4",
+    "analyze_new_loss_v1.py": "428bc23332992f2d3ac7dea3674e0453dc279fbd3b00858a040ad996a16c46eb",
+    "moe_survey_v1.py": "3292d45724395485070db3ebdf0f6b741a945ec3d88e361f7c563f63b3ad7825",
+    "capture-profile-v1.json": "b0b517dd926e135a5ac5a5041416cb099f2844ce8744974909c2a4fa41626df2",
+    "source_adapter_v2.py": "87193ce1da3a4728567af2a9c21d4bcbef36c727c3457f20ffb2bfcaeb1d6e8c",
+    "manifest-v2.json": "774719926c1773cabd1585dead14c0ea38ab8dc3054fe928ada50b20e44ba628",
+    "moe_survey_analysis_v1.py": "c06fb3a77b6c9ea88ab32566179fe3334ffea3cb26055c139c2ae7cfa4d83b30",
+    "analyze_moe_survey_v1.py": "239c1cca3821f96993d1a7ace35446a8a4ab859839b9a8920c853e5afc3d5bf2",
+    "control-references-v1.json": "cb9548ab59ac0584a78bd7699bc2ca2b0fba689c74e4c88d69f9697bc232d381",
+    "run-matrix-v1.json": "d75593970e1e96242de04181733745cc5ad9113bc5d3e38d62e5545c82c0a44d"
+  },
+  "bindings": {
+    "/root/workspace/muxpd-target-prefill-moe-survey-20261030/runs-v1/native-peer-p-moe-observed-v1-01/controller.json": {
+      "sha256": "14f43ca3568a67f72854023377b042d427045d39e2d597a66843a13295bf9792",
+      "bytes": 9750
+    },
+    "/root/workspace/muxpd-target-prefill-moe-survey-20261030/runs-v1/native-peer-p-moe-observed-v1-01/process.log": {
+      "sha256": "32f0061182b3413155fea6c1c32174e24e53901b781622faca0c09bee0eb2d96",
+      "bytes": 53761
+    },
+    "/root/workspace/muxpd-target-prefill-moe-survey-20261030/runs-v1/native-peer-p-moe-observed-v1-01/results/run.json": {
+      "sha256": "dc18cdb1bc74ff3981923c9a334ba5c0a00957fa01b2d57dec27c8fa7f488fd3",
+      "bytes": 174247
+    },
+    "/root/workspace/muxpd-target-prefill-moe-survey-20261030/analysis-native-v1.json": {
+      "sha256": "bd4e432c5f86cfce2db5c6aeaf04da7112d150e8f3a2a8db77fca387962727f3",
+      "bytes": 63969
+    },
+    "/root/workspace/muxpd-target-prefill-moe-survey-20261030/freeze-manifest-v1.json": {
+      "sha256": "6501fe7047516f84b52e4ccf9f085e0b72fa0f1e3bd883e83b593fd196c2957e",
+      "bytes": 3385
+    },
+    "/root/workspace/muxpd-target-prefill-moe-survey-20261030/producer-map-v1.json": {
+      "sha256": "58f766fc585a68c164b085ec1aa9b6db30ebdd3675b7295735e429b7e3ccd830",
+      "bytes": 2515
+    },
+    "/root/workspace/vllm-ascend-hust/vllm_ascend/patch/worker/patch_qwen3_5.py": {
+      "sha256": "97ff11df1d7db0930d5742cfc6020e5ec425064bd37ea5d17e5089712f5fcdae",
+      "bytes": 9533
+    },
+    "/root/workspace/runtime/env.sh": {
+      "sha256": "32bb60a0c0c8fd8b90695f20b23baa0cb482e840701bba7b45e28743d70cf72a",
+      "bytes": 836
+    }
+  },
+  "scope": "Failed observer installation retained. No first-P 40-layer values or quality/performance conclusions. Original frozen files unchanged; initial independent READY missed the installed worker monkeypatch binding."
+}
