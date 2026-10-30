@@ -222,6 +222,9 @@ async def execute(args, report):
         actual_actor_model=args.model,
         author_actor_reproduction=False,
         official_scoring_executed=False,
+        configured_rollout_type=generator.config.rollout.rollout_type,
+        actual_publisher_execution_api="TrajectoryGenerator.vanilla_rollout",
+        default_aviary_batch_backend_reproduction=False,
         transport_timeout_override_seconds=args.request_timeout,
     )
 
