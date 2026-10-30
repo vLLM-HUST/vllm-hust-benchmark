@@ -1041,6 +1041,9 @@ Research专用准备可在上述配置准备命令追加`--runtime-profile offic
 Research关键词工具还会调用KeyBERT默认的`sentence-transformers/all-MiniLM-L6-v2`辅助模型。在要求模型只用NPU的部署中，不能让这个分支静默回落CPU推理。独立辅助客户端的实际版本约束见`configs/workload-native/marble-keybert-npu-client.txt`：先由平台提供匹配的厂商Torch/Torch-NPU构建，再在独立客户端安装其他依赖，不能升级现有服务或原MARBLE
 CPU环境。该文件是已观测的软件兼容组合，不是完整CANN/驱动安装脚本。辅助模型固定版本与资产校验在机器清单记录，原始权重不进入仓库。
 
+原`get_paper_by_arxiv_id`已在既有独立Python3.10客户端实测返回所请求论文；运行前核对固定原文件摘要，原请求及重试参数未改。此检查使用独立工具控制例，无模型调用，不属于原Agent题目，不代表其他检索工具、KeyBERT
+NPU前向或Research原生执行通过；具体回执见机器清单。
+
 ```bash
 python scripts/probe_marble_auxiliary_client.py \
   --client-python /external/marble-keybert-npu/bin/python
