@@ -58,3 +58,26 @@ def test_no_publisher_or_input_overwrite(tmp_path):
         MODULE.validate(options(tmp_path, output=tmp_path / "author" / "results"))
     with pytest.raises(ValueError):
         MODULE.validate(options(tmp_path, output=tmp_path / "input.csv"))
+
+
+def test_queue_plan_does_not_create_transport_or_output(tmp_path, capsys):
+    args = options(tmp_path, model_queue=tmp_path / "queue")
+    argv = [
+        item
+        for key, value in vars(args).items()
+        for item in ("--" + key.replace("_", "-"), str(value))
+    ]
+    assert MODULE.main(argv) == 0
+    report = json.loads(capsys.readouterr().out)
+    assert report["model_queue_enabled"] and not report["scoring_returned"]
+    assert not list(tmp_path.iterdir())
+
+
+def test_queue_cannot_overlap_inputs_or_output(tmp_path):
+    for queue in (
+        tmp_path / "author" / "queue",
+        tmp_path / "output" / "queue",
+        tmp_path,
+    ):
+        with pytest.raises(ValueError, match="external queue"):
+            MODULE.validate(options(tmp_path, model_queue=queue))

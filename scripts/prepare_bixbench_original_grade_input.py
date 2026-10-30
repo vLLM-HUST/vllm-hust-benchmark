@@ -41,9 +41,13 @@ def prepare(args):
     )
     if not 1 <= args.limit <= 205:
         raise ValueError("original prefix between1 and205 required")
-    if output.exists() or any(
-        output.is_relative_to(source) or source.is_relative_to(output)
-        for source in (author, data, native)
+    if (
+        output.exists()
+        or output.is_relative_to(ROOT)
+        or any(
+            output.is_relative_to(source) or source.is_relative_to(output)
+            for source in (author, data, native)
+        )
     ):
         raise ValueError("fresh external output required")
     report = {

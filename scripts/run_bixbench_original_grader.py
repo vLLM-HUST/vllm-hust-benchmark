@@ -7,6 +7,7 @@ No model service, downloader, question transformation or paid endpoint is starte
 
 import argparse
 import asyncio
+from contextlib import nullcontext
 import csv
 import importlib.util
 import json
@@ -38,11 +39,29 @@ def validate(args):
         Path(value).resolve()
         for value in (args.author_root, args.input_file, args.output)
     )
-    if output.exists() or any(
-        output.is_relative_to(source) or source.is_relative_to(output)
-        for source in (author, original)
+    if (
+        output.exists()
+        or output.is_relative_to(ROOT)
+        or any(
+            output.is_relative_to(source) or source.is_relative_to(output)
+            for source in (author, original)
+        )
     ):
         raise ValueError("fresh external scoring output required")
+    queue = getattr(args, "model_queue", None)
+    if queue:
+        queue = Path(queue).resolve()
+        if (
+            endpoint.hostname != "127.0.0.1"
+            or queue.is_relative_to(ROOT)
+            or any(
+                queue.is_relative_to(source) or source.is_relative_to(queue)
+                for source in (author, original, output)
+            )
+        ):
+            raise ValueError(
+                "separate external queue and IPv4 loopback endpoint required"
+            )
     return author, original, output
 
 
@@ -104,6 +123,7 @@ def main(argv=None):
     for name in ("author-root", "input-file", "output", "model", "api-base"):
         parser.add_argument("--" + name, required=True)
     parser.add_argument("--execute", action="store_true")
+    parser.add_argument("--model-queue", type=Path)
     args = parser.parse_args(argv)
     validate(args)
     report = {
@@ -116,10 +136,20 @@ def main(argv=None):
         "author_judge_reproduction": False,
         "source_checkbox_eligible": False,
         "scoring_returned": False,
+        "model_queue_enabled": args.model_queue is not None,
         "boundary": "A returned local-judge score is not official-model accuracy reproduction or proof that native Agent generation and research consumption completed.",
     }
     if args.execute:
-        report = asyncio.run(execute(args, report))
+        from appworld_model_transport import model_proxy
+
+        endpoint = urlsplit(args.api_base)
+        transport = (
+            model_proxy(args.model_queue, port=endpoint.port)
+            if args.model_queue
+            else nullcontext()
+        )
+        with transport:
+            report = asyncio.run(execute(args, report))
     print(json.dumps(report, indent=2))
     return 0
 
