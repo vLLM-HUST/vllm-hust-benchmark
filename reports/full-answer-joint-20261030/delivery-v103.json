@@ -155,7 +155,8 @@
   "prior_failures": [
     "Benchmark first CI retained: missing explicit development-control boundary and stale C16-only current-table assertions; fixed without weakening original evidence checks.",
     "Website first generic browser CI retained: old single-arm 3-value assertion. Updated to 3 paired metrics/6 values and checked per-arm links. Mobile quality summary was actually shortened to preserve the original matrix-entry height requirement.",
-    "Local members page networkidle timeout retained; same assertions passed on targeted repeat."
+    "Local members page networkidle timeout retained; same assertions passed on targeted repeat.",
+    "Receipt PR #570 first CI 41015822804: 3980 passed, 14 skipped, one failure because the live manifest could not be fetched locally. Existing no-production-error assertion retained; actual live bytes recovered using independent browser workflow, previous local transport errors preserved."
   ],
   "remaining": [
     "M01 B0 reference binding, applicable uninstrumented timing and quality for the original counted workload. New out8192 quality does not qualify old out256 F/T.",
@@ -195,5 +196,42 @@
         }
       ]
     }
+  },
+  "full_manifest_capture": {
+    "run": {
+      "conclusion": "success",
+      "headSha": "852df49ce4c640c2a4c034f8b02c1ba9954e4805",
+      "status": "completed",
+      "url": "https://github.com/vLLM-HUST/vllm-hust-website/actions/runs/41016888558"
+    },
+    "manifest_path": "reports/full-answer-joint-20261030/production-manifest-v103.json",
+    "manifest_sha256": "cfdb73220b4270d60263d9f21542a0c1298a1838ce8e3496113c87ca7f9b95f8",
+    "manifest_bytes": 56812,
+    "url": "https://vllm-hust.sage.org.ai/data/benchmark-source-manifest.json",
+    "publication_identity": {
+      "url": "https://vllm-hust.sage.org.ai",
+      "benchmark_commit": "0bc5f043d4707601ae15c47b77ac2649f21ad668",
+      "report_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/e4ef8f5f3a85f8598c01ae3d82e7f081145fff2d/reports/vllm-hust-midterm-20261019/中期测试报告.md",
+      "file": {
+        "website_path": "data/midterm-v103.json",
+        "benchmark_path": "website-publication/data/midterm-v103.json",
+        "sha256": "3119c271ed4691469a543c56b4c98a60b83ca24793346843285e1d8797091aad",
+        "source_sha256": "3119c271ed4691469a543c56b4c98a60b83ca24793346843285e1d8797091aad",
+        "bytes": 648417
+      },
+      "manifest": {
+        "file": "production-manifest.json",
+        "sha256": "cfdb73220b4270d60263d9f21542a0c1298a1838ce8e3496113c87ca7f9b95f8",
+        "bytes": 56812
+      }
+    },
+    "previous_local_transport": {
+      "method": "Canonical publication reconstruction; independent production browser verified deployed commit and current report payload hash/size. Full manifest not retained by browser artifact.",
+      "prior_urllib_error": "<urlopen error _ssl.c:993: The handshake operation timed out>",
+      "sha256": "cfdb73220b4270d60263d9f21542a0c1298a1838ce8e3496113c87ca7f9b95f8",
+      "production_browser_run": "https://github.com/vLLM-HUST/vllm-hust-website/actions/runs/41014541064",
+      "scope": "Local transport failure remains recorded; reconstructed bindings are not a claim that every deployed file was fetched."
+    },
+    "scope": "Browser workflow executed the capture-only patch against the actual deployed public origin. It retained the full original response; no local reconstruction or substituted network response. The patch changes verification only, not deployed page/data content."
   }
 }

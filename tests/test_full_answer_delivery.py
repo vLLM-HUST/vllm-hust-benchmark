@@ -43,3 +43,18 @@ def test_delivery_success_and_custody_are_bound():
     assert data["private_storage_readback"]["sha256"] == data["archive_sha256"]
     assert data["private_storage_readback"]["verified_manifest_members"] == 45
     assert len(data["remaining"]) == 2
+
+
+def test_live_manifest_capture_is_original_and_bound():
+    data = receipt()
+    capture = data["full_manifest_capture"]
+    raw = (ROOT / capture["manifest_path"]).read_bytes()
+    assert hashlib.sha256(raw).hexdigest() == capture["manifest_sha256"]
+    assert len(raw) == capture["manifest_bytes"]
+    assert capture["run"]["conclusion"] == "success"
+    assert capture["publication_identity"]["benchmark_commit"] == data["benchmark"]
+    sources = json.loads((ROOT / "docs/data-entrypoints-sources.json").read_text())
+    assert sources["production_manifest_error"] is None
+    assert json.loads(raw) == sources["website_publication_manifest"]
+    assert sources["production_manifest_transport"] == capture
+    assert capture["previous_local_transport"]["prior_urllib_error"]
