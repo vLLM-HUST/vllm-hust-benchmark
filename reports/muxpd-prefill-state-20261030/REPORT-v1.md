@@ -28,8 +28,8 @@
 这是后验选定 batch7 的新进程诊断，未重放前七批或其缓存历史；保留前缀对照是准入条件，不能据此声称完整复现原 full200 的执行上下文。
 
 模型为 Qwen3.5-35B-A3B BF16，TP4/EP4，物理设备 3、4、5、6（进程内逻辑 0–3）。保持 q4、FULL_DECODE_ONLY
-[1,2,4,8]、npugraphEx、static=false、HCCL_DETERMINISTIC=true、 BI 关闭及既定运行时。原生/P
-的请求布局不同，分析按目标请求与实际映射重建数据，不能把隐藏层行偏移当作缓存索引。
+[1,2,4,8]、enable_npugraph_ex=false、enable_static_kernel=false、HCCL_DETERMINISTIC=true、 BI
+关闭及既定运行时。原生/P 的请求布局不同，分析按目标请求与实际映射重建数据，不能把隐藏层行偏移当作缓存索引。
 
 ## 状态观测如何确认
 
