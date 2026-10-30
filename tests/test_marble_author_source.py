@@ -49,3 +49,30 @@ def test_default_source_plan_does_not_download_or_create_environment(tmp_path):
     assert report["files"] == 99
     assert report["model_calls"] == 0 and report["source_checkbox_eligible"] is False
     assert not target.exists()
+
+
+def test_supplemental_client_dependencies_are_disclosed_not_provider_defaults():
+    pins = [
+        line
+        for line in (ROOT / "configs/workload-native/marble-client-supplements.txt")
+        .read_text("utf-8")
+        .splitlines()
+        if line and not line.startswith("#")
+    ]
+    assert pins == ["ruamel.yaml==0.18.6", "ruamel.yaml.clib==0.2.12"]
+    assert "ruamel" not in (ROOT / "workload-preparation/pyproject.toml").read_text(
+        "utf-8"
+    )
+    ledger = json.loads(
+        (ROOT / "docs/workload-data/dataset-validation-status.json").read_text("utf-8")
+    )
+    row = ledger["delivery_inventory"]["MULTIAGENTBENCH"]
+    preflight = row["original_software_preparation"]["compat_client_entry_preflight"]
+    assert preflight["exit_code"] == 0 and preflight["total_client_distributions"] == 95
+    assert preflight["original93_locked_distribution_versions_unchanged"]
+    assert preflight["model_calls"] == 0
+    assert (
+        preflight["native_execution"] is False
+        and preflight["official_scoring"] is False
+    )
+    assert preflight["source_checkbox_eligible"] is False and row["checked"] is False

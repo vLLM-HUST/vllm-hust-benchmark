@@ -1012,6 +1012,11 @@ x86_64，须按原平台标记选择。独立Poetry2.1.3工具及Python3.10.12�
 
 平台继承的`PYTHONPATH`会使普通解释器列出环境外的CANN包；已用客户端`python -I`核验隔离后的93包，没有删改平台包。后续启动应显式清理本进程的继承路径，或使用隔离解释器并只加入已核验作者目录，不能将平台包混入原锁环境。这里只证明安装及依赖元数据，不证明完整模块导入、模型/embedding兼容、Agent执行或官方评分；模型调用仍为0。
 
+随后真实入口导入暴露`coding_utils/coder.py`依赖原锁未声明的`ruamel.yaml`。已单独固定[客户端补充依赖](../configs/workload-native/marble-client-supplements.txt)：`ruamel.yaml==0.18.6`及`ruamel.yaml.clib==0.2.12`，从官方PyPI取得，未改原93包版本或原锁。可在完成原锁安装后，针对显式客户端解释器执行`uv pip install --python /external/marble-client/bin/python --no-deps -r configs/workload-native/marble-client-supplements.txt`，再检查依赖元数据。当前客户端共95包，不冒称全部来自原锁。
+
+应用明确披露的评分器兼容副本后，真实`marble.main --help`及模块导入已在服务器通过，退出0、无假模块、无模型调用；最初缺ruamel的失败日志保留。预检使用Python连接审计拒绝、HF离线标记和空模型缓存，观测到0次Python
+socket连接尝试；这不是内核网络隔离认证或生成代码sandbox。原生Agent任务、embedding/裁判、各场景隔离与官方评分仍待验证，不得据此打总勾。
+
 ## BixBench 原科学任务准备与读取（原生执行未完成）
 
 本接口用于官方科学Agent任务，不用零样本问答替代Notebook工作流。原问题JSONL实际为205条扁平记录、17字段，不能按旧数据卡的嵌套`questions`结构加载。文件版本和64份ZIP身份见[固定原资产清单](data/catalogs/bixbench_original_files_v1.json)；205条问题引用其中59份。当前只取得固定原前三题所需的两份原ZIP，其余57份尚未取得。
