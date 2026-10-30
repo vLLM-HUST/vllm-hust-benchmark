@@ -82,6 +82,7 @@ def test_standalone_source_list_covers_runtime_package_imports():
                     if node.module
                     else [a.name for a in node.names]
                 )
+
             elif node.module and node.module.startswith("vllm_hust_benchmark."):
                 modules = [node.module.split(".")[1]]
             for module in modules:
@@ -90,6 +91,43 @@ def test_standalone_source_list_covers_runtime_package_imports():
                     relative,
                     module,
                 )
+
+
+@pytest.mark.parametrize("valid", [True, False])
+def test_network_fallback_keeps_digest_checks_and_bounds_retries(
+    tmp_path, monkeypatch, valid
+):
+    expected = b"pinned release"
+
+    def failed_request(*args, **kwargs):
+        raise TimeoutError("read timed out")
+
+    monkeypatch.setattr(bootstrap.urllib.request, "urlopen", failed_request)
+    monkeypatch.setattr(bootstrap.shutil, "which", lambda name: "/usr/bin/curl")
+
+    def curl(command, check, timeout):
+        assert command[0] == "/usr/bin/curl" and check and timeout == 400
+        assert command[command.index("--retry") + 1] == "2"
+        assert "--fail" in command and "--max-time" in command
+        Path(command[command.index("--output") + 1]).write_bytes(
+            expected if valid else b"truncated"
+        )
+
+    monkeypatch.setattr(bootstrap.subprocess, "run", curl)
+    target = tmp_path / "release.tar.gz"
+    if valid:
+        bootstrap.download(
+            "https://site.example/release", target, hashlib.sha256(expected).hexdigest()
+        )
+        assert target.read_bytes() == expected
+    else:
+        with pytest.raises(ValueError, match="SHA256"):
+            bootstrap.download(
+                "https://site.example/release",
+                target,
+                hashlib.sha256(expected).hexdigest(),
+            )
+        assert not target.exists()
 
 
 def test_standalone_runtime_imports_without_the_repository_on_python_path(tmp_path):

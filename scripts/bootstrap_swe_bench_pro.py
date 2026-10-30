@@ -217,12 +217,35 @@ def download(url, path, expected=None, headers=None, git_blob=None):
             "download destination already exists without matching hash: " + str(path)
         )
     temporary = path.with_suffix(path.suffix + ".partial")
-    request = urllib.request.Request(url, headers=headers or {})
-    with (
-        urllib.request.urlopen(request, timeout=120) as response,
-        temporary.open("wb") as output,
-    ):
-        shutil.copyfileobj(response, output)
+    request_headers = {"User-Agent": "swe-bench-pro-bootstrap/1.0", **(headers or {})}
+    request = urllib.request.Request(url, headers=request_headers)
+    try:
+        with (
+            urllib.request.urlopen(request, timeout=20) as response,
+            temporary.open("wb") as output,
+        ):
+            shutil.copyfileobj(response, output)
+    except OSError:
+        curl = shutil.which("curl")
+        if not curl or urllib.parse.urlsplit(url).scheme not in ("https", "http"):
+            raise
+        command = [
+            curl,
+            "--fail",
+            "--location",
+            "--retry",
+            "2",
+            "--retry-all-errors",
+            "--connect-timeout",
+            "10",
+            "--max-time",
+            "120",
+            "--output",
+            str(temporary),
+        ]
+        for name, value in request_headers.items():
+            command.extend(["--header", name + ": " + value])
+        subprocess.run(command + [url], check=True, timeout=400)
     if expected and sha256(temporary) != expected:
         raise ValueError("download SHA256 differs: " + str(path))
     if git_blob is not None:
