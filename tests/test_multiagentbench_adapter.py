@@ -78,3 +78,20 @@ def test_source_handoff_evidence_does_not_claim_native_completion():
     assert handoff["model_calls"] == 0
     assert handoff["native_execution"] is False and handoff["official_scoring"] is False
     assert handoff["source_checkbox_eligible"] is False and row["checked"] is False
+
+
+def test_actual_ci_handoff_still_does_not_claim_native_completion():
+    root = Path(__file__).resolve().parents[1]
+    row = json.loads(
+        (root / "docs/workload-data/dataset-validation-status.json").read_text("utf-8")
+    )["delivery_inventory"]["MULTIAGENTBENCH"]
+    handoff = row["actual_ci_artifact_handoff"]
+    assert handoff["actual_ci_run"] == 41039829015
+    assert handoff["actual_ci_artifact"] == 12970235878
+    assert handoff["installed_runtime_payloads"] == 72
+    assert handoff["public_and_unchanged_research_roundtrips"] == 500
+    assert handoff["index_rebuilt_or_changed"] is False
+    assert handoff["research_default_dependency_changed"] is False
+    assert handoff["model_calls"] == 0
+    assert handoff["native_execution"] is False and handoff["official_scoring"] is False
+    assert handoff["source_checkbox_eligible"] is False and row["checked"] is False
