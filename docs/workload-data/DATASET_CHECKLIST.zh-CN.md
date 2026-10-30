@@ -1224,7 +1224,8 @@ TB；服务器/data约1.42TB可用，未缩小语料。ChartQA当前两卡主机
   参数/历史回执回归15项通过，模型调用0。历史三题执行结果保持不变，本项不代表全503题或修改后入口已完成NPU复验。
 - [x] SCIENCEAGENTBENCH：原verified版102题的全部输入、参考及环境字段、全量索引和102条回查核验通过；30份官方执行/评分及依赖源码已固定并核对Git
   blob，未执行代码。[准备回执](validation/scienceagentbench-cpu-preparation-20261024.json)。
-- [ ] SCIENCEAGENTBENCH：verified配套科学数据/参考程序/评价脚本、隔离运行环境、本地模型及辅助评分模型未就绪；发现两个上游直接入口仍读旧validation
+- [x] SCIENCEAGENTBENCH：固定原前三题（1/2/3）的完整科学数据目录、各自参考程序/评价脚本/rubric已在专用CPU服务器取得，共14文件1006008字节；同一原归档ETag的Range请求、原CRC和保存后SHA复核通过，公开资产校验入口实测退出0。未整包下载1.77GB归档，未执行参考程序或生成代码，原始文件不公开；这不是全102题资产取得或来源完成。
+- [ ] SCIENCEAGENTBENCH：隔离科学环境、本地模型、原生执行及辅助评分模型仍未就绪；其余原题资产未取得。发现两个上游直接入口仍读旧validation
   split，不能与当前verified版混跑，不勾原生通过。
 - [x] TAUBENCH/τ²：2285个原telecom任务与引用全量准备/预检，新增3个原ACTION类任务公共引用交接预检通过；补齐显式ID/全量入口，125包实测环境快照和pip
   check通过，模型调用0。[CPU回执](validation/tau2-readiness-cpu-20261024.json)。

@@ -1130,6 +1130,27 @@ tokens；同三题在NPU上各生成一次，全部`stop`。不是500题全量�
 
 发布方`src/evaluation/evaluate_qa.py`及`print_qa_metrics.py`同时按原字节提供。它的原CLI只列出指定GPT-4o及本地Llama3.1-70B评估模型；使用前应准备真实对应的模型/端点或授权，不能把Qwen服务伪装成70B。当前本地14B绑定在原提示/10-token预算的空答案负例中未通过自检，因此未接受其正式分数。以上生成结果不冒称已有官方质量分数。原题、检索日志、参考答案及生成结果均只放服务器私有目录。
 
+## ScienceAgentBench 原科学数据资产核验（原生任务尚未执行）
+
+HF上的原`verified`
+Parquet是102题的任务元数据，不能用`dataset_preview`代替真实科学数据。配套文件须使用[发布方verified版说明](https://github.com/OSU-NLP-Group/ScienceAgentBench/blob/c26e151ed601ba109dc4d35e057ff8e73fec469d/README.md)链接的`benchmark_verified.zip`，不能混用旧validation归档。发布方要求不在网上再分发解压数据；本仓库仅保留身份、入口和说明，不放入数据、参考程序或临时下载授权URL。
+
+当前在专用CPU服务器取得原前三题1/2/3对应的完整`clintox`、`mat_diffusion`、`crystalline_compound`目录，以及三份原参考程序、三份评价脚本、三份rubric，共14文件1006008字节。通过匿名发布页面给出的原下载地址取得文件，没有账号登录；每次Range读取绑定同一ETag并核对Content-Range，原ZIP
+CRC和保存后SHA均复核通过。未下载整份1.77GB归档，数据文件未落入Windows或Git。只完成六份Python的静态解析，没有运行其中任何程序。
+
+复用既有原资产时执行以下入口，不会下载、重构数据或执行代码：
+
+```bash
+python -I scripts/verify_scienceagentbench_original_assets.py \
+  --metadata-root /private/sab-original-metadata \
+  --asset-root /private/sab-original-assets --action verify
+```
+
+`metadata-root`保留原`data/verified-00000-of-00001.parquet`；`asset-root`保留原`benchmark/datasets/`、`benchmark/gold_programs/`、`benchmark/eval_programs/`、`benchmark/scoring_rubrics/`结构。省略`--action verify`仅显示计划。入口核对固定原Parquet及14份文件身份，并拒绝所选数据目录中缺失、额外或链接文件；完整官方归档中的其他任务目录可以保留，不计作已验证任务。服务器已实测公开入口退出0。
+
+[身份清单](../configs/workload-native/scienceagentbench-original-fixed3-assets.json)中的成员SHA是实际取得后固定的摘要，不冒称发布方公布的SHA；其来源链路、原ZIP
+CRC和归档目录身份另行记录。完整102题仍可从发布方原归档取得；当前只验证前三题资产，不是仅凭三个preview拼出的替代语料。后续还缺隔离科学环境、原verified推理入口、本地NPU模型与原评价流程；两个旧直接脚本仍写死validation，不能拿它们的默认结果当verified成绩，来源总勾保持未完成。
+
 ## BixBench 原科学任务准备与读取（原生执行结束，评分待核验）
 
 本接口用于官方科学Agent任务，不用零样本问答替代Notebook工作流。原问题JSONL实际为205条扁平记录、17字段，不能按旧数据卡的嵌套`questions`结构加载。文件版本和64份ZIP身份见[固定原资产清单](data/catalogs/bixbench_original_files_v1.json)；205条问题引用其中59份。当前只取得固定原前三题所需的两份原ZIP，其余57份尚未取得。
