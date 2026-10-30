@@ -1101,6 +1101,17 @@ daemon与客户端两侧有相同路径，并由操作者仅对运行副本设�
 
 开放答案评分入口（默认仅计划，服务器原生评分尚待验证）：
 
+先将完整保存的原生轨迹与同一原始数据版本逐题对齐，准备官方评分输入：
+
+```bash
+/external/bixbench-client/bin/python scripts/prepare_bixbench_original_grade_input.py \
+  --author-root /external/bixbench-author --data-root /private/bixbench-original \
+  --native-output /private/bixbench-native-output \
+  --output /private/bixbench-new-grade-input --limit 3
+```
+
+默认仅计划；确认固定前N题的原生运行全部保存后加`--execute`。入口复用官方`load_answer`与单答案提取规则，不生成新答案；核验题目ID与原参考答案，保留原`evaluation_mode`，缺题、重复或不一致直接报错，空答案不丢弃。此步骤目前只通过合成夹具测试，真实轨迹端到端转换仍待验证。下面的`--input-file`指向其输出`original-grade-input.private.csv`。
+
 ```bash
 /external/bixbench-client/bin/python scripts/run_bixbench_original_grader.py \
   --author-root /external/bixbench-author \
