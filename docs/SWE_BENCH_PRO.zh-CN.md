@@ -29,6 +29,7 @@ GitHub 匿名 API 配额。
 ```bash
 MODEL_API=https://MODEL_HOST/v1
 MODEL_NAME=openai/SERVED_MODEL_NAME
+export PIP_INDEX_URL="${PIP_INDEX_URL:-https://pypi.tuna.tsinghua.edu.cn/simple}"
 BASE=https://coder.sage.org.ai:9443/swe-bench-pro-artifacts
 REV=33efa2a4ce065bcd6d25ab387ddffd85b3826a3f # pragma: allowlist secret
 BUNDLE_SHA=fcf21b81bc91e569ab57ebb43791a0a4b7b1b8678dd5dc3487ad931c57e5e7b8 # pragma: allowlist secret
