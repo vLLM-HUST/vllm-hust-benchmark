@@ -7,6 +7,7 @@ from pathlib import Path
 import shutil
 import subprocess
 import sys
+import tarfile
 
 import pytest
 
@@ -16,6 +17,52 @@ spec = importlib.util.spec_from_file_location(
 )
 bootstrap = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(bootstrap)
+
+
+def test_bundle_installs_complete_runtime_without_api_and_rejects_tampering(
+    tmp_path, monkeypatch
+):
+    revision = "b" * 40
+    contents = {
+        name: (ROOT / name).read_bytes() for name in bootstrap.RUNTIME_SOURCE_FILES
+    }
+    manifest = {
+        "commit": revision,
+        "files": {
+            name: hashlib.sha256(data).hexdigest() for name, data in contents.items()
+        },
+    }
+    contents["source-bundle.json"] = json.dumps(manifest).encode()
+    archive = tmp_path / "release.tar.gz"
+    with tarfile.open(archive, "w:gz") as tar:
+        for name, data in contents.items():
+            entry = tarfile.TarInfo(name)
+            entry.size = len(data)
+            tar.addfile(entry, io.BytesIO(data))
+    seen = []
+
+    def fetch(request, timeout):
+        seen.append(request.full_url)
+        return io.BytesIO(archive.read_bytes())
+
+    monkeypatch.setattr(bootstrap.urllib.request, "urlopen", fetch)
+    target = tmp_path / "install" / revision
+    args = (
+        "https://site.example/runtime.tar.gz",
+        bootstrap.sha256(archive),
+        revision,
+        target,
+    )
+    assert bootstrap.bundle_repository(*args) == target
+    assert seen == ["https://site.example/runtime.tar.gz"]
+    assert (target / "src/vllm_hust_benchmark/swe_patch_state.py").is_file()
+    bootstrap.bundle_repository(*args)
+    assert len(seen) == 1
+    (target / "src/vllm_hust_benchmark/swe_patch_state.py").write_text("tampered")
+    with pytest.raises(ValueError, match="installed source changed"):
+        bootstrap.bundle_repository(*args)
+    with pytest.raises(ValueError, match="immutable"):
+        bootstrap.bundle_repository(args[0], args[1], "main", target)
 
 
 def test_standalone_source_list_covers_runtime_package_imports():
@@ -35,14 +82,52 @@ def test_standalone_source_list_covers_runtime_package_imports():
                     if node.module
                     else [a.name for a in node.names]
                 )
+
             elif node.module and node.module.startswith("vllm_hust_benchmark."):
                 modules = [node.module.split(".")[1]]
             for module in modules:
                 dependency = package / (module + ".py")
-                assert str(dependency.relative_to(ROOT)) in declared, (
+                assert dependency.relative_to(ROOT).as_posix() in declared, (
                     relative,
                     module,
                 )
+
+
+@pytest.mark.parametrize("valid", [True, False])
+def test_network_fallback_keeps_digest_checks_and_bounds_retries(
+    tmp_path, monkeypatch, valid
+):
+    expected = b"pinned release"
+
+    def failed_request(*args, **kwargs):
+        raise TimeoutError("read timed out")
+
+    monkeypatch.setattr(bootstrap.urllib.request, "urlopen", failed_request)
+    monkeypatch.setattr(bootstrap.shutil, "which", lambda name: "/usr/bin/curl")
+
+    def curl(command, check, timeout):
+        assert command[0] == "/usr/bin/curl" and check and timeout == 400
+        assert command[command.index("--retry") + 1] == "2"
+        assert "--fail" in command and "--max-time" in command
+        Path(command[command.index("--output") + 1]).write_bytes(
+            expected if valid else b"truncated"
+        )
+
+    monkeypatch.setattr(bootstrap.subprocess, "run", curl)
+    target = tmp_path / "release.tar.gz"
+    if valid:
+        bootstrap.download(
+            "https://site.example/release", target, hashlib.sha256(expected).hexdigest()
+        )
+        assert target.read_bytes() == expected
+    else:
+        with pytest.raises(ValueError, match="SHA256"):
+            bootstrap.download(
+                "https://site.example/release",
+                target,
+                hashlib.sha256(expected).hexdigest(),
+            )
+        assert not target.exists()
 
 
 def test_standalone_runtime_imports_without_the_repository_on_python_path(tmp_path):
@@ -201,6 +286,7 @@ def test_standalone_installer_pins_source_and_refuses_changed_files(
             "swe_bench_pro_grading.py",
             "swe_bench_pro_timing.py",
             "swe_submodule_fixture.py",
+            "swe_patch_state.py",
             "data/",
         ],
         "src/vllm_hust_benchmark/data": [

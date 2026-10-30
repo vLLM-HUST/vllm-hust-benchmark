@@ -33,6 +33,7 @@ RUNTIME_SOURCE_FILES = [
     "src/vllm_hust_benchmark/swe_bench_pro_grading.py",
     "src/vllm_hust_benchmark/swe_bench_pro_timing.py",
     "src/vllm_hust_benchmark/swe_submodule_fixture.py",
+    "src/vllm_hust_benchmark/swe_patch_state.py",
     "src/vllm_hust_benchmark/data/swe_bench_pro_v1_lock.json",
     "src/vllm_hust_benchmark/data/swe_bench_pro_bootstrap_lock.json",
     "docs/examples/swe-bench-pro/client-requirements.txt",
@@ -139,6 +140,60 @@ def source_repository(argv):
     return directory
 
 
+def bundle_repository(url, checksum, revision, directory=None):
+    """Install the published runtime without GitHub API calls or shared caches."""
+    if not re.fullmatch(r"[a-f0-9]{40}", revision):
+        raise ValueError("source bundle requires an immutable source revision")
+    if not re.fullmatch(r"[a-f0-9]{64}", checksum or ""):
+        raise ValueError("source bundle requires its published SHA256")
+    directory = (
+        directory or Path.home() / ".local/share/swe-bench-pro/source" / revision
+    )
+    if not directory.is_absolute() or directory.is_symlink():
+        raise ValueError("source-directory must be an absolute non-symlink directory")
+    directory.parent.mkdir(parents=True, exist_ok=True)
+    archive_path = directory.parent / (revision + ".tar.gz")
+    download(url, archive_path, checksum)
+    with tarfile.open(archive_path) as archive:
+        entries = archive.getmembers()
+        names = [entry.name for entry in entries]
+        required = set(RUNTIME_SOURCE_FILES) | {"source-bundle.json"}
+        if len(names) != len(set(names)) or set(names) != required:
+            raise ValueError("source bundle file list differs from required runtime")
+        if any(not entry.isfile() for entry in entries):
+            raise ValueError("source bundle must contain regular files only")
+        manifest = json.load(archive.extractfile("source-bundle.json"))
+        if manifest["commit"] != revision or set(manifest["files"]) != set(
+            RUNTIME_SOURCE_FILES
+        ):
+            raise ValueError("source bundle revision or manifest differs")
+        data = {name: archive.extractfile(name).read() for name in RUNTIME_SOURCE_FILES}
+        if any(
+            hashlib.sha256(value).hexdigest() != manifest["files"][name]
+            for name, value in data.items()
+        ):
+            raise ValueError("source bundle file SHA256 differs")
+    receipt_path = directory / "source-installation.json"
+    if directory.exists():
+        if (
+            not receipt_path.is_file()
+            or json.loads(receipt_path.read_text()).get("commit") != revision
+        ):
+            raise ValueError("source directory exists without this installer revision")
+        for name, checksum in manifest["files"].items():
+            if sha256(directory / name) != checksum:
+                raise ValueError("installed source changed: " + name)
+        return directory
+    directory.mkdir(mode=0o700)
+    for name, value in data.items():
+        target = directory / name
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_bytes(value)
+    receipt_path.write_text(json.dumps(manifest, indent=2) + "\n")
+    print("SOURCE_COMMIT " + revision, flush=True)
+    return directory
+
+
 def sha256(path):
     h = hashlib.sha256()
     with Path(path).open("rb") as stream:
@@ -162,12 +217,35 @@ def download(url, path, expected=None, headers=None, git_blob=None):
             "download destination already exists without matching hash: " + str(path)
         )
     temporary = path.with_suffix(path.suffix + ".partial")
-    request = urllib.request.Request(url, headers=headers or {})
-    with (
-        urllib.request.urlopen(request, timeout=120) as response,
-        temporary.open("wb") as output,
-    ):
-        shutil.copyfileobj(response, output)
+    request_headers = {"User-Agent": "swe-bench-pro-bootstrap/1.0", **(headers or {})}
+    request = urllib.request.Request(url, headers=request_headers)
+    try:
+        with (
+            urllib.request.urlopen(request, timeout=20) as response,
+            temporary.open("wb") as output,
+        ):
+            shutil.copyfileobj(response, output)
+    except OSError:
+        curl = shutil.which("curl")
+        if not curl or urllib.parse.urlsplit(url).scheme not in ("https", "http"):
+            raise
+        command = [
+            curl,
+            "--fail",
+            "--location",
+            "--retry",
+            "2",
+            "--retry-all-errors",
+            "--connect-timeout",
+            "10",
+            "--max-time",
+            "120",
+            "--output",
+            str(temporary),
+        ]
+        for name, value in request_headers.items():
+            command.extend(["--header", name + ": " + value])
+        subprocess.run(command + [url], check=True, timeout=400)
     if expected and sha256(temporary) != expected:
         raise ValueError("download SHA256 differs: " + str(path))
     if git_blob is not None:
@@ -217,7 +295,22 @@ def main():
             "arm64",
         ):
             raise ValueError("standalone installation requires Linux ARM64")
-        ROOT = source_repository(sys.argv[1:])
+        options = argparse.ArgumentParser(add_help=False)
+        options.add_argument("--source-bundle-url")
+        options.add_argument("--source-bundle-sha256")
+        options.add_argument("--source-revision", default="main")
+        options.add_argument("--source-directory", type=Path)
+        bundle, _ = options.parse_known_args()
+        ROOT = (
+            bundle_repository(
+                bundle.source_bundle_url,
+                bundle.source_bundle_sha256,
+                bundle.source_revision,
+                bundle.source_directory,
+            )
+            if bundle.source_bundle_url
+            else source_repository(sys.argv[1:])
+        )
         LOCK = ROOT / "src/vllm_hust_benchmark/data/swe_bench_pro_v1_lock.json"
     artifact_lock = json.loads(
         (
@@ -236,6 +329,13 @@ def main():
         help="optional private source installation directory",
     )
     p.add_argument("--work", required=True, type=Path)
+    p.add_argument(
+        "--source-bundle-url",
+        help="published small runtime bundle; avoids GitHub API rate limits",
+    )
+    p.add_argument(
+        "--source-bundle-sha256", help="published SHA256 for the runtime bundle"
+    )
     p.add_argument("--model-api", required=True)
     p.add_argument("--model-name", required=True)
     p.add_argument("--api-key-env")
