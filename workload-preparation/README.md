@@ -1017,6 +1017,16 @@ x86_64，须按原平台标记选择。独立Poetry2.1.3工具及Python3.10.12�
 应用明确披露的评分器兼容副本后，真实`marble.main --help`及模块导入已在服务器通过，退出0、无假模块、无模型调用；最初缺ruamel的失败日志保留。预检使用Python连接审计拒绝、HF离线标记和空模型缓存，观测到0次Python
 socket连接尝试；这不是内核网络隔离认证或生成代码sandbox。原生Agent任务、embedding/裁判、各场景隔离与官方评分仍待验证，不得据此打总勾。
 
+固定原题配置准备入口（用原客户端解释器，默认仅计划）：
+
+```bash
+/external/marble-client/bin/python -I scripts/prepare_marble_original_configs.py \
+  --data-root /private/marble-original --author-root /external/marble-author \
+  --output /private/marble-fixed-configs --limit 3
+```
+
+加`--execute`才在全新独立目录写出五文件各原前三条，共15份配置。仅序列化为原`yaml.safe_load`可读的JSON形式YAML，不改题、模型名、预算、字段或路径；全部原字段保真，并用固定原`Config.load`验证任务、环境、Agent、关系、评分与协调配置。服务器15份原配置已通过。原生配置仍含原模型名及输出路径，尚未完成本地模型/裁判绑定和隔离运行部署，不能直接在宿主机盲跑或意外调用外部付费服务；配置准备不是原生执行。
+
 ## BixBench 原科学任务准备与读取（原生执行未完成）
 
 本接口用于官方科学Agent任务，不用零样本问答替代Notebook工作流。原问题JSONL实际为205条扁平记录、17字段，不能按旧数据卡的嵌套`questions`结构加载。文件版本和64份ZIP身份见[固定原资产清单](data/catalogs/bixbench_original_files_v1.json)；205条问题引用其中59份。当前只取得固定原前三题所需的两份原ZIP，其余57份尚未取得。
