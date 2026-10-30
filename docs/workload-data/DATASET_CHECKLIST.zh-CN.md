@@ -1271,15 +1271,17 @@ split；后续必须明确将生成和评估同时绑定原verified版本，并�
 
 #### WavCaps原生音频路径准备（未完成来源交付）
 
+- [x] BBC固定原前三条`NHU05051026/07066104/07039376`取得并完整解码，原PCM
+  MD5与时长核验通过；原字符串ID保留前导零。按原分卷ZIP64目录和盘内偏移取8段共16538564字节，不下载130GB整包，不把不同分卷的ETag误当一个值。与SoundBible共6条原媒体通过同一公共CLI，回执：`/root/wavcaps-original-media-public-verifier-20261031-002/qualification-public.json`。AudioSet和FreeSound固定媒体、全部模型执行仍缺，不打来源总勾。
 - [x] 固定SoundBible原前三条`2219/2218/2217`的真实FLAC已取得：原Hub固定版本ZIP仅取8段共4869230字节，原成员CRC及同一ETag核验；3个文件完整解码、PCM
-  MD5匹配原STREAMINFO，均为32kHz单声道，时长与原字段完全一致。公共`verify_wavcaps_original_media.py --decode`实跑exit0。原JSON的`audio`实际是`wav_path`占位符，单独按原ID/原ZIP成员绑定，不改JSON或音频。不冒称完整580MB归档哈希已重算，也不代表其他三组件媒体已取得。
+  MD5匹配原STREAMINFO，均为32kHz单声道，时长与原字段完全一致。公共`verify_wavcaps_original_media.py --decode`实跑exit0。原JSON的`audio`实际是`wav_path`占位符，单独按原ID/原ZIP成员绑定，不改JSON或音频。不冒称完整580MB归档哈希已重算，也不代表AudioSet和FreeSound固定媒体已取得。
 - [x] 复用公共原始数据接口，四份JSON的403050条逐字段完整还原通过；音频定位信息与caption/原描述/类别/标签分离，12条固定样本不能伪装为聊天请求。使用者缺文件时仍显式报错，不静默跳过。源码回执：`/root/wavcaps-public-adapter-20261031-003/qualification-public.json`；实际安装另见下项。
 - [x] 复用既有获取器的原文件校验CLI，四份元数据实际执行通过；源码候选的403050条索引与12条固定公共/未修改研究端完整读取核验通过，旧三文件索引保留且未恢复研究任务。服务器消费端源码与研究工作树版本一致。回执：同CPU目录下`getter-verify-public.json`、`research-handoff-public.json`。原生音频任务仍未完成。
 - [x] 实际CI工件13018794405独立安装通过：74份包内软件/资源逐项匹配已提交Git字节和安装文件，403050条原索引只读复用，四份各原前三条共12条公共/研究端完整读取一致，无模型调用。见[元数据CI交接回执](validation/wavcaps-original-metadata-ci-handoff-20261031.json)。这只证明原始元数据的获取与消费链路，不计原生音频交付。
 - [x] 取得并校验SoundBible、BBC、AudioSet、FreeSound四份原始JSON，共403050条、174782992字节，保留各组件原前三条完整记录。FreeSound通过现有公共获取器直接下载并验证发布方LFS哈希，以硬链接复用原文件、不重复占用数据空间。完整回执：`/root/wavcaps-original-metadata-20261031-002/complete-metadata-public.json`；原三文件回执、CPU直连TLS失败记录保留，不因网络失败换数据。
 - [x] 在专用CPU取得发布方固定版本的6份说明、音频captioning入口/评分器及检索入口，逐份核验Git
   blob和SHA256；3份Python仅做AST解析，未导入执行。服务端回执：`/root/wavcaps-original-source-20261031-001/preparation-public.json`。
-- [ ] 补齐其余三组件的固定原媒体、专用checkpoint及完整依赖，完成原生NPU推理、适用评分和输出消费闭环。SoundBible前三条媒体准备不等于模型运行；未下载模型，也未调用文本模型替代。
+- [ ] 补齐AudioSet和FreeSound两组件的固定原媒体、专用checkpoint及完整依赖，完成原生NPU推理、适用评分和输出消费闭环。SoundBible/BBC各前三条媒体准备不等于模型运行；未下载模型，也未调用文本模型替代。
 
 WavCaps是弱标注音频—文本资产；作者captioning示例使用专用音频编码器和BART
 checkpoint，不能直接填入Qwen文本服务。原评分器要求五条参考的接口不能靠复制弱标注caption凑足；须按原任务选用真实评价资产和协议。其音频仅限学术研究且保留各源条件，不作默认企业再分发。以上准备不增加75/113完成数，机器清单状态为`IN_PROGRESS`。

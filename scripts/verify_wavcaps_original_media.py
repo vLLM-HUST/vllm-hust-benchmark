@@ -10,6 +10,10 @@ PROFILE = (
     Path(__file__).resolve().parents[1]
     / "configs/workload-native/wavcaps-soundbible-original-fixed3-media.json"
 )
+PROFILES = {
+    "SoundBible": PROFILE,
+    "BBC_Sound_Effects": PROFILE.parent / "wavcaps-bbc-original-fixed3-media.json",
+}
 
 
 def contained(root, name):
@@ -109,7 +113,7 @@ def verify(profile, *, metadata_root, media_root, decode=False):
     return {
         "source_id": "WAVCAPS",
         "status": "FIXED3_ORIGINAL_MEDIA_VERIFIED_NOT_MODEL_INFERENCE",
-        "component": "SoundBible",
+        "component": profile.get("component", "SoundBible"),
         "files": results,
         "metadata_modified": False,
         "audio_modified": False,
@@ -121,6 +125,7 @@ def verify(profile, *, metadata_root, media_root, decode=False):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--component", choices=list(PROFILES), default="SoundBible")
     parser.add_argument("--metadata-root", type=Path, required=True)
     parser.add_argument("--media-root", type=Path, required=True)
     parser.add_argument(
@@ -132,7 +137,7 @@ if __name__ == "__main__":
     print(
         json.dumps(
             verify(
-                json.loads(PROFILE.read_text()),
+                json.loads(PROFILES[args.component].read_text()),
                 metadata_root=args.metadata_root,
                 media_root=args.media_root,
                 decode=args.decode,

@@ -141,3 +141,23 @@ def test_pinned_profile_keeps_original_soundbible_ids_only():
     assert profile["component"] == "SoundBible"
     assert profile["archive_bytes"] == 579522592
     assert all(item["sample_rate"] == 32000 for item in profile["files"])
+
+
+def test_bbc_profile_keeps_original_string_ids_and_split_identity():
+    profile = json.loads(entry.PROFILES["BBC_Sound_Effects"].read_text())
+    assert [item["id"] for item in profile["files"]] == [
+        "NHU05051026",
+        "07066104",
+        "07039376",
+    ]
+    assert [item["part"] for item in profile["files"]] == ["z02", "z09", "z24"]
+    assert len(profile["selected_archive_parts"]) == 4
+    assert profile["component"] == "BBC_Sound_Effects"
+
+
+def test_explicit_component_does_not_change_original_binding_contract(tmp_path):
+    profile, metadata, media = fixture(tmp_path)
+    profile["component"] = "BBC_Sound_Effects"
+    result = entry.verify(profile, metadata_root=metadata, media_root=media)
+    assert result["component"] == "BBC_Sound_Effects"
+    assert result["source_checkbox_eligible"] is False
