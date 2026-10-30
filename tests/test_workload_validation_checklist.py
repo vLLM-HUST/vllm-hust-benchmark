@@ -142,7 +142,7 @@ def test_appworld_protocol_files_are_not_task_or_execution_completion():
     )
     row = ledger["delivery_inventory"]["APPWORLD"]
     preparation = row["preparation_evidence"]
-    assert row["checked"] is False and row["delivery_receipt"] is None
+    assert row["delivery_receipt"] != preparation["core_client_receipt"]
     assert preparation["original_public_files_verified"] == 8
     assert preparation["original_public_source_bytes"] == 175040
     assert preparation["model_calls"] == 0
@@ -161,6 +161,38 @@ def test_appworld_protocol_files_are_not_task_or_execution_completion():
     assert receipt["source_checkbox_eligible"] is False
     assert receipt["model_calls"] == 0
     assert receipt["task_data_acquired"] is False
+
+
+def test_appworld_native_delivery_requires_scores_and_actual_ci_handoff():
+    ledger = json.loads(
+        (ROOT / "docs/workload-data/dataset-validation-status.json").read_text("utf-8")
+    )
+    row = ledger["delivery_inventory"]["APPWORLD"]
+    assert row["checked"] and row["status"] == "AVAILABLE"
+    receipt = json.loads((ROOT / row["delivery_receipt"]).read_text("utf-8"))
+    assert receipt["actor_exit_code"] == 0
+    assert receipt["source_checkbox_eligible"]
+    assert receipt["total_native_steps"] == 141
+    assert receipt["new_npu_api_calls"] == 113
+    assert receipt["reused_exact_original_cached_responses"] == 28
+    assert [task["task_id"] for task in receipt["tasks"]] == [
+        "3d9a636_1",
+        "3d9a636_2",
+        "3d9a636_3",
+    ]
+    for task in receipt["tasks"]:
+        assert task["official_tests"] == 5
+        assert task["official_passes"] == 1
+        assert task["official_failures"] == 4
+        assert task["task_success"] is False
+    handoff = receipt["current_provider_and_research_handoff"]
+    assert handoff["installed_runtime_payloads"] == 71
+    assert handoff["existing_index_records"] == 732
+    assert handoff[
+        "fixed3_public_and_unchanged_research_records_equal_to_original_provider"
+    ]
+    assert handoff["original_specs_and6_separate_reference_assets_per_task_preserved"]
+    assert handoff["audit_model_or_scorer_rerun"] is False
 
 
 def test_scienceworld_delivery_requires_native_scores_and_actual_ci_consumer():

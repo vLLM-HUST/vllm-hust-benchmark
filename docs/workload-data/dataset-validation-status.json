@@ -2370,10 +2370,25 @@
       "blocker": null
     },
     "APPWORLD": {
+      "public_native_validation_checkpoint": {
+        "status": "ORIGINAL_PUBLIC_FIXED3_NATIVE_EXECUTION_AND_OFFICIAL_SCORING_AUDITED",
+        "server_stage": "appworld-public-fixed3-native-20261030-001",
+        "original_and_public_bound_configs_equal": true,
+        "original_and_public_image_software_files_equal": 132,
+        "exact_original_request_response_prefix_reused": 28,
+        "original_use_cache_setting_changed": false,
+        "offline_replay_stopped_on_real_feedback_difference": true,
+        "request_feedback_normalized_or_rewritten": false,
+        "observed_new_http_200_completions": 113,
+        "observation_is_checkpoint_not_final_model_call_count": false,
+        "original_generation_budget": 400,
+        "model": "Qwen/Qwen3.5-9B",
+        "source_checkbox_eligible": true
+      },
       "saved_log_review_receipt": "docs/workload-data/validation/appworld-saved-log-review-20261030.json",
       "scope": "public",
-      "delivery_kind": "review_original_source_protocol",
-      "status": "IN_PROGRESS",
+      "delivery_kind": "original_appworld_native_react_and_official_scoring",
+      "status": "AVAILABLE",
       "preparation_evidence": {
         "kind": "original_public_protocol_core_client_and_task_data_preparation_not_native_execution",
         "publisher": "https://github.com/StonyBrookNLP/appworld",
@@ -2402,12 +2417,13 @@
         "retained_failures": ["Official raw endpoint TLS reset before acquisition", "Official blob API acquired all8 files; checker expected PEP621 metadata, corrected CPU-only verification reads publisher Poetry metadata without redownload"],
         "boundary": "Pinned public protocol, private isolated core-client installation and separate original task acquisition verified. execution_environment_installed remains false because task isolation and native task workflow are not qualified. Not Agent execution or official scoring. No decrypted protected source/data or original tasks copied to Git."
       },
-      "checked": false,
+      "checked": true,
       "legacy_checked": false,
       "existing_receipt": null,
-      "delivery_receipt": null,
+      "delivery_receipt": "docs/workload-data/validation/appworld-native-delivery-20261030.json",
       "research_consumer_receipt": "docs/workload-data/validation/appworld-research-consumer-20261030.json",
-      "blocker": "Original fixed3 ReAct and official evaluator exited0 on Qwen3.5-9B fallback: each task1/5 tests passed and unsuccessful, retained. Saved audit verified140 CPU/NPU request-response pairs and isolation. Public experiment recipe independently built; core83, ReCoMa0.0.4 and LiteLLM1.37.19 verified offline; fresh152 total dependencies differ from historical140. Unified source bind/index verified732 tasks,14696 original file hashes. After approved same-workspace restoration, historical actual-CI provider and unchanged research consumer fixed3 full records match saved original readbacks, including original specs and6 separate reference assets each; no model/scorer rerun. Remaining: public native entry qualification and saved traceback cause review beyond the three environment logs. No explicit readonly/locked SQLite, OS permission/readonly or HTTP500 exception signatures found in those three logs; no broad health or causality claim. Original70B not reproduced; budgets unchanged; no raw redistribution or host generated-code execution."
+      "blocker": null,
+      "known_limitations": "Fixed3 original test_normal tasks only: public native entry exited0, official scoring retained all3 unsuccessful tasks (each1/5 tests passed).141 native steps =28 exact cached responses +113 new HTTP200 NPU calls. Current-compatible actual CI71 runtime payloads and unchanged research consumer fixed3 full records verified against original732-row index, specs and6 reference assets each. Not full732 inference, original70B reproduction, deterministic environment replay, high task quality or engine performance. Historical preparation receipts remain preparation-only; raw protected assets and generated code remain server-private."
     },
     "SCIENCEWORLD": {
       "scope": "public",
@@ -2435,6 +2451,41 @@
       "official_client_preparation_receipt": "docs/workload-data/validation/bixbench-official-client-20261030.json",
       "notebook_preparation_receipt": "docs/workload-data/validation/bixbench-notebook-preparation-20261030.json",
       "selected_task_preparation_receipt": "docs/workload-data/validation/bixbench-selected-task-preparation-20261030.json",
+      "agent_binding_preflight": {
+        "status": "AUTHOR_AGENT_CONSTRUCTED_WITH_LOCAL_MODEL_BINDING_NOT_EXECUTED",
+        "model": "openai/Qwen/Qwen3.5-9B",
+        "original_recommended_actor_reproduced": false,
+        "max_steps": 40,
+        "client_default_max_tokens": 4096,
+        "temperature": 1.0,
+        "single_prompt": false,
+        "parallel_tool_calls": false,
+        "num_retries": 5,
+        "model_call_methods_disabled_during_preflight": true,
+        "model_calls": 0,
+        "official_open_answer_default_judge": "gpt-4o",
+        "judge_binding_and_model_connectivity_qualified": false,
+        "source_checkbox_eligible": false
+      },
+      "native_attempt": {
+        "status": "ORIGINAL_ROLE_SEQUENCE_REJECTED_BY_CURRENT_MODEL_CHAT_TEMPLATE",
+        "public_entry": "scripts/run_bixbench_original_agent.py",
+        "fixed_selected_question_ids": ["bix-1-q1", "bix-1-q2", "bix-10-q1"],
+        "active_question": "bix-1-q1",
+        "completed_questions": 0,
+        "http_attempts": 4,
+        "http_400_responses": 4,
+        "valid_model_completions": 0,
+        "original_message_role_sequence": ["system", "user", "user", "system"],
+        "api_error": "System message must be at the beginning.",
+        "original_messages_reordered_or_roles_changed": false,
+        "generated_task_code_executed": false,
+        "official_scoring_executed": false,
+        "model_service_reconfigured": false,
+        "model_worker_terminal": "CLOSED",
+        "native_window_released": true,
+        "source_checkbox_eligible": false
+      },
       "blocker": "Original205 flat JSONL questions/17 fields and all data_folder references to59 of64 registered ZIPs verified; stale nested-card schema not used. Two ZIPs5962719 bytes for fixed first3 questions acquired with LFS digest/all16 CRCs verified; other57 referenced ZIPs absent. Actual CI artifact12953366374 installed with71 runtime payloads byte-exact to Git; full205 original row restoration and unchanged205-row index plus fixed3 public/unchanged research full-record and ZIP checksum readbacks passed, without reindexing or model calls. Official ARM64 image16 layer digests and final config identity verified; unchanged author Notebook API trusted1+1 fixture passed in nonroot offline readonly task container. First notebook permissions failure retained; fixed only private runtime group/umask. Fixture is not native task execution. Scientific Agent/NPU execution and original scoring remain pending. Preserve original40-step protocol; no zero-shot replacement."
     },
     "LABBENCH": {

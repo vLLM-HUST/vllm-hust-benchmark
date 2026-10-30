@@ -18,10 +18,14 @@ from urllib.request import Request, urlopen
 import uuid
 
 
-def save_new(path, payload):
+def save_new(path, payload, *, owner_uid=None):
     temporary = path.with_suffix(path.suffix + ".partial")
     with temporary.open("xb") as stream:
         stream.write(payload)
+        if owner_uid is not None and os.fstat(stream.fileno()).st_uid != owner_uid:
+            # Publish the final response readable by the trusted requesting
+            # Agent, never a root-only file followed by a racy chown.
+            os.fchown(stream.fileno(), owner_uid, -1)
     temporary.replace(path)
 
 
@@ -108,6 +112,12 @@ def process_one(queue, api_base, *, api_key=None, disable_thinking=False, timeou
         except FileExistsError:
             continue
         with claim:
+            owner_uid = path.stat().st_uid
+            worker_uid = os.fstat(claim.fileno()).st_uid
+            if worker_uid not in (0, owner_uid):
+                raise ValueError(
+                    "worker must share Agent UID or have ownership privilege"
+                )
             raw = path.read_bytes()
             body = json.loads(raw)
             if disable_thinking:
@@ -138,7 +148,7 @@ def process_one(queue, api_base, *, api_key=None, disable_thinking=False, timeou
                 status, wire = response.code, response.read()
             save_new(queue / (identity + ".response.raw"), wire)
             payload = {"http_status": status, "response": json.loads(wire)}
-            save_new(result, json.dumps(payload).encode())
+            save_new(result, json.dumps(payload).encode(), owner_uid=owner_uid)
             return True
     return False
 

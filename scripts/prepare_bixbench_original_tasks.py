@@ -141,12 +141,24 @@ def prepare(author, data, output, workspace, limit=3, execute=False):
     for name in capsules:
         verify_asset(data, entries[name])
     verify_source(author, pins)
+    prepared_files = {}
+    for path in sorted(generator.config.local_data_folder.rglob("*")):
+        if path.is_symlink():
+            raise ValueError("unexpected prepared asset symlink")
+        if path.is_file():
+            prepared_files[
+                path.relative_to(generator.config.local_data_folder).as_posix()
+            ] = {
+                "bytes": path.stat().st_size,
+                "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+            }
     report.update(
         status="AUTHOR_SELECTED_TASK_PREPARATION_PASSED_NOT_NATIVE_EXECUTION",
         tasks=tasks,
         capsules=len(capsules),
         original_max_steps=generator.config.rollout.max_steps,
         original_inputs_and_author_source_unchanged=True,
+        prepared_files=prepared_files,
         container_workspace_permissions_still_require_explicit_operator_setup=True,
     )
     (output / "preparation-public.json").write_text(json.dumps(report, indent=2))

@@ -14,6 +14,55 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 from appworld_model_transport import model_proxy, process_one
+import appworld_model_transport as transport
+
+
+def test_response_ownership_is_set_before_atomic_publication(tmp_path, monkeypatch):
+    destination = tmp_path / "response.json"
+    observed = []
+
+    def change_owner(fd, uid, gid):
+        assert not destination.exists()
+        assert destination.with_suffix(".json.partial").exists()
+        observed.append((uid, gid))
+
+    monkeypatch.setattr(transport.os, "fchown", change_owner, raising=False)
+    owner = transport.os.stat(tmp_path).st_uid + 1
+    transport.save_new(destination, b"fixture-only", owner_uid=owner)
+    assert observed == [(owner, -1)]
+    assert destination.read_bytes() == b"fixture-only"
+    assert not destination.with_suffix(".json.partial").exists()
+
+
+def test_same_uid_response_needs_no_ownership_privilege(tmp_path, monkeypatch):
+    def forbidden(*_args):
+        pytest.fail("same UID must not require chown")
+
+    monkeypatch.setattr(transport.os, "fchown", forbidden, raising=False)
+    destination = tmp_path / "response.json"
+    transport.save_new(
+        destination, b"fixture-only", owner_uid=transport.os.stat(tmp_path).st_uid
+    )
+    assert destination.read_bytes() == b"fixture-only"
+
+
+def test_incompatible_worker_uid_rejected_before_api_call(tmp_path, monkeypatch):
+    identity = "1" * 32
+    (tmp_path / (identity + ".request.json")).write_text("{}")
+    owner = transport.os.stat(tmp_path).st_uid
+
+    class WorkerStat:
+        st_uid = owner + 1
+
+    monkeypatch.setattr(transport.os, "fstat", lambda _fd: WorkerStat())
+
+    def forbidden(*_args, **_kwargs):
+        pytest.fail("ownership rejection must precede inference")
+
+    monkeypatch.setattr(transport, "urlopen", forbidden)
+    with pytest.raises(ValueError, match="share Agent UID"):
+        process_one(tmp_path, "http://127.0.0.1:1/v1")
+    assert not list(tmp_path.glob("*.forwarded-request.json"))
 
 
 @pytest.mark.parametrize("disable_thinking", [False, True])
