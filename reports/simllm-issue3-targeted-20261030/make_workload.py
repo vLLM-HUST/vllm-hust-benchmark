@@ -10,8 +10,8 @@ import hashlib
 import json
 from pathlib import Path
 
-FIXTURE_SHA256 = "90f3c3229d96237b389e2a3f45fa8f8618d270921091211166661fec4a4e2c41"
-SOURCE_COMMIT = "28f2297c58cec2249576dff2ccdd251c662ad8d6"
+FIXTURE_SHA256 = "90f3c3229d96237b389e2a3f45fa8f8618d270921091211166661fec4a4e2c41"  # pragma: allowlist secret
+SOURCE_COMMIT = "28f2297c58cec2249576dff2ccdd251c662ad8d6"  # pragma: allowlist secret
 CASES = (
     ("number", ("17", "29", "43"), "本轮编号是多少？只输出数字。"),
     ("negation", ("允许", "禁止", "允许"), "本轮是否允许操作？只输出‘允许’或‘禁止’。"),
