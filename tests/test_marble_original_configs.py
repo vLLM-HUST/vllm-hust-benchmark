@@ -50,3 +50,30 @@ def test_native_loader_comparison_includes_references_and_routing():
     loaded.task = {"content": "fixture"}
     with pytest.raises(ValueError, match="field changed"):
         entry.validate_loaded_config(original, loaded)
+
+
+def test_cleared_runtime_fields_are_reported_without_default_invention():
+    spec = importlib.util.spec_from_file_location("marble_empty", ENTRY)
+    entry = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(entry)
+    original = {
+        "environment": {"type": "", "max_iterations": ""},
+        "llm": "",
+        "task": {"content": "unchanged fixture"},
+    }
+    before = json.loads(json.dumps(original))
+    assert entry.empty_runtime_fields(original) == [
+        "llm",
+        "environment.type",
+        "environment.max_iterations",
+    ]
+    assert original == before
+    assert (
+        entry.empty_runtime_fields(
+            {
+                "environment": {"type": "Minecraft", "max_iterations": 20},
+                "llm": "original-model",
+            }
+        )
+        == []
+    )

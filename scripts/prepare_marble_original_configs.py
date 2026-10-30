@@ -37,6 +37,30 @@ def validate_loaded_config(original, loaded):
         raise ValueError("original coordination mode changed")
 
 
+def empty_runtime_fields(original):
+    """Expose publisher-cleared bindings without guessing replacements."""
+    paths = (
+        ("coordinate_mode",),
+        ("llm",),
+        ("environment", "type"),
+        ("environment", "max_iterations"),
+        ("memory", "type"),
+        ("metrics", "evaluate_llm"),
+        ("output", "file_path"),
+    )
+    empty = []
+    for path in paths:
+        value = original
+        for key in path:
+            if not isinstance(value, dict) or key not in value:
+                break
+            value = value[key]
+        else:
+            if value is None or value == "":
+                empty.append(".".join(path))
+    return empty
+
+
 def prepare(data_root, author_root, output, *, limit=3, execute=False):
     if type(limit) is not int or not 1 <= limit <= 100:
         raise ValueError("original prefix must be between1 and100 per file")
@@ -98,6 +122,7 @@ def prepare(data_root, author_root, output, *, limit=3, execute=False):
                     "source_row_index": index,
                     "configuration": path.relative_to(output).as_posix(),
                     "sha256": hashlib.sha256(raw).hexdigest(),
+                    "publisher_cleared_runtime_fields": empty_runtime_fields(original),
                 }
             )
     report.update(
@@ -105,6 +130,8 @@ def prepare(data_root, author_root, output, *, limit=3, execute=False):
         selected_configurations=len(selected),
         configurations=selected,
         original_fields_relations_models_budgets_and_paths_changed=False,
+        runtime_bindings_complete=False,
+        runtime_boundary="Native Config.load only parses fields. Cleared bindings must be resolved from scenario-specific publisher instructions; do not apply Research/3-iteration converter defaults indiscriminately to all scenarios.",
     )
     (output / "preparation-public.json").write_text(
         json.dumps(report, indent=2), encoding="utf-8"

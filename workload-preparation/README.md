@@ -1027,6 +1027,8 @@ socket连接尝试；这不是内核网络隔离认证或生成代码sandbox。�
 
 加`--execute`才在全新独立目录写出五文件各原前三条，共15份配置。仅序列化为原`yaml.safe_load`可读的JSON形式YAML，不改题、模型名、预算、字段或路径；全部原字段保真，并用固定原`Config.load`验证任务、环境、Agent、关系、评分与协调配置。服务器15份原配置已通过。原生配置仍含原模型名及输出路径，尚未完成本地模型/裁判绑定和隔离运行部署，不能直接在宿主机盲跑或意外调用外部付费服务；配置准备不是原生执行。
 
+进一步的真实离线容器预检发现：其中12份原配置的`environment.type`与`max_iterations`为空；Minecraft三份为`Minecraft`、20次迭代。`Config.load`能读入空字段，不代表引擎能运行。准备回执现单列发布方清空的运行字段，不自动补值。官方`multiagentbench/jsonl2yaml.py`提供`fill_defaults`，其CLI默认却是Research环境、3次迭代，不能不分场景地套到bargaining、coding或database。须先取得各场景的官方配置依据，再显式绑定环境、模型、裁判和输出目录；尚无任何原生任务或评分完成结论。
+
 软件隔离镜像配方为`configs/workload-native/marble-compat-cpu.Dockerfile`。构建上下文只允许两个软件子目录：`client/`为已核验的Python3.10客户端（原锁93包＋披露的2包），`author/`为99份原软件及明确披露的评分器缩进兼容副本；禁止带入原题、答案、模型缓存、结果或凭据。操作者须先核验已有Ubuntu22.04基础镜像的不可变ID，显式传给`MARBLE_BASE_IMAGE`，不能把浮动tag当身份依据。
 
 本配方已在专用ARM64 CPU工作区构建，并通过非root65534、无网络、只读根、去全部能力、禁止提权的真实容器`--help`探测，退出0；未挂载任务数据、Docker
