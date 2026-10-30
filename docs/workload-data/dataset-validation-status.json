@@ -1271,7 +1271,7 @@
     "LONGMEMEVAL": {
       "scope": "public",
       "delivery_kind": "review_original_source_protocol",
-      "status": "BLOCKED",
+      "status": "IN_PROGRESS",
       "checked": false,
       "legacy_checked": false,
       "existing_receipt": null,
@@ -1280,7 +1280,32 @@
       "original_fields_audit_receipt": "docs/workload-data/validation/longmemeval-original-fields-audit-20261025.json",
       "native_generation_checkpoint": "docs/workload-data/validation/longmemeval-original-native-checkpoint-20261025.json",
       "public_runner": "scripts/run_longmemeval_original.py",
-      "blocker": "Oracle and S fixed original first3 each completed with unchanged publisher prompt function, all original sessions, original CoT800 budget; six saved requests/responses audited. S input113452-116259 tokens. Original judge client requirements plus explicit httpx0.27.2 compatibility installed and pip check0, but no publisher-supported judge deployed: scoring pending. M first original history1201716 tokens exceeds129272 publisher retrieval budget; stopped before generation, no truncation or replacement. All3 original files hash-verified, oracle/S1000 fields verified. Keep source unchecked; reuse six generations when judge is available."
+      "original_m_retrieval_progress": {
+        "source_receipt": "longmemeval-original-retrieval-source-20261031-001/preparation-public.json under the private shared task root",
+        "original_source_files": 13,
+        "original_source_bytes": 81752,
+        "source_commit": "9e0b455f4ef0e2ab8f2e582289761153549043fc", "identity_note": "pragma: allowlist secret - verified original publisher revision",
+        "selected_input_receipt": "longmemeval-m-original-bm25-fixed3-20261031-001/preparation-public.json under the private shared task root",
+        "selection": "unchanged original M first3 entries; every original field and history value preserved",
+        "original_sessions_per_case": [482, 472, 473],
+        "original_turns_per_case": [5057, 4783, 4847],
+        "runtime_receipt": "longmemeval-bm25-runtime-20261031-001/import-public.json under the private shared task root",
+        "execution_receipt": "longmemeval-m-original-bm25-execution-20261031-001/state-public.json under the private shared task root",
+        "publisher_bm25_exit_code": 0,
+        "original_worker_count": 10,
+        "publisher_source_modified": false,
+        "all_selected_original_fields_equal_after_retrieval": true,
+        "neural_execution_and_network_forbidden_in_all_retrieval_workers": true,
+        "retrieval_metric_eligibility_receipt": "longmemeval-m-original-bm25-execution-20261031-001/metric-eligibility-public.json under the private shared task root",
+        "fixed_cases_question_type": "single-session-assistant",
+        "eligible_user_side_positive_label_cases": 0,
+        "usable_retrieval_quality_aggregate_claimed": false,
+        "reader_generation_executed": false,
+        "qa_judging_executed": false,
+        "model_calls": 0,
+        "boundary": "Official M supports retrieval-augmented QA; full-history overflow is only the retained separate baseline limitation. Original BM25 indexes user-side text, and all fixed first3 cases have assistant-side answer evidence only. Publisher retrieval reporting excludes them; empty-positive recall_all=1 is vacuous, not retrieval success. Preserve original rows and outputs, do not change labels or select replacement cases. M reader/scoring and reusable public/consumer qualification remain pending."
+      },
+      "blocker": "Reuse the six completed Oracle/S generations; original QA judging remains pending. M full-history first case1201716 tokens exceeds129272 budget and remains a separate blocked baseline, not proof that original M is unusable. Unchanged publisher BM25-session retrieval over complete original M first3 histories now exited0 with original10 workers and all482/472/473 sessions preserved; no neural calls. All3 are assistant-evidence cases excluded from publisher user-side retrieval aggregates; do not claim vacuous metrics or replace cases. Next: original RAG reader and QA judging, exact public entry/artifact/research handoff. Keep source unchecked; no question/history truncation or quality-pass claim."
     },
     "LONGMEMEVAL_V2": {
       "scope": "public",

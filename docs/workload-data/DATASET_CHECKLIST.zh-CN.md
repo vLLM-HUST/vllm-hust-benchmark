@@ -3,6 +3,14 @@
 当前交付
 **75/113项**，待完成38项，另5项仅分类。首批#432的60项和第二批#538的ScienceWorld已合入main；早期五个草稿已关闭为被汇总承接，历史和分支保留。第三批新增CodeJudge-Eval、DeepPlanning、OpenMath、OpenCode、MVBench、Video-MME、LiveCodeBench、BigCodeBench、Spider、DRAGON、SWE_VERIFIED、SWE_BENCH及AppWorld固定原生profile交付，尚未合入。OpenMath/OpenCode是训练语料原问题生成，不是独立质量benchmark。打勾不代表全量模型评测、高分或性能保证。
 
+### LongMemEval M：补原生检索路径，问答交付仍未完成
+
+- [x] 复核[固定官方源码](https://github.com/xiaowu0162/LongMemEval/tree/9e0b455f4ef0e2ab8f2e582289761153549043fc)：官方明确M不适合直接全历史长上下文测试，另提供检索增强问答流程。保留此前全历史1201716-token超限记录，不将这一基线受限等同整个M来源不可用。
+- [x] 新增取得7份原检索/脚本/依赖文件，与既有6份原源码合并核验，共13文件81752字节；原文件未改。独立依赖及原模块导入通过，不改模型服务环境。
+- [x] 固定原M前三题，全部482/472/473会话、5057/4783/4847话轮及原字段完整保留。官方BM25-session、无索引扩展、原10个工作进程实际运行退出0，完整原值与输出逐项相等；所有进程禁止神经执行和联网，零模型调用。
+- [x] 评分适用性已复核：三题均为`single-session-assistant`，用户侧正例为0。官方检索只索引用户消息，聚合时排除这些题；原输出中的空正例`recall_all=1`不代表成功检索，也不报告为可用质量分数。不改标签、不换题凑通过。
+- [ ] 衔接官方RAG读者、原问答评分及可复用公共入口/精确工件/研究消费核验。Oracle/S既有6条生成继续复用，不重跑。本来源仍不打完成勾；检索结束不等于整个benchmark已跑通。机器证据入口：`dataset-validation-status.json`中的`LONGMEMEVAL.original_m_retrieval_progress`。
+
 ### Mind2Web（固定原题原生交付完成）
 
 - [x] 固定官方源码版本 `33bd95caeee7bba22dd08ecc935845e15c5e5dc7`，31个文件逐一核对Git对象；服务器源码归档SHA256与中转端一致。
