@@ -1,11 +1,29 @@
 {
   "schema_version": "workload-validation-checklist/v1",
   "updated_at": "2026-10-30",
+  "current_checked_receipt_custody_review": {
+    "date": "2026-10-30",
+    "checked_source_references": 75,
+    "unique_json_receipt_files": 67,
+    "missing_or_unparseable_receipts": 0,
+    "receipts_without_exact_source_identifier": 0,
+    "explicit_top_level_ineligible_receipt_conflicts": 0,
+    "existing37_group": {"registered": 37, "classification_only": 1, "required": 36, "delivered": 30, "pending": 6},
+    "boundary": "Current repository receipt custody and checkbox consistency only. No native tasks rerun, no new scoring, no current server raw-file or model-health availability assertion. Shared source-specific receipts are allowed."
+  },
+  "current_execution_access_review": {
+    "status": "NPU_HOST_KEY_REVALIDATION_REQUIRED_NO_LOGIN_PERFORMED",
+    "ssh_handshake_responds": true,
+    "presented_host_key_differs_from_previously_accepted_key": true,
+    "trusted_cpu_cluster_target_nodeport_mapping_found": false,
+    "boundary": "No matching service in the inspected CPU cluster does not establish NPU failure or ownership. Do not infer current service readiness or resource availability from historical runtime snapshots. Await trusted host identity confirmation; no platform changes, no NPU calls."
+  },
   "current_scope_note": "delivery_inventory is the current source-delivery ledger. sources/incident_gate and frozen receipts retain their original historical scope, not live service or current progress assertions.",
   "cpu_isolation_environment_latest": "docs/workload-data/validation/swebench-original-readiness-20261029.json#independent_cpu_recovery",
   "latest_frozen_software_ci_receipt": "docs/workload-data/validation/software-ci-regression-20261025.json",
   "latest_native_entry_software_smoke_receipt": "docs/workload-data/validation/native-entry-software-ci-20261026.json",
   "native_runtime_latest": {
+    "scope_note": "Historical last-confirmed profile, not current host authentication or service-health verification; consult current_execution_access_review before any new execution",
     "status": "REPLACEMENT_SERVER_API_READY_ORIGINAL_PROTOCOL_AND_HISTORICAL_CORPUS_PROFILES_VERIFIED",
     "latest_access_observation": "20261026 replacement host key independently verified; inspected idle before own model restore. Original two-NPU profile API ready and three fixed original MBPP tasks generated/scored. Earlier SSH refusals remain historical, not current service state.",
     "candidate_research_fixture_compatibility_receipt": "docs/workload-data/validation/research-candidate-wheel-fixture-compat-20261025.json",
