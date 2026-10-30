@@ -1,0 +1,866 @@
+{
+  "scope": "12-request exploratory paired diagnostic; not a formal quality or throughput benchmark",
+  "stages": {
+    "passed": true,
+    "diagnostic_only": true,
+    "device": "7",
+    "model": "/tmp/simllm-issue3-quality-oct30/model-local",
+    "model_config_sha256": "5e4d7f74fec2f360eb9cfbfcd6ec0c4c76e684d3a11caaed259d9fd9bfbc7944",
+    "input_sha256": "eff808dd32306cf61fbf04060a62b04cfebc924d5ee60763b2a0c2fe8c3bbf1d",
+    "requests_per_arm": 12,
+    "final_wheel_sha256": "7ae77f00e47a4de1ad34acbbd02db57c4d0d565af2184ceee62490f621566666",
+    "rollback_wheel_sha256": "10c0db015afa70b34277c8272814e5ffca0715350344041a7c6b384c4498dfea",
+    "stages": [
+      {
+        "name": "baseline",
+        "requests": 12,
+        "wheel_sha256": "10c0db015afa70b34277c8272814e5ffca0715350344041a7c6b384c4498dfea",
+        "enabled": false,
+        "native_apc": false,
+        "chunked_prefill": false,
+        "semantic_reuse_events": 0,
+        "semantic_reused_tokens": 0,
+        "startup_banner_observed": false,
+        "patch_exercised": false,
+        "server_stopped": true
+      },
+      {
+        "name": "approximate",
+        "requests": 12,
+        "wheel_sha256": "7ae77f00e47a4de1ad34acbbd02db57c4d0d565af2184ceee62490f621566666",
+        "enabled": true,
+        "native_apc": false,
+        "chunked_prefill": false,
+        "semantic_reuse_events": 8,
+        "semantic_reused_tokens": 22556,
+        "startup_banner_observed": false,
+        "patch_exercised": true,
+        "server_stopped": true
+      },
+      {
+        "name": "chunked_baseline",
+        "requests": 12,
+        "wheel_sha256": "10c0db015afa70b34277c8272814e5ffca0715350344041a7c6b384c4498dfea",
+        "enabled": false,
+        "native_apc": false,
+        "chunked_prefill": true,
+        "semantic_reuse_events": 0,
+        "semantic_reused_tokens": 0,
+        "startup_banner_observed": false,
+        "patch_exercised": false,
+        "server_stopped": true
+      },
+      {
+        "name": "native_apc",
+        "requests": 12,
+        "wheel_sha256": "10c0db015afa70b34277c8272814e5ffca0715350344041a7c6b384c4498dfea",
+        "enabled": false,
+        "native_apc": true,
+        "chunked_prefill": true,
+        "semantic_reuse_events": 0,
+        "semantic_reused_tokens": 0,
+        "startup_banner_observed": false,
+        "patch_exercised": false,
+        "server_stopped": true
+      },
+      {
+        "name": "rollback",
+        "requests": 12,
+        "wheel_sha256": "10c0db015afa70b34277c8272814e5ffca0715350344041a7c6b384c4498dfea",
+        "enabled": false,
+        "native_apc": false,
+        "chunked_prefill": false,
+        "semantic_reuse_events": 0,
+        "semantic_reused_tokens": 0,
+        "startup_banner_observed": false,
+        "patch_exercised": false,
+        "server_stopped": true
+      }
+    ],
+    "revalidated_stages": [
+      "baseline",
+      "approximate"
+    ],
+    "rollback_comparison": {
+      "exactly_equal": true,
+      "different_ids": []
+    },
+    "apc_comparison": {
+      "exactly_equal": true,
+      "different_ids": []
+    },
+    "base_installation_unchanged": true
+  },
+  "request_count": 12,
+  "reuse_hits": 8,
+  "reuse_from_prior_reuse_target": 0,
+  "reused_prompt_tokens": 22556,
+  "correct_by_arm": {
+    "baseline": 12,
+    "approximate": 5,
+    "chunked_baseline": 12,
+    "native_apc": 12,
+    "rollback": 12
+  },
+  "output_equal_baseline_by_arm": {
+    "baseline": 12,
+    "approximate": 5,
+    "chunked_baseline": 12,
+    "native_apc": 12,
+    "rollback": 12
+  },
+  "apc_equal_chunked_baseline": 12,
+  "client_summaries": {
+    "baseline": {
+      "phase": "summary",
+      "requests": 12,
+      "wall_s": 11.2274,
+      "requests_per_s": 1.0688,
+      "output_tokens_per_s": 2.672,
+      "cold_ttft_median_s": 0.5464,
+      "cold_ttft_mean_s": 0.6765,
+      "warm_ttft_median_s": 0.5262,
+      "warm_ttft_mean_s": 0.533
+    },
+    "approximate": {
+      "phase": "summary",
+      "requests": 12,
+      "wall_s": 12.0415,
+      "requests_per_s": 0.9966,
+      "output_tokens_per_s": 2.4914,
+      "cold_ttft_median_s": 0.5492,
+      "cold_ttft_mean_s": 0.8801,
+      "warm_ttft_median_s": 0.5337,
+      "warm_ttft_mean_s": 0.5399
+    },
+    "chunked_baseline": {
+      "phase": "summary",
+      "requests": 12,
+      "wall_s": 14.4699,
+      "requests_per_s": 0.8293,
+      "output_tokens_per_s": 2.0733,
+      "cold_ttft_median_s": 0.77,
+      "cold_ttft_mean_s": 0.8893,
+      "warm_ttft_median_s": 0.7918,
+      "warm_ttft_mean_s": 0.8505
+    },
+    "native_apc": {
+      "phase": "summary",
+      "requests": 12,
+      "wall_s": 21.2688,
+      "requests_per_s": 0.5642,
+      "output_tokens_per_s": 1.4105,
+      "cold_ttft_median_s": 0.8074,
+      "cold_ttft_mean_s": 2.5455,
+      "warm_ttft_median_s": 0.8056,
+      "warm_ttft_mean_s": 0.8503
+    },
+    "rollback": {
+      "phase": "summary",
+      "requests": 12,
+      "wall_s": 11.2824,
+      "requests_per_s": 1.0636,
+      "output_tokens_per_s": 2.659,
+      "cold_ttft_median_s": 0.5363,
+      "cold_ttft_mean_s": 0.6696,
+      "warm_ttft_median_s": 0.539,
+      "warm_ttft_mean_s": 0.5413
+    }
+  },
+  "median_ttft_s_by_arm": {
+    "baseline": 0.5277499999999999,
+    "approximate": 0.5337000000000001,
+    "chunked_baseline": 0.78285,
+    "native_apc": 0.8060499999999999,
+    "rollback": 0.5381499999999999
+  },
+  "median_ttft_s_on_reuse_targets": {
+    "baseline": 0.5262,
+    "approximate": 0.5337000000000001,
+    "chunked_baseline": 0.7918000000000001,
+    "native_apc": 0.8056,
+    "rollback": 0.53895
+  },
+  "comparisons": [
+    {
+      "id": "issue3_number_0",
+      "change_kind": "number",
+      "variant": 0,
+      "expected": "17",
+      "reuse": null,
+      "arms": {
+        "baseline": {
+          "output_text": "17",
+          "extracted_answer": "17",
+          "correct": true,
+          "ttft_s": 1.0856,
+          "latency_s": 1.5506,
+          "prompt_tokens": 3859,
+          "completion_tokens": 3
+        },
+        "approximate": {
+          "output_text": "17",
+          "extracted_answer": "17",
+          "correct": true,
+          "ttft_s": 1.895,
+          "latency_s": 2.3623,
+          "prompt_tokens": 3859,
+          "completion_tokens": 3
+        },
+        "chunked_baseline": {
+          "output_text": "17",
+          "extracted_answer": "17",
+          "correct": true,
+          "ttft_s": 1.2546,
+          "latency_s": 1.7104,
+          "prompt_tokens": 3859,
+          "completion_tokens": 3
+        },
+        "native_apc": {
+          "output_text": "17",
+          "extracted_answer": "17",
+          "correct": true,
+          "ttft_s": 7.7644,
+          "latency_s": 8.2354,
+          "prompt_tokens": 3859,
+          "completion_tokens": 3
+        },
+        "rollback": {
+          "output_text": "17",
+          "extracted_answer": "17",
+          "correct": true,
+          "ttft_s": 1.072,
+          "latency_s": 1.5444,
+          "prompt_tokens": 3859,
+          "completion_tokens": 3
+        }
+      }
+    },
+    {
+      "id": "issue3_number_1",
+      "change_kind": "number",
+      "variant": 1,
+      "expected": "29",
+      "reuse": {
+        "source_id": "issue3_number_0",
+        "skipped_tokens": 3378,
+        "cosine": 0.9998011612833514
+      },
+      "arms": {
+        "baseline": {
+          "output_text": "29",
+          "extracted_answer": "29",
+          "correct": true,
+          "ttft_s": 0.5278,
+          "latency_s": 0.9949,
+          "prompt_tokens": 3890,
+          "completion_tokens": 3
+        },
+        "approximate": {
+          "output_text": "17",
+          "extracted_answer": "17",
+          "correct": false,
+          "ttft_s": 0.5695,
+          "latency_s": 1.0303,
+          "prompt_tokens": 3890,
+          "completion_tokens": 3
+        },
+        "chunked_baseline": {
+          "output_text": "29",
+          "extracted_answer": "29",
+          "correct": true,
+          "ttft_s": 0.7814,
+          "latency_s": 1.2343,
+          "prompt_tokens": 3890,
+          "completion_tokens": 3
+        },
+        "native_apc": {
+          "output_text": "29",
+          "extracted_answer": "29",
+          "correct": true,
+          "ttft_s": 0.8074,
+          "latency_s": 1.2785,
+          "prompt_tokens": 3890,
+          "completion_tokens": 3
+        },
+        "rollback": {
+          "output_text": "29",
+          "extracted_answer": "29",
+          "correct": true,
+          "ttft_s": 0.5392,
+          "latency_s": 1.0126,
+          "prompt_tokens": 3890,
+          "completion_tokens": 3
+        }
+      }
+    },
+    {
+      "id": "issue3_number_2",
+      "change_kind": "number",
+      "variant": 2,
+      "expected": "43",
+      "reuse": {
+        "source_id": "issue3_number_0",
+        "skipped_tokens": 3408,
+        "cosine": 0.9992738644014478
+      },
+      "arms": {
+        "baseline": {
+          "output_text": "43",
+          "extracted_answer": "43",
+          "correct": true,
+          "ttft_s": 0.5256,
+          "latency_s": 0.9856,
+          "prompt_tokens": 3920,
+          "completion_tokens": 3
+        },
+        "approximate": {
+          "output_text": "17",
+          "extracted_answer": "17",
+          "correct": false,
+          "ttft_s": 0.5339,
+          "latency_s": 0.9916,
+          "prompt_tokens": 3920,
+          "completion_tokens": 3
+        },
+        "chunked_baseline": {
+          "output_text": "43",
+          "extracted_answer": "43",
+          "correct": true,
+          "ttft_s": 0.7843,
+          "latency_s": 1.2345,
+          "prompt_tokens": 3920,
+          "completion_tokens": 3
+        },
+        "native_apc": {
+          "output_text": "43",
+          "extracted_answer": "43",
+          "correct": true,
+          "ttft_s": 0.8076,
+          "latency_s": 1.2805,
+          "prompt_tokens": 3920,
+          "completion_tokens": 3
+        },
+        "rollback": {
+          "output_text": "43",
+          "extracted_answer": "43",
+          "correct": true,
+          "ttft_s": 0.5372,
+          "latency_s": 1.0097,
+          "prompt_tokens": 3920,
+          "completion_tokens": 3
+        }
+      }
+    },
+    {
+      "id": "issue3_negation_0",
+      "change_kind": "negation",
+      "variant": 0,
+      "expected": "允许",
+      "reuse": null,
+      "arms": {
+        "baseline": {
+          "output_text": "允许",
+          "extracted_answer": "允许",
+          "correct": true,
+          "ttft_s": 0.5304,
+          "latency_s": 0.7638,
+          "prompt_tokens": 2176,
+          "completion_tokens": 2
+        },
+        "approximate": {
+          "output_text": "允许",
+          "extracted_answer": "允许",
+          "correct": true,
+          "ttft_s": 0.5272,
+          "latency_s": 0.758,
+          "prompt_tokens": 2176,
+          "completion_tokens": 2
+        },
+        "chunked_baseline": {
+          "output_text": "允许",
+          "extracted_answer": "允许",
+          "correct": true,
+          "ttft_s": 0.7666,
+          "latency_s": 0.9894,
+          "prompt_tokens": 2176,
+          "completion_tokens": 2
+        },
+        "native_apc": {
+          "output_text": "允许",
+          "extracted_answer": "允许",
+          "correct": true,
+          "ttft_s": 0.8047,
+          "latency_s": 1.0417,
+          "prompt_tokens": 2176,
+          "completion_tokens": 2
+        },
+        "rollback": {
+          "output_text": "允许",
+          "extracted_answer": "允许",
+          "correct": true,
+          "ttft_s": 0.5339,
+          "latency_s": 0.776,
+          "prompt_tokens": 2176,
+          "completion_tokens": 2
+        }
+      }
+    },
+    {
+      "id": "issue3_negation_1",
+      "change_kind": "negation",
+      "variant": 1,
+      "expected": "禁止",
+      "reuse": {
+        "source_id": "issue3_negation_0",
+        "skipped_tokens": 1695,
+        "cosine": 0.9993942691212814
+      },
+      "arms": {
+        "baseline": {
+          "output_text": "禁止",
+          "extracted_answer": "禁止",
+          "correct": true,
+          "ttft_s": 0.5229,
+          "latency_s": 0.7556,
+          "prompt_tokens": 2207,
+          "completion_tokens": 2
+        },
+        "approximate": {
+          "output_text": "允许",
+          "extracted_answer": "允许",
+          "correct": false,
+          "ttft_s": 0.5239,
+          "latency_s": 0.7519,
+          "prompt_tokens": 2207,
+          "completion_tokens": 2
+        },
+        "chunked_baseline": {
+          "output_text": "禁止",
+          "extracted_answer": "禁止",
+          "correct": true,
+          "ttft_s": 0.7566,
+          "latency_s": 0.979,
+          "prompt_tokens": 2207,
+          "completion_tokens": 2
+        },
+        "native_apc": {
+          "output_text": "禁止",
+          "extracted_answer": "禁止",
+          "correct": true,
+          "ttft_s": 0.8038,
+          "latency_s": 1.0406,
+          "prompt_tokens": 2207,
+          "completion_tokens": 2
+        },
+        "rollback": {
+          "output_text": "禁止",
+          "extracted_answer": "禁止",
+          "correct": true,
+          "ttft_s": 0.5547,
+          "latency_s": 0.796,
+          "prompt_tokens": 2207,
+          "completion_tokens": 2
+        }
+      }
+    },
+    {
+      "id": "issue3_negation_2",
+      "change_kind": "negation",
+      "variant": 2,
+      "expected": "允许",
+      "reuse": {
+        "source_id": "issue3_negation_0",
+        "skipped_tokens": 1725,
+        "cosine": 0.997784535958968
+      },
+      "arms": {
+        "baseline": {
+          "output_text": "允许",
+          "extracted_answer": "允许",
+          "correct": true,
+          "ttft_s": 0.5201,
+          "latency_s": 0.753,
+          "prompt_tokens": 2237,
+          "completion_tokens": 2
+        },
+        "approximate": {
+          "output_text": "允许",
+          "extracted_answer": "允许",
+          "correct": true,
+          "ttft_s": 0.5286,
+          "latency_s": 0.7568,
+          "prompt_tokens": 2237,
+          "completion_tokens": 2
+        },
+        "chunked_baseline": {
+          "output_text": "允许",
+          "extracted_answer": "允许",
+          "correct": true,
+          "ttft_s": 0.7588,
+          "latency_s": 0.9809,
+          "prompt_tokens": 2237,
+          "completion_tokens": 2
+        },
+        "native_apc": {
+          "output_text": "允许",
+          "extracted_answer": "允许",
+          "correct": true,
+          "ttft_s": 0.5308,
+          "latency_s": 0.7663,
+          "prompt_tokens": 2237,
+          "completion_tokens": 2
+        },
+        "rollback": {
+          "output_text": "允许",
+          "extracted_answer": "允许",
+          "correct": true,
+          "ttft_s": 0.5444,
+          "latency_s": 0.7804,
+          "prompt_tokens": 2237,
+          "completion_tokens": 2
+        }
+      }
+    },
+    {
+      "id": "issue3_subject_0",
+      "change_kind": "subject",
+      "variant": 0,
+      "expected": "张岚",
+      "reuse": null,
+      "arms": {
+        "baseline": {
+          "output_text": "张岚",
+          "extracted_answer": "张岚",
+          "correct": true,
+          "ttft_s": 0.5277,
+          "latency_s": 0.9926,
+          "prompt_tokens": 4070,
+          "completion_tokens": 3
+        },
+        "approximate": {
+          "output_text": "张岚",
+          "extracted_answer": "张岚",
+          "correct": true,
+          "ttft_s": 0.5321,
+          "latency_s": 0.9898,
+          "prompt_tokens": 4070,
+          "completion_tokens": 3
+        },
+        "chunked_baseline": {
+          "output_text": "张岚",
+          "extracted_answer": "张岚",
+          "correct": true,
+          "ttft_s": 0.7626,
+          "latency_s": 1.2104,
+          "prompt_tokens": 4070,
+          "completion_tokens": 3
+        },
+        "native_apc": {
+          "output_text": "张岚",
+          "extracted_answer": "张岚",
+          "correct": true,
+          "ttft_s": 0.81,
+          "latency_s": 1.2807,
+          "prompt_tokens": 4070,
+          "completion_tokens": 3
+        },
+        "rollback": {
+          "output_text": "张岚",
+          "extracted_answer": "张岚",
+          "correct": true,
+          "ttft_s": 0.535,
+          "latency_s": 1.0047,
+          "prompt_tokens": 4070,
+          "completion_tokens": 3
+        }
+      }
+    },
+    {
+      "id": "issue3_subject_1",
+      "change_kind": "subject",
+      "variant": 1,
+      "expected": "李诚",
+      "reuse": {
+        "source_id": "issue3_subject_0",
+        "skipped_tokens": 3589,
+        "cosine": 0.9998260624015135
+      },
+      "arms": {
+        "baseline": {
+          "output_text": "李诚",
+          "extracted_answer": "李诚",
+          "correct": true,
+          "ttft_s": 0.5268,
+          "latency_s": 0.9918,
+          "prompt_tokens": 4101,
+          "completion_tokens": 3
+        },
+        "approximate": {
+          "output_text": "张岚",
+          "extracted_answer": "张岚",
+          "correct": false,
+          "ttft_s": 0.5335,
+          "latency_s": 1.0011,
+          "prompt_tokens": 4101,
+          "completion_tokens": 3
+        },
+        "chunked_baseline": {
+          "output_text": "李诚",
+          "extracted_answer": "李诚",
+          "correct": true,
+          "ttft_s": 1.0317,
+          "latency_s": 1.4753,
+          "prompt_tokens": 4101,
+          "completion_tokens": 3
+        },
+        "native_apc": {
+          "output_text": "李诚",
+          "extracted_answer": "李诚",
+          "correct": true,
+          "ttft_s": 1.1021,
+          "latency_s": 1.5872,
+          "prompt_tokens": 4101,
+          "completion_tokens": 3
+        },
+        "rollback": {
+          "output_text": "李诚",
+          "extracted_answer": "李诚",
+          "correct": true,
+          "ttft_s": 0.5336,
+          "latency_s": 1.0044,
+          "prompt_tokens": 4101,
+          "completion_tokens": 3
+        }
+      }
+    },
+    {
+      "id": "issue3_subject_2",
+      "change_kind": "subject",
+      "variant": 2,
+      "expected": "王宁",
+      "reuse": {
+        "source_id": "issue3_subject_0",
+        "skipped_tokens": 3619,
+        "cosine": 0.9993669382303626
+      },
+      "arms": {
+        "baseline": {
+          "output_text": "王宁",
+          "extracted_answer": "王宁",
+          "correct": true,
+          "ttft_s": 0.5299,
+          "latency_s": 1.0015,
+          "prompt_tokens": 4131,
+          "completion_tokens": 3
+        },
+        "approximate": {
+          "output_text": "张岚",
+          "extracted_answer": "张岚",
+          "correct": false,
+          "ttft_s": 0.5374,
+          "latency_s": 1.0385,
+          "prompt_tokens": 4131,
+          "completion_tokens": 3
+        },
+        "chunked_baseline": {
+          "output_text": "王宁",
+          "extracted_answer": "王宁",
+          "correct": true,
+          "ttft_s": 1.0376,
+          "latency_s": 1.4866,
+          "prompt_tokens": 4131,
+          "completion_tokens": 3
+        },
+        "native_apc": {
+          "output_text": "王宁",
+          "extracted_answer": "王宁",
+          "correct": true,
+          "ttft_s": 1.1613,
+          "latency_s": 1.664,
+          "prompt_tokens": 4131,
+          "completion_tokens": 3
+        },
+        "rollback": {
+          "output_text": "王宁",
+          "extracted_answer": "王宁",
+          "correct": true,
+          "ttft_s": 0.5376,
+          "latency_s": 1.018,
+          "prompt_tokens": 4131,
+          "completion_tokens": 3
+        }
+      }
+    },
+    {
+      "id": "issue3_instruction_0",
+      "change_kind": "instruction",
+      "variant": 0,
+      "expected": "A",
+      "reuse": null,
+      "arms": {
+        "baseline": {
+          "output_text": "A",
+          "extracted_answer": "A",
+          "correct": true,
+          "ttft_s": 0.5623,
+          "latency_s": 0.8372,
+          "prompt_tokens": 3037,
+          "completion_tokens": 2
+        },
+        "approximate": {
+          "output_text": "A",
+          "extracted_answer": "A",
+          "correct": true,
+          "ttft_s": 0.5663,
+          "latency_s": 0.8107,
+          "prompt_tokens": 3037,
+          "completion_tokens": 2
+        },
+        "chunked_baseline": {
+          "output_text": "A",
+          "extracted_answer": "A",
+          "correct": true,
+          "ttft_s": 0.7734,
+          "latency_s": 1.0152,
+          "prompt_tokens": 3037,
+          "completion_tokens": 2
+        },
+        "native_apc": {
+          "output_text": "A",
+          "extracted_answer": "A",
+          "correct": true,
+          "ttft_s": 0.8028,
+          "latency_s": 1.0348,
+          "prompt_tokens": 3037,
+          "completion_tokens": 2
+        },
+        "rollback": {
+          "output_text": "A",
+          "extracted_answer": "A",
+          "correct": true,
+          "ttft_s": 0.5375,
+          "latency_s": 0.7728,
+          "prompt_tokens": 3037,
+          "completion_tokens": 2
+        }
+      }
+    },
+    {
+      "id": "issue3_instruction_1",
+      "change_kind": "instruction",
+      "variant": 1,
+      "expected": "B",
+      "reuse": {
+        "source_id": "issue3_instruction_0",
+        "skipped_tokens": 2556,
+        "cosine": 0.9996993997483979
+      },
+      "arms": {
+        "baseline": {
+          "output_text": "B",
+          "extracted_answer": "B",
+          "correct": true,
+          "ttft_s": 0.586,
+          "latency_s": 0.8423,
+          "prompt_tokens": 3068,
+          "completion_tokens": 2
+        },
+        "approximate": {
+          "output_text": "A",
+          "extracted_answer": "A",
+          "correct": false,
+          "ttft_s": 0.5674,
+          "latency_s": 0.7945,
+          "prompt_tokens": 3068,
+          "completion_tokens": 2
+        },
+        "chunked_baseline": {
+          "output_text": "B",
+          "extracted_answer": "B",
+          "correct": true,
+          "ttft_s": 0.7993,
+          "latency_s": 1.0678,
+          "prompt_tokens": 3068,
+          "completion_tokens": 2
+        },
+        "native_apc": {
+          "output_text": "B",
+          "extracted_answer": "B",
+          "correct": true,
+          "ttft_s": 0.7935,
+          "latency_s": 1.0256,
+          "prompt_tokens": 3068,
+          "completion_tokens": 2
+        },
+        "rollback": {
+          "output_text": "B",
+          "extracted_answer": "B",
+          "correct": true,
+          "ttft_s": 0.5387,
+          "latency_s": 0.7724,
+          "prompt_tokens": 3068,
+          "completion_tokens": 2
+        }
+      }
+    },
+    {
+      "id": "issue3_instruction_2",
+      "change_kind": "instruction",
+      "variant": 2,
+      "expected": "C",
+      "reuse": {
+        "source_id": "issue3_instruction_0",
+        "skipped_tokens": 2586,
+        "cosine": 0.9988843451065986
+      },
+      "arms": {
+        "baseline": {
+          "output_text": "C",
+          "extracted_answer": "C",
+          "correct": true,
+          "ttft_s": 0.5246,
+          "latency_s": 0.7544,
+          "prompt_tokens": 3098,
+          "completion_tokens": 2
+        },
+        "approximate": {
+          "output_text": "A",
+          "extracted_answer": "A",
+          "correct": false,
+          "ttft_s": 0.5252,
+          "latency_s": 0.7511,
+          "prompt_tokens": 3098,
+          "completion_tokens": 2
+        },
+        "chunked_baseline": {
+          "output_text": "C",
+          "extracted_answer": "C",
+          "correct": true,
+          "ttft_s": 0.8544,
+          "latency_s": 1.0819,
+          "prompt_tokens": 3098,
+          "completion_tokens": 2
+        },
+        "native_apc": {
+          "output_text": "C",
+          "extracted_answer": "C",
+          "correct": true,
+          "ttft_s": 0.7959,
+          "latency_s": 1.0291,
+          "prompt_tokens": 3098,
+          "completion_tokens": 2
+        },
+        "rollback": {
+          "output_text": "C",
+          "extracted_answer": "C",
+          "correct": true,
+          "ttft_s": 0.5448,
+          "latency_s": 0.7854,
+          "prompt_tokens": 3098,
+          "completion_tokens": 2
+        }
+      }
+    }
+  ]
+}
