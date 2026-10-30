@@ -1163,4 +1163,7 @@ python scripts/prepare_jsonschemabench_author_source.py --source dailytalk --aut
 python scripts/prepare_dailytalk_original_metadata.py --data-root /private/dailytalk/original-assets --action verify
 ```
 
-当前服务器已通过上述两个公开`verify`入口，42份原Python文件语法检查通过。原生合成尚未运行：音频、原声学检查点及声码器、声学/历史预处理特征、原始评测与研究侧接入仍待完成。原依赖包含Torch1.7和TensorFlow2.5.1，原`synthesize.py`仅选择CUDA或CPU；不可直接运行并静默回退CPU，必须先完成独立NPU环境与设备适配核验。不能用现有Qwen文本服务替代声学模型，也不能把源码解析或元数据读取算作该来源完成。原公开资源与代码许可按发布方及组件各自LICENSE执行，本仓库不打包音频和权重。
+当前服务器已通过上述两个公开`verify`入口，42份原Python文件语法检查通过。另已取得原`val_phone.txt`按首次出现顺序的前3个完整对话（23、30、59）全部29段原始WAV及转写，保留原元数据；所选ZIP成员的原CRC和SHA256已核验，未下载或验证整份5.34GB压缩包。官方`history_guo`的900000步检查点也已取得并完成全文件SHA256与ZIP成员CRC校验，没有反序列化或运行。上述音频/检查点只在服务器保存，公开抽样音频获取入口尚待补齐。
+
+原生合成仍未运行：原配置要求的universal
+HiFi-GAN声码器、声学/历史预处理特征、NPU环境、原始评测与研究侧接入仍待完成。原依赖包含Torch1.7和TensorFlow2.5.1，原`synthesize.py`仅选择CUDA或CPU；不可直接运行并静默回退CPU，必须先完成独立NPU环境与设备适配核验。不能用现有Qwen文本服务替代声学模型，也不能把源码解析、原音频取得或检查点字节校验算作该来源完成。原公开资源与代码许可按发布方及组件各自LICENSE执行，本仓库不打包音频和权重。
