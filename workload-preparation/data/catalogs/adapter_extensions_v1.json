@@ -2,6 +2,13 @@
   "version": "adapter-extensions/v1",
   "boundary": "Field contracts from publisher metadata/docs. No real source payload downloaded or full adapter validation claimed.",
   "adapters": {
+    "MULTIAGENTBENCH": {
+      "kind": "task_dataset", "mapping": "multiagentbench_original_configurations", "row_format": "jsonl",
+      "input_fields": ["task"], "required_fields": ["task", "agents", "relationships", "environment"],
+      "outcome_fields": [], "annotation_fields": [], "id_field": null, "normalization": {},
+      "requirements": ["Native multi-agent configuration, not a ready chat request; preserve private agent routing", "Database evaluator task fields are separated by the dedicated adapter"],
+      "status": "ADAPTER_IMPLEMENTED_SERVER_ROUNDTRIP_PENDING_NATIVE_EXECUTION_PENDING"
+    },
     "SPIDER": {
       "kind": "task_dataset",
       "mapping": "spider_original_tasks",

@@ -968,6 +968,20 @@ blob、SHA256及大小，已有损坏文件或partial保留并报错，不覆盖
 
 服务器已检查全部500条原记录的字段形状；这不等于完成语义适配或原生运行。Minecraft的原任务标识位于`environment.task_id`。database的`task.labels`、`task.root_causes`及`task.number_of_labels_pred`由原引擎传给数据库评估器，须保持参考/评分侧关系，不能将整个task字典拼入模型输入；各Agent私有配置也不能广播成共同prompt。恢复原生运行配置与构造模型输入是两回事。
 
+统一读取及还原原配置：
+
+```python
+from pathlib import Path
+from vllm_hust_workload_data import iter_workload
+from vllm_hust_workload_data.multiagentbench import restore_original_configuration
+
+for record in iter_workload("MULTIAGENTBENCH", data_root=Path("/private/marble-original")):
+    original_config = restore_original_configuration(record)
+    # 交给原MARBLE运行器；不要把整个配置当作共同聊天prompt。
+```
+
+公共适配器已在服务器对五文件500条原记录逐条还原相等，原生关系、未知扩展字段及数据库评分参考未丢失；`request_body()`明确拒绝此类记录。记录位置ID采用文件摘要与原行号，不冒充原始task_id。当前只验证源码版提供方，尚未完成实际CI安装工件/研究侧交接，更没有原生运行或评分；不得由读取打总勾。
+
 原生运行尚未就绪：固定源码要求Python`>=3.9,<3.12`及原`poetry.lock`。`scripts/research/run_simulation.sh`使用`--config`，但当前`marble/main.py`实际解析`--config_path`；不可直接把示例运行成功作为已验证事实。模型调用经LiteLLM，保留原默认512-token预算及温度0；本地端点绑定仍需独立验证。`metrics.evaluate_llm`未配置时评分器回退到外部`gpt-3.5-turbo`，通信和规划评分均会调用模型，不能在未授权时直接启动。embedding另走`litellm.embedding`，已有聊天服务不代表具备该能力。以上为源码核查，不是环境安装、模型兼容或评分实跑证据。
 
 ## BixBench 原科学任务准备与读取（原生执行未完成）
