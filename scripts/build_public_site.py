@@ -194,6 +194,18 @@ def clean_javascript(path, text):
             "",
         )
     if path == "assets/leaderboard-frontier.js":
+        text = text.replace(
+            "Only Pareto-frontier points are shown, connected separately for BetterScale and Native. BetterScale spans workload-tuned configurations, not a fixed-capacity sweep.",
+            "Only currently published Pareto-frontier points are shown; each configuration retains its measurement scope.",
+        )
+        text = text.replace(
+            "BetterScale lines connect best trade-offs across workload-tuned configurations; other lines follow measured concurrency series",
+            "Lines follow the published measured concurrency series",
+        )
+        text = text.replace(
+            "BetterScale 连线连接不同 workload 调优配置的最佳权衡点；其他连线按实测并发序列连接",
+            "连线按当前公开的实测并发序列连接",
+        )
         start = "            ${point.configuration.mods.includes('betterscale')?"
         end = "            <p class=\"frontier-popup-load\">${t('warmup')}"
         if start in text:
