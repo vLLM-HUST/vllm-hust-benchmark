@@ -51,6 +51,7 @@ def main():
             "temporalwiki",
             "appworld-react",
             "bixbench",
+            "marble",
         ],
         default="jsonschemabench",
         help="Pinned original author source only; historical default unchanged",

@@ -1,0 +1,51 @@
+"""Pinned software preparation only; original runtime defect stays disclosed."""
+
+import json
+from pathlib import Path
+import subprocess
+import sys
+
+ROOT = Path(__file__).resolve().parents[1]
+PINS = ROOT / "configs/workload-native/marble-author-source.json"
+
+
+def test_original_source_selection_preserves_lock_and_known_defect_identity():
+    pins = json.loads(PINS.read_text("utf-8"))
+    files = {item["path"]: item for item in pins["files"]}
+    assert len(files) == len(pins["files"]) == 99
+    assert sum(item["bytes"] for item in files.values()) == 1420037
+    assert sum(name.endswith(".py") for name in files) == 94
+    assert {
+        "LICENSE",
+        "poetry.lock",
+        "pyproject.toml",
+        "marble/main.py",
+    } <= files.keys()
+    assert (
+        files["marble/evaluator/evaluator.py"]["sha256"]
+        == "cc9234a9003792538acc5e01579f484d16446da696319cb0c34a7f3466990ad8"  # pragma: allowlist secret - verified public publisher software digest
+    )
+    assert not any(name.endswith("_main.jsonl") for name in files)
+
+
+def test_default_source_plan_does_not_download_or_create_environment(tmp_path):
+    target = tmp_path / "absent"
+    report = json.loads(
+        subprocess.check_output(
+            [
+                sys.executable,
+                "-I",
+                str(ROOT / "scripts/prepare_jsonschemabench_author_source.py"),
+                "--source",
+                "marble",
+                "--author-root",
+                str(target),
+            ],
+            text=True,
+        )
+    )
+    assert report["source_id"] == "MULTIAGENTBENCH"
+    assert report["status"] == "PLAN_ONLY_NO_DOWNLOAD"
+    assert report["files"] == 99
+    assert report["model_calls"] == 0 and report["source_checkbox_eligible"] is False
+    assert not target.exists()

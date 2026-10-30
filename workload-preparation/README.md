@@ -986,6 +986,17 @@ for record in iter_workload("MULTIAGENTBENCH", data_root=Path("/private/marble-o
 
 服务器已按原Git对象校验99份原软件文件（1420037字节），其中94份Python仅做静态解析，未导入或执行。固定原`marble/evaluator/evaluator.py`第324行的`except json.JSONDecodeError`缩进导致`SyntaxError`，服务器及直接原Git对象解析均复现；原文件保留，未打补丁，依赖尚未安装。须先找到与原任务兼容的正式可用版本，或明确审批并披露最小源码兼容修复，再验证原生运行；不能将该阻塞归咎于模型或靠删评分绕过。
 
+官方软件的公共计划/校验入口如下；固定99文件的版本、大小、Git对象和SHA256在`configs/workload-native/marble-author-source.json`，源码目录必须与运行输出分离：
+
+```bash
+python -I scripts/prepare_jsonschemabench_author_source.py --source marble \
+  --author-root /external/marble-author
+python -I scripts/prepare_jsonschemabench_author_source.py --source marble \
+  --author-root /external/marble-author --action verify
+```
+
+已有缓存直接校验，不下载、不导入。需要取得缺失软件时可显式使用`--action prepare --max-bytes 1420037`；发布方Git接口可能限流，失败保留已核验文件，先处理访问条件，不能删缓存盲重试或换浮动版本。公共`verify`已在服务器复用99原文件通过；不据此宣称公共下载命令已重跑、完整依赖已安装或原生执行成功。
+
 经明确批准，已增加独立的最小语法兼容副本入口，不再把这个语法错误视为无可处理的上游阻塞：
 
 ```bash
