@@ -984,7 +984,7 @@ for record in iter_workload("MULTIAGENTBENCH", data_root=Path("/private/marble-o
 
 原生运行尚未就绪：固定源码要求Python`>=3.9,<3.12`及原`poetry.lock`。`scripts/research/run_simulation.sh`使用`--config`，但当前`marble/main.py`实际解析`--config_path`；不可直接把示例运行成功作为已验证事实。模型调用经LiteLLM，保留原默认512-token预算及温度0；本地端点绑定仍需独立验证。`metrics.evaluate_llm`未配置时评分器回退到外部`gpt-3.5-turbo`，通信和规划评分均会调用模型，不能在未授权时直接启动。embedding另走`litellm.embedding`，已有聊天服务不代表具备该能力。以上为源码核查，不是环境安装、模型兼容或评分实跑证据。
 
-服务器已按原Git对象校验99份原软件文件（1420037字节），其中94份Python仅做静态解析，未导入或执行。固定原`marble/evaluator/evaluator.py`第324行的`except json.JSONDecodeError`缩进导致`SyntaxError`，服务器及直接原Git对象解析均复现；原文件保留，未打补丁，依赖尚未安装。须先找到与原任务兼容的正式可用版本，或明确审批并披露最小源码兼容修复，再验证原生运行；不能将该阻塞归咎于模型或靠删评分绕过。
+服务器已按原Git对象校验99份原软件文件（1420037字节），其中94份Python仅做静态解析，未导入或执行。固定原`marble/evaluator/evaluator.py`第324行的`except json.JSONDecodeError`缩进导致`SyntaxError`，服务器及直接原Git对象解析均复现；原文件完整保留；初始检查尚未安装依赖，批准的兼容副本及客户端最新进展见下文。须先找到与原任务兼容的正式可用版本，或明确审批并披露最小源码兼容修复，再验证原生运行；不能将该阻塞归咎于模型或靠删评分绕过。
 
 官方软件的公共计划/校验入口如下；固定99文件的版本、大小、Git对象和SHA256在`configs/workload-native/marble-author-source.json`，源码目录必须与运行输出分离：
 
@@ -1007,8 +1007,10 @@ python scripts/prepare_marble_evaluator_compat.py \
 
 默认只显示计划；加`--execute`才在全新独立目录生成`evaluator.py`、`COMPATIBILITY.patch`及回执。入口只接受已固定原文件SHA256，拒绝猜测修复；仅移除原324—326行各四个前导空格，原文件及其他字节不变。服务器对真实原文件完成静态解析，并仅提取原`parse_research_ratings`函数验证有效JSON、无JSON、非法JSON三个分支。完整模块尚未导入、原生Agent和官方评分未运行；运行配置必须显式披露兼容副本及其摘要，不能宣称“未经修改的官方代码”。此工具不自动替换原作者目录或升级环境。
 
-客户端预检已确认服务器ARM64及现有Python3.10满足原版本范围；当前默认Python3.12不满足，不能直接混装。原锁文件153包中的CUDA/Triton依赖受Linux
-x86_64标记约束，须按原标记选择当前架构，不强装GPU包。独立Poetry2.1.3工具环境已准备，原源码和锁文件摘要未变；这不是153包客户端已安装，更不是原生执行。后续安装继续使用独立缓存/环境，并保留至少5GiB磁盘余量，不能删除旧数据或结果腾空间。
+客户端预检确认ARM64及Python3.10符合原版本范围；默认Python3.12不满足，不能直接混装。153包原锁的CUDA/Triton依赖仅适用Linux
+x86_64，须按原平台标记选择。独立Poetry2.1.3工具及Python3.10.12客户端已准备：原锁`poetry install --only main --no-root`退出0，当前平台main组合实际93个分发包，版本均在原锁中，依赖元数据检查通过；没有CUDA/Triton包，原项目及锁文件未修改。安装后仍余约6.17GiB，未触发5GiB安装余量门限。
+
+平台继承的`PYTHONPATH`会使普通解释器列出环境外的CANN包；已用客户端`python -I`核验隔离后的93包，没有删改平台包。后续启动应显式清理本进程的继承路径，或使用隔离解释器并只加入已核验作者目录，不能将平台包混入原锁环境。这里只证明安装及依赖元数据，不证明完整模块导入、模型/embedding兼容、Agent执行或官方评分；模型调用仍为0。
 
 ## BixBench 原科学任务准备与读取（原生执行未完成）
 
