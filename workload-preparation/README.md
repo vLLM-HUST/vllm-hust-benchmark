@@ -972,4 +972,4 @@ for record in iter_workload("BIXBENCH", data_root=root, limit=3):
 
 完整元数据索引可以在部分ZIP尚缺时建立；这只证明问题引用可读取，不能据此声明所有任务可执行。现有pipeline配置中的来源项可写为`{"source_id":"BIXBENCH","data_root":"/private/bixbench-original"}`，输出目录必须与来源目录分离；研究消费继续使用原`resolve_input`接口。记录的`runtime.assets`列出对应原ZIP身份，适配阶段不会把缺失ZIP自动下载或替换成别的语料。
 
-服务器候选包已核验全部205条字段还原/索引及固定前三条公共和未修改研究消费回查，原ZIP摘要也通过；这不是科学Agent执行或评分。[候选交接证据](../docs/workload-data/validation/bixbench-candidate-handoff-20261030.json)明确区分本地构建候选包、实际CI工件和原生任务。实际CI工件资格、Python3.12以上的官方科学运行环境、NPU模型绑定及原评分仍待完成。
+服务器已安装[实际CI工件](../docs/workload-data/validation/bixbench-actual-ci-handoff-20261030.json)，71个运行载荷与Git及安装文件逐字节一致；全部205条原字段还原、复用未改变的205条索引及固定前三条公共/未修改研究消费回查、原ZIP摘要校验均通过。这不是科学Agent执行或评分；[早期候选交接证据](../docs/workload-data/validation/bixbench-candidate-handoff-20261030.json)保留原阶段范围。Python3.12以上的官方科学运行环境、NPU模型绑定及原评分仍待完成。
