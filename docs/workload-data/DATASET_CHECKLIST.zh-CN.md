@@ -1271,6 +1271,7 @@ split；后续必须明确将生成和评估同时绑定原verified版本，并�
 
 #### WavCaps原生音频路径准备（未完成来源交付）
 
+- [x] 取得并校验SoundBible、BBC、AudioSet三份原始JSON，共140750条、27482307字节，保留各组件原前三条完整记录。数据只存专用CPU目录；FreeSound原始元数据尚未取得。回执：`/root/wavcaps-original-metadata-20261031-002/preparation-public.json`。原CPU直连TLS失败记录保留，不因网络失败换数据。
 - [x] 在专用CPU取得发布方固定版本的6份说明、音频captioning入口/评分器及检索入口，逐份核验Git
   blob和SHA256；3份Python仅做AST解析，未导入执行。服务端回执：`/root/wavcaps-original-source-20261031-001/preparation-public.json`。
 - [ ] 取得合规的原音频、专用checkpoint及完整依赖，完成原生NPU推理、适用评分和公共/研究消费闭环。没有下载音频或模型，也没有调用文本模型替代。
