@@ -38,6 +38,26 @@ for record in records:
 
 ## 当前证据与缺项
 
+### 原生检索集合的官方准备顺序（尚未执行）
+
+固定版本的[collection说明](https://github.com/apple-aiml-research/ml-qrecc/blob/1d174464290790c0198b474ad022952ecd83b76b/collection/README.md)提供以下顺序：取得Common
+Crawl网页和Wayback网页、按原脚本切成段落，再用Pyserini建立Lucene索引。官方明确提示Common
+Crawl下载涉及数十TB量级；这不是已经取得的任务JSON大小，也不能把网页集合容量直接等同最终索引大小。开始前必须分别核算下载流量、原网页、段落副本和索引的峰值空间。当前没有批准或开始这批大规模下载。
+
+以下为作者给出的命令结构，应在仓库外的固定官方源码副本内按作者相对路径执行；保留完整原集合，不为抽样评测缩小候选语料。Python、Pyserini及JDK环境仍待实际锁定和验证，不能将命令登记当作环境可用。
+
+```bash
+# 官方 collection/ 目录；--workers 是作者示例，不是本机已核定配置。
+python download_commoncrawl_passages.py --output-directory collection/commoncrawl --workers 8
+python download_wayback_passages.py --inputs '../dataset/*.json' --output-directory collection/wayback --workers 4
+python paragraph_chunker.py --input-directory collection --output-directory collection-paragraph --workers 8
+python -m pyserini.index -collection JsonCollection -generator DefaultLuceneDocumentGenerator \
+  -threads 76 -input collection-paragraph -index index-paragraph \
+  -storePositions -storeDocvectors -storeRaw
+```
+
+上述流程之后还缺原问题改写、原集合检索、阅读生成及检索/答案两类评分的完整运行入口。必须保留问题和原对话历史，原`Rewrite`只作改写参考，原`Answer`只作答案参考，不用参考字段代替预测。抽样只固定待评任务，不能将参考URL页面拼成小候选库后宣称端到端QReCC验证。官方的段落切分/索引流程与历史发布集合是否可逐项复现，也须在取得资产后核验，不能仅凭相同脚本名称假定相同语料。
+
 ### 已保存答案的原作者评分入口（不是端到端运行）
 
 固定版本的 `utils/evaluate_qa.py` 是函数库，没有命令行主程序。新增入口直接调用其原始 `compute_exact` 和 `compute_f1`，不重写指标；要求该文件
@@ -68,4 +88,5 @@ python scripts/score_qrecc_original_qa.py \
 - 发布方固定README说明端到端任务使用包含1000万网页、5400万 passages
   的集合，并分别提供检索和阅读评估脚本：[`evaluate_retrieval.py`](https://github.com/apple-aiml-research/ml-qrecc/blob/1d174464290790c0198b474ad022952ecd83b76b/utils/evaluate_retrieval.py)、[`evaluate_qa.py`](https://github.com/apple-aiml-research/ml-qrecc/blob/1d174464290790c0198b474ad022952ecd83b76b/utils/evaluate_qa.py)。当前取得的16451行test成员不是该检索集合；仅凭Context、Rewrite或答案字段不能宣称检索/端到端通过。
 - 原始检索集合尚未取得，检索运行、阅读链路和发布方评分均未执行，模型调用0次。现有本地与服务器读取/准备回执可复用；不得为填空改用另一套语料或用QReCC的Context伪造检索结果。
-- 该能力已在叠加草稿PR #426 的分支中；PR尚未合并。当前可以复用原归档准备、安装读取和三条消费记录，端到端检索与阅读缺口继续保持未完成，不另开单数据集PR。
+- 早期能力曾由叠加草稿PR #426 承载；该编号是历史开发记录，不用于判断当前交付或PR状态。当前进度只读取唯一机器清单的`delivery_inventory.QRECC`，本批统一在PR
+  #544维护，不另开单数据集PR。原归档准备、安装读取和三条消费记录可复用，端到端检索与阅读缺口保持未完成。
