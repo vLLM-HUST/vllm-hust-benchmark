@@ -1,0 +1,67 @@
+{
+  "schema": "muxpd-q40-cpu-validation-v1",
+  "passed": true,
+  "cpu_only": true,
+  "producer_map": {
+    "path": "/root/workspace/muxpd-target-q40-20261030/producer-map-v1.json",
+    "sha256": "84078045d0e3ceee76e3044d8e0237546a2d13bddf9aa31cb823afdd2b116c6d"
+  },
+  "producer_count": 31,
+  "final_integrated_suite": {
+    "artifact": {
+      "path": "/root/workspace/muxpd-target-q40-20261030/cpu-q40-integrated-final-v1.log",
+      "sha256": "d77c9e819e75ef2b58df64ec0de0bb800494aa32b36c1c0caf7e3b249ac94144"
+    },
+    "result": "62 passed, 1 deselected in14.40s",
+    "excluded_test": "test_real_qualified_controls_keep_native_P8_and_prefix_P7_comparable"
+  },
+  "earlier_real_controls_regression": {
+    "artifact": {
+      "path": "/root/workspace/muxpd-target-q40-20261030/cpu-analyzer-second-green-v1.log",
+      "sha256": "786501240e61442b7cf2834b05d2a303bae3289d95d54be3d083d9e2050d3094"
+    },
+    "result": "28 passed in78.34s, including actual qualified early native/prefix all208 vectors and first numeric183/token207",
+    "scope": "Prior completed-control vector regression; not a new q40 hardware result and not recounted as a final-suite execution."
+  },
+  "actual_history_serializer": {
+    "artifact": {
+      "path": "/root/workspace/muxpd-target-q40-20261030/cpu-history-integration-v1.log",
+      "sha256": "d9949c0a34401129242110be47e03b38d10c3d7dec93dc6d96be285b42d058b8"
+    },
+    "result": "2 passed; actual serializer629rows and210 original update calls including empty cleanup, missing peer ACK rejected",
+    "fixture": "Clearly synthetic CPU q40 metadata derived from completed q4 schema; not device evidence."
+  },
+  "complete_plain_terminal_path": {
+    "path": "/root/workspace/muxpd-target-q40-20261030/cpu-plain-audit-v1.log",
+    "sha256": "d0deb4e52e1bd4074ae74959d4a2ebfad828b825df07c466351f28c4ce29b9f8"
+  },
+  "source_proofs": [
+    {
+      "path": "/root/workspace/muxpd-target-q40-20261030/harness-source-proof-v1.json",
+      "sha256": "a19650c27596a2fb6205b35ee71e5d2fe3d47853ab8c802378bffdef28d23312"
+    },
+    {
+      "path": "/root/workspace/muxpd-target-q40-20261030/analyzer-source-proof-v1.json",
+      "sha256": "82e56bd2750aed259fb071fbe86ad3aea33ec2634406deec276813448d9333f9"
+    }
+  ],
+  "test_sources": {
+    "test_q40_analysis_v1.py": "01bcadc01954d7ebcfb69900d23d6ab6f35b68d08626e5a62f7c33513188bb72",
+    "test_q40_history_integration_v1.py": "65f3d910145c8a21bac6086f8d3f08c3ddefba1b5a833e6d6599b200e598ddca",
+    "test_q40_history_v1.py": "8034e87af87b94466c695f4b59ec44bd3aa19d4aa393c9dfb409e21efff87b43",
+    "test_q40_host_source_v1.py": "55f952b9dcd70f454c39eadc9d10bcf35a1159eec3181f27d9d95384f548f572",
+    "test_q40_plain_audit_v1.py": "7d40ed9234c63083b60c1831e3ca137d578524243b5c5d762122abf5bf2efb4d",
+    "test_q40_treatment_v1.py": "e0e784fa7d9b6c2c5ba97f348f62f7533573fc970224d4eac6b744bd199a08c2"
+  },
+  "lint": {
+    "ruff_check": "PASS for all11 modified/new Python sources and tests",
+    "ruff_format_check": "PASS all11 formatted",
+    "source_map_verification": "31 producer files present; only controller SHA changed after62PASS, with entire AST identity proven; no broad rerun needed."
+  },
+  "scope": "Configuration-only supported quota4-to40 protocol. Root freeze and both declared hardware attempts still required. No throughput/goodput or complete-answer acceptance.",
+  "producer_semantics_unchanged_after_tests": true,
+  "post_test_cosmetic_change": {
+    "path": "/root/workspace/muxpd-target-q40-20261030/controller-format-proof-v1.json",
+    "sha256": "ddd5284dc0161a0fc920f40c8dad451f314021671082fd94f9aa0d4eb2e10f5a"
+  }
+}
