@@ -93,3 +93,19 @@ def test_continuous_current_and_failed_configuration_are_separate():
     ]
     assert history[1]["receipt"]["model_run_started"] is False
     assert all(a["receipt"]["all_reserved_devices_released"] for a in history)
+
+
+def test_current_publication_matches_report_and_actual_pair(monkeypatch):
+    monkeypatch.syspath_prepend(str(ROOT / "scripts"))
+    builder = importlib.import_module("build_midterm_v103")
+    published = json.loads((ROOT / builder.OUTPUT).read_text())
+    rebuilt = builder.build(
+        published["source_commit"], lambda p: (ROOT / p).read_bytes()
+    )
+    assert rebuilt == published
+    assert published["current_summary"]["quality"]["b0"]["correct"] == 143
+    assert published["current_summary"]["quality"]["b1"]["candidate_correct"] == 153
+    assert (
+        published["full_answer_joint"]["arms"][0]["runtime"]["vllm_version"] == "0.18.0"
+    )
+    assert published["wholechain_reference"]["B1"]["eta_percent"] is None
