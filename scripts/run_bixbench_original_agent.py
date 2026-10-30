@@ -13,6 +13,7 @@ import json
 import os
 from pathlib import Path
 import re
+import shutil
 import sys
 from urllib.parse import urlsplit
 
@@ -79,6 +80,75 @@ def validate_options(args):
     ):
         raise ValueError("positive original prefix and simple run name required")
     return endpoint
+
+
+def reusable_trajectories(previous, selected, model, config):
+    """Validate an entire completed prefix, including unsuccessful task results.
+
+    This does not resume an in-memory Agent or reuse partial task workspaces.
+    The operator must first establish that the earlier actor has terminated.
+    """
+    import yaml
+
+    previous = Path(previous).resolve()
+    state = json.loads((previous / "state.private.json").read_text("utf-8"))
+    expected = [row["question_id"] for row in selected]
+    completed = state.get("completed")
+    if (
+        state.get("source_id") != "BIXBENCH"
+        or state.get("limit") != len(selected)
+        or state.get("actual_actor_model") != model
+        or not isinstance(completed, list)
+        or not completed
+        or completed != expected[: len(completed)]
+    ):
+        raise ValueError("same model and complete original selected prefix required")
+    prior_config = yaml.safe_load(
+        (previous / "runtime-binding.private.yaml").read_text("utf-8")
+    )
+
+    def task_protocol(value):
+        value = copy.deepcopy(value)
+        for field in ("paths", "run_name"):
+            value.pop(field, None)
+        llm = value["agent"]["agent_kwargs"]["llm_model"]
+        llm.pop("timeout", None)
+        if "router_kwargs" in llm:
+            llm["router_kwargs"].pop("timeout", None)
+            if not llm["router_kwargs"]:
+                llm.pop("router_kwargs")
+        return value
+
+    if task_protocol(prior_config) != task_protocol(config):
+        raise ValueError("original task, Agent and generation protocol changed")
+    found = {}
+    for path in (previous / "trajectories").rglob("*.json"):
+        if path.is_symlink() or not path.resolve().is_relative_to(previous):
+            raise ValueError("saved trajectory escapes previous output")
+        value = json.loads(path.read_text("utf-8"))
+        identity = value.get("problem_id")
+        if identity not in completed or identity in found:
+            raise ValueError("unexpected or duplicate completed trajectory")
+        original = selected[expected.index(identity)]
+        metadata = value.get("metadata", {})
+        if (
+            value.get("ideal_answer") != original["ideal"]
+            or any(metadata.get(key) != item for key, item in original.items())
+            or value.get("model") != model
+        ):
+            raise ValueError("saved original task or model identity changed")
+        trace = path.with_suffix(".jsonl")
+        for saved in (path, trace):
+            if saved.is_symlink() or not saved.resolve().is_relative_to(previous):
+                raise ValueError("saved trajectory escapes previous output")
+            if not saved.is_file() or not saved.stat().st_size:
+                raise ValueError("both original result and full trajectory required")
+        for line in trace.read_text("utf-8").splitlines():
+            json.loads(line)
+        found[identity] = (path, trace)
+    if set(found) != set(completed):
+        raise ValueError("missing completed original trajectories")
+    return completed, [saved for identity in completed for saved in found[identity]]
 
 
 async def execute(args, report):
@@ -190,6 +260,28 @@ async def execute(args, report):
         trajectories_dir=str(output / "trajectories"),
         data_folder=str(prepared / "processed"),
     )
+    reused_completed, reused_files = [], []
+    previous = getattr(args, "reuse_completed_from", None)
+    if previous:
+        previous = Path(previous).resolve()
+        if previous.is_relative_to(output) or output.is_relative_to(previous):
+            raise ValueError("separate prior and new native outputs required")
+        reused_completed, reused_files = reusable_trajectories(
+            previous, selected, args.model, config
+        )
+        report["reused_completed_trajectory_files"] = []
+        for saved in reused_files:
+            relative = saved.relative_to(previous)
+            destination = output / relative
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(saved, destination)
+            digest = hashlib.sha256(saved.read_bytes()).hexdigest()
+            if hashlib.sha256(destination.read_bytes()).hexdigest() != digest:
+                raise ValueError("copied original trajectory bytes changed")
+            report["reused_completed_trajectory_files"].append(
+                {"path": relative.as_posix(), "sha256": digest}
+            )
+        report["interrupted_task_state_resumed"] = False
     config_path = output / "runtime-binding.private.yaml"
     config_path.write_text(yaml.safe_dump(config))
     generator = TrajectoryGenerator(config_path)
@@ -217,7 +309,7 @@ async def execute(args, report):
     report.pop("model_calls")
     report.update(
         status="RUNNING_ORIGINAL_SCIENTIFIC_AGENT",
-        completed=[],
+        completed=list(reused_completed),
         original_max_steps=generator.config.rollout.max_steps,
         actual_actor_model=args.model,
         author_actor_reproduction=False,
@@ -234,6 +326,8 @@ async def execute(args, report):
     save()
     try:
         for original in selected:
+            if original["question_id"] in reused_completed:
+                continue
             report["active_question"] = original["question_id"]
             save()
             question = copy.deepcopy(original)
@@ -296,6 +390,11 @@ def main():
     parser.add_argument("--docker-host", required=True)
     parser.add_argument("--model-queue", type=Path)
     parser.add_argument("--request-timeout", type=float, default=None)
+    parser.add_argument(
+        "--reuse-completed-from",
+        type=Path,
+        help="Reuse every validated completed prefix trajectory after prior actor termination; incomplete tasks restart their original workflow",
+    )
     parser.add_argument("--run-name", default="original-local-actor")
     parser.add_argument("--limit", type=int, default=3)
     parser.add_argument("--execute", action="store_true")

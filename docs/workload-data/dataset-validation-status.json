@@ -50,7 +50,8 @@
       "same_template_and_resource_budget": true,
       "replacement_pod_scheduled_and_original_volume_attached": true,
       "native_task_restarted": false,
-      "historical_result_recovery_verified": false,
+      "historical_result_recovery_verified": true,
+      "recovered_original_selected_tasks_saved": 1,
       "boundary": "The prior CPU Pod no longer exists. A fresh workspace build is not continuation of that actor. Recover saved trajectories, queue responses and terminal records before deciding whether any native task needs further execution; do not count software recovery as dataset completion."
     },
     "ssh_handshake_responds": true,
@@ -2574,6 +2575,26 @@
         "source_checkbox_eligible": false
       },
       "current_native_attempt": {
+        "recovered_after_cpu_autostop": {
+          "public_reuse_entry_real_file_preflight": "passed",
+          "public_reuse_entry_server_receipt": "/root/bixbench-recovery-public-software-20261030-003/preflight-public.json",
+          "public_reuse_entry_new_model_calls": 0,
+          "completed_original_question_ids": ["bix-1-q1"],
+          "interrupted_original_question_id": "bix-1-q2",
+          "saved_original_actions": 40,
+          "saved_agent_answer_is_null": true,
+          "quality_boundary": "Original40-action rollout ended without an answer. Preserve this adverse result; do not regenerate the completed question or substitute another task.",
+          "original_result_json_bytes": 16779,
+          "original_result_json_sha256": "a5303bc77b8880fb6660dd50a87ac17887e6a5220dd0ee79225af4222f9c82a3",
+          "original_trajectory_jsonl_bytes": 4782398,
+          "original_trajectory_jsonl_sha256": "fa06c75741c8b874d599fb8fff28cc2027627cb9e9315e1034e6391cb2f8d3e4",
+          "queue_request_files_retained": 91,
+          "queue_response_files_retained": 90,
+          "official_scoring_executed": false,
+          "fixed_three_complete": false,
+          "source_checkbox_eligible": false,
+          "boundary": "Read-only inventory of the same persistent volume after restart. Saved state still says running but the old Pod/actor is gone. Only question1 has saved result and trajectory files; queue responses are not additional completed tasks."
+        },
         "grading_queue_preflight": {
           "server_receipt": "/root/bixbench-grading-public-software-20261030-002/preflight-public.json",
           "reused_public_transport": "scripts/appworld_model_transport.py:model_proxy",
@@ -2584,7 +2605,7 @@
           "original_grading_executed": false,
           "boundary": "Optional same queue transport as generation; original publisher grader unchanged. Native task completion and actual grading still pending."
         },
-        "status": "ORIGINAL_ACTOR_GONE_AFTER_CPU_AUTOSTOP_SAVED_RESULT_AUDIT_PENDING",
+        "status": "ORIGINAL_ACTOR_GONE_SAVED_FIRST_TRAJECTORY_AUDITED_REMAINING_NATIVE_EXECUTION_PENDING",
         "model": "Qwen/Qwen3-14B",
         "author_actor_reproduction": false,
         "actual_publisher_execution_api": "TrajectoryGenerator.vanilla_rollout",
