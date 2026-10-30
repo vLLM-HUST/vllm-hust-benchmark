@@ -1034,6 +1034,8 @@ gpt-4o。这是Research场景的发布方配置依据，不代表其他场景，
 
 同版本官方模板的服务器逐字段对照还发现：`coding_configs/config_1/2/3.yaml`与原JSONL前三题并非同题，不能按编号直接替换；`test_config_world/test_config_world.yaml`与前三条bargaining的任务、Agent及关系也不一致。模板中的Coding/5次或WorldSimulation/3次只能作为公开运行设置参考，不能伪称已找回这些原题的完整配置。对照未改写原题或创建替代测试，完整原生资格仍待验证。
 
+Research专用准备可在上述配置准备命令追加`--runtime-profile official-research`，并提供全新输出目录。默认仍只打印计划；加`--execute`后仅选原Research文件前N条，读取已固定官方脚本的字面量参数，通过原`fill_defaults`填入发布方清空的运行字段。入口检查原task、agents、relationships不变，不运行shell、模型、环境或评分。原官方模型与judge名称保留，因此生成配置不能直接盲跑。服务器原前三条已准备并在离线、非root、只读容器构造官方ResearchEnvironment成功，5次迭代及各自Agent数保留；这仍不证明检索工具、原生步骤或评分可用，后续须显式绑定已核验的本地模型、裁判、网络工具和私有输出。
+
 软件隔离镜像配方为`configs/workload-native/marble-compat-cpu.Dockerfile`。构建上下文只允许两个软件子目录：`client/`为已核验的Python3.10客户端（原锁93包＋披露的2包），`author/`为99份原软件及明确披露的评分器缩进兼容副本；禁止带入原题、答案、模型缓存、结果或凭据。操作者须先核验已有Ubuntu22.04基础镜像的不可变ID，显式传给`MARBLE_BASE_IMAGE`，不能把浮动tag当身份依据。
 
 本配方已在专用ARM64 CPU工作区构建，并通过非root65534、无网络、只读根、去全部能力、禁止提权的真实容器`--help`探测，退出0；未挂载任务数据、Docker

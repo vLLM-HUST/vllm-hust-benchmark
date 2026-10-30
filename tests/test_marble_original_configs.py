@@ -13,6 +13,27 @@ ROOT = Path(__file__).resolve().parents[1]
 ENTRY = ROOT / "scripts/prepare_marble_original_configs.py"
 
 
+def test_research_profile_uses_literal_publisher_settings_without_shell(tmp_path):
+    spec = importlib.util.spec_from_file_location("marble_profile", ENTRY)
+    entry = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(entry)
+    folder = tmp_path / "multiagentbench"
+    folder.mkdir()
+    script = folder / "runjsonl2yaml.sh"
+    script.write_text(
+        'INPUT_FILE="./research/research_main.jsonl"\nDEFAULT_COORDINATE_MODE="graph"\nDEFAULT_ENVIRONMENT=\'{"type":"Research","max_iterations":5}\'\nDEFAULT_LLM="official-fixture-model"\nDEFAULT_MEMORY=\'{"type":"BaseMemory"}\'\nDEFAULT_METRICS_EVALUATE_LLM="official-fixture-judge"\nDEFAULT_OUTPUT=\'{"file_path":"result/original.jsonl"}\'\nexit 99\n'
+    )
+    values = entry.official_research_defaults(tmp_path)
+    assert values["environment"]["max_iterations"] == 5
+    assert values["coordinate_mode"] == "graph"
+    assert values["llm"] == "official-fixture-model"
+    script.write_text(
+        script.read_text().replace('"max_iterations":5', '"max_iterations":3')
+    )
+    with pytest.raises(ValueError, match="mismatch"):
+        entry.official_research_defaults(tmp_path)
+
+
 def test_default_plan_has_no_reads_downloads_or_output(tmp_path):
     report = json.loads(
         subprocess.check_output(
