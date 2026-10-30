@@ -1,9 +1,9 @@
 {
   "schema": "benchmark-data-entrypoints/v1",
   "source_snapshot": "docs/data-entrypoints-sources.json",
-  "captured_at": "2026-10-29T20:10:28.834534+00:00",
-  "website_commit": "d1b225800743918da208e6585cd850f6013c5b0c",
-  "published_benchmark_commit": "34b4244c5451ded3b1d612db48ded269b6687699",
+  "captured_at": "2026-10-30T06:41:54.447912+00:00",
+  "website_commit": "d9cd37d8e74988e372c885c65575bf110de48272",
+  "published_benchmark_commit": "0bc5f043d4707601ae15c47b77ac2649f21ad668",
   "publication_manifest_source": "https://vllm-hust.sage.org.ai/data/benchmark-source-manifest.json",
   "production_manifest_error": null,
   "limits": "Offline navigation, not browser validation or evidence acceptance. Remote inventory is a dated snapshot. Literal links may be historical, dynamic, or unavailable. Reconstructed publication parts are checked locally; Release asset bytes are not downloaded.",
@@ -1320,7 +1320,7 @@
         "website-publication/data/midterm-v103.json"
       ],
       "sha256": "3119c271ed4691469a543c56b4c98a60b83ca24793346843285e1d8797091aad",
-      "snapshot_publication_status": "not-in-snapshot"
+      "snapshot_publication_status": "same-bytes"
     },
     {
       "website_path": "data/mmlu-pro-20261012/accuracy.json",
@@ -1658,6 +1658,7 @@
     {
       "target": "./data/benchmark-source-manifest.json",
       "consumers": [
+        "website:assets/b0-b1.js",
         "website:assets/benchmark-source.js",
         "website:assets/gennova.js",
         "website:assets/midterm-report.js"
@@ -2029,12 +2030,12 @@
       "resolution": "mapped"
     },
     {
-      "target": "./data/midterm-v083.json",
+      "target": "./data/midterm-v103.json",
       "consumers": [
         "website:assets/current-measurements.js",
         "website:assets/midterm-report.js"
       ],
-      "benchmark_path": "website-publication/data/midterm-v083.json",
+      "benchmark_path": "website-publication/data/midterm-v103.json",
       "resolution": "mapped"
     },
     {
@@ -3902,7 +3903,8 @@
       "target": "data/leaderboard_frontier_swe_evidence.json",
       "consumers": [
         "website-publication/data/examples/frontier-submission/README.md",
-        "website-publication/data/leaderboard_frontier.json.publication.json"
+        "website-publication/data/leaderboard_frontier.json.publication.json",
+        "website:assets/b0-b1.js"
       ],
       "benchmark_path": "website-publication/data/leaderboard_frontier_swe_evidence.json.publication.json",
       "resolution": "mapped"
@@ -3940,6 +3942,14 @@
         "website:assets/contributors-page.js"
       ],
       "benchmark_path": "website-publication/data/member_roster.json",
+      "resolution": "mapped"
+    },
+    {
+      "target": "data/midterm-v103.json",
+      "consumers": [
+        "website:assets/b0-b1.js"
+      ],
+      "benchmark_path": "website-publication/data/midterm-v103.json",
       "resolution": "mapped"
     },
     {
@@ -4039,6 +4049,41 @@
       "resolution": "literal-external-link-not-fetched"
     },
     {
+      "target": "https://MODEL_HOST",
+      "consumers": [
+        "website:assets/dataset-entrypoints.js"
+      ],
+      "resolution": "literal-external-link-not-fetched"
+    },
+    {
+      "target": "https://MODEL_HOST/v1",
+      "consumers": [
+        "website:assets/dataset-entrypoints.js"
+      ],
+      "resolution": "literal-external-link-not-fetched"
+    },
+    {
+      "target": "https://MODEL_HOST/v1/chat/completions",
+      "consumers": [
+        "website:assets/dataset-entrypoints.js"
+      ],
+      "resolution": "literal-external-link-not-fetched"
+    },
+    {
+      "target": "https://api.github.com/repos/vLLM-HUST/vllm-hust-benchmark/contents/scripts/bootstrap_swe_bench_pro.py?ref=${AGENT_REV}",
+      "consumers": [
+        "website:assets/dataset-entrypoints.js"
+      ],
+      "resolution": "dynamic-template-not-evaluated"
+    },
+    {
+      "target": "https://api.github.com/repos/vLLM-HUST/vllm-hust-benchmark/contents/scripts/bootstrap_terminal_arm64.py?ref=",
+      "consumers": [
+        "website:assets/dataset-entrypoints.js"
+      ],
+      "resolution": "literal-external-link-not-fetched"
+    },
+    {
       "target": "https://cdn.jsdelivr.net/npm/chart.js@4.4.9/dist/chart.umd.min.js",
       "consumers": [
         "website:leaderboard-runs.html"
@@ -4092,7 +4137,14 @@
     {
       "target": "https://datasys.sage.org.ai/",
       "consumers": [
-        "website:index.html"
+        "website:ecosystem-archive.html"
+      ],
+      "resolution": "literal-external-link-not-fetched"
+    },
+    {
+      "target": "https://docs.harborframework.com/jobs/configs",
+      "consumers": [
+        "website:assets/dataset-entrypoints.js"
       ],
       "resolution": "literal-external-link-not-fetched"
     },
@@ -4106,7 +4158,7 @@
     {
       "target": "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Fira+Code&family=Sora:wght@600;700;800;900&display=swap",
       "consumers": [
-        "website:index.html",
+        "website:ecosystem-archive.html",
         "website:plugins.html"
       ],
       "resolution": "literal-external-link-not-fetched"
@@ -4266,7 +4318,7 @@
         "website-publication/data/plugin-workshop-metadata.json",
         "website:assets/site.js",
         "website:courses.html",
-        "website:index.html"
+        "website:ecosystem-archive.html"
       ],
       "resolution": "literal-external-link-not-fetched"
     },
@@ -4440,7 +4492,7 @@
       "consumers": [
         "website-publication/data/repository-portfolio.json",
         "website-publication/data/version_meta.json",
-        "website:index.html"
+        "website:ecosystem-archive.html"
       ],
       "resolution": "literal-external-link-not-fetched"
     },
@@ -4588,7 +4640,7 @@
       "consumers": [
         "website-publication/data/ecosystem.json",
         "website-publication/data/repository-portfolio.json",
-        "website:index.html",
+        "website:ecosystem-archive.html",
         "website:plugins.html"
       ],
       "resolution": "literal-external-link-not-fetched"
@@ -4632,7 +4684,7 @@
       "consumers": [
         "website-publication/data/ecosystem.json",
         "website-publication/data/repository-portfolio.json",
-        "website:index.html",
+        "website:ecosystem-archive.html",
         "website:plugins.html"
       ],
       "resolution": "literal-external-link-not-fetched"
@@ -4680,7 +4732,7 @@
       "consumers": [
         "website-publication/data/ecosystem.json",
         "website-publication/data/repository-portfolio.json",
-        "website:index.html",
+        "website:ecosystem-archive.html",
         "website:plugins.html"
       ],
       "resolution": "literal-external-link-not-fetched"
@@ -4764,7 +4816,7 @@
         "website-publication/data/ecosystem.json",
         "website-publication/data/repository-portfolio.json",
         "website-publication/data/version_meta.json",
-        "website:index.html",
+        "website:ecosystem-archive.html",
         "website:plugins.html"
       ],
       "resolution": "literal-external-link-not-fetched"
@@ -4835,7 +4887,7 @@
         "website-publication/data/leaderboard_frontier.json.publication.json",
         "website-publication/data/repository-portfolio.json",
         "website-publication/data/version_meta.json",
-        "website:index.html",
+        "website:ecosystem-archive.html",
         "website:plugins.html"
       ],
       "resolution": "literal-external-link-not-fetched"
@@ -4846,7 +4898,7 @@
         "website-publication/data/ecosystem.json",
         "website-publication/data/plugin-workshop-metadata.json",
         "website-publication/data/repository-portfolio.json",
-        "website:index.html",
+        "website:ecosystem-archive.html",
         "website:plugins.html"
       ],
       "resolution": "literal-external-link-not-fetched"
@@ -4872,7 +4924,7 @@
         "website-publication/data/plugin-workshop-metadata.json",
         "website-publication/data/repository-portfolio.json",
         "website:assets/achievements-page.js",
-        "website:index.html",
+        "website:ecosystem-archive.html",
         "website:plugins.html"
       ],
       "resolution": "literal-external-link-not-fetched"
@@ -5003,7 +5055,7 @@
         "website-publication/data/ecosystem.json",
         "website-publication/data/plugin-workshop-metadata.json",
         "website-publication/data/repository-portfolio.json",
-        "website:index.html"
+        "website:ecosystem-archive.html"
       ],
       "resolution": "literal-external-link-not-fetched"
     },
@@ -5111,7 +5163,7 @@
         "website-publication/data/repository-portfolio.json",
         "website-publication/data/version_meta.json",
         "website:assets/achievements-page.js",
-        "website:index.html",
+        "website:ecosystem-archive.html",
         "website:plugins.html"
       ],
       "resolution": "literal-external-link-not-fetched"
@@ -5146,8 +5198,15 @@
         "website-publication/data/repository-portfolio.json",
         "website-publication/data/version_meta.json",
         "website:assets/achievements-page.js",
-        "website:index.html",
+        "website:ecosystem-archive.html",
         "website:plugins.html"
+      ],
+      "resolution": "literal-external-link-not-fetched"
+    },
+    {
+      "target": "https://github.com/vLLM-HUST/vllm-hust-benchmark.git",
+      "consumers": [
+        "website:assets/dataset-entrypoints.js"
       ],
       "resolution": "literal-external-link-not-fetched"
     },
@@ -5180,6 +5239,20 @@
       "resolution": "literal-external-link-not-fetched"
     },
     {
+      "target": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/${AGENT_REV}/",
+      "consumers": [
+        "website:assets/dataset-entrypoints.js"
+      ],
+      "resolution": "dynamic-template-not-evaluated"
+    },
+    {
+      "target": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/${REV}/",
+      "consumers": [
+        "website:assets/dataset-entrypoints.js"
+      ],
+      "resolution": "dynamic-template-not-evaluated"
+    },
+    {
       "target": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/${data.benchmark_evidence_commit}/reports/gennova-mmlu-pro-20261023/",
       "consumers": [
         "website:assets/gennova.js"
@@ -5194,9 +5267,30 @@
       "resolution": "dynamic-template-not-evaluated"
     },
     {
+      "target": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/${manifest.commit}/${path.split(",
+      "consumers": [
+        "website:assets/b0-b1.js"
+      ],
+      "resolution": "dynamic-template-not-evaluated"
+    },
+    {
       "target": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/${reportData.source_commit}/${quality.evidence_path}",
       "consumers": [
         "website:assets/current-measurements.js"
+      ],
+      "resolution": "dynamic-template-not-evaluated"
+    },
+    {
+      "target": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/${reportData.source_commit}/reports/full-answer-joint-20261030/joint-summary.json",
+      "consumers": [
+        "website:assets/current-measurements.js"
+      ],
+      "resolution": "dynamic-template-not-evaluated"
+    },
+    {
+      "target": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/${terminalSource.commit}/",
+      "consumers": [
+        "website:assets/dataset-entrypoints.js"
       ],
       "resolution": "dynamic-template-not-evaluated"
     },
@@ -6539,6 +6633,13 @@
       "resolution": "literal-external-link-not-fetched"
     },
     {
+      "target": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/main/workload-preparation/README.md",
+      "consumers": [
+        "website:dataset-introductions.html"
+      ],
+      "resolution": "literal-external-link-not-fetched"
+    },
+    {
       "target": "https://github.com/vLLM-HUST/vllm-hust-benchmark/commit/47c12e518a9188bb714bb6193d00260a7741841b",
       "consumers": [
         "website-publication/data/core_contributors.json"
@@ -6730,7 +6831,7 @@
         "website-publication/data/plugin-workshop-metadata.json",
         "website-publication/data/repository-portfolio.json",
         "website:assets/achievements-page.js",
-        "website:index.html",
+        "website:ecosystem-archive.html",
         "website:plugins.html"
       ],
       "resolution": "literal-external-link-not-fetched"
@@ -7092,7 +7193,7 @@
         "website-publication/data/ecosystem.json",
         "website-publication/data/plugin-workshop-metadata.json",
         "website-publication/data/repository-portfolio.json",
-        "website:index.html",
+        "website:ecosystem-archive.html",
         "website:traceloom.html"
       ],
       "resolution": "literal-external-link-not-fetched"
@@ -7212,7 +7313,7 @@
       "target": "https://github.com/vLLM-HUST/vllm-hust-profiling",
       "consumers": [
         "website-publication/data/repository-portfolio.json",
-        "website:index.html"
+        "website:ecosystem-archive.html"
       ],
       "resolution": "literal-external-link-not-fetched"
     },
@@ -8012,7 +8113,7 @@
       "consumers": [
         "website-publication/data/ecosystem.json",
         "website-publication/data/repository-portfolio.json",
-        "website:index.html",
+        "website:ecosystem-archive.html",
         "website:plugins.html"
       ],
       "resolution": "literal-external-link-not-fetched"
@@ -8240,6 +8341,13 @@
       "resolution": "literal-external-link-not-fetched"
     },
     {
+      "target": "https://github.com/yancanmao/npu-private-cloud-ops-skill/blob/02b8fea242d5fcf49e43344b2a6c0db4e03418d2/",
+      "consumers": [
+        "website:assets/dataset-entrypoints.js"
+      ],
+      "resolution": "literal-external-link-not-fetched"
+    },
+    {
       "target": "https://hf-mirror.com",
       "consumers": [
         "website:assets/hf-data-loader.js",
@@ -8258,7 +8366,7 @@
     {
       "target": "https://lab.sage.org.ai/",
       "consumers": [
-        "website:index.html"
+        "website:ecosystem-archive.html"
       ],
       "resolution": "literal-external-link-not-fetched"
     },
@@ -8315,7 +8423,7 @@
     {
       "target": "https://ride-lab.github.io/",
       "consumers": [
-        "website:index.html"
+        "website:ecosystem-archive.html"
       ],
       "resolution": "literal-external-link-not-fetched"
     },
@@ -8336,7 +8444,7 @@
     {
       "target": "https://vllm-hust.sage.org.ai/",
       "consumers": [
-        "website:index.html"
+        "website:ecosystem-archive.html"
       ],
       "resolution": "literal-external-link-not-fetched"
     },
@@ -8350,7 +8458,7 @@
     {
       "target": "https://vllm-hust.sage.org.ai/assets/brand/ecosystem-infrastructure.png",
       "consumers": [
-        "website:index.html"
+        "website:ecosystem-archive.html"
       ],
       "resolution": "literal-external-link-not-fetched"
     },
@@ -8374,6 +8482,13 @@
       "target": "https://vllm-hust.sage.org.ai/assets/traceloom-capture.svg",
       "consumers": [
         "website:traceloom.html"
+      ],
+      "resolution": "literal-external-link-not-fetched"
+    },
+    {
+      "target": "https://vllm-hust.sage.org.ai/b0-b1.html",
+      "consumers": [
+        "website:b0-b1.html"
       ],
       "resolution": "literal-external-link-not-fetched"
     },
@@ -8456,11 +8571,31 @@
       "resolution": "mapped"
     },
     {
+      "target": "https://vllm-hust.sage.org.ai/dataset-introductions.html",
+      "consumers": [
+        "website:dataset-introductions.html"
+      ],
+      "resolution": "literal-external-link-not-fetched"
+    },
+    {
       "target": "https://vllm-hust.sage.org.ai/dataset-validation.html",
       "consumers": [
         "website-publication/data/betterscale-dataset-validation-20261015/report.json",
-        "website:dataset-introductions.html",
         "website:dataset-validation.html"
+      ],
+      "resolution": "literal-external-link-not-fetched"
+    },
+    {
+      "target": "https://vllm-hust.sage.org.ai/ecosystem-archive.html",
+      "consumers": [
+        "website:ecosystem-archive.html"
+      ],
+      "resolution": "literal-external-link-not-fetched"
+    },
+    {
+      "target": "https://vllm-hust.sage.org.ai/index.html",
+      "consumers": [
+        "website:index.html"
       ],
       "resolution": "literal-external-link-not-fetched"
     },
@@ -8757,6 +8892,22 @@
       "resolution": "tracked-evidence-path"
     },
     {
+      "target": "reports/acceptance-completion-20261029/",
+      "consumers": [
+        "website:assets/b0-b1.js"
+      ],
+      "benchmark_path": "reports/acceptance-completion-20261029/",
+      "resolution": "tracked-evidence-directory"
+    },
+    {
+      "target": "reports/acceptance-completion-20261029/${name}",
+      "consumers": [
+        "website:assets/midterm-report.js"
+      ],
+      "benchmark_path": "reports/acceptance-completion-20261029/${name}",
+      "resolution": "dynamic-template-not-evaluated"
+    },
+    {
       "target": "reports/acceptance-completion-20261029/README.md",
       "consumers": [
         "website-publication/data/midterm-v102.json",
@@ -8817,6 +8968,14 @@
         "website-publication/data/midterm-v103.json"
       ],
       "benchmark_path": "reports/acceptance-completion-20261029/reference-reassessment-20261029.json",
+      "resolution": "tracked-evidence-path"
+    },
+    {
+      "target": "reports/acceptance-gaps-20261029/README.md",
+      "consumers": [
+        "website:assets/b0-b1.js"
+      ],
+      "benchmark_path": "reports/acceptance-gaps-20261029/README.md",
       "resolution": "tracked-evidence-path"
     },
     {
@@ -8885,7 +9044,8 @@
         "website-publication/data/midterm-v099.json",
         "website-publication/data/midterm-v101.json",
         "website-publication/data/midterm-v102.json",
-        "website-publication/data/midterm-v103.json"
+        "website-publication/data/midterm-v103.json",
+        "website:assets/midterm-report.js"
       ],
       "benchmark_path": "reports/c16-request-latency-reuse-20261026/summary.json",
       "resolution": "tracked-evidence-path"
@@ -9288,6 +9448,22 @@
       "resolution": "tracked-evidence-path"
     },
     {
+      "target": "reports/full-answer-joint-20261030/",
+      "consumers": [
+        "website:assets/b0-b1.js"
+      ],
+      "benchmark_path": "reports/full-answer-joint-20261030/",
+      "resolution": "tracked-evidence-directory"
+    },
+    {
+      "target": "reports/full-answer-joint-20261030/${name}",
+      "consumers": [
+        "website:assets/midterm-report.js"
+      ],
+      "benchmark_path": "reports/full-answer-joint-20261030/${name}",
+      "resolution": "dynamic-template-not-evaluated"
+    },
+    {
       "target": "reports/full-answer-joint-20261030/README.md",
       "consumers": [
         "website-publication/data/midterm-v103.json"
@@ -9372,7 +9548,8 @@
         "website-publication/data/midterm-v099.json",
         "website-publication/data/midterm-v101.json",
         "website-publication/data/midterm-v102.json",
-        "website-publication/data/midterm-v103.json"
+        "website-publication/data/midterm-v103.json",
+        "website:assets/midterm-report.js"
       ],
       "benchmark_path": "reports/hle-native018-completed-20261026/b0-completed-audit.json",
       "resolution": "tracked-evidence-path"
@@ -9493,7 +9670,8 @@
         "website-publication/data/midterm-v099.json",
         "website-publication/data/midterm-v101.json",
         "website-publication/data/midterm-v102.json",
-        "website-publication/data/midterm-v103.json"
+        "website-publication/data/midterm-v103.json",
+        "website:assets/midterm-report.js"
       ],
       "benchmark_path": "reports/swe-native018-batch-20261026/catalog.json",
       "resolution": "tracked-evidence-path"
@@ -9651,7 +9829,8 @@
         "website-publication/data/midterm-v099.json",
         "website-publication/data/midterm-v101.json",
         "website-publication/data/midterm-v102.json",
-        "website-publication/data/midterm-v103.json"
+        "website-publication/data/midterm-v103.json",
+        "website:assets/midterm-report.js"
       ],
       "benchmark_path": "reports/swe-native018-continuation-20261026/catalog.json",
       "resolution": "tracked-evidence-path"
@@ -9739,7 +9918,8 @@
         "website-publication/data/midterm-v099.json",
         "website-publication/data/midterm-v101.json",
         "website-publication/data/midterm-v102.json",
-        "website-publication/data/midterm-v103.json"
+        "website-publication/data/midterm-v103.json",
+        "website:assets/midterm-report.js"
       ],
       "benchmark_path": "reports/swe-native018-incremental-20261026/catalog.json",
       "resolution": "tracked-evidence-path"
@@ -9781,7 +9961,8 @@
         "website-publication/data/midterm-v099.json",
         "website-publication/data/midterm-v101.json",
         "website-publication/data/midterm-v102.json",
-        "website-publication/data/midterm-v103.json"
+        "website-publication/data/midterm-v103.json",
+        "website:assets/midterm-report.js"
       ],
       "benchmark_path": "reports/swe-native018-navidrome-20261027/catalog.json",
       "resolution": "tracked-evidence-path"
@@ -9820,7 +10001,8 @@
         "website-publication/data/midterm-v099.json",
         "website-publication/data/midterm-v101.json",
         "website-publication/data/midterm-v102.json",
-        "website-publication/data/midterm-v103.json"
+        "website-publication/data/midterm-v103.json",
+        "website:assets/midterm-report.js"
       ],
       "benchmark_path": "reports/swe-native018-next-repository-20261026/catalog.json",
       "resolution": "tracked-evidence-path"
@@ -9887,7 +10069,8 @@
         "website-publication/data/midterm-v099.json",
         "website-publication/data/midterm-v101.json",
         "website-publication/data/midterm-v102.json",
-        "website-publication/data/midterm-v103.json"
+        "website-publication/data/midterm-v103.json",
+        "website:assets/midterm-report.js"
       ],
       "benchmark_path": "reports/swe-native018-protonmail-qutebrowser-20261027/catalog.json",
       "resolution": "tracked-evidence-path"
@@ -9941,7 +10124,8 @@
         "website-publication/data/midterm-v099.json",
         "website-publication/data/midterm-v101.json",
         "website-publication/data/midterm-v102.json",
-        "website-publication/data/midterm-v103.json"
+        "website-publication/data/midterm-v103.json",
+        "website:assets/midterm-report.js"
       ],
       "benchmark_path": "reports/swe-native018-repository-20261026/catalog.json",
       "resolution": "tracked-evidence-path"
@@ -9989,7 +10173,8 @@
         "website-publication/data/midterm-v099.json",
         "website-publication/data/midterm-v101.json",
         "website-publication/data/midterm-v102.json",
-        "website-publication/data/midterm-v103.json"
+        "website-publication/data/midterm-v103.json",
+        "website:assets/midterm-report.js"
       ],
       "benchmark_path": "reports/swe-native018-single-agent-20261026/summary.json",
       "resolution": "tracked-evidence-path"
@@ -10003,7 +10188,8 @@
         "website-publication/data/midterm-v099.json",
         "website-publication/data/midterm-v101.json",
         "website-publication/data/midterm-v102.json",
-        "website-publication/data/midterm-v103.json"
+        "website-publication/data/midterm-v103.json",
+        "website:assets/midterm-report.js"
       ],
       "benchmark_path": "reports/swe-native018-tutanota-20261027/catalog.json",
       "resolution": "tracked-evidence-path"
@@ -10030,7 +10216,8 @@
         "website-publication/data/midterm-v099.json",
         "website-publication/data/midterm-v101.json",
         "website-publication/data/midterm-v102.json",
-        "website-publication/data/midterm-v103.json"
+        "website-publication/data/midterm-v103.json",
+        "website:assets/midterm-report.js"
       ],
       "benchmark_path": "reports/swe-native018-wave2-first-three-20261027/catalog.json",
       "resolution": "tracked-evidence-path"
@@ -10081,7 +10268,8 @@
         "website-publication/data/midterm-v099.json",
         "website-publication/data/midterm-v101.json",
         "website-publication/data/midterm-v102.json",
-        "website-publication/data/midterm-v103.json"
+        "website-publication/data/midterm-v103.json",
+        "website:assets/midterm-report.js"
       ],
       "benchmark_path": "reports/swe-native018-wave2-followup-20261027/catalog.json",
       "resolution": "tracked-evidence-path"
@@ -10128,7 +10316,8 @@
         "website-publication/data/midterm-v099.json",
         "website-publication/data/midterm-v101.json",
         "website-publication/data/midterm-v102.json",
-        "website-publication/data/midterm-v103.json"
+        "website-publication/data/midterm-v103.json",
+        "website:assets/midterm-report.js"
       ],
       "benchmark_path": "reports/swe-native018-wave2-openlibrary-navidrome-20261027/catalog.json",
       "resolution": "tracked-evidence-path"
@@ -10165,7 +10354,8 @@
         "website-publication/data/midterm-v099.json",
         "website-publication/data/midterm-v101.json",
         "website-publication/data/midterm-v102.json",
-        "website-publication/data/midterm-v103.json"
+        "website-publication/data/midterm-v103.json",
+        "website:assets/midterm-report.js"
       ],
       "benchmark_path": "reports/swe-protonmail-dependency-recovery-20261027/summary.json",
       "resolution": "tracked-evidence-path"
@@ -10181,7 +10371,8 @@
         "website-publication/data/midterm-v099.json",
         "website-publication/data/midterm-v101.json",
         "website-publication/data/midterm-v102.json",
-        "website-publication/data/midterm-v103.json"
+        "website-publication/data/midterm-v103.json",
+        "website:assets/midterm-report.js"
       ],
       "benchmark_path": "reports/swe-protonmail-test-source-recovery-20261027/summary.json",
       "resolution": "tracked-evidence-path"
@@ -10192,7 +10383,8 @@
         "website-publication/data/midterm-v099.json",
         "website-publication/data/midterm-v101.json",
         "website-publication/data/midterm-v102.json",
-        "website-publication/data/midterm-v103.json"
+        "website-publication/data/midterm-v103.json",
+        "website:assets/midterm-report.js"
       ],
       "benchmark_path": "reports/terminal-break-filter-byte-diagnostic-20261027/summary.json",
       "resolution": "tracked-evidence-path"
@@ -10204,7 +10396,8 @@
         "website-publication/data/midterm-v099.json",
         "website-publication/data/midterm-v101.json",
         "website-publication/data/midterm-v102.json",
-        "website-publication/data/midterm-v103.json"
+        "website-publication/data/midterm-v103.json",
+        "website:assets/midterm-report.js"
       ],
       "benchmark_path": "reports/terminal-break-filter-controls-20261027/summary.json",
       "resolution": "tracked-evidence-path"
@@ -10220,7 +10413,8 @@
         "website-publication/data/midterm-v099.json",
         "website-publication/data/midterm-v101.json",
         "website-publication/data/midterm-v102.json",
-        "website-publication/data/midterm-v103.json"
+        "website-publication/data/midterm-v103.json",
+        "website:assets/midterm-report.js"
       ],
       "benchmark_path": "reports/terminal-build-cython-controls-20261027/summary.json",
       "resolution": "tracked-evidence-path"
@@ -10238,7 +10432,8 @@
         "website-publication/data/midterm-v099.json",
         "website-publication/data/midterm-v101.json",
         "website-publication/data/midterm-v102.json",
-        "website-publication/data/midterm-v103.json"
+        "website-publication/data/midterm-v103.json",
+        "website:assets/midterm-report.js"
       ],
       "benchmark_path": "reports/terminal-cancel-async-controls-20261027/summary.json",
       "resolution": "tracked-evidence-path"
@@ -10255,7 +10450,8 @@
         "website-publication/data/midterm-v099.json",
         "website-publication/data/midterm-v101.json",
         "website-publication/data/midterm-v102.json",
-        "website-publication/data/midterm-v103.json"
+        "website-publication/data/midterm-v103.json",
+        "website:assets/midterm-report.js"
       ],
       "benchmark_path": "reports/terminal-cancel-async-partial-recovery-20261027/summary.json",
       "resolution": "tracked-evidence-path"
@@ -10266,7 +10462,8 @@
         "website-publication/data/midterm-v099.json",
         "website-publication/data/midterm-v101.json",
         "website-publication/data/midterm-v102.json",
-        "website-publication/data/midterm-v103.json"
+        "website-publication/data/midterm-v103.json",
+        "website:assets/midterm-report.js"
       ],
       "benchmark_path": "reports/terminal-circuit-context-20261027/summary.json",
       "resolution": "tracked-evidence-path"
@@ -10277,7 +10474,8 @@
         "website-publication/data/midterm-v099.json",
         "website-publication/data/midterm-v101.json",
         "website-publication/data/midterm-v102.json",
-        "website-publication/data/midterm-v103.json"
+        "website-publication/data/midterm-v103.json",
+        "website:assets/midterm-report.js"
       ],
       "benchmark_path": "reports/terminal-circuit-controls-20261027/summary.json",
       "resolution": "tracked-evidence-path"
@@ -10290,7 +10488,8 @@
         "website-publication/data/midterm-v099.json",
         "website-publication/data/midterm-v101.json",
         "website-publication/data/midterm-v102.json",
-        "website-publication/data/midterm-v103.json"
+        "website-publication/data/midterm-v103.json",
+        "website:assets/midterm-report.js"
       ],
       "benchmark_path": "reports/terminal-cython-context-20261027/controls-summary.json",
       "resolution": "tracked-evidence-path"
@@ -10303,7 +10502,8 @@
         "website-publication/data/midterm-v099.json",
         "website-publication/data/midterm-v101.json",
         "website-publication/data/midterm-v102.json",
-        "website-publication/data/midterm-v103.json"
+        "website-publication/data/midterm-v103.json",
+        "website:assets/midterm-report.js"
       ],
       "benchmark_path": "reports/terminal-cython-context-20261027/model-summary.json",
       "resolution": "tracked-evidence-path"
@@ -10316,7 +10516,8 @@
         "website-publication/data/midterm-v099.json",
         "website-publication/data/midterm-v101.json",
         "website-publication/data/midterm-v102.json",
-        "website-publication/data/midterm-v103.json"
+        "website-publication/data/midterm-v103.json",
+        "website:assets/midterm-report.js"
       ],
       "benchmark_path": "reports/terminal-cython-context-20261027/recovery-summary.json",
       "resolution": "tracked-evidence-path"
@@ -10329,7 +10530,8 @@
         "website-publication/data/midterm-v099.json",
         "website-publication/data/midterm-v101.json",
         "website-publication/data/midterm-v102.json",
-        "website-publication/data/midterm-v103.json"
+        "website-publication/data/midterm-v103.json",
+        "website:assets/midterm-report.js"
       ],
       "benchmark_path": "reports/terminal-cython-context-20261027/source-boundary.json",
       "resolution": "tracked-evidence-path"
@@ -10344,7 +10546,8 @@
         "website-publication/data/midterm-v099.json",
         "website-publication/data/midterm-v101.json",
         "website-publication/data/midterm-v102.json",
-        "website-publication/data/midterm-v103.json"
+        "website-publication/data/midterm-v103.json",
+        "website:assets/midterm-report.js"
       ],
       "benchmark_path": "reports/terminal-cython-single-trace-20261027/summary.json",
       "resolution": "tracked-evidence-path"
@@ -10364,7 +10567,8 @@
         "website-publication/data/midterm-v099.json",
         "website-publication/data/midterm-v101.json",
         "website-publication/data/midterm-v102.json",
-        "website-publication/data/midterm-v103.json"
+        "website-publication/data/midterm-v103.json",
+        "website:assets/midterm-report.js"
       ],
       "benchmark_path": "reports/terminal-openssl-arm64-controls-20261026/summary.json",
       "resolution": "tracked-evidence-path"
@@ -10383,7 +10587,8 @@
         "website-publication/data/midterm-v099.json",
         "website-publication/data/midterm-v101.json",
         "website-publication/data/midterm-v102.json",
-        "website-publication/data/midterm-v103.json"
+        "website-publication/data/midterm-v103.json",
+        "website:assets/midterm-report.js"
       ],
       "benchmark_path": "reports/terminal-openssl-model-recovery-20261026/summary.json",
       "resolution": "tracked-evidence-path"
@@ -17451,6 +17656,15 @@
           "state": "uploaded"
         },
         {
+          "name": "midterm-v103-production-20261030-r1.tar.gz",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/releases/download/m01-recovery-20261021-r7/midterm-v103-production-20261030-r1.tar.gz",
+          "id": 691203948,
+          "bytes": 3002457,
+          "digest": "sha256:ad2b8e738be691267b9254a5e9e235fb87e56d7ccdecba52d4bb6ba38df5b0c5",
+          "updated_at": "2026-10-30T06:38:32Z",
+          "state": "uploaded"
+        },
+        {
           "name": "mmlu-subset-production-20261022.tar.gz",
           "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/releases/download/m01-recovery-20261021-r7/mmlu-subset-production-20261022.tar.gz",
           "id": 664924319,
@@ -18509,8 +18723,8 @@
   ],
   "counts": {
     "publication_bindings": 161,
-    "references": 1191,
+    "references": 1215,
     "releases": 32,
-    "assets": 468
+    "assets": 469
   }
 }

@@ -57,6 +57,8 @@ B0复用已封存原件；B1预热24/40、正式408/183，共655请求无失败�
 
 ## 原件、复算与历史
 
+- [V1.03上线与归档回执](delivery-v103.json)：合并/CI、生产中英文/桌面移动/明暗浏览器、Release下载与存储SHA回验；保留本机HTTPS传输失败，不扩大线上字节核验范围。
+- [线上发布清单原始响应](production-manifest-v103.json)：独立生产浏览器留存的完整字节，采集流程与SHA见交付回执；不是本地重建替代。
 - [逐题标量及配对汇总](joint-summary.json)：完整200×2标量、每题原SSE哈希、实际版本、配置、双卡采样、报价与公式。公开标量由独立原SSE重建/原评分器复核产生，不包含题文、gold或全文回答。
 - [连续逐请求/窗口统计](continuous-summary.json)：包括原B0、当前B1、两rank激活和P95/P99。
 - [未改写的原始采样与回执](original-telemetry.tar.gz)、[成员校验](telemetry-manifest.json)、[文件校验](manifest.json)。这些是选定原件，不是完整私有响应包。
