@@ -1,0 +1,34 @@
+| batch | case  | gold | native1 历史    | native2 历史    | raw 历史          | prefix q4 历史    | builtin q40     | external q40    |
+| ----- | ----- | ---- | --------------- | --------------- | ----------------- | ----------------- | --------------- | --------------- |
+| 3     | 00803 | B    | B / stop / 734  | B / stop / 734  | B / stop / 734    | B / stop / 734    | B / stop / 734  | B / stop / 734  |
+| 3     | 00864 | C    | C / stop / 2234 | C / stop / 2234 | C / stop / 3169   | C / stop / 3515   | C / stop / 1769 | C / stop / 1769 |
+| 3     | 03584 | H    | H / stop / 1060 | H / stop / 1060 | H / stop / 1058   | H / stop / 1285   | H / stop / 1075 | H / stop / 1075 |
+| 3     | 03644 | E    | E / stop / 1178 | E / stop / 1178 | E / stop / 1163   | E / stop / 1210   | E / stop / 1134 | E / stop / 1134 |
+| 3     | 03706 | B    | B / stop / 1911 | B / stop / 1911 | B / stop / 1762   | B / stop / 1263   | B / stop / 1234 | B / stop / 1234 |
+| 3     | 03766 | B    | B / stop / 1018 | B / stop / 1018 | A / stop / 6396   | B / stop / 1053   | B / stop / 5412 | B / stop / 5412 |
+| 3     | 03826 | C    | C / stop / 505  | C / stop / 505  | C / stop / 505    | C / stop / 505    | C / stop / 505  | C / stop / 505  |
+| 3     | 03886 | A    | A / stop / 1351 | A / stop / 1351 | A / stop / 1239   | A / stop / 1336   | A / stop / 1274 | A / stop / 1274 |
+| 6     | 10611 | B    | B / stop / 647  | B / stop / 647  | B / stop / 687    | B / stop / 669    | B / stop / 711  | B / stop / 711  |
+| 6     | 10672 | A    | A / stop / 1198 | A / stop / 1198 | G / stop / 1046   | A / stop / 2613   | A / stop / 1198 | A / stop / 1198 |
+| 6     | 10734 | I    | I / stop / 840  | I / stop / 840  | I / stop / 840    | I / stop / 840    | I / stop / 840  | I / stop / 840  |
+| 6     | 06847 | D    | D / stop / 156  | D / stop / 156  | D / stop / 191    | D / stop / 156    | D / stop / 156  | D / stop / 156  |
+| 6     | 06907 | I    | I / stop / 271  | I / stop / 271  | I / stop / 266    | I / stop / 272    | I / stop / 271  | I / stop / 271  |
+| 6     | 06967 | C    | C / stop / 567  | C / stop / 567  | C / stop / 551    | C / stop / 519    | C / stop / 567  | C / stop / 567  |
+| 6     | 07028 | B    | B / stop / 153  | B / stop / 153  | B / stop / 147    | B / stop / 153    | B / stop / 153  | B / stop / 153  |
+| 6     | 07090 | J    | J / stop / 275  | J / stop / 275  | J / stop / 265    | J / stop / 256    | J / stop / 275  | J / stop / 275  |
+| 7     | 07151 | H    | H / stop / 289  | H / stop / 289  | H / stop / 445    | H / stop / 445    | H / stop / 486  | H / stop / 486  |
+| 7     | 07213 | J    | J / stop / 302  | J / stop / 302  | J / stop / 237    | J / stop / 302    | J / stop / 302  | J / stop / 302  |
+| 7     | 07275 | E    | E / stop / 379  | E / stop / 379  | E / stop / 805    | E / stop / 447    | E / stop / 378  | E / stop / 378  |
+| 7     | 07338 | H    | H / stop / 4723 | H / stop / 4723 | H / stop / 5133   | — / length / 8192 | H / stop / 3292 | H / stop / 3292 |
+| 7     | 07401 | A    | A / stop / 575  | A / stop / 575  | A / stop / 702    | A / stop / 682    | A / stop / 598  | A / stop / 598  |
+| 7     | 07461 | G    | G / stop / 468  | G / stop / 468  | G / stop / 481    | G / stop / 462    | G / stop / 468  | G / stop / 468  |
+| 7     | 07524 | I    | I / stop / 467  | I / stop / 467  | I / stop / 302    | I / stop / 417    | I / stop / 477  | I / stop / 477  |
+| 7     | 07585 | A    | A / stop / 532  | A / stop / 532  | A / stop / 544    | A / stop / 533    | A / stop / 533  | A / stop / 533  |
+| 14    | 01557 | C    | C / stop / 396  | C / stop / 396  | C / stop / 397    | C / stop / 397    | C / stop / 431  | C / stop / 431  |
+| 14    | 01619 | G    | G / stop / 1034 | G / stop / 1034 | G / stop / 473    | G / stop / 1165   | G / stop / 1034 | G / stop / 1034 |
+| 14    | 01680 | B    | H / stop / 585  | H / stop / 585  | H / stop / 1049   | H / stop / 2294   | C / stop / 818  | C / stop / 818  |
+| 14    | 01741 | E    | E / stop / 377  | E / stop / 377  | — / length / 8192 | E / stop / 590    | C / stop / 5551 | C / stop / 5551 |
+| 14    | 01802 | C    | I / stop / 426  | I / stop / 426  | I / stop / 678    | I / stop / 655    | I / stop / 538  | I / stop / 538  |
+| 14    | 01862 | D    | D / stop / 654  | D / stop / 654  | D / stop / 601    | D / stop / 605    | D / stop / 601  | D / stop / 601  |
+| 14    | 01923 | C    | C / stop / 323  | C / stop / 323  | C / stop / 505    | C / stop / 456    | C / stop / 323  | C / stop / 323  |
+| 14    | 01984 | A    | A / stop / 202  | A / stop / 202  | A / stop / 444    | A / stop / 413    | A / stop / 202  | A / stop / 202  |
