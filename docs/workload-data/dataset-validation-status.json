@@ -2923,6 +2923,20 @@
           "paper_260_utterance_evaluation_sample_reproduced": false,
           "boundary": "Our fixed first3 complete validation dialogues contain29 utterances for native workflow verification, not the paper's260-utterance evaluation sample. Do not present file checks, software imports or local model inference as human listening scores."
         },
+        "restricted_checkpoint_metadata_readiness": {
+          "server_receipt": "dailytalk-generator-checkpoint-metadata-20261031-003/preflight-public.json under the private shared task root",
+          "prior_negative_receipts_preserved": ["dailytalk-generator-checkpoint-metadata-20261031-001", "dailytalk-generator-checkpoint-metadata-20261031-002"],
+          "checkpoints_loaded_with_weights_only": true,
+          "storage_device": "meta",
+          "acoustic_tensor_entries": 237,
+          "vocoder_tensor_entries": 234,
+          "acoustic_numpy_allowlist": ["numpy.core.multiarray.scalar", "numpy.dtype", "numpy.dtypes.Float64DType"],
+          "vocoder_numpy_allowlist_used": false,
+          "unsafe_pickle_fallback_enabled": false,
+          "npu_initialized": false,
+          "model_calls": 0,
+          "boundary": "Original checkpoint bytes unchanged. Acoustic ZIP contains NumPy scalar optimizer metadata; exact known types were narrowly allowlisted after static inspection. Vocoder uses the original legacy Torch format, unsupported by the ZIP-only static scanner but accepted by the restricted weights-only loader without NumPy allowances. Meta tensor deserialization is not model construction, native synthesis or quality scoring."
+        },
         "server_receipt": "/root/dailytalk-public-software-20261031-001/preflight-public.json",
         "actual_public_verify_commands_passed": 2,
         "original_audio_files_acquired": 29,
@@ -2966,7 +2980,7 @@
           "sha256": "33b33797e7e56882a40c55048dc62023a817f311fe43f2fc9919cf611ce8cb61",
           "server_receipt": "/root/dailytalk-history-guo-checkpoint-20261031-001/acquisition-public.json",
           "original_zip_members_crc_checked": 664,
-          "deserialized_or_executed": false,
+          "deserialized_or_executed_at_initial_acquisition": false,
           "neural_inference_on_cpu": false
         },
         "official_vocoder_checkpoint": {
@@ -2977,7 +2991,7 @@
           "extracted_sha256": "771eaf4876485a35e25577563d390c262e23c2421e4a8c929eacfde34a5b7a60",
           "server_receipt": "/root/dailytalk-official-universal-vocoder-20261031-001/acquisition-public.json",
           "original_member_crc_verified": true,
-          "model_deserialized_or_executed": false
+          "model_deserialized_or_executed_at_initial_acquisition": false
         },
         "official_history_text_encoder": {
           "model": "sentence-transformers/distiluse-base-multilingual-cased-v1",
