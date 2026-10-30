@@ -1225,7 +1225,8 @@ TB；服务器/data约1.42TB可用，未缩小语料。ChartQA当前两卡主机
 - [x] SCIENCEAGENTBENCH：原verified版102题的全部输入、参考及环境字段、全量索引和102条回查核验通过；30份官方执行/评分及依赖源码已固定并核对Git
   blob，未执行代码。[准备回执](validation/scienceagentbench-cpu-preparation-20261024.json)。
 - [x] SCIENCEAGENTBENCH：固定原前三题（1/2/3）的完整科学数据目录、各自参考程序/评价脚本/rubric已在专用CPU服务器取得，共14文件1006008字节；同一原归档ETag的Range请求、原CRC和保存后SHA复核通过，公开资产校验入口实测退出0。未整包下载1.77GB归档，未执行参考程序或生成代码，原始文件不公开；这不是全102题资产取得或来源完成。
-- [ ] SCIENCEAGENTBENCH：隔离科学环境、本地模型、原生执行及辅助评分模型仍未就绪；其余原题资产未取得。发现两个上游直接入口仍读旧validation
+- [x] SCIENCEAGENTBENCH：原30份源码在专用CPU工作区复核，24份Python静态解析；原`make_test_spec`在Python3.10构造前三题通过，12个字段保留，ID仅沿用官方转字符串规则，配方选择ARM64。未构建镜像、未运行程序或模型，不代表科学环境通过；细节见唯一机器清单。
+- [ ] SCIENCEAGENTBENCH：隔离科学环境、本地模型、原生执行及辅助评分模型仍未就绪；其余原题资产未取得。官方单worker建议峰值约30GB，当前独立Docker可用约10.6GB，扩容授权待定，未清理旧镜像或降低原评价要求。发现两个上游直接入口仍读旧validation
   split，不能与当前verified版混跑，不勾原生通过。
 - [x] TAUBENCH/τ²：2285个原telecom任务与引用全量准备/预检，新增3个原ACTION类任务公共引用交接预检通过；补齐显式ID/全量入口，125包实测环境快照和pip
   check通过，模型调用0。[CPU回执](validation/tau2-readiness-cpu-20261024.json)。

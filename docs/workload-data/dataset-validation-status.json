@@ -1594,7 +1594,7 @@
     "SCIENCEAGENTBENCH": {
       "scope": "public",
       "delivery_kind": "review_original_source_protocol",
-      "status": "REVIEWED_GAPS_RECORDED",
+      "status": "IN_PROGRESS",
       "checked": false,
       "legacy_checked": false,
       "existing_receipt": "docs/workload-data/validation/public-original-assets-server-reader-20261023.json",
@@ -1602,6 +1602,43 @@
       "cpu_preparation_receipt": "docs/workload-data/validation/scienceagentbench-cpu-preparation-20261024.json",
       "original_task_metadata_preparation_checked": true,
       "current_fixed3_original_scientific_assets": {
+        "native_source_and_spec_preflight": {
+          "source_receipt": "/root/scienceagentbench-original-source-20261031-001/preparation-public.json",
+          "native_spec_receipt": "/root/scienceagentbench-original-test-spec-preflight-20261031-001/preflight-public.json",
+          "original_source_files_reverified": 30,
+          "original_source_bytes": 206703,
+          "original_python_files_static_parsed": 24,
+          "native_constructor_python": "3.10.12",
+          "original_instance_ids": [1, 2, 3],
+          "original_fields_preserved_per_task": 12,
+          "publisher_native_id_conversion": "integer instance_id to string, exactly as original run_evaluation.main",
+          "native_architecture": "arm64",
+          "native_platform": "linux/arm64/v8",
+          "blocked_network_attempts": 0,
+          "recipe_credential_values_cleared_for_preflight": true,
+          "original_recipe_has_credential_ENV_fields": true,
+          "docker_build_started": false,
+          "generated_or_reference_code_executed": false,
+          "model_calls": 0,
+          "full_scientific_environment_qualified": false,
+          "resource_snapshot": {
+            "owned_docker_data_free_bytes": 10588504064,
+            "owned_cpu_persistent_volume_free_bytes": 5880381440,
+            "publisher_single_worker_suggested_peak_gb": 30,
+            "publisher_capacity_formula": "5 + max_workers * 25 GB",
+            "existing_owned_docker_budget_gib": 35,
+            "additional_capacity_permission_requested": true,
+            "additional_capacity_approved": false,
+            "images_or_results_deleted": false,
+            "boundary": "Filesystem free space measured inside the Docker sidecar, not inferred from image logical sizes or the dev container root. No expansion or image build performed."
+          },
+          "deployment_boundaries_pending": [
+            "Keep supplied API credentials and gold/evaluation assets outside untrusted generated-program execution; retain original task inputs and scoped writable outputs",
+            "Original compute_scores calls CodeBERT before generated program execution; qualify an explicit NPU metric binding rather than silently falling back to CPU or skipping the metric",
+            "Preserve original verified split, task-specific dependencies, programs, scoring logic and budgets"
+          ],
+          "boundary": "Original dataclass/recipe constructors only, not a native Agent run, Docker environment build, scientific program execution or benchmark score. Direct CPU raw-GitHub source acquisition failed; exact existing commit/blob/SHA identities were reused through RAM-only source relay."
+        },
         "status": "FIXED3_ORIGINAL_VERIFIED_DATASET_FOLDERS_AND_REFERENCES_ACQUIRED_NOT_EXECUTED",
         "metadata_receipt": "/root/scienceagentbench-original-metadata-20261031-002/preparation-public.json",
         "acquisition_receipt": "/root/scienceagentbench-fixed3-original-assets-20261031-001/acquisition-public.json",
@@ -1641,7 +1678,7 @@
       "verified_evaluation_code_review": "Pinned c26e151ed601ba109dc4d35e057ff8e73fec469d harness explicitly accepts --split/--dataset_name; its main forwards split to load_dataset. Reuse it rather than replacing the evaluator. Legacy run_infer.py still hardcodes validation, and legacy LLMEngine routes non-gpt/non-o1 names to Bedrock; do not pass Qwen directly or rename it as GPT.",
       "scientific_assets_distribution_boundary": "Publisher README requires private benchmark_verified.zip and prohibits online redistribution of unpacked artifacts. Only metadata, acquisition instructions and entry code belong in the public repository.",
       "non_npu_preparation_checked": false,
-      "blocker": "All102 original verified metadata records and consumer/index roundtrips retained. Original first3 task assets now acquired privately from benchmark_verified.zip: complete clintox/mat_diffusion/crystalline_compound folders plus3 gold programs,3 eval programs and3 rubrics,14 files1006008 bytes, original CRC/SHA readback and public verifier passed. Not full102 assets. Isolated task-specific scientific environments, verified-split native inference transport, original evaluation harness and NPU-only auxiliary/visual judge bindings remain pending. Legacy run_infer.py/run_eval.py still hardcode validation; do not substitute old tasks or alias Qwen as GPT. No native source completion."
+      "blocker": "All102 original metadata/consumer evidence retained; original first3 complete dataset folders and named reference/scorer/rubric assets14 files1006008 bytes acquired and public verifier passed. Original30-source files206703 bytes reverified on CPU; Python3.10 native TestSpec constructors preserve all12 fields for1/2/3 and select ARM64. Actual Docker build not started: original documentation suggests30GB peak for one worker, current owned Docker free10.6GB and CPU volume free5.9GB, capacity permission pending. Credential-safe/reference-isolated deployment and NPU CodeBERT binding also pending. Do not skip metrics, use old validation tasks, or alias Qwen as GPT. No native source completion."
     },
     "DS1000": {
       "historical_generation_reuse_preparer": "scripts/prepare_ds1000_official_samples.py",

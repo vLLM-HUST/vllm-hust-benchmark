@@ -1151,6 +1151,12 @@ python -I scripts/verify_scienceagentbench_original_assets.py \
 [身份清单](../configs/workload-native/scienceagentbench-original-fixed3-assets.json)中的成员SHA是实际取得后固定的摘要，不冒称发布方公布的SHA；其来源链路、原ZIP
 CRC和归档目录身份另行记录。完整102题仍可从发布方原归档取得；当前只验证前三题资产，不是仅凭三个preview拼出的替代语料。后续还缺隔离科学环境、原verified推理入口、本地NPU模型与原评价流程；两个旧直接脚本仍写死validation，不能拿它们的默认结果当verified成绩，来源总勾保持未完成。
 
+原既定版本的30份源码已在CPU工作区重新核验（206703字节、24份Python静态解析），不是切换到浮动上游。原`make_test_spec`已在Python3.10对前三题调用通过，12个原字段保留；任务ID仅沿用官方入口的整数转字符串处理，生成配方选择`linux/arm64/v8`。这只验证原任务规格及配方构造，不能据此宣称科学依赖已安装或Docker任务已执行。
+
+[官方Docker说明](https://github.com/OSU-NLP-Group/ScienceAgentBench/blob/c26e151ed601ba109dc4d35e057ff8e73fec469d/docs/20250110_docker/README.md)建议峰值空间按`5 + max_workers * 25 GB`规划；单worker约30GB。当前专用Docker文件系统仅约10.6GB可用，CPU卷约5.9GB可用，未开始大镜像构建，也未删除旧镜像/结果或擅自扩容。不能用宿主卷空闲、镜像逻辑大小代替Docker实际文件系统余量。
+
+另需完成部署隔离：原镜像配方包含API凭据ENV字段，不能把真实凭据交给生成代码；参考程序和评价资源也应与生成代码隔离。原`compute_scores`在执行程序前计算CodeBERT，须核验NPU度量后端，不能静默在CPU推理或跳过该度量来宣称跑通。当前预检清空凭据值且未执行代码，完整科学环境和评分仍未验证。
+
 ## BixBench 原科学任务准备与读取（原生执行结束，评分待核验）
 
 本接口用于官方科学Agent任务，不用零样本问答替代Notebook工作流。原问题JSONL实际为205条扁平记录、17字段，不能按旧数据卡的嵌套`questions`结构加载。文件版本和64份ZIP身份见[固定原资产清单](data/catalogs/bixbench_original_files_v1.json)；205条问题引用其中59份。当前只取得固定原前三题所需的两份原ZIP，其余57份尚未取得。
