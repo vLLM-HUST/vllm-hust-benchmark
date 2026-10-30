@@ -1177,11 +1177,11 @@ python scripts/prepare_reused_research_assets.py WAVCAPS --mode verify \
   --files data/json_files/SoundBible/sb_final.json
 ```
 
-`download`仅对新外部目录或显式匹配的恢复目录执行，不覆盖旧数据；`verify`已在服务器对三份已取得原文件实际执行通过。下载仍受网络、来源条款和显式容量预算约束，失败不会换题或改文件。FreeSound的Git
-LFS URL仅登记身份，尚未实际取得；不要将其与GitHub普通blob传输混用。
+`download`仅对新外部目录或显式匹配的恢复目录执行，不覆盖旧数据；`verify`已在服务器对四份原文件实际执行通过。下载仍受网络、来源条款和显式容量预算约束，失败不会换题或改文件。FreeSound已用同一获取器从原Git
+LFS URL取得并通过发布方SHA256，不能将该URL与GitHub普通blob传输混用。
 
 `workload-data catalog download-plan WAVCAPS`提供作者Git固定版本的四份原始JSON及身份，不下载音频或模型；这不是将Git元数据冒称为另一个Hub
-revision。发布方限制学术用途，音频还须保留原来源条件，不根据Hub许可标签推断可商用或再分发。当前CPU只取得SoundBible、BBC、AudioSet三份，合计140750条，FreeSound尚缺；默认读取四份时缺失即报错，部分使用必须显式选文件。
+revision。发布方限制学术用途，音频还须保留原来源条件，不根据Hub许可标签推断可商用或再分发。当前CPU取得SoundBible、BBC、AudioSet、FreeSound四份，合计403050条、174782992字节；使用者本机默认读取四份时缺失仍报错，部分使用必须显式选文件。
 
 安装本数据包后，可以对自行合法取得并通过固定哈希核验的原JSON使用现有接口：
 
@@ -1199,7 +1199,7 @@ for record in records:
     weak_reference = record.outcome_record()  # caption及存在的原描述/类别，不送入模型
 ```
 
-原`num_captions_per_audio=1`和作者/下载定位信息保留在annotations，各组件身份由源文件路径区分；没有新造prompt、任务顺序或五条参考。CPU对三份全部140750条完成原字段还原及输入/参考分离核验。这不表示音频已取得、原生模型已运行、质量已评分，或研究侧已通过CI安装消费。作者音频模型、完整原媒体与适用原评价协议仍待接通，不能把caption当输入答案或用Qwen文本生成替代音频推理。
+原`num_captions_per_audio=1`、原文件名和作者/下载定位信息保留在annotations，各组件身份由源文件路径区分；caption、原描述、类别及FreeSound标签只作参考，没有新造prompt、任务顺序或五条参考。CPU对四份全部403050条完成原字段还原及输入/参考分离核验，12条原始固定样本与研究工作树中未修改的消费端读取一致。这不表示音频已取得、原生模型已运行、质量已评分，或研究侧已通过CI安装消费。作者音频模型、完整原媒体与适用原评价协议仍待接通，不能把caption当输入答案或用Qwen文本生成替代音频推理。
 
 ## BixBench 原科学任务准备与读取（原生执行结束，评分待核验）
 

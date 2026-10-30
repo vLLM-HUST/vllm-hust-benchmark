@@ -1271,9 +1271,9 @@ split；后续必须明确将生成和评估同时绑定原verified版本，并�
 
 #### WavCaps原生音频路径准备（未完成来源交付）
 
-- [x] 复用公共原始数据接口，三份已取得JSON的140750条逐字段完整还原通过；音频定位信息与弱标注/原描述分离，9条固定样本不能伪装为聊天请求。已登记四份固定元数据身份；FreeSound未取得时默认全量读取报缺失，不静默跳过。CPU回执：`/root/wavcaps-public-adapter-20261031-002/qualification-public.json`；尚非CI安装工件。
-- [x] 复用既有获取器的原文件校验CLI，三份已取得元数据实际执行通过；源码候选的140750条索引与9条固定公共/未修改研究端完整读取核验通过，复用旧索引且未恢复研究任务。回执：同CPU目录下`getter-verify-public.json`、`research-handoff-public.json`。CI工件安装消费与原生音频任务仍未完成。
-- [x] 取得并校验SoundBible、BBC、AudioSet三份原始JSON，共140750条、27482307字节，保留各组件原前三条完整记录。数据只存专用CPU目录；FreeSound原始元数据尚未取得。回执：`/root/wavcaps-original-metadata-20261031-002/preparation-public.json`。原CPU直连TLS失败记录保留，不因网络失败换数据。
+- [x] 复用公共原始数据接口，四份JSON的403050条逐字段完整还原通过；音频定位信息与caption/原描述/类别/标签分离，12条固定样本不能伪装为聊天请求。使用者缺文件时仍显式报错，不静默跳过。CPU回执：`/root/wavcaps-public-adapter-20261031-003/qualification-public.json`；尚非CI安装工件。
+- [x] 复用既有获取器的原文件校验CLI，四份元数据实际执行通过；源码候选的403050条索引与12条固定公共/未修改研究端完整读取核验通过，旧三文件索引保留且未恢复研究任务。服务器消费端源码与研究工作树版本一致。回执：同CPU目录下`getter-verify-public.json`、`research-handoff-public.json`。CI工件安装消费与原生音频任务仍未完成。
+- [x] 取得并校验SoundBible、BBC、AudioSet、FreeSound四份原始JSON，共403050条、174782992字节，保留各组件原前三条完整记录。FreeSound通过现有公共获取器直接下载并验证发布方LFS哈希，以硬链接复用原文件、不重复占用数据空间。完整回执：`/root/wavcaps-original-metadata-20261031-002/complete-metadata-public.json`；原三文件回执、CPU直连TLS失败记录保留，不因网络失败换数据。
 - [x] 在专用CPU取得发布方固定版本的6份说明、音频captioning入口/评分器及检索入口，逐份核验Git
   blob和SHA256；3份Python仅做AST解析，未导入执行。服务端回执：`/root/wavcaps-original-source-20261031-001/preparation-public.json`。
 - [ ] 取得合规的原音频、专用checkpoint及完整依赖，完成原生NPU推理、适用评分和公共/研究消费闭环。没有下载音频或模型，也没有调用文本模型替代。

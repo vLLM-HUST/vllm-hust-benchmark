@@ -21,6 +21,8 @@ def original_fixture():
         "description": "RAW_REFERENCE",
         "title": "TITLE_REFERENCE",
         "category": "CATEGORY_REFERENCE",
+        "tags": ["TAG_REFERENCE"],
+        "file_name": "original-file-name.wav",
         "author": "fixture-credit",
         "href": "https://example.org/fixture",
         "download_link": "https://example.org/fixture.flac",
@@ -120,11 +122,7 @@ def test_catalog_pins_all_four_metadata_components_not_audio():
         item["role"] == "data" and item["path"].endswith(".json")
         for item in spec["files"]
     )
-    assert {item["rows"] for item in spec["files"] if "rows" in item} == {
-        1232,
-        31201,
-        108317,
-    }
+    assert {item["rows"] for item in spec["files"]} == {1232, 31201, 108317, 262300}
     assert "academic-only" in spec["access"]["license"]
 
 
