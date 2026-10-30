@@ -5,6 +5,16 @@ Controller 接入与验证；运行本指南不需要克隆或安装它。 这�
 
 ## 新用户推荐入口
 
+### 当前平台状态（2026-10-31）
+
+[Coder 9443 平台](https://coder.sage.org.ai:9443/)上的模板对普通账号可见，但新增工作区目前受存储配额阻塞。 实测普通账号创建 20 GiB
+工作区时，Kubernetes 返回 `exceeded quota: npc-storage-growth-freeze`： 已用 4625 GiB，限额 4625
+GiB。管理员需按平台容量审批流程释放或增加至少 20 GiB 可申请额度，再重试新工作区。 使用者无需申请裸机权限或手工搭 Docker；不要用旧共享工作区替代新用户验收。
+
+独立评分的目录挂载缺陷已修复并发布为模板版本 `cpu-grade-bind-1031-1fd0da18`
+（`3eb13404-43e9-4b41-b270-0eb52cf8fd3f`）。已有本人工作区可通过 Coder 更新到该版本； 保存当前工作后更新会重建本工作区
+Pod，持久卷和历史结果保留。新工作区默认使用该版本，仍受上述容量准入限制。
+
 **模型服务与任务执行工作区是两个不同的东西。** 模型服务负责回答模型请求；本指南的 CPU 工作区负责运行 Agent、启动 Docker 任务容器、修改代码与测试。 有模型的 Ray
 地址，不代表已经有可运行任务的 Docker 环境。不要给模型工作区挂宿主机 Docker socket，也不要把客户端依赖装入模型环境。
 
@@ -76,7 +86,34 @@ python3 scripts/mirror_swe_bench_pro_image.py \
 [`http.compat: ["docker2s2"]`](https://zotregistry.dev/v2.1.18/admin-guide/admin-configuration/#compatibility-with-other-image-schema-types)。
 平台仓库提供 `configure_registry_compat.py`，按实际运行版本验证配置并备份；不能为绕过 415 错误转换清单后仍宣称摘要相同。
 
-### 干净工作区的实际验收
+### 2026-10-30—31 普通账号验收与评分修复
+
+2026-10-30，普通账号 `user`（roles=[]）从模板新建独立 20 GiB PVC，初始 Docker 为 0 images / 0 containers； `dev` 与
+`swe-pro-docker` 均 Ready，固定 ARM64 镜像、V1 数据与官方源码通过校验，模型 API 可达。 固定入口仍为本文的
+`33efa2a4ce065bcd6d25ab387ddffd85b3826a3f`，任务仍为入门 NodeBB V1 单题。
+
+| 阶段       | 实际结果                                                                                                      |
+| ---------- | ------------------------------------------------------------------------------------------------------------- |
+| 环境就绪   | 10月30日新工作区准备通过；10月31日修复模板后的第二个新工作区被存储配额拒绝                                    |
+| Agent 提交 | 61 次模型调用、1200.261 秒后达到既定时间预算；未 Submitted，保留 4165 字节未完成补丁                          |
+| 官方评分   | 10月31日仅复评原补丁，未新增模型调用；补丁应用退出码 0，取证完整，官方结果 0/1；解析输出 117 PASSED、4 FAILED |
+
+首次 `grade-001` 返回 127，缺失 `output.json`。文件探针证实 `dev` 中的评分目录在独立 daemon 中不存在。 模板修复为 `swe-pro-docker`
+挂载本工作区 home PVC 到与 `dev` 相同的路径；不挂宿主机 Docker socket， 不将整个 home 挂给 Agent 任务容器。使用普通账号更新验收工作区后，同一探针通过。
+
+`grade-002` 保留了原入口、官方评分源码、模型生成的补丁及固定任务镜像；评分前后 image ID 一致。 原始补丁与实际应用补丁 SHA256 均为
+`5d188aaa24ccb28a7dc2ac23bd9b33f4a5deab48b3ce13aab245b23f3bb4d1b6`。
+`grading_status=OUTPUTS_PRESENT`、`patch_application.status=applied`、`state_capture=complete`；
+这是未完成补丁的有效独立评分，不是 Agent 提交成功。
+
+本次私有原件保留在验收工作区 `/root/swe-pro-first/`：
+`run/task-000/report-private.json`、`run/task-000/patch-private.diff`、`grade-001/`、`grade-002/`、
+`grade-002-private.log` 和 `diagnostics-1031/`。 逐题 `grade-002/instance_*/workspace/` 包含
+`output.json`、`stdout.log`、`stderr.log`、 `hust-patch-apply.*` 及应用前后文件状态；私有题目、轨迹和补丁不公开。
+
+本轮没有重跑 Agent、放宽预算或重启模型。配额解除后，仍须以新 PVC、空 Docker 数据目录完成修复模板的完整新用户复验。
+
+### 2026-10-24 历史干净工作区验收
 
 2026-10-24，使用新建 CPU 工作区、新建 40 GiB 持久卷、初始 Docker 镜像数量 0， 从 GitHub 固定版本
 `820f6af85434367973c1131ea5e608845e328252` 下载安装入口， 自动建立客户端、下载校验数据与镜像，并复用既有模型 API 跑了一道真实 V1 任务。 结果为
@@ -132,6 +169,8 @@ NodeBB 的一道 V1 任务、一个独立 Agent。任务容器需要至少示例
 dockerd --host=unix:///run/swe-pro-docker/docker.sock \
   --data-root=/var/lib/docker --storage-driver=overlay2
 ```
+
+`dev` 与 `swe-pro-docker` 在相同 home 路径挂载本工作区自己的 PVC，使官方评分器的 bind mount 能解析评分工作目录。评分沙箱只挂本次评分目录。
 
 `dev` 容器通过 `DOCKER_HOST=unix:///run/swe-pro-docker/docker.sock` 访问它。 这与把物理机 `/var/run/docker.sock`
 挂入工作区、直接控制宿主 Docker 的方式不同。 该实现使用 **privileged 辅助容器**，不能据此宣称具备虚拟机级安全隔离；普通 devbox 不自动开放这项能力。 平台实现见
