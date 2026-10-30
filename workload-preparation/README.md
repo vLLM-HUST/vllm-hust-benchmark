@@ -986,7 +986,7 @@ for record in iter_workload("MULTIAGENTBENCH", data_root=Path("/private/marble-o
 
 服务器已按原Git对象校验99份原软件文件（1420037字节），其中94份Python仅做静态解析，未导入或执行。固定原`marble/evaluator/evaluator.py`第324行的`except json.JSONDecodeError`缩进导致`SyntaxError`，服务器及直接原Git对象解析均复现；原文件完整保留；初始检查尚未安装依赖，批准的兼容副本及客户端最新进展见下文。须先找到与原任务兼容的正式可用版本，或明确审批并披露最小源码兼容修复，再验证原生运行；不能将该阻塞归咎于模型或靠删评分绕过。
 
-官方软件的公共计划/校验入口如下；固定99文件的版本、大小、Git对象和SHA256在`configs/workload-native/marble-author-source.json`，源码目录必须与运行输出分离：
+官方软件的公共计划/校验入口如下；当前固定100文件的版本、大小、Git对象和SHA256在`configs/workload-native/marble-author-source.json`，源码目录必须与运行输出分离。原99份之外补入同一版本的951字节`multiagentbench/runjsonl2yaml.sh`，不改已有软件：
 
 ```bash
 python -I scripts/prepare_jsonschemabench_author_source.py --source marble \
@@ -995,7 +995,7 @@ python -I scripts/prepare_jsonschemabench_author_source.py --source marble \
   --author-root /external/marble-author --action verify
 ```
 
-已有缓存直接校验，不下载、不导入。需要取得缺失软件时可显式使用`--action prepare --max-bytes 1420037`；发布方Git接口可能限流，失败保留已核验文件，先处理访问条件，不能删缓存盲重试或换浮动版本。公共`verify`已在服务器复用99原文件通过；不据此宣称公共下载命令已重跑、完整依赖已安装或原生执行成功。
+已有缓存直接校验，不下载、不导入。需要取得缺失软件时可显式使用`--action prepare --max-bytes 1420988`；发布方Git接口可能限流，失败保留已核验文件，先处理访问条件，不能删缓存盲重试或换浮动版本。当前公共`verify`已在服务器复用原99文件、仅补入上述官方脚本后通过100文件校验；不据此宣称公共下载命令已重跑或原生执行成功。
 
 经明确批准，已增加独立的最小语法兼容副本入口，不再把这个语法错误视为无可处理的上游阻塞：
 
@@ -1028,6 +1028,9 @@ socket连接尝试；这不是内核网络隔离认证或生成代码sandbox。�
 加`--execute`才在全新独立目录写出五文件各原前三条，共15份配置。仅序列化为原`yaml.safe_load`可读的JSON形式YAML，不改题、模型名、预算、字段或路径；全部原字段保真，并用固定原`Config.load`验证任务、环境、Agent、关系、评分与协调配置。服务器15份原配置已通过。原生配置仍含原模型名及输出路径，尚未完成本地模型/裁判绑定和隔离运行部署，不能直接在宿主机盲跑或意外调用外部付费服务；配置准备不是原生执行。
 
 进一步的真实离线容器预检发现：其中12份原配置的`environment.type`与`max_iterations`为空；Minecraft三份为`Minecraft`、20次迭代。`Config.load`能读入空字段，不代表引擎能运行。准备回执现单列发布方清空的运行字段，不自动补值。官方`multiagentbench/jsonl2yaml.py`提供`fill_defaults`，其CLI默认却是Research环境、3次迭代，不能不分场景地套到bargaining、coding或database。须先取得各场景的官方配置依据，再显式绑定环境、模型、裁判和输出目录；尚无任何原生任务或评分完成结论。
+
+同版本`multiagentbench/runjsonl2yaml.sh`明确针对`research/research_main.jsonl`指定Research环境、5次迭代、graph协调、BaseMemory、原模型gpt-3.5-turbo及judge
+gpt-4o。这是Research场景的发布方配置依据，不代表其他场景，也不授权调用外部付费模型。后续资源替代模型及裁判须单独披露，原题、关系与5次迭代不得为跑通而缩减。该脚本已核验但未直接执行，尚未完成原生研究场景或评分。
 
 软件隔离镜像配方为`configs/workload-native/marble-compat-cpu.Dockerfile`。构建上下文只允许两个软件子目录：`client/`为已核验的Python3.10客户端（原锁93包＋披露的2包），`author/`为99份原软件及明确披露的评分器缩进兼容副本；禁止带入原题、答案、模型缓存、结果或凭据。操作者须先核验已有Ubuntu22.04基础镜像的不可变ID，显式传给`MARBLE_BASE_IMAGE`，不能把浮动tag当身份依据。
 

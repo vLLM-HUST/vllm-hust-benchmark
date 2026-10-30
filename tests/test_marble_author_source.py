@@ -12,14 +12,15 @@ PINS = ROOT / "configs/workload-native/marble-author-source.json"
 def test_original_source_selection_preserves_lock_and_known_defect_identity():
     pins = json.loads(PINS.read_text("utf-8"))
     files = {item["path"]: item for item in pins["files"]}
-    assert len(files) == len(pins["files"]) == 99
-    assert sum(item["bytes"] for item in files.values()) == 1420037
+    assert len(files) == len(pins["files"]) == 100
+    assert sum(item["bytes"] for item in files.values()) == 1420988
     assert sum(name.endswith(".py") for name in files) == 94
     assert {
         "LICENSE",
         "poetry.lock",
         "pyproject.toml",
         "marble/main.py",
+        "multiagentbench/runjsonl2yaml.sh",
     } <= files.keys()
     assert (
         files["marble/evaluator/evaluator.py"]["sha256"]
@@ -46,7 +47,7 @@ def test_default_source_plan_does_not_download_or_create_environment(tmp_path):
     )
     assert report["source_id"] == "MULTIAGENTBENCH"
     assert report["status"] == "PLAN_ONLY_NO_DOWNLOAD"
-    assert report["files"] == 99
+    assert report["files"] == 100
     assert report["model_calls"] == 0 and report["source_checkbox_eligible"] is False
     assert not target.exists()
 
