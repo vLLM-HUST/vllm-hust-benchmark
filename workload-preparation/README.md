@@ -973,3 +973,13 @@ for record in iter_workload("BIXBENCH", data_root=root, limit=3):
 完整元数据索引可以在部分ZIP尚缺时建立；这只证明问题引用可读取，不能据此声明所有任务可执行。现有pipeline配置中的来源项可写为`{"source_id":"BIXBENCH","data_root":"/private/bixbench-original"}`，输出目录必须与来源目录分离；研究消费继续使用原`resolve_input`接口。记录的`runtime.assets`列出对应原ZIP身份，适配阶段不会把缺失ZIP自动下载或替换成别的语料。
 
 服务器已安装[实际CI工件](../docs/workload-data/validation/bixbench-actual-ci-handoff-20261030.json)，71个运行载荷与Git及安装文件逐字节一致；全部205条原字段还原、复用未改变的205条索引及固定前三条公共/未修改研究消费回查、原ZIP摘要校验均通过。这不是科学Agent执行或评分；[早期候选交接证据](../docs/workload-data/validation/bixbench-candidate-handoff-20261030.json)保留原阶段范围。Python3.12以上的官方科学运行环境、NPU模型绑定及原评分仍待完成。
+
+官方软件准备入口固定发布方27份原文件（627,314字节），包含许可证、原Agent/评分源码和`uv.lock`，不包含任务数据或模型。以下命令分别预览、获取与核验；获取需要显式软件字节预算，核验不会导入或执行作者代码：
+
+```bash
+python scripts/prepare_jsonschemabench_author_source.py --source bixbench --author-root /external/bixbench-author
+python scripts/prepare_jsonschemabench_author_source.py --source bixbench --author-root /external/bixbench-author --action prepare --max-bytes 627314
+python -I scripts/prepare_jsonschemabench_author_source.py --source bixbench --author-root /external/bixbench-author --action verify
+```
+
+运行环境应独立于模型服务和源码目录：使用Python3.12以上和作者原`uv.lock`，将`UV_PROJECT_ENVIRONMENT`、`UV_CACHE_DIR`及`TMPDIR`显式设到外部目录，再执行`uv sync --frozen --no-dev --no-python-downloads --python <Python3.12路径> --project /external/bixbench-author`。专用CPU的Python3.12.13环境已完成这一步及依赖检查、安装后原源码核验。作者包安装后，在外部工作目录直接导入`bixbench`会报模块未找到；显式设置`PYTHONPATH=/external/bixbench-author`后，使用独立环境Python执行`-m bixbench.generate_trajectories --help`通过。这只是客户端入口加载验证，不是原生任务执行；隔离Notebook容器、模型连接和官方评分均须另行验证。不得通过修改锁文件或切成零样本问答来宣称原流程完成。

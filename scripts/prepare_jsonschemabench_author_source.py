@@ -7,6 +7,10 @@ No author code patching, fake modules, dataset downloads or model calls.
 import argparse
 import json
 from pathlib import Path
+import sys
+
+if __package__ in {None, ""}:
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from prepare_crosscodeeval_original_assets import acquire, verify_git_blob
 from prepare_xsum_original_assets import bound_path
@@ -46,6 +50,7 @@ def main():
             "naturebench",
             "temporalwiki",
             "appworld-react",
+            "bixbench",
         ],
         default="jsonschemabench",
         help="Pinned original author source only; historical default unchanged",
