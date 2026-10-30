@@ -945,7 +945,7 @@ for record in iter_workload("LJSPEECH", data_root=Path("/private/ljspeech"), lim
     reference_wav = record.outcome["audio"]  # 不传入TTS模型
 ```
 
-归档读取会先流式核对完整的文本/音频一一对应关系，即使`limit=3`也需要扫描原压缩包；因此不要在逐请求循环内重复创建迭代器。读取不会解码WAV、执行TTS或评分。软件夹具通过不等于原始数据消费或原生合成通过；真实NPU合成、固定软件工件和研究侧原数据消费仍待完成。
+归档读取会先流式核对完整的文本/音频一一对应关系，即使`limit=3`也需要扫描原压缩包；因此不要在逐请求循环内重复创建迭代器。读取不会解码WAV、执行TTS或评分。实际CI工件安装、完整13,100条原索引和固定前三条公共/未修改研究消费入口的原数据回查已通过，见[原数据交接证据](../docs/workload-data/validation/ljspeech-actual-ci-handoff-20261030.json)；这不替代真正的NPU语音合成与适用输出核验。
 
 VITS发布方提供对应LJ
 Speech的模型及原推理示例，可作为候选，但其CUDA/PyTorch1.6环境不等于已适配NPU；尚未取得并固定检查点，不宣称原生合成已运行。没有自动MOS分数可凭空补造，波形非空或格式合法也不能代表语音质量。[当前证据与缺口](../docs/workload-data/validation/ljspeech-original-readiness-20261029.json)持续更新，来源总勾保持未完成。
