@@ -7,6 +7,7 @@ from pathlib import Path
 import shutil
 import subprocess
 import sys
+from types import SimpleNamespace
 
 import pytest
 
@@ -39,7 +40,7 @@ def test_standalone_source_list_covers_runtime_package_imports():
                 modules = [node.module.split(".")[1]]
             for module in modules:
                 dependency = package / (module + ".py")
-                assert str(dependency.relative_to(ROOT)) in declared, (
+                assert dependency.relative_to(ROOT).as_posix() in declared, (
                     relative,
                     module,
                 )
@@ -277,7 +278,19 @@ def test_standalone_installer_pins_source_and_refuses_changed_files(
         bootstrap.source_repository(args)
 
 
-def test_wrong_registry_image_fails_before_client_installation(tmp_path, monkeypatch):
+@pytest.mark.parametrize(
+    ("free_gib", "expected_error"),
+    [(14, "at least 15 GiB free"), (16, "frozen upstream digest")],
+)
+def test_wrong_registry_image_fails_before_client_installation(
+    tmp_path, monkeypatch, free_gib, expected_error
+):
+    # Disk safety is a separate precondition, not the CI runner's spare space.
+    monkeypatch.setattr(
+        bootstrap.shutil,
+        "disk_usage",
+        lambda _: SimpleNamespace(free=free_gib * 1024**3),
+    )
     monkeypatch.setattr(bootstrap.platform, "system", lambda: "Linux")
     monkeypatch.setattr(bootstrap.platform, "machine", lambda: "aarch64")
     monkeypatch.setattr(
@@ -292,6 +305,7 @@ def test_wrong_registry_image_fails_before_client_installation(tmp_path, monkeyp
     monkeypatch.setattr(bootstrap, "LOCK", lock)
 
     def check(command, **kwargs):
+        assert free_gib >= 15, "low disk must fail before any Docker command"
         if "info" in command:
             return json.dumps(
                 {"OSType": "linux", "Architecture": "aarch64", "Images": 0}
@@ -325,7 +339,7 @@ def test_wrong_registry_image_fails_before_client_installation(tmp_path, monkeyp
             "openai/example",
         ],
     )
-    with pytest.raises(ValueError, match="frozen upstream digest"):
+    with pytest.raises(ValueError, match=expected_error):
         bootstrap.main()
     assert not (work / "client").exists()
     assert not (work / "sources").exists()

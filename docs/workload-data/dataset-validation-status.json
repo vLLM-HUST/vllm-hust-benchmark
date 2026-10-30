@@ -1584,12 +1584,23 @@
     "WAVCAPS": {
       "scope": "public",
       "delivery_kind": "review_original_source_protocol",
-      "status": "NOT_STARTED",
+      "status": "IN_PROGRESS",
       "checked": false,
       "legacy_checked": false,
       "existing_receipt": null,
       "delivery_receipt": null,
-      "blocker": null
+      "original_software_preparation": {
+        "repository": "XinhaoMei/WavCaps",
+        "revision": "a5a9649ce305d7fe82cfcf5d6a4a12f03df9ef1e", "identity_note": "pragma: allowlist secret - public publisher source revision",
+        "server_receipt": "/root/wavcaps-original-source-20261031-001/preparation-public.json",
+        "original_files_git_blob_and_sha256_verified": 6,
+        "python_ast_files": 3,
+        "publisher_code_imported_or_executed": false,
+        "audio_or_models_acquired": false,
+        "model_calls": 0,
+        "source_checkbox_eligible": false
+      },
+      "blocker": "Pinned publisher README, captioning README/test/scorer and retrieval README/zero-shot entry acquired on owned CPU; six original Git blobs and SHA256 identities checked, three Python ASTs parsed without importing. Official captioning uses a dedicated audio encoder/BART checkpoint, not a text chat completion; original loader selects32000Hz mono and architecture-dependent10s/30s preprocessing. Published COCO scoring has a five-reference assertion; WavCaps weak captions cannot be duplicated to pretend they are five human references. Audio, checkpoints, full model/runtime dependencies, appropriate original evaluation data/protocol, NPU execution and exact-artifact research handoff remain pending. Academic-only/source-specific audio conditions must be retained; no raw redistribution or text prompt substitution."
     },
     "SCIENCEAGENTBENCH": {
       "scope": "public",
