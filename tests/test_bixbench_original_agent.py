@@ -78,6 +78,20 @@ def test_container_policy_preserves_original_command_and_scoped_bind(tmp_path):
     assert actual["HostConfig"]["Binds"] == original["HostConfig"]["Binds"]
 
 
+@pytest.mark.parametrize("timeout", [0, 59, 1801, float("nan")])
+def test_invalid_transport_timeout_rejected(timeout):
+    with pytest.raises(ValueError, match="timeout"):
+        module().validate_options(
+            SimpleNamespace(
+                request_timeout=timeout,
+                api_base="http://127.0.0.1:1234/v1",
+                model="openai/local",
+                limit=3,
+                run_name="fixed",
+            )
+        )
+
+
 def test_container_policy_rejects_extra_device_or_mount(tmp_path):
     m = module()
     config = {

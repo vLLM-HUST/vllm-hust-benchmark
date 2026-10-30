@@ -1093,4 +1093,18 @@ daemon与客户端两侧有相同路径，并由操作者仅对运行副本设�
 
 将模型名、端口及Docker套接字替换为操作者已核验的专用环境；输出与workspace须是两个全新外部目录，不能覆盖准备目录。使用含`prepared_files`摘要的新准备回执，入口会再次核对原JSONL、ZIP、发布方软件和预处理文件身份。模型窗口空闲、容器资源及模型原消息模板兼容性就绪后才加`--execute`。远端模型可使用已授权的回环转发，或显式`--model-queue`配合前述可信worker；入口不自动建立网络连接或启动模型。
 
+对于已确认响应可能超过客户端默认60秒的本地模型，可显式加`--request-timeout 600`。这是传输等待时间，不是生成token预算或Agent步数；默认不覆盖作者客户端配置。须在回执披露该差异，不能通过重复请求或截断响应来掩盖超时。范围为60至1800秒，仍须核验模型绑定、客户端实际解析及原生任务终态。
+
 执行沿用原40步科学Agent、双阶段工具交互、原生成预算及原轨迹保存，不是静态问答。当前9B绑定拒绝原角色序列`system,user,user,system`，报`System message must be at the beginning`；保留失败容器和日志，不能合并或删除末尾system来凑通过。需另行验证兼容模型；资源替代模型不得标为官方推荐。此入口不包含评分，作者默认开放答案judge为GPT-4o；未授权调用付费judge，不以轨迹生成、计划输出或Notebook夹具代替官方评分与来源总勾。
+
+开放答案评分入口（默认仅计划，服务器原生评分尚待验证）：
+
+```bash
+/external/bixbench-client/bin/python scripts/run_bixbench_original_grader.py \
+  --author-root /external/bixbench-author \
+  --input-file /private/bixbench-original-grading-input.csv \
+  --output /private/bixbench-new-grading-output \
+  --model openai/QUALIFIED_LOCAL_JUDGE --api-base http://127.0.0.1:19466/v1
+```
+
+输入遵循发布方`grade_outputs.py`的CSV约定：`question`为原题、`target`为原参考答案、`predicted`为已保存的原生Agent答案；已有`evaluation_mode`原值须保留，不得改题或用模型重新生成答案。该入口不自动将轨迹改写成CSV，调用方须先核对逐题对应关系。加`--execute`后直接调用固定发布方的`grade_answers`，保留开放答案评分规则、温度1.0与作者默认生成配置；仅显式绑定已核验的本地judge和回环API。发布方会原地更新CSV，因此入口只传新私有副本，不覆盖输入。评分失败保留输出并报错。当前仅软件边界测试通过，尚无真实评分成功声明；替代judge的结果也不等于GPT-4o结果复现，必须披露模型差异，不能据此单独打来源总勾。

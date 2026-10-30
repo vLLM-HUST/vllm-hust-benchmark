@@ -57,6 +57,9 @@ def notebook_policy(config, workspace):
 
 
 def validate_options(args):
+    timeout = getattr(args, "request_timeout", None)
+    if timeout is not None and not 60 <= timeout <= 1800:
+        raise ValueError("transport timeout must be between60 and1800 seconds")
     endpoint = urlsplit(args.api_base)
     if (
         endpoint.scheme != "http"
@@ -178,6 +181,8 @@ async def execute(args, report):
     )
     config["run_name"] = args.run_name
     config["agent"]["agent_kwargs"]["llm_model"]["name"] = args.model
+    if args.request_timeout is not None:
+        config["agent"]["agent_kwargs"]["llm_model"]["timeout"] = args.request_timeout
     config["paths"].update(
         workspace_dir=str(workspace),
         trajectories_dir=str(output / "trajectories"),
@@ -215,6 +220,7 @@ async def execute(args, report):
         actual_actor_model=args.model,
         author_actor_reproduction=False,
         official_scoring_executed=False,
+        transport_timeout_override_seconds=args.request_timeout,
     )
 
     def save():
@@ -284,6 +290,7 @@ def main():
     parser.add_argument("--api-key-env", default="OPENAI_API_KEY")
     parser.add_argument("--docker-host", required=True)
     parser.add_argument("--model-queue", type=Path)
+    parser.add_argument("--request-timeout", type=float, default=None)
     parser.add_argument("--run-name", default="original-local-actor")
     parser.add_argument("--limit", type=int, default=3)
     parser.add_argument("--execute", action="store_true")
