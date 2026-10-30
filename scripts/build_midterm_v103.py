@@ -368,9 +368,13 @@ def prepare():
             paragraphs[index] = (
                 f"本轮固定200题完整回答质量为B0 {a['correct']}/200、优化候选{b['correct']}/200，"
                 "联合性能与成本见5.13节。5.11节的151/200等既有质量记录保留原配置与日期；"
-                "3.3节另列既有服务窗口。其他版本的Native仅称版本对照，不称B0。"
+                "3.3节另列既有服务窗口。其他版本的Native仅称版本对照，不称B0；开发栈对照收益不作为相对B0的收益。"
             )
     report = "\n\n".join(paragraphs)
+    report = report.replace(
+        "报告结论截至2026年10月26日（北京时间）",
+        "报告结论截至2026年10月30日（北京时间）",
+    )
     before, rest = report.split("### 当前证据与缺口清单", 1)
     _, after = rest.split("## 二、大纲指标对照表", 1)
     gaps = f"""### 当前证据与缺口清单
