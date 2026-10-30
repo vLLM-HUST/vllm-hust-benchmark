@@ -459,7 +459,9 @@ Pod已不存在（Kubernetes返回`NotFound`）；Coder最新build为`stopped`�
 - [x] 原生字段适配器安装候选软件包后，服务器全部205条原字段可还原、205条索引及固定前三条公共/未修改研究消费完整记录回查通过，原ZIP引用与摘要验证通过。输入只含原问题和数据目录名，答案/结果/未知扩展字段保持参考侧；不是API
   prompt生成器。[候选包交接证据](validation/bixbench-candidate-handoff-20261030.json)
 - [x] 实际CI工件12953366374的71个运行载荷与Git及安装文件逐字节一致；服务器全部205条原记录还原、复用未改变的205条索引及固定原前三条公共/研究消费与ZIP校验通过，无索引重建和模型调用。[实际CI交接证据](validation/bixbench-actual-ci-handoff-20261030.json)
-- [ ] Python3.12以上的官方科学Agent/Notebook隔离环境、NPU模型绑定和原评分仍待完成。官方镜像有ARM64元数据，但尚未拉取或验证运行；没有模型调用，不打来源总勾。
+- [x] 官方ARM64 Notebook镜像16层摘要与最终配置身份核验通过；原作者Notebook
+  API的可信`1+1`夹具在非root、离线、只读根容器执行成功。保留第一次运行副本权限失败，只调整本任务副本的组权限及客户端umask，未改作者源码或共享数据权限。[环境夹具证据](validation/bixbench-notebook-preparation-20261030.json)
+- [ ] 原生科学任务、公共执行入口、NPU模型绑定及官方评分仍待完成。环境夹具没有模型调用，不打来源总勾。
 
 本来源保留科学Agent执行路线，不能用发布方另有的零样本问答模式替代。固定原配置默认40步，依赖`fhaviary`、`fhda`、`fhlmi`和`ldp`；作者入口为`bixbench/generate_trajectories.py`，随后按作者后处理/评分协议评判。原ZIP须保留为来源；运行副本按作者预处理移动Data内容、移除参考Notebook，不能将整个含参考Notebook的归档直接暴露给Agent。官方软件准备入口已补充，27份原文件在专用CPU工作区校验通过、13份Python文件通过静态解析；原锁文件客户端安装仍在进行，尚未验证Agent导入、隔离容器或原生执行，不打来源总勾。命令与边界见[组件说明](../../workload-preparation/README.md#bixbench-%E5%8E%9F%E7%A7%91%E5%AD%A6%E4%BB%BB%E5%8A%A1%E5%87%86%E5%A4%87%E4%B8%8E%E8%AF%BB%E5%8F%96%E5%8E%9F%E7%94%9F%E6%89%A7%E8%A1%8C%E6%9C%AA%E5%AE%8C%E6%88%90)。
 

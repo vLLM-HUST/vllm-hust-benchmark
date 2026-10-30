@@ -982,4 +982,18 @@ python scripts/prepare_jsonschemabench_author_source.py --source bixbench --auth
 python -I scripts/prepare_jsonschemabench_author_source.py --source bixbench --author-root /external/bixbench-author --action verify
 ```
 
-运行环境应独立于模型服务和源码目录：使用Python3.12以上和作者原`uv.lock`，将`UV_PROJECT_ENVIRONMENT`、`UV_CACHE_DIR`及`TMPDIR`显式设到外部目录，再执行`uv sync --frozen --no-dev --no-python-downloads --python <Python3.12路径> --project /external/bixbench-author`。专用CPU的Python3.12.13环境已完成这一步及依赖检查、安装后原源码核验。作者包安装后，在外部工作目录直接导入`bixbench`会报模块未找到；显式设置`PYTHONPATH=/external/bixbench-author`后，使用独立环境Python执行`-m bixbench.generate_trajectories --help`通过。这只是客户端入口加载验证，不是原生任务执行；隔离Notebook容器、模型连接和官方评分均须另行验证。不得通过修改锁文件或切成零样本问答来宣称原流程完成。
+运行环境应独立于模型服务和源码目录：使用Python3.12以上和作者原`uv.lock`，将`UV_PROJECT_ENVIRONMENT`、`UV_CACHE_DIR`及`TMPDIR`显式设到外部目录，再执行`uv sync --frozen --no-dev --no-python-downloads --python <Python3.12路径> --project /external/bixbench-author`。专用CPU的Python3.12.13环境已完成这一步及依赖检查、安装后原源码核验。作者包安装后，在外部工作目录直接导入`bixbench`会报模块未找到；显式设置`PYTHONPATH=/external/bixbench-author`后，使用独立环境Python执行`-m bixbench.generate_trajectories --help`通过。这只是客户端入口加载验证；官方ARM64镜像及原作者Notebook
+API的隔离可信夹具也已通过，但模型连接、原任务和官方评分仍待验证。不得通过修改锁文件或切成零样本问答来宣称原流程完成。
+
+数据准备公共入口使用已取得的原JSONL与ZIP，不自动下载。先用上述独立客户端Python运行以下命令查看计划，确认两个全新外部输出目录及空间后再加`--execute`：
+
+```bash
+/external/bixbench-client/bin/python scripts/prepare_bixbench_original_tasks.py \
+  --author-root /external/bixbench-author --data-root /private/bixbench-original \
+  --output /private/bixbench-prepared --workspace /private/bixbench-workspaces --limit 3
+```
+
+执行时固定核验发布方软件及数据摘要，按原JSONL顺序选择前N题，调用作者预处理和科学环境构造；仅修改新副本中的运行路径，原ZIP及JSONL不变。作者预处理删除的是运行副本中的参考Notebook及复制ZIP，不应把来源目录作为输出。此公共入口已在服务器复用同一批资产验证原前三题，数据文件数为4、4、6；见[原任务准备证据](../docs/workload-data/validation/bixbench-selected-task-preparation-20261030.json)。它不会启动Notebook、Agent或模型，也不评分。
+
+后续隔离执行还要求workspace在Docker
+daemon与客户端两侧有相同路径，并由操作者仅对运行副本设置非root容器所需的组权限；不得递归修改原始数据或共享目录。已验证的可信夹具使用UID/GID65534、运行目录setgid2770及控制器进程局部umask0007，避免root创建的0600文件阻止非root读取。任务容器保持离线、只读根、去除能力且只挂载本任务workspace；原执行器必须显式启用Docker，不能退回宿主机执行生成代码。[镜像与夹具证据](../docs/workload-data/validation/bixbench-notebook-preparation-20261030.json)不代表原生科学任务已跑通。
