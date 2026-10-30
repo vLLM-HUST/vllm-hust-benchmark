@@ -193,8 +193,8 @@ def test_original_research_assets_are_registered_without_native_completion_claim
         runner.CATALOG.read_text("utf-8"), object_pairs_hook=unique_object
     )["sources"]
     assert (
-        len(sources) == 108
-    )  # existing107 plus already-planned LJSPEECH archive, not new scope
+        len(sources) == 109
+    )  # Existing108 plus already-planned MULTIAGENTBENCH, not new delivery scope.
     assert "TEMPORALWIKI" in sources
     assert sum(EXPECTED.values()) == 48
 
