@@ -1,6 +1,8 @@
 """Native configuration custody fixtures, not Agent/scoring validation."""
 
 from copy import deepcopy
+import json
+from pathlib import Path
 import pytest
 
 from vllm_hust_workload_data.multiagentbench import (
@@ -59,3 +61,20 @@ def test_input_reference_tampering_rejected():
     record.task["input"]["labels"] = ["leaked"]
     with pytest.raises(ValueError, match="separation"):
         restore_original_configuration(record)
+
+
+def test_source_handoff_evidence_does_not_claim_native_completion():
+    root = Path(__file__).resolve().parents[1]
+    ledger = json.loads(
+        (root / "docs/workload-data/dataset-validation-status.json").read_text("utf-8")
+    )
+    row = ledger["delivery_inventory"]["MULTIAGENTBENCH"]
+    handoff = row["research_source_checkout_handoff"]
+    assert handoff["original_index_records"] == 500
+    assert handoff["public_and_research_full_record_roundtrips"] == 500
+    assert handoff["restored_original_configurations_equal"] == 500
+    assert handoff["research_code_or_default_dependency_changed"] is False
+    assert handoff["actual_ci_artifact_verified"] is False
+    assert handoff["model_calls"] == 0
+    assert handoff["native_execution"] is False and handoff["official_scoring"] is False
+    assert handoff["source_checkbox_eligible"] is False and row["checked"] is False
