@@ -9,6 +9,7 @@ from pathlib import Path
 import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
+ORIGINAL_REVISION = "1110a243fdf4706b3f48f1d95db1a4f5529b4d41"  # pragma: allowlist secret - public model revision
 SPEC = importlib.util.spec_from_file_location(
     "marble_keybert_npu", ROOT / "scripts/run_marble_keybert_npu.py"
 )
@@ -73,8 +74,6 @@ def test_fixture_model_assets_checked_before_model_import(tmp_path, monkeypatch)
 def test_pinned_model_matches_actual_qualified_original():
     profile = json.loads(entry.PROFILE.read_text())
     assert profile["model"] == "sentence-transformers/all-MiniLM-L6-v2"
-    assert (
-        profile["revision"] == "1110a243fdf4706b3f48f1d95db1a4f5529b4d41"
-    )  # pragma: allowlist secret - fixed public model revision
+    assert profile["revision"] == ORIGINAL_REVISION
     assert len(profile["files"]) == 11
     assert sum(x["bytes"] for x in profile["files"]) == 91607178

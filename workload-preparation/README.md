@@ -1065,6 +1065,11 @@ ASCEND_RT_VISIBLE_DEVICES="$OWNED_NPU_ID" \
 
 默认不读取输入、不加载模型；执行入口以[固定原文件身份](../configs/workload-native/marble-minilm-original-assets.json)核对模型，禁止远程代码和CPU神经前向，输出原KeyBERT关键词及实际前向次数。它是单次工具后端，不自行开放网络服务、分配卡或接管模型服务，也不等于Research工具已经接入此后端。跨机传输和原Agent调度仍须继续接通，不能以本命令代替原生多Agent流程。
 
+原Research模块的显式队列绑定在`scripts/marble_keybert_transport.py`。在原工具调用所在进程中使用`keyword_transport(paper_collector, private_queue)`上下文，只临时替换该模块的默认KeyBERT工厂；退出上下文恢复原工厂，不修改发布方文件。原查询和1—3
+gram/英文停用词设置保持不变，关键词及分数按原tuple格式返回。队列复用既有原子写入，每次调用一个UUID；可信跨机worker将该请求送至上述NPU入口，再将返回JSON写入同UUID的响应文件。超时保留请求并报错，不自动重发；worker不得把它接到公开端口或允许任务代码访问SSH凭据。
+
+实际跨机控制已确认原`get_related_papers`消费了NPU返回的5个关键词，原查询两端摘要一致，无本地原始数据文件。该控制仍在后续论文内容获取阶段，尚未观察到原工具返回；它不是原Agent题目，也不是Research场景完成。后续须跟踪同一进程，不重复启动，完整原生Agent与评分仍待验证。相关CI只运行夹具及协议检查，不访问arXiv或分配NPU。
+
 本配方已在专用ARM64 CPU工作区构建，并通过非root65534、无网络、只读根、去全部能力、禁止提权的真实容器`--help`探测，退出0；未挂载任务数据、Docker
 socket或NPU。任务运行还必须另行部署私有数据/输出、本地模型传输、各场景原环境和评分；镜像只证明软件导入底座可用，不代表Minecraft、数据库、研究工具等环境已齐备，也不是安全认证或原生任务完成。旧容器、镜像和结果未清理。
 
