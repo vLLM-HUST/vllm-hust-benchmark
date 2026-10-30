@@ -53,6 +53,7 @@ def main():
             "bixbench",
             "marble",
             "dailytalk",
+            "longmemeval",
         ],
         default="jsonschemabench",
         help="Pinned original author source only; historical default unchanged",

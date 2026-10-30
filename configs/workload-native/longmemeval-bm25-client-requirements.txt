@@ -1,0 +1,17 @@
+# Separate CPU BM25 client, not a model-serving environment replacement.
+# Preinstall the platform's matching CPU/vendor Torch; never pull CUDA wheels.
+# Real validation: Python3.12.13, vendor Torch2.10.0+cpu, torch-npu2.10.0.post4.
+# Dense retrieval, index expansion and full publisher CUDA environment unqualified.
+torch==2.10.0+cpu
+rank-bm25==0.2.2
+openai==1.35.1
+httpx==0.27.2
+sentence-transformers==3.4.1
+transformers==4.49.0
+tokenizers==0.21.0
+huggingface-hub==0.29.1
+numpy==1.26.4
+scipy==1.13.1
+scikit-learn==1.6.1
+nltk==3.10.4
+tqdm==4.66.4

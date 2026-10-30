@@ -41,7 +41,7 @@
     "boundary": "Current repository receipt custody and checkbox consistency only. No native tasks rerun, no new scoring, no current server raw-file or model-health availability assertion. Shared source-specific receipts are allowed."
   },
   "current_execution_access_review": {
-    "status": "REPLACEMENT_NPU_APPROVED_MODEL_RESTORED_FIXED_PREFIX_NATIVE_RECOVERY_RUNNING",
+    "status": "BIXBENCH_FIXED3_NATIVE_RETURNED_PUBLISHER_SCORING_DEFECTS_PENDING",
     "current_cpu_isolation_recovery": {
       "same_persistent_graph_reused": true,
       "backing_file_capacity_bytes": 30064771072,
@@ -83,9 +83,9 @@
     "approved_model_start_process_observed_live": true,
     "model_api_readiness_verified": true,
     "previous_failed_binding_http200_responses": 6,
-    "corrected_binding_native_http200_responses_lower_bound": 3,
+    "corrected_binding_native_http200_responses_lower_bound": 160,
     "corrected_binding_content_and_tool_messages_observed": true,
-    "new_native_tasks_completed": 1,
+    "new_native_tasks_completed": 2,
     "bixbench_previous_client_exit_code": 1,
     "bixbench_previous_error_type": "Timeout",
     "bixbench_current_requested_transport_timeout_seconds": 600,
@@ -93,7 +93,7 @@
     "bixbench_current_effective_transport_timeout_seconds": 600,
     "bixbench_next_binding_router_timeout_verified_seconds": 600,
     "trusted_cpu_cluster_target_nodeport_mapping_found": false,
-    "boundary": "Previous timeout/reasoning-only failures and the pre-autostop ignored top-level timeout600 are retained as historical evidence. The restored original service and new actor use verified router_kwargs.timeout600 with unchanged task/model/generation budgets. Original question1 files were reused; question2 completed40 actions without an answer and was retained; question3 is running. This does not assert interrupted actor memory survived, scoring completed or the source delivery checkbox passed."
+    "boundary": "Previous timeout/reasoning-only failures and the pre-autostop ignored top-level timeout600 are retained. Original question1 files were reused; questions2/3 each completed the original40 actions in the new actor, which exited0 with160 request/HTTP200-response pairs. All three saved agent answers are null and preserved. No interrupted actor memory, valid formal scoring or source completion is claimed: synthetic controls reproduced publisher partial-match and range-template defects."
   },
   "current_scope_note": "delivery_inventory is the current source-delivery ledger. sources/incident_gate and frozen receipts retain their original historical scope, not live service or current progress assertions.",
   "current_research_consumer_integrity_followup": {
@@ -1300,12 +1300,38 @@
         "fixed_cases_question_type": "single-session-assistant",
         "eligible_user_side_positive_label_cases": 0,
         "usable_retrieval_quality_aggregate_claimed": false,
-        "reader_generation_executed": false,
+        "reader_public_preflight_receipt": "longmemeval-m-bm25-reader-public-preflight-20261031-002/preflight-public.json under the private shared task root",
+        "reader_native_receipt": "longmemeval-m-bm25-reader-native-20261031-001/state-public.json under the private shared task root",
+        "original_publisher_prompt_and_corpus_multiset_verified": true,
+        "original_repeated_session_ids_and_multiplicity_preserved": true,
+        "reader_profile": "original flat-session top10, JSON, both roles, CoN800, no additional truncation",
+        "reader_input_tokens": [34366, 31034, 30916],
+        "reader_model": "Qwen/Qwen3-14B",
+        "explicit_nonthinking_model_binding": true,
+        "reader_generation_executed": true,
+        "reader_native_exit_code": 0,
+        "reader_finish_reasons": ["stop", "stop", "stop"],
+        "new_reader_model_calls": 3,
+        "public_source_verify_server_receipt": "longmemeval-public-source-verifier-20261031-001/preflight-public.json under the private shared task root",
+        "local_qa_judge_sanity": {
+          "server_receipt": "longmemeval-qa-judge-controls-20261031-001/controls-public.json under the private shared task root",
+          "synthetic_controls_not_benchmark_tasks": true,
+          "model": "Qwen/Qwen3-14B",
+          "original_prompt_and_yes_substring_parser_unchanged": true,
+          "original_max_tokens": 10,
+          "original_temperature": 0,
+          "control_cases": 3,
+          "matched_expected_cases": 2,
+          "empty_response_negative_control_wrongly_labelled_yes": true,
+          "model_calls": 3,
+          "qualified_for_formal_qa_scoring": false,
+          "publisher_70b_or_gpt4o_reproduction": false,
+          "boundary": "Actual model is explicitly attributed as Qwen, not a supported70B alias. Keep failed sanity results; do not use the resulting labels as accepted benchmark scores or retry until passing."
+        },
         "qa_judging_executed": false,
-        "model_calls": 0,
-        "boundary": "Official M supports retrieval-augmented QA; full-history overflow is only the retained separate baseline limitation. Original BM25 indexes user-side text, and all fixed first3 cases have assistant-side answer evidence only. Publisher retrieval reporting excludes them; empty-positive recall_all=1 is vacuous, not retrieval success. Preserve original rows and outputs, do not change labels or select replacement cases. M reader/scoring and reusable public/consumer qualification remain pending."
+        "boundary": "Official M supports retrieval-augmented QA; full-history overflow remains a separate baseline limitation. All fixed3 assistant-evidence cases are excluded from publisher user-side retrieval aggregates, so vacuous metrics are not claimed. Original top10/CoN reader generations completed once on NPU after complete-corpus validation, including repeated session IDs. Original source, labels, questions and budgets unchanged; QA judging and exact-artifact/public-research handoff remain pending."
       },
-      "blocker": "Reuse the six completed Oracle/S generations; original QA judging remains pending. M full-history first case1201716 tokens exceeds129272 budget and remains a separate blocked baseline, not proof that original M is unusable. Unchanged publisher BM25-session retrieval over complete original M first3 histories now exited0 with original10 workers and all482/472/473 sessions preserved; no neural calls. All3 are assistant-evidence cases excluded from publisher user-side retrieval aggregates; do not claim vacuous metrics or replace cases. Next: original RAG reader and QA judging, exact public entry/artifact/research handoff. Keep source unchecked; no question/history truncation or quality-pass claim."
+      "blocker": "Reuse six Oracle/S generations and the new3 M RAG generations. Original BM25 over complete482/472/473-session histories and original top10/CoN800 reader exited0; all3 reader completions stopped normally. M full-history overflow remains a separate failed baseline, not a reason to change original questions or truncate histories. Current14B local QA binding failed the empty-answer negative sanity control under the unchanged publisher prompt/max10 budget, so formal judging is not accepted; need a qualified judge binding. All3 assistant-evidence cases are excluded from publisher user-side retrieval aggregates; do not claim vacuous retrieval scores. Exact public artifact/research handoff and accepted QA judging remain pending."
     },
     "LONGMEMEVAL_V2": {
       "scope": "public",
@@ -2641,7 +2667,7 @@
         "source_checkbox_eligible": false
       },
       "current_native_attempt": {
-        "status": "FIXED_ORIGINAL_PREFIX_RECOVERY_RUNNING_NOT_SCORED",
+        "status": "FIXED3_ORIGINAL_AGENT_TRAJECTORIES_TERMINAL_SCORING_DEFECTS_PENDING",
         "server_output": "/root/bixbench14b-native-agent-control-20261031-003/native-output",
         "model": "Qwen/Qwen3-14B",
         "physical_npu": 6,
@@ -2653,11 +2679,15 @@
         "effective_router_transport_timeout_seconds": 600,
         "fixed_selected_question_ids": ["bix-1-q1", "bix-1-q2", "bix-10-q1"],
         "completed_original_questions_reused": ["bix-1-q1"],
-        "new_original_questions_completed": ["bix-1-q2"],
-        "completed_fixed_question_count": 2,
+        "new_original_questions_completed": ["bix-1-q2", "bix-10-q1"],
+        "completed_fixed_question_count": 3,
+        "actor_exit_code": 0,
+        "terminal_audit_server_receipt": "/root/bixbench14b-native-agent-control-20261031-003/native-terminal-audit-public.json",
+        "all_saved_original_actions": [40, 40, 40],
+        "all_saved_agent_answers_are_null": true,
         "original_trajectory_files_reused_unchanged": 2,
         "interrupted_task_memory_restored": false,
-        "active_original_question": "bix-10-q1",
+        "active_original_question": null,
         "second_question_saved_result": {
           "problem_id": "bix-1-q2",
           "original_actions": 40,
@@ -2668,11 +2698,11 @@
           "trajectory_sha256": "72b399b4bac6cd299d95b1f28d0909f1c4b9190e2e9a7e19a6db2dedb622c829",
           "boundary": "Original40-action workflow completed without a final answer. Preserve and score the failure; do not replace or rerun to improve quality."
         },
-        "new_http200_responses_observed_lower_bound": 2,
+        "new_http200_responses_observed_lower_bound": 160,
         "model_response_cache_identity": "same queue request UUID and exact body SHA256 only; distinct retries are not substituted with earlier responses",
         "official_scoring_executed": false,
         "source_checkbox_eligible": false,
-        "boundary": "Previous actor disappeared with its Pod. Reused complete question1 including its null answer; original question2 completed in a fresh isolated notebook and also has no final answer. Original question3 is running. Same fixed three tasks, original40-step workflow and generation budget; no completed question rerun, no task replacement, no native scoring or source completion yet."
+        "boundary": "Reused complete question1; questions2/3 each completed40 original actions and all three null answers were retained. Actor exited0, all160 new requests have saved HTTP200 responses. No completed question rerun or task replacement. Formal scoring remains unexecuted because the original grader failed sanity controls; raw HTTP success and trajectory completion do not prove quality or source delivery."
       },
       "current_scoring_preparation_review": {
         "raw_jsonl_mode_field": "eval_mode",
@@ -2680,7 +2710,7 @@
         "original_modes_preserved": ["str_verifier", "str_verifier", "range_verifier"],
         "field_mapping_bug_found_before_any_native_scoring": true,
         "missing_conflicting_or_unknown_modes_rejected": true,
-        "saved_real_trajectory_rows_join_checked": 2,
+        "saved_real_trajectory_rows_join_checked": 3,
         "original_null_answers_preserved_via_publisher_parser": true,
         "public_grading_software_dependency_files_staged": 9,
         "real_client_router_max_tokens": 4096,
@@ -2688,14 +2718,23 @@
         "original_client_config_changed": false,
         "row_mapping_server_receipt": "/root/bixbench-grading-public-software-20261031-003/mode-and-client-public.json",
         "router_defaults_server_receipt": "/root/bixbench-grading-public-software-20261031-003/effective-router-defaults-public.json",
-        "judge_sanity_controls_prepared_not_executed": 5,
+        "judge_sanity_controls_prepared": 5,
+        "judge_sanity_controls_executed": 5,
+        "judge_sanity_controls_matching_expected": 3,
+        "judge_control_model_calls": 4,
         "judge_controls_are_synthetic_not_benchmark_tasks": true,
         "judge_controls_included_in_benchmark_scores": false,
         "judge_control_server_receipt": "/root/bixbench-judge-controls-20261031-001/preparation-public.json",
-        "all_three_grade_csv_prepared": false,
-        "model_calls_by_this_review": 0,
+        "all_three_grade_csv_prepared": true,
+        "original_grade_input_server_receipt": "/root/bixbench-original-grade-input-20261031-001/preparation.private.json",
+        "publisher_grading_defect_diagnosis_receipt": "/root/bixbench-judge-control-execution-20261031-001/root-cause-public.json",
+        "publisher_empty_normalized_prediction_can_pass_partial_match": true,
+        "publisher_range_verifier_overrides_range_template_with_generic_template": true,
+        "publisher_source_or_scoring_rules_modified": false,
+        "semantic_repair_user_decision_pending": true,
+        "new_model_calls_in_source_mapping_and_defect_inspection": 0,
         "source_checkbox_eligible": false,
-        "boundary": "Real saved-row mapping and original client software inspection only. The first two fixed questions use str_verifier, the third range_verifier; do not silently replace these with llm_verifier. Native generation is not rerun. Full CSV conversion waits for all three trajectories; local-judge sanity controls and actual scoring remain unexecuted."
+        "boundary": "All three original rows converted after native termination, preserving str/str/range modes and null predictions via publisher parsing. Separate synthetic controls matched3/5: empty prediction was deterministically marked correct without an LLM call; range dispatch used the generic rather than dedicated publisher template. These are not solely local-model errors. Preserve source/control outputs; do not silently change modes, filters, templates or formal task scores. Original scoring plus an explicitly repaired variant awaits user direction."
       },
       "previous_native_attempt_14b_autostop": {
         "recovered_after_cpu_autostop": {
@@ -2883,6 +2922,20 @@
       "scope": "public",
       "delivery_kind": "review_original_source_protocol",
       "status": "IN_PROGRESS",
+      "latest_native_synthesis_attempt": {
+        "server_receipt": "dailytalk-original-guo-native-stage-20261031-003/native-execution/state-private.json under the private shared task root",
+        "status": "ORIGINAL_GUO_SYNTHESIS_FAILED_RETAINED",
+        "physical_device": 6,
+        "acoustic_forward_entries": 1,
+        "vocoder_forward_entries": 0,
+        "initiating_error": "DynamicGRUV2Hidden rejects DT_FLOAT weight_hidden; current kernel advertises DT_FLOAT16/FRACTAL_Z only",
+        "precision_changed_to_force_success": false,
+        "earlier_environment_failures": ["Missing CANN Python paths", "AF_UNIX path too long"],
+        "short_tmp_manager_probe_passed": true,
+        "original_checkpoint_batch_history_and_controls_unchanged": true,
+        "cpu_neural_fallback_used": false,
+        "source_checkbox_eligible": false
+      },
       "original_readiness": {
         "publisher_repository": "https://github.com/keonlee9420/DailyTalk",
         "publisher_revision": "05a0173dac8e68fb2b22190cfc5c22248538a1a6",
@@ -3046,8 +3099,15 @@
           "verified_bytes": 543484070,
           "server_receipt": "dailytalk-distiluse-original-assets-20261031-001/acquisition-public.json under the private shared task root",
           "original_safetensors_and_git_identities_verified": true,
-          "npu_forward_verified": false,
-          "model_loaded": false
+          "npu_forward_verified": true,
+          "model_loaded": true,
+          "original_feature_files_generated": 29,
+          "original_per_utterance_encode_calls": 29,
+          "parameterized_module_forward_hooks_on_npu": 1508,
+          "execution_server_receipt": "dailytalk-guo-encoder-execution-20261031-001/execution-public.json under the private shared task root",
+          "original_encode_rule": "encode([raw_text])[0]",
+          "embedding_dtype": "float32",
+          "original_model_max_sequence_length": 128
         },
         "publisher_guo_input_contract_review": {
           "source": "dataset.py:TextDataset.__getitem__, pinned original publisher revision",

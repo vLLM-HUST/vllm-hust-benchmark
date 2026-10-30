@@ -1051,7 +1051,35 @@ python scripts/probe_marble_auxiliary_client.py \
 本配方已在专用ARM64 CPU工作区构建，并通过非root65534、无网络、只读根、去全部能力、禁止提权的真实容器`--help`探测，退出0；未挂载任务数据、Docker
 socket或NPU。任务运行还必须另行部署私有数据/输出、本地模型传输、各场景原环境和评分；镜像只证明软件导入底座可用，不代表Minecraft、数据库、研究工具等环境已齐备，也不是安全认证或原生任务完成。旧容器、镜像和结果未清理。
 
-## BixBench 原科学任务准备与读取（原生执行未完成）
+## LongMemEval M 原检索与读者入口（问答评分尚未完成）
+
+[固定官方版本](https://github.com/xiaowu0162/LongMemEval/tree/9e0b455f4ef0e2ab8f2e582289761153549043fc)区分全历史和检索增强问答；M过长，不把全历史超限当作原检索路径不可用。原数据在服务器仓库外按发布方方式取得，本仓库不打包原题或权重。原软件可独立准备和核验：
+
+```bash
+python scripts/prepare_jsonschemabench_author_source.py --source longmemeval --author-root /private/LongMemEval-author --action prepare --max-bytes 81752
+python scripts/prepare_jsonschemabench_author_source.py --source longmemeval --author-root /private/LongMemEval-author --action verify
+```
+
+BM25客户端与模型服务使用分离环境。本次实际环境为Python3.12.13、平台vendor
+Torch2.10.0+cpu/torch-npu2.10.0.post4，依赖见`configs/workload-native/longmemeval-bm25-client-requirements.txt`。先准备匹配的CPU/vendor
+Torch，再安装该文件；不要覆盖已有推理服务环境，也不要隐式拉取CUDA依赖。此客户端中的神经库只是原脚本顶层导入依赖：固定`flat-bm25`、`session`、无扩展分支不执行神经模型。不是原全量CUDA环境复现，也未验证dense检索或索引扩展。
+
+全量原生示例（示例输入是发布方完整M文件；以下`--full`与完整检索日志配套）：
+
+```bash
+mkdir -p /private/longmemeval/retrieval
+PYTHONPATH=/private/LongMemEval-author python /private/LongMemEval-author/src/retrieval/run_retrieval.py --in_file /private/longmemeval/longmemeval_m_cleaned.json --out_dir /private/longmemeval/retrieval --retriever flat-bm25 --granularity session --index_expansion_method none --index_expansion_result_join_mode none --index_expansion_result_cache none --outfile_prefix original-m
+python scripts/run_longmemeval_original.py --source /private/LongMemEval-author --data-root /private/longmemeval --variant m --retrieval-log /private/longmemeval/retrieval/original-m_retrievallog_session_flat-bm25 --full --api-base http://127.0.0.1:19468/v1 --model Qwen/Qwen3-14B --context-window 131072 --output /private/longmemeval/reader-preflight --disable-thinking --prepare-only
+```
+
+显式去掉`--prepare-only`并选择另一个全新输出目录，才执行生成。原全历史入口默认不变，不传`--retrieval-log`仍保留完整历史并禁止截断。RAG分支核验所有原字段、文档内容、时间戳和重复次数；保留原重复会话ID，不自行去重。读者调用原`prepare_prompt`的`flat-session`分支，top10、JSON、双侧消息、原CoN800-token预算不变，不允许额外截断。`--disable-thinking`仅是明确的兼容模型绑定，分词计数与生成使用相同设置，不是作者模型质量复现。
+
+已验证范围：固定原前三题的482/472/473个完整会话经原BM25退出0；公开入口准备及分词通过，输入34366/31034/30916
+tokens；同三题在NPU上各生成一次，全部`stop`。不是500题全量推理通过。三个问题都是助手侧证据题，官方用户侧索引的聚合检索统计排除它们；空正例`recall_all=1`不能解释为检索成功。原生问答评分仍待完成，Oracle/S既有六条生成保留复用。
+
+发布方`src/evaluation/evaluate_qa.py`及`print_qa_metrics.py`同时按原字节提供。它的原CLI只列出指定GPT-4o及本地Llama3.1-70B评估模型；使用前应准备真实对应的模型/端点或授权，不能把Qwen服务伪装成70B。当前本地14B绑定在原提示/10-token预算的空答案负例中未通过自检，因此未接受其正式分数。以上生成结果不冒称已有官方质量分数。原题、检索日志、参考答案及生成结果均只放服务器私有目录。
+
+## BixBench 原科学任务准备与读取（原生执行结束，评分待核验）
 
 本接口用于官方科学Agent任务，不用零样本问答替代Notebook工作流。原问题JSONL实际为205条扁平记录、17字段，不能按旧数据卡的嵌套`questions`结构加载。文件版本和64份ZIP身份见[固定原资产清单](data/catalogs/bixbench_original_files_v1.json)；205条问题引用其中59份。当前只取得固定原前三题所需的两份原ZIP，其余57份尚未取得。
 
@@ -1149,6 +1177,8 @@ daemon与客户端两侧有相同路径，并由操作者仅对运行副本设�
 
 ### DailyTalk：官方对话语音合成准备入口（原生验证未完成）
 
+最新第三次原参数尝试已进入声学模型，但当前NPU软件栈的`DynamicGRUV2Hidden`拒绝原FP32权重（报错仅列出FP16/FRACTAL_Z支持）；不能据此宣称所有精度均不支持GRU。声码器尚未进入，合成未完成。前两次环境错误不能再作为当前唯一阻塞。保留原检查点及失败证据，不擅自降低精度、不删除GRU、不改网络结构，也不回退CPU冒充NPU通过。
+
 [DailyTalk 官方发布](https://github.com/keonlee9420/DailyTalk)提供带历史上下文的对话语音合成基线及预训练模型，不是把录音转成普通文本问答的
 benchmark。官方上下文模型使用批量推理；抽样须保留原验证划分及所需完整对话历史，不能将单个话轮拆成无上下文题目。源码、转写/说话人/统计元数据与词典、原始音频、声学模型、HiFi-GAN声码器须分别取得和核验。
 
@@ -1195,4 +1225,5 @@ python scripts/prepare_dailytalk_original_guo_inputs.py --metadata-root /private
 当前服务器已通过软件和元数据公开`verify`入口，42份原Python文件语法检查通过。已取得原`val_phone.txt`按首次出现顺序的前3个完整对话（23、30、59）全部29段原始WAV及转写，保留原元数据；所选ZIP成员的原CRC和SHA256已核验，未下载或验证整份5.34GB压缩包。上述公开音频入口的`verify`与复用式`prepare`也已通过服务器实测，均无新下载。该CPU节点不能直连Google
 Drive，首次音频取得使用已披露的纯内存HTTPS中转；当前公开下载函数已做真实HTTP范围探测，完整首次下载路径只有离线夹具覆盖，不能称为该节点直连下载通过。官方`history_guo`的900000步检查点也已取得并完成全文件SHA256与ZIP成员CRC校验，取得阶段未反序列化或运行。随后两个生成器检查点已用`weights_only=True`加载为`meta`张量核验结构：声学检查点仅明确放行其NumPy标量及对应dtype类型，声码器不使用该白名单；没有关闭受限加载、初始化NPU或执行推理。音频和检查点只在服务器保存。
 
-universal声码器及原512维文本编码器文件也已取得并校验，尚未做NPU前向。独立软件环境已通过依赖检查；保留原文件的兼容副本仅调整可选依赖按需导入和显式NPU设备选择，原`model`、`dataset`、`synthesize`模块导入检查已通过，未初始化NPU或加载权重。这不等于复现原Torch1.7/TensorFlow2.5.1环境，也不等于原生合成通过。所需原编码器文本特征、真实NPU前向、原始评测与研究侧接入仍待完成；不得静默回退CPU。不能用现有Qwen文本服务替代声学模型，也不能把源码解析、原音频取得或检查点字节校验算作该来源完成。原公开资源与代码许可按发布方及组件各自LICENSE执行，本仓库不打包音频和权重。
+universal声码器及原512维文本编码器文件也已取得并校验。29话轮已按原编码入口完成真实NPU编码，保留512维特征，不重复生成。声学合成仍未通过：第一次尝试缺少CANN
+Python路径，第二次在编译器子进程遇到`AF_UNIX path too long`；均保留失败记录，尚无已核验的合成WAV。短临时目录的独立多进程探测已通过，后续重试不改变原模型、历史窗口、批大小和生成控制。独立软件环境不等于复现原Torch1.7/TensorFlow2.5.1环境；保留原文件的兼容副本仅调整可选依赖按需导入和显式NPU设备选择。声学及声码器完整NPU前向、原始评测与研究侧接入仍待完成；不得静默回退CPU。不能用现有Qwen文本服务替代声学模型，也不能把编码成功或检查点字节校验算作该来源完成。原公开资源与代码许可按发布方及组件各自LICENSE执行，本仓库不打包音频和权重。
