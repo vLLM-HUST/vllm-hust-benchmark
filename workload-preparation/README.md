@@ -1199,7 +1199,7 @@ for record in records:
     weak_reference = record.outcome_record()  # caption及存在的原描述/类别，不送入模型
 ```
 
-原`num_captions_per_audio=1`、原文件名和作者/下载定位信息保留在annotations，各组件身份由源文件路径区分；caption、原描述、类别及FreeSound标签只作参考，没有新造prompt、任务顺序或五条参考。CPU对四份全部403050条完成原字段还原及输入/参考分离核验，12条原始固定样本与研究工作树中未修改的消费端读取一致。这不表示音频已取得、原生模型已运行、质量已评分，或研究侧已通过CI安装消费。作者音频模型、完整原媒体与适用原评价协议仍待接通，不能把caption当输入答案或用Qwen文本生成替代音频推理。
+原`num_captions_per_audio=1`、原文件名和作者/下载定位信息保留在annotations，各组件身份由源文件路径区分；caption、原描述、类别及FreeSound标签只作参考，没有新造prompt、任务顺序或五条参考。CPU对四份全部403050条完成原字段还原及输入/参考分离核验。实际CI安装包的74份软件/资源身份核验通过，12条原始固定样本与研究工作树中未修改的消费端读取一致，见[元数据CI交接回执](../docs/workload-data/validation/wavcaps-original-metadata-ci-handoff-20261031.json)。这些只证明原始元数据链路，不表示音频已取得、原生模型已运行或质量已评分。作者音频模型、完整原媒体与适用原评价协议仍待接通，不能把caption当输入答案或用Qwen文本生成替代音频推理。
 
 ## BixBench 原科学任务准备与读取（原生执行结束，评分待核验）
 

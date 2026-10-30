@@ -140,3 +140,21 @@ def test_existing_public_getter_reuses_the_explicit_metadata_profile():
     selected = [item["path"] for item in files if "/FreeSound/" not in item["path"]]
     _, files = getter.selection("WAVCAPS", selected)
     assert len(files) == 3 and sum(item["bytes"] for item in files) == 27482307
+
+
+def test_metadata_ci_receipt_cannot_promote_native_audio_delivery():
+    root = Path(__file__).resolve().parents[2]
+    receipt = json.loads(
+        (
+            root
+            / "docs/workload-data/validation/wavcaps-original-metadata-ci-handoff-20261031.json"
+        ).read_text()
+    )
+    assert receipt["source_checkbox_eligible"] is False
+    assert receipt["native_audio_model_execution"] is False
+    assert receipt["official_audio_quality_scoring"] is False
+    assert receipt["model_calls"] == 0
+    assert receipt["original_metadata_rows"] == sum(
+        item["rows"] for item in source_spec("WAVCAPS")["files"]
+    )
+    assert receipt["public_and_unchanged_research_complete_record_readbacks"] == 12
