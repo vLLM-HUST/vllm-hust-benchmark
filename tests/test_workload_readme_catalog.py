@@ -58,3 +58,16 @@ def test_readme_catalog_local_links_exist_and_source_anchors_resolve():
             assert f'<a id="{target[1:]}"></a>' in section
         else:
             assert (ROOT / target.split("#", 1)[0]).is_file(), target
+
+
+def test_ovobench_navigation_distinguishes_preparation_from_native_execution():
+    text = (ROOT / "README.md").read_text("utf-8")
+    row = next(
+        line
+        for line in text.splitlines()
+        if '<a id="workload-source-ovobench"></a>' in line
+    )
+    assert "scripts/prepare_ovobench_native_selection.py" in row
+    assert "scripts/prepare_ovobench_original_media.py" in row
+    assert "原生推理与评分未完成" in row
+    assert "[x]" not in row
