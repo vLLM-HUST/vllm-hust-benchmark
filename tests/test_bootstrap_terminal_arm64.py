@@ -94,11 +94,16 @@ def connection(**kwargs):
 
 
 def test_direct_connection_requires_no_private_profile():
-    assert bootstrap.model_profile(connection(api_key_env="MODEL_API_KEY")) == {
-        "api_base": "https://model.invalid/v1",
-        "model": "example",
-        "api_key_env": "MODEL_API_KEY",
-    }
+    assert (
+        bootstrap.model_profile(
+            connection(api_key_env="MODEL_API_KEY")
+        )  # pragma: allowlist secret
+        == {  # pragma: allowlist secret - non-secret test or unauthenticated-service placeholder
+            "api_base": "https://model.invalid/v1",
+            "model": "example",
+            "api_key_env": "MODEL_API_KEY",
+        }
+    )
 
 
 def test_explicit_unauthenticated_service():
@@ -106,7 +111,9 @@ def test_explicit_unauthenticated_service():
     assert profile["no_api_key"] is True
     assert "api_key_env" not in profile
     with pytest.raises(ValueError, match="either"):
-        bootstrap.model_profile(connection(no_api_key=True, api_key_env="KEY"))
+        bootstrap.model_profile(
+            connection(no_api_key=True, api_key_env="KEY")  # pragma: allowlist secret
+        )  # pragma: allowlist secret - non-secret test or unauthenticated-service placeholder
 
 
 @pytest.mark.parametrize(
