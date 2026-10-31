@@ -8,6 +8,27 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def test_wavcaps_preparation_is_not_missing_media_or_native_completion():
+    ledger = json.loads(
+        (ROOT / "docs/workload-data/dataset-validation-status.json").read_text("utf-8")
+    )
+    row = ledger["delivery_inventory"]["WAVCAPS"]
+    gates = row["fixed_media_remaining_delivery_gates"]
+    assert gates["public_cache_preparation_real_cli_verified"] is True
+    assert gates["public_cache_preparation_real_media_files"] == 12
+    assert gates["public_download_network_real_qualified"] is False
+    assert row["checked"] is False
+    assert "entry still needs completion" not in row["blocker"]
+    checklist = (ROOT / "docs/workload-data/DATASET_CHECKLIST.zh-CN.md").read_text(
+        "utf-8"
+    )
+    overview = next(
+        line for line in checklist.splitlines() if line.startswith("| [ ]  | WAVCAPS ")
+    )
+    assert "原音频/模型未取得" not in overview
+    assert "12原音频" in overview
+
+
 def test_codejudge_delivery_requires_original_native_and_actual_ci_evidence():
     ledger = json.loads(
         (ROOT / "docs/workload-data/dataset-validation-status.json").read_text("utf-8")
