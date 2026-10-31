@@ -8,6 +8,20 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def test_spokenwoz_full_original_dialogues_are_not_audio_execution():
+    ledger = json.loads(
+        (ROOT / "docs/workload-data/dataset-validation-status.json").read_text("utf-8")
+    )
+    row = ledger["delivery_inventory"]["SPOKENWOZ"]
+    evidence = row["original_text_preparation"]
+    assert evidence["original_dialogues"] == 1000
+    assert evidence["original_turns"] == 35564
+    assert list(evidence["fixed_first3_complete_turn_counts"].values()) == [50, 44, 42]
+    assert evidence["audio_acquired"] is False
+    assert evidence["model_calls"] == 0
+    assert row["checked"] is False and row["status"] == "IN_PROGRESS"
+
+
 def test_full_duplex_publisher_examples_are_not_native_delivery():
     ledger = json.loads(
         (ROOT / "docs/workload-data/dataset-validation-status.json").read_text("utf-8")

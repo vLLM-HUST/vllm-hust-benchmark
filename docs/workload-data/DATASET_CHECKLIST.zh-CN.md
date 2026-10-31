@@ -1322,6 +1322,17 @@ split；后续必须明确将生成和评估同时绑定原verified版本，并�
 WavCaps是弱标注音频—文本资产；作者captioning示例使用专用音频编码器和BART
 checkpoint，不能直接填入Qwen文本服务。原评分器要求五条参考的接口不能靠复制弱标注caption凑足；须按原任务选用真实评价资产和协议。其音频仅限学术研究且保留各源条件，不作默认企业再分发。以上准备不增加75/113完成数，机器清单状态为`IN_PROGRESS`。
 
+#### SpokenWOZ原生准备
+
+- [x] 从[发布方项目页](https://spokenwoz.github.io/SpokenWOZ-github.io/)当前链接的`ssz1111/SpokenWOZ-Test-Text-Fixed`取得固定版本原`data.json`：52233254字节，发布方LFS
+  SHA256匹配，1000完整对话、35564话轮。原文件仅保存在专用CPU，传输内存块上限8MiB，不在Windows落盘。
+- [x] 固定原JSON首次出现的前三个完整对话`MUL0001/MUL0002/MUL0004`，分别50/44/42话轮；不截取单轮冒充完整对话，不换成功样本。回执：`/root/spokenwoz-original-test-text-20261031-001/acquisition-public.json`。
+- [ ] 公共获取/准备入口、原对话/词时间戳/状态/参考及媒体关系的provider适配与消费核验。
+- [ ] 原音频、合适的NPU模型、完整原生任务和适用评分。当前模型调用0，总项不打勾。
+
+当前公开测试文件与旧Git说明中的隐藏测试集必须区分，不能声称复现隐藏榜单。官方既有文本DST/响应基线，也有语音—文本模型；文本基线运行不能证明音频或双工流程跑通。原数据遵循发布方CC
+BY-NC4.0，不在公共PR再分发。
+
 #### Full-Duplex-Bench原生准备
 
 - [x] 固定发布方版本`3e799c45a045256f47d5f1c9cda90157e2d2ec9e`的`v1_v1.5`离线协议，专用CPU取得16份原说明、评分软件和官方样例JSON，逐份校验Git
