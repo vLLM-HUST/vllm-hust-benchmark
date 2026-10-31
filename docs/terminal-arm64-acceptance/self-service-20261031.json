@@ -1,0 +1,452 @@
+{
+  "schema": "terminal-arm64-self-service-acceptance/v1",
+  "date": "2026-10-31",
+  "task_id": "openssl-selfsigned-cert",
+  "purpose": "Self-service functional diagnostic on an existing model API",
+  "scope": {
+    "ordinary_user_new_workspace_validated": true,
+    "new_account_signup_validated": false,
+    "template_visible_in_browser": true,
+    "browser_terminal_command_verified": true,
+    "workspace_creation_transport": "Coder API as ordinary user",
+    "planned_model_tasks": 1,
+    "attempted_model_tasks": 1,
+    "scored_model_tasks": 1,
+    "passed_model_tasks": 1,
+    "full_dataset_validated": false,
+    "b0_b1_comparison": false,
+    "formal_leaderboard_submission": false
+  },
+  "workspace": {
+    "user_roles": [],
+    "workspace_id": "7413e3fb-6d68-4022-be58-558cc87ed363",
+    "build_id": "9eca0ab9-fe4d-4a0a-aa7a-dbcf3df8069e",
+    "build_status": "running",
+    "template_id": "36262631-c136-4b7d-bc97-2f99a234a6f6",
+    "template_version": "3eb13404-43e9-4b41-b270-0eb52cf8fd3f",
+    "pvc_uid": "a505e6df-5923-49d2-94d3-2131a7660199",
+    "pvc_created_at": "2026-10-31T01:50:31Z",
+    "home_request": {
+      "storage": "20Gi"
+    },
+    "pod_ready": [
+      {
+        "name": "dev",
+        "ready": true,
+        "restartCount": 0
+      },
+      {
+        "name": "swe-pro-docker",
+        "ready": true,
+        "restartCount": 0
+      }
+    ],
+    "host_docker_socket_mounted": false
+  },
+  "validation": {
+    "nop": {
+      "role": "nop",
+      "process_exit_code": 0,
+      "reward": 0.0,
+      "tests": 6,
+      "passed": 0,
+      "exception_type": null,
+      "ended_epoch": 1793411791.4770281,
+      "status": "scored",
+      "started_at": "2026-10-31T01:56:05.156561Z",
+      "finished_at": "2026-10-31T01:56:26.435320Z"
+    },
+    "oracle": {
+      "role": "oracle",
+      "process_exit_code": 0,
+      "reward": 1.0,
+      "tests": 6,
+      "passed": 6,
+      "exception_type": null,
+      "ended_epoch": 1793411820.5704162,
+      "status": "scored",
+      "started_at": "2026-10-31T01:56:33.316035Z",
+      "finished_at": "2026-10-31T01:56:55.561961Z"
+    },
+    "model": {
+      "role": "model",
+      "process_exit_code": 0,
+      "reward": 1.0,
+      "tests": 6,
+      "passed": 6,
+      "exception_type": null,
+      "ended_epoch": 1793412586.6895754,
+      "status": "scored",
+      "started_at": "2026-10-31T01:57:06.841859Z",
+      "finished_at": "2026-10-31T02:09:45.615826Z"
+    }
+  },
+  "agent": {
+    "task_complete_confirmed": true,
+    "episodes": 8,
+    "api_request_timing_count": 8,
+    "tool_calls": 19,
+    "usage": {
+      "total_prompt_tokens": 32575,
+      "total_completion_tokens": 3137,
+      "total_cached_tokens": 0
+    },
+    "exception": null
+  },
+  "runtime": {
+    "served_model": "Qwen3.5-35B-A3B",
+    "versions": {
+      "vllm": "0.23.0+empty",
+      "vllm-ascend": "0.23.0.post1",
+      "torch": "2.10.0+cpu",
+      "torch-npu": "2.10.0.post4"
+    },
+    "server_settings": {
+      "--served-model-name": "Qwen3.5-35B-A3B",
+      "--max-model-len": "65536",
+      "--tensor-parallel-size": "2",
+      "--gpu-memory-utilization": "0.85",
+      "enable_expert_parallel": false,
+      "enforce_eager": true
+    },
+    "existing_service_reused": true,
+    "service_modified_or_restarted": false,
+    "process_identity_unchanged": true,
+    "classification": "development eager service; functional diagnostic only"
+  },
+  "source": {
+    "bootstrap_commit": "980f89884a7036526adca2c5811fd69189c8187d",
+    "bootstrap_sha256": "5b468a8a20750148c59f0a112f4bded579bd28abcd0908bea5356c2da6a21871",
+    "bootstrap_url": "https://coder.sage.org.ai:9443/swe-bench-pro-artifacts/terminal/5b468a8a20750148c59f0a112f4bded579bd28abcd0908bea5356c2da6a21871/bootstrap_terminal_arm64.py",
+    "task_revision": "7131e4375048a0e408a8fb404b5f499d726b695b",
+    "harbor": "0.24.0",
+    "bindings": {
+      "task/environment/Dockerfile": "be00cb478ca38540d8ad18211de0ebea632b14c7d0cdbc0108a349ab3f1c6f65",
+      "task/environment/curl": "a7a1d699291f320eda0485b5d2e4b67a2e254099d001494e20aa47de7f0d1806",
+      "task/environment/uv-aarch64-unknown-linux-gnu.tar.gz": "9db0c2f6683099f86bfeea47f4134e915f382512278de95b2a0e625957594ff3",
+      "task/environment/uv-installer.sh": "8402ab80d2ef54d7044a71ea4e4e1e8db3b20c87c7bffbc30bff59f1e80ebbd5",
+      "task/instruction.md": "38054a3371f7c2c853478a2f9af0bff858437d5b28a9a07483238f06e566921f",
+      "task/solution/solve.sh": "58cf3c844e907745cd81fb4bd75efb3d080e2f0e82b589c56c954ae6e1756510",
+      "task/task.toml": "35c130c45e2ebcd372adbaa8e791ac242532e0f578e675af7ec1ad7ae2118d53",
+      "task/tests/test.sh": "4770437ea96c3cc84684b4f99d55fb148fcac09f9ea1e8ef49de487716e6c334",
+      "task/tests/test_outputs.py": "90970bb3c372e8e7fb6bb9ac5f649ba73eb38e1a5ea2e922a9057a72b6b4192d",
+      "compose.json": "82d160136f141195f6bd55e8540e6be0e4bdb078a4a213df0cc2deefb79f559b",
+      "requirements-installed.txt": "2deb619ecba046e4af019fd96c9229c1aaf5b2c7df9011f893f971380c5ca16d"
+    }
+  },
+  "sandbox": {
+    "harbor_version": "0.24.0",
+    "architecture": "arm64",
+    "base_manifest": "sha256:608b27b2db85abf38d81685085cd1166a5ed7ada66549f0dfe53a75bb830cd5d",
+    "base_image_ref": "docker.m.daocloud.io/library/python@sha256:608b27b2db85abf38d81685085cd1166a5ed7ada66549f0dfe53a75bb830cd5d",
+    "base_image_id": "sha256:18d58f4e045f133283c50016a09285439cbe765877e1a93760888b85fd2ce905",
+    "image_id": "sha256:c49f0d88048a1d78f40826b7b4c150e5ac5303d8af219eceb84b6513c9755eac",
+    "image_tag": "terminal-user-openssl:be00cb478ca38540",
+    "network": "terminal-user-9d1606cdbfc1",
+    "compose_version": "Docker Compose version v2.39.4",
+    "task_cpu_limit": 1,
+    "task_memory_bytes": 2147483648,
+    "disk_limit_enforced": false,
+    "fresh_client": true,
+    "daemon_client_mount_probe": "passed",
+    "prepared_epoch": 1793411698.2566414
+  },
+  "initial_docker": {
+    "ID": "a13e1fd2-992e-4da2-9c34-078428836957",
+    "Images": 0,
+    "Containers": 0,
+    "Architecture": "aarch64",
+    "Driver": "overlay2",
+    "DockerRootDir": "/var/lib/docker",
+    "ServerVersion": "29.9.1"
+  },
+  "diagnosis": {
+    "original_failure": "Docker Hub connection timeout when pulling the pinned Python base image in a separate new workspace.",
+    "fix": "Add a registry-mirror option constrained to the original manifest; verify config ID and ARM64 architecture. Accept model API/name/key-environment options directly.",
+    "final_preparation_attempts": 1,
+    "manual_dependency_installs_in_final_workspace": 0,
+    "old_workspace_images_or_answers_reused": false
+  },
+  "evidence": {
+    "bootstrap_terminal_arm64.py": {
+      "sha256": "5b468a8a20750148c59f0a112f4bded579bd28abcd0908bea5356c2da6a21871",
+      "bytes": 24334
+    },
+    "terminal-entry-audit/container-ee6512ab9c0a.json": {
+      "sha256": "b6b351fe23b5a4bc4e1400dabe7133eaab6d9b4ce402d8228fe88812502efae6",
+      "bytes": 1024
+    },
+    "terminal-entry-audit/download-sha256": {
+      "sha256": "03201e12e284512cf454372ce18bc5c51af7b9b6fd0451cdb25404aec98d8ee3",
+      "bytes": 64
+    },
+    "terminal-entry-audit/initial.json": {
+      "sha256": "4366142a394e6c370fe4a6bf3ba08e41e0b237ade6179dda3bf8c941fed9600a",
+      "bytes": 204
+    },
+    "terminal-entry-audit/models-check.json": {
+      "sha256": "e327a8042eef3b15868114ce6b49ec3d8f4a8c296fc8d68c2f1335324cd65161",
+      "bytes": 60
+    },
+    "terminal-entry-audit/prepare.log": {
+      "sha256": "d7f35f4960ce480515d6a40458726f11f1f38543e21461689c9a9d2474db4dc6",
+      "bytes": 187
+    },
+    "terminal-entry-audit/run-once-process.json": {
+      "sha256": "e8109067d284af9d6ee2f57d6a86206647a734a6cfa7a8e07d3120bcf51da788",
+      "bytes": 156
+    },
+    "terminal-entry-audit/run-once.log": {
+      "sha256": "c2e45be9ce2ea68b892f4ca7b720c6196380774fede5b6f8129d58dbbad07f85",
+      "bytes": 1753
+    },
+    "terminal-entry-audit/run-once.sh": {
+      "sha256": "39311a40836b84fc7aca25af91d779de6897e3031480b948b82f3224f6929945",
+      "bytes": 354
+    },
+    "terminal-first/base-pull.log": {
+      "sha256": "9e9510ef9449b6b4cacf50181a345d4cd25c6b8de67c44eb28f54ffb34590549",
+      "bytes": 986
+    },
+    "terminal-first/build.log": {
+      "sha256": "4283c6294fe110904cc33b5c1f76ecc75d3fe416ab0c3859872ad9c3d7d0421e",
+      "bytes": 20988
+    },
+    "terminal-first/compose.json": {
+      "sha256": "82d160136f141195f6bd55e8540e6be0e4bdb078a4a213df0cc2deefb79f559b",
+      "bytes": 343
+    },
+    "terminal-first/install.log": {
+      "sha256": "6e17ded65cac4c22b7009d5f0d292cd05f62957d1f8a08a6e48f7b2dd75bbb7b",
+      "bytes": 24592
+    },
+    "terminal-first/jobs/terminal-user-model/config.json": {
+      "sha256": "d684cb319be9b32218799d1ad6eb805596a303e671eb6f8620b7d2fbbe94302b",
+      "bytes": 1740
+    },
+    "terminal-first/jobs/terminal-user-model/job.log": {
+      "sha256": "f7afdaee97a87616eed391baed7747bb059fd16a71c1a0a70cb1632cc8a116de",
+      "bytes": 8519
+    },
+    "terminal-first/jobs/terminal-user-model/lock.json": {
+      "sha256": "5fbfd1b8a0006fd91de0e8aab0f71a440d360547ea497f3d9b6c86484ec34ecb",
+      "bytes": 3592
+    },
+    "terminal-first/jobs/terminal-user-model/result.json": {
+      "sha256": "98b868c8a6c0ceaf2c85fe1fee6a92566fe362033f5abff3f1505e53b0a0be18",
+      "bytes": 1114
+    },
+    "terminal-first/jobs/terminal-user-model/task__iTFwGrZ/agent/recording.cast": {
+      "sha256": "0db2ee143bd8b65e284ebaa87b3e233276b0a44a1c73251ce894d5efac644815",
+      "bytes": 27656
+    },
+    "terminal-first/jobs/terminal-user-model/task__iTFwGrZ/agent/terminus_2.pane": {
+      "sha256": "30fcf7d57cc3ec27b49b34ca1dd7049f15e66970cd53bde1d94c435994eeb2b5",
+      "bytes": 11722
+    },
+    "terminal-first/jobs/terminal-user-model/task__iTFwGrZ/agent/trajectory.json": {
+      "sha256": "d52f195a36aa0a37cd35be390d44714364666f7e1cc3e43a866ac2d61802e9ca",
+      "bytes": 31518
+    },
+    "terminal-first/jobs/terminal-user-model/task__iTFwGrZ/artifacts/manifest.json": {
+      "sha256": "ded0d7ce10852ffc713c14edac13664f70953cf5e271de31db9e1c64229411d8",
+      "bytes": 178
+    },
+    "terminal-first/jobs/terminal-user-model/task__iTFwGrZ/config.json": {
+      "sha256": "e49b10c47eb6591d2f4488a3ace6afc15600e5286d1a0028b6bf1044a4bec51f",
+      "bytes": 1604
+    },
+    "terminal-first/jobs/terminal-user-model/task__iTFwGrZ/lock.json": {
+      "sha256": "450b2716e8bd7bd67896f28eb97d67879001c261defa70c81aabe84a1032aeee",
+      "bytes": 2270
+    },
+    "terminal-first/jobs/terminal-user-model/task__iTFwGrZ/result.json": {
+      "sha256": "4b868f628494e295afa2a9ad362ee888803e916b400d4c8887a5a8b6d51bea1b",
+      "bytes": 33642
+    },
+    "terminal-first/jobs/terminal-user-model/task__iTFwGrZ/trial.log": {
+      "sha256": "6153f9de6925c161e331b49dd9ff82aba39c5ff81dd3a26f8ef51dce7578387f",
+      "bytes": 1863
+    },
+    "terminal-first/jobs/terminal-user-model/task__iTFwGrZ/verifier/ctrf.json": {
+      "sha256": "a3063ff5378500e9015ab94b6a4300b21e10b3da3120f81cdf0574773c7de04d",
+      "bytes": 2488
+    },
+    "terminal-first/jobs/terminal-user-model/task__iTFwGrZ/verifier/reward.txt": {
+      "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+      "bytes": 2
+    },
+    "terminal-first/jobs/terminal-user-model/task__iTFwGrZ/verifier/test-stdout.txt": {
+      "sha256": "ea0a224c88271494c97dc564b5f72c7251fdaf83b93940ba65ecae33b76a81c4",
+      "bytes": 1723
+    },
+    "terminal-first/jobs/terminal-user-nop/config.json": {
+      "sha256": "ef7d57b820bd5bb4608f1ec84c37f0f6967e5b96eccb3961825b84a77486bbaa",
+      "bytes": 508
+    },
+    "terminal-first/jobs/terminal-user-nop/job.log": {
+      "sha256": "27645709b8dfe2c26fbdc8bfca9f0aa3dcf77d84005fb1db61a290fb23dd4259",
+      "bytes": 109
+    },
+    "terminal-first/jobs/terminal-user-nop/lock.json": {
+      "sha256": "85a8e570c891fede35a8a4ed475c83f5edd654e56ba4b0e36fa48f2a50a8150b",
+      "bytes": 2264
+    },
+    "terminal-first/jobs/terminal-user-nop/result.json": {
+      "sha256": "7a4aee22164c07344ee11ecf7ecb97325d73b0349ae2ddaafc99d34d3172e549",
+      "bytes": 1092
+    },
+    "terminal-first/jobs/terminal-user-nop/task__To85A6b/artifacts/manifest.json": {
+      "sha256": "ded0d7ce10852ffc713c14edac13664f70953cf5e271de31db9e1c64229411d8",
+      "bytes": 178
+    },
+    "terminal-first/jobs/terminal-user-nop/task__To85A6b/config.json": {
+      "sha256": "46fea007b9b2d38f45341623563eeaa1a008e1bdb05aa67765b4dc82225088ba",
+      "bytes": 500
+    },
+    "terminal-first/jobs/terminal-user-nop/task__To85A6b/lock.json": {
+      "sha256": "2d6f2c27ed89cc0a2173d15bdcf8ca2bc6d31c7cd321e7a6cb5ed424100d2a3a",
+      "bytes": 1190
+    },
+    "terminal-first/jobs/terminal-user-nop/task__To85A6b/result.json": {
+      "sha256": "68eb3f3b274226a09d2c2b3f8fcbe8b9cb9246eaef250247cbb73eb5fecdc042",
+      "bytes": 3795
+    },
+    "terminal-first/jobs/terminal-user-nop/task__To85A6b/trial.log": {
+      "sha256": "5868e519b78e4f2f267470e411fb5e62ab85729eb3642ffbddd64e569930f993",
+      "bytes": 34
+    },
+    "terminal-first/jobs/terminal-user-nop/task__To85A6b/verifier/ctrf.json": {
+      "sha256": "55ed0b1f1036e4ac4cf99a291dca57451ac28ecc202cdc4d1e52c3aa08ce20f0",
+      "bytes": 7155
+    },
+    "terminal-first/jobs/terminal-user-nop/task__To85A6b/verifier/reward.txt": {
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "bytes": 2
+    },
+    "terminal-first/jobs/terminal-user-nop/task__To85A6b/verifier/test-stdout.txt": {
+      "sha256": "b76f3efe1aa0aec18a1e927aebc70b4f8d09da16342ef5179aff75cd91e4617f",
+      "bytes": 5949
+    },
+    "terminal-first/jobs/terminal-user-oracle/config.json": {
+      "sha256": "06a078ed020fa17b9b42ebc6a0ed050e54cd324aef7953d3fcb2a050812936a7",
+      "bytes": 442
+    },
+    "terminal-first/jobs/terminal-user-oracle/job.log": {
+      "sha256": "bf29af3c977c2ccf0d3abae6e48b65e526c76e6174a82392398ca22f0599fed5",
+      "bytes": 112
+    },
+    "terminal-first/jobs/terminal-user-oracle/lock.json": {
+      "sha256": "7dce50b15722bd40d4eac69fde665462e57a38bb908d4281ff9b9c3e4627baa3",
+      "bytes": 2267
+    },
+    "terminal-first/jobs/terminal-user-oracle/result.json": {
+      "sha256": "804cd4474c2bb76a85bbb6915fe0056bc6d92a9165f4b03e1b497507b5362eeb",
+      "bytes": 1095
+    },
+    "terminal-first/jobs/terminal-user-oracle/task__KHhTstW/agent/oracle.txt": {
+      "sha256": "7b287efcb4145080030bdf8437ae4ec823b09be7cd7a8e26dc4909f1ab2984e4",
+      "bytes": 128
+    },
+    "terminal-first/jobs/terminal-user-oracle/task__KHhTstW/artifacts/manifest.json": {
+      "sha256": "ded0d7ce10852ffc713c14edac13664f70953cf5e271de31db9e1c64229411d8",
+      "bytes": 178
+    },
+    "terminal-first/jobs/terminal-user-oracle/task__KHhTstW/config.json": {
+      "sha256": "8fc4439739fc2c40c25d6e2a48897fec20a8c17ffea3a07ebbbe1bc3c8337bef",
+      "bytes": 459
+    },
+    "terminal-first/jobs/terminal-user-oracle/task__KHhTstW/lock.json": {
+      "sha256": "afc0e7319e079035b6bc9c595acca935519081185a6b8779217b4376e22c8f99",
+      "bytes": 1193
+    },
+    "terminal-first/jobs/terminal-user-oracle/task__KHhTstW/result.json": {
+      "sha256": "70ebc893a7cd1448d54959a6d75ad464ae930ed20f9038fe854cca438f559032",
+      "bytes": 3807
+    },
+    "terminal-first/jobs/terminal-user-oracle/task__KHhTstW/trial.log": {
+      "sha256": "5868e519b78e4f2f267470e411fb5e62ab85729eb3642ffbddd64e569930f993",
+      "bytes": 34
+    },
+    "terminal-first/jobs/terminal-user-oracle/task__KHhTstW/verifier/ctrf.json": {
+      "sha256": "2b72386bcb6cc2bc08b368b2703268becbf3b5d2e53c6aa46c31f5102bf42d03",
+      "bytes": 2493
+    },
+    "terminal-first/jobs/terminal-user-oracle/task__KHhTstW/verifier/reward.txt": {
+      "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+      "bytes": 2
+    },
+    "terminal-first/jobs/terminal-user-oracle/task__KHhTstW/verifier/test-stdout.txt": {
+      "sha256": "74e846b178c2ff2d93e4da5aa043bc952f34d040f205c6c1e1476a2c94d0a3fe",
+      "bytes": 1723
+    },
+    "terminal-first/model-job.json": {
+      "sha256": "410898440d6a3abf00c5870bdb774b3827438c2e3472905f7427512d66c269be",
+      "bytes": 1489
+    },
+    "terminal-first/model-receipt.json": {
+      "sha256": "5f07ba16eb85eb53e7561f0ae8b015af80d99e172f5a93d87861f35e2d5454fa",
+      "bytes": 282
+    },
+    "terminal-first/model-started.json": {
+      "sha256": "365770ce85d8f7945fc93f2b64d8fad6a8dbbdcc324366a146b30eb1357e489b",
+      "bytes": 360
+    },
+    "terminal-first/model.log": {
+      "sha256": "a8580839d6f452ee9183a243fc664a8a98b42cc9cdb675e2ac94827c83e3f48c",
+      "bytes": 1518
+    },
+    "terminal-first/mount-probe.txt": {
+      "sha256": "540eddf9e34ce369f3473091d7054979597d85d8152dc3d20f549643ad49586f",
+      "bytes": 64
+    },
+    "terminal-first/mount-reply.txt": {
+      "sha256": "1c34f88707b55e6104c4eb20e71ffa3d33e414b71ef689a15fad0640d0ac58cb",
+      "bytes": 8
+    },
+    "terminal-first/nop-job.json": {
+      "sha256": "9674a5a245b05e3a01231ef72710977254843ec5a76020a1f8855bc0c139a39b",
+      "bytes": 541
+    },
+    "terminal-first/nop-receipt.json": {
+      "sha256": "6c51d3e43bb128ef53fd5ff1586432fef0b6fdf52721e0ac9da53d4c03c816a2",
+      "bytes": 278
+    },
+    "terminal-first/nop-started.json": {
+      "sha256": "18c43c6748f15e09cefa311d36841ac0b7a99e475e42884119fc464d2ff6db40",
+      "bytes": 357
+    },
+    "terminal-first/nop.log": {
+      "sha256": "52dceed8fc2e9a795a8b93b80845cc613cdca5270cdffdef2ed9408799a90b37",
+      "bytes": 1127
+    },
+    "terminal-first/oracle-job.json": {
+      "sha256": "142a18397dc917d018cfe9846fbe7d3868671863485704a059be337f81853bc4",
+      "bytes": 547
+    },
+    "terminal-first/oracle-receipt.json": {
+      "sha256": "20ad0840d759a634710f485b2261ccecb43f423260d0d0205b7375c72f37df67",
+      "bytes": 284
+    },
+    "terminal-first/oracle-started.json": {
+      "sha256": "36fa76a7e320f59385ae53918986b6ddfcce36c395f409983f21fec7192de767",
+      "bytes": 361
+    },
+    "terminal-first/oracle.log": {
+      "sha256": "bd408fcb55a9a692aecb9a2829af23deeca4ffa99dd73b434da641bece3d7635",
+      "bytes": 1014
+    },
+    "terminal-first/prepared.json": {
+      "sha256": "5fa55f148910df30d1d07b37c306ac87f8bee2ecb5690d5f17ade527f51dd028",
+      "bytes": 2093
+    },
+    "terminal-first/requirements-installed.txt": {
+      "sha256": "2deb619ecba046e4af019fd96c9229c1aaf5b2c7df9011f893f971380c5ca16d",
+      "bytes": 1604
+    }
+  },
+  "evidence_archive_sha256": "8bb76d5dfa6eef5b88458cc3b83a200ce91ad734dbe2297dc201265bbdc76b6d",
+  "resource_readback_files": [
+    "terminal-entry-audit/container-ee6512ab9c0a.json"
+  ]
+}
