@@ -3259,7 +3259,16 @@
         "audit_new_model_calls": 0,
         "compatibility": "Original dst_data.py writes intermediate JSON without flushing before reread; retained stage001 failed on NFS. Separate compatibility copy adds exactly two f2.flush() calls; original code, tasks, prompts, references and scorer retained. No new raw data download or repeated generation.",
         "audio_execution": false,
-        "public_native_runner_delivered": false,
+        "public_native_runner_delivered": true,
+        "public_native_runner": "scripts/run_spokenwoz_original_dst.py",
+        "public_original_preparer": "scripts/prepare_spokenwoz_original_dst.py",
+        "public_native_saved_entry_receipt": "/root/spokenwoz-native-public-entry-20261031-002/qualification-public.json",
+        "public_original_preparation_cli_verified": true,
+        "public_saved_verifier_cli_verified": true,
+        "public_saved_original_responses_verified": 68,
+        "public_fresh_generation_cli_real_run_verified": false,
+        "public_saved_entry_new_model_calls": 0,
+        "public_entry_boundary": "Actual public preparation and saved verifier CLI passed on owned CPU, matching all68 prior original NPU prompts/responses/JGA. Fresh public execute loop is covered by transport fixtures, not repeated real generation; existing68 model calls were not rerun.",
         "source_checkbox_eligible": false
       },
       "public_adapter_preparation": {
@@ -3311,7 +3320,7 @@
       "legacy_checked": false,
       "existing_receipt": null,
       "delivery_receipt": null,
-      "blocker": "Original1000 dialogues35564 turns fully roundtripped; getter verify and fixed3 preparation passed. Actual CI41172187985 artifact13032060104 independently installed:77 exact Git/wheel/installed payloads, fixed3 public/unchanged-research136-turn readbacks, original index reused unchanged. Fixed3 original text DST now executed on NPU Qwen3-14B:68/68 stop,0 request failures; exact original prompts/histories/references and responses independently audited, original JGA4/68 agrees with independent state accumulation. Preserve original NFS flush failure and disclosed flush-only compatibility copy. Public native DST runner/saved verifier and actual output-consumer delivery remain pending, as do fresh server download network, original audio and remaining speech/response protocols. No hidden leaderboard, audio, duplex or whole-source completion claim; native runner must enforce per-call history visibility; CC BY-NC4.0 applies."
+      "blocker": "Original1000 dialogues35564 turns fully roundtripped; actual CI41172187985 artifact13032060104 installed with77 exact payloads and fixed3 unchanged-research136-turn readbacks. Native NPU text DST68/68 stop,0 request failures; original prompts/histories/references/responses audited, original JGA4/68 independently confirmed. Public original preparer and native runner/saved verifier now delivered; public prepare and saved CLI actually passed on CPU, reusing all68 original NPU responses with0 new calls. Fresh public generation loop has fixture coverage, not a repeated real run. Preserve original NFS flush failure and disclosed flush-only compatibility. Actual output research-consumer delivery, fresh server download network, original audio and remaining speech/response protocols remain pending. No hidden leaderboard, audio, duplex or whole-source completion claim; CC BY-NC4.0 applies."
     },
     "DAILYTALK": {
       "scope": "public",

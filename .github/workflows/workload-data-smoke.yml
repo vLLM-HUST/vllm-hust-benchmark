@@ -14,6 +14,7 @@ on:
       - 'scripts/*full_duplex*'
       - 'tests/test_full_duplex*'
       - 'tests/test_spokenwoz*'
+      - 'scripts/*spokenwoz*'
       - 'src/vllm_hust_benchmark/workload_data.py'
       - 'src/vllm_hust_benchmark/workload_response_validation.py'
       - 'tests/test_workload*'
@@ -471,7 +472,7 @@ jobs:
       - name: Original model and metric CPU contracts only
         run: python -m pytest -q tests/test_gpqa_original_runner.py tests/test_xlsum_original_runner.py tests/test_beir_original_runner.py tests/test_stsb_original_runner.py tests/test_librispeech_original_runner.py tests/test_xsum_original_runner.py tests/test_multinews_original_runner.py tests/test_billsum_original_runner.py tests/test_flores200_original_assets.py tests/test_research_acquisition_reuse.py
       - name: SpokenWOZ dialogue and full-duplex scorer CPU fixtures only
-        run: python -m pytest -q tests/test_spokenwoz_original_dialogues.py tests/test_full_duplex_original_scorers.py
+        run: python -m pytest -q tests/test_spokenwoz_original_dialogues.py tests/test_spokenwoz_original_dst.py tests/test_full_duplex_original_scorers.py
       - name: Installed CLI and packaged catalogs
         working-directory: ${{ runner.temp }}
         run: |

@@ -39,6 +39,11 @@ def test_spokenwoz_full_original_dialogues_are_not_audio_execution():
     assert native["audit_new_model_calls"] == 0
     assert native["audio_execution"] is False
     assert native["source_checkbox_eligible"] is False
+    assert native["public_native_runner_delivered"] is True
+    assert native["public_saved_verifier_cli_verified"] is True
+    assert native["public_saved_original_responses_verified"] == 68
+    assert native["public_fresh_generation_cli_real_run_verified"] is False
+    assert native["public_saved_entry_new_model_calls"] == 0
 
 
 def test_full_duplex_publisher_examples_are_not_native_delivery():

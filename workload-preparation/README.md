@@ -1366,6 +1366,31 @@ for record in records:
 
 原`num_captions_per_audio=1`、原文件名和作者/下载定位信息保留在annotations，各组件身份由源文件路径区分；caption、原描述、类别及FreeSound标签只作参考，没有新造prompt、任务顺序或五条参考。CPU对四份全部403050条完成原字段还原及输入/参考分离核验。实际CI安装包的74份软件/资源身份核验通过，12条原始固定样本与研究工作树中未修改的消费端读取一致，见[元数据CI交接回执](../docs/workload-data/validation/wavcaps-original-metadata-ci-handoff-20261031.json)。这些只证明原始元数据链路，不表示音频已取得、原生模型已运行或质量已评分。作者音频模型、完整原媒体与适用原评价协议仍待接通，不能把caption当输入答案或用Qwen文本生成替代音频推理。
 
+## SpokenWOZ 原文本DST（固定完整对话已实跑，非音频或整项完成）
+
+使用发布方项目页链接的公开`SpokenWOZ-Test-Text-Fixed`固定版本，而非宣称复现旧说明中的隐藏测试集。原JSON共1000对话/35564话轮，统一读取保持完整对话、词时间戳及参考分离；原音频未取得。以下命令在仓库根执行，数据、作者代码和结果仅放服务器外部目录，不提交原始数据。
+
+客户端可使用独立Python3.11/3.12环境，原预处理导入`pandas`、`jsonlines`，原评分器导入`tqdm`；它们不是模型推理环境，也不需要在CPU安装神经模型。原作者模型为GPT3.5，本地实跑使用明确声明的NPU
+Qwen3-14B非思考绑定；不比较原榜单质量。
+
+```bash
+python -m pip install pandas jsonlines==4.0.0 tqdm
+python scripts/prepare_reused_research_assets.py SPOKENWOZ --mode download --data-root /srv/workloads/spokenwoz
+python scripts/prepare_spokenwoz_original_dst.py --download-author --author-root /srv/workloads/spokenwoz-author
+python scripts/prepare_spokenwoz_original_dst.py --execute --data-root /srv/workloads/spokenwoz --author-root /srv/workloads/spokenwoz-author --output /srv/workloads/spokenwoz-dst-inputs
+
+# 默认只核查计划，不调用模型；端点应通过本机回环/SSH转发连接已部署的NPU模型
+python scripts/run_spokenwoz_original_dst.py --data-root /srv/workloads/spokenwoz --author-root /srv/workloads/spokenwoz-author --model Qwen/Qwen3-14B --thinking false
+python scripts/run_spokenwoz_original_dst.py --execute --data-root /srv/workloads/spokenwoz --author-root /srv/workloads/spokenwoz-author --prepared-root /srv/workloads/spokenwoz-dst-inputs --model Qwen/Qwen3-14B --thinking false --endpoint http://127.0.0.1:19468/v1 --output /srv/workloads/spokenwoz-dst-run
+
+# 复用已保存的原请求/响应与评分，不下载、不重新生成、不重跑评分器
+python scripts/run_spokenwoz_original_dst.py --verify-saved /srv/workloads/spokenwoz-dst-run --data-root /srv/workloads/spokenwoz --author-root /srv/workloads/spokenwoz-author --model Qwen/Qwen3-14B --thinking false
+```
+
+固定选择原JSON前三个完整对话`MUL0001/MUL0002/MUL0004`，136话轮产生68个DST请求。执行入口消费原作者预处理输出，并与独立重建的原提示/参考逐条比对后才请求模型；不改题、不漏掉失败、不缩短历史。采样与输出预算参数继续按原客户端省略，不把不同服务的默认值当成相同预算；额外的thinking参数是显式模型绑定。原预处理兼容副本只增加两处中间文件刷新，原文件及差异保留。原评分器不改写，独立检查防止解析失败时沿用上一预测。
+
+实际已验证：NPU原始68次请求全部`stop`，官方JGA与独立结果均为4/68；低分保留。公共准备入口和`--verify-saved`在专用CPU真实通过并复用了全部原响应。公共新生成循环仅做软件夹具测试，未为验证新入口重复这68次生成；新鲜服务器直连下载仍未核验。音频、响应生成及其他语音协议未完成，不能用该文本DST结果宣称音频流或双工完成。详细回执与当前缺口以[唯一清单](../docs/workload-data/DATASET_CHECKLIST.zh-CN.md)为准。
+
 ## BixBench 原科学任务准备与读取（原生执行结束，评分待核验）
 
 本接口用于官方科学Agent任务，不用零样本问答替代Notebook工作流。原问题JSONL实际为205条扁平记录、17字段，不能按旧数据卡的嵌套`questions`结构加载。文件版本和64份ZIP身份见[固定原资产清单](data/catalogs/bixbench_original_files_v1.json)；205条问题引用其中59份。当前只取得固定原前三题所需的两份原ZIP，其余57份尚未取得。
