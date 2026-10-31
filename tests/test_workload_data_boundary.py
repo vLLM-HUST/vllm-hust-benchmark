@@ -5,6 +5,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1] / "workload-preparation"
 DATA_MODULES = {
+    "ovobench",  # Original online-video case/stage/reference relations, no model or observations.
     "spider",  # Original split/schema/database relations; no SQL or observations.
     "appworld",  # Original task/database/shared/reference file relations only.
     "livecodebench",  # Original scenario fields and case/reference relations only.

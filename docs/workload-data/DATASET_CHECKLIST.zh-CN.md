@@ -1277,6 +1277,8 @@ split；后续必须明确将生成和评估同时绑定原verified版本，并�
 - [x] 专用CPU核验当前官方固定版本45份原软件、79170字节，20份Python只做AST解析；复用公共作者获取器`--source ovobench --action verify`退出0。回执`/root/ovobench-original-software-20261031-001/preparation-public.json`。原代码不导入执行，模型调用0，不取得视频或发布方模型结果。
 - [x] README补充官方软件准备、推理及评分入口，明确三种时间模式、12种任务、向前任务全部`test_info`阶段、原64帧上限/128-token预算及CUDA到NPU环境缺口；代码与数据许可分别核对。
 - [ ] 取得并校验原注释和固定原题所需完整视频/片段，核验NPU原生模型、原完整流程、官方评分及输出消费；未完成不打来源总勾。
+- [x] 原注释918443字节整文件取得并校验；1640个case/12类任务/644个视频名、全部1567个向前阶段经公共候选适配器及`iter_workload`逐字段完整还原。`count/type`等参考不入模型输入，不改题、不丢阶段。回执`/root/ovobench-original-public-adapter-20261031-002/qualification-public.json`，0模型调用。
+- [ ] 完成实际CI工件安装/研究读取、原视频获取和原生NPU推理/评分闭环；上述注释准备不代表原生benchmark可用。
 
 #### WavCaps原生音频路径准备（未完成来源交付）
 

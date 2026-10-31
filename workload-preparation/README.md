@@ -1175,7 +1175,17 @@ python scripts/prepare_jsonschemabench_author_source.py --source ovobench \
   --author-root /srv/benchmarks/ovo-author --action prepare --max-bytes 79170
 ```
 
-原始注释入口是`data/ovo_bench_new.json`；原视频由[官方数据页](https://huggingface.co/datasets/JoeLeelyf/OVO-Bench)发布。官方说明提供约44GB原视频拼接包或约144GB预切分包，不能因体积大而用静态截图或自造prompt冒充完整任务。当前尚未取得视频、未完成原注释读取适配，不能按下述示例声称已跑通。
+原始注释入口是`data/ovo_bench_new.json`；固定原文件918443字节、1640个原始case对应644个视频名。向前case包含多次查询，因此case数不等于官方介绍的查询数。原视频由[官方数据页](https://huggingface.co/datasets/JoeLeelyf/OVO-Bench)发布。官方说明提供约44GB原视频拼接包或约144GB预切分包，不能因体积大而用静态截图或自造prompt冒充完整任务。当前尚未取得视频，不能按下述推理示例声称已跑通。
+
+注释复用公共原始文件获取器，默认只显示计划，显式`--mode download`才下载，`--mode verify`核验已有原文件；不把数据放进仓库：
+
+```bash
+python scripts/prepare_reused_research_assets.py OVOBENCH --mode plan
+python scripts/prepare_reused_research_assets.py OVOBENCH \
+  --mode download --data-root /srv/datasets/ovobench --max-bytes 918443
+```
+
+适配器保留原始case及完整`test_info`顺序；阶段`realtime/step`为输入，`type/count`和顶层答案为参考，`restore_original_case(record)`可还原原字段。服务器已验证全部1640条、1567个向前阶段，公共`iter_workload`全量回读一致；这是候选代码对真实注释的验证，不是实际CI工件安装、研究侧消费或模型运行证据。使用`iter_workload("OVOBENCH", data_root=Path("/srv/datasets/ovobench"))`读取，不能调用`request_body()`将其冒充聊天请求。
 
 在完整原数据及合格NPU模型环境具备后，官方原入口示例为：
 

@@ -4179,13 +4179,31 @@
     "OVOBENCH": {
       "scope": "public",
       "delivery_kind": "review_original_source_protocol",
-      "status": "ORIGINAL_SOFTWARE_PREPARED_NATIVE_PENDING",
+      "status": "ORIGINAL_SOFTWARE_AND_ALL_ANNOTATION_FIELDS_PREPARED_NATIVE_PENDING",
       "checked": false,
       "legacy_checked": false,
       "existing_receipt": null,
       "delivery_receipt": null,
       "public_author_source_preparer": "scripts/prepare_jsonschemabench_author_source.py --source ovobench",
       "author_source_profile": "configs/workload-native/ovobench-author-source.json",
+      "annotation_preparation": {
+        "server_acquisition_receipt": "/root/ovobench-original-annotations-20261031-001/acquisition-public.json",
+        "server_candidate_adapter_receipt": "/root/ovobench-original-public-adapter-20261031-002/qualification-public.json",
+        "original_annotation_bytes": 918443,
+        "complete_original_cases": 1640,
+        "original_task_groups": 12,
+        "original_video_names": 644,
+        "all_original_forward_stages_preserved": 1567,
+        "all_original_rows_field_roundtripped": true,
+        "public_iter_workload_complete_original_records": 1640,
+        "input_reference_separation_verified": true,
+        "candidate_not_installed_ci_artifact": true,
+        "public_asset_preparer": "scripts/prepare_reused_research_assets.py OVOBENCH",
+        "native_video_acquired": false,
+        "model_calls": 0,
+        "native_tasks_run": 0,
+        "source_checkbox_eligible": false
+      },
       "cpu_preparation": {
         "server_receipt": "/root/ovobench-original-software-20261031-001/preparation-public.json",
         "original_files_verified": 45,
@@ -4195,7 +4213,7 @@
         "model_calls": 0,
         "raw_annotations_or_videos_acquired": false
       },
-      "blocker": "Pinned current official revision's45 software files prepared and publicly verified on owned CPU;20 Python ASTs parsed without importing. Original annotation JSON, original full per-task video/chunk sequence, qualified NPU Qwen2-VL or other author-supported model profile and official scoring remain pending. Author Qwen2-VL uses CUDA/FlashAttention2, up to64 frames and128 generation tokens; cannot silently replace with text chat or one static frame. Forward tasks require every original test_info stage. CC BY-NC-SA4.0/source-video conditions separate from code license; no raw assets redistributed. Source remains unchecked."
+      "blocker": "Original45 software files and full918443-byte annotations acquired unchanged on owned CPU. All1640 original cases/12 groups/1567 forward stages field-roundtripped through the public candidate adapter and iterator; reference labels kept separate. This is not installed-CI/research handoff or native task execution. Original full per-task videos/chunks, qualified NPU Qwen2-VL or author-supported model, official scoring and output consumption remain pending. Preserve original frame sampling/128-token budget and all forward stages; no static-image/text fallback. CC BY-NC-SA4.0/source-video terms retained; source remains unchecked."
     },
     "FULL_DUPLEX_BENCH": {
       "scope": "public",

@@ -164,6 +164,10 @@ def adapt_row(
     source_id: str, row: dict, *, source: dict, spec: dict, index: int
 ) -> WorkloadRecord:
     """Projection is explicit/allowlisted; outcome fields never become task inputs."""
+    if spec["mapping"] == "ovobench_original_tasks":
+        from .ovobench import adapt_case
+
+        return adapt_case(row, source=source, index=index)
     if spec["mapping"] == "multiagentbench_original_configurations":
         from .multiagentbench import adapt_case
 

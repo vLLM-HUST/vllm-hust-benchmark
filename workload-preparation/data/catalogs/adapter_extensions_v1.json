@@ -2,6 +2,14 @@
   "version": "adapter-extensions/v1",
   "boundary": "Field contracts from publisher metadata/docs. No real source payload downloaded or full adapter validation claimed.",
   "adapters": {
+    "OVOBENCH": {
+      "kind": "task_dataset",
+      "mapping": "ovobench_original_tasks",
+      "input_fields": [], "required_fields": ["id", "task", "video"],
+      "outcome_fields": [], "annotation_fields": [], "id_field": "id",
+      "requirements": ["Native online-video task, not a ready model request", "Preserve original complete forward test_info sequence; count/type and top-level answers remain reference-only"],
+      "status": "ORIGINAL_FIELD_ADAPTER_NATIVE_VIDEO_EXECUTION_PENDING"
+    },
     "WAVCAPS": {
       "kind": "task_dataset",
       "mapping": "original_audio_caption_metadata",
