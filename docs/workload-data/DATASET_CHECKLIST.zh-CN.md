@@ -10,7 +10,7 @@
 - 按已有证据逐项复核，不因口径调整批量补勾；失败和低分如实保留，不用替换样本凑通过。113项来源与另5项仅分类的范围不变。
 
 当前交付
-**77/113项**，待完成36项，另5项仅分类。首批#432的60项和第二批#538的ScienceWorld已合入main；早期五个草稿已关闭为被汇总承接，历史和分支保留。第三批新增CodeJudge-Eval、DeepPlanning、OpenMath、OpenCode、MVBench、Video-MME、LiveCodeBench、BigCodeBench、Spider、DRAGON、SWE_VERIFIED、SWE_BENCH、AppWorld及SpokenWOZ文本DST固定原生profile交付，尚未合入。OpenMath/OpenCode是训练语料原问题生成，不是独立质量benchmark。打勾不代表全量模型评测、高分或性能保证。
+**78/113项**，待完成35项，另5项仅分类。首批#432的60项和第二批#538的ScienceWorld已合入main；早期五个草稿已关闭为被汇总承接，历史和分支保留。第三批新增CodeJudge-Eval、DeepPlanning、OpenMath、OpenCode、MVBench、Video-MME、LiveCodeBench、BigCodeBench、Spider、DRAGON、SWE_VERIFIED、SWE_BENCH、AppWorld及SpokenWOZ文本DST固定原生profile交付，尚未合入。OpenMath/OpenCode是训练语料原问题生成，不是独立质量benchmark。打勾不代表全量模型评测、高分或性能保证。
 
 ### LongMemEval M：补原生检索路径，问答交付仍未完成
 
@@ -1199,7 +1199,7 @@ TB；服务器/data约1.42TB可用，未缩小语料。ChartQA当前两卡主机
 | MULTIAGENTBENCH            | [ ] 原五份数据与源码消费链路通过，原生执行待补 | 官方五文件500条原数据取得并校验；统一适配/引用索引及未修改研究消费者500条完整回读、原配置还原一致，数据库评分参考分离。实际CI72载荷独立安装及500条公共/研究回读也通过；原生环境/模型/裁判及官方评分仍待完成，不把读取当执行。详见机器清单。                                                                                                                                                                                                                                              |
 | DEEPPLANNING               | [x] 五类原生样本及实际CI/研究消费闭环          | 购物三级、英文/中文旅行共5个profile各原前三题，合计15题原生执行/评分及保存审计通过；360条原字段/索引及15条当前研究回读经实际CI包复核。436次SDK尝试与414条保存消息分记；失败/零分保留，不宣称360题模型全跑或性能。[交付证据](validation/deepplanning-original-native-delivery-20261028.json)                                                                                                                                                                                              |
 | STREAMINGBENCH             | [ ] 官方协议已核查，原生未跑                   | 官方 THUNLP-MT/StreamingBench 固定修订见机器清单；保留视频组、时间戳、SQA前序参考答案上下文、主动输出逐秒轮询至原参考时间+4秒。官方Qwen2-VL-7B包装器使用自适应1/0.5/0.2fps、128输出预算、CUDA/flash_attention_2；NPU尚未适配。31份官方软件及8份原JSON已取得，公共verify通过；实际CI包76份内容核验及24条原组公共/研究回读通过；七模式原前三组21任务已准备且保留全部69次问题；原媒体、预处理、推理、原评分及原生结果消费待补，不算完成。                                                   |
-| OVOBENCH                   | [ ] 原生抽样已验证；完整入口待收口             | 12类36题/103响应NPU执行及原评分已核验；保留类型兼容说明，公开完整入口与新CI工件待收口                                                                                                                                                                                                                                                                                                                                                                                                    |
+| OVOBENCH                   | [x] offline原生协议已交付                      | 12类36题/103响应NPU执行、原评分、完整入口及实际CI消费交接已核验；[交付证据](validation/ovobench-offline-native-delivery-20261031.json)                                                                                                                                                                                                                                                                                                                                                   |
 | FULL_DUPLEX_BENCH          | [ ] 官方评分器准备已核验，原生语音待完成       | 原16文件已核验，两个未修改评分器对发布方样例运行exit0；公共11文件准备入口在专用CPU验证通过。尚无本项目原生语音推理或真实输出评分，不能打来源完成勾；详见下方原生准备清单。                                                                                                                                                                                                                                                                                                               |
 | LIBRITTS                   | [ ] 原包及完整配对已验证，原生TTS待完成        | 官方test-other完整964502297字节双校验通过；实际CI组件78文件一致，5120个原始话段及原文/规范化文本/参考WAV全量配对还原，公共前三条准备通过。固定三条研究只读回查通过、索引不变；未做合成/质量评价或完整PCM解码，不计来源完成。                                                                                                                                                                                                                                                             |
 | LJSPEECH                   | [ ] 公共读取通过，原生合成待完成               | 原包全13100配对读取与实际CI提供方/索引/研究原三条回查已通过；原生NPU合成仍待完成。见ljspeech-actual-ci-handoff-20261030.json。                                                                                                                                                                                                                                                                                                                                                           |
@@ -1292,7 +1292,13 @@ split；后续必须明确将生成和评估同时绑定原verified版本，并�
 
 - [x] 保存结果完成原评分及独立复核：原Qwen2-VL包装返回单元素文本列表，官方REC评分器期望字符串，首次评分TypeError保留；只在评分副本中将`[text]`无损解包为完全相同的`text`，不提取答案、不改任何文字、标签或计分函数。未修改官方评分器，原生成输出不变，原任务及全部阶段顺序逐项一致；原宏平均47.04%，独立复算47.0417853751187%，按作者打印精度一致。评分和审计均0次新模型调用。回执位于共享任务根`ovobench-lossless-scalar-original-score-32068-001/qualification-public.json`及`ovobench-original103-independent-audit-32068-001/qualification-public.json`。该数值只是固定抽样可用性结果，不是全量质量或引擎性能结论。
 
-- [ ] 公开NPU完整数据集执行入口、对应文档及新CI工件仍需收口；已验证的103次生成不得重跑，以上子项通过尚不升级来源总勾。官方online模型路径和全量1640-case生成也未声称完成。
+- [x] 公开NPU入口支持固定抽样及`--full`；服务器核验当前入口的103份原媒体身份快照、1640题/3035片段全量计划，模型调用0。回执`ovobench-current-public-media-32068-001/qualification-public.json`。模型修订、隔离视频环境、原始媒体、抽样/全量与保存输出评分命令已写入使用说明。
+
+- [x] 新CPU
+  smoke运行41202187413成功；实际工件13042688731独立安装，78份载荷与Git/包内字节一致。复用1640条原索引，12类各前三题共36条公共/未修改研究消费端完整回读通过，数据库与研究代码不变；回执`/root/ovobench-actual-ci-wheel-20261031-002/qualification-public.json`。0新模型调用，输入消费与上文原生推理分别举证。
+
+- [x] 通用CI41202187376的测试、lint均通过，CPU
+  smoke41202187413通过；来源总勾仅覆盖明确的offline原生协议。[完整交付证据](validation/ovobench-offline-native-delivery-20261031.json)。103次有效生成不重跑，online路径与全量生成单列缺口。
 
 - [x] NPU共享盘原软件与注释准备：复用专用CPU已取得的45份固定官方软件，逐份与仓库固定SHA256/字节数一致；原注释918443字节、1640个case原样转入`ovobench-original-inputs-32068-001`，软件和注释转移后再次逐份核验，Python仅AST解析。回执为该目录`qualification-public.json`。未执行模型、未取得原生成绩，不以输入准备计来源完成。
 
@@ -1316,11 +1322,11 @@ split；后续必须明确将生成和评估同时绑定原verified版本，并�
 
 - [x] README补充官方软件准备、推理及评分入口，明确三种时间模式、12种任务、向前任务全部`test_info`阶段、原64帧上限/128-token预算及CUDA到NPU环境缺口；代码与数据许可分别核对。
 
-- [ ] 核验合格NPU模型、原帧处理和完整36-case/103调用流程、真实输出官方评分及结果消费；原注释与固定输入媒体已齐，未完成原生执行仍不打来源总勾。
+- [x] 合格NPU模型、原帧处理、36-case/103调用流程及真实输出原评分已核验，见本节原生执行与独立审计回执；消费交接另列，不重复生成。
 
 - [x] 原注释918443字节整文件取得并校验；1640个case/12类任务/644个视频名、全部1567个向前阶段经公共候选适配器及`iter_workload`逐字段完整还原。`count/type`等参考不入模型输入，不改题、不丢阶段。回执`/root/ovobench-original-public-adapter-20261031-002/qualification-public.json`，0模型调用。
 
-- [ ] 完成原生NPU推理/真实输出评分闭环；元数据实际CI工件/研究读取已通过、原视频已齐，二者不代表原生benchmark已跑通。
+- [x] 固定抽样原生NPU推理及真实输出评分闭环已完成；早期元数据工件/读取证据保留其原范围，新公开入口交接仍单独核验。
 
 - [x] 成功CPU
   CI运行41151526268的实际工件13022928107独立安装，75个Git/包内/安装载荷字节一致；复用1640条原索引，12类原前三条共36条公共/未修改研究端完整回读通过。回执`/root/ovobench-actual-ci-wheel-20261031-001/qualification-public.json`；0模型调用，不恢复研究任务，不计视频原生完成。

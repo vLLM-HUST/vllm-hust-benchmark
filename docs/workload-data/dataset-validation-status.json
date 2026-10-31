@@ -4579,11 +4579,11 @@
     "OVOBENCH": {
       "scope": "public",
       "delivery_kind": "review_original_source_protocol",
-      "status": "IN_PROGRESS",
-      "checked": false,
+      "status": "AVAILABLE",
+      "checked": true,
       "legacy_checked": false,
       "existing_receipt": null,
-      "delivery_receipt": null,
+      "delivery_receipt": "docs/workload-data/validation/ovobench-offline-native-delivery-20261031.json",
       "public_author_source_preparer": "scripts/prepare_jsonschemabench_author_source.py --source ovobench",
       "original_offline_npu_fixed3_validation": {
         "status": "103_ORIGINAL_NPU_GENERATIONS_AND_LOSSLESS_OFFICIAL_SCORING_AUDITED",
@@ -4609,7 +4609,26 @@
         "original_prompts_stage_order_media_and_raw_generated_text_verified": true,
         "scoring_and_audit_new_model_calls": 0,
         "new_public_native_entry": "scripts/run_ovobench_original_npu.py",
-        "full_corpus_entry_and_new_ci_handoff_pending": true,
+        "full_corpus_entry_and_new_ci_handoff_pending": false,
+        "full_corpus_entry_implemented": true,
+        "current_public_media_snapshot_receipt": "ovobench-current-public-media-32068-001/qualification-public.json",
+        "current_public_media_verified_clips": 103,
+        "full_original_plan_cases": 1640,
+        "full_original_plan_clips": 3035,
+        "current_public_entry_qualification_model_calls": 0,
+        "new_ci_original_input_consumer": {
+          "run_id": 41202187413,
+          "artifact_id": 13042688731,
+          "producer_commit": "7f21d5a3f3fe653f0bdeb91ad2b4550345090195",
+          "receipt": "/root/ovobench-actual-ci-wheel-20261031-002/qualification-public.json",
+          "installed_payloads_equal": 78,
+          "reused_original_index_records": 1640,
+          "fixed_original_public_and_unchanged_research_readbacks": 36,
+          "database_unchanged": true,
+          "research_code_modified_or_task_resumed": false,
+          "new_model_calls": 0,
+          "scope": "Actual successful CPU-smoke artifact and original input consumption; general test/lint CI41202187376 also passed"
+        },
         "full_corpus_generation_claim": false,
         "paper_hardware_quality_replication": false,
         "performance_claim": false,
@@ -4913,7 +4932,8 @@
         "model_calls": 0,
         "raw_annotations_or_videos_acquired": false
       },
-      "blocker": "All1640 original annotation cases and fixed36 public/research readbacks verified; all103 original clips acquired, hashed and validated on NPU. Official pinned Qwen2-VL-7B BF16/eager NPU binding completed all103 response slots for12 classes/36 cases, original prompts, adaptive maximum64 frames and128-token budget preserved. Original scorer rejected singleton decoded text lists; raw outputs and failure retained. Lossless singleton-list-to-identical-text projection passed untouched original scorer and independent audit:47.04 percent at author precision,0 new model calls. Public full-corpus NPU entry and new CI/artifact handoff still require closure; no source checkbox yet. Whole archives/full1640-case/online inference not claimed. Data license discrepancy remains disclosed, no raw redistribution or performance/paper reproduction claim."
+      "blocker": null,
+      "remaining_optional_modes": "Declared offline protocol delivered: all12 classes, fixed36 cases and103 original response slots, official scoring47.04 percent, full-protocol entry and actual CI/research input handoff verified. Full1640-case generation, whole archive acquisition/member comparison and official online model path remain unexecuted. Original score TypeError retained; only lossless singleton-text input adaptation applied. Data license discrepancy disclosed; no raw redistribution, paper quality or engine performance claim."
     },
     "FULL_DUPLEX_BENCH": {
       "scope": "public",
