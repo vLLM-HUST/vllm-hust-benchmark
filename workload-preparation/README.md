@@ -1188,7 +1188,20 @@ python scripts/verify_wavcaps_original_media.py \
 `--decode`使用已有SoundFile/FLAC解码器逐块验证PCM16与原STREAMINFO
 MD5；本次复用服务器已有SoundFile0.14.0、libsndfile1.2.2，没有安装或升级包。未装解码器时明确失败，不静默降为头部检查。省略该选项只验文件/原ID/头部关系，不算完整解码。四组件各三条已在CPU完整执行此入口。当前范围获取使用本任务的私有传输控制，公共有界媒体获取/准备入口还未完整迁入；不能把“已有媒体可校验”说成使用者已能一键准备全部输入。原模型、NPU执行、适用评分仍未完成，不勾选整个来源。
 
-复用现有获取器，不新增下载实现。默认只显示计划；服务器上可显式获取某份原始元数据，已自行取得的文件使用只读校验：
+媒体准备入口：`scripts/prepare_wavcaps_original_media.py`默认只打印固定原前三条的有界范围计划，不联网。显式`--download`才请求固定发布版本的压缩成员范围；服务器必须返回精确206和Content-Range，否则失败，不退回整包下载。输出必须匹配原成员CRC和已核验SHA256；已有不兼容文件不覆盖。
+
+```bash
+# 仅计划；四组件名称同上表
+python scripts/prepare_wavcaps_original_media.py --component AudioSet_SL
+# 服务器显式下载；不要将数据放进仓库
+python scripts/prepare_wavcaps_original_media.py --component AudioSet_SL \
+  --download --metadata-root /srv/datasets/wavcaps-metadata \
+  --media-root /srv/datasets/wavcaps-media/AudioSet_SL --decode
+```
+
+已有原压缩范围可用`--cache-root /srv/cache/wavcaps/AudioSet_SL`替换`--download`。缓存命名为`<part>-range-<start>-<end>.private.bin`，以离线计划为准；原SoundBible缓存若无`zip-`前缀，可在服务器另目录用硬链接建立该名称，不修改原文件。四组件共12条通过公共缓存准备CLI重新解压并完整PCM校验，回执`/root/wavcaps-public-media-preparation-20261031-001/qualification-public.json`。**网络下载模式尚未真实核验**，不可将缓存实跑或HTTP夹具测试宣称为网络获取已跑通。模型和评分仍未完成。
+
+元数据复用现有获取器。默认只显示计划；服务器上可显式获取某份原始元数据，已自行取得的文件使用只读校验：
 
 ```bash
 python scripts/prepare_reused_research_assets.py WAVCAPS
