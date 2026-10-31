@@ -1327,8 +1327,20 @@ checkpoint，不能直接填入Qwen文本服务。原评分器要求五条参考
 - [x] 固定发布方版本`3e799c45a045256f47d5f1c9cda90157e2d2ec9e`的`v1_v1.5`离线协议，专用CPU取得16份原说明、评分软件和官方样例JSON，逐份校验Git
   blob与SHA256；未在Windows落盘原始资产。
 - [x] 未修改的`eval_pause_handling.py`和`eval_smooth_turn_taking.py`分别对官方自带的1份输出样例实际运行，均exit0。回执：`/root/full-duplex-original-scorer-controls-20261031-001/qualification-public.json`。这是发布方输出的评分器控制，不是本项目模型结果，也不是固定原前三题的验证。
-- [ ] 原数据与音频取得、公共准备入口、原始时序与媒体关系的provider接入。
+- [x] 公共评分器准备入口`prepare_full_duplex_original_scorers.py --verify-only`已在专用CPU核验现有原11文件子集，exit0，无新下载、无重复评分。回执：`/root/full-duplex-public-source-entry-20261031-001/qualification-public.json`。新鲜`--download`的服务器网络路径未通过实测，不冒称整仓或原音频已取得。
+- [ ] 原数据与音频取得、原始时序与媒体关系的provider接入。
 - [ ] 合适的NPU双工语音模型、原生输入/输出音频、ASR和适用完整评分、输出消费闭环。模型调用仍为0，总项不打勾。
+
+公共入口在仓库根目录运行，原资产仅写服务器外部目录；评分脚本依赖发布方要求中的`tqdm`，不需要模型、ASR或外部judge。官方样例输出不代表本项目模型输出。
+
+```bash
+# 默认离线计划，不下载；显式下载只取11份固定原文件，不取整仓/node_modules
+python scripts/prepare_full_duplex_original_scorers.py
+python scripts/prepare_full_duplex_original_scorers.py --download --output /srv/workloads/fdb-scorer-subset
+python scripts/prepare_full_duplex_original_scorers.py --verify-only --output /srv/workloads/fdb-scorer-subset
+python /srv/workloads/fdb-scorer-subset/v1_v1.5/evaluation/eval_pause_handling.py --root_dir /srv/workloads/fdb-scorer-subset/v1_v1.5/evaluation/example_data/pause_handling_example
+python /srv/workloads/fdb-scorer-subset/v1_v1.5/evaluation/eval_smooth_turn_taking.py --root_dir /srv/workloads/fdb-scorer-subset/v1_v1.5/evaluation/example_data/smooth_turn_taking_example
+```
 
 官方的v1/v1.5离线、v2实时考官、v3语音工具调用是不同协议，不得把上述两个样例评分推及其他版本；也不得以文本问答、拼造音频或CPU神经推理替代原生流程。官方协议入口：[Full-Duplex-Bench](https://github.com/DanielLin94144/Full-Duplex-Bench)。
 
