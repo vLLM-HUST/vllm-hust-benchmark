@@ -1210,6 +1210,8 @@ BY-NC-SA 4.0的README标注与Hub数据卡存在差异，见下述许可记录�
 许可标注存在待澄清差异：代码LICENSE为MIT，固定代码README声明数据CC BY-NC-SA 4.0，而官方Hub数据卡标注CC BY-SA
 4.0。保留原视频来源条款，不自动选择更宽松声明，不将公开可见解释为商业再分发授权。当前不再分发原视频/注释，许可差异核验未完成。
 
+OVO媒体范围计划可使用`python scripts/plan_ovobench_original_media_ranges.py --data-root /srv/datasets/ovobench --index /srv/private/ovo-captured-tar-index.json`。输入是对固定发布方归档捕获的原TAR头检查点；规划器核验捕获头哈希、原TAR校验和、连续偏移、分卷边界和已记录ETag，按原103片段生成不截断的跨分卷范围。它不对伪造索引提供原站认证，也不重新计算整分卷LFS哈希；获取时的固定URL/原版本/精确HTTP范围证据需另行保留。默认明确报告未定位项；`--require-complete`在目录未完成或固定片段未找全时失败，不换题补齐。真实368头快照已通过公共CLI，定位16片段共553531286字节；未下载视频、未完成全目录，也不视为模型可执行。
+
 ## WavCaps 原始音频元数据（数据适配已核验，原生音频执行待完成）
 
 同一校验器支持四个已核验组件，默认保持SoundBible；其他组件显式传`--component`和独立媒体目录。四组件各固定原前三条，共12个原FLAC已完整解码，原PCM

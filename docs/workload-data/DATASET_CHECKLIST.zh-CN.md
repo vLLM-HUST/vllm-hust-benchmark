@@ -1283,6 +1283,7 @@ split；后续必须明确将生成和评估同时绑定原verified版本，并�
   CI运行41151526268的实际工件13022928107独立安装，75个Git/包内/安装载荷字节一致；复用1640条原索引，12类原前三条共36条公共/未修改研究端完整回读通过。回执`/root/ovobench-actual-ci-wheel-20261031-001/qualification-public.json`；0模型调用，不恢复研究任务，不计视频原生完成。
 - [x] 官方固定媒体版本20分卷大小/LFS身份已登记并由计划CLI展示；原视频总46341744640字节，预切分总153277153280字节，专用CPU剩余5040644096字节，未启动装不下的整包下载。仅身份登记，不冒称视频取得。
 - [x] 原预切分分卷仅取64KB，精确HTTP206/Content-Range及原TAR目录头核验通过。首个文件是非固定抽样的`35.mp4`，57464390字节，未因其容易取得而换题或下载；完整视频取得数仍为0。回执`/root/ovobench-original-media-ranges-20261031-001/first-tar-header-public.json`。仍缺可靠成员索引和固定103片段的有界获取。
+- [x] 公共`plan_ovobench_original_media_ranges.py`在专用CPU对实际捕获的368个原头部快照实跑exit0，逐头校验捕获哈希、TAR校验和/连续偏移/原分卷/观察ETag，已定位固定103片段中的16个、553531286字节。仅结构与范围计划，不独立证明发布方整分卷哈希；未定位项明确保留，不换片段，未下载完整视频。回执`/root/ovobench-public-media-range-plan-20261031-001/qualification-public.json`。完整头索引另在持续推进，不以本快照冒称完成。
 - [ ] 澄清代码README数据CC BY-NC-SA 4.0与官方Hub数据卡CC BY-SA 4.0差异；代码MIT单独登记，不以更宽松数据卡推定再分发权限。
 - [x] 公共`prepare_ovobench_native_selection.py`在服务器成功生成12类各原前三题的36-case原字段子集，供官方`--anno_path`读取，列出全部103个必需原视频片段，不删向前阶段。实跑复用已安装CI提供侧，原文件不变；回执`/root/ovobench-native-selection-20261031-002/qualification-public.json`。首次输出边界拒绝记录保留，纠正为独立数据目录后通过；未下载视频、0模型调用。
 - [x] 候选源码建立1640条引用索引；每种任务原前三条，共36条，经公共和未修改研究消费者完整回读一致。当前研究工作树消费者SHA与服务器副本一致，索引读取前后不变；未恢复研究任务。回执`/root/ovobench-original-index-20261031-001/qualification-public.json`。实际CI工件闭环仍待完成，0模型调用。
