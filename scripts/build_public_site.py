@@ -49,6 +49,15 @@ IDENTITY_KEYS = {
 }
 DROP = object()
 
+# The owner explicitly restored this historical C16 comparison on 2026-10-31.
+C16_EVIDENCE_PATH = "data/leaderboard_frontier_swe_evidence.json"
+PUBLIC_C16_RUN_IDS = frozenset(
+    {
+        "dab8ed7c4ee74f2d958dab5528514294",  # pragma: allowlist secret - public B0 run ID
+        "fa0e01a32eef456bab4bebe51e4aa7dd",  # pragma: allowlist secret - public B1 run ID
+    }
+)
+
 
 def matches(value):
     return bool(PROJECT.search(json.dumps(value, ensure_ascii=False)))
@@ -70,8 +79,11 @@ def target_record(value):
     return False
 
 
-def project_json(value, removed_ids, record=False):
+def project_json(value, removed_ids, record=False, retained_runs=()):
     if isinstance(value, dict):
+        run_id = value.get("run_id")
+        if isinstance(run_id, str) and run_id in retained_runs:
+            return copy.deepcopy(value)
         if record and (
             target_record(value)
             or (isinstance(value.get("id"), str) and value["id"] in removed_ids)
@@ -83,14 +95,21 @@ def project_json(value, removed_ids, record=False):
         for key, item in value.items():
             if PROJECT.search(key) or key in removed_ids:
                 continue
-            child = project_json(item, removed_ids, record=isinstance(item, dict))
+            child = project_json(
+                item,
+                removed_ids,
+                record=isinstance(item, dict),
+                retained_runs=retained_runs,
+            )
             if child is not DROP:
                 result[key] = child
         return result
     if isinstance(value, list):
         result = []
         for item in value:
-            child = project_json(item, removed_ids, record=True)
+            child = project_json(
+                item, removed_ids, record=True, retained_runs=retained_runs
+            )
             if child is not DROP:
                 result.append(child)
         return result
@@ -327,7 +346,11 @@ def build(source, destination, policy_revision):
             continue
         if suffix == ".json" and name != "data/benchmark-source-manifest.json":
             data = json.loads(raw)
-            projected = project_json(data, removed_ids)
+            projected = project_json(
+                data,
+                removed_ids,
+                retained_runs=PUBLIC_C16_RUN_IDS if name == C16_EVIDENCE_PATH else (),
+            )
             prune_frontier(projected, removed_ids)
             documents[name] = (data, projected, raw)
             continue
@@ -342,7 +365,11 @@ def build(source, destination, policy_revision):
             changed.append(name)
     # Repeat with the full removed-id set so cross-file references cannot expose orphan records.
     for name, (original, _, raw) in documents.items():
-        projected = project_json(original, removed_ids)
+        projected = project_json(
+            original,
+            removed_ids,
+            retained_runs=PUBLIC_C16_RUN_IDS if name == C16_EVIDENCE_PATH else (),
+        )
         prune_frontier(projected, removed_ids)
         if projected is DROP:
             removed.append(name)
@@ -373,6 +400,7 @@ def build(source, destination, policy_revision):
     manifest["files"] = entries
     manifest["projection"] = {
         "policy": "selected-research-withdrawal-20261030",
+        "public_run_ids": sorted(PUBLIC_C16_RUN_IDS),
         "revision": policy_revision,
         "scope": "Public website projection; original research records are not rewritten.",
     }
@@ -409,7 +437,12 @@ def validate(destination):
     for path in (destination / "data").rglob("*.json"):
         if path.name == "benchmark-source-manifest.json":
             continue
-        assert not PROJECT.search(path.read_text()), path
+        data = json.loads(path.read_text())
+        if path.relative_to(destination).as_posix() == C16_EVIDENCE_PATH:
+            for run in data.get("runs", []):
+                if run.get("run_id") in PUBLIC_C16_RUN_IDS:
+                    run.clear()
+        assert not matches(data), path
     for name in [
         "betterscale.html",
         "traceloom.html",
