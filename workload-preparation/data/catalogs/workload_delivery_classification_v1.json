@@ -21,6 +21,10 @@
     {"source_id": "PAIO-SEMANTIC-SIMILAR-5000", "asset_group": "enterprise-private-requests", "related_workload_ids": [], "boundary": "Semantic similarity is not exact-prefix or KV reuse; preserve original private requests without rewriting."}
   ],
   "source_entrypoints": {
+    "TOOLBENCH": [
+      {"role": "prepare_assets", "path": "scripts/prepare_jsonschemabench_author_source.py", "scope": "--source toolbench: fixed original author software acquisition/verification, not native execution"},
+      {"role": "original_profile", "path": "configs/workload-native/toolbench-author-source.json", "scope": "Original software identity only; task data, real tool backend, model and evaluation remain unqualified"}
+    ],
     "OVOBENCH": [
       {"role": "prepare_assets", "path": "scripts/prepare_jsonschemabench_author_source.py", "scope": "--source ovobench: fixed original author software; no task execution"},
       {"role": "prepare_assets", "path": "scripts/prepare_reused_research_assets.py", "scope": "OVOBENCH: original annotation acquisition and identity verification"},

@@ -1,6 +1,22 @@
 {
   "schema_version": "workload-validation-checklist/v1",
   "updated_at": "2026-10-31",
+  "owned_cpu_storage_cleanup": {
+    "date": "2026-10-31",
+    "volume_expansion_performed": false,
+    "free_bytes_initial": 1090072576,
+    "free_bytes_final": 14216171520,
+    "ovobench_inactive_duplicate_media_removed": 103,
+    "ovobench_duplicate_bytes": 3520157133,
+    "ovobench_npu_originals_byte_and_sha256_verified_before_cpu_cleanup": true,
+    "ovobench_cpu_cleanup_receipt": "/root/ovobench-fixed-original-media-all-20261031-001/cleanup-verified-duplicate-media-20261031.json",
+    "stopped_failed_bigcodebench_setup_container_removed": 1,
+    "qualified_bigcodebench_images_and_all_results_retained": true,
+    "container_cleanup_receipt": "/root/workload-native-cleanup-20261031-001/failed-bcb-setup-cleanup-public.json",
+    "untagged_unreferenced_images_removed_nonforce": 2,
+    "referenced_image_deletion_conflicts_preserved": 76,
+    "policy": "After each completed batch, retire verified inactive duplicates and obsolete temporary environments; preserve results, source identities, reproducible configuration and required original inputs. No broad dataset or Docker-directory deletion."
+  },
   "delivery_completion_policy": {
     "approved_by_user": true,
     "verification_unit": "source_id + explicitly identified original native protocol",
@@ -2449,12 +2465,28 @@
     "TOOLBENCH": {
       "scope": "public",
       "delivery_kind": "review_original_source_protocol",
-      "status": "NOT_STARTED",
+      "status": "IN_PROGRESS",
       "checked": false,
       "legacy_checked": false,
       "existing_receipt": null,
       "delivery_receipt": null,
-      "blocker": null
+      "original_source_preparation": {
+        "repository": "OpenBMB/ToolBench",
+        "revision": "d56fdd89faf8c91fa135090b212bb9057ee5cfc2", "identity_note": "pragma: allowlist secret - public original author revision",
+        "profile": "configs/workload-native/toolbench-author-source.json",
+        "public_entry": "scripts/prepare_jsonschemabench_author_source.py --source toolbench",
+        "original_files": 79,
+        "original_bytes": 397381,
+        "python_ast_parsed_not_imported": 64,
+        "syntax_failures": 0,
+        "source_receipt": "toolbench-original-software-32068-001/qualification-public.json under private shared task root",
+        "public_verify_receipt": "toolbench-public-source-entry-32068-001/qualification-public.json under private shared task root",
+        "public_verify_exit_code": 0,
+        "raw_tasks_or_weights_acquired": false,
+        "neural_model_calls": 0,
+        "source_checkbox_eligible": false
+      },
+      "blocker": "Pinned original author software acquired and public verify CLI passed; no imports or task execution. Original data release, full workflow adaptation, matching NPU model/retriever and original ToolEval evaluation remain pending. Mainline documents a ToolBench backend key or one's own RapidAPI setup; neither backend has been qualified here. Do not substitute fabricated responses or silently change to StableToolBench's simulation protocol."
     },
     "AGENTBENCH": {
       "scope": "public",

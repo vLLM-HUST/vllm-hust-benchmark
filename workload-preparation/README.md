@@ -1171,6 +1171,27 @@ CRC和归档目录身份另行记录。完整102题仍可从发布方原归档�
 
 本次修复了2023年缺少显式获取角色、便捷准备入口未接入data角色的问题；服务器公开verify与两份各原前三条prepare/resolve均通过，共6条仍为`request_metadata`，`request_body()`明确拒绝。回执`/root/azure-2023-public-entry-20261031-001/qualification-public.json`；初次验证使用当前脚本/目录和此前成功CI安装的provider。随后实际成功CI运行41166717605的工件13029254390独立安装通过，76份Git/包内/安装文件一致，复用两份原CSV和原索引，6次公共端/未改研究端完整读取一致，全部CSV字符串字段不变、索引和原文件未改变；见`/root/azure-2023-actual-ci-wheel-20261031-001/qualification-public.json`。未恢复研究任务，不将历史28185条全量证据重标为本轮新跑，也不声称原prompt回放。
 
+## ToolBench 原始软件准备（原生任务未完成）
+
+[官方项目](https://github.com/OpenBMB/ToolBench)提供原始工具任务、ToolLLaMA推理与ToolEval评测。当前固定版本的79份Python、shell、说明、依赖和Apache2许可共397381字节已在服务器取得并核验，64份Python静态解析通过；没有执行任务或下载权重。
+
+```bash
+# 默认只展示软件计划，不下载数据或执行工具。
+python scripts/prepare_jsonschemabench_author_source.py \
+  --source toolbench --author-root /srv/software/toolbench
+# 明确的软件预算；不覆盖不兼容文件或失败partial。
+python scripts/prepare_jsonschemabench_author_source.py \
+  --source toolbench --author-root /srv/software/toolbench \
+  --action prepare --max-bytes 397381
+# 已有原文件只读核验。
+python scripts/prepare_jsonschemabench_author_source.py \
+  --source toolbench --author-root /srv/software/toolbench --action verify
+```
+
+本入口仅获取原软件，不能用它替代完整原数据包或宣称原生benchmark可运行。官方主线的工具调用需要ToolBench后端key或自己的RapidAPI部署；原数据获取、后端、NPU模型/检索器及ToolEval评测环境尚未核验。不得把训练用历史工具轨迹当成当前工具执行结果。作者另行推荐的StableToolBench采用不同的模拟服务协议，不能在这里静默替代原主线。服务访问配置应由使用者在私有环境提供，不写入配置、Git、CI或回执。
+
+当前软件只读核验回执为共享任务根`toolbench-public-source-entry-32068-001/qualification-public.json`，模型调用0、来源未勾选；新环境直连下载仍需单独核验，本次原文件通过受限RAM中转取得，无Windows原数据落盘。
+
 ## StreamingBench 原生流视频评测（仅软件准备，尚未完成原生验证）
 
 官方源码固定到

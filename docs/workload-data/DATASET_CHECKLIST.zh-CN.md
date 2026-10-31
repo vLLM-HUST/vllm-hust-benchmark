@@ -12,6 +12,17 @@
 当前交付
 **78/113项**，待完成35项，另5项仅分类。首批#432的60项和第二批#538的ScienceWorld已合入main；早期五个草稿已关闭为被汇总承接，历史和分支保留。第三批新增CodeJudge-Eval、DeepPlanning、OpenMath、OpenCode、MVBench、Video-MME、LiveCodeBench、BigCodeBench、Spider、DRAGON、SWE_VERIFIED、SWE_BENCH、AppWorld及SpokenWOZ文本DST固定原生profile交付，尚未合入。OpenMath/OpenCode是训练语料原问题生成，不是独立质量benchmark。打勾不代表全量模型评测、高分或性能保证。
 
+### ToolBench：原软件准备完成，原生任务未完成
+
+- [x] 固定官方版本`d56fdd89faf8c91fa135090b212bb9057ee5cfc2`，服务器取得79份原Python/shell/说明/依赖/许可文件，共397381字节，逐份Git对象与SHA256核验；64份Python仅AST解析通过，未导入执行，未取得原题或权重。
+- [x] 复用公共作者获取器`--source toolbench`，只读`--action verify`在服务器通过；回执为共享任务根`toolbench-original-software-32068-001/qualification-public.json`、`toolbench-public-source-entry-32068-001/qualification-public.json`。软件准备不计来源总勾。
+- [ ] 原数据包、完整工具交互环境、合适NPU模型/检索器、原ToolEval评分与实际工件/研究消费仍待接通。官方主线要求ToolBench后端key或自己的RapidAPI环境，当前均未核验；不自行编造响应，也不静默改用StableToolBench模拟协议。
+
+### 已完成批次的存储清理
+
+- [x] 专用CPU卷不扩容。OVO的103份CPU重复视频在与NPU副本逐份字节/SHA256核对且无进程打开后删除，保留NPU原文件及所有评分/审计回执。清理记录位于原CPU目录`cleanup-verified-duplicate-media-20261031.json`。
+- [x] 删除已退出且安装失败的旧BigCodeBench准备容器，保留安装日志、容器配置、合格镜像和正式结果；仅非强制清理2个无标签且无容器引用的镜像，76个引用冲突保留。CPU可用空间由1090072576增至14216171520字节，累计回收约13.1GB。回执位于`/root/workload-native-cleanup-20261031-001/`。后续逐批清理闲置重复数据/临时环境，不对整个Docker目录或数据根目录递归删除。
+
 ### LongMemEval M：补原生检索路径，问答交付仍未完成
 
 - [x] 复核[固定官方源码](https://github.com/xiaowu0162/LongMemEval/tree/9e0b455f4ef0e2ab8f2e582289761153549043fc)：官方明确M不适合直接全历史长上下文测试，另提供检索增强问答流程。保留此前全历史1201716-token超限记录，不将这一基线受限等同整个M来源不可用。
