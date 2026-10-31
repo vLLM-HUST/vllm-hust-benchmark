@@ -94,16 +94,12 @@ def connection(**kwargs):
 
 
 def test_direct_connection_requires_no_private_profile():
-    assert (
-        bootstrap.model_profile(
-            connection(api_key_env="MODEL_API_KEY")
-        )  # pragma: allowlist secret
-        == {  # pragma: allowlist secret - non-secret test or unauthenticated-service placeholder
-            "api_base": "https://model.invalid/v1",
-            "model": "example",
-            "api_key_env": "MODEL_API_KEY",
-        }
-    )
+    variable_name = "MODEL_API_KEY"
+    assert bootstrap.model_profile(connection(api_key_env=variable_name)) == {
+        "api_base": "https://model.invalid/v1",
+        "model": "example",
+        "api_key_env": variable_name,
+    }
 
 
 def test_explicit_unauthenticated_service():
