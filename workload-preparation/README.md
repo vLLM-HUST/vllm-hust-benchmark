@@ -1175,7 +1175,8 @@ python scripts/prepare_jsonschemabench_author_source.py --source ovobench \
   --author-root /srv/benchmarks/ovo-author --action prepare --max-bytes 79170
 ```
 
-原始注释入口是`data/ovo_bench_new.json`；固定原文件918443字节、1640个原始case对应644个视频名。向前case包含多次查询，因此case数不等于官方介绍的查询数。原视频由[官方数据页](https://huggingface.co/datasets/JoeLeelyf/OVO-Bench)发布。官方说明提供约44GB原视频拼接包或约144GB预切分包，不能因体积大而用静态截图或自造prompt冒充完整任务。当前尚未取得视频，不能按下述推理示例声称已跑通。
+原始注释入口是`data/ovo_bench_new.json`；固定原文件918443字节、1640个原始case对应644个视频名。向前case包含多次查询，因此case数不等于官方介绍的查询数。原视频由[官方数据页](https://huggingface.co/datasets/JoeLeelyf/OVO-Bench)发布。官方说明提供约44GB原视频拼接包或约144GB预切分包，不能因体积大而用静态截图或自造prompt冒充完整任务。当前仅取得固定原ASI
+case485完整片段（1/103），其余片段尚缺，不能按下述推理示例声称已跑通。
 
 注释复用公共原始文件获取器，默认只显示计划，显式`--mode download`才下载，`--mode verify`核验已有原文件；不把数据放进仓库：
 
@@ -1211,6 +1212,8 @@ BY-NC-SA 4.0的README标注与Hub数据卡存在差异，见下述许可记录�
 4.0。保留原视频来源条款，不自动选择更宽松声明，不将公开可见解释为商业再分发授权。当前不再分发原视频/注释，许可差异核验未完成。
 
 OVO媒体范围计划可使用`python scripts/plan_ovobench_original_media_ranges.py --data-root /srv/datasets/ovobench --index /srv/private/ovo-captured-tar-index.json`。输入是对固定发布方归档捕获的原TAR头检查点；规划器核验捕获头哈希、原TAR校验和、连续偏移、分卷边界和已记录ETag，按原103片段生成不截断的跨分卷范围。它不对伪造索引提供原站认证，也不重新计算整分卷LFS哈希；获取时的固定URL/原版本/精确HTTP范围证据需另行保留。默认明确报告未定位项；`--require-complete`在目录未完成或固定片段未找全时失败，不换题补齐。真实368头快照已通过公共CLI，定位16片段共553531286字节；未下载视频、未完成全目录，也不视为模型可执行。
+
+OVO原片段校验入口：`python scripts/verify_ovobench_original_media.py --data-root /srv/datasets/ovobench --media-root /srv/datasets/ovo-original-clips --decode`。默认仅检查profile已登记的原成员，当前为`485.mp4`一份、8800190字节；`--decode`使用已有PyAV逐帧核验，省略时只证明文件身份，不证明解码。服务器公共CLI已完整解码2128帧，未重编码或更改采样；这不是官方Decord/Qwen帧处理或模型验证。`--require-all`在103个原片段未全部登记时拒绝运行，不能把一份媒体校验说成全套可用。原文件、全部解码回执和范围证据仅保留在服务器，Git不含视频或任务原文。
 
 ## WavCaps 原始音频元数据（数据适配已核验，原生音频执行待完成）
 
