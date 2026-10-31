@@ -14,6 +14,11 @@ from .registry import adapter_spec, source_spec
 
 def iter_source_rows(path, spec):
     """Use one source view for reading, binding and index resolution."""
+    if spec["mapping"] == "streamingbench_original_groups":
+        from .streamingbench import original_rows
+
+        yield from original_rows(path)
+        return
     if spec.get("native_format") == "ljspeech_original_archive":
         from .ljspeech import original_rows
 
@@ -164,6 +169,10 @@ def adapt_row(
     source_id: str, row: dict, *, source: dict, spec: dict, index: int
 ) -> WorkloadRecord:
     """Projection is explicit/allowlisted; outcome fields never become task inputs."""
+    if spec["mapping"] == "streamingbench_original_groups":
+        from .streamingbench import adapt_case
+
+        return adapt_case(row, source=source, index=index)
     if spec["mapping"] == "ovobench_original_tasks":
         from .ovobench import adapt_case
 

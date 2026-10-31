@@ -2,6 +2,13 @@
   "version": "adapter-extensions/v1",
   "boundary": "Field contracts from publisher metadata/docs. No real source payload downloaded or full adapter validation claimed.",
   "adapters": {
+    "STREAMINGBENCH": {
+      "kind": "task_dataset", "mapping": "streamingbench_original_groups",
+      "input_fields": [], "required_fields": ["original_group"],
+      "outcome_fields": [], "annotation_fields": [], "id_field": null,
+      "requirements": ["Complete original video/question groups, not independent chat requests", "Preserve nested SQA ordering and author reference-answer context protocol; native media, inference and grading remain separate"],
+      "status": "ORIGINAL_GROUP_ADAPTER_NATIVE_EXECUTION_PENDING"
+    },
     "OVOBENCH": {
       "kind": "task_dataset",
       "mapping": "ovobench_original_tasks",
