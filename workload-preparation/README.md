@@ -1569,9 +1569,10 @@ python scripts/prepare_libritts_original_assets.py --data-root /srv/workloads/li
 
 默认命令仅输出离线计划。下载中断时保留原`.partial`与私有获取记录；检查没有存活的写入进程后，使用原下载命令追加`--resume`，必须匹配原URL、长度、双校验和服务器精确HTTP范围，不能重建记录冒充续传。`verify`可复用既有完整原包，不重新下载。约965MB是压缩包大小，后续解压空间另算。
 
-实际服务器已通过公共离线计划，原始获取进程已启动，尚未取得完整包验证证据；候选适配器仅通过格式夹具，原包适配、研究回读、合适NPU语音模型、原生合成与评价仍待完成。该语料没有一个通用的官方聊天模型或统一计分命令，必须明确后续采用的TTS原生协议，不用文本生成、ASR转写或格式检查冒充TTS完成。
+服务器已取得完整964502297字节原包，发布方MD5与固定TorchAudio
+SHA256均匹配。实际CI工件13036267370的78份运行文件与Git及安装内容一致；5120个原始话段的原文、规范化文本、参考WAV和身份信息已全部还原，公共固定前三条准备已通过。固定三条原始输入的公共与未修改研究消费者回查已通过，索引未变、零模型调用；合适NPU语音模型、原生合成与评价仍待完成。该语料没有通用的官方聊天模型或统一计分命令，后续须明确TTS原生协议，不以ASR、文本生成或格式检查冒充完成。
 
-原包完整校验后可使用公共读取入口（当前尚无原包实测成功声明）：
+原包完整校验后可使用公共读取入口（实际CI组件已在原5120话段上验证）：
 
 ```python
 from pathlib import Path
@@ -1579,6 +1580,12 @@ from vllm_hust_workload_data import iter_workload
 
 records = iter_workload("LIBRITTS", data_root=Path("/srv/workloads/libritts"))
 first_record = next(records)
+```
+
+公共引用准备入口也已实际验证；只生成原始输入引用，不复制音频或执行模型：
+
+```bash
+PYTHONPATH=workload-preparation/src python scripts/prepare_reused_source_records.py LIBRITTS --data-root /srv/workloads/libritts --output /srv/workloads/libritts-first3 --limit 3
 ```
 
 读取按官方TorchAudio的字典序话段ID排列，不代表请求到达顺序或对话。原文与发布方规范化文本分开保留，参考WAV留在结果侧；说话人、章节、片段/话段ID保留前导零，共享章节元数据保留原归档成员引用。原包不展开、不重采样，只检查有界WAV头；不据此宣称完整音频解码或语音合成验证。

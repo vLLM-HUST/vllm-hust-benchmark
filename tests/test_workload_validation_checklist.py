@@ -8,6 +8,25 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def test_libritts_full_input_handoff_does_not_claim_native_tts():
+    ledger = json.loads(
+        (ROOT / "docs/workload-data/dataset-validation-status.json").read_text("utf-8")
+    )
+    row = ledger["delivery_inventory"]["LIBRITTS"]
+    data = row["candidate_adapter"]
+    assert row["original_acquisition"]["original_archive_verified"] is True
+    assert row["original_acquisition"]["original_complete_archive_bytes"] == 964502297
+    assert data["original_utterances_and_reference_waveforms"] == 5120
+    assert data["original_text_variants_each"] == 5120
+    assert data["all_original_fields_roundtripped"] is True
+    assert data["actual_ci_payload_files_verified"] == 78
+    assert data["fixed_original_public_and_research_readbacks"] == 3
+    assert data["research_index_unchanged"] is True
+    assert data["research_observation_or_analysis_executed"] is False
+    assert data["native_synthesis_or_scoring"] is False
+    assert row["checked"] is False and row["status"] == "IN_PROGRESS"
+
+
 def test_agentbench_alfworld_delivery_preserves_other_domain_gaps():
     ledger = json.loads(
         (ROOT / "docs/workload-data/dataset-validation-status.json").read_text("utf-8")

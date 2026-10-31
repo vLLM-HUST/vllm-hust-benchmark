@@ -17,7 +17,14 @@ MAPPINGS = {
     / "configs/workload-native/reused-source-mappings/naturalquestions.json",
 }
 DIALOGUE_SOURCES = {"WILDCHAT", "ULTRACHAT", "LMSYS_CHAT", "TULU3", "OPENTHOUGHTS3"}
-NATIVE_FIELD_SOURCES = {"REPOBENCH", "DOCVQA", "OPENMATH2", "OPENCODE", "SPOKENWOZ"}
+NATIVE_FIELD_SOURCES = {
+    "REPOBENCH",
+    "DOCVQA",
+    "OPENMATH2",
+    "OPENCODE",
+    "SPOKENWOZ",
+    "LIBRITTS",
+}
 TRACE_METADATA_SOURCES = {"AZURE_LLM", "AZURE_LMM_2025", "COPILOT_AGENT_2026"}
 INFINITE_MAPPINGS = {
     kind: ROOT
@@ -96,7 +103,7 @@ def prepare(source_id, *, data_root, output, files=None, limit=None, catalog_roo
         )
     original_role = (
         "data"
-        if source_id in {"OPENMATH2", "OPENCODE", "AZURE_LLM", "SPOKENWOZ"}
+        if source_id in {"OPENMATH2", "OPENCODE", "AZURE_LLM", "SPOKENWOZ", "LIBRITTS"}
         else "raw_source"
     )
     registered = {

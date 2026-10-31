@@ -2325,7 +2325,7 @@
         "birth": "863583565",
         "observed_running_same_birth": true,
         "observed_attempted_positions": [0],
-        "observed_completed_positions": [],
+        "observed_completed_positions": [0],
         "transport_timeout_seconds": 3600,
         "automatic_model_retries": 0,
         "qualified_runtime_reused": "xsum-original-score-client-32082-001/bin/python + existing original InfiniteBench client overlay and local original ROUGE cache",
@@ -3768,7 +3768,7 @@
     },
     "MULTIAGENTBENCH": {
       "native_research_execution": {
-        "observed_status": "RUNNING_ORIGINAL_RESEARCH_NATIVE_CLI",
+        "observed_status": "RELAY_TRANSPORT_INTERRUPTED_ORIGINAL_ACTOR_LIVE",
         "server_stage": "/root/marble-original-research-native-runtime-20261031-003",
         "launch_receipt": "/root/marble-original-research-native-launch-20261031-001/launch-private.json",
         "npu_backend_stage": "/data/shared_upload/hust-phr/workload-benchmark-native-delivery-20261024/marble-native-research-32068-001",
@@ -3779,8 +3779,17 @@
         "native_client_pid": 114680,
         "native_client_birth": "1245572434",
         "observed_active_original_row": 0,
-        "observed_original_model_requests_and_responses": 3,
-        "observed_original_keyword_requests_and_responses": 3,
+        "observed_original_model_requests_and_responses": 4,
+        "observed_original_keyword_requests_and_responses": 4,
+        "relay_transport_exit_code": 1,
+        "relay_rpc_timeout_seconds": 620,
+        "cpu_original_model_queue_requests": 7,
+        "cpu_original_model_queue_responses": 4,
+        "npu_transferred_model_requests": 5,
+        "npu_model_responses": 4,
+        "npu_claimed_model_requests_without_response": 1,
+        "uncertain_model_request_resubmitted": false,
+        "original_actor_restarted": false,
         "paper_transport_diagnostic": {
           "environment": "Same owned CPU and original isolated MARBLE client",
           "independent_control_path": "arxiv.org/html/2401.00123",
@@ -3803,7 +3812,7 @@
         "local_raw_data_files": 0,
         "scoring_qualified": false,
         "source_checkbox_eligible": false,
-        "boundary": "Observed running snapshot, not completion. Check same PID/birth, task state and queues before resuming; no automatic actor/request restart or original task replacement. Raw model/tool frames stay private on owned servers. Research workload steps and final original evaluation remain pending."
+        "boundary": "Relay process terminated on a620-second RPC timeout; original actor and parent still live at observation. Four original model and keyword returns retained, one transferred/claimed model request has no saved response. Extra CPU queued requests are not new completed tasks or permission to replay uncertain inference. No actor restart/resubmission or quality/data-failure conclusion; inspect exact original state and service queuing before recovery. Same single-sequence service also hosts a long correctness request; do not infer performance or complete native qualification from this mixed window."
       },
       "compat_container_preflight": {
         "software_cpu_smoke": {
@@ -4828,7 +4837,22 @@
         "module": "workload-preparation/src/vllm_hust_workload_data/libritts.py",
         "registered_public_provider": true,
         "format_fixture_tests_passed": 8,
-        "original_archive_readbacks_verified": false,
+        "original_archive_readbacks_verified": true,
+        "original_utterances_and_reference_waveforms": 5120,
+        "original_text_variants_each": 5120,
+        "all_original_fields_roundtripped": true,
+        "public_fixed3_preparer_exit_code": 0,
+        "actual_original_provider_receipt": "libritts-original-ci-input-validation-20261031-003/qualification-public.json under the private shared task root",
+        "actual_ci_run": 41185194052,
+        "actual_ci_artifact": 13036267370,
+        "actual_ci_payload_files_verified": 78,
+        "research_handoff_status": "FIXED_ORIGINAL3_VERIFIED",
+        "research_handoff_receipt": "libritts-research-input-handoff-20261031-001/qualification-public.json under the private shared task root",
+        "fixed_original_public_and_research_readbacks": 3,
+        "research_index_unchanged": true,
+        "research_observation_or_analysis_executed": false,
+        "research_handoff_launch": "libritts-research-input-handoff-20261031-001/launch-private.json under the private shared task root",
+        "retained_preparation_failures": "First standalone probe lacked the repository catalog view; second exposed missing source-specific data-role registration. Exact CI catalog view supplied and public role binding corrected; source archive unchanged, no model calls.",
         "incomplete_archive_prefix_format_probe": {
           "available_bytes_at_probe": 265289728,
           "archive_members_inspected": 71,
@@ -4876,17 +4900,20 @@
           "exact_http_range_and_full_dual_checksums_required": true,
           "model_or_agent_stopped": false
         },
-        "original_archive_verified": false,
+        "original_archive_verified": true,
+        "original_complete_archive_bytes": 964502297,
+        "original_complete_archive_dual_checksums_verified": true,
+        "complete_archive_receipt": "libritts-original-test-other-cn-20261031-001/qualification-public.json under the private shared task root",
         "public_server_plan_receipt": "libritts-public-acquisition-entry-20261031-001/qualification-public.json under the private shared task root",
         "public_server_plan_exit_code": 0,
         "native_model_calls": 0,
-        "boundary": "Original slow owned writer was identity-checked and terminated, original16MiB partial retained. Subsequent mirror attempt terminated on read timeout at266338304 bytes; failure retained and original prefix resumed using bounded exact byte ranges. Whole archive remains unverified. No provider, synthesis, scoring or completion claim. Inspect the current exact process before any continuation."
+        "boundary": "Original slow writer and later read-timeout records retained. Bounded exact ranges resumed the existing266338304-byte prefix; complete964502297-byte archive now matches both pinned TorchAudio SHA256 and publisher MD5. Acquisition is complete, not native synthesis/scoring or source completion."
       },
       "checked": false,
       "legacy_checked": false,
       "existing_receipt": null,
       "delivery_receipt": null,
-      "blocker": "Original test-other acquisition started on NPU shared storage with full publisher MD5 and pinned TorchAudio SHA256 requirements. Public bounded resumable acquisition entry and actual server offline plan are available; body remains unverified. Corpus adapter preserving both text forms and speaker/chapter/utterance identities, suitable NPU TTS protocol, native synthesis/scoring and handoff remain pending. LibriTTS is not LibriSpeech ASR, LibriTTS-R or a standalone model/scoring protocol."
+      "blocker": "Complete original test-other archive verified by publisher MD5 and fixed TorchAudio SHA256. Actual CI provider78 payloads matched Git/wheel/installed bytes; all5120 original text/normalized-text/reference-WAV pairs and identities roundtripped. Public fixed3 preparation and unchanged research input readbacks passed after source-specific data-role fix. Suitable NPU TTS binding, native synthesis and evaluation remain pending. No ASR, LibriTTS-R, full PCM decode, invented prompt or source completion claim."
     },
     "LJSPEECH": {
       "scope": "public",
