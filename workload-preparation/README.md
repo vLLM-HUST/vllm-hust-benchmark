@@ -1582,3 +1582,27 @@ first_record = next(records)
 ```
 
 读取按官方TorchAudio的字典序话段ID排列，不代表请求到达顺序或对话。原文与发布方规范化文本分开保留，参考WAV留在结果侧；说话人、章节、片段/话段ID保留前导零，共享章节元数据保留原归档成员引用。原包不展开、不重采样，只检查有界WAV头；不据此宣称完整音频解码或语音合成验证。
+
+### InfiniteBench原评分依赖与执行环境
+
+原`compute_scores.py`在导入时会调用`evaluate.load("rouge")`，数学任务也不能省略这一依赖。模型服务与客户端环境分开；已有合格环境优先复用。新的隔离客户端可按以下直接版本快照准备（不是完整传递依赖锁）：
+
+```bash
+python3 -m venv /srv/envs/infinitebench
+/srv/envs/infinitebench/bin/python -m pip install -r configs/workload-native/infinitebench-client-dependencies.txt
+/srv/envs/infinitebench/bin/python -m pip install ./workload-preparation
+python scripts/prepare_infinitebench_original_metric.py --output /srv/workloads/infinitebench-metric
+python scripts/prepare_infinitebench_original_metric.py --execute --output /srv/workloads/infinitebench-metric
+python scripts/prepare_infinitebench_original_metric.py --verify-only --output /srv/workloads/infinitebench-metric
+```
+
+默认只输出计划，显式执行仅获取固定6140字节原ROUGE模块；可校验并复用已有相同字节，不下载数据或模型。服务器已实际核验公开计划、只读校验及在新准备目录导入原评分器，原数学评分的正例/空答案控制通过，零模型调用；直接新鲜网络下载和空环境重装尚未实测。
+
+原数据使用既有`prepare_reused_research_assets.py INFINITEBENCH`获取/校验；原作者代码固定`OpenBMB/InfiniteBench@51d9b37b0f1790ead936df2243abbf7f0420e439`并由`verify_infinitebench_original_code.py`核验。代码、数据、指标和输出均放仓库外。下面所有路径为示例，模型服务由使用者按资源和任务要求单独部署：
+
+```bash
+cd /srv/workloads/infinitebench-metric/scoring
+/srv/envs/infinitebench/bin/python /srv/vllm-hust-benchmark/scripts/run_infinitebench_original.py --official-checkout /srv/workloads/InfiniteBench-author --data-root /srv/workloads/infinitebench --output /srv/workloads/infinitebench-results-math --task math_calc --model Qwen/Qwen3-14B --template gpt4 --context-limit 131072 --request-timeout 3600 --count 3 --disable-thinking --endpoint http://127.0.0.1:19468/v1
+```
+
+从`scoring`目录执行让原`evaluate.load("rouge")`按原标识解析到已校验的本地`rouge/rouge.py`，不改原评分器。`--request-timeout`默认600秒，只控制HTTP等待；长输出可以显式延长，原生成预算不变且自动重试仍为0。原模板标识与实际服务模型分别记录，评分器的模型参数使用实际绑定，不将本地Qwen结果当作GPT-4复现。当前math_calc原前三题仍在NPU执行，不能把环境/指标准备成功当作任务完成。
