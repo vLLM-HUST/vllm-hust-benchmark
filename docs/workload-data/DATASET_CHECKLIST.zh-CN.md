@@ -1289,7 +1289,9 @@ split；后续必须明确将生成和评估同时绑定原verified版本，并�
 - [x] 公共`prepare_ovobench_original_media.py`完整成员网络读取在Windows
   RAM中验证：原分卷ETag/精确范围/完整SHA核验通过，8800190字节与服务器保留原文件逐字节一致；不在本地落数据、不新增服务器副本。服务器CLI复用已有原文件也exit0。回执分别为`/root/ovobench-public-media-network-20261031-001/qualification-public.json`和`/root/ovobench-public-media-prepare-reuse-20261031-001/qualification-public.json`。不据此宣称服务器直连网络可用。
 - [x] 公共`capture_ovobench_original_tar_headers.py`已实现，每次只取512字节原头部、跳过成员载荷、检查点可继续；RAM真实网络推进2048→2050验证通过。纠正验证脚本输出目录后，服务器CLI真实尝试失败于`Network is unreachable`，最后有效检查点成功保留；首次路径边界拒绝单独保留，不冒充网络故障。回执`/root/ovobench-public-header-capture-20261031-002/qualification-public.json`，未改动/重启主目录任务，0模型调用。
-- [ ] 公共目录捕获和片段获取的服务器直连网络环境仍未通过，主目录索引继续复用原运行控制推进；单片段公共获取不等于103片段全链路完成。
+- [ ] 公共目录捕获和片段获取的服务器直连网络环境仍未通过；原主目录已沿用原控制完成（见下项），不重复扫描；单片段公共获取不等于103片段全链路完成。
+- [x] 原主目录任务已自然完成：3036个原TAR头、3035个视频成员及两个结束标记，公共规划器`--require-complete`实跑exit0；36个原case所需103片段全部定位，总3520157133字节。仅目录/范围闭环，不重算整分卷哈希、不冒充媒体取得或模型运行。回执`/root/ovobench-complete-original-index-20261031-001/qualification-public.json`。
+- [ ] 全部固定103原媒体的有界获取/完整视频解码仍在进行：队列复用既有3份，只补100份；已核算新增峰值3492466587字节，逐文件保留512MiB空间、验证后只清理本次重复分块缓存。服务器进度位于`/root/ovobench-fixed-original-media-all-20261031-001/progress-public.json`。未满足全量前不勾选此项，也不计原生模型或评分完成。
 - [x] 固定原ASI
   case485完整原片段`485.mp4`取得，8800190字节；固定URL/精确原范围和原捕获ETag一致，文件身份登记到既有profile。复用服务器PyAV18.1.0逐帧解码全部2128帧，公共`verify_ovobench_original_media.py --decode`实跑exit0，未重编码/截断/安装依赖。回执`/root/ovobench-public-media-verifier-20261031-001/qualification-public.json`。仅1/103片段准备完成，官方帧采样、NPU推理、评分均未完成，0模型调用。
 - [x] 公共`prepare_ovobench_native_selection.py`在服务器成功生成12类各原前三题的36-case原字段子集，供官方`--anno_path`读取，列出全部103个必需原视频片段，不删向前阶段。实跑复用已安装CI提供侧，原文件不变；回执`/root/ovobench-native-selection-20261031-002/qualification-public.json`。首次输出边界拒绝记录保留，纠正为独立数据目录后通过；未下载视频、0模型调用。

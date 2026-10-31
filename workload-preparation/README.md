@@ -1224,7 +1224,7 @@ OVO原片段校验入口：`python scripts/verify_ovobench_original_media.py --d
 原片段获取入口：`python scripts/prepare_ovobench_original_media.py --data-root /srv/datasets/ovobench --index /srv/private/ovo-captured-tar-index.json --member 485.mp4`默认只显示计划。显式加`--download --media-root /srv/datasets/ovo-original-clips --max-bytes 8800190`才获取；仅支持profile已登记、原抽样集合内且已定位的原成员，HTTP读取每段不超过8MiB，必须匹配捕获分卷ETag、精确206/Content-Range和完整成员SHA。保留512MiB磁盘余量；已有完整原文件校验后复用，不覆盖不兼容文件或`.partial`。新文件只有完整身份通过才发布，失败保留partial供排查。
 
 验证边界：公共transfer已在Windows
-RAM完成该原成员实际网络读取，逐字节匹配服务器保留文件，未在Windows写数据或增加服务器原媒体副本；服务器公开CLI已验证原文件复用。服务器自身直连网络路径尚未通过，公共目录捕获入口已实现并验证RAM网络推进，但服务器直连仍失败；现有主目录任务继续使用原控制运行，不重启已取得结果。因此当前不宣称完整103片段一键准备或原生视频评测完成。原模型、原帧处理和评分必须另行验证。
+RAM完成该原成员实际网络读取，逐字节匹配服务器保留文件，未在Windows写数据或增加服务器原媒体副本；服务器公开CLI已验证原文件复用。服务器自身直连网络路径尚未通过，公共目录捕获入口已实现并验证RAM网络推进，但服务器直连仍失败；原主目录已沿用旧控制完成，不重复扫描已取得结果。因此当前不宣称完整103片段一键准备或原生视频评测完成。原模型、原帧处理和评分必须另行验证。
 
 公共目录捕获入口（需要可访问发布方的网络）：
 
@@ -1241,6 +1241,8 @@ python scripts/capture_ovobench_original_tar_headers.py \
 ```
 
 每次严格取512字节原头部，跳过成员载荷，要求固定发布版本/精确HTTP范围/同分卷ETag一致；不支持的TAR扩展、重复或不安全成员直接失败，不静默跳过。失败保留最后成功步的检查点；不覆盖旧目录或回退到其他题目。真实RAM网络已验证两步推进2048→2050，服务器公开CLI因直连`Network is unreachable`失败但保留有效检查点。首个验证控制脚本输出路径放错而被边界保护拒绝，纠正后的网络失败另行记录；不修改保护规则或主运行索引。回执`/root/ovobench-public-header-capture-20261031-002/qualification-public.json`。完整目录、媒体取得、模型及评分分别判断，不因捕获入口存在就声称原生benchmark已可用。
+
+完整目录的最新验证：沿用原运行控制取得3036个原TAR头，覆盖3035个视频成员和两个原结束标记；公共规划器`--require-complete`已实跑通过，103个固定片段全部定位，总3520157133字节，回执`/root/ovobench-complete-original-index-20261031-001/qualification-public.json`。这不等于服务器公共捕获CLI已全程直连成功，也不意味着103个视频已经取得。媒体队列正在复用已验证3份、补剩余100份；保持原case和全部阶段，完整解码后保留原文件及证据、仅移除本次重复分块缓存。公开profile目前已登记的仍是上述ASI三份，其余在验证后再登记。
 
 ## WavCaps 原始音频元数据（数据适配已核验，原生音频执行待完成）
 
