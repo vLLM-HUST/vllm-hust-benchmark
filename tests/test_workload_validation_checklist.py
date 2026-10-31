@@ -38,7 +38,12 @@ def test_spokenwoz_full_original_dialogues_are_not_audio_execution():
     assert list(evidence["fixed_first3_complete_turn_counts"].values()) == [50, 44, 42]
     assert evidence["audio_acquired"] is False
     assert evidence["model_calls"] == 0
-    assert row["checked"] is False and row["status"] == "IN_PROGRESS"
+    assert row["checked"] is True and row["status"] == "AVAILABLE"
+    delivery = json.loads((ROOT / row["delivery_receipt"]).read_text("utf-8"))
+    assert delivery["source_checkbox_eligible"] is True
+    assert delivery["native_execution"]["total_actual_requests"] == 128
+    assert delivery["audio_workload_coverage_established"] is False
+    assert delivery["current_saved_audit"]["new_model_calls"] == 0
     provider = row["public_adapter_preparation"]
     assert provider["actual_ci_artifact_installed"] is True
     assert provider["actual_ci_run"] == 41172187985
