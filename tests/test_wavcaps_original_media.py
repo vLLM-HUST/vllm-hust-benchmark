@@ -155,9 +155,45 @@ def test_bbc_profile_keeps_original_string_ids_and_split_identity():
     assert profile["component"] == "BBC_Sound_Effects"
 
 
-def test_explicit_component_does_not_change_original_binding_contract(tmp_path):
+@pytest.mark.parametrize("component", ["BBC_Sound_Effects", "AudioSet_SL", "FreeSound"])
+def test_explicit_component_does_not_change_original_binding_contract(
+    tmp_path, component
+):
     profile, metadata, media = fixture(tmp_path)
-    profile["component"] = "BBC_Sound_Effects"
+    profile["component"] = component
     result = entry.verify(profile, metadata_root=metadata, media_root=media)
-    assert result["component"] == "BBC_Sound_Effects"
+    assert result["component"] == component
     assert result["source_checkbox_eligible"] is False
+
+
+def test_audioset_ids_are_not_rewritten_as_media_filenames():
+    profile = json.loads(entry.PROFILES["AudioSet_SL"].read_text())
+    assert [item["id"] for item in profile["files"]] == [
+        "Yb0RFKhbpFJA.wav",
+        "YNQNTnl0zaqU.wav",
+        "Y4PPmyY_-YrA.wav",
+    ]
+    assert all(
+        item["id"].endswith(".wav") and item["path"].endswith(".flac")
+        for item in profile["files"]
+    )
+    assert all(item["total_samples"] == 320000 for item in profile["files"])
+
+
+def test_all_original_components_have_fixed_three_media_identities():
+    assert set(entry.PROFILES) == {
+        "SoundBible",
+        "BBC_Sound_Effects",
+        "AudioSet_SL",
+        "FreeSound",
+    }
+    for component, path in entry.PROFILES.items():
+        profile = json.loads(path.read_text())
+        assert profile["component"] == component
+        assert len(profile["files"]) == 3
+        assert len({item["id"] for item in profile["files"]}) == 3
+        assert all(item["path"].endswith(".flac") for item in profile["files"])
+    assert [
+        item["id"]
+        for item in json.loads(entry.PROFILES["FreeSound"].read_text())["files"]
+    ] == ["180913", "177462", "176413"]

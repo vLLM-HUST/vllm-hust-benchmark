@@ -1165,7 +1165,15 @@ CRC和归档目录身份另行记录。完整102题仍可从发布方原归档�
 
 ## WavCaps 原始音频元数据（数据适配已核验，原生音频执行待完成）
 
-同一校验器现支持SoundBible和BBC两个已核验组件，默认保持SoundBible；BBC使用`--component BBC_Sound_Effects`及其独立媒体目录，固定身份见[BBC媒体清单](../configs/workload-native/wavcaps-bbc-original-fixed3-media.json)。BBC原前三条`NHU05051026/07066104/07039376`已从原ZIP64分卷取得并完整解码，保留前导零，原时长完全一致。仅对已取得范围及原成员CRC/PCM做核验，不声称整套分卷哈希已重新计算。
+同一校验器支持四个已核验组件，默认保持SoundBible；其他组件显式传`--component`和独立媒体目录。四组件各固定原前三条，共12个原FLAC已完整解码，原PCM
+MD5及原时长均一致。只核验已取得范围和原成员，不声称整套归档/分卷哈希已重新计算。
+
+| `--component`       | 固定原样本身份                                       | 媒体清单                                                                             |
+| ------------------- | ---------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| `SoundBible`        | 原前三条`2219/2218/2217`                             | [固定身份](../configs/workload-native/wavcaps-soundbible-original-fixed3-media.json) |
+| `BBC_Sound_Effects` | 原前三条，保留ID前导零                               | [固定身份](../configs/workload-native/wavcaps-bbc-original-fixed3-media.json)        |
+| `AudioSet_SL`       | 原前三条，原`.wav` ID不改写为`.flac`文件名           | [固定身份](../configs/workload-native/wavcaps-audioset-original-fixed3-media.json)   |
+| `FreeSound`         | 原前三条`180913/177462/176413`，保留原网站文件名字段 | [固定身份](../configs/workload-native/wavcaps-freesound-original-fixed3-media.json)  |
 
 原JSON的`audio`字段实际为`wav_path`占位符，不能直接当作真实媒体文件。应保留原行，另按来源组件、原`id`和原发布包成员绑定。现已取得SoundBible固定原前三条`2219/2218/2217`的原FLAC；固定身份见[媒体清单](../configs/workload-native/wavcaps-soundbible-original-fixed3-media.json)。官方ZIP未整包下载，仅从固定版本、同一ETag取得原目录/局部头/压缩成员；校验原CRC、FLAC头和全部解码PCM的原MD5，原时长均完全一致，没有重采样、截断、改写原行或换题。完整归档SHA仅登记发布方身份，不能声称已重新验证整包哈希。
 
@@ -1178,7 +1186,7 @@ python scripts/verify_wavcaps_original_media.py \
 ```
 
 `--decode`使用已有SoundFile/FLAC解码器逐块验证PCM16与原STREAMINFO
-MD5；本次复用服务器已有SoundFile0.14.0、libsndfile1.2.2，没有安装或升级包。未装解码器时明确失败，不静默降为头部检查。省略该选项只验文件/原ID/头部关系，不算完整解码。SoundBible/BBC各三条已在CPU完整执行此入口；AudioSet和FreeSound的固定媒体、模型及NPU原生流程仍缺，不能因此勾选整个来源。
+MD5；本次复用服务器已有SoundFile0.14.0、libsndfile1.2.2，没有安装或升级包。未装解码器时明确失败，不静默降为头部检查。省略该选项只验文件/原ID/头部关系，不算完整解码。四组件各三条已在CPU完整执行此入口。当前范围获取使用本任务的私有传输控制，公共有界媒体获取/准备入口还未完整迁入；不能把“已有媒体可校验”说成使用者已能一键准备全部输入。原模型、NPU执行、适用评分仍未完成，不勾选整个来源。
 
 复用现有获取器，不新增下载实现。默认只显示计划；服务器上可显式获取某份原始元数据，已自行取得的文件使用只读校验：
 

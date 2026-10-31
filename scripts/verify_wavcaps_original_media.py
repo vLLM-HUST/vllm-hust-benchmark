@@ -13,6 +13,8 @@ PROFILE = (
 PROFILES = {
     "SoundBible": PROFILE,
     "BBC_Sound_Effects": PROFILE.parent / "wavcaps-bbc-original-fixed3-media.json",
+    "AudioSet_SL": PROFILE.parent / "wavcaps-audioset-original-fixed3-media.json",
+    "FreeSound": PROFILE.parent / "wavcaps-freesound-original-fixed3-media.json",
 }
 
 
