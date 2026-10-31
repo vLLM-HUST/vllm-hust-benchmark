@@ -40,3 +40,40 @@ def test_typst_failures_are_not_reported_as_positive_judge_qualification():
     current = ledger["delivery_inventory"]["STRUCTEVAL"]
     assert current["verified_unique_native_tasks"] >= 1394
     assert current["checked"] is False
+
+
+def test_latex_closed_groups_are_counted_once_without_promoting_source():
+    ledger = json.loads(
+        (ROOT / "docs/workload-data/dataset-validation-status.json").read_text("utf-8")
+    )["delivery_inventory"]["STRUCTEVAL"]
+    progress = json.loads(
+        (ROOT / ledger["latex_full_protocol_progress_receipt"]).read_text("utf-8")
+    )
+    completed = progress["completed_protocols"]
+    assert len({p["profile"] for p in completed}) == len(completed)
+    assert progress["new_original_tasks_audited"] == sum(
+        p["new_original_tasks"] for p in completed
+    )
+    for profile in completed:
+        assert profile["previous_original_tasks_reused"] == 3
+        assert profile["previous3_already_in_previous_counter"] is True
+        assert (
+            profile["all_original_protocol_tasks"] == profile["new_original_tasks"] + 3
+        )
+        assert profile["new_generation_calls"] == profile["new_original_tasks"]
+        assert profile["new_judge_calls"] == profile["new_successfully_rendered_images"]
+        assert profile["new_model_calls_in_independent_audit"] == 0
+    assert progress["current_audited_unique_task_count"] == (
+        progress["previous_audited_unique_task_count"]
+        + progress["new_original_tasks_audited"]
+    )
+    assert (
+        progress["current_audited_unique_task_count"]
+        == ledger["verified_unique_native_tasks"]
+    )
+    assert (
+        progress["remaining_original_tasks"]
+        == 2035 - ledger["verified_unique_native_tasks"]
+    )
+    assert progress["source_checkbox_eligible"] is False
+    assert ledger["checked"] is False

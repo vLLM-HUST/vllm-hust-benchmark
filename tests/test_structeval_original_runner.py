@@ -357,6 +357,13 @@ def test_completed_protocol_audit_adds_only_previously_unexecuted_rows():
     assert typst["newly_counted_original_task_executions"] == 50
     assert typst["actual_native_vqa_calls"] == 0
     assert typst["positive_native_vqa_path_qualified"] is False
+    latex_full = json.loads(
+        (ROOT / ledger["latex_full_protocol_progress_receipt"]).read_text("utf-8")
+    )
+    assert latex_full["previous_audited_unique_task_count"] == 1394
+    assert latex_full["new_original_tasks_audited"] == sum(
+        p["new_original_tasks"] for p in latex_full["completed_protocols"]
+    )
     assert (
         ledger["verified_unique_native_tasks"]
         == count
@@ -371,6 +378,7 @@ def test_completed_protocol_audit_adds_only_previously_unexecuted_rows():
         + browser_complete["text_markdown_additional_original_tasks"]
         + sum(p["original_tasks"] for p in latex["profiles"])
         + typst["newly_counted_original_task_executions"]
+        + latex_full["new_original_tasks_audited"]
     )
     held = receipt.get("held_native_exit_evidence")
     if held:
