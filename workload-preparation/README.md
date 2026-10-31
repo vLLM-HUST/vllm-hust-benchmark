@@ -1177,6 +1177,9 @@ python scripts/prepare_jsonschemabench_author_source.py --source streamingbench 
 默认只计划；显式准备核验31份原始软件文件的Git
 blob、SHA256和大小。服务器已取得全部74376字节、解析25份Python语法且公共verify命令exit0；未导入作者模型代码。回执：`/root/streamingbench-original-software-20261031-001/preparation-public.json`、`/root/streamingbench-public-source-verify-20261031-001/qualification-public.json`。软件准备不代表数据、NPU环境、推理或评分已通过。
 
+原始问题文件获取：`python scripts/prepare_reused_research_assets.py STREAMINGBENCH`默认只计划，显式`--mode download --data-root /srv/datasets/streamingbench --max-bytes 9752155`取得固定作者修订的8份JSON；已有文件用`--mode verify --data-root /srv/datasets/streamingbench`只读核验。服务器已取得全部8份9752155字节，逐文件Git
+blob/SHA256验证，公共verify命令exit0，见`/root/streamingbench-public-question-verify-20261031-001/qualification-public.json`。offline/stream及proactive子集有重叠，不把行数求和当独立任务数；SQA原嵌套组未展平。只有获取注册，原生适配及研究回读尚未验证，视频/音频仍需另备。
+
 后续必须遵循[官方流程](https://github.com/THUNLP-MT/StreamingBench)：原数据按real/omni/sqa/proactive组织，依次使用`preprocess.sh`、`eval.sh`、`stats.sh`，保留原视频组与时间戳。SQA原实现把前序参考答案加入后续上下文；主动响应原实现逐秒查询到参考时间+4秒，不能简化成单次问答。官方Qwen2-VL-7B包装器采用自适应1/0.5/0.2fps和128输出预算，但写死CUDA与flash_attention_2；当前尚无已验证NPU绑定。完整组固定抽样、原始媒体、原生推理/评分和统一消费链路均待补，来源不打勾。
 
 ## OVO-Bench 原生在线视频评测（软件准备入口，尚未完成原生验证）

@@ -25,8 +25,8 @@ def test_every_class_has_an_explicit_plan():
 def test_catalog_registration_does_not_claim_runtime_or_local_data():
     sources = provider.list_sources()
     assert (
-        len(sources) == 110
-    )  # Existing109 plus already-planned OVO-Bench; delivery scope stays118 sources.
+        len(sources) == 111
+    )  # Existing109 plus planned OVO/StreamingBench; delivery scope stays118 sources.
     assert any(row["source_id"] == "TEMPORALWIKI" for row in sources)
     assert any(row["source_id"] == "LJSPEECH" for row in sources)
     assert sum(row["source_id"].startswith("PAIO-") for row in sources) == 8

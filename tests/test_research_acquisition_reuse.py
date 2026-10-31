@@ -47,6 +47,22 @@ EXPECTED = {
 }
 
 
+def test_streamingbench_original_question_variants_are_not_independent_tasks():
+    source, files = runner.selection("STREAMINGBENCH")
+    assert len(files) == 8
+    assert sum(item["bytes"] for item in files) == 9752155
+    assert all(item["role"] == "data" for item in files)
+    assert all(source["revision"] in item["url"] for item in files)
+    assert "not_disjoint_tasks" in source["provenance_kind"]
+    assert {item["rows"] for item in files} == {1500, 300, 248, 50, 2252, 498}
+
+
+def test_ovobench_metadata_is_accepted_by_public_acquisition_entry():
+    _, files = runner.selection("OVOBENCH")
+    assert len(files) == 1
+    assert files[0]["rows"] == 1640
+
+
 def test_mind2web_original_assets_use_existing_acquisition_roles():
     source, files = runner.selection("MIND2WEB")
     assert [item["path"] for item in files] == ["test.zip", "scores_all_data.pkl"]
@@ -193,8 +209,8 @@ def test_original_research_assets_are_registered_without_native_completion_claim
         runner.CATALOG.read_text("utf-8"), object_pairs_hook=unique_object
     )["sources"]
     assert (
-        len(sources) == 110
-    )  # Existing109 plus already-planned OVO-Bench, not new delivery scope.
+        len(sources) == 111
+    )  # Existing109 plus planned OVO/StreamingBench; not new delivery scope.
     assert "TEMPORALWIKI" in sources
     assert sum(EXPECTED.values()) == 48
 
