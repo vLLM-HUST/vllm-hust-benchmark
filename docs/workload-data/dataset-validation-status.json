@@ -4179,12 +4179,23 @@
     "OVOBENCH": {
       "scope": "public",
       "delivery_kind": "review_original_source_protocol",
-      "status": "NOT_STARTED",
+      "status": "ORIGINAL_SOFTWARE_PREPARED_NATIVE_PENDING",
       "checked": false,
       "legacy_checked": false,
       "existing_receipt": null,
       "delivery_receipt": null,
-      "blocker": null
+      "public_author_source_preparer": "scripts/prepare_jsonschemabench_author_source.py --source ovobench",
+      "author_source_profile": "configs/workload-native/ovobench-author-source.json",
+      "cpu_preparation": {
+        "server_receipt": "/root/ovobench-original-software-20261031-001/preparation-public.json",
+        "original_files_verified": 45,
+        "original_software_bytes": 79170,
+        "python_ast_parsed_not_imported": 20,
+        "public_verify_exit_code": 0,
+        "model_calls": 0,
+        "raw_annotations_or_videos_acquired": false
+      },
+      "blocker": "Pinned current official revision's45 software files prepared and publicly verified on owned CPU;20 Python ASTs parsed without importing. Original annotation JSON, original full per-task video/chunk sequence, qualified NPU Qwen2-VL or other author-supported model profile and official scoring remain pending. Author Qwen2-VL uses CUDA/FlashAttention2, up to64 frames and128 generation tokens; cannot silently replace with text chat or one static frame. Forward tasks require every original test_info stage. CC BY-NC-SA4.0/source-video conditions separate from code license; no raw assets redistributed. Source remains unchecked."
     },
     "FULL_DUPLEX_BENCH": {
       "scope": "public",

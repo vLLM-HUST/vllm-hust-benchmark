@@ -54,6 +54,7 @@ def main():
             "marble",
             "dailytalk",
             "longmemeval",
+            "ovobench",
         ],
         default="jsonschemabench",
         help="Pinned original author source only; historical default unchanged",

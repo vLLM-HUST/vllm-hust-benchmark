@@ -1163,6 +1163,33 @@ CRC和归档目录身份另行记录。完整102题仍可从发布方原归档�
 
 通信模块尚未接入原Agent的价格和tokenizer路径，不能用GPT别名、虚构单价或“成本为零”绕过价格表；未知价格应报告不可得，完整Agent绑定仍待完成。另检查了[官方OpenHands legacy入口](https://github.com/OpenHands/benchmarks/blob/542cb71c860c11d6a70238a1dd4b4ac7a3e0d4d2/legacy/scienceagentbench/run_infer.py)：它仍默认读取validation，旧镜像上下文还复制整个benchmark目录，不能直接当作本次verified数据与隔离部署已就绪的依据。未拉取旧镜像，也未切换到未经验证的替代流程。
 
+## OVO-Bench 原生在线视频评测（软件准备入口，尚未完成原生验证）
+
+[官方仓库](https://github.com/JoeLeelyf/OVO-Bench)当前修订版区分回溯、实时感知和向前主动响应，包含12种原生任务。复用已有作者软件获取器，固定45份原Python、shell、依赖说明和许可，不复制注释数据、视频或发布方模型结果进仓库：
+
+```bash
+# 默认只显示计划；prepare显式获取小型原作者软件，verify只核验已有文件
+python scripts/prepare_jsonschemabench_author_source.py --source ovobench \
+  --author-root /srv/benchmarks/ovo-author --action plan
+python scripts/prepare_jsonschemabench_author_source.py --source ovobench \
+  --author-root /srv/benchmarks/ovo-author --action prepare --max-bytes 79170
+```
+
+原始注释入口是`data/ovo_bench_new.json`；原视频由[官方数据页](https://huggingface.co/datasets/JoeLeelyf/OVO-Bench)发布。官方说明提供约44GB原视频拼接包或约144GB预切分包，不能因体积大而用静态截图或自造prompt冒充完整任务。当前尚未取得视频、未完成原注释读取适配，不能按下述示例声称已跑通。
+
+在完整原数据及合格NPU模型环境具备后，官方原入口示例为：
+
+```bash
+cd /srv/benchmarks/ovo-author
+python inference.py --model QWen2VL_7B --model_path /srv/models/Qwen2-VL-7B-Instruct \
+  --mode offline --anno_path data/ovo_bench_new.json \
+  --video_dir data/src_videos --chunked_dir data/chunked_videos
+bash scripts/score/QWen2VL_7B.sh
+```
+
+这只是官方调用方式，不是本项目已验证的Ascend命令。原Qwen2-VL实现明确使用CUDA、FlashAttention2、最多64帧和128生成token；必须先核验保持原帧采样、提示词、生成预算及所有`test_info`阶段的NPU适配，不能直接替换成普通Qwen文本服务。回溯/实时任务用原`id.mp4`，向前任务按原`id_index.mp4`执行全部阶段，不能只取一个片段当整题。数据为CC
+BY-NC-SA 4.0并保留原视频来源条款，代码许可与数据条款分别核对；不作为默认商业可再分发资产。
+
 ## WavCaps 原始音频元数据（数据适配已核验，原生音频执行待完成）
 
 同一校验器支持四个已核验组件，默认保持SoundBible；其他组件显式传`--component`和独立媒体目录。四组件各固定原前三条，共12个原FLAC已完整解码，原PCM
