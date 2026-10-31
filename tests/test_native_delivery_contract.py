@@ -8,6 +8,76 @@ ROOT = Path(__file__).resolve().parents[1]
 DOCS = ROOT / "docs/workload-data"
 
 
+def test_spider_archive_acquisition_is_not_native_delivery_or_publisher_digest():
+    receipt = json.loads(
+        (DOCS / "validation/spider-original-preparation-20261029.json").read_text(
+            "utf-8"
+        )
+    )
+    assert receipt["archive"]["bytes"] == 205800266
+    assert receipt["archive"]["all_archive_crc_verified"]
+    assert not receipt["archive"]["publisher_published_checksum_available"]
+    assert receipt["archive"]["extracted"]
+    assert receipt["official_test_suite_database_archive_acquired_and_verified"]
+    assert receipt["test_suite_archive"]["bytes"] == 1269456098
+    assert receipt["test_suite_archive"]["all_archive_crc_verified"]
+    assert not receipt["test_suite_archive"]["publisher_published_checksum_available"]
+    assert receipt["test_suite_archive"]["extracted"]
+    assert receipt["materialization"]["original_database_namespaces"] == {
+        "database": 166,
+        "test_database": 206,
+    }
+    assert receipt["materialization"][
+        "same_db_ids_not_collapsed_across_original_namespaces"
+    ]
+    assert receipt["all11840_original_question_schema_and_db_file_links_verified"]
+    assert receipt["official_public_dev_suite_coverage"][
+        "all20_official_suites_present"
+    ]
+    assert receipt["native_input_adapter_and_official_test_suite_scoring_verified"]
+    assert receipt["model_calls"] == 3
+    assert receipt["windows_raw_files_written"] == 0
+    # Reference-only controls qualify the original scorer, not model delivery.
+    assert receipt["scorer_calls"] == 4
+    actual = receipt["actual_npu_and_public_scorer_followup"]
+    assert actual["fixed_original_dev_indices"] == [0, 1, 2]
+    assert actual["actual_responses_and_stop"] == 3
+    assert actual["raw_response_to_prediction_bytes_equal"]
+    assert actual["official_test_suite_accuracy"] == 1.0
+    assert not actual["source_checkbox_eligible"]
+    prepared = receipt["fixed_original_dev_preparation"]
+    assert prepared["selected_original_indices"] == [0, 1, 2]
+    assert prepared["selected_complete_official_suite_files"] == 32
+    assert not prepared["source_sql_executed_during_preparation"]
+    control = receipt["isolated_official_scorer_reference_control"]
+    assert control["reference_only_rows"] == 3
+    assert control["official_test_suite_accuracy"] == 1.0
+    assert control["official_scorer_source_unchanged"]
+    assert control["nonroot_readonly_network_none_cpu_execution"]
+    assert not control["plug_gold_values_into_predictions"]
+    assert control["keep_distinct"]
+    assert control["model_calls"] == 0
+    assert not control["native_model_benchmark_completed"]
+    assert receipt["source_checkbox_eligible"]
+    closure = receipt["fixed_ci_artifact_closure"]
+    assert closure["both_ci_conclusions"] == "success"
+    assert closure["artifact_id"] == 12876710598
+    assert closure["all67_payloads_equal_fixed_git_blobs_without_normalization"]
+    assert closure["all67_installed_payloads_equal_actual_ci_wheel"]
+    assert (
+        closure["all_original_records_verified"]
+        == closure["original_index_rows_reused"]
+        == 11840
+    )
+    assert closure["public_research_readbacks"] == 12
+    assert closure["new_model_calls"] == 0
+    assert closure["native_results_reused_without_rerun"]
+    inventory = json.loads(
+        (DOCS / "dataset-validation-status.json").read_text("utf-8")
+    )["delivery_inventory"]["SPIDER"]
+    assert inventory["checked"] and inventory["delivery_receipt"]
+
+
 def test_crosscodeeval_native_delivery_keeps_original_profiles_and_ci_consumer_scope():
     receipt = json.loads(
         (
@@ -1215,6 +1285,20 @@ def test_code_generation_is_not_functional_execution_without_isolation():
             assert delivery["six_other_libraries"][
                 "author_16_worker_concurrency_preflight_passed"
             ]
+        elif sid == "BIGCODEBENCH":
+            delivery = json.loads(
+                (ROOT / current["delivery_receipt"]).read_text("utf-8")
+            )
+            assert delivery["source_checkbox_eligible"]
+            assert delivery["native_scoring_completed"]
+            assert delivery["harmless_probe"]["nonroot"]
+            assert delivery["harmless_probe"]["network_unreachable"]
+            assert delivery["harmless_probe"]["readonly_root_and_input"]
+            assert delivery["native_scoring_summary"][
+                "independent_saved_scoring_and_container_audit_passed"
+            ]
+            assert delivery["public_cpu_recipe"]["from_scratch_recipe_build_completed"]
+            assert delivery["public_cpu_recipe"]["locked_distributions_verified"] == 233
         else:
             assert not current["checked"]
         assert ledger["delivery_inventory"][sid]["isolation_preflight"]

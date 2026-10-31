@@ -11,6 +11,86 @@ import pytest
 ROOT = Path(__file__).resolve().parents[1]
 
 
+@pytest.mark.parametrize(
+    "output_type",
+    [
+        "Matplotlib",
+        "Typst",
+        "SVG",
+        "HTML",
+        "Canvas",
+        "Markdown",
+        "Latex",
+        "Tikz",
+        "TikZ",
+    ],
+)
+def test_matplotlib_selection_preserves_original_rows_and_requires_rendering(
+    output_type,
+):
+    spec = importlib.util.spec_from_file_location(
+        "structeval_render_selection", ROOT / "scripts/run_structeval_original_json.py"
+    )
+    runner = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(runner)
+    rows = [
+        {
+            "input_type": "Text",
+            "output_type": output_type,
+            "rendering": value,
+            "task_id": str(index),
+            "VQA": ["original relationship fixture"],
+        }
+        for index, value in enumerate([False, True, True, True])
+    ]
+    selected, available = runner.select_original_rows(
+        rows, output_type=output_type, rendering=True
+    )
+    assert available == 3
+    assert [index for index, _ in selected] == [1, 2, 3]
+    assert all(row is rows[index] for index, row in selected)
+
+
+@pytest.mark.parametrize(
+    "output_type",
+    [
+        "Matplotlib",
+        "Typst",
+        "SVG",
+        "HTML",
+        "Canvas",
+        "Markdown",
+        "Latex",
+        "Tikz",
+        "TikZ",
+    ],
+)
+def test_matplotlib_cli_requires_explicit_isolated_dispatch_before_data_access(
+    output_type,
+):
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(ROOT / "scripts/run_structeval_original_json.py"),
+            "--data-file",
+            "absent",
+            "--official-archive",
+            "absent",
+            "--output",
+            "absent",
+            "--output-type",
+            output_type,
+        ],
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 2
+    assert (
+        f"{output_type} requires both private render queue and pinned image"
+        in result.stderr
+    )
+
+
 def test_nonrendering_protocol_selection_keeps_original_rows_and_boundaries():
     spec = importlib.util.spec_from_file_location(
         "structeval_selection", ROOT / "scripts/run_structeval_original_json.py"
@@ -133,7 +213,155 @@ def test_completed_protocol_audit_adds_only_previously_unexecuted_rows():
         assert checkpoint["full_nonrendering_protocols"] == len(seen)
         assert checkpoint["audit_model_calls"] == 0
         assert not checkpoint["full_source_completed"]
-    assert ledger["verified_unique_native_tasks"] == count
+    rendering = checkpoint["render_preparation_followup_20261029"][
+        "original_matplotlib_selection_review"
+    ]
+    assert rendering["sampled_original_tasks_executed"]
+    assert rendering["fixed_first3_original_task_ids"] == ["000802", "000803", "000804"]
+    assert rendering["original_vqa_pairs_per_task"] == [7, 8, 8]
+    assert (
+        rendering["original_generation_calls"]
+        == rendering["original_complete_vqa_judge_calls"]
+        == 3
+    )
+    assert rendering["all_original_judge_questions_answers_and_image_bytes_verified"]
+    assert not rendering["source_checkbox_eligible"]
+    continued = rendering["remaining47_audit"]
+    assert (
+        continued["status"]
+        == "ALL50_ORIGINAL_MATPLOTLIB_TASKS_EXECUTED_AND_COMPLETE_VQA_AUDITED"
+    )
+    assert continued["new_original_tasks"] == 47
+    assert continued["previous_first3_reused_not_rerun"] == 3
+    assert (
+        continued["new_generation_calls"] == 47 and continued["new_judge_calls"] == 46
+    )
+    assert continued["combined_render_scores"] == {"1": 49, "0": 1}
+    assert not continued["source_checkbox_eligible"]
+    svg = checkpoint["render_preparation_followup_20261029"][
+        "svg_browser_native_followup"
+    ]
+    assert svg["fixed_first3_original_task_ids"] == ["001200", "001201", "001202"]
+    assert svg["original_vqa_pairs_per_task"] == [7, 8, 10]
+    assert svg["actual_generation_calls"] == svg["actual_judge_calls"] == 3
+    assert svg["all_original_judge_pairs_and_actual_image_bytes_verified"]
+    assert not svg["source_checkbox_eligible"]
+    svg_continued = svg["remaining47_audit"]
+    assert (
+        svg_continued["status"]
+        == "ALL50_ORIGINAL_SVG_TASKS_EXECUTED_AND_COMPLETE_VQA_AUDITED"
+    )
+    assert (
+        svg_continued["new_original_tasks"] == 47
+        and svg_continued["previous_first3_reused_not_rerun"] == 3
+    )
+    assert (
+        svg_continued["new_generation_calls"] == svg_continued["new_judge_calls"] == 47
+    )
+    assert svg_continued[
+        "complete_original_judge_pairs_and_actual_image_bytes_verified"
+    ]
+    assert not svg_continued["source_checkbox_eligible"]
+    nested = checkpoint["render_preparation_followup_20261029"][
+        "nested_browser_native_first3_checkpoint"
+    ]
+    assert len(nested["protocols"]) == 6
+    ids = nested["original_task_ids_by_protocol"]
+    assert len(ids) == 6 and all(len(group) == 3 for group in ids)
+    assert len({task for group in ids for task in group}) == 18
+    assert nested["unique_original_tasks"] == 18
+    assert sum(nested["original_vqa_pairs_by_protocol"]) == 158
+    assert nested["original_vqa_pairs_preserved"] == 158
+    assert nested["generation_calls"] == nested["judge_calls"] == 18
+    assert nested["finish_reasons"] == {"stop": 36}
+    assert nested[
+        "actual_judge_images_original_pairs_and_parsed_code_independently_verified"
+    ]
+    assert nested["canvas_vqa_scores"] == [0, 0, 0]
+    assert not nested["failed_scores_replaced_or_retried"]
+    assert not nested["source_checkbox_eligible"]
+    assert nested["remaining_original_tasks_in_these_six_protocols"] == 267
+    html = nested["text_html_remaining47"]
+    assert html["new_original_tasks"] == 47
+    assert html["previous_first3_reused_not_rerun"] == 3
+    assert html["combined_unique_protocol_tasks"] == 50
+    assert html["new_generation_calls"] == html["new_judge_calls"] == 47
+    assert html["combined_generation_and_judge_calls"] == 100
+    assert html["combined_original_vqa_pairs"] == 345
+    assert html["combined_original_render_scores"] == {"1": 50}
+    assert not html["source_checkbox_eligible"]
+    markdown_html = nested["markdown_html_remaining47"]
+    assert markdown_html["new_original_tasks"] == 47
+    assert markdown_html["previous_first3_reused_not_rerun"] == 3
+    assert markdown_html["combined_unique_protocol_tasks"] == 50
+    assert (
+        markdown_html["new_generation_calls"] == markdown_html["new_judge_calls"] == 47
+    )
+    assert markdown_html["new_finish_reasons"] == {"stop": 94}
+    assert markdown_html["combined_original_vqa_pairs"] == 439
+    assert markdown_html["other_four_protocols_remaining_original_tasks"] == 173
+    assert not markdown_html["source_checkbox_eligible"]
+    react_html = nested["react_html_remaining42"]
+    assert react_html["new_original_tasks"] == 42
+    assert react_html["previous_first3_reused_not_rerun"] == 3
+    assert react_html["combined_unique_protocol_tasks"] == 45
+    assert react_html["new_generation_calls"] == react_html["new_judge_calls"] == 42
+    assert react_html["new_finish_reasons"] == {"stop": 84}
+    assert react_html["combined_original_vqa_pairs"] == 408
+    assert react_html["other_three_protocols_remaining_original_tasks"] == 131
+    assert not react_html["source_checkbox_eligible"]
+    browser_followup = checkpoint["additional_browser_protocol_audit_20261029"]
+    assert browser_followup["vue_html_additional_original_tasks"] == 37
+    assert browser_followup["vue_html_additional_generation_and_judge_stop_calls"] == 74
+    assert browser_followup["vue_html_additional_original_vqa_pairs"] == 317
+    assert browser_followup["text_canvas_additional_original_tasks"] == 47
+    assert (
+        browser_followup["text_canvas_additional_generation_and_judge_stop_calls"] == 94
+    )
+    assert browser_followup["text_canvas_additional_original_vqa_pairs"] == 374
+    assert browser_followup[
+        "original_fields_prompts_parsed_code_and_actual_judge_images_verified"
+    ]
+    assert not browser_followup["valid_first_three_rerun"]
+    assert browser_followup["low_model_scores_preserved"]
+    assert not browser_followup["source_checkbox_eligible"]
+    assert browser_followup["verified_unique_native_tasks"] == 1288
+    assert browser_followup["remaining_original_tasks"] == 2035 - 1288
+    assert browser_followup["text_markdown_remaining_47"] == "RUNNING_NOT_COUNTED"
+    browser_complete = checkpoint["complete_browser_protocol_audit_20261029"]
+    assert browser_complete["text_markdown_additional_original_tasks"] == 47
+    assert (
+        browser_complete["text_markdown_additional_generation_and_judge_stop_calls"]
+        == 94
+    )
+    assert browser_complete["text_markdown_additional_original_vqa_pairs"] == 377
+    assert browser_complete["previous_first3_reused_not_rerun"]
+    assert browser_complete["all_six_original_browser_protocols_complete"]
+    assert browser_complete["audit_new_model_calls"] == 0
+    assert not browser_complete["source_checkbox_eligible"]
+    assert browser_complete["verified_unique_native_tasks"] == 1335
+    assert browser_complete["remaining_original_tasks"] == 2035 - 1335
+    latex = checkpoint["latex_fixed_first3_native_audit_20261029"]
+    assert [p["original_tasks"] for p in latex["profiles"]] == [3, 3, 3]
+    assert sum(p["generation_calls"] for p in latex["profiles"]) == 9
+    assert [p["judge_calls"] for p in latex["profiles"]] == [3, 2, 3]
+    assert latex["all17_actual_calls_finished_stop"]
+    assert latex["audit_new_model_calls"] == 0
+    assert latex["three_protocols_only_sampled_not_complete"]
+    assert not latex["source_checkbox_eligible"]
+    assert latex["verified_unique_native_tasks"] == 1344
+    assert latex["remaining_original_tasks"] == 2035 - 1344
+    assert ledger["verified_unique_native_tasks"] == count + continued[
+        "combined_unique_protocol_tasks"
+    ] + svg_continued["combined_unique_protocol_tasks"] + nested[
+        "unique_original_tasks"
+    ] + html["new_original_tasks"] + markdown_html["new_original_tasks"] + react_html[
+        "new_original_tasks"
+    ] + browser_followup["vue_html_additional_original_tasks"] + browser_followup[
+        "text_canvas_additional_original_tasks"
+    ] + browser_complete["text_markdown_additional_original_tasks"] + sum(
+        p["original_tasks"] for p in latex["profiles"]
+    )
     held = receipt.get("held_native_exit_evidence")
     if held:
         assert held["native_exit_code"] == 0

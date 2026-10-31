@@ -5,12 +5,67 @@ on:
     paths:
       - '.gitignore'
       - 'workload-preparation/**'
+      - 'scripts/*ovobench*'
+      - 'tests/test_ovobench*'
+      - 'scripts/*streamingbench*'
+      - 'tests/test_streamingbench*'
+      - 'scripts/*wavcaps*'
+      - 'tests/test_wavcaps*'
+      - 'scripts/*full_duplex*'
+      - 'tests/test_full_duplex*'
+      - 'tests/test_spokenwoz*'
+      - 'scripts/*spokenwoz*'
       - 'src/vllm_hust_benchmark/workload_data.py'
       - 'src/vllm_hust_benchmark/workload_response_validation.py'
       - 'tests/test_workload*'
+      - 'tests/test_spider_test_suite_environment.py'
+      - 'tests/test_spider_original_dev.py'
+      - 'scripts/prepare_spider_original_dev.py'
+      - 'scripts/run_spider_official_scoring.py'
+      - 'scripts/run_spider_original_generation.py'
+      - 'tests/test_spider_official_scoring.py'
+      - 'tests/test_spider_original_generation.py'
+      - 'scripts/verify_spider_test_suite_environment.py'
+      - 'configs/workload-native/spider-test-suite-cpu.Dockerfile'
       - 'docs/workload-data/**'
       - 'scripts/verify_workload_migration_inputs.py'
       - 'scripts/run_source_request_samples.py'
+      - 'scripts/run_openmath2_original.py'
+      - 'scripts/verify_openmath2_original_saved.py'
+      - 'scripts/run_opencode_original.py'
+      - 'scripts/verify_opencode_original_saved.py'
+      - 'tests/test_openmath2_original_runner.py'
+      - 'tests/test_openmath2_delivery_receipt.py'
+      - 'tests/test_opencode_original_manifest.py'
+      - 'scripts/verify_naturebench_original_contract.py'
+      - 'scripts/prepare_naturebench_original_assets.py'
+      - 'tests/test_naturebench_original_contract.py'
+      - 'tests/test_naturebench_original_assets.py'
+      - 'scripts/verify_naturebench_original_packages.py'
+      - 'tests/test_naturebench_packages.py'
+      - 'scripts/verify_temporalwiki_original_contract.py'
+      - 'tests/test_temporalwiki_original_contract.py'
+      - 'scripts/prepare_temporalwiki_original_assets.py'
+      - 'tests/test_temporalwiki_original_assets.py'
+      - 'scripts/prepare_mvbench_original_view.py'
+      - 'scripts/prepare_mvbench_original_assets.py'
+      - 'scripts/run_mvbench_original.py'
+      - 'configs/workload-native/mvbench-original-protocol.json'
+      - 'tests/test_mvbench_original_view.py'
+      - 'configs/workload-native/videomme-original-protocol.json'
+      - 'tests/test_videomme_original_protocol.py'
+      - 'scripts/prepare_videomme_original_view.py'
+      - 'scripts/prepare_videomme_original_assets.py'
+      - 'scripts/prepare_videomme_native_media.py'
+      - 'tests/test_videomme_native_media.py'
+      - 'scripts/run_videomme_original.py'
+      - 'scripts/prepare_bigcodebench_cpu_context.py'
+      - 'scripts/verify_bigcodebench_cpu_environment.py'
+      - 'configs/workload-native/bigcodebench-cpu.Dockerfile'
+      - 'configs/workload-native/bigcodebench-cpu-py310-aarch64.lock.txt'
+      - 'tests/test_bigcodebench_cpu_environment.py'
+      - 'tests/test_videomme_original_runner.py'
+      - 'configs/workload-native/videomme-subtitle-requirements.txt'
       - 'scripts/run_tau2_original_telecom.py'
       - 'scripts/run_gsm8k_incremental_samples.py'
       - 'scripts/run_arc_original_samples.py'
@@ -43,6 +98,65 @@ on:
       - 'tests/test_labbench_original_assets.py'
       - 'scripts/prepare_labbench_runtime.py'
       - 'tests/test_labbench_runtime.py'
+      - 'scripts/prepare_appworld_runtime.py'
+      - 'tests/test_appworld_runtime.py'
+      - 'tests/test_appworld_core_cpu_image.py'
+      - 'tests/test_appworld_react_author_source.py'
+      - 'scripts/run_appworld_original_react.py'
+      - 'scripts/appworld_model_transport.py'
+      - 'scripts/verify_structeval_matplotlib_environment.py'
+      - 'scripts/verify_structeval_typst_environment.py'
+      - 'scripts/verify_structeval_browser_environment.py'
+      - 'scripts/verify_structeval_latex_environment.py'
+      - 'tests/test_structeval_latex_environment.py'
+      - 'configs/workload-native/structeval-latex-cpu.Dockerfile'
+      - 'tests/test_structeval_browser_environment.py'
+      - 'configs/workload-native/structeval-browser*'
+      - 'configs/workload-native/structeval-markdown-cpu.Dockerfile'
+      - 'tests/test_structeval_typst_environment.py'
+      - 'configs/workload-native/structeval-typst-cpu.Dockerfile'
+      - 'scripts/run_structeval_matplotlib_worker.py'
+      - 'scripts/run_structeval_matplotlib_isolated.py'
+      - 'scripts/structeval_render_queue.py'
+      - 'tests/test_structeval_render_queue.py'
+      - 'scripts/run_structeval_render_queue_backend.py'
+      - 'tests/test_structeval_render_queue_backend.py'
+      - 'tests/test_structeval_matplotlib_isolated.py'
+      - 'tests/test_structeval_matplotlib_worker.py'
+      - 'tests/test_structeval_matplotlib_environment.py'
+      - 'configs/workload-native/structeval-matplotlib*'
+      - 'tests/test_appworld_model_transport.py'
+      - 'tests/test_appworld_native_react_entry.py'
+      - 'configs/workload-native/appworld-react-author-source.json'
+      - 'scripts/verify_appworld_core_cpu_environment.py'
+      - 'configs/workload-native/appworld-core-cpu.Dockerfile'
+      - 'configs/workload-native/appworld-react-cpu.Dockerfile'
+      - 'scripts/prepare_appworld_original_assets.py'
+      - 'tests/test_appworld_original_assets.py'
+      - 'scripts/prepare_discoverybench_original_assets.py'
+      - 'scripts/verify_discoverybench_original_contract.py'
+      - 'tests/test_discoverybench_original_contract.py'
+      - 'tests/test_discoverybench_original_assets.py'
+      - 'configs/workload-native/discoverybench*'
+      - 'configs/workload-native/dragon*'
+      - 'scripts/probe_dragon_native_environment.py'
+      - 'scripts/run_dragon_original.py'
+      - 'tests/test_dragon_original_runner.py'
+      - 'scripts/verify_dragon_original_saved.py'
+      - 'tests/test_dragon_original_saved.py'
+      - 'tests/test_dragon_native_environment.py'
+      - 'scripts/prepare_dragon_model_client_lock.py'
+      - 'tests/test_dragon_model_client_lock.py'
+      - 'configs/workload-native/swebench-author-source.json'
+      - 'configs/workload-native/mind2web*'
+      - 'scripts/prepare_mind2web*'
+      - 'scripts/run_mind2web_original.py'
+      - 'tests/test_mind2web*'
+      - 'scripts/prepare_swebench_author_source.py'
+      - 'tests/test_swebench_author_source.py'
+      - 'configs/workload-native/ljspeech-original-assets.json'
+      - 'scripts/prepare_ljspeech_original_assets.py'
+      - 'tests/test_ljspeech_original_assets.py'
       - 'scripts/prepare_repobench_original_assets.py'
       - 'tests/test_repobench_original_assets.py'
       - 'scripts/prepare_repobench_runtime.py'
@@ -84,6 +198,8 @@ on:
       - 'tests/test_copilot*'
       - 'scripts/*scienceworld*'
       - 'scripts/*deepplanning*'
+      - 'scripts/*codejudge*'
+      - 'tests/test_codejudge*'
       - 'tests/test_prepare_deepplanning*'
       - 'tests/test_deepplanning*'
       - 'configs/workload-native/deepplanning*'
@@ -146,6 +262,18 @@ on:
       - 'scripts/score_flores200_original_results.py'
       - 'tests/test_flores200_original_runner.py'
       - 'scripts/prepare_reused_research_assets.py'
+      - 'scripts/prepare_livecodebench_original_tasks.py'
+      - 'tests/test_livecodebench_original_preparation.py'
+      - 'scripts/run_livecodebench_original_generation.py'
+      - 'scripts/livecodebench_container_worker.py'
+      - 'scripts/livecodebench_repair.py'
+      - 'scripts/livecodebench_other_scenarios.py'
+      - 'tests/test_livecodebench_other_scenarios.py'
+      - 'scripts/run_livecodebench_container_scoring.py'
+      - 'tests/test_livecodebench_original_generation.py'
+      - 'tests/test_livecodebench_repair.py'
+      - 'configs/workload-native/livecodebench-api-cpu.Dockerfile'
+      - 'configs/workload-native/livecodebench-api-cpu.lock.txt'
       - 'scripts/prepare_reused_source_records.py'
       - 'scripts/verify_infinitebench_original_code.py'
       - 'scripts/run_infinitebench_original.py'
@@ -236,6 +364,26 @@ on:
       - 'tests/test_bigcodebench_original_generation.py'
       - 'tests/test_ds1000_original_generation.py'
       - 'pyproject.toml'
+      - 'scripts/*marble*'
+      - 'scripts/*bixbench*'
+      - 'tests/test_bixbench*.py'
+      - 'configs/workload-native/bixbench*'
+      - 'scripts/data_index.py'
+      - 'scripts/data_entrypoints.py'
+      - 'tests/test_data_index.py'
+      - 'tests/test_data_entrypoints.py'
+      - 'docs/data-index.json'
+      - 'docs/data-entrypoints*.json'
+      - 'tests/test_marble*.py'
+      - 'configs/workload-native/marble*'
+      - 'scripts/verify_scienceagentbench_original_assets.py'
+      - 'tests/test_scienceagentbench_original_assets.py'
+      - 'scripts/scienceagentbench_local_engine.py'
+      - 'tests/test_scienceagentbench_local_engine.py'
+      - 'configs/workload-native/scienceagentbench*'
+      - 'configs/workload-native/dailytalk*'
+      - 'scripts/*dailytalk*'
+      - 'tests/test_dailytalk*.py'
       - '.github/workflows/workload-data-smoke.yml'
   workflow_dispatch:
 
@@ -258,7 +406,7 @@ jobs:
         run: |
           python -m pip install build pytest
           python -m build --wheel --outdir workload-data-dist workload-preparation
-          python -m pip install '.[workload-validation]' 'workload-data-dist/vllm_hust_workload_data-0.1.0-py3-none-any.whl[data]'
+          python -m pip install '.[test,workload-validation]' 'workload-data-dist/vllm_hust_workload_data-0.1.0-py3-none-any.whl[data]'
           (cd workload-data-dist && sha256sum *.whl > SHA256SUMS)
           python -c "import json, pathlib, subprocess; p=pathlib.Path('workload-data-dist'); (p/'BUILD_METADATA.json').write_text(json.dumps({'schema_version':'workload-data-build/v1','source_commit':subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),'distribution':'vllm-hust-workload-data','version':'0.1.0'},indent=2)+'\n',encoding='utf-8')"
       - name: CPU fixtures and data-only boundary
@@ -266,15 +414,31 @@ jobs:
       - name: ScienceWorld CPU preparation and original runner contracts
         run: python -m pytest -q tests/test_scienceworld_original_preparation.py tests/test_scienceworld_original_runner.py tests/test_scienceworld_saved_audit.py
       - name: DeepPlanning original asset preparation fixtures
-        run: python -m pytest -q tests/test_prepare_deepplanning_original_assets.py tests/test_deepplanning_original_shopping.py tests/test_deepplanning_original_travel.py
+        run: python -m pytest -q tests/test_prepare_deepplanning_original_assets.py tests/test_deepplanning_original_shopping.py tests/test_deepplanning_original_travel.py tests/test_deepplanning_shopping_saved.py tests/test_deepplanning_travel_saved.py
       - name: README workload and source navigation contracts
         run: python -m pytest -q tests/test_workload_readme_catalog.py
+      - name: Original published code judging inputs and declared metric fixtures
+        run: python -m pytest -q tests/test_codejudge_original_runner.py tests/test_codejudge_saved.py
       - name: CPU existing fixtures and data-only boundary
         run: python -m pytest -q workload-preparation/tests tests/test_workload_data_boundary.py tests/test_workload_gap_catalog.py tests/test_workload_validation_checklist.py tests/test_workload_category_checklist.py tests/test_tau2_original_runner.py tests/test_reasoning_original_runners.py workload-preparation/tests/test_math500_original_adapter.py tests/test_math500_original_runner.py tests/test_structeval_original_runner.py tests/test_longbench_original_runner.py tests/test_dolly_original_runner.py tests/test_longwriter_original_runner.py tests/test_agentbench_original_runner.py tests/test_bfcl_original_runner.py tests/test_workload_response_validation.py tests/test_docvqa_native_runner.py tests/test_reused_source_records.py
       - name: OASST runner CPU contract only
         run: python -m pytest -q tests/test_oasst_original_runner.py tests/test_reused_source_records.py tests/test_infinitebench_code_preflight.py tests/test_infinitebench_original_runner.py
       - name: Historical dialogue and saved QReCC score software fixtures only
         run: python -m pytest -q tests/test_historical_dialogue_prefix.py tests/test_historical_dialogue_runner.py tests/test_historical_dialogue_native_receipt.py tests/test_qrecc_original_qa_score.py tests/test_labbench_original_runner.py tests/test_labbench_saved_audit.py tests/test_labbench_original_assets.py tests/test_labbench_runtime.py tests/test_repobench_original_assets.py tests/test_repobench_runtime.py tests/test_repobench_original_npu.py tests/test_repobench_saved_audit.py
+      - name: AppWorld core preparation CPU fixtures only; no installation or tasks
+        run: python -m pytest -q tests/test_appworld_runtime.py tests/test_appworld_original_assets.py tests/test_appworld_core_cpu_image.py tests/test_appworld_react_author_source.py tests/test_appworld_native_react_entry.py tests/test_appworld_model_transport.py
+      - name: DiscoveryBench original asset CPU fixtures only; no download or Agent
+        run: python -m pytest -q tests/test_discoverybench_original_assets.py tests/test_discoverybench_original_contract.py
+      - name: OpenMath corpus generation and saved integrity CPU fixtures; no model
+        run: python -m pytest -q tests/test_openmath2_original_runner.py tests/test_openmath2_delivery_receipt.py tests/test_opencode_original_manifest.py
+      - name: NatureBench original source and task-group fixtures only; no scientific tasks
+        run: python -m pytest -q tests/test_naturebench_original_contract.py tests/test_naturebench_original_assets.py tests/test_naturebench_packages.py
+      - name: TemporalWiki original protocol fixtures only; no data, training or inference
+        run: python -m pytest -q tests/test_temporalwiki_original_contract.py tests/test_temporalwiki_original_assets.py tests/test_mvbench_original_view.py tests/test_videomme_original_protocol.py tests/test_videomme_native_media.py tests/test_videomme_original_runner.py
+      - name: OVO and StreamingBench author-plan fixtures only; no video or model
+        run: python -m pytest -q tests/test_streamingbench_author_preparation.py tests/test_streamingbench_native_selection.py tests/test_streamingbench_original_media.py tests/test_streamingbench_original_scoring.py workload-preparation/tests/test_streamingbench_original_groups.py tests/test_ovobench_author_preparation.py tests/test_ovobench_native_selection.py tests/test_ovobench_media_ranges.py tests/test_ovobench_original_media.py tests/test_ovobench_media_preparation.py tests/test_ovobench_header_capture.py workload-preparation/tests/test_ovobench_original_cases.py
+      - name: OVO NPU binding and saved-score contracts; no model or device imports
+        run: python -m pytest -q tests/test_ovobench_original_npu.py
       - name: MBPP original preparation and mocked execution controls only
         run: python -m pytest -q tests/test_mbpp_original_assets.py tests/test_mbpp_original_generation.py tests/test_mbpp_scoring_preparation.py tests/test_mbpp_isolated_scoring.py tests/test_mbpp_native_delivery_receipt.py
       - name: Serving trace and ToolACE preparation software fixtures only
@@ -304,9 +468,13 @@ jobs:
       - name: Original TraceLab build and replay CPU contracts only
         run: python -m pytest -q tests/test_tracelab_original_build.py tests/test_tracelab_original_runner.py
       - name: Original PAWS and LongBench offline CPU contracts only
-        run: python -m pytest -q tests/test_paws_original_assets.py tests/test_paws_original_runner.py tests/test_longbench_v2_saved_audit.py tests/test_longbench_v2_capacity_preparation.py tests/test_narrativeqa_metric_preparation.py tests/test_narrativeqa_original_summary.py tests/test_schemastore_runtime.py tests/test_schemastore_original_validation.py tests/test_structeval_rendering_plan.py
+        run: python -m pytest -q tests/test_paws_original_assets.py tests/test_paws_original_runner.py tests/test_longbench_v2_saved_audit.py tests/test_longbench_v2_capacity_preparation.py tests/test_narrativeqa_metric_preparation.py tests/test_narrativeqa_original_summary.py tests/test_schemastore_runtime.py tests/test_schemastore_original_validation.py tests/test_structeval_rendering_plan.py tests/test_structeval_matplotlib_environment.py tests/test_structeval_matplotlib_worker.py tests/test_structeval_matplotlib_isolated.py tests/test_structeval_render_queue.py
+      - name: StructEval isolated render dispatch CPU contracts only
+        run: python -m pytest -q tests/test_structeval_render_queue_backend.py tests/test_structeval_typst_environment.py tests/test_structeval_browser_environment.py tests/test_structeval_latex_environment.py
       - name: Original model and metric CPU contracts only
         run: python -m pytest -q tests/test_gpqa_original_runner.py tests/test_xlsum_original_runner.py tests/test_beir_original_runner.py tests/test_stsb_original_runner.py tests/test_librispeech_original_runner.py tests/test_xsum_original_runner.py tests/test_multinews_original_runner.py tests/test_billsum_original_runner.py tests/test_flores200_original_assets.py tests/test_research_acquisition_reuse.py
+      - name: SpokenWOZ dialogue and full-duplex scorer CPU fixtures only
+        run: python -m pytest -q tests/test_spokenwoz_original_dialogues.py tests/test_spokenwoz_original_dst.py tests/test_full_duplex_original_scorers.py
       - name: Installed CLI and packaged catalogs
         working-directory: ${{ runner.temp }}
         run: |
@@ -334,6 +502,31 @@ jobs:
         run: python -m pytest -q tests/test_structeval_saved_nonrender.py tests/test_structeval_original_runner.py
       - name: HumanEval historical completion reuse fixtures, no code execution
         run: python -m pytest -q tests/test_humaneval_official_samples.py tests/test_humaneval_isolated_scoring.py tests/test_bigcodebench_official_samples.py tests/test_bigcodebench_scoring_assets.py tests/test_bigcodebench_scoring_plan.py tests/test_bigcodebench_container_scoring.py tests/test_ds1000_official_samples.py tests/test_ds1000_isolated_scoring.py
+      - name: BigCodeBench CPU image contract fixtures, no image build or task execution
+        run: python -m pytest -q tests/test_bigcodebench_cpu_environment.py
+      - name: Spider CPU environment contract fixtures, no SQL or original task execution
+        run: python -m pytest -q tests/test_spider_test_suite_environment.py tests/test_spider_original_dev.py tests/test_spider_official_scoring.py tests/test_spider_original_generation.py
+      - name: DRAGON NPU-client dependency probe fixtures, no model or device initialization
+        run: python -m pytest -q tests/test_dragon_native_environment.py tests/test_dragon_model_client_lock.py tests/test_dragon_original_runner.py tests/test_dragon_original_saved.py
+      - name: SWE-bench shared author software fixtures, no tasks or code execution
+        run: python -m pytest -q tests/test_swebench_author_source.py tests/test_mind2web_author_source.py tests/test_mind2web_original_protocol.py tests/test_mind2web_original_tasks.py tests/test_mind2web_original_runner.py tests/test_bixbench_author_source.py tests/test_bixbench_original_preparation.py tests/test_bixbench_original_agent.py tests/test_bixbench_original_grade_input.py tests/test_bixbench_original_grader.py tests/test_multiagentbench_original_assets.py tests/test_multiagentbench_adapter.py tests/test_marble_evaluator_compat.py tests/test_marble_author_source.py tests/test_marble_original_configs.py tests/test_marble_cpu_recipe.py
+      - name: LJSpeech original archive identity and resume fixtures, no audio or models
+        run: python -m pytest -q tests/test_ljspeech_original_assets.py workload-preparation/tests/test_ljspeech.py
+      - name: MARBLE auxiliary-client plan and version contracts, no model or device imports
+        run: python -m pytest -q tests/test_marble_auxiliary_client.py tests/test_marble_keybert_npu.py tests/test_marble_keybert_transport.py tests/test_marble_research_local_binding.py tests/test_marble_original_research_runner.py
+      - name: DailyTalk original preparation contracts, no audio, weights or synthesis
+        run: python -m pytest -q tests/test_dailytalk_original_preparation.py tests/test_dailytalk_original_audio.py tests/test_dailytalk_original_models.py tests/test_dailytalk_original_guo_inputs.py
+      - name: ScienceAgentBench original asset identity fixtures, no datasets or programs
+        run: python -m pytest -q tests/test_scienceagentbench_original_assets.py tests/test_scienceagentbench_local_engine.py
+      - name: WavCaps original media binding fixtures, no audio download or decoder execution
+        run: python -m pytest -q tests/test_wavcaps_original_media.py tests/test_wavcaps_original_preparation.py
+      - name: Offline navigation contracts, no remote refresh or model execution
+        run: |
+          python scripts/data_index.py --check
+          python scripts/data_entrypoints.py --check
+          python -m pytest -q tests/test_data_index.py tests/test_data_entrypoints.py
+      - name: LiveCodeBench opaque original task preparation fixtures, no task execution
+        run: python -m pytest -q tests/test_livecodebench_original_preparation.py tests/test_livecodebench_original_generation.py tests/test_livecodebench_repair.py tests/test_livecodebench_other_scenarios.py
       - name: Author JSONSchemaBench local Engine interface fixtures
         run: python -m pytest -q tests/test_jsonschemabench_local_engine.py tests/test_jsonschemabench_environment_probe.py tests/test_jsonschemabench_original_assets.py tests/test_jsonschemabench_official_runner.py tests/test_jsonschemabench_original_records.py tests/test_xsum_original_runner.py
       - name: Verify exact current-source wheel payload

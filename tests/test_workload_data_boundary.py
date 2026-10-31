@@ -5,7 +5,19 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1] / "workload-preparation"
 DATA_MODULES = {
+    "libritts",  # Original text/reference-wave pairs and chapter IDs only; no synthesis.
+    "spokenwoz",  # Original complete dialogue/state/word-time relations, no execution.
+    "streamingbench",  # Original nested video/question/reference groups only.
+    "ovobench",  # Original online-video case/stage/reference relations, no model or observations.
+    "spider",  # Original split/schema/database relations; no SQL or observations.
+    "appworld",  # Original task/database/shared/reference file relations only.
+    "livecodebench",  # Original scenario fields and case/reference relations only.
+    "videomme",  # Original task/option/reference/media-locator relations only.
+    "mvbench",  # Original ordered video task/media/answer relations only.
+    "naturebench",  # Original package/material references only, no scientific execution.
     "deepplanning",  # Original queries/metadata/database references only.
+    "dragon",  # Original four-file task/corpus/reference identities only.
+    "mind2web",  # Original task/page/reference relations only; no Agent, observation or scoring.
     "scienceworld",  # Original publisher task/variation/reference relations only.
     "docvqa",  # Original field types and media paths only; no inference or analysis.
     "copilot",  # Original release integrity and nested metadata only, no analysis.
@@ -15,6 +27,9 @@ DATA_MODULES = {
     "schemastore",  # Original schema/fixture bytes and identities only, no execution.
     "multinews",  # Original paired documents/references, no research analysis.
     "librispeech",  # Original audio/transcript bindings only, no observations.
+    "ljspeech",  # Original text/reference WAV relations only; no synthesis.
+    "bixbench",  # Original question/reference/capsule relations only; no Agent.
+    "multiagentbench",  # Native configuration/reference custody only; no Agent execution.
     "stsb",  # Publisher sentence pairs and labels only; no research analysis.
     "beir",  # Original retrieval assets and relations, no research analysis.
     "__init__",
@@ -44,6 +59,111 @@ DATA_MODULES = {
 def test_only_data_modules_are_included():
     actual = {path.stem for path in (ROOT / "src/vllm_hust_workload_data").glob("*.py")}
     assert actual == DATA_MODULES
+
+
+def test_livecodebench_reader_has_no_model_scoring_network_or_private_decoder():
+    import ast
+
+    tree = ast.parse(
+        (ROOT / "src/vllm_hust_workload_data/livecodebench.py").read_text("utf-8")
+    )
+    imports = set()
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            imports.update(item.name for item in node.names)
+        elif isinstance(node, ast.ImportFrom):
+            imports.add(node.module)
+    assert imports == {"copy", "datetime", "json", "pathlib", "assets", "records"}
+    assert not any(
+        isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Name)
+        and node.func.id in {"eval", "exec", "compile", "__import__"}
+        for node in ast.walk(tree)
+    )
+
+
+def test_naturebench_reader_has_no_execution_network_or_research_imports():
+    import ast
+
+    tree = ast.parse(
+        (ROOT / "src/vllm_hust_workload_data/naturebench.py").read_text("utf-8")
+    )
+    imports = set()
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            imports.update(item.name for item in node.names)
+        elif isinstance(node, ast.ImportFrom):
+            imports.add(node.module)
+    assert imports == {"copy", "json", "pathlib", "assets", "registry", "records"}
+    assert not any(
+        isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Name)
+        and node.func.id in {"eval", "exec", "compile", "__import__"}
+        for node in ast.walk(tree)
+    )
+
+
+def test_dragon_reader_has_no_models_network_scoring_or_research_imports():
+    import ast
+
+    tree = ast.parse(
+        (ROOT / "src/vllm_hust_workload_data/dragon.py").read_text("utf-8")
+    )
+    imports = set()
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            imports.update(item.name for item in node.names)
+        elif isinstance(node, ast.ImportFrom):
+            imports.add(node.module)
+    assert imports == {"ast", "copy", "pathlib", "assets", "records", "registry"}
+    assert not any(
+        isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Name)
+        and node.func.id in {"eval", "exec", "compile"}
+        for node in ast.walk(tree)
+    )
+
+
+def test_multiagentbench_adapter_remains_data_only():
+    import ast
+
+    tree = ast.parse(
+        (ROOT / "src/vllm_hust_workload_data/multiagentbench.py").read_text("utf-8")
+    )
+    imports = set()
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            imports.update(item.name for item in node.names)
+        elif isinstance(node, ast.ImportFrom):
+            imports.add(node.module)
+    assert imports == {"copy", "pathlib", "records"}
+    assert not any(
+        isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Name)
+        and node.func.id in {"eval", "exec", "compile", "__import__"}
+        for node in ast.walk(tree)
+    )
+
+
+def test_bixbench_adapter_has_no_scientific_execution_or_research_imports():
+    import ast
+
+    tree = ast.parse(
+        (ROOT / "src/vllm_hust_workload_data/bixbench.py").read_text("utf-8")
+    )
+    imports = set()
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            imports.update(item.name for item in node.names)
+        elif isinstance(node, ast.ImportFrom):
+            imports.add(node.module)
+    assert imports == {"copy", "pathlib", "assets", "records", "registry"}
+    assert not any(
+        isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Name)
+        and node.func.id in {"eval", "exec", "compile", "__import__"}
+        for node in ast.walk(tree)
+    )
 
 
 def test_docvqa_adapter_remains_data_only():

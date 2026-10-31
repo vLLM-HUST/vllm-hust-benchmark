@@ -21,6 +21,94 @@
     {"source_id": "PAIO-SEMANTIC-SIMILAR-5000", "asset_group": "enterprise-private-requests", "related_workload_ids": [], "boundary": "Semantic similarity is not exact-prefix or KV reuse; preserve original private requests without rewriting."}
   ],
   "source_entrypoints": {
+    "OVOBENCH": [
+      {"role": "prepare_assets", "path": "scripts/prepare_jsonschemabench_author_source.py", "scope": "--source ovobench: fixed original author software; no task execution"},
+      {"role": "prepare_assets", "path": "scripts/prepare_reused_research_assets.py", "scope": "OVOBENCH: original annotation acquisition and identity verification"},
+      {"role": "prepare_assets", "path": "scripts/prepare_ovobench_native_selection.py", "scope": "Fixed first3 per original task class or --full all1640; preserve complete forward stages"},
+      {"role": "prepare_assets", "path": "scripts/prepare_ovobench_original_media.py", "scope": "Bounded original archive-member acquisition with explicit original identity checks; no invented clips"},
+      {"role": "prepare_assets", "path": "scripts/verify_ovobench_original_media.py", "scope": "Read-only registered original media verification and optional complete archive LFS verification"},
+      {"role": "original_profile", "path": "configs/workload-native/ovobench-author-source.json", "scope": "Original author/data/media identities; metadata alone is not native evidence"},
+      {"role": "generation", "path": "scripts/run_ovobench_original_npu.py", "scope": "Original offline controller/prompt/stages and scoring with explicit official Qwen2-VL-7B NPU binding; fixed sample or --full"},
+      {"role": "saved_output_reuse_audit", "path": "scripts/score_ovobench_original_saved.py", "scope": "Untouched original scorer with disclosed lossless singleton-list-to-text input adaptation; zero model calls"}
+    ],
+    "MIND2WEB": [
+      {"role": "prepare_assets", "path": "scripts/prepare_reused_research_assets.py", "scope": "Original encrypted test ZIP and official candidate scores; verify publisher identities without unpickling"},
+      {"role": "prepare_assets", "path": "scripts/prepare_mind2web_author_source.py", "scope": "Pinned31 original software files; no execution or dependency installation"},
+      {"role": "prepare_assets", "path": "scripts/prepare_mind2web_original_tasks.py", "scope": "Original first3 complete tasks per split; all fields and actions retained"},
+      {"role": "generation", "path": "scripts/run_mind2web_original.py", "scope": "Unmodified original prompt, top50 tournament and scorer; explicit non-thinking Qwen fallback, original50-token budget"}
+    ],
+    "DRAGON_PUBLIC": [
+      {"role": "prepare_assets", "path": "scripts/prepare_reused_research_assets.py", "scope": "All four same-release original public/reference datasets; reference QA is scoring-only"},
+      {"role": "original_profile", "path": "configs/workload-native/dragon-e5-original-artifact.json", "scope": "Exact author-listed original encoder export; not proof of NPU execution"},
+      {"role": "generation", "path": "scripts/run_dragon_original.py", "scope": "Unchanged author full-corpus Chroma MMR, standalone chunk1000/overlap100/k5, original prompt and scorer; explicit NPU encoder/existing-reader transport, fixed first3 or full. Fixed original3 executed/scored; all length outputs retained, no quality/performance claim."},
+      {"role": "saved_output_reuse_audit", "path": "scripts/verify_dragon_original_saved.py", "scope": "No inference: original prompts/context chunk-ID binding, full corpus/query embedding inputs/vectors, saved responses and original rescoring. Not source completion by itself."}
+    ],
+    "LIBRITTS": [
+      {"role": "prepare_assets", "path": "scripts/prepare_libritts_original_assets.py", "scope": "Pinned test-other original corpus only; not native speech synthesis"},
+      {"role": "data_reading_only", "path": "workload-preparation/src/vllm_hust_workload_data/libritts.py", "scope": "Candidate original-pair adapter, format fixtures only until original archive validation; no model or generated prompt"}
+    ],
+    "LJSPEECH": [
+      {"role": "prepare_assets", "path": "scripts/prepare_ljspeech_original_assets.py", "scope": "Full original1.1 speech archive with official TorchAudio checksum and exact matching resume only; not TTS model execution or quality scoring"}
+    ],
+    "SWE_BENCH": [
+      {"role": "prepare_assets", "path": "scripts/prepare_swebench_author_source.py", "scope": "Pinned original shared author software only, not task data, repository images, Agent execution or official grading"}
+    ],
+    "SWE_VERIFIED": [
+      {"role": "prepare_assets", "path": "scripts/prepare_swebench_author_source.py", "scope": "Reuse same official software as SWE_BENCH; existing Verified original records remain separate; native execution pending"}
+    ],
+    "SPIDER": [
+      {"role": "prepare_assets", "path": "scripts/prepare_spider_original_dev.py", "scope": "Original dev prefix and complete official test-suite binding; no invented prompts or SQL execution"},
+      {"role": "generation", "path": "scripts/run_spider_original_generation.py", "scope": "Original questions/schema, disclosed integration prompt, references excluded, no SQL repair"},
+      {"role": "isolated_scoring", "path": "scripts/run_spider_official_scoring.py", "scope": "Unchanged official Test Suite Accuracy in nonroot network-none read-only CPU Docker; no host SQL"}
+    ],
+    "LIVECODEBENCH": [
+      {"role": "prepare_assets", "path": "scripts/prepare_reused_research_assets.py"},
+      {"role": "prepare_scoring_inputs", "path": "scripts/prepare_livecodebench_original_tasks.py"},
+      {"role": "generation", "path": "scripts/run_livecodebench_original_generation.py"},
+      {"role": "isolated_scoring", "path": "scripts/run_livecodebench_container_scoring.py"}
+    ],
+    "VIDEOMME": [
+      {"role": "prepare_assets", "path": "scripts/prepare_videomme_native_media.py", "scope": "Complete original release verification, gated unchanged author extraction and byte/CRC comparison; no native model inference, fresh media directories only"},
+      {"role": "original_profile", "path": "scripts/run_videomme_original.py", "scope": "Original eight-frame with/without-subtitles profiles, fixed27 per profile or full2700, original API encoding and exact-matching scoring; real execution pending, plan by default"},
+      {"role": "prepare_assets", "path": "scripts/prepare_videomme_original_assets.py", "scope": "Explicit academic-only full release acquisition/verification, or annotation-only regular-file view; not media extraction or native execution"},
+      {"role": "prepare_assets", "path": "scripts/prepare_videomme_original_view.py", "scope": "Original2700 table/relations only, plan by default; not completed media acquisition, native inference or scoring"},
+      {"role": "original_profile", "path": "configs/workload-native/videomme-original-protocol.json", "scope": "Frozen original8frame and8frame_subs task selection; both native validations pending"}
+    ],
+    "MVBENCH": [
+      {"role": "prepare_assets", "path": "scripts/prepare_mvbench_original_assets.py", "scope": "Fixed complete original video snapshot and external regular-file data view; plan by default, no model calls"},
+      {"role": "prepare_assets", "path": "scripts/prepare_mvbench_original_view.py", "scope": "Unchanged author full4000 TSV generation and table identity validation; no model calls"},
+      {"role": "original_profile", "path": "configs/workload-native/mvbench-original-protocol.json", "scope": "Pinned official20-type video task view and fixed original first3 per type,16 frames"},
+      {"role": "generation", "path": "scripts/run_mvbench_original.py", "scope": "Original role preprocessing, video prompt/API encoder and exact_matching scorer; default fixed60, explicit --full all4000; no performance claim"}
+    ],
+    "DISCOVERYBENCH": [
+      {"role": "prepare_assets", "path": "scripts/prepare_discoverybench_original_assets.py", "scope": "Fixed unchanged official Git tree, original real/synth tasks and native protocol; external acquisition or read-only reuse. No Agent execution, scoring or source completion."}
+    ],
+    "APPWORLD": [
+      {"role": "prepare_assets", "path": "scripts/prepare_appworld_original_assets.py", "scope": "Official data CLI in fresh private destination; read-only original split/task-directory verification; no native execution or scoring."},
+      {"role": "prepare_assets", "path": "scripts/prepare_appworld_runtime.py", "scope": "Pinned official isolated Python3.11 core client only; explicit private protected-code installation. No task download, Agent execution, scoring or security qualification."}
+    ],
+    "CODEJUDGE_EVAL": [
+      {
+        "role": "prepare_assets",
+        "path": "scripts/prepare_reused_research_assets.py",
+        "scope": "Fixed publisher six original JSON variants; plan/download/verify modes, explicit same-version HF mirror optional. Not native scoring."
+      },
+      {
+        "role": "data_reading_only",
+        "path": "workload-preparation/src/vllm_hust_workload_data/adapters.py",
+        "scope": "Preserve original complete input, independent answer and original problem/candidate provenance. No replacement judging prompt or claim of author runtime."
+      },
+      {
+        "role": "original_profile",
+        "path": "scripts/run_codejudge_original.py",
+        "scope": "Original published prompts and independent declared paper-protocol extraction/Accuracy/Macro-F1 implementation; not author regex or exact score reproduction. Supports full settings and saved-case resume without repeating completed requests."
+      },
+      {
+        "role": "saved_output_reuse_audit",
+        "path": "scripts/verify_codejudge_saved.py",
+        "scope": "Offline original selection/request/reference/response and declared metrics consistency, no model or network calls."
+      }
+    ],
     "DEEPPLANNING": [
       {
         "role": "prepare_assets",
@@ -30,12 +118,12 @@
       {
         "role": "original_profile",
         "path": "scripts/run_deepplanning_original_shopping.py",
-        "scope": "Original shopping tool/Agent loops, fixed first3 validation or full tasks, and original cart scoring. Candidate under native validation; not travel workflow or qualified source delivery."
+        "scope": "Original shopping tool/Agent loops, fixed first3 per original level or full tasks, and original cart scoring. Levels1/2/3 fixed original samples executed/scored and saved-audited; retained failure recovery is not a model rerun. Not full-data quality or performance."
       },
       {
         "role": "original_profile",
         "path": "scripts/run_deepplanning_original_travel.py",
-        "scope": "Original English/Chinese travel Agent, local-model report conversion and original constraint scorer. Candidate pending native execution; converter fallback is not author qwen-plus score reproduction."
+        "scope": "Original English/Chinese travel Agent, local-model report conversion and original constraint scorer. Fixed original first3 per language executed, scored and saved per-case/full-test-denominator aggregates audited. Converter fallback is not author qwen-plus quality reproduction."
       }
     ],
     "SCIENCEWORLD": [
@@ -71,6 +159,23 @@
       {"role": "prepare_assets", "path": "scripts/prepare_mmmu_author_source.py"},
       {"role": "original_profile", "path": "scripts/run_mmmu_original.py"},
       {"role": "saved_output_reuse_audit", "path": "scripts/verify_mmmu_original_saved.py"}
+    ],
+    "NATUREBENCH": [
+      {"role":"prepare_assets","path":"scripts/prepare_jsonschemabench_author_source.py","scope":"Use --source naturebench;56 pinned official runtime/protocol files only. No scientific data download, task execution or blanket data redistribution license."},
+      {"role":"prepare_assets","path":"scripts/prepare_naturebench_original_assets.py","scope":"Unchanged author download-only for all3 canonical CPU tasks;576 pinned original file identities, explicit byte/storage budget and supported same-revision pagination transport. No task/Agent/evaluator/judge execution or full90-task claim."},
+      {"role":"prepare_assets","path":"scripts/verify_naturebench_original_contract.py","scope":"Pinned source integrity,90/25 canonical task-group relations and AST syntax only; not task data/provider preparation, Agent execution, native evaluator or validity judge."}
+    ],
+    "OPENCODE": [
+      {"role":"prepare_assets","path":"scripts/prepare_reused_research_assets.py","scope":"50 pinned original training corpus shards registered; explicit selected-file acquisition and publisher checksums, not execution."},
+      {"role":"data_reading_only","path":"scripts/prepare_reused_source_records.py","scope":"Unchanged original coding question, ID, teacher code, original tests and historical scores; no code execution or quality assertion."},
+      {"role":"original_profile","path":"scripts/run_opencode_original.py","scope":"Original input field only under explicit operator model and budget. No teacher leakage, retry, replacement or execution of original/generated code; training-corpus workload, not independent quality benchmark."},
+      {"role":"saved_output_reuse_audit","path":"scripts/verify_opencode_original_saved.py","scope":"Saved input/reference/response integrity without model calls or code execution; runtime qualification tracked separately."}
+    ],
+    "OPENMATH2": [
+      {"role":"prepare_assets","path":"scripts/prepare_reused_research_assets.py","scope":"32 canonical train shards registered; selected original files by fixed publisher hashes, not overlapping subset duplication or native generation."},
+      {"role":"data_reading_only","path":"scripts/prepare_reused_source_records.py","scope":"Original problem, separate expected_answer/generated_solution and unchanged problem_source. Preparation is not independent math scoring."},
+      {"role":"original_profile","path":"scripts/run_openmath2_original.py","scope":"Original published problems as sole user content under explicit operator model/budget. Fixed first rows or streaming full selected shards, no teacher leakage/retry/replacement. Training-corpus workload generation, not author training or independent quality benchmark; runtime status is separate."},
+      {"role":"saved_output_reuse_audit","path":"scripts/verify_openmath2_original_saved.py","scope":"Saved original problem/reference/response integrity only; no model replay or independent math scoring."}
     ],
     "TULU3": [
       {"role":"prepare_assets","path":"scripts/prepare_reused_research_assets.py","scope":"Pinned six publisher Parquet files; explicit mirror, checksum verification and component licensing boundaries. Acquisition is not native delivery."},
@@ -283,6 +388,23 @@
         "path": "scripts/run_stsb_original.py"
       }
     ],
+    "SPOKENWOZ": [
+      {
+        "role": "prepare_assets",
+        "path": "scripts/prepare_spokenwoz_original_dst.py",
+        "scope": "Original publisher text-DST preparation; not audio."
+      },
+      {
+        "role": "original_profile",
+        "path": "scripts/run_spokenwoz_original_dst.py",
+        "scope": "Complete original dialogue text-DST execution and original scoring; full/range selection supported, audio not established."
+      },
+      {
+        "role": "saved_output_reuse_audit",
+        "path": "scripts/run_spokenwoz_original_dst.py",
+        "scope": "Explicit --verify-saved mode, no new model calls."
+      }
+    ],
     "AGENTBENCH": [
       {
         "role": "original_profile",
@@ -307,6 +429,11 @@
       }
     ],
     "INFINITEBENCH": [
+      {
+        "role": "prepare_assets",
+        "path": "scripts/prepare_infinitebench_original_metric.py",
+        "scope": "Pinned original ROUGE import dependency only; no task generation, scoring or model."
+      },
       {
         "role": "original_profile",
         "path": "scripts/run_infinitebench_original.py"

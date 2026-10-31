@@ -35,6 +35,7 @@ def test_readme_workload_catalog_covers_exact_delivery_scope():
         if item["checked"]:
             assert "[x] 已交付" in row
             assert item["delivery_receipt"] in row
+            assert "入口索引待补" not in row
         else:
             assert "[x]" not in row
         if source.startswith("PAIO-"):
@@ -58,3 +59,21 @@ def test_readme_catalog_local_links_exist_and_source_anchors_resolve():
             assert f'<a id="{target[1:]}"></a>' in section
         else:
             assert (ROOT / target.split("#", 1)[0]).is_file(), target
+
+
+def test_ovobench_navigation_distinguishes_sample_execution_from_delivery():
+    text = (ROOT / "README.md").read_text("utf-8")
+    row = next(
+        line
+        for line in text.splitlines()
+        if '<a id="workload-source-ovobench"></a>' in line
+    )
+    assert "scripts/prepare_ovobench_native_selection.py" in row
+    assert "scripts/prepare_ovobench_original_media.py" in row
+    assert "offline固定36题/103响应、原评分及CI消费交接" in row
+    assert "ovobench-offline-native-delivery-20261031.json" in row
+    ledger = json.loads(
+        (ROOT / "docs/workload-data/dataset-validation-status.json").read_text("utf-8")
+    )
+    assert ledger["delivery_inventory"]["OVOBENCH"]["checked"] is True
+    assert "[x] 已交付" in row

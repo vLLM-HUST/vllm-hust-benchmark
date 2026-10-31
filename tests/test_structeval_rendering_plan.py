@@ -40,3 +40,17 @@ def test_runtime_binary_is_not_sandbox_qualification():
 def test_rejects_implicit_rendering_classification():
     with pytest.raises(ValueError):
         MODULE.protocol_inventory([{"input_type": "Text", "output_type": "SVG"}])
+
+
+def test_author_dependency_scan_does_not_import_or_execute(tmp_path):
+    folder = tmp_path / "render_engine"
+    folder.mkdir()
+    (folder / "render_fixture.py").write_text(
+        'import nonexistent_fixture_module\nraise RuntimeError("must not execute")\nASSET="https://example.invalid/static-fixture.js"\n'
+    )
+    report = MODULE.author_render_dependencies(tmp_path)
+    assert report["original_modules"][0]["imports"] == ["nonexistent_fixture_module"]
+    assert report["original_modules"][0]["literal_http_assets"] == [
+        "https://example.invalid/static-fixture.js"
+    ]
+    assert report["offline_network_qualified"] is False

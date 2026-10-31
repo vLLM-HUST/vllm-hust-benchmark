@@ -1,6 +1,146 @@
 {
   "version": "source-manifests/v1",
   "sources": {
+    "OVOBENCH": {
+      "source_id": "OVOBENCH", "platform": "github",
+      "repo_id": "JoeLeelyf/OVO-Bench",
+      "source_url": "https://github.com/JoeLeelyf/OVO-Bench",
+      "revision": "c34093f9a072d93f9e1c6b923446dfba71f4528e", "revision_note": "pragma: allowlist secret - fixed official current author revision",
+      "unit": "original_online_video_case_with_complete_stage_sequence",
+      "provenance_kind": "publisher_original_annotation_json_not_model_results",
+      "publisher_metadata_acquisition": {"registered_file_roles":["data"]},
+      "license": "CC-BY-NC-SA-4.0 and source-video conditions; code license separate",
+      "files": [
+        {"path":"data/ovo_bench_new.json","bytes":918443,"git_blob":"72a84caa67e077f381434bbc811fc96b445c51be","sha256":"dc4a90daf26764dc8ab8b228ea4af864ba2ea50c2833ead8c9af6573f78ccf97","role":"data","rows":1640,"url":"https://raw.githubusercontent.com/JoeLeelyf/OVO-Bench/c34093f9a072d93f9e1c6b923446dfba71f4528e/data/ovo_bench_new.json","identity_note":"pragma: allowlist secret - verified original full annotation identity"}
+      ]
+    },
+    "MULTIAGENTBENCH": {
+      "source_id": "MULTIAGENTBENCH",
+      "platform": "github",
+      "repo_id": "ulab-uiuc/MARBLE",
+      "source_url": "https://github.com/ulab-uiuc/MARBLE",
+      "revision": "8d60fa17b5596b44458a52d4296061b9fc13d6f2",
+      "unit": "original_multiagent_scenario_configuration",
+      "provenance_kind": "publisher_multiagent_task_environment_configuration",
+      "files": [
+        {
+          "path": "multiagentbench/bargaining/bargaining_main.jsonl",
+          "bytes": 1778988,
+          "git_blob": "670f5d4d405b1af8815313e350e99284caba89ec",
+          "sha256": "786b03c4a7c20ba67ae59860ad6c01dd8bb4ce0528ae08515f921320488c1547",
+          "role": "data"
+        },
+        {
+          "path": "multiagentbench/coding/coding_main.jsonl",
+          "bytes": 521235,
+          "git_blob": "f7d815a254b69c38d9c651937000b4f789923017",
+          "sha256": "7189bb38cb1c099dfa42c55af9b56ad4d177df986ff0f357160928e9d401d48b",
+          "role": "data"
+        },
+        {
+          "path": "multiagentbench/database/database_main.jsonl",
+          "bytes": 950472,
+          "git_blob": "21dc71601df932bf898e1bf1b23799e689c6d742",
+          "sha256": "e1128d946d49c4943849a758b0c2d22a1af57b7a71c43694107813d8a1542631",
+          "role": "data"
+        },
+        {
+          "path": "multiagentbench/minecraft/minecraft_main.jsonl",
+          "bytes": 327300,
+          "git_blob": "b5da7cc1babcb84d3efc897184367fc25d21fd29",
+          "sha256": "232785cbd492eff0fbb821db4db7415f5cf1f01a1326e7deaffe9f59a6f1d08d",
+          "role": "data"
+        },
+        {
+          "path": "multiagentbench/research/research_main.jsonl",
+          "bytes": 1791147,
+          "git_blob": "37ba3d51bd9b1fc0d1a1cd10ae729d359cf77821",
+          "sha256": "1c7583f1ee0583ac12a625fb5c19de7b5983344dde89a2254c1782d6309310e9",
+          "role": "data"
+        }
+      ],
+      "boundary": "Five original scenario files only; no native execution or scoring qualification. Preserve per-agent routing and separate database evaluator parameters."
+    },
+    "CODEJUDGE_EVAL": {
+      "source_id": "CODEJUDGE_EVAL",
+      "platform": "hf",
+      "repo_id": "CodeResearch/CodeJudge-Eval",
+      "source_url": "https://huggingface.co/datasets/CodeResearch/CodeJudge-Eval",
+      "revision": "6541deb0c42e56ec1300d94d4e9ae7b3b4cc764a", "revision_identity_note": "pragma: allowlist secret - verified public publisher file identity",
+      "revision_note": "pragma: allowlist secret - public publisher revision",
+      "unit": "original_code_judging_configuration_row",
+      "provenance_kind": "publisher_constructed_code_judging_multiple_choice_tasks",
+      "status": "ORIGINAL_FILES_VERIFIED_NATIVE_PROTOCOL_IMPLEMENTATION_PENDING",
+      "publisher_metadata_acquisition": {
+        "registered_file_roles": ["data"],
+        "identity_source": "Pinned publisher HF revision and all six LFS checksums verified on server; original download429 failure retained and retried only after cooldown",
+        "registered_original_variants": 6,
+        "boundary": "Published full input prompt and independent answer; no source-code generation or host execution. Six settings reuse base tasks;11160 rows are not11160 unique base questions."
+      },
+      "access": {
+        "gated": false,
+        "license": "MIT",
+        "note": "Publisher dataset card declares MIT; retain publisher/upstream attribution and check applicable terms before reuse or redistribution. Raw files remain external."
+      },
+      "files": [
+        {
+          "path": "CodeJudge_Eval_0shot_easy.json",
+          "bytes": 12269207,
+          "sha256": "9be680763406afad9233a33e5a1fd41bac2c1004febd4dd3c9bb5b2f95d1c7e5", "sha256_identity_note": "pragma: allowlist secret - verified public publisher file identity",
+          "sha256_note": "pragma: allowlist secret - public original file identity",
+          "rows": 1860,
+          "role": "data",
+          "url": "https://huggingface.co/datasets/CodeResearch/CodeJudge-Eval/resolve/6541deb0c42e56ec1300d94d4e9ae7b3b4cc764a/CodeJudge_Eval_0shot_easy.json"
+        },
+        {
+          "path": "CodeJudge_Eval_0shot_hard.json",
+          "bytes": 12689567,
+          "sha256": "eb86bf286478c19016d899f75db6394b037a46b95af7968cbfa2a854aff77581", "sha256_identity_note": "pragma: allowlist secret - verified public publisher file identity",
+          "sha256_note": "pragma: allowlist secret - public original file identity",
+          "rows": 1860,
+          "role": "data",
+          "url": "https://huggingface.co/datasets/CodeResearch/CodeJudge-Eval/resolve/6541deb0c42e56ec1300d94d4e9ae7b3b4cc764a/CodeJudge_Eval_0shot_hard.json"
+        },
+        {
+          "path": "CodeJudge_Eval_0shot_middle.json",
+          "bytes": 12494267,
+          "sha256": "4690ec01132fc7fc3c7e05f464d3311fb7cb4184695d16d436c84c30e9a63e70", "sha256_identity_note": "pragma: allowlist secret - verified public publisher file identity",
+          "sha256_note": "pragma: allowlist secret - public original file identity",
+          "rows": 1860,
+          "role": "data",
+          "url": "https://huggingface.co/datasets/CodeResearch/CodeJudge-Eval/resolve/6541deb0c42e56ec1300d94d4e9ae7b3b4cc764a/CodeJudge_Eval_0shot_middle.json"
+        },
+        {
+          "path": "CodeJudge_Eval_1shot_easy.json",
+          "bytes": 15684167,
+          "sha256": "ba40279884f36e216ab9b2760633d7cbfd01abac4438301faac16101df3997fa", "sha256_identity_note": "pragma: allowlist secret - verified public publisher file identity",
+          "sha256_note": "pragma: allowlist secret - public original file identity",
+          "rows": 1860,
+          "role": "data",
+          "url": "https://huggingface.co/datasets/CodeResearch/CodeJudge-Eval/resolve/6541deb0c42e56ec1300d94d4e9ae7b3b4cc764a/CodeJudge_Eval_1shot_easy.json"
+        },
+        {
+          "path": "CodeJudge_Eval_1shot_hard.json",
+          "bytes": 16104527,
+          "sha256": "4af512b1e35b014b6d7ede7fb41fbe3cec1309d29c7ef6b6db78ca2908101926", "sha256_identity_note": "pragma: allowlist secret - verified public publisher file identity",
+          "sha256_note": "pragma: allowlist secret - public original file identity",
+          "rows": 1860,
+          "role": "data",
+          "url": "https://huggingface.co/datasets/CodeResearch/CodeJudge-Eval/resolve/6541deb0c42e56ec1300d94d4e9ae7b3b4cc764a/CodeJudge_Eval_1shot_hard.json"
+        },
+        {
+          "path": "CodeJudge_Eval_1shot_middle.json",
+          "bytes": 15909227,
+          "sha256": "67464cb4f3989a3cdabac1486b36b458c8372b276d99f8ecf7ba5f79ed81fb19", "sha256_identity_note": "pragma: allowlist secret - verified public publisher file identity",
+          "sha256_note": "pragma: allowlist secret - public original file identity",
+          "rows": 1860,
+          "role": "data",
+          "url": "https://huggingface.co/datasets/CodeResearch/CodeJudge-Eval/resolve/6541deb0c42e56ec1300d94d4e9ae7b3b4cc764a/CodeJudge_Eval_1shot_middle.json"
+        }
+      ],
+      "native_reference_command": "python scripts/run_codejudge_original.py --help; explicit local fallback profile required, not author regex reproduction",
+      "boundary": "Native model and paper metric integration still pending; author regex extractor code not released in inspected repository, no exact score reproduction claim."
+    },
     "DEEPPLANNING": {
       "source_id": "DEEPPLANNING",
       "platform": "https",
@@ -1305,7 +1445,7 @@
       "provenance": "author_release",
       "fitness_status": "VARIABLES_REQUIRE_ASSET_INSPECTION",
       "discovery_status": "ENTRY_IDENTIFIED",
-      "revision": "b74c0d0bf70d2c0bc459be537895cca163007f1a",
+      "revision": "b74c0d0bf70d2c0bc459be537895cca163007f1a", "publisher_metadata_acquisition": {"kind": "original_pinned_bigcodebench_parquet", "registered_file_roles": ["data"], "boundary": "Acquire unchanged original v0.1.4 Parquet only; no model call or scoring. Native sanitizer and reference/candidate scoring remain separate."},
       "files": [
         {
           "path": "README.md",
@@ -1363,7 +1503,23 @@
       "fitness_status": "VARIABLES_REQUIRE_ASSET_INSPECTION",
       "discovery_status": "ENTRY_IDENTIFIED",
       "revision": "e48e2bd1e9fecd5bbd641e9414ac59da9f2e69f6",
-      "files": [],
+      "files": [
+        {
+          "path": "data/test-00000-of-00001.parquet",
+          "sha256": "db4f70ef735b3162c74801ddcdf8d7bae8d704193788c6d844f898c20b571cbb", "sha256_identity_note": "pragma: allowlist secret - verified original public SWE-bench LFS SHA256, not credential",
+          "bytes": 12097227,
+          "rows": 2294,
+          "url": "https://huggingface.co/datasets/princeton-nlp/SWE-bench/resolve/e48e2bd1e9fecd5bbd641e9414ac59da9f2e69f6/data/test-00000-of-00001.parquet",
+          "role": "data",
+          "fields": ["repo", "instance_id", "base_commit", "patch", "test_patch", "problem_statement", "hints_text", "created_at", "version", "FAIL_TO_PASS", "PASS_TO_PASS", "environment_setup_commit"],
+          "historical_receipt": "docs/workload-data/validation/swebench-original-readiness-20261029.json#shared_classic_original_asset_preparation"
+        }
+      ],
+      "publisher_metadata_acquisition": {
+        "kind": "original_pinned_swe_classic_test_parquet",
+        "registered_file_roles": ["data"],
+        "boundary": "Pinned original2294 test rows/12 fields, not Verified500. Asset verification does not complete native Agent or official grading."
+      },
       "unit": "source_rows",
       "provenance_kind": "repository_task_corpus",
       "access": {
@@ -1451,12 +1607,16 @@
       "discovery_status": "ENTRY_IDENTIFIED",
       "revision": "1394b4f59ab6f1f2e5aff6bc15b448e15960e170",
       "files": [],
+      "files_resource": "visionarena_original_files_v1.json",
       "unit": "source_rows",
       "provenance_kind": "multimodal_conversation_corpus",
       "access": {
-        "license": null,
+        "license": "LMArena VisionArena dataset License Agreement (custom; not an unrestricted open-data license)",
         "gated": false,
-        "note": "Verify publisher terms before acquisition or redistribution"
+        "agreement_acceptance_required": true,
+        "third_party_transfer_permitted": false,
+        "terms_url": "https://huggingface.co/datasets/lmarena-ai/VisionArena-Chat/blob/1394b4f59ab6f1f2e5aff6bc15b448e15960e170/README.md",
+        "note": "Official agreement governs access/use and prohibits transfer to third parties. Public metadata registration is not agreement acceptance or permission to redistribute raw images/conversations. Authorized users obtain originals directly; no automatic download profile is enabled."
       },
       "metadata_snapshot": "public-source-metadata-v0.5; not a fresh web check"
     },
@@ -2446,16 +2606,16 @@
       "provenance": "official_project",
       "fitness_status": "VARIABLES_REQUIRE_ASSET_INSPECTION",
       "discovery_status": "ENTRY_IDENTIFIED",
-      "revision": null,
-      "files": [],
+      "revision": "ead1408f75b618502df9a1d8e0950166bf0a2a0b", "identity_note": "pragma: allowlist secret - observed fixed publisher release; original archives not yet verified", "protocol_profile": "configs/workload-native/videomme-original-protocol.json",
+      "files": [], "files_resource": "videomme_original_release_files_v1.json",
       "unit": "source_rows",
       "provenance_kind": "multimodal_task_corpus",
       "access": {
-        "license": null,
-        "gated": null,
-        "note": "Verify publisher terms before acquisition or redistribution"
+        "license": "custom-academic-research-only",
+        "gated": false,
+        "note": "Academic research only; commercial use and unauthorized redistribution/modification prohibited. No raw payload redistribution by this package.", "terms_url": "https://github.com/MME-Benchmarks/Video-MME#-dataset"
       },
-      "metadata_snapshot": "public-source-metadata-v0.5; not a fresh web check"
+      "metadata_snapshot": "20261028 fixed Hub release metadata, original README Git identity and official project terms reviewed; full asset/native validation pending"
     },
     "VIDEOMME_V2": {
       "source_id": "VIDEOMME_V2",
@@ -2473,7 +2633,17 @@
       "fitness_status": "VARIABLES_REQUIRE_ASSET_INSPECTION",
       "discovery_status": "ENTRY_IDENTIFIED",
       "revision": "6e4bebb03202e1ddbf3d37703e560e51c5aa2d64",
-      "files": [],
+      "publisher_metadata_acquisition": {
+        "kind": "original_pinned_videomme_v2_small_assets",
+        "registered_file_roles": ["data", "native_environment"],
+        "boundary": "Four unchanged publisher files only: complete3200 questions/800 four-question groups, subtitle archive, README and eval configuration. No video archive, native inference, prompt adaptation or source completion claim."
+      },
+      "files": [
+        {"path": "README.md", "bytes": 6158, "sha256": "57ddaf7bb20cb6715518a72a4ffd14afefe211c54a51605ec4ab648277b0b6ca", "identity_note": "pragma: allowlist secret - verified original Git blob and observed SHA256", "role": "native_environment", "url": "https://huggingface.co/datasets/MME-Benchmarks/Video-MME-v2/resolve/6e4bebb03202e1ddbf3d37703e560e51c5aa2d64/README.md"},
+        {"path": "eval.yaml", "bytes": 262, "sha256": "5f37d0fb961d4f0a33ae7a58bd67688454bcd3d6f99b49eab85d1b5c9a3f3eae", "identity_note": "pragma: allowlist secret - verified original Git blob and observed SHA256", "role": "native_environment", "url": "https://huggingface.co/datasets/MME-Benchmarks/Video-MME-v2/resolve/6e4bebb03202e1ddbf3d37703e560e51c5aa2d64/eval.yaml"},
+        {"path": "test.parquet", "bytes": 1185975, "sha256": "8dc7f8c8830aa49dd08a82592f8276899472a145155dde3bea5dd6914a65a9b4", "identity_note": "pragma: allowlist secret - verified publisher LFS SHA256", "role": "data", "rows": 3200, "url": "https://huggingface.co/datasets/MME-Benchmarks/Video-MME-v2/resolve/6e4bebb03202e1ddbf3d37703e560e51c5aa2d64/test.parquet"},
+        {"path": "subtitle.zip", "bytes": 7854449, "sha256": "adbd3cfd98bd03756398d1c8b63c7bcddf0e5c2494b6a0736ed890456021c287", "identity_note": "pragma: allowlist secret - verified publisher LFS SHA256", "role": "data", "url": "https://huggingface.co/datasets/MME-Benchmarks/Video-MME-v2/resolve/6e4bebb03202e1ddbf3d37703e560e51c5aa2d64/subtitle.zip"}
+      ],
       "unit": "source_rows",
       "provenance_kind": "multimodal_task_corpus",
       "access": {
@@ -2481,7 +2651,7 @@
         "gated": false,
         "note": "Verify publisher terms before acquisition or redistribution"
       },
-      "metadata_snapshot": "public-source-metadata-v0.5; not a fresh web check"
+      "metadata_snapshot": "20261029 original fixed Hub revision and Git/LFS identities verified for four small assets on server; no video acquisition/native completion. Preserve complete four-question groups and original grouped scorer."
     },
     "MVBENCH": {
       "source_id": "MVBENCH",
@@ -2497,8 +2667,8 @@
       "provenance": "author_release",
       "fitness_status": "VARIABLES_REQUIRE_ASSET_INSPECTION",
       "discovery_status": "ENTRY_IDENTIFIED",
-      "revision": "230a2d4fac8900333c61754641c7a13e069ac9c6",
-      "files": [],
+      "revision": "a776e554280b99b70f00cc3eacd69a65e0727efc", "dataset_revision":"a776e554280b99b70f00cc3eacd69a65e0727efc", "previous_main_view_revision":"230a2d4fac8900333c61754641c7a13e069ac9c6", "identity_note":"pragma: allowlist secret - explicit official video view; prior main registration retained as provenance, not interchangeable data",
+      "files": [], "files_resource":"mvbench_original_video_files_v1.json", "native_reference_command":"python scripts/run_mvbench_original.py --help",
       "unit": "source_rows",
       "provenance_kind": "multimodal_task_corpus",
       "access": {
@@ -2596,9 +2766,9 @@
     },
     "WAVCAPS": {
       "source_id": "WAVCAPS",
-      "platform": "hf",
-      "repo_id": "cvssp/WavCaps",
-      "source_url": "https://huggingface.co/datasets/cvssp/WavCaps",
+      "platform": "github",
+      "repo_id": "XinhaoMei/WavCaps",
+      "source_url": "https://github.com/XinhaoMei/WavCaps",
       "asset_kind": "audio_caption_corpus",
       "independent_source_id": "WAVCAPS",
       "workload_tags": [
@@ -2608,16 +2778,16 @@
       "provenance": "author_release",
       "fitness_status": "VARIABLES_REQUIRE_ASSET_INSPECTION",
       "discovery_status": "ENTRY_IDENTIFIED",
-      "revision": "0930ec11ded28fa0eaa910fde2f6fc3538acbeac",
-      "files": [],
+      "revision": "a5a9649ce305d7fe82cfcf5d6a4a12f03df9ef1e", "identity_note": "pragma: allowlist secret - pinned official metadata Git revision; not the separate Hub revision",
+      "files": [], "files_resource": "wavcaps_original_files_v1.json", "publisher_metadata_acquisition": {"kind": "original_pinned_audio_caption_metadata", "registered_file_roles": ["data"], "boundary": "Original JSON metadata only, not audio acquisition, model execution or scoring. Publisher academic-use/per-source conditions retained."},
       "unit": "source_rows",
       "provenance_kind": "audio_caption_corpus",
       "access": {
-        "license": "cc-by-4.0",
+        "license": "academic-only plus original per-source audio conditions",
         "gated": false,
-        "note": "Verify publisher terms before acquisition or redistribution"
+        "note": "Publisher README restricts academic use; do not infer unrestricted commercial audio use from the Hub metadata license tag. No raw redistribution."
       },
-      "metadata_snapshot": "public-source-metadata-v0.5; not a fresh web check"
+      "metadata_snapshot": "All four original Git metadata components acquired and hash-verified, including262300 FreeSound rows matched to publisher LFS identity; native audio inference not verified"
     },
     "SCIENCEAGENTBENCH": {
       "source_id": "SCIENCEAGENTBENCH",
@@ -2748,7 +2918,27 @@
       "fitness_status": "VARIABLES_REQUIRE_ASSET_INSPECTION",
       "discovery_status": "ENTRY_IDENTIFIED",
       "revision": "17ece8eb89862368edc0cc806acee6fca5163474",
-      "files": [],
+      "files": [
+        {
+          "path": "test.zip",
+          "bytes": 567745122,
+          "sha256": "8f5fbe72afab942fe97cdf7fb397e179885d89b5c16862288e9a14bc6d41ca89", "identity_note": "pragma: allowlist secret - official public LFS SHA256",
+          "url": "https://huggingface.co/datasets/osunlp/Mind2Web/resolve/17ece8eb89862368edc0cc806acee6fca5163474/test.zip",
+          "role": "data"
+        },
+        {
+          "path": "scores_all_data.pkl",
+          "bytes": 245190981,
+          "sha256": "884c97cd9ae0544485d21ea39e0d46422aee0291969a7324e56df3a84466dbd7", "identity_note": "pragma: allowlist secret - official public LFS SHA256",
+          "url": "https://huggingface.co/datasets/osunlp/Mind2Web/resolve/17ece8eb89862368edc0cc806acee6fca5163474/scores_all_data.pkl",
+          "role": "raw_source"
+        }
+      ],
+      "publisher_metadata_acquisition": {
+        "kind": "original_mind2web_encrypted_test_and_candidate_scores",
+        "registered_file_roles": ["data", "raw_source"],
+        "boundary": "Original encrypted test archive and author ranks only. No auto-unpickle, no decrypted test redistribution; acquisition does not qualify native execution."
+      },
       "unit": "source_rows",
       "provenance_kind": "web_action_demonstrations",
       "access": {
@@ -4186,7 +4376,7 @@
       "fitness_status": "VARIABLES_REQUIRE_ASSET_INSPECTION",
       "asset_scope": "AzureLLMInferenceDataset2023 only; exclude VM/Functions/non-LLM traces",
       "discovery_status": "ORIGINAL_2023_CODE_AND_CONVERSATION_FULL_READ_VERIFIED",
-      "revision": "215becdacba1ce682c7368642ce97d5a332de7a6",
+      "revision": "215becdacba1ce682c7368642ce97d5a332de7a6", "publisher_metadata_acquisition": {"kind":"original_publisher_csv_metadata_profile","registered_file_roles":["data"],"boundary":"Original serving metadata asset only; no original prompt replay or generated prompts"},
       "files": [
         {"path": "AzureLLMInferenceTrace_code.csv", "upstream_path": "data/AzureLLMInferenceTrace_code.csv", "url": "https://raw.githubusercontent.com/Azure/AzurePublicDataset/215becdacba1ce682c7368642ce97d5a332de7a6/data/AzureLLMInferenceTrace_code.csv", "sha256": "54e9a6d2a4bd06ba1e060304b900abbc74cbea53de96506e60fe5bb4f2277fb6", "bytes": 320117, "rows": 8819, "role": "data"},
         {"path": "AzureLLMInferenceTrace_conv.csv", "upstream_path": "data/AzureLLMInferenceTrace_conv.csv", "url": "https://raw.githubusercontent.com/Azure/AzurePublicDataset/215becdacba1ce682c7368642ce97d5a332de7a6/data/AzureLLMInferenceTrace_conv.csv", "sha256": "2f1e5b666d4e3055fdbba98598ce2ec307767b9064e03e2fa46676dbcc7d0bf8", "bytes": 719188, "rows": 19366, "role": "data"}
@@ -4758,16 +4948,52 @@
       "provenance": "author_release",
       "fitness_status": "VARIABLES_REQUIRE_ASSET_INSPECTION",
       "discovery_status": "ENTRY_IDENTIFIED",
-      "revision": null,
-      "files": [],
+      "revision": "28fef95ea8c9f7a547c8329f2cd3d32b92c1fa24", "identity_note": "pragma: allowlist secret - fixed public code revision",
+      "publisher_metadata_acquisition": {
+        "registered_file_roles": ["data"],
+        "identity_source": "Fixed official dataset revisions and publisher LFS SHA256 metadata; transport may explicitly use hf-mirror.com without changing original files",
+        "boundary": "Acquisition only, not native delivery. Full code_generation test.jsonl is not lite; never unpickle its private tests on the host. Self-repair workflow, native prompts, original budgets and scoring remain separate."
+      },
+      "files": [
+        {
+          "path": "code_generation/test.jsonl",
+          "publisher_repo_id": "livecodebench/code_generation",
+          "publisher_revision": "bb83f1c3c643a772b7a2a8f07bd62c2aab76be8f", "revision_note": "pragma: allowlist secret - fixed public dataset revision",
+          "bytes": 9375644586,
+          "sha256": "412b80eacab2ac1deb5fc02a067ed3eddbf130f9a121d690bdbf76df09bc81c9", "sha256_note": "pragma: allowlist secret - publisher LFS identity",
+          "identity_note": "pragma: allowlist secret - publisher LFS identity",
+          "role": "data",
+          "url": "https://huggingface.co/datasets/livecodebench/code_generation/resolve/bb83f1c3c643a772b7a2a8f07bd62c2aab76be8f/test.jsonl"
+        },
+        {
+          "path": "execution-v2/data/test-00000-of-00001.parquet",
+          "publisher_repo_id": "livecodebench/execution-v2",
+          "publisher_revision": "ff6ea0e2a638001006ddcc41259eff23a4283fb2", "revision_note": "pragma: allowlist secret - fixed public dataset revision",
+          "bytes": 71483,
+          "sha256": "c54e4377642f689758c2ee8664457af1b95ba95813a18208003c7a5a1efa410f", "sha256_note": "pragma: allowlist secret - publisher LFS identity",
+          "identity_note": "pragma: allowlist secret - publisher LFS identity",
+          "role": "data",
+          "url": "https://huggingface.co/datasets/livecodebench/execution-v2/resolve/ff6ea0e2a638001006ddcc41259eff23a4283fb2/data/test-00000-of-00001.parquet"
+        },
+        {
+          "path": "test_generation/test.parquet",
+          "publisher_repo_id": "livecodebench/test_generation",
+          "publisher_revision": "6f3ac40bbecf81eba15899139d279b077f2816fd", "revision_note": "pragma: allowlist secret - fixed public dataset revision",
+          "bytes": 73331,
+          "sha256": "4826aa00c059d6d47a099606ceed2d0e51d3aeeb1868f1bcf349a038bb64b4b1", "sha256_note": "pragma: allowlist secret - publisher LFS identity",
+          "identity_note": "pragma: allowlist secret - publisher LFS identity",
+          "role": "data",
+          "url": "https://huggingface.co/datasets/livecodebench/test_generation/resolve/6f3ac40bbecf81eba15899139d279b077f2816fd/test.parquet"
+        }
+      ],
       "unit": "source_rows",
       "provenance_kind": "code_task_corpus",
       "access": {
         "license": null,
-        "gated": null,
-        "note": "Verify publisher terms before acquisition or redistribution"
+        "gated": false,
+        "note": "Official code MIT does not license datasets. Dataset cards only declare generic cc; specific CC terms remain unresolved. Keep raw assets external and do not redistribute."
       },
-      "metadata_snapshot": "public-source-metadata-v0.5; not a fresh web check"
+      "metadata_snapshot": "Official code and three fixed HF dataset revisions checked 2026-10-28; two small original files acquired and LFS-verified on dedicated CPU server; native execution pending"
     },
     "HUMANEVAL": {
       "source_id": "HUMANEVAL",
@@ -4918,7 +5144,7 @@
       "provenance": "author_release",
       "fitness_status": "VARIABLES_REQUIRE_ASSET_INSPECTION",
       "discovery_status": "ENTRY_IDENTIFIED",
-      "revision": null,
+      "revision": "f92b849bc8d64944184a19c32f084f640246b668", "identity_note": "pragma: allowlist secret - fixed official protocol revision", "author_source_pins": "configs/workload-native/naturebench-author-source.json", "original_release_profile": "configs/workload-native/naturebench-original-release.json", "original_cpu_asset_profile": "configs/workload-native/naturebench-original-cpu-files.json", "code_license_scope": "MIT for original benchmark code/specifications; third-party task data retains per-task terms, not blanket MIT redistribution", "files_resource": "naturebench_original_cpu_assets_v1.json", "dataset_revision": "27e2dc304464257d2884fa6996bc8ca5d4a2256b",
       "files": [],
       "unit": "source_rows",
       "provenance_kind": "scientific_task_and_trace_release",
@@ -5379,7 +5605,7 @@
       "discovery_status": "ENTRY_IDENTIFIED",
       "lineage_note": "Derived from GSM8K/MATH plus generated questions; downsampled 1M/2M/5M overlap full train.",
       "revision": "469216e3f46f4dacf476b382e192485ea51a143e",
-      "files": [],
+      "files": [], "files_resource":"openmath2_original_files_v1.json", "publisher_metadata_acquisition":{"kind":"canonical_original_train_corpus","registered_file_roles":["data"],"scope":"All32 canonical train shards registered; overlapping1M/2M/5M subsets not independent data. Acquisition and stored teacher solutions are not native execution or independent quality evaluation."},
       "unit": "source_rows",
       "provenance_kind": "synthetic_reasoning_corpus",
       "access": {
@@ -5550,7 +5776,7 @@
       "provenance": "author_release",
       "fitness_status": "VARIABLES_REQUIRE_ASSET_INSPECTION",
       "discovery_status": "ENTRY_IDENTIFIED",
-      "revision": "8f3ba5bafe4d6e8db46082cf7ae6741bc370604d",
+      "revision": "8f3ba5bafe4d6e8db46082cf7ae6741bc370604d", "files_resource": "opencode_original_files_v1.json", "publisher_metadata_acquisition": {"identity_source": "Pinned HF publisher metadata and LFS descriptors verified2026-10-28", "registered_original_shards": 50, "registered_original_bytes": 6861113102, "registered_file_roles": ["data"], "source_kind": "synthetic_code_training_corpus_not_independent_quality_benchmark"},
       "files": [],
       "unit": "source_rows",
       "provenance_kind": "synthetic_code_corpus",
@@ -5671,9 +5897,11 @@
     },
     "BIXBENCH": {
       "source_id": "BIXBENCH",
-      "platform": "github",
-      "repo_id": "Future-House/BixBench",
-      "source_url": "https://github.com/Future-House/BixBench",
+      "platform": "huggingface",
+      "repo_id": "futurehouse/BixBench",
+      "source_url": "https://huggingface.co/datasets/futurehouse/BixBench",
+      "author_repository": "Future-House/BixBench",
+      "author_revision": "49311180bdacb324c596f2e07596c126f2004008", "author_identity_note": "pragma: allowlist secret - reviewed fixed original Agent protocol source revision",
       "asset_kind": "scientific_analysis_tasks_and_traces",
       "independent_source_id": "BIXBENCH",
       "workload_tags": [
@@ -5681,18 +5909,20 @@
         "verification"
       ],
       "provenance": "author_release",
-      "fitness_status": "VARIABLES_REQUIRE_ASSET_INSPECTION",
-      "discovery_status": "ENTRY_IDENTIFIED",
-      "revision": null,
+      "fitness_status": "ACTUAL_FLAT_QUESTION_AND_CAPSULE_RELATIONS_VERIFIED_NATIVE_PENDING",
+      "discovery_status": "ORIGINAL_METADATA_AND_FIXED3_QUESTION_CAPSULES_PREPARED",
+      "revision": "f8cc3bdcc6357c88b8c3648306522b9c422dc95a", "identity_note": "pragma: allowlist secret - original publisher dataset revision",
       "files": [],
-      "unit": "source_rows",
+      "files_resource": "bixbench_original_files_v1.json",
+      "unit": "original_question_with_capsule_environment",
       "provenance_kind": "scientific_analysis_tasks_and_traces",
       "access": {
-        "license": null,
-        "gated": null,
-        "note": "Verify publisher terms before acquisition or redistribution"
+        "license": "apache-2.0",
+        "gated": false,
+        "note": "2026-10-30 publisher metadata/card observation. Preserve embedded third-party capsule notices; registration is not permission to rehost raw capsules. No credentials or gate bypass used."
       },
-      "metadata_snapshot": "public-source-metadata-v0.5; not a fresh web check"
+      "metadata_snapshot": "2026-10-30 fixed Hub metadata plus original205 JSONL rows inspected on server",
+      "boundary": "205 original flat questions/17 fields reference59 of64 registered ZIPs. Metadata and the two original ZIPs for fixed first3 questions acquired/verified; other57 referenced ZIPs absent. Original field adapter preserves question/asset/reference relations; catalog metadata does not establish installed handoff, scientific execution or scoring. Do not implement the stale nested-questions dataset-card schema or substitute zero-shot QA for the scientific Agent workflow."
     },
     "LABBENCH": {
       "source_id": "LABBENCH",
@@ -5748,9 +5978,9 @@
     },
     "SPOKENWOZ": {
       "source_id": "SPOKENWOZ",
-      "platform": "github",
-      "repo_id": "AlibabaResearch/DAMO-ConvAI",
-      "source_url": "https://github.com/AlibabaResearch/DAMO-ConvAI/tree/main/spokenwoz",
+      "platform": "huggingface",
+      "repo_id": "ssz1111/SpokenWOZ-Test-Text-Fixed",
+      "source_url": "https://huggingface.co/datasets/ssz1111/SpokenWOZ-Test-Text-Fixed",
       "asset_kind": "spoken_dialogue_corpus",
       "independent_source_id": "SPOKENWOZ",
       "workload_tags": [
@@ -5761,14 +5991,14 @@
       "provenance": "author_release",
       "fitness_status": "VARIABLES_REQUIRE_ASSET_INSPECTION",
       "discovery_status": "ENTRY_IDENTIFIED",
-      "revision": null,
-      "files": [],
+      "revision": "d6c2d9e53b1005e327db582d327b69311092eb65", "identity_note": "pragma: allowlist secret - publisher-linked original test release",
+      "files": [{"path":"data.json","url":"https://huggingface.co/datasets/ssz1111/SpokenWOZ-Test-Text-Fixed/resolve/d6c2d9e53b1005e327db582d327b69311092eb65/data.json","bytes":52233254,"sha256":"96b6ff493a8294ffaf03021c024ef4aa2bfe92f980b84c029c81f2aa0f07f728","role":"data","identity_note":"pragma: allowlist secret - original publisher LFS identity"}], "publisher_metadata_acquisition":{"registered_file_roles":["data"],"boundary":"Publisher project links this fixed public test JSON; not hidden leaderboard, audio, models or native execution."},
       "unit": "source_rows",
       "provenance_kind": "spoken_dialogue_corpus",
       "access": {
-        "license": null,
-        "gated": null,
-        "note": "Verify publisher terms before acquisition or redistribution"
+        "license": "CC-BY-NC-4.0",
+        "gated": false,
+        "note": "Publisher project links public test release; academic/noncommercial conditions, no audio or hidden leaderboard reproduction claim"
       },
       "metadata_snapshot": "public-source-metadata-v0.5; not a fresh web check"
     },
@@ -6029,8 +6259,17 @@
       "provenance": "author_release",
       "fitness_status": "VARIABLES_REQUIRE_ASSET_INSPECTION",
       "discovery_status": "ENTRY_IDENTIFIED",
-      "revision": null,
-      "files": [],
+      "revision": "b7b5b8c890cd30e35427348bb9eb8c6d1350ca7c", "revision_identity_note": "pragma: allowlist secret - public author source revision",
+      "dataset_revision": "sha256:00636695dabed6b5f4b8328a16b13e069a2f16591d5efcce57660669c85b121b",
+      "revision_scope": "Code revision identifies author protocol; dataset archive/file SHA256 identities are receiver-observed, not publisher-signed checksums. Original public Drive acquisition is separate from reading.",
+      "files": [
+        {"path": "train_spider.json", "sha256": "c43d0d72e59e1a9e1a60837da9bf70d5a6277226bdb7f634d544f380646f527a", "rows": 7000, "format": "json", "role": "data", "identity_note": "pragma: allowlist secret - public original file identity"},
+        {"path": "train_others.json", "sha256": "7adb04af470b3c9be653504e03c9a36c1b963a861f308ecf25d436472284e10f", "rows": 1659, "format": "json", "role": "data", "identity_note": "pragma: allowlist secret - public original file identity"},
+        {"path": "dev.json", "sha256": "30d64a3fccde493226df79687aed9e4a1c0129525baf44f29c0573d914d758a4", "rows": 1034, "format": "json", "role": "data", "identity_note": "pragma: allowlist secret - public original file identity"},
+        {"path": "test.json", "sha256": "ce9b3d20429b2f57f49fb3c06c83c0f73880a35cd2bdb43665c4d3ffc491761b", "rows": 2147, "format": "json", "role": "data", "identity_note": "pragma: allowlist secret - public original file identity"},
+        {"path": "tables.json", "sha256": "61bb20aa401f03164e2d7f3b16509b7b5f79cc9c943ca7bd159046df1159e2ed", "rows": 166, "format": "json", "role": "native_environment", "identity_note": "pragma: allowlist secret - public original file identity"},
+        {"path": "test_tables.json", "sha256": "7760883d07453737f70aa5ff4c21fb4e14d2a77c06a063a3c023f4905b7faee0", "rows": 206, "format": "json", "role": "native_environment", "identity_note": "pragma: allowlist secret - public original file identity"}
+      ],
       "unit": "source_rows",
       "provenance_kind": "text_to_sql_corpus",
       "access": {
@@ -6370,6 +6609,72 @@
       "files_resource": "copilot_source_files_v1.json",
       "native_reference_command": "python scripts/prepare_copilot_original_assets.py --output /private/copilot --execute",
       "boundary": "Metadata asset, not original-request replay or coding task benchmark. Retain entire sessions, turns, call/tool relations and anonymous model labels. No prompts, code, model/tool outputs, inferred KV block identities or research analysis. Original source order is not a global request arrival order."
+    },
+    "DRAGON_PUBLIC": {
+      "source_id":"DRAGON_PUBLIC", "platform":"author_release",
+      "repo_id":"RussianNLP/DRAGON", "source_url":"https://github.com/RussianNLP/DRAGON",
+      "revision":"687165a93638270e8138eac168e7f58ba9a93683", "identity_note":"pragma: allowlist secret - pinned original publisher protocol revision",
+      "asset_kind":"author_published_versioned_rag_assets",
+      "unit":"same_release_original_question_and_corpus_relations",
+      "provenance_kind":"author_release", "workload_tags":["evolving-corpus-rag"],
+      "access":{"gated":false,"license":"Apache-2.0 datasets; MIT protocol repository","note":"Official unauthenticated metadata confirms all four same-tag datasets, including private-named reference QA/texts, publicly accessible. Check original publisher/upstream attribution; do not infer access from names, redistribute original bodies or claim production event traces."},
+      "files":[], "files_resource":"dragon_original_files_v1.json",
+      "publisher_metadata_acquisition":{"kind":"same_tag_original_hf_release","release_tag":"1.15.0","registered_file_roles":["data","native_environment"],"scope":"Full four-file fixed snapshot acquisition only, not native retrieval/generation/scoring or temporal event replay."},
+      "boundary":"Original questions separate from reference QA and reference text mapping. Same-tag snapshots are not per-document update/delete events. Existing DRAGON_PUBLIC delivery item only; original native execution/provider/research integration still pending."
+    },
+    "LIBRITTS": {
+      "source_id": "LIBRITTS", "platform": "publisher", "repo_id": "openslr/60", "source_url": "https://www.openslr.org/60/", "revision": "original-test-other",
+      "asset_kind": "original_multispeaker_text_reference_audio_pairs", "unit": "utterance", "provenance_kind": "publisher_release", "workload_tags": ["text_to_speech"],
+      "files": [{"path": "test-other.tar.gz", "role": "data", "bytes": 964502297, "url": "https://www.openslr.org/resources/60/test-other.tar.gz", "sha256": "33a5342094f3bba7ccc2e0500b9e72d558f72eb99328ac8debe1d9080402f10d", "identity_note": "pragma: allowlist secret - pinned official TorchAudio archive checksum"}],
+      "boundary": "CC BY4.0 original LibriTTS, not LibriSpeech ASR or LibriTTS-R. Candidate adapter only until original acquisition/readback verification; no native synthesis or scoring inferred."
+    },
+    "LJSPEECH": {
+      "source_id": "LJSPEECH", "platform": "publisher", "repo_id": "keithito/LJSpeech-1.1",
+      "source_url": "https://keithito.com/LJ-Speech-Dataset/", "revision": "1.1",
+      "asset_kind": "original_text_reference_audio_pairs", "unit": "utterance",
+      "provenance_kind": "publisher_release", "workload_tags": ["text_to_speech"],
+      "files": [{"path": "LJSpeech-1.1.tar.bz2", "role": "data", "rows": 13100, "bytes": 2748572632,
+        "url": "https://data.keithito.com/data/speech/LJSpeech-1.1.tar.bz2",
+        "sha256": "be1a30453f28eb8dd26af4101ae40cbf2c50413b1bb21936cbcdc6fae3de8aa5", "identity_note": "pragma: allowlist secret - original checksum published in TorchAudio v2.8.0 LJSPEECH dataset loader"}],
+      "boundary": "Original corpus acquisition/reading only; no synthesized audio or native model/scoring completion. WAV remains reference-side."
+    },
+    "TEMPORALWIKI": {
+      "source_id": "TEMPORALWIKI",
+      "platform": "github",
+      "repo_id": "joeljang/temporalwiki",
+      "source_url": "https://github.com/joeljang/temporalwiki",
+      "revision": "0fc291a63beabbe56620c794fa67ee96076e684a", "identity_note": "pragma: allowlist secret - pinned original publisher protocol revision",
+      "asset_kind": "evolving_corpus_and_original_probe_evaluation",
+      "unit": "original_corpus_or_probe_rows",
+      "provenance_kind": "author_release",
+      "workload_tags": ["evolving-corpus-rag", "continual_knowledge_evaluation"],
+      "files": [],
+      "author_source_pins": "configs/workload-native/temporalwiki-author-source.json",
+      "files_resource": "temporalwiki_original_probe_files_v1.json",
+      "dataset_repo": "seonghyeonye/TemporalWiki",
+      "dataset_revision": "b58cf6dd919f873c76ef1232aac16a31d135e2ff", "data_identity_note": "pragma: allowlist secret - original publisher probe upload revision",
+      "access": {"license": null, "gated": null, "note": "No LICENSE file in pinned code tree. Original software is acquired externally only; code and Wikipedia-derived dataset redistribution terms must be checked separately. Public dataset page does not establish an unrestricted license."},
+      "boundary": "177 original software/configuration files verified externally, not task data or model execution. Preserve distinct full corpus, difference sets and subject/relation/object probes. Original configurations use checkpoint-based CUDA perplexity/evaluation, not a replacement chat QA or fabricated update stream. Entire fixed probe archive and8 original dated CSVs35948 triple rows/adapter/index plus24 current-research readbacks verified via candidate source. Actual CI software installation and complete NPU-compatible original execution remain pending; full/difference corpus archives are not acquired."
+    },
+    "STREAMINGBENCH": {
+      "source_id": "STREAMINGBENCH", "platform": "github",
+      "repo_id": "THUNLP-MT/StreamingBench",
+      "source_url": "https://github.com/THUNLP-MT/StreamingBench",
+      "revision": "89299232c4cc1cc3721951173c5f107b48cf6877", "revision_note": "pragma: allowlist secret - immutable original question-file revision",
+      "unit": "original_video_question_group_preserving_nested_sequential_questions",
+      "provenance_kind": "publisher_original_question_files_with_offline_and_streaming_variants_not_disjoint_tasks",
+      "publisher_metadata_acquisition": {"registered_file_roles":["data"]},
+      "license": "Author repository MIT; video/source media rights remain separate",
+      "files": [
+        {"path":"src/data/questions_omni.json","bytes":1716029,"git_blob":"70c306988303133328894da8ffb62638e8b82c8e","sha256":"e2a769c22aa925abc76df7499fcb56aebf77317d12e1b743d8865801671fb016","role":"data","rows":1500,"url":"https://raw.githubusercontent.com/THUNLP-MT/StreamingBench/89299232c4cc1cc3721951173c5f107b48cf6877/src/data/questions_omni.json","identity_note":"pragma: allowlist secret - verified original publisher question file identity"},
+        {"path":"src/data/questions_omni_stream.json","bytes":1661445,"git_blob":"320a7070f745d1586b653300cc2524c43882d801","sha256":"7dd3b6ee2ec8e0e38cef9c8c57a9a753952f274f0ecc1e30e61a3c7bafccfd83","role":"data","rows":300,"url":"https://raw.githubusercontent.com/THUNLP-MT/StreamingBench/89299232c4cc1cc3721951173c5f107b48cf6877/src/data/questions_omni_stream.json","identity_note":"pragma: allowlist secret - verified original publisher question file identity"},
+        {"path":"src/data/questions_proactive.json","bytes":141217,"git_blob":"dab098ab166dd32ce43940180c80869565855cb4","sha256":"e17db411762c643afa70c17895871bf3e9d20b2119890889034ee31fb96a590d","role":"data","rows":248,"url":"https://raw.githubusercontent.com/THUNLP-MT/StreamingBench/89299232c4cc1cc3721951173c5f107b48cf6877/src/data/questions_proactive.json","identity_note":"pragma: allowlist secret - verified original publisher question file identity"},
+        {"path":"src/data/questions_proactive_50.json","bytes":28690,"git_blob":"efeb464685b56df0e447a218f1841e3bbcee1499","sha256":"e1800732fbed5605c4b965e2312496f414a13c8245ed7062acffdcd7901d5bd8","role":"data","rows":50,"url":"https://raw.githubusercontent.com/THUNLP-MT/StreamingBench/89299232c4cc1cc3721951173c5f107b48cf6877/src/data/questions_proactive_50.json","identity_note":"pragma: allowlist secret - verified original publisher question file identity"},
+        {"path":"src/data/questions_real.json","bytes":4095077,"git_blob":"70cb533395680c89637910ae07d0d57022b2f525","sha256":"64ca14052205a240ccc5391dd6d1784dac3c11ed86e0f0aa2eac3176ab56329a","role":"data","rows":2252,"url":"https://raw.githubusercontent.com/THUNLP-MT/StreamingBench/89299232c4cc1cc3721951173c5f107b48cf6877/src/data/questions_real.json","identity_note":"pragma: allowlist secret - verified original publisher question file identity"},
+        {"path":"src/data/questions_real_stream.json","bytes":1761478,"git_blob":"fb1836ddb8ba42fd406ad1ddabdfd9d58bc98c42","sha256":"b566c2b3f3cd38e0fe53375841eb4fe7f6a43fc3d724afb448f164f4aa968c4f","role":"data","rows":498,"url":"https://raw.githubusercontent.com/THUNLP-MT/StreamingBench/89299232c4cc1cc3721951173c5f107b48cf6877/src/data/questions_real_stream.json","identity_note":"pragma: allowlist secret - verified original publisher question file identity"},
+        {"path":"src/data/questions_sqa.json","bytes":188598,"git_blob":"210b31c70e0b2074954134ab4f66686d07c95da5","sha256":"ea0be61f17313c72fb8994d16a0f6378c4a91c978857c5b3f723cf8311312a2d","role":"data","rows":50,"url":"https://raw.githubusercontent.com/THUNLP-MT/StreamingBench/89299232c4cc1cc3721951173c5f107b48cf6877/src/data/questions_sqa.json","identity_note":"pragma: allowlist secret - verified original publisher question file identity"},
+        {"path":"src/data/questions_sqa_stream.json","bytes":159621,"git_blob":"3e852ca65e41f7ec847fd79bf336a7be8fd4495d","sha256":"0ce40f9c5b78a86d59dd67e23a2cda0f7977fac1f855d6ba30186f13e36402db","role":"data","rows":50,"url":"https://raw.githubusercontent.com/THUNLP-MT/StreamingBench/89299232c4cc1cc3721951173c5f107b48cf6877/src/data/questions_sqa_stream.json","identity_note":"pragma: allowlist secret - verified original publisher question file identity"}
+      ]
     }
   }
 }

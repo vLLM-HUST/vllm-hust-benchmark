@@ -1,4 +1,4 @@
-"""Pinned official StructEval JSON tasks, original workflow and scorer, local NPU API."""
+"""Pinned StructEval original tasks/scorer with explicit isolated render dispatch."""
 
 import argparse
 import asyncio
@@ -12,17 +12,24 @@ import zipfile
 
 
 def select_original_rows(
-    rows, input_type="Text", output_type="JSON", *, start=0, count=3, full=False
+    rows,
+    input_type="Text",
+    output_type="JSON",
+    *,
+    start=0,
+    count=3,
+    full=False,
+    rendering=False,
 ):
     available = [
         (index, row)
         for index, row in enumerate(rows)
         if row["input_type"] == input_type
         and row["output_type"] == output_type
-        and not row["rendering"]
+        and row["rendering"] == rendering
     ]
     if not available:
-        raise ValueError("no original non-rendering tasks for selected protocol")
+        raise ValueError("no original tasks for selected protocol")
     if full:
         if start != 0 or count != 3:
             raise ValueError("full selection cannot be combined with range")
@@ -42,17 +49,49 @@ def main():
     parser.add_argument(
         "--input-type",
         default="Text",
-        choices=["Text", "CSV", "JSON", "XML", "YAML", "TOML"],
+        choices=[
+            "Text",
+            "CSV",
+            "JSON",
+            "XML",
+            "YAML",
+            "TOML",
+            "HTML",
+            "Markdown",
+            "React",
+            "Vue",
+            "Matplotlib",
+        ],
     )
     parser.add_argument(
-        "--output-type", default="JSON", choices=["CSV", "JSON", "XML", "YAML", "TOML"]
+        "--output-type",
+        default="JSON",
+        choices=[
+            "CSV",
+            "JSON",
+            "XML",
+            "YAML",
+            "TOML",
+            "Matplotlib",
+            "Typst",
+            "SVG",
+            "HTML",
+            "Canvas",
+            "Markdown",
+            "Latex",
+            "Tikz",
+            "TikZ",
+        ],
     )
+    parser.add_argument("--render-queue", type=Path)
+    parser.add_argument("--render-image")
+    parser.add_argument("--disable-thinking", action="store_true")
     parser.add_argument("--start", type=int, default=0)
     parser.add_argument("--count", type=int, default=3)
     parser.add_argument(
         "--all-selected",
         action="store_true",
-        help="All original rows of the explicit non-rendering protocol",
+        help="All original rows of the explicit protocol",
     )
     parser.add_argument(
         "--all-json",
@@ -60,6 +99,23 @@ def main():
         help="All original Text-to-JSON tasks only; excludes format-to-JSON conversions",
     )
     args = parser.parse_args()
+    rendering = args.output_type in {
+        "Matplotlib",
+        "Typst",
+        "SVG",
+        "HTML",
+        "Canvas",
+        "Markdown",
+        "Latex",
+        "Tikz",
+        "TikZ",
+    }
+    if rendering != bool(args.render_queue and args.render_image):
+        parser.error(
+            f"{args.output_type} requires both private render queue and pinned image"
+        )
+    if not rendering and (args.render_queue or args.render_image):
+        parser.error("render dispatch requires an explicitly supported render protocol")
     if args.all_json and (args.input_type != "Text" or args.output_type != "JSON"):
         parser.error("--all-json is only the historical Text-to-JSON selection")
     url = urlparse(args.endpoint)
@@ -102,18 +158,98 @@ def main():
         start=args.start,
         count=args.count,
         full=args.all_json or args.all_selected,
+        rendering=rendering,
     )
     dataset = args.output / "original-selected.private.json"
     dataset.write_text(json.dumps([r for _, r in selected]), encoding="utf-8")
     model = "openai/" + args.model
     original_acompletion = litellm.acompletion
+    audit_root = args.output / "model-transport-private"
+    audit_root.mkdir(mode=0o700)
+    call_number = 0
 
     async def local_only(*positional, **kwargs):
+        nonlocal call_number
         if kwargs.get("model") != model or kwargs.get("api_base") != args.endpoint:
             raise RuntimeError("unapproved model or external judge refused")
-        return await original_acompletion(*positional, **kwargs)
+        if args.disable_thinking:
+            extra = kwargs.setdefault("extra_body", {})
+            if "chat_template_kwargs" in extra:
+                raise ValueError(
+                    "do not overwrite existing native template configuration"
+                )
+            extra["chat_template_kwargs"] = {"enable_thinking": False}
+        call_number += 1
+        call_id = str(call_number).zfill(6)
+        (audit_root / (call_id + ".request.json")).write_text(
+            json.dumps(
+                {"positional": positional, "kwargs": kwargs}, ensure_ascii=False
+            ),
+            encoding="utf-8",
+        )
+        try:
+            response = await original_acompletion(*positional, **kwargs)
+        except Exception as error:
+            (audit_root / (call_id + ".error.json")).write_text(
+                json.dumps({"error_type": type(error).__name__}), encoding="utf-8"
+            )
+            raise
+        (audit_root / (call_id + ".response.json")).write_text(
+            response.model_dump_json(), encoding="utf-8"
+        )
+        return response
 
     litellm.acompletion = local_only
+    queue = None
+    if rendering:
+        import structeval.render_engine.main as render_main
+        from structeval_render_queue import (
+            CanvasRenderQueue,
+            HtmlRenderQueue,
+            LatexRenderQueue,
+            MarkdownRenderQueue,
+            MatplotlibRenderQueue,
+            SvgRenderQueue,
+            TypstRenderQueue,
+        )
+
+        queue_class = {
+            "Typst": TypstRenderQueue,
+            "Matplotlib": MatplotlibRenderQueue,
+            "SVG": SvgRenderQueue,
+            "HTML": HtmlRenderQueue,
+            "Canvas": CanvasRenderQueue,
+            "Markdown": MarkdownRenderQueue,
+            "Latex": LatexRenderQueue,
+            "Tikz": LatexRenderQueue,
+            "TikZ": LatexRenderQueue,
+        }[args.output_type]
+        queue = queue_class(
+            args.render_queue,
+            image_root=args.output / "official-workflow" / "images",
+            image=args.render_image,
+            timeout=900,
+        )
+        if args.output_type in {"SVG", "HTML", "Canvas", "Markdown"}:
+
+            async def remote_browser(task_id, parsed_code, img_output_path):
+                return await asyncio.to_thread(
+                    queue.render, task_id, parsed_code, img_output_path
+                )
+
+            render_main.ASYNC_RENDERERS[args.output_type.lower()] = remote_browser
+        elif args.output_type in {"Latex", "Tikz", "TikZ"}:
+            render_main.render_latex_to_png = queue.render
+        else:
+            render_main.THREAD_RENDERERS[args.output_type.lower()] = queue.render
+        original_render_file = workflow.render_file_async
+
+        async def guarded_render(**kwargs):
+            result = await original_render_file(**kwargs)
+            queue.require_ready_for_judge()
+            return result
+
+        workflow.render_file_async = guarded_render
     receipt = {
         "source_id": "STRUCTEVAL",
         "source_revision": "936be10548688c6d417cd435dd906158f19ba14b",  # pragma: allowlist secret - public dataset revision
@@ -124,16 +260,20 @@ def main():
         "selected_protocol": {
             "input_type": args.input_type,
             "output_type": args.output_type,
-            "rendering": False,
+            "rendering": rendering,
         },
         "available_selected_protocol_tasks": available,
-        "selection": "explicit non-rendering protocol and original order/range, fixed before model calls",
+        "selection": "explicit protocol and original order/range, fixed before model calls",
         "model": args.model,
         "temperature": 0.0,
         "max_tokens": None,
         "prompt": "official build_prompt(query) including original official code markers",
-        "scorer": "official syntax and path validation, no vision/LLM judge",
+        "scorer": "official complete VQA and final evaluation"
+        if rendering
+        else "official syntax and path validation, no vision/LLM judge",
         "status": "STARTED",
+        "thinking_explicitly_disabled": args.disable_thinking,
+        "render_dispatch_only_original_parser_and_vqa_unchanged": rendering,
         "started_at_unix": time.time(),
         "all_text_to_json_requested": args.all_json,
     }
@@ -145,7 +285,7 @@ def main():
                 dataset=dataset,
                 output_dir=args.output / "official-workflow",
                 model=model,
-                judge_model=None,
+                judge_model=model if rendering else None,
                 concurrency=1,
                 render_concurrency=1,
                 temperature=0.0,
@@ -157,6 +297,12 @@ def main():
                     "api_key": "local-unused"  # pragma: allowlist secret - dummy loopback key
                 },  # pragma: allowlist secret - dummy loopback key
                 split="full",
+                judge_api_base=args.endpoint if rendering else None,
+                judge_litellm_params={
+                    "api_key": "local-unused"  # pragma: allowlist secret - dummy loopback key
+                }
+                if rendering
+                else None,  # pragma: allowlist secret - dummy loopback key
             )
         )
         scored = json.loads(Path(result["evaluation"]).read_text())
@@ -165,6 +311,8 @@ def main():
         receipt.update(
             status="END_TO_END_EXECUTED_AND_SCORED",
             unique_tasks=len(scored),
+            model_transport_calls=call_number,
+            render_dispatch_receipts=queue.receipts if queue else [],
             tasks=[
                 {
                     k: r.get(k)

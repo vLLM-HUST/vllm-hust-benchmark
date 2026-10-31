@@ -67,6 +67,21 @@ def test_missing_delivery_receipt_prevents_completion_count():
         runner.summarize(changed)
 
 
+def test_current_checked_receipts_are_real_contained_json_and_source_bound():
+    # Custody/consistency only. This cannot replace source-specific native audits.
+    for source_id, row in ledger()["delivery_inventory"].items():
+        if not row["checked"]:
+            continue
+        receipt_path = (ROOT / row["delivery_receipt"]).resolve(strict=True)
+        assert receipt_path.is_relative_to(ROOT)
+        assert receipt_path.is_file() and receipt_path.suffix == ".json"
+        receipt = json.loads(receipt_path.read_text("utf-8"))
+        assert isinstance(receipt, dict)
+        # Shared multi-source receipts are allowed, but must name this source.
+        assert json.dumps(source_id) in json.dumps(receipt)
+        assert receipt.get("source_checkbox_eligible") is not False
+
+
 def test_scope_or_checkbox_drift_is_rejected():
     changed = ledger()
     row = next(
