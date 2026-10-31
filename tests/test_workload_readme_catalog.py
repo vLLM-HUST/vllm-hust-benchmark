@@ -35,6 +35,7 @@ def test_readme_workload_catalog_covers_exact_delivery_scope():
         if item["checked"]:
             assert "[x] 已交付" in row
             assert item["delivery_receipt"] in row
+            assert "入口索引待补" not in row
         else:
             assert "[x]" not in row
         if source.startswith("PAIO-"):

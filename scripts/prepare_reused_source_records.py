@@ -18,7 +18,7 @@ MAPPINGS = {
 }
 DIALOGUE_SOURCES = {"WILDCHAT", "ULTRACHAT", "LMSYS_CHAT", "TULU3", "OPENTHOUGHTS3"}
 NATIVE_FIELD_SOURCES = {"REPOBENCH", "DOCVQA", "OPENMATH2", "OPENCODE"}
-TRACE_METADATA_SOURCES = {"AZURE_LMM_2025", "COPILOT_AGENT_2026"}
+TRACE_METADATA_SOURCES = {"AZURE_LLM", "AZURE_LMM_2025", "COPILOT_AGENT_2026"}
 INFINITE_MAPPINGS = {
     kind: ROOT
     / f"configs/workload-native/reused-source-mappings/infinitebench-{kind}.json"
@@ -94,7 +94,9 @@ def prepare(source_id, *, data_root, output, files=None, limit=None, catalog_roo
         raise ValueError(
             "catalog revision differs from reviewed mapping; re-review required"
         )
-    original_role = "data" if source_id in {"OPENMATH2", "OPENCODE"} else "raw_source"
+    original_role = (
+        "data" if source_id in {"OPENMATH2", "OPENCODE", "AZURE_LLM"} else "raw_source"
+    )
     registered = {
         item["path"] for item in source["files"] if item["role"] == original_role
     }

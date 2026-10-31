@@ -1163,6 +1163,14 @@ CRC和归档目录身份另行记录。完整102题仍可从发布方原归档�
 
 通信模块尚未接入原Agent的价格和tokenizer路径，不能用GPT别名、虚构单价或“成本为零”绕过价格表；未知价格应报告不可得，完整Agent绑定仍待完成。另检查了[官方OpenHands legacy入口](https://github.com/OpenHands/benchmarks/blob/542cb71c860c11d6a70238a1dd4b4ac7a3e0d4d2/legacy/scienceagentbench/run_infer.py)：它仍默认读取validation，旧镜像上下文还复制整个benchmark目录，不能直接当作本次verified数据与隔离部署已就绪的依据。未拉取旧镜像，也未切换到未经验证的替代流程。
 
+## Azure 服务轨迹（仅原始数据资产，不是原 prompt 回放）
+
+`AZURE_LLM`是2023年code/conversation两份原CSV（28185条），`AZURE_LMM_2025`是2025年多模态服务元数据（1000000条）。两者不含原prompt/媒体，不能自编prompt冒充原请求，也不能据此声称模型质量或原生推理性能。后者不是视觉任务评测集。已有完整数据验证和索引证据保留，不因本次修复入口重复计数。
+
+以2023年资产为例：`python scripts/prepare_reused_research_assets.py AZURE_LLM`默认只计划；显式加`--mode download --data-root /srv/datasets/azure-2023 --max-bytes 1039305`获取原文件，已有文件改用`--mode verify --data-root /srv/datasets/azure-2023`。然后运行`python scripts/prepare_reused_source_records.py AZURE_LLM --data-root /srv/datasets/azure-2023 --output /srv/prepared/azure-2023`生成仅含引用的全量索引；若只验证单文件原前三条，显式指定`--files AzureLLMInferenceTrace_code.csv --limit 3`并用另一个全新输出目录。2025年将来源改为`AZURE_LMM_2025`，下载预算为8524196字节。两者共用既有公共入口，不额外创建合成负载或研究观测。
+
+本次修复了2023年缺少显式获取角色、便捷准备入口未接入data角色的问题；服务器公开verify与两份各原前三条prepare/resolve均通过，共6条仍为`request_metadata`，`request_body()`明确拒绝。回执`/root/azure-2023-public-entry-20261031-001/qualification-public.json`；使用当前脚本/目录和此前成功CI安装的provider，不冒充本次新CI工件验证。
+
 ## StreamingBench 原生流视频评测（仅软件准备，尚未完成原生验证）
 
 官方源码固定到

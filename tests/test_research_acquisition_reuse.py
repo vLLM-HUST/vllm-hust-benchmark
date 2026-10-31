@@ -63,6 +63,17 @@ def test_ovobench_metadata_is_accepted_by_public_acquisition_entry():
     assert files[0]["rows"] == 1640
 
 
+def test_azure_2023_serving_metadata_has_explicit_original_acquisition_profile():
+    source, files = runner.selection("AZURE_LLM")
+    assert source["publisher_metadata_acquisition"]["registered_file_roles"] == ["data"]
+    assert {item["path"] for item in files} == {
+        "AzureLLMInferenceTrace_code.csv",
+        "AzureLLMInferenceTrace_conv.csv",
+    }
+    assert sum(item["bytes"] for item in files) == 1039305
+    assert sum(item["rows"] for item in files) == 28185
+
+
 def test_mind2web_original_assets_use_existing_acquisition_roles():
     source, files = runner.selection("MIND2WEB")
     assert [item["path"] for item in files] == ["test.zip", "scores_all_data.pkl"]
