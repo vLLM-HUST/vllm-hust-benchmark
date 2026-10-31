@@ -1204,7 +1204,51 @@ stream结果强转成SQA嵌套输入；这部分尚未核验，不计完成。
 
 后续必须遵循[官方流程](https://github.com/THUNLP-MT/StreamingBench)：原数据按real/omni/sqa/proactive组织，依次使用`preprocess.sh`、`eval.sh`、`stats.sh`，保留原视频组与时间戳。SQA原实现把前序参考答案加入后续上下文；主动响应原实现逐秒查询到参考时间+4秒，不能简化成单次问答。官方Qwen2-VL-7B包装器采用自适应1/0.5/0.2fps和128输出预算，但写死CUDA与flash_attention_2；当前尚无已验证NPU绑定。剩余原始媒体、原生推理/评分及原生结果消费仍待补，来源不打勾。
 
-## OVO-Bench 原生在线视频评测（软件准备入口，尚未完成原生验证）
+## OVO-Bench 原生在线视频评测（固定抽样原生验证完成）
+
+### NPU 运行与评分
+
+已验证的模型为官方支持的 `Qwen/Qwen2-VL-7B-Instruct`，固定修订 `eed13092ef92e448dd6875b2a00151bd3f7db0ac`；14份必要文件的身份见
+`configs/workload-native/ovobench-qwen2-vl-7b-model-pins.json`。服务器环境为 Python 3.12.13、torch
+2.10.0+cpu、torch-npu 2.10.0.post4、transformers 5.5.4，配合隔离安装的 qwen-vl-utils 0.0.8、Decord 0.6.0 和
+FFmpeg 4.4.8。这里的 torch wheel 标签不代表使用 CPU 推理：实际模型参数驻留 NPU。应复用匹配的 Ascend/CANN 环境，保留原有 CANN Python
+与动态库路径，将视频依赖加入独立 overlay，不覆盖共享环境。
+
+先按本节准备作者源码、注释、模型及完整原片段，再运行：
+
+```bash
+python scripts/run_ovobench_original_npu.py \
+  --author-root /srv/software/ovo-author \
+  --data-root /srv/datasets/ovobench \
+  --media-root /srv/datasets/ovo-original-clips \
+  --model-root /srv/models/Qwen2-VL-7B-Instruct \
+  --model-revision eed13092ef92e448dd6875b2a00151bd3f7db0ac \
+  --device npu:0 --output /srv/results/ovo-fixed3-new
+```
+
+输出目录必须是新目录。默认保留12类各原前三题，共36个case及全部103个响应阶段。入口复用作者原任务控制器、提示词和评分器；仅将设备与注意力实现绑定到
+NPU/eager，并把原模型返回的单元素文本列表无损转换为同一字符串供原评分器使用，原始列表响应另行保留。不提取答案、不修改参考或计分规则。帧数上限64，短片段沿用原
+`min(64, frame_count-2)`，生成预算128 token，`max_pixels=360*420`。
+
+全量准备可用
+`python scripts/prepare_ovobench_native_selection.py --data-root /srv/datasets/ovobench --full --output /srv/datasets/ovo-full-plan-new`；全量推理在上述命令增加
+`--full`，需要全部1640个原case对应的3035份完整原切分片段。原预切分归档来自官方数据修订
+`fec29e3385747b5642d995370143ba92d2819bd2`，15个分卷合计153277153280字节。分卷清单和发布方 LFS 身份见
+`ovobench-author-source.json` 的
+`media_archive_inventory`；可按原数据说明下载、拼接解包，并预留解包空间。`verify_ovobench_original_media.py` 的可选
+`--archive-root` 核验整分卷身份；默认 `--require-all`
+仅指已登记的103份固定抽样原片段，不能解释为3035份全量。全量入口对额外片段冻结实测输入哈希，这些不是发布方逐片段签发的哈希。
+
+已有原始预测只需评分时，无需重新部署或调用模型：
+
+```bash
+python scripts/score_ovobench_original_saved.py \
+  --author-root /srv/software/ovo-author \
+  --prediction-file /srv/results/ovo-old/results/QWen2VL_7B/predictions.json \
+  --model QWen2VL_7B --output /srv/results/ovo-score-new
+```
+
+实跑固定36题的103个响应全部取得，原评分47.04%；独立核算为47.0417853751187%，按任务、大类宏平均。首次运行在生成结束后因原评分器不接受单元素列表而失败，失败记录保留；后续仅做上述无损封装转换并重评分，新增模型调用为0。全量1640题目前只验证了选择计划与字段/阶段保真，没有全量模型成绩。后文保留的早期准备回执分别证明其对应阶段，不取代此处的原生实跑结论。
 
 [官方仓库](https://github.com/JoeLeelyf/OVO-Bench)当前修订版区分回溯、实时感知和向前主动响应，包含12种原生任务。复用已有作者软件获取器，固定45份原Python、shell、依赖说明和许可，不复制注释数据、视频或发布方模型结果进仓库：
 
@@ -1216,7 +1260,7 @@ python scripts/prepare_jsonschemabench_author_source.py --source ovobench \
   --author-root /srv/benchmarks/ovo-author --action prepare --max-bytes 79170
 ```
 
-原始注释入口是`data/ovo_bench_new.json`；固定原文件918443字节、1640个原始case对应644个视频名。向前case包含多次查询，因此case数不等于官方介绍的查询数。原视频由[官方数据页](https://huggingface.co/datasets/JoeLeelyf/OVO-Bench)发布。官方说明提供约44GB原视频拼接包或约144GB预切分包，不能因体积大而用静态截图或自造prompt冒充完整任务。目前固定抽样的103/103份完整原片段均已取得并公开登记身份；原NPU模型、原帧处理、真实推理和评分尚未完成，不能按下述推理示例声称已跑通。
+原始注释入口是`data/ovo_bench_new.json`；固定原文件918443字节、1640个原始case对应644个视频名。向前case包含多次查询，因此case数不等于官方介绍的查询数。原视频由[官方数据页](https://huggingface.co/datasets/JoeLeelyf/OVO-Bench)发布。官方说明提供约44GB原视频拼接包或约144GB预切分包，不能因体积大而用静态截图或自造prompt冒充完整任务。目前固定抽样的103/103份完整原片段均已取得并公开登记身份；固定12类原前三题已用官方7B在NPU完成103响应，并经无损文本封装转换交给未修改原评分器完成评分；公开完整NPU入口与新CI工件仍待收口，不冒称全量或online模式已经验证。
 
 注释复用公共原始文件获取器，默认只显示计划，显式`--mode download`才下载，`--mode verify`核验已有原文件；不把数据放进仓库：
 
@@ -1612,4 +1656,5 @@ cd /srv/workloads/infinitebench-metric/scoring
 /srv/envs/infinitebench/bin/python /srv/vllm-hust-benchmark/scripts/run_infinitebench_original.py --official-checkout /srv/workloads/InfiniteBench-author --data-root /srv/workloads/infinitebench --output /srv/workloads/infinitebench-results-math --task math_calc --model Qwen/Qwen3-14B --template gpt4 --context-limit 131072 --request-timeout 3600 --count 3 --disable-thinking --endpoint http://127.0.0.1:19468/v1
 ```
 
-从`scoring`目录执行让原`evaluate.load("rouge")`按原标识解析到已校验的本地`rouge/rouge.py`，不改原评分器。`--request-timeout`默认600秒，只控制HTTP等待；长输出可以显式延长，原生成预算不变且自动重试仍为0。原模板标识与实际服务模型分别记录，评分器的模型参数使用实际绑定，不将本地Qwen结果当作GPT-4复现。当前math_calc原前三题仍在NPU执行，不能把环境/指标准备成功当作任务完成。
+从`scoring`目录执行让原`evaluate.load("rouge")`按原标识解析到已校验的本地`rouge/rouge.py`，不改原评分器。`--request-timeout`默认600秒，只控制HTTP等待；长输出可以显式延长，原生成预算不变且自动重试仍为0。原模板标识与实际服务模型分别记录，评分器的模型参数使用实际绑定，不将本地Qwen结果当作GPT-4复现。math_calc原前三题已在14B
+NPU服务保持原角色及30000-token预算完成，均达到预算，原与独立计分均为0；其他三个长书协议尚未完成，不增加来源完成数。

@@ -17,6 +17,28 @@ PROFILE = (
 )
 
 
+def verify_archives(root, inventory):
+    """Read-only publisher LFS verification of complete precut archive parts."""
+    parts = [
+        item
+        for item in inventory["parts"]
+        if item["path"].startswith("chunked_videos.tar.part")
+    ]
+    if not parts:
+        raise ValueError("pinned original precut archive inventory required")
+    return [
+        verify_file(
+            root,
+            {
+                "path": item["path"],
+                "bytes": item["bytes"],
+                "sha256": item["publisher_lfs_sha256"],
+            },
+        )
+        for item in parts
+    ]
+
+
 def verify(members, selection, media_root, *, decode=False):
     expected = {item["path"]: item for item in selection["required_native_clips"]}
     if len(expected) != selection["required_native_clip_count"]:
@@ -85,18 +107,28 @@ if __name__ == "__main__":
     parser.add_argument("--data-root", required=True, type=Path)
     parser.add_argument("--media-root", required=True, type=Path)
     parser.add_argument(
+        "--archive-root",
+        type=Path,
+        help="Also hash complete original precut parts against publisher LFS identities; large read-only I/O",
+    )
+    parser.add_argument(
         "--decode",
         action="store_true",
         help="Use an existing PyAV decoder; no automatic installation",
     )
     parser.add_argument("--require-all", action="store_true")
     args = parser.parse_args()
-    members = json.loads(PROFILE.read_text("utf-8"))["media_archive_inventory"][
-        "qualified_original_members"
-    ]
+    inventory = json.loads(PROFILE.read_text("utf-8"))["media_archive_inventory"]
+    members = inventory["qualified_original_members"]
     selection = prepare(args.data_root)
     if args.require_all and len(members) != selection["required_native_clip_count"]:
         parser.error(
             "fixed original media not all registered; no substitutions allowed"
         )
-    print(json.dumps(verify(members, selection, args.media_root, decode=args.decode)))
+    report = verify(members, selection, args.media_root, decode=args.decode)
+    if args.archive_root is not None:
+        report["verified_publisher_archive_parts"] = verify_archives(
+            args.archive_root, inventory
+        )
+        report["archive_member_to_every_extracted_clip_comparison_performed"] = False
+    print(json.dumps(report))

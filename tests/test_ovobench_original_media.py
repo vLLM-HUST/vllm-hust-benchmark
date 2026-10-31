@@ -19,6 +19,25 @@ finally:
     sys.path.pop(0)
 
 
+def test_original_archive_parts_are_verified_by_publisher_digest(tmp_path):
+    raw = b"invented archive fragment, not original media"
+    name = "chunked_videos.tar.partaa"
+    (tmp_path / name).write_bytes(raw)
+    inventory = {
+        "parts": [
+            {
+                "path": name,
+                "bytes": len(raw),
+                "publisher_lfs_sha256": hashlib.sha256(raw).hexdigest(),
+            }
+        ]
+    }
+    assert len(entry.verify_archives(tmp_path, inventory)) == 1
+    (tmp_path / name).write_bytes(b"x" * len(raw))
+    with pytest.raises(ValueError):
+        entry.verify_archives(tmp_path, inventory)
+
+
 def test_identity_only_does_not_import_codec_or_claim_full_scope(tmp_path, monkeypatch):
     raw = b"invented file fixture, not valid media"
     (tmp_path / "0.mp4").write_bytes(raw)

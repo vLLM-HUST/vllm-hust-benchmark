@@ -52,6 +52,15 @@ def test_every_first_three_keeps_all_fields_and_forward_stages():
         )
 
 
+def test_full_selection_keeps_every_original_case_and_all_stages():
+    rows = cases()
+    original = deepcopy(rows)
+    selected, clips = entry.fixed_selection(rows, full=True)
+    assert selected == original and rows == original and len(selected) == 48
+    assert len(clips) == 9 * 4 + 3 * 4 * 2
+    assert {item["case_id"] for item in clips} == {row["id"] for row in rows}
+
+
 def test_duplicate_or_missing_original_tasks_fail_not_replaced():
     rows = cases()
     with pytest.raises(ValueError, match="unique original"):
