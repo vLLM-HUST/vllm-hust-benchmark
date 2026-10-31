@@ -95,6 +95,24 @@ def transfer(member, archive, inventory, sink, *, opener=urlopen):
     }
 
 
+def verify_existing(member, inventory, media_root):
+    name = PurePosixPath(member["original_task_media_path"]).name
+    qualified = [
+        item
+        for item in inventory.get("qualified_original_members", [])
+        if item["path"] == name
+    ]
+    if len(qualified) != 1 or qualified[0]["bytes"] != member["bytes"]:
+        raise ValueError("existing original has no qualified SHA256; never overwrite")
+    report = verify_file(media_root, qualified[0])
+    return {
+        **report,
+        "file": name,
+        "existing_original_reused": True,
+        "network_fetch_executed": False,
+    }
+
+
 def download(member, archive, inventory, media_root, *, max_bytes):
     root = Path(media_root).resolve()
     if root.is_relative_to(PROFILE.parents[2]) or max_bytes < member["bytes"]:
@@ -107,8 +125,10 @@ def download(member, archive, inventory, media_root, *, max_bytes):
     root.mkdir(parents=True, exist_ok=True)
     target = root / name
     partial = target.with_name(target.name + ".partial")
-    if target.exists() or partial.exists():
+    if partial.exists():
         raise ValueError("inspect existing original/partial; never overwrite")
+    if target.exists():
+        return verify_existing(member, inventory, root)
     if shutil.disk_usage(root).free < member["bytes"] + 512 * 1024**2:
         raise ValueError("insufficient space including 512MiB reserve")
     with partial.open("xb") as stream:
@@ -132,7 +152,13 @@ if __name__ == "__main__":
     parser.add_argument(
         "--member", required=True, help="Exact registered native video basename"
     )
-    parser.add_argument("--download", action="store_true")
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument("--download", action="store_true")
+    mode.add_argument(
+        "--verify",
+        action="store_true",
+        help="Read-only qualified original SHA256 verification; no network",
+    )
     parser.add_argument("--media-root", type=Path)
     parser.add_argument("--max-bytes", type=int, default=0)
     args = parser.parse_args()
@@ -149,6 +175,10 @@ if __name__ == "__main__":
         item for item in inventory["archives"] if item["archive"] == member["archive"]
     )
     report = {"member": member, "archive_bytes": archive["bytes"]}
+    if args.verify:
+        if args.media_root is None:
+            parser.error("explicit existing --media-root required")
+        report = verify_existing(member, inventory, args.media_root)
     if args.download:
         if args.media_root is None:
             parser.error("explicit external --media-root required")
@@ -159,7 +189,9 @@ if __name__ == "__main__":
         json.dumps(
             {
                 "source_id": "STREAMINGBENCH",
-                "status": "ORIGINAL_MEDIA_PREPARED_NOT_NATIVE_EXECUTION"
+                "status": "ORIGINAL_MEDIA_VERIFIED_READ_ONLY_NOT_NATIVE_EXECUTION"
+                if args.verify
+                else "ORIGINAL_MEDIA_PREPARED_NOT_NATIVE_EXECUTION"
                 if args.download
                 else "PLAN_ONLY_NO_NETWORK",
                 **report,

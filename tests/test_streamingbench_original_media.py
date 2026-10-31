@@ -1,6 +1,7 @@
 """Invented ZIP fixtures only; no original dataset, video or model execution."""
 
 import importlib.util
+import hashlib
 import io
 from pathlib import Path
 import sys
@@ -112,3 +113,27 @@ def test_capacity_guard_precedes_network_and_existing_files_are_not_overwritten(
     with pytest.raises(ValueError, match="never overwrite"):
         runner.download(member, archive, inventory, tmp_path, max_bytes=member["bytes"])
     assert target.read_bytes() == b"keep"
+
+
+def test_qualified_existing_original_is_reused_without_network(tmp_path, monkeypatch):
+    payload, member, archive, inventory, _ = fixture()
+    name = "sample_1_real.mp4"
+    (tmp_path / name).write_bytes(payload)
+    inventory["qualified_original_members"] = [
+        {
+            "path": name,
+            "bytes": len(payload),
+            "sha256": hashlib.sha256(payload).hexdigest(),
+        }
+    ]
+    monkeypatch.setattr(
+        runner, "transfer", lambda *a, **kw: pytest.fail("must reuse original")
+    )
+    result = runner.download(
+        member, archive, inventory, tmp_path, max_bytes=len(payload)
+    )
+    assert result["existing_original_reused"] is True
+    assert result["network_fetch_executed"] is False
+    (tmp_path / name).write_bytes(b"changed")
+    with pytest.raises(ValueError):
+        runner.verify_existing(member, inventory, tmp_path)
