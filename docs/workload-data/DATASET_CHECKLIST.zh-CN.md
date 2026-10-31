@@ -32,6 +32,7 @@
 - [x] 公开读者入口在完整原检索日志上完成准备/分词核验，保留重复会话ID及全部文档多重集；原top10、JSON、双侧消息、CoN800预算及无额外截断。固定三题实际NPU生成退出0，输入34366/31034/30916
   tokens，三题均`stop`，不代表500题全量通过。
 - [ ] 原问答评分及精确工件/研究消费核验待完成。当前14B绑定使用原提示、原10-token评分预算，三个独立合成自检中空答案负例被判`yes`，因此不接受其正式分数，不反复重试凑通过。Oracle/S既有6条及M新增3条生成继续复用。本来源仍不打完成勾。机器证据入口：`dataset-validation-status.json`中的`LONGMEMEVAL.original_m_retrieval_progress`。
+- [x] 单列Qwen3.5-9B本地judge绑定的三个最小自检：等价正例、错误答案负例、空答案负例分别返回`yes/no/no`，均正常停止，保持原提示、10-token预算及yes子串解析。回执位于共享任务根`longmemeval-qa-judge9b-controls-20261031-001/controls-public.json`；这是3次合成接口自检，不计数据集任务、正式分数或官方70B/GPT-4 judge复现。原9条读者生成仍复用，公开评分入口及真实答案评分尚待补齐。
 
 ### Mind2Web（固定原题原生交付完成）
 

@@ -39,6 +39,10 @@ query不改；当前官方模型运行只读取query，因此既有Text→JSON�
 
 ## 运行
 
+传输参数与生成预算分别记录：`--request-timeout 300`控制单次HTTP超时，`--max-retries 0`控制官方客户端外层重试；入口显式关闭SDK内部重试，避免一次逻辑请求被隐式发送三次。这些参数不改变原题、`max_tokens=None`或评分规则。历史运行曾发生内部额外重试，原始失败记录保留，不改写为新配置实跑结果。取消且未收到响应的请求记录为结果未知，不能计作零分或未经核查自动重放。
+
+渲染任务的最新逐协议状态以[唯一打勾清单](DATASET_CHECKLIST.zh-CN.md)及[机器清单](dataset-validation-status.json)为准。Text→LaTeX全50题已完成审计；后续Text→TikZ传输失败，保留34份有效生成及一个结果未知请求，尚未完成该协议评分。已完成的生成不能因批次失败而全部重跑。
+
 ```sh
 python scripts/run_structeval_original_json.py \
   --data-file /authorized/StructEval/data/train-00000-of-00001.parquet \
