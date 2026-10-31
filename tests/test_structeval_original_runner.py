@@ -11,6 +11,49 @@ import pytest
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def test_selected_zero_retry_policy_reaches_sdk_without_changing_task_budget():
+    spec = importlib.util.spec_from_file_location(
+        "structeval_transport_control", ROOT / "scripts/run_structeval_original_json.py"
+    )
+    runner = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(runner)
+    original = {
+        "messages": [{"role": "user", "content": "unchanged fixture"}],
+        "max_tokens": None,
+        "temperature": 0,
+        "timeout": 300,
+    }
+    bound = runner.no_implicit_sdk_retries(original)
+    assert bound == {**original, "max_retries": 0, "num_retries": 0}
+    assert "max_retries" not in original and "num_retries" not in original
+    assert bound["messages"] is original["messages"]
+    for key in ("max_retries", "num_retries"):
+        with pytest.raises(ValueError, match="conflicting native retry"):
+            runner.no_implicit_sdk_retries({**original, key: 2})
+
+
+@pytest.mark.parametrize("value", ["0", "-1", "nan", "inf", "-inf"])
+def test_request_timeout_rejected_before_original_data_access(value, tmp_path):
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(ROOT / "scripts/run_structeval_original_json.py"),
+            "--data-file",
+            "absent",
+            "--official-archive",
+            "absent",
+            "--output",
+            str(tmp_path / "output"),
+            f"--request-timeout={value}",
+        ],
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 2
+    assert "finite positive request timeout" in result.stderr
+    assert not (tmp_path / "output").exists()
+
+
 @pytest.mark.parametrize(
     "output_type",
     [

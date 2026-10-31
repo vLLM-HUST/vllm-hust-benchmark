@@ -4,11 +4,27 @@ import argparse
 import asyncio
 import hashlib
 import json
+import math
 import os
 from pathlib import Path
 import time
 from urllib.parse import urlparse
 import zipfile
+
+
+def no_implicit_sdk_retries(kwargs):
+    """Honor the selected zero-retry run at both library and provider layers."""
+    for key in ("max_retries", "num_retries"):
+        if kwargs.get(key) not in (None, 0):
+            raise ValueError("conflicting native retry configuration; do not overwrite")
+    return {**kwargs, "max_retries": 0, "num_retries": 0}
+
+
+def positive_timeout(value):
+    result = float(value)
+    if not math.isfinite(result) or result <= 0:
+        raise argparse.ArgumentTypeError("finite positive request timeout required")
+    return result
 
 
 def select_original_rows(
@@ -46,6 +62,18 @@ def main():
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--endpoint", default="http://127.0.0.1:19466/v1")
     parser.add_argument("--model", default="workload-qwen35-27b-128k-nonthinking")
+    parser.add_argument(
+        "--request-timeout",
+        type=positive_timeout,
+        default=300,
+        help="HTTP transport timeout in seconds; does not change original output or step budgets",
+    )
+    parser.add_argument(
+        "--max-retries",
+        type=int,
+        default=0,
+        help="Explicit author client retries; hidden SDK retries remain disabled",
+    )
     parser.add_argument(
         "--input-type",
         default="Text",
@@ -99,6 +127,8 @@ def main():
         help="All original Text-to-JSON tasks only; excludes format-to-JSON conversions",
     )
     args = parser.parse_args()
+    if args.max_retries < 0:
+        parser.error("nonnegative explicit client retry count required")
     rendering = args.output_type in {
         "Matplotlib",
         "Typst",
@@ -172,6 +202,7 @@ def main():
         nonlocal call_number
         if kwargs.get("model") != model or kwargs.get("api_base") != args.endpoint:
             raise RuntimeError("unapproved model or external judge refused")
+        kwargs = no_implicit_sdk_retries(kwargs)
         if args.disable_thinking:
             extra = kwargs.setdefault("extra_body", {})
             if "chat_template_kwargs" in extra:
@@ -189,6 +220,18 @@ def main():
         )
         try:
             response = await original_acompletion(*positional, **kwargs)
+        except asyncio.CancelledError:
+            (audit_root / (call_id + ".error.json")).write_text(
+                json.dumps(
+                    {
+                        "error_type": "CancelledError",
+                        "completion_received": False,
+                        "model_outcome": "UNKNOWN_NOT_A_TASK_SCORE",
+                    }
+                ),
+                encoding="utf-8",
+            )
+            raise
         except Exception as error:
             (audit_root / (call_id + ".error.json")).write_text(
                 json.dumps({"error_type": type(error).__name__}), encoding="utf-8"
@@ -267,6 +310,9 @@ def main():
         "model": args.model,
         "temperature": 0.0,
         "max_tokens": None,
+        "request_timeout_seconds": args.request_timeout,
+        "outer_max_retries": args.max_retries,
+        "sdk_max_retries": 0,
         "prompt": "official build_prompt(query) including original official code markers",
         "scorer": "official complete VQA and final evaluation"
         if rendering
@@ -290,8 +336,8 @@ def main():
                 render_concurrency=1,
                 temperature=0.0,
                 max_tokens=None,
-                timeout=300,
-                max_retries=0,
+                timeout=args.request_timeout,
+                max_retries=args.max_retries,
                 api_base=args.endpoint,
                 litellm_params={
                     "api_key": "local-unused"  # pragma: allowlist secret - dummy loopback key
