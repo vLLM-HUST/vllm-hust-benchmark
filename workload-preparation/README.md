@@ -1169,7 +1169,7 @@ CRC和归档目录身份另行记录。完整102题仍可从发布方原归档�
 
 以2023年资产为例：`python scripts/prepare_reused_research_assets.py AZURE_LLM`默认只计划；显式加`--mode download --data-root /srv/datasets/azure-2023 --max-bytes 1039305`获取原文件，已有文件改用`--mode verify --data-root /srv/datasets/azure-2023`。然后运行`python scripts/prepare_reused_source_records.py AZURE_LLM --data-root /srv/datasets/azure-2023 --output /srv/prepared/azure-2023`生成仅含引用的全量索引；若只验证单文件原前三条，显式指定`--files AzureLLMInferenceTrace_code.csv --limit 3`并用另一个全新输出目录。2025年将来源改为`AZURE_LMM_2025`，下载预算为8524196字节。两者共用既有公共入口，不额外创建合成负载或研究观测。
 
-本次修复了2023年缺少显式获取角色、便捷准备入口未接入data角色的问题；服务器公开verify与两份各原前三条prepare/resolve均通过，共6条仍为`request_metadata`，`request_body()`明确拒绝。回执`/root/azure-2023-public-entry-20261031-001/qualification-public.json`；使用当前脚本/目录和此前成功CI安装的provider，不冒充本次新CI工件验证。
+本次修复了2023年缺少显式获取角色、便捷准备入口未接入data角色的问题；服务器公开verify与两份各原前三条prepare/resolve均通过，共6条仍为`request_metadata`，`request_body()`明确拒绝。回执`/root/azure-2023-public-entry-20261031-001/qualification-public.json`；初次验证使用当前脚本/目录和此前成功CI安装的provider。随后实际成功CI运行41166717605的工件13029254390独立安装通过，76份Git/包内/安装文件一致，复用两份原CSV和原索引，6次公共端/未改研究端完整读取一致，全部CSV字符串字段不变、索引和原文件未改变；见`/root/azure-2023-actual-ci-wheel-20261031-001/qualification-public.json`。未恢复研究任务，不将历史28185条全量证据重标为本轮新跑，也不声称原prompt回放。
 
 ## StreamingBench 原生流视频评测（仅软件准备，尚未完成原生验证）
 
