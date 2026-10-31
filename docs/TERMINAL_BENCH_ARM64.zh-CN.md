@@ -19,12 +19,12 @@ usage 为输入 23,378、输出 2,400 tokens。 本次模型独立生成答案�
 
 ## 自助入口验收范围（2026-10-31 核查）
 
-上面的 OpenSSL 单题在已有 ARM64 CPU 工作区完成了环境准备、正负控制、一次真实 Agent 和原评分器验收。
-目前尚未完成普通用户从新建工作区开始的 Terminal 全流程验收，不能据此称为与 SWE-bench Pro 同等状态的自助入口。
+上面的 OpenSSL 单题在已有 ARM64 CPU 工作区完成了环境准备、正负控制、一次真实 Agent 和原评分器验收。 目前尚未完成普通用户从新建工作区开始的 Terminal
+全流程验收，不能据此称为与 SWE-bench Pro 同等状态的自助入口。
 
-SWE 专用模板的新卷创建、独立 Docker 与目录共享已另行验证，但 Terminal 还需要自己的 Harbor、Compose、
-原生 ARM64 任务构建、私有模型配置及正负控制。Terminal 入口会安装 Compose；共享 Docker 能力可用不等于这些步骤已在新卷通过。
-当前已验收范围仍只包含 `openssl-selfsigned-cert`，其他 88 道任务未因此获得兼容性或评分验收。
+SWE 专用模板的新卷创建、独立 Docker 与目录共享已另行验证，但 Terminal 还需要自己的 Harbor、Compose、 原生 ARM64
+任务构建、私有模型配置及正负控制。Terminal 入口会安装 Compose；共享 Docker 能力可用不等于这些步骤已在新卷通过。 当前已验收范围仍只包含
+`openssl-selfsigned-cert`，其他 88 道任务未因此获得兼容性或评分验收。
 
 ## 使用前
 
