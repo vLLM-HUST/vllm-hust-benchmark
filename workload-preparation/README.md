@@ -1215,6 +1215,11 @@ OVO媒体范围计划可使用`python scripts/plan_ovobench_original_media_range
 
 OVO原片段校验入口：`python scripts/verify_ovobench_original_media.py --data-root /srv/datasets/ovobench --media-root /srv/datasets/ovo-original-clips --decode`。默认仅检查profile已登记的原成员，当前为`485.mp4`一份、8800190字节；`--decode`使用已有PyAV逐帧核验，省略时只证明文件身份，不证明解码。服务器公共CLI已完整解码2128帧，未重编码或更改采样；这不是官方Decord/Qwen帧处理或模型验证。`--require-all`在103个原片段未全部登记时拒绝运行，不能把一份媒体校验说成全套可用。原文件、全部解码回执和范围证据仅保留在服务器，Git不含视频或任务原文。
 
+原片段获取入口：`python scripts/prepare_ovobench_original_media.py --data-root /srv/datasets/ovobench --index /srv/private/ovo-captured-tar-index.json --member 485.mp4`默认只显示计划。显式加`--download --media-root /srv/datasets/ovo-original-clips --max-bytes 8800190`才获取；仅支持profile已登记、原抽样集合内且已定位的原成员，HTTP读取每段不超过8MiB，必须匹配捕获分卷ETag、精确206/Content-Range和完整成员SHA。保留512MiB磁盘余量；已有完整原文件校验后复用，不覆盖不兼容文件或`.partial`。新文件只有完整身份通过才发布，失败保留partial供排查。
+
+验证边界：公共transfer已在Windows
+RAM完成该原成员实际网络读取，逐字节匹配服务器保留文件，未在Windows写数据或增加服务器原媒体副本；服务器公开CLI已验证原文件复用。服务器自身直连网络路径尚未通过，目录捕获仍使用私有控制，公共目录捕获入口还需补齐。因此当前不宣称完整103片段一键准备或原生视频评测完成。原模型、原帧处理和评分必须另行验证。
+
 ## WavCaps 原始音频元数据（数据适配已核验，原生音频执行待完成）
 
 同一校验器支持四个已核验组件，默认保持SoundBible；其他组件显式传`--component`和独立媒体目录。四组件各固定原前三条，共12个原FLAC已完整解码，原PCM
