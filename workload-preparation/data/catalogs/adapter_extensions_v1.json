@@ -2,6 +2,13 @@
   "version": "adapter-extensions/v1",
   "boundary": "Field contracts from publisher metadata/docs. No real source payload downloaded or full adapter validation claimed.",
   "adapters": {
+    "SPOKENWOZ": {
+      "kind":"task_dataset", "mapping":"spokenwoz_original_dialogues",
+      "input_fields":[], "required_fields":["dialogue_id","original_dialogue"],
+      "outcome_fields":[], "annotation_fields":[], "id_field":"dialogue_id",
+      "requirements":["Complete original dialogues; per-call visibility is enforced by the selected native runner", "Separate goal/state/act/span references; original timed words do not establish audio acquisition or duplex execution"],
+      "status":"ORIGINAL_DIALOGUE_ADAPTER_NATIVE_EXECUTION_PENDING"
+    },
     "STREAMINGBENCH": {
       "kind": "task_dataset", "mapping": "streamingbench_original_groups",
       "input_fields": [], "required_fields": ["original_group"],

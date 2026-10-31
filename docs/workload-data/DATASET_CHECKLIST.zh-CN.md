@@ -1327,11 +1327,22 @@ checkpoint，不能直接填入Qwen文本服务。原评分器要求五条参考
 - [x] 从[发布方项目页](https://spokenwoz.github.io/SpokenWOZ-github.io/)当前链接的`ssz1111/SpokenWOZ-Test-Text-Fixed`取得固定版本原`data.json`：52233254字节，发布方LFS
   SHA256匹配，1000完整对话、35564话轮。原文件仅保存在专用CPU，传输内存块上限8MiB，不在Windows落盘。
 - [x] 固定原JSON首次出现的前三个完整对话`MUL0001/MUL0002/MUL0004`，分别50/44/42话轮；不截取单轮冒充完整对话，不换成功样本。回执：`/root/spokenwoz-original-test-text-20261031-001/acquisition-public.json`。
-- [ ] 公共获取/准备入口、原对话/词时间戳/状态/参考及媒体关系的provider适配与消费核验。
+- [x] 公共适配对全部1000对话/35564话轮逐字段无损还原；原goal、metadata、dialog_act和span_info留在参考侧，原text、tag、words及词时间戳保持不变。公共获取器只读校验、固定前三个完整对话的准备入口均exit0。回执：`/root/spokenwoz-public-adapter-20261031-002/qualification-public.json`。
+- [x] 未修改的研究消费端从固定三条索引读回完整136话轮，与公共消费端和原JSON一致；索引不变、研究任务未恢复。回执：同目录`research-handoff-public.json`。这是候选源码验证，不是CI安装工件或原生模型结果验证。
+- [ ] CI真实安装包消费核验、新鲜公共下载的服务器网络实测，以及原音频和原生执行输出的消费闭环。首次实跑的文件角色注册错误已修正，失败stage001保留；没有重下原数据。
 - [ ] 原音频、合适的NPU模型、完整原生任务和适用评分。当前模型调用0，总项不打勾。
 
 当前公开测试文件与旧Git说明中的隐藏测试集必须区分，不能声称复现隐藏榜单。官方既有文本DST/响应基线，也有语音—文本模型；文本基线运行不能证明音频或双工流程跑通。原数据遵循发布方CC
 BY-NC4.0，不在公共PR再分发。
+
+在仓库根目录使用统一入口；所有原数据与索引保存在服务器外部目录，`--limit 3`选择前三个完整对话，不是前三个话轮。读取完整对话仅获得原生任务包，每次模型调用的历史可见范围仍由官方runner负责。
+
+```bash
+python scripts/prepare_reused_research_assets.py SPOKENWOZ
+python scripts/prepare_reused_research_assets.py SPOKENWOZ --mode download --data-root /srv/workloads/spokenwoz
+python scripts/prepare_reused_research_assets.py SPOKENWOZ --mode verify --data-root /srv/workloads/spokenwoz
+PYTHONPATH=workload-preparation/src python scripts/prepare_reused_source_records.py SPOKENWOZ --data-root /srv/workloads/spokenwoz --output /srv/workloads/spokenwoz-first3 --limit 3
+```
 
 #### Full-Duplex-Bench原生准备
 
