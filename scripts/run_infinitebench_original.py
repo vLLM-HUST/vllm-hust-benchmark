@@ -194,6 +194,12 @@ def main():
     parser.add_argument("--model", required=True)
     parser.add_argument("--template", required=True)
     parser.add_argument("--context-limit", type=int, required=True)
+    parser.add_argument(
+        "--request-timeout",
+        type=float,
+        default=600,
+        help="Finite positive HTTP wait in seconds; does not alter original generation budget or enable retry",
+    )
     parser.add_argument("--endpoint", default="http://127.0.0.1:19466/v1")
     parser.add_argument("--start", type=int, default=0)
     parser.add_argument("--count", type=int, default=3)
@@ -204,6 +210,8 @@ def main():
         help="Explicit compatible model transport option; original task prompt and budget unchanged",
     )
     args = parser.parse_args()
+    if not math.isfinite(args.request_timeout) or args.request_timeout <= 0:
+        raise ValueError("positive finite request timeout required")
     route = urlparse(args.endpoint)
     if (
         route.scheme != "http"
@@ -248,7 +256,7 @@ def main():
         base_url=args.endpoint,
         api_key="local-only",  # pragma: allowlist secret - dummy for loopback-only service, not a credential
         max_retries=0,
-        timeout=600,
+        timeout=args.request_timeout,
     )
 
     def token_count(messages):

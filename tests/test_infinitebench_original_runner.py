@@ -18,6 +18,38 @@ runner = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(runner)
 
 
+@pytest.mark.parametrize("timeout", ["0", "-1", "nan", "inf"])
+def test_invalid_transport_timeout_rejected_before_source_or_model_access(
+    monkeypatch, tmp_path, timeout
+):
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "runner",
+            "--official-checkout",
+            str(tmp_path),
+            "--data-root",
+            str(tmp_path),
+            "--output",
+            str(tmp_path / "out"),
+            "--task",
+            "math_calc",
+            "--model",
+            "local",
+            "--template",
+            "gpt4",
+            "--context-limit",
+            "131072",
+            "--request-timeout",
+            timeout,
+        ],
+    )
+    with pytest.raises(ValueError, match="positive finite request timeout"):
+        runner.main()
+    assert not (tmp_path / "out").exists()
+
+
 def fixture(tmp_path, *, tokens=10, fail=False):
     calls = []
 
