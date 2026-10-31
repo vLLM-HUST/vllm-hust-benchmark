@@ -1,6 +1,16 @@
 {
   "schema_version": "workload-validation-checklist/v1",
   "updated_at": "2026-10-31",
+  "delivery_completion_policy": {
+    "approved_by_user": true,
+    "verification_unit": "source_id + explicitly identified original native protocol",
+    "execution_scope": "Public entry supports the complete selected protocol; fixed original samples establish operational validation. Small datasets are run fully when practical; full-corpus generation is not a universal completion gate.",
+    "source_checkbox_meaning": "The declared delivered protocol is usable and evidence-backed, not every optional task or modality offered by the source.",
+    "required_evidence": ["original source identity and acquisition route", "reproducible environment and suitable explicit model binding", "public native execution and original scoring/evaluation route where applicable", "fixed original sample execution with retained failures", "public input and unchanged research-consumer handoff"],
+    "optional_modes": "List unfinished modes and their workload coverage separately; do not require all optional modes to finish a delivered protocol and do not conceal required unsupported workloads.",
+    "coverage_invariant": "Text protocol completion never establishes audio, video, streaming, tool or other unexecuted workload coverage. Preserve all40 classes and113 required sources; five existing sources remain classification-only.",
+    "transition": "Reaudit sources individually against retained evidence. No bulk checkbox promotion and no change to original tasks, workflows, scoring or generation budgets."
+  },
   "latest_public_entry_software_ci_review": {
     "run_id": 41178771323,
     "producer_commit_short": "6ee409e9",
@@ -3242,6 +3252,16 @@
     },
     "SPOKENWOZ": {
       "scope": "public",
+      "protocol_delivery_review": {
+        "protocol": "publisher original text dialogue-state tracking (DST)",
+        "native_fixed_sample_status": "VERIFIED",
+        "current_saved60_server_receipt_rechecked": true,
+        "original_workflow_and_official_scoring_preserved": true,
+        "full_corpus_generation_required_for_sample_validation": false,
+        "unfinished_modes": ["original audio and speech interaction", "other response-generation protocols"],
+        "audio_workload_coverage_established": false,
+        "next_action": "Consolidate the scoped protocol delivery receipt and reconcile checkbox/count references; retain old broad ineligible receipts unchanged. Do not rerun valid128 calls or require all1000 dialogues/audio to complete text-DST delivery."
+      },
       "delivery_kind": "review_original_source_protocol",
       "status": "IN_PROGRESS",
       "native_text_dst_validation": {

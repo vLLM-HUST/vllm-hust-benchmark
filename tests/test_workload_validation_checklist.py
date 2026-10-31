@@ -8,6 +8,25 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def test_completion_policy_keeps_protocol_and_workload_coverage_separate():
+    ledger = json.loads(
+        (ROOT / "docs/workload-data/dataset-validation-status.json").read_text("utf-8")
+    )
+    policy = ledger["delivery_completion_policy"]
+    assert policy["approved_by_user"] is True
+    assert (
+        policy["verification_unit"]
+        == "source_id + explicitly identified original native protocol"
+    )
+    assert len(policy["required_evidence"]) == 5
+    review = ledger["delivery_inventory"]["SPOKENWOZ"]["protocol_delivery_review"]
+    assert review["native_fixed_sample_status"] == "VERIFIED"
+    assert review["current_saved60_server_receipt_rechecked"] is True
+    assert review["full_corpus_generation_required_for_sample_validation"] is False
+    assert review["audio_workload_coverage_established"] is False
+    assert len(review["unfinished_modes"]) == 2
+
+
 def test_spokenwoz_full_original_dialogues_are_not_audio_execution():
     ledger = json.loads(
         (ROOT / "docs/workload-data/dataset-validation-status.json").read_text("utf-8")
