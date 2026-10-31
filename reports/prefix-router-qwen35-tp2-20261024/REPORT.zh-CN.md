@@ -6,7 +6,8 @@
 
 ## 结论与学长要求
 
-已补齐同转发层的随机路由基线、Prefix-only和Lifecycle，各三轮，9轮共504次计分请求全部成功。输入仅来自学长提供的zlf.zip：PAIO三类数据与LongBench v2，没有加入合成请求。504次来自同样56个不同样本的重复，不能写成504个不同样本。
+已补齐同转发层的随机路由基线、Prefix-only和Lifecycle，各三轮，9轮共504次计分请求全部成功。输入仅来自学长提供的zlf.zip：PAIO三类数据与LongBench
+v2，没有加入合成请求。504次来自同样56个不同样本的重复，不能写成504个不同样本。
 
 本轮不能支持“Lifecycle一律比Prefix-only慢”。三类PAIO平均输出吞吐变化依次为−0.08%、+1.59%、−0.70%；但Lifecycle平均TTFT在四类负载中均略高，PAIO分别增加4.09%、5.79%、3.82%。吞吐和首token延迟要分别报告，不能用其中一个替代另一个，也不能据三个重复宣称统计显著。
 
@@ -22,34 +23,48 @@
 
 ## 环境和公平性控制
 
-单台服务器四张Ascend 910B2，每卡64GiB；本轮物理卡0/1组成node0，2/7组成node1，对应容器逻辑卡0/1、2/3。两个独立后端各TP=2，HTTP端口8100、8101；Router端口8000。资源采样中的四个TP进程PID全程一致。
+单台服务器四张Ascend
+910B2，每卡64GiB；本轮物理卡0/1组成node0，2/7组成node1，对应容器逻辑卡0/1、2/3。两个独立后端各TP=2，HTTP端口8100、8101；Router端口8000。资源采样中的四个TP进程PID全程一致。
 
-vLLM 0.23.0+empty、vLLM-Ascend 0.23.0.post1、torch 2.10.0+cpu、torch-npu 2.10.0.post4。镜像版本与启动方式沿用已通过检查的配置。模型为本地BF16 Qwen3.5-35B-A3B，仅文本输入；max-model-len=16384、max-num-seqs=4（每后端）、max-num-batched-tokens=4096、chunked prefill、eager、显存系数0.85、prefix caching、SHA256、mamba align。Router块长和四个缓存组配置均为2048。精确启动参数和运行环境在原始workers.json中。
+vLLM 0.23.0+empty、vLLM-Ascend 0.23.0.post1、torch 2.10.0+cpu、torch-npu
+2.10.0.post4。镜像版本与启动方式沿用已通过检查的配置。模型为本地BF16
+Qwen3.5-35B-A3B，仅文本输入；max-model-len=16384、max-num-seqs=4（每后端）、max-num-batched-tokens=4096、chunked
+prefill、eager、显存系数0.85、prefix caching、SHA256、mamba
+align。Router块长和四个缓存组配置均为2048。精确启动参数和运行环境在原始workers.json中。
 
 客户端全局闭环并发4；每阶段使用同一来源提交顺序，但线程并发不保证所有轮次后端到达顺序完全相同。不是固定RPS或饱和容量实验。三组共享后端、连接池与配置；除策略差异及其必要的随机前端替换外，配置一致。
 
 重复顺序：第1组Random→Prefix→Lifecycle，第2组Prefix→Lifecycle→Random，第3组Lifecycle→Random→Prefix。种子依次24001、24002、24003。种子固定随机抽样，不保证负载依赖的决策与执行输出逐字确定。
 
-每轮前两后端必须空闲，调用reset_prefix_cache，再以不计分的原始数据预热，每后端2条、输出上限8。预热首块与全部计分输入首块不相同；之后必须见到本轮新的AllBlocksCleared回放事件，并启动新Router。四类数据在同一轮依次运行，阶段间不再清缓存。HTTP 200本身不作为重置成功的唯一依据。使用旧版unversioned回放；不声称验证了snapshot/epoch恢复。
+每轮前两后端必须空闲，调用reset_prefix_cache，再以不计分的原始数据预热，每后端2条、输出上限8。预热首块与全部计分输入首块不相同；之后必须见到本轮新的AllBlocksCleared回放事件，并启动新Router。四类数据在同一轮依次运行，阶段间不再清缓存。HTTP
+200本身不作为重置成功的唯一依据。使用旧版unversioned回放；不声称验证了snapshot/epoch恢复。
 
 ## 数据选择及输出协议
 
 PAIO长输入取前8个独立组，共8条；共享前缀和会话复用各取前4个完整五条组，各20条。仅复用学长原始输入和每行metadata的输出上限，temperature=0、模型seed=0，允许EOS；没有强制补齐输出长度。会话复用数据按原始记录重放，不用本轮模型回答重新构建后续对话。
 
-LongBench v2按上下文字符长度从短到长筛选，完整模板token数+64必须不超过16384，检查9题后取8题，1题超限；没有截断上下文。自定义直接答题模板，enable_thinking=false，严格解析选项。这是长度筛选子集，不是官方全量协议或503题成绩。
+LongBench
+v2按上下文字符长度从短到长筛选，完整模板token数+64必须不超过16384，检查9题后取8题，1题超限；没有截断上下文。自定义直接答题模板，enable_thinking=false，严格解析选项。这是长度筛选子集，不是官方全量协议或503题成绩。
 
-全部请求用预渲染的token-ID输入发送至/v1/completions。冻结输入SHA256为 `adcdb992bd58f76b73f96362c69a646dcdad2602c813947c9b9b60fbadad26ca`。各轮逐条核对来源ID、输入token数、输出上限、HTTP状态、路由响应头和计时request ID。
+全部请求用预渲染的token-ID输入发送至/v1/completions。冻结输入SHA256为
+`adcdb992bd58f76b73f96362c69a646dcdad2602c813947c9b9b60fbadad26ca`。各轮逐条核对来源ID、输入token数、输出上限、HTTP状态、路由响应头和计时request
+ID。
 
 ## 实测结果
 
 下列吞吐为三轮阶段吞吐的算术平均，TTFT为三轮请求平均值的算术平均；各阶段请求数相同。范围与每轮P95保留在per-point.csv；不把三个P95的平均数当作总体P95。
 
-- **PAIO 长输入**：Random 12.259、Prefix-only 11.937、Lifecycle 11.927 输出token/s；Lifecycle相对Prefix-only **-0.08%**。平均TTFT依次为 2220.7 / 2044.2 / 2127.8 ms。
-- **PAIO 共享前缀**：Random 12.252、Prefix-only 12.180、Lifecycle 12.374 输出token/s；Lifecycle相对Prefix-only **+1.59%**。平均TTFT依次为 1145.6 / 1144.8 / 1211.1 ms。
-- **PAIO 会话复用**：Random 14.356、Prefix-only 14.505、Lifecycle 14.403 输出token/s；Lifecycle相对Prefix-only **-0.70%**。平均TTFT依次为 1313.7 / 1167.6 / 1212.2 ms。
-- **LongBench v2（8题）**：Random 2.929、Prefix-only 4.056、Lifecycle 4.059 输出token/s；Lifecycle相对Prefix-only **+0.08%**。平均TTFT依次为 3560.1 / 2497.3 / 2514.8 ms。
+- **PAIO 长输入**：Random 12.259、Prefix-only 11.937、Lifecycle 11.927 输出token/s；Lifecycle相对Prefix-only
+  **-0.08%**。平均TTFT依次为 2220.7 / 2044.2 / 2127.8 ms。
+- **PAIO 共享前缀**：Random 12.252、Prefix-only 12.180、Lifecycle 12.374 输出token/s；Lifecycle相对Prefix-only
+  **+1.59%**。平均TTFT依次为 1145.6 / 1144.8 / 1211.1 ms。
+- **PAIO 会话复用**：Random 14.356、Prefix-only 14.505、Lifecycle 14.403 输出token/s；Lifecycle相对Prefix-only
+  **-0.70%**。平均TTFT依次为 1313.7 / 1167.6 / 1212.2 ms。
+- **LongBench v2（8题）**：Random 2.929、Prefix-only 4.056、Lifecycle 4.059
+  输出token/s；Lifecycle相对Prefix-only **+0.08%**。平均TTFT依次为 3560.1 / 2497.3 / 2514.8 ms。
 
-对照组间实际输出量略有变化。例如共享前缀每轮实际输出：Random 4710–4726、Prefix-only 4726–4729、Lifecycle 4703–4714 token；会话复用分别4122–4123、4118–4127、4118 token。输出吞吐用实际输出总量除以阶段耗时，不能把耗时差都归为路由收益。
+对照组间实际输出量略有变化。例如共享前缀每轮实际输出：Random 4710–4726、Prefix-only 4726–4729、Lifecycle 4703–4714
+token；会话复用分别4122–4123、4118–4127、4118 token。输出吞吐用实际输出总量除以阶段耗时，不能把耗时差都归为路由收益。
 
 按重复编号配对的Lifecycle相对Prefix-only吞吐变化见paired-differences.csv。长输入三次分别+3.64%、−4.85%、+1.07%；共享前缀+1.81%、+3.01%、−0.02%；会话复用−2.00%、+0.03%、−0.11%。均保留，不选择性删除不利轮次，不将三次重复当作独立大样本显著性证据。
 
@@ -58,41 +73,53 @@ LongBench v2按上下文字符长度从短到长筛选，完整模板token数+64
 - 9/9轮、36/36阶段、504/504计分请求成功；另36次原始数据预热不计分。504条请求均有唯一对应的服务端计时，路由头一致。18份新的两后端清缓存证据通过。
 - 3888条Router监控记录无采集错误；事件源正常，无新增拒绝或指纹回退，各阶段结束后记账归零。记录的后端抢占计数增量为0。
 - 已对208个原始归档文件建立本地SHA256清单，并核对归档中的五个运行工具与本地工具完全一致；这些完整原件未包含于本PR。此清单是本地归档完整性记录，未与单独远端校验清单对比。
-- 共享前缀20条仅18个不同首个2048-token块；命中token按三轮分别为Random 2048/4096/2048、Prefix-only 2048/2048/4096、Lifecycle 0/2048/2048。其他三类阶段全部观测为0命中。复用覆盖弱，数据集名字中的“shared/reuse”不等同于本模型块粒度上的有效复用。
-- **缓存查询计数口径须保留疑点**：Random的9个阶段，prefix_cache_queries_total增量大于API输入token总量；其他阶段相等。最明显的是Random的LB v2三轮，输入每轮96998 token，而查询增量为342408/372678/217271。请求无重复ID、放行计数正确、抢占增量0。现有记录未确定额外查询原因；可能涉及后端多次缓存查找，但没有后端调度轨迹佐证，不作定论。报告因此不将查询计数当作唯一输入量，也不从它推导独立请求重复或数据错误。精确差异在audit.json中。
-- 每卡490个离散资源样本，健康均OK；四卡AICore采样中位数均2%，最大68%/71%/66%/66%，HBM约56793–56839 MiB，逐卡范围见CSV。这包括阶段边界与尾部，不是时间加权算力利用率，不能据此宣称饱和，也不能凭低瞬时读数认定没使用NPU。
+- 共享前缀20条仅18个不同首个2048-token块；命中token按三轮分别为Random 2048/4096/2048、Prefix-only 2048/2048/4096、Lifecycle
+  0/2048/2048。其他三类阶段全部观测为0命中。复用覆盖弱，数据集名字中的“shared/reuse”不等同于本模型块粒度上的有效复用。
+- **缓存查询计数口径须保留疑点**：Random的9个阶段，prefix_cache_queries_total增量大于API输入token总量；其他阶段相等。最明显的是Random的LB
+  v2三轮，输入每轮96998
+  token，而查询增量为342408/372678/217271。请求无重复ID、放行计数正确、抢占增量0。现有记录未确定额外查询原因；可能涉及后端多次缓存查找，但没有后端调度轨迹佐证，不作定论。报告因此不将查询计数当作唯一输入量，也不从它推导独立请求重复或数据错误。精确差异在audit.json中。
+- 每卡490个离散资源样本，健康均OK；四卡AICore采样中位数均2%，最大68%/71%/66%/66%，HBM约56793–56839
+  MiB，逐卡范围见CSV。这包括阶段边界与尾部，不是时间加权算力利用率，不能据此宣称饱和，也不能凭低瞬时读数认定没使用NPU。
 
 采样覆盖北京时间 2026-10-24T12:55:39+08:00 至 2026-10-24T15:14:35+08:00。切换为CPU工作区不改变已经落盘的NPU测试记录。
 
 ## LongBench答案一致性
 
-Prefix-only和Lifecycle每轮均3/8正确（37.5%）；Random依次2/8、3/8、2/8。全部答案格式可解析，且每轮8题各输出4 token。变化集中在题ID `66f2e0bc821e116aacb2bf37`：Random第1、3轮回答C，其他轮回答D（金标D）。相同输入和参数不等于该模型/批处理执行的输出严格确定。批次或数值差异属于待验证解释；本轮未证实具体原因，更不能据此说路由提升了模型推理准确率。逐题、逐轮记录见longbench-answers.csv。
+Prefix-only和Lifecycle每轮均3/8正确（37.5%）；Random依次2/8、3/8、2/8。全部答案格式可解析，且每轮8题各输出4 token。变化集中在题ID
+`66f2e0bc821e116aacb2bf37`：Random第1、3轮回答C，其他轮回答D（金标D）。相同输入和参数不等于该模型/批处理执行的输出严格确定。批次或数值差异属于待验证解释；本轮未证实具体原因，更不能据此说路由提升了模型推理准确率。逐题、逐轮记录见longbench-answers.csv。
 
-Random在LB v2三轮的node0/node1分配为2/6、1/7、5/3，Prefix与Lifecycle均4/4。随机分配偏斜与较高TTFT同时出现，但没有后端阶段剖析，不能把全部差值确定归因于偏斜。LB答案也有差异，性能与质量都只能按这个小子集报告。
+Random在LB
+v2三轮的node0/node1分配为2/6、1/7、5/3，Prefix与Lifecycle均4/4。随机分配偏斜与较高TTFT同时出现，但没有后端阶段剖析，不能把全部差值确定归因于偏斜。LB答案也有差异，性能与质量都只能按这个小子集报告。
 
 ## 开销排查与可优化处
 
-计时覆盖fingerprint、choose、observer setup/dispatch/observe/finish等包装函数；是函数累计壁钟耗时，不是完整CPU剖析，不覆盖所有代理解析、事件订阅、排队、网络或日志开销。
+计时覆盖fingerprint、choose、observer
+setup/dispatch/observe/finish等包装函数；是函数累计壁钟耗时，不是完整CPU剖析，不覆盖所有代理解析、事件订阅、排队、网络或日志开销。
 
-- PAIO 长输入：Prefix-only选路 0.078 ms，Lifecycle选路 0.458 ms；Lifecycle整条流累计观察 23.735 ms；已计时函数累计耗时/代理E2E约 0.034%。
-- PAIO 共享前缀：Prefix-only选路 0.089 ms，Lifecycle选路 0.270 ms；Lifecycle整条流累计观察 17.049 ms；已计时函数累计耗时/代理E2E约 0.034%。
-- PAIO 会话复用：Prefix-only选路 0.098 ms，Lifecycle选路 0.278 ms；Lifecycle整条流累计观察 14.440 ms；已计时函数累计耗时/代理E2E约 0.033%。
-- LongBench v2（8题）：Prefix-only选路 0.104 ms，Lifecycle选路 0.285 ms；Lifecycle整条流累计观察 0.465 ms；已计时函数累计耗时/代理E2E约 0.129%。
+- PAIO 长输入：Prefix-only选路 0.078 ms，Lifecycle选路 0.458 ms；Lifecycle整条流累计观察 23.735 ms；已计时函数累计耗时/代理E2E约
+  0.034%。
+- PAIO 共享前缀：Prefix-only选路 0.089 ms，Lifecycle选路 0.270 ms；Lifecycle整条流累计观察 17.049 ms；已计时函数累计耗时/代理E2E约
+  0.034%。
+- PAIO 会话复用：Prefix-only选路 0.098 ms，Lifecycle选路 0.278 ms；Lifecycle整条流累计观察 14.440 ms；已计时函数累计耗时/代理E2E约
+  0.033%。
+- LongBench v2（8题）：Prefix-only选路 0.104 ms，Lifecycle选路 0.285 ms；Lifecycle整条流累计观察 0.465
+  ms；已计时函数累计耗时/代理E2E约 0.129%。
 
 共同fingerprint平均耗时约1.2–3.7ms。Lifecycle选路比Prefix-only平均多约0.18–0.38ms。PAIO的流观察累计约14.4–23.7ms，分布在约48–80秒的响应流内，不能全部计入TTFT；这些计时也不足以单独解释几十毫秒的TTFT差异。不能将微小的“已测函数耗时/E2E比值”解读为完整系统性能损失的上界或某项优化的预计收益。
 
 建议按下面顺序做后续优化；本报告不自动发起新测试：
 
 1. **先定位TTFT额外等待**：保留当前协议，补充后端接收、排队、prefill与首token时间，结合实际缓存匹配量，分开识别Router计算耗时和不同请求放置造成的等待。当前摘要不是这些后端阶段的完整追踪。
-2. **减少不必要的流观察工作**：core/lifecycle.py:695–819包含每片段touch、SSE分帧和JSON解析、内容检查。对于已确认prefill完成的prompt，可评估跳过重复的首token内容判断；仍须处理终止、超时touch、多choice、取消和输出追踪。当前track_output_blocks已经为false，不能把“再次关闭”当作优化。
-3. **降低负载评分的重复扫描**：同文件:506的_worker_load_locked扫描活跃请求；:648的过期清理也有全表遍历。可考虑增量统计、单次决策内复用和摊销清理。当前并发仅4，choose耗时低于1ms，不能保证这项能改善端到端指标；必须回归确认释放、取消和超时后的计账守恒。
-4. **再校准调度权重**：当前prefill/decode权重1/1；用实际阶段耗时校准比任意改权重更可靠。权重、tie-break变化需单独消融；不擅自改Qwen混合注意力的2048缓存块配置。更多原始组的实际块复用分层可作为扩展验证，应预先冻结，不能只挑对某策略有利的样本。
+1. **减少不必要的流观察工作**：core/lifecycle.py:695–819包含每片段touch、SSE分帧和JSON解析、内容检查。对于已确认prefill完成的prompt，可评估跳过重复的首token内容判断；仍须处理终止、超时touch、多choice、取消和输出追踪。当前track_output_blocks已经为false，不能把“再次关闭”当作优化。
+1. **降低负载评分的重复扫描**：同文件:506的_worker_load_locked扫描活跃请求；:648的过期清理也有全表遍历。可考虑增量统计、单次决策内复用和摊销清理。当前并发仅4，choose耗时低于1ms，不能保证这项能改善端到端指标；必须回归确认释放、取消和超时后的计账守恒。
+1. **再校准调度权重**：当前prefill/decode权重1/1；用实际阶段耗时校准比任意改权重更可靠。权重、tie-break变化需单独消融；不擅自改Qwen混合注意力的2048缓存块配置。更多原始组的实际块复用分层可作为扩展验证，应预先冻结，不能只挑对某策略有利的样本。
 
 任何优化完成后，都应在同一后端参数和冻结输入下与原Lifecycle、Prefix-only重复对照，同时检查HTTP成功率、末态归零、缓存事件、答案与输出预算。本次只有排查和建议，没有已验证的优化收益。
 
 ## 可交付范围及剩余项
 
-可以向学长交付：四卡两后端TP=2、指定数据固定子集、三策略各三轮结果、逐请求计时和缓存证据，以及有源码依据的优化方向。不是“所有研究实验均已完成”。未测：单机八卡四后端、三个PAIO各5000条全量、LB v2全503题、不同并发/到达率容量扫描、优化后性能。
+可以向学长交付：四卡两后端TP=2、指定数据固定子集、三策略各三轮结果、逐请求计时和缓存证据，以及有源码依据的优化方向。不是“所有研究实验均已完成”。未测：单机八卡四后端、三个PAIO各5000条全量、LB
+v2全503题、不同并发/到达率容量扫描、优化后性能。
 
 2026-10-23六轮Prefix/Lifecycle实验另留于实验者的历史归档，不和本轮数值混合；那次物理卡和顺序不同。本报告补齐随机基线，替代旧报告里“随机基线尚未测”的当前状态描述。
 
