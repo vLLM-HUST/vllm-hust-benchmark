@@ -856,7 +856,7 @@ LMM
 - [ ] `math_calc`：当前9B原前三题均以原`system,user,system,user`消息顺序在tokenize阶段被拒绝400，原输出预算30000保留；未删除/移动后置system，不更换作者模板凑通过。
 - [x] `math_calc`新增14B绑定的原样预检通过：同一原前三题的消息角色不变，输入54280/54301/54350
   token，加原30000输出预算均在当前131072窗口内。预检零生成，旧9B拒绝记录保留。
-- [ ] 当前14B原生执行已启动，首次观察原第0题已发送、尚未返回，不计完成。复用此前合格的隔离评分环境、原ROUGE缓存和客户端组件，没有重装或修改全局服务环境；原始评分器导入通过。第一次误用基础Python缺少`evaluate`的失败保留，发生在模型调用之前。当前执行目录为共享任务根`infinitebench-mathcalc-14b-native-20261031-002`，精确PID/birth及观察状态见机器清单。HTTP等待上限显式为3600秒，不改变原输出预算、不增加自动重试、不重复此前已通过的任务；与其他正确性客户端共用现有服务，不用于性能测量。
+- [ ] 当前14B原生执行进行中：原第0、1题已返回，原第2题在途，固定三题未全部完成。前两题分别保留原30000-token输出及length终态；原问题/提示/请求、保存哈希、原评分器及独立数值前缀计分核对一致，两题得分均0，不重跑凑分。只读审计回执为共享任务根`infinitebench-mathcalc-14b-prefix-audit-20261031-001/qualification-public.json`及`infinitebench-mathcalc-14b-prefix-audit-row1-20261031-001/qualification-public.json`，审计新增模型调用0。复用此前合格的隔离评分环境、原ROUGE缓存和客户端组件，没有重装或修改全局服务环境；原始评分器导入通过。第一次误用基础Python缺少`evaluate`的失败保留，发生在模型调用之前。当前执行目录为共享任务根`infinitebench-mathcalc-14b-native-20261031-002`，精确PID/birth及观察状态见机器清单。HTTP等待上限显式为3600秒，不改变原输出预算、不增加自动重试、不重复此前已通过的任务；与其他正确性客户端共用现有服务，不用于性能测量。
 
 本次只读预检12次tokenize、0次生成，原代码/数据身份核验通过，服务器回执为`infinitebench-remaining-9b-original-preflight-32028-001/receipt-public.json`。上述上下文需求只是当前固定三题的token算术下界，不代表扩大服务上下文即可部署或已验证硬件可行性；未重跑已有原生结果，来源总勾仍未完成。
 
@@ -1286,31 +1286,57 @@ split；后续必须明确将生成和评估同时绑定原verified版本，并�
 
 #### OVO-Bench原生在线视频路径准备（未完成来源交付）
 
+- [x] NPU共享盘原软件与注释准备：复用专用CPU已取得的45份固定官方软件，逐份与仓库固定SHA256/字节数一致；原注释918443字节、1640个case原样转入`ovobench-original-inputs-32068-001`，软件和注释转移后再次逐份核验，Python仅AST解析。回执为该目录`qualification-public.json`。未执行模型、未取得原生成绩，不以输入准备计来源完成。
+
+- [ ] NPU侧原媒体准备：2026-10-31启动从本任务专用CPU既有103份原片段向NPU共享目录`ovobench-existing-original-media-32068-001`的流式传输，逐文件按已登记字节数和SHA256核验后才转为正式文件；原CPU文件保留，不经本地磁盘、不重复下载或解码。传输中不计输入已在NPU齐备，也不计原生推理/评分完成；中断后的`.partial`不可当作有效媒体。
+  首份`0.mp4`第一次接收短读，保留150962176字节的partial，与CPU原文件同长度前缀SHA256一致后仅补2346712字节；完整153308888字节及登记SHA256复核通过，已转正式文件。当前检查点1/103，其余继续传输，不隐去首次传输失败。
+
 - [x] 固定12类各原前三题的36个完整case所需103份原片段已全部取得并公开登记身份，共3520157133字节；全部文件重算SHA256，通过旧完整解码回执核验489216视频帧，未重下载或重复解码。公共CLI以`--require-all`核验全部103份exit0；完整回执`/root/ovobench-fixed-original-media-all-20261031-001/complete-fixed103-registration-public.json`及`/root/ovobench-public-registered103-20261031-001/qualification-public.json`。重复分块bin缓存余量为0，仅清理已核验重复缓存，完整原文件和全部证据保留；0模型调用，不打来源总勾。
+
 - [x] 未修改的官方offline评分器完成参考正确/全部None两项控制；12类36-case全部103响应位置均计入，None计0不丢弃，原宏平均不变。回执`/root/ovobench-original-score-reference-controls-20261031-001/qualification-public.json`及同目录`slot-count-public.json`。仅评分器控制，模型未加载，不是Qwen模型成绩。
+
 - [x] 专用CPU核验当前官方固定版本45份原软件、79170字节，20份Python只做AST解析；复用公共作者获取器`--source ovobench --action verify`退出0。回执`/root/ovobench-original-software-20261031-001/preparation-public.json`。该软件准备阶段不导入执行原代码，模型调用0，不取得视频或发布方模型结果；后续媒体及评分控制另项记录。
+
 - [x] README补充官方软件准备、推理及评分入口，明确三种时间模式、12种任务、向前任务全部`test_info`阶段、原64帧上限/128-token预算及CUDA到NPU环境缺口；代码与数据许可分别核对。
+
 - [ ] 核验合格NPU模型、原帧处理和完整36-case/103调用流程、真实输出官方评分及结果消费；原注释与固定输入媒体已齐，未完成原生执行仍不打来源总勾。
+
 - [x] 原注释918443字节整文件取得并校验；1640个case/12类任务/644个视频名、全部1567个向前阶段经公共候选适配器及`iter_workload`逐字段完整还原。`count/type`等参考不入模型输入，不改题、不丢阶段。回执`/root/ovobench-original-public-adapter-20261031-002/qualification-public.json`，0模型调用。
+
 - [ ] 完成原生NPU推理/真实输出评分闭环；元数据实际CI工件/研究读取已通过、原视频已齐，二者不代表原生benchmark已跑通。
+
 - [x] 成功CPU
   CI运行41151526268的实际工件13022928107独立安装，75个Git/包内/安装载荷字节一致；复用1640条原索引，12类原前三条共36条公共/未修改研究端完整回读通过。回执`/root/ovobench-actual-ci-wheel-20261031-001/qualification-public.json`；0模型调用，不恢复研究任务，不计视频原生完成。
+
 - [x] 官方固定媒体版本20分卷大小/LFS身份已登记并由计划CLI展示；原视频总46341744640字节，预切分总153277153280字节，专用CPU剩余5040644096字节，未启动装不下的整包下载。仅身份登记，不冒称视频取得。
+
 - [x] 原预切分分卷仅取64KB，精确HTTP206/Content-Range及原TAR目录头核验通过。首个文件是非固定抽样的`35.mp4`，57464390字节，未因其容易取得而换题或下载；该首头探测阶段完整视频取得数为0。回执`/root/ovobench-original-media-ranges-20261031-001/first-tar-header-public.json`。此为早期探测记录，后续完整目录和103片段核验另见本节。
+
 - [x] 公共`plan_ovobench_original_media_ranges.py`在专用CPU对实际捕获的368个原头部快照实跑exit0，逐头校验捕获哈希、TAR校验和/连续偏移/原分卷/观察ETag，已定位固定103片段中的16个、553531286字节。仅结构与范围计划，不独立证明发布方整分卷哈希；未定位项明确保留，不换片段，未下载完整视频。回执`/root/ovobench-public-media-range-plan-20261031-001/qualification-public.json`。此为中间快照；最终完整头索引及媒体核验另见本节，不以本快照冒称完成。
+
 - [ ] 澄清代码README数据CC BY-NC-SA 4.0与官方Hub数据卡CC BY-SA 4.0差异；代码MIT单独登记，不以更宽松数据卡推定再分发权限。
+
 - [x] ASI固定原前三题483/484/485输入媒体已齐：完整原文件共37469641字节，公共`--decode`核验全部8556帧。新取得483/484，485不重取、以硬链接复用原文件不额外占空间；各自原帧率保留，不重编码、不更换题目。回执`/root/ovobench-public-media-verifier-20261031-002/qualification-public.json`，0模型调用。该早期子集阶段为3/103；最终全量见本节首项，ASI原生模型执行/官方评分仍未完成。
+
 - [x] 公共`prepare_ovobench_original_media.py`完整成员网络读取在Windows
   RAM中验证：原分卷ETag/精确范围/完整SHA核验通过，8800190字节与服务器保留原文件逐字节一致；不在本地落数据、不新增服务器副本。服务器CLI复用已有原文件也exit0。回执分别为`/root/ovobench-public-media-network-20261031-001/qualification-public.json`和`/root/ovobench-public-media-prepare-reuse-20261031-001/qualification-public.json`。不据此宣称服务器直连网络可用。
+
 - [x] 公共`capture_ovobench_original_tar_headers.py`已实现，每次只取512字节原头部、跳过成员载荷、检查点可继续；RAM真实网络推进2048→2050验证通过。纠正验证脚本输出目录后，服务器CLI真实尝试失败于`Network is unreachable`，最后有效检查点成功保留；首次路径边界拒绝单独保留，不冒充网络故障。回执`/root/ovobench-public-header-capture-20261031-002/qualification-public.json`，未改动/重启主目录任务，0模型调用。
+
 - [ ] 公共目录捕获和片段获取的服务器直连网络环境仍未通过；原主目录已沿用原控制完成（见下项），不重复扫描；本任务通过有界RAM中转完成103片段取得，不等于服务器直连公共下载链路通过。
+
 - [x] 原主目录任务已自然完成：3036个原TAR头、3035个视频成员及两个结束标记，公共规划器`--require-complete`实跑exit0；36个原case所需103片段全部定位，总3520157133字节。仅目录/范围闭环，不重算整分卷哈希、不冒充媒体取得或模型运行。回执`/root/ovobench-complete-original-index-20261031-001/qualification-public.json`。
+
 - [x] 全部固定103原媒体队列已退出0：复用既有3份、补齐100份，原问题和阶段未改变；逐文件保留512MiB空间，验证后只清理重复分块缓存。进度回执`/root/ovobench-fixed-original-media-all-20261031-001/progress-public.json`，完整核验见本节首项；不计原生模型或评分完成。
+
 - [x] 首轮在5份原媒体验证后遇到发布方TLS握手EOF，已核实控制进程退出1后恢复；5份已完成媒体及有效分块缓存复用，恢复时只剩98份，不重新取已通过内容、不换源/换题。公共传输补充最多3次同一原范围重试，仅覆盖临时连接/TLS
   EOF/超时及部分5xx；权限、限流、ETag/身份差异不重试，成功结果仍记录传输失败次数，非模型质量验证。
+
 - [x] 固定原ASI
   case485完整原片段`485.mp4`取得，8800190字节；固定URL/精确原范围和原捕获ETag一致，文件身份登记到既有profile。复用服务器PyAV18.1.0逐帧解码全部2128帧，公共`verify_ovobench_original_media.py --decode`实跑exit0，未重编码/截断/安装依赖。回执`/root/ovobench-public-media-verifier-20261031-001/qualification-public.json`。该最初阶段仅1/103片段准备完成；最终全量见本节首项，官方帧采样、NPU推理、评分均未完成，0模型调用。
+
 - [x] 公共`prepare_ovobench_native_selection.py`在服务器成功生成12类各原前三题的36-case原字段子集，供官方`--anno_path`读取，列出全部103个必需原视频片段，不删向前阶段。实跑复用已安装CI提供侧，原文件不变；回执`/root/ovobench-native-selection-20261031-002/qualification-public.json`。首次输出边界拒绝记录保留，纠正为独立数据目录后通过；未下载视频、0模型调用。
+
 - [x] 候选源码建立1640条引用索引；每种任务原前三条，共36条，经公共和未修改研究消费者完整回读一致。当前研究工作树消费者SHA与服务器副本一致，索引读取前后不变；未恢复研究任务。回执`/root/ovobench-original-index-20261031-001/qualification-public.json`。该候选阶段本身不是实际CI证明，后续实际CI闭环见前项，0模型调用。
 
 #### WavCaps原生音频路径准备（未完成来源交付）
