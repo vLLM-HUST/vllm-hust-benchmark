@@ -464,7 +464,9 @@ def run_once(root, role, profile=None):
                 raise RuntimeError("Model credential file must be private")
             env["OPENAI_API_KEY"] = key.read_text().strip()
         elif profile.get("no_api_key"):
-            env["OPENAI_API_KEY"] = "not-required"
+            env["OPENAI_API_KEY"] = (
+                "not-required"  # pragma: allowlist secret - non-secret test or unauthenticated-service placeholder
+            )
         elif not env.get(profile.get("api_key_env", "OPENAI_API_KEY")):
             raise RuntimeError("Model API credential environment variable is missing")
         else:
