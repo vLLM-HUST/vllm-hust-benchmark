@@ -1,6 +1,7 @@
 """Safety and reproducibility boundaries for the single-task entry."""
 
 import importlib.util
+from argparse import Namespace
 import json
 from pathlib import Path
 from unittest.mock import patch
@@ -69,4 +70,68 @@ def test_identity_change_blocks_execution(tmp_path):
     with patch.object(bootstrap, "docker") as docker:
         with pytest.raises(RuntimeError, match="source changed"):
             bootstrap.verify_preparation(tmp_path)
+    docker.assert_not_called()
+
+
+def connection(**kwargs):
+    options = dict(
+        profile=None,
+        model_api="https://model.invalid/v1/",
+        model_name="openai/example",
+        api_key_env=None,
+        no_api_key=False,
+    )
+    options.update(kwargs)
+    return Namespace(**options)
+
+
+def test_direct_connection_requires_no_private_profile():
+    assert bootstrap.model_profile(connection(api_key_env="MODEL_API_KEY")) == {
+        "api_base": "https://model.invalid/v1",
+        "model": "example",
+        "api_key_env": "MODEL_API_KEY",
+    }
+
+
+def test_explicit_unauthenticated_service():
+    profile = bootstrap.model_profile(connection(no_api_key=True))
+    assert profile["no_api_key"] is True
+    assert "api_key_env" not in profile
+    with pytest.raises(ValueError, match="either"):
+        bootstrap.model_profile(connection(no_api_key=True, api_key_env="KEY"))
+
+
+@pytest.mark.parametrize(
+    "url",
+    [
+        "file:///tmp/api",
+        "https://key@model.invalid/v1",
+        "https://model.invalid/v1?api_key=secret",
+    ],
+)
+def test_connection_rejects_credentials_in_url(url):
+    with pytest.raises(ValueError):
+        bootstrap.model_profile(connection(model_api=url))
+
+
+def test_private_profile_remains_supported(tmp_path):
+    path = tmp_path / "model.json"
+    profile = {
+        "api_base": "https://model.invalid/v1",
+        "model": "example",
+        "api_key_file": "/private/key",
+    }
+    path.write_text(json.dumps(profile))
+    args = connection(profile=path, model_api=None, model_name=None)
+    assert bootstrap.model_profile(args) == profile
+    with pytest.raises(ValueError, match="either"):
+        bootstrap.model_profile(connection(profile=path))
+
+
+def test_mirror_cannot_change_pinned_base(tmp_path):
+    with patch.object(bootstrap, "docker") as docker:
+        with pytest.raises(ValueError, match="pinned ARM64 manifest"):
+            bootstrap.prepare(
+                tmp_path, None, base_image_ref="mirror.invalid/python:latest"
+            )
     docker.assert_not_called()
