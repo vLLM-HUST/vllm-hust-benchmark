@@ -1185,7 +1185,7 @@ python scripts/prepare_reused_research_assets.py OVOBENCH \
   --mode download --data-root /srv/datasets/ovobench --max-bytes 918443
 ```
 
-适配器保留原始case及完整`test_info`顺序；阶段`realtime/step`为输入，`type/count`和顶层答案为参考，`restore_original_case(record)`可还原原字段。服务器已验证全部1640条、1567个向前阶段，公共`iter_workload`全量回读一致；这是候选代码对真实注释的验证，不是实际CI工件安装、研究侧消费或模型运行证据。使用`iter_workload("OVOBENCH", data_root=Path("/srv/datasets/ovobench"))`读取，不能调用`request_body()`将其冒充聊天请求。
+适配器保留原始case及完整`test_info`顺序；阶段`realtime/step`为输入，`type/count`和顶层答案为参考，`restore_original_case(record)`可还原原字段。服务器已验证全部1640条、1567个向前阶段，公共`iter_workload`全量回读一致；候选源码引用索引及每种任务原前三条共36条公共/未修改研究端回读也已通过。这些不是实际CI工件安装或模型运行证据。使用`iter_workload("OVOBENCH", data_root=Path("/srv/datasets/ovobench"))`读取，不能调用`request_body()`将其冒充聊天请求。
 
 在完整原数据及合格NPU模型环境具备后，官方原入口示例为：
 
