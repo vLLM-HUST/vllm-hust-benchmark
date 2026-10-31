@@ -20,6 +20,14 @@ def test_spokenwoz_full_original_dialogues_are_not_audio_execution():
     assert evidence["audio_acquired"] is False
     assert evidence["model_calls"] == 0
     assert row["checked"] is False and row["status"] == "IN_PROGRESS"
+    provider = row["public_adapter_preparation"]
+    assert provider["actual_ci_artifact_installed"] is True
+    assert provider["actual_ci_run"] == 41172187985
+    assert provider["actual_ci_git_wheel_installed_exact_payloads"] == 77
+    assert provider["actual_ci_fixed_original_public_and_research_readbacks"] == 3
+    assert provider["actual_ci_complete_original_turns_roundtripped"] == 136
+    assert provider["actual_ci_existing_index_reused_unchanged"] is True
+    assert provider["model_calls"] == 0
 
 
 def test_full_duplex_publisher_examples_are_not_native_delivery():
