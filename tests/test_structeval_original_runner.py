@@ -351,16 +351,26 @@ def test_completed_protocol_audit_adds_only_previously_unexecuted_rows():
     assert not latex["source_checkbox_eligible"]
     assert latex["verified_unique_native_tasks"] == 1344
     assert latex["remaining_original_tasks"] == 2035 - 1344
-    assert ledger["verified_unique_native_tasks"] == count + continued[
-        "combined_unique_protocol_tasks"
-    ] + svg_continued["combined_unique_protocol_tasks"] + nested[
-        "unique_original_tasks"
-    ] + html["new_original_tasks"] + markdown_html["new_original_tasks"] + react_html[
-        "new_original_tasks"
-    ] + browser_followup["vue_html_additional_original_tasks"] + browser_followup[
-        "text_canvas_additional_original_tasks"
-    ] + browser_complete["text_markdown_additional_original_tasks"] + sum(
-        p["original_tasks"] for p in latex["profiles"]
+    typst = json.loads((ROOT / ledger["typst_full50_audit_receipt"]).read_text("utf-8"))
+    assert typst["previous_first3_excluded_from_previous_counter"] is True
+    assert typst["previous_audited_unique_task_count"] == 1344
+    assert typst["newly_counted_original_task_executions"] == 50
+    assert typst["actual_native_vqa_calls"] == 0
+    assert typst["positive_native_vqa_path_qualified"] is False
+    assert (
+        ledger["verified_unique_native_tasks"]
+        == count
+        + continued["combined_unique_protocol_tasks"]
+        + svg_continued["combined_unique_protocol_tasks"]
+        + nested["unique_original_tasks"]
+        + html["new_original_tasks"]
+        + markdown_html["new_original_tasks"]
+        + react_html["new_original_tasks"]
+        + browser_followup["vue_html_additional_original_tasks"]
+        + browser_followup["text_canvas_additional_original_tasks"]
+        + browser_complete["text_markdown_additional_original_tasks"]
+        + sum(p["original_tasks"] for p in latex["profiles"])
+        + typst["newly_counted_original_task_executions"]
     )
     held = receipt.get("held_native_exit_evidence")
     if held:

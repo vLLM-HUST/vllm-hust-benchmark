@@ -28,12 +28,13 @@
     "transition": "Reaudit sources individually against retained evidence. No bulk checkbox promotion and no change to original tasks, workflows, scoring or generation budgets."
   },
   "latest_public_entry_software_ci_review": {
-    "run_id": 41178771323,
-    "producer_commit_short": "6ee409e9",
+    "run_id": 41204855282,
+    "producer_commit_short": "83741ae6",
     "conclusion": "success",
-    "workflow_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/actions/runs/41178771323",
+    "workflow_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/actions/runs/41204855282",
+    "cpu_smoke_run_id": 41204855279,
     "native_execution": false,
-    "boundary": "Verified completed CI for the public full/range SpokenWOZ entrypoint commit. Software CI only; no additional source completion, model execution, scoring or performance result inferred."
+    "boundary": "Verified completed tests/lint/CPU smoke for the exact ToolBench software-preparation entry commit. Software CI only; native execution/scoring and input-consumer receipts remain separate evidence."
   },
   "current_navigation_compatibility_review": {
     "tracked_path_index_regenerated": true,
@@ -2002,9 +2003,12 @@
         "docs/workload-data/validation/structeval-nonrender-checkpoint2-20261024.json",
         "docs/workload-data/validation/structeval-nonrender-checkpoint3-20261025.json"
       ],
-      "verified_unique_native_tasks": 1344,
-      "native_queue_state": "950_NONRENDER_EIGHT_COMPLETE_RENDER_PROTOCOLS_AND_THREE_LATEX_FIRST3_AUDITED",
-      "blocker": "All950 nonrender originals reused. Full50 each Matplotlib,SVG,Text-to-HTML,Markdown-to-HTML,Text-to-Canvas,Text-to-Markdown; full45 React-to-HTML and40 Vue-to-HTML completed with original scoring. All six browser protocols independently audited. Three LaTeX/TikZ fixed first3 protocols now independently audited:9 generation/8 actual VQA calls, all17 stop; original task001303 render0/missing-image/final0.1 retained without repairs or invented judge calls. Original fields/prompts/parsed code/actual images verified, zero audit model calls. Verified unique tasks1344; remaining17 partial/uncovered render groups/691 rows, including191 remaining LaTeX/TikZ originals. Typst three render0/missing-image branches excluded due no actual judge in that protocol; stronger27B permission pending. Other browser/CDN/npm isolation pending, no unrestricted generated-code egress. Whole source unchecked.",
+      "verified_unique_native_tasks": 1394,
+      "verified_unique_native_task_count_meaning": "Original task executions and saved results audited, including author-defined failed-model/missing-image branches. Not successful answers or whole-source readiness.",
+      "native_queue_state": "TYPST_ALL50_NEGATIVE_BRANCHES_AUDITED_LATEX_REMAINING191_RUNNING",
+      "typst_full50_audit_receipt": "docs/workload-data/validation/structeval-typst-full50-audit-20261031.json",
+      "latex_remaining191_live_stage": "structeval-original-latex-window-32068-001 under private shared task root; inspect exact process birth and state before any resume",
+      "blocker": "950 nonrender and earlier positive render/LaTeX evidence reused. Typst full50 original executions audited: prior3 reused plus47 new stop responses and original render/score returns; all50 render0, original final scores48x0.1/1x0.09/1x0.07, author missing-image rule skipped all judges. Saved47 compiler diagnostics show47 language errors/Markdown-style headings and no external imports; no model/code repairs or reruns, no positive Typst VQA-path qualification. Original audited task-execution count1394 includes these failures, not successful-answer count; remaining641 original rows/16 partial or uncovered render groups. Original191 remaining LaTeX/TikZ tasks started serially with prior9 reused; do not count until terminal and independently audited. Other browser/CDN/npm isolation pending; whole source unchecked.",
       "rendering_preparation": {
         "nested_html_canvas_markdown_components": {
           "status": "ALL_SIX_COMPLETE_ORIGINAL_BROWSER_PROTOCOLS_AUDITED",
@@ -2044,18 +2048,21 @@
           "source_checkbox_eligible": false
         },
         "typst_cli_component": {
-          "status": "TYPED_DISPATCH_VERIFIED_FIRST3_ORIGINAL_GENERATIONS_RENDER0_ACTUAL_JUDGE_NOT_EXERCISED",
+          "status": "ALL50_ORIGINAL_FAILURE_BRANCHES_AUDITED_POSITIVE_JUDGE_PATH_UNQUALIFIED",
           "recipe": "configs/workload-native/structeval-typst-cpu.Dockerfile",
           "verifier": "scripts/verify_structeval_typst_environment.py",
           "receipt": "docs/workload-data/validation/structeval-nonrender-checkpoint3-20261025.json",
-          "original_tasks_executed": 3,
-          "model_calls": 3,
+          "original_tasks_executed": 50,
+          "model_calls": 50,
           "actual_judge_calls": 0,
           "original_first3_render_scores": [0, 0, 0],
           "first3_original_outcomes_independently_audited": true,
           "original_typst_profile_end_to_end_qualified": false,
-          "first3_included_in_verified_unique_native_task_count": false,
-          "stronger_existing27B_profile_permission_requested_not_started": true,
+          "first3_included_in_verified_unique_native_task_count": true,
+          "full50_included_as_audited_executions_not_successful_answers": true,
+          "full50_receipt": "docs/workload-data/validation/structeval-typst-full50-audit-20261031.json",
+          "earlier_stronger27B_request_not_executed": true,
+          "failed_tasks_not_regenerated_to_improve_scores": true,
           "author_environment_lock_reproduced": false,
           "original_renderer_positive_and_negative_controls_verified": true,
           "original_renderer_control_scores": [1, 0],
