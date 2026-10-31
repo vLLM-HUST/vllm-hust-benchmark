@@ -12,7 +12,6 @@ import base64
 import hashlib
 import json
 import os
-from pathlib import Path
 import platform
 import re
 import shutil
@@ -21,6 +20,8 @@ import subprocess
 import sys
 import time
 import urllib.request
+from pathlib import Path
+from urllib.parse import urlsplit
 
 TASK = "openssl-selfsigned-cert"
 REV = "7131e4375048a0e408a8fb404b5f499d726b695b"  # pragma: allowlist secret — public source identity
@@ -78,7 +79,12 @@ def command(argv, env, logfile=None, timeout=900):
     if logfile:
         with Path(logfile).open("ab") as stream:
             result = subprocess.run(
-                argv, env=env, stdout=stream, stderr=subprocess.STDOUT, timeout=timeout
+                argv,
+                env=env,
+                stdout=stream,
+                stderr=subprocess.STDOUT,
+                timeout=timeout,
+                check=False,
             )
         if result.returncode:
             raise RuntimeError(
@@ -126,7 +132,10 @@ def verify_preparation(root):
     return state
 
 
-def prepare(root, cpuset, resume_prepare=False):
+def prepare(root, cpuset, resume_prepare=False, base_image_ref=None):
+    base_image_ref = base_image_ref or "python@sha256:" + BASE_MANIFEST
+    if not base_image_ref.endswith("@sha256:" + BASE_MANIFEST):
+        raise ValueError("Base image reference must use the pinned ARM64 manifest")
     if platform.machine() not in ("aarch64", "arm64") or sys.version_info < (3, 12):
         raise RuntimeError("Use a native ARM64 CPU workspace with Python >=3.12")
     if (root / "prepared.json").exists():
@@ -209,7 +218,7 @@ def prepare(root, cpuset, resume_prepare=False):
                 "pull",
                 "--platform",
                 "linux/arm64",
-                "python@sha256:" + BASE_MANIFEST,
+                base_image_ref,
             ],
             env,
             root / "base-pull.log",
@@ -305,7 +314,10 @@ RUN uvx -p 3.13 -w pytest==8.4.1 -w pytest-json-ctrf==0.3.5 pytest --version
     image = json.loads(docker(env, "image", "inspect", tag))[0]
     toml = (task / "task.toml").read_text()
     toml, count = re.subn(
-        r"^docker_image\s*=.*$", 'docker_image = "' + tag + '"', toml, flags=re.M
+        r"^docker_image\s*=.*$",
+        'docker_image = "' + tag + '"',
+        toml,
+        flags=re.MULTILINE,
     )
     if count != 1:
         raise RuntimeError("Unexpected upstream task image declaration")
@@ -363,6 +375,7 @@ RUN uvx -p 3.13 -w pytest==8.4.1 -w pytest-json-ctrf==0.3.5 pytest --version
             "harbor_version": HARBOR,
             "architecture": image["Architecture"],
             "base_manifest": "sha256:" + BASE_MANIFEST,
+            "base_image_ref": base_image_ref,
             "base_image_id": base_id,
             "image_id": image["Id"],
             "image_tag": tag,
@@ -444,14 +457,16 @@ def run_once(root, role, profile=None):
             if previous["reward"] != reward or previous["tests"] != 6:
                 raise RuntimeError("Verifier controls have not passed")
         if not profile:
-            raise RuntimeError(
-                "Model execution requires an ops-provided private profile"
-            )
+            raise RuntimeError("Provide --model-api and --model-name, or --profile")
         if profile.get("api_key_file"):
             key = Path(profile["api_key_file"])
             if key.stat().st_mode & 0o077:
                 raise RuntimeError("Model credential file must be private")
             env["OPENAI_API_KEY"] = key.read_text().strip()
+        elif profile.get("no_api_key"):
+            env["OPENAI_API_KEY"] = (
+                "not-required"  # pragma: allowlist secret - non-secret test or unauthenticated-service placeholder
+            )
         elif not env.get(profile.get("api_key_env", "OPENAI_API_KEY")):
             raise RuntimeError("Model API credential environment variable is missing")
         else:
@@ -538,12 +553,56 @@ def run_once(root, role, profile=None):
         )
 
 
+def model_profile(args):
+    if args.profile:
+        if args.model_api or args.model_name or args.api_key_env or args.no_api_key:
+            raise ValueError("Use either --profile or the model connection options")
+        profile = json.loads(args.profile.expanduser().read_text())
+    else:
+        if not args.model_api or not args.model_name:
+            raise ValueError("Provide both --model-api and --model-name")
+        profile = {
+            "api_base": args.model_api.rstrip("/"),
+            "model": args.model_name.removeprefix("openai/"),
+        }
+        if args.no_api_key:
+            if args.api_key_env:
+                raise ValueError("Use either --api-key-env or --no-api-key")
+            profile["no_api_key"] = True
+        else:
+            profile["api_key_env"] = args.api_key_env or "OPENAI_API_KEY"
+    url = urlsplit(profile["api_base"])
+    if url.scheme not in ("http", "https") or not url.hostname:
+        raise ValueError("Model API must be an HTTP(S) base URL, including /v1")
+    if url.username or url.password or url.query or url.fragment:
+        raise ValueError("Keep API credentials in an environment variable or key file")
+    if not isinstance(profile.get("model"), str) or not profile["model"].strip():
+        raise ValueError("Model name is required")
+    return profile
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("action", choices=("prepare", "controls", "run", "status"))
     parser.add_argument("--directory", type=Path, required=True)
     parser.add_argument(
-        "--profile", type=Path, help="Private ops-provided model profile; no key values"
+        "--profile", type=Path, help="Optional private model connection JSON"
+    )
+    parser.add_argument(
+        "--model-api", help="OpenAI-compatible API base URL including /v1"
+    )
+    parser.add_argument("--model-name", help="Served model name")
+    parser.add_argument(
+        "--base-image-ref",
+        help="Registry mirror reference with the pinned base manifest",
+    )
+    parser.add_argument(
+        "--api-key-env", help="API key environment variable (default OPENAI_API_KEY)"
+    )
+    parser.add_argument(
+        "--no-api-key",
+        action="store_true",
+        help="Use a service without API authentication",
     )
     parser.add_argument(
         "--resume-prepare",
@@ -557,7 +616,7 @@ def main():
     os.umask(0o077)
     root = args.directory.expanduser().resolve()
     if args.action == "prepare":
-        prepare(root, args.cpuset, args.resume_prepare)
+        prepare(root, args.cpuset, args.resume_prepare, args.base_image_ref)
     elif args.action == "controls":
         for role in ("nop", "oracle"):
             run_once(root, role)
@@ -565,7 +624,7 @@ def main():
         run_once(
             root,
             "model",
-            json.loads(args.profile.read_text()) if args.profile else None,
+            model_profile(args),
         )
     else:
         print(
