@@ -18,6 +18,12 @@ StructEval恢复增量：原LaTeX镜像12层、972434432字节经只读原层SHA
 
 StructEval评分续接：同一保存输出已调用未经修改的原`render_file_async`及`evaluate_file`完成，原render_score为0、final_eval_score为0.08。无图像时按原规则跳过实际VQA请求；通过禁止新增模型调用的控制核验新增生成/评委请求均0，不把“VQA流程返回”误称为实际评委推理。原推理文件逐字保留，原null结果未动；独立逐题审计待完成，总计数暂不增加。回执`structeval-capped-saved-final-evaluation-20261101-001/qualification-public.json`。
 
+StructEval逐题审计续报：任务001304（全局原行726、协议位置37）的10个原字段、9组VQA、原提示词、响应、原代码解析与渲染请求SHA均核对通过；原评分器独立重算与0.08保存结果完全相同，新增模型调用0。该独立32768配置单列，不与null配置合计质量分。此前未尝试的位置39–49共11题已在研究空闲、现有9B无在途请求后启动；控制器和子进程均核验存活，不能据此计完成。第38题未知结果不重放，已有有效输出不重生成，卡6服务不变。
+
+StructEval新增11题终态：位置39–49的11次原生成与11次原渲染全部返回，原评分流程退出0；独立审计已核对原字段、提示词、响应、代码解析、渲染请求及完整条件VQA。11次评委请求中10次正常返回、1次BadRequestError，原评分器对后者的全None分支与0.3最终分照实保留，未重试或伪装成正常评分。该组所有保存结果的审计不发起新模型请求；[逐题回执](validation/structeval-capped-tikz11-audit-20261101.json)。独立32768配置与原null配置继续分开，来源总勾不变。
+
+上述BadRequest已定位：任务001334原渲染PNG为1433×1、86字节；同一9B服务日志明确报长宽比1433超过处理器上限200。原图片不缩放、不替换，不为凑通过改图或重试；原评分器的失败分支和分数保留。
+
 ### StreamingBench：媒体准备进行中，原生未跑
 
 StreamingBench媒体准备增量（2026-11-01）：清理后专用CPU实测空闲14141509632字节，原固定10份视频总量2823253471字节，原容量阻塞已解除，不扩卷。原已核验视频不重下载；余9份尝试公开下载入口时首项返回Network
@@ -31,6 +37,8 @@ unreachable，失败记录保留，现复用原分块获取器经至多8MiB原�
 - [x] 第四、五份原视频sample_17_proactive及sample_221_real已取得，原ZIP成员CRC/EOF、观测SHA及全部38802帧解码通过。两份公开`--verify`和`--download`复用CLI各退出0，无联网、重复解码或模型调用。累计5/10视频、908128954字节、87988帧；其余5份视频及45份音频未完成，原生执行未完成，不计来源交付。回执分别为`/root/streamingbench-public-fourth-media-reuse-20261101-001/qualification-public.json`和`/root/streamingbench-public-fifth-media-reuse-20261101-001/qualification-public.json`。
 
 - [x] 第六份原视频sample_348_real完整667768200字节、原CRC/EOF与观测SHA及全部58247帧解码通过，保留原音轨；默认real三组原题所需媒体已齐。累计6/10视频、1575897154字节、146235帧；其余4份视频及45份音频未完成，不计原生任务。回执`/root/streamingbench-remaining-ram-member-04-20261101-001/qualification-public.json`。
+
+- [x] 第七份原视频sample_416_real完整335839436字节、原CRC/EOF与观测SHA及全部20783帧解码通过，保留原音轨。累计7/10视频、1911736590字节、167018帧，余3份视频和45份音频未完成，不计原生执行。回执`/root/streamingbench-remaining-ram-member-05-20261101-001/qualification-public.json`。
 
 - [x] 明确原Qwen2-VL类的候选NPU入口及分类索引已补，不走作者CLI未知模型回退；服务器固定与全量real计划通过，0模型调用。默认3组共用sample_348原视频，保持3个原问题，不因共享视频去重任务或改用已取得的视频。原31份软件、128-token预算、作者时间窗及评分流程保留；`streamingbench-public-native-plan-20261101-004/qualification-public.json`是软件计划证据，不是实际NPU推理或全量媒体验证。
 
