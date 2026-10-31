@@ -97,6 +97,12 @@ def test_existing_deliveries_have_real_indexed_paths_without_runtime_claim():
     }
     assert assets["AZURE_LLM"]["entrypoints"][0]["role"] == "data_reading_only"
     assert assets["JSONSCHEMABENCH"]["entrypoints"]
+    ovo = {(item["role"], item["path"]) for item in assets["OVOBENCH"]["entrypoints"]}
+    assert ("generation", "scripts/run_ovobench_original_npu.py") in ovo
+    assert (
+        "saved_output_reuse_audit",
+        "scripts/score_ovobench_original_saved.py",
+    ) in ovo
     assert {item["role"] for item in assets["SPOKENWOZ"]["entrypoints"]} == {
         "prepare_assets",
         "original_profile",

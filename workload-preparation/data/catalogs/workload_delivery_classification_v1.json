@@ -21,6 +21,16 @@
     {"source_id": "PAIO-SEMANTIC-SIMILAR-5000", "asset_group": "enterprise-private-requests", "related_workload_ids": [], "boundary": "Semantic similarity is not exact-prefix or KV reuse; preserve original private requests without rewriting."}
   ],
   "source_entrypoints": {
+    "OVOBENCH": [
+      {"role": "prepare_assets", "path": "scripts/prepare_jsonschemabench_author_source.py", "scope": "--source ovobench: fixed original author software; no task execution"},
+      {"role": "prepare_assets", "path": "scripts/prepare_reused_research_assets.py", "scope": "OVOBENCH: original annotation acquisition and identity verification"},
+      {"role": "prepare_assets", "path": "scripts/prepare_ovobench_native_selection.py", "scope": "Fixed first3 per original task class or --full all1640; preserve complete forward stages"},
+      {"role": "prepare_assets", "path": "scripts/prepare_ovobench_original_media.py", "scope": "Bounded original archive-member acquisition with explicit original identity checks; no invented clips"},
+      {"role": "prepare_assets", "path": "scripts/verify_ovobench_original_media.py", "scope": "Read-only registered original media verification and optional complete archive LFS verification"},
+      {"role": "original_profile", "path": "configs/workload-native/ovobench-author-source.json", "scope": "Original author/data/media identities; metadata alone is not native evidence"},
+      {"role": "generation", "path": "scripts/run_ovobench_original_npu.py", "scope": "Original offline controller/prompt/stages and scoring with explicit official Qwen2-VL-7B NPU binding; fixed sample or --full"},
+      {"role": "saved_output_reuse_audit", "path": "scripts/score_ovobench_original_saved.py", "scope": "Untouched original scorer with disclosed lossless singleton-list-to-text input adaptation; zero model calls"}
+    ],
     "MIND2WEB": [
       {"role": "prepare_assets", "path": "scripts/prepare_reused_research_assets.py", "scope": "Original encrypted test ZIP and official candidate scores; verify publisher identities without unpickling"},
       {"role": "prepare_assets", "path": "scripts/prepare_mind2web_author_source.py", "scope": "Pinned31 original software files; no execution or dependency installation"},
