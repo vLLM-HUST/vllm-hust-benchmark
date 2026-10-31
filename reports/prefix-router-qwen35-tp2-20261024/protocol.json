@@ -1,0 +1,68 @@
+{
+  "phase": "three_policy_controlled_fixed_subset_NOT_full_dataset",
+  "baseline": "same RouterService transport, uniform IID random backend, no fingerprint/scoring/lifecycle; same KV readiness subscribers retained",
+  "not_a_builtin_vllm_random_scheduler": true,
+  "topology": "one server, four NPUs, two TP=2 workers",
+  "repo_commit": "04142b28e4962321c23b0228331745e3297a5378",
+  "input_sha256": "adcdb992bd58f76b73f96362c69a646dcdad2602c813947c9b9b60fbadad26ca",
+  "counts_per_point": {
+    "paio-long-prefill-5000": 8,
+    "paio-prefix-shared-5000": 20,
+    "paio-reuse-conv-5000": 20,
+    "longbench-v2": 8
+  },
+  "concurrency": 4,
+  "order": [
+    [
+      1,
+      "random"
+    ],
+    [
+      1,
+      "prefix"
+    ],
+    [
+      1,
+      "lifecycle"
+    ],
+    [
+      2,
+      "prefix"
+    ],
+    [
+      2,
+      "lifecycle"
+    ],
+    [
+      2,
+      "random"
+    ],
+    [
+      3,
+      "lifecycle"
+    ],
+    [
+      3,
+      "random"
+    ],
+    [
+      3,
+      "prefix"
+    ]
+  ],
+  "seed_by_repetition": {
+    "1": 24001,
+    "2": 24002,
+    "3": 24003
+  },
+  "arrival": "closed-loop, same source submission order; not fixed RPS",
+  "cache_protocol": "same idle reset / new AllBlocksCleared / excluded original warmups / fresh frontend as previous controlled suite",
+  "warmup_requests_per_point": 4,
+  "warmup_output_cap": 8,
+  "timings": "server perf_counter wrappers around fingerprint, choose and lifecycle observer; logging after response; instrumentation overhead exists",
+  "timing_limit": "observer total spans the whole stream; not all of it delays first token; proxy_e2e is not backend compute time",
+  "rng_limit": "seed fixes random draws; concurrent arrival/load still affects route decisions",
+  "scope": "56 unique source inputs, no truncation, same per-row output caps/EOS; not full PAIO/LBv2, not saturation",
+  "algorithm_optimization_applied": false,
+  "classification": "diagnostic fixed-subset experiment; enforce-eager; NOT official leaderboard evidence"
+}
