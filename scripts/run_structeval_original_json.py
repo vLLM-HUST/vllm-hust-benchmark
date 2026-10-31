@@ -27,6 +27,20 @@ def positive_timeout(value):
     return result
 
 
+def output_budget(profile, model, disable_thinking):
+    if profile == "publisher-null":
+        return None
+    if (
+        profile != "qwen35-9b-nonthinking-32768"
+        or model != "Qwen/Qwen3.5-9B"
+        or not disable_thinking
+    ):
+        raise ValueError(
+            "32768 profile requires explicit Qwen/Qwen3.5-9B nonthinking binding"
+        )
+    return 32768
+
+
 def select_original_rows(
     rows,
     input_type="Text",
@@ -62,6 +76,12 @@ def main():
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--endpoint", default="http://127.0.0.1:19466/v1")
     parser.add_argument("--model", default="workload-qwen35-27b-128k-nonthinking")
+    parser.add_argument(
+        "--output-profile",
+        choices=["publisher-null", "qwen35-9b-nonthinking-32768"],
+        default="publisher-null",
+        help="Disclosed output-budget binding; capped results must not be pooled with publisher-null",
+    )
     parser.add_argument(
         "--request-timeout",
         type=positive_timeout,
@@ -129,6 +149,12 @@ def main():
     args = parser.parse_args()
     if args.max_retries < 0:
         parser.error("nonnegative explicit client retry count required")
+    try:
+        max_tokens = output_budget(
+            args.output_profile, args.model, args.disable_thinking
+        )
+    except ValueError as error:
+        parser.error(str(error))
     rendering = args.output_type in {
         "Matplotlib",
         "Typst",
@@ -309,7 +335,11 @@ def main():
         "selection": "explicit protocol and original order/range, fixed before model calls",
         "model": args.model,
         "temperature": 0.0,
-        "max_tokens": None,
+        "max_tokens": max_tokens,
+        "output_profile": args.output_profile,
+        "publisher_max_tokens": None,
+        "output_budget_differs_from_publisher": max_tokens is not None,
+        "results_must_be_grouped_by_output_profile": True,
         "request_timeout_seconds": args.request_timeout,
         "outer_max_retries": args.max_retries,
         "sdk_max_retries": 0,
@@ -335,7 +365,7 @@ def main():
                 concurrency=1,
                 render_concurrency=1,
                 temperature=0.0,
-                max_tokens=None,
+                max_tokens=max_tokens,
                 timeout=args.request_timeout,
                 max_retries=args.max_retries,
                 api_base=args.endpoint,

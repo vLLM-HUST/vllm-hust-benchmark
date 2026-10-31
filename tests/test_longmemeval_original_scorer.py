@@ -66,6 +66,20 @@ def test_controls_do_not_qualify_another_model_or_question_type():
         runner.checked_controls(report, "explicit-model", {"single-session-assistant"})
 
 
+@pytest.mark.parametrize("question_type", ["temporal-reasoning", "single-session-user"])
+def test_explicit_type_controls_do_not_expand_to_other_types_or_abstention(
+    question_type,
+):
+    report = {**controls(), "question_type": question_type, "abstention": False}
+    runner.checked_controls(report, "explicit-model", {question_type})
+    with pytest.raises(ValueError):
+        runner.checked_controls(report, "explicit-model", {"single-session-assistant"})
+    with pytest.raises(ValueError):
+        runner.checked_controls(
+            report, "explicit-model", {question_type}, abstention=True
+        )
+
+
 def test_selector_and_constructor_only_are_bound(monkeypatch):
     raw = b"model_zoo = {'official': ('official-model', 'local')}\nclient = OpenAI(api_key='fixture')\nresult = 'yes' in 'yesterday'\n"  # pragma: allowlist secret - inert source fixture
     monkeypatch.setattr(runner, "SCORER_SHA256", hashlib.sha256(raw).hexdigest())

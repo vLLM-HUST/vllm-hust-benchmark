@@ -1140,7 +1140,9 @@ tokens；同三题在NPU上各生成一次，全部`stop`。不是500题全量�
 python scripts/score_longmemeval_original.py --source-root /private/LongMemEval-author --reference /private/longmemeval/longmemeval_m_cleaned.json --variant m --hypotheses /private/longmemeval/reader/hypotheses.private.jsonl --controls /private/longmemeval/judge-controls/controls-public.json --model Qwen/Qwen3.5-9B --endpoint http://127.0.0.1:19466/v1 --output /private/longmemeval/fresh-qa-output
 ```
 
-确认资源可用后添加`--execute`才对保存回答评分，不重新生成读者回答。输出目录必须不存在，原题、评分请求/响应、原回答及原聚合日志保留在私有目录。Oracle、S、M所选题型分别核验，不能把M的助手信息题自检当作Oracle时间推理或S用户信息题的评分资格。失败或未满足控制条件的流程不能计来源完成。
+确认资源可用后添加`--execute`才对保存回答评分，不重新生成读者回答。输出目录必须不存在，原题、评分请求/响应、原回答及原聚合日志保留在私有目录。Oracle、S、M所选题型分别核验，不能把M的助手信息题自检当作Oracle时间推理或S用户信息题的评分资格。控制回执通过`question_type`声明单一题型，未声明的历史回执仅覆盖助手信息题；`abstention`单列，普通问答控制不能覆盖不可回答问题，不混合评分批次。失败或未满足控制条件的流程不能计来源完成。
+
+当前固定三题Oracle、三题S和三题M的保存回答均已完成明确9B本地judge评分及独立审计，原读者回答未重跑。该自检和执行不代表本地judge具有官方70B/GPT-4的准确率；精确软件工件与研究消费核验仍待收口。
 
 ## ScienceAgentBench 原科学数据资产核验（原生任务尚未执行）
 

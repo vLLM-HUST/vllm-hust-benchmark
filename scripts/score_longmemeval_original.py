@@ -36,7 +36,7 @@ def checked_inputs(reference, hypotheses):
     return {by_id[qid]["question_type"] for qid in ids}
 
 
-def checked_controls(report, model, question_types):
+def checked_controls(report, model, question_types, abstention=False):
     cases = report.get("control_cases", [])
     expected = {
         "positive-equivalent": True,
@@ -46,7 +46,8 @@ def checked_controls(report, model, question_types):
     if (
         report.get("model") != model
         or report.get("status") != "LOCAL_JUDGE_SELECTED_TYPE_SANITY_PASSED"
-        or question_types != {"single-session-assistant"}
+        or question_types != {report.get("question_type", "single-session-assistant")}
+        or report.get("abstention", False) is not abstention
         or len(cases) != 3
         or {x.get("control_id") for x in cases} != set(expected)
         or any(
@@ -116,8 +117,16 @@ def main():
         json.loads(line) for line in args.hypotheses.read_text("utf-8").splitlines()
     ]
     question_types = checked_inputs(json.loads(ref_raw), hypotheses)
+    abstention_flags = {"_abs" in row["question_id"] for row in hypotheses}
+    if len(abstention_flags) != 1:
+        raise ValueError(
+            "separate answerable and abstention scoring/control batches required"
+        )
     checked_controls(
-        json.loads(args.controls.read_text("utf-8")), args.model, question_types
+        json.loads(args.controls.read_text("utf-8")),
+        args.model,
+        question_types,
+        abstention=next(iter(abstention_flags)),
     )
     plan = {
         "source_id": "LONGMEMEVAL",

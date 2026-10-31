@@ -37,6 +37,8 @@
 
 LongMemEval最新增量：公开`scripts/score_longmemeval_original.py`已在服务器对M既有3份原回答完成原QA评分主流程，0次重复读者生成。独立审计逐项核对原题、原提示、保存回答、3次10-token评分请求/响应及原yes子串标签，全部正常停止，复核0次模型调用。回执为共享任务根`longmemeval-public-qa-scorer-plan-20261031-002/m-independent-audit-public.json`。这是明确的9B本地judge绑定，不是官方推荐judge质量复现。Oracle固定三题实际为时间推理，S固定三题为用户信息回忆，现有助手信息题自检不能覆盖它们；入口已拒绝不匹配评分，未改题或重跑。来源仍不打勾，待补题型自检、评分及完整工件/研究消费核验。
 
+- [x] 后续补齐Oracle时间推理及S用户信息回忆的独立题型自检：各固定正例、错误负例和空答案负例均通过，共6次合成评分调用，不计原题。随后复用各3份原回答，完成原QA主流程及独立审计；原提示、10-token预算、原yes子串标签及全部stop核验一致，0次重复读者生成。阶段为共享任务根`longmemeval-oracle-s-public-qa-20261031-001`，两份`*-independent-audit-public.json`保留。加上M共9份原回答已评分；当前缺口缩小为精确工件与未修改研究消费者接通，来源仍未打总勾。入口分别绑定题型及是否为不可回答问题，不能用普通问答控制覆盖abstention。
+
 ### Mind2Web（固定原题原生交付完成）
 
 - [x] 固定官方源码版本 `33bd95caeee7bba22dd08ecc935845e15c5e5dc7`，31个文件逐一核对Git对象；服务器源码归档SHA256与中转端一致。

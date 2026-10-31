@@ -11,6 +11,22 @@ import pytest
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def test_capped_profile_is_explicit_and_does_not_replace_publisher_null():
+    spec = importlib.util.spec_from_file_location(
+        "structeval_output_budget", ROOT / "scripts/run_structeval_original_json.py"
+    )
+    runner = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(runner)
+    assert runner.output_budget("publisher-null", "original-model", False) is None
+    assert (
+        runner.output_budget("qwen35-9b-nonthinking-32768", "Qwen/Qwen3.5-9B", True)
+        == 32768
+    )
+    for model, nonthinking in [("other-model", True), ("Qwen/Qwen3.5-9B", False)]:
+        with pytest.raises(ValueError, match="explicit.*nonthinking"):
+            runner.output_budget("qwen35-9b-nonthinking-32768", model, nonthinking)
+
+
 def test_selected_zero_retry_policy_reaches_sdk_without_changing_task_budget():
     spec = importlib.util.spec_from_file_location(
         "structeval_transport_control", ROOT / "scripts/run_structeval_original_json.py"

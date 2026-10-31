@@ -39,6 +39,8 @@ query不改；当前官方模型运行只读取query，因此既有Text→JSON�
 
 ## 运行
 
+新增经确认的`--output-profile qwen35-9b-nonthinking-32768`：必须同时指定`--model Qwen/Qwen3.5-9B --disable-thinking`，显式将workflow输出上限绑定为32768。默认`publisher-null`仍保持原`max_tokens=None`。回执同时记录原上限、实际上限、profile及是否偏离发布方预算；两种配置单独报告，不能合并成绩或把新配置称为官方默认。新配置仅用于失败题及未跑题，成功生成保留复用；已取消且结果未知的请求需先核查，不自动重放。该配置已完成软件测试，真实任务结果另行登记，不因加入配置补勾。
+
 传输参数与生成预算分别记录：`--request-timeout 300`控制单次HTTP超时，`--max-retries 0`控制官方客户端外层重试；入口显式关闭SDK内部重试，避免一次逻辑请求被隐式发送三次。这些参数不改变原题、`max_tokens=None`或评分规则。历史运行曾发生内部额外重试，原始失败记录保留，不改写为新配置实跑结果。取消且未收到响应的请求记录为结果未知，不能计作零分或未经核查自动重放。
 
 渲染任务的最新逐协议状态以[唯一打勾清单](DATASET_CHECKLIST.zh-CN.md)及[机器清单](dataset-validation-status.json)为准。Text→LaTeX全50题已完成审计；后续Text→TikZ传输失败，保留34份有效生成及一个结果未知请求，尚未完成该协议评分。已完成的生成不能因批次失败而全部重跑。
