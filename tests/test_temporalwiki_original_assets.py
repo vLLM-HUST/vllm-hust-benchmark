@@ -23,6 +23,34 @@ def identity(raw):
     return {"bytes": len(raw), "sha256": hashlib.sha256(raw).hexdigest()}
 
 
+def test_publisher_inventory_does_not_expand_acquired_probe_scope(tmp_path):
+    profile = json.loads(runner.PROFILE.read_text("utf-8"))
+    inventory = profile["publisher_archive_inventory"]
+    assert len(inventory["archives"]) == 3
+    assert inventory["license_review_complete"] is False
+    probe, difference, full = inventory["archives"]
+    assert probe["publisher_lfs_sha256"] == profile["archive"]["sha256"]
+    assert probe["bytes"] == profile["archive"]["bytes"]
+    assert difference["bytes"] == 932070039
+    assert full["bytes"] == 24655216607
+    assert not difference["acquired_under_existing_probe_profile"]
+    assert not full["acquired_under_existing_probe_profile"]
+    assert inventory["dataset_revision"] != profile["dataset_revision"]
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(ROOT / "scripts/prepare_temporalwiki_original_assets.py"),
+            "--archive",
+            str(tmp_path / "not-downloaded.zip"),
+        ],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    assert json.loads(result.stdout)["publisher_archive_inventory"] == inventory
+    assert not (tmp_path / "not-downloaded.zip").exists()
+
+
 def fixture(tmp_path):
     csv = b'subject,relation,object\r\n" a, b ",relation,reference\r\n'
     files = [

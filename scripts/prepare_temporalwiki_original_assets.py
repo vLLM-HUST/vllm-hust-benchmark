@@ -157,6 +157,9 @@ def main():
         json.dumps(
             {
                 "source_id": "TEMPORALWIKI",
+                "publisher_archive_inventory": profile.get(
+                    "publisher_archive_inventory"
+                ),
                 "action": args.action,
                 "status": "PLAN_ONLY_NO_DOWNLOAD"
                 if args.action == "plan"

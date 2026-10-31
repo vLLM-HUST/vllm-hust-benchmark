@@ -248,6 +248,9 @@ LD_LIBRARY_PATH=/external/ffmpeg/lib python -B scripts/run_videomme_original.py 
 
 - [ ] 原数据许可待核验；另外两种归档尚未取得，不得把Wikipedia全文、差分语料和subject/relation/object探针强行合并为同一种行结构。
 
+- [x] 2026-10-31通过发布方dataset info和不可变版本tree
+  API补齐三种归档身份，登记在现有探针profile的`publisher_archive_inventory`，计划CLI直接显示。另两包分别为932070039和24655216607字节，仅登记官方LFS身份，未下载、未重算整包SHA；原探针取得版本与内容不变。许可和剩余数据获取仍未完成，不计来源总勾。
+
 - [ ] 官方模型/checkpoint、合格NPU环境及原生评测待完成。旧环境为Python3.8、Torch1.9 CUDA11.1等，不在当前NPU环境盲装或静默修改作者配置。
 
   仅准备/核验作者软件（外部目录；不下载数据或权重、不执行训练/推理）：
