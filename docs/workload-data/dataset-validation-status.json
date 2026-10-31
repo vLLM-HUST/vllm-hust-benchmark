@@ -4796,6 +4796,15 @@
         "registered_public_provider": true,
         "format_fixture_tests_passed": 8,
         "original_archive_readbacks_verified": false,
+        "incomplete_archive_prefix_format_probe": {
+          "available_bytes_at_probe": 265289728,
+          "archive_members_inspected": 71,
+          "complete_text_audio_pair_identities_found": 3,
+          "original_wav_headers_inspected": 24,
+          "all_inspected_headers_mono16bit24kHz": true,
+          "whole_archive_checksum_verified": false,
+          "original_provider_or_native_execution_qualified": false
+        },
         "preserves": ["original text", "publisher-normalized text", "reference WAV locator", "speaker/chapter/segment/utterance string identities", "shared chapter metadata locators"],
         "archive_extraction_or_resampling": false,
         "waveform_checks": "bounded header only, not complete PCM decode",
@@ -4816,8 +4825,19 @@
           "stage": "libritts-original-test-other-cn-20261031-001 under the private shared task root",
           "pid": 484724,
           "birth": "863283231",
-          "last_observed_alive_same_birth": true,
-          "last_observed_partial_bytes": 20971520,
+          "last_observed_alive_same_birth": false,
+          "last_observed_partial_bytes": 266338304,
+          "terminal_failure": "TimeoutError: The read operation timed out; original failure and partial preserved",
+          "bounded_original_range_resume": {
+            "stage": "resume-bounded-ranges-002 under the same private acquisition root",
+            "pid": 597641,
+            "birth": "863498294",
+            "initial_partial_bytes_reused": 266338304,
+            "parallel_connections": 4,
+            "maximum_original_range_bytes": 4194304,
+            "range_identity_and_whole_archive_dual_checksums_required": true,
+            "source_checkbox_eligible": false
+          },
           "original16MiB_partial_and_logs_retained": true,
           "original_writer_identity_checked_before_termination": true,
           "exact_http_range_and_full_dual_checksums_required": true,
@@ -4827,7 +4847,7 @@
         "public_server_plan_receipt": "libritts-public-acquisition-entry-20261031-001/qualification-public.json under the private shared task root",
         "public_server_plan_exit_code": 0,
         "native_model_calls": 0,
-        "boundary": "Original slow owned writer was identity-checked and terminated, original16MiB partial retained, identical prefix resumed from the publisher CN mirror in a separate stage. Latest mirror writer is live; whole archive remains unverified. No provider, synthesis, scoring or completion claim. Inspect the current exact process before any continuation."
+        "boundary": "Original slow owned writer was identity-checked and terminated, original16MiB partial retained. Subsequent mirror attempt terminated on read timeout at266338304 bytes; failure retained and original prefix resumed using bounded exact byte ranges. Whole archive remains unverified. No provider, synthesis, scoring or completion claim. Inspect the current exact process before any continuation."
       },
       "checked": false,
       "legacy_checked": false,

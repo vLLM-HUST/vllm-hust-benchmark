@@ -220,8 +220,12 @@ def test_original_research_assets_are_registered_without_native_completion_claim
         runner.CATALOG.read_text("utf-8"), object_pairs_hook=unique_object
     )["sources"]
     assert (
-        len(sources) == 111
-    )  # Existing109 plus planned OVO/StreamingBench; not new delivery scope.
+        len(sources) == 112
+    )  # Adds already-planned LibriTTS; no change to the118-source delivery scope.
+    assert (
+        sources["LIBRITTS"]["asset_kind"]
+        == "original_multispeaker_text_reference_audio_pairs"
+    )
     assert "TEMPORALWIKI" in sources
     assert sum(EXPECTED.values()) == 48
 
