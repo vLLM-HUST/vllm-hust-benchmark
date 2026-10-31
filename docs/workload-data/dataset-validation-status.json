@@ -1,6 +1,6 @@
 {
   "schema_version": "workload-validation-checklist/v1",
-  "updated_at": "2026-10-31",
+  "updated_at": "2026-11-01",
   "owned_cpu_storage_cleanup": {
     "date": "2026-10-31",
     "volume_expansion_performed": false,
@@ -1306,11 +1306,11 @@
     "LONGMEMEVAL": {
       "scope": "public",
       "delivery_kind": "review_original_source_protocol",
-      "status": "IN_PROGRESS",
-      "checked": false,
+      "status": "AVAILABLE",
+      "checked": true,
       "legacy_checked": false,
       "existing_receipt": null,
-      "delivery_receipt": null,
+      "delivery_receipt": "docs/workload-data/validation/longmemeval-original-native-delivery-20261101.json",
       "original_acquisition_receipt": "docs/workload-data/validation/longmemeval-original-acquisition-20261025.json",
       "original_fields_audit_receipt": "docs/workload-data/validation/longmemeval-original-fields-audit-20261025.json",
       "native_generation_checkpoint": "docs/workload-data/validation/longmemeval-original-native-checkpoint-20261025.json",
@@ -1402,10 +1402,28 @@
           "publisher_70b_or_gpt4o_reproduction": false,
           "boundary": "Actual model is explicitly attributed as Qwen, not a supported70B alias. Keep failed sanity results; do not use the resulting labels as accepted benchmark scores or retry until passing."
         },
-        "qa_judging_executed": false,
-        "boundary": "Official M supports retrieval-augmented QA; full-history overflow remains a separate baseline limitation. All fixed3 assistant-evidence cases are excluded from publisher user-side retrieval aggregates, so vacuous metrics are not claimed. Original top10/CoN reader generations completed once on NPU after complete-corpus validation, including repeated session IDs. Original source, labels, questions and budgets unchanged; QA judging and exact-artifact/public-research handoff remain pending."
+        "qa_judging_executed": true,
+        "boundary": "Official M supports retrieval-augmented QA; full-history overflow remains a separate baseline limitation. All fixed3 assistant-evidence cases are excluded from publisher user-side retrieval aggregates, so vacuous metrics are not claimed. Original top10/CoN reader generations completed once on NPU after complete-corpus validation, including repeated session IDs. Saved answers now scored with the original QA workflow under the explicit9B local judge; the failed14B sanity remains retained. Exact-artifact/public-research handoff remains pending."
       },
-      "blocker": "Reuse six Oracle/S generations and the new3 M RAG generations. Original BM25 over complete482/472/473-session histories and original top10/CoN800 reader exited0; all3 reader completions stopped normally. M full-history overflow remains a separate failed baseline, not a reason to change original questions or truncate histories. Current14B local QA binding failed the empty-answer negative sanity control under the unchanged publisher prompt/max10 budget, so formal judging is not accepted; need a qualified judge binding. All3 assistant-evidence cases are excluded from publisher user-side retrieval aggregates; do not claim vacuous retrieval scores. Exact public artifact/research handoff and accepted QA judging remain pending."
+      "fixed_ci_research_handoff_progress": {
+        "stage": "longmemeval-fixed-ci-research-handoff-20261101-001 under the private shared task root",
+        "actual_successful_cpu_ci_run": 41215520402,
+        "provider_commit_short": "dc44676d",
+        "provider_payloads_unchanged_since_fixed_successful_ci": true,
+        "research_commit": "dd4103140d358cf211b88f24296b7419d170a54f", "identity_note": "pragma: allowlist secret - unchanged research source revision",
+        "pid": 2488052,
+        "birth": "866550265",
+        "last_verified_state": "TERMINAL_SUCCESS; Oracle3, S3 and M3 original complete-field public/unchanged-research readbacks passed",
+        "terminal_receipt": "qualification-public.json",
+        "actual_artifact_id": 13047975722,
+        "installed_payloads_byte_identical": 78,
+        "all_three_variants_original_complete_readbacks": 9,
+        "model_calls": 0,
+        "research_observation_or_analysis_started": false,
+        "source_checkbox_eligible": false
+      },
+      "blocker": null,
+      "remaining_optional_modes": "Nine fixed original Oracle/S full-history and M BM25-top10/CoN answers executed, originally scored with explicit9B local judge, audited and handed off through exact successful CI provider and unchanged research consumer. Not full500-case inference, broad local-judge accuracy or publisher70B/GPT4 reproduction. M full-history overflow remains retained; assistant-evidence cases excluded from user-side retrieval aggregates. Dense/index expansion and unmatched type/abstention bindings remain unvalidated."
     },
     "LONGMEMEVAL_V2": {
       "scope": "public",
@@ -2054,7 +2072,13 @@
         "outer_and_sdk_retries": 0,
         "stage": "structeval-capped-failed-tikz-window-32068-001 under the private shared task root",
         "selection": "Text-to-Tikz protocol position37 only: prior known failed task; position38 unknown outcome not replayed",
-        "last_verified_status": "ORIGINAL_GENERATE_RENDER_VQA_RUNNING",
+        "last_verified_status": "NATIVE_FAILED_RETAINED; generation saved, rendering blocked after owned CPU workspace autostop",
+        "generation_finish_reason": "length",
+        "completion_tokens": 32768,
+        "render_requests_retained": 1,
+        "render_responses_received": 0,
+        "actual_judge_calls": 0,
+        "owned_cpu_workspace_recovery": "Same80GiB PVC/template/TTL restarted; Pod running, original Docker restoring containers and API not yet ready; no daemon restart or model replay",
         "controller_pid": 2450168,
         "controller_birth": "866520946",
         "child_pid": 2450169,

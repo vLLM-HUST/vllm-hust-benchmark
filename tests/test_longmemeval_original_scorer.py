@@ -2,6 +2,7 @@
 
 import hashlib
 import importlib.util
+import json
 from pathlib import Path
 import sys
 
@@ -95,3 +96,29 @@ def test_selector_and_constructor_only_are_bound(monkeypatch):
     assert namespace["result"] is True  # Original substring parsing is not replaced.
     with pytest.raises(ValueError, match="identity mismatch"):
         runner.bound_program(raw + b"# changed", "explicit-model")
+
+
+def test_delivery_receipt_separates_native_scoring_and_consumer_evidence():
+    ledger = json.loads(
+        (ROOT / "docs/workload-data/dataset-validation-status.json").read_text("utf-8")
+    )
+    source = ledger["delivery_inventory"]["LONGMEMEVAL"]
+    receipt = json.loads((ROOT / source["delivery_receipt"]).read_text("utf-8"))
+    assert source["checked"] and source["status"] == "AVAILABLE"
+    assert receipt["source_checkbox_eligible"]
+    assert receipt["native_execution"]["original_cases"] == 9
+    assert (
+        receipt["native_execution"][
+            "reader_generations_repeated_for_scoring_or_handoff"
+        ]
+        == 0
+    )
+    assert receipt["qa_scoring"]["original_cases_scored"] == 9
+    assert not receipt["qa_scoring"][
+        "publisher_recommended_70b_or_gpt4_judge_reproduced"
+    ]
+    assert (
+        receipt["public_and_research_handoff"]["original_complete_record_roundtrips"]
+        == 9
+    )
+    assert receipt["public_and_research_handoff"]["model_calls"] == 0
