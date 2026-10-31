@@ -12,7 +12,6 @@ import base64
 import hashlib
 import json
 import os
-from pathlib import Path
 import platform
 import re
 import shutil
@@ -21,6 +20,7 @@ import subprocess
 import sys
 import time
 import urllib.request
+from pathlib import Path
 from urllib.parse import urlsplit
 
 TASK = "openssl-selfsigned-cert"
@@ -79,7 +79,12 @@ def command(argv, env, logfile=None, timeout=900):
     if logfile:
         with Path(logfile).open("ab") as stream:
             result = subprocess.run(
-                argv, env=env, stdout=stream, stderr=subprocess.STDOUT, timeout=timeout
+                argv,
+                env=env,
+                stdout=stream,
+                stderr=subprocess.STDOUT,
+                timeout=timeout,
+                check=False,
             )
         if result.returncode:
             raise RuntimeError(
@@ -309,7 +314,10 @@ RUN uvx -p 3.13 -w pytest==8.4.1 -w pytest-json-ctrf==0.3.5 pytest --version
     image = json.loads(docker(env, "image", "inspect", tag))[0]
     toml = (task / "task.toml").read_text()
     toml, count = re.subn(
-        r"^docker_image\s*=.*$", 'docker_image = "' + tag + '"', toml, flags=re.M
+        r"^docker_image\s*=.*$",
+        'docker_image = "' + tag + '"',
+        toml,
+        flags=re.MULTILINE,
     )
     if count != 1:
         raise RuntimeError("Unexpected upstream task image declaration")
