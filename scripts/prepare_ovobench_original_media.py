@@ -6,10 +6,14 @@ sealed original annotations, registered complete-member identity and byte budget
 
 import argparse
 import hashlib
+from http.client import IncompleteRead
 import json
 import os
 from pathlib import Path, PureWindowsPath
 import shutil
+from ssl import SSLCertVerificationError, SSLEOFError
+import time
+from urllib.error import HTTPError, URLError
 from urllib.request import urlopen
 
 from plan_ovobench_original_media_ranges import PROFILE, plan
@@ -18,7 +22,9 @@ from prepare_wavcaps_original_media import fetch
 from vllm_hust_workload_data.assets import verify_file
 
 
-def transfer(member, location, inventory, etags, sink, *, opener=urlopen):
+def transfer(
+    member, location, inventory, etags, sink, *, opener=urlopen, sleep=time.sleep
+):
     parts = {item["path"]: item for item in inventory["parts"]}
     if (
         location["path"] != member["path"]
@@ -29,6 +35,7 @@ def transfer(member, location, inventory, etags, sink, *, opener=urlopen):
     ):
         raise ValueError("complete registered original member span required")
     digest, count = hashlib.sha256(), 0
+    transport_failures = []
     for span in location["ranges"]:
         part = parts[span["part"]]
         expected_etag = etags.get(span["part"])
@@ -53,7 +60,42 @@ def transfer(member, location, inventory, etags, sink, *, opener=urlopen):
                     )
                 return response
 
-            raw = fetch(item, opener=checked_open)
+            for attempt in range(1, 4):
+                try:
+                    raw = fetch(item, opener=checked_open)
+                    break
+                except (
+                    URLError,
+                    TimeoutError,
+                    ConnectionError,
+                    IncompleteRead,
+                    SSLEOFError,
+                ) as error:
+                    # Access/rate denials and all identity/ETag errors are not retried.
+                    if isinstance(error, URLError) and isinstance(
+                        error.reason, SSLCertVerificationError
+                    ):
+                        raise
+                    if isinstance(error, HTTPError) and error.code not in {
+                        408,
+                        500,
+                        502,
+                        503,
+                        504,
+                    }:
+                        raise
+                    transport_failures.append(
+                        {
+                            "part": part["path"],
+                            "start": start,
+                            "end": end,
+                            "attempt": attempt,
+                            "error_type": type(error).__name__,
+                        }
+                    )
+                    if attempt == 3:
+                        raise
+                    sleep(attempt * 2)
             if sink.write(raw) != len(raw):
                 raise OSError("incomplete original media write")
             digest.update(raw)
@@ -63,7 +105,13 @@ def transfer(member, location, inventory, etags, sink, *, opener=urlopen):
         raise ValueError(
             "complete original member identity mismatch; do not use partial media"
         )
-    return {"path": member["path"], "bytes": count, "sha256": digest.hexdigest()}
+    return {
+        "path": member["path"],
+        "bytes": count,
+        "sha256": digest.hexdigest(),
+        "transport_retry_count": len(transport_failures),
+        "transport_failures": transport_failures,
+    }
 
 
 def download(member, location, inventory, etags, media_root, *, max_bytes):

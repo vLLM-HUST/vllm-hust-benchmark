@@ -4,8 +4,10 @@ import hashlib
 import importlib.util
 import io
 from pathlib import Path
+from ssl import SSLCertVerificationError
 import sys
 from types import SimpleNamespace
+from urllib.error import HTTPError, URLError
 
 import pytest
 
@@ -75,6 +77,103 @@ def test_original_ranges_and_whole_member_identity_are_both_required():
             {"p": '"original"'},
             io.BytesIO(),
             opener=opener_for(raw),
+        )
+
+
+def test_transient_transport_retry_uses_identical_range_and_writes_once():
+    raw, member, location, inventory = fixture()
+    calls, waits = [], []
+
+    def flaky(request, **kwargs):
+        calls.append((request.full_url, request.get_header("Range")))
+        if len(calls) == 1:
+            raise URLError(ConnectionResetError("fixture transport reset"))
+        return opener_for(raw)(request, **kwargs)
+
+    sink = io.BytesIO()
+    result = entry.transfer(
+        member,
+        location,
+        inventory,
+        {"p": '"original"'},
+        sink,
+        opener=flaky,
+        sleep=waits.append,
+    )
+    assert calls[0] == calls[1] and sink.getvalue() == raw
+    assert result["transport_retry_count"] == 1 and waits == [2]
+
+
+@pytest.mark.parametrize("status", [401, 403, 429])
+def test_access_denial_and_etag_mismatch_are_not_retried(status):
+    raw, member, location, inventory = fixture()
+    calls = []
+
+    def denied(request, **kwargs):
+        calls.append(request.full_url)
+        raise HTTPError(request.full_url, status, "fixture denial", {}, None)
+
+    with pytest.raises(HTTPError):
+        entry.transfer(
+            member,
+            location,
+            inventory,
+            {"p": '"original"'},
+            io.BytesIO(),
+            opener=denied,
+            sleep=lambda _: pytest.fail("permission denial retried"),
+        )
+    assert len(calls) == 1
+    with pytest.raises(ValueError, match="captured original ETag"):
+        entry.transfer(
+            member,
+            location,
+            inventory,
+            {"p": '"different"'},
+            io.BytesIO(),
+            opener=opener_for(raw),
+            sleep=lambda _: pytest.fail("identity error retried"),
+        )
+
+
+def test_transport_attempt_bound_keeps_sink_empty_on_failure():
+    _, member, location, inventory = fixture()
+    calls, waits = [], []
+
+    def unavailable(request, **kwargs):
+        calls.append(request.get_header("Range"))
+        raise URLError(TimeoutError("fixture timeout"))
+
+    sink = io.BytesIO()
+    with pytest.raises(URLError):
+        entry.transfer(
+            member,
+            location,
+            inventory,
+            {"p": '"original"'},
+            sink,
+            opener=unavailable,
+            sleep=waits.append,
+        )
+    assert len(calls) == 3 and len(set(calls)) == 1 and waits == [2, 4]
+    assert sink.getvalue() == b""
+
+
+def test_wrapped_certificate_failure_is_not_treated_as_transient_transport():
+    _, member, location, inventory = fixture()
+
+    def bad_certificate(*args, **kwargs):
+        raise URLError(SSLCertVerificationError(1, "fixture certificate failure"))
+
+    with pytest.raises(URLError):
+        entry.transfer(
+            member,
+            location,
+            inventory,
+            {"p": '"original"'},
+            io.BytesIO(),
+            opener=bad_certificate,
+            sleep=lambda _: pytest.fail("certificate verification failure retried"),
         )
 
 
