@@ -1163,6 +1163,22 @@ CRC和归档目录身份另行记录。完整102题仍可从发布方原归档�
 
 通信模块尚未接入原Agent的价格和tokenizer路径，不能用GPT别名、虚构单价或“成本为零”绕过价格表；未知价格应报告不可得，完整Agent绑定仍待完成。另检查了[官方OpenHands legacy入口](https://github.com/OpenHands/benchmarks/blob/542cb71c860c11d6a70238a1dd4b4ac7a3e0d4d2/legacy/scienceagentbench/run_infer.py)：它仍默认读取validation，旧镜像上下文还复制整个benchmark目录，不能直接当作本次verified数据与隔离部署已就绪的依据。未拉取旧镜像，也未切换到未经验证的替代流程。
 
+## StreamingBench 原生流视频评测（仅软件准备，尚未完成原生验证）
+
+官方源码固定到
+`THUNLP-MT/StreamingBench@89299232c4cc1cc3721951173c5f107b48cf6877`，复用作者软件获取器，不把原始问题JSON、视频或发布方模型结果复制进仓库：
+
+```bash
+python scripts/prepare_jsonschemabench_author_source.py --source streamingbench --author-root /srv/benchmarks/StreamingBench
+python scripts/prepare_jsonschemabench_author_source.py --source streamingbench --author-root /srv/benchmarks/StreamingBench --action prepare --max-bytes 74376
+python scripts/prepare_jsonschemabench_author_source.py --source streamingbench --author-root /srv/benchmarks/StreamingBench --action verify
+```
+
+默认只计划；显式准备核验31份原始软件文件的Git
+blob、SHA256和大小。服务器已取得全部74376字节、解析25份Python语法且公共verify命令exit0；未导入作者模型代码。回执：`/root/streamingbench-original-software-20261031-001/preparation-public.json`、`/root/streamingbench-public-source-verify-20261031-001/qualification-public.json`。软件准备不代表数据、NPU环境、推理或评分已通过。
+
+后续必须遵循[官方流程](https://github.com/THUNLP-MT/StreamingBench)：原数据按real/omni/sqa/proactive组织，依次使用`preprocess.sh`、`eval.sh`、`stats.sh`，保留原视频组与时间戳。SQA原实现把前序参考答案加入后续上下文；主动响应原实现逐秒查询到参考时间+4秒，不能简化成单次问答。官方Qwen2-VL-7B包装器采用自适应1/0.5/0.2fps和128输出预算，但写死CUDA与flash_attention_2；当前尚无已验证NPU绑定。完整组固定抽样、原始媒体、原生推理/评分和统一消费链路均待补，来源不打勾。
+
 ## OVO-Bench 原生在线视频评测（软件准备入口，尚未完成原生验证）
 
 [官方仓库](https://github.com/JoeLeelyf/OVO-Bench)当前修订版区分回溯、实时感知和向前主动响应，包含12种原生任务。复用已有作者软件获取器，固定45份原Python、shell、依赖说明和许可，不复制注释数据、视频或发布方模型结果进仓库：

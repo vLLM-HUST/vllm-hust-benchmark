@@ -55,6 +55,7 @@ def main():
             "dailytalk",
             "longmemeval",
             "ovobench",
+            "streamingbench",
         ],
         default="jsonschemabench",
         help="Pinned original author source only; historical default unchanged",
