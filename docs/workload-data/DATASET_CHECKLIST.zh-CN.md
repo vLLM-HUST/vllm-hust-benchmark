@@ -12,6 +12,8 @@
 当前交付
 **78/113项**，待完成35项，另5项仅分类。首批#432的60项和第二批#538的ScienceWorld已合入main；早期五个草稿已关闭为被汇总承接，历史和分支保留。第三批新增CodeJudge-Eval、DeepPlanning、OpenMath、OpenCode、MVBench、Video-MME、LiveCodeBench、BigCodeBench、Spider、DRAGON、SWE_VERIFIED、SWE_BENCH、AppWorld及SpokenWOZ文本DST固定原生profile交付，尚未合入。OpenMath/OpenCode是训练语料原问题生成，不是独立质量benchmark。打勾不代表全量模型评测、高分或性能保证。
 
+StructEval新增配置进展：经确认，`qwen35-9b-nonthinking-32768`与原`publisher-null`分开记录。仅原Text→TikZ位置37的已知失败题启动新配置，传输timeout3600秒、外层/SDK重试均0；未重跑成功生成及位置38的结果未知请求。共享任务根`structeval-capped-failed-tikz-window-32068-001`的控制器2450168及子进程2450169已核实存活，终态尚待审计，计数暂不增加。
+
 ### ToolBench：原软件准备完成，原生任务未完成
 
 - [x] 固定官方版本`d56fdd89faf8c91fa135090b212bb9057ee5cfc2`，服务器取得79份原Python/shell/说明/依赖/许可文件，共397381字节，逐份Git对象与SHA256核验；64份Python仅AST解析通过，未导入执行，未取得原题或权重。
