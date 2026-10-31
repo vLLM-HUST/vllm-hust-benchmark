@@ -548,7 +548,15 @@ def test_structeval_checkpoint_counts_only_audited_terminal_protocols():
     checkpoint = json.loads(
         (ROOT / row["completed_protocols_checkpoint_chain"][0]).read_text("utf-8")
     )
-    assert not row["checked"]
+    # The480-task checkpoint stays historical. Later declared nonrender
+    # delivery requires a separate closing receipt, not all optional modes.
+    delivery = json.loads((ROOT / row["delivery_receipt"]).read_text("utf-8"))
+    assert row["checked"] and delivery["source_checkbox_eligible"]
+    assert delivery["native_evidence"]["unique_original_tasks"] == 950
+    assert delivery["native_evidence"]["complete_original_protocols"] == 19
+    assert not delivery["remaining_modes"][
+        "all44_protocols_or_all2035_native_tasks_complete"
+    ]
     assert checkpoint["verified_unique_native_tasks"] == 480
     assert checkpoint["previous_unique_original_tasks_reused"] == 339
     assert checkpoint["new_unique_original_tasks_audited"] == 141

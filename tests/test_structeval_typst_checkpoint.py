@@ -39,7 +39,19 @@ def test_typst_failures_are_not_reported_as_positive_judge_qualification():
     )
     current = ledger["delivery_inventory"]["STRUCTEVAL"]
     assert current["verified_unique_native_tasks"] >= 1394
-    assert current["checked"] is False
+    delivery = json.loads((ROOT / current["delivery_receipt"]).read_text("utf-8"))
+    assert (
+        current["checked"]
+        and current["delivery_kind"] == "original_nonrender_protocols_official_scoring"
+    )
+    assert delivery["native_evidence"]["complete_original_protocols"] == 19
+    assert not delivery["remaining_modes"][
+        "all44_protocols_or_all2035_native_tasks_complete"
+    ]
+    assert all(
+        "typst" not in path.lower()
+        for path in delivery["native_evidence"]["historical_receipts_reused"]
+    )
 
 
 def test_latex_closed_groups_are_counted_once_without_promoting_source():
@@ -76,4 +88,9 @@ def test_latex_closed_groups_are_counted_once_without_promoting_source():
         == 2035 - ledger["verified_unique_native_tasks"]
     )
     assert progress["source_checkbox_eligible"] is False
-    assert ledger["checked"] is False
+    delivery = json.loads((ROOT / ledger["delivery_receipt"]).read_text("utf-8"))
+    assert ledger["checked"] and delivery["source_checkbox_eligible"]
+    assert delivery["native_evidence"]["unique_original_tasks"] == 950
+    assert not delivery["remaining_modes"][
+        "all44_protocols_or_all2035_native_tasks_complete"
+    ]
