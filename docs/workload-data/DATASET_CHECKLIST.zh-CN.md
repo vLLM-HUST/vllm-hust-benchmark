@@ -1322,6 +1322,13 @@ split；后续必须明确将生成和评估同时绑定原verified版本，并�
 WavCaps是弱标注音频—文本资产；作者captioning示例使用专用音频编码器和BART
 checkpoint，不能直接填入Qwen文本服务。原评分器要求五条参考的接口不能靠复制弱标注caption凑足；须按原任务选用真实评价资产和协议。其音频仅限学术研究且保留各源条件，不作默认企业再分发。以上准备不增加75/113完成数，机器清单状态为`IN_PROGRESS`。
 
+#### MultiAgentBench原Research续跑
+
+MultiAgentBench续跑状态：官方Research固定原前三题已启动，保留5/5/3个Agent及各5轮。当前观测第0题已产生真实模型请求和原关键词请求各1个，均已由NPU返回，正在原arXiv工具收集论文；不是先前的合成工具夹具。已完成题数仍为0，不打来源总勾。CPU运行目录`/root/marble-original-research-native-runtime-20261031-003`，原生父进程PID/birth及私有队列位置见机器清单`MULTIAGENTBENCH.native_research_execution`。续跑必须核查同一进程和队列，不能因工具检索慢或观察超时重启原题。
+
+- [x] 原Research前三题真实启动，首个原生模型与关键词请求已在NPU返回。
+- [ ] 三题完整原Agent流程及原评分结束，并完成保存结果核验；当前仍在运行，不能将启动、HTTP成功或论文检索当成任务完成。
+
 #### SpokenWOZ原生准备
 
 - [x] 从[发布方项目页](https://spokenwoz.github.io/SpokenWOZ-github.io/)当前链接的`ssz1111/SpokenWOZ-Test-Text-Fixed`取得固定版本原`data.json`：52233254字节，发布方LFS
