@@ -28,6 +28,17 @@ def test_spokenwoz_full_original_dialogues_are_not_audio_execution():
     assert provider["actual_ci_complete_original_turns_roundtripped"] == 136
     assert provider["actual_ci_existing_index_reused_unchanged"] is True
     assert provider["model_calls"] == 0
+    native = row["native_text_dst_validation"]
+    assert native["actual_npu_model_calls"] == native["original_dst_requests"] == 68
+    assert native["finish_reasons"] == {"stop": 68}
+    assert native["request_failures"] == 0
+    assert native["official_scorer_exit_code"] == 0
+    assert native["independent_correct_turns"] == 4
+    assert native["official_jga"] == 4 / 68
+    assert native["independent_scorer_agrees"] is True
+    assert native["audit_new_model_calls"] == 0
+    assert native["audio_execution"] is False
+    assert native["source_checkbox_eligible"] is False
 
 
 def test_full_duplex_publisher_examples_are_not_native_delivery():

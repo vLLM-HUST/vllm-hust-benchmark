@@ -3236,6 +3236,32 @@
       "scope": "public",
       "delivery_kind": "review_original_source_protocol",
       "status": "IN_PROGRESS",
+      "native_text_dst_validation": {
+        "server_stage": "/data/shared_upload/hust-phr/workload-benchmark-native-delivery-20261024/spokenwoz-original-DST-fixed3-32068-002",
+        "launch_receipt": "launch-public.json",
+        "saved_audit_receipt": "saved-audit-public.json",
+        "official_author_repository": "AlibabaResearch/DAMO-ConvAI",
+        "official_author_revision": "faf754671f5b850e1b4d1ff870db37a6a2480df6", "revision_note": "pragma: allowlist secret - original author code revision",
+        "original_complete_dialogues": 3,
+        "original_complete_turns": 136,
+        "original_dst_requests": 68,
+        "actual_npu_model_calls": 68,
+        "model": "Qwen/Qwen3-14B",
+        "model_binding": "NPU fallback, declared nonthinking; original client omits generation sampling/budget controls, and they remain omitted. Not GPT3.5 or hidden leaderboard reproduction.",
+        "finish_reasons": {"stop":68},
+        "request_failures": 0,
+        "original_prompts_histories_and_references_independently_verified": true,
+        "official_scorer_exit_code": 0,
+        "official_jga": 0.058823529411764705,
+        "independent_correct_turns": 4,
+        "independent_scorer_agrees": true,
+        "independent_parse_failures": [],
+        "audit_new_model_calls": 0,
+        "compatibility": "Original dst_data.py writes intermediate JSON without flushing before reread; retained stage001 failed on NFS. Separate compatibility copy adds exactly two f2.flush() calls; original code, tasks, prompts, references and scorer retained. No new raw data download or repeated generation.",
+        "audio_execution": false,
+        "public_native_runner_delivered": false,
+        "source_checkbox_eligible": false
+      },
       "public_adapter_preparation": {
         "server_receipt": "/root/spokenwoz-public-adapter-20261031-002/qualification-public.json",
         "original_dialogues_roundtripped": 1000,
@@ -3285,7 +3311,7 @@
       "legacy_checked": false,
       "existing_receipt": null,
       "delivery_receipt": null,
-      "blocker": "Original1000 dialogues35564 turns fully roundtripped via candidate public adapter; getter verify and fixed3 preparation passed. Actual successful CI41172187985 artifact13032060104 was independently installed on owned CPU:77 Git/wheel/installed payloads match, original fixed3 complete dialogues136 turns read back through public and unchanged research consumers, original index reused unchanged, no task resumed. Fresh server download network remains unqualified. Current publisher site links public Test-Text-Fixed while old Git README says hidden test: no hidden leaderboard reproduction claim. Original audio, official task-specific NPU DST/response or speech-text runtime, native scoring and real output consumption pending. Whole stored dialogues are not ready prompts; native runner must enforce per-call history visibility. Text-only official baselines do not qualify audio or duplex execution; CC BY-NC4.0 applies."
+      "blocker": "Original1000 dialogues35564 turns fully roundtripped; getter verify and fixed3 preparation passed. Actual CI41172187985 artifact13032060104 independently installed:77 exact Git/wheel/installed payloads, fixed3 public/unchanged-research136-turn readbacks, original index reused unchanged. Fixed3 original text DST now executed on NPU Qwen3-14B:68/68 stop,0 request failures; exact original prompts/histories/references and responses independently audited, original JGA4/68 agrees with independent state accumulation. Preserve original NFS flush failure and disclosed flush-only compatibility copy. Public native DST runner/saved verifier and actual output-consumer delivery remain pending, as do fresh server download network, original audio and remaining speech/response protocols. No hidden leaderboard, audio, duplex or whole-source completion claim; native runner must enforce per-call history visibility; CC BY-NC4.0 applies."
     },
     "DAILYTALK": {
       "scope": "public",
