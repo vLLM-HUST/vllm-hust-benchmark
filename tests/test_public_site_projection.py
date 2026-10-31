@@ -36,6 +36,10 @@ def test_projection_retains_other_results_and_input(tmp_path):
         )
     (source / "assets/site.js").write_text("// shared presentation\n")
     (source / "betterscale.html").write_text("withdrawn implementation")
+    (source / "assets/mixed-curves.svg").write_text("<svg>BetterScale</svg>")
+    (source / "index.html").write_text(
+        '<a href="./assets/mixed-curves.svg?v=old#chart">Curves</a>'
+    )
     retained = {
         "id": "native-run",
         "engine": "Native",
@@ -48,6 +52,8 @@ def test_projection_retains_other_results_and_input(tmp_path):
             {"id": "run-private", "engine": "BetterScale", "throughput": 999},
         ],
         "refs": ["native-run", "run-private"],
+        "concurrency_curves_url": "./assets/mixed-curves.svg?v=old",
+        "archived": {"concurrency_curves_url": "./assets/mixed-curves.svg#chart"},
     }
     raw = (json.dumps(records) + "\n").encode()
     (source / "data/leaderboard.json").write_bytes(raw)
@@ -69,7 +75,8 @@ def test_projection_retains_other_results_and_input(tmp_path):
     projection.validate(output)
     assert snapshot(source) == before
     projected = json.loads((output / "data/leaderboard.json").read_text())
-    assert projected == {"points": [retained], "refs": ["native-run"]}
+    assert projected == {"points": [retained], "refs": ["native-run"], "archived": {}}
+    assert "mixed-curves.svg" not in (output / "index.html").read_text()
     assert "betterscale.html" not in (output / "index.html").read_text()
     entry = json.loads((output / "data/benchmark-source-manifest.json").read_text())[
         "files"
