@@ -8,6 +8,23 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def test_full_duplex_publisher_examples_are_not_native_delivery():
+    ledger = json.loads(
+        (ROOT / "docs/workload-data/dataset-validation-status.json").read_text("utf-8")
+    )
+    row = ledger["delivery_inventory"]["FULL_DUPLEX_BENCH"]
+    evidence = row["original_scorer_preparation"]
+    assert evidence["original_files_git_blob_and_sha256_verified"] == 16
+    assert evidence["unchanged_publisher_example_scorer_exit_codes"] == {
+        "pause_handling": 0,
+        "smooth_turn_taking": 0,
+    }
+    assert evidence["publisher_example_output_not_our_model_output"] is True
+    assert evidence["audio_acquired"] is False
+    assert evidence["model_calls"] == 0
+    assert row["status"] == "IN_PROGRESS" and row["checked"] is False
+
+
 def test_wavcaps_preparation_is_not_missing_media_or_native_completion():
     ledger = json.loads(
         (ROOT / "docs/workload-data/dataset-validation-status.json").read_text("utf-8")

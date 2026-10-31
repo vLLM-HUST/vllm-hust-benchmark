@@ -1322,6 +1322,16 @@ split；后续必须明确将生成和评估同时绑定原verified版本，并�
 WavCaps是弱标注音频—文本资产；作者captioning示例使用专用音频编码器和BART
 checkpoint，不能直接填入Qwen文本服务。原评分器要求五条参考的接口不能靠复制弱标注caption凑足；须按原任务选用真实评价资产和协议。其音频仅限学术研究且保留各源条件，不作默认企业再分发。以上准备不增加75/113完成数，机器清单状态为`IN_PROGRESS`。
 
+#### Full-Duplex-Bench原生准备
+
+- [x] 固定发布方版本`3e799c45a045256f47d5f1c9cda90157e2d2ec9e`的`v1_v1.5`离线协议，专用CPU取得16份原说明、评分软件和官方样例JSON，逐份校验Git
+  blob与SHA256；未在Windows落盘原始资产。
+- [x] 未修改的`eval_pause_handling.py`和`eval_smooth_turn_taking.py`分别对官方自带的1份输出样例实际运行，均exit0。回执：`/root/full-duplex-original-scorer-controls-20261031-001/qualification-public.json`。这是发布方输出的评分器控制，不是本项目模型结果，也不是固定原前三题的验证。
+- [ ] 原数据与音频取得、公共准备入口、原始时序与媒体关系的provider接入。
+- [ ] 合适的NPU双工语音模型、原生输入/输出音频、ASR和适用完整评分、输出消费闭环。模型调用仍为0，总项不打勾。
+
+官方的v1/v1.5离线、v2实时考官、v3语音工具调用是不同协议，不得把上述两个样例评分推及其他版本；也不得以文本问答、拼造音频或CPU神经推理替代原生流程。官方协议入口：[Full-Duplex-Bench](https://github.com/DanielLin94144/Full-Duplex-Bench)。
+
 #### TOOLACE原始语料使用入口
 
 来源固定为`Team-ACE/ToolACE@6bda777c88d21e5a204703c1ee45597a8fa4f734`，原`data.json`为37154735字节、11300条，SHA256为`ba12c083fca7e8da48c67ad5b895e495447da7c66e39a2e19742c082e6cb537e`。使用数据组件的`workload-data catalog download-plan TOOLACE`查看原始URL；将自行取得并校验的文件放在私有目录，不放入Git。JSON读取/准备不需要模型、工具服务或科研观测环境，数据包安装及固定工件核对见[安装说明](INSTALLATION.zh-CN.md)。
