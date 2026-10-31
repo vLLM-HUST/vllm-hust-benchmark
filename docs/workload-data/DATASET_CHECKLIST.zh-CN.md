@@ -14,6 +14,10 @@
 
 StructEval新增配置进展：经确认，`qwen35-9b-nonthinking-32768`与原`publisher-null`分开记录。仅原Text→TikZ位置37的已知失败题运行新配置，传输timeout3600秒、外层/SDK重试均0；保存响应为length／32768输出tokens。CPU原工作区autostop导致渲染转发失败，900秒等待后原生子进程以RenderBlocked失败退出；原响应、代码和待渲染请求保留，实际VQA调用0，不计完整任务。原80GiB持久卷和模板已原样恢复，Docker仍在恢复旧容器；不重启daemon、不重新生成，不重放位置38的结果未知请求。共享任务根`structeval-capped-failed-tikz-window-32068-001`保留终态，计数不增加。
 
+StructEval恢复增量：原LaTeX镜像12层、972434432字节经只读原层SHA核验后流式导入独立Docker，镜像ID与所有diff_id不变；未重建、未扩容、未重启原Docker。五项原渲染器CPU控制通过。此前保存的32768-token原题输出已实际渲染并回传，原render_score为0、无图像，请求SHA核验一致；未新增模型调用。原控制器失败记录保留，原最终评价续接与逐题审计尚未完成，不增加总计数。
+
+StructEval评分续接：同一保存输出已调用未经修改的原`render_file_async`及`evaluate_file`完成，原render_score为0、final_eval_score为0.08。无图像时按原规则跳过实际VQA请求；通过禁止新增模型调用的控制核验新增生成/评委请求均0，不把“VQA流程返回”误称为实际评委推理。原推理文件逐字保留，原null结果未动；独立逐题审计待完成，总计数暂不增加。回执`structeval-capped-saved-final-evaluation-20261101-001/qualification-public.json`。
+
 ### StreamingBench：媒体准备进行中，原生未跑
 
 StreamingBench媒体准备增量（2026-11-01）：清理后专用CPU实测空闲14141509632字节，原固定10份视频总量2823253471字节，原容量阻塞已解除，不扩卷。原已核验视频不重下载；余9份尝试公开下载入口时首项返回Network
@@ -25,6 +29,8 @@ unreachable，失败记录保留，现复用原分块获取器经至多8MiB原�
 - [x] 第三份原视频sample_16已取得150322640字节，原CRC／SHA及全16934帧解码通过，公开验证／既有文件复用CLI各退出0。该检查点累计3/10视频、439921516字节、49186帧，不计任务。回执为`/root/streamingbench-public-third-media-reuse-20261101-001/qualification-public.json`。
 
 - [x] 第四、五份原视频sample_17_proactive及sample_221_real已取得，原ZIP成员CRC/EOF、观测SHA及全部38802帧解码通过。两份公开`--verify`和`--download`复用CLI各退出0，无联网、重复解码或模型调用。累计5/10视频、908128954字节、87988帧；其余5份视频及45份音频未完成，原生执行未完成，不计来源交付。回执分别为`/root/streamingbench-public-fourth-media-reuse-20261101-001/qualification-public.json`和`/root/streamingbench-public-fifth-media-reuse-20261101-001/qualification-public.json`。
+
+- [x] 第六份原视频sample_348_real完整667768200字节、原CRC/EOF与观测SHA及全部58247帧解码通过，保留原音轨；默认real三组原题所需媒体已齐。累计6/10视频、1575897154字节、146235帧；其余4份视频及45份音频未完成，不计原生任务。回执`/root/streamingbench-remaining-ram-member-04-20261101-001/qualification-public.json`。
 
 - [x] 明确原Qwen2-VL类的候选NPU入口及分类索引已补，不走作者CLI未知模型回退；服务器固定与全量real计划通过，0模型调用。默认3组共用sample_348原视频，保持3个原问题，不因共享视频去重任务或改用已取得的视频。原31份软件、128-token预算、作者时间窗及评分流程保留；`streamingbench-public-native-plan-20261101-004/qualification-public.json`是软件计划证据，不是实际NPU推理或全量媒体验证。
 
