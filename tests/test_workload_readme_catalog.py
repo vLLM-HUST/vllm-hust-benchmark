@@ -61,7 +61,7 @@ def test_readme_catalog_local_links_exist_and_source_anchors_resolve():
             assert (ROOT / target.split("#", 1)[0]).is_file(), target
 
 
-def test_ovobench_navigation_distinguishes_preparation_from_native_execution():
+def test_ovobench_navigation_distinguishes_sample_execution_from_delivery():
     text = (ROOT / "README.md").read_text("utf-8")
     row = next(
         line
@@ -70,5 +70,10 @@ def test_ovobench_navigation_distinguishes_preparation_from_native_execution():
     )
     assert "scripts/prepare_ovobench_native_selection.py" in row
     assert "scripts/prepare_ovobench_original_media.py" in row
-    assert "原生推理与评分未完成" in row
+    assert "原生固定36题/103响应及原评分已验证" in row
+    assert "完整入口与新CI待收口" in row
+    ledger = json.loads(
+        (ROOT / "docs/workload-data/dataset-validation-status.json").read_text("utf-8")
+    )
+    assert ledger["delivery_inventory"]["OVOBENCH"]["checked"] is False
     assert "[x]" not in row
