@@ -1216,7 +1216,7 @@ python scripts/prepare_jsonschemabench_author_source.py --source ovobench \
   --author-root /srv/benchmarks/ovo-author --action prepare --max-bytes 79170
 ```
 
-原始注释入口是`data/ovo_bench_new.json`；固定原文件918443字节、1640个原始case对应644个视频名。向前case包含多次查询，因此case数不等于官方介绍的查询数。原视频由[官方数据页](https://huggingface.co/datasets/JoeLeelyf/OVO-Bench)发布。官方说明提供约44GB原视频拼接包或约144GB预切分包，不能因体积大而用静态截图或自造prompt冒充完整任务。目前公开登记31/103份完整原片段，详见下文已核验快照；剩余片段、原模型和原评分未完成，不能按下述推理示例声称已跑通。
+原始注释入口是`data/ovo_bench_new.json`；固定原文件918443字节、1640个原始case对应644个视频名。向前case包含多次查询，因此case数不等于官方介绍的查询数。原视频由[官方数据页](https://huggingface.co/datasets/JoeLeelyf/OVO-Bench)发布。官方说明提供约44GB原视频拼接包或约144GB预切分包，不能因体积大而用静态截图或自造prompt冒充完整任务。目前固定抽样的103/103份完整原片段均已取得并公开登记身份；原NPU模型、原帧处理、真实推理和评分尚未完成，不能按下述推理示例声称已跑通。
 
 注释复用公共原始文件获取器，默认只显示计划，显式`--mode download`才下载，`--mode verify`核验已有原文件；不把数据放进仓库：
 
@@ -1257,7 +1257,7 @@ BY-NC-SA 4.0的README标注与Hub数据卡存在差异，见下述许可记录�
 
 OVO媒体范围计划可使用`python scripts/plan_ovobench_original_media_ranges.py --data-root /srv/datasets/ovobench --index /srv/private/ovo-captured-tar-index.json`。输入是对固定发布方归档捕获的原TAR头检查点；规划器核验捕获头哈希、原TAR校验和、连续偏移、分卷边界和已记录ETag，按原103片段生成不截断的跨分卷范围。它不对伪造索引提供原站认证，也不重新计算整分卷LFS哈希；获取时的固定URL/原版本/精确HTTP范围证据需另行保留。默认明确报告未定位项；`--require-complete`在目录未完成或固定片段未找全时失败，不换题补齐。真实368头快照已通过公共CLI，定位16片段共553531286字节；未下载视频、未完成全目录，也不视为模型可执行。
 
-OVO原片段校验入口：`python scripts/verify_ovobench_original_media.py --data-root /srv/datasets/ovobench --media-root /srv/datasets/ovo-original-clips`。当前profile登记31份完整原片段，共2613138981字节；服务器公共CLI对31份文件重新核验身份通过，未重下载或重解码。完整解码回执合计287876帧复用既有验证，见`/root/ovobench-fixed-original-media-all-20261031-001/public-registration-snapshot-20261031-001.json`；当前身份CLI回执`/root/ovobench-public-registered31-20261031-001/qualification-public.json`。显式`--decode`才调用已有PyAV逐帧核验；身份检查本身不证明解码。早期ASI三份的公共完整解码8556帧证据保留，下表仅列该子集。所有视频未重编码或更改采样，仍不等于官方Decord/Qwen帧处理或模型验证。`--require-all`在103个原片段未全部登记时失败；不能把31份媒体准备当全套可用。Git不含视频或任务原文。
+OVO原片段校验入口：`python scripts/verify_ovobench_original_media.py --data-root /srv/datasets/ovobench --media-root /srv/datasets/ovo-original-clips`。当前profile登记全部103份完整原片段，共3520157133字节；服务器公共CLI以`--require-all`对全部103份文件重新核验身份通过，未重下载或重解码。完整解码回执合计489216帧复用既有验证，见`/root/ovobench-fixed-original-media-all-20261031-001/complete-fixed103-registration-public.json`；当前身份CLI回执`/root/ovobench-public-registered103-20261031-001/qualification-public.json`。显式`--decode`才调用已有PyAV逐帧核验；身份检查本身不证明解码。早期ASI三份的公共完整解码8556帧证据保留，下表仅列该子集。所有视频未重编码或更改采样，仍不等于官方Decord/Qwen帧处理或模型验证。全部103媒体与固定36-case/12类及每个原阶段一一对应，重复分块bin缓存已清空；这不是NPU原生执行或全源1640-case成绩。Git不含视频或任务原文。
 
 | 获取参数`--member` | 完整原文件字节（`--max-bytes`至少此值） | 完整视频解码帧数 | 原帧率   |
 | ------------------ | --------------------------------------: | ---------------: | -------- |
@@ -1268,7 +1268,7 @@ OVO原片段校验入口：`python scripts/verify_ovobench_original_media.py --d
 原片段获取入口：`python scripts/prepare_ovobench_original_media.py --data-root /srv/datasets/ovobench --index /srv/private/ovo-captured-tar-index.json --member 485.mp4`默认只显示计划。显式加`--download --media-root /srv/datasets/ovo-original-clips --max-bytes 8800190`才获取；仅支持profile已登记、原抽样集合内且已定位的原成员，HTTP读取每段不超过8MiB，必须匹配捕获分卷ETag、精确206/Content-Range和完整成员SHA。保留512MiB磁盘余量；已有完整原文件校验后复用，不覆盖不兼容文件或`.partial`。新文件只有完整身份通过才发布，失败保留partial供排查。
 
 验证边界：公共transfer已在Windows
-RAM完成该原成员实际网络读取，逐字节匹配服务器保留文件，未在Windows写数据或增加服务器原媒体副本；服务器公开CLI已验证原文件复用。服务器自身直连网络路径尚未通过，公共目录捕获入口已实现并验证RAM网络推进，但服务器直连仍失败；原主目录已沿用旧控制完成，不重复扫描已取得结果。因此当前不宣称完整103片段一键准备或原生视频评测完成。原模型、原帧处理和评分必须另行验证。
+RAM完成该原成员实际网络读取，逐字节匹配服务器保留文件，未在Windows写数据或增加服务器原媒体副本；服务器公开CLI已验证原文件复用。服务器自身直连网络路径尚未通过，公共目录捕获入口已实现并验证RAM网络推进，但服务器直连仍失败；原主目录已沿用旧控制完成，不重复扫描已取得结果。本任务已通过有界RAM中转完成固定103片段取得及完整性核验，但不宣称服务器直连一键下载或原生视频评测完成。原模型、原帧处理和评分必须另行验证。
 
 公共目录捕获入口（需要可访问发布方的网络）：
 

@@ -51,3 +51,39 @@ def test_original_software_plan_excludes_raw_annotations_and_results(tmp_path):
     ]
     assert sum(item["bytes"] for item in media if item["task"] == "ASI") == 37469641
     assert not (tmp_path / "original-author").exists()
+
+
+def test_registered_fixed_media_matches_ledger_without_implying_native_execution():
+    profile = json.loads(
+        (ROOT / "configs/workload-native/ovobench-author-source.json").read_text()
+    )["media_archive_inventory"]
+    state = json.loads(
+        (ROOT / "docs/workload-data/dataset-validation-status.json").read_text("utf-8")
+    )["delivery_inventory"]["OVOBENCH"]["media_capacity_and_license_review"]
+    media = state["qualified_fixed_original_media"]
+    members = profile["qualified_original_members"]
+    assert (
+        len(members)
+        == len({item["path"] for item in members})
+        == media["registered_native_clips"]
+    )
+    assert (
+        sum(item["bytes"] for item in members)
+        == media["current_registered_original_bytes_total"]
+    )
+    assert (
+        sum(item["video_frames"] for item in members)
+        == media["current_registered_video_frames_total"]
+    )
+    if media["all_fixed_media_registered"]:
+        assert len(members) == media["required_fixed_native_clips"] == 103
+        assert len({item["case_id"] for item in members}) == 36
+        assert len({item["task"] for item in members}) == 12
+        assert media["public_require_all_fixed103_cli_passed"] is True
+    assert media["source_checkbox_eligible"] is False
+    assert (
+        state["fixed_original_media_acquisition_queue"][
+            "native_model_execution_started"
+        ]
+        is False
+    )
