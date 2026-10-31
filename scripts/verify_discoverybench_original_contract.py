@@ -47,7 +47,9 @@ def check_relations(data, rows):
                 re.fullmatch(r"[0-9]+", row[key]) for key in ("metadataid", "query_id")
             ):
                 raise ValueError("invalid original numeric identifier")
-            key = tuple(identity.values())
+            # Match the integer identity used below to locate metadata and queries.
+            # Alternate zero padding must not inflate verified task coverage.
+            key = (dataset, int(row["metadataid"]), int(row["query_id"]))
             if key in seen:
                 raise ValueError("duplicate original task identity")
             seen.add(key)

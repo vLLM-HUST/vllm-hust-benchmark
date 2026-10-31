@@ -80,3 +80,16 @@ def test_answer_key_identity_required(tmp_path):
         (tmp_path / "answer_key/answer_key_real.csv").write_text("not original")
         with patch.object(MODULE, "prepare_publisher_index"):
             MODULE.verify(tmp_path, tmp_path)
+
+
+@pytest.mark.parametrize("field", ["metadataid", "query_id"])
+def test_zero_padded_identity_is_same_original_task(tmp_path, field):
+    row = fixture_task(tmp_path)
+    padded = {**row, field: "00"}
+    result = MODULE.check_relations(tmp_path, [row, padded])
+    assert result["task_references"] == 2
+    assert result["verified_task_references"] == 1
+    assert result["error_type_counts"] == {"ValueError": 1}
+    assert result["errors"][0][field] == "00"
+    assert result["errors"][0]["error"] == "duplicate original task identity"
+    assert result["source_checkbox_eligible"] is False
