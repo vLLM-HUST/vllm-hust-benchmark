@@ -14,6 +14,14 @@
 
 StructEval新增配置进展：经确认，`qwen35-9b-nonthinking-32768`与原`publisher-null`分开记录。仅原Text→TikZ位置37的已知失败题运行新配置，传输timeout3600秒、外层/SDK重试均0；保存响应为length／32768输出tokens。CPU原工作区autostop导致渲染转发失败，900秒等待后原生子进程以RenderBlocked失败退出；原响应、代码和待渲染请求保留，实际VQA调用0，不计完整任务。原80GiB持久卷和模板已原样恢复，Docker仍在恢复旧容器；不重启daemon、不重新生成，不重放位置38的结果未知请求。共享任务根`structeval-capped-failed-tikz-window-32068-001`保留终态，计数不增加。
 
+### StreamingBench：媒体准备进行中，原生未跑
+
+StreamingBench媒体准备增量（2026-11-01）：清理后专用CPU实测空闲14141509632字节，原固定10份视频总量2823253471字节，原容量阻塞已解除，不扩卷。原已核验视频不重下载；余9份尝试公开下载入口时首项返回Network
+is
+unreachable，失败记录保留，现复用原分块获取器经至多8MiB原字节转发到服务器。45份音频及原生模型/预处理/任务/评分仍待验证，不补来源总勾。另核查作者CLI仅分派MiniCPM-V/MiniCPMo，虽提供Qwen2-VL类却未接入该CLI；不能把未知模型回退到基类当成有效推理，后续必须明确接原模型类并披露NPU设备/attention兼容绑定，原题、时间窗、自适应fps和128-token预算不改。
+
+- [x] 原视频新增1份：sample_24完整274336183字节，原ZIP成员CRC/EOF与观测SHA256核验、全23869帧解码通过，保留原音轨；与此前sample_2合计2/10份、289598876字节、32252帧。公开`--verify`及`--download`复用分支均退出0，不联网或重复解码。回执为`/root/streamingbench-public-second-media-reuse-20261101-001/qualification-public.json`。第二份新视频TLS中断后保留部分文件，按原字节比对前缀、只追加缺失后缀继续获取；已完成视频复用，不重新获取，不计原生任务。
+
 ### ToolBench：原软件准备完成，原生任务未完成
 
 - [x] 固定官方版本`d56fdd89faf8c91fa135090b212bb9057ee5cfc2`，服务器取得79份原Python/shell/说明/依赖/许可文件，共397381字节，逐份Git对象与SHA256核验；64份Python仅AST解析通过，未导入执行，未取得原题或权重。
