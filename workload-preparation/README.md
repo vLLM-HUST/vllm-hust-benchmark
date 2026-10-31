@@ -1243,6 +1243,10 @@ python inference.py --model QWen2VL_7B --model_path /srv/models/Qwen2-VL-7B-Inst
 bash scripts/score/QWen2VL_7B.sh
 ```
 
+官方offline评分器已独立核验：未修改`score.py`或`utils/OVOBenchScore.py`，对固定12类/36个完整case做参考正确答案与全部None两项控制，原CLI均exit0。原方法逐项核对103个响应位置：九类普通题各3个，CRR15、SSR52、REC9；None全部计为0而非丢弃。回执`/root/ovobench-original-score-reference-controls-20261031-001/qualification-public.json`和同目录`slot-count-public.json`。原评分按任务及三大类作宏平均，不改为103位置的微平均，也不添加外部judge。控制使用作者要求的模型别名仅作评分器分发，没有加载模型或调用推理，不能作为该模型成绩。真实输出齐备后才运行上述原评分命令；只跑部分组导致原汇总器缺组时应记录未完成评分，不补造任务或零分来伪造完整成绩。
+
+输入字段已对照固定作者执行代码复核：SSR阶段`step`确实进入原提示词，`type/count`为原评分标签；全部原始字段仍可无损还原。此核查不代表视频帧采样、NPU后端或模型调用已经验证。
+
 这只是官方调用方式，不是本项目已验证的Ascend命令。原Qwen2-VL实现明确使用CUDA、FlashAttention2、最多64帧和128生成token；必须先核验保持原帧采样、提示词、生成预算及所有`test_info`阶段的NPU适配，不能直接替换成普通Qwen文本服务。回溯/实时任务用原`id.mp4`，向前任务按原`id_index.mp4`执行全部阶段，不能只取一个片段当整题。数据为CC
 BY-NC-SA 4.0的README标注与Hub数据卡存在差异，见下述许可记录；不作为默认商业可再分发资产。
 
