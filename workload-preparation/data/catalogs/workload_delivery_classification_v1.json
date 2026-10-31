@@ -374,6 +374,23 @@
         "path": "scripts/run_stsb_original.py"
       }
     ],
+    "SPOKENWOZ": [
+      {
+        "role": "prepare_assets",
+        "path": "scripts/prepare_spokenwoz_original_dst.py",
+        "scope": "Original publisher text-DST preparation; not audio."
+      },
+      {
+        "role": "original_profile",
+        "path": "scripts/run_spokenwoz_original_dst.py",
+        "scope": "Complete original dialogue text-DST execution and original scoring; full/range selection supported, audio not established."
+      },
+      {
+        "role": "saved_output_reuse_audit",
+        "path": "scripts/run_spokenwoz_original_dst.py",
+        "scope": "Explicit --verify-saved mode, no new model calls."
+      }
+    ],
     "AGENTBENCH": [
       {
         "role": "original_profile",

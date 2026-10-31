@@ -97,6 +97,11 @@ def test_existing_deliveries_have_real_indexed_paths_without_runtime_claim():
     }
     assert assets["AZURE_LLM"]["entrypoints"][0]["role"] == "data_reading_only"
     assert assets["JSONSCHEMABENCH"]["entrypoints"]
+    assert {item["role"] for item in assets["SPOKENWOZ"]["entrypoints"]} == {
+        "prepare_assets",
+        "original_profile",
+        "saved_output_reuse_audit",
+    }
     assert {item["role"] for item in assets["NARRATIVEQA"]["entrypoints"]} == {
         "prepare_assets",
         "original_profile",

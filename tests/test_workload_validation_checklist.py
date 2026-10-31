@@ -8,6 +8,25 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def test_agentbench_alfworld_delivery_preserves_other_domain_gaps():
+    ledger = json.loads(
+        (ROOT / "docs/workload-data/dataset-validation-status.json").read_text("utf-8")
+    )
+    row = ledger["delivery_inventory"]["AGENTBENCH"]
+    assert row["checked"] is True and row["status"] == "AVAILABLE"
+    receipt = json.loads((ROOT / row["delivery_receipt"]).read_text("utf-8"))
+    assert receipt["source_checkbox_eligible"] is True
+    assert receipt["native_execution"]["original_unique_tasks"] == 109
+    assert receipt["native_execution"]["model_requests_audited"] == 1625
+    assert receipt["current_saved_audit"]["new_game_episodes_or_model_calls"] == 0
+    assert (
+        receipt["public_and_research_handoff"]["original_native_references_verified"]
+        == 109
+    )
+    assert receipt["all_agentbench_domains_claim"] is False
+    assert receipt["official_container_equivalence_claim"] is False
+
+
 def test_completion_policy_keeps_protocol_and_workload_coverage_separate():
     ledger = json.loads(
         (ROOT / "docs/workload-data/dataset-validation-status.json").read_text("utf-8")
