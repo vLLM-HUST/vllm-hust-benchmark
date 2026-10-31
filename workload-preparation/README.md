@@ -1286,7 +1286,7 @@ python scripts/capture_ovobench_original_tar_headers.py \
 
 每次严格取512字节原头部，跳过成员载荷，要求固定发布版本/精确HTTP范围/同分卷ETag一致；不支持的TAR扩展、重复或不安全成员直接失败，不静默跳过。失败保留最后成功步的检查点；不覆盖旧目录或回退到其他题目。真实RAM网络已验证两步推进2048→2050，服务器公开CLI因直连`Network is unreachable`失败但保留有效检查点。首个验证控制脚本输出路径放错而被边界保护拒绝，纠正后的网络失败另行记录；不修改保护规则或主运行索引。回执`/root/ovobench-public-header-capture-20261031-002/qualification-public.json`。完整目录、媒体取得、模型及评分分别判断，不因捕获入口存在就声称原生benchmark已可用。
 
-完整目录的最新验证：沿用原运行控制取得3036个原TAR头，覆盖3035个视频成员和两个原结束标记；公共规划器`--require-complete`已实跑通过，103个固定片段全部定位，总3520157133字节，回执`/root/ovobench-complete-original-index-20261031-001/qualification-public.json`。这不等于服务器公共捕获CLI已全程直连成功，也不意味着103个视频已经取得。媒体队列正在复用已验证3份、补剩余100份；保持原case和全部阶段，完整解码后保留原文件及证据、仅移除本次重复分块缓存。公开profile目前已登记的仍是上述ASI三份，其余在验证后再登记。
+完整目录验证：沿用原运行控制取得3036个原TAR头，覆盖3035个视频成员和两个原结束标记；公共规划器`--require-complete`已实跑通过，103个固定片段全部定位，总3520157133字节，回执`/root/ovobench-complete-original-index-20261031-001/qualification-public.json`。该目录回执本身不证明媒体取得。后续媒体队列已完成全部103份原片段，逐份SHA256及既有完整解码回执核验通过，公开profile已登记全部103份，而非仅早期ASI三份；完整回执为`/root/ovobench-fixed-original-media-all-20261031-001/complete-fixed103-registration-public.json`。原case和全部阶段保持不变，完整原文件及证据保留，重复分块缓存已清理。NPU侧复制进度见唯一打勾清单；CPU媒体取得、NPU输入就绪、原生推理和评分是不同的完成项，不能相互替代。
 
 传输故障处理：公共原片段获取器对临时连接中断、TLS
 EOF、超时及408/部分5xx最多尝试3次，始终重取同一固定URL/字节范围，写入前才重试，保留原ETag与完整文件SHA约束；成功结果含`transport_retry_count`和失败摘要。403/401、429限流及身份/ETag差异直接失败，不关闭TLS验证，不换题或切换数据来源。最终失败仍保留原partial供排查，不发布不完整文件。重试逻辑经可控故障夹具测试；这些不是额外模型运行或质量证据。真实批量队列曾在5份通过后遇TLS
