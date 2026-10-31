@@ -1284,7 +1284,7 @@ split；后续必须明确将生成和评估同时绑定原verified版本，并�
 - [x] 在专用CPU取得发布方固定版本的6份说明、音频captioning入口/评分器及检索入口，逐份核验Git
   blob和SHA256；3份Python仅做AST解析，未导入执行。服务端回执：`/root/wavcaps-original-source-20261031-001/preparation-public.json`。
 - [x] 公共`prepare_wavcaps_original_media.py --cache-root ... --decode`在专用CPU使用保留的原压缩范围完成四组件12条重新解压、身份及PCM校验。回执`/root/wavcaps-public-media-preparation-20261031-001/qualification-public.json`，模型调用0；不重复下载原媒体。
-- [ ] 公共有界媒体获取的`--download`网络路径真实核验；已实现精确206/Content-Range、长度和成员身份限制，但缓存实跑及HTTP夹具不能代替网络实跑，不宣称完整自动获取已完成。
+- [ ] 公共有界媒体获取的`--download`网络路径真实核验；已实现精确206/Content-Range、长度和成员身份限制。专用CPU对FreeSound原第一成员的真实下载exit1：`urllib.error.URLError: [Errno 101] Network is unreachable`，尚未取得首成员，未换来源或换题。缓存实跑及HTTP夹具不能代替网络获取成功，不宣称完整自动获取已完成。
 - [ ] 补齐专用checkpoint和完整原生依赖，完成原生NPU推理、适用评分和输出消费闭环。四组件媒体准备不等于模型运行；未下载模型，也未调用文本模型替代。
 
 WavCaps是弱标注音频—文本资产；作者captioning示例使用专用音频编码器和BART
