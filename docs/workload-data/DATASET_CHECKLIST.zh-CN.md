@@ -10,7 +10,7 @@
 - 按已有证据逐项复核，不因口径调整批量补勾；失败和低分如实保留，不用替换样本凑通过。113项来源与另5项仅分类的范围不变。
 
 当前交付
-**79/113项**，待完成34项，另5项仅分类。首批#432的60项和第二批#538的ScienceWorld已合入main；早期五个草稿已关闭为被汇总承接，历史和分支保留。第三批新增CodeJudge-Eval、DeepPlanning、OpenMath、OpenCode、MVBench、Video-MME、LiveCodeBench、BigCodeBench、Spider、DRAGON、SWE_VERIFIED、SWE_BENCH、AppWorld及SpokenWOZ文本DST固定原生profile交付，尚未合入。OpenMath/OpenCode是训练语料原问题生成，不是独立质量benchmark。打勾不代表全量模型评测、高分或性能保证。
+**80/113项**，待完成33项，另5项仅分类。首批#432的60项和第二批#538的ScienceWorld已合入main；早期五个草稿已关闭为被汇总承接，历史和分支保留。第三批来源及精确协议范围以机器清单和各交付回执为准，尚未合入。本次StructEval按19个完整非渲染原生协议收口，渲染/VQA模式缺口继续单列，不称整套44协议或2035题全部完成。OpenMath/OpenCode是训练语料原问题生成，不是独立质量benchmark。打勾不代表全量模型评测、高分或性能保证。
 
 StructEval新增配置进展：经确认，`qwen35-9b-nonthinking-32768`与原`publisher-null`分开记录。仅原Text→TikZ位置37的已知失败题运行新配置，传输timeout3600秒、外层/SDK重试均0；保存响应为length／32768输出tokens。CPU原工作区autostop导致渲染转发失败，900秒等待后原生子进程以RenderBlocked失败退出；原响应、代码和待渲染请求保留，实际VQA调用0，不计完整任务。原80GiB持久卷和模板已原样恢复，Docker仍在恢复旧容器；不重启daemon、不重新生成，不重放位置38的结果未知请求。共享任务根`structeval-capped-failed-tikz-window-32068-001`保留终态，计数不增加。
 
@@ -27,6 +27,9 @@ StructEval新增11题终态：位置39–49的11次原生成与11次原渲染全
 StructEval非渲染交付复核：按已确认的“来源＋明确原生协议”口径复核，而非要求所有可选模式同时完成。19个非渲染协议各50题、共950题的既有结果已找到；37个保存运行目录的111份receipt/inference/evaluation文件重新核对原审计哈希，缺失0、变化0、新模型调用0。这里的37是运行目录数，不是37个来源。新增公开原数据/官方源码获取入口及独立客户端安装步骤；服务器公开只读验证退出0、27个原源码模块一致，13个直接依赖版本一致，清除客户端继承CANN路径后pip
 check退出0。复用了原文件硬链接，没有重复下载或宣称新装环境/冷下载通过。回执`structeval-public-original-assets-verify-20261101-002/qualification-public.json`。原132次固定provider/研究读取证据保留；待本次公开工件与当前未修改研究消费者复核后，再决定协议级交付打勾，渲染模式缺口继续单列。
 
+StructEval非渲染交付收口：本次CI249dff34的tests/lint及CPU
+smoke均通过，实际工件13054253582的78份软件载荷与Git、wheel、安装字节一致；当前未修改研究提交9933c1e与公开入口完成全部2035行字段核对、2035条索引及44组协议的132次完整记录回查，输入/参考/注释无丢失，数据库未变，0模型调用。结合已核验的19协议950题原生执行与原评分、111份原保存文件及公开获取/环境说明，按已确认协议级口径打勾。[交付回执](validation/structeval-nonrender-native-delivery-20261101.json)。这不是重跑950题，也不改变其他渲染模式的未完成状态。
+
 ### StreamingBench：媒体准备进行中，原生未跑
 
 StreamingBench媒体准备增量（2026-11-01）：清理后专用CPU实测空闲14141509632字节，原固定10份视频总量2823253471字节，原容量阻塞已解除，不扩卷。原已核验视频不重下载；余9份尝试公开下载入口时首项返回Network
@@ -42,6 +45,8 @@ unreachable，失败记录保留，现复用原分块获取器经至多8MiB原�
 - [x] 第六份原视频sample_348_real完整667768200字节、原CRC/EOF与观测SHA及全部58247帧解码通过，保留原音轨；默认real三组原题所需媒体已齐。累计6/10视频、1575897154字节、146235帧；其余4份视频及45份音频未完成，不计原生任务。回执`/root/streamingbench-remaining-ram-member-04-20261101-001/qualification-public.json`。
 
 - [x] 第七份原视频sample_416_real完整335839436字节、原CRC/EOF与观测SHA及全部20783帧解码通过，保留原音轨。累计7/10视频、1911736590字节、167018帧，余3份视频和45份音频未完成，不计原生执行。回执`/root/streamingbench-remaining-ram-member-05-20261101-001/qualification-public.json`。
+
+- [x] 第八、九份原视频sample_17_sqa、sample_32_sqa的原CRC/EOF、观测SHA和全部65201帧解码通过，保留音轨；累计9/10视频、2421684080字节、232219帧。回执为`/root/streamingbench-remaining-ram-member-06-20261101-001/qualification-public.json`及`/root/streamingbench-remaining-ram-member-07-20261101-001/qualification-public.json`。最后一份SSH中断保留192879471字节partial，核查无残留写进程后按原字节前缀核对续传；已完成9份未重新下载或解码。续传仅对幂等初始化/加锁原字节追加的SSH255传输错误至多重试3次，不重试原生模型任务或未知终态解码任务。45份音频和原生模型执行/评分仍未完成，来源不打勾。
 
 - [x] 明确原Qwen2-VL类的候选NPU入口及分类索引已补，不走作者CLI未知模型回退；服务器固定与全量real计划通过，0模型调用。默认3组共用sample_348原视频，保持3个原问题，不因共享视频去重任务或改用已取得的视频。原31份软件、128-token预算、作者时间窗及评分流程保留；`streamingbench-public-native-plan-20261101-004/qualification-public.json`是软件计划证据，不是实际NPU推理或全量媒体验证。
 
@@ -1191,7 +1196,7 @@ TB；服务器/data约1.42TB可用，未缩小语料。ChartQA当前两卡主机
 | DS1000                     | [x] 已交付                                     | 通用原题ID／范围／full入口已接通，七库24道原题生成及作者评分完成；1000原字段公共／研究消费一致。ARM移植差异及告警保留，非全1000题成绩。见[回执](validation/ds1000-native-delivery-20261025.json)。                                                                                                                                                                                                                                                                                       |
 | MIND2WEB                   | [x] 原生交付可用                               | 原始三split各前3完整任务共9题89动作、846次NPU请求及官方评分；原提示/预算不变，显式非思考模型适配。保存响应复核、实际CI包及双端索引消费通过，非全量/实时浏览器结论。[交付回执](validation/mind2web-native-delivery-20261030.json)                                                                                                                                                                                                                                                         |
 | GAIA                       | [ ] 待开展                                     | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| STRUCTEVAL                 | [ ] 非渲染部分完成，渲染/VQA待验证             | 原19类950条非渲染任务结果保留，不重复计算；其余1085条尚未交付。专用CPU Docker工作区已可用，原27模块已复核暂存，公开静态依赖扫描验证15个渲染模块；CDN/npm等离线依赖、隔离渲染及完整VQA仍待验证，不打总勾。[阶段审计](validation/structeval-nonrender-checkpoint3-20261025.json)                                                                                                                                                                                                           |
+| STRUCTEVAL                 | [x] 已交付：19个完整非渲染协议                 | 原950题NPU生成/官方语法路径评分复用，111份保存文件哈希一致；公开原数据/源码获取及隔离客户端说明齐，当前CI工件/未修改研究消费者完成2035行原字段与132次回查。仅声明非渲染协议，其他渲染/VQA模式及原生失败单列，不称全44协议完成。[交付范围与证据](validation/structeval-nonrender-native-delivery-20261101.json)                                                                                                                                                                           |
 | PAWS                       | [x] 已完成                                     | 全8000条人工test＋15条辅助分类、保存输入/响应/评分复核；全751450条4字段/索引、精确CI44文件和固定研究消费21处回查通过。[交付回执](validation/paws-native-delivery-20261027.json)。声明式模型适配非作者聊天运行器；noisy辅助标签不作人工test。                                                                                                                                                                                                                                             |
 | XLSUM                      | [x] 已完成                                     | 原45变体6173个固定位置均核验原输入/编码/解码及作者ROUGE；10变体全6068、其余35各3。固定CI/研究消费与独立环境通过，不代表全114198条NPU推理；限非商业研究。                                                                                                                                                                                                                                                                                                                                 |
 | FLORES200                  | [x] 原生抽样协议已交付                         | 原Meta归档204代码、2009公开平行位置保留；复用原NLLB-600M三语向9次NPU翻译/6个唯一平行位置，chrF++与原SPM spBLEU评分、固定CI安装及公共/研究消费通过；[交付证据](validation/flores200-native-delivery-20261026.json)。不重生成、不替换3个缺失模型语言标记、不称全部语向已执行，模型限非商业研究。                                                                                                                                                                                           |

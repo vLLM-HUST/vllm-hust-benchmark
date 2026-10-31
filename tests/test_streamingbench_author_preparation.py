@@ -33,13 +33,13 @@ def test_streamingbench_plan_preserves_all_native_software_modes(tmp_path):
     assert media["directory_range_bytes_total"] == 179576
     assert media["video_payload_acquired"] is True
     assert media["fixed_video_selection_complete"] is False
-    assert len(media["qualified_original_members"]) == 7
+    assert len(media["qualified_original_members"]) == 9
     assert (
-        sum(item["bytes"] for item in media["qualified_original_members"]) == 1911736590
+        sum(item["bytes"] for item in media["qualified_original_members"]) == 2421684080
     )
     assert (
         sum(item["video_frames"] for item in media["qualified_original_members"])
-        == 167018
+        == 232219
     )
     assert media["whole_archives_rehashed"] is False
     assert media["media_rights_not_inferred_from_code_license"] is True

@@ -249,7 +249,16 @@ def test_completed_protocol_audit_adds_only_previously_unexecuted_rows():
     ledger = json.loads(
         (ROOT / "docs/workload-data/dataset-validation-status.json").read_text("utf-8")
     )["delivery_inventory"]["STRUCTEVAL"]
-    assert not ledger["checked"]
+    # Earlier partial-suite audits remain immutable. Current delivery follows
+    # the approved declared-protocol rule and needs a separate closing receipt.
+    delivery = json.loads((ROOT / ledger["delivery_receipt"]).read_text("utf-8"))
+    assert ledger["checked"] and ledger["status"] == "AVAILABLE"
+    assert delivery["source_checkbox_eligible"]
+    assert delivery["native_evidence"]["complete_original_protocols"] == 19
+    assert delivery["native_evidence"]["unique_original_tasks"] == 950
+    assert not delivery["remaining_modes"][
+        "all44_protocols_or_all2035_native_tasks_complete"
+    ]
     # The earlier audit is immutable; current counts include a separate,
     # explicitly linked incremental checkpoint rather than rewriting history.
     count = receipt["verified_unique_native_tasks"]
