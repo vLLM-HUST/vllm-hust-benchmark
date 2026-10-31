@@ -884,3 +884,5 @@ benchmark；缺少原生评测流程的须继续补齐，不包装成作者未�
 | <a id="workload-source-paio-semantic-similar-5000"></a>PAIO-SEMANTIC-SIMILAR-5000 | 派欧云提供，原始数据私有、不提供公开下载                                                                                              | 请求回放：[run_source_request_samples.py](scripts/run_source_request_samples.py)                                                                                                                                                                                                                    | [x] 已交付；[交付范围与环境](docs/workload-data/validation/enterprise-fixed-ci-handoff-20261024.json)                                                                                                                                           |
 
 <!-- workload-catalog:end -->
+
+StructEval的[原始数据、官方源码获取与独立客户端安装说明](docs/workload-data/STRUCTURED_ORIGINAL_SOURCES.zh-CN.md#%E8%BF%90%E8%A1%8C)已补齐，获取入口为[prepare_structeval_original_assets.py](scripts/prepare_structeval_original_assets.py)。它复用既有固定哈希下载器；获取/核验与原生任务、官方评分分别执行。非渲染完整协议与未完成的渲染/VQA模式分开登记，精确交付状态仍以唯一清单为准。
