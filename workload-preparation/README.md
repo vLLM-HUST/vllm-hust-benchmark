@@ -1189,6 +1189,8 @@ python scripts/prepare_reused_research_assets.py OVOBENCH \
 
 在完整原数据及合格NPU模型环境具备后，官方原入口示例为：
 
+固定抽样准备：`python scripts/prepare_ovobench_native_selection.py --data-root /srv/datasets/ovobench`只显示计划；显式增加`--output /srv/datasets/ovobench-fixed3`才写入一个全新外部目录。服务器已核验12类各原前三题，共36个完整case，对应103个原始片段。输出`original-first3-each-task.json`保留原字段、答案和全部阶段，直接作为官方`--anno_path`；`preparation-public.json`列出每个case及阶段的原片段名。此入口不下载视频、不裁掉阶段、不执行模型、不覆盖已有目录。片段未取得时不能据此声称可执行，回执`/root/ovobench-native-selection-20261031-002/qualification-public.json`。
+
 实际软件交付验证：CPU
 CI运行41151526268的工件13022928107已在专用CPU独立安装，75个Git/包内/安装文件身份一致；复用1640条索引、按12类各原前三条共36条公共/未修改研究端完整回读一致。回执`/root/ovobench-actual-ci-wheel-20261031-001/qualification-public.json`。这证明该版本注释消费链路，未运行视频模型，也未恢复暂停的研究任务。
 
