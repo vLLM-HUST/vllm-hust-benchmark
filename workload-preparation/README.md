@@ -1189,6 +1189,9 @@ python scripts/prepare_reused_research_assets.py OVOBENCH \
 
 在完整原数据及合格NPU模型环境具备后，官方原入口示例为：
 
+实际软件交付验证：CPU
+CI运行41151526268的工件13022928107已在专用CPU独立安装，75个Git/包内/安装文件身份一致；复用1640条索引、按12类各原前三条共36条公共/未修改研究端完整回读一致。回执`/root/ovobench-actual-ci-wheel-20261031-001/qualification-public.json`。这证明该版本注释消费链路，未运行视频模型，也未恢复暂停的研究任务。
+
 ```bash
 cd /srv/benchmarks/ovo-author
 python inference.py --model QWen2VL_7B --model_path /srv/models/Qwen2-VL-7B-Instruct \
@@ -1198,7 +1201,12 @@ bash scripts/score/QWen2VL_7B.sh
 ```
 
 这只是官方调用方式，不是本项目已验证的Ascend命令。原Qwen2-VL实现明确使用CUDA、FlashAttention2、最多64帧和128生成token；必须先核验保持原帧采样、提示词、生成预算及所有`test_info`阶段的NPU适配，不能直接替换成普通Qwen文本服务。回溯/实时任务用原`id.mp4`，向前任务按原`id_index.mp4`执行全部阶段，不能只取一个片段当整题。数据为CC
-BY-NC-SA 4.0并保留原视频来源条款，代码许可与数据条款分别核对；不作为默认商业可再分发资产。
+BY-NC-SA 4.0的README标注与Hub数据卡存在差异，见下述许可记录；不作为默认商业可再分发资产。
+
+媒体固定身份和容量登记在同一作者profile的`media_archive_inventory`，计划CLI直接展示：原视频5分卷共46341744640字节，预切分15分卷共153277153280字节；仅为官方LFS身份登记，未取得或重算完整分卷哈希。2026-10-31专用CPU卷剩余5040644096字节，不能在该卷整包下载/拼接/解压；固定题目媒体还需要有界取得方案或足够的服务器存储，不在本地落盘。
+
+许可标注存在待澄清差异：代码LICENSE为MIT，固定代码README声明数据CC BY-NC-SA 4.0，而官方Hub数据卡标注CC BY-SA
+4.0。保留原视频来源条款，不自动选择更宽松声明，不将公开可见解释为商业再分发授权。当前不再分发原视频/注释，许可差异核验未完成。
 
 ## WavCaps 原始音频元数据（数据适配已核验，原生音频执行待完成）
 

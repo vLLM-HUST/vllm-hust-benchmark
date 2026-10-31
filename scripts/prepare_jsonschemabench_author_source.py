@@ -86,6 +86,11 @@ def main():
         json.dumps(
             {
                 "source_id": pins["source_id"],
+                **(
+                    {"media_archive_inventory": pins["media_archive_inventory"]}
+                    if "media_archive_inventory" in pins
+                    else {}
+                ),
                 "status": "PLAN_ONLY_NO_DOWNLOAD"
                 if args.action == "plan"
                 else "ORIGINAL_PUBLISHER_SOURCE_FILES_VERIFIED_NOT_NATIVE_EXECUTION",
