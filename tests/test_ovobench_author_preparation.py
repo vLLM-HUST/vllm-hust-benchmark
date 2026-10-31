@@ -43,4 +43,11 @@ def test_original_software_plan_excludes_raw_annotations_and_results(tmp_path):
     assert inventory["complete_chunked_archive_bytes"] == 153277153280
     assert inventory["dataset_license_conflict_unresolved"] is True
     assert inventory["dataset_readme_license"] != inventory["hub_card_license"]
+    media = inventory["qualified_original_members"]
+    assert [item["case_id"] for item in media if item["task"] == "ASI"] == [
+        483,
+        484,
+        485,
+    ]
+    assert sum(item["bytes"] for item in media if item["task"] == "ASI") == 37469641
     assert not (tmp_path / "original-author").exists()

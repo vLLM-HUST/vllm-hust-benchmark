@@ -1285,6 +1285,7 @@ split；后续必须明确将生成和评估同时绑定原verified版本，并�
 - [x] 原预切分分卷仅取64KB，精确HTTP206/Content-Range及原TAR目录头核验通过。首个文件是非固定抽样的`35.mp4`，57464390字节，未因其容易取得而换题或下载；完整视频取得数仍为0。回执`/root/ovobench-original-media-ranges-20261031-001/first-tar-header-public.json`。仍缺可靠成员索引和固定103片段的有界获取。
 - [x] 公共`plan_ovobench_original_media_ranges.py`在专用CPU对实际捕获的368个原头部快照实跑exit0，逐头校验捕获哈希、TAR校验和/连续偏移/原分卷/观察ETag，已定位固定103片段中的16个、553531286字节。仅结构与范围计划，不独立证明发布方整分卷哈希；未定位项明确保留，不换片段，未下载完整视频。回执`/root/ovobench-public-media-range-plan-20261031-001/qualification-public.json`。完整头索引另在持续推进，不以本快照冒称完成。
 - [ ] 澄清代码README数据CC BY-NC-SA 4.0与官方Hub数据卡CC BY-SA 4.0差异；代码MIT单独登记，不以更宽松数据卡推定再分发权限。
+- [x] ASI固定原前三题483/484/485输入媒体已齐：完整原文件共37469641字节，公共`--decode`核验全部8556帧。新取得483/484，485不重取、以硬链接复用原文件不额外占空间；各自原帧率保留，不重编码、不更换题目。回执`/root/ovobench-public-media-verifier-20261031-002/qualification-public.json`，0模型调用。当前3/103片段准备完成，ASI原生模型执行/官方评分仍未完成。
 - [x] 公共`prepare_ovobench_original_media.py`完整成员网络读取在Windows
   RAM中验证：原分卷ETag/精确范围/完整SHA核验通过，8800190字节与服务器保留原文件逐字节一致；不在本地落数据、不新增服务器副本。服务器CLI复用已有原文件也exit0。回执分别为`/root/ovobench-public-media-network-20261031-001/qualification-public.json`和`/root/ovobench-public-media-prepare-reuse-20261031-001/qualification-public.json`。不据此宣称服务器直连网络可用。
 - [x] 公共`capture_ovobench_original_tar_headers.py`已实现，每次只取512字节原头部、跳过成员载荷、检查点可继续；RAM真实网络推进2048→2050验证通过。纠正验证脚本输出目录后，服务器CLI真实尝试失败于`Network is unreachable`，最后有效检查点成功保留；首次路径边界拒绝单独保留，不冒充网络故障。回执`/root/ovobench-public-header-capture-20261031-002/qualification-public.json`，未改动/重启主目录任务，0模型调用。
