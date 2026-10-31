@@ -22,9 +22,9 @@ Pod，持久卷和历史结果保留。新工作区默认使用该版本。
 **模型服务与任务执行工作区是两个不同的东西。** 模型服务负责回答模型请求；本指南的 CPU 工作区负责运行 Agent、启动 Docker 任务容器、修改代码与测试。 有模型的 Ray
 地址，不代表已经有可运行任务的 Docker 环境。不要给模型工作区挂宿主机 Docker socket，也不要把客户端依赖装入模型环境。
 
-在 Coder 中选择管理员发布的 `swe-bench-pro-cpu` 模板，新建自己的 **CPU 工作区**。该模板提供独立 Docker 服务、客户端和 socket；Docker
-镜像、容器数据与 `/root` 共用所选持久卷额度。单题可使用模板默认 20 GiB（安装前至少 15 GiB 可用）；多任务请先确认平台存储额度。普通 `ascend-devbox` 和模型
-Ray 模板不能替代这个模板。
+在 Coder 中选择 **Agent Benchmark · CPU** 模板（标识 `swe-bench-pro-cpu`），新建自己的 **CPU 工作区**。该模板提供独立 Docker
+服务、客户端和 socket；Docker 镜像、容器数据与 `/root` 共用所选持久卷额度。单题可使用模板默认 20 GiB（安装前至少 15 GiB 可用）；多任务请先确认平台存储额度。普通
+`ascend-devbox` 和模型 Ray 模板不能替代这个模板。
 
 模板不存在时，由管理员先按私有云仓库的
 [`scripts/create_swe_bench_workspace.py`](https://github.com/yancanmao/npu-private-cloud/blob/main/scripts/create_swe_bench_workspace.py)
@@ -154,9 +154,10 @@ NodeBB 的一道 V1 任务、一个独立 Agent。任务容器需要至少示例
 
 ![学生在 Coder 上的操作路径（示意，非页面截图）](images/swe-bench-pro-coder-workflow.svg)
 
-**不需要物理机 SSH 或 Kubernetes 管理员权限。** 管理员先发布带 Docker 执行能力的 `swe-bench-pro-cpu` 模板、准备固定 ARM
-任务镜像和下载源；学生创建该模板的 CPU 工作区， 再连接自己有权使用的模型 API。模型可运行在另一个 LLM 工作区，也可复用已授权的服务。 两个工作区之间的模型 API
-必须可达，服务需要鉴权时由 Agent 客户端提供凭据。 普通 CPU `ascend-devbox` 不保证具有 Docker 执行能力；安装 Docker 客户端本身不会提供 Docker 服务。
+**不需要物理机 SSH 或 Kubernetes 管理员权限。** 管理员先发布带 Docker 执行能力的 **Agent Benchmark · CPU** 模板（标识
+`swe-bench-pro-cpu`）、准备固定 ARM 任务镜像和下载源；学生创建该模板的 CPU 工作区， 再连接自己有权使用的模型 API。模型可运行在另一个 LLM
+工作区，也可复用已授权的服务。 两个工作区之间的模型 API 必须可达，服务需要鉴权时由 Agent 客户端提供凭据。 普通 CPU `ascend-devbox` 不保证具有 Docker
+执行能力；安装 Docker 客户端本身不会提供 Docker 服务。
 
 ### 从网页入口到物理机上的实际进程
 
