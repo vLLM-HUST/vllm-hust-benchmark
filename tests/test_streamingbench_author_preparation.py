@@ -25,6 +25,16 @@ def test_streamingbench_plan_preserves_all_native_software_modes(tmp_path):
         "src/model/Qwen2VL.py",
     } <= paths
     assert not any(path.endswith((".json", ".mp4", ".png")) for path in paths)
+    media = profile["media_archive_inventory"]
+    assert len(media["archives"]) == 8
+    members = media["selected_original_video_members"]
+    assert len({item["original_task_media_path"] for item in members}) == 10
+    assert sum(item["bytes"] for item in members) == 2823253471
+    assert media["directory_range_bytes_total"] == 179576
+    assert media["video_payload_acquired"] is False
+    assert media["whole_archives_rehashed"] is False
+    assert media["media_rights_not_inferred_from_code_license"] is True
+    assert media["audio_paths_require_original_preprocessing"] == 45
     target = tmp_path / "author"
     result = subprocess.run(
         [

@@ -1182,6 +1182,8 @@ blob/SHA256验证，公共verify命令exit0，见`/root/streamingbench-public-qu
 
 固定原题准备：`python scripts/prepare_streamingbench_native_selection.py --data-root /srv/datasets/streamingbench`默认只计划，显式`--output /srv/datasets/streamingbench-fixed3`才写入全新且与原数据分离的外部目录。原脚本四个offline组件及三个可选stream模式各取原前三个完整外层任务，保留SQA嵌套和全部问题；`proactive_50`仅辅助子集，不额外算运行模式。服务器公共命令exit0，七份输出均等于原数组前三项，共21外层任务/33嵌套组/69次问题出现，需10视频和45音频原路径，见`/root/streamingbench-public-native-selection-20261031-001/qualification-public.json`。报告给出原文件SHA、官方benchmark名称及全部媒体路径，不下载媒体、不裁剪阶段、不启动模型；未取得媒体仍不能运行。
 
+原媒体定位已核验：固定官方Hub修订的8个ZIP目录，仅读取179576字节，按作者`move_video.py`的原规则把`sample_N/video.mp4`对应到题目中的`sample_N_TYPE.mp4`，全部10视频成员已定位。原成员大小合计2823253471字节，压缩字节2818342632；当前CPU卷2468687872字节余量不足，且已有OVO队列，不启动额外视频下载。完整目录证据见`/root/streamingbench-original-media-directory-20261031-001/aliased-original-members-public.json`，配置只记录成员/CRC/压缩偏移和发布方整包身份，未声称视频已取得或整包SHA已重算；45音频路径的原预处理仍待补。直接按题目名查ZIP的初次失败保留，不改题或换视频。代码MIT许可不自动覆盖源视频权利，数据页未声明的许可不推定为开放再分发。
+
 后续必须遵循[官方流程](https://github.com/THUNLP-MT/StreamingBench)：原数据按real/omni/sqa/proactive组织，依次使用`preprocess.sh`、`eval.sh`、`stats.sh`，保留原视频组与时间戳。SQA原实现把前序参考答案加入后续上下文；主动响应原实现逐秒查询到参考时间+4秒，不能简化成单次问答。官方Qwen2-VL-7B包装器采用自适应1/0.5/0.2fps和128输出预算，但写死CUDA与flash_attention_2；当前尚无已验证NPU绑定。原始媒体、原生推理/评分及原生结果消费仍待补，来源不打勾。
 
 ## OVO-Bench 原生在线视频评测（软件准备入口，尚未完成原生验证）
