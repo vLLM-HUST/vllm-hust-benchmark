@@ -1191,6 +1191,9 @@ EOF、原完整大小和CRC，每段最多8MiB，保留512MiB余量，既有文�
 
 真实公共传输函数已通过内存中转取得上述完整15262693字节原文件并在服务器核验SHA256、完整解码8383视频帧，保留1920×1080/h264及原音轨；回执`/root/streamingbench-original-fixed-media-20261031-001/qualification-public.json`。这一条在重新确认容量后取得，不表示其余9视频已取得；未写Windows原数据，未取得整包。服务器直连下载CLI尚未验证，CPU解码不等于模型推理，也未独立验证45个音频预处理输出。
 
+官方offline评分入口：取得真实模型原输出后，使用`python scripts/score_streamingbench_original.py --author-root /srv/benchmarks/StreamingBench --data-root /srv/datasets/streamingbench --original-subset /srv/datasets/streamingbench-fixed3/questions_real.json --answers /srv/results/real-answers.json --model Qwen2-VL --task real --output /srv/results/real-score`。先核对固定作者软件和原题身份、完整问题/参考字段/嵌套顺序及每题结果，再原样调用`src/data/count.py`，保留原JSON/CSV及日志，不清洗答案或改评分。缺结果、空结果或不兼容形状须先排查，不能换题、补答案或默默减少分母。四个offline组件的8次参考答案正反控制已在CPU通过，见`/root/streamingbench-original-scoring-controls-20261031-002/qualification-public.json`；仅评分器控制，非真实模型分数。原`stats.sh`未给出全部可选stream模式的匹配评分流程，不能把flat
+stream结果强转成SQA嵌套输入；这部分尚未核验，不计完成。
+
 后续必须遵循[官方流程](https://github.com/THUNLP-MT/StreamingBench)：原数据按real/omni/sqa/proactive组织，依次使用`preprocess.sh`、`eval.sh`、`stats.sh`，保留原视频组与时间戳。SQA原实现把前序参考答案加入后续上下文；主动响应原实现逐秒查询到参考时间+4秒，不能简化成单次问答。官方Qwen2-VL-7B包装器采用自适应1/0.5/0.2fps和128输出预算，但写死CUDA与flash_attention_2；当前尚无已验证NPU绑定。剩余原始媒体、原生推理/评分及原生结果消费仍待补，来源不打勾。
 
 ## OVO-Bench 原生在线视频评测（软件准备入口，尚未完成原生验证）
