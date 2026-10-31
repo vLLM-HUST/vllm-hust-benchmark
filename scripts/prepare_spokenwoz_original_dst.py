@@ -60,7 +60,25 @@ def acquire_author(root, *, opener=urlopen):
     return verify_author(root)
 
 
-def selected_originals(data_root):
+def validate_selection(start=0, count=3, full=False, total=1000):
+    if type(full) is not bool or type(start) is not int or type(count) is not int:
+        raise ValueError("explicit boolean/full and integer dialogue range required")
+    if full:
+        if start != 0 or count != 3:
+            raise ValueError("full cannot mix with an explicit range")
+        return
+    if start < 0 or count < 3 or start + count > total:
+        raise ValueError("select a fixed range of at least3 complete dialogues")
+
+
+def select_dialogues(data, *, start=0, count=3, full=False):
+    validate_selection(start, count, full, len(data))
+    if full:
+        return dict(data)
+    return {key: data[key] for key in list(data)[start : start + count]}
+
+
+def selected_originals(data_root, *, start=0, count=3, full=False):
     path = Path(data_root) / "data.json"
     digest = hashlib.sha256()
     with path.open("rb") as stream:
@@ -71,7 +89,7 @@ def selected_originals(data_root):
     data = json.loads(path.read_text(encoding="utf-8"))
     if len(data) != 1000 or list(data)[:3] != IDS:
         raise ValueError("original public test ordering changed")
-    return {identity: data[identity] for identity in IDS}
+    return select_dialogues(data, start=start, count=count, full=full)
 
 
 def expected_prompts(dialogues, author_root):
@@ -114,9 +132,9 @@ def expected_prompts(dialogues, author_root):
     return rows
 
 
-def prepare(data_root, author_root, output):
+def prepare(data_root, author_root, output, *, start=0, count=3, full=False):
     author_root = verify_author(author_root)
-    dialogues = selected_originals(data_root)
+    dialogues = selected_originals(data_root, start=start, count=count, full=full)
     output = Path(output).resolve()
     protected = [
         Path(data_root).resolve(),
@@ -165,14 +183,15 @@ def prepare(data_root, author_root, output):
         .read_text(encoding="utf-8")
         .splitlines()
     ]
-    if actual != expected or len(actual) != 68:
+    if actual != expected:
         raise ValueError("original prepared prompts/references differ")
     report = {
         "source_id": "SPOKENWOZ",
         "status": "FIXED_ORIGINAL_DST_PROMPTS_PREPARED_NOT_EXECUTED",
-        "dialogue_ids": IDS,
-        "original_turns": 136,
-        "original_requests": 68,
+        "dialogue_ids": list(dialogues),
+        "original_turns": sum(len(row["log"]) for row in dialogues.values()),
+        "original_requests": len(expected),
+        "selection": {"start": start, "count": count, "full": full},
         "model_calls": 0,
         "source_checkbox_eligible": False,
     }
@@ -187,10 +206,25 @@ def main():
     parser.add_argument("--author-root", type=Path)
     parser.add_argument("--data-root", type=Path)
     parser.add_argument("--output", type=Path)
+    parser.add_argument(
+        "--start", type=int, default=0, help="Original dialogue index, not turn index"
+    )
+    parser.add_argument(
+        "--count", type=int, default=3, help="Complete dialogues, at least3"
+    )
+    parser.add_argument(
+        "--full",
+        action="store_true",
+        help="All1000 original dialogues; no turn truncation",
+    )
     mode = parser.add_mutually_exclusive_group()
     mode.add_argument("--download-author", action="store_true")
     mode.add_argument("--execute", action="store_true")
     args = parser.parse_args()
+    try:
+        validate_selection(args.start, args.count, args.full)
+    except ValueError as error:
+        parser.error(str(error))
     if args.download_author:
         if args.author_root is None:
             parser.error("--author-root required")
@@ -204,15 +238,27 @@ def main():
             value is None for value in (args.author_root, args.data_root, args.output)
         ):
             parser.error("--author-root, --data-root and --output required")
-        result = prepare(args.data_root, args.author_root, args.output)
+        result = prepare(
+            args.data_root,
+            args.author_root,
+            args.output,
+            start=args.start,
+            count=args.count,
+            full=args.full,
+        )
     else:
         result = {
             "status": "PLAN_ONLY_NO_DOWNLOAD",
             "repository": REPOSITORY,
             "revision": REVISION,
             "original_author_files": list(PINS),
-            "original_dialogue_ids": IDS,
-            "original_requests": 68,
+            "selection": {"start": args.start, "count": args.count, "full": args.full},
+            "original_dialogue_ids": IDS
+            if not args.full and args.start == 0 and args.count == 3
+            else None,
+            "original_requests": 17782
+            if args.full
+            else (68 if args.start == 0 and args.count == 3 else None),
             "model_calls": 0,
         }
     print(json.dumps(result, indent=2))

@@ -1373,6 +1373,9 @@ for record in records:
 客户端可使用独立Python3.11/3.12环境，原预处理导入`pandas`、`jsonlines`，原评分器导入`tqdm`；它们不是模型推理环境，也不需要在CPU安装神经模型。原作者模型为GPT3.5，本地实跑使用明确声明的NPU
 Qwen3-14B非思考绑定；不比较原榜单质量。
 
+本次服务环境实测发行包为`vllm==0.23.0+empty`、`vllm-ascend==0.23.0`、`torch==2.10.0+cpu`、`torch-npu==2.10.0.post4`、`transformers==5.5.4`。Torch包名中的`+cpu`不代表采用CPU神经推理：服务使用Ascend平台插件，模型请求已核实在910B2
+NPU执行。模型固定原`Qwen/Qwen3-14B@40c069824f4251a91eefaf281ebe4c544efd3e18`，复用17份原工件身份核验。部署为BF16、TP1、131072上下文、`max_num_seqs=1`、`max_num_batched_tokens=4096`、eager模式；使用明确的YaRN4倍覆盖（原32768），不是模型原生默认配置。源码提交/镜像摘要没有在此发行包版本中得到确认，不把`+empty`推测成某个上游提交。
+
 ```bash
 python -m pip install pandas jsonlines==4.0.0 tqdm
 python scripts/prepare_reused_research_assets.py SPOKENWOZ --mode download --data-root /srv/workloads/spokenwoz
@@ -1389,7 +1392,20 @@ python scripts/run_spokenwoz_original_dst.py --verify-saved /srv/workloads/spoke
 
 固定选择原JSON前三个完整对话`MUL0001/MUL0002/MUL0004`，136话轮产生68个DST请求。执行入口消费原作者预处理输出，并与独立重建的原提示/参考逐条比对后才请求模型；不改题、不漏掉失败、不缩短历史。采样与输出预算参数继续按原客户端省略，不把不同服务的默认值当成相同预算；额外的thinking参数是显式模型绑定。原预处理兼容副本只增加两处中间文件刷新，原文件及差异保留。原评分器不改写，独立检查防止解析失败时沿用上一预测。
 
-实际已验证：NPU原始68次请求全部`stop`，官方JGA与独立结果均为4/68；低分保留。公共准备入口和`--verify-saved`在专用CPU真实通过并复用了全部原响应。公共新生成循环仅做软件夹具测试，未为验证新入口重复这68次生成；新鲜服务器直连下载仍未核验。音频、响应生成及其他语音协议未完成，不能用该文本DST结果宣称音频流或双工完成。详细回执与当前缺口以[唯一清单](../docs/workload-data/DATASET_CHECKLIST.zh-CN.md)为准。
+前三个对话是默认验证范围，不是使用者的范围上限。准备、执行和保存核验三个阶段均可显式指定同一个`--start N --count M`（至少三个完整对话），或指定`--full`运行公开测试集全部1000对话/17782请求；全量不能与非默认范围混用。所有话轮、原历史及任务关系保留，不能把对话计数误作话轮计数。复用`--prepared-root`时，若其范围/提示/参考不匹配，会在模型调用前拒绝。
+
+```bash
+# 第3至5号原始完整对话，另外的120话轮/60请求，不替换原前三例
+python scripts/prepare_spokenwoz_original_dst.py --execute --start 3 --count 3 --data-root /srv/workloads/spokenwoz --author-root /srv/workloads/spokenwoz-author --output /srv/workloads/spokenwoz-dst-next3-inputs
+python scripts/run_spokenwoz_original_dst.py --execute --start 3 --count 3 --data-root /srv/workloads/spokenwoz --author-root /srv/workloads/spokenwoz-author --prepared-root /srv/workloads/spokenwoz-dst-next3-inputs --model Qwen/Qwen3-14B --thinking false --output /srv/workloads/spokenwoz-dst-next3-run
+
+# 全量先做无模型计划；确认资源后显式加 --execute 和全新 --output
+python scripts/run_spokenwoz_original_dst.py --full --data-root /srv/workloads/spokenwoz --author-root /srv/workloads/spokenwoz-author --model Qwen/Qwen3-14B --thinking false
+```
+
+全量计划与第3至5号对话准备已在专用CPU真实通过，原前三例保存核验仍确认4/68且不重新生成。全量17782请求没有实跑，不得将计划/准备通过标成全量验证通过。全量中间文件和结果可能显著增加磁盘占用，需先核查外部目录容量；本次未在接近满盘的CPU卷执行全量准备或生成。
+
+实际已验证：原前三对话68次NPU请求全部`stop`，官方JGA与独立结果均4/68，低分保留且未重跑。公共新生成循环另在原第3至5号对话真实完成60次请求，全部`stop`、0请求失败，官方和独立评分均6/60；当前公开保存核验再次通过，不新增模型调用。总共128次原DST模型调用，不把调用数当数据集数。初版执行报告把只读核验的新增调用数0继承到了生成报告（实际调用字段60一直存在）；更正报告单独保存，原报告与全部请求/响应/评分保持原样。新鲜服务器直连下载、全量17782次生成、音频与其他语音/响应协议仍未验证，不据此宣称音频流、双工或整项完成。详细回执与当前缺口以[唯一清单](../docs/workload-data/DATASET_CHECKLIST.zh-CN.md)为准。
 
 ## BixBench 原科学任务准备与读取（原生执行结束，评分待核验）
 

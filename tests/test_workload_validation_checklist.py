@@ -42,7 +42,13 @@ def test_spokenwoz_full_original_dialogues_are_not_audio_execution():
     assert native["public_native_runner_delivered"] is True
     assert native["public_saved_verifier_cli_verified"] is True
     assert native["public_saved_original_responses_verified"] == 68
-    assert native["public_fresh_generation_cli_real_run_verified"] is False
+    assert native["public_fresh_generation_cli_real_run_verified"] is True
+    assert native["public_additional_original_model_calls"] == 60
+    assert native["public_additional_finish_reasons"] == {"stop": 60}
+    assert native["public_additional_official_and_independent_correct_turns"] == 6
+    assert native["total_actual_dst_model_calls"] == 128
+    assert native["prior68_generations_repeated"] is False
+    assert native["public_full_generation_verified"] is False
     assert native["public_saved_entry_new_model_calls"] == 0
 
 

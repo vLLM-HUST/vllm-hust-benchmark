@@ -17,6 +17,7 @@ from prepare_spokenwoz_original_dst import (
     expected_prompts,
     prepare as prepare_inputs,
     selected_originals,
+    validate_selection,
     verify_author,
 )
 from run_oasst_original_continuation import post, validate_endpoint
@@ -91,8 +92,20 @@ def original_state_score(rows):
     }
 
 
-def verify_saved(data_root, author_root, run_root, model, thinking=None):
-    prompts = expected_prompts(selected_originals(data_root), author_root)
+def verify_saved(
+    data_root,
+    author_root,
+    run_root,
+    model,
+    thinking=None,
+    *,
+    start=0,
+    count=3,
+    full=False,
+):
+    prompts = expected_prompts(
+        selected_originals(data_root, start=start, count=count, full=full), author_root
+    )
     run_root = Path(run_root)
     rows, finishes = [], Counter()
     for index, prompt in enumerate(prompts):
@@ -125,6 +138,7 @@ def verify_saved(data_root, author_root, run_root, model, thinking=None):
         "independent_score": score,
         "new_model_calls": 0,
         "source_checkbox_eligible": False,
+        "selection": {"start": start, "count": count, "full": full},
     }
     grade_log = run_root / "score-private.log"
     if grade_log.is_file():
@@ -149,10 +163,14 @@ def execute(
     *,
     sender=post,
     prepared_root=None,
+    start=0,
+    count=3,
+    full=False,
 ):
     endpoint = validate_endpoint(endpoint.rstrip("/"))
     author_root = verify_author(author_root)
-    prompts = expected_prompts(selected_originals(data_root), author_root)
+    selection = {"start": start, "count": count, "full": full}
+    prompts = expected_prompts(selected_originals(data_root, **selection), author_root)
     output = Path(output).resolve()
     protected = [
         Path(data_root).resolve(),
@@ -166,7 +184,7 @@ def execute(
     output.mkdir(mode=0o700, parents=True, exist_ok=False)
     if prepared_root is None:
         prepared_root = output / "preparation"
-        prepare_inputs(data_root, author_root, prepared_root)
+        prepare_inputs(data_root, author_root, prepared_root, **selection)
     prepared_file = Path(prepared_root) / "author/prompt_test_output_cleangpt.jsonl"
     prepared = [
         json.loads(line)
@@ -202,7 +220,9 @@ def execute(
         raise RuntimeError(
             "original request failures retained; no filtered score or replacement"
         )
-    report, rows = verify_saved(data_root, author_root, output, model, thinking)
+    report, rows = verify_saved(
+        data_root, author_root, output, model, thinking, **selection
+    )
     scoring = output / "score-inputs"
     scoring.mkdir()
     for name, content in (
@@ -222,16 +242,23 @@ def execute(
     (output / "score-private.log").write_text(
         result.stdout + result.stderr, encoding="utf-8"
     )
-    report, _ = verify_saved(data_root, author_root, output, model, thinking)
+    report, _ = verify_saved(
+        data_root, author_root, output, model, thinking, **selection
+    )
+    qualified = result.returncode == 0 and report.get("independent_grade_agrees")
     report.update(
-        status="ORIGINAL_DST_EXECUTED_AND_SCORED_NOT_AUDIO",
+        status="ORIGINAL_DST_EXECUTED_AND_SCORED_NOT_AUDIO"
+        if qualified
+        else "ORIGINAL_DST_EXECUTED_SCORING_FAILED_RETAINED",
         official_scorer_exit_code=result.returncode,
         actual_model_calls=len(prompts),
+        new_model_calls=len(prompts),
+        saved_verification_new_model_calls=0,
     )
     (output / "qualification-public.json").write_text(
         json.dumps(report, indent=2), encoding="utf-8"
     )
-    if result.returncode or not report.get("independent_grade_agrees"):
+    if not qualified:
         raise RuntimeError(
             "original scoring failed or independent grade disagrees; results preserved"
         )
@@ -248,6 +275,9 @@ def main():
     )
     parser.add_argument("--endpoint", default="http://127.0.0.1:19468/v1")
     parser.add_argument("--output", type=Path)
+    parser.add_argument("--start", type=int, default=0)
+    parser.add_argument("--count", type=int, default=3)
+    parser.add_argument("--full", action="store_true")
     parser.add_argument(
         "--prepared-root",
         type=Path,
@@ -257,10 +287,20 @@ def main():
     mode.add_argument("--execute", action="store_true")
     mode.add_argument("--verify-saved", type=Path)
     args = parser.parse_args()
+    try:
+        validate_selection(args.start, args.count, args.full)
+    except ValueError as error:
+        parser.error(str(error))
     thinking = None if args.thinking == "default" else args.thinking == "true"
+    selection = {"start": args.start, "count": args.count, "full": args.full}
     if args.verify_saved:
         report, _ = verify_saved(
-            args.data_root, args.author_root, args.verify_saved, args.model, thinking
+            args.data_root,
+            args.author_root,
+            args.verify_saved,
+            args.model,
+            thinking,
+            **selection,
         )
     elif args.execute:
         if args.output is None:
@@ -273,9 +313,12 @@ def main():
             args.model,
             thinking,
             prepared_root=args.prepared_root,
+            **selection,
         )
     else:
-        prompts = expected_prompts(selected_originals(args.data_root), args.author_root)
+        prompts = expected_prompts(
+            selected_originals(args.data_root, **selection), args.author_root
+        )
         report = {
             "status": "PLAN_ONLY_NO_MODEL_CALLS",
             "original_requests": len(prompts),
