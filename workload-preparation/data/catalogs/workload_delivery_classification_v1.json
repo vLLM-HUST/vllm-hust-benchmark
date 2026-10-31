@@ -21,6 +21,13 @@
     {"source_id": "PAIO-SEMANTIC-SIMILAR-5000", "asset_group": "enterprise-private-requests", "related_workload_ids": [], "boundary": "Semantic similarity is not exact-prefix or KV reuse; preserve original private requests without rewriting."}
   ],
   "source_entrypoints": {
+    "STREAMINGBENCH": [
+      {"role": "prepare_assets", "path": "scripts/prepare_jsonschemabench_author_source.py", "scope": "--source streamingbench: pinned original author software, not native execution"},
+      {"role": "prepare_assets", "path": "scripts/prepare_streamingbench_native_selection.py", "scope": "Original first3 complete groups per seven modes, preserving nested questions and source timestamps"},
+      {"role": "prepare_assets", "path": "scripts/prepare_streamingbench_original_media.py", "scope": "Exact original registered video member acquisition/verification; incomplete media is not a task run"},
+      {"role": "generation", "path": "scripts/run_streamingbench_original_npu.py", "scope": "Original real/SQA/proactive video-only loops and original scoring with explicit published Qwen2-VL NPU binding; fixed/full real plans verified, neural execution not qualified"},
+      {"role": "saved_output_reuse_audit", "path": "scripts/score_streamingbench_original.py", "scope": "Unchanged original offline scorer and strict complete-result checks; no neural calls"}
+    ],
     "LONGMEMEVAL": [
       {"role": "prepare_assets", "path": "scripts/prepare_jsonschemabench_author_source.py", "scope": "--source longmemeval: pinned original author source acquisition and verification"},
       {"role": "generation", "path": "scripts/run_longmemeval_original.py", "scope": "Original full-history/oracle or original BM25 top10 reader; preserve original prompts and budgets"},

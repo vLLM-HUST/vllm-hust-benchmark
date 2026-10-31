@@ -1241,6 +1241,23 @@ stream结果强转成SQA嵌套输入；这部分尚未核验，不计完成。
 
 后续必须遵循[官方流程](https://github.com/THUNLP-MT/StreamingBench)：原数据按real/omni/sqa/proactive组织，依次使用`preprocess.sh`、`eval.sh`、`stats.sh`，保留原视频组与时间戳。SQA原实现把前序参考答案加入后续上下文；主动响应原实现逐秒查询到参考时间+4秒，不能简化成单次问答。官方Qwen2-VL-7B包装器采用自适应1/0.5/0.2fps和128输出预算，但写死CUDA与flash_attention_2；当前尚无已验证NPU绑定。剩余原始媒体、原生推理/评分及原生结果消费仍待补，来源不打勾。
 
+### StreamingBench 原视频协议NPU入口（软件计划已验证，真实推理待验证）
+
+作者CLI仅分派MiniCPM-V/MiniCPMo；直接传Qwen2-VL会落到基类，不能当成有效推理。`scripts/run_streamingbench_original_npu.py`明确接作者发布的Qwen2-VL类及原`StreamingBench`／`StreamingBenchSQA`／`StreamingBenchProactive`循环，保留原时间窗、前序参考上下文、主动轮询、自适应fps、max_pixels151200及128-token输出预算；仅将CUDA／FlashAttention2和远程权重绑定改为明确NPU／eager／固定本地权重。权重先加载再整体移到NPU，全部神经权重必须在NPU，不启用CPU推理或自动offload。
+
+复用OVO已验证的Qwen2-VL-7B固定工件身份及同族运行环境作为候选：Python3.12.13、vendor
+torch2.10.0+cpu／torch-npu2.10.0.post4、transformers5.5.4、qwen-vl-utils0.0.8、decord0.6.0、ffmpeg4.4.8，并准备ffmpeg-python和原评分器依赖。`+cpu`版本标签不代表在CPU推理；本入口的新协议尚未实际加载模型验证，不把同族环境复用当作新协议成功。不要覆盖已有模型服务环境；调用前由操作者取得空闲NPU窗口，不自动停止其他服务。
+
+```bash
+python scripts/run_streamingbench_original_npu.py --author-root /srv/benchmarks/StreamingBench --data-root /srv/datasets/streamingbench --media-root /srv/datasets/streamingbench/videos --model-root /srv/models/Qwen2-VL-7B-Instruct --model-revision eed13092ef92e448dd6875b2a00151bd3f7db0ac --task real --device npu:0 --output /srv/results/streamingbench-real
+```
+
+默认只校验作者／原问题身份、固定原前三个完整组及运行绑定，列出缺失媒体，不加载模型或创建结果目录。服务器对`real`固定3组／3问题／1个共享原视频，以及`--full`的2252组／2500问题／499视频均验证计划退出0，0模型调用。缺媒体或未核验权重不能计推理完成；先准备原媒体及固定权重，再添加`--execute`执行原循环和原评分器。`--task sqa/proactive`复用对应原循环，尚未实跑；omni／stream接口不支持，不能拿视频协议代替音频或实时流任务。
+
+已核实作者FPS解析局限：原代码对完整basename取数字，包含扩展名`.mp4`中的4；对三个合成的60／360／660秒文件名，原公式分别算出-56／-356／-656，均进入1fps分支。此控制不读取视频、不调用模型；当前入口保留原表达式，不静默修正，也不把声明的1／0.5／0.2fps分支列表当成实际生效的自适应采样。若后续修正，必须作为独立披露的协议变体，不混报原结果。
+
+默认固定选择要求媒体已注册原身份；`--full`不缩成三组，额外视频保存观察SHA快照而非冒称发布方逐文件SHA，用户仍须按官方原档准备完整媒体。原字幕／题目／参考字段不改，输出使用明确的`Qwen2-VL-NPU`结果键以避开作者发布结果缓存；临时原视频切片只写全新结果目录，不覆盖原文件。新入口自动调用原评分器；对其输出单独重评分时，结果键也应传`--model Qwen2-VL-NPU`。失败保留部分输出及错误，不换题、不自动重试或补答案。
+
 ## OVO-Bench 原生在线视频评测（固定抽样原生验证完成）
 
 ### NPU 运行与评分
