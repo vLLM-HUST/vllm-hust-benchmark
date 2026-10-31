@@ -4,8 +4,9 @@
 
 ## 1. 创建工作区
 
-打开 [Coder](https://coder.sage.org.ai:9443)，选择 `swe-bench-pro-cpu` 模板创建工作区，家目录选 20 GiB 或以上，然后打开终端。这个
-CPU 模板同时适用于本页的 Terminal 任务，提供 Python 3.12 和独立 Docker 服务。
+打开 [Coder](https://coder.sage.org.ai:9443)，选择 **Agent Benchmark · CPU** 模板（标识
+`swe-bench-pro-cpu`）创建工作区，家目录选 20 GiB 或以上，然后打开终端。这个 CPU 模板同时适用于本页的 Terminal 任务，提供 Python 3.12 和独立
+Docker 服务。
 
 准备好模型的 OpenAI 兼容 API 地址（含 `/v1`）、模型名和所需 API 密钥。模型通过 API 连接；工作区内运行客户端和任务沙箱。
 
