@@ -32,7 +32,10 @@
 - [x] 公开读者入口在完整原检索日志上完成准备/分词核验，保留重复会话ID及全部文档多重集；原top10、JSON、双侧消息、CoN800预算及无额外截断。固定三题实际NPU生成退出0，输入34366/31034/30916
   tokens，三题均`stop`，不代表500题全量通过。
 - [ ] 原问答评分及精确工件/研究消费核验待完成。当前14B绑定使用原提示、原10-token评分预算，三个独立合成自检中空答案负例被判`yes`，因此不接受其正式分数，不反复重试凑通过。Oracle/S既有6条及M新增3条生成继续复用。本来源仍不打完成勾。机器证据入口：`dataset-validation-status.json`中的`LONGMEMEVAL.original_m_retrieval_progress`。
-- [x] 单列Qwen3.5-9B本地judge绑定的三个最小自检：等价正例、错误答案负例、空答案负例分别返回`yes/no/no`，均正常停止，保持原提示、10-token预算及yes子串解析。回执位于共享任务根`longmemeval-qa-judge9b-controls-20261031-001/controls-public.json`；这是3次合成接口自检，不计数据集任务、正式分数或官方70B/GPT-4 judge复现。原9条读者生成仍复用，公开评分入口及真实答案评分尚待补齐。
+- [x] 单列Qwen3.5-9B本地judge绑定的三个最小自检：等价正例、错误答案负例、空答案负例分别返回`yes/no/no`，均正常停止，保持原提示、10-token预算及yes子串解析。回执位于共享任务根`longmemeval-qa-judge9b-controls-20261031-001/controls-public.json`；这是3次合成接口自检，不计数据集任务、正式分数或官方70B/GPT-4
+  judge复现。原9条读者生成仍复用，公开评分入口及真实答案评分尚待补齐。
+
+LongMemEval最新增量：公开`scripts/score_longmemeval_original.py`已在服务器对M既有3份原回答完成原QA评分主流程，0次重复读者生成。独立审计逐项核对原题、原提示、保存回答、3次10-token评分请求/响应及原yes子串标签，全部正常停止，复核0次模型调用。回执为共享任务根`longmemeval-public-qa-scorer-plan-20261031-002/m-independent-audit-public.json`。这是明确的9B本地judge绑定，不是官方推荐judge质量复现。Oracle固定三题实际为时间推理，S固定三题为用户信息回忆，现有助手信息题自检不能覆盖它们；入口已拒绝不匹配评分，未改题或重跑。来源仍不打勾，待补题型自检、评分及完整工件/研究消费核验。
 
 ### Mind2Web（固定原题原生交付完成）
 

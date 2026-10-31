@@ -21,6 +21,12 @@
     {"source_id": "PAIO-SEMANTIC-SIMILAR-5000", "asset_group": "enterprise-private-requests", "related_workload_ids": [], "boundary": "Semantic similarity is not exact-prefix or KV reuse; preserve original private requests without rewriting."}
   ],
   "source_entrypoints": {
+    "LONGMEMEVAL": [
+      {"role": "prepare_assets", "path": "scripts/prepare_jsonschemabench_author_source.py", "scope": "--source longmemeval: pinned original author source acquisition and verification"},
+      {"role": "generation", "path": "scripts/run_longmemeval_original.py", "scope": "Original full-history/oracle or original BM25 top10 reader; preserve original prompts and budgets"},
+      {"role": "saved_output_reuse_audit", "path": "scripts/score_longmemeval_original.py", "scope": "Pinned original QA scorer on saved answers; execute makes new judge calls, not reader calls. Disclosed local selector/transport, selected-type controls required; not recommended judge reproduction"},
+      {"role": "original_profile", "path": "configs/workload-native/longmemeval-eval-client-constraints.txt", "scope": "Separate publisher QA client compatibility constraint; not model service environment"}
+    ],
     "TOOLBENCH": [
       {"role": "prepare_assets", "path": "scripts/prepare_jsonschemabench_author_source.py", "scope": "--source toolbench: fixed original author software acquisition/verification, not native execution"},
       {"role": "original_profile", "path": "configs/workload-native/toolbench-author-source.json", "scope": "Original software identity only; task data, real tool backend, model and evaluation remain unqualified"}

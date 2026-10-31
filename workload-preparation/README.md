@@ -1130,6 +1130,18 @@ tokens；同三题在NPU上各生成一次，全部`stop`。不是500题全量�
 
 发布方`src/evaluation/evaluate_qa.py`及`print_qa_metrics.py`同时按原字节提供。它的原CLI只列出指定GPT-4o及本地Llama3.1-70B评估模型；使用前应准备真实对应的模型/端点或授权，不能把Qwen服务伪装成70B。当前本地14B绑定在原提示/10-token预算的空答案负例中未通过自检，因此未接受其正式分数。以上生成结果不冒称已有官方质量分数。原题、检索日志、参考答案及生成结果均只放服务器私有目录。
 
+### LongMemEval 保存回答的原生QA评分入口
+
+`scripts/score_longmemeval_original.py`校验完整原参考文件及原评分器SHA，运行原评分器主流程，仅增加明确命名的本地模型选择和本地传输绑定。原提示、10-token评分预算、yes子串解析及聚合保持原实现；SDK重试关闭，传输失败不自动重放。该绑定不是发布方推荐的Llama3.1-70B/GPT-4质量复现。
+
+使用分离的原QA客户端环境及`configs/workload-native/longmemeval-eval-client-constraints.txt`约束，不向推理服务环境安装评测依赖。先提供与实际judge模型及题型匹配的正例、错误负例和空答案负例自检回执；当前已核验的回执只覆盖`single-session-assistant`。默认命令只核验输入和生成执行计划，不调用模型：
+
+```bash
+python scripts/score_longmemeval_original.py --source-root /private/LongMemEval-author --reference /private/longmemeval/longmemeval_m_cleaned.json --variant m --hypotheses /private/longmemeval/reader/hypotheses.private.jsonl --controls /private/longmemeval/judge-controls/controls-public.json --model Qwen/Qwen3.5-9B --endpoint http://127.0.0.1:19466/v1 --output /private/longmemeval/fresh-qa-output
+```
+
+确认资源可用后添加`--execute`才对保存回答评分，不重新生成读者回答。输出目录必须不存在，原题、评分请求/响应、原回答及原聚合日志保留在私有目录。Oracle、S、M所选题型分别核验，不能把M的助手信息题自检当作Oracle时间推理或S用户信息题的评分资格。失败或未满足控制条件的流程不能计来源完成。
+
 ## ScienceAgentBench 原科学数据资产核验（原生任务尚未执行）
 
 HF上的原`verified`
