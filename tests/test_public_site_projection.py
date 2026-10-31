@@ -146,3 +146,77 @@ def test_object_valued_id_is_not_treated_as_a_record_reference():
     assert projection.project_json(
         {"nested": {"id": {"type": "descriptive"}}}, {"gone"}
     ) == {"nested": {"id": {"type": "descriptive"}}}
+
+
+def test_c16_pair_is_restored_intact_only_in_its_evidence_file(tmp_path):
+    source = tmp_path / "source"
+    (source / "data").mkdir(parents=True)
+    (source / "assets").mkdir()
+    for name in (
+        "index.html",
+        "plugins.html",
+        "dataset-introductions.html",
+        "leaderboard-runs.html",
+    ):
+        (source / name).write_text("<main>Results</main>")
+    (source / "assets/site.js").write_text("// presentation\n")
+    ids = sorted(projection.PUBLIC_C16_RUN_IDS)
+    b0 = {
+        "run_id": ids[0],
+        "configuration": {"engine": "Native"},
+        "metrics": {"output_tps": 42},
+    }
+    b1 = {
+        "run_id": ids[1],
+        "configuration": {
+            "mods": ["betterscale"],
+            "parameters": {"execution_seats": 16},
+        },
+        "metrics": {"output_tps": 84},
+        "validation": {"effective_graph_mode": "FULL"},
+    }
+    other = {
+        "run_id": "another-run",
+        "configuration": {"mods": ["betterscale"]},
+        "metrics": {"output_tps": 99},
+    }
+    original = {"runs": [b0, b1, other]}
+    raw = (json.dumps(original) + "\n").encode()
+    paths = [projection.C16_EVIDENCE_PATH, "data/unrelated.json"]
+    for name in paths:
+        (source / name).write_bytes(raw)
+    manifest = {
+        "files": [
+            {
+                "website_path": name,
+                "sha256": hashlib.sha256(raw).hexdigest(),
+                "bytes": len(raw),
+            }
+            for name in paths
+        ]
+    }
+    (source / "data/benchmark-source-manifest.json").write_text(json.dumps(manifest))
+    before = snapshot(source)
+    output = tmp_path / "public"
+    projection.build(source, output, "test-policy")
+    projection.validate(output)
+    assert snapshot(source) == before
+    retained = json.loads((output / projection.C16_EVIDENCE_PATH).read_text())
+    assert retained == {"runs": [b0, b1]}
+    assert json.loads((output / "data/unrelated.json").read_text()) == {"runs": [b0]}
+    assert original["runs"][1] == b1
+    # A manifest update alone cannot authorize a different research record.
+    retained["runs"].append(other)
+    changed = (json.dumps(retained) + "\n").encode()
+    (output / projection.C16_EVIDENCE_PATH).write_bytes(changed)
+    manifest_path = output / "data/benchmark-source-manifest.json"
+    manifest = json.loads(manifest_path.read_text())
+    entry = next(
+        e
+        for e in manifest["files"]
+        if e["website_path"] == projection.C16_EVIDENCE_PATH
+    )
+    entry.update(sha256=hashlib.sha256(changed).hexdigest(), bytes=len(changed))
+    manifest_path.write_text(json.dumps(manifest))
+    with pytest.raises(AssertionError):
+        projection.validate(output)
