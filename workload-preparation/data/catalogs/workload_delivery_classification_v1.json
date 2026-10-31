@@ -33,6 +33,10 @@
       {"role": "generation", "path": "scripts/run_dragon_original.py", "scope": "Unchanged author full-corpus Chroma MMR, standalone chunk1000/overlap100/k5, original prompt and scorer; explicit NPU encoder/existing-reader transport, fixed first3 or full. Fixed original3 executed/scored; all length outputs retained, no quality/performance claim."},
       {"role": "saved_output_reuse_audit", "path": "scripts/verify_dragon_original_saved.py", "scope": "No inference: original prompts/context chunk-ID binding, full corpus/query embedding inputs/vectors, saved responses and original rescoring. Not source completion by itself."}
     ],
+    "LIBRITTS": [
+      {"role": "prepare_assets", "path": "scripts/prepare_libritts_original_assets.py", "scope": "Pinned test-other original corpus only; not native speech synthesis"},
+      {"role": "data_reading_only", "path": "workload-preparation/src/vllm_hust_workload_data/libritts.py", "scope": "Candidate original-pair adapter, format fixtures only until original archive validation; no model or generated prompt"}
+    ],
     "LJSPEECH": [
       {"role": "prepare_assets", "path": "scripts/prepare_ljspeech_original_assets.py", "scope": "Full original1.1 speech archive with official TorchAudio checksum and exact matching resume only; not TTS model execution or quality scoring"}
     ],

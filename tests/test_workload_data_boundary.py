@@ -5,6 +5,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1] / "workload-preparation"
 DATA_MODULES = {
+    "libritts",  # Original text/reference-wave pairs and chapter IDs only; no synthesis.
     "spokenwoz",  # Original complete dialogue/state/word-time relations, no execution.
     "streamingbench",  # Original nested video/question/reference groups only.
     "ovobench",  # Original online-video case/stage/reference relations, no model or observations.

@@ -1569,4 +1569,16 @@ python scripts/prepare_libritts_original_assets.py --data-root /srv/workloads/li
 
 默认命令仅输出离线计划。下载中断时保留原`.partial`与私有获取记录；检查没有存活的写入进程后，使用原下载命令追加`--resume`，必须匹配原URL、长度、双校验和服务器精确HTTP范围，不能重建记录冒充续传。`verify`可复用既有完整原包，不重新下载。约965MB是压缩包大小，后续解压空间另算。
 
-实际服务器已通过公共离线计划，原始获取进程已启动，尚未取得完整包验证证据；语料适配、合适NPU语音模型、原生合成与评价仍待完成。该语料没有一个通用的官方聊天模型或统一计分命令，必须明确后续采用的TTS原生协议，不用文本生成、ASR转写或格式检查冒充TTS完成。
+实际服务器已通过公共离线计划，原始获取进程已启动，尚未取得完整包验证证据；候选适配器仅通过格式夹具，原包适配、研究回读、合适NPU语音模型、原生合成与评价仍待完成。该语料没有一个通用的官方聊天模型或统一计分命令，必须明确后续采用的TTS原生协议，不用文本生成、ASR转写或格式检查冒充TTS完成。
+
+原包完整校验后可使用公共读取入口（当前尚无原包实测成功声明）：
+
+```python
+from pathlib import Path
+from vllm_hust_workload_data import iter_workload
+
+records = iter_workload("LIBRITTS", data_root=Path("/srv/workloads/libritts"))
+first_record = next(records)
+```
+
+读取按官方TorchAudio的字典序话段ID排列，不代表请求到达顺序或对话。原文与发布方规范化文本分开保留，参考WAV留在结果侧；说话人、章节、片段/话段ID保留前导零，共享章节元数据保留原归档成员引用。原包不展开、不重采样，只检查有界WAV头；不据此宣称完整音频解码或语音合成验证。

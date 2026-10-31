@@ -24,6 +24,11 @@ def iter_source_rows(path, spec):
 
         yield from original_rows(path)
         return
+    if spec.get("native_format") == "libritts_original_archive":
+        from .libritts import original_rows
+
+        yield from original_rows(path)
+        return
     if spec.get("native_format") == "ljspeech_original_archive":
         from .ljspeech import original_rows
 

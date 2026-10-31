@@ -597,6 +597,17 @@
       },
       "normalization": {}
     },
+    "LIBRITTS": {
+      "kind": "task_dataset", "mapping": "native_fields",
+      "native_format": "libritts_original_archive",
+      "input_fields": ["text", "normalized_text"],
+      "required_fields": ["id", "text", "normalized_text", "audio", "speaker_id", "chapter_id", "segment_id", "utterance_id", "original_text_member", "normalized_text_member", "context_metadata_members"],
+      "outcome_fields": ["audio"],
+      "annotation_fields": ["id", "speaker_id", "chapter_id", "segment_id", "utterance_id", "original_text_member", "normalized_text_member", "context_metadata_members"],
+      "id_field": "id", "normalization": {},
+      "requirements": ["Original and publisher-normalized texts remain separate unchanged UTF-8 fields", "Reference WAV is not synthesized output or implicit model input", "Speaker/chapter/segment/utterance IDs and original shared metadata references are preserved; no invented arrival or dialogue relation"],
+      "status": "CANDIDATE_FIXTURE_ONLY_ORIGINAL_AND_NATIVE_VALIDATION_PENDING"
+    },
     "LJSPEECH": {
       "kind": "task_dataset", "mapping": "native_fields",
       "native_format": "ljspeech_original_archive",
