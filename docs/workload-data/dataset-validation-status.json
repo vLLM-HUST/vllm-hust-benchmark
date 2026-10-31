@@ -4751,12 +4751,28 @@
     "LIBRITTS": {
       "scope": "public",
       "delivery_kind": "review_original_source_protocol",
-      "status": "NOT_STARTED",
+      "status": "IN_PROGRESS",
+      "original_acquisition": {
+        "public_entry": "scripts/prepare_libritts_original_assets.py",
+        "profile": "configs/workload-native/libritts-original-assets.json",
+        "split": "test-other",
+        "expected_bytes": 964502297,
+        "server_stage": "libritts-original-test-other-20261031-001 under the private shared task root",
+        "pid": 430196,
+        "birth": "863178751",
+        "last_observed_alive_same_birth": true,
+        "last_observed_partial_bytes": 0,
+        "original_archive_verified": false,
+        "public_server_plan_receipt": "libritts-public-acquisition-entry-20261031-001/qualification-public.json under the private shared task root",
+        "public_server_plan_exit_code": 0,
+        "native_model_calls": 0,
+        "boundary": "Acquisition process and offline public plan verified only. No final archive, provider, synthesis, scoring or completion claim; same process must be inspected before any resume."
+      },
       "checked": false,
       "legacy_checked": false,
       "existing_receipt": null,
       "delivery_receipt": null,
-      "blocker": null
+      "blocker": "Original test-other acquisition started on NPU shared storage with full publisher MD5 and pinned TorchAudio SHA256 requirements. Public bounded resumable acquisition entry and actual server offline plan are available; body remains unverified. Corpus adapter preserving both text forms and speaker/chapter/utterance identities, suitable NPU TTS protocol, native synthesis/scoring and handoff remain pending. LibriTTS is not LibriSpeech ASR, LibriTTS-R or a standalone model/scoring protocol."
     },
     "LJSPEECH": {
       "scope": "public",

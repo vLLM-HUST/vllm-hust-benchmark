@@ -1555,3 +1555,18 @@ Drive，首次音频取得使用已披露的纯内存HTTPS中转；当前公开�
 
 universal声码器及原512维文本编码器文件也已取得并校验。29话轮已按原编码入口完成真实NPU编码，保留512维特征，不重复生成。声学合成仍未通过：第一次尝试缺少CANN
 Python路径，第二次在编译器子进程遇到`AF_UNIX path too long`；均保留失败记录，尚无已核验的合成WAV。短临时目录的独立多进程探测已通过，后续重试不改变原模型、历史窗口、批大小和生成控制。独立软件环境不等于复现原Torch1.7/TensorFlow2.5.1环境；保留原文件的兼容副本仅调整可选依赖按需导入和显式NPU设备选择。声学及声码器完整NPU前向、原始评测与研究侧接入仍待完成；不得静默回退CPU。不能用现有Qwen文本服务替代声学模型，也不能把编码成功或检查点字节校验算作该来源完成。原公开资源与代码许可按发布方及组件各自LICENSE执行，本仓库不打包音频和权重。
+
+### LibriTTS原始测试包获取（不等于原生合成）
+
+[OpenSLR SLR60](https://www.openslr.org/60/)提供24kHz多说话人TTS语料，包含原文、规范化文本与参考音频；不是LibriSpeech
+ASR，也不是LibriTTS-R。当前公共入口固定`test-other`原包，发布方MD5与固定TorchAudio版本SHA256双重核验，不下载到仓库、不展开全包、不产生模型请求。
+
+```bash
+python scripts/prepare_libritts_original_assets.py --data-root /srv/workloads/libritts
+python scripts/prepare_libritts_original_assets.py --data-root /srv/workloads/libritts --action download --max-bytes 964502297
+python scripts/prepare_libritts_original_assets.py --data-root /srv/workloads/libritts --action verify
+```
+
+默认命令仅输出离线计划。下载中断时保留原`.partial`与私有获取记录；检查没有存活的写入进程后，使用原下载命令追加`--resume`，必须匹配原URL、长度、双校验和服务器精确HTTP范围，不能重建记录冒充续传。`verify`可复用既有完整原包，不重新下载。约965MB是压缩包大小，后续解压空间另算。
+
+实际服务器已通过公共离线计划，原始获取进程已启动，尚未取得完整包验证证据；语料适配、合适NPU语音模型、原生合成与评价仍待完成。该语料没有一个通用的官方聊天模型或统一计分命令，必须明确后续采用的TTS原生协议，不用文本生成、ASR转写或格式检查冒充TTS完成。
