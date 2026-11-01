@@ -186,6 +186,31 @@ def test_formal_native_receipt_preserves_failure_recovery_and_remaining_scope():
     )
 
 
+def test_graph_native_receipt_preserves_original_score_and_pending_imdb():
+    receipt = json.loads(
+        (
+            ROOT
+            / "docs/workload-data/validation/mlagentbench-formal-ogbn-arxiv-native-audit-20261102.json"
+        ).read_text("utf-8")
+    )
+    assert receipt["task"] == "ogbn-arxiv"
+    assert receipt["actual_task_scoped_npu_http200_jobs"] == 15
+    assert receipt["final_prediction_rows"] == 48603
+    assert receipt["final_prediction_columns"] == 1
+    assert receipt["original_final_score"] == 0.2571857704256939
+    assert receipt["submitted_final_answer"] is False
+    assert receipt["models_rerun_for_grading_or_audit"] == 0
+    assert (
+        receipt["first_grader_failure_retained"]["not_accepted_as_scored_completion"]
+        is True
+    )
+    assert receipt["provider_and_research_complete_input_outcome_equal"] is True
+    assert receipt["readback_index_unchanged"] is True
+    assert receipt["research_features_or_observation_run"] is False
+    assert receipt["remaining_fixed_task_ids"] == ["imdb"]
+    assert receipt["source_checkbox_eligible"] is False
+
+
 def test_original_main_module_dispatch_preserves_python_m_semantics():
     tree = ast.parse(
         (ROOT / "scripts/run_mlagentbench_local_agent.py").read_text("utf-8")
