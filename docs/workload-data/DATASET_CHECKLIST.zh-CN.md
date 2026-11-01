@@ -1335,7 +1335,7 @@ TB；服务器/data约1.42TB可用，未缩小语料。ChartQA当前两卡主机
 - [x] SCIENCEAGENTBENCH：原30份源码在专用CPU工作区复核，24份Python静态解析；原`make_test_spec`在Python3.10构造前三题通过，12个字段保留，ID仅沿用官方转字符串规则，配方选择ARM64。未构建镜像、未运行程序或模型，不代表科学环境通过；细节见唯一机器清单。
 - [x] SCIENCEAGENTBENCH：显式本地模型通信接口及固定旧版SDK的两次合成回环HTTP控制通过，保留模型标识、原消息及所选GPT-chat分支2000输出预算；不是原题、不是NPU推理。原Agent价格/tokenizer、完整流程仍未接通，不填虚假价格，也不将Qwen改名GPT。官方OpenHands
   legacy入口亦经检查，不能盲用其validation默认值和旧整包镜像。
-- [ ] SCIENCEAGENTBENCH：隔离科学环境、本地模型、原生执行及辅助评分模型仍未就绪；其余原题资产未取得。官方单worker建议峰值约30GB，当前独立Docker可用约10.6GB，扩容授权待定，未清理旧镜像或降低原评价要求。发现两个上游直接入口仍读旧validation
+- [ ] SCIENCEAGENTBENCH：隔离科学环境、本地模型、原生执行及辅助评分模型仍未就绪；其余原题资产未取得。2026-11-01原专用CPU工作区及独立Docker已恢复，80GiB卷和已有数据不变，隔离容器控制通过；这不是科学任务执行。按已确认要求清理经核验的不再使用的缓存，不再列作扩容授权待定。官方单worker约30GB是容量建议，不是实测最低需求。发现两个上游直接入口仍读旧validation
   split，不能与当前verified版混跑，不勾原生通过。
 - [x] TAUBENCH/τ²：2285个原telecom任务与引用全量准备/预检，新增3个原ACTION类任务公共引用交接预检通过；补齐显式ID/全量入口，125包实测环境快照和pip
   check通过，模型调用0。[CPU回执](validation/tau2-readiness-cpu-20261024.json)。
@@ -1369,12 +1369,19 @@ TB；服务器/data约1.42TB可用，未缩小语料。ChartQA当前两卡主机
 
 原数据URL及SHA可用`workload-data catalog download-plan SCIENCEAGENTBENCH`查看。配置`{"sources":[{"source_id":"SCIENCEAGENTBENCH","data_root":"/private/ScienceAgentBench"}]}`即可用现有pipeline全量准备/回查；数据目录须保留原`data/verified-00000-of-00001.parquet`路径。本次102条均实测回查，不仅前三题，也未修改源Parquet。
 
-[发布方当前说明](https://github.com/OSU-NLP-Group/ScienceAgentBench/tree/c26e151ed601ba109dc4d35e057ff8e73fec469d)要求verified版使用配套`benchmark_verified.zip`，并明确不得在线重新分发解包数据。该包中科学数据、参考程序及原评价脚本尚未取得；预览文字不能替代真实数据文件，旧benchmark压缩包不能冒充verified修正版。
+[发布方当前说明](https://github.com/OSU-NLP-Group/ScienceAgentBench/tree/c26e151ed601ba109dc4d35e057ff8e73fec469d)要求verified版使用配套`benchmark_verified.zip`，并明确不得在线重新分发解包数据。该包中原前三题的完整科学数据目录、参考程序、原评价脚本及rubric现已取得并核验，14文件1006008字节；其余题资产尚未取得。预览文字不能替代真实数据文件，旧benchmark压缩包不能冒充verified修正版。
 
 原生生成入口为上游run_infer.py/agent.py，评估可使用上游`evaluation.harness.run_evaluation`容器化路径，直接Conda评估为另一官方路径。当前两份直接脚本run_infer.py和run_eval.py仍硬编码`validation`
 split；后续必须明确将生成和评估同时绑定原verified版本，并核验instance ID及配套评价脚本，不能静默运行不同split或回退main。原源码未修改，本次未执行任何生成程序或评分。
 
-环境不能写成只装一个requirements就可用：上游主Agent和科学程序评估环境分开，直接路径使用Python3.10及独立sci-agent-eval环境；任务还会配置各自的科学依赖，CodeBERT和视觉judge也是评分链路的一部分。本机有Conda命令但其环境未核验，未找到Docker；既有隔离预检未证明可安全运行生成程序。本地NPU模型、辅助评分模型、原框架模型表/上下文和loopback配置尚待适配与验证；不得在全局推理环境执行上游会卸载/同步包的评估脚本，不发默认外部付费模型请求，不删指标以凑通过。原代码与依赖文件已私有保存并校验，但未安装或冒充干净环境复现。
+环境不能写成只装一个requirements就可用：上游主Agent和科学程序评估环境分开，直接路径使用Python3.10及独立sci-agent-eval环境；任务还会配置各自的科学依赖，CodeBERT和视觉judge也是评分链路的一部分。专用CPU的独立Docker已恢复并完成无网络、只读根、内存及PID限制的容器控制；科学任务镜像尚未构建，不能据此计原题通过。本地NPU模型、辅助评分模型、原框架模型表/上下文和loopback配置尚待适配与验证；不得在全局推理环境执行上游会卸载/同步包的评估脚本，不发默认外部付费模型请求，不删指标以凑通过。
+
+2026-11-01依赖核查：官方`code_bert_score==0.4.1`源码分发包已按PyPI
+SHA256取得并静态核验；Python默认评分模型为`neulab/codebert-python`、第11层。评分API允许显式device，但无CUDA时默认CPU，后续必须显式绑定并验证NPU，不能直接运行默认设备。官方requirements的`litellm==1.52.8`精确版本查询返回HTTP404，当前查询的包索引未列出该版本；历史发布及失效原因未确认，也未静默安装替代版本。原Agent的真实模型tokenizer和价格绑定仍待补，不将Qwen冒称GPT或填写虚假价格。[依赖与隔离环境准备记录](validation/scienceagentbench-original-library-audit-20261101.json)仅证明准备，不是原生任务交付。
+
+- [x] ScienceAgentBench辅助模型准备：原Python评分模型`neulab/codebert-python`固定版本的8份原文件、502184777字节已取得，逐份核对发布方Git/LFS身份，权重仅保存于NPU共享盘，本地磁盘不落权重。尚未加载模型或运行评分，不算原题通过或来源交付。
+
+- [x] 专用CPU磁盘清理：已完成来源LiveCodeBench的原始9.38GB文件逐次核对官方SHA256及未打开/未映射状态，清理两个既有硬链接；首个链接删除未释放空间，查明并清理同任务原消费者留下的最后链接后，实测释放9375645696字节，空余20745592832字节。原消费索引、审计、生成结果、评分及环境均保留；原始数据可按固定官方版本重新获取，未扩卷。这是缓存退役，不是新增数据集验证。
 
 #### OVO-Bench原生在线视频路径准备（未完成来源交付）
 
