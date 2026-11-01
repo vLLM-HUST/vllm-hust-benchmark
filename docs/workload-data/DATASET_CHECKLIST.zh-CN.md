@@ -310,7 +310,7 @@ LD_LIBRARY_PATH=/external/ffmpeg/lib python -B scripts/run_videomme_original.py 
 
 ### TemporalWiki原基座探针PPL已交付，其他演化语料模式缺口保留
 
-- [x] 原GPT2-large基座PPL全部8CSV／35,948行、1126个NPU批次完成，原评分标量独立重算精确一致；当前97d9e096两项CI通过，实际工件13072375186的78提供方载荷独立安装核验，全部原字段／索引和24条公共／当前研究回读通过，与原生全部输入文件绑定。现有9B／14B未重启，保护租约已释放。[交付回执](validation/temporalwiki-base-probes-native-delivery-20261101.json)
+- [x] 原GPT2-large基座PPL全部8CSV／35,948行、1126个NPU批次完成，原评分标量独立重算精确一致；296cc656补齐分类API入口后两项CI通过，实际工件13073205020的78提供方载荷独立安装核验，全部原字段／索引和24条公共／当前研究回读通过，与原生全部输入文件绑定；TemporalWiki原生评测和LJSpeech原生TTS可通过分类API查询，751项CPU同套检查通过，先前漏登失败保留。现有9B／14B未重启，保护租约已释放。[交付回执](validation/temporalwiki-base-probes-native-delivery-20261101.json)
 
 - [ ] 持续训练checkpoint、T5、生成、全文／差分语料等模式未完成，另2份语料归档和发布方许可审查仍待补；不编造更新事件。下列准备与失败记录为历史检查点，不表示当前声明的基座探针协议仍未交付。
 

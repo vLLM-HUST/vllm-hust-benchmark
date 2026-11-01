@@ -45,6 +45,7 @@ def test_full_original_probe_native_delivery_and_current_consumer():
         == 35948
     )
     assert handoff["fixed_complete_public_research_readbacks"] == 24
+    assert handoff["temporalwiki_and_ljspeech_native_api_entries_discoverable"]
     assert (
         not handoff["research_modified_or_observation_started"]
         and handoff["new_model_calls"] == 0
