@@ -21,6 +21,10 @@
     {"source_id": "PAIO-SEMANTIC-SIMILAR-5000", "asset_group": "enterprise-private-requests", "related_workload_ids": [], "boundary": "Semantic similarity is not exact-prefix or KV reuse; preserve original private requests without rewriting."}
   ],
   "source_entrypoints": {
+    "WORKARENA": [
+      {"role": "prepare_assets", "path": "scripts/prepare_workarena_author_source.py", "scope": "Public original174-file repository archive prepare/verify qualified; no credential acquisition, browser, Agent or native validation"},
+      {"role": "original_profile", "path": "configs/workload-native/workarena-author-source.json", "scope": "Pinned public software/static runtime assets; live ServiceNow instance pool access requires separate user authorization"}
+    ],
     "MULTIAGENTBENCH": [
       {"role": "generation", "path": "scripts/run_marble_original_research.py", "scope": "Original fixed3 Research tasks and original iterations with disclosed local NPU transports; previous attempt interrupted, not full native delivery"},
       {"role": "saved_output_reuse_audit", "path": "scripts/audit_marble_original_research_saved.py", "scope": "Read-only process birth and saved queue status audit; stale RUNNING does not prove liveness, no queued request execution or inference authorization"},
