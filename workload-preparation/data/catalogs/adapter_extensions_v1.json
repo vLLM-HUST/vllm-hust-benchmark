@@ -2,6 +2,13 @@
   "version": "adapter-extensions/v1",
   "boundary": "Field contracts from publisher metadata/docs. No real source payload downloaded or full adapter validation claimed.",
   "adapters": {
+    "DISCOVERYBENCH": {
+      "kind": "native_environment_dataset", "mapping": "discoverybench_original_real_tasks",
+      "input_fields": [], "required_fields": ["original_key", "original_query", "original_prompt_material", "metadata_path", "native_files", "blockers"],
+      "outcome_fields": [], "annotation_fields": [], "id_field": null,
+      "requirements": ["Original real answer-key order, native metadata and exact scientific data references", "Publisher decode and filename defects remain explicit blocked records, never renamed or filtered", "Original author Agent/scorer required; model-provider profile disclosed separately"],
+      "status": "ORIGINAL_NATIVE_RELATIONS_SOURCE_VALIDATED_CI_WHEEL_PENDING"
+    },
     "LONGMEMEVAL_V2": {
       "kind": "native_environment_dataset", "mapping": "longmemeval_v2_original_relations",
       "input_fields": [], "required_fields": ["original_question", "original_haystacks", "native_files"],

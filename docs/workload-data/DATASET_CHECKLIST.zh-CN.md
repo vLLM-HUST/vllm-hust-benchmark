@@ -2,13 +2,37 @@
 
 ### DiscoveryBench 隔离执行准备（2026-11-02）
 
+- [x] 公共原始任务适配器已接入：固定186份原文件身份，共13,883,534字节，原答案表239条全部保留。229条能解析原生问题与数据关系；5条原元数据解码异常、5条原文件关系异常保留为阻塞记录（后者共8处缺失引用，非8条任务），不改编码、不补文件别名、不过滤原题。
+- [x] 229条输入材料与原官方默认提示构造器结果一致，答案表gold与元数据main假设不进入输入材料；原完整元数据可通过原生文件关系恢复。原前三题完整元数据恢复、239条公共/未修改研究入口回读及索引不变检查通过，未运行模型或重跑原题。本地数据准备包及边界测试566项通过；本项是源码验证，尚非安装版CI工件验证。
+
+原始任务读取入口：
+
+```python
+from pathlib import Path
+from vllm_hust_workload_data import iter_workload
+from vllm_hust_workload_data.discoverybench import restore_original_case
+
+data_root = Path("/external/discoverybench-native-real")
+records = iter_workload("DISCOVERYBENCH", data_root=data_root)
+try:
+    record = next(records)  # 原答案表顺序；不要用跳过失败题改变固定样本。
+    if record.runtime["blockers"]:
+        raise RuntimeError(record.runtime["blockers"])
+    native = restore_original_case(record, data_root=data_root)
+    # native含原metadata/question和单独的answer_key_row，供原框架/评分器使用。
+finally:
+    records.close()
+```
+
+外部数据目录保留`answer_key/answer_key_real.csv`及`discoverybench/real/test/...`原相对路径。准备索引仍使用统一pipeline；记录不是可直接发送的模型请求，必须接原Agent/工具/评分流程。研究侧复用原始任务、参考及文件关系，不迁入观测或特征分析。读取回执：`discoverybench-public-native-relations-20261102-001/qualification-public.json`。
+
 - [x] 完整原coder
   Agent驱动`run_discoverybench_original_actor.py`已在实际无网络/非root/只读容器完成构造检查，模型和工具请求均为0。默认仅plan；`--preflight`只构造；`--execute`才调用原提示构造器和原Agent循环，保留5轮/1次Python规则，读取哈希固定的四份作者源码。模型提供方与隔离工具传输明确披露，不称GPT-4复现。
 - [x] 固定前三题原coder
   Agent已全部返回，各3次真实NPU14B请求、1次原Python调用；CPU与NPU保存的原请求/响应逐字节一致，原元数据未变，未重新生成答案。该勾仅代表Actor阶段，原评分与来源总勾尚未完成。回执：`discoverybench-fixed3-saved-execution-audit-20261102-001/qualification-public.json`。
 - [x] 三题原评分已返回并审计，各3/3/5次NPU
   judge请求，实际judge为Qwen3-14B，不是官方GPT-4成绩；原参考/预测保持一致，评分算式核对通过。三题均为0分，原工具均报`NameError: py`：模型生成的`py`代码围栏被原清洗器保留，未成功执行科学程序。原输出/原工具未修补，没有重跑题目；不能称科学任务通过。回执及格式诊断位于`discoverybench-fixed3-saved-scoring-audit-20261102-001/`。
-- [ ] 完整公共运行入口，以及公共/研究侧原始任务、参考答案和原生文件关系的读取核验仍待完成；来源总勾不变。科研观测、特征和分析仍留研究仓，不另建研究结果接入系统。
+- [ ] 完整公共运行入口，以及CI安装版工件上的原始任务、参考答案和原生文件关系读取核验仍待完成；源码版239条公共/研究回读已通过，来源总勾不变。科研观测、特征和分析仍留研究仓，不另建研究结果接入系统。
 - [x] `discoverybench_tool_transport.py`补齐原一次Python调用计数及按题独占的工具请求队列；实际CPU文件队列到隔离官方工具往返通过，返回字符串精确保留，二次提交被拒绝。超时/基础设施失败保留请求，不自动重放；返回值必须匹配原代码哈希。该传输不在宿主机执行代码，完整Agent与评分绑定仍待完成。回执：`discoverybench-tool-queue-public-20261102-001/qualification-public.json`。
 - [x] 原官方依赖在专用CPU独立Docker镜像安装、依赖检查及离线导入通过；19份官方源码身份核对，两个官方CLI在无网络/非root/只读容器中启动通过。实际115项依赖快照已保存，未修改全局环境。
 - [x] 按官方real答案表原顺序固定前三题`archaeology/0/0`、`archaeology/1/0`、`archaeology/10/0`；六份原始文件共2,010,940字节已在CPU侧核对Git

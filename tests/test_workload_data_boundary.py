@@ -5,6 +5,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1] / "workload-preparation"
 DATA_MODULES = {
+    "discoverybench",  # Original task/reference/data relations only; no Agent or models.
     "longmemeval_v2",  # Original memory/data-file relations only, no observation or models.
     "swesmith",  # Original repository task/bug-patch/test partitions only, no execution.
     "mlagentbench",  # Original task registry/software references; no Agent or scientific execution.
