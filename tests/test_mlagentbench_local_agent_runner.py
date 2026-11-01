@@ -153,6 +153,39 @@ def test_resume_step_without_checkpoint_is_not_silently_ignored():
         MODULE.resume_arguments(SimpleNamespace(resume=None, resume_step=3))
 
 
+def test_formal_native_receipt_preserves_failure_recovery_and_remaining_scope():
+    receipt = json.loads(
+        (
+            ROOT
+            / "docs/workload-data/validation/mlagentbench-formal-cifar10-native-audit-20261102.json"
+        ).read_text("utf-8")
+    )
+    assert receipt["task"] == "cifar10"
+    assert receipt["submitted_final_answer"] is False
+    assert (
+        receipt["original_agent_final_message"] == "No valid response after max_retries"
+    )
+    assert receipt["original_final_score"] == 0.4803
+    assert receipt["this_formal_task_actual_npu_http200_jobs"] == 13
+    assert (
+        receipt["original_segment_jobs"] + receipt["resumed_new_inference_jobs"] == 13
+    )
+    assert receipt["exact_boundary_cached_replays_without_inference"] == 1
+    assert (
+        receipt["prior_grader_attempt_retained"]["not_accepted_as_scored_completion"]
+        is True
+    )
+    assert receipt["remaining_fixed_task_ids"] == ["imdb", "ogbn-arxiv"]
+    assert receipt["source_checkbox_eligible"] is False
+    assert receipt["quality_success_or_performance_improvement_claim"] is False
+    assert (
+        hashlib.sha256(
+            (ROOT / receipt["entry"]).read_text("utf-8").encode()
+        ).hexdigest()
+        == receipt["entry_sha256"]
+    )
+
+
 def test_original_main_module_dispatch_preserves_python_m_semantics():
     tree = ast.parse(
         (ROOT / "scripts/run_mlagentbench_local_agent.py").read_text("utf-8")
