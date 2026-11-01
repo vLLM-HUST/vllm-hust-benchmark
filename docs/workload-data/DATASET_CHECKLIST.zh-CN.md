@@ -1874,6 +1874,8 @@ for record in records:
 
 长任务启动前检查执行工作区剩余寿命，至少覆盖原任务上限和收尾窗口。平台中断不记为题目效果失败；作者原生续跑重新建立环境计时，保留各段用时，不冒称无中断运行或性能测量。
 
+- [x] `ogbn-arxiv`完整原始归档83058288字节已在服务器取得，19个原ZIP成员CRC全部通过，未抽子图。公开入口`prepare_mlagentbench_arxiv_assets.py`的verify及已有缓存acquire均通过；摘要为本次官方源下载实测固定值，不冒称发布方提供的校验和。[准备回执](validation/mlagentbench-ogbn-arxiv-preparation-20261102.json)。图算子构建、原任务准备、Agent及评分另行核验，尚不代表原生完成。
+
 准备入口：
 
 ```bash
