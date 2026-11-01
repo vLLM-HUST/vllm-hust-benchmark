@@ -21,6 +21,14 @@
     {"source_id": "PAIO-SEMANTIC-SIMILAR-5000", "asset_group": "enterprise-private-requests", "related_workload_ids": [], "boundary": "Semantic similarity is not exact-prefix or KV reuse; preserve original private requests without rewriting."}
   ],
   "source_entrypoints": {
+    "DAILYTALK": [
+      {"role": "prepare_assets", "path": "scripts/prepare_dailytalk_original_metadata.py", "scope": "Pinned original transcripts, maps and lexicons; no synthetic requests"},
+      {"role": "prepare_assets", "path": "scripts/prepare_dailytalk_original_audio.py", "scope": "Original fixed complete dialogue audio acquisition; no native synthesis claim"},
+      {"role": "prepare_assets", "path": "scripts/prepare_dailytalk_original_guo_inputs.py", "scope": "Original row bytes, speaker/emotion maps and ten-turn Guo history"},
+      {"role": "original_profile", "path": "configs/workload-native/dailytalk-original-model-assets.json", "scope": "Original acoustic, vocoder and text-encoder identities"},
+      {"role": "generation", "path": "scripts/run_dailytalk_guo_encoder_npu.py", "scope": "Original Guo model-required text embeddings on NPU, not workload characterization; plan default, saved-output verification has zero new model calls; acoustic/vocoder public entry still pending"},
+      {"role": "original_profile", "path": "configs/workload-native/dailytalk-npu-py312-observed.txt", "scope": "Observed qualified ARM64 runtime constraints, not an author lock or platform installer; synthesis uses the separate plotting overlay"}
+    ],
     "MLAGENTBENCH": [
       {"role": "prepare_assets", "path": "scripts/prepare_jsonschemabench_author_source.py", "scope": "Use --source mlagentbench; pinned author software and released task definitions only, not task data or native execution"},
       {"role": "original_profile", "path": "configs/workload-native/mlagentbench-author-source.json", "scope": "Pinned138 publisher software/task-definition files; underlying task data and access conditions remain separate"}

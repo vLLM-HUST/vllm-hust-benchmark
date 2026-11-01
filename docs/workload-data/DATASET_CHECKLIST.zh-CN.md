@@ -1721,6 +1721,29 @@ smoke、tests和lint全部通过。[交付回执](validation/ruler-native-delive
 - [x] 原29条完整合成及独立保存结果审计通过：声学/vocoder各4批，29个WAV全部完整PCM解码、均有非零采样，29份PNG签名及尺寸核验；重核2份原模型、52份既有兼容源码和29份原Guo特征，新增模型调用0。[合成审计](validation/dailytalk-original-fixed29-synthesis-audit-20261101.json)。原失败保留，无主观音质或引擎性能结论。
 - [ ] 公开完整原生编排入口、所选原协议评价边界及最终CI工件研究消费仍待完成，来源总勾为空。
 
+#### DailyTalk 公共 Guo 文本嵌入入口
+
+入口为
+`scripts/run_dailytalk_guo_encoder_npu.py`。这是原TTS模型必需的文本嵌入预处理，不是研究特征挖掘；它不替代声学/vocoder执行或音质评价。公开入口已在服务器实测
+`plan` 和已有29份原结果的
+`verify`，没有导入Torch、改动旧回执或新增模型调用。[入口核验回执](validation/dailytalk-public-encoder-entry-20261101.json)。公共
+`execute` 路径本次未为包装重复运行，既有NPU生成证据与该项验证分别保留。
+
+使用固定原模型身份配置中的distiluse发布文件，先准备原元数据及完整对话输入；环境版本见
+[85项观测约束](../../configs/workload-native/dailytalk-npu-py312-observed.txt)。这是ARM64/Python3.12.13实际运行环境，不是作者锁文件或平台安装脚本；厂商Torch2.10/Torch_npu2.10和CANN须由执行平台提供，不要用普通CPU包替换。原基础Matplotlib3.10.9与合成所需的独立3.9.4绘图overlay分开配置，不合并为一次全局降级。
+
+```bash
+python scripts/run_dailytalk_guo_encoder_npu.py --action plan --prepared <外部准备目录> --metadata-root <原元数据目录> --encoder-root <固定原encoder目录> --output <外部新回执目录>
+python scripts/run_dailytalk_guo_encoder_npu.py --action execute --prepared <外部准备目录> --metadata-root <原元数据目录> --encoder-root <固定原encoder目录> --output <外部新回执目录> --device npu:0 --resource-window-confirmed
+python scripts/run_dailytalk_guo_encoder_npu.py --action verify --prepared <上述准备目录> --metadata-root <原元数据目录> --encoder-root <固定原encoder目录> --output <已有execution-private.json所在目录>
+```
+
+执行前先核查研究占用并设置平台允许的设备映射；`npu:0`相对于当前可见设备，不代表主机物理卡号。默认计划不读取输入或加载模型；`execute`要求显式空闲窗口确认，只允许NPU
+FP32，禁止覆盖已有嵌入。`verify`仅按原文件身份及结果哈希核验，不调用模型。
+
+入口不硬编码29条：按原输入逐句使用 `encode([原文])[0]`，校验完整对话历史、512维及原128-token
+encoder策略。`--source-file`和`--split train/val`可绑定其他原行集合；原行字节、原顺序及整对话关系必须匹配固定元数据，不能提交重写的prompt。其他原集合仍需先按原协议准备；现有自动音频/对话准备配置只验证了登记的三段，不能把本入口参数化等同全量准备已通过。完整声学编排与最终工件研究消费仍按上方未完成项推进。
+
 ### MLAgentBench：原任务环境准备
 
 - [x] 固定原作者版本`5d71205cc20a8e95d43aa7cb7120e89ca3323e31`的138份软件/任务定义文件，共670271字节；79份Python静态解析通过。15个发布目录包含工具型示例，不能据此称论文有15个评测任务。原许可、依赖、Agent、准备与评价脚本均保留；可选Auto-GPT
