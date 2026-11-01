@@ -1719,7 +1719,8 @@ smoke、tests和lint全部通过。[交付回执](validation/ruler-native-delive
 
 - [x] 独立绘图overlay固定Matplotlib3.9.4原wheel并校验SHA256，原绘图函数按原调用者前置条件验证通过；原环境不变。[绘图回执](validation/dailytalk-plotting-overlay-20261101.json)。
 - [x] 原29条完整合成及独立保存结果审计通过：声学/vocoder各4批，29个WAV全部完整PCM解码、均有非零采样，29份PNG签名及尺寸核验；重核2份原模型、52份既有兼容源码和29份原Guo特征，新增模型调用0。[合成审计](validation/dailytalk-original-fixed29-synthesis-audit-20261101.json)。原失败保留，无主观音质或引擎性能结论。
-- [ ] 公开完整原生编排入口、所选原协议评价边界及最终CI工件研究消费仍待完成，来源总勾为空。
+- [x] 公开工作区准备和完整合成执行入口代码已补齐；服务器实测准备/复核及已有29条结果复用，未为包装重复生成。公共`execute`包装未重新实跑，与既有原流程NPU证据分开记录。
+- [ ] 所选原协议评价边界及最终CI工件研究消费仍待完成，来源总勾为空。
 
 #### DailyTalk 公共 Guo 文本嵌入入口
 
@@ -1754,6 +1755,27 @@ python scripts/verify_dailytalk_synthesis_outputs.py --action verify --prepared 
 ```
 
 `--stage`应包含原`native-execution/state-private.json`和`results/900000/<对话ID>/`；按原文件名逐一匹配，不通过改名、删题或重新生成来修补失败。结果中的非零采样、格式与文件完整性不是音质分数。默认`plan`不读取数据或加载模型。
+
+#### DailyTalk 公共原生合成链路
+
+`scripts/prepare_dailytalk_synthesis_workspace.py`从固定原作者源码创建外部新工作区，逐份校验52份文件及原权重，复核完整对话输入和已有Guo嵌入；原源码和旧输出不覆盖。仅披露两类兼容处理：未使用的DeepSpeaker/G2P分支延迟导入，以及显式NPU设备和原seed绑定。两份YAML只改路径，原模型配置、batch8、900000步权重和10轮历史不变。
+
+`scripts/run_dailytalk_synthesis_npu.py`调用原`batch`合成CLI，使用原FP32声学模型和universal
+HiFi-GAN；显式启用已验证的单实例GRU公式分解，安全权重加载，无CPU/CUDA神经网络回退。执行要求空闲窗口确认、共享互斥文件和最多6GiB的进程分配器预算；这些条件不替代平台调度或研究侧优先检查。默认`plan`不加载模型，已有结果可通过`verify --result-stage`复用。
+
+```bash
+common=(--author-root <固定原作者源码目录> --prepared <外部输入准备目录> --metadata-root <固定原元数据目录> --models-root <原权重目录> --audio-root <原音频根目录> --encoder-output <已有Guo编码回执目录> --stage <外部新stage目录>)
+python scripts/prepare_dailytalk_synthesis_workspace.py "${common[@]}" --action prepare
+python scripts/prepare_dailytalk_synthesis_workspace.py "${common[@]}" --action verify
+PYTHONPATH=<独立Matplotlib3.9.4-overlay目录> MPLBACKEND=Agg python scripts/run_dailytalk_synthesis_npu.py "${common[@]}" --action execute --device npu:0 --allocator-gib 6 --lease-file <平台共享互斥文件> --resource-window-confirmed
+python scripts/run_dailytalk_synthesis_npu.py "${common[@]}" --action verify --result-stage <已有原合成stage目录>
+```
+
+以上为Bash参数数组示例，尖括号替换为实际外部路径；准备前先按前述入口取得原源码、元数据、原音频、权重和Guo嵌入，配置厂商NPU环境及独立绘图overlay。不要将示例直接作为平台调度器。执行前检查研究占用和设备映射；失败保留新stage，已有结果不重新生成凑通过。`verify`会重新核验公开工作区和原资产，再读取指定已保存结果，不调用模型。
+
+- [x] 服务器公共准备入口`plan/prepare/verify`均退出0，52文件及42份Python语法检查通过，原作者文件未改，原vocoder符号链接核验通过。
+- [x] 公共合成入口`plan/verify`均退出0，完整PCM核验原29条已保存WAV，无Torch导入、无新增模型调用。[实际入口回执](validation/dailytalk-public-workspace-entry-20261101.json)。
+- [ ] 公共`execute`包装未为整理代码重新运行；既有原流程NPU合成成功回执单列，不把此入口的读取/核验称作第二次真实生成。最终工件研究消费及协议评价边界仍需收口，来源不打总勾。
 
 ### MLAgentBench：原任务环境准备
 

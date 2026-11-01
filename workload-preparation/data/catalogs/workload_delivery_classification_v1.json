@@ -26,7 +26,9 @@
       {"role": "prepare_assets", "path": "scripts/prepare_dailytalk_original_audio.py", "scope": "Original fixed complete dialogue audio acquisition; no native synthesis claim"},
       {"role": "prepare_assets", "path": "scripts/prepare_dailytalk_original_guo_inputs.py", "scope": "Original row bytes, speaker/emotion maps and ten-turn Guo history"},
       {"role": "original_profile", "path": "configs/workload-native/dailytalk-original-model-assets.json", "scope": "Original acoustic, vocoder and text-encoder identities"},
-      {"role": "generation", "path": "scripts/run_dailytalk_guo_encoder_npu.py", "scope": "Original Guo model-required text embeddings on NPU, not workload characterization; plan default, saved-output verification has zero new model calls; acoustic/vocoder public entry still pending"},
+      {"role": "generation", "path": "scripts/run_dailytalk_guo_encoder_npu.py", "scope": "Original Guo model-required text embeddings on NPU, not workload characterization; plan default, saved-output verification has zero new model calls"},
+      {"role": "prepare_assets", "path": "scripts/prepare_dailytalk_synthesis_workspace.py", "scope": "Fresh verified 52-file original Guo workspace, path-only config bindings, disclosed NPU/import ports, original weight symlink; no model execution"},
+      {"role": "generation", "path": "scripts/run_dailytalk_synthesis_npu.py", "scope": "Original Guo batch synthesis with FP32 NPU acoustic and universal HiFi-GAN, original 900000 checkpoint/seed1234/batch8/history10/controls; plan and saved-result verify qualified, public execute wrapper not reexecuted"},
       {"role": "saved_output_reuse_audit", "path": "scripts/verify_dailytalk_synthesis_outputs.py", "scope": "Saved original Guo output audit: original rows/history, original weight digests, all PCM frames, PNG headers and exact output coverage; no model imports, synthesis or quality-score claim"},
       {"role": "original_profile", "path": "configs/workload-native/dailytalk-npu-py312-observed.txt", "scope": "Observed qualified ARM64 runtime constraints, not an author lock or platform installer; synthesis uses the separate plotting overlay"}
     ],
