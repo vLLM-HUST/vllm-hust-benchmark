@@ -3,6 +3,14 @@
 2026-11-01，复算 `joint-b0-r2` / `joint-b1-r4` 的全部 200×2 份记录。模型为 Qwen3.5-35B-A3B，BF16、TP2、同两张 910B2，固定
 MMLU-Pro 200 题、输出上限 8192、自然结束。B1 包含 BetterScale E24/R36、逐请求重算和 FA Microflow，主机 State 为 4 GiB/rank。
 
+**B1 完整回答批次的基础运算算量为 6.344603156438050×10¹⁵—6.354121280655970×10¹⁵ FLOPs；除以同轮两卡客户端时间，得到
+4.5324876112—4.5392872138 TFLOPS/芯片。** 区间只来自 GDN prefill 分块未知；不是统计置信区间。大纲验收还需匹配的同步计时和本批独立参考时间。
+
+B1 的原始 SSE 尾包保留了全部 200 请求的详细 MTP 记录，先前汇总 JSON 没有带出这些字段。此次恢复 247720 步、原始接纳 413286 个 draft token；按
+EOS/长度终止裁剪后保留 413218 个输出依赖根。B0 原 SSE 没有对应逐步记录，因此两臂共同可比部分仍单列为下面的矩阵小计。
+
+## 两臂共同可复算的矩阵部分
+
 | 本次可复算的量                         |                 B0 |                B1 |
 | -------------------------------------- | -----------------: | ----------------: |
 | 输入 token                             |             282265 |            282265 |
@@ -13,7 +21,7 @@ MMLU-Pro 200 题、输出上限 8192、自然结束。B1 包含 BetterScale E24/
 | 同轮客户端时间 T_client（秒）          | 1425.4634465482086 | 699.9029783103615 |
 | F_mat/(2×T_client×10¹²)（TFLOPS/芯片） |       2.1186101241 |      4.0871392185 |
 
-这两项是主干矩阵小计的处理速率，尚未包括 GDN 状态运算、基础标量运算和必要 MTP 依赖算量。大纲的完整 C、参考时间和 η 需要补测。已有日志不能恢复缺失的逐步接纳和分块状态。
+这两项只包含主干矩阵。下文为 B1 补入基础标量、必要 MTP 依赖和 GDN prefill 分块区间；两臂的矩阵小计不与 B1 的扩展算量混算倍率。
 
 ## 计算式
 
@@ -45,6 +53,43 @@ QK/AV 系数为 `4×10×16×256=163840`；必要 target 词表投影系数为 `2
 
 两臂自然回答长度不同，各自计算 F_mat。不得用 B0 的算量除以 B1 的时间，也不得按 token 比例放大旧计数轮的总 F 或参考时间。
 
+## B1 基础运算与 GDN 分块区间
+
+沿用既有基础运算计量：加、减、乘及矩阵乘累加按源码计数；特殊函数、比较和除法不赋任意 FLOP 等价值。
+
+| 分项                                    |            FLOPs |
+| --------------------------------------- | ---------------: |
+| target 矩阵                             | 5721201823580160 |
+| target 基础标量、卷积与 decode 状态运算 |   79260797645085 |
+| 必要 MTP KV、完整查询及保留词表依赖     |  515038808672965 |
+| GDN prefill 分块下界                    |   29101726539840 |
+| GDN prefill 分块上界                    |   38619850757760 |
+
+必要 MTP 依赖包含 1133191 个 KV 行、413218 个完整查询/词表根，以及 1599700493 个因果 attention 对。各步 KV
+版本只保留会被输出根读取的版本。step0 的必要 KV 前缀止于最后保留查询；step1 仅保留第二 draft 的必要根。线性闭包与原 cache-version 图在旧轮全部 200 请求及
+720 个穷举合成终止案例中一致。
+
+[几何记录](b1-native-acceptance.json.gz)只含请求标识、长度、逐步接纳/提出数量和原 SSE 哈希，不含题文、token ID
+或回答文本。[运算目录](operation-catalog.json)保留固定架构系数及 GDN 每种分块的源码运算量。
+
+对 GDN prefill，首块从结构零状态开始，后续块延续状态。每块长度为 1—64，按原 30 层、32 个全局 value heads
+计数。用动态规划枚举所有正长度分块；实际调度对分块的额外约束只会缩小此区间：
+
+```text
+L(0)=U(0)=0
+L(n)=min_{1≤k≤min(64,n)} [c_initial(k)             if n=k
+                         L(n−k)+c_continuation(k) otherwise]
+U(n)=max_{1≤k≤min(64,n)} [c_initial(k)             if n=k
+                         U(n−k)+c_continuation(k) otherwise]
+F_low  = F_mat + F_scalar + F_draft + Σ L(I_j)
+F_high = F_mat + F_scalar + F_draft + Σ U(I_j)
+C_client,low/high = F_low/high / (2×699.9029783103615×10¹²)
+                 = 4.5324876112—4.5392872138 TFLOPS/芯片
+```
+
+该区间覆盖固定 chunk 算法中分块及初始状态的算量差异，不覆盖换模型、不同算法或缺失运行路径。它使用同轮客户端区间，包含 HTTP/SSE 与客户端开销；未将其标成大纲要求的同步无插桩 C。η
+仍需要独立推导的本批参考时间。
+
 ## 大纲指标与旧计数轮
 
 ```text
@@ -61,7 +106,7 @@ F=1812905151088034、T=127.59352582134306 秒、T_ref=47.503348961177785 秒，�
 
 ## 补测需要记录什么
 
-1. 在预先固定的同一工况中保存逐请求 MTP 接纳根及必要 KV/hidden 依赖闭包、GDN prefill 的实际分块和初始状态，补齐总 F。
+1. B0 补逐步 MTP 记录；两臂补 GDN prefill 实际分块和状态，取得点值 F。B1 原生 MTP 序列已从 SSE 恢复。
 1. 配对记录同步起止边界及匹配的无插桩时间；所有测量开销保留，不估算扣减。
 1. 用独立标定、必要执行依赖和资源约束构造本批次参考模型，检查长输出、B0/B1 各自路径的适用域，计算各自 T_ref 和 η。
 
@@ -80,8 +125,10 @@ python scripts/recompute_full_answer_compute.py --check
 - [复算程序](../../scripts/recompute_full_answer_compute.py)：从配置和逐题长度重算，拒绝输入不一致、重复请求、失败批次及无效时间。
 - [旧计数轮复核](../acceptance-completion-20261029/reference-reassessment-20261029.json)：保留原数值与适用范围。
 
-The current complete-answer pair yields target-matrix subtotals of 2.1186101241 and 4.0871392185
-TFLOPS/chip over the original client intervals. These are not total effective compute or outline
-efficiency. Total work requires same-run MTP dependency and GDN chunk ledgers; acceptance also
-requires matched synchronized timing and independently calibrated reference times for the
-full-answer workloads. No old reference time or throughput ratio is substituted.
+The recovered B1 native MTP sequences and the original arithmetic convention yield a basic-work
+interval of 6.344603156438050e15–6.354121280655970e15 FLOPs, or 4.5324876112–4.5392872138
+TFLOPS/chip over the same client interval. The range covers all positive 1–64-token GDN prefill
+partitions; it is not a confidence interval. B0 lacks detailed native MTP sequences. Outline
+efficiency still requires matched synchronized timing and independently calibrated reference times
+for the full-answer workload. The old out256 reference time and throughput ratio are not
+substituted.
