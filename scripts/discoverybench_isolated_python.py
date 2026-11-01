@@ -71,7 +71,6 @@ def main():
         not isinstance(payload, dict)
         or set(payload) != {"code"}
         or not isinstance(payload["code"], str)
-        or not payload["code"].strip()
     ):
         raise ValueError("one explicit original tool code string required")
     result = original_tool(args.source)._run(payload["code"])

@@ -1,7 +1,10 @@
 """Isolation software fixtures, not original tasks or model-generated programs."""
 
 import importlib.util
+import io
+import json
 from pathlib import Path
+import sys
 
 import pytest
 
@@ -45,3 +48,22 @@ def test_weaker_boundary_rejected(change):
     values.update(change)
     with pytest.raises(RuntimeError):
         entry.validate_isolation(**values)
+
+
+def test_empty_code_is_passed_unchanged_to_original_tool(monkeypatch, capsys):
+    calls = []
+
+    class FixtureTool:
+        def _run(self, code):
+            calls.append(code)
+            return "fixture original response"
+
+    monkeypatch.setattr(entry, "check_container", lambda: None)
+    monkeypatch.setattr(entry, "original_tool", lambda source: FixtureTool())
+    monkeypatch.setattr(sys, "argv", ["fixture", "--source", "/inert"])
+    monkeypatch.setattr(sys, "stdin", io.StringIO('{"code":""}'))
+    assert entry.main() == 0
+    assert calls == [""]
+    assert json.loads(capsys.readouterr().out) == {
+        "tool_output": "fixture original response"
+    }

@@ -2,6 +2,7 @@
 
 ### DiscoveryBench 隔离执行准备（2026-11-02）
 
+- [x] `discoverybench_tool_transport.py`补齐原一次Python调用计数及按题独占的工具请求队列；实际CPU文件队列到隔离官方工具往返通过，返回字符串精确保留，二次提交被拒绝。超时/基础设施失败保留请求，不自动重放；返回值必须匹配原代码哈希。该传输不在宿主机执行代码，完整Agent与评分绑定仍待完成。回执：`discoverybench-tool-queue-public-20261102-001/qualification-public.json`。
 - [x] 原官方依赖在专用CPU独立Docker镜像安装、依赖检查及离线导入通过；19份官方源码身份核对，两个官方CLI在无网络/非root/只读容器中启动通过。实际115项依赖快照已保存，未修改全局环境。
 - [x] 按官方real答案表原顺序固定前三题`archaeology/0/0`、`archaeology/1/0`、`archaeology/10/0`；六份原始文件共2,010,940字节已在CPU侧核对Git
   blob、大小及SHA256。题目、元数据和数据路径保持原样，参考答案单独保存，未进入Git。
