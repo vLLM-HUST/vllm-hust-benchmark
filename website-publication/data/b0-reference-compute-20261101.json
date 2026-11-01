@@ -1,0 +1,183 @@
+{
+  "schema": "project-b0-reference-compute/v1",
+  "method": "docs/B0_REFERENCE_COMPUTE.md",
+  "report_path": "reports/b0-reference-compute-20261101/README.md",
+  "method_date": "2026-11-01",
+  "analysis_kind": "retrospective_recomputation_of_audited_pair",
+  "reference_selection": "User-designated official B0, common to both arms",
+  "reference_kind": "measured_official_baseline_not_physical_ceiling",
+  "target_scope": "project_B0_reference_compute_target",
+  "independent_outline_eta_ref_pass": null,
+  "original_independent_reference_reclassified": false,
+  "baseline_percent_is_normalization_identity": true,
+  "new_model_calls_for_this_calculation": 0,
+  "independent_pair_count": 1,
+  "workload": {
+    "model": "Qwen3.5-35B-A3B",
+    "dtype": "BF16",
+    "hardware": "Ascend 910B2",
+    "TP": 2,
+    "requests_per_arm": 200,
+    "dataset": "MMLU-Pro",
+    "actual_input_tokens_per_arm": 282265,
+    "actual_output_tokens_per_arm": 51200,
+    "output_budget": 256,
+    "ignore_eos": false
+  },
+  "measurement": {
+    "same_run_F_T": true,
+    "all_accounting_cost_retained": true,
+    "strict_uninstrumented": false,
+    "fresh_per_run_cache": true
+  },
+  "identities": {
+    "B0": "vLLM 0.18.0 / vLLM-Ascend 0.18.0 with disclosed text-only compatibility patches",
+    "B1": "vLLM 0.28.1.post1.dev143+gf18cf803c / vLLM-Ascend 0.25.1rc2 development stack; vLLM-HUST combined optimization"
+  },
+  "source_sha256": {
+    "reports/vllm-hust-midterm-20261019/m01-recovery/official018-paired-compute-20261024/summary.json": "7b31cd029e6a00217be5e32e9cc56c92c19875a3a47f57d4624bfce5b7722c3a",
+    "reports/b0-reference-compute-20261101/accounting-parts.json": "f5d681e90db2c062989f681d79abcf701bdcabf8abad6d068a65c2e9f5bf1d66",
+    "website-publication/data/midterm-v103.json": "3119c271ed4691469a543c56b4c98a60b83ca24793346843285e1d8797091aad"
+  },
+  "component_totals": {
+    "B0": {
+      "input_norm": 136882028952,
+      "kv_projection": 253543915192320,
+      "q_projection": 84514638397440,
+      "z_projection": 169029276794880,
+      "ba_projection": 2641082449920,
+      "kv_convolution": 432860221440,
+      "q_convolution": 144286740480,
+      "key_l2": 58609274880,
+      "query_l2": 58609274880,
+      "gate_bias_softplus_scale": 1611988800,
+      "fused_sigmoid_denominator_add": 0,
+      "gdn_output_norm": 206656964160,
+      "output_projection": 169029276794880,
+      "post_attention_norm": 137556681878,
+      "shared_expert": 84724691238912,
+      "active_routed_experts": 677797529911296,
+      "router": 14120781873152,
+      "shared_gate": 55159304192,
+      "moe_scalar": 541344938773,
+      "recurrence_state": 4219183841280,
+      "recurrence_output": 1685040660480,
+      "prefill.wy.kkt_dot": 2166220554240,
+      "prefill.wy.kkt_gate_difference_and_scaling": 25385397120,
+      "prefill.wy.wy_value_beta": 34684723200,
+      "prefill.wy.wy_key_beta_gate": 69369446400,
+      "prefill.wy.wy_lower_triangular_dot": 4471180001280,
+      "prefill.inverse.inverse16_recurrence": 18902970240,
+      "prefill.inverse.inverse_merge_triangular_dot": 355010242560,
+      "prefill.inverse.inverse_negations": 8461799040,
+      "prefill.prefix_scan": 266640000,
+      "prefill.transformed_value_state_dot": 8476635955200,
+      "prefill.transformed_value_residual": 33111859200,
+      "prefill.state_decay_difference": 270974400,
+      "prefill.state_value_decay": 34684723200,
+      "prefill.state_kv_dot": 8879289139200,
+      "prefill.state_decay_add": 135738163200,
+      "prefill.output_qk": 2235590000640,
+      "prefill.output_gate": 17465546880,
+      "prefill.output_qh": 8476635955200,
+      "prefill.output_av": 2235590000640,
+      "prefill.output_state_decay_add": 66223718400,
+      "prefill.output_scale": 34684723200,
+      "vocabulary": 87341001605120,
+      "kv": 15554798682112,
+      "q_gate": 113806466351104,
+      "output": 56903233175552,
+      "qk_av": 48581973180416,
+      "key_norm": 7602533650,
+      "query_norm": 55623830800,
+      "rope": 11843377536,
+      "attention_gate": 13892390912,
+      "score_scale": 47443333184,
+      "softmax_stability_subtract": 47443333184,
+      "softmax_denominator_add": 47389066032,
+      "final_norm": 3426116309,
+      "hidden_embedding_fusion": 5876102463488,
+      "three_input_norms": 8608622697,
+      "post_and_final_norms": 710090458
+    },
+    "B1": {
+      "target_projection": 1624140582912000,
+      "target_qk_av": 47100042936320,
+      "target_vocabulary": 52076478464000,
+      "target_scalar": 7559251772685,
+      "target_prefill": 37777590405120,
+      "necessary_draft": 44251204597909
+    }
+  },
+  "B0_family_totals": {
+    "target:linear_attention:prefill": 1097942682634270,
+    "target:full_attention:": 424808599084978,
+    "target_final:final_norm:": 52081938817749,
+    "draft:full_attention:": 47240891285860,
+    "target:linear_attention:spec": 207087843436132
+  },
+  "quality": {
+    "schema": "retained-out256-quality/v1",
+    "arms": [
+      {
+        "role": "B0",
+        "source_sha256": "5f6088f3fc5d5359790e9331cdd2a09d3f53ece17762e17b4696456bcff2c93a",
+        "total": 200,
+        "request_success": 200,
+        "correct": 21,
+        "parsed": 147,
+        "empty_outputs": 0,
+        "at_output_budget": 200
+      },
+      {
+        "role": "B1",
+        "source_sha256": "cf5d111ca4aefc72c7230b59679dc0ca06906df0a78618d0a3056d47558ffb88",
+        "total": 200,
+        "request_success": 200,
+        "correct": 19,
+        "parsed": 152,
+        "empty_outputs": 0,
+        "at_output_budget": 200
+      }
+    ],
+    "scorer_source_sha256": "c2237c69f848e2358abe71c68f54143b5c090a81bd4f7915088b19b8ae157801",
+    "label_manifest_sha256": "708056e54a5a50a78a3f794fb6f5ec70f50d18384d938d8d67b45d7f1d405959",
+    "materialized_input_sha256": "fb79b6fa98f232282a948e4a17f404f80c03dc2bae05af57b95b9cc0651b3506",
+    "paired_correct_changes": {
+      "improved": 2,
+      "regressed": 4
+    },
+    "interpretation": "Derived original-scorer result on retained out256 generated_texts, not original online scoring or out8192 task quality. Scorer fallback may extract an option mentioned in unfinished text; no inferred final-answer or finish-reason validity.",
+    "service_slo": "No numeric SLO/goodput threshold recorded in these plans; do not invent one retrospectively.",
+    "new_model_runs": 0,
+    "private_text_published": false
+  },
+  "reference_C_TFLOPS_per_chip": 3.840732572879189,
+  "target_percent": 90,
+  "target_C_TFLOPS_per_chip": 3.4566593155912697,
+  "C_gain_percent": 84.97046148366367,
+  "arms": [
+    {
+      "role": "B0",
+      "F": 1829161955258989,
+      "T_seconds": 238.12670116312802,
+      "chips": 2,
+      "C_TFLOPS_per_chip": 3.840732572879189,
+      "eta_compute_b0_percent": 100.0,
+      "equivalent_reference_seconds": 238.12670116312802,
+      "reference_target_met": true,
+      "margin_percentage_points": 10.0
+    },
+    {
+      "role": "B1",
+      "F": 1812905151088034,
+      "T_seconds": 127.59352582134306,
+      "chips": 2,
+      "C_TFLOPS_per_chip": 7.1042207644080255,
+      "eta_compute_b0_percent": 184.97046148366368,
+      "equivalent_reference_seconds": 236.01033353501583,
+      "reference_target_met": true,
+      "margin_percentage_points": 94.97046148366368
+    }
+  ]
+}
