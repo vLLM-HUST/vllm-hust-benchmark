@@ -61,7 +61,7 @@
   "matrix_subtotal_rate_gain_percent": 92.91606190102529,
   "timing_basis": "Original client submission-to-response-drain interval, all overhead retained; no synchronized worker boundary receipt.",
   "missing_total_work": [
-    "Same-run retained MTP outputs and their necessary KV/hidden dependency closure",
+    "B0 detailed MTP sequence absent; B1 native sequence recovered and dependency work reconstructed",
     "Same-run GDN prefill chunk/state ledger and remaining basic scalar operations"
   ],
   "missing_acceptance": [
@@ -70,9 +70,48 @@
   ],
   "convention": "I+O-1 target positions, triangular causal pairs, top8 activated experts; vocabulary for O target decisions. Count global TP2 work once. Exclude padding and rejected speculative work. This subtotal is not complete F or outline C.",
   "report_path": "reports/full-answer-compute-20261101/README.md",
+  "b1_basic_work_interval": {
+    "status": "basic_work_interval_over_gdn_partitions_client_timing",
+    "run": "joint-b1-r4",
+    "recovered_native_requests": 200,
+    "dependencies": {
+      "kv_rows": 1133191,
+      "full_query_rows": 413218,
+      "retained_vocab_rows": 413218,
+      "attention_pairs": 1599700493,
+      "first_retained": 222700,
+      "second_retained": 190518,
+      "draft_steps": 247720,
+      "raw_accepted": 413286
+    },
+    "target_scalar_flops": 79260797645085,
+    "necessary_draft_flops": 515038808672965,
+    "gdn_prefill_flops_interval": [
+      29101726539840,
+      38619850757760
+    ],
+    "basic_work_flops_interval": [
+      6344603156438050,
+      6354121280655970
+    ],
+    "client_tflops_per_chip_interval": [
+      4.532487611179039,
+      4.539287213776029
+    ],
+    "timing_basis": "Original client submission-to-response-drain interval, all overhead retained; no synchronized worker boundary receipt.",
+    "synchronized_effective_tflops_per_chip": null,
+    "reference_seconds": null,
+    "efficiency_percent": null,
+    "outline_pass": null,
+    "interval_meaning": "Exact arithmetic extrema over all 1..64-token prefill partitions under the frozen 64-chunk GDN algorithm, structural-zero initial state and continued state thereafter; not a statistical confidence interval.",
+    "dependency_basis": "Ordered native MTP2 acceptance, terminal output clipping, unique no-reuse request paths and qualified logical KV/hidden dependencies. Rejected roots and dead KV versions excluded.",
+    "remaining": "Actual GDN partition ledger for a point F; matched synchronized uninstrumented T and independent full-answer reference for outline eta. B0 has no detailed native MTP sequence in its SSE records."
+  },
   "sources": {
     "reports/full-answer-joint-20261030/joint-summary.json": "279d0245612d8e66c99e96f0d4b244e9e3efaab3f38a9c10f61b66b52396b094",
     "reports/full-answer-compute-20261101/model-config.json": "a2619dc4d764affa76f420443393196d2bda5d8cfecfc7da235ff4a05a442ace",
-    "reports/full-answer-compute-20261101/source-audit.json": "0e607bb5197f475717801405ebb002492b591b5316f5690b2a3c03f73d2ba6e9"
+    "reports/full-answer-compute-20261101/source-audit.json": "0c9337550a27879b080811fbd1bf84fcf72634557a34e909fc8903b06b0c3f32",
+    "reports/full-answer-compute-20261101/b1-native-acceptance.json.gz": "5ff95c0e8e78d9b11d15a3bc9a2fb106865a592f080590a78c67c63367f75ea8",
+    "reports/full-answer-compute-20261101/operation-catalog.json": "ed5c462060ea4ea9546a8a2187c8bb6c55f1db34a32ede4dfe261ac1309b9cd1"
   }
 }

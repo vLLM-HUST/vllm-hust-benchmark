@@ -1,6 +1,8 @@
 """Recompute the identifiable target-matrix subtotal; never impute total F or eta."""
 
 import argparse
+from collections import Counter
+import gzip
 import hashlib
 import json
 import math
@@ -159,6 +161,136 @@ def calculate(pair, config):
     }
 
 
+def draft_dependencies(rows):
+    """MTP2 version closure in linear space; terminal outputs clip accepted roots."""
+    total = Counter()
+    for row in rows:
+        output = positive_integer(row["output_tokens"])
+        selected = positive_integer(row["prompt_tokens"]) - 1
+        emitted, kv0, first, second, pairs = 1, 0, 0, 0, 0
+        accepted, drafted = row["per_step_accepted"], row["per_step_drafted"]
+        if len(accepted) != len(drafted):
+            raise ValueError("MTP sequence lengths differ")
+        for count, proposed in zip(accepted, drafted, strict=True):
+            if type(count) is not int or count not in (0, 1, 2) or proposed != 2:
+                raise ValueError("Ordered MTP2 counts required")
+            if emitted >= output:
+                raise ValueError("MTP steps after terminal output")
+            keep = min(count + 1, output - emitted)
+            retained = min(count, keep)
+            if retained:
+                kv0 = selected + 1
+                first += 1
+                pairs += selected + 1
+            if retained == 2:
+                second += 1
+                pairs += selected + 2
+            emitted += keep
+            selected += count + 1
+        if emitted != output:
+            raise ValueError("MTP sequence does not close emitted output")
+        total.update(
+            kv_rows=kv0 + second,
+            full_query_rows=first + second,
+            retained_vocab_rows=first + second,
+            attention_pairs=pairs,
+            first_retained=first,
+            second_retained=second,
+            draft_steps=len(accepted),
+            raw_accepted=sum(accepted),
+        )
+    return dict(total)
+
+
+def partition_bounds(lengths, initial, continuation):
+    """Exact extrema over all compositions into positive chunks of at most 64."""
+    maximum = max(positive_integer(n) for n in lengths)
+    if set(initial) != set(range(1, 65)) or set(continuation) != set(range(1, 65)):
+        raise ValueError("Complete 1..64 chunk catalog required")
+    low, high = [0], [0]
+    for n in range(1, maximum + 1):
+        low.append(
+            min(
+                initial[k] if n == k else low[n - k] + continuation[k]
+                for k in range(1, min(64, n) + 1)
+            )
+        )
+        high.append(
+            max(
+                initial[k] if n == k else high[n - k] + continuation[k]
+                for k in range(1, min(64, n) + 1)
+            )
+        )
+    return [sum(low[n] for n in lengths), sum(high[n] for n in lengths)]
+
+
+def extended_b1(pair, result, rows, catalog):
+    original = pair["arms"][1]
+    if len(rows) != len(original["rows"]):
+        raise ValueError("Incomplete native-metrics recovery")
+    for a, b in zip(rows, original["rows"], strict=True):
+        for key in ("case_id", "prompt_tokens", "output_tokens", "raw_sse_sha256"):
+            if a[key] != b[key]:
+                raise ValueError("Native metrics do not match original request")
+    arm = result["arms"][1]
+    n, pairs = arm["necessary_target_positions"], arm["causal_pairs"]
+    if any(r["prompt_tokens"] + r["output_tokens"] - 1 < 4 for r in rows):
+        raise ValueError("This convolution correction requires at least four positions")
+    c = catalog["target_scalar"]
+    scalar = n * sum(
+        c[k]
+        for k in (
+            "normalization_residual_gate",
+            "rope_moe_router_attention_gate",
+            "gdn_preprocessing",
+            "causal_convolution_per_position",
+            "attention_softmax_per_position",
+        )
+    )
+    scalar += c["causal_convolution_initial_correction_per_request"] * len(rows)
+    scalar += c["attention_softmax_per_pair"] * pairs
+    scalar += c["gdn_recurrence_per_decode_row"] * (arm["output_tokens"] - len(rows))
+    dep = draft_dependencies(rows)
+    dc = catalog["draft"]
+    draft = sum(
+        dc[k] * dep[v]
+        for k, v in (
+            ("kv_row", "kv_rows"),
+            ("full_query_row", "full_query_rows"),
+            ("retained_vocab_row", "retained_vocab_rows"),
+            ("attention_pair", "attention_pairs"),
+        )
+    )
+    costs = [
+        {int(k): v for k, v in catalog["gdn_prefill_chunks"][kind].items()}
+        for kind in ("initial", "continuation")
+    ]
+    prefill = partition_bounds([r["prompt_tokens"] for r in rows], *costs)
+    base = arm["matrix_flops_subtotal"] + scalar + draft
+    total = [base + value for value in prefill]
+    return dict(
+        status="basic_work_interval_over_gdn_partitions_client_timing",
+        run=arm["run"],
+        recovered_native_requests=len(rows),
+        dependencies=dep,
+        target_scalar_flops=scalar,
+        necessary_draft_flops=draft,
+        gdn_prefill_flops_interval=prefill,
+        basic_work_flops_interval=total,
+        client_tflops_per_chip_interval=[
+            f / (2 * arm["client_seconds"] * 1e12) for f in total
+        ],
+        timing_basis=result["timing_basis"],
+        synchronized_effective_tflops_per_chip=None,
+        reference_seconds=None,
+        efficiency_percent=None,
+        outline_pass=None,
+        interval_meaning="Exact arithmetic extrema over all 1..64-token prefill partitions under the frozen 64-chunk GDN algorithm, structural-zero initial state and continued state thereafter; not a statistical confidence interval.",
+        dependency_basis="Ordered native MTP2 acceptance, terminal output clipping, unique no-reuse request paths and qualified logical KV/hidden dependencies. Rejected roots and dead KV versions excluded.",
+        remaining="Actual GDN partition ledger for a point F; matched synchronized uninstrumented T and independent full-answer reference for outline eta. B0 has no detailed native MTP sequence in its SSE records.",
+    )
+
+
 def build(root):
     paths = [PAIR, REPORT + "/model-config.json", REPORT + "/source-audit.json"]
     raw = {path: (root / path).read_bytes() for path in paths}
@@ -173,6 +305,21 @@ def build(root):
             or not record["request_salts_unique"]
         ):
             raise ValueError("Original request audit mismatch")
+    for name in ("b1-native-acceptance.json.gz", "operation-catalog.json"):
+        path = REPORT + "/" + name
+        raw[path] = (root / path).read_bytes()
+    catalog = json.loads(raw[REPORT + "/operation-catalog.json"])
+    if catalog["model_config_sha256"] != audit["model_config_sha256"]:
+        raise ValueError("Operation catalog model binding mismatch")
+    result["b1_basic_work_interval"] = extended_b1(
+        json.loads(raw[PAIR]),
+        result,
+        json.loads(gzip.decompress(raw[REPORT + "/b1-native-acceptance.json.gz"])),
+        catalog,
+    )
+    result["missing_total_work"][0] = (
+        "B0 detailed MTP sequence absent; B1 native sequence recovered and dependency work reconstructed"
+    )
     result["sources"] = {p: hashlib.sha256(b).hexdigest() for p, b in raw.items()}
     return result
 
@@ -193,7 +340,16 @@ def main():
             path.write_bytes(raw)
         elif args.check and path.read_bytes() != raw:
             raise SystemExit("Stale derived result: " + name)
-    print(json.dumps({"status": result["status"], "arms": result["arms"]}, indent=2))
+    print(
+        json.dumps(
+            {
+                "status": result["status"],
+                "arms": result["arms"],
+                "b1_basic_work_interval": result["b1_basic_work_interval"],
+            },
+            indent=2,
+        )
+    )
 
 
 if __name__ == "__main__":
