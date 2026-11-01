@@ -1839,86 +1839,50 @@ for record in records:
 
 ### MLAgentBench：原任务环境准备
 
-- [x] `scripts/run_mlagentbench_local_agent.py`已启动原默认`debug`任务完整ResearchAgent：保留原任务描述、工具、50步／5小时及编辑4000-token预算，实际NPU请求已连通；启动快照核验6个HTTP200响应，原输出上限触发的`length`结束也保留，不为跑通放大预算。[启动快照](validation/mlagentbench-original-agent-start-20261102.json)。这不是最终执行／评分／交付回执。包装入口曾因未保留标准`python -m`主模块行为而在创建Agent前失败，已用`alter_sys=True`修正，原失败容器及日志保留，原任务／runner未改。
+- [x] 原作者版本 `5d71205cc20a8e95d43aa7cb7120e89ca3323e31`
+  的138份软件／任务定义、670271字节已校验，79份Python静态解析通过。15个发布目录含示例，不能据此称论文有15个评测任务；原许可、Agent、准备和评价脚本保留。[源码准备回执](validation/mlagentbench-original-source-preparation-20261101.json)。
+- [x] 原CIFAR10完整归档170498071字节通过官方MD5校验；50000训练图、10000测试图只在专用隔离CPU容器加载。公共资产及原任务目录准备入口均已实测。[原任务准备回执](validation/mlagentbench-cifar-original-preparation-20261101.json)。软件及数据均在服务器取得，没有在Windows保存数据或权重。
+- [x] 独立CPU任务镜像使用已核验的Python3.10.22／aarch64、Torch2.3.0及TorchVision0.18.0；25份真实Agent
+  SDK轮子逐个对照官方PyPI校验SHA256，离线扩展镜像构建和真实SDK／原runner导入通过。原LLM及runner文件、两处适配差异保留；没有用假SDK或GPT／Claude别名。[任务镜像回执](validation/mlagentbench-cifar-cpu-image-20261101.json)、[Agent环境回执](validation/mlagentbench-local-agent-preparation-20261101.json)。
+- [x] 原五轮科学基线和原任务评分器已完成，评分0.5152，仅用于科学环境核验，不替代Agent。[基线回执](validation/mlagentbench-cifar-original-baseline-20261101.json)。
+- [x] 原默认 `debug`／CIFAR10 ResearchAgent 与原评分入口完成：实际NPU模型请求13个，原工具动作4步，容器退出0；原生格式重试耗尽，未提交Final
+  Answer，原评分0.3103。失败不换题、不补造答案、不放大原预算，也不称任务效果成功或性能提升。[原执行／评分审计](validation/mlagentbench-default-agent-native-audit-20261102.json)。保留原提示、工具、50步／5小时、编辑4000-token上限、fast0.01参数和原OpenAI-chat分支默认500-token／0.2；本地Qwen3-14B不是作者默认Claude配置。
+- [x] 公共读取适配保留原 `tasks.json` 登记的1个 `debug`
+  定义、原JSON字节、真实任务ID／科学环境文件关系；评价软件独立放在outcome，不拼成聊天请求。目录可选任务不冒充原registry行，底层科学数据是否取得单独核验。
+- [x] 本地构建的真实wheel在服务器安装后，81份包文件逐字节校验；全部138原软件资产校验、原任务索引及未修改研究消费入口读回通过，输入／评价引用一致，数据库未变，未运行研究观测／特征或模型。[本地wheel接通回执](validation/mlagentbench-local-wheel-research-readback-20261102.json)。这是本地源码构建包，不冒称GitHub
+  CI工件。
+- [ ] 回查实际CI工件并完成同一原任务读取／研究接通；补齐正式原生科学任务的固定样本覆盖。当前只有原默认debug场景闭环，不代表论文其余任务或全部原生目录任务，此来源继续不打总勾。
 
-执行入口必须在专用断网、只读根、移除capability及`no-new-privileges`容器内运行。将已核验适配软件、完整原数据、独立输出目录及私有队列按只读／专用可写边界挂载；宿主机只运行可信模型队列worker，连接现有或SSH回环转发的NPU服务，不能在宿主机执行Agent生成代码。`appworld_model_transport.py`可复用为队列worker；本次跨服务器验证采用私有缓存HTTP作业及仅内存中转，请求／响应不保存到Windows。启动或HTTP成功不计来源打勾，须取回原终态、评分和接入证据。
-
-```bash
-# 默认只显示计划，不执行Agent。只有在上述隔离容器中才添加 --execute。
-python scripts/run_mlagentbench_local_agent.py --port-root <已验证适配目录> --queue <独立私有队列> --work-root <新的任务工作目录> --log-root <新的任务日志目录> --model <NPU服务实际模型ID>
-```
-
-- [x] `scripts/prepare_mlagentbench_local_agent.py`在专用CPU实际`plan/prepare/verify`均通过：核验138份原软件，保留LLM和runner原文件与差异，只改本地传输及未选用LangChain后端的延迟导入。25份真实SDK轮子9912376字节逐个对照官方PyPI校验SHA256；在原科学镜像上离线构建独立扩展镜像，真实anthropic/dacite导入及原runner的`--help`在断网、只读根、降权容器通过，未导入Torch。[实测回执](validation/mlagentbench-local-agent-preparation-20261101.json)。无Agent或NPU推理完成声明，保留原AutoGPT可选依赖未安装警告。
-
-```bash
-python scripts/prepare_mlagentbench_local_agent.py --action prepare --author-root <完整原源码目录> --output <新的外部适配目录>
-python scripts/prepare_mlagentbench_local_agent.py --action verify --author-root <完整原源码目录> --output <已有未运行适配目录>
-```
-
-Agent软件准备不获取数据或运行任务；后续原默认`debug`任务在原`tasks.json`中指向CIFAR10，使用该原任务描述，不能与目录默认`research_problem.txt`混用。完整任务仍需专用隔离执行、独立私有请求队列及仅在研究侧空闲时工作的NPU传输端。
-
-- [x] 完整原五轮CIFAR10科学训练基线与原任务评分器在专用断网隔离容器中完成，退出0；10000行／10列预测逐行核验，概率有限且归一化，三个原脚本字节未改。原评分为0.5152。[基线实测回执](validation/mlagentbench-cifar-original-baseline-20261101.json)。这是科学任务环境核验，不是ResearchAgent执行或来源完成，预测和原数据均留在服务器。
-
-- [x] `scripts/mlagentbench_local_chat.py`补充本地推理传输，使用原支持的OpenAI-chat协议：原prompt完整置于一条user消息，默认500输出token、temperature0.2、停止词`Observation:`，编辑4000和fast0.01覆盖参数不变；明确传实际服务模型名，不伪装GPT/Claude，不发送外部付费API，不自动重试或伪造费用。8项请求级夹具测试通过，尚未真实NPU调用，也未接入完整ResearchAgent。
-
-- [ ] 保持原ResearchAgent提示、工具、50步／5小时限制，完成隔离Agent与NPU推理连接、原任务评分、公共provider和研究侧接通。原默认Claude分支与本地OpenAI-chat适配不是同一模型配置，结果必须区分。
-
-- [x] 原始完整CIFAR10归档170498071字节已取得，通过官方MD5及完整长度核验。公共工作目录入口`scripts/prepare_mlagentbench_cifar_workspace.py`在CPU实际`plan/prepare/verify`均退出0，保留原作者5份任务文件，未在宿主机解包或加载pickle；随后在断网、只读根、降权的专用容器内执行未修改的原`scripts/prepare.py`，完整50000训练图／10000测试图加载成功。[原任务准备回执](validation/mlagentbench-cifar-original-preparation-20261101.json)。这不代表ResearchAgent流程或来源交付完成。
+准备入口：
 
 ```bash
-python scripts/prepare_mlagentbench_cifar_workspace.py --action prepare --author-root <完整原源码目录> --data-root <完整原归档目录> --output <新的外部任务目录>
-```
-
-`--action verify`复核尚未执行的准备目录；原准备脚本解包后会产生额外文件，因此不能再将该目录当作未执行的纯准备目录验证。原准备脚本的容器工作目录为`/workspace/scripts`，任务目录挂载到`/workspace`，命令为`python prepare.py`。使用已核验的任务镜像、断网、只读根、移除全部capability和`no-new-privileges`，仅专用任务目录可写。原训练基线与原评分器是环境核验，不代替ResearchAgent任务，也不缩减五轮训练或完整数据。
-
-- [x] 隔离任务环境补齐TorchVision0.18.0：公共入口`scripts/prepare_mlagentbench_cifar_cpu.py`准备固定哈希的离线构建上下文，Dockerfile要求显式指定已核验的CPU基础镜像。专用CPU实际离线构建成功；另起断网、只读、移除全部capability的容器，核验原CIFAR加载器和依赖导入通过，基础镜像未修改。[环境构建回执](validation/mlagentbench-cifar-cpu-image-20261101.json)。这只证明任务环境可用，未打开数据、未训练、未运行Agent，不计来源完成。
-
-```bash
-python scripts/prepare_mlagentbench_cifar_cpu.py --action plan --software-root <软件目录> --output <外部构建上下文>
-python scripts/prepare_mlagentbench_cifar_cpu.py --action prepare --software-root <已验证软件目录> --output <新的外部构建上下文>
-python scripts/prepare_mlagentbench_cifar_cpu.py --action verify --software-root <已验证软件目录> --output <已有外部构建上下文>
-docker build --pull=false --network none --build-arg BASE_IMAGE=<已核验基础镜像> -t <任务镜像> <外部构建上下文>
-```
-
-基础镜像须满足原资产配置中已验证的Python3.10.22/aarch64及Torch2.3.0等版本。本入口不创建或修改Docker服务，不自动选择其他人的镜像；构建不会获取数据或启动科学训练。科学训练和Agent完整流程仍须在专用隔离执行环境继续验证。
-
-- [x] 默认原CIFAR10任务资产入口`scripts/prepare_mlagentbench_cifar_assets.py`已加入分类索引；配置固定原作者源码谱系、官方PyPI
-  ARM64/Python3.10
-  TorchVision0.18.0轮子及原CIFAR10归档。原数据MD5取自该精确官方轮子的原loader，而不是自定样本或替代数据；完整数据仍是50000训练图像和10000测试图像。
-- [x] CPU已取得13995854字节官方轮子并核对PyPI
-  SHA256，其公开依赖要求Torch2.3.0，与现有候选科学镜像一致；公共软件部分`plan/prepare/verify`实测均退出0，旧轮子不变，无新下载、无Torch导入、未安装软件。[公共准备回执](validation/mlagentbench-public-cifar-software-20261101.json)。数据部分正在独立专用CPU任务获取，未完成前不称取得或验证。
-- [ ] 隔离环境实际安装/导入、完整原数据校验/原准备流程、NPU Agent模型绑定、原生研究任务与原评价、公共数据和实际工件研究消费仍待完成。软件获取和夹具测试不计来源完成。
-
-```bash
-python scripts/prepare_mlagentbench_cifar_assets.py --action plan --output <外部资产目录>
+python scripts/prepare_jsonschemabench_author_source.py --source mlagentbench --author-root <外部原源码目录> --action prepare --max-bytes 670271
 python scripts/prepare_mlagentbench_cifar_assets.py --action prepare --parts software --output <外部软件目录> --max-bytes 13995854
 python scripts/prepare_mlagentbench_cifar_assets.py --action prepare --parts data --output <外部原数据目录> --max-bytes 170498071
-python scripts/prepare_mlagentbench_cifar_assets.py --action verify --parts data --output <已有完整原归档目录>
+python scripts/prepare_mlagentbench_cifar_cpu.py --action prepare --software-root <已验证软件目录> --output <新的外部构建上下文>
+python scripts/prepare_mlagentbench_cifar_workspace.py --action prepare --author-root <完整原源码目录> --data-root <完整原归档目录> --output <新的外部任务目录>
+python scripts/prepare_mlagentbench_local_agent.py --action prepare --author-root <完整原源码目录> --output <新的外部适配目录>
 ```
 
-新下载使用显式字节预算、完整归档校验和独立归属记录；只有相同入口建立的匹配记录和原HTTP字节范围才能`--resume`。不要在现有下载仍存活时另启同文件任务，也不要让公开入口接管不匹配的私有partial。已取得且校验一致的最终文件直接复用，不重下；失败或不完整文件保留。数据准备不解pickle、不在宿主机执行任务代码；实际研究程序后续只在专用隔离CPU容器运行，LLM仍使用NPU。
+各准备入口支持显式verify；已有完整资产直接校验复用，不重复下载。下载resume只接受同一公开入口建立的归属记录及原HTTP字节范围；原数据不在宿主机解包／加载pickle。纯准备目录执行原脚本后产生的额外文件不再当作未运行准备目录校验。
 
-- [x] 在本任务专用CPU工作区，用既有科学环境镜像做无网络、只读根、移除全部capability的短容器元数据核验：Python3.10.22/aarch64、Torch2.3.0、NumPy1.26.4、pandas2.3.3、Pillow12.3.0；缺TorchVision，因此尚不能直接运行原CIFAR10准备/训练脚本。[环境检查回执](validation/mlagentbench-cpu-runtime-inspection-20261101.json)。无数据下载、无生成代码或模型执行，不计来源完成。后续只补任务所需隔离依赖，不盲装包含其他可选任务、云API和旧git依赖的全套requirements。
-
-- [x] 固定原作者版本`5d71205cc20a8e95d43aa7cb7120e89ca3323e31`的138份软件/任务定义文件，共670271字节；79份Python静态解析通过。15个发布目录包含工具型示例，不能据此称论文有15个评测任务。原许可、依赖、Agent、准备与评价脚本均保留；可选Auto-GPT
-  vendor、图片和绘图不纳入此准备配置。
-
-- [x] 公共源码入口在专用CPU工作区实测`plan`、复用原文件的`prepare`和`verify`均退出0。[准备回执](validation/mlagentbench-original-source-preparation-20261101.json)。CPU直连失败记录保留，后续670271字节原软件经内存中转，没有在本地保存数据或权重。
-
-- [ ] 原任务数据及访问条件、隔离运行环境、明确NPU模型绑定、固定原任务执行/评价、公共workload及当前工件研究消费尚待完成。此来源仍不打总勾。
-
-复用现有源码准备能力，不新增平行下载器：
+执行与评分：
 
 ```bash
-python scripts/prepare_jsonschemabench_author_source.py --source mlagentbench \
-  --author-root <外部原源码目录> --action plan
-python scripts/prepare_jsonschemabench_author_source.py --source mlagentbench \
-  --author-root <外部原源码目录> --action prepare --max-bytes 670271
-python scripts/prepare_jsonschemabench_author_source.py --source mlagentbench \
-  --author-root <外部原源码目录> --action verify
+# 默认只显示计划；仅在下面规定的专用隔离容器中添加 --execute。
+python scripts/run_mlagentbench_local_agent.py --port-root <已验证适配目录> --queue <独立私有队列> --work-root <新的任务工作目录> --log-root <新的任务日志目录> --model <NPU服务实际模型ID>
+# 原Agent终止后，在同样隔离的CPU容器中，从 <任务工作目录>/cifar10 运行：
+PYTHONPATH=<已验证适配目录> python -m MLAgentBench.eval --log-folder <原任务日志目录> --task debug --output-file <独立评分目录>/results.json
 ```
 
-入口只处理固定源码和原任务定义，不导入作者运行模块、不执行`prepare.py`，也不获取底层训练/测试数据。作者原生入口是`MLAgentBench.prepare_task`、`MLAgentBench.runner`和`MLAgentBench.eval`，后续须在隔离环境绑定使用；取得软件不等于这些入口已跑通。静态核查发现原默认actor为`claude-v1`，原HuggingFace分支写死`cuda:9`；当前未接通NPU推理，不能直接照该分支启动，也不把Qwen伪装成原默认actor。涉及Kaggle等访问条件时另列阻塞，不代使用者接受规则或填写凭据。
+执行容器必须断网、只读根、移除全部capability并启用no-new-privileges；原科学数据只读挂载，适配软件／任务输出／私有队列分别限定到本任务目录，不挂Docker套接字或凭据。所有生成程序只在容器内执行。原
+`debug` 描述来自原 `tasks.json`，不能替换成目录默认 `research_problem.txt`。包装入口的早期主模块加载错误在创建Agent前退出，已用
+`alter_sys=True` 保留标准 `python -m`
+行为；失败容器／日志仍保留。[启动快照](validation/mlagentbench-original-agent-start-20261102.json)不当最终结果。
+
+可信队列worker只转发原请求给已有或SSH回环转发的NPU服务，可复用
+`scripts/appworld_model_transport.py`；本次跨服务器使用私有缓存HTTP作业和仅内存中转，原请求／响应不落Windows。队列服务覆盖原任务全时段，不能因科学训练暂时无模型请求提前退出。每次请求核验研究侧空闲及共享租约；观测超时检查原句柄和已存结果，不重提相同作业。评分前保留实际runner
+stdout／stderr到原日志目录的 `log` 文件，不补造日志；原最终文件及原科学数据保持一致，不重跑模型凑成绩。Kaggle等其他任务访问条件单独登记，不替使用者接受规则或填写凭据。
 
 ## 打勾规则
 

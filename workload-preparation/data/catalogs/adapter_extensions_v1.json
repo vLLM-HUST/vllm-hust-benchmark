@@ -2,6 +2,14 @@
   "version": "adapter-extensions/v1",
   "boundary": "Field contracts from publisher metadata/docs. No real source payload downloaded or full adapter validation claimed.",
   "adapters": {
+    "MLAGENTBENCH": {
+      "kind": "task_dataset", "mapping": "mlagentbench_original_registry",
+      "input_fields": ["research_problem", "benchmark_folder_name"],
+      "required_fields": ["case_id", "benchmark_folder_name", "research_problem", "original_registry_case", "original_registry_text", "task_software", "evaluation_assets", "license_assets"],
+      "outcome_fields": ["evaluation_assets"], "annotation_fields": [], "id_field": "case_id",
+      "requirements": ["Original registered task and all pinned scientific software relations; no generated prompt or implicit scientific-data acquisition", "Native folder tasks outside tasks.json remain official runner choices, not fabricated registry rows"],
+      "status": "ORIGINAL_REGISTRY_ADAPTER_NATIVE_AGENT_AND_RESEARCH_HANDOFF_PENDING"
+    },
     "SPOKENWOZ": {
       "kind":"task_dataset", "mapping":"spokenwoz_original_dialogues",
       "input_fields":[], "required_fields":["dialogue_id","original_dialogue"],

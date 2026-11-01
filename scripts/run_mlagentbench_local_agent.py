@@ -140,7 +140,8 @@ def run(args):
     finally:
         sys.argv = original_argv
     report.update(
-        status="ORIGINAL_AGENT_RUNNER_RETURNED_REQUIRES_TRACE_AND_ORIGINAL_SCORE_AUDIT"
+        status="ORIGINAL_AGENT_RUNNER_RETURNED_REQUIRES_TRACE_AND_ORIGINAL_SCORE_AUDIT",
+        native_agent_tasks_run=1,
     )
     return report
 

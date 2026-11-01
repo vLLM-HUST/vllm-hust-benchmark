@@ -5,6 +5,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1] / "workload-preparation"
 DATA_MODULES = {
+    "mlagentbench",  # Original task registry/software references; no Agent or scientific execution.
     "dailytalk",  # Original phoneme/text/speaker/emotion and dialogue/reference relations only.
     "libritts",  # Original text/reference-wave pairs and chapter IDs only; no synthesis.
     "spokenwoz",  # Original complete dialogue/state/word-time relations, no execution.
@@ -60,6 +61,27 @@ DATA_MODULES = {
 def test_only_data_modules_are_included():
     actual = {path.stem for path in (ROOT / "src/vllm_hust_workload_data").glob("*.py")}
     assert actual == DATA_MODULES
+
+
+def test_mlagentbench_reader_has_no_model_execution_network_or_research_imports():
+    import ast
+
+    tree = ast.parse(
+        (ROOT / "src/vllm_hust_workload_data/mlagentbench.py").read_text("utf-8")
+    )
+    imports = set()
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            imports.update(item.name for item in node.names)
+        elif isinstance(node, ast.ImportFrom):
+            imports.add(node.module)
+    assert imports == {"copy", "json", "pathlib", "re", "assets", "records", "registry"}
+    assert not any(
+        isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Name)
+        and node.func.id in {"eval", "exec", "compile", "__import__"}
+        for node in ast.walk(tree)
+    )
 
 
 def test_dailytalk_reader_has_no_model_network_execution_or_research_imports():

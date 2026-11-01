@@ -91,11 +91,15 @@ def test_live_start_snapshot_is_bound_to_entry_not_counted_as_delivery():
             / "docs/workload-data/validation/mlagentbench-original-agent-start-20261102.json"
         ).read_text("utf-8")
     )
+    current = (ROOT / receipt["entry"]).read_text("utf-8")
+    # Reverse only the terminal metadata count fix. The full-file digest proves
+    # all native execution logic is identical to the actual executed version.
+    fixed = 'status="ORIGINAL_AGENT_RUNNER_RETURNED_REQUIRES_TRACE_AND_ORIGINAL_SCORE_AUDIT",\n        native_agent_tasks_run=1,\n'
+    original = 'status="ORIGINAL_AGENT_RUNNER_RETURNED_REQUIRES_TRACE_AND_ORIGINAL_SCORE_AUDIT"\n'
+    assert current.count(fixed) == 1
     assert (
         receipt["entry_sha256"]
-        == hashlib.sha256(
-            (ROOT / receipt["entry"]).read_text("utf-8").encode()
-        ).hexdigest()
+        == hashlib.sha256(current.replace(fixed, original).encode()).hexdigest()
     )
     assert receipt["task"] == "debug"
     assert receipt["max_time_seconds"] == 18000

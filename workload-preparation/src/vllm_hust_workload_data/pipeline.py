@@ -50,6 +50,10 @@ def _binding(entry, catalog_root=None):
         else source_spec(sid, catalog_root)
     )
     spec = mapping_spec(mapping) if mapping else adapter_spec(sid, catalog_root)
+    if sid == "MLAGENTBENCH" and mapping is None:
+        from .mlagentbench import relation_spec
+
+        spec = relation_spec(manifest, spec)
     if sid == "NATUREBENCH" and mapping is None:
         from .naturebench import relation_spec
 
