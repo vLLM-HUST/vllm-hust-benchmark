@@ -1880,6 +1880,8 @@ for record in records:
 
 - [ ] `ogbn-arxiv`原生ResearchAgent已启动，预算保持原50步／5小时；启动前实查工作区剩余40953秒，高于所需18600秒。原评分、最终工件及公开图环境构建配方仍待收口，不能只凭准备成功算原生完成。
 
+- [x] 公开图环境上下文入口已实测：7份官方软件按固定摘要复用，prepare／verify结果一致，构建上下文不包含数据、权重或研究代码。公开Docker配方正在断网构建，构建及采样终验通过后再勾环境完成。清理未被运行任务使用的失败准备缓存191278556字节，保留原归档、当前缓存及全部结果，可重建。
+
 准备入口：
 
 ```bash
@@ -1890,6 +1892,10 @@ python scripts/prepare_mlagentbench_cifar_cpu.py --action prepare --software-roo
 python scripts/prepare_mlagentbench_cifar_workspace.py --action prepare --author-root <完整原源码目录> --data-root <完整原归档目录> --output <新的外部任务目录>
 python scripts/prepare_mlagentbench_local_agent.py --action prepare --author-root <完整原源码目录> --output <新的外部适配目录>
 python scripts/prepare_mlagentbench_arxiv_assets.py --action acquire --data-root <外部原图归档目录> --max-bytes 134217728
+python scripts/prepare_mlagentbench_graph_cpu.py --action acquire --software-root <外部图软件目录> --max-bytes 16777216
+python scripts/prepare_mlagentbench_graph_cpu.py --action prepare --software-root <已验证图软件目录> --output <新的外部图构建上下文>
+# 显式指定前述已验证的Python3.10/aarch64科学CPU Agent基础镜像，不修改原模型服务环境：
+docker build --network none --build-arg BASE_IMAGE=<已验证Agent基础镜像> -t <独立图CPU镜像> <图构建上下文>
 # 仅在具备上述已验证图依赖的专用隔离CPU容器内，使用原任务的全新副本：
 python scripts/prepare_mlagentbench_arxiv_offline.py --task-root <原始ogbn-arxiv任务目录副本> --archive <已验证arxiv.zip> --execute
 ```

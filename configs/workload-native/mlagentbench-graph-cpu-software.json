@@ -1,0 +1,16 @@
+{
+  "source_id": "MLAGENTBENCH",
+  "task": "ogbn-arxiv",
+  "runtime": "Python3.10/aarch64, torch2.3.0 scientific CPU; LLM/encoder/judge remain on NPU",
+  "base_recipe": "configs/workload-native/mlagentbench-agent-cpu.Dockerfile",
+  "software": [
+    {"project":"torch-geometric","version":"2.3.1","group":"core","path":"torch_geometric-2.3.1.tar.gz","bytes":661639,"sha256":"454fd0bbc128a17a4b9d15010ba9f66d48ec8cd7277991b888a7770263fa125d","note":"pragma: allowlist secret - official PyPI software digest"},
+    {"project":"ogb","version":"1.3.6","group":"core","path":"ogb-1.3.6-py3-none-any.whl","bytes":78750,"sha256":"29ab84078c66a7846bf137c9be9545978616a053e734c032a2ff731d026bb5e9","note":"pragma: allowlist secret - official PyPI software digest"},
+    {"project":"outdated","version":"0.2.2","group":"core","path":"outdated-0.2.2-py2.py3-none-any.whl","bytes":7543,"sha256":"3e9c2ee6d17e86ae8cc7bb71d70c4172690121cda367155a30994742172678c8","note":"pragma: allowlist secret - official PyPI software digest"},
+    {"project":"littleutils","version":"0.2.4","group":"core","path":"littleutils-0.2.4-py3-none-any.whl","bytes":8145,"sha256":"d10d5fe2e107c49fe2fc2904a08d6e5a302b41f8405921835ffcc323782d5dbc","note":"pragma: allowlist secret - official PyPI software digest"},
+    {"project":"psutil","version":"6.1.1","group":"core","path":"psutil-6.1.1-cp36-abi3-manylinux_2_17_aarch64.manylinux2014_aarch64.whl","bytes":289017,"sha256":"33431e84fee02bc84ea36d9e2c4a6d395d479c9dd9bba2376c1f6ee8f3a4e0b3","note":"pragma: allowlist secret - official PyPI software digest"},
+    {"project":"torch-scatter","version":"2.1.2","group":"scatter","path":"torch_scatter-2.1.2.tar.gz","bytes":108045,"sha256":"69b3aa435f2424ac6a1bfb6ff702da6eb73b33ca0db38fb26989c74159258e47","note":"pragma: allowlist secret - official PyPI software digest"},
+    {"project":"torch-sparse","version":"0.6.18","group":"sparse","path":"torch_sparse-0.6.18.tar.gz","bytes":209982,"sha256":"2f14c510a6e93f404c6ea357210615b3c15a71731f9dbd86f25434e34fb5a741","note":"pragma: allowlist secret - official PyPI software digest"}
+  ],
+  "original_data_or_model_weights_bundled": false
+}
