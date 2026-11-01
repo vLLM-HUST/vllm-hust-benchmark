@@ -61,5 +61,7 @@ def test_fixed_first3_preserves_original_empty_issue_without_completion_claim():
     assert receipt["pinned_release_files"] == 11
     assert receipt["research_consumer_qualified"]
     assert receipt["public_research_readbacks"] == 3
+    assert receipt["public_installed_wheel_qualified"]
+    assert receipt["actual_ci_wheel_package_payloads_verified"] == 82
     assert not receipt["native_scoring_executed"]
     assert not receipt["source_checkbox_eligible"]
