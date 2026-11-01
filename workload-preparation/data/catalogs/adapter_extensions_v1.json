@@ -2,6 +2,116 @@
   "version": "adapter-extensions/v1",
   "boundary": "Field contracts from publisher metadata/docs. No real source payload downloaded or full adapter validation claimed.",
   "adapters": {
+    "SPOKENWOZ": {
+      "kind":"task_dataset", "mapping":"spokenwoz_original_dialogues",
+      "input_fields":[], "required_fields":["dialogue_id","original_dialogue"],
+      "outcome_fields":[], "annotation_fields":[], "id_field":"dialogue_id",
+      "requirements":["Complete original dialogues; per-call visibility is enforced by the selected native runner", "Separate goal/state/act/span references; original timed words do not establish audio acquisition or duplex execution"],
+      "status":"ORIGINAL_DIALOGUE_ADAPTER_NATIVE_EXECUTION_PENDING"
+    },
+    "STREAMINGBENCH": {
+      "kind": "task_dataset", "mapping": "streamingbench_original_groups",
+      "input_fields": [], "required_fields": ["original_group"],
+      "outcome_fields": [], "annotation_fields": [], "id_field": null,
+      "requirements": ["Complete original video/question groups, not independent chat requests", "Preserve nested SQA ordering and author reference-answer context protocol; native media, inference and grading remain separate"],
+      "status": "ORIGINAL_GROUP_ADAPTER_NATIVE_EXECUTION_PENDING"
+    },
+    "OVOBENCH": {
+      "kind": "task_dataset",
+      "mapping": "ovobench_original_tasks",
+      "input_fields": [], "required_fields": ["id", "task", "video"],
+      "outcome_fields": [], "annotation_fields": [], "id_field": "id",
+      "requirements": ["Native online-video task, not a ready model request", "Preserve original complete forward test_info sequence; count/type and top-level answers remain reference-only"],
+      "status": "ORIGINAL_FIELD_ADAPTER_NATIVE_VIDEO_EXECUTION_PENDING"
+    },
+    "WAVCAPS": {
+      "kind": "task_dataset",
+      "mapping": "original_audio_caption_metadata",
+      "records_path": ["data"],
+      "root_fields": ["num_captions_per_audio"],
+      "input_fields": ["audio", "duration"],
+      "required_fields": ["id", "audio", "duration", "caption", "num_captions_per_audio"],
+      "outcome_fields": ["caption", "description", "title", "category", "tags"],
+      "annotation_fields": ["id", "author", "href", "download_link", "file_name", "num_captions_per_audio"],
+      "id_field": "id",
+      "requirements": ["Original weakly labelled audio-text corpus; metadata locator is not verified audio or a ready model request", "Caption and raw textual descriptions/categories remain reference-only; never invent chat prompts or copy one caption into five evaluation references", "Retain publisher academic-only and per-source audio terms; native audio model, media qualification and applicable evaluation remain separate"],
+      "status": "ORIGINAL_METADATA_ADAPTER_IMPLEMENTED_NATIVE_AUDIO_EXECUTION_PENDING"
+    },
+    "MULTIAGENTBENCH": {
+      "kind": "task_dataset", "mapping": "multiagentbench_original_configurations", "row_format": "jsonl",
+      "input_fields": ["task"], "required_fields": ["task", "agents", "relationships", "environment"],
+      "outcome_fields": [], "annotation_fields": [], "id_field": null, "normalization": {},
+      "requirements": ["Native multi-agent configuration, not a ready chat request; preserve private agent routing", "Database evaluator task fields are separated by the dedicated adapter"],
+      "status": "ADAPTER_IMPLEMENTED_SERVER_ROUNDTRIP_PENDING_NATIVE_EXECUTION_PENDING"
+    },
+    "SPIDER": {
+      "kind": "task_dataset",
+      "mapping": "spider_original_tasks",
+      "input_fields": ["db_id", "question", "schema"],
+      "required_fields": ["db_id", "question", "schema", "query", "query_toks", "query_toks_no_value", "sql", "question_toks", "database_asset", "original_split"],
+      "outcome_fields": ["query", "query_toks", "query_toks_no_value", "sql"],
+      "annotation_fields": ["question_toks", "database_asset", "original_split"],
+      "id_field": "",
+      "requirements": ["Keep original split, row order, all seven fields and complete schema", "Database and test_database namespaces remain distinct even for equal db_id", "Gold SQL, SQL AST and query tokens are reference-only; no invented chat prompt", "Reading does not execute SQL or replace official Test Suite Accuracy; public test lacks corresponding official distilled suites"],
+      "status": "ORIGINAL_READER_IMPLEMENTED_INSTALLED_CONSUMER_VALIDATION_PENDING"
+    },
+    "LIVECODEBENCH": {
+      "kind": "task_dataset",
+      "mapping": "livecodebench_original_tasks",
+      "input_fields": [],
+      "required_fields": ["question_id"],
+      "outcome_fields": [],
+      "annotation_fields": [],
+      "id_field": "",
+      "requirements": ["Scenario-specific original fields and native case identities retained; references kept separate", "Opaque private tests must never be decoded on the host; native execution and self-repair feedback remain separate"],
+      "status": "ORIGINAL_FIELD_ADAPTER_CONSUMER_VALIDATION_PENDING"
+    },
+    "VIDEOMME": {
+      "kind": "task_dataset",
+      "mapping": "videomme_original_tasks",
+      "input_fields": ["question", "options", "videoID"],
+      "required_fields": ["video_id", "duration", "domain", "sub_category", "url", "videoID", "question_id", "task_type", "question", "options", "answer"],
+      "outcome_fields": ["answer"],
+      "annotation_fields": ["video_id", "duration", "domain", "sub_category", "url", "question_id", "task_type"],
+      "id_field": "question_id",
+      "requirements": ["Original annotation rows and all original fields preserved; no generated request or observed outcome", "Video/subtitle filenames follow the pinned author view contract; actual archive extraction/media verification and original frame/subtitle processing are separate", "Academic research only; no raw media/annotations/outputs redistributed by this package"],
+      "status": "ORIGINAL_FIELDS_MAPPED_MEDIA_NATIVE_AND_CONSUMER_VALIDATION_PENDING"
+    },
+    "MVBENCH": {
+      "kind": "task_dataset",
+      "mapping": "mvbench_original_video_tasks",
+      "input_fields": ["question", "candidates", "video", "media_path"],
+      "required_fields": ["original", "task_type", "original_task_offset", "original_global_index", "media_root", "media_path"],
+      "outcome_fields": ["answer"],
+      "annotation_fields": ["original_case_annotations"],
+      "id_field": "",
+      "requirements": ["Original video-view test.json, all four observed case schemas and all media relations preserved; no generated prompts or request-arrival claims", "Raw main-view annotation sidecars are retained separately; temporal/subtitle metadata remain annotations and are not silently injected into the native MP4 protocol", "Reading does not perform video decoding, model execution or native scoring"],
+      "status": "ORIGINAL4000_FIELDS_AND_NATIVE60_VERIFIED_PROVIDER_CONSUMER_CLOSURE_PENDING"
+    },
+    "TEMPORALWIKI": {
+      "kind": "task_dataset",
+      "mapping": "native_fields",
+      "input_fields": ["subject", "relation"],
+      "required_fields": ["subject", "relation", "object"],
+      "outcome_fields": ["object"],
+      "annotation_fields": [],
+      "id_field": "",
+      "requirements": ["Original eight dated changed/unchanged CSVs, all original strings and file/row identities retained; no synthetic temporal events or chat prompt", "Object is a separate reference in this data envelope; original likelihood evaluator must consume the complete triple under its own protocol, not silently drop object", "Original checkpoint, preprocessing, perplexity/generation scorer and NPU-qualified environment required separately; reader is not native completion"],
+      "status": "ORIGINAL_PROBE_FIELDS_MAPPED_NATIVE_EXECUTION_PENDING"
+    },
+    "NATUREBENCH": {
+      "kind": "task_dataset",
+      "mapping": "naturebench_original_packages",
+      "input_fields": ["input"],
+      "required_fields": ["task_id", "source", "input", "environment_assets", "license_assets", "outcome", "native_execution_complete"],
+      "outcome_fields": ["outcome"],
+      "annotation_fields": [],
+      "id_field": "task_id",
+      "code_revision": "f92b849bc8d64944184a19c32f084f640246b668", "code_identity_note": "pragma: allowlist secret - fixed original code revision",
+      "dataset_revision": "27e2dc304464257d2884fa6996bc8ca5d4a2256b", "dataset_identity_note": "pragma: allowlist secret - fixed original data revision",
+      "requirements": ["Original CPU task package relationships only; hidden evaluation and performance metadata stay outcome-only; no task code or Agent executed"],
+      "status": "ORIGINAL_CPU_PACKAGE_READER_NATIVE_EXECUTION_PENDING"
+    },
     "CROSSCODEEVAL": {
       "kind": "task_dataset",
       "mapping": "crosscodeeval_original_archive",
@@ -487,6 +597,28 @@
       },
       "normalization": {}
     },
+    "LIBRITTS": {
+      "kind": "task_dataset", "mapping": "native_fields",
+      "native_format": "libritts_original_archive",
+      "input_fields": ["text", "normalized_text"],
+      "required_fields": ["id", "text", "normalized_text", "audio", "speaker_id", "chapter_id", "segment_id", "utterance_id", "original_text_member", "normalized_text_member", "context_metadata_members"],
+      "outcome_fields": ["audio"],
+      "annotation_fields": ["id", "speaker_id", "chapter_id", "segment_id", "utterance_id", "original_text_member", "normalized_text_member", "context_metadata_members"],
+      "id_field": "id", "normalization": {},
+      "requirements": ["Original and publisher-normalized texts remain separate unchanged UTF-8 fields", "Reference WAV is not synthesized output or implicit model input", "Speaker/chapter/segment/utterance IDs and original shared metadata references are preserved; no invented arrival or dialogue relation"],
+      "status": "CANDIDATE_FIXTURE_ONLY_ORIGINAL_AND_NATIVE_VALIDATION_PENDING"
+    },
+    "LJSPEECH": {
+      "kind": "task_dataset", "mapping": "native_fields",
+      "native_format": "ljspeech_original_archive",
+      "input_fields": ["text", "normalized_text"],
+      "required_fields": ["id", "text", "normalized_text", "audio", "metadata_member", "metadata_row_index"],
+      "outcome_fields": ["audio"],
+      "annotation_fields": ["id", "metadata_member", "metadata_row_index"],
+      "id_field": "id", "normalization": {},
+      "requirements": ["Original text and publisher-normalized text are distinct unchanged fields; native model frontend must choose explicitly", "Original WAV is a reference, not synthesized output or model input", "No NPU synthesis, scoring or research consumption is established by reading"],
+      "status": "ORIGINAL_ARCHIVE_ADAPTER_NATIVE_AND_RESEARCH_PENDING"
+    },
     "LIBRISPEECH": {
       "kind": "task_dataset",
       "mapping": "native_fields",
@@ -861,6 +993,34 @@
       "normalization": {},
       "requirements": ["Original validation fields and PNG bytes preserved without resizing or answer coercion", "Use the pinned maintained Inspect Evals task for native template, thumbnail1024 and ANLS; this raw reader is not an alternative prompt/scorer", "No task execution or research integration is established by catalog registration"],
       "status": "ORIGINAL_VALIDATION_FIELDS_MAPPED_NATIVE_AND_RESEARCH_PENDING"
+    },
+    "BIXBENCH": {
+      "kind": "task_dataset", "mapping": "bixbench_original_tasks", "row_format": "jsonl",
+      "input_fields": ["question", "data_folder"],
+      "required_fields": ["question_id", "capsule_uuid", "question", "data_folder", "ideal", "distractors"],
+      "outcome_fields": ["ideal", "distractors", "answer", "hypothesis", "result"],
+      "annotation_fields": [], "id_field": "question_id", "normalization": {},
+      "requirements": ["Original flat question and full capsule environment; author Agent/preprocessing/scoring remain required", "Unknown extensions and reference fields retained separately; no original-task rewriting or zero-shot substitution"],
+      "status": "ORIGINAL_TASK_ADAPTER_IMPLEMENTED_NATIVE_EXECUTION_PENDING"
+    },
+    "MIND2WEB": {
+      "kind": "task_dataset", "mapping": "mind2web_original_tasks",
+      "input_fields": ["annotation_id", "website", "domain", "subdomain", "confirmed_task"],
+      "required_fields": ["annotation_id", "website", "domain", "subdomain", "confirmed_task", "actions", "action_reprs"],
+      "outcome_fields": ["action_reprs"], "annotation_fields": [],
+      "id_field": "annotation_id", "normalization": {},
+      "requirements": ["Original complete offline tasks and all actions; gold operations and candidate labels remain reference-side", "Original ranking and author evaluator required; no live browser claim"],
+      "status": "ORIGINAL_FIELDS_MAPPED_NATIVE_AND_RESEARCH_CLOSURE_PENDING"
+    },
+    "DRAGON_PUBLIC": {
+      "kind":"task_dataset", "mapping":"dragon_original_tasks",
+      "input_fields":["original_question"],
+      "required_fields":["original_question","original_reference_qa","original_query_offset","corpus_file","reference_text_mapping_file","release_tag","asset_references"],
+      "outcome_fields":["original_reference_qa"],
+      "annotation_fields":["release_tag","original_query_offset"],
+      "id_field":null, "normalization":{},
+      "requirements":["Full exact four-file original release, public question order/IDs, corpus and separate author QA/reference ID mapping", "Original retrieval/generation/scorer still required; no synthetic questions, replacement corpus or update/delete event invention"],
+      "status":"ORIGINAL_FIELDS_MAPPED_NATIVE_AND_RESEARCH_CLOSURE_PENDING"
     },
     "COPILOT_AGENT_2026": {
       "kind": "request_metadata",

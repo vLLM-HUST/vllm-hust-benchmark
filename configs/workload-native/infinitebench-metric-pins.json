@@ -1,0 +1,10 @@
+{
+  "source_id": "INFINITEBENCH",
+  "scoring_files": [{
+    "path": "rouge/rouge.py",
+    "bytes": 6140,
+    "sha256": "805b71b855be6dc270ce2366639a4e264c2a1fb93a2c8a50f9fb9ef5a2b9c21a", "identity_note": "pragma: allowlist secret - same fixed original Evaluate ROUGE used in qualified XSum and InfiniteBench runtime",
+    "url": "https://huggingface.co/spaces/evaluate-metric/rouge/resolve/1bc20e7e9df922e5dfb597c31a4ea8467a89caff/rouge.py", "revision_note": "pragma: allowlist secret - pinned original metric release"
+  }],
+  "boundary": "Metric source preparation only. Original compute_scores.py imports evaluate.load('rouge') at module scope even for non-ROUGE tasks. Run from the prepared scoring directory so its original relative lookup resolves the verified local module; no monkeypatch or metric replacement."
+}

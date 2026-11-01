@@ -8,6 +8,337 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def test_libritts_full_input_handoff_does_not_claim_native_tts():
+    ledger = json.loads(
+        (ROOT / "docs/workload-data/dataset-validation-status.json").read_text("utf-8")
+    )
+    row = ledger["delivery_inventory"]["LIBRITTS"]
+    data = row["candidate_adapter"]
+    assert row["original_acquisition"]["original_archive_verified"] is True
+    assert row["original_acquisition"]["original_complete_archive_bytes"] == 964502297
+    assert data["original_utterances_and_reference_waveforms"] == 5120
+    assert data["original_text_variants_each"] == 5120
+    assert data["all_original_fields_roundtripped"] is True
+    assert data["actual_ci_payload_files_verified"] == 78
+    assert data["fixed_original_public_and_research_readbacks"] == 3
+    assert data["research_index_unchanged"] is True
+    assert data["research_observation_or_analysis_executed"] is False
+    assert data["native_synthesis_or_scoring"] is False
+    assert row["checked"] is False and row["status"] == "IN_PROGRESS"
+
+
+def test_agentbench_alfworld_delivery_preserves_other_domain_gaps():
+    ledger = json.loads(
+        (ROOT / "docs/workload-data/dataset-validation-status.json").read_text("utf-8")
+    )
+    row = ledger["delivery_inventory"]["AGENTBENCH"]
+    assert row["checked"] is True and row["status"] == "AVAILABLE"
+    receipt = json.loads((ROOT / row["delivery_receipt"]).read_text("utf-8"))
+    assert receipt["source_checkbox_eligible"] is True
+    assert receipt["native_execution"]["original_unique_tasks"] == 109
+    assert receipt["native_execution"]["model_requests_audited"] == 1625
+    assert receipt["current_saved_audit"]["new_game_episodes_or_model_calls"] == 0
+    assert (
+        receipt["public_and_research_handoff"]["original_native_references_verified"]
+        == 109
+    )
+    assert receipt["all_agentbench_domains_claim"] is False
+    assert receipt["official_container_equivalence_claim"] is False
+
+
+def test_completion_policy_keeps_protocol_and_workload_coverage_separate():
+    ledger = json.loads(
+        (ROOT / "docs/workload-data/dataset-validation-status.json").read_text("utf-8")
+    )
+    policy = ledger["delivery_completion_policy"]
+    assert policy["approved_by_user"] is True
+    assert (
+        policy["verification_unit"]
+        == "source_id + explicitly identified original native protocol"
+    )
+    assert len(policy["required_evidence"]) == 5
+    review = ledger["delivery_inventory"]["SPOKENWOZ"]["protocol_delivery_review"]
+    assert review["native_fixed_sample_status"] == "VERIFIED"
+    assert review["current_saved60_server_receipt_rechecked"] is True
+    assert review["full_corpus_generation_required_for_sample_validation"] is False
+    assert review["audio_workload_coverage_established"] is False
+    assert len(review["unfinished_modes"]) == 2
+
+
+def test_spokenwoz_full_original_dialogues_are_not_audio_execution():
+    ledger = json.loads(
+        (ROOT / "docs/workload-data/dataset-validation-status.json").read_text("utf-8")
+    )
+    row = ledger["delivery_inventory"]["SPOKENWOZ"]
+    evidence = row["original_text_preparation"]
+    assert evidence["original_dialogues"] == 1000
+    assert evidence["original_turns"] == 35564
+    assert list(evidence["fixed_first3_complete_turn_counts"].values()) == [50, 44, 42]
+    assert evidence["audio_acquired"] is False
+    assert evidence["model_calls"] == 0
+    assert row["checked"] is True and row["status"] == "AVAILABLE"
+    delivery = json.loads((ROOT / row["delivery_receipt"]).read_text("utf-8"))
+    assert delivery["source_checkbox_eligible"] is True
+    assert delivery["native_execution"]["total_actual_requests"] == 128
+    assert delivery["audio_workload_coverage_established"] is False
+    assert delivery["current_saved_audit"]["new_model_calls"] == 0
+    provider = row["public_adapter_preparation"]
+    assert provider["actual_ci_artifact_installed"] is True
+    assert provider["actual_ci_run"] == 41172187985
+    assert provider["actual_ci_git_wheel_installed_exact_payloads"] == 77
+    assert provider["actual_ci_fixed_original_public_and_research_readbacks"] == 3
+    assert provider["actual_ci_complete_original_turns_roundtripped"] == 136
+    assert provider["actual_ci_existing_index_reused_unchanged"] is True
+    assert provider["model_calls"] == 0
+    native = row["native_text_dst_validation"]
+    assert native["actual_npu_model_calls"] == native["original_dst_requests"] == 68
+    assert native["finish_reasons"] == {"stop": 68}
+    assert native["request_failures"] == 0
+    assert native["official_scorer_exit_code"] == 0
+    assert native["independent_correct_turns"] == 4
+    assert native["official_jga"] == 4 / 68
+    assert native["independent_scorer_agrees"] is True
+    assert native["audit_new_model_calls"] == 0
+    assert native["audio_execution"] is False
+    assert native["source_checkbox_eligible"] is False
+    assert native["public_native_runner_delivered"] is True
+    assert native["public_saved_verifier_cli_verified"] is True
+    assert native["public_saved_original_responses_verified"] == 68
+    assert native["public_fresh_generation_cli_real_run_verified"] is True
+    assert native["public_additional_original_model_calls"] == 60
+    assert native["public_additional_finish_reasons"] == {"stop": 60}
+    assert native["public_additional_official_and_independent_correct_turns"] == 6
+    assert native["total_actual_dst_model_calls"] == 128
+    assert native["prior68_generations_repeated"] is False
+    assert native["public_full_generation_verified"] is False
+    assert native["public_saved_entry_new_model_calls"] == 0
+
+
+def test_full_duplex_publisher_examples_are_not_native_delivery():
+    ledger = json.loads(
+        (ROOT / "docs/workload-data/dataset-validation-status.json").read_text("utf-8")
+    )
+    row = ledger["delivery_inventory"]["FULL_DUPLEX_BENCH"]
+    evidence = row["original_scorer_preparation"]
+    assert evidence["original_files_git_blob_and_sha256_verified"] == 16
+    assert evidence["unchanged_publisher_example_scorer_exit_codes"] == {
+        "pause_handling": 0,
+        "smooth_turn_taking": 0,
+    }
+    assert evidence["publisher_example_output_not_our_model_output"] is True
+    assert evidence["audio_acquired"] is False
+    assert evidence["model_calls"] == 0
+    assert row["status"] == "IN_PROGRESS" and row["checked"] is False
+
+
+def test_wavcaps_preparation_is_not_missing_media_or_native_completion():
+    ledger = json.loads(
+        (ROOT / "docs/workload-data/dataset-validation-status.json").read_text("utf-8")
+    )
+    row = ledger["delivery_inventory"]["WAVCAPS"]
+    gates = row["fixed_media_remaining_delivery_gates"]
+    assert gates["public_cache_preparation_real_cli_verified"] is True
+    assert gates["public_cache_preparation_real_media_files"] == 12
+    assert gates["public_download_network_real_qualified"] is False
+    assert row["checked"] is False
+    assert "entry still needs completion" not in row["blocker"]
+    checklist = (ROOT / "docs/workload-data/DATASET_CHECKLIST.zh-CN.md").read_text(
+        "utf-8"
+    )
+    overview = next(
+        line for line in checklist.splitlines() if line.startswith("| [ ]  | WAVCAPS ")
+    )
+    assert "原音频/模型未取得" not in overview
+    assert "12原音频" in overview
+
+
+def test_codejudge_delivery_requires_original_native_and_actual_ci_evidence():
+    ledger = json.loads(
+        (ROOT / "docs/workload-data/dataset-validation-status.json").read_text("utf-8")
+    )
+    row = ledger["delivery_inventory"]["CODEJUDGE_EVAL"]
+    evidence = row["actual_ci_data_consumer_evidence"]
+    assert evidence["both_ci_runs_success"] is True
+    assert evidence["original_configuration_rows_verified_and_indexed"] == 6 * 1860
+    assert evidence["fixed_research_readbacks"] == 18
+    assert evidence["new_model_calls"] == 0
+    assert evidence["ci_artifact"] == 12735679183
+    assert row["native_sample_and_saved_audit"]["finish_reasons"] == {"stop": 18}
+    assert row["checked"] and row["status"] == "AVAILABLE"
+    receipt = json.loads((ROOT / row["delivery_receipt"]).read_text("utf-8"))
+    assert receipt["source_id"] == "CODEJUDGE_EVAL"
+    assert receipt["source_checkbox_eligible"] is True
+    assert receipt["assets"]["prompt_field_sent_verbatim"] == "input"
+    assert receipt["assets"]["reference_field_not_sent"] == "answer"
+    assert receipt["native_execution"]["requests"] == 18
+    assert len(receipt["native_execution"]["per_configuration"]) == 6
+    assert receipt["native_execution"]["extractor"].startswith("independent-")
+    assert receipt["saved_audit"]["new_model_calls"] == 0
+    assert receipt["actual_ci_consumer"]["fixed_research_readbacks"] == 18
+    assert receipt["actual_ci_consumer"]["wheel_sha256"] == evidence["wheel_sha256"]
+    for field, filename in (
+        ("native_runner_sha256", "run_codejudge_original.py"),
+        ("saved_verifier_sha256", "verify_codejudge_saved.py"),
+    ):
+        assert receipt["saved_audit"][field] in _script_hashes_for_line_endings(
+            (ROOT / "scripts" / filename).read_bytes()
+        )
+
+
+def test_deepplanning_old_shopping_receipt_remains_partial_after_full_qualification():
+    ledger = json.loads(
+        (ROOT / "docs/workload-data/dataset-validation-status.json").read_text("utf-8")
+    )
+    row = ledger["delivery_inventory"]["DEEPPLANNING"]
+    partial = row["preparation_evidence"]["remaining_shopping_native_run"]
+    receipt = json.loads((ROOT / partial["receipt"]).read_text("utf-8"))
+    assert row["checked"] is True and row["delivery_receipt"] != partial["receipt"]
+    assert receipt["source_checkbox_eligible"] is False
+    assert receipt["native_request_attempts"] == 158
+    assert receipt["saved_assistant_messages"] == 154
+    assert sum(case["model_messages"] for case in receipt["case_scores"]) == 154
+    assert sum(case["tool_calls"] for case in receipt["case_scores"]) == 321
+    assert all(case["case_score"] == 0.0 for case in receipt["case_scores"])
+    assert receipt["saved_consistency_verification"]["new_model_calls"] == 0
+    assert receipt["executed_verifier_sha256"] in _script_hashes_for_line_endings(
+        (ROOT / receipt["public_verifier"]).read_bytes()
+    )
+
+
+def test_deepplanning_english_receipt_remains_partial_after_full_qualification():
+    ledger = json.loads(
+        (ROOT / "docs/workload-data/dataset-validation-status.json").read_text("utf-8")
+    )
+    row = ledger["delivery_inventory"]["DEEPPLANNING"]
+    partial = row["preparation_evidence"]["english_travel_native_run"]
+    receipt = json.loads((ROOT / partial["receipt"]).read_text("utf-8"))
+    assert receipt["original_ids"] == ["0", "1", "2"]
+    assert receipt["original_cases_scored"] == 3
+    assert receipt["original_tool_call_result_pairs"] == 81
+    assert receipt["official_full_test_denominator"] == 120
+    assert receipt["official_aggregate_recomputed_equal"] is True
+    assert all(case["case_acc"] == 0 for case in receipt["saved_case_scores"])
+    assert receipt["saved_audit_new_model_calls"] == 0
+    assert row["checked"] is True and receipt["source_checkbox_eligible"] is False
+
+
+def test_deepplanning_full_qualification_needs_all_five_profiles_and_actual_ci():
+    ledger = json.loads(
+        (ROOT / "docs/workload-data/dataset-validation-status.json").read_text("utf-8")
+    )
+    row = ledger["delivery_inventory"]["DEEPPLANNING"]
+    receipt = json.loads((ROOT / row["delivery_receipt"]).read_text("utf-8"))
+    assert row["checked"] is True and row["status"] == "AVAILABLE"
+    assert (
+        receipt["source_checkbox_eligible"] is True
+        and receipt["native_original_cases"] == 15
+    )
+    profiles = receipt["native_sample_profiles"]
+    assert {
+        (profile["domain"], profile.get("level"), profile.get("language"))
+        for profile in profiles
+    } == {
+        ("shopping", 1, None),
+        ("shopping", 2, None),
+        ("shopping", 3, None),
+        ("travel", None, "en"),
+        ("travel", None, "zh"),
+    }
+    assert all(profile["cases"] == 3 for profile in profiles)
+    assert (
+        receipt["guarded_sdk_create_attempts"] == 436
+        and receipt["saved_agent_assistant_messages"] == 414
+    )
+    assert receipt["cpu_qualification_model_calls"] == 0
+    ci = receipt["actual_ci_consumer"]
+    assert (
+        ci["artifact"] == 12763808461
+        and ci["installed_package_payloads_verified"] == 52
+    )
+    assert ci["original_rows_verified"] == ci["original_rows_indexed"] == 360
+    assert ci["fixed_research_readbacks"] == 15 and ci["model_calls"] == 0
+    assert ci["provider_runtime_and_source_manifests_unchanged_since_ci"] is True
+    assert receipt["quality_claim"] is False and receipt["performance_claim"] is False
+    assert receipt["chinese_saved_verifier_sha256"] in _script_hashes_for_line_endings(
+        (ROOT / "scripts/verify_deepplanning_travel_saved.py").read_bytes()
+    )
+
+
+def test_discoverybench_original_assets_are_not_native_completion():
+    ledger = json.loads(
+        (ROOT / "docs/workload-data/dataset-validation-status.json").read_text("utf-8")
+    )
+    row = ledger["delivery_inventory"]["DISCOVERYBENCH"]
+    preparation = row["preparation_evidence"]
+    receipt = json.loads((ROOT / preparation["receipt"]).read_text("utf-8"))
+    assert preparation["original_files_verified"] == receipt["files_verified"] == 1499
+    assert receipt["original_bytes"] == 54085184
+    assert receipt["core_client_preparation"]["installed_distributions"] == 110
+    assert receipt["core_client_preparation"]["original_requirements_changed"] is False
+    assert row["checked"] is False and row["delivery_receipt"] is None
+    assert receipt["model_calls"] == 0 and receipt["benchmark_executed"] is False
+    assert receipt["source_checkbox_eligible"] is False
+
+
+def test_appworld_protocol_files_are_not_task_or_execution_completion():
+    ledger = json.loads(
+        (ROOT / "docs/workload-data/dataset-validation-status.json").read_text("utf-8")
+    )
+    row = ledger["delivery_inventory"]["APPWORLD"]
+    preparation = row["preparation_evidence"]
+    assert row["delivery_receipt"] != preparation["core_client_receipt"]
+    assert preparation["original_public_files_verified"] == 8
+    assert preparation["original_public_source_bytes"] == 175040
+    assert preparation["model_calls"] == 0
+    assert preparation["task_data_acquired"] is True
+    data_receipt = json.loads(
+        (ROOT / preparation["task_data_preparation_receipt"]).read_text("utf-8")
+    )
+    assert data_receipt["unique_original_tasks"] == 732
+    assert sum(data_receipt["splits"].values()) == 732
+    assert data_receipt["source_checkbox_eligible"] is False
+    assert preparation["benchmark_executed"] is False
+    assert preparation["execution_environment_installed"] is False
+    assert preparation["core_client_environment_installed"] is True
+    assert preparation["protected_bundles_unpacked"] is True
+    receipt = json.loads((ROOT / preparation["core_client_receipt"]).read_text("utf-8"))
+    assert receipt["source_checkbox_eligible"] is False
+    assert receipt["model_calls"] == 0
+    assert receipt["task_data_acquired"] is False
+
+
+def test_appworld_native_delivery_requires_scores_and_actual_ci_handoff():
+    ledger = json.loads(
+        (ROOT / "docs/workload-data/dataset-validation-status.json").read_text("utf-8")
+    )
+    row = ledger["delivery_inventory"]["APPWORLD"]
+    assert row["checked"] and row["status"] == "AVAILABLE"
+    receipt = json.loads((ROOT / row["delivery_receipt"]).read_text("utf-8"))
+    assert receipt["actor_exit_code"] == 0
+    assert receipt["source_checkbox_eligible"]
+    assert receipt["total_native_steps"] == 141
+    assert receipt["new_npu_api_calls"] == 113
+    assert receipt["reused_exact_original_cached_responses"] == 28
+    assert [task["task_id"] for task in receipt["tasks"]] == [
+        "3d9a636_1",
+        "3d9a636_2",
+        "3d9a636_3",
+    ]
+    for task in receipt["tasks"]:
+        assert task["official_tests"] == 5
+        assert task["official_passes"] == 1
+        assert task["official_failures"] == 4
+        assert task["task_success"] is False
+    handoff = receipt["current_provider_and_research_handoff"]
+    assert handoff["installed_runtime_payloads"] == 71
+    assert handoff["existing_index_records"] == 732
+    assert handoff[
+        "fixed3_public_and_unchanged_research_records_equal_to_original_provider"
+    ]
+    assert handoff["original_specs_and6_separate_reference_assets_per_task_preserved"]
+    assert handoff["audit_model_or_scorer_rerun"] is False
+
+
 def test_scienceworld_delivery_requires_native_scores_and_actual_ci_consumer():
     ledger = json.loads(
         (ROOT / "docs/workload-data/dataset-validation-status.json").read_text("utf-8")
@@ -217,7 +548,15 @@ def test_structeval_checkpoint_counts_only_audited_terminal_protocols():
     checkpoint = json.loads(
         (ROOT / row["completed_protocols_checkpoint_chain"][0]).read_text("utf-8")
     )
-    assert not row["checked"]
+    # The480-task checkpoint stays historical. Later declared nonrender
+    # delivery requires a separate closing receipt, not all optional modes.
+    delivery = json.loads((ROOT / row["delivery_receipt"]).read_text("utf-8"))
+    assert row["checked"] and delivery["source_checkbox_eligible"]
+    assert delivery["native_evidence"]["unique_original_tasks"] == 950
+    assert delivery["native_evidence"]["complete_original_protocols"] == 19
+    assert not delivery["remaining_modes"][
+        "all44_protocols_or_all2035_native_tasks_complete"
+    ]
     assert checkpoint["verified_unique_native_tasks"] == 480
     assert checkpoint["previous_unique_original_tasks_reused"] == 339
     assert checkpoint["new_unique_original_tasks_audited"] == 141

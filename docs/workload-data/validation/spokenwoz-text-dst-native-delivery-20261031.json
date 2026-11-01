@@ -1,0 +1,78 @@
+{
+  "schema_version": "workload-native-delivery/v1",
+  "source_id": "SPOKENWOZ",
+  "status": "DECLARED_TEXT_DST_PROTOCOL_EXECUTED_AND_SCORED",
+  "source_checkbox_eligible": true,
+  "delivered_protocol": "Publisher original text dialogue-state tracking (DST), public fixed test-text release",
+  "completion_policy": "Source checkbox covers this explicit native protocol, not all source modalities or full-corpus evaluation",
+  "original_source": {
+    "project": "https://spokenwoz.github.io/SpokenWOZ-github.io/",
+    "data": "https://huggingface.co/datasets/ssz1111/SpokenWOZ-Test-Text-Fixed",
+    "dataset_revision": "d6c2d9e53b1005e327db582d327b69311092eb65", "revision_note": "pragma: allowlist secret - publisher-linked public test-text release",
+    "original_bytes": 52233254,
+    "original_dialogues": 1000,
+    "original_turns": 35564,
+    "license": "CC BY-NC 4.0; raw data is not redistributed",
+    "author_repository": "https://github.com/AlibabaResearch/DAMO-ConvAI",
+    "author_revision": "faf754671f5b850e1b4d1ff870db37a6a2480df6", "author_note": "pragma: allowlist secret - verified original DST preparation/client/scoring code",
+    "not_hidden_test_leaderboard_reproduction": true
+  },
+  "public_entries": {
+    "acquisition": "scripts/prepare_reused_research_assets.py SPOKENWOZ --mode download --data-root /srv/workloads/spokenwoz",
+    "preparation": "scripts/prepare_spokenwoz_original_dst.py",
+    "execution_and_saved_verification": "scripts/run_spokenwoz_original_dst.py",
+    "complete_dialogue_ranges_supported": true,
+    "full1000_dialogue_entry_supported": true,
+    "full_original_requests_planned": 17782,
+    "full_corpus_generation_executed": false,
+    "fresh_server_download_network_qualified": false,
+    "boundary": "Exact original acquisition and whole-file hash verified using bounded RAM relay; a clean fresh download directly from this server remains unqualified. No raw data is stored in Git."
+  },
+  "native_execution": {
+    "model": "Qwen/Qwen3-14B",
+    "model_revision": "40c069824f4251a91eefaf281ebe4c544efd3e18", "model_note": "pragma: allowlist secret - existing verified model files, identity evidence reused",
+    "deployment": "Ascend 910B2, BF16, TP1, explicit thinking=false; not the author's GPT-3.5 binding",
+    "runtime_distributions": {"vllm":"0.23.0+empty","vllm-ascend":"0.23.0","torch":"2.10.0+cpu","torch-npu":"2.10.0.post4","transformers":"5.5.4"},
+    "engine_git_commit_and_image_digest": "unknown, not inferred from package versions",
+    "original_sampling_and_output_budget_fields_remain_omitted": true,
+    "original_server_defaults_identical_to_author": null,
+    "compatibility": "Exactly two flush() calls in a retained compatibility copy before the original preparer rereads its files on NFS; original task/prompt/reference/scoring logic unchanged",
+    "groups": [
+      {"selection":"first3 complete dialogues in pinned JSON insertion order","dialogues":["MUL0001","MUL0002","MUL0004"],"complete_turns":136,"requests":68,"finish_reasons":{"stop":68},"request_failures":0,"correct_turns":4,"JGA":0.058823529411764705,"server_stage":"spokenwoz-original-DST-fixed3-32068-002"},
+      {"selection":"disjoint complete dialogues at original positions3:6","dialogues":["MUL0012","MUL0015","MUL0019"],"complete_turns":120,"requests":60,"finish_reasons":{"stop":60},"request_failures":0,"correct_turns":6,"JGA":0.1,"server_stage":"spokenwoz-public-DST-next3-32068-001"}
+    ],
+    "total_actual_requests": 128,
+    "prior_valid_generations_repeated": false,
+    "original_scorer": "eval_JGA.py",
+    "original_and_independent_state_accumulation_agree": true,
+    "no_prompt_truncation_reference_leakage_or_failure_replacement": true,
+    "low_quality_retained_not_quality_acceptance": true
+  },
+  "current_saved_audit": {
+    "server_receipt": "spokenwoz-text-dst-delivery-audit-20261031-001/qualification-public.json under the private shared task root",
+    "exit_code": 0,
+    "original_requests_verified": 60,
+    "correct_turns": 6,
+    "independent_grade_agrees": true,
+    "original_saved_run_files_unchanged": 136,
+    "new_model_calls": 0,
+    "old_phase_receipts_with_source_checkbox_eligible_false_retained": true,
+    "report_counter_correction": "Original60 generation report retained; separate corrected report distinguishes60 actual generation calls from0 saved-verification calls."
+  },
+  "actual_ci_consumer": {
+    "server_receipt": "/root/spokenwoz-actual-ci-wheel-20261031-001/qualification-public.json",
+    "run_id": 41172187985,
+    "artifact_id": 13032060104,
+    "installed_payload_files_equal": 77,
+    "fixed_original_public_and_unchanged_research_readbacks": 3,
+    "complete_original_turns_roundtripped": 136,
+    "existing_index_reused_unchanged": true,
+    "research_code_modified_or_task_resumed": false,
+    "server_receipt_rechecked_for_delivery": true,
+    "boundary": "Exact provider artifact and original input handoff, not model-output research analysis. Native execution and saved audit are separate evidence."
+  },
+  "unfinished_modes": ["original audio and speech interaction", "other response-generation protocols"],
+  "audio_workload_coverage_established": false,
+  "performance_evaluation": false,
+  "scientific_or_full_quality_conclusion": false
+}

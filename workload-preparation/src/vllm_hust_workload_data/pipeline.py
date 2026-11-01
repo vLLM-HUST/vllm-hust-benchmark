@@ -50,6 +50,10 @@ def _binding(entry, catalog_root=None):
         else source_spec(sid, catalog_root)
     )
     spec = mapping_spec(mapping) if mapping else adapter_spec(sid, catalog_root)
+    if sid == "NATUREBENCH" and mapping is None:
+        from .naturebench import relation_spec
+
+        spec = relation_spec(manifest, spec)
     if sid == "NARRATIVEQA" and mapping is None:
         from .narrativeqa import relation_spec
 
@@ -176,6 +180,10 @@ def run(config, *, output, allow_partial=False, catalog_root=None):
                             # One original parallel row has distinct directed
                             # task views. Do not collide their record identities.
                             reference["mapping_sha256"] = spec["contract_sha256"]
+                        if sid == "APPWORLD":
+                            from .appworld import record_assets
+
+                            reference["native_task_assets"] = record_assets(record)
                         if entry.get("history_targets") is not None:
                             reference["view"] = "original-parent-history/v1"
                         task = {

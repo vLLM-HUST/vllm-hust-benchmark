@@ -18,6 +18,38 @@ runner = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(runner)
 
 
+@pytest.mark.parametrize("timeout", ["0", "-1", "nan", "inf"])
+def test_invalid_transport_timeout_rejected_before_source_or_model_access(
+    monkeypatch, tmp_path, timeout
+):
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "runner",
+            "--official-checkout",
+            str(tmp_path),
+            "--data-root",
+            str(tmp_path),
+            "--output",
+            str(tmp_path / "out"),
+            "--task",
+            "math_calc",
+            "--model",
+            "local",
+            "--template",
+            "gpt4",
+            "--context-limit",
+            "131072",
+            "--request-timeout",
+            timeout,
+        ],
+    )
+    with pytest.raises(ValueError, match="positive finite request timeout"):
+        runner.main()
+    assert not (tmp_path / "out").exists()
+
+
 def fixture(tmp_path, *, tokens=10, fail=False):
     calls = []
 
@@ -138,6 +170,15 @@ def test_full_and_minimum_selection_rules(tmp_path):
         runner.select(rows, count=2)
     with pytest.raises(ValueError):
         runner.select(rows, full=True, start=1)
+
+
+def test_final_incremental_tail_never_requires_replaying_completed_questions():
+    rows = [{"input": str(index)} for index in range(8)]
+    assert runner.select(rows, start=6, count=2) == list(enumerate(rows))[6:]
+    assert runner.select(rows, start=7, count=1) == list(enumerate(rows))[7:]
+    for start, count in [(0, 2), (3, 2), (6, 0), (7, 2)]:
+        with pytest.raises(ValueError):
+            runner.select(rows, start=start, count=count)
 
 
 def test_scorer_failure_preserves_predictions_without_completion(tmp_path):
