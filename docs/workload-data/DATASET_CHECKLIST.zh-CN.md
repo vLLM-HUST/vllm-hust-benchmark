@@ -21,6 +21,9 @@
 
 原始数据读取入口（数据须在外部目录取得，仓库不内置）：
 
+- [x] 当前提交CPU
+  CI通过；正式工件13102996636的84份包文件在服务器独立安装并核对。先前本地wheel的两份源码仅有换行差异，因此没有直接升级旧证据；已使用正式CI安装版重新完成451题、两档关联、四组完整代表记忆及4条公共/研究回读，全部通过。证据：`lme-v2-ci-payload-equivalence-20261102-001/qualification-public.json`，仍未执行模型或原生评分。
+
 ```python
 from pathlib import Path
 from vllm_hust_workload_data import iter_workload
