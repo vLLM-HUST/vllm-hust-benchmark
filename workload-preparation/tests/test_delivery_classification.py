@@ -97,6 +97,17 @@ def test_existing_deliveries_have_real_indexed_paths_without_runtime_claim():
     }
     assert assets["AZURE_LLM"]["entrypoints"][0]["role"] == "data_reading_only"
     assert assets["JSONSCHEMABENCH"]["entrypoints"]
+    temporal = {
+        (item["role"], item["path"]) for item in assets["TEMPORALWIKI"]["entrypoints"]
+    }
+    assert ("native_evaluation", "scripts/run_temporalwiki_original_npu.py") in temporal
+    assert (
+        "prepare_assets",
+        "scripts/prepare_temporalwiki_original_assets.py",
+    ) in temporal
+    assert ("generation", "scripts/run_ljspeech_vits_original_npu.py") in {
+        (item["role"], item["path"]) for item in assets["LJSPEECH"]["entrypoints"]
+    }
     ovo = {(item["role"], item["path"]) for item in assets["OVOBENCH"]["entrypoints"]}
     assert ("generation", "scripts/run_ovobench_original_npu.py") in ovo
     assert (
