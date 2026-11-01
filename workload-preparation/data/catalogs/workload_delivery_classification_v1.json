@@ -21,6 +21,14 @@
     {"source_id": "PAIO-SEMANTIC-SIMILAR-5000", "asset_group": "enterprise-private-requests", "related_workload_ids": [], "boundary": "Semantic similarity is not exact-prefix or KV reuse; preserve original private requests without rewriting."}
   ],
   "source_entrypoints": {
+    "LONGMEMEVAL_V2": [
+      {"role": "prepare_assets", "path": "scripts/verify_longmemeval_v2_processor.py", "scope": "CPU image/token preprocessing fixture qualified against original reader metadata, with neural forward and weight loading blocked; not native RAG"},
+      {"role": "original_profile", "path": "configs/workload-native/longmemeval-v2-processor-arm64-py312-lock.txt", "scope": "Qualified isolated ARM64 Python3.12 CPU preprocessing software, not the author CUDA environment or a CPU encoder"},
+      {"role": "prepare_assets", "path": "scripts/prepare_longmemeval_v2_original.py", "scope": "Original data/source preparation; original native task and screenshot relationships are not flattened prompts"},
+      {"role": "prepare_assets", "path": "scripts/prepare_longmemeval_v2_reader.py", "scope": "Pinned original recommended9B reader assets only; no service start"},
+      {"role": "prepare_assets", "path": "scripts/prepare_longmemeval_v2_embedding.py", "scope": "Original default8B embedding all17 assets and public verify-only qualified; no service health or native RAG claim, direct HF download branch not qualified on this server"},
+      {"role": "generation", "path": "scripts/run_longmemeval_v2_original.py", "scope": "Original no_retrieval or rag_query_to_slice protocol, fixed questions and original budgets; only no_retrieval negative control completed, positive memory pending"}
+    ],
     "WORKARENA": [
       {"role": "prepare_assets", "path": "scripts/prepare_workarena_author_source.py", "scope": "Public original174-file repository archive prepare/verify qualified; no credential acquisition, browser, Agent or native validation"},
       {"role": "original_profile", "path": "configs/workload-native/workarena-author-source.json", "scope": "Pinned public software/static runtime assets; live ServiceNow instance pool access requires separate user authorization"}

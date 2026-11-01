@@ -1,5 +1,20 @@
 # 数据集逐项验证清单
 
+### LongMemEval-V2 正向记忆流程准备（2026-11-02）
+
+- [x] 原`enterprise/small`前三条`no_retrieval`结果及三个0分保留为消融对照，不改算正向记忆验证。
+- [x] 按原`run_eval.py`默认值固定`Qwen/Qwen3-Embedding-8B`的17文件身份，约15.15GB；公开获取入口已补充。
+- [x] 原嵌入模型17份文件、15,150,575,778字节全部校验通过，公开入口`--verify-only`实际通过；HF固定元数据和官方ModelScope同哈希大文件分工传输，不把ModelScope浮动master当不可变身份；该服务器的直接HF下载分支未验证。
+- [x] 独立ARM64/Python3.12预处理环境及依赖检查通过，公开检查器对原reader的12份处理器元数据前后校验一致，CPU夹具通过，神经前向/权重加载被禁用；不在CPU运行嵌入器、LLM或judge，也不把该夹具算原题执行。
+- [ ] 原固定前三条正向`rag_query_to_slice`、原评分以及公共包/研究侧任务结果交接。
+
+源数据、原9B
+reader及已有有效结果复用，不重跑消融以凑完成数。下载在服务器进行，本地不保存权重；未启动新模型服务或改动现有服务。动态进程与证据路径见[准备状态](validation/longmemeval-v2-rag-prerequisites-20261102.json)，不能仅凭该静态回执推定进程继续存活。
+
+预处理环境使用`configs/workload-native/longmemeval-v2-processor-arm64-py312-lock.txt`安装到单独Python3.12
+venv，保留原HTTP客户端不动；这是ARM64
+CPU构建适配，不是作者CUDA环境。检查命令：`python scripts/verify_longmemeval_v2_processor.py --python /external/client/bin/python --reader-assets /external/reader/model --execute`。默认只打印plan；执行仅运行图像/token预处理夹具，不调用模型或下载数据。
+
 ### WorkArena 公开准备进展（2026-11-02）
 
 - [x] 官方固定版本174份源码与静态运行资产已在服务器取得，148,527,353字节逐份核对Git blob和SHA256；本地未保存数据。
