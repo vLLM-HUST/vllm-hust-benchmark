@@ -1744,6 +1744,17 @@ FP32，禁止覆盖已有嵌入。`verify`仅按原文件身份及结果哈希�
 入口不硬编码29条：按原输入逐句使用 `encode([原文])[0]`，校验完整对话历史、512维及原128-token
 encoder策略。`--source-file`和`--split train/val`可绑定其他原行集合；原行字节、原顺序及整对话关系必须匹配固定元数据，不能提交重写的prompt。其他原集合仍需先按原协议准备；现有自动音频/对话准备配置只验证了登记的三段，不能把本入口参数化等同全量准备已通过。完整声学编排与最终工件研究消费仍按上方未完成项推进。
 
+#### DailyTalk 公共保存结果核验
+
+- [x] `scripts/verify_dailytalk_synthesis_outputs.py`已在服务器对已有29条原合成结果实测`plan/verify`，均退出0。重核原元数据、原请求和历史关系、2份原权重、声学/vocoder各4批、29个WAV全部PCM及29份PNG头部；旧原生回执不变，未导入Torch，新增模型调用0。[公共核验回执](validation/dailytalk-public-synthesis-audit-20261101.json)。
+- [ ] 本入口只验证已保存的原合成工件，不替代完整公开执行入口、最终研究消费或音质评价；来源总勾仍为空。
+
+```bash
+python scripts/verify_dailytalk_synthesis_outputs.py --action verify --prepared <外部原输入准备目录> --metadata-root <固定原元数据目录> --models-root <原900000及universal权重目录> --stage <已有合成stage目录>
+```
+
+`--stage`应包含原`native-execution/state-private.json`和`results/900000/<对话ID>/`；按原文件名逐一匹配，不通过改名、删题或重新生成来修补失败。结果中的非零采样、格式与文件完整性不是音质分数。默认`plan`不读取数据或加载模型。
+
 ### MLAgentBench：原任务环境准备
 
 - [x] 固定原作者版本`5d71205cc20a8e95d43aa7cb7120e89ca3323e31`的138份软件/任务定义文件，共670271字节；79份Python静态解析通过。15个发布目录包含工具型示例，不能据此称论文有15个评测任务。原许可、依赖、Agent、准备与评价脚本均保留；可选Auto-GPT
