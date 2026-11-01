@@ -2,6 +2,9 @@
 
 ### DiscoveryBench 隔离执行准备（2026-11-02）
 
+- [x] 完整原coder
+  Agent驱动`run_discoverybench_original_actor.py`已在实际无网络/非root/只读容器完成构造检查，模型和工具请求均为0。默认仅plan；`--preflight`只构造；`--execute`才调用原提示构造器和原Agent循环，保留5轮/1次Python规则，读取哈希固定的四份作者源码。模型提供方与隔离工具传输明确披露，不称GPT-4复现。
+- [ ] 固定前三题真实执行已启动，现有NPU14B服务已返回原题响应；控制器、请求和响应均在服务器私有保存。三题终态、评分及结果消费核验未完成，不能依据启动或单条返回打来源勾。
 - [x] `discoverybench_tool_transport.py`补齐原一次Python调用计数及按题独占的工具请求队列；实际CPU文件队列到隔离官方工具往返通过，返回字符串精确保留，二次提交被拒绝。超时/基础设施失败保留请求，不自动重放；返回值必须匹配原代码哈希。该传输不在宿主机执行代码，完整Agent与评分绑定仍待完成。回执：`discoverybench-tool-queue-public-20261102-001/qualification-public.json`。
 - [x] 原官方依赖在专用CPU独立Docker镜像安装、依赖检查及离线导入通过；19份官方源码身份核对，两个官方CLI在无网络/非root/只读容器中启动通过。实际115项依赖快照已保存，未修改全局环境。
 - [x] 按官方real答案表原顺序固定前三题`archaeology/0/0`、`archaeology/1/0`、`archaeology/10/0`；六份原始文件共2,010,940字节已在CPU侧核对Git
