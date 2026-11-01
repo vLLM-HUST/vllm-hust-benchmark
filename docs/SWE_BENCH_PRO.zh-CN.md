@@ -385,5 +385,13 @@ Controller 可选实现 `integration.hook = "module:factory"`：`before_run`、`
 [request-throttling-controller](https://github.com/vLLM-HUST/request-throttling-controller)。
 通用入口不含模型部署、容量调参或政策实现。
 
+观测插件还可选择实现 `bind_runtime(config, folder, program, model, env)`。
+它在 `before_program` 之后、入口自带的 `instrument` 之前执行，收到本次真实创建的
+模型和任务环境实例。可用它记录原生调用边界、返回用量和工具输出大小；不得替换
+官方 Agent 循环、改写提示词/结果、插入额外模型请求或变更评分逻辑。凭据仍留在实例中，
+插件不得将它们写入日志。旧插件未实现这个方法时继续按原流程运行。
+在 `after_program` 中关闭插件自己的采样线程与文件。此接点本身不保证字段覆盖率，
+必须另外核验 SDK、服务端和硬件的实际采集证据。
+
 通用准备/评分逻辑从 Controller 的历史 `ea13820` 提取，官方核心保持固定来源； Controller 历史脚本、配置和实验记录可以作为备份保留，但新用户入口以本仓库为准。
 本次迁移不改写历史运行、网站矩阵或已有实验成绩。
