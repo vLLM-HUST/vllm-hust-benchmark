@@ -1710,10 +1710,16 @@ smoke、tests和lint全部通过。[交付回执](validation/ruler-native-delive
 - [x] 20组CPU合成夹具通过，环境Python3.12.10/PyTorch2.7.1+cpu；覆盖方向、层数、bias、布局、非零/默认零hidden和原Guo的128维双层双向、1/10步输入。输出及最终hidden均按`atol=1e-6, rtol=1e-5`对照原PyTorch
   GRU，原参数不变；这是合成单元测试，不是原任务或NPU数值结果。
 - [x] 实际服务器PyTorch2.10.0+cpu/Python3.12.13隔离环境完成18组CPU数值对照，最大绝对误差`3.5762786865234375e-7`；没有初始化NPU、加载原checkpoint或执行原任务。[服务器夹具回执](validation/dailytalk-gru-cpu-equations-20261101.json)。
-- [ ] 在空闲NPU窗口完成同精度算子数值验证，随后续跑原模型、原对话和原评价；未获空闲前不占卡。候选不能仅凭CPU夹具当作已经解决原NPU失败。
+- [x] 确认两服务在途/排队均0、仅有原受保护引擎后，在互斥窗口完成18组NPU
+  FP32数值对照，最大绝对误差`2.682209014892578e-7`；包含原Guo维度，关闭HF32，不加载原checkpoint。[NPU夹具回执](validation/dailytalk-gru-npu-equations-20261101.json)。控制进程已退出，服务身份未变，互斥租约释放；不把合成算子夹具计为原TTS任务。
+- [x] 原29条输入在全新输出目录尝试原checkpoint合成，声学前向1次，已越过GRU错误；在原绘图函数遇到Matplotlib3.10.9移除`tostring_rgb`的兼容失败，vocoder尚未执行、WAV文件0。失败和旧环境保留，控制/子进程均已退出，服务身份未变。[原任务失败回执](validation/dailytalk-original-gru-compat-render-blocker-20261101.json)。这不是原任务质量失败，也不算完整合成；后续先在独立绘图环境核验兼容版本，不改原请求或模型。
 
 使用时只对原声学模型中明确定位的Guo
-`gru`实例调用`install_npu_gru_forward`，并先沿用原`model.eval()`；不修改全局`torch.nn.GRU`。正式forward拒绝CPU/CUDA、非FP32、训练及非原稠密批输入。`require_npu=False`仅供合成数值夹具，不可作为实际任务的CPU回退。当前没有修改既有原任务工作区或部署该候选，DailyTalk来源总勾仍为空。
+`gru`实例调用`install_npu_gru_forward`，并先沿用原`model.eval()`；不修改全局`torch.nn.GRU`。正式forward拒绝CPU/CUDA、非FP32、训练及非原稠密批输入。`require_npu=False`仅供合成数值夹具，不可作为实际任务的CPU回退。原失败工作区未修改；候选已在新目录完成原29条合成，尚待公开入口和最终交接，DailyTalk来源总勾仍为空。
+
+- [x] 独立绘图overlay固定Matplotlib3.9.4原wheel并校验SHA256，原绘图函数按原调用者前置条件验证通过；原环境不变。[绘图回执](validation/dailytalk-plotting-overlay-20261101.json)。
+- [x] 原29条完整合成及独立保存结果审计通过：声学/vocoder各4批，29个WAV全部完整PCM解码、均有非零采样，29份PNG签名及尺寸核验；重核2份原模型、52份既有兼容源码和29份原Guo特征，新增模型调用0。[合成审计](validation/dailytalk-original-fixed29-synthesis-audit-20261101.json)。原失败保留，无主观音质或引擎性能结论。
+- [ ] 公开完整原生编排入口、所选原协议评价边界及最终CI工件研究消费仍待完成，来源总勾为空。
 
 ### MLAgentBench：原任务环境准备
 

@@ -42,9 +42,72 @@ def test_gru_cpu_equation_evidence_does_not_promote_native_source():
         )
     )["delivery_inventory"]["DAILYTALK"]
     assert not source["checked"]
-    assert not source["fp32_gru_compatibility_candidate"][
-        "actual_npu_equivalence_or_synthesis_verified"
-    ]
+    assert source["delivery_receipt"] is None
+
+
+def test_npu_equation_control_is_bound_and_not_original_synthesis():
+    source = json.loads(
+        (ROOT / "docs/workload-data/dataset-validation-status.json").read_text(
+            encoding="utf-8"
+        )
+    )["delivery_inventory"]["DAILYTALK"]
+    candidate = source["fp32_gru_compatibility_candidate"]
+    receipt = json.loads(
+        (ROOT / candidate["npu_equation_receipt"]).read_text(encoding="utf-8")
+    )
+    assert candidate["synthetic_npu_equivalence_verified"] is True
+    assert not source["checked"]
+    code = (ROOT / receipt["entry"]).read_text(encoding="utf-8")
+    assert hashlib.sha256(code.encode()).hexdigest() == receipt["entry_sha256"]
+    assert (
+        receipt["numeric_cases"] == 18
+        and receipt["maximum_absolute_error"] < receipt["atol"]
+    )
+    assert receipt["dtype"] == "float32" and receipt["hf32"] is False
+    assert (
+        receipt["controller_exit_code"] == 0
+        and receipt["protected_services_same_birth"]
+    )
+    assert receipt["lease_released_and_control_processes_exited"]
+    assert (
+        receipt["original_checkpoint_loads"] == receipt["original_tasks_executed"] == 0
+    )
+    assert receipt["source_checkbox_eligible"] is False
+
+
+def test_actual_fixed29_synthesis_requires_separate_saved_native_evidence():
+    source = json.loads(
+        (ROOT / "docs/workload-data/dataset-validation-status.json").read_text(
+            encoding="utf-8"
+        )
+    )["delivery_inventory"]["DAILYTALK"]
+    assert source["fp32_gru_compatibility_candidate"]["original_synthesis_verified"]
+    native = json.loads(
+        (ROOT / source["current_native_synthesis_attempt"]["receipt"]).read_text(
+            encoding="utf-8"
+        )
+    )
+    assert native["original_utterances"] == native["wav_files_full_pcm_decoded"] == 29
+    assert (
+        native["wav_files_nonzero"]
+        == native["png_files_signature_and_dimensions_verified"]
+        == 29
+    )
+    assert native["acoustic_forward_batches"] == native["vocoder_forward_batches"] == 4
+    assert native["official_model_files_rehashed"] == 2
+    assert native["original_compatibility_source_files_reverified"] == 52
+    assert native["original_guo_feature_files_reverified"] == 29
+    assert native["native_exit_code"] == 0 and native["exclusive_lease_released"]
+    assert native["audit_model_calls"] == 0 and not native["quality_score_claimed"]
+    assert not native["source_checkbox_eligible"] and not source["checked"]
+    plotting = json.loads(
+        (ROOT / source["plotting_overlay_receipt"]).read_text(encoding="utf-8")
+    )
+    assert plotting["control"]["original_render_function_passed"]
+    assert plotting["selected_matplotlib"] == "3.9.4"
+    assert plotting["wheel_sha256"] in (ROOT / plotting["requirements"]).read_text(
+        encoding="utf-8"
+    )
 
 
 def test_plan_never_reads_data_or_creates_output(tmp_path):

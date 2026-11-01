@@ -3633,8 +3633,9 @@
       "fp32_gru_compatibility_candidate": {
         "entry": "scripts/dailytalk_gru_npu.py",
         "vendor_cpu_receipt": "docs/workload-data/validation/dailytalk-gru-cpu-equations-20261101.json",
+        "npu_equation_receipt": "docs/workload-data/validation/dailytalk-gru-npu-equations-20261101.json",
         "tests": "tests/test_dailytalk_gru_npu.py",
-        "status": "SYNTHETIC_CPU_EQUATION_CONTROLS_ONLY_NPU_VALIDATION_PENDING",
+        "status": "SYNTHETIC_CPU_AND_NPU_EQUATION_CONTROLS_PASSED_NATIVE_SYNTHESIS_PENDING",
         "cpu_fixture_tests_passed": 20,
         "fixture_python": "3.12.10",
         "fixture_torch": "2.7.1+cpu",
@@ -3643,12 +3644,14 @@
         "publisher_guo_dense_shape_checked": "batch3, sequence1/10, input128, hidden128, layers2, bidirectional, eval dropout0.2, default zero hidden",
         "original_parameters_and_state_dict_unchanged_in_fixtures": true,
         "production_cpu_or_cuda_fallback_forbidden": true,
-        "model_checkpoint_loaded_or_task_executed": false,
-        "actual_npu_equivalence_or_synthesis_verified": false,
+        "synthetic_controls_load_original_checkpoints": false,
+        "synthetic_npu_equivalence_verified": true,
+        "original_synthesis_verified": true,
         "source_checkbox_eligible": false
       },
       "latest_native_synthesis_attempt": {
         "server_receipt": "dailytalk-original-guo-native-stage-20261031-003/native-execution/state-private.json under the private shared task root",
+        "scope_note": "Historical fused-GRU failure retained; consult current_native_synthesis_attempt for the later original-checkpoint attempt.",
         "status": "ORIGINAL_GUO_SYNTHESIS_FAILED_RETAINED",
         "physical_device": 6,
         "acoustic_forward_entries": 1,
@@ -3659,6 +3662,22 @@
         "short_tmp_manager_probe_passed": true,
         "original_checkpoint_batch_history_and_controls_unchanged": true,
         "cpu_neural_fallback_used": false,
+        "source_checkbox_eligible": false
+      },
+      "retained_native_render_failure_receipt": "docs/workload-data/validation/dailytalk-original-gru-compat-render-blocker-20261101.json",
+      "plotting_overlay_receipt": "docs/workload-data/validation/dailytalk-plotting-overlay-20261101.json",
+      "current_native_synthesis_attempt": {
+        "receipt": "docs/workload-data/validation/dailytalk-original-fixed29-synthesis-audit-20261101.json",
+        "status": "ORIGINAL_FIXED29_SYNTHESIS_COMPLETE_SAVED_AUDIT_PASSED_PUBLIC_ENTRY_HANDOFF_PENDING",
+        "controller_pid": 1827848,
+        "controller_birth": "873213331",
+        "child_pid": 1827861,
+        "child_birth": "873213400",
+        "terminal": true,
+        "acoustic_forward_entries": 4,
+        "vocoder_forward_entries": 4,
+        "saved_wav_files": 29,
+        "independent_full_pcm_decodes": 29,
         "source_checkbox_eligible": false
       },
       "original_readiness": {
