@@ -21,6 +21,14 @@
     {"source_id": "PAIO-SEMANTIC-SIMILAR-5000", "asset_group": "enterprise-private-requests", "related_workload_ids": [], "boundary": "Semantic similarity is not exact-prefix or KV reuse; preserve original private requests without rewriting."}
   ],
   "source_entrypoints": {
+    "SCIENCEAGENTBENCH": [
+      {"role": "prepare_assets", "path": "scripts/verify_scienceagentbench_original_assets.py", "scope": "Original verified metadata and original first3 scientific asset identities; raw scientific assets remain private"},
+      {"role": "original_profile", "path": "configs/workload-native/scienceagentbench-author-software-pins.json", "scope": "Pinned publisher30 software files; no task/data redistribution"},
+      {"role": "original_profile", "path": "configs/workload-native/scienceagentbench-local-baseline-requirements.txt", "scope": "Original SDK and local tokenizer/Parquet client dependencies, not scientific execution image"},
+      {"role": "generation", "path": "scripts/run_scienceagentbench_original_baseline.py", "scope": "Original single-turn GPT-chat protocol with explicit local non-thinking model; full original messages and2000-token budget, no knowledge/debug; local monetary cost null"},
+      {"role": "native_evaluation", "path": "scripts/scienceagentbench_codebert_npu.py", "scope": "Original Python CodeBERTScore on actual saved programs, pinned model/layer11 on NPU; auxiliary score is not scientific success"},
+      {"role": "native_evaluation", "path": "scripts/run_scienceagentbench_scientific.py", "scope": "Prepare private original cases/recipes and run original scientific grader in explicitly owned restricted Docker with hash-bound actual NPU auxiliary scores; original model failures retained, no source completion implied by discovery"}
+    ],
     "STREAMINGBENCH": [
       {"role": "prepare_assets", "path": "scripts/prepare_jsonschemabench_author_source.py", "scope": "--source streamingbench: pinned original author software, not native execution"},
       {"role": "prepare_assets", "path": "scripts/prepare_streamingbench_native_selection.py", "scope": "Original first3 complete groups per seven modes, preserving nested questions and source timestamps"},

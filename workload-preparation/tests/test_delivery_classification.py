@@ -97,6 +97,22 @@ def test_existing_deliveries_have_real_indexed_paths_without_runtime_claim():
     }
     assert assets["AZURE_LLM"]["entrypoints"][0]["role"] == "data_reading_only"
     assert assets["JSONSCHEMABENCH"]["entrypoints"]
+    scientific = {
+        (item["role"], item["path"])
+        for item in assets["SCIENCEAGENTBENCH"]["entrypoints"]
+    }
+    assert (
+        "generation",
+        "scripts/run_scienceagentbench_original_baseline.py",
+    ) in scientific
+    assert (
+        "native_evaluation",
+        "scripts/run_scienceagentbench_scientific.py",
+    ) in scientific
+    assert (
+        "native_evaluation",
+        "scripts/scienceagentbench_codebert_npu.py",
+    ) in scientific
     temporal = {
         (item["role"], item["path"]) for item in assets["TEMPORALWIKI"]["entrypoints"]
     }

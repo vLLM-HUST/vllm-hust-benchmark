@@ -1416,7 +1416,10 @@ python scripts/scienceagentbench_codebert_npu.py \
 - [x] 原ARM64科学基础配方的软件安装完成；磁盘保护中断后复用已提交安装层，只补原配方最后一步，不重装、不扩卷、不删旧环境。原Python3.10环境依赖/导入通过，第2/3题原instance配方已构建。第2题补齐原XLSX数据必需的`openpyxl==3.1.5`；上游pipreqs不能推断pandas动态可选reader，首次缺依赖记录保留，不改模型程序。
 - [x] 实际容器控制验证只读根、无网络、no-new-privileges、UID1000执行、参考不可读、数据可读及结果可写。原`compute_scores.py`不改；辅助F1经原任务/程序/参考SHA绑定复用真实NPU结果，原900秒执行预算、原成功判定及结果tuple保留。只增加非root执行身份和缓存目录隔离，未在CPU重新计算神经辅助分数。
 - [x] 第2/3题到达原程序错误终态，原结果分别为`(valid=0, CodeBERT=0.7659464478, success=0)`和`(0, 0.8183770776, 0)`：程序将set作为pandas列名、预测特征与训练不一致。原成功评价脚本因程序先失败而未进入；不改答案、不降校验、不换题凑通过。第3题不重复执行；第2题只在补reader后重跑科学程序，不重跑LLM或CodeBERT。[实际进展回执](validation/scienceagentbench-original-fixed3-native-progress-20261101.json)。
-- [ ] 第1题科学程序涉及图神经网络计算，其执行后端/范围尚未核验；最终原生编排、最新工件与研究消费交接未收口。来源仍未交付，全102题科学执行和其他官方Agent分支另列缺口。
+- [x] 第1题按官方科学执行流程在专用CPU隔离容器执行；任务内部科学网络允许使用CPU，LLM与CodeBERT评分仍使用NPU。原程序因`from_smiles`参数错误进入官方失败分支，原始错误及评分保留，不修改生成程序凑通过。
+- [x] 公共科学执行编排入口已用第2题保存的真实生成程序完成`prepare`和`run`实跑，二者退出码均为0；保留原程序错误和原始评分，未重新调用生成或辅助评分模型。
+- [x] 前三题保存结果已跨端复核：原12字段、生成程序、NPU评分回执、原评分源码及各题科学输入文件身份一致，三题原始成功标记均为0。汇总见`validation/scienceagentbench-fixed3-saved-audit-20261101.json`；本次审计新增模型调用和程序执行均为0。
+- [ ] 三题完整证据汇总、最新安装工件与研究消费交接尚未收口。来源仍未交付，全102题科学执行和其他官方Agent分支另列缺口。
 
 生成客户端在执行机隔离环境安装`configs/workload-native/scienceagentbench-local-baseline-requirements.txt`；该文件不是科学执行镜像依赖。固定源码沿用上文版本，元数据必须是原`verified`
 Parquet；不要用硬编码旧validation的直接脚本替换。
@@ -1432,7 +1435,29 @@ python scripts/run_scienceagentbench_original_baseline.py \
   --start 0 --limit 3
 ```
 
-`--full`选择原102题；超出原输入预算会失败，不裁剪。输出目录必须全新，已有程序拒绝覆盖；每次请求前记录在途原位置，响应先私有保存，未知请求不得盲目重放。科学执行入口`scienceagentbench_isolated_scoring.py`只在受限的单任务Docker容器内使用，拒绝宿主机或放宽的容器环境；它不是自动建镜像/拷贝数据的完整编排入口。最终一体化编排仍属上项待补，不以本节命令代替来源总验收。
+`--full`选择原102题；超出原输入预算会失败，不裁剪。输出目录必须全新，已有程序拒绝覆盖；每次请求前记录在途原位置，响应先私有保存，未知请求不得盲目重放。容器内评分入口`scienceagentbench_isolated_scoring.py`拒绝宿主机或放宽的容器环境。外层公共入口`scripts/run_scienceagentbench_scientific.py`提供`--action prepare`生成原作者镜像配方及私有任务目录，再用`--action run`连接明确指定并核对身份的专用Docker执行；镜像构建仍由使用者按生成配方完成。第2题已验证这两个公共动作，不能据此代替来源总验收。
+
+在专用Linux CPU执行机上准备任务，所需原始资产均保存在仓库外；`--program-root`指向已保存的生成程序目录，`--npu-receipt`指向上述真实程序的NPU
+CodeBERT评分回执：
+
+```bash
+python scripts/run_scienceagentbench_scientific.py --action prepare \
+  --source-dir <固定作者源码目录> --metadata <原verified.parquet> \
+  --asset-root <固定原科学资产根目录> --program-root <保存的生成程序目录> \
+  --npu-receipt <真实NPU评分回执.json> --base-image <专用基础镜像名> \
+  --work-dir <外部全新私有工作目录> --start 0 --limit 3 --xlsx-reader
+```
+
+源码身份由`scienceagentbench-author-software-pins.json`核对。准备后先构建工作目录内的原基础镜像配方，再按各`<instance_id>/recipe/Dockerfile`构建任务镜像，镜像映射JSON使用原`instance_id`作为键、完整`sha256:`镜像ID作为值。`--xlsx-reader`明确补充原Excel任务缺失的`openpyxl==3.1.5`读取依赖，不改原题或计分。默认ARM64，x86执行机显式使用`--arch x86_64`，不得混用不同架构镜像。
+
+```bash
+python scripts/run_scienceagentbench_scientific.py --action run \
+  --work-dir <上述私有工作目录> --image-map <镜像映射.json> \
+  --docker-host <专用Docker套接字URI> --docker-id <已核验的Docker实例ID> \
+  --daemon-work-dir <Docker守护进程所见的同一工作目录>
+```
+
+执行客户端与Docker守护进程位于不同容器时，二者路径必须对应同一持久卷中的同一目录；不能直接假定客户端绝对路径可供守护进程挂载。入口核对专用Docker身份，使用无网络、只读根文件系统、受限权限的容器；原生成程序以非root用户运行。已有科学结果拒绝覆盖。程序报错仍保留官方结果四元组及日志，不改程序或换题；基础设施失败则明确失败，不算完成。
 
 #### OVO-Bench原生在线视频路径准备（未完成来源交付）
 
