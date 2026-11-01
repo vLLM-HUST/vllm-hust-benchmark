@@ -254,6 +254,15 @@ def test_native_definition_evidence_and_fixed_samples_do_not_inflate_datasets():
     assert receipt["original_native_directory_definitions"] == 15
     assert receipt["public_and_unchanged_research_records_equal"] == 16
     assert receipt["source_checkbox_eligible"] is False
+    ci = receipt["actual_ci_followup"]
+    assert ci["cpu_ci_conclusion"] == "success"
+    assert ci["installed_payload_files_byte_verified"] == 81
+    assert ci["all_original_software_assets_verified"] == 138
+    assert ci["all_16_choices_match_author_get_task_info"] is True
+    assert ci["unchanged_research_input_and_outcome_readbacks"] == 16
+    assert ci["prepared_index_unchanged"] is True
+    assert ci["model_calls"] == ci["scientific_programs_executed"] == 0
+    assert ci["source_checkbox_eligible"] is False
     assert profile["task_ids"] == ["cifar10", "imdb", "ogbn-arxiv"]
     assert profile["default_debug_alias_is_not_one_of_selected_tasks"] is True
     assert not set(profile["task_ids"]) & set(
