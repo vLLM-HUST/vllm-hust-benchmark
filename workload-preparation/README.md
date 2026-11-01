@@ -1763,3 +1763,50 @@ export ASCEND_RT_VISIBLE_DEVICES=0
 ```
 
 保持原`noise_scale=0.667`、`noise_scale_w=0.8`、`length_scale=1`及22050Hz输出；种子1234是另行披露的可复现设置，不宣称为作者评测种子。输出使用原浮点波形，不裁剪、不重采样。入口保存每条输入摘要、参考音频成员、WAV摘要及失败记录，校验有限值、非空和写入/读回一致。独立审计另核验RIFF、单声道float32和原文关系；这些只证明协议可用性，不等于语音自然度、MOS或引擎性能结论。已成功输出不应为更新文档或CI而重跑。
+
+### TemporalWiki：原GPT2-large基座探针困惑度
+
+原作者[TemporalWiki](https://github.com/joeljang/temporalwiki)支持`evaluate_ppl`在`checkpoint_path=""`时直接构造基座模型。这里声明的协议是这一原代码分支，使用原GPT2-large和8份月份／changed或unchanged三元组探针，不是持续预训练checkpoint、训练过程、Wikipedia全文／差分语料或人为构造的更新事件。不能改成聊天模型回答三元组后宣称跑过原困惑度评测。
+
+准备原软件和原探针包，全部保存在外部目录：
+
+```bash
+python scripts/prepare_jsonschemabench_author_source.py --source temporalwiki --author-root /srv/workloads/temporalwiki-author --action prepare --max-bytes 382667
+python scripts/prepare_temporalwiki_original_assets.py --archive /srv/workloads/TWiki_Probes.zip --action download --max-bytes 620459
+python scripts/prepare_temporalwiki_original_assets.py --archive /srv/workloads/TWiki_Probes.zip --data-root /srv/workloads/temporalwiki-probes --action extract
+```
+
+原探针包全部8CSV／35,948行及原辅助文件保持不变。模型从[发布方快照](https://huggingface.co/openai-community/gpt2-large/tree/32b71b12589c2f8d625668d2335a01cac3249519)取得，放入外部`/srv/models/gpt2-large`，只需[模型工件清单](../configs/workload-native/temporalwiki-gpt2-large-model-pins.json)所列8文件。入口核对全部Git／LFS内容身份，总量3,250,026,117字节；不需要同时下载其他格式的重复权重。
+
+已核验的兼容环境为Python3.12.13、平台配套Torch2.10.0+cpu／torch_npu2.10.0.post4／CANN9.1.0及[固定依赖](../configs/workload-native/temporalwiki-base-npu-requirements.txt)，不是作者原Python3.8／CUDA／旧Lightning环境的复刻。隔离环境只复用厂商Torch及NPU扩展，不继承整个系统包目录。以下示例针对上述已验证Python版本；其他平台须先核验厂商ABI和包位置，不安装普通CPU/CUDA
+Torch替换厂商包：
+
+```bash
+/usr/local/python3.12.13/bin/python3 -m venv --copies /srv/envs/temporalwiki
+/usr/local/python3.12.13/bin/python3 - <<'PY'
+from pathlib import Path
+import sysconfig
+vendor = Path(sysconfig.get_paths()["purelib"])
+target = Path("/srv/envs/temporalwiki/lib/python3.12/site-packages")
+for name in ("torch", "torchgen", "functorch", "torch_npu",
+             "torch-2.10.0+cpu.dist-info", "torch_npu-2.10.0.post4.dist-info"):
+    source = (vendor / name).resolve(strict=True)
+    (target / name).symlink_to(source, target_is_directory=source.is_dir())
+PY
+/srv/envs/temporalwiki/bin/python -m pip install --dry-run --report /srv/envs/temporalwiki/dependency-plan.json -r configs/workload-native/temporalwiki-base-npu-requirements.txt
+```
+
+确认安装计划不替换Torch／torch_npu后，在同一虚拟环境执行不带`--dry-run --report ...`的安装命令，再执行`python -I -m pip check`核验隔离环境依赖。平台继承的CANN
+`PYTHONPATH`还会暴露独立工具包元数据，普通`pip check`可能报告那些工具的缺依赖；该失败记录已保留，不能把隔离环境检查说成整个平台工具链无依赖问题。CANN系统运行库及环境须来自匹配的厂商镜像，不能由此requirements替换。兼容副本只排除5项基座评测不用的DeepSpeed／LoRA／Kadapter／RecAdam训练导入；原GPT2模型类主体、特殊token、左侧padding、原Dataset及平均批次loss后取exp的计算方式保留，将原CUDA设备放置显式绑定NPU。新Transformers4.45.2在本次实际运行中自动选用SDPA，逐文件记录在回执，不能宣称是作者旧CUDA／eager实现的性能复现。
+
+先查看计划，再在已协调的NPU窗口显式执行。默认固定每CSV前三条；`--full`运行全部8CSV／35,948行，始终保持原25-token输入／输出和batch32。25-token截断是原作者协议，不是为跑通另外缩短原题。种子42是明确披露的可复现设置，原作者验证分支本身没有调用`set_seed`。
+
+```bash
+export ASCEND_RT_VISIBLE_DEVICES=0
+export HF_HUB_OFFLINE=1
+export TRANSFORMERS_OFFLINE=1
+/srv/envs/temporalwiki/bin/python scripts/run_temporalwiki_original_npu.py --author-root /srv/workloads/temporalwiki-author --data-root /srv/workloads/temporalwiki-probes --model-root /srv/models/gpt2-large --output /srv/results/temporalwiki-base-probes --allocator-budget-gib 5 --full
+/srv/envs/temporalwiki/bin/python scripts/run_temporalwiki_original_npu.py --author-root /srv/workloads/temporalwiki-author --data-root /srv/workloads/temporalwiki-probes --model-root /srv/models/gpt2-large --output /srv/results/temporalwiki-base-probes --allocator-budget-gib 5 --full --execute
+```
+
+分配器上限只是资源保护，不改变模型精度、批量或原评分。首轮4GiB保护上限在第一批原交叉熵计算失败，日志保留；5GiB配置已完成全部35,948行／1126个批次，8份原CSV困惑度保存成功，原float32批次loss／exp经NPU标量独立重算全部精确一致，复核没有重新执行模型。当前仍需完成该公开代码的CI／研究消费交接后才计来源交付。入口记录每文件原CSV困惑度和逐批原loss；CPU浮点模拟存在末位差异，不能混称逐位相同。失败、低分或缺失结果照实保留，不换题、换评分器或伪造训练checkpoint。

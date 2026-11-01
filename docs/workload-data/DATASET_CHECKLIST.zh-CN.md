@@ -310,6 +310,11 @@ LD_LIBRARY_PATH=/external/ffmpeg/lib python -B scripts/run_videomme_original.py 
 
 ### TemporalWiki演化语料与原生探针评测（进行中，不打来源总勾）
 
+- [x] 官方GPT2-large全部8份模型文件／3,250,026,117字节在服务器核验通过，权重整文件3,247,159,078字节与发布方LFS
+  SHA256一致，未写入Windows原始数据或权重。公开候选入口`run_temporalwiki_original_npu.py`的完整8文件／35,948行计划核验通过，保留原25-token输入／输出和batch32；明确为empty-checkpoint基座原探针困惑度，不冒充持续训练论文模型。
+
+- [x] 全部35,948行／1126批次原GPT2基座NPU评测完成，8份原困惑度CSV均返回；保存loss按原float32顺序在NPU仅重算标量评分，8份结果逐一精确一致，0新模型调用。第一轮自设4GiB分配器上限失败保留，5GiB配置成功，显存增量峰值4926MiB，9B／14B不重启；当前19项直接依赖版本及隔离`pip check`通过，继承CANN工具元数据的失败另存。仍需当前CI及公共／研究消费交接后补来源总勾，下列更早准备记录按历史检查点保留。
+
 - [x] 隔离兼容环境安装、`pip check`及真实依赖导入通过；未替换系统Torch。执行未修改的原`Datasets.py`与原GPT2分词器，在1,776条changed探针中核验固定前三条，保留原25-token输入/输出、特殊token和左侧padding。证据`temporalwiki-original-dataset-cpu-20261101-001/qualification-public.json`；仅CPU数据处理，0模型调用，仍需权重、NPU评测和官方困惑度结果。
 
 - [x] 重新核验原`evaluation_ppl.py`及GPT2
