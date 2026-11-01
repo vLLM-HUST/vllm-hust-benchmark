@@ -103,3 +103,41 @@ def test_reject_mismatched_or_invalid_measurements(calculator, failure):
         arm["failed"] = 1
     with pytest.raises(ValueError):
         calculator.calculate(pair, config)
+
+
+def test_terminal_clipping_keeps_accepted_roots_before_discarded_bonus(calculator):
+    def row(output):
+        return dict(
+            prompt_tokens=4,
+            output_tokens=output,
+            per_step_accepted=[2],
+            per_step_drafted=[2],
+        )
+
+    both = calculator.draft_dependencies([row(3)])
+    assert both["retained_vocab_rows"] == 2
+    assert both["kv_rows"] == 5
+    assert both["attention_pairs"] == 9
+    one = calculator.draft_dependencies([row(2)])
+    assert one["retained_vocab_rows"] == 1
+    assert one["kv_rows"] == 4
+    assert one["attention_pairs"] == 4
+
+
+def test_dependency_context_includes_prior_unaccepted_step(calculator):
+    row = dict(
+        prompt_tokens=4,
+        output_tokens=4,
+        per_step_accepted=[0, 1],
+        per_step_drafted=[2, 2],
+    )
+    result = calculator.draft_dependencies([row])
+    assert result["kv_rows"] == 5
+    assert result["full_query_rows"] == 1
+    assert result["attention_pairs"] == 5
+
+
+def test_partition_extrema_are_not_confidence_intervals(calculator):
+    initial = {n: n * n for n in range(1, 65)}
+    continuation = {n: 3 * n for n in range(1, 65)}
+    assert calculator.partition_bounds([3, 4], initial, continuation) == [17, 25]

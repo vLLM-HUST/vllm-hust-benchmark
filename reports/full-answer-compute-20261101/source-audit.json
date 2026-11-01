@@ -1,5 +1,5 @@
 {
-  "schema": "full-answer-compute-source-audit/v1",
+  "schema": "full-answer-compute-source-audit/v2",
   "model_config_sha256": "a2619dc4d764affa76f420443393196d2bda5d8cfecfc7da235ff4a05a442ace",
   "frozen_sources_sha256": "3b13f565c2b94c4c1ba7dbfa1a1a3ac6af222085ef4e74fefe50906a3bd9c961",
   "arms": [
@@ -10,8 +10,10 @@
       "request_salts_unique": true,
       "source_manifest_sha256": "a92bb21b67b2ca5534240d8afc14bb0f447a9217aae55f0bbfe93a11ce6467db",
       "synchronized_boundary_present": false,
-      "accepted_draft_dependency_ledger_present": false,
-      "gdn_prefill_chunk_ledger_present": false
+      "gdn_prefill_chunk_ledger_present": false,
+      "original_explicit_dependency_ledger_present": false,
+      "native_acceptance_sequences_present": false,
+      "derived_dependency_closure_available": false
     },
     {
       "run": "joint-b1-r4",
@@ -20,8 +22,10 @@
       "request_salts_unique": true,
       "source_manifest_sha256": "f491fee9f2f14d6a0267a66d520b5d2e15cd68266f9354189e863ff40fac46b6",
       "synchronized_boundary_present": false,
-      "accepted_draft_dependency_ledger_present": false,
-      "gdn_prefill_chunk_ledger_present": false
+      "gdn_prefill_chunk_ledger_present": false,
+      "original_explicit_dependency_ledger_present": false,
+      "native_acceptance_sequences_present": true,
+      "derived_dependency_closure_available": true
     }
   ],
   "environment_recheck": {
@@ -38,5 +42,27 @@
     "new_accelerator_runs": 0
   },
   "model_config_original_sha256": "5e4d7f74fec2f360eb9cfbfcd6ec0c4c76e684d3a11caaed259d9fd9bfbc7944",
-  "model_config_public_copy": "Original configuration with a trailing newline added for repository formatting; JSON values unchanged."
+  "model_config_public_copy": "Original configuration with a trailing newline added for repository formatting; JSON values unchanged.",
+  "native_sse_recovery": {
+    "joint-b0-r2": {
+      "recovered_requests": 0,
+      "missing_requests": 200,
+      "steps": 0,
+      "raw_accepted": 0,
+      "output_tokens": 0
+    },
+    "joint-b1-r4": {
+      "recovered_requests": 200,
+      "missing_requests": 0,
+      "steps": 247720,
+      "raw_accepted": 413286,
+      "output_tokens": 661040
+    }
+  },
+  "supersedes_note": "B1 detailed MTP counts were present in original SSE metrics but omitted by the response-summary JSON. They are recovered here; B0 has no corresponding SSE metrics.",
+  "dependency_reconstruction_validation": {
+    "original_out256_requests": 200,
+    "exhaustive_small_terminal_cases": 720,
+    "compared_to": "Original logical_draft_dependencies cache-version graph"
+  }
 }
