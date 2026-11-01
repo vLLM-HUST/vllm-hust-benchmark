@@ -1839,6 +1839,22 @@ for record in records:
 
 ### MLAgentBench：原任务环境准备
 
+- [x] 默认原CIFAR10任务资产入口`scripts/prepare_mlagentbench_cifar_assets.py`已加入分类索引；配置固定原作者源码谱系、官方PyPI
+  ARM64/Python3.10
+  TorchVision0.18.0轮子及原CIFAR10归档。原数据MD5取自该精确官方轮子的原loader，而不是自定样本或替代数据；完整数据仍是50000训练图像和10000测试图像。
+- [x] CPU已取得13995854字节官方轮子并核对PyPI
+  SHA256，其公开依赖要求Torch2.3.0，与现有候选科学镜像一致；公共软件部分`plan/prepare/verify`实测均退出0，旧轮子不变，无新下载、无Torch导入、未安装软件。[公共准备回执](validation/mlagentbench-public-cifar-software-20261101.json)。数据部分正在独立专用CPU任务获取，未完成前不称取得或验证。
+- [ ] 隔离环境实际安装/导入、完整原数据校验/原准备流程、NPU Agent模型绑定、原生研究任务与原评价、公共数据和实际工件研究消费仍待完成。软件获取和夹具测试不计来源完成。
+
+```bash
+python scripts/prepare_mlagentbench_cifar_assets.py --action plan --output <外部资产目录>
+python scripts/prepare_mlagentbench_cifar_assets.py --action prepare --parts software --output <外部软件目录> --max-bytes 13995854
+python scripts/prepare_mlagentbench_cifar_assets.py --action prepare --parts data --output <外部原数据目录> --max-bytes 170498071
+python scripts/prepare_mlagentbench_cifar_assets.py --action verify --parts data --output <已有完整原归档目录>
+```
+
+新下载使用显式字节预算、完整归档校验和独立归属记录；只有相同入口建立的匹配记录和原HTTP字节范围才能`--resume`。不要在现有下载仍存活时另启同文件任务，也不要让公开入口接管不匹配的私有partial。已取得且校验一致的最终文件直接复用，不重下；失败或不完整文件保留。数据准备不解pickle、不在宿主机执行任务代码；实际研究程序后续只在专用隔离CPU容器运行，LLM仍使用NPU。
+
 - [x] 在本任务专用CPU工作区，用既有科学环境镜像做无网络、只读根、移除全部capability的短容器元数据核验：Python3.10.22/aarch64、Torch2.3.0、NumPy1.26.4、pandas2.3.3、Pillow12.3.0；缺TorchVision，因此尚不能直接运行原CIFAR10准备/训练脚本。[环境检查回执](validation/mlagentbench-cpu-runtime-inspection-20261101.json)。无数据下载、无生成代码或模型执行，不计来源完成。后续只补任务所需隔离依赖，不盲装包含其他可选任务、云API和旧git依赖的全套requirements。
 
 - [x] 固定原作者版本`5d71205cc20a8e95d43aa7cb7120e89ca3323e31`的138份软件/任务定义文件，共670271字节；79份Python静态解析通过。15个发布目录包含工具型示例，不能据此称论文有15个评测任务。原许可、依赖、Agent、准备与评价脚本均保留；可选Auto-GPT

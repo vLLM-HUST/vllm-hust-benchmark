@@ -1,0 +1,28 @@
+{
+  "source_id": "MLAGENTBENCH",
+  "task": "cifar10",
+  "author_source_profile": "configs/workload-native/mlagentbench-author-source.json",
+  "scope": "Original default CIFAR10 task corpus and task-scoped ARM64 CPU software only; not Agent execution, training, scoring or delivery completion.",
+  "software": {
+    "path": "torchvision-0.18.0-cp310-cp310-manylinux2014_aarch64.whl",
+    "url": "https://files.pythonhosted.org/packages/b2/dd/e5d39496413a5e5c2ca69d333bc241e7c8e8e412778c8309d54ce27cb9ec/torchvision-0.18.0-cp310-cp310-manylinux2014_aarch64.whl",
+    "bytes": 13995854,
+    "sha256": "5337f6acfa1fe959d5cb340d01a00614d6b31ce7a4824ccb95435a85c5273b95", "identity_note": "pragma: allowlist secret - official PyPI published wheel digest",
+    "metadata_url": "https://pypi.org/pypi/torchvision/0.18.0/json",
+    "requires": ["torch==2.3.0", "numpy", "pillow!=8.3.*,>=5.3.0"],
+    "observed_candidate_base": {"python": "3.10.22", "architecture": "aarch64", "torch": "2.3.0", "numpy": "1.26.4", "pandas": "2.3.3", "Pillow": "12.3.0"},
+    "boundary": "CPU task-internal scientific environment, not CPU LLM inference. Compatibility with actual imports/training remains to be verified. This is not the author's original CUDA Docker image."
+  },
+  "data": {
+    "path": "cifar-10-python.tar.gz",
+    "url": "https://www.cs.toronto.edu/~kriz/cifar-10-python.tar.gz",
+    "bytes": 170498071,
+    "bytes_provenance": "Observed official HTTPS Content-Length; official loader MD5 below establishes archive identity.",
+    "md5": "c58f30108f718f92721af3b95e74349a", "identity_note": "pragma: allowlist secret - published TorchVision CIFAR10 archive checksum",
+    "checksum_source": "torchvision/datasets/cifar.py inside the exact official wheel above",
+    "checksum_source_sha256": "9b030104352ed74144d52b21b5041a43ae634addd7787e38ae491a51437f51c1", "loader_identity_note": "pragma: allowlist secret - exact official wheel loader source checksum",
+    "train_images": 50000,
+    "test_images": 10000,
+    "boundary": "Original complete corpus, not image questions or invented prompts. No pickle loading or training on the host."
+  }
+}

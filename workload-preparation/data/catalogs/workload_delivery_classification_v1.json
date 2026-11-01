@@ -34,6 +34,8 @@
       {"role": "original_profile", "path": "configs/workload-native/dailytalk-npu-py312-observed.txt", "scope": "Observed qualified ARM64 runtime constraints, not an author lock or platform installer; synthesis uses the separate plotting overlay"}
     ],
     "MLAGENTBENCH": [
+      {"role": "prepare_assets", "path": "scripts/prepare_mlagentbench_cifar_assets.py", "scope": "Original default CIFAR10 task corpus and task-scoped ARM64 CPU software; explicit byte budget and owned exact-range resume, no Agent/model execution"},
+      {"role": "original_profile", "path": "configs/workload-native/mlagentbench-cifar10-original-assets.json", "scope": "Official original CIFAR checksum from exact TorchVision wheel and observed CPU compatibility prerequisites, not a native execution qualification"},
       {"role": "prepare_assets", "path": "scripts/prepare_jsonschemabench_author_source.py", "scope": "Use --source mlagentbench; pinned author software and released task definitions only, not task data or native execution"},
       {"role": "original_profile", "path": "configs/workload-native/mlagentbench-author-source.json", "scope": "Pinned138 publisher software/task-definition files; underlying task data and access conditions remain separate"}
     ],
