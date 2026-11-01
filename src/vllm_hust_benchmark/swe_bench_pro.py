@@ -487,6 +487,8 @@ def _agent_task(c, row, image, folder, barrier):
         )
         # Credentials remain usable by the model but are redacted when saving config.
         call_hook(hook, "before_program", c, folder, program)
+        # Optional instance binding: retain the official Agent and native clients.
+        call_hook(hook, "bind_runtime", c, folder, program, model, env)
         instrument(model, env, folder, program)
         agent = DefaultAgent(model, env, **agent_cfg)
 

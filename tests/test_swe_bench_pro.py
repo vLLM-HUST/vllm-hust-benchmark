@@ -377,3 +377,15 @@ def test_invalid_sandbox_budget_rejected_before_creation(wall):
 
     with pytest.raises(ValueError):
         runner.create_task_environment(c, {"image_id": "image"}, forbidden)
+
+
+def test_optional_runtime_hook_preserves_native_instances_and_legacy_hooks():
+    model, environment = object(), object()
+    seen = []
+    hook = SimpleNamespace(bind_runtime=lambda *args: seen.append(args))
+    config, folder = {}, Path('fixture')
+    runner.call_hook(hook, 'bind_runtime', config, folder, 'program', model, environment)
+    assert seen == [(config, folder, 'program', model, environment)]
+    assert runner.call_hook(None, 'bind_runtime', config, folder, 'program', model, environment) is None
+    assert runner.call_hook(SimpleNamespace(before_program=lambda *args: None),
+                            'bind_runtime', config, folder, 'program', model, environment) is None
