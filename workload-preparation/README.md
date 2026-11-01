@@ -1230,11 +1230,11 @@ blob/SHA256验证，公共verify命令exit0，见`/root/streamingbench-public-qu
 原媒体定位已核验：固定官方Hub修订的8个ZIP目录，仅读取179576字节，按作者`move_video.py`的原规则把`sample_N/video.mp4`对应到题目中的`sample_N_TYPE.mp4`，全部10视频成员已定位。原成员大小合计2823253471字节，压缩字节2818342632；当前CPU卷2468687872字节余量不足，且已有OVO队列，不启动额外视频下载。完整目录证据见`/root/streamingbench-original-media-directory-20261031-001/aliased-original-members-public.json`，配置只记录成员/CRC/压缩偏移和发布方整包身份，未声称视频已取得或整包SHA已重算；45音频路径的原预处理仍待补。直接按题目名查ZIP的初次失败保留，不改题或换视频。代码MIT许可不自动覆盖源视频权利，数据页未声明的许可不推定为开放再分发。
 
 单成员原媒体准备：`python scripts/prepare_streamingbench_original_media.py --member sample_2_Misleading_Context_Understanding.mp4`默认只计划。显式增加`--download --media-root /srv/datasets/streamingbench-original-videos --max-bytes 15262693`才下载完整原成员；核对固定整包ETag、精确HTTP范围、原ZIP本地头/成员名、deflate
-
-服务器公开`--verify`及已有文件的`--download`复用命令均exit0，完整15262693字节原文件未重下载或重解码；回执`/root/streamingbench-public-media-reuse-20261031-001/qualification-public.json`。这只验证当前已取得的一条原视频，服务器直接联网下载其他成员尚未验证。
 EOF、原完整大小和CRC，每段最多8MiB，保留512MiB余量，既有文件/partial不覆盖。不得换视频、转码或把整包下载当准备条件。
 
-真实公共传输函数已通过内存中转取得上述完整15262693字节原文件并在服务器核验SHA256、完整解码8383视频帧，保留1920×1080/h264及原音轨；回执`/root/streamingbench-original-fixed-media-20261031-001/qualification-public.json`。这一条在重新确认容量后取得，不表示其余9视频已取得；未写Windows原数据，未取得整包。服务器直连下载CLI尚未验证，CPU解码不等于模型推理，也未独立验证45个音频预处理输出。
+服务器公开`--verify`及已有文件的`--download`复用命令均exit0，完整15262693字节原文件未重下载或重解码；回执`/root/streamingbench-public-media-reuse-20261031-001/qualification-public.json`。这只验证当前已取得的一条原视频，服务器直接联网下载其他成员尚未验证。
+
+初始公共传输函数取得完整15262693字节原文件并核验SHA256及全部8383视频帧，保留1920×1080/h264及原音轨；回执`/root/streamingbench-original-fixed-media-20261031-001/qualification-public.json`。后续固定选择的10份视频已全部取得并完成原大小/CRC/SHA及完整帧核验，未取得整包；详细历史与逐项证据见唯一清单。real前三组共用的`sample_348_real.mp4`另复用到NPU存储，Windows不落原文件，不重新下载。服务器直接联网冷下载CLI、45份独立音频及原生模型推理仍未全部验证，不能把媒体完整性或CPU处理器成功当作模型验证。
 
 官方offline评分入口：取得真实模型原输出后，使用`python scripts/score_streamingbench_original.py --author-root /srv/benchmarks/StreamingBench --data-root /srv/datasets/streamingbench --original-subset /srv/datasets/streamingbench-fixed3/questions_real.json --answers /srv/results/real-answers.json --model Qwen2-VL --task real --output /srv/results/real-score`。先核对固定作者软件和原题身份、完整问题/参考字段/嵌套顺序及每题结果，再原样调用`src/data/count.py`，保留原JSON/CSV及日志，不清洗答案或改评分。缺结果、空结果或不兼容形状须先排查，不能换题、补答案或默默减少分母。四个offline组件的8次参考答案正反控制已在CPU通过，见`/root/streamingbench-original-scoring-controls-20261031-002/qualification-public.json`；仅评分器控制，非真实模型分数。原`stats.sh`未给出全部可选stream模式的匹配评分流程，不能把flat
 stream结果强转成SQA嵌套输入；这部分尚未核验，不计完成。
@@ -1243,10 +1243,17 @@ stream结果强转成SQA嵌套输入；这部分尚未核验，不计完成。
 
 ### StreamingBench 原视频协议NPU入口（软件计划已验证，真实推理待验证）
 
-作者CLI仅分派MiniCPM-V/MiniCPMo；直接传Qwen2-VL会落到基类，不能当成有效推理。`scripts/run_streamingbench_original_npu.py`明确接作者发布的Qwen2-VL类及原`StreamingBench`／`StreamingBenchSQA`／`StreamingBenchProactive`循环，保留原时间窗、前序参考上下文、主动轮询、自适应fps、max_pixels151200及128-token输出预算；仅将CUDA／FlashAttention2和远程权重绑定改为明确NPU／eager／固定本地权重。权重先加载再整体移到NPU，全部神经权重必须在NPU，不启用CPU推理或自动offload。
+作者CLI仅分派MiniCPM-V/MiniCPMo；直接传Qwen2-VL会落到基类，不能当成有效推理。`scripts/run_streamingbench_original_npu.py`明确接作者发布的Qwen2-VL类及原`StreamingBench`／`StreamingBenchSQA`／`StreamingBenchProactive`循环，保留原时间窗、前序参考上下文、主动轮询、fps表达式、max_pixels151200及128-token输出预算；CUDA／FlashAttention2和远程权重绑定改为明确NPU／SDPA／固定本地权重。`--attention-backend eager`仅作为显式兼容选项，不自动切换后端或减小原输入。权重先加载再整体移到NPU，全部神经权重必须在NPU，不启用CPU推理或自动offload。
 
 复用OVO已验证的Qwen2-VL-7B固定工件身份及同族运行环境作为候选：Python3.12.13、vendor
 torch2.10.0+cpu／torch-npu2.10.0.post4、transformers5.5.4、qwen-vl-utils0.0.8、decord0.6.0、ffmpeg4.4.8，并准备ffmpeg-python和原评分器依赖。`+cpu`版本标签不代表在CPU推理；本入口的新协议尚未实际加载模型验证，不把同族环境复用当作新协议成功。不要覆盖已有模型服务环境；调用前由操作者取得空闲NPU窗口，不自动停止其他服务。
+
+视频环境不能复用只安装文本SDK的客户端。原`split_video`需要`ffmpeg-python`及能编码`libx264`和`aac`的FFmpeg命令行；本次使用独立前缀的FFmpeg4.4.8、发行方x264包、ffmpeg-python0.2.0／future1.0.0，原失败记录保留，没有覆盖系统或OVO原库。使用相应`PATH`、Python模块路径和动态库路径，保留本机CANN路径。加载大模型前应检查以下导入与编码器；检查不执行模型：
+
+```bash
+python -c "import ffmpeg, decord, torch, torch_npu; from transformers import Qwen2VLForConditionalGeneration, AutoProcessor; from qwen_vl_utils import process_vision_info; assert not torch.npu.is_initialized()"
+ffmpeg -hide_banner -encoders
+```
 
 ```bash
 python scripts/run_streamingbench_original_npu.py --author-root /srv/benchmarks/StreamingBench --data-root /srv/datasets/streamingbench --media-root /srv/datasets/streamingbench/videos --model-root /srv/models/Qwen2-VL-7B-Instruct --model-revision eed13092ef92e448dd6875b2a00151bd3f7db0ac --task real --device npu:0 --output /srv/results/streamingbench-real
@@ -1254,9 +1261,15 @@ python scripts/run_streamingbench_original_npu.py --author-root /srv/benchmarks/
 
 默认只校验作者／原问题身份、固定原前三个完整组及运行绑定，列出缺失媒体，不加载模型或创建结果目录。服务器对`real`固定3组／3问题／1个共享原视频，以及`--full`的2252组／2500问题／499视频均验证计划退出0，0模型调用。缺媒体或未核验权重不能计推理完成；先准备原媒体及固定权重，再添加`--execute`执行原循环和原评分器。`--task sqa/proactive`复用对应原循环，尚未实跑；omni／stream接口不支持，不能拿视频协议代替音频或实时流任务。
 
+固定real前三组的原时间窗为0至31／206／403秒。原作者切片函数及公开处理器已在CPU完整执行，输入为3060／18736／36536个token，采样和预算没有缩减。小规模NPU
+SDPA数值控制通过，但尚未证明原Qwen整模型或完整长上下文可运行。原生NPU推理与评分仍待完成，见[准备证据](../docs/workload-data/validation/streamingbench-prefix-preflight-20261101.json)。
+
+若已有**受信本机流程调用原`split_video`生成并审计的缓存**，可选传入`--prefix-cache /srv/cache/streamingbench/prefix-cache.json`，仅支持完整fixed3
+real选择。入口核验清单版本`streamingbench-original-prefix-cache/v1`、原题SHA、原切片函数SHA、原媒体SHA、0起点/原终点、三个文件的大小和SHA，并在评分后复核；按作者原有“文件存在则复用”的分支运行，仍执行全部原问题和评分，不读取已有答案。清单中的`directory`固定为`videos/tmp_60`，文件名和时间必须与原题一致；不能用不受信缓存生产者的自报摘要代替来源真实性。没有合格缓存就不传此项，按原流程生成切片，不能以缩小窗口、减帧或改题代替准备。
+
 已核实作者FPS解析局限：原代码对完整basename取数字，包含扩展名`.mp4`中的4；对三个合成的60／360／660秒文件名，原公式分别算出-56／-356／-656，均进入1fps分支。此控制不读取视频、不调用模型；当前入口保留原表达式，不静默修正，也不把声明的1／0.5／0.2fps分支列表当成实际生效的自适应采样。若后续修正，必须作为独立披露的协议变体，不混报原结果。
 
-默认固定选择要求媒体已注册原身份；`--full`不缩成三组，额外视频保存观察SHA快照而非冒称发布方逐文件SHA，用户仍须按官方原档准备完整媒体。原字幕／题目／参考字段不改，输出使用明确的`Qwen2-VL-NPU`结果键以避开作者发布结果缓存；临时原视频切片只写全新结果目录，不覆盖原文件。新入口自动调用原评分器；对其输出单独重评分时，结果键也应传`--model Qwen2-VL-NPU`。失败保留部分输出及错误，不换题、不自动重试或补答案。
+默认固定选择要求媒体已注册原身份；`--full`不缩成三组，额外视频保存观察SHA快照而非冒称发布方逐文件SHA，用户仍须按官方原档准备完整媒体。原字幕／题目／参考字段不改，输出使用明确的`Qwen2-VL-NPU`结果键以避开作者发布结果缓存；默认切片只写全新结果目录，不覆盖原文件，显式合格缓存只读复用。新入口自动调用原评分器；对其输出单独重评分时，结果键也应传`--model Qwen2-VL-NPU`。失败保留部分输出及错误，不换题、不自动重试或补答案。
 
 ## OVO-Bench 原生在线视频评测（固定抽样原生验证完成）
 

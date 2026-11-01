@@ -54,10 +54,12 @@ def media_names(rows):
     return sorted(names)
 
 
-def npu_program(raw, model_root, device):
+def npu_program(raw, model_root, device, attention_backend="sdpa"):
     """Bind only original checkpoint transport, device placement and attention."""
     if not re.fullmatch(r"npu:\d+", device):
         raise ValueError("explicit NPU device required")
+    if attention_backend not in {"sdpa", "eager"}:
+        raise ValueError("explicit supported NPU attention backend required")
     tree = ast.parse(raw)
     counts = {"checkpoint": 0, "device": 0, "attention": 0, "placement": 0}
     for node in ast.walk(tree):
@@ -79,7 +81,7 @@ def npu_program(raw, model_root, device):
                 if keyword.arg == "attn_implementation":
                     if ast.literal_eval(keyword.value) != "flash_attention_2":
                         raise ValueError("unexpected original attention binding")
-                    keyword.value = ast.Constant("eager")
+                    keyword.value = ast.Constant(attention_backend)
                     counts["attention"] += 1
                 if keyword.arg == "device_map":
                     if ast.literal_eval(keyword.value) != "auto":
@@ -104,6 +106,80 @@ def npu_program(raw, model_root, device):
     return compile(
         ast.fix_missing_locations(tree), "<pinned-streamingbench-qwen2vl-npu>", "exec"
     )
+
+
+def verify_prefix_cache(path, selected, question_sha, registered, author):
+    """Verify locally prepared clips for the author's existing-file fast path.
+
+    This is integrity/provenance checking, not authentication of an untrusted
+    cache producer. Use only a trusted cache made by the original split_video.
+    """
+    path = Path(path).resolve(strict=True)
+    saved = json.loads(path.read_text("utf-8"))
+    utility = author / "src/utils/video_execution.py"
+    if (
+        saved.get("schema") != "streamingbench-original-prefix-cache/v1"
+        or saved.get("source_id") != "STREAMINGBENCH"
+        or saved.get("task") != "real"
+        or saved.get("selection") != "first3_original_complete_outer_groups"
+        or saved.get("context_time") != -1
+        or saved.get("source_question_sha256") != question_sha
+        or saved.get("split_video_code_sha256")
+        != hashlib.sha256(utility.read_bytes()).hexdigest()
+        or saved.get("directory") != "videos/tmp_60"
+    ):
+        raise ValueError("original fixed3 prefix-cache protocol identity differs")
+    names = media_names(selected)
+    if saved.get("source_media_sha256") != {
+        name: registered[name]["sha256"] for name in names
+    }:
+        raise ValueError("prefix cache source video identity differs")
+    expected = []
+    for group in groups(selected):
+        stem = PurePosixPath(group["video_path"]).stem
+        for question in group["questions"]:
+            end = sum(
+                int(value) * 60**index
+                for index, value in enumerate(
+                    reversed(question["time_stamp"].split(":"))
+                )
+            )
+            expected.append((f"{stem}_0_{end}.mp4", end))
+    clips = saved.get("clips")
+    if (
+        not isinstance(clips, list)
+        or len(clips) != len(expected)
+        or any(not isinstance(clip, dict) for clip in clips)
+    ):
+        raise ValueError("complete fixed-selection prefix cache required")
+    directory = path.parent / "videos/tmp_60"
+    if (
+        directory.is_symlink()
+        or not directory.is_dir()
+        or not directory.resolve().is_relative_to(path.parent)
+    ):
+        raise ValueError("owned regular prefix directory required")
+    for clip, (name, end) in zip(clips, expected, strict=True):
+        if (
+            clip.get("path") != name
+            or clip.get("start_seconds") != 0
+            or clip.get("end_seconds") != end
+            or type(clip.get("bytes")) is not int
+            or clip["bytes"] <= 0
+        ):
+            raise ValueError("original prefix name/time selection differs")
+        target = directory / name
+        if (
+            target.is_symlink()
+            or not target.is_file()
+            or target.stat().st_size != clip.get("bytes")
+        ):
+            raise ValueError("original prepared prefix size/type differs")
+        with target.open("rb") as stream:
+            digest = hashlib.file_digest(stream, "sha256").hexdigest()
+        if digest != clip.get("sha256"):
+            raise ValueError("original prepared prefix digest differs")
+    return directory, len(clips)
 
 
 def run(args):
@@ -153,7 +229,18 @@ def run(args):
                     }
                 )
     raw = (author / "src/model/Qwen2VL.py").read_bytes()
-    program = npu_program(raw, args.model_root, args.device)
+    attention = getattr(args, "attention_backend", "sdpa")
+    program = npu_program(raw, args.model_root, args.device, attention)
+    cache_path = getattr(args, "prefix_cache", None)
+    prefix_directory, prefix_count = None, 0
+    if cache_path is not None:
+        if args.task != "real" or args.full:
+            raise ValueError(
+                "prefix reuse currently requires complete fixed3 real mode"
+            )
+        prefix_directory, prefix_count = verify_prefix_cache(
+            cache_path, selected, item["sha256"], registered, author
+        )
     pins = json.loads(MODEL_PINS.read_text("utf-8"))
     if args.model_revision != pins["revision"]:
         raise ValueError("fixed original Qwen2-VL model revision required")
@@ -180,7 +267,9 @@ def run(args):
         "unregistered_media": unregistered,
         "media_snapshot": snapshots,
         "device": args.device,
-        "attention_binding": "eager replaces CUDA FlashAttention2",
+        "attention_binding": attention + " replaces CUDA FlashAttention2",
+        "verified_original_cached_prefixes": prefix_count,
+        "author_existing_prefix_branch_reused": prefix_directory is not None,
         "explicit_published_qwen_class_not_author_cli_fallback": True,
         "model_result_key": RESULT_KEY,
         "native_model_calls": 0,
@@ -214,6 +303,11 @@ def run(args):
             raise ValueError(
                 "fresh external output separate from sources/media/model required"
             )
+    if prefix_directory is not None and (
+        output.is_relative_to(prefix_directory.parent.parent)
+        or prefix_directory.parent.parent.is_relative_to(output)
+    ):
+        raise ValueError("fresh native output must be separate from prefix cache")
     output.mkdir(mode=0o700, parents=True, exist_ok=False)
     subset = output / "original-subset.private.json"
     subset.write_text(json.dumps(selected), "utf-8")
@@ -222,6 +316,8 @@ def run(args):
     videos.mkdir()
     for name in names:
         (videos / name).symlink_to(asset_path(args.media_root, name))
+    if prefix_directory is not None:
+        (videos / "tmp_60").symlink_to(prefix_directory, target_is_directory=True)
     previous_cwd, previous_path = Path.cwd(), list(sys.path)
     try:
         import torch
@@ -268,6 +364,10 @@ def run(args):
             task=args.task,
             output=output / "original-score",
         )
+        if prefix_directory is not None:
+            verify_prefix_cache(
+                cache_path, selected, item["sha256"], registered, author
+            )
         receipt.update(
             status="ORIGINAL_VIDEO_PROTOCOL_EXECUTED_AND_SCORED",
             native_execution_complete=True,
@@ -296,6 +396,14 @@ if __name__ == "__main__":
     parser.add_argument("--model-revision", required=True)
     parser.add_argument("--task", choices=CLASSES, default="real")
     parser.add_argument("--device", default="npu:0")
+    parser.add_argument(
+        "--attention-backend", choices=["sdpa", "eager"], default="sdpa"
+    )
+    parser.add_argument(
+        "--prefix-cache",
+        type=Path,
+        help="Trusted local original split_video cache manifest; fixed3 real mode only",
+    )
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--full", action="store_true")
     parser.add_argument("--execute", action="store_true")

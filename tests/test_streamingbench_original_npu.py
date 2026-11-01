@@ -1,6 +1,7 @@
 """Software-only original binding fixtures, no actual model/video validation."""
 
 import importlib.util
+import hashlib
 import json
 from pathlib import Path
 import sys
@@ -25,7 +26,8 @@ answer = model.generate(max_new_tokens=128)
 """
 
 
-def test_only_checkpoint_device_and_attention_are_rebound():
+@pytest.mark.parametrize("attention", ["sdpa", "eager"])
+def test_only_checkpoint_device_and_attention_are_rebound(attention):
     loads = []
 
     class Box:
@@ -35,14 +37,14 @@ def test_only_checkpoint_device_and_attention_are_rebound():
             return SimpleNamespace(generate=lambda **options: options)
 
     namespace = {"Box": Box, "inputs": SimpleNamespace(to=lambda device: device)}
-    exec(runner.npu_program(RAW, Path("/owned/model"), "npu:2"), namespace)
+    exec(runner.npu_program(RAW, Path("/owned/model"), "npu:2", attention), namespace)
     assert len(loads) == 2
     assert all(
         path == str(Path("/owned/model").resolve()) and args["local_files_only"]
         for path, args in loads
     )
     assert "device_map" not in loads[0][1]
-    assert loads[0][1]["attn_implementation"] == "eager"
+    assert loads[0][1]["attn_implementation"] == attention
     assert loads[0][1]["torch_dtype"] == "auto"
     assert namespace["inputs"] == "npu:2"
     assert namespace["answer"] == {"max_new_tokens": 128}
@@ -111,6 +113,7 @@ def test_missing_media_plan_keeps_three_groups_sharing_one_video(tmp_path, monke
     assert report["original_question_occurrences"] == 3
     assert report["missing_original_media"] == ["shared.mp4"]
     assert report["native_model_calls"] == 0 and not report["model_artifacts_verified"]
+    assert report["attention_binding"] == "sdpa replaces CUDA FlashAttention2"
     assert not args.output.exists()
 
 
@@ -132,3 +135,90 @@ def test_complete_nested_groups_and_source_paths():
                 }
             ]
         )
+
+
+def prefix_fixture(tmp_path):
+    author = tmp_path / "author"
+    (author / "src/utils").mkdir(parents=True)
+    utility = author / "src/utils/video_execution.py"
+    utility.write_bytes(b"original utility fixture, not executable author code")
+    workspace = tmp_path / "prepared"
+    directory = workspace / "videos/tmp_60"
+    directory.mkdir(parents=True)
+    rows, clips = [], []
+    for timestamp in [31, 206, 403]:
+        name = f"sample_348_real_0_{timestamp}.mp4"
+        raw = f"encoded-video fixture {timestamp}".encode()
+        (directory / name).write_bytes(raw)
+        clips.append(
+            {
+                "path": name,
+                "bytes": len(raw),
+                "sha256": hashlib.sha256(raw).hexdigest(),
+                "start_seconds": 0,
+                "end_seconds": timestamp,
+            }
+        )
+        rows.append(
+            {
+                "video_path": "./videos/sample_348_real.mp4",
+                "questions": [
+                    {"time_stamp": f"00:{timestamp // 60:02d}:{timestamp % 60:02d}"}
+                ],
+            }
+        )
+    registered = {"sample_348_real.mp4": {"sha256": "0" * 64}}
+    saved = {
+        "schema": "streamingbench-original-prefix-cache/v1",
+        "source_id": "STREAMINGBENCH",
+        "task": "real",
+        "selection": "first3_original_complete_outer_groups",
+        "context_time": -1,
+        "source_question_sha256": "question-fixture",
+        "split_video_code_sha256": hashlib.sha256(utility.read_bytes()).hexdigest(),
+        "source_media_sha256": {"sample_348_real.mp4": "0" * 64},
+        "directory": "videos/tmp_60",
+        "clips": clips,
+    }
+    path = workspace / "prefix-cache.json"
+    path.write_text(json.dumps(saved))
+    return author, directory, rows, registered, saved, path
+
+
+def test_original_prepared_prefix_integrity_and_time_selection(tmp_path):
+    author, directory, rows, registered, saved, path = prefix_fixture(tmp_path)
+    assert runner.verify_prefix_cache(
+        path, rows, "question-fixture", registered, author
+    ) == (directory, 3)
+    (directory / saved["clips"][1]["path"]).write_bytes(b"different")
+    with pytest.raises(ValueError, match="size/type differs"):
+        runner.verify_prefix_cache(path, rows, "question-fixture", registered, author)
+
+
+@pytest.mark.parametrize(
+    "field,value",
+    [
+        ("context_time", 30),
+        ("source_question_sha256", "changed"),
+        ("directory", "../elsewhere"),
+    ],
+)
+def test_changed_prefix_protocol_is_rejected(tmp_path, field, value):
+    author, _, rows, registered, saved, path = prefix_fixture(tmp_path)
+    saved[field] = value
+    path.write_text(json.dumps(saved))
+    with pytest.raises(ValueError, match="protocol identity differs"):
+        runner.verify_prefix_cache(path, rows, "question-fixture", registered, author)
+
+
+def test_prefix_clip_cannot_escape_original_filename_or_time(tmp_path):
+    author, _, rows, registered, saved, path = prefix_fixture(tmp_path)
+    saved["clips"][0]["path"] = "../outside.mp4"
+    path.write_text(json.dumps(saved))
+    with pytest.raises(ValueError, match="name/time selection differs"):
+        runner.verify_prefix_cache(path, rows, "question-fixture", registered, author)
+
+
+def test_unsupported_attention_is_not_automatically_substituted():
+    with pytest.raises(ValueError, match="supported NPU attention"):
+        runner.npu_program(RAW, Path("/owned/model"), "npu:0", "automatic")
