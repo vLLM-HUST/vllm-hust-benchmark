@@ -1839,6 +1839,12 @@ for record in records:
 
 ### MLAgentBench：原任务环境准备
 
+- [x] 完整原五轮CIFAR10科学训练基线与原任务评分器在专用断网隔离容器中完成，退出0；10000行／10列预测逐行核验，概率有限且归一化，三个原脚本字节未改。原评分为0.5152。[基线实测回执](validation/mlagentbench-cifar-original-baseline-20261101.json)。这是科学任务环境核验，不是ResearchAgent执行或来源完成，预测和原数据均留在服务器。
+
+- [x] `scripts/mlagentbench_local_chat.py`补充本地推理传输，使用原支持的OpenAI-chat协议：原prompt完整置于一条user消息，默认500输出token、temperature0.2、停止词`Observation:`，编辑4000和fast0.01覆盖参数不变；明确传实际服务模型名，不伪装GPT/Claude，不发送外部付费API，不自动重试或伪造费用。8项请求级夹具测试通过，尚未真实NPU调用，也未接入完整ResearchAgent。
+
+- [ ] 保持原ResearchAgent提示、工具、50步／5小时限制，完成隔离Agent与NPU推理连接、原任务评分、公共provider和研究侧接通。原默认Claude分支与本地OpenAI-chat适配不是同一模型配置，结果必须区分。
+
 - [x] 原始完整CIFAR10归档170498071字节已取得，通过官方MD5及完整长度核验。公共工作目录入口`scripts/prepare_mlagentbench_cifar_workspace.py`在CPU实际`plan/prepare/verify`均退出0，保留原作者5份任务文件，未在宿主机解包或加载pickle；随后在断网、只读根、降权的专用容器内执行未修改的原`scripts/prepare.py`，完整50000训练图／10000测试图加载成功。[原任务准备回执](validation/mlagentbench-cifar-original-preparation-20261101.json)。这不代表ResearchAgent流程或来源交付完成。
 
 ```bash

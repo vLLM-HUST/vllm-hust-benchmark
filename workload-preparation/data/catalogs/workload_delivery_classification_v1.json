@@ -34,6 +34,7 @@
       {"role": "original_profile", "path": "configs/workload-native/dailytalk-npu-py312-observed.txt", "scope": "Observed qualified ARM64 runtime constraints, not an author lock or platform installer; synthesis uses the separate plotting overlay"}
     ],
     "MLAGENTBENCH": [
+      {"role": "generation", "path": "scripts/mlagentbench_local_chat.py", "scope": "Fixture-tested local transport for original OpenAI-chat single-user prompt,500-token/0.2 defaults, Observation stop and explicit fast/edit overrides; not default Claude, real NPU qualification or an Agent runner"},
       {"role": "prepare_assets", "path": "scripts/prepare_mlagentbench_cifar_workspace.py", "scope": "Verify all pinned author source and original complete CIFAR archive, copy unchanged task files to fresh external workspace; no host extraction, unpickling, training or Agent execution"},
       {"role": "prepare_assets", "path": "scripts/prepare_mlagentbench_cifar_cpu.py", "scope": "Fresh verified offline ARM64 CPU task-image context; public pinned wheel only, no build, Agent or training execution"},
       {"role": "original_profile", "path": "configs/workload-native/mlagentbench-cifar10-cpu.Dockerfile", "scope": "Explicit qualified CPU base extension with hash-pinned offline TorchVision; original scientific task environment, not the author's CUDA image or a completed native task"},
