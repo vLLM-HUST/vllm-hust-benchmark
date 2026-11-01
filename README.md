@@ -29,6 +29,9 @@ export and website publication flows in one place.
 
 ## Current Delivery Contract
 
+[B0 实测基线与相对性能公式](docs/B0_BASELINE_METRICS.md)：`η_B0 = 100 × Q_B1 / Q_B0`，B0 = 100%。
+包含倍率、提升率、耗时、时延、成本及已有配对的可复算示例；独立标定效率 `η_ref` 单列。
+
 Historical Frontier raw measurements and offline recomputation:
 [56-run raw archive](reports/frontier-raw-recovery-20261020/README.md) (BetterScale/Native and six
 additional MOD series; includes complete concurrency curves and SHA-256).
