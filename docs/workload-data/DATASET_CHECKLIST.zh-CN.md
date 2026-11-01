@@ -1281,7 +1281,7 @@ TB；服务器/data约1.42TB可用，未缩小语料。ChartQA当前两卡主机
 | LABBENCH                   | [x] 已完成                                     | 31原子集各首3条共93题原生NPU运行、原评分及保存复核通过；87 stop/6 length保留，45题被原解析器解析、14题正确。1967条索引/原图像、CI46载荷和124研究回读已核复用；不是全量推理或作者模型质量复现。                                                                                                                                                                                                                                                                                           |
 | PAPERBENCH                 | [ ] 待开展                                     | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 | SPOKENWOZ                  | [x] 原文本DST协议已交付，音频未完成            | 固定3+3完整对话，共128次NPU原生DST请求，官方/独立评分4/68、6/60，低分保留。全1000对话入口及范围选择可用；实际CI组件与研究原输入接通。音频/其他响应协议未完成，不据此计语音覆盖。[协议交付证据](validation/spokenwoz-text-dst-native-delivery-20261031.json)。                                                                                                                                                                                                                            |
-| DAILYTALK                  | [ ] 进行中                                     | 原23676行已全读/索引；固定29条原NPU合成及公共保存结果核验通过，候选源码研究回读29条相等；原协议已固定，待实际CI工件消费收口。                                                                                                                                                                                                                                                                                                                                                            |
+| DAILYTALK                  | [ ] 进行中                                     | 原23676行已全读/索引；固定29条原NPU合成及公共保存结果核验通过，候选源码研究回读29条相等；原协议已固定，CI工件消费已核，待新增完整对话准备入口CI闭环。                                                                                                                                                                                                                                                                                                                                    |
 | LONGWRITER                 | [x] 原语料生成交付                             | 6000条原字段/索引审计，复用前三条、新范围入口实跑末三条均完成响应完整性复核；研究侧双路径三条接通。无语义或长度达标结论，不是LongBench-Write。[交付回执](validation/longwriter-native-delivery-20261024.json)                                                                                                                                                                                                                                                                            |
 | LONGALPACA                 | [x] 原始指令语料使用已交付                     | 原12000条全部字段/索引和12处固定工件公共/研究回查，补回3231条file来源标识于非输入侧；固定原0..2与7324..7326共6题NPU执行并核验，6 stop，含2条原非空input。[证据](validation/longalpaca-native-delivery-20261026.json)。构造训练语料而非独立质量benchmark，不称全量生成、训练复现或每条均为文档分析。                                                                                                                                                                                      |
 | TOOLACE                    | [x] 有界原始历史续写可用                       | 全11300条原system/对话字段及索引、首尾6条固定工件公共/研究回查；原三会话全部15处NPU续写正常stop。[证据](validation/toolace-original-continuation-20261026.json)；原历史tool返回保留、不造工具/ID；无在线Agent/BFCL/ToolACE-8B复现或全量模型推理承诺。                                                                                                                                                                                                                                    |
@@ -1720,7 +1720,7 @@ smoke、tests和lint全部通过。[交付回执](validation/ruler-native-delive
 - [x] 独立绘图overlay固定Matplotlib3.9.4原wheel并校验SHA256，原绘图函数按原调用者前置条件验证通过；原环境不变。[绘图回执](validation/dailytalk-plotting-overlay-20261101.json)。
 - [x] 原29条完整合成及独立保存结果审计通过：声学/vocoder各4批，29个WAV全部完整PCM解码、均有非零采样，29份PNG签名及尺寸核验；重核2份原模型、52份既有兼容源码和29份原Guo特征，新增模型调用0。[合成审计](validation/dailytalk-original-fixed29-synthesis-audit-20261101.json)。原失败保留，无主观音质或引擎性能结论。
 - [x] 公开工作区准备和完整合成执行入口代码已补齐；服务器实测准备/复核及已有29条结果复用，未为包装重复生成。公共`execute`包装未重新实跑，与既有原流程NPU证据分开记录。
-- [ ] 原协议评价边界已固定，最终CI工件研究消费仍待完成，来源总勾为空。
+- [ ] 原协议评价边界已固定，CI工件研究消费已通过，其他原完整对话的自动准备已补，待新增代码CI闭环，来源总勾为空。
 
 #### DailyTalk 公共 Guo 文本嵌入入口
 
@@ -1743,7 +1743,7 @@ python scripts/run_dailytalk_guo_encoder_npu.py --action verify --prepared <上�
 FP32，禁止覆盖已有嵌入。`verify`仅按原文件身份及结果哈希核验，不调用模型。
 
 入口不硬编码29条：按原输入逐句使用 `encode([原文])[0]`，校验完整对话历史、512维及原128-token
-encoder策略。`--source-file`和`--split train/val`可绑定其他原行集合；原行字节、原顺序及整对话关系必须匹配固定元数据，不能提交重写的prompt。其他原集合仍需先按原协议准备；现有自动音频/对话准备配置只验证了登记的三段，不能把本入口参数化等同全量准备已通过。声学/vocoder公开入口已补，实际CI工件研究消费仍按下方未完成项推进。
+encoder策略。`--source-file`和`--split train/val`可绑定其他原行集合；原行字节、原顺序及整对话关系必须匹配固定元数据，不能提交重写的prompt。其他原集合仍需先按原协议准备；现有自动音频/对话准备配置只验证了登记的三段，不能把本入口参数化等同全量准备已通过。声学/vocoder公开入口已补，实际CI工件研究消费已通过，其他完整对话的自动准备仍按下方未完成项推进。
 
 #### DailyTalk 公共保存结果核验
 
@@ -1775,20 +1775,42 @@ python scripts/run_dailytalk_synthesis_npu.py "${common[@]}" --action verify --r
 
 - [x] 服务器公共准备入口`plan/prepare/verify`均退出0，52文件及42份Python语法检查通过，原作者文件未改，原vocoder符号链接核验通过。
 - [x] 公共合成入口`plan/verify`均退出0，完整PCM核验原29条已保存WAV，无Torch导入、无新增模型调用。[实际入口回执](validation/dailytalk-public-workspace-entry-20261101.json)。
-- [ ] 公共`execute`包装未为整理代码重新运行；既有原流程NPU合成成功回执单列，不把此入口的读取/核验称作第二次真实生成。原协议评价边界已固定，最终CI工件研究消费仍需收口，来源不打总勾。
+- [ ] 公共`execute`包装未为整理代码重新运行；既有原流程NPU合成成功回执单列，不把此入口的读取/核验称作第二次真实生成。原协议评价边界已固定，CI工件研究消费已通过，其他原完整对话的自动准备已补，待新增代码CI闭环，来源不打总勾。
+
+#### DailyTalk 实际CI安装包与剩余使用链路
+
+- [x] 提交`70335959`的全量CI `41309439575`和CPU smoke
+  `41309442204`均成功；实际安装CPU工件`13084712746`后，79份提供者文件逐份匹配。复用既有23676条索引，两个原split全部原行字节还原通过，固定29条公共/未修改研究消费者回读相等，原生输入行哈希及参考媒体对应一致；无Torch导入、无新增模型调用。[实际工件回执](validation/dailytalk-actual-ci-research-handoff-20261101.json)。
+- [ ] 默认原音频/Guo输入准备保留前三段，新入口已支持其他原完整对话和全split，条件和实际验证范围见下节。新增代码CI闭环和总交付审计尚未完成，不打来源总勾。
+
+#### DailyTalk 任意原完整对话准备
+
+`prepare_dailytalk_original_guo_inputs.py`保留原固定前三段默认行为，新增`--dialogue-ids`选择任意原完整对话，或`--all-dialogues`选择指定原split的全部对话。`--split train/val`绑定对应原元数据，未知/重复ID、缺失历史、缺失或多余音频turn均报错，不重构缺失请求、音频或目录。原行、原顺序、原10轮历史和原映射文件不变。
+
+```bash
+# 已有发布方固定哈希覆盖的原对话23，不需要重新下载或调用模型。
+python scripts/prepare_dailytalk_original_guo_inputs.py --action prepare --metadata-root <原元数据根目录> --audio-root <包含dailytalk目录的原音频根目录> --output <外部新准备目录> --split val --dialogue-ids 23
+# 其他原完整对话：先从原作者入口取得原ZIP，在服务器外部数据目录原样解压并保留ZIP。
+python scripts/prepare_dailytalk_original_guo_inputs.py --action prepare --metadata-root <原元数据根目录> --audio-root <原解压根目录> --output <外部新准备目录> --split val --all-dialogues --original-audio-archive <原作者ZIP路径>
+```
+
+非固定选择输出`<split>_phone.selected.private.txt`；后续编码器、工作区准备和合成入口应同时传入对应`--split`与`--source-file <上述文件>`。原音频根目录是ZIP解压后`dailytalk/`的父目录，不能指向合成结果目录。其他对话的原WAV会与给定ZIP的同名原成员逐字节比对，并检查CRC/EOF、目录turn集合及原归档大小；未得到发布方完整ZIP摘要，不把大小/成员校验称为完整归档官方SHA认证。此准备入口不下载全量归档，也不创建原WAV占位文件。
+
+- [x] 服务器实测显式选择原对话23的`plan/prepare/verify`，全部12个原turn、真实音频SHA/CRC和原历史与既有原生验证集合的对应子集一致，无Torch/模型调用；完整train22479行与val1197行的原行还原及历史构造通过。[实际准备回执](validation/dailytalk-general-cohort-preparation-20261101.json)。首次把数据输出放入软件目录被安全检查拒绝，已改用独立外部数据目录，未放宽检查。
+- [ ] 非固定原音频的完整ZIP比对分支当前只有明确标注的夹具测试，未取得和验证全量原ZIP；不称全量音频已取得、全split推理已跑完。新增入口的CI闭环及总交付审计仍待完成，来源总勾不变。
 
 #### DailyTalk 原协议及结果含义
 
 本来源采用原作者README的`history_guo`完整对话`batch`语音合成协议，定义见[固定协议](../../configs/workload-native/dailytalk-guo-batch-protocol.json)，不是新增一个自动音质评分benchmark。原作者说明生成某一turn可能依赖对话历史，因此固定抽样按前三段完整对话取29条，保留原音素、原顺序和10轮历史，不按单句拆题。原`evaluate.py`是训练/验证损失循环，与README的合成命令分别登记，不用格式或非零采样冒充MOS、论文评价指标或质量分数。
 
 - [x] 原协议、原模型绑定、完整对话抽样、实际输出核验及兼容变更已明确，原合成NPU证据与公开入口源码/保存结果核验分别保留。
-- [ ] 当前候选适配的实际CI安装包研究消费尚未完成；全量音频/合成、论文音质评价和流式时间关系未验证，不计为本次已取得能力。
+- [x] 实际CI安装包研究消费已完成，见上方工件回执；全量音频/合成、论文音质评价和流式时间关系未验证，不计为本次已取得能力。
 
 #### DailyTalk 原数据公共适配与研究读取
 
 - [x] 固定原`train_phone.txt`的22479条和`val_phone.txt`的1197条，共23676条；公共适配器逐行保留原5列及原行字节，完整重建两个原文件，SQLite索引全量建立。文本、音素、说话人和情绪作为原TTS输入；对话/turn和相邻原turn关系单列，原音频只作为参考侧定位符，不包装成聊天请求。
 - [x] 固定原生验证的29条经公共`resolve_input`及未修改的研究`resolve_input`回读，完整记录相等；与既有原生输入的行哈希全部匹配，29份原参考音频存在。未启动观测/分析，索引不变，未导入Torch，新增模型调用0。[候选源码联调回执](validation/dailytalk-original-provider-research-20261101.json)。
-- [ ] 以上是当前候选源码联调，实际CI安装包的同等核验仍待完成；不据此打来源交付总勾。全量参考音频未取得，只有固定三段29份音频实证；其他定位符不表示本地已有文件。原录音和turn顺序也不表示具有流式到达、重叠或打断时间戳。
+- [x] 上述候选源码联调后，实际CI安装包的同等核验也已通过；来源总勾仍需完整准备链路收口。全量参考音频未取得，只有固定三段29份音频实证；其他定位符不表示本地已有文件。原录音和turn顺序也不表示具有流式到达、重叠或打断时间戳。
 
 ```python
 from pathlib import Path
@@ -1866,7 +1888,7 @@ ID、数据版本、模型、执行器、评分器、终态、失败原因和脱
 | [ ]  | BURSTGPT             | 到达/尺寸等跨任务运行维度                                                                                                                            | 官方首文件已取得并传服务器                       | 当前安装前三条prepare/resolve通过          | 不适用：无原prompt                                            | 不适用：非任务评分                                            | 仅首文件抽样；其他文件/最终工件/消费端待核；不是对话原文                                                                                                                                                                                                                            |
 | [ ]  | CHARTQA              | visual-document-chart                                                                                                                                | 服务器已核验选定原文件                           | 原0/1/2三条输入/参考往返                   | 阻塞：无Qwen3-VL权重，且SSH拒绝重连                           | 未评分                                                        | [服务器读取记录](PUBLIC_ASSET_SERVER_READINESS.zh-CN.md)，仅读回执；未发视觉模型请求，等待可用视觉模型与服务器连接                                                                                                                                                                  |
 | [ ]  | CROSSCODEEVAL        | repository-completion                                                                                                                                | 待复核                                           | 待复核                                     | 未跑                                                          | 未跑                                                          | 待重新核验                                                                                                                                                                                                                                                                          |
-| [ ]  | DAILYTALK            | conversation-continuation<br>audio-streaming-interaction                                                                                             | 原23676行全读/索引通过                           | 公共原生入口已补齐                         | 固定原29条NPU合成通过                                         | 候选源码29条研究回读相等                                      | 原协议已固定，待实际CI工件消费；未声称全量媒体/流式时序                                                                                                                                                                                                                             |
+| [ ]  | DAILYTALK            | conversation-continuation<br>audio-streaming-interaction                                                                                             | 原23676行全读/索引通过                           | 公共原生入口已补齐                         | 固定原29条NPU合成通过                                         | 候选源码29条研究回读相等                                      | 原协议已固定，CI工件消费已核，待新增完整对话准备入口CI闭环；未声称全量媒体/流式时序                                                                                                                                                                                                 |
 | [ ]  | DISCOVERYBENCH       | scientific-experiment-planning<br>simulation-analysis-verification                                                                                   | 待复核                                           | 待复核                                     | 未跑                                                          | 未跑                                                          | 待重新核验                                                                                                                                                                                                                                                                          |
 | [x]  | DOLLY                | general-single-turn-assistant<br>document-grounded-analysis<br>text-summarization<br>text-extraction-classification<br>text-rewriting                | 完整文件SHA已核验                                | 原前三条字段回查                           | NPU生成3条stop                                                | 响应完整性，未评语义正确性                                    | [来源与接入边界](DOLLY_ORIGINAL_INSTRUCTIONS.zh-CN.md)，3/15011；未覆盖其他类别与全量                                                                                                                                                                                               |
 | [ ]  | DS1000               | code-generation-with-tests<br>scientific-coding-workflow                                                                                             | 服务器已核验选定原文件                           | 原0/1/2三条输入/参考往返                   | 原补全3题，1条原预算length                                    | 未功能评分：隔离/依赖待核                                     | [原始生成记录](DS1000_ORIGINAL_GENERATION.zh-CN.md)，原预算1024与后处理顺序不变；非完整任务/全量                                                                                                                                                                                    |

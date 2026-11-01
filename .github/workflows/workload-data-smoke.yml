@@ -524,7 +524,7 @@ jobs:
       - name: MARBLE auxiliary-client plan and version contracts, no model or device imports
         run: python -m pytest -q tests/test_marble_auxiliary_client.py tests/test_marble_keybert_npu.py tests/test_marble_keybert_transport.py tests/test_marble_research_local_binding.py tests/test_marble_original_research_runner.py
       - name: DailyTalk preparation and saved output CPU fixtures, no models or synthesis
-        run: python -m pytest -q tests/test_dailytalk_original_preparation.py tests/test_dailytalk_original_audio.py tests/test_dailytalk_original_models.py tests/test_dailytalk_original_guo_inputs.py tests/test_dailytalk_public_encoder.py tests/test_dailytalk_synthesis_outputs.py tests/test_dailytalk_synthesis_workspace.py tests/test_dailytalk_synthesis_entry.py tests/test_dailytalk_original_provider.py
+        run: python -m pytest -q tests/test_dailytalk_original_preparation.py tests/test_dailytalk_original_audio.py tests/test_dailytalk_original_models.py tests/test_dailytalk_original_guo_inputs.py tests/test_dailytalk_public_encoder.py tests/test_dailytalk_synthesis_outputs.py tests/test_dailytalk_synthesis_workspace.py tests/test_dailytalk_synthesis_entry.py tests/test_dailytalk_original_provider.py tests/test_dailytalk_native_evidence.py tests/test_dailytalk_cohort_preparation.py
       - name: ScienceAgentBench original asset identity fixtures, no datasets or programs
         run: python -m pytest -q tests/test_scienceagentbench_original_assets.py tests/test_scienceagentbench_local_engine.py
       - name: WavCaps original media binding fixtures, no audio download or decoder execution
