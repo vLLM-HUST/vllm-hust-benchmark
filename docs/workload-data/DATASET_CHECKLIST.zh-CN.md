@@ -1839,6 +1839,17 @@ for record in records:
 
 ### MLAgentBench：原任务环境准备
 
+- [x] 隔离任务环境补齐TorchVision0.18.0：公共入口`scripts/prepare_mlagentbench_cifar_cpu.py`准备固定哈希的离线构建上下文，Dockerfile要求显式指定已核验的CPU基础镜像。专用CPU实际离线构建成功；另起断网、只读、移除全部capability的容器，核验原CIFAR加载器和依赖导入通过，基础镜像未修改。[环境构建回执](validation/mlagentbench-cifar-cpu-image-20261101.json)。这只证明任务环境可用，未打开数据、未训练、未运行Agent，不计来源完成。
+
+```bash
+python scripts/prepare_mlagentbench_cifar_cpu.py --action plan --software-root <软件目录> --output <外部构建上下文>
+python scripts/prepare_mlagentbench_cifar_cpu.py --action prepare --software-root <已验证软件目录> --output <新的外部构建上下文>
+python scripts/prepare_mlagentbench_cifar_cpu.py --action verify --software-root <已验证软件目录> --output <已有外部构建上下文>
+docker build --pull=false --network none --build-arg BASE_IMAGE=<已核验基础镜像> -t <任务镜像> <外部构建上下文>
+```
+
+基础镜像须满足原资产配置中已验证的Python3.10.22/aarch64及Torch2.3.0等版本。本入口不创建或修改Docker服务，不自动选择其他人的镜像；构建不会获取数据或启动科学训练。科学训练和Agent完整流程仍须在专用隔离执行环境继续验证。
+
 - [x] 默认原CIFAR10任务资产入口`scripts/prepare_mlagentbench_cifar_assets.py`已加入分类索引；配置固定原作者源码谱系、官方PyPI
   ARM64/Python3.10
   TorchVision0.18.0轮子及原CIFAR10归档。原数据MD5取自该精确官方轮子的原loader，而不是自定样本或替代数据；完整数据仍是50000训练图像和10000测试图像。
