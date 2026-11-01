@@ -1876,6 +1876,10 @@ for record in records:
 
 - [x] `ogbn-arxiv`完整原始归档83058288字节已在服务器取得，19个原ZIP成员CRC全部通过，未抽子图。公开入口`prepare_mlagentbench_arxiv_assets.py`的verify及已有缓存acquire均通过；摘要为本次官方源下载实测固定值，不冒称发布方提供的校验和。[准备回执](validation/mlagentbench-ogbn-arxiv-preparation-20261102.json)。图算子构建、原任务准备、Agent及评分另行核验，尚不代表原生完成。
 
+- [x] 图采样算子官方源码编译及隔离采样检查通过，公开`prepare_mlagentbench_arxiv_offline.py`执行原`scripts/prepare.py`通过：169343节点、1166243边、40类，train/valid/test分别90941/29799/48603，原划分不变。仅把官方URL下载接到已验证离线原归档；原解包、图处理及任务软件不改。两次准备失败已记录并修复，没有模型调用。
+
+- [ ] `ogbn-arxiv`原生ResearchAgent已启动，预算保持原50步／5小时；启动前实查工作区剩余40953秒，高于所需18600秒。原评分、最终工件及公开图环境构建配方仍待收口，不能只凭准备成功算原生完成。
+
 准备入口：
 
 ```bash
@@ -1885,6 +1889,9 @@ python scripts/prepare_mlagentbench_cifar_assets.py --action prepare --parts dat
 python scripts/prepare_mlagentbench_cifar_cpu.py --action prepare --software-root <已验证软件目录> --output <新的外部构建上下文>
 python scripts/prepare_mlagentbench_cifar_workspace.py --action prepare --author-root <完整原源码目录> --data-root <完整原归档目录> --output <新的外部任务目录>
 python scripts/prepare_mlagentbench_local_agent.py --action prepare --author-root <完整原源码目录> --output <新的外部适配目录>
+python scripts/prepare_mlagentbench_arxiv_assets.py --action acquire --data-root <外部原图归档目录> --max-bytes 134217728
+# 仅在具备上述已验证图依赖的专用隔离CPU容器内，使用原任务的全新副本：
+python scripts/prepare_mlagentbench_arxiv_offline.py --task-root <原始ogbn-arxiv任务目录副本> --archive <已验证arxiv.zip> --execute
 ```
 
 各准备入口支持显式verify；已有完整资产直接校验复用，不重复下载。下载resume只接受同一公开入口建立的归属记录及原HTTP字节范围；原数据不在宿主机解包／加载pickle。纯准备目录执行原脚本后产生的额外文件不再当作未运行准备目录校验。
