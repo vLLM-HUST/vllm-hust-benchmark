@@ -84,6 +84,75 @@ def test_zero_capability_no_new_privilege_control():
     MODULE.check_isolation("CapEff:\t0000000000000000\nNoNewPrivs:\t1")
 
 
+def resume_fixture(tmp_path):
+    root = tmp_path / "retained"
+    (root / "env_log/traces/step_3_files").mkdir(parents=True)
+    (root / "agent_log").mkdir()
+    (root / "env_log/trace.json").write_text(json.dumps({"steps": [{}] * 4}))
+    state = {
+        "args": {
+            "task": "cifar10",
+            "max_steps": 50,
+            "agent_max_steps": 50,
+            "max_time": 18000,
+            "max_retries": 5,
+            "edit_script_llm_max_tokens": 4000,
+            "max_steps_in_context": 3,
+            "max_observation_steps_in_context": 3,
+            **dict.fromkeys(
+                ["llm_name", "fast_llm_name", "edit_script_llm_name"], "Qwen/Qwen3-14B"
+            ),
+        }
+    }
+    (root / "agent_log/agent_3_3.json").write_text(json.dumps(state))
+    return SimpleNamespace(
+        resume=root,
+        resume_step=3,
+        task="cifar10",
+        model="Qwen/Qwen3-14B",
+        work_root=tmp_path / "fresh-work",
+        log_root=tmp_path / "fresh-log",
+    )
+
+
+def test_explicit_native_resume_preserves_checkpoint_and_original_budgets(tmp_path):
+    args = resume_fixture(tmp_path)
+    before = {p: p.read_bytes() for p in args.resume.rglob("*") if p.is_file()}
+    argv = MODULE.original_arguments(args)
+    assert argv[-4:] == ["--resume", str(args.resume), "--resume-step", "3"]
+    assert dict(zip(argv[1::2], argv[2::2]))["--max-time"] == "18000"
+    assert all(p.read_bytes() == raw for p, raw in before.items())
+
+
+@pytest.mark.parametrize(
+    "change", ["model", "task", "overlap", "snapshot", "step", "budget"]
+)
+def test_resume_rejects_mismatched_or_incomplete_checkpoint(tmp_path, change):
+    args = resume_fixture(tmp_path)
+    if change == "model":
+        args.model = "different-model"
+    elif change == "task":
+        args.task = "debug"
+    elif change == "overlap":
+        args.work_root = args.resume / "work"
+    elif change == "snapshot":
+        (args.resume / "env_log/traces/step_3_files").rmdir()
+    elif change == "step":
+        args.resume_step = -1
+    else:
+        path = args.resume / "agent_log/agent_3_3.json"
+        saved = json.loads(path.read_text())
+        saved["args"]["max_steps"] = 500
+        path.write_text(json.dumps(saved))
+    with pytest.raises(ValueError):
+        MODULE.resume_arguments(args)
+
+
+def test_resume_step_without_checkpoint_is_not_silently_ignored():
+    with pytest.raises(ValueError, match="explicit"):
+        MODULE.resume_arguments(SimpleNamespace(resume=None, resume_step=3))
+
+
 def test_original_main_module_dispatch_preserves_python_m_semantics():
     tree = ast.parse(
         (ROOT / "scripts/run_mlagentbench_local_agent.py").read_text("utf-8")
@@ -108,6 +177,16 @@ def test_live_start_snapshot_is_bound_to_entry_not_counted_as_delivery():
         ).read_text("utf-8")
     )
     current = (ROOT / receipt["entry"]).read_text("utf-8")
+    # The opt-in native resume branch is not entered by the historical run.
+    start = current.index("def resume_arguments(args):\n")
+    end = current.index("def original_arguments(args):\n")
+    current = current[:start] + current[end:]
+    assert current.count("] + resume_arguments(args)") == 1
+    current = current.replace("] + resume_arguments(args)", "]")
+    current = current.replace('    parser.add_argument("--resume", type=Path)\n', "")
+    current = current.replace(
+        '    parser.add_argument("--resume-step", type=int, default=0)\n', ""
+    )
     # Reverse only the terminal metadata count fix. The full-file digest proves
     # all native execution logic is identical to the actual executed version.
     fixed = 'status="ORIGINAL_AGENT_RUNNER_RETURNED_REQUIRES_TRACE_AND_ORIGINAL_SCORE_AUDIT",\n        native_agent_tasks_run=1,\n'

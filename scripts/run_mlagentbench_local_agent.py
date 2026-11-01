@@ -26,6 +26,50 @@ def check_isolation(status):
         )
 
 
+def resume_arguments(args):
+    resume = getattr(args, "resume", None)
+    if resume is None:
+        if getattr(args, "resume_step", 0) != 0:
+            raise ValueError("resume-step requires an explicit original checkpoint")
+        return []
+    step = args.resume_step
+    if type(step) is not int or not 0 <= step < 50:
+        raise ValueError("original resume step must be within the original budget")
+    root = resume.resolve(strict=True)
+    for output in [args.work_root, args.log_root]:
+        target = output.resolve()
+        if target.is_relative_to(root) or root.is_relative_to(target):
+            raise ValueError("fresh outputs must not overlap retained checkpoint")
+    trace = root / "env_log/trace.json"
+    snapshot = root / "env_log/traces" / f"step_{step}_files"
+    states = list((root / "agent_log").glob(f"agent_{step}_*.json"))
+    if not trace.is_file() or not snapshot.is_dir() or not states:
+        raise ValueError("original trace, scientific snapshot and Agent state required")
+    for path in [trace, snapshot, *states]:
+        if path.is_symlink() or not path.resolve(strict=True).is_relative_to(root):
+            raise ValueError("checkpoint metadata must remain within retained logs")
+    saved = json.loads(max(states, key=lambda p: p.stat().st_ctime).read_text("utf-8"))
+    if saved["args"]["task"] != args.task or any(
+        saved["args"][key] != args.model
+        for key in ["llm_name", "fast_llm_name", "edit_script_llm_name"]
+    ):
+        raise ValueError("resume task and actual model must match original state")
+    if len(json.loads(trace.read_text("utf-8"))["steps"]) <= step:
+        raise ValueError("resume step absent from original trace")
+    expected = {
+        "max_steps": 50,
+        "agent_max_steps": 50,
+        "max_time": 18000,
+        "max_retries": 5,
+        "edit_script_llm_max_tokens": 4000,
+        "max_steps_in_context": 3,
+        "max_observation_steps_in_context": 3,
+    }
+    if any(saved["args"].get(key) != value for key, value in expected.items()):
+        raise ValueError("retained Agent budgets must match the original protocol")
+    return ["--resume", str(root), "--resume-step", str(step)]
+
+
 def original_arguments(args):
     return [
         "MLAgentBench.runner",
@@ -57,7 +101,7 @@ def original_arguments(args):
         "3",
         "--max-observation-steps-in-context",
         "3",
-    ]
+    ] + resume_arguments(args)
 
 
 def verify_port(root):
@@ -154,6 +198,8 @@ def main():
     parser.add_argument("--log-root", type=Path, required=True)
     parser.add_argument("--model", required=True)
     parser.add_argument("--task", default="debug")
+    parser.add_argument("--resume", type=Path)
+    parser.add_argument("--resume-step", type=int, default=0)
     parser.add_argument("--execute", action="store_true")
     print(json.dumps(run(parser.parse_args()), indent=2))
 
