@@ -1388,6 +1388,25 @@ SHA256取得并静态核验；Python默认评分模型为`neulab/codebert-python
 
 - [x] 专用CPU磁盘清理：已完成来源LiveCodeBench的原始9.38GB文件逐次核对官方SHA256及未打开/未映射状态，清理两个既有硬链接；首个链接删除未释放空间，查明并清理同任务原消费者留下的最后链接后，实测释放9375645696字节，空余20745592832字节。原消费索引、审计、生成结果、评分及环境均保留；原始数据可按固定官方版本重新获取，未扩卷。这是缓存退役，不是新增数据集验证。
 
+##### ScienceAgentBench原版辅助指标NPU入口
+
+- [x] `scripts/scienceagentbench_codebert_npu.py`在卡4完成一次明确标注的原参考自匹配控制：原函数处理canary前缀，3次原模型NPU前向，控制值0.9999998807907104。未执行生成程序，未生成模型回答，不是科学任务得分或来源完成。显存增量实测采样最高492MiB，原9B/14B服务身份不变，租约已释放；保存结果独立复核不重跑模型。[控制回执](validation/scienceagentbench-codebert-original-npu-control-20261101.json)。
+
+该入口只补原CodeBERTScore辅助评分，不替代原科学执行、成功率或视觉评价。环境沿用上文隔离版本，并使用原Python模型固定版本`c4ff459e2a91d002d9bb4ab8cc2b7ee7125ef213`；入口核对8份模型文件、4份原评分包源码和原`compute_scores.py`身份，禁止CPU/CUDA回退。运行前先取得空闲资源窗口，入口不会替使用者停服务或协调共享卡。
+
+输入JSON为记录列表，每项仅含`task_inst`、`pred_fname`、`gold_fname`：分别是原任务指令、实际生成程序路径、原参考程序路径。原参考仅供评分，不能放进生成提示。任务、代码、权重和输出保存在执行者私有目录，不提交到仓库。
+
+```bash
+python scripts/scienceagentbench_codebert_npu.py \
+  --original-source /private/ScienceAgentBench/compute_scores.py \
+  --model-dir /private/codebert-python \
+  --records /private/actual-prediction-records.json \
+  --output-dir /private/new-codebert-result \
+  --device npu:0
+```
+
+使用原作者固定源码版本，`--output-dir`必须尚不存在；生成程序与科学评价另行接原容器流程。本次真实NPU证据仅覆盖辅助组件控制，尚未覆盖实际生成答案的评分或完整科学任务。
+
 #### OVO-Bench原生在线视频路径准备（未完成来源交付）
 
 - [x] 官方Qwen2-VL-7B-Instruct固定版本的14个必需模型文件已在NPU共享盘取得，合计16594373111字节，逐份与官方Git/LFS身份一致；未下载权重到本地，未更改卡6现有14B服务。
