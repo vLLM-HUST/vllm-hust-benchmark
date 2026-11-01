@@ -109,7 +109,11 @@ def test_readiness_is_not_native_completion():
     )
     item = ledger["delivery_inventory"]["TEMPORALWIKI"]
     receipt = json.loads((ROOT / item["preparation_receipt"]).read_text("utf-8"))
-    assert not item["checked"] and item["delivery_receipt"] is None
+    assert not receipt["source_checkbox_eligible"]
+    assert item["delivery_receipt"] != item["preparation_receipt"]
+    delivery = json.loads((ROOT / item["delivery_receipt"]).read_text("utf-8"))
+    assert item["checked"] and delivery["source_checkbox_eligible"]
+    assert delivery["native_protocol"]["native_npu_completed_forwards"] == 1126
     assert receipt["original_source_verification"]["files"] == 177
     assert (
         sum(receipt["original_source_verification"]["configuration_modes"].values())

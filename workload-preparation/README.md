@@ -1809,4 +1809,4 @@ export TRANSFORMERS_OFFLINE=1
 /srv/envs/temporalwiki/bin/python scripts/run_temporalwiki_original_npu.py --author-root /srv/workloads/temporalwiki-author --data-root /srv/workloads/temporalwiki-probes --model-root /srv/models/gpt2-large --output /srv/results/temporalwiki-base-probes --allocator-budget-gib 5 --full --execute
 ```
 
-分配器上限只是资源保护，不改变模型精度、批量或原评分。首轮4GiB保护上限在第一批原交叉熵计算失败，日志保留；5GiB配置已完成全部35,948行／1126个批次，8份原CSV困惑度保存成功，原float32批次loss／exp经NPU标量独立重算全部精确一致，复核没有重新执行模型。当前仍需完成该公开代码的CI／研究消费交接后才计来源交付。入口记录每文件原CSV困惑度和逐批原loss；CPU浮点模拟存在末位差异，不能混称逐位相同。失败、低分或缺失结果照实保留，不换题、换评分器或伪造训练checkpoint。
+分配器上限只是资源保护，不改变模型精度、批量或原评分。首轮4GiB保护上限在第一批原交叉熵计算失败，日志保留；5GiB配置已完成全部35,948行／1126个批次，8份原CSV困惑度保存成功，原float32批次loss／exp经NPU标量独立重算全部精确一致，复核没有重新执行模型。当前代码两项CI、实际工件独立安装、全部原字段／索引及24条公共／当前研究消费交接均已通过，见[交付回执](../docs/workload-data/validation/temporalwiki-base-probes-native-delivery-20261101.json)。入口记录每文件原CSV困惑度和逐批原loss；CPU浮点模拟存在末位差异，不能混称逐位相同。失败、低分或缺失结果照实保留，不换题、换评分器或伪造训练checkpoint。
