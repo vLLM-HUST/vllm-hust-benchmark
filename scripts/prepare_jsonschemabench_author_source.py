@@ -58,6 +58,7 @@ def main():
             "streamingbench",
             "toolbench",
             "ljspeech-vits",
+            "mlagentbench",
         ],
         default="jsonschemabench",
         help="Pinned original author source only; historical default unchanged",

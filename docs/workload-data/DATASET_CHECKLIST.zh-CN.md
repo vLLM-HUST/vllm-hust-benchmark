@@ -1715,6 +1715,26 @@ smoke、tests和lint全部通过。[交付回执](validation/ruler-native-delive
 使用时只对原声学模型中明确定位的Guo
 `gru`实例调用`install_npu_gru_forward`，并先沿用原`model.eval()`；不修改全局`torch.nn.GRU`。正式forward拒绝CPU/CUDA、非FP32、训练及非原稠密批输入。`require_npu=False`仅供合成数值夹具，不可作为实际任务的CPU回退。当前没有修改既有原任务工作区或部署该候选，DailyTalk来源总勾仍为空。
 
+### MLAgentBench：原任务环境准备
+
+- [x] 固定原作者版本`5d71205cc20a8e95d43aa7cb7120e89ca3323e31`的138份软件/任务定义文件，共670271字节；79份Python静态解析通过。15个发布目录包含工具型示例，不能据此称论文有15个评测任务。原许可、依赖、Agent、准备与评价脚本均保留；可选Auto-GPT
+  vendor、图片和绘图不纳入此准备配置。
+- [x] 公共源码入口在专用CPU工作区实测`plan`、复用原文件的`prepare`和`verify`均退出0。[准备回执](validation/mlagentbench-original-source-preparation-20261101.json)。CPU直连失败记录保留，后续670271字节原软件经内存中转，没有在本地保存数据或权重。
+- [ ] 原任务数据及访问条件、隔离运行环境、明确NPU模型绑定、固定原任务执行/评价、公共workload及当前工件研究消费尚待完成。此来源仍不打总勾。
+
+复用现有源码准备能力，不新增平行下载器：
+
+```bash
+python scripts/prepare_jsonschemabench_author_source.py --source mlagentbench \
+  --author-root <外部原源码目录> --action plan
+python scripts/prepare_jsonschemabench_author_source.py --source mlagentbench \
+  --author-root <外部原源码目录> --action prepare --max-bytes 670271
+python scripts/prepare_jsonschemabench_author_source.py --source mlagentbench \
+  --author-root <外部原源码目录> --action verify
+```
+
+入口只处理固定源码和原任务定义，不导入作者运行模块、不执行`prepare.py`，也不获取底层训练/测试数据。作者原生入口是`MLAgentBench.prepare_task`、`MLAgentBench.runner`和`MLAgentBench.eval`，后续须在隔离环境绑定使用；取得软件不等于这些入口已跑通。静态核查发现原默认actor为`claude-v1`，原HuggingFace分支写死`cuda:9`；当前未接通NPU推理，不能直接照该分支启动，也不把Qwen伪装成原默认actor。涉及Kaggle等访问条件时另列阻塞，不代使用者接受规则或填写凭据。
+
 ## 打勾规则
 
 - **一个来源一个勾**：先固定至少 3 条原始样本及其 ID，再在指定服务器使用 NPU 完成该来源适用的执行、终止及评分/完整性核验，保存脱敏验证记录后才改成 `[x]`。

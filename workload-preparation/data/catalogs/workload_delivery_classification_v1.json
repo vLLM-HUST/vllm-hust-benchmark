@@ -21,6 +21,10 @@
     {"source_id": "PAIO-SEMANTIC-SIMILAR-5000", "asset_group": "enterprise-private-requests", "related_workload_ids": [], "boundary": "Semantic similarity is not exact-prefix or KV reuse; preserve original private requests without rewriting."}
   ],
   "source_entrypoints": {
+    "MLAGENTBENCH": [
+      {"role": "prepare_assets", "path": "scripts/prepare_jsonschemabench_author_source.py", "scope": "Use --source mlagentbench; pinned author software and released task definitions only, not task data or native execution"},
+      {"role": "original_profile", "path": "configs/workload-native/mlagentbench-author-source.json", "scope": "Pinned138 publisher software/task-definition files; underlying task data and access conditions remain separate"}
+    ],
     "SCIENCEAGENTBENCH": [
       {"role": "prepare_assets", "path": "scripts/verify_scienceagentbench_original_assets.py", "scope": "Original verified metadata and original first3 scientific asset identities; raw scientific assets remain private"},
       {"role": "original_profile", "path": "configs/workload-native/scienceagentbench-author-software-pins.json", "scope": "Pinned publisher30 software files; no task/data redistribution"},
