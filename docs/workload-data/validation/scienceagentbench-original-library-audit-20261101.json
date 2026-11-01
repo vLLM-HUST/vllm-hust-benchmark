@@ -35,6 +35,25 @@
     "score_function_accepts_explicit_device": true,
     "default_on_non_cuda_host": "cpu",
     "npu_model_binding_verified": false,
+    "isolated_runtime": {
+      "source_receipt": "scienceagentbench-codebert-runtime-20261101-001/source-qualification-public.json",
+      "source_files_verified_against_original_sdist": 4,
+      "distribution_version": "0.4.1",
+      "original_internal_version": "0.3.5",
+      "version_boundary": "The original0.4.1 distribution itself retains internal __version__0.3.5; installed Python sources are byte-identical to the verified official0.4.1 source archive",
+      "transformers": "4.46.3",
+      "transformers_basis": "Pinned publisher Docker base recipe, not an arbitrary latest version",
+      "python": "3.12.13",
+      "torch": "2.10.0+cpu",
+      "torch_npu": "2.10.0.post4",
+      "vendor_torch_readonly_links": 6,
+      "pip_check_exit_code": 0,
+      "import_exit_code": 0,
+      "global_environment_modified": false,
+      "npu_initialized": false,
+      "model_loaded": false,
+      "compatibility_boundary": "New Python/vendor Torch NPU environment, not original CUDA environment reproduction"
+    },
     "scoring_metric_omitted": false
   },
   "litellm": {
@@ -47,6 +66,35 @@
     "original_tokenizer_binding_verified": false,
     "local_model_relabelled_as_gpt": false,
     "fabricated_token_prices": false
+  },
+  "original_inputs_on_npu_server": {
+    "receipt": "scienceagentbench-original-inputs-20261101-001/qualification-public.json",
+    "reused_original_source_files": 30,
+    "original_source_bytes": 206703,
+    "original_verified_metadata_bytes": 129086,
+    "original_git_and_sha_identities_verified": true,
+    "scientific_task_data_or_reference_programs_copied": false,
+    "raw_windows_disk_written": false,
+    "native_tasks_executed": false
+  },
+  "original_baseline_prompt_control": {
+    "receipt": "scienceagentbench-original-baseline-prompt-control-20261101-001/qualification-public.json",
+    "model": "Qwen/Qwen3-14B",
+    "original_rows": 102,
+    "original_formatter_and_prompt_function_used": true,
+    "tokenizer_from_actual_existing_14b_model": true,
+    "profile": "Original single-turn baseline, no knowledge/self-debug; non-thinking local model binding",
+    "context_cutoff": 28000,
+    "reserved_output_tokens": 2000,
+    "input_budget": 26000,
+    "minimum_chat_tokens": 280,
+    "maximum_chat_tokens": 21059,
+    "over_budget_cases": [],
+    "all_prompts_unchanged": true,
+    "identity_trim_control_not_original_litellm_execution": true,
+    "npu_initialized": false,
+    "model_calls": 0,
+    "boundary": "CPU tokenization control establishes that all102 unchanged baseline prompts fit actual local-model input budget; not original LiteLLM execution, Agent generation, monetary cost accounting or scientific scoring"
   },
   "owned_cpu_executor": {
     "scope": "Executor restoration and isolated control, before subsequent completed-source raw cache retirement",
