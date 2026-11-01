@@ -48,6 +48,9 @@ unreachable，失败记录保留，现复用原分块获取器经至多8MiB原�
 
 - [x] 第八、九份原视频sample_17_sqa、sample_32_sqa的原CRC/EOF、观测SHA和全部65201帧解码通过，保留音轨；累计9/10视频、2421684080字节、232219帧。回执为`/root/streamingbench-remaining-ram-member-06-20261101-001/qualification-public.json`及`/root/streamingbench-remaining-ram-member-07-20261101-001/qualification-public.json`。最后一份SSH中断保留192879471字节partial，核查无残留写进程后按原字节前缀核对续传；已完成9份未重新下载或解码。续传仅对幂等初始化/加锁原字节追加的SSH255传输错误至多重试3次，不重试原生模型任务或未知终态解码任务。45份音频和原生模型执行/评分仍未完成，来源不打勾。
 
+- [x] 第十份sample_42_sqa完整原文件已保留并独立复核原ZIP成员CRC266770352、401569391字节、观测SHA及全部34450帧；累计固定视频10/10、2823253471字节、266669帧。传输完成后的校验RPC因SSH中断未启动，核查无存活进程/回执后，复用完整文件做校验，不重新下载；恢复阶段没有重放压缩流，不把原始字节复核冒称为再次验证deflate
+  EOF。CPU双线程仅用于完整性解码，不修改模型预处理。回执`/root/streamingbench-remaining-ram-member-08-20261101-001/qualification-public.json`。45份音频和原生推理/评分仍待完成，来源不打勾。
+
 - [x] 明确原Qwen2-VL类的候选NPU入口及分类索引已补，不走作者CLI未知模型回退；服务器固定与全量real计划通过，0模型调用。默认3组共用sample_348原视频，保持3个原问题，不因共享视频去重任务或改用已取得的视频。原31份软件、128-token预算、作者时间窗及评分流程保留；`streamingbench-public-native-plan-20261101-004/qualification-public.json`是软件计划证据，不是实际NPU推理或全量媒体验证。
 
 - [x] 作者FPS解析问题用3个合成文件名的原函数前缀计算复核，`.mp4`数字被当成时间，原分支均1fps；未读视频或调用模型，原公式不改。不以分支常量列表宣称实际自适应fps，修正需另行披露协议变体。真实运行及原评分结果仍待完成，整来源不打勾。
