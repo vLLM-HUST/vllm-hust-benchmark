@@ -1335,7 +1335,7 @@ TB；服务器/data约1.42TB可用，未缩小语料。ChartQA当前两卡主机
 - [x] SCIENCEAGENTBENCH：原30份源码在专用CPU工作区复核，24份Python静态解析；原`make_test_spec`在Python3.10构造前三题通过，12个字段保留，ID仅沿用官方转字符串规则，配方选择ARM64。未构建镜像、未运行程序或模型，不代表科学环境通过；细节见唯一机器清单。
 - [x] SCIENCEAGENTBENCH：显式本地模型通信接口及固定旧版SDK的两次合成回环HTTP控制通过，保留模型标识、原消息及所选GPT-chat分支2000输出预算；不是原题、不是NPU推理。原Agent价格/tokenizer、完整流程仍未接通，不填虚假价格，也不将Qwen改名GPT。官方OpenHands
   legacy入口亦经检查，不能盲用其validation默认值和旧整包镜像。
-- [ ] SCIENCEAGENTBENCH：隔离科学环境、本地模型、原生执行及辅助评分模型仍未就绪；其余原题资产未取得。2026-11-01原专用CPU工作区及独立Docker已恢复，80GiB卷和已有数据不变，隔离容器控制通过；这不是科学任务执行。按已确认要求清理经核验的不再使用的缓存，不再列作扩容授权待定。官方单worker约30GB是容量建议，不是实测最低需求。发现两个上游直接入口仍读旧validation
+- [ ] SCIENCEAGENTBENCH：原前三题已完成14B真实NPU生成及原版CodeBERT实际程序评分；原第2/3题在隔离CPU到达官方程序错误终态，失败保留。第1科学程序执行及最终工件/研究消费交接尚待收口，来源不打总勾；当前进展见下方原生链路。原80GiB卷不变、旧环境/结果保留，约30GB只是官方容量建议而非实测最低需求。两个上游直接入口仍读旧validation
   split，不能与当前verified版混跑，不勾原生通过。
 - [x] TAUBENCH/τ²：2285个原telecom任务与引用全量准备/预检，新增3个原ACTION类任务公共引用交接预检通过；补齐显式ID/全量入口，125包实测环境快照和pip
   check通过，模型调用0。[CPU回执](validation/tau2-readiness-cpu-20261024.json)。
@@ -1406,6 +1406,33 @@ python scripts/scienceagentbench_codebert_npu.py \
 ```
 
 使用原作者固定源码版本，`--output-dir`必须尚不存在；生成程序与科学评价另行接原容器流程。本次真实NPU证据仅覆盖辅助组件控制，尚未覆盖实际生成答案的评分或完整科学任务。
+
+##### ScienceAgentBench原单轮本地基线与科学执行进展
+
+- [x] 原前三题`1/2/3`已用现有`Qwen/Qwen3-14B`完成真实NPU生成，原完整消息、代码提取、temperature=0.2、top_p=0.95及2000输出预算保留；输出701/359/329
+  token。原GPT-chat协议明确绑定本地非思考模型，不冒称Claude/GPT论文成绩；价格仅记为`null`，不伪造API单价。原作者不加知识、不自调试分支的3个方法沿用，未开放宿主机安装/调试代码路径。
+- [x] 三份实际生成程序完成原CodeBERTScore
+  NPU评分，9次模型前向，原值0.7892104387/0.7659464478/0.8183770776保留；不是此前自匹配控制，也不是科学任务成功率。生成程序未重跑，参考仅在生成结束后供独立评分。
+- [x] 原ARM64科学基础配方的软件安装完成；磁盘保护中断后复用已提交安装层，只补原配方最后一步，不重装、不扩卷、不删旧环境。原Python3.10环境依赖/导入通过，第2/3题原instance配方已构建。第2题补齐原XLSX数据必需的`openpyxl==3.1.5`；上游pipreqs不能推断pandas动态可选reader，首次缺依赖记录保留，不改模型程序。
+- [x] 实际容器控制验证只读根、无网络、no-new-privileges、UID1000执行、参考不可读、数据可读及结果可写。原`compute_scores.py`不改；辅助F1经原任务/程序/参考SHA绑定复用真实NPU结果，原900秒执行预算、原成功判定及结果tuple保留。只增加非root执行身份和缓存目录隔离，未在CPU重新计算神经辅助分数。
+- [x] 第2/3题到达原程序错误终态，原结果分别为`(valid=0, CodeBERT=0.7659464478, success=0)`和`(0, 0.8183770776, 0)`：程序将set作为pandas列名、预测特征与训练不一致。原成功评价脚本因程序先失败而未进入；不改答案、不降校验、不换题凑通过。第3题不重复执行；第2题只在补reader后重跑科学程序，不重跑LLM或CodeBERT。[实际进展回执](validation/scienceagentbench-original-fixed3-native-progress-20261101.json)。
+- [ ] 第1题科学程序涉及图神经网络计算，其执行后端/范围尚未核验；最终原生编排、最新工件与研究消费交接未收口。来源仍未交付，全102题科学执行和其他官方Agent分支另列缺口。
+
+生成客户端在执行机隔离环境安装`configs/workload-native/scienceagentbench-local-baseline-requirements.txt`；该文件不是科学执行镜像依赖。固定源码沿用上文版本，元数据必须是原`verified`
+Parquet；不要用硬编码旧validation的直接脚本替换。
+
+```bash
+python scripts/run_scienceagentbench_original_baseline.py \
+  --source-dir /private/ScienceAgentBench \
+  --metadata /private/ScienceAgentBench-data/data/verified-00000-of-00001.parquet \
+  --tokenizer /private/deployed-model-tokenizer \
+  --model Qwen/Qwen3-14B \
+  --api-base http://127.0.0.1:8000/v1 \
+  --output-dir /private/new-science-baseline \
+  --start 0 --limit 3
+```
+
+`--full`选择原102题；超出原输入预算会失败，不裁剪。输出目录必须全新，已有程序拒绝覆盖；每次请求前记录在途原位置，响应先私有保存，未知请求不得盲目重放。科学执行入口`scienceagentbench_isolated_scoring.py`只在受限的单任务Docker容器内使用，拒绝宿主机或放宽的容器环境；它不是自动建镜像/拷贝数据的完整编排入口。最终一体化编排仍属上项待补，不以本节命令代替来源总验收。
 
 #### OVO-Bench原生在线视频路径准备（未完成来源交付）
 
