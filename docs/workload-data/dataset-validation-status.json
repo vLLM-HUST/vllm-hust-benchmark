@@ -3629,6 +3629,23 @@
       "scope": "public",
       "delivery_kind": "review_original_source_protocol",
       "status": "IN_PROGRESS",
+      "fp32_gru_compatibility_candidate": {
+        "entry": "scripts/dailytalk_gru_npu.py",
+        "vendor_cpu_receipt": "docs/workload-data/validation/dailytalk-gru-cpu-equations-20261101.json",
+        "tests": "tests/test_dailytalk_gru_npu.py",
+        "status": "SYNTHETIC_CPU_EQUATION_CONTROLS_ONLY_NPU_VALIDATION_PENDING",
+        "cpu_fixture_tests_passed": 20,
+        "fixture_python": "3.12.10",
+        "fixture_torch": "2.7.1+cpu",
+        "atol": 0.000001,
+        "rtol": 0.00001,
+        "publisher_guo_dense_shape_checked": "batch3, sequence1/10, input128, hidden128, layers2, bidirectional, eval dropout0.2, default zero hidden",
+        "original_parameters_and_state_dict_unchanged_in_fixtures": true,
+        "production_cpu_or_cuda_fallback_forbidden": true,
+        "model_checkpoint_loaded_or_task_executed": false,
+        "actual_npu_equivalence_or_synthesis_verified": false,
+        "source_checkbox_eligible": false
+      },
       "latest_native_synthesis_attempt": {
         "server_receipt": "dailytalk-original-guo-native-stage-20261031-003/native-execution/state-private.json under the private shared task root",
         "status": "ORIGINAL_GUO_SYNTHESIS_FAILED_RETAINED",

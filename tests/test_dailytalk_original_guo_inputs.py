@@ -1,6 +1,7 @@
 """Preparation fixtures are not native TTS or original-data execution evidence."""
 
 import importlib.util
+import hashlib
 import json
 from pathlib import Path
 import sys
@@ -15,6 +16,35 @@ spec = importlib.util.spec_from_file_location(
 )
 runner = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(runner)
+
+
+def test_gru_cpu_equation_evidence_does_not_promote_native_source():
+    receipt = json.loads(
+        (
+            ROOT
+            / "docs/workload-data/validation/dailytalk-gru-cpu-equations-20261101.json"
+        ).read_text(encoding="utf-8")
+    )
+    code = (ROOT / receipt["entry"]).read_text(encoding="utf-8")
+    assert hashlib.sha256(code.encode()).hexdigest() == receipt["entry_sha256"]
+    assert receipt["numeric_cases"] == 18
+    assert receipt["maximum_absolute_error"] < receipt["atol"]
+    assert not receipt["npu_initialized"]
+    assert (
+        receipt["original_checkpoints_loaded"]
+        == receipt["original_tasks_executed"]
+        == 0
+    )
+    assert receipt["source_checkbox_eligible"] is False
+    source = json.loads(
+        (ROOT / "docs/workload-data/dataset-validation-status.json").read_text(
+            encoding="utf-8"
+        )
+    )["delivery_inventory"]["DAILYTALK"]
+    assert not source["checked"]
+    assert not source["fp32_gru_compatibility_candidate"][
+        "actual_npu_equivalence_or_synthesis_verified"
+    ]
 
 
 def test_plan_never_reads_data_or_creates_output(tmp_path):

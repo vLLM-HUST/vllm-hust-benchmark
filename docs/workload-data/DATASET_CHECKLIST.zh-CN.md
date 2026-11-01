@@ -1703,6 +1703,18 @@ smoke、tests和lint全部通过。[交付回执](validation/ruler-native-delive
 
 更新时间：2026-10-23。清单覆盖现有 **89 个公开候选来源、8 份企业数据**；“候选”不等于已取得、已适配或已跑通。新推荐的 17 个来源另列，尚不计入已接入范围。
 
+### DailyTalk：原FP32声学模型的算子兼容候选
+
+- [x] 已定位原生失败：原Guo模型进入声学前向后，当前NPU的`DynamicGRUV2Hidden`拒绝FP32隐藏权重；尚未执行vocoder，不算合成完成。原失败、权重、精度和输入均保留。
+- [x] `scripts/dailytalk_gru_npu.py`提供显式、单实例、仅推理的原GRU公式分解候选，保留原参数对象和state-dict键，不替换checkpoint、不降精度、不改变10轮历史。使用PyTorch的reset-after-hidden-affine公式，不能换成原论文的另一种GRU公式。依据：[PyTorch 2.10 GRU](https://docs.pytorch.org/docs/2.10/generated/torch.nn.GRU.html)。
+- [x] 20组CPU合成夹具通过，环境Python3.12.10/PyTorch2.7.1+cpu；覆盖方向、层数、bias、布局、非零/默认零hidden和原Guo的128维双层双向、1/10步输入。输出及最终hidden均按`atol=1e-6, rtol=1e-5`对照原PyTorch
+  GRU，原参数不变；这是合成单元测试，不是原任务或NPU数值结果。
+- [x] 实际服务器PyTorch2.10.0+cpu/Python3.12.13隔离环境完成18组CPU数值对照，最大绝对误差`3.5762786865234375e-7`；没有初始化NPU、加载原checkpoint或执行原任务。[服务器夹具回执](validation/dailytalk-gru-cpu-equations-20261101.json)。
+- [ ] 在空闲NPU窗口完成同精度算子数值验证，随后续跑原模型、原对话和原评价；未获空闲前不占卡。候选不能仅凭CPU夹具当作已经解决原NPU失败。
+
+使用时只对原声学模型中明确定位的Guo
+`gru`实例调用`install_npu_gru_forward`，并先沿用原`model.eval()`；不修改全局`torch.nn.GRU`。正式forward拒绝CPU/CUDA、非FP32、训练及非原稠密批输入。`require_npu=False`仅供合成数值夹具，不可作为实际任务的CPU回退。当前没有修改既有原任务工作区或部署该候选，DailyTalk来源总勾仍为空。
+
 ## 打勾规则
 
 - **一个来源一个勾**：先固定至少 3 条原始样本及其 ID，再在指定服务器使用 NPU 完成该来源适用的执行、终止及评分/完整性核验，保存脱敏验证记录后才改成 `[x]`。
