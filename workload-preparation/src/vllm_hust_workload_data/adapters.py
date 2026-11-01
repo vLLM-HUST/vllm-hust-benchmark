@@ -14,6 +14,11 @@ from .registry import adapter_spec, source_spec
 
 def iter_source_rows(path, spec):
     """Use one source view for reading, binding and index resolution."""
+    if spec["mapping"] == "dailytalk_original_utterances":
+        from .dailytalk import original_rows
+
+        yield from original_rows(path)
+        return
     if spec["mapping"] == "spokenwoz_original_dialogues":
         from .spokenwoz import original_rows
 
@@ -179,6 +184,10 @@ def adapt_row(
     source_id: str, row: dict, *, source: dict, spec: dict, index: int
 ) -> WorkloadRecord:
     """Projection is explicit/allowlisted; outcome fields never become task inputs."""
+    if spec["mapping"] == "dailytalk_original_utterances":
+        from .dailytalk import adapt_case
+
+        return adapt_case(row, source=source, index=index)
     if spec["mapping"] == "spokenwoz_original_dialogues":
         from .spokenwoz import adapt_case
 

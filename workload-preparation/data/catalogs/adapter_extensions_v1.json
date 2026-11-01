@@ -597,6 +597,17 @@
       },
       "normalization": {}
     },
+    "DAILYTALK": {
+      "kind": "task_dataset", "mapping": "dailytalk_original_utterances",
+      "input_fields": ["phonemes", "text", "speaker", "emotion"],
+      "required_fields": ["id", "phonemes", "text", "speaker", "emotion", "dialogue_id", "turn_index", "split", "original_row", "metadata_row_index", "previous_turn_id", "reference_audio"],
+      "nullable_fields": ["previous_turn_id"],
+      "outcome_fields": ["reference_audio"],
+      "annotation_fields": ["id", "dialogue_id", "turn_index", "split", "original_row", "metadata_row_index", "previous_turn_id"],
+      "id_field": "id", "normalization": {},
+      "requirements": ["Original whole-dialogue TTS protocol; no chat prompt fabrication", "Reference media locators do not prove local acquisition", "Original file order, dialogue identity and numeric turn relation are preserved without inferred arrival/streaming timing"],
+      "status": "ORIGINAL_PHONE_SPLIT_ADAPTER_NATIVE_AND_RESEARCH_HANDOFF_PENDING"
+    },
     "LIBRITTS": {
       "kind": "task_dataset", "mapping": "native_fields",
       "native_format": "libritts_original_archive",
