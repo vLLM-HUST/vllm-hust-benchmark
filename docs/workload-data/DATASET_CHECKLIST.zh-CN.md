@@ -1839,6 +1839,15 @@ for record in records:
 
 ### MLAgentBench：原任务环境准备
 
+- [x] `scripts/run_mlagentbench_local_agent.py`已启动原默认`debug`任务完整ResearchAgent：保留原任务描述、工具、50步／5小时及编辑4000-token预算，实际NPU请求已连通；启动快照核验6个HTTP200响应，原输出上限触发的`length`结束也保留，不为跑通放大预算。[启动快照](validation/mlagentbench-original-agent-start-20261102.json)。这不是最终执行／评分／交付回执。包装入口曾因未保留标准`python -m`主模块行为而在创建Agent前失败，已用`alter_sys=True`修正，原失败容器及日志保留，原任务／runner未改。
+
+执行入口必须在专用断网、只读根、移除capability及`no-new-privileges`容器内运行。将已核验适配软件、完整原数据、独立输出目录及私有队列按只读／专用可写边界挂载；宿主机只运行可信模型队列worker，连接现有或SSH回环转发的NPU服务，不能在宿主机执行Agent生成代码。`appworld_model_transport.py`可复用为队列worker；本次跨服务器验证采用私有缓存HTTP作业及仅内存中转，请求／响应不保存到Windows。启动或HTTP成功不计来源打勾，须取回原终态、评分和接入证据。
+
+```bash
+# 默认只显示计划，不执行Agent。只有在上述隔离容器中才添加 --execute。
+python scripts/run_mlagentbench_local_agent.py --port-root <已验证适配目录> --queue <独立私有队列> --work-root <新的任务工作目录> --log-root <新的任务日志目录> --model <NPU服务实际模型ID>
+```
+
 - [x] `scripts/prepare_mlagentbench_local_agent.py`在专用CPU实际`plan/prepare/verify`均通过：核验138份原软件，保留LLM和runner原文件与差异，只改本地传输及未选用LangChain后端的延迟导入。25份真实SDK轮子9912376字节逐个对照官方PyPI校验SHA256；在原科学镜像上离线构建独立扩展镜像，真实anthropic/dacite导入及原runner的`--help`在断网、只读根、降权容器通过，未导入Torch。[实测回执](validation/mlagentbench-local-agent-preparation-20261101.json)。无Agent或NPU推理完成声明，保留原AutoGPT可选依赖未安装警告。
 
 ```bash
