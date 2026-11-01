@@ -6,3 +6,5 @@ COPY requirements-*.txt /opt/mlagentbench-graph/
 RUN MAX_JOBS=1 FORCE_CUDA=0 python -m pip install --no-index --no-deps --no-build-isolation --require-hashes --find-links /opt/mlagentbench-graph/software -r /opt/mlagentbench-graph/requirements-core.txt
 RUN MAX_JOBS=1 FORCE_CUDA=0 python -m pip install --no-index --no-deps --no-build-isolation --require-hashes --find-links /opt/mlagentbench-graph/software -r /opt/mlagentbench-graph/requirements-scatter.txt
 RUN MAX_JOBS=1 FORCE_CUDA=0 python -m pip install --no-index --no-deps --no-build-isolation --require-hashes --find-links /opt/mlagentbench-graph/software -r /opt/mlagentbench-graph/requirements-sparse.txt
+# Keep scientific libraries within the bounded task/grader PID budget.
+ENV OMP_NUM_THREADS=2 OPENBLAS_NUM_THREADS=2 MKL_NUM_THREADS=2 NUMEXPR_NUM_THREADS=2

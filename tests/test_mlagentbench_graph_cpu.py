@@ -121,3 +121,35 @@ def test_real_profile_keeps_original_software_and_scientific_cpu_boundary():
     }
     assert "LLM/encoder/judge remain on NPU" in profile["runtime"]
     assert profile["original_data_or_model_weights_bundled"] is False
+    dockerfile = MODULE.DOCKERFILE.read_text()
+    for name in [
+        "OMP_NUM_THREADS",
+        "OPENBLAS_NUM_THREADS",
+        "MKL_NUM_THREADS",
+        "NUMEXPR_NUM_THREADS",
+    ]:
+        assert name + "=2" in dockerfile
+
+
+def test_actual_public_environment_receipt_is_bound_to_recipe_and_scope():
+    receipt = json.loads(
+        (
+            ROOT
+            / "docs/workload-data/validation/mlagentbench-ogbn-arxiv-preparation-20261102.json"
+        ).read_text("utf-8")
+    )
+    qualification = receipt["public_environment_qualification"]
+    assert receipt["public_graph_environment_recipe_pending"] is False
+    assert (
+        qualification["dockerfile_sha256"]
+        == hashlib.sha256(MODULE.DOCKERFILE.read_text("utf-8").encode()).hexdigest()
+    )
+    assert qualification["all_seven_original_software_identities_verified"] is True
+    assert (
+        qualification["original_score_record_equals_prior_qualified_environment"]
+        is True
+    )
+    assert qualification["original_scorer_saved_prediction_score"] == 0.2571857704256939
+    assert qualification["model_or_training_reruns"] == 0
+    assert qualification["full_agent_execution_repeated_on_public_image"] is False
+    assert qualification["source_checkbox_eligible"] is False
