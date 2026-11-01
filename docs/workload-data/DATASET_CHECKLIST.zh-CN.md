@@ -2,11 +2,48 @@
 
 ### LongMemEval-V2 正向记忆流程准备（2026-11-02）
 
+- [x] 451道原题的8个原始字段及两档有序记忆关联已与官方读取器逐项核对；企业/网页两域、small/medium四组代表记忆完整回读（100/500/100/479条轨迹），保留历史状态，不重新构造prompt。
+
+- [x] 当前源码公共入口与未修改的研究侧入口完成4条记录回读一致性检查；451条索引及研究读取器前后未改变。该验证未使用安装后的CI
+  wheel，未解码原题图片，也未执行原生RAG或评分，不增加来源完成数。服务器证据：`lme-v2-public-relations-20261102-001/qualification-public.json`；本地数据准备包测试539项通过。
+
 - [x] 原`enterprise/small`前三条`no_retrieval`结果及三个0分保留为消融对照，不改算正向记忆验证。
+
 - [x] 按原`run_eval.py`默认值固定`Qwen/Qwen3-Embedding-8B`的17文件身份，约15.15GB；公开获取入口已补充。
+
 - [x] 原嵌入模型17份文件、15,150,575,778字节全部校验通过，公开入口`--verify-only`实际通过；HF固定元数据和官方ModelScope同哈希大文件分工传输，不把ModelScope浮动master当不可变身份；该服务器的直接HF下载分支未验证。
+
 - [x] 独立ARM64/Python3.12预处理环境及依赖检查通过，公开检查器对原reader的12份处理器元数据前后校验一致，CPU夹具通过，神经前向/权重加载被禁用；不在CPU运行嵌入器、LLM或judge，也不把该夹具算原题执行。
+
 - [ ] 原固定前三条正向`rag_query_to_slice`、原评分以及公共包/研究侧任务结果交接。
+
+- [x] 本地构建的小型wheel已传到服务器隔离目录安装；安装版再次核对451道原题、两档记忆关系、四组代表完整轨迹及4条公共/研究消费记录，全部一致。证据：`lme-v2-installed-wheel-relations-20261102-001/qualification-public.json`。这是安装包实数据验证，不是CI下载工件验证，也不是模型执行或评分。
+
+原始数据读取入口（数据须在外部目录取得，仓库不内置）：
+
+```python
+from pathlib import Path
+from vllm_hust_workload_data import iter_workload
+from vllm_hust_workload_data.longmemeval_v2 import (
+    iter_haystack_trajectories,
+    restore_original_question,
+)
+
+data_root = Path("/external/longmemeval-v2")
+records = iter_workload("LONGMEMEVAL_V2", data_root=data_root)
+try:
+    record = next(records)
+    # 输入保留原问题和有序记忆ID；答案与评分函数只在outcome.references。
+    original_question = restore_original_question(record)  # 仅供官方任务/评分器使用
+    for trajectory in iter_haystack_trajectories(
+        record, tier="small", data_root=data_root
+    ):
+        pass  # 原始完整历史轨迹；不在这里生成prompt或研究特征
+finally:
+    records.close()
+```
+
+图片引用及截图归档身份保留在`runtime.native_files`。该元数据入口不会解码图片、执行记忆检索、调用模型或运行评分；应接原官方流程，不把`restore_original_question`返回的答案字段直接送给模型。准备索引仍使用统一pipeline，研究侧继续通过`resolve_input`消费。
 
 源数据、原9B
 reader及已有有效结果复用，不重跑消融以凑完成数。下载在服务器进行，本地不保存权重；未启动新模型服务或改动现有服务。动态进程与证据路径见[准备状态](validation/longmemeval-v2-rag-prerequisites-20261102.json)，不能仅凭该静态回执推定进程继续存活。

@@ -14,6 +14,11 @@ from .registry import adapter_spec, source_spec
 
 def iter_source_rows(path, spec):
     """Use one source view for reading, binding and index resolution."""
+    if spec["mapping"] == "longmemeval_v2_original_relations":
+        from .longmemeval_v2 import original_rows
+
+        yield from original_rows(path, spec)
+        return
     if spec["mapping"] == "mlagentbench_original_registry":
         from .mlagentbench import original_rows
 
@@ -189,6 +194,10 @@ def adapt_row(
     source_id: str, row: dict, *, source: dict, spec: dict, index: int
 ) -> WorkloadRecord:
     """Projection is explicit/allowlisted; outcome fields never become task inputs."""
+    if spec["mapping"] == "longmemeval_v2_original_relations":
+        from .longmemeval_v2 import adapt_case
+
+        return adapt_case(row, source=source, index=index)
     if spec["mapping"] == "swesmith_original_tasks":
         from .swesmith import adapt_case
 

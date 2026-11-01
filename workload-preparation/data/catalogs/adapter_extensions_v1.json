@@ -2,6 +2,13 @@
   "version": "adapter-extensions/v1",
   "boundary": "Field contracts from publisher metadata/docs. No real source payload downloaded or full adapter validation claimed.",
   "adapters": {
+    "LONGMEMEVAL_V2": {
+      "kind": "native_environment_dataset", "mapping": "longmemeval_v2_original_relations",
+      "input_fields": [], "required_fields": ["original_question", "original_haystacks", "native_files"],
+      "outcome_fields": [], "annotation_fields": [], "id_field": null,
+      "requirements": ["Original question, both haystack orders and full trajectory store/media references; no copied prompts", "Original memory method, NPU models and scoring remain separate from data preparation"],
+      "status": "ORIGINAL_RELATION_ADAPTER_NATIVE_RAG_PENDING"
+    },
     "SWESMITH": {
       "kind": "native_environment_dataset", "mapping": "swesmith_original_tasks",
       "input_fields": ["problem_statement", "repo", "image_name"],
