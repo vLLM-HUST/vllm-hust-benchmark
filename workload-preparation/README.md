@@ -1712,3 +1712,37 @@ cd /srv/workloads/infinitebench-metric/scoring
 
 从`scoring`目录执行让原`evaluate.load("rouge")`按原标识解析到已校验的本地`rouge/rouge.py`，不改原评分器。`--request-timeout`默认600秒，只控制HTTP等待；长输出可以显式延长，原生成预算不变且自动重试仍为0。原模板标识与实际服务模型分别记录，评分器的模型参数使用实际绑定，不将本地Qwen结果当作GPT-4复现。math_calc原前三题已在14B
 NPU服务保持原角色及30000-token预算完成，均达到预算，原与独立计分均为0；其他三个长书协议尚未完成，不增加来源完成数。
+
+### LJSpeech原生VITS文本到波形合成
+
+LJSpeech是单说话人TTS配对语料，不是带自动MOS计分的质量榜单。原生入口复用[VITS作者实现](https://github.com/jaywalnut310/vits)，固定发布方模型`pretrained_ljs.pth`与`ljs_base.json`，读取原始1.1归档中的发布方规范化转写，原转写和参考WAV关系保留。默认固定原顺序前三条；`--full`使用全部13,100条，不改变文本或裁剪生成波形。已实跑范围是固定前三条，不是全量合成或人工听测。
+
+已验证环境为openEuler 24.03 LTS-SP3、Python 3.12、Ascend 910B2、厂商Torch 2.10.0+cpu和torch-npu
+2.10.0.post4、eSpeak NG 1.51。Torch轮子名中的`+cpu`不代表允许CPU神经计算：入口检查全部模型参数和生成张量均在NPU。原作者Torch
+1.6依赖文件完整保留；当前环境属于明确披露的Ascend兼容绑定，不冒充原CUDA环境。
+
+复用已安装且适配本机CANN/驱动的厂商Torch、torch_npu，在独立Python环境中安装[直接依赖快照](../configs/workload-native/ljspeech-vits-npu-requirements.txt)。实际验证使用只读厂商包引用，`PYTHONPATH`清空后的`pip check`通过；此快照不是完整传递依赖锁，也不代表任意空环境已经验证。eSpeak
+NG 1.51及动态库可使用匹配系统的软件包；本次仅解包至独立目录，没有系统安装。设置`PHONEMIZER_ESPEAK_PATH`指向实际可执行文件，并保证它的动态库和语言数据目录可解析。
+
+以下路径均在仓库外。先获取并校验原归档及原作者软件，编译原对齐扩展；嵌套目标目录是原构建布局要求，不修改源码：
+
+```bash
+python scripts/prepare_ljspeech_original_assets.py --data-root /srv/workloads/ljspeech --action download --max-bytes 2748572632
+python scripts/prepare_jsonschemabench_author_source.py --source ljspeech-vits --author-root /srv/workloads/vits-author --action prepare --max-bytes 127230
+mkdir -p /srv/workloads/vits-author/monotonic_align/monotonic_align
+cd /srv/workloads/vits-author/monotonic_align
+/srv/envs/vits/bin/python setup.py build_ext --inplace
+```
+
+从作者README链接的[官方模型目录](https://drive.google.com/drive/folders/1ksarh-cJf3F5eKJjLVWY0X1j1qsQqiS2)取得`pretrained_ljs.pth`，放至`/srv/models/vits/pretrained_ljs.pth`。入口核对145,599,717字节及首次取得的观察SHA256；该SHA256不是发布方公布的校验和。权重通过`weights_only=True`安全加载，并严格匹配原模型全部参数，不允许缺失参数使用随机初始化。
+
+回到本仓库，先查看计划，再显式执行。下面的逻辑设备0应按运行实例的实际映射设置，不能直接推断为宿主机物理卡0。共享环境需先协调空闲窗口，不能照搬示例抢占设备。
+
+```bash
+export PHONEMIZER_ESPEAK_PATH=/srv/software/espeak/bin/espeak-ng
+export ASCEND_RT_VISIBLE_DEVICES=0
+/srv/envs/vits/bin/python scripts/run_ljspeech_vits_original_npu.py --archive /srv/workloads/ljspeech/LJSpeech-1.1.tar.bz2 --author-root /srv/workloads/vits-author --checkpoint /srv/models/vits/pretrained_ljs.pth --output /srv/results/ljspeech-fixed3
+/srv/envs/vits/bin/python scripts/run_ljspeech_vits_original_npu.py --archive /srv/workloads/ljspeech/LJSpeech-1.1.tar.bz2 --author-root /srv/workloads/vits-author --checkpoint /srv/models/vits/pretrained_ljs.pth --output /srv/results/ljspeech-fixed3 --execute
+```
+
+保持原`noise_scale=0.667`、`noise_scale_w=0.8`、`length_scale=1`及22050Hz输出；种子1234是另行披露的可复现设置，不宣称为作者评测种子。输出使用原浮点波形，不裁剪、不重采样。入口保存每条输入摘要、参考音频成员、WAV摘要及失败记录，校验有限值、非空和写入/读回一致。独立审计另核验RIFF、单声道float32和原文关系；这些只证明协议可用性，不等于语音自然度、MOS或引擎性能结论。已成功输出不应为更新文档或CI而重跑。
