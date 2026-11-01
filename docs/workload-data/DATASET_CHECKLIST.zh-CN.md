@@ -1,5 +1,42 @@
 # 数据集逐项验证清单
 
+### SWE-smith 当前补接入记录（2026-11-02）
+
+- [x] 复用已有24条完整作者历史轨迹，保留原始消息、patch与历史结果；共3,083,863字节，服务器回查未新增下载或模型调用。
+- [x] 补充原始任务发布版本、11份分片身份及复用获取入口；夹具检查通过，不代表服务器已下载或执行原题。
+- [x] 在服务器核对官方源码：原patch引入缺陷，gold模式反向应用，模型修复正向应用；不能直接复用SWE-bench参考答案映射。
+- [x] 11份原始分片全部取得并逐份核验官方LFS身份，共277,767,206字节；公共`--verify-only`通过。服务器直连HF失败，使用4MiB分块内存中转，本地未保存原数据。直接下载分支尚未在服务器验证。
+- [x] 固定原第一分片前三条。第三条原issue为空，保留、不换题。见[原题准备回执](validation/swesmith-original-first3-preparation-20261102.json)。
+- [x] 公共源码`iter_workload`、准备索引和未修改的研究消费端在服务器对原前三条回查一致，七字段完整恢复，缺陷patch和测试划分不进入模型输入，索引未被读取修改；仍不代表wheel或原生评分通过。
+- [x] 公共读取器遍历11份原分片全部59,136条任务，逐条七字段合同检查通过；这是读取验证，不是全量Agent执行。
+- [ ] 原生Agent、官方评分及公共入口与研究端接通验证。
+
+当前专用CPU为ARM64；官方容器创建与评分路径显式请求x86_64。尚未验证兼容执行，不能仅凭profile支持ARM镜像就宣称可跑。见[源码语义审计](validation/swesmith-original-semantics-audit-20261102.json)。
+
+原始任务获取与读取（仅准备，不运行Agent）：
+
+```bash
+python scripts/prepare_swesmith_original_assets.py --output /external/swesmith
+python scripts/prepare_swesmith_original_assets.py --output /external/swesmith --verify-only
+```
+
+读取时以`/external/swesmith/data`为`data_root`（通用获取器在外层增加`data/`目录），显式选择原分片，不需重新构造prompt：
+
+```python
+from pathlib import Path
+from vllm_hust_workload_data import iter_workload
+from vllm_hust_workload_data.swesmith import restore_original_task
+
+for record in iter_workload("SWESMITH", data_root=Path("/external/swesmith/data"),
+                            files=["data/train-00000-of-00011.parquet"], limit=3):
+    original_task = restore_original_task(record)
+    # original_task交给原生执行器；不得把patch或测试划分拼进模型输入。
+```
+
+需要安装公共数据包的`data`可选依赖。原生Agent与评分的可运行命令仍待环境验证，不把以上读取命令写成benchmark完成。
+
+历史轨迹不是本次原生实跑，SWESMITH仍未完成、不得打来源完成勾。证据见[部分复用回执](validation/swesmith-author-history-reuse-20261102.json)。原始轨迹及研究分析不提交到公开仓库。
+
 ## 完成口径：来源与原生协议分别记录
 
 验证单位是“来源＋明确的官方原生协议”。来源打勾表示其列明的交付协议已可使用并有固定原题实跑证据，不表示该来源全部可选任务、模态或全量模型评测完成。
@@ -1273,7 +1310,7 @@ TB；服务器/data约1.42TB可用，未缩小语料。ChartQA当前两卡主机
 | OPENMATH2                  | [x] 固定原始语料profile已交付                  | 3个固定原分片全部1309949条字段/索引、9条原问题生成与保存核验、实际CI包及研究回读通过；其余29分片未验证，不宣称数学质量评测。                                                                                                                                                                                                                                                                                                                                                             |
 | OPENTHOUGHTS3              | [x] 原语料续写交付                             | 固定三分片30000行/索引保真，三域各3条NPU续写及保存审计、实际CI46载荷/18研究回读通过；九条均预算耗尽无最终答案，不作质量或全120万条执行结论。[回执](validation/openthoughts3-native-delivery-20261027.json)                                                                                                                                                                                                                                                                               |
 | OPENCODE                   | [x] 固定原始代码语料profile已交付              | 3个固定原分片全部300000条九字段/索引、9条原问题生成及保存核验、实际CI包57载荷和研究侧回读通过；未执行代码或评判正确率，其余47分片未验证。                                                                                                                                                                                                                                                                                                                                                |
-| SWESMITH                   | [ ] 待开展                                     | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| SWESMITH                   | [ ] 进行中                                     | 11份原分片/59,136条读取通过，固定前三条公共与研究端回查一致；原生Agent/评分及wheel待验                                                                                                                                                                                                                                                                                                                                                                                                   |
 | WORKARENA                  | [ ] 待开展                                     | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 | APPWORLD                   | [x] 固定原三题原生流程与消费交接完成           | 公共入口141步、官方评分三题各1/5且均失败；28缓存响应复用＋113新增HTTP200。14696原文件、实际CI71运行载荷及732原索引上三题公共/研究完整回读已核验。不代表全量、高分或性能；见[交付回执](validation/appworld-native-delivery-20261030.json)。                                                                                                                                                                                                                                               |
 | SCIENCEWORLD               | [x] 固定原生抽样交付完成                       | 原生9个episode/464次NPU调用及保存作者评分核验完成；7207原始记录全字段/索引、9实际CI研究回读、51安装载荷与CI闭环通过。入口支持全部30类及原生完整test。严格新环境文本重放差异保留，非确定性复现或质量/性能验收。[交付证据](validation/scienceworld-original-native-delivery-20261027.json)。                                                                                                                                                                                               |
@@ -2028,7 +2065,7 @@ ID、数据版本、模型、执行器、评分器、终态、失败原因和脱
 | [x]  | STRUCTEVAL           | structured-generation                                                                                                                                | 官方文件SHA已核验                                | 修正后组件回查50原题                       | Text→JSON原50条全部完成                                       | 官方语法/路径均分0.9616，3条未满分                            | [完整子集回执](validation/structeval-text-json-full-npu-20261022.json)，其他格式/转换未跑                                                                                                                                                                                           |
 | [ ]  | SWE_BENCH            | repository-agent-loop                                                                                                                                | 待复核                                           | 待复核                                     | 未跑                                                          | 未跑                                                          | 待重新核验                                                                                                                                                                                                                                                                          |
 | [ ]  | SWE_VERIFIED         | repository-agent-loop                                                                                                                                | 服务器已核验选定原文件                           | 原0/1/2三条输入/参考往返                   | 原生任务未跑                                                  | 未评分                                                        | [服务器读取记录](PUBLIC_ASSET_SERVER_READINESS.zh-CN.md)，非任务执行；原生环境/全量/最终交接未完                                                                                                                                                                                    |
-| [ ]  | SWESMITH             | repository-agent-loop                                                                                                                                | 待复核                                           | 待复核                                     | 未跑                                                          | 未跑                                                          | 待重新核验                                                                                                                                                                                                                                                                          |
+| [ ]  | SWESMITH             | repository-agent-loop                                                                                                                                | 11份原始任务分片已取得                           | 全59,136条读取通过，原七字段保留           | 未跑原生Agent                                                 | 未跑官方评分                                                  | [准备与接通证据](validation/swesmith-original-first3-preparation-20261102.json)；amd64执行环境在ARM64上未验证，不打完成勾                                                                                                                                                           |
 | [x]  | TAUBENCH             | policy-constrained-service                                                                                                                           | 官方归档SHA已核验                                | 原生任务引用同三条                         | telecom_full 3/3正常结束                                      | 官方环境reward 1、1、0                                        | [完整引用交接回执](validation/tau2-reference-handoff-npu-20261022.json)，其他domain/全量未跑                                                                                                                                                                                        |
 | [ ]  | TOOLACE              | structured-generation<br>tool-call-generation                                                                                                        | 服务器已核验选定原文件                           | 原0/1/2三条输入/参考往返                   | 不适用：历史对话/元数据                                       | 不适用：无原生任务评分                                        | [服务器读取记录](PUBLIC_ASSET_SERVER_READINESS.zh-CN.md)，非任务执行；原生环境/全量/最终交接未完                                                                                                                                                                                    |
 | [ ]  | TOOLBENCH            | application-api-workflow                                                                                                                             | 待复核                                           | 待复核                                     | 未跑                                                          | 未跑                                                          | 待重新核验                                                                                                                                                                                                                                                                          |

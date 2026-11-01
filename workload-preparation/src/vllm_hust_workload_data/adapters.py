@@ -189,6 +189,10 @@ def adapt_row(
     source_id: str, row: dict, *, source: dict, spec: dict, index: int
 ) -> WorkloadRecord:
     """Projection is explicit/allowlisted; outcome fields never become task inputs."""
+    if spec["mapping"] == "swesmith_original_tasks":
+        from .swesmith import adapt_case
+
+        return adapt_case(row, source=source, index=index)
     if spec["mapping"] == "mlagentbench_original_registry":
         from .mlagentbench import adapt_case
 

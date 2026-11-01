@@ -21,6 +21,10 @@
     {"source_id": "PAIO-SEMANTIC-SIMILAR-5000", "asset_group": "enterprise-private-requests", "related_workload_ids": [], "boundary": "Semantic similarity is not exact-prefix or KV reuse; preserve original private requests without rewriting."}
   ],
   "source_entrypoints": {
+    "SWESMITH": [
+      {"role": "prepare_assets", "path": "scripts/prepare_swesmith_original_assets.py", "scope": "Fixed11 original task shards with publisher LFS identities; server verify-only qualified; direct server network acquisition and native Agent/scoring not yet qualified"},
+      {"role": "original_profile", "path": "configs/workload-native/swesmith-original-task-assets.json", "scope": "Original canonical task release, distinct from historical author trajectories; fixed first3, empty original issue preserved, bug patch reference semantics retained"}
+    ],
     "DAILYTALK": [
       {"role": "original_profile", "path": "configs/workload-native/dailytalk-guo-batch-protocol.json", "scope": "Declared original publisher history-Guo batch inference protocol, fixed complete-dialogue validation and explicit non-quality-score boundary"},
       {"role": "prepare_assets", "path": "scripts/prepare_dailytalk_original_metadata.py", "scope": "Pinned original transcripts, maps and lexicons; no synthetic requests"},

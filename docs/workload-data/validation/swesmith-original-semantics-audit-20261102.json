@@ -1,0 +1,21 @@
+{
+  "source_id": "SWESMITH",
+  "status": "OFFICIAL_SOURCE_SEMANTICS_SERVER_VERIFIED_NOT_NATIVE_EXECUTION",
+  "source_checkbox_eligible": false,
+  "author_revision": "9b74ac08118a85c39c356802f7961893af73e07f",
+  "server_receipt": "/root/swe-bench/docker-data/swesmith-official-semantics-20261102-001/audit-public.json",
+  "reviewed_original_files": ["swesmith/profiles/base.py", "swesmith/harness/eval.py", "swesmith/harness/utils.py", "swesmith/harness/grading.py"],
+  "original_dataset_patch": "Bug-inducing patch, not the forward repair answer",
+  "official_gold_protocol": "eval.py selects instance patch; utils.py applies it with --reverse when is_gold is true",
+  "official_candidate_protocol": "Candidate model repair applied forward, then original test scoring",
+  "adapter_constraint": "Do not map original patch to a forward SWE-bench reference repair or expose it as a model answer",
+  "native_environment": "get_container and run_patch_in_container explicitly request linux/x86_64; image name/profile architecture support alone does not establish compatible native execution",
+  "current_cpu_architecture": "aarch64",
+  "architecture_compatibility_qualified": false,
+  "official_dockerhub_tag_metadata_url": "https://hub.docker.com/v2/repositories/jyangballin/swesmith.x86_64.oauthlib_1776_oauthlib.1fd52536/tags/latest/",
+  "official_dockerhub_tag_architecture": "amd64",
+  "official_dockerhub_tag_compressed_bytes": 1336026495,
+  "server_manifest_probe": "Docker registry v2 network timeout; no image pulled and no native execution claimed",
+  "new_model_calls": 0,
+  "scoring_executed": false
+}

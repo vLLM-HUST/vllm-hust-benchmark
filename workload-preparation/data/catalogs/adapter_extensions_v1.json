@@ -2,6 +2,15 @@
   "version": "adapter-extensions/v1",
   "boundary": "Field contracts from publisher metadata/docs. No real source payload downloaded or full adapter validation claimed.",
   "adapters": {
+    "SWESMITH": {
+      "kind": "native_environment_dataset", "mapping": "swesmith_original_tasks",
+      "input_fields": ["problem_statement", "repo", "image_name"],
+      "required_fields": ["instance_id", "patch", "FAIL_TO_PASS", "PASS_TO_PASS", "image_name", "repo", "problem_statement"],
+      "outcome_fields": ["patch", "FAIL_TO_PASS", "PASS_TO_PASS"],
+      "annotation_fields": [], "id_field": "instance_id",
+      "requirements": ["Original bug patch is not a forward repair reference", "Preserve empty issues without filtering or synthetic fallback; official Agent and scoring remain separate"],
+      "status": "ORIGINAL_TASK_READER_IMPLEMENTED_NATIVE_EXECUTION_PENDING"
+    },
     "MLAGENTBENCH": {
       "kind": "task_dataset", "mapping": "mlagentbench_original_registry",
       "input_fields": ["research_problem", "benchmark_folder_name"],

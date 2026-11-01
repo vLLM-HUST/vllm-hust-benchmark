@@ -5,6 +5,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1] / "workload-preparation"
 DATA_MODULES = {
+    "swesmith",  # Original repository task/bug-patch/test partitions only, no execution.
     "mlagentbench",  # Original task registry/software references; no Agent or scientific execution.
     "dailytalk",  # Original phoneme/text/speaker/emotion and dialogue/reference relations only.
     "libritts",  # Original text/reference-wave pairs and chapter IDs only; no synthesis.
@@ -61,6 +62,24 @@ DATA_MODULES = {
 def test_only_data_modules_are_included():
     actual = {path.stem for path in (ROOT / "src/vllm_hust_workload_data").glob("*.py")}
     assert actual == DATA_MODULES
+
+
+def test_swesmith_reader_has_only_data_record_imports():
+    import ast
+
+    tree = ast.parse(
+        (ROOT / "src/vllm_hust_workload_data/swesmith.py").read_text("utf-8")
+    )
+    assert {
+        node.module for node in ast.walk(tree) if isinstance(node, ast.ImportFrom)
+    } == {"copy", "records"}
+    assert not any(isinstance(node, ast.Import) for node in ast.walk(tree))
+    assert not any(
+        isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Name)
+        and node.func.id in {"eval", "exec", "compile", "__import__"}
+        for node in ast.walk(tree)
+    )
 
 
 def test_mlagentbench_reader_has_no_model_execution_network_or_research_imports():
