@@ -520,7 +520,7 @@ jobs:
       - name: SWE-bench shared author software fixtures, no tasks or code execution
         run: python -m pytest -q tests/test_swebench_author_source.py tests/test_mind2web_author_source.py tests/test_mind2web_original_protocol.py tests/test_mind2web_original_tasks.py tests/test_mind2web_original_runner.py tests/test_bixbench_author_source.py tests/test_bixbench_original_preparation.py tests/test_bixbench_original_agent.py tests/test_bixbench_original_grade_input.py tests/test_bixbench_original_grader.py tests/test_multiagentbench_original_assets.py tests/test_multiagentbench_adapter.py tests/test_marble_evaluator_compat.py tests/test_marble_author_source.py tests/test_marble_original_configs.py tests/test_marble_cpu_recipe.py
       - name: LJSpeech archive, author and native-entry fixtures, no audio or models
-        run: python -m pytest -q tests/test_ljspeech_original_assets.py tests/test_ljspeech_vits_author_source.py tests/test_ljspeech_vits_original_npu.py workload-preparation/tests/test_ljspeech.py
+        run: python -m pytest -q tests/test_ljspeech_original_assets.py tests/test_ljspeech_vits_author_source.py tests/test_ljspeech_vits_original_npu.py tests/test_ljspeech_native_delivery_receipt.py workload-preparation/tests/test_ljspeech.py
       - name: MARBLE auxiliary-client plan and version contracts, no model or device imports
         run: python -m pytest -q tests/test_marble_auxiliary_client.py tests/test_marble_keybert_npu.py tests/test_marble_keybert_transport.py tests/test_marble_research_local_binding.py tests/test_marble_original_research_runner.py
       - name: DailyTalk original preparation contracts, no audio, weights or synthesis

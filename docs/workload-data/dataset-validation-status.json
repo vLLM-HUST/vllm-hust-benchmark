@@ -5332,12 +5332,12 @@
     },
     "LJSPEECH": {
       "scope": "public",
-      "delivery_kind": "review_original_source_protocol",
-      "status": "IN_PROGRESS",
-      "checked": false,
+      "delivery_kind": "original_vits_single_speaker_tts_generation",
+      "status": "AVAILABLE",
+      "checked": true,
       "legacy_checked": false,
       "existing_receipt": null,
-      "delivery_receipt": null,
+      "delivery_receipt": "docs/workload-data/validation/ljspeech-native-fixed3-20261101.json",
       "public_asset_preparer": "scripts/prepare_ljspeech_original_assets.py",
       "preparation_receipt": "docs/workload-data/validation/ljspeech-original-readiness-20261029.json",
       "all13100_original_text_and_wave_relations_verified": true,
@@ -5353,7 +5353,8 @@
       "native_entry": "scripts/run_ljspeech_vits_original_npu.py",
       "native_fixed3_receipt": "docs/workload-data/validation/ljspeech-native-fixed3-20261101.json",
       "original_fixed3_npu_synthesis_and_independent_wave_audit_verified": true,
-      "blocker": "Original13100 text/WAV pairs and prior actual CI/public/research readbacks verified. Original VITS software and checkpoint pinned. Public native entry executed fixed first3 original normalized texts on Ascend910B2 FP32;3 complete waveforms and independent RIFF/input/reference relations passed, no truncation or question replacement. Official generation controls retained, compatibility environment and seed disclosed. Final current CI artifact/software handoff qualification remains pending; source not yet counted. No MOS, full13100 synthesis or engine-performance claim."
+      "current_ci_research_handoff_verified": true,
+      "blocker": null
     },
     "BEIR_SCIFACT": {
       "scope": "public",
