@@ -44,7 +44,7 @@ def test_native_partial_progress_binds_executed_entries_and_preserves_gaps():
     assert scientific["independent_audit_program_executions"] == 0
 
 
-def test_partial_scientific_run_never_promotes_whole_source():
+def test_source_promotion_has_separate_complete_native_and_handoff_receipt():
     ledger = json.loads(
         (DOCS / "dataset-validation-status.json").read_text(encoding="utf-8")
     )
@@ -53,5 +53,13 @@ def test_partial_scientific_run_never_promotes_whole_source():
         entry["current_native_progress"]
         == "docs/workload-data/validation/scienceagentbench-original-fixed3-native-progress-20261101.json"
     )
-    assert entry["checked"] is False
-    assert entry["delivery_receipt"] is None
+    final = json.loads((ROOT / entry["delivery_receipt"]).read_text(encoding="utf-8"))
+    assert entry["checked"] is True and final["source_checkbox_eligible"] is True
+    assert final["original_instance_ids"] == [1, 2, 3]
+    assert final[
+        "all_three_generated_programs_executed_and_original_terminal_results_retained"
+    ]
+    assert final["native_evidence"].endswith(
+        "scienceagentbench-fixed3-saved-audit-20261101.json"
+    )
+    assert final["original_rows_roundtripped_and_public_research_readbacks"] == 102

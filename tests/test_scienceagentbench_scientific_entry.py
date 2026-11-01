@@ -1,6 +1,7 @@
 """Public orchestration helpers, no Docker/model calls in CI."""
 
 import importlib.util
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -107,3 +108,35 @@ def test_actual_ci_handoff_preserves_every_original_row():
     assert report["three_native_entries_discoverable"]
     assert not report["research_modified_or_observation_started"]
     assert report["new_model_calls"] == 0
+
+
+def test_final_delivery_requires_native_execution_and_actual_handoff():
+    docs = entry.ROOT / "docs/workload-data"
+    final = json.loads(
+        (
+            docs / "validation/scienceagentbench-fixed3-native-delivery-20261101.json"
+        ).read_text(encoding="utf-8")
+    )
+    native = json.loads(
+        (entry.ROOT / final["native_evidence"]).read_text(encoding="utf-8")
+    )
+    handoff = json.loads(
+        (entry.ROOT / final["research_handoff_evidence"]).read_text(encoding="utf-8")
+    )
+    assert final["source_checkbox_eligible"] is True
+    assert final["qualified_source_commit"] == handoff["source_commit"]
+    assert final["qualified_cpu_smoke_run"] == handoff["run_id"]
+    assert final["original_instance_ids"] == native["original_case_ids"] == [1, 2, 3]
+    assert final["original_codebert_scores"] == native["original_codebert_scores"]
+    assert final["original_success"] == native["original_success"] == [0, 0, 0]
+    assert (
+        final["original_rows_roundtripped_and_public_research_readbacks"]
+        == handoff["public_research_readbacks"]
+        == 102
+    )
+    assert final["remaining_modes"] and not final["quality_or_engine_performance_claim"]
+    code = (entry.ROOT / final["scientific_entry"]).read_text(encoding="utf-8")
+    assert (
+        hashlib.sha256(code.encode()).hexdigest()
+        == final["public_scientific_orchestrator_git_sha256"]
+    )

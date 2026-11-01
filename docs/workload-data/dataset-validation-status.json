@@ -1868,12 +1868,12 @@
     },
     "SCIENCEAGENTBENCH": {
       "scope": "public",
-      "delivery_kind": "review_original_source_protocol",
-      "status": "IN_PROGRESS",
-      "checked": false,
+      "delivery_kind": "original_single_turn_fixed3_native_scientific_protocol",
+      "status": "AVAILABLE",
+      "checked": true,
       "legacy_checked": false,
       "existing_receipt": "docs/workload-data/validation/public-original-assets-server-reader-20261023.json",
-      "delivery_receipt": null,
+      "delivery_receipt": "docs/workload-data/validation/scienceagentbench-fixed3-native-delivery-20261101.json",
       "cpu_preparation_receipt": "docs/workload-data/validation/scienceagentbench-cpu-preparation-20261024.json",
       "original_task_metadata_preparation_checked": true,
       "current_fixed3_original_scientific_assets": {
@@ -1989,11 +1989,14 @@
       "official_verified_evaluation_entry": "python -m evaluation.harness.run_evaluation --split verified",
       "verified_evaluation_code_review": "Pinned c26e151ed601ba109dc4d35e057ff8e73fec469d harness explicitly accepts --split/--dataset_name; its main forwards split to load_dataset. Reuse it rather than replacing the evaluator. Legacy run_infer.py still hardcodes validation, and legacy LLMEngine routes non-gpt/non-o1 names to Bedrock; do not pass Qwen directly or rename it as GPT.",
       "scientific_assets_distribution_boundary": "Publisher README requires private benchmark_verified.zip and prohibits online redistribution of unpacked artifacts. Only metadata, acquisition instructions and entry code belong in the public repository.",
-      "non_npu_preparation_checked": false,
+      "non_npu_preparation_checked": true,
       "current_dependency_executor_audit": "docs/workload-data/validation/scienceagentbench-original-library-audit-20261101.json",
       "current_auxiliary_metric_control": "docs/workload-data/validation/scienceagentbench-codebert-original-npu-control-20261101.json",
       "current_native_progress": "docs/workload-data/validation/scienceagentbench-original-fixed3-native-progress-20261101.json",
-      "blocker": "Original verified cases1/2/3 generated on existing14B NPU with original GPT-chat single-turn budget/sampling/prompts; local price explicitly null. Actual saved programs scored by original CodeBERT on NPU,9 forwards. Original ARM64 scientific base and cases2/3 instance recipes built, dependencies checked; UID1000 reference-isolated network-none grading verified. Cases2/3 reached original failing-program terminal branches with actual auxiliary scores retained, not successful scientific solutions. Added missing optional original XLSX reader openpyxl3.1.5 without regenerating any answer or score. Case1 task-internal neural execution scope/backend remains pending, as do final native orchestration/current artifact and consumer qualification; source unchecked. Original102 input evidence retained, no old validation tasks or GPT alias, no model-code fixes for a better grade."
+      "current_fixed3_saved_audit": "docs/workload-data/validation/scienceagentbench-fixed3-saved-audit-20261101.json",
+      "current_ci_research_handoff": "docs/workload-data/validation/scienceagentbench-current-ci-research-handoff-20261101.json",
+      "delivery_scope": "Original verified fixed first3 single-turn cases: NPU generation and original CodeBERT metric, isolated original scientific program execution and terminal scoring; all3 program failures retained. Current CI wheel installed and78 payloads matched; all102 original12-field records and public/research index reads verified. Full102 scientific execution and other Agent branches remain unexecuted; no positive quality or engine performance claim.",
+      "blocker": null
     },
     "DS1000": {
       "historical_generation_reuse_preparer": "scripts/prepare_ds1000_official_samples.py",

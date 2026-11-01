@@ -50,8 +50,9 @@ def test_dependency_audit_preserves_original_scoring_and_pending_delivery():
     assert (
         entry["current_dependency_executor_audit"] == "docs/workload-data/" + audit_path
     )
-    assert entry["checked"] is False
-    assert entry["delivery_receipt"] is None
+    final = json.loads((ROOT / entry["delivery_receipt"]).read_text(encoding="utf-8"))
+    assert entry["checked"] is True and final["source_checkbox_eligible"] is True
+    assert final["native_evidence"] != "docs/workload-data/" + audit_path
 
 
 def test_owned_executor_control_does_not_claim_scientific_environment():

@@ -88,5 +88,6 @@ def test_real_control_is_bound_to_executed_entry_not_native_delivery():
         (docs / "dataset-validation-status.json").read_text(encoding="utf-8")
     )["delivery_inventory"]["SCIENCEAGENTBENCH"]
     assert source["current_auxiliary_metric_control"] == receipt_path
-    assert source["checked"] is False
-    assert source["delivery_receipt"] is None
+    final = json.loads((root / source["delivery_receipt"]).read_text(encoding="utf-8"))
+    assert source["checked"] is True and final["source_checkbox_eligible"] is True
+    assert final["native_evidence"] != receipt_path
