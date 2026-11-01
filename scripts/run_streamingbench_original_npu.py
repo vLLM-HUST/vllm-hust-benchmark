@@ -33,6 +33,23 @@ CLASSES = {
 }
 
 
+def local_video_messages(messages):
+    """Normalize author local-file URI for Decord, without altering model text."""
+    normalized = deepcopy(messages)
+    for message in normalized:
+        for part in message.get("content", []):
+            if isinstance(part, dict) and part.get("type") == "video":
+                path = part.get("video")
+                if isinstance(path, str) and path.startswith("file://"):
+                    local = path[len("file://") :]
+                    if not local or not Path(local).is_file():
+                        raise ValueError(
+                            "author local video URI must resolve to a file"
+                        )
+                    part["video"] = local
+    return normalized
+
+
 def groups(rows):
     for row in rows:
         yield from row if isinstance(row, list) else [row]
@@ -336,6 +353,10 @@ def run(args):
             with redirect_stdout(log):
                 module = ModuleType("explicit_streamingbench_qwen2vl")
                 exec(program, module.__dict__)
+                original_vision_info = module.process_vision_info
+                module.process_vision_info = lambda messages: original_vision_info(
+                    local_video_messages(messages)
+                )
                 model = module.Qwen2VL()
                 module.model = module.model.to(args.device)
                 if any(

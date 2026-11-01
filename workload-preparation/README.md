@@ -1245,6 +1245,8 @@ stream结果强转成SQA嵌套输入；这部分尚未核验，不计完成。
 
 作者CLI仅分派MiniCPM-V/MiniCPMo；直接传Qwen2-VL会落到基类，不能当成有效推理。`scripts/run_streamingbench_original_npu.py`明确接作者发布的Qwen2-VL类及原`StreamingBench`／`StreamingBenchSQA`／`StreamingBenchProactive`循环，保留原时间窗、前序参考上下文、主动轮询、fps表达式、max_pixels151200及128-token输出预算；CUDA／FlashAttention2和远程权重绑定改为明确NPU／SDPA／固定本地权重。`--attention-backend eager`仅作为显式兼容选项，不自动切换后端或减小原输入。权重先加载再整体移到NPU，全部神经权重必须在NPU，不启用CPU推理或自动offload。
 
+本地视频路径兼容：作者传给视觉工具的`file://./videos/…`在当前Decord后端不能直接打开。入口仅在调用视觉解码工具前，将其规范化为指向同一已存在文件的本地路径；传给模型聊天模板的原消息不变，帧率、像素上限、原媒体和时间窗均不变。首次原生尝试的解码失败保留；修复后的原片段CPU解码已验证，但不能据此声明完整NPU推理和评分通过。
+
 复用OVO已验证的Qwen2-VL-7B固定工件身份及同族运行环境作为候选：Python3.12.13、vendor
 torch2.10.0+cpu／torch-npu2.10.0.post4、transformers5.5.4、qwen-vl-utils0.0.8、decord0.6.0、ffmpeg4.4.8，并准备ffmpeg-python和原评分器依赖。`+cpu`版本标签不代表在CPU推理；本入口的新协议尚未实际加载模型验证，不把同族环境复用当作新协议成功。不要覆盖已有模型服务环境；调用前由操作者取得空闲NPU窗口，不自动停止其他服务。
 

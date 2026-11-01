@@ -26,6 +26,47 @@ answer = model.generate(max_new_tokens=128)
 """
 
 
+def test_local_video_uri_transport_preserves_author_messages(tmp_path):
+    video = tmp_path / "original.mp4"
+    video.write_bytes(b"fixture-not-real-video")
+    messages = [
+        {
+            "role": "user",
+            "content": [
+                {
+                    "type": "video",
+                    "video": f"file://{video}",
+                    "fps": 1.0,
+                    "max_pixels": 151200,
+                },
+                {"type": "text", "text": "unchanged original prompt"},
+            ],
+        }
+    ]
+    converted = runner.local_video_messages(messages)
+    assert converted[0]["content"][0] == {
+        "type": "video",
+        "video": str(video),
+        "fps": 1.0,
+        "max_pixels": 151200,
+    }
+    assert converted[0]["content"][1] == messages[0]["content"][1]
+    assert messages[0]["content"][0]["video"].startswith("file://")
+
+
+def test_missing_local_video_is_not_replaced(tmp_path):
+    with pytest.raises(ValueError, match="must resolve"):
+        runner.local_video_messages(
+            [
+                {
+                    "content": [
+                        {"type": "video", "video": f"file://{tmp_path / 'missing.mp4'}"}
+                    ]
+                }
+            ]
+        )
+
+
 @pytest.mark.parametrize("attention", ["sdpa", "eager"])
 def test_only_checkpoint_device_and_attention_are_rebound(attention):
     loads = []
