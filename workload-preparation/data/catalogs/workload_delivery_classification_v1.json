@@ -21,6 +21,11 @@
     {"source_id": "PAIO-SEMANTIC-SIMILAR-5000", "asset_group": "enterprise-private-requests", "related_workload_ids": [], "boundary": "Semantic similarity is not exact-prefix or KV reuse; preserve original private requests without rewriting."}
   ],
   "source_entrypoints": {
+    "MULTIAGENTBENCH": [
+      {"role": "generation", "path": "scripts/run_marble_original_research.py", "scope": "Original fixed3 Research tasks and original iterations with disclosed local NPU transports; previous attempt interrupted, not full native delivery"},
+      {"role": "saved_output_reuse_audit", "path": "scripts/audit_marble_original_research_saved.py", "scope": "Read-only process birth and saved queue status audit; stale RUNNING does not prove liveness, no queued request execution or inference authorization"},
+      {"role": "original_profile", "path": "configs/workload-native/marble-author-source.json", "scope": "Pinned original author software; other four scenarios require their own native environments"}
+    ],
     "SWESMITH": [
       {"role": "prepare_assets", "path": "scripts/prepare_swesmith_original_assets.py", "scope": "Fixed11 original task shards with publisher LFS identities; server verify-only qualified; direct server network acquisition and native Agent/scoring not yet qualified"},
       {"role": "original_profile", "path": "configs/workload-native/swesmith-original-task-assets.json", "scope": "Original canonical task release, distinct from historical author trajectories; fixed first3, empty original issue preserved, bug patch reference semantics retained"}

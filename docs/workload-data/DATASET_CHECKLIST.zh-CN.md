@@ -1,5 +1,14 @@
 # 数据集逐项验证清单
 
+### MultiAgentBench 原生运行恢复核对（2026-11-02）
+
+- [x] 核验原父进程及子进程均已退出；旧状态文件的`RUNNING`不是当前运行证据。
+- [x] 两端逐字节对账保留4条原模型HTTP200返回及4条关键词返回，没有重复推理。
+- [x] 区分42条未转发请求与1条已claim但无保存返回的请求；不向已退出的消费者补发43条请求。
+- [ ] 完成固定前三条原生协议、judge资格验证、官方评分及原生结果交接。
+
+原第0条CLI曾以1退出，不能据此归因模型质量。原状态、请求、返回与失败均保留。见[恢复核对回执](validation/multiagentbench-native-recovery-audit-20261102.json)。只读检查入口`audit_marble_original_research_saved.py --run-root <原运行目录> --launch-receipt <原启动回执>`不触发推理或恢复操作。
+
 ### SWE-smith 当前补接入记录（2026-11-02）
 
 - [x] 复用已有24条完整作者历史轨迹，保留原始消息、patch与历史结果；共3,083,863字节，服务器回查未新增下载或模型调用。
@@ -1602,7 +1611,7 @@ checkpoint，不能直接填入Qwen文本服务。原评分器要求五条参考
 
 #### MultiAgentBench原Research续跑
 
-MultiAgentBench续跑状态：原Research固定前三题、5/5/3个Agent及各5轮均保持。最后核查原模型与关键词各4个请求/响应已返回；本地转发器随后因620秒RPC超时退出，原CPU父/子进程仍存活，三题完整结果及评分均未完成。NPU有1个已提交/claimed但未保存响应的模型请求，不能盲目重发；CPU额外排队项不算新完成任务。保留全部原响应和失败，不将环境/排队问题当作原题质量失败。原运行目录`/root/marble-original-research-native-runtime-20261031-003`和精确PID/birth见机器清单`MULTIAGENTBENCH.native_research_execution`；不得因超时自动重启Actor或替换题目。
+MultiAgentBench续跑状态（2026-11-02重新核验）：原Research固定前三题、5/5/3个Agent及各5轮不变。原CPU父/子进程已退出，旧`RUNNING`状态不可沿用。CPU保存47个模型请求和4个返回，两端已转发的5个请求及4个HTTP200返回逐字节一致；另有42条未转发请求与1条已claim但无保存返回的请求，不给已退出的消费者补发。关键词4个返回保留。原第0条CLI以1退出，其余流程未收口，不能据此归因模型质量。保留原响应、失败及状态；恢复前先核对请求级消费者与不确定推理，不自动重启Actor或替换题目。原目录`/root/marble-original-research-native-runtime-20261031-003`，证据见[恢复回执](validation/multiagentbench-native-recovery-audit-20261102.json)。
 
 同一CPU/原客户端的独立网络对照显示：`http://arxiv.org/html/2401.00123`连接超时约9.02秒，HTTPS同路径约2.04秒返回200；原论文工具将检索结果URL直接用于HTML抓取，超时为60秒。此对照不是原题URL或所有慢请求的因果证明。现有任务、题目、工具及模型没有改动；已提出仅为后续新执行制作明确披露的同路径HTTPS兼容副本，等待确认，不热修改运行中的任务。
 
