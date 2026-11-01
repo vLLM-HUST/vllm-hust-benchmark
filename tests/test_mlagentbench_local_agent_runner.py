@@ -28,7 +28,10 @@ def test_plan_does_not_open_sources_or_call_model():
 def test_original_default_task_and_full_budgets_retained():
     argv = MODULE.original_arguments(
         SimpleNamespace(
-            model="Qwen/Qwen3-14B", work_root=Path("work"), log_root=Path("log")
+            model="Qwen/Qwen3-14B",
+            work_root=Path("work"),
+            log_root=Path("log"),
+            task="debug",
         )
     )
     options = dict(zip(argv[1::2], argv[2::2]))
@@ -64,6 +67,19 @@ def test_unsafe_host_or_container_cannot_run_agent(status):
         MODULE.check_isolation(status)
 
 
+def test_official_quickstart_task_can_be_selected_without_budget_changes():
+    base = SimpleNamespace(
+        model="Qwen/Qwen3-14B",
+        work_root=Path("work"),
+        log_root=Path("log"),
+        task="debug",
+    )
+    default = MODULE.original_arguments(base)
+    base.task = "cifar10"
+    formal = MODULE.original_arguments(base)
+    assert [(x, y) for x, y in zip(default, formal) if x != y] == [("debug", "cifar10")]
+
+
 def test_zero_capability_no_new_privilege_control():
     MODULE.check_isolation("CapEff:\t0000000000000000\nNoNewPrivs:\t1")
 
@@ -97,6 +113,11 @@ def test_live_start_snapshot_is_bound_to_entry_not_counted_as_delivery():
     fixed = 'status="ORIGINAL_AGENT_RUNNER_RETURNED_REQUIRES_TRACE_AND_ORIGINAL_SCORE_AUDIT",\n        native_agent_tasks_run=1,\n'
     original = 'status="ORIGINAL_AGENT_RUNNER_RETURNED_REQUIRES_TRACE_AND_ORIGINAL_SCORE_AUDIT"\n'
     assert current.count(fixed) == 1
+    assert current.count("        args.task,\n") == 1
+    assert current.count('    parser.add_argument("--task", default="debug")\n') == 1
+    current = current.replace("        args.task,\n", '        "debug",\n').replace(
+        '    parser.add_argument("--task", default="debug")\n', ""
+    )
     assert (
         receipt["entry_sha256"]
         == hashlib.sha256(current.replace(fixed, original).encode()).hexdigest()

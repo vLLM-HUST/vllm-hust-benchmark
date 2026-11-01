@@ -5,10 +5,11 @@
     "MLAGENTBENCH": {
       "kind": "task_dataset", "mapping": "mlagentbench_original_registry",
       "input_fields": ["research_problem", "benchmark_folder_name"],
-      "required_fields": ["case_id", "benchmark_folder_name", "research_problem", "original_registry_case", "original_registry_text", "task_software", "evaluation_assets", "license_assets"],
+      "required_fields": ["case_id", "benchmark_folder_name", "research_problem", "original_registry_case", "original_registry_text", "definition_origin", "definition_file", "original_definition_text", "task_software", "evaluation_assets", "license_assets"],
+      "nullable_fields": ["original_registry_case", "original_registry_text"],
       "outcome_fields": ["evaluation_assets"], "annotation_fields": [], "id_field": "case_id",
-      "requirements": ["Original registered task and all pinned scientific software relations; no generated prompt or implicit scientific-data acquisition", "Native folder tasks outside tasks.json remain official runner choices, not fabricated registry rows"],
-      "status": "ORIGINAL_REGISTRY_ADAPTER_NATIVE_AGENT_AND_RESEARCH_HANDOFF_PENDING"
+      "requirements": ["Original registered aliases and native directory definitions preserve pinned software relations without invented prompts or implicit scientific-data acquisition", "Directory cases follow original get_task_info, not fabricated registry entries or extra datasets; released examples without evaluators are marked"],
+      "status": "ORIGINAL_REGISTRY_AND_NATIVE_DIRECTORY_ADAPTER_FORMAL_TASK_VALIDATION_PENDING"
     },
     "SPOKENWOZ": {
       "kind":"task_dataset", "mapping":"spokenwoz_original_dialogues",

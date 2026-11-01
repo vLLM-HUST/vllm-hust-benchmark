@@ -30,7 +30,7 @@ def original_arguments(args):
     return [
         "MLAgentBench.runner",
         "--task",
-        "debug",
+        args.task,
         "--agent-type",
         "ResearchAgent",
         "--log-dir",
@@ -153,6 +153,7 @@ def main():
     parser.add_argument("--work-root", type=Path, required=True)
     parser.add_argument("--log-root", type=Path, required=True)
     parser.add_argument("--model", required=True)
+    parser.add_argument("--task", default="debug")
     parser.add_argument("--execute", action="store_true")
     print(json.dumps(run(parser.parse_args()), indent=2))
 

@@ -1839,18 +1839,29 @@ for record in records:
 
 ### MLAgentBench：原任务环境准备
 
+- [x] 按作者`get_task_info`两条原生分支补齐读取：1个registry别名和15个真实目录任务定义，服务器逐项核对全部16个入口及原描述字节；未修改的研究消费入口16条读回一致。[原生定义接通回执](validation/mlagentbench-native-definitions-readback-20261102.json)。16是入口数，不是16个独立数据集或论文任务数；`bibtex-generation`、`literature-review-tool`、`llama-inference`缺少发布的`eval.py`，只保留原任务定义，不标为已评分benchmark。
+
+- [ ] 正式固定样本为`cifar10`、`imdb`、`ogbn-arxiv`，见[冻结配置](../../configs/workload-native/mlagentbench-original-directory-fixed3.json)。作者Quick
+  Start使用`--task cifar10`；原默认`debug`虽然共用数据但描述不同，不能代替正式样本。执行入口新增显式`--task`选择，原默认值、步骤及预算不变。
+
 - [x] 原作者版本 `5d71205cc20a8e95d43aa7cb7120e89ca3323e31`
   的138份软件／任务定义、670271字节已校验，79份Python静态解析通过。15个发布目录含示例，不能据此称论文有15个评测任务；原许可、Agent、准备和评价脚本保留。[源码准备回执](validation/mlagentbench-original-source-preparation-20261101.json)。
+
 - [x] 原CIFAR10完整归档170498071字节通过官方MD5校验；50000训练图、10000测试图只在专用隔离CPU容器加载。公共资产及原任务目录准备入口均已实测。[原任务准备回执](validation/mlagentbench-cifar-original-preparation-20261101.json)。软件及数据均在服务器取得，没有在Windows保存数据或权重。
+
 - [x] 独立CPU任务镜像使用已核验的Python3.10.22／aarch64、Torch2.3.0及TorchVision0.18.0；25份真实Agent
   SDK轮子逐个对照官方PyPI校验SHA256，离线扩展镜像构建和真实SDK／原runner导入通过。原LLM及runner文件、两处适配差异保留；没有用假SDK或GPT／Claude别名。[任务镜像回执](validation/mlagentbench-cifar-cpu-image-20261101.json)、[Agent环境回执](validation/mlagentbench-local-agent-preparation-20261101.json)。
+
 - [x] 原五轮科学基线和原任务评分器已完成，评分0.5152，仅用于科学环境核验，不替代Agent。[基线回执](validation/mlagentbench-cifar-original-baseline-20261101.json)。
+
 - [x] 原默认 `debug`／CIFAR10 ResearchAgent 与原评分入口完成：实际NPU模型请求13个，原工具动作4步，容器退出0；原生格式重试耗尽，未提交Final
   Answer，原评分0.3103。失败不换题、不补造答案、不放大原预算，也不称任务效果成功或性能提升。[原执行／评分审计](validation/mlagentbench-default-agent-native-audit-20261102.json)。保留原提示、工具、50步／5小时、编辑4000-token上限、fast0.01参数和原OpenAI-chat分支默认500-token／0.2；本地Qwen3-14B不是作者默认Claude配置。
-- [x] 公共读取适配保留原 `tasks.json` 登记的1个 `debug`
-  定义、原JSON字节、真实任务ID／科学环境文件关系；评价软件独立放在outcome，不拼成聊天请求。目录可选任务不冒充原registry行，底层科学数据是否取得单独核验。
+
+- [x] 公共读取适配保留原registry别名与目录原描述字节、真实原生ID及科学环境文件关系；评价软件独立放在outcome，不拼成聊天请求，底层科学数据是否取得单独核验。
+
 - [x] 本地构建的真实wheel在服务器安装后，81份包文件逐字节校验；全部138原软件资产校验、原任务索引及未修改研究消费入口读回通过，输入／评价引用一致，数据库未变，未运行研究观测／特征或模型。[本地wheel接通回执](validation/mlagentbench-local-wheel-research-readback-20261102.json)。这是本地源码构建包，不冒称GitHub
   CI工件。
+
 - [ ] 回查实际CI工件并完成同一原任务读取／研究接通；补齐正式原生科学任务的固定样本覆盖。当前只有原默认debug场景闭环，不代表论文其余任务或全部原生目录任务，此来源继续不打总勾。
 
 准备入口：
@@ -1871,6 +1882,7 @@ python scripts/prepare_mlagentbench_local_agent.py --action prepare --author-roo
 ```bash
 # 默认只显示计划；仅在下面规定的专用隔离容器中添加 --execute。
 python scripts/run_mlagentbench_local_agent.py --port-root <已验证适配目录> --queue <独立私有队列> --work-root <新的任务工作目录> --log-root <新的任务日志目录> --model <NPU服务实际模型ID>
+# 正式CIFAR10任务在相同参数后添加 --task cifar10；其他冻结任务同理。
 # 原Agent终止后，在同样隔离的CPU容器中，从 <任务工作目录>/cifar10 运行：
 PYTHONPATH=<已验证适配目录> python -m MLAgentBench.eval --log-folder <原任务日志目录> --task debug --output-file <独立评分目录>/results.json
 ```

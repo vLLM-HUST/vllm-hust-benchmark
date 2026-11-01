@@ -76,9 +76,15 @@ def test_packaged_manifest_matches_all_existing_author_pins():
     assert [{k: f[k] for k in keys} for f in public["files"]] == [
         {k: f[k] for k in keys} for f in original["files"]
     ]
-    assert [item["path"] for item in public["files"] if item["role"] == "data"] == [
-        REGISTRY
-    ]
+    definitions = [item["path"] for item in public["files"] if item["role"] == "data"]
+    assert REGISTRY in definitions
+    assert (
+        len(definitions) == 16
+    )  # One alias registry +15 directories, not16 paper tasks.
+    assert all(
+        name == REGISTRY or name.endswith("/scripts/research_problem.txt")
+        for name in definitions
+    )
 
 
 def test_original_registry_case_and_exact_material_relationships(bundle):
@@ -157,6 +163,52 @@ def test_prepared_index_reconstructs_bound_original_case_and_evaluator(bundle):
     assert record.outcome["evaluation_assets"][0]["path"].endswith("/scripts/eval.py")
 
 
+def test_native_directory_case_uses_original_description_not_debug_alias(bundle):
+    root, cases, manifest = bundle
+    name = "MLAgentBench/benchmarks/cifar10/scripts/research_problem.txt"
+    next(item for item in manifest["files"] if item["path"] == name)["role"] = "data"
+    records = list(
+        iter_workload("MLAGENTBENCH", data_root=root, manifest=manifest, files=[name])
+    )
+    assert len(records) == 1
+    record = records[0]
+    assert record.task["task_id"] == "cifar10"
+    assert record.task["input"]["research_problem"] == (root / name).read_text("utf-8")
+    assert (
+        record.task["input"]["research_problem"] != cases["debug"]["research_problem"]
+    )
+    assert record.replay["definition_origin"] == "native_directory"
+    assert record.replay["original_registry_case"] is None
+    assert record.replay["original_registry_text"] is None
+    assert (
+        record.replay["original_definition_text"].encode() == (root / name).read_bytes()
+    )
+
+
+def test_released_directory_without_evaluator_is_not_marked_scored(bundle):
+    root, _, manifest = bundle
+    name = "MLAgentBench/benchmarks/another/scripts/research_problem.txt"
+    path = root / name
+    path.parent.mkdir(parents=True)
+    raw = b"Original released example fixture, not a validated benchmark"
+    path.write_bytes(raw)
+    manifest["files"].append(
+        {
+            "path": name,
+            "role": "data",
+            "bytes": len(raw),
+            "sha256": hashlib.sha256(raw).hexdigest(),
+        }
+    )
+    record = next(
+        iter_workload("MLAGENTBENCH", data_root=root, manifest=manifest, files=[name])
+    )
+    assert record.task["task_id"] == "another"
+    assert record.outcome["evaluation_assets"] == []
+    assert record.outcome["original_evaluator_available"] is False
+    assert record.runtime["execution"] == "not_executed"
+
+
 def test_real_default_case_receipts_keep_native_failure_and_artifact_scope():
     root = Path(__file__).resolve().parents[2]
     directory = root / "docs/workload-data/validation"
@@ -183,3 +235,31 @@ def test_real_default_case_receipts_keep_native_failure_and_artifact_scope():
         is readback["source_checkbox_eligible"]
         is False
     )
+
+
+def test_native_definition_evidence_and_fixed_samples_do_not_inflate_datasets():
+    root = Path(__file__).resolve().parents[2]
+    receipt = json.loads(
+        (
+            root
+            / "docs/workload-data/validation/mlagentbench-native-definitions-readback-20261102.json"
+        ).read_text("utf-8")
+    )
+    profile = json.loads(
+        (
+            root / "configs/workload-native/mlagentbench-original-directory-fixed3.json"
+        ).read_text("utf-8")
+    )
+    assert receipt["original_registry_aliases"] == 1
+    assert receipt["original_native_directory_definitions"] == 15
+    assert receipt["public_and_unchanged_research_records_equal"] == 16
+    assert receipt["source_checkbox_eligible"] is False
+    assert profile["task_ids"] == ["cifar10", "imdb", "ogbn-arxiv"]
+    assert profile["default_debug_alias_is_not_one_of_selected_tasks"] is True
+    assert not set(profile["task_ids"]) & set(
+        receipt["released_definitions_without_evaluator"]
+    )
+    canonical = {item["path"]: item for item in source_spec("MLAGENTBENCH")["files"]}
+    for task in profile["tasks"]:
+        for item in task["original_files"]:
+            assert item["sha256"] == canonical[item["path"]]["sha256"]

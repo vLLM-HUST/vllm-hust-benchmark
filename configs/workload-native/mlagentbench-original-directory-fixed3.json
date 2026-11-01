@@ -1,0 +1,29 @@
+{
+  "source_id": "MLAGENTBENCH",
+  "protocol": "original_directory_tasks_fixed3",
+  "source_revision": "5d71205cc20a8e95d43aa7cb7120e89ca3323e31", "revision_note": "pragma: allowlist secret - pinned original public source revision",
+  "task_ids": [
+    "cifar10",
+    "imdb",
+    "ogbn-arxiv"
+  ],
+  "selection_reason": "Author Quick Start CIFAR10 plus original released text and graph classification tasks; fixed before formal validation, with no replacement of failed cases.",
+  "default_debug_alias_is_not_one_of_selected_tasks": true,
+  "agent_type": "ResearchAgent",
+  "max_steps": 50,
+  "agent_max_steps": 50,
+  "max_time_seconds": 18000,
+  "edit_script_max_tokens": 4000,
+  "max_retries": 5,
+  "history_steps": 3,
+  "observation_history_steps": 3,
+  "model_binding": "Explicit existing NPU model with original supported OpenAI-chat semantics; not author default Claude equivalence",
+  "llm_encoder_judge_device": "NPU_ONLY",
+  "task_internal_nonlanguage_scientific_network_device": "Dedicated isolated CPU allowed",
+  "status": "FORMAL_TASK_VALIDATION_PENDING_NOT_COMPLETED",
+  "tasks": [
+    {"task_id":"cifar10","definition_origin":"native_directory","definition_file":"MLAgentBench/benchmarks/cifar10/scripts/research_problem.txt","original_files":[{"path":"MLAgentBench/benchmarks/cifar10/env/train.py","bytes":3554,"sha256":"1d31d90aae58152e20e222f36721cbe224f96021f4f3fccbddfe619a96bd60ad","identity_note":"pragma: allowlist secret - original public task software digest"},{"path":"MLAgentBench/benchmarks/cifar10/scripts/eval.py","bytes":538,"sha256":"7c0b387a0b25c991045f2edba90cf56c13aa730a4985941ae07593afc5197e51","identity_note":"pragma: allowlist secret - original public task software digest"},{"path":"MLAgentBench/benchmarks/cifar10/scripts/prepare.py","bytes":268,"sha256":"b8e0a19b6d35d5e401579e30ec6947dffb47f96489c9e61ec976fe0bf83b7c39","identity_note":"pragma: allowlist secret - original public task software digest"},{"path":"MLAgentBench/benchmarks/cifar10/scripts/read_only_files.txt","bytes":6,"sha256":"f1cffc9e04f54186b51f98bdd6866dc789a587efe29d7e2d51d4ad637bb8ac77","identity_note":"pragma: allowlist secret - original public task software digest"},{"path":"MLAgentBench/benchmarks/cifar10/scripts/research_problem.txt","bytes":286,"sha256":"19a3fe2fb03b45b14386d74fddac2806827402d0aca6a3e87bf861bc8a373559","identity_note":"pragma: allowlist secret - original public task software digest"}]},
+    {"task_id":"imdb","definition_origin":"native_directory","definition_file":"MLAgentBench/benchmarks/imdb/scripts/research_problem.txt","original_files":[{"path":"MLAgentBench/benchmarks/imdb/env/train.py","bytes":869,"sha256":"8de07d2768f4385ee36ecfa9e2aee84785114b937eee387c968205502a9cc5cd","identity_note":"pragma: allowlist secret - original public task software digest"},{"path":"MLAgentBench/benchmarks/imdb/scripts/eval.py","bytes":584,"sha256":"f75762634131247941c22e783da7f2622b5a1d2e5e6f20be094caec90b6c34a7","identity_note":"pragma: allowlist secret - original public task software digest"},{"path":"MLAgentBench/benchmarks/imdb/scripts/research_problem.txt","bytes":366,"sha256":"af58a7368b9236d45a30551ff8990dfa5ee3168152c2e9a9e3725e8ab93e0f5a","identity_note":"pragma: allowlist secret - original public task software digest"}]},
+    {"task_id":"ogbn-arxiv","definition_origin":"native_directory","definition_file":"MLAgentBench/benchmarks/ogbn-arxiv/scripts/research_problem.txt","original_files":[{"path":"MLAgentBench/benchmarks/ogbn-arxiv/env/train.py","bytes":4649,"sha256":"3d12663360c1159cd6e5adc12df55c5526ed2fc85eb0dd5e224caf80937b7456","identity_note":"pragma: allowlist secret - original public task software digest"},{"path":"MLAgentBench/benchmarks/ogbn-arxiv/scripts/eval.py","bytes":1050,"sha256":"7e9ffe1d585d9839c06c631ad94f8dc9d4c8b9441794313c7647c28c2f0d039b","identity_note":"pragma: allowlist secret - original public task software digest"},{"path":"MLAgentBench/benchmarks/ogbn-arxiv/scripts/prepare.py","bytes":213,"sha256":"42fda9ef244e6b80e79d295f06a285ab272271fb0fa087ac7ef39b7746a7d734","identity_note":"pragma: allowlist secret - original public task software digest"},{"path":"MLAgentBench/benchmarks/ogbn-arxiv/scripts/read_only_files.txt","bytes":10,"sha256":"1e3398eab3c1fcfee2fe7444ab14736c863d6ab87cc7d76cd76ea45b78f3b6d2","identity_note":"pragma: allowlist secret - original public task software digest"},{"path":"MLAgentBench/benchmarks/ogbn-arxiv/scripts/research_problem.txt","bytes":194,"sha256":"9f6731bf6b0b3e6fbc9febd6ef91fd12052b6e042e4247c7ca89115b36030c13","identity_note":"pragma: allowlist secret - original public task software digest"}]}
+  ]
+}
