@@ -1245,7 +1245,7 @@ stream结果强转成SQA嵌套输入；这部分尚未核验，不计完成。
 
 作者CLI仅分派MiniCPM-V/MiniCPMo；直接传Qwen2-VL会落到基类，不能当成有效推理。`scripts/run_streamingbench_original_npu.py`明确接作者发布的Qwen2-VL类及原`StreamingBench`／`StreamingBenchSQA`／`StreamingBenchProactive`循环，保留原时间窗、前序参考上下文、主动轮询、fps表达式、max_pixels151200及128-token输出预算；CUDA／FlashAttention2和远程权重绑定改为明确NPU／SDPA／固定本地权重。`--attention-backend eager`仅作为显式兼容选项，不自动切换后端或减小原输入。权重先加载再整体移到NPU，全部神经权重必须在NPU，不启用CPU推理或自动offload。
 
-本地视频路径兼容：作者传给视觉工具的`file://./videos/…`在当前Decord后端不能直接打开。入口仅在调用视觉解码工具前，将其规范化为指向同一已存在文件的本地路径；传给模型聊天模板的原消息不变，帧率、像素上限、原媒体和时间窗均不变。首次原生尝试的解码失败保留；修复后的原片段CPU解码已验证，但不能据此声明完整NPU推理和评分通过。
+本地视频路径兼容：作者传给视觉工具的`file://./videos/…`在当前Decord后端不能直接打开。入口仅在调用视觉解码工具前，将其规范化为指向同一已存在文件的本地路径；传给模型聊天模板的原消息不变，帧率、像素上限、原媒体和时间窗均不变。首次原生尝试的解码失败保留；修复后已完成原片段CPU解码、固定前三组NPU推理和原评分，不能外推为全量或其他任务模式通过。
 
 复用OVO已验证的Qwen2-VL-7B固定工件身份及同族运行环境作为候选：Python3.12.13、vendor
 torch2.10.0+cpu／torch-npu2.10.0.post4、transformers5.5.4、qwen-vl-utils0.0.8、decord0.6.0、ffmpeg4.4.8，并准备ffmpeg-python和原评分器依赖。`+cpu`版本标签不代表在CPU推理；本入口的新协议尚未实际加载模型验证，不把同族环境复用当作新协议成功。不要覆盖已有模型服务环境；调用前由操作者取得空闲NPU窗口，不自动停止其他服务。
@@ -1264,7 +1264,9 @@ python scripts/run_streamingbench_original_npu.py --author-root /srv/benchmarks/
 默认只校验作者／原问题身份、固定原前三个完整组及运行绑定，列出缺失媒体，不加载模型或创建结果目录。服务器对`real`固定3组／3问题／1个共享原视频，以及`--full`的2252组／2500问题／499视频均验证计划退出0，0模型调用。缺媒体或未核验权重不能计推理完成；先准备原媒体及固定权重，再添加`--execute`执行原循环和原评分器。`--task sqa/proactive`复用对应原循环，尚未实跑；omni／stream接口不支持，不能拿视频协议代替音频或实时流任务。
 
 固定real前三组的原时间窗为0至31／206／403秒。原作者切片函数及公开处理器已在CPU完整执行，输入为3060／18736／36536个token，采样和预算没有缩减。小规模NPU
-SDPA数值控制通过，但尚未证明原Qwen整模型或完整长上下文可运行。原生NPU推理与评分仍待完成，见[准备证据](../docs/workload-data/validation/streamingbench-prefix-preflight-20261101.json)。
+固定前三组原题已完成Qwen2-VL-7B整模型NPU推理、原评分和独立重算，原分数2/3；当前CI软件和原生输入／研究消费核验亦通过，见[交付证据](../docs/workload-data/validation/streamingbench-real-native-delivery-20261101.json)。全量及其他模式未验证，不能据3题报告质量或引擎性能；此前[准备证据](../docs/workload-data/validation/streamingbench-prefix-preflight-20261101.json)保留为历史检查点。
+
+已验证环境：aarch64、Ascend910B2、CANN9.1.0，平台配套Torch2.10.0+cpu／torch_npu2.10.0.post4（计算实际在NPU，不是CPU模型回退），Transformers5.5.4、qwen-vl-utils0.0.8、Decord0.6.0及FFmpeg4.4.8。`ffmpeg-python==0.2.0`是Python绑定，仍须有可执行的`ffmpeg`／`ffprobe`，且CLI支持libx264和AAC；本次以独立目录编译，未覆盖系统安装。Decord在ARM上使用原源码构建并明确设置`DECORD_LIBRARY_PATH`及对应FFmpeg库的`LD_LIBRARY_PATH`；`FORCE_QWENVL_VIDEO_READER=decord`固定实际后端。按所在平台设置可见NPU，程序使用对应逻辑`--device npu:0`；本次逻辑0映射物理4，不应直接照抄物理编号作为逻辑编号。换平台时应先核验厂商Torch／torch_npu／CANN匹配，不能用普通CPU/CUDA环境假称已验证。
 
 若已有**受信本机流程调用原`split_video`生成并审计的缓存**，可选传入`--prefix-cache /srv/cache/streamingbench/prefix-cache.json`，仅支持完整fixed3
 real选择。入口核验清单版本`streamingbench-original-prefix-cache/v1`、原题SHA、原切片函数SHA、原媒体SHA、0起点/原终点、三个文件的大小和SHA，并在评分后复核；按作者原有“文件存在则复用”的分支运行，仍执行全部原问题和评分，不读取已有答案。清单中的`directory`固定为`videos/tmp_60`，文件名和时间必须与原题一致；不能用不受信缓存生产者的自报摘要代替来源真实性。没有合格缓存就不传此项，按原流程生成切片，不能以缩小窗口、减帧或改题代替准备。
