@@ -1,0 +1,50 @@
+{
+  "source_id": "LJSPEECH",
+  "status": "ORIGINAL_VITS_PREPARATION_NOT_NATIVE_SYNTHESIS",
+  "author_repository": "https://github.com/jaywalnut310/vits",
+  "author_revision": "2e561ba58618d021b5b8323d3765880f7e0ecfdb",
+  "identity_note": "pragma: allowlist secret - immutable publisher software revision",
+  "public_source_profile": "configs/workload-native/ljspeech-vits-author-source.json",
+  "public_source_getter": "scripts/prepare_jsonschemabench_author_source.py --source ljspeech-vits --author-root <server-author-root> --action verify",
+  "original_source_files_verified": 23,
+  "original_source_bytes": 127230,
+  "original_python_modules_ast_parsed_without_import": 17,
+  "public_cli_exit_code": 0,
+  "checkpoint": {
+    "filename": "pretrained_ljs.pth",
+    "publisher_folder": "https://drive.google.com/drive/folders/1ksarh-cJf3F5eKJjLVWY0X1j1qsQqiS2",
+    "bytes": 145599717,
+    "observed_sha256": "c94fb49d08ba90c598de16e7d5dec8d26bf225c1cf193a4fba05eb2dbda5a561",
+    "identity_note": "pragma: allowlist secret - observed checkpoint identity, not publisher hash",
+    "publisher_per_file_hash_claim": false,
+    "zip_all_member_crc_verified": true,
+    "safe_weights_only_cpu_deserialization_verified": true,
+    "state_tensors": 838,
+    "state_elements": 36321072,
+    "all_loaded_tensors_cpu": true,
+    "model_executed": false,
+    "original_direct_server_download": "URLError; retained failure, no native execution",
+    "successful_transport": "Official public URL through existing local proxy, exact HTTP ranges relayed in RAM to NPU server; no raw Windows disk file"
+  },
+  "model_calls": 0,
+  "native_tts_verified": false,
+  "cpu_dependency_probe": {
+    "exit_code": 0,
+    "torch": "2.10.0+cpu",
+    "torch_npu": "2.10.0.post4",
+    "numpy": "1.26.4",
+    "scipy": "1.13.1",
+    "Unidecode": "1.1.1",
+    "matplotlib": "3.10.9",
+    "missing": ["phonemizer", "espeak", "espeak-ng", "Cython", "librosa"],
+    "npu_initialized": false,
+    "scope": "Existing isolated DailyTalk dependency probe, not a qualified VITS inference environment"
+  },
+  "source_checkbox_eligible": false,
+  "remaining": [
+    "Qualify original cleaner and inference dependencies for isolated Ascend runtime",
+    "Safely load checkpoint and execute original synthesis on fixed first three source texts without output truncation",
+    "Validate generated waveforms and publish runnable native entry and environment instructions",
+    "Do not replace TTS with ASR or invent MOS quality scores"
+  ]
+}
