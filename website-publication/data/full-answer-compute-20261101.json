@@ -1,0 +1,78 @@
+{
+  "schema": "full-answer-compute-subtotal/v1",
+  "status": "target_matrix_subtotal_recomputed_total_requires_measurement",
+  "coefficients": {
+    "projection_per_position": {
+      "full_attention": 545259520,
+      "linear_attention": 2021130240,
+      "moe_and_router": 2307031040
+    },
+    "causal_qk_av_per_pair": 163840,
+    "vocabulary_per_output": 1017118720
+  },
+  "arms": [
+    {
+      "role": "B0",
+      "run": "joint-b0-r2",
+      "requests": 200,
+      "input_tokens": 282265,
+      "output_tokens": 706796,
+      "necessary_target_positions": 988861,
+      "causal_pairs": 3063790102,
+      "matrix_flops_parts": {
+        "target_projections": 4819135765708800,
+        "target_causal_qk_av": 501971370311680,
+        "target_vocabulary": 718895442821120
+      },
+      "matrix_flops_subtotal": 6040002578841600,
+      "client_seconds": 1425.4634465482086,
+      "chips": 2,
+      "matrix_subtotal_tflops_per_chip": 2.1186101241205453,
+      "effective_flops_total": null,
+      "effective_tflops_per_chip": null,
+      "reference_seconds": null,
+      "efficiency_percent": null,
+      "outline_pass": null
+    },
+    {
+      "role": "B1",
+      "run": "joint-b1-r4",
+      "requests": 200,
+      "input_tokens": 282265,
+      "output_tokens": 661040,
+      "necessary_target_positions": 943105,
+      "causal_pairs": 2763050179,
+      "matrix_flops_parts": {
+        "target_projections": 4596147523584000,
+        "target_causal_qk_av": 452698141327360,
+        "target_vocabulary": 672356158668800
+      },
+      "matrix_flops_subtotal": 5721201823580160,
+      "client_seconds": 699.9029783103615,
+      "chips": 2,
+      "matrix_subtotal_tflops_per_chip": 4.08713921848978,
+      "effective_flops_total": null,
+      "effective_tflops_per_chip": null,
+      "reference_seconds": null,
+      "efficiency_percent": null,
+      "outline_pass": null
+    }
+  ],
+  "matrix_subtotal_rate_gain_percent": 92.91606190102529,
+  "timing_basis": "Original client submission-to-response-drain interval, all overhead retained; no synchronized worker boundary receipt.",
+  "missing_total_work": [
+    "Same-run retained MTP outputs and their necessary KV/hidden dependency closure",
+    "Same-run GDN prefill chunk/state ledger and remaining basic scalar operations"
+  ],
+  "missing_acceptance": [
+    "Matched synchronized uninstrumented timing",
+    "Independent calibrated dependency/resource reference for each full-answer workload/path"
+  ],
+  "convention": "I+O-1 target positions, triangular causal pairs, top8 activated experts; vocabulary for O target decisions. Count global TP2 work once. Exclude padding and rejected speculative work. This subtotal is not complete F or outline C.",
+  "report_path": "reports/full-answer-compute-20261101/README.md",
+  "sources": {
+    "reports/full-answer-joint-20261030/joint-summary.json": "279d0245612d8e66c99e96f0d4b244e9e3efaab3f38a9c10f61b66b52396b094",
+    "reports/full-answer-compute-20261101/model-config.json": "5e4d7f74fec2f360eb9cfbfcd6ec0c4c76e684d3a11caaed259d9fd9bfbc7944",
+    "reports/full-answer-compute-20261101/source-audit.json": "0a684fa978fab1342e8a5496163a64bc5cae248715f2e0b7bd25eeaab11cdfd0"
+  }
+}
