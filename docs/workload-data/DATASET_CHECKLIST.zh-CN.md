@@ -306,6 +306,8 @@ LD_LIBRARY_PATH=/external/ffmpeg/lib python -B scripts/run_videomme_original.py 
 
 ### TemporalWiki演化语料与原生探针评测（进行中，不打来源总勾）
 
+- [x] 隔离兼容环境安装、`pip check`及真实依赖导入通过；未替换系统Torch。执行未修改的原`Datasets.py`与原GPT2分词器，在1,776条changed探针中核验固定前三条，保留原25-token输入/输出、特殊token和左侧padding。证据`temporalwiki-original-dataset-cpu-20261101-001/qualification-public.json`；仅CPU数据处理，0模型调用，仍需权重、NPU评测和官方困惑度结果。
+
 - [x] 重新核验原`evaluation_ppl.py`及GPT2
   baseline配置：原作者支持`checkpoint_path=""`时直接使用基座模型，配置模型为`gpt2-large`，原input/output长度25、batch32。可以继续适配这一明确的原生基座探针协议，不必把未公开的持续训练checkpoint当作该分支的必需前置；不能据此声称复现持续训练模型或改用Qwen聊天。证据`temporalwiki-original-base-probe-review-20261101-001/qualification-public.json`，0模型调用，模型/分词器及NPU原生执行仍待验证。
 
