@@ -1,5 +1,19 @@
 # 数据集逐项验证清单
 
+### DiscoveryBench 隔离执行准备（2026-11-02）
+
+- [x] 原官方依赖在专用CPU独立Docker镜像安装、依赖检查及离线导入通过；19份官方源码身份核对，两个官方CLI在无网络/非root/只读容器中启动通过。实际115项依赖快照已保存，未修改全局环境。
+- [x] 按官方real答案表原顺序固定前三题`archaeology/0/0`、`archaeology/1/0`、`archaeology/10/0`；六份原始文件共2,010,940字节已在CPU侧核对Git
+  blob、大小及SHA256。题目、元数据和数据路径保持原样，参考答案单独保存，未进入Git。
+- [x] 公开子入口`scripts/discoverybench_isolated_python.py`在实际隔离容器完成普通输出和异常输出夹具验证；8项本地边界测试通过。脚本先检查无网络/非root/只读/无额外能力及no-new-privileges，再导入哈希固定的原官方Python工具，不在宿主机执行生成代码。
+- [ ] 原固定前三题的完整Agent、原Python工具调用、NPU模型和官方评分流程，以及最终公共/研究侧结果交接。
+
+该脚本是容器内的Python工具子入口，不是独立的DiscoveryBench
+Agent或评分器。调用者须通过只读挂载提供原官方源码及该脚本，使用已安装官方依赖的Python执行`python -B /boundary/discoverybench_isolated_python.py --source /original`，标准输入为`{"code": "原Agent生成的代码"}`，标准输出为`{"tool_output": "原工具返回字符串"}`；容器须使用`--network none --read-only --user 65534:65534 --cap-drop ALL --security-opt no-new-privileges`，并提供有容量限制的`/tmp`和工作目录tmpfs。容器内不会挂载Docker套接字、模型服务凭据或评分参考。外层Agent仍须保持官方最多5次迭代和最多1次Python执行，不能通过反复启动工具进程增加预算。当前仅夹具验证，不算原题完成；固定任务数据和模型/评分器联调待继续。
+
+原评分CLI硬编码`gpt-4-1106-preview`。若使用本地NPU
+judge，须在调用记录和报告中明确实际模型及评分配置，不能标成官方GPT-4成绩。阶段证据见[原资产与隔离准备回执](validation/discoverybench-original-assets-20261028.json)。
+
 ### LongMemEval-V2 正向记忆流程准备（2026-11-02）
 
 - [x] 451道原题的8个原始字段及两档有序记忆关联已与官方读取器逐项核对；企业/网页两域、small/medium四组代表记忆完整回读（100/500/100/479条轨迹），保留历史状态，不重新构造prompt。

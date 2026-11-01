@@ -152,6 +152,8 @@ on:
       - 'tests/test_appworld_original_assets.py'
       - 'scripts/prepare_discoverybench_original_assets.py'
       - 'scripts/verify_discoverybench_original_contract.py'
+      - 'scripts/discoverybench_isolated_python.py'
+      - 'tests/test_discoverybench_isolated_python.py'
       - 'tests/test_discoverybench_original_contract.py'
       - 'tests/test_discoverybench_original_assets.py'
       - 'configs/workload-native/discoverybench*'
@@ -447,7 +449,7 @@ jobs:
       - name: AppWorld core preparation CPU fixtures only; no installation or tasks
         run: python -m pytest -q tests/test_appworld_runtime.py tests/test_appworld_original_assets.py tests/test_appworld_core_cpu_image.py tests/test_appworld_react_author_source.py tests/test_appworld_native_react_entry.py tests/test_appworld_model_transport.py
       - name: DiscoveryBench original asset CPU fixtures only; no download or Agent
-        run: python -m pytest -q tests/test_discoverybench_original_assets.py tests/test_discoverybench_original_contract.py
+        run: python -m pytest -q tests/test_discoverybench_original_assets.py tests/test_discoverybench_original_contract.py tests/test_discoverybench_isolated_python.py
       - name: OpenMath corpus generation and saved integrity CPU fixtures; no model
         run: python -m pytest -q tests/test_openmath2_original_runner.py tests/test_openmath2_delivery_receipt.py tests/test_opencode_original_manifest.py
       - name: NatureBench original source and task-group fixtures only; no scientific tasks
