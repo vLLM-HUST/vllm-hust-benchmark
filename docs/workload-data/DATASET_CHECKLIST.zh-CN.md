@@ -1839,6 +1839,14 @@ for record in records:
 
 ### MLAgentBench：原任务环境准备
 
+- [x] 原始完整CIFAR10归档170498071字节已取得，通过官方MD5及完整长度核验。公共工作目录入口`scripts/prepare_mlagentbench_cifar_workspace.py`在CPU实际`plan/prepare/verify`均退出0，保留原作者5份任务文件，未在宿主机解包或加载pickle；随后在断网、只读根、降权的专用容器内执行未修改的原`scripts/prepare.py`，完整50000训练图／10000测试图加载成功。[原任务准备回执](validation/mlagentbench-cifar-original-preparation-20261101.json)。这不代表ResearchAgent流程或来源交付完成。
+
+```bash
+python scripts/prepare_mlagentbench_cifar_workspace.py --action prepare --author-root <完整原源码目录> --data-root <完整原归档目录> --output <新的外部任务目录>
+```
+
+`--action verify`复核尚未执行的准备目录；原准备脚本解包后会产生额外文件，因此不能再将该目录当作未执行的纯准备目录验证。原准备脚本的容器工作目录为`/workspace/scripts`，任务目录挂载到`/workspace`，命令为`python prepare.py`。使用已核验的任务镜像、断网、只读根、移除全部capability和`no-new-privileges`，仅专用任务目录可写。原训练基线与原评分器是环境核验，不代替ResearchAgent任务，也不缩减五轮训练或完整数据。
+
 - [x] 隔离任务环境补齐TorchVision0.18.0：公共入口`scripts/prepare_mlagentbench_cifar_cpu.py`准备固定哈希的离线构建上下文，Dockerfile要求显式指定已核验的CPU基础镜像。专用CPU实际离线构建成功；另起断网、只读、移除全部capability的容器，核验原CIFAR加载器和依赖导入通过，基础镜像未修改。[环境构建回执](validation/mlagentbench-cifar-cpu-image-20261101.json)。这只证明任务环境可用，未打开数据、未训练、未运行Agent，不计来源完成。
 
 ```bash
