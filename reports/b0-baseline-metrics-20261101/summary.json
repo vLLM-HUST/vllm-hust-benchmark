@@ -1,0 +1,73 @@
+{
+  "schema": "b0-relative-performance/v1",
+  "method": "docs/B0_BASELINE_METRICS.md",
+  "source": {
+    "path": "reports/full-answer-joint-20261030/joint-summary.json",
+    "sha256": "279d0245612d8e66c99e96f0d4b244e9e3efaab3f38a9c10f61b66b52396b094"
+  },
+  "baseline_eta_b0_percent": 100,
+  "protocol": {
+    "model": "Qwen3.5-35B-A3B",
+    "dtype": "BF16",
+    "chip": "Ascend910B2",
+    "physical_cards": [
+      5,
+      6
+    ],
+    "reserved_cards": 2,
+    "tensor_parallel": 2,
+    "requests": 200,
+    "arrival": "one simultaneous arrival batch",
+    "max_completion_tokens": 8192,
+    "temperature": 0,
+    "request_seed": 0,
+    "warmups": 0,
+    "eos_enabled": true,
+    "max_num_seqs": 24,
+    "b1_host_state_budget_bytes_per_rank": 4294967296,
+    "request_timeout_seconds": 6600,
+    "output_denominator": "All successfully completed response tokens, including incorrect and length-stopped answers; not correct-answer-only token cost.",
+    "scorer": "Unchanged original extract_answer, including original fallback; score and length-stop breakdown both retained."
+  },
+  "arms": [
+    {
+      "role": "B0",
+      "run": "joint-b0-r2",
+      "completed": 200,
+      "failed": 0,
+      "correct": 143,
+      "successful_output_tokens": 706796,
+      "phase_seconds": 1425.4634465482086,
+      "output_tokens_per_second": 495.8359344194495,
+      "allocated_expense_cny": 20.29745558842642
+    },
+    {
+      "role": "B1",
+      "run": "joint-b1-r4",
+      "completed": 200,
+      "failed": 0,
+      "correct": 153,
+      "successful_output_tokens": 661040,
+      "phase_seconds": 699.9029783103615,
+      "output_tokens_per_second": 944.4737634862181,
+      "allocated_expense_cny": 9.966056760601397
+    }
+  ],
+  "metrics": {
+    "throughput_ratio": 1.904811043177129,
+    "eta_b0_percent": 190.4811043177129,
+    "throughput_gain_percent": 90.4811043177129,
+    "batch_time_ratio": 2.0366586380149796,
+    "batch_time_reduction_percent": 50.89997011111074,
+    "equal_output_tokens": false,
+    "cost_reduction_percent": 47.50135434263074,
+    "latency_reduction_percent": {
+      "ttft_ms": 52.33738111027273,
+      "tpot_ms": 48.775676176864536
+    }
+  },
+  "interpretation": "Measured B0-relative throughput; separate from calibrated eta_ref",
+  "cost_basis": "Same-rate rental estimate over the measured request interval",
+  "independent_pair_count": 1,
+  "new_model_calls": 0
+}
