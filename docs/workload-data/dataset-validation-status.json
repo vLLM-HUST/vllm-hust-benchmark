@@ -2957,6 +2957,7 @@
       "existing_receipt": null,
       "delivery_receipt": null,
       "original_source_preparation_receipt": "docs/workload-data/validation/mlagentbench-original-source-preparation-20261101.json",
+      "cpu_runtime_inspection_receipt": "docs/workload-data/validation/mlagentbench-cpu-runtime-inspection-20261101.json",
       "blocker": "Pinned138 original software and task-definition files670271 bytes verified on dedicated CPU;79 Python files static-parsed. Public plan, reuse-prepare and verify passed without task execution or model calls. Original task data/access review, isolated runtime, NPU actor binding, native task/evaluation and current-artifact research consumption remain pending. No source delivery or underlying dataset acquisition claim."
     },
     "MLEBENCH": {
@@ -3628,15 +3629,16 @@
     },
     "DAILYTALK": {
       "scope": "public",
-      "delivery_kind": "review_original_source_protocol",
-      "status": "IN_PROGRESS",
+      "delivery_kind": "original_conversational_tts_batch_inference",
+      "status": "AVAILABLE",
       "public_encoder_entry_receipt": "docs/workload-data/validation/dailytalk-public-encoder-entry-20261101.json",
       "public_saved_synthesis_audit_receipt": "docs/workload-data/validation/dailytalk-public-synthesis-audit-20261101.json",
       "public_workspace_and_synthesis_entry_receipt": "docs/workload-data/validation/dailytalk-public-workspace-entry-20261101.json",
       "candidate_original_provider_research_receipt": "docs/workload-data/validation/dailytalk-original-provider-research-20261101.json",
       "actual_ci_provider_research_receipt": "docs/workload-data/validation/dailytalk-actual-ci-research-handoff-20261101.json",
       "general_complete_dialogue_preparation_receipt": "docs/workload-data/validation/dailytalk-general-cohort-preparation-20261101.json",
-      "remaining_delivery_gates": ["New generalized preparation code/tests and documented original ZIP prerequisite need final CI closure; combine separate native synthesis and actual provider/research artifact evidence before source promotion. Full original ZIP branch has fixture coverage only, not actual full-corpus acquisition."],
+      "remaining_delivery_gates": [],
+      "remaining_protocol_gaps": "Full ZIP branch has fixture coverage only; full corpus audio and full split synthesis not verified. No MOS/CMOS, paper metric or online streaming claim. Public execute wrapper not rerun for packaging; original audited NPU Guo CLI generation reused and independently bound to original inputs, current public saved-result verification and actual installed provider/research artifact.",
       "declared_original_protocol": "configs/workload-native/dailytalk-guo-batch-protocol.json",
       "encoder_runtime_observed_constraints": "configs/workload-native/dailytalk-npu-py312-observed.txt",
       "fp32_gru_compatibility_candidate": {
@@ -3677,7 +3679,7 @@
       "plotting_overlay_receipt": "docs/workload-data/validation/dailytalk-plotting-overlay-20261101.json",
       "current_native_synthesis_attempt": {
         "receipt": "docs/workload-data/validation/dailytalk-original-fixed29-synthesis-audit-20261101.json",
-        "status": "ORIGINAL_FIXED29_SYNTHESIS_COMPLETE_SAVED_AUDIT_PASSED_PUBLIC_ENTRY_HANDOFF_PENDING",
+        "status": "ORIGINAL_FIXED29_SYNTHESIS_COMPLETE_PUBLIC_ENTRY_AND_ACTUAL_CI_HANDOFF_VERIFIED",
         "controller_pid": 1827848,
         "controller_birth": "873213331",
         "child_pid": 1827861,
@@ -3689,6 +3691,7 @@
         "independent_full_pcm_decodes": 29,
         "source_checkbox_eligible": false
       },
+      "original_readiness_scope_note": "Historical acquisition/import/preflight snapshots below precede the successful native run. Their false execution flags are retained, not current source-level delivery gates; consult delivery_receipt and current_native_synthesis_attempt.",
       "original_readiness": {
         "publisher_repository": "https://github.com/keonlee9420/DailyTalk",
         "publisher_revision": "05a0173dac8e68fb2b22190cfc5c22248538a1a6",
@@ -3876,10 +3879,10 @@
         "remaining_native_prerequisites": ["Original Guo current/history512D text embedding arrays on NPU, preserving original phoneme rows and speaker/emotion/statistic maps", "Qualified isolated runtime for publisher legacy dependencies", "Explicit NPU device binding: original synthesis chooses CUDA or CPU, neither proves NPU execution", "Native synthesis outputs for the fixed complete dialogues and applicable original evaluation", "Complete fresh public audio acquisition on a node with original-host network access; provider/research consumption of original audio-text-dialogue relationships"],
         "boundary": "52 software files,11 original metadata/lexicon assets,29 original WAVs covering the fixed first3 complete validation dialogues, and the official Guo900000 checkpoint are acquired on the dedicated CPU server. Exact selected archive members, not the entire5.34GB archive, were verified. Checkpoint bytes and ZIP CRCs were verified without pickle deserialization or neural execution. No local audio/weight files, prompt conversion, native synthesis, scoring or source completion claimed."
       },
-      "checked": false,
+      "checked": true,
       "legacy_checked": false,
       "existing_receipt": null,
-      "delivery_receipt": null,
+      "delivery_receipt": "docs/workload-data/validation/dailytalk-fixed3-native-delivery-20261101.json",
       "blocker": null
     },
     "LONGWRITER": {

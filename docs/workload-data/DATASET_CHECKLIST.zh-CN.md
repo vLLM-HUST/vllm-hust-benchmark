@@ -10,7 +10,7 @@
 - 按已有证据逐项复核，不因口径调整批量补勾；失败和低分如实保留，不用替换样本凑通过。113项来源与另5项仅分类的范围不变。
 
 当前交付
-**84/113项**，待完成29项，另5项仅分类。首批#432的60项和第二批#538的ScienceWorld已合入main；早期五个草稿已关闭为被汇总承接，历史和分支保留。第三批来源及精确协议范围以机器清单和各交付回执为准，尚未合入。ScienceAgentBench按原verified固定前三题单轮生成、NPU辅助评分和隔离科学执行协议交付，三题程序失败如实保留，不代表全102题执行或其他Agent分支。TemporalWiki按原GPT2-large基座探针全部35,948行PPL交付，不代表持续训练checkpoint或其他语料模式。StreamingBench按real固定前三组原视频NPU推理与原评分交付，其他任务／模态缺口单列。LJSpeech按原VITS固定前三条NPU文本到波形协议交付，不代表全13,100条合成或MOS评价。StructEval按19个完整非渲染原生协议收口，渲染/VQA模式缺口继续单列，不称整套44协议或2035题全部完成。OpenMath/OpenCode是训练语料原问题生成，不是独立质量benchmark。打勾不代表全量模型评测、高分或性能保证。
+**85/113项**，待完成28项，另5项仅分类。首批#432的60项和第二批#538的ScienceWorld已合入main；早期五个草稿已关闭为被汇总承接，历史和分支保留。第三批来源及精确协议范围以机器清单和各交付回执为准，尚未合入。DailyTalk按原Guo前三段完整对话29条NPU批量合成协议交付，公共准备入口支持其他完整原对话；不代表全量音频、全split生成、MOS或流式时序。ScienceAgentBench按原verified固定前三题单轮生成、NPU辅助评分和隔离科学执行协议交付，三题程序失败如实保留，不代表全102题执行或其他Agent分支。TemporalWiki按原GPT2-large基座探针全部35,948行PPL交付，不代表持续训练checkpoint或其他语料模式。StreamingBench按real固定前三组原视频NPU推理与原评分交付，其他任务／模态缺口单列。LJSpeech按原VITS固定前三条NPU文本到波形协议交付，不代表全13,100条合成或MOS评价。StructEval按19个完整非渲染原生协议收口，渲染/VQA模式缺口继续单列，不称整套44协议或2035题全部完成。OpenMath/OpenCode是训练语料原问题生成，不是独立质量benchmark。打勾不代表全量模型评测、高分或性能保证。
 
 StructEval新增配置进展：经确认，`qwen35-9b-nonthinking-32768`与原`publisher-null`分开记录。仅原Text→TikZ位置37的已知失败题运行新配置，传输timeout3600秒、外层/SDK重试均0；保存响应为length／32768输出tokens。CPU原工作区autostop导致渲染转发失败，900秒等待后原生子进程以RenderBlocked失败退出；原响应、代码和待渲染请求保留，实际VQA调用0，不计完整任务。原80GiB持久卷和模板已原样恢复，Docker仍在恢复旧容器；不重启daemon、不重新生成，不重放位置38的结果未知请求。共享任务根`structeval-capped-failed-tikz-window-32068-001`保留终态，计数不增加。
 
@@ -1281,7 +1281,7 @@ TB；服务器/data约1.42TB可用，未缩小语料。ChartQA当前两卡主机
 | LABBENCH                   | [x] 已完成                                     | 31原子集各首3条共93题原生NPU运行、原评分及保存复核通过；87 stop/6 length保留，45题被原解析器解析、14题正确。1967条索引/原图像、CI46载荷和124研究回读已核复用；不是全量推理或作者模型质量复现。                                                                                                                                                                                                                                                                                           |
 | PAPERBENCH                 | [ ] 待开展                                     | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 | SPOKENWOZ                  | [x] 原文本DST协议已交付，音频未完成            | 固定3+3完整对话，共128次NPU原生DST请求，官方/独立评分4/68、6/60，低分保留。全1000对话入口及范围选择可用；实际CI组件与研究原输入接通。音频/其他响应协议未完成，不据此计语音覆盖。[协议交付证据](validation/spokenwoz-text-dst-native-delivery-20261031.json)。                                                                                                                                                                                                                            |
-| DAILYTALK                  | [ ] 进行中                                     | 原23676行已全读/索引；固定29条原NPU合成及公共保存结果核验通过，候选源码研究回读29条相等；原协议已固定，CI工件消费已核，待新增完整对话准备入口CI闭环。                                                                                                                                                                                                                                                                                                                                    |
+| DAILYTALK                  | [x] 原Guo对话TTS协议已交付                     | 原三段完整对话29条NPU合成及独立PCM审计；23676行原字节保真，CI79文件工件/研究29条回查通过，完整对话准备可参数化；不称全量媒体、MOS或流式时序。[交付回执](validation/dailytalk-fixed3-native-delivery-20261101.json)                                                                                                                                                                                                                                                                       |
 | LONGWRITER                 | [x] 原语料生成交付                             | 6000条原字段/索引审计，复用前三条、新范围入口实跑末三条均完成响应完整性复核；研究侧双路径三条接通。无语义或长度达标结论，不是LongBench-Write。[交付回执](validation/longwriter-native-delivery-20261024.json)                                                                                                                                                                                                                                                                            |
 | LONGALPACA                 | [x] 原始指令语料使用已交付                     | 原12000条全部字段/索引和12处固定工件公共/研究回查，补回3231条file来源标识于非输入侧；固定原0..2与7324..7326共6题NPU执行并核验，6 stop，含2条原非空input。[证据](validation/longalpaca-native-delivery-20261026.json)。构造训练语料而非独立质量benchmark，不称全量生成、训练复现或每条均为文档分析。                                                                                                                                                                                      |
 | TOOLACE                    | [x] 有界原始历史续写可用                       | 全11300条原system/对话字段及索引、首尾6条固定工件公共/研究回查；原三会话全部15处NPU续写正常stop。[证据](validation/toolace-original-continuation-20261026.json)；原历史tool返回保留、不造工具/ID；无在线Agent/BFCL/ToolACE-8B复现或全量模型推理承诺。                                                                                                                                                                                                                                    |
@@ -1703,15 +1703,28 @@ smoke、tests和lint全部通过。[交付回执](validation/ruler-native-delive
 
 更新时间：2026-10-23。清单覆盖现有 **89 个公开候选来源、8 份企业数据**；“候选”不等于已取得、已适配或已跑通。新推荐的 17 个来源另列，尚不计入已接入范围。
 
-### DailyTalk：原FP32声学模型的算子兼容候选
+### DailyTalk：原Guo完整对话批量合成
+
+- [x] [合并交付回执](validation/dailytalk-fixed3-native-delivery-20261101.json)：原作者Guo900000权重、原universal
+  HiFi-GAN、FP32
+  NPU、seed1234、batch8、10轮历史及原控制值，前三段完整原对话29条合成完成；声学/vocoder各4批、29个WAV完整PCM与原图头部核验通过，历史失败和原结果保留。
+
+- [x] 全23676行原输入/参考关系保真，实际成功CI工件79文件逐份匹配；29条公共与未修改研究消费者回读及原生输入行哈希一致。通用对话准备代码两类CI通过，真实原对话23的12条准备验证通过；既有合成不重跑。
+
+- 已交付的是上述明确原生批量合成协议，不是全量合成或音质评分。其他原对话需原ZIP/解压音频，完整ZIP分支只有夹具验证；公共`execute`包装没有为整理代码重复生成，真实原CLI合成及公共保存结果核验分别留证。以下阶段记录的单项回执不单独代表源级交付状态。
 
 - [x] 已定位原生失败：原Guo模型进入声学前向后，当前NPU的`DynamicGRUV2Hidden`拒绝FP32隐藏权重；尚未执行vocoder，不算合成完成。原失败、权重、精度和输入均保留。
+
 - [x] `scripts/dailytalk_gru_npu.py`提供显式、单实例、仅推理的原GRU公式分解候选，保留原参数对象和state-dict键，不替换checkpoint、不降精度、不改变10轮历史。使用PyTorch的reset-after-hidden-affine公式，不能换成原论文的另一种GRU公式。依据：[PyTorch 2.10 GRU](https://docs.pytorch.org/docs/2.10/generated/torch.nn.GRU.html)。
+
 - [x] 20组CPU合成夹具通过，环境Python3.12.10/PyTorch2.7.1+cpu；覆盖方向、层数、bias、布局、非零/默认零hidden和原Guo的128维双层双向、1/10步输入。输出及最终hidden均按`atol=1e-6, rtol=1e-5`对照原PyTorch
   GRU，原参数不变；这是合成单元测试，不是原任务或NPU数值结果。
+
 - [x] 实际服务器PyTorch2.10.0+cpu/Python3.12.13隔离环境完成18组CPU数值对照，最大绝对误差`3.5762786865234375e-7`；没有初始化NPU、加载原checkpoint或执行原任务。[服务器夹具回执](validation/dailytalk-gru-cpu-equations-20261101.json)。
+
 - [x] 确认两服务在途/排队均0、仅有原受保护引擎后，在互斥窗口完成18组NPU
   FP32数值对照，最大绝对误差`2.682209014892578e-7`；包含原Guo维度，关闭HF32，不加载原checkpoint。[NPU夹具回执](validation/dailytalk-gru-npu-equations-20261101.json)。控制进程已退出，服务身份未变，互斥租约释放；不把合成算子夹具计为原TTS任务。
+
 - [x] 原29条输入在全新输出目录尝试原checkpoint合成，声学前向1次，已越过GRU错误；在原绘图函数遇到Matplotlib3.10.9移除`tostring_rgb`的兼容失败，vocoder尚未执行、WAV文件0。失败和旧环境保留，控制/子进程均已退出，服务身份未变。[原任务失败回执](validation/dailytalk-original-gru-compat-render-blocker-20261101.json)。这不是原任务质量失败，也不算完整合成；后续先在独立绘图环境核验兼容版本，不改原请求或模型。
 
 使用时只对原声学模型中明确定位的Guo
@@ -1767,11 +1780,12 @@ HiFi-GAN；显式启用已验证的单实例GRU公式分解，安全权重加载
 common=(--author-root <固定原作者源码目录> --prepared <外部输入准备目录> --metadata-root <固定原元数据目录> --models-root <原权重目录> --audio-root <原音频根目录> --encoder-output <已有Guo编码回执目录> --stage <外部新stage目录>)
 python scripts/prepare_dailytalk_synthesis_workspace.py "${common[@]}" --action prepare
 python scripts/prepare_dailytalk_synthesis_workspace.py "${common[@]}" --action verify
-PYTHONPATH=<独立Matplotlib3.9.4-overlay目录> MPLBACKEND=Agg python scripts/run_dailytalk_synthesis_npu.py "${common[@]}" --action execute --device npu:0 --allocator-gib 6 --lease-file <平台共享互斥文件> --resource-window-confirmed
+PYTHONPATH="<独立Matplotlib3.9.4-overlay目录>${PYTHONPATH:+:$PYTHONPATH}" TMPDIR=/tmp MPLBACKEND=Agg python scripts/run_dailytalk_synthesis_npu.py "${common[@]}" --action execute --device npu:0 --allocator-gib 6 --lease-file <平台共享互斥文件> --resource-window-confirmed
 python scripts/run_dailytalk_synthesis_npu.py "${common[@]}" --action verify --result-stage <已有原合成stage目录>
 ```
 
-以上为Bash参数数组示例，尖括号替换为实际外部路径；准备前先按前述入口取得原源码、元数据、原音频、权重和Guo嵌入，配置厂商NPU环境及独立绘图overlay。不要将示例直接作为平台调度器。执行前检查研究占用和设备映射；失败保留新stage，已有结果不重新生成凑通过。`verify`会重新核验公开工作区和原资产，再读取指定已保存结果，不调用模型。
+以上为Bash参数数组示例，尖括号替换为实际外部路径；准备前先按前述入口取得原源码、元数据、原音频、权重和Guo嵌入，激活平台已有CANN环境及独立绘图overlay。当前服务器原安装记录为CANN9.1.0、aarch64；85项Python观测约束不是CANN安装器。保留平台的`ASCEND_HOME_PATH`、`ASCEND_OPP_PATH`、`LD_LIBRARY_PATH`及CANN
+Python路径，绘图overlay只前置追加，不覆盖SDK路径；使用短实例临时目录，避免共享内存管理器的Unix套接字路径过长。不要将示例直接作为平台调度器。执行前检查研究占用和设备映射；失败保留新stage，已有结果不重新生成凑通过。`verify`会重新核验公开工作区和原资产，再读取指定已保存结果，不调用模型。
 
 - [x] 服务器公共准备入口`plan/prepare/verify`均退出0，52文件及42份Python语法检查通过，原作者文件未改，原vocoder符号链接核验通过。
 - [x] 公共合成入口`plan/verify`均退出0，完整PCM核验原29条已保存WAV，无Torch导入、无新增模型调用。[实际入口回执](validation/dailytalk-public-workspace-entry-20261101.json)。
@@ -1825,9 +1839,13 @@ for record in records:
 
 ### MLAgentBench：原任务环境准备
 
+- [x] 在本任务专用CPU工作区，用既有科学环境镜像做无网络、只读根、移除全部capability的短容器元数据核验：Python3.10.22/aarch64、Torch2.3.0、NumPy1.26.4、pandas2.3.3、Pillow12.3.0；缺TorchVision，因此尚不能直接运行原CIFAR10准备/训练脚本。[环境检查回执](validation/mlagentbench-cpu-runtime-inspection-20261101.json)。无数据下载、无生成代码或模型执行，不计来源完成。后续只补任务所需隔离依赖，不盲装包含其他可选任务、云API和旧git依赖的全套requirements。
+
 - [x] 固定原作者版本`5d71205cc20a8e95d43aa7cb7120e89ca3323e31`的138份软件/任务定义文件，共670271字节；79份Python静态解析通过。15个发布目录包含工具型示例，不能据此称论文有15个评测任务。原许可、依赖、Agent、准备与评价脚本均保留；可选Auto-GPT
   vendor、图片和绘图不纳入此准备配置。
+
 - [x] 公共源码入口在专用CPU工作区实测`plan`、复用原文件的`prepare`和`verify`均退出0。[准备回执](validation/mlagentbench-original-source-preparation-20261101.json)。CPU直连失败记录保留，后续670271字节原软件经内存中转，没有在本地保存数据或权重。
+
 - [ ] 原任务数据及访问条件、隔离运行环境、明确NPU模型绑定、固定原任务执行/评价、公共workload及当前工件研究消费尚待完成。此来源仍不打总勾。
 
 复用现有源码准备能力，不新增平行下载器：
@@ -1888,7 +1906,7 @@ ID、数据版本、模型、执行器、评分器、终态、失败原因和脱
 | [ ]  | BURSTGPT             | 到达/尺寸等跨任务运行维度                                                                                                                            | 官方首文件已取得并传服务器                       | 当前安装前三条prepare/resolve通过          | 不适用：无原prompt                                            | 不适用：非任务评分                                            | 仅首文件抽样；其他文件/最终工件/消费端待核；不是对话原文                                                                                                                                                                                                                            |
 | [ ]  | CHARTQA              | visual-document-chart                                                                                                                                | 服务器已核验选定原文件                           | 原0/1/2三条输入/参考往返                   | 阻塞：无Qwen3-VL权重，且SSH拒绝重连                           | 未评分                                                        | [服务器读取记录](PUBLIC_ASSET_SERVER_READINESS.zh-CN.md)，仅读回执；未发视觉模型请求，等待可用视觉模型与服务器连接                                                                                                                                                                  |
 | [ ]  | CROSSCODEEVAL        | repository-completion                                                                                                                                | 待复核                                           | 待复核                                     | 未跑                                                          | 未跑                                                          | 待重新核验                                                                                                                                                                                                                                                                          |
-| [ ]  | DAILYTALK            | conversation-continuation<br>audio-streaming-interaction                                                                                             | 原23676行全读/索引通过                           | 公共原生入口已补齐                         | 固定原29条NPU合成通过                                         | 候选源码29条研究回读相等                                      | 原协议已固定，CI工件消费已核，待新增完整对话准备入口CI闭环；未声称全量媒体/流式时序                                                                                                                                                                                                 |
+| [x]  | DAILYTALK            | conversation-continuation<br>audio-streaming-interaction                                                                                             | 原23676行全读/索引通过                           | 原Guo完整对话批量合成，非在线流式          | 固定原29条NPU合成，声学/vocoder各4批                          | 实际CI79文件与研究29条回读一致                                | [原生协议回执](validation/dailytalk-fixed3-native-delivery-20261101.json)；全量原ZIP仅夹具分支、非全量音频/合成/MOS，无流式时序证明                                                                                                                                                 |
 | [ ]  | DISCOVERYBENCH       | scientific-experiment-planning<br>simulation-analysis-verification                                                                                   | 待复核                                           | 待复核                                     | 未跑                                                          | 未跑                                                          | 待重新核验                                                                                                                                                                                                                                                                          |
 | [x]  | DOLLY                | general-single-turn-assistant<br>document-grounded-analysis<br>text-summarization<br>text-extraction-classification<br>text-rewriting                | 完整文件SHA已核验                                | 原前三条字段回查                           | NPU生成3条stop                                                | 响应完整性，未评语义正确性                                    | [来源与接入边界](DOLLY_ORIGINAL_INSTRUCTIONS.zh-CN.md)，3/15011；未覆盖其他类别与全量                                                                                                                                                                                               |
 | [ ]  | DS1000               | code-generation-with-tests<br>scientific-coding-workflow                                                                                             | 服务器已核验选定原文件                           | 原0/1/2三条输入/参考往返                   | 原补全3题，1条原预算length                                    | 未功能评分：隔离/依赖待核                                     | [原始生成记录](DS1000_ORIGINAL_GENERATION.zh-CN.md)，原预算1024与后处理顺序不变；非完整任务/全量                                                                                                                                                                                    |

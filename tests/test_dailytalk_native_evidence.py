@@ -63,3 +63,37 @@ def test_compatibility_and_public_wrapper_execution_evidence_are_disclosed():
     assert public["native_entry_exit_codes"] == [0, 0]
     assert not public["public_execute_path_reexecuted"]
     assert not public["source_checkbox_eligible"]
+
+
+def test_source_delivery_requires_combined_native_general_and_artifact_evidence():
+    ledger = json.loads(
+        (ROOT / "docs/workload-data/dataset-validation-status.json").read_text("utf-8")
+    )
+    source = ledger["delivery_inventory"]["DAILYTALK"]
+    assert source["checked"] and source["status"] == "AVAILABLE"
+    final = json.loads((ROOT / source["delivery_receipt"]).read_text("utf-8"))
+    assert final["source_checkbox_eligible"]
+    assert final["native_selection"]["dialogue_ids"] == ["23", "30", "59"]
+    assert final["native_selection"]["original_utterances"] == 29
+    assert final["native_exit_code"] == 0
+    assert final["acoustic_forward_batches"] == final["vocoder_forward_batches"] == 4
+    assert final["original_input_rows_indexed_and_reconstructed"] == 23676
+    assert final["actual_ci_public_research_full_record_roundtrips"] == 29
+    assert final["qualified_general_cpu_ci_run"] == 41312871677
+    assert final["qualified_general_full_ci_run"] == 41312868734
+    assert final["qualified_ci_conclusions"] == "success"
+    assert final["original_native_generation_reused_without_rerun"]
+    assert not final["public_execute_wrapper_reexecuted"]
+    assert not final["quality_or_engine_performance_claim"]
+    for key in (
+        "native_evidence",
+        "public_saved_output_audit",
+        "public_workspace_evidence",
+        "general_preparation_evidence",
+        "research_handoff_evidence",
+        "declared_protocol",
+        "generation_entry",
+        "preparation_entry",
+        "runtime_constraints",
+    ):
+        assert (ROOT / final[key]).is_file()

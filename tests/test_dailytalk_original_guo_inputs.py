@@ -18,6 +18,22 @@ runner = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(runner)
 
 
+def assert_separate_source_delivery(source):
+    if not source["checked"]:
+        assert source["delivery_receipt"] is None
+        return
+    final = json.loads((ROOT / source["delivery_receipt"]).read_text("utf-8"))
+    assert final["source_checkbox_eligible"]
+    assert final["native_evidence"].endswith(
+        "dailytalk-original-fixed29-synthesis-audit-20261101.json"
+    )
+    assert final["original_wav_files_full_pcm_decoded"] == 29
+    assert final["actual_ci_public_research_full_record_roundtrips"] == 29
+    assert final["installed_provider_payloads_verified"] == 79
+    assert final["general_complete_dialogue_preparation_available"]
+    assert final["qualified_ci_conclusions"] == "success"
+
+
 def test_gru_cpu_equation_evidence_does_not_promote_native_source():
     receipt = json.loads(
         (
@@ -41,8 +57,7 @@ def test_gru_cpu_equation_evidence_does_not_promote_native_source():
             encoding="utf-8"
         )
     )["delivery_inventory"]["DAILYTALK"]
-    assert not source["checked"]
-    assert source["delivery_receipt"] is None
+    assert_separate_source_delivery(source)
 
 
 def test_npu_equation_control_is_bound_and_not_original_synthesis():
@@ -56,7 +71,7 @@ def test_npu_equation_control_is_bound_and_not_original_synthesis():
         (ROOT / candidate["npu_equation_receipt"]).read_text(encoding="utf-8")
     )
     assert candidate["synthetic_npu_equivalence_verified"] is True
-    assert not source["checked"]
+    assert_separate_source_delivery(source)
     code = (ROOT / receipt["entry"]).read_text(encoding="utf-8")
     assert hashlib.sha256(code.encode()).hexdigest() == receipt["entry_sha256"]
     assert (
@@ -99,7 +114,8 @@ def test_actual_fixed29_synthesis_requires_separate_saved_native_evidence():
     assert native["original_guo_feature_files_reverified"] == 29
     assert native["native_exit_code"] == 0 and native["exclusive_lease_released"]
     assert native["audit_model_calls"] == 0 and not native["quality_score_claimed"]
-    assert not native["source_checkbox_eligible"] and not source["checked"]
+    assert not native["source_checkbox_eligible"]
+    assert_separate_source_delivery(source)
     plotting = json.loads(
         (ROOT / source["plotting_overlay_receipt"]).read_text(encoding="utf-8")
     )
