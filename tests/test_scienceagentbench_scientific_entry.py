@@ -90,3 +90,20 @@ def test_saved_three_case_audit_does_not_claim_quality_or_source_delivery():
     assert report["source_checkbox_eligible"] is False and report["pending"]
     assert report["public_orchestrator_real_qualification"]["prepare_exit_code"] == 0
     assert report["public_orchestrator_real_qualification"]["run_exit_code"] == 0
+
+
+def test_actual_ci_handoff_preserves_every_original_row():
+    report = json.loads(
+        (
+            entry.ROOT
+            / "docs/workload-data/validation/scienceagentbench-current-ci-research-handoff-20261101.json"
+        ).read_text(encoding="utf-8")
+    )
+    assert report["complete_original_fields_per_row"] == 12
+    assert report["complete_original_rows_roundtripped"] == 102
+    assert report["public_research_readbacks"] == 102
+    assert report["installed_git_payloads_verified"] == 78
+    assert report["original_index_unchanged"]
+    assert report["three_native_entries_discoverable"]
+    assert not report["research_modified_or_observation_started"]
+    assert report["new_model_calls"] == 0

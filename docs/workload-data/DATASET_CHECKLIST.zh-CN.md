@@ -1419,7 +1419,9 @@ python scripts/scienceagentbench_codebert_npu.py \
 - [x] 第1题按官方科学执行流程在专用CPU隔离容器执行；任务内部科学网络允许使用CPU，LLM与CodeBERT评分仍使用NPU。原程序因`from_smiles`参数错误进入官方失败分支，原始错误及评分保留，不修改生成程序凑通过。
 - [x] 公共科学执行编排入口已用第2题保存的真实生成程序完成`prepare`和`run`实跑，二者退出码均为0；保留原程序错误和原始评分，未重新调用生成或辅助评分模型。
 - [x] 前三题保存结果已跨端复核：原12字段、生成程序、NPU评分回执、原评分源码及各题科学输入文件身份一致，三题原始成功标记均为0。汇总见`validation/scienceagentbench-fixed3-saved-audit-20261101.json`；本次审计新增模型调用和程序执行均为0。
-- [ ] 三题完整证据汇总、最新安装工件与研究消费交接尚未收口。来源仍未交付，全102题科学执行和其他官方Agent分支另列缺口。
+- [x] 当前CPU
+  CI工件已在服务器隔离安装，78份包内文件与提交一致；全部102条原始记录的12字段完整往返，公共端和研究端逐条读取一致，SQLite和研究消费者均未修改。见`validation/scienceagentbench-current-ci-research-handoff-20261101.json`，新增模型调用0。
+- [ ] 最终来源交付回执与总勾验收尚待收口。全102题科学执行和其他官方Agent分支另列缺口，不将全量读取作为全量科学执行。
 
 生成客户端在执行机隔离环境安装`configs/workload-native/scienceagentbench-local-baseline-requirements.txt`；该文件不是科学执行镜像依赖。固定源码沿用上文版本，元数据必须是原`verified`
 Parquet；不要用硬编码旧validation的直接脚本替换。
