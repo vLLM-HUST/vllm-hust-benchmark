@@ -240,7 +240,7 @@ def test_full_duplex_publisher_examples_are_not_native_delivery():
     assert row["status"] == "IN_PROGRESS" and row["checked"] is False
 
 
-def test_wavcaps_preparation_is_not_missing_media_or_native_completion():
+def test_wavcaps_native_delivery_requires_execution_and_actual_ci_handoff():
     ledger = json.loads(
         (ROOT / "docs/workload-data/dataset-validation-status.json").read_text("utf-8")
     )
@@ -249,13 +249,28 @@ def test_wavcaps_preparation_is_not_missing_media_or_native_completion():
     assert gates["public_cache_preparation_real_cli_verified"] is True
     assert gates["public_cache_preparation_real_media_files"] == 12
     assert gates["public_download_network_real_qualified"] is False
-    assert row["checked"] is False
-    assert "entry still needs completion" not in row["blocker"]
+    assert row["checked"] is True
+    assert row["blocker"] is None
+    receipt = json.loads((ROOT / row["delivery_receipt"]).read_text("utf-8"))
+    assert receipt["source_checkbox_eligible"] is True
+    assert receipt["native_execution"]["completed_original_cases"] == 12
+    assert (
+        receipt["native_execution"][
+            "all12_original_input_sha_case_caption_stdout_bindings_verified"
+        ]
+        is True
+    )
+    handoff = receipt["current_public_and_research_handoff"]
+    assert handoff["git_wheel_installed_payloads_verified"] == 91
+    assert handoff["registered_native_entrypoints"] == 7
+    assert handoff["research_consumer_and_index_unchanged"] is True
+    assert receipt["software_checks"]["current_cpu_smoke_conclusion"] == "success"
+    assert receipt["software_checks"]["current_full_ci_conclusion"] == "success"
     checklist = (ROOT / "docs/workload-data/DATASET_CHECKLIST.zh-CN.md").read_text(
         "utf-8"
     )
     overview = next(
-        line for line in checklist.splitlines() if line.startswith("| [ ]  | WAVCAPS ")
+        line for line in checklist.splitlines() if line.startswith("| [x]  | WAVCAPS ")
     )
     assert "原音频/模型未取得" not in overview
     assert "12原音频" in overview
