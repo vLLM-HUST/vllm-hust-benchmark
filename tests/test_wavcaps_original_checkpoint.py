@@ -48,6 +48,36 @@ def test_default_plan_no_model_import_or_download():
     assert not report["source_checkbox_eligible"]
 
 
+def test_declared_original_inference_protocol_preserves_publisher_defaults():
+    profile = json.loads(
+        (
+            ROOT / "configs/workload-native/wavcaps-original-captioning-protocol.json"
+        ).read_text("utf-8")
+    )
+    assert len(profile["fixed_media_profiles"]) == 4
+    cohorts = [
+        json.loads((ROOT / path).read_text("utf-8"))
+        for path in profile["fixed_media_profiles"]
+    ]
+    assert sum(len(item["files"]) for item in cohorts) == 12
+    assert profile["publisher_generation_defaults"] == {
+        "num_beams": 3,
+        "max_length": 30,
+        "min_length": 2,
+        "use_nucleus_sampling": False,
+        "repetition_penalty": 1.0,
+    }
+    assert (
+        profile["publisher_signal_preparation"]["transformer_window_samples"] == 320000
+    )
+    assert profile["verified_frozen_cohort_environment"]["transformers"] == "4.36.2"
+    assert (
+        profile["verified_frozen_cohort_environment"]["neural_execution_device"]
+        == "NPU"
+    )
+    assert not profile["claims_paper_quality_or_full_corpus_reproduction"]
+
+
 def test_same_byte_identity_and_zip_control(tmp_path):
     path, profile = fixture_archive(tmp_path)
     assert ENTRY.verify(path, profile) == 1

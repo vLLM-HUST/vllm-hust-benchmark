@@ -1476,9 +1476,14 @@ python scripts/verify_wavcaps_original_checkpoint.py --action verify-dependencie
 
 服务器已用当前公共入口完成完整原文件核验。另一次安全元数据检查使用`weights_only=True`及`meta`映射，仅允许原checkpoint所需的NumPy标量/dtype类型，未构造模型或执行前向。原配置为HTSAT编码器、`facebook/bart-base`解码器、32000Hz输入，保存设备为CUDA。额外官方`HTSAT.ckpt`及固定版本BART的5份文件现已取得，公共`verify-dependencies`全部通过；它不重复核验主checkpoint，也不替代模型运行。原安全加载器首次拒绝NumPy类型的记录保留，未回退到任意pickle执行。
 
-独立候选环境已安装并通过pip check，原架构模块导入成功：厂商Torch 2.10.0+cpu与torch_npu 2.10.0.post4以只读链接复用，配合Transformers
-4.49.0、torchvision 0.25.0、timm 0.9.12、torchlibrosa 0.1.0、librosa 0.11.0、NumPy 1.26.4及ruamel.yaml
-0.17.40。作者未在这些原文件中提供完整环境锁，本记录不是官方依赖锁；首次缺ruamel的导入失败保留。导入验证禁止加载checkpoint，没有模型实例、前向或NPU初始化。仍需完成原模型构建/权重恢复、NPU绑定、原音频推理、适用评价及结果交接，来源不打完成勾。
+初始Transformers4.49.0候选仅安装、pip
+check和原架构导入通过，原生成随后因显式None参数与新版API不兼容失败；4.40.2也保留同类失败。旧环境及结果保留，没有为跑通修改原模型实现。
+
+实际首条原SoundBible `2219`在独立Transformers4.36.2/tokenizers0.15.2环境完成NPU
+caption生成；原FP32、beam=3、max_length=30、min_length=2和作者信号处理体不变。参数、固定12条选择与环境记录见[原生协议](../configs/workload-native/wavcaps-original-captioning-protocol.json)。Torch2.10.0+cpu和torch_npu2.10.0.post4只读复用厂商库；包版本中的`+cpu`不表示本次神经执行设备，输入/参数/缓冲区均经NPU边界检查。原模型465项严格状态恢复控制也已通过。
+
+作者未提供完整环境锁，本协议记录的是实际兼容环境，不是官方依赖锁。原输入全部保留；10秒窗口/短音频补零是作者原test.py处理，而非调用方为跑通缩减题目。四组件各原前三条共12条均已完成NPU生成，独立核验全部原音频SHA256、case
+ID/结果关系、标准输出及29份原源码；不是全403050条执行或质量成绩。尚缺公共原生执行入口及最终工件交接，来源不打完成勾；不为整理代码重复运行有效样本。
 
 同一校验器支持四个已核验组件，默认保持SoundBible；其他组件显式传`--component`和独立媒体目录。四组件各固定原前三条，共12个原FLAC已完整解码，原PCM
 MD5及原时长均一致。只核验已取得范围和原成员，不声称整套归档/分卷哈希已重新计算。

@@ -2114,6 +2114,16 @@ python scripts/run_scienceagentbench_scientific.py --action run \
 
 #### WavCaps原生音频路径准备（未完成来源交付）
 
+- [x] 原模型构建及严格权重恢复通过：465项状态匹配、171336151个参数、原FP32；控制期间禁止全部神经前向，未初始化NPU。原29份软件保持不变，权重仅硬链接复用。回执：`wavcaps-original-state-restoration-20261103-001/state-public.json`，位于私有共享任务根目录。
+
+- [x] 固定首条原SoundBible
+  `2219`已在NPU真实生成1份caption，exit0，保持原FP32、beam=3、作者32kHz/10秒窗口处理及原生成体；只替换部署路径和CUDA到NPU绑定，不改原FLAC、模型源码或题目。使用Transformers4.36.2/tokenizers0.15.2；更高版本的原None参数兼容失败及包装失败保留，不把它们归为模型质量问题。回执：`wavcaps-original-soundbible-first-native-20261103-006/state-public.json`；[原生协议](../../configs/workload-native/wavcaps-original-captioning-protocol.json)。
+
+- [x] 固定四组件各3条、共12条原音频已全部完成NPU生成，随后独立核验全部原音频SHA256、case
+  ID/结果映射、原标准输出及29份原源码。首条有效结果复用，其余11条均exit0，无换题、无新评分或审计推理。回执：`wavcaps-original-fixed12-native-20261103-001/independent-audit-public.json`；不是全403050条执行或质量成绩。
+
+- [ ] 公共原生执行入口和最终工件交接。原12条有效推理与独立审计已完成，不因整理执行入口而重跑；来源总勾仍为空。
+
 - [x] 额外原HTSAT编码器127072759字节、202个ZIP成员CRC通过；固定官方BART版本5份文件560422635字节均核验Git身份/原safetensors
   LFS摘要。公共`--action verify-dependencies`在服务器exit0，不重下原2.03GB
   checkpoint或12条音频，不反序列化或前向。回执：`wavcaps-public-checkpoint-verifier-20261103-002/qualification-public.json`，位于私有共享任务根目录。
