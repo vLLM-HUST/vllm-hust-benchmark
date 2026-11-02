@@ -790,7 +790,21 @@ blob和大小校验获取，不带凭据、不用改造数据。`--reuse-assets 
 
 公开编排在持有专用Docker权限的Linux
 CPU节点运行，主机Python只需标准库；LLM端点由使用者提供已有NPU服务的回环地址或已授权SSH转发。先准备发布方原软件和科学客户端镜像，镜像须包含原依赖及`/opt/discovery-client/bin/python`（可显式指定其他路径），并传入不可变本地镜像ID与预期Docker
-daemon ID。镜像环境尚未提供一键重建配方，不应把本机已有镜像当成公开可下载镜像。
+daemon
+ID。已补公开构建上下文入口，先验证原requirements的固定SHA256，再生成Dockerfile，不改原依赖声明。服务器上生成的两个文件与已有成功构建的上下文逐字节相等，复用原构建和离线导入证据，没有重复安装。基础镜像仍须使用者提供，不能把本机已有镜像当成公开可下载镜像；传递依赖未做全量wheel哈希锁定，不承诺任意日期重新构建得到相同镜像。
+
+```bash
+python scripts/prepare_discoverybench_client_context.py \
+  --author-root /private/discoverybench-author \
+  --base-image sha256:<local-base-image-id> \
+  --base-python /opt/miniconda3/bin/python \
+  --output /private/fresh-client-context --execute
+docker build -t discoverybench-local-client /private/fresh-client-context
+docker image inspect discoverybench-local-client --format '{{.Id}}'
+docker info --format '{{.ID}}'
+```
+
+基础镜像必须已有Python3.10及venv；若路径不同，显式修改`--base-python`，不修改原requirements。构建时需要访问PyPI；本次专用环境的默认构建DNS曾失败，使用已授权主机网络构建后成功，这仅用于安装依赖。原题actor、工具及评分容器运行时始终为`--network none`。构建完成后将实际不可变镜像ID传给编排入口，并保留`pip freeze`、Python版本、CPU架构和构建日志。本次环境为ARM64／Python3.10.22，115份实际分发包的快照不是wheel哈希锁；它也不是发布方官方Docker镜像。
 
 ```bash
 python scripts/run_discoverybench_native.py \
