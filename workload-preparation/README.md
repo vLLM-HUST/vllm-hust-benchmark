@@ -1876,7 +1876,23 @@ Drive，可按官方目录自行取得文件，按`v1.0/<原文件名>.zip`、`v
 
 服务器已取得全部9原包并完成公开入口的plan、prepare既有原文件复用及verify。该验证未证明服务器直接公网下载分支可用，也不是原生语音推理。用户反馈子集原包实际98条而文档写99条，原字段为`backchannel_text`，保持原样；不补造第99条或改成文档示例字段。
 
-当前尚无统一provider的原始时序/媒体关系读取，也未完成NPU双工模型、转写、原生推理及评分交接。原始Moshi客户端需要独立语音服务，原转写脚本使用NeMo并明确调用CUDA，不能直接用文本模型或CPU神经推理替代。官方评分器准备入口及发布方样例控制见[清单](../docs/workload-data/DATASET_CHECKLIST.zh-CN.md)，样例分数不代表本项目模型输出。
+统一provider现可读取全部1225个原任务目录，保持ZIP内`input.wav`出现顺序，不将其解释为请求到达时间。默认输入只有原音频流引用；标注JSON全字段、配对干净音频和其他构造音频分别保留在outcome中，归档级文件保持可追溯引用。`request_body()`拒绝把它转成文本聊天。以下示例对每份原归档固定取前三条，而不是仅取整个来源的前三条：
+
+```python
+from pathlib import Path
+from vllm_hust_workload_data import iter_workload, source_spec
+
+root = Path("/srv/workloads/fdb")
+for asset in source_spec("FULL_DUPLEX_BENCH")["files"]:
+    for record in iter_workload("FULL_DUPLEX_BENCH", data_root=root, files=[asset["path"]], limit=3):
+        audio_stream = record.task["input"]["audio_stream"]
+        original_annotations = record.outcome["original_annotations"]
+        paired_control = record.outcome["related_media"].get("clean_input.wav")
+```
+
+`clean_input.wav`是原配对控制输入，不是默认输入或模型输出；标注及转写不得自动发送给参测模型。沿用统一bind/pipeline/resolve_input准备引用索引，索引输出目录须与数据根目录分离。候选代码在服务器完成全部1225条绑定/索引，并对9包各前三条共27条完成公共端与未修改研究consumer一致回读，原包、consumer和索引均未改变；实际CI安装包交接尚待核验。
+
+NPU双工模型、转写、原生推理及评分交接仍未完成。原始Moshi客户端需要独立语音服务，原转写脚本使用NeMo并明确调用CUDA，不能直接用文本模型或CPU神经推理替代。官方评分器准备入口及发布方样例控制见[清单](../docs/workload-data/DATASET_CHECKLIST.zh-CN.md)，样例分数不代表本项目模型输出。
 
 ## PaperBench 原始论文任务包
 

@@ -38,6 +38,14 @@ def fixture_zip(name="original/metadata.json", content=b'{"original":true}'):
 def test_real_pins_and_offline_plan_do_not_create_output(tmp_path):
     pins = entry.load_pins()
     assert len(pins) == 9 and sum(x["bytes"] for x in pins) == 705372348
+    source = json.loads(
+        (
+            ROOT / "workload-preparation/data/catalogs/source_manifests_v1.json"
+        ).read_text("utf-8")
+    )["sources"]["FULL_DUPLEX_BENCH"]
+    assert {(x["path"], x["bytes"], x["sha256"]) for x in pins} == {
+        (x["path"], x["bytes"], x["sha256"]) for x in source["files"]
+    }
     assert all(
         x["url"].startswith("https://drive.usercontent.google.com/") for x in pins
     )

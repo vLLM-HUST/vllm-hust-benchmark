@@ -2,6 +2,14 @@
   "version": "adapter-extensions/v1",
   "boundary": "Field contracts from publisher metadata/docs. No real source payload downloaded or full adapter validation claimed.",
   "adapters": {
+    "FULL_DUPLEX_BENCH": {
+      "kind":"task_dataset","mapping":"full_duplex_original_archives",
+      "input_fields":["input"],"required_fields":["task_id","original_case_id","original_case_directory","version","family","input","outcome","native_execution_complete"],
+      "outcome_fields":["outcome"],"annotation_fields":[],"id_field":"task_id",
+      "source_revision":"official-drive-v1-v15-observed-20261103",
+      "requirements":["Original ZIP order,raw input audio,paired-control and full annotation relationships only; no prompt renderer,speech inference or scoring"],
+      "status":"ORIGINAL_CASE_READER_NATIVE_EXECUTION_PENDING"
+    },
     "PAPERBENCH": {
       "kind":"task_dataset", "mapping":"paperbench_original_packages",
       "input_fields":["input"], "required_fields":["task_id","source","input","outcome","native_execution_complete"],

@@ -66,6 +66,14 @@ def bind_source(
             name not in known or known[name].get("role") != "data" for name in files
         ):
             raise ValueError("NatureBench requires original registered task metadata")
+    if source_id == "FULL_DUPLEX_BENCH" and mapping is None:
+        from .full_duplex import relation_spec
+
+        spec = relation_spec(upstream, spec)
+        if revision != upstream["revision"] or any(
+            name not in known or known[name].get("role") != "data" for name in files
+        ):
+            raise ValueError("full-duplex requires original registered audio archives")
     if source_id == "PAPERBENCH" and mapping is None:
         from .paperbench import relation_spec
 

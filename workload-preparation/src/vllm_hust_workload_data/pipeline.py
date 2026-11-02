@@ -58,6 +58,10 @@ def _binding(entry, catalog_root=None):
         from .naturebench import relation_spec
 
         spec = relation_spec(manifest, spec)
+    if sid == "FULL_DUPLEX_BENCH" and mapping is None:
+        from .full_duplex import relation_spec
+
+        spec = relation_spec(manifest, spec)
     if sid == "PAPERBENCH" and mapping is None:
         from .paperbench import relation_spec
 
