@@ -25,6 +25,21 @@ def test_all_118_ledger_sources_have_one_source_plan():
     assert all(r["local_availability"] == "NOT_CHECKED_ON_THIS_MACHINE" for r in assets)
 
 
+def test_wavcaps_native_path_is_discoverable_without_model_imports():
+    plan = provider.delivery_source_plan("WAVCAPS")
+    entries = plan["entrypoints"]
+    assert len(entries) == 7
+    assert {row["path"] for row in entries if row["role"] == "generation"} == {
+        "scripts/run_wavcaps_original_captioning.py"
+    }
+    assert any(
+        row["role"] == "original_profile"
+        and row["path"].endswith("wavcaps-original-captioning-protocol.json")
+        for row in entries
+    )
+    assert plan["native_validation"] == "NOT_ESTABLISHED_BY_CLASSIFICATION"
+
+
 def test_enterprise_and_traces_not_forced_into_task_classes():
     assets = taxonomy.delivery_assets()
     private = [r for r in assets if r["asset_group"] == "enterprise-private-requests"]

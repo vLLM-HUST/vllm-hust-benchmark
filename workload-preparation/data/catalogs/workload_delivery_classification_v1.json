@@ -752,6 +752,15 @@
     "REPOBENCH": [
       {"role": "prepare_assets", "path": "scripts/prepare_reused_research_assets.py", "scope": "Original Python/Java v1.1 Parquet files with per-file immutable publisher dataset revisions and checksums; explicit download budget, no model execution."},
       {"role": "data_reading_only", "path": "scripts/prepare_reused_source_records.py", "scope": "Bind all original fields and dataset language/version provenance, separate next_line/full-code/gold-snippet references, prepare common index. Native completion and author scoring remain separate and pending."}
+    ],
+    "WAVCAPS": [
+      {"role":"prepare_assets","path":"scripts/prepare_reused_research_assets.py","scope":"Unchanged four-component original metadata acquisition and identity verification; not audio generation."},
+      {"role":"prepare_assets","path":"scripts/prepare_wavcaps_original_media.py","scope":"Declared original fixed audio members; public range/cache preparation, no fabricated prompts or missing media."},
+      {"role":"prepare_assets","path":"scripts/prepare_jsonschemabench_author_source.py","scope":"--source wavcaps: fixed complete captioning software subtree, not model inference."},
+      {"role":"prepare_assets","path":"scripts/verify_wavcaps_original_checkpoint.py","scope":"Original captioning checkpoint and HTSAT/BART dependency identity checks without deserialization or neural calls."},
+      {"role":"original_profile","path":"configs/workload-native/wavcaps-original-captioning-protocol.json","scope":"Original FP32/beam3/30-token-total-length captioning example, original signal preparation and fixed12 cohort; not five-reference COCO or paper quality reproduction."},
+      {"role":"original_profile","path":"configs/workload-native/wavcaps-npu-py312-direct-requirements.txt","scope":"Observed direct compatibility pins with matching vendor Torch/NPU precondition; not a publisher lock or automatic driver installation."},
+      {"role":"generation","path":"scripts/run_wavcaps_original_captioning.py","scope":"Offline plan, original-row/audio/model preparation, explicit NPU execution of unchanged author test body; references retained separately and never used as model inputs. Existing results cannot be replayed or overwritten."}
     ]
   },
   "classes": [

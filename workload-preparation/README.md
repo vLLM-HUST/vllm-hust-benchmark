@@ -1454,7 +1454,40 @@ python scripts/capture_ovobench_original_tar_headers.py \
 EOF、超时及408/部分5xx最多尝试3次，始终重取同一固定URL/字节范围，写入前才重试，保留原ETag与完整文件SHA约束；成功结果含`transport_retry_count`和失败摘要。403/401、429限流及身份/ETag差异直接失败，不关闭TLS验证，不换题或切换数据来源。最终失败仍保留原partial供排查，不发布不完整文件。重试逻辑经可控故障夹具测试；这些不是额外模型运行或质量证据。真实批量队列曾在5份通过后遇TLS
 EOF，确认旧进程退出后复用5份和已验证缓存继续补98份。
 
-## WavCaps 原始音频元数据（数据适配已核验，原生音频执行待完成）
+## WavCaps 原始音频与原生 captioning（抽样执行通过，最终工件交接待核验）
+
+公共原生入口是`run_wavcaps_original_captioning.py`，分离离线计划、资产/原始行准备和显式NPU执行。原12条推理已审计；该公开入口另外对预先选定的原第4行SoundBible
+`2215`完成真实prepare/execute，不替换或重跑原12条。
+
+使用Python3.12独立环境，先确认平台提供的厂商Torch/NPU版本匹配，再安装[实际直接依赖](../configs/workload-native/wavcaps-npu-py312-direct-requirements.txt)。不要把依赖安装到正在服务的模型环境，也不要替换厂商Torch；CANN/驱动由匹配的NPU镜像提供，不由本命令安装。
+
+```bash
+set -e
+python -c 'from importlib.metadata import version; assert version("torch") == "2.10.0+cpu"; assert version("torch-npu") == "2.10.0.post4"'
+python -m pip install -r configs/workload-native/wavcaps-npu-py312-direct-requirements.txt
+python -m pip check
+python scripts/run_wavcaps_original_captioning.py
+```
+
+按本节原获取器准备元数据、原音频和官方软件/权重后，在仓库根目录运行以下命令。路径均是服务器外部路径示例；`--metadata-root`下保留`data/json_files/...`原目录。准备命令核验原元数据、软件和模型指纹，保留完整原始行与参考caption，使用链接而非复制大权重，不加载神经模型。
+
+```bash
+python scripts/run_wavcaps_original_captioning.py --action prepare \
+  --author-root /srv/workloads/wavcaps-software \
+  --metadata-root /srv/datasets/wavcaps-metadata \
+  --checkpoint /srv/models/wavcaps/HTSAT_Clotho_Spider_29_7.pt \
+  --encoder-checkpoint /srv/models/wavcaps/HTSAT.ckpt \
+  --bart-root /srv/models/wavcaps/bart-base \
+  --audio-file /srv/datasets/wavcaps-media/SoundBible/2219.flac \
+  --component SoundBible --case-id 2219 \
+  --device npu:0 --memory-fraction 0.10 \
+  --output-root /srv/runs/wavcaps/soundbible-2219
+# 只在自己有可用NPU资源时执行；不启动、停止或重配其他模型服务。
+OMP_NUM_THREADS=2 MKL_NUM_THREADS=2 python scripts/run_wavcaps_original_captioning.py \
+  --action execute --output-root /srv/runs/wavcaps/soundbible-2219
+```
+
+执行只替换作者空部署路径及运行设备绑定，原模型与test.py文件不变；使用受限weights-only加载，神经参数/缓冲区/输入要求在NPU，原信号解码与分词可在CPU。结果位于`result-private.json`，原始行/参考位于`case-private.json`，作者标准输出另存。已有结果会拒绝重跑/覆盖；失败记录也保留，需要新配置时使用新目录。其他原ID可用相同入口绑定原元数据和官方音频；只有固定12条具有本仓库存档媒体指纹，其他音频的输入摘要会记录，但不能据此声称匹配发布方校验码。
 
 官方captioning运行软件复用已有固定源码准备器：29份原文件覆盖模型实现、数据加载、配置、测试/训练和评分代码，排除原数据及权重。先查看离线计划，再在服务器外部目录取得和核验原文件：
 
@@ -1483,7 +1516,8 @@ check和原架构导入通过，原生成随后因显式None参数与新版API�
 caption生成；原FP32、beam=3、max_length=30、min_length=2和作者信号处理体不变。参数、固定12条选择与环境记录见[原生协议](../configs/workload-native/wavcaps-original-captioning-protocol.json)。Torch2.10.0+cpu和torch_npu2.10.0.post4只读复用厂商库；包版本中的`+cpu`不表示本次神经执行设备，输入/参数/缓冲区均经NPU边界检查。原模型465项严格状态恢复控制也已通过。
 
 作者未提供完整环境锁，本协议记录的是实际兼容环境，不是官方依赖锁。原输入全部保留；10秒窗口/短音频补零是作者原test.py处理，而非调用方为跑通缩减题目。四组件各原前三条共12条均已完成NPU生成，独立核验全部原音频SHA256、case
-ID/结果关系、标准输出及29份原源码；不是全403050条执行或质量成绩。尚缺公共原生执行入口及最终工件交接，来源不打完成勾；不为整理代码重复运行有效样本。
+ID/结果关系、标准输出及29份原源码；不是全403050条执行或质量成绩。公共原生执行入口另用预先固定的原第四条SoundBible `2215`完成prepare和NPU
+execute；该条仅核验公共入口，不替换或重跑原12条。尚待新注册版本的实际CI安装包及研究侧工件交接核验，来源不打完成勾。
 
 同一校验器支持四个已核验组件，默认保持SoundBible；其他组件显式传`--component`和独立媒体目录。四组件各固定原前三条，共12个原FLAC已完整解码，原PCM
 MD5及原时长均一致。只核验已取得范围和原成员，不声称整套归档/分卷哈希已重新计算。
