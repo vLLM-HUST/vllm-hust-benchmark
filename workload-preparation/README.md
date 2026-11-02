@@ -1892,7 +1892,17 @@ for asset in source_spec("FULL_DUPLEX_BENCH")["files"]:
 
 `clean_input.wav`是原配对控制输入，不是默认输入或模型输出；标注及转写不得自动发送给参测模型。沿用统一bind/pipeline/resolve_input准备引用索引，索引输出目录须与数据根目录分离。成功CI运行41505642132的工件13171405317已在服务器独立安装（软件提交6896e413），91份Git/包内/安装文件一致；该安装包完成全部1225条绑定/索引及9包各前三条共27条公共端与未修改研究consumer一致回读。原包、consumer和索引均未改变，未新增模型调用。详细边界与证据见机器清单`actual_ci_common_provider_handoff`。
 
-NPU双工模型、转写、原生推理及评分交接仍未完成。原始Moshi客户端需要独立语音服务，原转写脚本使用NeMo并明确调用CUDA，不能直接用文本模型或CPU神经推理替代。官方评分器准备入口及发布方样例控制见[清单](../docs/workload-data/DATASET_CHECKLIST.zh-CN.md)，样例分数不代表本项目模型输出。
+官方评分器及客户端源码可通过以下入口准备；默认只处理11份评分配套文件，`--include-client`增加4份原始Moshi/ASR软件文件，不下载模型权重：
+
+```bash
+python scripts/prepare_full_duplex_original_scorers.py --include-client
+python scripts/prepare_full_duplex_original_scorers.py --include-client --download --output /srv/workloads/full-duplex-software
+python scripts/prepare_full_duplex_original_scorers.py --include-client --verify-only --output /srv/workloads/full-duplex-software
+```
+
+服务器已验证固定版本的15份原文件、客户端依赖、原客户端帮助入口，以及Opus编解码和回环WebSocket软件控制；这些控制没有调用模型，不计原生benchmark完成。新目录直接下载曾因连接重置失败，完整网络获取链路尚未验证。详细版本与证据见[清单](../docs/workload-data/DATASET_CHECKLIST.zh-CN.md)。
+
+NPU双工模型、转写、原生推理及评分交接仍未完成。原始Moshi客户端需要独立语音服务，原转写脚本使用NeMo并明确调用CUDA，不能直接用文本模型或CPU神经推理替代。发布方评分样例的分数不代表本项目模型输出。
 
 ## PaperBench 原始论文任务包
 

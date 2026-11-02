@@ -2173,16 +2173,30 @@ PYTHONPATH=workload-preparation/src python scripts/prepare_reused_source_records
 
 #### Full-Duplex-Bench原生准备
 
+- [x] 原Moshi客户端CPU环境已核验：Python3.11、Torch/torchaudio2.6.0、NumPy1.26.4复用现有科学环境，官方固定`sphn==0.1.12`在ARM64按原版本源码编译；Rust1.90官方归档校验、CMake3.22.1及maturin1.16.0记录保留。初次128MB临时目录不足、后续子环境继承到错误系统路径的失败均保留；仅修本任务环境路径，`pip check`及未改原客户端`--help`均exit0，没有更改全局镜像或原科学任务环境。
+
+- [x] 未改原客户端的编解码控制实际解码30包、51840个PCM样本；本地WebSocket回声控制31包往返，57600采样点输出含53712个非零采样，源文件哈希未变。使用的是明确标注的软件控制音频，不是原benchmark请求或模型输出；0模型调用，0原题执行，不能据此补来源总勾。服务器证据：任务自有`full-duplex-moshi-client-recovery-20261103-002`的`path-repair-public.json`、`codec-control-public.json`及`websocket-fixture/qualification-public.json`。
+
+- [x] 公共源码准备入口新增可选`--include-client`：默认原11文件不变，可选包含4份固定Moshi/ASR源码共15文件；当前脚本在服务器完成两种plan及11/15文件verify，原文件以硬链接复用。新鲜下载分支因连接被重置失败，保留日志，不当作新鲜获取成功；已有官方原文件的身份校验通过。此参数不安装Moshi或NeMo，不启动模型、ASR或评分。
+
 - [x] 固定发布方版本`3e799c45a045256f47d5f1c9cda90157e2d2ec9e`的`v1_v1.5`离线协议，专用CPU取得16份原说明、评分软件和官方样例JSON，逐份校验Git
   blob与SHA256；未在Windows落盘原始资产。
+
 - [x] 未修改的`eval_pause_handling.py`和`eval_smooth_turn_taking.py`分别对官方自带的1份输出样例实际运行，均exit0。回执：`/root/full-duplex-original-scorer-controls-20261031-001/qualification-public.json`。这是发布方输出的评分器控制，不是本项目模型结果，也不是固定原前三题的验证。
+
 - [x] 公共评分器准备入口`prepare_full_duplex_original_scorers.py --verify-only`已在专用CPU核验现有原11文件子集，exit0，无新下载、无重复评分。回执：`/root/full-duplex-public-source-entry-20261031-001/qualification-public.json`。新鲜`--download`的服务器网络路径未通过实测，不冒称整仓或原音频已取得。
+
 - [x] 官方公开数据目录已定位9份原ZIP：v1.0的Candor暂停/换轮、ICC反馈、合成暂停/打断，v1.5的背景语音、对他人说话、用户反馈/打断。官方文档分别列727和499条；目录声明的文件ID和字节数已记录到机器清单，不将可变Drive文件ID当作版本哈希。初次盘点仅取得目录元信息；后续原包获取及内容校验见下一项。CPU/NPU直接访问失败均保留，本地未保存数据文件。
+
 - [x] 全部9份官方原ZIP已在服务器取得，共705372348字节；全部ZIP
   CRC与路径安全检查、2576份原JSON解析通过，原3119份WAV成员保持原样。用户反馈原包实际98条而文档写99条，原字段为`backchannel_text`而非文档示例的`current_turn_text`，均未补造或改名；该包392份原WAV已完整读取PCM，其他包仅作ZIP层完整性核验，不混称均已解码。CPU/NPU直连失败保留，成功获取经有界内存中转，本地无数据文件；9份原包未解压重复占盘。观察到的SHA256及服务器回执见机器清单`original_archive_acquisition`，不是作者发布的校验码。
+
 - [x] 公共原包准备入口`prepare_full_duplex_original_assets.py`已接入统一source-plan；格式化后的候选脚本在服务器对9份原ZIP完成plan、prepare既有文件复用、verify，2576份原JSON核验通过。原包以同文件系统硬链接复用，没有复制原始数据；这是候选代码的真实CLI验证，不是当前CI工件或新鲜公网下载验证。回执：`/root/full-duplex-public-assets-entry-20261103-002/qualification-public.json`。
+
 - [x] 候选统一provider已完成全部1225原任务目录的输入/关联音频/标注关系核验，并绑定和准备1225条引用索引。9份归档各原前三条共27条的公共端/未修改研究consumer回读一致，原包、consumer、SQLite均未改变；原始ZIP输入成员顺序保持，不解释成到达轨迹。回执：`/root/full-duplex-common-provider-handoff-20261103-001/qualification-public.json`。
+
 - [x] 成功CI运行41505642132的实际工件13171405317已在服务器独立安装，软件提交6896e413，91份Git/包内/安装文件一致。该安装包重新完成全部1225条绑定和引用索引，以及9包各前三条共27次公共端和27次未改研究consumer回读；索引及consumer未改，0模型调用，原包未复制。回执：`/root/full-duplex-actual-ci-provider-20261103-001/qualification-public.json`。这不等于原生语音推理或评分完成，总项仍不打勾。
+
 - [ ] 合适的NPU双工语音模型、原生输入/输出音频、ASR和适用完整评分、输出消费闭环。模型调用仍为0，总项不打勾。
 
 公共入口在仓库根目录运行，原资产仅写服务器外部目录；评分脚本依赖发布方要求中的`tqdm`，不需要模型、ASR或外部judge。官方样例输出不代表本项目模型输出。
@@ -2192,11 +2206,17 @@ PYTHONPATH=workload-preparation/src python scripts/prepare_reused_source_records
 python scripts/prepare_full_duplex_original_scorers.py
 python scripts/prepare_full_duplex_original_scorers.py --download --output /srv/workloads/fdb-scorer-subset
 python scripts/prepare_full_duplex_original_scorers.py --verify-only --output /srv/workloads/fdb-scorer-subset
+# 可选原客户端/ASR源码：先离线查看15文件计划，再获取或核验已有原文件。
+python scripts/prepare_full_duplex_original_scorers.py --include-client
+python scripts/prepare_full_duplex_original_scorers.py --include-client --download --output /srv/workloads/fdb-scorer-and-client-subset
+python scripts/prepare_full_duplex_original_scorers.py --include-client --verify-only --output /srv/workloads/fdb-scorer-and-client-subset
 python /srv/workloads/fdb-scorer-subset/v1_v1.5/evaluation/eval_pause_handling.py --root_dir /srv/workloads/fdb-scorer-subset/v1_v1.5/evaluation/example_data/pause_handling_example
 python /srv/workloads/fdb-scorer-subset/v1_v1.5/evaluation/eval_smooth_turn_taking.py --root_dir /srv/workloads/fdb-scorer-subset/v1_v1.5/evaluation/example_data/smooth_turn_taking_example
 ```
 
 官方的v1/v1.5离线、v2实时考官、v3语音工具调用是不同协议，不得把上述两个样例评分推及其他版本；也不得以文本问答、拼造音频或CPU神经推理替代原生流程。官方协议入口：[Full-Duplex-Bench](https://github.com/DanielLin94144/Full-Duplex-Bench)。
+
+客户端控制环境另记录soundfile0.14.0、websockets17.4。Moshi推理需要对应的独立模型服务，原NeMo转写脚本使用`nvidia/parakeet-tdt-0.6b-v2`并调用CUDA；其NPU模型/ASR执行尚未核验。不能把上述CPU编解码与传输控制写成NPU神经推理完成。
 
 #### TOOLACE原始语料使用入口
 

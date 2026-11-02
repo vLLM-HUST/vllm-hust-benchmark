@@ -1,7 +1,8 @@
 """Prepare a pinned subset of official offline scorers/examples, not a benchmark run.
 
 Default: offline plan. Acquisition writes only a fresh external directory.
-No whole repository, node_modules, audio, models, ASR or judge is downloaded.
+Optional --include-client also prepares pinned inference/ASR source, not models.
+No whole repository, node_modules, audio, model weights or judge is downloaded.
 """
 
 import argparse
@@ -33,17 +34,29 @@ FILES = {
     + "example_data/smooth_turn_taking_example/1/turn_taking.json": "089998bdc6ad97ced6a7056b51a4f24773db440d",  # pragma: allowlist secret
 }
 MAX_FILE_BYTES = 100_000
+CLIENT_PREFIX = "v1_v1.5/"
+CLIENT_FILES = {
+    CLIENT_PREFIX
+    + "model_inference/moshi/README.md": "b59c2433f6e330c2a40fc2a551544aabbdab750f",  # pragma: allowlist secret - public original Git blob
+    CLIENT_PREFIX
+    + "model_inference/moshi/inference.py": "5bd9521a6e990c519fcc83aa4c8ccaa291d7dcfe",  # pragma: allowlist secret - public original Git blob
+    CLIENT_PREFIX
+    + "get_transcript/README.md": "0c9b0aa4dc5dbe7abae15ec9a8e00a01f091a1f4",  # pragma: allowlist secret - public original Git blob
+    CLIENT_PREFIX
+    + "get_transcript/asr.py": "822bc204e372606545845396416d05d9ab99ba8e",  # pragma: allowlist secret - public original Git blob
+}
 
 
 def check_bytes(name, raw):
     identity = hashlib.sha1(f"blob {len(raw)}\0".encode() + raw).hexdigest()
-    if len(raw) > MAX_FILE_BYTES or identity != FILES[name]:
+    if len(raw) > MAX_FILE_BYTES or identity != (FILES | CLIENT_FILES)[name]:
         raise ValueError("pinned original Git blob mismatch: " + name)
 
 
-def verify(root):
+def verify(root, *, include_client=False):
     root = Path(root).resolve(strict=True)
-    for name in FILES:
+    selected = FILES | CLIENT_FILES if include_client else FILES
+    for name in selected:
         path = root / name
         if path.is_symlink() or not path.resolve().is_relative_to(root):
             raise ValueError("original file escapes selected root")
@@ -52,8 +65,11 @@ def verify(root):
     return {
         "source_id": "FULL_DUPLEX_BENCH",
         "revision": REVISION,
-        "status": "PINNED_SCORER_SUBSET_VERIFIED_NOT_NATIVE_EXECUTION",
-        "selected_original_files_verified": len(FILES),
+        "status": "PINNED_SCORER_AND_CLIENT_SUBSET_VERIFIED_NOT_NATIVE_EXECUTION"
+        if include_client
+        else "PINNED_SCORER_SUBSET_VERIFIED_NOT_NATIVE_EXECUTION",
+        "selected_original_files_verified": len(selected),
+        "client_sources_included": include_client,
         "whole_repository_verified": False,
         "audio_acquired": False,
         "model_calls": 0,
@@ -61,12 +77,13 @@ def verify(root):
     }
 
 
-def acquire(root, *, opener=urlopen):
+def acquire(root, *, opener=urlopen, include_client=False):
     root = Path(root).resolve()
     if root.is_relative_to(Path(__file__).resolve().parents[1]):
         raise ValueError("use external server storage, not the benchmark repository")
     root.mkdir(parents=True, exist_ok=False)
-    for name in FILES:
+    selected = FILES | CLIENT_FILES if include_client else FILES
+    for name in selected:
         url = f"https://raw.githubusercontent.com/{REPOSITORY}/{REVISION}/{name}"
         with opener(url, timeout=30) as response:
             raw = response.read(MAX_FILE_BYTES + 1)
@@ -75,12 +92,17 @@ def acquire(root, *, opener=urlopen):
         path.parent.mkdir(parents=True, exist_ok=True)
         with path.open("xb") as stream:
             stream.write(raw)
-    return verify(root)
+    return verify(root, include_client=include_client)
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path)
+    parser.add_argument(
+        "--include-client",
+        action="store_true",
+        help="include four original Moshi/ASR software files; no model execution",
+    )
     mode = parser.add_mutually_exclusive_group()
     mode.add_argument("--download", action="store_true")
     mode.add_argument("--verify-only", action="store_true")
@@ -88,13 +110,20 @@ def main():
     if args.download or args.verify_only:
         if args.output is None:
             parser.error("--output is required for acquisition/verification")
-        result = acquire(args.output) if args.download else verify(args.output)
+        result = (
+            acquire(args.output, include_client=args.include_client)
+            if args.download
+            else verify(args.output, include_client=args.include_client)
+        )
     else:
         result = {
             "status": "PLAN_ONLY_NO_DOWNLOAD",
             "repository": REPOSITORY,
             "revision": REVISION,
-            "selected_files": list(FILES),
+            "selected_files": list(
+                FILES | CLIENT_FILES if args.include_client else FILES
+            ),
+            "client_sources_included": args.include_client,
             "model_calls": 0,
         }
     print(json.dumps(result, indent=2))

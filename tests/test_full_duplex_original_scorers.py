@@ -28,6 +28,58 @@ def test_offline_plan_is_explicit_subset():
     assert not any("node_modules" in name for name in plan["selected_files"])
 
 
+def test_optional_client_plan_adds_only_four_pinned_software_files():
+    result = subprocess.run(
+        [sys.executable, str(SPEC.origin), "--include-client"],
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    plan = json.loads(result.stdout)
+    assert plan["status"] == "PLAN_ONLY_NO_DOWNLOAD"
+    assert plan["client_sources_included"]
+    assert len(plan["selected_files"]) == 15
+    assert set(plan["selected_files"]) == set(ENTRY.FILES) | set(ENTRY.CLIENT_FILES)
+    assert plan["model_calls"] == 0
+
+
+def test_optional_client_verification_requires_unchanged_complete_sources(
+    tmp_path, monkeypatch
+):
+    raw = b"invented software fixture, not a task or audio"
+    identity = hashlib.sha1(f"blob {len(raw)}\0".encode() + raw).hexdigest()
+    monkeypatch.setattr(ENTRY, "FILES", {"scorer.py": identity})
+    monkeypatch.setattr(ENTRY, "CLIENT_FILES", {"client.py": identity})
+    root = tmp_path / "source"
+    root.mkdir()
+    (root / "scorer.py").write_bytes(raw)
+    assert ENTRY.verify(root)["selected_original_files_verified"] == 1
+    with pytest.raises(FileNotFoundError):
+        ENTRY.verify(root, include_client=True)
+    (root / "client.py").write_bytes(raw)
+    checked = ENTRY.verify(root, include_client=True)
+    assert checked["selected_original_files_verified"] == 2
+    assert checked["client_sources_included"]
+    assert not checked["source_checkbox_eligible"]
+    (root / "client.py").write_bytes(b"changed")
+    with pytest.raises(ValueError, match="Git blob mismatch"):
+        ENTRY.verify(root, include_client=True)
+
+
+def test_optional_acquisition_uses_the_same_verifier(tmp_path, monkeypatch):
+    raw = b"invented client software fixture"
+    identity = hashlib.sha1(f"blob {len(raw)}\0".encode() + raw).hexdigest()
+    monkeypatch.setattr(ENTRY, "FILES", {"scorer.py": identity})
+    monkeypatch.setattr(ENTRY, "CLIENT_FILES", {"client.py": identity})
+    result = ENTRY.acquire(
+        tmp_path / "external",
+        opener=lambda *a, **k: io.BytesIO(raw),
+        include_client=True,
+    )
+    assert result["selected_original_files_verified"] == 2
+    assert result["client_sources_included"]
+
+
 def test_acquisition_and_read_only_reuse(tmp_path, monkeypatch):
     raw = b"invented publisher software fixture"
     identity = hashlib.sha1(f"blob {len(raw)}\0".encode() + raw).hexdigest()
