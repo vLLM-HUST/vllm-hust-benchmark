@@ -44,7 +44,7 @@
   Git子模块尚未取得，不宣称完整Agent环境。官方Docker
   provider明确在缺KVM时设置`KVM=N`，因此不能仅以缺KVM判定无法执行。官方容器架构、原桌面镜像、Agent与评分仍待核验；本次容器元数据请求遇到网络不可达，未下载镜像层。来源仍不打勾。证据：`/var/lib/npc/osworld-original-harness-20261103-001/qualification-public.json`。
 
-- [x] NatureBench第三道固定原题的原版评分服务在对应合格科学环境通过独立回环健康检查；只读挂载原数据，不挂Docker套接字，准备检查0模型调用。第二题现已终止为原4小时预算超时，原任务评分-1，有效性judge因上下文容量不足失败。CPU自动停止后已恢复同一持久卷、独立Docker、同一第三题评分容器及受限模型通道；第三题原Agent已于UTC2026-11-02T19:37:41启动，实际出现4次assistant事件和原工具调用，无API错误标记，尚无最终结果。原预算与judge保留，来源仍不打勾。证据：`validation/naturebench-original-fixed3-native-progress-20261102.json`。
+- [x] NatureBench第三道固定原题的原版评分服务在对应合格科学环境通过独立回环健康检查；只读挂载原数据，不挂Docker套接字，准备检查0模型调用。第二题现已终止为原4小时预算超时，原任务评分-1，有效性judge因上下文容量不足失败。CPU自动停止后已恢复同一持久卷、独立Docker、同一第三题评分容器及受限模型通道；第三题启动阶段于UTC2026-11-02T19:37:41记录到实际Agent事件和原工具调用；现已正常结束，但科学评估尝试0、judge为空，最新终态见下文科学代码工作流。原预算与judge保留，来源仍不打勾。证据：`validation/naturebench-original-fixed3-native-progress-20261102.json`。
 
 - [x] VisualWebArena已复用公共归档准备器：478份原生软件、任务配置、网站准备与仓内参考资产共200942354字节，在服务器通过plan、prepare、verify，复用原归档、没有重复下载。仅排除media演示和tests；网站镜像及题目外链媒体仍需另行准备。公共仓仅存固定摘要元数据，不存这些原文件。用法如下（先plan查看官方固定归档地址）：
 
@@ -691,6 +691,9 @@ LD_LIBRARY_PATH=/external/ffmpeg/lib python -B scripts/run_videomme_original.py 
   服务器GitHub匿名配额及原代码域名连接失败记录保留；最终只通过已有认证读取原小型软件并内存中转到服务器，没有发送凭据、原软件入Git或本地落数据集。HF镜像元数据403与原站连接超时仍是数据获取缺口。软件无LICENSE文件，Wikipedia衍生数据许可应另外核对。[阶段证据](validation/temporalwiki-original-readiness-20261028.json)。
 
 ### NatureBench科学代码工作流（进行中，不打来源总勾）
+
+第三题最新终态：原`s43588-024-00689-2`于UTC
+2026-11-02T21:47:34结束，Agent与harness退出0，任务状态`success`，实际7781.7秒；原4小时是上限，没有人为缩短。官方`scored_tasks=0`、科学评估尝试0、`judge=null`，不把Agent正常结束写作科学评价通过。原输出与失败保留，详情见机器清单`NATUREBENCH.third_original_terminal_20261103`；来源仍未完成。
 
 - [x] 固定官方代码与数据版本，服务器取得56份原始运行/评估/环境/任务列表文件，共514543字节，Git blob及SHA256核验通过；30份Python只做语法解析，未执行科学任务代码。
 
@@ -2110,6 +2113,13 @@ python scripts/run_scienceagentbench_scientific.py --action run \
 - [x] 候选源码建立1640条引用索引；每种任务原前三条，共36条，经公共和未修改研究消费者完整回读一致。当前研究工作树消费者SHA与服务器副本一致，索引读取前后不变；未恢复研究任务。回执`/root/ovobench-original-index-20261031-001/qualification-public.json`。该候选阶段本身不是实际CI证明，后续实际CI闭环见前项，0模型调用。
 
 #### WavCaps原生音频路径准备（未完成来源交付）
+
+- [x] 额外原HTSAT编码器127072759字节、202个ZIP成员CRC通过；固定官方BART版本5份文件560422635字节均核验Git身份/原safetensors
+  LFS摘要。公共`--action verify-dependencies`在服务器exit0，不重下原2.03GB
+  checkpoint或12条音频，不反序列化或前向。回执：`wavcaps-public-checkpoint-verifier-20261103-002/qualification-public.json`，位于私有共享任务根目录。
+
+- [x] 独立候选环境安装、pip
+  check及原`BartCaptionModel`模块导入通过；厂商Torch/NPU库仅只读链接，未替换全局环境。首次缺`ruamel`的导入失败保留，隔离环境补`ruamel.yaml==0.17.40`后通过；导入期间禁止checkpoint加载，NPU未初始化，没有模型实例或前向。这是兼容候选环境，不是作者发布的依赖锁。版本及回执见机器清单，模型构建/状态恢复及真实NPU音频推理仍待完成。
 
 - [x] 已取得发布方原`HTSAT_Clotho_Spider_29_7.pt`：2028254247字节，完整1332个ZIP成员CRC通过；以有界管道直接写服务器共享目录，本地没有权重文件。SHA256是本次官方文件获取记录而非作者校验码。公共`verify_wavcaps_original_checkpoint.py`的plan及完整原文件verify均exit0，不下载或反序列化模型。回执：`wavcaps-official-htsat-clotho-checkpoint-20261103-001/state-public.json`和`wavcaps-public-checkpoint-verifier-20261103-001/qualification-public.json`，位于私有共享任务根目录。
 

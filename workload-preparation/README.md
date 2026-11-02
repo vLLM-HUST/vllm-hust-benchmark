@@ -1471,9 +1471,14 @@ python scripts/prepare_jsonschemabench_author_source.py --source wavcaps --autho
 ```bash
 python scripts/verify_wavcaps_original_checkpoint.py
 python scripts/verify_wavcaps_original_checkpoint.py --action verify --checkpoint /srv/models/wavcaps/HTSAT_Clotho_Spider_29_7.pt
+python scripts/verify_wavcaps_original_checkpoint.py --action verify-dependencies --encoder-checkpoint /srv/models/wavcaps/HTSAT.ckpt --bart-root /srv/models/wavcaps/bart-base
 ```
 
-服务器已用当前公共入口完成完整原文件核验。另一次安全元数据检查使用`weights_only=True`及`meta`映射，仅允许原checkpoint所需的NumPy标量/dtype类型，未构造模型或执行前向。原配置为HTSAT编码器、`facebook/bart-base`解码器、32000Hz输入，保存设备为CUDA；原构造器还需额外的预训练HTSAT/BART资产、隔离依赖和经过验证的NPU绑定，目前尚未闭环。原安全加载器首次拒绝NumPy类型的记录保留，未回退到任意pickle执行。
+服务器已用当前公共入口完成完整原文件核验。另一次安全元数据检查使用`weights_only=True`及`meta`映射，仅允许原checkpoint所需的NumPy标量/dtype类型，未构造模型或执行前向。原配置为HTSAT编码器、`facebook/bart-base`解码器、32000Hz输入，保存设备为CUDA。额外官方`HTSAT.ckpt`及固定版本BART的5份文件现已取得，公共`verify-dependencies`全部通过；它不重复核验主checkpoint，也不替代模型运行。原安全加载器首次拒绝NumPy类型的记录保留，未回退到任意pickle执行。
+
+独立候选环境已安装并通过pip check，原架构模块导入成功：厂商Torch 2.10.0+cpu与torch_npu 2.10.0.post4以只读链接复用，配合Transformers
+4.49.0、torchvision 0.25.0、timm 0.9.12、torchlibrosa 0.1.0、librosa 0.11.0、NumPy 1.26.4及ruamel.yaml
+0.17.40。作者未在这些原文件中提供完整环境锁，本记录不是官方依赖锁；首次缺ruamel的导入失败保留。导入验证禁止加载checkpoint，没有模型实例、前向或NPU初始化。仍需完成原模型构建/权重恢复、NPU绑定、原音频推理、适用评价及结果交接，来源不打完成勾。
 
 同一校验器支持四个已核验组件，默认保持SoundBible；其他组件显式传`--component`和独立媒体目录。四组件各固定原前三条，共12个原FLAC已完整解码，原PCM
 MD5及原时长均一致。只核验已取得范围和原成员，不声称整套归档/分卷哈希已重新计算。

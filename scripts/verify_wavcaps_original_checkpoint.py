@@ -6,6 +6,7 @@ from pathlib import Path, PurePosixPath
 import zipfile
 
 from verify_dailytalk_original_models import verify_file
+from prepare_xsum_original_assets import bound_path
 
 PROFILE = (
     Path(__file__).resolve().parents[1]
@@ -43,7 +44,11 @@ def verify(path, profile):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--checkpoint", type=Path)
-    parser.add_argument("--action", choices=["plan", "verify"], default="plan")
+    parser.add_argument(
+        "--action", choices=["plan", "verify", "verify-dependencies"], default="plan"
+    )
+    parser.add_argument("--encoder-checkpoint", type=Path)
+    parser.add_argument("--bart-root", type=Path)
     args = parser.parse_args()
     profile = json.loads(PROFILE.read_text("utf-8"))
     report = {
@@ -60,6 +65,16 @@ def main():
             parser.error("--checkpoint is required for verification")
         report["verified_zip_members"] = verify(args.checkpoint, profile)
         report["status"] = "ORIGINAL_CHECKPOINT_VERIFIED_NOT_NATIVE_EXECUTION"
+    elif args.action == "verify-dependencies":
+        if args.encoder_checkpoint is None or args.bart_root is None:
+            parser.error("--encoder-checkpoint and --bart-root are required")
+        report["verified_encoder_zip_members"] = verify(
+            args.encoder_checkpoint, {"checkpoint": profile["audio_encoder"]}
+        )
+        for item in profile["text_decoder"]["files"]:
+            verify_file(bound_path(args.bart_root, "", item), item)
+        report["verified_decoder_files"] = len(profile["text_decoder"]["files"])
+        report["status"] = "ORIGINAL_DEPENDENCY_FILES_VERIFIED_NOT_NATIVE_EXECUTION"
     print(json.dumps(report, indent=2))
 
 
