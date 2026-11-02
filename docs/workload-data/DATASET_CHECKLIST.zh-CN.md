@@ -649,7 +649,7 @@ LD_LIBRARY_PATH=/external/ffmpeg/lib python -B scripts/run_videomme_original.py 
   软件准备入口（不下载任务、不装科学依赖、不启动Agent）：
 
   ```bash
-  # 默认只做离线计划；常规Docker环境使用original。
+  # 默认只做离线计划；新原生执行须显式选择original-context以透传真实容量。
   python scripts/prepare_naturebench_native_runtime.py --author-root /path/to/pinned-naturebench-code --output /path/to/fresh-runtime --profile original-context
   python scripts/prepare_naturebench_native_runtime.py --author-root /path/to/pinned-naturebench-code --output /path/to/fresh-runtime --profile original-context --write
   python scripts/prepare_naturebench_native_runtime.py --author-root /path/to/pinned-naturebench-code --output /path/to/fresh-runtime --verify
