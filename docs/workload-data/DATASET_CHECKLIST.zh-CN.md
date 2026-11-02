@@ -574,11 +574,13 @@ LD_LIBRARY_PATH=/external/ffmpeg/lib python -B scripts/run_videomme_original.py 
 
 - [x] 两个已建成镜像的任务固定版本核验完成。第一环境`pip check`通过；第三环境原始安装将NumPy升至2.2.6、protobuf升至7.36.2，与原CatBoost/wandb冲突，原镜像及失败记录保留。
 
-- [ ] 第三环境独立兼容层恢复原基础NumPy1.26.4和已验证兼容的protobuf5.29.6；必须再通过依赖检查和原科学库导入，不能因镜像构建成功就算合格。
+- [x] 第三环境独立兼容层恢复原基础NumPy1.26.4、兼容的protobuf5.29.6，并固定未被原方案钉死的传递依赖TensorBoard2.20.0、numdifftools0.9.41；`pip check`及Scanpy/scvi/monod实际导入通过。第一次修复的额外冲突仍保留，原任务固定版本、题目、预算和评分未改。
 
-- [ ] 第二个任务的原固定`gudhi==3.10.1`缺少ARM64安装包，原失败保留；已取得同版本官方源码并核验官方校验和，正进行带磁盘/超时保护的源码构建，不换版本、不删依赖。
+- [x] 第二任务的原固定`gudhi==3.10.1`已由核验官方校验和的同版本源码构建成功；独立环境保留原43个基础固定版本和原任务固定版本，`pip check`及Scanpy/scvelo/phate/palantir/GUDHI/scikit-sparse/PyGraphviz实际导入通过。原ARM安装失败保留，不换版本、不删依赖。
 
-- [ ] 完整原生Agent流程、官方评估器与有效性judge仍待完成，不以静态问答或`--skip-judge`替代。原作者Codex适配器支持自定义Responses地址，现有NPU服务公开该路由；这不是工具调用或评分兼容性实跑证明。独立Docker当前仅有host/none网络，原流程所需容器通信也须验证后才执行。
+- [x] Docker守护进程实际可见路径已核验：56个原软件文件按固定清单核验、576个原任务文件以同inode硬链接接通，任务数据重复占用为0；最初将Python生成缓存也计入源文件的未合格尝试保留。三个原CPU任务在实际只读挂载下的官方运行dry-run、solve/evaluation/judge/Agent帮助共5项均返回0；没有模型或科学任务执行。
+
+- [ ] 完整原生Agent流程、官方评估器与有效性judge仍待完成，不以静态问答或`--skip-judge`替代。独立Docker仅有host/none网络；已保留原代码并单列仅修改容器host网络与loopback主机别名的兼容配置，不称未修改官方运行时。实际通信、工具调用和评分仍须实跑，CLI帮助或dry-run不替代原生验证。
 
   任务包关系核验（不执行科学代码、不调用模型）：
 
