@@ -283,6 +283,49 @@ def test_discoverybench_original_assets_are_not_native_completion():
     assert receipt["source_checkbox_eligible"] is False
 
 
+def test_videomme_v2_native_delivery_is_not_only_group_readback():
+    ledger = json.loads(
+        (ROOT / "docs/workload-data/dataset-validation-status.json").read_text("utf-8")
+    )
+    row = ledger["delivery_inventory"]["VIDEOMME_V2"]
+    receipt = json.loads((ROOT / row["delivery_receipt"]).read_text("utf-8"))
+    assert row["checked"] and row["status"] == "AVAILABLE"
+    assert receipt["source_checkbox_eligible"]
+    assert (
+        receipt["original_questions_completed"]
+        == receipt["native_model_requests"]
+        == 24
+    )
+    assert (
+        receipt["frames_each_request"] == 64
+        and receipt["original_complete_groups"] == 6
+    )
+    assert receipt["distinct_original_frame_files"] == 384
+    assert receipt["native_ci_conclusions"] == "success"
+    assert (
+        receipt["actual_ci_provider_consumer"][
+            "public_and_unchanged_research_group_readbacks"
+        ]
+        == 800
+    )
+    assert receipt[
+        "all24_wire_images_generation_settings_answers_references_and_scores_verified"
+    ]
+    assert receipt["per_question_correct"] == 2 and receipt["paid_judge_calls"] == 0
+    assert receipt["independent_audit_model_calls"] == 0
+    assert not receipt["official_paper_model_or_full_leaderboard_replication"]
+    assert not receipt["quality_or_engine_performance_claim"]
+    assert len(receipt["unfinished_modes"]) == 3
+    for field in [
+        "public_asset_entry",
+        "public_media_entry",
+        "public_prompt_entry",
+        "public_native_entry",
+        "full_official_configuration",
+    ]:
+        assert (ROOT / receipt[field]).is_file()
+
+
 def test_discoverybench_delivery_preserves_native_failures_and_provider_scope():
     ledger = json.loads(
         (ROOT / "docs/workload-data/dataset-validation-status.json").read_text("utf-8")

@@ -95,3 +95,28 @@ def test_default_plan_does_not_require_assets_or_call_model():
         "frames_each": 64,
         "model_calls": 0,
     }
+
+
+def test_official_full_config_does_not_restrict_dataset_to_validation_subset():
+    config = json.loads(
+        (
+            SCRIPTS.parent
+            / "configs/workload-native/videomme-v2-official-full-local.json"
+        ).read_bytes()
+    )
+    dataset = config["data"]["Video-MME-v2_64frame"]
+    assert dataset == {
+        "class": "VideoMMEv2",
+        "dataset": "Video-MME-v2",
+        "nframe": 64,
+        "fps": -1,
+        "with_subtitle": False,
+        "subtitle_interleave": False,
+        "reasoning": False,
+        "resize_target_area": False,
+    }
+    model = config["model"]["Qwen35-9B-local-native64"]
+    assert model["class"] == "OpenAIWrapper" and model["max_tokens"] == 2048
+    assert model["temperature"] == 0 and model["chat_template_kwargs"] == {
+        "enable_thinking": False
+    }

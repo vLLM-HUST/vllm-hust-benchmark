@@ -1,0 +1,27 @@
+{
+  "model": {
+    "Qwen35-9B-local-native64": {
+      "class": "OpenAIWrapper",
+      "model": "Qwen/Qwen3.5-9B",
+      "api_base": "http://127.0.0.1:19466/v1/chat/completions",
+      "key": "local-only",
+      "retry": 1,
+      "timeout": 600,
+      "max_tokens": 2048,
+      "temperature": 0,
+      "chat_template_kwargs": {"enable_thinking": false}
+    }
+  },
+  "data": {
+    "Video-MME-v2_64frame": {
+      "class": "VideoMMEv2",
+      "dataset": "Video-MME-v2",
+      "nframe": 64,
+      "fps": -1,
+      "with_subtitle": false,
+      "subtitle_interleave": false,
+      "reasoning": false,
+      "resize_target_area": false
+    }
+  }
+}
