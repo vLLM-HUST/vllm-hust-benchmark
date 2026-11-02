@@ -377,8 +377,13 @@ unreachable，失败记录保留，现复用原分块获取器经至多8MiB原�
 
 ### ToolBench：原软件准备完成，原生任务未完成
 
+- [x] 2026-11-03已核查固定官方README的数据发布入口：Drive目录和直接文件页返回404；清华云盘返回HTTP200但正文为“Link does not
+  exist”。这是当前网络路径的公开访问结果，不证明永久删除。服务器保留有限页面和状态证据：`/root/toolbench-author-release-links-20261103-001/qualification-public.json`。未下载原任务包，不以第三方加工SFT数据替代原始工具任务；来源仍不打勾。
+
 - [x] 固定官方版本`d56fdd89faf8c91fa135090b212bb9057ee5cfc2`，服务器取得79份原Python/shell/说明/依赖/许可文件，共397381字节，逐份Git对象与SHA256核验；64份Python仅AST解析通过，未导入执行，未取得原题或权重。
+
 - [x] 复用公共作者获取器`--source toolbench`，只读`--action verify`在服务器通过；回执为共享任务根`toolbench-original-software-32068-001/qualification-public.json`、`toolbench-public-source-entry-32068-001/qualification-public.json`。软件准备不计来源总勾。
+
 - [ ] 原数据包、完整工具交互环境、合适NPU模型/检索器、原ToolEval评分与实际工件/研究消费仍待接通。官方主线要求ToolBench后端key或自己的RapidAPI环境，当前均未核验；不自行编造响应，也不静默改用StableToolBench模拟协议。
 
 ### 已完成批次的存储清理
