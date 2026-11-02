@@ -47,12 +47,12 @@ Agent或评分器。调用者须通过只读挂载提供原官方源码及该脚
 原评分CLI硬编码`gpt-4-1106-preview`。若使用本地NPU
 judge，须在调用记录和报告中明确实际模型及评分配置，不能标成官方GPT-4成绩。阶段证据见[原资产与隔离准备回执](validation/discoverybench-original-assets-20261028.json)。
 
-### LongMemEval-V2 正向记忆流程准备（2026-11-02）
+### LongMemEval-V2 正向记忆流程（已交付，2026-11-02）
 
 - [x] 默认`Qwen/Qwen3-Embedding-8B`已在NPU以BF16、LAST pooling启动，既有9B
   reader及14B服务未改动。作者嵌入内容上限仍为4096；服务上下文设为4224以容纳编码后的额外token。使用原生因果分块预填充512，不启用会分块求平均的`enable_chunked_processing`；单序列、显存比例0.243只是本机共驻验证配置，不是跨硬件最低需求。启动回执`lme-v2-original-embedding-service-20261102-004/state-public.json`。
 
-- [ ] 原enterprise/small位置0／1／2的正向`rag_query_to_slice`正在执行，完整共享100条原轨迹建库，嵌入已返回HTTP200；原20,000输出／200,000记忆预算及thinking设置保持。运行目录`lme-v2-enterprise-small-positive-rag-fixed3-20261102-002`，进程回执`lme-v2-positive-rag-public-entry-20261102-002/execution-window/state-public.json`；静态记录不证明进程当前存活，尚不算来源完成。前次原请求因服务4096-token容量不足返回400，原失败保留，没有改题、换题或裁掉特殊token。
+- [x] 原enterprise/small位置0／1／2的正向`rag_query_to_slice`已完成完整共享100轨迹建库、三题NPU生成及原评分0／1／1；原20,000输出／200,000记忆预算及thinking保留，三题记忆上下文均未截断。实际CI451条原关系、四处公共／未修改研究回读和三题原生输入绑定通过。[最终回执](validation/longmemeval-v2-positive-rag-native-delivery-20261102.json)。初次原请求400及两次KV容量失败保留；临时8B已释放，原9B／14B不变。
 
 - [x] RAG公开执行入口补齐`--embedding-assets /external/embedding/model`，同时建立固定reader与嵌入模型的离线缓存；清除继承的`HF_HUB_CACHE`／`HUGGINGFACE_HUB_CACHE`／`TRANSFORMERS_CACHE`覆盖，避免误读其他任务缓存。服务器核验原reader12份、嵌入模型13份元数据及原嵌入tokenizer离线加载通过，全部神经前向和权重加载被禁止。首次缓存覆盖失败保留；回执`lme-v2-dual-offline-cache-20261102-002/qualification-public.json`。本项0模型调用，不代表正向RAG已跑通，来源仍未完成。
 
@@ -103,7 +103,7 @@ finally:
 图片引用及截图归档身份保留在`runtime.native_files`。该元数据入口不会解码图片、执行记忆检索、调用模型或运行评分；应接原官方流程，不把`restore_original_question`返回的答案字段直接送给模型。准备索引仍使用统一pipeline，研究侧继续通过`resolve_input`消费。
 
 源数据、原9B
-reader及已有有效结果复用，不重跑消融以凑完成数。下载在服务器进行，本地不保存权重；默认8B嵌入服务现已启动，既有reader／14B服务未改动。早期动态进程与证据路径见[准备状态](validation/longmemeval-v2-rag-prerequisites-20261102.json)，后续运行以本节及机器清单的新回执为准，不能仅凭静态回执推定进程继续存活。
+reader及已有有效结果复用，不重跑消融以凑完成数。下载在服务器进行，本地不保存权重；默认8B嵌入服务已完成原生验证并释放，既有reader／14B服务未改动。早期动态进程与证据路径见[准备状态](validation/longmemeval-v2-rag-prerequisites-20261102.json)，后续运行以本节及机器清单的新回执为准，不能仅凭静态回执推定进程继续存活。
 
 预处理环境使用`configs/workload-native/longmemeval-v2-processor-arm64-py312-lock.txt`安装到单独Python3.12
 venv，保留原HTTP客户端不动；这是ARM64
@@ -178,7 +178,7 @@ for record in iter_workload("SWESMITH", data_root=Path("/external/swesmith/data"
 - 按已有证据逐项复核，不因口径调整批量补勾；失败和低分如实保留，不用替换样本凑通过。113项来源与另5项仅分类的范围不变。
 
 当前交付
-**88/113项**，待完成25项，另5项仅分类。首批#432的60项和第二批#538的ScienceWorld已合入main；早期五个草稿已关闭为被汇总承接，历史和分支保留。第三批来源及精确协议范围以机器清单和各交付回执为准，尚未合入。DailyTalk按原Guo前三段完整对话29条NPU批量合成协议交付，公共准备入口支持其他完整原对话；不代表全量音频、全split生成、MOS或流式时序。ScienceAgentBench按原verified固定前三题单轮生成、NPU辅助评分和隔离科学执行协议交付，三题程序失败如实保留，不代表全102题执行或其他Agent分支。TemporalWiki按原GPT2-large基座探针全部35,948行PPL交付，不代表持续训练checkpoint或其他语料模式。StreamingBench按real固定前三组原视频NPU推理与原评分交付，其他任务／模态缺口单列。LJSpeech按原VITS固定前三条NPU文本到波形协议交付，不代表全13,100条合成或MOS评价。StructEval按19个完整非渲染原生协议收口，渲染/VQA模式缺口继续单列，不称整套44协议或2035题全部完成。OpenMath/OpenCode是训练语料原问题生成，不是独立质量benchmark。打勾不代表全量模型评测、高分或性能保证。
+**89/113项**，待完成24项，另5项仅分类。首批#432的60项和第二批#538的ScienceWorld已合入main；早期五个草稿已关闭为被汇总承接，历史和分支保留。第三批来源及精确协议范围以机器清单和各交付回执为准，尚未合入。DailyTalk按原Guo前三段完整对话29条NPU批量合成协议交付，公共准备入口支持其他完整原对话；不代表全量音频、全split生成、MOS或流式时序。ScienceAgentBench按原verified固定前三题单轮生成、NPU辅助评分和隔离科学执行协议交付，三题程序失败如实保留，不代表全102题执行或其他Agent分支。TemporalWiki按原GPT2-large基座探针全部35,948行PPL交付，不代表持续训练checkpoint或其他语料模式。StreamingBench按real固定前三组原视频NPU推理与原评分交付，其他任务／模态缺口单列。LJSpeech按原VITS固定前三条NPU文本到波形协议交付，不代表全13,100条合成或MOS评价。StructEval按19个完整非渲染原生协议收口，渲染/VQA模式缺口继续单列，不称整套44协议或2035题全部完成。OpenMath/OpenCode是训练语料原问题生成，不是独立质量benchmark。打勾不代表全量模型评测、高分或性能保证。
 
 StructEval新增配置进展：经确认，`qwen35-9b-nonthinking-32768`与原`publisher-null`分开记录。仅原Text→TikZ位置37的已知失败题运行新配置，传输timeout3600秒、外层/SDK重试均0；保存响应为length／32768输出tokens。CPU原工作区autostop导致渲染转发失败，900秒等待后原生子进程以RenderBlocked失败退出；原响应、代码和待渲染请求保留，实际VQA调用0，不计完整任务。原80GiB持久卷和模板已原样恢复，Docker仍在恢复旧容器；不重启daemon、不重新生成，不重放位置38的结果未知请求。共享任务根`structeval-capped-failed-tikz-window-32068-001`保留终态，计数不增加。
 
@@ -1131,7 +1131,7 @@ LMM
 
 - [x] 最终公共数据/研究消费审计通过，2500条原字段/索引与6条固定往返闭环，CI安装44文件逐字节相等；原始数据未公开。
 
-### LongMemEval-V2分步骤（来源总勾未完成）
+### LongMemEval-V2分步骤（原enterprise/small正向RAG协议已交付）
 
 - [x] 固定官方53文件源码身份，服务器只读verify成功；不套用旧LongMemEval协议。
 - [x] 公共数据准备入口、原41文件身份与容量预算已补，调用未修改作者脚本；软件夹具通过。
@@ -1139,9 +1139,9 @@ LMM
 - [x] 截图展开及small/medium官方完整性校验均exit0：每档451问题、1870轨迹、451问题映射，未关闭截图检查；见[原始准备回执](validation/longmemeval-v2-original-readiness-20261026.json)。
 - [x] 官方9B完整16资产校验、空闲窗口服务切换及HTTP健康检查通过；BF16/TP1/262144上下文，NPU3运行。配置支持图片不等于真实视觉题已验证。
 - [x] 原enterprise/small前三题`no_retrieval`负对照完成NPU生成、原本地评分与独立复核；thinking开启、原预算20000保留，三个0分不删改；不冒称正向记忆检索。
-- [x] 独立HTTP客户端依赖锁、隔离后pip check与两份原CLI导入预检通过；RAG图像预处理的PyTorch另列未完成。
-- [ ] 原生记忆方法执行与原评分；视觉reader、RAG embedding及judge条件仍未齐备。
-- [ ] 公共数据关系适配与固定研究消费闭环；准备成功不等于原生benchmark交付。
+- [x] 独立HTTP客户端依赖锁、隔离后pip check与两份原CLI导入预检通过；后续RAG图像/token预处理及双离线缓存通过。CPU仅做预处理，原reader及嵌入推理均在NPU。
+- [x] 原enterprise/small固定前三题`rag_query_to_slice`完成全100条共享轨迹建库、103次成功嵌入响应、三题生成及原本地评分；原输出20,000／记忆200,000预算保留，三题均无记忆上下文截断。得分0／1／1如实保留，第一题用满输出预算，不换题或加预算凑分。独立保存审计0新增模型调用。
+- [x] 实际CI工件87载荷与Git／安装一致，全451条原问题及双档haystack关系核验；四处公共／未修改研究回读与三条正向原生输入绑定通过。[最终交付回执](validation/longmemeval-v2-positive-rag-native-delivery-20261102.json)。本项只交付所声明原生协议，web／medium／在线记忆模式及外部judge另列未验证。
 
 ### InfiniteBench分协议进展（2026-10-28；来源总勾仍未完成）
 
@@ -1527,7 +1527,7 @@ TB；服务器/data约1.42TB可用，未缩小语料。ChartQA当前两卡主机
 | LONGBENCH                  | [x] 登记Qasper交付                             | 原Qasper200题原生执行、官方评分及完整输入/参考均复核；研究端固定工件三条双路径接通。不宣称其他LongBench子集或原Qasper全库。[交付回执](validation/longbench-qasper-native-delivery-20261024.json)                                                                                                                                                                                                                                                                                         |
 | LONGBENCH_V2               | [ ] 原上下文容量阻塞                           | 原Short三题复用；事前固定Medium原3/5/8行中两题超131072窗口，Long原0/2/7行全部超限。未截断、换题或新增推理，不计完成。[容量回执](validation/longbench-v2-length-group-capacity-20261025.json)                                                                                                                                                                                                                                                                                             |
 | LONGMEMEVAL                | [x] 已声明原生协议交付                         | Oracle/S完整历史及M原BM25-session/top10/CoN流程各原前三题，共9条生成、原QA评分及独立审计。实际CI工件78载荷匹配，公共／未修改研究消费者9条完整回读；本地9B judge与官方推荐judge分开。M全历史超限及非适用检索分数保留，不冒称全量或质量复现。                                                                                                                                                                                                                                              |
-| LONGMEMEVAL_V2             | [ ] 待开展                                     | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| LONGMEMEVAL_V2             | [x] 原enterprise/small正向RAG交付              | 固定三题、完整100原轨迹、103成功嵌入响应及原评分0／1／1；全451原问题与双档haystack、当前CI87载荷及公共／研究读取闭环。非全量、web／medium／在线学习或性能。[回执](validation/longmemeval-v2-positive-rag-native-delivery-20261102.json)。                                                                                                                                                                                                                                                |
 | QASPER                     | [x] 原版v0.3抽样原生交付完成                   | 复用原5049字段/索引与图像准备；原dev0..2完成3次NPU答案/证据预测和作者原CLI评分，Answer F1约0.4996、Evidence F1=0保留。当前A9精确工件/研究dd三split9处旧索引回查通过。[证据](validation/qasper-native-delivery-20261026.json)。非LongBench200、全dev/test、LED或视觉推理，不筛图表参考，不称质量通过。                                                                                                                                                                                    |
 | NARRATIVEQA                | [x] 原summary-QA已完成                         | 原test前三题生成/双参考评分/保存审计完成；全46765问答三表字段关系与索引、精确CI44文件及固定研究端18处回查通过。[回执](validation/narrativeqa-native-delivery-20261027.json)。不是full-story、全test推理或作者模型复现。                                                                                                                                                                                                                                                                  |
 | XLAM_TOOL                  | [ ] 待开展                                     | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
@@ -2306,7 +2306,7 @@ ID、数据版本、模型、执行器、评分器、终态、失败原因和脱
 | [x]  | LONGBENCH            | rag-followup<br>document-grounded-analysis                                                                                                           | 官方归档及Qasper校验                             | 安装及原字段隔离验证                       | qasper原3题完成                                               | 官方QA-F1 22.52%                                              | 仅3/200；模型chat传输披露，其他子集未验                                                                                                                                                                                                                                             |
 | [ ]  | LONGBENCH_V2         | document-grounded-analysis                                                                                                                           | 官方文件SHA已核验                                | 服务器同三题完整输入回查                   | 公共入口同三题复验，1条原预算耗尽                             | 官方评分0/3，错误保留                                         | [尝试与范围说明](LONGBENCH_V2_ORIGINAL_ATTEMPT.zh-CN.md)，入口已复验；原预算终态及更长范围未完成                                                                                                                                                                                    |
 | [x]  | LONGMEMEVAL          | rag-followup<br>conversation-memory-recall                                                                                                           | 原资产已取得                                     | 原读者／BM25及QA入口已接                   | 原前三题各3条，合计9条已验证                                  | 原QA流程，本地9B judge明确披露                                | 实际CI工件与未修改研究消费者9条完整回读通过                                                                                                                                                                                                                                         |
-| [ ]  | LONGMEMEVAL_V2       | evolving-corpus-rag<br>experience-memory-recall                                                                                                      | 待复核                                           | 待复核                                     | 未跑                                                          | 未跑                                                          | 待重新核验                                                                                                                                                                                                                                                                          |
+| [x]  | LONGMEMEVAL_V2       | evolving-corpus-rag<br>experience-memory-recall                                                                                                      | 原41文件及451条问题／双档haystack保留            | 实际CI87载荷与4处公共／研究读取通过        | 原enterprise/small固定三题正向RAG完成                         | 原本地评分0／1／1，保存审计通过                               | 完整100轨迹建库；在线演化／web／medium运行未验证，不从分类标签推导能力全覆盖。[回执](validation/longmemeval-v2-positive-rag-native-delivery-20261102.json)。                                                                                                                        |
 | [ ]  | LONGVIDEOBENCH       | video-understanding                                                                                                                                  | 待复核                                           | 待复核                                     | 未跑                                                          | 未跑                                                          | 待重新核验                                                                                                                                                                                                                                                                          |
 | [x]  | LONGWRITER           | general-single-turn-assistant                                                                                                                        | 完整文件SHA已核验                                | 原消息/参考隔离回查                        | NPU生成3条stop                                                | 响应完整性，未评质量/篇幅达标                                 | [LongWriter-6k说明](LONGWRITER_ORIGINAL_MESSAGES.zh-CN.md)，训练语料3/6000，不是LongBench-Write评估                                                                                                                                                                                 |
 | [ ]  | MATH500              | standalone-reasoning                                                                                                                                 | OpenAI PRM800K固定版本；500行/500唯一ID及SHA已核 | 当前适配器完整读500行；答案/解答与输入隔离 | H4 Inspect固定前三题入口已提供，尚未NPU执行                   | H4官方4轮/pass_at_1/model_graded_fact待执行                   | [来源与协议及运行命令](MATH500_ORIGINAL_TASK.zh-CN.md)、[本地读取回执](validation/math500-source-read-20261023.json)；PRM800K确定性评分脚本仅作数据包诊断，不冒充H4官方分数；仓库已有200请求性能材料，run绑定评级D，单独保留，不重复做性能                                          |

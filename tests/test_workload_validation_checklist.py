@@ -8,6 +8,39 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def test_longmemeval_v2_delivery_requires_positive_native_rag_and_handoff():
+    ledger = json.loads(
+        (ROOT / "docs/workload-data/dataset-validation-status.json").read_text("utf-8")
+    )
+    row = ledger["delivery_inventory"]["LONGMEMEVAL_V2"]
+    assert row["checked"] and row["status"] == "AVAILABLE"
+    receipt = json.loads((ROOT / row["delivery_receipt"]).read_text("utf-8"))
+    assert receipt["source_checkbox_eligible"]
+    native = receipt["native_execution"]
+    assert native["original_positions"] == [0, 1, 2]
+    assert native["original_shared_trajectories"] == 100
+    assert native["observed_successful_embedding_http_responses"] == 103
+    assert native["completed_original_questions"] == 3
+    assert native["local_author_scores_recomputed"] == 3
+    assert native["correct_answers"] == 2
+    assert [sample["score"] for sample in native["samples"]] == [0.0, 1.0, 1.0]
+    assert not any(
+        sample["author_memory_context_was_truncated"] for sample in native["samples"]
+    )
+    assert receipt["model_binding"]["reader_max_completion_tokens"] == 20000
+    assert receipt["model_binding"]["memory_context_max_tokens"] == 200000
+    handoff = receipt["public_and_research_handoff"]
+    assert handoff["original_question_and_index_records_verified"] == 451
+    assert handoff["exact_git_wheel_installed_payloads"] == 87
+    assert handoff["public_and_unchanged_research_readbacks"] == 4
+    assert handoff["positive_native_input_bindings"] == 3
+    assert handoff["research_consumer_and_index_unchanged"]
+    assert not handoff["research_observation_or_analysis_migrated"]
+    assert receipt["saved_audit"]["new_model_calls"] == 0
+    assert not receipt["saved_audit"]["independent_vector_retrieval_replay_claim"]
+    assert receipt["resources"]["temporary8b_embedding_released"]
+
+
 def test_libritts_full_input_handoff_does_not_claim_native_tts():
     ledger = json.loads(
         (ROOT / "docs/workload-data/dataset-validation-status.json").read_text("utf-8")

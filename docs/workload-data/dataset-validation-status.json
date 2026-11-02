@@ -1427,7 +1427,7 @@
     },
     "LONGMEMEVAL_V2": {
       "embedding_npu_runtime_preparation": {
-        "status": "ORIGINAL_8B_NPU_POOLING_SERVICE_READY_POSITIVE_RAG_IN_PROGRESS",
+        "status": "ORIGINAL_8B_NPU_POOLING_QUALIFIED_AND_RELEASED_AFTER_POSITIVE_RAG",
         "server_receipt": "lme-v2-original-embedding-service-20261102-004/state-public.json",
         "model": "Qwen/Qwen3-Embedding-8B",
         "dtype": "bfloat16",
@@ -1453,7 +1453,11 @@
         "original_shared_memory_trajectories": 100,
         "original_max_completion_tokens": 20000,
         "original_memory_context_max_tokens": 200000,
-        "status_at_observation": "BUILDING_ORIGINAL_SHARED_MEMORY_EMBEDDING_HTTP200_NOT_COMPLETED",
+        "status_at_observation": "ORIGINAL_FIXED3_GENERATION_SCORING_SAVED_AUDIT_AND_CURRENT_CI_HANDOFF_PASSED",
+        "completed_questions": 3,
+        "correct_answers": 2,
+        "embedding_http200_responses": 103,
+        "saved_audit_new_model_calls": 0,
         "source_checkbox_eligible": false
       },
       "offline_dual_model_cache": {
@@ -1471,19 +1475,20 @@
       "rag_prerequisite_preparation": "docs/workload-data/validation/longmemeval-v2-rag-prerequisites-20261102.json",
       "embedding_asset_preparer": "scripts/prepare_longmemeval_v2_embedding.py",
       "scope": "public",
-      "delivery_kind": "review_original_source_protocol",
-      "status": "IN_PROGRESS",
-      "checked": false,
+      "delivery_kind": "original_positive_memory_rag",
+      "status": "AVAILABLE",
+      "checked": true,
       "legacy_checked": false,
       "existing_receipt": null,
-      "delivery_receipt": null,
+      "delivery_receipt": "docs/workload-data/validation/longmemeval-v2-positive-rag-native-delivery-20261102.json",
       "public_asset_preparer": "scripts/prepare_longmemeval_v2_original.py",
       "author_source_preparer": "scripts/prepare_jsonschemabench_author_source.py --source longmemeval-v2",
       "reader_asset_preparer": "scripts/prepare_longmemeval_v2_reader.py",
       "preparation_receipt": "docs/workload-data/validation/longmemeval-v2-original-readiness-20261026.json",
       "native_entrypoint": "scripts/run_longmemeval_v2_original.py",
-      "native_entrypoint_scope": "Original enterprise/small first3 no_retrieval executed and independently regraded on original Qwen3.5-9B BF16 TP1 NPU, original thinking/20000 completion/200000 memory budgets retained. Three0 scores preserved; this negative control is not positive memory retrieval or image-task coverage.",
-      "blocker": "Original53-source/41-data,16-file9B reader and17-file default8B embedding assets verified; first3 no_retrieval controls remain negative controls. CPU processor and dual offline tokenizer caches qualified. Original8B BF16 LAST-pooling NPU service now ready with4224 service context for original4096 content plus special-token encoding, native causal chunked prefill512 and0.243 memory ratio; reader/14B untouched. Original enterprise/small first3 positive RAG is building the complete shared100-trajectory memory with HTTP200 embeddings. Original20000 completion/200000 memory budgets retained; generation, scoring and final handoff pending. Prior KV-capacity and4097-token admission failures retained. Web fixed3 still require an unauthorized external judge; no filtering/replacement."
+      "native_entrypoint_scope": "Original enterprise/small first3 positive rag_query_to_slice completed: full shared100 trajectories,103 successful embedding responses, Qwen3-Embedding-8B and Qwen3.5-9B NPU BF16, original thinking/20000 completion/200000 memory budgets. All3 responses and local author scores independently audited,2/3 correct; original wrong answer retained. All451 original question/index rows and four current-CI public/unchanged-research readbacks plus three native bindings verified. Existing no_retrieval three0 negative controls retained, not counted as positive delivery.",
+      "blocker": null,
+      "remaining_optional_modes": "Declared enterprise/small offline positive-RAG protocol delivered. Full451 generation, medium/web native runs, online learning/evolving memory, external judges, independent embedding-vector retrieval replay, paper quality and engine performance remain unvalidated. Web fixed selections still require separately authorized external judge; no replacement to avoid it."
     },
     "QASPER": {
       "scope": "public",
