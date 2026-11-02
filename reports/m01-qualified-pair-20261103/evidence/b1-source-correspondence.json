@@ -1,0 +1,108 @@
+{
+  "status": "B1_observer_removal_functional_source_correspondence_passed",
+  "AST_comparisons": [
+    {
+      "path": "kvmat/vllm_kv_materialization/school_vllm_028.py",
+      "old_sha256": "6af72798a5aca44c7e36e6580d8ba644a3a4c88079ef8158d6fb863fb0304558",
+      "new_sha256": "7196bfa5837e846466ba5f5a30363395523467a7dfd2f219bbd97a3e14a56aab",
+      "removed_observer_nodes": [
+        "record_observation",
+        "original_init",
+        "initialize",
+        "Request_init_wrapper"
+      ],
+      "all_other_AST_equal": true
+    },
+    {
+      "path": "microflow/hust_prefill_microflow/runtime/school028_attention.py",
+      "old_sha256": "62ae3e125ad8393652347a52cc25d255d115b64b357587f5923edc85f82b71d8",
+      "new_sha256": "4767b3ead31293d8785cd057a012e1ae587243c71de0932e003b5f97393bc984",
+      "removed_observer_nodes": [
+        "event_import",
+        "event"
+      ],
+      "all_other_AST_equal": true
+    },
+    {
+      "path": "microflow/hust_prefill_microflow/school028/worker.py",
+      "old_sha256": "47f7a89f71ceea5e76b4093c132cfb0024392b9b26fe0bd9dd526dd40753ba76",
+      "new_sha256": "e5f561f2a9ddf0b0bccb3d79ac8954e41af6d0cd52d53c5e85f41a3101138751",
+      "removed_observer_nodes": [
+        "_install_graph_receipts",
+        "_install_graph_receipts"
+      ],
+      "all_other_AST_equal": true
+    }
+  ],
+  "unchanged_functional_corrections": [
+    {
+      "component": "m01_progress_source_snapshot.py",
+      "sha256": "56f7cd9c37ec88d1dc22ef5055a5c80332586b8a425921892f5fe21c705c3d3d",
+      "new_pinned_paths": [
+        "/workspace/m01-qualification-20261101/b1/m01_progress_source_snapshot.py"
+      ]
+    },
+    {
+      "component": "owned_optimistic_operand.py",
+      "sha256": "1581d33ff9e5fa1a161102ec82330c48e12ef6b03480e12bdca8f69ca62e2ddf",
+      "new_pinned_paths": [
+        "/workspace/m01-qualification-20261101/b1/owned_optimistic_operand.py"
+      ]
+    },
+    {
+      "component": "causal_draft_lengths.py",
+      "sha256": "b47a21fcdf732a28359d72dd8e050c667398b47ed6ee874a43caef05b65aa2e1",
+      "new_pinned_paths": [
+        "/workspace/m01-qualification-20261101/b1/causal_draft_lengths.py"
+      ]
+    }
+  ],
+  "isolated_input_guard_cases": 3,
+  "timed_boundary_source_checks": [
+    {
+      "repetition": 1,
+      "sha256": "0407c570c288265d9b5038a7e2a87eb1e8ea87553551785c7f6695a073ab2a86",
+      "both_ranks_runner_identity_and_fences_verified": true
+    },
+    {
+      "repetition": 2,
+      "sha256": "c5bea9d69988f75e68fe6c141965a13e23d8a34533a11fb84a00bff465c12a10",
+      "both_ranks_runner_identity_and_fences_verified": true
+    },
+    {
+      "repetition": 3,
+      "sha256": "9a198f5dcb9e6a062b9caac2a69040508e82d4210c852fd8b007f1f671113746",
+      "both_ranks_runner_identity_and_fences_verified": true
+    }
+  ],
+  "scope": "Preserves existing arithmetic-source applicability across removal of observation wrappers. Does not by itself establish timed prefill/raw-path equality or admit F/Tref/eta.",
+  "source_sha256": [
+    {
+      "artifact": "corrected_serving_runtime.py",
+      "sha256": "3213f9b82f84a06f8a5f9b310ca70bd1c0376c5a4f151b895afac81bcbe38329"
+    },
+    {
+      "artifact": "manifest.json",
+      "sha256": "738c3fd2f98129631544e5b743b8da190164ab8fcdaab390ab4fc5fa8a46952c"
+    },
+    {
+      "artifact": "plan.json",
+      "sha256": "e4bf1ded7f9abebeaf61ee15b239478c1224fc1c4b20bcad3c325520b4c8a9ee"
+    },
+    {
+      "artifact": "audit_observer_removal_source_r1.py",
+      "sha256": "6ee07a151ad4bc0f7de0b9a84e0f5873b18f473ac4e2cc32782b13f9f35ceb21"
+    },
+    {
+      "artifact": "m01_progress_source_snapshot.py",
+      "sha256": "56f7cd9c37ec88d1dc22ef5055a5c80332586b8a425921892f5fe21c705c3d3d"
+    }
+  ],
+  "formal_F_admitted": false,
+  "eta": null,
+  "export_provenance": {
+    "original_filename": "observer-removal-source-correspondence-r1.json",
+    "original_sha256": "432c59e775545ed39b22592074afc2b852628c8c90de73b85fa481ef60e21992",
+    "kind": "public_evidence_projection"
+  }
+}
