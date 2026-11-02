@@ -422,3 +422,33 @@ def test_reused_archive_profiles_plan_only(tmp_path, profile, source, count, siz
     assert plan["files"] == count and plan["bytes"] == size
     assert plan["model_calls"] == 0 and not plan["source_checkbox_eligible"]
     assert not output.exists()
+
+
+def test_visualwebarena_source_plan_exposes_software_not_native_completion():
+    catalog = json.loads(
+        (
+            SCRIPTS.parent
+            / "workload-preparation/data/catalogs/source_manifests_v1.json"
+        ).read_text("utf-8")
+    )
+    # Catalog mapping is deliberately separate from acquired task-data receipts.
+    sources = catalog.get("sources", catalog)
+    source = sources["VISUALWEBARENA"]
+    assert source["files"] == [] and source["revision"] is None
+    assert source["native_software_profile"]["profile"] == "visualwebarena"
+    pins = json.loads(
+        (SCRIPTS.parent / source["native_software_profile"]["manifest"]).read_text(
+            "utf-8"
+        )
+    )
+    paths = {item["path"] for item in pins["files"]}
+    assert {
+        "run.py",
+        "LICENSE",
+        "requirements.txt",
+        "scripts/generate_test_data.py",
+        "config_files/vwa/test_classifieds.raw.json",
+        "config_files/vwa/test_shopping.raw.json",
+        "config_files/vwa/test_reddit.raw.json",
+    } <= paths
+    assert not any(path.startswith(("media/", "tests/")) for path in paths)
