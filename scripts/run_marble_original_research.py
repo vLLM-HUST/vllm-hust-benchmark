@@ -25,13 +25,17 @@ from prepare_marble_evaluator_compat import compatibility_copy
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE_PROFILE = ROOT / "configs/workload-native/marble-author-source.json"
 WORKER = """
-import json,pathlib,runpy,sys
+import json,os,pathlib,runpy,sys
 stage=pathlib.Path(sys.argv[1]);config=pathlib.Path(sys.argv[2])
 sys.path[:0]=[str(stage/'helpers'),str(stage/'author')]
 from appworld_model_transport import model_proxy
+from marble_live_model_transport import live_model_transport
 from marble_keybert_transport import keyword_transport
 import marble.environments.research_utils.paper_collector as collector
-with keyword_transport(collector,stage/'keyword-queue'), model_proxy(stage/'model-queue',port=14005):
+endpoint=os.environ.get('MARBLE_OWNED_MODEL_API_BASE')
+transport=(live_model_transport(config.parent/'live-model-queue',endpoint,port=14005)
+           if endpoint else model_proxy(stage/'model-queue',port=14005))
+with keyword_transport(collector,stage/'keyword-queue'), transport:
     sys.argv=['marble.main','--config_path',str(config)]
     runpy.run_module('marble.main',run_name='__main__')
 """
@@ -135,7 +139,11 @@ def prepare(author_root, prepared_root, bound_root, output):
             if item["path"] == "marble/evaluator/evaluator.py"
             else (author / item["path"]).read_bytes()
         )
-    for name in ("appworld_model_transport.py", "marble_keybert_transport.py"):
+    for name in (
+        "appworld_model_transport.py",
+        "marble_keybert_transport.py",
+        "marble_live_model_transport.py",
+    ):
         (output / "helpers" / name).write_bytes((ROOT / "scripts" / name).read_bytes())
     (output / "native_worker.py").write_text(WORKER, "utf-8")
     for index, config in enumerate(configs):
@@ -184,6 +192,12 @@ def execute(output, report):
         OPENAI_API_BASE="http://127.0.0.1:14005/v1",
         OPENAI_BASE_URL="http://127.0.0.1:14005/v1",
     )
+    # Do not inherit an accidental endpoint from the caller's environment.
+    env.pop("MARBLE_OWNED_MODEL_API_BASE", None)
+    if report.get("model_api_base") is not None:
+        from marble_live_model_transport import loopback_endpoint
+
+        env["MARBLE_OWNED_MODEL_API_BASE"] = loopback_endpoint(report["model_api_base"])
     for index in range(3):
         folder = output / f"original-row-{index:05d}"
         report.update(
@@ -233,8 +247,10 @@ def execute(output, report):
                 "result_file_exists": (folder / "original-result.jsonl").is_file(),
             }
         )
-        report["model_requests"] = len(
-            list((output / "model-queue").glob("*.request.json"))
+        report["model_requests"] = (
+            len(list(output.glob("original-row-*/live-model-queue/*.request.json")))
+            if report.get("model_api_base") is not None
+            else len(list((output / "model-queue").glob("*.request.json")))
         )
         (output / "state-private.json").write_text(
             json.dumps(report, indent=2), "utf-8"
@@ -251,7 +267,16 @@ def main(argv=None):
     modes = parser.add_mutually_exclusive_group()
     modes.add_argument("--execute", action="store_true")
     modes.add_argument("--prepare-only", action="store_true")
+    parser.add_argument(
+        "--model-api-base",
+        help="Qualified owned loopback /v1 service: task-scoped direct forwarding; keyword worker remains external",
+    )
     args = parser.parse_args(argv)
+    endpoint = None
+    if args.model_api_base is not None:
+        from marble_live_model_transport import loopback_endpoint
+
+        endpoint = loopback_endpoint(args.model_api_base)
     if not args.execute and not args.prepare_only:
         print(
             json.dumps(
@@ -265,6 +290,12 @@ def main(argv=None):
         )
         return 0
     report = prepare(args.author_root, args.prepared_root, args.bound_root, args.output)
+    if endpoint is not None:
+        report["model_api_base"] = endpoint
+        report["model_transport"] = "TASK_SCOPED_LIVE_LOOPBACK_NONTHINKING"
+        (args.output / "state-private.json").write_text(
+            json.dumps(report, indent=2), "utf-8"
+        )
     if args.execute:
         report = execute(args.output.resolve(), report)
     print(json.dumps(report, indent=2))

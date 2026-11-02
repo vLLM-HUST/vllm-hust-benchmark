@@ -68,3 +68,20 @@ def test_live_parent_is_not_request_scoped_authorization(tmp_path):
     report = entry.audit(root, launch, proc_root=tmp_path / "proc")
     assert report["live_consumer_exists"]
     assert not report["pending_requests_may_be_served"]
+
+
+def test_direct_task_queues_counted_without_cross_task_response_binding(tmp_path):
+    root, launch = fixture(tmp_path)
+    first = root / "original-row-00000/live-model-queue"
+    second = root / "original-row-00001/live-model-queue"
+    first.mkdir(parents=True)
+    second.mkdir(parents=True)
+    identity = "b" * 32
+    (first / (identity + ".request.json")).write_text("fixture")
+    (second / (identity + ".response.json")).write_text("fixture")
+    with pytest.raises(ValueError, match="without original request"):
+        entry.audit(root, launch, proc_root=tmp_path / "proc")
+    (second / (identity + ".request.json")).write_text("fixture")
+    report = entry.audit(root, launch, proc_root=tmp_path / "proc")
+    assert report["model_queue"] == {"requests": 3, "responses": 1, "pending": 2}
+    assert not report["pending_requests_may_be_served"]

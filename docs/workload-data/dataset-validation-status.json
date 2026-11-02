@@ -4733,6 +4733,23 @@
       "scope_limits": "NQ-open only; not full document NQ, EfficientQA or DPR/REALM retrieval. Plain default profile has152/3610 EM and3127 empty outputs; native-chat fixed3 has0/3 EM with no empty output. Availability is not quality acceptance, and these profiles must not be pooled."
     },
     "MULTIAGENTBENCH": {
+      "task_scoped_model_transport_software": {
+        "entry": "scripts/run_marble_original_research.py --model-api-base",
+        "helper": "scripts/marble_live_model_transport.py",
+        "same_process_as_original_native_child": true,
+        "fresh_separate_queue_per_original_task": true,
+        "old_queues_replayed": false,
+        "original_requests_and_backend_responses_preserved": true,
+        "disclosed_nonthinking_binding_unchanged": true,
+        "http_fixtures_only": true,
+        "server_original_client_python": "3.10.12",
+        "server_invented_http_status_controls": [200, 500],
+        "server_control_original_requests_and_backend_responses_unchanged": true,
+        "server_control_receipt": "/root/marble-live-transport-control-20261103-001/qualification-public.json",
+        "new_native_model_calls": 0,
+        "old_response_reuse_and_real_npu_path_pending": true,
+        "source_checkbox_eligible": false
+      },
       "current_native_recovery_audit": "docs/workload-data/validation/multiagentbench-native-recovery-audit-20261102.json",
       "native_research_execution": {
         "observed_status": "STOPPED_WITH_INCOMPLETE_ORIGINAL_PROTOCOL",

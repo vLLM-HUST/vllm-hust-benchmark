@@ -96,6 +96,20 @@ def test_isolated_cli_plan_imports_only_software(tmp_path):
     assert not list(tmp_path.iterdir())
 
 
+def test_invalid_live_endpoint_rejected_before_preparing_assets(tmp_path, monkeypatch):
+    monkeypatch.setattr(entry, "prepare", lambda *a: pytest.fail("asset preparation"))
+    args = sum(
+        (
+            ["--" + key, str(tmp_path / key)]
+            for key in ["author-root", "prepared-root", "bound-root", "output"]
+        ),
+        [],
+    )
+    with pytest.raises(ValueError, match="loopback"):
+        entry.main(args + ["--execute", "--model-api-base", "http://example.com:1/v1"])
+    assert not list(tmp_path.iterdir())
+
+
 def test_complete_original_prefix_and_unknown_fields_kept(tmp_path):
     source, bound = fixture_prefix(tmp_path)
     configs, actor, judge = entry.original_prefix(source, bound)

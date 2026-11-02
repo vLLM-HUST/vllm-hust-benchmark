@@ -28,13 +28,23 @@ def queue_state(root, kind):
     directory = root / (kind + "-queue")
     requests = list(directory.glob("*.request.json"))
     responses = list(directory.glob("*.response.json"))
+    if kind == "model":
+        requests.extend(root.glob("original-row-*/live-model-queue/*.request.json"))
+        responses.extend(root.glob("original-row-*/live-model-queue/*.response.json"))
     for path in requests + responses:
-        if path.is_symlink() or not re.fullmatch(
-            r"[a-f0-9]{32}\.(request|response)\.json", path.name
+        if (
+            path.is_symlink()
+            or not path.resolve().is_relative_to(root.resolve())
+            or not re.fullmatch(r"[a-f0-9]{32}\.(request|response)\.json", path.name)
         ):
             raise ValueError("original private queue file identity required")
-    requested = {path.name.split(".", 1)[0] for path in requests}
-    returned = {path.name.split(".", 1)[0] for path in responses}
+    requested = {
+        (path.parent.relative_to(root), path.name.split(".", 1)[0]) for path in requests
+    }
+    returned = {
+        (path.parent.relative_to(root), path.name.split(".", 1)[0])
+        for path in responses
+    }
     if returned - requested:
         raise ValueError("response without original request; inspect before recovery")
     return {
