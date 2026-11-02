@@ -2,6 +2,14 @@
 
 ### 剩余原生环境前置条件复核（2026-11-02）
 
+- [x] VisualWebArena已复用公共归档准备器：478份原生软件、任务配置、网站准备与仓内参考资产共200942354字节，在服务器通过plan、prepare、verify，复用原归档、没有重复下载。仅排除media演示和tests；网站镜像及题目外链媒体仍需另行准备。公共仓仅存固定摘要元数据，不存这些原文件。用法如下（先plan查看官方固定归档地址）：
+
+  ```bash
+  python scripts/prepare_swebench_author_source.py --profile visualwebarena --author-root /server/visualwebarena-source --action plan
+  python scripts/prepare_swebench_author_source.py --profile visualwebarena --author-root /server/visualwebarena-source --archive /server/original-visualwebarena.tar.gz --action prepare
+  python scripts/prepare_swebench_author_source.py --profile visualwebarena --author-root /server/visualwebarena-source --action verify
+  ```
+
 - [x] VisualWebArena官方固定版本的511份原文件已在服务器按Git对象与SHA256核验，共212274671字节；原任务含classifieds 234、shopping
   466、reddit
   210，共910题。这里只完成取得和盘点，没有执行网站初始化、登录、Agent或评分，来源仍不打勾。剩余条件是原可复位网站、题目引用媒体及合适的NPU视觉Agent/评分后端；不能用公开网页demo或伪装GPT模型名替代。证据：`/var/lib/npc/visualwebarena-original-harness-20261102-001/qualification-public.json`和同目录`original-task-inventory-public.json`。

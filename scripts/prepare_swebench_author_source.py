@@ -83,7 +83,14 @@ def main():
     parser.add_argument("--archive", type=Path)
     parser.add_argument(
         "--profile",
-        choices=["current", "v4.1.0", "mini-swe-agent", "webarena", "mlebench"],
+        choices=[
+            "current",
+            "v4.1.0",
+            "mini-swe-agent",
+            "webarena",
+            "mlebench",
+            "visualwebarena",
+        ],
         default="current",
         help="Original software profiles; SWE-bench default unchanged. WebArena/MLE-bench use existing official archives,not task execution.",
     )
@@ -97,6 +104,7 @@ def main():
         "mini-swe-agent": PINS.with_name("mini-swe-agent-author-source.json"),
         "webarena": PINS.with_name("webarena-author-source.json"),
         "mlebench": PINS.with_name("mlebench-author-source.json"),
+        "visualwebarena": PINS.with_name("visualwebarena-author-source.json"),
     }
     pins_path = profiles[args.profile]
     pins = json.loads(pins_path.read_text(encoding="utf-8"))

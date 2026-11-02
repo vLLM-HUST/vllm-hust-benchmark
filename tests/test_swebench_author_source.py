@@ -396,7 +396,11 @@ def test_lfs_pointer_only_download_is_not_expanded_payload(tmp_path):
 
 @pytest.mark.parametrize(
     "profile,source,count,size",
-    [("webarena", "WEBARENA", 88, 7550641), ("mlebench", "MLEBENCH", 758, 7501882)],
+    [
+        ("webarena", "WEBARENA", 88, 7550641),
+        ("mlebench", "MLEBENCH", 758, 7501882),
+        ("visualwebarena", "VISUALWEBARENA", 478, 200942354),
+    ],
 )
 def test_reused_archive_profiles_plan_only(tmp_path, profile, source, count, size):
     output = tmp_path / "not-created"
