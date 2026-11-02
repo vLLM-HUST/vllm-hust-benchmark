@@ -94,6 +94,11 @@ def iter_source_rows(path, spec):
 
         yield from original_rows(path, spec)
         return
+    if spec["mapping"] == "paperbench_original_packages":
+        from .paperbench import original_rows
+
+        yield from original_rows(path, spec)
+        return
     if spec["mapping"] == "dragon_original_tasks":
         from .dragon import original_rows
 
@@ -275,6 +280,10 @@ def adapt_row(
         return adapt_case(row, source=source, index=index)
     if spec["mapping"] == "naturebench_original_packages":
         from .naturebench import adapt_case
+
+        return adapt_case(row, source=source, index=index)
+    if spec["mapping"] == "paperbench_original_packages":
+        from .paperbench import adapt_case
 
         return adapt_case(row, source=source, index=index)
     if spec["mapping"] == "dragon_original_tasks":
@@ -790,6 +799,10 @@ def iter_workload(
         raise ValueError("explicit manifest requires matching source ID and revision")
     if source_id == "NATUREBENCH" and mapping is None:
         from .naturebench import relation_spec
+
+        spec = relation_spec(manifest, spec)
+    if source_id == "PAPERBENCH" and mapping is None:
+        from .paperbench import relation_spec
 
         spec = relation_spec(manifest, spec)
     if source_id == "MSMARCO_PASSAGE" and mapping is None:

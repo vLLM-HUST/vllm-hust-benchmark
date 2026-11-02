@@ -66,6 +66,14 @@ def bind_source(
             name not in known or known[name].get("role") != "data" for name in files
         ):
             raise ValueError("NatureBench requires original registered task metadata")
+    if source_id == "PAPERBENCH" and mapping is None:
+        from .paperbench import relation_spec
+
+        spec = relation_spec(upstream, spec)
+        if revision != upstream["revision"] or any(
+            name not in known or known[name].get("role") != "data" for name in files
+        ):
+            raise ValueError("PaperBench requires original registered paper metadata")
     for relative in files:
         path = asset_path(data_root, relative)
         digest = sha256(path)
@@ -161,7 +169,7 @@ def bind_source(
         ),
         **(
             {"native_task_assets": deepcopy(upstream["files"])}
-            if source_id == "NATUREBENCH" and mapping is None
+            if source_id in {"NATUREBENCH", "PAPERBENCH"} and mapping is None
             else {}
         ),
         **({"mapping_sha256": spec["contract_sha256"]} if mapping is not None else {}),

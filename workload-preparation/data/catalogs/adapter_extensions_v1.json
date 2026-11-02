@@ -2,6 +2,14 @@
   "version": "adapter-extensions/v1",
   "boundary": "Field contracts from publisher metadata/docs. No real source payload downloaded or full adapter validation claimed.",
   "adapters": {
+    "PAPERBENCH": {
+      "kind":"task_dataset", "mapping":"paperbench_original_packages",
+      "input_fields":["input"], "required_fields":["task_id","source","input","outcome","native_execution_complete"],
+      "outcome_fields":["outcome"], "annotation_fields":[], "id_field":"task_id",
+      "code_revision":"b78dab1da774a6456b1ed9c48c9ff194ee3ff36d", "identity_note":"pragma: allowlist secret - fixed original code and published data",
+      "requirements":["Original paper/config/material graph only; rubric and judge assets remain outcome-only; no model request renderer or native task execution"],
+      "status":"ORIGINAL_PAPER_PACKAGE_READER_NATIVE_EXECUTION_PENDING"
+    },
     "VIDEOMME_V2": {
       "kind": "native_environment_dataset", "mapping": "videomme_v2_original_complete_groups",
       "input_fields": [], "required_fields": ["original_rows"],

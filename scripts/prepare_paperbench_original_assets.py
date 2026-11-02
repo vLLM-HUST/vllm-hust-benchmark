@@ -16,7 +16,9 @@ from prepare_crosscodeeval_original_assets import (
 from prepare_xsum_original_assets import bound_path
 
 ROOT = Path(__file__).resolve().parents[1]
-PINS = ROOT / "configs/workload-native/paperbench-original-task-assets.json"
+PINS = (
+    ROOT / "workload-preparation/data/catalogs/paperbench_original_paper_assets_v1.json"
+)
 REVISION = "b78dab1da774a6456b1ed9c48c9ff194ee3ff36d"  # pragma: allowlist secret - fixed official public revision
 PREFIX = "project/paperbench/data/papers/"
 
