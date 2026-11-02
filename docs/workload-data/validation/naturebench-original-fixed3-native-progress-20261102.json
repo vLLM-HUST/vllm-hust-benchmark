@@ -1,6 +1,6 @@
 {
   "source_id": "NATUREBENCH",
-  "status": "FIRST_CONTEXT_FAILURE_RETAINED_SECOND_CORRECTED_ORIGINAL_RUNNING",
+  "status": "FIRST_CONTEXT_FAILURE_RETAINED_SECOND_TIMEOUT_JUDGE_CONTEXT_BLOCKED_THIRD_NOT_STARTED",
   "source_checkbox_eligible": false,
   "declared_protocol": "Original full CPU resource group: three fixed original scientific coding tasks, complete Agent/evaluator/validity-judge workflow",
   "selected_original_task_ids": ["s41592-022-01709-7", "s41592-025-02870-5", "s43588-024-00689-2"],
@@ -68,7 +68,29 @@
     "new_model_calls": 0,
     "new_native_execute_qualified": false,
     "public_execute_started_on_original_second_task": true,
-    "second_task_state": "RUNNING_NATIVE_RESULTS_PENDING",
+    "second_task_state": "TERMINAL_TIMEOUT_VALIDITY_JUDGE_CONTEXT_ERROR",
+    "second_terminal_result": {
+      "controller_exit_code": 0,
+      "official_task_status": "timeout",
+      "official_task_returncode": -1,
+      "official_scored_tasks": 1,
+      "average_best_aggregate_improvement": -1.0,
+      "official_validity_is_valid": null,
+      "official_validity_error": "judge_error: HTTP 500: request failed",
+      "confirmed_judge_failure": "Original 4096-token output reservation plus original evidence exceeds served 131072-token combined context",
+      "recollected_original_judge_input": {
+        "collection": "Unchanged official collection and prompt functions on retained outputs; not a captured historical HTTP request",
+        "request_sha256": "3016a417f7a71cbcd51ea401a43e7e77ecc5411b67666f24f5112c7c48c9cae1",
+        "offline_qwen35_9b_template_input_tokens": 360566,
+        "original_output_tokens": 4096,
+        "combined_tokens": 364662,
+        "current_9b_served_context": 262144,
+        "fits_current_9b_service": false,
+        "tokenizer_only_no_neural_forward": true,
+        "live_anthropic_rendering_qualified": false
+      },
+      "source_checkbox_eligible": false
+    },
     "second_official_evaluator_readonly_probe": {
       "http_status": 200,
       "recorded_attempts_observed_lower_bound": 3,
@@ -119,7 +141,7 @@
     "new_model_calls_by_plan": 0,
     "source_checkbox_eligible": false
   },
-  "pending": ["First original task terminal outcome, native evaluation and validity judgement", "Remaining two original tasks complete native execution", "Public wrapper execute qualification and complete scientific environment reproduction instructions", "Current CI artifact/provider/unchanged research-consumer final handoff"],
+  "pending": ["First corrected original task retry, native evaluation and validity judgement", "Second original task validity judge with qualified sufficient context and original evidence unchanged", "Third original task complete native execution; not started before owned CPU autostop", "Public wrapper execute qualification and complete scientific environment reproduction instructions", "Current CI artifact/provider/unchanged research-consumer final handoff"],
   "raw_task_payloads_or_private_transcripts_redistributed": false,
   "research_observation_or_analysis_migrated": false
 }
