@@ -1,0 +1,67 @@
+{
+  "schema": "muxpd-new-loss-source-receipt-analysis-adapter-v2",
+  "status": "review-ready-draft",
+  "device_executed": false,
+  "analysis_executed": false,
+  "immutable_inputs": {
+    "/root/workspace/muxpd-quality-layout-20261028/new-loss-analysis-v1.json": "ebe82ac020a7efa789b3eb33a0a4809b66a64ddbdc1808bd6876c1d3577312de",
+    "/root/workspace/muxpd-quality-layout-20261028/new-loss-probe-v1/freeze-manifest-v1.json": "72e1d82ca3fcabba5ee428ab3c062af453b42b26d3124ea58e816c081c3b62fb",
+    "/root/workspace/muxpd-quality-layout-20261028/new-loss-probe-v1/analyze_new_loss_v1.py": "428bc23332992f2d3ac7dea3674e0453dc279fbd3b00858a040ad996a16c46eb",
+    "/root/workspace/muxpd-quality-layout-20261028/new-loss-probe-v1/probe_run_v1.py": "bbcee277580349355c22eb9681794816fb91994309d563229ed267c361560604",
+    "/root/workspace/muxpd-quality-layout-20261028/new-loss-probe-v1/source-manifest-v1.json": "66bf0d149c34b9bdc0064750f670910af94e26314ab4f39a0e462c40282d683a",
+    "/root/workspace/muxpd-quality-layout-20261028/quality-v1/run_quality.py": "389ab14e591130d2bc44a31b93f31ecde6a44112fb8d36662d15505abe7359cf",
+    "/root/workspace/muxpd-quality-layout-20261028/quality-v1/quality_run_v1.py": "4b7f22a80a6866261bf0c397db82ce6a69f4819d31715fd3b9e82147ec6cbd41"
+  },
+  "files": {
+    "analyze_v2.py": "87193ce1da3a4728567af2a9c21d4bcbef36c727c3457f20ffb2bfcaeb1d6e8c",
+    "test_adapter_v2.py": "00ea16efcc3e6c4372ad5fea39a7905a4cf4883c757f22abb66a10972a876a13",
+    "README.md": "ea4d61ce72446082a96eb361ce207fc0e8e842ad4b5390fce96c5057b81b5963",
+    "cpu-tests-v2.log": "5f8f56976314134b47a12f5aa90f4890020775d834bd480f643fb80be26a7652",
+    "invalid-attempt-regression-v2.log": "49032c031a3424e3157d144b79f1c43eedaddbff648eab281ce93b2408fb4f17",
+    "ruff-v2.log": "419f330558192fe36f2f6cf8dafcc347ce0ed10476066093fd3c82ca438f6055"
+  },
+  "cpu_checks": [
+    {
+      "command": [
+        "/root/workspace/.venv/bin/python",
+        "-m",
+        "pytest",
+        "-q",
+        "test_adapter_v2.py"
+      ],
+      "cwd": "/root/workspace/muxpd-quality-layout-20261028/new-loss-analysis-v2",
+      "exit_code": 0,
+      "log": "cpu-tests-v2.log",
+      "sha256": "5f8f56976314134b47a12f5aa90f4890020775d834bd480f643fb80be26a7652"
+    },
+    {
+      "command": [
+        "/root/workspace/.venv/bin/python",
+        "-m",
+        "pytest",
+        "-q",
+        "/root/workspace/muxpd-quality-layout-20261028/new-loss-probe-v1/test_new_loss_probe_v1.py",
+        "-k",
+        "invalid_attempt_cannot_be_ignored_in_favor_of_valid_retry"
+      ],
+      "cwd": "/root/workspace/muxpd-quality-layout-20261028/new-loss-analysis-v2",
+      "exit_code": 0,
+      "log": "invalid-attempt-regression-v2.log",
+      "sha256": "49032c031a3424e3157d144b79f1c43eedaddbff648eab281ce93b2408fb4f17"
+    },
+    {
+      "command": [
+        "/root/workspace/.venv/bin/python",
+        "-m",
+        "ruff",
+        "check",
+        "analyze_v2.py",
+        "test_adapter_v2.py"
+      ],
+      "cwd": "/root/workspace/muxpd-quality-layout-20261028/new-loss-analysis-v2",
+      "exit_code": 0,
+      "log": "ruff-v2.log",
+      "sha256": "419f330558192fe36f2f6cf8dafcc347ce0ed10476066093fd3c82ca438f6055"
+    }
+  ]
+}

@@ -1,0 +1,485 @@
+{
+  "schema": "terminal-arm64-user-acceptance/v1",
+  "date": "2026-10-28",
+  "dataset": "Terminal-Bench 2.1",
+  "task_id": "openssl-selfsigned-cert",
+  "scope": {
+    "planned_model_tasks": 1,
+    "attempted_model_tasks": 1,
+    "scored_model_tasks": 1,
+    "passed_model_tasks": 1,
+    "official_task_count": 89,
+    "full_dataset_validated": false,
+    "b0_b1_comparison": false,
+    "new_account_workspace_creation_validated": false,
+    "workflow": "Existing authorized ARM64 CPU workspace; ops provisions platform and private model profile, outside the tested Agent."
+  },
+  "validation": {
+    "nop": {
+      "role": "nop",
+      "process_exit_code": 0,
+      "reward": 0.0,
+      "tests": 6,
+      "passed": 0,
+      "exception_type": null,
+      "ended_epoch": 1793171507.9482384,
+      "status": "scored",
+      "started_at": "2026-10-28T07:11:23.086201Z",
+      "finished_at": "2026-10-28T07:11:42.897165Z"
+    },
+    "oracle": {
+      "role": "oracle",
+      "process_exit_code": 0,
+      "reward": 1.0,
+      "tests": 6,
+      "passed": 6,
+      "exception_type": null,
+      "ended_epoch": 1793171535.9265826,
+      "status": "scored",
+      "started_at": "2026-10-28T07:11:49.703460Z",
+      "finished_at": "2026-10-28T07:12:10.908930Z"
+    },
+    "model": {
+      "role": "model",
+      "process_exit_code": 0,
+      "reward": 1.0,
+      "tests": 6,
+      "passed": 6,
+      "exception_type": null,
+      "ended_epoch": 1793172821.2437496,
+      "status": "scored",
+      "started_at": "2026-10-28T07:31:31.316672Z",
+      "finished_at": "2026-10-28T07:33:40.068573Z"
+    }
+  },
+  "runtime": {
+    "model": "Qwen3.5-35B-A3B",
+    "model_revision": "59d61f3ce65a6d9863b86d2e96597125219dc754",
+    "served_model_id": "qwen3.5-35b",
+    "precision": "bf16",
+    "npu": "Ascend 910B2",
+    "npu_count": 2,
+    "tensor_parallel_size": 2,
+    "expert_parallel": true,
+    "max_model_len": 32768,
+    "seed": 17,
+    "prefix_caching": false,
+    "vllm": "0.18.0",
+    "vllm_ascend": "0.18.0",
+    "architecture": "Qwen3_5MoeForConditionalGeneration",
+    "text_only_overlay": false,
+    "module_sha256": {
+      "vllm": "fd3708e5a13abe98c566afd79a6b1987cef70c0548bb19c1218ff6a7f9d43346",
+      "vllm_ascend": "5f986228b7d273c71cba73cea91bc61dc443e01c39cd9985ea04bc3358e8bf65",
+      "torch": "3caf7f40140ede2465bde40b9003af10cbbc8f7bcf436fa1de026471daa1b288",
+      "torch_npu": "967690b75576c1dfb76ed3cef3bd8a876fe94ec3195e4afa3116ef7d31e9b160",
+      "acl": "603b42753dd878faa90d6b3b81b5ddb791375fb9b3fcd8c39799ee58a3182617",
+      "vllm.model_executor.models.qwen3_5": "76eeda13ad5d104b74ce8352e4a9766a0a93f29230ba359e9f7727aef4173f1d",
+      "vllm_ascend.patch.worker.patch_qwen3vl": "6bf8b3b89948ff40c38dfe9b15ea8d9f01d9d237453fa729e3f9dd50cf5b77d7"
+    }
+  },
+  "source": {
+    "bootstrap_commit": "2109c36ba3fd6523e00cf3e6b2ecc725d693609a",
+    "bootstrap_path": "scripts/bootstrap_terminal_arm64.py",
+    "guide_path": "docs/TERMINAL_BENCH_ARM64.zh-CN.md",
+    "task_repository": "harbor-framework/terminal-bench-2-1",
+    "task_revision": "7131e4375048a0e408a8fb404b5f499d726b695b",
+    "harbor": {
+      "pypi_version": "0.24.0",
+      "upstream_revision": "b53b8134e1241686dca7759af188f987ecc48e8b",
+      "files": [
+        {
+          "path": "src/harbor/models/job/config.py",
+          "sha256": "bc52e7daca07ab492158cda4d2a6ac9a63093146f452068d79752633c087dbd8",
+          "matches_upstream": true
+        },
+        {
+          "path": "src/harbor/models/trial/config.py",
+          "sha256": "829d4dbd802ce913ccb1f29f149f5ad83ebb52d6c5e0fb1fb9456790f266f4c2",
+          "matches_upstream": true
+        },
+        {
+          "path": "src/harbor/agents/terminus_2/terminus_2.py",
+          "sha256": "de15c2c86a66fdc9d7f75f974759835b1174e320fd146f393ef8101c46ba2e6e",
+          "matches_upstream": true
+        },
+        {
+          "path": "src/harbor/llms/lite_llm.py",
+          "sha256": "8faa5941aee862bdb9c020874ec721e348165a9b907c5a3509381a2ab50ec5a8",
+          "matches_upstream": true
+        },
+        {
+          "path": "src/harbor/environments/docker/docker.py",
+          "sha256": "77911f4df7fe29850d006ec969786a920302668fa7cdf35ff7c31cc96337bf65",
+          "matches_upstream": true
+        },
+        {
+          "path": "src/harbor/models/task/config.py",
+          "sha256": "f9cd1d01960de82f1ec025c285a7367cec5eb8e3a2bb0b8e6313e7bce3283e5e",
+          "matches_upstream": true
+        }
+      ]
+    },
+    "task_files_sha256": {
+      "task/environment/Dockerfile": "be00cb478ca38540d8ad18211de0ebea632b14c7d0cdbc0108a349ab3f1c6f65",
+      "task/environment/curl": "a7a1d699291f320eda0485b5d2e4b67a2e254099d001494e20aa47de7f0d1806",
+      "task/environment/uv-aarch64-unknown-linux-gnu.tar.gz": "9db0c2f6683099f86bfeea47f4134e915f382512278de95b2a0e625957594ff3",
+      "task/environment/uv-installer.sh": "8402ab80d2ef54d7044a71ea4e4e1e8db3b20c87c7bffbc30bff59f1e80ebbd5",
+      "task/instruction.md": "38054a3371f7c2c853478a2f9af0bff858437d5b28a9a07483238f06e566921f",
+      "task/solution/solve.sh": "58cf3c844e907745cd81fb4bd75efb3d080e2f0e82b589c56c954ae6e1756510",
+      "task/task.toml": "35c130c45e2ebcd372adbaa8e791ac242532e0f578e675af7ec1ad7ae2118d53",
+      "task/tests/test.sh": "4770437ea96c3cc84684b4f99d55fb148fcac09f9ea1e8ef49de487716e6c334",
+      "task/tests/test_outputs.py": "90970bb3c372e8e7fb6bb9ac5f649ba73eb38e1a5ea2e922a9057a72b6b4192d"
+    },
+    "unaltered_upstream_files": [
+      "task/instruction.md",
+      "task/solution/solve.sh",
+      "task/tests/test.sh",
+      "task/tests/test_outputs.py"
+    ]
+  },
+  "sandbox": {
+    "architecture": "linux/arm64",
+    "base_manifest": "sha256:608b27b2db85abf38d81685085cd1166a5ed7ada66549f0dfe53a75bb830cd5d",
+    "base_image_id": "sha256:18d58f4e045f133283c50016a09285439cbe765877e1a93760888b85fd2ce905",
+    "actual_image_id": "sha256:5a96b88aee6d407ce73fb635d74abcacf7e52abd6419499514b67c4a8fc3b526",
+    "cpu_limit": 1,
+    "memory_bytes": 2147483648,
+    "network_mtu": 1400,
+    "disk_limit_enforced": false,
+    "persistent_volume": "existing authorized shared client/daemon PVC",
+    "mount_probe": "passed",
+    "effective_container_readback": [
+      {
+        "image": "sha256:5a96b88aee6d407ce73fb635d74abcacf7e52abd6419499514b67c4a8fc3b526",
+        "limits": {
+          "NanoCpus": 1000000000,
+          "Memory": 2147483648,
+          "MemorySwap": 2147483648,
+          "CpusetCpus": "24-31"
+        },
+        "cgroup_readback_exit": 0,
+        "cgroup_readback": "100000 100000\n2147483648\n1400\n"
+      }
+    ],
+    "compose_version": "Docker Compose version v2.39.4",
+    "uv_version": "0.9.5",
+    "pytest_version": "8.4.1",
+    "pytest_json_ctrf_version": "0.3.5"
+  },
+  "budget": {
+    "agent": "terminus-2",
+    "max_turns": 100,
+    "max_output_tokens_per_request": 4096,
+    "agent_timeout_seconds": 900,
+    "verifier_timeout_seconds": 900,
+    "temperature": 0,
+    "seed": 17,
+    "thinking": false,
+    "summarization": false,
+    "whole_trial_attempts": 1,
+    "whole_trial_retries": 0,
+    "litellm_sdk_retries": 0,
+    "upstream_nested_max_attempts": [
+      3,
+      3
+    ],
+    "http_count_is_not_turn_budget": true
+  },
+  "agent": {
+    "episodes": 7,
+    "request_timing_count": 7,
+    "summarization_count": 0,
+    "input_tokens": 23378,
+    "output_tokens": 2400,
+    "cache_tokens": 0,
+    "tool_calls": 16
+  },
+  "client_completion": {
+    "client_exited": true,
+    "exit_code": 0,
+    "remaining_owned_containers": []
+  },
+  "isolation": {
+    "fresh_run_directory": true,
+    "fresh_harbor_client": true,
+    "fresh_task_containers": true,
+    "fresh_service_window": true,
+    "no_answer_or_score_reuse": true,
+    "reused_readonly_weights_and_base_image": true,
+    "weights_full_hash_repeated": false,
+    "weight_identity_note": "Previously verified 16-item transfer manifest matched; current stat and small metadata checked before model load. No claim of repeating full large-weight hashing."
+  },
+  "preparation_history": [
+    {
+      "attempt": 1,
+      "stage": "image build before any control/model trial",
+      "status": "stopped",
+      "observed": "Initial build used default bridge and omitted build CPU/memory limits; apt stalled. Original log and failed preparation script preserved.",
+      "fix": "Published entry uses MTU 1400 build network and 1 CPU/2 GiB; dependency preparation resumed explicitly before any task."
+    },
+    {
+      "attempt": 2,
+      "stage": "dependency preparation",
+      "status": "completed",
+      "model_calls": 0
+    }
+  ],
+  "historical_result_policy": "Earlier uv download timeout and same-answer 6/6 recovery are separate history and do not substitute for this fresh user trial.",
+  "private_evidence": {
+    "policy": "Only redacted metadata and SHA256 identities published. Original prompts, solutions, trajectories, model address and credentials remain private. Hashes alone do not grant access or independently prove contents.",
+    "files": {
+      "nop-receipt.json": {
+        "sha256": "83649e7c12706c264aa18771a193d1e07535f1835df1f832d3f9ae7d441f5ee1",
+        "bytes": 328
+      },
+      "nop-job.json": {
+        "sha256": "1025e02cb0c9506a447962b06de2c4de5ba29022ba424463a3f0232ffd62ec31",
+        "bytes": 691
+      },
+      "nop-started.json": {
+        "sha256": "e8267a468f15ac57a46d7002949f96302cf895a9f86a6b8fdb2c9c0c615c37c0",
+        "bytes": 357
+      },
+      "jobs/terminal-user-nop/task__ZUq7ssd/result.json": {
+        "sha256": "9fd52ca2d0e0f771bec8a6e432f63045c901520acb745af69788d69919630a53",
+        "bytes": 4045
+      },
+      "jobs/terminal-user-nop/task__ZUq7ssd/verifier/ctrf.json": {
+        "sha256": "57bf083e24d3869eb88d74101c73875ea58ee798ed6429f1dc63315736c8ffb7",
+        "bytes": 7152
+      },
+      "jobs/terminal-user-nop/task__ZUq7ssd/verifier/reward.txt": {
+        "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+        "bytes": 2
+      },
+      "oracle-receipt.json": {
+        "sha256": "5503d3037cc1d03829dbd7c8c564c99b74fae5f992970f9c79147f9aeab27368",
+        "bytes": 334
+      },
+      "oracle-job.json": {
+        "sha256": "f284bf8da68a2bb12283cc64ea91bc74f1ebc000561b9a45862f31eae1fea32d",
+        "bytes": 697
+      },
+      "oracle-started.json": {
+        "sha256": "487b9893ea5de9ee1e34a4b31e0e591da764b4b0a914009e1b7178549c0cf645",
+        "bytes": 361
+      },
+      "jobs/terminal-user-oracle/task__C6tvQsG/result.json": {
+        "sha256": "7119365dac9d130fb5c3c0798b084a7c416b7d7489b772fcc9737b8f7b7ec7f7",
+        "bytes": 4057
+      },
+      "jobs/terminal-user-oracle/task__C6tvQsG/verifier/ctrf.json": {
+        "sha256": "8d80d88e8e7f638828646d2f0a333136c1bf653aa08fab9fa51ef8eb282226ef",
+        "bytes": 2490
+      },
+      "jobs/terminal-user-oracle/task__C6tvQsG/verifier/reward.txt": {
+        "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+        "bytes": 2
+      },
+      "model-receipt.json": {
+        "sha256": "2c1b7e2d8427dac72c095ea4af295020cc92873fdd062080416096fba6fe7d98",
+        "bytes": 332
+      },
+      "model-job.json": {
+        "sha256": "d75dd8b0d2abe1d6a219734032bc78935645f9b2c1ec4737ff500c20f929c2b4",
+        "bytes": 1634
+      },
+      "model-started.json": {
+        "sha256": "92df901252e346e6f2ee35f70199447ed4b8d0d80641c61ecc1ffa384fd1d416",
+        "bytes": 359
+      },
+      "jobs/terminal-user-model/task__gzgDNec/result.json": {
+        "sha256": "fcf1a92bb5d2a1a75a5ae7bd36c441f41f026935e95c2f1b21601c79a88ec844",
+        "bytes": 27721
+      },
+      "jobs/terminal-user-model/task__gzgDNec/verifier/ctrf.json": {
+        "sha256": "358426d543c5377c8c51772f882d1ceaa60858737d81ae66d2f1f61726399351",
+        "bytes": 2486
+      },
+      "jobs/terminal-user-model/task__gzgDNec/verifier/reward.txt": {
+        "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+        "bytes": 2
+      },
+      "jobs/terminal-user-model/task__gzgDNec/agent/terminus_2.pane": {
+        "sha256": "b19a2032444fc455d47a09acd93aeb6bd969264d1e65c2e76343dd001f9d082b",
+        "bytes": 7485
+      },
+      "jobs/terminal-user-model/task__gzgDNec/agent/trajectory.json": {
+        "sha256": "790031b54e34ad0b88bdc9daf67d36844388730d277b767a9628b7f5c66ae187",
+        "bytes": 25158
+      },
+      "jobs/terminal-user-model/task__gzgDNec/agent/recording.cast": {
+        "sha256": "16e1b9bb541031ad003e559fddc612b98e02a97951692a08f1a1bd7bab223e9c",
+        "bytes": 15836
+      },
+      "prepared.json": {
+        "sha256": "ecd77c4dc18dad441badcc8d45613d3841891fbed6e8cc72e923baa4a057b60b",
+        "bytes": 1962
+      },
+      "harbor-source-identity.json": {
+        "sha256": "ba7e20a4bfd0ebec082a263308fc836747995a035ba0d95852adbc4ea708d991",
+        "bytes": 1195
+      },
+      "service-ready.json": {
+        "sha256": "455458ce6481f00465da4d115e30ed575b3ad3c28f3ddfa20bef7c4ffd4dff1b",
+        "bytes": 1534
+      },
+      "service-runtime-identity.json": {
+        "sha256": "d210f66f39f001d4ee3960cc46783b11dff63602a090b0b02901e6eca53e0a70",
+        "bytes": 3241
+      },
+      "cpu-request.json": {
+        "sha256": "a28277c7e6d5ea6d5d0b40863a6b6d52f657f98b1c5c4a496a4c837fdb01f1a7",
+        "bytes": 8354
+      },
+      "receipt.json": {
+        "sha256": "ebafc73e6415c497eca1af2ade7d13656d1207238c542b8600a9572dc150b8b0",
+        "bytes": 422
+      },
+      "client-complete.json": {
+        "sha256": "876011da49585273823a08b88d79980af6a01c178b1b796415a7c7c927208407",
+        "bytes": 518
+      },
+      "requirements-installed.txt": {
+        "sha256": "83e72fe527a454d67471399217dd5a8e002ff2e3e04fdb2fc15a82af1e79bc9a",
+        "bytes": 1604
+      },
+      "resource-probe.json": {
+        "sha256": "cd666dc36b34638dc2cbf6e50ba45582179244bdd6db28ccf10fa8c8901d605e",
+        "bytes": 305
+      },
+      "bootstrap_terminal_arm64.py": {
+        "sha256": "0d64adc9217036601108e3689a6f1802cebbf7138f1fe14090326f97e80ff2fc",
+        "bytes": 22122
+      },
+      "launch_once.py": {
+        "sha256": "802d6727d7cc1e8aa40bc4453ed5e59ef2c887f4d11a6e8b35604405f04bf3b4",
+        "bytes": 4882
+      },
+      "prepare-build-attempt1.json": {
+        "sha256": "3793778438a781328fe4f3b16f5d8893570052d9aaaa1faa9a4326955f84597e",
+        "bytes": 331
+      },
+      "model-container-40a47316554b.json": {
+        "sha256": "eeff8740585c000970947c6cbb2e5a8c2b278d8effc66fe8ca9b7c07d9030ea1",
+        "bytes": 1335
+      },
+      "storage/final-storage-review-r1.json": {
+        "sha256": "09eb9d358aac2e468352f8285fb7527bf85e08d5cacb35960cb71d9dbfa11966",
+        "bytes": 8982
+      },
+      "storage/SHA256SUMS": {
+        "sha256": "2e4fda692dbf2c939f0d0f8718307e028d3ae7f218b82e9dc9fcaa13cbaa3a34"
+      },
+      "storage/api-metrics-after-0.txt": {
+        "sha256": "8f9539739f05a578c9bd9733a6a9030419c9be4af49a770fec4628bdbaf08246",
+        "bytes": 51637
+      },
+      "storage/api-metrics-after-1.txt": {
+        "sha256": "3ab6b58bb4531f14023b1b23ba56f558276413fa6a444ba1d71d484ed967c1fe",
+        "bytes": 51637
+      },
+      "storage/api-metrics-before.txt": {
+        "sha256": "6089041fb8a126298486c799d8bf577a385b04def377f9b12f191aabccb48680",
+        "bytes": 50077
+      },
+      "storage/checkpoint-post-load.json": {
+        "sha256": "7ded8d241af39da498ee3c4452713637df6b5eddd426c0b9208cdf08d2d3d044",
+        "bytes": 5522
+      },
+      "storage/checkpoint-pre-request.json": {
+        "sha256": "abe6c0779d3e9708d061c1fd6fce88c70ae97d985e9c8900170d452f67ed66d1",
+        "bytes": 5528
+      },
+      "storage/client-completion-readback.json": {
+        "sha256": "7d10efc82eb3038d7f2b99d795097ee867cc1263421e44715a30c208e1ed412b",
+        "bytes": 1709
+      },
+      "storage/cpu-preflight.json": {
+        "sha256": "f193e5246bb80ab6769a65f5bd215920054b73bdb69fe0a5601c6c26c8f12e38",
+        "bytes": 274
+      },
+      "storage/cpu-private-ready-delivery.json": {
+        "sha256": "8a6c9c50704fd1ee0c53c956b24fa88d04460cb39270ddbd2977c275f2536d3c",
+        "bytes": 159
+      },
+      "storage/execution-plan.json": {
+        "sha256": "dc130aa810000b99d2ffe2556ffbc9da5a7ef42dedd810dfec28924427bc4942",
+        "bytes": 16418
+      },
+      "storage/monitor.jsonl": {
+        "sha256": "75d18edc12b683b0ef342f3c31017d140818f5441565e466bccc9fedc84e8e1f",
+        "bytes": 180385
+      },
+      "storage/npu-after.txt": {
+        "sha256": "2e9db8b9cf8573f8ab643450e36d34aead5a776e88c621ffbf22810affd0668d",
+        "bytes": 1881
+      },
+      "storage/npu-before.txt": {
+        "sha256": "9dc608250234307cb2d4490b9e58ba9569b321034915714c6027f21415fc1217",
+        "bytes": 1881
+      },
+      "storage/ready.json": {
+        "sha256": "455458ce6481f00465da4d115e30ed575b3ad3c28f3ddfa20bef7c4ffd4dff1b",
+        "bytes": 1534
+      },
+      "storage/receipt.json": {
+        "sha256": "1cc1d24d5c071db338119b4bf453e91d0a4f1395987a51f5931025c8018125cd",
+        "bytes": 760
+      },
+      "storage/runtime-identity.json": {
+        "sha256": "d210f66f39f001d4ee3960cc46783b11dff63602a090b0b02901e6eca53e0a70",
+        "bytes": 3241
+      },
+      "storage/service.log": {
+        "sha256": "b3918ffae78856f0106bc6a3dc9d5a685de7bff3b999c9d383968e5434912a4e",
+        "bytes": 38135
+      },
+      "storage/start-clearance.json": {
+        "sha256": "0f6b246d16e47ca3f7a04af0ca8c3b9943871a5842dfd42e6742f2efc9f1039b",
+        "bytes": 680
+      }
+    }
+  },
+  "service_reconciliation": {
+    "schema": "terminal-user-openssl-service-result/v1",
+    "status": "PASS_SINGLE_FRESH_TRIAL",
+    "task_id": "openssl-selfsigned-cert",
+    "model": "Qwen3.5-35B-A3B",
+    "vllm": "0.18.0",
+    "vllm_ascend": "0.18.0",
+    "trial_attempts": 1,
+    "reward": 1,
+    "tests": 6,
+    "passed": 6,
+    "http_model_requests": 7,
+    "http_200": 7,
+    "server_finished_reason": {
+      "stop": 7.0,
+      "length": 0.0,
+      "abort": 0.0,
+      "error": 0.0,
+      "repetition": 0.0
+    },
+    "input_tokens": 23378,
+    "output_tokens": 2400,
+    "cached_tokens": 0,
+    "agent_steps": 7,
+    "transport": "non-streaming Chat Completions",
+    "sse_applicable": false,
+    "sse_done_marker_observed": false,
+    "transport_basis": "Pinned Harbor lite_llm.py rejects CustomStreamWrapper; frozen job does not request stream. Seven parsed responses match server stop counters and CPU usage. No SSE qualification performed.",
+    "additional_qualification_calls": 0,
+    "automatic_whole_trial_retries": 0,
+    "service_exit_code": 0,
+    "sessions_drained": true,
+    "all_devices_released": true,
+    "cpu_containers_remaining": 0,
+    "historical_results_unchanged": true,
+    "scope_note": "One new OpenSSL user-path trial. Not full Terminal89 coverage, universal ARM64 compatibility or visual/API platform acceptance.",
+    "raw_service_receipt_request_count": null,
+    "count_provenance": "Derived reconciliation of API access log, before/after server counters, and original Harbor usage. Raw pending/null service receipt preserved.",
+    "seal_verified_files": 17
+  }
+}

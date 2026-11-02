@@ -18,12 +18,19 @@ V1：[从全新 CPU 工作区部署并运行一个真实 Agent](docs/SWE_BENCH_P
 
 Wrapper benchmark repository for vllm-hust.
 
+GenNova 与 GenNova Autotune 的独立测试结果统一维护在
+[GenNova-HUST/gennova-benchmark](https://github.com/GenNova-HUST/gennova-benchmark)（私有仓库，需授权）。
+本仓库不保留这些项目的报告、结果压缩包或网站汇总副本。
+
 The goal is to keep `vllm-hust-benchmark` as the stable entrypoint for running experiments, while
 the real benchmark implementations stay in `vllm-hust`. This repo resolves the sibling `vllm-hust`
 and `vllm-hust-website` repositories, invokes the benchmark entrypoints from there, and keeps result
 export and website publication flows in one place.
 
 ## Current Delivery Contract
+
+[B0 实测基线与相对性能公式](docs/B0_BASELINE_METRICS.md)：`η_B0 = 100 × Q_B1 / Q_B0`，B0 = 100%。
+包含倍率、提升率、耗时、时延、成本及已有配对的可复算示例；独立标定效率 `η_ref` 单列。
 
 Historical Frontier raw measurements and offline recomputation:
 [56-run raw archive](reports/frontier-raw-recovery-20261020/README.md) (BetterScale/Native and six

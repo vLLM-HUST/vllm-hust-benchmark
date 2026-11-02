@@ -1,0 +1,74 @@
+{
+  "schema": "acceptance-gap-audit/v1",
+  "as_of": "2026-10-29",
+  "source_commit": "81babbc3b2206171726860a5520c3e2c8ae903c5",
+  "contract": "reports/vllm-hust-midterm-20261019/milestone-v15/project4-v1.5.txt",
+  "report_version": "V1.02",
+  "covered_metrics": ["M01", "M02", "M03", "M04", "M05", "M06"],
+  "open_acceptance_families": 4,
+  "required_new_experiment_count": null,
+  "new_model_runs_started": 5,
+  "new_model_runs_completed": 3,
+  "new_service_start_attempts": 6,
+  "startup_failures_before_requests": 2,
+  "continuous_b1_failed_requests": 8,
+  "count_scope": "Four unresolved acceptance families, not four missing experiments. Shared measurements and existing evidence must be reused before assigning new run counts.",
+  "families": [
+    {
+      "id": "reference_capacity",
+      "metrics": ["M01"],
+      "status": "independent_model_recomputed_formal_binding_unclosed",
+      "existing": "61 public capsule members byte-verified and three resource/dependency DAGs recomputed. B1 primary modeled reference19.0818667603 TFLOPS/chip, Tref47.5033489612s, diagnostic37.2302188966% against original host-counted T. A separate executable witness/three-run median is not a universal V1.5 gate. Old7.1085 remains withdrawn.",
+      "evidence": "reports/acceptance-completion-20261029/reference-method.md",
+      "next": "Bind B0 own work/path and applicable uninstrumented timing; assess same-budget quality. Do not scale B1 reference to B0, estimate away instrumentation, or promote diagnostic eta to formal acceptance.",
+      "owner_role": "benchmark measurement and method maintainer"
+    },
+    {
+      "id": "matched_serving_pair",
+      "metrics": ["M02", "M03", "M04"],
+      "status": "measured_serving_with_short_budget_quality_problem",
+      "existing": "Recovered MMLU fixed018/B1 out256 originals verify200 successful requests per arm, matching materialized input hashes and two reserved physical cards3/6. Throughput+86.6291%, meanTTFT-43.8072%, meanTPOT-50.3070% from original synchronized windows; all accounting overhead retained. Earlier C16 reuse remains separate.",
+      "evidence": "reports/acceptance-completion-20261029/out256-quality-audit.json",
+      "next": "Out256 original-scorer audit is21/200 B0 versus19/200 B1; all400 responses reach256 tokens and fallback parsing is not final-answer proof. Joint complete-answer serving/cost measurement requires stable B1 first; do not borrow out8192 quality or invent SLO after observing results.",
+      "owner_role": "benchmark experiment maintainer"
+    },
+    {
+      "id": "continuous_stability",
+      "metrics": ["M05"],
+      "status": "fixed_b0_continuous_completed_b1_measured_failure",
+      "existing": "New fixed018 B0 and corrected B1 matched16K/32K synthetic retrieval completed: both6/6 correct, zero failed requests, same input token hashes, TP2/BF16 and reserved physical5/6. B1 seven recompute admissions include parser qualification; both Microflow ranks exercised. Earlier fixed018 five900s mixed-length windows remain separate, not controlled4K/16K stability.",
+      "evidence": "reports/acceptance-completion-20261029/continuous-summary.json",
+      "next": "Fixed018 B0 completed153/73 formal C8 synthetic4K/16K requests with zero failures. Corrected B1 completed24 warmup requests, then eight formal4K SSE failures from pinned-host allocation in state offload;16K not run. Repair/admit that resource path before another prospective run. Five-task retained logs reviewed with HLE unknown original exit and Agent context failures preserved; no all-task pass.",
+      "owner_role": "benchmark dataset and stability maintainer"
+    },
+    {
+      "id": "fixed_baseline_cost",
+      "metrics": ["M06"],
+      "status": "rental_arithmetic_recomputed_business_quality_and_stability_unclosed",
+      "existing": "B0/B1 same two reserved cards and full200-request windows verified. Public analogous rental estimate66.2253 to35.4849 CNY/million output tokens, reduction46.4178%. B1 same-interval sample estimate22.3946%; B0 missing exact wall/perf bridge, with explicit conditional lifecycle sample bounds9.4245..16.7177% (not physical confidence bounds).",
+      "evidence": "reports/acceptance-gaps-20261029/recovered-serving-summary.json",
+      "next": "Old out256 task quality is now measured21/200 versus19/200; quality-qualified cost acceptance remains open. New B0 continuous windows have aligned two-card sampling, but cannot fill old B0 timing or failed B1 business pairing. Joint serving/cost measurement awaits a stable applicable configuration; no discounted card fee by utilization.",
+      "owner_role": "benchmark cost and measurement maintainer"
+    }
+  ],
+  "do_not_reclassify_as_unmeasured": [
+    "Fixed200 MMLU quality: B0 151/200, current corrected B1 156/200; corrected KV candidate143/200 is a measured failure.",
+    "FrontierScience160-case fixed018/frozen-combination pair exists; candidate quality did not improve. Preserve unresolved grades, not a reason to rerun until positive.",
+    "HLE fixed018 full text/image baseline and several other measured solutions exist; check each configuration rather than claiming all B1 quality is absent.",
+    "SWE/Terminal original failures, incomplete submissions and context rejections are outcomes; their full-dataset task counts are not this audit's missing experiment count."
+  ],
+  "execution_preflight": {
+    "local_npu_observation": "Both new retrieval runs held exclusive physical5/6 locks and confirmed both910B2 devices released after completion; not a reservation for a future run.",
+    "local_baseline_runtime": "Restored necessary official018 interpreter/CANN8.5.1/compatibility overlay:12818963574 bytes and149999 members verified. Actual service imports vLLM0.18.0 and Ascend0.18.0; model configuration hashes match recovered source.",
+    "corrected_candidate_runtime": "Actual vLLM0.28.1.post1.dev143+gf18cf803c / Ascend0.25.1rc2.dev125+hust.20260903.4.g74f0c0a27.d20260909, CorrectedWorker with original Manager KV-recompute/Microflow bundles. Import checks may initialize NPU context and are performed under device locks.",
+    "storage": "Pinned-host32267 storage holds11 archived clean closed-task worktrees;89256 files verified before local removal, reclaiming10982886866 logical bytes. Shared Git objects, uncommitted work and weights preserved. Only extracted runtime restored; duplicate image archives remain on storage.",
+    "admitted": true,
+    "admission_scope": "The completed two-arm synthetic retrieval measurement only; not continuous stability or blanket admission for future jobs. One pre-request spawn-entry failure retained."
+  },
+  "tracking": {
+    "primary": "https://github.com/vLLM-HUST/vllm-hust-benchmark/issues/378",
+    "dataset_scope": "https://github.com/vLLM-HUST/vllm-hust-benchmark/issues/254",
+    "trace_scope": "https://github.com/vLLM-HUST/vllm-hust-benchmark/issues/403",
+    "migration_326_reopened": false
+  }
+}

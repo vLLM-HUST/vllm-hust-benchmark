@@ -1,0 +1,653 @@
+{
+  "schema": "m01-method-status/v1",
+  "method_version": "wholechain-20261025",
+  "outline": {
+    "path": "reports/vllm-hust-midterm-20261019/milestone-v15/project4-v1.5.txt",
+    "bytes": 19177,
+    "sha256": "7f9352a85ec8025731b37b57362d80bfc48f8204ae9d1877eba521377267fa24",
+    "source_docx_sha256": "08196093d69c655bbae39f902a77ed89b2aaba71237adabe13f9122e8769a1ca",
+    "source_docx_available_in_this_repository": false,
+    "scope": "Exact Project 4 extract; source DOCX digest supplied by document owner"
+  },
+  "status": "independent_wholechain_reference_qualified",
+  "effective_compute_formula": "C = F / (k * T * 10^12)",
+  "effective_compute_unit": "TFLOPS per participating chip",
+  "reference_effective_compute_formula": "C_reference = F / (k * T_reference * 10^12)",
+  "reference_effective_compute_unit": "TFLOPS per participating chip",
+  "efficiency_formula": "eta = C / C_reference * 100% = T_reference / T * 100%",
+  "reference_scope": "Measured and reference compute use the same effective work F and participating chip count k within each efficiency calculation. The calibrated reference is not a proven theoretical upper bound or vendor peak.",
+  "equivalent_threshold": "C >= 0.9 * C_reference",
+  "threshold_percent": 90,
+  "current": {
+    "effective_flops": 1812905151088034,
+    "participating_chips": 2,
+    "matched_uninstrumented_seconds": null,
+    "reference_seconds": 127.51659917337653,
+    "effective_tflops_per_chip": 7.1042207644080255,
+    "reference_effective_tflops_per_chip": 7.108506511466548,
+    "efficiency_percent": 99.93970959931444,
+    "passed": true,
+    "matched_synchronized_seconds": 127.59352582134306
+  },
+  "requirements": {
+    "effective_flops_excludes": [
+      "padding",
+      "redundant computation",
+      "unaccepted draft tokens",
+      "cache-omitted work"
+    ],
+    "timing": "Same-run effective F and synchronized T retain all accounting costs; no estimated overhead subtraction.",
+    "reference": {
+      "kind": "Independently executed empirical whole-chain reference, not theoretical peak or a global optimum",
+      "shared_code_with_B1": true,
+      "selection": "Prospectively selected executable source-qualified full corrected combination with same-identity quality pass from bounded known candidates; not selected using old B1 time or desired eta",
+      "C_ref": "median(own_F/(2*own_T*1e12) for C1,C2,C3)",
+      "T_ref": "own_F/(2*C_ref*1e12)",
+      "eta_percent": "100*own_C/C_ref",
+      "old_B1_time_used_as_denominator": false,
+      "overhead_subtracted": false,
+      "all_valid_slow_windows_retained": true,
+      "fresh_service_and_six_caches_each_window": true,
+      "H_scope": "200 matched nonoverlapping target samples, not previously unseen corpus",
+      "freeze_sha256": "c1139dbfe50d0a97de05c14835e5ac278c8af62ab2f22c497fe9deb2ad4c2960"
+    },
+    "forbidden_reference_substitutes": [
+      "global max(compute, HBM, communication)",
+      "reverse fitting to measured B0 or B1 time"
+    ],
+    "comparison": "Same reference method; separately derive reference time when precision, workload or execution path differs. Efficiency ratios under different references are not performance gains.",
+    "timing_refinement": "Same-run F/T retain all accounting costs; strict_uninstrumented=false. This is the approved round refinement, not original V1.5 uninstrumented timing."
+  },
+  "fair_comparison": {
+    "fixed_b0": {
+      "vllm": "0.18",
+      "vllm_ascend": "0.18"
+    },
+    "b1_base_version_constraint": null,
+    "common_conditions": [
+      "base model and source weights",
+      "data and task scope",
+      "request semantics",
+      "sampling and output constraints",
+      "quality and SLO",
+      "statistics",
+      "physical accelerator model, count and interconnect",
+      "comparable host resources"
+    ],
+    "allowed_implementation_differences": [
+      "weight quantization",
+      "activation quantization",
+      "KV quantization",
+      "speculative decoding",
+      "cache management",
+      "graph mode",
+      "operators",
+      "batching",
+      "scheduling",
+      "logical parallelism"
+    ],
+    "auxiliary_resources_included": true,
+    "quality_and_performance_bind_actual_configuration": true
+  },
+  "pending_evidence": [],
+  "existing_audit_path": "reports/vllm-hust-midterm-20261019/m01-recovery/method-v526-20261023/README.md",
+  "historical_instrumented": {
+    "classification": "historical empirical-resource reference, not current V1.5 efficiency or acceptance",
+    "request_window_seconds": 135.340126192,
+    "empirical_attainment_percent_range": [
+      30.2443,
+      30.2505
+    ],
+    "reference_formula": "T_ref = max(T_compute, T_HBM, T_comm)",
+    "evidence_path": "reports/vllm-hust-midterm-20261019/m01-recovery/request-assessment-20261022/m01-request-window-assessment.json"
+  },
+  "additional_existing_evidence": [
+    "reports/vllm-hust-midterm-20261019/m01-recovery/collective-graph-20261023/manifest.json",
+    "reports/vllm-hust-midterm-20261019/m01-recovery/boundary-measured-20261023/manifest.json"
+  ],
+  "measured_synchronized_b1": {
+    "completed": 200,
+    "failed": 0,
+    "client_seconds": 120.6243702378124,
+    "synchronized_seconds": 120.65347687713802,
+    "effective_flops": null,
+    "efficiency_percent": null
+  },
+  "current_measurement": {
+    "run_id": "timing-b1-storage-r1",
+    "evidence_path": "reports/vllm-hust-midterm-20261019/m01-recovery/storage-timing-20261024/arithmetic.json",
+    "arithmetic_convention": "V1.5 2MNK, activated top8 experts, actual causal structure, necessary draft KV/hidden closure. Basic float additions/subtractions/multiplications and matrix multiply-adds; SFUs/comparisons/division reported separately without invented equivalents.",
+    "implementation_variant": "owned-optimistic-causal-draft/v1",
+    "strict_uninstrumented": false,
+    "host_prefill_counting": true,
+    "native_detailed_acceptance": true,
+    "all_measurement_cost_retained": true,
+    "device_journals": false,
+    "model_profiler": false,
+    "replaces_prior_best_b1_performance": false
+  },
+  "reference_supplement": {
+    "path": "reports/vllm-hust-midterm-20261019/m01-recovery/storage-reference-supplement-20261024/summary.json",
+    "sha256": "eafd20b91d5b8d2571e28604a8931ed4596e88c810fb551a7fe80b20f0020861",
+    "unique_cases": 281,
+    "numerical_checks": 1402,
+    "stable_graph_groups": 478,
+    "unstable_graph_groups": 60,
+    "validation": {
+      "fit_count": 1,
+      "source_rank_heldout_groups": 32,
+      "passed": 6,
+      "failed": 26,
+      "old_training_anchors_reused": true,
+      "heldout_not_used_for_training": true,
+      "k_and_thresholds_unchanged": true,
+      "evidence": "minimum-reference-model-mismatch-audit-r1.json"
+    },
+    "scenario_coverage": [
+      {
+        "seed": 0,
+        "missing_duration": 18111,
+        "measured_or_modeled_but_unqualified": 317712,
+        "qualified_duration": 25273
+      },
+      {
+        "seed": 1,
+        "missing_duration": 18081,
+        "measured_or_modeled_but_unqualified": 314176,
+        "qualified_duration": 28839
+      },
+      {
+        "seed": 2,
+        "missing_duration": 18051,
+        "measured_or_modeled_but_unqualified": 315536,
+        "qualified_duration": 27509
+      }
+    ]
+  },
+  "paired_own_compute": {
+    "schema": "m01-own-compute-pair/v1",
+    "status": "own_F_T_C_and_independent_reference_closed",
+    "rows": {
+      "B0": {
+        "F": 1829161955258989,
+        "T_seconds": 238.12670116312802,
+        "chips": 2,
+        "C_TFLOPS_per_chip": 3.840732572879189,
+        "reference_seconds": 128.660074539456,
+        "reference_tflops_per_chip": 7.108506511466548,
+        "eta_percent": 54.03009150633544,
+        "attainment": false
+      },
+      "B1": {
+        "F": 1812905151088034,
+        "T_seconds": 127.59352582134306,
+        "chips": 2,
+        "C_TFLOPS_per_chip": 7.1042207644080255,
+        "reference_seconds": 127.51659917337653,
+        "reference_tflops_per_chip": 7.108506511466548,
+        "eta_percent": 99.93970959931444,
+        "attainment": true
+      }
+    },
+    "C_gain_percent": 84.97046148366367,
+    "reference_seconds": 127.51659917337653,
+    "reference_tflops_per_chip": 7.108506511466548,
+    "eta_percent": 99.93970959931444,
+    "attainment": true,
+    "reference_method_status": "independent_wholechain_reference_qualified",
+    "baseline_is_reference_ceiling": false,
+    "identities": {
+      "B0": "vLLM 0.18.0 / vLLM-Ascend 0.18.0 with disclosed text-only compatibility patches",
+      "B1": "vLLM 0.28.1.post1.dev143+gf18cf803c / vLLM-Ascend 0.25.1rc2 development stack; vLLM-HUST combined optimization"
+    },
+    "workload": {
+      "model": "Qwen3.5-35B-A3B",
+      "dtype": "BF16",
+      "hardware": "Ascend 910B2",
+      "TP": 2,
+      "requests_per_arm": 200,
+      "dataset": "MMLU-Pro",
+      "actual_input_tokens_per_arm": 282265,
+      "actual_output_tokens_per_arm": 51200,
+      "output_budget": 256,
+      "ignore_eos": false
+    },
+    "measurement": {
+      "same_run_F_T": true,
+      "all_accounting_cost_retained": true,
+      "strict_uninstrumented": false,
+      "fresh_per_run_cache": true
+    },
+    "scope": "Own-run compute and independent empirical whole-chain reference attainment; shared code disclosed. Not nominal chip peak or a task-quality score.",
+    "supersedes": {
+      "B0_r1_F": 1829506984194363,
+      "reason": "Native Mamba aligned-block publication dependencies corrected; original timing and raw requests unchanged."
+    },
+    "evidence": {
+      "paired-own-metrics-closed-r2.json": "2b73f3c8a79a80a4fce4e4d3f26fbb6070992659f5057d1a2ad0b49e4710d503",
+      "profiling-final-export-audit-r2.json": "6711f48dffa99b19a73b211d40c25b5f51f8d8505ef3def4644234f3bed54224",
+      "profiling-group-sum-audit-r2.json": "2b9f3d50ecd8ef0e971ab9ba3e5bda5d22488cf385e2e9797e663bd1c2795320",
+      "formal-necessary-full-export-audit-r2.json": "180b93a1a4cd20c6a8bcf0e51c9d0f3f1890b93c3f9d0cf6784c0fcbef4a488e",
+      "native-align-independent-source-review-r2.json": "d191b1c7ce993f82941864a8e30cb6d1e98058f53db27dc1a6b891e1b62b5073",
+      "B1-native-align-applicability-source-review-r1.json": "5342fd3eb12a83bb46e6024589d9f31cf67d6449ebf1bd50f1452f22ebfba3e2"
+    },
+    "wholechain_reference": {
+      "schema": "m01-wholechain-reference-public/v1",
+      "status": "reference_qualified",
+      "reference_qualified": true,
+      "model": "Qwen3.5-35B-A3B",
+      "dtype": "BF16",
+      "participating_chips": 2,
+      "device": "Ascend 910B2",
+      "dataset": "MMLU-Pro",
+      "reference_C_TFLOPS_per_chip": 7.108506511466548,
+      "B0": {
+        "ownF": 1829161955258989,
+        "own_T_seconds": 238.12670116312802,
+        "own_C": 3.840732572879189,
+        "T_reference_seconds": 128.660074539456,
+        "eta_percent": 54.03009150633544,
+        "eta_target_percent": 90,
+        "eta_target_met": false
+      },
+      "B1": {
+        "ownF": 1812905151088034,
+        "own_T_seconds": 127.59352582134306,
+        "own_C": 7.1042207644080255,
+        "T_reference_seconds": 127.51659917337653,
+        "eta_percent": 99.93970959931444,
+        "eta_target_percent": 90,
+        "eta_target_met": true
+      },
+      "windows": [
+        {
+          "label": "C1",
+          "ownF": 1812879106716099,
+          "synchronized_seconds": 123.58018648251891,
+          "own_C": 7.334829143394037,
+          "actual_output": 51200,
+          "prefill_F": 1449445097137045,
+          "decode_F": 363434009579054,
+          "plan_sha256": "e6126b0f3cf67e21e612e6001d173f8d30a7a714638d7a20e59ed831f8886365",
+          "receipt_sha256": "6be3ab6c78c2943ee657b589dbe13417bbe47b0a1165a89182a2dcb91f440ba0",
+          "seal_sha256": "f447f7d91927a6a15fb2852e47e9c28ecca54bb8afe5abb3c2cc4410dbb53670"
+        },
+        {
+          "label": "C2",
+          "ownF": 1812914711403082,
+          "synchronized_seconds": 128.39263179153204,
+          "own_C": 7.060041865746109,
+          "actual_output": 51200,
+          "prefill_F": 1449441656446165,
+          "decode_F": 363473054956917,
+          "plan_sha256": "4e76ab26c36b8e565894d9d41d7cfcc7f68a71f8f55b680f1ef774b8363882c1",
+          "receipt_sha256": "250179169757e9545668225017c172dc423903f00f4234298d444c664d942ba3",
+          "seal_sha256": "0f2b587428bf17a1c5f91571f9c38a502428c27126d654a11d576dfa83015af6"
+        },
+        {
+          "label": "C3",
+          "ownF": 1812898098830529,
+          "synchronized_seconds": 127.51610312983394,
+          "own_C": 7.108506511466548,
+          "actual_output": 51200,
+          "prefill_F": 1449442955549845,
+          "decode_F": 363455143280684,
+          "plan_sha256": "cf6d751403e055add5f347ff6f336140abdd6d9f25fd01d0018ba3c6a7250eeb",
+          "receipt_sha256": "9c6c5c8fd6ebaffcb93d9631fa4f24e94f04ede336724b2469b477c44b65fce0",
+          "seal_sha256": "5830aededba35cb60556b1170fe69bf2fdf7dfce441794af819b4d8013077041"
+        },
+        {
+          "label": "H",
+          "ownF": 1812705760255459,
+          "synchronized_seconds": 126.11558162793517,
+          "own_C": 7.18668437657166,
+          "actual_output": 51200,
+          "prefill_F": 1449310271747587,
+          "decode_F": 363395488507872,
+          "plan_sha256": "5db3a5523df14bcdaa84207ac0cabf59c47efa07b902f6b729f840ba1cba4db9",
+          "receipt_sha256": "58bbecbe089a8b8d9ded1b482006223b60a129cba06b23032792b8bd14d96463",
+          "seal_sha256": "cd77f45cf87f9758725bc09286c147541b654a4dd16d4dc5d914ecd1d2b25c56"
+        }
+      ],
+      "quality": {
+        "B0_correct": 151,
+        "B1_correct": 156,
+        "total": 200,
+        "failed": 0,
+        "scope": "Fixed C200 max8192 quality reused; performance windows max256"
+      },
+      "method": {
+        "kind": "Independently executed empirical whole-chain reference, not theoretical peak or a global optimum",
+        "shared_code_with_B1": true,
+        "selection": "Prospectively selected executable source-qualified full corrected combination with same-identity quality pass from bounded known candidates; not selected using old B1 time or desired eta",
+        "C_ref": "median(own_F/(2*own_T*1e12) for C1,C2,C3)",
+        "T_ref": "own_F/(2*C_ref*1e12)",
+        "eta_percent": "100*own_C/C_ref",
+        "old_B1_time_used_as_denominator": false,
+        "overhead_subtracted": false,
+        "all_valid_slow_windows_retained": true,
+        "fresh_service_and_six_caches_each_window": true,
+        "H_scope": "200 matched nonoverlapping target samples, not previously unseen corpus",
+        "freeze_sha256": "c1139dbfe50d0a97de05c14835e5ac278c8af62ab2f22c497fe9deb2ad4c2960"
+      },
+      "capacity_checks": {
+        "status": "evaluated",
+        "C_ref": 7.108506511466548,
+        "C_values": [
+          7.334829143394037,
+          7.060041865746109,
+          7.108506511466548
+        ],
+        "H_own_C": 7.18668437657166,
+        "range_over_median": 0.03865611956670163,
+        "H_C_relative_deviation": 0.010997790461189746,
+        "maximum_range_over_median": 0.05,
+        "maximum_H_C_relative_deviation": 0.1,
+        "repeatability_pass": true,
+        "H_capacity_pass": true
+      },
+      "composition_checks": [
+        {
+          "subject": "H",
+          "baseline": "pooled_C1_C2_C3",
+          "prefill_share_difference_percentage_points": 0.0011132130419253075,
+          "decode_share_difference_percentage_points": 0.0011132130419253075,
+          "F_per_actual_output_token_relative_deviation": 0.00010565705726815367,
+          "maximum_share_difference_percentage_points": 5,
+          "maximum_F_per_output_relative_deviation": 0.05,
+          "shares_pass": true,
+          "F_per_output_pass": true,
+          "passed": true,
+          "arithmetic": "Exact integer/rational comparisons, inclusive <=; no threshold tolerance",
+          "scope": "Two work-composition gates only; not quality, repeatability, capability H/C, or eta admission"
+        },
+        {
+          "subject": "B0",
+          "baseline": "pooled_C1_C2_C3",
+          "prefill_share_difference_percentage_points": 0.7112152592001125,
+          "decode_share_difference_percentage_points": 0.7112152592001125,
+          "F_per_actual_output_token_relative_deviation": 0.008971633174365038,
+          "maximum_share_difference_percentage_points": 5,
+          "maximum_F_per_output_relative_deviation": 0.05,
+          "shares_pass": true,
+          "F_per_output_pass": true,
+          "passed": true,
+          "arithmetic": "Exact integer/rational comparisons, inclusive <=; no threshold tolerance",
+          "scope": "Two work-composition gates only; not quality, repeatability, capability H/C, or eta admission"
+        },
+        {
+          "subject": "B1",
+          "baseline": "pooled_C1_C2_C3",
+          "prefill_share_difference_percentage_points": 0.0005533968576046324,
+          "decode_share_difference_percentage_points": 0.0005533968576046324,
+          "F_per_actual_output_token_relative_deviation": 4.327568972724666e-06,
+          "maximum_share_difference_percentage_points": 5,
+          "maximum_F_per_output_relative_deviation": 0.05,
+          "shares_pass": true,
+          "F_per_output_pass": true,
+          "passed": true,
+          "arithmetic": "Exact integer/rational comparisons, inclusive <=; no threshold tolerance",
+          "scope": "Two work-composition gates only; not quality, repeatability, capability H/C, or eta admission"
+        }
+      ],
+      "all_frozen_applicability_checks_pass": true,
+      "evidence": {
+        "final_result_sha256": "1773105314e83ac74e112383048e301ee4c71693b1613c7df3227b26f044708c",
+        "independent_result_sha256": "1773105314e83ac74e112383048e301ee4c71693b1613c7df3227b26f044708c",
+        "source_sha256": {
+          "finalize_reference_r1.py": "23c17b6da33e8e1b631838b16c0c9d66eb5bc2c39257b9aa1d7b3e7efa52c074",
+          "reference_window_r1.py": "e1a235381fbdee54eb133fc02f1e41881706f0c2ffefd522a6ec080974c8b918",
+          "work_composition_api.py": "23b24362d4586f42d9a93b0ee993c74af186d9669bf49fc3c3f2326d37a536b1",
+          "work_composition_applicability.py": "671c3b0e6d620fd95462e638ece4ab0f0c806dfb9a76cbb31eaaf262db795f6a",
+          "profiling-acceptance-freeze-r1.json": "172f87ed7848d052c34f951d6bf8e08a2856efd6c7180a1c58e89b94494f541b",
+          "reference-selection-and-acceptance-r1.json": "c1139dbfe50d0a97de05c14835e5ac278c8af62ab2f22c497fe9deb2ad4c2960",
+          "existing-B0-B1-work-composition-r1.json": "4e9211840226d5e5368a5833a0ca72e29452e78e589a7e4e71f1ec80d25d39fa",
+          "paired-own-metrics-closed-r2.json": "2b73f3c8a79a80a4fce4e4d3f26fbb6070992659f5057d1a2ad0b49e4710d503"
+        }
+      },
+      "original_failed_receipts_preserved": true
+    },
+    "scalar_reference_fields_arm": "B1"
+  },
+  "paired_own_compute_source": {
+    "path": "reports/vllm-hust-midterm-20261019/m01-recovery/official018-paired-compute-20261024/summary.json",
+    "sha256": "7b31cd029e6a00217be5e32e9cc56c92c19875a3a47f57d4624bfce5b7722c3a"
+  },
+  "reference_closure": {
+    "path": "reports/vllm-hust-midterm-20261019/m01-recovery/storage-reference-closed-20261024/summary.json",
+    "sha256": "353635dd911b9a54cddab95e01734774bb52577b4b9cd64458b5c9369d0ad6ab",
+    "primary_display_seed": 0,
+    "scenario_sensitivity_range": {
+      "reference_seconds": [
+        47.503348961177785,
+        47.557189519622206
+      ],
+      "reference_tflops_per_chip": [
+        19.060263751919415,
+        19.081866760274465
+      ],
+      "efficiency_percent": [
+        37.2302188966015,
+        37.27241583261204
+      ]
+    },
+    "reference_identity": "Declared independent empirical reference: canonical r6 target and validated same-request/step draft statistical route payloads, regrouped by formal own workgroups/F/T/dependencies. Not recovered formal actual expert paths.",
+    "limitations": [
+      "All three schedule scenarios are reported. Their range is sensitivity, not a confidence interval or bound over all schedules.",
+      "CPU timings mix existing pinned-slab/DMA transaction-context anchors with new pre-touched ordinary-slab intrinsic CPU measurements. Rank anchor median new/old ratios are about0.741 and0.687; no ratio correction, subtraction or overwrite was applied.",
+      "Draft routes are an independently validated aggregate statistical reference. Hidden/KV state and expert IDs are not claimed identical to formal execution. The archive and reused oracle points are disclosed in the route methods.",
+      "Original failed measurements and earlier nonqualified snapshots remain preserved. Only the previously failed concat rank0 rows4 input received the frozen longer-graph precision correction.",
+      "Component model error criteria and calibration support are empirical. They are not a whole-model uncertainty guarantee or hardware peak theorem.",
+      "B1 remains its actual measured development stack. Official vLLM0.18/Ascend0.18 B0 identity is unchanged."
+    ],
+    "classification": "Prior operator-DAG method; not current whole-chain reference acceptance",
+    "reference_seconds": 47.503348961177785,
+    "reference_tflops_per_chip": 19.081866760274465,
+    "efficiency_percent": 37.2302188966015,
+    "threshold_percent": 50,
+    "attainment": false
+  },
+  "whole_chain_method_revision": {
+    "status": "execution_and_independent_verification_complete",
+    "requested_threshold_percent": 90,
+    "external_acceptance_approval_record": null,
+    "baseline_normalization_is_reference_attainment": false,
+    "freeze_sha256": "c1139dbfe50d0a97de05c14835e5ac278c8af62ab2f22c497fe9deb2ad4c2960",
+    "authority_scope": "current_round_implementation_criterion"
+  },
+  "wholechain_reference": {
+    "schema": "m01-wholechain-reference-public/v1",
+    "status": "reference_qualified",
+    "reference_qualified": true,
+    "model": "Qwen3.5-35B-A3B",
+    "dtype": "BF16",
+    "participating_chips": 2,
+    "device": "Ascend 910B2",
+    "dataset": "MMLU-Pro",
+    "reference_C_TFLOPS_per_chip": 7.108506511466548,
+    "B0": {
+      "ownF": 1829161955258989,
+      "own_T_seconds": 238.12670116312802,
+      "own_C": 3.840732572879189,
+      "T_reference_seconds": 128.660074539456,
+      "eta_percent": 54.03009150633544,
+      "eta_target_percent": 90,
+      "eta_target_met": false
+    },
+    "B1": {
+      "ownF": 1812905151088034,
+      "own_T_seconds": 127.59352582134306,
+      "own_C": 7.1042207644080255,
+      "T_reference_seconds": 127.51659917337653,
+      "eta_percent": 99.93970959931444,
+      "eta_target_percent": 90,
+      "eta_target_met": true
+    },
+    "windows": [
+      {
+        "label": "C1",
+        "ownF": 1812879106716099,
+        "synchronized_seconds": 123.58018648251891,
+        "own_C": 7.334829143394037,
+        "actual_output": 51200,
+        "prefill_F": 1449445097137045,
+        "decode_F": 363434009579054,
+        "plan_sha256": "e6126b0f3cf67e21e612e6001d173f8d30a7a714638d7a20e59ed831f8886365",
+        "receipt_sha256": "6be3ab6c78c2943ee657b589dbe13417bbe47b0a1165a89182a2dcb91f440ba0",
+        "seal_sha256": "f447f7d91927a6a15fb2852e47e9c28ecca54bb8afe5abb3c2cc4410dbb53670"
+      },
+      {
+        "label": "C2",
+        "ownF": 1812914711403082,
+        "synchronized_seconds": 128.39263179153204,
+        "own_C": 7.060041865746109,
+        "actual_output": 51200,
+        "prefill_F": 1449441656446165,
+        "decode_F": 363473054956917,
+        "plan_sha256": "4e76ab26c36b8e565894d9d41d7cfcc7f68a71f8f55b680f1ef774b8363882c1",
+        "receipt_sha256": "250179169757e9545668225017c172dc423903f00f4234298d444c664d942ba3",
+        "seal_sha256": "0f2b587428bf17a1c5f91571f9c38a502428c27126d654a11d576dfa83015af6"
+      },
+      {
+        "label": "C3",
+        "ownF": 1812898098830529,
+        "synchronized_seconds": 127.51610312983394,
+        "own_C": 7.108506511466548,
+        "actual_output": 51200,
+        "prefill_F": 1449442955549845,
+        "decode_F": 363455143280684,
+        "plan_sha256": "cf6d751403e055add5f347ff6f336140abdd6d9f25fd01d0018ba3c6a7250eeb",
+        "receipt_sha256": "9c6c5c8fd6ebaffcb93d9631fa4f24e94f04ede336724b2469b477c44b65fce0",
+        "seal_sha256": "5830aededba35cb60556b1170fe69bf2fdf7dfce441794af819b4d8013077041"
+      },
+      {
+        "label": "H",
+        "ownF": 1812705760255459,
+        "synchronized_seconds": 126.11558162793517,
+        "own_C": 7.18668437657166,
+        "actual_output": 51200,
+        "prefill_F": 1449310271747587,
+        "decode_F": 363395488507872,
+        "plan_sha256": "5db3a5523df14bcdaa84207ac0cabf59c47efa07b902f6b729f840ba1cba4db9",
+        "receipt_sha256": "58bbecbe089a8b8d9ded1b482006223b60a129cba06b23032792b8bd14d96463",
+        "seal_sha256": "cd77f45cf87f9758725bc09286c147541b654a4dd16d4dc5d914ecd1d2b25c56"
+      }
+    ],
+    "quality": {
+      "B0_correct": 151,
+      "B1_correct": 156,
+      "total": 200,
+      "failed": 0,
+      "scope": "Fixed C200 max8192 quality reused; performance windows max256"
+    },
+    "method": {
+      "kind": "Independently executed empirical whole-chain reference, not theoretical peak or a global optimum",
+      "shared_code_with_B1": true,
+      "selection": "Prospectively selected executable source-qualified full corrected combination with same-identity quality pass from bounded known candidates; not selected using old B1 time or desired eta",
+      "C_ref": "median(own_F/(2*own_T*1e12) for C1,C2,C3)",
+      "T_ref": "own_F/(2*C_ref*1e12)",
+      "eta_percent": "100*own_C/C_ref",
+      "old_B1_time_used_as_denominator": false,
+      "overhead_subtracted": false,
+      "all_valid_slow_windows_retained": true,
+      "fresh_service_and_six_caches_each_window": true,
+      "H_scope": "200 matched nonoverlapping target samples, not previously unseen corpus",
+      "freeze_sha256": "c1139dbfe50d0a97de05c14835e5ac278c8af62ab2f22c497fe9deb2ad4c2960"
+    },
+    "capacity_checks": {
+      "status": "evaluated",
+      "C_ref": 7.108506511466548,
+      "C_values": [
+        7.334829143394037,
+        7.060041865746109,
+        7.108506511466548
+      ],
+      "H_own_C": 7.18668437657166,
+      "range_over_median": 0.03865611956670163,
+      "H_C_relative_deviation": 0.010997790461189746,
+      "maximum_range_over_median": 0.05,
+      "maximum_H_C_relative_deviation": 0.1,
+      "repeatability_pass": true,
+      "H_capacity_pass": true
+    },
+    "composition_checks": [
+      {
+        "subject": "H",
+        "baseline": "pooled_C1_C2_C3",
+        "prefill_share_difference_percentage_points": 0.0011132130419253075,
+        "decode_share_difference_percentage_points": 0.0011132130419253075,
+        "F_per_actual_output_token_relative_deviation": 0.00010565705726815367,
+        "maximum_share_difference_percentage_points": 5,
+        "maximum_F_per_output_relative_deviation": 0.05,
+        "shares_pass": true,
+        "F_per_output_pass": true,
+        "passed": true,
+        "arithmetic": "Exact integer/rational comparisons, inclusive <=; no threshold tolerance",
+        "scope": "Two work-composition gates only; not quality, repeatability, capability H/C, or eta admission"
+      },
+      {
+        "subject": "B0",
+        "baseline": "pooled_C1_C2_C3",
+        "prefill_share_difference_percentage_points": 0.7112152592001125,
+        "decode_share_difference_percentage_points": 0.7112152592001125,
+        "F_per_actual_output_token_relative_deviation": 0.008971633174365038,
+        "maximum_share_difference_percentage_points": 5,
+        "maximum_F_per_output_relative_deviation": 0.05,
+        "shares_pass": true,
+        "F_per_output_pass": true,
+        "passed": true,
+        "arithmetic": "Exact integer/rational comparisons, inclusive <=; no threshold tolerance",
+        "scope": "Two work-composition gates only; not quality, repeatability, capability H/C, or eta admission"
+      },
+      {
+        "subject": "B1",
+        "baseline": "pooled_C1_C2_C3",
+        "prefill_share_difference_percentage_points": 0.0005533968576046324,
+        "decode_share_difference_percentage_points": 0.0005533968576046324,
+        "F_per_actual_output_token_relative_deviation": 4.327568972724666e-06,
+        "maximum_share_difference_percentage_points": 5,
+        "maximum_F_per_output_relative_deviation": 0.05,
+        "shares_pass": true,
+        "F_per_output_pass": true,
+        "passed": true,
+        "arithmetic": "Exact integer/rational comparisons, inclusive <=; no threshold tolerance",
+        "scope": "Two work-composition gates only; not quality, repeatability, capability H/C, or eta admission"
+      }
+    ],
+    "all_frozen_applicability_checks_pass": true,
+    "evidence": {
+      "final_result_sha256": "1773105314e83ac74e112383048e301ee4c71693b1613c7df3227b26f044708c",
+      "independent_result_sha256": "1773105314e83ac74e112383048e301ee4c71693b1613c7df3227b26f044708c",
+      "source_sha256": {
+        "finalize_reference_r1.py": "23c17b6da33e8e1b631838b16c0c9d66eb5bc2c39257b9aa1d7b3e7efa52c074",
+        "reference_window_r1.py": "e1a235381fbdee54eb133fc02f1e41881706f0c2ffefd522a6ec080974c8b918",
+        "work_composition_api.py": "23b24362d4586f42d9a93b0ee993c74af186d9669bf49fc3c3f2326d37a536b1",
+        "work_composition_applicability.py": "671c3b0e6d620fd95462e638ece4ab0f0c806dfb9a76cbb31eaaf262db795f6a",
+        "profiling-acceptance-freeze-r1.json": "172f87ed7848d052c34f951d6bf8e08a2856efd6c7180a1c58e89b94494f541b",
+        "reference-selection-and-acceptance-r1.json": "c1139dbfe50d0a97de05c14835e5ac278c8af62ab2f22c497fe9deb2ad4c2960",
+        "existing-B0-B1-work-composition-r1.json": "4e9211840226d5e5368a5833a0ca72e29452e78e589a7e4e71f1ec80d25d39fa",
+        "paired-own-metrics-closed-r2.json": "2b73f3c8a79a80a4fce4e4d3f26fbb6070992659f5057d1a2ad0b49e4710d503"
+      }
+    },
+    "original_failed_receipts_preserved": true
+  },
+  "identity": {
+    "kind": "current_round_implementation_method",
+    "frozen_date": "2026-10-24",
+    "verification_date": "2026-10-25",
+    "threshold_percent": 90,
+    "formal_indicator_amendment": false,
+    "external_acceptance_approval_record": null,
+    "authority_scope": "User-approved implementation criterion for this round; not a principal-unit or third-party approval record and not a rewrite of original V1.5.",
+    "original_v15": {
+      "threshold_percent": 50,
+      "reference": "independently derived reference",
+      "strict_uninstrumented_required": true,
+      "unchanged": true
+    },
+    "policy_path": "m01-recovery/wholechain-reference-20261025/original-reference-policy-v2.md",
+    "policy_sha256": "3389a75f94639f1970ade8f7662e1876ce53607e31bfddfb7592b2800008e420",
+    "original_v15_method_snapshot": "milestone-v15/method-status.json",
+    "snapshot_role": "historical pre-wholechain status; never current admission"
+  }
+}

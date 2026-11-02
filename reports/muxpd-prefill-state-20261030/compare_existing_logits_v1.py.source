@@ -1,0 +1,97 @@
+"""Read-only cross-role supplement; does not replace frozen primary analysis."""
+
+import hashlib
+import json
+from pathlib import Path
+
+import numpy as np
+
+
+BUNDLE = Path('/root/workspace/muxpd-target-prefill-moe-survey-v2-20261030')
+OUT = Path(__file__).with_name('existing-logits-cross-role-v1.json')
+
+
+def sha(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def collect(role, case_by_digest):
+    run = BUNDLE / 'runs-v2' / f'{role}-peer-p-moe-observed-v2-01'
+    ctl = json.loads((run / 'controller.json').read_text())
+    assert ctl['passed'] and ctl['terminal_process_proven']
+    assert ctl['exit_code'] == 0 and not ctl['owned_members_after_cleanup']
+    directory = run / 'results/worker-observations'
+    rows = {}
+    for log in sorted(directory.glob('rank-0-*.jsonl')):
+        for line in log.open():
+            event = json.loads(line)
+            if event['event'] != 'native-sample-observed':
+                continue
+            for row in event['rows']:
+                if not row.get('logits'):
+                    continue
+                case = case_by_digest[row['prompt_sha256']]
+                key = (case, row['output_token_index'] + 1)
+                assert key not in rows
+                path = directory / row['logits']['file']
+                digest = sha(path)
+                assert digest == row['logits']['sha256']
+                array = np.load(path, allow_pickle=False)
+                assert array.dtype == np.float32 and array.shape == (248320,)
+                assert np.isfinite(array).all()
+                rows[key] = {
+                    'array': array,
+                    'file': str(path),
+                    'sha256': digest,
+                    'row': row['row'],
+                    'batch_shape': event['shape'],
+                    'lane': event['lane'],
+                    'num_computed_tokens': row['num_computed_tokens'],
+                    'input_token_ids': row['input_token_ids'],
+                    'output_prefix_sha256': row['output_prefix_sha256'],
+                }
+    assert len(rows) == 80
+    return rows
+
+
+def main():
+    profile = json.loads((BUNDLE / 'capture-profile-v1.json').read_text())
+    mapping = {digest: case for case, digest in profile['prompt_sha256'].items()}
+    native, prefix = (collect(role, mapping) for role in ('native', 'prefix'))
+    assert set(native) == set(prefix)
+    comparisons = []
+    for case, token in sorted(native):
+        left, right = native[(case, token)], prefix[(case, token)]
+        a, b = left['array'], right['array']
+        delta = a.astype(np.float64) - b.astype(np.float64)
+        comparisons.append({
+            'case_id': case,
+            'output_token_one_based': token,
+            'npy_byte_equal': left['sha256'] == right['sha256'],
+            'numeric_equal': bool(np.array_equal(a, b)),
+            'unequal_entries': int(np.count_nonzero(a != b)),
+            'max_abs_delta': float(np.max(np.abs(delta))),
+            'rms_delta': float(np.sqrt(np.mean(delta * delta))),
+            'same_output_prefix': left['output_prefix_sha256'] == right['output_prefix_sha256'],
+            'same_current_input_tokens': left['input_token_ids'] == right['input_token_ids'],
+            'native': {k: v for k, v in left.items() if k != 'array'},
+            'prefix': {k: v for k, v in right.items() if k != 'array'},
+        })
+    result = {
+        'schema': 'muxpd-qualified-moe-v2-cross-role-logits-supplement-v1',
+        'primary_sha256': sha(BUNDLE / 'analysis-final-v2.json'),
+        'independent_sha256': sha(BUNDLE / 'independent-preflight-v1/pair-terminal-check-v2.json'),
+        'script_sha256': sha(Path(__file__)),
+        'comparisons': comparisons,
+        'byte_equal_count': sum(x['npy_byte_equal'] for x in comparisons),
+        'all_eight_first_p_logits_byte_equal': all(x['npy_byte_equal'] for x in comparisons if x['output_token_one_based'] == 1),
+        'scope': 'Existing qualified terminal captures only. Positions2-199 were not sampled; no earliest numeric divergence, state equality, answer repair or performance claim.',
+    }
+    with OUT.open('x') as stream:
+        json.dump(result, stream, indent=2, allow_nan=False)
+        stream.write('\n')
+    print(json.dumps({'output': str(OUT), 'sha256': sha(OUT), 'equal': result['byte_equal_count'], 'first_p_equal': result['all_eight_first_p_logits_byte_equal']}))
+
+
+if __name__ == '__main__':
+    main()

@@ -1,0 +1,85 @@
+{
+  "schema": "muxpd-native-conv-freeze-v1",
+  "status": "frozen",
+  "frozen_at": "2026-10-29T14:10:48.112811+00:00",
+  "device_executed": false,
+  "files": {
+    "conv_run_v1.py": "a69fe84cb8fb769eaf332661f7618dc74f72a76d7b4b763e0e935f08d3632997",
+    "conv_control_v1.py": "ebfcf0ef31dcd3dd2b7ed91c4cb108c1ebd49282295a8f25e540342059791d49",
+    "conv_observer_v1.py": "24fa004b01a5f4bc7130bc9d8af5d6723dd616d56e90d5571a1e161d0d04c43f",
+    "conv_workers_v1.py": "6e6513fc00016548868b355b322e44a25094f001f9df92b3ec6a6c3f75f53bf6",
+    "conv_checks_v1.py": "a4b749c024cc1ff4e6a0e25f3660943571e90cd3b18fb4faf9f92ff4b1cd2f6f",
+    "conv_analyze_v1.py": "cc657ac603340e4559a566577a08f4823144a516a2a1fe8b407b63edac77ef52",
+    "plan-v1.json": "d98d808a8aea0fa9e0d8e227762b6f4903551866b364c0780334f4f42e0e845c",
+    "native-engine-args-v1.json": "5500cba24e78aa9edc44b8946fbd7d2fce571cd2320792d2cdaa5f9de14f5a9c",
+    "historical-prefixes-v1.json": "5e5f34d52e5ba3b2c5f747e8fc6c35397f694f590ef0fb41cd43501209aa5ae1",
+    "source-manifest-v1.json": "66bf0d149c34b9bdc0064750f670910af94e26314ab4f39a0e462c40282d683a",
+    "operator-contract-v1.json": "a85c3ad10e588511576d7bc36d3ac018b04f7fcd37237a64115155fa6dd59941",
+    "source_adapter_v2.py": "87193ce1da3a4728567af2a9c21d4bcbef36c727c3457f20ffb2bfcaeb1d6e8c",
+    "manifest-v2.json": "774719926c1773cabd1585dead14c0ea38ab8dc3054fe928ada50b20e44ba628"
+  },
+  "expected_physical": [
+    "0",
+    "1",
+    "2",
+    "7"
+  ],
+  "previous_draft_sha256": "5df6a611ac892997da9bc41189592e7a7879139e18956651af31029a9a2c40b5",
+  "changed_since_draft": {
+    "conv_control_v1.py": {
+      "old": "eed748fca5fc35e3c32aa829706fbe01c793c38d7284b4ed7920fbb0e10cd581",
+      "current": "ebfcf0ef31dcd3dd2b7ed91c4cb108c1ebd49282295a8f25e540342059791d49"
+    },
+    "conv_analyze_v1.py": {
+      "old": "1a9f9f1508df8e255d7fd6f7a980f753889b43c905ba1246dc3526334da0b2c5",
+      "current": "cc657ac603340e4559a566577a08f4823144a516a2a1fe8b407b63edac77ef52"
+    }
+  },
+  "reason": "Before first device execution, bind current allocation at controller launch and analysis; reject incomplete attempt directories. Runtime observation and frozen plan unchanged.",
+  "preflight_sha256": "bb1c0ab0c182f546a06dd6abe1ff54e7c821f9a32b1ac5e2a8027accfc6f87b3",
+  "logical_to_physical": [
+    0,
+    1,
+    2,
+    7
+  ],
+  "historical_same_physical_hardware": false,
+  "cpu_checks": [
+    {
+      "command": [
+        "/root/workspace/.venv/bin/python",
+        "-m",
+        "pytest",
+        "-q",
+        "test_conv_v1.py"
+      ],
+      "exit_code": 0,
+      "log": "root-cpu-final-20261029.log",
+      "sha256": "bfbe0c10e2eededb0fc2dc399bf787f1b81f447ac99f8dccf140fd05ef5fe98d"
+    },
+    {
+      "command": [
+        "/root/workspace/.venv/bin/python",
+        "-m",
+        "ruff",
+        "check",
+        "conv_run_v1.py",
+        "conv_control_v1.py",
+        "conv_observer_v1.py",
+        "conv_workers_v1.py",
+        "conv_checks_v1.py",
+        "conv_analyze_v1.py",
+        "test_conv_v1.py"
+      ],
+      "exit_code": 0,
+      "log": "root-ruff-final-20261029.log",
+      "sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18"
+    }
+  ],
+  "independent_review": {
+    "core": "conv_probe_review: no blocking capture/alias/private-state defect; independent24CPU pass plus seed-row2 check",
+    "inventory": "conv_probe_review: strict physical receipt and cross-role validation reviewed;31CPU pass",
+    "final_root": "Verified final no-controller rejection and launch-time frozen allocation checks;34CPU pass"
+  },
+  "scope": "Two native profiles, all8 historical and observed/plain bridge required. No actual prefix graph observations, no quality/performance qualification."
+}

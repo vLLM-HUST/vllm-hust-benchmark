@@ -1,0 +1,230 @@
+{
+  "schema": "fixed018-retrieval-pair/v1",
+  "arms": [
+    {
+      "role": "B0",
+      "runtime": {
+        "vllm_version": "0.18.0",
+        "ascend_version": "0.18.0",
+        "vllm_source": "/root/m01-b0-accounting-20261024/runtime/text-only-overlay-r1/vllm/vllm/__init__.py",
+        "ascend_source": "/root/m01-b0-accounting-20261024/runtime/text-only-overlay-r1/vllm-ascend/vllm_ascend/__init__.py",
+        "python": "/root/m01-b0-accounting-20261024/runtime/unpacked/rootfs/usr/local/python3.11.14/bin/python3.11",
+        "plan_sha256": "d80b7d12dcecef76527a39b8e632e2ecfb11f09c062d249c0ca067d24538a8db",
+        "role": "B0",
+        "cann_home": "/root/m01-b0-accounting-20261024/runtime/unpacked/rootfs/usr/local/Ascend/cann-8.5.1",
+        "plugins": "ascend,ascend_model_loader,ascend_kv_connector"
+      },
+      "status": "retrieval_complete",
+      "all_reserved_devices_released": true,
+      "physical_cards": [
+        5,
+        6
+      ],
+      "request_plan_sha256": "2c1acbbe802ad0382f7ab054f573d966fa3afe13fef4523da5c6cbece0497b1a",
+      "cases": [
+        {
+          "case_id": "m05-16384-0.1-r1",
+          "input_tokens": 16457,
+          "completion_tokens": 372,
+          "finish_reason": "stop",
+          "success": true,
+          "correct": true,
+          "reasoning_separated": true,
+          "content_has_think_delimiter": false
+        },
+        {
+          "case_id": "m05-16384-0.5-r1",
+          "input_tokens": 16457,
+          "completion_tokens": 390,
+          "finish_reason": "stop",
+          "success": true,
+          "correct": true,
+          "reasoning_separated": true,
+          "content_has_think_delimiter": false
+        },
+        {
+          "case_id": "m05-16384-0.9-r1",
+          "input_tokens": 16457,
+          "completion_tokens": 444,
+          "finish_reason": "stop",
+          "success": true,
+          "correct": true,
+          "reasoning_separated": true,
+          "content_has_think_delimiter": false
+        },
+        {
+          "case_id": "m05-32768-0.1-r1",
+          "input_tokens": 32843,
+          "completion_tokens": 412,
+          "finish_reason": "stop",
+          "success": true,
+          "correct": true,
+          "reasoning_separated": true,
+          "content_has_think_delimiter": false
+        },
+        {
+          "case_id": "m05-32768-0.5-r1",
+          "input_tokens": 32843,
+          "completion_tokens": 429,
+          "finish_reason": "stop",
+          "success": true,
+          "correct": true,
+          "reasoning_separated": true,
+          "content_has_think_delimiter": false
+        },
+        {
+          "case_id": "m05-32768-0.9-r1",
+          "input_tokens": 32843,
+          "completion_tokens": 476,
+          "finish_reason": "stop",
+          "success": true,
+          "correct": true,
+          "reasoning_separated": true,
+          "content_has_think_delimiter": false
+        }
+      ],
+      "completed": 6,
+      "failed": 0,
+      "correct": 6,
+      "total": 6,
+      "continuous_stability_pass": null
+    },
+    {
+      "role": "B1",
+      "runtime": {
+        "role": "B1",
+        "vllm_version": "0.28.1.post1.dev143+gf18cf803c",
+        "ascend_version": "0.25.1rc2.dev125+hust.20260903.4.g74f0c0a27.d20260909",
+        "vllm_source": "/root/modcost-runtime-028-20261017/vllm-workspace/vllm/vllm/__init__.py",
+        "ascend_source": "/root/gennova-evidence/20261019-midterm-aligned/runtime/vllm_ascend/__init__.py",
+        "python": "/root/frontierscience-recovery-20261022/venv/bin/python",
+        "plan_sha256": "2d6085350943f6f3b85b8602ae961683c15c6de8a12750b58bcdfd96c1e3dbaa",
+        "worker": "corrected_serving_runtime.CorrectedWorker",
+        "cann_home": "/usr/local/Ascend/cann-9.1.0",
+        "plugins": "ascend,ascend_model,ascend_model_loader,ascend_kv_connector,kv_materialization,hust_m01_correction"
+      },
+      "status": "retrieval_complete",
+      "all_reserved_devices_released": true,
+      "physical_cards": [
+        5,
+        6
+      ],
+      "request_plan_sha256": "2c1acbbe802ad0382f7ab054f573d966fa3afe13fef4523da5c6cbece0497b1a",
+      "cases": [
+        {
+          "case_id": "m05-16384-0.1-r1",
+          "input_tokens": 16457,
+          "completion_tokens": 348,
+          "finish_reason": "stop",
+          "success": true,
+          "correct": true,
+          "reasoning_separated": true,
+          "content_has_think_delimiter": false
+        },
+        {
+          "case_id": "m05-16384-0.5-r1",
+          "input_tokens": 16457,
+          "completion_tokens": 474,
+          "finish_reason": "stop",
+          "success": true,
+          "correct": true,
+          "reasoning_separated": true,
+          "content_has_think_delimiter": false
+        },
+        {
+          "case_id": "m05-16384-0.9-r1",
+          "input_tokens": 16457,
+          "completion_tokens": 470,
+          "finish_reason": "stop",
+          "success": true,
+          "correct": true,
+          "reasoning_separated": true,
+          "content_has_think_delimiter": false
+        },
+        {
+          "case_id": "m05-32768-0.1-r1",
+          "input_tokens": 32843,
+          "completion_tokens": 441,
+          "finish_reason": "stop",
+          "success": true,
+          "correct": true,
+          "reasoning_separated": true,
+          "content_has_think_delimiter": false
+        },
+        {
+          "case_id": "m05-32768-0.5-r1",
+          "input_tokens": 32843,
+          "completion_tokens": 381,
+          "finish_reason": "stop",
+          "success": true,
+          "correct": true,
+          "reasoning_separated": true,
+          "content_has_think_delimiter": false
+        },
+        {
+          "case_id": "m05-32768-0.9-r1",
+          "input_tokens": 32843,
+          "completion_tokens": 383,
+          "finish_reason": "stop",
+          "success": true,
+          "correct": true,
+          "reasoning_separated": true,
+          "content_has_think_delimiter": false
+        }
+      ],
+      "completed": 6,
+      "failed": 0,
+      "correct": 6,
+      "total": 6,
+      "continuous_stability_pass": null
+    }
+  ],
+  "same_request_and_resource_pair": true,
+  "corrected_b1_activation": {
+    "request_scoped_recompute_admissions": 7,
+    "reused_tokens": 0,
+    "microflow": {
+      "0": {
+        "split_events": 130,
+        "target_mtp_graph_replays": 992
+      },
+      "1": {
+        "split_events": 130,
+        "target_mtp_graph_replays": 992
+      }
+    },
+    "corrected_worker": "corrected_serving_runtime.CorrectedWorker",
+    "scope": "Actual activation and request admission, not general state-isolation proof"
+  },
+  "prior_failed_startup": {
+    "role": "B0",
+    "runtime": {
+      "vllm_version": "0.18.0",
+      "ascend_version": "0.18.0",
+      "vllm_source": "/root/m01-b0-accounting-20261024/runtime/text-only-overlay-r1/vllm/vllm/__init__.py",
+      "ascend_source": "/root/m01-b0-accounting-20261024/runtime/text-only-overlay-r1/vllm-ascend/vllm_ascend/__init__.py",
+      "python": "/root/m01-b0-accounting-20261024/runtime/unpacked/rootfs/usr/local/python3.11.14/bin/python3.11",
+      "plan_sha256": "eb1651b6e08a79599e9a6330f92362e904b4f07fe6d4ca3d137a4ab9cfd3a505",
+      "role": "B0",
+      "cann_home": "/root/m01-b0-accounting-20261024/runtime/unpacked/rootfs/usr/local/Ascend/cann-8.5.1",
+      "plugins": "ascend,ascend_model_loader,ascend_kv_connector"
+    },
+    "status": "failed",
+    "all_reserved_devices_released": true,
+    "physical_cards": [
+      5,
+      6
+    ],
+    "request_plan_sha256": null,
+    "cases": null,
+    "completed": null,
+    "failed": null,
+    "correct": null,
+    "total": null,
+    "continuous_stability_pass": null,
+    "failure": "AssertionError: Service exited 1"
+  },
+  "scope": "Six synthetic16K/32K retrieval cases at10/50/90% positions, not full dataset quality or controlled continuous4K/16K stability",
+  "continuous_stability_pass": null,
+  "capsule_sha256": "9f2c6cc17351c579317276709e5c68513f1088b93d363309998c68d464bb2686"
+}

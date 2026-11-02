@@ -14,6 +14,8 @@ b = importlib.import_module("build_midterm_v099")
 
 
 def read(path):
+    if path == b.REPORT:
+        path = path.replace(".md", "-v099.md")
     return (ROOT / path).read_bytes()
 
 

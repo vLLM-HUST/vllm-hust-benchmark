@@ -1,0 +1,94 @@
+{
+  "schema": "muxpd-target-early-logits-independent-preflight-v1",
+  "reviewed_at": "2026-10-30T11:56:49.795450+00:00",
+  "status": "READY_FOR_ROOT_FREEZE_AND_SINGLE_MATRIX_ATTEMPTS",
+  "scope": "CPU/source/schema review only. No new model execution or early-logit numerical result, answer repair, or performance qualification.",
+  "producer_map_sha256": "dff8eedb91ab15aab0f73c4c9bd16917e74a62b92634bddc7a48837baf783db2",
+  "canonical_files_sha256": "05055894d29f6d4e970f44cde127d24301e71f105e98c1ed3ff080ffa3f04bf1",
+  "files": {
+    "probe_run_v1.py": "46e48b3ede3b274ad3549d4ff6a3bb5361bce3a498fbae08f892c35ca4362785",
+    "probe_control_v1.py": "2a0a4fc4888048ed82ada55997f0e22a0aa349aa4b4135361eea57a5fc669903",
+    "plan-v1.json": "6d99b3274da2e3784b5c1c5c98c73657944d44e9447676a7b4656aa3a9da6634",
+    "native-engine-args-v1.json": "5500cba24e78aa9edc44b8946fbd7d2fce571cd2320792d2cdaa5f9de14f5a9c",
+    "raw-engine-args-v1.json": "d42f1007c5e059fdd872a4b77c8f003aa185e948a59c35373322690a6248d512",
+    "prefill_collective_layout_v1.py": "6431c4c0abdd869ef17e7122f681c457ad2b4d5741f86c6a0653e9fca44e02fc",
+    "window_numeric_diagnostics_v1.py": "45d949d2b7dfcca90980f5e0e98ecb25f40eae3724296bca67139e85dd286610",
+    "window_numeric_workers_v1.py": "b85d3f7de15144d246894314f323e64dd39406288306433bc90f902aa2f4263e",
+    "numeric-window-adaptation-v1.json": "6e245b6c7541f5a5543741774b2536a0083dd70fd28b6eea3911715139fb9dfa",
+    "numeric-window-adaptation-v1.diff": "f61c8b9272ebea249e094ce0681d7da201af9cfee2e359a78f497ec54df8052d",
+    "historical-prefixes-v1.json": "5e5f34d52e5ba3b2c5f747e8fc6c35397f694f590ef0fb41cd43501209aa5ae1",
+    "source-manifest-v1.json": "66bf0d149c34b9bdc0064750f670910af94e26314ab4f39a0e462c40282d683a",
+    "new_loss_checks_v1.py": "2600200ef619d439a5dd2db7850b83a17be1167ca105a1e87c35c65945085c97",
+    "window_analysis_core_v1.py": "ddd04348c70e27c8416fe591941ed49413f615c778aabca431dfc337f4354ab4",
+    "analyze_new_loss_v1.py": "428bc23332992f2d3ac7dea3674e0453dc279fbd3b00858a040ad996a16c46eb",
+    "target-capture-profile-v1.json": "8e1d9af5546d8b98f8d578eecbfbc543bd10dcbfea146da1a6201c0c9dd42a43",
+    "source_adapter_v2.py": "87193ce1da3a4728567af2a9c21d4bcbef36c727c3457f20ffb2bfcaeb1d6e8c",
+    "manifest-v2.json": "774719926c1773cabd1585dead14c0ea38ab8dc3054fe928ada50b20e44ba628",
+    "early_logits_analysis_v1.py": "320808746617964934622a6b8a788ccc9606a42d2009abc40d94da4044ca8a0d",
+    "analyze_early_logits_v1.py": "36fe761f8eb68e126619342997630315cc458d202a4568225cbce178f4856f17",
+    "control-references-v1.json": "cb9548ab59ac0584a78bd7699bc2ca2b0fba689c74e4c88d69f9697bc232d381",
+    "run-matrix-v1.json": "65112392da0cd78f200a08505f9f99281307982e16278465080d390a59c3fb51",
+    "failure-lineage-v2.json": "53083c7aed91f7345ec69946fcfa03809e56e57e18ae32c4230b4dfb706e1893",
+    "state-references-v1.json": "2d8534f572c685e54fde031ceceb82dd487d7fd8df5ac7fa7bb19b2939862e00",
+    "early-references-v1.json": "bbe464b24e5784dbf0ce601f2821aa4122093a58eb9cc5418747f7dff32382ff"
+  },
+  "reviewed_invariants": [
+    "Original window [1,200..208], bounded128 validator, ordinary80 loader, numeric workers, plan and engine arguments retain original bytes. Twelve observer functions remain literal exact.",
+    "Extra selection is rank0, native/decode lane, exact original1340-token target prompt and198 positions2..199. Sidecar bytes and original plan semantic/file hashes are pinned.",
+    "Original greedy call executes once before the unchanged clone expression. Ordinary and extra selection form one union, including seed-late-window overlap. Actual FP32 shape1..8 and maximum7946240bytes are checked.",
+    "Original bookkeeping precedes the existing single D2H expression. Ordinary serialization is literal unchanged; extra export follows that loop and uses a separate directory and extra_logits row field.",
+    "No new model, sampler math, synchronization, graph hook, collective, or cache operation is introduced. Extra history is exported sequentially and complete before target position200.",
+    "Driver changes remove only state-observer installation/snapshot/restore and change schema; original admission/enqueue/step loops, layout behavior and controller process lifecycle are preserved.",
+    "New loader checks actual target prompt/prefix/input/count/scheduled token and sampled output for every position1..208 on all four ranks and correct P/D lane, and binds full co-batch/descriptor context.",
+    "Exactly198 original extra NPYs and10 ordinary target endpoints are checked for byte SHA/size/shape/dtype/finite/argmax. Extra files remain disjoint from the unchanged ordinary80 files.",
+    "Every208 target position is compared; numeric and canonical byte equality, first differences, later reconvergence, sampled-token divergence and unmatched target histories are distinguished. Co-batch differences do not support unique operator attribution.",
+    "Old80 complete-vector/all8-prefix same-role controls and prefixBplain bridge precede extra numerical attribution. All prior failed attempts and qualified state evidence remain hash-bound.",
+    "Prefix execution requires native controller terminal and matching childSHA plus explicit early-analysis schema,198extras/all208positions/four-rank context/payload/current-profile qualification."
+  ],
+  "required_review_finding_resolved": "Prefix predecessor validation now rejects stale old80-only PASS or missing/wrong extra qualification; controller lifecycle stays unchanged.",
+  "verification": {
+    "independent_focused": {
+      "passed": 28,
+      "seconds": 3.58,
+      "command": "PYTHONDONTWRITEBYTECODE=1 TORCH_DEVICE_BACKEND_AUTOLOAD=0 /root/workspace/.venv/bin/python -m pytest -q test_target_numeric_observer_v1.py test_target_numeric_source_proof_v1.py test_host_source_v1.py"
+    },
+    "integrated_cpu": {
+      "passed": 85,
+      "seconds": 266.84,
+      "log_sha256": "af8dd9eafb9145aadafd8b078650eb014dfba00d55781753182958513a327ef1"
+    },
+    "actual_prior_metadata_check": "All198 completed-state target positions per role independently matched exact prompt+prefix input, count1340+position-1, computed1340+position-2, scheduled1, row3 and sample-entry shape8x248320.",
+    "fixture_scope": "Actual observer clone/flush serialization and original qualified all-rank metadata/ordinary80 bytes are exercised. Extra values are explicit CPU synthetic fixtures and are not numerical runtime evidence.",
+    "artifacts": {
+      "cpu-validation-v1.json": "bcb5d42ae782cdc140cf55257e0dd32eefd0e6a766de4adfcbbffa17d95a2d47",
+      "observer-source-proof-v1.json": "101dc67eee92c5cfd903938abd8f6e59be42eb10898e8f22e2827c3f27ba4b42",
+      "observer-adaptation-v1.diff": "e94c7cacc6d5a2b70305a32a0e50fa741bc72dc778c36e6c41779c861b004ab7",
+      "harness-source-proof-v1.json": "1f21ae2b2f6b9e055773826dbea958cb64d50dd50315dce5a0c7539ec977d377",
+      "root-preflight-v1/preflight.json": "49e17fb52c4698a994f9d7525a02c63042bdd8cd0a2caa4f61d1ae77f0510a10"
+    }
+  },
+  "matrix": {
+    "roles": [
+      "native",
+      "prefix"
+    ],
+    "attempts_per_role": 1,
+    "physical": [
+      "3",
+      "4",
+      "5",
+      "6"
+    ],
+    "logical": [
+      "0",
+      "1",
+      "2",
+      "3"
+    ],
+    "exact_bundle_and_output_paths_checked": true
+  },
+  "remaining_conditions": [
+    "Root freezes and launches the declared native attempt, proves terminal and extra/control qualification, then launches prefix once.",
+    "Only after both terminal declarations and primary PASS may independent raw208-vector pair comparison execute."
+  ]
+}

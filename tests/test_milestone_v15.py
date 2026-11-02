@@ -67,7 +67,8 @@ def test_v15_exact_extract_and_offline_reuse():
     assert "报告编号：HUST-INFERENCE-MIDTERM-20261019" in report
     assert "V1.5第3.4.4节按测量区间分摊费用" in report
     assert "M06全流程验收未通过" not in report
-    assert "官方0.18/0.18 B0与vLLM-HUST B1的同轮F、T、C已闭合" in report
+    assert "同轮复算：B0 3.8407、B1 7.1042 TFLOPS/芯片" in " ".join(report.split())
+    assert "当前η及中期50%/最终90%判定均未确定" in report
 
 
 def test_v074_publication_identity_and_bilingual_current_scope(monkeypatch):

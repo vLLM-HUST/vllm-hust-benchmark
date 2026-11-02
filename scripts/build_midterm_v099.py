@@ -224,6 +224,14 @@ def build(revision, read=None):
                 ["git", "show", f"{revision}:{path}"], cwd=ROOT
             )
 
+    if "报告版本：V1.01" in read(REPORT).decode():
+        original_read = read
+
+        def read(path):
+            if path == REPORT:
+                path = REPORT.replace(".md", "-v099.md")
+            return original_read(path)
+
     data = previous.build(revision, lambda p: read(OLD_REPORT if p == REPORT else p))
     value = json.loads(read(SOURCE))
     prior = json.loads(read(previous.SOURCE))

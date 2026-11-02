@@ -1,0 +1,269 @@
+{
+  "all_checks_passed": true,
+  "run": "npu4-threeway-1792817713344881007",
+  "input_sha256": "adcdb992bd58f76b73f96362c69a646dcdad2602c813947c9b9b60fbadad26ca",
+  "repo_commit": "04142b28e4962321c23b0228331745e3297a5378",
+  "raw_file_count": 208,
+  "measured_requests": 504,
+  "timing_records": 504,
+  "distinct_source_inputs": 56,
+  "warmup_requests": 36,
+  "new_clear_evidence_count": 18,
+  "points": [
+    {
+      "point": 1,
+      "rep": 1,
+      "policy": "random",
+      "verified": true,
+      "monitor_samples": 438,
+      "npu_card_samples": 220,
+      "measured_requests": 56,
+      "warmups": 4,
+      "cleared_nodes": 2
+    },
+    {
+      "point": 2,
+      "rep": 1,
+      "policy": "prefix",
+      "verified": true,
+      "monitor_samples": 435,
+      "npu_card_samples": 220,
+      "measured_requests": 56,
+      "warmups": 4,
+      "cleared_nodes": 2
+    },
+    {
+      "point": 3,
+      "rep": 1,
+      "policy": "lifecycle",
+      "verified": true,
+      "monitor_samples": 430,
+      "npu_card_samples": 216,
+      "measured_requests": 56,
+      "warmups": 4,
+      "cleared_nodes": 2
+    },
+    {
+      "point": 4,
+      "rep": 2,
+      "policy": "prefix",
+      "verified": true,
+      "monitor_samples": 435,
+      "npu_card_samples": 220,
+      "measured_requests": 56,
+      "warmups": 4,
+      "cleared_nodes": 2
+    },
+    {
+      "point": 5,
+      "rep": 2,
+      "policy": "lifecycle",
+      "verified": true,
+      "monitor_samples": 434,
+      "npu_card_samples": 220,
+      "measured_requests": 56,
+      "warmups": 4,
+      "cleared_nodes": 2
+    },
+    {
+      "point": 6,
+      "rep": 2,
+      "policy": "random",
+      "verified": true,
+      "monitor_samples": 429,
+      "npu_card_samples": 216,
+      "measured_requests": 56,
+      "warmups": 4,
+      "cleared_nodes": 2
+    },
+    {
+      "point": 7,
+      "rep": 3,
+      "policy": "lifecycle",
+      "verified": true,
+      "monitor_samples": 428,
+      "npu_card_samples": 216,
+      "measured_requests": 56,
+      "warmups": 4,
+      "cleared_nodes": 2
+    },
+    {
+      "point": 8,
+      "rep": 3,
+      "policy": "random",
+      "verified": true,
+      "monitor_samples": 429,
+      "npu_card_samples": 216,
+      "measured_requests": 56,
+      "warmups": 4,
+      "cleared_nodes": 2
+    },
+    {
+      "point": 9,
+      "rep": 3,
+      "policy": "prefix",
+      "verified": true,
+      "monitor_samples": 430,
+      "npu_card_samples": 216,
+      "measured_requests": 56,
+      "warmups": 4,
+      "cleared_nodes": 2
+    }
+  ],
+  "resource_summary": [
+    {
+      "physical_npu": 0,
+      "samples": 490,
+      "aicore_pct_median": 2.0,
+      "aicore_pct_max": 68,
+      "hbm_mib_min": 56808,
+      "hbm_mib_max": 56820,
+      "temp_c_max": 41
+    },
+    {
+      "physical_npu": 1,
+      "samples": 490,
+      "aicore_pct_median": 2.0,
+      "aicore_pct_max": 71,
+      "hbm_mib_min": 56800,
+      "hbm_mib_max": 56812,
+      "temp_c_max": 38
+    },
+    {
+      "physical_npu": 2,
+      "samples": 490,
+      "aicore_pct_median": 2.0,
+      "aicore_pct_max": 66,
+      "hbm_mib_min": 56793,
+      "hbm_mib_max": 56806,
+      "temp_c_max": 40
+    },
+    {
+      "physical_npu": 7,
+      "samples": 490,
+      "aicore_pct_median": 2.0,
+      "aicore_pct_max": 66,
+      "hbm_mib_min": 56825,
+      "hbm_mib_max": 56839,
+      "temp_c_max": 44
+    }
+  ],
+  "prefix_characteristics": {
+    "paio-long-prefill-5000": {
+      "requests": 8,
+      "distinct_first_blocks": 8,
+      "extra_same_first_block_requests": 0,
+      "prompt_tokens_min": 8258,
+      "prompt_tokens_max": 13306
+    },
+    "paio-prefix-shared-5000": {
+      "requests": 20,
+      "distinct_first_blocks": 18,
+      "extra_same_first_block_requests": 2,
+      "prompt_tokens_min": 2285,
+      "prompt_tokens_max": 5190
+    },
+    "paio-reuse-conv-5000": {
+      "requests": 20,
+      "distinct_first_blocks": 20,
+      "extra_same_first_block_requests": 0,
+      "prompt_tokens_min": 2362,
+      "prompt_tokens_max": 5192
+    },
+    "longbench-v2": {
+      "requests": 8,
+      "distinct_first_blocks": 8,
+      "extra_same_first_block_requests": 0,
+      "prompt_tokens_min": 10326,
+      "prompt_tokens_max": 15765
+    }
+  },
+  "sampled_time_start_UTC8": "2026-10-24T12:55:39+08:00",
+  "sampled_time_end_UTC8": "2026-10-24T15:14:35+08:00",
+  "cache_query_count_notes": [
+    {
+      "point": 1,
+      "policy": "random",
+      "dataset": "paio-reuse-conv-5000",
+      "cache_query_counter_delta": 78585.0,
+      "api_input_tokens": 75576,
+      "excess_lookup_tokens": 3009.0,
+      "cause": "not established by archived evidence"
+    },
+    {
+      "point": 1,
+      "policy": "random",
+      "dataset": "longbench-v2",
+      "cache_query_counter_delta": 342408.0,
+      "api_input_tokens": 96998,
+      "excess_lookup_tokens": 245410.0,
+      "cause": "not established by archived evidence"
+    },
+    {
+      "point": 6,
+      "policy": "random",
+      "dataset": "paio-long-prefill-5000",
+      "cache_query_counter_delta": 110194.0,
+      "api_input_tokens": 76130,
+      "excess_lookup_tokens": 34064.0,
+      "cause": "not established by archived evidence"
+    },
+    {
+      "point": 6,
+      "policy": "random",
+      "dataset": "paio-reuse-conv-5000",
+      "cache_query_counter_delta": 79627.0,
+      "api_input_tokens": 75576,
+      "excess_lookup_tokens": 4051.0,
+      "cause": "not established by archived evidence"
+    },
+    {
+      "point": 6,
+      "policy": "random",
+      "dataset": "longbench-v2",
+      "cache_query_counter_delta": 372678.0,
+      "api_input_tokens": 96998,
+      "excess_lookup_tokens": 275680.0,
+      "cause": "not established by archived evidence"
+    },
+    {
+      "point": 8,
+      "policy": "random",
+      "dataset": "paio-long-prefill-5000",
+      "cache_query_counter_delta": 143226.0,
+      "api_input_tokens": 76130,
+      "excess_lookup_tokens": 67096.0,
+      "cause": "not established by archived evidence"
+    },
+    {
+      "point": 8,
+      "policy": "random",
+      "dataset": "paio-prefix-shared-5000",
+      "cache_query_counter_delta": 82255.0,
+      "api_input_tokens": 78251,
+      "excess_lookup_tokens": 4004.0,
+      "cause": "not established by archived evidence"
+    },
+    {
+      "point": 8,
+      "policy": "random",
+      "dataset": "paio-reuse-conv-5000",
+      "cache_query_counter_delta": 79640.0,
+      "api_input_tokens": 75576,
+      "excess_lookup_tokens": 4064.0,
+      "cause": "not established by archived evidence"
+    },
+    {
+      "point": 8,
+      "policy": "random",
+      "dataset": "longbench-v2",
+      "cache_query_counter_delta": 217271.0,
+      "api_input_tokens": 96998,
+      "excess_lookup_tokens": 120273.0,
+      "cause": "not established by archived evidence"
+    }
+  ],
+  "cache_query_counter_is_not_used_as_unique_input_count": true,
+  "longbench_answers_identical": false,
+  "raw_evidence_availability": "208-file raw run archive retained by the experimenter; this PR contains derived numeric records and input identifiers, not full prompts or the complete raw archive."
+}

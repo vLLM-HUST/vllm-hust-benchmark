@@ -103,8 +103,14 @@ def test_m01_limited_verdict_matches_retained_model_evidence():
     assert "不是V1.5当前C、η或达标判定" in report
     assert "3.840732572879189" in report
     assert "7.1042207644080255" in report
-    assert "B1 η=99.9397%，达到90%" in report
-    assert "不是理论峰值或全局最优上界" in report
+    assert "参考修订中" in report
+    assert "历史整链经验参考（已退出当前判定）" in report
+    assert "B1 η=99.9397%，达到90%" not in report
+    current = json.loads((report_dir / "current-method.json").read_text())
+    assert current["current"]["efficiency_percent"] is None
+    assert current["current"]["passed"] is None
+    archived = (report_dir / "中期测试报告-v099.md").read_text()
+    assert "B1 η=99.9397%，达到90%" in archived
     method = json.loads((report_dir / "milestone-v15/method-status.json").read_text())
     assert method["current"]["effective_tflops_per_chip"] == 7.1042207644080255
     assert method["current"]["efficiency_percent"] is None

@@ -1,0 +1,77 @@
+{
+  "schema": "independent-conv-data-audit-v2",
+  "passed": true,
+  "method": "Standalone CPU script, direct raw bytes and NPY decode, original historical full outputs, raw step history, actual per-rank RPC/maps/helper receipts; no producer/analyzer imports.",
+  "freeze_sha256": "b500a57e4d5d64a8e40e2fe206b679020480218c7d51d3e8fa30333069fffb30",
+  "producer_files_unchanged": 16,
+  "attempts": [
+    {
+      "label": "conv-v2-native-conv-observed-01",
+      "controller_sha256": "a8346c3e277b9fb7435532898d5691cf6dbf2303e53778b3daefa41c96ce8891",
+      "run_sha256": "05424cb1ca28f847321c64dbd0ad567790e2a77c505c79f34cc7b2b9fb272732",
+      "history_sha256": "9ec804a0e133a827ece57d1843e90cfb8e791dbe220640e47c0549268f69477a",
+      "process_log_sha256": "5d33fb41ece79a2cc296700b45ffd62ad9fb7a3f09c50757246a8c8e3f0a0b85",
+      "whole_prefix_historical_comparisons": 16,
+      "shutdown_sigterm_notice": true,
+      "shutdown_sigkill_notice": false
+    },
+    {
+      "label": "conv-v2-native-conv-plain-01",
+      "controller_sha256": "3fdd1bca0de28676fba5557aa745c64d5ce10e12c6e71780d6647ace0678c696",
+      "run_sha256": "0aa251dfd24c5969e72716aa64f42651bccf991c195c508c338e73caa730c14c",
+      "history_sha256": "fbc7649825f82299436f6ace07aea2e5359d9ed26a8d6ae75aa834c56cf462d7",
+      "process_log_sha256": "6da21f313248846854845bc777afd873fcd32493ca639351dbd077eaf11771fa",
+      "whole_prefix_historical_comparisons": 16,
+      "shutdown_sigterm_notice": true,
+      "shutdown_sigkill_notice": false
+    }
+  ],
+  "whole_prefix_historical_comparisons": 32,
+  "whole_prefix_observer_plain_pairs": 8,
+  "loaded_maps_receipts_verified": 16,
+  "tensor_pairs_raw_npy_verified": 64,
+  "rank_comparisons": [
+    {
+      "rank": 0,
+      "seed_sequence": 0,
+      "physical_slot": 3,
+      "output_elements": 2048,
+      "state_elements": 6144,
+      "all_A_B0_B1_C0_C1_bytes_equal": true,
+      "finite": true,
+      "estimated_peak_bytes": 180832
+    },
+    {
+      "rank": 1,
+      "seed_sequence": 0,
+      "physical_slot": 3,
+      "output_elements": 2048,
+      "state_elements": 6144,
+      "all_A_B0_B1_C0_C1_bytes_equal": true,
+      "finite": true,
+      "estimated_peak_bytes": 180832
+    },
+    {
+      "rank": 2,
+      "seed_sequence": 0,
+      "physical_slot": 3,
+      "output_elements": 2048,
+      "state_elements": 6144,
+      "all_A_B0_B1_C0_C1_bytes_equal": true,
+      "finite": true,
+      "estimated_peak_bytes": 180832
+    },
+    {
+      "rank": 3,
+      "seed_sequence": 0,
+      "physical_slot": 3,
+      "output_elements": 2048,
+      "state_elements": 6144,
+      "all_A_B0_B1_C0_C1_bytes_equal": true,
+      "finite": true,
+      "estimated_peak_bytes": 180832
+    }
+  ],
+  "scope": "First mixed admission, first GDN layer, native seed D; private mode0/mode1 repeats only. A=B=C is valid negative evidence here. Actual prefix graph inputs remain unobserved, answer gate remains FAIL, no quality or performance qualification.",
+  "audit_script_sha256": "d05b7a4a21d7ccda717ff715c4d5810753de1ec035c51955db65672d134f73db"
+}
