@@ -283,6 +283,39 @@ def test_discoverybench_original_assets_are_not_native_completion():
     assert receipt["source_checkbox_eligible"] is False
 
 
+def test_discoverybench_delivery_preserves_native_failures_and_provider_scope():
+    ledger = json.loads(
+        (ROOT / "docs/workload-data/dataset-validation-status.json").read_text("utf-8")
+    )
+    row = ledger["delivery_inventory"]["DISCOVERYBENCH"]
+    delivery = json.loads((ROOT / row["delivery_receipt"]).read_text("utf-8"))
+    assert row["checked"] and row["status"] == "AVAILABLE"
+    assert delivery["source_checkbox_eligible"]
+    assert delivery["qualified_ci_conclusions"] == "success"
+    assert delivery["original_agent_iterations"] == 5
+    assert delivery["original_python_tool_call_limit"] == 1
+    assert delivery["original_tool_attempts_by_position"] == [1, 1, 1, 1]
+    assert delivery["alternate_judge_scores_by_position"] == [0.0] * 4
+    assert delivery["scientific_programs_successfully_completed"] == 0
+    assert not delivery["official_gpt4_replication"]
+    assert not delivery["quality_or_engine_performance_claim"]
+    assert (
+        delivery["original_key_records_retained_and_public_research_readbacks"] == 239
+    )
+    assert (
+        delivery["native_input_relations_and_author_default_prompt_comparisons"] == 229
+    )
+    assert delivery["original_blocked_tasks_retained"] == 10
+    assert delivery["scoring_recovered_without_actor_or_tool_replay"]
+    for field in (
+        "public_asset_entry",
+        "public_case_entry",
+        "public_environment_entry",
+        "public_native_entry",
+    ):
+        assert (ROOT / delivery[field]).is_file()
+
+
 def test_appworld_protocol_files_are_not_task_or_execution_completion():
     ledger = json.loads(
         (ROOT / "docs/workload-data/dataset-validation-status.json").read_text("utf-8")
