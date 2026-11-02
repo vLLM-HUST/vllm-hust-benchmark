@@ -2,6 +2,22 @@
 
 ### 剩余原生环境前置条件复核（2026-11-02）
 
+- [x] MLE-bench原版Python 3.11客户端安装、pip check及官方CLI
+  help已在专用CPU容器通过。首次help因原代码在当前目录建立cache、而工作目录只读而失败；保留失败记录，仅改为本任务可写工作目录后，在禁网容器复核help退出0，未改源码。此项不代表官方完整Agent镜像、竞赛数据或评分完成，来源仍不打勾。证据：`/root/swe-bench/docker-data/mlebench-cpu-client-20261102-001/client-help-writable-public.json`。
+
+  客户端环境的复现步骤如下，先通过下述固定归档入口准备`/server/mlebench-native-source`，再在独立CPU环境执行。Python须为3.11，工作目录须可写；这是已验证的客户端准备流程，不是完整竞赛运行命令。首次验证使用原pyproject允许范围内的解析依赖，未证明任意后续解析结果均兼容。
+
+  ```bash
+  python3.11 -m venv /server/mlebench-client/venv
+  /server/mlebench-client/venv/bin/python -I -m pip install /server/mlebench-native-source
+  /server/mlebench-client/venv/bin/python -I -m pip check
+  cd /server/mlebench-client
+  env -u PYTHONPATH -u PYTHONHOME /server/mlebench-client/venv/bin/mlebench --help
+  ```
+
+  后续仍须取得官方Kaggle竞赛访问授权、按原README准备固定竞赛数据、配置与NPU模型兼容的原生Agent，完成运行和官方grade。当前ARM64节点不能原样使用硬编码x86
+  Miniconda的官方完整Agent Dockerfile；未执行其中的自动条款接受步骤，未用替代数据或空评分填补缺口。
+
 - [x] MLE-bench固定官方版本的1015份原仓库文件已在服务器核验，展开后41716866字节；其中322份Git
   LFS文件已核验内容摘要、大小与原Git指针身份的绑定。初次将展开文件直接按指针摘要比较而失败的记录保留，原内容未改。这里只记录原仓库取得；下述公共运行时准备已另行验证，竞赛数据授权获取、原生Agent及官方评分仍未完成，来源不打勾。服务器证据：`/var/lib/npc/mlebench-original-source-20261102-001/lfs-qualified-public.json`。
 
