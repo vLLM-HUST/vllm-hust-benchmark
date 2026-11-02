@@ -75,6 +75,9 @@ on:
       - 'scripts/prepare_videomme_original_assets.py'
       - 'scripts/prepare_videomme_native_media.py'
       - 'tests/test_videomme_native_media.py'
+      - 'scripts/prepare_videomme_v2_fixed_media.py'
+      - 'tests/test_videomme_v2_fixed_media.py'
+      - 'configs/workload-native/videomme-v2-original-fixed-media.json'
       - 'scripts/run_videomme_original.py'
       - 'scripts/prepare_bigcodebench_cpu_context.py'
       - 'scripts/verify_bigcodebench_cpu_environment.py'
@@ -467,7 +470,7 @@ jobs:
       - name: NatureBench original source and task-group fixtures only; no scientific tasks
         run: python -m pytest -q tests/test_naturebench_original_contract.py tests/test_naturebench_original_assets.py tests/test_naturebench_packages.py
       - name: TemporalWiki original protocol fixtures only; no data, training or inference
-        run: python -m pytest -q tests/test_temporalwiki_original_contract.py tests/test_temporalwiki_original_assets.py tests/test_mvbench_original_view.py tests/test_videomme_original_protocol.py tests/test_videomme_native_media.py tests/test_videomme_original_runner.py
+        run: python -m pytest -q tests/test_temporalwiki_original_contract.py tests/test_temporalwiki_original_assets.py tests/test_mvbench_original_view.py tests/test_videomme_original_protocol.py tests/test_videomme_native_media.py tests/test_videomme_original_runner.py tests/test_videomme_v2_fixed_media.py
       - name: OVO and StreamingBench author-plan fixtures only; no video or model
         run: python -m pytest -q tests/test_streamingbench_author_preparation.py tests/test_streamingbench_native_selection.py tests/test_streamingbench_original_media.py tests/test_streamingbench_original_scoring.py workload-preparation/tests/test_streamingbench_original_groups.py tests/test_ovobench_author_preparation.py tests/test_ovobench_native_selection.py tests/test_ovobench_media_ranges.py tests/test_ovobench_original_media.py tests/test_ovobench_media_preparation.py tests/test_ovobench_header_capture.py workload-preparation/tests/test_ovobench_original_cases.py
       - name: OVO NPU binding and saved-score contracts; no model or device imports
