@@ -600,6 +600,17 @@ LD_LIBRARY_PATH=/external/ffmpeg/lib python -B scripts/run_videomme_original.py 
   # owned-hostnet只用于专用、已核验的pod，不是通用不可信网络隔离方案。
   ```
 
+- [x] 公共原生委托入口`run_naturebench_original.py`已接好：复用原包读取器核验输入、隐藏评估、环境与许可证，直接委托原版harness，默认原CPU3、单worker、原4小时预算，不提供`skip-judge`或宿主机生成代码回退。服务器在实际挂载命名空间通过第二题完整原包的离线计划核验，0模型调用、未创建实验输出目录；这不是第二题执行或来源交付。
+
+- [ ] 公共委托入口的`--execute`实跑及科学环境完整复现说明待完成；第一题现有运行不重跑。10项新增编排夹具只验证参数、身份/数据拒绝、显式凭据、失败保留和不自动宣告完成。
+
+  ```bash
+  # 离线计划；科学依赖、原任务Docker镜像和原evaluator须先准备并核验。
+  python scripts/run_naturebench_original.py --author-root /path/to/pinned-naturebench-code --runtime /path/to/fresh-runtime --data-root /path/to/original-naturebench-data --output /path/to/new-native-run --model YOUR_SERVED_MODEL --endpoint http://127.0.0.1:YOUR_MODEL_PORT
+  # --execute只在已准备好的可信控制环境显式调用；Agent/judge端点和API_KEY均显式配置。
+  # 默认三题；--task-id只接受原CPU任务ID，不会换题或减预算。
+  ```
+
   任务包关系核验（不执行科学代码、不调用模型）：
 
   ```bash
