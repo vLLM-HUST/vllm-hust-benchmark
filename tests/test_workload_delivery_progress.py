@@ -4,6 +4,7 @@ from copy import deepcopy
 import importlib.util
 import json
 from pathlib import Path
+import re
 
 import pytest
 
@@ -17,6 +18,48 @@ spec.loader.exec_module(runner)
 
 def ledger():
     return json.loads(runner.LEDGER.read_text("utf-8"))
+
+
+def test_current_markdown_total_matches_ledger_not_historical_snapshots():
+    text = (ROOT / "docs/workload-data/DATASET_CHECKLIST.zh-CN.md").read_text("utf-8")
+    result = runner.summarize(ledger())["all_sources"]
+    totals = re.findall(
+        r"当前交付\s+\*\*(\d+)/113项\*\*，待完成(\d+)项，另(\d+)项仅分类",
+        text,
+    )
+    assert totals == [
+        tuple(
+            str(result[key]) for key in ("delivered", "pending", "classification_only")
+        )
+    ]
+    assert "当前机器清单计算：**57/" not in text
+    assert "当前交付可用48/" not in text
+
+
+def test_current_118_row_markdown_checkboxes_match_single_ledger():
+    lines = (
+        (ROOT / "docs/workload-data/DATASET_CHECKLIST.zh-CN.md")
+        .read_text("utf-8")
+        .splitlines()
+    )
+    starts = [
+        i
+        for i, line in enumerate(lines)
+        if line.startswith("| 来源 ID") and "本轮勾选" in line
+    ]
+    assert len(starts) == 1
+    rows = {}
+    for line in lines[starts[0] + 2 :]:
+        if not line.startswith("|"):
+            break
+        fields = [field.strip() for field in line.split("|")[1:-1]]
+        source_id, state = fields[:2]
+        assert source_id not in rows
+        rows[source_id] = "[x]" in state
+    assert rows == {
+        source_id: item["checked"]
+        for source_id, item in ledger()["delivery_inventory"].items()
+    }
 
 
 def test_groups_partition_current_scope_without_double_counting():
