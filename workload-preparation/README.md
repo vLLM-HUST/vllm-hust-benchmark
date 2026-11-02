@@ -64,6 +64,37 @@ ALFWorld原生引用入口见[接入与验证](../docs/workload-data/AGENTBENCH_
 不包含观测钩子、采集、研究特征计算、机制干预或 QBI
 历史执行入口。目录登记、读取适配与模型执行/官方评分是不同状态，见[逐项验证清单](../docs/workload-data/DATASET_CHECKLIST.zh-CN.md)。
 
+## MS MARCO 原始 passage reranking 输入
+
+先审阅原始非商业研究条款，再在仓库外取得原数据；仓库不分发数据或模型：
+
+```bash
+python scripts/prepare_msmarco_original_assets.py
+python scripts/prepare_msmarco_original_assets.py --download --accept-noncommercial-research-license --data-dir /data/msmarco-original
+python scripts/prepare_msmarco_original_assets.py --verify --data-dir /data/msmarco-original
+python scripts/prepare_msmarco_original_reranker.py --output /data/msmarco-reranker
+```
+
+默认第一条只输出离线计划。数据获取固定官方 dev top1000 和 qrels 的已观测快照；哈希不是发布方另行发布的校验值。下载失败的 `.part` 保留，不覆盖已有数据。模型获取固定发布方
+`cross-encoder/ms-marco-MiniLM-L6-v2` 工件，不启动推理。
+
+安装准备包后可读取完整原始查询池：
+
+```python
+from pathlib import Path
+from vllm_hust_workload_data import iter_workload
+
+for record in iter_workload("MSMARCO_PASSAGE", data_root=Path("/data/msmarco-original"), limit=3):
+    print(record.task["task_id"], len(record.task["input"]["candidates"]))
+```
+
+`limit=3` 是原始首次出现顺序的前三个查询，每个查询保留全部候选；不是每个查询只取三条候选。原归档中的查询相互交错，读取必须扫描完整归档才能保证候选不缺。有限读取只在内存中聚合选中查询；不指定
+`limit` 时使用内存 SQLite 聚合所有原始候选，需要容纳约2.61GB原文本及数据库/索引额外开销的
+RAM，不隐式创建磁盘数据缓存。CRLF只作为行分隔符处理，查询/段落中的空格、引号和制表符不改写。
+
+`task.input` 只包含原始 query 与候选，原四列 qrels 留在 `outcome.references`；原始查询和 passage ID、候选原顺序均保留，不生成聊天
+prompt 或负例。服务器已核验全部6,980查询/6,668,967候选和固定前三查询绑定；NPU重排、原Microsoft MRR评分及实际CI工件/研究消费者交接尚未完成。
+
 ## 安装与来源查询
 
 从本仓库根目录运行：

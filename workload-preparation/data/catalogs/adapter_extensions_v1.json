@@ -1072,6 +1072,17 @@
       "requirements":["Full exact four-file original release, public question order/IDs, corpus and separate author QA/reference ID mapping", "Original retrieval/generation/scorer still required; no synthetic questions, replacement corpus or update/delete event invention"],
       "status":"ORIGINAL_FIELDS_MAPPED_NATIVE_AND_RESEARCH_CLOSURE_PENDING"
     },
+    "MSMARCO_PASSAGE": {
+      "kind": "task_dataset",
+      "mapping": "msmarco_original_dev_query_pools",
+      "input_fields": ["query", "candidates"],
+      "required_fields": ["query_id", "query", "candidates", "original_qrel_rows", "qrels_sha256"],
+      "outcome_fields": ["original_qrel_rows"],
+      "annotation_fields": ["query_id", "qrels_sha256"],
+      "id_field": "query_id",
+      "requirements": ["Preserve complete original per-query candidate pools, original order and separate qrels; native NPU reranking and original Microsoft MRR scoring still required"],
+      "status": "ORIGINAL_QUERY_POOLS_MAPPED_NATIVE_AND_RESEARCH_VALIDATION_PENDING"
+    },
     "COPILOT_AGENT_2026": {
       "kind": "request_metadata",
       "mapping": "copilot_original_session_metadata",

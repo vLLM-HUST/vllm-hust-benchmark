@@ -14,6 +14,11 @@ from .registry import adapter_spec, source_spec
 
 def iter_source_rows(path, spec):
     """Use one source view for reading, binding and index resolution."""
+    if spec["mapping"] == "msmarco_original_dev_query_pools":
+        from .msmarco import original_rows
+
+        yield from original_rows(path, spec)
+        return
     if spec["mapping"] == "videomme_v2_original_complete_groups":
         from .videomme_v2 import original_rows
 
@@ -204,6 +209,10 @@ def adapt_row(
     source_id: str, row: dict, *, source: dict, spec: dict, index: int
 ) -> WorkloadRecord:
     """Projection is explicit/allowlisted; outcome fields never become task inputs."""
+    if spec["mapping"] == "msmarco_original_dev_query_pools":
+        from .msmarco import adapt_case
+
+        return adapt_case(row, source=source, index=index)
     if spec["mapping"] == "videomme_v2_original_complete_groups":
         from .videomme_v2 import adapt_case
 
@@ -783,6 +792,10 @@ def iter_workload(
         from .naturebench import relation_spec
 
         spec = relation_spec(manifest, spec)
+    if source_id == "MSMARCO_PASSAGE" and mapping is None:
+        from .msmarco import relation_spec
+
+        spec = relation_spec(manifest, spec)
     if source_id == "MLAGENTBENCH" and mapping is None:
         from .mlagentbench import relation_spec
 
@@ -895,8 +908,13 @@ def iter_workload(
             ):
                 raise ValueError("RULER manifest must preserve generation provenance")
             source["generation"] = deepcopy(generation)
-        rows = iter_source_rows(asset_path(Path(data_root), name), spec)
         remaining = None if limit is None else limit - emitted
+        row_spec = (
+            {**spec, "diagnostic_query_limit": remaining}
+            if spec["mapping"] == "msmarco_original_dev_query_pools"
+            else spec
+        )
+        rows = iter_source_rows(asset_path(Path(data_root), name), row_spec)
         try:
             if history_targets is not None:
                 original_rows = list(rows)

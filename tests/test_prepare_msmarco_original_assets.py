@@ -36,6 +36,23 @@ def test_profile_preserves_original_pools_and_distinguishes_snapshot_hashes():
     assert len(profile["files"]) == 2
 
 
+def test_publisher_reranker_profile_is_pinned_and_does_not_claim_execution():
+    profile = json.loads(
+        (ROOT / "configs/workload-native/msmarco-reranker-pins.json").read_text("utf-8")
+    )
+    assert profile["source_id"] == "MSMARCO_RERANKER"
+    assert profile["model"]["repo_id"] == "cross-encoder/ms-marco-MiniLM-L6-v2"
+    assert len(profile["model"]["revision"]) == 40
+    assert len(profile["model"]["files"]) == 7
+    weights = next(
+        item
+        for item in profile["model"]["files"]
+        if item["path"] == "model.safetensors"
+    )
+    assert weights["bytes"] == 90870598 and len(weights["sha256"]) == 64
+    assert (ROOT / "scripts/prepare_msmarco_original_reranker.py").is_file()
+
+
 def test_existing_valid_asset_reused_without_network(tmp_path, monkeypatch):
     raw = b"original fixture\n"
     (tmp_path / "qrels.dev.tsv").write_bytes(raw)
