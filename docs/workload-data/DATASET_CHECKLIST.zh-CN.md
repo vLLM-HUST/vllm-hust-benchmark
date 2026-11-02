@@ -1318,6 +1318,19 @@ LMM
 
 ### LibriTTS多说话人TTS准备（尚未交付）
 
+原生执行入口为`scripts/run_libritts_styletts2_original_npu.py`，默认仅输出计划，尚未验证实际合成。需准备固定作者源码、发布方模型、原test-other归档、官方NLTK资源及独立StyleTTS2依赖环境；设置已验证的eSpeak路径，并安装本仓库数据读取包。命令如下，只有补上`--execute`才进行NPU推理，`--full`选择原5120条；输出目录须在仓库外且尚不存在。服务器已验证公开入口的plan分支，不能代替执行证据。
+
+```bash
+python scripts/run_libritts_styletts2_original_npu.py \
+  --author-root /path/to/pinned-StyleTTS2 \
+  --model-root /path/to/publisher-model-assets \
+  --archive /path/to/test-other.tar.gz \
+  --nltk-root /path/to/nltk-data \
+  --output /path/to/new-external-output
+```
+
+入口保留作者notebook推理定义、alpha=0.3、beta=0.7、5步扩散、embedding_scale=1及作者原50样本尾部处理；使用float32／NPU和种子0，不截断原始文本，不使用目标录音作为条件参考。仅校验输出波形结构，未提供MOS或冒称官方LibriTTS质量评分。
+
 - [x] 隔离客户端77项新依赖已安装并通过`pip check`，安装计划未替换Torch／torch_npu，原只读vendor链接保留。按原Git树编译作者要求的monotonic_align扩展，源码未改；补齐旧phonemizer漏声明的six后，原模块导入通过。导入检查期间禁止所有神经前向和权重加载，未初始化NPU上下文。
 
 - [x] 原模型构造器／build_model构建的13个模块全部从发布方主检查点严格加载参数，只移除保存时的`module.`键前缀。ASR辅助包的旧训练调度器pickle被安全加载器拒绝，旧失败保留；不放宽安全反序列化，改从已包含全部最终参数的主检查点加载，未改网络计算定义、未缺失参数或补随机权重。检查时禁止所有前向，0神经调用；尚不是NPU模型验证。回执`libritts-styletts2-state-loading-20261102-002/qualification-public.json`。
