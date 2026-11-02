@@ -304,8 +304,9 @@ def test_original_research_assets_are_registered_without_native_completion_claim
         runner.CATALOG.read_text("utf-8"), object_pairs_hook=unique_object
     )["sources"]
     assert (
-        len(sources) == 113
-    )  # Adds already-planned MS MARCO; no change to the118-source delivery scope.
+        len(sources) == 114
+    )  # Adds existing FULL_DUPLEX_BENCH; no change to the118-source delivery scope.
+    assert sum(x["rows"] for x in sources["FULL_DUPLEX_BENCH"]["files"]) == 1225
     assert (
         sources["LIBRITTS"]["asset_kind"]
         == "original_multispeaker_text_reference_audio_pairs"
