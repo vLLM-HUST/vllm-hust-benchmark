@@ -341,6 +341,7 @@ on:
       - 'tests/test_mmmu_original_runner.py'
       - 'tests/test_tracelab_original_build.py'
       - 'tests/test_tracelab_original_runner.py'
+      - 'tests/test_tracelab_tokenizer_legacy.py'
       - 'tests/test_paws_original_assets.py'
       - 'tests/test_paws_original_runner.py'
       - 'scripts/run_paws_original.py'
@@ -349,6 +350,7 @@ on:
       - 'configs/workload-native/paws-original-assets.json'
       - 'scripts/build_tracelab_original.py'
       - 'scripts/run_tracelab_original.py'
+      - 'scripts/prepare_tracelab_tokenizer_legacy.py'
       - 'scripts/prepare_mmmu_author_source.py'
       - 'scripts/run_mmmu_original.py'
       - 'scripts/verify_mmmu_original_saved.py'
@@ -526,7 +528,7 @@ jobs:
       - name: Original visual and memory preparation CPU contracts only
         run: python -m pytest -q tests/test_chartqa_native_toolkit.py tests/test_chartqa_original_view.py tests/test_chartqa_original_runner.py tests/test_chartqa_original_saved.py tests/test_chartqa_native_runtime.py tests/test_mmmu_original_assets.py tests/test_mmmu_original_runner.py tests/test_longmemeval_v2_preparation.py tests/test_longmemeval_v2_original_runner.py
       - name: Original TraceLab build and replay CPU contracts only
-        run: python -m pytest -q tests/test_tracelab_original_build.py tests/test_tracelab_original_runner.py
+        run: python -m pytest -q tests/test_tracelab_original_build.py tests/test_tracelab_original_runner.py tests/test_tracelab_tokenizer_legacy.py
       - name: Original PAWS and LongBench offline CPU contracts only
         run: python -m pytest -q tests/test_paws_original_assets.py tests/test_paws_original_runner.py tests/test_longbench_v2_saved_audit.py tests/test_longbench_v2_capacity_preparation.py tests/test_narrativeqa_metric_preparation.py tests/test_narrativeqa_original_summary.py tests/test_schemastore_runtime.py tests/test_schemastore_original_validation.py tests/test_structeval_rendering_plan.py tests/test_structeval_matplotlib_environment.py tests/test_structeval_matplotlib_worker.py tests/test_structeval_matplotlib_isolated.py tests/test_structeval_render_queue.py
       - name: StructEval isolated render dispatch CPU contracts only

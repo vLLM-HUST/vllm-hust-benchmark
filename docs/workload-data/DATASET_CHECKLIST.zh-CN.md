@@ -1309,11 +1309,25 @@ tree元数据、`--node`私有node路径、`--output`独立日志目录和`--exe
 
 ### TraceLab分步骤（来源总勾未完成）
 
+- [x] 2026-11-03只读核查现有14B服务：固定三会话全部20轮最大输入加原输出46646，小于实际131072上下文；全量1006780仍不满足。原Rust0.19.1读取14B原tokenizer失败，保留失败；新增`prepare_tracelab_tokenizer_legacy.py`仅将BPE合并对数组转换成无歧义旧序列化，原文件、词表ID、全部151387合并对及顺序不变。服务器266组编码对照相等，格式化后的当前公开脚本AST及输出字节与该对照配置一致；0模型调用。原1亿token文本池CPU核验正在运行，原512-token缓存探测及20轮回放尚未执行；不将容量预检或序列化兼容计为来源完成。
+
+  ```bash
+  # 默认只规划；从实际已核验的模型工件取得原tokenizer SHA256。
+  # 输出必须是仓库外的新文件；确认后加--write，不覆盖模型原文件。
+  python scripts/prepare_tracelab_tokenizer_legacy.py --tokenizer /path/to/original-model/tokenizer.json --expected-sha256 ORIGINAL_TOKENIZER_SHA256 --output /path/to/private-preparation/tokenizer-legacy.json
+  # 后续给原回放器的--tokenizer指定经核验的兼容副本，并披露此格式兼容。
+  # 这不改变原缓存探测、会话、轮次、预算或模型；仍须空闲窗口实际验证。
+  ```
+
 - [x] 复用665453轮全部元数据、全量索引、原DuckDB及官方确定性CSV转换、独立enwik9文本身份；不是原始用户prompt正文。
+
 - [x] 官方Rust1.90归档和校验文件核对，恢复到持久化私有前缀；公共构建入口实际按原锁编译exit0，原源码不变，避免下次容器切换丢失二进制。[恢复回执](validation/tracelab-original-locked-build-20261024.json)
+
 - [x] 公开原生回放入口及7项离线合同测试：默认只规划，不绕过原缓存资格探测，超上下文在调用前阻塞、不截断或跳过，核验全部原session/轮次/预算/工具等待。
+
 - [ ] 官方原生回放：已到达原缓存资格探测，但512-token探测在当前1024-token
   Mamba对齐缓存块下未命中，原程序exit1，20轮任务均未开始。[失败证据](validation/tracelab-original-dry-run-20261024.json)。缓存相关开关已开启，不能误称未配置；未改探测、换session或重启服务，待合适模型/配置后续验证。
+
 - [ ] 保存原生日志/summary独立复核与公共提供者/固定研究消费交接；不迁入研究采集和分析，不报告性能提升。
 
 ### MMMU分步骤（固定原validation抽样交付完成）
