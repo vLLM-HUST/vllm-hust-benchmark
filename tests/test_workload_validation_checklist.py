@@ -27,6 +27,24 @@ def test_libritts_full_input_handoff_does_not_claim_native_tts():
     assert row["checked"] is False and row["status"] == "IN_PROGRESS"
 
 
+def test_libritts_publisher_model_bytes_are_not_native_tts_completion():
+    ledger = json.loads(
+        (ROOT / "docs/workload-data/dataset-validation-status.json").read_text("utf-8")
+    )
+    row = ledger["delivery_inventory"]["LIBRITTS"]
+    preparation = row["native_model_preparation"]
+    assert preparation["checkpoint_acquired"]
+    assert preparation["candidate_model"] == "yl4579/StyleTTS2-LibriTTS"
+    assert preparation["candidate_checkpoint_bytes"] == 771390526
+    assert preparation["source_files_verified"] == 48
+    assert (
+        preparation["model_calls"] == 0 and not preparation["source_checkbox_eligible"]
+    )
+    assert not row["checked"] and row["delivery_receipt"] is None
+    assert (ROOT / preparation["public_model_preparer"]).is_file()
+    assert (ROOT / preparation["model_profile"]).is_file()
+
+
 def test_agentbench_alfworld_delivery_preserves_other_domain_gaps():
     ledger = json.loads(
         (ROOT / "docs/workload-data/dataset-validation-status.json").read_text("utf-8")
@@ -302,6 +320,11 @@ def test_videomme_v2_native_delivery_is_not_only_group_readback():
     )
     assert receipt["distinct_original_frame_files"] == 384
     assert receipt["native_ci_conclusions"] == "success"
+    refresh = receipt["registered_entrypoint_ci_refresh"]
+    assert refresh["ci_conclusions"] == "success"
+    assert refresh["native_entrypoint_metadata_verified"] == 6
+    assert refresh["public_and_unchanged_research_group_readbacks"] == 800
+    assert refresh["installed_payloads_verified"] == 87 and refresh["model_calls"] == 0
     assert (
         receipt["actual_ci_provider_consumer"][
             "public_and_unchanged_research_group_readbacks"

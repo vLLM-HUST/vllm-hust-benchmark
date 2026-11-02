@@ -1320,11 +1320,18 @@ LMM
 
 - [x] 复用已核验的原test-other整包964502297字节、5120条原文／规范化文本／参考WAV关系，以及实际CI包和原研究消费者固定3条回读；不重新下载原数据。
 - [x] 已在服务器取得作者StyleTTS2固定源码，48份原文件175216146字节复现原Git树；原`Demo/Inference_LibriTTS.ipynb`存在并可解析。版本`5cedc71c333f8d8b8551ca59378bdcc7af4c9529`，未导入作者Python、未加载神经权重、0模型调用。
-- [ ] 候选采用作者`yl4579/StyleTTS2-LibriTTS`多说话人模型，固定HF版本`3aa7ba7f8f275ec13dce21682a61494c35089e2a`。主权重771390526字节身份已登记，尚未下载，NPU兼容性未验证；不能拿现有LJ
-  Speech单说话人权重冒充此模型或编造缺失说话人向量。
+- [x] 作者`yl4579/StyleTTS2-LibriTTS`多说话人模型的配置／主权重已取得，共771392385字节，固定HF版本`3aa7ba7f8f275ec13dce21682a61494c35089e2a`；Git配置身份和主权重LFS
+  SHA256均匹配，公共只读verify复核通过。仅下载字节，未反序列化权重，NPU兼容性未验证；不能拿现有LJ Speech单说话人权重冒充此模型或编造缺失说话人向量。
+
+公共模型准备：`python scripts/prepare_libritts_styletts2_model.py`只输出计划；加`--output /external/fresh-styletts2 --download`取得固定原文件，`--output /external/saved-styletts2 --verify-only`只读复核。服务器实际使用显式`--hf-endpoint https://hf-mirror.com`传输，身份仍按作者原Git对象／LFS
+SHA验证；不据此声称本机直接HF下载分支也已验证。新输出必须在仓库外，原失败／partial不覆盖；不下载作者示例语音替换原LibriTTS任务，不加载模型。公共下载／verify已在服务器验证，6项本地字节／预算／路径夹具测试通过。
+
 - [ ] 核对原推理示例的语音条件、采样预算与全部模型依赖，保留原文本、说话人和参考音频关系；评分参考不能无声明混入模型输入。完成隔离客户端、NPU原生合成及适用输出核验后再勾选来源，当前不增加完成数。证据位于服务器`libritts-styletts2-original-source-20261102-001/qualification-public.json`，机器清单`LIBRITTS.native_model_preparation`记录同一状态。
 
 ### Video-MME-v2基础64帧原生协议（已交付）
+
+- [x] 原生入口统一索引补齐后，6cb0d0a8的CPU CI 41384656261和完整CI
+  41384659590均通过；实际工件13114113410已在服务器独立安装，87份软件载荷一致，6个执行入口元数据可发现，3200原题／800完整组再次完成公共和未修改研究消费者回读。源码索引和研究消费者未改，0模型调用；不重跑已完成24题。最新回执在`videomme-v2-actual-ci-group-provider-20261102-002`。
 
 本来源已按原基础64帧协议交付：固定24题／6完整组全部NPU推理及官方分组评分完成，独立核验24份请求、回复、参考和评分一致。当前模型2/24题答对，官方分组总分2.0833；不以答对率作为工程接通的替代标准。固定验证入口使用上面给定的6段媒体，原数据／研究读取入口保留全部3200题／800组，未迁入研究观测或分析。
 
