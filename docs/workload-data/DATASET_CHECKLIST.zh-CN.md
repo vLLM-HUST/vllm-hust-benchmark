@@ -588,6 +588,18 @@ LD_LIBRARY_PATH=/external/ffmpeg/lib python -B scripts/run_videomme_original.py 
 - [ ] 原CPU组固定第一题已启动完整Claude
   Agent，题目、提示、4小时任务/准备预算及评分保留；已观察到至少5个assistant事件和4个user事件，尚无最终result事件，不能换算为精确模型请求数或来源完成。其余两题及最终原生评分/judge、公共入口和最终研究交接待完成。进展证据：`validation/naturebench-original-fixed3-native-progress-20261102.json`。
 
+- [x] 公共运行时软件准备器已在服务器候选版本验证：离线计划、准备、再核验均返回0；生成的56个文件与正在执行的原生运行时逐字节一致，0新增模型调用。9项小夹具覆盖原文件保护、两处网络兼容改动、重复目录拒绝与篡改拒绝；不是数据集或科学任务测试，也还不是CI工件核验。
+
+  软件准备入口（不下载任务、不装科学依赖、不启动Agent）：
+
+  ```bash
+  # 默认只做离线计划；常规Docker环境使用original。
+  python scripts/prepare_naturebench_native_runtime.py --author-root /path/to/pinned-naturebench-code --output /path/to/fresh-runtime --profile original
+  python scripts/prepare_naturebench_native_runtime.py --author-root /path/to/pinned-naturebench-code --output /path/to/fresh-runtime --profile original --write
+  python scripts/prepare_naturebench_native_runtime.py --author-root /path/to/pinned-naturebench-code --output /path/to/fresh-runtime --verify
+  # owned-hostnet只用于专用、已核验的pod，不是通用不可信网络隔离方案。
+  ```
+
   任务包关系核验（不执行科学代码、不调用模型）：
 
   ```bash
