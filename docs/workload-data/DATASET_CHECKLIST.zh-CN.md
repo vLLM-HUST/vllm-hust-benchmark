@@ -2,6 +2,11 @@
 
 ### 剩余原生环境前置条件复核（2026-11-02）
 
+- [x] Playwright官方ARM
+  Chromium125.0.6422.26已在任务独立目录准备，34项官方系统依赖仅在专用CPU容器安装，未要求升级已有包。无头浏览器启动及本地静态页面渲染通过，原网站未部署、benchmark任务执行数0、模型调用数0。下载客户端等待超时后已核实原Node进程继续下载，最终复用原下载完成安装，没有重复下载。服务器证据：`webarena-agentlab-dependency-preflight-20261102-001/chromium-smoke-public.json`。
+
+  浏览器准备须在专用CPU容器完成，不在共享NPU工作区安装系统库。先用`/server/webarena-env/bin/python -I -m playwright install-deps --dry-run chromium`查看当前平台的官方依赖清单，再由该容器的操作人以`--no-upgrade --no-install-recommends`安装缺项；随后设置`PLAYWRIGHT_BROWSERS_PATH=/server/webarena-browsers`，使用同一虚拟环境执行`python -I -m playwright install chromium`。正式执行时保留该浏览器路径及上述NLTK资源路径。软件页面渲染不替代原网站状态、Agent动作或官方任务评分。
+
 - [x] BrowserGym安装包中的812条WebArena任务与固定官方`test.raw.json`逐字节一致，任务ID集合及所有任务字段均一致，差异任务为0。该结果只证明任务身份保持，不代表Agent、网站或评分已跑通；服务器证据：`webarena-agentlab-dependency-preflight-20261102-001/original-task-identity-public.json`。
 
 - [x] WebArena官方推荐框架路径已完成独立CPU环境准备：AgentLab0.4.2、BrowserGym
@@ -17,7 +22,7 @@
   ```
 
   本机NLTK默认下载因网络重置失败，实际改用官方NLTK GitHub同一`punkt_tab.zip`对象，Git
-  blob、大小和SHA256校验后在专用目录准备；没有替换分词内容。后续进程须显式设置`NLTK_DATA`。本项只证明依赖与导入可用：浏览器二进制、原网站状态、真实NPU
+  blob、大小和SHA256校验后在专用目录准备；没有替换分词内容。后续进程须显式设置`NLTK_DATA`。本项只证明依赖与导入可用，浏览器软件检查另见上述记录；原网站状态、真实NPU
   Agent及原评分尚未验证；采用原始任务加官方推荐框架的配置，不能混报成旧论文运行器成绩。框架不会在CPU执行LLM、embedding或judge前向。
 
 - [x] 已复用现有作者源码准备器接入WebArena完整88文件固定清单；服务器对已取得原文件执行plan、prepare复用、verify均通过，未重复下载。完整88文件的全新GitHub
@@ -30,7 +35,7 @@ python scripts/prepare_jsonschemabench_author_source.py --source webarena --auth
 ```
 
 - [x] WebArena同一固定版本的完整官方源码归档已在服务器取得：88份原文件、7550641字节，逐份按官方Git
-  tree的大小和blob身份核验，保留原归档。包含原Agent、浏览器环境、评分器及依赖声明；尚未安装浏览器或部署网站，也尚未核验公共完整源码获取入口，不将此项算原生完成。
+  tree的大小和blob身份核验，保留原归档。包含原Agent、浏览器环境、评分器及依赖声明；本项记录原源码取得阶段，后续公共入口、框架和浏览器准备另见上述记录，原网站及原生执行仍未完成。
 
 - [x] WebArena官方固定版本的812条原任务配置及LICENSE/README共901850字节已在服务器取得，Git
   blob及SHA256核验通过；已有公共获取入口的plan、download和verify实际通过。前3条原题均依赖`shopping_admin`，后续优先核验该原网站镜像与完整原题流程；不将下载或读取算作来源交付。首次raw域名连接重置及编排脚本误把下载成功的空stdout当JSON的失败保留，已回查实际成功回执，未重复下载。
