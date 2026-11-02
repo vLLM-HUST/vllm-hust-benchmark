@@ -2199,6 +2199,8 @@ PYTHONPATH=workload-preparation/src python scripts/prepare_reused_source_records
 
 - [ ] 合适的NPU双工语音模型、原生输入/输出音频、ASR和适用完整评分、输出消费闭环。模型调用仍为0，总项不打勾。
 
+- [x] 固定Moshi官方软件版本`e6a55d2722a65870ef52a6c9f6ecfc0e90f38362`，在服务器核验3份模型服务/依赖文件；原warmup无条件调用`torch.cuda.synchronize()`，官方禁用graph/compile开关不会消除它。模型服务器要求sphn至少0.2.0，不能与benchmark客户端0.1.12环境混用。回执：`/root/moshi-original-server-prerequisites-20261103-001/qualification-public.json`。这是静态前置审查，未做NPU后端适配、权重下载或模型调用，不判定硬件不可行。
+
 公共入口在仓库根目录运行，原资产仅写服务器外部目录；评分脚本依赖发布方要求中的`tqdm`，不需要模型、ASR或外部judge。官方样例输出不代表本项目模型输出。
 
 ```bash

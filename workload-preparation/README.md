@@ -1902,6 +1902,12 @@ python scripts/prepare_full_duplex_original_scorers.py --include-client --verify
 
 服务器已验证固定版本的15份原文件、客户端依赖、原客户端帮助入口，以及Opus编解码和回环WebSocket软件控制；这些控制没有调用模型，不计原生benchmark完成。新目录直接下载曾因连接重置失败，完整网络获取链路尚未验证。详细版本与证据见[清单](../docs/workload-data/DATASET_CHECKLIST.zh-CN.md)。
 
+已验证客户端使用Python 3.11、NumPy 1.26.4、Torch/torchaudio 2.6.0、soundfile 0.14.0、sphn 0.1.12及websockets
+17.4。ARM64下sphn 0.1.12需要源码构建，本次使用Rust 1.90.0、maturin 1.16.0和CMake
+3.22.1；这些是实际环境记录，不是全套依赖锁或干净机器重装验证。客户端与神经模型服务器应分别管理依赖，不能把通过CPU编解码控制的环境当作NPU模型环境。
+
+[Moshi官方服务器](https://github.com/kyutai-labs/moshi/blob/e6a55d2722a65870ef52a6c9f6ecfc0e90f38362/moshi/moshi/server.py)在该固定版本默认选择CUDA，warmup还直接调用`torch.cuda.synchronize()`；官方`NO_CUDA_GRAPH=1`和`NO_TORCH_COMPILE=1`不能消除这一调用。其项目依赖要求sphn至少0.2.0，与benchmark客户端固定0.1.12不同。现已在服务器保存并核验这三份官方软件文件，但没有修改后端、下载权重或运行神经模型；不能据此断言NPU不可部署，也不能仅改`--device`就宣称已适配。
+
 NPU双工模型、转写、原生推理及评分交接仍未完成。原始Moshi客户端需要独立语音服务，原转写脚本使用NeMo并明确调用CUDA，不能直接用文本模型或CPU神经推理替代。发布方评分样例的分数不代表本项目模型输出。
 
 ## PaperBench 原始论文任务包
