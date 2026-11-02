@@ -1426,6 +1426,36 @@
       "remaining_optional_modes": "Nine fixed original Oracle/S full-history and M BM25-top10/CoN answers executed, originally scored with explicit9B local judge, audited and handed off through exact successful CI provider and unchanged research consumer. Not full500-case inference, broad local-judge accuracy or publisher70B/GPT4 reproduction. M full-history overflow remains retained; assistant-evidence cases excluded from user-side retrieval aggregates. Dense/index expansion and unmatched type/abstention bindings remain unvalidated."
     },
     "LONGMEMEVAL_V2": {
+      "embedding_npu_runtime_preparation": {
+        "status": "ORIGINAL_8B_NPU_POOLING_SERVICE_READY_POSITIVE_RAG_IN_PROGRESS",
+        "server_receipt": "lme-v2-original-embedding-service-20261102-004/state-public.json",
+        "model": "Qwen/Qwen3-Embedding-8B",
+        "dtype": "bfloat16",
+        "pooling": "LAST",
+        "original_content_token_limit": 4096,
+        "service_model_context": 4224,
+        "max_num_batched_tokens": 512,
+        "max_num_seqs": 1,
+        "enable_chunked_prefill": true,
+        "enable_chunked_processing": false,
+        "gpu_memory_utilization": 0.243,
+        "protected_reader_and_14b_service_unchanged": true,
+        "retained_failures": ["Initial0.24 budget left0.03GiB KV, below original4096 request requirement0.56GiB", "Native chunked prefill512 raised KV room to0.43GiB but remained insufficient", "Ready4096-context service rejected original request containing at least4097 service-encoded tokens; input and special tokens were not removed"],
+        "source_checkbox_eligible": false
+      },
+      "positive_rag_runtime_progress": {
+        "server_stage": "lme-v2-enterprise-small-positive-rag-fixed3-20261102-002",
+        "server_process_receipt": "lme-v2-positive-rag-public-entry-20261102-002/execution-window/state-public.json",
+        "method": "rag_query_to_slice",
+        "domain": "enterprise",
+        "tier": "small",
+        "original_positions": [0, 1, 2],
+        "original_shared_memory_trajectories": 100,
+        "original_max_completion_tokens": 20000,
+        "original_memory_context_max_tokens": 200000,
+        "status_at_observation": "BUILDING_ORIGINAL_SHARED_MEMORY_EMBEDDING_HTTP200_NOT_COMPLETED",
+        "source_checkbox_eligible": false
+      },
       "offline_dual_model_cache": {
         "status": "ORIGINAL_READER_AND_EMBEDDING_OFFLINE_METADATA_AND_TOKENIZER_PASSED_NO_FORWARD",
         "server_receipt": "lme-v2-dual-offline-cache-20261102-002/qualification-public.json",
@@ -1453,7 +1483,7 @@
       "preparation_receipt": "docs/workload-data/validation/longmemeval-v2-original-readiness-20261026.json",
       "native_entrypoint": "scripts/run_longmemeval_v2_original.py",
       "native_entrypoint_scope": "Original enterprise/small first3 no_retrieval executed and independently regraded on original Qwen3.5-9B BF16 TP1 NPU, original thinking/20000 completion/200000 memory budgets retained. Three0 scores preserved; this negative control is not positive memory retrieval or image-task coverage.",
-      "blocker": "Original53-source/41-data and16-file9B reader evidence retained; first3 no_retrieval negative controls are not positive-memory delivery. Original default embedding8B all17 files/15150575778 bytes and public verify-only passed; no model service started. Isolated CPU torch2.6/vision0.21 image/token preprocessing and public verifier passed with neural forward/weights blocked and12 metadata files unchanged. Safe NPU embedding deployment, positive fixed3 RAG, scoring and public/research handoff pending; web fixed3 require unauthorized external judge, no filtering/replacement."
+      "blocker": "Original53-source/41-data,16-file9B reader and17-file default8B embedding assets verified; first3 no_retrieval controls remain negative controls. CPU processor and dual offline tokenizer caches qualified. Original8B BF16 LAST-pooling NPU service now ready with4224 service context for original4096 content plus special-token encoding, native causal chunked prefill512 and0.243 memory ratio; reader/14B untouched. Original enterprise/small first3 positive RAG is building the complete shared100-trajectory memory with HTTP200 embeddings. Original20000 completion/200000 memory budgets retained; generation, scoring and final handoff pending. Prior KV-capacity and4097-token admission failures retained. Web fixed3 still require an unauthorized external judge; no filtering/replacement."
     },
     "QASPER": {
       "scope": "public",

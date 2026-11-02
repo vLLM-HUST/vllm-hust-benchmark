@@ -49,6 +49,11 @@ judge，须在调用记录和报告中明确实际模型及评分配置，不能
 
 ### LongMemEval-V2 正向记忆流程准备（2026-11-02）
 
+- [x] 默认`Qwen/Qwen3-Embedding-8B`已在NPU以BF16、LAST pooling启动，既有9B
+  reader及14B服务未改动。作者嵌入内容上限仍为4096；服务上下文设为4224以容纳编码后的额外token。使用原生因果分块预填充512，不启用会分块求平均的`enable_chunked_processing`；单序列、显存比例0.243只是本机共驻验证配置，不是跨硬件最低需求。启动回执`lme-v2-original-embedding-service-20261102-004/state-public.json`。
+
+- [ ] 原enterprise/small位置0／1／2的正向`rag_query_to_slice`正在执行，完整共享100条原轨迹建库，嵌入已返回HTTP200；原20,000输出／200,000记忆预算及thinking设置保持。运行目录`lme-v2-enterprise-small-positive-rag-fixed3-20261102-002`，进程回执`lme-v2-positive-rag-public-entry-20261102-002/execution-window/state-public.json`；静态记录不证明进程当前存活，尚不算来源完成。前次原请求因服务4096-token容量不足返回400，原失败保留，没有改题、换题或裁掉特殊token。
+
 - [x] RAG公开执行入口补齐`--embedding-assets /external/embedding/model`，同时建立固定reader与嵌入模型的离线缓存；清除继承的`HF_HUB_CACHE`／`HUGGINGFACE_HUB_CACHE`／`TRANSFORMERS_CACHE`覆盖，避免误读其他任务缓存。服务器核验原reader12份、嵌入模型13份元数据及原嵌入tokenizer离线加载通过，全部神经前向和权重加载被禁止。首次缓存覆盖失败保留；回执`lme-v2-dual-offline-cache-20261102-002/qualification-public.json`。本项0模型调用，不代表正向RAG已跑通，来源仍未完成。
 
 - [x] 451道原题的8个原始字段及两档有序记忆关联已与官方读取器逐项核对；企业/网页两域、small/medium四组代表记忆完整回读（100/500/100/479条轨迹），保留历史状态，不重新构造prompt。
@@ -98,7 +103,7 @@ finally:
 图片引用及截图归档身份保留在`runtime.native_files`。该元数据入口不会解码图片、执行记忆检索、调用模型或运行评分；应接原官方流程，不把`restore_original_question`返回的答案字段直接送给模型。准备索引仍使用统一pipeline，研究侧继续通过`resolve_input`消费。
 
 源数据、原9B
-reader及已有有效结果复用，不重跑消融以凑完成数。下载在服务器进行，本地不保存权重；未启动新模型服务或改动现有服务。动态进程与证据路径见[准备状态](validation/longmemeval-v2-rag-prerequisites-20261102.json)，不能仅凭该静态回执推定进程继续存活。
+reader及已有有效结果复用，不重跑消融以凑完成数。下载在服务器进行，本地不保存权重；默认8B嵌入服务现已启动，既有reader／14B服务未改动。早期动态进程与证据路径见[准备状态](validation/longmemeval-v2-rag-prerequisites-20261102.json)，后续运行以本节及机器清单的新回执为准，不能仅凭静态回执推定进程继续存活。
 
 预处理环境使用`configs/workload-native/longmemeval-v2-processor-arm64-py312-lock.txt`安装到单独Python3.12
 venv，保留原HTTP客户端不动；这是ARM64
