@@ -61,6 +61,7 @@ def main():
             "mlagentbench",
             "webarena",
             "paperbench",
+            "wavcaps",
         ],
         default="jsonschemabench",
         help="Pinned original author source only; historical default unchanged",

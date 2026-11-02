@@ -31,6 +31,7 @@ on:
       - 'tests/test_streamingbench*'
       - 'scripts/*wavcaps*'
       - 'tests/test_wavcaps*'
+      - 'configs/workload-native/wavcaps-author-source.json'
       - 'scripts/*full_duplex*'
       - 'tests/test_full_duplex*'
       - 'tests/test_spokenwoz*'
@@ -583,7 +584,7 @@ jobs:
       - name: MLAgentBench original source and CIFAR asset fixtures, no data or models
         run: python -m pytest -q tests/test_mlagentbench_source_preparation.py tests/test_mlagentbench_cifar_assets.py tests/test_mlagentbench_cifar_cpu.py tests/test_mlagentbench_cifar_workspace.py tests/test_mlagentbench_local_chat.py tests/test_mlagentbench_local_llm_binding.py tests/test_mlagentbench_local_agent_preparation.py tests/test_mlagentbench_local_agent_runner.py
       - name: WavCaps original media binding fixtures, no audio download or decoder execution
-        run: python -m pytest -q tests/test_wavcaps_original_media.py tests/test_wavcaps_original_preparation.py
+        run: python -m pytest -q tests/test_wavcaps_original_media.py tests/test_wavcaps_original_preparation.py tests/test_wavcaps_author_source.py
       - name: Offline navigation contracts, no remote refresh or model execution
         run: |
           python scripts/data_index.py --check

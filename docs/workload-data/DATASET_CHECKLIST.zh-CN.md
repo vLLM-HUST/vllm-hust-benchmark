@@ -2111,20 +2111,34 @@ python scripts/run_scienceagentbench_scientific.py --action run \
 
 #### WavCaps原生音频路径准备（未完成来源交付）
 
+- [x] 补齐固定发布方版本的完整captioning软件子树及原说明，共29文件、191308字节，24份Python通过AST解析；排除`captioning/data/`与模型权重。复用公共源码准备器新增`--source wavcaps`，服务器plan、prepare复用、verify均exit0；没有导入模型、下载权重或改动原12条音频。回执：`/root/wavcaps-original-captioning-software-20261103-001/qualification-public.json`、`/root/wavcaps-public-source-entry-20261103-002/qualification-public.json`。新鲜网络获取分支尚未实测。
+
+- [x] 发布方README链接的原checkpoint目录及AudioCaptioning子目录已只读核查，可见`Cnn14_Clotho_Spider_31.pt`、`HTSAT_AudioCaps_Spider_48_5.pt`、`HTSAT_Clotho_Spider_29_7.pt`；仅取得目录HTML及元信息，尚未下载、校验或加载权重，不把目录可见当作模型可用。
+
 - [x] 四组件各固定原前三条，共12个真实FLAC已取得并通过同一公共CLI完整解码；原CRC、PCM MD5和原时长均匹配。AudioSet保留原`.wav`
   ID，另绑定发布包FLAC；FreeSound保留原`file_name`。四个CLI均exit0，回执：`/root/wavcaps-original-media-public-verifier-20261031-003/qualification-public.json`。仅CPU信号解码，模型调用0。
+
 - [x] BBC固定原前三条`NHU05051026/07066104/07039376`取得并完整解码，原PCM
   MD5与时长核验通过；原字符串ID保留前导零。按原分卷ZIP64目录和盘内偏移取8段共16538564字节，不下载130GB整包，不把不同分卷的ETag误当一个值。旧两组件回执保留于`/root/wavcaps-original-media-public-verifier-20261031-002/qualification-public.json`；四组件现状见上项，不打来源总勾。
+
 - [x] 固定SoundBible原前三条`2219/2218/2217`的真实FLAC已取得：原Hub固定版本ZIP仅取8段共4869230字节，原成员CRC及同一ETag核验；3个文件完整解码、PCM
   MD5匹配原STREAMINFO，均为32kHz单声道，时长与原字段完全一致。公共`verify_wavcaps_original_media.py --decode`实跑exit0。原JSON的`audio`实际是`wav_path`占位符，单独按原ID/原ZIP成员绑定，不改JSON或音频。不冒称完整580MB归档哈希已重算；此项仅说明SoundBible样本。
+
 - [x] 复用公共原始数据接口，四份JSON的403050条逐字段完整还原通过；音频定位信息与caption/原描述/类别/标签分离，12条固定样本不能伪装为聊天请求。使用者缺文件时仍显式报错，不静默跳过。源码回执：`/root/wavcaps-public-adapter-20261031-003/qualification-public.json`；实际安装另见下项。
+
 - [x] 复用既有获取器的原文件校验CLI，四份元数据实际执行通过；源码候选的403050条索引与12条固定公共/未修改研究端完整读取核验通过，旧三文件索引保留且未恢复研究任务。服务器消费端源码与研究工作树版本一致。回执：同CPU目录下`getter-verify-public.json`、`research-handoff-public.json`。原生音频任务仍未完成。
+
 - [x] 实际CI工件13018794405独立安装通过：74份包内软件/资源逐项匹配已提交Git字节和安装文件，403050条原索引只读复用，四份各原前三条共12条公共/研究端完整读取一致，无模型调用。见[元数据CI交接回执](validation/wavcaps-original-metadata-ci-handoff-20261031.json)。这只证明原始元数据的获取与消费链路，不计原生音频交付。
+
 - [x] 取得并校验SoundBible、BBC、AudioSet、FreeSound四份原始JSON，共403050条、174782992字节，保留各组件原前三条完整记录。FreeSound通过现有公共获取器直接下载并验证发布方LFS哈希，以硬链接复用原文件、不重复占用数据空间。完整回执：`/root/wavcaps-original-metadata-20261031-002/complete-metadata-public.json`；原三文件回执、CPU直连TLS失败记录保留，不因网络失败换数据。
+
 - [x] 在专用CPU取得发布方固定版本的6份说明、音频captioning入口/评分器及检索入口，逐份核验Git
   blob和SHA256；3份Python仅做AST解析，未导入执行。服务端回执：`/root/wavcaps-original-source-20261031-001/preparation-public.json`。
+
 - [x] 公共`prepare_wavcaps_original_media.py --cache-root ... --decode`在专用CPU使用保留的原压缩范围完成四组件12条重新解压、身份及PCM校验。回执`/root/wavcaps-public-media-preparation-20261031-001/qualification-public.json`，模型调用0；不重复下载原媒体。
+
 - [ ] 公共有界媒体获取的`--download`网络路径真实核验；已实现精确206/Content-Range、长度和成员身份限制。专用CPU对FreeSound原第一成员的真实下载exit1：`urllib.error.URLError: [Errno 101] Network is unreachable`，尚未取得首成员，未换来源或换题。缓存实跑及HTTP夹具不能代替网络获取成功，不宣称完整自动获取已完成。
+
 - [ ] 补齐专用checkpoint和完整原生依赖，完成原生NPU推理、适用评分和输出消费闭环。四组件媒体准备不等于模型运行；未下载模型，也未调用文本模型替代。
 
 WavCaps是弱标注音频—文本资产；作者captioning示例使用专用音频编码器和BART

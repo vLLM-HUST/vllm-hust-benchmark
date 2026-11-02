@@ -1456,6 +1456,17 @@ EOF，确认旧进程退出后复用5份和已验证缓存继续补98份。
 
 ## WavCaps 原始音频元数据（数据适配已核验，原生音频执行待完成）
 
+官方captioning运行软件复用已有固定源码准备器：29份原文件覆盖模型实现、数据加载、配置、测试/训练和评分代码，排除原数据及权重。先查看离线计划，再在服务器外部目录取得和核验原文件：
+
+```bash
+python scripts/prepare_jsonschemabench_author_source.py --source wavcaps --author-root /srv/workloads/wavcaps-software
+python scripts/prepare_jsonschemabench_author_source.py --source wavcaps --author-root /srv/workloads/wavcaps-software --action prepare --max-bytes 191308
+python scripts/prepare_jsonschemabench_author_source.py --source wavcaps --author-root /srv/workloads/wavcaps-software --action verify
+```
+
+固定版本及每个文件的Git身份、字节数和SHA256见[软件清单](../configs/workload-native/wavcaps-author-source.json)。服务器已取得全部29文件、解析24份Python，并用当前公共入口完成计划、已有文件复用准备和核验；未验证新鲜网络获取，也未导入模型或安装完整依赖。原测试入口还需要发布方captioning
+checkpoint、它引用的音频编码器/BART依赖和合适的NPU环境；不能仅凭源码核验称为原生推理成功。发布方模型目录当前可见3个captioning checkpoint，但权重尚未取得或核验。
+
 同一校验器支持四个已核验组件，默认保持SoundBible；其他组件显式传`--component`和独立媒体目录。四组件各固定原前三条，共12个原FLAC已完整解码，原PCM
 MD5及原时长均一致。只核验已取得范围和原成员，不声称整套归档/分卷哈希已重新计算。
 
