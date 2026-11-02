@@ -582,6 +582,12 @@ LD_LIBRARY_PATH=/external/ffmpeg/lib python -B scripts/run_videomme_original.py 
 
 - [ ] 完整原生Agent流程、官方评估器与有效性judge仍待完成，不以静态问答或`--skip-judge`替代。独立Docker仅有host/none网络；已保留原代码并单列仅修改容器host网络与loopback主机别名的兼容配置，不称未修改官方运行时。实际通信、工具调用和评分仍须实跑，CLI帮助或dry-run不替代原生验证。
 
+- [x] CPU到现有NPU
+  14B服务的限时受限SSH回环通道已接通，未改写流式HTTP、未重启模型；原版评估服务回环健康检查及第一题注册通过。Docker权限仅交给可信原harness，不挂入生成代码任务容器。
+
+- [ ] 原CPU组固定第一题已启动完整Claude
+  Agent，题目、提示、4小时任务/准备预算及评分保留；已观察到至少5个assistant事件和4个user事件，尚无最终result事件，不能换算为精确模型请求数或来源完成。其余两题及最终原生评分/judge、公共入口和最终研究交接待完成。进展证据：`validation/naturebench-original-fixed3-native-progress-20261102.json`。
+
   任务包关系核验（不执行科学代码、不调用模型）：
 
   ```bash
