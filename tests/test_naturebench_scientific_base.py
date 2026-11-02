@@ -28,6 +28,17 @@ def test_unknown_or_duplicate_original_rejected(raw):
         runner.derive(raw)
 
 
+def test_second_task_preserves_original_dependencies():
+    original = b"FROM naturebench-base:v3\nRUN python -m pip install gudhi==3.10.1\n"
+    result = runner.second_task_recipe(original)
+    assert b"FROM naturebench-gudhi:3.10.1-arm64" in result
+    assert b"gudhi==3.10.1" in result
+    assert b"PIP_CONSTRAINT=" in result and b"pip check" in result
+    assert b"no model forward" in result
+    with pytest.raises(ValueError, match="base differs"):
+        runner.second_task_recipe(b"FROM changed-base\n")
+
+
 def test_plan_no_output_and_write_preserves_original(tmp_path, monkeypatch):
     source = tmp_path / "original"
     (source / "docker").mkdir(parents=True)

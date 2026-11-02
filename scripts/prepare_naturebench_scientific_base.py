@@ -7,11 +7,55 @@ import argparse
 import hashlib
 import json
 from pathlib import Path
+import re
 
 from prepare_naturebench_native_runtime import original_files
 
 
 BASE = "nvidia/cuda@sha256:8f9dd0d09d3ad3900357a1cf7f887888b5b74056636cd6ef03c160c3cd4b1d95"
+ROOT = Path(__file__).resolve().parents[1]
+SECOND = "s41592-025-02870-5"
+
+
+def second_task_recipe(raw):
+    before = b"FROM naturebench-base:v3\n"
+    if not raw.startswith(before) or raw.count(before) != 1:
+        raise ValueError("original second task base differs")
+    return (
+        raw.replace(
+            before,
+            b"FROM naturebench-gudhi:3.10.1-arm64\nLABEL workload.owner=naturebench-native-20261102\nCOPY original-base-constraints.txt /opt/original-base-constraints.txt\nENV PIP_CONSTRAINT=/opt/original-base-constraints.txt\n",
+            1,
+        )
+        + b"\nRUN python -m pip check\nRUN HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 WANDB_MODE=disabled python -c \"import scanpy,scvelo,phate,palantir,gudhi,sksparse,pygraphviz; assert gudhi.__version__ == '3.10.1'; print('Original scientific imports passed; no model forward')\"\n"
+    )
+
+
+def task_recipes(data_root, original):
+    from vllm_hust_workload_data.naturebench import original_cpu_packages
+
+    packages = list(original_cpu_packages(data_root))
+    pins = re.findall(rb"^\s+([\w.-]+)==([^\s\\]+)", original, re.MULTILINE)
+    if len(pins) != 43 or len({name for name, _ in pins}) != 43:
+        raise ValueError("43 distinct original base package pins required")
+    files = {}
+    for package in packages:
+        task = package["task_id"]
+        relative = f"tasks/{task}/environment/Dockerfile.v3"
+        if relative not in {item["path"] for item in package["environment_assets"]}:
+            raise ValueError("registered original task Dockerfile required")
+        raw = (Path(data_root) / relative).read_bytes()
+        files[f"{task}/Dockerfile.original"] = raw
+        files[f"{task}/Dockerfile"] = second_task_recipe(raw) if task == SECOND else raw
+    files[f"{SECOND}/original-base-constraints.txt"] = (
+        b"\n".join(name + b"==" + version for name, version in sorted(pins))
+        + b"\nprotobuf==5.29.6\n"
+    )
+    for name in ["gudhi-3.10.1.Dockerfile", "third-task-constraints.Dockerfile"]:
+        files[name] = (
+            ROOT / "configs/workload-native/naturebench-arm64" / name
+        ).read_bytes()
+    return files
 
 
 def derive(raw, cached=False):
@@ -42,7 +86,7 @@ def derive(raw, cached=False):
     return raw
 
 
-def prepare(author_root, output, *, cached=False, write=False):
+def prepare(author_root, output, *, cached=False, write=False, data_root=None):
     root, pins = original_files(author_root)
     output = Path(output).resolve()
     if output.is_relative_to(root) or root.is_relative_to(output):
@@ -51,8 +95,13 @@ def prepare(author_root, output, *, cached=False, write=False):
         )
     if output.exists():
         raise FileExistsError("fresh scientific recipe output required")
+    if data_root is not None:
+        data = Path(data_root).resolve(strict=True)
+        if output.is_relative_to(data) or data.is_relative_to(output):
+            raise ValueError("recipe output must be separate from original task data")
     original = (root / "docker/Dockerfile.base").read_bytes()
     derived = derive(original, cached)
+    tasks = {} if data_root is None else task_recipes(data_root, original)
     result = {
         "source_id": "NATUREBENCH",
         "status": "SCIENTIFIC_RECIPE_PREPARED_NOT_BUILT"
@@ -72,6 +121,8 @@ def prepare(author_root, output, *, cached=False, write=False):
         "scientific_task_executed": False,
         "source_checkbox_eligible": False,
         "output_created": write,
+        "task_recipes_prepared": bool(tasks),
+        "original_task_data_copied": False,
     }
     if write:
         output.mkdir(mode=0o700, parents=True, exist_ok=False)
@@ -80,7 +131,9 @@ def prepare(author_root, output, *, cached=False, write=False):
             ("Dockerfile.cpu-arm64", derived),
             ("LICENSE", (root / "LICENSE").read_bytes()),
             ("NOTICE", (root / "NOTICE").read_bytes()),
+            *tasks.items(),
         ]:
+            (output / name).parent.mkdir(mode=0o700, parents=True, exist_ok=True)
             with (output / name).open("xb") as stream:
                 stream.write(raw)
         (output / "recipe-public.json").write_text(
@@ -99,6 +152,11 @@ def main():
         help="Explicit local software cache; blobs are not copied or verified here",
     )
     parser.add_argument("--write", action="store_true")
+    parser.add_argument(
+        "--data-root",
+        type=Path,
+        help="Verify CPU3 original packages and prepare task software recipes only",
+    )
     args = parser.parse_args()
     print(
         json.dumps(
@@ -107,6 +165,7 @@ def main():
                 args.output,
                 cached=args.cached_wheelhouse,
                 write=args.write,
+                data_root=args.data_root,
             ),
             indent=2,
         )

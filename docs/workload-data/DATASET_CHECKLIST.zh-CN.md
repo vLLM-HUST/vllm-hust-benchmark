@@ -625,15 +625,19 @@ LD_LIBRARY_PATH=/external/ffmpeg/lib python -B scripts/run_videomme_original.py 
 
   镜像标签是本次环境名称，不是已发布的下载地址；完整镜像身份、构建差异和失败记录见上述准备证据。已公开服务器实际构建的[GUDHI同版本源码配方](../../configs/workload-native/naturebench-arm64/gudhi-3.10.1.Dockerfile)与[第三题传递依赖兼容层](../../configs/workload-native/naturebench-arm64/third-task-constraints.Dockerfile)。三题执行、评分和公共`--execute`尚未全部验证。
 
-  GUDHI配方的构建上下文需提供[官方3.10.1源码](https://github.com/GUDHI/gudhi-devel/releases/download/tags/gudhi-release-3.10.1/gudhi.3.10.1.tar.gz)，先核验SHA256为`24f9743c579c9e01696cb2cbc564248d6e038e4bf23e7484073283e57495d80d`。配方不自动下载任务数据。构建前核对`naturebench-base:v3`为本次合格基础环境；不能将任意同名镜像当作已验证环境。第三题兼容层依赖未改的原第三题镜像，不能代替原Dockerfile构建。两个配方都只做软件构建与导入，不进行模型前向；完整基础环境与第二题组装的公共自动化仍待补齐。
+  GUDHI配方的构建上下文需提供[官方3.10.1源码](https://github.com/GUDHI/gudhi-devel/releases/download/tags/gudhi-release-3.10.1/gudhi.3.10.1.tar.gz)，先核验SHA256为`24f9743c579c9e01696cb2cbc564248d6e038e4bf23e7484073283e57495d80d`。配方不自动下载任务数据。构建前核对`naturebench-base:v3`为本次合格基础环境；不能将任意同名镜像当作已验证环境。第三题兼容层依赖未改的原第三题镜像，不能代替原Dockerfile构建。两个配方都只做软件构建与导入，不进行模型前向；公共入口生成的配方尚未独立重建，不冒充第二次构建通过。
 
   基础科学配方也可从已核验原源码准备，默认只打印计划；它不安装依赖、不启动Docker，不下载数据或模型。服务器已通过真实固定源码的计划与准备核验；缓存模式生成配方除不可变基础镜像引用外，与实际已构建配方逐字节一致。5项软件夹具不等于重建镜像或原生题目验证。
 
   ```bash
   python scripts/prepare_naturebench_scientific_base.py --author-root /path/to/pinned-naturebench-code --output /path/to/fresh-build-context
+  # 同时核验完整CPU3原包并准备三题软件配方及第二题43个原基础包约束：
+  python scripts/prepare_naturebench_scientific_base.py --author-root /path/to/pinned-naturebench-code --data-root /path/to/original-naturebench-data --output /path/to/fresh-task-context --write
   # 确认计划后追加--write；仅已有独立、经核验wheelhouse时使用--cached-wheelhouse。
   # 生成目录保留原配方、派生配方、LICENSE/NOTICE及差异证据；缓存文件不由此入口复制或核验。
   ```
+
+  带`--data-root`的服务器验证已通过全部三个完整原任务包，第二题生成配方与已成功构建配方逐字节一致，未复制问题、隐藏真值或其他数据文件。构建顺序：基础镜像→GUDHI同版本镜像→第二题；第一、第三题先使用对应原配方，第三题再加公开兼容层。实际构建后的`pip check`、科学包导入和镜像身份核验仍必须保留，不能仅凭标签或生成成功认定环境合格。
 
   原evaluator必须与本次运行使用同一份已核验运行时，并在相同控制网络内启动。另开运行时后不要复用旧运行时的私有控制token。先检查端口未被占用，再在独立科学容器内启动原服务：
 
