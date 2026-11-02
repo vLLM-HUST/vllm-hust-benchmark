@@ -3,7 +3,18 @@
 ### 剩余原生环境前置条件复核（2026-11-02）
 
 - [x] MLE-bench固定官方版本的1015份原仓库文件已在服务器核验，展开后41716866字节；其中322份Git
-  LFS文件已核验内容摘要、大小与原Git指针身份的绑定。初次将展开文件直接按指针摘要比较而失败的记录保留，原内容未改。这里只完成服务器原软件取得；公共准备器的LFS支持、竞赛数据授权获取、原生Agent及官方评分均未完成，来源不打勾。服务器证据：`/var/lib/npc/mlebench-original-source-20261102-001/lfs-qualified-public.json`。
+  LFS文件已核验内容摘要、大小与原Git指针身份的绑定。初次将展开文件直接按指针摘要比较而失败的记录保留，原内容未改。这里只记录原仓库取得；下述公共运行时准备已另行验证，竞赛数据授权获取、原生Agent及官方评分仍未完成，来源不打勾。服务器证据：`/var/lib/npc/mlebench-original-source-20261102-001/lfs-qualified-public.json`。
+
+- [x] 复用既有源码归档准备器，MLE-bench的758份原生运行时/Agent/环境/竞赛定义及评分资产共7501882字节已通过服务器plan、prepare、verify；其中83份LFS内容保持原字节并绑定原指针身份。未选作者历史运行结果与familiarity研究抓取代码。WebArena同入口的88文件归档准备及复核也通过，原归档复用、没有重复下载，0模型调用。公共仓只存固定元数据和准备代码，不带原文件；它们均不是原生任务完成。
+
+  下列入口在服务器的仓库外目录准备软件，plan会给出固定版本的官方归档地址；竞赛数据须另按官方授权流程取得：
+
+  ```bash
+  python scripts/prepare_swebench_author_source.py --profile mlebench --author-root /server/mlebench-native-source --action plan
+  python scripts/prepare_swebench_author_source.py --profile mlebench --author-root /server/mlebench-native-source --archive /server/original-mlebench-source.tar.gz --action prepare
+  python scripts/prepare_swebench_author_source.py --profile mlebench --author-root /server/mlebench-native-source --action verify
+  # WebArena已取得的官方源码归档同样可复用：将profile换为webarena并使用对应的独立目录/归档。
+  ```
 
 - [x] Playwright官方ARM
   Chromium125.0.6422.26已在任务独立目录准备，34项官方系统依赖仅在专用CPU容器安装，未要求升级已有包。无头浏览器启动及本地静态页面渲染通过，原网站未部署、benchmark任务执行数0、模型调用数0。下载客户端等待超时后已核实原Node进程继续下载，最终复用原下载完成安装，没有重复下载。服务器证据：`webarena-agentlab-dependency-preflight-20261102-001/chromium-smoke-public.json`。

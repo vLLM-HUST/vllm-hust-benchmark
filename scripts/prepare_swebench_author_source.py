@@ -1,8 +1,9 @@
-"""Prepare pinned official SWE-bench/Agent software externally; never execute it.
+"""Prepare pinned official benchmark/Agent software externally; never execute it.
 
 The original package is shared by SWE-bench and Verified. A supplied official
 archive avoids hundreds of Git blob API requests. Each selected file is still
 checked against both its pinned Git object and SHA256 before publication.
+MLE-bench expanded Git LFS assets remain bound to their original pointer objects.
 """
 
 import argparse
@@ -12,7 +13,7 @@ import os
 from pathlib import Path, PurePosixPath
 import tarfile
 
-from prepare_crosscodeeval_original_assets import verify_git_blob
+from prepare_crosscodeeval_original_assets import git_blob_for_payload, verify_git_blob
 from prepare_jsonschemabench_author_source import verify_source
 from prepare_xsum_original_assets import bound_path
 
@@ -27,6 +28,11 @@ def prepare(archive_path, output, pins):
     expected = {item["path"]: item for item in pins["files"]}
     if len(expected) != len(pins["files"]):
         raise ValueError("duplicate pinned original path")
+    if any(
+        "git_mode" in item and item["git_mode"] not in {"100644", "100755"}
+        for item in expected.values()
+    ):
+        raise ValueError("regular original Git file mode required")
     seen = set()
     prefix = None
     with tarfile.open(archive_path, "r:gz") as archive:
@@ -51,10 +57,7 @@ def prepare(archive_path, output, pins):
             if (
                 len(raw) != item["bytes"]
                 or hashlib.sha256(raw).hexdigest() != item["sha256"]
-                or hashlib.sha1(
-                    b"blob " + str(len(raw)).encode() + b"\0" + raw
-                ).hexdigest()
-                != item["git_blob"]
+                or git_blob_for_payload(raw, item) != item["git_blob"]
             ):
                 raise ValueError("original publisher file identity mismatch")
             target = bound_path(output, "", item)
@@ -67,6 +70,8 @@ def prepare(archive_path, output, pins):
                 handle.write(raw)
             os.link(partial, target)
             partial.unlink()
+            if "git_mode" in item:
+                target.chmod(int(item["git_mode"], 8) & 0o777)
     if seen != set(expected):
         raise ValueError("incomplete original software archive")
     return len(seen)
@@ -78,9 +83,9 @@ def main():
     parser.add_argument("--archive", type=Path)
     parser.add_argument(
         "--profile",
-        choices=["current", "v4.1.0", "mini-swe-agent"],
+        choices=["current", "v4.1.0", "mini-swe-agent", "webarena", "mlebench"],
         default="current",
-        help="v4.1.0 preserves legacy13-field tasks; mini-swe-agent prepares official Agent software only; default unchanged",
+        help="Original software profiles; SWE-bench default unchanged. WebArena/MLE-bench use existing official archives,not task execution.",
     )
     parser.add_argument(
         "--action", choices=["plan", "prepare", "verify"], default="plan"
@@ -90,6 +95,8 @@ def main():
         "current": PINS,
         "v4.1.0": PINS.with_name("swebench-v410-author-source.json"),
         "mini-swe-agent": PINS.with_name("mini-swe-agent-author-source.json"),
+        "webarena": PINS.with_name("webarena-author-source.json"),
+        "mlebench": PINS.with_name("mlebench-author-source.json"),
     }
     pins_path = profiles[args.profile]
     pins = json.loads(pins_path.read_text(encoding="utf-8"))
@@ -102,7 +109,9 @@ def main():
     print(
         json.dumps(
             {
-                "source_ids": pins["shared_source_ids"],
+                "source_ids": pins["shared_source_ids"]
+                if "shared_source_ids" in pins
+                else [pins["source_id"]],
                 "revision": pins["revision"],
                 "official_archive_url": f"https://api.github.com/repos/{pins['repository']}/tarball/{pins['revision']}",
                 "status": "PLAN_ONLY"

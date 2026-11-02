@@ -331,3 +331,90 @@ def test_checkout_output_rejected_before_writes(tmp_path):
     archive, pins = fixture(tmp_path)
     with pytest.raises(ValueError, match="outside the checkout"):
         module.prepare(archive, module.ROOT / "never-create-swebench-source", pins)
+
+
+def lfs_fixture(tmp_path):
+    archive, pins = fixture(tmp_path)
+    item = pins["files"][0]
+    pointer = f"version https://git-lfs.github.com/spec/v1\noid sha256:{item['sha256']}\nsize {item['bytes']}\n".encode()
+    item["git_lfs"] = {"pointer_bytes": len(pointer), "oid_sha256": item["sha256"]}
+    item["git_blob"] = hashlib.sha1(
+        b"blob " + str(len(pointer)).encode() + b"\0" + pointer
+    ).hexdigest()
+    item["git_mode"] = "100755"
+    return archive, pins
+
+
+def test_original_lfs_payload_preserved_and_identical_resume(tmp_path):
+    import os
+
+    archive, pins = lfs_fixture(tmp_path)
+    output = tmp_path / "external"
+    assert module.prepare(archive, output, pins) == 1
+    target = output / "swebench/__init__.py"
+    assert target.read_bytes() == b"inert original software\n"
+    module.verify_git_blob(target, pins["files"][0])
+    if os.name == "posix":
+        assert target.stat().st_mode & 0o777 == 0o755
+    assert module.prepare(archive, output, pins) == 1
+    target.write_bytes(b"altered original bytes\n")
+    with pytest.raises(ValueError):
+        module.prepare(archive, output, pins)
+    assert target.read_bytes() == b"altered original bytes\n"
+
+
+@pytest.mark.parametrize(
+    "tamper", ["oid", "pointer_size", "git_blob", "unknown_field", "git_mode"]
+)
+def test_lfs_identity_corruption_fails_without_writing_payload(tmp_path, tamper):
+    archive, pins = lfs_fixture(tmp_path)
+    item = pins["files"][0]
+    if tamper == "oid":
+        item["git_lfs"]["oid_sha256"] = "0" * 64
+    elif tamper == "pointer_size":
+        item["git_lfs"]["pointer_bytes"] += 1
+    elif tamper == "git_blob":
+        item["git_blob"] = "0" * 40
+    elif tamper == "git_mode":
+        item["git_mode"] = "120000"
+    else:
+        item["git_lfs"]["unexpected"] = True
+    output = tmp_path / "external"
+    with pytest.raises(ValueError):
+        module.prepare(archive, output, pins)
+    assert not (output / "swebench/__init__.py").exists()
+
+
+def test_lfs_pointer_only_download_is_not_expanded_payload(tmp_path):
+    from prepare_crosscodeeval_original_assets import acquire
+
+    _, pins = lfs_fixture(tmp_path)
+    with pytest.raises(ValueError, match="original publisher archive"):
+        acquire(tmp_path / "not-created", pins["files"][0])
+    assert not (tmp_path / "not-created").exists()
+
+
+@pytest.mark.parametrize(
+    "profile,source,count,size",
+    [("webarena", "WEBARENA", 88, 7550641), ("mlebench", "MLEBENCH", 758, 7501882)],
+)
+def test_reused_archive_profiles_plan_only(tmp_path, profile, source, count, size):
+    output = tmp_path / "not-created"
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(SCRIPTS / "prepare_swebench_author_source.py"),
+            "--profile",
+            profile,
+            "--author-root",
+            str(output),
+        ],
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    plan = json.loads(result.stdout)
+    assert plan["source_ids"] == [source]
+    assert plan["files"] == count and plan["bytes"] == size
+    assert plan["model_calls"] == 0 and not plan["source_checkbox_eligible"]
+    assert not output.exists()
