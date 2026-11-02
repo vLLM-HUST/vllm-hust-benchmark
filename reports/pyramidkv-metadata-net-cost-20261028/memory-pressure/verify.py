@@ -15,6 +15,10 @@ ROOT = Path(__file__).resolve().parent
 
 
 def main():
+    if not __debug__:
+        raise SystemExit(
+            "Verification requires assertions enabled; unset PYTHONOPTIMIZE and omit -O."
+        )
     members = json.loads((ROOT / "members.json").read_text())
     files = {}
     chunks = json.loads((ROOT / "chunks.json").read_text())

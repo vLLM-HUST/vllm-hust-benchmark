@@ -15,6 +15,10 @@ ROOT = Path(__file__).resolve().parent
 
 
 def main():
+    if not __debug__:
+        raise SystemExit(
+            "Verification requires assertions enabled; unset PYTHONOPTIMIZE and omit -O."
+        )
     members = json.loads((ROOT / "members.json").read_text())
     files = {}
     chunks = json.loads((ROOT / "chunks.json").read_text())
@@ -57,6 +61,9 @@ def main():
         encoded = json.dumps(case["prompt"], separators=(",", ":")).encode()
         assert hashlib.sha256(encoded).hexdigest() == case["prompt_sha256"]
     analysis = json.loads((ROOT / "analysis.json").read_text())
+    assert analysis == read("analysis.json"), (
+        "outer analysis differs from archived original"
+    )
     totals = {}
     transactions = {}
     for arm in contract["order"]:
