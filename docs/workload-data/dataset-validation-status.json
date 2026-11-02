@@ -1740,6 +1740,30 @@
       "blocker": null
     },
     "WAVCAPS": {
+      "official_captioning_checkpoint_preparation_20261103": {
+        "profile": "configs/workload-native/wavcaps-original-captioning-checkpoint.json",
+        "public_verifier": "scripts/verify_wavcaps_original_checkpoint.py",
+        "checkpoint": "HTSAT_Clotho_Spider_29_7.pt",
+        "verified_bytes": 2028254247,
+        "all_zip_members_crc_verified": 1332,
+        "hash_scope": "Observed official-download SHA256, not publisher-provided checksum",
+        "server_acquisition_receipt": "wavcaps-official-htsat-clotho-checkpoint-20261103-001/state-public.json under the private shared task root",
+        "server_public_verifier_receipt": "wavcaps-public-checkpoint-verifier-20261103-001/qualification-public.json under the private shared task root",
+        "public_plan_and_verify_exit_codes": [0, 0],
+        "server_safe_metadata_receipt": "wavcaps-safe-checkpoint-metadata-20261103-002/qualification-public.json under the private shared task root",
+        "initial_default_safe_loader_failure_retained": true,
+        "safe_metadata_map_location": "meta",
+        "weights_only": true,
+        "explicit_numpy_scalar_dtype_safe_globals_only": true,
+        "encoder": "htsat, pretrained=true",
+        "decoder": "facebook/bart-base, pretrained=true",
+        "original_saved_device": "cuda",
+        "remaining_requirements": "Original constructor additionally needs pretrained HTSAT encoder and BART assets, isolated dependencies and a qualified NPU execution profile. No CPU neural fallback or task/reference changes.",
+        "local_weight_files": 0,
+        "model_constructed": false,
+        "model_calls": 0,
+        "source_checkbox_eligible": false
+      },
       "complete_captioning_software_preparation_20261103": {
         "pins": "configs/workload-native/wavcaps-author-source.json",
         "entry": "scripts/prepare_jsonschemabench_author_source.py --source wavcaps",

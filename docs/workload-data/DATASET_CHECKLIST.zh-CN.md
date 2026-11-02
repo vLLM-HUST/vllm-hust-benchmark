@@ -2111,6 +2111,10 @@ python scripts/run_scienceagentbench_scientific.py --action run \
 
 #### WavCaps原生音频路径准备（未完成来源交付）
 
+- [x] 已取得发布方原`HTSAT_Clotho_Spider_29_7.pt`：2028254247字节，完整1332个ZIP成员CRC通过；以有界管道直接写服务器共享目录，本地没有权重文件。SHA256是本次官方文件获取记录而非作者校验码。公共`verify_wavcaps_original_checkpoint.py`的plan及完整原文件verify均exit0，不下载或反序列化模型。回执：`wavcaps-official-htsat-clotho-checkpoint-20261103-001/state-public.json`和`wavcaps-public-checkpoint-verifier-20261103-001/qualification-public.json`，位于私有共享任务根目录。
+
+- [x] 原checkpoint安全元数据检查通过：465项模型张量均映射到`meta`，配置为HTSAT、`facebook/bart-base`、32000Hz、原保存设备CUDA；只允许原NumPy标量/dtype类型，维持`weights_only=True`，未实例化模型或前向。首次默认安全加载拒绝记录保留；后续回执：`wavcaps-safe-checkpoint-metadata-20261103-002/qualification-public.json`。仍缺原构造器的额外HTSAT/BART资产、隔离环境及NPU原生执行，不打来源总勾。
+
 - [x] 补齐固定发布方版本的完整captioning软件子树及原说明，共29文件、191308字节，24份Python通过AST解析；排除`captioning/data/`与模型权重。复用公共源码准备器新增`--source wavcaps`，服务器plan、prepare复用、verify均exit0；没有导入模型、下载权重或改动原12条音频。回执：`/root/wavcaps-original-captioning-software-20261103-001/qualification-public.json`、`/root/wavcaps-public-source-entry-20261103-002/qualification-public.json`。新鲜网络获取分支尚未实测。
 
 - [x] 发布方README链接的原checkpoint目录及AudioCaptioning子目录已只读核查，可见`Cnn14_Clotho_Spider_31.pt`、`HTSAT_AudioCaps_Spider_48_5.pt`、`HTSAT_Clotho_Spider_29_7.pt`；仅取得目录HTML及元信息，尚未下载、校验或加载权重，不把目录可见当作模型可用。

@@ -1464,8 +1464,16 @@ python scripts/prepare_jsonschemabench_author_source.py --source wavcaps --autho
 python scripts/prepare_jsonschemabench_author_source.py --source wavcaps --author-root /srv/workloads/wavcaps-software --action verify
 ```
 
-固定版本及每个文件的Git身份、字节数和SHA256见[软件清单](../configs/workload-native/wavcaps-author-source.json)。服务器已取得全部29文件、解析24份Python，并用当前公共入口完成计划、已有文件复用准备和核验；未验证新鲜网络获取，也未导入模型或安装完整依赖。原测试入口还需要发布方captioning
-checkpoint、它引用的音频编码器/BART依赖和合适的NPU环境；不能仅凭源码核验称为原生推理成功。发布方模型目录当前可见3个captioning checkpoint，但权重尚未取得或核验。
+固定版本及每个文件的Git身份、字节数和SHA256见[软件清单](../configs/workload-native/wavcaps-author-source.json)。服务器已取得全部29文件、解析24份Python，并用当前公共入口完成计划、已有文件复用准备和核验；未验证新鲜源码网络获取，也未导入模型或安装完整依赖。不能仅凭源码核验称为原生推理成功。
+
+已从上述README链接的官方模型目录取得`HTSAT_Clotho_Spider_29_7.pt`，完整文件2028254247字节、1332个ZIP成员CRC通过。文件身份见[checkpoint清单](../configs/workload-native/wavcaps-original-captioning-checkpoint.json)，SHA256来自这次官方文件获取，不是发布方校验码。使用者须在服务器另行取得原权重，再运行只读核验；该入口不下载、反序列化或加载模型：
+
+```bash
+python scripts/verify_wavcaps_original_checkpoint.py
+python scripts/verify_wavcaps_original_checkpoint.py --action verify --checkpoint /srv/models/wavcaps/HTSAT_Clotho_Spider_29_7.pt
+```
+
+服务器已用当前公共入口完成完整原文件核验。另一次安全元数据检查使用`weights_only=True`及`meta`映射，仅允许原checkpoint所需的NumPy标量/dtype类型，未构造模型或执行前向。原配置为HTSAT编码器、`facebook/bart-base`解码器、32000Hz输入，保存设备为CUDA；原构造器还需额外的预训练HTSAT/BART资产、隔离依赖和经过验证的NPU绑定，目前尚未闭环。原安全加载器首次拒绝NumPy类型的记录保留，未回退到任意pickle执行。
 
 同一校验器支持四个已核验组件，默认保持SoundBible；其他组件显式传`--component`和独立媒体目录。四组件各固定原前三条，共12个原FLAC已完整解码，原PCM
 MD5及原时长均一致。只核验已取得范围和原成员，不声称整套归档/分卷哈希已重新计算。
