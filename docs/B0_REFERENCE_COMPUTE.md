@@ -27,7 +27,8 @@ C_ref,i = F_i/(k_i × T_ref,i × 10^12)
 η_i = 100 × C_i/C_ref,i
 ```
 
-参考采用 **B0 阶段标定与依赖约束模型**。固定官方 B0 的版本、精度和运行条件，标定必要计算、访存、通信及主机处理的阶段时间；记录输入形状、实际工作量、数据分布和全部参与资源。先复用已有标定，补充缺失的形状或阶段。
+参考采用 **B0 阶段标定与依赖约束模型**。固定官方 B0
+的版本、精度和运行条件，标定必要计算、访存、通信及主机处理的阶段时间；记录输入形状、实际工作量、数据分布和全部参与资源。先复用已有标定，补充缺失的形状或阶段。
 
 串行且互不重叠的阶段直接累加；跨卡并行与计算/通信重叠按数据依赖、资源占用及既定调度顺序计算完工时间。对包含必要资源顺序边的无环依赖图：
 
@@ -40,7 +41,8 @@ T_ref = max_{v in sink_nodes} finish(v)
 
 F、T、T_ref对应同一测量区间和工作量。采集记录用于识别路径、核查算量及阶段标定；验收T使用加载和预热后的无插桩同步墙钟时间，保留完整执行区间内的真实开销。B0、B1采用同一参考方法，按各自工作量核算T_ref；精度或路径差异对应的标定和映射分别归档。
 
-**本次里程碑要求 η≥50%，即 T≤2T_ref。后续90%目标对应 T≤T_ref/0.9≈1.111T_ref。** 两个阶段均衡量同工况参考效率。C_ref是固定B0阶段能力及执行约束下的工况参考值；采用更快实现后可超过该参考，η按实值报告。硬件MFU、设备利用率和B1相对B0的算力提升分别报告。
+**本次里程碑要求 η≥50%，即 T≤2T_ref。后续90%目标对应 T≤T_ref/0.9≈1.111T_ref。**
+两个阶段均衡量同工况参考效率。C_ref是固定B0阶段能力及执行约束下的工况参考值；采用更快实现后可超过该参考，η按实值报告。硬件MFU、设备利用率和B1相对B0的算力提升分别报告。
 
 本页确定参考计算方法，新的阶段标定结果另行归档。现有256-token配对含统计开销，缺少两侧完整的同口径参考验收记录，当前3.4.1计量验收未通过。原实测F、T和算力比较值保持原记录。
 
@@ -67,8 +69,9 @@ Compute each arm as `C_i=F_i/(k_i T_i 10^12)` and report its descriptive baselin
 `R_C,i=100 C_i/C_0`. The measured gain is84.9705%; no acceptance verdict follows from that ratio.
 The former90%-of-B0 target is withdrawn because it permits a regression. Outline efficiency remains
 `η_i=100 T_ref,i/T_i`, with independently calibrated resources, actual dependencies, matched work
-and uninstrumented synchronized timing. For the current milestone require η≥50% (T≤2T_ref); the later90% target means T≤T_ref/0.9.
-Calibrate necessary B0 stages, then apply data dependencies, resource ordering and overlap. Sum only
-serial nonoverlapping stages; include necessary host, transfer and synchronization work once.
-Freeze the stage model and aggregation before formal calculation. This workload reference is scoped
-to calibrated B0 capabilities and execution constraints; hardware MFU and B0-relative gains are separate.
+and uninstrumented synchronized timing. For the current milestone require η≥50% (T≤2T_ref); the
+later90% target means T≤T_ref/0.9. Calibrate necessary B0 stages, then apply data dependencies,
+resource ordering and overlap. Sum only serial nonoverlapping stages; include necessary host,
+transfer and synchronization work once. Freeze the stage model and aggregation before formal
+calculation. This workload reference is scoped to calibrated B0 capabilities and execution
+constraints; hardware MFU and B0-relative gains are separate.
