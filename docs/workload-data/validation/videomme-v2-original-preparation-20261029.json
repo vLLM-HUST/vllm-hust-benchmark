@@ -112,6 +112,23 @@
     "model_calls": 0,
     "source_checkbox_eligible": false
   },
+  "original64_prompt_preparer_development_20261102": {
+    "script": "scripts/prepare_videomme_v2_original_prompts.py",
+    "status": "OFFICIAL_CPU_IMPORTS_VERIFIED_ORIGINAL_TSV_MD5_MISMATCH_NOT_NATIVE_EXECUTION",
+    "related_video_fixture_tests_passed": 88,
+    "static_check": "ruff check passed",
+    "ci_smoke_test_wired": true,
+    "server_client": "/data/shared_upload/hust-phr/workload-benchmark-native-delivery-20261024/videomme-v2-native-prompt-client-20261102-002",
+    "environment_scope": "Private Python overlay only; no global NumPy upgrade or model-service changes",
+    "cpu_import_receipt": "qualification-public.json under server_client; PyArrow19.0.1, Decord0.6.0, portalocker3.2.0, torch2.10.0+cpu, official default64; torch_npu imported by toolkit but NPU context not initialized",
+    "prompt_preparation_attempt": "/data/shared_upload/hust-phr/workload-benchmark-native-delivery-20261024/videomme-v2-original-prompts-20261102-001",
+    "prompt_preparation_terminal_failure": "Official constructor generated full TSV, but its MD5 ecd7dbb2900f0cb549d4e85b64af1476 differs from class MD5 27826ea282386ee20d4b0054a58608db. Own post-construction identity gate stopped before frame sampling or model calls. Preserve both; diagnose original fields and serialization before proceeding.",
+    "generated_tsv_readonly_field_audit": "All3200 original rows and all14 generated columns exactly match original pinned Parquet plus upstream constructor's index/video/subtitle path mapping; mismatch_count0. Unknown historical cache hash is not treated as original Parquet identity. No TSV or upstream source rewrite.",
+    "prompt_preparation_followup": "/data/shared_upload/hust-phr/workload-benchmark-native-delivery-20261024/videomme-v2-original-prompts-20261102-002; started pid548705 birth878769048; terminal not yet qualified. Public preparer verifies every original generated field and reports author MD5 mismatch separately, matching original constructor's permission to regenerate TSV.",
+    "preserved_failures": "Client001 reused PyArrow requires NumPy2 but host has1.26.4; client002 uses isolated PyArrow19.0.1. Official toolkit eager imports require additional original dependencies; bounded closure logs001-006 retained. No upstream source patches, fabricated modules or model calls.",
+    "original64_prompts_actually_prepared": false,
+    "source_checkbox_eligible": false
+  },
   "native_inference_and_scoring_completed": false,
   "model_calls": 0,
   "source_checkbox_eligible": false,

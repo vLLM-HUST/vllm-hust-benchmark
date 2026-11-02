@@ -1333,6 +1333,11 @@ LMM
 
 - [ ] 六个固定完整原组共24题的64帧原提示、合适NPU配置、实际原生推理与评分；原32图服务配置不能冒充64帧配置，不为跑通缩帧。
 
+- [x] 官方工具包 CPU 导入环境已核验：私有依赖目录使用 PyArrow19.0.1、Decord0.6.0、portalocker3.2.0及官方所需补充依赖；不升级全局
+  NumPy。官方类默认64帧已确认。工具包会导入`torch_npu`模块，但实测未初始化NPU上下文，0模型调用。各轮原失败日志保留。
+
+原64帧提示准备入口：`python scripts/prepare_videomme_v2_original_prompts.py --official-checkout /external/pinned-VLMEvalKit --data-root /external/original-metadata --media-root /external/saved-media --output /external/fresh-native-prompts --execute`。需先配置官方工具包的CPU依赖及已核验Decord运行库，并安装公共数据包。入口使用未修改的官方构造器、抽帧和提示函数，冻结每种原组类型前3组、共24题，保留全部3200条标注及6段原视频；用硬链接准备独立离线缓存，因此输入和输出须在同一文件系统。设计输出为原提示及384个独立帧文件，不调用模型或评分。默认不加`--execute`只输出计划。首次服务器运行在官方构造器生成完整TSV后停止：生成MD5为`ecd7dbb2900f0cb549d4e85b64af1476`，与官方类固定MD5不同，尚待逐字段与序列化核查；未开始抽帧／模型推理，不据此勾选交付。原失败与完整TSV保留，未跳过校验。
+
 - [x] 原字段／媒体定位／分组适配及实际CI安装包消费闭环：b40f68dd的CPU
   CI工件13110416014已在服务器独立安装，87份包载荷与原wheel逐份相等；全3200题／800完整组和800组公共／未修改研究读取一致，已取得6段媒体哈希复核通过。该项不是64帧模型输入、全800段视频或原生推理／评分。[阶段回执](validation/videomme-v2-original-preparation-20261029.json)保留范围，来源仍不打总勾。
 
@@ -1343,6 +1348,8 @@ LMM
 媒体准备：先将固定官方`videos/001.zip`下载到服务器的仓库外目录（URL、大小、SHA和冻结ID由`python scripts/prepare_videomme_v2_fixed_media.py`只读输出），然后执行`python scripts/prepare_videomme_v2_fixed_media.py --archive /external/001.zip --output /external/fresh-videomme-v2-media --execute`。原包约2.02GB，默认新提取数据预算4GiB，另保留256MiB磁盘余量；这个预算不包含已存在的原包。缺失、重复、非法成员、CRC或整包身份失败均停止，不换视频。当前服务器用显式镜像传输取得原包，整包SHA仍以官方固定版本为准；准备器自身不负责联网下载。输出仅原MP4及媒体身份回执，不读取答案、不构造prompt、不做模型评分。
 
 已取得媒体可不依赖原包再次核验：`python scripts/prepare_videomme_v2_fixed_media.py --verify-media-root /external/saved-media --output /external/fresh-media-audit --execute`。完整视频流解码再加`--decode --ffmpeg /trusted/prefix/bin/ffmpeg`，并为该进程配置其已有运行库路径；使用两线程CPU将全部视频帧解码到null输出，不抽帧、不改尺寸、不输出新视频，不调用NPU或模型。音轨保留在原文件中，本检查不解码音频。输出逐文件帧数、原媒体哈希、解码器版本和哈希；任何解码错误／超时均保留失败，不换媒体。服务器已复用既有FFmpeg4.4.8低优先级开始六段完整解码，现已完成六段全部103832帧解码；这不代表原生64帧推理、音频任务或来源整体交付。
+
+上述TSV差异已追加只读核验：3200行、14列与固定原Parquet及官方构造器的序号／路径映射逐项一致，零字段差异。官方构造器本身在缓存MD5不符时会重新生成TSV，并不要求生成文件再次匹配旧缓存MD5。公共准备器因此改为逐字段校验全部原始内容，同时独立记录官方缓存MD5与生成MD5，不改官方源码或生成文件。第二次仅CPU准备任务已启动，终态尚待核验；两次日志均保留，尚无模型调用。相关88项夹具测试及静态检查通过，不等于原生交付。
 
 ## 本轮完整交付清单（2026-10-24）
 
