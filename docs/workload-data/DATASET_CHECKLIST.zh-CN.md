@@ -1322,6 +1322,10 @@ LMM
 
 - [x] 原模型构造器／build_model构建的13个模块全部从发布方主检查点严格加载参数，只移除保存时的`module.`键前缀。ASR辅助包的旧训练调度器pickle被安全加载器拒绝，旧失败保留；不放宽安全反序列化，改从已包含全部最终参数的主检查点加载，未改网络计算定义、未缺失参数或补随机权重。检查时禁止所有前向，0神经调用；尚不是NPU模型验证。回执`libritts-styletts2-state-loading-20261102-002/qualification-public.json`。
 
+- [x] 固定前三条原始规范文本经作者音素化／分词流程得到214／144／76个token，无截断。补齐官方NLTK的`punkt_tab`软件资源，校验发布索引SHA256后仅安装到本任务目录。缺资源及服务器下载连接重置的失败保留；回执`libritts-styletts2-original-frontend-20261102-003/qualification-public.json`，0神经调用。
+
+- [x] 固定三条均绑定同一原始说话人的另一条录音`1688_142285_000059_000000`作为条件参考，不使用目标句子的参考WAV；规则为全test-other同说话人中按ID排序最后一条不同录音。原24kHz音频身份、作者trim及Mel预处理已通过，未改作者Mel默认采样率；回执`libritts-original-reference-binding-20261102-001/qualification-public.json`。这是公开模型在原语料上的显式TTS协议准备，不是官方LibriTTS质量评分或已完成合成。
+
 - [x] 主权重已在独立检查中用`torch.load(weights_only=True, map_location="cpu")`安全读取，14个网络状态、1475个张量共872183356字节。只做张量反序列化／元数据检查，没有构建或前向执行模型、没有初始化NPU上下文，现有服务身份未变；不代表NPU适配成功。服务器回执`libritts-styletts2-safe-checkpoint-20261102-001/qualification-public.json`。下方“未加载／未反序列化”均指各自早期源码／下载阶段，非此后检查状态。
 
 - [x] 复用已核验的原test-other整包964502297字节、5120条原文／规范化文本／参考WAV关系，以及实际CI包和原研究消费者固定3条回读；不重新下载原数据。
