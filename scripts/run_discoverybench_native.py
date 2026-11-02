@@ -191,13 +191,16 @@ def run_child(args, command, queue, output, *, tool=None):
         # An observation failure never triggers a second model/tool request.
         while child.poll() is None:
             if not args.preflight:
-                process_one(
-                    queue,
-                    args.api_base,
-                    api_key=os.environ[args.api_key_env] if args.api_key_env else None,
-                    disable_thinking=args.disable_thinking,
-                    timeout=args.transport_timeout,
-                )
+                if not args.external_model_worker:
+                    process_one(
+                        queue,
+                        args.api_base,
+                        api_key=os.environ[args.api_key_env]
+                        if args.api_key_env
+                        else None,
+                        disable_thinking=args.disable_thinking,
+                        timeout=args.transport_timeout,
+                    )
                 if tool:
                     tool()
             time.sleep(0.2)
@@ -250,7 +253,7 @@ def execute(args):
         args.output.resolve()
     ):
         raise ValueError("run output and prepared inputs must be separate")
-    if not args.preflight:
+    if not args.preflight and not args.external_model_worker:
         endpoint = urlsplit(args.api_base)
         if (
             endpoint.scheme != "http"
@@ -420,6 +423,11 @@ def main():
     parser.add_argument("--judge-model", default="Qwen/Qwen3-14B")
     parser.add_argument("--python", default="/opt/discovery-client/bin/python")
     parser.add_argument("--disable-thinking", action="store_true")
+    parser.add_argument(
+        "--external-model-worker",
+        action="store_true",
+        help="operator serves dedicated model queues externally; no local HTTP forwarding",
+    )
     parser.add_argument("--transport-timeout", type=float, default=3600)
     mode = parser.add_mutually_exclusive_group()
     mode.add_argument("--preflight", action="store_true")
@@ -440,7 +448,7 @@ def main():
     if (
         any(getattr(args, key) is None for key in required)
         or args.transport_timeout <= 0
-        or (args.execute and not args.api_base)
+        or (args.execute and bool(args.api_base) == args.external_model_worker)
     ):
         parser.error(
             "explicit prepared cases, owned immutable Docker environment, fresh output and model endpoint required"

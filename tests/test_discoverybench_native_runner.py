@@ -172,3 +172,33 @@ def test_staging_rejects_a_different_original_position(tmp_path):
     }
     with pytest.raises(ValueError, match="original position"):
         entry.stage_inputs(tmp_path, case, tmp_path / "output")
+
+
+def test_external_worker_mode_never_sends_local_model_request(tmp_path, monkeypatch):
+    calls = []
+
+    class Child:
+        pid = 123
+        returncode = 0
+
+        def poll(self):
+            calls.append("poll")
+            return None if len(calls) == 1 else 0
+
+    monkeypatch.setattr(entry.subprocess, "Popen", lambda *_a, **_k: Child())
+    monkeypatch.setattr(
+        entry,
+        "process_one",
+        lambda *_a, **_k: pytest.fail("external worker owns model delivery"),
+    )
+    monkeypatch.setattr(entry.time, "sleep", lambda *_a: None)
+    args = SimpleNamespace(preflight=False, external_model_worker=True)
+    tools = []
+    entry.run_child(
+        args,
+        ["docker", "run", "--name", "owned"],
+        tmp_path,
+        tmp_path,
+        tool=lambda: tools.append("served"),
+    )
+    assert tools == ["served"]

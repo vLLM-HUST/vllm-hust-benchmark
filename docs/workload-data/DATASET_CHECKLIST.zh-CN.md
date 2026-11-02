@@ -818,6 +818,8 @@ python scripts/run_discoverybench_native.py \
 若Docker
 daemon在独立sidecar，两个bind-root分别指宿主Python与daemon可见的同一专用卷根目录；不得指向他人目录。完整执行使用另一个新输出目录，将`--preflight`改成`--execute --api-base http://127.0.0.1:<port>/v1 --model <actual-model> --judge-model <actual-judge>`；本次14B非思考配置还显式加`--disable-thinking`。原评分的提示、预算和应用级重试不改，替代judge不是官方GPT-4成绩。程序失败保存原输出；基础设施错误保留请求声明及容器身份，不自动重发、换题或删除现场。当前完整公开执行尚未验证，不能仅凭上述预检宣布可交付。
 
+CPU和NPU没有已授权回环转发时，可使用`--external-model-worker`代替`--api-base`，由操作者已有的可信队列传输器服务每题的`model-queue`及`judge-model-queue`。该模式下编排器不发送HTTP模型请求，但仍执行原actor、独立隔离工具及原评分；外部worker须保留原请求／响应、一次性声明、真实模型配置和资源互斥，不将队列或Docker套接字挂入科学工具容器。本次使用已有共享租约传输器验证原位置3，尚在运行，不新增SSH公钥或开放公网服务。
+
 ### Copilot 2026嵌套会话元数据（已交付，非原始请求回放）
 
 - [x] 固定[官方release](https://github.com/Azure/AzurePublicDataset/releases/tag/ghcp-coding-agent-2026)身份400522856及七份原包，共3218886136字节，全部发布方SHA256和大小匹配。后补说明/schema/card另固定文档版本215becda，不假称文档属于旧release标签。
