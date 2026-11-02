@@ -56,6 +56,29 @@ def test_webarena_complete_original_harness_inventory():
     )
 
 
+def test_webarena_framework_constraints_preserve_official_release_versions():
+    path = (
+        ROOT
+        / "configs/workload-native/webarena-agentlab-0.4.2-official-constraints.txt"
+    )
+    lines = [
+        line
+        for line in path.read_text("utf-8").splitlines()
+        if line and not line.startswith("#")
+    ]
+    assert len(lines) == 252 and len(set(lines)) == 252
+    assert {
+        "browsergym==0.14.2",
+        "openai==1.99.5",
+        "litellm==1.75.3",
+        "torch==2.2.2",
+        "contexttimer==0.3.3",
+    } <= set(lines)
+    assert all(
+        re.fullmatch(r"[A-Za-z0-9_.-]+==[A-Za-z0-9_.+!-]+", line) for line in lines
+    )
+
+
 def test_existing_public_source_baseline_positions_match_unchanged_digests():
     """Bookkeeping check, not a substitute for the actual secret scanner."""
     path = "workload-preparation/data/catalogs/source_manifests_v1.json"
