@@ -1,0 +1,72 @@
+{
+  "created_unix": 1793655684.2035866,
+  "status": "source_induction_for_native_work_enclosure_recorded",
+  "lemmas": [
+    {
+      "name": "Control domain",
+      "claim": "Native per-request control depends on its public retained count, terminal/inactive raw domain, prior accepted state and fixed scheduler allocation. Enumeration executes pinned native AST for every per-request sequence. Independent request combinations are overapproximated, never restricted to all-low/all-high endpoints.",
+      "evidence": "local-domain-audit-r1.json"
+    },
+    {
+      "name": "Producer inclusion",
+      "claim": "Each concrete buffer, cache cell, conv slot, state slot and output position has a producer contained in the corresponding abstract set. The induction starts from the original declared boundary convention. Conditional writes join every alternative plus untouched previous contents; physical reuse never clears a cell implicitly. Cache offsets are retained per producer.",
+      "evidence": "abstract-cache-audit-r1.json"
+    },
+    {
+      "name": "Dependency enclosure",
+      "claim": "For may, every possible producer edge and largest causal read range is included. For must, a producer edge is retained only for singleton producer sets and smallest universally present read range. Position-dependent local roots use minimum/maximum required retained draft roots; exact local arithmetic dependencies are retained. Thus must dependency/root relation is a subset of every concrete relation, and may is a superset. Correlation loss can widen bounds but cannot narrow them.",
+      "evidence": "abstract_native_work_r1.py"
+    },
+    {
+      "name": "Least fixed point",
+      "claim": "All original interval closure transfer functions are monotone union on row bitsets. Starting from enclosed roots and enclosed dependency relations, induction on propagation steps yields must masks subset concrete masks subset may masks. The least fixed point is finite and the original closure solver is unchanged.",
+      "evidence": "abstract-branch-audit-r1.json"
+    },
+    {
+      "name": "Arithmetic enclosure",
+      "claim": "The original basic arithmetic catalog is applied, with nonnegative operation counts. FA query-position/visible-end values are bounded by native alternative extrema; GDN initial-state terms use all/any, convolution structural-zero taps are excluded below if any alternative is zero and excluded above only if all are zero. SFU/comparison/copy are not assigned arbitrary basic FLOP equivalents. Unknown producer boundaries follow the original sealed-window convention.",
+      "evidence": "abstract-singleton-audit-r1.json"
+    },
+    {
+      "name": "Validation scope",
+      "claim": "Counted singleton checks every original mask and arithmetic group; nine variable native-control/cache-copy branches independently verify closure inclusion; exhaustive shared-cache conditional-write test checks producer sets and offsets. These executable checks support the source induction and are not presented as exhaustive enumeration of the actual global branch Cartesian product.",
+      "evidence": "abstract-branch-audit-r1.json"
+    }
+  ],
+  "source_sha256": [
+    {
+      "artifact": "abstract-branch-audit-r1.json",
+      "sha256": "99d11b5fb31c0122a7f66d93b94d72c5028f39568e5ad12d9a7a278b5d5c84d5"
+    },
+    {
+      "artifact": "abstract-cache-audit-r1.json",
+      "sha256": "22f6423bf6f950a0e84f5e0357e80b99d71b8a278bf02189e5ba152d243d6636"
+    },
+    {
+      "artifact": "abstract-singleton-audit-r1.json",
+      "sha256": "20908938b3d28fc4ef682cd506e1b0c65ee1af8a59803cf23cd0b41fee233d85"
+    },
+    {
+      "artifact": "abstract_native_work_r1.py",
+      "sha256": "5105bead491dd8af99f7109bbc3db7636d54b731a1eb0c2cec3c36f4871cf68e"
+    },
+    {
+      "artifact": "local-domain-audit-r1.json",
+      "sha256": "7338de7e24720513229803ae6ac00b49d08317a68d01ead37ecc1e0504dede0a"
+    },
+    {
+      "artifact": "plan-r1.json",
+      "sha256": "c72c573aafc93241c3a84201b67a478cbe2235a447be26246e83e4f1557b78dd"
+    },
+    {
+      "artifact": "timed-bounds-plan-r1.json",
+      "sha256": "25ccdc9a2642868e2b3ba25349e1aa8a0778df36eac5517226e120f0d4df35f1"
+    }
+  ],
+  "scope": "F bounds only. Current timed-domain outputs and paired lower/upper consistency remain to verify. No reference time inferred from work bounds.",
+  "export_provenance": {
+    "original_filename": "abstract-soundness-review-r1.json",
+    "original_sha256": "10ffe067c8d426c3d6bf9184436fffa478e053262661f17660940a2a1f2c827a",
+    "kind": "public_evidence_projection"
+  }
+}

@@ -1,77 +1,75 @@
-# B0、B1 有效算力与相对提升
+# B0、B1 有效算力与独立参考效率
 
-分别计算两组有效算力，再以官方 B0 作性能比较基线。版本 `b0-effective-compute-comparison/v2`，2026-11-02 订正。
+当前结果及逐项代入见[3.4.1 配对验收报告](../reports/m01-qualified-pair-20261103/README.md)。网站从同一份原始量生成展示，B0、B1各3轮全部计入。
 
-## 1. 算力与比较公式
+## 1. 有效算力
 
-```text
-F_i = Σ_g F_i,g
-C_i = F_i / (k_i × T_i × 10^12)       [TFLOPS/芯片]
-R_C,i = 100 × C_i/C_0                 [%]
-G_C = 100 × (C_1/C_0 − 1)             [%]
-R_C,1 = 100 × F_1 × k_0 × T_0 / (F_0 × k_1 × T_1)
+对配置 i、重复 j，Fᵢⱼ 是保留输出所需的基础运算量，Tᵢⱼ 是无插桩同步墙钟，k是全部参与芯片数。当前固定k=2：
+
+```
+Fᵢⱼ = Σ_g Fᵢⱼ,g
+Cᵢ = ΣⱼFᵢⱼ / (k × ΣⱼTᵢⱼ × 10¹²)  [TFLOPS/芯片]
 ```
 
-每组使用自己的必要算量、全部参与芯片数与同轮同步耗时。矩阵乘加计2次基础运算；基础标量按源码计数，特殊函数等调用量另列。统计开销保留在原计时内。只有 `F_0/k_0=F_1/k_1`
-时，算力比才等于耗时比。
+矩阵乘加计2次基础运算；归一化、卷积、注意力、GDN状态更新和路由等按固定算术目录计数。特殊函数调用另列。沿保留输出反向追溯依赖，计入必要草稿工作，排除无依赖的丢弃、填充及重复工作。
 
-`R_C,0=100%` 是归一化身份，`R_C,1=184.9705%` 表示 B1 算力提升84.9705%。这些比较值不产生考核达标标志。
+对于无插桩记录不能唯一确定的末次状态、共享缓存或依赖分支，保留全部源码允许的情形，以F下界和上界代入，得到C区间。
 
-## 2. 3.4.1 的参考与验收
+## 2. 同口径同步计时
 
-按 [V1.5 原文](../reports/vllm-hust-midterm-20261019/milestone-v15/project4-v1.5.json) 第302—312段：
+模型加载与预热在计时外。请求提交前和所有请求结束后分别同步全部参与芯片；T覆盖区间内执行、搬运、通信、同步及真实空闲。HTTP和分词在当前两侧都位于区间外。逐步路径采集独立进行，三轮正式T不含观察器或Profiler，也不扣除估计开销。
 
-```text
-η_i = 100 × T_ref,i/T_i
-C_ref,i = F_i/(k_i × T_ref,i × 10^12)
-η_i = 100 × C_i/C_ref,i
+计时和算量逐轮对应。只有完整算量输入字节一致时共用CPU复算，仍保留各轮独立T。
+
+## 3. 独立参考时间
+
+将B0、B1各自的必要工作映射到同一套独立标定的规范算子，按各自数据依赖、全部参与资源和固定资源顺序求参考完成时间。源码映射、算子形状、精度、数据分布与计时适用域分别记录。
+
+```
+finish(v) = d(v) + max_{u→v} finish(u)
+T参 = max_v finish(v)
+C参,ᵢⱼ = Fᵢⱼ / (k × T参,ᵢⱼ × 10¹²)
+C参,ᵢ = ΣⱼFᵢⱼ / (k × ΣⱼT参,ᵢⱼ × 10¹²)
+ηᵢ = 100 × Cᵢ/C参,ᵢ = 100 × ΣⱼT参,ᵢⱼ / ΣⱼTᵢⱼ
 ```
 
-参考采用 **B0 阶段标定与依赖约束模型**。固定官方 B0
-的版本、精度和运行条件，标定必要计算、访存、通信及主机处理的阶段时间；记录输入形状、实际工作量、数据分布和全部参与资源。先复用已有标定，补充缺失的形状或阶段。
+无前驱节点从0开始。串行、互不重叠阶段可以相加；跨卡并行和计算/通信重叠按图计算。阶段耗时已包含的访存不重复叠加；完整参考包含必要计算、搬运、通信、同步和主机处理。
 
-串行且互不重叠的阶段直接累加；跨卡并行与计算/通信重叠按数据依赖、资源占用及既定调度顺序计算完工时间。对包含必要资源顺序边的无环依赖图：
+方法、统计规则、适用域和依赖规则在正式测量或复算前固定。先复用已有标定，缺失形状才按原协议补测；参考不使用整机耗时、已知成绩或目标门槛作为拟合输入。新增形状沿用已有模型、数值容差、统计分位数和样本数要求。
 
-```text
-finish(v) = duration(v) + max_{u in predecessors(v)} finish(u)
-T_ref = max_{v in sink_nodes} finish(v)
+当前使用完整参考时间的**可证明下界**：对所有与无插桩记录相容的分支，保留不变节点和必然成立的顺序。删除非负工作或依赖只会降低参考完成时间。保留节点全部需要合格独立时长；完整参考中的未定项不被赋零。
+
+```
+T参,ᵢⱼ ≥ T参,ᵢⱼ,下界
+ηᵢ ≥ 100 × ΣⱼT参,ᵢⱼ,下界 / ΣⱼTᵢⱼ
 ```
 
-无前驱节点的起始时间为0。每项必要计算、搬运、通信和同步计入一次；阶段时间已包含的访存不重复叠加。必要主机处理和调度按实际路径标定，可消除的排队空洞、冗余工作及采集开销另列。阶段划分、标定统计规则、依赖关系与适用范围在正式测量或复算前固定。
+这里的下界针对路径与依赖不确定性；组件时长使用预先固定的标定统计量，不将其解释为统计置信下界或硬件绝对极限。
 
-F、T、T_ref对应同一测量区间和工作量。采集记录用于识别路径、核查算量及阶段标定；验收T使用加载和预热后的无插桩同步墙钟时间，保留完整执行区间内的真实开销。B0、B1采用同一参考方法，按各自工作量核算T_ref；精度或路径差异对应的标定和映射分别归档。
+两侧分别给出节点选择规则、源码依据、标定输入、图校验、关键路径和保守值。参考表示已标定算子能力与执行约束下的工况算力；硬件MFU另报，更快实现超过参考时保留实际比例。
 
-**本次里程碑要求 η≥50%，即 T≤2T_ref。后续90%目标对应 T≤T_ref/0.9≈1.111T_ref。**
-两个阶段均衡量同工况参考效率。C_ref是固定B0阶段能力及执行约束下的工况参考值；采用更快实现后可超过该参考，η按实值报告。硬件MFU、设备利用率和B1相对B0的算力提升分别报告。
+## 4. 阶段门槛与性能比较
 
-本页确定参考计算方法，新的阶段标定结果另行归档。现有256-token配对含统计开销，缺少两侧完整的同口径参考验收记录，当前3.4.1计量验收未通过。原实测F、T和算力比较值保持原记录。
+按[V1.5课题四大纲](../reports/vllm-hust-midterm-20261019/milestone-v15/project4-v1.5.json)，本次里程碑要求η≥50%，后续目标η≥90%。保守下界达到50%即可证明本次要求；未达到90%的下界不能证明真实效率必低于90%。B0是固定比较基线，项目优化验收针对B1。
 
-## 3. 订正记录
-
-撤回v1中“达到B0算力90%即可达标”的门槛和两组达标结论。该条件允许算力比B0低10%，不适合作为本优化项目的验收标准。不能把门槛改成100%、提升90%，或依据本次184.9705%倒推一个能通过的阈值。
-
-原始测量和算量保留；[v1报告](../reports/b0-reference-compute-20261101/README.md)仅供追溯，当前结果见[订正报告](../reports/b0-compute-comparison-20261102/README.md)。本次没有新增模型成绩。
-
-## 4. 工况与复算
-
-Qwen3.5-35B-A3B，BF16、TP2、两片910B2；MMLU-Pro200请求，282265输入token，每题输出上限256 token、保留EOS。两组均输出51200
-token；正确数B0 21/200、B1 19/200。完整回答143/200、153/200属于另一组max8192实验，分别保留。
-
-```bash
-python scripts/recompute_b0_reference_compute.py --check
+```
+本次：η≥50%  ⇔  ΣT≤2ΣT参
+后续：η≥90%  ⇔  ΣT≤ΣT参/0.9
+G_C = 100 × (C₁/C₀ − 1)
+G_C区间 = [100(C₁下界/C₀上界−1), 100(C₁上界/C₀下界−1)]
 ```
 
-计算器从[运算分项](../reports/b0-reference-compute-20261101/accounting-parts.json)求和，核对[原配对](../reports/vllm-hust-midterm-20261019/m01-recovery/official018-paired-compute-20261024/summary.json)，生成当前报告和网站数据。它不生成目标值、目标差距或达标布尔值。
+相对B0提升与独立参考效率分别计算。达到B0实测算力的90%允许性能退步，不能作为本项目门槛。硬件MFU和设备采样利用率也分别报告。
 
-## English summary
+## 5. 工况、证据与复算
 
-Compute each arm as `C_i=F_i/(k_i T_i 10^12)` and report its descriptive baseline ratio
-`R_C,i=100 C_i/C_0`. The measured gain is84.9705%; no acceptance verdict follows from that ratio.
-The former90%-of-B0 target is withdrawn because it permits a regression. Outline efficiency remains
-`η_i=100 T_ref,i/T_i`, with independently calibrated resources, actual dependencies, matched work
-and uninstrumented synchronized timing. For the current milestone require η≥50% (T≤2T_ref); the
-later90% target means T≤T_ref/0.9. Calibrate necessary B0 stages, then apply data dependencies,
-resource ordering and overlap. Sum only serial nonoverlapping stages; include necessary host,
-transfer and synchronization work once. Freeze the stage model and aggregation before formal
-calculation. This workload reference is scoped to calibrated B0 capabilities and execution
-constraints; hardware MFU and B0-relative gains are separate.
+当前为Qwen3.5-35B-A3B、BF16、TP2、两片910B2、MMLU-Pro固定200请求、每题上限256
+token。全部输出均达到长度上限，属于固定预算服务工况。完整回答质量和吞吐使用网站3.4.2标明的独立批次；不借用旧256-token批次正确数。
+
+```
+python scripts/recompute_m01_qualified_pair.py --check
+```
+
+复算器验证证据清单，分别合计运算分项、三轮时间与参考关键路径，生成报告和网站数据。原始路径记录、失败尝试和不足域记录保存在专用证据存储，路径及SHA256列于[证据清单](../reports/m01-qualified-pair-20261103/evidence/evidence-manifest.json)。
+
+旧的带统计开销配对及其订正保留在[历史比较报告](../reports/b0-compute-comparison-20261102/README.md)，不再作为当前3.4.1主展示。

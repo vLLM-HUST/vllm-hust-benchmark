@@ -1,0 +1,191 @@
+{
+  "status": "timed_native_masks_and_component_sums_independently_audited",
+  "case": "uninstrumented-1",
+  "mask_subset_checks": 5893874,
+  "active_buckets": [
+    841982,
+    842183
+  ],
+  "bounds": [
+    {
+      "bound": "must",
+      "basic_F": 1829129362383260,
+      "groups": 822769,
+      "families": {
+        "target:linear_attention:prefill": 1097947176174430,
+        "target:full_attention:": 424820829468310,
+        "target_final:final_norm:": 52079904641755,
+        "draft:full_attention:": 47139484221605,
+        "target:linear_attention:spec": 207141967877160
+      },
+      "basic_parts": {
+        "input_norm": 136887735240,
+        "kv_projection": 253554484838400,
+        "q_projection": 84518161612800,
+        "z_projection": 169036323225600,
+        "ba_projection": 2641192550400,
+        "kv_convolution": 432878284800,
+        "q_convolution": 144292761600,
+        "key_l2": 58610995200,
+        "query_l2": 58610995200,
+        "gate_bias_softplus_scale": 1612056000,
+        "fused_sigmoid_denominator_add": 0,
+        "gdn_output_norm": 206665579200,
+        "output_projection": 169036323225600,
+        "post_attention_norm": 137562334910,
+        "shared_expert": 84727635640320,
+        "active_routed_experts": 677821085122560,
+        "router": 14121272606720,
+        "shared_gate": 55161221120,
+        "moe_scalar": 541363751905,
+        "recurrence_state": 4220286566400,
+        "recurrence_output": 1685481062400,
+        "prefill.wy.kkt_dot": 2166662676480,
+        "prefill.wy.kkt_gate_difference_and_scaling": 25390578240,
+        "prefill.wy.wy_value_beta": 34684723200,
+        "prefill.wy.wy_key_beta_gate": 69369446400,
+        "prefill.wy.wy_lower_triangular_dot": 4472064245760,
+        "prefill.inverse.inverse16_recurrence": 18905299200,
+        "prefill.inverse.inverse_merge_triangular_dot": 355160678400,
+        "prefill.inverse.inverse_negations": 8463526080,
+        "prefill.prefix_scan": 266639040,
+        "prefill.transformed_value_state_dot": 8477674045440,
+        "prefill.transformed_value_residual": 33115914240,
+        "prefill.state_decay_difference": 270974400,
+        "prefill.state_value_decay": 34684723200,
+        "prefill.state_kv_dot": 8879289139200,
+        "prefill.state_decay_add": 135769620480,
+        "prefill.output_qk": 2236032122880,
+        "prefill.output_gate": 17469000960,
+        "prefill.output_qh": 8477674045440,
+        "prefill.output_av": 2236032122880,
+        "prefill.output_state_decay_add": 66231828480,
+        "prefill.output_scale": 34684723200,
+        "vocabulary": 87253529395200,
+        "kv": 15554584772608,
+        "q_gate": 113808076963840,
+        "output": 56904038481920,
+        "qk_av": 48576485244928,
+        "key_norm": 7602429100,
+        "query_norm": 55624618000,
+        "rope": 11843505408,
+        "attention_gate": 13892587520,
+        "score_scale": 47437973872,
+        "softmax_stability_subtract": 47437973872,
+        "softmax_denominator_add": 47383705952,
+        "final_norm": 3426177755,
+        "hidden_embedding_fusion": 5872898015232,
+        "three_input_norms": 8603928108,
+        "post_and_final_norms": 708369970
+      }
+    },
+    {
+      "bound": "may",
+      "basic_F": 1829419442663123,
+      "groups": 822969,
+      "families": {
+        "target:linear_attention:prefill": 1097947176174430,
+        "target:full_attention:": 424846751429016,
+        "target_final:final_norm:": 52089058853609,
+        "draft:full_attention:": 47321033730370,
+        "target:linear_attention:spec": 207215422475698
+      },
+      "basic_parts": {
+        "input_norm": 136895479488,
+        "kv_projection": 253568829358080,
+        "q_projection": 84522943119360,
+        "z_projection": 169045886238720,
+        "ba_projection": 2641341972480,
+        "kv_convolution": 432902799360,
+        "q_convolution": 144300933120,
+        "key_l2": 58613329920,
+        "query_l2": 58613329920,
+        "gate_bias_softplus_scale": 1612147200,
+        "fused_sigmoid_denominator_add": 0,
+        "gdn_output_norm": 206677271040,
+        "output_projection": 169045886238720,
+        "post_attention_norm": 137570066865,
+        "shared_expert": 84733341990912,
+        "active_routed_experts": 677866735927296,
+        "router": 14122223665152,
+        "shared_gate": 55164936192,
+        "moe_scalar": 541400212398,
+        "recurrence_state": 4221783121920,
+        "recurrence_output": 1686078750720,
+        "prefill.wy.kkt_dot": 2166662676480,
+        "prefill.wy.kkt_gate_difference_and_scaling": 25390578240,
+        "prefill.wy.wy_value_beta": 34684723200,
+        "prefill.wy.wy_key_beta_gate": 69369446400,
+        "prefill.wy.wy_lower_triangular_dot": 4472064245760,
+        "prefill.inverse.inverse16_recurrence": 18905299200,
+        "prefill.inverse.inverse_merge_triangular_dot": 355160678400,
+        "prefill.inverse.inverse_negations": 8463526080,
+        "prefill.prefix_scan": 266639040,
+        "prefill.transformed_value_state_dot": 8477674045440,
+        "prefill.transformed_value_residual": 33115914240,
+        "prefill.state_decay_difference": 270974400,
+        "prefill.state_value_decay": 34684723200,
+        "prefill.state_kv_dot": 8879289139200,
+        "prefill.state_decay_add": 135769620480,
+        "prefill.output_qk": 2236032122880,
+        "prefill.output_gate": 17469000960,
+        "prefill.output_qh": 8477674045440,
+        "prefill.output_av": 2236032122880,
+        "prefill.output_state_decay_add": 66231828480,
+        "prefill.output_scale": 34684723200,
+        "vocabulary": 87417285509120,
+        "kv": 15556660953088,
+        "q_gate": 113819384807424,
+        "output": 56909692403712,
+        "qk_av": 48585698803712,
+        "key_norm": 7603443850,
+        "query_norm": 55630144800,
+        "rope": 11844730752,
+        "attention_gate": 13893967872,
+        "score_scale": 47446971488,
+        "softmax_stability_subtract": 47446971488,
+        "softmax_denominator_add": 47392698176,
+        "final_norm": 3426321129,
+        "hidden_embedding_fusion": 5878015066112,
+        "three_input_norms": 8611424703,
+        "post_and_final_norms": 711483234
+      }
+    }
+  ],
+  "F_interval": [
+    1829129362383260,
+    1829419442663123
+  ],
+  "source_sha256": [
+    {
+      "artifact": "abstract-soundness-review-r1.json",
+      "sha256": "10ffe067c8d426c3d6bf9184436fffa478e053262661f17660940a2a1f2c827a"
+    },
+    {
+      "artifact": "audit_timed_work_bounds_r1.py",
+      "sha256": "95a94226af70c6b1c35b236c8dd0bf5964ca1b665e838686706180b2c4f59930"
+    },
+    {
+      "artifact": "early-summary.json",
+      "sha256": "0b6fa774a63188d290f7e35f9df0131dff281c9e0550723979b5a1fb8c9072ce"
+    },
+    {
+      "artifact": "necessary-buckets.jsonl.gz",
+      "sha256": "adc858d835a38b7950a7f8a7bb44cf968e5352e2b22d586419d5abf729eaae3c"
+    },
+    {
+      "artifact": "early-summary.json",
+      "sha256": "5cc585ea8c82f9b2a3d31c60eb32cf965433257106abbf190e5c0d78c21bcf81"
+    },
+    {
+      "artifact": "necessary-buckets.jsonl.gz",
+      "sha256": "1395456503418f495f54cec86b6744dbc7e9803e3fa57ad594818c102048f1b8"
+    }
+  ],
+  "scope": "Checks interval containment and every component sum; source induction and original arithmetic/source audits supply semantic soundness. Independent reference qualification remains separate.",
+  "export_provenance": {
+    "original_filename": "uninstrumented-1-work-bound-audit-r1.json",
+    "original_sha256": "08d862c4d0936e6484f5e53c3a5dbd3b55141098441ef852724660c0e3ee53bb",
+    "kind": "public_evidence_projection"
+  }
+}

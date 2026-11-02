@@ -1,0 +1,111 @@
+{
+  "status": "source_invariant_lower_reference_computed",
+  "case": "uninstrumented-2",
+  "reference_lower_seconds": 34.107723639846924,
+  "full_reference_point_seconds": null,
+  "counts": {
+    "operation": 548410,
+    "edges": 779840,
+    "tp_complete": 57858,
+    "collectives": 57858
+  },
+  "retained_passes": 629,
+  "omitted_uncertain_passes": 236,
+  "unique_leaf_bindings": 235796,
+  "critical_path_nodes": 332063,
+  "critical_seconds_by_family": {
+    "primitive": 6.8209745222778055,
+    "movement": 0.07903815976048278,
+    "collective": 5.489913420678631,
+    "vocab": 0.7677366366186744,
+    "norm": 1.367417255123949,
+    "dense": 2.4103578806150763,
+    "swiglu": 0.5971465114556929,
+    "moe_primitive": 1.6866822242694515,
+    "moe_gmm": 9.617191802890979,
+    "gate": 0.7046123831045552,
+    "fia": 0.36704938529859193,
+    "recurrence": 2.517182586673061,
+    "conv": 0.43797229685636996,
+    "preprocess": 0.11058153945640593,
+    "wy": 0.733139328371502,
+    "ho": 0.40072770639349403
+  },
+  "plan_sha256": "f45d4961fd5f59fe29aeb01d4b41d77e2a742334142b3e77c101a087d30d6757",
+  "source_sha256": [
+    {
+      "artifact": "b0_reference_dag_r1.py",
+      "sha256": "64e2a882702b7c45d6920382343112c569cb69455ee3dd487f4e426acf5b50c7"
+    },
+    {
+      "artifact": "audit_reference_lower_r1.py",
+      "sha256": "6efad3a3b1b88c086305ebfac31ccecb788912ff819b5060822313b715977de7"
+    },
+    {
+      "artifact": "build_reference_lower_r1.py",
+      "sha256": "7bc43889ae7d7b34434c49fe2e3a6b4effa08ea9f18aa546dde75106f1b7c94c"
+    },
+    {
+      "artifact": "reference-projection-plan-r2.json",
+      "sha256": "7156237e8e90fcf418a9113a33167d7542e2937c3f95a9bb350396afa1932a04"
+    },
+    {
+      "artifact": "qualified-contexts.jsonl.gz",
+      "sha256": "c18d89a0912dc5706866934c636c8edd61e2527cd6a51a7889f8e3a4f311e26c"
+    },
+    {
+      "artifact": "qualified-summary.json",
+      "sha256": "1ac5e73cd888c5da8782777a2752a5483cda9e4ec19a313dcc4191262e1ee481"
+    },
+    {
+      "artifact": "nonroute-binding-summary-r4.json",
+      "sha256": "1d0c42f4b89534b1bbb3509f0c8cda98dbf6c825453b30a714d77256535ba5a8"
+    },
+    {
+      "artifact": "nonroute-bindings-r4.jsonl.gz",
+      "sha256": "7eab93d49d25e8ab828e8119e8e5be2d07ba37c66b967720c8a2a0c775e1dedc"
+    },
+    {
+      "artifact": "operations-by-pass.pickle.gz",
+      "sha256": "f6262780e3ff931878e5e946c8f46d275a2801bf19af5f1c71d841ef6096eb19"
+    },
+    {
+      "artifact": "queries.json.gz",
+      "sha256": "ef35a04b96fbd6b4f4ec34fcbaf506f0310949737d4bee0d9be90b6cefbbfa82"
+    },
+    {
+      "artifact": "summary.json",
+      "sha256": "03cd705da0d783dbb612b6ee649d9b53ea724ab50a0131f6e1ba23c9cdf0016c"
+    },
+    {
+      "artifact": "contexts.jsonl.gz",
+      "sha256": "2df3e842a5b25e84437d540b7b9540c2e80336c31520aaabce3bd74235d74807"
+    },
+    {
+      "artifact": "summary.json",
+      "sha256": "2d8f20141a4a8aee0b9be9890d52623d0dc244f7fc838de5f5a921585154997a"
+    }
+  ],
+  "output_sha256": [
+    {
+      "artifact": "critical-path.json",
+      "sha256": "8fad91bab7e0ea5b3c70cb3e3a4abf1f2b472ccaa5687704ec8bb181dce2dcbf"
+    },
+    {
+      "artifact": "leaves.jsonl.gz",
+      "sha256": "08f866315f487e94900353674b5a702b0fb6533e381191f73b201ac2acedc959"
+    },
+    {
+      "artifact": "nodes.jsonl.gz",
+      "sha256": "93efb3eeabeeaaee82a509f42e6edd470d8d2fe7dd4254a291cb8809d16138dd"
+    }
+  ],
+  "proof": "Every retained node is invariant in all admissible native states. Each same-rank retained predecessor is a transitive path of the original source DAG (including through omitted passes); TP readiness uses only retained participants. Removing other nonnegative work and constraints cannot increase the longest path. No remaining selected duration is omitted or zero-filled.",
+  "independent_audit_pending": false,
+  "correspondence": "b0-work-domain-plan.json",
+  "export_provenance": {
+    "original_filename": "summary.json",
+    "original_sha256": "e389235ad27798a004038badfb8cd5b6f8717510141d7e962a6746bb50ea684b",
+    "kind": "public_evidence_projection"
+  }
+}

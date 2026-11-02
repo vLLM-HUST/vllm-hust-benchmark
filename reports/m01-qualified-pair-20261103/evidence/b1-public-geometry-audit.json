@@ -1,0 +1,103 @@
+{
+  "status": "public_geometry_matches_native_and_source_invariants_checked",
+  "schedule_comparisons": 6968,
+  "cases": 8,
+  "prefill_segments": 217,
+  "prefill_tokens": 282265,
+  "no_prefix_or_cross_request_state_reuse": "unique source request salts; each request submitted once; no load/reload commands",
+  "static_capacity": {
+    "block_size": 2048,
+    "lookahead_tokens": 2,
+    "max_prompt": 2502,
+    "seats": 36,
+    "max_protected_seats": 28,
+    "max_pages_per_request": 2,
+    "all_seats_plus_one_detached_store_and_null_page_bound": 75,
+    "available_blocks": 781
+  },
+  "active_backup_eligible_steps": 0,
+  "frontier_terminal_inactive_checks": 24,
+  "induction": "With the preceding public prefix fixed: native request/queue reservations and the round-robin demand are deterministic. Terminal raw suffix is clamped before Frontier retention and removed from native requests on length stop; inactive Frontier advances are ignored. A cache store cannot lock an active owner: no active owner satisfies both drained writer and two-round stale eligibility in any reconstructed step. Streaming permits at most one store/seal, with no load for unique salts. At most28 protected seats plus one I/O seat leave capacity in36. Even all36 seats plus one detached backup fit the781-page pool under the static request-length bound; partial reclaim and native preemption therefore cannot be required. Changing receipt delay/terminal suffix can change only cold-seat identity/backup traffic, not eligibility or token grant. These invariants close inductively for every step and every per-request suffix combination, rather than extrapolating two endpoint runs.",
+  "qualification": "CPU source replay and source proof for scheduling/prefill only. Worker necessary dependency validity and reference projection audit remain separate. No recorded cache DMA timing is inferred.",
+  "source_sha256": [
+    {
+      "artifact": "async_scheduler.py",
+      "sha256": "e586a0ef3c6778be56a93e7f9bb712d4de9de6e7d7fe7e3e1d51dae83ecfc508"
+    },
+    {
+      "artifact": "scheduler.py",
+      "sha256": "50e7cea25eea05fa192bdd99f30e990f45c499eb327c42b247bf61220d7b64b7"
+    },
+    {
+      "artifact": "public-replay-counted-audit-lower-r2.json.gz",
+      "sha256": "b9fd4cc0de61a19a6c4d07f801a800cc4dfe4117384c6e10fe80de9f725a0b28"
+    },
+    {
+      "artifact": "public-replay-counted-audit-upper-r2.json.gz",
+      "sha256": "09d9a49727da5682cae27c6c74b599eca585bd024c4ea4d448c619bef2404ff2"
+    },
+    {
+      "artifact": "public-replay-uninstrumented-1-lower-r2.json.gz",
+      "sha256": "7b9f99964d215b7120fb36e1d89b6ed5a9f15465348473cfa125255ccd970b07"
+    },
+    {
+      "artifact": "public-replay-uninstrumented-1-lower-r3.json.gz",
+      "sha256": "4f18562ac9561b2c38dd0e994e425d923a42743d27084c675a00148edba7f54e"
+    },
+    {
+      "artifact": "public-replay-uninstrumented-1-upper-r2.json.gz",
+      "sha256": "c0124d7d0f88a332f2ff3cf17757fcf36eb970b73bb7a3bc8f7ec77b44425bdc"
+    },
+    {
+      "artifact": "public-replay-uninstrumented-1-upper-r3.json.gz",
+      "sha256": "f521c775784de9ba98f8e07e75aa2895a08f5af12639177693acfc9063ecdcda"
+    },
+    {
+      "artifact": "public-replay-uninstrumented-2-lower-r2.json.gz",
+      "sha256": "030a711c87aec7f39ac731955c0ee25aaecd1e0b94ca70dd1e3c94d4432f9cf7"
+    },
+    {
+      "artifact": "public-replay-uninstrumented-2-upper-r2.json.gz",
+      "sha256": "181e9bba89638538c32632cc0cc650c2e2a5c3617a0b7cba52359a151def32d9"
+    },
+    {
+      "artifact": "public-replay-uninstrumented-3-lower-r2.json.gz",
+      "sha256": "37320cf3aa90ab09be750d1c4bd3e9d77cf53b918e35223899f798bdb86bddad"
+    },
+    {
+      "artifact": "public-replay-uninstrumented-3-upper-r2.json.gz",
+      "sha256": "d466d4b225e1a4391ada0eee6e76e656e6092404a8ba1d52e59c32d4e24a0642"
+    },
+    {
+      "artifact": "cache_actions.py",
+      "sha256": "e548d35dc1acc158a4098333f5229b1f0417a507324a3cebf3b2f66efe732ef4"
+    },
+    {
+      "artifact": "cache_policy.py",
+      "sha256": "b0895659e6a8ba70d026650650e2f958256c34ee1ba93afbb1ecad722270e516"
+    },
+    {
+      "artifact": "partial_reclaim.py",
+      "sha256": "5f2257d88be4d348c71b2fc312dd552af24848afa369628949960bd475bc67da"
+    },
+    {
+      "artifact": "prefill_round_robin.py",
+      "sha256": "f0eabc367aeb68f68d7d30b8b002f3c096d134fdab0d86a06eabb767206acc5c"
+    },
+    {
+      "artifact": "resident_leases.py",
+      "sha256": "2d9a0f9d00b82aae100a5aaf568907f83384876394251952230324f95619ea57"
+    },
+    {
+      "artifact": "seat_scheduler.py",
+      "sha256": "37c6308e6ec569aa81dbd3f1affa3b64692b48fada7504b51e6e1ecbbcb41400"
+    }
+  ],
+  "no_npu_initialized": true,
+  "formal_eta": null,
+  "export_provenance": {
+    "original_filename": "public-geometry-independent-audit-r1.json",
+    "original_sha256": "d324e97ce3b6fc48462168b3ea123ec79316f00def5866de97b84e4c6376bbbc",
+    "kind": "public_evidence_projection"
+  }
+}
