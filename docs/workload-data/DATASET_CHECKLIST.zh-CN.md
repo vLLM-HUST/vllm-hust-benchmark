@@ -2,6 +2,9 @@
 
 ### 剩余原生环境前置条件复核（2026-11-02）
 
+- [x] MLE-bench固定官方版本的1015份原仓库文件已在服务器核验，展开后41716866字节；其中322份Git
+  LFS文件已核验内容摘要、大小与原Git指针身份的绑定。初次将展开文件直接按指针摘要比较而失败的记录保留，原内容未改。这里只完成服务器原软件取得；公共准备器的LFS支持、竞赛数据授权获取、原生Agent及官方评分均未完成，来源不打勾。服务器证据：`/var/lib/npc/mlebench-original-source-20261102-001/lfs-qualified-public.json`。
+
 - [x] Playwright官方ARM
   Chromium125.0.6422.26已在任务独立目录准备，34项官方系统依赖仅在专用CPU容器安装，未要求升级已有包。无头浏览器启动及本地静态页面渲染通过，原网站未部署、benchmark任务执行数0、模型调用数0。下载客户端等待超时后已核实原Node进程继续下载，最终复用原下载完成安装，没有重复下载。服务器证据：`webarena-agentlab-dependency-preflight-20261102-001/chromium-smoke-public.json`。
 
