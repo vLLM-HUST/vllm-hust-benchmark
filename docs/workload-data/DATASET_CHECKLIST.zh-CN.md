@@ -783,9 +783,26 @@ blob和大小校验获取，不带凭据、不用改造数据。`--reuse-assets 
 
 - [x] CI运行41363321688的工件13106550478已在服务器独立安装，86份包载荷逐份核对；239条原键的公共及未修改研究消费者回读通过，229条可解析原输入与原作者默认提示材料一致。10条原资产阻塞保留，不过滤或替换。
 - [x] 公共案例准备命令已使用上述CI安装包实际准备原位置0/1/2：元数据、科学数据逐字节匹配固定原资产，参考行匹配原答案表，三个目录隔离。首次核验误把CPU路径用于NPU节点，保留错误记录；仅纠正保存结果核验，没有重做准备或推理。
-- [ ] 将公开actor、隔离工具、模型传输和原评分串成可复用执行入口，完成入口验证后再审计来源总勾；本次准备与回读不算原生执行交付。
+- [x] 公开编排入口`run_discoverybench_native.py`已串接actor、独立科学工具容器、公共模型传输和原评分；专用CPU实际构造原前三题actor通过，所有模型／工具／judge队列为空。73项相关夹具测试通过。此前输出位置、运行时目录权限及核验脚本路径错误保留；成功预检没有运行模型或科学程序。
+- [ ] 公开编排入口的完整`--execute`链路待验证，随后再审计来源总勾；历史原前三题真实执行／评分单列，不为重构入口重新生成回答。本次离线构造与回读不算完整入口验证。
 
 准备命令：`python scripts/prepare_discoverybench_original_cases.py --data-root /external/discoverybench-native-real --output /private/fresh-discovery-cases --positions 0 1 2 --execute`。先安装公共数据包；数据目录布局和固定文件身份见原资产准备入口。省略`--execute`只输出计划。输出必须为仓库及原数据目录之外的新目录；阻塞题停止，不自动换题。输出`cases-private.json`关联原题、元数据、参考和科学文件哈希。工具容器只能挂载对应科学数据，不能挂载含主假设的元数据、评分参考、模型队列或Docker套接字。此命令不启动模型、Agent或评分器。[证据及原生运行边界](validation/discoverybench-original-assets-20261028.json)
+
+公开编排在持有专用Docker权限的Linux
+CPU节点运行，主机Python只需标准库；LLM端点由使用者提供已有NPU服务的回环地址或已授权SSH转发。先准备发布方原软件和科学客户端镜像，镜像须包含原依赖及`/opt/discovery-client/bin/python`（可显式指定其他路径），并传入不可变本地镜像ID与预期Docker
+daemon ID。镜像环境尚未提供一键重建配方，不应把本机已有镜像当成公开可下载镜像。
+
+```bash
+python scripts/run_discoverybench_native.py \
+  --cases /private/cases/cases-private.json \
+  --author-root /private/discoverybench-author \
+  --host-bind-root /private --daemon-bind-root /private \
+  --image sha256:<actual-image-id> --daemon-id <owned-daemon-id> \
+  --output /private/fresh-offline-check --preflight
+```
+
+若Docker
+daemon在独立sidecar，两个bind-root分别指宿主Python与daemon可见的同一专用卷根目录；不得指向他人目录。完整执行使用另一个新输出目录，将`--preflight`改成`--execute --api-base http://127.0.0.1:<port>/v1 --model <actual-model> --judge-model <actual-judge>`；本次14B非思考配置还显式加`--disable-thinking`。原评分的提示、预算和应用级重试不改，替代judge不是官方GPT-4成绩。程序失败保存原输出；基础设施错误保留请求声明及容器身份，不自动重发、换题或删除现场。当前完整公开执行尚未验证，不能仅凭上述预检宣布可交付。
 
 ### Copilot 2026嵌套会话元数据（已交付，非原始请求回放）
 
