@@ -32,6 +32,30 @@ def test_webarena_original_task_assets_are_not_native_completion():
     assert source["discovery_status"].endswith("NATIVE_WEBSITES_PENDING")
 
 
+def test_webarena_complete_original_harness_inventory():
+    pins = json.loads(
+        (ROOT / "configs/workload-native/webarena-author-source.json").read_text(
+            "utf-8"
+        )
+    )
+    source, _ = runner.selection("WEBARENA")
+    assert pins["revision"] == source["revision"]
+    assert pins["repository"] == source["repo_id"]
+    files = {item["path"]: item for item in pins["files"]}
+    assert len(files) == 88 and sum(item["bytes"] for item in files.values()) == 7550641
+    assert {
+        "run.py",
+        "requirements.txt",
+        "LICENSE",
+        "config_files/test.raw.json",
+        "browser_env/auto_login.py",
+        "evaluation_harness/evaluators.py",
+    } <= set(files)
+    assert all(
+        not Path(name).is_absolute() and ".." not in Path(name).parts for name in files
+    )
+
+
 def test_existing_public_source_baseline_positions_match_unchanged_digests():
     """Bookkeeping check, not a substitute for the actual secret scanner."""
     path = "workload-preparation/data/catalogs/source_manifests_v1.json"

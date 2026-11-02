@@ -2,6 +2,15 @@
 
 ### 剩余原生环境前置条件复核（2026-11-02）
 
+- [x] 已复用现有作者源码准备器接入WebArena完整88文件固定清单；服务器对已取得原文件执行plan、prepare复用、verify均通过，未重复下载。完整88文件的全新GitHub
+  API下载分支未实跑，不能冒充已验证；原始取得方式是逐文件Git身份核验的官方归档。
+
+```bash
+python scripts/prepare_jsonschemabench_author_source.py --source webarena --author-root /server/webarena-original-source --action plan
+python scripts/prepare_jsonschemabench_author_source.py --source webarena --author-root /server/webarena-original-source --action prepare --max-bytes 7550641
+python scripts/prepare_jsonschemabench_author_source.py --source webarena --author-root /server/webarena-original-source --action verify
+```
+
 - [x] WebArena同一固定版本的完整官方源码归档已在服务器取得：88份原文件、7550641字节，逐份按官方Git
   tree的大小和blob身份核验，保留原归档。包含原Agent、浏览器环境、评分器及依赖声明；尚未安装浏览器或部署网站，也尚未核验公共完整源码获取入口，不将此项算原生完成。
 

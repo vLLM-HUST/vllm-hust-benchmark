@@ -59,6 +59,7 @@ def main():
             "toolbench",
             "ljspeech-vits",
             "mlagentbench",
+            "webarena",
         ],
         default="jsonschemabench",
         help="Pinned original author source only; historical default unchanged",
