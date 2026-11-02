@@ -30,7 +30,7 @@ ARMS = {
         },
     ),
     "sixteen_k": (
-        "workload_16k.jsonl",
+        "workload_16k.jsonl.gz",
         {
             "first_baseline": "run-16k/baseline",
             "first_approximate512": "run-16k/approximate512",
@@ -46,6 +46,9 @@ HIT = re.compile(
 
 
 def read_rows(path: Path) -> list[dict]:
+    if path.suffix == ".gz":
+        with gzip.open(path, "rt") as source:
+            return [json.loads(line) for line in source if line.strip()]
     return [json.loads(line) for line in path.read_text().splitlines() if line]
 
 
