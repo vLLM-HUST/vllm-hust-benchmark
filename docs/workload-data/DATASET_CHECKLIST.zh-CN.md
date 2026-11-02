@@ -2156,10 +2156,11 @@ PYTHONPATH=workload-preparation/src python scripts/prepare_reused_source_records
   blob与SHA256；未在Windows落盘原始资产。
 - [x] 未修改的`eval_pause_handling.py`和`eval_smooth_turn_taking.py`分别对官方自带的1份输出样例实际运行，均exit0。回执：`/root/full-duplex-original-scorer-controls-20261031-001/qualification-public.json`。这是发布方输出的评分器控制，不是本项目模型结果，也不是固定原前三题的验证。
 - [x] 公共评分器准备入口`prepare_full_duplex_original_scorers.py --verify-only`已在专用CPU核验现有原11文件子集，exit0，无新下载、无重复评分。回执：`/root/full-duplex-public-source-entry-20261031-001/qualification-public.json`。新鲜`--download`的服务器网络路径未通过实测，不冒称整仓或原音频已取得。
-- [x] 官方公开数据目录已定位9份原ZIP：v1.0的Candor暂停/换轮、ICC反馈、合成暂停/打断，v1.5的背景语音、对他人说话、用户反馈/打断。官方文档分别列727和499条；目录声明的文件ID和字节数已记录到机器清单，尚无下载后的内容校验，不将可变Drive文件ID当作版本哈希。CPU原探测已终止并保留网络不可达失败；NPU直接IPv4访问也失败。目录元信息通过内存转交服务器保存，本地未保存或下载原音频。
+- [x] 官方公开数据目录已定位9份原ZIP：v1.0的Candor暂停/换轮、ICC反馈、合成暂停/打断，v1.5的背景语音、对他人说话、用户反馈/打断。官方文档分别列727和499条；目录声明的文件ID和字节数已记录到机器清单，不将可变Drive文件ID当作版本哈希。初次盘点仅取得目录元信息；后续原包获取及内容校验见下一项。CPU/NPU直接访问失败均保留，本地未保存数据文件。
 - [x] 全部9份官方原ZIP已在服务器取得，共705372348字节；全部ZIP
   CRC与路径安全检查、2576份原JSON解析通过，原3119份WAV成员保持原样。用户反馈原包实际98条而文档写99条，原字段为`backchannel_text`而非文档示例的`current_turn_text`，均未补造或改名；该包392份原WAV已完整读取PCM，其他包仅作ZIP层完整性核验，不混称均已解码。CPU/NPU直连失败保留，成功获取经有界内存中转，本地无数据文件；9份原包未解压重复占盘。观察到的SHA256及服务器回执见机器清单`original_archive_acquisition`，不是作者发布的校验码。
-- [ ] 公共原数据获取入口、原始时序与媒体关系的provider接入。
+- [x] 公共原包准备入口`prepare_full_duplex_original_assets.py`已接入统一source-plan；格式化后的候选脚本在服务器对9份原ZIP完成plan、prepare既有文件复用、verify，2576份原JSON核验通过。原包以同文件系统硬链接复用，没有复制原始数据；这是候选代码的真实CLI验证，不是当前CI工件或新鲜公网下载验证。回执：`/root/full-duplex-public-assets-entry-20261103-002/qualification-public.json`。
+- [ ] 原始时序与媒体关系的provider接入。
 - [ ] 合适的NPU双工语音模型、原生输入/输出音频、ASR和适用完整评分、输出消费闭环。模型调用仍为0，总项不打勾。
 
 公共入口在仓库根目录运行，原资产仅写服务器外部目录；评分脚本依赖发布方要求中的`tqdm`，不需要模型、ASR或外部judge。官方样例输出不代表本项目模型输出。

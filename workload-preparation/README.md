@@ -1858,6 +1858,26 @@ export TRANSFORMERS_OFFLINE=1
 
 分配器上限只是资源保护，不改变模型精度、批量或原评分。首轮4GiB保护上限在第一批原交叉熵计算失败，日志保留；5GiB配置已完成全部35,948行／1126个批次，8份原CSV困惑度保存成功，原float32批次loss／exp经NPU标量独立重算全部精确一致，复核没有重新执行模型。当前代码两项CI、实际工件独立安装、全部原字段／索引及24条公共／当前研究消费交接均已通过，见[交付回执](../docs/workload-data/validation/temporalwiki-base-probes-native-delivery-20261101.json)。入口记录每文件原CSV困惑度和逐批原loss；CPU浮点模拟存在末位差异，不能混称逐位相同。失败、低分或缺失结果照实保留，不换题、换评分器或伪造训练checkpoint。
 
+## Full-Duplex-Bench 原始语音归档
+
+[官方数据说明](https://github.com/DanielLin94144/Full-Duplex-Bench/blob/3e799c45a045256f47d5f1c9cda90157e2d2ec9e/v1_v1.5/dataset/README.md)链接到9份v1.0/v1.5原ZIP，覆盖暂停、换轮、反馈、打断和重叠语音。Candor/ICC子集遵循CC
+BY-NC4.0及上游条款，发布方合成子集遵循MIT；不能把软件许可证当作全部数据的统一许可证。
+
+原包只放服务器仓库外目录。Python标准库即可执行以下准备命令，无需模型、ASR或观测环境：
+
+```bash
+python scripts/prepare_full_duplex_original_assets.py --output /srv/workloads/fdb --action plan
+python scripts/prepare_full_duplex_original_assets.py --output /srv/workloads/fdb --action prepare --max-bytes 705372348
+python scripts/prepare_full_duplex_original_assets.py --output /srv/workloads/fdb --action verify
+```
+
+默认plan不联网、不创建目录。prepare从官方公开下载入口取得原ZIP；已有文件须通过固定大小、观察到的SHA256、ZIP路径/CRC及JSON解析检查后才复用，失败残留不会被覆盖。程序不解压、不生成prompt、不执行模型或接受受限数据条款。若服务器无法访问Google
+Drive，可按官方目录自行取得文件，按`v1.0/<原文件名>.zip`、`v1.5/<原文件名>.zip`放入输出目录，再执行verify；文件ID、大小及固定摘要见[机器清单](../docs/workload-data/dataset-validation-status.json)的`FULL_DUPLEX_BENCH`。这些SHA256来自本次官方文件获取记录，不是作者发布的校验码；若上游文件变化，入口会拒绝静默替换。
+
+服务器已取得全部9原包并完成公开入口的plan、prepare既有原文件复用及verify。该验证未证明服务器直接公网下载分支可用，也不是原生语音推理。用户反馈子集原包实际98条而文档写99条，原字段为`backchannel_text`，保持原样；不补造第99条或改成文档示例字段。
+
+当前尚无统一provider的原始时序/媒体关系读取，也未完成NPU双工模型、转写、原生推理及评分交接。原始Moshi客户端需要独立语音服务，原转写脚本使用NeMo并明确调用CUDA，不能直接用文本模型或CPU神经推理替代。官方评分器准备入口及发布方样例控制见[清单](../docs/workload-data/DATASET_CHECKLIST.zh-CN.md)，样例分数不代表本项目模型输出。
+
 ## PaperBench 原始论文任务包
 
 [PaperBench 原始发布](https://github.com/openai/frontier-evals/tree/b78dab1da774a6456b1ed9c48c9ff194ee3ff36d/project/paperbench)用于论文复现实验，不是把论文文本当成单轮问答。公共资产入口只取得发布方的论文、配置和评分配套材料，不包含论文复现所需的全部外部科学数据。
