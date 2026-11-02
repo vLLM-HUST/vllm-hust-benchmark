@@ -2,6 +2,13 @@
   "version": "adapter-extensions/v1",
   "boundary": "Field contracts from publisher metadata/docs. No real source payload downloaded or full adapter validation claimed.",
   "adapters": {
+    "VIDEOMME_V2": {
+      "kind": "native_environment_dataset", "mapping": "videomme_v2_original_complete_groups",
+      "input_fields": [], "required_fields": ["original_rows"],
+      "outcome_fields": [], "annotation_fields": [], "id_field": null,
+      "requirements": ["One native record is a complete original four-question group, not four independent tasks", "Original eleven string fields, opaque options/group structure and ordered answer relations are preserved", "Original media,64-frame native preprocessing and grouped nonlinear scorer remain separate requirements"],
+      "status": "ORIGINAL_COMPLETE_GROUPS_SOURCE_VALIDATED_CI_WHEEL_PENDING"
+    },
     "DISCOVERYBENCH": {
       "kind": "native_environment_dataset", "mapping": "discoverybench_original_real_tasks",
       "input_fields": [], "required_fields": ["original_key", "original_query", "original_prompt_material", "metadata_path", "native_files", "blockers"],

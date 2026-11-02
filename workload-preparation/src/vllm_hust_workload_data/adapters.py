@@ -14,6 +14,11 @@ from .registry import adapter_spec, source_spec
 
 def iter_source_rows(path, spec):
     """Use one source view for reading, binding and index resolution."""
+    if spec["mapping"] == "videomme_v2_original_complete_groups":
+        from .videomme_v2 import original_rows
+
+        yield from original_rows(path)
+        return
     if spec["mapping"] == "discoverybench_original_real_tasks":
         from .discoverybench import original_rows
 
@@ -199,6 +204,10 @@ def adapt_row(
     source_id: str, row: dict, *, source: dict, spec: dict, index: int
 ) -> WorkloadRecord:
     """Projection is explicit/allowlisted; outcome fields never become task inputs."""
+    if spec["mapping"] == "videomme_v2_original_complete_groups":
+        from .videomme_v2 import adapt_case
+
+        return adapt_case(row, source=source, index=index)
     if spec["mapping"] == "discoverybench_original_real_tasks":
         from .discoverybench import adapt_case
 
@@ -922,10 +931,20 @@ def iter_workload(
                 yield record
                 count += 1
                 emitted += 1
+            expected_records = file_spec.get("rows")
+            if (
+                spec["mapping"] == "videomme_v2_original_complete_groups"
+                and expected_records is not None
+            ):
+                if type(expected_records) is not int or expected_records % 4:
+                    raise ValueError(
+                        "original annotation count must preserve complete four-question groups"
+                    )
+                expected_records //= 4
             if (
                 remaining is None
-                and file_spec.get("rows") is not None
-                and count != file_spec["rows"]
+                and expected_records is not None
+                and count != expected_records
             ):
                 raise ValueError(f"source row count mismatch: {source_id}/{name}")
         finally:

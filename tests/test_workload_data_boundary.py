@@ -18,6 +18,7 @@ DATA_MODULES = {
     "appworld",  # Original task/database/shared/reference file relations only.
     "livecodebench",  # Original scenario fields and case/reference relations only.
     "videomme",  # Original task/option/reference/media-locator relations only.
+    "videomme_v2",  # Original complete group/reference/media locators; no execution.
     "mvbench",  # Original ordered video task/media/answer relations only.
     "naturebench",  # Original package/material references only, no scientific execution.
     "deepplanning",  # Original queries/metadata/database references only.

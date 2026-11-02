@@ -1319,17 +1319,29 @@ LMM
 ### Video-MME-v2资产与原协议准备（尚未交付）
 
 - [x] 四份固定发布方原文件共9046844字节已在服务器取得，Git/LFS身份核验通过；包含全3200题和原800份字幕，不含视频，Windows无原始文件落盘。
+
 - [x] 全3200题的11字段、800个完整四题组与原顺序、字幕对应关系及ZIP CRC核验通过；未拆散四题组或用旧Video-MME数据替换。
+
 - [x] 三份官方协议源码共49432字节核验；原非线性分组评分器通过参考答案/CPU控制，不是模型评分，不计来源完成。
+
 - [x] 六个冻结完整原组对应的视频001/002/003/009/013/016共697616024字节已在服务器取得，原2,020,332,935字节压缩包的发布方LFS
   SHA256、六成员CRC和保留媒体独立SHA均核验。没有转码、裁剪或移除音轨。已核对公开准备器与实跑代码一致；74项相关视频夹具测试通过，这不是完整解码或推理。
+
 - [x] 旧压缩包在下载／提取进程终止、整包身份及六媒体独立哈希复核后已精确清理，释放约2GB；六段原媒体与证据保留，压缩包可按固定官方URL重新取得。未删除模型、其他数据集或原失败证据。
-- [ ] 六个固定完整原组共24题的完整解码、64帧原提示、合适NPU配置、实际原生推理与评分；当前32图服务配置不能冒充64帧配置，不为跑通缩帧。
+
+- [x] 六段固定原视频完整解码通过，共103832帧（001/002/003/009/013/016分别12675/19262/5797/15070/35828/15200帧）；终态与每段原媒体后验哈希均核验。音轨仍保存在原视频中，本次未解码音频，未运行模型。
+
+- [ ] 六个固定完整原组共24题的64帧原提示、合适NPU配置、实际原生推理与评分；原32图服务配置不能冒充64帧配置，不为跑通缩帧。
+
 - [ ] 原字段/媒体/分组适配与固定安装工件消费闭环；[阶段回执](validation/videomme-v2-original-preparation-20261029.json)明确区分资产、软件控制和实际执行，来源仍不打总勾。
+
+- [x] 当前源码公共组适配已在服务器全量核验：3200原题按原顺序生成800个完整四题组，11个原字符串字段逐项还原，答案只在参考侧，800个字幕ID关系及已取得6段媒体身份匹配。公共及未修改研究消费者完成800组回读，索引和消费者源码未变。首次逻辑记录计数失败保留；修正为原3200行／每组4题的显式计数规则，未改成800条原标注或删除题目。本项尚不是实际CI安装包验证或原生模型执行。
+
+公共数据入口现在支持`iter_workload("VIDEOMME_V2", data_root=...)`及统一pipeline。数据根保留四份发布方原文件的路径，视频另放`videos/<原ID>.mp4`；字幕保持原`subtitle.zip`。pipeline配置为`{"sources":[{"source_id":"VIDEOMME_V2","data_root":"/external/videomme-v2"}]}`，执行`python -m vllm_hust_workload_data.pipeline run --config /external/v2-config.json --output /external/fresh-v2-prepared`即可准备800组引用索引。原Parquet有3200题，但一个可读记录是完整四题组；`options`和`group_structure`保持原字符串，不用旧版的选项列表适配器。`restore_original_group(record)`还原四条原记录供原框架／评分读取，不是可直接发送给模型的请求；它会检查参考与题号的逐题绑定。媒体解码、原64帧提示、模型及原分组评分仍须走原生入口，不能拿800组读取成功代替。
 
 媒体准备：先将固定官方`videos/001.zip`下载到服务器的仓库外目录（URL、大小、SHA和冻结ID由`python scripts/prepare_videomme_v2_fixed_media.py`只读输出），然后执行`python scripts/prepare_videomme_v2_fixed_media.py --archive /external/001.zip --output /external/fresh-videomme-v2-media --execute`。原包约2.02GB，默认新提取数据预算4GiB，另保留256MiB磁盘余量；这个预算不包含已存在的原包。缺失、重复、非法成员、CRC或整包身份失败均停止，不换视频。当前服务器用显式镜像传输取得原包，整包SHA仍以官方固定版本为准；准备器自身不负责联网下载。输出仅原MP4及媒体身份回执，不读取答案、不构造prompt、不做模型评分。
 
-已取得媒体可不依赖原包再次核验：`python scripts/prepare_videomme_v2_fixed_media.py --verify-media-root /external/saved-media --output /external/fresh-media-audit --execute`。完整视频流解码再加`--decode --ffmpeg /trusted/prefix/bin/ffmpeg`，并为该进程配置其已有运行库路径；使用两线程CPU将全部视频帧解码到null输出，不抽帧、不改尺寸、不输出新视频，不调用NPU或模型。音轨保留在原文件中，本检查不解码音频。输出逐文件帧数、原媒体哈希、解码器版本和哈希；任何解码错误／超时均保留失败，不换媒体。服务器已复用既有FFmpeg4.4.8低优先级开始六段完整解码，当前只确认001的12675帧完成，整体仍在运行，不将部分进度作为全部解码通过。
+已取得媒体可不依赖原包再次核验：`python scripts/prepare_videomme_v2_fixed_media.py --verify-media-root /external/saved-media --output /external/fresh-media-audit --execute`。完整视频流解码再加`--decode --ffmpeg /trusted/prefix/bin/ffmpeg`，并为该进程配置其已有运行库路径；使用两线程CPU将全部视频帧解码到null输出，不抽帧、不改尺寸、不输出新视频，不调用NPU或模型。音轨保留在原文件中，本检查不解码音频。输出逐文件帧数、原媒体哈希、解码器版本和哈希；任何解码错误／超时均保留失败，不换媒体。服务器已复用既有FFmpeg4.4.8低优先级开始六段完整解码，现已完成六段全部103832帧解码；这不代表原生64帧推理、音频任务或来源整体交付。
 
 ## 本轮完整交付清单（2026-10-24）
 
