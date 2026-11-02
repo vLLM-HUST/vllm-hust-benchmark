@@ -1,0 +1,156 @@
+{
+  "schema": "m01-b1-formal-public-bound/v1",
+  "status": "B1_timed_F_and_reference_lower_bound_correspondence_qualified",
+  "effective_basic_F_interval_per_repetition": [
+    1812705120593615,
+    1812879444816795
+  ],
+  "target_basic_F": 1768657893978445,
+  "draft_basic_F_interval": {
+    "lower": 44047226615170,
+    "upper": 44221550838350
+  },
+  "prefill_segments": 217,
+  "reference_method": "Previously fixed independently calibrated component/resource DAG; same method and leaf values. Certified lower bound over every compatible terminal branch; no exact full timed reference point is asserted.",
+  "Tref_lower_seconds": "46.86772263772173",
+  "repetitions": [
+    {
+      "name": "uninstrumented-1",
+      "synchronized_seconds": "93.280719797",
+      "effective_basic_F_interval": [
+        1812705120593615,
+        1812879444816795
+      ],
+      "C_TFLOPS_per_chip_interval": [
+        "9.716397582150268664055171731127288269418",
+        "9.717331988657633578487597613236500699041"
+      ],
+      "Tref_lower_seconds": "46.86772263772173",
+      "eta_percent_lower": "50.24374033531958466947806243245170785332",
+      "midterm50_supported_by_lower_bound": true,
+      "source_sha256": "0407c570c288265d9b5038a7e2a87eb1e8ea87553551785c7f6695a073ab2a86"
+    },
+    {
+      "name": "uninstrumented-2",
+      "synchronized_seconds": "71.653411446",
+      "effective_basic_F_interval": [
+        1812705120593615,
+        1812879444816795
+      ],
+      "C_TFLOPS_per_chip_interval": [
+        "12.64911944883266235323580883618826267824",
+        "12.65033588933187972527897719378043526182"
+      ],
+      "Tref_lower_seconds": "46.86772263772173",
+      "eta_percent_lower": "65.40892009453387554484868148143691385856",
+      "midterm50_supported_by_lower_bound": true,
+      "source_sha256": "c5bea9d69988f75e68fe6c141965a13e23d8a34533a11fb84a00bff465c12a10"
+    },
+    {
+      "name": "uninstrumented-3",
+      "synchronized_seconds": "70.356381742",
+      "effective_basic_F_interval": [
+        1812705120593615,
+        1812879444816795
+      ],
+      "C_TFLOPS_per_chip_interval": [
+        "12.88230772896256794546857923892239716991",
+        "12.88354659471194129106412625217914947733"
+      ],
+      "Tref_lower_seconds": "46.86772263772173",
+      "eta_percent_lower": "66.61474265346357071905148911033094610330",
+      "midterm50_supported_by_lower_bound": true,
+      "source_sha256": "9a198f5dcb9e6a062b9caac2a69040508e82d4210c852fd8b007f1f671113746"
+    }
+  ],
+  "aggregate": {
+    "repetitions": 3,
+    "chips": 2,
+    "sum_synchronized_seconds": "235.290512985",
+    "sum_effective_basic_F_interval": [
+      5438115361780845,
+      5438638334450385
+    ],
+    "C_TFLOPS_per_chip_interval": [
+      "11.55617218218978970364541151540045804027",
+      "11.55728351613799130414607863752751977536"
+    ],
+    "sum_Tref_lower_seconds": "140.60316791316519",
+    "eta_percent_lower": "59.75726183321670061341678705592882024036",
+    "midterm50_supported_by_lower_bound": true,
+    "final90_supported_by_lower_bound": false
+  },
+  "calculation": {
+    "C": "sum(F)/(2*sum(T)*10^12)",
+    "eta_lower": "100*sum(Tref_lower)/sum(T)",
+    "threshold": "Original current milestone50%; no change",
+    "F": "target projection + causal QK/AV + target vocabulary + target scalar/GDN decode + exact217segment GDN prefill + exhaustive retained-draft closure interval"
+  },
+  "source_applicability": "Original r6 physical/logical request-local dependency equivalence, unchanged functional source, observer-removal AST audit; native public geometry invariant under all terminal clipping branches and cache receipt orders by source/capacity proof. Original no-reuse/no-preemption domain preserved.",
+  "quality_scope": "Fixed200MMLU-Pro requests, identical max256/temperature0/seed0 conditions. All outputs length-terminated. This is a fixed-budget service measurement, not the separate full-answer benchmark score; no quality improvement claim.",
+  "acceptance_scope": "B1 component of3.4.1 satisfies current50% using conservative bound. Overall task remains open for B0 corresponding F/reference and benchmark/website publication verification.",
+  "no_new_model_run": true,
+  "source_sha256": [
+    {
+      "artifact": "manifest.json",
+      "sha256": "a443f5c16326ff25d875ce487d1ed39dc25e0a20a7a4a650f4e2ad7dce6610b7"
+    },
+    {
+      "artifact": "public-geometry-independent-audit-r1.json",
+      "sha256": "d324e97ce3b6fc48462168b3ea123ec79316f00def5866de97b84e4c6376bbbc"
+    },
+    {
+      "artifact": "independent-collection-audit-r3.json",
+      "sha256": "98ab14fd08b526fe0b559e8895260e3c3ffbe4f5fcef0c157198461c21355f4d"
+    },
+    {
+      "artifact": "uninstrumented-1.json.gz",
+      "sha256": "0407c570c288265d9b5038a7e2a87eb1e8ea87553551785c7f6695a073ab2a86"
+    },
+    {
+      "artifact": "uninstrumented-2.json.gz",
+      "sha256": "c5bea9d69988f75e68fe6c141965a13e23d8a34533a11fb84a00bff465c12a10"
+    },
+    {
+      "artifact": "uninstrumented-3.json.gz",
+      "sha256": "9a198f5dcb9e6a062b9caac2a69040508e82d4210c852fd8b007f1f671113746"
+    },
+    {
+      "artifact": "counted-arithmetic-r1.json",
+      "sha256": "3f72edabd94eeff3b1ea26387df46ea14b504385746c6803e03a4c2d50767b4e"
+    },
+    {
+      "artifact": "observed-prefill-partitions-r1.json",
+      "sha256": "2873df2762ede284f43945d62ef27047b2568863376955314adee0195375204e"
+    },
+    {
+      "artifact": "observer-removal-source-correspondence-r1.json",
+      "sha256": "432c59e775545ed39b22592074afc2b852628c8c90de73b85fa481ef60e21992"
+    },
+    {
+      "artifact": "qualify_b1_timed_bounds_r1.py",
+      "sha256": "38fa4cd9063b1cded9f4be1c7b9587c914b36eb1ef3b843c7aeb3e03e1716ff5"
+    },
+    {
+      "artifact": "terminal-envelope-domain-r1.json",
+      "sha256": "83c87e0ce26b25f0494761fdd3cb4913f5cbf75e84f1c4dabc3c646bb77b82c5"
+    },
+    {
+      "artifact": "terminal-lower-independent-audit-r1.json",
+      "sha256": "45bc760aaa20ba2e4c9a55ae2048165fe2313407d3949dd9aaecc38725750252"
+    },
+    {
+      "artifact": "terminal-reference-lower-r1.json",
+      "sha256": "650a7b34e68066a225e5f820325b896f71208aa2a7a4dc01c54c466ce3872ab0"
+    },
+    {
+      "artifact": "r6-logical-dependency-comparison.json",
+      "sha256": "f4ebdd1bc4b3bc02e428d862b69eb67ffb07323c6849d05be946cd1aa945682d"
+    }
+  ],
+  "export_provenance": {
+    "original_filename": "b1-timed-conservative-qualification-r1.json",
+    "original_sha256": "c805c04a1710aae4b1851ec29ed3b446532260ae08ba7f7f90424cdf8f920924",
+    "kind": "public_evidence_projection"
+  }
+}
