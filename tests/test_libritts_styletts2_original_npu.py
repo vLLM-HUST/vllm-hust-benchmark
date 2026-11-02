@@ -44,3 +44,24 @@ def test_notebook_definitions_preserved_not_rewritten():
     notebook["cells"][2]["source"] = [inference + "other_statement = True\n"]
     with pytest.raises(ValueError, match="single unchanged"):
         entry.notebook_definitions(notebook)
+
+
+def test_exact_snapshot_source_does_not_require_head(monkeypatch, tmp_path):
+    seen = []
+
+    def git(command, **kwargs):
+        parts = command[3:]
+        seen.append(parts)
+        assert parts in (
+            ["write-tree"],
+            ["diff", "--name-only"],
+            ["ls-files", "--others"],
+        )
+        return entry.AUTHOR_TREE + "\n" if parts == ["write-tree"] else ""
+
+    monkeypatch.setattr(entry.subprocess, "check_output", git)
+    entry.verify_author_source(tmp_path)
+    assert len(seen) == 3
+    monkeypatch.setattr(entry.subprocess, "check_output", lambda *a, **k: "wrong-tree")
+    with pytest.raises(ValueError, match="exact unchanged"):
+        entry.verify_author_source(tmp_path)

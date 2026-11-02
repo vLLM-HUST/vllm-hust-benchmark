@@ -52,12 +52,8 @@ def notebook_definitions(notebook):
     return preprocess, inference_cell
 
 
-def execute(args):
-    output = args.output.resolve()
-    if output.exists() or output.is_relative_to(ROOT):
-        raise ValueError("fresh external output directory required")
-    author = args.author_root.resolve()
-    pins = json.loads(PINS.read_text("utf-8"))
+def verify_author_source(author):
+    """Accept exact source trees, including verified codeload snapshots without HEAD."""
 
     def git(*parts):
         return subprocess.check_output(
@@ -65,12 +61,20 @@ def execute(args):
         ).strip()
 
     if (
-        git("rev-parse", "HEAD") != pins["author_revision"]
-        or git("write-tree") != AUTHOR_TREE
+        git("write-tree") != AUTHOR_TREE
         or git("diff", "--name-only")
         or git("ls-files", "--others")
     ):
         raise ValueError("exact unchanged pinned publisher source required")
+
+
+def execute(args):
+    output = args.output.resolve()
+    if output.exists() or output.is_relative_to(ROOT):
+        raise ValueError("fresh external output directory required")
+    author = args.author_root.resolve()
+    pins = json.loads(PINS.read_text("utf-8"))
+    verify_author_source(author)
     for item in pins["files"]:
         verify(args.model_root / item["path"], item)
     with args.archive.open("rb") as stream:
