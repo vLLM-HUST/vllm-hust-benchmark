@@ -2,6 +2,10 @@
 
 ### 剩余原生环境前置条件复核（2026-11-02）
 
+- [x] OSWorld公共归档准备入口已在服务器通过plan、prepare、verify，复用原归档、0模型调用；统一`source-plan OSWORLD`登记入口和缺口。命令为`python scripts/prepare_swebench_author_source.py --profile osworld --author-root /server/osworld-source --action plan`，prepare另传`--archive /server/original-osworld.tar.gz`，verify复核同一目录。官方Docker
+  Hub元数据显示镜像为linux/amd64；当前ARM64
+  CPU节点未注册binfmt仿真器。原Ubuntu.qcow2.zip为12273896463字节，卷余7.6GiB不足以容纳压缩包，因此未下载。主仓准备通过不是桌面环境或原生任务完成。
+
 - [x] OSWorld固定版本的主仓1324份原文件已在服务器核验，共21403779字节，当前test_all含368个任务；两个Agent
   Git子模块尚未取得，不宣称完整Agent环境。官方Docker
   provider明确在缺KVM时设置`KVM=N`，因此不能仅以缺KVM判定无法执行。官方容器架构、原桌面镜像、Agent与评分仍待核验；本次容器元数据请求遇到网络不可达，未下载镜像层。来源仍不打勾。证据：`/var/lib/npc/osworld-original-harness-20261103-001/qualification-public.json`。

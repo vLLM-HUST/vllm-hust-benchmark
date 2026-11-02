@@ -400,6 +400,7 @@ def test_lfs_pointer_only_download_is_not_expanded_payload(tmp_path):
         ("webarena", "WEBARENA", 88, 7550641),
         ("mlebench", "MLEBENCH", 758, 7501882),
         ("visualwebarena", "VISUALWEBARENA", 478, 200942354),
+        ("osworld", "OSWORLD", 1324, 21403779),
     ],
 )
 def test_reused_archive_profiles_plan_only(tmp_path, profile, source, count, size):
@@ -460,3 +461,26 @@ def test_visualwebarena_source_plan_exposes_software_not_native_completion():
         "config_files/vwa/test_reddit.raw.json",
     } <= paths
     assert not any(path.startswith(("media/", "tests/")) for path in paths)
+
+
+def test_osworld_source_plan_does_not_hide_submodule_and_vm_gaps():
+    from vllm_hust_workload_data.provider import delivery_source_plan
+
+    entries = delivery_source_plan("OSWORLD")["entrypoints"]
+    assert any("--profile osworld" in entry["scope"] for entry in entries)
+    assert any(
+        "submodules" in entry["scope"] and "VM" in entry["scope"] for entry in entries
+    )
+    pins = json.loads(
+        (
+            SCRIPTS.parent / "configs/workload-native/osworld-author-source.json"
+        ).read_text("utf-8")
+    )
+    paths = {item["path"] for item in pins["files"]}
+    assert {
+        "desktop_env/providers/docker/provider.py",
+        "desktop_env/providers/docker/manager.py",
+        "evaluation_examples/test_all.json",
+        "run.py",
+    } <= paths
+    assert "separate unqualified" in pins["scope"]

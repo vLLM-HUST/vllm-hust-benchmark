@@ -21,6 +21,10 @@
     {"source_id": "PAIO-SEMANTIC-SIMILAR-5000", "asset_group": "enterprise-private-requests", "related_workload_ids": [], "boundary": "Semantic similarity is not exact-prefix or KV reuse; preserve original private requests without rewriting."}
   ],
   "source_entrypoints": {
+    "OSWORLD": [
+      {"role":"prepare_assets","path":"scripts/prepare_swebench_author_source.py","scope":"Use --profile osworld: fixed original main repository,1324 files verified on server; Git submodules,desktop VM,Agent and scoring remain unqualified"},
+      {"role":"original_profile","path":"configs/workload-native/osworld-author-source.json","scope":"Publisher main-repository byte/Git identities; not desktop VM or Agent qualification"}
+    ],
     "VISUALWEBARENA": [
       {"role":"prepare_assets","path":"scripts/prepare_swebench_author_source.py","scope":"Use --profile visualwebarena: fixed official archive,478 unchanged original software/task/bundled asset files,server plan/prepare/verify passed; external websites,Agent and scoring remain unqualified"},
       {"role":"original_profile","path":"configs/workload-native/visualwebarena-author-source.json","scope":"Pinned publisher byte and Git identities only; not a completed native run or website image acquisition"}
