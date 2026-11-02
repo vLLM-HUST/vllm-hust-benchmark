@@ -2,6 +2,10 @@
 
 ### 剩余原生环境前置条件复核（2026-11-02）
 
+- [x] OSWorld固定版本的主仓1324份原文件已在服务器核验，共21403779字节，当前test_all含368个任务；两个Agent
+  Git子模块尚未取得，不宣称完整Agent环境。官方Docker
+  provider明确在缺KVM时设置`KVM=N`，因此不能仅以缺KVM判定无法执行。官方容器架构、原桌面镜像、Agent与评分仍待核验；本次容器元数据请求遇到网络不可达，未下载镜像层。来源仍不打勾。证据：`/var/lib/npc/osworld-original-harness-20261103-001/qualification-public.json`。
+
 - [x] NatureBench第三道固定原题的原版评分服务已在对应合格科学环境中启动，独立回环端口18324健康检查通过；只读挂载原数据，不挂Docker套接字，0模型调用。第二题继续运行，第三题Agent尚未启动，来源仍不打勾。证据：`/var/lib/npc/naturebench-third-evaluator-20261103-001/state-public.json`。
 
 - [x] VisualWebArena已复用公共归档准备器：478份原生软件、任务配置、网站准备与仓内参考资产共200942354字节，在服务器通过plan、prepare、verify，复用原归档、没有重复下载。仅排除media演示和tests；网站镜像及题目外链媒体仍需另行准备。公共仓仅存固定摘要元数据，不存这些原文件。用法如下（先plan查看官方固定归档地址）：

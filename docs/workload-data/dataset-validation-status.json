@@ -3315,13 +3315,28 @@
     "OSWORLD": {
       "scope": "public",
       "delivery_kind": "review_original_source_protocol",
-      "status": "NOT_STARTED",
+      "status": "ORIGINAL_MAIN_REPOSITORY_ACQUIRED_NATIVE_PENDING",
       "checked": false,
       "legacy_checked": false,
       "existing_receipt": null,
       "delivery_receipt": null,
-      "blocker": "2026-11-02 read-only preflight: dedicated CPU dev container is aarch64 and exposes none of /dev/kvm,/dev/vhost-net,/dev/net/tun. Original desktop image/provider/Agent/evaluation not qualified. KVM absence is not proof all official providers are impossible; VMware, VirtualBox and authenticated remote providers remain unconfigured alternatives. No external paid provider started.",
-      "official_protocol_url": "https://github.com/xlang-ai/OSWorld#installation"
+      "blocker": "2026-11-03: fixed original main repository verified. Dedicated CPU is aarch64 with no /dev/kvm,/dev/vhost-net,/dev/net/tun, but the original Docker provider explicitly supports KVM=N. Actual remaining gaps are official container architecture/runtime compatibility, original desktop image and task initialization, selected Agent dependencies/submodules and native evaluation. Official container metadata probe hit network unreachable. No paid remote provider or model call started.",
+      "official_protocol_url": "https://github.com/xlang-ai/OSWorld#installation",
+      "original_source_preparation": {
+        "revision": "0e4318d5d0af2135e71fb7aec6bf08d8fbd89cd9",
+        "main_repository_files_verified": 1324,
+        "original_bytes": 21403779,
+        "archive_bytes": 11381619,
+        "main_repository_git_submodules_acquired": false,
+        "official_task_count_in_current_test_all": 368,
+        "official_docker_provider_no_kvm_fallback": "Original provider sets KVM=N when /dev/kvm is absent; absence alone does not establish impossibility",
+        "official_container": "happysixd/osworld-docker:latest; architecture and layer identities not yet verified",
+        "container_metadata_probe": "Control-node auth.docker.io request failed with network unreachable; no image layers downloaded",
+        "vm_image_acquired_or_executed": false,
+        "source_receipt": "/var/lib/npc/osworld-original-harness-20261103-001/qualification-public.json",
+        "model_calls": 0,
+        "source_checkbox_eligible": false
+      }
     },
     "XSUM": {
       "scope": "public",
