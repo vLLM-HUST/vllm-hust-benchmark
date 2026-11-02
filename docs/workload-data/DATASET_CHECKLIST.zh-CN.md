@@ -2,6 +2,8 @@
 
 ### 剩余原生环境前置条件复核（2026-11-02）
 
+- [x] BrowserGym安装包中的812条WebArena任务与固定官方`test.raw.json`逐字节一致，任务ID集合及所有任务字段均一致，差异任务为0。该结果只证明任务身份保持，不代表Agent、网站或评分已跑通；服务器证据：`webarena-agentlab-dependency-preflight-20261102-001/original-task-identity-public.json`。
+
 - [x] WebArena官方推荐框架路径已完成独立CPU环境准备：AgentLab0.4.2、BrowserGym
   WebArena0.14.2；复用官方发布锁文件的252项约束，安装、隔离`pip check`及禁网导入通过，vLLM后端类可用，0网络尝试、0模型调用。原浮动解析超时、二进制限定解析失败、CANN全局`PYTHONPATH`污染及NLTK资源缺失记录保留；只对本进程使用`-I`隔离，不改全局环境。
 
