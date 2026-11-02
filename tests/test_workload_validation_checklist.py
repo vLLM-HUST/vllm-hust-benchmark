@@ -37,6 +37,14 @@ def test_libritts_publisher_model_bytes_are_not_native_tts_completion():
     assert preparation["candidate_model"] == "yl4579/StyleTTS2-LibriTTS"
     assert preparation["candidate_checkpoint_bytes"] == 771390526
     assert preparation["source_files_verified"] == 48
+    client = preparation["isolated_client_preparation"]
+    assert client["pip_check_returncode"] == 0
+    assert client["readonly_torch_vendor_links_preserved"]
+    assert client["original_modules_imported_with_forward_and_weight_loading_blocked"]
+    binding = preparation["strict_architecture_binding"]
+    assert binding["modules_strictly_loaded_from_published_main_checkpoint"] == 13
+    assert binding["auxiliary_training_metadata_not_deserialized"]
+    assert binding["every_neural_forward_blocked"] and binding["model_calls"] == 0
     assert (
         preparation["model_calls"] == 0 and not preparation["source_checkbox_eligible"]
     )

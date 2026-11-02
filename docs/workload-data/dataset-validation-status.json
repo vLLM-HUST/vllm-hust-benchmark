@@ -5529,6 +5529,33 @@
           "npu_context_initialized": false,
           "protected_services_unchanged": true
         },
+        "isolated_client_preparation": {
+          "stage": "libritts-styletts2-isolated-client-20261102-001 under shared task root",
+          "resolved_new_distributions": 77,
+          "resolver_plan_excludes_torch_and_torch_npu_replacement": true,
+          "readonly_torch_vendor_links_preserved": true,
+          "pip_check_returncode": 0,
+          "additional_undeclared_dependency": "six==1.17.0 for original phonemizer2.2.1 import; initial failure retained",
+          "original_alignment_extension": "resemble-ai/monotonic_align c6e5e6cb19882164027eb6e35118e841eed9298e, exact tree5ff078c3392999c0dec3ad39ec8cf1582156ff7e; built in owned source copy, original untouched",
+          "alignment_receipt": "libritts-monotonic-original-extension-20261102-001/state-public.json under shared task root",
+          "original_import_receipt": "libritts-styletts2-original-imports-20261102-002/qualification-public.json under shared task root",
+          "original_modules_imported_with_forward_and_weight_loading_blocked": true,
+          "npu_context_initialized": false,
+          "model_calls": 0
+        },
+        "strict_architecture_binding": {
+          "receipt": "libritts-styletts2-state-loading-20261102-002/qualification-public.json under shared task root",
+          "original_model_builder_and_constructors_unchanged": true,
+          "modules_strictly_loaded_from_published_main_checkpoint": 13,
+          "module_prefix_removal_only": true,
+          "unused_checkpoint_module": "mwd; not constructed by original build_model, not an omitted inference module",
+          "auxiliary_training_metadata_not_deserialized": true,
+          "initial_failure": "Original ASR auxiliary checkpoint includes optimizer/scheduler/getattr pickle globals rejected by weights_only. No unsafe allowlisting or weights_only=False used; main checkpoint already contains full final states for all13 original modules.",
+          "every_neural_forward_blocked": true,
+          "npu_context_initialized": false,
+          "model_calls": 0,
+          "source_checkbox_eligible": false
+        },
         "author_source": "https://github.com/yl4579/StyleTTS2",
         "author_revision": "5cedc71c333f8d8b8551ca59378bdcc7af4c9529",
         "author_tree": "ac9c64d908d0bdca127de56bec33c6f78d519c52",
@@ -5538,7 +5565,7 @@
         "source_receipt": "qualification-public.json under source_stage; whole original Git tree reproduced, no author Python imports or neural weights loaded",
         "official_native_notebook": "Demo/Inference_LibriTTS.ipynb",
         "reason": "Publisher LibriTTS-trained multispeaker reference-conditioned model and original inference notebook; do not label an LJ Speech single-speaker checkpoint as LibriTTS official evaluation or invent missing speaker vectors",
-        "remaining": ["Full original runtime dependencies and architecture/NPU device compatibility", "Preserve fixed original text/reference-waveform/speaker conditioning and author sampler budget", "NPU-only neural execution, native output validation and handoff"],
+        "remaining": ["Original speech frontend/tokenizer data and NPU neural-device compatibility", "Preserve fixed original text/reference-waveform/speaker conditioning and author sampler budget", "NPU-only neural execution, native output validation and handoff"],
         "model_calls": 0,
         "source_checkbox_eligible": false
       },

@@ -1318,6 +1318,10 @@ LMM
 
 ### LibriTTS多说话人TTS准备（尚未交付）
 
+- [x] 隔离客户端77项新依赖已安装并通过`pip check`，安装计划未替换Torch／torch_npu，原只读vendor链接保留。按原Git树编译作者要求的monotonic_align扩展，源码未改；补齐旧phonemizer漏声明的six后，原模块导入通过。导入检查期间禁止所有神经前向和权重加载，未初始化NPU上下文。
+
+- [x] 原模型构造器／build_model构建的13个模块全部从发布方主检查点严格加载参数，只移除保存时的`module.`键前缀。ASR辅助包的旧训练调度器pickle被安全加载器拒绝，旧失败保留；不放宽安全反序列化，改从已包含全部最终参数的主检查点加载，未改网络计算定义、未缺失参数或补随机权重。检查时禁止所有前向，0神经调用；尚不是NPU模型验证。回执`libritts-styletts2-state-loading-20261102-002/qualification-public.json`。
+
 - [x] 主权重已在独立检查中用`torch.load(weights_only=True, map_location="cpu")`安全读取，14个网络状态、1475个张量共872183356字节。只做张量反序列化／元数据检查，没有构建或前向执行模型、没有初始化NPU上下文，现有服务身份未变；不代表NPU适配成功。服务器回执`libritts-styletts2-safe-checkpoint-20261102-001/qualification-public.json`。下方“未加载／未反序列化”均指各自早期源码／下载阶段，非此后检查状态。
 
 - [x] 复用已核验的原test-other整包964502297字节、5120条原文／规范化文本／参考WAV关系，以及实际CI包和原研究消费者固定3条回读；不重新下载原数据。
