@@ -21,6 +21,10 @@
     {"source_id": "PAIO-SEMANTIC-SIMILAR-5000", "asset_group": "enterprise-private-requests", "related_workload_ids": [], "boundary": "Semantic similarity is not exact-prefix or KV reuse; preserve original private requests without rewriting."}
   ],
   "source_entrypoints": {
+    "VISUALWEBARENA": [
+      {"role":"prepare_assets","path":"scripts/prepare_swebench_author_source.py","scope":"Use --profile visualwebarena: fixed official archive,478 unchanged original software/task/bundled asset files,server plan/prepare/verify passed; external websites,Agent and scoring remain unqualified"},
+      {"role":"original_profile","path":"configs/workload-native/visualwebarena-author-source.json","scope":"Pinned publisher byte and Git identities only; not a completed native run or website image acquisition"}
+    ],
     "VIDEOMME_V2": [
       {"role": "prepare_assets", "path": "scripts/prepare_reused_research_assets.py", "scope": "Original pinned annotation and subtitle assets; invoke with source_id VIDEOMME_V2, no native execution"},
       {"role": "prepare_assets", "path": "scripts/prepare_videomme_v2_fixed_media.py", "scope": "Frozen six original validation videos, publisher archive/member identity and full decode; not all800 videos"},

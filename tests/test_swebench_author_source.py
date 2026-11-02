@@ -425,6 +425,14 @@ def test_reused_archive_profiles_plan_only(tmp_path, profile, source, count, siz
 
 
 def test_visualwebarena_source_plan_exposes_software_not_native_completion():
+    from vllm_hust_workload_data.provider import delivery_source_plan
+
+    plan = delivery_source_plan("VISUALWEBARENA")
+    assert any(
+        entry["path"] == "scripts/prepare_swebench_author_source.py"
+        and "--profile visualwebarena" in entry["scope"]
+        for entry in plan["entrypoints"]
+    )
     catalog = json.loads(
         (
             SCRIPTS.parent
