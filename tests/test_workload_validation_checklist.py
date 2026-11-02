@@ -275,8 +275,11 @@ def test_discoverybench_original_assets_are_not_native_completion():
     assert receipt["original_bytes"] == 54085184
     assert receipt["core_client_preparation"]["installed_distributions"] == 110
     assert receipt["core_client_preparation"]["original_requirements_changed"] is False
-    assert row["checked"] is False and row["delivery_receipt"] is None
-    assert receipt["model_calls"] == 0 and receipt["benchmark_executed"] is False
+    # A later native delivery must cite its own evidence, not this asset receipt.
+    assert row["delivery_receipt"] != preparation["receipt"]
+    assert preparation["benchmark_executed"] is False
+    assert receipt["model_calls"] == 0
+    assert receipt["historical_preparation_benchmark_executed"] is False
     assert receipt["source_checkbox_eligible"] is False
 
 
