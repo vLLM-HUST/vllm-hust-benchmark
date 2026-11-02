@@ -3,6 +3,7 @@
 import importlib.util
 from pathlib import Path
 import zipfile
+from types import SimpleNamespace
 
 import pytest
 
@@ -77,3 +78,52 @@ def test_duplicate_same_video_member_is_not_silently_chosen(tmp_path):
         archive.writestr("another/001.mp4", b"ambiguous")
     with zipfile.ZipFile(path) as archive, pytest.raises(ValueError, match="ambiguous"):
         entry.selected_members(archive, ["001"])
+
+
+def test_saved_media_hash_audit_does_not_require_deleted_archive(tmp_path):
+    archive, profile = fixture(tmp_path)
+    media = tmp_path / "media"
+    entry.extract(profile, archive, media, budget=1024)
+    archive.unlink()
+    args = SimpleNamespace(
+        verify_media_root=media, output=tmp_path / "audit", decode=False
+    )
+    report = entry.verify_media(profile, args)
+    assert report["status"] == "SAVED_ORIGINAL_MEDIA_HASHES_VERIFIED_NOT_DECODED"
+    assert report["model_calls"] == 0
+    assert report["source_checkbox_eligible"] is False
+
+
+def test_saved_media_change_is_not_silently_accepted(tmp_path):
+    archive, profile = fixture(tmp_path)
+    media = tmp_path / "media"
+    entry.extract(profile, archive, media, budget=1024)
+    (media / "001.mp4").write_bytes(b"modified")
+    args = SimpleNamespace(
+        verify_media_root=media, output=tmp_path / "audit", decode=False
+    )
+    with pytest.raises(ValueError, match="identity differs"):
+        entry.verify_media(profile, args)
+
+
+def test_decoder_command_is_full_cpu_video_to_null_not_frame_sampling():
+    command = entry.decode_command(Path("/trusted/ffmpeg"), Path("/media/001.mp4"))
+    assert command[command.index("-threads") + 1] == "2"
+    assert command[command.index("-f") + 1] == "null"
+    assert command[command.index("-vsync") + 1] == "0"
+    assert command[-1] == "-"
+    assert not any(
+        flag in command for flag in ("-ss", "-t", "-frames:v", "-vf", "-hwaccel")
+    )
+    assert (
+        entry.decoded_frames("frame=25\nprogress=continue\nframe=100\nprogress=end\n")
+        == 100
+    )
+
+
+@pytest.mark.parametrize(
+    "progress", ["frame=0\nprogress=end", "frame=100\nprogress=continue"]
+)
+def test_decoder_requires_terminal_positive_frames(progress):
+    with pytest.raises(ValueError, match="terminal"):
+        entry.decoded_frames(progress)

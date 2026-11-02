@@ -91,7 +91,7 @@ def unique_object(pairs):
     return result
 
 
-def test_videomme_v2_small_assets_do_not_claim_video_or_native_delivery():
+def test_videomme_v2_small_asset_profile_is_separate_from_media_and_delivery():
     source, files = runner.selection("VIDEOMME_V2")
     assert {item["path"] for item in files} == {
         "README.md",
@@ -128,7 +128,11 @@ def test_videomme_v2_small_assets_do_not_claim_video_or_native_delivery():
         receipt["official_recommended_frames"] > receipt["current_service_image_limit"]
     )
     assert receipt["model_calls"] == receipt["local_windows_raw_files_written"] == 0
-    assert not receipt["source_checkbox_eligible"] and not receipt["videos_acquired"]
+    assert not receipt["source_checkbox_eligible"]
+    assert receipt["videos_acquired"]
+    assert receipt["selected_original_video_files"] == 6
+    assert receipt["video_acquisition_scope"].endswith("not all800 videos")
+    assert not receipt["native_inference_and_scoring_completed"]
     inventory = json.loads(
         (ROOT / "docs/workload-data/dataset-validation-status.json").read_text("utf-8")
     )["delivery_inventory"]["VIDEOMME_V2"]

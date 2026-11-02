@@ -1329,6 +1329,8 @@ LMM
 
 媒体准备：先将固定官方`videos/001.zip`下载到服务器的仓库外目录（URL、大小、SHA和冻结ID由`python scripts/prepare_videomme_v2_fixed_media.py`只读输出），然后执行`python scripts/prepare_videomme_v2_fixed_media.py --archive /external/001.zip --output /external/fresh-videomme-v2-media --execute`。原包约2.02GB，默认新提取数据预算4GiB，另保留256MiB磁盘余量；这个预算不包含已存在的原包。缺失、重复、非法成员、CRC或整包身份失败均停止，不换视频。当前服务器用显式镜像传输取得原包，整包SHA仍以官方固定版本为准；准备器自身不负责联网下载。输出仅原MP4及媒体身份回执，不读取答案、不构造prompt、不做模型评分。
 
+已取得媒体可不依赖原包再次核验：`python scripts/prepare_videomme_v2_fixed_media.py --verify-media-root /external/saved-media --output /external/fresh-media-audit --execute`。完整视频流解码再加`--decode --ffmpeg /trusted/prefix/bin/ffmpeg`，并为该进程配置其已有运行库路径；使用两线程CPU将全部视频帧解码到null输出，不抽帧、不改尺寸、不输出新视频，不调用NPU或模型。音轨保留在原文件中，本检查不解码音频。输出逐文件帧数、原媒体哈希、解码器版本和哈希；任何解码错误／超时均保留失败，不换媒体。服务器已复用既有FFmpeg4.4.8低优先级开始六段完整解码，当前只确认001的12675帧完成，整体仍在运行，不将部分进度作为全部解码通过。
+
 ## 本轮完整交付清单（2026-10-24）
 
 2026-10-25补充复核：原37项复核与研究人员七批23项成果去重为46个有历史获取/准备/验证记录的来源（含本轮仅分类项及受限子集，不是46个完整benchmark）。其中此前遗漏的8项已有48份原文件身份，本轮已复用固定版本、URL与校验和，并提供统一离线计划/原文件校验入口；没有重新下载9.51GB原数据，也未复制研究特征、观测或分析。详见[复用审计](validation/research-acquisition-reuse-audit-20261025.json)。这些来源改标“历史资产已复用、原生待补”，不再用“未开始”掩盖已有成果；准备映射、原生执行和固定工件消费未收口前，完成勾保持不勾。
