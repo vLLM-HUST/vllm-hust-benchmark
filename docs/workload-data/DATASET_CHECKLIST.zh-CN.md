@@ -1340,6 +1340,10 @@ LMM
 - [x] 官方工具包 CPU 导入环境已核验：私有依赖目录使用 PyArrow19.0.1、Decord0.6.0、portalocker3.2.0及官方所需补充依赖；不升级全局
   NumPy。官方类默认64帧已确认。工具包会导入`torch_npu`模块，但实测未初始化NPU上下文，0模型调用。各轮原失败日志保留。
 
+- [ ] 提示的自包含缓存交接：首次真实入口在发出请求前发现原帧落在官方默认缓存目录，被边界检查拒绝，0模型调用。原因是官方`LMUDataRoot`只接受已存在的目录，准备器漏建目录。现已补建独立缓存及路径边界检查，同配置原CPU准备正在`videomme-v2-original-prompts-20261102-003`重新运行，旧帧、提示和失败日志保留。尚待新终态和原生消费核验，不把原目录的生成成功计为交接完成。
+
+- [x] 用户授权的本线程服务32→64图调整已完成，原9B模型、精度、262144上下文、内存比例及其他参数不变。新API594476／birth878851616健康检查通过，14B服务及周期队列未改。该项仅服务就绪，不是原题推理通过。
+
 原64帧提示准备入口：`python scripts/prepare_videomme_v2_original_prompts.py --official-checkout /external/pinned-VLMEvalKit --data-root /external/original-metadata --media-root /external/saved-media --output /external/fresh-native-prompts --execute`。需先配置官方工具包的CPU依赖及已核验Decord运行库，并安装公共数据包。入口使用未修改的官方构造器、抽帧和提示函数，冻结每种原组类型前3组、共24题，保留全部3200条标注及6段原视频；用硬链接准备独立离线缓存，因此输入和输出须在同一文件系统。设计输出为原提示及384个独立帧文件，不调用模型或评分。默认不加`--execute`只输出计划。首次服务器运行在官方构造器生成完整TSV后停止：生成MD5为`ecd7dbb2900f0cb549d4e85b64af1476`，与官方类固定MD5不同，尚待逐字段与序列化核查；未开始抽帧／模型推理，不据此勾选交付。原失败与完整TSV保留，未跳过校验。
 
 - [x] 原字段／媒体定位／分组适配及实际CI安装包消费闭环：b40f68dd的CPU

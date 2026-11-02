@@ -77,6 +77,8 @@ def test_identical_frame_outside_prepared_root_not_accepted(tmp_path):
     record["original_prompt"][0]["value"] = str(outside)
     with pytest.raises(ValueError, match="escaped"):
         entry.validate_record(record, original, 0, owned)
+    with pytest.raises(ValueError, match="escaped"):
+        entry.check_prompt(record["original_prompt"], original, owned_root=owned)
 
 
 def test_default_plan_does_not_require_assets_or_call_model():

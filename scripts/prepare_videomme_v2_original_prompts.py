@@ -62,7 +62,7 @@ def sha256(path):
     return value.hexdigest()
 
 
-def check_prompt(prompt, original):
+def check_prompt(prompt, original, owned_root=None):
     images = [item["value"] for item in prompt if item["type"] == "image"]
     texts = [item["value"] for item in prompt if item["type"] == "text"]
     if (
@@ -75,6 +75,11 @@ def check_prompt(prompt, original):
         raise ValueError(
             "original64 frames and unchanged original question/options required"
         )
+    if owned_root is not None and any(
+        not Path(path).resolve(strict=True).is_relative_to(owned_root)
+        for path in images
+    ):
+        raise ValueError("original frame cache escaped the owned preparation root")
     return images
 
 
@@ -180,6 +185,8 @@ def prepare(args):
         os.link(media / item["path"], snapshot / "video" / (item["video_id"] + ".mp4"))
     (repository / "refs").mkdir()
     (repository / "refs/main").write_text(manifest["revision"], encoding="utf-8")
+    # LMUDataRoot ignores a supplied directory unless it already exists.
+    (output / "native-cache").mkdir(mode=0o700)
     os.environ.update(
         HF_HUB_OFFLINE="1",
         HF_HUB_DISABLE_TELEMETRY="1",
@@ -236,7 +243,7 @@ def prepare(args):
         ):
             raise ValueError("native original question/reference/order changed")
         prompt = dataset.build_prompt(position, video_llm=False)
-        images = check_prompt(prompt, original)
+        images = check_prompt(prompt, original, owned_root=output)
         records.append(
             {
                 "source_index": position,
