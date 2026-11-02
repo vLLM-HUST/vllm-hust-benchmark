@@ -2,6 +2,10 @@
 
 ### 剩余原生环境前置条件复核（2026-11-02）
 
+- [x] VisualWebArena官方固定版本的511份原文件已在服务器按Git对象与SHA256核验，共212274671字节；原任务含classifieds 234、shopping
+  466、reddit
+  210，共910题。这里只完成取得和盘点，没有执行网站初始化、登录、Agent或评分，来源仍不打勾。剩余条件是原可复位网站、题目引用媒体及合适的NPU视觉Agent/评分后端；不能用公开网页demo或伪装GPT模型名替代。证据：`/var/lib/npc/visualwebarena-original-harness-20261102-001/qualification-public.json`和同目录`original-task-inventory-public.json`。
+
 - [x] MLE-bench原版Python 3.11客户端安装、pip check及官方CLI
   help已在专用CPU容器通过。首次help因原代码在当前目录建立cache、而工作目录只读而失败；保留失败记录，仅改为本任务可写工作目录后，在禁网容器复核help退出0，未改源码。此项不代表官方完整Agent镜像、竞赛数据或评分完成，来源仍不打勾。证据：`/root/swe-bench/docker-data/mlebench-cpu-client-20261102-001/client-help-writable-public.json`。
 
