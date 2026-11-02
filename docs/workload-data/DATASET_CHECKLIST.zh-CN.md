@@ -49,6 +49,8 @@ judge，须在调用记录和报告中明确实际模型及评分配置，不能
 
 ### LongMemEval-V2 正向记忆流程准备（2026-11-02）
 
+- [x] RAG公开执行入口补齐`--embedding-assets /external/embedding/model`，同时建立固定reader与嵌入模型的离线缓存；清除继承的`HF_HUB_CACHE`／`HUGGINGFACE_HUB_CACHE`／`TRANSFORMERS_CACHE`覆盖，避免误读其他任务缓存。服务器核验原reader12份、嵌入模型13份元数据及原嵌入tokenizer离线加载通过，全部神经前向和权重加载被禁止。首次缓存覆盖失败保留；回执`lme-v2-dual-offline-cache-20261102-002/qualification-public.json`。本项0模型调用，不代表正向RAG已跑通，来源仍未完成。
+
 - [x] 451道原题的8个原始字段及两档有序记忆关联已与官方读取器逐项核对；企业/网页两域、small/medium四组代表记忆完整回读（100/500/100/479条轨迹），保留历史状态，不重新构造prompt。
 
 - [x] 当前源码公共入口与未修改的研究侧入口完成4条记录回读一致性检查；451条索引及研究读取器前后未改变。该验证未使用安装后的CI
