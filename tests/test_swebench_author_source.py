@@ -401,6 +401,7 @@ def test_lfs_pointer_only_download_is_not_expanded_payload(tmp_path):
         ("mlebench", "MLEBENCH", 758, 7501882),
         ("visualwebarena", "VISUALWEBARENA", 478, 200942354),
         ("osworld", "OSWORLD", 1324, 21403779),
+        ("paperbench", "PAPERBENCH", 189, 2114286),
     ],
 )
 def test_reused_archive_profiles_plan_only(tmp_path, profile, source, count, size):

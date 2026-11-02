@@ -60,6 +60,7 @@ def main():
             "ljspeech-vits",
             "mlagentbench",
             "webarena",
+            "paperbench",
         ],
         default="jsonschemabench",
         help="Pinned original author source only; historical default unchanged",

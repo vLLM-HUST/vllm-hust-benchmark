@@ -91,6 +91,7 @@ def main():
             "mlebench",
             "visualwebarena",
             "osworld",
+            "paperbench",
         ],
         default="current",
         help="Original software profiles; SWE-bench default unchanged. WebArena/MLE-bench use existing official archives,not task execution.",
@@ -107,6 +108,7 @@ def main():
         "mlebench": PINS.with_name("mlebench-author-source.json"),
         "visualwebarena": PINS.with_name("visualwebarena-author-source.json"),
         "osworld": PINS.with_name("osworld-author-source.json"),
+        "paperbench": PINS.with_name("paperbench-author-source.json"),
     }
     pins_path = profiles[args.profile]
     pins = json.loads(pins_path.read_text(encoding="utf-8"))

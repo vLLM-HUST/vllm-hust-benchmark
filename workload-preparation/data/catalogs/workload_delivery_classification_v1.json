@@ -21,6 +21,11 @@
     {"source_id": "PAIO-SEMANTIC-SIMILAR-5000", "asset_group": "enterprise-private-requests", "related_workload_ids": [], "boundary": "Semantic similarity is not exact-prefix or KV reuse; preserve original private requests without rewriting."}
   ],
   "source_entrypoints": {
+    "PAPERBENCH": [
+      {"role":"prepare_assets","path":"scripts/prepare_swebench_author_source.py","scope":"Use --profile paperbench:189 original runtime/common files only; LFS papers/rubrics,locked chz dependency,Agent,reproduction and grading remain separate requirements"},
+      {"role":"prepare_assets","path":"scripts/prepare_jsonschemabench_author_source.py","scope":"Use --source paperbench: fixed Git blob preparation without whole-repository LFS hydration; supply explicit byte budget and respect GitHub API limits"},
+      {"role":"original_profile","path":"configs/workload-native/paperbench-author-source.json","scope":"Original runtime/common identities only,not native task or author historical experiments"}
+    ],
     "OSWORLD": [
       {"role":"prepare_assets","path":"scripts/prepare_swebench_author_source.py","scope":"Use --profile osworld: fixed original main repository,1324 files verified on server; Git submodules,desktop VM,Agent and scoring remain unqualified"},
       {"role":"original_profile","path":"configs/workload-native/osworld-author-source.json","scope":"Publisher main-repository byte/Git identities; not desktop VM or Agent qualification"}

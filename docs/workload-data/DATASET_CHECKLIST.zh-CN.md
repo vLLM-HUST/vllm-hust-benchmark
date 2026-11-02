@@ -2,6 +2,19 @@
 
 ### 剩余原生环境前置条件复核（2026-11-02）
 
+- [x] PaperBench的189份原生运行代码及common依赖共2114286字节已通过官方Git
+  blob接口取得并在服务器核验，未传输凭据、未取得LFS任务数据，排除作者历史实验目录。公共原文件入口在已有文件上通过plan/prepare/verify；归档入口也通过，但验证输入是服务器按已核验原文件打的软件包，不是重新下载的完整官方归档。初次验证误将输出放进软件目录而被拒绝的记录保留，修正为独立输出目录后通过。原uv.lock含206个包，另有固定chz
+  Git依赖；尚未安装完整环境、未运行Agent/复现/评分，来源仍不打勾。
+
+  ```bash
+  python scripts/prepare_jsonschemabench_author_source.py --source paperbench --author-root /server/paperbench-source --action plan
+  python scripts/prepare_jsonschemabench_author_source.py --source paperbench --author-root /server/paperbench-source --max-bytes 2114286 --action prepare
+  python scripts/prepare_jsonschemabench_author_source.py --source paperbench --author-root /server/paperbench-source --action verify
+  ```
+
+  新文件获取需GitHub
+  API可达并有足够配额；本轮未验证服务器从零获取全部189文件。不要盲目下载包含全部LFS数据的大归档，也不要把未展开指针当论文/评分规则。软件证据：`/var/lib/npc/paperbench-official-api-software-20261103-001/qualification-public.json`；公共入口证据：`/var/lib/npc/paperbench-public-source-entry-20261103-001/qualification-public.json`。
+
 - [x] OSWorld公共归档准备入口已在服务器通过plan、prepare、verify，复用原归档、0模型调用；统一`source-plan OSWORLD`登记入口和缺口。命令为`python scripts/prepare_swebench_author_source.py --profile osworld --author-root /server/osworld-source --action plan`，prepare另传`--archive /server/original-osworld.tar.gz`，verify复核同一目录。官方Docker
   Hub元数据显示镜像为linux/amd64；当前ARM64
   CPU节点未注册binfmt仿真器。原Ubuntu.qcow2.zip为12273896463字节，卷余7.6GiB不足以容纳压缩包，因此未下载。主仓准备通过不是桌面环境或原生任务完成。
