@@ -2,6 +2,9 @@
 
 ### 剩余原生环境前置条件复核（2026-11-02）
 
+- [x] PaperBench客户端安装、pip
+  check、原版editable源码路径及可写HOME已核验；195份运行软件与48份固定chz源码逐文件保持原字节，CPU工作区的506份材料也已核验。禁网检查中，原版注册器解析23个论文配置，作者`check_for_lfs`在all/debug/dev/human/testing五种划分均通过，分别20/1/3/5/1项。真实`--help`正常打印完整参数，但该固定chz版本的帮助分支原本就退出1；已核验原源码语义，不篡改退出码、不误报为运行失败。初次只读HOME/普通wheel缺划分目录的失败保留，按原工作区editable方式修正。此项仍不是Agent、复现或评分完成。证据：CPU工作区`/root/swe-bench/docker-data/paperbench-native-client-20261103-001/original-client-readiness-public.json`。
+
 - [x] PaperBench公开的原始论文资产准备入口已在服务器完成全部506份既有原文件的plan、prepare复用、verify；并分别用新目录验证一份原LFS文件和一份原普通Git文件的真实下载。没有重复下载全部506份，也未据此宣称完整从零获取链路在所有网络环境通过。使用下列命令，原文件只放服务器仓库外目录；输出会给出原版运行器所需的`PAPERBENCH_DATA_DIR`。
 
   ```bash
