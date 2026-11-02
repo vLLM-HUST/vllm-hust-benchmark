@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import argparse
 import contextlib
+import gzip
 import hashlib
 import json
 import os
@@ -193,12 +194,18 @@ def main() -> None:
         parser.error("rollback must use a different wheel")
     assert_port_free(args.port)
     args.output.mkdir(parents=True, exist_ok=True)
+    input_bytes = (
+        gzip.decompress(args.input.read_bytes())
+        if args.input.suffix == ".gz"
+        else args.input.read_bytes()
+    )
+    input_sha256 = hashlib.sha256(input_bytes).hexdigest()
     if args.resume_completed:
-        if digest(args.input) != digest(args.output / "input.jsonl"):
+        if input_sha256 != digest(args.output / "input.jsonl"):
             parser.error("resume input differs from the original replay")
     else:
-        shutil.copyfile(args.input, args.output / "input.jsonl")
-    rows = [json.loads(line) for line in args.input.read_text().splitlines() if line]
+        (args.output / "input.jsonl").write_bytes(input_bytes)
+    rows = [json.loads(line) for line in input_bytes.decode().splitlines() if line]
     if not rows or len({row["id"] for row in rows}) != len(rows):
         parser.error("input must contain unique request IDs")
 
@@ -236,7 +243,7 @@ def main() -> None:
         "device": args.device,
         "model": str(args.model),
         "model_config_sha256": digest(args.model / "config.json"),
-        "input_sha256": digest(args.input),
+        "input_sha256": input_sha256,
         "requests_per_arm": len(rows),
         "final_wheel_sha256": digest(args.final_wheel),
         "rollback_wheel_sha256": digest(args.rollback_wheel),
