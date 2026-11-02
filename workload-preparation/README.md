@@ -1857,3 +1857,32 @@ export TRANSFORMERS_OFFLINE=1
 ```
 
 分配器上限只是资源保护，不改变模型精度、批量或原评分。首轮4GiB保护上限在第一批原交叉熵计算失败，日志保留；5GiB配置已完成全部35,948行／1126个批次，8份原CSV困惑度保存成功，原float32批次loss／exp经NPU标量独立重算全部精确一致，复核没有重新执行模型。当前代码两项CI、实际工件独立安装、全部原字段／索引及24条公共／当前研究消费交接均已通过，见[交付回执](../docs/workload-data/validation/temporalwiki-base-probes-native-delivery-20261101.json)。入口记录每文件原CSV困惑度和逐批原loss；CPU浮点模拟存在末位差异，不能混称逐位相同。失败、低分或缺失结果照实保留，不换题、换评分器或伪造训练checkpoint。
+
+## PaperBench 原始论文任务包
+
+[PaperBench 原始发布](https://github.com/openai/frontier-evals/tree/b78dab1da774a6456b1ed9c48c9ff194ee3ff36d/project/paperbench)用于论文复现实验，不是把论文文本当成单轮问答。公共资产入口只取得发布方的论文、配置和评分配套材料，不包含论文复现所需的全部外部科学数据。
+
+在仓库根目录先查看获取计划，再在服务器仓库外目录准备、校验原文件：
+
+```bash
+python scripts/prepare_paperbench_original_assets.py --output /srv/workloads/paperbench --action plan
+python scripts/prepare_paperbench_original_assets.py --output /srv/workloads/paperbench --action prepare --max-bytes 213434104
+python scripts/prepare_paperbench_original_assets.py --output /srv/workloads/paperbench --action verify
+```
+
+准备后的根目录作为`data_root`。安装本软件包后，已有统一入口可读取23个原始论文目录：
+
+```python
+from pathlib import Path
+from vllm_hust_workload_data import iter_workload
+
+for record in iter_workload("PAPERBENCH", data_root=Path("/srv/workloads/paperbench")):
+    original_yaml = record.task["input"]["original_config_yaml"]
+    problem_references = record.task["input"]["paper_assets"]
+    grading_references = record.outcome["evaluation_assets"]
+```
+
+任务ID是原始论文目录名；原配置按UTF-8原文保留，不宣称已解析其全部语义。404份任务材料引用与79份评分材料引用分离；评分材料不进入`input_record()`。所有506份文件在读取前及关闭迭代器时核验内容身份。`request_body()`会拒绝将论文任务包冒充模型请求。需要引用索引时，沿用统一pipeline和`resolve_input`，评分文件仍须作为受控评测材料管理，不能发送给参测Agent。
+
+服务器已安装成功CI运行41493282959的工件13165601157，90份Git／包内／安装文件一致，并在该安装包下完成全部23个任务包、公共端23次及未修改研究consumer23次索引回读，索引未改变。对应软件提交为`d42097da`；这些是公共数据能力接通证据，不是Agent执行证据。原始客户端依赖、CLI帮助语义和五种划分的资产检查已核验；原生`paperbench.nano.entrypoint`的Agent执行、复现及评分尚未完成，仍不能将此来源勾选为完整交付。当前官方Agent
+Dockerfile包含x86_64安装依赖及自动接受条款步骤，须先核验执行环境和授权，不能在ARM64节点直接宣称原版环境已可用。完整证据及剩余缺口见[统一机器清单](../docs/workload-data/dataset-validation-status.json)的`PAPERBENCH`项。
