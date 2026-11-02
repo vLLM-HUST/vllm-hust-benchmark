@@ -401,7 +401,7 @@ def test_lfs_pointer_only_download_is_not_expanded_payload(tmp_path):
         ("mlebench", "MLEBENCH", 758, 7501882),
         ("visualwebarena", "VISUALWEBARENA", 478, 200942354),
         ("osworld", "OSWORLD", 1324, 21403779),
-        ("paperbench", "PAPERBENCH", 189, 2114286),
+        ("paperbench", "PAPERBENCH", 195, 2114907),
     ],
 )
 def test_reused_archive_profiles_plan_only(tmp_path, profile, source, count, size):
@@ -485,3 +485,18 @@ def test_osworld_source_plan_does_not_hide_submodule_and_vm_gaps():
         "run.py",
     } <= paths
     assert "separate unqualified" in pins["scope"]
+
+
+def test_paperbench_keeps_required_original_splits_not_historical_results():
+    pins = json.loads(
+        (
+            SCRIPTS.parent / "configs/workload-native/paperbench-author-source.json"
+        ).read_text("utf-8")
+    )
+    experiment_files = {
+        x["path"] for x in pins["files"] if "/experiments/" in x["path"]
+    }
+    assert experiment_files == {
+        "project/paperbench/experiments/splits/" + name + ".txt"
+        for name in ["all", "debug", "dev", "human", "lite", "testing"]
+    }

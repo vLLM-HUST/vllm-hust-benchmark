@@ -2,13 +2,18 @@
 
 ### 剩余原生环境前置条件复核（2026-11-02）
 
+- [x] PaperBench发布的23个论文目录、506份原始论文/评分规则/配套资产共213434104字节已在服务器全部核验；这不是23个独立benchmark，也不等于论文实验所需的外部科学数据集均已取得。首轮487份成功、19份受网络及限定回退次数影响而失败，失败记录保留；19份从同一官方Git
+  blob接口恢复后，全506份重新做字节及Git/LFS身份核验，未替换材料。原始材料不进入公开仓库。证据：`/var/lib/npc/paperbench-original-task-assets-20261103-001/complete-original-assets-public.json`。Agent、复现实验及评分未执行，来源仍不打勾。
+
+- [x] 补齐原生软件实际依赖的六份`experiments/splits/*.txt`，原软件选择现为195文件、2114907字节；只加入官方划分，不加入作者历史实验结果。修正后的两个公共准备入口在服务器重新通过plan/prepare/verify。证据：`/var/lib/npc/paperbench-public-source-entry-20261103-002/qualification-public.json`。下文189文件是先前运行代码/common准备的历史记录，不是最新完整软件选择。
+
 - [x] PaperBench的189份原生运行代码及common依赖共2114286字节已通过官方Git
   blob接口取得并在服务器核验，未传输凭据、未取得LFS任务数据，排除作者历史实验目录。公共原文件入口在已有文件上通过plan/prepare/verify；归档入口也通过，但验证输入是服务器按已核验原文件打的软件包，不是重新下载的完整官方归档。初次验证误将输出放进软件目录而被拒绝的记录保留，修正为独立输出目录后通过。原uv.lock含206个包，另有固定chz
   Git依赖；尚未安装完整环境、未运行Agent/复现/评分，来源仍不打勾。
 
   ```bash
   python scripts/prepare_jsonschemabench_author_source.py --source paperbench --author-root /server/paperbench-source --action plan
-  python scripts/prepare_jsonschemabench_author_source.py --source paperbench --author-root /server/paperbench-source --max-bytes 2114286 --action prepare
+  python scripts/prepare_jsonschemabench_author_source.py --source paperbench --author-root /server/paperbench-source --max-bytes 2114907 --action prepare
   python scripts/prepare_jsonschemabench_author_source.py --source paperbench --author-root /server/paperbench-source --action verify
   ```
 
