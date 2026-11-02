@@ -93,7 +93,23 @@ for record in iter_workload("MSMARCO_PASSAGE", data_root=Path("/data/msmarco-ori
 RAM，不隐式创建磁盘数据缓存。CRLF只作为行分隔符处理，查询/段落中的空格、引号和制表符不改写。
 
 `task.input` 只包含原始 query 与候选，原四列 qrels 留在 `outcome.references`；原始查询和 passage ID、候选原顺序均保留，不生成聊天
-prompt 或负例。服务器已核验全部6,980查询/6,668,967候选和固定前三查询绑定；NPU重排、原Microsoft MRR评分及实际CI工件/研究消费者交接尚未完成。
+prompt 或负例。服务器已核验全部6,980查询/6,668,967候选和固定前三查询绑定。
+
+原生执行使用独立NPU客户端：配套的
+`torch==2.10.0`/`torch-npu==2.10.0.post4`（实际Torch分发版本含`+cpu`，神经前向由torch-npu在NPU执行），`sentence-transformers==5.1.2`、`transformers==4.57.3`。本次复用已有BEIR客户端，不修改服务环境。先取得固定原Microsoft评估器：
+
+```bash
+git clone https://github.com/microsoft/MSMARCO-Passage-Ranking /data/msmarco-author
+git -C /data/msmarco-author checkout 28b369395881cdc50eb69173dcf2f94eb247395e
+python scripts/run_msmarco_original.py run --data-root /data/msmarco-original --author-root /data/msmarco-author --model-root /data/msmarco-reranker/model --output /data/msmarco-run-001 --limit 3 --device npu:0
+python scripts/run_msmarco_original.py score --data-root /data/msmarco-original --author-root /data/msmarco-author --rankings /data/msmarco-run-001/rankings.private.tsv --output /data/msmarco-score-001 --limit 3
+```
+
+`run`只允许NPU。固定FP32、eager
+attention、模型原生512长度策略和128批大小，完整原始query/passage对交给发布方CrossEncoder；不自造prompt、替换负例或改参考答案。默认前三查询，`--all-queries`运行全部原始查询。`score`只重算已保存排名，不载入模型。原评估器对选中查询的全部原始qrels计分，而不是从候选集合生成标签；参考中未被检索到的passage
+ID仍保留。
+
+已实跑前三查询的全部3,000候选，官方MRR@10为0.5，逐查询倒数排名为1、1/4、1/4，独立复算一致；这不是全量论文成绩或引擎性能结论。实际CI工件及研究消费者交接仍待完成，来源总勾尚未打。
 
 ## 安装与来源查询
 
