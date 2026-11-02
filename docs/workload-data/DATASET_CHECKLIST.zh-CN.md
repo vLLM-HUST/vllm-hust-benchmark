@@ -2,6 +2,17 @@
 
 ### 剩余原生环境前置条件复核（2026-11-02）
 
+- [x] PaperBench公开的原始论文资产准备入口已在服务器完成全部506份既有原文件的plan、prepare复用、verify；并分别用新目录验证一份原LFS文件和一份原普通Git文件的真实下载。没有重复下载全部506份，也未据此宣称完整从零获取链路在所有网络环境通过。使用下列命令，原文件只放服务器仓库外目录；输出会给出原版运行器所需的`PAPERBENCH_DATA_DIR`。
+
+  ```bash
+  python scripts/prepare_paperbench_original_assets.py --output /server/paperbench-assets --action plan
+  python scripts/prepare_paperbench_original_assets.py --output /server/paperbench-assets --action prepare --max-bytes 213434104 --github-api
+  python scripts/prepare_paperbench_original_assets.py --output /server/paperbench-assets --action verify
+  export PAPERBENCH_DATA_DIR=/server/paperbench-assets/project/paperbench/data
+  ```
+
+  `--github-api`只用于原普通Git文件，原LFS文件直接读取官方media端点；须遵守API配额和访问条件。配额或网络错误保留原错误，恢复后重用已通过文件；已有不合格文件或`.partial`须先检查，不覆盖。该入口不包含论文实验依赖的外部ImageNet等科学数据，不启动Agent/复现/评分。证据：`/var/lib/npc/paperbench-public-asset-entry-20261103-001/qualification-public.json`。
+
 - [x] PaperBench发布的23个论文目录、506份原始论文/评分规则/配套资产共213434104字节已在服务器全部核验；这不是23个独立benchmark，也不等于论文实验所需的外部科学数据集均已取得。首轮487份成功、19份受网络及限定回退次数影响而失败，失败记录保留；19份从同一官方Git
   blob接口恢复后，全506份重新做字节及Git/LFS身份核验，未替换材料。原始材料不进入公开仓库。证据：`/var/lib/npc/paperbench-original-task-assets-20261103-001/complete-original-assets-public.json`。Agent、复现实验及评分未执行，来源仍不打勾。
 
