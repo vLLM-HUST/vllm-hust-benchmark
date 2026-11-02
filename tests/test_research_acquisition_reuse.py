@@ -20,9 +20,8 @@ spec.loader.exec_module(runner)
 
 def test_webarena_original_task_assets_are_not_native_completion():
     source, files = runner.selection("WEBARENA")
-    assert (
-        source["revision"] == "dce04686a56253aefba7b18a4fa0937cf1dc987b"
-    )  # pragma: allowlist secret - verified public upstream Git commit
+    revision = "dce04686a56253aefba7b18a4fa0937cf1dc987b"  # pragma: allowlist secret
+    assert source["revision"] == revision
     assert len(files) == 3 and sum(item["bytes"] for item in files) == 901850
     assert {item["path"] for item in files} == {
         "LICENSE",
