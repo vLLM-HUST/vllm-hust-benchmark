@@ -59,6 +59,9 @@ on:
       - 'tests/test_opencode_original_manifest.py'
       - 'scripts/verify_naturebench_original_contract.py'
       - 'scripts/prepare_naturebench_original_assets.py'
+      - 'scripts/prepare_msmarco_original_assets.py'
+      - 'configs/workload-native/msmarco-original-reranking-assets.json'
+      - 'tests/test_prepare_msmarco_original_assets.py'
       - 'tests/test_naturebench_original_contract.py'
       - 'tests/test_naturebench_original_assets.py'
       - 'scripts/verify_naturebench_original_packages.py'
@@ -477,6 +480,8 @@ jobs:
         run: python -m pytest -q tests/test_openmath2_original_runner.py tests/test_openmath2_delivery_receipt.py tests/test_opencode_original_manifest.py
       - name: NatureBench original source and task-group fixtures only; no scientific tasks
         run: python -m pytest -q tests/test_naturebench_original_contract.py tests/test_naturebench_original_assets.py tests/test_naturebench_packages.py
+      - name: MS MARCO original asset fixtures only; no downloads or model execution
+        run: python -m pytest -q tests/test_prepare_msmarco_original_assets.py
       - name: TemporalWiki original protocol fixtures only; no data, training or inference
         run: python -m pytest -q tests/test_temporalwiki_original_contract.py tests/test_temporalwiki_original_assets.py tests/test_mvbench_original_view.py tests/test_videomme_original_protocol.py tests/test_videomme_native_media.py tests/test_videomme_original_runner.py tests/test_videomme_v2_fixed_media.py tests/test_videomme_v2_original_prompts.py tests/test_videomme_v2_original_runner.py
       - name: OVO and StreamingBench author-plan fixtures only; no video or model
