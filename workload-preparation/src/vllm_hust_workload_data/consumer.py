@@ -33,7 +33,12 @@ def resolve_input(database: Path, record_id: str, *, data_root: Path):
         if reference.get("mapping_sha256") != spec["contract_sha256"]:
             raise ValueError("original translation direction/profile binding mismatch")
     verify_file(data_root, {"path": reference["file"], "sha256": reference["sha256"]})
-    rows = iter_source_rows(asset_path(data_root, reference["file"]), spec)
+    row_spec = (
+        {**spec, "diagnostic_query_limit": reference["row_index"] + 1}
+        if spec["mapping"] == "msmarco_original_dev_query_pools"
+        else spec
+    )
+    rows = iter_source_rows(asset_path(data_root, reference["file"]), row_spec)
     try:
         if spec.get("history_targets") is not None:
             from .conversations import history_record

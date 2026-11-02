@@ -3,6 +3,7 @@
 from copy import deepcopy
 import hashlib
 import io
+import json
 import tarfile
 
 import pytest
@@ -111,3 +112,64 @@ def test_crlf_framing_is_not_field_content_and_spaces_are_preserved(tmp_path):
     assert record.task["input"]["query"] == " query "
     assert record.task["input"]["candidates"][0]["passage"] == " passage "
     assert record.outcome["references"]["original_qrel_rows"] == [["10", "0", "1", "1"]]
+
+
+def test_prepared_index_preserves_qrels_binding_and_complete_pool(
+    tmp_path, monkeypatch
+):
+    from dataclasses import asdict
+    from vllm_hust_workload_data import consumer
+    from vllm_hust_workload_data.pipeline import run, prepared_rows
+
+    data = tmp_path / "data"
+    data.mkdir()
+    manifest = assets(data, ["10\t1\tq\tp\n", "20\t2\tu\tv\n", "10\t3\tq\tw\n"])
+    manifest_path = tmp_path / "manifest.json"
+    manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+    output = tmp_path / "prepared"
+    run(
+        {
+            "sources": [
+                {
+                    "source_id": "MSMARCO_PASSAGE",
+                    "data_root": str(data),
+                    "manifest": str(manifest_path),
+                    "limit": 1,
+                }
+            ]
+        },
+        output=output,
+    )
+    (entry,) = list(prepared_rows(output / "workload.sqlite"))
+    observed = []
+    original = consumer.iter_source_rows
+
+    def spy(path, spec):
+        observed.append(spec)
+        yield from original(path, spec)
+
+    monkeypatch.setattr(consumer, "iter_source_rows", spy)
+    restored = consumer.resolve_input(
+        output / "workload.sqlite", entry["record_id"], data_root=data
+    )
+    (direct,) = list(
+        iter_workload("MSMARCO_PASSAGE", data_root=data, manifest=manifest, limit=1)
+    )
+    assert asdict(restored) == asdict(direct)
+    assert observed[0]["original_qrels"]["sha256"] == next(
+        item["sha256"] for item in manifest["files"] if item["role"] == "reference"
+    )
+    assert observed[0]["diagnostic_query_limit"] == 1
+    import sqlite3
+
+    with sqlite3.connect(output / "workload.sqlite") as connection:
+        stored = json.loads(
+            connection.execute("SELECT adapter_json FROM sources").fetchone()[0]
+        )
+    assert stored["diagnostic_query_limit"] == 1
+    assert stored["original_qrels"] == observed[0]["original_qrels"]
+    (data / "qrels.dev.tsv").write_bytes(b"10\t0\t98\t1\n")
+    with pytest.raises(ValueError, match="asset identity mismatch"):
+        consumer.resolve_input(
+            output / "workload.sqlite", entry["record_id"], data_root=data
+        )

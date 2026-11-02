@@ -62,6 +62,12 @@ def _binding(entry, catalog_root=None):
         from .narrativeqa import relation_spec
 
         spec = relation_spec(manifest, spec)
+    if sid == "MSMARCO_PASSAGE" and mapping is None:
+        from .msmarco import relation_spec
+
+        spec = relation_spec(manifest, spec)
+        if entry.get("limit") is not None:
+            spec = {**spec, "diagnostic_query_limit": entry["limit"]}
     from .conversations import validate_history_targets
 
     validate_history_targets(sid, entry.get("history_targets"), mapping)
