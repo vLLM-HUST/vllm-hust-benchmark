@@ -623,7 +623,9 @@ LD_LIBRARY_PATH=/external/ffmpeg/lib python -B scripts/run_videomme_original.py 
   | 数据路径     | 使用Docker守护进程可见的绝对路径，不假定控制器内路径对守护进程可见。Agent仅见`problem/`，隐藏评估及真值由原evaluator读取。                                                                    |
   | 模型接口     | 本次使用Qwen3-14B BF16 TP1 NPU服务，经受限回环转发提供原Anthropic消息接口；不是官方论文模型成绩复现。judge保留原客户端与规则。                                                                |
 
-  镜像标签是本次环境名称，不是已发布的下载地址；完整镜像身份、构建差异和失败记录见上述准备证据。三题执行、评分和公共`--execute`尚未全部验证。
+  镜像标签是本次环境名称，不是已发布的下载地址；完整镜像身份、构建差异和失败记录见上述准备证据。已公开服务器实际构建的[GUDHI同版本源码配方](../../configs/workload-native/naturebench-arm64/gudhi-3.10.1.Dockerfile)与[第三题传递依赖兼容层](../../configs/workload-native/naturebench-arm64/third-task-constraints.Dockerfile)。三题执行、评分和公共`--execute`尚未全部验证。
+
+  GUDHI配方的构建上下文需提供[官方3.10.1源码](https://github.com/GUDHI/gudhi-devel/releases/download/tags/gudhi-release-3.10.1/gudhi.3.10.1.tar.gz)，先核验SHA256为`24f9743c579c9e01696cb2cbc564248d6e038e4bf23e7484073283e57495d80d`。配方不自动下载任务数据。构建前核对`naturebench-base:v3`为本次合格基础环境；不能将任意同名镜像当作已验证环境。第三题兼容层依赖未改的原第三题镜像，不能代替原Dockerfile构建。两个配方都只做软件构建与导入，不进行模型前向；完整基础环境与第二题组装的公共自动化仍待补齐。
 
   原evaluator必须与本次运行使用同一份已核验运行时，并在相同控制网络内启动。另开运行时后不要复用旧运行时的私有控制token。先检查端口未被占用，再在独立科学容器内启动原服务：
 
