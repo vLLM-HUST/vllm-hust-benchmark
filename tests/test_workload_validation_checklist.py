@@ -8,6 +8,39 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def test_msmarco_delivery_requires_native_full_pools_scoring_and_actual_handoff():
+    ledger = json.loads(
+        (ROOT / "docs/workload-data/dataset-validation-status.json").read_text("utf-8")
+    )
+    row = ledger["delivery_inventory"]["MSMARCO_PASSAGE"]
+    assert row["checked"] and row["status"] == "AVAILABLE" and row["blocker"] is None
+    receipt = json.loads((ROOT / row["delivery_receipt"]).read_text("utf-8"))
+    assert receipt["source_checkbox_eligible"]
+    native = receipt["native_execution"]
+    assert native["original_query_ids"] == ["188714", "1082792", "995526"]
+    assert native["complete_candidate_counts"] == [1000, 1000, 1000]
+    assert native["original_query_passage_pairs_scored"] == 3000
+    assert native["original_reference_counts"] == [3, 1, 1]
+    assert native["official_mrr_at10"] == 0.5
+    assert native["independently_recomputed_reciprocal_ranks"] == [1.0, 0.25, 0.25]
+    assert receipt["full_adapter_validation"]["original_query_pools"] == 6980
+    assert receipt["full_adapter_validation"]["original_candidates"] == 6668967
+    assert receipt["saved_audit"]["new_model_calls"] == 0
+    assert receipt["saved_audit"]["neural_imports_blocked"]
+    handoff = receipt["public_and_research_handoff"]
+    assert handoff["exact_git_wheel_installed_payloads"] == 88
+    assert handoff["prepared_index_records"] == 3
+    assert handoff["public_readbacks"] == handoff["research_readbacks"] == 3
+    assert handoff["native_score_and_rank_bindings"] == 3
+    assert handoff["research_consumer_and_index_unchanged"]
+    assert not handoff["research_observation_or_analysis_migrated"]
+    assert handoff["new_model_calls"] == 0
+    assert (
+        receipt["ci"]["cpu_conclusion"] == receipt["ci"]["full_conclusion"] == "success"
+    )
+    assert not receipt["original_assets"]["raw_assets_redistributed"]
+
+
 def test_longmemeval_v2_delivery_requires_positive_native_rag_and_handoff():
     ledger = json.loads(
         (ROOT / "docs/workload-data/dataset-validation-status.json").read_text("utf-8")
