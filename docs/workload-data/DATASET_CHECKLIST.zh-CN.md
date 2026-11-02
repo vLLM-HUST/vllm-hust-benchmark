@@ -171,7 +171,7 @@ for record in iter_workload("SWESMITH", data_root=Path("/external/swesmith/data"
 - 按已有证据逐项复核，不因口径调整批量补勾；失败和低分如实保留，不用替换样本凑通过。113项来源与另5项仅分类的范围不变。
 
 当前交付
-**87/113项**，待完成26项，另5项仅分类。首批#432的60项和第二批#538的ScienceWorld已合入main；早期五个草稿已关闭为被汇总承接，历史和分支保留。第三批来源及精确协议范围以机器清单和各交付回执为准，尚未合入。DailyTalk按原Guo前三段完整对话29条NPU批量合成协议交付，公共准备入口支持其他完整原对话；不代表全量音频、全split生成、MOS或流式时序。ScienceAgentBench按原verified固定前三题单轮生成、NPU辅助评分和隔离科学执行协议交付，三题程序失败如实保留，不代表全102题执行或其他Agent分支。TemporalWiki按原GPT2-large基座探针全部35,948行PPL交付，不代表持续训练checkpoint或其他语料模式。StreamingBench按real固定前三组原视频NPU推理与原评分交付，其他任务／模态缺口单列。LJSpeech按原VITS固定前三条NPU文本到波形协议交付，不代表全13,100条合成或MOS评价。StructEval按19个完整非渲染原生协议收口，渲染/VQA模式缺口继续单列，不称整套44协议或2035题全部完成。OpenMath/OpenCode是训练语料原问题生成，不是独立质量benchmark。打勾不代表全量模型评测、高分或性能保证。
+**88/113项**，待完成25项，另5项仅分类。首批#432的60项和第二批#538的ScienceWorld已合入main；早期五个草稿已关闭为被汇总承接，历史和分支保留。第三批来源及精确协议范围以机器清单和各交付回执为准，尚未合入。DailyTalk按原Guo前三段完整对话29条NPU批量合成协议交付，公共准备入口支持其他完整原对话；不代表全量音频、全split生成、MOS或流式时序。ScienceAgentBench按原verified固定前三题单轮生成、NPU辅助评分和隔离科学执行协议交付，三题程序失败如实保留，不代表全102题执行或其他Agent分支。TemporalWiki按原GPT2-large基座探针全部35,948行PPL交付，不代表持续训练checkpoint或其他语料模式。StreamingBench按real固定前三组原视频NPU推理与原评分交付，其他任务／模态缺口单列。LJSpeech按原VITS固定前三条NPU文本到波形协议交付，不代表全13,100条合成或MOS评价。StructEval按19个完整非渲染原生协议收口，渲染/VQA模式缺口继续单列，不称整套44协议或2035题全部完成。OpenMath/OpenCode是训练语料原问题生成，不是独立质量benchmark。打勾不代表全量模型评测、高分或性能保证。
 
 StructEval新增配置进展：经确认，`qwen35-9b-nonthinking-32768`与原`publisher-null`分开记录。仅原Text→TikZ位置37的已知失败题运行新配置，传输timeout3600秒、外层/SDK重试均0；保存响应为length／32768输出tokens。CPU原工作区autostop导致渲染转发失败，900秒等待后原生子进程以RenderBlocked失败退出；原响应、代码和待渲染请求保留，实际VQA调用0，不计完整任务。原80GiB持久卷和模板已原样恢复，Docker仍在恢复旧容器；不重启daemon、不重新生成，不重放位置38的结果未知请求。共享任务根`structeval-capped-failed-tikz-window-32068-001`保留终态，计数不增加。
 
@@ -1316,9 +1316,9 @@ LMM
   hook均有记录，最终只调整部署适配和私有目录；不改作者核心、数据或在用服务。旧零hook计数未追认为有效设备证明，最终直接检查输出NPU张量。
 - [x] 精确提交675b7da2的两项CI均成功；实际CI工件12890070997的67份载荷与Git对象、独立安装文件一致。原生入口/保存核验器与实际服务器执行代码字节相同，模型身份清单只补公开哈希误报注释。安装后的四类导航、全部600条原字段/索引和固定3条当前研究回读通过，0新增推理。来源总项按原生固定抽样交付打勾，不是全600或质量/性能完成；见[交付证据](validation/dragon-original-preparation-20261028.json)。
 
-### LibriTTS多说话人TTS准备（尚未交付）
+### LibriTTS多说话人TTS（固定三条原生协议已交付）
 
-原生执行入口为`scripts/run_libritts_styletts2_original_npu.py`，默认仅输出计划，尚未验证实际合成。需准备固定作者源码、发布方模型、原test-other归档、官方NLTK资源及独立StyleTTS2依赖环境；设置已验证的eSpeak路径，并安装本仓库数据读取包。在执行进程中加载服务器已安装CANN的`set_env.sh`，保留其编译器Python路径，不要用数据包路径覆盖整个`PYTHONPATH`。命令如下，只有补上`--execute`才进行NPU推理，`--full`选择原5120条；输出目录须在仓库外且尚不存在。服务器已验证公开入口的plan分支，不能代替执行证据。
+原生执行入口为`scripts/run_libritts_styletts2_original_npu.py`，默认仅输出计划，固定前三条已完成实际合成。需准备固定作者源码、发布方模型、原test-other归档、官方NLTK资源及独立StyleTTS2依赖环境；设置已验证的eSpeak路径，并安装本仓库数据读取包。在执行进程中加载服务器已安装CANN的`set_env.sh`，保留其编译器Python路径，不要用数据包路径覆盖整个`PYTHONPATH`。命令如下，只有补上`--execute`才进行NPU推理，`--full`选择原5120条；输出目录须在仓库外且尚不存在。服务器已验证公开入口的plan及固定三条执行分支，全量5120条未执行。
 
 ```bash
 python scripts/run_libritts_styletts2_original_npu.py \
@@ -1330,6 +1330,8 @@ python scripts/run_libritts_styletts2_original_npu.py \
 ```
 
 入口保留作者notebook推理定义、alpha=0.3、beta=0.7、5步扩散、embedding_scale=1及作者原50样本尾部处理；使用float32／NPU和种子0，不截断原始文本，不使用目标录音作为条件参考。仅校验输出波形结构，未提供MOS或冒称官方LibriTTS质量评分。
+
+- [x] 固定前三条已完成NPU合成，输出为316150／215350／121150个24kHz采样点；原文SHA、不同同说话人参考录音、波形哈希、有限非零单声道输出及执行入口字节一致性均独立审计通过，审计0新增模型调用。两套服务进程身份不变，临时进程退出且租约释放；回执`libritts-original-fixed3-saved-audit-20261102-001/qualification-public.json`。LSTM使用CANN的acl_op路径，不是CPU神经回退；不据此声明MOS或性能。当前CI注册入口的提供者／研究消费最终复核已通过，来源总勾已完成。
 
 首次原题执行已到达NPU参考编码，因隔离进程遗漏CANN编译器Python路径，原LSTM初始化报`No module named tbe`，未生成波形。失败保存在`libritts-public-native-entry-20261102-002/execution-window`，两套服务进程身份保持不变；随后只读接入既有CANN路径，`tbe/te`导入控制通过，回执`libritts-cann-compiler-imports-20261102-001/qualification-public.json`。这不代表完整合成通过。
 
@@ -1353,7 +1355,7 @@ python scripts/run_libritts_styletts2_original_npu.py \
 公共模型准备：`python scripts/prepare_libritts_styletts2_model.py`只输出计划；加`--output /external/fresh-styletts2 --download`取得固定原文件，`--output /external/saved-styletts2 --verify-only`只读复核。服务器实际使用显式`--hf-endpoint https://hf-mirror.com`传输，身份仍按作者原Git对象／LFS
 SHA验证；不据此声称本机直接HF下载分支也已验证。新输出必须在仓库外，原失败／partial不覆盖；不下载作者示例语音替换原LibriTTS任务，不加载模型。公共下载／verify已在服务器验证，6项本地字节／预算／路径夹具测试通过。
 
-- [ ] 核对原推理示例的语音条件、采样预算与全部模型依赖，保留原文本、说话人和参考音频关系；评分参考不能无声明混入模型输入。完成隔离客户端、NPU原生合成及适用输出核验后再勾选来源，当前不增加完成数。证据位于服务器`libritts-styletts2-original-source-20261102-001/qualification-public.json`，机器清单`LIBRITTS.native_model_preparation`记录同一状态。
+- [x] 原推理示例的语音条件、采样预算、模型依赖及原文本／说话人关系已核对；使用不同同说话人原录音作条件，不使用目标WAV。当前CI87载荷／4入口、固定三条公共及未修改研究消费与保存波形原输入绑定均通过。[最终交付回执](validation/libritts-original-native-delivery-20261102.json)，来源已计完成。
 
 ### Video-MME-v2基础64帧原生协议（已交付）
 
@@ -1599,7 +1601,7 @@ TB；服务器/data约1.42TB可用，未缩小语料。ChartQA当前两卡主机
 | STREAMINGBENCH             | [x] 已交付real原视频NPU协议                    | 固定前三完整组原生生成3次、原评分2/3且独立重算一致；原题、参考、时间窗和128预算未改。当前CI工件78载荷独立安装核验，8文件／4948索引及24条公共研究完整回读通过，实际原生输入匹配；原9B恢复，卡6未动。全量、SQA／主动／音频／在线模式未验证，45音频待补，详见交付回执。                                                                                                                                                                                                                     |
 | OVOBENCH                   | [x] offline原生协议已交付                      | 12类36题/103响应NPU执行、原评分、完整入口及实际CI消费交接已核验；[交付证据](validation/ovobench-offline-native-delivery-20261031.json)                                                                                                                                                                                                                                                                                                                                                   |
 | FULL_DUPLEX_BENCH          | [ ] 官方评分器准备已核验，原生语音待完成       | 原16文件已核验，两个未修改评分器对发布方样例运行exit0；公共11文件准备入口在专用CPU验证通过。尚无本项目原生语音推理或真实输出评分，不能打来源完成勾；详见下方原生准备清单。                                                                                                                                                                                                                                                                                                               |
-| LIBRITTS                   | [ ] 原包及完整配对已验证，原生TTS待完成        | 官方test-other完整964502297字节双校验通过；实际CI组件78文件一致，5120个原始话段及原文/规范化文本/参考WAV全量配对还原，公共前三条准备通过。固定三条研究只读回查通过、索引不变；未做合成/质量评价或完整PCM解码，不计来源完成。                                                                                                                                                                                                                                                             |
+| LIBRITTS                   | [x] 原生固定三条TTS交付                        | 原test-other5120配对保留；原多说话人StyleTTS2、float32/NPU、5步采样，三条波形及不同同说话人条件参考核验通过。实际CI87载荷／4入口、公共及研究三条原输入回读通过；非全量、非MOS／性能。[最终回执](validation/libritts-original-native-delivery-20261102.json)。                                                                                                                                                                                                                            |
 | LJSPEECH                   | [x] 原VITS文本到波形协议可用                   | 原13100配对索引和公共/研究读取保留；固定原前三条NPU完整合成、独立RIFF与输入/参考关系核验，以及当前CI工件接入均通过。全量合成、MOS和性能不作声明。见ljspeech-native-fixed3-20261101.json。                                                                                                                                                                                                                                                                                                |
 | BEIR_SCIFACT               | [x] 已完成                                     | 原test全量检索/top100重排、原评分、最终公开NPU命令及固定CI组件/研究消费均通过。范围仅为登记集合与协议，不是BM25或全部BEIR基线。                                                                                                                                                                                                                                                                                                                                                          |
 | BEIR_NFCORPUS              | [x] 已完成                                     | 原test全量检索/top100重排、原评分、最终公开NPU命令及固定CI组件/研究消费均通过。范围仅为登记集合与协议，不是BM25或全部BEIR基线。                                                                                                                                                                                                                                                                                                                                                          |

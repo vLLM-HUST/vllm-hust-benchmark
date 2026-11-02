@@ -24,7 +24,17 @@ def test_libritts_full_input_handoff_does_not_claim_native_tts():
     assert data["research_index_unchanged"] is True
     assert data["research_observation_or_analysis_executed"] is False
     assert data["native_synthesis_or_scoring"] is False
-    assert row["checked"] is False and row["status"] == "IN_PROGRESS"
+    assert data["source_checkbox_eligible"] is False
+    assert row["checked"] is True and row["status"] == "AVAILABLE"
+    receipt = json.loads((ROOT / row["delivery_receipt"]).read_text("utf-8"))
+    assert receipt["source_checkbox_eligible"]
+    assert receipt["native_execution"]["completed_original_records"] == 3
+    assert (
+        receipt["public_and_research_handoff"][
+            "fixed_original_public_and_unchanged_research_readbacks"
+        ]
+        == 3
+    )
 
 
 def test_libritts_publisher_model_bytes_are_not_native_tts_completion():
@@ -48,7 +58,14 @@ def test_libritts_publisher_model_bytes_are_not_native_tts_completion():
     assert (
         preparation["model_calls"] == 0 and not preparation["source_checkbox_eligible"]
     )
-    assert not row["checked"] and row["delivery_receipt"] is None
+    assert row["checked"] and row["delivery_receipt"]
+    receipt = json.loads((ROOT / row["delivery_receipt"]).read_text("utf-8"))
+    assert receipt["source_checkbox_eligible"] and receipt["model"]["device"] == "npu:0"
+    assert len(receipt["native_execution"]["outputs"]) == 3
+    assert receipt["saved_output_audit"]["new_model_calls"] == 0
+    assert (
+        receipt["ci"]["cpu_conclusion"] == receipt["ci"]["full_conclusion"] == "success"
+    )
     assert (ROOT / preparation["public_model_preparer"]).is_file()
     assert (ROOT / preparation["model_profile"]).is_file()
 

@@ -5504,8 +5504,8 @@
     },
     "LIBRITTS": {
       "scope": "public",
-      "delivery_kind": "review_original_source_protocol",
-      "status": "IN_PROGRESS",
+      "delivery_kind": "original_reference_conditioned_tts",
+      "status": "AVAILABLE",
       "native_model_preparation": {
         "status": "PUBLISHER_SOURCE_AND_MODEL_BYTES_QUALIFIED_NOT_NPU_EXECUTION",
         "candidate_model": "yl4579/StyleTTS2-LibriTTS",
@@ -5597,8 +5597,26 @@
           "failure": "First original reference encoding reached NPU LSTM, then CANN compile initialization failed because isolated PYTHONPATH omitted tbe; no generated waveforms",
           "source_checkbox_eligible": false
         },
-        "remaining": ["NPU neural-device compatibility", "Preserve fixed original text/reference-waveform/speaker conditioning and author sampler budget", "NPU-only neural execution, native output validation and handoff"],
+        "remaining": [],
         "model_calls": 0,
+        "model_calls_scope": "Acquisition, imports and CPU strict-loading preparation only; actual synthesis is recorded separately in native_synthesis_progress",
+        "source_checkbox_eligible": false
+      },
+      "native_synthesis_progress": {
+        "status": "FIXED3_ORIGINAL_NPU_SYNTHESIS_SAVED_AUDIT_AND_HANDOFF_PASSED",
+        "server_native_receipt": "libritts-original-fixed3-native-npu-20261102-002/qualification-public.json",
+        "server_execution_receipt": "libritts-public-native-entry-20261102-003/execution-window-002/state-public.json",
+        "server_saved_audit": "libritts-original-fixed3-saved-audit-20261102-001/qualification-public.json",
+        "completed_original_records": 3,
+        "sample_rate": 24000,
+        "output_samples": [316150, 215350, 121150],
+        "dtype": "float32",
+        "device": "npu:0",
+        "sampler_steps": 5,
+        "runtime_files_match_public": true,
+        "protected_services_same_birth": true,
+        "new_model_calls_in_saved_audit": 0,
+        "human_quality_evaluation_performed": false,
         "source_checkbox_eligible": false
       },
       "candidate_adapter": {
@@ -5677,11 +5695,12 @@
         "native_model_calls": 0,
         "boundary": "Original slow writer and later read-timeout records retained. Bounded exact ranges resumed the existing266338304-byte prefix; complete964502297-byte archive now matches both pinned TorchAudio SHA256 and publisher MD5. Acquisition is complete, not native synthesis/scoring or source completion."
       },
-      "checked": false,
+      "checked": true,
       "legacy_checked": false,
       "existing_receipt": null,
-      "delivery_receipt": null,
-      "blocker": "Complete original test-other archive verified by publisher MD5 and fixed TorchAudio SHA256. Actual CI provider78 payloads matched Git/wheel/installed bytes; all5120 original text/normalized-text/reference-WAV pairs and identities roundtripped. Public fixed3 preparation and unchanged research input readbacks passed after source-specific data-role fix. Suitable NPU TTS binding, native synthesis and evaluation remain pending. No ASR, LibriTTS-R, full PCM decode, invented prompt or source completion claim."
+      "delivery_receipt": "docs/workload-data/validation/libritts-original-native-delivery-20261102.json",
+      "blocker": null,
+      "remaining_optional_modes": "Declared original fixed3 reference-conditioned StyleTTS2 TTS protocol delivered. Full5120 synthesis, additional speaker coverage, human MOS, ASR quality, performance measurements and second clean-machine environment rebuild remain unvalidated. Not LibriTTS-R or LJ Speech model substitution."
     },
     "LJSPEECH": {
       "scope": "public",
