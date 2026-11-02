@@ -2156,6 +2156,7 @@ PYTHONPATH=workload-preparation/src python scripts/prepare_reused_source_records
   blob与SHA256；未在Windows落盘原始资产。
 - [x] 未修改的`eval_pause_handling.py`和`eval_smooth_turn_taking.py`分别对官方自带的1份输出样例实际运行，均exit0。回执：`/root/full-duplex-original-scorer-controls-20261031-001/qualification-public.json`。这是发布方输出的评分器控制，不是本项目模型结果，也不是固定原前三题的验证。
 - [x] 公共评分器准备入口`prepare_full_duplex_original_scorers.py --verify-only`已在专用CPU核验现有原11文件子集，exit0，无新下载、无重复评分。回执：`/root/full-duplex-public-source-entry-20261031-001/qualification-public.json`。新鲜`--download`的服务器网络路径未通过实测，不冒称整仓或原音频已取得。
+- [x] 官方公开数据目录已定位9份原ZIP：v1.0的Candor暂停/换轮、ICC反馈、合成暂停/打断，v1.5的背景语音、对他人说话、用户反馈/打断。官方文档分别列727和499条；目录声明的文件ID和字节数已记录到机器清单，尚无下载后的内容校验，不将可变Drive文件ID当作版本哈希。CPU原探测已终止并保留网络不可达失败；NPU直接IPv4访问也失败。目录元信息通过内存转交服务器保存，本地未保存或下载原音频。
 - [ ] 原数据与音频取得、原始时序与媒体关系的provider接入。
 - [ ] 合适的NPU双工语音模型、原生输入/输出音频、ASR和适用完整评分、输出消费闭环。模型调用仍为0，总项不打勾。
 
