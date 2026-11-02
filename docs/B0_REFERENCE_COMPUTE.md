@@ -27,10 +27,22 @@ C_ref,i = F_i/(k_i × T_ref,i × 10^12)
 η_i = 100 × C_i/C_ref,i
 ```
 
-参考时间由相应精度和运行条件下独立标定的计算、访存、通信能力，结合必要工作量、阶段依赖、资源重叠与必要调度推导。两组采用相同参考方法；工作量或执行路径不同则分别核算参考时间。方法和适用范围在正式测量或复算前确定，不以B0、B1实测耗时反向拟合。
+参考采用 **B0 阶段标定与依赖约束模型**。固定官方 B0 的版本、精度和运行条件，标定必要计算、访存、通信及主机处理的阶段时间；记录输入形状、实际工作量、数据分布和全部参与资源。先复用已有标定，补充缺失的形状或阶段。
 
-中期条件为有效且同口径的 F、无插桩同步 T 和 T_ref，以及
-η≥50%；最终90%沿用其对应阶段要求。B0实测算力比值不能替代该效率。当前配对保留了统计开销，也没有两组完整的同口径独立参考验收记录，因此本次3.4.1计量验收未通过。
+串行且互不重叠的阶段直接累加；跨卡并行与计算/通信重叠按数据依赖、资源占用及既定调度顺序计算完工时间。对包含必要资源顺序边的无环依赖图：
+
+```text
+finish(v) = duration(v) + max_{u in predecessors(v)} finish(u)
+T_ref = max_{v in sink_nodes} finish(v)
+```
+
+无前驱节点的起始时间为0。每项必要计算、搬运、通信和同步计入一次；阶段时间已包含的访存不重复叠加。必要主机处理和调度按实际路径标定，可消除的排队空洞、冗余工作及采集开销另列。阶段划分、标定统计规则、依赖关系与适用范围在正式测量或复算前固定。
+
+F、T、T_ref对应同一测量区间和工作量。采集记录用于识别路径、核查算量及阶段标定；验收T使用加载和预热后的无插桩同步墙钟时间，保留完整执行区间内的真实开销。B0、B1采用同一参考方法，按各自工作量核算T_ref；精度或路径差异对应的标定和映射分别归档。
+
+**本次里程碑要求 η≥50%，即 T≤2T_ref。后续90%目标对应 T≤T_ref/0.9≈1.111T_ref。** 两个阶段均衡量同工况参考效率。C_ref是固定B0阶段能力及执行约束下的工况参考值；采用更快实现后可超过该参考，η按实值报告。硬件MFU、设备利用率和B1相对B0的算力提升分别报告。
+
+本页确定参考计算方法，新的阶段标定结果另行归档。现有256-token配对含统计开销，缺少两侧完整的同口径参考验收记录，当前3.4.1计量验收未通过。原实测F、T和算力比较值保持原记录。
 
 ## 3. 订正记录
 
@@ -55,5 +67,8 @@ Compute each arm as `C_i=F_i/(k_i T_i 10^12)` and report its descriptive baselin
 `R_C,i=100 C_i/C_0`. The measured gain is84.9705%; no acceptance verdict follows from that ratio.
 The former90%-of-B0 target is withdrawn because it permits a regression. Outline efficiency remains
 `η_i=100 T_ref,i/T_i`, with independently calibrated resources, actual dependencies, matched work
-and uninstrumented synchronized timing. Preserve the original50% midterm and corresponding90% final
-criteria; do not fit the reference to measured performance or substitute a new gain threshold.
+and uninstrumented synchronized timing. For the current milestone require η≥50% (T≤2T_ref); the later90% target means T≤T_ref/0.9.
+Calibrate necessary B0 stages, then apply data dependencies, resource ordering and overlap. Sum only
+serial nonoverlapping stages; include necessary host, transfer and synchronization work once.
+Freeze the stage model and aggregation before formal calculation. This workload reference is scoped
+to calibrated B0 capabilities and execution constraints; hardware MFU and B0-relative gains are separate.
