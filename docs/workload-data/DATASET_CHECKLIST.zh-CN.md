@@ -611,6 +611,37 @@ LD_LIBRARY_PATH=/external/ffmpeg/lib python -B scripts/run_videomme_original.py 
   # 默认三题；--task-id只接受原CPU任务ID，不会换题或减预算。
   ```
 
+  原生执行前的环境核对：
+
+  | 层次         | 本次实际配置与核对要求                                                                                                                                                                        |
+  | ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+  | 可信控制器   | Python3.12、Docker客户端及专用守护进程；Claude Code2.1.316。Docker客户端和socket仅交给控制器，不交给生成代码的任务容器。                                                                      |
+  | 科学基础环境 | 原43个固定包保持版本；ARM64使用同版本官方CPU科学计算轮子。CPU仅执行科学任务程序，Agent和judge调用NPU服务。                                                                                    |
+  | 第一题       | 原Dockerfile、Scanpy1.10.4；`pip check`与科学包导入通过。原harness镜像别名为`naturebench-task-s41592-022-01709-7:base`。                                                                      |
+  | 第二题       | GUDHI3.10.1从官方同版本源码构建，保留原固定包；`pip check`及科学包导入通过。别名为`naturebench-task-s41592-025-02870-5:base`。                                                                |
+  | 第三题       | 保留原镜像，另加兼容层：NumPy1.26.4、protobuf5.29.6、TensorBoard2.20.0、numdifftools0.9.41；原任务固定包不变，`pip check`及科学包导入通过。别名为`naturebench-task-s43588-024-00689-2:base`。 |
+  | 数据路径     | 使用Docker守护进程可见的绝对路径，不假定控制器内路径对守护进程可见。Agent仅见`problem/`，隐藏评估及真值由原evaluator读取。                                                                    |
+  | 模型接口     | 本次使用Qwen3-14B BF16 TP1 NPU服务，经受限回环转发提供原Anthropic消息接口；不是官方论文模型成绩复现。judge保留原客户端与规则。                                                                |
+
+  镜像标签是本次环境名称，不是已发布的下载地址；完整镜像身份、构建差异和失败记录见上述准备证据。三题执行、评分和公共`--execute`尚未全部验证。
+
+  原evaluator必须与本次运行使用同一份已核验运行时，并在相同控制网络内启动。另开运行时后不要复用旧运行时的私有控制token。先检查端口未被占用，再在独立科学容器内启动原服务：
+
+  ```bash
+  python /path/to/fresh-runtime/source/eval_service.py --host 127.0.0.1 --port 18322 --timeout 14400
+  # 在另一可信控制会话中检查公共入口；密钥经私有环境注入，不写入命令或Git。
+  export PYTHONPATH=/path/to/benchmark/workload-preparation/src
+  python /path/to/benchmark/scripts/run_naturebench_original.py \
+    --author-root /path/to/pinned-naturebench-code \
+    --runtime /path/to/fresh-runtime --data-root /path/to/original-naturebench-data \
+    --output /path/to/separate-fresh-run --model YOUR_SERVED_MODEL \
+    --endpoint http://127.0.0.1:YOUR_MODEL_PORT --eval-port 18322 \
+    --eval-mapping /path/to/mapping-with-matching-main-port.json
+  # 离线计划通过后，同命令追加--execute；先显式设置ANTHROPIC_API_KEY和JUDGE_API_KEY。
+  ```
+
+  `--output`必须在源码、运行时和原数据目录之外，且不存在；不要预先创建该叶目录。原生任务运行期间保留预算及失败反馈，不人工编辑Agent答案、不因模型答错换题。退出后仍须核查官方评估、有效性judge和三题终态，退出码0不能直接打勾。
+
   任务包关系核验（不执行科学代码、不调用模型）：
 
   ```bash
@@ -634,7 +665,7 @@ python scripts/prepare_naturebench_original_assets.py --mode verify \
 下载客户端依赖见`configs/workload-native/naturebench-preparation-client-py312-observed.txt`，是已验证的Python3.12
 ARM准备环境，不是原始科学任务conda环境。默认优先调用未改的官方download-only入口；确需镜像时显式指定`--hf-endpoint https://hf-mirror.com`，通过[官方HTTP后端扩展](https://huggingface.co/docs/huggingface_hub/v0.36.0/package_reference/utilities#configure-http-backend)仅保持同版本分页请求的传输域名，保留路径和参数。中断后可用相同目录加`--resume`，先完整校验已有文件再续传；不要与其他下载器同时写同一目录。对象超时可显式加`--transport publisher-files`，仅获取缺失的完整原对象，仍须全部576文件的原始摘要/大小通过，不更换数据源或任务。所有已取得数据原样保留在服务器，未下载到本地工作站或Git。
 
-官方数据是科学代码任务包：`problem/`向Agent可见，`evaluation/`与隐藏真值不可泄漏；任务环境、评估器和有效性审查均属于原生流程。当前ARM/NPU服务器没有Docker/Podman/bwrap，官方conda导出又包含linux-64/MKL构建，不能悄悄换包便宣称原环境已复现。代码/任务规范的MIT许可不覆盖全部第三方科学数据，必须保留每任务许可与署名；公开可下载不等于可随意再分发。[原始版本与资源分组](../../configs/workload-native/naturebench-original-release.json)；[阶段证据](validation/naturebench-original-readiness-20261028.json)。
+官方数据是科学代码任务包：`problem/`向Agent可见，`evaluation/`与隐藏真值不可泄漏；任务环境、评估器和有效性审查均属于原生流程。NPU工作区没有Docker/Podman/bwrap，本次使用专用CPU工作区的独立Docker执行科学程序，经回环转发调用NPU模型。官方conda导出包含linux-64/MKL构建；上述ARM环境差异必须披露，不能称原封不动复现。代码/任务规范的MIT许可不覆盖全部第三方科学数据，必须保留每任务许可与署名；公开可下载不等于可随意再分发。[原始版本与资源分组](../../configs/workload-native/naturebench-original-release.json)；[阶段证据](validation/naturebench-original-readiness-20261028.json)。
 
 ### OpenCodeInstruct原始代码训练语料（固定原始profile已交付）
 
