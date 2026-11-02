@@ -781,6 +781,21 @@ blob和大小校验获取，不带凭据、不用改造数据。`--reuse-assets 
 
 #### DiscoveryBench公共案例准备与安装包核验
 
+原软件与原real数据是两个固定版本，不能用GitHub软件树中的旧数据替代HF修正版。首次取得数据可按以下顺序操作，所有目录均为仓库外的新目录，保留发布方使用条款：
+
+```bash
+python scripts/prepare_discoverybench_original_assets.py \
+  --release github-tree --output /private/discovery-author --execute
+python scripts/prepare_discoverybench_original_assets.py \
+  --release publisher-native-real --output /private/discovery-real --execute
+python scripts/prepare_discoverybench_original_assets.py \
+  --release publisher-answer-keys --output /private/discovery-keys --execute
+mkdir -p /private/discovery-real/answer_key
+cp -n /private/discovery-keys/answer_key/answer_key_real.csv /private/discovery-real/answer_key/
+```
+
+软件根为`/private/discovery-author/source`，原生数据根为`/private/discovery-real`。最后一步仅汇集原real答案表，字节不变；案例准备会再核对完整186文件身份，不接受覆盖旧文件或修改参考。原synth答案表的UTF8失败是单列的官方资产缺陷，不将它用于本次real协议。已有资产用相应release的`--verify-only`只读复核，或用`--reuse-assets`逐文件核验复用，不重复下载。上述不同资产入口的历史验证范围见回执，不将本次目录说明称作一次新冷下载验证。
+
 - [x] CI运行41363321688的工件13106550478已在服务器独立安装，86份包载荷逐份核对；239条原键的公共及未修改研究消费者回读通过，229条可解析原输入与原作者默认提示材料一致。10条原资产阻塞保留，不过滤或替换。
 - [x] 公共案例准备命令已使用上述CI安装包实际准备原位置0/1/2：元数据、科学数据逐字节匹配固定原资产，参考行匹配原答案表，三个目录隔离。首次核验误把CPU路径用于NPU节点，保留错误记录；仅纠正保存结果核验，没有重做准备或推理。
 - [x] 公开编排入口`run_discoverybench_native.py`已串接actor、独立科学工具容器、公共模型传输和原评分；专用CPU实际构造原前三题actor通过，所有模型／工具／judge队列为空。73项相关夹具测试通过。此前输出位置、运行时目录权限及核验脚本路径错误保留；成功预检没有运行模型或科学程序。
