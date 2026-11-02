@@ -1319,6 +1319,8 @@ tree元数据、`--node`私有node路径、`--output`独立日志目录和`--exe
   # 这不改变原缓存探测、会话、轮次、预算或模型；仍须空闲窗口实际验证。
   ```
 
+- [x] 同一14B兼容副本的后续CPU检查：原版Rust文本池输出确认完整100000000token；独立进程退出码未保存，不声称exit0。另一次有完整退出状态的跨运行时检查exit0：固定旧Rust0.19.1与当前编码器对同一133段文本、含/不含特殊token共266组ID完全一致，原文件和Rust源码/锁未变。此项只证明编码兼容和已观测池容量，不证明原缓存探测、NPU回放或来源完成；证据为私有任务根`tracelab-14b-legacy-serialization-20261103-002/cross-runtime/qualification-public.json`。
+
 - [x] 复用665453轮全部元数据、全量索引、原DuckDB及官方确定性CSV转换、独立enwik9文本身份；不是原始用户prompt正文。
 
 - [x] 官方Rust1.90归档和校验文件核对，恢复到持久化私有前缀；公共构建入口实际按原锁编译exit0，原源码不变，避免下次容器切换丢失二进制。[恢复回执](validation/tracelab-original-locked-build-20261024.json)
