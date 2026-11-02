@@ -5517,6 +5517,18 @@
         "model_profile": "configs/workload-native/libritts-styletts2-model.json",
         "model_acquisition_receipt": "libritts-styletts2-model-20261102-001/assets/qualification-public.json under shared task root; both pinned files771392385 bytes verified, public read-only verify also passed, checkpoint not deserialized",
         "transport_scope": "Explicit hf-mirror downloads qualified by original Git/LFS identities; canonical direct-HF download branch not tested, verify-only makes no HTTP request",
+        "safe_checkpoint_inspection": {
+          "receipt": "libritts-styletts2-safe-checkpoint-20261102-001/qualification-public.json under shared task root",
+          "weights_only": true,
+          "map_location": "cpu",
+          "network_state_modules": 14,
+          "network_tensor_count": 1475,
+          "network_tensor_bytes": 872183356,
+          "scope": "Trusted tensor deserialization and metadata inspection only, not model construction/forward or NPU compatibility",
+          "model_calls": 0,
+          "npu_context_initialized": false,
+          "protected_services_unchanged": true
+        },
         "author_source": "https://github.com/yl4579/StyleTTS2",
         "author_revision": "5cedc71c333f8d8b8551ca59378bdcc7af4c9529",
         "author_tree": "ac9c64d908d0bdca127de56bec33c6f78d519c52",
@@ -5526,7 +5538,7 @@
         "source_receipt": "qualification-public.json under source_stage; whole original Git tree reproduced, no author Python imports or neural weights loaded",
         "official_native_notebook": "Demo/Inference_LibriTTS.ipynb",
         "reason": "Publisher LibriTTS-trained multispeaker reference-conditioned model and original inference notebook; do not label an LJ Speech single-speaker checkpoint as LibriTTS official evaluation or invent missing speaker vectors",
-        "remaining": ["Full original runtime dependencies and safe checkpoint loading", "Preserve fixed original text/reference-waveform/speaker conditioning and author sampler budget", "NPU-only neural execution, native output validation and handoff"],
+        "remaining": ["Full original runtime dependencies and architecture/NPU device compatibility", "Preserve fixed original text/reference-waveform/speaker conditioning and author sampler budget", "NPU-only neural execution, native output validation and handoff"],
         "model_calls": 0,
         "source_checkbox_eligible": false
       },

@@ -1318,8 +1318,12 @@ LMM
 
 ### LibriTTS多说话人TTS准备（尚未交付）
 
+- [x] 主权重已在独立检查中用`torch.load(weights_only=True, map_location="cpu")`安全读取，14个网络状态、1475个张量共872183356字节。只做张量反序列化／元数据检查，没有构建或前向执行模型、没有初始化NPU上下文，现有服务身份未变；不代表NPU适配成功。服务器回执`libritts-styletts2-safe-checkpoint-20261102-001/qualification-public.json`。下方“未加载／未反序列化”均指各自早期源码／下载阶段，非此后检查状态。
+
 - [x] 复用已核验的原test-other整包964502297字节、5120条原文／规范化文本／参考WAV关系，以及实际CI包和原研究消费者固定3条回读；不重新下载原数据。
+
 - [x] 已在服务器取得作者StyleTTS2固定源码，48份原文件175216146字节复现原Git树；原`Demo/Inference_LibriTTS.ipynb`存在并可解析。版本`5cedc71c333f8d8b8551ca59378bdcc7af4c9529`，未导入作者Python、未加载神经权重、0模型调用。
+
 - [x] 作者`yl4579/StyleTTS2-LibriTTS`多说话人模型的配置／主权重已取得，共771392385字节，固定HF版本`3aa7ba7f8f275ec13dce21682a61494c35089e2a`；Git配置身份和主权重LFS
   SHA256均匹配，公共只读verify复核通过。仅下载字节，未反序列化权重，NPU兼容性未验证；不能拿现有LJ Speech单说话人权重冒充此模型或编造缺失说话人向量。
 
