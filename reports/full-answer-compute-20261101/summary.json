@@ -1,0 +1,117 @@
+{
+  "schema": "full-answer-compute-subtotal/v1",
+  "status": "target_matrix_subtotal_recomputed_total_requires_measurement",
+  "coefficients": {
+    "projection_per_position": {
+      "full_attention": 545259520,
+      "linear_attention": 2021130240,
+      "moe_and_router": 2307031040
+    },
+    "causal_qk_av_per_pair": 163840,
+    "vocabulary_per_output": 1017118720
+  },
+  "arms": [
+    {
+      "role": "B0",
+      "run": "joint-b0-r2",
+      "requests": 200,
+      "input_tokens": 282265,
+      "output_tokens": 706796,
+      "necessary_target_positions": 988861,
+      "causal_pairs": 3063790102,
+      "matrix_flops_parts": {
+        "target_projections": 4819135765708800,
+        "target_causal_qk_av": 501971370311680,
+        "target_vocabulary": 718895442821120
+      },
+      "matrix_flops_subtotal": 6040002578841600,
+      "client_seconds": 1425.4634465482086,
+      "chips": 2,
+      "matrix_subtotal_tflops_per_chip": 2.1186101241205453,
+      "effective_flops_total": null,
+      "effective_tflops_per_chip": null,
+      "reference_seconds": null,
+      "efficiency_percent": null,
+      "outline_pass": null
+    },
+    {
+      "role": "B1",
+      "run": "joint-b1-r4",
+      "requests": 200,
+      "input_tokens": 282265,
+      "output_tokens": 661040,
+      "necessary_target_positions": 943105,
+      "causal_pairs": 2763050179,
+      "matrix_flops_parts": {
+        "target_projections": 4596147523584000,
+        "target_causal_qk_av": 452698141327360,
+        "target_vocabulary": 672356158668800
+      },
+      "matrix_flops_subtotal": 5721201823580160,
+      "client_seconds": 699.9029783103615,
+      "chips": 2,
+      "matrix_subtotal_tflops_per_chip": 4.08713921848978,
+      "effective_flops_total": null,
+      "effective_tflops_per_chip": null,
+      "reference_seconds": null,
+      "efficiency_percent": null,
+      "outline_pass": null
+    }
+  ],
+  "matrix_subtotal_rate_gain_percent": 92.91606190102529,
+  "timing_basis": "Original client submission-to-response-drain interval, all overhead retained; no synchronized worker boundary receipt.",
+  "missing_total_work": [
+    "B0 detailed MTP sequence absent; B1 native sequence recovered and dependency work reconstructed",
+    "Same-run GDN prefill chunk/state ledger and remaining basic scalar operations"
+  ],
+  "missing_acceptance": [
+    "Matched synchronized uninstrumented timing",
+    "Independent calibrated dependency/resource reference for each full-answer workload/path"
+  ],
+  "convention": "I+O-1 target positions, triangular causal pairs, top8 activated experts; vocabulary for O target decisions. Count global TP2 work once. Exclude padding and rejected speculative work. This subtotal is not complete F or outline C.",
+  "report_path": "reports/full-answer-compute-20261101/README.md",
+  "b1_basic_work_interval": {
+    "status": "basic_work_interval_over_gdn_partitions_client_timing",
+    "run": "joint-b1-r4",
+    "recovered_native_requests": 200,
+    "dependencies": {
+      "kv_rows": 1133191,
+      "full_query_rows": 413218,
+      "retained_vocab_rows": 413218,
+      "attention_pairs": 1599700493,
+      "first_retained": 222700,
+      "second_retained": 190518,
+      "draft_steps": 247720,
+      "raw_accepted": 413286
+    },
+    "target_scalar_flops": 79260797645085,
+    "necessary_draft_flops": 515038808672965,
+    "gdn_prefill_flops_interval": [
+      29101726539840,
+      38619850757760
+    ],
+    "basic_work_flops_interval": [
+      6344603156438050,
+      6354121280655970
+    ],
+    "client_tflops_per_chip_interval": [
+      4.532487611179039,
+      4.539287213776029
+    ],
+    "timing_basis": "Original client submission-to-response-drain interval, all overhead retained; no synchronized worker boundary receipt.",
+    "synchronized_effective_tflops_per_chip": null,
+    "reference_seconds": null,
+    "efficiency_percent": null,
+    "outline_pass": null,
+    "interval_meaning": "Exact arithmetic extrema over all 1..64-token prefill partitions under the frozen 64-chunk GDN algorithm, structural-zero initial state and continued state thereafter; not a statistical confidence interval.",
+    "dependency_basis": "Ordered native MTP2 acceptance, terminal output clipping, unique no-reuse request paths and qualified logical KV/hidden dependencies. Rejected roots and dead KV versions excluded.",
+    "remaining": "Actual GDN partition ledger for a point F; matched synchronized uninstrumented T and independent full-answer reference for outline eta. B0 has no detailed native MTP sequence in its SSE records."
+  },
+  "sources": {
+    "reports/full-answer-joint-20261030/joint-summary.json": "279d0245612d8e66c99e96f0d4b244e9e3efaab3f38a9c10f61b66b52396b094",
+    "reports/full-answer-compute-20261101/model-config.json": "a2619dc4d764affa76f420443393196d2bda5d8cfecfc7da235ff4a05a442ace",
+    "reports/full-answer-compute-20261101/source-audit.json": "0c9337550a27879b080811fbd1bf84fcf72634557a34e909fc8903b06b0c3f32",
+    "reports/full-answer-compute-20261101/b1-native-acceptance.json.gz": "5ff95c0e8e78d9b11d15a3bc9a2fb106865a592f080590a78c67c63367f75ea8",
+    "reports/full-answer-compute-20261101/operation-catalog.json": "ed5c462060ea4ea9546a8a2187c8bb6c55f1db34a32ede4dfe261ac1309b9cd1"
+  }
+}

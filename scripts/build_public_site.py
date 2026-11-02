@@ -11,6 +11,7 @@ import json
 import re
 import subprocess
 import zipfile
+from urllib.parse import unquote, urlsplit
 from pathlib import Path
 
 PROJECT = re.compile(
@@ -282,6 +283,22 @@ def archive_matches(path):
     return False
 
 
+def prune_removed_artifact_links(value, removed):
+    """Optional curve downloads must refer to files in the public artifact."""
+    if isinstance(value, dict):
+        url = value.get("concurrency_curves_url")
+        if isinstance(url, str):
+            parsed = urlsplit(url)
+            local = unquote(parsed.path).removeprefix("./").lstrip("/")
+            if not parsed.scheme and not parsed.netloc and local in removed:
+                del value["concurrency_curves_url"]
+        for child in value.values():
+            prune_removed_artifact_links(child, removed)
+    elif isinstance(value, list):
+        for child in value:
+            prune_removed_artifact_links(child, removed)
+
+
 def build(source, destination, policy_revision):
     source, destination = source.resolve(), destination.resolve()
     if destination.exists() or source == destination or source in destination.parents:
@@ -371,6 +388,7 @@ def build(source, destination, policy_revision):
             retained_runs=PUBLIC_C16_RUN_IDS if name == C16_EVIDENCE_PATH else (),
         )
         prune_frontier(projected, removed_ids)
+        prune_removed_artifact_links(projected, set(removed))
         if projected is DROP:
             removed.append(name)
             continue
@@ -412,7 +430,7 @@ def build(source, destination, policy_revision):
 
         def link(match):
             href = re.search(r'href=["\']([^"\']+)', match[0])
-            if href and href[1].split("#")[0].removeprefix("./") in omitted:
+            if href and unquote(urlsplit(href[1]).path).removeprefix("./") in omitted:
                 return ""
             return match[0]
 
