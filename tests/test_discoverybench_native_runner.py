@@ -202,3 +202,37 @@ def test_external_worker_mode_never_sends_local_model_request(tmp_path, monkeypa
         tool=lambda: tools.append("served"),
     )
     assert tools == ["served"]
+
+
+def test_scoring_resume_keeps_saved_actor_and_checks_original_input(tmp_path):
+    previous = tmp_path / "previous"
+    original = previous / "case-3"
+    (original / "inputs").mkdir(parents=True)
+    (original / "inputs/data.csv").write_bytes(b"original")
+    saved = original / "actor/run"
+    saved.mkdir(parents=True)
+    receipt = {
+        "status": "ORIGINAL_ACTOR_RETURNED_NOT_SCORED",
+        "metadata_sha256": "fixture",
+        "original_query_id": 0,
+        "requested_model": "actual-model",
+    }
+    (saved / "actor-receipt-public.json").write_text(json.dumps(receipt))
+    (saved / "original-agent-results-private.json").write_bytes(
+        b"saved original prediction"
+    )
+    current = tmp_path / "current"
+    current.mkdir()
+    (current / "data.csv").write_bytes(b"original")
+    output = tmp_path / "output"
+    output.mkdir()
+    case = {"original_position": 3, "metadata": {"sha256": "fixture"}, "query_id": 0}
+    entry.reuse_actor(previous, case, current, output, "actual-model")
+    assert (
+        output / "run/original-agent-results-private.json"
+    ).read_bytes() == b"saved original prediction"
+    (current / "data.csv").write_bytes(b"changed")
+    with pytest.raises(ValueError, match="input differs"):
+        entry.reuse_actor(
+            previous, case, current, tmp_path / "different-output", "actual-model"
+        )

@@ -234,6 +234,27 @@ def stage_inputs(prepared, case, output):
         path.chmod(0o755 if path.is_dir() else 0o644)
 
 
+def reuse_actor(previous, case, current_inputs, output, model):
+    """Resume scoring only after exact original input/actor receipt validation."""
+    original = previous / f"case-{case['original_position']}"
+    for path in current_inputs.rglob("*"):
+        if path.is_file():
+            saved = original / "inputs" / path.relative_to(current_inputs)
+            if saved.read_bytes() != path.read_bytes():
+                raise ValueError("saved actor input differs; do not regenerate")
+    receipt = json.loads(
+        (original / "actor/run/actor-receipt-public.json").read_bytes()
+    )
+    if (
+        receipt.get("status") != "ORIGINAL_ACTOR_RETURNED_NOT_SCORED"
+        or receipt.get("metadata_sha256") != case["metadata"]["sha256"]
+        or int(receipt.get("original_query_id")) != int(case["query_id"])
+        or receipt.get("requested_model") != model
+    ):
+        raise ValueError("saved completed actor receipt does not match original case")
+    shutil.copytree(original / "actor/run", output / "run")
+
+
 def execute(args):
     if os.name != "posix" or os.geteuid() != 0:
         raise ValueError(
@@ -253,6 +274,14 @@ def execute(args):
         args.output.resolve()
     ):
         raise ValueError("run output and prepared inputs must be separate")
+    if args.score_existing_run:
+        args.score_existing_run = args.score_existing_run.resolve(strict=True)
+        if args.preflight or args.output.resolve().is_relative_to(
+            args.score_existing_run
+        ):
+            raise ValueError(
+                "scoring resume requires separate fresh output and execution mode"
+            )
     if not args.preflight and not args.external_model_worker:
         endpoint = urlsplit(args.api_base)
         if (
@@ -332,17 +361,23 @@ def execute(args):
             str(args.transport_timeout),
             "--preflight" if args.preflight else "--execute",
         ]
-        run_child(
-            args,
-            command,
-            queue,
-            case_dir / "actor",
-            tool=lambda: tool_once(args, runtime, data, tool_queue, case_dir),
-        )
+        if args.score_existing_run:
+            reuse_actor(
+                args.score_existing_run, case, inputs, case_dir / "actor", args.model
+            )
+        else:
+            run_child(
+                args,
+                command,
+                queue,
+                case_dir / "actor",
+                tool=lambda: tool_once(args, runtime, data, tool_queue, case_dir),
+            )
         if not args.preflight:
             prediction = case_dir / "actor/run/original-agent-results-private.json"
             scoring = case_dir / "scoring-input"
             scoring.mkdir(mode=0o755)
+            scoring.chmod(0o755)
             for source, name in [
                 (metadata, metadata.name),
                 (inputs / "reference.json", "reference.json"),
@@ -423,6 +458,11 @@ def main():
     parser.add_argument("--judge-model", default="Qwen/Qwen3-14B")
     parser.add_argument("--python", default="/opt/discovery-client/bin/python")
     parser.add_argument("--disable-thinking", action="store_true")
+    parser.add_argument(
+        "--score-existing-run",
+        type=Path,
+        help="reuse completed original actors from this run after exact input checks; never regenerate",
+    )
     parser.add_argument(
         "--external-model-worker",
         action="store_true",
