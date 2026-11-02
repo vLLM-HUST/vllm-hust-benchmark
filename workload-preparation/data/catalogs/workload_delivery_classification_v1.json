@@ -21,6 +21,14 @@
     {"source_id": "PAIO-SEMANTIC-SIMILAR-5000", "asset_group": "enterprise-private-requests", "related_workload_ids": [], "boundary": "Semantic similarity is not exact-prefix or KV reuse; preserve original private requests without rewriting."}
   ],
   "source_entrypoints": {
+    "VIDEOMME_V2": [
+      {"role": "prepare_assets", "path": "scripts/prepare_reused_research_assets.py", "scope": "Original pinned annotation and subtitle assets; invoke with source_id VIDEOMME_V2, no native execution"},
+      {"role": "prepare_assets", "path": "scripts/prepare_videomme_v2_fixed_media.py", "scope": "Frozen six original validation videos, publisher archive/member identity and full decode; not all800 videos"},
+      {"role": "prepare_assets", "path": "scripts/prepare_videomme_v2_original_prompts.py", "scope": "Unchanged official constructor,64-frame sampler and prompt builder for24 original questions/6 complete groups; owned cache and all3200 annotations retained"},
+      {"role": "generation", "path": "scripts/run_videomme_v2_original.py", "scope": "Frozen original24-question64-frame NPU inference and original complete-group nonlinear scoring; default plan, failures retained, not full3200 validation"},
+      {"role": "native_evaluation", "path": "scripts/run_videomme_v2_original.py", "scope": "Publisher exact_matching and grouped nonlinear rating on all four questions of every selected original group; no paid judge or row-accuracy substitution"},
+      {"role": "original_profile", "path": "configs/workload-native/videomme-v2-official-full-local.json", "scope": "Official run.py configuration for all3200 original questions, base64-frame profile; full800 original videos required, full run not validated here"}
+    ],
     "LONGMEMEVAL_V2": [
       {"role": "prepare_assets", "path": "scripts/verify_longmemeval_v2_processor.py", "scope": "CPU image/token preprocessing fixture qualified against original reader metadata, with neural forward and weight loading blocked; not native RAG"},
       {"role": "original_profile", "path": "configs/workload-native/longmemeval-v2-processor-arm64-py312-lock.txt", "scope": "Qualified isolated ARM64 Python3.12 CPU preprocessing software, not the author CUDA environment or a CPU encoder"},

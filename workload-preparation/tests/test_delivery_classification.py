@@ -177,3 +177,21 @@ def test_invalid_entrypoint_metadata_rejected(monkeypatch, failure):
     )
     with pytest.raises(ValueError):
         taxonomy.delivery_assets()
+
+
+def test_videomme_v2_execution_is_discoverable_without_runtime_upgrade():
+    row = next(
+        row for row in taxonomy.delivery_assets() if row["source_id"] == "VIDEOMME_V2"
+    )
+    entries = {(entry["role"], entry["path"]) for entry in row["entrypoints"]}
+    assert ("generation", "scripts/run_videomme_v2_original.py") in entries
+    assert ("native_evaluation", "scripts/run_videomme_v2_original.py") in entries
+    assert (
+        "prepare_assets",
+        "scripts/prepare_videomme_v2_original_prompts.py",
+    ) in entries
+    assert (
+        "original_profile",
+        "configs/workload-native/videomme-v2-official-full-local.json",
+    ) in entries
+    assert row["native_validation"] == "NOT_ESTABLISHED_BY_CLASSIFICATION"
