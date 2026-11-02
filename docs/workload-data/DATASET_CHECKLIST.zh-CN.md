@@ -44,7 +44,7 @@
   Git子模块尚未取得，不宣称完整Agent环境。官方Docker
   provider明确在缺KVM时设置`KVM=N`，因此不能仅以缺KVM判定无法执行。官方容器架构、原桌面镜像、Agent与评分仍待核验；本次容器元数据请求遇到网络不可达，未下载镜像层。来源仍不打勾。证据：`/var/lib/npc/osworld-original-harness-20261103-001/qualification-public.json`。
 
-- [x] NatureBench第三道固定原题的原版评分服务在对应合格科学环境通过独立回环健康检查；只读挂载原数据，不挂Docker套接字，0模型调用。第二题现已终止为原4小时预算超时，原任务评分-1，有效性judge因上下文容量不足失败；第三题Agent尚未启动。CPU自动停止后已恢复同一持久卷、独立Docker及同一第三题评分容器，回环健康检查再次通过；模型通道和Agent仍待恢复核验，来源仍不打勾。证据：`validation/naturebench-original-fixed3-native-progress-20261102.json`。
+- [x] NatureBench第三道固定原题的原版评分服务在对应合格科学环境通过独立回环健康检查；只读挂载原数据，不挂Docker套接字，准备检查0模型调用。第二题现已终止为原4小时预算超时，原任务评分-1，有效性judge因上下文容量不足失败。CPU自动停止后已恢复同一持久卷、独立Docker、同一第三题评分容器及受限模型通道；第三题原Agent已于UTC2026-11-02T19:37:41启动，实际出现4次assistant事件和原工具调用，无API错误标记，尚无最终结果。原预算与judge保留，来源仍不打勾。证据：`validation/naturebench-original-fixed3-native-progress-20261102.json`。
 
 - [x] VisualWebArena已复用公共归档准备器：478份原生软件、任务配置、网站准备与仓内参考资产共200942354字节，在服务器通过plan、prepare、verify，复用原归档、没有重复下载。仅排除media演示和tests；网站镜像及题目外链媒体仍需另行准备。公共仓仅存固定摘要元数据，不存这些原文件。用法如下（先plan查看官方固定归档地址）：
 
