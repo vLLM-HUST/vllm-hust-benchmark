@@ -1318,7 +1318,7 @@ LMM
 
 ### LibriTTS多说话人TTS准备（尚未交付）
 
-原生执行入口为`scripts/run_libritts_styletts2_original_npu.py`，默认仅输出计划，尚未验证实际合成。需准备固定作者源码、发布方模型、原test-other归档、官方NLTK资源及独立StyleTTS2依赖环境；设置已验证的eSpeak路径，并安装本仓库数据读取包。命令如下，只有补上`--execute`才进行NPU推理，`--full`选择原5120条；输出目录须在仓库外且尚不存在。服务器已验证公开入口的plan分支，不能代替执行证据。
+原生执行入口为`scripts/run_libritts_styletts2_original_npu.py`，默认仅输出计划，尚未验证实际合成。需准备固定作者源码、发布方模型、原test-other归档、官方NLTK资源及独立StyleTTS2依赖环境；设置已验证的eSpeak路径，并安装本仓库数据读取包。在执行进程中加载服务器已安装CANN的`set_env.sh`，保留其编译器Python路径，不要用数据包路径覆盖整个`PYTHONPATH`。命令如下，只有补上`--execute`才进行NPU推理，`--full`选择原5120条；输出目录须在仓库外且尚不存在。服务器已验证公开入口的plan分支，不能代替执行证据。
 
 ```bash
 python scripts/run_libritts_styletts2_original_npu.py \
@@ -1330,6 +1330,8 @@ python scripts/run_libritts_styletts2_original_npu.py \
 ```
 
 入口保留作者notebook推理定义、alpha=0.3、beta=0.7、5步扩散、embedding_scale=1及作者原50样本尾部处理；使用float32／NPU和种子0，不截断原始文本，不使用目标录音作为条件参考。仅校验输出波形结构，未提供MOS或冒称官方LibriTTS质量评分。
+
+首次原题执行已到达NPU参考编码，因隔离进程遗漏CANN编译器Python路径，原LSTM初始化报`No module named tbe`，未生成波形。失败保存在`libritts-public-native-entry-20261102-002/execution-window`，两套服务进程身份保持不变；随后只读接入既有CANN路径，`tbe/te`导入控制通过，回执`libritts-cann-compiler-imports-20261102-001/qualification-public.json`。这不代表完整合成通过。
 
 - [x] 隔离客户端77项新依赖已安装并通过`pip check`，安装计划未替换Torch／torch_npu，原只读vendor链接保留。按原Git树编译作者要求的monotonic_align扩展，源码未改；补齐旧phonemizer漏声明的six后，原模块导入通过。导入检查期间禁止所有神经前向和权重加载，未初始化NPU上下文。
 

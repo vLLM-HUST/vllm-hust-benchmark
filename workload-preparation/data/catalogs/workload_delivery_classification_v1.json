@@ -131,7 +131,9 @@
     ],
     "LIBRITTS": [
       {"role": "prepare_assets", "path": "scripts/prepare_libritts_original_assets.py", "scope": "Pinned test-other original corpus only; not native speech synthesis"},
-      {"role": "data_reading_only", "path": "workload-preparation/src/vllm_hust_workload_data/libritts.py", "scope": "Candidate original-pair adapter, format fixtures only until original archive validation; no model or generated prompt"}
+      {"role": "data_reading_only", "path": "workload-preparation/src/vllm_hust_workload_data/libritts.py", "scope": "All5120 original test-other pairs and fixed3 actual CI/public/research readbacks verified; original text, normalized text, reference waveforms and speaker identities retained, not synthesis"},
+      {"role": "prepare_assets", "path": "scripts/prepare_libritts_styletts2_model.py", "scope": "Pinned publisher multispeaker StyleTTS2 configuration/checkpoint acquisition and verification; no neural execution"},
+      {"role": "generation", "path": "scripts/run_libritts_styletts2_original_npu.py", "scope": "Declared original test-other reference-conditioned TTS protocol using unchanged publisher inference definitions and NPU float32; fixed first3 or all5120, default plan. Native synthesis not yet qualified; no official corpus quality metric or performance claim"}
     ],
     "LJSPEECH": [
       {"role": "prepare_assets", "path": "scripts/prepare_ljspeech_original_assets.py", "scope": "Full original1.1 speech archive with official TorchAudio checksum and exact matching resume only; not TTS model execution or quality scoring"},
