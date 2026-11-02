@@ -639,8 +639,10 @@ LD_LIBRARY_PATH=/external/ffmpeg/lib python -B scripts/run_videomme_original.py 
 - [x] CPU到现有NPU
   14B服务的限时受限SSH回环通道已接通，未改写流式HTTP、未重启模型；原版评估服务回环健康检查及第一题注册通过。Docker权限仅交给可信原harness，不挂入生成代码任务容器。
 
-- [ ] 原CPU组固定第一题已启动完整Claude
-  Agent，题目、提示、4小时任务/准备预算及评分保留；已观察到至少5个assistant事件和4个user事件，尚无最终result事件，不能换算为精确模型请求数或来源完成。其余两题及最终原生评分/judge、公共入口和最终研究交接待完成。进展证据：`validation/naturebench-original-fixed3-native-progress-20261102.json`。
+- [ ] 原CPU组固定第一题已终止为`agent_error`，任务返回1、控制器退出0，官方已评分任务数0。终止请求为输入至少99073、输出32000，合计超过服务131072容量；不以容器退出0当成功，也不归因于科学答案质量。原输入、输出及失败轨迹保留，未人工修答案、未换题。其余两题及最终原生评分/judge、公共入口和最终研究交接待完成。进展证据：`validation/naturebench-original-fixed3-native-progress-20261102.json`。
+
+- [x] 已核验原Claude
+  Code2.1.316支持[官方自定义模型上下文配置](https://code.claude.com/docs/en/model-config#correct-the-window-for-a-gateway-or-custom-model-id)。公共入口新增`--model-context-tokens`，执行前必须按实际部署声明容量，使用`CLAUDE_CODE_MAX_CONTEXT_TOKENS`交给原客户端；不改任务、4小时预算、输出预算或模型服务。修复后原题执行尚待验证，首次失败不合并为成功结果。
 
 - [x] 公共运行时软件准备器已在服务器候选版本验证：离线计划、准备、再核验均返回0；生成的56个文件与正在执行的原生运行时逐字节一致，0新增模型调用。9项小夹具覆盖原文件保护、两处网络兼容改动、重复目录拒绝与篡改拒绝；不是数据集或科学任务测试，也还不是CI工件核验。
 
@@ -648,19 +650,21 @@ LD_LIBRARY_PATH=/external/ffmpeg/lib python -B scripts/run_videomme_original.py 
 
   ```bash
   # 默认只做离线计划；常规Docker环境使用original。
-  python scripts/prepare_naturebench_native_runtime.py --author-root /path/to/pinned-naturebench-code --output /path/to/fresh-runtime --profile original
-  python scripts/prepare_naturebench_native_runtime.py --author-root /path/to/pinned-naturebench-code --output /path/to/fresh-runtime --profile original --write
+  python scripts/prepare_naturebench_native_runtime.py --author-root /path/to/pinned-naturebench-code --output /path/to/fresh-runtime --profile original-context
+  python scripts/prepare_naturebench_native_runtime.py --author-root /path/to/pinned-naturebench-code --output /path/to/fresh-runtime --profile original-context --write
   python scripts/prepare_naturebench_native_runtime.py --author-root /path/to/pinned-naturebench-code --output /path/to/fresh-runtime --verify
-  # owned-hostnet只用于专用、已核验的pod，不是通用不可信网络隔离方案。
+  # owned-hostnet-context仅用于专用、已核验的pod，不是通用不可信网络隔离方案。
+  # 两个-context配置只额外透传CLAUDE_CODE_MAX_CONTEXT_TOKENS，不修改原任务或提示。
   ```
 
 - [x] 公共原生委托入口`run_naturebench_original.py`已接好：复用原包读取器核验输入、隐藏评估、环境与许可证，直接委托原版harness，默认原CPU3、单worker、原4小时预算，不提供`skip-judge`或宿主机生成代码回退。服务器在实际挂载命名空间通过第二题完整原包的离线计划核验，0模型调用、未创建实验输出目录；这不是第二题执行或来源交付。
 
-- [ ] 公共委托入口的`--execute`实跑及科学环境完整复现说明待完成；第一题现有运行不重跑。10项新增编排夹具只验证参数、身份/数据拒绝、显式凭据、失败保留和不自动宣告完成。
+- [ ] 公共委托入口的`--execute`实跑及科学环境完整复现说明待完成；首次失败运行保留，修复后的原题运行须单独记录。14项编排夹具只验证参数、身份/数据拒绝、显式凭据、上下文容量声明、容器透传、失败保留和不自动宣告完成。
 
   ```bash
   # 离线计划；科学依赖、原任务Docker镜像和原evaluator须先准备并核验。
-  python scripts/run_naturebench_original.py --author-root /path/to/pinned-naturebench-code --runtime /path/to/fresh-runtime --data-root /path/to/original-naturebench-data --output /path/to/new-native-run --model YOUR_SERVED_MODEL --endpoint http://127.0.0.1:YOUR_MODEL_PORT
+  python scripts/run_naturebench_original.py --author-root /path/to/pinned-naturebench-code --runtime /path/to/fresh-runtime --data-root /path/to/original-naturebench-data --output /path/to/new-native-run --model YOUR_SERVED_MODEL --model-context-tokens 131072 --endpoint http://127.0.0.1:YOUR_MODEL_PORT
+  # 131072对应本次已核验14B服务；其他部署填其真实的输入+输出总容量，不是修改输出预算。
   # --execute只在已准备好的可信控制环境显式调用；Agent/judge端点和API_KEY均显式配置。
   # 默认三题；--task-id只接受原CPU任务ID，不会换题或减预算。
   ```
@@ -702,7 +706,7 @@ LD_LIBRARY_PATH=/external/ffmpeg/lib python -B scripts/run_videomme_original.py 
   python /path/to/benchmark/scripts/run_naturebench_original.py \
     --author-root /path/to/pinned-naturebench-code \
     --runtime /path/to/fresh-runtime --data-root /path/to/original-naturebench-data \
-    --output /path/to/separate-fresh-run --model YOUR_SERVED_MODEL \
+    --output /path/to/separate-fresh-run --model YOUR_SERVED_MODEL --model-context-tokens 131072 \
     --endpoint http://127.0.0.1:YOUR_MODEL_PORT --eval-port 18322 \
     --eval-mapping /path/to/mapping-with-matching-main-port.json
   # 离线计划通过后，同命令追加--execute；先显式设置ANTHROPIC_API_KEY和JUDGE_API_KEY。

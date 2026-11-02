@@ -1,6 +1,6 @@
 {
   "source_id": "NATUREBENCH",
-  "status": "FIRST_FIXED_ORIGINAL_AGENT_RUNNING_NOT_DELIVERY",
+  "status": "FIRST_FIXED_ORIGINAL_AGENT_CONTEXT_FAILURE_NO_SCORED_TASKS",
   "source_checkbox_eligible": false,
   "declared_protocol": "Original full CPU resource group: three fixed original scientific coding tasks, complete Agent/evaluator/validity-judge workflow",
   "selected_original_task_ids": ["s41592-022-01709-7", "s41592-025-02870-5", "s43588-024-00689-2"],
@@ -22,7 +22,22 @@
   "original_evaluator": "Unchanged eval_service.py in qualified isolated scientific container, bound127.0.0.1:18321; health passed, original first task registration passed",
   "trusted_controller_check": "Exact owned Docker daemon, existing NPU model discovery and evaluator health all passed inside actual controller mount namespace",
   "docker_access_scope": "Docker client/socket mounted only into trusted original harness; not mounted into generated-code task container",
-  "native_observation": {"controller_running": true, "task_container_running": true, "assistant_events_lower_bound": 5, "user_events_lower_bound": 4, "result_event_seen": false, "event_counts_are_not_exact_model_request_counts": true},
+  "native_observation": {"controller_running": false, "assistant_events_lower_bound": 200, "user_events_lower_bound": 102, "result_event_seen": true, "event_counts_are_not_exact_model_request_counts": true},
+  "first_terminal_result": {
+    "controller_exit_code": 0,
+    "official_task_status": "agent_error",
+    "official_task_returncode": 1,
+    "official_scored_tasks": 0,
+    "native_agent_result_is_error": true,
+    "reported_api_status": 500,
+    "actual_served_context_tokens": 131072,
+    "failing_prompt_tokens_lower_bound": 99073,
+    "requested_output_tokens": 32000,
+    "root_cause": "Unknown custom model ID lacked explicit Claude Code context-capacity declaration; original request exceeded service combined input/output capacity. Not scientific answer quality and not successful native scoring.",
+    "failed_outputs_and_transcripts_retained": true,
+    "model_service_restarted_or_reconfigured": false,
+    "public_wrapper_repair": "Require explicit served context and pass official CLAUDE_CODE_MAX_CONTEXT_TOKENS without changing task,prompt,14400-second budgets or output budget; original CLI2.1.316 binary contains this setting. New-profile native verification pending."
+  },
   "private_server_evidence": {
     "launch": "Control node /var/lib/npc/naturebench-first-original-agent-20261102-001/state-public.json",
     "poll": "Same directory latest-poll-public.json; poll itself performs zero model calls",
@@ -33,6 +48,18 @@
     "cpu_loopback_discovery": "CPU dev /root/naturebench-loopback-20261102-001/route-discovery-public.json"
   },
   "preparation_receipt": "docs/workload-data/validation/naturebench-original-readiness-20261028.json",
+  "context_capacity_repair_readiness": {
+    "runtime_profile": "owned-hostnet-context",
+    "declared_client_context_tokens": 131072,
+    "actual_service_model_metadata_context_tokens": 131072,
+    "original_second_task_package_plan_passed": true,
+    "task_container_capacity_environment_passthrough_in_verified_source": true,
+    "output_budget_override_added": false,
+    "new_model_calls": 0,
+    "new_native_execute_qualified": false,
+    "candidate_not_ci_artifact": true,
+    "server_receipt": "CPU dev /root/swe-bench/docker-data/naturebench-context-capacity-20261102-001/qualification-public.json"
+  },
   "public_runtime_preparer_candidate": {
     "entry": "scripts/prepare_naturebench_native_runtime.py",
     "default_mode": "Offline software plan,no output,network,task data,installation or model call",

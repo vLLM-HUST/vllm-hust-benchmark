@@ -38,7 +38,13 @@ def endpoint(value):
 
 
 def plan(args):
+    context_tokens = getattr(args, "model_context_tokens", None)
+    if context_tokens is not None and context_tokens <= 0:
+        raise ValueError("positive actual served model context required")
     source = verify_runtime(args.author_root, args.runtime)
+    runtime_profile = json.loads(
+        (args.runtime / "runtime-profile.json").read_text("utf-8")
+    )
     release = json.loads(RELEASE.read_text("utf-8"))
     tasks = args.task_id or release["official_cpu_tasks"]
     if (
@@ -108,6 +114,11 @@ def plan(args):
         "agent": "claude",
         "agent_model": args.model,
         "judge_model": args.judge_model or args.model,
+        "caller_declared_served_context_tokens": context_tokens,
+        "context_capacity_discovered_from_endpoint": False,
+        "runtime_context_capacity_forwarded": runtime_profile[
+            "network_profile"
+        ].endswith("-context"),
         "agent_endpoint": endpoint(args.endpoint),
         "judge_endpoint": endpoint(args.judge_endpoint or args.endpoint),
         "task_budget_seconds": 14400,
@@ -124,6 +135,14 @@ def execute(args, prepared):
     if any(not os.environ.get(key, "").strip() for key in required):
         raise ValueError(
             "set explicit ANTHROPIC_API_KEY and JUDGE_API_KEY; never borrow default credentials"
+        )
+    if prepared["caller_declared_served_context_tokens"] is None:
+        raise ValueError(
+            "declare --model-context-tokens from actual service configuration before execution"
+        )
+    if not prepared["runtime_context_capacity_forwarded"]:
+        raise ValueError(
+            "prepare original-context or owned-hostnet-context runtime so the original task container receives the declared capacity"
         )
     # Only a trusted harness runs here; generated scientific programs stay in
     # the original task Docker containers. Do not fall back to host execution.
@@ -142,6 +161,11 @@ def execute(args, prepared):
         "ANTHROPIC_AUTH_TOKEN",
         "ANTHROPIC_API_BASE",
         "CLAUDE_CODE_OAUTH_TOKEN",
+        "CLAUDE_CODE_AUTO_COMPACT_WINDOW",
+        "CLAUDE_CODE_MAX_CONTEXT_TOKENS",
+        "CLAUDE_CODE_MAX_OUTPUT_TOKENS",
+        "DISABLE_COMPACT",
+        "CLAUDE_CODE_DISABLE_UNKNOWN_MODEL_WINDOW_ENFORCEMENT",
     ]:
         environment.pop(key, None)
     environment.update(
@@ -149,6 +173,9 @@ def execute(args, prepared):
         ANTHROPIC_MODEL=prepared["agent_model"],
         JUDGE_BASE_URL=prepared["judge_endpoint"],
         JUDGE_MODEL=prepared["judge_model"],
+        CLAUDE_CODE_MAX_CONTEXT_TOKENS=str(
+            prepared["caller_declared_served_context_tokens"]
+        ),
     )
     output = args.output.resolve()
     output.mkdir(mode=0o700, parents=True, exist_ok=False)
@@ -194,6 +221,11 @@ def main():
     parser.add_argument("--data-root", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--model", required=True)
+    parser.add_argument(
+        "--model-context-tokens",
+        type=int,
+        help="Actual combined input/output context limit of deployed service; required by execute, not an output-budget override",
+    )
     parser.add_argument("--endpoint", required=True)
     parser.add_argument("--judge-model")
     parser.add_argument("--judge-endpoint")

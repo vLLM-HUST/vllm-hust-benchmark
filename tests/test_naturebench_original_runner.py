@@ -27,6 +27,9 @@ def args(tmp_path, monkeypatch):
     for path in [author, runtime / "source", data]:
         path.mkdir(parents=True)
     (runtime / "source/eval_env_mapping.json").write_text("{}")
+    (runtime / "runtime-profile.json").write_text(
+        json.dumps({"network_profile": "original-context"})
+    )
     monkeypatch.setattr(runner, "verify_runtime", lambda a, r: r / "source")
     monkeypatch.setattr(
         runner,
@@ -39,6 +42,7 @@ def args(tmp_path, monkeypatch):
         data_root=data,
         output=tmp_path / "fresh-output",
         model="fixture-local-model",
+        model_context_tokens=131072,
         endpoint="http://127.0.0.1:9999",
         judge_model=None,
         judge_endpoint=None,
@@ -109,6 +113,10 @@ def fake_execution(monkeypatch, code):
     monkeypatch.setenv("JUDGE_API_KEY", "fixture-judge-secret")
     monkeypatch.setenv("JUDGE_OPENAI_BASE_URL", "https://unrelated.example")
     monkeypatch.setenv("ANTHROPIC_AUTH_TOKEN", "fixture-unrelated-secret")
+    monkeypatch.setenv("CLAUDE_CODE_MAX_CONTEXT_TOKENS", "999999")
+    monkeypatch.setenv("CLAUDE_CODE_AUTO_COMPACT_WINDOW", "999999")
+    monkeypatch.setenv("CLAUDE_CODE_MAX_OUTPUT_TOKENS", "1")
+    monkeypatch.setenv("DISABLE_COMPACT", "1")
     monkeypatch.setattr(runner, "urlopen", lambda *a, **k: Health())
     calls = []
 
@@ -130,6 +138,10 @@ def test_native_exit_never_promotes_source_or_discloses_keys(args, monkeypatch, 
     assert "JUDGE_OPENAI_BASE_URL" not in environment
     assert "ANTHROPIC_AUTH_TOKEN" not in environment
     assert environment["ANTHROPIC_BASE_URL"] == args.endpoint
+    assert environment["CLAUDE_CODE_MAX_CONTEXT_TOKENS"] == "131072"
+    assert "CLAUDE_CODE_AUTO_COMPACT_WINDOW" not in environment
+    assert "DISABLE_COMPACT" not in environment
+    assert "CLAUDE_CODE_MAX_OUTPUT_TOKENS" not in environment
     receipt = (args.output / "execution-public.json").read_text()
     result = json.loads(receipt)
     assert result["source_checkbox_eligible"] is False
@@ -150,3 +162,29 @@ def test_original_input_verification_failure_is_not_replaced(args, monkeypatch):
     with pytest.raises(ValueError, match="checksum"):
         runner.plan(args)
     assert not args.output.exists()
+
+
+def test_missing_actual_context_rejected_before_any_native_launch(args, monkeypatch):
+    args.model_context_tokens = None
+    calls = fake_execution(monkeypatch, 0)
+    prepared = runner.plan(args)
+    with pytest.raises(ValueError, match="model-context-tokens"):
+        runner.execute(args, prepared)
+    assert calls == [] and not args.output.exists()
+
+
+def test_non_forwarding_runtime_rejected_before_native_launch(args, monkeypatch):
+    (args.runtime / "runtime-profile.json").write_text(
+        json.dumps({"network_profile": "original"})
+    )
+    calls = fake_execution(monkeypatch, 0)
+    with pytest.raises(ValueError, match="task container"):
+        runner.execute(args, runner.plan(args))
+    assert calls == [] and not args.output.exists()
+
+
+@pytest.mark.parametrize("value", [0, -1])
+def test_invalid_actual_context_rejected(args, value):
+    args.model_context_tokens = value
+    with pytest.raises(ValueError, match="positive actual"):
+        runner.plan(args)

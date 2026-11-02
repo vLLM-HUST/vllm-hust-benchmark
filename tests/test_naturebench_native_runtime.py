@@ -23,6 +23,9 @@ SOLVE = b"""def launch(container_name):
             "--name", container_name,
     ]
     docker_cmd.extend(["--add-host=host.docker.internal:host-gateway"])
+    env_keys = (
+        "ANTHROPIC_API_BASE", "ANTHROPIC_MODEL",
+    )
     return docker_cmd
 """
 
@@ -70,10 +73,18 @@ def test_exact_profile_and_original_preservation(original, tmp_path, profile):
     assert result["task_data_copied"] is False
     expected = [] if profile == "original" else ["solve.py"]
     assert result["changed_original_files"] == expected
-    if profile == "owned-hostnet":
+    if profile.startswith("owned-hostnet"):
         raw = (output / "source/solve.py").read_bytes()
         assert b'"--network", "host"' in raw
         assert b"host.docker.internal:127.0.0.1" in raw
+    assert result["task_container_context_capacity_forwarded"] == profile.endswith(
+        "-context"
+    )
+    if profile.endswith("-context"):
+        assert (
+            b"CLAUDE_CODE_MAX_CONTEXT_TOKENS"
+            in (output / "source/solve.py").read_bytes()
+        )
 
 
 def test_unknown_or_changed_original_network_fails_closed(original, tmp_path):
