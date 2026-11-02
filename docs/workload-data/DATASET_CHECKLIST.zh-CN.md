@@ -2,6 +2,15 @@
 
 ### 剩余原生环境前置条件复核（2026-11-02）
 
+- [x] WebArena官方固定版本的812条原任务配置及LICENSE/README共901850字节已在服务器取得，Git
+  blob及SHA256核验通过；已有公共获取入口的plan、download和verify实际通过。前3条原题均依赖`shopping_admin`，后续优先核验该原网站镜像与完整原题流程；不将下载或读取算作来源交付。首次raw域名连接重置及编排脚本误把下载成功的空stdout当JSON的失败保留，已回查实际成功回执，未重复下载。
+
+```bash
+python scripts/prepare_reused_research_assets.py WEBARENA --mode plan
+python scripts/prepare_reused_research_assets.py WEBARENA --mode download --data-root /server/fresh-webarena-assets --max-bytes 901850 --github-api
+python scripts/prepare_reused_research_assets.py WEBARENA --mode verify --data-root /server/fresh-webarena-assets
+```
+
 以下三项保持未完成，不因官方文档核查或环境探测而打勾；机器记录见`dataset-validation-status.json`的`delivery_inventory`。
 
 | 来源      | 本次确认的缺口                                                                                                                                                                   | 下一步原生验证条件                                                                                                                                                  |

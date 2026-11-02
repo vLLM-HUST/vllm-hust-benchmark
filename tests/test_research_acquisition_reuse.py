@@ -18,6 +18,21 @@ runner = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(runner)
 
 
+def test_webarena_original_task_assets_are_not_native_completion():
+    source, files = runner.selection("WEBARENA")
+    assert (
+        source["revision"] == "dce04686a56253aefba7b18a4fa0937cf1dc987b"
+    )  # pragma: allowlist secret - verified public upstream Git commit
+    assert len(files) == 3 and sum(item["bytes"] for item in files) == 901850
+    assert {item["path"] for item in files} == {
+        "LICENSE",
+        "README.md",
+        "config_files/test.raw.json",
+    }
+    assert all(source["revision"] in item["url"] for item in files)
+    assert source["discovery_status"].endswith("NATIVE_WEBSITES_PENDING")
+
+
 def test_existing_public_source_baseline_positions_match_unchanged_digests():
     """Bookkeeping check, not a substitute for the actual secret scanner."""
     path = "workload-preparation/data/catalogs/source_manifests_v1.json"
