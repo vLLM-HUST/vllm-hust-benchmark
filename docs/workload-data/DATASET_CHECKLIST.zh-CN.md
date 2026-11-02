@@ -1335,6 +1335,8 @@ LMM
 
 - [x] 固定24道原题的官方64帧提示已在服务器实际准备完成，保留全部3200条标注及384个独立帧文件。原构造器、抽帧与提示函数未改，字幕／推理／额外缩放均关闭；后验源码树核验通过，NPU上下文未初始化、0模型调用。仍缺兼容64帧服务、实际推理及原分组评分，来源总勾不变。
 
+原生推理／评分入口已补写，尚待服务器实跑：`python scripts/run_videomme_v2_original.py --official-checkout /external/pinned-VLMEvalKit --prepared-root /external/fresh-native-prompts --model Qwen/Qwen3.5-9B --output /external/fresh-native-results --execute`。默认端点为本地19466；模型服务必须支持每请求64图，不能把提示减为32帧。入口复核原元数据、24题顺序及全部帧哈希，复用官方OpenAI编码与默认2048输出上限、temperature0，明确使用非思考模型配置，再调用官方exact_matching及非线性完整组评分。Qwen3.5-9B是现有可部署模型的功能验证配置，不是官方全量榜单成绩复现；原题、帧数和评分保持原样。无`--execute`只输出计划；请求失败即保留并停止，不换题。新增7项入口夹具测试，相关视频测试共95项通过；尚无该入口的模型调用或评分证据。
+
 - [x] 官方工具包 CPU 导入环境已核验：私有依赖目录使用 PyArrow19.0.1、Decord0.6.0、portalocker3.2.0及官方所需补充依赖；不升级全局
   NumPy。官方类默认64帧已确认。工具包会导入`torch_npu`模块，但实测未初始化NPU上下文，0模型调用。各轮原失败日志保留。
 
