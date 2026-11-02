@@ -2,6 +2,22 @@
 
 ### 剩余原生环境前置条件复核（2026-11-02）
 
+- [x] WebArena官方推荐框架路径已完成独立CPU环境准备：AgentLab0.4.2、BrowserGym
+  WebArena0.14.2；复用官方发布锁文件的252项约束，安装、隔离`pip check`及禁网导入通过，vLLM后端类可用，0网络尝试、0模型调用。原浮动解析超时、二进制限定解析失败、CANN全局`PYTHONPATH`污染及NLTK资源缺失记录保留；只对本进程使用`-I`隔离，不改全局环境。
+
+  环境准备示例（独立服务器目录，不安装到系统Python）：
+
+  ```bash
+  python3.12 -m venv /server/webarena-env
+  /server/webarena-env/bin/python -I -m pip install --index-url https://pypi.org/simple --constraint /path/to/benchmark/configs/workload-native/webarena-agentlab-0.4.2-official-constraints.txt agentlab==0.4.2
+  /server/webarena-env/bin/python -I -m pip check
+  NLTK_DATA=/server/webarena-nltk /server/webarena-env/bin/python -I -c "import nltk; nltk.download('punkt_tab',download_dir='/server/webarena-nltk',raise_on_error=True)"
+  ```
+
+  本机NLTK默认下载因网络重置失败，实际改用官方NLTK GitHub同一`punkt_tab.zip`对象，Git
+  blob、大小和SHA256校验后在专用目录准备；没有替换分词内容。后续进程须显式设置`NLTK_DATA`。本项只证明依赖与导入可用：浏览器二进制、原网站状态、真实NPU
+  Agent及原评分尚未验证；采用原始任务加官方推荐框架的配置，不能混报成旧论文运行器成绩。框架不会在CPU执行LLM、embedding或judge前向。
+
 - [x] 已复用现有作者源码准备器接入WebArena完整88文件固定清单；服务器对已取得原文件执行plan、prepare复用、verify均通过，未重复下载。完整88文件的全新GitHub
   API下载分支未实跑，不能冒充已验证；原始取得方式是逐文件Git身份核验的官方归档。
 
