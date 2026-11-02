@@ -779,6 +779,14 @@ blob和大小校验获取，不带凭据、不用改造数据。`--reuse-assets 
 
 原生输入合同仍未全通：239条原test答案引用中229条通过原JSON题目/数据文件关系及原作者默认提示构造；10条失败引用中5条为原metadata的UTF8解码失败、5条为原metadata引用的精确文件名不存在。后者引用连字符文件名，而目录只有下划线形式，未擅自重命名或补别名。这里未运行Agent、生成代码或评分；不得过滤这10条换题。两个官方版本的20份不同文件，即便做严格、可逆的旧代码页诊断，其完整JSON对象也均不相同；未采用运行时猜编码或转写。安全执行隔离、原生调用/评判及公共/研究消费仍待完成，来源总勾保持未完成。
 
+#### DiscoveryBench公共案例准备与安装包核验
+
+- [x] CI运行41363321688的工件13106550478已在服务器独立安装，86份包载荷逐份核对；239条原键的公共及未修改研究消费者回读通过，229条可解析原输入与原作者默认提示材料一致。10条原资产阻塞保留，不过滤或替换。
+- [x] 公共案例准备命令已使用上述CI安装包实际准备原位置0/1/2：元数据、科学数据逐字节匹配固定原资产，参考行匹配原答案表，三个目录隔离。首次核验误把CPU路径用于NPU节点，保留错误记录；仅纠正保存结果核验，没有重做准备或推理。
+- [ ] 将公开actor、隔离工具、模型传输和原评分串成可复用执行入口，完成入口验证后再审计来源总勾；本次准备与回读不算原生执行交付。
+
+准备命令：`python scripts/prepare_discoverybench_original_cases.py --data-root /external/discoverybench-native-real --output /private/fresh-discovery-cases --positions 0 1 2 --execute`。先安装公共数据包；数据目录布局和固定文件身份见原资产准备入口。省略`--execute`只输出计划。输出必须为仓库及原数据目录之外的新目录；阻塞题停止，不自动换题。输出`cases-private.json`关联原题、元数据、参考和科学文件哈希。工具容器只能挂载对应科学数据，不能挂载含主假设的元数据、评分参考、模型队列或Docker套接字。此命令不启动模型、Agent或评分器。[证据及原生运行边界](validation/discoverybench-original-assets-20261028.json)
+
 ### Copilot 2026嵌套会话元数据（已交付，非原始请求回放）
 
 - [x] 固定[官方release](https://github.com/Azure/AzurePublicDataset/releases/tag/ghcp-coding-agent-2026)身份400522856及七份原包，共3218886136字节，全部发布方SHA256和大小匹配。后补说明/schema/card另固定文档版本215becda，不假称文档属于旧release标签。
