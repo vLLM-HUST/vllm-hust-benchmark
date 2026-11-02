@@ -1,4 +1,4 @@
-"""Recompute the explicitly versioned B0-reference effective-compute comparison."""
+"""Recompute effective compute and its B0 ratio without an acceptance verdict."""
 
 import argparse
 import hashlib
@@ -10,7 +10,7 @@ from fractions import Fraction
 ROOT = Path(__file__).resolve().parents[1]
 PAIR = "reports/vllm-hust-midterm-20261019/m01-recovery/official018-paired-compute-20261024/summary.json"
 PARTS = "reports/b0-reference-compute-20261101/accounting-parts.json"
-REPORT = "reports/b0-reference-compute-20261101/summary.json"
+REPORT = "reports/b0-compute-comparison-20261102/summary.json"
 PUBLIC = "website-publication/data/b0-reference-compute-20261101.json"
 METHOD = "docs/B0_REFERENCE_COMPUTE.md"
 QUALITY = "website-publication/data/midterm-v103.json"
@@ -24,8 +24,8 @@ def positive(value):
     return value
 
 
-def calculate(f0, t0, k0, f1, t1, k1, threshold_percent):
-    for value in (f0, t0, k0, f1, t1, k1, threshold_percent):
+def calculate(f0, t0, k0, f1, t1, k1):
+    for value in (f0, t0, k0, f1, t1, k1):
         positive(value)
     if any(not isinstance(v, int) for v in (f0, k0, f1, k1)):
         raise ValueError("Operation and participating-chip counts must be integers")
@@ -38,8 +38,6 @@ def calculate(f0, t0, k0, f1, t1, k1, threshold_percent):
         ratio = (
             Fraction(f * k0, f0 * chips) * Fraction(str(t0)) / Fraction(str(seconds))
         )
-        exact_eta = 100 * ratio
-        eta = float(exact_eta)
         rows.append(
             {
                 "role": role,
@@ -47,19 +45,12 @@ def calculate(f0, t0, k0, f1, t1, k1, threshold_percent):
                 "T_seconds": seconds,
                 "chips": chips,
                 "C_TFLOPS_per_chip": c,
-                "eta_compute_b0_percent": eta,
-                "equivalent_reference_seconds": float(
-                    Fraction(f * k0, f0 * chips) * Fraction(str(t0))
-                ),
-                "reference_target_met": exact_eta >= Fraction(str(threshold_percent)),
-                "margin_percentage_points": eta - threshold_percent,
+                "relative_compute_percent": float(100 * ratio),
             }
         )
     return {
-        "reference_C_TFLOPS_per_chip": c0,
-        "target_percent": threshold_percent,
-        "target_C_TFLOPS_per_chip": c0 * threshold_percent / 100,
-        "C_gain_percent": 100 * (c1 / c0 - 1),
+        "baseline_C_TFLOPS_per_chip": c0,
+        "C_gain_percent": float(100 * (ratio - 1)),
         "arms": rows,
     }
 
@@ -89,17 +80,19 @@ def recompute(root=ROOT):
     quality = loaded[QUALITY]["acceptance_completion"]["out256_quality"]
     a, b = pair["rows"]["B0"], pair["rows"]["B1"]
     metrics = calculate(
-        a["F"], a["T_seconds"], a["chips"], b["F"], b["T_seconds"], b["chips"], 90
+        a["F"], a["T_seconds"], a["chips"], b["F"], b["T_seconds"], b["chips"]
     )
     return {
-        "schema": "project-b0-reference-compute/v1",
+        "schema": "b0-effective-compute-comparison/v2",
         "method": METHOD,
-        "report_path": "reports/b0-reference-compute-20261101/README.md",
-        "method_date": "2026-11-01",
+        "report_path": "reports/b0-compute-comparison-20261102/README.md",
+        "method_date": "2026-11-02",
         "analysis_kind": "retrospective_recomputation_of_audited_pair",
-        "reference_selection": "User-designated official B0, common to both arms",
-        "reference_kind": "measured_official_baseline_not_physical_ceiling",
-        "target_scope": "project_B0_reference_compute_target",
+        "baseline_selection": "Official B0 for descriptive comparison only",
+        "comparison_kind": "measured_baseline_ratio_not_attainable_efficiency",
+        "acceptance_scope": "descriptive_comparison_only",
+        "supersedes": "reports/b0-reference-compute-20261101/summary.json",
+        "correction": "Withdraw the below-baseline 90% target and its pass verdicts",
         "independent_outline_eta_ref_pass": None,
         "original_independent_reference_reclassified": False,
         "baseline_percent_is_normalization_identity": True,

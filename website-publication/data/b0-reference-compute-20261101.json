@@ -1,12 +1,14 @@
 {
-  "schema": "project-b0-reference-compute/v1",
+  "schema": "b0-effective-compute-comparison/v2",
   "method": "docs/B0_REFERENCE_COMPUTE.md",
-  "report_path": "reports/b0-reference-compute-20261101/README.md",
-  "method_date": "2026-11-01",
+  "report_path": "reports/b0-compute-comparison-20261102/README.md",
+  "method_date": "2026-11-02",
   "analysis_kind": "retrospective_recomputation_of_audited_pair",
-  "reference_selection": "User-designated official B0, common to both arms",
-  "reference_kind": "measured_official_baseline_not_physical_ceiling",
-  "target_scope": "project_B0_reference_compute_target",
+  "baseline_selection": "Official B0 for descriptive comparison only",
+  "comparison_kind": "measured_baseline_ratio_not_attainable_efficiency",
+  "acceptance_scope": "descriptive_comparison_only",
+  "supersedes": "reports/b0-reference-compute-20261101/summary.json",
+  "correction": "Withdraw the below-baseline 90% target and its pass verdicts",
   "independent_outline_eta_ref_pass": null,
   "original_independent_reference_reclassified": false,
   "baseline_percent_is_normalization_identity": true,
@@ -152,10 +154,8 @@
     "new_model_runs": 0,
     "private_text_published": false
   },
-  "reference_C_TFLOPS_per_chip": 3.840732572879189,
-  "target_percent": 90,
-  "target_C_TFLOPS_per_chip": 3.4566593155912697,
-  "C_gain_percent": 84.97046148366367,
+  "baseline_C_TFLOPS_per_chip": 3.840732572879189,
+  "C_gain_percent": 84.97046148366368,
   "arms": [
     {
       "role": "B0",
@@ -163,10 +163,7 @@
       "T_seconds": 238.12670116312802,
       "chips": 2,
       "C_TFLOPS_per_chip": 3.840732572879189,
-      "eta_compute_b0_percent": 100.0,
-      "equivalent_reference_seconds": 238.12670116312802,
-      "reference_target_met": true,
-      "margin_percentage_points": 10.0
+      "relative_compute_percent": 100.0
     },
     {
       "role": "B1",
@@ -174,10 +171,7 @@
       "T_seconds": 127.59352582134306,
       "chips": 2,
       "C_TFLOPS_per_chip": 7.1042207644080255,
-      "eta_compute_b0_percent": 184.97046148366368,
-      "equivalent_reference_seconds": 236.01033353501583,
-      "reference_target_met": true,
-      "margin_percentage_points": 94.97046148366368
+      "relative_compute_percent": 184.97046148366368
     }
   ]
 }
