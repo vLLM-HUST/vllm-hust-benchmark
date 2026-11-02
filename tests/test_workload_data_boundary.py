@@ -5,6 +5,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1] / "workload-preparation"
 DATA_MODULES = {
+    "msmarco",  # Original candidate/query/qrel aggregation only; no model, network or observation.
     "discoverybench",  # Original task/reference/data relations only; no Agent or models.
     "longmemeval_v2",  # Original memory/data-file relations only, no observation or models.
     "swesmith",  # Original repository task/bug-patch/test partitions only, no execution.
@@ -65,6 +66,38 @@ DATA_MODULES = {
 def test_only_data_modules_are_included():
     actual = {path.stem for path in (ROOT / "src/vllm_hust_workload_data").glob("*.py")}
     assert actual == DATA_MODULES
+
+
+def test_msmarco_reader_only_aggregates_data_in_memory():
+    import ast
+
+    tree = ast.parse(
+        (ROOT / "src/vllm_hust_workload_data/msmarco.py").read_text("utf-8")
+    )
+    imports = set()
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            imports.update(item.name for item in node.names)
+        elif isinstance(node, ast.ImportFrom):
+            imports.add(node.module)
+    assert imports == {"copy", "sqlite3", "tarfile", "pathlib", "assets", "records"}
+    connections = [
+        node
+        for node in ast.walk(tree)
+        if isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Attribute)
+        and isinstance(node.func.value, ast.Name)
+        and node.func.value.id == "sqlite3"
+        and node.func.attr == "connect"
+    ]
+    assert len(connections) == 1
+    assert ast.literal_eval(connections[0].args[0]) == ":memory:"
+    assert not any(
+        isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Name)
+        and node.func.id in {"eval", "exec", "compile", "__import__"}
+        for node in ast.walk(tree)
+    )
 
 
 def test_swesmith_reader_has_only_data_record_imports():
