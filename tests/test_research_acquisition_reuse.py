@@ -136,7 +136,26 @@ def test_videomme_v2_small_asset_profile_is_separate_from_media_and_delivery():
     inventory = json.loads(
         (ROOT / "docs/workload-data/dataset-validation-status.json").read_text("utf-8")
     )["delivery_inventory"]["VIDEOMME_V2"]
-    assert not inventory["checked"] and inventory["delivery_receipt"] is None
+    # Historical preparation remains ineligible. A later native delivery must
+    # cite separate real execution evidence, not keep the source forever open.
+    assert inventory["checked"] and inventory["status"] == "AVAILABLE"
+    assert (
+        inventory["delivery_receipt"]
+        != inventory["original_assets_preparation_receipt"]
+    )
+    delivery = json.loads((ROOT / inventory["delivery_receipt"]).read_text("utf-8"))
+    assert delivery["source_checkbox_eligible"]
+    assert (
+        delivery["original_questions_completed"]
+        == delivery["native_model_requests"]
+        == 24
+    )
+    assert delivery["frames_each_request"] == 64
+    assert delivery[
+        "all24_wire_images_generation_settings_answers_references_and_scores_verified"
+    ]
+    assert delivery["native_ci_conclusions"] == "success"
+    assert not delivery["quality_or_engine_performance_claim"]
 
 
 def test_livecodebench_original_assets_are_pinned_per_dataset_not_code_revision():
