@@ -1,5 +1,6 @@
 """Synthetic integrity failures must not become accepted experiment evidence."""
 
+import copy
 import hashlib
 import importlib.util
 import io
@@ -18,9 +19,9 @@ REPORT = (
 )
 
 
-def module():
+def module(name="evidence"):
     spec = importlib.util.spec_from_file_location(
-        "effect_evidence", REPORT / "evidence.py"
+        "effect_" + name, REPORT / f"{name}.py"
     )
     loaded = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(loaded)
@@ -174,3 +175,388 @@ def test_real_loader_integrity_checks_survive_optimized_python(tmp_path, optimiz
     )
     assert result.returncode != 0
     assert "File digest mismatch: members.json" in result.stderr
+
+
+def response_fixture():
+    case = {
+        "case_id": "boundary-2",
+        "kind": "boundary",
+        "prompt_tokens": 2,
+        "prompt_sha256": hashlib.sha256(b"[11,12]").hexdigest(),
+        "max_tokens": 2,
+        "ignore_eos": True,
+        "require_uncached": True,
+        "cache_salt": "isolated-input",
+    }
+    payload = {
+        "model": "qwen35-pyramidkv",
+        "prompt": [11, 12],
+        "max_tokens": 2,
+        "ignore_eos": True,
+        "temperature": 0,
+        "seed": 17,
+        "stream": True,
+        "stream_options": {"include_usage": True},
+        "cache_salt": "isolated-input",
+    }
+    usage = {
+        "prompt_tokens": 2,
+        "completion_tokens": 2,
+        "total_tokens": 4,
+        "prompt_tokens_details": {"cached_tokens": 0},
+    }
+    row = dict(
+        case,
+        request_id="cmpl-example",
+        output="seven",
+        usage=usage,
+        http_status=200,
+        success=True,
+        finish_reason="length",
+        ttft_seconds=1.0,
+        e2e_seconds=3.0,
+        tpot_seconds=1.0,
+    )
+    chunks = [
+        {
+            "id": "cmpl-example",
+            "choices": [{"index": 0, "text": "seven", "finish_reason": None}],
+        },
+        {
+            "id": "cmpl-example",
+            "choices": [{"index": 0, "text": "", "finish_reason": "length"}],
+        },
+        {"id": "cmpl-example", "choices": [], "usage": usage},
+    ]
+    return case, payload, row, chunks
+
+
+def sse(chunks, done=True):
+    return (
+        "".join("data: " + json.dumps(chunk) + "\n\n" for chunk in chunks)
+        + ("data: [DONE]\n\n" if done else "")
+    ).encode()
+
+
+def test_request_checks_real_payload_sse_and_usage():
+    case, payload, row, chunks = response_fixture()
+    assert module().verify_response(case, row, payload, sse(chunks)) == {
+        "payload_verified": True
+    }
+
+
+@pytest.mark.parametrize(
+    "change", ["text", "id", "usage", "done", "after_done", "finish", "choice"]
+)
+def test_request_rejects_inconsistent_raw_stream(change):
+    case, payload, row, chunks = response_fixture()
+    chunks = copy.deepcopy(chunks)
+    if change == "text":
+        chunks[0]["choices"][0]["text"] = "different"
+    elif change == "id":
+        chunks[0]["id"] = "cmpl-someone-else"
+    elif change == "usage":
+        chunks[-1]["usage"]["completion_tokens"] = 1
+    elif change == "finish":
+        chunks[1]["choices"][0]["finish_reason"] = "stop"
+    elif change == "choice":
+        chunks[0]["choices"][0]["index"] = 1
+    raw = sse(chunks, done=change != "done")
+    if change == "after_done":
+        raw += b'data: {"id":"cmpl-example","choices":[]}\n'
+    with pytest.raises(ValueError, match="SSE"):
+        module().verify_response(case, row, payload, raw)
+
+
+@pytest.mark.parametrize(
+    "field,value",
+    [
+        ("prompt", [11, 13]),
+        ("seed", 18),
+        ("temperature", 0.5),
+        ("max_tokens", 3),
+        ("ignore_eos", False),
+        ("cache_salt", "other"),
+        ("stream", False),
+        ("stream_options", {}),
+        ("model", "other-model"),
+    ],
+)
+def test_request_rejects_changed_generation_or_prompt(field, value):
+    case, payload, row, chunks = response_fixture()
+    payload[field] = value
+    with pytest.raises(ValueError, match="Payload"):
+        module().verify_response(case, row, payload, sse(chunks))
+
+
+@pytest.mark.parametrize(
+    "field,value",
+    [
+        ("prompt_tokens", 1),
+        ("completion_tokens", 1),
+        ("total_tokens", 999),
+        ("prompt_tokens_details", None),
+        ("prompt_tokens_details", {"cached_tokens": 1}),
+    ],
+)
+def test_request_rejects_consistent_but_invalid_usage(field, value):
+    case, payload, row, chunks = response_fixture()
+    # Shared usage deliberately changes both SSE and the derived row.
+    row["usage"][field] = value
+    with pytest.raises(ValueError, match="Usage"):
+        module().verify_response(case, row, payload, sse(chunks))
+
+
+@pytest.mark.parametrize(
+    "field,value",
+    [
+        ("success", False),
+        ("http_status", 503),
+        ("ttft_seconds", float("nan")),
+        ("e2e_seconds", -1),
+        ("tpot_seconds", 9),
+        ("case_id", "other"),
+    ],
+)
+def test_request_rejects_changed_result_metadata_and_invalid_timing(field, value):
+    case, payload, row, chunks = response_fixture()
+    row[field] = value
+    with pytest.raises(ValueError, match="Result"):
+        module().verify_response(case, row, payload, sse(chunks))
+
+
+def test_pressure_cached_usage_is_retained_when_policy_allows_it():
+    case, payload, row, chunks = response_fixture()
+    case["require_uncached"] = row["require_uncached"] = False
+    row["usage"]["prompt_tokens_details"]["cached_tokens"] = 1
+    assert module().verify_response(case, row, payload, sse(chunks)) == {
+        "payload_verified": True
+    }
+    assert row["usage"]["prompt_tokens_details"]["cached_tokens"] == 1
+
+
+def test_omitted_quality_payload_has_explicitly_limited_verification():
+    case, _payload, row, chunks = response_fixture()
+    case["kind"] = row["kind"] = "quality"
+    assert module().verify_response(case, row, None, sse(chunks)) == {
+        "payload_verified": False
+    }
+
+
+def test_omitted_synthetic_payload_is_an_error():
+    case, _payload, row, chunks = response_fixture()
+    with pytest.raises(ValueError, match="Payload missing"):
+        module().verify_response(case, row, None, sse(chunks))
+
+
+@pytest.mark.parametrize("ids", [["b", "a"], ["a"], ["a", "a"], ["a", "b", "c"]])
+def test_request_membership_cannot_reorder_omit_duplicate_or_add_cases(ids):
+    with pytest.raises(ValueError, match="Case order"):
+        module().verify_case_order(
+            [{"case_id": "a"}, {"case_id": "b"}], [{"case_id": x} for x in ids]
+        )
+
+
+def transaction_fixture(attempts=1):
+    engine = "cmpl-example-0-abcdef12"
+    rows = [{"case_id": "long", "request_id": "cmpl-example", "prompt_tokens": 8192}]
+    log = "PyramidKV plugin activated\n"
+    for _ in range(attempts):
+        for rank in (0, 1):
+            log += (
+                f"(Worker_TP{rank} pid={100 + rank}) INFO worker commit acknowledged "
+                f"request_id={engine} semantic_tokens=8192 physical_tokens=2048\n"
+            )
+        log += (
+            f"INFO scheduler commit request_id={engine} semantic_tokens=8192 "
+            "physical_tokens=2048 source_blocks=128 destination_blocks=32 released_blocks=128\n"
+        )
+    return rows, log
+
+
+def test_transactions_match_each_request_and_both_tp_ranks():
+    rows, log = transaction_fixture()
+    result = module().verify_transactions(log, rows, True, pressure=False)
+    assert len(result["transactions"]) == 1
+    assert result["transactions"][0]["acknowledged_tp_ranks"] == [0, 1]
+    assert result["repeated_commit_cases"] == []
+
+
+def test_pressure_preserves_each_recomputed_transaction():
+    rows, log = transaction_fixture(2)
+    result = module().verify_transactions(log, rows, True, pressure=True)
+    assert len(result["transactions"]) == 2
+    assert result["repeated_commit_cases"] == [{"case_id": "long", "commits": 2}]
+    assert result["requires_recomputation_review"] is True
+
+
+@pytest.mark.parametrize(
+    "change", ["rank", "extra_ack", "orphan", "length", "release", "repeat", "off"]
+)
+def test_transactions_reject_missing_extra_or_inconsistent_evidence(change):
+    rows, log = transaction_fixture()
+    if change == "rank":
+        log = log.replace("Worker_TP1", "Worker_TP2")
+    elif change == "extra_ack":
+        log += log.splitlines()[1] + "\n"
+    elif change == "orphan":
+        log += log.splitlines()[-1].replace("cmpl-example", "cmpl-orphan") + "\n"
+    elif change == "length":
+        log = log.replace("physical_tokens=2048", "physical_tokens=2049")
+    elif change == "release":
+        log = log.replace("released_blocks=128", "released_blocks=97")
+    elif change == "repeat":
+        rows, log = transaction_fixture(2)
+    with pytest.raises(ValueError, match="Transaction"):
+        module().verify_transactions(log, rows, change != "off", pressure=False)
+
+
+def test_short_and_off_requests_do_not_require_compression():
+    rows = [{"case_id": "short", "request_id": "cmpl-short", "prompt_tokens": 4096}]
+    assert (
+        module().verify_transactions(
+            "PyramidKV plugin activated", rows, True, pressure=False
+        )["transactions"]
+        == []
+    )
+    rows[0]["prompt_tokens"] = 8192
+    assert (
+        module().verify_transactions("native service", rows, False, pressure=False)[
+            "transactions"
+        ]
+        == []
+    )
+
+
+@pytest.mark.parametrize("reverse", [False, True])
+def test_explicit_two_worker_prefixes_with_two_identical_records_are_conserved(reverse):
+    rows, log = transaction_fixture()
+    lines = log.splitlines()
+    prefix0, body = lines[1].split("INFO ", 1)
+    prefix1, body1 = lines[2].split("INFO ", 1)
+    assert body == body1  # These are two indistinguishable records with explicit ranks.
+    prefixes = prefix1 + prefix0 if reverse else prefix0 + prefix1
+    raw = "\n".join([lines[0], prefixes + "INFO " + body, "INFO " + body, lines[3]])
+    result = module().verify_transactions(raw, rows, True, pressure=False)
+    assert result["transactions"][0]["acknowledged_tp_ranks"] == [0, 1]
+    assert len(result["log_recoveries"]) == 1
+    assert result["log_recoveries"][0]["kind"] == "two-prefix-identical-pair"
+
+
+def test_two_prefixes_cannot_supply_a_missing_second_record():
+    rows, log = transaction_fixture()
+    lines = log.splitlines()
+    prefix1 = lines[2].split("INFO ", 1)[0]
+    raw = "\n".join([lines[0], prefix1 + lines[1], lines[3]])
+    with pytest.raises(ValueError, match="Transaction"):
+        module().verify_transactions(raw, rows, True, pressure=False)
+
+
+def test_two_prefixes_with_different_records_remain_ambiguous():
+    rows, log = transaction_fixture()
+    lines = log.splitlines()
+    prefix1, body1 = lines[2].split("INFO ", 1)
+    raw = "\n".join(
+        [
+            lines[0],
+            prefix1 + lines[1],
+            "INFO " + body1.replace("8192", "8193"),
+            lines[3],
+        ]
+    )
+    with pytest.raises(ValueError, match="Transaction"):
+        module().verify_transactions(raw, rows, True, pressure=False)
+
+
+def test_service_summary_pools_tokens_over_wall_time_across_processes():
+    first = [
+        {
+            "case_id": "same-id",
+            "success": True,
+            "usage": {
+                "completion_tokens": 2,
+                "prompt_tokens_details": {"cached_tokens": 0},
+            },
+            "ttft_seconds": 1,
+            "e2e_seconds": 3,
+            "tpot_seconds": 1,
+        }
+    ]
+    second = [
+        dict(
+            first[0],
+            usage={
+                "completion_tokens": 8,
+                "prompt_tokens_details": {"cached_tokens": 4},
+            },
+            ttft_seconds=3,
+            e2e_seconds=8,
+            tpot_seconds=2,
+        )
+    ]
+    groups = [
+        [{"case_ids": ["same-id"], "wall_seconds": 1}],
+        [{"case_ids": ["same-id"], "wall_seconds": 8}],
+    ]
+    result = module("analyze").summarize_groups(
+        [(groups[0], first), (groups[1], second)]
+    )
+    assert result["output_tokens_per_second"] == pytest.approx(10 / 9)
+    assert result["cohort_output_tokens_per_second"] == [2, 1]
+    assert result["cached_prompt_tokens"] == 4
+    assert result["successful_requests"] == 2
+    assert result["ttft_seconds"] == {"mean": 2, "p50": 2, "p95": 2.9}
+
+
+def quality_fixture():
+    return [
+        {
+            "case_id": f"{task}-{index:03d}",
+            "kind": "quality",
+            "task": task,
+            "subset": "development" if index < 50 else "holdout",
+            "qa_f1": 0.5,
+        }
+        for task in ("narrativeqa", "qasper", "2wikimqa")
+        for index in range(100)
+    ]
+
+
+@pytest.mark.parametrize("failure", ["mean", "task"])
+def test_quality_gate_cannot_hide_failure_in_a_task_or_subset(failure):
+    off = quality_fixture()
+    on = copy.deepcopy(off)
+    for row in on:
+        if failure == "mean":
+            row["qa_f1"] = 0.54 if row["subset"] == "development" else 0.46
+        elif row["subset"] == "development":
+            row["qa_f1"] = 0.44 if row["task"] == "qasper" else 0.53
+    result = module("analyze").quality_comparison(off, on)
+    assert result["gate_passed"] is False
+    subset = "holdout" if failure == "mean" else "development"
+    assert result["subsets"][subset]["gate_passed"] is False
+    assert result["subsets"][subset]["samples_per_task"] == {
+        "narrativeqa": 50,
+        "qasper": 50,
+        "2wikimqa": 50,
+    }
+
+
+def test_quality_requires_every_original_row_and_matching_subsets():
+    off, on = quality_fixture(), quality_fixture()
+    on.pop()
+    with pytest.raises(ValueError, match="Quality membership"):
+        module("analyze").quality_comparison(off, on)
+
+
+@pytest.mark.parametrize(
+    "prediction,answers,want",
+    [
+        ("The red fox!", ["a red fox"], 1),
+        ("red red fox", ["red fox"], 0.8),
+        ("red fox", ["blue cat", "fox"], 2 / 3),
+        ("", [""], 0),
+    ],
+)
+def test_quality_f1_normalizes_and_uses_best_reference(prediction, answers, want):
+    assert module("analyze").qa_f1(prediction, answers) == pytest.approx(want)
