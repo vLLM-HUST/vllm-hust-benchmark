@@ -2,6 +2,8 @@
 
 ### 最新原生运行复核（2026-11-04）
 
+PaperBench 在构建隔离环境前，先运行 `python scripts/check_paperbench_native_prerequisites.py --author-root <已校验的上游源码根目录>`。此命令核验固定上游版本的原始文件及镜像、架构和时间预算约束，不构建镜像或接受供应商条款。预检通过不代表运行环境可用；正式验证仍需合规的隔离执行环境，并保留原任务预算和 rubric。
+
 MultiAgentBench 中断恢复：沿用原运行的作者源码、准备目录、模型绑定及工具环境，给 `scripts/run_marble_original_research.py` 的执行命令加上 `--original-row 2`，并将 `--output` 指向新的目录。这只执行第三道固定原题（行号从 0 开始）；不加该参数时仍执行原固定三题。补跑记录标记为部分恢复，须与前两题已审计的原生结果合并核对，不能单独勾选来源。保留旧尝试及失败记录。
 
 - [x] 研究交接进一步按正式入口补强：研究README指定的是`workload-preparation`子项目，不是历史根目录wheel。两份发布源码快照各84个软件/目录文件按Git校验，主分支与PR57均从各自完整pipeline和consumer执行500条回读，不借用旧研究pipeline；公共provider来自实际CI安装。原数据/索引、默认依赖和活动研究工作区未改，0神经调用，不替代原生完成。专用CPU回执：`/root/marble-complete-published-research-component-20261104-002/qualification-public.json`。
