@@ -119,7 +119,15 @@ async def execute(args, report):
 
 
 def main(argv=None):
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(
+        description=__doc__,
+        epilog=(
+            "Before treating results as validated, check the pinned publisher "
+            "scorer with empty-answer and numeric-range controls. The audited "
+            "revision can award partial match to an empty answer and bypass "
+            "the dedicated range template. This wrapper does not repair either."
+        ),
+    )
     for name in ("author-root", "input-file", "output", "model", "api-base"):
         parser.add_argument("--" + name, required=True)
     parser.add_argument("--execute", action="store_true")
