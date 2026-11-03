@@ -5471,6 +5471,54 @@
       "scope_limits": "NQ-open only; not full document NQ, EfficientQA or DPR/REALM retrieval. Plain default profile has152/3610 EM and3127 empty outputs; native-chat fixed3 has0/3 EM with no empty output. Availability is not quality acceptance, and these profiles must not be pooled."
     },
     "MULTIAGENTBENCH": {
+      "latest_9b_original_attempt": {
+        "server_receipt": "/root/marble-original-research-native-launch-20261104-004/terminal-independent-audit-public.json on owned CPU workspace",
+        "status": "ORIGINAL_FIXED3_9B_PROFILE_FAILED_OFFICIAL_CHAT_TEMPLATE_RETAINED",
+        "original_positions": [0, 1, 2],
+        "model": "Qwen/Qwen3.5-9B BF16 TP1 NPU",
+        "context_capacity": 262144,
+        "original_max_iterations": 5,
+        "original_output_budget": 512,
+        "budget_scope": "512 is the actor generation setting, not every original call. Saved original requests retain distinct256/512/2048 output budgets.",
+        "preserved_saved_output_budgets": [256, 512, 2048],
+        "cli_exit_codes": [1, 1, 1],
+        "saved_model_requests": 31,
+        "http200": 16,
+        "http400": 15,
+        "http400_error": "No user query found in messages.",
+        "returned_keyword_queries": 7,
+        "parent_and_active_child_terminal": true,
+        "pending_model_or_keyword_requests": 0,
+        "original_roles_or_materials_rewritten": false,
+        "audit_model_calls": 0,
+        "source_checkbox_eligible": false,
+        "boundary": "All original fixed3 attempted, none qualifies as native completion. Official9B template rejects original messages without user query. Retain all errors and prior14B context failures; do not rewrite roles, truncate material or count result files as completion."
+      },
+      "alternative_official_template_preflight": {
+        "server_receipt": "/root/marble-official-alternative-template-preflight-20261104-001/qualification-public.json on owned CPU workspace",
+        "models": ["Qwen/Qwen3-30B-A3B-Instruct-2507", "Qwen/Qwen3-4B-Instruct-2507"],
+        "all_original15_failed_requests_rendered_by_each_pinned_official_template": true,
+        "original_messages_modified": false,
+        "model_calls": 0,
+        "weights_downloaded_by_this_preflight": false,
+        "boundary": "Template rendering only, not model deployment, tokenizer capacity, original task completion or quality."
+      },
+      "alternative4b_original_input_capacity_preflight": {
+        "server_receipt": "marble4b-saved-request-capacity-20261104-001/qualification-public.json under private shared task root",
+        "model": "Qwen/Qwen3-4B-Instruct-2507",
+        "saved_original_requests_checked": 33,
+        "selection": "All31 saved forwarded9B requests, plus largest serialized forwarded request per existing14B case",
+        "maximum_saved_input_tokens": 177444,
+        "native_context_capacity": 262144,
+        "all_selected_saved_inputs_and_original_output_budgets_fit": true,
+        "preserved_saved_output_budgets": [256, 512, 2048],
+        "original_messages_tools_or_budget_changed": false,
+        "neural_model_calls": 0,
+        "original_fixed3_public_binding_prepared": true,
+        "binding_changed_fields": ["llm", "metrics.evaluate_llm", "output.file_path"],
+        "source_checkbox_eligible": false,
+        "boundary": "Pinned official tokenizer capacity and exact original binding only. Weights acquisition, Ascend deployment, future Agent inputs, native task completion and quality are separate gates."
+      },
       "latest_network_repaired_original_attempt": {
         "public_transport_error_exit_guard": {
           "entry": "scripts/run_marble_original_research.py",
