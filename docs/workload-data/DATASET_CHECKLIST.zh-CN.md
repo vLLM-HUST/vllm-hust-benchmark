@@ -2,6 +2,8 @@
 
 ### 最新原生运行复核（2026-11-04）
 
+LongBench v2 长档补跑：用 `scripts/prepare_longbench_v2_original_capacity.py` 对目标模型及窗口做预检，指定 `--row-index 0 --row-index 2 --row-index 7`。将生成的 `capacity-selection.private.json` 传给 `scripts/run_longbench_v2_original_samples.py --capacity-selection`，沿用原输入和 128-token 输出预算。任一固定原题放不下时不截断、不换题；短档和中档复用已有结果。
+
 Full-Duplex-Bench：已取得原包时，用 `python scripts/prepare_full_duplex_original_assets.py --action verify --output <服务器原包目录>` 核验，不重新下载。已有固定版本评分器及客户端源码时，用 `python scripts/prepare_full_duplex_original_scorers.py --verify-only --include-client --output <服务器源码目录>` 核验。两条命令只检查材料；Moshi 双工推理和原生 ASR 评分仍需另行验证。
 
 MLE-bench：在隔离执行节点按[固定版本官方说明](https://github.com/openai/mle-bench/blob/507f92e1138bb6e40dac5c6ee7a6758e6424bf97/README.md)安装。由操作者配置自己的 Kaggle 访问权限和凭据，勿提交凭据或竞赛文件。对既定竞赛运行 `mlebench prepare -c <competition-id>`，保留官方拆分；原生 Agent 生成提交 CSV 后，用 `mlebench grade-sample <submission.csv> <competition-id>` 评分。尚未验证实际下载、Agent 执行或评分。
