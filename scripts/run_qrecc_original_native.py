@@ -227,13 +227,16 @@ def run(
         "answer_budget": answer_budget,
         "model_timeout_seconds": model_timeout,
         "expected_index_documents": expected_documents,
+        "attempted_original_positions": [],
         "completed_original_positions": [],
         "failed_original_positions": [],
         "source_checkbox_eligible": False,
     }
     predictions = []
-    rankings = []
+    rankings = output / "rankings-private.jsonl"
+    rankings.touch(exist_ok=False)
     marker = output / "receipt-private.json"
+    marker.write_text(json.dumps(receipt, indent=2), encoding="utf-8")
     for task in tasks:
         identity = {
             k: task[k] for k in ["original_row_index", "Conversation_no", "Turn_no"]
@@ -243,6 +246,8 @@ def run(
         (directory / "inputs-private.json").write_text(
             json.dumps(task), encoding="utf-8"
         )
+        receipt["attempted_original_positions"].append(task["original_row_index"])
+        marker.write_text(json.dumps(receipt, indent=2), encoding="utf-8")
         answer = ""
         hits = []
         try:
@@ -333,14 +338,16 @@ def run(
                 traceback.format_exc(), encoding="utf-8"
             )
             receipt["failed_original_positions"].append(task["original_row_index"])
-        predictions.append({**identity, "prediction": answer})
-        rankings.append({**identity, "retrieved_passages": hits})
+        prediction = {**identity, "prediction": answer}
+        predictions.append(prediction)
+        (directory / "outcome-private.json").write_text(
+            json.dumps(prediction), encoding="utf-8"
+        )
+        with rankings.open("a", encoding="utf-8") as stream:
+            stream.write(json.dumps({**identity, "retrieved_passages": hits}) + "\n")
         marker.write_text(json.dumps(receipt, indent=2), encoding="utf-8")
     (output / "predictions-private.json").write_text(
         json.dumps(predictions), encoding="utf-8"
-    )
-    (output / "rankings-private.jsonl").write_text(
-        "".join(json.dumps(x) + "\n" for x in rankings), encoding="utf-8"
     )
     if digest(data_file) != TEST_SHA:
         raise ValueError("original test changed during native execution")

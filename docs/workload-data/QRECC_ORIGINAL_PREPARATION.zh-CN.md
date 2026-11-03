@@ -1,5 +1,7 @@
 # QReCC 原始测试数据准备与原生检索缺口
 
+当前状态（2026-11-03）：完整原passages包、56003成员CRC、54573064原行及Java空行规则均已核验，实际完整Lucene索引为54241550文档；早期“下载/构建中”记录不再是当前缺口。公开改写/检索/阅读入口和三步原评分链路见[唯一勾选清单的QReCC段](DATASET_CHECKLIST.zh-CN.md#qrecc%E5%8E%9F%E6%A3%80%E7%B4%A2%E9%9B%86%E5%90%88%E8%8E%B7%E5%8F%962026-11-03)。原test准备接口已复用成功CI安装包在服务器执行，完整索引搜索控制返回100条真实原正文；原题完整模型RAG及最终交付仍未完成，来源不打勾。
+
 ## 来源与任务范围
 
 官方来源：[apple-aiml-research/ml-qrecc](https://github.com/apple-aiml-research/ml-qrecc)，固定提交

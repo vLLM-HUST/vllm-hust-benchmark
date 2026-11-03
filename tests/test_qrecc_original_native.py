@@ -109,6 +109,7 @@ def test_complete_pipeline_or_retained_original_failure(
         == "ORIGINAL_NATIVE_ATTEMPTS_RETAINED_PUBLISHER_SCORING_REQUIRED"
     )
     assert result["failed_original_positions"] == ([] if failed_row is None else [1])
+    assert result["attempted_original_positions"] == [0, 1, 2]
     assert result["completed_original_positions"] == (
         [0, 1, 2] if failed_row is None else [0, 2]
     )
@@ -117,6 +118,16 @@ def test_complete_pipeline_or_retained_original_failure(
         (kwargs["output"] / "predictions-private.json").read_text()
     )
     assert [x["original_row_index"] for x in predictions] == [0, 1, 2]
+    rankings = [
+        json.loads(line)
+        for line in (kwargs["output"] / "rankings-private.jsonl")
+        .read_text()
+        .splitlines()
+    ]
+    assert [x["original_row_index"] for x in rankings] == [0, 1, 2]
+    assert all(
+        (kwargs["output"] / f"row-{i}/outcome-private.json").exists() for i in range(3)
+    )
     if failed_row is not None:
         assert (
             predictions[1]["prediction"] == ""

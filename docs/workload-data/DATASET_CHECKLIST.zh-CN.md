@@ -2279,6 +2279,8 @@ python scripts/run_gaia_original_agent.py  # 仅显示计划，不读取题目�
 
 #### QReCC原检索集合获取（2026-11-03）
 
+原test文件复用已有`workload-data prepare-qrecc-test --data-archive /data/qrecc_data.zip --output /data/qrecc-original-test`公共能力，从固定原ZIP只提取test成员并验证归档/成员哈希，不提取train。服务器已通过实际成功CI94载荷中的该接口复用原包，准备全部16451条原test，新增下载0次；不是重写解析器或重新构造请求。
+
 最新终态：原Java索引器退出0，但初始包装器要求empty为0，因数量不相等而停止验收。原日志为indexed54241550、empty331514、unindexable/skipped/errors均0，二者之和等于54573064原始行；公共只读计数器已独立确认实际Lucene文档数54241550，未重建或修改索引。固定原JAR字节码证实其空记录规则为Java
 `String.trim().length()==0`。完整56003份原JSONL已按发布ZIP
 CRC及原Java规则全部复核，54573064行/331514空记录与作者计数一致；原索引可用，未重建。初始失败来自包装器要求空记录为0的过严假设，不是原数据丢失；原生检索/阅读/评分仍待完成。回执：`qrecc-full-original-index-job-20261103-001/counter-reconciliation-public.json`；独立审计：`qrecc-original-empty-record-audit-20261103-001/state-public.json`。
