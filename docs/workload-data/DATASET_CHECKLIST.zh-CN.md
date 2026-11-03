@@ -2257,6 +2257,19 @@ python scripts/score_gaia_original_predictions.py --execute \
 
 Agent参考实现核查：[smolagents公开GAIA示例](https://github.com/huggingface/smolagents/blob/96f33faaf028479119ec8d34507b47694cf14e34/examples/open_deep_research/run_gaia.py)默认涉及annotated数据分支，原始数据分支仍引用旧`GAIA.py`布局，且选题逻辑只保留有附件的题。因此不能将它未经检查地当作当前原始GAIA全题集入口；需要对当前Parquet读取和工具/本地NPU模型绑定做明确适配，保留原题、原附件和失败，不照搬其过滤逻辑。
 
+原题Agent入口`run_gaia_original_agent.py`使用固定smolagents1.26.0的`ToolCallingAgent`，由操作者提供固定摘要的已审查工具工厂。选题按原validation顺序，默认前3题，可显式选择完整范围；不筛掉无附件题、不传参考答案或Annotator步骤。失败题保留null预测及失败记录，不重选；保存原Agent步骤和输出，随后独立调用上述官方评分入口。声明的文本配置为20步、每次输出4096
+token、工具串行；这是本项目公开配置，不是未经修改的官方open_deep_research脚本或官方规定预算。
+
+`gaia_smolagents_text_tools.py`复用框架搜索解析与网页格式化，限定公网HTTP(S)、逐次重验重定向并固定实际连接IP；网页最多2MiB、文本输出沿用40000字符上限。Python只交给隔离容器。原二进制附件及音视频读取尚未合格，不能声称完整GAIA能力已覆盖。工具构造已在专用CPU固定环境验证，首轮公开代码目录权限失败保留，修正只读代码挂载后第二轮通过；模型调用0，真实原题执行/网络工具实用性与评分尚未完成。
+
+```bash
+python -m pip install -r configs/workload-native/gaia-smolagents-client.txt
+python scripts/run_gaia_original_agent.py --help
+python scripts/run_gaia_original_agent.py  # 仅显示计划，不读取题目或调用模型
+```
+
+实际执行需先核验工具环境及NPU回环转发：显式提供`--execute --data-root --output --factory-file --factory-sha256 --endpoint --model`，并在运行前固定`--start/--count/--max-steps/--max-output-tokens`。Qwen3非思考配置可显式加`--disable-thinking`，不能把不同配置结果混报。Python工厂另需`GAIA_DOCKER_HOST/GAIA_PYTHON_IMAGE/GAIA_FRAMEWORK_VENV`绑定本机Unix套接字、已验证本地不可变镜像及仅含框架的venv；不能挂载宿主机根目录、原参考数据或凭据给生成代码。默认计划、软件测试和构造验证均不构成已完成的原生运行。
+
 #### QReCC原检索集合获取（2026-11-03）
 
 - [x] 完整原集合公共解压入口退出0：56003个原JSONL、86557816928字节，全部成员CRC通过，保留原路径和原字节，不是仅ZIP目录检查。完整回执：`qrecc-full-original-collection-prepared-20261103-001/collection-preparation.private.json`。后续完整索引准备进程PID1163702/出生时间887989570核验存活，正在统计全库原始行数；使用原Pyserini0.10.0.1
