@@ -85,29 +85,42 @@ python -m pyserini.index -collection JsonCollection -generator DefaultLuceneDocu
 
 上述流程之后还缺原问题改写、原集合检索、阅读生成及检索/答案两类评分的完整运行入口。必须保留问题和原对话历史，原`Rewrite`只作改写参考，原`Answer`只作答案参考，不用参考字段代替预测。抽样只固定待评任务，不能将参考URL页面拼成小候选库后宣称端到端QReCC验证。官方的段落切分/索引流程与历史发布集合是否可逐项复现，也须在取得资产后核验，不能仅凭相同脚本名称假定相同语料。
 
-### 已核验的独立检索软件配置
+### 已核验的原始锁版本索引环境
 
-服务器Linux aarch64已取得并按发布方SHA-256核验以下两份原软件包；未改系统Java、Python或现有模型服务。它们是本仓固定的工程配置，不是QReCC论文声明的历史依赖版本。
+原Apple仓库固定提交的[requirements.txt](https://github.com/apple-aiml-research/ml-qrecc/blob/1d174464290790c0198b474ad022952ecd83b76b/requirements.txt)明确锁定`pyserini==0.10.0.1`，同时声明nltk3.5、beautifulsoup4
+4.9.3与warcio1.7.4。当前原始协议采用该Pyserini版本，不用较新版本替换后冒称原环境。服务器Linux
+aarch64已取得并按发布方SHA-256核验以下软件包，复用独立Java11，不修改系统环境或现有模型服务。
 
-| 软件                                 | 原发布包                                                                                                                                               |    字节数 | 发布方SHA-256                                                      |
-| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ | --------: | ------------------------------------------------------------------ |
-| Pyserini 0.44.0                      | [PyPI原包](https://files.pythonhosted.org/packages/52/8e/4b748ddf296c1031f20a5b12e14b1ba86488dfb144648a60edf682e32018/pyserini-0.44.0.tar.gz)          | 195278293 | `bb6bf1f02ef32d617b6d2235715f4ca9b091d102a33521962fb12474971ac1d5` |
-| Temurin JDK 21.0.13+9，Linux aarch64 | [Adoptium原包](https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.13%2B9/OpenJDK21U-jdk_aarch64_linux_hotspot_21.0.13_9.tar.gz) | 205995218 | `e3522e707fc7dbe2a72c30746b1e7068301a0213ecd213d4491f35a14eb55578` |
+| 软件                                   | 原发布包                                                                                                                                                   |    字节数 | 发布方SHA-256                                                      |
+| -------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | --------: | ------------------------------------------------------------------ |
+| Pyserini 0.10.0.1                      | [PyPI原包](https://files.pythonhosted.org/packages/19/5e/11247de00294454a0c3c6abb187e808d7f87f401dbaa753bf75675b2c108/pyserini-0.10.0.1.tar.gz)            |  63065880 | `67ded994108530d17db74512460347cadd84d0f9ef8ffcbf0f6459f925117abd` |
+| Temurin JDK 11.0.32.1+1，Linux aarch64 | [Adoptium原包](https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.32.1%2B1/OpenJDK11U-jdk_aarch64_linux_hotspot_11.0.32.1_1.tar.gz) | 192356586 | `f27033e6f7523c1b0b2565a78e9c0e0abe5596a854ce00ca04ec1b06ece7a935` |
 
-原Pyserini包内`pyserini/resources/jars/anserini-0.39.0-fatjar.jar`为203439302字节，解包后实测SHA-256为`02e06f2f112803aeee9cb0a577b2e04edfa75a1318746a7fa5b6f802b2c6b14f`；该内部文件摘要是本次对原包成员的观察，不冒充另一个发布方声明。原[Python索引包装器](https://github.com/castorini/pyserini/blob/pyserini-0.44.0/pyserini/index/lucene/__main__.py)最终调用`io.anserini.index.IndexCollection`。已直接使用这份未修改Java类完成三份人工文档的建库及BM25查询控制，顶一文档与预期相符；没有调用神经模型，也没有用人工文档替代QReCC语料。
+原包包含`pyserini/resources/jars/anserini-0.10.0-fatjar.jar`，本次解包实测SHA-256为`b2f40e9dc56091364814e4146515d34a7a05af2be2a1cba5c88e3d25a50276f6`；该内部摘要不是另一个发布方声明。未修改Java索引/查询入口已完成3个人工文档的建库、1条BM25查询及顶一结果核验，k1=0.82、b=0.68；没有执行QReCC原题或神经模型。当前只证明原锁版本的Java入口可用，完整Python包装依赖、全库索引及原生RAG仍未完成。回执：`qrecc-original-pinned-index-runtime-20261103-001/qualification-public.json`。
+
+11份原作者软件和依赖声明共53913字节，固定身份见`configs/workload-native/qrecc-author-source.json`；不含数据集或权重。公共源码准备与只读核验入口：
+
+```bash
+python scripts/prepare_jsonschemabench_author_source.py --source qrecc \
+  --author-root /external/qrecc-author --action prepare --max-bytes 53913
+python scripts/prepare_jsonschemabench_author_source.py --source qrecc \
+  --author-root /external/qrecc-author --action verify
+```
 
 在仓库外解包并校验上述软件后，Java入口的命令形态如下。`/external/qrecc-passages`必须是完整校验的作者集合，不能填验证样本目录；实际全库构建前仍须核算索引与临时空间、内存及共享资源窗口。
 
 ```bash
-/external/jdk-21.0.13+9/bin/java -Xmx4g \
-  -cp /external/pyserini-0.44.0/pyserini/resources/jars/anserini-0.39.0-fatjar.jar \
+/external/jdk-11.0.32.1+1/bin/java -Xmx4g \
+  -cp /external/pyserini-0.10.0.1/pyserini/resources/jars/anserini-0.10.0-fatjar.jar \
   io.anserini.index.IndexCollection \
   -collection JsonCollection -generator DefaultLuceneDocumentGenerator \
   -threads 2 -input /external/qrecc-passages -index /external/qrecc-index \
   -storePositions -storeDocvectors -storeRaw
 ```
 
-`-threads 2`与`-Xmx4g`是保守的待全库验证配置，不是作者的76线程实测配置，也未证明足以完成全库。当前只证明Java入口可用，尚未执行上述QReCC建库命令、Python包装器或原生RAG。软件控制回执：服务器任务目录`qrecc-original-index-runtime-20261103-001/original-java-entrypoint-control-001/qualification-public.json`。首次误用`-help`及`-topicreader`产生的失败日志保留；该版本帮助参数为`-options`，查询类参数为`-topicReader`，不能只凭进程退出0判断执行成功，必须核查原日志和实际索引/排名文件。
+`-threads 2`与`-Xmx4g`是保守的待全库验证配置，不是作者的76线程实测配置，也未证明足以完成全库。尚未执行上述QReCC建库命令、Python包装器或原生RAG。必须核查原日志和实际索引/排名文件，不能只凭进程退出0判断成功。
+
+历史Pyserini0.44/Java21软件对照及错误CLI参数日志保留在`qrecc-original-index-runtime-20261103-001`，不将其索引与原始锁版本混用。另核查到[竞赛组织方SCAI基线](https://github.com/webis-de/SCAI-QReCC/tree/8020bbe28127ca6af5fe99534908b4b33f331731/code/simple-baseline)锁定Pyserini0.12.0，属于不同软件协议；其测试集/评分修订也不能静默替换本方案的固定Apple任务。该组织方简单基线的回答阶段是启发式句子选择，不能拿它冒充NPU阅读模型或原端到端神经基线。
 
 ### 已保存答案的原作者评分入口（不是端到端运行）
 

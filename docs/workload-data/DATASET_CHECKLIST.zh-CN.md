@@ -2178,6 +2178,8 @@ checkpoint，不能直接填入Qwen文本服务。原评分器要求五条参考
 
 #### QReCC原检索集合获取（2026-11-03）
 
+- [x] 原Apple固定提交的11份软件及53913字节身份已通过服务器公共plan/verify入口，原requirements明确锁定Pyserini0.10.0.1。按该版本、复用Java11完成3人工文档索引和1条BM25控制查询，顶一结果核实，0模型调用；不是全库或原题执行。原软件回执：`qrecc-original-author-source-20261103-001/qualification-public.json`；原锁版本控制回执：`qrecc-original-pinned-index-runtime-20261103-001/qualification-public.json`。较新0.44候选及组织方0.12基线是独立软件协议，不混用索引或替换原任务/评分。
+
 已核实[作者Zenodo5760304发布](https://zenodo.org/records/5760304)的完整`passages.zip`为27512656777字节，非必须重新爬取数十TB网页。完整原ZIP目录56007个成员已检查：56003个JSONL，解压合计86557816928字节。当前原包正在服务器获取，限速8MiB/s、共享盘保留64GiB余量，本地不落数据；同一writer的PID/出生时间和partial增长已核实。
 
 - [x] 两份作者原test全部16451条逐行比较，原文件哈希/发布方MD5通过，会话与话轮顺序一致；每条增加`Passages`参考，24条原`Answer_URL`不同，其余原字段相同。原文件独立保留，不当作同一版本覆盖，模型调用0次。服务器回执：`qrecc-author-test-release-comparison-20261103-001/qualification-public.json`。
