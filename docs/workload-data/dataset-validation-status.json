@@ -1287,6 +1287,21 @@
       "blocker": null
     },
     "LONGBENCH_V2": {
+      "official_long_context_profile_review": {
+        "reviewed_date": "2026-11-03",
+        "model_card": "https://huggingface.co/Qwen/Qwen3.5-9B#processing-ultra-long-texts",
+        "observed_original_model_config_max_position_embeddings": 262144,
+        "observed_original_rope_type": "default",
+        "publisher_documented_extended_max_model_len": 1010000,
+        "publisher_documented_yarn_factor": 4.0,
+        "publisher_documented_original_max_position_embeddings": 262144,
+        "candidate_capacity_covers_fixed_longest_input_plus_original_output_arithmetically": true,
+        "actual_npu_extended_service_capacity_qualified": false,
+        "service_or_original_model_files_changed": false,
+        "deployment_approval_requested": true,
+        "new_model_calls": 0,
+        "source_checkbox_eligible": false
+      },
       "scope": "public",
       "delivery_kind": "review_original_source_protocol",
       "status": "BLOCKED",
@@ -2279,6 +2294,53 @@
       "blocker": null
     },
     "GAIA": {
+      "independent_native_provenance_audit": {
+        "server_receipt": "gaia-native-final-provenance-20261103-001/qualification-public.json",
+        "actual_installed_provider_payloads_equal_successful_ci_wheel": 94,
+        "original_profile_model_requests": 33,
+        "original_profile_http200": 33,
+        "late_response_not_consumed_by_timed_out_agent": 1,
+        "failed_row_recheck_model_requests": 9,
+        "failed_row_recheck_http200": 9,
+        "every_cpu_request_and_received_response_matches_npu_saved_bytes": true,
+        "late_response_independently_retained_not_injected_back": true,
+        "executed_scripts_equal_declared_public_commits": true,
+        "original_question_inputs_and_official_scores_independently_verified": true,
+        "new_model_calls_during_audit": 0,
+        "source_checkbox_eligible": false
+      },
+      "failed_second_task_explicit_timeout_recheck": {
+        "private_server_receipt": "gaia-failed-second-timeout1800-score-audit-20261103-001/qualification-public.json",
+        "original_start": 1,
+        "original_count": 1,
+        "model_timeout_seconds": 1800,
+        "max_steps": 20,
+        "max_output_tokens": 4096,
+        "model": "Qwen/Qwen3-14B; original service unchanged",
+        "returned_tasks": 1,
+        "failed_tasks": 0,
+        "official_correct": 0,
+        "original_inputs_independently_equal": true,
+        "first_and_third_tasks_rerun": false,
+        "first_run_failure_or_score_overwritten": false,
+        "scores_merged_across_profiles": false,
+        "improvement_caused_by_wait_change_proven": false,
+        "source_checkbox_eligible": false
+      },
+      "native_actor_provider94_research_handoff": {
+        "server_receipt": "gaia-current-ci-handoff-20261103-002/qualification-public.json",
+        "ci_run_id": 41595932350,
+        "ci_artifact_id": 13212776049,
+        "installed_payloads_verified_against_git": 94,
+        "original_files_verified": 119,
+        "original_task_rows_verified": 466,
+        "original_attachment_relations_verified": 109,
+        "fixed_public_research_roundtrips": 7,
+        "research_patch_committed_or_published": false,
+        "research_default_lock_changed": false,
+        "new_model_calls": 0,
+        "source_checkbox_eligible": false
+      },
       "original_native_agent_current_attempt": {
         "status": "FIXED_ORIGINAL_FIRST_THREE_AUTHOR_SCORED_ONE_CLIENT_TIMEOUT_NOT_DELIVERED",
         "private_cpu_run": "gaia-native-actor-software-20261103-001/original-agent-001/native",
@@ -2462,7 +2524,7 @@
       "legacy_checked": false,
       "existing_receipt": null,
       "delivery_receipt": null,
-      "blocker": "All119 pinned originals acquired and identity verified; candidate466-task/109-attachment adapter plus7 public/patched-research readbacks passed. Minimal local research compatibility preserves old QBI rejection; it is not committed/published and default dependency lock is unchanged. Original public leaderboard scorer passed12 invented software controls, not native scores. Public Agent/tool environment, original validation execution/scoring and exact installed-CI artifact closure remain pending. Keep test references withheld and do not use QBI FrozenEvidence, annotated-task replacements or oracle material."
+      "blocker": "原validation前三题已完整尝试/作者评分：2返回、1客户端超时、正确0/3；仅失败第二题以单列1800秒等待复核返回并评分0/1，原题/20步/4096输出预算不变，不重跑第一第三题，不混报配置或覆盖失败。实际成功CI94载荷、119原文件、466任务/109附件及7处公共/研究回读已复核。原33次和复核9次请求/响应及执行脚本溯源已独立通过，首次迟到响应未注回原Agent。研究侧最小GAIA委托补丁发布交接、当前软件CI及最终交付回执仍待收口；文本工具配置不证明附件/视听能力；不以0分或已读数据替代原生可用性证明，不使用QBI FrozenEvidence或oracle材料。"
     },
     "STRUCTEVAL": {
       "scope": "public",
