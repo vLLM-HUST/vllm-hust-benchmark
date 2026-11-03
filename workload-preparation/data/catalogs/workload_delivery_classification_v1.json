@@ -21,6 +21,10 @@
     {"source_id": "PAIO-SEMANTIC-SIMILAR-5000", "asset_group": "enterprise-private-requests", "related_workload_ids": [], "boundary": "Semantic similarity is not exact-prefix or KV reuse; preserve original private requests without rewriting."}
   ],
   "source_entrypoints": {
+    "GAIA": [
+      {"role":"original_profile","path":"workload-preparation/data/catalogs/gaia_original_files_v1.json","scope":"Pinned official gated file identities only; no raw questions,answers,annotator plans or attachment payloads. User authorized account and original assets required."},
+      {"role":"native_evaluation","path":"scripts/score_gaia_original_predictions.py","scope":"Plan by default; score saved original validation task IDs using unchanged pinned official leaderboard question_scorer only. No Agent execution, test-reference scoring, generation provenance or full-source completion claim."}
+    ],
     "FULL_DUPLEX_BENCH": [
       {"role":"prepare_assets","path":"scripts/prepare_full_duplex_original_assets.py","scope":"Nine original official audio ZIPs; offline plan and frozen observed hash/ZIP/JSON verification,optional bounded official download. No extraction,ASR,model or native task execution; server existing-file reuse verified separately from fresh network path."},
       {"role":"prepare_assets","path":"scripts/prepare_full_duplex_original_scorers.py","scope":"Original offline scorer/software subset only; publisher example scoring is not our native speech execution."}

@@ -2190,7 +2190,10 @@ FrozenEvidence、公开镜像、改写题目或预先整理的证据包替代原
 - [x] 原始任务适配候选已准备466行引用索引，7处公共回读通过，包含两种split的首个原附件；读取时重新核对固定原版本、元数据及存储资产身份，拒绝伪造的QBI映射或版本。这是93载荷的候选源码树验证，尚非成功CI安装包。回执：`gaia-original-adapter-candidate-20261103-003/qualification-public.json`。
 - [x] 研究侧候选读取接通：维护线程确认现有consumer无同文件改动/替代入口后，仅为GAIA加`gaia_original_tasks`委托，旧QBI拒绝保留；6项隔离接口测试通过。服务器私有覆盖层实际7处公共/研究读取一致，含两种split首附件，466行索引和历史研究快照未改，模型调用0。回执：`gaia-original-research-handoff-20261103-001/qualification-public.json`。研究补丁仅为本地改动，未提交/推送，默认依赖锁未改；这不是已发布依赖环境或原生Agent闭环。
 - [x] 官方[GAIA榜单评分器](https://huggingface.co/spaces/gaia-benchmark/leaderboard/blob/9f133d71362e77b3539f1514f31b9c101a545fec/scorer.py)固定代码已取得并验证Git对象/文件摘要；原`question_scorer`以numpy1.26.4完成12项人工正反控制，未改规则、未评分真实GAIA题目或调用模型。回执：`gaia-official-scorer-controls-20261103-001/qualification-public.json`。
-- [ ] 原生Agent/工具、原验证集评分及安装版闭环尚未完成，不能以读取通过打来源总勾。测试集参考答案不可用，不将其当作本地可评分验证集。
+- [x] 成功CI安装包复核：提交`2ee41c49a841b59eb48c1f249093f6cef9d2d37a`的CPU
+  smoke运行`41588224018`、工件`13208757996`实际安装后，93个软件载荷与Git逐字节一致；119份原资产、466行原字段及109处附件关系核实，7处公共/研究读取一致。回执：`gaia-current-ci-handoff-20261103-001/qualification-public.json`。研究补丁仍未发布，模型调用与原生Agent执行均为0。
+- [x] 隔离环境准备：固定smolagents1.26.0及42个包已安装，依赖检查通过；原Python工具在无网络、只读根目录、非root、受内存/CPU/PID限制的专用Docker中完成人工控制。这里只证明工具与隔离可用，不是GAIA原题执行。
+- [ ] 原生Agent/工具、原验证集真实输出评分及研究默认安装环境闭环尚未完成，不能以读取通过打来源总勾。测试集参考答案不可用，不将其当作本地可评分验证集。
 
 使用者先自行完成官方授权并配置HF CLI，然后获取同一原始版本（不需要本项目维护者分享数据）：
 
@@ -2216,6 +2219,21 @@ for record in iter_workload(
 ```
 
 上述入口是原始任务读取，不是已完成的原生benchmark命令。`record.request_body()`会拒绝把它伪装成单条聊天请求；附带原参考步骤的“annotated”版本不作为输入替代。
+
+独立评分入口使用固定官方评分函数，输入为原validation任务的已保存输出；不负责生成答案。JSONL每行仅含`task_id`和`prediction`（字符串或明确的null失败），拒绝重复、未知或test任务ID。全部165题均可提交，抽样时保留未评分数量；不改题、不以参考答案构造预测。
+
+```bash
+python -m pip install -r configs/workload-native/gaia-original-scorer-client.txt
+curl --fail --location \
+  https://huggingface.co/spaces/gaia-benchmark/leaderboard/resolve/9f133d71362e77b3539f1514f31b9c101a545fec/scorer.py \
+  --output /data/gaia-scorer.py
+python scripts/score_gaia_original_predictions.py --help
+python scripts/score_gaia_original_predictions.py --execute \
+  --data-root /data/gaia-original --scorer-file /data/gaia-scorer.py \
+  --predictions-file /data/gaia-predictions.jsonl --output /data/gaia-score-run-001
+```
+
+评分器文件必须匹配固定摘要，输出目录必须为仓库和原资产之外的新私有目录，不能覆盖历史结果。官方函数可能打印答案，因此其标准输出与错误仅保存在该私有目录。默认不加`--execute`只显示计划，不读取数据或调用模型。当前评分入口仅经过人工夹具测试，不能证明预测生成过程或原生Agent任务已完成。
 
 Agent参考实现核查：[smolagents公开GAIA示例](https://github.com/huggingface/smolagents/blob/96f33faaf028479119ec8d34507b47694cf14e34/examples/open_deep_research/run_gaia.py)默认涉及annotated数据分支，原始数据分支仍引用旧`GAIA.py`布局，且选题逻辑只保留有附件的题。因此不能将它未经检查地当作当前原始GAIA全题集入口；需要对当前Parquet读取和工具/本地NPU模型绑定做明确适配，保留原题、原附件和失败，不照搬其过滤逻辑。
 
