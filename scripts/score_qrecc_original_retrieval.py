@@ -94,9 +94,9 @@ def convert_rankings(rows, rankings, output):
                     "original conversation, turn and answer identity required"
                 )
             passages = item["retrieved_passages"]
-            if not isinstance(passages, list) or not 0 <= len(passages) <= 100:
+            if not isinstance(passages, list):
                 raise ValueError(
-                    "retain zero to100 actual hits; never omit or fabricate empty retrieval"
+                    "retain the complete actual hit list, including empty retrieval"
                 )
             ids = set()
             for rank, passage in enumerate(passages, 1):
@@ -144,8 +144,8 @@ def convert_rankings(rows, rankings, output):
 def score(
     *, data_file, author_root, rankings_file, output, python=sys.executable, workers=1
 ):
-    if type(workers) is not int or not 1 <= workers <= 8:
-        raise ValueError("one to8 original scorer workers required")
+    if type(workers) is not int or workers < 1:
+        raise ValueError("positive original scorer worker count required")
     author_root = verify_source(Path(author_root), PINS)
     inputs = [Path(data_file), Path(rankings_file)]
     hashes = [digest(p) for p in inputs]

@@ -102,7 +102,7 @@ def test_scoring_joins_references_only_after_saved_retrieval(original, monkeypat
         "reference",
         "wrong-turn",
         "duplicate-row",
-        "too-many-hits",
+        "non-list-hits",
         "duplicate-doc",
         "wrong-rank",
         "nan-score",
@@ -117,8 +117,8 @@ def test_bad_or_missing_results_not_silently_filtered(original, monkeypatch, cha
         items[0]["Turn_no"] = 99
     elif change == "duplicate-row":
         items[1] = items[0]
-    elif change == "too-many-hits":
-        items[0]["retrieved_passages"] *= 101
+    elif change == "non-list-hits":
+        items[0]["retrieved_passages"] = "not a hit list"
     elif change == "duplicate-doc":
         items[0]["retrieved_passages"] *= 2
     elif change == "wrong-rank":
@@ -220,4 +220,35 @@ def test_zero_hit_query_retained_without_fabricated_passage(original, monkeypatc
             "Extractive Upper Bound for F1 (100 point scale)"
         ]
         is None
+    )
+
+
+def test_all_saved_ranks_preserved_beyond_recall100_cutoff(original, monkeypatch):
+    items = [ranking(i) for i in range(3)]
+    items[0]["retrieved_passages"] = [
+        {
+            "docid": f"fixture-{rank}",
+            "content": "saved passage",
+            "rank": rank,
+            "score": 1.0 / rank,
+        }
+        for rank in range(1, 102)
+    ]
+    original["rankings_file"].write_text("\n".join(json.dumps(x) for x in items))
+    monkeypatch.setattr(
+        module.subprocess,
+        "run",
+        lambda *a, **k: SimpleNamespace(returncode=0, stdout=stdout(), stderr=""),
+    )
+    module.score(**original)
+    saved = [
+        json.loads(x)
+        for x in (original["output"] / "evaluation-input.private.jsonl")
+        .read_text()
+        .splitlines()
+    ]
+    assert (
+        len(saved) == 103
+        and saved[100]["rank"] == 101
+        and saved[100]["docid"] == "fixture-101"
     )

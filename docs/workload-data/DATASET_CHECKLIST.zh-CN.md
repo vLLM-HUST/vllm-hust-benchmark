@@ -2178,7 +2178,7 @@ checkpoint，不能直接填入Qwen文本服务。原评分器要求五条参考
 
 #### QReCC原检索集合获取（2026-11-03）
 
-- [x] 公开保存检索结果评分入口及独立nltk3.5客户端已补齐；14项人工保存结果控制、服务器4个人工查询的真实作者函数控制通过，保留零命中任务分母，不补造段落。原函数对零命中的抽取上界未定义时明确记null，不冒充模型成绩。复用旧原CLI相同输入及5指标对照一致，不重跑旧CLI；尚不是原题检索/阅读执行。回执：`qrecc-public-retrieval-score-control-20261103-002/qualification-public.json`。
+- [x] 公开保存检索结果评分入口及独立nltk3.5客户端已补齐；15项人工保存结果控制、服务器4个人工查询的真实作者函数控制通过，保留零命中任务分母及100位之后的真实命中，不补造段落。原函数对零命中的抽取上界未定义时明确记null，不冒充模型成绩。复用旧原CLI相同输入及5指标对照一致，不重跑旧CLI；尚不是原题检索/阅读执行。回执：`qrecc-public-retrieval-score-control-20261103-002/qualification-public.json`。
 
 - [x] 原Apple固定提交的11份软件及53913字节身份已通过服务器公共plan/verify入口，原requirements明确锁定Pyserini0.10.0.1。按该版本、复用Java11完成3人工文档索引和1条BM25控制查询，顶一结果核实，0模型调用；不是全库或原题执行。原软件回执：`qrecc-original-author-source-20261103-001/qualification-public.json`；原锁版本控制回执：`qrecc-original-pinned-index-runtime-20261103-001/qualification-public.json`。较新0.44候选及组织方0.12基线是独立软件协议，不混用索引或替换原任务/评分。
 
