@@ -1300,3 +1300,496 @@ print(json.dumps(summarize_groups([(groups,[row])])["wall_seconds"]))
         check=True,
     )
     assert json.loads(result.stdout) == 10000000000000002.0
+
+
+def execution_fixture():
+    groups, _, rows = group_fixture()
+    for row in rows:
+        row.update(kind="capacity", max_tokens=2)
+    rows.append(
+        {
+            "case_id": "qasper-000",
+            "kind": "quality",
+            "task": "qasper",
+            "qa_f1": 0.25,
+            "success": True,
+            "max_tokens": 2,
+        }
+    )
+    cases = [
+        {
+            key: value
+            for key, value in row.items()
+            if key in ("case_id", "kind", "max_tokens")
+        }
+        for row in rows
+    ]
+    manifest = {"cases_sha256": "frozen-case-hash"}
+    manifest_bytes = json.dumps(manifest).encode()
+    plan = {"manifest_bytes": manifest_bytes, "groups": groups, "cases": cases}
+    lifecycle = {
+        "enabled": True,
+        "group_kinds": ["capacity"],
+        "skip_quality": False,
+        "request_count": 3,
+        "max_output_tokens": 6,
+    }
+    execution = {
+        "plan_manifest_sha256": hashlib.sha256(manifest_bytes).hexdigest(),
+        "plan_manifest": manifest,
+        "group_names": ["capacity"],
+        "quality_case_ids": ["qasper-000"],
+        "arm": "pyramidkv",
+    }
+    summary = {
+        "arm": "pyramidkv",
+        "requests": 3,
+        "failures": 0,
+        "quality_f1": {"qasper": 25.0},
+        "plan_manifest": manifest,
+    }
+    return lifecycle, plan, execution, summary, rows
+
+
+def test_execution_joins_selected_groups_quality_and_exact_plan_identity():
+    result = module("qualification").verify_execution(*execution_fixture())
+    assert result["case_ids"] == ["a", "b", "qasper-000"]
+    assert [row["name"] for row in result["groups"]] == ["capacity"]
+
+
+@pytest.mark.parametrize(
+    "change",
+    [
+        "manifest_sha",
+        "manifest",
+        "arm",
+        "groups",
+        "quality",
+        "counts",
+        "budget",
+        "failed",
+        "aggregate",
+        "summary_manifest",
+        "summary_arm",
+        "case_order",
+        "group_member",
+        "private_field",
+    ],
+)
+def test_execution_rejects_partial_changed_or_mixed_plan_receipts(change):
+    lifecycle, plan, execution, summary, rows = execution_fixture()
+    if change == "manifest_sha":
+        execution["plan_manifest_sha256"] = "changed"
+    elif change == "manifest":
+        execution["plan_manifest"] = {}
+    elif change == "arm":
+        execution["arm"] = "baseline"
+    elif change == "groups":
+        execution["group_names"] = []
+    elif change == "quality":
+        execution["quality_case_ids"] = []
+    elif change == "counts":
+        summary["requests"] = 2
+    elif change == "budget":
+        lifecycle["max_output_tokens"] = 5
+    elif change == "failed":
+        summary["failures"] = 1
+    elif change == "aggregate":
+        summary["quality_f1"]["qasper"] = 100
+    elif change == "summary_manifest":
+        summary["plan_manifest"] = {}
+    elif change == "summary_arm":
+        summary["arm"] = "baseline"
+    elif change == "case_order":
+        rows.reverse()
+    elif change == "group_member":
+        plan["groups"][0]["case_ids"].append("qasper-000")
+    elif change == "private_field":
+        plan["cases"][0]["answers"] = ["PRIVATE"]
+    with pytest.raises(ValueError):
+        module("qualification").verify_execution(
+            lifecycle, plan, execution, summary, rows
+        )
+
+
+def test_capacity_only_execution_excludes_quality_in_both_receipts_and_results():
+    lifecycle, plan, execution, summary, rows = execution_fixture()
+    lifecycle.update(skip_quality=True, request_count=2, max_output_tokens=4)
+    execution["quality_case_ids"] = []
+    summary.update(requests=2, quality_f1={})
+    result = module("qualification").verify_execution(
+        lifecycle, plan, execution, summary, rows[:2]
+    )
+    assert result["case_ids"] == ["a", "b"]
+
+
+def test_contract_qualification_rejects_absent_or_unpinned_experiment():
+    with pytest.raises(ValueError, match="Contract"):
+        module("qualification").verify_contracts({})
+
+
+def service_fixture():
+    runs = {}
+    for budget in (8, 2):
+        for arm in ("off", "on"):
+            for repeat in (1, 2):
+                rows, groups = [], []
+                for tokens in (1024, 8192, 24576):
+                    for concurrency in (1, 4):
+                        for cohort in range(3):
+                            name = f"perf-{tokens}-c{concurrency}-r{cohort}"
+                            ids = [
+                                f"{name}-{i:02d}"
+                                for i in range(3 if concurrency == 1 else 8)
+                            ]
+                            groups.append(
+                                {
+                                    "name": name,
+                                    "kind": "performance",
+                                    "concurrency": concurrency,
+                                    "case_ids": ids,
+                                    "wall_seconds": 1.0
+                                    if arm == "on"
+                                    else (2.0 if budget == 8 else 4.0),
+                                }
+                            )
+                            rows.extend(
+                                {
+                                    "case_id": key,
+                                    "kind": "performance",
+                                    "prompt_tokens": tokens,
+                                    "success": True,
+                                    "usage": {
+                                        "completion_tokens": 128,
+                                        "prompt_tokens_details": {"cached_tokens": 0},
+                                    },
+                                    "ttft_seconds": 0.2,
+                                    "e2e_seconds": 0.8,
+                                    "tpot_seconds": 0.004,
+                                }
+                                for key in ids
+                            )
+                groups.append(
+                    {
+                        "name": "excluded-warmup",
+                        "kind": "warmup",
+                        "concurrency": 1,
+                        "case_ids": ["warmup"],
+                        "wall_seconds": 1000000,
+                    }
+                )
+                rows.append(
+                    {
+                        "case_id": "warmup",
+                        "kind": "warmup",
+                        "success": True,
+                        "usage": {"completion_tokens": 99999999},
+                    }
+                )
+                runs[f"service{budget}-{arm}-{repeat}"] = {
+                    "groups": groups,
+                    "rows": rows,
+                }
+    return runs
+
+
+def test_service_comparison_keeps_budgets_pairs_cells_and_exclusions_distinct():
+    result = module("analyze").service_comparison(service_fixture())
+    eight, two = result["8gib"], result["2gib"]
+    assert eight["all_formal"]["off"]["successful_requests"] == 198
+    assert eight["all_formal"]["off"]["output_tokens_per_second"] == 352
+    assert eight["all_formal"]["on"]["output_tokens_per_second"] == 704
+    assert two["all_formal"]["off"]["output_tokens_per_second"] == 176
+    assert len(eight["cells"]) == 6
+    cell = eight["cells"]["24576-c4"]
+    assert cell["off"]["successful_requests"] == 48
+    assert cell["on"]["output_tokens_per_second"] == 1024
+    assert cell["throughput_ratio_on_over_off"] == 2
+    assert [pair["throughput_ratio_on_over_off"] for pair in cell["pairs"]] == [2, 2]
+    assert two["cells"]["24576-c4"]["throughput_ratio_on_over_off"] == 4
+    assert eight["processes"]["service8-off-1"]["successful_requests"] == 99
+
+
+@pytest.mark.parametrize(
+    "change",
+    [
+        "missing_process",
+        "missing_cell",
+        "duplicate_cohort",
+        "changed_concurrency",
+        "missing_request",
+    ],
+)
+def test_service_comparison_rejects_incomplete_or_changed_formal_design(change):
+    runs = service_fixture()
+    selected = runs["service8-off-1"]
+    if change == "missing_process":
+        del runs["service2-on-2"]
+    elif change == "missing_cell":
+        selected["groups"] = selected["groups"][3:]
+    elif change == "duplicate_cohort":
+        selected["groups"].append(copy.deepcopy(selected["groups"][0]))
+    elif change == "changed_concurrency":
+        selected["groups"][0]["concurrency"] = 4
+    elif change == "missing_request":
+        selected["rows"].pop(0)
+    with pytest.raises(ValueError, match="Service"):
+        module("analyze").service_comparison(runs)
+
+
+def capacity_fixture():
+    runs = {}
+    for budget, stem in ((8, "quality8"), (2, "capacity2")):
+        for arm in ("off", "on"):
+            groups, rows = [], []
+            for concurrency in (1, 2, 4):
+                name = f"capacity-{concurrency}"
+                ids = [f"{name}-{i}" for i in range(concurrency)]
+                groups.append(
+                    {
+                        "name": name,
+                        "kind": "capacity",
+                        "concurrency": concurrency,
+                        "case_ids": ids,
+                        "wall_seconds": 10,
+                    }
+                )
+                rows.extend(
+                    {
+                        "case_id": key,
+                        "kind": "capacity",
+                        "prompt_tokens": 32704,
+                        "max_tokens": 64,
+                        "success": True,
+                        "usage": {
+                            "completion_tokens": 64,
+                            "prompt_tokens_details": {"cached_tokens": 0},
+                        },
+                        "ttft_seconds": 2,
+                        "e2e_seconds": 8,
+                        "tpot_seconds": 0.09,
+                    }
+                    for key in ids
+                )
+            runs[f"{stem}-{arm}"] = {"groups": groups, "rows": rows}
+    return runs
+
+
+def test_capacity_report_preserves_only_the_three_measured_operating_points():
+    result = module("analyze").capacity_comparison(capacity_fixture())
+    assert set(result) == {"8gib", "2gib"}
+    assert set(result["2gib"]) == {"c1", "c2", "c4"}
+    assert result["2gib"]["c4"]["on"]["successful_requests"] == 4
+    assert result["8gib"]["c2"]["off"]["output_tokens_per_second"] == 12.8
+
+
+@pytest.mark.parametrize(
+    "change", ["missing", "length", "output_budget", "concurrency"]
+)
+def test_capacity_report_rejects_missing_or_changed_operating_points(change):
+    runs = capacity_fixture()
+    selected = runs["capacity2-on"]
+    if change == "missing":
+        selected["groups"].pop()
+    elif change == "length":
+        selected["rows"][0]["prompt_tokens"] = 8192
+    elif change == "output_budget":
+        selected["rows"][0]["max_tokens"] = 128
+    elif change == "concurrency":
+        selected["groups"][0]["concurrency"] = 8
+    with pytest.raises(ValueError, match="Capacity"):
+        module("analyze").capacity_comparison(runs)
+
+
+def request_set_fixture():
+    case, payload, row, chunks = response_fixture()
+    case["prompt"] = payload["prompt"]
+    qa = copy.deepcopy(case)
+    qa.update(
+        case_id="qasper-000",
+        kind="quality",
+        task="qasper",
+        subset="development",
+        dataset_id="official-0",
+        answers=["seven"],
+    )
+    qrow = {key: value for key, value in qa.items() if key not in ("prompt", "answers")}
+    qrow.update({key: value for key, value in row.items() if key not in case})
+    qrow.update(request_id="cmpl-quality", qa_f1=1.0)
+    qchunks = json.loads(json.dumps(chunks).replace("cmpl-example", "cmpl-quality"))
+    prefix = "runs/example/evaluation/requests/"
+    raw = {}
+    for item, original, stream in ((case, row, chunks), (qa, qrow, qchunks)):
+        raw[prefix + item["case_id"] + ".json"] = json.dumps(original).encode()
+        raw[prefix + item["case_id"] + ".sse"] = sse(stream)
+    encoded = module("private_inputs").request_bytes(case)
+    raw[prefix + case["case_id"] + ".request.json"] = encoded
+    private = {
+        prefix + qa["case_id"] + ".request.json": {
+            "bytes": len(encoded),
+            "sha256": hashlib.sha256(encoded).hexdigest(),
+        }
+    }
+    references = {"qasper-000": {"dataset_id": "official-0", "answers": ["seven"]}}
+    return raw, prefix, [case, qa], [row, qrow], private, references
+
+
+def test_public_request_verification_never_claims_private_payload_or_official_f1_coverage():
+    raw, prefix, cases, rows, private, _references = request_set_fixture()
+    cases[1] = {
+        key: value
+        for key, value in cases[1].items()
+        if key not in ("prompt", "answers")
+    }
+    result = module("qualification").verify_requests(raw, prefix, cases, rows, private)
+    assert result["synthetic_payloads_verified"] == 1
+    assert result["private_payloads_verified"] == 0
+    assert result["official_f1_recomputed"] == 0
+    assert result["requests_verified"] == 2
+
+
+def test_private_request_verification_reconstructs_and_scores_from_pinned_references():
+    result = module("qualification").verify_requests(*request_set_fixture())
+    assert result["private_payloads_verified"] == 1
+    assert result["official_f1_recomputed"] == 1
+
+
+@pytest.mark.parametrize(
+    "change",
+    [
+        "extra",
+        "missing",
+        "result",
+        "private_leak",
+        "private_missing",
+        "private_hash",
+        "private_length",
+        "private_answers",
+        "official_id",
+        "qa_score",
+        "synthetic_payload",
+    ],
+)
+def test_request_set_rejects_orphans_leaks_and_unverified_private_reconstruction(
+    change,
+):
+    raw, prefix, cases, rows, private, references = request_set_fixture()
+    qa_key = prefix + "qasper-000"
+    if change == "extra":
+        raw[prefix + "unexpected.sse"] = b"extra"
+    elif change == "missing":
+        del raw[qa_key + ".sse"]
+    elif change == "result":
+        raw[qa_key + ".json"] = b"{}"
+    elif change == "private_leak":
+        raw[qa_key + ".request.json"] = b"PRIVATE"
+    elif change == "private_missing":
+        private.clear()
+    elif change == "private_hash":
+        private[qa_key + ".request.json"]["sha256"] = "0" * 64
+    elif change == "private_length":
+        private[qa_key + ".request.json"]["bytes"] += 1
+    elif change == "private_answers":
+        cases[1]["answers"] = ["changed"]
+    elif change == "official_id":
+        references["qasper-000"]["dataset_id"] = "another-row"
+    elif change == "qa_score":
+        rows[1]["qa_f1"] = 0.0
+        raw[qa_key + ".json"] = json.dumps(rows[1]).encode()
+    elif change == "synthetic_payload":
+        raw[prefix + "boundary-2.request.json"] = b"{}"
+    with pytest.raises(ValueError):
+        module("qualification").verify_requests(
+            raw, prefix, cases, rows, private, references
+        )
+
+
+def test_http_and_engine_completion_counts_exclude_hidden_retries():
+    after = 'vllm:request_success_total{finished_reason="length"} 2\n'
+    log = '"POST /v1/completions HTTP/1.1" 200 OK\n' * 2
+    module("qualification").verify_request_counts("", after, log, 2)
+
+
+@pytest.mark.parametrize(
+    "change",
+    [
+        "extra_post",
+        "error_post",
+        "missing_post",
+        "extra_engine",
+        "reset",
+        "nan",
+        "duplicate_metric",
+    ],
+)
+def test_http_and_engine_counts_reject_unaccounted_activity(change):
+    before = ""
+    after = 'vllm:request_success_total{finished_reason="length"} 2\n'
+    log = '"POST /v1/completions HTTP/1.1" 200 OK\n' * 2
+    if change == "extra_post":
+        log += '"POST /v1/completions HTTP/1.1" 200 OK\n'
+    elif change == "error_post":
+        log = log.replace("200", "500", 1)
+    elif change == "missing_post":
+        log = ""
+    elif change == "extra_engine":
+        after = after.replace(" 2", " 3")
+    elif change == "reset":
+        before = after.replace(" 2", " 4")
+    elif change == "nan":
+        after = after.replace(" 2", " nan")
+    elif change == "duplicate_metric":
+        after = 'vllm:request_success_total{finished_reason="length"} 1\n' * 2
+    with pytest.raises(ValueError, match="Request count"):
+        module("qualification").verify_request_counts(before, after, log, 2)
+
+
+def pressure_fixture():
+    cases = [
+        {"case_id": "a", "cache_salt": "unique-a"},
+        {"case_id": "b", "cache_salt": "unique-b"},
+    ]
+    rows = [
+        {"case_id": "a", "usage": {"prompt_tokens_details": {"cached_tokens": 8192}}},
+        {"case_id": "b", "usage": {"prompt_tokens_details": {"cached_tokens": 0}}},
+    ]
+    groups = [{"name": "perf-24576-c4-r0", "case_ids": ["a", "b"]}]
+    resource = {
+        "phases": {
+            "perf-24576-c4-r0": {
+                "first_counters": {"vllm:num_preemptions_total": 0},
+                "last_counters": {"vllm:num_preemptions_total": 8},
+            }
+        }
+    }
+    return cases, rows, groups, resource
+
+
+def test_pressure_cache_review_keeps_unique_salt_and_phase_preemption_evidence():
+    result = module("qualification").pressure_cache_review(*pressure_fixture())
+    assert result["unique_request_salts"] == 2
+    assert result["cached_tokens"] == 8192
+    assert result["cached_cases"][0]["phase_preemptions"] == 8
+    assert result["individual_request_preemption_trace_available"] is False
+
+
+@pytest.mark.parametrize(
+    "change",
+    ["shared_salt", "absent_salt", "no_preemption", "missing_phase", "unassigned_case"],
+)
+def test_pressure_cache_review_rejects_unexplained_or_cross_request_reuse(change):
+    cases, rows, groups, resource = pressure_fixture()
+    if change == "shared_salt":
+        cases[1]["cache_salt"] = "unique-a"
+    elif change == "absent_salt":
+        cases[1].pop("cache_salt")
+    elif change == "no_preemption":
+        resource["phases"][groups[0]["name"]]["last_counters"][
+            "vllm:num_preemptions_total"
+        ] = 0
+    elif change == "missing_phase":
+        resource["phases"].clear()
+    elif change == "unassigned_case":
+        groups[0]["case_ids"] = ["b"]
+    with pytest.raises(ValueError, match="Pressure"):
+        module("qualification").pressure_cache_review(cases, rows, groups, resource)

@@ -6,6 +6,8 @@ import statistics
 import string
 from collections import Counter
 
+from evidence import require
+
 COUNTERS = (
     "num_preemptions",
     "spec_decode_num_draft_tokens",
@@ -80,6 +82,138 @@ def summarize_groups(batches: list[tuple[list[dict], list[dict]]]) -> dict:
     }
     for metric in ("ttft_seconds", "e2e_seconds", "tpot_seconds"):
         result[metric] = distribution([row[metric] for row in good])
+    return result
+
+
+def service_comparison(runs: dict) -> dict:
+    names = {
+        f"service{budget}-{arm}-{repeat}"
+        for budget in (8, 2)
+        for arm in ("off", "on")
+        for repeat in (1, 2)
+    }
+    require(set(runs) == names, "Service process inventory differs")
+    cells = {
+        f"{tokens}-c{concurrency}": concurrency
+        for tokens in (1024, 8192, 24576)
+        for concurrency in (1, 4)
+    }
+    formal = {}
+    for name, run in runs.items():
+        groups = [group for group in run["groups"] if group["kind"] == "performance"]
+        expected = [f"perf-{cell}-r{repeat}" for cell in cells for repeat in range(3)]
+        require(
+            [group["name"] for group in groups] == expected,
+            "Service formal cohorts differ",
+        )
+        lookup = {row["case_id"]: row for row in run["rows"]}
+        for group in groups:
+            match = re.fullmatch(r"perf-(\d+)-c([14])-r[012]", group["name"])
+            tokens, concurrency = map(int, match.groups())
+            require(
+                group["concurrency"] == concurrency
+                and len(group["case_ids"]) == (3 if concurrency == 1 else 8),
+                "Service cohort concurrency or request count differs",
+            )
+            require(
+                all(
+                    key in lookup and lookup[key]["prompt_tokens"] == tokens
+                    for key in group["case_ids"]
+                ),
+                "Service formal request missing or length changed",
+            )
+        formal[name] = groups
+
+    def summarize(names, cell=None):
+        batches = []
+        for name in names:
+            groups = formal[name]
+            if cell is not None:
+                groups = [
+                    group
+                    for group in groups
+                    if group["name"].startswith(f"perf-{cell}-r")
+                ]
+            batches.append((groups, runs[name]["rows"]))
+        return summarize_groups(batches)
+
+    result = {}
+    for budget in (8, 2):
+        arms = {
+            arm: [f"service{budget}-{arm}-{repeat}" for repeat in (1, 2)]
+            for arm in ("off", "on")
+        }
+        report = {
+            "all_formal": {arm: summarize(names) for arm, names in arms.items()},
+            "cells": {},
+            "processes": {},
+        }
+        for names in arms.values():
+            for name in names:
+                report["processes"][name] = summarize([name])
+                report["processes"][name]["cohort_details"] = [
+                    {
+                        "name": group["name"],
+                        **summarize_groups([([group], runs[name]["rows"])]),
+                    }
+                    for group in formal[name]
+                ]
+        for cell in cells:
+            value = {arm: summarize(names, cell) for arm, names in arms.items()}
+            value["throughput_ratio_on_over_off"] = (
+                value["on"]["output_tokens_per_second"]
+                / value["off"]["output_tokens_per_second"]
+            )
+            value["pairs"] = []
+            for repeat in (1, 2):
+                names = {
+                    arm: f"service{budget}-{arm}-{repeat}" for arm in ("off", "on")
+                }
+                pair = {arm: summarize([name], cell) for arm, name in names.items()}
+                pair["processes"] = names
+                pair["throughput_ratio_on_over_off"] = (
+                    pair["on"]["output_tokens_per_second"]
+                    / pair["off"]["output_tokens_per_second"]
+                )
+                value["pairs"].append(pair)
+            report["cells"][cell] = value
+        result[f"{budget}gib"] = report
+    return result
+
+
+def capacity_comparison(runs: dict) -> dict:
+    expected = {
+        f"{stem}-{arm}" for stem in ("quality8", "capacity2") for arm in ("off", "on")
+    }
+    require(set(runs) == expected, "Capacity process inventory differs")
+    result = {}
+    for budget, stem in ((8, "quality8"), (2, "capacity2")):
+        result[f"{budget}gib"] = {f"c{c}": {} for c in (1, 2, 4)}
+        for arm in ("off", "on"):
+            run = runs[f"{stem}-{arm}"]
+            groups = [group for group in run["groups"] if group["kind"] == "capacity"]
+            require(
+                [group["concurrency"] for group in groups] == [1, 2, 4],
+                "Capacity operating points differ",
+            )
+            lookup = {row["case_id"]: row for row in run["rows"]}
+            for group in groups:
+                require(
+                    len(group["case_ids"]) == group["concurrency"],
+                    "Capacity request count differs",
+                )
+                require(
+                    all(
+                        key in lookup
+                        and lookup[key]["prompt_tokens"] == 32704
+                        and lookup[key]["max_tokens"] == 64
+                        for key in group["case_ids"]
+                    ),
+                    "Capacity prompt or output budget differs",
+                )
+                result[f"{budget}gib"][f"c{group['concurrency']}"][arm] = (
+                    summarize_groups([([group], run["rows"])])
+                )
     return result
 
 

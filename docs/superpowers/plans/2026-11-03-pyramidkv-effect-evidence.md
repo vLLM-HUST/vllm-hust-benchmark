@@ -100,6 +100,7 @@ requires the pinned local LongBench inputs.
 - Create: `reports/pyramidkv-standalone-effects-20261103/verify.py`
 - Create: `reports/pyramidkv-standalone-effects-20261103/runtime.py`
 - Create: `reports/pyramidkv-standalone-effects-20261103/private_inputs.py`
+- Create: `reports/pyramidkv-standalone-effects-20261103/qualification.py`
 - Extend: `tests/test_pyramidkv_effect_evidence.py`
 
 **Interfaces:**
@@ -143,6 +144,8 @@ requires the pinned local LongBench inputs.
 
 - Create: `reports/pyramidkv-standalone-effects-20261103/README.md`, `analysis.json`,
   `members.json`, `SHA256SUMS`, capsule parts and verification receipt.
+- Create: `reports/pyramidkv-standalone-effects-20261103/PRESSURE.md`
+
 - Modify: `docs/data-index.json` through the generator only.
 
 **Interfaces:**
