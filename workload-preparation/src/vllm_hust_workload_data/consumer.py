@@ -22,6 +22,16 @@ def resolve_input(database: Path, record_id: str, *, data_root: Path):
     if row is None:
         raise KeyError("unknown prepared record")
     source, task, spec = map(json.loads, row)
+    if source["source_id"] == "GAIA":
+        from .registry import source_spec
+
+        if (
+            source["revision"] != source_spec("GAIA")["revision"]
+            or spec.get("mapping") != "gaia_original_tasks"
+        ):
+            raise ValueError(
+                "pinned original GAIA source and task mapping required; no QBI fallback"
+            )
     reference = task["input_ref"]
     if source["source_id"] == "APPWORLD":
         assets = reference.get("native_task_assets")

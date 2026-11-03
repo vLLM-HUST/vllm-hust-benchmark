@@ -912,17 +912,17 @@
       "status": "NATIVE_REFERENCE_PREPARATION_IMPLEMENTED_ALFWORLD_FC_ONLY"
     },
     "GAIA": {
-      "kind": "official_task_suite",
-      "mapping": "official_runner_required",
-      "input_fields": [],
-      "required_fields": [],
-      "outcome_fields": [],
-      "annotation_fields": [],
-      "id_field": "",
+      "kind": "task_dataset",
+      "mapping": "gaia_original_tasks",
+      "input_fields": ["Question", "file_name", "file_path"],
+      "required_fields": ["task_id", "Question", "Level", "Final answer", "file_name", "file_path", "Annotator Metadata"],
+      "outcome_fields": ["Final answer", "Annotator Metadata"],
+      "annotation_fields": ["Level"],
+      "id_field": "task_id",
       "requirements": [
         "Use raw GAIA and attachments with a pinned public agent stack; no curated evidence or annotated-task fallback"
       ],
-      "status": "NOT_IMPLEMENTED_OFFICIAL_RUNNER_REQUIRED"
+      "status": "ORIGINAL_FIELDS_MAPPED_NATIVE_AGENT_AND_RESEARCH_CLOSURE_PENDING"
     },
     "TAUBENCH": {
       "kind": "official_task_suite",

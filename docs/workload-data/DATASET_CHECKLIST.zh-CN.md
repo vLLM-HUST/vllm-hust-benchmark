@@ -2181,10 +2181,48 @@ checkpoint，不能直接填入Qwen文本服务。原评分器要求五条参考
 
 #### GAIA原始数据访问前置条件（2026-11-03）
 
-GAIA访问前置条件补查（2026-11-03）：[官方页面](https://huggingface.co/datasets/gaia-benchmark/GAIA)仍要求账号同意信息共享和访问条件，并限制公开再分发。当前自有NPU及专用CPU的默认HF环境凭据/令牌文件均未配置，仅检查存在性，未读取或打印凭据，也未代用户接受条款。已请求配置已获授权账号；原任务、原附件、Agent/工具、评分和研究交接仍未完成，不以QBI
-FrozenEvidence、公开镜像或改写题目替代，不打来源总勾。
+GAIA访问前置条件补查（2026-11-03）：[官方页面](https://huggingface.co/datasets/gaia-benchmark/GAIA)要求账号同意信息共享和访问条件，并限制公开再分发。初查自有环境未配置凭据；随后用户已自行完成服务器登录，官方授权检查通过，未代用户接受条款，凭据不回显或进入仓库。下面的原资产和读取验证不等于Agent/工具、评分或研究接通完成，不以QBI
+FrozenEvidence、公开镜像、改写题目或预先整理的证据包替代原任务。
+
+- [x] 固定原版本`682dd723ee1e1697e00360edccf2366dc8418dd9`全部119文件、110175514字节已在服务器取得，逐文件发布方LFS摘要或Git
+  blob核验通过；原始内容不落Windows、不进Git/CI。原validation165题、test301题的7字段完整恢复，109处原附件路径和字节身份核实；6个分级视图不重复计成任务，答案及Annotator
+  Metadata的步骤/工具留在outcome，不进入模型输入。
+- [x] 原始任务适配候选已准备466行引用索引，7处公共回读通过，包含两种split的首个原附件；读取时重新核对固定原版本、元数据及存储资产身份，拒绝伪造的QBI映射或版本。这是93载荷的候选源码树验证，尚非成功CI安装包。回执：`gaia-original-adapter-candidate-20261103-003/qualification-public.json`。
+- [x] 研究侧候选读取接通：维护线程确认现有consumer无同文件改动/替代入口后，仅为GAIA加`gaia_original_tasks`委托，旧QBI拒绝保留；6项隔离接口测试通过。服务器私有覆盖层实际7处公共/研究读取一致，含两种split首附件，466行索引和历史研究快照未改，模型调用0。回执：`gaia-original-research-handoff-20261103-001/qualification-public.json`。研究补丁仅为本地改动，未提交/推送，默认依赖锁未改；这不是已发布依赖环境或原生Agent闭环。
+- [x] 官方[GAIA榜单评分器](https://huggingface.co/spaces/gaia-benchmark/leaderboard/blob/9f133d71362e77b3539f1514f31b9c101a545fec/scorer.py)固定代码已取得并验证Git对象/文件摘要；原`question_scorer`以numpy1.26.4完成12项人工正反控制，未改规则、未评分真实GAIA题目或调用模型。回执：`gaia-official-scorer-controls-20261103-001/qualification-public.json`。
+- [ ] 原生Agent/工具、原验证集评分及安装版闭环尚未完成，不能以读取通过打来源总勾。测试集参考答案不可用，不将其当作本地可评分验证集。
+
+使用者先自行完成官方授权并配置HF CLI，然后获取同一原始版本（不需要本项目维护者分享数据）：
+
+```bash
+hf download gaia-benchmark/GAIA --repo-type dataset \
+  --revision 682dd723ee1e1697e00360edccf2366dc8418dd9 --local-dir /data/gaia-original
+python -m pip install -e 'workload-preparation[data]'
+```
+
+直接读取原validation，不筛掉无附件题目，问题和附件交给所声明的Agent配置，答案只用于独立评分：
+
+```python
+from pathlib import Path
+from vllm_hust_workload_data import iter_workload
+
+for record in iter_workload(
+    "GAIA", data_root=Path("/data/gaia-original"),
+    files=["2023/validation/metadata.parquet"],
+):
+    original_inputs = record.task["input"]
+    scoring_references = record.outcome_record()
+    # 原生Agent及工具消费original_inputs；不要把scoring_references加入模型提示。
+```
+
+上述入口是原始任务读取，不是已完成的原生benchmark命令。`record.request_body()`会拒绝把它伪装成单条聊天请求；附带原参考步骤的“annotated”版本不作为输入替代。
+
+Agent参考实现核查：[smolagents公开GAIA示例](https://github.com/huggingface/smolagents/blob/96f33faaf028479119ec8d34507b47694cf14e34/examples/open_deep_research/run_gaia.py)默认涉及annotated数据分支，原始数据分支仍引用旧`GAIA.py`布局，且选题逻辑只保留有附件的题。因此不能将它未经检查地当作当前原始GAIA全题集入口；需要对当前Parquet读取和工具/本地NPU模型绑定做明确适配，保留原题、原附件和失败，不照搬其过滤逻辑。
 
 #### QReCC原检索集合获取（2026-11-03）
+
+- [x] 完整原集合公共解压入口退出0：56003个原JSONL、86557816928字节，全部成员CRC通过，保留原路径和原字节，不是仅ZIP目录检查。完整回执：`qrecc-full-original-collection-prepared-20261103-001/collection-preparation.private.json`。后续完整索引准备进程PID1163702/出生时间887989570核验存活，正在统计全库原始行数；使用原Pyserini0.10.0.1
+  JAR/Java11，2个索引工作线程、4GiB堆，保留storePositions/storeDocvectors/storeRaw。索引新增预算200GiB、共享盘至少保留64GiB；租约出现或预算触及时仅终止自有索引并保留记录，不自动重试。索引完成还须核对原日志零错误/跳过及实际Lucene文档数，不能以退出0或论文约5400万代替精确验证。当前索引、检索/阅读/评分及来源总勾仍未完成。
 
 - [x] 作者完整`passages.zip`已取得，27512656777字节，发布方MD5校验通过；本机实测SHA256为`7ebb7612101bc383c597b47babd511470c0b3b59210d1ce6e2fe475b5e1d3920`，原断流和显式续传记录保留。下载进程正常结束，公共完整解压器已启动并核验PID1119538/出生时间887910350存活，请求idle
   I/O及nice10；当前尚未完成全库CRC解压、建索引或原题RAG，来源不打勾。

@@ -64,7 +64,7 @@ def test_index_contains_references_not_payload_or_research_tables(tmp_path):
 
 
 def test_native_tasks_never_fall_back_to_qbi(tmp_path):
-    for sid in ("GAIA", "AGENTBENCH", "TAUBENCH"):
+    for sid in ("AGENTBENCH", "TAUBENCH"):
         result = plan({"sources": [{"source_id": sid, "data_root": str(tmp_path)}]})
         assert (
             result["sources"][0]["blocking_reason"]
@@ -72,6 +72,17 @@ def test_native_tasks_never_fall_back_to_qbi(tmp_path):
         )
     with pytest.raises(ValueError):
         plan({"sources": [{"source_id": "GAIA", "qbi_root": str(tmp_path)}]})
+    # GAIA now has a raw-task adapter, but absent original metadata still cannot
+    # be replaced with QBI local evidence or treated as native Agent execution.
+    root = tmp_path / "gaia-originals"
+    root.mkdir()
+    (root / "qbi-frozen-evidence.jsonl").write_text('{"fixture":true}\n')
+    with pytest.raises(FileNotFoundError, match="no download or fallback"):
+        run(
+            {"sources": [{"source_id": "GAIA", "data_root": str(root)}]},
+            output=tmp_path / "gaia-prepared",
+        )
+    assert not (tmp_path / "gaia-prepared/workload.sqlite").exists()
 
 
 def test_failed_source_does_not_publish_complete_index(tmp_path):

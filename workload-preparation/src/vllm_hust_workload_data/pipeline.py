@@ -70,6 +70,10 @@ def _binding(entry, catalog_root=None):
         from .narrativeqa import relation_spec
 
         spec = relation_spec(manifest, spec)
+    if sid == "GAIA" and mapping is None:
+        from .gaia import relation_spec
+
+        spec = relation_spec(manifest, spec)
     if sid == "MSMARCO_PASSAGE" and mapping is None:
         from .msmarco import relation_spec
 

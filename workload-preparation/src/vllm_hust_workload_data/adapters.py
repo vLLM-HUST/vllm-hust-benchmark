@@ -14,6 +14,11 @@ from .registry import adapter_spec, source_spec
 
 def iter_source_rows(path, spec):
     """Use one source view for reading, binding and index resolution."""
+    if spec["mapping"] == "gaia_original_tasks":
+        from .gaia import original_rows
+
+        yield from original_rows(path, spec)
+        return
     if spec["mapping"] == "full_duplex_original_archives":
         from .full_duplex import original_rows
 
@@ -219,6 +224,10 @@ def adapt_row(
     source_id: str, row: dict, *, source: dict, spec: dict, index: int
 ) -> WorkloadRecord:
     """Projection is explicit/allowlisted; outcome fields never become task inputs."""
+    if spec["mapping"] == "gaia_original_tasks":
+        from .gaia import adapt_case
+
+        return adapt_case(row, source=source, index=index)
     if spec["mapping"] == "msmarco_original_dev_query_pools":
         from .msmarco import adapt_case
 
@@ -806,6 +815,10 @@ def iter_workload(
         "revision"
     ):
         raise ValueError("explicit manifest requires matching source ID and revision")
+    if source_id == "GAIA" and mapping is None:
+        from .gaia import relation_spec
+
+        spec = relation_spec(manifest, spec)
     if source_id == "NATUREBENCH" and mapping is None:
         from .naturebench import relation_spec
 
