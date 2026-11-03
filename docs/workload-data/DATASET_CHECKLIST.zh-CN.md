@@ -2210,6 +2210,7 @@ FrozenEvidence、公开镜像、改写题目或预先整理的证据包替代原
 - [x] 成功CI安装包复核：提交`2ee41c49a841b59eb48c1f249093f6cef9d2d37a`的CPU
   smoke运行`41588224018`、工件`13208757996`实际安装后，93个软件载荷与Git逐字节一致；119份原资产、466行原字段及109处附件关系核实，7处公共/研究读取一致。回执：`gaia-current-ci-handoff-20261103-001/qualification-public.json`。研究补丁仍未发布，模型调用与原生Agent执行均为0。
 - [x] 隔离环境准备：固定smolagents1.26.0及42个包已安装，依赖检查通过；原Python工具在无网络、只读根目录、非root、受内存/CPU/PID限制的专用Docker中完成人工控制。这里只证明工具与隔离可用，不是GAIA原题执行。
+- [x] 公共隔离辅助模块`gaia_isolated_python_tool.py`已在专用CPU工作区实跑人工算术控制：生成代码仅通过stdin进入无网络、非root、只读Docker；仅挂载框架venv，不挂原题参考、凭据或Docker套接字。固定镜像、256MiB内存/1CPU/64PID、私有日志1MiB上限，超时或客户端异常仅停止本次容器。回执：CPU工作区`/root/gaia-public-tool-control-20261103-001/qualification-public.json`。不是原生Agent运行，完整Agent工具绑定仍待完成。
 - [ ] 原生Agent/工具、原验证集真实输出评分及研究默认安装环境闭环尚未完成，不能以读取通过打来源总勾。测试集参考答案不可用，不将其当作本地可评分验证集。
 
 使用者先自行完成官方授权并配置HF CLI，然后获取同一原始版本（不需要本项目维护者分享数据）：
