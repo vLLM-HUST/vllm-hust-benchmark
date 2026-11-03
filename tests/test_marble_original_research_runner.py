@@ -13,6 +13,31 @@ import bind_marble_research_local as binder  # noqa: E402
 import run_marble_original_research as entry  # noqa: E402
 
 
+def test_cli_recovery_selects_only_original_row_two(tmp_path, monkeypatch):
+    prepared = {"fixed_original_rows": [0, 1, 2], "source_checkbox_eligible": False}
+    monkeypatch.setattr(entry, "prepare", lambda *_: prepared)
+
+    def execute(output, report):
+        assert output == tmp_path
+        assert report["fixed_original_rows"] == [2]
+        assert report["full_fixed_original_rows"] == [0, 1, 2]
+        assert report["partial_recovery_only"] is True
+        assert report["source_checkbox_eligible"] is False
+        return dict(
+            report,
+            completed=[],
+            model_http={"requests": 1, "pending": 0, "non200_responses": 0},
+        )
+
+    monkeypatch.setattr(entry, "execute", execute)
+    argv = [
+        arg
+        for name in ("author-root", "prepared-root", "bound-root", "output")
+        for arg in ("--" + name, str(tmp_path))
+    ]
+    assert entry.main([*argv, "--execute", "--original-row", "2"]) == 0
+
+
 def fixture_prefix(tmp_path, count=3):
     source = tmp_path / "original-prefix"
     source.mkdir()

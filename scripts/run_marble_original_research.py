@@ -333,6 +333,12 @@ def main(argv=None):
     modes.add_argument("--execute", action="store_true")
     modes.add_argument("--prepare-only", action="store_true")
     parser.add_argument(
+        "--original-row",
+        type=int,
+        choices=range(3),
+        help="Execute only this zero-based original row in a fresh recovery output directory",
+    )
+    parser.add_argument(
         "--model-api-base",
         help="Qualified owned loopback /v1 service: task-scoped direct forwarding; keyword worker remains external",
     )
@@ -342,6 +348,8 @@ def main(argv=None):
         help="Explicit byte-verified original responses for validation recovery only, never performance measurement",
     )
     args = parser.parse_args(argv)
+    if args.original_row is not None and not args.execute:
+        parser.error("--original-row requires --execute")
     if args.reuse_model_results is not None and args.model_api_base is None:
         parser.error("--reuse-model-results requires --model-api-base")
     endpoint = None
@@ -362,6 +370,10 @@ def main(argv=None):
         )
         return 0
     report = prepare(args.author_root, args.prepared_root, args.bound_root, args.output)
+    if args.original_row is not None:
+        report["full_fixed_original_rows"] = report["fixed_original_rows"]
+        report["fixed_original_rows"] = [args.original_row]
+        report["partial_recovery_only"] = True
     if endpoint is not None:
         report["model_api_base"] = endpoint
         report["model_transport"] = "TASK_SCOPED_LIVE_LOOPBACK_NONTHINKING"
