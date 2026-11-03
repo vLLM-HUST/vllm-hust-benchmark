@@ -2272,7 +2272,11 @@ python scripts/run_gaia_original_agent.py  # 仅显示计划，不读取题目�
 
 #### QReCC原检索集合获取（2026-11-03）
 
-- [x] 完整原集合公共解压入口退出0：56003个原JSONL、86557816928字节，全部成员CRC通过，保留原路径和原字节，不是仅ZIP目录检查。完整回执：`qrecc-full-original-collection-prepared-20261103-001/collection-preparation.private.json`。后续完整索引准备进程PID1163702/出生时间887989570核验存活，正在统计全库原始行数；使用原Pyserini0.10.0.1
+最新终态：原Java索引器退出0，但初始包装器要求empty为0，因数量不相等而停止验收。原日志为indexed54241550、empty331514、unindexable/skipped/errors均0，二者之和等于54573064原始行；公共只读计数器已独立确认实际Lucene文档数54241550，未重建或修改索引。固定原JAR字节码证实其空记录规则为Java
+`String.trim().length()==0`。正在对全部原JSONL重新核对ZIP CRC和该精确空记录规则，不用Python默认Unicode
+strip替代Java规则；尚未将来源判通过，原生检索/阅读/评分仍待完成。回执：`qrecc-full-original-index-job-20261103-001/counter-reconciliation-public.json`；独立审计：`qrecc-original-empty-record-audit-20261103-001/state-public.json`。
+
+- [x] 完整原集合公共解压入口退出0：56003个原JSONL、86557816928字节，全部成员CRC通过，保留原路径和原字节，不是仅ZIP目录检查。完整回执：`qrecc-full-original-collection-prepared-20261103-001/collection-preparation.private.json`。索引构建阶段记录（现已结束，见上述终态）：完整索引准备进程PID1163702/出生时间887989570曾核验存活；使用原Pyserini0.10.0.1
   JAR/Java11，2个索引工作线程、4GiB堆，保留storePositions/storeDocvectors/storeRaw。索引新增预算200GiB、共享盘至少保留64GiB；租约出现或预算触及时仅终止自有索引并保留记录，不自动重试。索引完成还须核对原日志零错误/跳过及实际Lucene文档数，不能以退出0或论文约5400万代替精确验证。当前索引、检索/阅读/评分及来源总勾仍未完成。
 
 - [x] 作者完整`passages.zip`已取得，27512656777字节，发布方MD5校验通过；本机实测SHA256为`7ebb7612101bc383c597b47babd511470c0b3b59210d1ce6e2fe475b5e1d3920`，原断流和显式续传记录保留。下载进程正常结束，公共完整解压器已启动并核验PID1119538/出生时间887910350存活，请求idle
