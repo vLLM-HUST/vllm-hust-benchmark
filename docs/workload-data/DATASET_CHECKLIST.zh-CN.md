@@ -2179,6 +2179,11 @@ python scripts/run_scienceagentbench_scientific.py --action run \
 WavCaps是弱标注音频—文本资产；作者captioning示例使用专用音频编码器和BART
 checkpoint，不能直接填入Qwen文本服务。原评分器要求五条参考的接口不能靠复制弱标注caption凑足；须按原任务选用真实评价资产和协议。其音频仅限学术研究且保留各源条件，不作默认企业再分发。以上准备不增加来源完成数，机器清单状态为`IN_PROGRESS`。
 
+#### xLAM工具调用语料获取（2026-11-03）
+
+- [x] 用户既有账号的官方授权检查通过；固定原版本的`xlam_function_calling_60k.json`已在服务器取得，96116570字节与发布方LFS摘要一致，60000行原数据均含`answers/id/query/tools`四字段。回执：`xlam-original-acquisition-20261103-001/qualification-public.json`。原内容未进入Windows或Git，未由Agent代接受条款。
+- [ ] 公共适配、原生工具调用执行协议、适用评价及研究消费闭环尚未完成。`query/tools`为输入，`answers`仅作参考；这是发布方构造的训练语料，不是独立任务评分benchmark，不能编造“官方评分器”或以数据取得打总勾。
+
 #### GAIA原始数据访问前置条件（2026-11-03）
 
 GAIA访问前置条件补查（2026-11-03）：[官方页面](https://huggingface.co/datasets/gaia-benchmark/GAIA)要求账号同意信息共享和访问条件，并限制公开再分发。初查自有环境未配置凭据；随后用户已自行完成服务器登录，官方授权检查通过，未代用户接受条款，凭据不回显或进入仓库。下面的原资产和读取验证不等于Agent/工具、评分或研究接通完成，不以QBI
