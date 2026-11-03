@@ -38,7 +38,17 @@ for record in records:
 
 ## 当前证据与缺项
 
-### 原生检索集合的官方准备顺序（尚未执行）
+### 作者已发布的完整段落集合（优先获取路线）
+
+作者[Zenodo发布5760304](https://zenodo.org/records/5760304)，版本2021-12-06，提供完整`passages.zip`，27512656777字节，发布方MD5为`16c48fb9c4b9603b8ccc8ba3bd7d69c1`。<!-- pragma: allowlist secret - public publisher MD5 checksum -->
+资源地址：`https://zenodo.org/api/records/5760304/files/passages.zip/content`。作者[随包说明](https://zenodo.org/api/records/5760304/files/README.txt/content)明确这些段落由原`paragraph_chunker.py`流程产生；不必把重抓Common
+Crawl数十TB作为唯一获取路线。
+
+已在服务器保存并检查完整原ZIP目录：56007个成员，含56003个JSONL和4个目录，原文件解压合计86557816928字节，最大单成员271773680字节；这是空间计划，尚非整包MD5或成员内容校验。原包现以8MiB/s上限通过内存管道写入服务器，至少保留64GiB共享盘余量，本地不落原包；本服务器直连失败记录保留，不能把它写成发布方资产不存在。原包完整校验、解压、全库索引、原生检索/阅读与评分仍待完成。
+
+该版本另提供`qrecc-test.json`，19546617字节。作者说明它增加`Passages`参考字段；与本仓库当前固定Git版16451条test的逐行兼容性尚待核验。不得直接混用版本、删除不同字段，或把新增段落标签当成模型检索结果/输入。采用后续发布版时须保留其独立身份和适配证明。
+
+### 从原网页重建集合（官方备选流程，尚未执行）
 
 固定版本的[collection说明](https://github.com/apple-aiml-research/ml-qrecc/blob/1d174464290790c0198b474ad022952ecd83b76b/collection/README.md)提供以下顺序：取得Common
 Crawl网页和Wayback网页、按原脚本切成段落，再用Pyserini建立Lucene索引。官方明确提示Common
