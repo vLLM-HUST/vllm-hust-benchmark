@@ -2,6 +2,26 @@
 
 ### 剩余原生环境前置条件复核（2026-11-02）
 
+LMSYS复用步骤（在服务器、仓库根目录执行）：先用自己的HF账号在官方页面取得访问权，再执行`hf auth login`隐藏输入凭据。已核实的获取客户端为`huggingface-hub==1.27.0`；续接客户端为Python3.12.13、`pyarrow==21.0.0`，安装`workload-preparation[data]`。下载文件放仓库外，原始数据不提交Git。原始会话是数据资产，下面是明确声明的历史续接协议，不冒称发布方提供了质量benchmark。
+
+```bash
+python - <<'PY'
+import json
+from pathlib import Path
+from huggingface_hub import HfApi, hf_hub_download
+source = json.loads(Path("workload-preparation/data/catalogs/source_manifests_v1.json").read_text())["sources"]["LMSYS_CHAT"]
+HfApi().auth_check(repo_id=source["repo_id"], repo_type="dataset")
+for item in source["files"]:
+    if item["role"] == "raw_source":
+        hf_hub_download(repo_id=source["repo_id"], repo_type="dataset", revision=source["revision"], filename=item["path"], local_dir="/data/lmsys-original")
+PY
+python scripts/prepare_reused_research_assets.py LMSYS_CHAT --mode verify --data-root /data/lmsys-original
+python scripts/prepare_reused_source_records.py LMSYS_CHAT --data-root /data/lmsys-original --output /data/lmsys-prepared --limit 3
+python scripts/run_historical_dialogue_original.py LMSYS_CHAT --prepared /data/lmsys-prepared --data-root /data/lmsys-original --output /data/lmsys-run-fresh --endpoint http://127.0.0.1:19468/v1 --model Qwen/Qwen3-14B --max-tokens 512 --context-capacity 131072 --request-timeout-seconds 600 --count 3
+```
+
+上述路径是使用者自行指定的外部目录，输出目录必须全新。模型服务须按最终回执的Qwen3-14B固定权重和131072上下文配置准备；端口可改为自己的已部署端点。`--limit 3`只限制索引记录，不裁剪会话；`--count 3`运行原前三段的全部前缀。全量使用时，准备命令去掉`--limit 3`，执行命令用`--full`替代`--count 3`；不代表本次做过全量推理。此前服务器获取使用同一官方SDK逐文件调用，准备/续接命令和参数已实际使用；上面的通用路径整段未重新冷下载，不将命令示例当作新增实跑证据。
+
 - [x] LMSYS授权后取得原六分片共1488850250字节，全部100万条绑定核验；固定原前三段全部8个历史前缀已在14B
   NPU运行，独立审计通过。8次均到达声明512-token上限，不是自然结束或质量通过；原历史回复用于后续前缀，不是在线Agent。实际成功CI94载荷、3个公共脚本逐字节一致，3处公共／未修改研究读取及实际外部锁CLI通过，默认研究锁未改。[最终回执](validation/lmsys-original-native-delivery-20261103.json)。下方403和未取得文件记录是授权前历史状态。
 
