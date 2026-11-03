@@ -5420,17 +5420,66 @@
     },
     "MULTIAGENTBENCH": {
       "latest_network_repaired_original_attempt": {
-        "status": "FRESH002_ORIGINAL_RESEARCH_FIRST_TASK_RUNNING_NOT_COMPLETE",
+        "public_transport_error_exit_guard": {
+          "entry": "scripts/run_marble_original_research.py",
+          "regression_test": "tests/test_marble_original_research_runner.py",
+          "native_exit0_or_result_exists_not_sufficient": true,
+          "http_non200_pending_or_absent_request_evidence_causes_nonzero_exit": true,
+          "original_author_scoring_tasks_and_generation_requests_changed": false,
+          "guard_did_not_run_new_native_tasks": true,
+          "actual_saved_response_guard_review": {
+            "server_receipt": "/root/marble-original-research-native-launch-20261103-002/http-failure-guard-candidate-audit-public.json on owned CPU workspace",
+            "candidate_entry_sha256": "9551fb2d4f249d128ea50c00ad2300dedf334e41fa62da66b2ba40b1ef869cd8", "identity_note": "pragma: allowlist secret - public candidate software SHA256",
+            "requests_snapshot": 75,
+            "responses_snapshot": 74,
+            "http200_snapshot": 29,
+            "http400_snapshot": 45,
+            "pending_snapshot": 1,
+            "guard_correctly_reports_transport_failure": true,
+            "model_calls": 0,
+            "boundary": "Read-only metadata check of the live retained run, not a final custody snapshot or new native attempt. Counts can grow."
+          },
+          "existing_live_attempt_software_replaced": false
+        },
+        "status": "FRESH002_FIRST_TASK_RETURNED_WITH_CONTEXT_HTTP400_NATIVE_NOT_QUALIFIED_SECOND_TASK_RUNNING",
         "cpu_launch_receipt": "/root/marble-original-research-native-launch-20261103-002/launch-public.json on owned CPU workspace",
         "cpu_state": "/root/marble-original-research-native-runtime-20261103-002/state-private.json on owned CPU workspace",
         "original_fixed_positions": [0, 1, 2],
         "original_iterations": 5,
         "original_output_tokens_per_call": 512,
         "actual_original_model_and_npu_keyword_responses_observed": true,
+        "first_original_case": {
+          "original_row": 0,
+          "native_cli_exit_code": 0,
+          "original_max_iterations": 5,
+          "actual_iterations": 2,
+          "official_planner_termination_log_present": true,
+          "saved_http_responses": 35,
+          "http200": 10,
+          "http400_context_exceeded": 25,
+          "original_planning_scores": [-1, -1],
+          "original_communication_scores": [-1, -1],
+          "native_completion_qualified": false,
+          "failure_boundary": "Exit0 and a populated result do not prove native operation. Original 131072-token14B context rejects complete tool-returned inputs; no input clipped or output budget reduced. Original planner terminated after2 under unchanged maximum5, not an operator-shortened protocol."
+        },
+        "existing9b_profile_feasibility": {
+          "server_receipt": "marble-existing9b-context-feasibility-20261103-001/qualification-public.json under private task root",
+          "selected_original_saved_failed_request_bytes": 481494,
+          "complete_request_tokens_under_existing9b_service": 177117,
+          "unchanged_output_budget": 512,
+          "existing9b_service_context_capacity": 262144,
+          "fits_one_checked_request": true,
+          "tokenizer_calls": 1,
+          "neural_model_calls": 0,
+          "new_original_fixed3_actor_judge_binding_prepared": true,
+          "new_profile_model": "openai/Qwen/Qwen3.5-9B",
+          "new_profile_native_executed": false,
+          "boundary": "Only model/judge/output bindings differ; original tasks, agents, relations, tools and maximum5 iterations remain. One tokenizer control does not prove all future prompts fit or qualify the native source. Old14B results remain separate."
+        },
         "old_attempts_or_unresolved_queues_replayed": false,
         "research_window_actual_return_and_exact_service_recovery_verified": true,
         "source_checkbox_eligible": false,
-        "remaining": "Full original iterations, evaluation and independent output/consumer closure; live progress is not source completion."
+        "remaining": "Let current original child finish; outer wait supervisor alone is held to prevent automatic next-task launch across the research handoff. Then preserve failed14B profile, use an explicitly separate suitable-context profile for original fixed tasks, and audit full native execution/evaluation plus consumer closure."
       },
       "authorized_fresh_native_attempt": {
         "human_authorized_fresh_attempt_after_stopped_run_audit": true,

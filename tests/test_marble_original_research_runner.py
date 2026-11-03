@@ -220,3 +220,92 @@ def test_task_failure_cannot_be_reported_as_cli_success(tmp_path, monkeypatch, c
         [],
     )
     assert entry.main(args + ["--execute"]) == 1
+
+
+def http_fixture(root, folder, status):
+    queue = root / folder
+    queue.mkdir(parents=True)
+    (queue / ("a" * 32 + ".request.json")).write_text("{}")
+    (queue / ("a" * 32 + ".response.json")).write_text(
+        json.dumps({"http_status": status, "response": {}})
+    )
+    return queue
+
+
+def test_native_http400_is_retained_not_mistaken_for_model_success(tmp_path):
+    http_fixture(tmp_path, "original-row-00000/live-model-queue", 200)
+    http_fixture(tmp_path, "original-row-00001/live-model-queue", 400)
+    assert entry.saved_model_http_summary(tmp_path) == {
+        "requests": 2,
+        "responses": 2,
+        "pending": 0,
+        "http_status_counts": {"200": 1, "400": 1},
+        "non200_responses": 1,
+        "quality_scored_by_this_summary": False,
+    }
+
+
+def test_missing_response_remains_pending_not_a_request_to_replay(tmp_path):
+    queue = tmp_path / "model-queue"
+    queue.mkdir()
+    (queue / ("a" * 32 + ".request.json")).write_text("{}")
+    result = entry.saved_model_http_summary(tmp_path)
+    assert result["requests"] == result["pending"] == 1
+    assert result["responses"] == result["non200_responses"] == 0
+
+
+@pytest.mark.parametrize("status", [None, True, "200", 600])
+def test_invalid_saved_http_status_is_not_silent_success(tmp_path, status):
+    http_fixture(tmp_path, "model-queue", status)
+    with pytest.raises(ValueError, match="explicit HTTP status"):
+        entry.saved_model_http_summary(tmp_path)
+
+
+def test_orphan_response_is_rejected(tmp_path):
+    queue = http_fixture(tmp_path, "model-queue", 200)
+    (queue / ("a" * 32 + ".request.json")).unlink()
+    with pytest.raises(ValueError, match="without matching"):
+        entry.saved_model_http_summary(tmp_path)
+
+
+@pytest.mark.parametrize(
+    "requests,pending,failed,code",
+    [
+        (1, 0, 1, 1),
+        (1, 1, 0, 1),
+        (0, 0, 0, 1),
+        (1, 0, 0, 0),
+    ],
+)
+def test_cli_exit_zero_and_result_file_do_not_hide_http_failures(
+    tmp_path,
+    monkeypatch,
+    capsys,
+    requests,
+    pending,
+    failed,
+    code,
+):
+    monkeypatch.setattr(entry, "prepare", lambda *a: {})
+    monkeypatch.setattr(
+        entry,
+        "execute",
+        lambda *a: {
+            "completed": [{"cli_exit_code": 0, "result_file_exists": True}],
+            "model_http": {
+                "requests": requests,
+                "pending": pending,
+                "non200_responses": failed,
+            },
+            "source_checkbox_eligible": False,
+        },
+    )
+    args = sum(
+        (
+            ["--" + key, str(tmp_path / key)]
+            for key in ["author-root", "prepared-root", "bound-root", "output"]
+        ),
+        [],
+    )
+    assert entry.main(args + ["--execute"]) == code
+    assert json.loads(capsys.readouterr().out)["source_checkbox_eligible"] is False

@@ -195,6 +195,44 @@ def prepare(author_root, prepared_root, bound_root, output):
     return report
 
 
+def saved_model_http_summary(output):
+    """Transport evidence only; native exit0 does not make an HTTP400 successful."""
+    output = Path(output)
+    queues = [output / "model-queue", *output.glob("original-row-*/live-model-queue")]
+    counts = {}
+    requests = pending = 0
+    for queue in queues:
+        requested = {
+            p.name.removesuffix(".request.json") for p in queue.glob("*.request.json")
+        }
+        responses = {
+            p.name.removesuffix(".response.json"): p
+            for p in queue.glob("*.response.json")
+        }
+        if responses.keys() - requested:
+            raise ValueError("model response without matching saved request")
+        requests += len(requested)
+        pending += len(requested - responses.keys())
+        for path in responses.values():
+            if path.is_symlink() or not path.resolve().is_relative_to(output.resolve()):
+                raise ValueError("saved model response escapes private output")
+            status = json.loads(path.read_text("utf-8")).get("http_status")
+            if type(status) is not int or not 100 <= status <= 599:
+                raise ValueError(
+                    "saved model response requires an explicit HTTP status"
+                )
+            key = str(status)
+            counts[key] = counts.get(key, 0) + 1
+    return {
+        "requests": requests,
+        "responses": sum(counts.values()),
+        "pending": pending,
+        "http_status_counts": counts,
+        "non200_responses": sum(value for key, value in counts.items() if key != "200"),
+        "quality_scored_by_this_summary": False,
+    }
+
+
 def execute(output, report):
     if sys.platform != "linux" or sys.version_info[:2] != (3, 10):
         raise ValueError("qualified isolated Linux Python3.10 MARBLE client required")
@@ -282,6 +320,7 @@ def execute(output, report):
             json.dumps(report, indent=2), "utf-8"
         )
     report["status"] = "ORIGINAL_RESEARCH_NATIVE_CLIENT_TERMINAL_AUDIT_PENDING"
+    report["model_http"] = saved_model_http_summary(output)
     (output / "state-private.json").write_text(json.dumps(report, indent=2), "utf-8")
     return report
 
@@ -344,9 +383,14 @@ def main(argv=None):
     print(json.dumps(report, indent=2))
     return int(
         args.execute
-        and any(
-            row["cli_exit_code"] != 0 or not row["result_file_exists"]
-            for row in report["completed"]
+        and (
+            any(
+                row["cli_exit_code"] != 0 or not row["result_file_exists"]
+                for row in report["completed"]
+            )
+            or not report.get("model_http", {}).get("requests")
+            or report["model_http"]["pending"] > 0
+            or report["model_http"]["non200_responses"] > 0
         )
     )
 
