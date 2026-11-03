@@ -8,6 +8,35 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def test_tracelab_delivery_requires_original_native_rounds_and_actual_handoff():
+    ledger = json.loads(
+        (ROOT / "docs/workload-data/dataset-validation-status.json").read_text("utf-8")
+    )
+    row = ledger["delivery_inventory"]["TRACELAB"]
+    assert row["checked"] and row["status"] == "AVAILABLE" and row["blocker"] is None
+    receipt = json.loads((ROOT / row["delivery_receipt"]).read_text("utf-8"))
+    assert receipt["source_checkbox_eligible"]
+    assert receipt["original_sessions_run"] == 3
+    assert receipt["original_rounds_run"] == receipt["successful_rounds"] == 20
+    assert receipt["failed_rounds"] == receipt["context_overflow_rounds"] == 0
+    assert receipt["mandatory_original_cache_probe_passed"]
+    assert (
+        receipt["original_target_output_tokens"]
+        == receipt["actual_output_tokens"]
+        == 6904
+    )
+    assert receipt["output_mismatch_rounds"] == 0
+    assert receipt[
+        "original_round_identity_budget_and_tool_wait_independently_verified"
+    ]
+    assert receipt["existing_full_index_rows_reused"] == 665453
+    assert receipt["installed_software_payloads_equal_git"] == 94
+    assert receipt["public_and_unchanged_research_consumer_readbacks"] == 6
+    assert receipt["original_index_and_research_consumer_unchanged"]
+    assert not receipt["new_generation_during_final_audit"]
+    assert not receipt["raw_data_published"]
+
+
 def test_msmarco_delivery_requires_native_full_pools_scoring_and_actual_handoff():
     ledger = json.loads(
         (ROOT / "docs/workload-data/dataset-validation-status.json").read_text("utf-8")

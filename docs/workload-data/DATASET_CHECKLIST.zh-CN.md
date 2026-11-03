@@ -318,7 +318,7 @@ for record in iter_workload("SWESMITH", data_root=Path("/external/swesmith/data"
 - 按已有证据逐项复核，不因口径调整批量补勾；失败和低分如实保留，不用替换样本凑通过。113项来源与另5项仅分类的范围不变。
 
 当前交付
-**91/113项**，待完成22项，另5项仅分类。首批#432的60项和第二批#538的ScienceWorld已合入main；早期五个草稿已关闭为被汇总承接，历史和分支保留。第三批来源及精确协议范围以机器清单和各交付回执为准，尚未合入。DailyTalk按原Guo前三段完整对话29条NPU批量合成协议交付，公共准备入口支持其他完整原对话；不代表全量音频、全split生成、MOS或流式时序。ScienceAgentBench按原verified固定前三题单轮生成、NPU辅助评分和隔离科学执行协议交付，三题程序失败如实保留，不代表全102题执行或其他Agent分支。TemporalWiki按原GPT2-large基座探针全部35,948行PPL交付，不代表持续训练checkpoint或其他语料模式。StreamingBench按real固定前三组原视频NPU推理与原评分交付，其他任务／模态缺口单列。LJSpeech按原VITS固定前三条NPU文本到波形协议交付，不代表全13,100条合成或MOS评价。StructEval按19个完整非渲染原生协议收口，渲染/VQA模式缺口继续单列，不称整套44协议或2035题全部完成。OpenMath/OpenCode是训练语料原问题生成，不是独立质量benchmark。打勾不代表全量模型评测、高分或性能保证。
+**92/113项**，待完成21项，另5项仅分类。首批#432的60项和第二批#538的ScienceWorld已合入main；早期五个草稿已关闭为被汇总承接，历史和分支保留。第三批来源及精确协议范围以机器清单和各交付回执为准，尚未合入。DailyTalk按原Guo前三段完整对话29条NPU批量合成协议交付，公共准备入口支持其他完整原对话；不代表全量音频、全split生成、MOS或流式时序。ScienceAgentBench按原verified固定前三题单轮生成、NPU辅助评分和隔离科学执行协议交付，三题程序失败如实保留，不代表全102题执行或其他Agent分支。TemporalWiki按原GPT2-large基座探针全部35,948行PPL交付，不代表持续训练checkpoint或其他语料模式。StreamingBench按real固定前三组原视频NPU推理与原评分交付，其他任务／模态缺口单列。LJSpeech按原VITS固定前三条NPU文本到波形协议交付，不代表全13,100条合成或MOS评价。StructEval按19个完整非渲染原生协议收口，渲染/VQA模式缺口继续单列，不称整套44协议或2035题全部完成。OpenMath/OpenCode是训练语料原问题生成，不是独立质量benchmark。打勾不代表全量模型评测、高分或性能保证。
 
 StructEval新增配置进展：经确认，`qwen35-9b-nonthinking-32768`与原`publisher-null`分开记录。仅原Text→TikZ位置37的已知失败题运行新配置，传输timeout3600秒、外层/SDK重试均0；保存响应为length／32768输出tokens。CPU原工作区autostop导致渲染转发失败，900秒等待后原生子进程以RenderBlocked失败退出；原响应、代码和待渲染请求保留，实际VQA调用0，不计完整任务。原80GiB持久卷和模板已原样恢复，Docker仍在恢复旧容器；不重启daemon、不重新生成，不重放位置38的结果未知请求。共享任务根`structeval-capped-failed-tikz-window-32068-001`保留终态，计数不增加。
 
@@ -1310,7 +1310,10 @@ tree元数据、`--node`私有node路径、`--output`独立日志目录和`--exe
 - [x] 全8000条人工test＋其他5文件各原前三，共8015题已执行并保存，全部stop、无非法输出；正式test正确6774/8000（84.675%），仅报告该模型配置结果，不设质量通过结论。保存结果复核无新增模型调用；来源总勾仍等待下项闭环。
 - [x] 751450条原记录4字段及全量索引核对、精确CI工件44文件一致、固定研究消费21处回查完成；无新增模型调用。[最终交付回执](validation/paws-native-delivery-20261027.json)。21处回查不冒称逐一覆盖全部8015次推理。
 
-### TraceLab分步骤（来源总勾未完成）
+### TraceLab分步骤（固定原3会话20轮交付完成）
+
+最终交付：[原生回放与两端接入回执](validation/tracelab-original-native-delivery-20261103.json)。原14B缓存探测通过，完整20轮成功且目标/实际输出均6904
+token；独立核对原会话/轮次、输入/输出预算和工具等待，未改原源码、锁或探测。成功CI工件94载荷与Git一致，665453行原索引及首尾6处公共/未修改研究消费回读通过，未重新推理。以下保留早期预检与失败历史；全量1006780上下文仍超所验证131072，未声明全轨迹模型评测或性能提升。
 
 - [x] 2026-11-03只读核查现有14B服务：固定三会话全部20轮最大输入加原输出46646，小于实际131072上下文；全量1006780仍不满足。原Rust0.19.1读取14B原tokenizer失败，保留失败；新增`prepare_tracelab_tokenizer_legacy.py`仅将BPE合并对数组转换成无歧义旧序列化，原文件、词表ID、全部151387合并对及顺序不变。服务器266组编码对照相等，格式化后的当前公开脚本AST及输出字节与该对照配置一致；0模型调用。原1亿token文本池CPU核验正在运行，原512-token缓存探测及20轮回放尚未执行；不将容量预检或序列化兼容计为来源完成。
 
@@ -1330,10 +1333,10 @@ tree元数据、`--node`私有node路径、`--output`独立日志目录和`--exe
 
 - [x] 公开原生回放入口及7项离线合同测试：默认只规划，不绕过原缓存资格探测，超上下文在调用前阻塞、不截断或跳过，核验全部原session/轮次/预算/工具等待。
 
-- [ ] 官方原生回放：已到达原缓存资格探测，但512-token探测在当前1024-token
-  Mamba对齐缓存块下未命中，原程序exit1，20轮任务均未开始。[失败证据](validation/tracelab-original-dry-run-20261024.json)。缓存相关开关已开启，不能误称未配置；未改探测、换session或重启服务，待合适模型/配置后续验证。
+- [x] 官方原生回放：14B原探测及固定20轮完整通过。原9B在1024-token
+  Mamba块下未命中512-token探测的失败仍保留，不倒填为通过：[早期失败证据](validation/tracelab-original-dry-run-20261024.json)。14B仅增加获批的报告开关，没有绕过探测、改变会话或修改原预算。
 
-- [ ] 保存原生日志/summary独立复核与公共提供者/固定研究消费交接；不迁入研究采集和分析，不报告性能提升。
+- [x] 原生日志/summary独立复核与成功CI提供者/未修改研究消费交接均通过；不迁入研究采集和分析，不报告性能提升。
 
 ### MMMU分步骤（固定原validation抽样交付完成）
 
@@ -1815,7 +1818,7 @@ QReCC历史容量判断后来补正：数十TB是从网页重建的获取代价�
 | XLSUM                      | [x] 已完成                                     | 原45变体6173个固定位置均核验原输入/编码/解码及作者ROUGE；10变体全6068、其余35各3。固定CI/研究消费与独立环境通过，不代表全114198条NPU推理；限非商业研究。                                                                                                                                                                                                                                                                                                                                 |
 | FLORES200                  | [x] 原生抽样协议已交付                         | 原Meta归档204代码、2009公开平行位置保留；复用原NLLB-600M三语向9次NPU翻译/6个唯一平行位置，chrF++与原SPM spBLEU评分、固定CI安装及公共/研究消费通过；[交付证据](validation/flores200-native-delivery-20261026.json)。不重生成、不替换3个缺失模型语言标记、不称全部语向已执行，模型限非商业研究。                                                                                                                                                                                           |
 | BURSTGPT                   | [x] 已交付                                     | 三份各原20条官方模拟已核；固定CI提供者及研究消费端三份各原3行消费相等。无新模型调用；第2/3份仅授权官方缩放，不作原时序性能结论。见[回执](validation/burstgpt-native-delivery-20261025.json)。                                                                                                                                                                                                                                                                                            |
-| TRACELAB                   | [ ] 缺口已列待补                               | 复用历史证据；原生缺口见37项复核表及方案8.5.2                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| TRACELAB                   | [x] 固定原3会话20轮原生回放交付                | 原缓存探测、20轮/6904 token与预算/等待核验通过；成功CI94载荷、665453行索引及6处公共/未修改研究回读通过。全量上下文缺口保留；[回执](validation/tracelab-original-native-delivery-20261103.json)。                                                                                                                                                                                                                                                                                         |
 | AZURE_LLM                  | [x] 数据资产可用                               | Azure 本轮脱敏回执；非模型 benchmark                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | MOONCAKE                   | [x] 固定官方存储回放可用                       | 两原轨迹35639条读取/索引及12实际CI研究回读；两个官方场景各首3条原生I/O通过并独立核验，测试页已精确清理。无prompt合成、无模型推理或性能结论。[证据](validation/mooncake-official-storage-delivery-20261027.json)                                                                                                                                                                                                                                                                          |
 | QRECC                      | [ ] 阻塞                                       | 作者27.5GB完整passages包已定位并在服务器获取；整包校验/全库索引/原生检索与阅读仍待完成                                                                                                                                                                                                                                                                                                                                                                                                   |
@@ -1928,7 +1931,7 @@ QReCC历史容量判断后来补正：数十TB是从网页重建的获取代价�
   dry-run通过，模型调用0。[构建回执](validation/tracelab-original-locked-build-20261024.json)、[dry-run回执](validation/tracelab-original-dry-run-20261024.json)。
 - [x] TRACELAB：独立CPU诊断程序直接引用未改的上游Rust分词器/token池函数，当前Qwen3.5
   tokenizer加载及默认1亿token池构建通过，未降低池容量、模型调用0。[诊断回执](validation/tracelab-original-token-pool-cpu-20261024.json)。回执依据SSH失败前完整采到的结构化stdout恢复，未冒充SCP成功；这不是原回放器或NPU运行。
-- [ ] TRACELAB：服务缓存明细探测、真实NPU回放未完成。全量336898轮的完整输入+原输出预算超当前131072，保留阻塞，不跳题；固定三会话20轮容量可容纳但尚未调用模型。新实例已核验连通；近期原生响应的缓存明细为null，官方缓存探测仍未运行，不绕过探测或修改正在使用的服务。[前提复核](validation/runtime-prerequisite-recheck-20261025.json)。来源继续未勾，运行边界见[服务轨迹说明](ORIGINAL_SERVING_TRACES.zh-CN.md)。
+- [x] TRACELAB：原14B缓存资格探测及固定三会话20轮完整回放通过，原6904输出token全部生成；独立原预算/等待核验和成功CI94载荷/665453行索引/6处公共与未修改研究回读通过。[最终回执](validation/tracelab-original-native-delivery-20261103.json)。原9B探测失败保留，全量1006780上下文仍不满足，不冒称全轨迹模型执行或性能结论。
 - [x] TOOLACE：原11300条system/历史对话、原轮次与工具描述、全量索引及首尾6条回查完成，保持历史对话资产身份。[CPU回执](validation/toolace-corpus-cpu-audit-20261024.json)。
 - [ ] TOOLACE：服务器新取固定版数据卡网络不可达，不能将目录中的预期SHA当下载验证；没有附带可执行工具环境/任务oracle，不编prompt冒充Agent原生评测，来源级继续未勾。
 - [x] JSONSCHEMABENCH：固定CI包与登记的三个原schema
@@ -2273,8 +2276,8 @@ python scripts/run_gaia_original_agent.py  # 仅显示计划，不读取题目�
 #### QReCC原检索集合获取（2026-11-03）
 
 最新终态：原Java索引器退出0，但初始包装器要求empty为0，因数量不相等而停止验收。原日志为indexed54241550、empty331514、unindexable/skipped/errors均0，二者之和等于54573064原始行；公共只读计数器已独立确认实际Lucene文档数54241550，未重建或修改索引。固定原JAR字节码证实其空记录规则为Java
-`String.trim().length()==0`。正在对全部原JSONL重新核对ZIP CRC和该精确空记录规则，不用Python默认Unicode
-strip替代Java规则；尚未将来源判通过，原生检索/阅读/评分仍待完成。回执：`qrecc-full-original-index-job-20261103-001/counter-reconciliation-public.json`；独立审计：`qrecc-original-empty-record-audit-20261103-001/state-public.json`。
+`String.trim().length()==0`。完整56003份原JSONL已按发布ZIP
+CRC及原Java规则全部复核，54573064行/331514空记录与作者计数一致；原索引可用，未重建。初始失败来自包装器要求空记录为0的过严假设，不是原数据丢失；原生检索/阅读/评分仍待完成。回执：`qrecc-full-original-index-job-20261103-001/counter-reconciliation-public.json`；独立审计：`qrecc-original-empty-record-audit-20261103-001/state-public.json`。
 
 - [x] 完整原集合公共解压入口退出0：56003个原JSONL、86557816928字节，全部成员CRC通过，保留原路径和原字节，不是仅ZIP目录检查。完整回执：`qrecc-full-original-collection-prepared-20261103-001/collection-preparation.private.json`。索引构建阶段记录（现已结束，见上述终态）：完整索引准备进程PID1163702/出生时间887989570曾核验存活；使用原Pyserini0.10.0.1
   JAR/Java11，2个索引工作线程、4GiB堆，保留storePositions/storeDocvectors/storeRaw。索引新增预算200GiB、共享盘至少保留64GiB；租约出现或预算触及时仅终止自有索引并保留记录，不自动重试。索引完成还须核对原日志零错误/跳过及实际Lucene文档数，不能以退出0或论文约5400万代替精确验证。当前索引、检索/阅读/评分及来源总勾仍未完成。

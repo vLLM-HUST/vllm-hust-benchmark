@@ -2725,11 +2725,11 @@
     "TRACELAB": {
       "scope": "public",
       "delivery_kind": "serving_trace",
-      "status": "REVIEWED_GAPS_RECORDED",
-      "checked": false,
+      "status": "AVAILABLE",
+      "checked": true,
       "legacy_checked": false,
       "existing_receipt": "docs/workload-data/validation/public-original-assets-server-reader-20261023.json",
-      "delivery_receipt": null,
+      "delivery_receipt": "docs/workload-data/validation/tracelab-original-native-delivery-20261103.json",
       "cpu_field_audit": "docs/workload-data/validation/tracelab-cpu-audit-20261024.json",
       "official_replay_preparation": "docs/workload-data/validation/tracelab-official-replay-preparation-20261024.json",
       "official_duckdb_asset_receipt": "docs/workload-data/validation/tracelab-duckdb-original-20261024.json",
@@ -2753,7 +2753,7 @@
       "public_native_builder": "scripts/build_tracelab_original.py",
       "public_native_runner": "scripts/run_tracelab_original.py",
       "existing14b_profile_preparation": {
-        "status": "LOSSLESS_SERIALIZATION_CROSS_RUNTIME_IDS_EQUAL_FULL_POOL_CAPACITY_OBSERVED_NATIVE_CACHE_PROBE_PENDING",
+        "status": "LOSSLESS_SERIALIZATION_AND_ORIGINAL14B_CACHE_PROBE_FIXED20_REPLAY_VERIFIED",
         "model": "Qwen/Qwen3-14B",
         "actual_served_context_tokens": 131072,
         "fixed_original20_round_max_input_plus_output": 46646,
@@ -2773,7 +2773,7 @@
         "old_locked_rust_vs_current_encoder_equal_id_controls": 266,
         "cross_runtime_diagnostic_exit_code": 0,
         "cross_runtime_receipt": "Private shared task root/tracelab-14b-legacy-serialization-20261103-002/cross-runtime/qualification-public.json",
-        "original512_token_cache_probe_qualified": false,
+        "original512_token_cache_probe_qualified": true,
         "cache_reporting_prerequisite_review": {
           "explicit_14b_prompt_token_details_flag_present": false,
           "installed_cli_default": false,
@@ -2782,16 +2782,18 @@
           "installed_completion_serialization_requires_details_enabled": true,
           "required_next_change": "Human approved only --enable-prompt-tokens-details during14B recovery; guarded recovery amended, original checkpoint retained. Await actual peer release and restored service, then run unchanged original cache probe",
           "reporting_only_change_human_approved": true,
-          "current_model_service_changed": false,
-          "actual14b_cache_probe_attempted": false,
+          "current_model_service_changed": true,
+          "actual14b_cache_probe_attempted": true,
           "server_receipt": "Private shared task root/tracelab-cache-reporting-audit-20261103-001/flag-resolution-public.json"
         },
-        "native_rounds_executed": 0,
-        "protected_model_service_changed": false,
-        "model_calls": 0,
-        "source_checkbox_eligible": false
+        "native_rounds_executed": 20,
+        "protected_model_service_changed": true,
+        "approved_only_delta": "--enable-prompt-tokens-details",
+        "preparation_model_calls": 0,
+        "source_checkbox_eligible": true
       },
-      "blocker": "Persistent original locked Rust1.90 build succeeded; original512-token cache qualification attempted twice and failed before any of20 selected trace rounds. Current Qwen3.5-9B Ascend profile enables prefix caching/details but uses1024-token aligned Mamba cache blocks, so512 cannot guarantee a hit. Do not bypass probe or change sessions; qualify a suitable model/service profile. All665453metadata/index and historical CPU evidence retained. Full trace max1006780context remains above262144. Not source completion or performance evidence.",
+      "blocker": null,
+      "scope_limits": "Original14B mandatory cache probe and fixed3 complete sessions/20 rounds passed; all6904 target tokens generated,independent original identity/budget/wait audit passed. Actual successful CI94 payloads installed,full665453 index and6 public/unchanged-research readbacks verified. Legacy BPE serialization only,original source/lock/tokenizer preserved. Full trace max1006780 remains above verified131072; no full model run,private original prompts or formal performance/optimization claim.",
       "license_review": {
         "source_commit": "61fea8f97277d0aa247cc2e4c7e31f90ed2bea1c",
         "dataset_license": "CC-BY-4.0",
@@ -2891,7 +2893,9 @@
         "readonly_counter_receipt": "qrecc-full-original-index-job-20261103-001/counter-reconciliation-public.json under private task root",
         "initial_wrapper_rejected_nonzero_empty_counter": true,
         "original_generator_rule": "Pinned original JAR bytecode uses String.trim().length()==0 to throw EmptyDocumentException",
-        "independent_full_original_crc_and_empty_audit": "RUNNING: qrecc-original-empty-record-audit-20261103-001; pid1775562 birth889119951",
+        "independent_full_original_crc_and_empty_audit": "COMPLETE: qrecc-original-empty-record-audit-20261103-001/state-public.json; all56003 files/86557816928 bytes CRC verified,54573064 rows,331514 exact Java-trim empty rows",
+        "independent_empty_count_equals_author_counter": true,
+        "complete_original_index_usable": true,
         "index_rebuilt_or_modified": false,
         "native_tasks_executed": 0,
         "source_checkbox_eligible": false
@@ -3096,7 +3100,7 @@
       "legacy_checked": false,
       "existing_receipt": null,
       "delivery_receipt": null,
-      "blocker": "作者27512656777字节原passages包已通过发布方MD5；完整56003个JSONL、86557816928字节已通过公共入口解压和全部成员CRC。全库原始行数统计正在进行；完整原锁版本索引、原生检索与阅读、原评分及研究消费仍未完成。两版test全部16451条已比较，身份顺序及问题/历史/改写/答案一致，新版每条增加Passages参考且24条Answer_URL不同；原文件独立保留，不混用版本或以参考字段替代检索。"
+      "blocker": "完整原集合56003文件/86557816928字节已再次核对发布ZIP CRC；54573064行中331514行按原Java trim规则为空，剩余54241550与原日志indexed及实际Lucene文档数一致。原索引可用，未重建；原生改写/检索/阅读、评分及消费闭环仍待完成。两版test16451条原关系保留，新版Passages和24条不同Answer_URL不混入检索输入或冒充检索结果。"
     },
     "INFINITEBENCH": {
       "scope": "public",
