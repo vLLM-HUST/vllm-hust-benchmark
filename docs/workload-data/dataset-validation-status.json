@@ -1,6 +1,13 @@
 {
   "schema_version": "workload-validation-checklist/v1",
   "updated_at": "2026-11-04",
+  "full_duplex_moshi_npu_preflight": {
+    "source_id": "FULL_DUPLEX_BENCH",
+    "scope": "Static review of the pinned official Moshi server; not a deployment or inference result.",
+    "blocking_call": "torch.cuda.synchronize()",
+    "disable_graph_or_compile_is_insufficient": true,
+    "native_npu_moshi_and_original_asr_verified": false
+  },
   "marble_two_case_audit_software_ci": {
     "producer_commit": "19117de3e5040a2333a58131b2f63c9305c4b2cc",
     "ci_run_id": 41701430137,
