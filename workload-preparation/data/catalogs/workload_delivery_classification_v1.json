@@ -326,7 +326,11 @@
     "WILDCHAT": [{"role": "original_profile", "path": "scripts/run_historical_dialogue_original.py", "scope": "Original first shard59857 rows bound/indexed; fixed first3 conversations/all4 assistant positions on Ascend NPU,3 stop/1 declared-budget length retained. Fixed installed provider/research sample consumption verified. Bounded historical continuation, not live Agent, quality evaluation or original API capture."}],
     "ULTRACHAT": [{"role": "original_profile", "path": "scripts/run_historical_dialogue_original.py", "scope": "Original test_gen28304 rows fully mapped/indexed; fixed first3 conversations/all7 assistant positions return stop on Ascend NPU. Fixed installed provider and6 public/research resolutions verified. Other7 shards/full-corpus generation, online Agent and quality score not claimed."}],
     "LMSYS_CHAT": [{"role": "original_profile", "path": "scripts/run_historical_dialogue_original.py", "scope": "Original historical text continuation only; full publisher records and NPU validation pending."}],
-    "QRECC": [{"role": "original_profile", "path": "scripts/score_qrecc_original_qa.py", "scope": "Saved-answer scoring with original author QA functions only; no retrieval or generation execution."}],
+    "QRECC": [
+      {"role": "original_profile", "path": "scripts/run_qrecc_original_native.py", "scope": "Declared local-LLM rewrite, full original Anserini0.10 index BM25 and reader; unchanged original questions/history, no reference rewrites or labels in model inputs. Not the paper trained-model baseline. Operational validation and official scoring remain separate evidence."},
+      {"role": "native_evaluation", "path": "scripts/score_qrecc_original_retrieval.py", "scope": "Pinned original publisher retrieval scoring over saved actual rankings; labels joined only in private evaluation."},
+      {"role": "original_profile", "path": "scripts/score_qrecc_original_qa.py", "scope": "Saved-answer scoring with original author QA functions only; no retrieval or generation execution."}
+    ],
     "OASST1": [
       {
         "role": "original_profile",

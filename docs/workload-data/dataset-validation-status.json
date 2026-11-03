@@ -2986,6 +2986,26 @@
       }
     },
     "QRECC": {
+      "public_rewrite_retrieval_reader_software_preparation": {
+        "entry": "scripts/run_qrecc_original_native.py",
+        "declared_protocol": "Original question/history -> explicit local-LLM rewrite -> complete original Anserini0.10 BM25 index -> local-LLM reader; not paper trained-model replication",
+        "reference_rewrite_answer_or_url_in_model_inputs": false,
+        "all_actual_top100_passages_supplied_without_truncation": true,
+        "rewrite_budget": 128,
+        "answer_budget": 512,
+        "model_timeout_seconds": 1800,
+        "new_fixture_tests_passed": 7,
+        "related_software_tests_passed": 40,
+        "server_full_index_search_control": "qrecc-actual-full-index-public-search-control-20261103-001/qualification-public.json",
+        "actual_full_index_documents": 54241550,
+        "actual_stored_hits_from_invented_control_query": 100,
+        "server_java_major_version": 11,
+        "server_original_anserini_version": "0.10.0",
+        "native_original_tasks_executed": 0,
+        "model_calls": 0,
+        "original_scoring_of_model_results_completed": false,
+        "source_checkbox_eligible": false
+      },
       "full_original_index_terminal_review": {
         "indexer_exit_code": 0,
         "original_input_rows": 54573064,

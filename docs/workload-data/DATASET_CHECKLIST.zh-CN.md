@@ -2301,7 +2301,33 @@ I/O优先级，效力未作性能测量。研究线程仅确认其自身无敏�
 - [x] 两份作者原test全部16451条逐行比较，原文件哈希/发布方MD5通过，会话与话轮顺序一致；每条增加`Passages`参考，24条原`Answer_URL`不同，其余原字段相同。原文件独立保留，不当作同一版本覆盖，模型调用0次。服务器回执：`qrecc-author-test-release-comparison-20261103-001/qualification-public.json`。
 - [x] 服务器独立安装原Pyserini0.44.0包与Temurin21.0.13+9，两个发布方SHA-256及解包成员核验通过；使用未修改Anserini
   Java入口完成3人工文档的索引、1条BM25控制查询并核查顶一结果。原命令参数失败记录保留；不是QReCC原题、完整索引或Python包装器通过。回执：`qrecc-original-index-runtime-20261103-001/original-java-entrypoint-control-001/qualification-public.json`。
-- [ ] 整包MD5、语料准备/完整索引、原生检索与阅读、原评分和最终研究消费。QRECC总勾保持为空；不以只做改写、缩小检索库或参考URL拼接替代原端到端任务。[获取与版本说明](QRECC_ORIGINAL_PREPARATION.zh-CN.md)。原包传输在5885990912字节处因网络关闭失败，已保留原partial；核对旧writer退出及文件长度后，以精确HTTP206范围分段续传，不从头下载，整包校验前不使用。
+- [x] 完整原包MD5、全库CRC准备和原索引计数已完成。新增公开执行入口`run_qrecc_original_native.py`，按原问题/会话历史依次完成模型改写、完整原索引BM25和模型阅读；参考Rewrite/Answer/Answer_URL不进入执行输入。公开Java搜索源码已在服务器原Java11/Anserini0.10上验证：3文档夹具控制通过，完整54241550文档索引实测返回100条原正文命中，均为人工通用查询、0模型调用，不是原题RAG完成。7项新增软件控制及整组40项测试通过。
+- [ ] 原固定题的改写/全库检索/阅读、原评分和最终研究消费仍待执行。QRECC总勾保持为空；不以只做改写、缩小检索库或参考URL拼接替代原端到端任务。[获取与版本说明](QRECC_ORIGINAL_PREPARATION.zh-CN.md)。此前断流及显式续传记录保留，不再将已完成的整包校验误列为当前缺口。
+
+执行采用明确披露的本地LLM改写/阅读配置，不冒称复现论文训练过的改写器或阅读器。原发布方未提供该LLM配置的提示或生成预算，因此固定声明BM25
+`k1=0.82/b=0.68`、前100命中全部交给阅读器、改写128/回答512输出上限和非思考模式；不裁短原问题、历史或命中正文。若长度、模型或环境不适配，逐题保留失败、空预测及真实已有排名，不换题。公开执行入口支持按原顺序运行整个test范围；本次计划固定原0/1/2条。
+
+准备好固定原`qrecc_test.json`、完整索引、Java11、原0.10
+JAR、作者11份固定软件及隔离的nltk3.5评分客户端后，使用以下三步。`QRECC_TEST/QRECC_INDEX/JAVA11/ANSERINI_JAR/QRECC_AUTHOR/QRECC_SCORER_PYTHON`由操作者设为实际绝对路径；原资产获取、版本与完整性检查见上述准备说明，模型端点须绑定实际NPU服务。
+
+```bash
+python scripts/run_qrecc_original_native.py --execute \
+  --data-file "$QRECC_TEST" --index "$QRECC_INDEX" \
+  --java "$JAVA11" --jar "$ANSERINI_JAR" --output /data/qrecc-native-001 \
+  --endpoint http://127.0.0.1:19468/v1 --model Qwen/Qwen3-14B \
+  --start 0 --count 3 --retrieval-k 100 --rewrite-budget 128 --answer-budget 512 \
+  --model-timeout 1800
+python scripts/score_qrecc_original_retrieval.py --execute \
+  --data-file "$QRECC_TEST" --author-root "$QRECC_AUTHOR" \
+  --rankings-file /data/qrecc-native-001/rankings-private.jsonl \
+  --python "$QRECC_SCORER_PYTHON" --workers 1 --output /data/qrecc-retrieval-score-001
+python scripts/score_qrecc_original_qa.py \
+  --data-file "$QRECC_TEST" --scorer-file "${QRECC_AUTHOR}/utils/evaluate_qa.py" \
+  --predictions-file /data/qrecc-native-001/predictions-private.json \
+  --output /data/qrecc-qa-score-001
+```
+
+前两步不带`--execute`仅显示计划；第三步的旧评分入口直接评估给定文件，可先用`--help`核对参数。实际评分只使用已保存的排名和答案，不重复生成。运行目录须全新且在仓库与原资产之外。上述命令是运行说明，不是已执行原题或达到论文成绩的证明；完整私有日志和模型配置须与最终交付回执一并核验。
 
 #### MultiAgentBench原Research续跑
 
