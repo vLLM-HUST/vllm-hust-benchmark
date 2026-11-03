@@ -2,6 +2,17 @@
   "version": "adapter-extensions/v1",
   "boundary": "Field contracts from publisher metadata/docs. No real source payload downloaded or full adapter validation claimed.",
   "adapters": {
+    "XLAM_TOOL": {
+      "kind": "task_dataset",
+      "mapping": "xlam_original_query_tools",
+      "input_fields": ["query", "tools"],
+      "required_fields": ["id", "query", "tools", "answers"],
+      "outcome_fields": ["answers"],
+      "annotation_fields": ["id"],
+      "id_field": "id",
+      "requirements": ["Preserve original query and complete tool schemas; answers remain reference-only", "Publisher synthetic training corpus, not an independently scored official benchmark; declare execution and evaluation protocol separately"],
+      "status": "ORIGINAL_FIELDS_REGISTERED_NATIVE_EXECUTION_PENDING"
+    },
     "FULL_DUPLEX_BENCH": {
       "kind":"task_dataset","mapping":"full_duplex_original_archives",
       "input_fields":["input"],"required_fields":["task_id","original_case_id","original_case_directory","version","family","input","outcome","native_execution_complete"],
