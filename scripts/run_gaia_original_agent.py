@@ -12,6 +12,7 @@ import importlib.metadata
 import importlib.util
 from itertools import islice
 import json
+import os
 from pathlib import Path
 import shutil
 from urllib.parse import urlsplit
@@ -101,6 +102,15 @@ def run(
         "max_output_tokens": max_output_tokens,
         "disable_thinking": disable_thinking,
         "tool_factory_sha256": factory_sha256,
+        "operator_tool_environment": {
+            key: os.environ.get(key)
+            for key in [
+                "GAIA_SEARCH_ENGINE",
+                "GAIA_DOCKER_HOST",
+                "GAIA_PYTHON_IMAGE",
+                "GAIA_FRAMEWORK_VENV",
+            ]
+        },
         "selected_original_ids": [t["task_id"] for t in tasks],
         "attempted_original_ids": [],
         "returned_original_ids": [],

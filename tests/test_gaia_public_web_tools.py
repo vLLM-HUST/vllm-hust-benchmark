@@ -45,3 +45,17 @@ def test_public_address_is_returned_for_pinned_connection(monkeypatch):
     )
     value, port, ip = module.public_target("https://example.org/path")
     assert value.hostname == "example.org" and port == 443 and ip == "8.8.8.8"
+
+
+def test_bing_rss_uses_original_framework_projection_without_fake_results():
+    xml = "<rss><channel><item><title>Fixture</title><link>https://example.org/</link><description>Invented fixture</description></item><item><title>Second</title></item></channel></rss>"
+    assert module.parse_bing_rss(xml, 1) == [
+        {
+            "title": "Fixture",
+            "link": "https://example.org/",
+            "description": "Invented fixture",
+        }
+    ]
+    assert module.parse_bing_rss("<rss><channel/></rss>", 10) == []
+    with pytest.raises(module.ET.ParseError):
+        module.parse_bing_rss("not XML", 10)

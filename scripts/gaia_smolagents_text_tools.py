@@ -12,6 +12,20 @@ import socket
 import ssl
 from urllib.parse import quote, urljoin, urlsplit
 import uuid
+import xml.etree.ElementTree as ET
+
+
+def parse_bing_rss(text, max_results):
+    """Same RSS projection as stable smolagents WebSearchTool.search_bing."""
+    root = ET.fromstring(text)
+    return [
+        {
+            "title": item.findtext("title"),
+            "link": item.findtext("link"),
+            "description": item.findtext("description"),
+        }
+        for item in root.findall(".//item")[:max_results]
+    ]
 
 
 def public_target(url):
@@ -64,7 +78,13 @@ def public_page(url):
             mime = response.getheader("Content-Type", "").split(";")[0]
             if not (
                 mime.startswith("text/")
-                or mime in {"application/json", "application/xhtml+xml"}
+                or mime
+                in {
+                    "application/json",
+                    "application/xhtml+xml",
+                    "application/xml",
+                    "application/rss+xml",
+                }
             ):
                 raise ValueError("nontext media needs a separately qualified reader")
             body = response.read(2 * 1024 * 1024 + 1)
@@ -82,6 +102,14 @@ def make_tools(task_input, task_dir):
     from gaia_isolated_python_tool import run_code
 
     class Search(WebSearchTool):
+        def search_bing(self, query):
+            return parse_bing_rss(
+                public_page(
+                    "https://www.bing.com/search?q=" + quote(query) + "&format=rss"
+                ),
+                self.max_results,
+            )
+
         def search_duckduckgo(self, query):
             parser = self._create_duckduckgo_parser()
             parser.feed(
@@ -99,7 +127,7 @@ def make_tools(task_input, task_dir):
 
     class Python(Tool):
         name = "python_interpreter"
-        description = "Run Python using the original smolagents interpreter in a resource-limited offline container. No host files or network."
+        description = "Run Python using the original smolagents interpreter in a resource-limited offline container. Each call starts a fresh interpreter; variables do not persist. No host files or network."
         inputs = {"code": {"type": "string", "description": "Python code to execute."}}
         output_type = "string"
 
@@ -112,4 +140,9 @@ def make_tools(task_input, task_dir):
                 output=task_dir / ("python-" + uuid.uuid4().hex),
             )
 
-    return [Search(engine="duckduckgo"), Visit(), Python()]
+    engine = os.environ.get("GAIA_SEARCH_ENGINE", "duckduckgo")
+    if engine not in {"duckduckgo", "bing"}:
+        raise ValueError(
+            "explicit supported public search engine required; no silent fallback"
+        )
+    return [Search(engine=engine), Visit(), Python()]

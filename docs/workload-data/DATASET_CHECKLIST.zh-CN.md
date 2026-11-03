@@ -2265,6 +2265,8 @@ token、工具串行；这是本项目公开配置，不是未经修改的官方
 
 `gaia_smolagents_text_tools.py`复用框架搜索解析与网页格式化，限定公网HTTP(S)、逐次重验重定向并固定实际连接IP；网页最多2MiB、文本输出沿用40000字符上限。Python只交给隔离容器。原二进制附件及音视频读取尚未合格，不能声称完整GAIA能力已覆盖。工具构造已在专用CPU固定环境验证，首轮公开代码目录权限失败保留，修正只读代码挂载后第二轮通过；模型调用0，真实原题执行/网络工具实用性与评分尚未完成。
 
+搜索后端由`GAIA_SEARCH_ENGINE`显式固定，可选`duckduckgo`（默认）或`bing`，不在失败后静默切换。服务器DuckDuckGo连接超时记录保留；Bing采用同一稳定框架已有的RSS接口和字段投影，泛化查询实测返回10条结果，模型调用0。使用已验证后端时，在原题启动前设置`export GAIA_SEARCH_ENGINE=bing`并重算工厂文件摘要；该选择及隔离工具绑定会写入私有回执。原问题和原评分不变，不提供预先整理的题目证据；原题尚未实跑，来源总勾仍未完成。
+
 ```bash
 python -m pip install -r configs/workload-native/gaia-smolagents-client.txt
 python scripts/run_gaia_original_agent.py --help
