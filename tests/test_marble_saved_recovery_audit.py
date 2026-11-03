@@ -70,10 +70,11 @@ def test_live_parent_is_not_request_scoped_authorization(tmp_path):
     assert not report["pending_requests_may_be_served"]
 
 
-def test_direct_task_queues_counted_without_cross_task_response_binding(tmp_path):
+@pytest.mark.parametrize("kind", ["model", "keyword"])
+def test_direct_task_queues_counted_without_cross_task_response_binding(tmp_path, kind):
     root, launch = fixture(tmp_path)
-    first = root / "original-row-00000/live-model-queue"
-    second = root / "original-row-00001/live-model-queue"
+    first = root / f"original-row-00000/live-{kind}-queue"
+    second = root / f"original-row-00001/live-{kind}-queue"
     first.mkdir(parents=True)
     second.mkdir(parents=True)
     identity = "b" * 32
@@ -83,5 +84,9 @@ def test_direct_task_queues_counted_without_cross_task_response_binding(tmp_path
         entry.audit(root, launch, proc_root=tmp_path / "proc")
     (second / (identity + ".request.json")).write_text("fixture")
     report = entry.audit(root, launch, proc_root=tmp_path / "proc")
-    assert report["model_queue"] == {"requests": 3, "responses": 1, "pending": 2}
+    assert report[kind + "_queue"] == {
+        "requests": 3 if kind == "model" else 2,
+        "responses": 1,
+        "pending": 2 if kind == "model" else 1,
+    }
     assert not report["pending_requests_may_be_served"]

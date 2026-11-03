@@ -110,6 +110,21 @@ def test_invalid_live_endpoint_rejected_before_preparing_assets(tmp_path, monkey
     assert not list(tmp_path.iterdir())
 
 
+def test_response_reuse_requires_explicit_live_backend(tmp_path, monkeypatch):
+    monkeypatch.setattr(entry, "prepare", lambda *a: pytest.fail("asset preparation"))
+    args = sum(
+        (
+            ["--" + key, str(tmp_path / key)]
+            for key in ["author-root", "prepared-root", "bound-root", "output"]
+        ),
+        [],
+    )
+    with pytest.raises(SystemExit) as error:
+        entry.main(args + ["--reuse-model-results", str(tmp_path / "saved")])
+    assert error.value.code == 2
+    assert not list(tmp_path.iterdir())
+
+
 def test_complete_original_prefix_and_unknown_fields_kept(tmp_path):
     source, bound = fixture_prefix(tmp_path)
     configs, actor, judge = entry.original_prefix(source, bound)

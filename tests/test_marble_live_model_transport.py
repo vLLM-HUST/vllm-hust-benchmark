@@ -1,6 +1,7 @@
 """Invented HTTP fixtures only: no original task, model or NPU execution."""
 
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+import hashlib
 import json
 from pathlib import Path
 import sys
@@ -13,6 +14,143 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 import marble_live_model_transport as transport  # noqa: E402
+
+
+def saved_fixture(tmp_path):
+    root = tmp_path / "saved"
+    root.mkdir()
+    identity = "a" * 32
+    request = {
+        "model": "fixture",
+        "messages": [{"role": "user", "content": "invented"}],
+        "max_tokens": 17,
+    }
+    response = {"choices": [{"message": {"content": "invented saved response"}}]}
+    objects = {
+        ".request.json": request,
+        ".forwarded-request.json": {
+            **request,
+            "chat_template_kwargs": {"enable_thinking": False},
+        },
+        ".response.raw": response,
+        ".response.json": {"http_status": 200, "response": response},
+    }
+    hashes = {}
+    for suffix, value in objects.items():
+        raw = json.dumps(value).encode()
+        (root / (identity + suffix)).write_bytes(raw)
+        hashes[suffix] = hashlib.sha256(raw).hexdigest()
+    manifest = {
+        "source_id": "MULTIAGENTBENCH",
+        "model": "fixture",
+        "historical_backend_same_api_birth_verified": True,
+        "original_nonthinking_binding": True,
+        "rows": [{"identity": identity, "sha256": hashes}],
+    }
+    (root / "provenance-private.json").write_text(json.dumps(manifest))
+    return root, request, response
+
+
+def test_exact_saved_reply_needs_no_backend_call(tmp_path):
+    root, request, response = saved_fixture(tmp_path)
+    consumed = tmp_path / "consumed"
+    consumed.mkdir()
+    queue = tmp_path / "new-task"
+    with transport.live_model_transport(
+        queue,
+        "http://127.0.0.1:1/v1",
+        port=0,
+        timeout=2,
+        reuse_root=root,
+        expected_model="fixture",
+        reuse_state=consumed,
+    ) as port:
+        with urlopen(
+            Request(
+                f"http://127.0.0.1:{port}/v1/chat/completions",
+                data=json.dumps(request).encode(),
+            ),
+            timeout=4,
+        ) as result:
+            assert json.load(result) == response
+    marker = json.loads(next(queue.glob("*.reuse-private.json")).read_text())
+    assert marker["new_model_calls"] == 0
+    assert marker["original_identity"] == "a" * 32
+    assert len(list(consumed.iterdir())) == 2
+
+
+def test_one_saved_sample_is_consumed_once_across_task_processes(tmp_path):
+    root, request, _ = saved_fixture(tmp_path)
+    consumed = tmp_path / "consumed"
+    consumed.mkdir()
+    for index in range(2):
+        queue = tmp_path / str(index)
+        queue.mkdir()
+        (queue / ("b" * 32 + ".request.json")).write_text(json.dumps(request))
+        cache = transport.saved_responses(root, "fixture")
+        assert transport.reuse_one(queue, cache, consumed) is (index == 0)
+        assert bool(list(queue.glob("*.response.json"))) is (index == 0)
+
+
+def test_changed_budget_does_not_match_saved_request(tmp_path):
+    root, request, _ = saved_fixture(tmp_path)
+    queue = tmp_path / "new"
+    queue.mkdir()
+    consumed = tmp_path / "consumed"
+    consumed.mkdir()
+    (queue / ("b" * 32 + ".request.json")).write_text(
+        json.dumps({**request, "max_tokens": 18})
+    )
+    assert not transport.reuse_one(
+        queue, transport.saved_responses(root, "fixture"), consumed
+    )
+    assert not list(queue.glob("*.claim")) and not list(consumed.iterdir())
+
+
+def test_uncertain_previous_consumption_cannot_fall_through_to_model(tmp_path):
+    root, request, _ = saved_fixture(tmp_path)
+    queue = tmp_path / "new"
+    queue.mkdir()
+    consumed = tmp_path / "consumed"
+    consumed.mkdir()
+    (consumed / ("a" * 32 + ".json")).write_text("invented partial reservation")
+    (queue / ("b" * 32 + ".request.json")).write_text(json.dumps(request))
+    with pytest.raises(ValueError, match="never resubmit"):
+        transport.reuse_one(queue, transport.saved_responses(root, "fixture"), consumed)
+    assert not list(queue.glob("*.claim")) and not list(queue.glob("*.response.json"))
+
+
+def test_tampered_or_wrong_model_saved_reply_rejected(tmp_path):
+    root, _, _ = saved_fixture(tmp_path)
+    with pytest.raises(ValueError, match="model binding"):
+        transport.saved_responses(root, "different-model")
+    (root / ("a" * 32 + ".response.raw")).write_text("{}")
+    with pytest.raises(ValueError, match="hash mismatch"):
+        transport.saved_responses(root, "fixture")
+
+
+def test_known_unanswered_claim_is_never_automatically_forwarded(tmp_path):
+    root, request, _ = saved_fixture(tmp_path)
+    path = root / "provenance-private.json"
+    manifest = json.loads(path.read_text())
+    manifest["excluded_claim_without_saved_response"] = 1
+    path.write_text(json.dumps(manifest))
+    unknown = {**request, "max_tokens": 19}
+    digest = hashlib.sha256(transport.canonical_request(unknown).encode()).hexdigest()
+    (root / "uncertain-requests-private.json").write_text(
+        json.dumps([{"canonical_request_sha256": digest}])
+    )
+    queue = tmp_path / "new"
+    queue.mkdir()
+    (queue / ("b" * 32 + ".request.json")).write_text(json.dumps(unknown))
+    with pytest.raises(ValueError, match="known unanswered original claim"):
+        transport.reuse_one(
+            queue,
+            transport.saved_responses(root, "fixture"),
+            tmp_path,
+            transport.uncertain_requests(root),
+        )
+    assert not list(queue.glob("*.claim"))
 
 
 @pytest.mark.parametrize(

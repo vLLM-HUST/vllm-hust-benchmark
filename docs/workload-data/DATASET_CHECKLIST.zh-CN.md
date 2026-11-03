@@ -2191,6 +2191,10 @@ MultiAgentBench续跑状态（2026-11-02重新核验）：原Research固定前�
 
 - [x] 新转发helper已在专用CPU保留的原Python3.10.12客户端执行虚构HTTP200/500对照，原请求/后端响应一致，已存在队列拒绝重放；未导入Torch/NPU、未访问外网、未执行原题。回执：`/root/marble-live-transport-control-20261103-001/qualification-public.json`。该对照不是原生NPU模型调用。
 
+- [x] 默认关闭、显式开启的旧响应精确复用控制通过：服务器原3.10.12客户端验证4份旧响应/16个原文件哈希，完整请求/参数一致才命中，每份旧响应跨原题只消费一次，不确定消费拒绝补发；原缓存资产不变，后端HTTP和新模型调用均0，未运行Agent题。回执：`/root/marble-verified-response-reuse-control-20261103-002/qualification-public.json`。实际恢复前仍须核验当前后端部署绑定；不用于性能或新的独立质量评价。
+
+- [x] 当前公共CLI已在服务器原3.10客户端执行`--prepare-only --model-api-base --reuse-model-results`，10份软件按摘要固定，原前三题/5轮、actor/judge绑定、按题关键词队列及1条不确定请求保护均通过；原源码不改，Agent/后端/新模型调用均0。回执：`/root/marble-current-public-live-entry-20261103-002/qualification-public.json`。不是原题执行。
+
 #### SpokenWOZ原文本DST协议交付
 
 - [x] 从[发布方项目页](https://spokenwoz.github.io/SpokenWOZ-github.io/)当前链接的`ssz1111/SpokenWOZ-Test-Text-Fixed`取得固定版本原`data.json`：52233254字节，发布方LFS

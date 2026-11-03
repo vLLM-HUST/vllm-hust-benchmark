@@ -33,9 +33,13 @@ from marble_live_model_transport import live_model_transport
 from marble_keybert_transport import keyword_transport
 import marble.environments.research_utils.paper_collector as collector
 endpoint=os.environ.get('MARBLE_OWNED_MODEL_API_BASE')
-transport=(live_model_transport(config.parent/'live-model-queue',endpoint,port=14005)
+transport=(live_model_transport(config.parent/'live-model-queue',endpoint,port=14005,
+           reuse_root=os.environ.get('MARBLE_VERIFIED_RESPONSE_REUSE_ROOT'),
+           expected_model=os.environ.get('MARBLE_EXPECTED_REUSE_MODEL'),
+           reuse_state=stage/'saved-response-reuse-claims')
            if endpoint else model_proxy(stage/'model-queue',port=14005))
-with keyword_transport(collector,stage/'keyword-queue'), transport:
+keyword_queue=config.parent/'live-keyword-queue' if endpoint else stage/'keyword-queue'
+with keyword_transport(collector,keyword_queue), transport:
     sys.argv=['marble.main','--config_path',str(config)]
     runpy.run_module('marble.main',run_name='__main__')
 """
@@ -129,7 +133,13 @@ def prepare(author_root, prepared_root, bound_root, output):
         (author / "marble/evaluator/evaluator.py").read_bytes()
     )
     output.mkdir(mode=0o700)
-    for name in ("author", "helpers", "model-queue", "keyword-queue"):
+    for name in (
+        "author",
+        "helpers",
+        "model-queue",
+        "keyword-queue",
+        "saved-response-reuse-claims",
+    ):
         (output / name).mkdir(mode=0o700)
     for item in profile["files"]:
         target = output / "author" / item["path"]
@@ -150,6 +160,7 @@ def prepare(author_root, prepared_root, bound_root, output):
         folder = output / f"original-row-{index:05d}"
         folder.mkdir(mode=0o700)
         (folder / "logs").mkdir()
+        (folder / "live-keyword-queue").mkdir(mode=0o700)
         (folder / "marble").symlink_to(
             output / "author/marble", target_is_directory=True
         )
@@ -194,10 +205,17 @@ def execute(output, report):
     )
     # Do not inherit an accidental endpoint from the caller's environment.
     env.pop("MARBLE_OWNED_MODEL_API_BASE", None)
+    env.pop("MARBLE_VERIFIED_RESPONSE_REUSE_ROOT", None)
+    env.pop("MARBLE_EXPECTED_REUSE_MODEL", None)
     if report.get("model_api_base") is not None:
         from marble_live_model_transport import loopback_endpoint
 
         env["MARBLE_OWNED_MODEL_API_BASE"] = loopback_endpoint(report["model_api_base"])
+        if report.get("reuse_model_results") is not None:
+            env["MARBLE_VERIFIED_RESPONSE_REUSE_ROOT"] = report["reuse_model_results"]
+            env["MARBLE_EXPECTED_REUSE_MODEL"] = report["actor_model"].removeprefix(
+                "openai/"
+            )
     for index in range(3):
         folder = output / f"original-row-{index:05d}"
         report.update(
@@ -252,6 +270,9 @@ def execute(output, report):
             if report.get("model_api_base") is not None
             else len(list((output / "model-queue").glob("*.request.json")))
         )
+        report["reused_saved_model_responses"] = len(
+            list(output.glob("original-row-*/live-model-queue/*.reuse-private.json"))
+        )
         (output / "state-private.json").write_text(
             json.dumps(report, indent=2), "utf-8"
         )
@@ -271,7 +292,14 @@ def main(argv=None):
         "--model-api-base",
         help="Qualified owned loopback /v1 service: task-scoped direct forwarding; keyword worker remains external",
     )
+    parser.add_argument(
+        "--reuse-model-results",
+        type=Path,
+        help="Explicit byte-verified original responses for validation recovery only, never performance measurement",
+    )
     args = parser.parse_args(argv)
+    if args.reuse_model_results is not None and args.model_api_base is None:
+        parser.error("--reuse-model-results requires --model-api-base")
     endpoint = None
     if args.model_api_base is not None:
         from marble_live_model_transport import loopback_endpoint
@@ -293,6 +321,16 @@ def main(argv=None):
     if endpoint is not None:
         report["model_api_base"] = endpoint
         report["model_transport"] = "TASK_SCOPED_LIVE_LOOPBACK_NONTHINKING"
+        if args.reuse_model_results is not None:
+            from marble_live_model_transport import saved_responses, uncertain_requests
+
+            cache = args.reuse_model_results.resolve(strict=True)
+            saved_responses(cache, report["actor_model"].removeprefix("openai/"))
+            report["guarded_unanswered_original_requests"] = len(
+                uncertain_requests(cache)
+            )
+            report["reuse_model_results"] = str(cache)
+            report["saved_response_reuse_is_validation_recovery_not_performance"] = True
         (args.output / "state-private.json").write_text(
             json.dumps(report, indent=2), "utf-8"
         )

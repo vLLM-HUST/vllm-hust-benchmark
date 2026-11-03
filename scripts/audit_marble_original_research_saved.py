@@ -31,6 +31,9 @@ def queue_state(root, kind):
     if kind == "model":
         requests.extend(root.glob("original-row-*/live-model-queue/*.request.json"))
         responses.extend(root.glob("original-row-*/live-model-queue/*.response.json"))
+    elif kind == "keyword":
+        requests.extend(root.glob("original-row-*/live-keyword-queue/*.request.json"))
+        responses.extend(root.glob("original-row-*/live-keyword-queue/*.response.json"))
     for path in requests + responses:
         if (
             path.is_symlink()
