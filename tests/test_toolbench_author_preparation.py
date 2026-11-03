@@ -13,6 +13,26 @@ ROOT = Path(__file__).resolve().parents[1]
 PROFILE = ROOT / "configs/workload-native/toolbench-author-source.json"
 
 
+def test_publisher_examples_plan_is_separate_and_unchecked(tmp_path):
+    destination = tmp_path / "examples"
+    result = subprocess.check_output(
+        [
+            sys.executable,
+            str(ROOT / "scripts/prepare_jsonschemabench_author_source.py"),
+            "--source",
+            "toolbench-examples",
+            "--author-root",
+            str(destination),
+        ],
+        text=True,
+    )
+    report = json.loads(result)
+    assert report["status"] == "PLAN_ONLY_NO_DOWNLOAD"
+    assert (report["files"], report["bytes"]) == (3, 71370)
+    assert not report["source_checkbox_eligible"]
+    assert not destination.exists()
+
+
 def test_original_plan_excludes_tasks_weights_and_results(tmp_path):
     pins = json.loads(PROFILE.read_text("utf-8"))
     paths = {row["path"] for row in pins["files"]}

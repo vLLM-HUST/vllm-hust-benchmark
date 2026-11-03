@@ -57,6 +57,7 @@ def main():
             "ovobench",
             "streamingbench",
             "toolbench",
+            "toolbench-examples",
             "ljspeech-vits",
             "mlagentbench",
             "webarena",
