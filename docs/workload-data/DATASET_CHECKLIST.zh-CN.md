@@ -2,6 +2,8 @@
 
 ### 最新原生运行复核（2026-11-04）
 
+Full-Duplex-Bench：已取得原包时，用 `python scripts/prepare_full_duplex_original_assets.py --action verify --output <服务器原包目录>` 核验，不重新下载。已有固定版本评分器及客户端源码时，用 `python scripts/prepare_full_duplex_original_scorers.py --verify-only --include-client --output <服务器源码目录>` 核验。两条命令只检查材料；Moshi 双工推理和原生 ASR 评分仍需另行验证。
+
 MLE-bench：在隔离执行节点按[固定版本官方说明](https://github.com/openai/mle-bench/blob/507f92e1138bb6e40dac5c6ee7a6758e6424bf97/README.md)安装。由操作者配置自己的 Kaggle 访问权限和凭据，勿提交凭据或竞赛文件。对既定竞赛运行 `mlebench prepare -c <competition-id>`，保留官方拆分；原生 Agent 生成提交 CSV 后，用 `mlebench grade-sample <submission.csv> <competition-id>` 评分。尚未验证实际下载、Agent 执行或评分。
 
 PaperBench 在构建隔离环境前，先运行 `python scripts/check_paperbench_native_prerequisites.py --author-root <已校验的上游源码根目录>`。此命令核验固定上游版本的原始文件及镜像、架构和时间预算约束，不构建镜像或接受供应商条款。预检通过不代表运行环境可用；正式验证仍需合规的隔离执行环境，并保留原任务预算和 rubric。
