@@ -60,7 +60,7 @@ def test_supplemental_client_dependencies_are_disclosed_not_provider_defaults():
         .splitlines()
         if line and not line.startswith("#")
     ]
-    assert pins == ["ruamel.yaml==0.18.6", "ruamel.yaml.clib==0.2.12"]
+    assert pins == ["ruamel.yaml==0.18.6", "ruamel.yaml.clib==0.2.12", "lxml==6.0.2"]
     assert "ruamel" not in (ROOT / "workload-preparation/pyproject.toml").read_text(
         "utf-8"
     )
