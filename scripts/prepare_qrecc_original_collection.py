@@ -125,6 +125,11 @@ def prepare(archive, *, output=None, max_bytes=0, spec=None):
                         if info.is_dir():
                             dest.mkdir(parents=True, exist_ok=True)
                             continue
+                        if (
+                            shutil.disk_usage(output).free
+                            < DISK_RESERVE + info.file_size
+                        ):
+                            raise ValueError("shared disk reserve would be exceeded")
                         dest.parent.mkdir(parents=True, exist_ok=True)
                         with z.open(info) as inp, dest.open("xb") as out:
                             shutil.copyfileobj(inp, out, length=4 * 1024**2)

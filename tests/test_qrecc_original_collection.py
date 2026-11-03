@@ -107,6 +107,23 @@ def test_explicit_whole_collection_budget_and_external_output(original):
         module.prepare(archive, output=ROOT / "unused-collection-fixture", spec=spec)
 
 
+def test_other_writers_consuming_space_stop_before_next_member(
+    original, tmp_path, monkeypatch
+):
+    archive, spec, _ = original
+    spaces = iter(
+        [SimpleNamespace(free=spec["uncompressed_bytes"]), SimpleNamespace(free=0)]
+    )
+    monkeypatch.setattr(module.shutil, "disk_usage", lambda p: next(spaces))
+    output = tmp_path / "space-failure"
+    with pytest.raises(ValueError, match="shared disk reserve"):
+        module.prepare(
+            archive, output=output, max_bytes=spec["uncompressed_bytes"], spec=spec
+        )
+    report = json.loads((output / "collection-preparation.private.json").read_text())
+    assert report["completed_files"] == 0 and not report["member_crc_verified"]
+
+
 @pytest.mark.parametrize(
     "name",
     ["../escape.jsonl", "/absolute.jsonl", "a\\b.jsonl", "a/./b.jsonl", "C:evil.jsonl"],
