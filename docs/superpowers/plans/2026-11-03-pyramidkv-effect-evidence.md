@@ -98,6 +98,8 @@ requires the pinned local LongBench inputs.
 - Extend: `reports/pyramidkv-standalone-effects-20261103/evidence.py`
 - Create: `reports/pyramidkv-standalone-effects-20261103/analyze.py`
 - Create: `reports/pyramidkv-standalone-effects-20261103/verify.py`
+- Create: `reports/pyramidkv-standalone-effects-20261103/runtime.py`
+- Create: `reports/pyramidkv-standalone-effects-20261103/private_inputs.py`
 - Extend: `tests/test_pyramidkv_effect_evidence.py`
 
 **Interfaces:**

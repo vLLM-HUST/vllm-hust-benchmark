@@ -845,3 +845,271 @@ def test_observed_runtime_rejects_changed_profile_or_activation(change):
         snapshot["selected_environment"][key] = value
     with pytest.raises(ValueError, match="Runtime"):
         module("runtime").verify_runtime(snapshot, lifecycle)
+
+
+def plan_fixture():
+    synthetic, _payload, _row, _chunks = response_fixture()
+    synthetic["prompt"] = [11, 12]
+    quality = {
+        "case_id": "qasper-000",
+        "kind": "quality",
+        "task": "qasper",
+        "dataset_id": "official-row-0",
+        "subset": "development",
+        "answers": ["PRIVATE REFERENCE"],
+        "original_instruction_tokens": 2,
+        "truncated": False,
+        "prompt": [100, 101],
+        "max_tokens": 128,
+        "ignore_eos": False,
+        "prompt_tokens": 2,
+        "prompt_sha256": hashlib.sha256(b"[100,101]").hexdigest(),
+    }
+    return [quality, synthetic]
+
+
+def test_public_plan_removes_quality_token_ids_and_references_only():
+    cases = plan_fixture()
+    index, synthetic = module("private_inputs").public_plan(cases)
+    assert [row["case_id"] for row in index] == ["qasper-000", "boundary-2"]
+    assert all("prompt" not in row and "answers" not in row for row in index)
+    assert synthetic == [cases[1]]
+    assert b"PRIVATE REFERENCE" not in json.dumps([index, synthetic]).encode()
+
+
+@pytest.mark.parametrize("field", ["question", "context", "input", "reference_text"])
+def test_public_plan_rejects_unrecognized_input_fields(field):
+    cases = plan_fixture()
+    cases[0][field] = "PRIVATE QUESTION"
+    with pytest.raises(ValueError, match="Private plan"):
+        module("private_inputs").public_plan(cases)
+
+
+def test_public_plan_cannot_leak_reference_on_synthetic_case():
+    cases = plan_fixture()
+    cases[1]["answers"] = ["PRIVATE REFERENCE"]
+    with pytest.raises(ValueError, match="Private plan"):
+        module("private_inputs").public_plan(cases)
+
+
+def test_private_plan_reconstruction_matches_frozen_case_bytes():
+    cases = plan_fixture()
+    encoded = (json.dumps(cases, ensure_ascii=False, indent=2) + "\n").encode()
+    index = [
+        {k: v for k, v in row.items() if k not in ("prompt", "answers")}
+        for row in cases
+    ]
+    result = module("private_inputs").reconstruct_cases(
+        index, [cases[1]], [cases[0]], hashlib.sha256(encoded).hexdigest()
+    )
+    assert result == cases
+
+
+def test_service_quality_cache_salt_is_restored_from_public_index_and_hash_checked():
+    cases = plan_fixture()
+    quality = copy.deepcopy(cases[0])
+    cases[0]["cache_salt"] = "net-cost-20261028-qasper-000"
+    index = [
+        {k: v for k, v in row.items() if k not in ("prompt", "answers")}
+        for row in cases
+    ]
+    wanted = hashlib.sha256(
+        (json.dumps(cases, ensure_ascii=False, indent=2) + "\n").encode()
+    ).hexdigest()
+    assert (
+        module("private_inputs").reconstruct_cases(index, [cases[1]], [quality], wanted)
+        == cases
+    )
+    index[0]["cache_salt"] = "changed"
+    with pytest.raises(ValueError, match="Private plan case digest"):
+        module("private_inputs").reconstruct_cases(index, [cases[1]], [quality], wanted)
+
+
+@pytest.mark.parametrize(
+    "change",
+    ["order", "private_prompt", "synthetic_prompt", "metadata", "duplicate", "missing"],
+)
+def test_private_plan_reconstruction_rejects_changed_members_or_payloads(change):
+    cases = plan_fixture()
+    wanted = hashlib.sha256(
+        (json.dumps(cases, ensure_ascii=False, indent=2) + "\n").encode()
+    ).hexdigest()
+    index = [
+        {k: v for k, v in row.items() if k not in ("prompt", "answers")}
+        for row in cases
+    ]
+    quality, synthetic = [copy.deepcopy(cases[0])], [copy.deepcopy(cases[1])]
+    if change == "order":
+        index.reverse()
+    elif change == "private_prompt":
+        quality[0]["prompt"] = [100, 102]
+    elif change == "synthetic_prompt":
+        synthetic[0]["prompt"] = [11, 13]
+    elif change == "metadata":
+        index[0]["subset"] = "holdout"
+    elif change == "duplicate":
+        synthetic.append(copy.deepcopy(synthetic[0]))
+    else:
+        quality.clear()
+    with pytest.raises(ValueError, match="Private plan"):
+        module("private_inputs").reconstruct_cases(index, synthetic, quality, wanted)
+
+
+def run_fixture(root):
+    folder = root / "runs/example/evaluation"
+    (folder / "requests").mkdir(parents=True)
+    cases = {row["case_id"]: row for row in plan_fixture()}
+    rows = []
+    for key, case in cases.items():
+        row = {
+            "case_id": key,
+            "kind": case["kind"],
+            "success": True,
+            "output": "prediction",
+        }
+        rows.append(row)
+        (folder / "requests" / f"{key}.json").write_text(json.dumps(row))
+        (folder / "requests" / f"{key}.sse").write_bytes(b"data: [DONE]\n")
+        (folder / "requests" / f"{key}.request.json").write_bytes(
+            json.dumps({"prompt": case["prompt"]}).encode()
+        )
+    (folder / "results.json").write_text(json.dumps(rows))
+    return folder, cases, rows
+
+
+def test_public_export_retains_outputs_but_omits_quality_payloads(tmp_path):
+    folder, cases, _rows = run_fixture(tmp_path)
+    public, private, origins = module("export").collect_run(tmp_path, "example", cases)
+    prefix = "runs/example/evaluation/requests/"
+    key = prefix + "qasper-000.request.json"
+    assert key not in public
+    original = (folder / "requests/qasper-000.request.json").read_bytes()
+    assert private[key]["sha256"] == hashlib.sha256(original).hexdigest()
+    assert private[key]["bytes"] == len(original)
+    assert public[prefix + "boundary-2.request.json"] == b'{"prompt": [11, 12]}'
+    assert public[prefix + "qasper-000.sse"] == b"data: [DONE]\n"
+    assert set(origins) == set(public)
+
+
+@pytest.mark.parametrize("change", ["answers", "prompt", "context", "kind", "orphan"])
+def test_public_export_rejects_ambiguous_or_private_result_content(tmp_path, change):
+    folder, cases, rows = run_fixture(tmp_path)
+    if change == "orphan":
+        (folder / "requests/unknown.request.json").write_text('{"prompt": "PRIVATE"}')
+    elif change == "kind":
+        rows[0]["kind"] = "performance"
+    else:
+        rows[0][change] = "PRIVATE CONTENT"
+    (folder / "results.json").write_text(json.dumps(rows))
+    (folder / "requests/qasper-000.json").write_text(json.dumps(rows[0]))
+    with pytest.raises(ValueError, match="Export"):
+        module("export").collect_run(tmp_path, "example", cases)
+
+
+def test_public_export_preserves_failure_receipt_and_failed_response(tmp_path):
+    folder, cases, rows = run_fixture(tmp_path)
+    rows[0]["success"] = False
+    rows[0]["error"] = "request timeout"
+    (folder / "results.json").write_text(json.dumps(rows))
+    (folder / "requests/qasper-000.json").write_text(json.dumps(rows[0]))
+    failure = b'{"type":"RuntimeError","error":"request failed"}'
+    (folder.parent / "failure.json").write_bytes(failure)
+    public, _private, _origins = module("export").collect_run(
+        tmp_path, "example", cases
+    )
+    assert public["runs/example/failure.json"] == failure
+    assert (
+        json.loads(public["runs/example/evaluation/results.json"])[0]["success"]
+        is False
+    )
+
+
+@pytest.mark.parametrize("part_bytes", [100, 480000])
+def test_exported_capsule_roundtrips_through_independent_inventory_checks(
+    tmp_path, part_bytes
+):
+    (tmp_path / "verify.py").write_bytes(b"# reviewed verifier\n")
+    members = {"run/output.sse": b"data: [DONE]\n", "contract.json": b'{"frozen":true}'}
+    module("export").write_capsule(tmp_path, members, {}, part_bytes=part_bytes)
+    assert module().load_capsule(tmp_path) == members
+    if part_bytes == 100:
+        assert len(list(tmp_path.glob("raw.tar.gz.part-*"))) > 1
+    else:
+        assert (tmp_path / "raw.tar.gz").is_file()
+    assert b"verify.py" in (tmp_path / "SHA256SUMS").read_bytes()
+
+
+def test_capsule_export_refuses_to_overwrite_an_existing_original(tmp_path):
+    module("export").write_capsule(tmp_path, {"record": b"original"}, {})
+    before = (tmp_path / "raw.tar.gz").read_bytes()
+    with pytest.raises(ValueError, match="Export.*existing"):
+        module("export").write_capsule(tmp_path, {"record": b"changed"}, {})
+    assert (tmp_path / "raw.tar.gz").read_bytes() == before
+
+
+def test_public_export_retains_startup_failure_without_inventing_results(tmp_path):
+    folder = tmp_path / "runs/startup"
+    folder.mkdir(parents=True)
+    failure = b'{"error":"readiness timeout"}'
+    (folder / "failure.json").write_bytes(failure)
+    (folder / "server.log").write_text("startup failed\n")
+    public, private, _origins = module("export").collect_run(tmp_path, "startup", {})
+    assert public["runs/startup/failure.json"] == failure
+    assert "runs/startup/evaluation/results.json" not in public
+    assert private == {}
+
+
+def experiment_fixture(root):
+    _folder, cases, _rows = run_fixture(root)
+    plan = root / "quality-plan"
+    plan.mkdir()
+    encoded = (
+        json.dumps(list(cases.values()), ensure_ascii=False, indent=2) + "\n"
+    ).encode()
+    (plan / "cases.json").write_bytes(encoded)
+    (plan / "groups.json").write_text("[]\n")
+    manifest = {
+        "cases_sha256": hashlib.sha256(encoded).hexdigest(),
+        "groups_sha256": hashlib.sha256(b"[]\n").hexdigest(),
+        "dataset_files_sha256": {},
+    }
+    (plan / "manifest.json").write_text(json.dumps(manifest))
+    pins = {
+        p.relative_to(root).as_posix(): hashlib.sha256(p.read_bytes()).hexdigest()
+        for p in plan.iterdir()
+    }
+    contract = {
+        "lifecycles": [{"name": "example", "plan": "quality-plan"}],
+        "files_sha256": pins,
+    }
+    (root / "contract.json").write_text(json.dumps(contract))
+    (root / "series-state.json").write_text('{"phase":"all_requests_executed"}')
+    (root / "unrelated-private.txt").write_text("PRIVATE UNRELATED CONTENT")
+    return contract
+
+
+def test_experiment_export_uses_frozen_files_and_explicit_privacy_inventory(tmp_path):
+    experiment_fixture(tmp_path)
+    public, private, origins = module("export").collect_experiment(tmp_path)
+    assert "quality-plan/cases.json" not in public
+    assert "quality-plan/cases.json" in private
+    assert "unrelated-private.txt" not in public
+    assert (
+        json.loads(public["quality-plan/case-index.json"])[0]["case_id"] == "qasper-000"
+    )
+    assert len(json.loads(public["quality-plan/synthetic-cases.json"])) == 1
+    assert json.loads(public["private-inputs.json"]) == private
+    assert "quality-plan/groups.json" in origins
+
+
+@pytest.mark.parametrize("change", ["active", "frozen", "extra_run"])
+def test_experiment_export_rejects_live_changed_or_unclassified_input(change, tmp_path):
+    experiment_fixture(tmp_path)
+    if change == "active":
+        (tmp_path / "series-state.json").write_text('{"phase":"running"}')
+    elif change == "frozen":
+        (tmp_path / "quality-plan/groups.json").write_text("changed")
+    else:
+        (tmp_path / "runs/unclassified").mkdir()
+    with pytest.raises(ValueError, match="Export"):
+        module("export").collect_experiment(tmp_path)
