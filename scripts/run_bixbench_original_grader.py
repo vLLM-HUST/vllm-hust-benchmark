@@ -143,6 +143,11 @@ def main(argv=None):
         "actual_judge_binding": args.model,
         "author_judge_reproduction": False,
         "source_checkbox_eligible": False,
+        "scorer_validity_verified": False,
+        "known_publisher_scorer_defects": [
+            "empty_answer_can_receive_partial_match",
+            "dedicated_numeric_range_template_can_be_bypassed",
+        ],
         "scoring_returned": False,
         "model_queue_enabled": args.model_queue is not None,
         "boundary": "A returned local-judge score is not official-model accuracy reproduction or proof that native Agent generation and research consumption completed.",

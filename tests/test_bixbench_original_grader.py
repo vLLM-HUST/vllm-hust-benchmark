@@ -36,6 +36,12 @@ def test_plan_does_not_import_author_or_create_output(tmp_path, capsys):
     report = json.loads(capsys.readouterr().out)
     assert report["status"] == "PLAN_ONLY"
     assert not report["scoring_returned"]
+    assert not report["scorer_validity_verified"]
+    assert not report["source_checkbox_eligible"]
+    assert report["known_publisher_scorer_defects"] == [
+        "empty_answer_can_receive_partial_match",
+        "dedicated_numeric_range_template_can_be_bypassed",
+    ]
     assert not args.output.exists()
 
 
