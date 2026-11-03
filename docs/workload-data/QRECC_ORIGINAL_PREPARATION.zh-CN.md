@@ -56,7 +56,8 @@ Crawl数十TB作为唯一获取路线。
 Crawl网页和Wayback网页、按原脚本切成段落，再用Pyserini建立Lucene索引。官方明确提示Common
 Crawl下载涉及数十TB量级；这不是已经取得的任务JSON大小，也不能把网页集合容量直接等同最终索引大小。开始前必须分别核算下载流量、原网页、段落副本和索引的峰值空间。当前没有批准或开始这批大规模下载。
 
-以下为作者给出的命令结构，应在仓库外的固定官方源码副本内按作者相对路径执行；保留完整原集合，不为抽样评测缩小候选语料。Python、Pyserini及JDK环境仍待实际锁定和验证，不能将命令登记当作环境可用。
+以下为作者给出的命令结构，应在仓库外的固定官方源码副本内按作者相对路径执行；保留完整原集合，不为抽样评测缩小候选语料。后述固定Java入口已完成独立软件控制，但完整Pyserini
+Python包装环境与QReCC实际语料尚未验证。
 
 ```bash
 # 官方 collection/ 目录；--workers 是作者示例，不是本机已核定配置。
@@ -69,6 +70,30 @@ python -m pyserini.index -collection JsonCollection -generator DefaultLuceneDocu
 ```
 
 上述流程之后还缺原问题改写、原集合检索、阅读生成及检索/答案两类评分的完整运行入口。必须保留问题和原对话历史，原`Rewrite`只作改写参考，原`Answer`只作答案参考，不用参考字段代替预测。抽样只固定待评任务，不能将参考URL页面拼成小候选库后宣称端到端QReCC验证。官方的段落切分/索引流程与历史发布集合是否可逐项复现，也须在取得资产后核验，不能仅凭相同脚本名称假定相同语料。
+
+### 已核验的独立检索软件配置
+
+服务器Linux aarch64已取得并按发布方SHA-256核验以下两份原软件包；未改系统Java、Python或现有模型服务。它们是本仓固定的工程配置，不是QReCC论文声明的历史依赖版本。
+
+| 软件                                 | 原发布包                                                                                                                                               |    字节数 | 发布方SHA-256                                                      |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ | --------: | ------------------------------------------------------------------ |
+| Pyserini 0.44.0                      | [PyPI原包](https://files.pythonhosted.org/packages/52/8e/4b748ddf296c1031f20a5b12e14b1ba86488dfb144648a60edf682e32018/pyserini-0.44.0.tar.gz)          | 195278293 | `bb6bf1f02ef32d617b6d2235715f4ca9b091d102a33521962fb12474971ac1d5` |
+| Temurin JDK 21.0.13+9，Linux aarch64 | [Adoptium原包](https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.13%2B9/OpenJDK21U-jdk_aarch64_linux_hotspot_21.0.13_9.tar.gz) | 205995218 | `e3522e707fc7dbe2a72c30746b1e7068301a0213ecd213d4491f35a14eb55578` |
+
+原Pyserini包内`pyserini/resources/jars/anserini-0.39.0-fatjar.jar`为203439302字节，解包后实测SHA-256为`02e06f2f112803aeee9cb0a577b2e04edfa75a1318746a7fa5b6f802b2c6b14f`；该内部文件摘要是本次对原包成员的观察，不冒充另一个发布方声明。原[Python索引包装器](https://github.com/castorini/pyserini/blob/pyserini-0.44.0/pyserini/index/lucene/__main__.py)最终调用`io.anserini.index.IndexCollection`。已直接使用这份未修改Java类完成三份人工文档的建库及BM25查询控制，顶一文档与预期相符；没有调用神经模型，也没有用人工文档替代QReCC语料。
+
+在仓库外解包并校验上述软件后，Java入口的命令形态如下。`/external/qrecc-passages`必须是完整校验的作者集合，不能填验证样本目录；实际全库构建前仍须核算索引与临时空间、内存及共享资源窗口。
+
+```bash
+/external/jdk-21.0.13+9/bin/java -Xmx4g \
+  -cp /external/pyserini-0.44.0/pyserini/resources/jars/anserini-0.39.0-fatjar.jar \
+  io.anserini.index.IndexCollection \
+  -collection JsonCollection -generator DefaultLuceneDocumentGenerator \
+  -threads 2 -input /external/qrecc-passages -index /external/qrecc-index \
+  -storePositions -storeDocvectors -storeRaw
+```
+
+`-threads 2`与`-Xmx4g`是保守的待全库验证配置，不是作者的76线程实测配置，也未证明足以完成全库。当前只证明Java入口可用，尚未执行上述QReCC建库命令、Python包装器或原生RAG。软件控制回执：服务器任务目录`qrecc-original-index-runtime-20261103-001/original-java-entrypoint-control-001/qualification-public.json`。首次误用`-help`及`-topicreader`产生的失败日志保留；该版本帮助参数为`-options`，查询类参数为`-topicReader`，不能只凭进程退出0判断执行成功，必须核查原日志和实际索引/排名文件。
 
 ### 已保存答案的原作者评分入口（不是端到端运行）
 

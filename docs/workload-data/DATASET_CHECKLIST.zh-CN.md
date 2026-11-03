@@ -2181,6 +2181,8 @@ checkpoint，不能直接填入Qwen文本服务。原评分器要求五条参考
 已核实[作者Zenodo5760304发布](https://zenodo.org/records/5760304)的完整`passages.zip`为27512656777字节，非必须重新爬取数十TB网页。完整原ZIP目录56007个成员已检查：56003个JSONL，解压合计86557816928字节。当前原包正在服务器获取，限速8MiB/s、共享盘保留64GiB余量，本地不落数据；同一writer的PID/出生时间和partial增长已核实。
 
 - [x] 两份作者原test全部16451条逐行比较，原文件哈希/发布方MD5通过，会话与话轮顺序一致；每条增加`Passages`参考，24条原`Answer_URL`不同，其余原字段相同。原文件独立保留，不当作同一版本覆盖，模型调用0次。服务器回执：`qrecc-author-test-release-comparison-20261103-001/qualification-public.json`。
+- [x] 服务器独立安装原Pyserini0.44.0包与Temurin21.0.13+9，两个发布方SHA-256及解包成员核验通过；使用未修改Anserini
+  Java入口完成3人工文档的索引、1条BM25控制查询并核查顶一结果。原命令参数失败记录保留；不是QReCC原题、完整索引或Python包装器通过。回执：`qrecc-original-index-runtime-20261103-001/original-java-entrypoint-control-001/qualification-public.json`。
 - [ ] 整包MD5、语料准备/完整索引、原生检索与阅读、原评分和最终研究消费。QRECC总勾保持为空；不以只做改写、缩小检索库或参考URL拼接替代原端到端任务。[获取与版本说明](QRECC_ORIGINAL_PREPARATION.zh-CN.md)。原包传输在5885990912字节处因网络关闭失败，已保留原partial；核对旧writer退出及文件长度后，以精确HTTP206范围分段续传，不从头下载，整包校验前不使用。
 
 #### MultiAgentBench原Research续跑
