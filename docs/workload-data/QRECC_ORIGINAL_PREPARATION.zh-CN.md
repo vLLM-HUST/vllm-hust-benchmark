@@ -122,6 +122,29 @@ python scripts/prepare_jsonschemabench_author_source.py --source qrecc \
 
 历史Pyserini0.44/Java21软件对照及错误CLI参数日志保留在`qrecc-original-index-runtime-20261103-001`，不将其索引与原始锁版本混用。另核查到[竞赛组织方SCAI基线](https://github.com/webis-de/SCAI-QReCC/tree/8020bbe28127ca6af5fe99534908b4b33f331731/code/simple-baseline)锁定Pyserini0.12.0，属于不同软件协议；其测试集/评分修订也不能静默替换本方案的固定Apple任务。该组织方简单基线的回答阶段是启发式句子选择，不能拿它冒充NPU阅读模型或原端到端神经基线。
 
+### 已保存检索结果的作者函数评分入口
+
+`scripts/score_qrecc_original_retrieval.py`使用原11份软件身份校验及未修改的`evaluate_retrieval.py`、`evaluate_qa.py`和`span_heuristic.py`。独立Python3.12客户端固定nltk3.5，附加依赖见`configs/workload-native/qrecc-original-scorer-client.txt`，不是根包默认依赖，不安装神经框架。安装示例：
+
+```bash
+python3.12 -m venv /external/qrecc-scorer
+/external/qrecc-scorer/bin/python -m pip install setuptools==75.8.0 wheel==0.45.1 packaging==24.2
+/external/qrecc-scorer/bin/python -m pip install --no-build-isolation \
+  -r configs/workload-native/qrecc-original-scorer-client.txt
+python scripts/score_qrecc_original_retrieval.py \
+  --data-file /data/qrecc-original-test/qrecc_test.json \
+  --author-root /external/qrecc-author \
+  --rankings-file /private/qrecc-original-rankings.jsonl \
+  --output /private/fresh-qrecc-retrieval-score \
+  --python /external/qrecc-scorer/bin/python --workers 1 --execute
+```
+
+不加`--execute`只显示计划，不读取任务或运行评分。保存的rankings每题一行JSON，顶层只含`original_row_index`、`Conversation_no`、`Turn_no`、`retrieved_passages`；每个真实命中只含`docid`、`content`、`rank`、`score`，保留原检索顺序、唯一文档ID及从1开始连续排名，不接受参考答案字段，也不截掉超过100条的输入来凑协议。参考答案仅从已核验原test加入独立评分文件，不回传给检索或阅读模型。
+
+该入口调用原作者函数API，不宣称原CLI未经包装。原CLI只从命中行建立查询分组，无法表达零命中查询；适配层按全部保存任务预建分组，零命中仍参与分母，原MRR/Recall函数直接返回该查询的零贡献，不丢题、不补造段落。原作者的抽取上界函数对空列表未定义，存在零命中时上界记为`null`，不伪造值；无零命中时其结果也由原函数计算。抽取上界是参考答案驱动的诊断值，不是阅读模型输出或质量成绩。
+
+14项人工保存结果/子进程控制通过；服务器原nltk3.5、原作者函数、4个正例/次位命中/空答案/零命中人工查询控制通过，零命中保留。另复用先前原CLI的相同3查询输入和结果，对照5项指标完全一致，没有重新执行该原CLI。回执：`qrecc-public-retrieval-score-control-20261103-002/qualification-public.json`。首次依赖探针误用了被其他模块覆盖的`nltk.util`属性，失败日志保留，改用原源码相同的`from nltk.util import ngrams`后通过；没有修改nltk或作者代码。以上均不是QReCC原题、真实检索或模型验证，公共完整`--execute`原题链路仍待运行。
+
 ### 已保存答案的原作者评分入口（不是端到端运行）
 
 固定版本的 `utils/evaluate_qa.py` 是函数库，没有命令行主程序。新增入口直接调用其原始 `compute_exact` 和 `compute_f1`，不重写指标；要求该文件
