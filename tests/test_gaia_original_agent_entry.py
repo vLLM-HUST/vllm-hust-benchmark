@@ -41,7 +41,10 @@ def test_selection_does_not_read_references(monkeypatch):
 
 
 @pytest.mark.parametrize("fails", [False, True])
-def test_full_framework_call_or_retained_failure(tmp_path, monkeypatch, fails):
+@pytest.mark.parametrize("model_timeout", [600, 1800])
+def test_full_framework_call_or_retained_failure(
+    tmp_path, monkeypatch, fails, model_timeout
+):
     calls = []
     monkeypatch.setattr(module, "selected_tasks", lambda *args: [task()])
     monkeypatch.setattr(module.importlib.metadata, "version", lambda name: "1.26.0")
@@ -85,10 +88,13 @@ def test_full_framework_call_or_retained_failure(tmp_path, monkeypatch, fails):
         count=1,
         max_steps=20,
         max_output_tokens=4096,
+        model_timeout=model_timeout,
     )
     assert calls[0]["max_steps"] == 20 and calls[0]["max_tool_threads"] == 1
     assert calls[0]["model"]["max_tokens"] == 4096
     assert calls[0]["model"]["client_kwargs"]["max_retries"] == 0
+    assert calls[0]["model"]["client_kwargs"]["timeout"] == model_timeout
+    assert result["model_timeout_seconds"] == model_timeout
     assert result["attempted_original_ids"] == ["invented-id"]
     assert result["failed_original_ids"] == (["invented-id"] if fails else [])
     prediction = json.loads((out / "predictions-private.jsonl").read_text())
@@ -112,6 +118,24 @@ def test_remote_model_transport_rejected():
             count=1,
             max_steps=20,
             max_output_tokens=4096,
+        )
+
+
+@pytest.mark.parametrize("timeout", [True, 0, -1, 86401, 1.5, "1800"])
+def test_invalid_model_timeout_rejected_before_assets(timeout):
+    with pytest.raises(ValueError, match="model timeout"):
+        module.run(
+            data_root="unused",
+            output="unused",
+            factory_file="unused",
+            factory_sha256="unused",
+            endpoint="http://127.0.0.1:19503/v1",
+            model="fixture",
+            start=0,
+            count=1,
+            max_steps=20,
+            max_output_tokens=4096,
+            model_timeout=timeout,
         )
 
 

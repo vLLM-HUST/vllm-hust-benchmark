@@ -60,6 +60,7 @@ def run(
     max_steps,
     max_output_tokens,
     disable_thinking=False,
+    model_timeout=600,
 ):
     target = urlsplit(endpoint)
     if (
@@ -71,6 +72,8 @@ def run(
         raise ValueError("explicit loopback model transport required")
     if any(type(x) is not int or x <= 0 for x in [max_steps, max_output_tokens]):
         raise ValueError("declare positive Agent step/output budgets before running")
+    if type(model_timeout) is not int or not 1 <= model_timeout <= 86400:
+        raise ValueError("declare model timeout in seconds within1..86400")
     output = Path(output)
     data_root = Path(data_root).resolve(strict=True)
     if output.exists() or output.is_symlink():
@@ -101,6 +104,7 @@ def run(
         "max_steps": max_steps,
         "max_output_tokens": max_output_tokens,
         "disable_thinking": disable_thinking,
+        "model_timeout_seconds": model_timeout,
         "tool_factory_sha256": factory_sha256,
         "operator_tool_environment": {
             key: os.environ.get(key)
@@ -165,7 +169,7 @@ def run(
                             model_id=model,
                             api_base=endpoint,
                             api_key="local-only",  # pragma: allowlist secret - public noncredential loopback placeholder
-                            client_kwargs={"max_retries": 0, "timeout": 600},
+                            client_kwargs={"max_retries": 0, "timeout": model_timeout},
                             max_tokens=max_output_tokens,
                             **(
                                 {
@@ -228,6 +232,7 @@ def main():
         ("count", 3),
         ("max-steps", 20),
         ("max-output-tokens", 4096),
+        ("model-timeout", 600),
     ]:
         parser.add_argument("--" + name, type=int, default=default)
     args = vars(parser.parse_args())
