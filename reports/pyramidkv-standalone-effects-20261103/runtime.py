@@ -1,9 +1,75 @@
 """Check observed launch treatment against this experiment's frozen host profile."""
 
+import ast
 import json
 import math
+import re
 
 from evidence import require
+
+
+def verify_startup_log(log: str, lifecycle: dict) -> dict:
+    installed = "Installed plugin: /root/.cache/pyramidkv-issue31-20261103/release-overlay/vllm_ascend_pyramidkv/__init__.py 0.4.0rc1"
+    require(
+        log.splitlines().count(installed) == 1,
+        "Startup installed wheel import evidence differs",
+    )
+    lines = [
+        line.split("non-default args: ", 1)[1]
+        for line in log.splitlines()
+        if "non-default args: " in line
+    ]
+    require(len(lines) == 1, "Startup parsed serving arguments missing or duplicated")
+    # Enum reprs are data: replace only their representation, then use literal_eval.
+    encoded = re.sub(
+        r"<([A-Za-z_]\w*\.[A-Za-z_]\w*): [^>]+>", lambda match: repr(match[1]), lines[0]
+    )
+    try:
+        args = ast.literal_eval(encoded)
+    except (ValueError, SyntaxError) as exc:
+        raise ValueError("Startup arguments cannot be parsed as literals") from exc
+    expected = {
+        "model": "/root/workspace/Qwen3.5-35B-A3B",
+        "dtype": "bfloat16",
+        "seed": 17,
+        "host": "127.0.0.1",
+        "port": 8013,
+        "max_model_len": 32768,
+        "max_num_seqs": 4,
+        "max_num_batched_tokens": 4096,
+        "tensor_parallel_size": 2,
+        "distributed_executor_backend": "mp",
+        "worker_cls": "vllm_ascend_pyramidkv.adapter.host_worker.PyramidKVHostWorker",
+        "kv_cache_memory_bytes": lifecycle["kv_bytes_per_worker"],
+        "gpu_memory_utilization": 0.9,
+        "served_model_name": ["qwen35-pyramidkv"],
+        "generation_config": "vllm",
+        "enable_prefix_caching": True,
+        "mamba_cache_mode": "align",
+        "enable_chunked_prefill": True,
+        "async_scheduling": True,
+        "enable_prompt_tokens_details": True,
+        "limit_mm_per_prompt": {"image": 0, "video": 0},
+        "additional_config": {"enable_cpu_binding": False},
+        "speculative_config": {"method": "mtp", "num_speculative_tokens": 2},
+    }
+    require(
+        all(args.get(key) == value for key, value in expected.items()),
+        "Startup serving profile differs",
+    )
+    graph = {
+        "cudagraph_mode": "CUDAGraphMode.FULL_AND_PIECEWISE",
+        "cudagraph_capture_sizes": [3, 6, 12],
+        "max_cudagraph_capture_size": 12,
+    }
+    require(
+        all(
+            args.get("compilation_config", {}).get(key) == value
+            for key, value in graph.items()
+        ),
+        "Startup graph profile differs",
+    )
+    return args
 
 
 def verify_lifecycle_records(

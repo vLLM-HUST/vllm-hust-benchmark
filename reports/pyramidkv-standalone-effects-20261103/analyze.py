@@ -6,7 +6,7 @@ import statistics
 import string
 from collections import Counter
 
-from evidence import require
+from evidence import digest, read_json, require
 
 COUNTERS = (
     "num_preemptions",
@@ -380,5 +380,92 @@ def resource_summary(samples: list[dict], devices: list[int]) -> dict:
         "device_hbm_mib": {
             key: {"minimum": min(values), "peak": max(values)}
             for key, values in hbm.items()
+        },
+    }
+
+
+def analyze(raw: dict[str, bytes], verification: dict) -> dict:
+    """Deterministically recompute all reported effects from verified originals."""
+    contract = read_json(raw["contract.json"])
+    runs = {}
+    for lifecycle in contract["lifecycles"]:
+        name = lifecycle["name"]
+        prefix = f"runs/{name}/evaluation/"
+        runs[name] = {
+            "groups": read_json(raw[prefix + "groups.json"]),
+            "rows": read_json(raw[prefix + "results.json"]),
+        }
+    quality = quality_comparison(
+        runs["quality8-off"]["rows"], runs["quality8-on"]["rows"]
+    )
+    service = service_comparison(
+        {name: run for name, run in runs.items() if name.startswith("service")}
+    )
+    capacity = capacity_comparison(
+        {
+            name: run
+            for name, run in runs.items()
+            if name.startswith(("quality", "capacity"))
+        }
+    )
+    probes = {}
+    smoke = {}
+    for name, run in runs.items():
+        if not name.startswith("service"):
+            continue
+        hashes = [
+            digest(row["output"].encode())
+            for row in run["rows"]
+            if row["kind"] == "repeatability"
+        ]
+        probes[name] = {
+            "requests": len(hashes),
+            "unique_output_hashes": len(set(hashes)),
+            "output_sha256_in_order": hashes,
+        }
+        tasks = {}
+        for row in run["rows"]:
+            if row["kind"] == "quality":
+                tasks.setdefault(row["task"], []).append(row["qa_f1"])
+        smoke[name] = {
+            task: {
+                "requests": len(scores),
+                "mean_f1_points": 100 * statistics.mean(scores),
+            }
+            for task, scores in tasks.items()
+        }
+    processes = verification["lifecycles"]
+    return {
+        "schema_version": 1,
+        "identity": {
+            key: contract[key]
+            for key in (
+                "release_source",
+                "runner_source",
+                "wheel_sha256",
+                "physical_devices",
+            )
+        },
+        "requests": sum(row["requests"] for row in processes.values()),
+        "compression_transactions": sum(
+            row["compression_transactions"] for row in processes.values()
+        ),
+        "quality": quality,
+        "service": service,
+        "capacity": capacity,
+        "repeatability_probes_excluded_from_performance": probes,
+        "service_quality_smoke_not_the_full_quality_gate": smoke,
+        "process_resources_and_runtime": processes,
+        "limits": {
+            "capacity": "C1/C2/C4 tested operating points; not maximum resident capacity",
+            "timings": "Original client observations; SSE bodies do not independently reproduce receive timestamps",
+            "private_inputs": "Saved-score aggregates are public; official F1 and QA payload reconstruction require pinned private inputs",
+            "runtime_snapshot_gaps": verification["runtime_snapshot_gaps"],
+            "model_weights_rehashed_after_series": verification[
+                "model_weights_rehashed_after_series"
+            ],
+            "service_replicates_per_arm_per_budget": 2,
+            "pressure_cache_attribution": "Unique per-request salts, phase preemptions and pinned host source; no individual request preemption event trace",
+            "hbm": "Sampled physical HBM; KV block release is not HBM savings",
         },
     }

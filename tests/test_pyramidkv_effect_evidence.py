@@ -1,6 +1,7 @@
 """Synthetic integrity failures must not become accepted experiment evidence."""
 
 import copy
+import gzip
 import hashlib
 import importlib.util
 import io
@@ -1116,6 +1117,29 @@ def test_experiment_export_rejects_live_changed_or_unclassified_input(change, tm
         module("export").collect_experiment(tmp_path)
 
 
+def test_service_plan_export_reuses_quality_dataset_identity_without_duplicated_manifest_fields(
+    tmp_path,
+):
+    contract = experiment_fixture(tmp_path)
+    service = tmp_path / "service-plan"
+    service.mkdir()
+    for name in ("cases.json", "groups.json", "manifest.json"):
+        content = (tmp_path / "quality-plan" / name).read_bytes()
+        if name == "manifest.json":
+            manifest = json.loads(content)
+            manifest.pop("dataset_files_sha256")
+            content = json.dumps(manifest).encode()
+        (service / name).write_bytes(content)
+        contract["files_sha256"]["service-plan/" + name] = hashlib.sha256(
+            content
+        ).hexdigest()
+    contract["lifecycles"].append({"name": "service", "plan": "service-plan"})
+    (tmp_path / "contract.json").write_text(json.dumps(contract))
+    public, private, _ = module("export").collect_experiment(tmp_path)
+    assert "service-plan/case-index.json" in public
+    assert "service-plan/cases.json" in private
+
+
 def group_fixture():
     expected = [
         {
@@ -1793,3 +1817,329 @@ def test_pressure_cache_review_rejects_unexplained_or_cross_request_reuse(change
         groups[0]["case_ids"] = ["b"]
     with pytest.raises(ValueError, match="Pressure"):
         module("qualification").pressure_cache_review(cases, rows, groups, resource)
+
+
+def test_only_private_case_plans_can_be_hash_only_frozen_inputs():
+    raw = {"launcher.py": b"public original"}
+    private = {"quality-plan/cases.json": {"sha256": "frozen-private-hash"}}
+    expected = {
+        "launcher.py": hashlib.sha256(raw["launcher.py"]).hexdigest(),
+        "quality-plan/cases.json": "frozen-private-hash",
+    }
+    module("qualification").verify_frozen_files(raw, private, expected)
+    private["launcher.py"] = {"sha256": expected["launcher.py"]}
+    del raw["launcher.py"]
+    with pytest.raises(ValueError, match="frozen file"):
+        module("qualification").verify_frozen_files(raw, private, expected)
+
+
+def telemetry_context_fixture():
+    return (
+        telemetry_fixture(),
+        [{"name": "warmup"}, {"name": "perf"}],
+        [],
+        {"ready_at": 9, "completed_at": 12},
+        metrics_fixture(0, 0, 0),
+        metrics_fixture(1, 2, 1),
+    )
+
+
+def test_telemetry_is_bounded_by_process_metrics_time_and_selected_phases():
+    result = module("qualification").verify_telemetry(*telemetry_context_fixture())
+    assert result["counter_deltas"]["num_preemptions"] == 1
+    assert result["resources"]["samples"] == 2
+
+
+@pytest.mark.parametrize(
+    "change",
+    [
+        "unknown_phase",
+        "reversed_phase",
+        "before_ready",
+        "after_completion",
+        "counter_above_after",
+        "counter_below_before",
+    ],
+)
+def test_telemetry_rejects_cross_process_or_unaccounted_samples(change):
+    samples, groups, rows, times, before, after = telemetry_context_fixture()
+    if change == "unknown_phase":
+        samples[0]["phase"] = "unregistered"
+    elif change == "reversed_phase":
+        groups.reverse()
+    elif change == "before_ready":
+        times["ready_at"] = 10.5
+    elif change == "after_completion":
+        times["completed_at"] = 10.5
+    elif change == "counter_above_after":
+        after = metrics_fixture(0, 2, 1)
+    elif change == "counter_below_before":
+        before = metrics_fixture(1, 0, 0)
+    with pytest.raises(ValueError, match="Telemetry"):
+        module("qualification").verify_telemetry(
+            samples, groups, rows, times, before, after
+        )
+
+
+def startup_log_fixture():
+    args = {
+        "model": "/root/workspace/Qwen3.5-35B-A3B",
+        "dtype": "bfloat16",
+        "seed": 17,
+        "host": "127.0.0.1",
+        "port": 8013,
+        "max_model_len": 32768,
+        "max_num_seqs": 4,
+        "max_num_batched_tokens": 4096,
+        "tensor_parallel_size": 2,
+        "distributed_executor_backend": "mp",
+        "worker_cls": "vllm_ascend_pyramidkv.adapter.host_worker.PyramidKVHostWorker",
+        "kv_cache_memory_bytes": 8589934592,
+        "gpu_memory_utilization": 0.9,
+        "served_model_name": ["qwen35-pyramidkv"],
+        "generation_config": "vllm",
+        "enable_prefix_caching": True,
+        "mamba_cache_mode": "align",
+        "enable_chunked_prefill": True,
+        "async_scheduling": True,
+        "enable_prompt_tokens_details": True,
+        "limit_mm_per_prompt": {"image": 0, "video": 0},
+        "additional_config": {"enable_cpu_binding": False},
+        "speculative_config": {"method": "mtp", "num_speculative_tokens": 2},
+        "compilation_config": {
+            "cudagraph_mode": "CUDAGraphMode.FULL_AND_PIECEWISE",
+            "cudagraph_capture_sizes": [3, 6, 12],
+            "max_cudagraph_capture_size": 12,
+        },
+    }
+    return args, {"enabled": False, "kv_bytes_per_worker": 8589934592}
+
+
+def startup_log(args):
+    encoded = repr(args).replace(
+        "'CUDAGraphMode.FULL_AND_PIECEWISE'",
+        "<CUDAGraphMode.FULL_AND_PIECEWISE: (2, 1)>",
+    )
+    return (
+        "Installed plugin: /root/.cache/pyramidkv-issue31-20261103/release-overlay/vllm_ascend_pyramidkv/__init__.py 0.4.0rc1\n"
+        + "(APIServer pid=123) INFO non-default args: "
+        + encoded
+        + "\n"
+    )
+
+
+def test_startup_log_retains_import_identity_and_parsed_host_profile():
+    args, lifecycle = startup_log_fixture()
+    module("runtime").verify_startup_log(startup_log(args), lifecycle)
+
+
+@pytest.mark.parametrize(
+    "change",
+    [
+        "dtype",
+        "model",
+        "kv",
+        "tp",
+        "graph",
+        "mtp",
+        "prefix",
+        "import",
+        "missing",
+        "duplicate",
+    ],
+)
+def test_startup_log_rejects_missing_or_changed_fallback_evidence(change):
+    args, lifecycle = startup_log_fixture()
+    if change == "dtype":
+        args["dtype"] = "float16"
+    elif change == "model":
+        args["model"] = "/different/model"
+    elif change == "kv":
+        args["kv_cache_memory_bytes"] = 2147483648
+    elif change == "tp":
+        args["tensor_parallel_size"] = 1
+    elif change == "graph":
+        args["compilation_config"]["cudagraph_capture_sizes"] = [1, 2, 4]
+    elif change == "mtp":
+        args["speculative_config"]["num_speculative_tokens"] = 1
+    elif change == "prefix":
+        args["enable_prefix_caching"] = False
+    log = startup_log(args)
+    if change == "import":
+        log = log.replace("release-overlay", "editable-source")
+    elif change == "missing":
+        log = log.splitlines()[0]
+    elif change == "duplicate":
+        log += log.splitlines()[-1] + "\n"
+    with pytest.raises(ValueError, match="Startup"):
+        module("runtime").verify_startup_log(log, lifecycle)
+
+
+def test_large_member_inventory_remains_below_repository_file_limit(tmp_path):
+    members = {
+        f"runs/service2-on-2/evaluation/requests/perf-24576-c4-r{i:04d}-07.request.json": b"original"
+        for i in range(5100)
+    }
+    module("export").write_capsule(tmp_path, members, {})
+    assert all(path.stat().st_size <= 1000 * 1024 for path in tmp_path.iterdir())
+    assert (tmp_path / "members.json.gz").is_file()
+    assert module().load_capsule(tmp_path) == members
+
+
+@pytest.mark.parametrize("change", ["both", "corrupt"])
+def test_compressed_member_inventory_rejects_ambiguity_and_corruption(change, tmp_path):
+    capsule(tmp_path)
+    encoded = (tmp_path / "members.json").read_bytes()
+    (tmp_path / "members.json.gz").write_bytes(
+        gzip.compress(encoded) if change == "both" else b"invalid gzip"
+    )
+    if change == "corrupt":
+        (tmp_path / "members.json").unlink()
+    checksums(tmp_path)
+    with pytest.raises(ValueError, match="[Ii]nventory"):
+        module().load_capsule(tmp_path)
+
+
+@pytest.fixture(scope="module")
+def measured_capsule():
+    return module().load_capsule(REPORT)
+
+
+@pytest.fixture(scope="module")
+def measured_verification(measured_capsule):
+    return module("qualification").verify_evidence(measured_capsule)
+
+
+def test_delivered_experiment_verifies_all_twelve_lifecycles_without_private_claims(
+    measured_verification,
+):
+    result = measured_verification
+    assert result["coverage"] == {
+        "requests_verified": 1834,
+        "synthetic_payloads_verified": 1138,
+        "private_payloads_verified": 0,
+        "official_f1_recomputed": 0,
+    }
+    assert len(result["lifecycles"]) == 12
+    assert result["runtime_snapshot_gaps"] == ["quality8-off"]
+    assert result["quality_gate_passed"] is True
+
+
+@pytest.mark.parametrize(
+    "change",
+    [
+        "unfinished",
+        "missing_run",
+        "unknown_run",
+        "changed_contract",
+        "private_public_file",
+        "wrong_run_contract",
+        "overlapping_run",
+        "private_inventory",
+        "changed_client",
+        "unfree_device",
+    ],
+)
+def test_delivered_evidence_rejects_semantic_changes_beyond_archive_hashes(
+    change, measured_capsule
+):
+    raw = dict(measured_capsule)
+
+    def alter(name, update):
+        value = json.loads(raw[name])
+        update(value)
+        raw[name] = json.dumps(value).encode()
+
+    if change == "unfinished":
+        alter("series-state.json", lambda value: value.update(phase="running"))
+    elif change == "missing_run":
+        raw = {
+            key: value
+            for key, value in raw.items()
+            if not key.startswith("runs/capacity2-on/")
+        }
+    elif change == "unknown_run":
+        raw["runs/not-preregistered/process.json"] = b"{}"
+    elif change == "changed_contract":
+        alter("contract.json", lambda value: value.update(total_request_budget=1833))
+    elif change == "private_public_file":
+        original = raw.pop("serve.sh")
+        alter(
+            "private-inputs.json",
+            lambda value: value.update(
+                {
+                    "serve.sh": {
+                        "sha256": hashlib.sha256(original).hexdigest(),
+                        "bytes": len(original),
+                    }
+                }
+            ),
+        )
+    elif change == "wrong_run_contract":
+        alter(
+            "runs/quality8-off/process.json",
+            lambda value: value.update(contract_sha256="0" * 64),
+        )
+    elif change == "overlapping_run":
+        alter("runs/quality8-on/process.json", lambda value: value.update(at=1))
+    elif change == "private_inventory":
+        alter(
+            "private-inputs.json",
+            lambda value: value.update(
+                {"unknown/private.json": {"bytes": 1, "sha256": "0" * 64}}
+            ),
+        )
+    elif change == "changed_client":
+        raw["runs/quality8-off/client-command.json"] = b"[]"
+    elif change == "unfree_device":
+        raw["runs/quality8-off/npu-before.txt"] = raw[
+            "runs/quality8-off/npu-before.txt"
+        ].replace(b"No running processes found", b"A process was running")
+    with pytest.raises(ValueError):
+        module("qualification").verify_evidence(raw)
+
+
+def test_committed_analysis_is_recomputed_from_delivered_originals(
+    measured_capsule, measured_verification
+):
+    actual = module("analyze").analyze(measured_capsule, measured_verification)
+    assert actual == json.loads((REPORT / "analysis.json").read_text())
+    assert actual["quality"]["gate_passed"] is True
+    assert set(actual["service"]) == {"8gib", "2gib"}
+    assert set(actual["capacity"]["2gib"]) == {"c1", "c2", "c4"}
+
+
+@pytest.mark.parametrize("optimized", [False, True])
+def test_cli_rejects_changed_analysis_even_with_refreshed_checksums(
+    tmp_path, optimized
+):
+    for source in REPORT.iterdir():
+        if source.is_file():
+            shutil.copy2(source, tmp_path / source.name)
+    analysis = json.loads((tmp_path / "analysis.json").read_text())
+    analysis["quality"]["gate_passed"] = False
+    (tmp_path / "analysis.json").write_text(json.dumps(analysis))
+    checksums(tmp_path)
+    command = (
+        [sys.executable] + (["-O"] if optimized else []) + [str(tmp_path / "verify.py")]
+    )
+    result = subprocess.run(
+        command, check=False, capture_output=True, text=True, timeout=180
+    )
+    assert result.returncode != 0
+    assert "Analysis differs" in result.stderr
+
+
+def test_cli_verifies_delivered_public_capsule_without_private_coverage():
+    result = subprocess.run(
+        [sys.executable, str(REPORT / "verify.py")],
+        check=False,
+        capture_output=True,
+        text=True,
+        timeout=180,
+    )
+    assert result.returncode == 0, result.stderr
+    receipt = json.loads(result.stdout)
+    assert receipt["status"] == "verified"
+    assert receipt["coverage"]["requests_verified"] == 1834
+    assert receipt["coverage"]["official_f1_recomputed"] == 0

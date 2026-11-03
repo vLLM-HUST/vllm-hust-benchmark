@@ -151,6 +151,8 @@ TOP_FILES = (
     "hf-metadata.json",
     "wheel-npu-tests.txt",
     "npu-before.txt",
+    "npu-final.txt",
+    "final-identity.json",
     "vllm_ascend_pyramidkv_hust-0.4.0rc1-py3-none-any.whl",
 )
 
@@ -208,7 +210,7 @@ def collect_experiment(root: Path) -> tuple[dict, dict, dict]:
         public[name + "/case-index.json"] = json_bytes(index)
         public[name + "/synthetic-cases.json"] = json_bytes(synthetic)
         plan_cases[name] = {case["case_id"]: case for case in cases}
-        for task, sha in manifest["dataset_files_sha256"].items():
+        for task, sha in manifest.get("dataset_files_sha256", {}).items():
             require(
                 task in ("narrativeqa", "qasper", "2wikimqa"),
                 "Export unknown private dataset",
@@ -290,5 +292,9 @@ def write_capsule(
             (report / f"raw.tar.gz.part-{ordinal:03d}").write_bytes(
                 packed[offset : offset + part_bytes]
             )
-    (report / "members.json").write_bytes(json_bytes(inventory))
+    encoded = json_bytes(inventory)
+    if len(encoded) > 480000:
+        (report / "members.json.gz").write_bytes(gzip.compress(encoded, mtime=0))
+    else:
+        (report / "members.json").write_bytes(encoded)
     write_checksums(report)

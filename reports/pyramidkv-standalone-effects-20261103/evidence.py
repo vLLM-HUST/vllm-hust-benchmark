@@ -1,5 +1,6 @@
 """Read immutable experiment evidence without extracting or executing its files."""
 
+import gzip
 import hashlib
 import io
 import json
@@ -119,8 +120,17 @@ def load_capsule(root: Path) -> dict[str, bytes]:
         require(path.is_file() and not path.is_symlink(), f"Nonregular file: {name}")
         files[name] = path.read_bytes()
         require(digest(files[name]) == sha, f"File digest mismatch: {name}")
-    require("members.json" in files, "Member inventory is missing")
-    inventory = read_json(files["members.json"])
+    inventories = [
+        name for name in ("members.json", "members.json.gz") if name in files
+    ]
+    require(len(inventories) == 1, "Member inventory is missing or ambiguous")
+    encoded = files[inventories[0]]
+    if inventories[0].endswith(".gz"):
+        try:
+            encoded = gzip.decompress(encoded)
+        except (OSError, EOFError) as exc:
+            raise ValueError("Member inventory gzip is invalid") from exc
+    inventory = read_json(encoded)
     require(isinstance(inventory, dict), "Member inventory must be an object")
     parts = sorted(name for name in files if name.startswith("raw.tar.gz.part-"))
     if parts:
