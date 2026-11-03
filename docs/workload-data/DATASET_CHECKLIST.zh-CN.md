@@ -2203,6 +2203,8 @@ MultiAgentBench续跑状态（2026-11-02重新核验）：原Research固定前�
 
 - [x] 当前公共CLI已在服务器原3.10客户端执行`--prepare-only --model-api-base --reuse-model-results`，10份软件按摘要固定，原前三题/5轮、actor/judge绑定、按题关键词队列及1条不确定请求保护均通过；原源码不改，Agent/后端/新模型调用均0。回执：`/root/marble-current-public-live-entry-20261103-002/qualification-public.json`。不是原题执行。
 
+- [x] 公开Research执行入口的前三题硬上限已解除，支持原1–100题前缀；本次实跑仍固定前三题。服务器真实100题的原转换器、绑定及最终原YAML加载均逐字段核验通过，未启动Agent或模型。第34题DEL触发旧序列化失败已保留；修复只改变JSON-as-YAML转义表示，不删字符、不改原题和官方读取器。回执：`/root/marble-full100-public-preparation-20261103-002/qualification-public.json`；不将配置准备计作100题推理通过。
+
 #### SpokenWOZ原文本DST协议交付
 
 - [x] 从[发布方项目页](https://spokenwoz.github.io/SpokenWOZ-github.io/)当前链接的`ssz1111/SpokenWOZ-Test-Text-Fixed`取得固定版本原`data.json`：52233254字节，发布方LFS

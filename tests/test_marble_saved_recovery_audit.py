@@ -70,6 +70,18 @@ def test_live_parent_is_not_request_scoped_authorization(tmp_path):
     assert not report["pending_requests_may_be_served"]
 
 
+def test_full_hundred_case_prefix_is_audited_without_assuming_three_done(tmp_path):
+    root, launch = fixture(tmp_path)
+    path = root / "state-private.json"
+    state = json.loads(path.read_text())
+    state["fixed_original_rows"] = list(range(100))
+    path.write_text(json.dumps(state))
+    report = entry.audit(root, launch, proc_root=tmp_path / "proc")
+    assert report["returned_original_rows"] == [0]
+    assert report["status"] == "STOPPED_WITH_INCOMPLETE_ORIGINAL_PROTOCOL"
+    assert report["source_checkbox_eligible"] is False
+
+
 @pytest.mark.parametrize("kind", ["model", "keyword"])
 def test_direct_task_queues_counted_without_cross_task_response_binding(tmp_path, kind):
     root, launch = fixture(tmp_path)

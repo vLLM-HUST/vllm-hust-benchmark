@@ -11,6 +11,12 @@ import hashlib
 import json
 from pathlib import Path
 import re
+import sys
+
+if __package__ in {None, ""}:
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from marble_config_serialization import native_config_json
 
 
 def model_name(value):
@@ -122,7 +128,7 @@ def prepare(prepared_root, output, *, model, judge, execute=False):
     bindings = []
     for identity, config, prior in configs:
         path = output / f"original-row-{identity:05d}.yaml"
-        raw = json.dumps(config, ensure_ascii=False, indent=2).encode()
+        raw = native_config_json(config).encode("utf-8")
         with path.open("xb") as stream:
             stream.write(raw)
         bindings.append(

@@ -13,11 +13,11 @@ import bind_marble_research_local as binder  # noqa: E402
 import run_marble_original_research as entry  # noqa: E402
 
 
-def fixture_prefix(tmp_path):
+def fixture_prefix(tmp_path, count=3):
     source = tmp_path / "original-prefix"
     source.mkdir()
     rows = []
-    for index in range(3):
+    for index in range(count):
         config = {
             "task": {"content": f"synthetic fixture {index}", "reference": "retain"},
             "agents": [{"agent_id": "fixture"}],
@@ -47,7 +47,7 @@ def fixture_prefix(tmp_path):
                 "source_id": "MULTIAGENTBENCH",
                 "status": "OFFICIAL_RESEARCH_RUNTIME_PROFILE_PREPARED_NOT_EXECUTED",
                 "runtime_profile": "official-research",
-                "selected_configurations": 3,
+                "selected_configurations": count,
                 "configurations": rows,
             }
         )
@@ -156,8 +156,16 @@ def test_dropped_original_case_rejected(tmp_path):
     report = json.loads(p.read_text())
     report["configurations"].pop()
     p.write_text(json.dumps(report))
-    with pytest.raises(ValueError, match="first3"):
+    with pytest.raises(ValueError, match="original Research prefix"):
         entry.original_prefix(source, bound)
+
+
+def test_full_original_research_hundred_cases_not_capped_to_validation_three(tmp_path):
+    source, bound = fixture_prefix(tmp_path, count=100)
+    configs, actor, judge = entry.original_prefix(source, bound)
+    assert len(configs) == 100
+    assert configs[-1]["task"]["content"] == "synthetic fixture 99"
+    assert actor == "openai/local-actor" and judge == "openai/local-judge"
 
 
 def test_prepare_stages_only_approved_compat_copy_no_model(tmp_path, monkeypatch):

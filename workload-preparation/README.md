@@ -1143,7 +1143,11 @@ socket或NPU。任务运行还必须另行部署私有数据/输出、本地模�
   --output /private/marble-native-preflight --prepare-only
 ```
 
-该命令核对固定100份原源码、批准的三行缩进补丁及原前三题部署绑定，创建独立软件副本、原资源路径、私有日志目录和运行配置；不会运行工具、模型或Agent。服务器已实际执行通过。源码/原配置不原地修改；输出必须是独立新目录，不得放入仓库或任何输入目录。
+该命令核对固定100份原源码、批准的三行缩进补丁及所选择的原Research前缀部署绑定，创建独立软件副本、原资源路径、私有日志目录和运行配置；不会运行工具、模型或Agent。公开入口支持1–100题原始前缀，本次模型验证固定前三题，不是使用上限。源码/原配置不原地修改；输出必须是独立新目录，不得放入仓库或任何输入目录。
+
+需要全部Research题时，先用`prepare_marble_original_configs.py --runtime-profile official-research --limit 100 --execute`在独立输出目录准备全部原配置，再用`bind_marble_research_local.py`绑定显式actor/judge模型；将对应两个目录传给原生运行器即可覆盖全部100题。前两步是配置准备，只有`run_marble_original_research.py --execute`才启动Agent；后端和关键词worker仍须先接好。其他四个场景不自动套用Research绑定。
+
+服务器已对真实100题完成原转换器/原Config.load、部署绑定、公开运行目录准备，以及最终运行配置的100次原YAML加载核对，未启动模型或Agent。第34题原含DEL字符，旧JSON-as-YAML序列化曾失败；现仅转义YAML不接受或会折叠的码点，加载后逐字段与原对象一致，非BMP字符保留，不删除或替换原题字符。原作者源码未改。
 
 确认NPU服务和可信worker可用后，将输出改成另一个全新私有目录并使用`--execute`。入口依次调用原`marble.main`，保留原题、Agent、关系、5轮协议及原函数各自生成预算；不以单次问答替代Agent。`model-queue/`使用既有`appworld_model_transport.py`协议，`keyword-queue/`使用上述关键词协议，均由可信worker对接NPU。运行器本身不会分配设备、恢复模型、提供SSH凭据或启动这些外部worker；未连接worker时不要开始原题运行。模型proxy仅监听本进程的`127.0.0.1:14005`，端口须空闲，外部推理服务不能指回该proxy形成环路。
 

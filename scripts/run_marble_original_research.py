@@ -21,6 +21,7 @@ if __package__ in {None, ""}:
 from bind_marble_research_local import bind_config, model_name
 from prepare_jsonschemabench_author_source import verify_source
 from prepare_marble_evaluator_compat import compatibility_copy
+from marble_config_serialization import native_config_json
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE_PROFILE = ROOT / "configs/workload-native/marble-author-source.json"
@@ -73,18 +74,22 @@ def original_prefix(prepared_root, bound_root):
         if "together_ai/TA" in name:
             raise ValueError("publisher external-provider special route forbidden")
     originals, bindings = original["configurations"], binding["configurations"]
-    # This delivery protocol fixes the first3 original Research tasks.
+    # Validation uses first3; public execution supports every original Research
+    # prefix produced by the publisher converter, including all100 tasks.
+    count = len(originals)
     if (
-        len(originals) != 3
-        or len(bindings) != 3
-        or [x["source_row_index"] for x in originals] != [0, 1, 2]
-        or [x["source_row_index"] for x in bindings] != [0, 1, 2]
+        not 1 <= count <= 100
+        or len(bindings) != count
+        or original.get("selected_configurations") != count
+        or binding.get("selected_configurations") != count
+        or [x["source_row_index"] for x in originals] != list(range(count))
+        or [x["source_row_index"] for x in bindings] != list(range(count))
         or any(
             x["source_file"] != "multiagentbench/research/research_main.jsonl"
             for x in originals
         )
     ):
-        raise ValueError("fixed original first3 Research tasks required")
+        raise ValueError("matching complete original Research prefix required (1..100)")
     configs = []
     for source, item in zip(originals, bindings):
         paths = [prepared / source["configuration"], bound / item["configuration"]]
@@ -170,12 +175,12 @@ def prepare(author_root, prepared_root, bound_root, output):
         runtime = deepcopy(config)
         runtime["output"]["file_path"] = str(folder / "original-result.jsonl")
         (folder / "runtime.private.yaml").write_text(
-            json.dumps(runtime, ensure_ascii=False, indent=2), "utf-8"
+            native_config_json(runtime), "utf-8"
         )
     report = {
         "source_id": "MULTIAGENTBENCH",
         "status": "ORIGINAL_RESEARCH_NATIVE_RUNTIME_PREPARED_NOT_EXECUTED",
-        "fixed_original_rows": [0, 1, 2],
+        "fixed_original_rows": list(range(len(configs))),
         "actor_model": actor,
         "judge_model": judge,
         "original_iterations": 5,
@@ -216,7 +221,7 @@ def execute(output, report):
             env["MARBLE_EXPECTED_REUSE_MODEL"] = report["actor_model"].removeprefix(
                 "openai/"
             )
-    for index in range(3):
+    for index in report["fixed_original_rows"]:
         folder = output / f"original-row-{index:05d}"
         report.update(
             status="RUNNING_ORIGINAL_RESEARCH_NATIVE_CLI", active_original_row=index

@@ -18,6 +18,7 @@ if __package__ in {None, ""}:
 
 from prepare_jsonschemabench_author_source import verify_source
 from prepare_multiagentbench_original_assets import LEDGER, prepare as verify_assets
+from marble_config_serialization import native_config_json
 
 ROOT = Path(__file__).resolve().parents[1]
 FIELDS = (
@@ -173,7 +174,7 @@ def prepare(
             # JSON is accepted by the original yaml.safe_load implementation.
             # Default preserves all fields. Explicit Research mode fills only
             # publisher-cleared runtime slots through its original converter.
-            raw = json.dumps(runtime, ensure_ascii=False, indent=2).encode("utf-8")
+            raw = native_config_json(runtime).encode("utf-8")
             with path.open("xb") as stream:
                 stream.write(raw)
             if json.loads(path.read_text("utf-8")) != runtime:
