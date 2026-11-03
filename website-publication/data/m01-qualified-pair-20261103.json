@@ -1,0 +1,305 @@
+{
+  "schema": "m01-qualified-pair/v1",
+  "chips": 2,
+  "milestone_percent": 50,
+  "final_target_percent": 90,
+  "evidence_qualified": true,
+  "reference_kind": "certified_lower_bound_of_fixed_full_reference",
+  "current_milestone_met": true,
+  "final_target_supported": false,
+  "arms": [
+    {
+      "role": "B0",
+      "repetitions": [
+        {
+          "name": "uninstrumented-1",
+          "F_interval": [
+            1829129362383260,
+            1829419442663123
+          ],
+          "T_seconds": "166.194264621",
+          "Tref_lower_seconds": "34.1077236398449652986688",
+          "requests": 200,
+          "input_tokens": 282265,
+          "output_tokens": 51200,
+          "uninstrumented": true,
+          "synchronized_ranks": 2,
+          "source_sha256": "0c51f8f42043eff8f82ec23888702cdd1583a9d68835135e32190c7514c8feff",
+          "work_domain": 1
+        },
+        {
+          "name": "uninstrumented-2",
+          "F_interval": [
+            1829129362383260,
+            1829419442663123
+          ],
+          "T_seconds": "145.389653179",
+          "Tref_lower_seconds": "34.1077236398449652986688",
+          "requests": 200,
+          "input_tokens": 282265,
+          "output_tokens": 51200,
+          "uninstrumented": true,
+          "synchronized_ranks": 2,
+          "source_sha256": "6db7784be4bb652d1d0179e6673f7405314a2cb5077adf0321c765cb152ab30d",
+          "work_domain": 2
+        },
+        {
+          "name": "uninstrumented-3",
+          "F_interval": [
+            1829129362383260,
+            1829419442663123
+          ],
+          "T_seconds": "142.837009382",
+          "Tref_lower_seconds": "34.1077236398449652986688",
+          "requests": 200,
+          "input_tokens": 282265,
+          "output_tokens": 51200,
+          "uninstrumented": true,
+          "synchronized_ranks": 2,
+          "source_sha256": "b91eb934d213473b74f2cc499f94b2c72d167682082a4e520254c9a6cb35eb82",
+          "work_domain": 2
+        }
+      ],
+      "work_components": [
+        {
+          "id": "target:linear_attention:prefill",
+          "label_zh": "目标模型 GDN 预填充",
+          "label_en": "Target GDN prefill",
+          "F_interval": [
+            3293841528523290,
+            3293841528523290
+          ]
+        },
+        {
+          "id": "target:full_attention:",
+          "label_zh": "目标模型全注意力层",
+          "label_en": "Target full-attention layers",
+          "F_interval": [
+            1274462488404930,
+            1274540254287048
+          ]
+        },
+        {
+          "id": "target_final:final_norm:",
+          "label_zh": "目标模型最终归一化与词表",
+          "label_en": "Target final normalization and vocabulary",
+          "F_interval": [
+            156239713925265,
+            156267176560827
+          ]
+        },
+        {
+          "id": "draft:full_attention:",
+          "label_zh": "必要草稿依赖",
+          "label_en": "Necessary draft dependencies",
+          "F_interval": [
+            141418452664815,
+            141963101191110
+          ]
+        },
+        {
+          "id": "target:linear_attention:spec",
+          "label_zh": "目标模型 GDN 解码与验证",
+          "label_en": "Target GDN decode and verification",
+          "F_interval": [
+            621425903631480,
+            621646267427094
+          ]
+        }
+      ],
+      "aggregate": {
+        "sum_T_seconds": "454.420927182",
+        "sum_Tref_lower_seconds": "102.3231709195348958960064",
+        "sum_F_interval": [
+          5487388087149780,
+          5488258327989369
+        ],
+        "C_interval": [
+          "6.037781007554728782605206387349877567373",
+          "6.038738534802632640784874899428108354491"
+        ],
+        "eta_percent_lower": "22.51726643710523282755304890565778256768"
+      },
+      "F_correspondence_qualified": true,
+      "reference_lower_qualified": true,
+      "reference_certificate_path": "reports/m01-qualified-pair-20261103/evidence/b0-r1-reference-certificate.json",
+      "reference_certificates": [
+        "evidence/b0-r1-reference-certificate.json",
+        "evidence/b0-r2-reference-certificate.json"
+      ],
+      "reference_paths": [
+        {
+          "nodes": 332063,
+          "sum_component_seconds": "34.1077236398449650828341",
+          "certified_lower_seconds": "34.1077236398449652986688",
+          "artifact": "b0-r1-reference-critical-path.jsonl.gz.archive.json",
+          "sha256": "08a46adc8dc2d38df24083884f6599c4d13d704a817e777da173f67e8cd13769"
+        },
+        {
+          "nodes": 332063,
+          "sum_component_seconds": "34.1077236398449650828341",
+          "certified_lower_seconds": "34.1077236398449652986688",
+          "artifact": "b0-r2-reference-critical-path.jsonl.gz.archive.json",
+          "sha256": "1da6375882ad1c6c6080831eda82f2c5d0d8294c20f0733d45c4d8f5af48bb7e"
+        }
+      ]
+    },
+    {
+      "role": "B1",
+      "repetitions": [
+        {
+          "name": "uninstrumented-1",
+          "F_interval": [
+            1812705120593615,
+            1812879444816795
+          ],
+          "T_seconds": "93.280719797",
+          "Tref_lower_seconds": "46.86772263772173",
+          "requests": 200,
+          "input_tokens": 282265,
+          "output_tokens": 51200,
+          "uninstrumented": true,
+          "synchronized_ranks": 2,
+          "source_sha256": "0407c570c288265d9b5038a7e2a87eb1e8ea87553551785c7f6695a073ab2a86"
+        },
+        {
+          "name": "uninstrumented-2",
+          "F_interval": [
+            1812705120593615,
+            1812879444816795
+          ],
+          "T_seconds": "71.653411446",
+          "Tref_lower_seconds": "46.86772263772173",
+          "requests": 200,
+          "input_tokens": 282265,
+          "output_tokens": 51200,
+          "uninstrumented": true,
+          "synchronized_ranks": 2,
+          "source_sha256": "c5bea9d69988f75e68fe6c141965a13e23d8a34533a11fb84a00bff465c12a10"
+        },
+        {
+          "name": "uninstrumented-3",
+          "F_interval": [
+            1812705120593615,
+            1812879444816795
+          ],
+          "T_seconds": "70.356381742",
+          "Tref_lower_seconds": "46.86772263772173",
+          "requests": 200,
+          "input_tokens": 282265,
+          "output_tokens": 51200,
+          "uninstrumented": true,
+          "synchronized_ranks": 2,
+          "source_sha256": "9a198f5dcb9e6a062b9caac2a69040508e82d4210c852fd8b007f1f671113746"
+        }
+      ],
+      "work_components": [
+        {
+          "id": "target_projection",
+          "label_zh": "目标模型投影",
+          "label_en": "Target projections",
+          "F_interval": [
+            4872421748736000,
+            4872421748736000
+          ]
+        },
+        {
+          "id": "target_qk_av",
+          "label_zh": "目标模型 QK / AV",
+          "label_en": "Target QK / AV",
+          "F_interval": [
+            141300128808960,
+            141300128808960
+          ]
+        },
+        {
+          "id": "target_vocabulary",
+          "label_zh": "目标模型输出词表",
+          "label_en": "Target vocabulary",
+          "F_interval": [
+            156229435392000,
+            156229435392000
+          ]
+        },
+        {
+          "id": "target_scalar",
+          "label_zh": "目标模型基础标量与状态更新",
+          "label_en": "Target scalar and state updates",
+          "F_interval": [
+            22677755318055,
+            22677755318055
+          ]
+        },
+        {
+          "id": "target_prefill",
+          "label_zh": "GDN 预填充",
+          "label_en": "GDN prefill",
+          "F_interval": [
+            113344613680320,
+            113344613680320
+          ]
+        },
+        {
+          "id": "necessary_draft",
+          "label_zh": "必要草稿依赖",
+          "label_en": "Necessary draft dependencies",
+          "F_interval": [
+            132141679845510,
+            132664652515050
+          ]
+        }
+      ],
+      "aggregate": {
+        "sum_T_seconds": "235.290512985",
+        "sum_Tref_lower_seconds": "140.60316791316519",
+        "sum_F_interval": [
+          5438115361780845,
+          5438638334450385
+        ],
+        "C_interval": [
+          "11.55617218218978970364541151540045804027",
+          "11.55728351613799130414607863752751977536"
+        ],
+        "eta_percent_lower": "59.75726183321670061341678705592882024036"
+      },
+      "F_correspondence_qualified": true,
+      "reference_lower_qualified": true,
+      "reference_certificate_path": "reports/m01-qualified-pair-20261103/evidence/b1-reference-certificate.json",
+      "reference_certificates": [
+        "evidence/b1-reference-certificate.json"
+      ],
+      "reference_paths": [
+        {
+          "nodes": 174271,
+          "sum_component_seconds": "46.8677226377341687575338",
+          "certified_lower_seconds": "46.86772263772173",
+          "artifact": "b1-reference-critical-path.jsonl.gz.archive.json",
+          "sha256": "e369f57ef75936c655acb81cc02267f9a9b0d4f475a76bdd3e2d29fe0ee652d0"
+        }
+      ]
+    }
+  ],
+  "C_gain_percent_interval": [
+    "91.36732142961520575839542013811356159780",
+    "91.41607656317819201282784237805748858100"
+  ],
+  "report_path": "reports/m01-qualified-pair-20261103/README.md",
+  "evidence_manifest_sha256": "5d1f4e6c50aa144bdc37ed293db9dd73fec5ab1c28788f91785a758146654cee",
+  "formulas": {
+    "C": "sum(F)/(k*sum(T)*10^12)",
+    "eta_lower": "100*sum(Tref_lower)/sum(T)",
+    "gain": "100*(C1/C0-1)",
+    "reference": "finish(v)=d(v)+max(finish(u):u->v);Tref=max(finish(v))"
+  },
+  "workload": {
+    "model": "Qwen3.5-35B-A3B",
+    "precision": "BF16",
+    "chips": "2x910B2",
+    "tensor_parallel": 2,
+    "dataset": "MMLU-Pro fixed200",
+    "max_completion_tokens": 256,
+    "input_tokens_per_repetition": 282265,
+    "output_tokens_per_repetition": 51200
+  },
+  "quality_scope": "Fixed-budget service workload; all outputs length-terminated. Full-answer quality and throughput belong to the separately identified max8192 batch. No current answer-quality score is borrowed from an older256-token run."
+}

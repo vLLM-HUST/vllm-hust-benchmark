@@ -1,0 +1,59 @@
+{
+  "target_parts": {
+    "target_projection": 1624140582912000,
+    "target_qk_av": 47100042936320,
+    "target_vocabulary": 52076478464000,
+    "target_scalar": 7559251772685,
+    "target_prefill": 37781537893440
+  },
+  "draft_interval": {
+    "lower": 44047226615170,
+    "upper": 44221550838350
+  },
+  "prefill_segments": 217,
+  "scalar_parts": {
+    "normalization_residual_gate": 542333132245,
+    "rope_moe_router_attention_gate": 561044962200,
+    "attention_softmax": 137935084640,
+    "causal_convolution": 572732620800,
+    "gdn_decode_recurrence": 5621391360000,
+    "gdn_preprocessing": 123814612800
+  },
+  "prefill_family_parts": {
+    "ho_scan": {
+      "prefix_scan_add": 266640000,
+      "h_wh_dot": 8478429020160,
+      "h_value_residual_subtract": 33118863360,
+      "h_decay_difference": 270974400,
+      "h_value_decay_multiply": 34684723200,
+      "h_kv_dot": 8879289139200,
+      "h_state_decay_and_add": 135738163200,
+      "o_qk_causal_dot": 2236059648000,
+      "o_gate_difference_and_multiply": 17469216000,
+      "o_qh_dot": 8478429020160,
+      "o_av_causal_dot": 2236059648000,
+      "o_state_decay_and_add": 66237726720,
+      "o_output_scale": 34684723200,
+      "exp_evaluations": 9268465920,
+      "clamp_comparisons": 8734608000
+    },
+    "kkt_wy": {
+      "kkt_dot": 2166690201600,
+      "kkt_gate_difference_and_scaling": 25390900800,
+      "wy_value_beta": 34684723200,
+      "wy_key_beta_gate": 69369446400,
+      "wy_lower_triangular_dot": 4472119296000,
+      "exp_evaluations": 8734608000
+    },
+    "inverse": {
+      "inverse16_recurrence": 18904642560,
+      "inverse_merge_triangular_dot": 355177543680,
+      "inverse_negations": 8463633600
+    }
+  },
+  "export_provenance": {
+    "original_filename": "counted-arithmetic-r1.json",
+    "original_sha256": "3f72edabd94eeff3b1ea26387df46ea14b504385746c6803e03a4c2d50767b4e",
+    "kind": "public_evidence_projection"
+  }
+}
