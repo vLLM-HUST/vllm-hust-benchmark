@@ -44,6 +44,20 @@ for record in records:
 资源地址：`https://zenodo.org/api/records/5760304/files/passages.zip/content`。作者[随包说明](https://zenodo.org/api/records/5760304/files/README.txt/content)明确这些段落由原`paragraph_chunker.py`流程产生；不必把重抓Common
 Crawl数十TB作为唯一获取路线。
 
+公共准备入口默认只显示计划。取得完整原包后可只读校验其发布方MD5和完整成员清单，再显式解压整个集合；不抽取小候选库冒充完整检索空间。
+
+```bash
+python scripts/prepare_qrecc_original_collection.py
+python scripts/prepare_qrecc_original_collection.py --action verify \
+  --archive /external/passages.zip
+python scripts/prepare_qrecc_original_collection.py --action extract \
+  --archive /external/passages.zip --output /external/qrecc-prepared \
+  --max-uncompressed-bytes 86557816928
+```
+
+原成员及层级保存在`/external/qrecc-prepared/collection/`；回执与其分开，索引时只传`collection/`，不把准备回执读成检索文档。解压前核验56007个成员及完整容量，拒绝路径穿越、重复成员、链接和非JSONL；逐成员解压检查ZIP
+CRC，至少保留64GiB磁盘余量。已有输出拒绝覆盖，失败现场保留供检查，不自动删除或重做。`verify`只校验整包身份和目录，不冒称已解压或逐成员CRC通过。15项人工ZIP控制在Windows及服务器Linux均通过，服务器公共plan命令exit0，回执为`qrecc-public-collection-entry-20261103-001/qualification-public.json`。真实完整原包仍在获取，公共入口的实际全库验证尚未完成。
+
 已在服务器保存并检查完整原ZIP目录：56007个成员，含56003个JSONL和4个目录，原文件解压合计86557816928字节，最大单成员271773680字节；这是空间计划，尚非整包MD5或成员内容校验。原包现以8MiB/s上限通过内存管道写入服务器，至少保留64GiB共享盘余量，本地不落原包；本服务器直连失败记录保留，不能把它写成发布方资产不存在。原包完整校验、解压、全库索引、原生检索/阅读与评分仍待完成。
 
 该版本另提供`qrecc-test.json`，19546617字节，发布方MD5为`7ad29296a1dfd2f75dafd653a8822269`。<!-- pragma: allowlist secret - public publisher MD5 checksum -->
