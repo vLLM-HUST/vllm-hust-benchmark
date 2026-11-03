@@ -51,6 +51,8 @@ GenNova 与 GenNova Autotune 独立结果已迁往
 - **当前验收标准：** [README 的 Current Delivery Contract](README.md#current-delivery-contract)，
   [公开目标](docs/OFFICIAL_TARGETS.zh-CN.md)；历史规格不能覆盖当前权威契约。
 
+- **PyramidKV Qwen2.5 同配置复测：** [三轮 TP1 开关对照](reports/pyramidkv-qwen25-matched-20261103/README.md)，保留当前运行时、候选代码、480 个正式请求及原始流式响应。仅 Eager 诊断复测，不进入官方榜单。
+
 ## 按路径查询（不加载大数据，不运行实验）
 
 机器索引：[docs/data-index.json](docs/data-index.json)。包含集合、文件数、格式、入口和写入规则。 入口最多显示 12
