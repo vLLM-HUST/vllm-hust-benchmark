@@ -2,6 +2,8 @@
 
 ### 最新原生运行复核（2026-11-04）
 
+WorkArena：已有固定版本作者源码和本地归档时，用 `python scripts/prepare_workarena_author_source.py --author-root <源码目录> --archive <归档路径> --action verify` 复核；软件验证不获取实例凭据。官方 WorkArena-Instances 访问权限、可重置浏览器环境和原生任务评分仍需单独验证。
+
 LongBench v2 长档补跑：用 `scripts/prepare_longbench_v2_original_capacity.py` 对目标模型及窗口做预检，指定 `--row-index 0 --row-index 2 --row-index 7`。将生成的 `capacity-selection.private.json` 传给 `scripts/run_longbench_v2_original_samples.py --capacity-selection`，沿用原输入和 128-token 输出预算。任一固定原题放不下时不截断、不换题；短档和中档复用已有结果。
 
 Full-Duplex-Bench：已取得原包时，用 `python scripts/prepare_full_duplex_original_assets.py --action verify --output <服务器原包目录>` 核验，不重新下载。已有固定版本评分器及客户端源码时，用 `python scripts/prepare_full_duplex_original_scorers.py --verify-only --include-client --output <服务器源码目录>` 核验。两条命令只检查材料；Moshi 双工推理和原生 ASR 评分仍需另行验证。
