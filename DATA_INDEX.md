@@ -70,6 +70,10 @@ GenNova 与 GenNova Autotune 独立结果已迁往
   [14B 并发 64、35B 并发 128 单轮 TP2 对照](reports/pyramidkv-pressure-20261103/README.md)，保留有效开关组、客户端 100
   连接限制的修正和中止记录，并核验服务端实际并发。仅 Eager 诊断，不进入官方榜单。
 
+- **PyramidKV 固定 KV 池对照：**
+  [Qwen2.5 TP2/C64，228,352 槽位单轮对照](reports/pyramidkv-pool228352-20261103/README.md)，保持请求、批预算和插件版本，核验两臂原生池容量；记录用户批准的设备变化及跨轮比较限制。仅
+  Eager 诊断。
+
 ## 按路径查询（不加载大数据，不运行实验）
 
 机器索引：[docs/data-index.json](docs/data-index.json)。包含集合、文件数、格式、入口和写入规则。 入口最多显示 12
