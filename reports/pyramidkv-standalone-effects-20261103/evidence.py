@@ -5,6 +5,7 @@ import io
 import json
 import math
 import re
+import statistics
 import tarfile
 from pathlib import Path, PurePosixPath
 
@@ -28,6 +29,62 @@ def read_json(content: bytes):
 
 def digest(content: bytes) -> str:
     return hashlib.sha256(content).hexdigest()
+
+
+def verify_groups(expected: list[dict], actual: list[dict], rows: list[dict]) -> None:
+    """Check recorded cohort membership and aggregates against request originals."""
+    require(len(expected) == len(actual), "Group count differs")
+    by_id = {row["case_id"]: row for row in rows}
+    require(len(by_id) == len(rows), "Group request IDs are duplicated")
+    seen = set()
+    for frozen, observed in zip(expected, actual):
+        for key in ("name", "kind", "concurrency", "case_ids"):
+            require(observed.get(key) == frozen[key], f"Group {key} differs")
+        ids = frozen["case_ids"]
+        require(
+            bool(ids) and len(ids) == len(set(ids)),
+            "Group membership is empty or duplicated",
+        )
+        require(not seen.intersection(ids), "Group membership overlaps")
+        require(set(ids) <= by_id.keys(), "Group request is missing")
+        seen.update(ids)
+        requests = [by_id[key] for key in ids]
+        good = [row for row in requests if row["success"]]
+        wall = observed["wall_seconds"]
+        require(math.isfinite(wall) and wall > 0, "Group wall time is invalid")
+        require(
+            all(row["e2e_seconds"] <= wall + 1e-9 for row in requests),
+            "Group wall time excludes request duration",
+        )
+        require(
+            math.fsum(row["e2e_seconds"] for row in requests)
+            <= wall * frozen["concurrency"] + 1e-9,
+            "Group wall time contradicts concurrency",
+        )
+        require(observed["success"] == len(good), "Group success count differs")
+        require(
+            observed["failures"] == len(requests) - len(good),
+            "Group failure count differs",
+        )
+        values = {
+            "output_tokens_per_second": sum(
+                row["usage"]["completion_tokens"] for row in good
+            )
+            / wall
+        }
+        for metric in ("ttft_seconds", "tpot_seconds", "e2e_seconds"):
+            values["mean_" + metric] = (
+                statistics.mean(row[metric] for row in good) if good else None
+            )
+        for key, wanted in values.items():
+            value = observed[key]
+            require(
+                value is None
+                if wanted is None
+                else isinstance(value, (float, int))
+                and math.isclose(value, wanted, rel_tol=1e-12, abs_tol=1e-12),
+                f"Group {key} differs",
+            )
 
 
 def safe_member(name: str) -> bool:

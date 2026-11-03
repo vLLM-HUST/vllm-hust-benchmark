@@ -139,6 +139,8 @@ requires the pinned local LongBench inputs.
 
 **Files:**
 
+- Create: `reports/pyramidkv-standalone-effects-20261103/export.py`
+
 - Create: `reports/pyramidkv-standalone-effects-20261103/README.md`, `analysis.json`,
   `members.json`, `SHA256SUMS`, capsule parts and verification receipt.
 - Modify: `docs/data-index.json` through the generator only.

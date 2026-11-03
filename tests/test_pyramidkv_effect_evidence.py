@@ -1113,3 +1113,80 @@ def test_experiment_export_rejects_live_changed_or_unclassified_input(change, tm
         (tmp_path / "runs/unclassified").mkdir()
     with pytest.raises(ValueError, match="Export"):
         module("export").collect_experiment(tmp_path)
+
+
+def group_fixture():
+    expected = [
+        {
+            "name": "capacity",
+            "kind": "capacity",
+            "concurrency": 2,
+            "case_ids": ["a", "b"],
+        }
+    ]
+    rows = [
+        {
+            "case_id": key,
+            "success": True,
+            "usage": {"completion_tokens": 2},
+            "ttft_seconds": 1,
+            "e2e_seconds": 3,
+            "tpot_seconds": 1,
+        }
+        for key in ("a", "b")
+    ]
+    actual = [
+        dict(
+            expected[0],
+            wall_seconds=4,
+            success=2,
+            failures=0,
+            output_tokens_per_second=1,
+            mean_ttft_seconds=1,
+            mean_tpot_seconds=1,
+            mean_e2e_seconds=3,
+        )
+    ]
+    return expected, actual, rows
+
+
+def test_group_receipt_agrees_with_all_requests_and_frozen_membership():
+    expected, actual, rows = group_fixture()
+    module().verify_groups(expected, actual, rows)
+
+
+@pytest.mark.parametrize(
+    "change",
+    [
+        "missing",
+        "extra",
+        "members",
+        "concurrency",
+        "success",
+        "failures",
+        "rate",
+        "mean",
+        "wall",
+        "nonfinite",
+    ],
+)
+def test_group_receipt_rejects_derived_values_or_membership_changes(change):
+    expected, actual, rows = group_fixture()
+    if change == "missing":
+        actual.clear()
+    elif change == "extra":
+        actual.append(copy.deepcopy(actual[0]))
+    else:
+        field, value = {
+            "members": ("case_ids", ["a"]),
+            "concurrency": ("concurrency", 4),
+            "success": ("success", 1),
+            "failures": ("failures", 1),
+            "rate": ("output_tokens_per_second", 999),
+            "mean": ("mean_e2e_seconds", 1),
+            "wall": ("wall_seconds", 2),
+            "nonfinite": ("wall_seconds", float("nan")),
+        }[change]
+        actual[0][field] = value
+    with pytest.raises(ValueError, match="Group"):
+        module().verify_groups(expected, actual, rows)
