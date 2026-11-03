@@ -464,6 +464,7 @@ on:
       - 'configs/workload-native/dailytalk*'
       - 'scripts/*dailytalk*'
       - 'tests/test_dailytalk*.py'
+      - 'tests/test_workload_smoke_checkout.py'
       - '.github/workflows/workload-data-smoke.yml'
   workflow_dispatch:
 
@@ -479,6 +480,13 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
           persist-credentials: false
+          # Keep the existing checks, without downloading historical result blobs.
+          sparse-checkout: |
+            /*
+            !/reports/
+            !/archive/
+            !/submissions/
+          sparse-checkout-cone-mode: false
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
@@ -491,6 +499,8 @@ jobs:
           python -c "import json, pathlib, subprocess; p=pathlib.Path('workload-data-dist'); (p/'BUILD_METADATA.json').write_text(json.dumps({'schema_version':'workload-data-build/v1','source_commit':subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),'distribution':'vllm-hust-workload-data','version':'0.1.0'},indent=2)+'\n',encoding='utf-8')"
       - name: CPU fixtures and data-only boundary
         run: python -m pytest -q tests/test_copilot_original_manifest.py
+      - name: Sparse checkout scope contracts, no data or models
+        run: python -m pytest -q tests/test_workload_smoke_checkout.py
       - name: ScienceWorld CPU preparation and original runner contracts
         run: python -m pytest -q tests/test_scienceworld_original_preparation.py tests/test_scienceworld_original_runner.py tests/test_scienceworld_saved_audit.py
       - name: DeepPlanning original asset preparation fixtures
