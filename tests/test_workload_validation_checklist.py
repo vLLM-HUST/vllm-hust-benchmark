@@ -8,6 +8,30 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def test_qrecc_delivery_requires_full_index_native_rag_and_actual_handoff():
+    ledger = json.loads(
+        (ROOT / "docs/workload-data/dataset-validation-status.json").read_text("utf-8")
+    )
+    row = ledger["delivery_inventory"]["QRECC"]
+    assert row["checked"] and row["status"] == "AVAILABLE" and row["blocker"] is None
+    receipt = json.loads((ROOT / row["delivery_receipt"]).read_text("utf-8"))
+    assert receipt["source_checkbox_eligible"]
+    assert receipt["native_fixed_original_positions"] == [0, 1, 2]
+    assert (
+        receipt["native_completed_tasks"] == 3 and receipt["native_failed_tasks"] == 0
+    )
+    assert receipt["actual_model_responses"] == 6
+    assert receipt["actual_ranked_original_passages"] == 300
+    assert receipt["actual_full_index_documents"] == 54241550
+    assert receipt["all_actual_top100_hits_given_to_reader"]
+    assert receipt["original_test_rows_verified"] == 16451
+    assert receipt["installed_provider_payloads_equal_git"] == 94
+    assert receipt["fixed_public_and_unchanged_research_readbacks"] == 6
+    assert receipt["index_and_research_consumer_unchanged"]
+    assert not receipt["raw_data_published"]
+    assert (ROOT / receipt["optional_scorer_dependencies"]).is_file()
+
+
 def test_tracelab_delivery_requires_original_native_rounds_and_actual_handoff():
     ledger = json.loads(
         (ROOT / "docs/workload-data/dataset-validation-status.json").read_text("utf-8")
@@ -680,7 +704,7 @@ def test_infinitebench_does_not_inherit_unrelated_qrecc_storage_blocker():
     )
     inventory = ledger["delivery_inventory"]
     assert "QReCC" not in (inventory["INFINITEBENCH"]["blocker"] or "")
-    assert inventory["QRECC"]["checked"] is False
+    assert inventory["INFINITEBENCH"]["checked"] is False
 
 
 def test_gpqa_fixed_artifact_and_native_main_do_not_hide_skipped_task():

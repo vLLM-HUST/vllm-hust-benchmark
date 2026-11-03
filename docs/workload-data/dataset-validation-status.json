@@ -2986,6 +2986,30 @@
       }
     },
     "QRECC": {
+      "final_native_delivery_audit": {
+        "server_receipt": "qrecc-native-actual-ci-research-audit-20261103-001/qualification-public.json",
+        "model_and_software_binding_receipt": "qrecc-native-actual-ci-research-audit-20261103-001/model-software-binding-public.json",
+        "native_completed_tasks": 3,
+        "native_failed_tasks": 0,
+        "original_positions": [0, 1, 2],
+        "actual_model_responses": 6,
+        "actual_ranked_passages": 300,
+        "all_actual_top100_hits_supplied_to_reader": true,
+        "original_test_records_verified": 16451,
+        "installed_successful_ci_provider_payloads_equal_git": 94,
+        "native_public_software_files_equal_git": 8,
+        "fixed_public_unchanged_research_readbacks": 6,
+        "ci_run_id": 41622114199,
+        "ci_artifact_id": 13224650659,
+        "source_index_and_research_consumer_unchanged": true,
+        "research_default_lock_changed": false,
+        "new_model_calls_during_audit": 0,
+        "qa_exact_match": 0.0,
+        "qa_f1": 0.30235294117647055,
+        "qa_metric_scale": "0_to_1",
+        "declared_protocol_only_not_paper_baseline_or_full_test_inference": true,
+        "source_checkbox_eligible": true
+      },
       "existing_public_test_preparation_reused": {
         "server_receipt": "qrecc-native-original-test-prepared-20261103-001/qualification-public.json",
         "public_entry": "workload-data prepare-qrecc-test",
@@ -3233,14 +3257,14 @@
         "model_calls": 0,
         "source_checkbox_eligible": false
       },
-      "saved_answer_scoring_scope": "Pinned unchanged author QA functions; strict original test and task identity, all selected predictions retained including wrong answers. Software fixtures only; no original test predictions, retrieval or NPU execution verified.",
-      "delivery_kind": "review_original_source_protocol",
-      "status": "BLOCKED",
-      "checked": false,
+      "saved_answer_scoring_scope": "Pinned unchanged author QA functions over the actual fixed original0/1/2 predictions; original inputs, full-index actual top100 retrieval and NPU responses independently verified. Sample EM/F1 are not paper replication, full-test inference or engine performance.",
+      "delivery_kind": "original_full_index_conversational_retrieval_qa_llm_profile",
+      "status": "AVAILABLE",
+      "checked": true,
       "legacy_checked": false,
       "existing_receipt": null,
-      "delivery_receipt": null,
-      "blocker": "完整原集合56003文件/86557816928字节已再次核对发布ZIP CRC；54573064行中331514行按原Java trim规则为空，剩余54241550与原日志indexed及实际Lucene文档数一致。原索引可用，未重建；原生改写/检索/阅读、评分及消费闭环仍待完成。两版test16451条原关系保留，新版Passages和24条不同Answer_URL不混入检索输入或冒充检索结果。"
+      "delivery_receipt": "docs/workload-data/validation/qrecc-original-native-delivery-20261103.json",
+      "blocker": null
     },
     "INFINITEBENCH": {
       "scope": "public",

@@ -1,6 +1,6 @@
-# QReCC 原始测试数据准备与原生检索缺口
+# QReCC 原始数据准备与原生检索问答运行
 
-当前状态（2026-11-03）：完整原passages包、56003成员CRC、54573064原行及Java空行规则均已核验，实际完整Lucene索引为54241550文档；早期“下载/构建中”记录不再是当前缺口。公开改写/检索/阅读入口和三步原评分链路见[唯一勾选清单的QReCC段](DATASET_CHECKLIST.zh-CN.md#qrecc%E5%8E%9F%E6%A3%80%E7%B4%A2%E9%9B%86%E5%90%88%E8%8E%B7%E5%8F%962026-11-03)。原test准备接口已复用成功CI安装包在服务器执行，完整索引搜索控制返回100条真实原正文；原题完整模型RAG及最终交付仍未完成，来源不打勾。
+当前状态（2026-11-03）：完整原passages包、56003成员CRC、54573064原行及Java空行规则均已核验，实际完整Lucene索引为54241550文档；早期“下载/构建中”记录不再是当前缺口。固定原0/1/2完整模型RAG、原检索/QA评分和6处公共/未修改研究回读均已通过，全16451原记录及其参考/关系保留。声明的本地LLM协议已交付，不代表全test推理、论文训练模型复现或性能验收。[运行与勾选清单](DATASET_CHECKLIST.zh-CN.md#qrecc%E5%8E%9F%E6%A3%80%E7%B4%A2%E9%9B%86%E5%90%88%E8%8E%B7%E5%8F%962026-11-03)，[最终回执](validation/qrecc-original-native-delivery-20261103.json)。
 
 ## 来源与任务范围
 
@@ -14,6 +14,26 @@
 Rewrite/Answer/Answer_URL 作为待预测任务的输入。
 
 发布方 README 声明数据为 CC BY-SA 3.0，代码为 Apache-2.0，两者不混同。本仓仅提供元数据、准备代码和使用入口，不公开复制原始数据或答案。使用者自行按许可取得归档。
+
+## 已验证的运行与评分环境
+
+本地LLM执行示例使用Python3.12.13、Java11（实测Temurin11.0.32.1+1）和Pyserini0.10.0.1发布包内的原Anserini0.10
+JAR；不要求其Python检索包装器。JAR路径由`--jar`显式给定，执行入口核验其固定SHA256，不能改用较新0.44或SCAI0.12的JAR。索引须保留原`storePositions/storeDocvectors/storeRaw`，公开入口只读搜索，不重建或缩小集合。
+
+原评分客户端独立安装，避免把旧nltk依赖写进模型服务环境：
+
+```bash
+python -m venv /data/qrecc-scorer-client
+/data/qrecc-scorer-client/bin/python -m pip install \
+  setuptools==75.8.0 wheel==0.45.1 packaging==24.2
+/data/qrecc-scorer-client/bin/python -m pip install --no-build-isolation \
+  -r configs/workload-native/qrecc-original-scorer-client.txt
+```
+
+模型实跑绑定为Qwen3-14B固定权重版本、BF16、单NPU、131072上下文、YaRN4（原32768）、eager、并发1、batch-token上限4096、显存预算0.9；每个模型请求固定非思考和温度0，改写128/回答512输出上限。原服务额外保留已获授权的cached-token报告，不据此报告性能。完整版本、模型revision和真实样本结果见[最终回执](validation/qrecc-original-native-delivery-20261103.json)；软件包标签中的`+cpu`不是LLM执行设备，本次LLM明确在Ascend
+NPU，Java检索和非神经评分在CPU。
+
+该环境用于公开入口的功能验证，不是作者训练模型复现或引擎性能验收；换模型、预算或检索参数应单列配置，不与此样本成绩混报。
 
 ## 准备和读取
 
