@@ -120,6 +120,20 @@ python scripts/prepare_jsonschemabench_author_source.py --source qrecc \
 
 `-threads 2`与`-Xmx4g`是保守的待全库验证配置，不是作者的76线程实测配置，也未证明足以完成全库。尚未执行上述QReCC建库命令、Python包装器或原生RAG。必须核查原日志和实际索引/排名文件，不能只凭进程退出0判断成功。
 
+原锁版本的`io.anserini.index.IndexUtils`主类探针实查返回ClassNotFound，不能以此断言已有索引损坏，也不以新版本工具读取原索引后混报。独立只读计数入口使用本仓固定、非模型生成的Java源码和原JAR，通过Lucene
+`DirectoryReader`读取实际索引文档数，不创建或重建索引：
+
+```bash
+python scripts/probe_qrecc_original_index.py \
+  --index /external/qrecc-index --java /external/jdk-11.0.32.1+1/bin/java \
+  --jar /external/pyserini-0.10.0.1/pyserini/resources/jars/anserini-0.10.0-fatjar.jar \
+  --output /private/fresh-qrecc-index-probe --execute
+```
+
+不加`--execute`只显示计划。上例只返回实际文档数；完整集合的真实条数另经核验后，可传`--expected-documents`进行精确比较，不能把论文约5400万直接当成精确值。默认Java堆上限1024MiB，可用`--heap-mib`显式配置；这不证明全库内存需求。输出在索引外的私有新目录，失败保留日志，计数相符也不自动证明原集合来源、检索/阅读执行或任务质量。
+
+7项人工子进程控制通过；服务器公共plan/execute实际复用原锁版本的3文档软件索引，读回3，16个原索引文件哈希均未改变，没有重新建库或模型调用。回执：`qrecc-public-index-counter-control-20261103-001/qualification-public.json`；这不是QReCC全库索引验证。
+
 历史Pyserini0.44/Java21软件对照及错误CLI参数日志保留在`qrecc-original-index-runtime-20261103-001`，不将其索引与原始锁版本混用。另核查到[竞赛组织方SCAI基线](https://github.com/webis-de/SCAI-QReCC/tree/8020bbe28127ca6af5fe99534908b4b33f331731/code/simple-baseline)锁定Pyserini0.12.0，属于不同软件协议；其测试集/评分修订也不能静默替换本方案的固定Apple任务。该组织方简单基线的回答阶段是启发式句子选择，不能拿它冒充NPU阅读模型或原端到端神经基线。
 
 ### 已保存检索结果的作者函数评分入口

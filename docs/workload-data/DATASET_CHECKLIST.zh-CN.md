@@ -2176,6 +2176,11 @@ python scripts/run_scienceagentbench_scientific.py --action run \
 WavCaps是弱标注音频—文本资产；作者captioning示例使用专用音频编码器和BART
 checkpoint，不能直接填入Qwen文本服务。原评分器要求五条参考的接口不能靠复制弱标注caption凑足；须按原任务选用真实评价资产和协议。其音频仅限学术研究且保留各源条件，不作默认企业再分发。以上准备不增加来源完成数，机器清单状态为`IN_PROGRESS`。
 
+#### GAIA原始数据访问前置条件（2026-11-03）
+
+GAIA访问前置条件补查（2026-11-03）：[官方页面](https://huggingface.co/datasets/gaia-benchmark/GAIA)仍要求账号同意信息共享和访问条件，并限制公开再分发。当前自有NPU及专用CPU的默认HF环境凭据/令牌文件均未配置，仅检查存在性，未读取或打印凭据，也未代用户接受条款。已请求配置已获授权账号；原任务、原附件、Agent/工具、评分和研究交接仍未完成，不以QBI
+FrozenEvidence、公开镜像或改写题目替代，不打来源总勾。
+
 #### QReCC原检索集合获取（2026-11-03）
 
 - [x] 公开保存检索结果评分入口及独立nltk3.5客户端已补齐；15项人工保存结果控制、服务器4个人工查询的真实作者函数控制通过，保留零命中任务分母及100位之后的真实命中，不补造段落。原函数对零命中的抽取上界未定义时明确记null，不冒充模型成绩。复用旧原CLI相同输入及5指标对照一致，不重跑旧CLI；尚不是原题检索/阅读执行。回执：`qrecc-public-retrieval-score-control-20261103-002/qualification-public.json`。
