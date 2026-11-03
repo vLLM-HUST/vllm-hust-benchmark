@@ -71,6 +71,12 @@ def test_architecture_never_promotes_preflight_to_execution(
     assert not result["docker_built_or_run"]
     assert result["model_calls"] == 0
     assert not result["source_checkbox_eligible"]
+    assert (
+        result["publisher_reproduction_entry"]
+        == "project/paperbench/paperbench/reproduce.py"
+    )
+    assert result["publisher_scoring_entry"] == "project/paperbench/paperbench/grade.py"
+    assert not result["native_agent_reproduction_or_scoring_executed"]
 
 
 def test_modified_source_is_rejected_before_recipe_inspection(tmp_path):

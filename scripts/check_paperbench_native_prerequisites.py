@@ -77,6 +77,9 @@ def inspect_original(author_root, *, pins_path=PINS, host_architecture=None):
         "docker_built_or_run": False,
         "model_calls": 0,
         "native_agent_reproduction_or_scoring_executed": False,
+        "publisher_reproduction_entry": PROJECT + "paperbench/reproduce.py",
+        "publisher_scoring_entry": PROJECT + "paperbench/grade.py",
+        "scoring_input_contract": "Reproduction submission archive and matching original paper rubric",
         "source_checkbox_eligible": False,
         "remaining": [
             "Qualify actual isolated images and execution architecture; matching host alone is insufficient",
