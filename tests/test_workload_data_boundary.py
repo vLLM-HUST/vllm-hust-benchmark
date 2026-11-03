@@ -5,6 +5,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1] / "workload-preparation"
 DATA_MODULES = {
+    "gaia",  # Original tasks/attachments and separate references only; no Agent, network or observation.
     "msmarco",  # Original candidate/query/qrel aggregation only; no model, network or observation.
     "discoverybench",  # Original task/reference/data relations only; no Agent or models.
     "longmemeval_v2",  # Original memory/data-file relations only, no observation or models.
@@ -68,6 +69,22 @@ DATA_MODULES = {
 def test_only_data_modules_are_included():
     actual = {path.stem for path in (ROOT / "src/vllm_hust_workload_data").glob("*.py")}
     assert actual == DATA_MODULES
+
+
+def test_gaia_reader_has_no_agent_model_network_or_research_imports():
+    import ast
+
+    tree = ast.parse((ROOT / "src/vllm_hust_workload_data/gaia.py").read_text("utf-8"))
+    assert {
+        node.module for node in ast.walk(tree) if isinstance(node, ast.ImportFrom)
+    } == {"copy", "pathlib", "assets", "records", "registry"}
+    assert not any(isinstance(node, ast.Import) for node in ast.walk(tree))
+    assert not any(
+        isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Name)
+        and node.func.id in {"eval", "exec", "compile", "__import__"}
+        for node in ast.walk(tree)
+    )
 
 
 def test_msmarco_reader_only_aggregates_data_in_memory():
