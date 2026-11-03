@@ -13,7 +13,10 @@ import bind_marble_research_local as binder  # noqa: E402
 import run_marble_original_research as entry  # noqa: E402
 
 
-def test_cli_recovery_selects_only_original_row_two(tmp_path, monkeypatch):
+@pytest.mark.parametrize("returned_rows,exit_code", [([2], 0), ([], 1), ([0], 1)])
+def test_cli_recovery_selects_only_original_row_two(
+    tmp_path, monkeypatch, returned_rows, exit_code
+):
     prepared = {"fixed_original_rows": [0, 1, 2], "source_checkbox_eligible": False}
     monkeypatch.setattr(entry, "prepare", lambda *_: prepared)
 
@@ -25,7 +28,10 @@ def test_cli_recovery_selects_only_original_row_two(tmp_path, monkeypatch):
         assert report["source_checkbox_eligible"] is False
         return dict(
             report,
-            completed=[],
+            completed=[
+                {"original_row": row, "cli_exit_code": 0, "result_file_exists": True}
+                for row in returned_rows
+            ],
             model_http={"requests": 1, "pending": 0, "non200_responses": 0},
         )
 
@@ -35,7 +41,7 @@ def test_cli_recovery_selects_only_original_row_two(tmp_path, monkeypatch):
         for name in ("author-root", "prepared-root", "bound-root", "output")
         for arg in ("--" + name, str(tmp_path))
     ]
-    assert entry.main([*argv, "--execute", "--original-row", "2"]) == 0
+    assert entry.main([*argv, "--execute", "--original-row", "2"]) == exit_code
 
 
 def fixture_prefix(tmp_path, count=3):

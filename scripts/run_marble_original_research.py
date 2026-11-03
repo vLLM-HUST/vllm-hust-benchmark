@@ -396,7 +396,12 @@ def main(argv=None):
     return int(
         args.execute
         and (
-            any(
+            (
+                args.original_row is not None
+                and [row.get("original_row") for row in report["completed"]]
+                != [args.original_row]
+            )
+            or any(
                 row["cli_exit_code"] != 0 or not row["result_file_exists"]
                 for row in report["completed"]
             )
