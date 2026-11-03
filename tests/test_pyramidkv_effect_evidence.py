@@ -24,7 +24,11 @@ def module(name="evidence"):
         "effect_" + name, REPORT / f"{name}.py"
     )
     loaded = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(loaded)
+    sys.path.insert(0, str(REPORT))
+    try:
+        spec.loader.exec_module(loaded)
+    finally:
+        sys.path.remove(str(REPORT))
     return loaded
 
 
@@ -560,3 +564,284 @@ def test_quality_requires_every_original_row_and_matching_subsets():
 )
 def test_quality_f1_normalizes_and_uses_best_reference(prediction, answers, want):
     assert module("analyze").qa_f1(prediction, answers) == pytest.approx(want)
+
+
+def telemetry_fixture():
+    metrics = {
+        "vllm:kv_cache_usage_perc": 0.2,
+        "vllm:num_requests_running": 1,
+        "vllm:num_requests_waiting": 0,
+        "vllm:num_preemptions_total": 0,
+        "vllm:spec_decode_num_draft_tokens_total": 2,
+        "vllm:spec_decode_num_accepted_tokens_total": 1,
+    }
+    device = "| 1 910B2 |\n| 0 | 0 / 0 47000 / 65536 |\n| 6 910B2 |\n| 0 | 0 / 0 47002 / 65536 |\n"
+    return [
+        {"time_unix": 10, "phase": "warmup", "metrics": metrics, "npu_smi": device},
+        {
+            "time_unix": 11,
+            "phase": "perf",
+            "metrics": dict(
+                metrics,
+                **{
+                    "vllm:kv_cache_usage_perc": 0.7,
+                    "vllm:num_requests_running": 4,
+                    "vllm:num_requests_waiting": 2,
+                    "vllm:num_preemptions_total": 1,
+                },
+            ),
+            "npu_smi": device.replace("47000", "48000").replace("47002", "48002"),
+        },
+    ]
+
+
+def test_resource_summary_keeps_sampled_hbm_and_kv_ownership_separate():
+    result = module("analyze").resource_summary(telemetry_fixture(), [1, 6])
+    assert result["device_hbm_mib"] == {
+        "1": {"minimum": 47000, "peak": 48000},
+        "6": {"minimum": 47002, "peak": 48002},
+    }
+    assert result["peak_kv_usage_fraction"] == 0.7
+    assert result["phases"]["perf"]["peak_running_requests"] == 4
+    assert result["phases"]["perf"]["peak_waiting_requests"] == 2
+    assert result["samples"] == 2
+
+
+@pytest.mark.parametrize(
+    "change",
+    [
+        "time",
+        "missing",
+        "nonfinite",
+        "negative",
+        "error",
+        "device",
+        "hbm",
+        "counter_reset",
+        "no_hbm",
+    ],
+)
+def test_resource_summary_rejects_incomplete_or_inconsistent_samples(change):
+    rows = telemetry_fixture()
+    if change == "time":
+        rows[1]["time_unix"] = 9
+    elif change == "missing":
+        del rows[1]["metrics"]["vllm:num_preemptions_total"]
+    elif change == "nonfinite":
+        rows[1]["metrics"]["vllm:kv_cache_usage_perc"] = float("nan")
+    elif change == "negative":
+        rows[1]["metrics"]["vllm:num_requests_waiting"] = -1
+    elif change == "error":
+        rows[1]["error"] = "sample failed"
+    elif change == "device":
+        rows[1]["npu_smi"] = rows[1]["npu_smi"].replace("6 910B2", "7 910B2")
+    elif change == "hbm":
+        rows[1]["npu_smi"] = rows[1]["npu_smi"].replace("65536", "32768")
+    elif change == "counter_reset":
+        rows[1]["metrics"]["vllm:spec_decode_num_draft_tokens_total"] = 0
+    else:
+        for row in rows:
+            row.pop("npu_smi")
+    with pytest.raises(ValueError, match="Telemetry"):
+        module("analyze").resource_summary(rows, [1, 6])
+
+
+def metrics_fixture(preemptions, draft, accepted):
+    return "\n".join(
+        f'vllm:{key}_total{{model_name="model"}} {value}'
+        for key, value in [
+            ("num_preemptions", preemptions),
+            ("spec_decode_num_draft_tokens", draft),
+            ("spec_decode_num_accepted_tokens", accepted),
+        ]
+    )
+
+
+def test_counter_deltas_use_process_boundaries():
+    result = module("analyze").counter_deltas(
+        metrics_fixture(0, 2, 1), metrics_fixture(3, 12, 7)
+    )
+    assert result == {
+        "num_preemptions": 3,
+        "spec_decode_num_draft_tokens": 10,
+        "spec_decode_num_accepted_tokens": 6,
+    }
+
+
+@pytest.mark.parametrize(
+    "after",
+    [
+        metrics_fixture(-1, 12, 7),
+        metrics_fixture(0, 1, 0),
+        metrics_fixture(0, 12, 20),
+        metrics_fixture(0, "NaN", 7),
+        "",
+    ],
+)
+def test_counter_deltas_reject_reset_impossible_acceptance_or_missing_metrics(after):
+    with pytest.raises(ValueError, match="Counter"):
+        module("analyze").counter_deltas(metrics_fixture(0, 2, 1), after)
+
+
+def private_fixture(root):
+    (root / "data").mkdir()
+    hashes = {}
+    for task in ("narrativeqa", "qasper", "2wikimqa"):
+        data = "".join(
+            json.dumps({"_id": f"{task}-{i}", "answers": [f"answer-{i}"]}) + "\n"
+            for i in range(100)
+        ).encode()
+        (root / "data" / f"{task}.jsonl").write_bytes(data)
+        hashes[task] = hashlib.sha256(data).hexdigest()
+    return {"dataset_files_sha256": hashes}
+
+
+def test_private_reference_loading_checks_pinned_files_and_row_identity(tmp_path):
+    manifest = private_fixture(tmp_path)
+    result = module("private_inputs").load_references(tmp_path, manifest)
+    assert len(result) == 300
+    assert result["qasper-050"] == {"dataset_id": "qasper-50", "answers": ["answer-50"]}
+
+
+@pytest.mark.parametrize("change", ["missing", "digest", "too_few", "bad_answers"])
+def test_private_reference_loading_rejects_missing_wrong_or_invalid_inputs(
+    tmp_path, change
+):
+    manifest = private_fixture(tmp_path)
+    path = tmp_path / "data/qasper.jsonl"
+    if change == "missing":
+        path.unlink()
+    elif change == "digest":
+        path.write_text(path.read_text().replace("answer-50", "changed-answer"))
+    else:
+        rows = [json.loads(line) for line in path.read_text().splitlines()]
+        if change == "too_few":
+            rows.pop()
+        else:
+            rows[50]["answers"] = []
+        path.write_text("".join(json.dumps(row) + "\n" for row in rows))
+        manifest["dataset_files_sha256"]["qasper"] = hashlib.sha256(
+            path.read_bytes()
+        ).hexdigest()
+    with pytest.raises(ValueError, match="Private"):
+        module("private_inputs").load_references(tmp_path, manifest)
+
+
+def test_rebuilt_private_request_matches_recorded_generation_shape():
+    case, payload, _row, _chunks = response_fixture()
+    case["prompt"] = [11, 12]
+    result = module("private_inputs").request_bytes(case)
+    assert json.loads(result) == payload
+    assert result.endswith(b"\n")
+    assert (
+        hashlib.sha256(result).hexdigest()
+        == hashlib.sha256(
+            (json.dumps(payload, ensure_ascii=False, indent=2) + "\n").encode()
+        ).hexdigest()
+    )
+
+
+def runtime_fixture():
+    experiment = "/root/.cache/pyramidkv-issue31-20261103"
+    model = "/root/workspace/Qwen3.5-35B-A3B"
+    options = {
+        "--host": "127.0.0.1",
+        "--port": "8013",
+        "--served-model-name": "qwen35-pyramidkv",
+        "--tensor-parallel-size": "2",
+        "--distributed-executor-backend": "mp",
+        "--worker-cls": "vllm_ascend_pyramidkv.adapter.host_worker.PyramidKVHostWorker",
+        "--dtype": "bfloat16",
+        "--max-model-len": "32768",
+        "--max-num-seqs": "4",
+        "--max-num-batched-tokens": "4096",
+        "--gpu-memory-utilization": "0.9",
+        "--kv-cache-memory-bytes": "8589934592",
+        "--seed": "17",
+        "--mamba-cache-mode": "align",
+        "--additional-config": '{"enable_cpu_binding":false}',
+        "--limit-mm-per-prompt": '{"image":0,"video":0}',
+        "--compilation-config": '{"cudagraph_mode":"FULL_AND_PIECEWISE","cudagraph_capture_sizes":[3,6,12],"max_cudagraph_capture_size":12}',
+        "--speculative-config": '{"method":"mtp","num_speculative_tokens":2}',
+        "--generation-config": "vllm",
+    }
+    argv = ["python", "-m", "vllm.entrypoints.cli.main", "serve", model]
+    for key, value in options.items():
+        argv.extend([key, value])
+    argv.extend(
+        [
+            "--enable-prefix-caching",
+            "--enable-chunked-prefill",
+            "--async-scheduling",
+            "--enable-prompt-tokens-details",
+        ]
+    )
+    env = {
+        "PYRAMIDKV_ENABLED": "1",
+        "VLLM_ASCEND_PYRAMIDKV_ENABLED": "1",
+        "VLLM_ASCEND_PYRAMIDKV_BATCHED_METADATA": "1",
+        "VLLM_ASCEND_PYRAMIDKV_EXPERIMENTAL_MTP2": "1",
+        "ASCEND_RT_VISIBLE_DEVICES": "0,1",
+        "MODEL_PATH": model,
+        "SERVE_PORT": "8013",
+        "PYRAMIDKV_KV_CACHE_MEMORY_BYTES": "8589934592",
+        "PYRAMIDKV_CONFIG": experiment + "/pyramidkv-aligned.json",
+        "VLLM_ASCEND_PYRAMIDKV_CONFIG": experiment + "/pyramidkv-aligned.json",
+        "VLLM_PLUGINS": "ascend,ascend_model,ascend_model_loader,ascend_kv_connector,ascend_pyramidkv",
+        "PYTHONPATH": experiment
+        + "/release-overlay:/root/workspace/pyramidkv-runtime/src/vllm:/root/workspace/pyramidkv-runtime/src/vllm-ascend",
+    }
+    return {"argv": argv, "selected_environment": env}, {
+        "enabled": True,
+        "kv_bytes_per_worker": 8589934592,
+    }
+
+
+def test_observed_runtime_qualifies_only_the_frozen_host_profile():
+    snapshot, lifecycle = runtime_fixture()
+    module("runtime").verify_runtime(snapshot, lifecycle)
+
+
+@pytest.mark.parametrize(
+    "change",
+    [
+        "graph",
+        "mtp",
+        "concurrency",
+        "kv",
+        "dtype",
+        "duplicate",
+        "extra",
+        "disabled",
+        "metadata",
+        "overlay",
+        "device",
+    ],
+)
+def test_observed_runtime_rejects_changed_profile_or_activation(change):
+    snapshot, lifecycle = runtime_fixture()
+    argv = snapshot["argv"]
+    field_changes = {
+        "graph": ("--compilation-config", '{"cudagraph_mode":"NONE"}'),
+        "mtp": ("--speculative-config", '{"method":"mtp","num_speculative_tokens":1}'),
+        "concurrency": ("--max-num-seqs", "8"),
+        "kv": ("--kv-cache-memory-bytes", "2147483648"),
+        "dtype": ("--dtype", "float16"),
+    }
+    if change in field_changes:
+        flag, value = field_changes[change]
+        argv[argv.index(flag) + 1] = value
+    elif change == "duplicate":
+        argv.extend(["--seed", "18"])
+    elif change == "extra":
+        argv.append("--enforce-eager")
+    else:
+        key, value = {
+            "disabled": ("VLLM_ASCEND_PYRAMIDKV_ENABLED", "0"),
+            "metadata": ("VLLM_ASCEND_PYRAMIDKV_BATCHED_METADATA", "0"),
+            "overlay": ("PYTHONPATH", "/some/editable/source"),
+            "device": ("ASCEND_RT_VISIBLE_DEVICES", "1,6"),
+        }[change]
+        snapshot["selected_environment"][key] = value
+    with pytest.raises(ValueError, match="Runtime"):
+        module("runtime").verify_runtime(snapshot, lifecycle)
