@@ -6,6 +6,7 @@ import importlib.util
 import io
 import json
 import os
+import shutil
 import subprocess
 import sys
 import tarfile
@@ -1190,3 +1191,112 @@ def test_group_receipt_rejects_derived_values_or_membership_changes(change):
         actual[0][field] = value
     with pytest.raises(ValueError, match="Group"):
         module().verify_groups(expected, actual, rows)
+
+
+def lifecycle_fixture():
+    snapshot, lifecycle = runtime_fixture()
+    lifecycle.update(name="quality8-on", request_count=2)
+    snapshot.update(pid=123, at=12)
+    return lifecycle, {
+        "process": {
+            "pid": 123,
+            "pgid": 123,
+            "start_ticks": "1000",
+            "at": 10,
+            "lifecycle": copy.deepcopy(lifecycle),
+            "contract_sha256": "frozen",
+        },
+        "ready": {"pid": 123, "at": 20},
+        "completion": {"at": 30, "requests": 2, "request_execution_complete": True},
+        "shutdown": {"at": 31, "server_returncode": 0},
+        "snapshot": snapshot,
+    }
+
+
+def test_lifecycle_receipts_prove_order_identity_and_request_completion():
+    lifecycle, records = lifecycle_fixture()
+    result = module("runtime").verify_lifecycle_records(lifecycle, records, "frozen", 9)
+    assert result["identity"] == [123, "1000"]
+    assert result["shutdown_at"] == 31
+    assert result["actual_runtime_snapshot"] is True
+
+
+@pytest.mark.parametrize(
+    "change",
+    [
+        "contract",
+        "lifecycle",
+        "ready_pid",
+        "pgid",
+        "overlap",
+        "ready_time",
+        "completion_time",
+        "shutdown_time",
+        "nan",
+        "incomplete",
+        "count",
+        "missing_snapshot",
+        "snapshot_pid",
+        "snapshot_time",
+    ],
+)
+def test_lifecycle_receipts_reject_missing_mixed_or_reordered_evidence(change):
+    lifecycle, records = lifecycle_fixture()
+    if change == "missing_snapshot":
+        records["snapshot"] = None
+    else:
+        section, key, value = {
+            "contract": ("process", "contract_sha256", "changed"),
+            "lifecycle": ("process", "lifecycle", {}),
+            "ready_pid": ("ready", "pid", 99),
+            "pgid": ("process", "pgid", 99),
+            "overlap": ("process", "at", 8),
+            "ready_time": ("ready", "at", 9),
+            "completion_time": ("completion", "at", 19),
+            "shutdown_time": ("shutdown", "at", 29),
+            "nan": ("ready", "at", float("nan")),
+            "incomplete": ("completion", "request_execution_complete", False),
+            "count": ("completion", "requests", 1),
+            "snapshot_pid": ("snapshot", "pid", 99),
+            "snapshot_time": ("snapshot", "at", 32),
+        }[change]
+        records[section][key] = value
+    with pytest.raises(ValueError, match="Lifecycle"):
+        module("runtime").verify_lifecycle_records(lifecycle, records, "frozen", 9)
+
+
+def test_missing_first_off_snapshot_is_disclosed_instead_of_fabricated():
+    lifecycle, records = lifecycle_fixture()
+    lifecycle.update(name="quality8-off", enabled=False)
+    records["process"]["lifecycle"] = copy.deepcopy(lifecycle)
+    records["snapshot"] = None
+    result = module("runtime").verify_lifecycle_records(lifecycle, records, "frozen", 9)
+    assert result["actual_runtime_snapshot"] is False
+
+
+def test_shutdown_returncode_is_retained_separately_from_successful_requests():
+    lifecycle, records = lifecycle_fixture()
+    records["shutdown"]["server_returncode"] = -15
+    result = module("runtime").verify_lifecycle_records(lifecycle, records, "frozen", 9)
+    assert result["server_returncode"] == -15
+
+
+def test_pooled_wall_time_recomputes_identically_on_python311():
+    executable = shutil.which("python3.11")
+    if executable is None:
+        pytest.skip("Cross-version check requires Python 3.11")
+    script = """
+import sys,json
+sys.path.insert(0,sys.argv[1])
+from analyze import summarize_groups
+row={"case_id":"x","success":True,"usage":{"completion_tokens":1,"prompt_tokens_details":{"cached_tokens":0}},"ttft_seconds":0.1,"e2e_seconds":0.2,"tpot_seconds":0.1}
+groups=[{"case_ids":["x"],"wall_seconds":w} for w in (1e16,1.0,1.0)]
+print(json.dumps(summarize_groups([(groups,[row])])["wall_seconds"]))
+"""
+    result = subprocess.run(
+        [executable, "-c", script, str(REPORT)],
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    assert json.loads(result.stdout) == 10000000000000002.0

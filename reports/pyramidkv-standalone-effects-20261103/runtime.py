@@ -1,8 +1,76 @@
 """Check observed launch treatment against this experiment's frozen host profile."""
 
 import json
+import math
 
 from evidence import require
+
+
+def verify_lifecycle_records(
+    lifecycle: dict, records: dict, contract_sha: str, previous_shutdown: float
+) -> dict:
+    """Join original process/readiness/completion receipts without inventing observations."""
+    process, ready, completion, shutdown = (
+        records[key] for key in ("process", "ready", "completion", "shutdown")
+    )
+    require(
+        process["lifecycle"] == lifecycle
+        and process["contract_sha256"] == contract_sha,
+        "Lifecycle contract or definition differs",
+    )
+    require(
+        type(process["pid"]) is int
+        and process["pid"] > 0
+        and process["pid"] == process["pgid"] == ready["pid"],
+        "Lifecycle process identity differs",
+    )
+    require(
+        isinstance(process["start_ticks"], str) and process["start_ticks"].isdigit(),
+        "Lifecycle start ticks are invalid",
+    )
+    times = [row["at"] for row in (process, ready, completion, shutdown)]
+    require(
+        all(
+            isinstance(value, (int, float)) and math.isfinite(value) for value in times
+        ),
+        "Lifecycle timestamp is invalid",
+    )
+    require(
+        previous_shutdown < times[0] < times[1] <= times[2] <= times[3],
+        "Lifecycle timestamps overlap or are reversed",
+    )
+    require(
+        completion["request_execution_complete"] is True
+        and completion["requests"] == lifecycle["request_count"],
+        "Lifecycle requests are incomplete",
+    )
+    require(
+        type(shutdown["server_returncode"]) is int,
+        "Lifecycle lacks final server return code",
+    )
+    snapshot = records.get("snapshot")
+    if snapshot is None:
+        require(
+            lifecycle["name"] == "quality8-off" and not lifecycle["enabled"],
+            "Lifecycle actual runtime snapshot missing",
+        )
+    else:
+        require(
+            snapshot["pid"] == process["pid"]
+            and times[0] <= snapshot["at"] <= times[2],
+            "Lifecycle runtime snapshot belongs to another process or time",
+        )
+        verify_runtime(snapshot, lifecycle)
+    return {
+        "identity": [process["pid"], process["start_ticks"]],
+        "started_at": times[0],
+        "ready_at": times[1],
+        "completed_at": times[2],
+        "shutdown_at": times[3],
+        "server_returncode": shutdown["server_returncode"],
+        "actual_runtime_snapshot": snapshot is not None,
+    }
+
 
 EXPERIMENT = "/root/.cache/pyramidkv-issue31-20261103"
 MODEL = "/root/workspace/Qwen3.5-35B-A3B"

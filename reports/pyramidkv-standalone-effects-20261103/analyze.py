@@ -71,8 +71,8 @@ def summarize_groups(batches: list[tuple[list[dict], list[dict]]]) -> dict:
         "successful_requests": len(good),
         "failed_requests": len(selected) - len(good),
         "output_tokens": tokens,
-        "wall_seconds": sum(elapsed),
-        "output_tokens_per_second": tokens / sum(elapsed),
+        "wall_seconds": math.fsum(elapsed),
+        "output_tokens_per_second": tokens / math.fsum(elapsed),
         "cohort_output_tokens_per_second": rates,
         "cached_prompt_tokens": sum(
             row["usage"]["prompt_tokens_details"]["cached_tokens"] for row in good
