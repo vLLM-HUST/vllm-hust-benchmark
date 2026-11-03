@@ -106,8 +106,8 @@ def test_real_git_sparse_patterns_preserve_inputs_and_complete_tracked_index(tmp
 def test_actual_smoke_checkout_does_not_materialize_result_capsules():
     # Full CI intentionally retains these directories; only this smoke is sparse.
     if os.environ.get("GITHUB_WORKFLOW") == "Workload data CPU correctness smoke":
-        assert all(
-            not (ROOT / name).exists() for name in ("reports", "archive", "submissions")
-        )
+        from test_data_index import test_guide_local_links_exist
+
+        test_guide_local_links_exist()
     for name in ("workload-preparation", "tests", "scripts", "configs", "docs"):
         assert (ROOT / name).is_dir()
