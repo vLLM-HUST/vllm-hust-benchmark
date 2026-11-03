@@ -1,6 +1,7 @@
 """Invented xLAM field-contract controls, no publisher requests bundled."""
 
 from copy import deepcopy
+import json
 
 import pytest
 
@@ -47,3 +48,22 @@ def test_missing_original_field_is_not_synthesized(missing):
             spec=adapter_spec("XLAM_TOOL"),
             index=0,
         )
+
+
+def test_publisher_json_encoded_fields_remain_original_strings():
+    row = {
+        "id": 1,
+        "query": "invented original-format fixture",
+        "tools": json.dumps([{"name": "fixture", "parameters": {}}]),
+        "answers": json.dumps([{"name": "fixture", "arguments": {}}]),
+    }
+    record = adapt_row(
+        "XLAM_TOOL",
+        row,
+        source={"source_id": "XLAM_TOOL"},
+        spec=adapter_spec("XLAM_TOOL"),
+        index=0,
+    )
+    assert record.task["input"]["tools"] == row["tools"]
+    assert record.outcome_record()["answers"] == row["answers"]
+    assert record.replay["annotations"]["id"] == row["id"]

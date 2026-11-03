@@ -2182,7 +2182,19 @@ checkpoint，不能直接填入Qwen文本服务。原评分器要求五条参考
 #### xLAM工具调用语料获取（2026-11-03）
 
 - [x] 用户既有账号的官方授权检查通过；固定原版本的`xlam_function_calling_60k.json`已在服务器取得，96116570字节与发布方LFS摘要一致，60000行原数据均含`answers/id/query/tools`四字段。回执：`xlam-original-acquisition-20261103-001/qualification-public.json`。原内容未进入Windows或Git，未由Agent代接受条款。
-- [ ] 公共适配、原生工具调用执行协议、适用评价及研究消费闭环尚未完成。`query/tools`为输入，`answers`仅作参考；这是发布方构造的训练语料，不是独立任务评分benchmark，不能编造“官方评分器”或以数据取得打总勾。
+- [x] 提交版候选软件94个载荷在服务器回读全部60000行，原问题、工具、答案及数值ID逐条相等，ID唯一。原`tools/answers`均为JSON编码字符串，读取保持原字符串而非隐式重新编码。回执：`xlam-original-candidate-readback-20261103-001/qualification-public.json`；这是候选源码验证，未证明成功CI安装包或原生执行。
+- [ ] 原生工具调用执行协议、适用评价及研究消费闭环尚未完成。`query/tools`为输入，`answers`仅作参考；这是发布方构造的训练语料，不是独立任务评分benchmark，不能编造“官方评分器”或以数据取得打总勾。
+
+官方授权后，将固定原文件放在外部数据目录；读取不下载数据、不发模型请求。工具执行层如需解析JSON，应显式解析原`tools`字符串，不能把`answers`传给模型：
+
+```python
+from pathlib import Path
+from vllm_hust_workload_data import iter_workload
+
+for record in iter_workload("XLAM_TOOL", data_root=Path("/data/xlam-original")):
+    original_inputs = record.task["input"]
+    references = record.outcome_record()
+```
 
 #### GAIA原始数据访问前置条件（2026-11-03）
 
