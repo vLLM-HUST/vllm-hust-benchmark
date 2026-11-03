@@ -27,31 +27,44 @@ GenNova 与 GenNova Autotune 独立结果已迁往
 
 - **固定B0完整回答联合测量：**
   [2026-10-30配对](reports/full-answer-joint-20261030/README.md)，包含固定200题/max8192的同轮质量、时延、吞吐、利用率、公开报价成本及4K/16K连续窗口；失败配置与私有原件哈希独立保留，不替代M01旧计数轮。
+
 - **中期 B0/B1、质量、长上下文、资源成本、M01：** [中期报告目录](reports/vllm-hust-midterm-20261019/README.md)，
   [B1 候选审计](reports/vllm-hust-midterm-20261019/B1-CANDIDATE-AUDIT.md)，以及该目录的
   `m01-*`、`quality*`、`long*` 文件/子目录。按当前报告的链接找证据，不凭文件名日期选“最新有效”。
+
 - **MuxPD 实际 decode 图数值边界：**
   [首 D 图归约复核](reports/muxpd-prefix-first-decode-graph-20261029/README.md)，保留 v1
   构造失败、跨物理卡分配及执行路径偏差；局部同输入结果不代表答案不退化或性能验收通过。
+
 - **Frontier 原始并发曲线：** [56-run 索引](reports/frontier-raw-recovery-20261020/README.md)。
+
 - **迁入 benchmark 的 MOD 数据：** [2026-10-21](archive/mod-git-20261021/)、
   [2026-10-22](archive/mod-git-20261022/)；每个 capsule 的 manifest 记录原仓库、固定提交、路径和 SHA256。
   [2026-10-23 后续盘点](archive/mod-followup-20261023/README.md)列出尚待分类的 MOD 数据、BiDKV 消费者迁移、
   旧安装资产保留依据及硬件/审核阻塞；路径命中不等于可删除实测原件。
   [剩余 MOD 与安装消费者复核](archive/mod-followup-20261023/REMAINING-CONSUMERS.md)补充 SimLLM 消费者迁移、合并后公开盘点、逐
   Release 附件核对和旧本地输入的有界可用性检查。
+
 - **大文件/Release：** [Frontier 原件](archive/frontier-recovered-20261021/README.md)、
   [源码和校准附件](archive/frontier-capsules-20261021/README.md)、
   [terminal history](archive/terminal-history-20261021/README.md)。下载固定资产后先核验包摘要，再核验成员； 本索引不联网，不枚举
   GitHub 当前所有资产，也不证明远端链接仍可下载。
+
 - **Split-Batch 缺失原件：**
   [可用性审计](archive/mod-git-20261022/split-probe-recovery/local-reference-audit.json)。 33
   处旧引用仍不可回验，停止重复追索；新实验不能回填成旧原件恢复。恢复/补测是否继续以
   [#326 的最新决定](https://github.com/vLLM-HUST/vllm-hust-benchmark/issues/326)为准，旧计划不是执行授权。
+
 - **当前验收标准：** [README 的 Current Delivery Contract](README.md#current-delivery-contract)，
   [公开目标](docs/OFFICIAL_TARGETS.zh-CN.md)；历史规格不能覆盖当前权威契约。
 
-- **PyramidKV Qwen2.5 同配置复测：** [三轮 TP1 开关对照](reports/pyramidkv-qwen25-matched-20261103/README.md)，保留当前运行时、候选代码、480 个正式请求及原始流式响应。仅 Eager 诊断复测，不进入官方榜单。
+- **PyramidKV Qwen2.5 同配置复测：**
+  [三轮 TP1 开关对照](reports/pyramidkv-qwen25-matched-20261103/README.md)，保留当前运行时、候选代码、480 个正式请求及原始流式响应。仅
+  Eager 诊断复测，不进入官方榜单。
+
+- **PyramidKV 模型影响比较：**
+  [单轮 TP2 开关对照](reports/pyramidkv-model-comparison-20261103/README.md)，同文本、同双卡配置下比较两个模型，保留用户缩减轮次的记录和可复算原件。仅
+  Eager 诊断，不进入官方榜单。
 
 ## 按路径查询（不加载大数据，不运行实验）
 
