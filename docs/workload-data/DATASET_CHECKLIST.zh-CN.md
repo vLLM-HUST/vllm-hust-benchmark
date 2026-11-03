@@ -2,6 +2,10 @@
 
 ### 剩余原生环境前置条件复核（2026-11-02）
 
+- [x] 2026-11-03新增PaperBench离线前置核验入口：`python scripts/check_paperbench_native_prerequisites.py`仅展示计划；提供`--author-root /external/frontier-source`后逐项核验195份固定源码，再报告作者镜像为amd64、Miniconda为x86_64及原构建自动接受Anaconda条款的行为。该入口不构建、不安装、不接受条款、不执行作者程序；服务器现有195份原源码已实际验证，5项人为夹具控制通过，尚非CI安装工件验证。ARM64不能因此算作原生执行就绪，x86主机匹配也不证明镜像、科学任务与评分已合格。原BasicAgent默认300秒和README开发配置的复现60秒分别标明，不将开发/默认配置冒称24小时正式协议；PaperBench来源总勾不变。
+
+- [x] OSWorld官方镜像元数据已从原Docker注册表取得，manifest与config摘要一致，观测版本仅发布linux/amd64、无ARM64。没有拉取镜像层、启动桌面或执行任务；当前原生架构兼容仍未解决，不以官方`KVM=N`支持推断ARM64镜像可用。该核验只解决前次网络不可达导致的平台元数据未知，不代表桌面或Agent完成。
+
 - [x] PaperBench客户端安装、pip
   check、原版editable源码路径及可写HOME已核验；195份运行软件与48份固定chz源码逐文件保持原字节，CPU工作区的506份材料也已核验。禁网检查中，原版注册器解析23个论文配置，作者`check_for_lfs`在all/debug/dev/human/testing五种划分均通过，分别20/1/3/5/1项。真实`--help`正常打印完整参数，但该固定chz版本的帮助分支原本就退出1；已核验原源码语义，不篡改退出码、不误报为运行失败。初次只读HOME/普通wheel缺划分目录的失败保留，按原工作区editable方式修正。此项仍不是Agent、复现或评分完成。证据：CPU工作区`/root/swe-bench/docker-data/paperbench-native-client-20261103-001/original-client-readiness-public.json`。
 

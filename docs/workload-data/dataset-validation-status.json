@@ -4143,6 +4143,17 @@
       }
     },
     "OSWORLD": {
+      "official_registry_architecture_review": {
+        "server_receipt": "/var/lib/npc/osworld-official-container-preflight-20261103-002/qualification-public.json on authorized control node",
+        "official_image": "happysixd/osworld-docker:latest",
+        "observed_registry_digest": "sha256:0e6497a9295647cf05bf2b2af522fdd79bdeba2737595259cab310a3bcf6baa9",
+        "manifest_and_config_digests_verified": true,
+        "published_platform": "linux/amd64",
+        "linux_arm64_published": false,
+        "image_layers_downloaded": false,
+        "model_calls": 0,
+        "source_checkbox_eligible": false
+      },
       "scope": "public",
       "delivery_kind": "review_original_source_protocol",
       "status": "ORIGINAL_MAIN_REPOSITORY_ACQUIRED_NATIVE_PENDING",
@@ -4150,7 +4161,7 @@
       "legacy_checked": false,
       "existing_receipt": null,
       "delivery_receipt": null,
-      "blocker": "2026-11-03: fixed original main repository verified. Dedicated CPU is aarch64 with no /dev/kvm,/dev/vhost-net,/dev/net/tun, but the original Docker provider explicitly supports KVM=N. Actual remaining gaps are official container architecture/runtime compatibility, original desktop image and task initialization, selected Agent dependencies/submodules and native evaluation. Official container metadata probe hit network unreachable. No paid remote provider or model call started.",
+      "blocker": "2026-11-03: fixed original main repository verified. Dedicated CPU is aarch64; original Docker supports KVM=N but official registry manifest/config now verified only linux/amd64. No registered cross-architecture execution qualified. Remaining gaps are isolated compatible runtime, original desktop image/task initialization, selected Agent dependencies/submodules and native evaluation. Earlier direct-network metadata failure retained, superseded by authenticated anonymous registry metadata verification; no image layers, paid provider or model calls started.",
       "official_protocol_url": "https://github.com/xlang-ai/OSWorld#installation",
       "original_source_preparation": {
         "revision": "0e4318d5d0af2135e71fb7aec6bf08d8fbd89cd9",
@@ -4671,6 +4682,10 @@
     },
     "PAPERBENCH": {
       "original_image_prerequisite_review": {
+        "public_entry": "scripts/check_paperbench_native_prerequisites.py",
+        "public_entry_server_receipt": "/root/paperbench-public-prerequisite-entry-20261103-001/qualification-public.json on owned CPU workspace",
+        "public_entry_original_files_verified": 195,
+        "public_entry_candidate_not_successful_ci_artifact": true,
         "server_receipt": "/root/paperbench-original-image-prerequisites-20261103-001/qualification-public.json on owned CPU workspace",
         "original_recipe_files_verified": 5,
         "host_architecture": "aarch64",
