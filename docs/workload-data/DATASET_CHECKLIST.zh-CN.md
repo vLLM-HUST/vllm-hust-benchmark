@@ -2,6 +2,8 @@
 
 ### 剩余原生环境前置条件复核（2026-11-02）
 
+- [x] 经用户明确同意，MultiAgentBench失败14B配置已在无在途模型/关键词请求的边界结束；父子均终止，原前两题已存在的结果文件SHA256不变，其余输入/输出/失败记录全留，不回放未知队列。整体目标未暂停，下一原生窗口用已准备的独立9B262144配置完整验证原固定任务。xLAM3条生成也已终止，周期队列第240批完整收口，原模型/队列精确快照保存后交接下一双卡研究窗口；不将停止失败配置或交卡当作来源完成。
+
 - [x] 上述HTTP错误保护又直接用于服务器保存记录只读检查：快照75请求/74返回中29个200、45个400、1个未返回，修复入口会返回失败；原请求、响应、状态、评分均未改，新增模型调用0。该快照仍在第二原题运行期间，不是最终终态。扩大相关软件回归114项通过、1项平台跳过；单元测试与实际元数据核查均不能替代原生新配置执行。
 
 - [x] MultiAgentBench外层命令修复HTTP失败漏报：官方子进程退出0/结果文件存在不再足以让命令返回0；保存HTTP非200、未返回请求或无请求证据均返回非0，并输出HTTP计数。新保护只影响命令错误报告，不改作者任务、工具、评分或生成预算。错误状态、孤立响应和不同原题同ID等人为控制连同原恢复/传输回归43项通过、1项Windows平台跳过；不是新原题执行。在途fresh002仍使用其冻结软件副本，不热替换或重启，后续独立配置才使用修复入口。
@@ -2231,6 +2233,28 @@ WavCaps是弱标注音频—文本资产；作者captioning示例使用专用音
 checkpoint，不能直接填入Qwen文本服务。原评分器要求五条参考的接口不能靠复制弱标注caption凑足；须按原任务选用真实评价资产和协议。其音频仅限学术研究且保留各源条件，不作默认企业再分发。以上准备不增加来源完成数，机器清单状态为`IN_PROGRESS`。
 
 #### xLAM工具调用语料获取（2026-11-03）
+
+当前协议已由用户确认：按作者原格式对原query和全部tools生成，原answers仅作独立参考，不编造官方评分。入口为`scripts/run_xlam_original_generation.py`，复用已有语料生成executor；作者固定版本原`task_instruction`、`format_instruction`和纯`build_prompt`从原README校验后加载，不公开复制整份作者提示，也不执行作者模型安装代码。原tools已经是xLAM紧凑格式，不再次按OpenAI
+schema压缩而丢参数。
+
+独立核查已验证5份执行软件、实际成功CI提供方94载荷及原60000条文件身份；原前三条请求/参考/返回一致，输入tokens346/399/762，输出64/39/72，均自然stop。三条回复都包含Markdown围栏，不是严格原始JSON，原输出未去围栏或重写；这是保留的模型格式偏差，不声称语义正确或官方评分通过。当前提交后的成功CI包和研究消费仍待核验，来源总勾保持未完成。
+
+- [x] 服务器固定原0/1/2的全部1/2/2个工具已保留；Qwen3.5-9B BF16 TP1
+  NPU显式回退配置、512输出上限、262144上下文、非思考模式已生成3次stop返回。首次仅在模型调用前遇到注册表role标准化差异，旧失败与软件保留，0神经调用；修复支持data/raw_source后使用全新输出目录，没有回放未知请求。
+- [ ] 原输入、参考、输出和公开源代码字节的独立审计、当前成功CI包/研究回读待收口，暂不打来源总勾。下列0模型调用/待确认条目保留为更早阶段的证据，不覆盖本段最新状态。
+
+服务器使用方式（先取得数据访问权，凭据由使用者自行登录；原数据、作者卡和输出均在仓库外）：
+
+```bash
+python -m pip install -e './workload-preparation[data]' 'huggingface-hub==1.27.0'
+hf auth login
+hf download --repo-type dataset Salesforce/xlam-function-calling-60k xlam_function_calling_60k.json --revision 26d14ebfe18b1f7b524bd39b404b50af5dc97866 --local-dir /data/xlam-original
+hf download Salesforce/xLAM-7b-fc-r README.md --revision 42587ba3ff49d92c1b37e23f9c651ff753f60742 --local-dir /data/xlam-author
+python scripts/run_xlam_original_generation.py --mode plan
+python scripts/run_xlam_original_generation.py --mode run --data-root /data/xlam-original --author-card /data/xlam-author/README.md --output /data/xlam-native-fresh --model Qwen/Qwen3.5-9B --context 262144 --disable-thinking --count 3
+```
+
+只下载作者README，不需要为提示构造下载作者模型权重。若已有授权原数据，直接复用，无需重新下载。`--full`替代`--count 3`处理全部60000条；本次仅生成原前三条。官方推荐模型为作者xLAM-7b-fc-r，现有NPU服务为明确披露的Qwen回退，不当作者模型复现。该来源用于结构化/工具调用生成，不冒称多步Agent、真实工具API执行或独立质量benchmark。公开入口取得环境数据与推理端点后可完整处理选择范围；通用下载命令没有重新冷下载验证。
 
 - [x] 用户既有账号的官方授权检查通过；固定原版本的`xlam_function_calling_60k.json`已在服务器取得，96116570字节与发布方LFS摘要一致，60000行原数据均含`answers/id/query/tools`四字段。回执：`xlam-original-acquisition-20261103-001/qualification-public.json`。原内容未进入Windows或Git，未由Agent代接受条款。
 - [x] 提交版候选软件94个载荷在服务器回读全部60000行，原问题、工具、答案及数值ID逐条相等，ID唯一。原`tools/answers`均为JSON编码字符串，读取保持原字符串而非隐式重新编码。回执：`xlam-original-candidate-readback-20261103-001/qualification-public.json`；这是候选源码验证，未证明成功CI安装包或原生执行。

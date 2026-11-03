@@ -13,7 +13,7 @@ from run_oasst_original_continuation import post, validate_endpoint
 
 
 def corpus_input_field(source_id):
-    profiles = {"OPENMATH2": "problem", "OPENCODE": "input"}
+    profiles = {"OPENMATH2": "problem", "OPENCODE": "input", "XLAM_TOOL": "query"}
     if source_id not in profiles:
         raise ValueError("explicit reviewed original corpus profile required")
     return profiles[source_id]
@@ -31,11 +31,27 @@ def execute(
     expected_count=None,
     final_verify=None,
     source_id="OPENMATH2",
+    input_renderer=None,
+    protocol_profile=None,
+    chat_template_kwargs=None,
 ):
     input_field = corpus_input_field(source_id)
     endpoint = validate_endpoint(endpoint)
     if not model or type(max_tokens) is not int or not 0 < max_tokens < context:
         raise ValueError("explicit model, budget and context required")
+    if source_id == "XLAM_TOOL" and not callable(input_renderer):
+        raise ValueError("xLAM requires its reviewed original author prompt renderer")
+    if source_id != "XLAM_TOOL" and input_renderer is not None:
+        raise ValueError(
+            "published problem inputs do not accept a replacement renderer"
+        )
+    if chat_template_kwargs is not None and (
+        set(chat_template_kwargs) != {"enable_thinking"}
+        or type(chat_template_kwargs["enable_thinking"]) is not bool
+    ):
+        raise ValueError(
+            "only an explicit thinking-mode flag may supplement this profile"
+        )
     if expected_count is not None:
         records = list(records)
         if not records or len(records) != expected_count:
@@ -57,11 +73,16 @@ def execute(
                 previous, previous_index = name, -1
             if (
                 record.source["source_id"] != source_id
-                or set(record.task["input"]) != {input_field}
+                or set(record.task["input"])
+                != ({"query", "tools"} if source_id == "XLAM_TOOL" else {input_field})
                 or not isinstance(record.task["input"][input_field], str)
                 or not record.task["input"][input_field]
                 or type(index) is not int
                 or index != previous_index + 1
+                or (
+                    source_id == "XLAM_TOOL"
+                    and type(record.replay["annotations"].get("id")) is not int
+                )
                 or (
                     source_id == "OPENCODE"
                     and (
@@ -73,24 +94,43 @@ def execute(
                 != (
                     record.replay["annotations"].get("id")
                     if source_id == "OPENCODE"
+                    else str(record.replay["annotations"].get("id"))
+                    if source_id == "XLAM_TOOL"
                     else f"{record.source['file_sha256']}:{index}"
                 )
             ):
                 raise ValueError("unique unchanged original corpus problems required")
             previous_index = index
+            content = (
+                input_renderer(record.task["input"])
+                if input_renderer is not None
+                else record.task["input"][input_field]
+            )
+            if not isinstance(content, str) or not content:
+                raise ValueError(
+                    "original protocol renderer must produce nonempty text"
+                )
             yield {
                 "source": record.source,
                 "task_id": record.task["task_id"],
                 "row_index": record.replay["source_row_index"],
                 "request": {
                     "model": model,
-                    "messages": [
-                        {"role": "user", "content": record.task["input"][input_field]}
-                    ],
+                    "messages": [{"role": "user", "content": content}],
                     "temperature": 0,
                     "max_tokens": max_tokens,
                     "n": 1,
+                    **(
+                        {"chat_template_kwargs": chat_template_kwargs}
+                        if chat_template_kwargs is not None
+                        else {}
+                    ),
                 },
+                **(
+                    {"original_input": record.task["input"]}
+                    if source_id == "XLAM_TOOL"
+                    else {}
+                ),
                 "original_reference": record.outcome,
                 "original_annotations": record.replay["annotations"],
             }
@@ -104,7 +144,8 @@ def execute(
         "model": model,
         "max_tokens": max_tokens,
         "context_capacity": context,
-        "profile": "UNCHANGED_PUBLISHED_PROBLEM_AS_USER_INPUT_EXPLICIT_OPERATOR_BUDGET",
+        "profile": protocol_profile
+        or "UNCHANGED_PUBLISHED_PROBLEM_AS_USER_INPUT_EXPLICIT_OPERATOR_BUDGET",
         "original_api_request_capture": False,
         "author_evaluation_reproduction": False,
         "quality_scored": False,
@@ -144,6 +185,11 @@ def execute(
                         "model": model,
                         "messages": sample["request"]["messages"],
                         "add_generation_prompt": True,
+                        **(
+                            {"chat_template_kwargs": chat_template_kwargs}
+                            if chat_template_kwargs is not None
+                            else {}
+                        ),
                     },
                 )
                 attempt["tokenize"] = tokenized
