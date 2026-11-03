@@ -34,9 +34,10 @@ from private_inputs import (
 )
 from runtime import EXPERIMENT, MODEL, verify_lifecycle_records, verify_startup_log
 
-CONTRACT_V1 = "94b1f3b26f5d2ba3d5ad7ae75ed685035a0fa34a976ddb6324e755c694e7a4ad"
-CONTRACT_V2 = "787559a9cfc357664749c18fc656d81a42358822f430116f8a744da7b7c0046a"
-WHEEL_SHA256 = "46a0a9b2dd02b7523fe61d5032a78abd7dceb653b660d0304f2dc52d9ae5ae81"
+# Public preregistered artifact digests, not credentials.
+CONTRACT_V1 = "94b1f3b26f5d2ba3d5ad7ae75ed685035a0fa34a976ddb6324e755c694e7a4ad"  # pragma: allowlist secret
+CONTRACT_V2 = "787559a9cfc357664749c18fc656d81a42358822f430116f8a744da7b7c0046a"  # pragma: allowlist secret
+WHEEL_SHA256 = "46a0a9b2dd02b7523fe61d5032a78abd7dceb653b660d0304f2dc52d9ae5ae81"  # pragma: allowlist secret
 WHEEL_NAME = "vllm_ascend_pyramidkv_hust-0.4.0rc1-py3-none-any.whl"
 NAMES = (
     "quality8-off",

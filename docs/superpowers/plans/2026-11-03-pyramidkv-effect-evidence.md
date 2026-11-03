@@ -172,7 +172,7 @@ requires the pinned local LongBench inputs.
   formatting and the project test suite; keep any unrelated baseline failures explicit and resolve
   required CI checks before merge.
 
-- [ ] Request one fresh whole-branch review per executing-plans. Resolve substantive findings with
+- [x] Request one fresh whole-branch review per executing-plans. Resolve substantive findings with
   failing-then-passing regressions and rerun required checks.
 
 - [ ] Merge only after review and CI pass. Download published bytes anonymously at the immutable
