@@ -1,9 +1,49 @@
 """Check the MiniWoB++ launcher without a browser or model dependency."""
 
 import json
+import runpy
 from pathlib import Path
 import subprocess
 import sys
+
+import pytest
+
+
+@pytest.mark.parametrize(
+    ("terminated", "truncated", "reward", "error", "valid"),
+    [
+        (True, False, 0.0, None, True),
+        (False, True, 0.0, None, True),
+        (False, False, 1.0, None, False),
+        (True, False, "1.0", None, False),
+        (True, False, 1.0, "browser failed", False),
+    ],
+)
+def test_terminal_summary(tmp_path, terminated, truncated, reward, error, valid):
+    script = Path(__file__).resolve().parents[1] / "scripts/run_miniwob_agentlab.py"
+    read_summary = runpy.run_path(str(script))["terminal_summary"]
+    (tmp_path / "summary_info.json").write_text(
+        json.dumps(
+            {
+                "n_steps": 1,
+                "cum_reward": reward,
+                "terminated": terminated,
+                "truncated": truncated,
+                "err_msg": error,
+            }
+        ),
+        encoding="utf-8",
+    )
+    if not valid:
+        with pytest.raises(ValueError, match="invalid BrowserGym terminal summary"):
+            read_summary(tmp_path)
+        return
+    assert read_summary(tmp_path) == {
+        "steps": 1,
+        "reward": reward,
+        "terminated": terminated,
+        "truncated": truncated,
+    }
 
 
 def run_cli(tmp_path, endpoint):
