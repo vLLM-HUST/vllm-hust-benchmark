@@ -1998,6 +1998,20 @@
             "estimate_excludes_text_and_output": true,
             "existing_service_context_tokens": 32768,
             "capacity_estimate_is_not_live_execution": true,
+            "cached_qwen35_9b_candidate": {
+              "prior_service_context_tokens": 262144,
+              "prior_service_image_limit": 32,
+              "processor_patch_size": 16,
+              "processor_merge_size": 2,
+              "visual_token_approximate_upper_estimate_at_256_frames": 235520,
+              "cpu_processor_same_dimensions_grid_thw": [1, 44, 80],
+              "cpu_processor_visual_tokens_at_256_frames": 225280,
+              "complete_original_cpu_prompt_tokens_by_position": {"0": 167957, "1": 167931, "2": 226248},
+              "cpu_probe_exit_code": 0,
+              "max_prompt_context_headroom_before_output": 35896,
+              "cpu_probe_uses_dimension_matched_blank_image_not_original_inference": true,
+              "qualification_pending": "Measure exact processed input plus generation budget and qualify 256-image NPU runtime; prior service did not support this image count."
+            },
           "text_segments": 68,
           "reference_choice_separate": true,
           "device": "CPU"

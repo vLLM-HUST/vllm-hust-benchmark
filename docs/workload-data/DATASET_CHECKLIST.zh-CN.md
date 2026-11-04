@@ -714,6 +714,15 @@ LD_LIBRARY_PATH=/external/ffmpeg/lib python -B scripts/run_videomme_original.py 
 
 ### LongVideoBench长视频交错理解（原素材部分取得，原生推理未完成）
 
+固定三题的原素材现已齐备。Qwen3.5-9B 的 CPU 容量检查得到 167957／167931／226248 token；262144 窗口内最长题余 35896 token。单卡 256
+图服务已启动，原生推理与评分结果另验。复现时使用 `--endpoint`、`--model Qwen/Qwen3.5-9B`、`--max-tokens 32` 和新的私有 `--output`
+目录，保留作者加载器交错顺序；该部署显式关闭思考并用贪心解码。
+
+评分使用
+[LMMs-Eval 固定上游版本](https://github.com/EvolvingLMMs-Lab/lmms-eval/tree/19085f3ac07e4631fd2f0218786741b6bbc40f69)
+的原解析及聚合函数；在独立环境运行
+`python scripts/score_longvideobench_original_results.py --validation <原验证集JSON> --responses <私有结果目录> --seed 0`。原评分器有随机回退，种子必须记录；三题分数不作全量质量结论。
+
 - [x] 发布方固定版本的 validation 1337 条和原位置 0、1、2 对应的两份原字幕已在服务器核验。已取得位置 2
   的原视频，并通过[原版加载器预检入口](../../scripts/verify_longvideobench_original_inputs.py)：256 帧、68
   段文本，参考选项与输入分离。位置 0、1 共用的原视频已从发布方归档提取并核验；预检不计模型执行。
@@ -724,6 +733,9 @@ python scripts/verify_longvideobench_original_inputs.py --author-loader /externa
 
 使用作者加载器依赖（含 Decord 和 Pillow）及原始 `lvb_val.json`、`videos/`、`subtitles/` 布局。素材齐备后去掉
 `--position 2`，预检全部三个固定位置；不更换题目，不减少已选帧数。
+
+已有本地候选模型权重时，可在同一预检命令上加 `--capacity-model <本地模型目录>`，按该模型的图像处理器和聊天模板核算完整输入。不传 `--endpoint`，不占用
+NPU；实跑前还须核对输出预算、服务上下文和多图接收上限。
 
 - [x] 2026-10-28复核[官方数据页](https://huggingface.co/datasets/longvideobench/LongVideoBench)及[原生软件](https://github.com/longvideobench/LongVideoBench)：6678题，validation1337/test5341；长视频、字幕与图像交错关系属于原任务，不能用Video-MME替代，不构造纯文本题冒充。
 - [ ] 现有账号授权已核验，原素材部分取得，不公开受控原数据。位置 2 的 256 帧均为 1280×720；按本机 Qwen2-VL-7B 图像处理配置（patch 14、merge

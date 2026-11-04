@@ -32,9 +32,21 @@ def main():
         "--endpoint", help="OpenAI-compatible /v1 URL; omit for CPU preflight"
     )
     parser.add_argument("--model")
+    parser.add_argument(
+        "--capacity-model", type=Path, help="Local processor for CPU token accounting"
+    )
     parser.add_argument("--max-tokens", type=int)
     parser.add_argument("--output", type=Path, help="New private response directory")
     args = parser.parse_args()
+    processor = None
+    if args.capacity_model:
+        if args.endpoint:
+            parser.error("capacity preflight does not send model requests")
+        from transformers import AutoProcessor
+
+        processor = AutoProcessor.from_pretrained(
+            args.capacity_model, local_files_only=True
+        )
     if args.endpoint:
         if not (args.model and args.max_tokens and args.max_tokens > 0 and args.output):
             parser.error(
@@ -66,6 +78,44 @@ def main():
             "E",
         }:
             raise ValueError(f"Malformed upstream input at position {index}")
+        if processor is not None:
+            parts = []
+            grids = {}
+            visual = 0
+            for item in inputs:
+                if isinstance(item, str):
+                    parts.append({"type": "text", "text": item})
+                else:
+                    parts.append({"type": "image"})
+                    if item.size not in grids:
+                        grid = processor.image_processor(
+                            images=[item], return_tensors="np"
+                        )["image_grid_thw"][0]
+                        grids[item.size] = (
+                            int(grid.prod()) // processor.image_processor.merge_size**2
+                        )
+                    visual += grids[item.size]
+            rendered = processor.apply_chat_template(
+                [{"role": "user", "content": parts}],
+                tokenize=False,
+                add_generation_prompt=True,
+            )
+            if rendered.count(processor.image_token) != frame_count:
+                raise ValueError(
+                    "Processor placeholder count differs from original frames"
+                )
+            text = len(processor.tokenizer.encode(rendered, add_special_tokens=False))
+            print(
+                json.dumps(
+                    {
+                        "position": index,
+                        "prompt_tokens": text - frame_count + visual,
+                        "visual_tokens": visual,
+                        "capacity_probe_only": True,
+                    }
+                ),
+                flush=True,
+            )
         if args.endpoint:
             request = Request(
                 args.endpoint.rstrip("/") + "/chat/completions",
@@ -73,6 +123,8 @@ def main():
                     {
                         "model": args.model,
                         "max_tokens": args.max_tokens,
+                        "temperature": 0,
+                        "chat_template_kwargs": {"enable_thinking": False},
                         "messages": [
                             {
                                 "role": "user",
