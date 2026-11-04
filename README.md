@@ -770,6 +770,8 @@ prompt/媒体时不能伪造原始请求；有官方回放工具的按原工具�
 
 [StableToolBench 固定作者版本](https://github.com/THUNLP-MT/StableToolBench/tree/aa4ed9f4737ad98bd706663f01d63623c3427812) · [固定三题准备入口](scripts/prepare_stabletoolbench_fixed_g1.py) · [ARM64 客户端兼容补丁](configs/workload-native/stabletoolbench-lazy-backend-imports.patch)。运行 `python scripts/prepare_stabletoolbench_fixed_g1.py --instructions <G1_instruction.json> --toolenv <toolenv2404_filtered.tar.gz> --cache <server_cache.zip> --output <新目录>`。原题 588、608、1073 均已通过作者入队检查。Agent 和工具服务必须显式使用回环地址；官方缓存未命中会先尝试外连，未隔离前不要启动服务。原生执行和评分未验证，不计入已交付项，也不等同于 ToolBench 的实时第三方 API。
 
+如需准备 FAC 评分，准备命令同时传入 `--official-ids <test_query_ids/G1_instruction.json>`。保留三题原始 Agent 输出，用作者的 `convert_to_answer_format.py --method CoT@1` 转换后，先运行 `python scripts/check_stabletoolbench_fac_inputs.py --instructions <fixed-g1.json> --ids <fixed-g1-fac-ids.json> --answers <转换后的答案.json>`。检查通过后才把相同的答案文件和题号表交给作者 `fac_eval.py`；缺题应排查原运行，空答案则保留并按作者规则评分。
+
 ### 逐来源：官方出处、仓库入口与验证范围
 
 “准备／执行入口”仅列已登记的真实代码路径；读取适配器不冒充执行入口。没有原生入口索引的来源明确标记待补。原始训练语料、schema 资源、轨迹资产并不天然是完整
