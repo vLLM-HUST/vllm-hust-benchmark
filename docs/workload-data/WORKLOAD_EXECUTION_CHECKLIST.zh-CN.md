@@ -576,10 +576,10 @@ PaperBench（未完成）：复用已核验的 23 个原始论文包。先用
 
 每个来源均未取得/适配/真实验证；归属仍需原生协议审查。
 
-- [ ] MULTIAGENTBENCH：已核验 5 份原始 JSONL、500 条公共入口及研究侧回读；Research
-  固定前三题仍缺完整原生执行与原评分证据。旧运行已停止，旧队列不回放；关键词工具验证不计作原题完成。[恢复审计](validation/multiagentbench-native-recovery-audit-20261102.json)
-  恢复候选为 Qwen3-4B-Instruct-2507 的 262,144-token 服务：33 条留存原请求（最长输入 177,444
-  tokens）连同各自原输出预算均通过静态容量检查。动态工具输出可能更长，仍须用原任务完整执行并核验评分；不要把容量检查当成原题结果。
+- [x] MULTIAGENTBENCH：Research 固定前三题已用 Qwen3-4B-Instruct-2507 的 262,144-token
+  NPU 服务跑通原生流程；最终任务评分已离线复核，规划和通信占位值不计分。
+  5 份原始 JSONL、500 条公共入口及研究侧回读已验证；其余四个场景未做原生验证。
+  [交付回执](validation/multiagentbench-research-fixed3-delivery.json)
 
   在已隔离的 Agent 环境中，先以
   `prepare_marble_original_configs.py --runtime-profile official-research --limit 3` 准备固定原题，再用
