@@ -4470,7 +4470,7 @@
       "legacy_checked": false,
       "existing_receipt": null,
       "delivery_receipt": null,
-      "blocker": "2026-11-02 official protocol review: native evaluation requires original self-hosted website state, URL configuration, authentication and reset. Current dedicated task environment has not qualified these services; public demo browsing or task JSON reading is not native completion. Official AMI recommendation of 1000GB is not a measured minimum for fixed samples.",
+      "blocker": "Pinned first three original task IDs 0/1/2 only target shopping_admin and require authentication. Qualify the original resettable shopping_admin snapshot, login state and the author harness URL configuration before any model request. The public registry candidate is linux/amd64 and its equivalence to the publisher archive has not been verified; the available NPU container is aarch64 without qualified isolation or x86 execution. The full multi-site AMI recommendation is not a measured minimum for this fixed batch. Public demo browsing and task JSON reading are not native completion.",
       "official_protocol_url": "https://github.com/web-arena-x/webarena/blob/main/environment_docker/README.md",
       "official_website_image_access_review": {
         "archive_declared_bytes_by_initial_range": 9640032256,
@@ -4545,6 +4545,16 @@
       "legacy_checked": false,
       "existing_receipt": null,
       "delivery_receipt": null,
+      "original_split_site_preflight": {
+        "date": "2026-11-04",
+        "pinned_author_files_sha256_verified": true,
+        "original_split_rows": {"classifieds": 234, "reddit": 210, "shopping": 466},
+        "inspected_first_original_ids_per_split": [0, 1, 2],
+        "inspected_sites_per_split": ["classifieds", "reddit", "shopping"],
+        "all_inspected_tasks_require_login": true,
+        "inspected_reddit_rows_with_explicit_images": 3,
+        "scope": "Static dependency audit only, not a new execution selection. None of these splits uses WebArena shopping_admin as its site."
+      },
       "blocker": "2026-11-02 original software and 910 task definitions verified on server. Native completion still requires original resettable websites,login state,referenced media and a qualified NPU visual Agent/judge backend. Original tokenizer selects tiktoken by OpenAI model identity; Qwen compatibility is not established and no GPT identity spoofing is permitted.",
       "original_source_preparation": {
         "revision": "89f5af29305c3d1e9f97ce4421462060a70c9a03",
