@@ -43,6 +43,7 @@ def main():
     p.add_argument("--output", type=Path, required=True)
     p.add_argument("--endpoint", required=True)
     p.add_argument("--model", required=True)
+    p.add_argument("--qwen-no-thinking", action="store_true")
     p.add_argument("--execute", action="store_true")
     args = p.parse_args()
     url = urlsplit(args.endpoint)
@@ -70,6 +71,11 @@ def main():
     env = WebAgentTextEnv(observation_mode="text", num_products=1000, human_goals=True)
 
     def choose(observation, available):
+        template_options = (
+            {"extra_body": {"chat_template_kwargs": {"enable_thinking": False}}}
+            if args.qwen_no_thinking
+            else {}
+        )
         response = client.chat.completions.create(
             model=args.model,
             messages=[
@@ -80,6 +86,7 @@ def main():
             ],
             max_tokens=1024,
             temperature=0,
+            **template_options,
         )
         return response.choices[0].message.content
 
