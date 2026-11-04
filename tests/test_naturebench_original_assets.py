@@ -20,6 +20,23 @@ runner = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(runner)
 
 
+def test_saved_validity_verdict_is_not_scientific_completion():
+    ledger = ROOT / "docs/workload-data/dataset-validation-status.json"
+    item = json.loads(ledger.read_text("utf-8"))["delivery_inventory"]["NATUREBENCH"]
+    preflight = item["second_original_validity_judge_extended_context_preflight"]
+    verdict = item["second_original_validity_judge_extended_context_result"]
+    assert verdict["input_tokens"] == preflight["anthropic_count_tokens"]
+    assert verdict["original_output_budget"] == preflight["original_output_budget"]
+    assert (
+        verdict["input_tokens"] + verdict["original_output_budget"]
+        <= verdict["served_context"]
+    )
+    assert verdict["author_verdict_schema_valid"] and verdict["is_valid"] is False
+    assert not verdict["original_agent_rerun"]
+    assert item["third_original_terminal_20261103"]["scored_tasks"] == 0
+    assert not item["checked"]
+
+
 def test_original_cpu_assets_are_not_native_scientific_delivery():
     directory = ROOT / "docs/workload-data"
     item = json.loads(
