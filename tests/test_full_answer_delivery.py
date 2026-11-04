@@ -53,8 +53,18 @@ def test_live_manifest_capture_is_original_and_bound():
     assert len(raw) == capture["manifest_bytes"]
     assert capture["run"]["conclusion"] == "success"
     assert capture["publication_identity"]["benchmark_commit"] == data["benchmark"]
-    sources = json.loads((ROOT / "docs/data-entrypoints-sources.json").read_text())
-    assert sources["production_manifest_error"] is None
-    assert json.loads(raw) == sources["website_publication_manifest"]
-    assert sources["production_manifest_transport"] == capture
+    # The immutable delivery is bound to its captured manifest, not the mutable
+    # navigation snapshot, which legitimately follows later deployments.
+    manifest = json.loads(raw)
+    assert manifest["schema"] == "benchmark-website-publication/v1"
+    assert manifest["repository"] == "vLLM-HUST/vllm-hust-benchmark"
+    assert manifest["commit"] == data["benchmark"]
+    assert manifest["status"] == "published-source"
+    published_file = capture["publication_identity"]["file"]
+    assert published_file in manifest["files"]
+    assert (
+        capture["publication_identity"]["manifest"]["sha256"]
+        == capture["manifest_sha256"]
+    )
+    assert capture["publication_identity"]["manifest"]["bytes"] == len(raw)
     assert capture["previous_local_transport"]["prior_urllib_error"]
