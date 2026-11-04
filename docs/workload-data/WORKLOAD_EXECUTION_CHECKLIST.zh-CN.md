@@ -585,11 +585,15 @@ StableToolBench（候选，未交付）：复用已核验的原工具定义和�
 `--model_path`、`--evaluation_path`、`--output_path` 和固定 `--ids`。
 作者评估模型的 BF16 Transformers NPU 路径尚未验证，不能以缓存控制代替原评分。
 
-API-Bank（候选，未交付）：使用清单固定的作者源码，先通过
+API-Bank（同类候选，14 个固定位置已生成并完成兼容评分）：从
+[作者仓库](https://github.com/AlibabaResearch/DAMO-ConvAI) 检出机器清单所列提交，使用其中的 `api-bank/` 作为 `--author-root`。
+在独立 Linux ARM64 Python 3.11 环境安装 `configs/workload-native/api-bank-fixed-client-arm64-requirements.txt`；
+该依赖清单已离线安装验证，在线包源解析尚未验证。先通过
 `scripts/score_api_bank_saved.py --author-root <原源码> --export-messages` 核对原消息位置。
 需要生成时使用同一脚本的 `--generate <新私有输出> --endpoint <回环端点> --model <部署模型>`；
 已有完整输出时直接用 `--predictions <留存输出>` 离线评分。若复现作者评分器的已知缺参中断，
 可用 `--record-missing-end-time` 单独记录失败；不补造参数，不把兼容结果称为未修改的官方成绩。
+现有结果中 13 个位置由原评分器处理，另 1 个位置缺少必填参数，按兼容路径保留失败。离线重放与留存结果逐字节一致，无需重跑推理。
 该协议覆盖本地工具调用与评分，不覆盖 ToolBench 的外部 API。
 
 MiniWoB++（候选，未交付）：从清单所列固定作者提交恢复网页，仅在回环地址启动静态站点，`--site` 指向其 `/miniwob/`。
@@ -600,7 +604,7 @@ MiniWoB++（候选，未交付）：从清单所列固定作者提交恢复网�
 到达 20 步上限、奖励 0.0。保留 1024 token 配置的解析失败，两个配置不汇总成同一成绩。
 它覆盖原生多步浏览器动作，不覆盖登录后业务状态或桌面操作，因此不将 WebArena 标为已完成。
 
-WebShop（候选，未交付）：按机器清单锁定作者提交和三份镜像语料，校验 Git 对象后接到作者 `data/`。
+WebShop（同类候选，固定三题已验证）：按机器清单锁定作者提交和三份镜像语料，校验 Git 对象后接到作者 `data/`。
 在任务私有环境配置 `JAVA_HOME`、Pyserini 0.17.0 和 `en_core_web_sm` 3.7.1，再执行作者商品转换和 1k 索引命令。
 已在 ARM64 验证 1,000 条索引和原生搜索—选商品—购买评分链路。模型验证用
 `scripts/run_webshop_original.py --author-root <源码> --endpoint <回环模型地址> --model <模型> --output <新私有文件> --execute`，
@@ -627,8 +631,8 @@ OSWorld 先在作者镜像内确认桌面启动、原任务初始化和重置，
 SWE-smith 可复用已验证的 11 个分片与固定前三题读回，通过 `scripts/prepare_swesmith_original_assets.py` 准备原资产；
 仍须运行原 Agent、在隔离环境内执行生成补丁并采集官方评分。复用的 24 条作者轨迹不是本项目的实跑结果。
 
-剩余项的资源准备可并行。WebArena、VisualWebArena、OSWorld、SWE-smith 和 PaperBench 可复用同一个经过验证的隔离 amd64 节点，
-但镜像、数据盘和原生评分要分别验收。WorkArena、MLE-bench 和 ToolBench 分别依赖 ServiceNow、Kaggle 和原工具后端；
+当前执行环境为 ARM64 和两张 NPU。WebArena、VisualWebArena、OSWorld、SWE-smith 和 PaperBench 的原协议保留环境阻塞；
+同类替代项可在现有环境独立验证，登记实际覆盖和差异，不把未覆盖行为标成完成。WorkArena、MLE-bench 和 ToolBench 分别依赖 ServiceNow、Kaggle 和原工具后端；
 节点就绪不等于授权或数据已取得。NatureBench、MLAgentBench、BixBench 与 Full-Duplex-Bench 应分别处理长上下文、
 隔离 NPU 微调、原评分输入恢复和双工语音/ASR，不因共用硬件合并协议。
 
