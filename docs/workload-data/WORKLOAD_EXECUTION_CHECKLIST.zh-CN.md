@@ -628,6 +628,9 @@ PaperBench（未完成）：复用已核验的 23 个原始论文包。先用
 
 - [ ] FULL_DUPLEX_BENCH：9 份原始 ZIP 已取得并核验，公共入口和研究侧回读已验证；原生双工语音推理与原评分仍待完成。官方 ASR 路径显式依赖 CUDA，当前 NPU
   路径尚未验证。
+  `scripts/prepare_full_duplex_original_scorers.py --include-client` 可离线列出固定版本的 Moshi 客户端、ASR 和评分文件；
+  加 `--verify-only --output <既有源码目录>` 核验已取得的文件。正式验证需保留原始音频、双工输出时序及转录，
+  分别交给原场景评分器。发布方示例和 WebSocket 夹具仅用于检查接口，不替代原音频的端到端结果。
 
 - [x] LIBRITTS：text-to-speech-generation；按机器清单所列交付口径核验，具体范围见[回执](validation/libritts-original-native-delivery-20261102.json)。
 
