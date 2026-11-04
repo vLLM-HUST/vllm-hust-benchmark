@@ -1,0 +1,71 @@
+"""Download public evidence without credentials; check archive and member bytes."""
+import argparse
+import concurrent.futures
+from datetime import datetime, timezone
+import json
+from pathlib import Path
+import subprocess
+import sys
+
+ROOT = Path(__file__).resolve().parent
+sys.path.insert(0, str(ROOT / 'reproduction/striatrace-comparison'))
+from tp2_pilot import digest
+from package_tp2_evidence import verify_archive
+
+REPO = 'vLLM-HUST/vllm-hust-benchmark'
+TAG = 'evidence-traceloom-tp2-20261027-v1'
+
+
+def main():
+    p = argparse.ArgumentParser(description=__doc__)
+    p.add_argument('--output', type=Path, required=True)
+    p.add_argument('--record', type=Path, required=True)
+    p.add_argument('--release-record', type=Path, required=True)
+    a = p.parse_args()
+    meta = json.loads(subprocess.check_output(['gh', 'api', f'repos/{REPO}/releases/tags/{TAG}']))
+    if meta['draft'] or meta['tag_name'] != TAG:
+        raise ValueError('Release is not publicly published')
+    manifest = json.loads((ROOT / 'MANIFEST.json').read_text())
+    archives = {r['name']: r for r in manifest['archives']}
+    expected = {name: r['sha256'] for name, r in archives.items()}
+    expected.update({name: digest(ROOT / name) for name in ('MANIFEST.json', 'SHA256SUMS')})
+    assets = {r['name']: r for r in meta['assets']}
+    if set(assets) != set(expected):
+        raise ValueError('Published asset inventory differs')
+    a.output.mkdir(parents=True, exist_ok=False)
+
+    def download(name):
+        asset = assets[name]
+        url = asset['browser_download_url']
+        if asset['state'] != 'uploaded' or not url.startswith(f'https://github.com/{REPO}/releases/download/{TAG}/'):
+            raise ValueError('Unexpected asset state or destination')
+        dest = a.output / name
+        subprocess.run(['curl', '--fail', '--location', '--silent', '--show-error', '--retry', '2',
+                        '--connect-timeout', '20', '--max-time', '600', '--output', str(dest), url], check=True)
+        actual = digest(dest)
+        if actual != expected[name] or dest.stat().st_size != asset['size']:
+            raise ValueError(('Downloaded bytes differ', name))
+        if asset.get('digest') and asset['digest'] != 'sha256:' + actual:
+            raise ValueError(('GitHub digest differs', name))
+        if name in archives:
+            verify_archive(dest, archives[name]['members'])
+        print('VERIFIED', name, flush=True)
+        return dict(name=name, url=url, asset_id=asset['id'], bytes=dest.stat().st_size,
+                    sha256=actual, members_verified=len(archives[name]['members']) if name in archives else 0)
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=2) as pool:
+        results = list(pool.map(download, sorted(expected)))
+    release = dict(repository=REPO, tag=TAG, url=meta['html_url'], release_id=meta['id'],
+                   published_at=meta['published_at'], assets=results)
+    record = dict(status='PUBLIC_BYTES_AND_ALL_MEMBERS_VERIFIED',
+                  checked_at=datetime.now(timezone.utc).isoformat(),
+                  transport='curl on public browser_download_url without Authorization or cookies',
+                  assets=results, verification_script_sha256=digest(__file__))
+    for path, value in ((a.release_record, release), (a.record, record)):
+        with path.open('x') as f:
+            json.dump(value, f, indent=2)
+            f.write('\n')
+
+
+if __name__ == '__main__':
+    main()
