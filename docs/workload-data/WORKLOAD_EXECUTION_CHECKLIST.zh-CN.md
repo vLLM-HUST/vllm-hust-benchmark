@@ -651,6 +651,13 @@ SWE-smith 可复用已验证的 11 个分片与固定前三题读回，通过 `s
 节点就绪不等于授权或数据已取得。NatureBench、MLAgentBench、BixBench 与 Full-Duplex-Bench 应分别处理长上下文、
 隔离 NPU 微调、原评分输入恢复和双工语音/ASR，不因共用硬件合并协议。
 
+Full-Duplex-Bench（未完成）：用 `scripts/prepare_full_duplex_original_scorers.py --include-client --output <新目录> --download`
+获取固定作者评分及 Moshi/ASR 源码；已有目录改用 `--verify-only` 核对。两个入口只准备软件，不下载模型、不执行推理。
+评分应消费原双工服务生成的结果；作者样例、离线 ASR 或文本对话都不能替代该结果。
+可移植路径：SGLang-Omni 分别提供 [MiniCPM-o 的 Ascend 配置](https://sgl-project.github.io/sglang-omni/get_started/installation_npu.html#minicpm-o)
+及 [原 Full-Duplex-Bench 双工回放指南](https://sgl-project.github.io/sglang-omni/developer_reference/full_duplex_guide.html)。
+这两份文档不能合并解读为 910B2 已验证双工：还须验证 `session` 变体、实时音频输出及原 ASR/评分在现有设备上的完整链路。
+
 MLE-bench（未完成）：用 `scripts/prepare_jsonschemabench_author_source.py --source mlebench` 准备固定作者源码。
 在隔离执行环境安装作者客户端后，由具备权限的操作者配置 Kaggle，并自行处理对应竞赛规则；凭据不进入仓库。
 用 `mlebench prepare -c <已确认的原竞赛 ID>` 获取和校验原始数据。即使已有 ZIP，原准备入口仍会检查授权；
