@@ -704,7 +704,16 @@ def test_infinitebench_does_not_inherit_unrelated_qrecc_storage_blocker():
     )
     inventory = ledger["delivery_inventory"]
     assert "QReCC" not in (inventory["INFINITEBENCH"]["blocker"] or "")
-    assert inventory["INFINITEBENCH"]["checked"] is False
+    item = inventory["INFINITEBENCH"]
+    assert item["checked"] is True
+    receipt = json.loads((ROOT / item["delivery_receipt"]).read_text("utf-8"))
+    assert receipt["original_positions_per_protocol"] == [0, 1, 2]
+    assert len(receipt["prior_protocols_reused"]) == 9
+    assert set(receipt["remaining_protocols"]) == {
+        "longbook_choice_eng",
+        "longbook_qa_chn",
+        "longbook_sum_eng",
+    }
 
 
 def test_gpqa_fixed_artifact_and_native_main_do_not_hide_skipped_task():
@@ -1022,9 +1031,7 @@ def test_checklist_covers_registered_sources_once():
         marker = (
             "—"
             if item["status"] == "CLASSIFICATION_ONLY"
-            else "[x]"
-            if item["checked"]
-            else "[ ]"
+            else "[x]" if item["checked"] else "[ ]"
         )
         assert current[1].startswith(marker)
 
