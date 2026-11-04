@@ -104,6 +104,20 @@ def fixture(tmp_path, *, tokens=10, fail=False):
     return rows, kwargs, calls
 
 
+def test_capacity_only_checks_all_rows_without_generation_or_scoring(tmp_path):
+    rows, kwargs, calls = fixture(tmp_path)
+    counts = iter([10, 51, 50])
+    kwargs.update(token_count=lambda _: next(counts), scorer=None)
+    result = runner.execute(rows, **kwargs, capacity_only=True)
+    assert result["status"] == "CAPACITY_ONLY_NO_GENERATION"
+    assert [c["fits"] for c in result["capacity_checks"]] == [True, False, True]
+    assert not result["all_selected_fit"]
+    assert not result["native_execution_complete"]
+    assert not result["source_checkbox_eligible"]
+    assert not calls
+    assert not (kwargs["output"] / "predictions-private.jsonl").exists()
+
+
 def test_original_positions_budget_prompt_and_scorer_preserved(tmp_path):
     rows, kwargs, calls = fixture(tmp_path)
     result = runner.execute(rows, **kwargs)

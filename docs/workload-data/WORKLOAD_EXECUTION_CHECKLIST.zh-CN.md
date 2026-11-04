@@ -560,6 +560,9 @@ InfiniteBench（未完成）：复用已审计的九组结果。剩余三组分�
 的现有容量预检门槛 分别为 403,228、268,047、339,371 tokens，均含原输出预算。 更换模型时重新核对实际 tokenizer，不以周期队列的 `number_string`
 结果替代。
 
+先追加 `--capacity-only` 逐题检查，只调用服务的 tokenizer，不生成或评分。 全部放得下时退出码为 0，有超限题时为 2；私有回执保留每题的容量判定。
+正式运行时移除此参数，并使用另一新的输出目录。
+
 MLAgentBench（未完成）：固定 CIFAR-10 和 OGBN-Arxiv 已原生执行并评分，保留负面结果，不重跑。只补固定 IMDb：需要隔离的 NPU 训练执行环境，能运行原
 DistilBERT 微调及评分，不能以 CPU
 编码器或其他题目代替。[CIFAR-10 回执](validation/mlagentbench-formal-cifar10-native-audit-20261102.json) ·

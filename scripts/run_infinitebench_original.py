@@ -51,6 +51,7 @@ def execute(
     count=3,
     full=False,
     disable_thinking=False,
+    capacity_only=False,
 ):
     selected = select(rows, start=start, count=count, full=full)
     if template not in utils.MODEL_TO_PROMPT_TEMPLATE:
@@ -89,6 +90,29 @@ def execute(
 
     save()
     try:
+        if capacity_only:
+            checks = []
+            for index, row in selected:
+                messages, _ = utils.create_msgs(
+                    None, row, task, data_dir=str(data_dir), model_name=template
+                )
+                tokens = token_count(messages)
+                if type(tokens) is not int or tokens < 1:
+                    raise ValueError("invalid tokenizer response")
+                checks.append(
+                    {
+                        "row_index": index,
+                        "input_tokens": tokens,
+                        "fits": tokens + budget <= context_limit,
+                    }
+                )
+            receipt.update(
+                status="CAPACITY_ONLY_NO_GENERATION",
+                capacity_checks=checks,
+                context_limit=context_limit,
+                all_selected_fit=all(check["fits"] for check in checks),
+            )
+            return receipt
         predictions, labels = [], []
         with (output / "predictions-private.jsonl").open(
             "x", encoding="utf-8"
@@ -205,6 +229,11 @@ def main():
     parser.add_argument("--count", type=int, default=3)
     parser.add_argument("--full", action="store_true")
     parser.add_argument(
+        "--capacity-only",
+        action="store_true",
+        help="Tokenize only; never generate or score",
+    )
+    parser.add_argument(
         "--disable-thinking",
         action="store_true",
         help="Explicit compatible model transport option; original task prompt and budget unchanged",
@@ -249,15 +278,17 @@ def main():
     data_identity = verify_file(args.data_root, spec)
     sys.path.insert(0, str(args.official_checkout.resolve() / "src"))
     utils = importlib.import_module("eval_utils")
-    scorer = importlib.import_module("compute_scores")
-    from openai import OpenAI
+    scorer = client = None
+    if not args.capacity_only:
+        scorer = importlib.import_module("compute_scores")
+        from openai import OpenAI
 
-    client = OpenAI(
-        base_url=args.endpoint,
-        api_key="local-only",  # pragma: allowlist secret - dummy for loopback-only service, not a credential
-        max_retries=0,
-        timeout=args.request_timeout,
-    )
+        client = OpenAI(
+            base_url=args.endpoint,
+            api_key="local-only",  # pragma: allowlist secret - dummy for loopback-only service, not a credential
+            max_retries=0,
+            timeout=args.request_timeout,
+        )
 
     def token_count(messages):
         payload = {
@@ -293,6 +324,7 @@ def main():
         count=args.count,
         full=args.full,
         disable_thinking=args.disable_thinking,
+        capacity_only=args.capacity_only,
     )
     try:
         verify_file(args.data_root, spec)
@@ -327,6 +359,8 @@ def main():
         )
     )
 
+    return 2 if args.capacity_only and not receipt["all_selected_fit"] else 0
+
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())
