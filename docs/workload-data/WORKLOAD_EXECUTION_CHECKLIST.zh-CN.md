@@ -662,10 +662,14 @@ Full-Duplex-Bench（未完成）：用 `scripts/prepare_full_duplex_original_sco
 及 [原 Full-Duplex-Bench 双工回放指南](https://sgl-project.github.io/sglang-omni/developer_reference/full_duplex_guide.html)。
 这两份文档不能合并解读为 910B2 已验证双工：还须验证 `session` 变体、实时音频输出及原 ASR/评分在现有设备上的完整链路。
 
-MLE-bench（未完成）：用 `scripts/prepare_jsonschemabench_author_source.py --source mlebench` 准备固定作者源码。
+MLE-bench（未完成）：用 `scripts/prepare_jsonschemabench_author_source.py --source mlebench --author-root <新目录> --action prepare` 准备固定作者源码。
+同一命令改用 `--action plan` 可先核对固定版本及 758 个文件（约 7.5 MB）。ARM64 Python 3.12 的 CLI 依赖见
+`configs/workload-native/mlebench-arm64-client-py312.txt`，该环境只验证到 CLI 启动。
 在隔离执行环境安装作者客户端后，由具备权限的操作者配置 Kaggle，并自行处理对应竞赛规则；凭据不进入仓库。
 用 `mlebench prepare -c <已确认的原竞赛 ID>` 获取和校验原始数据。即使已有 ZIP，原准备入口仍会检查授权；
 不跳过作者校验，也不临时替换竞赛。准备成功后仍须运行 Agent、保留原提交并执行作者评分。
+已核验低复杂度候选 `nomad2018-predict-transparent-conductors` 的作者准备、校验和 RMSLE 评分定义；它尚未锁定为原验证样本，也未取得竞赛数据。
+生成提交后，单赛道评分入口为 `mlebench grade-sample <submission-path> <competition-id>`，使用作者准备出的私有评测标签。
 
 PaperBench（未完成）：复用已核验的 23 个原始论文包。先用
 `dataset-validation-status.json` 中 PaperBench 的 CPU 资产回执定位既有包；当前 NPU 任务共享目录未发现同名副本，不把历史取得视为当前容器可用。
