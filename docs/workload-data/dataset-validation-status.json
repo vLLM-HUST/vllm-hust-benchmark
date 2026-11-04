@@ -324,6 +324,28 @@
     "conclusion": "success",
     "scope": "Software checks for the commit recording two audited original cases; excludes the later recovery entry and does not establish third-case execution."
   },
+  "marble_third_case_recovery": {
+    "attempt": "confirmed-row2-native-003",
+    "original_row": 2,
+    "native_cli_exit_code": 0,
+    "iterations": 5,
+    "planning_score_entries": 5,
+    "communication_score_entries": 5,
+    "planning_and_communication_values": [-1, -1, -1, -1, -1],
+    "planning_and_communication_semantics": "Author engine writes -1 placeholders with these scoring calls disabled; these are not measured scores.",
+    "task_evaluation": {"innovation": 5, "safety": 4, "feasibility": 4},
+    "saved_final_judge_response_sha256": "2243bd3629f3a832c477262e16ed536d0dfe30d7bc7c11b5992a90a46f735f25",
+    "saved_judge_finish_reason": "stop",
+    "saved_judge_model": "Qwen/Qwen3-4B-Instruct-2507",
+    "author_parser_replay_matches_native_result": true,
+    "audit_model_calls": 0,
+    "model_queue_requests": 34,
+    "model_queue_responses": 34,
+    "keyword_queue_requests": 5,
+    "keyword_queue_responses": 5,
+    "original_result_sha256": "0b3a7c955db1d7f2e50a7769e17e74e47a3a231ab4739a3d4a64ef5048722231",
+    "source_checkbox_eligible": false
+  },
   "marble_third_case_interruption": {
     "source_id": "MULTIAGENTBENCH",
     "original_row": 2,
@@ -7077,7 +7099,7 @@
       "legacy_checked": false,
       "existing_receipt": null,
       "delivery_receipt": null,
-      "blocker": "Original Research fixed rows 0 and 1 have audited native results and must not be rerun. Fixed row 2 reached iteration 4 before the owned CPU workspace autostopped; no normal exit or final result was verified. Recover only row 2 under the unchanged protocol, preserve the interrupted attempt, then audit original scoring and final handoff. Pinned author source, disclosed evaluator syntax fix and 500 original public/research readbacks are already available. Other four scenarios remain separate gaps; no full-source completion."
+      "blocker": "Original Research fixed rows 0 and 1 retain their audited results. Row 2 recovery attempt 003 exited normally with five original iterations, five planning and communication score entries each, and complete model and keyword queues. The interrupted attempt is preserved. Independent result and exact-artifact handoff qualification remain pending. Pinned author source, disclosed evaluator syntax fix and 500 original public/research readbacks are already available. Other four scenarios remain separate gaps."
     },
     "DEEPPLANNING": {
       "scope": "public",
