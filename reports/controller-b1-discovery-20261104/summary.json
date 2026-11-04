@@ -1,0 +1,88 @@
+{
+  "scope": "four complete ordered discovery arms; conditional performance, not numerical equivalence or stable gain",
+  "arms": {
+    "A": {
+      "label": "A 旧B1重算参考",
+      "makespan_seconds": 497.7352,
+      "request_p95_seconds": 301.299827080071,
+      "computed_input_tokens": 5992408.0,
+      "cached_input_fraction_percent": 0.0,
+      "successful_business_requests": 336,
+      "actual_generated_tokens": 43516
+    },
+    "B": {
+      "label": "B 跨轮缓存B1，无Controller",
+      "makespan_seconds": 353.7383,
+      "request_p95_seconds": 207.85831731749477,
+      "computed_input_tokens": 3911106.0,
+      "cached_input_fraction_percent": 34.73231462210183,
+      "successful_business_requests": 336,
+      "actual_generated_tokens": 43516
+    },
+    "C": {
+      "label": "C B＋原版Controller",
+      "makespan_seconds": 270.7971,
+      "request_p95_seconds": 202.16578040147425,
+      "computed_input_tokens": 2575715.0,
+      "cached_input_fraction_percent": 57.01702888054352,
+      "successful_business_requests": 336,
+      "actual_generated_tokens": 43516
+    },
+    "D": {
+      "label": "D C＋延迟感知候选",
+      "makespan_seconds": 365.7262,
+      "request_p95_seconds": 196.1219522870302,
+      "computed_input_tokens": 3965750.0,
+      "cached_input_fraction_percent": 33.82042744753028,
+      "successful_business_requests": 336,
+      "actual_generated_tokens": 43516
+    }
+  },
+  "C_over_B_percent": 23.4470511109484,
+  "D_over_C_percent": -35.055434493205425,
+  "C_over_A_percent": 45.59414323117995,
+  "accepted_pairs": 0,
+  "validated_win": false,
+  "generator_sha256": "681262b8ce1e15f92a4319630a0336e2ff559fc6338aa4b5978e8a993d58a90d",
+  "schema": "controller-b1-discovery/v1",
+  "date": "2026-11-04",
+  "evidence_type": "real_model_multiturn_replay",
+  "programs_per_arm": 112,
+  "rounds_per_program": 3,
+  "logical_input_tokens_per_arm": 5992408,
+  "order": [
+    "B",
+    "C",
+    "D",
+    "A"
+  ],
+  "repetitions_per_arm": 1,
+  "matched_B0": null,
+  "task_quality_evaluated": false,
+  "ttft_seconds": null,
+  "tpot_seconds": null,
+  "strict_cached_cold_diagnostic": {
+    "status": "FAIL_UNRESOLVED",
+    "matching_output_tokens": 15,
+    "compared_output_tokens": 64
+  },
+  "workload_sha256": "78e29e2a60ca71f9e87808cdea6277a4d353a6996e034398ea84267c377672a9",
+  "configuration": {
+    "model": "Qwen3.5-35B-A3B",
+    "dtype": "BF16",
+    "tensor_parallel_size": 2,
+    "devices": "2 x Ascend 910B2",
+    "execution_seats": 24,
+    "resident_seats_A": 36,
+    "resident_seats_B_C_D": 80,
+    "device_state_gib_per_rank": 20,
+    "host_state_gib_per_rank": 4,
+    "mtp": 2,
+    "arrival": "all programs ready at time zero; no client slots",
+    "history": "actual generated token IDs; recorded tool waits",
+    "client_timeout": -1,
+    "controller": "original scheduling with disclosed common HTTP token-ID, capacity and transport adaptations; not an unmodified upstream binary"
+  },
+  "source_summary_sha256": "6aa084b9ab99e4f072cc941edd65d4b6c6e7624dfcac2e0432302318ae21aa99",
+  "report_path": "reports/controller-b1-discovery-20261104/README.md"
+}
