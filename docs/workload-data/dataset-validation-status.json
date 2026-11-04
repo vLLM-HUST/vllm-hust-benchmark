@@ -385,6 +385,13 @@
       "boundary": "All 14 fixed original positions have saved NPU outputs. Compatibility scoring was reproduced offline byte-for-byte: 13 positions use the author evaluator, one missing required argument is recorded as failure. This is not an unmodified official score. The given-description protocol exercises local author tools, not ToolBench remote API execution. No registered source replaced."
     },
     "MINIWOB_PLUSPLUS": {
+      "saved_native_summary_reverification": {
+        "verifier": "scripts/run_miniwob_agentlab.py --verify-saved",
+        "server_runs": ["native-click-dialog-002", "native-multi-layouts-004"],
+        "verified_summaries": 2,
+        "model_calls": 0,
+        "scope": "Both original saved summary files matched their pinned SHA-256 and terminal fields on the server. The second is a valid step-cap outcome, not a solved task. This does not verify the complete trajectory or research consumer."
+      },
       "replacement_review": {
         "current_retained_client": {
           "stage": "agentlab-miniwob-client.7zgFBx",
