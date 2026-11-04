@@ -77,6 +77,29 @@ def test_fixed_scoring_positions(tmp_path, mode):
         timeout=10,
     )
     if mode == "complete":
+        (tmp_path / "evaluator.py").write_text(
+            "api_call_prompt = 'call:'\nresponse_prompt = 'reply:'\n",
+            encoding="utf-8",
+        )
+        messages = subprocess.run(
+            [
+                sys.executable,
+                str(SCRIPT),
+                "--author-root",
+                str(tmp_path),
+                "--export-messages",
+            ],
+            capture_output=True,
+            text=True,
+            timeout=10,
+            check=True,
+        )
+        rows = [json.loads(line) for line in messages.stdout.splitlines()]
+        assert len(rows) == 6
+        assert [row["messages"][0]["content"] for row in rows] == [
+            "call:tools",
+            "reply:tools",
+        ] * 3
         assert result.returncode == 0, result.stderr
         scored = json.loads(result.stdout)
         assert [row["score"] for row in scored] == [
@@ -111,3 +134,24 @@ def test_fixed_scoring_positions(tmp_path, mode):
     else:
         assert result.returncode == 2
         assert not result.stdout
+
+
+def test_author_messages_preserves_tool_history():
+    import runpy
+
+    author_messages = runpy.run_path(str(SCRIPT))["author_messages"]
+    assert author_messages(
+        "prompt",
+        "tools",
+        [
+            {
+                "role": "API",
+                "api_name": "AddAgenda",
+                "param_dict": {"id": 7},
+                "result": {"output": "ok"},
+            },
+        ],
+    ) == [
+        {"role": "system", "content": "prompttools"},
+        {"role": "system", "content": "[AddAgenda(id='7')] Response: ok"},
+    ]

@@ -1,6 +1,7 @@
 """Export native inputs or score saved outputs for fixed API-Bank dialogues."""
 
 import argparse
+import ast
 import json
 import os
 from pathlib import Path
@@ -19,17 +20,54 @@ def read_jsonl(path):
     return [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines()]
 
 
+def author_prompts(root):
+    names = {"api_call_prompt", "response_prompt"}
+    prompts = {}
+    tree = ast.parse((root / "evaluator.py").read_text(encoding="utf-8"))
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Assign) and len(node.targets) == 1:
+            target = node.targets[0]
+            if isinstance(target, ast.Name) and target.id in names:
+                if target.id in prompts:
+                    raise ValueError(f"ambiguous author prompt: {target.id}")
+                prompts[target.id] = ast.literal_eval(node.value)
+    if prompts.keys() != names or not all(isinstance(v, str) for v in prompts.values()):
+        raise ValueError("missing author prompts")
+    return prompts
+
+
+def author_messages(prompt, descriptions, history):
+    messages = [{"role": "system", "content": prompt + descriptions}]
+    for item in history:
+        role = item["role"]
+        if role == "API":
+            params = ", ".join(f"{k}='{v}'" for k, v in item["param_dict"].items())
+            content = (
+                f"[{item['api_name']}({params})] Response: {item['result']['output']}"
+            )
+            messages.append({"role": "system", "content": content})
+        else:
+            messages.append(
+                {
+                    "role": {"User": "user", "AI": "assistant"}[role],
+                    "content": item["text"],
+                }
+            )
+    return messages
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--author-root", type=Path, required=True)
     mode = parser.add_mutually_exclusive_group(required=True)
     mode.add_argument("--predictions", type=Path)
     mode.add_argument("--export-inputs", action="store_true")
+    mode.add_argument("--export-messages", action="store_true")
     args = parser.parse_args()
     root = args.author_root.resolve(strict=True)
     predictions = {}
     try:
-        rows = [] if args.export_inputs else read_jsonl(args.predictions)
+        rows = [] if args.predictions is None else read_jsonl(args.predictions)
     except (OSError, UnicodeError, json.JSONDecodeError) as exc:
         parser.error(f"cannot read prediction JSONL: {exc}")
     for line_number, row in enumerate(rows, 1):
@@ -64,9 +102,24 @@ def main():
         for i, sample in enumerate(samples):
             if sample.ground_truth["role"] in {"API", "AI"}:
                 cases[name, i] = (evaluator, sample.ground_truth["role"])
-    if args.export_inputs:
-        for (name, i), (evaluator, _) in cases.items():
+    if args.predictions is None:
+        prompts = author_prompts(root) if args.export_messages else None
+        for (name, i), (evaluator, role) in cases.items():
             descriptions, history = evaluator.get_model_input(i)
+            if prompts is not None:
+                prompt = prompts[
+                    "api_call_prompt" if role == "API" else "response_prompt"
+                ]
+                print(
+                    json.dumps(
+                        {
+                            "file": name,
+                            "id": i,
+                            "messages": author_messages(prompt, descriptions, history),
+                        }
+                    )
+                )
+                continue
             print(
                 json.dumps(
                     {
