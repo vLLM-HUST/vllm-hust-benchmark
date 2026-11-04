@@ -15,8 +15,12 @@ def test_metadata_capture_preserves_response_and_restores_client(tmp_path):
     capture = runpy.run_path(str(script))["response_metadata"]
     response = SimpleNamespace(
         choices=[
-            SimpleNamespace(finish_reason="length", message=SimpleNamespace(content=None)),
-            SimpleNamespace(finish_reason="stop", message=SimpleNamespace(content="private")),
+            SimpleNamespace(
+                finish_reason="length", message=SimpleNamespace(content=None)
+            ),
+            SimpleNamespace(
+                finish_reason="stop", message=SimpleNamespace(content="private")
+            ),
         ],
         usage=SimpleNamespace(completion_tokens=1024),
     )

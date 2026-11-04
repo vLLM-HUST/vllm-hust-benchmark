@@ -79,7 +79,10 @@ def main():
     from web_agent_site.envs.web_agent_text_env import WebAgentTextEnv
 
     client = OpenAI(
-        base_url=args.endpoint, api_key="local-loopback", max_retries=0, timeout=60
+        base_url=args.endpoint,
+        api_key="local-loopback",  # pragma: allowlist secret - noncredential for validated loopback
+        max_retries=0,
+        timeout=60,
     )
     env = WebAgentTextEnv(observation_mode="text", num_products=1000, human_goals=True)
     history = []
