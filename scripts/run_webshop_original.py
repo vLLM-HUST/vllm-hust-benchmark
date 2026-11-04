@@ -44,6 +44,8 @@ def main():
     p.add_argument("--endpoint", required=True)
     p.add_argument("--model", required=True)
     p.add_argument("--qwen-no-thinking", action="store_true")
+    p.add_argument("--retain-history", action="store_true")
+    p.add_argument("--author-episode-budget", action="store_true")
     p.add_argument("--execute", action="store_true")
     args = p.parse_args()
     url = urlsplit(args.endpoint)
@@ -55,9 +57,12 @@ def main():
         or url.fragment
     ):
         p.error("explicit loopback /v1 endpoint required")
+    max_steps = 100 if args.author_episode_budget else 15
     if not args.execute:
         print(
-            json.dumps({"status": "PLAN_ONLY", "sessions": [0, 1, 2], "max_steps": 15})
+            json.dumps(
+                {"status": "PLAN_ONLY", "sessions": [0, 1, 2], "max_steps": max_steps}
+            )
         )
         return
     from openai import OpenAI
@@ -69,6 +74,7 @@ def main():
         base_url=args.endpoint, api_key="local-loopback", max_retries=0, timeout=60
     )
     env = WebAgentTextEnv(observation_mode="text", num_products=1000, human_goals=True)
+    history = []
 
     def choose(observation, available):
         template_options = (
@@ -79,20 +85,39 @@ def main():
         response = client.chat.completions.create(
             model=args.model,
             messages=[
+                *history,
                 {
                     "role": "user",
                     "content": f"{observation}\nAvailable actions: {available}\nReturn one action only: search[query] or click[element].",
-                }
+                },
             ],
             max_tokens=1024,
             temperature=0,
             **template_options,
         )
-        return response.choices[0].message.content
+        action = response.choices[0].message.content
+        if args.retain_history and action is not None:
+            history.extend(
+                [
+                    {
+                        "role": "user",
+                        "content": f"{observation}\nAvailable actions: {available}",
+                    },
+                    {"role": "assistant", "content": action},
+                ]
+            )
+        return action
 
     with args.output.open("x", encoding="utf-8") as output:
         for session in (0, 1, 2):
-            output.write(json.dumps(run_session(env, session, choose, 15)) + "\n")
+            history.clear()
+            result = run_session(env, session, choose, max_steps)
+            if args.author_episode_budget:
+                # Publisher baseline returns zero if the 100-action episode expires.
+                result["episode_score"] = (
+                    result["reward"] if result["terminated"] else 0.0
+                )
+            output.write(json.dumps(result) + "\n")
             output.flush()
 
 

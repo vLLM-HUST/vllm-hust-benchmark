@@ -88,6 +88,25 @@
         "first_session": {"session": 0, "steps": 15, "null_actions": 15, "terminated": false, "reward": null},
         "scope": "Partial readback while the original process was live. Null message content is not an environment action or a native score."
       },
+      "npu_nonthinking_attempt": {
+        "run": "webshop-author.1Qdqdp/nonthinking.EIjq4L",
+        "model": "Qwen/Qwen3.5-9B",
+        "sessions": [0, 1, 2],
+        "steps_per_session": 15,
+        "valid_actions_per_session": [15, 15, 15],
+        "terminal_sessions": 0,
+        "result_sha256": "ae7d88e6716c1b8d9e06aadfa43f78aebddf9c4547f1225e688960174fc9ff3e",
+        "scope": "All fixed sessions reached the adapter step cap; none produced a terminal author reward. Model interaction verified, scoring completion not verified."
+      },
+      "npu_history_attempt": {
+        "run": "webshop-author.1Qdqdp/history.WMeeL3",
+        "profile": "Qwen3.5-9B non-thinking with per-session observation/action history",
+        "sessions": [0, 1, 2],
+        "steps_per_session": 15,
+        "terminal_sessions": 0,
+        "result_sha256": "8d4f9c44ff157e281f957fc842f9e46a5749b06a77f0eefb6b274d90f019511d",
+        "scope": "All fixed sessions exhausted the adapter cap without terminal author reward."
+      },
       "accepted_replacement": false,
       "source_checkbox_eligible": false
     },
