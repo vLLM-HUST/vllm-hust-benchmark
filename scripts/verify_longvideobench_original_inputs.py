@@ -55,6 +55,9 @@ def main():
         row = dataset[index]
         inputs = row["inputs"]
         frame_count = sum(not isinstance(item, str) for item in inputs)
+        frame_sizes = sorted(
+            {item.size for item in inputs if not isinstance(item, str)}
+        )
         if not 0 < frame_count <= 256 or row["correct_choice"] not in {
             "A",
             "B",
@@ -97,6 +100,7 @@ def main():
                 {
                     "position": index,
                     "frames": frame_count,
+                    "frame_sizes": frame_sizes,
                     "text_segments": len(inputs) - frame_count,
                     "reference_kept_separate": True,
                 }

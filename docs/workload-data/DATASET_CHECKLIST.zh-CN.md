@@ -726,7 +726,9 @@ python scripts/verify_longvideobench_original_inputs.py --author-loader /externa
 `--position 2`，预检全部三个固定位置；不更换题目，不减少已选帧数。
 
 - [x] 2026-10-28复核[官方数据页](https://huggingface.co/datasets/longvideobench/LongVideoBench)及[原生软件](https://github.com/longvideobench/LongVideoBench)：6678题，validation1337/test5341；长视频、字幕与图像交错关系属于原任务，不能用Video-MME替代，不构造纯文本题冒充。
-- [ ] 官方文件访问要求登录、分享账号信息并接受条款，本任务未接受条款、未取得受控原数据，不绕过门槛。CC-BY-NC-SA-4.0及原视频权利边界须保留；已有公共工具包源码不等于原数据就绪。原文件身份、视频/字幕关系、合格NPU执行配置、原生推理/评分及实际CI消费均未完成，来源总勾保持未选。
+- [ ] 现有账号授权已核验，原素材部分取得，不公开受控原数据。位置 2 的 256 帧均为 1280×720；按本机 Qwen2-VL-7B 图像处理配置（patch 14、merge
+  2）估算，不另降采样约需 30.6 万视觉 token，未计字幕、题目和生成预算，远超现有 32K 服务。此为容量预判，不是服务实测。仍缺位置 0、1 原视频、合格 NPU
+  执行配置、原生推理和评分；来源总勾保持未选。
 
 ### TemporalWiki原基座探针PPL已交付，其他演化语料模式缺口保留
 
