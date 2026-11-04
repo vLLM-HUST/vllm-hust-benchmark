@@ -1,7 +1,10 @@
 import argparse
+import asyncio
 import importlib.util
 import json
 from pathlib import Path
+import sys
+from types import SimpleNamespace
 
 import pytest
 
@@ -58,6 +61,49 @@ def test_patch_loader_only_replaces_grader(tmp_path):
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     assert loader.loaded and module.marker == "local patch"
+
+
+def test_patched_scoring_routes_publisher_package_import(tmp_path, monkeypatch):
+    args = options(tmp_path, patched_grader=True)
+    pkg = args.author_root / "bixbench"
+    pkg.mkdir(parents=True)
+    (pkg / "__init__.py").write_text("from .graders import marker\n")
+    (pkg / "graders.py").write_text("marker = 'original'\n")
+    (args.author_root / "grade_outputs.py").write_text(
+        "from bixbench import marker\n"
+        "class AnswerMode:\n    openanswer = 'openanswer'\n"
+        "async def grade_answers(*args, **kwargs):\n"
+        "    return {'marker': marker}\n"
+    )
+    args.input_file.write_text("question,target,predicted\nq,a,\n")
+
+    def prepare(author, overlay):
+        replacement = overlay / "bixbench/graders.py"
+        replacement.parent.mkdir(parents=True)
+        replacement.write_text("marker = 'patched'\n")
+        return {"official_unmodified_score": False}
+
+    monkeypatch.setitem(
+        sys.modules,
+        "prepare_jsonschemabench_author_source",
+        SimpleNamespace(verify_source=lambda *args: None),
+    )
+    monkeypatch.setitem(
+        sys.modules,
+        "prepare_bixbench_patched_grader",
+        SimpleNamespace(SOURCE="bixbench/graders.py", prepare=prepare),
+    )
+    monkeypatch.setattr(sys, "path", sys.path.copy())
+    monkeypatch.setattr(MODULE.os, "environ", MODULE.os.environ.copy())
+    try:
+        result = asyncio.run(MODULE.execute(args, {}))
+    finally:
+        sys.modules.pop("bixbench", None)
+    assert result["status"] == "PATCHED_OPENANSWER_SCORING_RETURNED"
+    assert json.loads((args.output / "metrics.private.json").read_text()) == {
+        "marker": "patched"
+    }
+    assert (pkg / "graders.py").read_text() == "marker = 'original'\n"
 
 
 @pytest.mark.parametrize(
