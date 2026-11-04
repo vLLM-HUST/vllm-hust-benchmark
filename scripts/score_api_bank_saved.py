@@ -58,7 +58,7 @@ def author_messages(prompt, descriptions, history):
     return messages
 
 
-def generate(endpoint, model, requests, output):
+def generate(endpoint, model, requests, output, *, resume_from=None):
     url = urlsplit(endpoint)
     if (
         url.scheme != "http"
@@ -71,8 +71,26 @@ def generate(endpoint, model, requests, output):
         or not model.strip()
     ):
         raise ValueError("explicit loopback /v1 endpoint and model required")
+    prior = read_jsonl(resume_from) if resume_from is not None else []
+    if resume_from is not None and (
+        not prior
+        or len(prior) >= len(requests)
+        or any(
+            not isinstance(saved, dict)
+            or saved.get("file") != request["file"]
+            or type(saved.get("id")) is not int
+            or saved["id"] != request["id"]
+            or not isinstance(saved.get("output"), str)
+            or not isinstance(saved.get("finish_reason"), str)
+            for saved, request in zip(prior, requests)
+        )
+    ):
+        raise ValueError("resume input must be an exact incomplete response prefix")
     with output.open("x", encoding="utf-8") as stream:
-        for row in requests:
+        for saved in prior:
+            stream.write(json.dumps(saved) + "\n")
+        stream.flush()
+        for row in requests[len(prior) :]:
             body = {"model": model, "messages": row["messages"]}
             client = HTTPConnection(url.hostname, url.port, timeout=600)
             try:
@@ -116,10 +134,14 @@ def main():
     mode.add_argument("--generate", type=Path, metavar="PRIVATE_OUTPUT")
     parser.add_argument("--endpoint")
     parser.add_argument("--model")
+    parser.add_argument("--resume-from", type=Path)
     args = parser.parse_args()
+    if args.resume_from is not None and args.generate is None:
+        parser.error("--resume-from requires --generate")
     if args.generate is not None and not (args.endpoint and args.model):
         parser.error("--generate requires --endpoint and --model")
     destination = args.generate.resolve() if args.generate else None
+    resume = args.resume_from.resolve() if args.resume_from else None
     root = args.author_root.resolve(strict=True)
     predictions = {}
     try:
@@ -186,7 +208,9 @@ def main():
                 )
             )
         if destination:
-            generate(args.endpoint, args.model, requests, destination)
+            generate(
+                args.endpoint, args.model, requests, destination, resume_from=resume
+            )
         else:
             for row in requests:
                 print(json.dumps(row))

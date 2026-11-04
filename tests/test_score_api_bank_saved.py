@@ -193,9 +193,12 @@ def test_generate_preserves_completed_rows_on_http_failure(tmp_path):
             )
 
     generate = runpy.run_path(str(SCRIPT))["generate"]
-    messages = [{"role": "user", "content": "fixture"}]
-    requests = [{"file": FILES[0], "id": i, "messages": messages} for i in range(3)]
+    requests = [
+        {"file": FILES[0], "id": i, "messages": [{"role": "user", "content": str(i)}]}
+        for i in range(3)
+    ]
     output = tmp_path / "private.jsonl"
+    resumed = tmp_path / "resumed.jsonl"
     with HTTPServer(("127.0.0.1", 0), Handler) as server:
         worker = Thread(target=server.serve_forever, daemon=True)
         worker.start()
@@ -205,13 +208,17 @@ def test_generate_preserves_completed_rows_on_http_failure(tmp_path):
                 generate(endpoint, "fixture", requests, output)
             with pytest.raises(FileExistsError):
                 generate(endpoint, "fixture", requests, output)
+            generate(endpoint, "fixture", requests, resumed, resume_from=output)
         finally:
             server.shutdown()
             worker.join()
-    assert (
-        received
-        == [("/v1/chat/completions", {"model": "fixture", "messages": messages})] * 2
-    )
+    assert received == [
+        (
+            "/v1/chat/completions",
+            {"model": "fixture", "messages": requests[i]["messages"]},
+        )
+        for i in (0, 1, 1, 2)
+    ]
     assert json.loads(output.read_text(encoding="utf-8")) == {
         "file": FILES[0],
         "id": 0,
@@ -219,3 +226,6 @@ def test_generate_preserves_completed_rows_on_http_failure(tmp_path):
         "finish_reason": "stop",
         "usage": {"completion_tokens": 1},
     }
+    assert [
+        json.loads(line)["id"] for line in resumed.read_text("utf-8").splitlines()
+    ] == [0, 1, 2]
