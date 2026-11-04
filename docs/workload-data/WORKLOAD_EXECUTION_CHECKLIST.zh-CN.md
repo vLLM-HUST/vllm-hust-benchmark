@@ -568,6 +568,11 @@ DistilBERT 微调及评分，不能以 CPU
 编码器或其他题目代替。[CIFAR-10 回执](validation/mlagentbench-formal-cifar10-native-audit-20261102.json) ·
 [OGBN-Arxiv 回执](validation/mlagentbench-formal-ogbn-arxiv-native-audit-20261102.json)
 
+WorkArena（未完成）：使用 `scripts/prepare_workarena_author_source.py --action prepare --archive <官方源码包> --author-root <新目录>`
+准备固定版本，再用同一脚本的 `--action verify --author-root <源码目录>` 核验。官方源码包不是 ServiceNow 实例快照。
+原生验证前须由具备权限的操作者配置官方实例，在隔离浏览器中确认登录、任务初始化与重置可用；凭据不进入仓库。
+通过这些前置检查后，才运行固定原题的 Agent 和作者验证器。源码校验和 oracle 演示均不计为交付。
+
 PaperBench（未完成）：复用已核验的 23 个原始论文包。先用
 `prepare_paperbench_original_assets.py --action verify --output <资产目录>` 校验原包，再用
 `check_paperbench_native_prerequisites.py --author-root <源码目录>` 检查原生运行前置条件。源码目录应包含
