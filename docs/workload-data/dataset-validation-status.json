@@ -2,6 +2,32 @@
   "schema_version": "workload-validation-checklist/v1",
   "updated_at": "2026-11-04",
   "replacement_candidate_audits": {
+    "API_BANK": {
+      "publisher": "https://github.com/AlibabaResearch/DAMO-ConvAI/tree/faf754671f5b850e1b4d1ff870db37a6a2480df6/api-bank",
+      "git_verified_files": 87,
+      "git_verified_bytes": 3497623,
+      "fixed_original_dialogues": 3,
+      "original_tool_calls_replayed": 7,
+      "publisher_check_matches": 6,
+      "publisher_evaluator_reference_control": {
+        "api_scoring_positions": 9,
+        "api_matches": 7,
+        "duplicate_original_call_positions": ["AddAgenda", "AddMeeting"],
+        "failed_positions": "Both evaluator positions for the same original AddMeeting call",
+        "reply_scoring_positions": 5,
+        "reply_rouge_l": [1.0, 1.0, 1.0, 1.0, 1.0],
+        "input_kind": "Reference-derived call text and reference replies, not model predictions",
+        "scorer": "Unmodified evaluator_by_json.Evaluator.evaluate",
+        "verified_saved_output_entrypoint": "scripts/score_api_bank_saved.py",
+        "server_result": "api-bank-score-check.qh7VtT/result.json",
+        "invocation": "python scripts/score_api_bank_saved.py --author-root <pinned-api-bank-directory> --predictions <saved-jsonl>",
+        "prediction_fields": "file: original dialogue basename; id: zero-based upstream Sample.from_chat_history position; output: original model reply or API-call text"
+      },
+      "retained_mismatch": "AddMeeting attendees is serialized as a string in the original parameters but is a list in the reference input; original ToolManager preserves the string and original comparison rejects it.",
+      "model_calls": 0,
+      "source_checkbox_eligible": false,
+      "boundary": "Original reference-parameter replay only, not model generation or external API coverage. No registered source replaced."
+    },
     "MINIWOB_PLUSPLUS": {
       "publisher": "https://github.com/Farama-Foundation/miniwob-plusplus",
       "revision": "33c3b4ddef8c6eb67c57a29663d844b1eda7e614",

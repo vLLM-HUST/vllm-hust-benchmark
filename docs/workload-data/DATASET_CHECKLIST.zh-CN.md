@@ -487,6 +487,17 @@ unreachable，失败记录保留，现复用原分块获取器经至多8MiB原�
 
 ### ToolBench：原软件准备完成，原生任务未完成
 
+同类候选 API-Bank 尚未替代 ToolBench。使用机器清单所列发布方固定版本，在独立环境中安装其评分依赖后，可用以下入口复核三个固定原始对话的保存输出：
+
+```bash
+python scripts/score_api_bank_saved.py \
+  --author-root "$api_bank_root" --predictions "$saved_predictions"
+```
+
+JSONL 每行提供 `file`（原对话文件名）、`id`（发布方展开后的零基位置）和
+`output`（原模型输出）。入口要求完整覆盖固定评分位置，调用原评分器，不启动模型。服务器参考答案对照结果为 API 调用 7/9、回复 5/5；两处 API 不匹配来自同一条
+AddMeeting 原调用。此结果只核验评分链路，不计入交付完成数。
+
 - [x] 2026-11-03已核查固定官方README的数据发布入口：Drive目录和直接文件页返回404；清华云盘返回HTTP200但正文为“Link does not
   exist”。这是当前网络路径的公开访问结果，不证明永久删除。服务器保留有限页面和状态证据：`/root/toolbench-author-release-links-20261103-001/qualification-public.json`。未下载原任务包，不以第三方加工SFT数据替代原始工具任务；来源仍不打勾。
 
@@ -1119,7 +1130,22 @@ Pod已不存在（Kubernetes返回`NotFound`）；Coder最新build为`stopped`�
 ### BixBench原问题与科学环境资产准备（未交付）
 
 - [x] 最新原生终态：固定三题均完成原40动作，客户端退出0。第一题原轨迹完整复用，第二、三题新增共160次请求/HTTP200响应，三题最终答案均为`null`，原样保留，不重新生成或替换。三题原CSV输入已按`str/str/range`模式准备，尚未正式评分。
-- [ ] 评分语义待用户决定：五个独立合成控制例仅3个符合预期。已在未改官方源码上复现空规范化字符串的部分匹配可直接判对；区间分支也被传入普通而非发布方已有区间模板。不是把两个问题都归因于小模型；诊断本身零新模型调用。已请求保留原版并增加显式最小修复版的授权，未改评分规则、原题或原分数。不得把控制例计入benchmark成绩，来源总勾仍保持未完成。
+- [ ] 正式评分待恢复原输入：五个独立合成控制例仅三个符合预期。原评分器可能把空答案判为部分匹配，区间分支也误用了普通模板。已获准单独使用只修这两处的本地评分器；原版与原控制结果保留，控制例不计入
+  benchmark 成绩。修补版结果不能称为未经修改的官方成绩。
+
+在专用 CPU 工作区优先复用已保存的 `original-grade-input.private.csv`。若只有完整原生轨迹，用
+`scripts/prepare_bixbench_original_grade_input.py` 指定
+`--author-root`、`--data-root`、`--native-output` 和新的外部 `--output`，加 `--limit 3 --execute` 从原轨迹重建
+CSV；不重新生成答案。评分命令如下，变量指向服务器上的原始文件、新输出目录和已获空闲窗口的本地 NPU 裁判：
+
+```bash
+python scripts/run_bixbench_original_grader.py \
+  --author-root "$author_root" --input-file "$grade_csv" \
+  --output "$score_dir" --model "openai/$judge_model" \
+  --api-base "$judge_loopback_v1" --patched-grader
+```
+
+上面默认只检查执行计划；确认路径、裁判与空闲窗口后加 `--execute`。评分器只改写输出目录中的私有副本；保留原 CSV、评分回执及补丁摘要，核对三条结果后再更新机器清单。
 
 以下准备和失败记录保留其发生时的范围；与最新终态不同时，以上述最新终态及机器清单为准。
 
