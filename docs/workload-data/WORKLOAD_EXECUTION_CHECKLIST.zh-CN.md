@@ -554,21 +554,27 @@ GSM8K历史[分批汇总](validation/gsm8k-incremental-progress-20261022.json)�
 
 ## 新增来源逐项接入
 
-MLAgentBench（未完成）：固定 CIFAR-10 和 OGBN-Arxiv 已原生执行并评分，保留负面结果，不重跑。只补固定 IMDb：需要隔离的 NPU 训练执行环境，能运行原 DistilBERT 微调及评分，不能以 CPU 编码器或其他题目代替。[CIFAR-10 回执](validation/mlagentbench-formal-cifar10-native-audit-20261102.json) · [OGBN-Arxiv 回执](validation/mlagentbench-formal-ogbn-arxiv-native-audit-20261102.json)
+MLAgentBench（未完成）：固定 CIFAR-10 和 OGBN-Arxiv 已原生执行并评分，保留负面结果，不重跑。只补固定 IMDb：需要隔离的 NPU 训练执行环境，能运行原
+DistilBERT 微调及评分，不能以 CPU
+编码器或其他题目代替。[CIFAR-10 回执](validation/mlagentbench-formal-cifar10-native-audit-20261102.json) ·
+[OGBN-Arxiv 回执](validation/mlagentbench-formal-ogbn-arxiv-native-audit-20261102.json)
 
 PaperBench（未完成）：复用已核验的 23 个原始论文包。先用
-`prepare_paperbench_original_assets.py --action verify --output <资产目录>`
-校验原包，再用 `check_paperbench_native_prerequisites.py --author-root <源码目录>`
-检查原生运行前置条件。源码目录应包含 `project/paperbench`。两步均不占卡。
-正式验证须保留同一原题的 Agent 提交、复现归档、原 rubric 和评分产物；
-默认 300 秒或开发用 60 秒不等同于正式 24 小时协议。
+`prepare_paperbench_original_assets.py --action verify --output <资产目录>` 校验原包，再用
+`check_paperbench_native_prerequisites.py --author-root <源码目录>` 检查原生运行前置条件。源码目录应包含
+`project/paperbench`。两步均不占卡。 正式验证须保留同一原题的 Agent 提交、复现归档、原 rubric 和评分产物； 默认 300 秒或开发用 60 秒不等同于正式 24
+小时协议。
 
 每个来源均未取得/适配/真实验证；归属仍需原生协议审查。
 
-- [ ] MULTIAGENTBENCH：已核验 5 份原始 JSONL、500 条公共入口及研究侧回读；Research 固定前三题仍缺完整原生执行与原评分证据。旧运行已停止，旧队列不回放；关键词工具验证不计作原题完成。[恢复审计](validation/multiagentbench-native-recovery-audit-20261102.json)
-  恢复候选为 Qwen3-4B-Instruct-2507 的 262,144-token 服务：33 条留存原请求（最长输入 177,444 tokens）连同各自原输出预算均通过静态容量检查。动态工具输出可能更长，仍须用原任务完整执行并核验评分；不要把容量检查当成原题结果。
+- [ ] MULTIAGENTBENCH：已核验 5 份原始 JSONL、500 条公共入口及研究侧回读；Research
+  固定前三题仍缺完整原生执行与原评分证据。旧运行已停止，旧队列不回放；关键词工具验证不计作原题完成。[恢复审计](validation/multiagentbench-native-recovery-audit-20261102.json)
+  恢复候选为 Qwen3-4B-Instruct-2507 的 262,144-token 服务：33 条留存原请求（最长输入 177,444
+  tokens）连同各自原输出预算均通过静态容量检查。动态工具输出可能更长，仍须用原任务完整执行并核验评分；不要把容量检查当成原题结果。
 
-  在已隔离的 Agent 环境中，先以 `prepare_marble_original_configs.py --runtime-profile official-research --limit 3` 准备固定原题，再用 `bind_marble_research_local.py` 绑定已核验的 actor 和 judge。执行前确认关键词消费者可用，并使用新输出目录：
+  在已隔离的 Agent 环境中，先以
+  `prepare_marble_original_configs.py --runtime-profile official-research --limit 3` 准备固定原题，再用
+  `bind_marble_research_local.py` 绑定已核验的 actor 和 judge。执行前确认关键词消费者可用，并使用新输出目录：
 
   ```bash
   python scripts/run_marble_original_research.py --author-root "$AUTHOR" \
@@ -577,22 +583,41 @@ PaperBench（未完成）：复用已核验的 23 个原始论文包。先用
   ```
 
   仅当其他原题已有可核验的完整结果时，才追加 `--original-row 0`、`1` 或 `2` 补指定原题。旧队列不回放，原始结果与失败记录保留。
+
 - [x] DEEPPLANNING：constraint-planning、application-api-workflow；按机器清单所列交付口径核验，具体范围见[回执](validation/deepplanning-original-native-delivery-20261028.json)。
+
 - [x] STREAMINGBENCH：streaming-video-interaction、video-understanding；按机器清单所列交付口径核验，具体范围见[回执](validation/streamingbench-real-native-delivery-20261101.json)。
+
 - [x] OVOBENCH：streaming-video-interaction；按机器清单所列交付口径核验，具体范围见[回执](validation/ovobench-offline-native-delivery-20261031.json)。
-- [ ] FULL_DUPLEX_BENCH：9 份原始 ZIP 已取得并核验，公共入口和研究侧回读已验证；原生双工语音推理与原评分仍待完成。官方 ASR 路径显式依赖 CUDA，当前 NPU 路径尚未验证。
+
+- [ ] FULL_DUPLEX_BENCH：9 份原始 ZIP 已取得并核验，公共入口和研究侧回读已验证；原生双工语音推理与原评分仍待完成。官方 ASR 路径显式依赖 CUDA，当前 NPU
+  路径尚未验证。
+
 - [x] LIBRITTS：text-to-speech-generation；按机器清单所列交付口径核验，具体范围见[回执](validation/libritts-original-native-delivery-20261102.json)。
+
 - [x] LJSPEECH：text-to-speech-generation；按机器清单所列交付口径核验，具体范围见[回执](validation/ljspeech-native-fixed3-20261101.json)。
+
 - [x] BEIR_SCIFACT：embedding-retrieval、reranking；按机器清单所列交付口径核验，具体范围见[回执](validation/beir-native-delivery-20261025.json)。
+
 - [x] BEIR_NFCORPUS：embedding-retrieval、reranking；按机器清单所列交付口径核验，具体范围见[回执](validation/beir-native-delivery-20261025.json)。
+
 - [x] MSMARCO_PASSAGE：reranking、embedding-retrieval；按机器清单所列交付口径核验，具体范围见[回执](validation/msmarco-original-native-delivery-20261102.json)。
+
 - [x] STSB：embedding-retrieval；按机器清单所列交付口径核验，具体范围见[回执](validation/stsb-native-delivery-20261025.json)。
+
 - [x] DOCVQA：visual-document-chart；按机器清单所列交付口径核验，具体范围见[回执](validation/docvqa-original-native-delivery-20261027.json)。
+
 - [x] CODEJUDGE_EVAL：code-evaluation；按机器清单所列交付口径核验，具体范围见[回执](validation/codejudge-original-native-delivery-20261027.json)。
+
 - [x] DRAGON_PUBLIC：evolving-corpus-rag；按机器清单所列交付口径核验，具体范围见[回执](validation/dragon-original-preparation-20261028.json)。
+
 - [x] TEMPORALWIKI：evolving-corpus-rag；按机器清单所列交付口径核验，具体范围见[回执](validation/temporalwiki-base-probes-native-delivery-20261101.json)。
-- [x] COPILOT_AGENT_2026：原始会话元数据资产；606 个分片与 301,026 个会话已核验并建立索引，CI 工件下研究侧固定回读 42 条。不是原请求回放。[回执](validation/copilot-2026-metadata-delivery-20261027.json)
-- [x] AZURE_LMM_2025：原始多模态服务轨迹元数据；已核验并复用全部 100 万行索引，CI 工件下研究侧固定回读 6 条。不含原始请求正文，不生成替代提示词。[回执](validation/azure-lmm-2025-asset-delivery-20261027.json)
+
+- [x] COPILOT_AGENT_2026：原始会话元数据资产；606 个分片与 301,026 个会话已核验并建立索引，CI 工件下研究侧固定回读 42
+  条。不是原请求回放。[回执](validation/copilot-2026-metadata-delivery-20261027.json)
+
+- [x] AZURE_LMM_2025：原始多模态服务轨迹元数据；已核验并复用全部 100 万行索引，CI 工件下研究侧固定回读 6
+  条。不含原始请求正文，不生成替代提示词。[回执](validation/azure-lmm-2025-asset-delivery-20261027.json)
 
 ## 分批提交追踪
 
