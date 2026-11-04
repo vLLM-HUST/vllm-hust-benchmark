@@ -253,6 +253,20 @@
           "archive_hash_reverified_before_extraction": true,
           "entrypoint": "toolbench/inference/qa_pipeline_multithread.py",
           "arm64_base_python_help_first_failure": "ModuleNotFoundError: termcolor",
+          "arm64_client_overlay": {
+            "stage": "stabletoolbench-full-source.CEnQEg/client-deps.SZYCms",
+            "installed": ["termcolor==2.4.0", "tenacity==8.5.0"],
+            "next_observed_failure": "ModuleNotFoundError: peft in eagerly imported Davinci model adapter",
+            "native_cli_help_passed": false
+          },
+          "lazy_optional_backend_compatibility_probe": {
+            "server_stage": "stabletoolbench-full-source.CEnQEg/chat-client-7b3utj_7",
+            "reproducible_patch": "configs/workload-native/stabletoolbench-lazy-backend-imports.patch",
+            "clean_application_byte_identical_to_qualified_probe": true,
+            "change": "In a separate derived source tree, move five optional backend imports to their existing branch or retriever method. Keep the original archive and extracted source untouched.",
+            "derived_cli_help_exit_code": 0,
+            "scope": "ARM64 offline CLI help only, NPU visibility disabled. No changes to task inputs, tools, Agent algorithm, budgets or scoring; no listener or model requests. Original unmodified CLI remains unqualified."
+          },
           "scope": "Offline help attempt with NPU visibility disabled. The native CLI imports optional model backends eagerly; a pinned client overlay must qualify the import chain. Use an empty output directory and omit the upstream --overwrite flag, which invokes recursive deletion. No listener or model calls."
         },
         "retained_server_static_recheck": {
