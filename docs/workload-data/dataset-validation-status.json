@@ -4446,11 +4446,22 @@
       "existing_receipt": null,
       "delivery_receipt": null,
       "author_single_competition_entry_review": {
+        "isolated_server_cli_preflight": {
+          "client_dependency_snapshot": "configs/workload-native/mlebench-arm64-client-py312.txt",
+          "architecture": "aarch64",
+          "python": "3.12.13",
+          "dependencies_installed_and_checked": 130,
+          "prepare_help_exit_code": 0,
+          "grade_sample_help_exit_code": 0,
+          "empty_home_no_kaggle_credentials": true,
+          "competition_data_or_submission_processed": false
+        },
         "server_archive_verified_files": 758,
         "server_archive_validation": "Pinned GitHub ZIP, all manifest entries matched expected size and SHA-256; no extraction or native run.",
         "author_source_preparer": "scripts/prepare_jsonschemabench_author_source.py --source mlebench",
         "date": "2026-11-04",
         "prepare_command": "mlebench prepare -c <competition-id>",
+        "pinned_prepare_authentication_boundary": "Author download_dataset authenticates with Kaggle and calls competition_download_files even with force=False. The official leaderboard can be reused, but the unchanged prepare command does not bypass authentication for an existing ZIP. Keep publisher checksum verification enabled and do not accept competition rules on the user's behalf.",
         "grade_command": "mlebench grade-sample <submission-path> <competition-id>",
         "scope": "Official pinned README; a single original competition can be prepared and graded without downloading the full suite. No competition selection changed and no credentials, data, execution or grade obtained."
       },
