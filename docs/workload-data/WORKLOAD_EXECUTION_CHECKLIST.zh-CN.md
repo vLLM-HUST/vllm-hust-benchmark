@@ -647,6 +647,8 @@ OSWorld 与 SWE-smith（未完成）：两项都需要先验收兼容的隔离 a
 OSWorld 先在作者镜像内确认桌面启动、原任务初始化和重置，再接独立 NPU 模型服务；作者支持关闭 KVM 不代表 ARM64 已验证。
 SWE-smith 可复用已验证的 11 个分片与固定前三题读回，通过 `scripts/prepare_swesmith_original_assets.py` 准备原资产；
 仍须运行原 Agent、在隔离环境内执行生成补丁并采集官方评分。复用的 24 条作者轨迹不是本项目的实跑结果。
+作者推理入口为 [SWE-agent 批处理脚本](https://github.com/SWE-bench/SWE-smith/blob/9b74ac08118a85c39c356802f7961893af73e07f/agent/_infer_model.sh)。
+固定第三题的空题面原样保留；若入口拒绝该题，保留拒绝证据，不换题或补写题面。
 
 当前执行环境为 ARM64 和两张 NPU。WebArena、VisualWebArena、OSWorld、SWE-smith 和 PaperBench 的原协议保留环境阻塞；
 同类替代项可在现有环境独立验证，登记实际覆盖和差异，不把未覆盖行为标成完成。WorkArena、MLE-bench 和 ToolBench 分别依赖 ServiceNow、Kaggle 和原工具后端；
