@@ -714,13 +714,16 @@ LD_LIBRARY_PATH=/external/ffmpeg/lib python -B scripts/run_videomme_original.py 
 
 ### LongVideoBench长视频交错理解（原素材部分取得，原生推理未完成）
 
-- [x] 发布方固定版本的 validation 1337 条和原位置 0、1、2 对应的两份原字幕已在服务器核验。已取得位置 2 的原视频，并通过[原版加载器预检入口](../../scripts/verify_longvideobench_original_inputs.py)：256 帧、68 段文本，参考选项与输入分离。位置 0、1 共用的原视频尚待从发布方归档提取；预检不计模型执行。
+- [x] 发布方固定版本的 validation 1337 条和原位置 0、1、2 对应的两份原字幕已在服务器核验。已取得位置 2
+  的原视频，并通过[原版加载器预检入口](../../scripts/verify_longvideobench_original_inputs.py)：256 帧、68
+  段文本，参考选项与输入分离。位置 0、1 共用的原视频尚待从发布方归档提取；预检不计模型执行。
 
 ```bash
 python scripts/verify_longvideobench_original_inputs.py --author-loader /external/LongVideoBench/longvideobench/longvideobench_dataset.py --data-root /external/LongVideoBench-data --position 2
 ```
 
-使用作者加载器依赖（含 Decord 和 Pillow）及原始 `lvb_val.json`、`videos/`、`subtitles/` 布局。素材齐备后去掉 `--position 2`，预检全部三个固定位置；不更换题目，不减少已选帧数。
+使用作者加载器依赖（含 Decord 和 Pillow）及原始 `lvb_val.json`、`videos/`、`subtitles/` 布局。素材齐备后去掉
+`--position 2`，预检全部三个固定位置；不更换题目，不减少已选帧数。
 
 - [x] 2026-10-28复核[官方数据页](https://huggingface.co/datasets/longvideobench/LongVideoBench)及[原生软件](https://github.com/longvideobench/LongVideoBench)：6678题，validation1337/test5341；长视频、字幕与图像交错关系属于原任务，不能用Video-MME替代，不构造纯文本题冒充。
 - [ ] 官方文件访问要求登录、分享账号信息并接受条款，本任务未接受条款、未取得受控原数据，不绕过门槛。CC-BY-NC-SA-4.0及原视频权利边界须保留；已有公共工具包源码不等于原数据就绪。原文件身份、视频/字幕关系、合格NPU执行配置、原生推理/评分及实际CI消费均未完成，来源总勾保持未选。
@@ -1047,7 +1050,8 @@ records = iter_workload("DRAGON_PUBLIC", data_root=Path("/external/dragon-origin
 
 该来源是已发布历史会话语料，不是自带完整任务评分器的benchmark。现有适配状态仍为`CONTRACT_MAPPED_ASSET_VALIDATION_PENDING`；43分片的登记不等于取得数据或原生运行成功。[固定版本官方协议](https://huggingface.co/datasets/lmarena-ai/VisionArena-Chat/blob/1394b4f59ab6f1f2e5aff6bc15b448e15960e170/README.md)
 
-已取得并核验首个原分片；固定位置 0、1、2 的原图及会话与公共索引和研究侧读取一致。三条原样本均已在单张 Ascend 910B2 上用 Qwen2-VL-7B-Instruct（BF16，修订 `eed13092ef92e448dd6875b2a00151bd3f7db0ac`）正常生成结束。复现协议把未改动的图片挂在首条用户消息上，保留历史消息，将末尾参考回答留在模型输入之外。图像挂载是本地约定，无官方评分。
+已取得并核验首个原分片；固定位置 0、1、2 的原图及会话与公共索引和研究侧读取一致。三条原样本均已在单张 Ascend 910B2 上用 Qwen2-VL-7B-Instruct（BF16，修订
+`eed13092ef92e448dd6875b2a00151bd3f7db0ac`）正常生成结束。复现协议把未改动的图片挂在首条用户消息上，保留历史消息，将末尾参考回答留在模型输入之外。图像挂载是本地约定，无官方评分。
 
 按发布方条款自行取得首分片并核验发布方摘要，安装 `pyarrow==22.0.0`、`Pillow==11.3.0` 后可运行：
 
@@ -1056,7 +1060,8 @@ python scripts/run_visionarena_original_continuation.py --shard /external/train-
 python scripts/run_visionarena_original_continuation.py --shard /external/train-00000-of-00043.parquet --endpoint http://127.0.0.1:19466/v1 --model Qwen/Qwen2-VL-7B-Instruct --max-tokens 1024 --output /private/visionarena-results
 ```
 
-第一条命令仅预检，已在原分片上通过并匹配实跑的三张图摘要。第二条需本地兼容 OpenAI 接口的视觉服务，输出目录须不存在。结果可能包含会话衍生内容，不上传原图、原会话或完整结果。首分片固定三条实跑不代表剩余 42 个分片或质量评测。
+第一条命令仅预检，已在原分片上通过并匹配实跑的三张图摘要。第二条需本地兼容 OpenAI
+接口的视觉服务，输出目录须不存在。结果可能包含会话衍生内容，不上传原图、原会话或完整结果。首分片固定三条实跑不代表剩余 42 个分片或质量评测。
 
 ### AppWorld固定原三题原生执行、官方评分与消费交接
 
@@ -1914,7 +1919,7 @@ QReCC历史容量判断后来补正：数十TB是从网页重建的获取代价�
 | BIGCODEBENCH               | [x] 固定原题交付闭环                           | 原3条sanitize、参考3/3、候选pass/pass/fail及独立审计通过，0新增模型调用。公共原Parquet获取/摘要、实际CI64载荷、1140原9字段/索引及受维护研究入口3条回读已核验。原Python3.10完整依赖CPU-only镜像已实际评分；新增代码专用构建上下文32原源码+6运行文件，完整锁及公开配方服务器实际构建完成，233锁版本/71原评估要求/32原文件核验通过；复用已有有效原3条评分，不重跑模型或冒充新镜像评分结果。e2b0.17废弃警告保留。[回执](validation/bigcodebench-container-runtime-readiness-20261028.json)。 |
 | SWE_BENCH                  | [x] 固定原三题原生链路完成                     | 全2294条/12字段、CI工件和研究回读通过；原Agent三题提交，原评分2未修复/1非法补丁，故障原题恢复且首题不重跑。384次NPU请求，保存审计通过，非全2294题评测；[独立回执](validation/swebench-classic-native-delivery-20261030.json)。                                                                                                                                                                                                                                                           |
 | SWE_VERIFIED               | [x] 固定三题原生链路完成                       | 原Agent144次NPU请求、官方参考对照3/3通过；模型1修复/1未修复/1非法补丁失败原样保留。保存结果审计、全500条数据字段/索引和固定3条研究回读通过，c585两项CI通过。非全量模型评测，SWE_BENCH另行待完成；[回执](validation/swebench-original-readiness-20261029.json)。                                                                                                                                                                                                                          |
-| VISIONARENA | [x] 固定原三条多模态续写交付 | 首个原分片核验、原图及对话研究回读、三条 NPU 续写及公共入口预检均通过。[交付回执](validation/visionarena-original-continuation-20261104.json)。无官方评分。 |
+| VISIONARENA                | [x] 固定原三条多模态续写交付                   | 首个原分片核验、原图及对话研究回读、三条 NPU 续写及公共入口预检均通过。[交付回执](validation/visionarena-original-continuation-20261104.json)。无官方评分。                                                                                                                                                                                                                                                                                                                              |
 | MMMU                       | [x] 原validation抽样交付完成                   | 全92文件/11550行/16字段与索引核验，30学科固定90题NPU推理和原评分（含4多图），152处公共/固定研究消费往返通过。[回执](validation/mmmu-native-delivery-20261027.json)。59次length保留，非完整validation质量或LLaVA复现。                                                                                                                                                                                                                                                                    |
 | CHARTQA                    | [x] 原测试抽样原生交付完成                     | 原测试2500条全字段/图像字节/索引核验；双类别固定6题NPU生成、原评分与公共离线复核，CI产物和固定研究6条往返通过。[回执](validation/chartqa-native-delivery-20261026.json)。非全量质量/性能；修复构建器全新重编译未验证。                                                                                                                                                                                                                                                                   |
 | VIDEOMME                   | [x] 固定原生协议交付完成                       | 全24原文件及900视频/744字幕字节核验、2700题原11字段/索引、实际CI及受维护研究27条回读已闭环。官方8帧与字幕8帧各27题均原生NPU推理/原评分完成，各13/27、全54 stop，独立原输入/帧/请求/回答/参考/评分审计通过且0新调用。27独立问题、9视频，不是2700题/全语义域质量或性能保证；仅学术研究。[环境与操作](../../workload-preparation/README.md#video-mme-%E5%8E%9F%E7%94%9F%E8%A7%86%E9%A2%91%E4%BB%BB%E5%8A%A1)、[回执](validation/videomme-original-readiness-20261028.json)。                |
