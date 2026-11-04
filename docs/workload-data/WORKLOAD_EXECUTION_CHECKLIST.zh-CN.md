@@ -590,6 +590,11 @@ NatureBench（未完成）：`scripts/run_naturebench_original.py` 默认检查�
 保留原任务退出、科学尝试次数、评分和有效性裁判各自的状态；正常退出但零科学尝试，不等于已验证科学评分。
 已有第二题裁判重放仅复用原材料，不替代原运行的最终评分记录。
 
+OSWorld 与 SWE-smith（未完成）：两项都需要先验收兼容的隔离 amd64 执行环境，但不能共用任务镜像或评分器。
+OSWorld 先在作者镜像内确认桌面启动、原任务初始化和重置，再接独立 NPU 模型服务；作者支持关闭 KVM 不代表 ARM64 已验证。
+SWE-smith 可复用已验证的 11 个分片与固定前三题读回，通过 `scripts/prepare_swesmith_original_assets.py` 准备原资产；
+仍须运行原 Agent、在隔离环境内执行生成补丁并采集官方评分。复用的 24 条作者轨迹不是本项目的实跑结果。
+
 PaperBench（未完成）：复用已核验的 23 个原始论文包。先用
 `prepare_paperbench_original_assets.py --action verify --output <资产目录>` 校验原包，再用
 `check_paperbench_native_prerequisites.py --author-root <源码目录>` 检查原生运行前置条件。源码目录应包含
