@@ -2,12 +2,38 @@
 
 import argparse
 import json
+import math
 import os
 from pathlib import Path
 from urllib.parse import urlsplit
 
 
 TASKS = ("miniwob.click-dialog", "miniwob.multi-layouts")
+
+
+def terminal_summary(result_dir):
+    summary = json.loads((Path(result_dir) / "summary_info.json").read_text("utf-8"))
+    reward = summary.get("cum_reward")
+    steps = summary.get("n_steps")
+    terminated = summary.get("terminated")
+    truncated = summary.get("truncated")
+    if (
+        summary.get("err_msg") is not None
+        or type(steps) is not int
+        or steps < 1
+        or type(reward) not in (int, float)
+        or not math.isfinite(reward)
+        or type(terminated) is not bool
+        or type(truncated) is not bool
+        or not (terminated or truncated)
+    ):
+        raise ValueError("missing or invalid BrowserGym terminal summary")
+    return {
+        "steps": steps,
+        "reward": reward,
+        "terminated": terminated,
+        "truncated": truncated,
+    }
 
 
 def loopback_url(value):
@@ -70,7 +96,20 @@ def main():
     run.run()
     if run.err_msg:
         raise RuntimeError(run.err_msg)
-    print(json.dumps({"status": "FINISHED", "result_dir": str(run.exp_dir)}))
+    print(
+        json.dumps(
+            {
+                "status": "FINISHED",
+                "result_dir": str(run.exp_dir),
+                "task": args.task,
+                "seed": 42,
+                "model": args.model,
+                "max_steps": args.max_steps,
+                "max_output_tokens": args.max_output_tokens,
+                **terminal_summary(run.exp_dir),
+            }
+        )
+    )
 
 
 if __name__ == "__main__":
