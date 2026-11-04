@@ -579,6 +579,11 @@ BixBench（未完成）：固定原题为 `bix-1-q1`、`bix-1-q2`、`bix-10-q1`�
 在隔离环境中用 `scripts/run_bixbench_original_grader.py`；默认仅输出计划，核对私有输入副本和本地模型端点后再加
 `--execute --patched-grader`。修复版评分单独标记，不能作为未修改的官方评分。
 
+WebArena（未完成）：固定原题 ID 为 0、1、2，均只访问 `shopping_admin`，且需要登录。
+先在隔离的 amd64 执行节点核验作者的 `shopping_admin_final_0719.tar`、站点 URL、登录及重置，
+再使用作者任务入口执行这三题。当前注册表候选仅核对了配置摘要和层数，尚不能替代原始归档；
+公开演示站点也不能替代可重置环境。站点与浏览器可在 CPU 节点运行，模型推理仍走独立 NPU 服务。
+
 PaperBench（未完成）：复用已核验的 23 个原始论文包。先用
 `prepare_paperbench_original_assets.py --action verify --output <资产目录>` 校验原包，再用
 `check_paperbench_native_prerequisites.py --author-root <源码目录>` 检查原生运行前置条件。源码目录应包含
