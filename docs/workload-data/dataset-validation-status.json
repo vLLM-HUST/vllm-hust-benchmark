@@ -218,7 +218,8 @@
         "wrapper": "run_fac_eval.sh",
         "wrapper_references_missing_file": "toolbench/tooleval/tool_eval.py",
         "published_implementation": "toolbench/tooleval/fac_eval.py",
-        "runtime": "Transformers text-generation pipeline, BF16, device_map=auto",
+        "runtime": "The benchmark main path uses vllm.LLM.chat with temperature=0 and max_tokens=512, consuming converted answers and the keys of the --ids JSON. The Transformers BF16 pipeline is used by the separate human-evaluation helper, not the benchmark main path.",
+        "fixed_run_scoring_gate": "Use the author's answer converter and a fixed ID map for 588, 608, 1073; keep empty final answers as author-defined unsolved cases. FAC is distinct from the GPT-4 SoPR/SoWR path. No score is available until the actual saved Agent answers and the pinned evaluator execute.",
         "publisher_evaluator_model_candidate": {"id": "stabletoolbench/Evaluator", "revision": "228c3bf20640ce6712c978bd9e574ae183fedef7", "architecture": "LlamaForCausalLM", "weight_bytes": 16060556376, "gated": false, "weights_downloaded": false},
       "arm64_cli_preflight": {
         "source_sha256": "f9fbb0ef486a1459696aa900bbafe48c8daed762c566cfc74bcb1ffee5e6d6d9",
