@@ -571,8 +571,8 @@ DistilBERT 微调及评分，不能以 CPU
 PaperBench（未完成）：复用已核验的 23 个原始论文包。先用
 `prepare_paperbench_original_assets.py --action verify --output <资产目录>` 校验原包，再用
 `check_paperbench_native_prerequisites.py --author-root <源码目录>` 检查原生运行前置条件。源码目录应包含
-`project/paperbench`。两步均不占卡。 正式验证须保留同一原题的 Agent 提交、复现归档、原 rubric 和评分产物； 默认 300 秒或开发用 60 秒不等同于正式 24
-小时协议。
+`project/paperbench`。两步均不占卡。原构建脚本指定 `linux/amd64`，应在经过验证的隔离执行节点上构建和运行；当前 ARM64 NPU 容器没有可用的本地容器执行路径，不能直接执行生成代码。构建前由操作者处理 Miniconda 软件条款；模型推理仍可由独立 NPU 服务承担。
+正式验证须保留同一原题的 Agent 提交、复现归档、原 rubric 和评分产物；默认 300 秒或开发用 60 秒不等同于正式 24 小时协议。
 
 每个来源均未取得/适配/真实验证；归属仍需原生协议审查。
 
