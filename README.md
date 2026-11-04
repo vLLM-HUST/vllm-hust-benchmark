@@ -760,9 +760,13 @@ prompt/媒体时不能伪造原始请求；有官方回放工具的按原工具�
 | 企业私有原始请求     | [PAIO-REUSE-CONV-5000](#workload-source-paio-reuse-conv-5000)             | 仅外部授权数据；保留原始请求与关系，不公开正文，不从文件名推断任务或实际复用。 |
 | 企业私有原始请求     | [PAIO-SEMANTIC-SIMILAR-5000](#workload-source-paio-semantic-similar-5000) | 仅外部授权数据；保留原始请求与关系，不公开正文，不从文件名推断任务或实际复用。 |
 
-### 原生替代候选：基础浏览器交互
+### 原生替代候选
 
 [MiniWoB++ 发布方源码](https://github.com/Farama-Foundation/miniwob-plusplus/tree/33c3b4ddef8c6eb67c57a29663d844b1eda7e614) · [运行及离线复核入口](scripts/run_miniwob_agentlab.py) · [固定版本和复现命令](docs/workload-data/DATASET_CHECKLIST.zh-CN.md) · [机器核验记录](docs/workload-data/dataset-validation-status.json)。ARM64 环境下两道固定原题已有真实 NPU 运行：一道获得原生奖励 1，另一道达到步数上限、奖励 0。仅覆盖基础网页交互，不替代 WebArena、WorkArena 或桌面操作；尚未进入统一研究消费入口，不计入已交付项。
+
+[API-Bank 发布方源码](https://github.com/AlibabaResearch/DAMO-ConvAI/tree/main/api-bank) · [固定对话输入与保存结果评分入口](scripts/score_api_bank_saved.py) · [机器核验记录](docs/workload-data/dataset-validation-status.json)。固定三段原始对话的 14 个模型调用位置已在 NPU 生成并保存。原评分器在一条缺少必填 `end_time` 的生成结果上抛出异常；离线兼容评分保留这条失败，另 13 个位置仍调用作者评分逻辑。候选覆盖对话中的工具调用及参数，不替代 ToolBench 的外部 API 检索和执行环境，不计入已交付项。
+
+在已安装 API-Bank 作者依赖的 Python 环境中，可以离线复核保存的输出：`python scripts/score_api_bank_saved.py --author-root <原始源码目录> --predictions <已保存输出.jsonl> --record-missing-end-time`。已用当前公共入口在 ARM64 服务器复评，输出与历史回执逐字节相同，没有重新调用模型。兼容模式的结果不等同于未修改的官方评分。
 
 ### 逐来源：官方出处、仓库入口与验证范围
 
