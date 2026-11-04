@@ -8,6 +8,23 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def test_partial_native_entrypoints_reference_repository_scripts():
+    ledger = json.loads(
+        (ROOT / "docs/workload-data/dataset-validation-status.json").read_text("utf-8")
+    )
+    inventory = ledger["delivery_inventory"]
+    for source_id in ("NATUREBENCH", "MLAGENTBENCH", "BIXBENCH", "MULTIAGENTBENCH"):
+        row = inventory[source_id]
+        tools = row["available_execution_tools"]
+        assert tools["boundary"]
+        assert row["checked"] or row["blocker"], source_id
+        assert all(
+            path.startswith("scripts/") and (ROOT / path).is_file()
+            for name, path in tools.items()
+            if name not in {"boundary", "source_checkout_help_preflight"}
+        ), source_id
+
+
 def test_qrecc_delivery_requires_full_index_native_rag_and_actual_handoff():
     ledger = json.loads(
         (ROOT / "docs/workload-data/dataset-validation-status.json").read_text("utf-8")
