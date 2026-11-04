@@ -262,6 +262,8 @@
               "added_original_members": ["tools/Data/kick_com_api_kick_api.json", "tools/Data/keyword_analysis.json"],
               "queued_ids": [588, 608, 1073],
               "original_rows_unchanged": true,
+              "public_preparer": "scripts/prepare_stabletoolbench_fixed_g1.py",
+              "public_preparer_server_recheck": "stabletoolbench-public-prep.eCOFI2: all three inputs hash-checked; fixed JSON and two supplemental definitions byte-identical to author-queue-qualified preparation.",
               "model_calls": 0,
               "scope": "Copied the two missing definitions byte-for-byte from the verified author cache ZIP into a separate tool tree. The original author queue accepted all three fixed rows in order; no Agent execution or scoring."
             },
@@ -287,6 +289,9 @@
           "server_stage": "stabletoolbench-client.2rT7Dk/source",
           "standalone_default_bind": "0.0.0.0",
           "cache_miss_requests_post": true,
+          "author_agent_default_service_is_non_loopback": true,
+          "native_launch_required_overrides": ["SERVICE_URL=http://127.0.0.1:<tool-port>/virtual", "--base_url http://127.0.0.1:<model-port>/v1"],
+          "author_fallback_order": "Cache hit returns directly. On miss the official handler calls the real ToolBench URL before entering the simulator branch; a network denial is not equivalent to a qualified simulator response.",
           "scope": "The retained subset contains server main.py, utils.py and config.yml, not the complete Agent client. Do not launch main.py directly on the shared host. Native validation still requires the pinned Agent client, a loopback-only server, and a qualified author fallback or an explicitly recorded cache miss."
         },
         "revision": "aa4ed9f4737ad98bd706663f01d63623c3427812",
