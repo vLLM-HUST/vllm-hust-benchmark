@@ -13,6 +13,34 @@ ROOT = Path(__file__).resolve().parents[1]
 PROFILE = ROOT / "configs/workload-native/toolbench-author-source.json"
 
 
+@pytest.mark.parametrize(
+    ("source", "source_id", "file_count"),
+    [("mlebench", "MLEBENCH", 758), ("visualwebarena", "VISUALWEBARENA", 478)],
+)
+def test_shared_preparer_exposes_pinned_author_sources(
+    tmp_path, source, source_id, file_count
+):
+    destination = tmp_path / source
+    result = subprocess.check_output(
+        [
+            sys.executable,
+            str(ROOT / "scripts/prepare_jsonschemabench_author_source.py"),
+            "--source",
+            source,
+            "--author-root",
+            str(destination),
+        ],
+        text=True,
+    )
+    report = json.loads(result)
+    assert report["source_id"] == source_id
+    assert report["status"] == "PLAN_ONLY_NO_DOWNLOAD"
+    assert report["files"] == file_count
+    assert report["model_calls"] == 0
+    assert not report["source_checkbox_eligible"]
+    assert not destination.exists()
+
+
 def test_publisher_examples_plan_is_separate_and_unchecked(tmp_path):
     destination = tmp_path / "examples"
     result = subprocess.check_output(
