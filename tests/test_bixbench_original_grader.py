@@ -52,6 +52,19 @@ def test_plan_does_not_import_author_or_create_output(tmp_path, capsys, patched)
     assert not args.output.exists()
 
 
+def test_wrong_retained_input_digest_stops_before_scoring(tmp_path, monkeypatch):
+    args = options(tmp_path, input_sha256="0" * 64)
+    args.input_file.write_text("question,target,predicted\nq,t,p\n", encoding="utf-8")
+    monkeypatch.setitem(
+        sys.modules,
+        "prepare_jsonschemabench_author_source",
+        SimpleNamespace(verify_source=lambda *_: None),
+    )
+    with pytest.raises(ValueError, match="retained SHA-256"):
+        asyncio.run(MODULE.execute(args, {}))
+    assert not args.output.exists()
+
+
 def test_patch_loader_only_replaces_grader(tmp_path):
     patch = tmp_path / "graders.py"
     patch.write_text("marker = 'local patch'\n", encoding="utf-8")

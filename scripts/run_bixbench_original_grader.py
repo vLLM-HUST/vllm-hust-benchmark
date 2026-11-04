@@ -9,12 +9,13 @@ import argparse
 import asyncio
 from contextlib import nullcontext
 import csv
+import hashlib
 import importlib.abc
 import importlib.util
+import io
 import json
 import os
 from pathlib import Path
-import shutil
 import sys
 from urllib.parse import urlsplit
 
@@ -92,7 +93,13 @@ async def execute(args, report):
 
     pins = ROOT / "configs/workload-native/bixbench-author-source.json"
     verify_source(author, pins)
-    with original.open(newline="", encoding="utf-8") as stream:
+    payload = original.read_bytes()
+    digest = hashlib.sha256(payload).hexdigest()
+    expected = getattr(args, "input_sha256", None)
+    if expected is not None and digest != expected.lower():
+        raise ValueError("grading CSV does not match the retained SHA-256")
+    report["input_sha256"] = digest
+    with io.StringIO(payload.decode("utf-8"), newline="") as stream:
         reader = csv.DictReader(stream)
         if not {"question", "target", "predicted"}.issubset(reader.fieldnames or ()):
             raise ValueError("publisher question/target/predicted CSV fields required")
@@ -114,7 +121,7 @@ async def execute(args, report):
         report["local_patch"] = prepare(author, overlay)
         loader = PatchedGraderLoader(overlay / SOURCE)
     copied = output / "graded.private.csv"
-    shutil.copyfile(original, copied)
+    copied.write_bytes(payload)
     os.chmod(copied, 0o600)
     sys.path.insert(0, str(author))
     os.environ["OPENAI_API_BASE"] = args.api_base
@@ -172,6 +179,9 @@ def main(argv=None):
     for name in ("author-root", "input-file", "output", "model", "api-base"):
         parser.add_argument("--" + name, required=True)
     parser.add_argument("--execute", action="store_true")
+    parser.add_argument(
+        "--input-sha256", help="Expected digest from the retained grading receipt"
+    )
     parser.add_argument("--patched-grader", action="store_true")
     parser.add_argument("--model-queue", type=Path)
     args = parser.parse_args(argv)
