@@ -1,6 +1,42 @@
 {
   "schema_version": "workload-validation-checklist/v1",
   "updated_at": "2026-11-04",
+  "replacement_candidate_audits": {
+    "MINIWOB_PLUSPLUS": {
+      "publisher": "https://github.com/Farama-Foundation/miniwob-plusplus",
+      "revision": "33c3b4ddef8c6eb67c57a29663d844b1eda7e614",
+      "browsergym_miniwob": "0.14.3",
+      "chromium": "125.0.6422.26",
+      "platform": "linux/arm64",
+      "seed": 42,
+      "scripted_native_rewards": {
+        "click-dialog": [1.0],
+        "multi-layouts": [0.0, 0.0, 0.0, 1.0]
+      },
+      "both_terminated_without_truncation": true,
+      "agentlab_loopback_fixture": {
+        "agentlab": "0.4.2",
+        "browsergym_miniwob": "0.14.2",
+        "task": "miniwob.click-dialog",
+        "max_steps": 5,
+        "fixture_http_requests": 1,
+        "cum_reward": 1.0,
+        "terminated": true,
+        "truncated": false,
+        "neural_model_calls": 0
+      },
+      "real_agent_execution_pending": {
+        "runner": "scripts/run_miniwob_agentlab.py wraps BrowserGym ExpArgs with AgentLab GenericAgentArgs; defaults to plan-only",
+        "task_ids_without_browsergym_prefix": ["miniwob.click-dialog", "miniwob.multi-layouts"],
+        "model_binding": "SelfHostedModelArgs backend=vllm; explicitly bind VLLM_API_URL to the allocated loopback service",
+        "browser_startup": "Set private Fontconfig and library paths; unset LD_PRELOAD for the client process only",
+        "required_evidence": "Actual NPU model identity, original task and seed, terminal summary and original reward. Fixture replies do not qualify."
+      },
+      "model_calls": 0,
+      "source_checkbox_eligible": false,
+      "boundary": "Scripted original browser actions only. Not NPU Agent evaluation or evidence of authenticated business-site coverage. No registered source replaced."
+    }
+  },
   "webarena_shopping_admin_preflight": {
     "candidate_original_task_ids": [0, 1, 2],
     "selection": "First three rows in the pinned author task file; candidate batch, not executed.",
@@ -4515,7 +4551,7 @@
       "legacy_checked": false,
       "existing_receipt": null,
       "delivery_receipt": null,
-      "blocker": "Pinned first three original task IDs 0/1/2 only target shopping_admin and require authentication. Qualify the original resettable shopping_admin snapshot, login state and the author harness URL configuration before any model request. A bounded filename search in the current NPU instance and task share found no staged copy; this does not rule out copies on other workspaces. The public registry candidate is linux/amd64 and its equivalence to the publisher archive has not been verified. The site may run on a separate compatible isolated node while LLM inference remains on NPU. The full multi-site AMI recommendation is not a measured minimum for this fixed batch. Public demo browsing and task JSON reading are not native completion.",
+      "blocker": "Pinned first three original task IDs 0/1/2 only target shopping_admin and require authentication. Qualify the original resettable shopping_admin snapshot, login state and the author harness URL configuration before any model request. A bounded filename search in the current NPU instance and task share found no staged copy; this does not rule out copies on other workspaces. The public registry candidate is linux/amd64 and its configuration digest and layer count match the official archive manifest; layer bytes and site behavior remain unverified. The site may run on a separate compatible isolated node while LLM inference remains on NPU. The full multi-site AMI recommendation is not a measured minimum for this fixed batch. Public demo browsing and task JSON reading are not native completion.",
       "official_protocol_url": "https://github.com/web-arena-x/webarena/blob/main/environment_docker/README.md",
       "official_website_image_access_review": {
         "archive_declared_bytes_by_initial_range": 9640032256,
@@ -5131,7 +5167,7 @@
         "grading_software_preflight": "Six public software files staged with SHA256 verification on owned CPU; both real-client plan commands passed without creating scoring inputs or model calls. Original grader import and corrected router timeout construction also passed; actual original trajectory conversion/scoring pending.",
         "source_checkbox_eligible": false
       },
-      "blocker": "Fixed first3 original questions completed the original40-action Agent protocol; all3 null answers retained. First trajectory reused, other2 produced160 new saved request/HTTP200 pairs; no generation rerun needed. All3 original grading CSV rows prepared with str/str/range modes. Original scorer sanity controls failed: deterministic empty partial-match passes incorrectly, and range grading overrides the dedicated publisher range template. Formal grading and final exact-artifact handoff remain pending; no scoring semantics patch authorized or applied. Previous205-row input/index and fixed3 public/research ZIP-checked readbacks remain valid within their historical software scope. Other57 referenced ZIPs remain unacquired; fixed3 is not full205 execution."
+      "blocker": "Fixed first3 original questions completed the original40-action Agent protocol; all3 null answers retained. First trajectory reused, other2 produced160 new saved request/HTTP200 pairs; no generation rerun needed. All3 original grading CSV rows prepared with str/str/range modes. Original scorer sanity controls failed: deterministic empty partial-match passes incorrectly, and range grading overrides the dedicated publisher range template. Formal grading and final exact-artifact handoff remain pending; the minimal separately labeled scorer repair was authorized and prepared, but the saved grading inputs in the dedicated CPU workspace must be recovered before formal scoring. Previous205-row input/index and fixed3 public/research ZIP-checked readbacks remain valid within their historical software scope. Other57 referenced ZIPs remain unacquired; fixed3 is not full205 execution."
     },
     "LABBENCH": {
       "scope": "public",
