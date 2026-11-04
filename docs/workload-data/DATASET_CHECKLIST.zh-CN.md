@@ -716,7 +716,7 @@ LD_LIBRARY_PATH=/external/ffmpeg/lib python -B scripts/run_videomme_original.py 
 
 - [x] 发布方固定版本的 validation 1337 条和原位置 0、1、2 对应的两份原字幕已在服务器核验。已取得位置 2
   的原视频，并通过[原版加载器预检入口](../../scripts/verify_longvideobench_original_inputs.py)：256 帧、68
-  段文本，参考选项与输入分离。位置 0、1 共用的原视频尚待从发布方归档提取；预检不计模型执行。
+  段文本，参考选项与输入分离。位置 0、1 共用的原视频已从发布方归档提取并核验；预检不计模型执行。
 
 ```bash
 python scripts/verify_longvideobench_original_inputs.py --author-loader /external/LongVideoBench/longvideobench/longvideobench_dataset.py --data-root /external/LongVideoBench-data --position 2
@@ -727,8 +727,7 @@ python scripts/verify_longvideobench_original_inputs.py --author-loader /externa
 
 - [x] 2026-10-28复核[官方数据页](https://huggingface.co/datasets/longvideobench/LongVideoBench)及[原生软件](https://github.com/longvideobench/LongVideoBench)：6678题，validation1337/test5341；长视频、字幕与图像交错关系属于原任务，不能用Video-MME替代，不构造纯文本题冒充。
 - [ ] 现有账号授权已核验，原素材部分取得，不公开受控原数据。位置 2 的 256 帧均为 1280×720；按本机 Qwen2-VL-7B 图像处理配置（patch 14、merge
-  2）估算，不另降采样约需 30.6 万视觉 token，未计字幕、题目和生成预算，远超现有 32K 服务。此为容量预判，不是服务实测。仍缺位置 0、1 原视频、合格 NPU
-  执行配置、原生推理和评分；来源总勾保持未选。
+  2）估算，不另降采样约需 30.6 万视觉 token，未计字幕、题目和生成预算，远超现有 32K 服务。此为容量预判，不是服务实测。仍缺合格 NPU 执行配置、原生推理和评分；来源总勾保持未选。
 
 ### TemporalWiki原基座探针PPL已交付，其他演化语料模式缺口保留
 

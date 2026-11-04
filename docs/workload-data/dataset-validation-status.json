@@ -1982,11 +1982,16 @@
         "original_subtitle_files_parsed": 2,
         "subtitle_record_counts": [32, 106],
         "required_original_videos": 2,
-        "original_videos_acquired": 1,
-        "acquired_video_fixed_positions": [2],
+        "original_videos_acquired": 2,
+        "acquired_video_fixed_positions": [0, 1, 2],
+        "second_original_video_bytes": 36859936,
+        "second_original_video_sha256": "75baabbf6863233f301934f6d0f12b953d13f1ebe65a4056af64f200e2a0d970",
+        "second_original_video_tar_payload_offset": 84630895616,
         "acquired_video_bytes": 99806645,
         "author_preprocessing": {
-          "verified_original_positions": [2],
+            "verified_original_positions": [0, 1, 2],
+            "per_position_frame_counts": [190, 190, 256],
+            "per_position_text_segment_counts": [37, 37, 68],
           "frames": 256,
             "frame_sizes": [[1280, 720]],
             "qwen2_vl_default_image_token_estimate": 306176,
@@ -2016,7 +2021,7 @@
       "existing_receipt": null,
       "delivery_receipt": null,
       "protocol_review": {"reviewed_on": "2026-10-28", "publisher_url": "https://huggingface.co/datasets/longvideobench/LongVideoBench", "official_software_url": "https://github.com/longvideobench/LongVideoBench", "original_questions": 6678, "validation_questions": 1337, "test_questions": 5341, "requires_interleaved_video_subtitle_relations": true, "license": "cc-by-nc-sa-4.0", "file_access_requires_account_and_terms_acceptance": true, "terms_accepted_by_this_task": false, "native_model_calls": 0},
-      "blocker": "Authorized access verified; all 1337 original validation questions and both subtitle files for fixed rows 0/1/2 are retained privately. The video for row 2 is acquired and passes author interleaving at 256 frames; only the original video shared by rows 0 and 1 remains to be located. Default full-resolution Qwen2-VL-7B preprocessing is estimated to exceed the existing 32768-token service on row 2 alone. A qualified NPU profile, native scoring and exact research-side handoff remain pending. No substitute media, prompts or tasks."
+      "blocker": "Authorized access verified; all 1337 original validation questions and both subtitle files for fixed rows 0/1/2 are retained privately. The video for row 2 is acquired and passes author interleaving at 256 frames; the original video shared by rows 0 and 1 has also been extracted and verified, and both pass author interleaving at 190 frames each. Default full-resolution Qwen2-VL-7B preprocessing is estimated to exceed the existing 32768-token service on row 2 alone. A qualified NPU profile, native scoring and exact research-side handoff remain pending. No substitute media, prompts or tasks."
     },
     "LIBRISPEECH": {
       "scope": "public",
