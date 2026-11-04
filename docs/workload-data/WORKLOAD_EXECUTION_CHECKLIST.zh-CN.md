@@ -579,6 +579,12 @@ BixBench（未完成）：固定原题为 `bix-1-q1`、`bix-1-q2`、`bix-10-q1`�
 在隔离环境中用 `scripts/run_bixbench_original_grader.py`；默认仅输出计划，核对私有输入副本和本地模型端点后再加
 `--execute --patched-grader`。修复版评分单独标记，不能作为未修改的官方评分。
 
+StableToolBench（候选，未交付）：复用已核验的原工具定义和响应缓存，G1 固定前三题为 588、608、1073。
+原 `/virtual` 路由缓存未命中会尝试外联，先验证回环监听和出网限制；无可用作者模拟后端时保留未命中失败。
+评分使用固定作者提交里的 `toolbench/tooleval/fac_eval.py`（原 shell 包装器引用的文件缺失），传入
+`--model_path`、`--evaluation_path`、`--output_path` 和固定 `--ids`。
+作者评估模型的 BF16 Transformers NPU 路径尚未验证，不能以缓存控制代替原评分。
+
 API-Bank（候选，未交付）：使用清单固定的作者源码，先通过
 `scripts/score_api_bank_saved.py --author-root <原源码> --export-messages` 核对原消息位置。
 需要生成时使用同一脚本的 `--generate <新私有输出> --endpoint <回环端点> --model <部署模型>`；
