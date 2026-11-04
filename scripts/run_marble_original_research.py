@@ -306,6 +306,9 @@ def execute(output, report):
                 "original_row": index,
                 "cli_exit_code": exit_code,
                 "result_file_exists": (folder / "original-result.jsonl").is_file(),
+                "result_record_present": has_result_record(
+                    folder / "original-result.jsonl"
+                ),
             }
         )
         report["model_requests"] = (
@@ -323,6 +326,25 @@ def execute(output, report):
     report["model_http"] = saved_model_http_summary(output)
     (output / "state-private.json").write_text(json.dumps(report, indent=2), "utf-8")
     return report
+
+
+def has_result_record(path):
+    try:
+        records = [
+            json.loads(line)
+            for line in path.read_text(encoding="utf-8").splitlines()
+            if line.strip()
+        ]
+    except (FileNotFoundError, UnicodeError, json.JSONDecodeError):
+        return False
+    if len(records) != 1 or not isinstance(records[0], dict):
+        return False
+    iterations = records[0].get("iterations")
+    return (
+        isinstance(iterations, list)
+        and bool(iterations)
+        and all(isinstance(item, dict) and item for item in iterations)
+    )
 
 
 def main(argv=None):
@@ -396,13 +418,10 @@ def main(argv=None):
     return int(
         args.execute
         and (
-            (
-                args.original_row is not None
-                and [row.get("original_row") for row in report["completed"]]
-                != [args.original_row]
-            )
+            [row.get("original_row") for row in report["completed"]]
+            != ([args.original_row] if args.original_row is not None else [0, 1, 2])
             or any(
-                row["cli_exit_code"] != 0 or not row["result_file_exists"]
+                row["cli_exit_code"] != 0 or not row.get("result_record_present")
                 for row in report["completed"]
             )
             or not report.get("model_http", {}).get("requests")

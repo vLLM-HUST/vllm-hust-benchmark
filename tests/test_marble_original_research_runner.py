@@ -29,7 +29,7 @@ def test_cli_recovery_selects_only_original_row_two(
         return dict(
             report,
             completed=[
-                {"original_row": row, "cli_exit_code": 0, "result_file_exists": True}
+                {"original_row": row, "cli_exit_code": 0, "result_record_present": True}
                 for row in returned_rows
             ],
             model_http={"requests": 1, "pending": 0, "non200_responses": 0},
@@ -300,12 +300,14 @@ def test_orphan_response_is_rejected(tmp_path):
 
 
 @pytest.mark.parametrize(
-    "requests,pending,failed,code",
+    "requests,pending,failed,rows,code",
     [
-        (1, 0, 1, 1),
-        (1, 1, 0, 1),
-        (0, 0, 0, 1),
-        (1, 0, 0, 0),
+        (1, 0, 1, [0, 1, 2], 1),
+        (1, 1, 0, [0, 1, 2], 1),
+        (0, 0, 0, [0, 1, 2], 1),
+        (1, 0, 0, [0, 1, 2], 0),
+        (1, 0, 0, [0], 1),
+        (1, 0, 0, [0, 1, 1], 1),
     ],
 )
 def test_cli_exit_zero_and_result_file_do_not_hide_http_failures(
@@ -315,6 +317,7 @@ def test_cli_exit_zero_and_result_file_do_not_hide_http_failures(
     requests,
     pending,
     failed,
+    rows,
     code,
 ):
     monkeypatch.setattr(entry, "prepare", lambda *a: {})
@@ -322,7 +325,10 @@ def test_cli_exit_zero_and_result_file_do_not_hide_http_failures(
         entry,
         "execute",
         lambda *a: {
-            "completed": [{"cli_exit_code": 0, "result_file_exists": True}],
+            "completed": [
+                {"original_row": row, "cli_exit_code": 0, "result_record_present": True}
+                for row in rows
+            ],
             "model_http": {
                 "requests": requests,
                 "pending": pending,
@@ -340,3 +346,20 @@ def test_cli_exit_zero_and_result_file_do_not_hide_http_failures(
     )
     assert entry.main(args + ["--execute"]) == code
     assert json.loads(capsys.readouterr().out)["source_checkbox_eligible"] is False
+
+
+@pytest.mark.parametrize(
+    "data,expected",
+    [
+        ("", False),
+        ("{", False),
+        ("{}", False),
+        ('{"iterations":[]}', False),
+        ('{"iterations":[{}]}', False),
+        ('{"iterations":[{"iteration":0}]}', True),
+    ],
+)
+def test_result_record_requires_recorded_iterations(tmp_path, data, expected):
+    result = tmp_path / "original-result.jsonl"
+    result.write_text(data, encoding="utf-8")
+    assert entry.has_result_record(result) is expected

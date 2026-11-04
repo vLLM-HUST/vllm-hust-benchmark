@@ -1423,6 +1423,33 @@
       "length_group_capacity_receipt": "docs/workload-data/validation/longbench-v2-length-group-capacity-20261025.json",
       "entry_native_after_update_checked": false,
       "current_medium_capacity_receipt": "docs/workload-data/validation/longbench-v2-medium-9b-capacity-20261027.json",
+      "short_exact_ci_research_readback": {
+        "ci_run": 41717575103,
+        "artifact_id": 13271321110,
+        "fixed_original_rows": [1, 4, 6],
+        "full_context_question_and_options_equal": true,
+        "reference_answers_isolated": true,
+        "new_model_calls": 0,
+        "source_checkbox_eligible": false
+      },
+      "medium_exact_ci_research_readback": {
+        "ci_run": 41717575103,
+        "artifact_id": 13271321110,
+        "fixed_original_rows": [3, 5, 8],
+        "full_context_question_and_options_equal": true,
+        "reference_answers_isolated": true,
+        "new_model_calls": 0,
+        "source_checkbox_eligible": false
+      },
+      "long_exact_ci_research_readback": {
+        "ci_run": 41717575103,
+        "artifact_id": 13271321110,
+        "fixed_original_rows": [0, 2, 7],
+        "full_context_question_and_options_equal": true,
+        "reference_answers_isolated": true,
+        "new_model_calls": 0,
+        "source_checkbox_eligible": false
+      },
       "read_only_deployment_capacity_review": {
         "existing_9b_served_context_tokens": 262144,
         "existing_9b_startup_reported_cache_tokens": 795436,
@@ -1435,7 +1462,7 @@
         "model_calls": 0,
         "server_receipt": "Private shared task root/qwen9b-actual-cache-capacity-20261103-001/qualification-public.json"
       },
-      "blocker": "Historical Short rows1/4/6 reused, not rerun. Same fixed Medium rows3/5/8 full149662/138653/68762 tokens completed and officially scored under current9B262144/nonthinking profile: length/stop/stop, correct1/3; independent saved original prompt/reference/response/scoring audit exit0, no new model calls. Fixed Long rows0/2/7 require295877/530991/815430 tokens and remain blocked. Original128 output budget retained, no filtering/truncation/replacement. Exact-artifact handoff pending; legal length finish is not an executor failure."
+      "blocker": "Fixed Long rows 0/2/7 still require qualified NPU context capacity for full 295877/530991/815430-token inputs plus the original 128-token output budget, followed by original inference and scoring. No filtering, truncation or replacement. Exact CI research readback has passed for fixed Medium and Long rows. Historical Short rows 1/4/6 and the original Medium inference/scoring (1/3 correct; length/stop/stop) are retained without reruns."
     },
     "LONGMEMEVAL": {
       "scope": "public",

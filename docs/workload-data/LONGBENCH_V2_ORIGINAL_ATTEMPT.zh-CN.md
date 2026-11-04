@@ -107,7 +107,13 @@ python scripts/run_longbench_v2_original_samples.py \
 - Long：固定原行 0、2、7 的完整输入分别需要 295877、530991、815430 tokens。须用实际部署的 tokenizer 重做容量预检，并给原 128-token
   输出预算留足空间；不能用截断、跳题或换题解决容量不足。
 
-交付状态以[机器清单](dataset-validation-status.json)为准。Medium 的执行和评分证据不等于最终发布工件及研究侧交接已经通过。
+Long 组容量预检沿用上面的准备入口，指定 `--row-index 0 --row-index 2 --row-index 7`，
+并将 `--model`、`--tokenizer` 与 `--model-max-length` 绑定到待验证服务；使用新的私有输出目录。
+该步骤不调用模型。执行时使用这份容量回执和同一模型、窗口；若官方提示发生截断或预算变化，执行器会在发送前拒绝。
+同一 CI 工件下，研究侧已回读 Long 组三题，完整上下文、问题、选项和隔离的参考答案均与原文件一致；这不是容量或推理结果。
+
+交付状态以[机器清单](dataset-validation-status.json)为准。[Medium 保存结果复核回执](validation/longbench-v2-medium-saved-audit-20261027.json)记录了三题原提示、保存响应及原评分的复核。
+随后在服务器校验并隔离安装 [PR #544 的 CI 工件](https://github.com/vLLM-HUST/vllm-hust-benchmark/actions/runs/41717575103/artifacts/13271321110)，用公共准备入口建索引，再用研究侧现有消费者回读原行 3、5、8。三题完整上下文、问题及四个选项均与原文件相等，答案独立保留，模型调用为 0。此回读只覆盖 Medium 固定三题，不改变 Long 组未完成状态。
 
 公开回执不含问题、答案、上下文或模型回答。上游私有预测文件会截短其保存的context，但不代表模型输入被截断；完整原输入仍由固定文件与SHA引用。此处是执行接入与来源边界，不迁科研观测/机制分析。CI只验证软件参数和事实口径，不跑模型或性能。
 
