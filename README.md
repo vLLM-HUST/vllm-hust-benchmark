@@ -766,7 +766,7 @@ prompt/媒体时不能伪造原始请求；有官方回放工具的按原工具�
 
 [API-Bank 发布方源码](https://github.com/AlibabaResearch/DAMO-ConvAI/tree/main/api-bank) · [固定对话输入与保存结果评分入口](scripts/score_api_bank_saved.py) · [机器核验记录](docs/workload-data/dataset-validation-status.json)。固定三段原始对话的 14 个模型调用位置已在 NPU 生成并保存。原评分器在一条缺少必填 `end_time` 的生成结果上抛出异常；离线兼容评分保留这条失败，另 13 个位置仍调用作者评分逻辑。候选覆盖对话中的工具调用及参数，不替代 ToolBench 的外部 API 检索和执行环境，不计入已交付项。
 
-在已安装 API-Bank 作者依赖的 Python 环境中，可以离线复核保存的输出：`python scripts/score_api_bank_saved.py --author-root <原始源码目录> --predictions <已保存输出.jsonl> --record-missing-end-time`。已用当前公共入口在 ARM64 服务器复评，输出与历史回执逐字节相同，没有重新调用模型。兼容模式的结果不等同于未修改的官方评分。
+使用[固定作者版本](https://github.com/AlibabaResearch/DAMO-ConvAI/tree/faf754671f5b850e1b4d1ff870db37a6a2480df6/api-bank)和 [ARM64 客户端依赖清单](configs/workload-native/api-bank-fixed-client-arm64-requirements.txt)。用 `python scripts/score_api_bank_saved.py --author-root <原始源码目录> --export-inputs` 导出不含参考答案的原生模型输入；离线复评时，将 `--export-inputs` 换成 `--predictions <已保存输出.jsonl> --record-missing-end-time`。两条命令均在 ARM64 服务器验证，复评与历史回执逐字节相同，没有重新调用模型。兼容模式的结果不等同于未修改的官方评分。
 
 ### 逐来源：官方出处、仓库入口与验证范围
 
