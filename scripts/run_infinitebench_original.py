@@ -18,7 +18,19 @@ from urllib.request import Request, urlopen
 from verify_infinitebench_original_code import verify
 
 
-def select(rows, *, start=0, count=3, full=False):
+def select(rows, *, start=0, count=3, full=False, partial_positions=None):
+    if partial_positions is not None:
+        if full or start != 0 or count != 3:
+            raise ValueError(
+                "partial positions cannot combine with a range or full selection"
+            )
+        if not partial_positions or sorted(set(partial_positions)) != list(
+            partial_positions
+        ):
+            raise ValueError("partial positions must be unique and in source order")
+        if partial_positions[0] < 0 or partial_positions[-1] >= len(rows):
+            raise ValueError("partial position outside original data")
+        return [(index, rows[index]) for index in partial_positions]
     if full:
         if start != 0 or count != 3:
             raise ValueError("full selection cannot combine with a range")
@@ -52,8 +64,11 @@ def execute(
     full=False,
     disable_thinking=False,
     capacity_only=False,
+    partial_positions=None,
 ):
-    selected = select(rows, start=start, count=count, full=full)
+    selected = select(
+        rows, start=start, count=count, full=full, partial_positions=partial_positions
+    )
     if template not in utils.MODEL_TO_PROMPT_TEMPLATE:
         raise ValueError("explicit author template profile required")
     if task not in utils.DATA_NAME_TO_MAX_NEW_TOKENS:
@@ -69,6 +84,7 @@ def execute(
         "scorer_model_name": model,
         "selected_original_positions": [index for index, _ in selected],
         "full_selection": full,
+        "partial_evidence_only": partial_positions is not None,
         "max_new_tokens": budget,
         "completed_original_positions": [],
         "attempted_original_positions": [],
@@ -197,9 +213,11 @@ def execute(
         ):
             raise ValueError("official scorer returned invalid aggregate")
         receipt.update(
-            status="SELECTED_ORIGINAL_TASKS_AND_AUTHOR_SCORE_COMPLETE",
+            status="PARTIAL_ORIGINAL_EVIDENCE_ONLY"
+            if partial_positions is not None
+            else "SELECTED_ORIGINAL_TASKS_AND_AUTHOR_SCORE_COMPLETE",
             score=score,
-            native_execution_complete=True,
+            native_execution_complete=partial_positions is None,
         )
     except Exception as exc:
         receipt.update(status="FAILED_NOT_COMPLETE", error_type=type(exc).__name__)
@@ -228,6 +246,20 @@ def main():
     parser.add_argument("--start", type=int, default=0)
     parser.add_argument("--count", type=int, default=3)
     parser.add_argument("--full", action="store_true")
+    parser.add_argument(
+        "--offline-rouge",
+        type=Path,
+        help="Existing trusted cached Evaluate rouge.py; no metric download",
+    )
+    parser.add_argument(
+        "--offline-rouge-sha256", help="Expected SHA-256 of the cached metric source"
+    )
+    parser.add_argument(
+        "--partial-original-position",
+        type=int,
+        action="append",
+        help="Run exact original positions as partial evidence, never count as native completion",
+    )
     parser.add_argument(
         "--capacity-only",
         action="store_true",
@@ -280,7 +312,32 @@ def main():
     utils = importlib.import_module("eval_utils")
     scorer = client = None
     if not args.capacity_only:
-        scorer = importlib.import_module("compute_scores")
+        if args.offline_rouge or args.offline_rouge_sha256:
+            if not args.offline_rouge or not args.offline_rouge_sha256:
+                raise ValueError(
+                    "offline ROUGE requires both cached source and its SHA-256"
+                )
+            rouge = args.offline_rouge.resolve(strict=True)
+            if (
+                rouge.name != "rouge.py"
+                or hashlib.sha256(rouge.read_bytes()).hexdigest()
+                != args.offline_rouge_sha256
+            ):
+                raise ValueError("offline ROUGE source identity mismatch")
+            import evaluate
+            from unittest.mock import patch
+
+            original_load = evaluate.load
+            with patch.object(
+                evaluate,
+                "load",
+                lambda name, *a, **kw: original_load(
+                    str(rouge) if name == "rouge" else name, *a, **kw
+                ),
+            ):
+                scorer = importlib.import_module("compute_scores")
+        else:
+            scorer = importlib.import_module("compute_scores")
         from openai import OpenAI
 
         client = OpenAI(
@@ -325,6 +382,7 @@ def main():
         full=args.full,
         disable_thinking=args.disable_thinking,
         capacity_only=args.capacity_only,
+        partial_positions=args.partial_original_position,
     )
     try:
         verify_file(args.data_root, spec)

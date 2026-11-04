@@ -18,6 +18,23 @@ runner = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(runner)
 
 
+def test_partial_original_positions_never_claim_native_completion(tmp_path):
+    rows, kwargs, calls = fixture(tmp_path)
+    result = runner.execute(rows, **kwargs, partial_positions=[1, 2])
+    assert result["selected_original_positions"] == [1, 2]
+    assert result["completed_original_positions"] == [1, 2]
+    assert result["status"] == "PARTIAL_ORIGINAL_EVIDENCE_ONLY"
+    assert result["native_execution_complete"] is False
+    assert result["source_checkbox_eligible"] is False
+    assert len(calls) == 2
+
+
+@pytest.mark.parametrize("positions", [[2, 1], [1, 1], [-1], [100]])
+def test_partial_selection_rejects_invalid_original_positions(positions):
+    with pytest.raises(ValueError, match="partial position"):
+        runner.select([{}, {}, {}], partial_positions=positions)
+
+
 @pytest.mark.parametrize("timeout", ["0", "-1", "nan", "inf"])
 def test_invalid_transport_timeout_rejected_before_source_or_model_access(
     monkeypatch, tmp_path, timeout
