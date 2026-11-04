@@ -3251,7 +3251,8 @@ profile保留；因此是替代模型的接入验证，不是GPT-4质量复现�
   GB，超过共享盘实测 63 GiB 可用空间。先在隔离 amd64 节点核验独立 Docker 数据盘及解包余量，再拉取镜像并验证原站点初始化、登录和重置；随后才执行原题及评分。当前未拉镜像层。
 
 - [ ] NatureBench 固定样本原生结果：第二题已保存的 judge 文本使用作者原版 `judge_core.runner._extract_json` 成功解析，`is_valid`
-  为布尔值 `false`，不是解析错误；尚未核对该判定与同一尝试的评估记录合并后的最终结果。未重跑推理，不将离线解析视为整项通过。
+  为布尔值 `false`，不是解析错误。服务器保存的重建请求与实际发送请求逐字段比较，只有 `model` 字段不同；保存响应以 `end_turn` 结束，使用 360,566 个输入
+  token、791 个输出 token。尚未核对该判定与同一尝试的评估记录合并后的最终结果。本次比对未重跑推理，不将离线解析视为整项通过。
 
 - [ ] MLAgentBench IMDb：ARM64 Python 3.12 客户端已验证可导入 DistilBERT 分类器及
   Trainer；[依赖清单](../../configs/workload-native/mlagentbench-imdb-npu-client-supplements.txt)只补客户端。执行须使用可访问指定
