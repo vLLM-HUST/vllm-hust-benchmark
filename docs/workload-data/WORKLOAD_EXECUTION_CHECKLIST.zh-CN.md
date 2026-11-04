@@ -600,6 +600,11 @@ SWE-smith 可复用已验证的 11 个分片与固定前三题读回，通过 `s
 节点就绪不等于授权或数据已取得。NatureBench、MLAgentBench、BixBench 与 Full-Duplex-Bench 应分别处理长上下文、
 隔离 NPU 微调、原评分输入恢复和双工语音/ASR，不因共用硬件合并协议。
 
+MLE-bench（未完成）：用 `scripts/prepare_jsonschemabench_author_source.py --source mlebench` 准备固定作者源码。
+在隔离执行环境安装作者客户端后，由具备权限的操作者配置 Kaggle，并自行处理对应竞赛规则；凭据不进入仓库。
+用 `mlebench prepare -c <已确认的原竞赛 ID>` 获取和校验原始数据。即使已有 ZIP，原准备入口仍会检查授权；
+不跳过作者校验，也不临时替换竞赛。准备成功后仍须运行 Agent、保留原提交并执行作者评分。
+
 PaperBench（未完成）：复用已核验的 23 个原始论文包。先用
 `prepare_paperbench_original_assets.py --action verify --output <资产目录>` 校验原包，再用
 `check_paperbench_native_prerequisites.py --author-root <源码目录>` 检查原生运行前置条件。源码目录应包含
