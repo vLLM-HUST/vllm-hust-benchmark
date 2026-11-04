@@ -1394,6 +1394,72 @@
       "blocker": null
     },
     "LONGBENCH_V2": {
+      "long_context_deployment_candidate": {
+        "model": "Qwen/Qwen3.5-9B",
+        "publisher_profile": "https://huggingface.co/Qwen/Qwen3.5-9B#processing-long-contexts",
+        "native_context": 262144,
+        "publisher_yarn_context": 1010000,
+        "publisher_yarn_factor": 4,
+        "installed_vllm_ascend_config_preflight": {
+          "vllm": "0.23.0+empty",
+          "vllm_ascend": "0.23.0",
+          "transformers": "5.5.4",
+          "resolved_max_model_len": 1010000,
+          "weights_loaded": false,
+          "inference_calls": 0
+        },
+        "runtime_switch_preflight": {
+          "date": "2026-11-04",
+          "first_attempt": "Previous engine exited before the previous API process. The guard stopped the switch before launching the extended profile and invoked restoration of the previous configuration.",
+          "extended_profile_started": false,
+          "long_sample_inference_calls": 0
+        },
+        "extended_profile_npu_capacity_attempt": {
+          "date": "2026-11-04",
+          "hardware": "single Ascend 910B2, 64 GiB",
+          "gpu_memory_utilization": 0.75,
+          "configured_max_model_len": 1010000,
+          "weights_loaded": true,
+          "available_kv_gib_reported": 24.76,
+          "required_kv_gib_reported": 31.39,
+          "estimated_max_model_len_reported": 795648,
+          "minimum_required_for_fixed_long_samples": 815558,
+          "service_ready": false,
+          "long_sample_inference_calls": 0,
+          "outcome": "Engine rejected startup for insufficient KV capacity. The original 262144-token service was relaunched by rollback."
+        },
+        "fixed_long_820k_input_preflight": {
+          "date": "2026-11-04",
+          "pinned_data_and_author_archive_sha256_verified": true,
+          "original_row_indices": [0, 2, 7],
+          "complete_prompt_tokens": [295877, 530991, 815430],
+          "original_output_budget_tokens": 128,
+          "configured_window_for_preflight": 820000,
+          "all_inputs_fit_configured_window": true,
+          "inference_calls": 0
+        },
+        "fixed_long_820k_engine_cache_profile": {
+          "date": "2026-11-04",
+          "configured_max_model_len": 820000,
+          "gpu_memory_utilization": 0.8,
+          "max_num_seqs": 1,
+          "available_kv_gib_reported": 27.81,
+          "cache_capacity_tokens_reported": 893159,
+          "boundary": "Engine cache profile only; does not establish successful original-task execution."
+        },
+        "fixed_long_820k_partial_execution": {
+          "date": "2026-11-04",
+          "original_row_indices_completed": [0, 2],
+          "prompt_tokens_reported": [295877, 530991],
+          "completion_tokens_reported": [8, 8],
+          "finish_reasons": ["stop", "stop"],
+          "official_judge_correct": [true, false],
+          "boundary": "Two of the three fixed long tasks; this is not completion of the long group."
+        },
+        "minimum_context_for_existing_fixed_long": 815558,
+        "estimated_bf16_full_attention_kv_bytes_per_token": 32768,
+        "boundary": "The KV estimate excludes hybrid state, cache layout overhead, weights and workspace. Publisher configuration is a candidate, not Ascend deployment evidence; qualify separately without altering the existing service or rerunning short/medium."
+      },
       "official_long_context_profile_review": {
         "reviewed_date": "2026-11-03",
         "model_card": "https://huggingface.co/Qwen/Qwen3.5-9B#processing-ultra-long-texts",
@@ -1411,11 +1477,11 @@
       },
       "scope": "public",
       "delivery_kind": "review_original_source_protocol",
-      "status": "BLOCKED",
-      "checked": false,
+      "status": "AVAILABLE",
+      "checked": true,
       "legacy_checked": false,
       "existing_receipt": "docs/workload-data/validation/longbench-v2-original-attempt-npu-20261022.json",
-      "delivery_receipt": null,
+      "delivery_receipt": "docs/workload-data/validation/longbench-v2-fixed-long-npu-20261104.json",
       "explicit_selection_entry_software_checked": true,
       "capacity_preparation_entry": "scripts/prepare_longbench_v2_original_capacity.py",
       "capacity_preparation_original_cpu_receipt": "docs/workload-data/validation/longbench-v2-original-capacity-cpu-20261024.json",
@@ -1462,7 +1528,8 @@
         "model_calls": 0,
         "server_receipt": "Private shared task root/qwen9b-actual-cache-capacity-20261103-001/qualification-public.json"
       },
-      "blocker": "Fixed Long rows 0/2/7 still require qualified NPU context capacity for full 295877/530991/815430-token inputs plus the original 128-token output budget, followed by original inference and scoring. No filtering, truncation or replacement. Exact CI research readback has passed for fixed Medium and Long rows. Historical Short rows 1/4/6 and the original Medium inference/scoring (1/3 correct; length/stop/stop) are retained without reruns."
+      "blocker": null,
+      "scope_limits": "Fixed Short, Medium and Long groups only. Long rows 0/2/7 completed with full inputs and original scoring, 2/3 correct. Earlier Short and Medium results and length termini are retained; no uniform-model quality or full-suite claim."
     },
     "LONGMEMEVAL": {
       "scope": "public",
