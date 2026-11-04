@@ -574,6 +574,8 @@ MLAgentBench（未完成）：固定 CIFAR-10 和 OGBN-Arxiv 已原生执行并�
 DistilBERT 微调及评分，不能以 CPU
 编码器或其他题目代替。[CIFAR-10 回执](validation/mlagentbench-formal-cifar10-native-audit-20261102.json) ·
 [OGBN-Arxiv 回执](validation/mlagentbench-formal-ogbn-arxiv-native-audit-20261102.json)
+续跑沿用 `scripts/run_mlagentbench_local_agent.py --task imdb`，先在专用容器内检查隔离和原源码，再用新工作及日志目录执行。
+IMDb 三份分片与 DistilBERT 权重可按机器清单的 SHA-256 回查，不需要重新下载。
 
 WorkArena（未完成）：使用 `scripts/prepare_workarena_author_source.py --action prepare --archive <官方源码包> --author-root <新目录>`
 准备固定版本，再用同一脚本的 `--action verify --author-root <源码目录>` 核验。官方源码包不是 ServiceNow 实例快照。
