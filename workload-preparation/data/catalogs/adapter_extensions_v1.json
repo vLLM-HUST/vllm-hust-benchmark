@@ -143,6 +143,17 @@
       "requirements": ["Original annotation rows and all original fields preserved; no generated request or observed outcome", "Video/subtitle filenames follow the pinned author view contract; actual archive extraction/media verification and original frame/subtitle processing are separate", "Academic research only; no raw media/annotations/outputs redistributed by this package"],
       "status": "ORIGINAL_FIELDS_MAPPED_MEDIA_NATIVE_AND_CONSUMER_VALIDATION_PENDING"
     },
+    "LONGVIDEOBENCH": {
+      "kind": "task_dataset",
+      "mapping": "native_fields",
+      "input_fields": ["question", "candidates", "video_path", "subtitle_path", "duration", "starting_timestamp_for_subtitles"],
+      "required_fields": ["candidates", "correct_choice", "duration", "duration_group", "id", "level", "position", "question", "question_category", "question_wo_referring_query", "starting_timestamp_for_subtitles", "subtitle_path", "topic_category", "video_id", "video_path", "view_count"],
+      "outcome_fields": ["correct_choice"],
+      "annotation_fields": ["duration_group", "level", "position", "question_category", "question_wo_referring_query", "topic_category", "video_id", "view_count"],
+      "id_field": "id",
+      "requirements": ["Original validation rows and candidate order retained; correct choice is separate", "Video and subtitle names remain original references; this reader does not acquire or decode media"],
+      "status": "ORIGINAL_FIELDS_MAPPED_CONSUMER_VALIDATION_PENDING"
+    },
     "MVBENCH": {
       "kind": "task_dataset",
       "mapping": "mvbench_original_video_tasks",
