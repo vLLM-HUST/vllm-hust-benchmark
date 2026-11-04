@@ -26,7 +26,7 @@ def test_simllm_current_effect_matches_retained_diagnostic():
         assert "910B3" in card[f"public_effect_{lang}"]
     assert card["public_effect_status"] == "not-beneficial-in-tested-cell"
     assert card["public_effect_url"].endswith(
-        "reports/simllm-issue3-targeted-20261030/README.md"
+        "reports/simllm-issue3-ttft-admission-20261102/README.md"
     )
     historical = next(
         e
