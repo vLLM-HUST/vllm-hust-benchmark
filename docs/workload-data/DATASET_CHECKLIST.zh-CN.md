@@ -712,7 +712,10 @@ mkdir -p /external/videomme-frames
 LD_LIBRARY_PATH=/external/ffmpeg/lib python -B scripts/run_videomme_original.py --official-checkout /external/VLMEvalKit --snapshot /external/hf-cache/datasets--lmms-lab--Video-MME/snapshots/ead1408f75b618502df9a1d8e0950166bf0a2a0b --media-receipt /external/videomme-native-media-receipt.json --frame-cache /external/videomme-frames --subtitle-overlay /external/videomme-subtitle-overlay --output /external/videomme-8frame-subs-run --model Qwen/Qwen3.5-9B --profile Video-MME_8frame_subs
 ```
 
-### LongVideoBench长视频交错理解（原素材部分取得，原生推理未完成）
+### LongVideoBench 长视频交错理解（固定原三题已交付）
+
+- [x] 固定原三题完成 NPU 推理和上游评分；实际 CI 安装包重建 1,337
+  条索引，固定三题公共端与研究侧回读一致。[交付回执](validation/longvideobench-native-delivery-20261104.json)。以下保留执行前预检记录。
 
 固定三题的原素材现已齐备。Qwen3.5-9B 的 CPU 容量检查得到 167957／167931／226248 token；262144 窗口内最长题余 35896 token。单卡 256
 图服务已启动，原生推理与评分结果另验。复现时使用 `--endpoint`、`--model Qwen/Qwen3.5-9B`、`--max-tokens 32` 和新的私有 `--output`
