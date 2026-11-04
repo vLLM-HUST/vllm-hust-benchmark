@@ -20,6 +20,22 @@ def ledger():
     return json.loads(runner.LEDGER.read_text("utf-8"))
 
 
+def test_pending_sources_use_current_inventory_only():
+    data = ledger()
+    report = runner.summarize(data)
+    pending = report["pending_sources"]
+    assert len(pending) == report["all_sources"]["pending"]
+    assert {row["source_id"] for row in pending} == {
+        source_id
+        for source_id, item in data["delivery_inventory"].items()
+        if not item["checked"] and item["status"] != "CLASSIFICATION_ONLY"
+    }
+    for row in pending:
+        item = data["delivery_inventory"][row["source_id"]]
+        assert row["status"] == item["status"]
+        assert row["blocker"] == item.get("blocker")
+
+
 def test_current_markdown_total_matches_ledger_not_historical_snapshots():
     text = (ROOT / "docs/workload-data/DATASET_CHECKLIST.zh-CN.md").read_text("utf-8")
     result = runner.summarize(ledger())["all_sources"]

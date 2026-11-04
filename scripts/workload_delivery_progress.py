@@ -84,6 +84,15 @@ def summarize(ledger):
             and not row["classification_only"]
         ],
         "status_counts": dict(Counter(row["status"] for row in rows)),
+        "pending_sources": [
+            {
+                "source_id": row["source_id"],
+                "status": row["status"],
+                "blocker": inventory[row["source_id"]].get("blocker"),
+            }
+            for row in rows
+            if not row["checked"] and not row["classification_only"]
+        ],
         "existing_37_pending": [
             row
             for row in rows

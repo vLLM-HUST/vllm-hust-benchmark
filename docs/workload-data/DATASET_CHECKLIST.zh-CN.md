@@ -3166,3 +3166,6 @@ profile保留；因此是替代模型的接入验证，不是GPT-4质量复现�
 
 原生Agent基线拟复用作者[SwiftSage论文分支](https://github.com/SwiftSage/SwiftSage/tree/b8ea624231a6a8d83d78c1c12bea1b44b8ea758b)，而非其已转为通用推理的main。该分支要求
 `scienceworld==1.1.3`，已在服务器另建隔离环境安装，不能与1.3.0检查混算。原ReAct流程使用作者提示、test_mini原test首3个variation、100环境步数、最多200次Agent循环、每次50生成token，以及原动作处理和环境评分。作者脚本的easy配置须明确标为作者基线profile，不宣称无简化ScienceWorld或全量论文复现。原生模型执行、保存评分核验及候选研究侧消费已完成；严格新环境重放差异保留，实际CI及原生抽样交付闭环已完成；未通过的严格重放检查不改写成成功。
+- [ ] VisualWebArena 原站点与固定原题执行：独立环境已用 Playwright 启动 Chromium 116.0.5845.82 并打开 `about:blank`。作者发布的 Classifieds ZIP 已经由临时回环通路取得，25,366,023 字节，ZIP 完整性检查通过，SHA-256 `25b560fd0e1d7a8944ab3bb21916ffa2fe63e6272316d22d7bc43da9e7c0bc24`。原 Compose 的 `jykoh/classifieds:latest` 注册表仅列 `linux/amd64`，`mysql:8.1` 有 `linux/arm64`。待取得兼容隔离执行环境并验证原站点初始化、重置、Agent 执行和评分；未拉镜像层。
+- [ ] NatureBench 固定样本原生结果：第二题已保存的 judge 文本使用作者原版 `judge_core.runner._extract_json` 成功解析，`is_valid` 为布尔值 `false`，不是解析错误；尚未核对该判定与同一尝试的评估记录合并后的最终结果。未重跑推理，不将离线解析视为整项通过。
+- [ ] MLAgentBench IMDb：ARM64 Python 3.12 客户端已验证可导入 DistilBERT 分类器及 Trainer；[依赖清单](../../configs/workload-native/mlagentbench-imdb-npu-client-supplements.txt)只补客户端。执行须使用可访问指定 NPU 的专用隔离容器，并保留原执行入口的隔离检查；不要把依赖导入或容器标志当成隔离证明。待完成原 IMDb 训练、完整测试集 `submission.csv` 和原版评分；已审计的另外两题不重跑。

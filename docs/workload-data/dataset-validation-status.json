@@ -8,12 +8,25 @@
     "requires_login": true,
     "publisher_archive": "shopping_admin_final_0719.tar",
     "archive_size_and_architecture_verified": false,
+    "publisher_mirror_probe_via_server_loopback": {
+      "internet_archive": "HTTP 403",
+      "google_drive": "Official large-file confirmation form followed by HTTP 206; first 512 bytes contain a ustar header",
+      "google_drive_archive_bytes": 9640032256,
+      "google_drive_sample_bytes": 512,
+      "cmu": "HTTP 502 from proxy",
+      "archive_downloaded": false
+    },
     "registry_candidate": {
       "image": "webarenaimages/shopping_admin_final_0719",
       "manifest_digest": "sha256:428cdedfc10996d7f5378299cff541c93c187d1243643e31d439a66c0156147d",
       "platform": "linux/amd64",
       "compressed_size_reported": "2.01 GB",
+      "publisher_tar_manifest_config_digest": "sha256:d0709482086f0e4931771795ae2b1e4b13fb9237c22328c8df0d074763465ad4",
+      "registry_config_digest_matches_publisher_tar_manifest": true,
+      "publisher_tar_and_registry_layer_count": 31,
+      "identity_scope": "Config identity and layer count match; archive layer bytes and site behavior have not been verified.",
       "publisher_archive_equivalence_verified": false,
+      "registry_repository_description_supplies_publisher_provenance": false,
       "arm64_execution_verified": false
     },
     "scope": "CMU HTTP connection failed locally; Google Drive and Internet Archive metadata timed out locally, and Internet Archive also timed out on Linux. These attempts do not establish archive removal. No image downloaded or environment started."
@@ -4435,7 +4448,7 @@
         "uncertain_or_saved_inference_resubmitted": false
       },
       "original_default_task_assets_profile": "configs/workload-native/mlagentbench-cifar10-original-assets.json",
-      "blocker": "Fixed native protocols cifar10 and ogbn-arxiv audited with original scoring and preserved negative outcomes; no quality-success/performance claims. Actual CI provider81 payloads/138 assets/16 definitions and unchanged research consumer verified. Full original graph preparation/splits preserved and actual task input/outcome matches provider/research. Public exact offline Docker recipe built; final sampler and unchanged original saved-prediction scoring qualified with default library thread limits. Grader failures and empty probe receipt preserved with disclosed recovery, no Agent/training reruns. Only fixed IMDb native protocol remains: original task requires DistilBERT finetuning and no qualified isolated NPU training executor is available; CPU language encoder fallback not permitted. Source remains unchecked; no replacement of frozen samples."
+      "blocker": "Fixed native protocols cifar10 and ogbn-arxiv audited with original scoring and preserved negative outcomes; no quality-success/performance claims. Actual CI provider81 payloads/138 assets/16 definitions and unchanged research consumer verified. Full original graph preparation/splits preserved and actual task input/outcome matches provider/research. Public exact offline Docker recipe built; final sampler and unchanged original saved-prediction scoring qualified with default library thread limits. Grader failures and empty probe receipt preserved with disclosed recovery, no Agent/training reruns. Pinned IMDb train/test/unsupervised assets and DistilBERT weights are staged on the server. Offline original short-name loading of the train/test splits is row-for-row identical to the pinned Parquet inputs when the original assets are mounted as imdb under the task working directory. Only fixed IMDb native protocol remains: original task requires DistilBERT finetuning and no qualified isolated NPU training executor is available; CPU language encoder fallback not permitted. Source remains unchecked; no replacement of frozen samples."
     },
     "MLEBENCH": {
       "scope": "public",
@@ -4465,7 +4478,7 @@
         "grade_command": "mlebench grade-sample <submission-path> <competition-id>",
         "scope": "Official pinned README; a single original competition can be prepared and graded without downloading the full suite. No competition selection changed and no credentials, data, execution or grade obtained."
       },
-      "blocker": "2026-11-02 official protocol review: native preparation requires Kaggle credentials; dedicated CPU workspace default credential file absent. Competition data, original Agent execution and grading not started. Do not replace with synthetic CSV or preparation-only success.",
+      "blocker": "Original Python 3.11 client installation, dependency check and official CLI startup verified. Native competition preparation still requires authorized Kaggle access; the dedicated CPU workspace default credential file was absent in the recorded check. Competition data, original Agent execution and grading remain pending. Do not replace with synthetic CSV or preparation-only success.",
       "official_protocol_url": "https://github.com/openai/mle-bench#dataset",
       "original_software_preparation": {
         "revision": "507f92e1138bb6e40dac5c6ee7a6758e6424bf97",
@@ -4502,7 +4515,7 @@
       "legacy_checked": false,
       "existing_receipt": null,
       "delivery_receipt": null,
-      "blocker": "Pinned first three original task IDs 0/1/2 only target shopping_admin and require authentication. Qualify the original resettable shopping_admin snapshot, login state and the author harness URL configuration before any model request. The public registry candidate is linux/amd64 and its equivalence to the publisher archive has not been verified; the available NPU container is aarch64 without qualified isolation or x86 execution. The full multi-site AMI recommendation is not a measured minimum for this fixed batch. Public demo browsing and task JSON reading are not native completion.",
+      "blocker": "Pinned first three original task IDs 0/1/2 only target shopping_admin and require authentication. Qualify the original resettable shopping_admin snapshot, login state and the author harness URL configuration before any model request. A bounded filename search in the current NPU instance and task share found no staged copy; this does not rule out copies on other workspaces. The public registry candidate is linux/amd64 and its equivalence to the publisher archive has not been verified. The site may run on a separate compatible isolated node while LLM inference remains on NPU. The full multi-site AMI recommendation is not a measured minimum for this fixed batch. Public demo browsing and task JSON reading are not native completion.",
       "official_protocol_url": "https://github.com/web-arena-x/webarena/blob/main/environment_docker/README.md",
       "official_website_image_access_review": {
         "archive_declared_bytes_by_initial_range": 9640032256,
@@ -4578,6 +4591,18 @@
       "existing_receipt": null,
       "delivery_receipt": null,
       "original_split_site_preflight": {
+        "classifieds_official_snapshot_acquisition": {
+          "archive_url": "https://archive.org/download/classifieds_docker_compose/classifieds_docker_compose.zip",
+          "bytes": 25366023,
+          "sha256": "25b560fd0e1d7a8944ab3bb21916ffa2fe63e6272316d22d7bc43da9e7c0bc24",
+          "zip_integrity_verified": true,
+          "compose_application_platforms_observed": ["linux/amd64"],
+          "compose_database_arm64_available": true,
+          "site_initialized": false,
+          "native_tasks_executed": false,
+          "source_checkbox_eligible": false,
+          "boundary": "Acquired through an ephemeral server loopback proxy after the earlier direct route failed. Original isolated site startup and reset remain unqualified."
+        },
         "pinned_author_environment_recipes": {
           "classifieds": "Author Docker Compose build and environment reset",
           "classifieds_verified_repository_media_files": 68,
@@ -5044,7 +5069,7 @@
         },
         "new_model_calls_in_source_mapping_and_defect_inspection": 0,
         "source_checkbox_eligible": false,
-        "boundary": "All three original rows converted after native termination, preserving str/str/range modes and null predictions via publisher parsing. Separate synthetic controls matched3/5: empty prediction was deterministically marked correct without an LLM call; range dispatch used the generic rather than dedicated publisher template. These are not solely local-model errors. Preserve source/control outputs; do not silently change modes, filters, templates or formal task scores. Original scoring plus an explicitly repaired variant awaits user direction."
+        "boundary": "All three original rows converted after native termination, preserving str/str/range modes and null predictions via publisher parsing. Separate synthetic controls matched 3/5: empty prediction was deterministically marked correct without an LLM call; range dispatch used the generic rather than dedicated publisher template. The user authorized the separately labeled minimal repair. Formal scoring with the repaired variant is pending recovery of the original saved grading inputs; preserve the original controls and results separately."
       },
       "previous_native_attempt_14b_autostop": {
         "recovered_after_cpu_autostop": {
