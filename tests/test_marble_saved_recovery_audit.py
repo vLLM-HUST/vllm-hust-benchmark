@@ -82,6 +82,24 @@ def test_full_hundred_case_prefix_is_audited_without_assuming_three_done(tmp_pat
     assert report["source_checkbox_eligible"] is False
 
 
+def test_third_row_recovery_requires_explicit_original_scope(tmp_path):
+    root, launch = fixture(tmp_path)
+    path = root / "state-private.json"
+    state = json.loads(path.read_text())
+    state.update(
+        fixed_original_rows=[2], completed=[{"original_row": 2, "cli_exit_code": 0}]
+    )
+    path.write_text(json.dumps(state))
+    with pytest.raises(ValueError, match="fixed task"):
+        entry.audit(root, launch, proc_root=tmp_path / "proc")
+    state.update(partial_recovery_only=True, full_fixed_original_rows=[0, 1, 2])
+    path.write_text(json.dumps(state))
+    report = entry.audit(root, launch, proc_root=tmp_path / "proc")
+    assert report["returned_original_rows"] == [2]
+    assert report["status"] == "STOPPED_ALL_ORIGINAL_CLIS_RETURNED_AUDIT_PENDING"
+    assert report["source_checkbox_eligible"] is False
+
+
 @pytest.mark.parametrize("kind", ["model", "keyword"])
 def test_direct_task_queues_counted_without_cross_task_response_binding(tmp_path, kind):
     root, launch = fixture(tmp_path)

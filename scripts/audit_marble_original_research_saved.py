@@ -70,12 +70,25 @@ def audit(root, launch_receipt, *, proc_root=Path("/proc")):
     child = process_live(state.get("active_child"), proc_root=proc_root)
     completed = state.get("completed", [])
     selected = state.get("fixed_original_rows")
+    partial = state.get("partial_recovery_only", False)
+    recovery_selection = (
+        partial is True
+        and state.get("full_fixed_original_rows") == [0, 1, 2]
+        and isinstance(selected, list)
+        and len(selected) == 1
+        and selected[0] in range(3)
+    )
     if (
         not isinstance(completed, list)
         or not isinstance(selected, list)
         or not 1 <= len(selected) <= 100
         or any(type(index) is not int for index in selected)
-        or selected != list(range(len(selected)))
+        or type(partial) is not bool
+        or (
+            not recovery_selection
+            if partial
+            else selected != list(range(len(selected)))
+        )
     ):
         raise ValueError("original fixed task completion metadata required")
     if any(
