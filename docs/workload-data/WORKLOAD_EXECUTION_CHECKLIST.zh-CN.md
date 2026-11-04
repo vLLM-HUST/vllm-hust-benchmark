@@ -595,6 +595,11 @@ OSWorld 先在作者镜像内确认桌面启动、原任务初始化和重置，
 SWE-smith 可复用已验证的 11 个分片与固定前三题读回，通过 `scripts/prepare_swesmith_original_assets.py` 准备原资产；
 仍须运行原 Agent、在隔离环境内执行生成补丁并采集官方评分。复用的 24 条作者轨迹不是本项目的实跑结果。
 
+剩余项的资源准备可并行。WebArena、VisualWebArena、OSWorld、SWE-smith 和 PaperBench 可复用同一个经过验证的隔离 amd64 节点，
+但镜像、数据盘和原生评分要分别验收。WorkArena、MLE-bench 和 ToolBench 分别依赖 ServiceNow、Kaggle 和原工具后端；
+节点就绪不等于授权或数据已取得。NatureBench、MLAgentBench、BixBench 与 Full-Duplex-Bench 应分别处理长上下文、
+隔离 NPU 微调、原评分输入恢复和双工语音/ASR，不因共用硬件合并协议。
+
 PaperBench（未完成）：复用已核验的 23 个原始论文包。先用
 `prepare_paperbench_original_assets.py --action verify --output <资产目录>` 校验原包，再用
 `check_paperbench_native_prerequisites.py --author-root <源码目录>` 检查原生运行前置条件。源码目录应包含
