@@ -579,6 +579,13 @@ BixBench（未完成）：固定原题为 `bix-1-q1`、`bix-1-q2`、`bix-10-q1`�
 在隔离环境中用 `scripts/run_bixbench_original_grader.py`；默认仅输出计划，核对私有输入副本和本地模型端点后再加
 `--execute --patched-grader`。修复版评分单独标记，不能作为未修改的官方评分。
 
+API-Bank（候选，未交付）：使用清单固定的作者源码，先通过
+`scripts/score_api_bank_saved.py --author-root <原源码> --export-messages` 核对原消息位置。
+需要生成时使用同一脚本的 `--generate <新私有输出> --endpoint <回环端点> --model <部署模型>`；
+已有完整输出时直接用 `--predictions <留存输出>` 离线评分。若复现作者评分器的已知缺参中断，
+可用 `--record-missing-end-time` 单独记录失败；不补造参数，不把兼容结果称为未修改的官方成绩。
+该协议覆盖本地工具调用与评分，不覆盖 ToolBench 的外部 API。
+
 MiniWoB++（候选，未交付）：从清单所列固定作者提交恢复网页，仅在回环地址启动静态站点，`--site` 指向其 `/miniwob/`。
 在 ARM64 上复用 Playwright Chromium 1117，令 `PLAYWRIGHT_BROWSERS_PATH` 指向浏览器缓存，
 `FONTCONFIG_SYSROOT` 指向私有依赖根、`LD_LIBRARY_PATH` 指向该根下的 `usr/lib64`。两道原题均已在 seed 42 下初始化。
