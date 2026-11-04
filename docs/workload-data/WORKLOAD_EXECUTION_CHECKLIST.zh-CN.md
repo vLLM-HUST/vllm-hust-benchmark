@@ -586,7 +586,8 @@ BixBench（未完成）：固定原题为 `bix-1-q1`、`bix-1-q2`、`bix-10-q1`�
 `scripts/prepare_bixbench_original_grade_input.py --author-root <源码> --data-root <数据> --native-output <原输出> --output <新目录> --limit 3 --execute`
 生成评分输入，核对题目身份、原参考答案与 str/str/range 模式；不丢弃空答案。共享队列仅用于恢复审计，四条合成裁判对照不用于正式评分。
 在隔离环境中用 `scripts/run_bixbench_original_grader.py`；默认仅输出计划，核对私有输入副本和本地模型端点后再加
-`--execute --patched-grader`。修复版评分单独标记，不能作为未修改的官方评分。
+`--execute --patched-grader`。恢复历史 CSV 时加 `--input-sha256 <原准备回执中的 csv_sha256>`，校验值必须来自原回执，不能用重建文件自身的摘要代替。
+修复版评分单独标记，不能作为未修改的官方评分。
 
 StableToolBench（候选，未交付）：复用已核验的原工具定义和响应缓存，G1 固定前三题为 588、608、1073。
 原 `/virtual` 路由缓存未命中会尝试外联，先验证回环监听和出网限制；无可用作者模拟后端时保留未命中失败。
