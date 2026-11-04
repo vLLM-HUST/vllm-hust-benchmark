@@ -50,6 +50,7 @@ def test_fixed_scoring_positions(tmp_path, mode):
             for i, output in enumerate(("AddAgenda", "reply"))
         )
     predictions[2]["output"] = "UnlistedTool"
+    predictions[3]["output"] = ""
     if mode == "missing":
         predictions.pop()
     elif mode == "duplicate":
@@ -82,7 +83,7 @@ def test_fixed_scoring_positions(tmp_path, mode):
             True,
             0.5,
             False,
-            0.5,
+            0,
             True,
             0.5,
         ]

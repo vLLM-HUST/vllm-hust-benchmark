@@ -494,6 +494,16 @@ python scripts/score_api_bank_saved.py \
   --author-root "$api_bank_root" --predictions "$saved_predictions"
 ```
 
+生成前可用同一入口的 `--export-inputs` 导出 14 个原始输入位置，供原协议的模型客户端使用：
+
+```bash
+python scripts/score_api_bank_saved.py \
+  --author-root "$api_bank_root" --export-inputs > "$private_inputs"
+```
+
+导出的工具说明和对话前缀来自发布方原函数，不含当前目标答案字段。这是模型输入的中间格式；执行时仍需按发布方 `evaluator.py` 分别应用工具调用和回复模板，不把导出的 JSONL
+当作最终请求直接发送。
+
 JSONL 每行提供 `file`（原对话文件名）、`id`（发布方展开后的零基位置）和
 `output`（原模型输出）。入口要求完整覆盖固定评分位置，调用原评分器，不启动模型。服务器参考答案对照结果为 API 调用 7/9、回复 5/5；两处 API 不匹配来自同一条
 AddMeeting 原调用。此结果只核验评分链路，不计入交付完成数。

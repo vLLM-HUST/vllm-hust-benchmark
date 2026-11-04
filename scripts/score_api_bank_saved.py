@@ -89,7 +89,8 @@ def main():
             if call and parse_api_call(call)[0] in LOCAL_TOOLS:
                 score = bool(evaluator.evaluate(i, call)[0])
         else:
-            score = evaluator.evaluate(i, output)
+            # The publisher's inference loop bypasses ROUGE for empty replies.
+            score = evaluator.evaluate(i, output) if output else 0
         results.append({"file": name, "id": i, "role": role, "score": score})
     print(json.dumps(results))
 
