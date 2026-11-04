@@ -46,6 +46,31 @@ def test_unknown_website_data_is_rejected(tmp_path):
         sync.run(website, "check")
 
 
+@pytest.mark.parametrize("mutation", ["missing", "commit", "status", "hash", "files"])
+def test_check_rejects_missing_or_incorrect_source_manifest(tmp_path, mutation):
+    sync = module(tmp_path)
+    website = tmp_path / "website"
+    (website / "data").mkdir(parents=True)
+    (website / "data/example.json").write_text("{}\n")
+    sync.run(website, "bootstrap")
+    path = website / "data" / sync.MANIFEST
+    manifest = json.loads(path.read_text())
+    if mutation == "missing":
+        path.unlink()
+    else:
+        if mutation == "commit":
+            manifest["commit"] = "a" * 40
+        elif mutation == "status":
+            manifest["status"] = "published-source"
+        elif mutation == "hash":
+            manifest["files"][0]["sha256"] = "0" * 64
+        else:
+            manifest["files"] = []
+        path.write_text(json.dumps(manifest))
+    with pytest.raises(ValueError, match="manifest"):
+        sync.run(website, "check")
+
+
 def test_large_source_is_lossless_and_archive_tampering_is_rejected(tmp_path):
     sync = module(tmp_path)
     website = tmp_path / "website"
@@ -61,3 +86,30 @@ def test_large_source_is_lossless_and_archive_tampering_is_rejected(tmp_path):
     parts[0].write_bytes(b"changed")
     with pytest.raises(ValueError, match="checksum mismatch"):
         sync.run(website, "check")
+
+
+def test_check_verifies_published_revision_without_rewriting_manifest(
+    tmp_path, monkeypatch
+):
+    sync = module(tmp_path)
+    website = tmp_path / "website"
+    (website / "data").mkdir(parents=True)
+    raw = b"{}\n"
+    (website / "data/example.json").write_bytes(raw)
+    sync.run(website, "bootstrap")
+    revision = "b" * 40
+    monkeypatch.setattr(
+        sync.subprocess,
+        "check_output",
+        lambda args, **kwargs: revision if args[1] == "rev-parse" else raw,
+    )
+    sync.run(website, "publish", revision)
+    sync.run(website, "check", revision)
+    path = website / "data" / sync.MANIFEST
+    manifest = json.loads(path.read_text())
+    manifest["commit"] = "c" * 40
+    altered = json.dumps(manifest)
+    path.write_text(altered)
+    with pytest.raises(ValueError, match="manifest"):
+        sync.run(website, "check", revision)
+    assert path.read_text() == altered
