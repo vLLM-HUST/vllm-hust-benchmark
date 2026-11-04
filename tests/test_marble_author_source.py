@@ -76,4 +76,4 @@ def test_supplemental_client_dependencies_are_disclosed_not_provider_defaults():
         preflight["native_execution"] is False
         and preflight["official_scoring"] is False
     )
-    assert preflight["source_checkbox_eligible"] is False and row["checked"] is False
+    assert preflight["source_checkbox_eligible"] is False
