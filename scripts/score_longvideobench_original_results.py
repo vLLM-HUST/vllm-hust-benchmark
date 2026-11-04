@@ -10,7 +10,7 @@ import re
 from collections import defaultdict
 from pathlib import Path
 
-UPSTREAM_SHA256 = "b5fad766cab8a0a0a5a2305a61882c158c7c2ebe509d7c7441dbbc2644f3d454"
+UPSTREAM_SHA256 = "b5fad766cab8a0a0a5a2305a61882c158c7c2ebe509d7c7441dbbc2644f3d454"  # pragma: allowlist secret - public upstream file digest
 
 
 def pinned_scorer(path):
