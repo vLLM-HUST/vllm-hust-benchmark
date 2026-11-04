@@ -2,10 +2,31 @@
 
 import json
 from pathlib import Path
+import subprocess
 
 
 ROOT = Path(__file__).resolve().parents[1]
 DOCS = ROOT / "docs/workload-data"
+
+
+def test_checked_sources_reference_tracked_public_receipts():
+    inventory = json.loads(
+        (DOCS / "dataset-validation-status.json").read_text("utf-8")
+    )["delivery_inventory"]
+    tracked = set(
+        subprocess.check_output(["git", "ls-files", "-z"], cwd=ROOT)
+        .decode()
+        .split("\0")
+    )
+    checked = {source: row for source, row in inventory.items() if row["checked"]}
+    assert checked
+    for source, row in checked.items():
+        path = row.get("delivery_receipt")
+        assert path in tracked, f"{source}: missing tracked receipt {path!r}"
+        receipt = ROOT / path
+        assert receipt.is_file(), f"{source}: missing receipt {path!r}"
+        if receipt.suffix == ".json":
+            json.loads(receipt.read_text("utf-8"))
 
 
 def test_spider_archive_acquisition_is_not_native_delivery_or_publisher_digest():
