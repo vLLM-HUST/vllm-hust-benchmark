@@ -13,6 +13,13 @@ LongBench v2 长档补跑：用 `scripts/prepare_longbench_v2_original_capacity.
 超长提示预填充需要更长的 HTTP 等待时，可通过 `--request-timeout-seconds` 设置并在回执中记录；
 该参数不改变原提示、输出预算或评分，默认仍为 300 秒。
 
+InfiniteBench：在独立客户端按 `configs/workload-native/infinitebench-client-dependencies.txt` 安装依赖，
+用 `scripts/verify_infinitebench_original_code.py --official-checkout <作者源码目录>` 核验源码。
+`scripts/run_infinitebench_original.py` 使用原数据目录、原任务名及明确的作者提示模板；
+即使是选择题或问答，作者评分模块导入时也会初始化 ROUGE。服务器不能访问评分器仓库时，
+为每个任务传入已核验的 `--offline-rouge <rouge.py>` 与 `--offline-rouge-sha256 <SHA-256>`，
+避免导入时等待外网；这不替换作者评分规则。
+
 Full-Duplex-Bench：已取得原包时，用
 `python scripts/prepare_full_duplex_original_assets.py --action verify --output <服务器原包目录>`
 核验，不重新下载。已有固定版本评分器及客户端源码时，用
