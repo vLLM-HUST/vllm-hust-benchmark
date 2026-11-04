@@ -574,6 +574,13 @@
       "inference_calls": 0
     },
     "native_npu_moshi_and_original_asr_verified": false,
+    "publisher_transport_boundary": {
+      "source_revision": "3e799c45a045256f47d5f1c9cda90157e2d2ec9e",
+      "moshi_route": "/api/chat",
+      "moshi_transport": "Binary Opus over WebSocket, paced in 1920-sample frames",
+      "asr_device_constraint": "Pinned author transcription script calls .cuda()",
+      "scope": "Replacing the inference endpoint requires an explicit protocol-compatible client, not a URL swap. Keep original audio, timing and scorer semantics."
+    },
     "arm64_publisher_example_scoring": {
       "source_revision": "3e799c45a045256f47d5f1c9cda90157e2d2ec9e",
       "verified_git_blobs": 11,
@@ -591,6 +598,8 @@
       "publisher_npu_config_git_blob": "ef308000a5ef67ce642aa4dbbedcae598dcc59d4",
       "publisher_npu_config_class": "MiniCPMOSpeechPipelineConfig",
       "publisher_npu_config_is_realtime_session": false,
+      "upstream_replay_cli": ["benchmarks.eval.benchmark_duplex_v10", "benchmarks.eval.benchmark_duplex_v15"],
+      "upstream_reference_asr_device": "cuda",
       "scope": "Host CANN matches the documented MiniCPM-o setup, but the inspected environment does not match the documented Torch/SGLang stack. Real-time session and original scorer remain unverified."
     }
   },
