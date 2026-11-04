@@ -1,6 +1,7 @@
 """Run fixed original WebShop text sessions with a local chat model."""
 
 import argparse
+import hashlib
 import json
 import math
 from pathlib import Path
@@ -47,15 +48,57 @@ def author_episode_score(result):
 
 def main():
     p = argparse.ArgumentParser(description=__doc__)
-    p.add_argument("--author-root", type=Path, required=True)
-    p.add_argument("--output", type=Path, required=True)
-    p.add_argument("--endpoint", required=True)
-    p.add_argument("--model", required=True)
+    p.add_argument("--author-root", type=Path)
+    p.add_argument("--output", type=Path)
+    p.add_argument("--endpoint")
+    p.add_argument("--model")
+    p.add_argument("--verify-saved-author-budget", type=Path)
     p.add_argument("--qwen-no-thinking", action="store_true")
     p.add_argument("--retain-history", action="store_true")
     p.add_argument("--author-episode-budget", action="store_true")
     p.add_argument("--execute", action="store_true")
     args = p.parse_args()
+    if args.verify_saved_author_budget:
+        if any(
+            (
+                args.author_root,
+                args.output,
+                args.endpoint,
+                args.model,
+                args.execute,
+                args.qwen_no_thinking,
+                args.retain_history,
+                args.author_episode_budget,
+            )
+        ):
+            p.error("saved verification cannot be combined with run options")
+        raw = args.verify_saved_author_budget.read_bytes()
+        digest = hashlib.sha256(raw).hexdigest()
+        if digest != "15b8bc1ec3714a97050e4b9ac2690f2674db9c4ccdd8648cbff6014d017876d3":
+            p.error("saved output does not match the pinned author-budget run")
+        rows = [json.loads(line) for line in raw.splitlines()]
+        if [row["session"] for row in rows] != [0, 1, 2] or any(
+            row["terminated"]
+            or row["reward"] is not None
+            or any(step.get("invalid") or step.get("done") for step in row["steps"])
+            or author_episode_score(row) != row["episode_score"]
+            for row in rows
+        ):
+            p.error("invalid saved author-budget episode outcome")
+        print(
+            json.dumps(
+                {
+                    "status": "SAVED_EPISODES_VERIFIED",
+                    "sha256": digest,
+                    "episode_scores": [row["episode_score"] for row in rows],
+                }
+            )
+        )
+        return
+    if not all((args.author_root, args.output, args.endpoint, args.model)):
+        p.error(
+            "--author-root, --output, --endpoint and --model are required for a run"
+        )
     url = urlsplit(args.endpoint)
     if (
         (url.scheme, url.hostname, url.path) != ("http", "127.0.0.1", "/v1")
