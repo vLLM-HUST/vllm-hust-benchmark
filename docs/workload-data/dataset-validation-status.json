@@ -340,6 +340,14 @@
       "publisher_help_exit_code": 0,
       "generic_arxiv_html_and_atom_controls_passed": true,
       "minilm_asset_files_verified": 11,
+      "vllm_tmpfs_preflight": {
+        "candidate_mount": "/dev/shm",
+        "free_bytes_at_probe": 17179803648,
+        "file_io_and_unix_socket_verified": true,
+        "api_server_help_exit_code": 0,
+        "model_weights_loaded": false,
+        "live_service_started": false
+      },
       "third_row_started": false
     },
     "recovery_scope": "Run only original row 2 under the unchanged protocol; preserve audited rows 0 and 1 and the interrupted attempt."
@@ -569,6 +577,11 @@
     "goal": "Every in-scope source usable through its original applicable protocol; not reader-only readiness, model accuracy, or dataset hosting.",
     "planned_sources": 118,
     "in_scope_sources": 113,
+    "status_authority": {
+      "current": "delivery_inventory",
+      "historical_only": "sources",
+      "count_rule": "Count checked in-scope entries in delivery_inventory only; do not union, subtract, or override them with historical sources rows."
+    },
     "classification_only_source_ids": [
       "MMLU_PRO",
       "HLE_VERIFIED",
@@ -5236,6 +5249,14 @@
       "exact_ci_delivery": {"ci_commit": "53db414cdea9c206f29fb55732f368d987cd7edd", "identity_note": "pragma: allowlist secret - verified public actual CI component revision", "ci_artifact": 12719388335, "installed_ci_payloads": 51, "full_original_rows_verified_and_indexed": 7207, "fixed_actual_ci_research_readbacks": 9, "native_original_episodes": 9, "native_model_call_attempts": 464, "new_model_calls_in_saved_audit_and_handoff": 0, "latest_native_entry_main_ci": 40475053016, "latest_native_entry_cpu_ci": 40475057760, "all_checks_success": true, "source_checkbox_eligible": true}
     },
     "BIXBENCH": {
+      "current_npu_container_isolation_probe": {
+        "architecture": "aarch64",
+        "docker_podman_or_bwrap_on_path": false,
+        "user_namespace_only_probe_exit_code": 0,
+        "full_namespace_probe_error": "cannot change root filesystem propagation: Permission denied",
+        "fuse_device_available": false,
+        "boundary": "User namespace creation alone does not qualify this container for original notebook isolation. No generated code executed, no saved trajectories recovered, and no score or delivery check claimed."
+      },
       "available_execution_tools": {
         "agent": "scripts/run_bixbench_original_agent.py",
         "saved_trajectory_to_grade_input": "scripts/prepare_bixbench_original_grade_input.py",

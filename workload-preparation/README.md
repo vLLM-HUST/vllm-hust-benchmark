@@ -1157,6 +1157,8 @@ socket或NPU。任务运行还必须另行部署私有数据/输出、本地模�
 
 恢复验证可显式增加`--reuse-model-results /private/marble-verified-returned-responses`。该私有目录须包含`provenance-private.json`，逐份列出原请求、实际转发请求、原始响应体及响应封装四文件的SHA256、原请求ID和模型绑定；不能包含无返回的claim来冒充已返回结果。操作者还须独立确认当前后端与旧结果的权重、精度、模板及部署参数一致，模型别名或清单中的布尔值本身不能证明这一点。
 
+若前两题已有通过审计的原生结果，只补第三题：保留包含固定前三题的准备目录与绑定目录，使用新的私有输出目录，把预检命令中的 `--prepare-only` 换为 `--execute --original-row 2`（从 0 编号）。不要把输入裁成单行或将第三题重编号。完成后用 `python scripts/audit_marble_original_research_saved.py --run-root <本次输出目录> --launch-receipt <本次启动凭证>` 单独核验该次运行，再与前两题的原审计结果合并核对覆盖范围；单题审计不能单独证明三题交付完成。
+
 只有完整请求语义精确匹配时才复用，生成参数变化不会命中；每份旧响应在同一恢复运行中跨原题最多消费一次，复用与新请求分开记账。不确定的消费记录会停止转发，不自动重发。默认关闭复用；它只用于本次验证恢复，性能测试和新的独立质量评测不能使用。服务器原Python3.10.12客户端已对旧4条响应/16文件验证精确返回、全局单次消费及原资产不变，后端调用0；这不代表三题Agent流程已恢复完成。
 
 清单元数据包括`source_id=MULTIAGENTBENCH`、`model`、`historical_backend_same_api_birth_verified`、`original_nonthinking_binding`和`rows`；每行有32位原请求`identity`及四个原文件后缀到SHA256的`sha256`映射。若`excluded_claim_without_saved_response`大于0，必须另有`uncertain-requests-private.json`列出全部未返回原请求的`canonical_request_sha256`，计算方式见转发helper的`canonical_request`。这些已知不确定输入默认阻止自动调用后端，不把丢失结果伪装成已成功、也不静默重试。
@@ -2013,3 +2015,11 @@ for record in iter_workload("PAPERBENCH", data_root=Path("/srv/workloads/paperbe
 
 服务器已安装成功CI运行41493282959的工件13165601157，90份Git／包内／安装文件一致，并在该安装包下完成全部23个任务包、公共端23次及未修改研究consumer23次索引回读，索引未改变。对应软件提交为`d42097da`；这些是公共数据能力接通证据，不是Agent执行证据。原始客户端依赖、CLI帮助语义和五种划分的资产检查已核验；原生`paperbench.nano.entrypoint`的Agent执行、复现及评分尚未完成，仍不能将此来源勾选为完整交付。当前官方Agent
 Dockerfile包含x86_64安装依赖及自动接受条款步骤，须先核验执行环境和授权，不能在ARM64节点直接宣称原版环境已可用。完整证据及剩余缺口见[统一机器清单](../docs/workload-data/dataset-validation-status.json)的`PAPERBENCH`项。
+
+执行前先检查**单独取得的官方源码**（不是上面下载的论文任务包）。将路径指向包含 `project/paperbench` 的固定版本 checkout：
+
+```bash
+python scripts/check_paperbench_native_prerequisites.py --author-root /srv/workloads/frontier-evals
+```
+
+该命令核对固定源码字节、原构建平台和执行约束，不运行作者代码。`native_host_architecture_matches` 为真也只代表架构匹配；仍需独立核验镜像、隔离执行环境和条款授权。原始入口是 `paperbench.nano.entrypoint`；复现和评分分别由官方 `paperbench/reproduce.py`、`paperbench/grade.py` 完成。评分须使用同一次复现的产物和对应论文的原始 rubric。不要用默认 5 分钟 Agent 或开发用 60 秒复现配置冒充正式 24 小时协议。
