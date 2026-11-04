@@ -1,5 +1,6 @@
 """Check the MiniWoB++ launcher without a browser or model dependency."""
 
+import hashlib
 import json
 import runpy
 from pathlib import Path
@@ -121,3 +122,29 @@ def test_non_loopback_endpoint_is_rejected(tmp_path):
     result = run_cli(tmp_path, "http://192.0.2.1:8002/v1")
     assert result.returncode == 2
     assert "loopback" in result.stderr
+
+
+def test_saved_summary_accepts_pinned_bytes_and_rejects_mutation(
+    tmp_path, monkeypatch, capsys
+):
+    script = Path(__file__).resolve().parents[1] / "scripts/run_miniwob_agentlab.py"
+    namespace = runpy.run_path(str(script))
+    main = namespace["main"]
+    task = "miniwob.multi-layouts"
+    path = tmp_path / "summary_info.json"
+    raw = b'{"n_steps":20,"cum_reward":0,"terminated":false,"truncated":true}'
+    path.write_bytes(raw)
+    monkeypatch.setitem(
+        main.__globals__["SAVED_PROFILES"],
+        task,
+        (hashlib.sha256(raw).hexdigest(), 4096, (20, 0, False, True)),
+    )
+    monkeypatch.setattr(
+        sys, "argv", [str(script), "--task", task, "--verify-saved", str(tmp_path)]
+    )
+    main()
+    assert json.loads(capsys.readouterr().out)["status"] == "SAVED_SUMMARY_VERIFIED"
+    path.write_bytes(raw + b"\n")
+    with pytest.raises(SystemExit, match="2"):
+        main()
+    assert "does not match" in capsys.readouterr().err

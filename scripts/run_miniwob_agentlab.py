@@ -2,6 +2,7 @@
 
 import argparse
 from contextlib import contextmanager
+import hashlib
 import json
 import math
 import os
@@ -10,6 +11,18 @@ from urllib.parse import urlsplit
 
 
 TASKS = ("miniwob.click-dialog", "miniwob.multi-layouts")
+SAVED_PROFILES = {
+    TASKS[0]: (
+        "d4f9370ad801820cea1f1855d8476747d7769703d9a540a8c4d5ba537724f8ea",
+        1024,
+        (1, 1.0, True, False),
+    ),
+    TASKS[1]: (
+        "e2722e4ffc6bb1c0ca504010bdb95be5b607b98d58d039154544556085e58a63",
+        4096,
+        (20, 0.0, False, True),
+    ),
+}
 
 
 @contextmanager
@@ -77,17 +90,55 @@ def loopback_url(value):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--task", choices=TASKS, required=True)
-    parser.add_argument("--site", type=loopback_url, required=True)
-    parser.add_argument("--endpoint", type=loopback_url, required=True)
-    parser.add_argument("--model", required=True)
-    parser.add_argument("--output", type=Path, required=True)
-    parser.add_argument("--max-steps", type=int, required=True)
-    parser.add_argument("--max-output-tokens", type=int, required=True)
+    parser.add_argument("--site", type=loopback_url)
+    parser.add_argument("--endpoint", type=loopback_url)
+    parser.add_argument("--model")
+    parser.add_argument("--output", type=Path)
+    parser.add_argument("--max-steps", type=int)
+    parser.add_argument("--max-output-tokens", type=int)
     parser.add_argument("--execute", action="store_true")
     parser.add_argument("--record-response-metadata", action="store_true")
+    parser.add_argument("--verify-saved", type=Path, metavar="RESULT_DIR")
     args = parser.parse_args()
+    runtime_options = (
+        args.site,
+        args.endpoint,
+        args.model,
+        args.output,
+        args.max_steps,
+        args.max_output_tokens,
+    )
+    if args.verify_saved is not None:
+        if (
+            args.execute
+            or args.record_response_metadata
+            or any(v is not None for v in runtime_options)
+        ):
+            parser.error("--verify-saved cannot be combined with runtime options")
+        expected_hash, budget, expected_terminal = SAVED_PROFILES[args.task]
+        actual_hash = hashlib.sha256(
+            (args.verify_saved / "summary_info.json").read_bytes()
+        ).hexdigest()
+        if actual_hash != expected_hash:
+            parser.error("saved summary does not match the pinned original evidence")
+        summary = terminal_summary(args.verify_saved)
+        if tuple(summary.values()) != expected_terminal:
+            parser.error("saved terminal outcome differs from the pinned receipt")
+        print(
+            json.dumps(
+                {
+                    "status": "SAVED_SUMMARY_VERIFIED",
+                    "task": args.task,
+                    "sha256": actual_hash,
+                    "max_output_tokens": budget,
+                    **summary,
+                }
+            )
+        )
+        return
     if (
-        not args.site.endswith("/miniwob/")
+        any(v is None for v in runtime_options)
+        or not args.site.endswith("/miniwob/")
         or not args.endpoint.rstrip("/").endswith("/v1")
         or not args.model.strip()
         or min(args.max_steps, args.max_output_tokens) <= 0

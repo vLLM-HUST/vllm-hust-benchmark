@@ -2,6 +2,12 @@
 
 ### 最新原生运行复核（2026-11-04）
 
+现有双卡环境的替代优先级：不再为固定来源等待 x86 节点。先复用已在 ARM64 验证的官方环境；原来源的阻塞和覆盖缺口保留，替代来源独立记录，不重复计数。MiniWoB++ 已有两道固定原题的真实 NPU 证据：`click-dialog` 原奖励 1，`multi-layouts` 在单独记录的 4096-token 配置下到达原生 20 步上限、奖励 0。后者是有效的协议终态，不是任务成功；原 1024-token 配置的解析失败另保留。该候选只覆盖基础浏览器交互，不替代认证业务网站、持久站点状态或桌面系统控制；公共执行入口、证据审计及研究消费闭环核对前不打勾。
+
+MiniWoB++ 保存证据复核：对每道题的 AgentLab 原结果目录运行
+`python scripts/run_miniwob_agentlab.py --task miniwob.click-dialog --verify-saved <RESULT_DIR>`，
+第二题将 `--task` 换成 `miniwob.multi-layouts`。命令仅核对固定摘要的字节摘要与原生终态，无需模型、浏览器或 AgentLab，不替代对完整运行记录和研究侧接入的核验。
+
 WorkArena：已有固定版本作者源码和本地归档时，用
 `python scripts/prepare_workarena_author_source.py --author-root <源码目录> --archive <归档路径> --action verify`
 复核；软件验证不获取实例凭据。官方 WorkArena-Instances 访问权限、可重置浏览器环境和原生任务评分仍需单独验证。
