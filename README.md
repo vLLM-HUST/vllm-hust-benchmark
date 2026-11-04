@@ -772,6 +772,8 @@ prompt/媒体时不能伪造原始请求；有官方回放工具的按原工具�
 
 如需准备 FAC 评分，准备命令同时传入 `--official-ids <test_query_ids/G1_instruction.json>`。保留三题原始 Agent 输出，用作者的 `convert_to_answer_format.py --method CoT@1` 转换后，先运行 `python scripts/check_stabletoolbench_fac_inputs.py --instructions <fixed-g1.json> --ids <fixed-g1-fac-ids.json> --answers <转换后的答案.json>`。检查通过后才把相同的答案文件和题号表交给作者 `fac_eval.py`；缺题应排查原运行，空答案则保留并按作者规则评分。
 
+[WebShop 发布方源码](https://github.com/princeton-nlp/WebShop) · [原生运行与保存结果复核入口](scripts/run_webshop_original.py)。固定三个文本购物会话在 ARM64 环境和 NPU 模型上各执行 100 步，均未完成购买，到期分均为 0；使用已固定的 1k 镜像语料，未独立核验发布方 Drive 文件。可用 `--verify-saved-author-budget <结果文件>` 离线复核该次结果。它覆盖购物搜索和动作闭环，不等同于 WebArena 的认证管理或跨站工作流，研究侧统一消费未接通，不计入已交付项。
+
 ### 逐来源：官方出处、仓库入口与验证范围
 
 “准备／执行入口”仅列已登记的真实代码路径；读取适配器不冒充执行入口。没有原生入口索引的来源明确标记待补。原始训练语料、schema 资源、轨迹资产并不天然是完整
