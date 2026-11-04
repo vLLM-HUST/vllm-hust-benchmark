@@ -36,6 +36,16 @@ MultiAgentBench 中断恢复：沿用原运行的作者源码、准备目录、�
 `--original-row 2`，并将 `--output` 指向新的目录。这只执行第三道固定原题（行号从 0
 开始）；不加该参数时仍执行原固定三题。补跑记录标记为部分恢复，须与前两题已审计的原生结果合并核对，不能单独勾选来源。保留旧尝试及失败记录。
 
+补跑退出后，用本次新运行目录和对应的启动回执核对进程、返回行号和队列：
+
+```bash
+python scripts/audit_marble_original_research_saved.py \
+  --run-root "$row2_run_root" --launch-receipt "$row2_launch_receipt"
+```
+
+运行目录的 `state-private.json` 须标记只恢复原行 `2`，并保留完整固定范围 `[0, 1, 2]`；启动回执用于核验进程身份。即使 CLI
+正常返回，也须单独核对原评分结果。该审计不会回放遗留请求。
+
 - [x] 研究交接进一步按正式入口补强：研究README指定的是`workload-preparation`子项目，不是历史根目录wheel。两份发布源码快照各84个软件/目录文件按Git校验，主分支与PR57均从各自完整pipeline和consumer执行500条回读，不借用旧研究pipeline；公共provider来自实际CI安装。原数据/索引、默认依赖和活动研究工作区未改，0神经调用，不替代原生完成。专用CPU回执：`/root/marble-complete-published-research-component-20261104-002/qualification-public.json`。
 
 - [x] MultiAgentBench研究读取交接补齐当前版本核验：实际成功CI41679369206工件13252192256的94个载荷全部一致，复用原500条索引；当前研究main入口和已发布PR57入口分别完成500条公共/研究完整回读，原配置及关系可逆还原，固定原三题均匹配索引。外部任务锁CLI通过，原数据/索引未改、未重建索引，研究旧客户端和默认锁未改，0神经调用。服务器回执：专用CPU的`/root/marble-current-ci-research-reuse-20261104-001/qualification-public.json`。这是输入交接，不替代原生任务与评分，不增加来源完成数。
