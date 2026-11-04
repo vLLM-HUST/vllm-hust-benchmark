@@ -1,6 +1,7 @@
 """Run fixed original MiniWoB++ tasks with the AgentLab vLLM client."""
 
 import argparse
+from contextlib import contextmanager
 import json
 import math
 import os
@@ -9,6 +10,29 @@ from urllib.parse import urlsplit
 
 
 TASKS = ("miniwob.click-dialog", "miniwob.multi-layouts")
+
+
+@contextmanager
+def response_metadata(client_type, destination):
+    original = client_type.create
+
+    def capture(client, *args, **kwargs):
+        result = original(client, *args, **kwargs)
+        for choice in result.choices:
+            row = {
+                "finish_reason": choice.finish_reason,
+                "content_is_null": choice.message.content is None,
+                "completion_tokens": getattr(result.usage, "completion_tokens", None),
+            }
+            with destination.open("a", encoding="utf-8") as stream:
+                stream.write(json.dumps(row) + "\n")
+        return result
+
+    client_type.create = capture
+    try:
+        yield
+    finally:
+        client_type.create = original
 
 
 def terminal_summary(result_dir):
@@ -60,6 +84,7 @@ def main():
     parser.add_argument("--max-steps", type=int, required=True)
     parser.add_argument("--max-output-tokens", type=int, required=True)
     parser.add_argument("--execute", action="store_true")
+    parser.add_argument("--record-response-metadata", action="store_true")
     args = parser.parse_args()
     if (
         not args.site.endswith("/miniwob/")
@@ -97,7 +122,13 @@ def main():
         env_args=EnvArgs(task_name=args.task, task_seed=42, max_steps=args.max_steps),
     )
     run.prepare(args.output)
-    run.run()
+    if args.record_response_metadata:
+        from openai.resources.chat.completions import Completions
+
+        with response_metadata(Completions, args.output / "response-metadata.jsonl"):
+            run.run()
+    else:
+        run.run()
     if run.err_msg:
         raise RuntimeError(run.err_msg)
     print(

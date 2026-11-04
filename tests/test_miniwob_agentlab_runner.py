@@ -5,8 +5,40 @@ import runpy
 from pathlib import Path
 import subprocess
 import sys
+from types import SimpleNamespace
 
 import pytest
+
+
+def test_metadata_capture_preserves_response_and_restores_client(tmp_path):
+    script = Path(__file__).resolve().parents[1] / "scripts/run_miniwob_agentlab.py"
+    capture = runpy.run_path(str(script))["response_metadata"]
+    response = SimpleNamespace(
+        choices=[
+            SimpleNamespace(finish_reason="length", message=SimpleNamespace(content=None)),
+            SimpleNamespace(finish_reason="stop", message=SimpleNamespace(content="private")),
+        ],
+        usage=SimpleNamespace(completion_tokens=1024),
+    )
+
+    class Client:
+        def create(self, **kwargs):
+            assert kwargs == {"messages": ["private prompt"]}
+            return response
+
+    original = Client.create
+    path = tmp_path / "metadata.jsonl"
+    with pytest.raises(RuntimeError, match="parser failed"):
+        with capture(Client, path):
+            assert Client().create(messages=["private prompt"]) is response
+            raise RuntimeError("parser failed")
+    assert Client.create is original
+    raw = path.read_text("utf-8")
+    assert "private" not in raw
+    assert [json.loads(line) for line in raw.splitlines()] == [
+        {"finish_reason": "length", "content_is_null": True, "completion_tokens": 1024},
+        {"finish_reason": "stop", "content_is_null": False, "completion_tokens": 1024},
+    ]
 
 
 @pytest.mark.parametrize(

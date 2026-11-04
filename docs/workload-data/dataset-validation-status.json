@@ -273,6 +273,28 @@
         "not_preserved": ["authenticated business-site workflows", "persistent site state", "desktop OS control"],
         "next_gate": "Run the already pinned tasks with a real NPU Agent after obtaining a resource window; record original rewards and termination without changing task IDs or seed.",
         "accepted_replacement": false,
+        "native_run_002_first_task": {
+          "task": "miniwob.click-dialog",
+          "model": "Qwen/Qwen3.5-9B",
+          "seed": 42,
+          "steps": 1,
+          "original_reward": 1.0,
+          "terminated": true,
+          "truncated": false,
+          "summary_sha256": "d4f9370ad801820cea1f1855d8476747d7769703d9a540a8c4d5ba537724f8ea",
+          "scope": "First fixed task only; second task and replacement acceptance are separate."
+        },
+        "native_run_002_second_task": {
+          "task": "miniwob.multi-layouts",
+          "exit_code": 1,
+          "reported_steps": 5,
+          "summary_sha256": "ca8f0ba58766ebab10a6b968cddca2a80ab165c4034aa03e384dd21d693e53e2",
+          "raw_response_finish_reason_verified": false,
+          "original_reward": 0.0,
+          "terminated": false,
+          "truncated": false,
+          "failure": "AgentLab parser received null response content and raised TypeError. Native browser actions and partial trace are retained; not a completed original task."
+        },
         "fixed_agent_execution_profile": {
           "tasks": ["miniwob.click-dialog", "miniwob.multi-layouts"],
           "seed": 42,
@@ -281,7 +303,27 @@
           "model_candidate": "Qwen/Qwen3.5-9B",
           "plan_only_verified": true,
           "model_calls": 0,
-          "scope": "Declared local Agent budget, not a publisher score-reproduction setting."
+          "scope": "Declared local Agent budget, not a publisher score-reproduction setting.",
+          "multi_layouts_recovery_004": {
+            "max_output_tokens_per_model_call": 4096,
+            "captured_model_responses": 20,
+            "null_content_responses": 0,
+            "steps": 20,
+            "original_reward": 0.0,
+            "terminated": false,
+            "truncated": true,
+            "summary_sha256": "e2722e4ffc6bb1c0ca504010bdb95be5b607b98d58d039154544556085e58a63",
+            "scope": "Valid native step-cap outcome under a separately declared recovery profile; not task success or 1024-token profile reproduction."
+          },
+          "multi_layouts_attempt_003": {
+            "captured_model_responses": 10,
+            "final_finish_reason": "length",
+            "final_content_is_null": true,
+            "final_completion_tokens": 1024,
+            "summary_sha256": "a53173cf923dc0eff1cba0e102eb60347fb4ca64ef31a2bd08be80717b0ee86a",
+            "completed": false,
+            "failure": "The budget-limited response had no text content; AgentLab raised TypeError. This diagnoses attempt 003 only."
+          }
         }
       },
       "publisher": "https://github.com/Farama-Foundation/miniwob-plusplus",

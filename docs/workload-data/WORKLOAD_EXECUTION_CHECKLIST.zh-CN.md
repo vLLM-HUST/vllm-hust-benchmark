@@ -596,7 +596,9 @@ MiniWoB++（候选，未交付）：从清单所列固定作者提交恢复网�
 在 ARM64 上复用 Playwright Chromium 1117，令 `PLAYWRIGHT_BROWSERS_PATH` 指向浏览器缓存，
 `FONTCONFIG_SYSROOT` 指向私有依赖根、`LD_LIBRARY_PATH` 指向该根下的 `usr/lib64`。两道原题均已在 seed 42 下初始化。
 使用 `scripts/run_miniwob_agentlab.py` 先验证计划；获得 NPU 窗口后，按清单固定预算执行并保留原始奖励、终止状态及失败。
-它覆盖原生多步浏览器动作，不覆盖登录后业务状态或桌面操作。
+实际 NPU 验证中，`click-dialog` 在每次 1024 token 配置下 1 步完成、奖励 1.0；`multi-layouts` 在单独的 4096 token 恢复配置下
+到达 20 步上限、奖励 0.0。保留 1024 token 配置的解析失败，两个配置不汇总成同一成绩。
+它覆盖原生多步浏览器动作，不覆盖登录后业务状态或桌面操作，因此不将 WebArena 标为已完成。
 
 WebArena（未完成）：固定原题 ID 为 0、1、2，均只访问 `shopping_admin`，且需要登录。
 先在隔离的 amd64 执行节点核验作者的 `shopping_admin_final_0719.tar`、站点 URL、登录及重置，
