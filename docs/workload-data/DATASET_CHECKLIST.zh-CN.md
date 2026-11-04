@@ -33,7 +33,7 @@ MultiAgentBench 中断恢复：沿用原运行的作者源码、准备目录、�
 
 - [x] MultiAgentBench研究读取交接补齐当前版本核验：实际成功CI41679369206工件13252192256的94个载荷全部一致，复用原500条索引；当前研究main入口和已发布PR57入口分别完成500条公共/研究完整回读，原配置及关系可逆还原，固定原三题均匹配索引。外部任务锁CLI通过，原数据/索引未改、未重建索引，研究旧客户端和默认锁未改，0神经调用。服务器回执：专用CPU的`/root/marble-current-ci-research-reuse-20261104-001/qualification-public.json`。这是输入交接，不替代原生任务与评分，不增加来源完成数。
 
-- [x] xLAM作者原格式生成协议已交付；原前三条、当前成功CI包与研究读取证据见本文件xLAM小节及机器清单。当前总计96/113，剩17项；三条围栏输出不是质量通过。精确回执提交db548b1d的完整CI41676183006和CPU
+- [x] xLAM作者原格式生成协议已交付；原前三条、当前成功CI包与研究读取证据见本文件xLAM小节及机器清单。当前总计96/113（当时），剩17项；三条围栏输出不是质量通过。精确回执提交db548b1d的完整CI41676183006和CPU
   smoke41676190613均成功，不能替代原生执行证据。
 
 - [x] MultiAgentBench独立9B262144配置的原固定三题均已终止并审计：三题CLI退出码均1，31次保存模型返回中16次200、15次400，全部400均为官方聊天模板`No user query found in messages`；原关键词工具7次返回，在途请求0。原任务、角色、工具、材料、5轮最大值和各类调用预算未改；保存请求的输出预算为256/512/2048，不笼统称每次512。失败和旧14B结果完整保留。服务器回执：专用CPU的`/root/marble-original-research-native-launch-20261104-004/terminal-independent-audit-public.json`。
@@ -414,7 +414,7 @@ for record in iter_workload("SWESMITH", data_root=Path("/external/swesmith/data"
 - 按已有证据逐项复核，不因口径调整批量补勾；失败和低分如实保留，不用替换样本凑通过。113项来源与另5项仅分类的范围不变。
 
 当前交付
-**96/113项**，待完成17项，另5项仅分类。首批#432的60项和第二批#538的ScienceWorld已合入main；早期五个草稿已关闭为被汇总承接，历史和分支保留。第三批来源及精确协议范围以机器清单和各交付回执为准，尚未合入。DailyTalk按原Guo前三段完整对话29条NPU批量合成协议交付，公共准备入口支持其他完整原对话；不代表全量音频、全split生成、MOS或流式时序。ScienceAgentBench按原verified固定前三题单轮生成、NPU辅助评分和隔离科学执行协议交付，三题程序失败如实保留，不代表全102题执行或其他Agent分支。TemporalWiki按原GPT2-large基座探针全部35,948行PPL交付，不代表持续训练checkpoint或其他语料模式。StreamingBench按real固定前三组原视频NPU推理与原评分交付，其他任务／模态缺口单列。LJSpeech按原VITS固定前三条NPU文本到波形协议交付，不代表全13,100条合成或MOS评价。StructEval按19个完整非渲染原生协议收口，渲染/VQA模式缺口继续单列，不称整套44协议或2035题全部完成。OpenMath/OpenCode是训练语料原问题生成，不是独立质量benchmark。打勾不代表全量模型评测、高分或性能保证。
+**97/113项**，待完成16项，另5项仅分类。首批#432的60项和第二批#538的ScienceWorld已合入main；早期五个草稿已关闭为被汇总承接，历史和分支保留。第三批来源及精确协议范围以机器清单和各交付回执为准，尚未合入。DailyTalk按原Guo前三段完整对话29条NPU批量合成协议交付，公共准备入口支持其他完整原对话；不代表全量音频、全split生成、MOS或流式时序。ScienceAgentBench按原verified固定前三题单轮生成、NPU辅助评分和隔离科学执行协议交付，三题程序失败如实保留，不代表全102题执行或其他Agent分支。TemporalWiki按原GPT2-large基座探针全部35,948行PPL交付，不代表持续训练checkpoint或其他语料模式。StreamingBench按real固定前三组原视频NPU推理与原评分交付，其他任务／模态缺口单列。LJSpeech按原VITS固定前三条NPU文本到波形协议交付，不代表全13,100条合成或MOS评价。StructEval按19个完整非渲染原生协议收口，渲染/VQA模式缺口继续单列，不称整套44协议或2035题全部完成。OpenMath/OpenCode是训练语料原问题生成，不是独立质量benchmark。打勾不代表全量模型评测、高分或性能保证。
 
 StructEval新增配置进展：经确认，`qwen35-9b-nonthinking-32768`与原`publisher-null`分开记录。仅原Text→TikZ位置37的已知失败题运行新配置，传输timeout3600秒、外层/SDK重试均0；保存响应为length／32768输出tokens。CPU原工作区autostop导致渲染转发失败，900秒等待后原生子进程以RenderBlocked失败退出；原响应、代码和待渲染请求保留，实际VQA调用0，不计完整任务。原80GiB持久卷和模板已原样恢复，Docker仍在恢复旧容器；不重启daemon、不重新生成，不重放位置38的结果未知请求。共享任务根`structeval-capped-failed-tikz-window-32068-001`保留终态，计数不增加。
 
@@ -1048,7 +1048,7 @@ python scripts/run_visionarena_original_continuation.py --shard /external/train-
 python scripts/run_visionarena_original_continuation.py --shard /external/train-00000-of-00043.parquet --endpoint http://127.0.0.1:19466/v1 --model Qwen/Qwen2-VL-7B-Instruct --max-tokens 1024 --output /private/visionarena-results
 ```
 
-第一条命令仅预检，已在原分片上通过并匹配实跑的三张图摘要。第二条需本地兼容 OpenAI 接口的视觉服务，输出目录须不存在。结果可能包含会话衍生内容，不上传原图、原会话或完整结果。首分片固定三条实跑不代表剩余 42 个分片或质量评测；来源总勾待交付检查。
+第一条命令仅预检，已在原分片上通过并匹配实跑的三张图摘要。第二条需本地兼容 OpenAI 接口的视觉服务，输出目录须不存在。结果可能包含会话衍生内容，不上传原图、原会话或完整结果。首分片固定三条实跑不代表剩余 42 个分片或质量评测。
 
 ### AppWorld固定原三题原生执行、官方评分与消费交接
 
@@ -1906,7 +1906,7 @@ QReCC历史容量判断后来补正：数十TB是从网页重建的获取代价�
 | BIGCODEBENCH               | [x] 固定原题交付闭环                           | 原3条sanitize、参考3/3、候选pass/pass/fail及独立审计通过，0新增模型调用。公共原Parquet获取/摘要、实际CI64载荷、1140原9字段/索引及受维护研究入口3条回读已核验。原Python3.10完整依赖CPU-only镜像已实际评分；新增代码专用构建上下文32原源码+6运行文件，完整锁及公开配方服务器实际构建完成，233锁版本/71原评估要求/32原文件核验通过；复用已有有效原3条评分，不重跑模型或冒充新镜像评分结果。e2b0.17废弃警告保留。[回执](validation/bigcodebench-container-runtime-readiness-20261028.json)。 |
 | SWE_BENCH                  | [x] 固定原三题原生链路完成                     | 全2294条/12字段、CI工件和研究回读通过；原Agent三题提交，原评分2未修复/1非法补丁，故障原题恢复且首题不重跑。384次NPU请求，保存审计通过，非全2294题评测；[独立回执](validation/swebench-classic-native-delivery-20261030.json)。                                                                                                                                                                                                                                                           |
 | SWE_VERIFIED               | [x] 固定三题原生链路完成                       | 原Agent144次NPU请求、官方参考对照3/3通过；模型1修复/1未修复/1非法补丁失败原样保留。保存结果审计、全500条数据字段/索引和固定3条研究回读通过，c585两项CI通过。非全量模型评测，SWE_BENCH另行待完成；[回执](validation/swebench-original-readiness-20261029.json)。                                                                                                                                                                                                                          |
-| VISIONARENA                | [ ] 待开展                                     | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| VISIONARENA | [x] 固定原三条多模态续写交付 | 首个原分片核验、原图及对话研究回读、三条 NPU 续写及公共入口预检均通过。[交付回执](validation/visionarena-original-continuation-20261104.json)。无官方评分。 |
 | MMMU                       | [x] 原validation抽样交付完成                   | 全92文件/11550行/16字段与索引核验，30学科固定90题NPU推理和原评分（含4多图），152处公共/固定研究消费往返通过。[回执](validation/mmmu-native-delivery-20261027.json)。59次length保留，非完整validation质量或LLaVA复现。                                                                                                                                                                                                                                                                    |
 | CHARTQA                    | [x] 原测试抽样原生交付完成                     | 原测试2500条全字段/图像字节/索引核验；双类别固定6题NPU生成、原评分与公共离线复核，CI产物和固定研究6条往返通过。[回执](validation/chartqa-native-delivery-20261026.json)。非全量质量/性能；修复构建器全新重编译未验证。                                                                                                                                                                                                                                                                   |
 | VIDEOMME                   | [x] 固定原生协议交付完成                       | 全24原文件及900视频/744字幕字节核验、2700题原11字段/索引、实际CI及受维护研究27条回读已闭环。官方8帧与字幕8帧各27题均原生NPU推理/原评分完成，各13/27、全54 stop，独立原输入/帧/请求/回答/参考/评分审计通过且0新调用。27独立问题、9视频，不是2700题/全语义域质量或性能保证；仅学术研究。[环境与操作](../../workload-preparation/README.md#video-mme-%E5%8E%9F%E7%94%9F%E8%A7%86%E9%A2%91%E4%BB%BB%E5%8A%A1)、[回执](validation/videomme-original-readiness-20261028.json)。                |
