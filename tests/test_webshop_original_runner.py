@@ -2,8 +2,26 @@
 
 from pathlib import Path
 import runpy
+import subprocess
+import sys
 
 import pytest
+
+
+def test_saved_author_budget_rejects_unpinned_output(tmp_path):
+    script = Path(__file__).resolve().parents[1] / "scripts/run_webshop_original.py"
+    result_file = tmp_path / "partial.jsonl"
+    result_file.write_bytes(b'{"session":0}\n')
+    result = subprocess.run(
+        [sys.executable, str(script), "--verify-saved-author-budget", str(result_file)],
+        capture_output=True,
+        text=True,
+        check=False,
+        timeout=10,
+    )
+    assert result.returncode == 2
+    assert "does not match the pinned author-budget run" in result.stderr
+    assert "SAVED_EPISODES_VERIFIED" not in result.stdout
 
 
 def test_author_episode_scoring_distinguishes_expiry_from_partial_probe():
