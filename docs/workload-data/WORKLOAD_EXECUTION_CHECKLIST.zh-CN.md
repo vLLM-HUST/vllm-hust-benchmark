@@ -584,6 +584,12 @@ WebArena（未完成）：固定原题 ID 为 0、1、2，均只访问 `shopping
 再使用作者任务入口执行这三题。当前注册表候选仅核对了配置摘要和层数，尚不能替代原始归档；
 公开演示站点也不能替代可重置环境。站点与浏览器可在 CPU 节点运行，模型推理仍走独立 NPU 服务。
 
+NatureBench（未完成）：`scripts/run_naturebench_original.py` 默认检查原 CPU3 组并输出计划；
+安装 workload-data 包后，提供固定源码、原数据、运行环境及模型端点。正式执行需 Docker、已运行的原 evaluator，
+以及明确的 Agent 和裁判端点。传入实际部署上下文容量，不调整原输出预算；可用 `--task-id` 单独定位尚缺证据的原题。
+保留原任务退出、科学尝试次数、评分和有效性裁判各自的状态；正常退出但零科学尝试，不等于已验证科学评分。
+已有第二题裁判重放仅复用原材料，不替代原运行的最终评分记录。
+
 PaperBench（未完成）：复用已核验的 23 个原始论文包。先用
 `prepare_paperbench_original_assets.py --action verify --output <资产目录>` 校验原包，再用
 `check_paperbench_native_prerequisites.py --author-root <源码目录>` 检查原生运行前置条件。源码目录应包含
