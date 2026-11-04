@@ -229,6 +229,13 @@ python scripts/prepare_jsonschemabench_author_source.py --source webarena --auth
 - [x] WebArena官方固定版本的812条原任务配置及LICENSE/README共901850字节已在服务器取得，Git
   blob及SHA256核验通过；已有公共获取入口的plan、download和verify实际通过。前3条原题均依赖`shopping_admin`，后续优先核验该原网站镜像与完整原题流程；不将下载或读取算作来源交付。首次raw域名连接重置及编排脚本误把下载成功的空stdout当JSON的失败保留，已回查实际成功回执，未重复下载。
 
+- [ ] WebArena `shopping_admin` 部署：在具备独立 Docker 的兼容节点按固定摘要拉取候选镜像，再按作者原步骤设置站点 URL、验证登录和复位。镜像配置摘要已与官方
+  TAR 的 `manifest.json` 匹配；拉取和站点运行未验证。固定任务 0/1/2 不依赖其他站点，模型推理仍在 NPU。
+
+  ```bash
+  docker pull --platform linux/amd64 webarenaimages/shopping_admin_final_0719@sha256:428cdedfc10996d7f5378299cff541c93c187d1243643e31d439a66c0156147d
+  ```
+
 ```bash
 python scripts/prepare_reused_research_assets.py WEBARENA --mode plan
 python scripts/prepare_reused_research_assets.py WEBARENA --mode download --data-root /server/fresh-webarena-assets --max-bytes 901850 --github-api
@@ -3172,9 +3179,15 @@ profile保留；因此是替代模型的接入验证，不是GPT-4质量复现�
   `25b560fd0e1d7a8944ab3bb21916ffa2fe63e6272316d22d7bc43da9e7c0bc24`。原 Compose 的
   `jykoh/classifieds:latest` 注册表仅列 `linux/amd64`，`mysql:8.1` 有
   `linux/arm64`。待取得兼容隔离执行环境并验证原站点初始化、重置、Agent 执行和评分；未拉镜像层。
+
 - [ ] NatureBench 固定样本原生结果：第二题已保存的 judge 文本使用作者原版 `judge_core.runner._extract_json` 成功解析，`is_valid`
   为布尔值 `false`，不是解析错误；尚未核对该判定与同一尝试的评估记录合并后的最终结果。未重跑推理，不将离线解析视为整项通过。
+
 - [ ] MLAgentBench IMDb：ARM64 Python 3.12 客户端已验证可导入 DistilBERT 分类器及
   Trainer；[依赖清单](../../configs/workload-native/mlagentbench-imdb-npu-client-supplements.txt)只补客户端。执行须使用可访问指定
   NPU 的专用隔离容器，并保留原执行入口的隔离检查；不要把依赖导入或容器标志当成隔离证明。待完成原 IMDb 训练、完整测试集 `submission.csv`
   和原版评分；已审计的另外两题不重跑。
+
+  在原训练与评分命令各自的工作目录，将已核验的原始 Parquet 分片目录只读挂载为 `./imdb`，并设置
+  `HF_HUB_OFFLINE=1`、`HF_DATASETS_OFFLINE=1`。原脚本无需改动：`load_dataset("imdb")` 会读取本地目录。服务器已逐行比对训练集和测试集各
+  25,000 条，顺序、文本、标签均与发布方分片一致。权重目录另行只读挂载，训练输出写入独立目录。
