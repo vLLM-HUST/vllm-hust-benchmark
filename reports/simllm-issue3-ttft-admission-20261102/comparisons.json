@@ -1,0 +1,1820 @@
+{
+  "short": {
+    "baseline": {
+      "summary": {
+        "requests": 12,
+        "correct": 12,
+        "prompt_tokens_min": 2176,
+        "prompt_tokens_max": 4131,
+        "target_ttft_median_s": 0.5161,
+        "target_ttft_mean_s": 0.5178,
+        "requests_per_s": 1.0958,
+        "semantic_hits": 0,
+        "skipped_tokens": 0
+      },
+      "requests": [
+        {
+          "id": "issue3_number_0",
+          "prompt_tokens": 3859,
+          "completion_tokens": 3,
+          "ttft_s": 1.1012,
+          "output_text": "17",
+          "expected": "17",
+          "correct": true,
+          "reuse": null
+        },
+        {
+          "id": "issue3_number_1",
+          "prompt_tokens": 3890,
+          "completion_tokens": 3,
+          "ttft_s": 0.5124,
+          "output_text": "29",
+          "expected": "29",
+          "correct": true,
+          "reuse": null
+        },
+        {
+          "id": "issue3_number_2",
+          "prompt_tokens": 3920,
+          "completion_tokens": 3,
+          "ttft_s": 0.5192,
+          "output_text": "43",
+          "expected": "43",
+          "correct": true,
+          "reuse": null
+        },
+        {
+          "id": "issue3_negation_0",
+          "prompt_tokens": 2176,
+          "completion_tokens": 2,
+          "ttft_s": 0.5119,
+          "output_text": "允许",
+          "expected": "允许",
+          "correct": true,
+          "reuse": null
+        },
+        {
+          "id": "issue3_negation_1",
+          "prompt_tokens": 2207,
+          "completion_tokens": 2,
+          "ttft_s": 0.5101,
+          "output_text": "禁止",
+          "expected": "禁止",
+          "correct": true,
+          "reuse": null
+        },
+        {
+          "id": "issue3_negation_2",
+          "prompt_tokens": 2237,
+          "completion_tokens": 2,
+          "ttft_s": 0.5106,
+          "output_text": "允许",
+          "expected": "允许",
+          "correct": true,
+          "reuse": null
+        },
+        {
+          "id": "issue3_subject_0",
+          "prompt_tokens": 4070,
+          "completion_tokens": 3,
+          "ttft_s": 0.5243,
+          "output_text": "张岚",
+          "expected": "张岚",
+          "correct": true,
+          "reuse": null
+        },
+        {
+          "id": "issue3_subject_1",
+          "prompt_tokens": 4101,
+          "completion_tokens": 3,
+          "ttft_s": 0.5296,
+          "output_text": "李诚",
+          "expected": "李诚",
+          "correct": true,
+          "reuse": null
+        },
+        {
+          "id": "issue3_subject_2",
+          "prompt_tokens": 4131,
+          "completion_tokens": 3,
+          "ttft_s": 0.5225,
+          "output_text": "王宁",
+          "expected": "王宁",
+          "correct": true,
+          "reuse": null
+        },
+        {
+          "id": "issue3_instruction_0",
+          "prompt_tokens": 3037,
+          "completion_tokens": 2,
+          "ttft_s": 0.5159,
+          "output_text": "A",
+          "expected": "A",
+          "correct": true,
+          "reuse": null
+        },
+        {
+          "id": "issue3_instruction_1",
+          "prompt_tokens": 3068,
+          "completion_tokens": 2,
+          "ttft_s": 0.5131,
+          "output_text": "B",
+          "expected": "B",
+          "correct": true,
+          "reuse": null
+        },
+        {
+          "id": "issue3_instruction_2",
+          "prompt_tokens": 3098,
+          "completion_tokens": 2,
+          "ttft_s": 0.5252,
+          "output_text": "C",
+          "expected": "C",
+          "correct": true,
+          "reuse": null
+        }
+      ]
+    },
+    "approximate512": {
+      "summary": {
+        "requests": 12,
+        "correct": 5,
+        "prompt_tokens_min": 2176,
+        "prompt_tokens_max": 4131,
+        "target_ttft_median_s": 0.5342,
+        "target_ttft_mean_s": 0.5441,
+        "requests_per_s": 0.9891,
+        "semantic_hits": 8,
+        "skipped_tokens": 22556
+      },
+      "requests": [
+        {
+          "id": "issue3_number_0",
+          "prompt_tokens": 3859,
+          "completion_tokens": 3,
+          "ttft_s": 1.9724,
+          "output_text": "17",
+          "expected": "17",
+          "correct": true,
+          "reuse": null
+        },
+        {
+          "id": "issue3_number_1",
+          "prompt_tokens": 3890,
+          "completion_tokens": 3,
+          "ttft_s": 0.5782,
+          "output_text": "17",
+          "expected": "29",
+          "correct": false,
+          "reuse": {
+            "source_id": "issue3_number_0",
+            "skipped_tokens": 3378,
+            "cosine": 0.9998011612833514
+          }
+        },
+        {
+          "id": "issue3_number_2",
+          "prompt_tokens": 3920,
+          "completion_tokens": 3,
+          "ttft_s": 0.535,
+          "output_text": "17",
+          "expected": "43",
+          "correct": false,
+          "reuse": {
+            "source_id": "issue3_number_0",
+            "skipped_tokens": 3408,
+            "cosine": 0.9992738644014478
+          }
+        },
+        {
+          "id": "issue3_negation_0",
+          "prompt_tokens": 2176,
+          "completion_tokens": 2,
+          "ttft_s": 0.5459,
+          "output_text": "允许",
+          "expected": "允许",
+          "correct": true,
+          "reuse": null
+        },
+        {
+          "id": "issue3_negation_1",
+          "prompt_tokens": 2207,
+          "completion_tokens": 2,
+          "ttft_s": 0.5334,
+          "output_text": "允许",
+          "expected": "禁止",
+          "correct": false,
+          "reuse": {
+            "source_id": "issue3_negation_0",
+            "skipped_tokens": 1695,
+            "cosine": 0.9993942691212814
+          }
+        },
+        {
+          "id": "issue3_negation_2",
+          "prompt_tokens": 2237,
+          "completion_tokens": 2,
+          "ttft_s": 0.5266,
+          "output_text": "允许",
+          "expected": "允许",
+          "correct": true,
+          "reuse": {
+            "source_id": "issue3_negation_0",
+            "skipped_tokens": 1725,
+            "cosine": 0.997784535958968
+          }
+        },
+        {
+          "id": "issue3_subject_0",
+          "prompt_tokens": 4070,
+          "completion_tokens": 3,
+          "ttft_s": 0.5635,
+          "output_text": "张岚",
+          "expected": "张岚",
+          "correct": true,
+          "reuse": null
+        },
+        {
+          "id": "issue3_subject_1",
+          "prompt_tokens": 4101,
+          "completion_tokens": 3,
+          "ttft_s": 0.5793,
+          "output_text": "张岚",
+          "expected": "李诚",
+          "correct": false,
+          "reuse": {
+            "source_id": "issue3_subject_0",
+            "skipped_tokens": 3589,
+            "cosine": 0.9998260624015135
+          }
+        },
+        {
+          "id": "issue3_subject_2",
+          "prompt_tokens": 4131,
+          "completion_tokens": 3,
+          "ttft_s": 0.5692,
+          "output_text": "张岚",
+          "expected": "王宁",
+          "correct": false,
+          "reuse": {
+            "source_id": "issue3_subject_0",
+            "skipped_tokens": 3619,
+            "cosine": 0.9993669382303626
+          }
+        },
+        {
+          "id": "issue3_instruction_0",
+          "prompt_tokens": 3037,
+          "completion_tokens": 2,
+          "ttft_s": 0.5242,
+          "output_text": "A",
+          "expected": "A",
+          "correct": true,
+          "reuse": null
+        },
+        {
+          "id": "issue3_instruction_1",
+          "prompt_tokens": 3068,
+          "completion_tokens": 2,
+          "ttft_s": 0.5135,
+          "output_text": "A",
+          "expected": "B",
+          "correct": false,
+          "reuse": {
+            "source_id": "issue3_instruction_0",
+            "skipped_tokens": 2556,
+            "cosine": 0.9996993997483979
+          }
+        },
+        {
+          "id": "issue3_instruction_2",
+          "prompt_tokens": 3098,
+          "completion_tokens": 2,
+          "ttft_s": 0.5179,
+          "output_text": "A",
+          "expected": "C",
+          "correct": false,
+          "reuse": {
+            "source_id": "issue3_instruction_0",
+            "skipped_tokens": 2586,
+            "cosine": 0.9988843451065986
+          }
+        }
+      ]
+    },
+    "approximate256": {
+      "summary": {
+        "requests": 12,
+        "correct": 5,
+        "prompt_tokens_min": 2176,
+        "prompt_tokens_max": 4131,
+        "target_ttft_median_s": 0.5177,
+        "target_ttft_mean_s": 0.5205,
+        "requests_per_s": 1.0232,
+        "semantic_hits": 8,
+        "skipped_tokens": 24604
+      },
+      "requests": [
+        {
+          "id": "issue3_number_0",
+          "prompt_tokens": 3859,
+          "completion_tokens": 3,
+          "ttft_s": 1.9587,
+          "output_text": "17",
+          "expected": "17",
+          "correct": true,
+          "reuse": null
+        },
+        {
+          "id": "issue3_number_1",
+          "prompt_tokens": 3890,
+          "completion_tokens": 3,
+          "ttft_s": 0.5454,
+          "output_text": "17",
+          "expected": "29",
+          "correct": false,
+          "reuse": {
+            "source_id": "issue3_number_0",
+            "skipped_tokens": 3634,
+            "cosine": 0.9998011612833514
+          }
+        },
+        {
+          "id": "issue3_number_2",
+          "prompt_tokens": 3920,
+          "completion_tokens": 3,
+          "ttft_s": 0.5311,
+          "output_text": "17",
+          "expected": "43",
+          "correct": false,
+          "reuse": {
+            "source_id": "issue3_number_0",
+            "skipped_tokens": 3664,
+            "cosine": 0.9992738644014478
+          }
+        },
+        {
+          "id": "issue3_negation_0",
+          "prompt_tokens": 2176,
+          "completion_tokens": 2,
+          "ttft_s": 0.5204,
+          "output_text": "允许",
+          "expected": "允许",
+          "correct": true,
+          "reuse": null
+        },
+        {
+          "id": "issue3_negation_1",
+          "prompt_tokens": 2207,
+          "completion_tokens": 2,
+          "ttft_s": 0.5146,
+          "output_text": "允许",
+          "expected": "禁止",
+          "correct": false,
+          "reuse": {
+            "source_id": "issue3_negation_0",
+            "skipped_tokens": 1951,
+            "cosine": 0.9993942691212814
+          }
+        },
+        {
+          "id": "issue3_negation_2",
+          "prompt_tokens": 2237,
+          "completion_tokens": 2,
+          "ttft_s": 0.5062,
+          "output_text": "允许",
+          "expected": "允许",
+          "correct": true,
+          "reuse": {
+            "source_id": "issue3_negation_0",
+            "skipped_tokens": 1981,
+            "cosine": 0.997784535958968
+          }
+        },
+        {
+          "id": "issue3_subject_0",
+          "prompt_tokens": 4070,
+          "completion_tokens": 3,
+          "ttft_s": 0.5237,
+          "output_text": "张岚",
+          "expected": "张岚",
+          "correct": true,
+          "reuse": null
+        },
+        {
+          "id": "issue3_subject_1",
+          "prompt_tokens": 4101,
+          "completion_tokens": 3,
+          "ttft_s": 0.5215,
+          "output_text": "张岚",
+          "expected": "李诚",
+          "correct": false,
+          "reuse": {
+            "source_id": "issue3_subject_0",
+            "skipped_tokens": 3845,
+            "cosine": 0.9998260624015135
+          }
+        },
+        {
+          "id": "issue3_subject_2",
+          "prompt_tokens": 4131,
+          "completion_tokens": 3,
+          "ttft_s": 0.5208,
+          "output_text": "张岚",
+          "expected": "王宁",
+          "correct": false,
+          "reuse": {
+            "source_id": "issue3_subject_0",
+            "skipped_tokens": 3875,
+            "cosine": 0.9993669382303626
+          }
+        },
+        {
+          "id": "issue3_instruction_0",
+          "prompt_tokens": 3037,
+          "completion_tokens": 2,
+          "ttft_s": 0.5209,
+          "output_text": "A",
+          "expected": "A",
+          "correct": true,
+          "reuse": null
+        },
+        {
+          "id": "issue3_instruction_1",
+          "prompt_tokens": 3068,
+          "completion_tokens": 2,
+          "ttft_s": 0.5097,
+          "output_text": "A",
+          "expected": "B",
+          "correct": false,
+          "reuse": {
+            "source_id": "issue3_instruction_0",
+            "skipped_tokens": 2812,
+            "cosine": 0.9996993997483979
+          }
+        },
+        {
+          "id": "issue3_instruction_2",
+          "prompt_tokens": 3098,
+          "completion_tokens": 2,
+          "ttft_s": 0.5145,
+          "output_text": "A",
+          "expected": "C",
+          "correct": false,
+          "reuse": {
+            "source_id": "issue3_instruction_0",
+            "skipped_tokens": 2842,
+            "cosine": 0.9988843451065986
+          }
+        }
+      ]
+    },
+    "approximate128": {
+      "summary": {
+        "requests": 12,
+        "correct": 5,
+        "prompt_tokens_min": 2176,
+        "prompt_tokens_max": 4131,
+        "target_ttft_median_s": 0.5217,
+        "target_ttft_mean_s": 0.5222,
+        "requests_per_s": 1.0124,
+        "semantic_hits": 8,
+        "skipped_tokens": 25628
+      },
+      "requests": [
+        {
+          "id": "issue3_number_0",
+          "prompt_tokens": 3859,
+          "completion_tokens": 3,
+          "ttft_s": 2.0815,
+          "output_text": "17",
+          "expected": "17",
+          "correct": true,
+          "reuse": null
+        },
+        {
+          "id": "issue3_number_1",
+          "prompt_tokens": 3890,
+          "completion_tokens": 3,
+          "ttft_s": 0.5421,
+          "output_text": "17",
+          "expected": "29",
+          "correct": false,
+          "reuse": {
+            "source_id": "issue3_number_0",
+            "skipped_tokens": 3762,
+            "cosine": 0.9998011612833514
+          }
+        },
+        {
+          "id": "issue3_number_2",
+          "prompt_tokens": 3920,
+          "completion_tokens": 3,
+          "ttft_s": 0.5328,
+          "output_text": "17",
+          "expected": "43",
+          "correct": false,
+          "reuse": {
+            "source_id": "issue3_number_0",
+            "skipped_tokens": 3792,
+            "cosine": 0.9992738644014478
+          }
+        },
+        {
+          "id": "issue3_negation_0",
+          "prompt_tokens": 2176,
+          "completion_tokens": 2,
+          "ttft_s": 0.5277,
+          "output_text": "允许",
+          "expected": "允许",
+          "correct": true,
+          "reuse": null
+        },
+        {
+          "id": "issue3_negation_1",
+          "prompt_tokens": 2207,
+          "completion_tokens": 2,
+          "ttft_s": 0.5143,
+          "output_text": "允许",
+          "expected": "禁止",
+          "correct": false,
+          "reuse": {
+            "source_id": "issue3_negation_0",
+            "skipped_tokens": 2079,
+            "cosine": 0.9993942691212814
+          }
+        },
+        {
+          "id": "issue3_negation_2",
+          "prompt_tokens": 2237,
+          "completion_tokens": 2,
+          "ttft_s": 0.5084,
+          "output_text": "允许",
+          "expected": "允许",
+          "correct": true,
+          "reuse": {
+            "source_id": "issue3_negation_0",
+            "skipped_tokens": 2109,
+            "cosine": 0.997784535958968
+          }
+        },
+        {
+          "id": "issue3_subject_0",
+          "prompt_tokens": 4070,
+          "completion_tokens": 3,
+          "ttft_s": 0.5169,
+          "output_text": "张岚",
+          "expected": "张岚",
+          "correct": true,
+          "reuse": null
+        },
+        {
+          "id": "issue3_subject_1",
+          "prompt_tokens": 4101,
+          "completion_tokens": 3,
+          "ttft_s": 0.522,
+          "output_text": "张岚",
+          "expected": "李诚",
+          "correct": false,
+          "reuse": {
+            "source_id": "issue3_subject_0",
+            "skipped_tokens": 3973,
+            "cosine": 0.9998260624015135
+          }
+        },
+        {
+          "id": "issue3_subject_2",
+          "prompt_tokens": 4131,
+          "completion_tokens": 3,
+          "ttft_s": 0.5214,
+          "output_text": "张岚",
+          "expected": "王宁",
+          "correct": false,
+          "reuse": {
+            "source_id": "issue3_subject_0",
+            "skipped_tokens": 4003,
+            "cosine": 0.9993669382303626
+          }
+        },
+        {
+          "id": "issue3_instruction_0",
+          "prompt_tokens": 3037,
+          "completion_tokens": 2,
+          "ttft_s": 0.5181,
+          "output_text": "A",
+          "expected": "A",
+          "correct": true,
+          "reuse": null
+        },
+        {
+          "id": "issue3_instruction_1",
+          "prompt_tokens": 3068,
+          "completion_tokens": 2,
+          "ttft_s": 0.5239,
+          "output_text": "A",
+          "expected": "B",
+          "correct": false,
+          "reuse": {
+            "source_id": "issue3_instruction_0",
+            "skipped_tokens": 2940,
+            "cosine": 0.9996993997483979
+          }
+        },
+        {
+          "id": "issue3_instruction_2",
+          "prompt_tokens": 3098,
+          "completion_tokens": 2,
+          "ttft_s": 0.5128,
+          "output_text": "A",
+          "expected": "C",
+          "correct": false,
+          "reuse": {
+            "source_id": "issue3_instruction_0",
+            "skipped_tokens": 2970,
+            "cosine": 0.9988843451065986
+          }
+        }
+      ]
+    },
+    "rollback": {
+      "summary": {
+        "requests": 12,
+        "correct": 12,
+        "prompt_tokens_min": 2176,
+        "prompt_tokens_max": 4131,
+        "target_ttft_median_s": 0.5043,
+        "target_ttft_mean_s": 0.5069,
+        "requests_per_s": 1.1324,
+        "semantic_hits": 0,
+        "skipped_tokens": 0
+      },
+      "requests": [
+        {
+          "id": "issue3_number_0",
+          "prompt_tokens": 3859,
+          "completion_tokens": 3,
+          "ttft_s": 0.9168,
+          "output_text": "17",
+          "expected": "17",
+          "correct": true,
+          "reuse": null
+        },
+        {
+          "id": "issue3_number_1",
+          "prompt_tokens": 3890,
+          "completion_tokens": 3,
+          "ttft_s": 0.5117,
+          "output_text": "29",
+          "expected": "29",
+          "correct": true,
+          "reuse": null
+        },
+        {
+          "id": "issue3_number_2",
+          "prompt_tokens": 3920,
+          "completion_tokens": 3,
+          "ttft_s": 0.5328,
+          "output_text": "43",
+          "expected": "43",
+          "correct": true,
+          "reuse": null
+        },
+        {
+          "id": "issue3_negation_0",
+          "prompt_tokens": 2176,
+          "completion_tokens": 2,
+          "ttft_s": 0.5229,
+          "output_text": "允许",
+          "expected": "允许",
+          "correct": true,
+          "reuse": null
+        },
+        {
+          "id": "issue3_negation_1",
+          "prompt_tokens": 2207,
+          "completion_tokens": 2,
+          "ttft_s": 0.5072,
+          "output_text": "禁止",
+          "expected": "禁止",
+          "correct": true,
+          "reuse": null
+        },
+        {
+          "id": "issue3_negation_2",
+          "prompt_tokens": 2237,
+          "completion_tokens": 2,
+          "ttft_s": 0.5069,
+          "output_text": "允许",
+          "expected": "允许",
+          "correct": true,
+          "reuse": null
+        },
+        {
+          "id": "issue3_subject_0",
+          "prompt_tokens": 4070,
+          "completion_tokens": 3,
+          "ttft_s": 0.5073,
+          "output_text": "张岚",
+          "expected": "张岚",
+          "correct": true,
+          "reuse": null
+        },
+        {
+          "id": "issue3_subject_1",
+          "prompt_tokens": 4101,
+          "completion_tokens": 3,
+          "ttft_s": 0.5009,
+          "output_text": "李诚",
+          "expected": "李诚",
+          "correct": true,
+          "reuse": null
+        },
+        {
+          "id": "issue3_subject_2",
+          "prompt_tokens": 4131,
+          "completion_tokens": 3,
+          "ttft_s": 0.5016,
+          "output_text": "王宁",
+          "expected": "王宁",
+          "correct": true,
+          "reuse": null
+        },
+        {
+          "id": "issue3_instruction_0",
+          "prompt_tokens": 3037,
+          "completion_tokens": 2,
+          "ttft_s": 0.5032,
+          "output_text": "A",
+          "expected": "A",
+          "correct": true,
+          "reuse": null
+        },
+        {
+          "id": "issue3_instruction_1",
+          "prompt_tokens": 3068,
+          "completion_tokens": 2,
+          "ttft_s": 0.4981,
+          "output_text": "B",
+          "expected": "B",
+          "correct": true,
+          "reuse": null
+        },
+        {
+          "id": "issue3_instruction_2",
+          "prompt_tokens": 3098,
+          "completion_tokens": 2,
+          "ttft_s": 0.4962,
+          "output_text": "C",
+          "expected": "C",
+          "correct": true,
+          "reuse": null
+        }
+      ]
+    },
+    "guarded_short": {
+      "summary": {
+        "requests": 12,
+        "correct": 12,
+        "prompt_tokens_min": 2176,
+        "prompt_tokens_max": 4131,
+        "target_ttft_median_s": 0.5307,
+        "target_ttft_mean_s": 0.5298,
+        "requests_per_s": 1.0946,
+        "semantic_hits": 0,
+        "skipped_tokens": 0
+      },
+      "requests": [
+        {
+          "id": "issue3_number_0",
+          "prompt_tokens": 3859,
+          "completion_tokens": 3,
+          "ttft_s": 0.9597,
+          "output_text": "17",
+          "expected": "17",
+          "correct": true,
+          "reuse": null
+        },
+        {
+          "id": "issue3_number_1",
+          "prompt_tokens": 3890,
+          "completion_tokens": 3,
+          "ttft_s": 0.5079,
+          "output_text": "29",
+          "expected": "29",
+          "correct": true,
+          "reuse": null
+        },
+        {
+          "id": "issue3_number_2",
+          "prompt_tokens": 3920,
+          "completion_tokens": 3,
+          "ttft_s": 0.5056,
+          "output_text": "43",
+          "expected": "43",
+          "correct": true,
+          "reuse": null
+        },
+        {
+          "id": "issue3_negation_0",
+          "prompt_tokens": 2176,
+          "completion_tokens": 2,
+          "ttft_s": 0.5166,
+          "output_text": "允许",
+          "expected": "允许",
+          "correct": true,
+          "reuse": null
+        },
+        {
+          "id": "issue3_negation_1",
+          "prompt_tokens": 2207,
+          "completion_tokens": 2,
+          "ttft_s": 0.5393,
+          "output_text": "禁止",
+          "expected": "禁止",
+          "correct": true,
+          "reuse": null
+        },
+        {
+          "id": "issue3_negation_2",
+          "prompt_tokens": 2237,
+          "completion_tokens": 2,
+          "ttft_s": 0.5557,
+          "output_text": "允许",
+          "expected": "允许",
+          "correct": true,
+          "reuse": null
+        },
+        {
+          "id": "issue3_subject_0",
+          "prompt_tokens": 4070,
+          "completion_tokens": 3,
+          "ttft_s": 0.5381,
+          "output_text": "张岚",
+          "expected": "张岚",
+          "correct": true,
+          "reuse": null
+        },
+        {
+          "id": "issue3_subject_1",
+          "prompt_tokens": 4101,
+          "completion_tokens": 3,
+          "ttft_s": 0.5398,
+          "output_text": "李诚",
+          "expected": "李诚",
+          "correct": true,
+          "reuse": null
+        },
+        {
+          "id": "issue3_subject_2",
+          "prompt_tokens": 4131,
+          "completion_tokens": 3,
+          "ttft_s": 0.5285,
+          "output_text": "王宁",
+          "expected": "王宁",
+          "correct": true,
+          "reuse": null
+        },
+        {
+          "id": "issue3_instruction_0",
+          "prompt_tokens": 3037,
+          "completion_tokens": 2,
+          "ttft_s": 0.5256,
+          "output_text": "A",
+          "expected": "A",
+          "correct": true,
+          "reuse": null
+        },
+        {
+          "id": "issue3_instruction_1",
+          "prompt_tokens": 3068,
+          "completion_tokens": 2,
+          "ttft_s": 0.5291,
+          "output_text": "B",
+          "expected": "B",
+          "correct": true,
+          "reuse": null
+        },
+        {
+          "id": "issue3_instruction_2",
+          "prompt_tokens": 3098,
+          "completion_tokens": 2,
+          "ttft_s": 0.5322,
+          "output_text": "C",
+          "expected": "C",
+          "correct": true,
+          "reuse": null
+        }
+      ]
+    }
+  },
+  "seven_k": {
+    "baseline": {
+      "summary": {
+        "requests": 12,
+        "correct": 12,
+        "prompt_tokens_min": 6882,
+        "prompt_tokens_max": 6964,
+        "target_ttft_median_s": 0.5402,
+        "target_ttft_mean_s": 0.5352,
+        "requests_per_s": 1.0945,
+        "semantic_hits": 0,
+        "skipped_tokens": 0
+      },
+      "requests": [
+        {
+          "id": "issue3_number_0",
+          "prompt_tokens": 6882,
+          "completion_tokens": 3,
+          "ttft_s": 0.952,
+          "output_text": "17",
+          "expected": "17",
+          "correct": true,
+          "reuse": null
+        },
+        {
+          "id": "issue3_number_1",
+          "prompt_tokens": 6913,
+          "completion_tokens": 3,
+          "ttft_s": 0.5153,
+          "output_text": "29",
+          "expected": "29",
+          "correct": true,
+          "reuse": null
+        },
+        {
+          "id": "issue3_number_2",
+          "prompt_tokens": 6943,
+          "completion_tokens": 3,
+          "ttft_s": 0.5147,
+          "output_text": "43",
+          "expected": "43",
+          "correct": true,
+          "reuse": null
+        },
+        {
+          "id": "issue3_negation_0",
+          "prompt_tokens": 6903,
+          "completion_tokens": 2,
+          "ttft_s": 0.5149,
+          "output_text": "允许",
+          "expected": "允许",
+          "correct": true,
+          "reuse": null
+        },
+        {
+          "id": "issue3_negation_1",
+          "prompt_tokens": 6934,
+          "completion_tokens": 2,
+          "ttft_s": 0.522,
+          "output_text": "禁止",
+          "expected": "禁止",
+          "correct": true,
+          "reuse": null
+        },
+        {
+          "id": "issue3_negation_2",
+          "prompt_tokens": 6964,
+          "completion_tokens": 2,
+          "ttft_s": 0.5416,
+          "output_text": "允许",
+          "expected": "允许",
+          "correct": true,
+          "reuse": null
+        },
+        {
+          "id": "issue3_subject_0",
+          "prompt_tokens": 6901,
+          "completion_tokens": 3,
+          "ttft_s": 0.5361,
+          "output_text": "张岚",
+          "expected": "张岚",
+          "correct": true,
+          "reuse": null
+        },
+        {
+          "id": "issue3_subject_1",
+          "prompt_tokens": 6932,
+          "completion_tokens": 3,
+          "ttft_s": 0.5476,
+          "output_text": "李诚",
+          "expected": "李诚",
+          "correct": true,
+          "reuse": null
+        },
+        {
+          "id": "issue3_subject_2",
+          "prompt_tokens": 6962,
+          "completion_tokens": 3,
+          "ttft_s": 0.5388,
+          "output_text": "王宁",
+          "expected": "王宁",
+          "correct": true,
+          "reuse": null
+        },
+        {
+          "id": "issue3_instruction_0",
+          "prompt_tokens": 6900,
+          "completion_tokens": 2,
+          "ttft_s": 0.5511,
+          "output_text": "A",
+          "expected": "A",
+          "correct": true,
+          "reuse": null
+        },
+        {
+          "id": "issue3_instruction_1",
+          "prompt_tokens": 6931,
+          "completion_tokens": 2,
+          "ttft_s": 0.5573,
+          "output_text": "B",
+          "expected": "B",
+          "correct": true,
+          "reuse": null
+        },
+        {
+          "id": "issue3_instruction_2",
+          "prompt_tokens": 6961,
+          "completion_tokens": 2,
+          "ttft_s": 0.5446,
+          "output_text": "C",
+          "expected": "C",
+          "correct": true,
+          "reuse": null
+        }
+      ]
+    },
+    "approximate512": {
+      "summary": {
+        "requests": 12,
+        "correct": 5,
+        "prompt_tokens_min": 6882,
+        "prompt_tokens_max": 6964,
+        "target_ttft_median_s": 0.5366,
+        "target_ttft_mean_s": 0.5445,
+        "requests_per_s": 0.958,
+        "semantic_hits": 8,
+        "skipped_tokens": 51444
+      },
+      "requests": [
+        {
+          "id": "issue3_number_0",
+          "prompt_tokens": 6882,
+          "completion_tokens": 3,
+          "ttft_s": 2.1035,
+          "output_text": "17",
+          "expected": "17",
+          "correct": true,
+          "reuse": null
+        },
+        {
+          "id": "issue3_number_1",
+          "prompt_tokens": 6913,
+          "completion_tokens": 3,
+          "ttft_s": 0.5488,
+          "output_text": "17",
+          "expected": "29",
+          "correct": false,
+          "reuse": {
+            "source_id": "issue3_number_0",
+            "skipped_tokens": 6401,
+            "cosine": 0.9999562050051815
+          }
+        },
+        {
+          "id": "issue3_number_2",
+          "prompt_tokens": 6943,
+          "completion_tokens": 3,
+          "ttft_s": 0.5225,
+          "output_text": "17",
+          "expected": "43",
+          "correct": false,
+          "reuse": {
+            "source_id": "issue3_number_0",
+            "skipped_tokens": 6431,
+            "cosine": 0.999839643224395
+          }
+        },
+        {
+          "id": "issue3_negation_0",
+          "prompt_tokens": 6903,
+          "completion_tokens": 2,
+          "ttft_s": 0.6844,
+          "output_text": "允许",
+          "expected": "允许",
+          "correct": true,
+          "reuse": null
+        },
+        {
+          "id": "issue3_negation_1",
+          "prompt_tokens": 6934,
+          "completion_tokens": 2,
+          "ttft_s": 0.5176,
+          "output_text": "允许",
+          "expected": "禁止",
+          "correct": false,
+          "reuse": {
+            "source_id": "issue3_negation_0",
+            "skipped_tokens": 6422,
+            "cosine": 0.9999728573894351
+          }
+        },
+        {
+          "id": "issue3_negation_2",
+          "prompt_tokens": 6964,
+          "completion_tokens": 2,
+          "ttft_s": 0.5244,
+          "output_text": "允许",
+          "expected": "允许",
+          "correct": true,
+          "reuse": {
+            "source_id": "issue3_negation_0",
+            "skipped_tokens": 6452,
+            "cosine": 0.9998992339524745
+          }
+        },
+        {
+          "id": "issue3_subject_0",
+          "prompt_tokens": 6901,
+          "completion_tokens": 3,
+          "ttft_s": 0.6849,
+          "output_text": "张岚",
+          "expected": "张岚",
+          "correct": true,
+          "reuse": null
+        },
+        {
+          "id": "issue3_subject_1",
+          "prompt_tokens": 6932,
+          "completion_tokens": 3,
+          "ttft_s": 0.5334,
+          "output_text": "张岚",
+          "expected": "李诚",
+          "correct": false,
+          "reuse": {
+            "source_id": "issue3_subject_0",
+            "skipped_tokens": 6420,
+            "cosine": 0.9999536175365381
+          }
+        },
+        {
+          "id": "issue3_subject_2",
+          "prompt_tokens": 6962,
+          "completion_tokens": 3,
+          "ttft_s": 0.5398,
+          "output_text": "张岚",
+          "expected": "王宁",
+          "correct": false,
+          "reuse": {
+            "source_id": "issue3_subject_0",
+            "skipped_tokens": 6450,
+            "cosine": 0.9998305981631911
+          }
+        },
+        {
+          "id": "issue3_instruction_0",
+          "prompt_tokens": 6900,
+          "completion_tokens": 2,
+          "ttft_s": 0.688,
+          "output_text": "A",
+          "expected": "A",
+          "correct": true,
+          "reuse": null
+        },
+        {
+          "id": "issue3_instruction_1",
+          "prompt_tokens": 6931,
+          "completion_tokens": 2,
+          "ttft_s": 0.6069,
+          "output_text": "A",
+          "expected": "B",
+          "correct": false,
+          "reuse": {
+            "source_id": "issue3_instruction_0",
+            "skipped_tokens": 6419,
+            "cosine": 0.9999658258234686
+          }
+        },
+        {
+          "id": "issue3_instruction_2",
+          "prompt_tokens": 6961,
+          "completion_tokens": 2,
+          "ttft_s": 0.5628,
+          "output_text": "A",
+          "expected": "C",
+          "correct": false,
+          "reuse": {
+            "source_id": "issue3_instruction_0",
+            "skipped_tokens": 6449,
+            "cosine": 0.9998721003161631
+          }
+        }
+      ]
+    }
+  },
+  "sixteen_k": {
+    "first_baseline": {
+      "summary": {
+        "requests": 12,
+        "correct": 12,
+        "prompt_tokens_min": 15996,
+        "prompt_tokens_max": 16063,
+        "target_ttft_median_s": 1.0191,
+        "target_ttft_mean_s": 1.0185,
+        "requests_per_s": 0.7245,
+        "semantic_hits": 0,
+        "skipped_tokens": 0
+      },
+      "requests": [
+        {
+          "id": "issue3_number_0",
+          "prompt_tokens": 16002,
+          "completion_tokens": 3,
+          "ttft_s": 1.3279,
+          "output_text": "17",
+          "expected": "17",
+          "correct": true,
+          "reuse": null
+        },
+        {
+          "id": "issue3_number_1",
+          "prompt_tokens": 16033,
+          "completion_tokens": 3,
+          "ttft_s": 1.0187,
+          "output_text": "29",
+          "expected": "29",
+          "correct": true,
+          "reuse": null
+        },
+        {
+          "id": "issue3_number_2",
+          "prompt_tokens": 16063,
+          "completion_tokens": 3,
+          "ttft_s": 1.0226,
+          "output_text": "43",
+          "expected": "43",
+          "correct": true,
+          "reuse": null
+        },
+        {
+          "id": "issue3_negation_0",
+          "prompt_tokens": 15999,
+          "completion_tokens": 2,
+          "ttft_s": 1.0076,
+          "output_text": "允许",
+          "expected": "允许",
+          "correct": true,
+          "reuse": null
+        },
+        {
+          "id": "issue3_negation_1",
+          "prompt_tokens": 16030,
+          "completion_tokens": 2,
+          "ttft_s": 1.0153,
+          "output_text": "禁止",
+          "expected": "禁止",
+          "correct": true,
+          "reuse": null
+        },
+        {
+          "id": "issue3_negation_2",
+          "prompt_tokens": 16060,
+          "completion_tokens": 2,
+          "ttft_s": 1.0209,
+          "output_text": "允许",
+          "expected": "允许",
+          "correct": true,
+          "reuse": null
+        },
+        {
+          "id": "issue3_subject_0",
+          "prompt_tokens": 15997,
+          "completion_tokens": 3,
+          "ttft_s": 1.0071,
+          "output_text": "张岚",
+          "expected": "张岚",
+          "correct": true,
+          "reuse": null
+        },
+        {
+          "id": "issue3_subject_1",
+          "prompt_tokens": 16028,
+          "completion_tokens": 3,
+          "ttft_s": 1.016,
+          "output_text": "李诚",
+          "expected": "李诚",
+          "correct": true,
+          "reuse": null
+        },
+        {
+          "id": "issue3_subject_2",
+          "prompt_tokens": 16058,
+          "completion_tokens": 3,
+          "ttft_s": 1.0195,
+          "output_text": "王宁",
+          "expected": "王宁",
+          "correct": true,
+          "reuse": null
+        },
+        {
+          "id": "issue3_instruction_0",
+          "prompt_tokens": 15996,
+          "completion_tokens": 2,
+          "ttft_s": 1.0075,
+          "output_text": "A",
+          "expected": "A",
+          "correct": true,
+          "reuse": null
+        },
+        {
+          "id": "issue3_instruction_1",
+          "prompt_tokens": 16027,
+          "completion_tokens": 2,
+          "ttft_s": 1.015,
+          "output_text": "B",
+          "expected": "B",
+          "correct": true,
+          "reuse": null
+        },
+        {
+          "id": "issue3_instruction_2",
+          "prompt_tokens": 16057,
+          "completion_tokens": 2,
+          "ttft_s": 1.0198,
+          "output_text": "C",
+          "expected": "C",
+          "correct": true,
+          "reuse": null
+        }
+      ]
+    },
+    "first_approximate512": {
+      "summary": {
+        "requests": 12,
+        "correct": 5,
+        "prompt_tokens_min": 15996,
+        "prompt_tokens_max": 16063,
+        "target_ttft_median_s": 0.5609,
+        "target_ttft_mean_s": 0.5614,
+        "requests_per_s": 0.8009,
+        "semantic_hits": 8,
+        "skipped_tokens": 124260
+      },
+      "requests": [
+        {
+          "id": "issue3_number_0",
+          "prompt_tokens": 16002,
+          "completion_tokens": 3,
+          "ttft_s": 2.6889,
+          "output_text": "17",
+          "expected": "17",
+          "correct": true,
+          "reuse": null
+        },
+        {
+          "id": "issue3_number_1",
+          "prompt_tokens": 16033,
+          "completion_tokens": 3,
+          "ttft_s": 0.5638,
+          "output_text": "17",
+          "expected": "29",
+          "correct": false,
+          "reuse": {
+            "source_id": "issue3_number_0",
+            "skipped_tokens": 15521,
+            "cosine": 0.9999954511338768
+          }
+        },
+        {
+          "id": "issue3_number_2",
+          "prompt_tokens": 16063,
+          "completion_tokens": 3,
+          "ttft_s": 0.5416,
+          "output_text": "17",
+          "expected": "43",
+          "correct": false,
+          "reuse": {
+            "source_id": "issue3_number_0",
+            "skipped_tokens": 15551,
+            "cosine": 0.999983308602437
+          }
+        },
+        {
+          "id": "issue3_negation_0",
+          "prompt_tokens": 15999,
+          "completion_tokens": 2,
+          "ttft_s": 1.256,
+          "output_text": "允许",
+          "expected": "允许",
+          "correct": true,
+          "reuse": null
+        },
+        {
+          "id": "issue3_negation_1",
+          "prompt_tokens": 16030,
+          "completion_tokens": 2,
+          "ttft_s": 0.5617,
+          "output_text": "允许",
+          "expected": "禁止",
+          "correct": false,
+          "reuse": {
+            "source_id": "issue3_negation_0",
+            "skipped_tokens": 15518,
+            "cosine": 0.9999963318474412
+          }
+        },
+        {
+          "id": "issue3_negation_2",
+          "prompt_tokens": 16060,
+          "completion_tokens": 2,
+          "ttft_s": 0.5601,
+          "output_text": "允许",
+          "expected": "允许",
+          "correct": true,
+          "reuse": {
+            "source_id": "issue3_negation_0",
+            "skipped_tokens": 15548,
+            "cosine": 0.9999863464714617
+          }
+        },
+        {
+          "id": "issue3_subject_0",
+          "prompt_tokens": 15997,
+          "completion_tokens": 3,
+          "ttft_s": 1.255,
+          "output_text": "张岚",
+          "expected": "张岚",
+          "correct": true,
+          "reuse": null
+        },
+        {
+          "id": "issue3_subject_1",
+          "prompt_tokens": 16028,
+          "completion_tokens": 3,
+          "ttft_s": 0.5622,
+          "output_text": "张岚",
+          "expected": "李诚",
+          "correct": false,
+          "reuse": {
+            "source_id": "issue3_subject_0",
+            "skipped_tokens": 15516,
+            "cosine": 0.9999952988482289
+          }
+        },
+        {
+          "id": "issue3_subject_2",
+          "prompt_tokens": 16058,
+          "completion_tokens": 3,
+          "ttft_s": 0.5875,
+          "output_text": "张岚",
+          "expected": "王宁",
+          "correct": false,
+          "reuse": {
+            "source_id": "issue3_subject_0",
+            "skipped_tokens": 15546,
+            "cosine": 0.9999827618192305
+          }
+        },
+        {
+          "id": "issue3_instruction_0",
+          "prompt_tokens": 15996,
+          "completion_tokens": 2,
+          "ttft_s": 1.2642,
+          "output_text": "A",
+          "expected": "A",
+          "correct": true,
+          "reuse": null
+        },
+        {
+          "id": "issue3_instruction_1",
+          "prompt_tokens": 16027,
+          "completion_tokens": 2,
+          "ttft_s": 0.5578,
+          "output_text": "A",
+          "expected": "B",
+          "correct": false,
+          "reuse": {
+            "source_id": "issue3_instruction_0",
+            "skipped_tokens": 15515,
+            "cosine": 0.9999959649038922
+          }
+        },
+        {
+          "id": "issue3_instruction_2",
+          "prompt_tokens": 16057,
+          "completion_tokens": 2,
+          "ttft_s": 0.5563,
+          "output_text": "A",
+          "expected": "C",
+          "correct": false,
+          "reuse": {
+            "source_id": "issue3_instruction_0",
+            "skipped_tokens": 15545,
+            "cosine": 0.9999848522677618
+          }
+        }
+      ]
+    },
+    "baseline": {
+      "summary": {
+        "requests": 12,
+        "correct": 12,
+        "prompt_tokens_min": 15996,
+        "prompt_tokens_max": 16063,
+        "target_ttft_median_s": 1.0189,
+        "target_ttft_mean_s": 1.0204,
+        "requests_per_s": 0.7199,
+        "semantic_hits": 0,
+        "skipped_tokens": 0
+      },
+      "requests": [
+        {
+          "id": "issue3_number_0",
+          "prompt_tokens": 16002,
+          "completion_tokens": 3,
+          "ttft_s": 1.3772,
+          "output_text": "17",
+          "expected": "17",
+          "correct": true,
+          "reuse": null
+        },
+        {
+          "id": "issue3_number_1",
+          "prompt_tokens": 16033,
+          "completion_tokens": 3,
+          "ttft_s": 1.0183,
+          "output_text": "29",
+          "expected": "29",
+          "correct": true,
+          "reuse": null
+        },
+        {
+          "id": "issue3_number_2",
+          "prompt_tokens": 16063,
+          "completion_tokens": 3,
+          "ttft_s": 1.02,
+          "output_text": "43",
+          "expected": "43",
+          "correct": true,
+          "reuse": null
+        },
+        {
+          "id": "issue3_negation_0",
+          "prompt_tokens": 15999,
+          "completion_tokens": 2,
+          "ttft_s": 1.0098,
+          "output_text": "允许",
+          "expected": "允许",
+          "correct": true,
+          "reuse": null
+        },
+        {
+          "id": "issue3_negation_1",
+          "prompt_tokens": 16030,
+          "completion_tokens": 2,
+          "ttft_s": 1.0195,
+          "output_text": "禁止",
+          "expected": "禁止",
+          "correct": true,
+          "reuse": null
+        },
+        {
+          "id": "issue3_negation_2",
+          "prompt_tokens": 16060,
+          "completion_tokens": 2,
+          "ttft_s": 1.016,
+          "output_text": "允许",
+          "expected": "允许",
+          "correct": true,
+          "reuse": null
+        },
+        {
+          "id": "issue3_subject_0",
+          "prompt_tokens": 15997,
+          "completion_tokens": 3,
+          "ttft_s": 1.0046,
+          "output_text": "张岚",
+          "expected": "张岚",
+          "correct": true,
+          "reuse": null
+        },
+        {
+          "id": "issue3_subject_1",
+          "prompt_tokens": 16028,
+          "completion_tokens": 3,
+          "ttft_s": 1.0176,
+          "output_text": "李诚",
+          "expected": "李诚",
+          "correct": true,
+          "reuse": null
+        },
+        {
+          "id": "issue3_subject_2",
+          "prompt_tokens": 16058,
+          "completion_tokens": 3,
+          "ttft_s": 1.0237,
+          "output_text": "王宁",
+          "expected": "王宁",
+          "correct": true,
+          "reuse": null
+        },
+        {
+          "id": "issue3_instruction_0",
+          "prompt_tokens": 15996,
+          "completion_tokens": 2,
+          "ttft_s": 1.0304,
+          "output_text": "A",
+          "expected": "A",
+          "correct": true,
+          "reuse": null
+        },
+        {
+          "id": "issue3_instruction_1",
+          "prompt_tokens": 16027,
+          "completion_tokens": 2,
+          "ttft_s": 1.0325,
+          "output_text": "B",
+          "expected": "B",
+          "correct": true,
+          "reuse": null
+        },
+        {
+          "id": "issue3_instruction_2",
+          "prompt_tokens": 16057,
+          "completion_tokens": 2,
+          "ttft_s": 1.0156,
+          "output_text": "C",
+          "expected": "C",
+          "correct": true,
+          "reuse": null
+        }
+      ]
+    },
+    "guarded_long": {
+      "summary": {
+        "requests": 12,
+        "correct": 5,
+        "prompt_tokens_min": 15996,
+        "prompt_tokens_max": 16063,
+        "target_ttft_median_s": 0.5512,
+        "target_ttft_mean_s": 0.5535,
+        "requests_per_s": 0.8109,
+        "semantic_hits": 8,
+        "skipped_tokens": 124260
+      },
+      "requests": [
+        {
+          "id": "issue3_number_0",
+          "prompt_tokens": 16002,
+          "completion_tokens": 3,
+          "ttft_s": 2.7027,
+          "output_text": "17",
+          "expected": "17",
+          "correct": true,
+          "reuse": null
+        },
+        {
+          "id": "issue3_number_1",
+          "prompt_tokens": 16033,
+          "completion_tokens": 3,
+          "ttft_s": 0.5798,
+          "output_text": "17",
+          "expected": "29",
+          "correct": false,
+          "reuse": {
+            "source_id": "issue3_number_0",
+            "skipped_tokens": 15521,
+            "cosine": 0.9999954511338768
+          }
+        },
+        {
+          "id": "issue3_number_2",
+          "prompt_tokens": 16063,
+          "completion_tokens": 3,
+          "ttft_s": 0.5444,
+          "output_text": "17",
+          "expected": "43",
+          "correct": false,
+          "reuse": {
+            "source_id": "issue3_number_0",
+            "skipped_tokens": 15551,
+            "cosine": 0.999983308602437
+          }
+        },
+        {
+          "id": "issue3_negation_0",
+          "prompt_tokens": 15999,
+          "completion_tokens": 2,
+          "ttft_s": 1.2494,
+          "output_text": "允许",
+          "expected": "允许",
+          "correct": true,
+          "reuse": null
+        },
+        {
+          "id": "issue3_negation_1",
+          "prompt_tokens": 16030,
+          "completion_tokens": 2,
+          "ttft_s": 0.5529,
+          "output_text": "允许",
+          "expected": "禁止",
+          "correct": false,
+          "reuse": {
+            "source_id": "issue3_negation_0",
+            "skipped_tokens": 15518,
+            "cosine": 0.9999963318474412
+          }
+        },
+        {
+          "id": "issue3_negation_2",
+          "prompt_tokens": 16060,
+          "completion_tokens": 2,
+          "ttft_s": 0.548,
+          "output_text": "允许",
+          "expected": "允许",
+          "correct": true,
+          "reuse": {
+            "source_id": "issue3_negation_0",
+            "skipped_tokens": 15548,
+            "cosine": 0.9999863464714617
+          }
+        },
+        {
+          "id": "issue3_subject_0",
+          "prompt_tokens": 15997,
+          "completion_tokens": 3,
+          "ttft_s": 1.2598,
+          "output_text": "张岚",
+          "expected": "张岚",
+          "correct": true,
+          "reuse": null
+        },
+        {
+          "id": "issue3_subject_1",
+          "prompt_tokens": 16028,
+          "completion_tokens": 3,
+          "ttft_s": 0.5495,
+          "output_text": "张岚",
+          "expected": "李诚",
+          "correct": false,
+          "reuse": {
+            "source_id": "issue3_subject_0",
+            "skipped_tokens": 15516,
+            "cosine": 0.9999952988482289
+          }
+        },
+        {
+          "id": "issue3_subject_2",
+          "prompt_tokens": 16058,
+          "completion_tokens": 3,
+          "ttft_s": 0.5445,
+          "output_text": "张岚",
+          "expected": "王宁",
+          "correct": false,
+          "reuse": {
+            "source_id": "issue3_subject_0",
+            "skipped_tokens": 15546,
+            "cosine": 0.9999827618192305
+          }
+        },
+        {
+          "id": "issue3_instruction_0",
+          "prompt_tokens": 15996,
+          "completion_tokens": 2,
+          "ttft_s": 1.2482,
+          "output_text": "A",
+          "expected": "A",
+          "correct": true,
+          "reuse": null
+        },
+        {
+          "id": "issue3_instruction_1",
+          "prompt_tokens": 16027,
+          "completion_tokens": 2,
+          "ttft_s": 0.5551,
+          "output_text": "A",
+          "expected": "B",
+          "correct": false,
+          "reuse": {
+            "source_id": "issue3_instruction_0",
+            "skipped_tokens": 15515,
+            "cosine": 0.9999959649038922
+          }
+        },
+        {
+          "id": "issue3_instruction_2",
+          "prompt_tokens": 16057,
+          "completion_tokens": 2,
+          "ttft_s": 0.554,
+          "output_text": "A",
+          "expected": "C",
+          "correct": false,
+          "reuse": {
+            "source_id": "issue3_instruction_0",
+            "skipped_tokens": 15545,
+            "cosine": 0.9999848522677618
+          }
+        }
+      ]
+    }
+  }
+}
