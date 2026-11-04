@@ -3,6 +3,25 @@
   "updated_at": "2026-11-04",
   "replacement_candidate_audits": {
     "STABLETOOLBENCH": {
+      "current_retained_archives_reverified_against_publisher_lfs": true,
+      "replacement_review": {
+        "candidate_for": "TOOLBENCH",
+        "fixed_g1_original_ids": [588, 608, 1073],
+        "fixed_g1_relevant_api_cache_entries": {"588": [7, 12], "608": [1, 1], "1073": [5, 3]},
+        "fixed_g1_cache_audit_scope": "All six relevant APIs resolve uniquely using author normalization and have nonempty original cache files. Agent argument hit rate is unverified; no request or score was generated.",
+        "selection_rule": "First three positions in the pinned author G1 instruction file, before checking individual cache hits.",
+        "live_listener_gate": "Enforce loopback binding and deny unintended outbound requests before invoking the author virtual API route. Cache misses are retained and may only use a separately qualified author simulator.",
+        "guarded_asgi_cache_miss_control": {
+          "outbound_dns_attempt_blocked_before_connection": true,
+          "author_route_http_status": 500,
+          "listener_started": false,
+          "model_calls": 0,
+          "scope": "Intentional synthetic miss under a Python socket audit hook; not an isolated production listener or an original task result."
+        },
+        "preserves": "Tool retrieval and multi-step interaction with the author's cached or simulated API backend.",
+        "not_preserved": "Live third-party API behavior; a cache miss cannot be counted as a completed tool call.",
+        "accepted_replacement": false
+      },
       "publisher": "https://github.com/THUNLP-MT/StableToolBench",
       "release_metadata_checked": "2026-11-04",
       "public_ungated_assets": {
