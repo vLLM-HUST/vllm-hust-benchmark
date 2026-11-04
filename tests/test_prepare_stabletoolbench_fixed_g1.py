@@ -7,6 +7,40 @@ import sys
 import tarfile
 import zipfile
 
+import pytest
+
+
+@pytest.mark.parametrize("variant", ["complete", "missing", "wrong_query"])
+def test_fac_input_gate_preserves_empty_answers_and_rejects_mismatch(tmp_path, variant):
+    script = (
+        Path(__file__).resolve().parents[1]
+        / "scripts/check_stabletoolbench_fac_inputs.py"
+    )
+    keys = ["588", "608", "1073"]
+    rows = [{"query_id": int(key), "query": key} for key in keys]
+    answers = {key: {"query": key, "answer": {"final_answer": ""}} for key in keys}
+    if variant == "missing":
+        del answers["608"]
+    elif variant == "wrong_query":
+        answers["608"]["query"] = "modified"
+    args = [sys.executable, str(script)]
+    for name, data in (
+        ("instructions", rows),
+        ("ids", dict.fromkeys(keys, 0)),
+        ("answers", answers),
+    ):
+        path = tmp_path / f"{name}.json"
+        path.write_text(json.dumps(data), encoding="utf-8")
+        args.extend([f"--{name}", str(path)])
+    result = subprocess.run(
+        args, capture_output=True, text=True, check=False, timeout=10
+    )
+    if variant == "complete":
+        assert result.returncode == 0, result.stderr
+        assert json.loads(result.stdout)["empty_final_answer_ids"] == keys
+    else:
+        assert result.returncode == 2
+
 
 def test_rejects_wrong_asset_without_creating_output(tmp_path):
     script = (
