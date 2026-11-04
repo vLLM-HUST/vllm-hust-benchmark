@@ -80,6 +80,10 @@ def main():
     from agentlab.llm.chat_api import SelfHostedModelArgs
     from browsergym.experiments.loop import EnvArgs, ExpArgs
 
+    action_set = FLAGS_CUSTOM.action.action_set
+    if list(action_set.subsets) != ["bid"] or action_set.multiaction:
+        raise RuntimeError("MiniWoB++ requires the fixed single browser-action profile")
+
     args.output.mkdir(parents=True, exist_ok=False)
     run = ExpArgs(
         agent_args=GenericAgentArgs(

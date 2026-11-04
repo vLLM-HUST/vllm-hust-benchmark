@@ -192,6 +192,38 @@
       "boundary": "Reference-control results and partial NPU generation are separate evidence. The given-description protocol exercises local author tools; it does not cover ToolBench remote API execution. No registered source replaced."
     },
     "MINIWOB_PLUSPLUS": {
+      "replacement_review": {
+        "current_retained_client": {
+          "stage": "agentlab-miniwob-client.7zgFBx",
+          "agentlab": "0.4.2",
+          "browsergym_miniwob": "0.14.2",
+          "imports_verified": true,
+          "site_assets_and_chromium_currently_verified": true,
+          "recovery_stage": "miniwob-browser-recovery.2JARnu",
+          "author_archive_sha256": "2290178d6159bbd10a9dabcc49c6a739341bc5a16cdb5f29a3f6abf035aa362c",
+          "chromium_archive_sha256": "695782e0c3b7e0950b662690c8de1216290d14329660db6df42aabb3e8f6f5ae",
+          "headless_loopback_dom_verified": ["click-dialog", "multi-layouts"],
+          "browsergym_seed_42_reset_verified": ["click-dialog", "multi-layouts"],
+          "fontconfig_recovery": "Set FONTCONFIG_SYSROOT and LD_LIBRARY_PATH to the existing ARM64 Chromium dependency sysroot. No BrowserGym, task, or grader source edits.",
+          "scope": "Original pages render and the BrowserGym task reset returns observations on the current server; not Agent execution or reward validation.",
+          "model_calls": 0
+        },
+        "candidate_for": "WEBARENA",
+        "preserved": ["interactive browser observations", "multi-step actions", "environment reward"],
+        "not_preserved": ["authenticated business-site workflows", "persistent site state", "desktop OS control"],
+        "next_gate": "Run the already pinned tasks with a real NPU Agent after obtaining a resource window; record original rewards and termination without changing task IDs or seed.",
+        "accepted_replacement": false,
+        "fixed_agent_execution_profile": {
+          "tasks": ["miniwob.click-dialog", "miniwob.multi-layouts"],
+          "seed": 42,
+          "max_steps_per_task": 20,
+          "max_output_tokens_per_model_call": 1024,
+          "model_candidate": "Qwen/Qwen3.5-9B",
+          "plan_only_verified": true,
+          "model_calls": 0,
+          "scope": "Declared local Agent budget, not a publisher score-reproduction setting."
+        }
+      },
       "publisher": "https://github.com/Farama-Foundation/miniwob-plusplus",
       "revision": "33c3b4ddef8c6eb67c57a29663d844b1eda7e614",
       "browsergym_miniwob": "0.14.3",
