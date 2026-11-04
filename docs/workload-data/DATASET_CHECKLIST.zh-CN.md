@@ -501,11 +501,23 @@ python scripts/score_api_bank_saved.py \
   --author-root "$api_bank_root" --export-inputs > "$private_inputs"
 ```
 
-导出的工具说明和对话前缀来自发布方原函数，不含当前目标答案字段。这是模型输入的中间格式；执行时仍需按发布方 `evaluator.py` 分别应用工具调用和回复模板，不把导出的 JSONL
-当作最终请求直接发送。
+导出的工具说明和对话前缀来自发布方原函数，不含当前目标答案字段。`--export-messages` 会进一步应用固定版本 `evaluator.py` 的工具调用和回复模板，输出最终消息。
+
+确认 NPU 服务窗口后，在服务器独立客户端环境执行：
+
+```bash
+python scripts/score_api_bank_saved.py \
+  --author-root "$api_bank_root" --generate "$saved_predictions" \
+  --endpoint "$npu_loopback_v1" --model "$served_model"
+python scripts/score_api_bank_saved.py \
+  --author-root "$api_bank_root" --predictions "$saved_predictions"
+```
+
+模型端点须为 `http://127.0.0.1:<端口>/v1`，输出须为未存在的私有文件。HTTP 失败时保留此前响应，
+不自动重试或跳过。回环夹具已核验成功响应落盘、失败停止与拒绝覆盖；尚未执行真实 NPU 生成。
 
 JSONL 每行提供 `file`（原对话文件名）、`id`（发布方展开后的零基位置）和
-`output`（原模型输出）。入口要求完整覆盖固定评分位置，调用原评分器，不启动模型。服务器参考答案对照结果为 API 调用 7/9、回复 5/5；两处 API 不匹配来自同一条
+`output`（原模型输出）。离线评分要求完整覆盖固定评分位置，调用原评分器，不启动模型。服务器参考答案对照结果为 API 调用 7/9、回复 5/5；两处 API 不匹配来自同一条
 AddMeeting 原调用。此结果只核验评分链路，不计入交付完成数。
 
 - [x] 2026-11-03已核查固定官方README的数据发布入口：Drive目录和直接文件页返回404；清华云盘返回HTTP200但正文为“Link does not

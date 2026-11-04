@@ -2,10 +2,12 @@
 
 import argparse
 import ast
+from http.client import HTTPConnection
 import json
 import os
 from pathlib import Path
 import sys
+from urllib.parse import urlsplit
 
 
 FILES = (
@@ -56,6 +58,54 @@ def author_messages(prompt, descriptions, history):
     return messages
 
 
+def generate(endpoint, model, requests, output):
+    url = urlsplit(endpoint)
+    if (
+        url.scheme != "http"
+        or url.hostname != "127.0.0.1"
+        or not url.port
+        or url.path != "/v1"
+        or url.username is not None
+        or url.query
+        or url.fragment
+        or not model.strip()
+    ):
+        raise ValueError("explicit loopback /v1 endpoint and model required")
+    with output.open("x", encoding="utf-8") as stream:
+        for row in requests:
+            body = {"model": model, "messages": row["messages"]}
+            client = HTTPConnection(url.hostname, url.port, timeout=600)
+            try:
+                client.request(
+                    "POST",
+                    "/v1/chat/completions",
+                    json.dumps(body),
+                    {"Content-Type": "application/json"},
+                )
+                reply = client.getresponse()
+                if reply.status != 200:
+                    raise RuntimeError(
+                        f"HTTP {reply.status} for {row['file']}:{row['id']}"
+                    )
+                result = json.loads(reply.read())
+            finally:
+                client.close()
+            choices = result["choices"]
+            if len(choices) != 1 or not isinstance(
+                choices[0]["message"]["content"], str
+            ):
+                raise ValueError("expected one text completion")
+            record = {
+                "file": row["file"],
+                "id": row["id"],
+                "output": choices[0]["message"]["content"],
+                "finish_reason": choices[0].get("finish_reason"),
+                "usage": result.get("usage"),
+            }
+            stream.write(json.dumps(record) + "\n")
+            stream.flush()
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--author-root", type=Path, required=True)
@@ -63,7 +113,13 @@ def main():
     mode.add_argument("--predictions", type=Path)
     mode.add_argument("--export-inputs", action="store_true")
     mode.add_argument("--export-messages", action="store_true")
+    mode.add_argument("--generate", type=Path, metavar="PRIVATE_OUTPUT")
+    parser.add_argument("--endpoint")
+    parser.add_argument("--model")
     args = parser.parse_args()
+    if args.generate is not None and not (args.endpoint and args.model):
+        parser.error("--generate requires --endpoint and --model")
+    destination = args.generate.resolve() if args.generate else None
     root = args.author_root.resolve(strict=True)
     predictions = {}
     try:
@@ -103,21 +159,20 @@ def main():
             if sample.ground_truth["role"] in {"API", "AI"}:
                 cases[name, i] = (evaluator, sample.ground_truth["role"])
     if args.predictions is None:
-        prompts = author_prompts(root) if args.export_messages else None
+        prompts = author_prompts(root) if args.export_messages or destination else None
+        requests = []
         for (name, i), (evaluator, role) in cases.items():
             descriptions, history = evaluator.get_model_input(i)
             if prompts is not None:
                 prompt = prompts[
                     "api_call_prompt" if role == "API" else "response_prompt"
                 ]
-                print(
-                    json.dumps(
-                        {
-                            "file": name,
-                            "id": i,
-                            "messages": author_messages(prompt, descriptions, history),
-                        }
-                    )
+                requests.append(
+                    {
+                        "file": name,
+                        "id": i,
+                        "messages": author_messages(prompt, descriptions, history),
+                    }
                 )
                 continue
             print(
@@ -130,6 +185,11 @@ def main():
                     }
                 )
             )
+        if destination:
+            generate(args.endpoint, args.model, requests, destination)
+        else:
+            for row in requests:
+                print(json.dumps(row))
         return
     if predictions.keys() != cases.keys():
         parser.error("predictions must match every fixed scoring position exactly")

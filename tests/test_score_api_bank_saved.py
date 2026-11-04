@@ -155,3 +155,67 @@ def test_author_messages_preserves_tool_history():
         {"role": "system", "content": "prompttools"},
         {"role": "system", "content": "[AddAgenda(id='7')] Response: ok"},
     ]
+
+
+def test_generate_rejects_external_endpoint(tmp_path):
+    import runpy
+
+    generate = runpy.run_path(str(SCRIPT))["generate"]
+    output = tmp_path / "private.jsonl"
+    with pytest.raises(ValueError, match="loopback"):
+        generate("https://example.org/v1", "fixture", [], output)
+    assert not output.exists()
+
+
+def test_generate_preserves_completed_rows_on_http_failure(tmp_path):
+    from http.server import BaseHTTPRequestHandler, HTTPServer
+    import runpy
+    from threading import Thread
+
+    received = []
+
+    class Handler(BaseHTTPRequestHandler):
+        def do_POST(self):
+            received.append(
+                (
+                    self.path,
+                    json.loads(self.rfile.read(int(self.headers["Content-Length"]))),
+                )
+            )
+            if len(received) == 2:
+                self.send_error(500)
+                return
+            self.send_response(200)
+            self.end_headers()
+            self.wfile.write(
+                b'{"choices":[{"message":{"content":"reply"},"finish_reason":"stop"}],'
+                b'"usage":{"completion_tokens":1}}'
+            )
+
+    generate = runpy.run_path(str(SCRIPT))["generate"]
+    messages = [{"role": "user", "content": "fixture"}]
+    requests = [{"file": FILES[0], "id": i, "messages": messages} for i in range(3)]
+    output = tmp_path / "private.jsonl"
+    with HTTPServer(("127.0.0.1", 0), Handler) as server:
+        worker = Thread(target=server.serve_forever, daemon=True)
+        worker.start()
+        try:
+            endpoint = f"http://127.0.0.1:{server.server_port}/v1"
+            with pytest.raises(RuntimeError, match="HTTP 500"):
+                generate(endpoint, "fixture", requests, output)
+            with pytest.raises(FileExistsError):
+                generate(endpoint, "fixture", requests, output)
+        finally:
+            server.shutdown()
+            worker.join()
+    assert (
+        received
+        == [("/v1/chat/completions", {"model": "fixture", "messages": messages})] * 2
+    )
+    assert json.loads(output.read_text(encoding="utf-8")) == {
+        "file": FILES[0],
+        "id": 0,
+        "output": "reply",
+        "finish_reason": "stop",
+        "usage": {"completion_tokens": 1},
+    }
