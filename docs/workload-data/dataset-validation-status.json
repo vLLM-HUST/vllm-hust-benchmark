@@ -5104,6 +5104,26 @@
         "system_python_torch_npu_distribution": "2.10.0.post4",
         "torch_npu_declared_torch_requirement": "torch ==2.10.0",
         "system_python_accelerate_import_spec_present": false,
+        "isolated_dependency_overlay": {
+          "stage": "mlagentbench-imdb-ascend-deps.mLvTgS",
+          "accelerate": "1.15.0",
+          "installation": "Pinned binary wheel, --no-deps, isolated target directory; distribution metadata confirmed via temporary PYTHONPATH. No global installation or service changes.",
+          "training_runtime_qualified": false
+        },
+        "full_client_overlay_recovery": {
+          "stage": "mlagentbench-imdb-ascend-full.jFH9Fv",
+          "requirements": "configs/workload-native/mlagentbench-imdb-npu-client-supplements.txt",
+          "installed_pinned_wheels": 8,
+          "dataset_import": "datasets 5.1.0 and pyarrow 26.0.1 imported with NPU visibility disabled",
+          "scope": "Recovered the complete client overlay without changing the base interpreter. Existing original split audit remains valid; no training or model requests."
+        },
+        "npu_host_isolation_probe": {
+          "container_cli_on_path": false,
+          "default_docker_socket_present": false,
+          "probe": "unshare --user --map-root-user --mount --pid --fork true",
+          "result": "cannot change root filesystem propagation: Permission denied",
+          "scope": "This host did not qualify the required isolation. Old Docker storage is not an active runtime. No daemon started, device allocated, or generated code executed."
+        },
         "scope": "Read-only inspection confirms staged assets and the installed Ascend extension metadata. The base torch CPU build tag alone does not imply a CPU fallback when torch_npu is installed. Accelerate is absent and isolated training is not qualified; no device initialization, training or allocation was attempted."
       },
       "imdb_current_shared_asset_inventory": {
