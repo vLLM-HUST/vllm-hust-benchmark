@@ -795,7 +795,16 @@
         "judge": "Qwen/Qwen3-14B",
         "unmodified_official_score": false
       },
-      "boundary": "Shared queues remain transport evidence. Recovered CSV matches the historical digest; the authorized patched grader returned all three scores."
+      "scored_protocol_ci_consumer_readback": {
+        "ci_run": 41904931449,
+        "artifact_id": 13359259388,
+        "wheel_sha256": "6f1b8a91fa180100938bd294dbd239e4c65b17b3f68c4ac2105704b6c1f76250",
+        "fixed_original_ids": ["bix-1-q1", "bix-1-q2", "bix-10-q1"],
+        "public_and_unchanged_research_full_records_equal": true,
+        "index_bytes_unchanged": true,
+        "model_calls": 0
+      },
+      "boundary": "Shared queues remain transport evidence. Recovered CSV matches the historical digest; the authorized patched grader returned all three scores. Exact CI provider and unchanged research reader resolve the three original records identically."
     },
     "status": "BIXBENCH_FIXED3_NATIVE_RETURNED_PUBLISHER_SCORING_DEFECTS_PENDING",
     "current_cpu_isolation_recovery": {
@@ -5690,11 +5699,11 @@
       },
       "scope": "public",
       "delivery_kind": "review_original_source_protocol",
-      "status": "IN_PROGRESS",
-      "checked": false,
+      "status": "AVAILABLE",
+      "checked": true,
       "legacy_checked": false,
       "existing_receipt": null,
-      "delivery_receipt": null,
+      "delivery_receipt": "docs/workload-data/validation/bixbench-fixed-native-delivery-20261104.json",
       "preparation_receipt": "docs/workload-data/validation/bixbench-original-metadata-20261030.json",
       "candidate_handoff_receipt": "docs/workload-data/validation/bixbench-candidate-handoff-20261030.json",
       "actual_ci_handoff_receipt": "docs/workload-data/validation/bixbench-actual-ci-handoff-20261030.json",
@@ -5881,7 +5890,8 @@
         "grading_software_preflight": "Six public software files staged with SHA256 verification on owned CPU; both real-client plan commands passed without creating scoring inputs or model calls. Original grader import and corrected router timeout construction also passed; actual original trajectory conversion/scoring pending.",
         "source_checkbox_eligible": false
       },
-      "blocker": "Fixed first three original 40-action Agent episodes completed with no final answers. The historical CSV was recovered byte-exactly and the authorized patched grader returned three zero scores with the local Qwen3-14B judge. No Agent rerun. The remaining delivery gate is the exact-artifact public runner and unchanged research-consumer handoff for this scored protocol; earlier fixed-three readbacks apply only to their historical software artifact. Other 57 ZIPs remain unacquired; this is not full 205-task execution."
+      "blocker": null,
+      "scope_limits": "Three fixed original Agent episodes and authorized patched scoring with a local judge; all three model attempts scored zero. Exact CI wheel and unchanged research reader resolve the three original records identically. Not publisher-judge reproduction or full 205-task execution; 57 other ZIPs were not acquired."
     },
     "LABBENCH": {
       "scope": "public",

@@ -1,9 +1,9 @@
 # Workload 分类执行清单
 
-当前交付以 [机器清单](dataset-validation-status.json) 的 `delivery_inventory` 为准：113 项应交付，101 项已勾选，12 项待完成；另有
+当前交付以 [机器清单](dataset-validation-status.json) 的 `delivery_inventory` 为准：113 项应交付，102 项已勾选，11 项待完成；另有
 5 项仅分类。 下方分类表保留阶段性及全量验证记录，不能直接用其全量状态计算固定抽样交付进度。
 
-待完成：ToolBench、NatureBench、MLAgentBench、MLE-bench、WebArena、VisualWebArena、OSWorld、SWE-smith、WorkArena、BixBench、PaperBench、Full-Duplex-Bench。
+待完成：ToolBench、NatureBench、MLAgentBench、MLE-bench、WebArena、VisualWebArena、OSWorld、SWE-smith、WorkArena、PaperBench、Full-Duplex-Bench。
 
 ## 原40类计划的增量定义（不改变历史快照）
 
@@ -581,14 +581,14 @@ WorkArena（未完成）：使用
 原生验证前须由具备权限的操作者配置官方实例，在隔离浏览器中确认登录、任务初始化与重置可用；凭据不进入仓库。 通过这些前置检查后，才运行固定原题的 Agent 和作者验证器。源码校验和 oracle
 演示均不计为交付。
 
-BixBench（未完成）：固定原题为 `bix-1-q1`、`bix-1-q2`、`bix-10-q1`。取得原生状态与轨迹后，用
+BixBench（固定三题已交付）：固定原题为 `bix-1-q1`、`bix-1-q2`、`bix-10-q1`。取得原生状态与轨迹后，用
 `scripts/prepare_bixbench_original_grade_input.py --author-root <源码> --data-root <数据> --native-output <原输出> --output <新目录> --limit 3 --execute`
 生成评分输入，核对题目身份、原参考答案与 str/str/range 模式；不丢弃空答案。共享队列仅用于恢复审计，四条合成裁判对照不用于正式评分。 在隔离环境中用
 `scripts/run_bixbench_original_grader.py`；默认仅输出计划，核对私有输入副本和本地模型端点后再加
 `--execute --patched-grader`。恢复历史 CSV 时加
 `--input-sha256 <原准备回执中的 csv_sha256>`，校验值必须来自原回执，不能用重建文件自身的摘要代替。 修复版评分单独标记，不能作为未修改的官方评分。 固定三题已复用原
-Agent 结果，恢复的 CSV 与历史回执逐字节一致；经兼容补丁及本地 Qwen3-14B 裁判评分，三题均为 0 分。
-当前只剩最终公开工件与未修改研究消费端的联调核验，不能用早期工件的读回结果替代。
+Agent 结果，恢复的 CSV 与历史回执逐字节一致；经兼容补丁及本地 Qwen3-14B 裁判评分，三题均为 0 分。 最终 CI 工件与未修改研究端已复验三条完整记录一致，见
+[交付回执](validation/bixbench-fixed-native-delivery-20261104.json)。
 
 StableToolBench（候选，未交付）：复用已核验的原工具定义和响应缓存，G1 固定前三题为 588、608、1073。 原 `/virtual`
 路由缓存未命中会尝试外联，先验证回环监听和出网限制；无可用作者模拟后端时保留未命中失败。 评分使用固定作者提交里的 `toolbench/tooleval/fac_eval.py`（原 shell
