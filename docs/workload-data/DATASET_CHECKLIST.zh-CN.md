@@ -3247,8 +3247,8 @@ profile保留；因此是替代模型的接入验证，不是GPT-4质量复现�
 - [ ] VisualWebArena 原站点与固定原题执行：独立环境已用 Playwright 启动 Chromium 116.0.5845.82 并打开 `about:blank`。作者发布的
   Classifieds ZIP 已经由临时回环通路取得，25,366,023 字节，ZIP 完整性检查通过，SHA-256
   `25b560fd0e1d7a8944ab3bb21916ffa2fe63e6272316d22d7bc43da9e7c0bc24`。原 Compose 的
-  `jykoh/classifieds:latest` 注册表仅列 `linux/amd64`，`mysql:8.1` 有
-  `linux/arm64`。待取得兼容隔离执行环境并验证原站点初始化、重置、Agent 执行和评分；未拉镜像层。
+  `jykoh/classifieds:latest` 注册表仅列 `linux/amd64`，`mysql:8.1` 有 `linux/arm64`。站点镜像摘要见机器清单；注册表报告约 76.9
+  GB，超过共享盘实测 63 GiB 可用空间。先在隔离 amd64 节点核验独立 Docker 数据盘及解包余量，再拉取镜像并验证原站点初始化、登录和重置；随后才执行原题及评分。当前未拉镜像层。
 
 - [ ] NatureBench 固定样本原生结果：第二题已保存的 judge 文本使用作者原版 `judge_core.runner._extract_json` 成功解析，`is_valid`
   为布尔值 `false`，不是解析错误；尚未核对该判定与同一尝试的评估记录合并后的最终结果。未重跑推理，不将离线解析视为整项通过。
