@@ -144,7 +144,13 @@ def run(website, mode, revision=None):
         "scope": "Website data files; original experiment provenance is retained inside each artifact.",
         "files": entries,
     }
-    if mode != "check":
+    if mode == "check":
+        manifest_path = destination / MANIFEST
+        if not manifest_path.is_file():
+            raise ValueError("Website source manifest is missing")
+        if json.loads(manifest_path.read_text()) != manifest:
+            raise ValueError("Website source manifest differs from benchmark")
+    else:
         (destination / MANIFEST).write_text(
             json.dumps(manifest, ensure_ascii=False, indent=2) + "\n"
         )
