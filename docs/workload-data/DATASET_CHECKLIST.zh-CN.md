@@ -712,7 +712,15 @@ mkdir -p /external/videomme-frames
 LD_LIBRARY_PATH=/external/ffmpeg/lib python -B scripts/run_videomme_original.py --official-checkout /external/VLMEvalKit --snapshot /external/hf-cache/datasets--lmms-lab--Video-MME/snapshots/ead1408f75b618502df9a1d8e0950166bf0a2a0b --media-receipt /external/videomme-native-media-receipt.json --frame-cache /external/videomme-frames --subtitle-overlay /external/videomme-subtitle-overlay --output /external/videomme-8frame-subs-run --model Qwen/Qwen3.5-9B --profile Video-MME_8frame_subs
 ```
 
-### LongVideoBench长视频交错理解（原协议已审，数据授权待完成）
+### LongVideoBench长视频交错理解（原素材部分取得，原生推理未完成）
+
+- [x] 发布方固定版本的 validation 1337 条和原位置 0、1、2 对应的两份原字幕已在服务器核验。已取得位置 2 的原视频，并通过[原版加载器预检入口](../../scripts/verify_longvideobench_original_inputs.py)：256 帧、68 段文本，参考选项与输入分离。位置 0、1 共用的原视频尚待从发布方归档提取；预检不计模型执行。
+
+```bash
+python scripts/verify_longvideobench_original_inputs.py --author-loader /external/LongVideoBench/longvideobench/longvideobench_dataset.py --data-root /external/LongVideoBench-data --position 2
+```
+
+使用作者加载器依赖（含 Decord 和 Pillow）及原始 `lvb_val.json`、`videos/`、`subtitles/` 布局。素材齐备后去掉 `--position 2`，预检全部三个固定位置；不更换题目，不减少已选帧数。
 
 - [x] 2026-10-28复核[官方数据页](https://huggingface.co/datasets/longvideobench/LongVideoBench)及[原生软件](https://github.com/longvideobench/LongVideoBench)：6678题，validation1337/test5341；长视频、字幕与图像交错关系属于原任务，不能用Video-MME替代，不构造纯文本题冒充。
 - [ ] 官方文件访问要求登录、分享账号信息并接受条款，本任务未接受条款、未取得受控原数据，不绕过门槛。CC-BY-NC-SA-4.0及原视频权利边界须保留；已有公共工具包源码不等于原数据就绪。原文件身份、视频/字幕关系、合格NPU执行配置、原生推理/评分及实际CI消费均未完成，来源总勾保持未选。
