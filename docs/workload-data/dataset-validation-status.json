@@ -211,7 +211,13 @@
         "published_implementation": "toolbench/tooleval/fac_eval.py",
         "runtime": "Transformers text-generation pipeline, BF16, device_map=auto",
         "publisher_evaluator_model_candidate": {"id": "stabletoolbench/Evaluator", "revision": "228c3bf20640ce6712c978bd9e574ae183fedef7", "architecture": "LlamaForCausalLM", "weight_bytes": 16060556376, "gated": false, "weights_downloaded": false},
-        "official_judge_weights_and_npu_execution_verified": false
+      "arm64_cli_preflight": {
+        "source_sha256": "f9fbb0ef486a1459696aa900bbafe48c8daed762c566cfc74bcb1ffee5e6d6d9",
+        "command": "fac_eval.py --help",
+        "exit_code": 0,
+        "scope": "Pinned author script imports and argument parsing passed on ARM64; no evaluator weights loaded or scoring executed."
+      },
+      "official_judge_weights_and_npu_execution_verified": false
       },
       "publisher_g1_instruction_acquisition": {
         "revision": "aa4ed9f4737ad98bd706663f01d63623c3427812",

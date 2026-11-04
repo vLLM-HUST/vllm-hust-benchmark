@@ -1,5 +1,10 @@
 # Workload 分类执行清单
 
+当前交付以 [机器清单](dataset-validation-status.json) 的 `delivery_inventory` 为准：113 项应交付，101 项已勾选，12 项待完成；另有 5 项仅分类。
+下方分类表保留阶段性及全量验证记录，不能直接用其全量状态计算固定抽样交付进度。
+
+待完成：ToolBench、NatureBench、MLAgentBench、MLE-bench、WebArena、VisualWebArena、OSWorld、SWE-smith、WorkArena、BixBench、PaperBench、Full-Duplex-Bench。
+
 ## 原40类计划的增量定义（不改变历史快照）
 
 当前程序目录新增下列两类，活跃定义由36增至38；总目标仍为40类，约束规划及语音合成尚待补齐，不能把38类称为40类全部就绪。
@@ -124,7 +129,7 @@ GSM8K历史[分批汇总](validation/gsm8k-incremental-progress-20261022.json)�
 | ---------------- | ----------------------------------------------------- | -------------------- | ------------------------------------------------------- |
 | LONGBENCH        | S：qasper原前三题，公开入口复验F1为22.52%，均stop     | [ ] 未完成           | 仅3/200，模型原生chat模板明确披露；其他子集与全量未验   |
 | LONGBENCH_V2     | 公共入口同三题全输入复验0/3；1条原预算耗尽            | [ ] 未完成           | 原预算终态、Medium/Long范围；不将0分抹掉                |
-| INFINITEBENCH    | 待核                                                  | [ ] 未完成           | 原生子集/协议、服务器执行及适用核验                     |
+| INFINITEBENCH    | 12 组协议各固定原题 0、1、2 已验证                    | [ ] 未全量执行       | [固定抽样回执](validation/infinitebench-fixed-native-delivery-20261104.json) |
 | QUALITY          | 原三篇首题MC似然执行，固定harness acc1/3、acc_norm2/3 | [ ] 未完成           | 仅3/2086、非自由生成/发布方基线；待CI工件和研究消费     |
 | QASPER           | 待核                                                  | [ ] 未完成           | 原生子集/协议、服务器执行及适用核验                     |
 | NARRATIVEQA      | 待核                                                  | [ ] 未完成           | 原生子集/协议、服务器执行及适用核验                     |
@@ -554,7 +559,9 @@ GSM8K历史[分批汇总](validation/gsm8k-incremental-progress-20261022.json)�
 
 ## 新增来源逐项接入
 
-InfiniteBench（未完成）：复用已审计的九组结果。剩余三组分别用
+InfiniteBench（固定抽样已验证）：12 组原生协议均已对固定原题 0、1、2 完成执行和评分。
+复用已审计的九组结果；其余三组已用扩展上下文配置补齐缺失位置，保留已有有效结果。
+不同部署配置不合并为同一模型成绩。复现时分别用
 `scripts/run_infinitebench_original.py --task <任务> --start 0 --count 3`
 执行，指定已验证的服务、模板、上下文上限及各自的新私有输出目录。 `longbook_sum_eng`、`longbook_choice_eng`、`longbook_qa_chn`
 的现有容量预检门槛 分别为 403,228、268,047、339,371 tokens，均含原输出预算。 更换模型时重新核对实际 tokenizer，不以周期队列的 `number_string`
@@ -584,6 +591,10 @@ StableToolBench（候选，未交付）：复用已核验的原工具定义和�
 评分使用固定作者提交里的 `toolbench/tooleval/fac_eval.py`（原 shell 包装器引用的文件缺失），传入
 `--model_path`、`--evaluation_path`、`--output_path` 和固定 `--ids`。
 作者评估模型的 BF16 Transformers NPU 路径尚未验证，不能以缓存控制代替原评分。
+
+ToolBench（未完成）：`scripts/prepare_jsonschemabench_author_source.py --source toolbench-examples --author-root <新目录> --action plan` 可查看固定作者样例的获取计划。
+原仓公开样例已核验 G1/G2/G3 共 10 条，但没有完整原归档、可用原工具后端或 ToolEval 实跑结果。
+第三方归档仅有部分文件与作者字节一致，未核实的部分不作为原数据；StableToolBench 的模拟响应与 API-Bank 的本地工具也不计作 ToolBench 原后端验证。
 
 API-Bank（同类候选，14 个固定位置已生成并完成兼容评分）：从
 [作者仓库](https://github.com/AlibabaResearch/DAMO-ConvAI) 检出机器清单所列提交，使用其中的 `api-bank/` 作为 `--author-root`。
