@@ -2,6 +2,86 @@
   "schema_version": "workload-validation-checklist/v1",
   "updated_at": "2026-11-04",
   "replacement_candidate_audits": {
+    "WEBSHOP": {
+      "publisher": "https://github.com/princeton-nlp/WebShop",
+      "source_revision": "64fa2a5c15c7daa698b9ac93f5bb5437b634c9bd",
+      "reviewed_against": "WEBARENA",
+      "preserved": "Stateful shopping interactions: search, navigate, select product options, purchase, and native reward.",
+      "not_preserved": "Authenticated administrative workflows and cross-site state.",
+      "preflight": "Publisher setup provides a small original corpus option and builds a search index. Original data acquisition and ARM64 Python/Java runtime remain unverified.",
+      "publisher_arm_setup": "https://github.com/princeton-nlp/WebShop/blob/64fa2a5c15c7daa698b9ac93f5bb5437b634c9bd/setup_arm.sh",
+      "arm_setup_data_boundary": "The author ARM setup still requires the original product, attribute, and human instruction files before search indexing.",
+      "small_corpus_mirror_review": {
+        "official_drive_probe": "All three bounded server requests timed out before HTTP.",
+        "pinned_mirrors": ["HongbangYuan/webshop@0129d4a81dbdb827e76afd20a1e2c38b61098613", "sparklabutah/timewarp-env-data@bfed490a8b4b5dae94b126be6105b84445dcbc4b"],
+        "matching_git_blobs": {
+          "items_human_ins.json": "b2ab7479b9798e0b62ea394e065f3d506875f090",
+          "items_ins_v2_1000.json": "22837ad99f3173712fc9cb1cce7de6b75fe90595",
+          "items_shuffle_1000.json": "08dfda9a1c896e0f69d50e3437dd3fe94419b7d7"
+        },
+        "publisher_origin_independently_verified": false,
+        "server_acquisition": {
+          "stage": "webshop-author.1Qdqdp/corpus.Fy0M5T",
+          "transport": "hf-mirror.com fixed-revision resolver; direct Hugging Face failed",
+          "files_matching_both_mirror_git_blobs": 3,
+          "search_index_built": true,
+          "indexed_documents": 1000,
+          "unindexable_empty_skipped_or_error_documents": 0,
+          "index_profile": "Author converter and run_indexing.sh resources_1k/indexes_1k command; ARM64 CPU."
+        },
+        "scope": "Two public mirrors list identical bytes for all three files. This does not independently establish equality to the publisher Drive objects."
+      },
+      "arm64_search_runtime_probe": {
+        "java": "openEuler BiSheng OpenJDK 17.0.18+8",
+        "pyserini": "0.17.0",
+        "pyjnius": "1.7.0",
+        "local_openjdk_and_tzdata_rpm_signatures_verified": true,
+        "fresh_process_offline_lucene_import_exit_code": 0,
+        "system_java_modified": false,
+        "scope": "Private JAVA_HOME with relocated security and timezone configuration. Import Pyserini before starting the JVM through Jnius. No original corpus index or task execution."
+      },
+      "native_text_environment_control": {
+        "original_human_goals_loaded": 13,
+        "reset_session": 0,
+        "search_returned_observation": true,
+        "search_reward": 0.0,
+        "search_terminal": false,
+        "scripted_purchase_control": {
+          "session": 0,
+          "public_adapter": "scripts/run_webshop_original.py",
+          "public_adapter_scripted_control_verified": true,
+          "public_adapter_steps": 3,
+          "actions": ["search", "click first returned product", "buy now"],
+          "original_reward": 0.0,
+          "terminated": true,
+          "model_calls": 0
+        },
+        "model_calls": 0,
+        "scope": "Author WebAgentTextEnv on mirrored 1k corpus, not browser or Agent execution."
+      },
+      "retained_server_environment_probe": {
+        "source_snapshot_present": true,
+        "source_snapshot_git_revision_verified": false,
+        "python": "3.11.15",
+        "package_specs_present": ["flask", "gym", "pyserini", "jnius"],
+        "java_on_default_path_or_in_webshop_environment": false,
+        "original_data_or_search_index_found_in_snapshot": false,
+        "scope": "Read-only inventory; module discovery does not establish imports or native environment execution."
+      },
+      "fixed_source_acquisition_probe": {
+        "retained_author_archive": "webshop-author.1Qdqdp/author-full.zip",
+        "retained_author_archive_bytes": 32318146,
+        "retained_author_archive_sha256": "8c906e599a64804a799596408b7de68a5ff437c5b7fde26b431734cc7cf0956e",
+        "archive_integrity_passed": true,
+        "core_files_matching_pinned_author_git_blobs": 4,
+        "author_archive_exceeded_bounded_download_bytes": 30000000,
+        "official_small_corpus_http_response_received": false,
+        "retained_snapshot_missing_core_files": ["web_agent_site/app.py", "web_agent_site/engine/engine.py", "web_agent_site/engine/goal.py", "web_agent_site/envs/web_agent_text_env.py"],
+        "scope": "The retained source directories are incomplete; the dependency environment remains separately reusable. No corpus or model run."
+      },
+      "accepted_replacement": false,
+      "source_checkbox_eligible": false
+    },
     "GUI_VS_CLI": {
       "publisher": "https://github.com/rebeccaz4/gui-vs-cli",
       "reviewed_against": "OSWORLD",

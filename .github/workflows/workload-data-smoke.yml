@@ -254,6 +254,8 @@ on:
       - 'tests/test_workload_delivery_progress.py'
       - 'scripts/run_miniwob_agentlab.py'
       - 'tests/test_miniwob_agentlab_runner.py'
+      - 'scripts/run_webshop_original.py'
+      - 'tests/test_webshop_original_runner.py'
       - 'tests/test_workload_wheel_audit.py'
       - 'tests/test_humaneval_official_samples.py'
       - 'scripts/run_longbench_v1_qasper_original.py'
@@ -662,7 +664,7 @@ jobs:
         run: |
           python -c "import json, os, pathlib, sys; p=pathlib.Path(os.environ['GITHUB_WORKSPACE']); sys.path.insert(0,str(p/'scripts')); from audit_toolace_original_corpus import installed_wheel_audit; result=installed_wheel_audit(next((p/'workload-data-dist').glob('*.whl'))); (p/'workload-data-dist/INSTALLED_PAYLOAD_AUDIT.json').write_text(json.dumps(result,indent=2),encoding='utf-8'); print(result['status'])"
       - name: Single-ledger delivery progress invariants
-        run: python -m pytest -q tests/test_workload_delivery_progress.py tests/test_workload_private_artifacts.py tests/test_workload_delivery_classification_cli.py tests/test_miniwob_agentlab_runner.py
+        run: python -m pytest -q tests/test_workload_delivery_progress.py tests/test_workload_private_artifacts.py tests/test_workload_delivery_classification_cli.py tests/test_miniwob_agentlab_runner.py tests/test_webshop_original_runner.py
       - name: Publish validated software wheel, never datasets
         uses: actions/upload-artifact@v4
         with:
