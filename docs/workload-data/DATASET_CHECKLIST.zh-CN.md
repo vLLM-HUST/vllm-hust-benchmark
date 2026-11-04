@@ -487,6 +487,17 @@ unreachable，失败记录保留，现复用原分块获取器经至多8MiB原�
 
 ### ToolBench：原软件准备完成，原生任务未完成
 
+完整原任务包不可用时，可先复核发布方随源码提供的 G1/G2/G3 共 10 条原示例：
+
+```bash
+python scripts/prepare_jsonschemabench_author_source.py --source toolbench-examples \
+  --author-root "$toolbench_examples_root" --action prepare
+python scripts/prepare_jsonschemabench_author_source.py --source toolbench-examples \
+  --author-root "$toolbench_examples_root" --action verify
+```
+
+两条命令已在 Linux 验证，仅取得并校验固定版本的三个查询文件（71,370 字节）。示例不替代完整任务包、远端工具服务或 ToolEval。
+
 [StableToolBench](https://github.com/THUNLP-MT/StableToolBench#the-virtual-api-server)
 可单独评估为工具交互候选：发布方提供缓存／模拟 API 和 MirrorAPI 两条路线。它使用筛选后的查询和不同的评分协议；即使原生跑通，也只能记录为 StableToolBench，不能用于确认原
 ToolBench 的远端 API 路径。MirrorAPI 路线还需核验官方工具集、模拟模型和评分环境在现有资源上可用。
