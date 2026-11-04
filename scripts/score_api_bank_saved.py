@@ -58,7 +58,7 @@ def author_messages(prompt, descriptions, history):
     return messages
 
 
-def generate(endpoint, model, requests, output, *, resume_from=None):
+def generate(endpoint, model, requests, output, *, resume_from=None, timeout=600):
     url = urlsplit(endpoint)
     if (
         url.scheme != "http"
@@ -92,7 +92,7 @@ def generate(endpoint, model, requests, output, *, resume_from=None):
         stream.flush()
         for row in requests[len(prior) :]:
             body = {"model": model, "messages": row["messages"]}
-            client = HTTPConnection(url.hostname, url.port, timeout=600)
+            client = HTTPConnection(url.hostname, url.port, timeout=timeout)
             try:
                 client.request(
                     "POST",
@@ -135,7 +135,10 @@ def main():
     parser.add_argument("--endpoint")
     parser.add_argument("--model")
     parser.add_argument("--resume-from", type=Path)
+    parser.add_argument("--socket-timeout", type=int, default=600)
     args = parser.parse_args()
+    if args.socket_timeout <= 0:
+        parser.error("--socket-timeout must be positive")
     if args.resume_from is not None and args.generate is None:
         parser.error("--resume-from requires --generate")
     if args.generate is not None and not (args.endpoint and args.model):
@@ -209,7 +212,12 @@ def main():
             )
         if destination:
             generate(
-                args.endpoint, args.model, requests, destination, resume_from=resume
+                args.endpoint,
+                args.model,
+                requests,
+                destination,
+                resume_from=resume,
+                timeout=args.socket_timeout,
             )
         else:
             for row in requests:
