@@ -3,6 +3,18 @@
 from pathlib import Path
 import runpy
 
+import pytest
+
+
+def test_author_episode_scoring_distinguishes_expiry_from_partial_probe():
+    score = runpy.run_path(
+        str(Path(__file__).resolve().parents[1] / "scripts/run_webshop_original.py")
+    )["author_episode_score"]
+    assert score({"terminated": True, "reward": 0.4, "steps": [{}]}) == 0.4
+    assert score({"terminated": False, "steps": [{}] * 100}) == 0.0
+    with pytest.raises(ValueError, match="incomplete author episode"):
+        score({"terminated": False, "steps": [{}] * 15})
+
 
 def test_fixed_session_preserves_author_reward():
     run = runpy.run_path(

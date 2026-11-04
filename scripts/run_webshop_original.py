@@ -37,6 +37,14 @@ def run_session(env, session, choose, max_steps):
     return {"session": session, "steps": steps, "terminated": False, "reward": None}
 
 
+def author_episode_score(result):
+    if result["terminated"]:
+        return result["reward"]
+    if len(result["steps"]) != 100:
+        raise ValueError("cannot score an incomplete author episode")
+    return 0.0
+
+
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--author-root", type=Path, required=True)
@@ -114,9 +122,7 @@ def main():
             result = run_session(env, session, choose, max_steps)
             if args.author_episode_budget:
                 # Publisher baseline returns zero if the 100-action episode expires.
-                result["episode_score"] = (
-                    result["reward"] if result["terminated"] else 0.0
-                )
+                result["episode_score"] = author_episode_score(result)
             output.write(json.dumps(result) + "\n")
             output.flush()
 
