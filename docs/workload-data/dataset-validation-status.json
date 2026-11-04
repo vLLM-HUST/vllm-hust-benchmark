@@ -5056,6 +5056,18 @@
         "probe": "unshare -Urnm true",
         "exit_code": 1,
         "error": "cannot change root filesystem propagation: Permission denied",
+        "alternate_probe": "unshare --propagation unchanged -Urnmpf",
+        "alternate_probe_exit_code": 0,
+        "private_tmpfs_mount_verified": true,
+        "static_chroot_fixture_host_passwd_visible": false,
+        "outer_network_interfaces": ["lo", "eth0"],
+        "inner_network_interfaces": ["lo"],
+        "trusted_fixture_effective_permitted_inheritable_capabilities_zero": true,
+        "trusted_fixture_no_new_privileges": true,
+        "trusted_fixture_outer_device_path_visible": false,
+        "pivot_root_and_mount_proc_probes": "Permission denied",
+        "manual_proc_mount_in_private_tmpfs": "Permission denied",
+        "dedicated_container_and_npu_device_isolation_verified": false,
         "scope": "Current NPU container only; no training or generated code executed. Reuse staged IMDb assets on a qualified isolated NPU executor."
       },
       "available_execution_tools": {
