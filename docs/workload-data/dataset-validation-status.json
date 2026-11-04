@@ -253,6 +253,20 @@
           "archive_hash_reverified_before_extraction": true,
           "entrypoint": "toolbench/inference/qa_pipeline_multithread.py",
           "arm64_base_python_help_first_failure": "ModuleNotFoundError: termcolor",
+          "author_fixed_queue_preflight": {
+            "server_stage": "stabletoolbench-queue.t5Xy7r",
+            "fixed_original_ids": [588, 608, 1073],
+            "queued_ids": [588],
+            "passed": false,
+            "recovery_with_publisher_cache_definitions": {
+              "added_original_members": ["tools/Data/kick_com_api_kick_api.json", "tools/Data/keyword_analysis.json"],
+              "queued_ids": [588, 608, 1073],
+              "original_rows_unchanged": true,
+              "model_calls": 0,
+              "scope": "Copied the two missing definitions byte-for-byte from the verified author cache ZIP into a separate tool tree. The original author queue accepted all three fixed rows in order; no Agent execution or scoring."
+            },
+            "scope": "The author's unmodified task-list construction ran against the SHA-verified ToolEnv2404 archive and silently filtered two of the fixed original rows. Do not run or count a one-task subset. Determine the rejected tool definitions and reconcile with the author-published tool asset revisions; no model or tool requests were sent."
+          },
           "arm64_client_overlay": {
             "stage": "stabletoolbench-full-source.CEnQEg/client-deps.SZYCms",
             "installed": ["termcolor==2.4.0", "tenacity==8.5.0"],
