@@ -1,0 +1,706 @@
+{
+  "schema_version": "a3-int8-kv-observation/v1",
+  "plugin_id": "quantized-kv-cache-migration",
+  "plugin_repository": "vllm-ascend-quantized-kv-cache-hust",
+  "publication_status": "local-unpublished",
+  "formal_acceptance": false,
+  "latency_acceptance": "failed",
+  "quality_evaluation": "not-evaluated",
+  "scope": "A3-shaped synthetic engineering comparison, not formal A3 dataset acceptance",
+  "configuration": {
+    "model": "Qwen3.5-35B-A3B",
+    "model_path": "/data/shared_models/Qwen3.5-35B-A3B",
+    "hardware": "2 x Ascend 910B2",
+    "hardware_evidence": "npu-smi observed during execution in this session; no contemporaneous inventory file in original run directories",
+    "tensor_parallel_size": 2,
+    "weight_dtype": "bfloat16",
+    "baseline_kv_dtype": "auto (BF16)",
+    "candidate_kv_dtype": "int8",
+    "plugins": [
+      "ascend",
+      "vllm-ascend-quantized-kv-cache"
+    ],
+    "input_tokens": 30720,
+    "output_tokens": 2048,
+    "window_seconds": 1800,
+    "prompt": "synthetic repeated prose, identical across requests",
+    "ignore_eos": true,
+    "temperature": 0,
+    "seed": 17,
+    "prefix_caching": false,
+    "max_model_len": 32768,
+    "max_num_batched_tokens": 2048,
+    "gpu_memory_utilization": 0.8,
+    "chunked_prefill": true,
+    "compilation_mode": 3,
+    "cudagraph_mode": "FULL_DECODE_ONLY",
+    "max_num_seqs": "equals tested concurrency",
+    "capture_sizes": "1,2,4,8,16,32 plus concurrency for boundary/confirmation; see archived runners for initial sweep",
+    "measurement": "client receipt timestamp of server continuous-usage deltas, includes unfinished requests; initial sweep only counts completed requests",
+    "latency_limits": {
+      "ttft_s": {
+        "mean": 30,
+        "p95": 45,
+        "p99": 60
+      },
+      "tpot_ms": {
+        "mean": 40,
+        "p95": 60,
+        "p99": 80
+      }
+    },
+    "provenance_limits": [
+      "Not a fixed public v0.18 baseline comparison: same HUST stack with BF16 versus INT8 KV.",
+      "Exact experiment-time plugin/Ascend commits, dirty diffs and model weight hashes were not frozen; do not substitute current checkout identity.",
+      "Legacy scripts captured at archive time; later campaigns contain their launch-time script snapshots."
+    ]
+  },
+  "runs": [
+    {
+      "campaign": "initial",
+      "concurrency": 16,
+      "repeat": 1,
+      "arm": "bf16",
+      "source_summary": "reports/a3-int8-kv-20261104/summaries/initial/concurrency-16/bf16/summary.json",
+      "observed_engine_versions": [
+        "v0.31.1.post1.dev162+g4f61604be.dirty"
+      ],
+      "actual_window_tps": null,
+      "completed_window_tps": 200.2488888888889,
+      "requests": 192,
+      "failed": 0,
+      "mean_ttft_s": 7.845717126884362,
+      "mean_tpot_ms": 73.19507734597413,
+      "mean_e2e_s": 157.67695943977742,
+      "latency_pass": false
+    },
+    {
+      "campaign": "initial",
+      "concurrency": 16,
+      "repeat": 1,
+      "arm": "int8",
+      "source_summary": "reports/a3-int8-kv-20261104/summaries/initial/concurrency-16/int8/summary.json",
+      "observed_engine_versions": [
+        "v0.31.1.post1.dev162+g4f61604be.dirty"
+      ],
+      "actual_window_tps": null,
+      "completed_window_tps": 177.49333333333334,
+      "requests": 172,
+      "failed": 0,
+      "mean_ttft_s": 10.17730577775483,
+      "mean_tpot_ms": 80.2561933399024,
+      "mean_e2e_s": 174.46261614686972,
+      "latency_pass": false
+    },
+    {
+      "campaign": "initial",
+      "concurrency": 32,
+      "repeat": 1,
+      "arm": "bf16",
+      "source_summary": "reports/a3-int8-kv-20261104/summaries/initial/concurrency-32/bf16/summary.json",
+      "observed_engine_versions": [
+        "v0.31.1.post1.dev162+g4f61604be.dirty"
+      ],
+      "actual_window_tps": null,
+      "completed_window_tps": 254.86222222222221,
+      "requests": 256,
+      "failed": 0,
+      "mean_ttft_s": 13.281210875980832,
+      "mean_tpot_ms": 108.71164061891797,
+      "mean_e2e_s": 235.81516459786872,
+      "latency_pass": false
+    },
+    {
+      "campaign": "initial",
+      "concurrency": 32,
+      "repeat": 1,
+      "arm": "int8",
+      "source_summary": "reports/a3-int8-kv-20261104/summaries/initial/concurrency-32/int8/summary.json",
+      "observed_engine_versions": [
+        "v0.31.1.post1.dev162+g4f61604be.dirty"
+      ],
+      "actual_window_tps": null,
+      "completed_window_tps": 218.45333333333335,
+      "requests": 224,
+      "failed": 0,
+      "mean_ttft_s": 18.411423646048725,
+      "mean_tpot_ms": 123.74571756058177,
+      "mean_e2e_s": 271.7203966049315,
+      "latency_pass": false
+    },
+    {
+      "campaign": "initial",
+      "concurrency": 64,
+      "repeat": 1,
+      "arm": "bf16",
+      "source_summary": "reports/a3-int8-kv-20261104/summaries/initial/concurrency-64/bf16/summary.json",
+      "observed_engine_versions": [
+        "v0.31.1.post1.dev162+g4f61604be.dirty"
+      ],
+      "actual_window_tps": null,
+      "completed_window_tps": 227.55555555555554,
+      "requests": 264,
+      "failed": 0,
+      "mean_ttft_s": 196.85588915710457,
+      "mean_tpot_ms": 143.49058666166027,
+      "mean_e2e_s": 490.5829694708139,
+      "latency_pass": false
+    },
+    {
+      "campaign": "initial",
+      "concurrency": 64,
+      "repeat": 1,
+      "arm": "int8",
+      "source_summary": "reports/a3-int8-kv-20261104/summaries/initial/concurrency-64/int8/summary.json",
+      "observed_engine_versions": [
+        "v0.31.1.post1.dev162+g4f61604be.dirty"
+      ],
+      "actual_window_tps": null,
+      "completed_window_tps": 218.45333333333335,
+      "requests": 256,
+      "failed": 0,
+      "mean_ttft_s": 52.29515391558016,
+      "mean_tpot_ms": 203.1787083127467,
+      "mean_e2e_s": 468.2029304003827,
+      "latency_pass": false
+    },
+    {
+      "campaign": "boundary",
+      "concurrency": 40,
+      "repeat": 1,
+      "arm": "bf16",
+      "source_summary": "reports/a3-int8-kv-20261104/summaries/boundary/concurrency-40/repeat-1/bf16/summary.json",
+      "observed_engine_versions": [
+        "v0.31.1.post1.dev162+g4f61604be.dirty"
+      ],
+      "actual_window_tps": 272.2077777777778,
+      "completed_window_tps": 251.4488888888889,
+      "requests": 261,
+      "failed": 0,
+      "mean_ttft_s": 21.75071055307749,
+      "mean_tpot_ms": 129.43555318499511,
+      "mean_e2e_s": 286.70624722292916,
+      "latency_pass": false
+    },
+    {
+      "campaign": "boundary",
+      "concurrency": 40,
+      "repeat": 1,
+      "arm": "int8",
+      "source_summary": "reports/a3-int8-kv-20261104/summaries/boundary/concurrency-40/repeat-1/int8/summary.json",
+      "observed_engine_versions": [
+        "v0.31.1.post1.dev162+g4f61604be.dirty"
+      ],
+      "actual_window_tps": 232.8538888888889,
+      "completed_window_tps": 224.14222222222222,
+      "requests": 237,
+      "failed": 0,
+      "mean_ttft_s": 24.670506274160626,
+      "mean_tpot_ms": 145.3692310386824,
+      "mean_e2e_s": 322.2422624857279,
+      "latency_pass": false
+    },
+    {
+      "campaign": "boundary",
+      "concurrency": 40,
+      "repeat": 2,
+      "arm": "bf16",
+      "source_summary": "reports/a3-int8-kv-20261104/summaries/boundary/concurrency-40/repeat-2/bf16/summary.json",
+      "observed_engine_versions": [
+        "v0.31.1.post1.dev162+g4f61604be.dirty"
+      ],
+      "actual_window_tps": 269.86833333333334,
+      "completed_window_tps": 242.34666666666666,
+      "requests": 253,
+      "failed": 0,
+      "mean_ttft_s": 22.919563621831063,
+      "mean_tpot_ms": 131.48560238070655,
+      "mean_e2e_s": 292.07145412568656,
+      "latency_pass": false
+    },
+    {
+      "campaign": "boundary",
+      "concurrency": 40,
+      "repeat": 2,
+      "arm": "int8",
+      "source_summary": "reports/a3-int8-kv-20261104/summaries/boundary/concurrency-40/repeat-2/int8/summary.json",
+      "observed_engine_versions": [
+        "v0.31.1.post1.dev162+g4f61604be.dirty"
+      ],
+      "actual_window_tps": 233.3788888888889,
+      "completed_window_tps": 225.28,
+      "requests": 238,
+      "failed": 0,
+      "mean_ttft_s": 25.15258536732779,
+      "mean_tpot_ms": 144.3985175237067,
+      "mean_e2e_s": 320.7374540229559,
+      "latency_pass": false
+    },
+    {
+      "campaign": "boundary",
+      "concurrency": 48,
+      "repeat": 1,
+      "arm": "bf16",
+      "source_summary": "reports/a3-int8-kv-20261104/summaries/boundary/concurrency-48/repeat-1/bf16/summary.json",
+      "observed_engine_versions": [
+        "v0.31.1.post1.dev162+g4f61604be.dirty"
+      ],
+      "actual_window_tps": 262.42277777777775,
+      "completed_window_tps": 228.69333333333333,
+      "requests": 249,
+      "failed": 0,
+      "mean_ttft_s": 79.56514624099296,
+      "mean_tpot_ms": 138.9099150166526,
+      "mean_e2e_s": 363.91443828019464,
+      "latency_pass": false
+    },
+    {
+      "campaign": "boundary",
+      "concurrency": 48,
+      "repeat": 1,
+      "arm": "int8",
+      "source_summary": "reports/a3-int8-kv-20261104/summaries/boundary/concurrency-48/repeat-1/int8/summary.json",
+      "observed_engine_versions": [
+        "v0.31.1.post1.dev162+g4f61604be.dirty"
+      ],
+      "actual_window_tps": 247.9411111111111,
+      "completed_window_tps": 218.45333333333335,
+      "requests": 240,
+      "failed": 0,
+      "mean_ttft_s": 34.51015716061423,
+      "mean_tpot_ms": 164.89342083627992,
+      "mean_e2e_s": 372.0476762485089,
+      "latency_pass": false
+    },
+    {
+      "campaign": "boundary",
+      "concurrency": 48,
+      "repeat": 2,
+      "arm": "bf16",
+      "source_summary": "reports/a3-int8-kv-20261104/summaries/boundary/concurrency-48/repeat-2/bf16/summary.json",
+      "observed_engine_versions": [
+        "v0.31.1.post1.dev162+g4f61604be.dirty"
+      ],
+      "actual_window_tps": 261.7994444444444,
+      "completed_window_tps": 228.69333333333333,
+      "requests": 249,
+      "failed": 0,
+      "mean_ttft_s": 79.84197476776653,
+      "mean_tpot_ms": 139.5411489408174,
+      "mean_e2e_s": 365.483512197163,
+      "latency_pass": false
+    },
+    {
+      "campaign": "boundary",
+      "concurrency": 48,
+      "repeat": 2,
+      "arm": "int8",
+      "source_summary": "reports/a3-int8-kv-20261104/summaries/boundary/concurrency-48/repeat-2/int8/summary.json",
+      "observed_engine_versions": [
+        "v0.31.1.post1.dev162+g4f61604be.dirty"
+      ],
+      "actual_window_tps": 265.3888888888889,
+      "completed_window_tps": 224.14222222222222,
+      "requests": 245,
+      "failed": 0,
+      "mean_ttft_s": 31.9899358761972,
+      "mean_tpot_ms": 159.4690154821087,
+      "mean_e2e_s": 358.42373067909773,
+      "latency_pass": false
+    },
+    {
+      "campaign": "confirmation",
+      "concurrency": 56,
+      "repeat": 1,
+      "arm": "bf16",
+      "source_summary": "reports/a3-int8-kv-20261104/summaries/confirmation/concurrency-56/repeat-1/bf16/summary.json",
+      "observed_engine_versions": [
+        "v0.31.1.post1.dev162+g4f61604be.dirty"
+      ],
+      "actual_window_tps": 258.9816666666667,
+      "completed_window_tps": 227.55555555555554,
+      "requests": 256,
+      "failed": 0,
+      "mean_ttft_s": 137.14363472067453,
+      "mean_tpot_ms": 139.58126706170762,
+      "mean_e2e_s": 422.86727378635806,
+      "latency_pass": false
+    },
+    {
+      "campaign": "confirmation",
+      "concurrency": 56,
+      "repeat": 1,
+      "arm": "int8",
+      "source_summary": "reports/a3-int8-kv-20261104/summaries/confirmation/concurrency-56/repeat-1/int8/summary.json",
+      "observed_engine_versions": [
+        "v0.31.1.post1.dev162+g4f61604be.dirty"
+      ],
+      "actual_window_tps": 254.32722222222222,
+      "completed_window_tps": 221.86666666666667,
+      "requests": 251,
+      "failed": 0,
+      "mean_ttft_s": 41.29438483120829,
+      "mean_tpot_ms": 183.00601741828922,
+      "mean_e2e_s": 415.90839449982104,
+      "latency_pass": false
+    },
+    {
+      "campaign": "confirmation",
+      "concurrency": 56,
+      "repeat": 2,
+      "arm": "bf16",
+      "source_summary": "reports/a3-int8-kv-20261104/summaries/confirmation/concurrency-56/repeat-2/bf16/summary.json",
+      "observed_engine_versions": [
+        "v0.31.1.post1.dev162+g4f61604be.dirty"
+      ],
+      "actual_window_tps": 261.7783333333333,
+      "completed_window_tps": 228.69333333333333,
+      "requests": 257,
+      "failed": 0,
+      "mean_ttft_s": 136.32143422441035,
+      "mean_tpot_ms": 138.97264360245018,
+      "mean_e2e_s": 420.7994454056061,
+      "latency_pass": false
+    },
+    {
+      "campaign": "confirmation",
+      "concurrency": 56,
+      "repeat": 2,
+      "arm": "int8",
+      "source_summary": "reports/a3-int8-kv-20261104/summaries/confirmation/concurrency-56/repeat-2/int8/summary.json",
+      "observed_engine_versions": [
+        "v0.31.1.post1.dev162+g4f61604be.dirty"
+      ],
+      "actual_window_tps": 254.83833333333334,
+      "completed_window_tps": 224.14222222222222,
+      "requests": 253,
+      "failed": 0,
+      "mean_ttft_s": 40.56836799277074,
+      "mean_tpot_ms": 182.62943698413036,
+      "mean_e2e_s": 414.4115847824601,
+      "latency_pass": false
+    },
+    {
+      "campaign": "confirmation",
+      "concurrency": 60,
+      "repeat": 1,
+      "arm": "bf16",
+      "source_summary": "reports/a3-int8-kv-20261104/summaries/confirmation/concurrency-60/repeat-1/bf16/summary.json",
+      "observed_engine_versions": [
+        "v0.31.1.post1.dev162+g4f61604be.dirty"
+      ],
+      "actual_window_tps": 255.75944444444445,
+      "completed_window_tps": 227.55555555555554,
+      "requests": 260,
+      "failed": 0,
+      "mean_ttft_s": 165.25830098366043,
+      "mean_tpot_ms": 140.70056190675461,
+      "mean_e2e_s": 453.27310374686675,
+      "latency_pass": false
+    },
+    {
+      "campaign": "confirmation",
+      "concurrency": 60,
+      "repeat": 1,
+      "arm": "int8",
+      "source_summary": "reports/a3-int8-kv-20261104/summaries/confirmation/concurrency-60/repeat-1/int8/summary.json",
+      "observed_engine_versions": [
+        "v0.31.1.post1.dev162+g4f61604be.dirty"
+      ],
+      "actual_window_tps": 265.27166666666665,
+      "completed_window_tps": 221.86666666666667,
+      "requests": 255,
+      "failed": 0,
+      "mean_ttft_s": 45.17105627551712,
+      "mean_tpot_ms": 190.32253727754662,
+      "mean_e2e_s": 434.7621495066101,
+      "latency_pass": false
+    },
+    {
+      "campaign": "confirmation",
+      "concurrency": 60,
+      "repeat": 2,
+      "arm": "bf16",
+      "source_summary": "reports/a3-int8-kv-20261104/summaries/confirmation/concurrency-60/repeat-2/bf16/summary.json",
+      "observed_engine_versions": [
+        "v0.31.1.post1.dev162+g4f61604be.dirty"
+      ],
+      "actual_window_tps": 261.4038888888889,
+      "completed_window_tps": 227.55555555555554,
+      "requests": 260,
+      "failed": 0,
+      "mean_ttft_s": 163.77427233757558,
+      "mean_tpot_ms": 139.17870176891049,
+      "mean_e2e_s": 448.67382344765804,
+      "latency_pass": false
+    },
+    {
+      "campaign": "confirmation",
+      "concurrency": 60,
+      "repeat": 2,
+      "arm": "int8",
+      "source_summary": "reports/a3-int8-kv-20261104/summaries/confirmation/concurrency-60/repeat-2/int8/summary.json",
+      "observed_engine_versions": [
+        "v0.31.1.post1.dev162+g4f61604be.dirty"
+      ],
+      "actual_window_tps": 262.3588888888889,
+      "completed_window_tps": 215.04,
+      "requests": 249,
+      "failed": 0,
+      "mean_ttft_s": 47.51159366508609,
+      "mean_tpot_ms": 193.49715550660605,
+      "mean_e2e_s": 443.60106722810434,
+      "latency_pass": false
+    },
+    {
+      "campaign": "confirmation",
+      "concurrency": 64,
+      "repeat": 1,
+      "arm": "bf16",
+      "source_summary": "reports/a3-int8-kv-20261104/summaries/confirmation/concurrency-64/repeat-1/bf16/summary.json",
+      "observed_engine_versions": [
+        "v0.31.1.post1.dev162+g4f61604be.dirty"
+      ],
+      "actual_window_tps": 249.315,
+      "completed_window_tps": 227.55555555555554,
+      "requests": 264,
+      "failed": 0,
+      "mean_ttft_s": 194.76087717822872,
+      "mean_tpot_ms": 141.79750959552422,
+      "mean_e2e_s": 485.0212254051938,
+      "latency_pass": false
+    },
+    {
+      "campaign": "confirmation",
+      "concurrency": 64,
+      "repeat": 1,
+      "arm": "int8",
+      "source_summary": "reports/a3-int8-kv-20261104/summaries/confirmation/concurrency-64/repeat-1/int8/summary.json",
+      "observed_engine_versions": [
+        "v0.31.1.post1.dev162+g4f61604be.dirty"
+      ],
+      "actual_window_tps": 276.09944444444443,
+      "completed_window_tps": 224.14222222222222,
+      "requests": 261,
+      "failed": 0,
+      "mean_ttft_s": 49.28630621633867,
+      "mean_tpot_ms": 196.76094616795646,
+      "mean_e2e_s": 452.0567746317742,
+      "latency_pass": false
+    },
+    {
+      "campaign": "confirmation",
+      "concurrency": 64,
+      "repeat": 2,
+      "arm": "bf16",
+      "source_summary": "reports/a3-int8-kv-20261104/summaries/confirmation/concurrency-64/repeat-2/bf16/summary.json",
+      "observed_engine_versions": [
+        "v0.31.1.post1.dev162+g4f61604be.dirty"
+      ],
+      "actual_window_tps": 245.6261111111111,
+      "completed_window_tps": 227.55555555555554,
+      "requests": 264,
+      "failed": 0,
+      "mean_ttft_s": 195.86198217451755,
+      "mean_tpot_ms": 142.59140411650407,
+      "mean_e2e_s": 487.74737800878586,
+      "latency_pass": false
+    },
+    {
+      "campaign": "confirmation",
+      "concurrency": 64,
+      "repeat": 2,
+      "arm": "int8",
+      "source_summary": "reports/a3-int8-kv-20261104/summaries/confirmation/concurrency-64/repeat-2/int8/summary.json",
+      "observed_engine_versions": [
+        "v0.31.1.post1.dev162+g4f61604be.dirty"
+      ],
+      "actual_window_tps": 274.0372222222222,
+      "completed_window_tps": 219.5911111111111,
+      "requests": 257,
+      "failed": 0,
+      "mean_ttft_s": 50.054217000886915,
+      "mean_tpot_ms": 199.25496734001104,
+      "mean_e2e_s": 457.92986561595154,
+      "latency_pass": false
+    },
+    {
+      "campaign": "confirmation",
+      "concurrency": 64,
+      "repeat": 3,
+      "arm": "bf16",
+      "source_summary": "reports/a3-int8-kv-20261104/summaries/confirmation/concurrency-64/repeat-3/bf16/summary.json",
+      "observed_engine_versions": [
+        "v0.31.1.post1.dev162+g4f61604be.dirty"
+      ],
+      "actual_window_tps": 246.4038888888889,
+      "completed_window_tps": 227.55555555555554,
+      "requests": 264,
+      "failed": 0,
+      "mean_ttft_s": 195.8018837197204,
+      "mean_tpot_ms": 142.39304925562138,
+      "mean_e2e_s": 487.2813528896377,
+      "latency_pass": false
+    },
+    {
+      "campaign": "confirmation",
+      "concurrency": 64,
+      "repeat": 3,
+      "arm": "int8",
+      "source_summary": "reports/a3-int8-kv-20261104/summaries/confirmation/concurrency-64/repeat-3/int8/summary.json",
+      "observed_engine_versions": [
+        "v0.31.1.post1.dev162+g4f61604be.dirty"
+      ],
+      "actual_window_tps": 269.1405555555556,
+      "completed_window_tps": 218.45333333333335,
+      "requests": 256,
+      "failed": 0,
+      "mean_ttft_s": 51.161677391752164,
+      "mean_tpot_ms": 200.14113763305457,
+      "mean_e2e_s": 460.85131590837955,
+      "latency_pass": false
+    },
+    {
+      "campaign": "confirmation",
+      "concurrency": 64,
+      "repeat": 4,
+      "arm": "bf16",
+      "source_summary": "reports/a3-int8-kv-20261104/summaries/confirmation/concurrency-64/repeat-4/bf16/summary.json",
+      "observed_engine_versions": [
+        "v0.31.1.post1.dev162+g4f61604be.dirty"
+      ],
+      "actual_window_tps": 255.0038888888889,
+      "completed_window_tps": 227.55555555555554,
+      "requests": 264,
+      "failed": 0,
+      "mean_ttft_s": 192.79363847874407,
+      "mean_tpot_ms": 140.43375341356145,
+      "mean_e2e_s": 480.26234238019924,
+      "latency_pass": false
+    },
+    {
+      "campaign": "confirmation",
+      "concurrency": 64,
+      "repeat": 4,
+      "arm": "int8",
+      "source_summary": "reports/a3-int8-kv-20261104/summaries/confirmation/concurrency-64/repeat-4/int8/summary.json",
+      "observed_engine_versions": [
+        "v0.31.1.post1.dev162+g4f61604be.dirty"
+      ],
+      "actual_window_tps": 266.1511111111111,
+      "completed_window_tps": 218.45333333333335,
+      "requests": 256,
+      "failed": 0,
+      "mean_ttft_s": 51.506054467776266,
+      "mean_tpot_ms": 200.72035286680926,
+      "mean_e2e_s": 462.3814351615292,
+      "latency_pass": false
+    }
+  ],
+  "breakpoint": {
+    "rule": "All four paired gains >0, mean paired gain >=3%, zero failed requests; full 1800s received-token window",
+    "results": [
+      {
+        "concurrency": 56,
+        "pairs": [
+          {
+            "repeat": 1,
+            "bf16_tps": 258.9816666666667,
+            "int8_tps": 254.32722222222222,
+            "gain_pct": -1.7972100127207735,
+            "failed": 0,
+            "bf16_e2e_s": 422.86727378635806,
+            "int8_e2e_s": 415.90839449982104
+          },
+          {
+            "repeat": 2,
+            "bf16_tps": 261.7783333333333,
+            "int8_tps": 254.83833333333334,
+            "gain_pct": -2.6510979390960476,
+            "failed": 0,
+            "bf16_e2e_s": 420.7994454056061,
+            "int8_e2e_s": 414.4115847824601
+          }
+        ],
+        "mean_gain_pct": -2.2241539759084104,
+        "passes_engineering_rule": false,
+        "confirmed_four_pairs": false
+      },
+      {
+        "concurrency": 60,
+        "pairs": [
+          {
+            "repeat": 1,
+            "bf16_tps": 255.75944444444445,
+            "int8_tps": 265.27166666666665,
+            "gain_pct": 3.7192066329688966,
+            "failed": 0,
+            "bf16_e2e_s": 453.27310374686675,
+            "int8_e2e_s": 434.7621495066101
+          },
+          {
+            "repeat": 2,
+            "bf16_tps": 261.4038888888889,
+            "int8_tps": 262.3588888888889,
+            "gain_pct": 0.3653350392219812,
+            "failed": 0,
+            "bf16_e2e_s": 448.67382344765804,
+            "int8_e2e_s": 443.60106722810434
+          }
+        ],
+        "mean_gain_pct": 2.042270836095439,
+        "passes_engineering_rule": false,
+        "confirmed_four_pairs": false
+      },
+      {
+        "concurrency": 64,
+        "pairs": [
+          {
+            "repeat": 1,
+            "bf16_tps": 249.315,
+            "int8_tps": 276.09944444444443,
+            "gain_pct": 10.743214184643701,
+            "failed": 0,
+            "bf16_e2e_s": 485.0212254051938,
+            "int8_e2e_s": 452.0567746317742
+          },
+          {
+            "repeat": 2,
+            "bf16_tps": 245.6261111111111,
+            "int8_tps": 274.0372222222222,
+            "gain_pct": 11.566812250778625,
+            "failed": 0,
+            "bf16_e2e_s": 487.74737800878586,
+            "int8_e2e_s": 457.92986561595154
+          },
+          {
+            "repeat": 3,
+            "bf16_tps": 246.4038888888889,
+            "int8_tps": 269.1405555555556,
+            "gain_pct": 9.227397655610602,
+            "failed": 0,
+            "bf16_e2e_s": 487.2813528896377,
+            "int8_e2e_s": 460.85131590837955
+          },
+          {
+            "repeat": 4,
+            "bf16_tps": 255.0038888888889,
+            "int8_tps": 266.1511111111111,
+            "gain_pct": 4.37139302886449,
+            "failed": 0,
+            "bf16_e2e_s": 480.26234238019924,
+            "int8_e2e_s": 462.3814351615292
+          }
+        ],
+        "mean_gain_pct": 8.977204279974355,
+        "passes_engineering_rule": true,
+        "confirmed_four_pairs": true
+      }
+    ]
+  },
+  "verdict": {
+    "candidate": 64,
+    "confirmed": true,
+    "interpretation": "Lowest qualifying tested candidate; unsampled concurrency values and nonmonotonic behavior are not excluded."
+  }
+}
