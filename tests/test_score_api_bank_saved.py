@@ -36,6 +36,7 @@ def test_fixed_scoring_positions(tmp_path, mode):
         "        return [SimpleNamespace(ground_truth=r) for r in rows]\n"
         "class Evaluator:\n"
         "    def __init__(self, samples): pass\n"
+        "    def get_model_input(self, i): return 'tools', [{'role': 'User', 'text': str(i)}]\n"
         "    def evaluate(self, i, output):\n"
         "        return (True,) if i == 0 else 0.5\n",
         encoding="utf-8",
@@ -76,7 +77,8 @@ def test_fixed_scoring_positions(tmp_path, mode):
     )
     if mode == "complete":
         assert result.returncode == 0, result.stderr
-        assert [row["score"] for row in json.loads(result.stdout)] == [
+        scored = json.loads(result.stdout)
+        assert [row["score"] for row in scored] == [
             True,
             0.5,
             False,
@@ -84,6 +86,27 @@ def test_fixed_scoring_positions(tmp_path, mode):
             True,
             0.5,
         ]
+        exported = subprocess.run(
+            [
+                sys.executable,
+                str(SCRIPT),
+                "--author-root",
+                str(tmp_path),
+                "--export-inputs",
+            ],
+            capture_output=True,
+            text=True,
+            timeout=10,
+            check=True,
+        )
+        requests = [json.loads(line) for line in exported.stdout.splitlines()]
+        assert [(r["file"], r["id"]) for r in requests] == [
+            (r["file"], r["id"]) for r in scored
+        ]
+        assert all(
+            set(r) == {"file", "id", "api_descriptions", "chat_history"}
+            for r in requests
+        )
     else:
         assert result.returncode == 2
         assert not result.stdout

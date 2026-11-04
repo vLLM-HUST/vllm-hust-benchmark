@@ -1,4 +1,4 @@
-"""Score saved outputs for the three fixed API-Bank dialogues using upstream code."""
+"""Export native inputs or score saved outputs for fixed API-Bank dialogues."""
 
 import argparse
 import json
@@ -22,12 +22,14 @@ def read_jsonl(path):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--author-root", type=Path, required=True)
-    parser.add_argument("--predictions", type=Path, required=True)
+    mode = parser.add_mutually_exclusive_group(required=True)
+    mode.add_argument("--predictions", type=Path)
+    mode.add_argument("--export-inputs", action="store_true")
     args = parser.parse_args()
     root = args.author_root.resolve(strict=True)
     predictions = {}
     try:
-        rows = read_jsonl(args.predictions)
+        rows = [] if args.export_inputs else read_jsonl(args.predictions)
     except (OSError, UnicodeError, json.JSONDecodeError) as exc:
         parser.error(f"cannot read prediction JSONL: {exc}")
     for line_number, row in enumerate(rows, 1):
@@ -62,6 +64,20 @@ def main():
         for i, sample in enumerate(samples):
             if sample.ground_truth["role"] in {"API", "AI"}:
                 cases[name, i] = (evaluator, sample.ground_truth["role"])
+    if args.export_inputs:
+        for (name, i), (evaluator, _) in cases.items():
+            descriptions, history = evaluator.get_model_input(i)
+            print(
+                json.dumps(
+                    {
+                        "file": name,
+                        "id": i,
+                        "api_descriptions": descriptions,
+                        "chat_history": history,
+                    }
+                )
+            )
+        return
     if predictions.keys() != cases.keys():
         parser.error("predictions must match every fixed scoring position exactly")
     results = []
