@@ -10,7 +10,9 @@ import zipfile
 import pytest
 
 
-@pytest.mark.parametrize("variant", ["complete", "missing", "wrong_query"])
+@pytest.mark.parametrize(
+    "variant", ["complete", "missing", "wrong_query", "duplicate", "wrong_shape"]
+)
 def test_fac_input_gate_preserves_empty_answers_and_rejects_mismatch(tmp_path, variant):
     script = (
         Path(__file__).resolve().parents[1]
@@ -23,6 +25,8 @@ def test_fac_input_gate_preserves_empty_answers_and_rejects_mismatch(tmp_path, v
         del answers["608"]
     elif variant == "wrong_query":
         answers["608"]["query"] = "modified"
+    elif variant == "wrong_shape":
+        answers = keys
     args = [sys.executable, str(script)]
     for name, data in (
         ("instructions", rows),
@@ -31,6 +35,8 @@ def test_fac_input_gate_preserves_empty_answers_and_rejects_mismatch(tmp_path, v
     ):
         path = tmp_path / f"{name}.json"
         path.write_text(json.dumps(data), encoding="utf-8")
+        if name == "answers" and variant == "duplicate":
+            path.write_text('{"608": {}, "608": {}}', encoding="utf-8")
         args.extend([f"--{name}", str(path)])
     result = subprocess.run(
         args, capture_output=True, text=True, check=False, timeout=10

@@ -20,6 +20,12 @@ def read_json(path):
 
 
 def check(rows, ids, answers):
+    if (
+        not isinstance(rows, list)
+        or not isinstance(ids, dict)
+        or not isinstance(answers, dict)
+    ):
+        raise ValueError("expected an instruction list and two JSON objects")
     keys = list(map(str, IDS))
     if [row["query_id"] for row in rows] != IDS or list(ids) != keys:
         raise ValueError("fixed task IDs or FAC ID order changed")
