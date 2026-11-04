@@ -61,6 +61,8 @@ def main():
             "ljspeech-vits",
             "mlagentbench",
             "webarena",
+            "visualwebarena",
+            "mlebench",
             "paperbench",
             "wavcaps",
             "qrecc",
