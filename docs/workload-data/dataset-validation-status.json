@@ -2,6 +2,37 @@
   "schema_version": "workload-validation-checklist/v1",
   "updated_at": "2026-11-04",
   "replacement_candidate_audits": {
+    "GUI_VS_CLI": {
+      "publisher": "https://github.com/rebeccaz4/gui-vs-cli",
+      "reviewed_against": "OSWORLD",
+      "preserved": "Real Linux application actions, original initial state, and final-state verifiers.",
+      "current_host_gate": "Publisher Dockerfile targets linux/amd64; the provided Docker/E2B routes are not qualified on the current ARM64 NPU container. The CLI track does not replace GUI interaction.",
+      "accepted_replacement": false,
+      "source_checkbox_eligible": false
+    },
+    "MYPCBENCH": {
+      "publisher": "https://github.com/ljang0/MyPCBench",
+      "reviewed_against": "OSWORLD",
+      "preserved": "Interactive Linux desktop, real LibreOffice applications, and deterministic snapshot reset.",
+      "current_host_gate": "Publisher workflow publishes container and QCOW2 images; no verified ARM64 execution route or compatible isolated backend is established on the current host.",
+      "publisher_docker_latest_manifest_probe": {
+        "repository": "ljang/mypcbench-qemu",
+        "runnable_platforms": ["linux/amd64"],
+        "amd64_manifest_digest": "sha256:704c136191897422c4fc9f7b66599db8a05740b7120e4d5c03a1ed4634cf2dc6",
+        "layers_downloaded": false
+      },
+      "accepted_replacement": false,
+      "source_checkbox_eligible": false
+    },
+    "SCREENSPOT_PRO": {
+      "publisher": "https://github.com/likaixin2000/ScreenSpot-Pro-GUI-Grounding",
+      "reviewed_against": "OSWORLD",
+      "preserved": "Professional desktop screenshots, natural-language instructions, and point localization scoring.",
+      "not_preserved": "Executable desktop actions, environment state transitions, and final task-state validation.",
+      "accepted_replacement": false,
+      "source_checkbox_eligible": false,
+      "boundary": "Useful for visual GUI grounding only; not a replacement for the existing interactive desktop slot. No data or model run in this review."
+    },
     "STABLETOOLBENCH": {
       "current_retained_archives_reverified_against_publisher_lfs": true,
       "replacement_review": {
