@@ -1,0 +1,21 @@
+{
+  "status": "qualification_protocol",
+  "date": "2026-10-27",
+  "question": "Can recovered repeated-region coordinates support cross-backend correspondence and local cost decomposition beyond associated flat events?",
+  "pilot_order": ["FFTS+", "AIV"],
+  "formal_order_if_qualified": ["FFTS+", "AIV", "AIV", "FFTS+"],
+  "model": "/models/Qwen3-0.6B",
+  "runtime": "/workspace/traceloom-guidance-20261025/runtime-v2",
+  "capability_tier": "native profile; no request/scheduler identity claim",
+  "independent_unit": "engine process; two worker profiles are paired ranks, not independent replications",
+  "inputs": {"prompt_tokens": [[1000, 8], [1001, 8]], "output_tokens": 32, "temperature": 0, "ignore_eos": true},
+  "controls": ["same source and model", "TP2", "same two devices", "same capture sizes [1]", "synchronous scheduler", "no prefix cache", "driver remains device-cold"],
+  "qualification": ["two complete worker profiles", "output token parity within and across arms", "observed PIECEWISE graph configuration", "exact provider-backed replay membership or explicitly recorded recovery failure", "visible structural treatment change"],
+  "comparisons": [
+    "TraceLoom public structural coordinates and source members",
+    "raw event workflow allowed to reconstruct membership and ordered per-stream sequences",
+    "flat aggregate costs as an overlap control, not a deliberately weakened competing tool"
+  ],
+  "outputs": ["selected instances", "matched and added members", "missing or ambiguous correspondence", "task sum, interval union and envelope separately", "construction and query costs separately"],
+  "exclusions": ["not a StriaTrace execution", "not historical binary reproduction", "no service speedup claim from profile durations", "no analyst productivity claim", "no invented correspondence after fusion or replacement"]
+}
