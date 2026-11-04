@@ -632,6 +632,7 @@ WebArena（未完成）：固定原题 ID 为 0、1、2，均只访问 `shopping
 先在隔离的 amd64 执行节点核验作者的 `shopping_admin_final_0719.tar`、站点 URL、登录及重置，
 再使用作者任务入口执行这三题。当前注册表候选仅核对了配置摘要和层数，尚不能替代原始归档；
 公开演示站点也不能替代可重置环境。站点与浏览器可在 CPU 节点运行，模型推理仍走独立 NPU 服务。
+ARM64 Chromium 已通过 MiniWoB++ 的原题验证，浏览器本身不是这三项的共同阻塞：WebArena 缺可重置的 `shopping_admin`，VisualWebArena 缺已启动并核验的 Classifieds，WorkArena 缺已配置的 ServiceNow 实例。
 
 NatureBench（未完成）：`scripts/run_naturebench_original.py` 默认检查原 CPU3 组并输出计划；
 安装 workload-data 包后，提供固定源码、原数据、运行环境及模型端点。正式执行需 Docker、已运行的原 evaluator，
