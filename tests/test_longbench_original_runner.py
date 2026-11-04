@@ -184,8 +184,11 @@ def test_qasper_public_handoff_is_original_three_not_full_suite_or_raw_diagnosti
     ]
     assert raw["source_checkbox_eligible"] is False
     assert all(s["finish_reason"] == "length" for s in raw["samples"])
-    assert receipt["helper_sha256"] == (
-        "333174542868a42ac1eaed7ad180cc0db8bac2deaab5cb013ea5e67ab6c49ee2"  # pragma: allowlist secret - historical executed helper checksum
+    assert (
+        receipt["helper_sha256"]
+        == (
+            "333174542868a42ac1eaed7ad180cc0db8bac2deaab5cb013ea5e67ab6c49ee2"  # pragma: allowlist secret - historical executed helper checksum
+        )
     )
 
 

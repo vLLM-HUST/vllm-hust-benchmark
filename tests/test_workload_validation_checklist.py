@@ -1031,7 +1031,9 @@ def test_checklist_covers_registered_sources_once():
         marker = (
             "—"
             if item["status"] == "CLASSIFICATION_ONLY"
-            else "[x]" if item["checked"] else "[ ]"
+            else "[x]"
+            if item["checked"]
+            else "[ ]"
         )
         assert current[1].startswith(marker)
 
