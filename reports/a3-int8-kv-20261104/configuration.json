@@ -1,0 +1,48 @@
+{
+  "model": "Qwen3.5-35B-A3B",
+  "model_path": "/data/shared_models/Qwen3.5-35B-A3B",
+  "hardware": "2 x Ascend 910B2",
+  "hardware_evidence": "npu-smi observed during execution in this session; no contemporaneous inventory file in original run directories",
+  "tensor_parallel_size": 2,
+  "weight_dtype": "bfloat16",
+  "baseline_kv_dtype": "auto (BF16)",
+  "candidate_kv_dtype": "int8",
+  "plugins": [
+    "ascend",
+    "vllm-ascend-quantized-kv-cache"
+  ],
+  "input_tokens": 30720,
+  "output_tokens": 2048,
+  "window_seconds": 1800,
+  "prompt": "synthetic repeated prose, identical across requests",
+  "ignore_eos": true,
+  "temperature": 0,
+  "seed": 17,
+  "prefix_caching": false,
+  "max_model_len": 32768,
+  "max_num_batched_tokens": 2048,
+  "gpu_memory_utilization": 0.8,
+  "chunked_prefill": true,
+  "compilation_mode": 3,
+  "cudagraph_mode": "FULL_DECODE_ONLY",
+  "max_num_seqs": "equals tested concurrency",
+  "capture_sizes": "1,2,4,8,16,32 plus concurrency for boundary/confirmation; see archived runners for initial sweep",
+  "measurement": "client receipt timestamp of server continuous-usage deltas, includes unfinished requests; initial sweep only counts completed requests",
+  "latency_limits": {
+    "ttft_s": {
+      "mean": 30,
+      "p95": 45,
+      "p99": 60
+    },
+    "tpot_ms": {
+      "mean": 40,
+      "p95": 60,
+      "p99": 80
+    }
+  },
+  "provenance_limits": [
+    "Not a fixed public v0.18 baseline comparison: same HUST stack with BF16 versus INT8 KV.",
+    "Exact experiment-time plugin/Ascend commits, dirty diffs and model weight hashes were not frozen; do not substitute current checkout identity.",
+    "Legacy scripts captured at archive time; later campaigns contain their launch-time script snapshots."
+  ]
+}

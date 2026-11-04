@@ -987,23 +987,49 @@
       "artifact_type": "runtime_component",
       "system_role": "kv_quantization_research",
       "integration_contracts": [],
-      "integration_surfaces": ["proposed KV format provider", "proposed quantize/dequantize dispatch"],
-      "execution_planes": ["worker", "device"],
+      "integration_surfaces": [
+        "proposed KV format provider",
+        "proposed quantize/dequantize dispatch"
+      ],
+      "execution_planes": [
+        "worker",
+        "device"
+      ],
       "deployment_topology": "in_process",
       "delivery_model": "python_distribution",
       "ownership": "original_contributor_maintained",
-      "maintainers": ["hustcui", "SuccinctPaul"],
+      "maintainers": [
+        "hustcui",
+        "SuccinctPaul"
+      ],
       "repository_relationship": "organization_native",
       "maturity": "incubating",
       "canonical_repository": "https://github.com/vLLM-HUST/vllm-ascend-quantized-kv-cache-hust",
       "upstream_repository": null,
       "summary_en": "Ascend runtime plugin for dynamic per-channel INT8 KV cache; legacy KIVI and packed-format work remains separate migration history.",
       "summary_zh": "面向昇腾的动态 per-channel INT8 KV Cache 运行时插件；KIVI 与其他 packed 格式仍属于后续迁移范围。",
-      "public_effect_en": "Real Qwen2.5-14B single-card serving, prefill/decode, ACL Graph replay, and three OpenAI API requests are verified. No matched performance comparison has been published.",
-      "public_effect_zh": "已验证 Qwen2.5-14B 单卡真实服务、prefill/decode、ACL Graph 回放及三次 OpenAI API 请求；尚无已发布的配对性能对比。",
+      "public_effect_en": "A3-length synthetic workload: Qwen3.5-35B-A3B, two-card TP2, 30,720 input + 2,048 output tokens. At C64 all four full-window throughput pairs improved: arithmetic mean +8.98% (range +4.37% to +11.57%). Mean TTFT fell 74.08% and end-to-end latency fell 5.53%, but TPOT rose 40.48%. Latency thresholds failed; answer quality was not evaluated. C56 regressed; C60 showed only a small gain.",
+      "public_effect_zh": "A3长度合成负载：Qwen3.5-35B-A3B、双卡TP2、30720输入+2048输出。并发64四轮全窗口输出吞吐均提升，配对算术平均+8.98%（范围+4.37%～+11.57%）；平均TTFT降低74.08%、完整请求耗时降低5.53%，但TPOT增加40.48%。延迟门槛未通过，答案质量未评估；并发56负收益，60仅小幅收益。",
       "public_effect_status": "validated",
-      "public_effect_url": "https://github.com/vLLM-HUST/vllm-ascend-quantized-kv-cache-hust/tree/ae7b44bfee695d0ba580040dffd10eb802104485#%E5%B7%B2%E9%AA%8C%E8%AF%81%E7%8E%AF%E5%A2%83",
-      "compatibility": {"status": "experimental", "host": "vLLM Ascend HUST", "versions": ["Plugin 0.2.0.dev0 @ ae7b44b", "Core 8a6655cf62 + Ascend f4f49832"], "platforms": ["Ascend 910B single card · Qwen2.5-14B · 8K"], "python": [">=3.10"], "requirements_en": "Activation requires --kv-cache-dtype int8. TP2, Qwen3.5 hybrid cache, APC, MTP2, asynchronous scheduling, and the current Qwen3.5 graph-mode setting remain unqualified.", "requirements_zh": "启用需传入 --kv-cache-dtype int8；TP2、Qwen3.5 hybrid cache、APC、MTP2、异步调度及当前 Qwen3.5 图模式设定仍未验收。", "followup_url": "https://github.com/vLLM-HUST/vllm-ascend-quantized-kv-cache-hust/issues/2"},
+      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/hustcui/a3-int8-kv-results-20261104/reports/a3-int8-kv-20261104/README.md",
+      "compatibility": {
+        "status": "experimental",
+        "host": "vLLM Ascend HUST",
+        "versions": [
+          "Plugin 0.2.0.dev0 @ ae7b44b",
+          "Core 8a6655cf62 + Ascend f4f49832"
+        ],
+        "platforms": [
+          "Ascend 910B single card · Qwen2.5-14B · 8K",
+          "2 x Ascend 910B2 · Qwen3.5-35B-A3B · TP2 · 32768 context · A3-shaped synthetic comparison"
+        ],
+        "python": [
+          ">=3.10"
+        ],
+        "requirements_en": "Requires --kv-cache-dtype int8. TP2/Qwen3.5/FULL_DECODE_ONLY paired runs completed, but formal A3 acceptance is not established: latency thresholds failed and quality was not evaluated. APC was off; MTP and other async settings are not qualified here. Exact experiment-time plugin/Ascend commits and dirty diffs were not frozen; listed legacy versions apply only to the earlier Qwen2.5 functional validation.",
+        "requirements_zh": "启用需 --kv-cache-dtype int8。本轮TP2、Qwen3.5、FULL_DECODE_ONLY配对测试已完成，但不代表正式A3验收通过：全部延迟门槛未通过、质量未评估。APC关闭；MTP及其他异步设定未由此验收。实验时插件/Ascend精确提交及dirty diff未完整冻结，旧versions仅对应此前Qwen2.5功能验证。",
+        "followup_url": "https://github.com/vLLM-HUST/vllm-ascend-quantized-kv-cache-hust/issues/2"
+      },
       "evidence_level": "hardware_verified"
     },
     {

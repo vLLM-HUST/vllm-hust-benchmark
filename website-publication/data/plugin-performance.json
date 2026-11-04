@@ -379,6 +379,59 @@
           ]
         }
       ]
+    },
+    {
+      "id": "quantized-kv-cache-migration",
+      "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/hustcui/a3-int8-kv-results-20261104/reports/a3-int8-kv-20261104/README.md",
+      "ecpa": {
+        "launch_acceptance": "not-reproduced-this-round",
+        "configuration_path": "not-evaluated",
+        "analysis_integration": "external-harness",
+        "note_zh": "独立runner，同HUST栈BF16/INT8 KV对照；非upstream基线，未通过ECPA复现。",
+        "note_en": "External runner comparing BF16/INT8 KV on the same HUST stack; not an upstream baseline or ECPA reproduction."
+      },
+      "default_observation_id": "quantized-kv-cache:a3-c64-20261104",
+      "observations": [
+        {
+          "id": "quantized-kv-cache:a3-c64-20261104",
+          "kind": "published-comparisons",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/hustcui/a3-int8-kv-results-20261104/reports/a3-int8-kv-20261104/README.md",
+          "setting_label_zh": "A3合成长上下文 · TP2 · C64 · 4轮 · 延迟未达标/质量未评估",
+          "setting_label_en": "A3 synthetic long context · TP2 · C64 · 4 pairs · latency failed / quality untested",
+          "aggregation_note_zh": "几何平均 +8.94%；配对算术平均 +8.98%；TPOT +40.48%。完整窗口含初始Prefill。",
+          "aggregation_note_en": "Geometric mean +8.94%; paired arithmetic mean +8.98%; TPOT +40.48%. Full window includes initial prefill.",
+          "comparisons": [
+            {
+              "metric": "output_tps",
+              "baseline": 249.315,
+              "candidate": 276.09944444444443,
+              "model_label": "Qwen3.5-35B-A3B",
+              "scope": "A3 synthetic · 2x910B2 TP2 BF16 weights · C64 · 30720 in/2048 out · 1800s received-token window · FULL_DECODE_ONLY · pair 1 · BF16 then INT8 · latency thresholds failed, quality untested"
+            },
+            {
+              "metric": "output_tps",
+              "baseline": 245.6261111111111,
+              "candidate": 274.0372222222222,
+              "model_label": "Qwen3.5-35B-A3B",
+              "scope": "A3 synthetic · 2x910B2 TP2 BF16 weights · C64 · 30720 in/2048 out · 1800s received-token window · FULL_DECODE_ONLY · pair 2 · INT8 then BF16 · latency thresholds failed, quality untested"
+            },
+            {
+              "metric": "output_tps",
+              "baseline": 246.4038888888889,
+              "candidate": 269.1405555555556,
+              "model_label": "Qwen3.5-35B-A3B",
+              "scope": "A3 synthetic · 2x910B2 TP2 BF16 weights · C64 · 30720 in/2048 out · 1800s received-token window · FULL_DECODE_ONLY · pair 3 · BF16 then INT8 · latency thresholds failed, quality untested"
+            },
+            {
+              "metric": "output_tps",
+              "baseline": 255.0038888888889,
+              "candidate": 266.1511111111111,
+              "model_label": "Qwen3.5-35B-A3B",
+              "scope": "A3 synthetic · 2x910B2 TP2 BF16 weights · C64 · 30720 in/2048 out · 1800s received-token window · FULL_DECODE_ONLY · pair 4 · INT8 then BF16 · latency thresholds failed, quality untested"
+            }
+          ]
+        }
+      ]
     }
   ],
   "comparison_sets": [
