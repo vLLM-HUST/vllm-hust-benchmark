@@ -4993,7 +4993,16 @@
         "publisher_empty_normalized_prediction_can_pass_partial_match": true,
         "publisher_range_verifier_overrides_range_template_with_generic_template": true,
         "publisher_source_or_scoring_rules_modified": false,
-        "semantic_repair_user_decision_pending": true,
+        "semantic_repair_user_decision_pending": false,
+        "local_grader_patch_preparation": {
+          "profile": "bixbench-local-empty-match-range-template-v1",
+          "entrypoint": "scripts/prepare_bixbench_patched_grader.py",
+          "scoring_entrypoint": "scripts/run_bixbench_original_grader.py --execute --patched-grader",
+          "verified_against_pinned_publisher_bytes": true,
+          "publisher_checkout_modified": false,
+          "formal_scoring_executed": false,
+          "boundary": "Authorized separate compatibility profile. Saved grading inputs and an end-to-end scoring run are still required; not an unmodified official score."
+        },
         "saved_grading_inputs_access_20261104": {
           "original_custody": "Dedicated CPU workspace, as recorded in the grading preparation receipts",
           "found_in_available_npu_container_or_shared_task_directory": false,

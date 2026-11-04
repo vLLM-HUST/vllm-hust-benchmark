@@ -9,6 +9,7 @@ import argparse
 import asyncio
 from contextlib import nullcontext
 import csv
+import importlib.abc
 import importlib.util
 import json
 import os
@@ -18,6 +19,26 @@ import sys
 from urllib.parse import urlsplit
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+class PatchedGraderLoader(importlib.abc.MetaPathFinder, importlib.abc.Loader):
+    def __init__(self, path):
+        self.path = path
+        self.loaded = False
+
+    def find_spec(self, fullname, path=None, target=None):
+        if fullname == "bixbench.graders":
+            return importlib.util.spec_from_file_location(
+                fullname, self.path, loader=self
+            )
+        return None
+
+    def create_module(self, spec):
+        return None
+
+    def exec_module(self, module):
+        exec(compile(self.path.read_bytes(), str(self.path), "exec"), module.__dict__)
+        self.loaded = True
 
 
 def validate(args):
@@ -78,9 +99,20 @@ async def execute(args, report):
         rows = list(reader)
     if not rows:
         raise ValueError("empty input cannot establish native scoring")
-    # Preserve publisher defaults, including evaluation_mode and matching rules.
+    patched = getattr(args, "patched_grader", False)
+    if patched and any(
+        name == "bixbench" or name.startswith("bixbench.") for name in sys.modules
+    ):
+        raise ValueError("patched grading requires a fresh Python process")
     # The input and original author source are never passed as writable outputs.
     output.mkdir(mode=0o700)
+    loader = None
+    if patched:
+        from prepare_bixbench_patched_grader import SOURCE, prepare
+
+        overlay = output / "grader-overlay"
+        report["local_patch"] = prepare(author, overlay)
+        loader = PatchedGraderLoader(overlay / SOURCE)
     copied = output / "graded.private.csv"
     shutil.copyfile(original, copied)
     os.chmod(copied, 0o600)
@@ -93,11 +125,16 @@ async def execute(args, report):
         "bixbench_pinned_original_grade_outputs", author / "grade_outputs.py"
     )
     module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    report.update(status="RUNNING_ORIGINAL_OPENANSWER_GRADER", input_rows=len(rows))
     receipt = output / "state.private.json"
-    receipt.write_text(json.dumps(report, indent=2))
     try:
+        if loader:
+            sys.meta_path.insert(0, loader)
+        spec.loader.exec_module(module)
+        if loader and not loader.loaded:
+            raise RuntimeError("patched grader was not imported; refusing scoring")
+        label = "PATCHED" if patched else "ORIGINAL"
+        report.update(status=f"RUNNING_{label}_OPENANSWER_GRADER", input_rows=len(rows))
+        receipt.write_text(json.dumps(report, indent=2))
         metrics = await module.grade_answers(
             copied,
             module.AnswerMode.openanswer,
@@ -108,12 +145,15 @@ async def execute(args, report):
         verify_source(author, pins)
         (output / "metrics.private.json").write_text(json.dumps(metrics, indent=2))
         report.update(
-            status="ORIGINAL_OPENANSWER_SCORING_RETURNED", scoring_returned=True
+            status=f"{label}_OPENANSWER_SCORING_RETURNED", scoring_returned=True
         )
     except BaseException as error:
         report.update(status="SCORING_FAILED_RETAINED", error_type=type(error).__name__)
         raise
     finally:
+        if loader:
+            sys.meta_path.remove(loader)
+            sys.modules.pop("bixbench.graders", None)
         receipt.write_text(json.dumps(report, indent=2))
     return report
 
@@ -125,12 +165,14 @@ def main(argv=None):
             "Before treating results as validated, check the pinned publisher "
             "scorer with empty-answer and numeric-range controls. The audited "
             "revision can award partial match to an empty answer and bypass "
-            "the dedicated range template. This wrapper does not repair either."
+            "the dedicated range template. --patched-grader explicitly opts "
+            "into a separately labeled local repair of those two defects."
         ),
     )
     for name in ("author-root", "input-file", "output", "model", "api-base"):
         parser.add_argument("--" + name, required=True)
     parser.add_argument("--execute", action="store_true")
+    parser.add_argument("--patched-grader", action="store_true")
     parser.add_argument("--model-queue", type=Path)
     args = parser.parse_args(argv)
     validate(args)
@@ -144,6 +186,9 @@ def main(argv=None):
         "author_judge_reproduction": False,
         "source_checkbox_eligible": False,
         "scorer_validity_verified": False,
+        "grader_variant": "local_patch"
+        if args.patched_grader
+        else "publisher_original",
         "known_publisher_scorer_defects": [
             "empty_answer_can_receive_partial_match",
             "dedicated_numeric_range_template_can_be_bypassed",

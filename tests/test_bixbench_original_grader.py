@@ -25,16 +25,20 @@ def options(tmp_path, **changes):
     return argparse.Namespace(**values)
 
 
-def test_plan_does_not_import_author_or_create_output(tmp_path, capsys):
+@pytest.mark.parametrize("patched", [False, True])
+def test_plan_does_not_import_author_or_create_output(tmp_path, capsys, patched):
     args = options(tmp_path)
     argv = [
         item
         for key, value in vars(args).items()
         for item in ("--" + key.replace("_", "-"), str(value))
     ]
-    assert MODULE.main(argv) == 0
+    assert MODULE.main(argv + (["--patched-grader"] if patched else [])) == 0
     report = json.loads(capsys.readouterr().out)
     assert report["status"] == "PLAN_ONLY"
+    assert report["grader_variant"] == (
+        "local_patch" if patched else "publisher_original"
+    )
     assert not report["scoring_returned"]
     assert not report["scorer_validity_verified"]
     assert not report["source_checkbox_eligible"]
@@ -43,6 +47,17 @@ def test_plan_does_not_import_author_or_create_output(tmp_path, capsys):
         "dedicated_numeric_range_template_can_be_bypassed",
     ]
     assert not args.output.exists()
+
+
+def test_patch_loader_only_replaces_grader(tmp_path):
+    patch = tmp_path / "graders.py"
+    patch.write_text("marker = 'local patch'\n", encoding="utf-8")
+    loader = MODULE.PatchedGraderLoader(patch)
+    assert loader.find_spec("bixbench.other") is None
+    spec = loader.find_spec("bixbench.graders")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    assert loader.loaded and module.marker == "local patch"
 
 
 @pytest.mark.parametrize(
