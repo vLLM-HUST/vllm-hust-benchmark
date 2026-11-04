@@ -389,6 +389,11 @@
         "verifier": "scripts/run_miniwob_agentlab.py --verify-saved",
         "server_runs": ["native-click-dialog-002", "native-multi-layouts-004"],
         "verified_summaries": 2,
+        "saved_trajectory_file_audit": {
+          "native-click-dialog-002": {"consecutive_step_files": 2, "screenshots": 2, "response_metadata_rows": 0},
+          "native-multi-layouts-004": {"consecutive_step_files": 21, "screenshots": 21, "response_metadata_rows": 20},
+          "scope": "Step indices start at reset index 0, match screenshot indices, and all step gzip streams decompress. All 20 saved response metadata rows in the recovery run report non-null content. Pickle objects were not executed; no independent recomputation of reward from actions is claimed."
+        },
         "model_calls": 0,
         "scope": "Both original saved summary files matched their pinned SHA-256 and terminal fields on the server. The second is a valid step-cap outcome, not a solved task. This does not verify the complete trajectory or research consumer."
       },
