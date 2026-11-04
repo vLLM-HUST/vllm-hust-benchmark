@@ -8,6 +8,15 @@ MiniWoB++ 保存证据复核：对每道题的 AgentLab 原结果目录运行
 `python scripts/run_miniwob_agentlab.py --task miniwob.click-dialog --verify-saved <RESULT_DIR>`，
 第二题将 `--task` 换成 `miniwob.multi-layouts`。命令仅核对固定摘要的字节摘要与原生终态，无需模型、浏览器或 AgentLab，不替代对完整运行记录和研究侧接入的核验。
 
+MiniWoB++ 公共运行入口：使用 [发布方源码](https://github.com/Farama-Foundation/miniwob-plusplus/tree/33c3b4ddef8c6eb67c57a29663d844b1eda7e614) 的原始网页，通过回环 HTTP 提供 `/miniwob/`。已实跑客户端使用 AgentLab 0.4.2、BrowserGym MiniWoB 0.14.2 和 ARM64 Chromium 125.0.6422.26。先让 Chromium 能在所在环境打开原网页，再按以下固定配置生成计划；确认服务资源窗口后加 `--execute --record-response-metadata`。端口是本地示例，需换成实际回环端口；输出目录必须尚不存在。
+
+```bash
+python scripts/run_miniwob_agentlab.py --task miniwob.click-dialog --site http://127.0.0.1:8001/miniwob/ --endpoint http://127.0.0.1:8002/v1 --model Qwen/Qwen3.5-9B --output ./miniwob-click --max-steps 20 --max-output-tokens 1024
+python scripts/run_miniwob_agentlab.py --task miniwob.multi-layouts --site http://127.0.0.1:8001/miniwob/ --endpoint http://127.0.0.1:8002/v1 --model Qwen/Qwen3.5-9B --output ./miniwob-layout --max-steps 20 --max-output-tokens 4096
+```
+
+两个配置的种子都是 42，生成预算不同，结果不混报。上述运行入口不构成研究侧统一数据读取：原任务是由浏览器环境提供的交互任务，不能把截图或摘要包装成原始静态问答。
+
 WorkArena：已有固定版本作者源码和本地归档时，用
 `python scripts/prepare_workarena_author_source.py --author-root <源码目录> --archive <归档路径> --action verify`
 复核；软件验证不获取实例凭据。官方 WorkArena-Instances 访问权限、可重置浏览器环境和原生任务评分仍需单独验证。

@@ -760,6 +760,10 @@ prompt/媒体时不能伪造原始请求；有官方回放工具的按原工具�
 | 企业私有原始请求     | [PAIO-REUSE-CONV-5000](#workload-source-paio-reuse-conv-5000)             | 仅外部授权数据；保留原始请求与关系，不公开正文，不从文件名推断任务或实际复用。 |
 | 企业私有原始请求     | [PAIO-SEMANTIC-SIMILAR-5000](#workload-source-paio-semantic-similar-5000) | 仅外部授权数据；保留原始请求与关系，不公开正文，不从文件名推断任务或实际复用。 |
 
+### 原生替代候选：基础浏览器交互
+
+[MiniWoB++ 发布方源码](https://github.com/Farama-Foundation/miniwob-plusplus/tree/33c3b4ddef8c6eb67c57a29663d844b1eda7e614) · [运行及离线复核入口](scripts/run_miniwob_agentlab.py) · [固定版本和复现命令](docs/workload-data/DATASET_CHECKLIST.zh-CN.md) · [机器核验记录](docs/workload-data/dataset-validation-status.json)。ARM64 环境下两道固定原题已有真实 NPU 运行：一道获得原生奖励 1，另一道达到步数上限、奖励 0。仅覆盖基础网页交互，不替代 WebArena、WorkArena 或桌面操作；尚未进入统一研究消费入口，不计入已交付项。
+
 ### 逐来源：官方出处、仓库入口与验证范围
 
 “准备／执行入口”仅列已登记的真实代码路径；读取适配器不冒充执行入口。没有原生入口索引的来源明确标记待补。原始训练语料、schema 资源、轨迹资产并不天然是完整
