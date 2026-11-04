@@ -1039,6 +1039,17 @@ records = iter_workload("DRAGON_PUBLIC", data_root=Path("/external/dragon-origin
 
 该来源是已发布历史会话语料，不是自带完整任务评分器的benchmark。现有适配状态仍为`CONTRACT_MAPPED_ASSET_VALIDATION_PENDING`；43分片的登记不等于取得数据或原生运行成功。[固定版本官方协议](https://huggingface.co/datasets/lmarena-ai/VisionArena-Chat/blob/1394b4f59ab6f1f2e5aff6bc15b448e15960e170/README.md)
 
+已取得并核验首个原分片；固定位置 0、1、2 的原图及会话与公共索引和研究侧读取一致。三条原样本均已在单张 Ascend 910B2 上用 Qwen2-VL-7B-Instruct（BF16，修订 `eed13092ef92e448dd6875b2a00151bd3f7db0ac`）正常生成结束。复现协议把未改动的图片挂在首条用户消息上，保留历史消息，将末尾参考回答留在模型输入之外。图像挂载是本地约定，无官方评分。
+
+按发布方条款自行取得首分片并核验发布方摘要，安装 `pyarrow==22.0.0`、`Pillow==11.3.0` 后可运行：
+
+```bash
+python scripts/run_visionarena_original_continuation.py --shard /external/train-00000-of-00043.parquet
+python scripts/run_visionarena_original_continuation.py --shard /external/train-00000-of-00043.parquet --endpoint http://127.0.0.1:19466/v1 --model Qwen/Qwen2-VL-7B-Instruct --max-tokens 1024 --output /private/visionarena-results
+```
+
+第一条命令仅预检，已在原分片上通过并匹配实跑的三张图摘要。第二条需本地兼容 OpenAI 接口的视觉服务，输出目录须不存在。结果可能包含会话衍生内容，不上传原图、原会话或完整结果。首分片固定三条实跑不代表剩余 42 个分片或质量评测；来源总勾待交付检查。
+
 ### AppWorld固定原三题原生执行、官方评分与消费交接
 
 - [ ] 2026-10-31研究消费端完整性回归待修复：当前研究消费文件与既有回查证据的SHA256一致。小型结构夹具确认，修改原数据库资产后公共入口拒绝读取，研究旧入口却重新计算引用并返回。此前固定三题的原生执行、官方评分和未改资产的完整记录回读仍有效，但不能据此声称防篡改校验已闭环。拟仅让研究AppWorld消费委托现有公共reader，并补数据库/参考资产负例；研究线程已暂停，正在等待用户确认最小接入修复，不启动研究实验。机器记录见`dataset-validation-status.json`的`current_research_consumer_integrity_followup`。
