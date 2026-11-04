@@ -10,7 +10,69 @@
         "stabletoolbench/Cache": {"revision": "c6aca0c1cda74d54915eccabb60984dc083fb14c", "file": "server_cache.zip", "bytes": 235732308},
         "stabletoolbench/MirrorAPI-Cache": {"revision": "df8f586d0f8d17bcbbaee11f1e8f9dd178a28c68", "weight_shards": 4, "weight_bytes": 15231271864}
       },
-      "assets_downloaded": false,
+      "tool_environment_archive_acquisition": {
+        "server_artifact": "stabletoolbench-toolenv.riJpkg/toolenv2404_filtered.tar.gz",
+        "publisher_lfs_sha256_verified": "8f5b0bccbf5cf64b937c7d1364536c2adc568cf069c523838702c7e62eec8302",
+        "tar_members_listed": 12354,
+        "regular_files": 12304,
+        "directories": 50,
+        "unsafe_paths_observed": 0,
+        "declared_expanded_bytes": 168209687,
+        "regular_files_parsed_as_json_objects": 12304,
+        "duplicate_member_names": 0,
+        "executable_regular_members": 0,
+        "transport": "In-memory relay to server after direct HTTPS failed; no local dataset file.",
+        "extracted_or_executed": false
+      },
+      "response_cache_acquisition": {
+        "server_artifact": "stabletoolbench-cache.5VjXEl/server_cache.zip",
+        "bytes": 235732308,
+        "publisher_lfs_sha256_verified": "a3ed72052c2dc961d8e9b71860374d90ded6d475ca6f6449c78fb248cb82a5b2",
+        "zip_integrity_test_passed": true,
+        "members": 48054,
+        "declared_expanded_bytes": 2605078137,
+        "unsafe_paths_observed": 0,
+        "member_counts_by_root": {"tools": 30899, "tool_response_cache": 17155},
+        "extracted_or_executed": false
+      },
+      "model_weights_downloaded": false,
+      "publisher_fac_entry_review": {
+        "revision": "aa4ed9f4737ad98bd706663f01d63623c3427812",
+        "wrapper": "run_fac_eval.sh",
+        "wrapper_references_missing_file": "toolbench/tooleval/tool_eval.py",
+        "published_implementation": "toolbench/tooleval/fac_eval.py",
+        "runtime": "Transformers text-generation pipeline, BF16, device_map=auto",
+        "publisher_evaluator_model_candidate": {"id": "stabletoolbench/Evaluator", "revision": "228c3bf20640ce6712c978bd9e574ae183fedef7", "architecture": "LlamaForCausalLM", "weight_bytes": 16060556376, "gated": false, "weights_downloaded": false},
+        "official_judge_weights_and_npu_execution_verified": false
+      },
+      "publisher_g1_instruction_acquisition": {
+        "revision": "aa4ed9f4737ad98bd706663f01d63623c3427812",
+        "server_directory": "stabletoolbench-g1.lpOcQ6",
+        "original_files_git_blob_verified": 2,
+        "original_rows": 163,
+        "unique_query_ids_match_publisher_index": true,
+        "nonempty_cache_file_coverage": {"rows_with_all_listed_apis": 90, "rows_with_any_listed_api": 163, "api_references": 862, "api_references_with_nonempty_file": 655},
+        "author_relevant_api_cache_file_coverage": {"rows_with_all_relevant_apis": 149, "rows_with_any_relevant_api": 162, "api_references": 371, "api_references_with_nonempty_file": 356, "missing_or_ambiguous_joins": 0},
+        "coverage_boundary": "Paths resolved by the pinned author normalizer; nonempty files do not guarantee matching arguments. No selection or filtering by cache coverage.",
+        "native_execution_verified": false
+      },
+      "publisher_cache_route_review": {
+        "revision": "aa4ed9f4737ad98bd706663f01d63623c3427812",
+        "path": "server/main.py",
+        "cache_json_files_at_server_lookup_depth": 10438,
+        "sample_nonempty_cache_records": 39,
+        "hit_returns_before_outbound_request": true,
+        "miss_can_call_external_services": true,
+        "in_process_asgi_cache_hit": {
+          "http_status": 200,
+          "response_matches_original_cache_record": true,
+          "author_log_type": "cached_real_response",
+          "python_outbound_socket_guard_installed": true,
+          "real_credentials_supplied": false,
+          "model_calls": 0
+        },
+        "live_listener_or_full_native_agent_verified": false
+      },
       "npu_host_direct_https_probe": "TCP connection to huggingface.co:443 failed before HTTP; public metadata remains verified from a separate network path.",
       "native_execution_verified": false,
       "source_checkbox_eligible": false,
