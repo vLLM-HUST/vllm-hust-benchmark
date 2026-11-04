@@ -136,6 +136,11 @@ def main():
     parser.add_argument("--model")
     parser.add_argument("--resume-from", type=Path)
     parser.add_argument("--socket-timeout", type=int, default=600)
+    parser.add_argument(
+        "--record-missing-end-time",
+        action="store_true",
+        help="Compatibility mode: record the known AddMeeting missing-end_time failure instead of aborting",
+    )
     args = parser.parse_args()
     if args.socket_timeout <= 0:
         parser.error("--socket-timeout must be positive")
@@ -228,15 +233,29 @@ def main():
     results = []
     for (name, i), (evaluator, role) in cases.items():
         output = predictions[name, i]
+        failure = None
         if role == "API":
             call = get_api_call(output)
             score = False
-            if call and parse_api_call(call)[0] in LOCAL_TOOLS:
-                score = bool(evaluator.evaluate(i, call)[0])
+            tool = parse_api_call(call)[0] if call else None
+            if tool in LOCAL_TOOLS:
+                try:
+                    score = bool(evaluator.evaluate(i, call)[0])
+                except TypeError as exc:
+                    if not (
+                        args.record_missing_end_time
+                        and tool == "AddMeeting"
+                        and str(exc)
+                        == "AddMeeting.call() missing 1 required positional argument: 'end_time'"
+                    ):
+                        raise
+                    failure = "missing_required_end_time"
         else:
             # The publisher's inference loop bypasses ROUGE for empty replies.
             score = evaluator.evaluate(i, output) if output else 0
         results.append({"file": name, "id": i, "role": role, "score": score})
+        if failure:
+            results[-1]["compatibility_failure"] = failure
     print(json.dumps(results))
 
 

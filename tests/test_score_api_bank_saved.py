@@ -18,7 +18,17 @@ FILES = (
 
 @pytest.mark.parametrize(
     "mode",
-    ["complete", "missing", "duplicate", "unexpected", "non_object", "no_output"],
+    [
+        "complete",
+        "missing",
+        "duplicate",
+        "unexpected",
+        "non_object",
+        "no_output",
+        "strict_tool_error",
+        "compatible_tool_error",
+        "unexpected_tool_error",
+    ],
 )
 def test_fixed_scoring_positions(tmp_path, mode):
     inputs = tmp_path / "lv1-lv2-samples/level-1-given-desc"
@@ -38,6 +48,9 @@ def test_fixed_scoring_positions(tmp_path, mode):
         "    def __init__(self, samples): pass\n"
         "    def get_model_input(self, i): return 'tools', [{'role': 'User', 'text': str(i)}]\n"
         "    def evaluate(self, i, output):\n"
+        "        if output == 'AddMeeting':\n"
+        "            raise TypeError(\"AddMeeting.call() missing 1 required positional argument: 'end_time'\")\n"
+        "        if output == 'AddAlarm': raise TypeError('unexpected evaluator error')\n"
         "        return (True,) if i == 0 else 0.5\n",
         encoding="utf-8",
     )
@@ -51,6 +64,10 @@ def test_fixed_scoring_positions(tmp_path, mode):
         )
     predictions[2]["output"] = "UnlistedTool"
     predictions[3]["output"] = ""
+    if mode in {"strict_tool_error", "compatible_tool_error", "unexpected_tool_error"}:
+        predictions[0]["output"] = (
+            "AddAlarm" if mode == "unexpected_tool_error" else "AddMeeting"
+        )
     if mode == "missing":
         predictions.pop()
     elif mode == "duplicate":
@@ -71,11 +88,32 @@ def test_fixed_scoring_positions(tmp_path, mode):
             str(tmp_path),
             "--predictions",
             str(saved),
+            *(
+                ["--record-missing-end-time"]
+                if mode in {"compatible_tool_error", "unexpected_tool_error"}
+                else []
+            ),
         ],
         capture_output=True,
         text=True,
         timeout=10,
     )
+    if mode == "compatible_tool_error":
+        assert result.returncode == 0, result.stderr
+        scored = json.loads(result.stdout)
+        assert len(scored) == 6
+        assert scored[0]["score"] is False
+        assert scored[0]["compatibility_failure"] == "missing_required_end_time"
+        assert all("compatibility_failure" not in row for row in scored[1:])
+        return
+    if mode in {"strict_tool_error", "unexpected_tool_error"}:
+        assert result.returncode != 0
+        assert (
+            "required positional argument"
+            if mode == "strict_tool_error"
+            else "unexpected evaluator error"
+        ) in result.stderr
+        return
     if mode == "complete":
         (tmp_path / "evaluator.py").write_text(
             "api_call_prompt = 'call:'\nresponse_prompt = 'reply:'\n",

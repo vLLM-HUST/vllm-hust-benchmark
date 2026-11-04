@@ -2,6 +2,20 @@
   "schema_version": "workload-validation-checklist/v1",
   "updated_at": "2026-11-04",
   "replacement_candidate_audits": {
+    "STABLETOOLBENCH": {
+      "publisher": "https://github.com/THUNLP-MT/StableToolBench",
+      "release_metadata_checked": "2026-11-04",
+      "public_ungated_assets": {
+        "stabletoolbench/ToolEnv2404": {"revision": "b6141cc50e0c72894517786e8c6b95b749270535", "file": "toolenv2404_filtered.tar.gz", "bytes": 11706795},
+        "stabletoolbench/Cache": {"revision": "c6aca0c1cda74d54915eccabb60984dc083fb14c", "file": "server_cache.zip", "bytes": 235732308},
+        "stabletoolbench/MirrorAPI-Cache": {"revision": "df8f586d0f8d17bcbbaee11f1e8f9dd178a28c68", "weight_shards": 4, "weight_bytes": 15231271864}
+      },
+      "assets_downloaded": false,
+      "npu_host_direct_https_probe": "TCP connection to huggingface.co:443 failed before HTTP; public metadata remains verified from a separate network path.",
+      "native_execution_verified": false,
+      "source_checkbox_eligible": false,
+      "boundary": "Author metadata only. Cached or simulated tool execution is a separate protocol, not evidence of original ToolBench remote API execution."
+    },
     "API_BANK": {
       "publisher": "https://github.com/AlibabaResearch/DAMO-ConvAI/tree/faf754671f5b850e1b4d1ff870db37a6a2480df6/api-bank",
       "git_verified_files": 87,
@@ -80,14 +94,40 @@
           "original_request_and_model_configuration_changed": false,
           "reused_prefix_positions": 10,
           "reused_prefix_byte_identical": true,
-          "terminal_status_verified": false
+          "verified_saved_positions": 14,
+          "first_new_completion": {
+            "position_in_run": 11,
+            "finish_reason": "stop",
+            "completion_tokens": 8639
+          },
+          "second_new_completion": {
+            "position_in_run": 12,
+            "finish_reason": "stop",
+            "completion_tokens": 2848
+          },
+          "third_new_completion": {
+            "position_in_run": 13,
+            "finish_reason": "stop",
+            "completion_tokens": 5936
+          },
+          "terminal_status_verified": true,
+          "original_scoring_completed": false,
+          "original_scoring_failure": "TypeError: AddMeeting.call() missing 1 required positional argument: end_time"
         },
         "full_scoring_saved": false,
+        "compatibility_scoring": {
+          "result": "api-bank-compat-score.NPO4qq/score.DrkZcD",
+          "positions": 14,
+          "author_scoring_positions": 13,
+          "missing_required_end_time_failures": 1,
+          "new_model_calls": 0,
+          "unmodified_official_score": false
+        },
         "source_checkbox_eligible": false
       },
       "model_calls": 0,
       "source_checkbox_eligible": false,
-      "boundary": "Original reference-parameter replay only, not model generation or external API coverage. No registered source replaced."
+      "boundary": "Reference-control results and partial NPU generation are separate evidence. The given-description protocol exercises local author tools; it does not cover ToolBench remote API execution. No registered source replaced."
     },
     "MINIWOB_PLUSPLUS": {
       "publisher": "https://github.com/Farama-Foundation/miniwob-plusplus",
