@@ -1,0 +1,2352 @@
+{
+  "current_steady_state_reassessment": "coordination/observations/steady-state-reassessment-20261019-v1.json",
+  "schema": "project-mod-composition-plan-v1",
+  "updated_date": "2026-10-18",
+  "objective": "Converge to a jointly enabled, quality-qualified, reproducible engine stack with the lowest measured cost per frozen workload/profile.",
+  "policy": "docs/architecture/mod-composition.md",
+  "pending_register": "mods/pending-mods.json",
+  "unknown_relation_policy": "Unlisted pairs and higher-order combinations are unverified, not compatible. A pair result is not a proof for a larger stack.",
+  "source": {
+    "analysis": "results/mmlu-pro-20261017/analysis.json",
+    "sha256_git_bytes": "0437b7a609b32364d54a9fcf2b494ce45e30b4e5431abee9db479fac2b81fc72",
+    "scope": "Historical eight-arm frozen campaign only. Later22 starts completed separately;99% point-score review is separately versioned and does not rewrite old strict verdicts."
+  },
+  "profiles": [
+    {
+      "id": "mmlu-028-r2",
+      "protocol": "docs/archive/protocols/measurement-protocol.md",
+      "model": "Qwen3.5-35B-A3B BF16",
+      "hardware": "Ascend 910B2 x2 TP2",
+      "runtime": "Core f18cf803c / Ascend 74f0c0a27",
+      "concurrency": 16,
+      "apc": false,
+      "mtp": false,
+      "chunked_prefill": true,
+      "graph": "FULL_DECODE_ONLY",
+      "workload_contract_sha256": "b4361cc7a7f6d281383940b3e6484e0355e287bddaa19389d2f8b271e5689387",
+      "reference_best_stack": [
+        "gate-fp32"
+      ],
+      "reference_best_status": "historical_single_launch_best_not_confirmed_restart_stable",
+      "cost_metric": "formal_batch_card_rental_cny",
+      "hourly_cost_cny": 8,
+      "native_formal_batch_card_rental_cny": 0.28842046066290805,
+      "reference_best_formal_batch_card_rental_cny": 0.2834774798485968,
+      "input_unit_cost": null,
+      "output_unit_cost": null,
+      "repeatability_study": "results/mmlu-pro-restarts-20261017/README.md",
+      "new_budget_reassessment": "results/mmlu-q99-reassessment-20261017/review-v1/README.md"
+    },
+    {
+      "id": "othermods-unified-r2",
+      "protocol": "results/ongoing-mod-tests-20261017/protocol.json",
+      "configuration": "docs/testing/reference-config.json#other_mods_profiles.unified_2x2",
+      "model": "Qwen3.5-35B-A3B BF16",
+      "hardware": "2x Ascend910B2 TP2",
+      "runtime": "Core d0f22d2b / Ascend03766ac6; exact compiled native and packages frozen",
+      "concurrency": 16,
+      "apc": false,
+      "mtp": false,
+      "chunked_prefill": false,
+      "graph": "NONE/eager",
+      "max_model_len": 32768,
+      "max_num_batched_tokens": 32768,
+      "arms": [
+        "native-simllm",
+        "kvcompress-unified",
+        "simllm",
+        "kvcompress+simllm"
+      ],
+      "cost_metric": "formal_batch_card_rental_cny",
+      "hourly_cost_cny": 8,
+      "status": "native_and_sim_smokes_passed_no_reuse_native_formal_initializing_tri_router_failed",
+      "measured_costs": null,
+      "active_campaign": "managed-othermods-r2"
+    },
+    {
+      "id": "othermods-unified-r3",
+      "protocol": "results/ongoing-mod-tests-20261017/protocol.json",
+      "configuration": "docs/testing/reference-config.json#other_mods_profiles.unified_2x2_r3",
+      "model": "Qwen3.5-35B-A3B BF16",
+      "hardware": "2x Ascend910B2 TP2",
+      "runtime": "Core d0f22d2b / Ascend03766ac6; exact compiled native and packages frozen",
+      "concurrency": 16,
+      "apc": false,
+      "mtp": false,
+      "chunked_prefill": false,
+      "graph": "NONE/eager",
+      "max_model_len": 32768,
+      "max_num_batched_tokens": 32768,
+      "arms": [
+        "native-simllm",
+        "kvcompress-unified",
+        "simllm",
+        "kvcompress+simllm"
+      ],
+      "cost_metric": "formal_batch_card_rental_cny",
+      "hourly_cost_cny": 8,
+      "status": "terminal_no_candidate_qualification",
+      "measured_costs": null,
+      "active_campaign": "managed-othermods-r3",
+      "candidate_override": {
+        "vllm-ascend-kvcompress-hust": "0.9.0+project.1"
+      },
+      "controller_ready_sha256": "d54ce62e5b2190177eb4583e9ff051684e08dd7c6a5f8317be9f0fdb055a1674",
+      "formal_arm_timeout_seconds": 14400,
+      "smoke_gate": "Each required owner event on rank0 and rank1 before candidate formal and containing combination; inactive original configurations deferred to targeted workload.",
+      "additional_separate_profile": "natural-strict-prefix-two-case-smoke-r1"
+    },
+    {
+      "profile_id": "natural-strict-prefix-two-case-smoke-r1",
+      "state": "failed_complete_continuation_output_equivalence",
+      "controller_cohort": "managed-othermods-r3 separate prefix-* arms",
+      "model": "Qwen3.5-35B-A3B BF16",
+      "kwargs": {
+        "model": "/models/Qwen3.5-35B-A3B",
+        "tensor_parallel_size": 2,
+        "dtype": "bfloat16",
+        "worker_cls": "othermods_worker.Worker",
+        "max_model_len": 32768,
+        "max_num_seqs": 16,
+        "max_num_batched_tokens": 32768,
+        "gpu_memory_utilization": 0.9,
+        "kv_cache_memory_bytes": 8589934592,
+        "seed": 17,
+        "enable_prefix_caching": false,
+        "enable_chunked_prefill": false,
+        "enforce_eager": true,
+        "async_scheduling": false,
+        "block_size": 128,
+        "mamba_cache_mode": "none",
+        "limit_mm_per_prompt": {
+          "image": 0,
+          "video": 0
+        },
+        "additional_config": {
+          "enable_cpu_binding": false
+        }
+      },
+      "actual_requests_per_phase": 2,
+      "phases": [
+        "complete source first turn",
+        "continuation"
+      ],
+      "source_generation_cap": 128,
+      "continuation_generation_cap": 128,
+      "temperature": 0,
+      "seed": 17,
+      "logical_input_tokens": 26226,
+      "source_logical_input_tokens": 12956,
+      "continuation_logical_input_tokens": 13270,
+      "simllm": {
+        "hybrid_reuse_mode": "exact",
+        "kv_cache_max_bytes": 2147483648,
+        "budget_scope": "additional per-worker snapshot limit outside native KV allocation; not measured peak"
+      },
+      "candidate_overrides": {
+        "kvcompress": "0.9.0+project.1 after verified offline installation",
+        "triattention_configuration": "Reuse frozen triattention-project.json and calibration SHA from original profile"
+      },
+      "arms": [
+        "prefix-native",
+        "prefix-simllm",
+        "prefix-triattention",
+        "prefix-triattention+simllm"
+      ],
+      "order_gate": "Both children must pass actual both-rank execution and full source/continuation output equivalence before the containing combination",
+      "cost_scope": "Sum actual generation wall times and I/O of both turns, RPC outside timers; diagnostic smoke only",
+      "formal_cost_qualification": false,
+      "quality_scope": "two natural long HLE cases only; no semantic score, no replacement for MMLU200/HLE200 or cross-restart study",
+      "cpu_preflight_commands": 26,
+      "artifact": "results/ongoing-mod-tests-20261017/queued-othermods-r3-v4/prefix-preflight-evidence.json",
+      "id": "natural-strict-prefix-two-case-smoke-r1",
+      "cost_metric": "diagnostic only; no accepted staircase",
+      "measured_costs": null,
+      "execution_events_per_rank": 2,
+      "candidate_full_outputs_match": false
+    },
+    {
+      "id": "gdn-static-unified-graph-v1-mmlu-r2",
+      "protocol": "results/campaigns/gdn-static-decay-mingqi-20261020/runs/formal-mmlu-r2-plan/preregistration.json",
+      "model": "Qwen3.5-35B-A3B BF16",
+      "hardware": "Ascend910B2 x2 TP2; actual hashed boards in receipts",
+      "runtime": "Core f18cf803c / Ascend74f0c0a27, private mother0.1.0rc26+gdn022",
+      "concurrency": 16,
+      "apc": true,
+      "mtp": false,
+      "chunked_prefill": true,
+      "graph": "FULL_DECODE_ONLY",
+      "reference_stack": [
+        "gate-fp32",
+        "zerocost-wiring"
+      ],
+      "reference_best_stack": null,
+      "reference_best_status": "Controlled same-profile reference; no prior stable/optimal claim",
+      "cost_metric": "steady_formal_request_window_card_rental_cny",
+      "hourly_cost_cny": 4.78,
+      "evidence": "results/campaigns/gdn-static-decay-mingqi-20261020/runs/formal-mmlu-r2-final/conditions.json"
+    }
+  ],
+  "measured_combinations": [
+    {
+      "id": "gate-fp32+fia-demask",
+      "members": [
+        "gate-fp32",
+        "fia-demask"
+      ],
+      "profile_id": "mmlu-028-r2",
+      "coenablement": "observed_in_frozen_campaign",
+      "all_declared_modules_exercised": true,
+      "quality_nonregression": false,
+      "performance_full_output_equivalence": false,
+      "quality_regressions": [
+        "mmlu-pro-00869"
+      ],
+      "formal_batch_card_rental_cny": 0.29372579228960805,
+      "parent_stack": "gate-fp32",
+      "parent_formal_batch_card_rental_cny": 0.2834774798485968,
+      "marginal_cost_reduction_vs_parent": -0.036152122018598486,
+      "reference_best_stack": "gate-fp32",
+      "reference_best_formal_batch_card_rental_cny": 0.2834774798485968,
+      "accepted_as_new_step_beyond_best": false,
+      "status": "coenabled_quality_failed",
+      "evidence": [
+        "results/mmlu-pro-20261017/analysis.json",
+        "results/mmlu-pro-20261017/raw-evidence.tgz"
+      ],
+      "limitation": "One launch per arm, three repeats in the same process; no new measurements or cross-restart qualification."
+    },
+    {
+      "id": "gate-fp32+zerocost-wiring",
+      "members": [
+        "gate-fp32",
+        "zerocost-wiring"
+      ],
+      "profile_id": "mmlu-028-r2",
+      "coenablement": "observed_in_frozen_campaign",
+      "all_declared_modules_exercised": true,
+      "quality_nonregression": true,
+      "performance_full_output_equivalence": true,
+      "quality_regressions": [],
+      "formal_batch_card_rental_cny": 0.2839957702635891,
+      "parent_stack": "gate-fp32",
+      "parent_formal_batch_card_rental_cny": 0.2834774798485968,
+      "marginal_cost_reduction_vs_parent": -0.0018283301208586664,
+      "reference_best_stack": "gate-fp32",
+      "reference_best_formal_batch_card_rental_cny": 0.2834774798485968,
+      "accepted_as_new_step_beyond_best": false,
+      "status": "coenabled_no_marginal_benefit",
+      "evidence": [
+        "results/mmlu-pro-20261017/analysis.json",
+        "results/mmlu-pro-20261017/raw-evidence.tgz"
+      ],
+      "limitation": "One launch per arm, three repeats in the same process; no new measurements or cross-restart qualification."
+    },
+    {
+      "id": "fia-demask+zerocost-wiring",
+      "members": [
+        "fia-demask",
+        "zerocost-wiring"
+      ],
+      "profile_id": "mmlu-028-r2",
+      "coenablement": "observed_in_frozen_campaign",
+      "all_declared_modules_exercised": true,
+      "quality_nonregression": false,
+      "performance_full_output_equivalence": true,
+      "quality_regressions": [
+        "mmlu-pro-00869",
+        "mmlu-pro-09048"
+      ],
+      "formal_batch_card_rental_cny": 0.2854040083765156,
+      "parent_stack": "zerocost-wiring",
+      "parent_formal_batch_card_rental_cny": 0.28465885850083494,
+      "marginal_cost_reduction_vs_parent": -0.0026176943152410414,
+      "reference_best_stack": "gate-fp32",
+      "reference_best_formal_batch_card_rental_cny": 0.2834774798485968,
+      "accepted_as_new_step_beyond_best": false,
+      "status": "coenabled_quality_failed",
+      "evidence": [
+        "results/mmlu-pro-20261017/analysis.json",
+        "results/mmlu-pro-20261017/raw-evidence.tgz"
+      ],
+      "limitation": "One launch per arm, three repeats in the same process; no new measurements or cross-restart qualification."
+    },
+    {
+      "id": "gate-fp32+fia-demask+zerocost-wiring",
+      "members": [
+        "gate-fp32",
+        "fia-demask",
+        "zerocost-wiring"
+      ],
+      "profile_id": "mmlu-028-r2",
+      "coenablement": "observed_in_frozen_campaign",
+      "all_declared_modules_exercised": true,
+      "quality_nonregression": false,
+      "performance_full_output_equivalence": false,
+      "quality_regressions": [
+        "mmlu-pro-00869"
+      ],
+      "formal_batch_card_rental_cny": 0.2853354375002285,
+      "parent_stack": "gate-fp32+zerocost-wiring",
+      "parent_formal_batch_card_rental_cny": 0.2839957702635891,
+      "marginal_cost_reduction_vs_parent": -0.004717208412632394,
+      "reference_best_stack": "gate-fp32",
+      "reference_best_formal_batch_card_rental_cny": 0.2834774798485968,
+      "accepted_as_new_step_beyond_best": false,
+      "status": "coenabled_quality_failed",
+      "evidence": [
+        "results/mmlu-pro-20261017/analysis.json",
+        "results/mmlu-pro-20261017/raw-evidence.tgz"
+      ],
+      "limitation": "One launch per arm, three repeats in the same process; no new measurements or cross-restart qualification."
+    },
+    {
+      "id": "gate-zero+gdn-static-decay-022-formal-r2",
+      "members": [
+        "gate-fp32",
+        "zerocost-wiring",
+        "gdn-static-decay-precompute"
+      ],
+      "profile_id": "gdn-static-unified-graph-v1-mmlu-r2",
+      "coenablement": "Both ranks and all12 starts audited; Gate40, Zero actual request effects, GDN30 pointers joined to actual graph replay",
+      "all_declared_modules_exercised": true,
+      "quality_nonregression": true,
+      "performance_full_output_equivalence": true,
+      "quality_scope": "Same-group Native shared98% budget; named200/8192 retention100%; HLE/FrontierScience untested",
+      "parent_stack": [
+        "gate-fp32",
+        "zerocost-wiring"
+      ],
+      "paired_marginal_cost_reductions": [
+        -0.007531509842568731,
+        -0.006516870053444858,
+        -0.002500743645763838
+      ],
+      "marginal_cost_reduction_vs_parent": -0.006516870053444858,
+      "accepted_as_new_step_beyond_best": false,
+      "status": "coenabled_scoped_quality_pass_stable_marginal_cost_failed",
+      "evidence": [
+        "results/campaigns/gdn-static-decay-mingqi-20261020/runs/formal-mmlu-r2-final/assessment.json",
+        "results/campaigns/gdn-static-decay-mingqi-20261020/runs/formal-mmlu-r2-final/mechanism-audit.json"
+      ],
+      "limitation": "3 independent pairs; within-start3 repeats not independent; reference not claimed optimal; only steady card rental; no full cross-track qualification"
+    }
+  ],
+  "required_candidate_metadata": [
+    "host_api_and_versions",
+    "hooks_and_registration_order",
+    "state_format_dtype_and_ownership",
+    "exclusive_resources",
+    "dependencies",
+    "fallback_and_rollback",
+    "per_worker_effect_evidence"
+  ],
+  "integration_queue": [
+    {
+      "id": "gate-zero-repeatability",
+      "status": "old_studies_complete_new_profile_matrix_running",
+      "members": [
+        "gate-fp32",
+        "zerocost-wiring"
+      ],
+      "next": "旧22次与新版Native诊断均完成归档；继续C16/C32各自Native、Gate与Zero子项到全开，分别核对两种百万Token成本；新正向边再独立重启。",
+      "evidence": [
+        "results/mmlu-pro-restarts-20261017/README.md",
+        "results/mmlu-q99-reassessment-20261017/review-v1/README.md",
+        "results/mmlu-q99-reassessment-20261017/matrix-freeze.json"
+      ]
+    },
+    {
+      "id": "zero-decomposition-on-reference-stack",
+      "status": "old_studies_complete_new_profile_matrix_running",
+      "members": [
+        "gate-fp32",
+        "zerocost-wiring"
+      ],
+      "next": "旧22次与新版Native诊断均完成归档；继续C16/C32各自Native、Gate与Zero子项到全开，分别核对两种百万Token成本；新正向边再独立重启。",
+      "evidence": [
+        "results/zero-ablation-20261017/README.md",
+        "results/mod-composition-20261017/README.md",
+        "results/mmlu-q99-reassessment-20261017/review-v1/README.md",
+        "results/mmlu-q99-reassessment-20261017/matrix-freeze.json"
+      ]
+    },
+    {
+      "id": "new-candidate-stack-admission",
+      "status": "common_host_admission_matrix_registered",
+      "members": [],
+      "next": "测试4的16-unified-profile已登记15组追加准入；原成员继续各自单项，新共同宿主重新测参考组合与完整新组合，当前不授组合或经济资格。",
+      "evidence": [
+        "mods/pending-mods.json",
+        "results/unified-profile-20261018/mod-admission-matrix.json"
+      ]
+    },
+    {
+      "id": "fia-combination-repair",
+      "status": "planned_not_started",
+      "members": [
+        "fia-demask"
+      ],
+      "next": "历史严格失败保留；新profile按预冻结Native99%分数预算复核，单题或Token差异不自动否决。取得共同宿主的每项作用、组合质量与边际成本后再判新增台阶。",
+      "evidence": [
+        "results/mmlu-pro-20261017/analysis.json"
+      ]
+    },
+    {
+      "id": "betterscale-overlap-audit",
+      "status": "common_host_artifacts_manager_admission_in_progress",
+      "members": [
+        "betterscale",
+        "betterscale-resident-state",
+        "betterscale-balanced-attention",
+        "betterscale-host-prepare",
+        "betterscale-state-cache-lifecycle"
+      ],
+      "next": "测试4在16-unified-profile重建共同宿主及载荷/Manager合同；复用测试2审计，先明确独立子项，再同条件测子项、完整母包与非重复外部MOD组合。",
+      "evidence": [
+        "mods/pending-mods.json",
+        "mods/composition-plan.md",
+        "results/unified-profile-20261018/README.md",
+        "results/unified-profile-20261018/mod-admission-matrix.json"
+      ]
+    },
+    {
+      "id": "othermods-unified-composition",
+      "status": "blocked_by_child_output_and_host_contracts",
+      "members": [
+        "ascend-kvcompress:triattention",
+        "simllm"
+      ],
+      "profile_id": "othermods-unified-r2",
+      "next": "修复调度签名/旧宿主Mamba契约，先定位SimLLM续答漂移并复验子项；未通过不测上层组合",
+      "evidence": [
+        "results/ongoing-mod-tests-20261017/othermods-smoke-summary.json",
+        "results/ongoing-mod-tests-20261017/calibration-preparation-r2/finished.json",
+        "results/ongoing-mod-tests-20261017/protocol.json",
+        "results/ongoing-mod-tests-20261017/queued-othermods-r3-v2/effect-gate-revision.json",
+        "results/ongoing-mod-tests-20261017/simllm-prefix-workload-plan.md"
+      ]
+    },
+    {
+      "id": "test4-int8-integration",
+      "status": "historical_smoke_superseded_by_completed_r2_diagnostic",
+      "members": [
+        "quantized-kv-cache-migration:int8_dynamic"
+      ],
+      "next": "历史冒烟状态已由匹配Native的r2正式配对诊断推进；单项真实生效，但未获稳定新增成本边，与其他MOD共启仍待验。",
+      "evidence": [
+        "results/test4-int8-kv-20261017/README.md",
+        "results/test4-int8-kv-20261017/r2-recovery/conclusion.md"
+      ]
+    },
+    {
+      "id": "test4-int8-r2-followup",
+      "members": [
+        "int8-dynamic-kv"
+      ],
+      "profile_id": "test4-int8-formal-diagnostic-r2-nofile65536",
+      "status": "not_admitted_no_qualified_single_module_cost_step",
+      "next": "本r2诊断完成，当前无后续模型队列；不将本项加入累计下降链。6-FD-root-cause待另行认领；新负载、宿主或组合需单独登记并建立匹配基线。",
+      "known_alternative": "kivi_int4",
+      "coenablement_with_other_mods": "unverified; no additive benefit inferred",
+      "evidence": [
+        "results/test4-int8-kv-20261017/r2-recovery/conclusion.md",
+        "results/test4-int8-kv-20261017/r2-recovery/paired-audit/summary.json"
+      ]
+    }
+  ],
+  "containment_policy": "mods/containment-plan.json",
+  "observed_studies": {
+    "independent-restarts-20261017-r1": {
+      "status": "completed_no_stable_step",
+      "completed_launches": 12,
+      "planned_launches": 12,
+      "evidence": "results/mmlu-pro-restarts-20261017/analysis.json",
+      "raw_archive_sha256": "cddb3fb28f6b4187b7254032bef0fd4c68629204088e5d90e5fc4079fe5cdb03",
+      "scope": "Completed12-start frozen strict study with fresh within-block baselines; no stable qualified edge. Separate99% review preserves strict history.",
+      "completed_observations": [
+        {
+          "block": 1,
+          "arm": "native",
+          "median_batch_card_rental_cny": 0.2987246337470909,
+          "matched_nonregressing": true,
+          "quality_regressions_vs_native": [],
+          "full_output_identical_counts_by_repeat": [
+            200,
+            200,
+            200
+          ]
+        },
+        {
+          "block": 1,
+          "arm": "gate-fp32",
+          "median_batch_card_rental_cny": 0.28242380814833773,
+          "matched_nonregressing": false,
+          "quality_regressions_vs_native": [
+            "mmlu-pro-02807"
+          ],
+          "full_output_identical_counts_by_repeat": [
+            200,
+            200,
+            200
+          ]
+        },
+        {
+          "block": 1,
+          "arm": "zerocost-wiring",
+          "median_batch_card_rental_cny": 0.2942875463494824,
+          "matched_nonregressing": false,
+          "quality_regressions_vs_native": [
+            "mmlu-pro-02807"
+          ],
+          "full_output_identical_counts_by_repeat": [
+            200,
+            34,
+            200
+          ]
+        },
+        {
+          "block": 1,
+          "arm": "gate-fp32+zerocost-wiring",
+          "median_batch_card_rental_cny": 0.285476873939236,
+          "matched_nonregressing": false,
+          "quality_regressions_vs_native": [],
+          "full_output_identical_counts_by_repeat": [
+            200,
+            200,
+            34
+          ]
+        },
+        {
+          "block": 2,
+          "arm": "gate-fp32+zerocost-wiring",
+          "median_batch_card_rental_cny": 0.29590454189520743,
+          "matched_nonregressing": false,
+          "quality_regressions_vs_native": [
+            "mmlu-pro-00869"
+          ],
+          "full_output_identical_counts_by_repeat": [
+            200,
+            200,
+            200
+          ]
+        },
+        {
+          "block": 2,
+          "arm": "zerocost-wiring",
+          "median_batch_card_rental_cny": 0.29561167193576693,
+          "matched_nonregressing": false,
+          "quality_regressions_vs_native": [
+            "mmlu-pro-00869",
+            "mmlu-pro-09048"
+          ],
+          "full_output_identical_counts_by_repeat": [
+            200,
+            200,
+            200
+          ]
+        },
+        {
+          "block": 2,
+          "arm": "gate-fp32",
+          "median_batch_card_rental_cny": 0.29734700172104767,
+          "matched_nonregressing": false,
+          "quality_regressions_vs_native": [
+            "mmlu-pro-00869"
+          ],
+          "full_output_identical_counts_by_repeat": [
+            200,
+            25,
+            25
+          ]
+        },
+        {
+          "block": 2,
+          "arm": "native",
+          "median_batch_card_rental_cny": 0.28739211064659886,
+          "matched_nonregressing": true,
+          "quality_regressions_vs_native": [],
+          "full_output_identical_counts_by_repeat": [
+            200,
+            200,
+            200
+          ]
+        },
+        {
+          "block": 3,
+          "arm": "zerocost-wiring",
+          "median_batch_card_rental_cny": 0.2906393275885946,
+          "matched_nonregressing": false,
+          "quality_regressions_vs_native": [
+            "mmlu-pro-00869"
+          ],
+          "full_output_identical_counts_by_repeat": [
+            200,
+            200,
+            200
+          ]
+        },
+        {
+          "block": 3,
+          "arm": "native",
+          "median_batch_card_rental_cny": 0.2982804273544914,
+          "matched_nonregressing": true,
+          "quality_regressions_vs_native": [],
+          "full_output_identical_counts_by_repeat": [
+            200,
+            200,
+            200
+          ]
+        },
+        {
+          "block": 3,
+          "arm": "gate-fp32+zerocost-wiring",
+          "median_batch_card_rental_cny": 0.2965727062481973,
+          "matched_nonregressing": false,
+          "quality_regressions_vs_native": [
+            "mmlu-pro-00869",
+            "mmlu-pro-09048"
+          ],
+          "full_output_identical_counts_by_repeat": [
+            30,
+            200,
+            200
+          ]
+        },
+        {
+          "block": 3,
+          "arm": "gate-fp32",
+          "median_batch_card_rental_cny": 0.2886483025716411,
+          "matched_nonregressing": false,
+          "quality_regressions_vs_native": [],
+          "full_output_identical_counts_by_repeat": [
+            25,
+            200,
+            200
+          ]
+        }
+      ],
+      "edge_observations": [
+        {
+          "from": "native",
+          "to": "gate-fp32",
+          "block": 1,
+          "batch_rental_reduction_pct": 5.456806622969679,
+          "matched_edge": false,
+          "quality_regressions_vs_previous_rung": [
+            "mmlu-pro-02807"
+          ],
+          "full_output_identical_counts_by_repeat": [
+            200,
+            200,
+            200
+          ]
+        },
+        {
+          "from": "native",
+          "to": "gate-fp32",
+          "block": 2,
+          "batch_rental_reduction_pct": -3.4638706859598356,
+          "matched_edge": false,
+          "quality_regressions_vs_previous_rung": [
+            "mmlu-pro-00869"
+          ],
+          "full_output_identical_counts_by_repeat": [
+            200,
+            25,
+            25
+          ]
+        },
+        {
+          "from": "native",
+          "to": "gate-fp32",
+          "block": 3,
+          "batch_rental_reduction_pct": 3.229217843181842,
+          "matched_edge": false,
+          "quality_regressions_vs_previous_rung": [],
+          "full_output_identical_counts_by_repeat": [
+            25,
+            200,
+            200
+          ]
+        },
+        {
+          "from": "native",
+          "to": "zerocost-wiring",
+          "block": 1,
+          "batch_rental_reduction_pct": 1.4853436564475242,
+          "matched_edge": false,
+          "quality_regressions_vs_previous_rung": [
+            "mmlu-pro-02807"
+          ],
+          "full_output_identical_counts_by_repeat": [
+            200,
+            34,
+            200
+          ]
+        },
+        {
+          "from": "native",
+          "to": "zerocost-wiring",
+          "block": 2,
+          "batch_rental_reduction_pct": -2.860051123419849,
+          "matched_edge": false,
+          "quality_regressions_vs_previous_rung": [
+            "mmlu-pro-00869",
+            "mmlu-pro-09048"
+          ],
+          "full_output_identical_counts_by_repeat": [
+            200,
+            200,
+            200
+          ]
+        },
+        {
+          "from": "native",
+          "to": "zerocost-wiring",
+          "block": 3,
+          "batch_rental_reduction_pct": 2.5617167823136167,
+          "matched_edge": false,
+          "quality_regressions_vs_previous_rung": [
+            "mmlu-pro-00869"
+          ],
+          "full_output_identical_counts_by_repeat": [
+            200,
+            200,
+            200
+          ]
+        },
+        {
+          "from": "native",
+          "to": "gate-fp32+zerocost-wiring",
+          "block": 1,
+          "batch_rental_reduction_pct": 4.434773135941262,
+          "matched_edge": false,
+          "quality_regressions_vs_previous_rung": [],
+          "full_output_identical_counts_by_repeat": [
+            200,
+            200,
+            34
+          ]
+        },
+        {
+          "from": "native",
+          "to": "gate-fp32+zerocost-wiring",
+          "block": 2,
+          "batch_rental_reduction_pct": -2.9619571774105458,
+          "matched_edge": false,
+          "quality_regressions_vs_previous_rung": [
+            "mmlu-pro-00869"
+          ],
+          "full_output_identical_counts_by_repeat": [
+            200,
+            200,
+            200
+          ]
+        },
+        {
+          "from": "native",
+          "to": "gate-fp32+zerocost-wiring",
+          "block": 3,
+          "batch_rental_reduction_pct": 0.5725220127382191,
+          "matched_edge": false,
+          "quality_regressions_vs_previous_rung": [
+            "mmlu-pro-00869",
+            "mmlu-pro-09048"
+          ],
+          "full_output_identical_counts_by_repeat": [
+            30,
+            200,
+            200
+          ]
+        },
+        {
+          "from": "gate-fp32",
+          "to": "gate-fp32+zerocost-wiring",
+          "block": 1,
+          "batch_rental_reduction_pct": -1.0810228113965037,
+          "matched_edge": false,
+          "quality_regressions_vs_previous_rung": [
+            "mmlu-pro-00869"
+          ],
+          "full_output_identical_counts_by_repeat": [
+            200,
+            200,
+            34
+          ]
+        },
+        {
+          "from": "gate-fp32",
+          "to": "gate-fp32+zerocost-wiring",
+          "block": 2,
+          "batch_rental_reduction_pct": 0.4851099279600146,
+          "matched_edge": false,
+          "quality_regressions_vs_previous_rung": [],
+          "full_output_identical_counts_by_repeat": [
+            200,
+            25,
+            25
+          ]
+        },
+        {
+          "from": "gate-fp32",
+          "to": "gate-fp32+zerocost-wiring",
+          "block": 3,
+          "batch_rental_reduction_pct": -2.745349134554309,
+          "matched_edge": false,
+          "quality_regressions_vs_previous_rung": [
+            "mmlu-pro-00869",
+            "mmlu-pro-09048"
+          ],
+          "full_output_identical_counts_by_repeat": [
+            34,
+            200,
+            200
+          ]
+        },
+        {
+          "from": "zerocost-wiring",
+          "to": "gate-fp32+zerocost-wiring",
+          "block": 1,
+          "batch_rental_reduction_pct": 2.9938991709092755,
+          "matched_edge": false,
+          "quality_regressions_vs_previous_rung": [
+            "mmlu-pro-00869"
+          ],
+          "full_output_identical_counts_by_repeat": [
+            200,
+            34,
+            34
+          ]
+        },
+        {
+          "from": "zerocost-wiring",
+          "to": "gate-fp32+zerocost-wiring",
+          "block": 2,
+          "batch_rental_reduction_pct": -0.09907252901169006,
+          "matched_edge": false,
+          "quality_regressions_vs_previous_rung": [
+            "mmlu-pro-11289"
+          ],
+          "full_output_identical_counts_by_repeat": [
+            200,
+            200,
+            200
+          ]
+        },
+        {
+          "from": "zerocost-wiring",
+          "to": "gate-fp32+zerocost-wiring",
+          "block": 3,
+          "batch_rental_reduction_pct": -2.0414920130841674,
+          "matched_edge": false,
+          "quality_regressions_vs_previous_rung": [
+            "mmlu-pro-02807",
+            "mmlu-pro-09048"
+          ],
+          "full_output_identical_counts_by_repeat": [
+            30,
+            200,
+            200
+          ]
+        }
+      ],
+      "conclusion": "results/mmlu-pro-restarts-20261017/conclusion.md"
+    },
+    "zero-ablation-20261017": {
+      "status": "completed_no_qualified_step",
+      "completed_model_starts": 5,
+      "formal_repeats": 15,
+      "independent_starts_per_configuration": 1,
+      "conclusion": "results/zero-ablation-20261017/conclusion.md",
+      "analysis": "results/zero-ablation-20261017/analysis.json",
+      "contained_feature_edges": [
+        {
+          "from": "out-copy-only",
+          "to": "zero-both",
+          "observed_batch_rental_reduction_pct": -0.22028657671602225,
+          "paired_output_comparisons": [
+            {
+              "total": 200,
+              "identical": 30,
+              "different_case_ids": [
+                "mmlu-pro-00070",
+                "mmlu-pro-00071",
+                "mmlu-pro-00072",
+                "mmlu-pro-00074",
+                "mmlu-pro-00075",
+                "mmlu-pro-00076",
+                "mmlu-pro-00077",
+                "mmlu-pro-00079",
+                "mmlu-pro-00081",
+                "mmlu-pro-00082",
+                "mmlu-pro-00083",
+                "mmlu-pro-00084",
+                "mmlu-pro-00866",
+                "mmlu-pro-00867",
+                "mmlu-pro-00868",
+                "mmlu-pro-00869",
+                "mmlu-pro-00870",
+                "mmlu-pro-00871",
+                "mmlu-pro-00872",
+                "mmlu-pro-00873",
+                "mmlu-pro-00874",
+                "mmlu-pro-00875",
+                "mmlu-pro-00876",
+                "mmlu-pro-00877",
+                "mmlu-pro-00878",
+                "mmlu-pro-00879",
+                "mmlu-pro-01986",
+                "mmlu-pro-01987",
+                "mmlu-pro-01988",
+                "mmlu-pro-01989",
+                "mmlu-pro-01990",
+                "mmlu-pro-01991",
+                "mmlu-pro-01992",
+                "mmlu-pro-01993",
+                "mmlu-pro-01994",
+                "mmlu-pro-01995",
+                "mmlu-pro-01996",
+                "mmlu-pro-01997",
+                "mmlu-pro-01998",
+                "mmlu-pro-02804",
+                "mmlu-pro-02805",
+                "mmlu-pro-02806",
+                "mmlu-pro-02807",
+                "mmlu-pro-02808",
+                "mmlu-pro-02809",
+                "mmlu-pro-02810",
+                "mmlu-pro-02811",
+                "mmlu-pro-02812",
+                "mmlu-pro-02813",
+                "mmlu-pro-02814",
+                "mmlu-pro-02815",
+                "mmlu-pro-02816",
+                "mmlu-pro-02817",
+                "mmlu-pro-02818",
+                "mmlu-pro-03526",
+                "mmlu-pro-03527",
+                "mmlu-pro-03528",
+                "mmlu-pro-03529",
+                "mmlu-pro-03530",
+                "mmlu-pro-03531",
+                "mmlu-pro-03532",
+                "mmlu-pro-03533",
+                "mmlu-pro-03534",
+                "mmlu-pro-03537",
+                "mmlu-pro-03539",
+                "mmlu-pro-04669",
+                "mmlu-pro-04670",
+                "mmlu-pro-04671",
+                "mmlu-pro-04672",
+                "mmlu-pro-04673",
+                "mmlu-pro-04674",
+                "mmlu-pro-04675",
+                "mmlu-pro-04676",
+                "mmlu-pro-04678",
+                "mmlu-pro-04679",
+                "mmlu-pro-04680",
+                "mmlu-pro-04681",
+                "mmlu-pro-04682",
+                "mmlu-pro-05059",
+                "mmlu-pro-05060",
+                "mmlu-pro-05061",
+                "mmlu-pro-05062",
+                "mmlu-pro-05063",
+                "mmlu-pro-05064",
+                "mmlu-pro-05065",
+                "mmlu-pro-05066",
+                "mmlu-pro-05067",
+                "mmlu-pro-05069",
+                "mmlu-pro-05070",
+                "mmlu-pro-05071",
+                "mmlu-pro-05072",
+                "mmlu-pro-05073",
+                "mmlu-pro-06001",
+                "mmlu-pro-06002",
+                "mmlu-pro-06003",
+                "mmlu-pro-06004",
+                "mmlu-pro-06005",
+                "mmlu-pro-06006",
+                "mmlu-pro-06007",
+                "mmlu-pro-06008",
+                "mmlu-pro-06009",
+                "mmlu-pro-06010",
+                "mmlu-pro-06011",
+                "mmlu-pro-06012",
+                "mmlu-pro-06013",
+                "mmlu-pro-06014",
+                "mmlu-pro-06826",
+                "mmlu-pro-06827",
+                "mmlu-pro-06828",
+                "mmlu-pro-06829",
+                "mmlu-pro-06830",
+                "mmlu-pro-06832",
+                "mmlu-pro-06836",
+                "mmlu-pro-06838",
+                "mmlu-pro-06839",
+                "mmlu-pro-06840",
+                "mmlu-pro-07689",
+                "mmlu-pro-07690",
+                "mmlu-pro-07692",
+                "mmlu-pro-07693",
+                "mmlu-pro-07696",
+                "mmlu-pro-07697",
+                "mmlu-pro-09044",
+                "mmlu-pro-09045",
+                "mmlu-pro-09046",
+                "mmlu-pro-09047",
+                "mmlu-pro-09048",
+                "mmlu-pro-09049",
+                "mmlu-pro-09050",
+                "mmlu-pro-09051",
+                "mmlu-pro-09052",
+                "mmlu-pro-09053",
+                "mmlu-pro-09054",
+                "mmlu-pro-09055",
+                "mmlu-pro-09056",
+                "mmlu-pro-09057",
+                "mmlu-pro-10356",
+                "mmlu-pro-10358",
+                "mmlu-pro-10359",
+                "mmlu-pro-10360",
+                "mmlu-pro-10361",
+                "mmlu-pro-10364",
+                "mmlu-pro-10365",
+                "mmlu-pro-10366",
+                "mmlu-pro-10367",
+                "mmlu-pro-10368",
+                "mmlu-pro-10369",
+                "mmlu-pro-10370",
+                "mmlu-pro-10774",
+                "mmlu-pro-10775",
+                "mmlu-pro-10776",
+                "mmlu-pro-10780",
+                "mmlu-pro-10781",
+                "mmlu-pro-10782",
+                "mmlu-pro-10783",
+                "mmlu-pro-10784",
+                "mmlu-pro-10785",
+                "mmlu-pro-10786",
+                "mmlu-pro-10787",
+                "mmlu-pro-11285",
+                "mmlu-pro-11287",
+                "mmlu-pro-11289",
+                "mmlu-pro-11290",
+                "mmlu-pro-11291",
+                "mmlu-pro-11292",
+                "mmlu-pro-11293",
+                "mmlu-pro-11295",
+                "mmlu-pro-11296",
+                "mmlu-pro-11297",
+                "mmlu-pro-11298"
+              ]
+            },
+            {
+              "total": 200,
+              "identical": 34,
+              "different_case_ids": [
+                "mmlu-pro-00070",
+                "mmlu-pro-00071",
+                "mmlu-pro-00072",
+                "mmlu-pro-00073",
+                "mmlu-pro-00074",
+                "mmlu-pro-00075",
+                "mmlu-pro-00076",
+                "mmlu-pro-00080",
+                "mmlu-pro-00081",
+                "mmlu-pro-00082",
+                "mmlu-pro-00083",
+                "mmlu-pro-00084",
+                "mmlu-pro-00866",
+                "mmlu-pro-00867",
+                "mmlu-pro-00868",
+                "mmlu-pro-00869",
+                "mmlu-pro-00870",
+                "mmlu-pro-00871",
+                "mmlu-pro-00872",
+                "mmlu-pro-00873",
+                "mmlu-pro-00874",
+                "mmlu-pro-00875",
+                "mmlu-pro-00877",
+                "mmlu-pro-00878",
+                "mmlu-pro-00879",
+                "mmlu-pro-01986",
+                "mmlu-pro-01987",
+                "mmlu-pro-01989",
+                "mmlu-pro-01990",
+                "mmlu-pro-01991",
+                "mmlu-pro-01993",
+                "mmlu-pro-01994",
+                "mmlu-pro-01995",
+                "mmlu-pro-01996",
+                "mmlu-pro-01997",
+                "mmlu-pro-01998",
+                "mmlu-pro-01999",
+                "mmlu-pro-02804",
+                "mmlu-pro-02805",
+                "mmlu-pro-02806",
+                "mmlu-pro-02807",
+                "mmlu-pro-02808",
+                "mmlu-pro-02811",
+                "mmlu-pro-02812",
+                "mmlu-pro-02813",
+                "mmlu-pro-02814",
+                "mmlu-pro-02815",
+                "mmlu-pro-02816",
+                "mmlu-pro-02817",
+                "mmlu-pro-02818",
+                "mmlu-pro-03526",
+                "mmlu-pro-03527",
+                "mmlu-pro-03529",
+                "mmlu-pro-03530",
+                "mmlu-pro-03531",
+                "mmlu-pro-03533",
+                "mmlu-pro-03537",
+                "mmlu-pro-03538",
+                "mmlu-pro-03539",
+                "mmlu-pro-03540",
+                "mmlu-pro-04669",
+                "mmlu-pro-04670",
+                "mmlu-pro-04671",
+                "mmlu-pro-04672",
+                "mmlu-pro-04673",
+                "mmlu-pro-04674",
+                "mmlu-pro-04675",
+                "mmlu-pro-04677",
+                "mmlu-pro-04678",
+                "mmlu-pro-04679",
+                "mmlu-pro-04680",
+                "mmlu-pro-04681",
+                "mmlu-pro-04682",
+                "mmlu-pro-05059",
+                "mmlu-pro-05060",
+                "mmlu-pro-05061",
+                "mmlu-pro-05063",
+                "mmlu-pro-05064",
+                "mmlu-pro-05065",
+                "mmlu-pro-05066",
+                "mmlu-pro-05067",
+                "mmlu-pro-05069",
+                "mmlu-pro-05071",
+                "mmlu-pro-05072",
+                "mmlu-pro-05073",
+                "mmlu-pro-06001",
+                "mmlu-pro-06002",
+                "mmlu-pro-06003",
+                "mmlu-pro-06004",
+                "mmlu-pro-06005",
+                "mmlu-pro-06006",
+                "mmlu-pro-06007",
+                "mmlu-pro-06008",
+                "mmlu-pro-06009",
+                "mmlu-pro-06010",
+                "mmlu-pro-06011",
+                "mmlu-pro-06012",
+                "mmlu-pro-06013",
+                "mmlu-pro-06014",
+                "mmlu-pro-06826",
+                "mmlu-pro-06827",
+                "mmlu-pro-06828",
+                "mmlu-pro-06829",
+                "mmlu-pro-06830",
+                "mmlu-pro-06831",
+                "mmlu-pro-06832",
+                "mmlu-pro-06833",
+                "mmlu-pro-06834",
+                "mmlu-pro-06836",
+                "mmlu-pro-06838",
+                "mmlu-pro-06840",
+                "mmlu-pro-07687",
+                "mmlu-pro-07689",
+                "mmlu-pro-07690",
+                "mmlu-pro-07691",
+                "mmlu-pro-07692",
+                "mmlu-pro-07693",
+                "mmlu-pro-07694",
+                "mmlu-pro-07696",
+                "mmlu-pro-07697",
+                "mmlu-pro-07700",
+                "mmlu-pro-09044",
+                "mmlu-pro-09045",
+                "mmlu-pro-09046",
+                "mmlu-pro-09047",
+                "mmlu-pro-09048",
+                "mmlu-pro-09049",
+                "mmlu-pro-09051",
+                "mmlu-pro-09053",
+                "mmlu-pro-09054",
+                "mmlu-pro-09055",
+                "mmlu-pro-09056",
+                "mmlu-pro-10356",
+                "mmlu-pro-10358",
+                "mmlu-pro-10359",
+                "mmlu-pro-10360",
+                "mmlu-pro-10361",
+                "mmlu-pro-10362",
+                "mmlu-pro-10363",
+                "mmlu-pro-10364",
+                "mmlu-pro-10366",
+                "mmlu-pro-10367",
+                "mmlu-pro-10368",
+                "mmlu-pro-10369",
+                "mmlu-pro-10370",
+                "mmlu-pro-10774",
+                "mmlu-pro-10775",
+                "mmlu-pro-10777",
+                "mmlu-pro-10779",
+                "mmlu-pro-10780",
+                "mmlu-pro-10782",
+                "mmlu-pro-10783",
+                "mmlu-pro-10784",
+                "mmlu-pro-10785",
+                "mmlu-pro-10786",
+                "mmlu-pro-10787",
+                "mmlu-pro-11285",
+                "mmlu-pro-11287",
+                "mmlu-pro-11288",
+                "mmlu-pro-11289",
+                "mmlu-pro-11290",
+                "mmlu-pro-11291",
+                "mmlu-pro-11295",
+                "mmlu-pro-11296",
+                "mmlu-pro-11297",
+                "mmlu-pro-11298"
+              ]
+            },
+            {
+              "total": 200,
+              "identical": 34,
+              "different_case_ids": [
+                "mmlu-pro-00070",
+                "mmlu-pro-00071",
+                "mmlu-pro-00072",
+                "mmlu-pro-00073",
+                "mmlu-pro-00074",
+                "mmlu-pro-00075",
+                "mmlu-pro-00076",
+                "mmlu-pro-00080",
+                "mmlu-pro-00081",
+                "mmlu-pro-00082",
+                "mmlu-pro-00083",
+                "mmlu-pro-00084",
+                "mmlu-pro-00866",
+                "mmlu-pro-00867",
+                "mmlu-pro-00868",
+                "mmlu-pro-00869",
+                "mmlu-pro-00870",
+                "mmlu-pro-00871",
+                "mmlu-pro-00872",
+                "mmlu-pro-00873",
+                "mmlu-pro-00874",
+                "mmlu-pro-00875",
+                "mmlu-pro-00877",
+                "mmlu-pro-00878",
+                "mmlu-pro-00879",
+                "mmlu-pro-01986",
+                "mmlu-pro-01987",
+                "mmlu-pro-01989",
+                "mmlu-pro-01990",
+                "mmlu-pro-01991",
+                "mmlu-pro-01993",
+                "mmlu-pro-01994",
+                "mmlu-pro-01995",
+                "mmlu-pro-01996",
+                "mmlu-pro-01997",
+                "mmlu-pro-01998",
+                "mmlu-pro-01999",
+                "mmlu-pro-02804",
+                "mmlu-pro-02805",
+                "mmlu-pro-02806",
+                "mmlu-pro-02807",
+                "mmlu-pro-02808",
+                "mmlu-pro-02811",
+                "mmlu-pro-02812",
+                "mmlu-pro-02813",
+                "mmlu-pro-02814",
+                "mmlu-pro-02815",
+                "mmlu-pro-02816",
+                "mmlu-pro-02817",
+                "mmlu-pro-02818",
+                "mmlu-pro-03526",
+                "mmlu-pro-03527",
+                "mmlu-pro-03529",
+                "mmlu-pro-03530",
+                "mmlu-pro-03531",
+                "mmlu-pro-03533",
+                "mmlu-pro-03537",
+                "mmlu-pro-03538",
+                "mmlu-pro-03539",
+                "mmlu-pro-03540",
+                "mmlu-pro-04669",
+                "mmlu-pro-04670",
+                "mmlu-pro-04671",
+                "mmlu-pro-04672",
+                "mmlu-pro-04673",
+                "mmlu-pro-04674",
+                "mmlu-pro-04675",
+                "mmlu-pro-04677",
+                "mmlu-pro-04678",
+                "mmlu-pro-04679",
+                "mmlu-pro-04680",
+                "mmlu-pro-04681",
+                "mmlu-pro-04682",
+                "mmlu-pro-05059",
+                "mmlu-pro-05060",
+                "mmlu-pro-05061",
+                "mmlu-pro-05063",
+                "mmlu-pro-05064",
+                "mmlu-pro-05065",
+                "mmlu-pro-05066",
+                "mmlu-pro-05067",
+                "mmlu-pro-05069",
+                "mmlu-pro-05071",
+                "mmlu-pro-05072",
+                "mmlu-pro-05073",
+                "mmlu-pro-06001",
+                "mmlu-pro-06002",
+                "mmlu-pro-06003",
+                "mmlu-pro-06004",
+                "mmlu-pro-06005",
+                "mmlu-pro-06006",
+                "mmlu-pro-06007",
+                "mmlu-pro-06008",
+                "mmlu-pro-06009",
+                "mmlu-pro-06010",
+                "mmlu-pro-06011",
+                "mmlu-pro-06012",
+                "mmlu-pro-06013",
+                "mmlu-pro-06014",
+                "mmlu-pro-06826",
+                "mmlu-pro-06827",
+                "mmlu-pro-06828",
+                "mmlu-pro-06829",
+                "mmlu-pro-06830",
+                "mmlu-pro-06831",
+                "mmlu-pro-06832",
+                "mmlu-pro-06833",
+                "mmlu-pro-06834",
+                "mmlu-pro-06836",
+                "mmlu-pro-06838",
+                "mmlu-pro-06840",
+                "mmlu-pro-07687",
+                "mmlu-pro-07689",
+                "mmlu-pro-07690",
+                "mmlu-pro-07691",
+                "mmlu-pro-07692",
+                "mmlu-pro-07693",
+                "mmlu-pro-07694",
+                "mmlu-pro-07696",
+                "mmlu-pro-07697",
+                "mmlu-pro-07700",
+                "mmlu-pro-09044",
+                "mmlu-pro-09045",
+                "mmlu-pro-09046",
+                "mmlu-pro-09047",
+                "mmlu-pro-09048",
+                "mmlu-pro-09049",
+                "mmlu-pro-09051",
+                "mmlu-pro-09053",
+                "mmlu-pro-09054",
+                "mmlu-pro-09055",
+                "mmlu-pro-09056",
+                "mmlu-pro-10356",
+                "mmlu-pro-10358",
+                "mmlu-pro-10359",
+                "mmlu-pro-10360",
+                "mmlu-pro-10361",
+                "mmlu-pro-10362",
+                "mmlu-pro-10363",
+                "mmlu-pro-10364",
+                "mmlu-pro-10366",
+                "mmlu-pro-10367",
+                "mmlu-pro-10368",
+                "mmlu-pro-10369",
+                "mmlu-pro-10370",
+                "mmlu-pro-10774",
+                "mmlu-pro-10775",
+                "mmlu-pro-10777",
+                "mmlu-pro-10779",
+                "mmlu-pro-10780",
+                "mmlu-pro-10782",
+                "mmlu-pro-10783",
+                "mmlu-pro-10784",
+                "mmlu-pro-10785",
+                "mmlu-pro-10786",
+                "mmlu-pro-10787",
+                "mmlu-pro-11285",
+                "mmlu-pro-11287",
+                "mmlu-pro-11288",
+                "mmlu-pro-11289",
+                "mmlu-pro-11290",
+                "mmlu-pro-11291",
+                "mmlu-pro-11295",
+                "mmlu-pro-11296",
+                "mmlu-pro-11297",
+                "mmlu-pro-11298"
+              ]
+            }
+          ],
+          "quality_regressions_from_child": [
+            "mmlu-pro-02807"
+          ],
+          "scope": "Descriptive child-to-containing-parent comparison; no relaxation of frozen Native gates and no stable staircase qualification."
+        },
+        {
+          "from": "lazy-cossin-only",
+          "to": "zero-both",
+          "observed_batch_rental_reduction_pct": -1.690655255191964,
+          "paired_output_comparisons": [
+            {
+              "total": 200,
+              "identical": 200,
+              "different_case_ids": []
+            },
+            {
+              "total": 200,
+              "identical": 200,
+              "different_case_ids": []
+            },
+            {
+              "total": 200,
+              "identical": 200,
+              "different_case_ids": []
+            }
+          ],
+          "quality_regressions_from_child": [],
+          "scope": "Descriptive child-to-containing-parent comparison; no relaxation of frozen Native gates and no stable staircase qualification."
+        }
+      ],
+      "scope": "Child-before-parent screening only; no stable-cost qualification, no replacement of historical evidence."
+    },
+    "mod-composition-20261017": {
+      "status": "completed_no_qualified_edge_under_original_strict_profile",
+      "completed_model_starts": 5,
+      "formal_repeats": 15,
+      "independent_starts_per_configuration": 1,
+      "conclusion": "results/mod-composition-20261017/conclusion.md",
+      "analysis": "results/mod-composition-20261017/analysis.json",
+      "archive_sha256": "be2c681a76f7f9c51a06ab70c1419726e47d47188ec65801cbfb0abb2c008f8b",
+      "edges": [
+        {
+          "from": "native",
+          "to": "gate",
+          "batch_rental_reduction_pct": 6.267599552001945,
+          "quality_regressions_from_previous_rung": [
+            "mmlu-pro-11289"
+          ],
+          "full_output_identical_counts_by_repeat": [
+            34,
+            200,
+            34
+          ],
+          "screening_edge_passed": false
+        },
+        {
+          "from": "gate",
+          "to": "gate-out-copy",
+          "batch_rental_reduction_pct": -3.27769022144353,
+          "quality_regressions_from_previous_rung": [
+            "mmlu-pro-02807"
+          ],
+          "full_output_identical_counts_by_repeat": [
+            25,
+            200,
+            34
+          ],
+          "screening_edge_passed": false
+        },
+        {
+          "from": "gate",
+          "to": "gate-lazy-cossin",
+          "batch_rental_reduction_pct": 0.5389074175127573,
+          "quality_regressions_from_previous_rung": [
+            "mmlu-pro-02807"
+          ],
+          "full_output_identical_counts_by_repeat": [
+            200,
+            200,
+            200
+          ],
+          "screening_edge_passed": false
+        },
+        {
+          "from": "gate-out-copy",
+          "to": "gate-zero-both",
+          "batch_rental_reduction_pct": -0.4914003712714221,
+          "quality_regressions_from_previous_rung": [],
+          "full_output_identical_counts_by_repeat": [
+            30,
+            200,
+            30
+          ],
+          "screening_edge_passed": false
+        },
+        {
+          "from": "gate-lazy-cossin",
+          "to": "gate-zero-both",
+          "batch_rental_reduction_pct": -4.347533774132684,
+          "quality_regressions_from_previous_rung": [],
+          "full_output_identical_counts_by_repeat": [
+            34,
+            200,
+            25
+          ],
+          "screening_edge_passed": false
+        }
+      ],
+      "scope": "Original frozen strict screening. No stable qualification; current quality-budget review requires a separately versioned report."
+    },
+    "mmlu-q99-reassessment-20261017": {
+      "status": "independent_matched_restarts_complete_mixed_results",
+      "observed_at": "2026-10-17T21:39:04.304495+00:00",
+      "quality_review": "results/mmlu-q99-reassessment-20261017/review-v1/README.md",
+      "candidate_metric_passes": 15,
+      "candidate_comparisons": 17,
+      "stable_cost_edges": 0,
+      "native_diagnostic": "results/mmlu-q99-reassessment-20261017/native-diagnostic-current.json",
+      "new_matrix": "results/mmlu-q99-reassessment-20261017/matrix-freeze.json",
+      "quality_policy_sha256": "58e5999c185b26440782ae9a3ddf79f8f20367c3359023540c5eaa5c37a34339",
+      "scope": "Old22/99% review and two Native diagnostics complete. New200-quality/max8192 C16/C32 child-to-full matrices running/queued, separate Native cohorts. No stable cost edge granted before completed quality/execution/metric-specific restart acceptance.",
+      "native_diagnostic_audit": "results/mmlu-q99-reassessment-20261017/native-diagnostic/audit-v1/analysis.json",
+      "current_state": "C16 Gate双口径3/3；out-copy0/3。C32 Native→Gate及Gate→完整组合双口径均0/3。18启动54遍全部完整审计，无活动模型队列。",
+      "new_profile_screened_edges": [
+        {
+          "profile": "q99-c16-q200-max8192-nofile65536-r1",
+          "from": "native",
+          "to": "gate",
+          "quality_correct": 161,
+          "quality_total": 200,
+          "same_complete_quality_output": true,
+          "execution_verified": true,
+          "internal_router_fp32_cached_per_worker": [
+            40,
+            40
+          ],
+          "separate_cost_screens": {
+            "card_rental_cny": {
+              "reduction_pct": 1.5118852839259844,
+              "all_repeat_ranges_strictly_lower": true,
+              "single_start_screen_pass": true,
+              "restart_stability_verified": false
+            },
+            "million_output_amortized": {
+              "reduction_pct": 0.7062736948116544,
+              "all_repeat_ranges_strictly_lower": true,
+              "single_start_screen_pass": true,
+              "restart_stability_verified": false
+            },
+            "million_total_tokens": {
+              "reduction_pct": 1.395177000196035,
+              "all_repeat_ranges_strictly_lower": true,
+              "single_start_screen_pass": true,
+              "restart_stability_verified": false
+            }
+          },
+          "stable_cost_edge": false,
+          "scope": "Single-start screen only; performance output lengths differ, metric rates not substituted. Same source/runtime/model/data, only Gate bundle enabled.",
+          "evidence": "results/mmlu-q99-reassessment-20261017/matrix-c16/prefix02/README.md",
+          "independent_restart_plan": "results/mmlu-q99-reassessment-20261017/gate-restarts-r1/plan.json"
+        },
+        {
+          "profile": "q99-c16-q200-max8192-nofile65536-r1",
+          "from": "gate",
+          "to": "gate-out-copy",
+          "manager_carrier": "org.vllm-hust.zerocost-wiring",
+          "feature_mode": "FI direct output + same-address copy skip enabled; CosSin disabled",
+          "quality_correct": 161,
+          "quality_total": 200,
+          "execution_verified": true,
+          "quality_budget_shared_with_original_native": true,
+          "separate_cost_screens": {
+            "card_rental_cny": {
+              "reduction_pct": 0.7937786873379649,
+              "all_repeat_ranges_strictly_lower": true,
+              "single_start_screen_pass": true,
+              "restart_stability_verified": false
+            },
+            "million_output_amortized": {
+              "reduction_pct": 0.7810976049144824,
+              "all_repeat_ranges_strictly_lower": true,
+              "single_start_screen_pass": true,
+              "restart_stability_verified": false
+            },
+            "million_total_tokens": {
+              "reduction_pct": 0.7919417902160442,
+              "all_repeat_ranges_strictly_lower": true,
+              "single_start_screen_pass": true,
+              "restart_stability_verified": false
+            }
+          },
+          "median_costs": {
+            "seconds": 132.52422221377492,
+            "card_rental_cny": 0.2944982715861665,
+            "input_tokens": 277106,
+            "output_tokens": 46939,
+            "million_output_amortized": 6.274063605661954,
+            "million_total_tokens": 0.9088190578042138
+          },
+          "stable_cost_edge": false,
+          "independent_feature_control_not_new_standalone_bundle": true,
+          "scope": "New matched C16 child-mode single-start screen only; does not qualify the full Zero-both parent or rewrite older strict scope.",
+          "evidence": "results/mmlu-q99-reassessment-20261017/matrix-c16/prefix03/README.md",
+          "operator_witness": "results/mmlu-q99-reassessment-20261017/matrix-c16/prefix03/out-copy-runtime-witness.json",
+          "independent_restart_followup": "results/mmlu-q99-reassessment-20261017/out-copy-restarts-followup.json"
+        },
+        {
+          "profile": "q99-c16-q200-max8192-nofile65536-r1",
+          "from": "gate",
+          "to": "gate-lazy-cossin",
+          "feature_mode": "CosSin deferred; FI direct-output/copy skip disabled",
+          "quality_correct": 161,
+          "quality_total": 200,
+          "execution_verified": true,
+          "separate_cost_screens": {
+            "card_rental_cny": {
+              "reduction_pct": -1.1441742920988096,
+              "all_repeat_ranges_strictly_lower": false,
+              "single_start_screen_pass": false,
+              "restart_stability_verified": false
+            },
+            "million_output_amortized": {
+              "reduction_pct": -1.1537028571566799,
+              "all_repeat_ranges_strictly_lower": false,
+              "single_start_screen_pass": false,
+              "restart_stability_verified": false
+            },
+            "million_total_tokens": {
+              "reduction_pct": -1.1460470722551186,
+              "all_repeat_ranges_strictly_lower": false,
+              "single_start_screen_pass": false,
+              "restart_stability_verified": false
+            }
+          },
+          "median_costs": {
+            "seconds": 135.11302872095257,
+            "card_rental_cny": 0.30025117493545017,
+            "input_tokens": 277106,
+            "output_tokens": 46939,
+            "million_output_amortized": 6.3964098609648135,
+            "million_total_tokens": 0.9265724665878201
+          },
+          "stable_cost_edge": false,
+          "negative_single_start_screen": true,
+          "scope": "Keep negative C16 result. Do not count as cost staircase; C32 and full-parent results independently pending, no global retirement or speculative cause.",
+          "evidence": "results/mmlu-q99-reassessment-20261017/matrix-c16/prefix04/README.md"
+        },
+        {
+          "profile": "q99-c32-q200-max8192-nofile65536-r1",
+          "from": "native",
+          "to": "gate",
+          "quality_correct": 160,
+          "quality_total": 200,
+          "execution_verified": true,
+          "separate_cost_screens": {
+            "card_rental_cny": {
+              "reduction_pct": 0.9514781819021767,
+              "all_repeat_ranges_strictly_lower": true,
+              "single_start_screen_pass": true,
+              "restart_stability_verified": false
+            },
+            "million_output_amortized": {
+              "reduction_pct": 0.9514781819021767,
+              "all_repeat_ranges_strictly_lower": true,
+              "single_start_screen_pass": true,
+              "restart_stability_verified": false
+            },
+            "million_total_tokens": {
+              "reduction_pct": 0.9514781819021656,
+              "all_repeat_ranges_strictly_lower": true,
+              "single_start_screen_pass": true,
+              "restart_stability_verified": false
+            }
+          },
+          "median_costs": {
+            "seconds": 102.7079176204279,
+            "card_rental_cny": 0.22823981693428425,
+            "input_tokens": 277106,
+            "output_tokens": 47385,
+            "million_output_amortized": 4.816710286678997,
+            "million_total_tokens": 0.7033779578918499
+          },
+          "stable_cost_edge": false,
+          "evidence": "results/mmlu-q99-reassessment-20261017/matrix-c32/prefix02/README.md",
+          "independent_restart_followup": "results/mmlu-q99-reassessment-20261017/c32-gate-restarts-followup.json"
+        },
+        {
+          "profile": "q99-c32-q200-max8192-nofile65536-r1",
+          "from": "gate",
+          "to": "gate-out-copy",
+          "quality_correct": 162,
+          "quality_total": 200,
+          "execution_verified": true,
+          "separate_cost_screens": {
+            "card_rental_cny": {
+              "reduction_pct": -1.5000306559459942,
+              "all_repeat_ranges_strictly_lower": false,
+              "single_start_screen_pass": false,
+              "restart_stability_verified": false
+            },
+            "million_output_amortized": {
+              "reduction_pct": -1.500030655945972,
+              "all_repeat_ranges_strictly_lower": false,
+              "single_start_screen_pass": false,
+              "restart_stability_verified": false
+            },
+            "million_total_tokens": {
+              "reduction_pct": -1.500030655945972,
+              "all_repeat_ranges_strictly_lower": false,
+              "single_start_screen_pass": false,
+              "restart_stability_verified": false
+            }
+          },
+          "median_costs": {
+            "seconds": 104.24856787081808,
+            "card_rental_cny": 0.2316634841573735,
+            "input_tokens": 277106,
+            "output_tokens": 47385,
+            "million_output_amortized": 4.888962417587285,
+            "million_total_tokens": 0.7139288428873944
+          },
+          "stable_cost_edge": false,
+          "negative_single_start_screen": true,
+          "scope": "C32 negative only; C16 positive screening retained separately. Quality within same-cohort Native99% budget. Do not add a descending rung or infer slowdown cause.",
+          "evidence": "results/mmlu-q99-reassessment-20261017/matrix-c32/prefix03/README.md",
+          "operator_witness": "results/mmlu-q99-reassessment-20261017/matrix-c32/prefix03/out-copy-runtime-witness.json"
+        },
+        {
+          "profile": "q99-c32-q200-max8192-nofile65536-r1",
+          "from": "gate",
+          "to": "gate-lazy-cossin",
+          "quality_correct": 162,
+          "quality_total": 200,
+          "execution_verified": true,
+          "separate_cost_screens": {
+            "card_rental_cny": {
+              "reduction_pct": 0.052323306206514264,
+              "all_repeat_ranges_strictly_lower": false,
+              "single_start_screen_pass": false,
+              "restart_stability_verified": false
+            },
+            "million_output_amortized": {
+              "reduction_pct": -0.18235520868561395,
+              "all_repeat_ranges_strictly_lower": false,
+              "single_start_screen_pass": false,
+              "restart_stability_verified": false
+            },
+            "million_total_tokens": {
+              "reduction_pct": 0.018122085067695526,
+              "all_repeat_ranges_strictly_lower": false,
+              "single_start_screen_pass": false,
+              "restart_stability_verified": false
+            }
+          },
+          "median_costs": {
+            "seconds": 102.65417744219303,
+            "card_rental_cny": 0.22812039431598452,
+            "input_tokens": 277106,
+            "output_tokens": 47385,
+            "million_output_amortized": 4.825493808774052,
+            "million_total_tokens": 0.7032504911399733
+          },
+          "stable_cost_edge": false,
+          "mixed_median_directions_without_screen_qualification": true,
+          "formal_actual_output_tokens": [
+            47385,
+            47274,
+            47660
+          ],
+          "scope": "Million-output median rises while million-total median drops slightly. Neither series passes repeated-range screening. Do not substitute batch rental or one token metric for another; do not count a descending rung. C16 andC32 scopes separate, output/timing cause not isolated.",
+          "evidence": "results/mmlu-q99-reassessment-20261017/matrix-c32/prefix04/README.md",
+          "operator_witness": "results/mmlu-q99-reassessment-20261017/matrix-c32/prefix04/cossin-runtime-witness.json"
+        }
+      ],
+      "pending_independent_restart_plan": "results/mmlu-q99-reassessment-20261017/c16-stack-restarts-r2/plan.json",
+      "pending_out_copy_restart_followup": "results/mmlu-q99-reassessment-20261017/out-copy-restarts-followup.json",
+      "C32_full_conclusion": "results/mmlu-q99-reassessment-20261017/matrix-c32/screening-conclusion.json",
+      "pending_C32_independent_restart_plan": "results/mmlu-q99-reassessment-20261017/c32-stack-restarts-r2/plan.json",
+      "independent_restart_pair_screens": [
+        {
+          "profile_sha256": "bd4e466eeb9ddd14c8240a8f40e3ed2cc4805a33dc7e01e6ef04f9b01ece11b5",
+          "cohort_id": "q99-c16-q200-8192-positive-stack-r2-A",
+          "block": "A",
+          "from": "native",
+          "to": "gate",
+          "fresh_independent_pair_observed": true,
+          "planned_independent_pairs": 3,
+          "completed_pair_evidence": 1,
+          "screening_pair_reused": false,
+          "native_quality": 161,
+          "candidate_quality": 161,
+          "whole_stack_minimum_correct_in_this_block": 160,
+          "separate_cost_metric_screens": {
+            "card_rental_cny": {
+              "reduction_pct": 2.8961815728479,
+              "all_repeat_ranges_strictly_lower": true,
+              "single_start_screen_pass": true,
+              "restart_stability_verified": false
+            },
+            "million_output_amortized": {
+              "reduction_pct": 3.3960282743579318,
+              "all_repeat_ranges_strictly_lower": true,
+              "single_start_screen_pass": true,
+              "restart_stability_verified": false
+            },
+            "million_total_tokens": {
+              "reduction_pct": 2.987522308450874,
+              "all_repeat_ranges_strictly_lower": true,
+              "single_start_screen_pass": true,
+              "restart_stability_verified": false
+            }
+          },
+          "median_costs": {
+            "native": {
+              "seconds": 136.66236164793372,
+              "card_rental_cny": 0.30369413699540826,
+              "input_tokens": 277106,
+              "output_tokens": 46939,
+              "million_output_amortized": 6.4682814844649315,
+              "million_total_tokens": 0.936952165900722
+            },
+            "gate": {
+              "seconds": 132.7043715128675,
+              "card_rental_cny": 0.2948986033619278,
+              "input_tokens": 277106,
+              "output_tokens": 47329,
+              "million_output_amortized": 6.248616816387443,
+              "million_total_tokens": 0.9089605109249242
+            }
+          },
+          "quality_and_execution_verified": true,
+          "restart_stability_verified": false,
+          "scope": "One of3new matched pairs; not full three-case block closure, cross-restart stability or cumulative Out-copy acceptance. All three planned pairs retained, even unfavorable. Per-cost-unit reductions depend on actual time and output counts; not pure kernel speedup. Same Native99% budget also applies to the later complete stack.",
+          "evidence": "results/mmlu-q99-reassessment-20261017/c16-stack-restarts-r2/blockA/prefix02/README.md",
+          "runtime_witness": "results/mmlu-q99-reassessment-20261017/c16-stack-restarts-r2/blockA/prefix02/gate-cache-runtime-witness.json"
+        }
+      ],
+      "independent_full_block_results": [
+        {
+          "cohort": "C16r2",
+          "block": "A",
+          "complete_raw_audit": "results/mmlu-q99-reassessment-20261017/c16-stack-restarts-r2/blockA/full-audit-v1/analysis.json",
+          "archive_sha256": "21b6bec7bc84c8e17043f18131688b68d3127f36b7917120e487eb07e6e71d47",
+          "status": "complete_raw_audit",
+          "cross_restart_summary": "results/mmlu-q99-reassessment-20261017/c16-stack-restarts-r2/restarts-audit-v1/analysis.json"
+        },
+        {
+          "cohort": "C16r2",
+          "block": "B",
+          "complete_raw_audit": "results/mmlu-q99-reassessment-20261017/c16-stack-restarts-r2/blockB/full-audit-v1/analysis.json",
+          "archive_sha256": "aadf0990974e4e1b28c71ff97107b71678e174dc7b29e515460976a8fc16a5dd",
+          "status": "complete_raw_audit",
+          "cross_restart_summary": "results/mmlu-q99-reassessment-20261017/c16-stack-restarts-r2/restarts-audit-v1/analysis.json"
+        },
+        {
+          "cohort": "C16r2",
+          "block": "C",
+          "complete_raw_audit": "results/mmlu-q99-reassessment-20261017/c16-stack-restarts-r2/blockC/full-audit-v1/analysis.json",
+          "archive_sha256": "f0aa9b075cc65a97f98ed9327628782ae793d35a5db337a6a693b4c39c3a0be3",
+          "status": "complete_raw_audit",
+          "cross_restart_summary": "results/mmlu-q99-reassessment-20261017/c16-stack-restarts-r2/restarts-audit-v1/analysis.json"
+        },
+        {
+          "cohort": "C32r2",
+          "block": "A",
+          "complete_raw_audit": "results/mmlu-q99-reassessment-20261017/c32-stack-restarts-r2/blockA/full-audit-v1/analysis.json",
+          "archive_sha256": "50454af7cd464fdfbd81ed7f3f7f643cad3775a48d460907b189a6255b707121",
+          "status": "complete_raw_audit",
+          "cross_restart_summary": "results/mmlu-q99-reassessment-20261017/c32-stack-restarts-r2/restarts-audit-v1/analysis.json"
+        },
+        {
+          "cohort": "C32r2",
+          "block": "B",
+          "complete_raw_audit": "results/mmlu-q99-reassessment-20261017/c32-stack-restarts-r2/blockB/full-audit-v1/analysis.json",
+          "archive_sha256": "af44409fbd6e198e4135f06e7bf9e01eacaad3bf6dacf0aedc112e1ab770cdbe",
+          "status": "complete_raw_audit",
+          "cross_restart_summary": "results/mmlu-q99-reassessment-20261017/c32-stack-restarts-r2/restarts-audit-v1/analysis.json"
+        },
+        {
+          "cohort": "C32r2",
+          "block": "C",
+          "complete_raw_audit": "results/mmlu-q99-reassessment-20261017/c32-stack-restarts-r2/blockC/full-audit-v1/analysis.json",
+          "archive_sha256": "8d2221fecf767d64abfc97cdb56a4b9a112a19cfe76679a27f5bac0ea8060b25",
+          "status": "complete_raw_audit",
+          "cross_restart_summary": "results/mmlu-q99-reassessment-20261017/c32-stack-restarts-r2/restarts-audit-v1/analysis.json"
+        }
+      ],
+      "C16_independent_restart_conclusion": {
+        "schema": "q99-c16-restart-conclusion-v1",
+        "observed_at": "2026-10-17T19:02:21.622371+00:00",
+        "audit": "results/mmlu-q99-reassessment-20261017/c16-stack-restarts-r2/restarts-audit-v1/analysis.json",
+        "audit_sha256": "696268a5285e69d46f00e202f4dd1ab27ac8c605e45eb6509d314cd42d73e7a5",
+        "independent_blocks": 3,
+        "fresh_model_starts": 9,
+        "formal_repeats": 27,
+        "edges": [
+          {
+            "from": "gate",
+            "to": "gate-out-copy",
+            "metrics": {
+              "card_rental_cny": {
+                "all_planned_blocks_pass": false,
+                "blocks_passed": 0,
+                "planned_blocks": 3,
+                "paired_reduction_pct": [
+                  0.15482615539975653,
+                  -0.7088879666965475,
+                  -0.27073043873773184
+                ],
+                "restart_stability_verified": false
+              },
+              "million_output_amortized": {
+                "all_planned_blocks_pass": false,
+                "blocks_passed": 0,
+                "planned_blocks": 3,
+                "paired_reduction_pct": [
+                  -0.37523072441505434,
+                  -0.7088879666965253,
+                  -0.08934220075285104
+                ],
+                "restart_stability_verified": false
+              },
+              "million_total_tokens": {
+                "all_planned_blocks_pass": false,
+                "blocks_passed": 0,
+                "planned_blocks": 3,
+                "paired_reduction_pct": [
+                  0.0365097584241858,
+                  -0.7088879666965253,
+                  -0.27073043873773184
+                ],
+                "restart_stability_verified": false
+              }
+            },
+            "both_token_cost_series_stable": false
+          },
+          {
+            "from": "native",
+            "to": "gate",
+            "metrics": {
+              "card_rental_cny": {
+                "all_planned_blocks_pass": true,
+                "blocks_passed": 3,
+                "planned_blocks": 3,
+                "paired_reduction_pct": [
+                  2.8961815728479,
+                  1.5472970361396499,
+                  0.8774129497857719
+                ],
+                "restart_stability_verified": true
+              },
+              "million_output_amortized": {
+                "all_planned_blocks_pass": true,
+                "blocks_passed": 3,
+                "planned_blocks": 3,
+                "paired_reduction_pct": [
+                  3.3960282743579318,
+                  0.8795876062123176,
+                  0.8774129497857719
+                ],
+                "restart_stability_verified": true
+              },
+              "million_total_tokens": {
+                "all_planned_blocks_pass": true,
+                "blocks_passed": 3,
+                "planned_blocks": 3,
+                "paired_reduction_pct": [
+                  2.987522308450874,
+                  1.4288056100849045,
+                  0.8774129497857719
+                ],
+                "restart_stability_verified": true
+              }
+            },
+            "both_token_cost_series_stable": true
+          }
+        ],
+        "cross_profile_qualification": false,
+        "scope": "Frozen C16 MMLU-Pro reused 200 subset; BF16 TP2 matching runtime/data/controls; per-block fresh Native99% whole-stack budget. Card rental only. No inference of kernel-only speedup, full-dataset quality, holdout or production SLO acceptance. Not the common-runtime canonical staircase; C32 is independent."
+      },
+      "C32_independent_restart_conclusion": {
+        "schema": "q99-c32-restart-conclusion-v1",
+        "observed_at": "2026-10-17T21:38:34.664403+00:00",
+        "audit": "results/mmlu-q99-reassessment-20261017/c32-stack-restarts-r2/restarts-audit-v1/analysis.json",
+        "audit_sha256": "39c9df84bf25b2ba3086db97f36987ffaacc94ff9f2992647c1dd9f3b115add1",
+        "independent_blocks": 3,
+        "fresh_model_starts": 9,
+        "formal_repeats": 27,
+        "edges": [
+          {
+            "from": "gate",
+            "to": "gate-zero-both",
+            "metrics": {
+              "card_rental_cny": {
+                "all_planned_blocks_pass": false,
+                "blocks_passed": 0,
+                "planned_blocks": 3,
+                "paired_reduction_pct": [
+                  0.7518923248365339,
+                  -1.2907021515111694,
+                  -1.007269968937874
+                ],
+                "restart_stability_verified": false
+              },
+              "million_output_amortized": {
+                "all_planned_blocks_pass": false,
+                "blocks_passed": 0,
+                "planned_blocks": 3,
+                "paired_reduction_pct": [
+                  0.751892324836545,
+                  -1.2907021515111694,
+                  -1.007269968937874
+                ],
+                "restart_stability_verified": false
+              },
+              "million_total_tokens": {
+                "all_planned_blocks_pass": false,
+                "blocks_passed": 0,
+                "planned_blocks": 3,
+                "paired_reduction_pct": [
+                  0.751892324836545,
+                  -1.2907021515111916,
+                  -1.007269968937874
+                ],
+                "restart_stability_verified": false
+              }
+            },
+            "both_token_cost_series_stable": false
+          },
+          {
+            "from": "native",
+            "to": "gate",
+            "metrics": {
+              "card_rental_cny": {
+                "all_planned_blocks_pass": false,
+                "blocks_passed": 0,
+                "planned_blocks": 3,
+                "paired_reduction_pct": [
+                  -2.536432063980776,
+                  0.34130925656558064,
+                  -5.662100270592552
+                ],
+                "restart_stability_verified": false
+              },
+              "million_output_amortized": {
+                "all_planned_blocks_pass": false,
+                "blocks_passed": 0,
+                "planned_blocks": 3,
+                "paired_reduction_pct": [
+                  -3.131504741359614,
+                  0.34130925656558064,
+                  -6.2753128394310576
+                ],
+                "restart_stability_verified": false
+              },
+              "million_total_tokens": {
+                "all_planned_blocks_pass": false,
+                "blocks_passed": 0,
+                "planned_blocks": 3,
+                "paired_reduction_pct": [
+                  -2.6233297554964174,
+                  0.34130925656558064,
+                  -5.751646906938146
+                ],
+                "restart_stability_verified": false
+              }
+            },
+            "both_token_cost_series_stable": false
+          }
+        ],
+        "cross_profile_qualification": false,
+        "scope": "Frozen C32 MMLU-Pro reused 200 subset; fresh same-block Native99% budget across each stack. Card rental only; no full dataset, holdout, statistical significance or production SLO claim. C16 and canonical unified runtime remain separate."
+      }
+    }
+  },
+  "current_composition_review": {
+    "observed_at": "2026-10-18T16:33:24.923956+08:00",
+    "headline": "BetterScale历史整包确有降本；Gate＋Zero科学单遍费用下降，GDN布局有局部重复收益；跨MOD稳定累计成本栈仍待闭合。",
+    "qualification_rule": "共启、机制生效、质量预算、同条件边际成本及独立重启分别验收；未知不当兼容，单项收益不相加。",
+    "rows": [
+      {
+        "id": "gate-zero",
+        "label": "Gate＋Zero子项/全开",
+        "coenablement": "新三臂360题完成；双rank Gate/Zero真实生效、fail-open0",
+        "cost_status": "科学卡租−8.243%/−2.796%，待新评分与重启；MMLU+1.082%",
+        "next": "测试3新科学480实例/417唯一文本已开判分；完成独立启动",
+        "assignment_id": "test1",
+        "task_refs": [
+          "3-D1-Q99-batch-matrix",
+          "16-unified-profile"
+        ],
+        "scope": "新同请求/预算/SLO的单次筛查：Olympiad/Research在Gate上再加Zero，本批卡租边际−5.347%/−1.812%；MMLU边际+0.334%。Native/Gate/组合判对160/161/159，组合99%点估计预算通过；科学新输出未判分，不复用旧成绩，不覆盖历史不同profile。",
+        "evidence": [
+          "results/effective-result-cost-20261018/business-stream-execution-v3/screening-gate-zero-r1-stack-vs-gate.md",
+          "results/archive/reviews/project-review-20261017/mod-cost-relations-20261018/README.md",
+          "results/mmlu-q99-reassessment-20261017/matrix-c16/full-audit-v1/analysis.json",
+          "results/mmlu-q99-reassessment-20261017/matrix-c32/screening-conclusion.json",
+          "results/mmlu-q99-reassessment-20261017/c16-stack-restarts-r2/plan.json"
+        ],
+        "source_reviewed_at": "2026-10-18T16:06:27.079600+08:00"
+      },
+      {
+        "id": "fia-combinations",
+        "label": "Gate / FIA / Zero组合",
+        "coenablement": "Gate＋FIA三组双worker真实共启已核验；当前profile的Zero三项完整组合未测",
+        "cost_status": "Native→Gate三项费用均0/3组通过；Gate→组合均2/3组通过，累计链未通过",
+        "next": "测试1继续Decode剖析，再对适用优化另冻匹配完整链；测试4共同宿主/母包独立验收",
+        "assignment_id": "test1",
+        "task_refs": [
+          "4-FIA",
+          "16-unified-profile",
+          "4-D2-FIA-stack-restarts-r1",
+          "14-decode-profile"
+        ],
+        "scope": "stack-restarts-r1：三组9启动/27正式、各组新Native99%共同预算、复用200题/max8192与性能/max256分开；三费用各组验收，未形成稳定完整累计链。历史严格失败与单启动筛查不改写，不跨运行时拼收益。",
+        "evidence": [
+          "results/fia-q99-followup-20261018/stack-restarts-r1/final-assessment-v1/assessment.json",
+          "results/mmlu-pro-20261017/analysis.json",
+          "results/mmlu-q99-reassessment-20261017/review-v1/README.md",
+          "mods/combination-plan.json"
+        ],
+        "source_reviewed_at": "2026-10-18T02:37:56.851568+00:00"
+      },
+      {
+        "id": "tri",
+        "label": "TriAttention",
+        "coenablement": "原r2仅Native/单项；当前冻结Tri源码拒绝kivi_int4，联合模型未测",
+        "cost_status": "12/12结束；压缩0触发，MMLU/HLE成本均略升",
+        "next": "测试2完成2048对齐新方案的单项准入；量化KV组合先适配，再共同宿主实测",
+        "assignment_id": "test2",
+        "task_refs": [
+          "7-Tri-active-profile",
+          "16-unified-profile",
+          "7-Tri-block-align"
+        ],
+        "scope": "固定r2两种百万Token成本：MMLU均+0.4264%，HLE均+0.7111%（正值更贵）；两rank压缩提交均0，不能评价压缩生效后的收益。MMLU70题56/70→56/70，预算通过；HLE语义未评分，单启动三遍不等于独立重启。 测试2本次补充：原活跃1024方案遇逻辑块2048约束，新2048目标/128重算方案仅本地准备；冻结provider对kivi_int4有显式源码拒绝，尚未运行该组合，不推广为算法普遍互斥。",
+        "evidence": [
+          "results/ongoing-mod-tests-20261017/tri-mmlu-hle-screening-r2/final-assessment.json",
+          "results/ongoing-mod-tests-20261017/tri-mmlu-hle-screening-r2/trigger-coverage.md",
+          "results/ongoing-mod-tests-20261017/tri-block-alignment-r1/tri-kivi-source-boundary-r1.json",
+          "results/ongoing-mod-tests-20261017/tri-aligned-quality-cost-r3/preparation.json"
+        ],
+        "source_reviewed_at": "2026-10-18T09:00:28.861048+08:00"
+      },
+      {
+        "id": "kivi",
+        "label": "KIVI INT4",
+        "coenablement": "双rank单项机制已验；新70题两小时整臂超时，完整组合未验",
+        "cost_status": "无正式质量/成本组合资格；不从容量或冒烟推算降本",
+        "next": "保留有界失败/未知I/O；需优化后另冻匹配Native/候选，修复Tri格式边界后再验组合",
+        "assignment_id": "test2",
+        "task_refs": [
+          "6-KIVI",
+          "16-unified-profile",
+          "6-KIVI-RPC-recovery"
+        ],
+        "scope": "原4请求冒烟约5.40倍Native的负向开销保留。新d765组Native70完整56/70、I95298/O37028复核；候选双rank各10实现/20uint8，实际RPC1800推进首个旧失败形态，但7200秒含启动整臂界后exit130，最后21950 host返回/各rank。完整候选70未返，接受I/O与任务质量未知；整臂至退出含清理卡租16.030870元、生成包络15.681149元重叠，不相加/不归一化或判精度失败。原组已清空，物理资源仍保留。与INT8同路径替代；当前冻结Tri拒绝kivi_int4，其他组合未知。",
+        "evidence": [
+          "results/ongoing-mod-tests-20261017/kivi-lifecycle-fix-model-r3/analysis.json",
+          "results/ongoing-mod-tests-20261017/README.md",
+          "mods/relations.json",
+          "results/ongoing-mod-tests-20261017/kivi-rpc-diagnostic-r1/latest-observation.json",
+          "results/ongoing-mod-tests-20261017/kivi-rpc-diagnostic-r1/native-quality-verification-r1.json",
+          "results/ongoing-mod-tests-20261017/tri-block-alignment-r1/tri-kivi-source-boundary-r1.json",
+          "results/ongoing-mod-tests-20261017/kivi-rpc-diagnostic-r1/bounded-terminal-assessment-r1.json"
+        ],
+        "source_reviewed_at": "2026-10-18T09:36:16.096411+08:00"
+      },
+      {
+        "id": "sim",
+        "label": "SimLLM",
+        "coenablement": "真实三臂已启动：canonical Native首组运行，literal Native/Sim仍排队；组合未验",
+        "cost_status": "无合格新增降本台阶",
+        "next": "测试2按完整两轮/匹配literal Native测任务质量、真实restore路径及完整费用；通过后再验组合",
+        "assignment_id": "test2",
+        "task_refs": [
+          "7-Sim-state-r1",
+          "16-unified-profile",
+          "7-Sim-task-quality"
+        ],
+        "scope": "原6臂数值诊断的恢复360/360匹配，续答SSM/conv数值差异原因与任务质量仍未决，数值误差不等于任务精度损失。新MMLU/HLE各200、2048/4096预算三遍与源/续答完整费用协议保留，r3三组载荷/末8、CPU驱动/缓存生命周期与部署包已本地检查，实际106文件profile已冻结并独立部署22文件，真实Manager CPU10命令/身份与物理准入已过，首个canonical Native双rank Worker/模型已运行，literal Native/Sim仍排队。未通过真实机制、分项任务预算和净成本前，不把配置启用当成组合资格。 真实Linux控制辅助6项已过，但只清自身临时CPU进程组，不替代完整运行时准入。 首组mmlu-r1-b0尚无完整批次/任务成绩；canonical仅格式控制，不能接入literal对比阶梯。",
+        "evidence": [
+          "results/ongoing-mod-tests-20261017/simllm-state-restarts-r1/README.md",
+          "results/ongoing-mod-tests-20261017/protocol.json",
+          "results/ongoing-mod-tests-20261017/simllm-state-restarts-r2/boundary-summary-r1.json",
+          "results/ongoing-mod-tests-20261017/simllm-task-quality-r1/cache-lifecycle-preparation-r9.json",
+          "results/ongoing-mod-tests-20261017/simllm-task-quality-r1/local-deployment-package-manifest-r1.json",
+          "results/ongoing-mod-tests-20261017/simllm-task-quality-r1/actual-runtime-preparation-r11.json",
+          "results/ongoing-mod-tests-20261017/simllm-task-quality-r1/model-admission-r1.json",
+          "results/ongoing-mod-tests-20261017/simllm-task-quality-r1/actual-runtime-r3/latest-observation.json"
+        ],
+        "source_reviewed_at": "2026-10-18T09:53:55.207166+08:00"
+      },
+      {
+        "id": "int8",
+        "label": "INT8 dynamic KV",
+        "coenablement": "双rank单项量化/反量化生效；与其他MOD共启未验",
+        "cost_status": "r2配对完成：MMLU更贵，HLE略低但语义未评分",
+        "next": "不自动加入下降链；新负载/组合先匹配Native并验证净收益",
+        "assignment_id": "test4",
+        "task_refs": [
+          "6-INT8",
+          "16-unified-profile"
+        ],
+        "scope": "r2百万输出摊销：MMLU +0.282%、HLE -0.160%；百万总Token：+0.176%、-0.320%。MMLU70题56/70→58/70；HLE缺评分、无跨重启稳定资格。与KIVI同一路径二选一，含FIA算子不等于依赖FIA De-mask MOD。",
+        "evidence": [
+          "results/test4-int8-kv-20261017/r2-recovery/conclusion.md",
+          "results/test4-int8-kv-20261017/r2-recovery/paired-audit/summary.json"
+        ]
+      },
+      {
+        "id": "bs",
+        "label": "BetterScale及可拆子项",
+        "coenablement": "共同宿主/完整载荷/ABI/Manager准入中；组合未验",
+        "cost_status": "历史六组输出摊销下降29.04%–56.45%；不接当前不同profile阶梯",
+        "next": "测试4先完成共同环境与冻结合同，再重测全部阶级",
+        "assignment_id": "test4",
+        "task_refs": [
+          "16-unified-profile"
+        ],
+        "scope": "四类拆分候选不是四个已独立可用Bundle。已包含的hook只执行并计益一次；共同宿主新Native与参考组合必须重测，不能搬用历史价格。环境/Manager静态检查不等于真机/模型准入。",
+        "evidence": [
+          "results/betterscale-20261016/README.md",
+          "results/unified-profile-20261018/README.md",
+          "results/unified-profile-20261018/mod-admission-matrix.json",
+          "docs/testing/unified-cost-profile.md"
+        ]
+      },
+      {
+        "id": "other",
+        "label": "其他候选与系统控制器",
+        "coenablement": "保留原成员专项；联合验收大多未完成",
+        "cost_status": "未有共同宿主净成本叠加资格",
+        "next": "逐项进入测试4追加准入矩阵；原负责人继续单项研发",
+        "assignment_id": null,
+        "task_refs": [
+          "16-unified-profile"
+        ],
+        "scope": "PyramidKV/OPset/Core Attention、DLA/BidKV、GDN Codec和请求节流控制器沿用config/project-team.json中的既有专项负责人，不转派原专项。控制器须核算新增服务资源与HTTP端到端净成本，未测费用不是0。",
+        "evidence": [
+          "results/unified-profile-20261018/mod-admission-matrix.json",
+          "config/project-team.json",
+          "mods/relations.json"
+        ]
+      },
+      {
+        "id": "gdn-layout",
+        "label": "GDN预布局/紧凑缓存",
+        "coenablement": "组合196/196完整输出一致；FULL_DECODE_ONLY/无MTP",
+        "cost_status": "预布局三配对TPOT−3.02%–6.93%；缓存目标TTFT约−50%，全负载未证",
+        "next": "真实多轮负载、组合性能与MTP状态语义",
+        "assignment_id": "gdn-state-codec",
+        "task_refs": [
+          "9-gdn-layout-state"
+        ],
+        "scope": "这是保留原精度的布局/驻留原型，不是完整LeapQuant量化。紧凑缓存全压力序列−1.97%/＋1.70%收益方向不一致；QKV未加入缓存组合，不推广单位成本。",
+        "evidence": [
+          "results/gdn-opt-20261018/REPORT.zh-CN.md"
+        ],
+        "source_reviewed_at": "2026-10-18T16:06:27.079600+08:00"
+      },
+      {
+        "id": "request-controller",
+        "label": "请求节流控制器",
+        "coenablement": "已对接vLLM单后端；与内核MOD整栈未验",
+        "cost_status": "SWE窗口吞吐1.916861×；新科学/Gold质量未过99%",
+        "next": "原队列MMLU/Revision收尾；真实任务与全服务成本",
+        "assignment_id": "request-throttling-controller",
+        "task_refs": [
+          "11"
+        ],
+        "scope": "固定180秒轨迹回放不等于代码修复成功率/整批成本。Gold159/164=96.95%保留，不授成本阶梯资格。",
+        "evidence": [
+          "results/request-throttling-controller-20261017/dataset-extension-20261018.md"
+        ],
+        "source_reviewed_at": "2026-10-18T16:06:27.079600+08:00"
+      },
+      {
+        "id": "prefill-microflow",
+        "label": "Microflow（GDN＋FA）",
+        "coenablement": "与BetterScale联合关系确定；独立ECPA受管NPU验收待完成",
+        "cost_status": "上游FA4K/8K窗口约−15%/−20%；无整模型成本资格",
+        "next": "选择具体组合，做基底与基底＋Microflow匹配对照；保留叠加资格，不因独立配对收益不稳定剔除。",
+        "assignment_id": "prefill-microflow",
+        "task_refs": [
+          "23"
+        ],
+        "scope": "Microflow a5共用GDN a2布局，Parent仅为当前接入载体；独立配对稳态收益不稳定，但功能及有限输出一致性已验证。组合收益未知，允许新组合假设验证；禁止内置/独立实现双开双计，按累计98%质量预算与同窗稳态成本验收。",
+        "evidence": [
+          "results/prefill-microflow-extraction-20261018/README.md"
+        ],
+        "source_reviewed_at": "2026-10-18T16:33:24.923956+08:00",
+        "candidate_disposition": "retained_for_composition",
+        "retention_decision": "results/gennova-6-microflow-20261019/runs/parent-fa-device-r3/composition-retention-decision.json"
+      },
+      {
+        "id": "apc-prefix",
+        "label": "APC前缀复用",
+        "coenablement": "首轮双臂808返回独核；实际缓存命中0",
+        "cost_status": "公共前缀短于2048块，无真实缓存作用/降本",
+        "next": "测试5已备R2原题长输入冷/热4请求，待设备准入",
+        "assignment_id": "test5",
+        "task_refs": [
+          "22"
+        ],
+        "scope": "最新main首轮808返回/I/O/作用均已闭合；14类自然公共前缀845–1938短于2048，缓存计数均0。CPU导出争用不匹配，不做收益结论；R2Manager双臂CPU准入通过，真实长输入命中待验证。",
+        "evidence": [
+          "results/apc-prefix-stack-20261018/README.md",
+          "results/archive/reviews/project-review-20261017/mod-cost-relations-20261018/README.md"
+        ],
+        "source_reviewed_at": "2026-10-18T16:14:42.735843+08:00"
+      },
+      {
+        "id": "gennova-prelayout-graph-v1",
+        "label": "GDN卷积权重预布局（当前统一图）",
+        "coenablement": "单项两臂16请求/8对输出一致；每rank30层图绑定及34次重放，累计母包共启待测",
+        "cost_status": "4合成请求计时1.808326→1.720828秒，仅方向信号；控制器费用r4已纠正，不授稳定成本台阶",
+        "next": "1号接Gate＋Zero＋QKV并做OFF/ON；4号正式费用；2号交付完成",
+        "assignment_id": "gennova-1",
+        "evidence": [
+          "results/gennova-2-32068-20261019/runs/shared-graph-r1/assessment-r4.json",
+          "results/gennova-2-32068-20261019/runs/shared-graph-r1/integration-handoff-r4.json"
+        ]
+      },
+      {
+        "id": "gdn-static-decay-022",
+        "label": "GDN静态衰减0.2.2（2026-10-20结项）",
+        "coenablement": "Controlled Gate+Zero及候选双rank实际图作用通过；12启动，三组独立S/S+m",
+        "cost_status": "三对稳态卡租均增，中位+0.652%；MMLU200相对Native100%，其他质量轨未测，无新增台阶",
+        "next": "默认关闭、限定条件封存；无同条件重跑队列，新版本及具体机制假设才重新登记",
+        "assignment_id": "gdn-static-decay-precompute",
+        "evidence": [
+          "results/campaigns/gdn-static-decay-mingqi-20261020/runs/formal-mmlu-r2-final/assessment.json"
+        ],
+        "scope": "0.2.2、统一graph-v1/BF16/TP2/APC/MTP关闭、16GiB KV；S仅为同条件Gate+Zero参考，不称最优；MMLU200/8192质量保留100%，其他轨未测；仅稳态卡租，非完整商业成本。"
+      }
+    ],
+    "restrictions": [
+      {
+        "text": "INT8与KIVI：同一层/缓存实例的KV存储路径二选一，不相加。",
+        "evidence": "mods/relations.json"
+      },
+      {
+        "text": "DLA与BidKV：同一进程的scheduler.preemption-policy独占资源互斥。",
+        "evidence": "mods/relations.json"
+      },
+      {
+        "text": "GDN State Codec：当前0.2.0实现拒绝graph/speculative；适配并复验前不能加入依赖这些模式的栈。",
+        "evidence": "docs/research/leapquant-20261017.md"
+      },
+      {
+        "text": "Tri/Pyramid/Sim/量化KV/母包：共享布局、状态与hook的兼容待验，不能据资源名称不同推断可共启。",
+        "evidence": "results/unified-profile-20261018/mod-admission-matrix.json"
+      },
+      {
+        "text": "Tri＋KIVI：当前冻结provider（1ab8f3f6）源码拒绝kivi_int4，先适配再联合准入；仅静态版本边界，尚无组合模型测量。",
+        "evidence": "results/ongoing-mod-tests-20261017/tri-block-alignment-r1/tri-kivi-source-boundary-r1.json"
+      }
+    ],
+    "execution_task": "16-unified-profile",
+    "execution_evidence": "results/unified-profile-20261018/mod-admission-matrix.json"
+  }
+}

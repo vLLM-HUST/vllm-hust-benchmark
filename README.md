@@ -18,9 +18,11 @@ V1：[从全新 CPU 工作区部署并运行一个真实 Agent](docs/SWE_BENCH_P
 
 Wrapper benchmark repository for vllm-hust.
 
-GenNova 与 GenNova Autotune 的独立测试结果统一维护在
+GenNova 与 GenNova Autotune 的产品级独立测试结果统一维护在
 [GenNova-HUST/gennova-benchmark](https://github.com/GenNova-HUST/gennova-benchmark)（私有仓库，需授权）。
-本仓库不保留这些项目的报告、结果压缩包或网站汇总副本。
+本仓库仅保留一份来自历史 `inference-engine-project` 的
+[MOD 单项与组合测试证据固定快照](reports/gennova-mod-evidence-20261105/README.md)，用于发现和审计；
+它不是产品结果包、正式榜单提交或网站汇总副本。
 
 The goal is to keep `vllm-hust-benchmark` as the stable entrypoint for running experiments, while
 the real benchmark implementations stay in `vllm-hust`. This repo resolves the sibling `vllm-hust`
@@ -122,6 +124,9 @@ Within that boundary, the important design point is:
 - `tests/`: focused tests for registry loading and command generation
 
 ## Measured experimental reports
+
+- [GenNova MOD 单项与组合测试证据归档（2026-11-05）](reports/gennova-mod-evidence-20261105/README.md)： 固定来源提交，整理
+  107 个结果入口、55 项接入记录、29 项组合影响和 90 项有边界的负结果； 没有新增测量，不进入正式榜单或网站发布。
 
 - [BetterScale + solver mixed graph pool (2026-10-20)](reports/betterscale-solver-mixed-pool-20261020/README.md):
   actual HTTP serving, C8/C16/C32 ×4K/8K, MMLU-Pro200 and HLE Gold text200, payload-free repeat
