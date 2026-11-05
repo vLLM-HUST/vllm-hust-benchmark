@@ -25,8 +25,8 @@ def test_every_class_has_an_explicit_plan():
 def test_catalog_registration_does_not_claim_runtime_or_local_data():
     sources = provider.list_sources()
     assert (
-        len(sources) == 114
-    )  # Adds the existing FULL_DUPLEX_BENCH reader; delivery scope stays118 sources.
+        len(sources) == 115
+    )  # StableToolBench is a separately named candidate; delivery scope stays118 sources.
     assert any(row["source_id"] == "FULL_DUPLEX_BENCH" for row in sources)
     assert any(row["source_id"] == "TEMPORALWIKI" for row in sources)
     assert any(row["source_id"] == "LJSPEECH" for row in sources)

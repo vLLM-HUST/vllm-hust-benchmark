@@ -3,7 +3,7 @@
   "source_id": "STABLETOOLBENCH",
   "reviewed_against": "TOOLBENCH",
   "source_checkbox_eligible": false,
-  "status": "NATIVE_FIXED_SAMPLE_AND_OFFICIAL_FAC_COMPLETED_CONSUMER_PENDING",
+  "status": "NATIVE_FIXED_SAMPLE_OFFICIAL_FAC_AND_PINNED_RESEARCH_CONSUMER_VERIFIED",
   "publisher": "https://github.com/THUNLP-MT/StableToolBench",
   "source_revision": "aa4ed9f4737ad98bd706663f01d63623c3427812",
   "date": "2026-11-05",
@@ -49,7 +49,21 @@
     "all_three_native_finish_calls": true,
     "converted_queries_and_final_answers_match_original_outputs": true,
     "all_three_official_fac_rows_match_original_queries_in_fixed_order": true,
-    "research_consumer_verified": false
+    "research_consumer_verified": true
+  },
+  "provider_and_research_readback": {
+    "provider_api": "vllm_hust_workload_data.iter_workload('STABLETOOLBENCH', data_root=original_source_root)",
+    "provider_wheel_sha256": "dc8650c887aacac8322e4d6e3c4aeafbf51fca7701f4ef4d987cbac01abbb1b6",
+    "provider_original_rows_fully_read": 163,
+    "original_task_and_reference_exact_roundtrips": 163,
+    "research_revision": "9f1f6a5ce21f486aa27cfb2482c4007d6b9d2344",
+    "research_source_archive_sha256": "ea8cf9abb4db7194b395cdeebe7b980ed8a8651afb916b3d6737410c99161a71",
+    "research_entrypoint": "llm_serving_workloads.pipeline.analysis_from_source_index",
+    "research_rows_processed": 163,
+    "research_source_modifications": 0,
+    "research_features_or_scientific_conclusions_verified": false,
+    "deployment_note": "Verified against the installed candidate wheel. Research repository dependency lock is unchanged; production adoption must explicitly pin the accepted wheel/source.",
+    "server_evidence_stage": "stabletoolbench-provider-readback-20261105-001"
   },
   "results": [
     {"id": 588, "agent_queries": 9, "agent_total_tokens": 35391, "official_fac_score": 0},
@@ -66,7 +80,7 @@
   "limitations": [
     "Three fixed tasks are a usability sample, not the complete benchmark or a model quality estimate.",
     "Simulated external APIs are not live third-party API execution and do not establish original ToolBench delivery.",
-    "Research-side consumer and a final accepted workload replacement remain pending; no additional inventory checkbox is claimed.",
+    "Pinned research consumer passed with the candidate wheel; a final explicitly documented inventory replacement is not yet claimed by this candidate receipt.",
     "Scorer startup failures and original converter null-function-call failure retained separately; no Agent rerun or task substitution."
   ]
 }

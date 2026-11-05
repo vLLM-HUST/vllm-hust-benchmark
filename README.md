@@ -785,8 +785,14 @@ prompt/媒体时不能伪造原始请求；有官方回放工具的按原工具�
 · [固定三题准备入口](scripts/prepare_stabletoolbench_fixed_g1.py) ·
 [ARM64 客户端兼容补丁](configs/workload-native/stabletoolbench-lazy-backend-imports.patch)。运行
 `python scripts/prepare_stabletoolbench_fixed_g1.py --instructions <G1_instruction.json> --toolenv <toolenv2404_filtered.tar.gz> --cache <server_cache.zip> --output <新目录>`。原题
-588、608、1073 均已通过作者入队检查。Agent 和工具服务必须显式使用回环地址；官方缓存未命中会先尝试外连，未隔离前不要启动服务。原生执行和评分未验证，不计入已交付项，也不等同于
-ToolBench 的实时第三方 API。
+588、608、1073 已完成作者原生 Agent 流程与官方 FAC 评分（0、1、1）。Agent
+和工具服务必须显式使用回环地址；官方缓存未命中会先尝试外连，未隔离前不要启动服务。该具名候选不等同于 ToolBench 的实时第三方 API。
+
+统一数据读取使用 `vllm_hust_workload_data.iter_workload("STABLETOOLBENCH", data_root=<固定官方源码目录>)`，覆盖原 G1 全部
+163 题。每条记录保留原 `query_id`、`query` 和完整 `api_list`；`relevant APIs` 仅作独立参考标注，不进入输入、不据此裁剪工具。
+`vllm_hust_workload_data.stabletoolbench.restore_original_task(record)` 可无损还原原题。安装包读取与固定研究版本
+`analysis_from_source_index` 已在服务器核验全部 163 条；不代表全量原生 Agent
+运行或研究结论。[执行、评分和双端读取回执](docs/workload-data/validation/stabletoolbench-fixed3-native-20261105.json)。
 
 本地工具服务入口为 [run_stabletoolbench_local_server.py](scripts/run_stabletoolbench_local_server.py)：
 
@@ -795,10 +801,25 @@ python scripts/run_stabletoolbench_local_server.py --author-server <固定原版
 ```
 
 默认只核验作者文件并生成计划；加 `--execute` 才启动服务。该入口只监听回环地址，阻断外连，不改写缓存；真实 API 层明确返回本地 HTTP
-503，再由作者原代码进入官方模拟器，不代表验证真实 API。官方模拟器权重已核验并在 NPU 上运行，固定三题已完成原生 Agent 流程；官方评分及研究侧接入仍须分别核验，尚不计入交付勾选。调用
+503，再由作者原代码进入官方模拟器，不代表验证真实 API。官方模拟器权重已核验并在 NPU 上运行，固定三题已完成原生 Agent、官方评分及双端读取核验；当前仍作为具名替代候选登记。调用
 Agent 时设置
 `SERVICE_URL=http://127.0.0.1:19468/virtual`，同时使用原始模型名及[本地模型名兼容补丁](configs/workload-native/stabletoolbench-local-model-name.patch)，不使用
 GPT 别名。
+
+在应用上述客户端补丁后的固定官方源码目录中，运行原生 Agent（两个本地模型服务和工具服务就绪后）：
+
+```bash
+SERVICE_URL=http://127.0.0.1:19468/virtual python toolbench/inference/qa_pipeline_multithread.py \
+  --backbone_model chatgpt_function --chatgpt_model Qwen/Qwen3.5-9B \
+  --base_url http://127.0.0.1:19466/v1 --openai_key local-loopback \
+  --tool_root_dir <准备后的toolenv2404_filtered目录> \
+  --input_query_file <准备后的fixed-g1.json> --output_answer_file <新答案目录> \
+  --method CoT@1 --max_observation_length 1024 --single_chain_max_step 50 \
+  --max_query_count 200 --num_thread 1
+```
+
+`local-loopback` 是本地无鉴权接口的占位值，不是凭据。不要传 `--overwrite`：作者该选项会递归删除输出目录。保留原生生成上限 1024
+token；原工具观测上限、步数和查询预算如上，不截断题目或筛除失败题。
 
 如需准备 FAC 评分，准备命令同时传入 `--official-ids <test_query_ids/G1_instruction.json>`。保留三题原始 Agent 输出，用作者的
 `convert_to_answer_format.py --method CoT@1` 转换。新版 OpenAI 消息可能包含 `function_call: null`；须在派生源码目录应用

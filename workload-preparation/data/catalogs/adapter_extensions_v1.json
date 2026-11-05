@@ -2,6 +2,18 @@
   "version": "adapter-extensions/v1",
   "boundary": "Field contracts from publisher metadata/docs. No real source payload downloaded or full adapter validation claimed.",
   "adapters": {
+    "STABLETOOLBENCH": {
+      "kind": "task_dataset",
+      "mapping": "stabletoolbench_original_tasks",
+      "input_fields": ["query_id", "query", "api_list"],
+      "required_fields": ["query_id", "query", "api_list", "relevant APIs"],
+      "outcome_fields": ["relevant APIs"],
+      "annotation_fields": [],
+      "id_field": "query_id",
+      "normalization": {},
+      "requirements": ["Original Agent, ToolEnv and cached/simulated API server required; reading does not execute tasks", "Reference API annotations do not restrict advertised tools or enter model input"],
+      "status": "ORIGINAL_G1_READER_NATIVE_FIXED3_AND_PINNED_RESEARCH_CONSUMER_VERIFIED"
+    },
     "XLAM_TOOL": {
       "kind": "task_dataset",
       "mapping": "xlam_original_query_tools",

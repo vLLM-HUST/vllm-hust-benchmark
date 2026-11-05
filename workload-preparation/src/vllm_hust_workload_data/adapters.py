@@ -272,6 +272,10 @@ def adapt_row(
         from .multiagentbench import adapt_case
 
         return adapt_case(row, source=source, index=index)
+    if spec["mapping"] == "stabletoolbench_original_tasks":
+        from .stabletoolbench import adapt_case
+
+        return adapt_case(row, source=source, index=index)
     if spec["mapping"] == "full_duplex_original_archives":
         from .full_duplex import adapt_case
 
