@@ -1,0 +1,124 @@
+{
+  "started_at": 1793855120.4571874,
+  "model": "/data/shared_models/Qwen3.5-35B-A3B",
+  "devices": "0,1",
+  "selection": "GSM8K test:0..199, fixed before inference",
+  "client_concurrency": 8,
+  "seed": 0,
+  "scope": "single paired subset; not full benchmark or statistical noninferiority",
+  "repos": {
+    "vllm-hust": "4f61604bea01ce56afc320e0f0566166fd79a562",
+    "vllm-ascend-hust": "e5870e657a2add3182551c70bbad5919fc96d899",
+    "vllm-ascend-quantized-kv-cache-hust": "2c2866b9991d056c869191f0c1536c3421055ea2",
+    "vllm-hust-benchmark": "2cc0fae34b57a639c819da38ea33af2235f1973f"
+  },
+  "plugin_source_sha256": {
+    "vllm_ascend_quantized_kv_cache/dtypes.py": "99d887359ed0bebb39b6cb96ce12348615ebce6c61a5122c85721f25e8efe7ad",
+    "vllm_ascend_quantized_kv_cache/__init__.py": "11144257d0c7102a2f357761d12911b557678ddc435e75fd491734c883fe4d00",
+    "vllm_ascend_quantized_kv_cache/bootstrap.py": "135d3a1e5edb24da506120801f0e817f6efe20b9648ccb5a211ef33f1633b7b6",
+    "vllm_ascend_quantized_kv_cache/_version.py": "4515d5889816e4a7e38944a301ef55af7dd09613e23fed63a9f78b5428bcae24",
+    "vllm_ascend_quantized_kv_cache/manifests/__init__.py": "92c5d995f5341e558110cddc101c510ebb9acde2f23cade02c654db03a1c3432",
+    "vllm_ascend_quantized_kv_cache/adapters/__init__.py": "63f74e17b10fcd1b2389bb08604b1bd59f3e147aa57daedb49211b7520e3eb60",
+    "vllm_ascend_quantized_kv_cache/adapters/base.py": "329dee59fb25891cf04611d70b444c167312b986eb0d15f06d6966b81e69b9f1",
+    "vllm_ascend_quantized_kv_cache/adapters/vllm_ascend_hust/__init__.py": "ec399ea0df2310fd4816ab769943295fd27ac50a72a9dc41fb38694053b4d51d",
+    "vllm_ascend_quantized_kv_cache/adapters/vllm_ascend_hust/runtime_int8.py": "3c0bcc2ad9144373505f861c33e1641eaea60bfd60f5fcbba57a4dc879fcd034",
+    "vllm_ascend_quantized_kv_cache/adapters/vllm_ascend_hust/backend.py": "bdbd8a47af9740abc34bc729185266c205d36514a2eddafa48656a3640248c89",
+    "vllm_ascend_quantized_kv_cache/adapters/vllm_ascend_hust/register.py": "8c50e7ace306405790901083a4e696ba2b5ba36b414f3cb84cda98319c8bc85a",
+    "vllm_ascend_quantized_kv_cache/core/__init__.py": "16e9908d7b40b2d5498e3a0187d16cbc22b739e6eb5708a0ab2b402ee5912e1d",
+    "vllm_ascend_quantized_kv_cache/core/runtime.py": "9f269d052cb25e5ae8c139ce330003bd25f60b18980262753ba4794f2e5919b5",
+    "vllm_ascend_quantized_kv_cache/core/activation.py": "a7f96c7cabcff29b3692d417ff4317af4ad183accc9c22975f62696b53f3bc4a",
+    "vllm_ascend_quantized_kv_cache/core/hosts.py": "8b9e43872b67bdefc5b1cb17b86388e060bf1565fe7c9b3d9687e4ef25f54e32",
+    "vllm_ascend_quantized_kv_cache/methods/__init__.py": "39e3873f83947af6ba83afe2f51e0dcdfcf78127faa619d4ae3b464c36a1286c",
+    "vllm_ascend_quantized_kv_cache/methods/registry.py": "7667ed4d03eee0db86f2bf98de54d8aa97e93cbbe6d233f36f02113e0b9f828f",
+    "vllm_ascend_quantized_kv_cache/methods/base.py": "334593a30f13985949db3f362dd80d0eb1ff7164965dd2c43a62cdaf48a24443",
+    "vllm_ascend_quantized_kv_cache/methods/kivi_int4/attention_backend.py": "ed8cd9d8312d0c095556d9e0527accd23c986558cfce63f56ce6511e41758840",
+    "vllm_ascend_quantized_kv_cache/methods/kivi_int4/__init__.py": "c4b4a312bcd16f9f03a12813cd0d92842d8c5459065bbf8f4df78dd3aeb7bf51",
+    "vllm_ascend_quantized_kv_cache/methods/kivi_int4/semantics.py": "5aa8591f5cc6819c161b766a1fa0e0e92e3d994635a40559e8904472c798fc43",
+    "vllm_ascend_quantized_kv_cache/methods/kivi_int4/byte_cache.py": "4e23af37a6ea30a4dd4ad1a63801f9577207ee9edb4c1aed491709263c067d7e",
+    "vllm_ascend_quantized_kv_cache/methods/kivi_int4/geometry.py": "a6386e9fd97443cc8e45a278fbaf0a1aefdcbe55240d26406282983d4159cfe6",
+    "vllm_ascend_quantized_kv_cache/methods/fp8_per_token_head/__init__.py": "b52aa309313a02d3adebc2fa697439806cc951ed110b11ff27b267b296f239bd",
+    "vllm_ascend_quantized_kv_cache/methods/fp8_per_token_head/semantics.py": "0aef4a762e137aeb502fa5debcdf12d151e2dadd8de1541d29076b38b2d96b22",
+    "vllm_ascend_quantized_kv_cache/methods/fp8_per_token_head/byte_cache.py": "38e7165cb4f7793d6b76358f7aeb05bb0bd38a22ae5afb187b0f229798b7c61c",
+    "vllm_ascend_quantized_kv_cache/methods/int8_dynamic/attention_backend.py": "490856bf7eca704fa19151011907452eba181c8d8b6df2566b351b50b756132a",
+    "vllm_ascend_quantized_kv_cache/methods/int8_dynamic/__init__.py": "f750379438a3ea616e7060e4f3daf3f1b25ee9489bf43e67f7552d7d7505dae3",
+    "vllm_ascend_quantized_kv_cache/methods/int8_dynamic/graph.py": "2bcf1636c6788daba6d5b8170bd0c0c809a0d459a24aa7799ed0b4c2452d21b1",
+    "vllm_ascend_quantized_kv_cache/methods/int8_dynamic/semantics.py": "a73a68bdc88aac7b3c28c454c8ee514caa81194ea4e2ad72fe289281083660dc",
+    "vllm_ascend_quantized_kv_cache/ops/__init__.py": "dbbd1514ad5dc91bac09fa430cd13c5e283b88556f77068c96a1513e115cbac3",
+    "vllm_ascend_quantized_kv_cache/ops/kivi_layout.py": "9f7ab9a881b115ead79edfef2e4be7b0ab1e9af543e7e0df229cf14f4951ad88",
+    "vllm_ascend_quantized_kv_cache/ops/kivi_gather.py": "fa1605c983950d1dc1822148d17b86d9030335ee2a44ad7884a5b4f822912e75",
+    "vllm_ascend_quantized_kv_cache/ops/triton/__init__.py": "c819cb451913ab60483d19e1d102424d1ab39611ee54134a051d1f568c9e21b6",
+    "vllm_ascend_quantized_kv_cache/ops/triton/kivi_pack.py": "84076282622c8731cb03cf3369bb97285813659e640dde0f1b7fc33a5712ef51",
+    "vllm_ascend_quantized_kv_cache/ops/triton/per_token_head_store.py": "41882a3735b3a130651a90e5e30f6f17ed645b664c9ea1c0a89716ea68600435",
+    "vllm_ascend_quantized_kv_cache/ops/triton/kivi_gather_experimental.py": "5c6d94a8bcc940b0ab1044bd3c8f06af2030bc241edc46f7f452ffd1a476fdbd",
+    "vllm_ascend_quantized_kv_cache/extension_manager_manifest/__init__.py": "2d38a5e221df3ab67b178e28a965abce186d5bd232e93beaf34ab412edd2f22f"
+  },
+  "model_config_sha256": {
+    "config.json": "5e4d7f74fec2f360eb9cfbfcd6ec0c4c76e684d3a11caaed259d9fd9bfbc7944",
+    "configuration.json": "2d4464e2ead06bc9bc718c781309ad1e7baded626d66e8dcdc8b469ba185faf0",
+    "generation_config.json": "4f25002776b741773666203dcea8f54619f177ace3ae483d311102092a4658e0",
+    "model.safetensors.index.json": "d8d0b7ca4e61ae107e3e87a3ff21136b3ac7c789e64bb24267227ca804e04205",
+    "preprocessor_config.json": "27225450ac9c6529872ee1924fcb0962ff5634834f817040f444118116f4e516",
+    "tokenizer.json": "5f9e4d4901a92b997e463c1f46055088b6cca5ca61a6522d1b9f64c4bb81cb42",
+    "tokenizer_config.json": "316230d6a809701f4db5ea8f8fc862bc3a6f3229c937c174e674ff3ca0a64ac8",
+    "video_preprocessor_config.json": "7768af27c1fafa9cc9011c1dc20067e03f8915e03b63504550e11d5066986d13",
+    "vocab.json": "ce99b4cb2983d118806ce0a8b777a35b093e2000a503ebde25853284c9dfa003"
+  },
+  "model_weights_stat": {
+    "model.safetensors-00005-of-00014.safetensors": {
+      "size": 5368709816,
+      "mtime_ns": 1791969852219008837
+    },
+    "model.safetensors-00008-of-00014.safetensors": {
+      "size": 5368709808,
+      "mtime_ns": 1791969898404091156
+    },
+    "model.safetensors-00003-of-00014.safetensors": {
+      "size": 5368709808,
+      "mtime_ns": 1791969907220296602
+    },
+    "model.safetensors-00006-of-00014.safetensors": {
+      "size": 5368709816,
+      "mtime_ns": 1791969954045381960
+    },
+    "model.safetensors-00001-of-00014.safetensors": {
+      "size": 5368709816,
+      "mtime_ns": 1791970530222186843
+    },
+    "model.safetensors-00004-of-00014.safetensors": {
+      "size": 5368709816,
+      "mtime_ns": 1791970714370150451
+    },
+    "model.safetensors-00009-of-00014.safetensors": {
+      "size": 5255463936,
+      "mtime_ns": 1791971425700515661
+    },
+    "model.safetensors-00011-of-00014.safetensors": {
+      "size": 5368710464,
+      "mtime_ns": 1791971526621840302
+    },
+    "model.safetensors-00010-of-00014.safetensors": {
+      "size": 5368710456,
+      "mtime_ns": 1791971540682035055
+    },
+    "model.safetensors-00012-of-00014.safetensors": {
+      "size": 5368710456,
+      "mtime_ns": 1791971608139000227
+    },
+    "model.safetensors-00002-of-00014.safetensors": {
+      "size": 5368709808,
+      "mtime_ns": 1791971698296361469
+    },
+    "model.safetensors-00013-of-00014.safetensors": {
+      "size": 5367839544,
+      "mtime_ns": 1791971762209369209
+    },
+    "model.safetensors-00014-of-00014.safetensors": {
+      "size": 2224764664,
+      "mtime_ns": 1791971835546563205
+    },
+    "model.safetensors-00007-of-00014.safetensors": {
+      "size": 5368709808,
+      "mtime_ns": 1791972027577844170
+    }
+  }
+}
