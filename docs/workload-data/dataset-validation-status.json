@@ -370,6 +370,16 @@
             "native_cli_help_passed": false
           },
           "lazy_optional_backend_compatibility_probe": {
+            "local_model_identity_patch": "configs/workload-native/stabletoolbench-local-model-name.patch",
+            "local_model_identity_patch_scope": "Author API client rejects all model names without a gpt prefix. Derived client explicitly accepts real model IDs on IPv4 loopback HTTP endpoints; no GPT alias or identity spoofing. Patch applied and syntax checked; generation budget remains1024, native task execution pending.",
+            "author_client_transport_smoke": {
+              "model": "Qwen/Qwen3.5-9B",
+              "finish_reason": "stop",
+              "content_present": true,
+              "prompt_tokens": 14,
+              "completion_tokens": 179,
+              "scope": "One minimal request through the derived author client at its unchanged1024-token limit. Not a task, tool-call or scoring result."
+            },
             "server_stage": "stabletoolbench-full-source.CEnQEg/chat-client-7b3utj_7",
             "reproducible_patch": "configs/workload-native/stabletoolbench-lazy-backend-imports.patch",
             "clean_application_byte_identical_to_qualified_probe": true,
