@@ -766,7 +766,12 @@ prompt/媒体时不能伪造原始请求；有官方回放工具的按原工具�
 · [运行及离线复核入口](scripts/run_miniwob_agentlab.py) ·
 [固定版本和复现命令](docs/workload-data/DATASET_CHECKLIST.zh-CN.md) ·
 [机器核验记录](docs/workload-data/dataset-validation-status.json)。ARM64 环境下两道固定原题已有真实 NPU 运行：一道获得原生奖励
-1，另一道达到步数上限、奖励 0。仅覆盖基础网页交互，不替代 WebArena、WorkArena 或桌面操作；尚未进入统一研究消费入口，不计入已交付项。
+1，另一道达到步数上限、奖励 0。统一读取和固定研究 pipeline 已接通全部 130 份原始任务定义，尚未更新研究部署依赖锁；不计入当前113项交付槽位，也不替代复杂认证站点或桌面操作。
+
+统一读取 ID 为
+`MINIWOB_PLUSPLUS`：`vllm_hust_workload_data.iter_workload("MINIWOB_PLUSPLUS", data_root=<原始ZIP所在目录>)`。返回原始任务名及生成器／奖励代码的资产引用，不生成
+prompt；可用 `vllm_hust_workload_data.miniwob.read_native_definition(record, data_root=...)`
+逐字节回查。原环境按显式 seed 生成真正的任务实例和截图。源码有130份定义，当前固定 BrowserGym0.14.2 注册125个环境；执行入口按原注册表检查，不将未支持定义算作已执行。
 
 加 `--agent-profile visual` 使用作者原始 VisualAgent 截图／坐标动作配置，不将 DOM 模式冒充视觉输入。相同两道原题按
 seed42、20步、每次4096输出token验证，43次请求均携带截图；两题均达到步数上限、奖励0，结果如实保留。[视觉原生回执](docs/workload-data/validation/miniwob-visual-native-20261105.json)。服务端须支持真实图像输入；客户端仅对回环服务使用占位

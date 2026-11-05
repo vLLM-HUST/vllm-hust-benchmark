@@ -1041,8 +1041,17 @@ def test_checklist_covers_registered_sources_once():
         assert receipt["source_id"] == replacement
         assert receipt["delivery_inventory_slot"] == source_id
         assert receipt["source_checkbox_eligible"]
-    assert set(catalog["sources"]) <= set(ledger["delivery_inventory"]) | set(
-        replacements
+    candidates = {
+        source_id: item
+        for source_id, item in ledger["replacement_candidate_audits"].items()
+        if item.get("registration_receipt")
+    }
+    for source_id, item in candidates.items():
+        receipt = json.loads((ROOT / item["registration_receipt"]).read_text("utf-8"))
+        assert receipt["source_id"] == source_id
+        assert receipt["source_checkbox_eligible"] is False
+    assert set(catalog["sources"]) <= (
+        set(ledger["delivery_inventory"]) | set(replacements) | set(candidates)
     )
     markdown = (directory / "DATASET_CHECKLIST.zh-CN.md").read_text(encoding="utf-8")
     table_rows = [

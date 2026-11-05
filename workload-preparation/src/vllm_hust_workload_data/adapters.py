@@ -14,6 +14,11 @@ from .registry import adapter_spec, source_spec
 
 def iter_source_rows(path, spec):
     """Use one source view for reading, binding and index resolution."""
+    if spec["mapping"] == "miniwob_original_html_definitions":
+        from .miniwob import original_rows
+
+        yield from original_rows(path)
+        return
     if spec["mapping"] == "gaia_original_tasks":
         from .gaia import original_rows
 
@@ -274,6 +279,10 @@ def adapt_row(
         return adapt_case(row, source=source, index=index)
     if spec["mapping"] == "stabletoolbench_original_tasks":
         from .stabletoolbench import adapt_case
+
+        return adapt_case(row, source=source, index=index)
+    if spec["mapping"] == "miniwob_original_html_definitions":
+        from .miniwob import adapt_case
 
         return adapt_case(row, source=source, index=index)
     if spec["mapping"] == "full_duplex_original_archives":

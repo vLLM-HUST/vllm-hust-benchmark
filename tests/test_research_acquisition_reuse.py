@@ -304,8 +304,8 @@ def test_original_research_assets_are_registered_without_native_completion_claim
         runner.CATALOG.read_text("utf-8"), object_pairs_hook=unique_object
     )["sources"]
     assert (
-        len(sources) == 115
-    )  # Includes separately named StableToolBench replacement; delivery scope stays118.
+        len(sources) == 116
+    )  # Named StableToolBench/MiniWoB entries do not expand the118 delivery slots.
     assert sum(x["rows"] for x in sources["FULL_DUPLEX_BENCH"]["files"]) == 1225
     assert (
         sources["LIBRITTS"]["asset_kind"]

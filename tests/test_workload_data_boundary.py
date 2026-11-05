@@ -41,6 +41,7 @@ DATA_MODULES = {
     "bixbench",  # Original question/reference/capsule relations only; no Agent.
     "multiagentbench",  # Native configuration/reference custody only; no Agent execution.
     "stabletoolbench",  # Original query/API/reference custody only; no simulator or Agent execution.
+    "miniwob",  # Original task-code references only; no browser, generated prompt or reward execution.
     "stsb",  # Publisher sentence pairs and labels only; no research analysis.
     "beir",  # Original retrieval assets and relations, no research analysis.
     "__init__",

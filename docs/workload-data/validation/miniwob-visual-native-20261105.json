@@ -1,7 +1,7 @@
 {
   "source_id": "MINIWOB_PLUSPLUS",
   "source_checkbox_eligible": false,
-  "status": "NATIVE_VISUAL_SAMPLE_COMPLETED_PROVIDER_AND_RESEARCH_PENDING",
+  "status": "NATIVE_VISUAL_SAMPLE_AND_DEFINITION_PROVIDER_RESEARCH_VERIFIED",
   "date": "2026-11-05",
   "publisher": "https://github.com/Farama-Foundation/miniwob-plusplus",
   "source_revision": "33c3b4ddef8c6eb67c57a29663d844b1eda7e614",
@@ -74,9 +74,27 @@
     "public_entry": "scripts/run_miniwob_agentlab.py --agent-profile visual",
     "software_tests_are_not_native_evidence": true
   },
+  "provider_and_research_readback": {
+    "public_api": "vllm_hust_workload_data.iter_workload('MINIWOB_PLUSPLUS', data_root=original_archive_directory)",
+    "native_definition_api": "vllm_hust_workload_data.miniwob.read_native_definition(record, data_root=original_archive_directory)",
+    "installed_wheel_sha256": "fa9dae7e3661cd700528841e53400cd59acbd025c268dca504e0fe2395c6139a",
+    "original_definition_rows": 130,
+    "all_original_html_bytes_resolved_exactly": true,
+    "native_site_original_source_files_byte_matched": 444,
+    "public_index_resolve_exact_rows": 130,
+    "research_pipeline_rows": 130,
+    "research_revision": "9f1f6a5ce21f486aa27cfb2482c4007d6b9d2344",
+    "research_entrypoint": "llm_serving_workloads.pipeline.analysis_from_source_index",
+    "research_source_changed": false,
+    "server_stage": "miniwob-provider-readback-20261105-001",
+    "generated_prompts": 0,
+    "new_model_calls_for_readback": 0,
+    "installed_browsergym_registered_tasks": 125,
+    "deployment_note": "Verified with the installed candidate wheel, not an update of the research dependency lock; source definitions are not instantiated model requests or a scientific analysis."
+  },
   "limitations": [
     "Both tasks reached configured step caps with zero reward; this establishes usable execution, not task-solving quality.",
-    "Provider registration, research consumer and accepted replacement remain pending; no additional inventory checkbox claimed.",
+    "Public provider and pinned research consumption passed; accepted replacement for a required source is not established and no additional inventory checkbox is claimed.",
     "Small browser widgets do not establish authenticated business workflows, multi-site state or desktop OS control.",
     "Saved trajectory files were counted, not unpickled or treated as an independent reward recomputation."
   ]
