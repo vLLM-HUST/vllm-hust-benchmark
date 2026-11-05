@@ -161,15 +161,12 @@ def test_completed_archive_has_evidence_and_an_active_successor():
     assert historical["archive_classification"] == "completed_and_migrated"
     assert historical["successor"] == "vLLM-HUST/vllm-hust-bidkv"
     assert historical["component_ids"] == []
-    assert (
-        historical["completion_evidence"]
-        == {
-            "source_commit": "5ee80256d263d58b1e512d9d436d47e9bac564ba",  # pragma: allowlist secret
-            "tests": "11 passed on 2026-11-05",
-            "wheel": "vllm-hust-ascend-bidkv 0.1.0 builds successfully",
-            "release_published": False,
-        }
-    )
+    assert historical["completion_evidence"] == {
+        "source_commit_short": "5ee80256",
+        "tests": "11 passed on 2026-11-05",
+        "wheel": "vllm-hust-ascend-bidkv 0.1.0 builds successfully",
+        "release_published": False,
+    }
     successor = repositories["vllm-hust-bidkv"]
     assert successor["lifecycle"] != "completed_archived"
     assert successor["public_surface"] is True
